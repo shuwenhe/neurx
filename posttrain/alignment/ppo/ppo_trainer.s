@@ -4,7 +4,7 @@ package neurx.posttrain.rlhf.ppo_trainer
 // PPO Trainer - Proximal Policy Optimization (English textoptimize)
 //
 // English textoptimize, useEnglish text:
-//   1. English text (Trajectory Collection)
+//   1. English text (trajectory Collection)
 //   2. English text (Advantage Estimation)
 //   3. PPO losscompute (PPO Loss Computation)
 //   4. English text (Policy Update)
@@ -600,7 +600,7 @@ func start_ppo_training(
 // English textcheckpointinformation
 func print_ppo_checkpoint(ppo_state state, int step) {
     print("═══════════════════════════════════════════════════════════")
-    print("PPO Checkpoint - Step " + int_to_string_ppo(step))
+    print("PPO checkpoint - Step " + int_to_string_ppo(step))
     print("═══════════════════════════════════════════════════════════")
     print("Total Trajectories: " + int_to_string_ppo(state.total_trajectories))
     print("Policy Loss:        " + float_to_string_ppo(state.avg_policy_loss))

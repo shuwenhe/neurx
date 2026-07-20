@@ -11,7 +11,7 @@ func main() int {
     println("NeurX Dataset Analyze (S Lang)")
     println("")
     println("Shards dir: " + shards_dir)
-    println("Manifest  : " + manifest_path)
+    println("manifest  : " + manifest_path)
     println("Report out: " + out_path)
     println("")
 

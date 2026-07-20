@@ -1,6 +1,6 @@
 package neurx.train.demo
 
-// NeurX GPT Training with Full Checkpoint Support
+// NeurX GPT Training with Full checkpoint Support
 // completeEnglish text S languagetrainingimplementation - English text checkpoint save/load
 
 use std.fs.write_text_file as fs_write
@@ -101,12 +101,12 @@ func compute_loss(int step, int tokens) float {
 }
 
 // ============================================
-// Checkpoint I/O (checkpointEnglish text)
+// checkpoint I/O (checkpointEnglish text)
 // ============================================
 
 func format_checkpoint_content(int step, float loss, float best_loss, int best_step, bool trained, int param_count) string {
     string content = "checkpoint_v1\n"
-    content = content + "# NeurX GPT Training Checkpoint\n\n"
+    content = content + "# NeurX GPT Training checkpoint\n\n"
 
     content = content + "[metadata]\n"
     content = content + "model_name=NeurX-GPT-Demo\n"
@@ -211,7 +211,7 @@ func run_training(training_config tconfig) training_context {
     println("========================================")
     println("NeurX GPT Model Training")
     println("Language: S (.s)")
-    println("With Full Checkpoint Support")
+    println("With Full checkpoint Support")
     println("========================================")
     println("Config: batch=", tconfig.batch_size,
             " seq_len=", tconfig.seq_len,

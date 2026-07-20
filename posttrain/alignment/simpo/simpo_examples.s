@@ -43,7 +43,7 @@ func example_basic_simpo_training() {
     print("  Learning rate: " + float_to_string_ex(cfg.learning_rate))
     print("")
 
-    print("[Creating Sample Batches]")
+    print("[Creating sample Batches]")
     []simpo_batch batches = []simpo_batch{cap: 10}
 
     int b = 0
@@ -222,7 +222,7 @@ func example_complete_pipeline() {
     print("[Stage 1: SFT (7 days, 64 A100s)]")
     print("  ├─ Input: Base model + 100K instructions")
     print("  ├─ Output: Instruction-tuned model")
-    print("  └─ Checkpoint: base_sft.pt")
+    print("  └─ checkpoint: base_sft.pt")
     print("")
 
     print("[Stage 2: Collect Preferences (2-3 days)]")

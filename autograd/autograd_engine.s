@@ -5,7 +5,7 @@ use neurx.tensor.tensor
 // ============================================================================
 // Autograd Engine - Complete Automatic Differentiation System
 // Supports: Computation graph construction, topological sort, backward pass
-// Covers all Transformer operations: MatMul, Softmax, LayerNorm, Embedding,
+// Covers all Transformer operations: MatMul, Softmax, LayerNorm, embedding,
 // GELU/SiLU, RoPE, Attention, CrossEntropyLoss, and more.
 // ============================================================================
 

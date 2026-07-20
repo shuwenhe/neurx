@@ -114,7 +114,7 @@ func example_basic_grpo_training() {
     print("✓ GRPO training completed!")
     print("  Final Loss: " + string_float(result.final_loss))
     print("  Avg Reward: " + string_float(result.avg_reward))
-    print("  Checkpoint: " + result.checkpoint_path)
+    print("  checkpoint: " + result.checkpoint_path)
 }
 
 // example 2: English text Group Size English text
@@ -222,7 +222,7 @@ func example_alignment_methods_comparison() {
     print("│ Group Relative   │ No     │ Yes     │ No                 │")
     print("│ Training Time    │ Fast   │ Medium  │ Slow               │")
     print("│ Memory Usage     │ Low    │ Medium  │ High               │")
-    print("│ Task Type        │ Pref.  │ Reason  │ General            │")
+    print("│ task Type        │ Pref.  │ Reason  │ General            │")
     print("│ Stability        │ High   │ High    │ Medium             │")
     print("│ Convergence      │ 3-5d   │ 7-14d   │ 7-10d              │")
     print("└──────────────────────────────────────────────────────────┘")

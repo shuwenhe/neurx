@@ -62,7 +62,7 @@ func new_2t_model_config() model_2t_config {
 
 // Calculate total parameters in 2T model
 func calculate_2t_model_parameters(model_2t_config cfg) int {
-    // Embedding layers
+    // embedding layers
     int embedding_params = cfg.vocab_size * cfg.hidden_dim
     
     // Transformer layers

@@ -628,7 +628,7 @@ func gpt_large_training_summary(gpt_large_state state, gpt_large_training_config
     out = out + "Val Loss: " + fmt_float(state.validation_loss, 6) + "\n"
     out = out + "Best Val Loss: " + fmt_float(state.best_validation_loss, 6) + "\n"
     out = out + "Learning Rate: " + fmt_float(state.learning_rate, 8) + "\n"
-    out = out + "Checkpoint Root: " + cfg.output_dir + "\n"
+    out = out + "checkpoint Root: " + cfg.output_dir + "\n"
     out
 }
 
@@ -643,7 +643,7 @@ func gpt_large_run_industrial_backend() int {
     println("NeurX Industrial GPT-Large Pretraining")
     println("=======================================================================")
     println("Backend: tensor.core + pretrain pipeline")
-    println("Manifest: " + state.dataset_manifest)
+    println("manifest: " + state.dataset_manifest)
     println("Output Dir: " + state.output_dir)
     println("Steps: " + int_to_str(state.cfg.max_steps, 0))
     println("LR: " + fmt_float(state.cfg.lr, 8))

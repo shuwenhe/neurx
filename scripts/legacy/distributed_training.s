@@ -15,8 +15,8 @@ import (
     "strconv"
 )
 
-// DistributedConfig configures distributed training
-type DistributedConfig struct {
+// distributed_config configures distributed training
+type distributed_config struct {
     // Multi-GPU settings
     backend: string  // "nccl", "gloo", "mpi"
     rank: int  // Global rank (0 to world_size-1)
@@ -38,9 +38,9 @@ type DistributedConfig struct {
     static_graph: bool
 }
 
-// DistributedProcess represents a single training process
-type DistributedProcess struct {
-    config: DistributedConfig
+// distributed_process represents a single training process
+type distributed_process struct {
+    config: distributed_config
     is_master: bool  // rank == 0
     
     // Process group state
@@ -57,8 +57,8 @@ type DistributedProcess struct {
 // ============================================
 
 // Initialize distributed training from environment
-func (dp *DistributedProcess) init_from_env(backend: string) error {
-    config := DistributedConfig{
+func (dp *distributed_process) init_from_env(backend: string) error {
+    config := distributed_config{
         backend: backend,
         rank: 0,
         world_size: 1,
@@ -107,7 +107,7 @@ func (dp *DistributedProcess) init_from_env(backend: string) error {
 // ============================================
 
 // AllReduce: synchronize gradients across all processes
-func (dp *DistributedProcess) all_reduce_grad(grad_norm: float): float {
+func (dp *distributed_process) all_reduce_grad(grad_norm: float): float {
     if !dp.config.sync_gradients || dp.config.world_size == 1 {
         return grad_norm
     }
@@ -121,7 +121,7 @@ func (dp *DistributedProcess) all_reduce_grad(grad_norm: float): float {
 }
 
 // Broadcast: sync model parameters from master
-func (dp *DistributedProcess) broadcast_parameters(param: float): float {
+func (dp *distributed_process) broadcast_parameters(param: float): float {
     if dp.config.world_size == 1 {
         return param
     }
@@ -136,7 +136,7 @@ func (dp *DistributedProcess) broadcast_parameters(param: float): float {
 // ============================================
 
 // Build gradient buckets for efficient communication
-func (dp *DistributedProcess) build_grad_buckets(total_params: int) {
+func (dp *distributed_process) build_grad_buckets(total_params: int) {
     if dp.config.world_size == 1 {
         return
     }
@@ -157,7 +157,7 @@ func (dp *DistributedProcess) build_grad_buckets(total_params: int) {
 }
 
 // Reduce bucket (all-reduce for single bucket)
-func (dp *DistributedProcess) reduce_bucket(bucket_idx: int) {
+func (dp *distributed_process) reduce_bucket(bucket_idx: int) {
     if bucket_idx >= len(dp.grad_buckets) {
         return
     }
@@ -175,8 +175,8 @@ func (dp *DistributedProcess) reduce_bucket(bucket_idx: int) {
 // Data Partitioning
 // ============================================
 
-// DataPartitioner handles data distribution
-type DataPartitioner struct {
+// data_partitioner handles data distribution
+type data_partitioner struct {
     world_size: int
     rank: int
     total_samples: int
@@ -184,7 +184,7 @@ type DataPartitioner struct {
 }
 
 // Get local batch indices for this process
-func (dp *DataPartitioner) get_local_indices(): []int {
+func (dp *data_partitioner) get_local_indices(): []int {
     indices := make([]int, 0)
     
     samples_per_rank := dp.total_samples / dp.world_size
@@ -210,7 +210,7 @@ func (dp *DataPartitioner) get_local_indices(): []int {
 }
 
 // Get local batch size for this process
-func (dp *DataPartitioner) get_local_batch_size(): int {
+func (dp *data_partitioner) get_local_batch_size(): int {
     total_batch := dp.local_batch_size * dp.world_size
     return total_batch / dp.world_size
 }
@@ -219,7 +219,7 @@ func (dp *DataPartitioner) get_local_batch_size(): int {
 // Distributed Sampler
 // ============================================
 
-type DistributedSampler struct {
+type distributed_sampler struct {
     num_samples: int
     world_size: int
     rank: int
@@ -229,7 +229,7 @@ type DistributedSampler struct {
 }
 
 // Get sample indices for this rank
-func (ds *DistributedSampler) get_indices(): []int {
+func (ds *distributed_sampler) get_indices(): []int {
     indices := make([]int, 0)
     
     samples_per_rank := ds.num_samples / ds.world_size
@@ -245,7 +245,7 @@ func (ds *DistributedSampler) get_indices(): []int {
 }
 
 // Set epoch (for shuffle)
-func (ds *DistributedSampler) set_epoch(epoch: int) {
+func (ds *distributed_sampler) set_epoch(epoch: int) {
     ds.epoch = epoch
 }
 
@@ -253,8 +253,8 @@ func (ds *DistributedSampler) set_epoch(epoch: int) {
 // Communication Monitoring
 // ============================================
 
-// CommunicationMetrics tracks communication efficiency
-type CommunicationMetrics struct {
+// communication_metrics tracks communication efficiency
+type communication_metrics struct {
     allreduce_count: int
     broadcast_count: int
     total_bytes_communicated: int
@@ -263,7 +263,7 @@ type CommunicationMetrics struct {
 }
 
 // Get communication efficiency
-func (cm *CommunicationMetrics) get_efficiency(): float {
+func (cm *communication_metrics) get_efficiency(): float {
     total_time := cm.communication_time_ms + cm.computation_time_ms
     if total_time == 0 {
         return 0.0
@@ -275,8 +275,8 @@ func (cm *CommunicationMetrics) get_efficiency(): float {
 // Multi-Node Setup
 // ============================================
 
-// MultiNodeConfig for multi-node distributed training
-type MultiNodeConfig struct {
+// multi_node_config for multi-node distributed training
+type multi_node_config struct {
     num_nodes: int
     processes_per_node: int
     node_rank: int
@@ -291,7 +291,7 @@ type MultiNodeConfig struct {
 // ============================================
 
 // Get distributed training stats
-func (dp *DistributedProcess) get_stats(): map[string]interface{} {
+func (dp *distributed_process) get_stats(): map[string]interface{} {
     return map[string]interface{}{
         "rank": dp.config.rank,
         "world_size": dp.config.world_size,
@@ -311,18 +311,18 @@ func (dp *DistributedProcess) get_stats(): map[string]interface{} {
 // ============================================
 
 // Check if current process is master
-func (dp *DistributedProcess) is_main_process(): bool {
+func (dp *distributed_process) is_main_process(): bool {
     return dp.is_master
 }
 
 // Synchronize all processes (barrier)
-func (dp *DistributedProcess) barrier() {
+func (dp *distributed_process) barrier() {
     // In actual implementation, would use MPI_Barrier or NCCL Barrier
     // Here just placeholder
 }
 
 // Destroy process group
-func (dp *DistributedProcess) destroy_process_group() {
+func (dp *distributed_process) destroy_process_group() {
     dp.initialized = false
 }
 
@@ -330,17 +330,17 @@ func (dp *DistributedProcess) destroy_process_group() {
 // Distributed Training Context Manager
 // ============================================
 
-type DistributedContext struct {
-    process: *DistributedProcess
-    comm_metrics: CommunicationMetrics
+type distributed_context struct {
+    process: *distributed_process
+    comm_metrics: communication_metrics
 }
 
-func (dc *DistributedContext) enter(): error {
-    dc.process = &DistributedProcess{}
+func (dc *distributed_context) enter(): error {
+    dc.process = &distributed_process{}
     return dc.process.init_from_env("nccl")
 }
 
-func (dc *DistributedContext) exit() {
+func (dc *distributed_context) exit() {
     if dc.process != nil {
         dc.process.destroy_process_group()
     }
@@ -350,7 +350,7 @@ func (dc *DistributedContext) exit() {
 // Launch Configuration
 // ============================================
 
-type LaunchConfig struct {
+type launch_config struct {
     num_processes: int
     num_nodes: int
     node_rank: int
@@ -359,8 +359,8 @@ type LaunchConfig struct {
     backend: string
 }
 
-func create_launch_config_from_env(): LaunchConfig {
-    config := LaunchConfig{
+func create_launch_config_from_env(): launch_config {
+    config := launch_config{
         num_processes: 1,
         num_nodes: 1,
         node_rank: 0,
@@ -404,7 +404,7 @@ func create_launch_config_from_env(): LaunchConfig {
 
 func main() {
     // Initialize distributed training
-    process := &DistributedProcess{}
+    process := &distributed_process{}
     if err := process.init_from_env("nccl"); err != nil {
         println("Error:", err.Error())
         return
@@ -419,7 +419,7 @@ func main() {
     println(string(stats_json))
     
     // Data partitioning example
-    partitioner := &DataPartitioner{
+    partitioner := &data_partitioner{
         world_size: process.config.world_size,
         rank: process.config.rank,
         total_samples: 10000,
@@ -432,7 +432,7 @@ func main() {
     fmt.Printf("  Local batch size: %d\n", partitioner.get_local_batch_size())
     
     // Sampler example
-    sampler := &DistributedSampler{
+    sampler := &distributed_sampler{
         num_samples: 10000,
         world_size: process.config.world_size,
         rank: process.config.rank,
@@ -442,7 +442,7 @@ func main() {
     
     sampler_indices := sampler.get_indices()
     fmt.Printf("\n🎲 Distributed Sampler (Rank %d):\n", process.config.rank)
-    fmt.Printf("  Sample count: %d\n", len(sampler_indices))
+    fmt.Printf("  sample count: %d\n", len(sampler_indices))
     
     // Communication simulation
     println("\n📡 Gradient Synchronization Simulation:")

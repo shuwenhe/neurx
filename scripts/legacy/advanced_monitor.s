@@ -16,8 +16,8 @@ import (
     "math"
 )
 
-// PerplexityMetrics tracks perplexity progression
-type PerplexityMetrics struct {
+// perplexity_metrics tracks perplexity progression
+type perplexity_metrics struct {
     step: int
     loss: float
     perplexity: float
@@ -38,11 +38,11 @@ type training_metrics struct {
     eta: float  // estimated time in seconds
     memory_used: float  // MB
     grad_norm: float  // gradient norm
-    perplexity: PerplexityMetrics
+    perplexity: perplexity_metrics
 }
 
-// AdvancedTrainingMonitor tracks comprehensive training progress
-type AdvancedTrainingMonitor struct {
+// advanced_training_monitor tracks comprehensive training progress
+type advanced_training_monitor struct {
     start_time: time.Time
     steps: []training_metrics
     total_steps: int
@@ -50,7 +50,7 @@ type AdvancedTrainingMonitor struct {
     update_interval: int
     
     // Perplexity tracking
-    ppl_history: []PerplexityMetrics
+    ppl_history: []perplexity_metrics
     best_val_ppl: float
     best_step: int
     
@@ -63,7 +63,7 @@ type AdvancedTrainingMonitor struct {
 // Initialization
 // ============================================
 
-func (atm *AdvancedTrainingMonitor) init(
+func (atm *advanced_training_monitor) init(
     total_steps: int,
     log_file: string,
     update_interval: int,
@@ -71,7 +71,7 @@ func (atm *AdvancedTrainingMonitor) init(
     
     atm.start_time = time.Now()
     atm.steps = make([]training_metrics, 0)
-    atm.ppl_history = make([]PerplexityMetrics, 0)
+    atm.ppl_history = make([]perplexity_metrics, 0)
     atm.total_steps = total_steps
     atm.log_file = log_file
     atm.update_interval = update_interval
@@ -103,7 +103,7 @@ func calculate_perplexity(loss: float): float {
 }
 
 // Track perplexity progression
-func (atm *AdvancedTrainingMonitor) log_perplexity(
+func (atm *advanced_training_monitor) log_perplexity(
     step: int,
     train_loss: float,
     val_loss: float) {
@@ -118,7 +118,7 @@ func (atm *AdvancedTrainingMonitor) log_perplexity(
         improvement = (prev.val_perplexity - val_ppl) / prev.val_perplexity * 100.0
     }
     
-    ppl_metric := PerplexityMetrics{
+    ppl_metric := perplexity_metrics{
         step: step,
         loss: train_loss,
         perplexity: train_ppl,
@@ -140,7 +140,7 @@ func (atm *AdvancedTrainingMonitor) log_perplexity(
 // Main Logging Functions
 // ============================================
 
-func (atm *AdvancedTrainingMonitor) log_step(
+func (atm *advanced_training_monitor) log_step(
     step: int,
     epoch: int,
     batch_idx: int,
@@ -149,7 +149,7 @@ func (atm *AdvancedTrainingMonitor) log_step(
     throughput: float,
     memory_used: float,
     grad_norm: float,
-    train_ppl: PerplexityMetrics) {
+    train_ppl: perplexity_metrics) {
     
     elapsed := time.Since(atm.start_time).Seconds()
     
@@ -183,7 +183,7 @@ func (atm *AdvancedTrainingMonitor) log_step(
 }
 
 // Calculate ETA
-func (atm *AdvancedTrainingMonitor) calculate_eta(step: int, elapsed: float): float {
+func (atm *advanced_training_monitor) calculate_eta(step: int, elapsed: float): float {
     if step <= 0 {
         return 0.0
     }
@@ -194,7 +194,7 @@ func (atm *AdvancedTrainingMonitor) calculate_eta(step: int, elapsed: float): fl
 }
 
 // Print detailed progress
-func (atm *AdvancedTrainingMonitor) print_progress(metrics: TrainingMetrics) {
+func (atm *advanced_training_monitor) print_progress(metrics: TrainingMetrics) {
     progress := float(metrics.step) / float(atm.total_steps) * 100.0
     bar_length := 50
     filled := int(progress / 100.0 * float(bar_length))
@@ -235,7 +235,7 @@ func (atm *AdvancedTrainingMonitor) print_progress(metrics: TrainingMetrics) {
 }
 
 // Log to file
-func (atm *AdvancedTrainingMonitor) log_to_file(metrics: TrainingMetrics) {
+func (atm *advanced_training_monitor) log_to_file(metrics: TrainingMetrics) {
     f, err := os.OpenFile(atm.log_file, os.O_APPEND|os.O_WRONLY, 0644)
     if err != nil {
         return
@@ -251,7 +251,7 @@ func (atm *AdvancedTrainingMonitor) log_to_file(metrics: TrainingMetrics) {
 // ============================================
 
 // Check for convergence
-func (atm *AdvancedTrainingMonitor) check_convergence(): bool {
+func (atm *advanced_training_monitor) check_convergence(): bool {
     if len(atm.ppl_history) < atm.convergence_window {
         return false
     }
@@ -272,7 +272,7 @@ func (atm *AdvancedTrainingMonitor) check_convergence(): bool {
 // ============================================
 
 // Get current statistics
-func (atm *AdvancedTrainingMonitor) get_stats(): map[string]interface{} {
+func (atm *advanced_training_monitor) get_stats(): map[string]interface{} {
     if len(atm.steps) == 0 {
         return map[string]interface{}{
             "status": "no_data",
@@ -334,7 +334,7 @@ func (atm *AdvancedTrainingMonitor) get_stats(): map[string]interface{} {
 }
 
 // Generate detailed report
-func (atm *AdvancedTrainingMonitor) generate_report(): string {
+func (atm *advanced_training_monitor) generate_report(): string {
     stats := atm.get_stats()
     
     report := "╔════════════════════════════════════════════════════════════╗\n"
@@ -393,7 +393,7 @@ func (atm *AdvancedTrainingMonitor) generate_report(): string {
 }
 
 // Export as JSON
-func (atm *AdvancedTrainingMonitor) export_json(): string {
+func (atm *advanced_training_monitor) export_json(): string {
     data := map[string]interface{}{
         "summary": atm.get_stats(),
         "perplexity_history": atm.ppl_history,
@@ -437,7 +437,7 @@ func format_time(seconds: float): string {
 
 func main() {
     // Initialize advanced monitor
-    monitor := &AdvancedTrainingMonitor{}
+    monitor := &advanced_training_monitor{}
     if err := monitor.init(100000, "./logs/training_advanced.jsonl", 100, 500); err != nil {
         println("Error:", err.Error())
         return
@@ -448,7 +448,7 @@ func main() {
         loss := 5.0 - float(step/1000)*0.8 + math.Sin(float(step))*0.1
         val_loss := 4.8 - float(step/1000)*0.7 + math.Sin(float(step/2))*0.15
         
-        ppl_metric := PerplexityMetrics{
+        ppl_metric := perplexity_metrics{
             step: step,
             loss: loss,
             perplexity: calculate_perplexity(loss),

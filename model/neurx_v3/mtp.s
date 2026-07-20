@@ -4,7 +4,7 @@
 // Paper: MTP reference architecture used by NeurX
 //
 // Core idea: predict D future tokens per position, boosting data efficiency.
-// Each MTP Module: Embedding + Projection + 1-layer Transformer + Output Head
+// Each MTP Module: embedding + Projection + 1-layer Transformer + Output Head
 // Loss: L_MTP = (1/D) * sum CE(p_i, t_i)
 // Also enables speculative decoding at inference time.
 // ============================================================================

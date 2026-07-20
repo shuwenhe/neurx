@@ -1,7 +1,7 @@
 package neurx.checkpoint.distributed
 
 // ═══════════════════════════════════════════════════════════════════
-// Async Distributed Checkpoint System — English textstepEnglish textcheckpointsystem
+// Async Distributed checkpoint System — English textstepEnglish textcheckpointsystem
 //
 // English text:
 //   • trainingEnglish text: English textstepsave,maintrainingEnglish text
@@ -12,7 +12,7 @@ package neurx.checkpoint.distributed
 //
 // English text:
 //   ┌──────────────┐     copy      ┌──────────────────┐
-//   │ Training     │ ──────────→  │ Checkpoint Buffer │ (English text)
+//   │ Training     │ ──────────→  │ checkpoint Buffer │ (English text)
 //   │ Main Thread  │              │ (frozen snapshot)│
 //   └──────────────┘              └────────┬─────────┘
 //                                          │ write
@@ -24,10 +24,10 @@ package neurx.checkpoint.distributed
 //                                        │ save to disk
 //                                        ▼
 //                               ══════════════════
-//                                  Checkpoint Files
+//                                  checkpoint Files
 //                               ══════════════════
 //
-// Checkpoint content (English text rank):
+// checkpoint content (English text rank):
 //   1. model_state_*.pt        - modelparameter (FSDP English textcomplete)
 //   2. optimizer_state_*.pt    - optimizeEnglish textstate (momentum, variance)
 //   3. training_state.json     - trainingEnglish textdata (step, epoch, lr, loss English text)
@@ -130,11 +130,11 @@ func default_checkpoint_config_for_large_model() checkpoint_config {
 }
 
 // ============================================================================
-// 2. Checkpoint dataEnglish text
+// 2. checkpoint dataEnglish text
 // ============================================================================
 
 struct model_checkpoint {
-    int version                       // Checkpoint English text
+    int version                       // checkpoint English text
     int training_step                 // trainingstepEnglish text
     int epoch                         // English text epoch
 
@@ -208,7 +208,7 @@ struct data_iterator_state {
 }
 
 // ============================================================================
-// 3. English text Checkpoint Manager
+// 3. English text checkpoint Manager
 // ============================================================================
 
 enum checkpoint_status {

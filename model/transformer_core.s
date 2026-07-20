@@ -58,7 +58,7 @@ struct LayerScale {
 }
 
 // ============================================================================
-// 1. English text: Rotary Position Embedding (RoPE)
+// 1. English text: Rotary Position embedding (RoPE)
 // ============================================================================
 
 // initializeEnglish text
@@ -530,7 +530,7 @@ func model_forward
 ) TransformerOutput {
     TransformerOutput output
 
-    // 1. Token Embedding
+    // 1. Token embedding
     float* x = alloc(float, batch_size * seq_len * model.config.hidden_size)
 
     // 2. English text Transformer English text

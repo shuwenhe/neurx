@@ -18,7 +18,7 @@ func main() int {
     println("Train split : " + train_split)
     println("Val split   : " + val_split)
     println("Test split  : " + test_split)
-    println("Manifest    : " + manifest)
+    println("manifest    : " + manifest)
     println("")
     print_flag("train split", runtime_file_exists(train_split))
     print_flag("val split", runtime_file_exists(val_split))

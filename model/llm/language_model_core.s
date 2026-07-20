@@ -757,10 +757,10 @@ func create_neurx_model(config: neurx_config) neurx_model {
 func count_parameters(config: neurx_config) int {
     int params = 0
 
-    // Embedding
+    // embedding
     params += config.vocab_size * config.hidden_size
 
-    // Position Embedding (2D PE)
+    // Position embedding (2D PE)
     if config.position_encoding_type == "2d" {
         params += config.max_position_embeddings * config.hidden_size
         params += 32 * config.hidden_size  // relative embedding buckets
@@ -859,7 +859,7 @@ func neurx_forward(
         // English textuseEnglish text (English text: English textcacheEnglish text)
         hidden_states = inputs_embeds!
     } else {
-        // Word Embedding Lookup
+        // Word embedding Lookup
         hidden_states = model.word_embeddings[input_ids]  // [batch, seq, hidden]
     }
 

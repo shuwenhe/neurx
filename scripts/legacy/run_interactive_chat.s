@@ -16,20 +16,20 @@ func main() int {
 
     println("System Configuration:")
     println("  Project Root    : " + project_root)
-    println("  Checkpoint Dir  : " + checkpoint_dir)
+    println("  checkpoint Dir  : " + checkpoint_dir)
     println("  Output Dir      : " + output_dir)
     println("")
 
-    // Phase 1: Checkpoint validation
-    println("Phase 1: Checkpoint Validation...")
+    // Phase 1: checkpoint validation
+    println("Phase 1: checkpoint Validation...")
     string checkpoint_file = checkpoint_dir + "/transformer_v2.ckpt"
     string metadata_file = checkpoint_dir + "/NeurX-1.3.neurx"
 
     if !runtime_file_exists(checkpoint_file) {
-        println("  ✗ Error: Checkpoint not found")
+        println("  ✗ Error: checkpoint not found")
         return 1
     }
-    println("  ✓ Checkpoint loaded: " + checkpoint_file)
+    println("  ✓ checkpoint loaded: " + checkpoint_file)
 
     if !runtime_file_exists(metadata_file) {
         println("  ✗ Error: Metadata not found")
@@ -73,7 +73,7 @@ func main() int {
     // Phase 4: Session statistics
     println("Session Statistics:")
     string cmd_checkpoint_size = "ls -lh \"" + checkpoint_file + "\" | awk '{print $5}'"
-    println("  Checkpoint Size: " + runtime_run_command(cmd_checkpoint_size))
+    println("  checkpoint Size: " + runtime_run_command(cmd_checkpoint_size))
     println("  Tokens Processed: 219,136")
     println("  Training Duration: ~5 minutes")
     println("  GPU Utilization: 37%")

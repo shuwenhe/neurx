@@ -11,7 +11,7 @@ import (
     "strings"
 )
 
-type SafetyConfig struct {
+type safety_config struct {
     harmful_keywords        []string
     toxicity_threshold      float64
     safety_threshold        float64
@@ -19,7 +19,7 @@ type SafetyConfig struct {
     enable_logging          bool
 }
 
-type SafetyCheckResult struct {
+type safety_check_result struct {
     is_safe                 bool
     toxicity_score          float64
     safety_score            float64
@@ -28,14 +28,14 @@ type SafetyCheckResult struct {
     reason                  string
 }
 
-type SafetyFilter struct {
-    config                  SafetyConfig
+type safety_filter struct {
+    config                  safety_config
     toxicity_model          PolicyModel
-    safety_stats            SafetyStats
-    violations              []SafetyViolation
+    safety_stats            safety_stats
+    violations              []safety_violation
 }
 
-type SafetyViolation struct {
+type safety_violation struct {
     timestamp               int64
     text_snippet            string
     violation_type          string
@@ -43,7 +43,7 @@ type SafetyViolation struct {
     category                string
 }
 
-type SafetyStats struct {
+type safety_stats struct {
     total_checks            int64
     flagged_safe            int64
     flagged_unsafe          int64
@@ -54,7 +54,7 @@ type SafetyStats struct {
 // Keyword-Based Detection
 // ============================================
 
-func (filter *SafetyFilter) detect_harmful_keywords(text string) []string {
+func (filter *safety_filter) detect_harmful_keywords(text string) []string {
     harmful := []string{}
     
     text_lower := strings.ToLower(text)
@@ -72,7 +72,7 @@ func (filter *SafetyFilter) detect_harmful_keywords(text string) []string {
 // Toxicity Detection
 // ============================================
 
-func (filter *SafetyFilter) calculate_toxicity_score(text string) float64 {
+func (filter *safety_filter) calculate_toxicity_score(text string) float64 {
     score := 0.0
 
     if len(text) == 0 {
@@ -131,7 +131,7 @@ func (filter *SafetyFilter) calculate_toxicity_score(text string) float64 {
 // Model-Based Safety Detection
 // ============================================
 
-func (filter *SafetyFilter) model_based_safety_check(text string) (float64, []string) {
+func (filter *safety_filter) model_based_safety_check(text string) (float64, []string) {
     // Simulate safety model inference
     logits := make([]float64, 10) // 10 safety categories
     
@@ -192,10 +192,10 @@ func (filter *SafetyFilter) model_based_safety_check(text string) (float64, []st
 // Comprehensive Safety Check
 // ============================================
 
-func (filter *SafetyFilter) check_safety(text string) SafetyCheckResult {
+func (filter *safety_filter) check_safety(text string) safety_check_result {
     filter.safety_stats.total_checks++
     
-    result := SafetyCheckResult{
+    result := safety_check_result{
         is_safe: true,
         harmful_categories: []string{},
     }
@@ -255,12 +255,12 @@ func (filter *SafetyFilter) check_safety(text string) SafetyCheckResult {
 // Violation Logging
 // ============================================
 
-func (filter *SafetyFilter) log_violation(text string, result SafetyCheckResult) {
+func (filter *safety_filter) log_violation(text string, result safety_check_result) {
     if len(text) > 120 {
         text = text[:120] + "..."
     }
     
-    violation := SafetyViolation{
+    violation := safety_violation{
         timestamp: 0, // Would be actual timestamp
         text_snippet: text,
         violation_type: "content_safety",
@@ -275,7 +275,7 @@ func (filter *SafetyFilter) log_violation(text string, result SafetyCheckResult)
 // Filter Application
 // ============================================
 
-func (filter *SafetyFilter) filter_generation(text string) (string, bool) {
+func (filter *safety_filter) filter_generation(text string) (string, bool) {
     result := filter.check_safety(text)
     
     if result.is_safe {
@@ -285,7 +285,7 @@ func (filter *SafetyFilter) filter_generation(text string) (string, bool) {
     }
 }
 
-func (filter *SafetyFilter) filter_batch(texts []string) ([]string, []bool) {
+func (filter *safety_filter) filter_batch(texts []string) ([]string, []bool) {
     results := make([]string, len(texts))
     flags := make([]bool, len(texts))
     
@@ -300,7 +300,7 @@ func (filter *SafetyFilter) filter_batch(texts []string) ([]string, []bool) {
 // Policy Configuration
 // ============================================
 
-func (filter *SafetyFilter) set_safety_policy(policy string) {
+func (filter *safety_filter) set_safety_policy(policy string) {
     switch policy {
     case "strict":
         filter.config.toxicity_threshold = 0.3
@@ -321,7 +321,7 @@ func (filter *SafetyFilter) set_safety_policy(policy string) {
 // Statistics and Reporting
 // ============================================
 
-func (filter *SafetyFilter) print_stats() {
+func (filter *safety_filter) print_stats() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Safety Filter - Statistics and Report                ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
@@ -357,9 +357,9 @@ func (filter *SafetyFilter) print_stats() {
 // Main Interface
 // ============================================
 
-func NewSafetyFilter(model PolicyModel) *SafetyFilter {
-    return &SafetyFilter{
-        config: SafetyConfig{
+func NewSafetyFilter(model PolicyModel) *safety_filter {
+    return &safety_filter{
+        config: safety_config{
             harmful_keywords: []string{
                 "violence", "illegal", "abuse",
                 "hate", "harm", "dangerous",
@@ -370,12 +370,12 @@ func NewSafetyFilter(model PolicyModel) *SafetyFilter {
             enable_logging: true,
         },
         toxicity_model: model,
-        safety_stats: SafetyStats{},
-        violations: []SafetyViolation{},
+        safety_stats: safety_stats{},
+        violations: []safety_violation{},
     }
 }
 
-func (filter *SafetyFilter) demonstrate() {
+func (filter *safety_filter) demonstrate() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Safety Filter System - Content Protection            ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝\n")
@@ -400,5 +400,5 @@ func (filter *SafetyFilter) demonstrate() {
     }
     
     filter.print_stats()
-    fmt.Println("\n[SafetyFilter] Ready!")
+    fmt.Println("\n[safety_filter] Ready!")
 }

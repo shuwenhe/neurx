@@ -133,7 +133,7 @@ func main() {
     model.v_gpu = cuda_malloc(total_params * 4)
     
     println("GPU memory allocated for model")
-    println("Embedding parameters: " + int_to_str(vocab_size * model.embedding_size / 1000000) + "M")
+    println("embedding parameters: " + int_to_str(vocab_size * model.embedding_size / 1000000) + "M")
     println("Transformer parameters: " + int_to_str(total_weight_size / 1000000) + "M")
     println("")
     
@@ -188,7 +188,7 @@ func main() {
             float batch_loss = gpu_forward_backward_pass(
                 cublas_handle, model,
                 batch_size, seq_len,
-                line  // Document content
+                line  // document content
             )
             
             state.total_loss = state.total_loss + batch_loss

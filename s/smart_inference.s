@@ -25,7 +25,7 @@ struct SimilarityResult {
     string text
 }
 
-struct InferenceConfig {
+struct inference_config {
     int maxContextLength
     float similarityThreshold
     int topKDocs

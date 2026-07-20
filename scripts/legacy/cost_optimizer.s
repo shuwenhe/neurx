@@ -10,7 +10,7 @@ import (
     "math"
 )
 
-type ResourceMetrics struct {
+type resource_metrics struct {
     step                int64
     gpu_count           int
     batch_size          int
@@ -20,21 +20,21 @@ type ResourceMetrics struct {
     cost_per_step       float64
 }
 
-type CostModel struct {
+type cost_model struct {
     gpu_price_per_hour  float64
     memory_price_per_gb float64
     network_price_per_gb float64
     storage_price_per_gb_month float64
 }
 
-type OptimizationStrategy struct {
+type optimization_strategy struct {
     strategy_name       string
     target_metric       string
     constraint          string
     expected_saving     float64
 }
 
-type ResourceAllocation struct {
+type resource_allocation struct {
     gpu_ids             []string
     batch_size          int
     sequence_length     int
@@ -42,27 +42,27 @@ type ResourceAllocation struct {
     precision           string  // fp32, fp16, int8
 }
 
-type CostOptimizer struct {
-    config              CostModel
-    current_allocation  ResourceAllocation
-    metrics_history     []ResourceMetrics
+type cost_optimizer struct {
+    config              cost_model
+    current_allocation  resource_allocation
+    metrics_history     []resource_metrics
     total_cost          float64
-    optimization_strategies []OptimizationStrategy
+    optimization_strategies []optimization_strategy
 }
 
 // ============================================
 // Cost Optimizer Initialization
 // ============================================
 
-func (co *CostOptimizer) initialize(config CostModel) {
+func (co *cost_optimizer) initialize(config cost_model) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Cost Optimization and Resource Management            ║")
     fmt.Println("║  Minimize costs while maintaining performance         ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝\n")
     
     co.config = config
-    co.metrics_history = make([]ResourceMetrics, 0)
-    co.optimization_strategies = make([]OptimizationStrategy, 0)
+    co.metrics_history = make([]resource_metrics, 0)
+    co.optimization_strategies = make([]optimization_strategy, 0)
     co.total_cost = 0.0
     
     fmt.Printf("Pricing Configuration:\n")
@@ -72,7 +72,7 @@ func (co *CostOptimizer) initialize(config CostModel) {
     fmt.Printf("  Storage: $%.2f/GB/month\n\n", config.storage_price_per_gb_month)
 }
 
-func (co *CostOptimizer) set_resource_allocation(
+func (co *cost_optimizer) set_resource_allocation(
     gpu_count int,
     batch_size int,
     sequence_length int,
@@ -94,7 +94,7 @@ func (co *CostOptimizer) set_resource_allocation(
         gradient_accum = batch_size / 32
     }
     
-    co.current_allocation = ResourceAllocation{
+    co.current_allocation = resource_allocation{
         gpu_ids:             gpu_ids,
         batch_size:          batch_size,
         sequence_length:     sequence_length,
@@ -110,7 +110,7 @@ func (co *CostOptimizer) set_resource_allocation(
 // Cost Calculation
 // ============================================
 
-func (co *CostOptimizer) calculate_step_cost(
+func (co *cost_optimizer) calculate_step_cost(
     step int64,
     gpu_count int,
     duration_seconds float64,
@@ -127,7 +127,7 @@ func (co *CostOptimizer) calculate_step_cost(
     return step_cost
 }
 
-func (co *CostOptimizer) record_metrics(
+func (co *cost_optimizer) record_metrics(
     step int64,
     gpu_count int,
     batch_size int,
@@ -145,7 +145,7 @@ func (co *CostOptimizer) record_metrics(
         0.1, // network transfer
     )
     
-    metric := ResourceMetrics{
+    metric := resource_metrics{
         step:              step,
         gpu_count:         gpu_count,
         batch_size:        batch_size,
@@ -170,7 +170,7 @@ func (co *CostOptimizer) record_metrics(
 // Dynamic Batch Size Optimization
 // ============================================
 
-func (co *CostOptimizer) optimize_batch_size(
+func (co *cost_optimizer) optimize_batch_size(
     available_memory_gb float64) int {
     
     fmt.Printf("\n[Optimization] Optimizing batch size\n")
@@ -198,10 +198,10 @@ func (co *CostOptimizer) optimize_batch_size(
 // GPU Utilization Optimization
 // ============================================
 
-func (co *CostOptimizer) optimize_gpu_utilization() []OptimizationStrategy {
+func (co *cost_optimizer) optimize_gpu_utilization() []optimization_strategy {
     fmt.Printf("\n[Optimization] GPU Utilization Optimization Strategies\n")
     
-    strategies := []OptimizationStrategy{
+    strategies := []optimization_strategy{
         {
             strategy_name:  "Mixed Precision Training",
             target_metric:  "memory",
@@ -248,7 +248,7 @@ func (co *CostOptimizer) optimize_gpu_utilization() []OptimizationStrategy {
 // Cost-Benefit Analysis
 // ============================================
 
-func (co *CostOptimizer) analyze_cost_benefit() {
+func (co *cost_optimizer) analyze_cost_benefit() {
     fmt.Printf("\n┌────────────────────────────────────────┐\n")
     fmt.Printf("│  Cost-Benefit Analysis                 │\n")
     fmt.Printf("└────────────────────────────────────────┘\n\n")
@@ -283,7 +283,7 @@ func (co *CostOptimizer) analyze_cost_benefit() {
 // Automated Resource Scaling
 // ============================================
 
-func (co *CostOptimizer) recommend_auto_scaling(
+func (co *cost_optimizer) recommend_auto_scaling(
     current_throughput float64,
     target_throughput float64,
     current_cost float64) {
@@ -306,7 +306,7 @@ func (co *CostOptimizer) recommend_auto_scaling(
 // Cost Tracking and Reporting
 // ============================================
 
-func (co *CostOptimizer) get_cost_report() {
+func (co *cost_optimizer) get_cost_report() {
     fmt.Printf("\n┌────────────────────────────────────────┐\n")
     fmt.Printf("│  Cost and Resource Report              │\n")
     fmt.Printf("└────────────────────────────────────────┘\n\n")
@@ -345,16 +345,16 @@ func (co *CostOptimizer) get_cost_report() {
 // Main Interface
 // ============================================
 
-func NewCostOptimizer() *CostOptimizer {
-    return &CostOptimizer{
-        metrics_history: make([]ResourceMetrics, 0),
-        optimization_strategies: make([]OptimizationStrategy, 0),
+func NewCostOptimizer() *cost_optimizer {
+    return &cost_optimizer{
+        metrics_history: make([]resource_metrics, 0),
+        optimization_strategies: make([]optimization_strategy, 0),
     }
 }
 
-func (co *CostOptimizer) run_complete_cost_optimization_cycle() {
+func (co *cost_optimizer) run_complete_cost_optimization_cycle() {
     // Initialize with GPU pricing
-    config := CostModel{
+    config := cost_model{
         gpu_price_per_hour:    2.48,  // H100 price
         memory_price_per_gb:    0.01,
         network_price_per_gb:   0.12,
@@ -408,5 +408,5 @@ func (co *CostOptimizer) run_complete_cost_optimization_cycle() {
     // Cost report
     co.get_cost_report()
     
-    fmt.Println("\n[CostOptimizer] Complete!")
+    fmt.Println("\n[cost_optimizer] Complete!")
 }

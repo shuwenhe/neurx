@@ -188,7 +188,7 @@ func agent_model_route_build_prompt(string goal, string task, string input) stri
     prompt = prompt + "  repo        - repository structure or architecture question\n"
     prompt = prompt + "  general     - any other task\n"
     prompt = prompt + "\nGoal: " + goal + "\n"
-    prompt = prompt + "Task: " + task + "\n"
+    prompt = prompt + "task: " + task + "\n"
     prompt = prompt + "Input: " + input + "\n"
     prompt = prompt + "\nRespond with exactly one line:\nroute: <route_name>\n"
     prompt

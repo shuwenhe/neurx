@@ -11,7 +11,7 @@ import (
     "time"
 )
 
-type InferenceConfig struct {
+type inference_config struct {
     max_batch_size      int
     max_seq_length      int
     use_kv_cache        bool
@@ -21,7 +21,7 @@ type InferenceConfig struct {
     num_replicas        int
 }
 
-type KVCache struct {
+type kvcache struct {
     key_cache           [][]float64
     value_cache         [][]float64
     cache_size          int
@@ -47,16 +47,16 @@ type inference_response struct {
     tokens_per_second   float64
 }
 
-type InferenceEngine struct {
-    config              InferenceConfig
+type inference_engine struct {
+    config              inference_config
     model               PolicyModel
-    kv_cache            *KVCache
+    kv_cache            *kvcache
     request_queue       []InferenceRequest
     response_cache      map[string]InferenceResponse
-    performance_stats   InferenceStats
+    performance_stats   inference_stats
 }
 
-type InferenceStats struct {
+type inference_stats struct {
     total_requests      int64
     total_tokens        int64
     total_latency       float64
@@ -72,14 +72,14 @@ type InferenceStats struct {
 // KV Cache Management
 // ============================================
 
-func (engine *InferenceEngine) initialize_kv_cache() {
+func (engine *inference_engine) initialize_kv_cache() {
     fmt.Println("[Inference] Initializing KV Cache...")
     
     cache_size := engine.config.max_batch_size * 
                  engine.config.max_seq_length * 
                  engine.model.hidden_size
     
-    engine.kv_cache = &KVCache{
+    engine.kv_cache = &kvcache{
         key_cache: make([][]float64, cache_size),
         value_cache: make([][]float64, cache_size),
         cache_size: cache_size,
@@ -95,7 +95,7 @@ func (engine *InferenceEngine) initialize_kv_cache() {
     fmt.Printf("  KV Cache size: %.2f GB\n", cache_memory)
 }
 
-func (engine *InferenceEngine) update_kv_cache(layer_idx int, tokens []int, values []float64) {
+func (engine *inference_engine) update_kv_cache(layer_idx int, tokens []int, values []float64) {
     // Store new KV values
     cache_idx := layer_idx * engine.config.max_batch_size * engine.config.max_seq_length
     
@@ -106,7 +106,7 @@ func (engine *InferenceEngine) update_kv_cache(layer_idx int, tokens []int, valu
     }
 }
 
-func (engine *InferenceEngine) get_cached_kv(layer_idx int, seq_len int) ([][]float64, [][]float64) {
+func (engine *inference_engine) get_cached_kv(layer_idx int, seq_len int) ([][]float64, [][]float64) {
     cache_idx := layer_idx * seq_len
     
     keys := [][]float64{}
@@ -124,7 +124,7 @@ func (engine *InferenceEngine) get_cached_kv(layer_idx int, seq_len int) ([][]fl
 // Batch Processing
 // ============================================
 
-func (engine *InferenceEngine) create_batch(requests []InferenceRequest) [][]int {
+func (engine *inference_engine) create_batch(requests []InferenceRequest) [][]int {
     batch := [][]int{}
     
     max_len := 0
@@ -143,7 +143,7 @@ func (engine *InferenceEngine) create_batch(requests []InferenceRequest) [][]int
     return batch
 }
 
-func (engine *InferenceEngine) process_batch(batch [][]int) [][]float64 {
+func (engine *inference_engine) process_batch(batch [][]int) [][]float64 {
     batch_size := len(batch)
     logits := make([][]float64, batch_size)
     
@@ -158,7 +158,7 @@ func (engine *InferenceEngine) process_batch(batch [][]int) [][]float64 {
 // Flash Attention Optimization
 // ============================================
 
-func (engine *InferenceEngine) flash_attention_forward(q []float64, k []float64, v []float64) []float64 {
+func (engine *inference_engine) flash_attention_forward(q []float64, k []float64, v []float64) []float64 {
     // Simplified Flash Attention: O(N) memory instead of O(N^2)
     
     // Compute attention scores
@@ -195,7 +195,7 @@ func (engine *InferenceEngine) flash_attention_forward(q []float64, k []float64,
     return output
 }
 
-func (engine *InferenceEngine) compute_attention_scores(q []float64, k []float64) []float64 {
+func (engine *inference_engine) compute_attention_scores(q []float64, k []float64) []float64 {
     scores := make([]float64, len(k))
     for i := 0; i < len(k); i++ {
         score := 0.0
@@ -211,7 +211,7 @@ func (engine *InferenceEngine) compute_attention_scores(q []float64, k []float64
 // Tensor Parallelism
 // ============================================
 
-func (engine *InferenceEngine) enable_tensor_parallelism(num_replicas int) {
+func (engine *inference_engine) enable_tensor_parallelism(num_replicas int) {
     fmt.Printf("[Inference] Enabling Tensor Parallelism (%d replicas)\n", num_replicas)
     
     // Shard model across multiple GPUs
@@ -225,7 +225,7 @@ func (engine *InferenceEngine) enable_tensor_parallelism(num_replicas int) {
 // Sampling and Generation
 // ============================================
 
-func (engine *InferenceEngine) sample_token(logits []float64, temperature float64, top_p float64) int {
+func (engine *inference_engine) sample_token(logits []float64, temperature float64, top_p float64) int {
     // Apply temperature
     for i := range logits {
         logits[i] /= temperature
@@ -269,7 +269,7 @@ func (engine *InferenceEngine) sample_token(logits []float64, temperature float6
     return 0
 }
 
-func (engine *InferenceEngine) generate(request InferenceRequest) InferenceResponse {
+func (engine *inference_engine) generate(request InferenceRequest) InferenceResponse {
     start_time := time.Now()
     
     generated_tokens := []int{}
@@ -282,7 +282,7 @@ func (engine *InferenceEngine) generate(request InferenceRequest) InferenceRespo
         // Forward pass
         logits := engine.model_forward(current_tokens)
         
-        // Sample next token
+        // sample next token
         next_token := engine.sample_token(
             logits, 
             request.temperature, 
@@ -318,7 +318,7 @@ func (engine *InferenceEngine) generate(request InferenceRequest) InferenceRespo
     }
 }
 
-func (engine *InferenceEngine) model_forward(tokens []int) []float64 {
+func (engine *inference_engine) model_forward(tokens []int) []float64 {
     // Simulate model forward pass
     logits := make([]float64, 128000) // vocab_size
     
@@ -333,7 +333,7 @@ func (engine *InferenceEngine) model_forward(tokens []int) []float64 {
 // Serving Interface
 // ============================================
 
-func (engine *InferenceEngine) handle_request(request InferenceRequest) InferenceResponse {
+func (engine *inference_engine) handle_request(request InferenceRequest) InferenceResponse {
     engine.request_queue = append(engine.request_queue, request)
     
     // Batch processing
@@ -349,7 +349,7 @@ func (engine *InferenceEngine) handle_request(request InferenceRequest) Inferenc
     return engine.response_cache[request.request_id]
 }
 
-func (engine *InferenceEngine) process_batch_requests() []InferenceResponse {
+func (engine *inference_engine) process_batch_requests() []InferenceResponse {
     responses := []InferenceResponse{}
     
     for _, req := range engine.request_queue {
@@ -368,7 +368,7 @@ func (engine *InferenceEngine) process_batch_requests() []InferenceResponse {
 // Performance Analysis
 // ============================================
 
-func (engine *InferenceEngine) print_stats() {
+func (engine *inference_engine) print_stats() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Inference Performance Statistics                     ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
@@ -394,13 +394,13 @@ func (engine *InferenceEngine) print_stats() {
 // Main Interface
 // ============================================
 
-func NewInferenceEngine(config InferenceConfig, model PolicyModel) *InferenceEngine {
-    engine := &InferenceEngine{
+func NewInferenceEngine(config inference_config, model PolicyModel) *inference_engine {
+    engine := &inference_engine{
         config: config,
         model: model,
         request_queue: []InferenceRequest{},
         response_cache: make(map[string]InferenceResponse),
-        performance_stats: InferenceStats{},
+        performance_stats: inference_stats{},
     }
     
     engine.initialize_kv_cache()
@@ -408,7 +408,7 @@ func NewInferenceEngine(config InferenceConfig, model PolicyModel) *InferenceEng
     return engine
 }
 
-func (engine *InferenceEngine) start_serving() {
+func (engine *inference_engine) start_serving() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Inference Engine - Production Serving               ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")

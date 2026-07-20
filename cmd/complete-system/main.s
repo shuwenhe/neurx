@@ -97,7 +97,7 @@ func runTraining(args []string) {
     fmt.Printf("  Model Parameters: %d\n", llm.NewGPT(modelConfig).NumParams())
     
     // Create training pipeline
-    trainingConfig := training.TrainingConfig{
+    trainingConfig := training.training_config{
         ModelScale:        scale,
         NumEpochs:         10,
         GlobalBatchSize:   1024 / uint64(numGPUs),

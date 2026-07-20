@@ -365,7 +365,7 @@ func gpu_forward_pass_example(int batch_size, int seq_len, int hidden_dim, int v
     fmt.printfln("⚙️  Computing operations...\n")
     
     // Simulate forward pass
-    fmt.printfln("1. Embedding lookup:")
+    fmt.printfln("1. embedding lookup:")
     cuda_gemm(input_ptr, embedding_ptr, hidden_ptr,
               batch_size * seq_len, hidden_dim, 1, ctx)
     profile_kernel(&prof, "embedding_lookup", 0.5)

@@ -14,8 +14,8 @@ import (
     "encoding/json"
 )
 
-// EvaluationMetrics holds training evaluation results
-type EvaluationMetrics struct {
+// evaluation_metrics holds training evaluation results
+type evaluation_metrics struct {
     step: int
     loss: float
     perplexity: float
@@ -26,18 +26,18 @@ type EvaluationMetrics struct {
     timestamp: string
 }
 
-// Evaluator computes training metrics
-type Evaluator struct {
+// evaluator computes training metrics
+type evaluator struct {
     batch_size: int
     accumulation_steps: int
-    history: []EvaluationMetrics
+    history: []evaluation_metrics
 }
 
 // Initialize evaluator
-func (e *Evaluator) init(batch_size: int, accumulation_steps: int) {
+func (e *evaluator) init(batch_size: int, accumulation_steps: int) {
     e.batch_size = batch_size
     e.accumulation_steps = accumulation_steps
-    e.history = make([]EvaluationMetrics, 0)
+    e.history = make([]evaluation_metrics, 0)
 }
 
 // Calculate perplexity from loss
@@ -81,12 +81,12 @@ func calculate_cross_entropy(logits: []float, labels: []int): float {
 }
 
 // Evaluate on validation set
-func (e *Evaluator) evaluate(
+func (e *evaluator) evaluate(
     step: int,
     train_loss: float,
     val_logits: [][]float,
     val_labels: [][]int,
-    speed: float) EvaluationMetrics {
+    speed: float) evaluation_metrics {
     
     // Calculate validation metrics
     val_loss := 0.0
@@ -106,7 +106,7 @@ func (e *Evaluator) evaluate(
     val_ppl := calculate_perplexity(val_loss)
     
     // Create metrics record
-    metrics := EvaluationMetrics{
+    metrics := evaluation_metrics{
         step: step,
         loss: train_loss,
         perplexity: train_ppl,
@@ -122,7 +122,7 @@ func (e *Evaluator) evaluate(
 }
 
 // Get current best perplexity
-func (e *Evaluator) best_perplexity(): float {
+func (e *evaluator) best_perplexity(): float {
     if len(e.history) == 0 {
         return math.MaxFloat
     }
@@ -138,7 +138,7 @@ func (e *Evaluator) best_perplexity(): float {
 }
 
 // Get convergence info
-func (e *Evaluator) convergence_info(): map[string]interface{} {
+func (e *evaluator) convergence_info(): map[string]interface{} {
     if len(e.history) < 2 {
         return map[string]interface{}{
             "status": "insufficient_data",
@@ -176,7 +176,7 @@ func (e *Evaluator) convergence_info(): map[string]interface{} {
 }
 
 // Generate evaluation report
-func (e *Evaluator) generate_report(): string {
+func (e *evaluator) generate_report(): string {
     report := "=== NeurX Training Evaluation Report ===\n\n"
     
     if len(e.history) == 0 {
@@ -221,7 +221,7 @@ func (e *Evaluator) generate_report(): string {
 }
 
 // Export metrics as JSON
-func (e *Evaluator) export_json(): string {
+func (e *evaluator) export_json(): string {
     data := map[string]interface{}{
         "total_evaluations": len(e.history),
         "best_perplexity": e.best_perplexity(),
@@ -246,7 +246,7 @@ func format_int(i: int): string {
 // Example main function
 func main() {
     // Initialize evaluator
-    evaluator := &Evaluator{}
+    evaluator := &evaluator{}
     evaluator.init(32, 4)
     
     // Simulate evaluation at different steps

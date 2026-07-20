@@ -332,7 +332,7 @@ func dataloader_estimate_throughput(streaming_dataloader loader, float time_seco
 }
 
 func dataloader_statistics(streaming_dataloader loader) string {
-    string stats = "Streaming DataLoader Statistics:\n"
+    string stats = "Streaming data_loader Statistics:\n"
     stats = stats + "  Total Files: " + string(len(loader.reader.file_paths)) + "\n"
     stats = stats + "  Total Batches: " + string(loader.total_batches) + "\n"
     stats = stats + "  Processed Batches: " + string(loader.processed_batches) + "\n"

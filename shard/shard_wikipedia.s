@@ -35,7 +35,7 @@ string g_manifest_file = ""
 int g_docs_per_shard = 5000
 int g_max_pages = 0
 
-struct ShardMetadata {
+struct shard_metadata {
     string shard_id
     string file_path
     int num_documents
@@ -250,7 +250,7 @@ func json_escape(string s) string {
     out
 }
 
-func generate_manifest_json(int total_pages, int total_shards, []ShardMetadata shards) string {
+func generate_manifest_json(int total_pages, int total_shards, []shard_metadata shards) string {
     string json = "{\n"
     json = json + "  \"dataset_name\": \"neurx-wikipedia\",\n"
     json = json + "  \"source_file\": " + json_escape(g_input_bz2_file) + ",\n"
@@ -294,7 +294,7 @@ func process_wikipedia() int {
     println("")
     println("Input      : " + g_input_bz2_file)
     println("Output dir : " + g_output_dir)
-    println("Manifest   : " + g_manifest_file)
+    println("manifest   : " + g_manifest_file)
     println("Docs/shard : " + int_to_str(g_docs_per_shard))
     println("Max pages  : " + int_to_str(g_max_pages))
     println("")
@@ -410,7 +410,7 @@ func process_wikipedia() int {
     println("[+] Wikipedia sharding complete")
     println("[+] Shards   : " + int_to_str(total_shards))
     println("[+] Pages    : " + int_to_str(total_pages))
-    println("[+] Manifest : " + g_manifest_file)
+    println("[+] manifest : " + g_manifest_file)
 
     return 0
 }

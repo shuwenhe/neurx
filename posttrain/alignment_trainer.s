@@ -278,7 +278,7 @@ func init_sft_trainer(
         }
     }
 
-func train_sft_epoch(self: SFTTrainer, DataLoader dataloader) -> float {
+func train_sft_epoch(self: SFTTrainer, data_loader dataloader) -> float {
     """
     trainingEnglish text epoch English text SFT
 
@@ -415,7 +415,7 @@ func prepare_sft_batch(
 // English text: https://arxiv.org/abs/2305.18290
 // ============================================================
 
-class DPOTrainer {
+class dpotrainer {
     neurx_model model
     tokenizer_state tokenizer
     alignment_config config
@@ -426,7 +426,7 @@ class DPOTrainer {
     } state
 
 func compute_dpo_loss(
-    self: DPOTrainer,
+    self: dpotrainer,
     chosen_logits: tensor,     // [batch, seq, vocab]
     rejected_logits: tensor,   // [batch, seq, vocab]
     chosen_labels: tensor,     // [batch, seq]
@@ -541,7 +541,7 @@ class GRPOTrainer {
 func train_grpo_step(
     self: GRPOTrainer,
     batch_prompts: string[],      # [batch_size] prompts
-    DataLoader prompt_loader,
+    data_loader prompt_loader,
     int group_size: int = 8
 ) -> tuple[tensor, dict[str, float]] {
     """
@@ -571,7 +571,7 @@ func train_grpo_step(
         tensor[] group_log_probs
 
         for g in range(group_size):
-            # Sample with temperature (for diversity)
+            # sample with temperature (for diversity)
             tuple[response, log_prob] = generate_with_logprob(
                 self.model,
                 self.tokenizer,
@@ -740,11 +740,11 @@ def score_response_grpo(
 // English text: https://arxiv.org/abs/1707.06347
 // ============================================================
 
-class PPOTrainer {
+class ppotrainer {
     neurx_model policy_model       # Actor (English textoptimizeEnglish text)
     neurx_model reference_model   # Frozen reference (English text KL penalty)
-    RewardModel reward_model     # Reward model
-    ValueModel value_model       # Critic (value function)
+    reward_model reward_model     # Reward model
+    value_model value_model       # Critic (value function)
     tokenizer_state tokenizer
     AdamW actor_optimizer
     AdamW critic_optimizer
@@ -758,7 +758,7 @@ class PPOTrainer {
     } state
 
 func train_ppo_iteration(
-    self: PPOTrainer,
+    self: ppotrainer,
     batch_prompts: string[]
 ) -> dict[str, float] {
     """

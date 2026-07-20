@@ -73,8 +73,8 @@ struct transformer_layer {
 
 struct language_model {
     model_config config
-    []float wte                  // Token Embedding: [vocab_size, n_embd]
-    []float wpe                  // English text Learned Pos Embedding: [block_size, n_embd]
+    []float wte                  // Token embedding: [vocab_size, n_embd]
+    []float wpe                  // English text Learned Pos embedding: [block_size, n_embd]
     []transformer_layer layers           // Transformer English text [n_layer]
     rms_norm final_norm          // English text RMSNorm (English text LM Head English text)
     []float lm_head              // LM Head weight: [n_embd, vocab_size]

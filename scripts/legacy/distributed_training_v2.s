@@ -19,8 +19,8 @@ import (
 // Enhanced Distributed Configuration
 // ============================================
 
-// DistributedConfigV2 adds support for large model optimizations
-type DistributedConfigV2 struct {
+// distributed_config_v2 adds support for large model optimizations
+type distributed_config_v2 struct {
     // Basic distributed
     backend: string
     rank: int
@@ -49,8 +49,8 @@ type DistributedConfigV2 struct {
 }
 
 // Initialize for 7B model
-func create_7b_distributed_config(): DistributedConfigV2 {
-    return DistributedConfigV2{
+func create_7b_distributed_config(): distributed_config_v2 {
+    return distributed_config_v2{
         backend: "nccl",
         rank: 0,
         world_size: 1,
@@ -74,8 +74,8 @@ func create_7b_distributed_config(): DistributedConfigV2 {
 // Gradient Accumulation Manager
 // ============================================
 
-// GradAccumManager manages gradient accumulation across steps
-type GradAccumManager struct {
+// grad_accum_manager manages gradient accumulation across steps
+type grad_accum_manager struct {
     accum_steps: int
     current_step: int
     accumulated_grads: map[string]float
@@ -83,7 +83,7 @@ type GradAccumManager struct {
 }
 
 // Initialize gradient accumulation
-func (gm *GradAccumManager) init(accum_steps: int) {
+func (gm *grad_accum_manager) init(accum_steps: int) {
     gm.accum_steps = accum_steps
     gm.current_step = 0
     gm.accumulated_grads = make(map[string]float)
@@ -91,24 +91,24 @@ func (gm *GradAccumManager) init(accum_steps: int) {
 }
 
 // Step the accumulator
-func (gm *GradAccumManager) step(grad_norm: float) {
+func (gm *grad_accum_manager) step(grad_norm: float) {
     gm.current_step++
     gm.accumulated_grads["grad_norm"] = grad_norm
     gm.is_sync_step = (gm.current_step % gm.accum_steps) == 0
 }
 
 // Check if should synchronize
-func (gm *GradAccumManager) should_sync(): bool {
+func (gm *grad_accum_manager) should_sync(): bool {
     return gm.is_sync_step
 }
 
 // Get effective batch size multiplier
-func (gm *GradAccumManager) get_effective_batch_multiplier(): int {
+func (gm *grad_accum_manager) get_effective_batch_multiplier(): int {
     return gm.accum_steps
 }
 
 // Reset for next cycle
-func (gm *GradAccumManager) reset() {
+func (gm *grad_accum_manager) reset() {
     gm.current_step = 0
     gm.is_sync_step = false
     gm.accumulated_grads = make(map[string]float)
@@ -118,8 +118,8 @@ func (gm *GradAccumManager) reset() {
 // Activation Checkpointing Manager
 // ============================================
 
-// ActivationCkptManager manages selective activation checkpointing
-type ActivationCkptManager struct {
+// activation_ckpt_manager manages selective activation checkpointing
+type activation_ckpt_manager struct {
     checkpoint_strategy: string  // "none", "every_other", "every_third", "custom"
     layer_checkpoint_map: map[int]bool
     total_layers: int
@@ -127,7 +127,7 @@ type ActivationCkptManager struct {
 }
 
 // Initialize checkpointing
-func (acm *ActivationCkptManager) init(total_layers: int, strategy: string) {
+func (acm *activation_ckpt_manager) init(total_layers: int, strategy: string) {
     acm.total_layers = total_layers
     acm.checkpoint_strategy = strategy
     acm.layer_checkpoint_map = make(map[int]bool)
@@ -135,14 +135,14 @@ func (acm *ActivationCkptManager) init(total_layers: int, strategy: string) {
     // Apply checkpointing strategy
     switch strategy {
     case "every_other":
-        // Checkpoint odd-numbered layers: ~40% memory savings
+        // checkpoint odd-numbered layers: ~40% memory savings
         for i := 1; i < total_layers; i += 2 {
             acm.layer_checkpoint_map[i] = true
         }
         acm.memory_savings_percent = 40.0
         
     case "every_third":
-        // Checkpoint every 3rd layer: ~30% memory savings
+        // checkpoint every 3rd layer: ~30% memory savings
         for i := 2; i < total_layers; i += 3 {
             acm.layer_checkpoint_map[i] = true
         }
@@ -155,7 +155,7 @@ func (acm *ActivationCkptManager) init(total_layers: int, strategy: string) {
 }
 
 // Check if layer should be checkpointed
-func (acm *ActivationCkptManager) should_checkpoint(layer_id: int): bool {
+func (acm *activation_ckpt_manager) should_checkpoint(layer_id: int): bool {
     if val, exists := acm.layer_checkpoint_map[layer_id]; exists {
         return val
     }
@@ -166,8 +166,8 @@ func (acm *ActivationCkptManager) should_checkpoint(layer_id: int): bool {
 // Mixed Precision Manager
 // ============================================
 
-// MixedPrecisionManager handles mixed precision training
-type MixedPrecisionManager struct {
+// mixed_precision_manager handles mixed precision training
+type mixed_precision_manager struct {
     dtype: string  // "fp32", "fp16", "bfloat16"
     compute_dtype: string
     weight_dtype: string
@@ -176,7 +176,7 @@ type MixedPrecisionManager struct {
 }
 
 // Initialize mixed precision
-func (mpm *MixedPrecisionManager) init(dtype: string) {
+func (mpm *mixed_precision_manager) init(dtype: string) {
     mpm.dtype = dtype
     mpm.loss_scaling_enabled = (dtype != "fp32")
     mpm.loss_scaling = 1024.0
@@ -200,7 +200,7 @@ func (mpm *MixedPrecisionManager) init(dtype: string) {
 }
 
 // Get memory savings percent
-func (mpm *MixedPrecisionManager) get_memory_savings(): float {
+func (mpm *mixed_precision_manager) get_memory_savings(): float {
     if mpm.dtype == "fp32" {
         return 0.0
     }
@@ -211,12 +211,12 @@ func (mpm *MixedPrecisionManager) get_memory_savings(): float {
 // Large Model Distributed Trainer
 // ============================================
 
-// LargeModelDistributedTrainer combines distributed training with large model optimizations
-type LargeModelDistributedTrainer struct {
-    config: DistributedConfigV2
-    grad_accum: GradAccumManager
-    activation_ckpt: ActivationCkptManager
-    mixed_precision: MixedPrecisionManager
+// large_model_distributed_trainer combines distributed training with large model optimizations
+type large_model_distributed_trainer struct {
+    config: distributed_config_v2
+    grad_accum: grad_accum_manager
+    activation_ckpt: activation_ckpt_manager
+    mixed_precision: mixed_precision_manager
     
     // Training state
     global_step: int
@@ -228,7 +228,7 @@ type LargeModelDistributedTrainer struct {
 }
 
 // Initialize large model distributed trainer
-func (lmdt *LargeModelDistributedTrainer) init(world_size: int, rank: int) error {
+func (lmdt *large_model_distributed_trainer) init(world_size: int, rank: int) error {
     lmdt.config = create_7b_distributed_config()
     lmdt.config.world_size = world_size
     lmdt.config.rank = rank
@@ -255,7 +255,7 @@ func (lmdt *LargeModelDistributedTrainer) init(world_size: int, rank: int) error
 }
 
 // Estimate memory requirements
-func (lmdt *LargeModelDistributedTrainer) estimate_memory() {
+func (lmdt *large_model_distributed_trainer) estimate_memory() {
     // 7B model memory estimate
     model_weights_gb := 7.0 * 4.0 / 1024.0  // 7B params * 4 bytes / 1024
     
@@ -284,7 +284,7 @@ func (lmdt *LargeModelDistributedTrainer) estimate_memory() {
 }
 
 // Process one training step
-func (lmdt *LargeModelDistributedTrainer) step(loss: float) {
+func (lmdt *large_model_distributed_trainer) step(loss: float) {
     lmdt.global_step++
     
     // Step gradient accumulation
@@ -298,7 +298,7 @@ func (lmdt *LargeModelDistributedTrainer) step(loss: float) {
 }
 
 // Print training config
-func (lmdt *LargeModelDistributedTrainer) print_config() {
+func (lmdt *large_model_distributed_trainer) print_config() {
     if !lmdt.is_master {
         return
     }
@@ -340,7 +340,7 @@ func (lmdt *LargeModelDistributedTrainer) print_config() {
 }
 
 // Get status
-func (lmdt *LargeModelDistributedTrainer) get_status(): map[string]interface{} {
+func (lmdt *large_model_distributed_trainer) get_status(): map[string]interface{} {
     return map[string]interface{}{
         "global_step": lmdt.global_step,
         "gradient_syncs": lmdt.num_gradient_syncs,
@@ -375,7 +375,7 @@ func main() {
     }
     
     // Initialize trainer
-    trainer := LargeModelDistributedTrainer{}
+    trainer := large_model_distributed_trainer{}
     if err := trainer.init(world_size, rank); err != nil {
         fmt.Printf("❌ Error: %v\n", err)
         os.Exit(1)

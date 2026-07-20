@@ -15,7 +15,7 @@ func main() {
     string project_root = runtime_env_get("NEURX_ROOT", ".")
     string model_name = runtime_env_get("NEURX_PRETRAIN_MODEL_NAME", "NeurX-1.3")
     string manifest_path = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
-    println("[TRAINER] Manifest: " + manifest_path)
+    println("[TRAINER] manifest: " + manifest_path)
     string shard_list_file = runtime_env_get("NEURX_PRETRAIN_SHARD_LIST_FILE", project_root + "/artifacts/build/run_large_pretrain/shard_list.sample.txt")
     string shard_dir = project_root + "/dataset/pretrain/shard"
     string output_dir = runtime_env_get("NEURX_PRETRAIN_OUTPUT_DIR", project_root + "/checkpoint/" + model_name)
@@ -40,11 +40,11 @@ func main() {
     println("[TRAINER] Checking manifest exists...")
     write_progress(progress_file, "checking-manifest path=" + manifest_path)
     if !runtime_file_exists(manifest_path) {
-        println("[ERROR] Manifest not found: " + manifest_path)
+        println("[ERROR] manifest not found: " + manifest_path)
         write_progress(progress_file, "error manifest-not-found path=" + manifest_path)
         return
     }
-    println("[TRAINER] Manifest found!")
+    println("[TRAINER] manifest found!")
     write_progress(progress_file, "manifest-ok path=" + manifest_path)
 
     println("[TRAINER] Loading shard list...")

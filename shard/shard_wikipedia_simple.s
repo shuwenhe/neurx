@@ -115,7 +115,7 @@ func main() int {
     println("Configuration:")
     println("  Input file    : " + input_file)
     println("  Output dir    : " + output_dir)
-    println("  Manifest file : " + manifest_file)
+    println("  manifest file : " + manifest_file)
     println("  Docs/shard    : " + docs_per_shard)
     println("  Max pages     : " + max_pages)
     println("  Resume        : " + resume)
@@ -267,7 +267,7 @@ func main() int {
 
     println("")
     println("[+] Wikipedia sharding complete")
-    println("[+] Manifest : " + manifest_file)
+    println("[+] manifest : " + manifest_file)
     println("")
 
     0

@@ -74,7 +74,7 @@ func sft_training_step(
 // 2. rewardmodel (Reward Model)
 // ============================================================================
 
-struct RewardModelConfig {
+struct reward_model_config {
     int num_epochs
     int batch_size
     float learning_rate
@@ -83,14 +83,14 @@ struct RewardModelConfig {
     bool use_mixed_precision
 }
 
-struct PreferenceData {
+struct preference_data {
     string* chosen_responses     // English text
     string* rejected_responses   // English text
     int num_pairs
 }
 
-struct RewardModelTrainer {
-    RewardModelConfig config
+struct reward_model_trainer {
+    reward_model_config config
     float* model_params
     int param_count
     float auc_score              // ROC-AUC English text
@@ -137,7 +137,7 @@ func reward_model_inference(
 // 3. PPO English text (Proximal Policy Optimization)
 // ============================================================================
 
-struct PPOConfig {
+struct ppoconfig {
     int num_epochs               // PPO English text
     int ppo_batch_size          // PPO English text
     float learning_rate_policy   // English textlearning rate
@@ -149,8 +149,8 @@ struct PPOConfig {
     int target_kl                // English text KL English text
 }
 
-struct PPOTrainer {
-    PPOConfig config
+struct ppotrainer {
+    ppoconfig config
     float* policy_params
     float* value_params
     int param_count
@@ -270,7 +270,7 @@ func compute_kl_divergence(
 // 4. English textevaluation (Multi-Dimensional Evaluation)
 // ============================================================================
 
-struct EvaluationConfig {
+struct evaluation_config {
     int num_eval_samples
     string* eval_prompts
     float helpfulness_weight    // helpfulEnglish textweight
@@ -279,7 +279,7 @@ struct EvaluationConfig {
     float consistency_weight    // English textweight
 }
 
-struct EvaluationMetrics {
+struct evaluation_metrics {
     float helpfulness_score     // 1-5 English text
     float harmlessness_score    // 1-5 English text
     float honesty_score         // 1-5 English text
@@ -337,9 +337,9 @@ func comprehensive_evaluation(
     string prompt,
     string* responses,
     int num_responses,
-    EvaluationConfig config
-) EvaluationMetrics {
-    EvaluationMetrics metrics
+    evaluation_config config
+) evaluation_metrics {
+    evaluation_metrics metrics
 
     metrics.helpfulness_score = evaluate_helpfulness(prompt, responses[0])
     metrics.harmlessness_score = evaluate_harmlessness(responses[0])
@@ -369,15 +369,15 @@ struct RLHFPipeline {
     float sft_best_loss
 
     // phase 2: rewardmodel
-    RewardModelTrainer reward_trainer
+    reward_model_trainer reward_trainer
     float reward_auc
 
     // phase 3: PPO
-    PPOTrainer ppo_trainer
+    ppotrainer ppo_trainer
     float best_reward
 
     // evaluation
-    EvaluationMetrics eval_metrics
+    evaluation_metrics eval_metrics
 
     int total_iterations
     bool converged
@@ -400,7 +400,7 @@ func init_rlhf_pipeline() RLHFPipeline {
 func rlhf_iteration(
     RLHFPipeline pipeline,
     SFTDataset sft_data,
-    PreferenceData pref_data,
+    preference_data pref_data,
     int iteration
 ) RLHFPipeline {
 

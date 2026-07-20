@@ -4,7 +4,7 @@ package neurx.examples
 // COMPLETE END-TO-END TRAINING LOOP EXAMPLE
 // Demonstrates integration of all NeurX components:
 //   ✅ Autograd Backward Propagation (28 operators)
-//   ✅ DataLoader (file I/O / shuffle / DistributedSampler / collation)
+//   ✅ data_loader (file I/O / shuffle / distributed_sampler / collation)
 //   ✅ Sampling Strategies (greedy / top-p / beam search)
 //   ✅ Gradient Checkpointing + TensorBoard/WandB Monitoring
 //   ✅ CUDA Kernels + NCCL Framework (optional GPU acceleration)
@@ -442,7 +442,7 @@ func run_training(training_config cfg) {
     opt = set_learning_rate(opt, cfg.learning_rate)
     println("✓ AdamW optimizer: lr=" + str(cfg.learning_rate) + ", wd=" + str(cfg.weight_decay))
     
-    // 5. Setup DataLoader for training data
+    // 5. Setup data_loader for training data
     dataset train_ds = load_text_dataset(
         cfg.data_path, 
         cfg.vocab_size,
@@ -459,14 +459,14 @@ func run_training(training_config cfg) {
     dl_cfg.collator = default_collator_config(cfg.max_seq_length)
     
     dataloader train_loader = new_dataloader(train_ds, dl_cfg)
-    println("✓ Training DataLoader ready: " + str(train_loader.total_batches) + " batches/epoch")
+    println("✓ Training data_loader ready: " + str(train_loader.total_batches) + " batches/epoch")
     
     // 6. Setup validation loader (if path provided)
     dataloader val_loader
     if len(cfg.validation_path) > 0 {
         dataset val_ds = load_text_dataset(cfg.validation_path, cfg.vocab_size, cfg.max_seq_length)
         val_loader = new_dataloader(val_ds, dl_cfg)
-        println("✓ Validation DataLoader ready: " + str(val_loader.total_batches) + " batches")
+        println("✓ Validation data_loader ready: " + str(val_loader.total_batches) + " batches")
     }
     
     // 7. Initialize monitoring (TensorBoard + WandB)
@@ -709,7 +709,7 @@ func run_training(training_config cfg) {
                     best_val_loss=state.best_validation_loss,
                 )
                 save_model_checkpoint(ckpt, cfg.output_dir, step=state.global_step)
-                println("✓ Checkpoint saved successfully")
+                println("✓ checkpoint saved successfully")
             
             // Get next batch
             (b, epoch_done) = next_batch(state.train_loader)

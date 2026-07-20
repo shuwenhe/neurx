@@ -11,14 +11,14 @@ import (
     "time"
 )
 
-type HyperParameter struct {
+type hyper_parameter struct {
     name            string
     value           string
     data_type       string
     search_range    string
 }
 
-type ExperimentMetrics struct {
+type experiment_metrics struct {
     step            int64
     train_loss      float64
     val_loss        float64
@@ -29,21 +29,21 @@ type ExperimentMetrics struct {
     memory_usage_gb float64
 }
 
-type ExperimentConfig struct {
+type experiment_config struct {
     experiment_id       string
     name                string
     description         string
     model_name          string
     dataset_name        string
-    hyperparameters     []HyperParameter
+    hyperparameters     []hyper_parameter
     start_time          int64
     end_time            int64
     status              string
 }
 
-type ExperimentResult struct {
-    config              ExperimentConfig
-    metrics_history     []ExperimentMetrics
+type experiment_result struct {
+    config              experiment_config
+    metrics_history     []experiment_metrics
     best_checkpoint     string
     best_loss           float64
     best_perplexity     float64
@@ -51,7 +51,7 @@ type ExperimentResult struct {
     converged           bool
 }
 
-type ExperimentComparison struct {
+type experiment_comparison struct {
     experiment_ids      []string
     metric_name         string
     results             map[string]float64
@@ -59,10 +59,10 @@ type ExperimentComparison struct {
     significance        float64
 }
 
-type ExperimentManager struct {
-    experiments         map[string]ExperimentResult
+type experiment_manager struct {
+    experiments         map[string]experiment_result
     current_experiment  string
-    comparison_history  []ExperimentComparison
+    comparison_history  []experiment_comparison
     best_experiment     string
 }
 
@@ -70,7 +70,7 @@ type ExperimentManager struct {
 // Experiment Initialization
 // ============================================
 
-func (manager *ExperimentManager) initialize() {
+func (manager *experiment_manager) initialize() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Industrial Experiment Management System              ║")
     fmt.Println("║  Track, compare, and optimize training experiments    ║")
@@ -81,25 +81,25 @@ func (manager *ExperimentManager) initialize() {
     fmt.Printf("  Current: %s\n\n", manager.current_experiment)
 }
 
-func (manager *ExperimentManager) create_experiment(
+func (manager *experiment_manager) create_experiment(
     experiment_id string,
     name string,
     description string,
     model_name string,
-    dataset_name string) ExperimentConfig {
+    dataset_name string) experiment_config {
     
     fmt.Printf("\n[Experiment] Creating experiment: %s\n", experiment_id)
     fmt.Printf("  Name: %s\n", name)
     fmt.Printf("  Model: %s\n", model_name)
     fmt.Printf("  Dataset: %s\n", dataset_name)
     
-    config := ExperimentConfig{
+    config := experiment_config{
         experiment_id:   experiment_id,
         name:            name,
         description:     description,
         model_name:      model_name,
         dataset_name:    dataset_name,
-        hyperparameters: make([]HyperParameter, 0),
+        hyperparameters: make([]hyper_parameter, 0),
         start_time:      1719842400,
         end_time:        0,
         status:          "created",
@@ -113,14 +113,14 @@ func (manager *ExperimentManager) create_experiment(
 // Hyperparameter Management
 // ============================================
 
-func (manager *ExperimentManager) add_hyperparameter(
+func (manager *experiment_manager) add_hyperparameter(
     experiment_id string,
     param_name string,
     param_value string,
     data_type string) {
     
     if result, exists := manager.experiments[experiment_id]; exists {
-        param := HyperParameter{
+        param := hyper_parameter{
             name:        param_name,
             value:       param_value,
             data_type:   data_type,
@@ -131,7 +131,7 @@ func (manager *ExperimentManager) add_hyperparameter(
     }
 }
 
-func (manager *ExperimentManager) log_hyperparameters(experiment_id string) {
+func (manager *experiment_manager) log_hyperparameters(experiment_id string) {
     fmt.Printf("\n[Experiment] Hyperparameters for %s:\n", experiment_id)
     
     if result, exists := manager.experiments[experiment_id]; exists {
@@ -145,7 +145,7 @@ func (manager *ExperimentManager) log_hyperparameters(experiment_id string) {
 // Metrics Recording
 // ============================================
 
-func (manager *ExperimentManager) record_metrics(
+func (manager *experiment_manager) record_metrics(
     experiment_id string,
     step int64,
     train_loss float64,
@@ -157,7 +157,7 @@ func (manager *ExperimentManager) record_metrics(
     memory_gb float64) {
     
     if result, exists := manager.experiments[experiment_id]; exists {
-        metric := ExperimentMetrics{
+        metric := experiment_metrics{
             step:           step,
             train_loss:     train_loss,
             val_loss:       val_loss,
@@ -183,7 +183,7 @@ func (manager *ExperimentManager) record_metrics(
     }
 }
 
-func (manager *ExperimentManager) get_metrics_summary(experiment_id string) {
+func (manager *experiment_manager) get_metrics_summary(experiment_id string) {
     fmt.Printf("\n[Metrics] Summary for %s:\n", experiment_id)
     
     if result, exists := manager.experiments[experiment_id]; exists {
@@ -206,13 +206,13 @@ func (manager *ExperimentManager) get_metrics_summary(experiment_id string) {
 // Experiment Comparison
 // ============================================
 
-func (manager *ExperimentManager) compare_experiments(
+func (manager *experiment_manager) compare_experiments(
     exp_ids []string,
-    metric string) ExperimentComparison {
+    metric string) experiment_comparison {
     
     fmt.Printf("\n[Comparison] Comparing %d experiments on metric: %s\n", len(exp_ids), metric)
     
-    comparison := ExperimentComparison{
+    comparison := experiment_comparison{
         experiment_ids: exp_ids,
         metric_name:    metric,
         results:        make(map[string]float64),
@@ -263,7 +263,7 @@ func (manager *ExperimentManager) compare_experiments(
 // Experiment History and Tracking
 // ============================================
 
-func (manager *ExperimentManager) mark_experiment_complete(
+func (manager *experiment_manager) mark_experiment_complete(
     experiment_id string,
     converged bool) {
     
@@ -285,7 +285,7 @@ func (manager *ExperimentManager) mark_experiment_complete(
     }
 }
 
-func (manager *ExperimentManager) get_experiment_history() {
+func (manager *experiment_manager) get_experiment_history() {
     fmt.Println("\n[History] Experiment History:")
     fmt.Println("  ID                    Status      Loss        PPL         Time")
     fmt.Println("  ──────────────────────────────────────────────────────────────")
@@ -305,7 +305,7 @@ func (manager *ExperimentManager) get_experiment_history() {
 // Experiment Reproducibility
 // ============================================
 
-func (manager *ExperimentManager) export_experiment_config(experiment_id string) string {
+func (manager *experiment_manager) export_experiment_config(experiment_id string) string {
     if result, exists := manager.experiments[experiment_id]; exists {
         config_str := fmt.Sprintf("# Experiment: %s\n", result.config.name)
         config_str += fmt.Sprintf("ID: %s\n", experiment_id)
@@ -332,7 +332,7 @@ func (manager *ExperimentManager) export_experiment_config(experiment_id string)
 // Automated Best Experiment Selection
 // ============================================
 
-func (manager *ExperimentManager) find_best_experiment() string {
+func (manager *experiment_manager) find_best_experiment() string {
     var best_exp string = ""
     var best_ppl float64 = math.MaxFloat64
     
@@ -355,16 +355,16 @@ func (manager *ExperimentManager) find_best_experiment() string {
 // Main Interface
 // ============================================
 
-func NewExperimentManager() *ExperimentManager {
-    return &ExperimentManager{
-        experiments:        make(map[string]ExperimentResult),
+func NewExperimentManager() *experiment_manager {
+    return &experiment_manager{
+        experiments:        make(map[string]experiment_result),
         current_experiment: "",
-        comparison_history: make([]ExperimentComparison, 0),
+        comparison_history: make([]experiment_comparison, 0),
         best_experiment:    "",
     }
 }
 
-func (manager *ExperimentManager) run_complete_experiment_cycle() {
+func (manager *experiment_manager) run_complete_experiment_cycle() {
     manager.initialize()
     
     // Create 3 experiments
@@ -392,9 +392,9 @@ func (manager *ExperimentManager) run_complete_experiment_cycle() {
             "wikitext",
         )
         
-        result := ExperimentResult{
+        result := experiment_result{
             config:          config,
-            metrics_history: make([]ExperimentMetrics, 0),
+            metrics_history: make([]experiment_metrics, 0),
             best_loss:       math.MaxFloat64,
             best_perplexity: math.MaxFloat64,
         }
@@ -458,5 +458,5 @@ func (manager *ExperimentManager) run_complete_experiment_cycle() {
     config_export := manager.export_experiment_config(manager.best_experiment)
     fmt.Println("\n" + config_export)
     
-    fmt.Println("[ExperimentManager] Complete!")
+    fmt.Println("[experiment_manager] Complete!")
 }

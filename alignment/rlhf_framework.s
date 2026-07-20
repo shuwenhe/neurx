@@ -14,7 +14,7 @@ struct InstructionData {
     int length
 }
 
-struct PreferenceData {
+struct preference_data {
     string prompt
     string response_a
     string response_b
@@ -240,7 +240,7 @@ func init_reward_model_state() RewardModelState {
 }
 
 // loadpreferencedata
-func load_preference_data(string filename) PreferenceData* {
+func load_preference_data(string filename) preference_data* {
     // English textfileloadpreferencedata
     // {
     //   "prompt": "...",
@@ -249,14 +249,14 @@ func load_preference_data(string filename) PreferenceData* {
     //   "preference": 1  // A English text
     // }
 
-    PreferenceData* data = alloc(PreferenceData, 100000)
+    preference_data* data = alloc(preference_data, 100000)
     data
 }
 
 // rewardmodeltrainingEnglish text
 func train_reward_model_epoch(
-    PreferenceData* train_data, int train_size,
-    PreferenceData* eval_data, int eval_size,
+    preference_data* train_data, int train_size,
+    preference_data* eval_data, int eval_size,
     RLHFConfig config
 ) RewardModelState {
     RewardModelState state = init_reward_model_state()
@@ -275,7 +275,7 @@ func train_reward_model_epoch(
         }
 
         int batch_size = batch_end - batch_start
-        PreferenceData* batch = alloc(PreferenceData, batch_size)
+        preference_data* batch = alloc(preference_data, batch_size)
 
         int i = 0
         while i < batch_size {
@@ -289,7 +289,7 @@ func train_reward_model_epoch(
 
         i = 0
         while i < batch_size {
-            PreferenceData sample = batch[i]
+            preference_data sample = batch[i]
 
             // English textresponseEnglish textrewardEnglish text
             float reward_a = reward_model_forward(sample.response_a, config)
@@ -343,7 +343,7 @@ func train_reward_model_epoch(
         }
 
         int batch_size = batch_end - batch_start
-        PreferenceData* batch = alloc(PreferenceData, batch_size)
+        preference_data* batch = alloc(preference_data, batch_size)
 
         int i = 0
         while i < batch_size {
@@ -426,7 +426,7 @@ func log_sigmoid(float x) float {
 }
 
 // rewardmodelEnglish text
-func reward_model_backward(PreferenceData* batch, int batch_size, RLHFConfig config) void {
+func reward_model_backward(preference_data* batch, int batch_size, RLHFConfig config) void {
     // computegradientEnglish textuse Adam optimizeEnglish text
 }
 
@@ -659,7 +659,7 @@ func main() {
     config.reward_epochs = 2
     config.reward_batch_size = 32
 
-    PreferenceData* pref_data = load_preference_data("preferences.jsonl")
+    preference_data* pref_data = load_preference_data("preferences.jsonl")
 
     println("Training reward model...")
     // rewardmodeltrainingEnglish textrun

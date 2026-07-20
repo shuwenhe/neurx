@@ -157,7 +157,7 @@ func main() int {
         string checkpoint_path = output_dir + "/sft_checkpoint_epoch_" + int_to_str(epoch + 1) + ".txt"
         runtime_write_text_file(
             checkpoint_path,
-            "NeurX SFT Checkpoint\n" +
+            "NeurX SFT checkpoint\n" +
             "path=" + checkpoint_path + "\n" +
             "data_path=" + data_path + "\n" +
             "samples=" + int_to_str(len(samples)) + "\n" +

@@ -71,8 +71,8 @@ struct dataloader_config {
     int io_thread_count                // IO English text (English textfile)
     int tokenize_thread_count          // Tokenization English text
 
-    // Tokenizer configuration
-    string tokenizer_path              // Tokenizer filepath
+    // tokenizer configuration
+    string tokenizer_path              // tokenizer filepath
     bool add_special_tokens            // English text token (BOS/EOS/PAD)
     bool enable_rope_scaling           // English text RoPE position encoding
 
@@ -176,7 +176,7 @@ struct training_batch {
 }
 
 // ============================================================================
-// 3. DataLoader mainEnglish text
+// 3. data_loader mainEnglish text
 // ============================================================================
 
 enum loader_status {
@@ -334,7 +334,7 @@ func init_dataloader(dataloader_config cfg) dataloader {
     pk.current_batch_accumulator = []tokenized_sample{}
     pk.accumulated_tokens = 0
 
-    // English text DataLoader English text
+    // English text data_loader English text
     dataloader loader
     loader.config = cfg
     loader.status = LOADER_IDLE
@@ -633,8 +633,8 @@ func create_position_ids(int seq_len) []int {
 // English text: English text "English text" English text
 //
 // example (target_length=10):
-//   Sample A: [tok tok tok] (len=3)  + PAD x7 = 10 tokens (30% efficiency)
-//   Sample B: [tok tok tok tok tok] (len=5) + PAD x5 = 10 tokens (50% efficiency)
+//   sample A: [tok tok tok] (len=3)  + PAD x7 = 10 tokens (30% efficiency)
+//   sample B: [tok tok tok tok tok] (len=5) + PAD x5 = 10 tokens (50% efficiency)
 //
 // Smart Packing:
 //   Block: [tok_A tok_A tok_A EOS tok_B tok_B tok_B tok_B tok_B EOS PAD PAD] (len=10)
@@ -908,13 +908,13 @@ func get_dataloader_stats(dataloader loader) dataloader_stats {
 func print_dataloader_summary(dataloader loader) string {
     dataloader_stats stats = loader.stats
 
-    "DataLoader Summary:\n" +
+    "data_loader Summary:\n" +
     "  Files Scanned: " + string(stats.total_files_scanned) + "\n" +
     "  Data Read: " + string(stats.total_bytes_read / (1024*1024)) + " MB\n" +
     "  Samples Loaded: " + string(stats.total_samples_loaded) + "\n" +
     "  After Filtering: " + string(stats.total_samples_after_filter) + "\n" +
     "  Batches Produced: " + string(stats.total_batches_produced) + "\n" +
-    "  Avg Tokens/Sample: " + string(avg_tokens_per_sample, 1) + "\n" +
+    "  Avg Tokens/sample: " + string(avg_tokens_per_sample, 1) + "\n" +
     "  Packing Efficiency: " + string(stats.packing_efficiency * 100, 1) + "%\n" +
     "  Load Throughput: " + string(stats.load_throughput_mb_s, 1) + " MB/s\n" +
     "  Tokenize Throughput: " + string(stats.tokenize_throughput_k_samples_s, 1) + " K samples/s\n" +

@@ -15,7 +15,7 @@ use std.strings
 // configurationdataEnglish text
 // ============================================================================
 
-struct TrainingConfig {
+struct training_config {
     // systemconfiguration
     string root_dir
     string hostfile
@@ -39,7 +39,7 @@ struct TrainingConfig {
     int transformer_layers
     int gradient_accumulation_steps
 
-    // Tokenizer
+    // tokenizer
     string tokenizer_vocab
     string tokenizer_merges
     string shard_list_file
@@ -49,8 +49,8 @@ struct TrainingConfig {
 // configurationEnglish text
 // ============================================================================
 
-func load_config_from_env() TrainingConfig {
-    TrainingConfig cfg
+func load_config_from_env() training_config {
+    training_config cfg
 
     // English textNEURX_ROOT
     string root = os::getenv("NEURX_ROOT")
@@ -104,7 +104,7 @@ func load_config_from_env() TrainingConfig {
     cfg.transformer_layers = parse_env_int("NEURX_TRANSFORMER_NUM_LAYERS", 24)
     cfg.gradient_accumulation_steps = parse_env_int("NEURX_GRADIENT_ACCUMULATION_STEPS", 8)
 
-    // Tokenizer
+    // tokenizer
     cfg.tokenizer_vocab = os::getenv("NEURX_TOKENIZER_VOCAB")
     if cfg.tokenizer_vocab == "" {
         cfg.tokenizer_vocab = root + "/data/corpus/vocab.json"
@@ -176,7 +176,7 @@ func parse_hostfile(string hostfile_path) []string {
 // ShellEnglish textgenerate
 // ============================================================================
 
-func generate_launcher_script(TrainingConfig cfg, []string hosts) string {
+func generate_launcher_script(training_config cfg, []string hosts) string {
     string script = ""
 
     // English text
@@ -301,7 +301,7 @@ func generate_hosts_array([]string hosts) string {
 
 func main() {
     // 1. loadconfiguration
-    TrainingConfig cfg = load_config_from_env()
+    training_config cfg = load_config_from_env()
 
     // 2. English texthostfile
     []string hosts = parse_hostfile(cfg.hostfile)

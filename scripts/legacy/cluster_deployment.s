@@ -10,7 +10,7 @@ import (
     "math"
 )
 
-type NodeSpec struct {
+type node_spec struct {
     node_id             int
     node_name           string
     ip_address          string
@@ -22,7 +22,7 @@ type NodeSpec struct {
     utilization         float64
 }
 
-type ClusterConfig struct {
+type cluster_config struct {
     cluster_name        string
     num_nodes           int
     backend             string  // "nccl", "gloo", "mpi"
@@ -32,7 +32,7 @@ type ClusterConfig struct {
     heartbeat_interval_s int
 }
 
-type DeploymentSpec struct {
+type deployment_spec struct {
     deployment_name     string
     image_name          string
     replica_count       int
@@ -41,23 +41,23 @@ type DeploymentSpec struct {
     volumes             []string
 }
 
-type ClusterManager struct {
-    config              ClusterConfig
-    nodes               []NodeSpec
-    deployments         []DeploymentSpec
+type cluster_manager struct {
+    config              cluster_config
+    nodes               []node_spec
+    deployments         []deployment_spec
     cluster_status      string
     total_gpus          int
     healthy_nodes       int
 }
 
-type ClusterMonitor struct {
-    manager             *ClusterManager
+type cluster_monitor struct {
+    manager             *cluster_manager
     metrics             map[string]float64
     alerts              []string
     health_status       string
 }
 
-type JobScheduler struct {
+type job_scheduler struct {
     pending_jobs        []string
     running_jobs        []string
     completed_jobs      []string
@@ -69,7 +69,7 @@ type JobScheduler struct {
 // Cluster Initialization
 // ============================================
 
-func (manager *ClusterManager) initialize_cluster() {
+func (manager *cluster_manager) initialize_cluster() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Cluster Deployment & Orchestration System            ║")
     fmt.Println("║  Multi-node distributed training management           ║")
@@ -83,14 +83,14 @@ func (manager *ClusterManager) initialize_cluster() {
     fmt.Printf("  Timeout: %d minutes\n\n", manager.config.timeout_minutes)
 }
 
-func (manager *ClusterManager) add_node(node NodeSpec) {
+func (manager *cluster_manager) add_node(node node_spec) {
     manager.nodes = append(manager.nodes, node)
     manager.total_gpus += node.gpu_count
     fmt.Printf("[Cluster] Added node: %s (GPU: %d x %s, Memory: %dGB)\n",
         node.node_name, node.gpu_count, node.gpu_type, node.memory_gb)
 }
 
-func (manager *ClusterManager) validate_cluster_setup() bool {
+func (manager *cluster_manager) validate_cluster_setup() bool {
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Validating Cluster Setup              │")
     fmt.Println("└────────────────────────────────────────┘\n")
@@ -128,7 +128,7 @@ func (manager *ClusterManager) validate_cluster_setup() bool {
 // Distributed Training Coordination
 // ============================================
 
-func (manager *ClusterManager) setup_distributed_env() {
+func (manager *cluster_manager) setup_distributed_env() {
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Setting Up Distributed Environment    │")
     fmt.Println("└────────────────────────────────────────┘\n")
@@ -143,7 +143,7 @@ func (manager *ClusterManager) setup_distributed_env() {
     fmt.Println("\n✓ Distributed environment configured")
 }
 
-func (manager *ClusterManager) launch_training_job(deployment DeploymentSpec) {
+func (manager *cluster_manager) launch_training_job(deployment deployment_spec) {
     fmt.Printf("\n[Job] Launching: %s\n", deployment.deployment_name)
     fmt.Printf("  Replicas: %d\n", deployment.replica_count)
     fmt.Printf("  Image: %s\n", deployment.image_name)
@@ -159,7 +159,7 @@ func (manager *ClusterManager) launch_training_job(deployment DeploymentSpec) {
 // Kubernetes-style Deployment
 // ============================================
 
-func (manager *ClusterManager) deploy_via_kubernetes(deployment DeploymentSpec) {
+func (manager *cluster_manager) deploy_via_kubernetes(deployment deployment_spec) {
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Kubernetes Deployment                 │")
     fmt.Println("└────────────────────────────────────────┘\n")
@@ -194,7 +194,7 @@ func (manager *ClusterManager) deploy_via_kubernetes(deployment DeploymentSpec) 
 // Cluster Monitoring
 // ============================================
 
-func (monitor *ClusterMonitor) collect_metrics() {
+func (monitor *cluster_monitor) collect_metrics() {
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Collecting Cluster Metrics            │")
     fmt.Println("└────────────────────────────────────────┘\n")
@@ -232,7 +232,7 @@ func (monitor *ClusterMonitor) collect_metrics() {
     fmt.Printf("Memory Utilization: %.1f%%\n", avg_mem)
 }
 
-func (monitor *ClusterMonitor) assess_health() {
+func (monitor *cluster_monitor) assess_health() {
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Assessing Cluster Health              │")
     fmt.Println("└────────────────────────────────────────┘\n")
@@ -264,7 +264,7 @@ func (monitor *ClusterMonitor) assess_health() {
 // Job Scheduling
 // ============================================
 
-func (scheduler *JobScheduler) submit_job(job_name string) {
+func (scheduler *job_scheduler) submit_job(job_name string) {
     job := make(map[string]string)
     job["name"] = job_name
     job["status"] = "pending"
@@ -274,7 +274,7 @@ func (scheduler *JobScheduler) submit_job(job_name string) {
     fmt.Printf("[Scheduler] Job submitted: %s\n", job_name)
 }
 
-func (scheduler *JobScheduler) schedule_jobs(manager *ClusterManager) {
+func (scheduler *job_scheduler) schedule_jobs(manager *cluster_manager) {
     fmt.Printf("\n[Scheduler] Scheduling %d pending jobs\n", len(scheduler.pending_jobs))
     
     for i, job := range scheduler.pending_jobs {
@@ -287,7 +287,7 @@ func (scheduler *JobScheduler) schedule_jobs(manager *ClusterManager) {
     scheduler.pending_jobs = []string{}
 }
 
-func (scheduler *JobScheduler) complete_jobs() {
+func (scheduler *job_scheduler) complete_jobs() {
     fmt.Printf("\n[Scheduler] Completing jobs\n")
     
     for _, job := range scheduler.running_jobs {
@@ -302,7 +302,7 @@ func (scheduler *JobScheduler) complete_jobs() {
 // Fault Tolerance
 // ============================================
 
-func (manager *ClusterManager) handle_node_failure(node_id int) {
+func (manager *cluster_manager) handle_node_failure(node_id int) {
     fmt.Printf("\n[FaultTolerance] Node %d failed\n", node_id)
     
     if node_id < len(manager.nodes) {
@@ -320,23 +320,23 @@ func (manager *ClusterManager) handle_node_failure(node_id int) {
 // Main Interface
 // ============================================
 
-func NewClusterManager(config ClusterConfig) *ClusterManager {
-    return &ClusterManager{
+func NewClusterManager(config cluster_config) *cluster_manager {
+    return &cluster_manager{
         config:        config,
-        nodes:         []NodeSpec{},
-        deployments:   []DeploymentSpec{},
+        nodes:         []node_spec{},
+        deployments:   []deployment_spec{},
         cluster_status: "initializing",
         total_gpus:    0,
         healthy_nodes: 0,
     }
 }
 
-func (manager *ClusterManager) run_full_deployment() {
+func (manager *cluster_manager) run_full_deployment() {
     manager.initialize_cluster()
     
     // Add nodes
     for i := 0; i < 4; i++ {
-        node := NodeSpec{
+        node := node_spec{
             node_id:     i,
             node_name:   fmt.Sprintf("worker-%d", i),
             ip_address:  fmt.Sprintf("192.168.1.%d", 100+i),
@@ -357,7 +357,7 @@ func (manager *ClusterManager) run_full_deployment() {
     manager.setup_distributed_env()
     
     // Create deployment
-    deployment := DeploymentSpec{
+    deployment := deployment_spec{
         deployment_name: "neurx-training",
         image_name:      "neurx:latest",
         replica_count:   4,
@@ -382,7 +382,7 @@ func (manager *ClusterManager) run_full_deployment() {
     manager.deploy_via_kubernetes(deployment)
     
     // Monitor cluster
-    monitor := &ClusterMonitor{
+    monitor := &cluster_monitor{
         manager:    manager,
         metrics:    make(map[string]float64),
         alerts:     []string{},
@@ -393,7 +393,7 @@ func (manager *ClusterManager) run_full_deployment() {
     monitor.assess_health()
     
     // Job scheduling
-    scheduler := &JobScheduler{
+    scheduler := &job_scheduler{
         pending_jobs:   []string{},
         running_jobs:   []string{},
         completed_jobs: []string{},
@@ -404,5 +404,5 @@ func (manager *ClusterManager) run_full_deployment() {
     scheduler.schedule_jobs(manager)
     scheduler.complete_jobs()
     
-    fmt.Println("\n[ClusterManager] Deployment complete!")
+    fmt.Println("\n[cluster_manager] Deployment complete!")
 }

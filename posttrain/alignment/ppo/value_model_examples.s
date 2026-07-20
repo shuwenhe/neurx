@@ -58,7 +58,7 @@ func example_basic_value_training() {
     int num_trajectories = 5
     int steps_per_trajectory = 32
 
-    print("[Sample Trajectories]")
+    print("[sample Trajectories]")
     print("  Number of trajectories: " + int_to_string_ex(num_trajectories))
     print("  Steps per trajectory: " + int_to_string_ex(steps_per_trajectory))
     print("")
@@ -136,7 +136,7 @@ func example_gae_advantage_estimation() {
     print("  G_t = A_t + V(s_t)")
     print("")
 
-    print("[Example Trajectory]")
+    print("[Example trajectory]")
     print("  Step | Reward | V(s)  | V(s+1) | δ     | A(GAE) | G(return)")
     print("  ──── ┼─────── ┼─────── ┼─────── ┼─────── ┼──────── ┼─────────")
 

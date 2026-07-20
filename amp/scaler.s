@@ -8,7 +8,7 @@ package neurx.amp.scaler
 // dataEnglish text
 // ============================================================================
 
-struct MixedPrecisionConfig {
+struct mixed_precision_config {
     string precision_type        // "fp32", "fp16", "bf16"
     float loss_scale             // English text: 2^16
     bool dynamic_loss_scaling    // English text loss scale
@@ -75,7 +75,7 @@ func check_gradient_overflow(float* gradients, int gradient_count) bool {
 // English textlossEnglish text (Dynamic Loss Scaling)
 func update_loss_scale(
     MixedPrecisionState state,
-    MixedPrecisionConfig config,
+    mixed_precision_config config,
     bool overflow_occurred
 ) MixedPrecisionState {
 
@@ -184,14 +184,14 @@ struct MixedPrecisionOptimizer {
     int parameter_count
 
     MixedPrecisionState amp_state
-    MixedPrecisionConfig amp_config
+    mixed_precision_config amp_config
 }
 
 // initializeEnglish textoptimizeEnglish text
 func init_mixed_precision_optimizer(
     int parameter_count,
     float learning_rate,
-    MixedPrecisionConfig amp_config
+    mixed_precision_config amp_config
 ) MixedPrecisionOptimizer {
     MixedPrecisionOptimizer optimizer
 
@@ -515,7 +515,7 @@ func main() {
     println("=== Mixed Precision Training System ===")
 
     // configuration
-    MixedPrecisionConfig amp_config
+    mixed_precision_config amp_config
     amp_config.precision_type = "bf16"
     amp_config.dynamic_loss_scaling = true
     amp_config.loss_scale_up_factor = 2.0

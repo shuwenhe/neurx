@@ -4,7 +4,7 @@
 
 module distributed_fault_recovery
 
-// Checkpoint types
+// checkpoint types
 enum checkpoint_type {
     FULL,           // Complete model, optimizer, and training state
     INCREMENTAL,    // Only changed parameters since last checkpoint
@@ -20,7 +20,7 @@ enum recovery_strategy {
     SKIP_STEP,      // Skip problematic step and continue
 }
 
-// Checkpoint metadata
+// checkpoint metadata
 structure checkpoint_metadata {
     checkpoint_id: int
     global_step: int
@@ -47,7 +47,7 @@ structure checkpoint_metadata {
     num_restarts: int
 }
 
-// Checkpoint storage manager
+// checkpoint storage manager
 structure checkpoint_manager {
     base_path: string               // Base directory for checkpoints
     save_interval: int              // Steps between checkpoints
@@ -65,7 +65,7 @@ structure checkpoint_manager {
     replicate_checkpoint: bool      // Save copies to multiple locations
     replication_factor: int         // Number of copies
     
-    // Checkpoint database
+    // checkpoint database
     checkpoint_db: vector           // Metadata for all checkpoints
 }
 

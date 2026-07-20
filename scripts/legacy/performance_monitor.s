@@ -11,14 +11,14 @@ import (
     "time"
 )
 
-type PerformanceMonitorConfig struct {
+type performance_monitor_config struct {
     sampling_interval       int      // seconds
     metrics_window          int      // number of samples to keep
     alert_thresholds        map[string]float64
     enable_adaptive          bool
 }
 
-type PerformanceMetrics struct {
+type performance_metrics struct {
     timestamp               int64
     throughput              float64  // tokens/sec
     latency_ms              float64
@@ -30,7 +30,7 @@ type PerformanceMetrics struct {
     cache_hit_rate          float64
 }
 
-type SystemHealthStatus struct {
+type system_health_status struct {
     overall_status          string   // "healthy", "degraded", "critical"
     cpu_status              string
     memory_status           string
@@ -39,15 +39,15 @@ type SystemHealthStatus struct {
     alerts                  []string
 }
 
-type PerformanceMonitor struct {
-    config                  PerformanceMonitorConfig
-    metrics_history         []PerformanceMetrics
-    health_history          []SystemHealthStatus
-    alerts                  []Alert
+type performance_monitor struct {
+    config                  performance_monitor_config
+    metrics_history         []performance_metrics
+    health_history          []system_health_status
+    alerts                  []alert
     recommendations         []string
 }
 
-type Alert struct {
+type alert struct {
     timestamp               int64
     level                   string   // "info", "warning", "critical"
     metric                  string
@@ -60,14 +60,14 @@ type Alert struct {
 // Metrics Collection
 // ============================================
 
-func (monitor *PerformanceMonitor) collect_metrics() PerformanceMetrics {
+func (monitor *performance_monitor) collect_metrics() performance_metrics {
     sample_idx := float64(len(monitor.metrics_history))
     perplexity := 100.0 / (float64(len(monitor.metrics_history)/100) + 1.0)
     if perplexity < 1.0 {
         perplexity = 1.0
     }
 
-    metrics := PerformanceMetrics{
+    metrics := performance_metrics{
         timestamp: time.Now().Unix(),
         throughput: 500.0 + math.Sin(sample_idx/10.0)*100.0,
         latency_ms: 100.0 + math.Sin(sample_idx/15.0)*20.0,
@@ -93,8 +93,8 @@ func (monitor *PerformanceMonitor) collect_metrics() PerformanceMetrics {
 // Health Assessment
 // ============================================
 
-func (monitor *PerformanceMonitor) assess_health() SystemHealthStatus {
-    status := SystemHealthStatus{
+func (monitor *performance_monitor) assess_health() system_health_status {
+    status := system_health_status{
         overall_status: "healthy",
         cpu_status: "normal",
         memory_status: "normal",
@@ -150,11 +150,11 @@ func (monitor *PerformanceMonitor) assess_health() SystemHealthStatus {
 }
 
 // ============================================
-// Alert Generation
+// alert Generation
 // ============================================
 
-func (monitor *PerformanceMonitor) check_alerts() []Alert {
-    alerts := []Alert{}
+func (monitor *performance_monitor) check_alerts() []alert {
+    alerts := []alert{}
     
     if len(monitor.metrics_history) == 0 {
         return alerts
@@ -165,7 +165,7 @@ func (monitor *PerformanceMonitor) check_alerts() []Alert {
     // Check throughput
     if threshold, ok := monitor.config.alert_thresholds["throughput_min"]; ok {
         if latest.throughput < threshold {
-            alerts = append(alerts, Alert{
+            alerts = append(alerts, alert{
                 timestamp: latest.timestamp,
                 level: "warning",
                 metric: "throughput",
@@ -180,7 +180,7 @@ func (monitor *PerformanceMonitor) check_alerts() []Alert {
     // Check latency
     if threshold, ok := monitor.config.alert_thresholds["latency_max"]; ok {
         if latest.latency_ms > threshold {
-            alerts = append(alerts, Alert{
+            alerts = append(alerts, alert{
                 timestamp: latest.timestamp,
                 level: "warning",
                 metric: "latency",
@@ -199,7 +199,7 @@ func (monitor *PerformanceMonitor) check_alerts() []Alert {
             if latest.memory_usage_gb > threshold*1.2 {
                 level = "critical"
             }
-            alerts = append(alerts, Alert{
+            alerts = append(alerts, alert{
                 timestamp: latest.timestamp,
                 level: level,
                 metric: "memory",
@@ -214,7 +214,7 @@ func (monitor *PerformanceMonitor) check_alerts() []Alert {
     // Check GPU utilization
     if threshold, ok := monitor.config.alert_thresholds["gpu_utilization_max"]; ok {
         if latest.gpu_utilization > threshold {
-            alerts = append(alerts, Alert{
+            alerts = append(alerts, alert{
                 timestamp: latest.timestamp,
                 level: "warning",
                 metric: "gpu_utilization",
@@ -235,7 +235,7 @@ func (monitor *PerformanceMonitor) check_alerts() []Alert {
 // Adaptive Optimization
 // ============================================
 
-func (monitor *PerformanceMonitor) generate_recommendations() {
+func (monitor *performance_monitor) generate_recommendations() {
     monitor.recommendations = []string{}
     
     if len(monitor.metrics_history) < 2 {
@@ -288,7 +288,7 @@ func (monitor *PerformanceMonitor) generate_recommendations() {
 // Reporting
 // ============================================
 
-func (monitor *PerformanceMonitor) print_dashboard() {
+func (monitor *performance_monitor) print_dashboard() {
     if len(monitor.metrics_history) == 0 {
         fmt.Println("No metrics collected yet")
         return
@@ -331,7 +331,7 @@ func (monitor *PerformanceMonitor) print_dashboard() {
     }
 }
 
-func (monitor *PerformanceMonitor) snapshot_summary() string {
+func (monitor *performance_monitor) snapshot_summary() string {
     if len(monitor.metrics_history) == 0 {
         return "no metrics collected"
     }
@@ -355,9 +355,9 @@ func (monitor *PerformanceMonitor) snapshot_summary() string {
 // Main Interface
 // ============================================
 
-func NewPerformanceMonitor() *PerformanceMonitor {
-    return &PerformanceMonitor{
-        config: PerformanceMonitorConfig{
+func NewPerformanceMonitor() *performance_monitor {
+    return &performance_monitor{
+        config: performance_monitor_config{
             sampling_interval: 5,
             metrics_window: 100,
             alert_thresholds: map[string]float64{
@@ -368,14 +368,14 @@ func NewPerformanceMonitor() *PerformanceMonitor {
             },
             enable_adaptive: true,
         },
-        metrics_history: []PerformanceMetrics{},
-        health_history: []SystemHealthStatus{},
-        alerts: []Alert{},
+        metrics_history: []performance_metrics{},
+        health_history: []system_health_status{},
+        alerts: []alert{},
         recommendations: []string{},
     }
 }
 
-func (monitor *PerformanceMonitor) monitor_training(duration_steps int) {
+func (monitor *performance_monitor) monitor_training(duration_steps int) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Performance Monitoring System                        ║")
     fmt.Println("║  Real-time tracking and adaptive optimization         ║")

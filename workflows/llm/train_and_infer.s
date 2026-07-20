@@ -30,7 +30,7 @@ struct ModelConfig {
     batch_size: i32
 }
 
-struct TrainingConfig {
+struct training_config {
     num_epochs: i32
     steps_per_epoch: i32
     learning_rate: f64
@@ -194,7 +194,7 @@ func print_training_progress(metrics: TrainingMetrics) {
             " | Tokens/sec: " + throughput_str)
 }
 
-func train_epoch(model: TransformerModel, config: TrainingConfig, epoch: i32) (TransformerModel, f64) {
+func train_epoch(model: TransformerModel, config: training_config, epoch: i32) (TransformerModel, f64) {
     println("")
     println("🔄 Epoch " + strings.from_i32(epoch + 1))
     println(strings.repeat("─", 70))
@@ -335,7 +335,7 @@ func main() {
         batch_size: 32
     }
 
-    let train_config = TrainingConfig {
+    let train_config = training_config {
         num_epochs: 2,
         steps_per_epoch: 50,
         learning_rate: 0.0005,

@@ -19,7 +19,7 @@ func greedy_step(
     uint64 rng_state
 ) (int, uint64) {
     if cfg.do_sample  cfg.temperature > 0.0 {
-        // Sample with temperature even though it's "greedy" mode
+        // sample with temperature even though it's "greedy" mode
         return sample_from_softmax(logits, cfg.temperature, rng_state)
     }
     

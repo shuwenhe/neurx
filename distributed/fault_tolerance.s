@@ -1,7 +1,7 @@
 package neurx.distributed.fault_tolerance
 
 // Distributed fault tolerance and recovery
-// - Checkpoint/restore state
+// - checkpoint/restore state
 // - Rank recovery
 // - Stragglers detection and handling
 

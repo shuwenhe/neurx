@@ -156,7 +156,7 @@ struct shard_info {
     float avg_read_time_ms             // Average read latency
 }
 
-// ── Dataset Manifest ──
+// ── Dataset manifest ──
 // Global index describing all shards in a dataset
 
 struct dataset_manifest {
@@ -251,7 +251,7 @@ func partition_dataset(
     
     print("Dataset analyzed:")
     print("  Total size: ", analysis.total_size_gb, " GB")
-    print("  Document count: ", analysis.document_count)
+    print("  document count: ", analysis.document_count)
     print("  Estimated tokens: ", analysis.estimated_tokens)
     
     // Step 2: Determine optimal shard boundaries based on strategy

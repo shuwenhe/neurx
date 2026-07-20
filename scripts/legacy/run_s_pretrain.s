@@ -16,7 +16,7 @@ func main() int {
     println("Project root : " + project_root)
     println("Source file  : " + source_file)
     println("Output dir   : " + output_dir)
-    println("Manifest     : " + manifest)
+    println("manifest     : " + manifest)
     println("Steps        : " + steps)
     println("Warmup steps : " + warmup)
     println("")

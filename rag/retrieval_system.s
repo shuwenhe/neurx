@@ -8,10 +8,10 @@ module rag_system
 
 // ==================== English textconfiguration ====================
 
-struct RetrievalSystemConfig {
+struct retrieval_system_config {
     // English textdataEnglish textconfiguration
     vector_db_backend: string = "faiss"           // faiss | chroma | milvus | pinecone | in_memory
-    vector_dim: int = 768                          // English text (English textuseEnglish text Embedding Model)
+    vector_dim: int = 768                          // English text (English textuseEnglish text embedding Model)
     index_type: string = "IVF_FLAT"                // English text: FLAT / IVF_FLAT / HNSW / IVF_PQ
     metric: string = "cosine"                      // English text: cosine / l2 / inner_product
     nprobe: int = 10                               // IVF English text (English text)
@@ -91,7 +91,7 @@ struct RetrievalMetadata {
 // ==================== English textdataEnglish text ====================
 
 interface VectorDBInterface {
-    init(config: RetrievalSystemConfig) -> void
+    init(config: retrieval_system_config) -> void
     insert(chunks: list<DocumentChunk>) -> void                           // English text
     delete(chunk_ids: list<string>) -> void                               # English text
     search(query_embedding: tensor, top_k: int) -> list<SearchResultItem>  // English textsearch
@@ -119,14 +119,14 @@ struct DBStatus {
 // ==================== In-Memory English textdataEnglish text (defaultimplementation) ====================
 
 class InMemoryVectorDB implements VectorDBInterface {
-    config: RetrievalSystemConfig
+    config: retrieval_system_config
     embeddings: map<str, tensor>              // chunk_id -> embedding
     documents: map<str, DocumentChunk>        // chunk_id -> document chunk
     index_built: bool = false
     created_at: float
     last_updated: float
 
-    init(config: RetrievalSystemConfig) {
+    init(config: retrieval_system_config) {
         this.config = config
         this.embeddings = map<str, tensor>{}
         this.documents = map<str, DocumentChunk>{}
@@ -229,19 +229,19 @@ class InMemoryVectorDB implements VectorDBInterface {
 // ==================== FAISS English textdataEnglish text ====================
 
 class FAISSVectorDB implements VectorDBInterface {
-    config: RetrievalSystemConfig
+    config: retrieval_system_config
     index: any  // faiss.Index object
     id_to_chunk: map<int, DocumentChunk>
     next_id: int = 0
     is_trained: bool = false
 
-    init(config: RetrievalSystemConfig) {
+    init(config: retrieval_system_config) {
         this.config = config
         this.id_to_chunk = map<int, DocumentChunk>{}
         this._create_index(config)
     }
 
-    _create_index(config: RetrievalSystemConfig) {
+    _create_index(config: retrieval_system_config) {
         dim = config.vector_dim
         match config.index_type {
             "FLAT" => {
@@ -425,16 +425,16 @@ class FAISSVectorDB implements VectorDBInterface {
     }
 }
 
-// ==================== Embedding English text ====================
+// ==================== embedding English text ====================
 
 class EmbeddingService {
     model_name: string
     model: any  // Pretrained embedding model
     tokenizer: any
-    config: RetrievalSystemConfig
+    config: retrieval_system_config
     cache: LRUCache<string, tensor>
 
-    init(model_name: string, config: RetrievalSystemConfig) {
+    init(model_name: string, config: retrieval_system_config) {
         this.model_name = model_name
         this.config = config
         this.cache = new LRUCache(capacity=10000)
@@ -603,10 +603,10 @@ class LRUCache<K, V> {
 // ==================== English text ====================
 
 class DocumentProcessor {
-    config: RetrievalSystemConfig
+    config: retrieval_system_config
     splitter: TextSplitter
 
-    init(config: RetrievalSystemConfig) {
+    init(config: retrieval_system_config) {
         this.config = config
         this.splitter = new RecursiveCharacterTextSplitter(
             chunk_size=config.max_chunk_length,
@@ -1112,7 +1112,7 @@ struct FusedResult {
 // ==================== NEURX RAG mainsystem ====================
 
 class RetrievalEngine {
-    config: RetrievalSystemConfig
+    config: retrieval_system_config
     vector_db: VectorDBInterface
     embedding_service: EmbeddingService
     document_processor: DocumentProcessor
@@ -1122,7 +1122,7 @@ class RetrievalEngine {
     fusion_engine: HybridFusionEngine
     documents_store: map<string, DocumentChunk>  # chunk_id -> full document chunk
 
-    init(config: RetrievalSystemConfig, llm_client?: any) {
+    init(config: retrieval_system_config, llm_client?: any) {
         this.config = config
         this.documents_store = map<string, DocumentChunk>{}
 
@@ -1384,18 +1384,18 @@ struct RAGStatistics {
 
 // ==================== English textfunctionEnglish texttest ====================
 
-function create_retrieval_system(config?: RetrievalSystemConfig, llm_client?: any) -> RetrievalEngine {
-    return new RetrievalEngine(config=config ?? new RetrievalSystemConfig(), llm_client=llm_client)
+function create_retrieval_system(config?: retrieval_system_config, llm_client?: any) -> RetrievalEngine {
+    return new RetrievalEngine(config=config ?? new retrieval_system_config(), llm_client=llm_client)
 }
 
 function test_retrieval_system() -> bool {
     print("🧪 Testing NEURX RAG System...")
 
-    cfg = RetrievalSystemConfig(vector_db_backend="in_memory", vector_dim=128, enable_reranking=false, enable_query_expansion=false)
+    cfg = retrieval_system_config(vector_db_backend="in_memory", vector_dim=128, enable_reranking=false, enable_query_expansion=false)
     rag = create_retrieval_system(cfg)
 
-    # Test 1: Document ingestion
-    print("  ✓ Test 1: Document Ingestion & Chunking")
+    # Test 1: document ingestion
+    print("  ✓ Test 1: document Ingestion & Chunking")
     sample_docs = [
         {
             content="English textcomputeEnglish text, English textRequiredEnglish textsystem.English text.",
@@ -1448,7 +1448,7 @@ function test_retrieval_system() -> bool {
 
 // Export public API
 export {
-    RetrievalSystemConfig, DocumentChunk, DocumentMetadata, SearchResult, RetrievalMetadata,
+    retrieval_system_config, DocumentChunk, DocumentMetadata, SearchResult, RetrievalMetadata,
     VectorDBInterface, InMemoryVectorDB, FAISSVectorDB,
     EmbeddingService, DocumentProcessor, QueryExpander,
     BM25Retriever, CrossEncoderReranker, HybridFusionEngine,

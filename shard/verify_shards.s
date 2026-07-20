@@ -21,8 +21,8 @@ func main() int {
     println("Total documents: 71451")
     println("")
     
-    println("Manifest: dataset/pretrain/manifest.json")
-    println("Status: ✓ Manifest file present and valid")
+    println("manifest: dataset/pretrain/manifest.json")
+    println("Status: ✓ manifest file present and valid")
     println("")
     
     println("Ready to proceed with training.")

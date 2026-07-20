@@ -282,7 +282,7 @@ func log_validation(training_monitor monitor, int step, float val_loss, float va
 }
 
 func log_checkpoint(training_monitor monitor, string path, int step) training_monitor {
-    string message = "Checkpoint saved: " + path + " (step " + string(step) + ")"
+    string message = "checkpoint saved: " + path + " (step " + string(step) + ")"
     
     monitor = add_log_entry(monitor, log_level.INFO, message)
     monitor

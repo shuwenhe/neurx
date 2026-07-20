@@ -3,7 +3,7 @@ package neurx.autograd
 use neurx.tensor.tensor
 
 // ============================================================================
-// Backward Kernels Part 3: Normalization Layers & Embedding
+// Backward Kernels Part 3: Normalization Layers & embedding
 // ============================================================================
 
 // ========================================================================

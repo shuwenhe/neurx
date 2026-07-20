@@ -16,7 +16,7 @@ struct FlashAttentionConfig {
     bool causal_mask
 }
 
-struct KVCache {
+struct kvcache {
     float* key_cache      // [seq_len, hidden_dim]
     float* value_cache    // [seq_len, hidden_dim]
     int cache_size
@@ -234,8 +234,8 @@ func accumulate_block_output(float* output, float* attention, int q_size, int hi
 // ============================================================================
 
 // initialize KV cache
-func init_kv_cache(int seq_length, int hidden_dim, int layer_id) KVCache {
-    KVCache cache
+func init_kv_cache(int seq_length, int hidden_dim, int layer_id) kvcache {
+    kvcache cache
 
     cache.key_cache = alloc(float, seq_length * hidden_dim)
     cache.value_cache = alloc(float, seq_length * hidden_dim)
@@ -248,7 +248,7 @@ func init_kv_cache(int seq_length, int hidden_dim, int layer_id) KVCache {
 }
 
 // English text KV cache (English textgenerateEnglish text token)
-func update_kv_cache(KVCache cache, float* new_keys, float* new_values, int token_count) void {
+func update_kv_cache(kvcache cache, float* new_keys, float* new_values, int token_count) void {
     // English textgenerateEnglish text token English text K, V
     // English textcomputeEnglish text token
 
@@ -275,7 +275,7 @@ func update_kv_cache(KVCache cache, float* new_keys, float* new_values, int toke
 }
 
 // English text KV cache
-func clear_kv_cache(KVCache cache) void {
+func clear_kv_cache(kvcache cache) void {
     cache.cache_size = 0
     cache.is_dirty = false
 }
@@ -408,7 +408,7 @@ func optimized_inference(InferenceRequest req, FlashAttentionConfig attention_co
     state.is_complete = false
 
     // 3. initialize KV cache
-    KVCache cache = init_kv_cache(4096, 768, 0)
+    kvcache cache = init_kv_cache(4096, 768, 0)
 
     // 4. English textgenerate
     int step = 0

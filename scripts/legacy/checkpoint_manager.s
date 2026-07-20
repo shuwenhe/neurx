@@ -1,7 +1,7 @@
 #!/usr/bin/env s
 
 // ============================================
-// NeurX Checkpoint Management Framework
+// NeurX checkpoint Management Framework
 // Purpose: Save, validate, and restore training checkpoints
 // Language: S
 // ============================================
@@ -17,8 +17,8 @@ import (
     "time"
 )
 
-// CheckpointMetadata stores checkpoint information
-type CheckpointMetadata struct {
+// checkpoint_metadata stores checkpoint information
+type checkpoint_metadata struct {
     step: int
     epoch: int
     timestamp: string
@@ -30,18 +30,18 @@ type CheckpointMetadata struct {
     config_hash: string
 }
 
-// CheckpointManager handles checkpoint operations
-type CheckpointManager struct {
+// checkpoint_manager handles checkpoint operations
+type checkpoint_manager struct {
     checkpoint_dir: string
     max_checkpoints: int
-    checkpoints: []CheckpointMetadata
+    checkpoints: []checkpoint_metadata
 }
 
 // Initialize checkpoint manager
-func (cm *CheckpointManager) init(checkpoint_dir: string, max_checkpoints: int) error {
+func (cm *checkpoint_manager) init(checkpoint_dir: string, max_checkpoints: int) error {
     cm.checkpoint_dir = checkpoint_dir
     cm.max_checkpoints = max_checkpoints
-    cm.checkpoints = make([]CheckpointMetadata, 0)
+    cm.checkpoints = make([]checkpoint_metadata, 0)
     
     // Create directory if not exists
     if err := os.MkdirAll(checkpoint_dir, 0755); err != nil {
@@ -52,7 +52,7 @@ func (cm *CheckpointManager) init(checkpoint_dir: string, max_checkpoints: int) 
 }
 
 // Save checkpoint
-func (cm *CheckpointManager) save_checkpoint(
+func (cm *checkpoint_manager) save_checkpoint(
     step: int,
     epoch: int,
     model_state: map[string]interface{},
@@ -98,7 +98,7 @@ func (cm *CheckpointManager) save_checkpoint(
     }
     
     // Create metadata
-    metadata := CheckpointMetadata{
+    metadata := checkpoint_metadata{
         step: step,
         epoch: epoch,
         timestamp: time.Now().Format("2006-01-02T15:04:05Z"),
@@ -128,7 +128,7 @@ func (cm *CheckpointManager) save_checkpoint(
 }
 
 // Load latest checkpoint
-func (cm *CheckpointManager) load_latest(): (map[string]interface{}, error) {
+func (cm *checkpoint_manager) load_latest(): (map[string]interface{}, error) {
     if len(cm.checkpoints) == 0 {
         return nil, error("No checkpoints available")
     }
@@ -138,19 +138,19 @@ func (cm *CheckpointManager) load_latest(): (map[string]interface{}, error) {
 }
 
 // Load specific checkpoint by step
-func (cm *CheckpointManager) load_checkpoint(step: int): (map[string]interface{}, error) {
+func (cm *checkpoint_manager) load_checkpoint(step: int): (map[string]interface{}, error) {
     checkpoint_name := "checkpoint-" + format_int(step)
     checkpoint_path := filepath.Join(cm.checkpoint_dir, checkpoint_name)
     
     // Check if directory exists
     if _, err := os.Stat(checkpoint_path); os.IsNotExist(err) {
-        return nil, error("Checkpoint not found: " + checkpoint_name)
+        return nil, error("checkpoint not found: " + checkpoint_name)
     }
     
     // Load metadata
     metadata_path := filepath.Join(checkpoint_path, "metadata.json")
     metadata_bytes, _ := ioutil.ReadFile(metadata_path)
-    var metadata CheckpointMetadata
+    var metadata checkpoint_metadata
     json.Unmarshal(metadata_bytes, &metadata)
     
     // Validate checkpoint integrity
@@ -179,9 +179,9 @@ func (cm *CheckpointManager) load_checkpoint(step: int): (map[string]interface{}
 }
 
 // Validate checkpoint integrity
-func (cm *CheckpointManager) validate_checkpoint(
+func (cm *checkpoint_manager) validate_checkpoint(
     checkpoint_path: string,
-    metadata: CheckpointMetadata) error {
+    metadata: checkpoint_metadata) error {
     
     // Load and verify model state
     model_path := filepath.Join(checkpoint_path, "model_state.json")
@@ -209,7 +209,7 @@ func (cm *CheckpointManager) validate_checkpoint(
 }
 
 // List all available checkpoints
-func (cm *CheckpointManager) list_checkpoints(): []map[string]interface{} {
+func (cm *checkpoint_manager) list_checkpoints(): []map[string]interface{} {
     result := make([]map[string]interface{}, len(cm.checkpoints))
     
     for i, metadata := range cm.checkpoints {
@@ -227,7 +227,7 @@ func (cm *CheckpointManager) list_checkpoints(): []map[string]interface{} {
 }
 
 // Get checkpoint by step
-func (cm *CheckpointManager) get_checkpoint_info(step: int): map[string]interface{} {
+func (cm *checkpoint_manager) get_checkpoint_info(step: int): map[string]interface{} {
     for _, metadata := range cm.checkpoints {
         if metadata.step == step {
             return map[string]interface{}{
@@ -245,7 +245,7 @@ func (cm *CheckpointManager) get_checkpoint_info(step: int): map[string]interfac
 }
 
 // Clean up old checkpoints
-func (cm *CheckpointManager) cleanup_old_checkpoints() error {
+func (cm *checkpoint_manager) cleanup_old_checkpoints() error {
     if len(cm.checkpoints) <= cm.max_checkpoints {
         return nil
     }
@@ -269,7 +269,7 @@ func (cm *CheckpointManager) cleanup_old_checkpoints() error {
 }
 
 // Export checkpoint statistics
-func (cm *CheckpointManager) export_stats(): string {
+func (cm *checkpoint_manager) export_stats(): string {
     if len(cm.checkpoints) == 0 {
         return "No checkpoints available"
     }
@@ -289,7 +289,7 @@ func (cm *CheckpointManager) export_stats(): string {
 }
 
 // Get best checkpoint (lowest perplexity)
-func (cm *CheckpointManager) get_best_perplexity(): float {
+func (cm *checkpoint_manager) get_best_perplexity(): float {
     if len(cm.checkpoints) == 0 {
         return 0.0
     }
@@ -317,7 +317,7 @@ func format_int(i: int): string {
 // Example main function
 func main() {
     // Initialize checkpoint manager
-    cm := &CheckpointManager{}
+    cm := &checkpoint_manager{}
     if err := cm.init("./checkpoints", 5); err != nil {
         println("Error initializing checkpoint manager:", err.Error())
         return

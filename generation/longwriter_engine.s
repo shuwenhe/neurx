@@ -471,11 +471,11 @@ Citation Guidelines (when referencing facts, data, or sources):
 
         return f"""You are an expert writer creating a specific section of a longer document.
 
-## Your Task
+## Your task
 Write section **{section.id}: {section.title}**
 
 ## Context
-**Overall Document Topic**: {context.document_topic}
+**Overall document Topic**: {context.document_topic}
 **Current Position**: This is section {get_section_position(context.full_outline, section.id)} of {context.total_sections} total sections.
 
 **Parent Section**: {parent_context}
@@ -939,7 +939,7 @@ function print_generation_summary(doc: LongDocument) {
     m = doc.generation_metadata
 
     print(f"\n{'='*60}")
-    print(f"✅ Document Generation Complete!")
+    print(f"✅ document Generation Complete!")
     print(f"{'='*60}")
     print(f"Title: {doc.title}")
     print(f"Total Words: {s.total_words:,}")
@@ -1008,7 +1008,7 @@ async function test_long_writer() -> bool {
     assert generated.tokens_used > 0, "Should track token usage"
 
     # Test 4: Statistics computation
-    print("  ✓ Test 4: Document Statistics")
+    print("  ✓ Test 4: document Statistics")
     all_generated = [generated]  # In real scenario would have many more
     dummy_full = "Test document content for statistics calculation. "
     stats = compute_long_doc_statistics(all_generated, dummy_full * 100, current_time_millis())

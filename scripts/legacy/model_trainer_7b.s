@@ -6,7 +6,7 @@ import (
     "strconv"
 )
 
-type LargeModelConfig struct {
+type large_model_config struct {
     model_name: string
     num_params: int
     hidden_dim: int
@@ -22,7 +22,7 @@ type LargeModelConfig struct {
     zero_stage: int
 }
 
-type MemoryEstimate struct {
+type memory_estimate struct {
     model_weights_gb: float
     gradients_gb: float
     optimizer_states_gb: float
@@ -30,8 +30,8 @@ type MemoryEstimate struct {
     total_gb: float
 }
 
-func create_7b_config(): LargeModelConfig {
-    config := LargeModelConfig{
+func create_7b_config(): large_model_config {
+    config := large_model_config{
         model_name: "neurx-7b",
         num_params: 7000000000,
         hidden_dim: 4096,
@@ -49,8 +49,8 @@ func create_7b_config(): LargeModelConfig {
     return config
 }
 
-func create_13b_config(): LargeModelConfig {
-    config := LargeModelConfig{
+func create_13b_config(): large_model_config {
+    config := large_model_config{
         model_name: "neurx-13b",
         num_params: 13000000000,
         hidden_dim: 5120,
@@ -68,8 +68,8 @@ func create_13b_config(): LargeModelConfig {
     return config
 }
 
-func create_70b_config(): LargeModelConfig {
-    config := LargeModelConfig{
+func create_70b_config(): large_model_config {
+    config := large_model_config{
         model_name: "neurx-70b",
         num_params: 70000000000,
         hidden_dim: 8192,
@@ -87,7 +87,7 @@ func create_70b_config(): LargeModelConfig {
     return config
 }
 
-func estimate_memory(config: LargeModelConfig, batch_size: int): MemoryEstimate {
+func estimate_memory(config: large_model_config, batch_size: int): memory_estimate {
     num_params_f := float(config.num_params)
     weights_gb := num_params_f * 4.0 / (1024.0 * 1024.0 * 1024.0)
     
@@ -108,7 +108,7 @@ func estimate_memory(config: LargeModelConfig, batch_size: int): MemoryEstimate 
     
     total_gb := (weights_gb + gradients_gb + optimizer_states_gb + batch_gb) * 1.2
     
-    estimate := MemoryEstimate{
+    estimate := memory_estimate{
         model_weights_gb: weights_gb,
         gradients_gb: gradients_gb,
         optimizer_states_gb: optimizer_states_gb,
@@ -119,7 +119,7 @@ func estimate_memory(config: LargeModelConfig, batch_size: int): MemoryEstimate 
     return estimate
 }
 
-func print_config(config: LargeModelConfig, memory: MemoryEstimate) {
+func print_config(config: large_model_config, memory: memory_estimate) {
     fmt.Printf("\n")
     fmt.Printf("Model: %s\n", config.model_name)
     fmt.Printf("Parameters: %.2f Billion\n", float(config.num_params) / 1e9)
@@ -169,7 +169,7 @@ func main() {
     
     is_master := (rank == 0)
     
-    var config LargeModelConfig
+    var config large_model_config
     
     if model_size == "7b" {
         config = create_7b_config()

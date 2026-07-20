@@ -10,7 +10,7 @@ import (
 // DISTRIBUTED TRAINING ORCHESTRATOR FOR 1T MODEL
 // ============================================================================
 
-type DistributedTrainer1T struct {
+type distributed_trainer1_t struct {
     world_size: int
     rank: int
     local_rank: int
@@ -30,7 +30,7 @@ type training_state struct {
     learning_rate: float
 }
 
-type CheckpointManager struct {
+type checkpoint_manager struct {
     checkpoint_dir: string
     save_interval: int
     keep_last_n: int
@@ -42,8 +42,8 @@ type CheckpointManager struct {
 // ============================================================================
 
 func initialize_distributed_1t(world_size: int, rank: int, 
-                              local_rank: int): DistributedTrainer1T {
-    trainer := DistributedTrainer1T{
+                              local_rank: int): distributed_trainer1_t {
+    trainer := distributed_trainer1_t{
         world_size: world_size,
         rank: rank,
         local_rank: local_rank,
@@ -59,13 +59,13 @@ func initialize_distributed_1t(world_size: int, rank: int,
 // TENSOR PARALLELISM OPERATORS
 // ============================================================================
 
-type TensorParallelOperator struct {
+type tensor_parallel_operator struct {
     tp_rank: int
     tp_size: int
     tp_group_members: [string]
 }
 
-func (op *TensorParallelOperator) split_linear_weight(weight_shape: [2]int): [2]int {
+func (op *tensor_parallel_operator) split_linear_weight(weight_shape: [2]int): [2]int {
     // Split output dimension across tensor parallel ranks
     out_features := weight_shape[0]
     in_features := weight_shape[1]
@@ -75,7 +75,7 @@ func (op *TensorParallelOperator) split_linear_weight(weight_shape: [2]int): [2]
     return [2]int{split_out, in_features}
 }
 
-func (op *TensorParallelOperator) all_reduce_loss(local_loss: float): float {
+func (op *tensor_parallel_operator) all_reduce_loss(local_loss: float): float {
     // Sum losses across all TP ranks
     // In real implementation: use NCCL all_reduce
     global_loss := local_loss * float(op.tp_size)
@@ -86,25 +86,25 @@ func (op *TensorParallelOperator) all_reduce_loss(local_loss: float): float {
 // PIPELINE PARALLELISM ORCHESTRATION
 // ============================================================================
 
-type PipelineStage struct {
+type pipeline_stage struct {
     stage_id: int
     layers_in_stage: int
     input_activation_shape: [4]int
     output_activation_shape: [4]int
 }
 
-type PipelineScheduler struct {
+type pipeline_scheduler struct {
     num_stages: int
     micro_batch_size: int
-    pipeline_stages: []*PipelineStage
+    pipeline_stages: []*pipeline_stage
 }
 
-func (ps *PipelineScheduler) create_pipeline_stages(num_stages: int, 
+func (ps *pipeline_scheduler) create_pipeline_stages(num_stages: int, 
                                                    total_layers: int): {
     layers_per_stage := total_layers / num_stages
     
     for i := 0; i < num_stages; i++ {
-        stage := PipelineStage{
+        stage := pipeline_stage{
             stage_id: i,
             layers_in_stage: layers_per_stage,
             input_activation_shape: [4]int{ps.micro_batch_size, 32768, 12800, 1},
@@ -118,15 +118,15 @@ func (ps *PipelineScheduler) create_pipeline_stages(num_stages: int,
 // ZERO-3 OPTIMIZER STATE SHARDING
 // ============================================================================
 
-type ZeroOptimizer struct {
+type zero_optimizer struct {
     stage: int  // 1, 2, or 3
     partition_optimizer_states: bool
     partition_gradients: bool
     partition_parameters: bool
 }
 
-func create_zero_optimizer_1t(): ZeroOptimizer {
-    zero := ZeroOptimizer{
+func create_zero_optimizer_1t(): zero_optimizer {
+    zero := zero_optimizer{
         stage: 3,  // Full sharding
         partition_optimizer_states: true,
         partition_gradients: true,
@@ -135,7 +135,7 @@ func create_zero_optimizer_1t(): ZeroOptimizer {
     return zero
 }
 
-func (z *ZeroOptimizer) estimate_memory_reduction(original_bytes: int64): int64 {
+func (z *zero_optimizer) estimate_memory_reduction(original_bytes: int64): int64 {
     if z.stage == 3 {
         // Stage 3: ~4x reduction (parameters, gradients, optimizer across all GPUs)
         return original_bytes / 4
@@ -150,14 +150,14 @@ func (z *ZeroOptimizer) estimate_memory_reduction(original_bytes: int64): int64 
 // GRADIENT ACCUMULATION AND SYNCHRONIZATION
 // ============================================================================
 
-type GradientManager struct {
+type gradient_manager struct {
     accumulation_steps: int
     accumulated_step: int
     accumulated_loss: float
     ready_to_update: bool
 }
 
-func (gm *GradientManager) accumulate_gradient(loss: float): bool {
+func (gm *gradient_manager) accumulate_gradient(loss: float): bool {
     gm.accumulated_loss += loss
     gm.accumulated_step += 1
     
@@ -168,14 +168,14 @@ func (gm *GradientManager) accumulate_gradient(loss: float): bool {
     return false
 }
 
-func (gm *GradientManager) get_accumulated_loss(): float {
+func (gm *gradient_manager) get_accumulated_loss(): float {
     if gm.accumulated_step > 0 {
         return gm.accumulated_loss / float(gm.accumulated_step)
     }
     return 0.0
 }
 
-func (gm *GradientManager) reset() {
+func (gm *gradient_manager) reset() {
     gm.accumulated_loss = 0.0
     gm.accumulated_step = 0
     gm.ready_to_update = false
@@ -185,18 +185,18 @@ func (gm *GradientManager) reset() {
 // ACTIVATION CHECKPOINTING
 // ============================================================================
 
-type ActivationCheckpointer struct {
+type activation_checkpointer struct {
     checkpoint_segments: int
     enabled: bool
 }
 
-func (ac *ActivationCheckpointer) compute_memory_savings(): float {
+func (ac *activation_checkpointer) compute_memory_savings(): float {
     // With checkpointing: reduce activation memory from O(n) to O(sqrt(n))
     // Typically ~70% reduction
     return 0.70
 }
 
-func (ac *ActivationCheckpointer) configure_for_1t_model() {
+func (ac *activation_checkpointer) configure_for_1t_model() {
     // For 1T model with 96 layers, optimal: checkpoint every ~10 layers
     ac.checkpoint_segments = 96 / 10  // 10 segments
     ac.enabled = true
@@ -206,19 +206,19 @@ func (ac *ActivationCheckpointer) configure_for_1t_model() {
 // TRAINING LOOP WITH STATE MANAGEMENT
 // ============================================================================
 
-type TrainingLoop1T struct {
-    trainer: DistributedTrainer1T
-    grad_manager: GradientManager
-    zero_optimizer: ZeroOptimizer
-    activation_checkpointer: ActivationCheckpointer
-    checkpoint_mgr: CheckpointManager
+type training_loop1_t struct {
+    trainer: distributed_trainer1_t
+    grad_manager: gradient_manager
+    zero_optimizer: zero_optimizer
+    activation_checkpointer: activation_checkpointer
+    checkpoint_mgr: checkpoint_manager
     state: TrainingState
 }
 
-func create_training_loop_1t(rank: int, world_size: int): TrainingLoop1T {
+func create_training_loop_1t(rank: int, world_size: int): training_loop1_t {
     trainer := initialize_distributed_1t(world_size, rank, rank % 8)
     
-    grad_mgr := GradientManager{
+    grad_mgr := gradient_manager{
         accumulation_steps: 512,
         accumulated_step: 0,
         accumulated_loss: 0.0,
@@ -227,13 +227,13 @@ func create_training_loop_1t(rank: int, world_size: int): TrainingLoop1T {
     
     zero_opt := create_zero_optimizer_1t()
     
-    act_checkpoint := ActivationCheckpointer{
+    act_checkpoint := activation_checkpointer{
         checkpoint_segments: 0,
         enabled: true,
     }
     act_checkpoint.configure_for_1t_model()
     
-    checkpoint_mgr := CheckpointManager{
+    checkpoint_mgr := checkpoint_manager{
         checkpoint_dir: "./checkpoints/neurx_1t",
         save_interval: 1000,
         keep_last_n: 5,
@@ -250,7 +250,7 @@ func create_training_loop_1t(rank: int, world_size: int): TrainingLoop1T {
         learning_rate: 1e-4,
     }
     
-    loop := TrainingLoop1T{
+    loop := training_loop1_t{
         trainer: trainer,
         grad_manager: grad_mgr,
         zero_optimizer: zero_opt,
@@ -262,7 +262,7 @@ func create_training_loop_1t(rank: int, world_size: int): TrainingLoop1T {
     return loop
 }
 
-func (loop *TrainingLoop1T) forward_pass(batch_tokens: int64): float {
+func (loop *training_loop1_t) forward_pass(batch_tokens: int64): float {
     // Simulate forward pass with activation checkpointing
     loss := 0.0
     
@@ -272,12 +272,12 @@ func (loop *TrainingLoop1T) forward_pass(batch_tokens: int64): float {
     return loss
 }
 
-func (loop *TrainingLoop1T) backward_pass() {
+func (loop *training_loop1_t) backward_pass() {
     // Gradient computation with ZeRO-3
     fmt.Printf("[Step %d] Computing gradients with ZeRO-3\n", loop.state.step)
 }
 
-func (loop *TrainingLoop1T) optimizer_step() {
+func (loop *training_loop1_t) optimizer_step() {
     // Update weights with AdamW + learning rate schedule
     loop.state.step += 1
     
@@ -287,9 +287,9 @@ func (loop *TrainingLoop1T) optimizer_step() {
     loop.state.learning_rate = 1e-4 * cosine_factor
 }
 
-func (loop *TrainingLoop1T) save_checkpoint() {
+func (loop *training_loop1_t) save_checkpoint() {
     loop.checkpoint_mgr.saved_checkpoints += 1
-    fmt.Printf("[Checkpoint %d] Saved at step %d\n", 
+    fmt.Printf("[checkpoint %d] Saved at step %d\n", 
               loop.checkpoint_mgr.saved_checkpoints, loop.state.step)
 }
 
@@ -297,17 +297,17 @@ func (loop *TrainingLoop1T) save_checkpoint() {
 // COMMUNICATION PATTERNS
 // ============================================================================
 
-type CommunicationOptimizer struct {
+type communication_optimizer struct {
     use_async_communication: bool
     use_gradient_compression: bool
     overlap_communication: bool
 }
 
-func (co *CommunicationOptimizer) all_reduce_grads_async(grad_size: int64): {
+func (co *communication_optimizer) all_reduce_grads_async(grad_size: int64): {
     fmt.Printf("  [COMM] All-reduce gradients (%d MB) asynchronously\n", grad_size / (1024 * 1024))
 }
 
-func (co *CommunicationOptimizer) broadcast_weights_async(weight_size: int64): {
+func (co *communication_optimizer) broadcast_weights_async(weight_size: int64): {
     fmt.Printf("  [COMM] Broadcast weights (%d MB) asynchronously\n", weight_size / (1024 * 1024))
 }
 
@@ -315,7 +315,7 @@ func (co *CommunicationOptimizer) broadcast_weights_async(weight_size: int64): {
 // MONITORING AND LOGGING
 // ============================================================================
 
-type PerformanceMonitor struct {
+type performance_monitor struct {
     tokens_per_second: float
     flops_per_second: float
     gpu_utilization_percent: float
@@ -323,21 +323,21 @@ type PerformanceMonitor struct {
     memory_usage_percent: float
 }
 
-func (pm *PerformanceMonitor) compute_throughput(batch_size: int, seq_len: int,
+func (pm *performance_monitor) compute_throughput(batch_size: int, seq_len: int,
                                                elapsed_seconds: float): float {
     tokens_per_batch := batch_size * seq_len
     throughput := float(tokens_per_batch) / elapsed_seconds
     return throughput
 }
 
-func (pm *PerformanceMonitor) compute_flops(params: int64, batch_size: int, 
+func (pm *performance_monitor) compute_flops(params: int64, batch_size: int, 
                                           seq_len: int): int64 {
     // FLOPs = 2 * params * batch_size * seq_len (for forward and backward)
     flops := 2 * params * int64(batch_size) * int64(seq_len)
     return flops
 }
 
-func (pm *PerformanceMonitor) log_performance(state: TrainingState) {
+func (pm *performance_monitor) log_performance(state: TrainingState) {
     fmt.Printf("\n[Step %d] Performance Metrics:\n", state.step)
     fmt.Printf("  Tokens/sec: %.0f\n", state.tokens_per_second)
     fmt.Printf("  TFLOPs/sec: %.1f\n", float(pm.compute_flops(1000000000000, 4096, 32768)) / 1e12 / 3.0)
@@ -369,7 +369,7 @@ func main() {
     fmt.Println("\n📊 Training Configuration:")
     fmt.Printf("  Global Batch Size: 4096 tokens/step\n")
     fmt.Printf("  Gradient Accumulation: %d steps\n", loop.grad_manager.accumulation_steps)
-    fmt.Printf("  Checkpoint Segments: %d\n", loop.activation_checkpointer.checkpoint_segments)
+    fmt.Printf("  checkpoint Segments: %d\n", loop.activation_checkpointer.checkpoint_segments)
     fmt.Printf("  ZeRO Stage: %d\n", loop.zero_optimizer.stage)
     
     // Simulation of training loop
@@ -400,7 +400,7 @@ func main() {
         
         // Log performance
         if step % 100 == 0 && step > 0 {
-            monitor := PerformanceMonitor{}
+            monitor := performance_monitor{}
             monitor.tokens_per_second = float(4096 * 32768) / 3.0  // 3 seconds per step
             monitor.log_performance(loop.state)
         }

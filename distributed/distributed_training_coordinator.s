@@ -150,7 +150,7 @@ func distributed_forward_pass(
     
     distributed_training_config config = dist_state.config
     
-    // Step 1: Embedding (replicated across all GPUs)
+    // Step 1: embedding (replicated across all GPUs)
     // Each GPU computes embeddings independently
     [][]double embeddings = input_tokens  // Simplified: actual embedding layer
     
@@ -288,7 +288,7 @@ func distributed_optimizer_step(
     dist_state.step_count = dist_state.step_count + 1
 }
 
-// ===================== Checkpoint Management =====================
+// ===================== checkpoint Management =====================
 
 // Save distributed checkpoint across all GPUs
 func save_distributed_checkpoint(

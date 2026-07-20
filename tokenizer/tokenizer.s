@@ -1,7 +1,7 @@
 #!/usr/bin/env s
 
 // ============================================
-// NeurX Tokenizer Framework
+// NeurX tokenizer Framework
 // Purpose: Tokenize training data for NeurX-level LLM training
 // Language: S
 // ============================================
@@ -14,8 +14,8 @@ import (
     "math"
 )
 
-// Tokenizer implements BPE-style tokenization
-type Tokenizer struct {
+// tokenizer implements BPE-style tokenization
+type tokenizer struct {
     vocab: map[string]int
     inv_vocab: map[int]string
     vocab_size: int
@@ -23,7 +23,7 @@ type Tokenizer struct {
 }
 
 // Initialize tokenizer with vocabulary
-func (t *Tokenizer) init(vocab_size: int) {
+func (t *tokenizer) init(vocab_size: int) {
     t.vocab_size = vocab_size
     t.vocab = make(map[string]int)
     t.inv_vocab = make(map[int]string)
@@ -49,7 +49,7 @@ func (t *Tokenizer) init(vocab_size: int) {
 }
 
 // Tokenize text into tokens
-func (t *Tokenizer) encode(text: string): []int {
+func (t *tokenizer) encode(text: string): []int {
     tokens := make([]int, 0)
     
     // Split into words
@@ -86,7 +86,7 @@ func (t *Tokenizer) encode(text: string): []int {
 }
 
 // Decode tokens back to text
-func (t *Tokenizer) decode(tokens: []int): string {
+func (t *tokenizer) decode(tokens: []int): string {
     text := ""
     for _, token_id := range tokens {
         if token, exists := t.inv_vocab[token_id]; exists {
@@ -97,7 +97,7 @@ func (t *Tokenizer) decode(tokens: []int): string {
 }
 
 // Calculate vocabulary statistics
-func (t *Tokenizer) vocab_stats(): map[string]interface{} {
+func (t *tokenizer) vocab_stats(): map[string]interface{} {
     return map[string]interface{}{
         "vocab_size": t.vocab_size,
         "actual_vocab": len(t.vocab),
@@ -107,7 +107,7 @@ func (t *Tokenizer) vocab_stats(): map[string]interface{} {
 }
 
 // Tokenize batch of texts
-func (t *Tokenizer) encode_batch(texts: []string, max_length: int, padding: bool): [][]int {
+func (t *tokenizer) encode_batch(texts: []string, max_length: int, padding: bool): [][]int {
     batch := make([][]int, len(texts))
     
     for i, text := range texts {
@@ -159,7 +159,7 @@ func split_whitespace(s: string): []string {
 // Main execution
 func main() {
     // Initialize tokenizer
-    tokenizer := &Tokenizer{}
+    tokenizer := &tokenizer{}
     tokenizer.init(128000)  // Match NeurX vocab size
     
     // Example: Tokenize training data
@@ -186,7 +186,7 @@ func main() {
     // Print tokenizer statistics
     vocab_stats := tokenizer.vocab_stats()
     stats_json, _ := json.Marshal(vocab_stats)
-    println("Tokenizer Stats:", string(stats_json))
+    println("tokenizer Stats:", string(stats_json))
 }
 
 func min(a, b: int): int {

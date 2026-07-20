@@ -59,7 +59,7 @@ func main() int {
     println("  • Input file: " + config.input_bz2_file)
     println("  • Temp XML: " + config.temp_xml_file)
     println("  • Shard dir: " + config.shard_dir)
-    println("  • Manifest: " + config.manifest_file)
+    println("  • manifest: " + config.manifest_file)
     println("  • Target shard size: " + itoa(config.target_shard_size_mb) + " MB")
     println("")
     
@@ -141,7 +141,7 @@ func process_enwiki_dataset(enwiki_shard_config config) bool {
         println("❌ Error: Failed to generate manifest")
         return false
     }
-    println("  ✓ Manifest generated")
+    println("  ✓ manifest generated")
     println("")
     
     // Step 7: Cleanup temp files if requested
@@ -186,7 +186,7 @@ func split_xml_into_shards(enwiki_shard_config config, int shard_count) bool {
 }
 
 // ============================================================================
-// Manifest Generation
+// manifest Generation
 // ============================================================================
 
 func generate_enwiki_manifest(enwiki_shard_config config, int shard_count) bool {
@@ -231,7 +231,7 @@ func generate_enwiki_manifest(enwiki_shard_config config, int shard_count) bool 
         return false
     }
     
-    println("  • Manifest written to: " + config.manifest_file)
+    println("  • manifest written to: " + config.manifest_file)
     println("  • Total shards: " + itoa(actual_shard_count))
     println("  • Total size: " + itoa(total_size_mb) + " MB")
     

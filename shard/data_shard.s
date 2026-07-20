@@ -198,7 +198,7 @@ func generate_shards(config: shard_config) bool {
         return false
     }
     
-    log_success("Manifest written to " + config.manifest_file)
+    log_success("manifest written to " + config.manifest_file)
     log_info("")
     
     // Summary

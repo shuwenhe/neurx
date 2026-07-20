@@ -1,11 +1,11 @@
 package neurx.data
 
 // ============================================================================
-// Complete DataLoader - Production-ready data loading system
+// Complete data_loader - Production-ready data loading system
 // Features: Multi-worker, prefetching, pin_memory, distributed support
 // ============================================================================
 
-// ---- DataLoader Config ----
+// ---- data_loader Config ----
 struct dataloader_config {
     int batch_size           // Samples per batch
     bool shuffle             // Shuffle data each epoch
@@ -27,7 +27,7 @@ struct dataloader_config {
     collator_config collator
 }
 
-// ---- DataLoader State ----
+// ---- data_loader State ----
 struct dataloader {
     dataset ds
     sampler samp
@@ -42,7 +42,7 @@ struct dataloader {
     []batch prefetch_buffer  // Pre-loaded batches
 }
 
-// Create new DataLoader from dataset and config
+// Create new data_loader from dataset and config
 func new_dataloader(
     dataset ds,
     dataloader_config cfg

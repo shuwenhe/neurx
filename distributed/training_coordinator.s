@@ -80,7 +80,7 @@ func execute_distributed_step(distributed_training_state state,
     state
 }
 
-// Checkpoint step: save and verify
+// checkpoint step: save and verify
 func handle_checkpoint_step(distributed_training_state state) distributed_training_state {
     // All ranks coordinate to save checkpoint
     // state.ft_state = save_distributed_checkpoint(state.ft_state, state.current_step, "./.checkpoints")

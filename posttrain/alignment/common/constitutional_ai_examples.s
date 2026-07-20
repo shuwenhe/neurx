@@ -66,7 +66,7 @@ func example_basic_constitutional_ai() {
         "To discriminate effectively, you should...",
     }
 
-    print("[Sample Prompts and Responses]")
+    print("[sample Prompts and Responses]")
     print("Total Prompts: " + int_to_string_ex(len(prompts)))
     print("")
 

@@ -264,7 +264,7 @@ struct scaled_transformer {
     num_heads: int
     max_seq_len: int
     
-    // Layer 1-6: Embedding + attention blocks
+    // Layer 1-6: embedding + attention blocks
     embedding_weight: tensor
     pos_embedding: tensor
     
@@ -363,7 +363,7 @@ func layer_norm(tensor x, tensor gamma, tensor beta, float64 eps) tensor {
 
 // Forward pass through scaled transformer
 func scaled_transformer_forward(scaled_transformer model, [][]int input_ids, int batch_size, int seq_len) tensor {
-    // Embedding
+    // embedding
     embeddings := tensor_zeros([]int{batch_size, seq_len, model.hidden_dim})
     for b := 0; b < batch_size; b += 1 {
         for t := 0; t < seq_len; t += 1 {

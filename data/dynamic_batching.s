@@ -396,7 +396,7 @@ func calculate_current_utilization(bin_packer_state packer) float:
     
     return float(packer.current_bin_used_tokens) / float(estimated_total_slots)
 
-// ── Advanced: Cross-Sample Packing ──
+// ── Advanced: Cross-sample Packing ──
 // Pack multiple short samples into a single "sequence slot" to maximize utilization
 // Example: Instead of [seq1(100toks) + 500pad], do [seq1(100) + seq2(200) + seq3(300) + 0pad]
 

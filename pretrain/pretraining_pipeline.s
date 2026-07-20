@@ -1,5 +1,5 @@
 // ============================================================
-// NEURX Multi-Task Pretraining Framework
+// NEURX Multi-task Pretraining Framework
 // supportEnglish texttrainingEnglish text:
 //   1. Causal Language Modeling (CLM) - English text
 //   2. Masked Language Modeling (MLM) - English text BERT English text
@@ -74,7 +74,7 @@ struct pretrain_config {
     int data_parallel_size        // DP/PP English text (FSDP)
     bool use_fsdp                // English textuse FSDP
 
-    // === Checkpoint & Logging ===
+    // === checkpoint & Logging ===
     string output_dir            // outputdirectory
     int save_interval            // saveEnglish text (stepEnglish text)
     int log_interval             // logEnglish text (stepEnglish text)
@@ -139,7 +139,7 @@ func create_neurx_200b_pretrain_config() pretrain_config {
         data_parallel_size: 4,    # 8 * 4 * 4 = 128
         use_fsdp: true,
 
-        // Checkpoint & log
+        // checkpoint & log
         output_dir: "./checkpoints/neurx_200b/",
         save_interval: 10_000,
         log_interval: 100,
@@ -284,7 +284,7 @@ func create_pretrain_state(config: pretrain_config) pretrain_state {
     print(f"   World Size: {config.world_size} GPUs")
     if config.world_size > 1:
         print(f"   Parallelism: TP={config.tensor_parallel_size} × PP={config.pipeline_parallel_size} × DP={config.data_parallel_size}")
-    print(f"\n📝 Task Distribution:")
+    print(f"\n📝 task Distribution:")
     print(f"   CLM:       {config.clm_ratio * 100:.1f}%")
     print(f"   MLM:       {config.mlm_ratio * 100:.1f}%")
     print(f"   PrefixLM:  {config.prefix_lm_ratio * 100:.1f}%")
@@ -704,7 +704,7 @@ func train_step(
 func evaluate(
     state: pretrain_state,
     neurx_model model,
-    eval_dataloader: DataLoader,
+    eval_dataloader: data_loader,
     tokenizer: tokenizer_state,
     max_eval_batches: int = 50
 ) -> dict[str, float] {
@@ -785,7 +785,7 @@ func run_pretraining(
     """
 
     print("\n" + "="*70)
-    print("🚀 Starting NEURX Multi-Task Pretraining")
+    print("🚀 Starting NEURX Multi-task Pretraining")
     print("="*70)
 
     // ===== Step 1: Load Configuration =====
@@ -829,7 +829,7 @@ func run_pretraining(
     # ===== Step 5: Initialize Scaler (Mixed Precision) =====
     GradScaler scaler = GradScaler(enabled=(config.precision != "fp32"))
 
-    # ===== Step 6: Load Checkpoint (if resuming) =====
+    # ===== Step 6: Load checkpoint (if resuming) =====
     pretrain_state state = create_pretrain_state(config)
 
     if resume_from_checkpoint != none:
@@ -848,14 +848,14 @@ func run_pretraining(
 
     tokenizer_state tokenizer = create_tokenizer(config.model_config.vocab_file or "vocab/neurx.model")
 
-    DataLoader train_loader = create_train_dataloader(
+    data_loader train_loader = create_train_dataloader(
         config=config,
         tokenizer=tokenizer,
         rank=rank,
         world_size=config.world_size
     )
 
-    DataLoader eval_loader = create_eval_dataloader(
+    data_loader eval_loader = create_eval_dataloader(
         config=config,
         tokenizer=tokenizer
     )
@@ -868,7 +868,7 @@ func run_pretraining(
     try:
         while state.current_step < config.total_steps:
 
-            # ===== Sample Task Type =====
+            # ===== sample task Type =====
             state.active_task = sample_training_task(state)
 
             # ===== Get Next Batch =====
@@ -914,7 +914,7 @@ func run_pretraining(
                 )
                 log_evaluation_results(state, eval_metrics)
 
-            # ===== Save Checkpoint =====
+            # ===== Save checkpoint =====
             if state.current_step % config.save_interval == 0:
                 save_checkpoint(
                     model=model,
@@ -1000,7 +1000,7 @@ func log_training_progress(
 
     # English text: timeEnglish text
     print(
-        f"{'':>8}  Task: {task_name:>6} | "
+        f"{'':>8}  task: {task_name:>6} | "
         f"RunLoss: {state.loss_history.running_loss:>7.4f} | "
         f"Elapsed: {elapsed_str:>8} | "
         f"ETA: {eta_str:>8}"
@@ -1014,7 +1014,7 @@ func log_training_progress(
 //
 // [Step     430/500000] Loss:   2.8100 | LR: 2.00e-04 | GradNorm:   4.28 | Tokens:    110,080
 //           Throughput: 18500 tok/s | Samples:  430 | Forward: 32.0ms | Backward: 48.0ms | Optimizer:  6.0ms | GPU Mem: 18.4GB
-//           Task:    CLM | RunLoss:   2.7850 | Elapsed:    2m 15s | ETA:   45d 12h
+//           task:    CLM | RunLoss:   2.7850 | Elapsed:    2m 15s | ETA:   45d 12h
 //
 // English textexplanation:
 // - step: English texttrainingstepEnglish text (430)
@@ -1028,7 +1028,7 @@ func log_training_progress(
 // - Backward: Backward pass English text (48ms)
 // - Optimizer: Optimizer step English text (6ms)
 // - GPU Mem: GPUEnglish textuseEnglish text (18.4GB)
-// - Task: English text (CLM/MLM/PreLM)
+// - task: English text (CLM/MLM/PreLM)
 // - RunLoss: English textlossEnglish text
 // - Elapsed: English texttime
 // - ETA: English texttime
@@ -1076,7 +1076,7 @@ func print_final_summary(pretrain_state state) {
     print(f"   Final Loss:         {state.loss_history.combined_losses[-1]:.4f}")
     print(f"   Best Val Loss:      {state.loss_history.best_val_loss:.4f}")
     print(f"   Training Duration:  {format_duration(now() - state.start_time)}")
-    print(f"\n📈 Per-Task Loss Statistics:")
+    print(f"\n📈 Per-task Loss Statistics:")
 
     if len(state.loss_history.clm_losses) > 0:
         print(f"   CLM Avg Loss:       {mean(state.loss_history.clm_losses):.4f}")
@@ -1163,7 +1163,7 @@ func test_pretrain_framework() {
     print(f"   End LR:    {lr_end:.6f}")
     print("✅ LR schedule works correctly!")
 
-    // Test 5: Task sampling
+    // Test 5: task sampling
     print("\n[Test 5] Testing task sampling...")
     int clm_count = 0
     int mlm_count = 0
@@ -1185,7 +1185,7 @@ func test_pretrain_framework() {
     assert(abs(clm_ratio - test_cfg.clm_ratio) < 0.05)
     assert(abs(mlm_ratio - test_cfg.mlm_ratio) < 0.05)
     assert(abs(plm_ratio - test_cfg.prefix_lm_ratio) < 0.05)
-    print("✅ Task sampling distribution is correct!")
+    print("✅ task sampling distribution is correct!")
 
     // Test 6: Phase transitions
     print("\n[Test 6] Testing training phase transitions...")

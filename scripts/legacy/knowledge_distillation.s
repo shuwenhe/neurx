@@ -10,7 +10,7 @@ import (
     "math"
 )
 
-type DistillationConfig struct {
+type distillation_config struct {
     temperature             float64
     student_weight          float64  // α for student loss
     distill_weight          float64  // 1-α for distillation loss
@@ -20,7 +20,7 @@ type DistillationConfig struct {
     compression_ratio       float64  // target model size reduction
 }
 
-type DistillationMetrics struct {
+type distillation_metrics struct {
     student_loss            float64
     distillation_loss       float64
     total_loss              float64
@@ -29,11 +29,11 @@ type DistillationMetrics struct {
     kl_divergence           float64
 }
 
-type DistillationFramework struct {
-    config                  DistillationConfig
+type distillation_framework struct {
+    config                  distillation_config
     teacher_model           PolicyModel
     student_model           PolicyModel
-    metrics_history         []DistillationMetrics
+    metrics_history         []distillation_metrics
     best_loss               float64
 }
 
@@ -41,7 +41,7 @@ type DistillationFramework struct {
 // Temperature-Scaled Softmax
 // ============================================
 
-func (framework *DistillationFramework) apply_temperature(logits []float64, temperature float64) []float64 {
+func (framework *distillation_framework) apply_temperature(logits []float64, temperature float64) []float64 {
     // Scale logits by temperature
     scaled := make([]float64, len(logits))
     for i, logit := range logits {
@@ -75,7 +75,7 @@ func (framework *DistillationFramework) apply_temperature(logits []float64, temp
 // Distillation Loss
 // ============================================
 
-func (framework *DistillationFramework) compute_distillation_loss(
+func (framework *distillation_framework) compute_distillation_loss(
     student_logits []float64,
     teacher_logits []float64,
     temperature float64) float64 {
@@ -96,10 +96,10 @@ func (framework *DistillationFramework) compute_distillation_loss(
 }
 
 // ============================================
-// Student Loss (Task Loss)
+// Student Loss (task Loss)
 // ============================================
 
-func (framework *DistillationFramework) compute_student_loss(
+func (framework *distillation_framework) compute_student_loss(
     student_logits []float64,
     target_indices []int) float64 {
     
@@ -135,11 +135,11 @@ func (framework *DistillationFramework) compute_student_loss(
 // Combined Distillation Loss
 // ============================================
 
-func (framework *DistillationFramework) compute_total_loss(
+func (framework *distillation_framework) compute_total_loss(
     student_logits []float64,
     teacher_logits []float64,
     target_indices []int,
-    temperature float64) DistillationMetrics {
+    temperature float64) distillation_metrics {
     
     student_loss := framework.compute_student_loss(student_logits, target_indices)
     distill_loss := framework.compute_distillation_loss(student_logits, teacher_logits, temperature)
@@ -154,7 +154,7 @@ func (framework *DistillationFramework) compute_total_loss(
     
     kl_div := framework.compute_distillation_loss(student_logits, teacher_logits, 1.0)
     
-    return DistillationMetrics{
+    return distillation_metrics{
         student_loss: student_loss,
         distillation_loss: distill_loss,
         total_loss: total_loss,
@@ -168,7 +168,7 @@ func (framework *DistillationFramework) compute_total_loss(
 // Training Step
 // ============================================
 
-func (framework *DistillationFramework) train_step(
+func (framework *distillation_framework) train_step(
     batch_logits [][]float64,
     teacher_logits [][]float64,
     targets [][]int) float64 {
@@ -195,7 +195,7 @@ func (framework *DistillationFramework) train_step(
 // Distillation Training Loop
 // ============================================
 
-func (framework *DistillationFramework) train(num_steps int) {
+func (framework *distillation_framework) train(num_steps int) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Knowledge Distillation Training                      ║")
     fmt.Println("║  Teacher → Student Model Compression                 ║")
@@ -247,7 +247,7 @@ func (framework *DistillationFramework) train(num_steps int) {
 // Compression Analysis
 // ============================================
 
-func (framework *DistillationFramework) analyze_compression() {
+func (framework *distillation_framework) analyze_compression() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Distillation Compression Analysis                    ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
@@ -281,7 +281,7 @@ func (framework *DistillationFramework) analyze_compression() {
 // Temperature Scheduling
 // ============================================
 
-func (framework *DistillationFramework) get_temperature(step int, total_steps int) float64 {
+func (framework *distillation_framework) get_temperature(step int, total_steps int) float64 {
     progress := float64(step) / float64(total_steps)
     
     // Start with higher temperature, decay over time
@@ -299,20 +299,20 @@ func (framework *DistillationFramework) get_temperature(step int, total_steps in
 // ============================================
 
 func NewDistillationFramework(
-    config DistillationConfig,
+    config distillation_config,
     teacher PolicyModel,
-    student PolicyModel) *DistillationFramework {
+    student PolicyModel) *distillation_framework {
     
-    return &DistillationFramework{
+    return &distillation_framework{
         config: config,
         teacher_model: teacher,
         student_model: student,
-        metrics_history: []DistillationMetrics{},
+        metrics_history: []distillation_metrics{},
         best_loss: 1e10,
     }
 }
 
-func (framework *DistillationFramework) distill() {
+func (framework *distillation_framework) distill() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Knowledge Distillation Pipeline                      ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝\n")

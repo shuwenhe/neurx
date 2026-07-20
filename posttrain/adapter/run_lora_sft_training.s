@@ -204,7 +204,7 @@ func main() int {
     println("Data file    : " + data_path)
     println("Output dir   : " + output_dir)
     println("Model config : " + model_config)
-    println("Tokenizer    : " + tokenizer_json)
+    println("tokenizer    : " + tokenizer_json)
     println("Format       : " + format_type)
     println("Epochs       : " + int_to_str(epochs))
     println("Feature dim  : " + int_to_str(feature_dim))
@@ -293,7 +293,7 @@ func main() int {
 
     println("")
     println("LoRA SFT training complete")
-    println("Checkpoint dir: " + output_dir)
+    println("checkpoint dir: " + output_dir)
     println("Best loss     : " + fmt_float(best_loss, 4))
     0
 }

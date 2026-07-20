@@ -4,13 +4,13 @@ use std.io
 use std.strings
 
 // dataloadEnglish textconfiguration
-type DataLoaderConfig struct {
+type data_loader_config struct {
     shard_dir: string
     max_samples_per_shard: i64
     max_shards: i64
 }
 
-type Sample struct {
+type sample struct {
     text: string
     index: i64
 }

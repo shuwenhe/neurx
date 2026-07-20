@@ -58,7 +58,7 @@ func example_training() {
     //     // Print progress
     //     print("Epoch {epoch}: loss = {epoch_loss}")
     //     
-    //     // Checkpoint
+    //     // checkpoint
     //     if epoch % 1 == 0 {
     //         save_checkpoint(trainer, "checkpoint_epoch_{epoch}.pt")
     //     }

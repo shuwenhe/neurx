@@ -274,7 +274,7 @@ func get_learned_position_encoding(
 }
 
 // =====================================================================
-// RoPE (Rotary Position Embedding)
+// RoPE (Rotary Position embedding)
 // =====================================================================
 
 func new_rope_position_encoding(position_encoding_config cfg) rope_position_encoding {

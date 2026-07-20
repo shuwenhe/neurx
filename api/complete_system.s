@@ -3,7 +3,7 @@
 //
 // English texttraining/inferencesystem:
 //   1. modelEnglish text (model/llm/neurx.s)
-//   2. Tokenizer (tokenizer/tokenizer_core.s)
+//   2. tokenizer (tokenizer/tokenizer_core.s)
 //   3. English texttrainingframework (pretrain/pretraining_pipeline.s)
 //   4. English text (attention/attention_mechanism.s)
 //   5. alignmenttraining (posttrain/alignment_trainer.s)
@@ -94,15 +94,15 @@ func check_system_status() -> system_status {
         append(status.errors, f"NEURX Architecture error: {e}")
         print(f"   ❌ {e}")
 
-    # Check Module 2: Tokenizer
-    print("[2/6] Checking NEURX Tokenizer...")
+    # Check Module 2: tokenizer
+    print("[2/6] Checking NEURX tokenizer...")
     try:
         tokenizer_state tok = create_tokenizer("vocab/neurx.model")
         status.modules.tokenizer_loaded = true
         status.tokenizer_ready = true
-        print(f"   ✅ NEURX Tokenizer loaded (vocab size: {tok.vocab_size})")
+        print(f"   ✅ NEURX tokenizer loaded (vocab size: {tok.vocab_size})")
     except Exception as e:
-        append(status.warnings, "Tokenizer using mock vocabulary (for testing)")
+        append(status.warnings, "tokenizer using mock vocabulary (for testing)")
         status.modules.tokenizer_loaded = true  # Still works with mock
         print("   ⚠️ Using mock tokenizer (testing mode)")
 
@@ -113,7 +113,7 @@ func check_system_status() -> system_status {
         assert(pt_cfg.clm_ratio + pt_cfg.mlm_ratio + pt_cfg.prefix_lm_ratio == 1.0)
         status.modules.pretraining_framework = true
         print("   ✅ Pretraining framework ready")
-        print(f"      Task distribution: CLM={pt_cfg.clm_ratio:.0%} MLM={pt_cfg.mlm_ratio:.0%} PrefixLM={pt_cfg.prefix_lm_ratio:.0%}")
+        print(f"      task distribution: CLM={pt_cfg.clm_ratio:.0%} MLM={pt_cfg.mlm_ratio:.0%} PrefixLM={pt_cfg.prefix_lm_ratio:.0%}")
     except Exception as e:
         append(status.errors, f"Pretraining error: {e}")
         print(f"   ❌ {e}")
@@ -357,7 +357,7 @@ func start_neurx_inference_server(int port = 8080, string model_path = "./checkp
     tokenizer_state tokenizer = create_tokenizer("./vocab/neurx.model")
 
     # Initialize engine
-    InferenceEngine engine = init_engine(
+    inference_engine engine = init_engine(
         model=model,
         tokenizer=tokenizer,
         max_batch_size=32,
@@ -398,12 +398,12 @@ func run_all_tests():
         print("❌ Architecture Tests FAILED\n")
         all_passed = False
 
-    # Test 2: Tokenizer
+    # Test 2: tokenizer
     try:
         test_tokenizer()
-        print("✅ Tokenizer Tests PASSED\n")
+        print("✅ tokenizer Tests PASSED\n")
     except:
-        print("❌ Tokenizer Tests FAILED\n")
+        print("❌ tokenizer Tests FAILED\n")
         all_passed = False
 
     # Test 3: Pretraining

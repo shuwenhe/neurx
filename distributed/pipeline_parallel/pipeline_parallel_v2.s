@@ -531,7 +531,7 @@ func recommended_pp_config_2t(int num_gpus_available) pipeline_config {
     cfg.schedule_type = "1f1b"
     cfg.num_chunks = 1
     cfg.use_activation_checkpointing = true
-    cfg.checkpoint_strategy = 2  // Checkpoint all layers
+    cfg.checkpoint_strategy = 2  // checkpoint all layers
     cfg.overlap_comm_compute = true
     
     return cfg

@@ -75,7 +75,7 @@ func main() int {
     println("================================================")
     println("Model: " + model_name)
     println("Device: " + device_type)
-    println("Checkpoint: " + checkpoint_arg)
+    println("checkpoint: " + checkpoint_arg)
     println("Seed: " + seed)
     println("Answer Mode: " + answer_mode)
     println("")

@@ -43,7 +43,7 @@ struct clean_config {
     string cleaned_dir          // Output cleaned directory
     string output_file          // Combined cleaned JSONL file
     string manifest_file        // Output manifest
-    string checkpoint_file      // Checkpoint for resume
+    string checkpoint_file      // checkpoint for resume
     int checkpoint_interval     // Save checkpoint every N items
 }
 
@@ -98,7 +98,7 @@ pub func clean_data(config: clean_config) bool {
     log_info("📂 Configuration:")
     log_info("  • Raw data: " + config.raw_dir)
     log_info("  • Output: " + config.output_file)
-    log_info("  • Manifest: " + config.manifest_file)
+    log_info("  • manifest: " + config.manifest_file)
     log_info("")
     
     // Find source files

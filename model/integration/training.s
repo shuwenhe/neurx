@@ -1,6 +1,6 @@
 package neurx.model.integration
 
-// Integration layer connecting Tokenizer and Transformer
+// Integration layer connecting tokenizer and Transformer
 // - End-to-end text processing
 // - Batch processing pipeline
 // - Training loop coordination
@@ -189,7 +189,7 @@ func train_epoch(
             // Log metrics
         }
         
-        // Checkpoint
+        // checkpoint
         if t(trainer.state.current_step - (trainer.state.current_step / trainer.config.save_steps) * trainer.config.save_steps) == 0  trainer.config.save_steps > 0 {
             // Save model checkpoint
         }

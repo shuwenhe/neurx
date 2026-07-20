@@ -14,7 +14,7 @@ func main() int {
     println("")
     println("Project root  : " + project_root)
     println("Mode          : " + mode)
-    println("Checkpoint dir: " + checkpoint_dir)
+    println("checkpoint dir: " + checkpoint_dir)
     println("Output dir    : " + output_dir)
     println("Log dir       : " + log_dir)
     println("")

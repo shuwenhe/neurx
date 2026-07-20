@@ -116,7 +116,7 @@ func zero_grad(tensor t) {
 // ============================================================================
 
 struct mini_transformer {
-    // Embedding layer
+    // embedding layer
     embedding_weight: tensor      // [vocab_size, hidden_dim]
     
     // Self-attention layer
@@ -189,7 +189,7 @@ func transformer_forward(
     seq_len := batch.seq_len
     hidden_dim := model.hidden_dim
     
-    // 1. Embedding: [batch, seq] -> [batch, seq, hidden]
+    // 1. embedding: [batch, seq] -> [batch, seq, hidden]
     embedded := tensor_embedding(model.embedding_weight, batch.input_ids)
     
     // 2. Simple self-attention: [batch, seq, hidden] -> [batch, seq, hidden]
@@ -541,7 +541,7 @@ func run_training_loop(
     println("🏗️  Creating model...")
     model := create_mini_transformer(vocab_size, hidden_dim, ff_dim, num_heads)
     println("✅ Model created")
-    printf("   Embedding: %s\n", tensor_shape_string(model.embedding_weight.shape))
+    printf("   embedding: %s\n", tensor_shape_string(model.embedding_weight.shape))
     printf("   Q/K/V proj: %s\n", tensor_shape_string(model.q_proj.shape))
     printf("   FC layers: %s → %s\n", tensor_shape_string(model.fc1.shape), tensor_shape_string(model.fc2.shape))
     printf("   LM Head: %s\n", tensor_shape_string(model.lm_head.shape))

@@ -318,7 +318,7 @@ func io_worker_function(async_prefetch_manager mgr) void:
             if !enqueued:
                 mgr.backpressure_events_count = mgr.backpressure_events_count + 1
 
-// Tokenizer Worker: converts raw text to token IDs
+// tokenizer Worker: converts raw text to token IDs
 func tokenizer_worker_function(async_prefetch_manager mgr) void:
     
     while mgr.workers_running:

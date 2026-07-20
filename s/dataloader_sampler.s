@@ -2,7 +2,7 @@ package neurx.data
 
 // ============================================================================
 // Samplers - Control which samples to yield and in what order
-// Sequential, Random (Shuffle), DistributedSampler
+// Sequential, Random (Shuffle), distributed_sampler
 // ============================================================================
 
 // ---- Sampler Interface ----

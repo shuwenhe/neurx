@@ -1,6 +1,6 @@
 package neurx.tokenizer.manager
 
-// Tokenizer Manager - Unified tokenization interface for training
+// tokenizer Manager - Unified tokenization interface for training
 // - Vocabulary management
 // - Batch processing
 // - Caching and efficiency
@@ -258,7 +258,7 @@ func get_special_tokens(tokenizer_manager mgr) [string:int {
 
 // Print tokenizer information
 func print_tokenizer_info(tokenizer_manager mgr) string {
-    string info = "Tokenizer Manager Information:\n"
+    string info = "tokenizer Manager Information:\n"
     // Add info
     info
 }

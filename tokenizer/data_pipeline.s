@@ -1,4 +1,4 @@
-// BPE Tokenizer Pipeline Integration for Streaming Data
+// BPE tokenizer Pipeline Integration for Streaming Data
 // High-performance tokenization: supports BPE, SentencePiece, WordPiece
 // Optimized for TB-scale corpora with streaming, caching, and parallel processing
 
@@ -6,9 +6,9 @@ package neurx.tokenizer.data_pipeline
 
 use neurx.strings
 
-// ── Tokenizer Configuration ──
+// ── tokenizer Configuration ──
 struct tokenizer_config {
-    // Tokenizer type
+    // tokenizer type
     string tokenizer_type          // "bpe", "sentencepiece", "wordpiece", "char"
     
     // Vocabulary settings
@@ -83,7 +83,7 @@ func default_llm_tokenizer_config() tokenizer_config {
     return cfg
 }
 
-// ── BPE Tokenizer Core State ──
+// ── BPE tokenizer Core State ──
 struct bpe_tokenizer_state {
     tokenizer_config config
     

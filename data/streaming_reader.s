@@ -143,9 +143,9 @@ func analyze_file_metadata(string filepath, stream_reader_config config) file_me
         []byte header = read_file_header(filepath, 8192)  // Read first 8KB
         (meta.encoding, meta.has_bom) = detect_encoding(header, config.default_encoding)
         
-        // Sample to estimate line count and quality
+        // sample to estimate line count and quality
         if meta.file_size_bytes > 10 * 1024 * 1024:  // If > 10MB
-            // Sample from beginning, middle, and end
+            // sample from beginning, middle, and end
             (meta.line_count, meta.quality_score) = sample_file_quality(filepath, meta.file_size_bytes)
         else:
             // Small file: just count everything

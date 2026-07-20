@@ -14,7 +14,7 @@ package neurx.distributed.training_orchestrator
 |                                                             |
 |  DP Replica 0 -+                                            |
 |  |- TP Group 0 -|                                           |
-|  |  |- PP Stage 0 (GPU 0): Embedding + Layers 0-9         |
+|  |  |- PP Stage 0 (GPU 0): embedding + Layers 0-9         |
 |  |  |- PP Stage 1 (GPU 1): Layers 10-19                   |
 |  |  |- ...                                                   |
 |  |  +- PP Stage P-1 (GPU P-1): Output Head                 |
@@ -578,7 +578,7 @@ func format_int(int value) string {
     return str(value)
 }
 
-// ===================== Checkpoint Management =====================
+// ===================== checkpoint Management =====================
 
 func save_distributed_checkpoint(orchestrator_state state, int step) {
     // Distributed checkpoint saving strategy:
@@ -631,7 +631,7 @@ func print_training_summary(orchestrator_state state) {
     // log_info("Total Samples: " + str(state.samples_processed))
     // log_info("Avg Throughput: " + str(state.current_throughput_tokens_sec) + " tok/s")
     // log_info("Avg TFLOPS/GPU: " + str(state.current_tflops))
-    // log_info("Checkpoint Dir: " + state.config.checkpoint_dir)
+    // log_info("checkpoint Dir: " + state.config.checkpoint_dir)
     // log_info("=" * 60)
 }
 
@@ -653,7 +653,7 @@ func estimate_memory_usage(training_orchestrator_config cfg) memory_estimate_res
     
     // Parameter count calculation (approximate)
     long_params = (
-        cfg.vocab_size * cfg.hidden_dim +                    // Embedding
+        cfg.vocab_size * cfg.hidden_dim +                    // embedding
         cfg.num_layers * (
             3 * cfg.hidden_dim * cfg.hidden_dim +            // QKV + O projections
             (2 * cfg.hidden_dim * cfg.intermediate_dim +      // SwiGLU gate+up

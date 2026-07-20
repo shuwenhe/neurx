@@ -10,7 +10,7 @@ func main() int {
     println("NeurX Interactive Chat (S Lang)")
     println("")
     println("Project root: " + project_root)
-    println("Checkpoint : " + checkpoint_dir)
+    println("checkpoint : " + checkpoint_dir)
     println("")
     println("  inference source : " + check_path("inference/production_inference.s"))
     println("  checkpoint dir   : " + check_path(checkpoint_dir))
@@ -20,7 +20,7 @@ func main() int {
         println("✓ Ready for interactive chat")
         println("  Type your question and press Enter")
     } else {
-        println("✗ Checkpoint not available - cannot start chat")
+        println("✗ checkpoint not available - cannot start chat")
     }
     0
 }

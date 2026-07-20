@@ -364,7 +364,7 @@ func test_gradient_accumulation_reset() bool {
 }
 
 // ============================================================
-// Checkpoint Tests - checkpointtest
+// checkpoint Tests - checkpointtest
 // ============================================================
 
 func test_checkpoint_creation() bool {
@@ -635,7 +635,7 @@ func run_all_training_pipeline_tests() bool {
     total = total + 1
     if test_gradient_accumulation_reset() { passed = passed + 1 }
 
-    // Checkpoint Tests
+    // checkpoint Tests
     total = total + 1
     if test_checkpoint_creation() { passed = passed + 1 }
 

@@ -63,7 +63,7 @@ func example_basic_orpo_training() {
     print("  Initial training steps: " + int_to_string_ex(state.training_step))
     print("")
 
-    print("[Creating Sample Trajectories]")
+    print("[Creating sample Trajectories]")
     print("  Created 0 trajectories")
     print("  Starting training...")
     print("")

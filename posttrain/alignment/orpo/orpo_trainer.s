@@ -43,8 +43,8 @@ struct orpo_config {
     
     // Training mechanics
     bool use_mixed_precision    // Enable mixed precision training
-    int save_interval           // Checkpoint saving interval
-    string checkpoint_dir       // Checkpoint directory
+    int save_interval           // checkpoint saving interval
+    string checkpoint_dir       // checkpoint directory
 }
 
 struct orpo_state {
@@ -100,7 +100,7 @@ struct orpo_trajectory_step {
 }
 
 struct orpo_trajectory {
-    int trajectory_id           // Trajectory ID
+    int trajectory_id           // trajectory ID
     []orpo_trajectory_step steps // Steps in trajectory
     int length                  // Number of steps
     float total_log_odds        // Accumulated log odds

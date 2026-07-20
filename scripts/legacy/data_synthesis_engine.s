@@ -11,7 +11,7 @@ import (
     "time"
 )
 
-type DataSynthesisConfig struct {
+type data_synthesis_config struct {
     num_synthetic_samples   int
     num_preference_pairs    int
     quality_threshold       float64
@@ -19,7 +19,7 @@ type DataSynthesisConfig struct {
     task_types              []string
 }
 
-type SyntheticExample struct {
+type synthetic_example struct {
     id                      string
     prompt                  string
     response                string
@@ -30,7 +30,7 @@ type SyntheticExample struct {
     timestamp               int64
 }
 
-type PreferencePair struct {
+type preference_pair struct {
     prompt                  string
     response_a              string
     response_b              string
@@ -40,15 +40,15 @@ type PreferencePair struct {
     annotator_id            string
 }
 
-type DataSynthesisEngine struct {
-    config                  DataSynthesisConfig
-    synthetic_examples      []SyntheticExample
-    preference_pairs        []PreferencePair
+type data_synthesis_engine struct {
+    config                  data_synthesis_config
+    synthetic_examples      []synthetic_example
+    preference_pairs        []preference_pair
     task_distribution       map[string]int
-    quality_stats           SynthesisQualityStats
+    quality_stats           synthesis_quality_stats
 }
 
-type SynthesisQualityStats struct {
+type synthesis_quality_stats struct {
     avg_quality             float64
     avg_diversity           float64
     avg_length              float64
@@ -60,7 +60,7 @@ type SynthesisQualityStats struct {
 // Synthetic Example Generation
 // ============================================
 
-func (engine *DataSynthesisEngine) generate_synthetic_examples() {
+func (engine *data_synthesis_engine) generate_synthetic_examples() {
     fmt.Println("[DataSynthesis] Generating synthetic examples...")
     
     tasks := []string{"qa", "writing", "coding", "math", "reasoning", "translation"}
@@ -76,7 +76,7 @@ func (engine *DataSynthesisEngine) generate_synthetic_examples() {
         diversity := engine.calculate_diversity(prompt, response)
         
         if quality > engine.config.quality_threshold {
-            example := SyntheticExample{
+            example := synthetic_example{
                 id: fmt.Sprintf("synthetic_%d", i),
                 prompt: prompt,
                 response: response,
@@ -100,7 +100,7 @@ func (engine *DataSynthesisEngine) generate_synthetic_examples() {
     }
 }
 
-func (engine *DataSynthesisEngine) generate_prompt(task string, index int) string {
+func (engine *data_synthesis_engine) generate_prompt(task string, index int) string {
     prompts := map[string][]string{
         "qa": {
             "What is the capital of France?",
@@ -151,10 +151,10 @@ func (engine *DataSynthesisEngine) generate_prompt(task string, index int) strin
         return task_prompts[index % len(task_prompts)]
     }
     
-    return fmt.Sprintf("Task %s example %d", task, index)
+    return fmt.Sprintf("task %s example %d", task, index)
 }
 
-func (engine *DataSynthesisEngine) generate_response(prompt string, task string) string {
+func (engine *data_synthesis_engine) generate_response(prompt string, task string) string {
     // Simulate generating response based on task type
     responses := map[string]string{
         "qa": "The answer is based on knowledge about " + prompt,
@@ -172,7 +172,7 @@ func (engine *DataSynthesisEngine) generate_response(prompt string, task string)
     return "Generated response for the given prompt"
 }
 
-func (engine *DataSynthesisEngine) evaluate_quality(prompt string, response string) float64 {
+func (engine *data_synthesis_engine) evaluate_quality(prompt string, response string) float64 {
     // Quality score based on length, diversity, and coherence
     length_score := math.Min(float64(len(response)) / 500.0, 1.0)
     coherence_score := 0.8 // Simulated coherence from language model
@@ -192,7 +192,7 @@ func (engine *DataSynthesisEngine) evaluate_quality(prompt string, response stri
     return quality
 }
 
-func (engine *DataSynthesisEngine) calculate_diversity(prompt string, response string) float64 {
+func (engine *data_synthesis_engine) calculate_diversity(prompt string, response string) float64 {
     // Diversity metric: token diversity and semantic variation
     unique_tokens := make(map[string]bool)
     
@@ -215,7 +215,7 @@ func (engine *DataSynthesisEngine) calculate_diversity(prompt string, response s
 // Preference Pair Generation
 // ============================================
 
-func (engine *DataSynthesisEngine) generate_preference_pairs() {
+func (engine *data_synthesis_engine) generate_preference_pairs() {
     fmt.Println("[DataSynthesis] Generating preference pairs...")
     
     for i := 0; i < engine.config.num_preference_pairs; i++ {
@@ -237,7 +237,7 @@ func (engine *DataSynthesisEngine) generate_preference_pairs() {
             confidence = 1.0
         }
         
-        pair := PreferencePair{
+        pair := preference_pair{
             prompt: prompt,
             response_a: response_a,
             response_b: response_b,
@@ -259,7 +259,7 @@ func (engine *DataSynthesisEngine) generate_preference_pairs() {
 // Data Quality Analysis
 // ============================================
 
-func (engine *DataSynthesisEngine) analyze_quality() {
+func (engine *data_synthesis_engine) analyze_quality() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Synthetic Data Quality Analysis                      ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
@@ -311,7 +311,7 @@ func (engine *DataSynthesisEngine) analyze_quality() {
 // Data Export
 // ============================================
 
-func (engine *DataSynthesisEngine) export_to_jsonl() {
+func (engine *data_synthesis_engine) export_to_jsonl() {
     fmt.Println("\n[DataSynthesis] Exporting to JSONL format...")
     
     fmt.Printf("  Synthetic examples: %d\n", len(engine.synthetic_examples))
@@ -323,17 +323,17 @@ func (engine *DataSynthesisEngine) export_to_jsonl() {
 // Main Interface
 // ============================================
 
-func NewDataSynthesisEngine(config DataSynthesisConfig) *DataSynthesisEngine {
-    return &DataSynthesisEngine{
+func NewDataSynthesisEngine(config data_synthesis_config) *data_synthesis_engine {
+    return &data_synthesis_engine{
         config: config,
-        synthetic_examples: []SyntheticExample{},
-        preference_pairs: []PreferencePair{},
+        synthetic_examples: []synthetic_example{},
+        preference_pairs: []preference_pair{},
         task_distribution: make(map[string]int),
-        quality_stats: SynthesisQualityStats{},
+        quality_stats: synthesis_quality_stats{},
     }
 }
 
-func (engine *DataSynthesisEngine) synthesize_data() {
+func (engine *data_synthesis_engine) synthesize_data() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Data Synthesis Engine                                ║")
     fmt.Println("║  Generate high-quality training and preference data   ║")

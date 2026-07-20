@@ -6,8 +6,8 @@
 //   1. tensor_core.s   → NEnglish text, English text, English text
 //   2. math_dl.s       → 80+ English textfunction (sin/exp/log/English text)
 //   3. autograd.s      → English text, English text, gradient
-//   4. nn.s            → Linear/Embedding/MHA/GPTmodel
-//   5. training_io.s  → Checkpoint v2, log, weightIO
+//   4. nn.s            → Linear/embedding/MHA/GPTmodel
+//   5. training_io.s  → checkpoint v2, log, weightIO
 //
 // compile: s build train_v2.s -o neurx_train
 // run: ./neurx_train

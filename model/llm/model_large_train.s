@@ -926,7 +926,7 @@ func gpt_large_training_update(gpt_large_training_state state, tensor input_ids,
         state.backbone, hidden, grad_hidden, state.backbone_optimizers
     )
 
-    // ── Embedding backward: accumulate gradient into embedding table ──
+    // ── embedding backward: accumulate gradient into embedding table ──
     tensor next_embedding = embedding_apply_grad(state.token_embedding, input_ids, bw.grad_input, state.optimizer.lr)
 
     float perplexity = exp_approx(loss_value)

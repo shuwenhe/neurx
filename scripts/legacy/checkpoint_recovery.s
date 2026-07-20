@@ -1,5 +1,5 @@
 // ============================================
-// Complete Checkpoint Recovery System
+// Complete checkpoint Recovery System
 // Save and restore full training state
 // ============================================
 
@@ -10,7 +10,7 @@ import (
     "math"
 )
 
-type CheckpointMetadata struct {
+type checkpoint_metadata struct {
     checkpoint_id       string
     step                int64
     epoch               int
@@ -22,7 +22,7 @@ type CheckpointMetadata struct {
     state_size_mb       int
 }
 
-type OptimizerState struct {
+type optimizer_state struct {
     optimizer_type      string
     learning_rate       float64
     beta1               float64
@@ -45,30 +45,30 @@ type training_state struct {
     total_tokens        int64
 }
 
-type Checkpoint struct {
-    metadata            CheckpointMetadata
+type checkpoint struct {
+    metadata            checkpoint_metadata
     model_weights       [][]float64
-    optimizer_state     OptimizerState
+    optimizer_state     optimizer_state
     training_state      TrainingState
     distributed_state   map[string]string
     custom_data         map[string]string
 }
 
-type CheckpointManager struct {
+type checkpoint_manager struct {
     checkpoint_dir      string
-    checkpoints         map[string]Checkpoint
+    checkpoints         map[string]checkpoint
     latest_checkpoint   string
     recovery_enabled    bool
 }
 
-type RecoveryManager struct {
-    manager             *CheckpointManager
-    recovery_points     []CheckpointMetadata
+type recovery_manager struct {
+    manager             *checkpoint_manager
+    recovery_points     []checkpoint_metadata
     backup_locations    []string
     verification_status map[string]bool
 }
 
-type CheckpointStorage struct {
+type checkpoint_storage struct {
     backend             string  // "local", "s3", "gcs", "hdfs"
     base_path           string
     max_checkpoints     int
@@ -77,40 +77,40 @@ type CheckpointStorage struct {
 }
 
 // ============================================
-// Checkpoint Creation
+// checkpoint Creation
 // ============================================
 
-func (manager *CheckpointManager) initialize() {
+func (manager *checkpoint_manager) initialize() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
-    fmt.Println("║  Complete Checkpoint Recovery System                  ║")
+    fmt.Println("║  Complete checkpoint Recovery System                  ║")
     fmt.Println("║  Save and restore full training state                 ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝\n")
     
     fmt.Printf("Configuration:\n")
-    fmt.Printf("  Checkpoint Dir: %s\n", manager.checkpoint_dir)
+    fmt.Printf("  checkpoint Dir: %s\n", manager.checkpoint_dir)
     fmt.Printf("  Recovery Enabled: %v\n", manager.recovery_enabled)
     fmt.Printf("  Checkpoints: %d\n\n", len(manager.checkpoints))
 }
 
-func (manager *CheckpointManager) save_checkpoint(
+func (manager *checkpoint_manager) save_checkpoint(
     step int64,
     epoch int,
     train_loss float64,
     val_loss float64,
     model_weights [][]float64,
-    opt_state OptimizerState,
+    opt_state optimizer_state,
     train_state TrainingState) {
     
     checkpoint_id := fmt.Sprintf("ckpt-step-%d-epoch-%d", step, epoch)
     
-    fmt.Printf("\n[Checkpoint] Saving checkpoint: %s\n", checkpoint_id)
+    fmt.Printf("\n[checkpoint] Saving checkpoint: %s\n", checkpoint_id)
     fmt.Printf("  Step: %d\n", step)
     fmt.Printf("  Epoch: %d\n", epoch)
     fmt.Printf("  Train Loss: %.6f\n", train_loss)
     fmt.Printf("  Val Loss: %.6f\n", val_loss)
     
-    checkpoint := Checkpoint{
-        metadata: CheckpointMetadata{
+    checkpoint := checkpoint{
+        metadata: checkpoint_metadata{
             checkpoint_id:    checkpoint_id,
             step:             step,
             epoch:            epoch,
@@ -138,20 +138,20 @@ func (manager *CheckpointManager) save_checkpoint(
     
     total_size := checkpoint.metadata.model_size_mb + checkpoint.metadata.state_size_mb
     fmt.Printf("  Total Size: %dMB\n", total_size)
-    fmt.Printf("  ✓ Checkpoint saved\n")
+    fmt.Printf("  ✓ checkpoint saved\n")
 }
 
 // ============================================
-// Checkpoint Recovery
+// checkpoint Recovery
 // ============================================
 
-func (manager *CheckpointManager) load_checkpoint(checkpoint_id string) Checkpoint {
+func (manager *checkpoint_manager) load_checkpoint(checkpoint_id string) checkpoint {
     fmt.Printf("\n[Recovery] Loading checkpoint: %s\n", checkpoint_id)
     
     checkpoint, exists := manager.checkpoints[checkpoint_id]
     if !exists {
-        fmt.Printf("[ERROR] Checkpoint not found: %s\n", checkpoint_id)
-        return Checkpoint{}
+        fmt.Printf("[ERROR] checkpoint not found: %s\n", checkpoint_id)
+        return checkpoint{}
     }
     
     fmt.Printf("  Step: %d\n", checkpoint.metadata.step)
@@ -159,12 +159,12 @@ func (manager *CheckpointManager) load_checkpoint(checkpoint_id string) Checkpoi
     fmt.Printf("  Train Loss: %.6f\n", checkpoint.metadata.training_loss)
     fmt.Printf("  Model Size: %dMB\n", checkpoint.metadata.model_size_mb)
     fmt.Printf("  State Size: %dMB\n", checkpoint.metadata.state_size_mb)
-    fmt.Printf("  ✓ Checkpoint loaded\n")
+    fmt.Printf("  ✓ checkpoint loaded\n")
     
     return checkpoint
 }
 
-func (manager *CheckpointManager) restore_training_state(checkpoint Checkpoint) TrainingState {
+func (manager *checkpoint_manager) restore_training_state(checkpoint checkpoint) TrainingState {
     fmt.Println("\n[Recovery] Restoring training state...")
     
     state := checkpoint.training_state
@@ -179,7 +179,7 @@ func (manager *CheckpointManager) restore_training_state(checkpoint Checkpoint) 
     return state
 }
 
-func (manager *CheckpointManager) restore_optimizer_state(checkpoint Checkpoint) OptimizerState {
+func (manager *checkpoint_manager) restore_optimizer_state(checkpoint checkpoint) optimizer_state {
     fmt.Println("\n[Recovery] Restoring optimizer state...")
     
     opt_state := checkpoint.optimizer_state
@@ -196,10 +196,10 @@ func (manager *CheckpointManager) restore_optimizer_state(checkpoint Checkpoint)
 }
 
 // ============================================
-// Distributed Checkpoint Handling
+// Distributed checkpoint Handling
 // ============================================
 
-func (manager *CheckpointManager) save_distributed_checkpoint(
+func (manager *checkpoint_manager) save_distributed_checkpoint(
     step int64,
     rank int,
     world_size int) {
@@ -208,8 +208,8 @@ func (manager *CheckpointManager) save_distributed_checkpoint(
     
     checkpoint_id := fmt.Sprintf("ckpt-step-%d-rank-%d", step, rank)
     
-    checkpoint := Checkpoint{
-        metadata: CheckpointMetadata{
+    checkpoint := checkpoint{
+        metadata: checkpoint_metadata{
             checkpoint_id: checkpoint_id,
             step:         step,
             epoch:        1,
@@ -225,21 +225,21 @@ func (manager *CheckpointManager) save_distributed_checkpoint(
     fmt.Printf("  ✓ Distributed checkpoint saved\n")
 }
 
-func (manager *CheckpointManager) synchronize_distributed_checkpoints() {
+func (manager *checkpoint_manager) synchronize_distributed_checkpoints() {
     fmt.Println("\n[DistributedCheckpoint] Synchronizing checkpoints...")
     fmt.Println("  ✓ All checkpoints synchronized")
 }
 
 // ============================================
-// Checkpoint Verification
+// checkpoint Verification
 // ============================================
 
-func (recovery *RecoveryManager) verify_checkpoint_integrity(checkpoint_id string) bool {
+func (recovery *recovery_manager) verify_checkpoint_integrity(checkpoint_id string) bool {
     fmt.Printf("\n[Verification] Verifying checkpoint: %s\n", checkpoint_id)
     
     checkpoint, exists := recovery.manager.checkpoints[checkpoint_id]
     if !exists {
-        fmt.Println("  ✗ Checkpoint not found")
+        fmt.Println("  ✗ checkpoint not found")
         recovery.verification_status[checkpoint_id] = false
         return false
     }
@@ -265,16 +265,16 @@ func (recovery *RecoveryManager) verify_checkpoint_integrity(checkpoint_id strin
         return false
     }
     
-    fmt.Println("  ✓ Checkpoint integrity verified")
+    fmt.Println("  ✓ checkpoint integrity verified")
     recovery.verification_status[checkpoint_id] = true
     return true
 }
 
 // ============================================
-// Checkpoint Storage
+// checkpoint Storage
 // ============================================
 
-func (storage *CheckpointStorage) configure_storage() {
+func (storage *checkpoint_storage) configure_storage() {
     fmt.Printf("\n[Storage] Configuring checkpoint storage\n")
     fmt.Printf("  Backend: %s\n", storage.backend)
     fmt.Printf("  Base Path: %s\n", storage.base_path)
@@ -284,7 +284,7 @@ func (storage *CheckpointStorage) configure_storage() {
     fmt.Printf("  ✓ Storage configured\n")
 }
 
-func (storage *CheckpointStorage) cleanup_old_checkpoints(keep_n int) {
+func (storage *checkpoint_storage) cleanup_old_checkpoints(keep_n int) {
     fmt.Printf("\n[Storage] Cleaning up old checkpoints (keep %d)\n", keep_n)
     fmt.Println("  ✓ Old checkpoints removed")
 }
@@ -293,7 +293,7 @@ func (storage *CheckpointStorage) cleanup_old_checkpoints(keep_n int) {
 // Recovery Scenarios
 // ============================================
 
-func (recovery *RecoveryManager) handle_training_interruption() {
+func (recovery *recovery_manager) handle_training_interruption() {
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Handling Training Interruption        │")
     fmt.Println("└────────────────────────────────────────┘\n")
@@ -307,7 +307,7 @@ func (recovery *RecoveryManager) handle_training_interruption() {
     
     // Verify checkpoint
     if !recovery.verify_checkpoint_integrity(recovery.manager.latest_checkpoint) {
-        fmt.Println("[ERROR] Checkpoint verification failed")
+        fmt.Println("[ERROR] checkpoint verification failed")
         return
     }
     
@@ -321,13 +321,13 @@ func (recovery *RecoveryManager) handle_training_interruption() {
     fmt.Println("\n✓ Training can resume from step", checkpoint.metadata.step)
 }
 
-func (recovery *RecoveryManager) handle_node_failure() {
+func (recovery *recovery_manager) handle_node_failure() {
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Handling Node Failure                 │")
     fmt.Println("└────────────────────────────────────────┘\n")
     
     // Find latest checkpoint
-    var latest_checkpoint *CheckpointMetadata
+    var latest_checkpoint *checkpoint_metadata
     for _, ckpt := range recovery.recovery_points {
         if latest_checkpoint == nil || ckpt.step > latest_checkpoint.step {
             latest_checkpoint = &ckpt
@@ -352,16 +352,16 @@ func (recovery *RecoveryManager) handle_node_failure() {
 // Main Interface
 // ============================================
 
-func NewCheckpointManager(checkpoint_dir string) *CheckpointManager {
-    return &CheckpointManager{
+func NewCheckpointManager(checkpoint_dir string) *checkpoint_manager {
+    return &checkpoint_manager{
         checkpoint_dir:    checkpoint_dir,
-        checkpoints:       make(map[string]Checkpoint),
+        checkpoints:       make(map[string]checkpoint),
         latest_checkpoint: "",
         recovery_enabled:  true,
     }
 }
 
-func (manager *CheckpointManager) run_full_checkpoint_cycle() {
+func (manager *checkpoint_manager) run_full_checkpoint_cycle() {
     manager.initialize()
     
     // Create sample checkpoint data
@@ -373,7 +373,7 @@ func (manager *CheckpointManager) run_full_checkpoint_cycle() {
         }
     }
     
-    opt_state := OptimizerState{
+    opt_state := optimizer_state{
         optimizer_type: "adamw",
         learning_rate:  5e-4,
         beta1:          0.9,
@@ -404,9 +404,9 @@ func (manager *CheckpointManager) run_full_checkpoint_cycle() {
     }
     
     // Recovery simulation
-    recovery := &RecoveryManager{
+    recovery := &recovery_manager{
         manager:            manager,
-        recovery_points:    []CheckpointMetadata{},
+        recovery_points:    []checkpoint_metadata{},
         backup_locations:   []string{},
         verification_status: make(map[string]bool),
     }
@@ -414,7 +414,7 @@ func (manager *CheckpointManager) run_full_checkpoint_cycle() {
     recovery.handle_training_interruption()
     
     // Storage management
-    storage := &CheckpointStorage{
+    storage := &checkpoint_storage{
         backend:             "local",
         base_path:           manager.checkpoint_dir,
         max_checkpoints:     10,
@@ -425,5 +425,5 @@ func (manager *CheckpointManager) run_full_checkpoint_cycle() {
     storage.configure_storage()
     storage.cleanup_old_checkpoints(5)
     
-    fmt.Println("\n[CheckpointManager] Complete!")
+    fmt.Println("\n[checkpoint_manager] Complete!")
 }

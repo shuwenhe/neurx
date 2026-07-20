@@ -28,7 +28,7 @@ package neurx.trainer.moe_1t_orchestrator
 //   │  │ 3. Loss Computation + Aux Loss               │  │
 //   │  │ 4. Backward Pass (Gradient Async Allreduce)  │  │
 //   │  │ 5. Optimizer Step (ZeRO Stage 3 Shards)      │  │
-//   │  │ 6. Checkpoint + Monitoring                   │  │
+//   │  │ 6. checkpoint + Monitoring                   │  │
 //   │  └──────────────────────────────────────────────┘  │
 //   └────────────────────────────────────────────────────┘
 //

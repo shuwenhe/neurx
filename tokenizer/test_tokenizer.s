@@ -1,10 +1,10 @@
 package main
 
-// Test BPE Tokenizer
+// Test BPE tokenizer
 
-// Test 1: Tokenizer configuration
+// Test 1: tokenizer configuration
 func test_tokenizer_config() {
-    println("Test 1: Tokenizer configuration")
+    println("Test 1: tokenizer configuration")
     
     let cfg = new_tokenizer_config()
     
@@ -37,9 +37,9 @@ func test_vocab_creation() {
     }
 }
 
-// Test 3: Tokenizer initialization
+// Test 3: tokenizer initialization
 func test_tokenizer_init() {
-    println("Test 3: Tokenizer initialization")
+    println("Test 3: tokenizer initialization")
     
     []string vocab = []string{cap: 10}
     vocab.push("<pad>")
@@ -57,7 +57,7 @@ func test_tokenizer_init() {
     let tokenizer = new_bpe_tokenizer(vocab, cfg)
     
     if tokenizer.vocab.vocab_size == 10 {
-        println("  ✓ Tokenizer initialized correctly")
+        println("  ✓ tokenizer initialized correctly")
     }
     
     if tokenizer.bos_token_id == 2 {
@@ -264,7 +264,7 @@ func to_string_int(int x) string {
 // Main test runner
 func main() {
     println("============================================")
-    println("BPE Tokenizer Tests")
+    println("BPE tokenizer Tests")
     println("============================================")
     println("")
     

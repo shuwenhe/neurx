@@ -12,7 +12,7 @@ import (
     "time"
 )
 
-type EvaluationConfig struct {
+type evaluation_config struct {
     benchmark_suites    []string  // MMLU, HellaSwag, TruthfulQA, etc
     num_samples         int
     batch_size          int
@@ -21,7 +21,7 @@ type EvaluationConfig struct {
     top_p               float64
 }
 
-type EvaluationMetric struct {
+type evaluation_metric struct {
     name                string
     score               float64
     accuracy            float64
@@ -30,7 +30,7 @@ type EvaluationMetric struct {
     timestamp           int64
 }
 
-type BenchmarkResult struct {
+type benchmark_result struct {
     model_name          string
     benchmark_name      string
     score               float64
@@ -41,22 +41,22 @@ type BenchmarkResult struct {
     category_scores     map[string]float64
 }
 
-type EvaluationFramework struct {
-    config              EvaluationConfig
-    benchmarks          map[string]BenchmarkDataset
-    results             []BenchmarkResult
+type evaluation_framework struct {
+    config              evaluation_config
+    benchmarks          map[string]benchmark_dataset
+    results             []benchmark_result
     comparison_baseline map[string]float64  // reference scores
 }
 
-type BenchmarkDataset struct {
+type benchmark_dataset struct {
     name                string
-    examples            []EvaluationExample
+    examples            []evaluation_example
     num_questions       int
     categories          map[string]int
     evaluation_func     func(prediction string, reference string) float64
 }
 
-type EvaluationExample struct {
+type evaluation_example struct {
     question            string
     reference_answer    string
     category            string
@@ -68,12 +68,12 @@ type EvaluationExample struct {
 // Benchmark Datasets
 // ============================================
 
-func (framework *EvaluationFramework) load_mmlu() BenchmarkDataset {
+func (framework *evaluation_framework) load_mmlu() benchmark_dataset {
     fmt.Println("[Evaluation] Loading MMLU (Massive Multitask Language Understanding)...")
     
-    dataset := BenchmarkDataset{
+    dataset := benchmark_dataset{
         name: "MMLU",
-        examples: []EvaluationExample{},
+        examples: []evaluation_example{},
         categories: make(map[string]int),
     }
     
@@ -88,8 +88,8 @@ func (framework *EvaluationFramework) load_mmlu() BenchmarkDataset {
     // Simulate loading 100 questions per category
     for _, cat := range categories {
         for i := 0; i < 100; i++ {
-            example := EvaluationExample{
-                question: fmt.Sprintf("%s question %d: Sample question about %s", cat, i, cat),
+            example := evaluation_example{
+                question: fmt.Sprintf("%s question %d: sample question about %s", cat, i, cat),
                 reference_answer: fmt.Sprintf("The correct answer is option %c", 'A' + rune(i%4)),
                 category: cat,
                 difficulty: (i % 5) + 1,
@@ -105,12 +105,12 @@ func (framework *EvaluationFramework) load_mmlu() BenchmarkDataset {
     return dataset
 }
 
-func (framework *EvaluationFramework) load_truthful_qa() BenchmarkDataset {
+func (framework *evaluation_framework) load_truthful_qa() benchmark_dataset {
     fmt.Println("[Evaluation] Loading TruthfulQA (Truthfulness assessment)...")
     
-    dataset := BenchmarkDataset{
+    dataset := benchmark_dataset{
         name: "TruthfulQA",
-        examples: []EvaluationExample{},
+        examples: []evaluation_example{},
         categories: make(map[string]int),
     }
     
@@ -118,7 +118,7 @@ func (framework *EvaluationFramework) load_truthful_qa() BenchmarkDataset {
     
     for _, cat := range categories {
         for i := 0; i < 50; i++ {
-            example := EvaluationExample{
+            example := evaluation_example{
                 question: fmt.Sprintf("Question about %s: %d", cat, i),
                 reference_answer: fmt.Sprintf("Truthful answer: %d", i),
                 category: cat,
@@ -134,12 +134,12 @@ func (framework *EvaluationFramework) load_truthful_qa() BenchmarkDataset {
     return dataset
 }
 
-func (framework *EvaluationFramework) load_gsm8k() BenchmarkDataset {
+func (framework *evaluation_framework) load_gsm8k() benchmark_dataset {
     fmt.Println("[Evaluation] Loading GSM8K (Math word problems)...")
     
-    dataset := BenchmarkDataset{
+    dataset := benchmark_dataset{
         name: "GSM8K",
-        examples: []EvaluationExample{},
+        examples: []evaluation_example{},
         categories: make(map[string]int),
     }
     
@@ -147,7 +147,7 @@ func (framework *EvaluationFramework) load_gsm8k() BenchmarkDataset {
     
     for _, cat := range categories {
         for i := 0; i < 250; i++ {
-            example := EvaluationExample{
+            example := evaluation_example{
                 question: fmt.Sprintf("Math problem (%s) %d: Solve this problem", cat, i),
                 reference_answer: fmt.Sprintf("%d", (i*7 + 13) % 1000),
                 category: cat,
@@ -163,12 +163,12 @@ func (framework *EvaluationFramework) load_gsm8k() BenchmarkDataset {
     return dataset
 }
 
-func (framework *EvaluationFramework) load_hellaswag() BenchmarkDataset {
+func (framework *evaluation_framework) load_hellaswag() benchmark_dataset {
     fmt.Println("[Evaluation] Loading HellaSwag (Common sense reasoning)...")
     
-    dataset := BenchmarkDataset{
+    dataset := benchmark_dataset{
         name: "HellaSwag",
-        examples: []EvaluationExample{},
+        examples: []evaluation_example{},
         categories: make(map[string]int),
     }
     
@@ -176,7 +176,7 @@ func (framework *EvaluationFramework) load_hellaswag() BenchmarkDataset {
     
     for _, cat := range categories {
         for i := 0; i < 250; i++ {
-            example := EvaluationExample{
+            example := evaluation_example{
                 question: fmt.Sprintf("Scenario (%s) %d: Choose the most logical continuation", cat, i),
                 reference_answer: fmt.Sprintf("Option %d", i%4),
                 category: cat,
@@ -196,7 +196,7 @@ func (framework *EvaluationFramework) load_hellaswag() BenchmarkDataset {
 // Evaluation Metrics
 // ============================================
 
-func (framework *EvaluationFramework) evaluate_accuracy(predictions []string, references []string) float64 {
+func (framework *evaluation_framework) evaluate_accuracy(predictions []string, references []string) float64 {
     correct := 0
     for i, pred := range predictions {
         if pred == references[i] {
@@ -206,7 +206,7 @@ func (framework *EvaluationFramework) evaluate_accuracy(predictions []string, re
     return float64(correct) / float64(len(predictions))
 }
 
-func (framework *EvaluationFramework) evaluate_f1(predictions []string, references []string) float64 {
+func (framework *evaluation_framework) evaluate_f1(predictions []string, references []string) float64 {
     tp := 0.0
     fp := 0.0
     false_negatives := 0.0
@@ -237,7 +237,7 @@ func (framework *EvaluationFramework) evaluate_f1(predictions []string, referenc
     return 2 * (precision * recall) / (precision + recall)
 }
 
-func (framework *EvaluationFramework) evaluate_semantic_similarity(prediction string, reference string) float64 {
+func (framework *evaluation_framework) evaluate_semantic_similarity(prediction string, reference string) float64 {
     pred_words := len(prediction)
     ref_words := len(reference)
     
@@ -260,7 +260,7 @@ func (framework *EvaluationFramework) evaluate_semantic_similarity(prediction st
     return float64(common) / float64(max_len)
 }
 
-func (framework *EvaluationFramework) evaluate_perplexity(logits []float64, labels []int) float64 {
+func (framework *evaluation_framework) evaluate_perplexity(logits []float64, labels []int) float64 {
     loss := 0.0
     count := 0
     
@@ -283,7 +283,7 @@ func (framework *EvaluationFramework) evaluate_perplexity(logits []float64, labe
 // Model Inference
 // ============================================
 
-func (framework *EvaluationFramework) generate_prediction(question string, max_tokens int) string {
+func (framework *evaluation_framework) generate_prediction(question string, max_tokens int) string {
     // Simulate model inference
     prediction := "The answer is: " + question[len(question)-10:]
     return prediction
@@ -293,7 +293,7 @@ func (framework *EvaluationFramework) generate_prediction(question string, max_t
 // Benchmark Execution
 // ============================================
 
-func (framework *EvaluationFramework) run_benchmark(dataset BenchmarkDataset) BenchmarkResult {
+func (framework *evaluation_framework) run_benchmark(dataset benchmark_dataset) benchmark_result {
     fmt.Printf("[Evaluation] Running %s benchmark...\n", dataset.name)
     
     predictions := []string{}
@@ -321,7 +321,7 @@ func (framework *EvaluationFramework) run_benchmark(dataset BenchmarkDataset) Be
     accuracy := framework.evaluate_accuracy(predictions, references)
     f1 := framework.evaluate_f1(predictions, references)
     
-    result := BenchmarkResult{
+    result := benchmark_result{
         model_name: "gpt_large_sft_ppo",
         benchmark_name: dataset.name,
         accuracy: accuracy,
@@ -358,7 +358,7 @@ func (framework *EvaluationFramework) run_benchmark(dataset BenchmarkDataset) Be
 // Multi-Dimensional Evaluation
 // ============================================
 
-func (framework *EvaluationFramework) run_full_evaluation() {
+func (framework *evaluation_framework) run_full_evaluation() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Comprehensive Evaluation Framework                   ║")
     fmt.Println("║  Multi-Dimensional Assessment                         ║")
@@ -386,7 +386,7 @@ func (framework *EvaluationFramework) run_full_evaluation() {
 // Reporting
 // ============================================
 
-func (framework *EvaluationFramework) print_report() {
+func (framework *evaluation_framework) print_report() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Evaluation Report                                    ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
@@ -418,7 +418,7 @@ func (framework *EvaluationFramework) print_report() {
 // Model Comparison
 // ============================================
 
-func (framework *EvaluationFramework) compare_with_baseline() {
+func (framework *evaluation_framework) compare_with_baseline() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Model Comparison with reference systems               ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
@@ -451,11 +451,11 @@ func (framework *EvaluationFramework) compare_with_baseline() {
 // Main Interface
 // ============================================
 
-func NewEvaluationFramework(config EvaluationConfig) *EvaluationFramework {
-    return &EvaluationFramework{
+func NewEvaluationFramework(config evaluation_config) *evaluation_framework {
+    return &evaluation_framework{
         config: config,
-        benchmarks: make(map[string]BenchmarkDataset),
-        results: []BenchmarkResult{},
+        benchmarks: make(map[string]benchmark_dataset),
+        results: []benchmark_result{},
         comparison_baseline: map[string]float64{
             "MMLU": 0.867,
             "TruthfulQA": 0.790,

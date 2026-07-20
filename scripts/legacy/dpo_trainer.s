@@ -10,7 +10,7 @@ import (
     "math"
 )
 
-type PreferencePair struct {
+type preference_pair struct {
     prompt              string
     chosen_response     string
     rejected_response   string
@@ -18,7 +18,7 @@ type PreferencePair struct {
     rejected_reward     float64
 }
 
-type DPOConfig struct {
+type dpoconfig struct {
     learning_rate       float64
     beta                float64  // KL divergence weight
     temperature         float64
@@ -27,7 +27,7 @@ type DPOConfig struct {
     loss_type           string   // sigmoid, hinge
 }
 
-type DPOMetrics struct {
+type dpometrics struct {
     step                int64
     loss                float64
     chosen_logits       float64
@@ -36,26 +36,26 @@ type DPOMetrics struct {
     accuracy            float64
 }
 
-type TrajectoryReward struct {
+type trajectory_reward struct {
     trajectory_id       string
     responses           []string
     rewards             []float64
     avg_reward          float64
 }
 
-type DPODataset struct {
-    preference_pairs    []PreferencePair
+type dpodataset struct {
+    preference_pairs    []preference_pair
     size                int
     source              string
     quality_score       float64
 }
 
-type DPOTrainer struct {
-    config              DPOConfig
-    dataset             DPODataset
+type dpotrainer struct {
+    config              dpoconfig
+    dataset             dpodataset
     model_logits        map[string]float64
     reference_logits    map[string]float64
-    metrics_history     []DPOMetrics
+    metrics_history     []dpometrics
     best_loss           float64
 }
 
@@ -63,7 +63,7 @@ type DPOTrainer struct {
 // DPO Initialization and Setup
 // ============================================
 
-func (trainer *DPOTrainer) initialize(config DPOConfig) {
+func (trainer *dpotrainer) initialize(config dpoconfig) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Direct Preference Optimization (DPO) Trainer         ║")
     fmt.Println("║  Stable alignment without reward models               ║")
@@ -72,7 +72,7 @@ func (trainer *DPOTrainer) initialize(config DPOConfig) {
     trainer.config = config
     trainer.model_logits = make(map[string]float64)
     trainer.reference_logits = make(map[string]float64)
-    trainer.metrics_history = make([]DPOMetrics, 0)
+    trainer.metrics_history = make([]dpometrics, 0)
     trainer.best_loss = math.MaxFloat64
     
     fmt.Printf("Configuration:\n")
@@ -83,7 +83,7 @@ func (trainer *DPOTrainer) initialize(config DPOConfig) {
     fmt.Printf("  Loss Type: %s\n\n", config.loss_type)
 }
 
-func (trainer *DPOTrainer) load_preference_data(
+func (trainer *dpotrainer) load_preference_data(
     size int,
     quality_score float64) {
     
@@ -91,8 +91,8 @@ func (trainer *DPOTrainer) load_preference_data(
     fmt.Printf("  Pairs: %d\n", size)
     fmt.Printf("  Quality: %.2f%%\n\n", quality_score*100)
     
-    trainer.dataset = DPODataset{
-        preference_pairs: make([]PreferencePair, 0),
+    trainer.dataset = dpodataset{
+        preference_pairs: make([]preference_pair, 0),
         size:             size,
         source:           "human_feedback",
         quality_score:    quality_score,
@@ -100,7 +100,7 @@ func (trainer *DPOTrainer) load_preference_data(
     
     // Simulate loading preference pairs
     for i := 0; i < size; i++ {
-        pair := PreferencePair{
+        pair := preference_pair{
             prompt:            fmt.Sprintf("prompt_%d", i),
             chosen_response:   fmt.Sprintf("chosen_response_%d", i),
             rejected_response: fmt.Sprintf("rejected_response_%d", i),
@@ -115,7 +115,7 @@ func (trainer *DPOTrainer) load_preference_data(
 // DPO Loss Computation
 // ============================================
 
-func (trainer *DPOTrainer) compute_dpo_loss(pair PreferencePair) float64 {
+func (trainer *dpotrainer) compute_dpo_loss(pair preference_pair) float64 {
     // Get model logits for chosen and rejected responses
     chosen_logit := trainer.model_logits[pair.chosen_response]
     rejected_logit := trainer.model_logits[pair.rejected_response]
@@ -139,7 +139,7 @@ func sigmoid(x float64) float64 {
     return 1.0 / (1.0 + math.Exp(-x))
 }
 
-func (trainer *DPOTrainer) compute_batch_loss(batch []PreferencePair) float64 {
+func (trainer *dpotrainer) compute_batch_loss(batch []preference_pair) float64 {
     var total_loss float64 = 0.0
     
     for _, pair := range batch {
@@ -155,9 +155,9 @@ func (trainer *DPOTrainer) compute_batch_loss(batch []PreferencePair) float64 {
 // DPO Training Loop
 // ============================================
 
-func (trainer *DPOTrainer) train_dpo_step(
+func (trainer *dpotrainer) train_dpo_step(
     step int64,
-    batch []PreferencePair) {
+    batch []preference_pair) {
     
     // Compute loss
     loss := trainer.compute_batch_loss(batch)
@@ -180,7 +180,7 @@ func (trainer *DPOTrainer) train_dpo_step(
     accuracy := float64(correct) / float64(len(batch))
     
     // Record metrics
-    metric := DPOMetrics{
+    metric := dpometrics{
         step:            step,
         loss:            loss,
         chosen_logits:   chosen_logit,
@@ -207,7 +207,7 @@ func (trainer *DPOTrainer) train_dpo_step(
 // DPO Evaluation
 // ============================================
 
-func (trainer *DPOTrainer) evaluate_dpo(test_pairs []PreferencePair) float64 {
+func (trainer *dpotrainer) evaluate_dpo(test_pairs []preference_pair) float64 {
     fmt.Printf("\n[Evaluation] Evaluating DPO model\n")
     fmt.Printf("  Test Pairs: %d\n", len(test_pairs))
     
@@ -236,7 +236,7 @@ func (trainer *DPOTrainer) evaluate_dpo(test_pairs []PreferencePair) float64 {
 // Comparison: RLHF vs DPO
 // ============================================
 
-func (trainer *DPOTrainer) compare_with_rlhf() {
+func (trainer *dpotrainer) compare_with_rlhf() {
     fmt.Printf("\n┌────────────────────────────────────────┐\n")
     fmt.Printf("│  DPO vs RLHF Comparison                │\n")
     fmt.Printf("└────────────────────────────────────────┘\n\n")
@@ -268,7 +268,7 @@ func (trainer *DPOTrainer) compare_with_rlhf() {
 // DPO Results Summary
 // ============================================
 
-func (trainer *DPOTrainer) get_dpo_summary() {
+func (trainer *dpotrainer) get_dpo_summary() {
     fmt.Printf("\n┌────────────────────────────────────────┐\n")
     fmt.Printf("│  DPO Training Summary                  │\n")
     fmt.Printf("└────────────────────────────────────────┘\n\n")
@@ -304,18 +304,18 @@ func (trainer *DPOTrainer) get_dpo_summary() {
 // Main Interface
 // ============================================
 
-func NewDPOTrainer() *DPOTrainer {
-    return &DPOTrainer{
+func NewDPOTrainer() *dpotrainer {
+    return &dpotrainer{
         model_logits:    make(map[string]float64),
         reference_logits: make(map[string]float64),
-        metrics_history: make([]DPOMetrics, 0),
+        metrics_history: make([]dpometrics, 0),
         best_loss:       math.MaxFloat64,
     }
 }
 
-func (trainer *DPOTrainer) run_complete_dpo_cycle() {
+func (trainer *dpotrainer) run_complete_dpo_cycle() {
     // Initialize
-    config := DPOConfig{
+    config := dpoconfig{
         learning_rate: 5e-4,
         beta:          0.1,
         temperature:   0.7,
@@ -368,5 +368,5 @@ func (trainer *DPOTrainer) run_complete_dpo_cycle() {
     // Summary
     trainer.get_dpo_summary()
     
-    fmt.Println("\n[DPOTrainer] Complete!")
+    fmt.Println("\n[dpotrainer] Complete!")
 }

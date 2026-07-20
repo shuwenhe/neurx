@@ -109,7 +109,7 @@ func example_basic_dpo_training() {
     print("✓ Training completed!")
     print("  Final Loss: " + string_float(result.final_loss))
     print("  Best Metric: " + string_float(result.best_metric))
-    print("  Checkpoint: " + result.checkpoint_path)
+    print("  checkpoint: " + result.checkpoint_path)
 }
 
 // example 2: English text GPU English text DPO training
@@ -160,7 +160,7 @@ func example_distributed_dpo_training() {
         print("")
         print("✓ Distributed training completed!")
         print("  Final Loss: " + string_float(result.final_loss))
-        print("  Checkpoint: " + result.checkpoint_path)
+        print("  checkpoint: " + result.checkpoint_path)
     }
 }
 
@@ -216,7 +216,7 @@ func example_dpo_with_different_betas() {
 // example 4: English textcheckpointrecovertraining
 func example_dpo_resume_from_checkpoint() {
     print("╔════════════════════════════════════════════════════════════╗")
-    print("║      Example 4: DPO Resume from Checkpoint                ║")
+    print("║      Example 4: DPO Resume from checkpoint                ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
 

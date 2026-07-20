@@ -1259,7 +1259,7 @@ function create_document_parser(config?: DocumentParserConfig) -> DocumentParser
 }
 
 function test_document_parser() -> bool {
-    print("🧪 Testing NEURX Document Parser...")
+    print("🧪 Testing NEURX document Parser...")
 
     parser = new DocumentParser()
 
@@ -1329,7 +1329,7 @@ AI is transforming industries.
     assert stats.total_characters > 0, "Char count should be > 0"
     assert stats.estimated_reading_time_minutes > 0, "Reading time should be > 0"
 
-    print("\n✅ All Document Parser Tests Passed!")
+    print("\n✅ All document Parser Tests Passed!")
     return true
 }
 

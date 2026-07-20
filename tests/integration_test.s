@@ -86,7 +86,7 @@ func test_flash_attention() {
 }
 
 func test_streaming_dataloader() {
-    print("Testing Streaming DataLoader...\n")
+    print("Testing Streaming data_loader...\n")
     
     streaming.streaming_config config = streaming.new_streaming_config("/tmp/test_data")
     config.batch_size = 8
@@ -108,9 +108,9 @@ func test_streaming_dataloader() {
     (streaming.batch_data batch, bool has_more) = streaming.dataloader_next_batch(loader, mock_tokenizer)
     
     if has_more && len(batch.input_ids) == config.batch_size {
-        print("PASS: Streaming DataLoader\n")
+        print("PASS: Streaming data_loader\n")
     } else {
-        print("INFO: Streaming DataLoader initialized (no real data)\n")
+        print("INFO: Streaming data_loader initialized (no real data)\n")
     }
 }
 
@@ -134,7 +134,7 @@ func test_fsdp() {
 }
 
 func test_bpe_tokenizer() {
-    print("Testing BPE Tokenizer...\n")
+    print("Testing BPE tokenizer...\n")
     
     bpe_tokenizer tokenizer = bpe_tokenizer.new_bpe_tokenizer()
     
@@ -158,9 +158,9 @@ func test_bpe_tokenizer() {
     bpe_tokenizer.tokenization_result result = bpe_tokenizer.encode(tokenizer, "Hello World")
     
     if result.num_tokens > 0 && result.ids[0] == tokenizer.bos_id {
-        print("PASS: BPE Tokenizer\n")
+        print("PASS: BPE tokenizer\n")
     } else {
-        print("FAIL: BPE Tokenizer\n")
+        print("FAIL: BPE tokenizer\n")
         return
     }
 }

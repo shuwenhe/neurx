@@ -839,7 +839,7 @@ func softmax_3d_last(tensor input) tensor {
     new(out, copy_int(input.shape), input.requires_grad)
 }
 
-// ── RoPE (Rotary Position Embedding) Precomputation ──────────────────────────
+// ── RoPE (Rotary Position embedding) Precomputation ──────────────────────────
 // Generate cos and sin tables for rotary position embeddings.
 // Used by LLaMA, NeurX, PaLM, etc.
 

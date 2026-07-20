@@ -10,8 +10,8 @@ package neurx.trainer.neurx_training_entry
 //   1. RoPE Scaling → support 32K/64K/128K English text
 //   2. Ring Attention → English text
 //   3. 3D Parallel Orchestrator → TP×PP×FSDP completeEnglish text
-//   4. Async Checkpoint System → English textmodelsaveEnglish textrecover
-//   5. High-Perf DataLoader → English text token dataEnglish text
+//   4. Async checkpoint System → English textmodelsaveEnglish textrecover
+//   5. High-Perf data_loader → English text token dataEnglish text
 //   6. Training Observability → English textmonitoringEnglish text
 //
 // useEnglish text:
@@ -174,7 +174,7 @@ func start_neurx_training(
         print(print_ring_attn_summary(ring_cfg))
     }
 
-    // Initialize Async Checkpoint System
+    // Initialize Async checkpoint System
     checkpoint_config ckpt_cfg = default_checkpoint_config_for_large_model()
     ckpt_cfg.base_directory = tcfg.checkpoint_dir
     ckpt_cfg.world_size = dims.total_gpus
@@ -249,7 +249,7 @@ func start_neurx_training(
             }
         }
 
-        // Checkpoint saving (async, non-blocking)
+        // checkpoint saving (async, non-blocking)
         if tcfg.save_interval > 0 &&
            orch.current_step > 0 &&
            orch.current_step % tcfg.save_interval == 0 {
@@ -258,7 +258,7 @@ func start_neurx_training(
             trigger_async_save(ref ckpt_mgr, current_ckpt)
 
             if my_rank == 0 {
-                print("  [Step " + string(orch.current_step) + "] Checkpoint saved (async)")
+                print("  [Step " + string(orch.current_step) + "] checkpoint saved (async)")
             }
         }
 

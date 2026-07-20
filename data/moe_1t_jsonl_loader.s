@@ -90,7 +90,7 @@ struct jsonl_data_config {
     int num_shards              // English textcount (8192)
     int batch_size
     int seq_len
-    int vocab_size              // Tokenizer English text
+    int vocab_size              // tokenizer English text
     int dp_rank                 // Data parallel rank
     int dp_size                 // Data parallel size
     int max_seq_length

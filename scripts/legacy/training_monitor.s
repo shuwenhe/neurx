@@ -27,8 +27,8 @@ type training_metrics struct {
     memory_used: float  // MB
 }
 
-// TrainingMonitor tracks training progress
-type TrainingMonitor struct {
+// training_monitor tracks training progress
+type training_monitor struct {
     start_time: time.Time
     steps: []training_metrics
     total_steps: int
@@ -37,7 +37,7 @@ type TrainingMonitor struct {
 }
 
 // Initialize monitor
-func (tm *TrainingMonitor) init(
+func (tm *training_monitor) init(
     total_steps: int,
     log_file: string,
     update_interval: int) error {
@@ -59,7 +59,7 @@ func (tm *TrainingMonitor) init(
 }
 
 // Log training step
-func (tm *TrainingMonitor) log_step(
+func (tm *training_monitor) log_step(
     step: int,
     epoch: int,
     loss: float,
@@ -101,7 +101,7 @@ func (tm *TrainingMonitor) log_step(
 }
 
 // Print progress bar
-func (tm *TrainingMonitor) print_progress(metrics: TrainingMetrics) {
+func (tm *training_monitor) print_progress(metrics: TrainingMetrics) {
     progress := float(metrics.step) / float(tm.total_steps) * 100.0
     bar_length := 50
     filled := int(progress / 100.0 * float(bar_length))
@@ -134,7 +134,7 @@ func (tm *TrainingMonitor) print_progress(metrics: TrainingMetrics) {
 }
 
 // Log to file
-func (tm *TrainingMonitor) log_to_file(metrics: TrainingMetrics) {
+func (tm *training_monitor) log_to_file(metrics: TrainingMetrics) {
     f, err := os.OpenFile(tm.log_file, os.O_APPEND|os.O_WRONLY, 0644)
     if err != nil {
         return
@@ -146,7 +146,7 @@ func (tm *TrainingMonitor) log_to_file(metrics: TrainingMetrics) {
 }
 
 // Get current statistics
-func (tm *TrainingMonitor) get_stats(): map[string]interface{} {
+func (tm *training_monitor) get_stats(): map[string]interface{} {
     if len(tm.steps) == 0 {
         return map[string]interface{}{
             "status": "no_data",
@@ -190,7 +190,7 @@ func (tm *TrainingMonitor) get_stats(): map[string]interface{} {
 }
 
 // Generate training report
-func (tm *TrainingMonitor) generate_report(): string {
+func (tm *training_monitor) generate_report(): string {
     stats := tm.get_stats()
     
     report := "========================================\n"
@@ -216,7 +216,7 @@ func (tm *TrainingMonitor) generate_report(): string {
 }
 
 // Export training history as JSON
-func (tm *TrainingMonitor) export_json(): string {
+func (tm *training_monitor) export_json(): string {
     data := map[string]interface{}{
         "training_info": tm.get_stats(),
         "history": tm.steps,
@@ -248,7 +248,7 @@ func format_time(seconds: float): string {
 // Example main function
 func main() {
     // Initialize monitor
-    monitor := &TrainingMonitor{}
+    monitor := &training_monitor{}
     if err := monitor.init(10000, "./logs/training.jsonl", 100); err != nil {
         println("Error:", err.Error())
         return

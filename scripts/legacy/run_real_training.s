@@ -19,7 +19,7 @@ func main() int {
     println("═══════════════════════════════════════════════════════════")
     println("")
     println("Project root : " + project_root)
-    println("Manifest     : " + manifest)
+    println("manifest     : " + manifest)
     println("Output dir   : " + output_dir)
     println("Batch size   : " + int_to_str(batch_size, 0))
     println("Seq len      : " + int_to_str(seq_len, 0))

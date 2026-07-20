@@ -12,7 +12,7 @@ func main() int {
     println("")
     println("Project root : " + project_root)
     println("Source file  : " + check_path(source_file))
-    println("Checkpoint   : " + check_path(checkpoint_dir))
+    println("checkpoint   : " + check_path(checkpoint_dir))
     println("Steps        : " + runtime_env_get("NEURX_S_PRETRAIN_STEPS", "50"))
     println("Warmup steps : " + runtime_env_get("NEURX_S_PRETRAIN_WARMUP_STEPS", "10"))
     println("")

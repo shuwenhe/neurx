@@ -23,7 +23,7 @@ enum InferenceBackend {
     Native,    // Pure S implementation
 }
 
-struct InferenceConfig {
+struct inference_config {
     modelPath    string
     backend      InferenceBackend
     batchSize    int
@@ -44,7 +44,7 @@ struct InferenceConfig {
 
 struct InferenceOrchestrator {
     logger  Logger
-    config  InferenceConfig
+    config  inference_config
     sCompiler string
     neurxRoot string
 }
@@ -68,7 +68,7 @@ func new_inference_orchestrator(modelPath string) (*InferenceOrchestrator, error
         return nil, fmt.Errorf("model not found at %s", modelPath)
     }
     
-    config := InferenceConfig{
+    config := inference_config{
         modelPath:        modelPath,
         backend:          InferenceBackend.Native,
         batchSize:        1,

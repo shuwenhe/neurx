@@ -293,7 +293,7 @@ func run_training(config: training_config) {
     // Create model
     fmt.Printf("\n📦 Creating Mini GPT model...\n")
     fmt.Printf("   Vocab size: %d\n", config.vocab_size)
-    fmt.Printf("   Embedding dim: %d\n", config.embedding_dim)
+    fmt.Printf("   embedding dim: %d\n", config.embedding_dim)
     fmt.Printf("   Layers: %d\n", config.num_layers)
     
     model := create_mini_gpt(config)
@@ -358,12 +358,12 @@ func run_training(config: training_config) {
             log_loss(log, step, loss)
         }
         
-        // Checkpoint
+        // checkpoint
         if step > 0 && step % config.checkpoint_interval == 0 {
             checkpoint_path := fmt.Sprintf("%s/checkpoint_step_%d.pt", config.output_dir, step)
             save_checkpoint(checkpoint_path, model, optimizer, step)
-            fmt.Printf("   💾 Checkpoint saved: %s\n", checkpoint_path)
-            log_message(log, fmt.Sprintf("Checkpoint saved: %s", checkpoint_path))
+            fmt.Printf("   💾 checkpoint saved: %s\n", checkpoint_path)
+            log_message(log, fmt.Sprintf("checkpoint saved: %s", checkpoint_path))
         }
     }
     
@@ -599,7 +599,7 @@ func log_message(log: logger, message: string) {
 func log_config(log: logger, config: training_config) {
     log_message(log, "=== CONFIGURATION ===")
     log_message(log, fmt.Sprintf("Vocab size: %d", config.vocab_size))
-    log_message(log, fmt.Sprintf("Embedding dim: %d", config.embedding_dim))
+    log_message(log, fmt.Sprintf("embedding dim: %d", config.embedding_dim))
     log_message(log, fmt.Sprintf("Layers: %d", config.num_layers))
     log_message(log, fmt.Sprintf("Batch size: %d", config.batch_size))
     log_message(log, fmt.Sprintf("Learning rate: %.2e", config.learning_rate))

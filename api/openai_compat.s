@@ -560,7 +560,7 @@ func main() {
     emb_req.input = "This is a test sentence for embedding"
 
     EmbeddingResponse emb_resp = handle_embeddings(emb_req, config)
-    println("Embedding dimension: " + int_to_string(emb_resp.embedding_dimension))
+    println("embedding dimension: " + int_to_string(emb_resp.embedding_dimension))
 
     println("\n=== API Tests Complete ===")
 }

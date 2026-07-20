@@ -84,7 +84,7 @@ class ViTEncoder {
     init(config: VisionConfig) {
         this.config = config
 
-        // Patch Embedding
+        // Patch embedding
         this.embeddings = new ViTPatchEmbeddings(
             img_size=config.image_size,
             patch_size=config.patch_size,
@@ -110,7 +110,7 @@ class ViTEncoder {
     forward(pixel_values: tensor) -> VisionOutput {
         // input: [batch, channels, height, width]
 
-        // Step 1: Patch Embedding + Position Embedding
+        // Step 1: Patch embedding + Position embedding
         let embeddings_output = this.embeddings.forward(pixel_values)
         // [batch, num_patches+1, hidden_size] (+1 for cls token)
 
@@ -176,7 +176,7 @@ class ViTPatchEmbeddings {
         this.embed_dim = embed_dim
         this.num_patches = (img_size / patch_size) ** 2
 
-        // useEnglish textimplementation Patch Embedding
+        // useEnglish textimplementation Patch embedding
         // English text patch English text
         this.projection = new Conv2D(
             in_channels=in_channels,
@@ -198,7 +198,7 @@ class ViTPatchEmbeddings {
     forward(pixel_values: tensor) -> EmbeddingsOutput {
         batch_size = pixel_values.shape[0]
 
-        // Patch Embedding via Convolution
+        // Patch embedding via Convolution
         // Input: [batch, channels, height, width]
         // Output: [batch, embed_dim, num_patches_h, num_patches_w]
         let x = this.projection.forward(pixel_values)
@@ -621,7 +621,7 @@ struct CLIPOutput {
 // ==================== CLIP Text Encoder ====================
 
 class CLIPTextEncoder {
-    token_embedding: Embedding
+    token_embedding: embedding
     positional_embedding: Parameter
     transformer_blocks: list<CLIPTransformerBlock>
     final_layer_norm: LayerNorm
@@ -637,7 +637,7 @@ class CLIPTextEncoder {
         this.vocab_size = vocab_size
         this.embed_dim = embed_dim
 
-        this.token_embedding = Embedding(num_embeddings=vocab_size, embedding_dim=embed_dim)
+        this.token_embedding = embedding(num_embeddings=vocab_size, embedding_dim=embed_dim)
         this.positional_embedding = Parameter(shape=(this.max_position_embeddings, embed_dim))
 
         this.transformer_blocks = []
@@ -747,7 +747,7 @@ class VideoProcessor {
     }
 
     process_video(video_input: VideoInput, vit_encoder: ViTEncoder) -> VideoVisionOutput {
-        // Step 1: Sample frames from video
+        // Step 1: sample frames from video
         let sampled_frames = this.frame_sampler.sample_frames(video_input)
         // List of tensors, each [C, H, W]
 

@@ -27,11 +27,11 @@ func main() int {
     string total_size_bytes_file = work_dir + "/total_size_bytes.txt"
     string average_docs_file = work_dir + "/average_docs.txt"
 
-    println("NeurX Pretrain Manifest Builder (S Lang)")
+    println("NeurX Pretrain manifest Builder (S Lang)")
     println("")
     println("Project root : " + project_root)
     println("Shard dir    : " + shard_dir)
-    println("Manifest     : " + manifest_file)
+    println("manifest     : " + manifest_file)
     println("")
 
     if !runtime_file_exists(shard_dir) {

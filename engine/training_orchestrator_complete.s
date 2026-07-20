@@ -78,7 +78,7 @@ struct training_state {
     // Device state
     cuda_context cuda_ctx
     
-    // Checkpoint management
+    // checkpoint management
     string last_checkpoint_path
     int steps_since_checkpoint
 }

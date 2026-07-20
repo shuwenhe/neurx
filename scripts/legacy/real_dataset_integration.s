@@ -10,7 +10,7 @@ import (
     "math"
 )
 
-type DataSource struct {
+type data_source struct {
     source_type         string  // "huggingface", "local", "s3", "http"
     name                string
     path                string
@@ -19,8 +19,8 @@ type DataSource struct {
     url                 string
 }
 
-type DatasetConfig struct {
-    sources             []DataSource
+type dataset_config struct {
+    sources             []data_source
     batch_size          int
     shuffle             bool
     num_workers         int
@@ -29,23 +29,23 @@ type DatasetConfig struct {
     max_cache_size_gb   int
 }
 
-type DataSample struct {
+type data_sample struct {
     input_ids           []int
     attention_mask      []int
     token_type_ids      []int
     labels              []int
 }
 
-type DataLoader struct {
-    config              DatasetConfig
-    loaded_samples      []DataSample
+type data_loader struct {
+    config              dataset_config
+    loaded_samples      []data_sample
     current_index       int
     total_samples       int
     samples_loaded      int64
     load_time_ms        float64
 }
 
-type DatasetStatistics struct {
+type dataset_statistics struct {
     total_samples       int64
     avg_sequence_length float64
     vocab_size          int
@@ -57,12 +57,12 @@ type DatasetStatistics struct {
 // Data Source Configuration
 // ============================================
 
-func (loader *DataLoader) register_source(source DataSource) {
+func (loader *data_loader) register_source(source data_source) {
     loader.config.sources = append(loader.config.sources, source)
     fmt.Printf("[Dataset] Registered source: %s (%s)\n", source.name, source.source_type)
 }
 
-func (loader *DataLoader) validate_sources() bool {
+func (loader *data_loader) validate_sources() bool {
     for _, source := range loader.config.sources {
         if source.source_type == "" || source.name == "" {
             fmt.Printf("[Dataset] Invalid source: %v\n", source)
@@ -76,15 +76,15 @@ func (loader *DataLoader) validate_sources() bool {
 // Dataset Loading
 // ============================================
 
-func (loader *DataLoader) load_from_huggingface(source DataSource) []DataSample {
+func (loader *data_loader) load_from_huggingface(source data_source) []data_sample {
     // Simulate loading from Hugging Face
     fmt.Printf("[HuggingFace] Loading: %s/%s\n", source.name, source.split)
     
-    samples := make([]DataSample, 0)
+    samples := make([]data_sample, 0)
     
     // Simulate loading 'size' samples
     for i := 0; i < source.size; i++ {
-        sample := DataSample{
+        sample := data_sample{
             input_ids:      make([]int, 512),
             attention_mask: make([]int, 512),
             token_type_ids: make([]int, 512),
@@ -107,14 +107,14 @@ func (loader *DataLoader) load_from_huggingface(source DataSource) []DataSample 
     return samples
 }
 
-func (loader *DataLoader) load_from_local(source DataSource) []DataSample {
+func (loader *data_loader) load_from_local(source data_source) []data_sample {
     // Simulate loading from local filesystem
     fmt.Printf("[Local] Loading: %s\n", source.path)
     
-    samples := make([]DataSample, 0)
+    samples := make([]data_sample, 0)
     
     for i := 0; i < source.size; i++ {
-        sample := DataSample{
+        sample := data_sample{
             input_ids:      make([]int, 512),
             attention_mask: make([]int, 512),
             token_type_ids: make([]int, 512),
@@ -134,14 +134,14 @@ func (loader *DataLoader) load_from_local(source DataSource) []DataSample {
     return samples
 }
 
-func (loader *DataLoader) load_from_s3(source DataSource) []DataSample {
+func (loader *data_loader) load_from_s3(source data_source) []data_sample {
     // Simulate loading from S3
     fmt.Printf("[S3] Loading: %s\n", source.url)
     
-    samples := make([]DataSample, 0)
+    samples := make([]data_sample, 0)
     
     for i := 0; i < source.size; i++ {
-        sample := DataSample{
+        sample := data_sample{
             input_ids:      make([]int, 512),
             attention_mask: make([]int, 512),
             token_type_ids: make([]int, 512),
@@ -164,7 +164,7 @@ func (loader *DataLoader) load_from_s3(source DataSource) []DataSample {
 // Dataset Loading Pipeline
 // ============================================
 
-func (loader *DataLoader) load_all_sources() {
+func (loader *data_loader) load_all_sources() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Real Dataset Integration System                      ║")
     fmt.Println("║  Load from multiple data sources                      ║")
@@ -178,7 +178,7 @@ func (loader *DataLoader) load_all_sources() {
     total_start := 0.0
     
     for _, source := range loader.config.sources {
-        var samples []DataSample
+        var samples []data_sample
         
         switch source.source_type {
         case "huggingface":
@@ -204,8 +204,8 @@ func (loader *DataLoader) load_all_sources() {
 // Data Batching & Shuffling
 // ============================================
 
-func (loader *DataLoader) create_batches() [][]DataSample {
-    batches := make([][]DataSample, 0)
+func (loader *data_loader) create_batches() [][]data_sample {
+    batches := make([][]data_sample, 0)
     
     for i := 0; i < len(loader.loaded_samples); i += loader.config.batch_size {
         end := i + loader.config.batch_size
@@ -221,7 +221,7 @@ func (loader *DataLoader) create_batches() [][]DataSample {
     return batches
 }
 
-func (loader *DataLoader) shuffle_data() {
+func (loader *data_loader) shuffle_data() {
     fmt.Println("[Dataset] Shuffling data...")
     
     for i := 0; i < len(loader.loaded_samples)-1; i++ {
@@ -241,8 +241,8 @@ func (loader *DataLoader) shuffle_data() {
 // Data Statistics & Verification
 // ============================================
 
-func (loader *DataLoader) analyze_dataset() DatasetStatistics {
-    stats := DatasetStatistics{
+func (loader *data_loader) analyze_dataset() dataset_statistics {
+    stats := dataset_statistics{
         total_samples: int64(len(loader.loaded_samples)),
         data_types:    make(map[string]int64),
     }
@@ -266,7 +266,7 @@ func (loader *DataLoader) analyze_dataset() DatasetStatistics {
     return stats
 }
 
-func (loader *DataLoader) verify_data_quality() bool {
+func (loader *data_loader) verify_data_quality() bool {
     fmt.Println("[Dataset] Verifying data quality...")
     
     valid_count := 0
@@ -288,7 +288,7 @@ func (loader *DataLoader) verify_data_quality() bool {
 // Dataset Caching
 // ============================================
 
-func (loader *DataLoader) setup_cache() {
+func (loader *data_loader) setup_cache() {
     if loader.config.cache_enabled {
         fmt.Printf("[Cache] Initializing cache (%dGB max)\n", loader.config.max_cache_size_gb)
         fmt.Println("[Cache] Cache setup complete")
@@ -299,9 +299,9 @@ func (loader *DataLoader) setup_cache() {
 // Data Iteration
 // ============================================
 
-func (loader *DataLoader) get_next_batch() []DataSample {
+func (loader *data_loader) get_next_batch() []data_sample {
     if loader.current_index >= len(loader.loaded_samples) {
-        return []DataSample{}
+        return []data_sample{}
     }
     
     end := loader.current_index + loader.config.batch_size
@@ -319,17 +319,17 @@ func (loader *DataLoader) get_next_batch() []DataSample {
 // Main Interface
 // ============================================
 
-func NewDataLoader(config DatasetConfig) *DataLoader {
-    return &DataLoader{
+func NewDataLoader(config dataset_config) *data_loader {
+    return &data_loader{
         config:          config,
-        loaded_samples:  []DataSample{},
+        loaded_samples:  []data_sample{},
         current_index:   0,
         total_samples:   0,
         samples_loaded:  0,
     }
 }
 
-func (loader *DataLoader) initialize() {
+func (loader *data_loader) initialize() {
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Initializing Dataset Loader           │")
     fmt.Println("└────────────────────────────────────────┘\n")
@@ -342,25 +342,25 @@ func (loader *DataLoader) initialize() {
     fmt.Printf("  Cache: %v (%dGB)\n\n", loader.config.cache_enabled, loader.config.max_cache_size_gb)
 }
 
-func (loader *DataLoader) run_full_pipeline() {
+func (loader *data_loader) run_full_pipeline() {
     loader.initialize()
     
     // Register sources
-    loader.register_source(DataSource{
+    loader.register_source(data_source{
         source_type: "huggingface",
         name:        "wikitext",
         split:       "train",
         size:        5000,
     })
     
-    loader.register_source(DataSource{
+    loader.register_source(data_source{
         source_type: "huggingface",
         name:        "openwebtext",
         split:       "train",
         size:        3000,
     })
     
-    loader.register_source(DataSource{
+    loader.register_source(data_source{
         source_type: "local",
         name:        "custom_data",
         path:        "/data/custom",
@@ -402,5 +402,5 @@ func (loader *DataLoader) run_full_pipeline() {
         fmt.Printf("First Batch Size: %d\n", len(batches[0]))
     }
     
-    fmt.Println("\n[DataLoader] Complete!")
+    fmt.Println("\n[data_loader] Complete!")
 }

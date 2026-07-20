@@ -6,7 +6,7 @@ package neurx.trainer.industrial_1t_training
 // This file ties together the five requested pieces:
 //   1. Training main loop
 //   2. Data pipeline
-//   3. Checkpoint restore/save
+//   3. checkpoint restore/save
 //   4. Distributed execution
 //   5. Mixed precision + optimizer
 //
@@ -1595,7 +1595,7 @@ func industrial_mixed_precision_step(
 }
 
 // ============================================================================
-// 6. Checkpoint Save / Restore
+// 6. checkpoint Save / Restore
 // ============================================================================
 
 func industrial_checkpoint_new(string base_dir) industrial_checkpoint_state {

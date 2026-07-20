@@ -99,9 +99,9 @@ func test_gradient_clipping() {
     }
 }
 
-// Test 6: Checkpoint creation
+// Test 6: checkpoint creation
 func test_checkpoint_creation() {
-    println("Test 6: Checkpoint creation")
+    println("Test 6: checkpoint creation")
     
     let model_name = "test_model"
     let step = 100
@@ -110,13 +110,13 @@ func test_checkpoint_creation() {
     let lr = 0.0001
     
     if len(model_name) > 0 && step > 0 && loss > 0.0 {
-        println("  ✓ Checkpoint metadata valid")
+        println("  ✓ checkpoint metadata valid")
     }
 }
 
-// Test 7: Checkpoint paths
+// Test 7: checkpoint paths
 func test_checkpoint_paths() {
-    println("Test 7: Checkpoint file paths")
+    println("Test 7: checkpoint file paths")
     
     let dir = "/tmp/checkpoints"
     let model = "model"
@@ -126,7 +126,7 @@ func test_checkpoint_paths() {
     let filename = dir + "/" + model + "_step_500.pt"
     
     if len(filename) > 0 {
-        println("  ✓ Checkpoint path generation works")
+        println("  ✓ checkpoint path generation works")
     }
 }
 
@@ -231,7 +231,7 @@ func test_integration_ready() {
 func test_data_pipeline() {
     println("Test 14: Data pipeline components")
     
-    // Tokenizer output format: [][]int (batch of token sequences)
+    // tokenizer output format: [][]int (batch of token sequences)
     [][]int tokenized = [][]int{cap: 2}
     
     []int seq1 = []int{cap: 5}
@@ -276,9 +276,9 @@ func test_training_loop() {
     }
 }
 
-// Test 16: Checkpoint-to-resume workflow
+// Test 16: checkpoint-to-resume workflow
 func test_checkpoint_resume() {
-    println("Test 16: Checkpoint and resume workflow")
+    println("Test 16: checkpoint and resume workflow")
     
     // Save checkpoint state
     let saved_step = 500
@@ -291,7 +291,7 @@ func test_checkpoint_resume() {
     let loaded_loss = saved_loss
     
     if loaded_step == saved_step && loaded_loss == saved_loss {
-        println("  ✓ Checkpoint save/resume compatible")
+        println("  ✓ checkpoint save/resume compatible")
     }
 }
 

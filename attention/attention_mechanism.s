@@ -524,7 +524,7 @@ class MaskBuilder {
         return base_mask + padding_2d
 
 // ============================================================
-// RoPE (Rotary Position Embedding) toolfunction
+// RoPE (Rotary Position embedding) toolfunction
 // ============================================================
 
 struct rope_cache {
@@ -741,7 +741,7 @@ func test_attention() {
     tensor prefix_mask = MaskBuilder.build_prefix_lm_mask(
         batch_size=2,
         total_seq_len=64,
-        prefix_lengths=[20, 30]  # Sample 0: 20 prefix, Sample 1: 30 prefix
+        prefix_lengths=[20, 30]  # sample 0: 20 prefix, sample 1: 30 prefix
     )
 
     tuple[prefix_output, _, _] = attn.forward(

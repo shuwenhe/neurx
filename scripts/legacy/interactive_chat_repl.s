@@ -258,10 +258,10 @@ func main() int {
     InferenceContext ctx = initialize_inference_context(checkpoint_dir)
 
     if ctx.model_loaded {
-        println("  ✓ Checkpoint loaded: " + ctx.checkpoint_path)
+        println("  ✓ checkpoint loaded: " + ctx.checkpoint_path)
         println("  ✓ Model initialized")
     } else {
-        println("  ✗ Warning: Checkpoint not found, using fallback mode")
+        println("  ✗ Warning: checkpoint not found, using fallback mode")
     }
     println("")
 

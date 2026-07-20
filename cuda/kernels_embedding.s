@@ -1,10 +1,10 @@
 package neurx.cuda
 
 // ============================================================================
-// CUDA Kernels - Embedding Lookup & Attention
+// CUDA Kernels - embedding Lookup & Attention
 # ============================================================================
 
-// ---- Embedding Config ----
+// ---- embedding Config ----
 struct embedding_config {
     int num_embeddings         // Vocabulary size (e.g., 50257 for GPT-2)
     int embedding_dim          // Dimension of each embedding vector (e.g., 4096)

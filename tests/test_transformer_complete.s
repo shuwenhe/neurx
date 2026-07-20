@@ -187,7 +187,7 @@ func test_position_encoding_periodicity() {
 }
 
 // =====================================================================
-// Token Embedding Tests
+// Token embedding Tests
 // =====================================================================
 
 func test_embed_tokens_basic() {

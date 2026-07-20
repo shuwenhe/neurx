@@ -14,8 +14,8 @@ import (
     "math"
 )
 
-// MixedPrecisionConfig configures AMP settings
-type MixedPrecisionConfig struct {
+// mixed_precision_config configures AMP settings
+type mixed_precision_config struct {
     enabled: bool
     loss_scale: float  // Initial loss scale
     loss_scale_growth_factor: float
@@ -26,9 +26,9 @@ type MixedPrecisionConfig struct {
     overflow_patience: int  // Steps before backoff
 }
 
-// MixedPrecisionTrainer implements AMP
-type MixedPrecisionTrainer struct {
-    config: MixedPrecisionConfig
+// mixed_precision_trainer implements AMP
+type mixed_precision_trainer struct {
+    config: mixed_precision_config
     current_loss_scale: float
     overflow_counter: int
     steps_since_overflow: int
@@ -38,15 +38,15 @@ type MixedPrecisionTrainer struct {
 // Initialization
 // ============================================
 
-func (mpt *MixedPrecisionTrainer) init(config: MixedPrecisionConfig) {
+func (mpt *mixed_precision_trainer) init(config: mixed_precision_config) {
     mpt.config = config
     mpt.current_loss_scale = config.loss_scale
     mpt.overflow_counter = 0
     mpt.steps_since_overflow = 0
 }
 
-func create_default_amp_config(): MixedPrecisionConfig {
-    return MixedPrecisionConfig{
+func create_default_amp_config(): mixed_precision_config {
+    return mixed_precision_config{
         enabled: true,
         loss_scale: 65536.0,  // 2^16
         loss_scale_growth_factor: 2.0,
@@ -63,7 +63,7 @@ func create_default_amp_config(): MixedPrecisionConfig {
 // ============================================
 
 // Scale loss for backward pass
-func (mpt *MixedPrecisionTrainer) scale_loss(loss: float): float {
+func (mpt *mixed_precision_trainer) scale_loss(loss: float): float {
     if !mpt.config.enabled {
         return loss
     }
@@ -71,7 +71,7 @@ func (mpt *MixedPrecisionTrainer) scale_loss(loss: float): float {
 }
 
 // Unscale gradients after backward
-func (mpt *MixedPrecisionTrainer) unscale_gradients(grad_norm: float): float {
+func (mpt *mixed_precision_trainer) unscale_gradients(grad_norm: float): float {
     if !mpt.config.enabled {
         return grad_norm
     }
@@ -83,7 +83,7 @@ func (mpt *MixedPrecisionTrainer) unscale_gradients(grad_norm: float): float {
 // ============================================
 
 // Check for NaN/Inf in gradients (overflow indicator)
-func (mpt *MixedPrecisionTrainer) check_overflow(grad_norm: float): bool {
+func (mpt *mixed_precision_trainer) check_overflow(grad_norm: float): bool {
     // Check for NaN
     if !(grad_norm == grad_norm) {  // NaN check
         return true
@@ -98,7 +98,7 @@ func (mpt *MixedPrecisionTrainer) check_overflow(grad_norm: float): bool {
 }
 
 // Handle overflow: backoff loss scale
-func (mpt *MixedPrecisionTrainer) handle_overflow() {
+func (mpt *mixed_precision_trainer) handle_overflow() {
     mpt.overflow_counter++
     mpt.steps_since_overflow = 0
     
@@ -112,7 +112,7 @@ func (mpt *MixedPrecisionTrainer) handle_overflow() {
 }
 
 // Handle successful step: grow loss scale if applicable
-func (mpt *MixedPrecisionTrainer) step_success() {
+func (mpt *mixed_precision_trainer) step_success() {
     mpt.steps_since_overflow++
     
     // Growth loss scale if configured
@@ -165,18 +165,18 @@ func cast_to_fp32(value: float): float {
 // ============================================
 
 // AMP training step
-type AmpStepResult struct {
+type amp_step_result struct {
     scaled_loss: float
     overflow: bool
     loss_scale: float
     skipped: bool
 }
 
-func (mpt *MixedPrecisionTrainer) amp_step(
+func (mpt *mixed_precision_trainer) amp_step(
     loss: float,
-    grad_norm: float): AmpStepResult {
+    grad_norm: float): amp_step_result {
     
-    result := AmpStepResult{
+    result := amp_step_result{
         skipped: false,
         loss_scale: mpt.current_loss_scale,
     }
@@ -210,7 +210,7 @@ func (mpt *MixedPrecisionTrainer) amp_step(
 // ============================================
 
 // Get AMP statistics
-func (mpt *MixedPrecisionTrainer) get_stats(): map[string]interface{} {
+func (mpt *mixed_precision_trainer) get_stats(): map[string]interface{} {
     return map[string]interface{}{
         "enabled": mpt.config.enabled,
         "current_loss_scale": mpt.current_loss_scale,
@@ -239,8 +239,8 @@ const (
     POLYNOMIAL_DECAY
 )
 
-// LearningRateScheduler manages learning rate changes
-type LearningRateScheduler struct {
+// learning_rate_scheduler manages learning rate changes
+type learning_rate_scheduler struct {
     schedule_type: LRScheduleType
     base_lr: float
     current_lr: float
@@ -265,7 +265,7 @@ type LearningRateScheduler struct {
 // ============================================
 
 // Linear warmup + cosine annealing
-func (lrs *LearningRateScheduler) cosine_annealing_warmup(step: int): float {
+func (lrs *learning_rate_scheduler) cosine_annealing_warmup(step: int): float {
     if step < lrs.warmup_steps {
         // Linear warmup
         return lrs.base_lr * float(step) / float(lrs.warmup_steps)
@@ -282,7 +282,7 @@ func (lrs *LearningRateScheduler) cosine_annealing_warmup(step: int): float {
 }
 
 // Linear warmup + exponential decay
-func (lrs *LearningRateScheduler) exponential_decay_warmup(step: int): float {
+func (lrs *learning_rate_scheduler) exponential_decay_warmup(step: int): float {
     if step < lrs.warmup_steps {
         return lrs.base_lr * float(step) / float(lrs.warmup_steps)
     }
@@ -293,7 +293,7 @@ func (lrs *LearningRateScheduler) exponential_decay_warmup(step: int): float {
 }
 
 // Step decay (constant then drop)
-func (lrs *LearningRateScheduler) step_decay(step: int): float {
+func (lrs *learning_rate_scheduler) step_decay(step: int): float {
     if step < lrs.warmup_steps {
         return lrs.base_lr * float(step) / float(lrs.warmup_steps)
     }
@@ -304,7 +304,7 @@ func (lrs *LearningRateScheduler) step_decay(step: int): float {
 }
 
 // Polynomial decay
-func (lrs *LearningRateScheduler) polynomial_decay(step: int): float {
+func (lrs *learning_rate_scheduler) polynomial_decay(step: int): float {
     if step < lrs.warmup_steps {
         return lrs.base_lr * float(step) / float(lrs.warmup_steps)
     }
@@ -320,7 +320,7 @@ func (lrs *LearningRateScheduler) polynomial_decay(step: int): float {
 }
 
 // Get learning rate for step
-func (lrs *LearningRateScheduler) get_lr(step: int): float {
+func (lrs *learning_rate_scheduler) get_lr(step: int): float {
     switch lrs.schedule_type {
     case LINEAR_WARMUP:
         if step < lrs.warmup_steps {
@@ -350,13 +350,13 @@ func (lrs *LearningRateScheduler) get_lr(step: int): float {
 // ============================================
 
 // Gradient clipper
-type GradientClipper struct {
+type gradient_clipper struct {
     max_grad_norm: float
     clip_type: string  // "norm" or "value"
 }
 
 // Clip gradients by norm
-func (gc *GradientClipper) clip_by_norm(grad_norm: float): float {
+func (gc *gradient_clipper) clip_by_norm(grad_norm: float): float {
     if grad_norm <= gc.max_grad_norm {
         return 1.0  // Scale factor
     }
@@ -364,7 +364,7 @@ func (gc *GradientClipper) clip_by_norm(grad_norm: float): float {
 }
 
 // Clip gradients by value
-func (gc *GradientClipper) clip_by_value(gradient: float): float {
+func (gc *gradient_clipper) clip_by_value(gradient: float): float {
     if gradient > gc.max_grad_norm {
         return gc.max_grad_norm
     }
@@ -378,11 +378,11 @@ func (gc *GradientClipper) clip_by_value(gradient: float): float {
 // Integration Configuration
 // ============================================
 
-// TrainingOptimizationConfig combines all optimizations
-type TrainingOptimizationConfig struct {
+// training_optimization_config combines all optimizations
+type training_optimization_config struct {
     // Mixed precision
     use_amp: bool
-    amp_config: MixedPrecisionConfig
+    amp_config: mixed_precision_config
     
     // Learning rate schedule
     use_lr_schedule: bool
@@ -397,8 +397,8 @@ type TrainingOptimizationConfig struct {
     max_grad_norm: float
 }
 
-func create_default_optimization_config(): TrainingOptimizationConfig {
-    return TrainingOptimizationConfig{
+func create_default_optimization_config(): training_optimization_config {
+    return training_optimization_config{
         use_amp: true,
         amp_config: create_default_amp_config(),
         use_lr_schedule: true,
@@ -418,10 +418,10 @@ func create_default_optimization_config(): TrainingOptimizationConfig {
 
 func main() {
     // Initialize components
-    amp_trainer := &MixedPrecisionTrainer{}
+    amp_trainer := &mixed_precision_trainer{}
     amp_trainer.init(create_default_amp_config())
     
-    lr_scheduler := &LearningRateScheduler{
+    lr_scheduler := &learning_rate_scheduler{
         schedule_type: COSINE_ANNEALING,
         base_lr: 5e-4,
         total_steps: 100000,
@@ -429,7 +429,7 @@ func main() {
         min_lr_ratio: 0.1,
     }
     
-    grad_clipper := &GradientClipper{
+    grad_clipper := &gradient_clipper{
         max_grad_norm: 1.0,
         clip_type: "norm",
     }

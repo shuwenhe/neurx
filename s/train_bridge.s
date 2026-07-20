@@ -7,7 +7,7 @@ use std.fs.write_text_file as write_file
 use std.fs.read_to_string as read_file
 
 // ============================================
-// Checkpoint I/O (English text s/checkpoint.s)
+// checkpoint I/O (English text s/checkpoint.s)
 // ============================================
 
 // English text checkpoint file (English text save_checkpoint)

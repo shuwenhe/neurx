@@ -73,7 +73,7 @@ while ki < len(expected_keys) {
     ki = ki + 1
 }
 
-// ─── Phase 4: Evaluator / report ─────────────────────────────────────────────
+// ─── Phase 4: evaluator / report ─────────────────────────────────────────────
 
 string stall_str = "false"
 if agent_is_stalled(phase2) {

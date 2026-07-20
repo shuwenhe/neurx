@@ -35,14 +35,14 @@ type shard_config struct {
     LinesPerShard  int
 }
 
-type ShardMetadata struct {
+type shard_metadata struct {
     ShardID       string `json:"shard_id"`
     FilePath      string `json:"file_path"`
     NumDocuments  int64  `json:"num_documents"`
     SizeBytes     int64  `json:"size_bytes"`
 }
 
-type Manifest struct {
+type manifest struct {
     DatasetName         string           `json:"dataset_name"`
     Version             string           `json:"version"`
     CreatedAt           string           `json:"created_at"`
@@ -50,7 +50,7 @@ type Manifest struct {
     TotalDocuments      int64            `json:"total_documents"`
     TotalSizeBytes      int64            `json:"total_size_bytes"`
     AverageDocsPerShard int64            `json:"average_docs_per_shard"`
-    Shards              []ShardMetadata  `json:"shards"`
+    Shards              []shard_metadata  `json:"shards"`
 }
 
 // ============================================
@@ -102,7 +102,7 @@ func cmdClean() {
     fmt.Printf("📂 Configuration:\n")
     fmt.Printf("  • Raw data: %s\n", config.RawDir)
     fmt.Printf("  • Output: %s\n", config.OutputFile)
-    fmt.Printf("  • Manifest: %s\n", config.ManifestFile)
+    fmt.Printf("  • manifest: %s\n", config.ManifestFile)
     fmt.Println("")
 
     if err := cleanData(config); err != nil {
@@ -198,7 +198,7 @@ func cleanData(config CleanConfig) error {
     fmt.Println("")
 
     seenHashes := make(map[string]bool)
-    stats := &CleanStats{
+    stats := &clean_stats{
         TotalProcessed: 0,
         TotalWritten:   0,
         Duplicates:     0,
@@ -245,14 +245,14 @@ func cleanData(config CleanConfig) error {
     return writeManifest(config, stats.TotalWritten)
 }
 
-type CleanStats struct {
+type clean_stats struct {
     TotalProcessed int64
     TotalWritten   int64
     Duplicates     int64
     Errors         int64
 }
 
-func processFileContent(writer *bufio.Writer, content string, seen map[string]bool, stats *CleanStats) {
+func processFileContent(writer *bufio.Writer, content string, seen map[string]bool, stats *clean_stats) {
     lines := strings.Split(content, "\n")
     
     for _, line := range lines {
@@ -379,7 +379,7 @@ func generateShards(config ShardConfig) error {
 
     fmt.Println("✂️ Generating shards...")
 
-    var shards []ShardMetadata
+    var shards []shard_metadata
     currentShard := 0
     currentData := ""
     currentCount := int64(0)
@@ -400,7 +400,7 @@ func generateShards(config ShardConfig) error {
                 return err
             }
 
-            shards = append(shards, ShardMetadata{
+            shards = append(shards, shard_metadata{
                 ShardID:       formatShardID(currentShard),
                 FilePath:      shardFile,
                 NumDocuments:  currentCount,
@@ -421,7 +421,7 @@ func generateShards(config ShardConfig) error {
             return err
         }
 
-        shards = append(shards, ShardMetadata{
+        shards = append(shards, shard_metadata{
             ShardID:       formatShardID(currentShard),
             FilePath:      shardFile,
             NumDocuments:  currentCount,
@@ -543,7 +543,7 @@ func formatShardFilename(dir string, index int) string {
     return filepath.Join(dir, formatShardID(index)+".jsonl")
 }
 
-func writeShardManifest(path string, shards []ShardMetadata) error {
+func writeShardManifest(path string, shards []shard_metadata) error {
     var totalDocs int64
     var totalSize int64
 
@@ -557,7 +557,7 @@ func writeShardManifest(path string, shards []ShardMetadata) error {
         avgDocs = totalDocs / int64(len(shards))
     }
 
-    manifest := Manifest{
+    manifest := manifest{
         DatasetName:         "neurx-pretrain-dataset",
         Version:             "1.0",
         CreatedAt:           "2026-07-07T00:00:00Z",

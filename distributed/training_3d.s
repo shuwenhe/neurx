@@ -115,7 +115,7 @@ struct training_config {
 
     // Checkpointing
     int save_interval                // English textstepsaveEnglish text checkpoint
-    string checkpoint_dir            // Checkpoint savepath
+    string checkpoint_dir            // checkpoint savepath
     bool async_checkpoint            // English textstepsave (English texttraining)
 
     // English text
@@ -568,7 +568,7 @@ func training_step(ref orchestrator_state orch, batch_data data) float {
         log_training_progress(orch)
     }
 
-    // save Checkpoint
+    // save checkpoint
     if orch.train_cfg.save_interval > 0 &&
        orch.current_step % orch.train_cfg.save_interval == 0 {
         if orch.train_cfg.async_checkpoint {
@@ -1099,7 +1099,7 @@ func print_full_config_summary(model_parallel_config mcfg, training_config tcfg)
 // English textparameterEnglish text
 func estimate_params(model_parallel_config cfg) float {
     // Transformer modelparameterEnglish text (English text):
-    // Embedding: vocab * hidden
+    // embedding: vocab * hidden
     // Per layer:
     //   Attention: 4 * hidden^2 (QKV + O) * (kv_heads/query_heads ratio for GQA)
     //   FFN: 3 * hidden * ffn_dim (gate + up + down for SwiGLU)

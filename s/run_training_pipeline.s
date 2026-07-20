@@ -1,4 +1,4 @@
-// run_training_pipeline.s - NeurX Training Runner with Checkpoint Generation
+// run_training_pipeline.s - NeurX Training Runner with checkpoint Generation
 // Replaces s/run_train.sh
 
 package main
@@ -10,8 +10,8 @@ import "strings"
 import "exec"
 import "core"
 
-// TrainingConfig holds configuration for training
-type TrainingConfig struct {
+// training_config holds configuration for training
+type training_config struct {
     ScriptDir      string
     NeurXDir       string
     CheckpointDir  string
@@ -22,7 +22,7 @@ type TrainingConfig struct {
 }
 
 // SetupTrainingConfig initializes training configuration
-func SetupTrainingConfig(trainBin string) (*TrainingConfig, error) {
+func SetupTrainingConfig(trainBin string) (*training_config, error) {
     scriptDir := core.ResolveScriptDir()
     neurxDir := core.ResolveRelativePath(scriptDir, "../neurx")
     checkpointDir := filepath.Join(neurxDir, "artifacts/checkpoints")
@@ -31,7 +31,7 @@ func SetupTrainingConfig(trainBin string) (*TrainingConfig, error) {
         trainBin = "/tmp/neurx_train"
     }
 
-    config := &TrainingConfig{
+    config := &training_config{
         ScriptDir:      scriptDir,
         NeurXDir:       neurxDir,
         CheckpointDir:  checkpointDir,
@@ -50,7 +50,7 @@ func SetupTrainingConfig(trainBin string) (*TrainingConfig, error) {
 }
 
 // PrintHeader prints the training header
-func PrintHeader(config *TrainingConfig) {
+func PrintHeader(config *training_config) {
     fmt.Println("========================================")
     fmt.Println("NeurX Training Pipeline")
     fmt.Printf("S Compiler: %s\n", os.Getenv("S_BIN"))
@@ -60,7 +60,7 @@ func PrintHeader(config *TrainingConfig) {
 }
 
 // RunTraining executes the training binary and captures output
-func RunTraining(config *TrainingConfig) (string, error) {
+func RunTraining(config *training_config) (string, error) {
     // Validate training binary exists
     if !core.FileExists(config.TrainBin) {
         return "", fmt.Errorf("[ERROR] Training binary not found: %s", config.TrainBin)
@@ -129,9 +129,9 @@ func ParseTrainingOutput(output string) map[string]string {
 }
 
 // GenerateCheckpoints generates checkpoint files
-func GenerateCheckpoints(config *TrainingConfig, metrics map[string]string) error {
+func GenerateCheckpoints(config *training_config, metrics map[string]string) error {
     fmt.Println("")
-    fmt.Println("--- Generating Checkpoint Files ---")
+    fmt.Println("--- Generating checkpoint Files ---")
 
     // Set environment variables for materialize script
     os.Setenv("NEURX_OUTPUT_DIR", config.CheckpointDir)
@@ -152,9 +152,9 @@ func GenerateCheckpoints(config *TrainingConfig, metrics map[string]string) erro
 }
 
 // ListCheckpoints lists all checkpoint files
-func ListCheckpoints(config *TrainingConfig) {
+func ListCheckpoints(config *training_config) {
     fmt.Println("")
-    fmt.Println("--- Checkpoint Files Generated ---")
+    fmt.Println("--- checkpoint Files Generated ---")
 
     filepath.Walk(config.CheckpointDir, func(path string, info os.FileInfo, err error) error {
         if err != nil {
@@ -168,7 +168,7 @@ func ListCheckpoints(config *TrainingConfig) {
 }
 
 // PrintFooter prints the training completion footer
-func PrintFooter(config *TrainingConfig) {
+func PrintFooter(config *training_config) {
     fmt.Println("")
     fmt.Println("========================================")
     fmt.Println("Training Pipeline Complete!")

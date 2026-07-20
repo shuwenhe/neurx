@@ -208,7 +208,7 @@ func example_3_multilayer_lora() {
 
 func example_4_task_specific_lora() {
     println("╔════════════════════════════════════════════════════════╗")
-    println("║ Example 4: Task-Specific LoRA Configuration            ║")
+    println("║ Example 4: task-Specific LoRA Configuration            ║")
     println("╚════════════════════════════════════════════════════════╝")
     
     // Configuration templates for different tasks
@@ -216,8 +216,8 @@ func example_4_task_specific_lora() {
     []int task_ranks = []int{8, 16, 24}
     []float task_lrs = []float{1e-3, 5e-4, 1e-4}
     
-    println("Task Configuration Summary:")
-    println("| Task | Rank | Learning Rate | Memory Efficiency |")
+    println("task Configuration Summary:")
+    println("| task | Rank | Learning Rate | Memory Efficiency |")
     println("|------|------|---------------|-------------------|")
     
     int i = 0

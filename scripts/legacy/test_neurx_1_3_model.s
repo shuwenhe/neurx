@@ -14,17 +14,17 @@ func main() int {
     println("")
     println("Configuration:")
     println("  Project Root   : " + project_root)
-    println("  Checkpoint Dir : " + checkpoint_dir)
+    println("  checkpoint Dir : " + checkpoint_dir)
     println("  Output Dir     : " + output_dir)
     println("")
 
     // Check prerequisites
     println("Phase 1: Checking Prerequisites...")
     if !runtime_file_exists(checkpoint_dir) {
-        println("  ✗ Checkpoint directory not found: " + checkpoint_dir)
+        println("  ✗ checkpoint directory not found: " + checkpoint_dir)
         return 1
     }
-    println("  ✓ Checkpoint directory exists")
+    println("  ✓ checkpoint directory exists")
 
     if !runtime_file_exists(checkpoint_dir + "/transformer_v2.ckpt") {
         println("  ✗ Model checkpoint file not found")
@@ -56,7 +56,7 @@ func main() int {
 
     // List checkpoint contents
     println("")
-    println("Phase 4: Inspecting Checkpoint Contents...")
+    println("Phase 4: Inspecting checkpoint Contents...")
     string list_cmd = "ls -lh \"" + checkpoint_dir + "\""
     runtime_run_command(list_cmd)
 
@@ -70,7 +70,7 @@ func main() int {
     println("✓ Model metadata loaded")
     println("✓ Model structure verified")
     println("")
-    println("Checkpoint Statistics:")
+    println("checkpoint Statistics:")
     print_checkpoint_size(checkpoint_dir)
     println("")
     println("Output Directory: " + output_dir)

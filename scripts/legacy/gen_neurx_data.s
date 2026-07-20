@@ -4,7 +4,7 @@
 package main
 
 // dataEnglish text
-struct TrainingData {
+struct training_data {
     text: string
     category: string  // python, llm_training, qa, distributed_training, etc.
     quality_score: float
@@ -29,9 +29,9 @@ const (
 )
 
 // generatePythonEnglish textoptimizedata
-func generate_python_data(): TrainingData {
+func generate_python_data(): training_data {
     text := "# PythonEnglish textoptimizeEnglish text..."
-    return TrainingData{
+    return training_data{
         text: text,
         category: CATEGORY_PYTHON,
         quality_score: 0.95,
@@ -39,9 +39,9 @@ func generate_python_data(): TrainingData {
 }
 
 // generateLLMtrainingdata
-func generate_llm_training_data(): TrainingData {
+func generate_llm_training_data(): training_data {
     text := "# English textlanguagemodeltrainingEnglish text..."
-    return TrainingData{
+    return training_data{
         text: text,
         category: CATEGORY_LLM,
         quality_score: 0.95,
@@ -49,9 +49,9 @@ func generate_llm_training_data(): TrainingData {
 }
 
 // generateEnglish text
-func generate_qa_data(): TrainingData {
+func generate_qa_data(): training_data {
     text := "# English text: English textusePythonimplementationquickrankingEnglish text?"
-    return TrainingData{
+    return training_data{
         text: text,
         category: CATEGORY_QA,
         quality_score: 0.90,

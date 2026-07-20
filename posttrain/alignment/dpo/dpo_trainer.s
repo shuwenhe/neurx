@@ -485,7 +485,7 @@ func save_dpo_checkpoint(dpo_trainer_state trainer, int step) {
     // TODO: Save to disk
 
     if trainer.global_rank == 0 {
-        print("[DPO] Checkpoint saved: " + checkpoint_path)
+        print("[DPO] checkpoint saved: " + checkpoint_path)
     }
 }
 
@@ -555,7 +555,7 @@ func print_dpo_training_complete(dpo_trainer_state trainer) {
     print("[Final Results]")
     print("  Final Loss: " + string_float(trainer.running_loss))
     print("  Best Eval Metric: " + string_float(trainer.best_eval_metric) + " @ step " + string(trainer.best_step))
-    print("  Checkpoint Dir: " + trainer.config.checkpoint_dir)
+    print("  checkpoint Dir: " + trainer.config.checkpoint_dir)
     print("")
 }
 

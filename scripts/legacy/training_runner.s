@@ -288,7 +288,7 @@ func saveCheckpoint(step int64) error {
 	}
 
 	gTrainingState.LastCheckpoint = checkpointDir
-	logInfo("Checkpoint saved: " + checkpointDir)
+	logInfo("checkpoint saved: " + checkpointDir)
 
 	return nil
 }
@@ -390,11 +390,11 @@ func runTraining() error {
 			}
 		}
 
-		// Checkpoint
+		// checkpoint
 		if step % int64(gConfig.CheckpointSteps) == 0 && step > 0 {
 			err := saveCheckpoint(step)
 			if err != nil {
-				logWarn("Checkpoint failed: " + err.Error())
+				logWarn("checkpoint failed: " + err.Error())
 			}
 		}
 

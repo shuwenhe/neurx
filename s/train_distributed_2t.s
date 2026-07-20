@@ -128,7 +128,7 @@ func main() {
     
     // ---- 3a. Create Data Loader ----
     // Each DP rank sees different data (different shuffle/order)
-    // DataLoader handles sharding across DP replicas
+    // data_loader handles sharding across DP replicas
     data_loader dl = create_data_loader(
         config.seq_len,
         config.global_batch_size,

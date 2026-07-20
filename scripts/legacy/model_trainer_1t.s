@@ -11,7 +11,7 @@ import (
 // 1T PARAMETER MODEL CONFIGURATION AND TRAINING FRAMEWORK
 // ============================================================================
 
-type ModelConfig1T struct {
+type model_config1_t struct {
     model_name: string
     num_params: int
     hidden_dim: int
@@ -29,7 +29,7 @@ type ModelConfig1T struct {
     use_bfloat16: bool
 }
 
-type DistributedConfig1T struct {
+type distributed_config1_t struct {
     tensor_parallel_size: int
     pipeline_parallel_stages: int
     data_parallel_size: int
@@ -38,7 +38,7 @@ type DistributedConfig1T struct {
     total_gpus: int
 }
 
-type MemoryAnalysis1T struct {
+type memory_analysis1_t struct {
     model_weights_tb: float
     gradients_tb: float
     optimizer_states_tb: float
@@ -47,7 +47,7 @@ type MemoryAnalysis1T struct {
     total_system_tb: float
 }
 
-type TrainingOptimization1T struct {
+type training_optimization1_t struct {
     learning_rate: float
     warmup_steps: int
     total_steps: int
@@ -63,8 +63,8 @@ type TrainingOptimization1T struct {
 // 1T MODEL CONFIGURATION BUILDERS
 // ============================================================================
 
-func create_1t_config(): ModelConfig1T {
-    config := ModelConfig1T{
+func create_1t_config(): model_config1_t {
+    config := model_config1_t{
         model_name: "neurx-1t",
         num_params: 1000000000000,  // 1T
         hidden_dim: 12800,           // Increased from 70B config
@@ -88,8 +88,8 @@ func create_1t_config(): ModelConfig1T {
 // DISTRIBUTED TRAINING CONFIGURATION FOR 1T MODEL
 // ============================================================================
 
-func create_distributed_config_1t(): DistributedConfig1T {
-    config := DistributedConfig1T{
+func create_distributed_config_1t(): distributed_config1_t {
+    config := distributed_config1_t{
         tensor_parallel_size: 64,      // Split model across 64 GPUs
         pipeline_parallel_stages: 8,   // 8 pipeline stages
         data_parallel_size: 2,         // 2x data parallel
@@ -113,8 +113,8 @@ func calculate_parallelism_dims(total_gpus: int): (int, int, int) {
 // MEMORY ANALYSIS FOR 1T MODEL
 // ============================================================================
 
-func estimate_memory_1t(config: ModelConfig1T, dist_config: DistributedConfig1T, 
-                       micro_batch_size: int): MemoryAnalysis1T {
+func estimate_memory_1t(config: model_config1_t, dist_config: distributed_config1_t, 
+                       micro_batch_size: int): memory_analysis1_t {
     
     num_params := float(config.num_params)
     
@@ -160,7 +160,7 @@ func estimate_memory_1t(config: ModelConfig1T, dist_config: DistributedConfig1T,
     // Total system memory
     total_system_tb := weights_tb + gradients_tb + (weights_tb * 2.0)
     
-    return MemoryAnalysis1T{
+    return memory_analysis1_t{
         model_weights_tb: weights_tb,
         gradients_tb: gradients_tb,
         optimizer_states_tb: optimizer_states_tb,
@@ -174,8 +174,8 @@ func estimate_memory_1t(config: ModelConfig1T, dist_config: DistributedConfig1T,
 // TRAINING CONFIGURATION
 // ============================================================================
 
-func create_training_config_1t(): TrainingOptimization1T {
-    config := TrainingOptimization1T{
+func create_training_config_1t(): training_optimization1_t {
+    config := training_optimization1_t{
         learning_rate: 1e-4,              // Conservative LR for 1T model
         warmup_steps: 2000,               // Extended warmup
         total_steps: 500000,              // Long training run
@@ -193,7 +193,7 @@ func create_training_config_1t(): TrainingOptimization1T {
 // HARDWARE REQUIREMENTS AND COST ANALYSIS
 // ============================================================================
 
-type HardwareRequirements struct {
+type hardware_requirements struct {
     num_h100_gpus: int
     total_memory_tb: float
     interconnect: string
@@ -202,7 +202,7 @@ type HardwareRequirements struct {
     estimated_cost_usd: int
 }
 
-func calculate_hardware_requirements(): HardwareRequirements {
+func calculate_hardware_requirements(): hardware_requirements {
     // 1T model with optimal parallelism: 1024 H100 GPUs
     num_gpus := 1024
     
@@ -223,7 +223,7 @@ func calculate_hardware_requirements(): HardwareRequirements {
     total_hours := float(training_days) * 24.0
     total_cost := int(float(num_gpus) * cost_per_gpu_hour * total_hours)
     
-    req := HardwareRequirements{
+    req := hardware_requirements{
         num_h100_gpus: num_gpus,
         total_memory_tb: total_memory_tb,
         interconnect: "NVLink + NVIDIA ConnectX-7 (400 Gbps)",
@@ -239,21 +239,21 @@ func calculate_hardware_requirements(): HardwareRequirements {
 // TRAINING PIPELINE ORCHESTRATION
 // ============================================================================
 
-type TrainingPipeline1T struct {
-    config: ModelConfig1T
-    dist_config: DistributedConfig1T
-    train_config: TrainingOptimization1T
-    memory_analysis: MemoryAnalysis1T
+type training_pipeline1_t struct {
+    config: model_config1_t
+    dist_config: distributed_config1_t
+    train_config: training_optimization1_t
+    memory_analysis: memory_analysis1_t
 }
 
-func create_training_pipeline_1t(): TrainingPipeline1T {
+func create_training_pipeline_1t(): training_pipeline1_t {
     config := create_1t_config()
     dist_config := create_distributed_config_1t()
     train_config := create_training_config_1t()
     memory_analysis := estimate_memory_1t(config, dist_config, 
                                          train_config.micro_batch_size)
     
-    pipeline := TrainingPipeline1T{
+    pipeline := training_pipeline1_t{
         config: config,
         dist_config: dist_config,
         train_config: train_config,
@@ -263,7 +263,7 @@ func create_training_pipeline_1t(): TrainingPipeline1T {
     return pipeline
 }
 
-func (p *TrainingPipeline1T) print_summary() {
+func (p *training_pipeline1_t) print_summary() {
     fmt.Println("\n" + "="*80)
     fmt.Println("🚀 NEURX 1T PARAMETER MODEL - TRAINING CONFIGURATION")
     fmt.Println("="*80)
@@ -327,7 +327,7 @@ func (p *TrainingPipeline1T) print_summary() {
 // TRAINING STEPS AND EXECUTION
 // ============================================================================
 
-func (p *TrainingPipeline1T) initialize_distributed_environment() {
+func (p *training_pipeline1_t) initialize_distributed_environment() {
     fmt.Println("\n[INIT] Initializing distributed training environment...")
     fmt.Printf("  Setting up %d GPU processes\n", p.dist_config.total_gpus)
     fmt.Printf("  Tensor Parallelism: %d\n", p.dist_config.tensor_parallel_size)
@@ -336,7 +336,7 @@ func (p *TrainingPipeline1T) initialize_distributed_environment() {
     fmt.Println("  Status: ✓ Distributed environment ready")
 }
 
-func (p *TrainingPipeline1T) initialize_model() {
+func (p *training_pipeline1_t) initialize_model() {
     fmt.Println("\n[MODEL] Initializing 1T parameter model...")
     fmt.Printf("  Parameters: %.2fT\n", float(p.config.num_params)/1e12)
     fmt.Printf("  Architecture: %d layers x %d hidden dims x %d heads\n",
@@ -344,7 +344,7 @@ func (p *TrainingPipeline1T) initialize_model() {
     fmt.Println("  Status: ✓ Model initialized with tensor parallelism")
 }
 
-func (p *TrainingPipeline1T) setup_optimization() {
+func (p *training_pipeline1_t) setup_optimization() {
     fmt.Println("\n[OPTIM] Setting up optimizer and scheduler...")
     fmt.Printf("  Optimizer: AdamW with weight decay %.2e\n", 0.01)
     fmt.Printf("  Learning Rate: %.2e (peak)\n", p.train_config.learning_rate)
@@ -353,7 +353,7 @@ func (p *TrainingPipeline1T) setup_optimization() {
     fmt.Println("  Status: ✓ Optimizer and scheduler ready")
 }
 
-func (p *TrainingPipeline1T) run_training() {
+func (p *training_pipeline1_t) run_training() {
     fmt.Println("\n[TRAIN] Starting 1T model training...")
     fmt.Printf("  Total Steps: %d\n", p.train_config.total_steps)
     fmt.Printf("  Global Batch Size: %d tokens per step\n", 

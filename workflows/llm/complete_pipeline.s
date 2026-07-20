@@ -306,7 +306,7 @@ func forward_pass(runner: Runner) (ForwardOutput, f64) {
     println("")
 
     // English text
-    println("   1️⃣  Embedding Layer")
+    println("   1️⃣  embedding Layer")
     println("      Input: [" + strings.from_i32(runner.batch.input_tensor.shape[0]) + ", " +
                     strings.from_i32(runner.batch.input_tensor.shape[1]) + "]")
     println("      → [" + strings.from_i32(runner.batch.input_tensor.shape[0]) + ", " +

@@ -117,7 +117,7 @@ func initializeEmbedding(inputDim int, outputDim int, std float32) *tensor.Tenso
 // initializePositionalEmbedding initializes positional embeddings (RoPE)
 func initializePositionalEmbedding(maxSeqLen int, hiddenDim int, std float32) *tensor.Tensor {
     // Initialize positional embedding matrix
-    // For RoPE (Rotary Position Embedding):
+    // For RoPE (Rotary Position embedding):
     // This will be applied during forward pass
     return tensor.Zeros(maxSeqLen, hiddenDim)
 }
@@ -183,7 +183,7 @@ func (m *GPTModel) embedTokens(tokenIds *tensor.Tensor) *tensor.Tensor {
 
 // addPositionalEmbedding adds positional embeddings (RoPE)
 func (m *GPTModel) addPositionalEmbedding(x *tensor.Tensor, seqLen int) *tensor.Tensor {
-    // Apply RoPE (Rotary Position Embedding)
+    // Apply RoPE (Rotary Position embedding)
     // This involves rotating query and key vectors by position-dependent angles
     
     // For now, simple addition of learned positional embeddings
@@ -290,7 +290,7 @@ func (m *GPTModel) SaveCheckpoint(path string) error {
     outputProjBytes := m.outputProj.Serialize()
     file.Write(outputProjBytes)
     
-    fmt.Printf("Checkpoint saved: %d bytes\n", 0)  // Placeholder
+    fmt.Printf("checkpoint saved: %d bytes\n", 0)  // Placeholder
     
     return nil
 }
@@ -327,7 +327,7 @@ func LoadCheckpoint(path string) (*GPTModel, error) {
     // Deserialize output projection
     model.outputProj = model.outputProj.Deserialize(file)
     
-    fmt.Printf("Checkpoint loaded successfully\n")
+    fmt.Printf("checkpoint loaded successfully\n")
     
     return model, nil
 }

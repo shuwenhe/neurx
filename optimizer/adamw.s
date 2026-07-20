@@ -210,7 +210,7 @@ func adamw_get_step(adamw_optimizer opt) int {
 }
 
 // =====================================================================
-// Checkpoint Support (for resuming training)
+// checkpoint Support (for resuming training)
 // =====================================================================
 
 struct adamw_state_dict {

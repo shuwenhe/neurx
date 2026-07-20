@@ -206,7 +206,7 @@ func checkpoint_clear(checkpoint_state state) checkpoint_state {
 }
 
 func get_checkpoint_stats(checkpoint_state state) string {
-    "Checkpoint Stats: Recomputations=" + string(state.recomputation_count) +
+    "checkpoint Stats: Recomputations=" + string(state.recomputation_count) +
     ", Memory Saved=" + string(state.memory_saved) + "MB"
 }
 

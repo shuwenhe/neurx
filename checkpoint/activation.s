@@ -71,10 +71,10 @@ func should_save_layer(checkpoint_manager mgr, int layer_id) bool {
 
     // Otherwise, use checkpoint_every strategy
     if mgr.config.checkpoint_every <= 0 {
-        return true  // Checkpoint every layer
+        return true  // checkpoint every layer
     }
 
-    // Checkpoint every Nth layer
+    // checkpoint every Nth layer
     (layer_id % mgr.config.checkpoint_every) == 0
 }
 
@@ -105,7 +105,7 @@ func estimate_recompute_cost(int layer_id) int {
 }
 
 // ============================================================================
-// Checkpoint Restore & Recomputation
+// checkpoint Restore & Recomputation
 // During backward pass, retrieve or recompute activations as needed
 // ============================================================================
 
@@ -129,7 +129,7 @@ func restore_activation(
     int ckpt_idx = mgr.layer_to_ckpt_idx[layer_id]
     layer_checkpoint ckpt = mgr.checkpoints[ckpt_idx]
 
-    // Case 1: Checkpoint is on CPU - bring back to device (GPU)
+    // Case 1: checkpoint is on CPU - bring back to device (GPU)
     if ckpt.is_on_cpu && mgr.config.cpu_offload {
         ckpt = load_from_cpu(ckpt)
         mgr.checkpoints[ckpt_idx] = ckpt  // Update manager state

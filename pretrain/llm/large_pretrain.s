@@ -1489,7 +1489,7 @@ func gpt_large_pretrain_core_summary(gpt_large_pretrain_state state) string {
     out = out + "Backward: " + int_to_str(bool_to_int(gpt_large_pretrain_backward_ready(state)), 0) + " | "
     out = out + "Distributed: " + int_to_str(bool_to_int(gpt_large_pretrain_distributed_ready(state)), 0) + " | "
     out = out + "Stability: " + int_to_str(bool_to_int(gpt_large_pretrain_stability_ready(state)), 0) + "\n"
-    out = out + "Manifest: " + state.dataset_manifest + "\n"
+    out = out + "manifest: " + state.dataset_manifest + "\n"
     out = out + "Output: " + state.output_dir + "\n"
     out = out + "Shard: " + int_to_str(state.active_shard_index, 0) + "/" + int_to_str(len(state.train_shard_refs), 0) + " @ " + state.active_shard_path + "\n"
     out = out + "Split shards(train/valid/test): " + int_to_str(len(state.train_shard_refs), 0) + "/" + int_to_str(len(state.valid_shard_refs), 0) + "/" + int_to_str(len(state.test_shard_refs), 0) + "\n"
@@ -2649,7 +2649,7 @@ pub func gpt_large_pretrain_launch() int {
     println("  - Distributed: " + int_to_str(bool_to_int(gpt_large_pretrain_distributed_ready(state)), 0))
     println("  - Stability: " + int_to_str(bool_to_int(gpt_large_pretrain_stability_ready(state)), 0))
     println("")
-    println("Manifest: " + state.dataset_manifest)
+    println("manifest: " + state.dataset_manifest)
     println("Output: " + state.output_dir)
     println("Shard split: train/valid/test = " + int_to_str(len(state.train_shard_refs), 0) + "/" + int_to_str(len(state.valid_shard_refs), 0) + "/" + int_to_str(len(state.test_shard_refs), 0))
     println("Shard rotation: epoch " + int_to_str(state.shard_epoch, 0) + ", order index " + int_to_str(state.shard_order_index, 0))

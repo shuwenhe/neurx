@@ -4,7 +4,7 @@ use neurx.strings
 use neurx.runtime.io.{io_println}
 
 // ============================================================================
-// BPE Tokenizer
+// BPE tokenizer
 //
 // This file keeps the public tokenizer surface simple and compile-safe:
 // - vocabulary and special tokens
@@ -341,7 +341,7 @@ func get_cache_stats(bpe_tokenizer tokenizer) bpe_cache_stats {
 }
 
 func print_statistics(bpe_tokenizer tokenizer) string {
-    string stats = "Tokenizer Statistics:\n"
+    string stats = "tokenizer Statistics:\n"
     stats = stats + "  vocab_size=" + int_to_string(tokenizer.vocab.vocab_size) + "\n"
     stats = stats + "  cache_hits=" + int_to_string(tokenizer.cache_hits) + "\n"
     stats = stats + "  cache_misses=" + int_to_string(tokenizer.cache_misses) + "\n"

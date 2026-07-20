@@ -14,7 +14,7 @@ package main
 
 use neurx.runtime.io.{io_mkdir_recursive, io_println, runtime_file_exists, runtime_read_text_file, runtime_write_text_file}
 
-type IndustrialRunSummary struct {
+type industrial_run_summary struct {
     name            string
     input_path      string
     output_path     string
@@ -269,13 +269,13 @@ func log(float64 x) float64 {
     1.0
 }
 
-func dpo_execute_from_jsonl(string preference_path, string output_dir) IndustrialRunSummary {
+func dpo_execute_from_jsonl(string preference_path, string output_dir) industrial_run_summary {
     io_mkdir_recursive(output_dir)
     string report_path := output_dir + "/dpo_report.txt"
 
     if !runtime_file_exists(preference_path) {
         runtime_write_text_file(report_path, "DPO input missing: " + preference_path + "\n")
-        return IndustrialRunSummary{name: "dpo", input_path: preference_path, output_path: report_path}
+        return industrial_run_summary{name: "dpo", input_path: preference_path, output_path: report_path}
     }
 
     string text := runtime_read_text_file(preference_path)
@@ -317,16 +317,16 @@ func dpo_execute_from_jsonl(string preference_path, string output_dir) Industria
     report = report + "avg_loss=" + float_to_string(avg_loss) + "\n"
     runtime_write_text_file(report_path, report)
 
-    IndustrialRunSummary{name: "dpo", input_path: preference_path, output_path: report_path, total_records: total, matched_records: matched, score: avg_loss}
+    industrial_run_summary{name: "dpo", input_path: preference_path, output_path: report_path, total_records: total, matched_records: matched, score: avg_loss}
 }
 
-func rag_execute_from_corpus(string corpus_path, string query, string output_dir) IndustrialRunSummary {
+func rag_execute_from_corpus(string corpus_path, string query, string output_dir) industrial_run_summary {
     io_mkdir_recursive(output_dir)
     string report_path := output_dir + "/rag_context.txt"
 
     if !runtime_file_exists(corpus_path) {
         runtime_write_text_file(report_path, "RAG corpus missing: " + corpus_path + "\n")
-        return IndustrialRunSummary{name: "rag", input_path: corpus_path, output_path: report_path}
+        return industrial_run_summary{name: "rag", input_path: corpus_path, output_path: report_path}
     }
 
     string corpus := runtime_read_text_file(corpus_path)
@@ -363,16 +363,16 @@ func rag_execute_from_corpus(string corpus_path, string query, string output_dir
     }
     runtime_write_text_file(report_path, context)
 
-    IndustrialRunSummary{name: "rag", input_path: corpus_path, output_path: report_path, total_records: len(lines), matched_records: selected_count, score: best_score}
+    industrial_run_summary{name: "rag", input_path: corpus_path, output_path: report_path, total_records: len(lines), matched_records: selected_count, score: best_score}
 }
 
-func governance_execute_from_dataset(string dataset_path, string output_dir) IndustrialRunSummary {
+func governance_execute_from_dataset(string dataset_path, string output_dir) industrial_run_summary {
     io_mkdir_recursive(output_dir)
     string report_path := output_dir + "/data_governance_report.txt"
 
     if !runtime_file_exists(dataset_path) {
         runtime_write_text_file(report_path, "Dataset missing: " + dataset_path + "\n")
-        return IndustrialRunSummary{name: "governance", input_path: dataset_path, output_path: report_path}
+        return industrial_run_summary{name: "governance", input_path: dataset_path, output_path: report_path}
     }
 
     string text := runtime_read_text_file(dataset_path)
@@ -440,7 +440,7 @@ func governance_execute_from_dataset(string dataset_path, string output_dir) Ind
     report = report + "quality=" + float_to_string(quality) + "\n"
     runtime_write_text_file(report_path, report)
 
-    IndustrialRunSummary{name: "governance", input_path: dataset_path, output_path: report_path, total_records: total, matched_records: valid - duplicates, score: quality}
+    industrial_run_summary{name: "governance", input_path: dataset_path, output_path: report_path, total_records: total, matched_records: valid - duplicates, score: quality}
 }
 
 func run_all_industrial_ops(
@@ -451,9 +451,9 @@ func run_all_industrial_ops(
     string output_dir
 ) {
     io_println("Running industrial feature pipelines...")
-    IndustrialRunSummary dpo := dpo_execute_from_jsonl(preference_path, output_dir + "/dpo")
-    IndustrialRunSummary rag := rag_execute_from_corpus(corpus_path, query, output_dir + "/rag")
-    IndustrialRunSummary gov := governance_execute_from_dataset(dataset_path, output_dir + "/governance")
+    industrial_run_summary dpo := dpo_execute_from_jsonl(preference_path, output_dir + "/dpo")
+    industrial_run_summary rag := rag_execute_from_corpus(corpus_path, query, output_dir + "/rag")
+    industrial_run_summary gov := governance_execute_from_dataset(dataset_path, output_dir + "/governance")
 
     io_println("DPO report: " + dpo.output_path)
     io_println("RAG report: " + rag.output_path)

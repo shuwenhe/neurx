@@ -665,7 +665,7 @@ func get_status_report(self: ContinuousBatchScheduler) -> string:
 // NEURX Inference Engine (English text)
 // ============================================================
 
-class InferenceEngine {
+class inference_engine {
     neurx_model model
     tokenizer_state tokenizer
     KVCacheManager kv_manager
@@ -701,7 +701,7 @@ func init_engine(
     int max_batch_size: int = 16,
     bool enable_paged_attention: bool = true,
     int gpu_memory_mb: int64 = 80 * 1024
-) -> InferenceEngine {
+) -> inference_engine {
 
     print("\n" + "="*60)
     print("🚀 Initializing NEURX Inference Engine")
@@ -736,7 +736,7 @@ func init_engine(
     print(f"   Heads: Q={cfg.num_attention_heads}, KV={num_kv_heads}")
     print("="*60 + "\n")
 
-    return InferenceEngine{
+    return inference_engine{
         model: model,
         tokenizer: tokenizer,
         kv_manager: kv_mgr,
@@ -752,7 +752,7 @@ func init_engine(
     }
 
 func generate(
-    self: InferenceEngine,
+    self: inference_engine,
     string prompt,
     int max_new_tokens: int = 512,
     float temperature: float = 0.7,
@@ -829,7 +829,7 @@ func generate(
     for step in range(max_new_tokens):
         timer.start("decode_step")
 
-        # Sample next token
+        # sample next token
         int next_token_id = sample_next_token(
             logits=logits,
             temperature=temperature,
@@ -962,13 +962,13 @@ func sample_next_token(
         probs[indices_to_remove] = 0.0
         probs = probs / probs.sum()  # Re-normalize
 
-    # Sample from categorical distribution
+    # sample from categorical distribution
     int next_token_id = multinomial(probs, num_samples=1).item()
 
     return next_token_id
 
 func generate_batch(
-    self: InferenceEngine,
+    self: inference_engine,
     string[] prompts,
     int max_new_tokens: int = 512,
     **kwargs

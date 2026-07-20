@@ -258,7 +258,7 @@ func run_complete_training() {
 }
 
 // ============================================================
-// Checkpoint and Resume Example - checkpointEnglish textrecoverexample
+// checkpoint and Resume Example - checkpointEnglish textrecoverexample
 // ============================================================
 
 // resume_training_from_checkpoint: English textcheckpointrecovertraining

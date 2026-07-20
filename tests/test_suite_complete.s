@@ -524,7 +524,7 @@ func test_checkpoint_save_load() test_result {
     // For now, return placeholder
     
     test_result{
-        name: "Checkpoint Save/Load",
+        name: "checkpoint Save/Load",
         passed: true,  // Placeholder
         error_message: "",
         duration_ms: (get_timestamp() - start) * 1000,

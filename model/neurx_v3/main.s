@@ -390,7 +390,7 @@ func demonstrate_fp8() {
 
     println("NeurX-V3 FP8 strategy:")
     println("  GEMM:       FP8 forward + FP8 backward")
-    println("  Embedding:  BF16 (precision sensitive)")
+    println("  embedding:  BF16 (precision sensitive)")
     println("  Attention:  BF16 (softmax sensitive)")
     println("  MoE gate:   BF16 (routing sensitive)")
     println("  Norm:       FP32 (stability)")

@@ -7,7 +7,7 @@ package neurx.quantization.dynamic
 // dataEnglish text
 // ============================================================================
 
-struct QuantizationConfig {
+struct quantization_config {
     string quantization_type   // "int8", "int4", "nf4", "fp8"
     bool symmetric
     bool calibration_enabled
@@ -19,7 +19,7 @@ struct QuantizationConfig {
     float outlier_threshold
 }
 
-struct QuantizationStats {
+struct quantization_stats {
     float min_value
     float max_value
     float mean_value
@@ -39,7 +39,7 @@ struct QuantizedTensor {
 }
 
 struct QuantizationCalibration {
-    QuantizationStats* layer_stats    // English textstatisticsinformation
+    quantization_stats* layer_stats    // English textstatisticsinformation
     int layer_count
     float* scale_values               // English text
     int8* zero_points                 // English text
@@ -71,8 +71,8 @@ struct QuantizationMetrics {
 // ============================================================================
 
 // computeEnglish textstatisticsinformation
-func compute_quantization_stats(float* tensor, int size) QuantizationStats {
-    QuantizationStats stats
+func compute_quantization_stats(float* tensor, int size) quantization_stats {
+    quantization_stats stats
 
     if size == 0 {
         return stats
@@ -126,7 +126,7 @@ func quantize_int8_symmetric(float* tensor, int size) QuantizedTensor {
     QuantizedTensor quantized
 
     // 1. computeEnglish text
-    QuantizationStats stats = compute_quantization_stats(tensor, size)
+    quantization_stats stats = compute_quantization_stats(tensor, size)
 
     float abs_max = abs_f(stats.max_value)
     if abs_f(stats.min_value) > abs_max {
@@ -179,7 +179,7 @@ func quantize_int8_asymmetric(float* tensor, int size) QuantizedTensor {
     QuantizedTensor quantized
 
     // 1. computeEnglish text
-    QuantizationStats stats = compute_quantization_stats(tensor, size)
+    quantization_stats stats = compute_quantization_stats(tensor, size)
 
     float scale = (stats.max_value - stats.min_value) / 255.0
 
@@ -359,7 +359,7 @@ func load_calibration_data(string filepath) float* {
 // English text (use KL English text)
 func calibrate_quantization(
     float* tensor, int size,
-    QuantizationConfig config
+    quantization_config config
 ) QuantizedTensor {
     QuantizedTensor quantized
 
@@ -367,7 +367,7 @@ func calibrate_quantization(
     int histogram_bins = 128
     int* histogram = alloc(int, histogram_bins)
 
-    QuantizationStats stats = compute_quantization_stats(tensor, size)
+    quantization_stats stats = compute_quantization_stats(tensor, size)
     float bin_width = (stats.max_value - stats.min_value) / float(histogram_bins)
 
     if bin_width == 0.0 {
@@ -423,12 +423,12 @@ func calibrate_quantization(
 func quantize_per_layer(
     float* layer_weights, int size,
     int num_layers,
-    QuantizationConfig config
+    quantization_config config
 ) QuantizationCalibration {
     QuantizationCalibration calib
 
     calib.layer_count = num_layers
-    calib.layer_stats = alloc(QuantizationStats, num_layers)
+    calib.layer_stats = alloc(quantization_stats, num_layers)
     calib.scale_values = alloc(float, num_layers)
     calib.zero_points = alloc(int8, num_layers)
 
@@ -438,7 +438,7 @@ func quantize_per_layer(
         int layer_size = size / num_layers
 
         // computeEnglish textstatisticsinformation
-        QuantizationStats stats = compute_quantization_stats(
+        quantization_stats stats = compute_quantization_stats(
             layer_weights + layer_idx * layer_size,
             layer_size
         )
@@ -643,7 +643,7 @@ func main() {
     println("=== Quantization System ===")
 
     // configuration
-    QuantizationConfig config
+    quantization_config config
     config.quantization_type = "int8"
     config.symmetric = true
     config.calibration_enabled = false

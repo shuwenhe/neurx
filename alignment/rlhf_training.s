@@ -135,7 +135,7 @@ func rlhf_training_loop(rlhf_trainer trainer,
     int i = 0
     
     while i < num_iterations {
-        // Sample batch of preferences
+        // sample batch of preferences
         
         // Train reward model
         // trainer.reward_mdl = train_reward_model(batch)

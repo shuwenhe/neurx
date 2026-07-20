@@ -293,7 +293,7 @@ struct monitoring_manager {
     moving_window loss_window           // English text N English text loss English text
     moving_window grad_window           // English text N English text grad norm English text
 
-    // Alert system
+    // alert system
     []alert_info alert_history          // English text
     int consecutive_loss_spike_count   // English text loss spike English text
 
@@ -543,7 +543,7 @@ func run_auto_diagnosis(
         // Recommendation
         if perf.data_load_time_pct > 30.0 {
             recommendation r
-            r.action = "Increase num_workers or prefetch_factor in DataLoader"
+            r.action = "Increase num_workers or prefetch_factor in data_loader"
             r.prio = PRIORITY_HIGH
             r.expected_improvement = "+20-40% throughput"
             r.complexity = COMPLEXITY_EASY
@@ -677,7 +677,7 @@ func run_auto_diagnosis(
 }
 
 // ============================================================================
-// 7. Alert system
+// 7. alert system
 // ============================================================================
 
 // Loss anomaly check

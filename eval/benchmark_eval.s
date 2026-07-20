@@ -1,7 +1,7 @@
 package neurx.eval.benchmark_eval
 
 // ============================================================================
-// Standard Benchmark Evaluator (real, runs on the GPT model)
+// Standard Benchmark evaluator (real, runs on the GPT model)
 //
 // Implements the same scoring methodology as lm-evaluation-harness:
 //

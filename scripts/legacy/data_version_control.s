@@ -10,7 +10,7 @@ import (
     "math"
 )
 
-type DataQualityMetrics struct {
+type data_quality_metrics struct {
     total_samples       int
     valid_samples       int
     invalid_samples     int
@@ -20,7 +20,7 @@ type DataQualityMetrics struct {
     null_rate           float64
 }
 
-type DataProvenance struct {
+type data_provenance struct {
     source              string
     timestamp           int64
     creator             string
@@ -29,7 +29,7 @@ type DataProvenance struct {
     format              string
 }
 
-type DataAuditLog struct {
+type data_audit_log struct {
     operation           string
     timestamp           int64
     actor               string
@@ -37,7 +37,7 @@ type DataAuditLog struct {
     status              string
 }
 
-type DatasetVersion struct {
+type dataset_version struct {
     version_id          string
     dataset_name        string
     version_number      int
@@ -45,20 +45,20 @@ type DatasetVersion struct {
     creator             string
     size_mb             int
     sample_count        int
-    quality_metrics     DataQualityMetrics
-    provenance          DataProvenance
+    quality_metrics     data_quality_metrics
+    provenance          data_provenance
     compliance_checks   map[string]bool
     lineage             []string
 }
 
-type DataVersionControl struct {
-    datasets            map[string][]DatasetVersion
+type data_version_control struct {
+    datasets            map[string][]dataset_version
     audit_logs          []DatauditLog
     current_version     map[string]string
     quality_threshold   float64
 }
 
-type DataGovernanceReport struct {
+type data_governance_report struct {
     dataset_name        string
     total_versions      int
     quality_trend       []float64
@@ -70,7 +70,7 @@ type DataGovernanceReport struct {
 // Data Version Management
 // ============================================
 
-func (dvc *DataVersionControl) initialize() {
+func (dvc *data_version_control) initialize() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Data Version Control and Governance System           ║")
     fmt.Println("║  Track, audit, and manage datasets                    ║")
@@ -83,14 +83,14 @@ func (dvc *DataVersionControl) initialize() {
     fmt.Printf("  Audit Logs: %d\n\n", len(dvc.audit_logs))
 }
 
-func (dvc *DataVersionControl) register_dataset_version(
+func (dvc *data_version_control) register_dataset_version(
     dataset_name string,
     version_number int,
     creator string,
     size_mb int,
     sample_count int,
     source string,
-    format string) DatasetVersion {
+    format string) dataset_version {
     
     version_id := fmt.Sprintf("%s-v%d", dataset_name, version_number)
     
@@ -101,7 +101,7 @@ func (dvc *DataVersionControl) register_dataset_version(
     fmt.Printf("  Size: %d MB\n", size_mb)
     fmt.Printf("  Source: %s\n", source)
     
-    version := DatasetVersion{
+    version := dataset_version{
         version_id:      version_id,
         dataset_name:    dataset_name,
         version_number:  version_number,
@@ -109,8 +109,8 @@ func (dvc *DataVersionControl) register_dataset_version(
         creator:         creator,
         size_mb:         size_mb,
         sample_count:    sample_count,
-        quality_metrics: DataQualityMetrics{},
-        provenance: DataProvenance{
+        quality_metrics: data_quality_metrics{},
+        provenance: data_provenance{
             source:       source,
             timestamp:    1719842400 + int64(version_number*86400),
             creator:      creator,
@@ -121,7 +121,7 @@ func (dvc *DataVersionControl) register_dataset_version(
     }
     
     if _, exists := dvc.datasets[dataset_name]; !exists {
-        dvc.datasets[dataset_name] = make([]DatasetVersion, 0)
+        dvc.datasets[dataset_name] = make([]dataset_version, 0)
     }
     
     dvc.datasets[dataset_name] = append(dvc.datasets[dataset_name], version)
@@ -138,7 +138,7 @@ func (dvc *DataVersionControl) register_dataset_version(
 // Quality Metrics
 // ============================================
 
-func (dvc *DataVersionControl) assess_data_quality(
+func (dvc *data_version_control) assess_data_quality(
     dataset_name string,
     version_number int,
     valid_samples int,
@@ -157,7 +157,7 @@ func (dvc *DataVersionControl) assess_data_quality(
                 quality_score := float64(valid_samples) / float64(total)
                 null_rate := 1.0 - completeness
                 
-                version.quality_metrics = DataQualityMetrics{
+                version.quality_metrics = data_quality_metrics{
                     total_samples:   total,
                     valid_samples:   valid_samples,
                     invalid_samples: invalid_samples,
@@ -190,7 +190,7 @@ func (dvc *DataVersionControl) assess_data_quality(
 // Compliance and Governance
 // ============================================
 
-func (dvc *DataVersionControl) run_compliance_checks(
+func (dvc *data_version_control) run_compliance_checks(
     dataset_name string,
     version_number int) {
     
@@ -229,7 +229,7 @@ func (dvc *DataVersionControl) run_compliance_checks(
 // Data Lineage and Provenance
 // ============================================
 
-func (dvc *DataVersionControl) add_to_lineage(
+func (dvc *data_version_control) add_to_lineage(
     dataset_name string,
     version_number int,
     parent_versions []string) {
@@ -253,7 +253,7 @@ func (dvc *DataVersionControl) add_to_lineage(
     }
 }
 
-func (dvc *DataVersionControl) get_data_provenance(
+func (dvc *data_version_control) get_data_provenance(
     dataset_name string,
     version_number int) {
     
@@ -278,12 +278,12 @@ func (dvc *DataVersionControl) get_data_provenance(
 // Audit Logging
 // ============================================
 
-func (dvc *DataVersionControl) log_audit_operation(
+func (dvc *data_version_control) log_audit_operation(
     operation string,
     actor string,
     changes string) {
     
-    log_entry := DataAuditLog{
+    log_entry := data_audit_log{
         operation:  operation,
         timestamp:  1719842400,
         actor:      actor,
@@ -294,7 +294,7 @@ func (dvc *DataVersionControl) log_audit_operation(
     dvc.audit_logs = append(dvc.audit_logs, log_entry)
 }
 
-func (dvc *DataVersionControl) get_audit_trail(
+func (dvc *data_version_control) get_audit_trail(
     dataset_name string) {
     
     fmt.Printf("\n[Audit] Audit trail for %s:\n", dataset_name)
@@ -314,7 +314,7 @@ func (dvc *DataVersionControl) get_audit_trail(
 // Data Governance Reports
 // ============================================
 
-func (dvc *DataVersionControl) generate_governance_report(
+func (dvc *data_version_control) generate_governance_report(
     dataset_name string) {
     
     fmt.Printf("\n┌────────────────────────────────────────┐\n")
@@ -372,16 +372,16 @@ func (dvc *DataVersionControl) generate_governance_report(
 // Main Interface
 // ============================================
 
-func NewDataVersionControl() *DataVersionControl {
-    return &DataVersionControl{
-        datasets:       make(map[string][]DatasetVersion),
-        audit_logs:     make([]DataAuditLog, 0),
+func NewDataVersionControl() *data_version_control {
+    return &data_version_control{
+        datasets:       make(map[string][]dataset_version),
+        audit_logs:     make([]data_audit_log, 0),
         current_version: make(map[string]string),
         quality_threshold: 0.95,
     }
 }
 
-func (dvc *DataVersionControl) run_complete_version_control_cycle() {
+func (dvc *data_version_control) run_complete_version_control_cycle() {
     dvc.initialize()
     
     // Register dataset versions
@@ -436,5 +436,5 @@ func (dvc *DataVersionControl) run_complete_version_control_cycle() {
     // Generate report
     dvc.generate_governance_report("wikitext")
     
-    fmt.Println("\n[DataVersionControl] Complete!")
+    fmt.Println("\n[data_version_control] Complete!")
 }

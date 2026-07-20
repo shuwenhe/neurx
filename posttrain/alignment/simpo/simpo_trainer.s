@@ -38,7 +38,7 @@ struct simpo_config {
     int dp_degree               // Data parallelism degree
     
     // Checkpointing
-    string checkpoint_dir       // Checkpoint save directory
+    string checkpoint_dir       // checkpoint save directory
     int save_interval           // Save every N batches
 }
 

@@ -529,7 +529,7 @@ func print_sft_training_complete(sft_trainer_state trainer) {
     println("  Best Eval Loss: " + fmt_float(trainer.best_eval_loss, 4))
     println("  Final Perplexity: " + fmt_float(trainer.running_perplexity, 4))
     println("  Best Step: " + int_to_str(trainer.best_step))
-    println("  Checkpoint: " + trainer.config.checkpoint_dir)
+    println("  checkpoint: " + trainer.config.checkpoint_dir)
     println("")
 }
 

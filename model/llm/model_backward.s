@@ -1043,7 +1043,7 @@ func model_backward
         l = l - 1
     }
 
-    // 5. Token Embedding English text
+    // 5. Token embedding English text
     // embedding = wte[token_ids] + wpe[positions]
     // d_wte: scatter d_hidden to token positions
     []float d_wte = bk_alloc(V * D)

@@ -37,7 +37,7 @@ func main() int {
 
     println("Configuration:")
     println("  Project root     : " + project_root)
-    println("  Checkpoint dir   : " + checkpoint_dir)
+    println("  checkpoint dir   : " + checkpoint_dir)
     println("  Output dir       : " + output_dir)
     println("")
 
@@ -47,11 +47,11 @@ func main() int {
     string metadata_file = checkpoint_dir + "/NeurX-1.3.neurx"
 
     if !runtime_file_exists(checkpoint_file) {
-        println("  ✗ Error: Checkpoint file not found")
+        println("  ✗ Error: checkpoint file not found")
         println("    Path: " + checkpoint_file)
         return 1
     }
-    println("  ✓ Checkpoint file found: " + checkpoint_file)
+    println("  ✓ checkpoint file found: " + checkpoint_file)
 
     if !runtime_file_exists(metadata_file) {
         println("  ✗ Error: Metadata file not found")
@@ -64,8 +64,8 @@ func main() int {
     // Phase 2: Display checkpoint statistics
     println("Phase 2: Loading checkpoint statistics...")
     string cmd_stat = "ls -lh \"" + checkpoint_file + "\" | awk '{print $5}'"
-    println("  Checkpoint size: " + runtime_run_command(cmd_stat))
-    println("  Checkpoint path: " + checkpoint_file)
+    println("  checkpoint size: " + runtime_run_command(cmd_stat))
+    println("  checkpoint path: " + checkpoint_file)
     println("")
 
     // Phase 3: Display metadata
@@ -103,7 +103,7 @@ func main() int {
     }
     println("    - Loading layer 23")
     println("  ✓ Loading attention masks and embeddings")
-    println("  ✓ Checkpoint fully loaded into memory")
+    println("  ✓ checkpoint fully loaded into memory")
     println("")
 
     // Phase 6: Inference output
@@ -124,7 +124,7 @@ func main() int {
     println("╚════════════════════════════════════════════════════╝")
     println("")
     println("Summary:")
-    println("  ✓ Checkpoint validated and ready")
+    println("  ✓ checkpoint validated and ready")
     println("  ✓ Model metadata loaded")
     println("  ✓ Model architecture initialized")
     println("  ✓ All 24 transformer layers prepared")

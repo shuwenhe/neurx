@@ -178,7 +178,7 @@ func tp_attention_forward(
     [][]double k_heads = reshape_to_heads(k_local, batch_size, seq_len, nkh, d)
     [][]double v_heads = reshape_to_heads(v_local, batch_size, seq_len, nkh, d)
     
-    // ===== Step 4: Apply RoPE Positional Embedding (per-head) =====
+    // ===== Step 4: Apply RoPE Positional embedding (per-head) =====
     // Only applied to Q and K, not V
     q_heads = apply_rope(q_heads, batch_size, seq_len, nh, d, state.config)
     k_heads = apply_rope(k_heads, batch_size, seq_len, nkh, d, state.config)
@@ -634,7 +634,7 @@ func compute_attn_scores([][]double q_head, [][]double k_head, int seq_len, int 
     return scores
 }
 
-// RoPE: Rotary Position Embedding
+// RoPE: Rotary Position embedding
 func apply_rope([][][]double x, int B, int S, int nh, int d, tp_v2_config cfg) [][][]double {
     // Apply rotary embeddings to pairs of dimensions
     // For position pos: rotate (x_{2i}, x_{2i+1}) by angle = pos * theta_i

@@ -17,7 +17,7 @@ package neurx.model.lora
 //
 // supportEnglish text:
 //   • Linear (English text): Q, K, V, O English text, FFN gate/up/down
-//   • Embedding (English text)
+//   • embedding (English text)
 // ============================================================================
 
 // ============================================================================

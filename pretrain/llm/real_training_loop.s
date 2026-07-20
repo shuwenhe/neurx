@@ -196,7 +196,7 @@ func run_training_loop(
     println("========================================")
     println("Starting Real Neural Network Training")
     println("========================================")
-    println("Manifest: " + manifest_path)
+    println("manifest: " + manifest_path)
     println("Steps: " + int_to_str(num_steps, 0))
     println("Batch size: " + int_to_str(batch_size, 0))
     println("Seq len: " + int_to_str(seq_len, 0))

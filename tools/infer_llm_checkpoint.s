@@ -345,7 +345,7 @@ func main() int {
 
     string checkpoint_path = resolve_checkpoint_path(checkpoint_arg)
     if !runtime_file_exists(checkpoint_path) {
-        println("Checkpoint not found: " + checkpoint_path)
+        println("checkpoint not found: " + checkpoint_path)
         return 1
     }
 
@@ -381,7 +381,7 @@ func main() int {
     println("================================================")
     println("NeurX S local checkpoint inference")
     println("================================================")
-    println("Checkpoint path: " + checkpoint_path)
+    println("checkpoint path: " + checkpoint_path)
     println("Step: " + int_to_str(step, 0))
     println("Loss: " + pad_float(loss, 8, 6))
     println("Param count: " + int_to_str(param_count, 0))

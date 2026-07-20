@@ -26,8 +26,8 @@ enum TrainingScale {
     OneT,    // 1T+ params (custom)
 }
 
-// TrainingConfig holds training parameters
-struct TrainingConfig {
+// training_config holds training parameters
+struct training_config {
     scale         TrainingScale
     numGpus       int
     batchSize     int
@@ -114,7 +114,7 @@ func get_scale_config(scale TrainingScale) struct {
 
 struct TrainOrchestrator {
     logger Logger
-    config TrainingConfig
+    config training_config
     sCompiler string
     neurxRoot string
 }
@@ -144,7 +144,7 @@ func new_train_orchestrator(scale TrainingScale, numGpus int) (*TrainOrchestrato
         return nil, fmt.Errorf("S compiler not found at %s", sCompiler)
     }
 
-    config := TrainingConfig{
+    config := training_config{
         scale:         scale,
         numGpus:       numGpus,
         timestamp:     timestamp(),

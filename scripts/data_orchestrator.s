@@ -221,7 +221,7 @@ Quality Filter: %v
 Language Filter: %v
 Min Length: %d
 Max Length: %d
-Tokenizer: %s
+tokenizer: %s
 Workers: %d
 `, d.config.inputPath, d.config.outputPath, format_string(d.config.format),
   d.config.compression, d.config.chunkSize, d.config.deduplication,
@@ -291,7 +291,7 @@ Deduplication: %v
 Quality Filter: %v
 Language Filter: %v
 Min/Max Length: %d/%d
-Tokenizer: %s
+tokenizer: %s
 Workers: %d
 `, d.config.inputPath, d.config.outputPath, format_string(d.config.format),
   d.config.compression, d.config.chunkSize, d.config.deduplication,

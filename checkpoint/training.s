@@ -198,7 +198,7 @@ func checkpoint_load_step(checkpoint_manager manager, int step, pointer model, o
 }
 
 func get_checkpoint_summary(checkpoint_manager manager) string {
-    string summary = "Checkpoint Manager Summary:\n"
+    string summary = "checkpoint Manager Summary:\n"
     summary = summary + "Save Directory: " + manager.config.save_dir + "\n"
     summary = summary + "Total Checkpoints: " + string(len(manager.checkpoints)) + "\n"
     summary = summary + "Current Step: " + string(manager.current_step) + "\n"
@@ -206,7 +206,7 @@ func get_checkpoint_summary(checkpoint_manager manager) string {
     
     for i := 0; i < len(manager.checkpoints); i += 1 {
         checkpoint_info info = manager.checkpoints[i]
-        summary = summary + "  Checkpoint " + string(i) + ": step=" + string(info.step) +
+        summary = summary + "  checkpoint " + string(i) + ": step=" + string(info.step) +
                   ", loss=" + string(info.loss) + ", time=" + info.timestamp + "\n"
     }
     

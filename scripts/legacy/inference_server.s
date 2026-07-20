@@ -69,7 +69,7 @@ type inference_response struct {
 	Timestamp    string    `json:"timestamp"`
 }
 
-type ServerMetrics struct {
+type server_metrics struct {
 	TotalRequests      int64   `json:"total_requests"`
 	SuccessfulRequests int64   `json:"successful_requests"`
 	FailedRequests     int64   `json:"failed_requests"`
@@ -106,7 +106,7 @@ var gConfig = &InferenceServerConfig{
 	WorkerThreads: 4,
 }
 
-var gMetrics = &ServerMetrics{
+var gMetrics = &server_metrics{
 	TotalRequests: 0,
 	SuccessfulRequests: 0,
 	FailedRequests: 0,

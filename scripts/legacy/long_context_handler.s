@@ -10,7 +10,7 @@ import (
     "math"
 )
 
-type LongContextConfig struct {
+type long_context_config struct {
     max_seq_length          int
     rope_theta              float64  // RoPE frequency base
     rope_dimensions         int
@@ -20,19 +20,19 @@ type LongContextConfig struct {
     window_size             int
 }
 
-type RoPEPositionalEncoding struct {
+type ro_pepositional_encoding struct {
     theta                   float64
     dimensions              int
     max_seq_length          int
 }
 
-type LongContextHandler struct {
-    config                  LongContextConfig
-    positional_encoding     *RoPEPositionalEncoding
-    cache_stats             CacheStats
+type long_context_handler struct {
+    config                  long_context_config
+    positional_encoding     *ro_pepositional_encoding
+    cache_stats             cache_stats
 }
 
-type CacheStats struct {
+type cache_stats struct {
     total_requests          int64
     cache_hits              int64
     cache_misses            int64
@@ -40,10 +40,10 @@ type CacheStats struct {
 }
 
 // ============================================
-// Rotary Position Embedding (RoPE)
+// Rotary Position embedding (RoPE)
 // ============================================
 
-func (encoder *RoPEPositionalEncoding) compute_rope_frequencies() []float64 {
+func (encoder *ro_pepositional_encoding) compute_rope_frequencies() []float64 {
     frequencies := make([]float64, encoder.dimensions)
     
     for i := 0; i < encoder.dimensions; i += 2 {
@@ -59,7 +59,7 @@ func (encoder *RoPEPositionalEncoding) compute_rope_frequencies() []float64 {
     return frequencies
 }
 
-func (encoder *RoPEPositionalEncoding) apply_rope(
+func (encoder *ro_pepositional_encoding) apply_rope(
     query []float64,
     key []float64,
     position int) ([]float64, []float64) {
@@ -91,7 +91,7 @@ func (encoder *RoPEPositionalEncoding) apply_rope(
     return rotated_q, rotated_k
 }
 
-func (handler *LongContextHandler) record_cache_request(hit bool, latency_ms float64) {
+func (handler *long_context_handler) record_cache_request(hit bool, latency_ms float64) {
     handler.cache_stats.total_requests++
     if hit {
         handler.cache_stats.cache_hits++
@@ -106,7 +106,7 @@ func (handler *LongContextHandler) record_cache_request(hit bool, latency_ms flo
     handler.cache_stats.avg_cache_time = (handler.cache_stats.avg_cache_time*(total-1.0) + latency_ms) / total
 }
 
-func (handler *LongContextHandler) estimate_memory_mb(token_count int) float64 {
+func (handler *long_context_handler) estimate_memory_mb(token_count int) float64 {
     if token_count <= 0 {
         return 0.0
     }
@@ -121,7 +121,7 @@ func (handler *LongContextHandler) estimate_memory_mb(token_count int) float64 {
 // Chunked Processing
 // ============================================
 
-func (handler *LongContextHandler) chunk_sequence(
+func (handler *long_context_handler) chunk_sequence(
     tokens []int,
     chunk_size int) [][]int {
     
@@ -139,7 +139,7 @@ func (handler *LongContextHandler) chunk_sequence(
     return chunks
 }
 
-func (handler *LongContextHandler) process_with_overlap(
+func (handler *long_context_handler) process_with_overlap(
     tokens []int,
     process_func func([]int) []float64) []float64 {
     
@@ -184,7 +184,7 @@ func (handler *LongContextHandler) process_with_overlap(
 // Sliding Window Attention
 // ============================================
 
-func (handler *LongContextHandler) apply_sliding_window_attention(
+func (handler *long_context_handler) apply_sliding_window_attention(
     query []float64,
     key_cache [][]float64,
     value_cache [][]float64,
@@ -247,7 +247,7 @@ func (handler *LongContextHandler) apply_sliding_window_attention(
 // Context Window Expansion
 // ============================================
 
-func (handler *LongContextHandler) expand_context_window(
+func (handler *long_context_handler) expand_context_window(
     current_max int,
     target_max int) {
     
@@ -270,7 +270,7 @@ func (handler *LongContextHandler) expand_context_window(
 // Memory-Efficient Processing
 // ============================================
 
-func (handler *LongContextHandler) process_long_sequence(
+func (handler *long_context_handler) process_long_sequence(
     tokens []int,
     model_forward func([]int) []float64) []float64 {
     
@@ -290,7 +290,7 @@ func (handler *LongContextHandler) process_long_sequence(
     }
 }
 
-func (handler *LongContextHandler) process_with_sliding_window(
+func (handler *long_context_handler) process_with_sliding_window(
     tokens []int,
     model_forward func([]int) []float64) []float64 {
     
@@ -311,7 +311,7 @@ func (handler *LongContextHandler) process_with_sliding_window(
     return result
 }
 
-func (handler *LongContextHandler) process_with_chunks(
+func (handler *long_context_handler) process_with_chunks(
     tokens []int,
     model_forward func([]int) []float64) []float64 {
     
@@ -322,7 +322,7 @@ func (handler *LongContextHandler) process_with_chunks(
 // Performance Analysis
 // ============================================
 
-func (handler *LongContextHandler) print_stats() {
+func (handler *long_context_handler) print_stats() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Long Context Handler - Performance Statistics       ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
@@ -348,7 +348,7 @@ func (handler *LongContextHandler) print_stats() {
     fmt.Printf("\nSupported Lengths:\n")
     fmt.Printf("  Short (4K): Standard inference\n")
     fmt.Printf("  Medium (8K): Conversation history\n")
-    fmt.Printf("  Long (16K): Document processing\n")
+    fmt.Printf("  Long (16K): document processing\n")
     fmt.Printf("  Extended (32K+): Long-form generation\n")
     fmt.Printf("  Estimated memory for max length: %.2f MB\n", handler.estimate_memory_mb(handler.config.max_seq_length))
 }
@@ -357,25 +357,25 @@ func (handler *LongContextHandler) print_stats() {
 // Main Interface
 // ============================================
 
-func NewLongContextHandler(config LongContextConfig) *LongContextHandler {
-    return &LongContextHandler{
+func NewLongContextHandler(config long_context_config) *long_context_handler {
+    return &long_context_handler{
         config: config,
-        positional_encoding: &RoPEPositionalEncoding{
+        positional_encoding: &ro_pepositional_encoding{
             theta: 10000.0,
             dimensions: config.rope_dimensions,
             max_seq_length: config.max_seq_length,
         },
-        cache_stats: CacheStats{},
+        cache_stats: cache_stats{},
     }
 }
 
-func (handler *LongContextHandler) demonstrate() {
+func (handler *long_context_handler) demonstrate() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Long Context Support - Extended Sequences            ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝\n")
     
     fmt.Println("Supported Features:")
-    fmt.Println("  ✓ Rotary Position Embedding (RoPE)")
+    fmt.Println("  ✓ Rotary Position embedding (RoPE)")
     fmt.Println("  ✓ Sliding Window Attention")
     fmt.Println("  ✓ Chunked Processing with Overlap")
     fmt.Println("  ✓ Memory-Efficient KV Cache")

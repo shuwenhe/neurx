@@ -10,7 +10,7 @@ import (
     "math"
 )
 
-type Document struct {
+type document struct {
     doc_id              string
     content             string
     source              string
@@ -18,7 +18,7 @@ type Document struct {
     metadata            map[string]string
 }
 
-type Embedding struct {
+type embedding struct {
     embedding_id        string
     document_id         string
     vector              []float64
@@ -26,13 +26,13 @@ type Embedding struct {
     model               string
 }
 
-type RetrievalResult struct {
-    document            Document
+type retrieval_result struct {
+    document            document
     similarity_score    float64
     rank                int
 }
 
-type RetrievalSystemConfig struct {
+type retrieval_system_config struct {
     embedding_model     string
     vector_db_type      string
     top_k               int
@@ -40,13 +40,13 @@ type RetrievalSystemConfig struct {
     cache_enabled       bool
 }
 
-type VectorDatabase struct {
-    embeddings          map[string]Embedding
-    documents           map[string]Document
+type vector_database struct {
+    embeddings          map[string]embedding
+    documents           map[string]document
     index_built         bool
 }
 
-type RAGMetrics struct {
+type ragmetrics struct {
     step                int64
     query               string
     retrieved_count     int
@@ -55,11 +55,11 @@ type RAGMetrics struct {
     retrieval_time_ms   int
 }
 
-type RAGIntegration struct {
-    config              RetrievalSystemConfig
-    vector_db           VectorDatabase
-    metrics_history     []RAGMetrics
-    cache               map[string][]RetrievalResult
+type ragintegration struct {
+    config              retrieval_system_config
+    vector_db           vector_database
+    metrics_history     []ragmetrics
+    cache               map[string][]retrieval_result
     knowledge_base_size int
 }
 
@@ -67,30 +67,30 @@ type RAGIntegration struct {
 // RAG Initialization
 // ============================================
 
-func (rag *RAGIntegration) initialize(config RetrievalSystemConfig) {
+func (rag *ragintegration) initialize(config retrieval_system_config) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  RAG Integration System                               ║")
     fmt.Println("║  Retrieval-Augmented Generation for LLMs              ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝\n")
     
     rag.config = config
-    rag.vector_db = VectorDatabase{
-        embeddings: make(map[string]Embedding),
-        documents:  make(map[string]Document),
+    rag.vector_db = vector_database{
+        embeddings: make(map[string]embedding),
+        documents:  make(map[string]document),
         index_built: false,
     }
-    rag.metrics_history = make([]RAGMetrics, 0)
-    rag.cache = make(map[string][]RetrievalResult)
+    rag.metrics_history = make([]ragmetrics, 0)
+    rag.cache = make(map[string][]retrieval_result)
     
     fmt.Printf("Configuration:\n")
-    fmt.Printf("  Embedding Model: %s\n", config.embedding_model)
+    fmt.Printf("  embedding Model: %s\n", config.embedding_model)
     fmt.Printf("  Vector DB: %s\n", config.vector_db_type)
     fmt.Printf("  Top-K: %d\n", config.top_k)
     fmt.Printf("  Similarity Threshold: %.2f\n", config.similarity_threshold)
     fmt.Printf("  Cache Enabled: %v\n\n", config.cache_enabled)
 }
 
-func (rag *RAGIntegration) load_knowledge_base(
+func (rag *ragintegration) load_knowledge_base(
     doc_count int,
     avg_doc_length int) {
     
@@ -102,9 +102,9 @@ func (rag *RAGIntegration) load_knowledge_base(
     
     for i := 0; i < doc_count; i++ {
         doc_id := fmt.Sprintf("doc_%d", i)
-        doc := Document{
+        doc := document{
             doc_id:   doc_id,
-            content:  fmt.Sprintf("Document content %d with %d words", i, avg_doc_length),
+            content:  fmt.Sprintf("document content %d with %d words", i, avg_doc_length),
             source:   sources[i%len(sources)],
             timestamp: 1719842400 + int64(i*3600),
             metadata: map[string]string{
@@ -121,10 +121,10 @@ func (rag *RAGIntegration) load_knowledge_base(
 }
 
 // ============================================
-// Embedding Generation and Storage
+// embedding Generation and Storage
 // ============================================
 
-func (rag *RAGIntegration) generate_embeddings() {
+func (rag *ragintegration) generate_embeddings() {
     fmt.Printf("\n[Embeddings] Generating embeddings\n")
     fmt.Printf("  Documents: %d\n", len(rag.vector_db.documents))
     fmt.Printf("  Model: %s\n", rag.config.embedding_model)
@@ -139,7 +139,7 @@ func (rag *RAGIntegration) generate_embeddings() {
             vector[j] = math.Sin(float64(j)*0.01) * 0.5
         }
         
-        emb := Embedding{
+        emb := embedding{
             embedding_id: embedding_id,
             document_id:  doc_id,
             vector:       vector,
@@ -158,7 +158,7 @@ func (rag *RAGIntegration) generate_embeddings() {
 // Similarity Computation
 // ============================================
 
-func (rag *RAGIntegration) cosine_similarity(vec1 []float64, vec2 []float64) float64 {
+func (rag *ragintegration) cosine_similarity(vec1 []float64, vec2 []float64) float64 {
     if len(vec1) != len(vec2) {
         return 0.0
     }
@@ -187,9 +187,9 @@ func (rag *RAGIntegration) cosine_similarity(vec1 []float64, vec2 []float64) flo
 // Retrieval Process
 // ============================================
 
-func (rag *RAGIntegration) retrieve_relevant_documents(
+func (rag *ragintegration) retrieve_relevant_documents(
     query string,
-    query_embedding []float64) []RetrievalResult {
+    query_embedding []float64) []retrieval_result {
     
     // Check cache
     if rag.config.cache_enabled {
@@ -203,7 +203,7 @@ func (rag *RAGIntegration) retrieve_relevant_documents(
     fmt.Printf("  Query: %s\n", query)
     fmt.Printf("  Top-K: %d\n", rag.config.top_k)
     
-    results := make([]RetrievalResult, 0)
+    results := make([]retrieval_result, 0)
     
     // Compute similarities
     for _, emb := range rag.vector_db.embeddings {
@@ -211,7 +211,7 @@ func (rag *RAGIntegration) retrieve_relevant_documents(
         
         if similarity >= rag.config.similarity_threshold {
             doc := rag.vector_db.documents[emb.document_id]
-            result := RetrievalResult{
+            result := retrieval_result{
                 document:         doc,
                 similarity_score: similarity,
                 rank:             0,
@@ -249,7 +249,7 @@ func (rag *RAGIntegration) retrieve_relevant_documents(
     return results
 }
 
-func (rag *RAGIntegration) display_retrieval_results(results []RetrievalResult) {
+func (rag *ragintegration) display_retrieval_results(results []retrieval_result) {
     fmt.Printf("\n[Results] Top Retrieved Documents:\n")
     fmt.Println("  Rank  Similarity  Source          Content")
     fmt.Println("  ────────────────────────────────────────────────")
@@ -272,9 +272,9 @@ func (rag *RAGIntegration) display_retrieval_results(results []RetrievalResult) 
 // Context Augmentation
 // ============================================
 
-func (rag *RAGIntegration) augment_context(
+func (rag *ragintegration) augment_context(
     query string,
-    results []RetrievalResult) string {
+    results []retrieval_result) string {
     
     fmt.Printf("\n[Augmentation] Augmenting context\n")
     
@@ -297,7 +297,7 @@ func (rag *RAGIntegration) augment_context(
 // RAG Performance Metrics
 // ============================================
 
-func (rag *RAGIntegration) record_retrieval_metrics(
+func (rag *ragintegration) record_retrieval_metrics(
     query string,
     retrieved_count int,
     top_similarity float64,
@@ -305,7 +305,7 @@ func (rag *RAGIntegration) record_retrieval_metrics(
     
     var avg_similarity float64 = top_similarity * 0.8
     
-    metric := RAGMetrics{
+    metric := ragmetrics{
         step:              int64(len(rag.metrics_history)),
         query:             query,
         retrieved_count:   retrieved_count,
@@ -317,7 +317,7 @@ func (rag *RAGIntegration) record_retrieval_metrics(
     rag.metrics_history = append(rag.metrics_history, metric)
 }
 
-func (rag *RAGIntegration) get_rag_statistics() {
+func (rag *ragintegration) get_rag_statistics() {
     fmt.Printf("\n┌────────────────────────────────────────┐\n")
     fmt.Printf("│  RAG Performance Statistics            │\n")
     fmt.Printf("└────────────────────────────────────────┘\n\n")
@@ -350,17 +350,17 @@ func (rag *RAGIntegration) get_rag_statistics() {
 // Main Interface
 // ============================================
 
-func NewRAGIntegration() *RAGIntegration {
-    return &RAGIntegration{
-        vector_db:   VectorDatabase{},
-        metrics_history: make([]RAGMetrics, 0),
-        cache:       make(map[string][]RetrievalResult),
+func NewRAGIntegration() *ragintegration {
+    return &ragintegration{
+        vector_db:   vector_database{},
+        metrics_history: make([]ragmetrics, 0),
+        cache:       make(map[string][]retrieval_result),
     }
 }
 
-func (rag *RAGIntegration) run_complete_rag_cycle() {
+func (rag *ragintegration) run_complete_rag_cycle() {
     // Initialize
-    config := RetrievalSystemConfig{
+    config := retrieval_system_config{
         embedding_model:     "sentence-transformers/all-MiniLM-L6-v2",
         vector_db_type:      "faiss",
         top_k:               5,
@@ -419,5 +419,5 @@ func (rag *RAGIntegration) run_complete_rag_cycle() {
     // Statistics
     rag.get_rag_statistics()
     
-    fmt.Println("\n[RAGIntegration] Complete!")
+    fmt.Println("\n[ragintegration] Complete!")
 }

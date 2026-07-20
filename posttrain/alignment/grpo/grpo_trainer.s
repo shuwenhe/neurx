@@ -551,7 +551,7 @@ func save_grpo_checkpoint(grpo_trainer_state trainer, int step) {
     string checkpoint_path = trainer.config.checkpoint_dir + "/step_" + string(step)
 
     if trainer.global_rank == 0 {
-        print("[GRPO] Checkpoint saved: " + checkpoint_path)
+        print("[GRPO] checkpoint saved: " + checkpoint_path)
     }
 }
 
@@ -598,7 +598,7 @@ func print_grpo_training_complete(grpo_trainer_state trainer) {
     print("[Final Results]")
     print("  Final Loss: " + string_float(trainer.running_loss))
     print("  Avg Reward: " + string_float(trainer.running_group_reward))
-    print("  Checkpoint: " + trainer.config.checkpoint_dir)
+    print("  checkpoint: " + trainer.config.checkpoint_dir)
     print("")
 }
 

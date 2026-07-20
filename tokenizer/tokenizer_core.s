@@ -1,5 +1,5 @@
 // ============================================================
-// NEURX Tokenizer - SentencePiece Based
+// NEURX tokenizer - SentencePiece Based
 // support NEURX-4 / NEURX-5.2 English text
 // English text:
 //   - English text SentencePiece (Unigram LM) English text BPE tokenizer
@@ -41,7 +41,7 @@ func default_special_tokens() special_tokens_config {
 }
 
 // ============================================================
-// Tokenizer state
+// tokenizer state
 // ============================================================
 enum encoding_type {
     UNIGRAM       // Unigram Language Model (SentencePiece default)
@@ -76,14 +76,14 @@ struct tokenizer_state {
 }
 
 // ============================================================
-// initialize NEURX Tokenizer
+// initialize NEURX tokenizer
 // ============================================================
 func create_tokenizer(
     vocab_file_path: string,
     special_tokens: option[special_tokens_config] = none
 ) tokenizer_state {
 
-    print("🔤 Loading NEURX Tokenizer from: {vocab_file_path}")
+    print("🔤 Loading NEURX tokenizer from: {vocab_file_path}")
 
     // === load SentencePiece model ===
     // actualimplementationEnglish text SentencePiece C++ English text Python English text
@@ -137,7 +137,7 @@ func create_tokenizer(
         }
     }
 
-    print(f"✅ NEURX Tokenizer loaded successfully!")
+    print(f"✅ NEURX tokenizer loaded successfully!")
     print(f"   Vocabulary size: {state.vocab_size}")
     print(f"   Special tokens added: {state.num_added_tokens}")
 
@@ -719,14 +719,14 @@ func print_special_tokens_info(state: tokenizer_state) {
 // ============================================================
 func test_tokenizer() {
     print("\n" + "="*60)
-    print("Testing NEURX Tokenizer")
+    print("Testing NEURX tokenizer")
     print("="*60)
 
-    // Test 1: English text Tokenizer
+    // Test 1: English text tokenizer
     print("\n[Test 1] Creating NEURX tokenizer...")
     tokenizer_state tok = create_tokenizer("vocab/neurx.model")
     assert(tok.vocab_size > 0)
-    print("✅ Tokenizer created!")
+    print("✅ tokenizer created!")
 
     // Test 2: English text tokens
     print("\n[Test 2] Printing special tokens...")

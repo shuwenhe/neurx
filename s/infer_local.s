@@ -444,7 +444,7 @@ func main() {
     string validate_only = runtime_env_get("NEURX_INFER_VALIDATE_ONLY", "")
 
     if !runtime_file_exists(checkpoint_path) {
-        println("Checkpoint file not found: " + checkpoint_path)
+        println("checkpoint file not found: " + checkpoint_path)
         return
     }
 
@@ -454,7 +454,7 @@ func main() {
         println("================================================")
         println("NeurX checkpoint validation")
         println("================================================")
-        println("Checkpoint path: " + checkpoint_path)
+        println("checkpoint path: " + checkpoint_path)
         println("Step: " + int_to_str(header.step))
         println("Loss: " + fmt_float(header.loss, 4))
         println("Param count: " + int_to_str(header.param_count))
@@ -479,7 +479,7 @@ func main() {
     println("================================================")
     println("NeurX checkpoint inference")
     println("================================================")
-    println("Checkpoint path: " + checkpoint_path)
+    println("checkpoint path: " + checkpoint_path)
     println("Step: " + int_to_str(header.step))
     println("Loss: " + fmt_float(header.loss, 4))
     println("Param count: " + int_to_str(header.param_count))

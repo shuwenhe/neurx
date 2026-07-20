@@ -72,7 +72,7 @@ func top_p_sample(
     // Step 6: Renormalize to sum to 1
     []float normalized = normalize(filtered_probs)
     
-    // Step 7: Sample from the nucleus set
+    // Step 7: sample from the nucleus set
     int sampled_idx = sample_from_distribution(normalized, rng_state)
     int selected_token = filtered_indices[sampled_idx] if sampled_idx < len(filtered_indices) else filtered_indices[0]
     

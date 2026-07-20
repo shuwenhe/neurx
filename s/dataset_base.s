@@ -5,12 +5,12 @@ package neurx.data
 // Supports: text files, tokenized data, custom datasets
 // ============================================================================
 
-// ---- Data Sample ----
+// ---- Data sample ----
 struct sample {
     []int token_ids      // Token IDs (the main data)
     string text          // Original text (optional)
     int label            // Label for classification tasks (-1 if N/A)
-    float weight         // Sample weight (1.0 default)
+    float weight         // sample weight (1.0 default)
     map[string]any metadata  // Additional metadata
 }
 

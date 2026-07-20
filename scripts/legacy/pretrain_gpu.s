@@ -68,7 +68,7 @@ func main() {
     }
     
     // Phase 1: Check for existing checkpoint
-    println("[PRETRAIN-GPU] Phase 1: Checkpoint Detection")
+    println("[PRETRAIN-GPU] Phase 1: checkpoint Detection")
     bool has_checkpoint = checkpoint_exists(output_dir)
     
     training_state state = new_training_state()
@@ -147,7 +147,7 @@ func main() {
 }
 
 // ============================================================================
-// Checkpoint Management Functions
+// checkpoint Management Functions
 // ============================================================================
 
 func checkpoint_exists(string checkpoint_dir) bool {
@@ -750,7 +750,7 @@ func str_len(string s) int {
 }
 
 // ============================================================================
-// Checkpoint Recovery Functions for CUDA Bridge Integration
+// checkpoint Recovery Functions for CUDA Bridge Integration
 // ============================================================================
 
 func find_latest_checkpoint_weights(string checkpoint_dir, int resume_step) string {

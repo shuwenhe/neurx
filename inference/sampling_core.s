@@ -125,7 +125,7 @@ func top_k_sample(
         // Step 6: Renormalize
         []float normalized = normalize(filtered_probs)
         
-        // Step 7: Sample from the filtered distribution
+        // Step 7: sample from the filtered distribution
         (sample_from_distribution(normalized, rng_state), advance_rng(rng_state))
     }
 }

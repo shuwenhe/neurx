@@ -35,9 +35,9 @@ func main() int {
     }
 
     if runtime_file_exists(project_root + "/dataset/pretrain/manifest.json") {
-        println("Manifest: English textgenerate")
+        println("manifest: English textgenerate")
     } else {
-        println("Manifest: English textgenerate")
+        println("manifest: English textgenerate")
     }
 
     println("")

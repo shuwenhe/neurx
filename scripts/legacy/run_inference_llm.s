@@ -14,7 +14,7 @@ func main() int {
     println("")
     println("Project root  : " + project_root)
     println("Inference src : " + inference_source)
-    println("Checkpoint dir: " + checkpoint_dir)
+    println("checkpoint dir: " + checkpoint_dir)
     println("Output dir    : " + output_dir)
     println("")
     print_flag("inference source", runtime_file_exists(inference_source))

@@ -119,7 +119,7 @@ func new_batch_mixer([]data_source sources, string strategy) batch_mixer {
 
 // Get next batch with proper source mixing
 func get_mixed_batch(batch_mixer mixer, int batch_size) []int {
-    // Sample from each source according to weights
+    // sample from each source according to weights
     // Mix samples to form batch
     // Maintain distribution of sources
     
@@ -156,7 +156,7 @@ func get_multilingual_batch(batch_mixer mixer, int batch_size) []int {
     []int{cap: batch_size}
 }
 
-// Document-level filtering
+// document-level filtering
 func filter_documents([]string documents, preprocessing_config cfg) []string {
     // Apply all quality filters
     // Return only high-quality documents
