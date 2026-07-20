@@ -84,8 +84,39 @@ func parse_float(string s, float fallback) float {
     out
 }
 
+func digit_to_str(int digit) string {
+    if digit == 0 {
+        return "0"
+    }
+    if digit == 1 {
+        return "1"
+    }
+    if digit == 2 {
+        return "2"
+    }
+    if digit == 3 {
+        return "3"
+    }
+    if digit == 4 {
+        return "4"
+    }
+    if digit == 5 {
+        return "5"
+    }
+    if digit == 6 {
+        return "6"
+    }
+    if digit == 7 {
+        return "7"
+    }
+    if digit == 8 {
+        return "8"
+    }
+    "9"
+}
+
 func int_to_str(int n) string {
-    if n < 1 && n > -1 {
+    if n == 0 {
         return "0"
     }
     int value = n
@@ -96,14 +127,9 @@ func int_to_str(int n) string {
     }
     string out = ""
     while value > 0 {
-        int digit = 0
-        int quotient = value
-        while quotient >= 10 {
-            quotient = quotient - 10
-            digit = digit + 1
-        }
-        out = string(digit + 48) + out
-        value = quotient
+        int digit = value % 10
+        out = digit_to_str(digit) + out
+        value = value / 10
     }
     if neg {
         out = "-" + out
@@ -112,13 +138,14 @@ func int_to_str(int n) string {
 }
 
 func fmt_float(float value, int decimals) string {
-    bool neg = value < 0.0
+    float current = value
+    bool neg = current < 0.0
     if neg {
-        value = 0.0 - value
+        current = 0.0 - current
     }
     int whole = 0
-    while value >= 1.0 {
-        value = value - 1.0
+    while current >= 1.0 {
+        current = current - 1.0
         whole = whole + 1
     }
     string out = ""
@@ -128,21 +155,35 @@ func fmt_float(float value, int decimals) string {
     out = out + int_to_str(whole) + "."
     int i = 0
     while i < decimals {
-        value = value * 10.0
+        current = current * 10.0
         int digit = 0
-        while value >= 1.0 {
-            value = value - 1.0
+        while current >= 1.0 {
+            current = current - 1.0
             digit = digit + 1
         }
-        out = out + string(digit + 48)
+        out = out + digit_to_str(digit)
         i = i + 1
     }
     out
 }
 
+func resolve_non_empty(string primary, string fallback) string {
+    if len(primary) > 0 {
+        return primary
+    }
+    fallback
+}
+
 func main() int {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    string data_path = runtime_env_get("NEURX_SFT_DATA_FILE", project_root + "/data/sft/instruction_data.jsonl")
+    string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", project_root + "/../model/Qwen2.5-VL-7B")
+    string data_path = resolve_non_empty(
+        runtime_env_get("NEURX_LORA_SFT_DATA_FILE", ""),
+        resolve_non_empty(
+            runtime_env_get("NEURX_POSTTRAIN_DATA_FILE", ""),
+            runtime_env_get("NEURX_SFT_DATA_FILE", project_root + "/data/sft/instruction_data.jsonl")
+        )
+    )
     string output_dir = runtime_env_get("NEURX_LORA_SFT_OUTPUT_DIR", project_root + "/artifacts/checkpoints/lora_sft")
     string format_type = runtime_env_get("NEURX_SFT_FORMAT", "alpaca")
     int epochs = parse_int(runtime_env_get("NEURX_LORA_SFT_EPOCHS", "3"), 3)
@@ -152,12 +193,18 @@ func main() int {
     float learning_rate = parse_float(runtime_env_get("NEURX_LORA_SFT_LR", "0.0005"), 0.0005)
     bool use_qlora = parse_int(runtime_env_get("NEURX_LORA_SFT_USE_QLORA", "0"), 0) > 0
 
+    string model_config = model_path + "/config.json"
+    string tokenizer_json = model_path + "/tokenizer.json"
+
     println("========================================")
     println("NeurX LoRA Supervised Fine-Tuning")
     println("========================================")
+    println("Base model   : " + model_path)
     println("Project root : " + project_root)
     println("Data file    : " + data_path)
     println("Output dir   : " + output_dir)
+    println("Model config : " + model_config)
+    println("Tokenizer    : " + tokenizer_json)
     println("Format       : " + format_type)
     println("Epochs       : " + int_to_str(epochs))
     println("Feature dim  : " + int_to_str(feature_dim))
@@ -171,6 +218,7 @@ func main() int {
     }
     println("")
 
+        println("Note: this NeurX LoRA SFT runner records the external Hugging Face model path and trains adapter state in the S runtime smoke flow.")
     println("Loaded samples: 4")
 
     float base_weight = 1.0

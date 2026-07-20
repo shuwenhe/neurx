@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test build-cpu-inference serving-native-socket-test posttrain pretrain-watch chat check-bash check-nvcc shard split logs logs-tail \
+.PHONY: help train infer pretrain pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test build-cpu-inference serving-native-socket-test posttrain postrain posttrain-lora run-lora-sft-training-s pretrain-watch chat check-bash check-nvcc shard split logs logs-tail \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -102,6 +102,10 @@ PRETRAIN_RUNNER_BIN := $(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_lar
 NEURX_SHARD_CMD ?= wikipedia
 NEURX_SHARD_RESUME ?= 1
 NEURX_SHARD_FORCE_REBUILD ?= 0
+POSTTRAIN_MODEL_PATH ?= $(CURDIR_UNIX)/../model/Qwen2.5-VL-7B
+POSTTRAIN_DATA_FILE ?= $(CURDIR_UNIX)/dataset/posttrain/instruction_data.jsonl
+POSTTRAIN_OUTPUT_DIR ?= $(CURDIR_UNIX)/artifacts/checkpoints/lora_sft
+POSTTRAIN_S_COMPILER ?= $(firstword $(wildcard $(CURDIR_UNIX)/../s/bin/s_seed $(CURDIR_UNIX)/tools/s_wrapper.sh) $(S_COMPILER))
 
 
 help:
@@ -110,6 +114,8 @@ help:
 	@echo "  make pretrain-npu"
 	@echo "  make pretrain-gpu"
 	@echo "  make posttrain"
+	@echo "  make postrain"
+	@echo "  make run-lora-sft-training-s"
 	@echo "  make infer"
 	@echo "  make chat"
 
@@ -420,16 +426,66 @@ test-checkpoint-resume: check-bash
 posttrain: check-bash
 	@echo "Building NeurX posttrain entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/posttrain
-	@if ! command -v "$(S_COMPILER)" >/dev/null 2>&1; then \
-		echo "Error: S compiler not found at $(S_COMPILER)"; \
+	@if ! [ -x "$(POSTTRAIN_S_COMPILER)" ] && ! command -v "$(POSTTRAIN_S_COMPILER)" >/dev/null 2>&1; then \
+		echo "Error: S compiler not found at $(POSTTRAIN_S_COMPILER)"; \
 		echo "Set S_COMPILER or S_COMPILER_EMIT_CWD environment variable"; \
 		exit 1; \
 	fi
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)' \
-		$(S_COMPILER) ir 'posttrain/posttrain.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain/posttrain.ir' 2>&1 && \
+		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain/posttrain.ir'; \
+		S_COMPILER='$(POSTTRAIN_S_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)'; \
+		"$(POSTTRAIN_S_COMPILER)" ir 'posttrain/posttrain.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain/posttrain.ir' 2>&1 || true; \
+		if [ ! -f '$(CURDIR_UNIX)/artifacts/build/posttrain/posttrain.ir' ]; then \
+			"$(POSTTRAIN_S_COMPILER)" 'posttrain/posttrain.s' '$(CURDIR_UNIX)/artifacts/build/posttrain/posttrain.ir' 2>&1 || exit 1; \
+		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain/posttrain.ir'
 	@echo "✓ posttrain entry compiled to S IR"
+	@echo "Hint: run 'make postrain' to launch the runnable LoRA SFT post-training entry."
+
+postrain: run-lora-sft-training-s
+
+posttrain-lora: run-lora-sft-training-s
+
+run-lora-sft-training-s: check-bash build-s-ir-runner
+	@echo "Building NeurX LoRA SFT post-training entry..."
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/lora_sft
+	@mkdir -p $(LOG_DIR)
+	@if ! [ -x "$(POSTTRAIN_S_COMPILER)" ] && ! command -v "$(POSTTRAIN_S_COMPILER)" >/dev/null 2>&1; then \
+		echo "Error: S compiler not found at $(POSTTRAIN_S_COMPILER)"; \
+		echo "Set S_COMPILER or S_COMPILER_EMIT_CWD environment variable"; \
+		exit 1; \
+	fi
+	@if [ ! -d '$(POSTTRAIN_MODEL_PATH)' ]; then \
+		echo "Error: post-train model directory not found: $(POSTTRAIN_MODEL_PATH)"; \
+		echo "Set POSTTRAIN_MODEL_PATH=/absolute/path/to/model and rerun make postrain"; \
+		exit 1; \
+	fi
+	@if [ ! -f '$(POSTTRAIN_MODEL_PATH)/config.json' ]; then \
+		echo "Error: missing config.json under model directory: $(POSTTRAIN_MODEL_PATH)"; \
+		exit 1; \
+	fi
+	@if [ ! -f '$(POSTTRAIN_DATA_FILE)' ]; then \
+		echo "Error: post-train SFT data file not found: $(POSTTRAIN_DATA_FILE)"; \
+		echo "Set POSTTRAIN_DATA_FILE=/absolute/path/to/your.jsonl and rerun make postrain"; \
+		exit 1; \
+	fi
+	@cd '$(CURDIR_UNIX)' && \
+		rm -f '$(CURDIR_UNIX)/artifacts/build/lora_sft/run_lora_sft_training.ir'; \
+		S_COMPILER='$(POSTTRAIN_S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)'; \
+		"$(POSTTRAIN_S_COMPILER)" ir 'scripts/legacy/run_lora_sft_training.s' -o '$(CURDIR_UNIX)/artifacts/build/lora_sft/run_lora_sft_training.ir' 2>&1 || true; \
+		if [ ! -f '$(CURDIR_UNIX)/artifacts/build/lora_sft/run_lora_sft_training.ir' ]; then \
+			"$(POSTTRAIN_S_COMPILER)" 'scripts/legacy/run_lora_sft_training.s' '$(CURDIR_UNIX)/artifacts/build/lora_sft/run_lora_sft_training.ir' 2>&1 || exit 1; \
+		fi && \
+		test -f '$(CURDIR_UNIX)/artifacts/build/lora_sft/run_lora_sft_training.ir'
+	@echo "Running NeurX LoRA SFT post-training entry..."
+	@cd '$(CURDIR_UNIX)' && \
+		NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)' \
+		NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)' \
+		NEURX_LORA_SFT_DATA_FILE='$(POSTTRAIN_DATA_FILE)' \
+		NEURX_LORA_SFT_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)' \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/lora_sft/run_lora_sft_training.ir' \
+		'$(S_RUNNER_BIN)' 2>&1 | tee -a $(LOG_DIR)/postrain_$(shell date +%Y%m%d_%H%M%S).log
 
 pretrain-watch: check-bash
 	@echo "Running NeurX large-model pre-training with live log monitoring"
