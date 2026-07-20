@@ -227,6 +227,9 @@ dataset/pretrain/shard/*
 !dataset/pretrain/shard/.gitkeep
 dataset/pretrain/manifest.json
 
+# Specific posttrain dataset (local, ignore)
+dataset/posttrain/posttrain.json
+
 # Training outputs and logs
 artifacts/checkpoints/
 artifacts/logs/
