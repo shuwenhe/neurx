@@ -175,6 +175,7 @@ func runtime_run_command_output(string command) string {
     ""
 }
 
+extern func runtime_run_command_exit_code(string command) int
 extern func runtime_execute_file(string target_path, string entry_function) int
 
 func runtime_json_parse(string text) json_value {
