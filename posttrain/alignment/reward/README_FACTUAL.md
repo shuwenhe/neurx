@@ -83,7 +83,7 @@ Factual Accuracy (40%)
 ## File Structure
 
 ```
-neurx/posttrain/reward/
+neurx/posttrain/alignment/reward/
 ├── factual_consistency_reward.s      # Core implementation
 ├── factual_consistency_examples.s    # Usage examples
 └── README.md                          # This file

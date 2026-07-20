@@ -188,7 +188,7 @@ English text: NeurX English texttraining (346M params).
 
 3️⃣ English text
    s run scripts/legacy/data_synthesis_engine.s        # dataEnglish text
-   s run scripts/legacy/rlhf_ppo.s                     # RLHF alignment
+   s run posttrain/alignment/ppo/ppo.s                     # RLHF alignment
    s run scripts/legacy/sft_trainer.s                  # English text
    s run scripts/legacy/evaluation_framework.s         # evaluation
    s run scripts/legacy/inference_optimization.s       # inferenceoptimize

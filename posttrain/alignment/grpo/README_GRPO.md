@@ -50,7 +50,7 @@ where:
 ## File Structure
 
 ```
-neurx/posttrain/grpo/
+neurx/posttrain/alignment/grpo/
 ├── grpo.s              # Original GRPO implementation (partial)
 ├── grpo_trainer.s      # Complete trainer (NEW)
 ├── grpo_examples.s     # Usage examples (NEW)

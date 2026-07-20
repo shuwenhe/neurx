@@ -73,8 +73,8 @@ NeurX Architecture (Pure S Language)
 │   ├── alignment/rlhf_training.s    - RLHF training
 │   ├── alignment/supervised_finetuning.s - SFT
 │   ├── alignment/constitutional_ai.s - Constitutional AI
-│   ├── posttrain/grpo/grpo.s        - GRPO training
-│   ├── posttrain/reward/reward_model.s - Reward model
+│   ├── posttrain/alignment/grpo/grpo.s        - GRPO training
+│   ├── posttrain/alignment/reward/reward_model.s - Reward model
 │   └── model/lora/lora.s            - LoRA/QLoRA adapters
 │
 ├── 9. Deployment & Serving Layer
@@ -189,9 +189,9 @@ NeurX Architecture (Pure S Language)
 
 - [x] Supervised Fine-tuning (alignment/supervised_finetuning.s)
 - [x] RLHF training (alignment/rlhf_training.s)
-- [x] Reward model training (posttrain/reward/reward_model.s)
+- [x] Reward model training (posttrain/alignment/reward/reward_model.s)
 - [x] Constitutional AI (alignment/constitutional_ai.s)
-- [x] GRPO training (posttrain/grpo/grpo.s)
+- [x] GRPO training (posttrain/alignment/grpo/grpo.s)
 - [x] LoRA/QLoRA adapters (model/lora/lora.s)
 - [x] Safety evaluation
 

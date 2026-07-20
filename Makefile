@@ -399,7 +399,7 @@ test-checkpoint-resume: check-bash
 	@mkdir -p $(CURDIR_UNIX)/tests
 	@bash $(CURDIR_UNIX)/tests/checkpoint_resume_e2e.sh
 
-posttrain: check-bash
+posttrain: check-bash build-s-ir-runner
 	@echo "Building NeurX posttrain entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/posttrain
 	@if ! [ -x "$(POSTTRAIN_S_COMPILER)" ] && ! command -v "$(POSTTRAIN_S_COMPILER)" >/dev/null 2>&1; then \
@@ -416,7 +416,21 @@ posttrain: check-bash
 		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain/posttrain.ir'
 	@echo "✓ posttrain entry compiled to S IR"
-	@echo "Hint: run 'make posttrain' to build the posttrain entry."
+	@mkdir -p $(LOG_DIR)
+	@echo "Starting posttrain runner (streaming logs to console and file)..."
+	@cd '$(CURDIR_UNIX)' && \
+		set -o pipefail; \
+		NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_POSTTRAIN_MODEL_PATH="$${NEURX_POSTTRAIN_MODEL_PATH:-$(POSTTRAIN_MODEL_PATH)}" \
+		NEURX_POSTTRAIN_DATA_FILE="$${NEURX_POSTTRAIN_DATA_FILE:-$(POSTTRAIN_DATA_FILE)}" \
+		NEURX_POSTTRAIN_OUTPUT_DIR="$${NEURX_POSTTRAIN_OUTPUT_DIR:-$(POSTTRAIN_OUTPUT_DIR)}"; \
+		if [ -f '$(CURDIR_UNIX)/artifacts/build/lora_sft/run_lora_sft_training.ir' ]; then \
+			RUN_IR='$(CURDIR_UNIX)/artifacts/build/lora_sft/run_lora_sft_training.ir'; \
+		else \
+			RUN_IR='$(CURDIR_UNIX)/artifacts/build/posttrain/posttrain.ir'; \
+		fi; \
+		echo "Using S IR: $$RUN_IR"; \
+		S_IR_RUNNER_INPUT="$$RUN_IR" '$(S_RUNNER_BIN)' 2>&1 | tee -a $(LOG_DIR)/posttrain_$(shell date +%Y%m%d_%H%M%S).log
 
 pretrain-watch: check-bash
 	@echo "Running NeurX large-model pre-training with live log monitoring"

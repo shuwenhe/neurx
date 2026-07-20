@@ -251,10 +251,10 @@ python3 deploy/inference_server.py
 
 ```bash
 # Rewardmodel
-s run scripts/legacy/reward_model.s
+s run posttrain/alignment/reward/reward_model.s
 
 # PPOtraining
-s run scripts/legacy/rlhf_ppo.s
+s run posttrain/alignment/ppo/ppo.s
 
 # SFTEnglish text
 s run scripts/legacy/sft_trainer.s
@@ -263,7 +263,7 @@ s run scripts/legacy/sft_trainer.s
 s run scripts/legacy/evaluation_framework.s
 
 # LoRAEnglish text
-s run scripts/legacy/lora_finetuning.s
+s run posttrain/adapter/lora_finetuning.s
 
 # English text
 s run scripts/legacy/quantization_system.s

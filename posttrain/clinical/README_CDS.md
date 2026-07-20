@@ -101,7 +101,7 @@ total = (fact * 0.70) + (length * 0.05) + (clarify * 0.05) + (external * 0.20)
 
 ## Integration with GRPO
 
-In `posttrain/grpo/train_grpo_cli_v2.sh`:
+In `posttrain/alignment/grpo/train_grpo_cli_v2.sh`:
 
 ```bash
 swift rlhf --rlhf_type grpo \

@@ -137,8 +137,8 @@ Total:              100%
 
 ✅ **Seamless Integration**:
 - SFT: Uses `posttrain/sft/sft_trainer.s` (unchanged)
-- DPO: Uses `posttrain/dpo/dpo_trainer.s` (unchanged)
-- GRPO: Uses `posttrain/grpo/grpo_trainer.s` with custom reward functions
+- DPO: Uses `posttrain/alignment/dpo/dpo_trainer.s` (unchanged)
+- GRPO: Uses `posttrain/alignment/grpo/grpo_trainer.s` with custom reward functions
 - Eval: Extends `eval/benchmark_eval.s` with medical-specific dimensions
 - Loss: Reuses existing DPO loss implementations
 

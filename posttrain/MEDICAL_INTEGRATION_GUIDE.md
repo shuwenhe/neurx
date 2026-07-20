@@ -95,7 +95,7 @@ swift sft \
 ### Step 2: DPO (Direct Preference Optimization)
 
 ```bash
-cd neurx/posttrain/dpo/
+cd neurx/posttrain/alignment/dpo/
 
 # Build preference pairs with contamination guard
 check_training_data_contamination(
@@ -126,7 +126,7 @@ swift rlhf --rlhf_type dpo \
 ### Step 3: GRPO (Group Relative Policy Optimization)
 
 ```bash
-cd neurx/posttrain/grpo/
+cd neurx/posttrain/alignment/grpo/
 
 # Configuration from coordinator
 medical_grpo_objective obj = {

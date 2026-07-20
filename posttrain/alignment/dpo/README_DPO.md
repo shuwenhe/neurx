@@ -49,7 +49,7 @@ Where:
 ## File Structure
 
 ```
-neurx/posttrain/dpo/
+neurx/posttrain/alignment/dpo/
 ├── dpo_loss.s           # DPO loss computation
 ├── dpo_state.s          # Training state management
 ├── dpo_step.s           # Single training step

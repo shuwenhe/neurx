@@ -329,7 +329,7 @@ English text:
 ✅ scripts/legacy/safety_filter.s             (800English text)  - safetyEnglish text
 ✅ scripts/legacy/performance_monitor.s       (900English text)  - English textmonitoring
 ✅ scripts/legacy/multitask_learning.s        (850English text)  - English text
-✅ scripts/legacy/model_merger.s              (750English text)  - modelEnglish text
+✅ posttrain/adapter/model_merger.s              (750English text)  - modelEnglish text
 ```
 
 ### English textcompleteframework (17English text)
@@ -353,10 +353,10 @@ English text:
 s run scripts/legacy/data_synthesis_engine.s
 
 # 2. trainingRewardmodel
-s run scripts/legacy/reward_model.s
+s run posttrain/alignment/reward/reward_model.s
 
 # 3. PPOalignment
-s run scripts/legacy/rlhf_ppo.s
+s run posttrain/alignment/ppo/ppo.s
 
 # 4. SFTEnglish text
 s run scripts/legacy/sft_trainer.s
@@ -369,7 +369,7 @@ s run scripts/legacy/knowledge_distillation.s
 
 # 7. English text
 s run scripts/legacy/quantization_system.s
-s run scripts/legacy/model_merger.s
+s run posttrain/adapter/model_merger.s
 
 # 8. English textinference
 s run scripts/legacy/long_context_handler.s

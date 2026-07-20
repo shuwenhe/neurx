@@ -275,15 +275,15 @@ Total steps: 400K
 **Status**: PARTIAL IMPLEMENTATION - framework present, some advanced features incomplete
 
 **Files**:
-- `neurx/posttrain/rlhf/ppo.s` (400+ lines) - PPO algorithm
+- `neurx/posttrain/alignment/ppo/ppo.s` (400+ lines) - PPO algorithm
 - `neurx/loss/dpo_loss.s` - Direct Preference Optimization
-- `neurx/posttrain/dpo/dpo_state.s`
-- `neurx/posttrain/dpo/dpo_step.s`
-- `neurx/posttrain/reward/reward.s` - Reward model base
-- `neurx/posttrain/reward/reward_model.s`
+- `neurx/posttrain/alignment/dpo/dpo_state.s`
+- `neurx/posttrain/alignment/dpo/dpo_step.s`
+- `neurx/posttrain/alignment/reward/reward.s` - Reward model base
+- `neurx/posttrain/alignment/reward/reward_model.s`
 - `neurx/posttrain/loop/posttrain_loop.s` (main loop)
 - `neurx/posttrain/posttrain.s` (entry point)
-- `neurx/posttrain/grpo/grpo.s` - Group Relative Policy Optimization
+- `neurx/posttrain/alignment/grpo/grpo.s` - Group Relative Policy Optimization
 - `neurx/test_distributed_rlhf.s` (integration tests)
 
 **Implemented Algorithms**:
