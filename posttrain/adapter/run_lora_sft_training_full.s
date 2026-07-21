@@ -167,7 +167,7 @@ func init_lora_adapter(int input_dim, int output_dim, int rank, float alpha) Mod
     state.rank = rank
     state.alpha = alpha
     
-    // initialize LoRA weights(小随机值)
+    // initialize LoRA weights(小随机value)
     []float lora_a
     []float lora_b
     
@@ -203,8 +203,8 @@ func init_lora_adapter(int input_dim, int output_dim, int rank, float alpha) Mod
 // ============================================================================
 
 func count_training_samples(string filepath) int {
-    // simplified:returnEstimated值
-    // 真实Implementation应该readfileline数
+    // simplified:returnEstimatedvalue
+    // realImplementation应该readfilelinenumber
     100
 }
 
@@ -223,8 +223,8 @@ func run_training(TrainingConfig cfg) TrainingMetrics {
     println("  • Output directory: " + cfg.output_dir)
     println("  • LoRA Rank: " + int_to_str(cfg.lora_rank))
     println("  • LoRA Alpha: " + int_to_str(cfg.lora_alpha))
-    println("  • 批次Size: " + int_to_str(cfg.batch_size))
-    println("  • Training轮数: " + int_to_str(cfg.num_epochs))
+    println("  • batchSize: " + int_to_str(cfg.batch_size))
+    println("  • Training轮number: " + int_to_str(cfg.num_epochs))
     println("  • learning_rate: " + float_to_str(cfg.learning_rate, 6))
     println("")
     
@@ -239,7 +239,7 @@ func run_training(TrainingConfig cfg) TrainingMetrics {
     ModelState model = init_lora_adapter(768, 768, cfg.lora_rank, cfg.lora_alpha as float)
     
     // Trainingloop
-    println("🎓 Training进linein...")
+    println("🎓 Trainingenterlinein...")
     println("")
     
     int epoch = 0
@@ -249,13 +249,13 @@ func run_training(TrainingConfig cfg) TrainingMetrics {
         float epoch_loss = 0.0
         int epoch_samples = 0
         
-        // modulo拟批次Training
+        // modulo拟batchTraining
         int batch = 0
-        while batch < 10 {  // modulo拟 10  批次
+        while batch < 10 {  // modulo拟 10  batch
             float batch_loss = 0.0
             int batch_samples = cfg.batch_size
             
-            // modulo拟批次内sample
+            // modulo拟batch内sample
             int sample = 0
             while sample < batch_samples {
                 // simplified of 前向传播
@@ -273,7 +273,7 @@ func run_training(TrainingConfig cfg) TrainingMetrics {
             // gradientUpdate
             float learning_rate = cfg.learning_rate
             
-            // weights衰减
+            // weightsdecay
             float wd_loss = 0.0
             int w = 0
             while w < len(model.lora_a) {
@@ -337,7 +337,7 @@ func export_merged_model(ModelState model, string base_model_dir, string output_
     println("")
     
     println("  readbasemodel: " + base_model_dir + "/model.safetensors")
-    println("  应用 LoRA: W_new = W_base + (α/r) × B × A")
+    println("  application LoRA: W_new = W_base + (α/r) × B × A")
     println("  Output directory: " + output_dir)
     println("")
     
@@ -374,9 +374,9 @@ func main() int {
     println("")
     
     println("📊 Trainingstatistics:")
-    println("  总sample数: " + int_to_str(metrics.total_samples))
-    println("  平均loss: " + float_to_str(metrics.avg_loss, 6))
-    println("  complete轮数: " + int_to_str(metrics.current_epoch))
+    println("  总samplenumber: " + int_to_str(metrics.total_samples))
+    println("  averageloss: " + float_to_str(metrics.avg_loss, 6))
+    println("  complete轮number: " + int_to_str(metrics.current_epoch))
     println("")
     
     println("💾 outputfile:")

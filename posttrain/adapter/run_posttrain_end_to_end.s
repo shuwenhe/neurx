@@ -6,7 +6,7 @@ use std.io.println
 // run_posttrain_end_to_end.s - Complete Post-Training End-to-End Pipeline
 // ============================================================================
 //
-// Complete of 端 to 端afterTrainingpipeline
+// Complete of end to endafterTrainingpipeline
 // Step:
 //   1. LoRA SFT Training
 //   2. LoRA weightsmerge
@@ -85,12 +85,12 @@ func step1_train() int {
     println("  • TrainingData: /home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl")
     println("  • LoRA Rank: 8")
     println("  • LoRA Alpha: 16")
-    println("  • 轮数: 3")
-    println("  • 批次Size: 32")
+    println("  • 轮number: 3")
+    println("  • batchSize: 32")
     println("  • learning_rate: 0.0005")
     println("")
     
-    println("⏳ Training进linein...")
+    println("⏳ Trainingenterlinein...")
     println("")
     
     int epoch = 0
@@ -103,8 +103,8 @@ func step1_train() int {
     
     println("")
     println("✅ Trainingcomplete")
-    println("  sample数: 3200")
-    println("  平均loss: 0.5")
+    println("  samplenumber: 3200")
+    println("  averageloss: 0.5")
     println("")
     
     println("💾 saveCheckpoint...")
@@ -139,7 +139,7 @@ func step2_merge() int {
     println("  Formula: W_final = W_base + (α/r) × B × A")
     println("  α (alpha) = 16")
     println("  r (rank) = 8")
-    println("  缩放因子 = 16 / 8 = 2.0")
+    println("  scaling因子 = 16 / 8 = 2.0")
     println("  ✓ mergecomplete")
     println("")
     
@@ -162,7 +162,7 @@ func step3_save() int {
     println("    ✓ README.md")
     println("")
     
-    println("📊 verifyfileComplete性...")
+    println("📊 verifyfileCompleteproperty...")
     println("    ✓ model.safetensors: Complete")
     println("    ✓ config.json: 有效")
     println("    ✓ tokenizer: Ready")
@@ -190,21 +190,21 @@ func step4_summary() int {
     println("📈 Performance提升:")
     println("  basemodel: Qwen2.5-0.5B-Instruct")
     println("  afterTrainingmethod: LoRA SFT")
-    println("  adaptationParameter数: ~1.3M (总Parameter of  ~0.5%)")
+    println("  adaptationParameternumber: ~1.3M (总Parameter of  ~0.5%)")
     println("  inferenceSpeed: ≈ basemodel")
-    println("  任务Performance: +5-15% ( in  MedMCQA 上)")
+    println("  taskPerformance: +5-15% ( in  MedMCQA 上)")
     println("")
     
     println("🚀 现 in 可以:")
-    println("  1. Usagemodel进lineinference")
+    println("  1. Usagemodelenterlineinference")
     println("     model = AutoModelForCausalLM.from_pretrained(")
     println("       '/home/shuwen/shuwen/train/model/base-model-posttrain')")
     println("")
-    println("  2. 进一步Fine-tuning")
-    println("     继续Usage LoRA  or 其他method")
+    println("  2. enter一stepFine-tuning")
+    println("     continueUsage LoRA  or 其他method")
     println("")
-    println("  3. 部署 and 服务")
-    println("     Usage vLLM、TGI 等inference引擎")
+    println("  3. deployment and service")
+    println("     Usage vLLM、TGI etcinference引擎")
     println("")
     
     0

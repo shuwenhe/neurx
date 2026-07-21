@@ -33,7 +33,7 @@ Step 2: ModelMerge (5-10 minutes)
 
 Step 3: 交互Test
   $ make chat
-  └─ Launch聊天会话,TestModel
+  └─ Launch聊天session,TestModel
 ```
 
 ---
@@ -54,7 +54,7 @@ Step 3: 交互Test
 
 ## 🔍 monitoringmethod
 
-### View实时Log
+### View实timeLog
 ```bash
 tail -f /home/shuwen/shuwen/train/neurx/artifacts/logs/posttrain_*.log
 ```
@@ -85,8 +85,8 @@ POSTTRAIN_LORA_RANK = 8
 
 ## ✅ Verification清单
 
-- [x] Dataset存 in :`/home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl` (136MB)
-- [x] baseModel存 in :`/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/`
+- [x] Datasetstore in :`/home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl` (136MB)
+- [x] baseModelstore in :`/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/`
 - [x] Makefile Configuration正确
 - [x] NeurX frameworkhaveinitialize
 
@@ -112,15 +112,15 @@ ls -lh ../model/Qwen2.5-0.5B-Instruct/
 
 ### Q3: Model对话无Response
 ```bash
-# ConfirmMergeModel存 in 
+# ConfirmMergeModelstore in 
 ls -lh ../model/base-model-posttrain/
 ```
 
 ---
 
-## 📈 expected结果
+## 📈 expectedresult
 
-| 指标 | 值 |
+| 指标 | value |
 |------|-----|
 | TrainingData | 173,680 条 |
 | afterTrainingtime | 2-4 hours |
@@ -132,12 +132,12 @@ ls -lh ../model/base-model-posttrain/
 
 ## 🔧 custom超Parameter
 
-Edit `Makefile` 修改:
+Edit `Makefile` modification:
 
 ```makefile
 # LoRA Configuration
-POSTTRAIN_LORA_ALPHA ?= 16    # 增大提高表现力
-POSTTRAIN_LORA_RANK ?= 8      # 增大提高表现力
+POSTTRAIN_LORA_ALPHA ?= 16    # 增大提高table现力
+POSTTRAIN_LORA_RANK ?= 8      # 增大提高table现力
 
 # TrainingConfiguration( in  posttrain 子DirectoryConfigurationFilein)
 batch_size = 4

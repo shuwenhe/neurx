@@ -166,7 +166,7 @@ func load_and_merge() MergedModel {
     println("✓ Weight merge complete")
     println("")
     
-    // simplifiedImplementation:Create结果object
+    // simplifiedImplementation:Createresultobject
     []float merged_weights
     
     result.weights = merged_weights
@@ -188,7 +188,7 @@ func save_merged_model(MergedModel model, string output_dir) int {
     println("  📄 Writing model.safetensors")
     println("     Size: ~1.5 GB")
     println("     format: SafeTensors")
-    println("     weights数: 1000000")
+    println("     weightsnumber: 1000000")
     println("     ✓ complete")
     println("")
     
@@ -298,10 +298,10 @@ func main() int {
     println("     └── README.md")
     println("")
     
-    println("🚀 afterTrainingcomplete!modelhaveReady好进line:")
+    println("🚀 afterTrainingcomplete!modelhaveReady好enterline:")
     println("  • inference and Generate")
     println("  • Fine-tuning and Evaluation")
-    println("  • 部署 and 服务")
+    println("  • deployment and service")
     println("")
     
     0

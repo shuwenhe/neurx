@@ -6,13 +6,13 @@
 
 ## Filedescription
 
-### 1. `lora_merge.s` - 核心MergeLibraries
+### 1. `lora_merge.s` - kernel心MergeLibraries
 - **目 of **: 提供LoRAMerge of SLanguageImplementationframework
 - **主要function**:
   - Safetensors Formatparse
-  - LoRA 数学operation (lora_merge: W_out = W_base + (alpha/rank) * (lora_B @ lora_A))
+  - LoRA mathematicsoperation (lora_merge: W_out = W_base + (alpha/rank) * (lora_B @ lora_A))
   - Directoryoperation (复制、遍历)
-  - 浮point数Process and FormatConvert
+  - 浮pointnumberProcess and FormatConvert
 
 - **keyfunction**:
   ```s
@@ -25,9 +25,9 @@
 - **目 of **: Complete of  Safetensors FormatProcess
 - **support内容**:
   - 多种DataType: F32, F16, BF16, I32, I64, U32, U64, etc.
-  - 张量元Dataparse
+  - tensor元Dataparse
   - FileI/Ooperation
-  - 浮point数精度Convert
+  - 浮pointnumberprecisionConvert
 
 - **UsageExample**:
   ```s
@@ -36,25 +36,25 @@
   ```
 
 ### 3. `lora_merge_cli.s` - commandline界面
-- **目 of **: 提供用户友好 of commandlineinterface
-- **环境变量Configuration**:
-  - `NEURX_ROOT`: NeurX项目根Directory
+- **目 of **: 提供user友好 of commandlineinterface
+- **environment variableConfiguration**:
+  - `NEURX_ROOT`: NeurXproject根Directory
   - `NEURX_POSTTRAIN_MODEL_PATH`: baseModelDirectory
   - `NEURX_LORA_ADAPTER_DIR`: LoRAadapterDirectory
   - `NEURX_MERGED_MODEL_DIR`: OutputDirectory
-  - `NEURX_LORA_ALPHA`: LoRA缩放系数(default16)
-  - `NEURX_LORA_RANK`: adapter秩(default8)
+  - `NEURX_LORA_ALPHA`: LoRAscaling系number(default16)
+  - `NEURX_LORA_RANK`: adapterrank(default8)
 
 ## 与 C Implementation of 对比
 
 | feature | C Version | S Version |
 |------|--------|--------|
-| Performance | ✅ 最优 | 📊 in等 |
-| 二进制operation | ✅ Complete | ⚠️ 有限 |
+| Performance | ✅ 最优 | 📊 inetc |
+| 二enter制operation | ✅ Complete | ⚠️ 有限 |
 | 大FileProcess | ✅ 高效 | ⚠️ 需Optimize |
-| 代码可读性 | 📚 复杂 | ✅ 清晰 |
+| code可读property | 📚 complexity | ✅ 清晰 |
 | SLanguageintegration | ⚠️ 需package装 | ✅ 原生 |
-| 维护性 | 📝 in等 | ✅ 高 |
+| 维护property | 📝 inetc | ✅ 高 |
 
 ## Recommendation用法
 
@@ -76,7 +76,7 @@ Usage C Version获得最优Performance:
   8
 ```
 
-### 通过 Makefile Run
+### through Makefile Run
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 make posttrain-merge-lora
@@ -90,9 +90,9 @@ W_out = W_base + (alpha / rank) * (lora_B @ lora_A)
 
 其in:
 - W_base: baseModelweights
-- lora_A, lora_B: 低秩adapter矩阵
-- alpha: 缩放系数 (通常为秩Size)
-- rank: adapter秩 (通常为8 or 16)
+- lora_A, lora_B: 低rankadaptermatrix
+- alpha: scaling系number (通常为rankSize)
+- rank: adapterrank (通常为8 or 16)
 ```
 
 ### Safetensors FileFormat
@@ -113,17 +113,17 @@ Header JSON structure:
 ## extension and Improve
 
 ### haveImplementation
-✅ baseLoRA数学operation
+✅ baseLoRAmathematicsoperation
 ✅ Directoryoperation and File管理
 ✅ 多种浮pointFormatsupport
 ✅ commandline界面
 
 ### 待Implementation
 - [ ] Complete of JSONparsedevice
-- [ ] 流式张量Process(Process大File)
+- [ ] 流式tensorProcess(Process大File)
 - [ ] parallelMergeOptimize
 - [ ] QLoRAsupport
-- [ ] 张量量化感知Merge
+- [ ] tensor量化感知Merge
 
 ## Debug and Test
 
@@ -133,7 +133,7 @@ cd /home/shuwen/shuwen/train/neurx
 S_COMPILER=../../s/bin/s_seed ../../s/bin/s_seed tools/lora_merge.s /tmp/test.ir
 ```
 
-### Run演示
+### Rundemonstration
 ```bash
 make posttrain-merge-lora
 ```
@@ -142,13 +142,13 @@ make posttrain-merge-lora
 
 ### MemoryUsage
 - C Version: ~2-3 GB (对应ModelSize)
-- S Version: 可Configuration,适合演示
+- S Version: 可Configuration,适合demonstration
 
 ### ExecuteTime
 - C Version: ~30-60 秒 (取决于ModelSize)
-- S Version: ~5-10 minutes (当前Implementation)
+- S Version: ~5-10 minutes (currentImplementation)
 
-## 相关File
+## correlationFile
 
 - Configuration: `/home/shuwen/shuwen/train/neurx/Makefile` (lines 113, 458)
 - COriginalImplementation: `/home/shuwen/shuwen/train/neurx/tools/lora_safetensors_merge.c`
@@ -157,4 +157,4 @@ make posttrain-merge-lora
 
 ## 许可证
 
-与 NeurX 项目syncUsage of 许可证.
+与 NeurX projectsyncUsage of 许可证.

@@ -8,12 +8,12 @@ package neurx.eval.six_dimension
 //   - OpenScholar: RAG pipeline + grounded generation + reranking
 //
 // Dimensions:
-//   1. Grounding (证据一致性) - Factual accuracy vs. medical evidence
+//   1. Grounding (证据一致property) - Factual accuracy vs. medical evidence
 //   2. Coverage (覆盖度) - Completeness of information
-//   3. Depth (inference链Complete性) - Multi-hop reasoning quality
+//   3. Depth (inference链Completeproperty) - Multi-hop reasoning quality
 //   4. Tool-use (retrieval利用Quality) - Quality of retrieval/tool integration
-//   5. Clarity (表达与规范) - Clarity + adherence to clinical SOP
-//   6. Safety (安全与边界) - Medical safety + uncertainty handling
+//   5. Clarity (table达与specification) - Clarity + adherence to clinical SOP
+//   6. Safety (安全与boundary) - Medical safety + uncertainty handling
 //
 // Scoring: 5-point Likert scale (0-4) → converted to 0-10 range for analysis
 //
@@ -255,7 +255,7 @@ func evaluate_tool_use(string response) tool_use_analysis {
     []string evidence_patterns = [
         "根据",                  // according to
         "研究",                  // research
-        "显示",                  // shows
+        "display",                  // shows
         "guide",                  // guideline
         "共识",                  // consensus
         "文献",                  // literature
@@ -396,7 +396,7 @@ func evaluate_safety(string response) safety_analysis {
     []string uncertainty_phrases = [
         "可能",                  // may/might
         "Not确定",                // uncertain
-        "need进一步",            // need further
+        "needenter一step",            // need further
         "应该",                  // should
         "可以考虑",              // can consider
     ]

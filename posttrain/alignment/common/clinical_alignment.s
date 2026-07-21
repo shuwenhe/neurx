@@ -201,7 +201,7 @@ func get_medical_safety_constraints() []medical_safety_constraint {
     constraints = append_constraint(constraints, medical_safety_constraint{
         constraint_name: "no_unapproved_drugs",
         description: "Don't recommend unapproved or experimental drugs",
-        violation_patterns: []string{ "实验性", "未经批准", "非正式" },
+        violation_patterns: []string{ "实验property", "未经批准", "非正式" },
         penalty_weight: 0.15
     })
     

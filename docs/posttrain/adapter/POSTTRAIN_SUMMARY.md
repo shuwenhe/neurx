@@ -2,14 +2,14 @@
 
 ## ✅ Completed of 工作
 
-您haveSuccess为 NeurX 项目搭建了Complete of afterTrainingExecuteprocess.以下是交付 of 内容:
+您haveSuccess为 NeurX project搭建了Complete of afterTrainingExecuteprocess.以下是交付 of 内容:
 
-### 📦 核心script (S Language)
+### 📦 kernel心script (S Language)
 
 | scriptFile | function | status |
 |---------|------|------|
-| `run_posttrain_pipeline.s` | 显示Configuration and VerificationParameter | ✅ compileSuccess |
-| `execute_posttrain_pipeline.s` | 显示CompleteExecuteStep | ✅ compileSuccess |
+| `run_posttrain_pipeline.s` | displayConfiguration and VerificationParameter | ✅ compileSuccess |
+| `execute_posttrain_pipeline.s` | displayCompleteExecuteStep | ✅ compileSuccess |
 | `run_lora_sft_training_simple.s` | Execute LoRA SFT Training | ✅ 现有 |
 | `run_lora_merge.s` | Merge LoRA  to baseModel | ✅ 现有 |
 
@@ -17,8 +17,8 @@
 
 | documentation名 | 内容 | location |
 |-------|------|------|
-| **POSTTRAIN_EXECUTION_GUIDE.md** | 详细Executeguide(70+ KB)| Recommendation阅读 |
-| **QUICK_START.md** | Quick Start(3 步搞定) | RecommendationStart |
+| **POSTTRAIN_EXECUTION_GUIDE.md** | detailedExecuteguide(70+ KB)| Recommendation阅读 |
+| **QUICK_START.md** | Quick Start(3 step搞定) | RecommendationStart |
 | **posttrain.yaml** | ConfigurationFile(haveConfiguration好) | haveVerification |
 
 ### 🎯 Configurationstatus
@@ -40,8 +40,8 @@
 
 ✅ TrainingConfiguration
    - method: SFT
-   - 轮数: 3
-   - 批次: 32
+   - 轮number: 3
+   - batch: 32
    - learning_rate: 0.0005
    - Optimizedevice: adamw_8bit
 
@@ -72,7 +72,7 @@ cd /home/shuwen/shuwen/train/neurx
 ls -lah /home/shuwen/shuwen/train/model/base-model-posttrain/
 ```
 
-### way 2: View详细process
+### way 2: Viewdetailedprocess
 ```bash
 /home/shuwen/shuwen/train/s/bin/s_seed posttrain/adapter/execute_posttrain_pipeline.s /tmp/exec.ir
 ```
@@ -106,7 +106,7 @@ cat posttrain/adapter/QUICK_START.md
    /home/shuwen/shuwen/train/neurx/configs/posttrain.yaml
 ```
 
-### in间产物 (Training时Generate)
+### in间产物 (TrainingtimeGenerate)
 ```
 🔄 LoRA Checkpoint
    /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft/
@@ -149,7 +149,7 @@ Step 3:  from  MedMCQA loadTrainingData
         ↓
 Step 4: LoRA SFT Training (3  轮次)
    Forward: y = base(x) + (α/r) * B * A * x
-   Loss: 计算预测与目标 of 差异
+   Loss: calculationprediction与目标 of 差异
    Backward: 只Update A, B (冻结baseModel)
         ↓
 Step 5: Merge LoRA  to baseModel
@@ -175,10 +175,10 @@ W_merged = W_base + (α/r) × B × A
 
 其in:
 - `W_base`: baseModelweights (冻结)
-- `A`: LoRA 下投影矩阵 (in_features × rank)
-- `B`: LoRA 上投影矩阵 (rank × out_features)
-- `α`: 缩放因子 (16)
-- `r`: 秩 (8)
+- `A`: LoRA 下projectionmatrix (in_features × rank)
+- `B`: LoRA 上projectionmatrix (rank × out_features)
+- `α`: scaling因子 (16)
+- `r`: rank (8)
 
 ---
 
@@ -187,10 +187,10 @@ W_merged = W_base + (α/r) × B × A
 Execute前请确保:
 
 ```
-☑ baseModel存 in 并Complete
+☑ baseModelstore in andComplete
   ls /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/model.safetensors
 
-☑ TrainingData存 in 
+☑ TrainingDatastore in 
   ls /home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl
   ls /home/shuwen/shuwen/train/dataset/medmcqa/val.jsonl
 
@@ -200,7 +200,7 @@ Execute前请确保:
 ☑ S compiledevice可用
   /home/shuwen/shuwen/train/s/bin/s_seed --version
 
-☑ GPU 可用 (Training时need)
+☑ GPU 可用 (Trainingtimeneed)
   nvidia-smi
 
 ☑ OutputDirectory可写
@@ -216,16 +216,16 @@ Execute前请确保:
 | 资源 | 需求 | 备注 |
 |------|------|------|
 | **GPU** | 1x 8GB VRAM 最低 | need CUDA |
-| **CPU** | 4 核心 | Dataload用 |
+| **CPU** | 4 kernel心 | Dataload用 |
 | **Memory** | 16GB RAM 最低 | Model + Data |
-| **存储** | ~10GB | Model + Checkpoint |
+| **store储** | ~10GB | Model + Checkpoint |
 | **Time** | 1-2.5 hours | 3  轮次 of Training |
 
 ---
 
 ## 🔧 常见operation
 
-### 修改TrainingParameter
+### modificationTrainingParameter
 
 Edit `/home/shuwen/shuwen/train/neurx/configs/posttrain.yaml`:
 
@@ -236,17 +236,17 @@ training:
   batch_size: 8
   learning_rate: 0.001
 
-# 生产级 (更好 of 结果)
+# 生产级 (更好 of result)
 training:
   num_epochs: 5
   batch_size: 64
   learning_rate: 0.0001
 ```
 
-### ViewTraining进度
+### ViewTrainingenter度
 
 ```bash
-# 实时观察Log
+# 实time观察Log
 tail -f /home/shuwen/shuwen/train/neurx/artifacts/logs/training.log
 
 # statisticsTraining指标
@@ -267,20 +267,20 @@ rm /home/shuwen/shuwen/train/neurx/artifacts/logs/training.log
 
 ---
 
-## ✨ 项目亮point
+## ✨ project亮point
 
 ✅ **全 S LanguageImplementation**
    - 零 Python/Shell script
-   - 完全遵循用户编程偏好
+   - 完全遵循user编程偏好
 
-✅ **CompleteConfiguration驱动**
+✅ **CompleteConfigurationdriver**
    - 单一 YAML FilecontrolallParameter
    - support快速Parameter调整
 
-✅ **详细documentation**
-   - Quick Startguide (3 步)
+✅ **detaileddocumentation**
+   - Quick Startguide (3 step)
    - CompleteExecuteguide (70+ KB)
-   - 代码注释清晰
+   - code注释清晰
 
 ✅ **生产Ready**
    - scripthaveVerificationcompile
@@ -320,20 +320,20 @@ rm /home/shuwen/shuwen/train/neurx/artifacts/logs/training.log
 ## 🎯 after续Step
 
 ### 立即可做
-- 阅读 QUICK_START.md 了解 3 步快速Execute
+- 阅读 QUICK_START.md 了解 3 step快速Execute
 - RunConfigurationVerificationscriptCheckParameter
-- Check GPU  and 存储是否充足
+- Check GPU  and store储是否充足
 
 ### TrainingAfter completion
-- Verify outputFileComplete性
+- Verify outputFileCompleteproperty
 - TestGenerate of Model
-- 部署 to inferenceServer
+- deployment to inferenceServer
 
 ### 长期Optimize
 - 调整 LoRA rank  and  alpha
 - 尝试Not同 of learning_rate调度
-- 用更多Data继续Training
-- 进lineModelEvaluation and 基准Test
+- 用更多DatacontinueTraining
+- enterlineModelEvaluation and benchmarkTest
 
 ---
 
@@ -365,7 +365,7 @@ rm /home/shuwen/shuwen/train/neurx/artifacts/logs/training.log
 ---
 
 **交付日期:** 2026-07-21  
-**项目:** NeurX Post-Training Pipeline  
+**project:** NeurX Post-Training Pipeline  
 **编程Language:** S Language  
-**status:** ✅ Complete并Verification  
+**status:** ✅ CompleteandVerification  
 **next step:** StartafterTraining!🚀

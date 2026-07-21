@@ -6,17 +6,17 @@
 
 ### 特point
 - ✅ 完全用 S Language编写
-- ✅ Usage curl 进line HTTP download(系统command)
-- ✅ supportall 57   MMLU 任务
+- ✅ Usage curl enterline HTTP download(systemcommand)
+- ✅ supportall 57   MMLU task
 - ✅ 自动Retry and ErrorProcess
-- ✅ CSV line数计数 and DataVerification
-- ✅ 环境变量Configuration
+- ✅ CSV linenumber计number and DataVerification
+- ✅ environment variableConfiguration
 
 ---
 
 ## 🚀 快速Launch
 
-### 1. setting环境变量
+### 1. settingenvironment variable
 
 ```bash
 cd /Users/shuwen/shuwen/train/neurx
@@ -28,7 +28,7 @@ export NEURX_MMLU_DATA_ROOT="./data/mmlu"
 ### 2. RunDatadownloaddevice
 
 ```bash
-# compile并RunS程序
+# compileandRunSprogram
 s run eval/setup_mmlu_s.s
 
 #  or 者直接compile
@@ -98,11 +98,11 @@ data/mmlu/
 
 ---
 
-## ⚙️ 环境变量
+## ⚙️ environment variable
 
-| 变量 | default值 | description |
+| variable | defaultvalue | description |
 |------|--------|------|
-| `NEURX_ROOT` | `.` | 项目根Directory |
+| `NEURX_ROOT` | `.` | project根Directory |
 | `NEURX_MMLU_DATA_ROOT` | `./data/mmlu` | DatasaveDirectory |
 
 ### customDataDirectory
@@ -126,7 +126,7 @@ s run eval/setup_mmlu_s.s
              │           ├─ ./data/mmlu/dev
              │           └─ ./data/mmlu/validation
              │
-             ├─ [Step 2] download任务
+             ├─ [Step 2] downloadtask
              │           ├─ for each task (57 tasks):
              │           │   ├─ download_file_curl(test_url)
              │           │   ├─ download_file_curl(dev_url)
@@ -139,10 +139,10 @@ s run eval/setup_mmlu_s.s
              │           └─ verify >= 50 files
              │
              └─ [Step 4] statisticsreport
-                        ├─ 总任务数
-                        ├─ Successdownload数
-                        ├─ question总数
-                        └─ Example总数
+                        ├─ 总tasknumber
+                        ├─ Successdownloadnumber
+                        ├─ question总number
+                        └─ Example总number
 ```
 
 ---
@@ -150,13 +150,13 @@ s run eval/setup_mmlu_s.s
 ## 🔍 keyfunction
 
 ### `main()`
-入口point,read环境变量并Launchdownload.
+入口point,readenvironment variableandLaunchdownload.
 
 ### `setup_mmlu_data_s(data_root string) → mmlu_download_stats`
 主downloadcontroldevice.Execute 4  Step:
 1. CreateDirectory
-2. downloadall任务
-3. VerificationDataComplete性
+2. downloadalltask
+3. VerificationDataCompleteproperty
 4. GeneratestatisticsInformation
 
 ### `download_file_curl(url string, output_path string) → bool`
@@ -166,10 +166,10 @@ curl -sS -L --retry 3 --retry-delay 1 -o {output_path} "{url}"
 ```
 
 ### `count_csv_rows(csv_path string) → int`
-计算 CSV Filein of Dataline数(Not含标题line).
+calculation CSV Filein of Datalinenumber(Not含标题line).
 
 ### `get_task_category(task string) → string`
-根据任务名returnclass别:STEM | Social | Humanities | Other
+根据task名returnclass别:STEM | Social | Humanities | Other
 
 ---
 
@@ -190,7 +190,7 @@ brew install curl
 # Linux
 sudo apt-get install curl
 
-#  or Usage系统预装 of curl
+#  or Usagesystem预装 of curl
 which curl  # ViewInstallationlocation
 ```
 
@@ -201,13 +201,13 @@ which curl  # ViewInstallationlocation
 **resolve**:
 - ChecknetworkConnection
 - 确保可访问 HuggingFace
-- IncreaseRetry次数( in 代码in修改 `--retry 3` → `--retry 5`)
+- IncreaseRetry次number( in codeinmodification `--retry 3` → `--retry 5`)
 
 ### question 3: disk空间Not足
 
 **symptom**: downloadin途stop
 
-**need空间**: ~200MB (57  任务)
+**need空间**: ~200MB (57  task)
 
 **resolve**:
 ```bash
@@ -223,9 +223,9 @@ export NEURX_MMLU_DATA_ROOT="/mnt/large_disk/mmlu"
 **symptom**: Failed count > 0
 
 **resolve**:
-1. Checknetwork稳定性
-2. 手动RetryFailed of 任务
-3. View详细Error(添加 `-v`  to  curl)
+1. Checknetwork稳定property
+2. 手动RetryFailed of task
+3. ViewdetailedError(添加 `-v`  to  curl)
 
 ---
 
@@ -234,7 +234,7 @@ export NEURX_MMLU_DATA_ROOT="/mnt/large_disk/mmlu"
 downloadAfter completionVerificationData:
 
 ```bash
-# statisticsFile数量
+# statisticsFilenumber量
 ls data/mmlu/test/ | wc -l    # 应该是 57
 ls data/mmlu/dev/ | wc -l     # 应该是 57
 
@@ -244,7 +244,7 @@ du -sh data/mmlu/              # 应该是 ~200MB
 # ViewsampleData
 head -3 data/mmlu/test/abstract_algebra.csv
 
-# 计算总line数
+# calculation总linenumber
 wc -l data/mmlu/test/*.csv | tail -1
 ```
 
@@ -272,7 +272,7 @@ mmlu_dataset_state dataset = mmlu_data.load_mmlu_dataset("./data/mmlu")
 目前顺序download,approximately 2-5 minutes(取决于network).
 
 ### 2. 增量download
-如果某些Filehave存 in ,`download_file_curl` 会Skip(need添加Check).
+如果某些Filehavestore in ,`download_file_curl` 会Skip(need添加Check).
 
 ### 3. 断point续传
 Usage curl  of  `-C -` optionsupport断point续传:
@@ -282,11 +282,11 @@ cmd := "curl -sS -L -C - --retry 3 -o " + output_path + " \"" + url + "\""
 
 ---
 
-## 📝 源代码structure
+## 📝 源codestructure
 
 ```
 eval/setup_mmlu_s.s
-├── 57  任务列表
+├── 57  task列table
 │   ├── all_mmlu_stem_tasks()       (19 )
 │   ├── all_mmlu_social_tasks()     (13 )
 │   ├── all_mmlu_humanities_tasks() (8 )
@@ -294,7 +294,7 @@ eval/setup_mmlu_s.s
 │
 ├── Datastructure
 │   ├── mmlu_download_stats         (statisticsInformation)
-│   └── mmlu_csv_question           (question记录)
+│   └── mmlu_csv_question           (questionrecord)
 │
 ├── Main function
 │   ├── main()                      (入口)
@@ -304,7 +304,7 @@ eval/setup_mmlu_s.s
 └── Utility functions
     ├── download_file_curl()        (HTTPdownload)
     ├── get_task_category()         (分classquery)
-    ├── count_csv_rows()            (line计数)
+    ├── count_csv_rows()            (line计number)
     ├── verify_data_integrity()     (Verification)
     └── stringtools
         ├── string_int_to_string()
@@ -322,7 +322,7 @@ eval/setup_mmlu_s.s
    ```
 
 2. **⏳ integrationModel**
-   -  in  `run_mmlu_benchmark.s` inload实际ModelCheckpoint
+   -  in  `run_mmlu_benchmark.s` inloadactualModelCheckpoint
    - replacemodulo拟inference
 
 3. **⏳ RunEvaluation**
@@ -330,10 +330,10 @@ eval/setup_mmlu_s.s
    s run eval/run_mmlu_benchmark.s
    ```
 
-4. **⏳ analysis结果**
-   - 任务级accuracy
+4. **⏳ analysisresult**
+   - task级accuracy
    - class别级accuracy
-   - 与基准对标
+   - 与benchmark对标
 
 ---
 
@@ -341,19 +341,19 @@ eval/setup_mmlu_s.s
 
 ### 为什么Usage curl?
 
-- ✅ 系统通用tools(大多数系统都有)
+- ✅ systemgenerictools(大多numbersystem都有)
 - ✅ supportRetry and Timeout
 - ✅ Speed快、可靠
 - ✅ S Language可直接call
 
-### S Run时function
+### S Runtimefunction
 
-该程序Usage以下 S Run时function:
+该programUsage以下 S Runtimefunction:
 
 | function | description |
 |------|------|
 | `io_println(s string)` | 打印Output |
-| `io_get_env(key, default)` | read环境变量 |
+| `io_get_env(key, default)` | readenvironment variable |
 | `io_mkdir_recursive(path)` | CreateDirectory |
 | `runtime_file_exists(path)` | CheckFile |
 | `runtime_read_text_file(path)` | readFile |
@@ -370,7 +370,7 @@ eval/setup_mmlu_s.s
 
 1. View [README_MMLU.md](./README_MMLU.md) - Complete技术documentation
 2. View [QUICKSTART_MMLU.md](./QUICKSTART_MMLU.md) - Quick Startguide
-3. Check环境变量setting
+3. Checkenvironment variablesetting
 4. Verification curl Availability
 
 ---

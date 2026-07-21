@@ -25,7 +25,7 @@
 cd /home/shuwen/shuwen/train/neurx && bash scripts/train_medmcqa_sft.sh
 ```
 
-### way 2:分步Execute
+### way 2:分stepExecute
 
 ```bash
 # 1. Only convertData
@@ -39,7 +39,7 @@ make posttrain
 make posttrain-merge-lora
 ```
 
-### way 3:试Run(Not实际Training)
+### way 3:试Run(NotactualTraining)
 
 ```bash
 bash scripts/train_medmcqa_sft.sh --dry-run
@@ -102,7 +102,7 @@ cd /home/shuwen/shuwen/train/neurx
 make eval-medical
 ```
 
-### Optional:继续Alignment
+### Optional:continueAlignment
 ```bash
 # DPO Alignment(第2Phase)
 cd /home/shuwen/shuwen/train/medical/Post_train/step2_DPO
@@ -147,7 +147,7 @@ Edit `Makefile` in of Parameter:
 
 ```makefile
 # 改变 LoRA Size
-POSTTRAIN_LORA_RANK ?= 8        # 增大 to  16 以提高表现力
+POSTTRAIN_LORA_RANK ?= 8        # 增大 to  16 以提高table现力
 
 # 改变批Size( in ConfigurationFilein)
 # vim posttrain/sft/config.json  
@@ -176,4 +176,4 @@ nvidia-smi
 
 ---
 
-**最after一步**:Execute以下commandStartTraining!
+**最after一step**:Execute以下commandStartTraining!

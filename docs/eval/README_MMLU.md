@@ -2,7 +2,7 @@
 
 ## 概述
 
-这是为 NeurX framework构建 of Complete MMLU (Massive Multitask Language Understanding) 基准Evaluationframework.用于VerificationModel in  57  学科上 of 多任务理解能力.
+这是为 NeurX framework构建 of Complete MMLU (Massive Multitask Language Understanding) benchmarkEvaluationframework.用于VerificationModel in  57  学科上 of 多task理解能力.
 
 **目标**: Verification Qwen 0.5B Model达 to  78%+ MMLU accuracy
 
@@ -13,7 +13,7 @@ eval/
 ├── mmlu_data.s              # MMLU Dataloaddevice (376 line)
 ├── mmlu_evaluator.s         # MMLU 5-shot Evaluationpipeline (475 line)
 ├── run_mmlu_benchmark.s     # EvaluationRundevicescript (130 line)
-├── benchmark_eval.s         # 通用基准framework (have存 in )
+├── benchmark_eval.s         # genericbenchmarkframework (havestore in )
 └── README_MMLU.md           # 此documentation
 ```
 
@@ -23,10 +23,10 @@ eval/
 
 **function**: load and 管理 MMLU Dataset
 
-**核心structure**:
+**kernel心structure**:
 ```s
 struct mmlu_question {
-    string task_name        // 任务名 (e.g., "abstract_algebra")
+    string task_name        // task名 (e.g., "abstract_algebra")
     string question         // 题目文本
     string choice_a         // option A
     string choice_b         // option B
@@ -37,7 +37,7 @@ struct mmlu_question {
 }
 
 struct mmlu_dataset_state {
-    map[string][]mmlu_question questions_by_task  // 按任务Group
+    map[string][]mmlu_question questions_by_task  // 按taskGroup
     map[string][]mmlu_question dev_by_task        // Few-shot sample
     int total_questions
     int total_dev
@@ -45,27 +45,27 @@ struct mmlu_dataset_state {
 }
 ```
 
-**任务覆盖**:
-- **STEM** (19 任务): 数学、物理、化学、生物、计算机科学等
-- **Social Science** (13 任务): 经济学、政治学、心理学、法律等
-- **Humanities** (8 任务): 历史、文学、艺术、宗教等
-- **Other** (17 任务): medical、商业道德、Clinical知识等
+**task覆盖**:
+- **STEM** (19 task): mathematics、物理、化学、生物、calculation机科学etc
+- **Social Science** (13 task): 经济学、政治学、心理学、法律etc
+- **Humanities** (8 task): 历史、文学、艺术、宗教etc
+- **Other** (17 task): medical、商业道德、Clinical知识etc
 
-**总计**: 57  任务, ~14K Test题
+**总计**: 57  task, ~14K Test题
 
 ### 2. MMLU Evaluationdevice (`mmlu_evaluator.s`)
 
 **function**: Implementation 5-shot Evaluationprocess
 
-**核心process**:
+**kernel心process**:
 
 ```
 For each test question:
   1. 构建 5-shot prompt (带 5  Example)
   2. For each choice (A, B, C, D):
-     - 计算 continuation log-likelihood
+     - calculation continuation log-likelihood
      - P(choice | prompt)
-  3. 选择 argmax (按 token 数量归一化)
+  3. 选择 argmax (按 token number量normalization)
   4. 与正确答案比对
   5. 累计accuracy
 ```
@@ -79,7 +79,7 @@ func build_mmlu_fewshot_prompt(
     mmlu_question test_q
 ) string
 
-// Evaluation单 任务
+// Evaluation单 task
 func evaluate_mmlu_task(
     language_model model,
     string task_name,
@@ -88,7 +88,7 @@ func evaluate_mmlu_task(
     mmlu_eval_config cfg
 ) mmlu_task_result
 
-// RunComplete基准
+// RunCompletebenchmark
 func evaluate_mmlu_benchmark(
     language_model model,
     mmlu_dataset_state dataset,
@@ -98,7 +98,7 @@ func evaluate_mmlu_benchmark(
 
 **Output**:
 - 整体accuracy
-- 按任务accuracy (57  )
+- 按taskaccuracy (57  )
 - 按class别accuracy (STEM, Social Science, Humanities, Other)
 
 ### 3. EvaluationRundevice (`run_mmlu_benchmark.s`)
@@ -110,7 +110,7 @@ func evaluate_mmlu_benchmark(
 ```bash
 cd /Users/shuwen/shuwen/train/neurx
 
-# setting环境变量
+# settingenvironment variable
 export NEURX_ROOT="."
 export NEURX_MODEL_PATH="./model/Qwen2.5-0.5B-Instruct"
 export NEURX_MMLU_DATA_ROOT="./data/mmlu"
@@ -147,32 +147,32 @@ if should_eval(step, eval_interval) {
 }
 ```
 
-### 2. 与inference服务integration
+### 2. 与inferenceserviceintegration
 
  in  `inference/` moduleinVerificationModelQuality:
 
 ```s
-// 部署前Verification
+// deployment前Verification
 func verify_model_quality(string model_path) bool {
     model = load_model(model_path)
     dataset = load_mmlu_dataset(...)
     result = evaluate_mmlu_benchmark(model, dataset, cfg)
     
-    // 要求 >= 75% 才能部署
+    // 要求 >= 75% 才能deployment
     return result.overall_accuracy >= 0.75
 }
 ```
 
 ### 3. 与对标frameworkintegration
 
-与其他基准组合:
+与其他benchmarkcombination:
 
 ```s
 struct multi_benchmark_result {
     float mmlu_accuracy          // MMLU
-    float gsm8k_accuracy         // 数学inference
-    float humaneval_accuracy     // 代码能力
-    float truthfulqa_accuracy    // 真实性
+    float gsm8k_accuracy         // mathematicsinference
+    float humaneval_accuracy     // code能力
+    float truthfulqa_accuracy    // realproperty
 }
 
 func run_all_benchmarks(...) multi_benchmark_result {
@@ -207,7 +207,7 @@ question|choice_a|choice_b|choice_c|choice_d|answer
 // 自动 from Directoryload
 dataset = mmlu_data.load_mmlu_dataset("./data/mmlu")
 
-// 手动load特定任务
+// 手动loadspecifictask
 dev_examples = mmlu_data.load_mmlu_dev_examples(
     "./data/mmlu",
     "abstract_algebra",
@@ -222,9 +222,9 @@ test_questions = mmlu_data.load_mmlu_test_questions(
 
 ## Performance指标
 
-### expected基准
+### expectedbenchmark
 
-| Model | 规modulo | MMLU | 任务数 |
+| Model | 规modulo | MMLU | tasknumber |
 |------|------|------|--------|
 | GPT-3.5 | 175B | 71.4% | 57 |
 | Claude 3 Haiku | 15B | 75.9% | 57 |
@@ -234,9 +234,9 @@ test_questions = mmlu_data.load_mmlu_test_questions(
 
 ### Evaluation成本Estimated
 
-- 总题目数: 14,000
-- 平均标记数/题: 150
-- 总标记数: 2.1M
+- 总题目number: 14,000
+- average标记number/题: 150
+- 总标记number: 2.1M
 - inferenceTime (V100): ~2-3 hours
 - 成本: ~$50-100 (AWS g4dn.12xlarge)
 
@@ -256,19 +256,19 @@ Answer:
 
 ### 评分method
 
-对每 option计算 log-likelihood:
+对每 optioncalculation log-likelihood:
 
 ```
 P(answer | question) = exp(log_prob(answer_tokens))
 ```
 
-**归一化**: 按 token 数量除以 token 长度
+**normalization**: 按 token number量除以 token length
 
 ```
 score = sum(log_prob) / num_tokens
 ```
 
-选择分数最高 of option.
+选择分number最高 of option.
 
 ## 故障排查
 
@@ -290,7 +290,7 @@ data/
         └── ...
 ```
 
-### question 2: OOM (Memory溢出)
+### question 2: OOM (Memoryoverflow)
 
 **symptom**: GPU MemoryNot足
 
@@ -315,7 +315,7 @@ export NEURX_MMLU_BATCH_SIZE=8
 ### 1. 批Process
 
 ```s
-// 分批Evaluation相同任务 of 题目
+// 分批Evaluation相同task of 题目
 batch_size = 32
 for batch in chunks(test_questions, batch_size) {
     evaluate_batch(model, batch)
@@ -325,7 +325,7 @@ for batch in chunks(test_questions, batch_size) {
 ### 2. cache
 
 ```s
-// cachehaveEvaluation of 题目结果
+// cachehaveEvaluation of 题目result
 cache: map[string]float = {}
 if cache.contains(question_id) {
     return cache[question_id]
@@ -335,14 +335,14 @@ if cache.contains(question_id) {
 ### 3. parallel化
 
 ```s
-// distributedEvaluation (Not同任务 in Not同 GPU)
+// distributedEvaluation (Not同task in Not同 GPU)
 tasks_per_gpu = split_tasks(57, num_gpus)
 parallel_evaluate(tasks_per_gpu)
 ```
 
-## 生产部署
+## 生产deployment
 
-### 持续基准Test
+### 持续benchmarkTest
 
 每次ModelUpdateafter自动Run:
 
@@ -350,7 +350,7 @@ parallel_evaluate(tasks_per_gpu)
 #  in  CI/CD processin
 make eval-mmlu
 
-# Check结果
+# Checkresult
 if [ $(grep "accuracy" results.json | cut -d: -f2) -lt 0.75 ]; then
   echo "FAIL: Model accuracy below threshold"
   exit 1
@@ -361,9 +361,9 @@ fi
 
 ```
 artifacts/eval/
-├── mmlu_results_2026-07-20.json    # 详细结果
-├── mmlu_results_2026-07-20.csv     # 按任务
-└── mmlu_benchmark_report.md        # 可视化report
+├── mmlu_results_2026-07-20.json    # detailedresult
+├── mmlu_results_2026-07-20.csv     # 按task
+└── mmlu_benchmark_report.md        # visualizationreport
 ```
 
 ### 趋势跟踪
@@ -388,7 +388,7 @@ MMLU Accuracy Trend:
 1. ✅ Implementation MMLU Dataloaddevice
 2. ✅ Implementation 5-shot Evaluationpipeline
 3. ✅ CreateEvaluationRundevice
-4. ⏳ integration实际Modelload
-5. ⏳ 添加 GSM8K 数学inferenceEvaluation
-6. ⏳ 添加 HumanEval 代码能力Evaluation
-7. ⏳ 构建综合基准仪表板
+4. ⏳ integrationactualModelload
+5. ⏳ 添加 GSM8K mathematicsinferenceEvaluation
+6. ⏳ 添加 HumanEval code能力Evaluation
+7. ⏳ 构建综合benchmark仪table板

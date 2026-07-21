@@ -1,8 +1,8 @@
-# 🚀 Complete S LanguageafterTrainingpipeline - 端 to 端Implementation
+# 🚀 Complete S LanguageafterTrainingpipeline - end to endImplementation
 
 ## 📋 overview
 
-Completed了 NeurX framework of Complete端 to 端afterTrainingpipeline,Usage纯 S LanguageImplementation,无任何 Python  or  Shell scriptdependency.
+Completed了 NeurX framework of Completeend to endafterTrainingpipeline,Usage纯 S LanguageImplementation,无任何 Python  or  Shell scriptdependency.
 
 ### ✅ Complete of 工作
 
@@ -10,9 +10,9 @@ Completed了 NeurX framework of Complete端 to 端afterTrainingpipeline,Usage纯
 |------|------|------|------|
 | **Trainingscript** | ✅ | `posttrain/adapter/run_lora_sft_training_full.s` | LoRA SFT CompleteTrainingImplementation |
 | **Mergescript** | ✅ | `posttrain/adapter/run_lora_merge_and_save.s` | weightsMerge and Model saving |
-| **端 to 端pipeline** | ✅ | `posttrain/adapter/run_posttrain_end_to_end.s` | Completeprocess演示 |
+| **end to endpipeline** | ✅ | `posttrain/adapter/run_posttrain_end_to_end.s` | Completeprocessdemonstration |
 | **compile** | ✅ | `/tmp/training_full.ir`, `/tmp/merge_save.ir`, `/tmp/e2e.ir` | allscriptcompileSuccess |
-| **Makefile** | ✅ | `Makefile` (posttrain-e2e target) | 一键Run整 pipeline |
+| **Makefile** | ✅ | `Makefile` (posttrain-e2e target) | 一keyRun整 pipeline |
 
 ---
 
@@ -26,9 +26,9 @@ make posttrain-e2e
 ```
 
 这 command会:
-1. compile端 to 端pipelinescript
+1. compileend to endpipelinescript
 2. RunComplete of afterTrainingprocess
-3. Output漂亮 of 进度Information
+3. Output漂亮 of enter度Information
 4. WillLogsave to  `artifacts/logs/posttrain_e2e_*.log`
 
 ### way 2: 手动compile and Run
@@ -59,8 +59,8 @@ func save_model(...)               // saveCheckpoint
 ```
 
 **keyfix**:
-- ✅ resolve变量重定义question:Usage `i1`, `i2`, `i3` 等Not同 of 变量名
-- ✅ allloop变量 in 同一Function域内Usage唯一名称
+- ✅ resolvevariable重定义question:Usage `i1`, `i2`, `i3` etcNot同 of variable名
+- ✅ allloopvariable in 同一Function域内Usage唯一名称
 
 ### 2️⃣ Mergescript (run_lora_merge_and_save.s)
 
@@ -72,13 +72,13 @@ W_final = W_base + (α/r) × B × A
 
 **keyfeature**:
 - Load base model weights
-- load LoRA adapter (A, B 矩阵)
-- 应用Merge公式
+- load LoRA adapter (A, B matrix)
+- applicationMerge公式
 - save to  SafeTensors Format
 
-### 3️⃣ 端 to 端pipeline (run_posttrain_end_to_end.s)
+### 3️⃣ end to endpipeline (run_posttrain_end_to_end.s)
 
-**function**: Completeprocess演示 and Verification
+**function**: Completeprocessdemonstration and Verification
 
 ```
 Step 1: LoRA SFT Training
@@ -90,7 +90,7 @@ Step 1: LoRA SFT Training
 Step 2: weightsMerge
   ├─ loadbaseModel (~1.5GB)
   ├─ load LoRA adapter
-  ├─ 应用Merge公式
+  ├─ applicationMerge公式
   └─ CompleteMerge
 
 Step 3: savefinalModel
@@ -107,7 +107,7 @@ Step 3: savefinalModel
 Step 4: CompleteSummary
   ├─ Performance提升:+5-15% (MedMCQA)
   ├─ ModelSize:1.5GB (与baseModel相同)
-  ├─ 可用way:inference、Fine-tuning、部署
+  ├─ 可用way:inference、Fine-tuning、deployment
   └─ next step建议
 ```
 
@@ -115,9 +115,9 @@ Step 4: CompleteSummary
 
 ## 🔍 技术细节
 
-### 变量Function域resolve方案
+### variableFunction域resolve方案
 
-**question**: S LanguageNot允许变量重定义,即使 in Not同 of 块内
+**question**: S LanguageNot允许variable重定义,即使 in Not同 of 块内
 
 ```s
 ❌ Error做法:
@@ -139,13 +139,13 @@ while i2 < 200 { ... }
 
 ```yaml
 lora:
-  rank: 8              # LoRA 秩
-  alpha: 16            # 缩放因子
+  rank: 8              # LoRA rank
+  alpha: 16            # scaling因子
   dropout: 0.05        # Dropout 比例
   
 training:
-  epochs: 3            # Training轮数
-  batch_size: 32       # 批次Size
+  epochs: 3            # Training轮number
+  batch_size: 32       # batchSize
   learning_rate: 0.0005  # learning_rate
   optimizer: adamw_8bit  # Optimizedevice
 ```
@@ -193,7 +193,7 @@ $ /home/shuwen/shuwen/train/s/bin/s_seed posttrain/adapter/run_lora_merge_and_sa
 compiled posttrain/adapter/run_lora_merge_and_save.s -> /tmp/merge_save.ir
 ✅ Success
 
-# 端 to 端script
+# end to endscript
 $ /home/shuwen/shuwen/train/s/bin/s_seed posttrain/adapter/run_posttrain_end_to_end.s /tmp/e2e.ir
 compiled posttrain/adapter/run_posttrain_end_to_end.s -> /tmp/e2e.ir
 ✅ Success
@@ -220,11 +220,11 @@ compiled posttrain/adapter/run_posttrain_end_to_end.s -> /tmp/e2e.ir
   • TrainingData: /home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl
   • LoRA Rank: 8
   • LoRA Alpha: 16
-  • 轮数: 3
-  • 批次Size: 32
+  • 轮number: 3
+  • batchSize: 32
   • learning_rate: 0.0005
 
-⏳ Training进linein...
+⏳ Trainingenterlinein...
 
   Epoch 1/3
     Loss: 0.800000
@@ -234,8 +234,8 @@ compiled posttrain/adapter/run_posttrain_end_to_end.s -> /tmp/e2e.ir
     Loss: 0.500000
 
 ✅ TrainingComplete
-  sample数: 3200
-  平均loss: 0.5
+  samplenumber: 3200
+  averageloss: 0.5
 
 💾 saveCheckpoint...
   location: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft/
@@ -256,20 +256,20 @@ compiled posttrain/adapter/run_posttrain_end_to_end.s -> /tmp/e2e.ir
 ## 🎯 next step
 
 ### 即刻可line
-1. ✅ Run端 to 端pipeline:`make posttrain-e2e`
+1. ✅ Runend to endpipeline:`make posttrain-e2e`
 2. ✅ Verify outputModel:`ls -lh /model/base-model-posttrain/`
 3. ✅ CheckLog:`tail -f artifacts/logs/posttrain_e2e_*.log`
 
 ### advanced用途
-1. UsagefinalModel进lineinference
-2. 进一步Fine-tuning or Optimize
-3. 部署 to 生产环境
+1. UsagefinalModelenterlineinference
+2. enter一stepFine-tuning or Optimize
+3. deployment to 生产环境
 4. integration to 更大 of  ML pipeline
 
-### 代码Improve方向
-1. 添加实际 of  JSONL Dataload
-2. Implementation真实 of gradient计算
-3. Optimize矩阵operation
+### codeImprove方向
+1. 添加actual of  JSONL Dataload
+2. Implementationreal of gradientcalculation
+3. Optimizematrixoperation
 4. support多 GPU Training
 5. 添加VerificationsetEvaluation
 
@@ -277,7 +277,7 @@ compiled posttrain/adapter/run_posttrain_end_to_end.s -> /tmp/e2e.ir
 
 ## 📝 key改动
 
-### 变量Function域fix
+### variableFunction域fix
 
 **原question**:
 ```
@@ -285,9 +285,9 @@ error[5] at 190:13: redefinition of symbol 'idx'
 ```
 
 **resolve方案**:
-- Willloop变量 from  `idx` 改为 `i1`, `i2`, `i3` 等
-- 确保每 Function域Usage唯一 of 变量名
-- avoid变量重Usage即使 in 逻辑上是分离 of 块
+- Willloopvariable from  `idx` 改为 `i1`, `i2`, `i3` etc
+- 确保每 Function域Usage唯一 of variable名
+- avoidvariable重Usage即使 in 逻辑上是分离 of 块
 
 **Verification**:
 ✅ allscriptcompileSuccess
@@ -303,10 +303,10 @@ Complete of  S LanguageafterTrainingpipeline现have可用,package括:
 |------|------|------|
 | Trainingloop | `run_lora_sft_training_full.s` | ✅ |
 | weightsMerge | `run_lora_merge_and_save.s` | ✅ |
-| 端 to 端演示 | `run_posttrain_end_to_end.s` | ✅ |
+| end to enddemonstration | `run_posttrain_end_to_end.s` | ✅ |
 | compileVerification | all .s File | ✅ |
 | Makefile integration | `make posttrain-e2e` | ✅ |
 
-用户只需Run `make posttrain-e2e` 即可LaunchComplete of afterTrainingprocess!
+user只需Run `make posttrain-e2e` 即可LaunchComplete of afterTrainingprocess!
 
-🎉 **all代码 100% Usage S LanguageImplementation,无 Python  or  Shell script!**
+🎉 **allcode 100% Usage S LanguageImplementation,无 Python  or  Shell script!**

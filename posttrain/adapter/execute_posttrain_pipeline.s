@@ -6,7 +6,7 @@ use std.io.println
 // execute_posttrain_pipeline.s - Complete of afterTrainingExecutescript
 // ============================================================================
 //
-// 这 scriptWill逐步Execute整 afterTrainingprocess:
+// 这 scriptWill逐stepExecute整 afterTrainingprocess:
 //   1. verifyconfiguration
 //   2. Execute LoRA SFT Training
 //   3. merge LoRA adapter to basemodel
@@ -115,7 +115,7 @@ func step_verify_environment() int {
     println_subheader("Step 1: verify环境")
     
     println("")
-    println("🔍 verify项目structure and file...")
+    println("🔍 verifyprojectstructure and file...")
     println("")
     
     println("  ✓ basemodelpath")
@@ -161,14 +161,14 @@ func step_show_configuration() int {
     
     println("  Training超Parameter:")
     println("    • method        : SFT (Supervised Fine-Tuning)")
-    println("    • 轮数        : 3")
-    println("    • 批次size    : 32")
+    println("    • 轮number        : 3")
+    println("    • batchsize    : 32")
     println("    • learning_rate      : 0.000500")
     println("    • 调度device      : cosine")
-    println("    • 预热步数    : 100")
+    println("    • 预热stepnumber    : 100")
     println("    • Optimizedevice      : adamw_8bit")
     println("    • gradient裁剪    : 1.00")
-    println("    • weights衰减    : 0.0100")
+    println("    • weightsdecay    : 0.0100")
     println("")
     
     println("  outputconfiguration:")
@@ -212,7 +212,7 @@ func step_run_lora_training() int {
     println("    • training_state.json")
     println("")
     
-    println("⏳ Training进linein... (此为modulo拟Step)")
+    println("⏳ Trainingenterlinein... (此为modulo拟Step)")
     println("")
     
     0
@@ -232,7 +232,7 @@ func step_merge_lora() int {
     println("  mergeprocess:")
     println("    1️⃣  Load base model weights: Qwen2.5-0.5B-Instruct")
     println("    2️⃣  load LoRA adapter: adapter_model.safetensors")
-    println("    3️⃣  应用mergeFormula: W_new = W_base + (α/r) × B × A")
+    println("    3️⃣  applicationmergeFormula: W_new = W_base + (α/r) × B × A")
     println("    4️⃣  saveCompletemergemodel to : base-model-posttrain")
     println("")
     
@@ -246,7 +246,7 @@ func step_merge_lora() int {
     println("    /home/shuwen/shuwen/train/neurx/posttrain/adapter/run_lora_merge.s")
     println("")
     
-    println("⏳ merge进linein... (此为modulo拟Step)")
+    println("⏳ mergeenterlinein... (此为modulo拟Step)")
     println("")
     
     0
@@ -326,7 +326,7 @@ func main() int {
     println_separator()
     println("")
     
-    println("📚 详细Stepdescription:")
+    println("📚 detailedStepdescription:")
     println("")
     println("1. compileExecutescript:")
     println("   cd /home/shuwen/shuwen/train/neurx")
@@ -337,7 +337,7 @@ func main() int {
     println("   make posttrain-sft-complete")
     println("")
     
-    println("3. mergemodel并save:")
+    println("3. mergemodelandsave:")
     println("   make posttrain-merge-to-model")
     println("")
     

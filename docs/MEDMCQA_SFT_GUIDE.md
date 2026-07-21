@@ -5,15 +5,15 @@
 - **Data来源**: `/home/shuwen/shuwen/train/dataset/medmcqa/train.json`
 - **总Data量**: 182,822 medical多选题
 - **Format**: JSONL (每line一  JSON object)
-- **Data字段**:
+- **Datafield**:
   - `question`: Medical question
   - `opa`, `opb`, `opc`, `opd`: 四 option
   - `cop`: 正确答案index (0-3)
-  - `exp`: 详细解释
+  - `exp`: detailed解释
   - `subject_name`: medical学科
   - `topic_name`: 话题
 
-## 🚀 Quick Start (3步)
+## 🚀 Quick Start (3step)
 
 ### 1️⃣ ConvertDataset to  SFT Format
 
@@ -38,7 +38,7 @@ bash scripts/convert_medmcqa.sh
 
 ### 2️⃣ Update Makefile Configuration
 
-Edit `/home/shuwen/shuwen/train/neurx/Makefile`,修改第 107 line:
+Edit `/home/shuwen/shuwen/train/neurx/Makefile`,modification第 107 line:
 
 ```makefile
 # 旧Configuration
@@ -60,7 +60,7 @@ make posttrain
 tail -f artifacts/logs/posttrain_*.log
 ```
 
-## 📊 expected结果
+## 📊 expectedresult
 
 | Phase | Time | Output |
 |------|------|------|
@@ -79,7 +79,7 @@ POSTTRAIN_LORA_ALPHA ?= 16      # LoRA alpha
 POSTTRAIN_LORA_RANK ?= 8        # LoRA rank
 ```
 
-### 修改TrainingData量
+### modificationTrainingData量
 
 ```bash
 # 只Usage前 5000 条DataTest
@@ -100,7 +100,7 @@ echo "Train examples:" && wc -l dataset/medmcqa_sft/train.jsonl
 echo "Val examples:" && wc -l dataset/medmcqa_sft/val.jsonl
 ```
 
-## 📈 monitoringTraining进度
+## 📈 monitoringTrainingenter度
 
 ```bash
 # ViewTrainingLog
@@ -144,9 +144,9 @@ ls -lh /home/shuwen/shuwen/train/dataset/medmcqa/train.json
 head -1 /home/shuwen/shuwen/train/dataset/medmcqa/train.json | python3 -m json.tool
 ```
 
-### question2: Training报错 "DataFileNot存 in "
+### question2: Training报错 "DataFileNotstore in "
 ```bash
-# ConfirmOutputDirectory存 in 
+# ConfirmOutputDirectorystore in 
 ls -lh /home/shuwen/shuwen/train/neurx/dataset/medmcqa_sft/
 
 # 重新ConvertData
@@ -154,14 +154,14 @@ rm -rf /home/shuwen/shuwen/train/neurx/dataset/medmcqa_sft/
 bash scripts/convert_medmcqa.sh
 ```
 
-### question3: GPU 显存Not足
+### question3: GPU 显storeNot足
 ```bash
 # 减少 batch size ( in  Makefile in)
 #  or 减少TrainingData量
 head -50000 dataset/medmcqa_sft/train.jsonl > dataset/medmcqa_sft/train_reduced.jsonl
 ```
 
-## 📝 DataFormat对应关系
+## 📝 DataFormat对应relation
 
 ```
 MedMCQA OriginalFormat:
@@ -188,7 +188,7 @@ SFT Format:
 
 ## 🔄 after续Step(Optional)
 
-TrainingAfter completion,你可以继续:
+TrainingAfter completion,你可以continue:
 
 1. **DPO Alignment** (Step 2)
    ```bash
@@ -197,8 +197,8 @@ TrainingAfter completion,你可以继续:
    ```
 
 2. **GRPO Optimize** (Step 3)
-   - need独立 of 奖励Model
-   - Usage vLLM 进line回滚Generate
+   - needindependence of 奖励Model
+   - Usage vLLM enterlinerollbackGenerate
 
 3. **Model评测**
    ```bash
@@ -206,10 +206,10 @@ TrainingAfter completion,你可以继续:
    make eval-medical
    ```
 
-## 📚 相关documentation
+## 📚 correlationdocumentation
 
 - NeurX SFT framework: `posttrain/sft/README_SFT.md`
-- MedMCQA 详细description: `posttrain/adapter/README_PEFT.md`
+- MedMCQA detaileddescription: `posttrain/adapter/README_PEFT.md`
 - medical评测framework: `eval/README_MEDICAL_EVAL.md`
 - afterTrainingCompleteguide: `posttrain/MEDICAL_INTEGRATION_GUIDE.md`
 

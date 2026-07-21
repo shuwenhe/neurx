@@ -22,7 +22,7 @@ Remove:
 ### Layer 3: Citation Removal
 Remove:
 - Reference citations: [1], [2-3], [1,2]
-- Figure/table references: (图1), (Table 2)
+- Figure/table references: (graph1), (Table 2)
 - Cross-references: (参见"...")
 
 ### Layer 4: Theme Extraction

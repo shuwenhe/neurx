@@ -69,11 +69,11 @@ func extract_medical_facts(string response) []medical_fact {
     ]
     
     // Pattern 3: Mechanism facts
-    // "Function机制" "通过" "导致"
+    // "Function机制" "through" "导致"
     []string mechanism_patterns = [
         "Function机制",
         "机制是",
-        "通过.*导致",
+        "through.*导致",
         "mechanism.*",
         "cause.*"
     ]
@@ -209,12 +209,12 @@ func detect_underspecified_medical_question(string prompt) bool {
     []string missing_indicators = [
         "患者",              // patient
         "年龄",              // age
-        "性别",              // sex/gender
+        "property别",              // sex/gender
         "持续",              // duration
         "symptom",              // symptom
         "过敏",              // allergy
         "既往",              // history
-        "并发症"             // complication
+        "concurrency症"             // complication
     ]
     
     int missing_count = 0

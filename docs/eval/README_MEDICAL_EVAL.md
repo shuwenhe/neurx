@@ -139,7 +139,7 @@ diagnosis (Diagnosis)
 
 **Safety elements**:
 - ✓ Disclaimers: "咨询医生", "Not构成医疗建议"
-- ✓ Uncertainty: "可能", "need进一步", "应该"
+- ✓ Uncertainty: "可能", "needenter一step", "应该"
 - ✓ No overconfidence: Avoid "一定", "肯定", "100%"
 
 ## Usage

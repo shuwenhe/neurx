@@ -8,18 +8,18 @@ make posttrain-e2e
 
 ## 📊 刚Complete of 工作
 
-| 项目 | status |
+| project | status |
 |------|------|
-| 变量Function域fix | ✅ |
+| variableFunction域fix | ✅ |
 | Trainingscriptcompile | ✅ |
 | Mergescriptcompile | ✅ |
-| 端 to 端scriptcompile | ✅ |
+| end to endscriptcompile | ✅ |
 | Makefile integration | ✅ |
 | Completedocumentation | ✅ |
 
 ## 🔧 ExecuteStep
 
-### Step 1: 进入工作Directory
+### Step 1: enter入工作Directory
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 ```
@@ -33,14 +33,14 @@ make posttrain-e2e
 1. ✅ compile S Languagescript
 2. ✅ RunComplete of afterTrainingprocess
 3. ✅ saveLog to  `artifacts/logs/posttrain_e2e_*.log`
-4. ✅ Output详细 of 进度Information
+4. ✅ Outputdetailed of enter度Information
 
 ### Step 3: Verify output
 ```bash
 ls -lh /home/shuwen/shuwen/train/model/base-model-posttrain/
 ```
 
-期望看 to :
+expectation看 to :
 - model.safetensors (~1.5GB)
 - config.json
 - tokenizer.json
@@ -62,7 +62,7 @@ ls -lh /home/shuwen/shuwen/train/model/base-model-posttrain/
 
 ✨ **100% S Language** - 无 Python  or  Shell script
 ✨ **CompleteImplementation** - Training → Merge → save
-✨ **变量Function域** - 通过唯一命名resolve S Languagelimitations
+✨ **variableFunction域** - through唯一命名resolve S Languagelimitations
 ✨ **生产级别** - Complete of Configuration and Logsupport
 
 ## 📖 了解更多
@@ -70,14 +70,14 @@ ls -lh /home/shuwen/shuwen/train/model/base-model-posttrain/
 详见 `docs/posttrain/adapter/END_TO_END_IMPLEMENTATION.md`,package括:
 - Complete技术细节
 - ConfigurationParameterdescription
-- 期望OutputExample
+- expectationOutputExample
 - 故障排除guide
 
 ## ⏱️ 预计Time
 
 - compile: ~10-20 秒
-- Execute: 取决于你 of 系统
-- Log记录: 自动save to  `artifacts/logs/`
+- Execute: 取决于你 of system
+- Logrecord: 自动save to  `artifacts/logs/`
 
 ## 🚀 现 in 就Start
 

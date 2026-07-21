@@ -8,7 +8,7 @@ use std.io.println
 //
 // simplified版afterTrainingpipelineconfigurationscript
 // function:
-//   1. 显示afterTrainingconfiguration
+//   1. displayafterTrainingconfiguration
 //   2. verifyInputoutputpath
 //   3. GenerateExecute建议
 

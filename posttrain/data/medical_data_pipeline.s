@@ -59,14 +59,14 @@ func clean_medical_content(string raw_content) string {
     cleaned = remove_pattern(cleaned, "Translator:.*\\n")
     
     // Remove evidence review statements
-    cleaned = remove_pattern(cleaned, "all专题都会依据新发表 of 证据.*[.\\n]")
+    cleaned = remove_pattern(cleaned, "all专题都会依据新发table of 证据.*[.\\n]")
     
     // Remove citations [1], [2-3], [1,2]
     cleaned = remove_pattern(cleaned, "\\[\\d+(?:[-,]\\d+)*\\]")
     
     // Remove figure/table references
-    cleaned = remove_pattern(cleaned, "(图片?\\d+)")
-    cleaned = remove_pattern(cleaned, "(表\\d+)")
+    cleaned = remove_pattern(cleaned, "(graph片?\\d+)")
+    cleaned = remove_pattern(cleaned, "(table\\d+)")
     cleaned = remove_pattern(cleaned, "\\(Figure \\d+\\)")
     cleaned = remove_pattern(cleaned, "\\(Table \\d+\\)")
     
@@ -108,9 +108,9 @@ func extract_disease_terms(string title, string subtitle) []string {
     // Non-disease terms to filter out (100+ words)
     []string non_disease_terms = [
         "筛查", "diagnosis", "治疗", "Evaluation", "管理",
-        "随访", "guide", "标准", "策略", "概述",
-        "患病率", "发病率", "死亡率", "生存率",
-        "综述", "analysis", "研究", "调查", "图表",
+        "随访", "guide", "standard", "策略", "概述",
+        "患病率", "发病率", "死亡率", "生store率",
+        "综述", "analysis", "研究", "调查", "chart",
         "screening", "diagnosis", "treatment", "management"
     ]
     

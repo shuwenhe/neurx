@@ -35,7 +35,7 @@ func main() int {
     
     println("✅ Verifying output...")
     println("  ✓ allfileComplete")
-    println("  ✓ formatverify通过")
+    println("  ✓ formatverifythrough")
     println("")
     
     println("=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=")
@@ -54,9 +54,9 @@ func main() int {
     println("")
     
     println("🚀 现 in 可以:")
-    println("  • Usagemodel进lineinference")
-    println("  • 进一步Fine-tuning")
-    println("  • 部署 to 生产环境")
+    println("  • Usagemodelenterlineinference")
+    println("  • enter一stepFine-tuning")
+    println("  • deployment to 生产环境")
     println("")
     
     0

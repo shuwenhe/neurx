@@ -7,7 +7,7 @@
 ```bash
 cd /Users/shuwen/shuwen/train/neurx
 
-# 自动download并ReadyData (首次need3-5minutes)
+# 自动downloadandReadyData (首次need3-5minutes)
 bash scripts/setup_mmlu_data.sh
 
 # VerificationData
@@ -44,10 +44,10 @@ Dev set:   285 examples across 57 tasks
 Total:     14,327 items
 ```
 
-### 2. Run MMLU 基准Evaluation
+### 2. Run MMLU benchmarkEvaluation
 
 ```bash
-# setting环境变量
+# settingenvironment variable
 export NEURX_ROOT="."
 export NEURX_MODEL_PATH="./model/Qwen2.5-0.5B-Instruct"
 export NEURX_MMLU_DATA_ROOT="./data/mmlu"
@@ -58,7 +58,7 @@ export NEURX_MMLU_BATCH_SIZE=32
 s run eval/run_mmlu_benchmark.s
 ```
 
-### 3. View结果
+### 3. Viewresult
 
 EvaluationAfter completion会看 to :
 
@@ -94,24 +94,24 @@ eval/
 │
 ├── mmlu_evaluator.s         # 🧠 Evaluation逻辑
 │   ├─ 5-shot prompt 构建
-│   ├─ Log-likelihood 计算
+│   ├─ Log-likelihood calculation
 │   └─ accuracy汇总
 │
 ├── run_mmlu_benchmark.s     # 🏃 Rundevice
 │   ├─ Modelload
 │   ├─ Data装载
 │   ├─ EvaluationExecute
-│   └─ 结果展示
+│   └─ result展示
 │
 └── README_MMLU.md           # 📖 Completedocumentation
 ```
 
 ## 🔧 Configurationoption
 
-| 环境变量 | default值 | description |
+| environment variable | defaultvalue | description |
 |---------|--------|------|
 | `NEURX_MMLU_DATA_ROOT` | `./data/mmlu` | MMLU DataDirectory |
-| `NEURX_MMLU_SHOTS` | `5` | Few-shot sample数 |
+| `NEURX_MMLU_SHOTS` | `5` | Few-shot samplenumber |
 | `NEURX_MMLU_BATCH_SIZE` | `32` | 批ProcessSize |
 | `NEURX_MODEL_PATH` | `./model/Qwen2.5-0.5B-Instruct` | ModelPath |
 
@@ -127,15 +127,15 @@ export NEURX_MMLU_BATCH_SIZE=8
 s run eval/run_mmlu_benchmark.s
 ```
 
-## 📈 理解结果
+## 📈 理解result
 
 ### accuracy指标
 
 - **Overall Accuracy**: all 14K 题目 of 整体accuracy
 - **Category Accuracy**: 按 STEM/Social/Humanities/Other 分class
-- **Task Accuracy**: 每  57  任务 of accuracy
+- **Task Accuracy**: 每  57  task of accuracy
 
-### 对标基准
+### 对标benchmark
 
 | Model | Parameter量 | MMLU | 来源 |
 |------|--------|------|------|
@@ -148,22 +148,22 @@ s run eval/run_mmlu_benchmark.s
 
 如果accuracy低于目标 (78%):
 
-### 1. analysisError分布
+### 1. analysisErrordistribution
 ```bash
-# Output详细Erroranalysis
+# OutputdetailedErroranalysis
 export NEURX_DEBUG_EVAL=1
 s run eval/run_mmlu_benchmark.s > eval_debug.log
 ```
 
-### 2. 重pointImprove弱任务
-View STEM  or  Social Science  of 详细Error,针对性Improve.
+### 2. 重pointImprove弱task
+View STEM  or  Social Science  of detailedError,针对propertyImprove.
 
 ### 3. IncreaseTrainingData
- in 弱任务Data上进line更多 SFT Training.
+ in 弱taskData上enterline更多 SFT Training.
 
 ### 4. 调整Model超参
-- Increase上下文长度 (support更长 prompt)
-- 提高Model容量
+- Increase上下文length (support更长 prompt)
+- 提高Modelcapacity
 - Optimizelearning_rate
 
 ## 📝 integration to Trainingprocess
@@ -223,7 +223,7 @@ data/mmlu/
 2. Tokenizer 是否match
 3. Prompt Format是否正确
 
-## 🔗 相关资源
+## 🔗 correlation资源
 
 - **Completedocumentation**: [eval/README_MMLU.md](./README_MMLU.md)
 - **MMLU 论文**: https://arxiv.org/abs/2009.03300
@@ -233,19 +233,19 @@ data/mmlu/
 ## ✅ Check清单
 
 - [ ] havedownload MMLU Data (57 tasks)
-- [ ] haveVerificationDataComplete性 (~14K 题目)
-- [ ] havesetting环境变量
-- [ ] haveRun基准Evaluation
-- [ ] have记录基准结果
+- [ ] haveVerificationDataCompleteproperty (~14K 题目)
+- [ ] havesettingenvironment variable
+- [ ] haveRunbenchmarkEvaluation
+- [ ] haverecordbenchmarkresult
 - [ ] haveintegration to Trainingprocess
 
 ## 📊 next step
 
 **立即line动** (本周):
 1. ✅ 搭建 MMLU framework (Completed)
-2. ⏳ Run初始基准 (48-52% expected)
-3. ⏳ 添加 GSM8K 数学inferenceEvaluation
-4. ⏳ 添加 HumanEval 代码能力Evaluation
+2. ⏳ Run初始benchmark (48-52% expected)
+3. ⏳ 添加 GSM8K mathematicsinferenceEvaluation
+4. ⏳ 添加 HumanEval code能力Evaluation
 
 **Optimize方向** (2-4周):
 - inferenceOptimize (Medusa 推测decoding)

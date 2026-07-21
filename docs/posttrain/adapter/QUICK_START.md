@@ -2,7 +2,7 @@
 
 ## 🎯 概述
 
-本guideWill指导您如何Usage NeurX framework对 **Qwen2.5-0.5B-Instruct** Model进lineComplete of afterTraining,并WillGenerate of Model saving to  `/home/shuwen/shuwen/train/model` Directory.
+本guideWill指导您如何Usage NeurX framework对 **Qwen2.5-0.5B-Instruct** ModelenterlineComplete of afterTraining,andWillGenerate of Model saving to  `/home/shuwen/shuwen/train/model` Directory.
 
 ### keyInformation
 - 📍 **baseModel**: `/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct`
@@ -15,7 +15,7 @@
 
 ## 📋 前置condition
 
-Check以下File是否存 in :
+Check以下File是否store in :
 
 ```bash
 # baseModel
@@ -34,14 +34,14 @@ ls /home/shuwen/shuwen/train/s/bin/s_seed
 
 ---
 
-## ⚡ 快速Execute (3 步)
+## ⚡ 快速Execute (3 step)
 
-### Step 1: 显示 and VerificationConfiguration
+### Step 1: display and VerificationConfiguration
 
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 
-# compile并RunConfigurationscript
+# compileandRunConfigurationscript
 /home/shuwen/shuwen/train/s/bin/s_seed \
   posttrain/adapter/run_posttrain_pipeline.s \
   /tmp/posttrain_config.ir
@@ -100,7 +100,7 @@ artifacts/logs/
 └── training.log                 ← TrainingLog
 ```
 
-### Step 3: MergeModel并save
+### Step 3: MergeModelandsave
 
 ```bash
 # compileMergescript
@@ -140,8 +140,8 @@ model:
 ### LoRA Parameter
 ```yaml
 lora:
-  rank: 8              # 秩Size (Parameter效率)
-  alpha: 16            # 缩放因子
+  rank: 8              # rankSize (Parameterefficiency)
+  alpha: 16            # scaling因子
   dropout: 0.05        # LoRA dropout
 ```
 
@@ -189,11 +189,11 @@ TrainingAfter completionVerificationGenerate of File:
 ```bash
 # Check LoRA adapter
 ls -lah /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft/
-# 应该显示: adapter_model.safetensors, adapter_config.json
+# 应该display: adapter_model.safetensors, adapter_config.json
 
 # CheckfinalModel
 ls -lah /home/shuwen/shuwen/train/model/base-model-posttrain/
-# 应该显示: model.safetensors, config.json, tokenizer.json, ...
+# 应该display: model.safetensors, config.json, tokenizer.json, ...
 
 # ViewModelSize
 du -sh /home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors
@@ -206,7 +206,7 @@ tail -50 /home/shuwen/shuwen/train/neurx/artifacts/logs/training.log
 
 ## 🛠️ FAQ
 
-### Q: 如何修改TrainingParameter?
+### Q: 如何modificationTrainingParameter?
 **A:** Edit `/home/shuwen/shuwen/train/neurx/configs/posttrain.yaml`,然after重新RunTrainingscript.
 
 ### Q: Training因为 GPU MemoryNot足而Failed?
@@ -222,7 +222,7 @@ lora:
 ### Q: 如何Restorein断 of Training?
 **A:** Check `artifacts/checkpoints/lora_sft/training_state.json` in of status,然after重新Runscript.
 
-### Q: finalModel存Where?
+### Q: finalModelstoreWhere?
 **A:** Complete of afterTrainingModel saving in :
 ```
 /home/shuwen/shuwen/train/model/base-model-posttrain/
@@ -230,7 +230,7 @@ lora:
 
 ---
 
-## 📚 相关documentation
+## 📚 correlationdocumentation
 
 | documentation | Path |
 |------|------|
@@ -252,10 +252,10 @@ TrainingAfter completion,您可以:
    tokenizer = AutoTokenizer.from_pretrained('/home/shuwen/shuwen/train/model/base-model-posttrain')"
    ```
 
-2. **部署Model**
+2. **deploymentModel**
    ```bash
    # Usage Hugging Face  of inference API
-   #  or 部署 to 私有Server
+   #  or deployment to privateServer
    ```
 
 3. **EvaluationPerformance**
@@ -273,11 +273,11 @@ TrainingAfter completion,您可以:
 - **LoRA Rank**: 8 适合小型Model,大型Model可用 16-32
 - **Batch Size**: 根据 GPU Memory调整,32 通常是好 of 起point
 - **learning_rate**: 0.0005 对 LoRA 通常很好,可尝试 0.0001-0.001
-- **epochs**: 3 是基准,可根据DatasetSize调整为 1-5
+- **epochs**: 3 是benchmark,可根据DatasetSize调整为 1-5
 
 ---
 
-**最after修改:** 2026-07-21  
+**最aftermodification:** 2026-07-21  
 **framework:** NeurX  
 **编程Language:** S Language (allscript)  
 **support:** 详见 POSTTRAIN_EXECUTION_GUIDE.md

@@ -63,13 +63,13 @@ training:
   # Trainingmethod (Training method: sft, dpo, grpo)
   training_method: sft
   
-  # Training周期 (Number of epochs)
+  # Trainingcycle (Number of epochs)
   num_epochs: 3
   
-  # 批次Size (Batch size)
+  # batchSize (Batch size)
   batch_size: 32
   
-  # gradient累积步数 (Gradient accumulation steps)
+  # gradient累积stepnumber (Gradient accumulation steps)
   gradient_accumulation_steps: 1
   
   # learning_rate (Learning rate)
@@ -78,13 +78,13 @@ training:
   # learning_rate调度device (Learning rate scheduler)
   lr_scheduler: cosine
   
-  # 预热步数 (Warmup steps)
+  # 预热stepnumber (Warmup steps)
   warmup_steps: 100
   
-  # 最大Training步数 (Maximum training steps)
+  # maximumTrainingstepnumber (Maximum training steps)
   max_steps: -1
   
-  # weights衰减 (Weight decay)
+  # weightsdecay (Weight decay)
   weight_decay: 0.01
   
   # Optimizedevice (Optimizer)
@@ -104,7 +104,7 @@ merge:
   # Merge比例 (Merge ratio)
   merge_ratio: 1.0
 
-# 系统Configuration (System Configuration)
+# systemConfiguration (System Configuration)
 system:
   # GPU Device (GPU devices)
   gpu_devices: "0"
@@ -115,7 +115,7 @@ system:
   # 种子 (Random seed)
   seed: 42
   
-  # 是否启用混合精度Training (Enable mixed precision)
+  # 是否启用混合precisionTraining (Enable mixed precision)
   fp16: false
   bf16: false
 
@@ -130,13 +130,13 @@ validation:
   # Save model间隔 (Save checkpoint interval)
   save_steps: 100
 
-# 项目Configuration (Project Configuration)
+# projectConfiguration (Project Configuration)
 project:
-  # 项目名称 (Project name)
+  # project名称 (Project name)
   project_name: medical-lora-sft
   
   # Run名称 (Run name)
   run_name: qwen2.5-0.5b-medmcqa-lora
   
-  # 项目根Directory (Project root directory)
+  # project根Directory (Project root directory)
   project_root: /home/shuwen/shuwen/train/neurx

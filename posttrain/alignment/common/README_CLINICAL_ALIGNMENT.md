@@ -69,7 +69,7 @@ medical_grpo_objective{
 |---|---|---|
 | **avoid_overconfidence** | 肯定, 一定, 100% | 0.10 |
 | **require_disclaimers** | Missing medical disclaimers | 0.05 |
-| **no_unapproved_drugs** | 实验性, 未经批准 | 0.15 |
+| **no_unapproved_drugs** | 实验property, 未经批准 | 0.15 |
 | **prompt_clinician_consultation** | Missing "咨询医生" | 0.05 |
 
 ```s
