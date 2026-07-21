@@ -23,8 +23,8 @@ struct JSONValue {
 
 // JSON object - key-value pairs
 struct JSONObject {
-    string[] keys
-    string[] values
+    []string keys
+    []string values
     int count
 }
 

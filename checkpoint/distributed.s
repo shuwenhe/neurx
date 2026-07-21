@@ -160,7 +160,7 @@ struct model_checkpoint {
 
 struct tensor_shard {
     string name                        // parameterEnglish text (English text "layers.0.attention.qkv.weight")
-    int[] shape                        // English text
+    []int shape                        // English text
     int num_elements                   // English textcount
     int dtype                          // dataEnglish text (fp32/bf16/fp16)
     []float data                       // actualdata (English textload)

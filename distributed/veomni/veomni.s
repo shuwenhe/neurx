@@ -54,9 +54,9 @@ struct veomni_state {
     []pipeline_stage stages
     int current_stage
     int current_micro_batch
-    float[] gradients
-    float[] parameters
-    float[] optimizer_state
+    []float gradients
+    []float parameters
+    []float optimizer_state
     int iteration
     int step
 }

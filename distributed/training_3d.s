@@ -179,8 +179,8 @@ struct pipeline_stage_state {
     [][]float output_buffer           // English text stage English text
 
     // English textcache (English text backward)
-    bool[] needs_gradient_checkpoint  // English text gradient checkpointing
-    [][]float[] activation_cache      // cacheEnglish text (English text)
+    []bool needs_gradient_checkpoint  // English text gradient checkpointing
+    [][][]float activation_cache      // cacheEnglish text (English text)
 
     // statistics
     float forward_time_ms

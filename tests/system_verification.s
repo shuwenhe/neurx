@@ -28,7 +28,7 @@ struct SystemHealthCheck {
     ready_components: i32
     health_score: f64
     components: ComponentStatus[]
-    recommendations: string[]
+    recommendations: []string
 }
 
 // ============================================================================

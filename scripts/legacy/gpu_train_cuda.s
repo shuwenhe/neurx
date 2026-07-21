@@ -255,7 +255,7 @@ func gpu_forward_backward_pass(int64 cublas_handle, gpu_model model,
     // === TOKENIZE DOCUMENT ===
     // In production: use actual tokenizer
     // For now: mock with simple byte encoding
-    int[] tokens = new int[seq_len]
+    []int tokens = new int[seq_len]
     int token_count = 0
     int i = 0
     while i < str_len(document) && token_count < seq_len {
@@ -313,7 +313,7 @@ func gpu_forward_backward_pass(int64 cublas_handle, gpu_model model,
     
     // === BACKWARD PASS ===
     // Compute gradient: dlogits = (probs - targets) / batch_size
-    int[] target_tokens = tokens  // Shifted sequence
+    []int target_tokens = tokens  // Shifted sequence
     int64 dlogits_gpu = cuda_malloc(batch_size * seq_len * 50000 * 4)
     
     cross_entropy_backward(batch_size * seq_len, 50000,

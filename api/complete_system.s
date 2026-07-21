@@ -53,8 +53,8 @@ struct system_status {
         bool inference_optimization
     } modules
 
-    string[] warnings
-    string[] errors
+    []string warnings
+    []string errors
 }
 
 func check_system_status() -> system_status {

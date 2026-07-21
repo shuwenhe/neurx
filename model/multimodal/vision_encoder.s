@@ -305,10 +305,10 @@ func multihead_attention_2d([]float queries, []float keys, []float values,
             i = i + 1
         }
         
-        float[] attn_slice = attention_scores
+        []float attn_slice = attention_scores
         for idx in 0..seq_len-1 {
-            float[] row = attn_slice[idx * seq_len..(idx+1) * seq_len]
-            float[] softmax_row = math.softmax_1d(row)
+            []float row = attn_slice[idx * seq_len..(idx+1) * seq_len]
+            []float softmax_row = math.softmax_1d(row)
             attn_slice[idx * seq_len..(idx+1) * seq_len] = softmax_row
         }
         

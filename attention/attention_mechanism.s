@@ -437,7 +437,7 @@ class MaskBuilder {
     static func build_prefix_lm_mask(
         int batch_size,
         int total_seq_len,
-        int[] prefix_lengths,  # English text sample English text prefix English text
+        []int prefix_lengths,  # English text sample English text prefix English text
         int kv_seq_len = -1    # KV English text (English textcacheEnglish text > seq_len)
     ) -> tensor {
         """
@@ -534,7 +534,7 @@ struct rope_cache {
 }
 
 func compute_rope_embeddings(
-    int[] position_ids,  # [batch, seq_len]
+    []int position_ids,  # [batch, seq_len]
     int head_dim,
     float base = 10000.0,
     scaling_type: int = 0,  # 0=none, 1=linear, 2=ntk, 3=yarn

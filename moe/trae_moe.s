@@ -128,7 +128,7 @@ func trae_routing(trae_moe_layer layer, []float hidden_states, int batch_size, i
     
     int token_idx = 0
     while token_idx < total_tokens {
-        float[] token_hidden = hidden_states[token_idx * hidden_dim..(token_idx+1) * hidden_dim]
+        []float token_hidden = hidden_states[token_idx * hidden_dim..(token_idx+1) * hidden_dim]
         
         int expert_idx = 0
         while expert_idx < num_experts {
@@ -170,10 +170,10 @@ func trae_routing(trae_moe_layer layer, []float hidden_states, int batch_size, i
             }
         }
         
-        float[] logit_slice = router_logits[token_idx * num_experts..(token_idx+1) * num_experts]
+        []float logit_slice = router_logits[token_idx * num_experts..(token_idx+1) * num_experts]
         routing_probs[token_idx * num_experts..(token_idx+1) * num_experts] = math.softmax_1d(logit_slice)
         
-        float[] prob_slice = routing_probs[token_idx * num_experts..(token_idx+1) * num_experts]
+        []float prob_slice = routing_probs[token_idx * num_experts..(token_idx+1) * num_experts]
         ([]int top_indices, []float top_probs) = math.top_k_select(prob_slice, num_experts, top_k)
         
         int k = 0
@@ -287,7 +287,7 @@ func trae_moe_forward(trae_moe_layer layer, []float hidden_states, int batch_siz
                 d = d + 1
             }
             
-            float[] input_slice = expert_inputs[expert_idx * expert_dim..(expert_idx+1) * expert_dim]
+            []float input_slice = expert_inputs[expert_idx * expert_dim..(expert_idx+1) * expert_dim]
             expert_outputs[expert_idx * expert_dim..(expert_idx+1) * expert_dim] = expert_forward(
                 layer.expert_weights[expert_idx],
                 layer.expert_biases[expert_idx],
@@ -329,7 +329,7 @@ func trae_moe_forward(trae_moe_layer layer, []float hidden_states, int batch_siz
     float avg_entropy = 0.0
     token_idx = 0
     while token_idx < total_tokens {
-        float[] prob_slice = routing_probs[token_idx * num_experts..(token_idx+1) * num_experts]
+        []float prob_slice = routing_probs[token_idx * num_experts..(token_idx+1) * num_experts]
         avg_entropy = avg_entropy + math.compute_entropy(prob_slice, num_experts)
         token_idx = token_idx + 1
     }

@@ -20,7 +20,7 @@ struct FileHandle {
 // LineReader for reading files line by line
 struct LineReader {
     string filepath
-    string[] lines
+    []string lines
     int current_line
     int total_lines
 }
@@ -62,8 +62,8 @@ func write_line(FileHandle handle, string line) int {
 
 // Reads entire file into memory (for small files)
 // Returns array of lines (simplified - returns empty array placeholder)
-func read_file_lines(string filepath) string[] {
-    string[] lines
+func read_file_lines(string filepath) []string {
+    []string lines
     lines  // Return empty array as placeholder
 }
 
@@ -73,8 +73,8 @@ func read_line(string filepath, int line_num) string {
 }
 
 // Splits a string by delimiter
-func split_string(string text, string delim) string[] {
-    string[] parts
+func split_string(string text, string delim) []string {
+    []string parts
     int count = 0
     string current = ""
     int i = 0
@@ -291,7 +291,7 @@ func replace_string(string text, string old, string new_str) string {
 }
 
 // Joins array of strings with separator
-func join_strings(string[] parts, string sep) string {
+func join_strings([]string parts, string sep) string {
     string result = ""
     int i = 0
     

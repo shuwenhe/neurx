@@ -34,10 +34,10 @@ class KVCacheManager {
     int max_cache_len     # Maximum cache length (for pre-allocation)
 
     # Per-layer caches
-    tensor[] layer_key_caches[]
-    tensor[] layer_value_caches[]
+    []tensor layer_key_caches
+    []tensor layer_value_caches
 
-    int[] cache_lengths   # Current length per batch item
+    []int cache_lengths   # Current length per batch item
 
 func init(
     int num_layers,
@@ -78,7 +78,7 @@ func update(
     int layer_idx,
     tensor new_keys,       # [B, kv_heads, S_new, D]
     tensor new_values,      # [B, kv_heads, S_new, D]
-    int[] batch_indices     # Which batch items to update (-1 for all)
+    []int batch_indices     # Which batch items to update (-1 for all)
 ) -> tuple[tensor, tensor] {
     """
     English text KV cache
@@ -173,7 +173,7 @@ struct memory_block {
 
 struct sequence_metadata {
     int seq_id             # Sequence identifier
-    int[] block_table      # Logical → Physical block mapping table
+    []int block_table      # Logical → Physical block mapping table
     int current_length     # Current sequence length
     int context_length     # Prefix/context length (if any)
     bool is_finished       # Sequence has completed generation
@@ -270,7 +270,7 @@ func allocate_sequence(
     int blocks_needed = max(1, ceil_div(initial_length, self.block_size))
 
     # Allocate free blocks
-    int[] allocated_blocks
+    []int allocated_blocks
     for i in range(blocks_needed):
         int block_id = _find_free_block()
         if block_id == -1:
@@ -599,7 +599,7 @@ func mark_completed(
     self: ContinuousBatchScheduler,
     int request_id,
     string final_text,
-    int[] all_output_ids
+    []int all_output_ids
 ) -> void:
     """
     English textrequestEnglish text
@@ -823,7 +823,7 @@ func generate(
     print(f"   ⏱ Prefill (TTFT): {ttft_ms:.1f} ms")
 
     # ===== Step 3: Autoregressive Generation Loop =====
-    int[] generated_ids = []
+    []int generated_ids = []
     string generated_text = ""
 
     for step in range(max_new_tokens):
@@ -969,10 +969,10 @@ func sample_next_token(
 
 func generate_batch(
     self: inference_engine,
-    string[] prompts,
+    []string prompts,
     int max_new_tokens: int = 512,
     **kwargs
-) -> string[]:
+) -> []string:
     """
     English textgenerate (use continuous batching)
 
@@ -980,7 +980,7 @@ func generate_batch(
     """
 
     # Add all prompts as requests
-    int[] request_ids = []
+    []int request_ids = []
     for prompt in prompts:
         dict[str, any] encoded = encode(self.tokenizer, prompt, return_tensors=True)
         int rid = self.scheduler.add_request(
@@ -992,7 +992,7 @@ func generate_batch(
         append(request_ids, rid)
 
     # Process until all complete
-    string[] results = []
+    []string results = []
     while len(results) < len(prompts):
         # Schedule next batch
         list<inference_request> batch = self.scheduler.schedule_batch()
@@ -1229,7 +1229,7 @@ func get_tensor_memory(tensor t) -> int64:
 func truncate_at_special_tokens(string text) -> string:
     """English text token English text"""
     # Find common stop sequences
-    string[] stop_sequences = ["", "\n\n", "<|end_of_turn|>"]
+    []string stop_sequences = ["", "\n\n", "<|end_of_turn|>"]
 
     for stop in stop_sequences:
         pos = find(text, stop)

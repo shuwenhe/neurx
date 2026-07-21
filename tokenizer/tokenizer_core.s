@@ -225,10 +225,10 @@ func encode(
     string preprocessed = preprocess_text(text)
 
     // Step 2: English text
-    string[] tokens = tokenize(state, preprocessed)
+    []string tokens = tokenize(state, preprocessed)
 
     // Step 3: English text IDs
-    int[] ids = convert_tokens_to_ids(state, tokens)
+    []int ids = convert_tokens_to_ids(state, tokens)
 
     // Step 4: English text tokens
     if add_special_tokens:
@@ -249,7 +249,7 @@ func encode(
         # Pad to max_length
         int pad_len = max_length! - len(ids)
         if pad_len > 0:
-            int[] padded_ids = ids + [state.special_tokens.pad_token_id] * pad_len
+            []int padded_ids = ids + [state.special_tokens.pad_token_id] * pad_len
             result["input_ids"] = padded_ids
             result["attention_mask"] = [1] * len(ids) + [0] * pad_len
         else:
@@ -267,7 +267,7 @@ func encode(
 // English text
 func batch_encode(
     state: tokenizer_state,
-    string[] texts,
+    []string texts,
     add_special_tokens: bool = true,
     max_length: option[int] = none,
     truncation: bool = false,
@@ -307,8 +307,8 @@ func batch_encode(
     tensor attention_mask_tensor(batch_size, max_len)
 
     for i, r in enumerate(results):
-        int[] ids = r["input_ids"]
-        int[] masks = r["attention_mask"]
+        []int ids = r["input_ids"]
+        []int masks = r["attention_mask"]
 
         int actual_len = min(len(ids), max_len)
 
@@ -333,12 +333,12 @@ func batch_encode(
 // ============================================================
 func decode(
     state: tokenizer_state,
-    int[] token_ids,
+    []int token_ids,
     skip_special_tokens: bool = false,
     clean_up_tokenization_spaces: bool = true
 ) string {
 
-    string[] tokens = []
+    []string tokens = []
     for id in token_ids:
         if id in state.decoder:
             string token = state.decoder[id]
@@ -370,13 +370,13 @@ func batch_decode(
     state: tokenizer_state,
     tensor token_ids,  // [batch, seq_len]
     skip_special_tokens: bool = false
-) string[] {
+) []string {
 
     int batch_size = shape(token_ids)[0]
-    string[] results = []
+    []string results = []
 
     for i in range(batch_size):
-        int[] ids = token_ids[i].tolist()
+        []int ids = token_ids[i].tolist()
         string text = decode(state, ids, skip_special_tokens=skip_special_tokens)
         append(results, text)
 
@@ -436,12 +436,12 @@ func cleanup_spaces(text: string) -> string {
 // ============================================================
 // English text
 // ============================================================
-func tokenize(state: tokenizer_state, text: string) string[] {
+func tokenize(state: tokenizer_state, text: string) []string {
 
     if len(text) == 0:
         return []
 
-    string[] tokens = []
+    []string tokens = []
 
     # English text (English text)
     int pos = 0
@@ -470,8 +470,8 @@ func tokenize(state: tokenizer_state, text: string) string[] {
     return tokens
 }
 
-func convert_tokens_to_ids(state: tokenizer_state, string[] tokens) int[] {
-    int[] ids = []
+func convert_tokens_to_ids(state: tokenizer_state, []string tokens) []int {
+    []int ids = []
     for token in tokens:
         if token in state.encoder:
             append(ids, state.encoder[token])
@@ -485,8 +485,8 @@ func convert_tokens_to_ids(state: tokenizer_state, string[] tokens) int[] {
     return ids
 }
 
-func convert_ids_to_tokens(state: tokenizer_state, int[] ids) string[] {
-    string[] tokens = []
+func convert_ids_to_tokens(state: tokenizer_state, []int ids) []string {
+    []string tokens = []
     for id in ids:
         if id in state.decoder:
             append(tokens, state.decoder[id])
@@ -502,7 +502,7 @@ func convert_ids_to_tokens(state: tokenizer_state, int[] ids) string[] {
 // English text Chat English text prompt (English text)
 func build_chat_prompt(
     state: tokenizer_state,
-    string[] messages,
+    []string messages,
     system_prompt: option<string> = none,
     add_generation_prompt: bool = true
 ) dict[str, any] {
@@ -521,7 +521,7 @@ func build_chat_prompt(
     ...
     */
 
-    string[] parts = []
+    []string parts = []
 
     // System prompt
     if system_prompt != none:
@@ -585,7 +585,7 @@ func build_prefix_lm_input(
     )
 
     # compute SOP/EOP English text
-    int[] input_ids = encoded["input_ids"].tolist()  if isinstance(encoded["input_ids"], tensor) else encoded["input_ids"]
+    []int input_ids = encoded["input_ids"].tolist()  if isinstance(encoded["input_ids"], tensor) else encoded["input_ids"]
 
     int sop_pos = index_of(input_ids, state.special_tokens.sop_token_id)
     int eop_pos = index_of(input_ids, state.special_tokens.eop_token_id)
@@ -622,20 +622,20 @@ func build_mlm_input(
         return_tensors=False
     )
 
-    int[] input_ids = original["input_ids"]
+    []int input_ids = original["input_ids"]
 
     # English text labels
-    int[] labels = input_ids.copy()
+    []int labels = input_ids.copy()
 
     # English text mask English text (English text tokens)
-    int[] valid_positions = []
+    []int valid_positions = []
     for i, id in enumerate(input_ids):
         if !_is_special_token(id, state.special_tokens):
             append(valid_positions, i)
 
     # English text mask English text (English text 15%)
     int num_to_mask = max(1, int(float(len(valid_positions)) * mlm_probability))
-    int[] mask_positions = sample_without_replacement(valid_positions, num_to_mask)
+    []int mask_positions = sample_without_replacement(valid_positions, num_to_mask)
 
     # English text masking: 80% [MASK], 10% English text, 10% English text
     for pos in mask_positions:
@@ -679,7 +679,7 @@ func _is_special_token(token_id: int, specs: special_tokens_config) -> bool {
 }
 
 # English text
-func index_of(int[] list, target: int) -> int {
+func index_of([]int list, target: int) -> int {
     for i, val in enumerate(list):
         if val == target:
             return i
@@ -687,11 +687,11 @@ func index_of(int[] list, target: int) -> int {
 }
 
 # English text
-func sample_without_replacement(int[] pool, int k) -> int[] {
+func sample_without_replacement([]int pool, int k) -> []int {
     if k >= len(pool):
         return pool.copy()
 
-    int[] result = pool.copy()
+    []int result = pool.copy()
     shuffle(result)
     return result[:k]
 }
@@ -747,7 +747,7 @@ func test_tokenizer() {
 
     // Test 4: Batch Encode
     print("\n[Test 4] Testing batch encoding...")
-    string[] batch_texts = [
+    []string batch_texts = [
         "English text.",
         "The quick brown fox jumps over the lazy dog.",
         "English text!",

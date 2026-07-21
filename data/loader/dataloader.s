@@ -151,7 +151,7 @@ struct tokenized_sample {
     []int token_ids                     // Token ID English text [seq_len]
     int seq_len                         // actualEnglish text
     int attention_mask[]                // Attention mask [seq_len] (1=real, 0=pad)
-    int[] position_ids                  // Position IDs (English textRequired)
+    []int position_ids                  // Position IDs (English textRequired)
     int64 sample_id                     // English text ID (English textdeduplication/debug)
     float weight                        // English textweight (English text upweighting English textdata)
     string metadata                     // English textdata JSON (English text)
@@ -258,7 +258,7 @@ struct distributed_sampler {
     int samples_per_rank
     int current_index
     uint64 seed
-    int[] shuffled_indices             // English text
+    []int shuffled_indices             // English text
 }
 
 struct smart_packer {

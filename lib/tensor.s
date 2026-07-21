@@ -5,20 +5,20 @@ package neurx.lib.tensor
 
 // Vector: 1D array of floats
 struct Vector {
-    float[] data
+    []float data
     int size
 }
 
 // Matrix: 2D array of floats
 struct Matrix {
-    float[] data
+    []float data
     int rows
     int cols
 }
 
 // Tensor: 3D array of floats (for higher dimensional tensors)
 struct Tensor {
-    float[] data
+    []float data
     int dim1
     int dim2
     int dim3
@@ -29,7 +29,7 @@ func create_vector(int size) Vector {
     Vector v
     v.size = size
     // Initialize with zeros
-    float[] data
+    []float data
     int i = 0
     while i < size {
         data[i] = 0.0
@@ -40,7 +40,7 @@ func create_vector(int size) Vector {
 }
 
 // Creates a vector with specific values
-func vector_from_array(float[] values) Vector {
+func vector_from_array([]float values) Vector {
     Vector v
     v.size = len(values)
     v.data = values
@@ -53,7 +53,7 @@ func create_matrix(int rows, int cols) Matrix {
     m.rows = rows
     m.cols = cols
     
-    float[] data
+    []float data
     int i = 0
     while i < rows * cols {
         data[i] = 0.0
@@ -388,7 +388,7 @@ func vector_softmax(Vector v) Vector {
     }
     
     // Compute exp(x_i - max_val) and sum
-    float[] exp_vals
+    []float exp_vals
     float sum = 0.0
     i = 0
     while i < v.size {

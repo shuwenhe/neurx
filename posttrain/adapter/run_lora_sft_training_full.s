@@ -38,9 +38,9 @@ struct TrainingConfig {
 }
 
 struct ModelState {
-    float[] base_weights
-    float[] lora_a
-    float[] lora_b
+    []float base_weights
+    []float lora_a
+    []float lora_b
     int input_dim
     int output_dim
     int rank
@@ -168,8 +168,8 @@ func init_lora_adapter(int input_dim, int output_dim, int rank, float alpha) Mod
     state.alpha = alpha
     
     // 初始化 LoRA 权重（小随机值）
-    float[] lora_a
-    float[] lora_b
+    []float lora_a
+    []float lora_b
     
     int i1 = 0
     while i1 < input_dim * rank {
@@ -187,7 +187,7 @@ func init_lora_adapter(int input_dim, int output_dim, int rank, float alpha) Mod
     state.lora_b = lora_b
     
     // 初始化基础权重
-    float[] base_weights
+    []float base_weights
     int i3 = 0
     while i3 < output_dim * input_dim {
         base_weights[i3] = 0.1

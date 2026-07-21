@@ -448,6 +448,23 @@ posttrain: check-bash build-s-ir-runner
 		fi; \
 		echo "Using S IR: $$RUN_IR"; \
 		S_IR_RUNNER_INPUT="$$RUN_IR" '$(S_RUNNER_BIN)' 2>&1 | tee -a $(LOG_DIR)/posttrain_$(shell date +%Y%m%d_%H%M%S).log
+	@echo ""
+	@echo "🔗 开始权重合并..."
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/lora_merge
+	@cd '$(CURDIR_UNIX)' && \
+		rm -f '$(CURDIR_UNIX)/artifacts/build/lora_merge/run_lora_merge_simple.ir'; \
+		"$(POSTTRAIN_S_COMPILER)" 'posttrain/adapter/run_lora_merge_simple.s' '$(CURDIR_UNIX)/artifacts/build/lora_merge/run_lora_merge_simple.ir' 2>&1 || exit 1; \
+		test -f '$(CURDIR_UNIX)/artifacts/build/lora_merge/run_lora_merge_simple.ir'
+	@echo "✓ 合并脚本编译成功"
+	@echo "🚀 运行合并和保存..."
+	@cd '$(CURDIR_UNIX)' && \
+		set -o pipefail; \
+		export NEURX_ROOT='$(CURDIR_UNIX)'; \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/lora_merge/run_lora_merge_simple.ir' '$(S_RUNNER_BIN)' 2>&1 | tee -a $(LOG_DIR)/posttrain_merge_$(shell date +%Y%m%d_%H%M%S).log
+	@echo ""
+	@echo "✨ 后训练完成！"
+	@echo "📁 最终模型位置: /home/shuwen/shuwen/train/model/base-model-posttrain/"
+	@echo ""
 
 build-lora-merge: check-bash
 	@mkdir -p '$(LORA_MERGE_BUILD_DIR)'

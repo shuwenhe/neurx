@@ -420,7 +420,7 @@ struct corpus_batch {
     int batch_size
     int seq_len
     int total_tokens
-    string[] source_names   // English textSourceName
+    []string source_names   // English textSourceName
 }
 
 struct corpus_source_selection {

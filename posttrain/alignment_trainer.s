@@ -356,8 +356,8 @@ func train_sft_epoch(self: SFTTrainer, data_loader dataloader) -> float {
 
 func prepare_sft_batch(
     tokenizer_state tokenizer,
-    string[] instructions,
-    string[] responses,
+    []string instructions,
+    []string responses,
     int max_len: int
 ) -> dict[str, any] {
     """
@@ -369,7 +369,7 @@ func prepare_sft_batch(
     Response
     """
 
-    string[] full_texts = []
+    []string full_texts = []
     for i in range(len(instructions)):
         text = (
             "" + instructions[i] + "\n\n" +
@@ -540,7 +540,7 @@ class GRPOTrainer {
 
 func train_grpo_step(
     self: GRPOTrainer,
-    batch_prompts: string[],      # [batch_size] prompts
+    batch_prompts: []string,      # [batch_size] prompts
     data_loader prompt_loader,
     int group_size: int = 8
 ) -> tuple[tensor, dict[str, float]] {
@@ -759,7 +759,7 @@ class ppotrainer {
 
 func train_ppo_iteration(
     self: ppotrainer,
-    batch_prompts: string[]
+    batch_prompts: []string
 ) -> dict[str, float] {
     """
     PPO English textpipeline:
