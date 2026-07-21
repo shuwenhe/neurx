@@ -45,6 +45,11 @@ data/training_data_shards/
 data/training_data_splits/
 data/training_data_*.jsonl
 
+# Large dataset files (MedMCQA, etc.)
+../dataset/**/*.jsonl
+../dataset/medmcqa/
+../dataset/*_sft/
+
 # Checkpoints and temporary training outputs
 checkpoint_*/
 checkpoint/NeurX-1.3/
