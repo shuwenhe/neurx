@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test build-cpu-inference serving-native-socket-test posttrain posttrain-merge-qwen build-qwen-lora-merge pretrain-watch chat check-bash check-nvcc shard split logs logs-tail \
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test build-cpu-inference serving-native-socket-test posttrain posttrain-merge-lora build-lora-merge pretrain-watch chat check-bash check-nvcc shard split logs logs-tail \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -102,15 +102,15 @@ PRETRAIN_RUNNER_BIN := $(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_lar
 NEURX_SHARD_CMD ?= wikipedia
 NEURX_SHARD_RESUME ?= 1
 NEURX_SHARD_FORCE_REBUILD ?= 0
-POSTTRAIN_MODEL_PATH ?= $(CURDIR_UNIX)/../model/Qwen2.5-VL-7B
+POSTTRAIN_MODEL_PATH ?= $(CURDIR_UNIX)/../model/base-model-7B
 POSTTRAIN_DATA_FILE ?= $(CURDIR_UNIX)/dataset/posttrain/instruction_data.jsonl
 POSTTRAIN_OUTPUT_DIR ?= $(CURDIR_UNIX)/artifacts/checkpoints/lora_sft
 POSTTRAIN_S_COMPILER ?= $(firstword $(wildcard $(CURDIR_UNIX)/../s/bin/s_seed $(CURDIR_UNIX)/tools/s_wrapper.sh) $(S_COMPILER))
-QWEN_LORA_MERGE_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/qwen_lora_merge
-QWEN_LORA_MERGE_BIN := $(QWEN_LORA_MERGE_BUILD_DIR)/qwen_lora_safetensors_merge$(BIN_EXT)
-QWEN_LORA_MERGE_IR := $(QWEN_LORA_MERGE_BUILD_DIR)/run_qwen_lora_merge.ir
-POSTTRAIN_ADAPTER_DIR ?= $(CURDIR_UNIX)/artifacts/checkpoints/qwen2_5_0_5b_lora_adapter
-POSTTRAIN_MERGED_MODEL_DIR ?= $(CURDIR_UNIX)/../model/Qwen2.5-0.5B-Instruct-posttrain
+LORA_MERGE_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/lora_merge
+LORA_MERGE_BIN := $(LORA_MERGE_BUILD_DIR)/lora_safetensors_merge$(BIN_EXT)
+LORA_MERGE_IR := $(LORA_MERGE_BUILD_DIR)/run_lora_merge.ir
+POSTTRAIN_ADAPTER_DIR ?= $(CURDIR_UNIX)/artifacts/checkpoints/lora_adapter
+POSTTRAIN_MERGED_MODEL_DIR ?= $(CURDIR_UNIX)/../model/base-model-posttrain
 POSTTRAIN_LORA_ALPHA ?= 16
 POSTTRAIN_LORA_RANK ?= 8
 
@@ -449,31 +449,31 @@ posttrain: check-bash build-s-ir-runner
 		echo "Using S IR: $$RUN_IR"; \
 		S_IR_RUNNER_INPUT="$$RUN_IR" '$(S_RUNNER_BIN)' 2>&1 | tee -a $(LOG_DIR)/posttrain_$(shell date +%Y%m%d_%H%M%S).log
 
-build-qwen-lora-merge: check-bash
-	@mkdir -p '$(QWEN_LORA_MERGE_BUILD_DIR)'
+build-lora-merge: check-bash
+	@mkdir -p '$(LORA_MERGE_BUILD_DIR)'
 	@$(CC) -std=c11 -O2 -Wall -Wextra \
-		-o '$(QWEN_LORA_MERGE_BIN)' \
-		'$(CURDIR_UNIX)/tools/qwen_lora_safetensors_merge.c'
+		-o '$(LORA_MERGE_BIN)' \
+		'$(CURDIR_UNIX)/tools/lora_safetensors_merge.c'
 
-posttrain-merge-qwen: check-bash build-s-ir-runner build-qwen-lora-merge
-	@mkdir -p '$(QWEN_LORA_MERGE_BUILD_DIR)' $(LOG_DIR)
+posttrain-merge-lora: check-bash build-s-ir-runner build-lora-merge
+	@mkdir -p '$(LORA_MERGE_BUILD_DIR)' $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		rm -f '$(QWEN_LORA_MERGE_IR)'; \
-		"$(POSTTRAIN_S_COMPILER)" ir 'posttrain/adapter/run_qwen_lora_merge.s' -o '$(QWEN_LORA_MERGE_IR)' 2>&1 || true; \
-		if [ ! -f '$(QWEN_LORA_MERGE_IR)' ]; then \
-			"$(POSTTRAIN_S_COMPILER)" 'posttrain/adapter/run_qwen_lora_merge.s' '$(QWEN_LORA_MERGE_IR)' 2>&1 || exit 1; \
+		rm -f '$(LORA_MERGE_IR)'; \
+		"$(POSTTRAIN_S_COMPILER)" ir 'posttrain/adapter/run_lora_merge.s' -o '$(LORA_MERGE_IR)' 2>&1 || true; \
+		if [ ! -f '$(LORA_MERGE_IR)' ]; then \
+			"$(POSTTRAIN_S_COMPILER)" 'posttrain/adapter/run_lora_merge.s' '$(LORA_MERGE_IR)' 2>&1 || exit 1; \
 		fi && \
-		test -f '$(QWEN_LORA_MERGE_IR)'
+		test -f '$(LORA_MERGE_IR)'
 	@cd '$(CURDIR_UNIX)' && \
 		set -o pipefail; \
 		export NEURX_ROOT='$(CURDIR_UNIX)'; \
-		export NEURX_QWEN_LORA_MERGER_BIN='$(QWEN_LORA_MERGE_BIN)'; \
+		export NEURX_LORA_MERGER_BIN='$(LORA_MERGE_BIN)'; \
 		export NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)'; \
 		export NEURX_LORA_ADAPTER_DIR='$(POSTTRAIN_ADAPTER_DIR)'; \
 		export NEURX_MERGED_MODEL_DIR='$(POSTTRAIN_MERGED_MODEL_DIR)'; \
 		export NEURX_LORA_ALPHA='$(POSTTRAIN_LORA_ALPHA)'; \
 		export NEURX_LORA_RANK='$(POSTTRAIN_LORA_RANK)'; \
-		S_IR_RUNNER_INPUT='$(QWEN_LORA_MERGE_IR)' '$(S_RUNNER_BIN)' 2>&1 | tee -a $(LOG_DIR)/posttrain_merge_qwen_$(shell date +%Y%m%d_%H%M%S).log
+		S_IR_RUNNER_INPUT='$(LORA_MERGE_IR)' '$(S_RUNNER_BIN)' 2>&1 | tee -a $(LOG_DIR)/posttrain_merge_lora_$(shell date +%Y%m%d_%H%M%S).log
 
 pretrain-watch: check-bash
 	@echo "Running NeurX large-model pre-training with live log monitoring"

@@ -38,7 +38,7 @@ func default_mmlu_eval_config() mmlu_eval_config {
         normalize_by_length: true,
         max_seq_len: 4096,
         data_root: "./data/mmlu",
-        model_type: "qwen",
+        model_type: "base-model",
     }
 }
 

@@ -6,7 +6,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
+
+/* Define _FILE_OFFSET_BITS for large file support */
+#ifndef _FILE_OFFSET_BITS
+#define _FILE_OFFSET_BITS 64
+#endif
 
 typedef struct {
     char name[512];
@@ -311,7 +317,7 @@ static float *read_tensor_as_f32(const char *path, const st_index *idx, const te
     if (!raw || !out) goto fail;
     fp = fopen(path, "rb");
     if (!fp) goto fail;
-    if (fseeko(fp, (off_t)(idx->data_base + t->begin), SEEK_SET) != 0) goto fail;
+    if (fseek(fp, (long)(idx->data_base + t->begin), SEEK_SET) != 0) goto fail;
     if (fread(raw, 1, (size_t)bytes, fp) != (size_t)bytes) goto fail;
     fclose(fp);
     fp = NULL;
@@ -356,7 +362,7 @@ static int write_tensor_from_f32(FILE *fp, const st_index *idx, const tensor_inf
             return -1;
         }
     }
-    if (fseeko(fp, (off_t)(idx->data_base + t->begin), SEEK_SET) != 0) {
+    if (fseek(fp, (long)(idx->data_base + t->begin), SEEK_SET) != 0) {
         free(raw);
         return -1;
     }

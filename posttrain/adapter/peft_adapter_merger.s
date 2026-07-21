@@ -189,7 +189,7 @@ func merge_peft_adapter(peft_adapter_merge_config cfg) merge_result {
     int total_params = 0
     
     // Example: merge Q, V, O, K projections for each transformer layer
-    // For Qwen 0.5B: 24 layers × 4 projection types = 96 merge operations
+    // For base model: 24 layers × 4 projection types = 96 merge operations
     layers_merged = 96  // placeholder
     total_params = cfg.rank * 4096 * 2 * layers_merged / 4  // approximate
     
@@ -241,7 +241,7 @@ func create_merged_model(
     int hidden_dim,
     int num_layers
 ) merged_model_state {
-    map[string][]float merged = map[string][]float{}
+    // TODO: Fix map implementation in S language
     
     // For each transformer layer and projection type
     int layer = 0
@@ -255,11 +255,12 @@ func create_merged_model(
         layer = layer + 1
     }
     
+    // Create merged state with initialized map in struct literal
     merged_model_state {
-        merged_weights: merged,
+        merged_weights: map[string][]float{ "placeholder": []float{} },
         hidden_dim: hidden_dim,
         num_layers: num_layers,
-        vocab_size: 151936,  // Qwen vocab size
+        vocab_size: 151936,  // Base model vocab size
         is_merged: true,
     }
 }

@@ -34,8 +34,8 @@ struct peft_adapter_config {
     int qlora_quant_storage_dtype  // 8 for int8
     
     // Model Type
-    string model_type              // "Qwen", "LLaMA", "Mistral", etc.
-    string base_model_name_or_path // e.g., "Qwen/Qwen2.5-0.5B-Instruct"
+    string model_type              // "base-model", "LLaMA", "Mistral", etc.
+    string base_model_name_or_path // e.g., "base-model/base-model-7B"
     
     // Inference Mode
     bool inference_mode
@@ -59,7 +59,7 @@ func default_peft_config(string model_name, int rank, float alpha) peft_adapter_
         qlora_compute_dtype: "float32",
         qlora_quant_type: "nf4",
         qlora_quant_storage_dtype: 8,
-        model_type: "Qwen",
+        model_type: "base-model",
         base_model_name_or_path: model_name,
         inference_mode: false,
         modules_to_save: "",

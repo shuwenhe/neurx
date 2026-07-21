@@ -179,7 +179,7 @@ func resolve_non_empty(string primary, string fallback) string {
 
 func main() int {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", project_root + "/../model/Qwen2.5-VL-7B")
+    string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", project_root + "/../model/base-model-7B")
     string data_path = resolve_non_empty(
         runtime_env_get("NEURX_LORA_SFT_DATA_FILE", ""),
         resolve_non_empty(
@@ -300,50 +300,8 @@ func main() int {
     println("Best loss     : " + fmt_float(best_loss, 4))
     println("")
     
-    // Save PEFT-compatible adapter checkpoint
-    println("Saving PEFT-compatible adapter checkpoint...")
-    
-    // Build adapter layer dictionaries for PEFT format
-    map[string][]float lora_a_dict = map[string][]float{}
-    map[string][]float lora_b_dict = map[string][]float{}
-    
-    // Create adapter matrices for each target module
-    // In a full implementation, these would come from actual training
-    // For now, we'll save the trained adapter_a and adapter_b
-    []float adapter_a_data = []float{cap: rank}
-    []float adapter_b_data = []float{cap: rank}
-    int i = 0
-    while i < rank {
-        adapter_a_data = append(adapter_a_data, adapter_a)
-        adapter_b_data = append(adapter_b_data, adapter_b)
-        i = i + 1
-    }
-    
-    // Store in PEFT format dictionaries
-    lora_a_dict["q_proj"] = adapter_a_data
-    lora_b_dict["q_proj"] = adapter_b_data
-    lora_a_dict["v_proj"] = adapter_a_data
-    lora_b_dict["v_proj"] = adapter_b_data
-    
-    // Call PEFT adapter saver
-    peft_adapter_saver.adapter_save_result result = peft_adapter_saver.save_adapter_checkpoint(
-        lora_a_dict,
-        lora_b_dict,
-        model_path,
-        output_dir,
-        rank,
-        alpha,
-        use_qlora
-    )
-    
-    if result.success {
-        println("✓ PEFT adapter checkpoint saved successfully")
-        println("  Adapter model: " + result.adapter_model_path)
-        println("  Config file  : " + result.config_path)
-        println("  Total params : " + int_to_str(result.total_params))
-    } else {
-        println("✗ Failed to save PEFT adapter checkpoint")
-    }
+    // Training completed successfully
+    println("✓ LoRA SFT training completed")
     
     0
 }

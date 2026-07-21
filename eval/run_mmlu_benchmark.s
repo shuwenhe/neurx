@@ -12,7 +12,7 @@ use std.io.println
 // Produces detailed accuracy metrics across 57 tasks and 4 categories.
 //
 // Usage:
-//   export NEURX_MODEL_PATH="./model/Qwen2.5-0.5B-Instruct"
+//   export NEURX_MODEL_PATH="./model/base-model-7B"
 //   export NEURX_MMLU_DATA_ROOT="./data/mmlu"
 //   export NEURX_MMLU_BATCH_SIZE="32"
 //   s run eval/run_mmlu_benchmark.s
@@ -20,7 +20,7 @@ use std.io.println
 
 func main() int {
     string project_root = runtime_env_get("NEURX_ROOT", "/Users/shuwen/shuwen/train/neurx")
-    string model_path = runtime_env_get("NEURX_MODEL_PATH", project_root + "/../model/Qwen2.5-0.5B-Instruct")
+    string model_path = runtime_env_get("NEURX_MODEL_PATH", project_root + "/../model/base-model-7B")
     string data_root = runtime_env_get("NEURX_MMLU_DATA_ROOT", project_root + "/data/mmlu")
     string batch_size_str = runtime_env_get("NEURX_MMLU_BATCH_SIZE", "32")
     string num_shots_str = runtime_env_get("NEURX_MMLU_SHOTS", "5")
@@ -41,7 +41,7 @@ func main() int {
     println("[Step 1] Initializing MMLU evaluation config...")
     mmlu_evaluator.mmlu_eval_config cfg = mmlu_evaluator.default_mmlu_eval_config()
     cfg.data_root = data_root
-    cfg.model_type = "Qwen2.5-0.5B"
+    cfg.model_type = "base-model-7B"
     cfg.num_shots = parse_int(num_shots_str, 5)
     println("  ✓ Config ready")
     println("")
@@ -68,7 +68,7 @@ func main() int {
     println("========================================")
     println("MMLU 5-Shot Benchmark Evaluation")
     println("========================================")
-    println("Model: Qwen2.5-0.5B")
+    println("Model: base-model-7B")
     println("Shots: 5")
     println("Seq length: 4096")
     println("")

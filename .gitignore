@@ -140,8 +140,8 @@ metrics/
 artifacts/checkpoints/*.neurx
 artifacts/checkpoints/**/*.neurx
 artifacts/checkpoints/llm_s_pretrain/
-artifacts/checkpoints/Qwen2.5-0.5B-Instruct/
-artifacts/checkpoints/Qwen2.5-VL-7B/
+artifacts/checkpoints/base-model/
+artifacts/checkpoints/base-model-7b/
 
 # Auto push
 .auto_push_state/

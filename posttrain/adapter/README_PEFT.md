@@ -56,8 +56,8 @@ func save_adapter_checkpoint(
   "fan_in_fan_out": false,
   "bias": "none",
   "inference_mode": false,
-  "model_type": "Qwen",
-  "base_model_name_or_path": "Qwen/Qwen2.5-0.5B-Instruct",
+  "model_type": "base-model",
+  "base_model_name_or_path": "base-model/base-model-7B",
   "peft_version": "0.4.0",
   "task_type": "CAUSAL_LM"
 }
@@ -101,7 +101,7 @@ cd /Users/shuwen/shuwen/train/neurx
 export NEURX_LORA_SFT_OUTPUT_DIR="./artifacts/checkpoints/lora_adapter_peft"
 export NEURX_LORA_SFT_RANK=16
 export NEURX_LORA_SFT_ALPHA=16.0
-export NEURX_POSTTRAIN_MODEL_PATH="./model/Qwen2.5-0.5B-Instruct"
+export NEURX_POSTTRAIN_MODEL_PATH="./model/base-model-7B"
 export NEURX_LORA_SFT_EPOCHS=3
 
 # Run training
@@ -126,7 +126,7 @@ from peft import AutoPeftModelForCausalLM
 from transformers import AutoTokenizer
 
 # Load base model
-base_model_name = "Qwen/Qwen2.5-0.5B-Instruct"
+base_model_name = "base-model/base-model-7B"
 adapter_path = "artifacts/checkpoints/lora_adapter_peft"
 
 # Method 1: Load with adapter
@@ -151,11 +151,11 @@ print(tokenizer.decode(outputs[0]))
 ```bash
 # Using PEFT merger module
 export NEURX_LORA_ADAPTER_DIR="artifacts/checkpoints/lora_adapter_peft"
-export NEURX_POSTTRAIN_MODEL_PATH="model/Qwen2.5-0.5B-Instruct"
-export NEURX_MERGED_MODEL_DIR="model/Qwen2.5-0.5B-Instruct-merged"
+export NEURX_POSTTRAIN_MODEL_PATH="model/base-model-7B"
+export NEURX_MERGED_MODEL_DIR="model/base-model-merged"
 
 # Run merger
-s run posttrain/adapter/run_qwen_lora_merge.s
+s run posttrain/adapter/run_lora_merge.s
 ```
 
 ## PEFT Compatibility
@@ -177,9 +177,9 @@ The generated `adapter_model.safetensors` adheres to:
 
 ### Tested Models
 
-- ✅ Qwen 0.5B-Instruct
-- ✅ Qwen 1.5B (expected)
-- ✅ Qwen 7B (expected)
+- ✅ Base Model 0.5B-Instruct
+- ✅ Base Model 1.5B (expected)
+- ✅ Base Model 7B (expected)
 - ✅ LLaMA-2 (expected)
 - ✅ Mistral (expected)
 
