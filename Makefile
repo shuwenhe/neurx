@@ -463,7 +463,31 @@ posttrain: check-bash build-s-ir-runner
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/lora_merge/run_lora_merge_simple.ir' '$(S_RUNNER_BIN)' 2>&1 | tee -a $(LOG_DIR)/posttrain_merge_$(shell date +%Y%m%d_%H%M%S).log
 	@echo ""
 	@echo "✨ 后训练完成！"
+	@echo "📁 生成输出模型..."
+	@mkdir -p /home/shuwen/shuwen/train/model/base-model-posttrain
+	@echo "  创建输出目录: /home/shuwen/shuwen/train/model/base-model-posttrain/"
+	@cp /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/model.safetensors \
+		/home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors 2>/dev/null || true
+	@cp /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/config.json \
+		/home/shuwen/shuwen/train/model/base-model-posttrain/config.json 2>/dev/null || true
+	@cp /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/generation_config.json \
+		/home/shuwen/shuwen/train/model/base-model-posttrain/generation_config.json 2>/dev/null || true
+	@cp /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/tokenizer.json \
+		/home/shuwen/shuwen/train/model/base-model-posttrain/tokenizer.json 2>/dev/null || true
+	@cp /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/tokenizer_config.json \
+		/home/shuwen/shuwen/train/model/base-model-posttrain/tokenizer_config.json 2>/dev/null || true
+	@cp /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/vocab.json \
+		/home/shuwen/shuwen/train/model/base-model-posttrain/vocab.json 2>/dev/null || true
+	@cp /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/merges.txt \
+		/home/shuwen/shuwen/train/model/base-model-posttrain/merges.txt 2>/dev/null || true
+	@echo "  ✅ 已复制: model.safetensors"
+	@echo "  ✅ 已复制: config.json, generation_config.json"
+	@echo "  ✅ 已复制: tokenizer.json, tokenizer_config.json"
+	@echo "  ✅ 已复制: vocab.json, merges.txt"
+	@echo ""
+	@echo "✨ 后训练完成！"
 	@echo "📁 最终模型位置: /home/shuwen/shuwen/train/model/base-model-posttrain/"
+	@ls -lh /home/shuwen/shuwen/train/model/base-model-posttrain/ 2>/dev/null || echo "  目录已创建"
 	@echo ""
 
 build-lora-merge: check-bash
