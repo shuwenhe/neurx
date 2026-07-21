@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test build-cpu-inference serving-native-socket-test posttrain posttrain-merge-lora build-lora-merge pretrain-watch chat check-bash check-nvcc shard split logs logs-tail \
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test build-cpu-inference serving-native-socket-test posttrain posttrain-e2e posttrain-merge-lora build-lora-merge pretrain-watch chat check-bash check-nvcc shard split logs logs-tail \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -474,6 +474,26 @@ posttrain-merge-lora: check-bash build-s-ir-runner build-lora-merge
 		export NEURX_LORA_ALPHA='$(POSTTRAIN_LORA_ALPHA)'; \
 		export NEURX_LORA_RANK='$(POSTTRAIN_LORA_RANK)'; \
 		S_IR_RUNNER_INPUT='$(LORA_MERGE_IR)' '$(S_RUNNER_BIN)' 2>&1 | tee -a $(LOG_DIR)/posttrain_merge_lora_$(shell date +%Y%m%d_%H%M%S).log
+
+posttrain-e2e: check-bash build-s-ir-runner
+	@echo "🚀 Building NeurX End-to-End Post-Training Pipeline (S Language)..."
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/posttrain_e2e $(LOG_DIR)
+	@if ! [ -x "$(POSTTRAIN_S_COMPILER)" ] && ! command -v "$(POSTTRAIN_S_COMPILER)" >/dev/null 2>&1; then \
+		echo "Error: S compiler not found at $(POSTTRAIN_S_COMPILER)"; \
+		exit 1; \
+	fi
+	@cd '$(CURDIR_UNIX)' && \
+		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_e2e/posttrain_e2e.ir'; \
+		"$(POSTTRAIN_S_COMPILER)" 'posttrain/adapter/run_posttrain_end_to_end.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_e2e/posttrain_e2e.ir' 2>&1 || exit 1; \
+		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_e2e/posttrain_e2e.ir'
+	@echo "✓ End-to-End pipeline compiled to S IR"
+	@cd '$(CURDIR_UNIX)' && \
+		set -o pipefail; \
+		export NEURX_ROOT='$(CURDIR_UNIX)'; \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_e2e/posttrain_e2e.ir' '$(S_RUNNER_BIN)' 2>&1 | tee -a $(LOG_DIR)/posttrain_e2e_$(shell date +%Y%m%d_%H%M%S).log
+	@echo ""
+	@echo "✨ Post-training pipeline complete!"
+	@echo "   Final model: /home/shuwen/shuwen/train/model/base-model-posttrain/"
 
 pretrain-watch: check-bash
 	@echo "Running NeurX large-model pre-training with live log monitoring"
