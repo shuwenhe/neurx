@@ -550,6 +550,23 @@ chat: check-bash build-cpu-inference
 		'$(CURDIR_UNIX)/artifacts/build/cpu_inference/neurx_cpu_inference' --interactive \
 		2>&1 | tee -a $(LOG_DIR)/chat_$(shell date +%Y%m%d_%H%M%S).log
 
+chat-posttrain: build-posttrain-chat-s
+	@echo "Starting NeurX PostTrain Model Interactive Chat"
+	@mkdir -p artifacts/logs
+	@$(CURDIR_UNIX)/artifacts/build/posttrain_chat/posttrain_chat 2>&1 | tee -a artifacts/logs/chat_posttrain_$(shell date +%Y%m%d_%H%M%S).log
+
+build-posttrain-chat-s:
+	@mkdir -p artifacts/build/posttrain_chat
+	@echo "Compiling PostTrain Chat (S)..."
+	@'$(S_COMPILER)' inference/posttrain_chat.s artifacts/build/posttrain_chat/posttrain_chat.ir || { \
+		echo "❌ Compilation failed!"; \
+		exit 1; \
+	}
+	@echo "✓ Compiled to IR successfully"
+	@echo "Creating PostTrain Chat runner script..."
+	@printf '#!/bin/bash\n%s/artifacts/build/s_runner/s_ir_runner %s/artifacts/build/posttrain_chat/posttrain_chat.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifacts/build/posttrain_chat/posttrain_chat
+	@chmod +x artifacts/build/posttrain_chat/posttrain_chat
+	@echo "✓ PostTrain Chat ready"
 
 
 shard: check-bash
