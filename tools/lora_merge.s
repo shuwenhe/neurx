@@ -224,7 +224,7 @@ func int_to_str(int n) string {
     }
     string out = ""
     while value > 0 {
-        int digit = value % 10
+        int digit = value - (value / 10) * 10
         out = digit_to_str(digit) + out
         value = value / 10
     }
