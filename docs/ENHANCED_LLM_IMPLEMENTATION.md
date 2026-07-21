@@ -286,11 +286,11 @@ func reset_gradients(model) int {
 //   ε = 1e-8       (English text)
 
 // English textparameter:
-//   m = β₁·m + (1-β₁)·g
-//   v = β₂·v + (1-β₂)·g²
+//   m = β₁-m + (1-β₁)-g
+//   v = β₂-v + (1-β₂)-g²
 //   m̂ = m / (1 - β₁^t)       // English text
 //   v̂ = v / (1 - β₂^t)       // English text
-//   θ = θ - lr·(m̂/√v̂ + λ·θ)  // English text + weightEnglish text
+//   θ = θ - lr-(m̂/√v̂ + λ-θ)  // English text + weightEnglish text
 ```
 
 **initializeEnglish text**:

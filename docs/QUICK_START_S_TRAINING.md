@@ -21,7 +21,7 @@ perplexity(loss)                   // English text = exp(loss)
 attention_forward(hidden_states, num_heads, seq_len, hidden_dim)
 // Multi-Head Attention completeimplementation
 // supportEnglish text
-// English text: score = Q·K^T / √d_k
+// English text: score = Q-K^T / √d_k
 ```
 
 #### Training Loop English text (trainingEnglish text)
@@ -114,7 +114,7 @@ English text = exp(loss)
 
 ### Attention English text
 ```s
-1. computeEnglish text: score = Q·K^T / √d_k
+1. computeEnglish text: score = Q-K^T / √d_k
 2. Softmax: attention_weights = softmax(score)
 3. English text: output = attention_weights @ V
 4. English textoutputEnglish text

@@ -69,9 +69,9 @@ The NeurX codebase represents a **sophisticated industrial-grade LLM training fr
 **Implemented Components**:
 - ✅ Scaled dot-product attention forward pass
   - Query, Key, Value projections
-  - Scaled attention scores: Q·K^T / √(d_k)
+  - Scaled attention scores: Q-K^T / √(d_k)
   - Softmax with numerical stability (max subtraction)
-  - Weighted aggregation: scores·V
+  - Weighted aggregation: scores-V
 - ✅ Multi-head reshaping and concatenation
 - ✅ Output projection layer
 - ✅ Causal masking for autoregressive models (large negative values for future positions)
@@ -140,10 +140,10 @@ The NeurX codebase represents a **sophisticated industrial-grade LLM training fr
 
 **AdamW Optimizer Features**:
 - ✅ First moment estimation (momentum):
-  - `m_t = β₁·m_{t-1} + (1-β₁)·g_t`
+  - `m_t = β₁-m_{t-1} + (1-β₁)-g_t`
   - Default: β₁ = 0.9
 - ✅ Second moment estimation (adaptive learning rate):
-  - `v_t = β₂·v_{t-1} + (1-β₂)·g_t²`
+  - `v_t = β₂-v_{t-1} + (1-β₂)-g_t²`
   - Default: β₂ = 0.999
 - ✅ Bias correction for early training:
   - `m̂ = m / (1 - β₁^t)`

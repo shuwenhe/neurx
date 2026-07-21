@@ -29,29 +29,29 @@ Remove:
 Extract disease/condition terms from title + subtitle.
 
 **Blacklist** (100+ terms to exclude):
-- Generic concepts: 筛查, 诊断, 治疗, 管理
+- Generic concepts: 筛查, diagnosis, 治疗, 管理
 - Statistical measures: 患病率, 发病率, 死亡率
-- Document types: 综述, 指南, 分析
+- Document types: 综述, guide, analysis
 
-**Fallback**: If no valid term extracted, use "健康问题"
+**Fallback**: If no valid term extracted, use "健康question"
 
 ### Layer 5: Question Generation
 Use 7 seed templates:
 
 ```
 1. 什么是{subject}?
-2. {subject}的通俗解释是什么?
-3. {subject}是怎么分型的?
-4. {subject}是怎么分期的?
-5. {subject}的诊断定义是什么?
-6. {subject}的发病机制是什么?
-7. {subject}的病理生理过程是什么?
+2. {subject} of 通俗解释是什么?
+3. {subject}是怎么分型 of ?
+4. {subject}是怎么分期 of ?
+5. {subject} of diagnosis定义是什么?
+6. {subject} of 发病机制是什么?
+7. {subject} of 病理生理过程是什么?
 ```
 
 Intent mapping:
 - definition → "definition"
 - 分型/分期 → "classification"
-- 诊断 → "diagnosis"
+- diagnosis → "diagnosis"
 - 机制 → "mechanism"
 
 ### Layer 6: Content Enhancement
@@ -59,7 +59,7 @@ Extract content relevant to question intent.
 
 **Intent patterns**:
 - **definition**: Match "定义", "概念", "是指", "是一种"
-- **diagnosis**: Match "诊断", "确诊", "检查", "症状"
+- **diagnosis**: Match "diagnosis", "确诊", "Check", "symptom"
 - **mechanism**: Match "机制", "原因", "病因", "病理"
 
 **Limits**:
@@ -76,7 +76,7 @@ Call Qwen3.5-35B-A3B to:
 **Constraints** (8 rules):
 1. No generic pronouns (本专题, 该病变)
 2. Specific not vague questions
-3. Skip if contains "学会指南链接"
+3. Skip if contains "学会guide链接"
 4. No third-person patient cases
 5. Focus on concepts, not cases
 6. Clear logical flow
@@ -116,7 +116,7 @@ struct medical_article {
     },
     {
       "role": "assistant",
-      "content": "心衰是指心脏无法提供足够的血流来满足身体需求..."
+      "content": "心衰是指心脏无法提供足够 of 血流来满足身体需求..."
     }
   ]
 }

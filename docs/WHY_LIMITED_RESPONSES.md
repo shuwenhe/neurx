@@ -64,7 +64,7 @@ func load_checkpoint(path: string) TransformerWeights {
 ### English text3step: truthfulEnglish textAttentioncompute (Requiredimplementation)
 ```s
 func attention_forward(Q: [][]f64, K: [][]f64, V: [][]f64) [][]f64 {
-    // Q·K^T / sqrt(d_k) → softmax → V
+    // Q-K^T / sqrt(d_k) → softmax → V
     // English textimplementation, RequiredtruthfulEnglish text
 }
 ```

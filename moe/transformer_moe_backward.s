@@ -12,7 +12,7 @@ package neurx.moe.transformer_backward
 //   output[t] = sum_k g_k * expert_k( hidden[t] )
 //
 //   d_expert_output[k] = d_output[t] * g_k               (∂L/∂expert_out)
-//   d_gate[k]           = d_output[t] · expert_out[k]    (∂L/∂g_k)
+//   d_gate[k]           = d_output[t] - expert_out[k]    (∂L/∂g_k)
 //   d_hidden[t]        += sum_k g_k * d_expert_input[k]  (∂L/∂h)
 //
 // Router gradient (through softmax + gate weights):
@@ -273,7 +273,7 @@ func moe_backward(
                     d = d + 1
                 }
 
-                // d_gate_logit[eid]: ∂L/∂g_k = d_output[t] · expert_out[k]
+                // d_gate_logit[eid]: ∂L/∂g_k = d_output[t] - expert_out[k]
                 // English textcomputeEnglish textoutputEnglish text (English textcache; English textcompute)
                 moe_expert ex = layer.experts[eid]
                 []float eo = moe_expert_forward(ex, h_t, H, D)

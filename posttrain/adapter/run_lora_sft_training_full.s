@@ -6,16 +6,16 @@ use std.io.println
 // run_lora_sft_training_full.s - Complete LoRA SFT Training in S Language
 // ============================================================================
 //
-// 完整的 LoRA SFT 后训练实现，无需 PyTorch
-// 功能：
-//   1. 加载基础模型和配置
-//   2. 从 JSONL 加载训练数据
-//   3. 初始化 LoRA 适配器
-//   4. 执行完整的训练循环
-//   5. 保存 LoRA 权重和模型配置
+// Complete of  LoRA SFT afterTrainingImplementation,无需 PyTorch
+// Features:
+//   1. loadbasemodel and configuration
+//   2.  from  JSONL loadTrainingData
+//   3. initialize LoRA adapter
+//   4. ExecuteComplete of Trainingloop
+//   5. save LoRA weights and modelconfiguration
 
 // ============================================================================
-// 配置结构体
+// Configuration structures体
 // ============================================================================
 
 struct TrainingConfig {
@@ -56,7 +56,7 @@ struct TrainingMetrics {
 }
 
 // ============================================================================
-// 工具函数
+// Utility functions
 // ============================================================================
 
 func int_to_str(int n) string {
@@ -126,19 +126,19 @@ func float_to_str(float value, int decimals) string {
 }
 
 // ============================================================================
-// 配置加载
+// Configuration loading
 // ============================================================================
 
 func load_config() TrainingConfig {
     TrainingConfig cfg
     
-    // 模型配置
+    // modelconfiguration
     cfg.base_model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
     cfg.train_data_path = "/home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl"
     cfg.val_data_path = "/home/shuwen/shuwen/train/dataset/medmcqa/val.jsonl"
     cfg.output_dir = "/home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft"
     
-    // 训练参数
+    // TrainingParameter
     cfg.num_epochs = 3
     cfg.batch_size = 32
     cfg.gradient_accumulation_steps = 1
@@ -147,7 +147,7 @@ func load_config() TrainingConfig {
     cfg.weight_decay = 0.01
     cfg.max_grad_norm = 1.0
     
-    // LoRA 参数
+    // LoRA Parameter
     cfg.lora_rank = 8
     cfg.lora_alpha = 16
     cfg.lora_dropout = 0.05
@@ -156,7 +156,7 @@ func load_config() TrainingConfig {
 }
 
 // ============================================================================
-// 模型初始化
+// modelinitialize
 // ============================================================================
 
 func init_lora_adapter(int input_dim, int output_dim, int rank, float alpha) ModelState {
@@ -167,7 +167,7 @@ func init_lora_adapter(int input_dim, int output_dim, int rank, float alpha) Mod
     state.rank = rank
     state.alpha = alpha
     
-    // 初始化 LoRA 权重（小随机值）
+    // initialize LoRA weights(小随机值)
     []float lora_a
     []float lora_b
     
@@ -186,7 +186,7 @@ func init_lora_adapter(int input_dim, int output_dim, int rank, float alpha) Mod
     state.lora_a = lora_a
     state.lora_b = lora_b
     
-    // 初始化基础权重
+    // initializebaseweights
     []float base_weights
     int i3 = 0
     while i3 < output_dim * input_dim {
@@ -199,47 +199,47 @@ func init_lora_adapter(int input_dim, int output_dim, int rank, float alpha) Mod
 }
 
 // ============================================================================
-// 训练数据加载
+// TrainingDataload
 // ============================================================================
 
 func count_training_samples(string filepath) int {
-    // 简化：返回估计值
-    // 真实实现应该读取文件行数
+    // simplified:returnEstimated值
+    // 真实Implementation应该readfileline数
     100
 }
 
 // ============================================================================
-// 训练循环
+// Trainingloop
 // ============================================================================
 
 func run_training(TrainingConfig cfg) TrainingMetrics {
-    println("🚀 开始 LoRA SFT 后训练")
+    println("🚀 Start LoRA SFT afterTraining")
     println("=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=")
     println("")
     
-    println("📋 配置信息：")
-    println("  • 基础模型: " + cfg.base_model_path)
-    println("  • 训练数据: " + cfg.train_data_path)
-    println("  • 输出目录: " + cfg.output_dir)
+    println("📋 configurationInformation:")
+    println("  • basemodel: " + cfg.base_model_path)
+    println("  • TrainingData: " + cfg.train_data_path)
+    println("  • Output directory: " + cfg.output_dir)
     println("  • LoRA Rank: " + int_to_str(cfg.lora_rank))
     println("  • LoRA Alpha: " + int_to_str(cfg.lora_alpha))
-    println("  • 批次大小: " + int_to_str(cfg.batch_size))
-    println("  • 训练轮数: " + int_to_str(cfg.num_epochs))
-    println("  • 学习率: " + float_to_str(cfg.learning_rate, 6))
+    println("  • 批次Size: " + int_to_str(cfg.batch_size))
+    println("  • Training轮数: " + int_to_str(cfg.num_epochs))
+    println("  • learning_rate: " + float_to_str(cfg.learning_rate, 6))
     println("")
     
-    // 初始化指标
+    // initialize指标
     TrainingMetrics metrics
     metrics.total_loss = 0.0
     metrics.total_samples = 0
     metrics.current_epoch = 0
     metrics.current_step = 0
     
-    // 初始化模型
+    // initializemodel
     ModelState model = init_lora_adapter(768, 768, cfg.lora_rank, cfg.lora_alpha as float)
     
-    // 训练循环
-    println("🎓 训练进行中...")
+    // Trainingloop
+    println("🎓 Training进linein...")
     println("")
     
     int epoch = 0
@@ -249,16 +249,16 @@ func run_training(TrainingConfig cfg) TrainingMetrics {
         float epoch_loss = 0.0
         int epoch_samples = 0
         
-        // 模拟批次训练
+        // modulo拟批次Training
         int batch = 0
-        while batch < 10 {  // 模拟 10 个批次
+        while batch < 10 {  // modulo拟 10  批次
             float batch_loss = 0.0
             int batch_samples = cfg.batch_size
             
-            // 模拟批次内样本
+            // modulo拟批次内sample
             int sample = 0
             while sample < batch_samples {
-                // 简化的前向传播
+                // simplified of 前向传播
                 float random_val = ((batch * batch_samples + sample) as float) * 0.001
                 float pred_loss = random_val * random_val
                 
@@ -270,10 +270,10 @@ func run_training(TrainingConfig cfg) TrainingMetrics {
             epoch_loss = epoch_loss + batch_loss
             epoch_samples = epoch_samples + batch_samples
             
-            // 梯度更新
+            // gradientUpdate
             float learning_rate = cfg.learning_rate
             
-            // 权重衰减
+            // weights衰减
             float wd_loss = 0.0
             int w = 0
             while w < len(model.lora_a) {
@@ -299,8 +299,8 @@ func run_training(TrainingConfig cfg) TrainingMetrics {
     
     metrics.avg_loss = metrics.total_loss / (metrics.total_samples as float)
     
-    // 保存模型
-    println("💾 保存模型...")
+    // Save model
+    println("💾 Save model...")
     println("")
     save_model(model, cfg.output_dir)
     
@@ -308,15 +308,15 @@ func run_training(TrainingConfig cfg) TrainingMetrics {
 }
 
 // ============================================================================
-// 模型保存
+// Model saving
 // ============================================================================
 
 func save_model(ModelState model, string output_dir) int {
-    println("  写入 adapter_model.safetensors...")
-    println("  位置: " + output_dir + "/adapter_model.safetensors")
+    println("  write adapter_model.safetensors...")
+    println("  location: " + output_dir + "/adapter_model.safetensors")
     println("")
     
-    println("  写入 adapter_config.json...")
+    println("  write adapter_config.json...")
     println("  {")
     println("    \"lora_rank\": " + int_to_str(model.rank) + ",")
     println("    \"lora_alpha\": " + float_to_str(model.alpha, 1) + ",")
@@ -329,16 +329,16 @@ func save_model(ModelState model, string output_dir) int {
 }
 
 // ============================================================================
-// 合并和导出
+// merge and export
 // ============================================================================
 
 func export_merged_model(ModelState model, string base_model_dir, string output_dir) int {
-    println("🔗 合并 LoRA 权重到基础模型...")
+    println("🔗 merge LoRA weights to basemodel...")
     println("")
     
-    println("  读取基础模型: " + base_model_dir + "/model.safetensors")
+    println("  readbasemodel: " + base_model_dir + "/model.safetensors")
     println("  应用 LoRA: W_new = W_base + (α/r) × B × A")
-    println("  输出目录: " + output_dir)
+    println("  Output directory: " + output_dir)
     println("")
     
     println("  • model.safetensors")
@@ -351,43 +351,43 @@ func export_merged_model(ModelState model, string base_model_dir, string output_
 }
 
 // ============================================================================
-// 主函数
+// Main function
 // ============================================================================
 
 func main() int {
     println("")
     println("╔" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╗")
-    println("║  NeurX LoRA SFT 后训练 - S 语言完整实现")
-    println("║  无 PyTorch 依赖 - 纯 S 实现")
+    println("║  NeurX LoRA SFT afterTraining - S LanguageCompleteImplementation")
+    println("║  无 PyTorch dependency - 纯 S Implementation")
     println("╚" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╝")
     println("")
     
-    // 加载配置
+    // Load configuration
     TrainingConfig cfg = load_config()
     
-    // 运行训练
+    // RunTraining
     TrainingMetrics metrics = run_training(cfg)
     
     println("=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=")
-    println("✨ 后训练完成!")
+    println("✨ afterTrainingcomplete!")
     println("=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=")
     println("")
     
-    println("📊 训练统计：")
-    println("  总样本数: " + int_to_str(metrics.total_samples))
-    println("  平均损失: " + float_to_str(metrics.avg_loss, 6))
-    println("  完成轮数: " + int_to_str(metrics.current_epoch))
+    println("📊 Trainingstatistics:")
+    println("  总sample数: " + int_to_str(metrics.total_samples))
+    println("  平均loss: " + float_to_str(metrics.avg_loss, 6))
+    println("  complete轮数: " + int_to_str(metrics.current_epoch))
     println("")
     
-    println("💾 输出文件：")
-    println("  LoRA 检查点: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft/")
+    println("💾 outputfile:")
+    println("  LoRA Checkpoint: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft/")
     println("    • adapter_model.safetensors")
     println("    • adapter_config.json")
     println("")
     
-    println("🔗 下一步：")
-    println("  1. 运行合并脚本: run_lora_merge.s")
-    println("  2. 最终模型位置: /home/shuwen/shuwen/train/model/base-model-posttrain/")
+    println("🔗 next step:")
+    println("  1. Runmergescript: run_lora_merge.s")
+    println("  2. finalmodellocation: /home/shuwen/shuwen/train/model/base-model-posttrain/")
     println("")
     
     0

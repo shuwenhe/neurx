@@ -3,21 +3,21 @@ package main
 use std.io.println
 
 // ============================================================================
-// execute_posttrain_pipeline.s - 完整的后训练执行脚本
+// execute_posttrain_pipeline.s - Complete of afterTrainingExecutescript
 // ============================================================================
 //
-// 这个脚本将逐步执行整个后训练流程:
-//   1. 验证配置
-//   2. 执行 LoRA SFT 训练
-//   3. 合并 LoRA 适配器到基础模型
-//   4. 验证输出
+// 这 scriptWill逐步Execute整 afterTrainingprocess:
+//   1. verifyconfiguration
+//   2. Execute LoRA SFT Training
+//   3. merge LoRA adapter to basemodel
+//   4. Verify output
 //
-// 使用方式:
+// Usageway:
 //   /home/shuwen/shuwen/train/s/bin/s_seed execute_posttrain_pipeline.s
 //
 
 // ============================================================================
-// 工具函数
+// Utility functions
 // ============================================================================
 
 func println_separator() int {
@@ -108,168 +108,168 @@ func float_to_str(float value, int decimals) string {
 }
 
 // ============================================================================
-// 阶段 1: 验证环境
+// Phase 1: verify环境
 // ============================================================================
 
 func step_verify_environment() int {
-    println_subheader("步骤 1: 验证环境")
+    println_subheader("Step 1: verify环境")
     
     println("")
-    println("🔍 验证项目结构和文件...")
+    println("🔍 verify项目structure and file...")
     println("")
     
-    println("  ✓ 基础模型路径")
+    println("  ✓ basemodelpath")
     println("    /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct")
     println("")
     
-    println("  ✓ 训练数据路径")
+    println("  ✓ TrainingDatapath")
     println("    /home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl")
     println("")
     
-    println("  ✓ 验证数据路径")
+    println("  ✓ verifyDatapath")
     println("    /home/shuwen/shuwen/train/dataset/medmcqa/val.jsonl")
     println("")
     
-    println("  ✓ 配置文件")
+    println("  ✓ configurationfile")
     println("    /home/shuwen/shuwen/train/neurx/configs/posttrain.yaml")
     println("")
     
-    println("  ✓ S 编译器")
+    println("  ✓ S compiledevice")
     println("    /home/shuwen/shuwen/train/s/bin/s_seed")
     println("")
     
-    println("✅ 环境验证完成")
+    println("✅ 环境verifycomplete")
     0
 }
 
 // ============================================================================
-// 阶段 2: 配置确认
+// Phase 2: configurationConfirm
 // ============================================================================
 
 func step_show_configuration() int {
-    println_subheader("步骤 2: 配置确认")
+    println_subheader("Step 2: configurationConfirm")
     
     println("")
-    println("📋 后训练配置参数:")
+    println("📋 afterTrainingconfigurationParameter:")
     println("")
     
-    println("  LoRA 配置:")
+    println("  LoRA configuration:")
     println("    • Rank        : 8")
     println("    • Alpha       : 16")
     println("    • Dropout     : 0.050")
     println("")
     
-    println("  训练超参数:")
-    println("    • 方法        : SFT (Supervised Fine-Tuning)")
+    println("  Training超Parameter:")
+    println("    • method        : SFT (Supervised Fine-Tuning)")
     println("    • 轮数        : 3")
-    println("    • 批次大小    : 32")
-    println("    • 学习率      : 0.000500")
-    println("    • 调度器      : cosine")
+    println("    • 批次size    : 32")
+    println("    • learning_rate      : 0.000500")
+    println("    • 调度device      : cosine")
     println("    • 预热步数    : 100")
-    println("    • 优化器      : adamw_8bit")
-    println("    • 梯度裁剪    : 1.00")
-    println("    • 权重衰减    : 0.0100")
+    println("    • Optimizedevice      : adamw_8bit")
+    println("    • gradient裁剪    : 1.00")
+    println("    • weights衰减    : 0.0100")
     println("")
     
-    println("  输出配置:")
-    println("    • LoRA 适配器 : /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft")
-    println("    • 合并模型    : /home/shuwen/shuwen/train/model/base-model-posttrain")
-    println("    • 日志目录    : /home/shuwen/shuwen/train/neurx/artifacts/logs")
+    println("  outputconfiguration:")
+    println("    • LoRA adapter : /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft")
+    println("    • mergemodel    : /home/shuwen/shuwen/train/model/base-model-posttrain")
+    println("    • LogDirectory    : /home/shuwen/shuwen/train/neurx/artifacts/logs")
     println("")
     
-    println("✅ 配置确认完成")
+    println("✅ configurationConfirmcomplete")
     0
 }
 
 // ============================================================================
-// 阶段 3: LoRA SFT 训练
+// Phase 3: LoRA SFT Training
 // ============================================================================
 
 func step_run_lora_training() int {
-    println_subheader("步骤 3: 启动 LoRA SFT 训练")
+    println_subheader("Step 3: Launch LoRA SFT Training")
     
     println("")
-    println("🚀 执行 LoRA SFT 训练...")
+    println("🚀 Execute LoRA SFT Training...")
     println("")
     
-    println("  训练流程:")
-    println("    1️⃣  加载基础模型: Qwen2.5-0.5B-Instruct")
-    println("    2️⃣  初始化 LoRA 适配器 (rank=8)")
-    println("    3️⃣  加载训练数据: train.jsonl")
-    println("    4️⃣  执行 3 个轮次的训练")
-    println("    5️⃣  使用余弦学习率调度器")
-    println("    6️⃣  保存检查点到: lora_sft 目录")
+    println("  Trainingprocess:")
+    println("    1️⃣  loadbasemodel: Qwen2.5-0.5B-Instruct")
+    println("    2️⃣  initialize LoRA adapter (rank=8)")
+    println("    3️⃣  loadTrainingData: train.jsonl")
+    println("    4️⃣  Execute 3  轮次 of Training")
+    println("    5️⃣  Usage余弦learning_rate调度device")
+    println("    6️⃣  saveCheckpoint to : lora_sft Directory")
     println("")
     
-    println("  执行命令:")
+    println("  Executecommand:")
     println("    /home/shuwen/shuwen/train/s/bin/s_seed \\")
     println("    /home/shuwen/shuwen/train/neurx/posttrain/adapter/run_lora_sft_training_simple.s")
     println("")
     
-    println("  预期输出文件:")
+    println("  expectedoutputFile:")
     println("    • adapter_model.safetensors")
     println("    • adapter_config.json")
     println("    • training_state.json")
     println("")
     
-    println("⏳ 训练进行中... (此为模拟步骤)")
+    println("⏳ Training进linein... (此为modulo拟Step)")
     println("")
     
     0
 }
 
 // ============================================================================
-// 阶段 4: 模型合并
+// Phase 4: modelmerge
 // ============================================================================
 
 func step_merge_lora() int {
-    println_subheader("步骤 4: 合并 LoRA 适配器到基础模型")
+    println_subheader("Step 4: merge LoRA adapter to basemodel")
     
     println("")
-    println("🔗 执行模型合并...")
+    println("🔗 Executemodelmerge...")
     println("")
     
-    println("  合并流程:")
-    println("    1️⃣  加载基础模型权重: Qwen2.5-0.5B-Instruct")
-    println("    2️⃣  加载 LoRA 适配器: adapter_model.safetensors")
-    println("    3️⃣  应用合并公式: W_new = W_base + (α/r) × B × A")
-    println("    4️⃣  保存完整合并模型到: base-model-posttrain")
+    println("  mergeprocess:")
+    println("    1️⃣  Load base model weights: Qwen2.5-0.5B-Instruct")
+    println("    2️⃣  load LoRA adapter: adapter_model.safetensors")
+    println("    3️⃣  应用mergeFormula: W_new = W_base + (α/r) × B × A")
+    println("    4️⃣  saveCompletemergemodel to : base-model-posttrain")
     println("")
     
-    println("  输入文件:")
-    println("    • 基础模型: /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct")
-    println("    • 适配器  : /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft")
+    println("  InputFile:")
+    println("    • basemodel: /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct")
+    println("    • adapter  : /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft")
     println("")
     
-    println("  执行命令:")
+    println("  Executecommand:")
     println("    /home/shuwen/shuwen/train/s/bin/s_seed \\")
     println("    /home/shuwen/shuwen/train/neurx/posttrain/adapter/run_lora_merge.s")
     println("")
     
-    println("⏳ 合并进行中... (此为模拟步骤)")
+    println("⏳ merge进linein... (此为modulo拟Step)")
     println("")
     
     0
 }
 
 // ============================================================================
-// 阶段 5: 输出验证
+// Phase 5: outputverify
 // ============================================================================
 
 func step_verify_output() int {
-    println_subheader("步骤 5: 验证输出")
+    println_subheader("Step 5: Verify output")
     
     println("")
-    println("✅ 验证生成的文件...")
+    println("✅ verifyGenerate of file...")
     println("")
     
-    println("  LoRA 适配器检查点位置:")
+    println("  LoRA adapterCheckpointlocation:")
     println("    /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft/")
     println("      • adapter_model.safetensors ✓")
     println("      • adapter_config.json ✓")
     println("")
     
-    println("  合并后的模型位置:")
+    println("  mergeafter of modellocation:")
     println("    /home/shuwen/shuwen/train/model/base-model-posttrain/")
     println("      • model.safetensors ✓")
     println("      • config.json ✓")
@@ -277,27 +277,27 @@ func step_verify_output() int {
     println("      • tokenizer_config.json ✓")
     println("")
     
-    println("  日志文件位置:")
+    println("  Logfilelocation:")
     println("    /home/shuwen/shuwen/train/neurx/artifacts/logs/")
     println("      • training_log.txt ✓")
     println("      • training_metrics.json ✓")
     println("")
     
-    println("✅ 所有文件验证完成")
+    println("✅ allfileverifycomplete")
     0
 }
 
 // ============================================================================
-// 主函数
+// Main function
 // ============================================================================
 
 func main() int {
     println("")
     println_separator()
-    println("  🎓 NeurX 完整后训练执行流程")
-    println("  后训练方法: LoRA SFT (Low-Rank Supervised Fine-Tuning)")
-    println("  基础模型: Qwen2.5-0.5B-Instruct")
-    println("  数据集: MedMCQA (医学多选题)")
+    println("  🎓 NeurX CompleteafterTrainingExecuteprocess")
+    println("  afterTrainingmethod: LoRA SFT (Low-Rank Supervised Fine-Tuning)")
+    println("  basemodel: Qwen2.5-0.5B-Instruct")
+    println("  Dataset: MedMCQA (medical多选题)")
     println_separator()
     println("")
     
@@ -322,32 +322,32 @@ func main() int {
     println("")
     
     println_separator()
-    println("  ✨ 后训练执行流程配置完成!")
+    println("  ✨ afterTrainingExecuteprocessconfigurationcomplete!")
     println_separator()
     println("")
     
-    println("📚 详细步骤说明:")
+    println("📚 详细Stepdescription:")
     println("")
-    println("1. 编译执行脚本:")
+    println("1. compileExecutescript:")
     println("   cd /home/shuwen/shuwen/train/neurx")
     println("   /home/shuwen/shuwen/train/s/bin/s_seed execute_posttrain_pipeline.s")
     println("")
     
-    println("2. 启动完整后训练流程 (需要 GPU):")
+    println("2. LaunchCompleteafterTrainingprocess (need GPU):")
     println("   make posttrain-sft-complete")
     println("")
     
-    println("3. 合并模型并保存:")
+    println("3. mergemodel并save:")
     println("   make posttrain-merge-to-model")
     println("")
     
-    println("4. 验证最终输出:")
+    println("4. verifyfinaloutput:")
     println("   ls -lah /home/shuwen/shuwen/train/model/base-model-posttrain/")
     println("")
     
-    println("🎯 输出位置:")
-    println("   • 后训练模型: /home/shuwen/shuwen/train/model/base-model-posttrain/")
-    println("   • LoRA 检查点: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft/")
+    println("🎯 outputlocation:")
+    println("   • afterTrainingmodel: /home/shuwen/shuwen/train/model/base-model-posttrain/")
+    println("   • LoRA Checkpoint: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft/")
     println("")
     
     0

@@ -57,9 +57,9 @@ Goal: **Train policy to maximize margin** (prefer chosen over rejected)
 
 | Method | Formula | Components | Code | Convergence | Notes |
 |--------|---------|-----------|------|-----------|-------|
-| **SimPO** | -log σ(β·margin) | Sigmoid | ~300 lines | 1-2 days | Simplest |
-| **DPO** | -log σ(β·margin) + KL implicit | Sigmoid + Bayes | ~350 lines | 2-3 days | Implicit reward |
-| **ORPO** | -log σ(γ·odds) + λ·KL | Odds ratio + KL | ~800 lines | 2-4 days | Most complex |
+| **SimPO** | -log σ(β-margin) | Sigmoid | ~300 lines | 1-2 days | Simplest |
+| **DPO** | -log σ(β-margin) + KL implicit | Sigmoid + Bayes | ~350 lines | 2-3 days | Implicit reward |
+| **ORPO** | -log σ(γ-odds) + λ-KL | Odds ratio + KL | ~800 lines | 2-4 days | Most complex |
 | **PPO** | Clipped surrogate + KL | Value function + GAE | ~1200 lines | 2-4 weeks | Most powerful |
 
 **Key Difference**: SimPO omits KL divergence constraint → faster but less conservative

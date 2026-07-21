@@ -27,7 +27,7 @@ if !check.is_clean {
 #### SFT Objective
 ```s
 medical_sft_objective{
-    system_prompt: "你是infoxmed医疗大模型。",
+    system_prompt: "你是infoxmed医疗大Model.",
     max_token_length: 1024,
     epochs: 2,
     learning_rate: 5e-5,

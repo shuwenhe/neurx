@@ -1,65 +1,65 @@
-# NeurX 完整后训练执行指南
+# NeurX CompleteafterTrainingExecuteguide
 
 ## 📖 概述
 
-本指南说明如何使用 NeurX 框架和提供的 S 语言脚本，对 Qwen2.5-0.5B-Instruct 模型进行完整的后训练（Post-Training），包括 LoRA SFT 训练和模型合并。
+本guidedescription如何Usage NeurX framework and 提供 of  S Languagescript,对 Qwen2.5-0.5B-Instruct Model进lineComplete of afterTraining(Post-Training),package括 LoRA SFT Training and ModelMerge.
 
-**关键配置:**
-- 🎯 基础模型: `Qwen2.5-0.5B-Instruct`
-- 📊 数据集: `MedMCQA` (医学多选题)
-- 🔧 训练方法: LoRA SFT (Low-Rank Supervised Fine-Tuning)
-- 💾 配置文件: `/home/shuwen/shuwen/train/neurx/configs/posttrain.yaml`
-- 🎓 输出位置: `/home/shuwen/shuwen/train/model/base-model-posttrain`
+**keyConfiguration:**
+- 🎯 baseModel: `Qwen2.5-0.5B-Instruct`
+- 📊 Dataset: `MedMCQA` (medical多选题)
+- 🔧 Trainingmethod: LoRA SFT (Low-Rank Supervised Fine-Tuning)
+- 💾 ConfigurationFile: `/home/shuwen/shuwen/train/neurx/configs/posttrain.yaml`
+- 🎓 Outputlocation: `/home/shuwen/shuwen/train/model/base-model-posttrain`
 
 ---
 
-## 🗂️ 项目结构
+## 🗂️ 项目structure
 
 ```
 /home/shuwen/shuwen/train/
-├── model/                          # 模型存储
-│   ├── Qwen2.5-0.5B-Instruct/     # 基础模型 ✓
-│   └── base-model-posttrain/       # 后训练模型输出 (新建)
+├── model/                          # Model存储
+│   ├── Qwen2.5-0.5B-Instruct/     # baseModel ✓
+│   └── base-model-posttrain/       # afterTrainingModelOutput (新建)
 │
 ├── dataset/
 │   └── medmcqa/
-│       ├── train.jsonl             # 训练数据
-│       └── val.jsonl               # 验证数据
+│       ├── train.jsonl             # TrainingData
+│       └── val.jsonl               # VerificationData
 │
-└── neurx/                          # NeurX 框架
+└── neurx/                          # NeurX framework
     ├── configs/
-    │   └── posttrain.yaml          # ⭐ 后训练配置
+    │   └── posttrain.yaml          # ⭐ afterTrainingConfiguration
     │
-    ├── lib/                        # 基础库
+    ├── lib/                        # baseLibraries
     │   ├── tensor.s                # 张量计算
-    │   ├── nn.s                    # 神经网络层
-    │   ├── loss.s                  # 损失函数
-    │   ├── json.s                  # JSON 解析
-    │   └── fileio.s                # 文件 I/O
+    │   ├── nn.s                    # 神经networklayer
+    │   ├── loss.s                  # lossfunction
+    │   ├── json.s                  # JSON parse
+    │   └── fileio.s                # File I/O
     │
-    ├── posttrain/                  # 后训练模块
+    ├── posttrain/                  # afterTrainingmodule
     │   └── adapter/
-    │       ├── run_lora_sft_training_simple.s      # LoRA SFT 训练脚本
-    │       ├── run_lora_merge.s                    # LoRA 合并脚本
-    │       ├── run_posttrain_pipeline.s            # ⭐ 配置验证脚本
-    │       └── execute_posttrain_pipeline.s        # ⭐ 执行流程脚本
+    │       ├── run_lora_sft_training_simple.s      # LoRA SFT Trainingscript
+    │       ├── run_lora_merge.s                    # LoRA Mergescript
+    │       ├── run_posttrain_pipeline.s            # ⭐ ConfigurationVerificationscript
+    │       └── execute_posttrain_pipeline.s        # ⭐ Executeprocessscript
     │
     ├── artifacts/
     │   ├── checkpoints/
-    │   │   └── lora_sft/           # LoRA 适配器检查点
-    │   └── logs/                   # 训练日志
+    │   │   └── lora_sft/           # LoRA adapterCheckpoint
+    │   └── logs/                   # TrainingLog
     │
-    └── s/bin/s_seed                # S 编译器
+    └── s/bin/s_seed                # S compiledevice
 
 ```
 
 ---
 
-## 📋 配置文件详解
+## 📋 ConfigurationFile详解
 
-配置文件位置: `/home/shuwen/shuwen/train/neurx/configs/posttrain.yaml`
+ConfigurationFilelocation: `/home/shuwen/shuwen/train/neurx/configs/posttrain.yaml`
 
-### 模型配置
+### ModelConfiguration
 ```yaml
 model:
   base_model_path: /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct
@@ -67,7 +67,7 @@ model:
   model_type: qwen
 ```
 
-### 数据配置
+### DataConfiguration
 ```yaml
 data:
   train_data_path: /home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl
@@ -76,7 +76,7 @@ data:
   dataset_type: medmcqa
 ```
 
-### 输出配置
+### OutputConfiguration
 ```yaml
 output:
   adapter_output_dir: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft
@@ -84,7 +84,7 @@ output:
   log_dir: /home/shuwen/shuwen/train/neurx/artifacts/logs
 ```
 
-### LoRA 配置
+### LoRA Configuration
 ```yaml
 lora:
   rank: 8              # LoRA 秩
@@ -100,7 +100,7 @@ lora:
     - down_proj
 ```
 
-### 训练配置
+### TrainingConfiguration
 ```yaml
 training:
   training_method: sft
@@ -116,7 +116,7 @@ training:
   max_grad_norm: 1.0
 ```
 
-### 合并配置
+### MergeConfiguration
 ```yaml
 merge:
   merge_lora_after_training: true
@@ -124,156 +124,156 @@ merge:
 
 ---
 
-## 🚀 执行步骤
+## 🚀 ExecuteStep
 
-### 第 1 步: 验证配置
+### 第 1 步: VerificationConfiguration
 
-首先运行配置验证脚本，确保所有路径和参数都配置正确：
+首先RunConfigurationVerificationscript,确保allPath and Parameter都Configuration正确:
 
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 
-# 方式 1: 直接用 S 编译器运行
+# way 1: 直接用 S compiledeviceRun
 /home/shuwen/shuwen/train/s/bin/s_seed \
   posttrain/adapter/run_posttrain_pipeline.s
 
-# 方式 2: 通过 Makefile (如果已配置)
+# way 2: 通过 Makefile (如果haveConfiguration)
 make posttrain-show-config
 ```
 
-**预期输出:**
-- ✓ 所有文件路径验证
-- ✓ 配置参数显示
-- ✓ 训练计划确认
+**expectedOutput:**
+- ✓ allFilePathVerification
+- ✓ ConfigurationParameter显示
+- ✓ Training计划Confirm
 
-### 第 2 步: 查看执行计划
+### 第 2 步: ViewExecute计划
 
-运行完整执行流程脚本，了解所有执行步骤：
+RunCompleteExecuteprocessscript,了解allExecuteStep:
 
 ```bash
 /home/shuwen/shuwen/train/s/bin/s_seed \
   posttrain/adapter/execute_posttrain_pipeline.s
 ```
 
-**预期输出:**
+**expectedOutput:**
 ```
 ╔════════════════════════════════════════════════════════════════╗
-║   NeurX 完整后训练执行流程                                      ║
-║   后训练方法: LoRA SFT (Low-Rank Supervised Fine-Tuning)       ║
-║   基础模型: Qwen2.5-0.5B-Instruct                              ║
-║   数据集: MedMCQA (医学多选题)                                 ║
+║   NeurX CompleteafterTrainingExecuteprocess                                      ║
+║   afterTrainingmethod: LoRA SFT (Low-Rank Supervised Fine-Tuning)       ║
+║   baseModel: Qwen2.5-0.5B-Instruct                              ║
+║   Dataset: MedMCQA (medical多选题)                                 ║
 ╚════════════════════════════════════════════════════════════════╝
 
-步骤 1: 验证环境
-  ✓ 基础模型路径
-  ✓ 训练数据路径
+Step 1: Verification环境
+  ✓ baseModelPath
+  ✓ TrainingDataPath
   ...
 
-步骤 2: 配置确认
-  LoRA 配置:
+Step 2: ConfigurationConfirm
+  LoRA Configuration:
     • Rank        : 8
     • Alpha       : 16
     ...
 
-步骤 3: 启动 LoRA SFT 训练
-  执行命令:
+Step 3: Launch LoRA SFT Training
+  Executecommand:
     /home/shuwen/shuwen/train/s/bin/s_seed \
     /home/shuwen/shuwen/train/neurx/posttrain/adapter/run_lora_sft_training_simple.s
 
-步骤 4: 合并 LoRA 适配器到基础模型
-  执行命令:
+Step 4: Merge LoRA adapter to baseModel
+  Executecommand:
     /home/shuwen/shuwen/train/s/bin/s_seed \
     /home/shuwen/shuwen/train/neurx/posttrain/adapter/run_lora_merge.s
 
-步骤 5: 验证输出
-  LoRA 适配器检查点位置:
+Step 5: Verify output
+  LoRA adapterCheckpointlocation:
     /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft/
   
-  合并后的模型位置:
+  Mergeafter of Modellocation:
     /home/shuwen/shuwen/train/model/base-model-posttrain/
 ```
 
-### 第 3 步: 执行 LoRA SFT 训练
+### 第 3 步: Execute LoRA SFT Training
 
-这是整个流程中最耗时的步骤，需要 GPU。
+这是整 processin最time of Step,need GPU.
 
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 
-# 方式 1: 直接运行训练脚本
+# way 1: 直接RunTrainingscript
 /home/shuwen/shuwen/train/s/bin/s_seed \
   posttrain/adapter/run_lora_sft_training_simple.s
 
-# 方式 2: 通过 Makefile (如果已配置)
+# way 2: 通过 Makefile (如果haveConfiguration)
 make posttrain-sft-train
 
-# 方式 3: 后台运行并保存日志
+# way 3: after台Run并saveLog
 nohup /home/shuwen/shuwen/train/s/bin/s_seed \
   posttrain/adapter/run_lora_sft_training_simple.s \
   > artifacts/logs/training.log 2>&1 &
 ```
 
-**训练流程:**
+**Trainingprocess:**
 
 ```
-1. 加载基础模型: Qwen2.5-0.5B-Instruct
-   └─ 从 /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct 加载
+1. loadbaseModel: Qwen2.5-0.5B-Instruct
+   └─  from  /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct load
    
-2. 初始化 LoRA 适配器
+2. initialize LoRA adapter
    └─ Rank: 8, Alpha: 16
    
-3. 加载训练数据
-   └─ train.jsonl (训练集)
-   └─ val.jsonl (验证集)
+3. loadTrainingData
+   └─ train.jsonl (Trainingset)
+   └─ val.jsonl (Verificationset)
    
-4. 执行 3 轮训练
-   └─ 每轮使用 32 的批次大小
-   └─ 学习率: 0.0005 (使用余弦调度)
+4. Execute 3 轮Training
+   └─ 每轮Usage 32  of 批次Size
+   └─ learning_rate: 0.0005 (Usage余弦调度)
    
-5. 保存检查点
+5. saveCheckpoint
    └─ /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft/
    
-输出文件:
-  • adapter_model.safetensors     (LoRA 权重, ~50-100MB)
-  • adapter_config.json           (配置参数)
-  • training_state.json           (训练状态)
-  • training_log.txt              (训练日志)
+OutputFile:
+  • adapter_model.safetensors     (LoRA weights, ~50-100MB)
+  • adapter_config.json           (ConfigurationParameter)
+  • training_state.json           (Trainingstatus)
+  • training_log.txt              (TrainingLog)
 ```
 
-**预期输出:**
-- ✓ 训练进度信息
-- ✓ 每个轮次的损失值
-- ✓ 验证集性能
-- ✓ 检查点保存位置
+**expectedOutput:**
+- ✓ Training进度Information
+- ✓ 每 轮次 of loss值
+- ✓ VerificationsetPerformance
+- ✓ Checkpointsavelocation
 
-**如何监控训练:**
+**如何monitoringTraining:**
 
 ```bash
-# 查看实时日志
+# View实时Log
 tail -f artifacts/logs/training.log
 
-# 查看训练参数统计
+# ViewTrainingParameterstatistics
 cat artifacts/logs/training_metrics.json | python -m json.tool
 
-# 检查生成的检查点
+# CheckGenerate of Checkpoint
 ls -lah artifacts/checkpoints/lora_sft/
 ```
 
-### 第 4 步: 合并 LoRA 适配器到基础模型
+### 第 4 步: Merge LoRA adapter to baseModel
 
-训练完成后，将 LoRA 适配器合并到基础模型，生成完整的后训练模型。
+TrainingAfter completion,Merge LoRA adapter into base model,GenerateComplete of afterTrainingModel.
 
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 
-# 方式 1: 直接运行合并脚本
+# way 1: 直接RunMergescript
 /home/shuwen/shuwen/train/s/bin/s_seed \
   posttrain/adapter/run_lora_merge.s
 
-# 方式 2: 通过 Makefile (如果已配置)
+# way 2: 通过 Makefile (如果haveConfiguration)
 make posttrain-merge-lora
 
-# 方式 3: 指定输入输出路径
+# way 3: 指定InputOutputPath
 /home/shuwen/shuwen/train/s/bin/s_seed \
   posttrain/adapter/run_lora_merge.s \
   --base-model /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct \
@@ -281,208 +281,208 @@ make posttrain-merge-lora
   --output /home/shuwen/shuwen/train/model/base-model-posttrain
 ```
 
-**合并流程:**
+**Mergeprocess:**
 
 ```
-1. 加载基础模型权重
+1. Load base model weights
    └─ /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/model.safetensors
    
-2. 加载 LoRA 适配器权重
+2. Load LoRA adapter weights
    └─ /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft/adapter_model.safetensors
    
-3. 应用 LoRA 合并公式
+3. 应用 LoRA Merge公式
    └─ W_new = W_base + (α/r) × B × A
-   └─ 对所有目标层应用合并
+   └─ 对all目标layer应用Merge
    
-4. 保存完整的合并模型
+4. saveComplete of MergeModel
    └─ /home/shuwen/shuwen/train/model/base-model-posttrain/
 
-输出文件:
-  • model.safetensors           (完整合并模型)
-  • config.json                 (模型配置)
-  • generation_config.json      (生成配置)
-  • tokenizer.json              (分词器)
-  • tokenizer_config.json       (分词器配置)
-  • README.md                   (说明文档)
+OutputFile:
+  • model.safetensors           (CompleteMergeModel)
+  • config.json                 (ModelConfiguration)
+  • generation_config.json      (GenerateConfiguration)
+  • tokenizer.json              (分词device)
+  • tokenizer_config.json       (分词deviceConfiguration)
+  • README.md                   (descriptiondocumentation)
 ```
 
-**预期输出:**
-- ✓ 合并完成确认
-- ✓ 输出文件大小
-- ✓ 模型验证信息
+**expectedOutput:**
+- ✓ MergeCompleteConfirm
+- ✓ OutputFileSize
+- ✓ ModelVerificationInformation
 
-### 第 5 步: 验证输出
+### 第 5 步: Verify output
 
-检查生成的所有输出文件。
+CheckGenerate of allOutputFile.
 
 ```bash
-# 检查 LoRA 适配器检查点
+# Check LoRA adapterCheckpoint
 ls -lah /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft/
-# 预期文件:
-#   adapter_model.safetensors (LoRA 权重)
-#   adapter_config.json       (配置)
+# expectedFile:
+#   adapter_model.safetensors (LoRA weights)
+#   adapter_config.json       (Configuration)
 
-# 检查合并后的模型
+# CheckMergeafter of Model
 ls -lah /home/shuwen/shuwen/train/model/base-model-posttrain/
-# 预期文件:
+# expectedFile:
 #   model.safetensors
 #   config.json
 #   tokenizer.json
 #   ...
 
-# 验证模型文件大小
+# VerificationModelFileSize
 du -sh /home/shuwen/shuwen/train/model/base-model-posttrain/*
 
-# 查看训练日志
+# ViewTrainingLog
 cat /home/shuwen/shuwen/train/neurx/artifacts/logs/training_log.txt
 ```
 
 ---
 
-## 🔄 完整一键执行流程
+## 🔄 Complete一键Executeprocess
 
-如果已经配置了 Makefile 规则，可以使用一条命令执行完整流程：
+如果have经Configuration了 Makefile 规则,可以Usage一条commandExecuteCompleteprocess:
 
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 
-# 验证 + 显示配置
+# Verification + 显示Configuration
 make posttrain-show-config
 
-# 启动完整训练 + 合并流程 (后台运行)
+# LaunchCompleteTraining + Mergeprocess (after台Run)
 make posttrain-complete
 
-# 只合并模型
+# 只MergeModel
 make posttrain-merge-to-model
 
-# 验证输出
+# Verify output
 make posttrain-verify-output
 ```
 
 ---
 
-## 📊 预期结果
+## 📊 expected结果
 
-### 训练时间估算
+### TrainingTime估算
 
-| 阶段 | 耗时 | GPU 需求 |
+| Phase | time | GPU 需求 |
 |------|------|----------|
-| LoRA SFT 训练 | 1-2 小时 | 1x GPU (8GB+) |
-| 模型合并 | 5-10 分钟 | CPU 即可 |
-| **总计** | **1-2.5 小时** | |
+| LoRA SFT Training | 1-2 hours | 1x GPU (8GB+) |
+| ModelMerge | 5-10 minutes | CPU 即可 |
+| **总计** | **1-2.5 hours** | |
 
-### 输出文件
+### OutputFile
 
-| 路径 | 文件 | 说明 |
+| Path | File | description |
 |------|------|------|
-| `artifacts/checkpoints/lora_sft/` | `adapter_model.safetensors` | LoRA 权重 (~50-100MB) |
-| | `adapter_config.json` | LoRA 配置 |
-| | `training_state.json` | 训练状态 |
-| `artifacts/logs/` | `training_log.txt` | 训练日志 |
-| | `training_metrics.json` | 训练指标 |
-| `model/base-model-posttrain/` | `model.safetensors` | 合并后完整模型 (~1.5GB) |
-| | `config.json` | 模型配置 |
-| | `tokenizer.json` | 分词器 |
+| `artifacts/checkpoints/lora_sft/` | `adapter_model.safetensors` | LoRA weights (~50-100MB) |
+| | `adapter_config.json` | LoRA Configuration |
+| | `training_state.json` | Trainingstatus |
+| `artifacts/logs/` | `training_log.txt` | TrainingLog |
+| | `training_metrics.json` | Training指标 |
+| `model/base-model-posttrain/` | `model.safetensors` | MergeafterCompleteModel (~1.5GB) |
+| | `config.json` | ModelConfiguration |
+| | `tokenizer.json` | 分词device |
 
-### 模型性能对比
+### ModelPerformance对比
 
-| 指标 | 基础模型 | 后训练模型 |
+| 指标 | baseModel | afterTrainingModel |
 |------|---------|----------|
-| 模型大小 | ~1.5GB | ~1.5GB |
-| 推理速度 | 基准 | ≈ 基准 |
-| MedMCQA 准确率 | X% | X+Y% |
+| ModelSize | ~1.5GB | ~1.5GB |
+| inferenceSpeed | 基准 | ≈ 基准 |
+| MedMCQA accuracy | X% | X+Y% |
 
 ---
 
 ## 🛠️ 故障排查
 
-### 问题 1: "找不到基础模型"
+### question 1: "找Not to baseModel"
 ```
-错误信息: Base model not found at /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct
+ErrorInformation: Base model not found at /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct
 ```
 
-**解决:**
+**resolve:**
 ```bash
-# 检查模型文件
+# CheckModelFile
 ls -la /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/
 
-# 如果不存在，下载或复制模型
-# 确保包含: model.safetensors, config.json, tokenizer.json 等
+# 如果Not存 in ,download or 复制Model
+# 确保package含: model.safetensors, config.json, tokenizer.json 等
 ```
 
-### 问题 2: "数据文件不存在"
+### question 2: "DataFileNot存 in "
 ```
-错误信息: Training data file not found
+ErrorInformation: Training data file not found
 ```
 
-**解决:**
+**resolve:**
 ```bash
-# 检查数据文件
+# CheckDataFile
 ls -la /home/shuwen/shuwen/train/dataset/medmcqa/
 
-# 确保包含: train.jsonl, val.jsonl
+# 确保package含: train.jsonl, val.jsonl
 ```
 
-### 问题 3: "GPU 内存不足"
+### question 3: "GPU MemoryNot足"
 ```
-错误信息: CUDA out of memory
+ErrorInformation: CUDA out of memory
 ```
 
-**解决:**
-- 减小 batch_size: `batch_size: 16` (改为 8 或 16)
-- 增加梯度累积: `gradient_accumulation_steps: 4`
+**resolve:**
+- 减小 batch_size: `batch_size: 16` (改为 8  or  16)
+- Increasegradient累积: `gradient_accumulation_steps: 4`
 - 减小 LoRA rank: `rank: 4` (改为 4)
 
-### 问题 4: "S 编译器错误"
+### question 4: "S compiledeviceError"
 ```
-错误信息: s_seed: command not found
+ErrorInformation: s_seed: command not found
 ```
 
-**解决:**
+**resolve:**
 ```bash
-# 检查 S 编译器路径
+# Check S compiledevicePath
 ls -la /home/shuwen/shuwen/train/s/bin/s_seed
 
-# 添加到 PATH
+# 添加 to  PATH
 export PATH="/home/shuwen/shuwen/train/s/bin:$PATH"
 ```
 
 ---
 
-## 📚 相关文档
+## 📚 相关documentation
 
-- [NeurX 框架介绍](../README.md)
-- [LoRA 适配器文档](../adapter/README_PEFT.md)
-- [SFT 训练文档](../sft/README_SFT.md)
-- [S 语言编程指南](../../s/README.md)
+- [NeurX frameworkIntroduction](../README.md)
+- [LoRA adapterdocumentation](../adapter/README_PEFT.md)
+- [SFT Trainingdocumentation](../sft/README_SFT.md)
+- [S Language编程guide](../../s/README.md)
 
 ---
 
-## ✨ 总结
+## ✨ Summary
 
-通过本指南，您可以:
+通过本guide,您可以:
 
-1. ✅ **验证配置** - 确保所有路径和参数正确
-2. ✅ **启动训练** - 对 Qwen 模型进行 LoRA SFT 微调
-3. ✅ **合并模型** - 将 LoRA 适配器集成到基础模型
-4. ✅ **验证输出** - 确保生成的模型可用
+1. ✅ **VerificationConfiguration** - 确保allPath and Parameter正确
+2. ✅ **LaunchTraining** - 对 Qwen Model进line LoRA SFT Fine-tuning
+3. ✅ **MergeModel** - Will LoRA adapterintegration to baseModel
+4. ✅ **Verify output** - 确保Generate of Model可用
 
-**最终输出:**
+**finalOutput:**
 ```
-✨ 后训练完成！
-📁 输出位置: /home/shuwen/shuwen/train/model/base-model-posttrain/
-🎯 模型已准备好进行部署和推理
+✨ afterTrainingComplete!
+📁 Outputlocation: /home/shuwen/shuwen/train/model/base-model-posttrain/
+🎯 ModelhaveReady好进line部署 and inference
 ```
 
 ---
 
 ## 🤝 获取帮助
 
-如有问题，请检查:
-1. 配置文件: `/home/shuwen/shuwen/train/neurx/configs/posttrain.yaml`
-2. 训练日志: `/home/shuwen/shuwen/train/neurx/artifacts/logs/training_log.txt`
-3. 项目文档: `../README.md` 和 `../IMPLEMENTATION_SUMMARY.md`
+如有question,请Check:
+1. ConfigurationFile: `/home/shuwen/shuwen/train/neurx/configs/posttrain.yaml`
+2. TrainingLog: `/home/shuwen/shuwen/train/neurx/artifacts/logs/training_log.txt`
+3. 项目documentation: `../README.md`  and  `../IMPLEMENTATION_SUMMARY.md`
 
-**最后修改:** 2026-07-21
-**框架版本:** NeurX
-**支持语言:** S Language
+**最after修改:** 2026-07-21
+**frameworkVersion:** NeurX
+**supportLanguage:** S Language

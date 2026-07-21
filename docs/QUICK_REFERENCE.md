@@ -1,80 +1,80 @@
-# 🚀 NeurX MedMCQA 后训练快速参考
+# 🚀 NeurX MedMCQA afterTraining快速Reference
 
-## 📋 快速命令
+## 📋 快速command
 
-### 一行启动后训练
+### 一lineLaunchafterTraining
 ```bash
 cd /home/shuwen/shuwen/train/neurx && make posttrain
 ```
 
-### 合并模型
+### MergeModel
 ```bash
 cd /home/shuwen/shuwen/train/neurx && make posttrain-merge-lora
 ```
 
-### 测试模型
+### TestModel
 ```bash
 cd /home/shuwen/shuwen/train/neurx && make chat
 ```
 
 ---
 
-## 📊 完整流程
+## 📊 Completeprocess
 
 ```
-Step 1: 后训练 (2-4 小时)
+Step 1: afterTraining (2-4 hours)
   $ cd /home/shuwen/shuwen/train/neurx
   $ make posttrain
-  └─ 输出: artifacts/checkpoints/lora_adapter/
+  └─ Output: artifacts/checkpoints/lora_adapter/
 
-Step 2: 模型合并 (5-10 分钟)  
+Step 2: ModelMerge (5-10 minutes)  
   $ make posttrain-merge-lora
-  └─ 输出: ../model/base-model-posttrain/
+  └─ Output: ../model/base-model-posttrain/
 
-Step 3: 交互测试
+Step 3: 交互Test
   $ make chat
-  └─ 启动聊天会话，测试模型
+  └─ Launch聊天会话,TestModel
 ```
 
 ---
 
-## 📁 关键路径
+## 📁 keyPath
 
-| 用途 | 路径 |
+| 用途 | Path |
 |------|------|
-| **数据集** | `/home/shuwen/shuwen/train/dataset/medmcqa/` |
-| 训练数据 | `train.jsonl` (173,680 条) |
-| 验证数据 | `val.jsonl` (9,142 条) |
-| **基础模型** | `/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/` |
-| **LoRA 适配器** | `/home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_adapter/` |
-| **合并后模型** | `/home/shuwen/shuwen/train/model/base-model-posttrain/` |
-| **日志** | `/home/shuwen/shuwen/train/neurx/artifacts/logs/posttrain_*.log` |
+| **Dataset** | `/home/shuwen/shuwen/train/dataset/medmcqa/` |
+| TrainingData | `train.jsonl` (173,680 条) |
+| VerificationData | `val.jsonl` (9,142 条) |
+| **baseModel** | `/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/` |
+| **LoRA adapter** | `/home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_adapter/` |
+| **MergeafterModel** | `/home/shuwen/shuwen/train/model/base-model-posttrain/` |
+| **Log** | `/home/shuwen/shuwen/train/neurx/artifacts/logs/posttrain_*.log` |
 
 ---
 
-## 🔍 监控方法
+## 🔍 monitoringmethod
 
-### 查看实时日志
+### View实时Log
 ```bash
 tail -f /home/shuwen/shuwen/train/neurx/artifacts/logs/posttrain_*.log
 ```
 
-### 监控检查点
+### monitoringCheckpoint
 ```bash
 watch -n 10 'ls -lh /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_*/'
 ```
 
-### 检查 GPU 使用
+### Check GPU Usage
 ```bash
 nvidia-smi
 ```
 
 ---
 
-## 🎯 配置信息
+## 🎯 ConfigurationInformation
 
 ```bash
-# Makefile 配置
+# Makefile Configuration
 POSTTRAIN_MODEL_PATH = /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct
 POSTTRAIN_DATA_FILE = /home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl
 POSTTRAIN_LORA_ALPHA = 16
@@ -83,63 +83,63 @@ POSTTRAIN_LORA_RANK = 8
 
 ---
 
-## ✅ 验证清单
+## ✅ Verification清单
 
-- [x] 数据集存在：`/home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl` (136MB)
-- [x] 基础模型存在：`/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/`
-- [x] Makefile 配置正确
-- [x] NeurX 框架已初始化
+- [x] Dataset存 in :`/home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl` (136MB)
+- [x] baseModel存 in :`/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/`
+- [x] Makefile Configuration正确
+- [x] NeurX frameworkhaveinitialize
 
 ---
 
-## 🆘 常见问题
+## 🆘 FAQ
 
-### Q1: 后训练卡住
+### Q1: afterTraining卡住
 ```bash
-# 查看日志
+# ViewLog
 tail -f artifacts/logs/posttrain_*.log
 
-# 检查 GPU
+# Check GPU
 nvidia-smi
 ```
 
-### Q2: 合并失败
+### Q2: MergeFailed
 ```bash
-# 检查输入文件
+# CheckInputFile
 ls -lh artifacts/checkpoints/lora_adapter/
 ls -lh ../model/Qwen2.5-0.5B-Instruct/
 ```
 
-### Q3: 模型对话无响应
+### Q3: Model对话无Response
 ```bash
-# 确认合并模型存在
+# ConfirmMergeModel存 in 
 ls -lh ../model/base-model-posttrain/
 ```
 
 ---
 
-## 📈 预期结果
+## 📈 expected结果
 
 | 指标 | 值 |
 |------|-----|
-| 训练数据 | 173,680 条 |
-| 后训练耗时 | 2-4 小时 |
-| LoRA 适配器大小 | ~100-200MB |
-| 合并后模型大小 | ~500MB-1GB |
-| 合并耗时 | 5-10 分钟 |
+| TrainingData | 173,680 条 |
+| afterTrainingtime | 2-4 hours |
+| LoRA adapterSize | ~100-200MB |
+| MergeafterModelSize | ~500MB-1GB |
+| Mergetime | 5-10 minutes |
 
 ---
 
-## 🔧 自定义超参数
+## 🔧 custom超Parameter
 
-编辑 `Makefile` 修改：
+Edit `Makefile` 修改:
 
 ```makefile
-# LoRA 配置
+# LoRA Configuration
 POSTTRAIN_LORA_ALPHA ?= 16    # 增大提高表现力
 POSTTRAIN_LORA_RANK ?= 8      # 增大提高表现力
 
-# 训练配置（在 posttrain 子目录配置文件中）
+# TrainingConfiguration( in  posttrain 子DirectoryConfigurationFilein)
 batch_size = 4
 learning_rate = 5e-4
 num_epochs = 3
@@ -147,27 +147,27 @@ num_epochs = 3
 
 ---
 
-## 📝 完整执行流程脚本
+## 📝 CompleteExecuteprocessscript
 
 ```bash
 #!/bin/bash
 cd /home/shuwen/shuwen/train/neurx
 
-echo "Step 1: 后训练..."
+echo "Step 1: afterTraining..."
 make posttrain || exit 1
 
-echo "Step 2: 合并模型..."
+echo "Step 2: MergeModel..."
 make posttrain-merge-lora || exit 1
 
-echo "Step 3: 测试模型..."
+echo "Step 3: TestModel..."
 make chat
 
-echo "✅ 完成！"
+echo "✅ Complete!"
 ```
 
 ---
 
-**快速开始**: 复制以下命令直接执行
+**Quick Start**: 复制以下command直接Execute
 ```bash
 cd /home/shuwen/shuwen/train/neurx && make posttrain && make posttrain-merge-lora && make chat
 ```

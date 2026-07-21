@@ -176,9 +176,9 @@ start
   English textcomplete, English textfunctionEnglish textimplementation
   ↓
  English text3step English text (English text TEST_INDEX.md)
-  · quickEnglish text? → TEST_SUMMARY.md
-  · English text? → TESTING_CHECKLIST.md
-  · completeEnglish text? → TEST_GUIDE.md
+  - quickEnglish text? → TEST_SUMMARY.md
+  - English text? → TESTING_CHECKLIST.md
+  - completeEnglish text? → TEST_GUIDE.md
   ↓
  English text4step compilesystem (2English text)
   English textcompileEnglish textcompile

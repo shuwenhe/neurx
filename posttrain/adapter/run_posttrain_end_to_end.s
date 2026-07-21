@@ -6,11 +6,11 @@ use std.io.println
 // run_posttrain_end_to_end.s - Complete Post-Training End-to-End Pipeline
 // ============================================================================
 //
-// 完整的端到端后训练管道
-// 步骤：
-//   1. LoRA SFT 训练
-//   2. LoRA 权重合并
-//   3. 保存最终模型到 /model/base-model-posttrain
+// Complete of 端 to 端afterTrainingpipeline
+// Step:
+//   1. LoRA SFT Training
+//   2. LoRA weightsmerge
+//   3. savefinalmodel to  /model/base-model-posttrain
 
 func int_to_str(int n) string {
     if n == 0 { return "0" }
@@ -74,23 +74,23 @@ func print_step(string step, string title) int {
 }
 
 func step1_train() int {
-    print_step("Step 1", "LoRA SFT 训练")
+    print_step("Step 1", "LoRA SFT Training")
     
-    println("🚀 启动训练...")
+    println("🚀 LaunchTraining...")
     println("")
     
-    println("📋 训练配置：")
-    println("  • 基础模型: Qwen2.5-0.5B-Instruct")
-    println("  • 路径: /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct")
-    println("  • 训练数据: /home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl")
+    println("📋 Trainingconfiguration:")
+    println("  • basemodel: Qwen2.5-0.5B-Instruct")
+    println("  • Path: /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct")
+    println("  • TrainingData: /home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl")
     println("  • LoRA Rank: 8")
     println("  • LoRA Alpha: 16")
     println("  • 轮数: 3")
-    println("  • 批次大小: 32")
-    println("  • 学习率: 0.0005")
+    println("  • 批次Size: 32")
+    println("  • learning_rate: 0.0005")
     println("")
     
-    println("⏳ 训练进行中...")
+    println("⏳ Training进linein...")
     println("")
     
     int epoch = 0
@@ -102,58 +102,58 @@ func step1_train() int {
     }
     
     println("")
-    println("✅ 训练完成")
-    println("  样本数: 3200")
-    println("  平均损失: 0.5")
+    println("✅ Trainingcomplete")
+    println("  sample数: 3200")
+    println("  平均loss: 0.5")
     println("")
     
-    println("💾 保存检查点...")
-    println("  位置: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft/")
+    println("💾 saveCheckpoint...")
+    println("  location: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft/")
     println("  • adapter_model.safetensors (50-100MB)")
     println("  • adapter_config.json")
     println("  • training_state.json")
-    println("✓ 完成")
+    println("✓ complete")
     
     0
 }
 
 func step2_merge() int {
-    print_step("Step 2", "LoRA 权重合并")
+    print_step("Step 2", "LoRA weightsmerge")
     
-    println("🔗 开始合并...")
+    println("🔗 Startmerge...")
     println("")
     
-    println("📖 加载基础模型...")
-    println("  路径: /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/model.safetensors")
-    println("  大小: ~1.5 GB")
-    println("  ✓ 加载完成")
+    println("📖 Loading base model...")
+    println("  Path: /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/model.safetensors")
+    println("  Size: ~1.5 GB")
+    println("  ✓ Loading complete")
     println("")
     
-    println("📖 加载 LoRA 适配器...")
-    println("  路径: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft/adapter_model.safetensors")
-    println("  大小: ~50-100 MB")
-    println("  ✓ 加载完成")
+    println("📖 Loading LoRA adapter...")
+    println("  Path: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft/adapter_model.safetensors")
+    println("  Size: ~50-100 MB")
+    println("  ✓ Loading complete")
     println("")
     
-    println("🔀 合并权重...")
-    println("  公式: W_final = W_base + (α/r) × B × A")
+    println("🔀 Merge weights...")
+    println("  Formula: W_final = W_base + (α/r) × B × A")
     println("  α (alpha) = 16")
     println("  r (rank) = 8")
     println("  缩放因子 = 16 / 8 = 2.0")
-    println("  ✓ 合并完成")
+    println("  ✓ mergecomplete")
     println("")
     
     0
 }
 
 func step3_save() int {
-    print_step("Step 3", "保存最终模型")
+    print_step("Step 3", "savefinalmodel")
     
-    println("💾 保存到目标目录...")
-    println("  输出目录: /home/shuwen/shuwen/train/model/base-model-posttrain/")
+    println("💾 save to 目标Directory...")
+    println("  Output directory: /home/shuwen/shuwen/train/model/base-model-posttrain/")
     println("")
     
-    println("  写入文件：")
+    println("  writefile:")
     println("    ✓ model.safetensors (~1.5 GB)")
     println("    ✓ config.json")
     println("    ✓ tokenizer.json")
@@ -162,49 +162,49 @@ func step3_save() int {
     println("    ✓ README.md")
     println("")
     
-    println("📊 验证文件完整性...")
-    println("    ✓ model.safetensors: 完整")
+    println("📊 verifyfileComplete性...")
+    println("    ✓ model.safetensors: Complete")
     println("    ✓ config.json: 有效")
-    println("    ✓ tokenizer: 就绪")
+    println("    ✓ tokenizer: Ready")
     println("")
     
     0
 }
 
 func step4_summary() int {
-    print_step("Step 4", "完成总结")
+    print_step("Step 4", "completeSummary")
     
-    println("✨ 后训练完成！")
+    println("✨ afterTrainingcomplete!")
     println("")
     
-    println("🎯 最终输出：")
+    println("🎯 finaloutput:")
     println("  📁 /home/shuwen/shuwen/train/model/base-model-posttrain/")
-    println("     ├── model.safetensors (1.5GB - 合并后的完整模型)")
-    println("     ├── config.json (模型配置)")
-    println("     ├── tokenizer.json (分词器)")
-    println("     ├── tokenizer_config.json (分词器配置)")
-    println("     ├── generation_config.json (生成配置)")
-    println("     └── README.md (说明文档)")
+    println("     ├── model.safetensors (1.5GB - mergeafter of Completemodel)")
+    println("     ├── config.json (modelconfiguration)")
+    println("     ├── tokenizer.json (分词device)")
+    println("     ├── tokenizer_config.json (分词deviceconfiguration)")
+    println("     ├── generation_config.json (Generateconfiguration)")
+    println("     └── README.md (descriptiondocumentation)")
     println("")
     
-    println("📈 性能提升：")
-    println("  基础模型: Qwen2.5-0.5B-Instruct")
-    println("  后训练方法: LoRA SFT")
-    println("  适配参数数: ~1.3M (总参数的 ~0.5%)")
-    println("  推理速度: ≈ 基础模型")
-    println("  任务性能: +5-15% (在 MedMCQA 上)")
+    println("📈 Performance提升:")
+    println("  basemodel: Qwen2.5-0.5B-Instruct")
+    println("  afterTrainingmethod: LoRA SFT")
+    println("  adaptationParameter数: ~1.3M (总Parameter of  ~0.5%)")
+    println("  inferenceSpeed: ≈ basemodel")
+    println("  任务Performance: +5-15% ( in  MedMCQA 上)")
     println("")
     
-    println("🚀 现在可以：")
-    println("  1. 使用模型进行推理")
+    println("🚀 现 in 可以:")
+    println("  1. Usagemodel进lineinference")
     println("     model = AutoModelForCausalLM.from_pretrained(")
     println("       '/home/shuwen/shuwen/train/model/base-model-posttrain')")
     println("")
-    println("  2. 进一步微调")
-    println("     继续使用 LoRA 或其他方法")
+    println("  2. 进一步Fine-tuning")
+    println("     继续Usage LoRA  or 其他method")
     println("")
-    println("  3. 部署和服务")
-    println("     使用 vLLM、TGI 等推理引擎")
+    println("  3. 部署 and 服务")
+    println("     Usage vLLM、TGI 等inference引擎")
     println("")
     
     0
@@ -213,9 +213,9 @@ func step4_summary() int {
 func main() int {
     println("")
     println("╔" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╗")
-    println("║  NeurX 完整后训练管道")
-    println("║  LoRA SFT - S 语言实现")
-    println("║  输出: /model/base-model-posttrain/")
+    println("║  NeurX CompleteafterTrainingpipeline")
+    println("║  LoRA SFT - S LanguageImplementation")
+    println("║  output: /model/base-model-posttrain/")
     println("╚" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╝")
     
     // Step 1: Training
@@ -231,7 +231,7 @@ func main() int {
     step4_summary()
     
     println("═" + "═" + "═" + "═" + "═" + "═" + "═" + "═" + "═" + "═" + "═" + "═" + "═" + "═" + "═" + "═")
-    println("✅ 完成！")
+    println("✅ complete!")
     println("═" + "═" + "═" + "═" + "═" + "═" + "═" + "═" + "═" + "═" + "═" + "═" + "═" + "═" + "═" + "═")
     println("")
     

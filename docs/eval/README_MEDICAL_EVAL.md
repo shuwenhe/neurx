@@ -74,15 +74,15 @@ Coverage: 4/6 = 67% → Score: 3 (7.5)
 - **1**: Minimal reasoning, 1 step
 - **0**: No reasoning, just answers
 
-**Markers**: "因为", "所以", "导致", "首先", "其次", "最后", "→"
+**Markers**: "因为", "所以", "导致", "首先", "其次", "最after", "→"
 
 **Example**:
 ```
 Q: Why is ACE inhibitor contraindicated in pregnancy?
 
-Response: "首先，ACE抑制剂阻滞血管紧张素转换酶。其次，
-          这导致胎儿肾脏血流减少。最后，可能导致胎儿肾脏发育不全。
-          因此，在妊娠期禁用。"
+Response: "首先,ACE抑制剂阻滞血管紧张素Convert酶.其次,
+          这导致胎儿肾脏血流减少.最after,可能导致胎儿肾脏发育Not全.
+          因此, in 妊娠期禁用."
 → 4 reasoning hops detected
 → Score: 4 (10.0)
 ```
@@ -98,7 +98,7 @@ Response: "首先，ACE抑制剂阻滞血管紧张素转换酶。其次，
 - **1**: Minimal citations/evidence
 - **0**: No citations or evidence
 
-**Markers**: Citations [1], [2-3], "根据", "研究", "指南", "共识"
+**Markers**: Citations [1], [2-3], "根据", "研究", "guide", "共识"
 
 ### 5. Clarity (Expression & SOP)
 
@@ -117,9 +117,9 @@ Response: "首先，ACE抑制剂阻滞血管紧张素转换酶。其次，
 ```
 病史 (History)
 ↓
-症状 (Symptoms)
+symptom (Symptoms)
 ↓
-诊断 (Diagnosis)
+diagnosis (Diagnosis)
 ↓
 治疗 (Treatment)
 ↓
@@ -138,8 +138,8 @@ Response: "首先，ACE抑制剂阻滞血管紧张素转换酶。其次，
 - **0**: Unsafe language, overconfident claims
 
 **Safety elements**:
-- ✓ Disclaimers: "咨询医生", "不构成医疗建议"
-- ✓ Uncertainty: "可能", "需要进一步", "应该"
+- ✓ Disclaimers: "咨询医生", "Not构成医疗建议"
+- ✓ Uncertainty: "可能", "need进一步", "应该"
 - ✓ No overconfidence: Avoid "一定", "肯定", "100%"
 
 ## Usage

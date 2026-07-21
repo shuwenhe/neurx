@@ -59,20 +59,20 @@ func clean_medical_content(string raw_content) string {
     cleaned = remove_pattern(cleaned, "Translator:.*\\n")
     
     // Remove evidence review statements
-    cleaned = remove_pattern(cleaned, "所有专题都会依据新发表的证据.*[。\\n]")
+    cleaned = remove_pattern(cleaned, "all专题都会依据新发表 of 证据.*[.\\n]")
     
     // Remove citations [1], [2-3], [1,2]
     cleaned = remove_pattern(cleaned, "\\[\\d+(?:[-,]\\d+)*\\]")
     
     // Remove figure/table references
-    cleaned = remove_pattern(cleaned, "（图片?\\d+）")
-    cleaned = remove_pattern(cleaned, "（表\\d+）")
+    cleaned = remove_pattern(cleaned, "(图片?\\d+)")
+    cleaned = remove_pattern(cleaned, "(表\\d+)")
     cleaned = remove_pattern(cleaned, "\\(Figure \\d+\\)")
     cleaned = remove_pattern(cleaned, "\\(Table \\d+\\)")
     
     // Remove cross-references
-    cleaned = remove_pattern(cleaned, "（参见下文[''\"'].*[''\"']）")
-    cleaned = remove_pattern(cleaned, "（参见\".*\"）")
+    cleaned = remove_pattern(cleaned, "(参见下文[''\"'].*[''\"'])")
+    cleaned = remove_pattern(cleaned, "(参见\".*\")")
     
     // Remove introductory markers
     cleaned = remove_pattern(cleaned, "引言—")
@@ -107,10 +107,10 @@ func extract_disease_terms(string title, string subtitle) []string {
     
     // Non-disease terms to filter out (100+ words)
     []string non_disease_terms = [
-        "筛查", "诊断", "治疗", "评估", "管理",
-        "随访", "指南", "标准", "策略", "概述",
+        "筛查", "diagnosis", "治疗", "Evaluation", "管理",
+        "随访", "guide", "标准", "策略", "概述",
         "患病率", "发病率", "死亡率", "生存率",
-        "综述", "分析", "研究", "调查", "图表",
+        "综述", "analysis", "研究", "调查", "图表",
         "screening", "diagnosis", "treatment", "management"
     ]
     
@@ -142,7 +142,7 @@ func extract_disease_terms(string title, string subtitle) []string {
     
     // Fallback strategy
     if len(disease_terms) == 0 {
-        disease_terms = append_string(disease_terms, "健康问题")
+        disease_terms = append_string(disease_terms, "健康question")
     }
     
     return disease_terms
@@ -217,12 +217,12 @@ func generate_questions_from_template(string subject, []seed_template templates)
 func get_seed_templates() []seed_template {
     []seed_template templates = [
         seed_template{ template: "什么是{subject}?", intent_type: "definition" },
-        seed_template{ template: "{subject}的通俗解释是什么?", intent_type: "definition" },
-        seed_template{ template: "{subject}是怎么分型的?", intent_type: "classification" },
-        seed_template{ template: "{subject}是怎么分期的?", intent_type: "classification" },
-        seed_template{ template: "{subject}的诊断定义是什么?", intent_type: "diagnosis" },
-        seed_template{ template: "{subject}的发病机制是什么?", intent_type: "mechanism" },
-        seed_template{ template: "{subject}的病理生理过程是什么?", intent_type: "pathophysiology" }
+        seed_template{ template: "{subject} of 通俗解释是什么?", intent_type: "definition" },
+        seed_template{ template: "{subject}是怎么分型 of ?", intent_type: "classification" },
+        seed_template{ template: "{subject}是怎么分期 of ?", intent_type: "classification" },
+        seed_template{ template: "{subject} of diagnosis定义是什么?", intent_type: "diagnosis" },
+        seed_template{ template: "{subject} of 发病机制是什么?", intent_type: "mechanism" },
+        seed_template{ template: "{subject} of 病理生理过程是什么?", intent_type: "pathophysiology" }
     ]
     
     return templates
@@ -276,7 +276,7 @@ func detect_intent(string question) question_intent {
     
     if string_contains(question, "怎么分") {
         intent.type = "classification"
-    } else if string_contains(question, "诊断") {
+    } else if string_contains(question, "diagnosis") {
         intent.type = "diagnosis"
     } else if string_contains(question, "机制") {
         intent.type = "mechanism"
@@ -294,7 +294,7 @@ func extract_relevant_content(string question, string full_content, question_int
         "定义", "概念", "是指", "是一种"
     ]
     []string diagnosis_patterns = [
-        "诊断", "确诊", "检查", "症状"
+        "diagnosis", "确诊", "Check", "symptom"
     ]
     []string mechanism_patterns = [
         "机制", "原因", "导致", "病理"

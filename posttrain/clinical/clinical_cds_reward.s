@@ -59,19 +59,19 @@ func extract_medical_facts(string response) []medical_fact {
     ]
     
     // Pattern 2: Contraindication facts
-    // "禁忌症" "禁用" "不能用于"
+    // "禁忌症" "禁用" "Not能用于"
     []string contra_patterns = [
         "禁忌.*",
         "禁用.*",
-        "不能用于.*",
+        "Not能用于.*",
         "contraindicated",
-        "避免.*"
+        "avoid.*"
     ]
     
     // Pattern 3: Mechanism facts
-    // "作用机制" "通过" "导致"
+    // "Function机制" "通过" "导致"
     []string mechanism_patterns = [
-        "作用机制",
+        "Function机制",
         "机制是",
         "通过.*导致",
         "mechanism.*",
@@ -211,7 +211,7 @@ func detect_underspecified_medical_question(string prompt) bool {
         "年龄",              // age
         "性别",              // sex/gender
         "持续",              // duration
-        "症状",              // symptom
+        "symptom",              // symptom
         "过敏",              // allergy
         "既往",              // history
         "并发症"             // complication
@@ -233,8 +233,8 @@ func count_clarification_questions(string response) int {
     []string clarification_patterns = [
         "请问",              // asking for info
         "能否",              // can you provide
-        "需要知道",          // need to know
-        "更多信息",          // more information
+        "need知道",          // need to know
+        "更多Information",          // more information
         "Could you",         // English
         "Can you provide",   // English
         "I need to know"     // English

@@ -185,7 +185,7 @@ func tp_attention_forward(
     
     // ===== Step 5: Compute scaled dot-product attention (LOCAL to this TP rank) =====
     // For GQA: each query group attends to shared KV heads
-    // score[b,h,i,j] = q[b,h,i] · k[b,kvh,j]^T / sqrt(d)
+    // score[b,h,i,j] = q[b,h,i] - k[b,kvh,j]^T / sqrt(d)
     // where h maps to kvh via h % nkv_groups
     
     int n_kv_groups = nh / nkh  // How many Q heads share one KV head

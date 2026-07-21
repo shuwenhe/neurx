@@ -6,10 +6,10 @@ package neurx.model.lora
 //
 // English text:
 //   English texttrainingweight W ∈ R^{d×k}, English texttrainingEnglish text:
-//   W' = W + ΔW = W + B·A
+//   W' = W + ΔW = W + B-A
 //   English text A ∈ R^{r×k}, B ∈ R^{d×r}, r << min(d,k)
 //   ΔW English textinitializeEnglish text 0: B=0, A~N(0,σ²)
-//   inferenceEnglish text: W_merged = W + (α/r)·B·A
+//   inferenceEnglish text: W_merged = W + (α/r)-B-A
 //
 // QLoRA extension:
 //   English textweight W English text NF4 (Normal Float 4-bit) English text INT8,
@@ -222,7 +222,7 @@ struct lora_linear {
 
     // English textcache (English text)
     []float last_input      // English textinput [batch*seq, in_dim]
-    []float last_Ax         // B·A·x (LoRA English text, English text)
+    []float last_Ax         // B-A-x (LoRA English text, English text)
 }
 
 func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config cfg) lora_linear {

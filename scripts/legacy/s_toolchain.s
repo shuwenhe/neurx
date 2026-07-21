@@ -57,7 +57,7 @@ func toolchain_status() int {
     println("  industrial-ops")
     println("  toolchain-s")
     0
-}···········
+}-----------
 
 func toolchain_roadmap() int {
     println("NeurX S-Only Toolchain Roadmap")

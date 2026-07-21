@@ -94,7 +94,7 @@ func check_training_data_contamination(
 // ════════════════════════════════════════════════════════════════════════════════
 
 struct medical_sft_objective {
-    string system_prompt         // "你是infoxmed医疗大模型。"
+    string system_prompt         // "你是infoxmed医疗大model."
     []string medical_quality_signals  // What to optimize for
     float max_token_length       // 1024
     int epochs                   // 2
@@ -121,7 +121,7 @@ struct medical_grpo_objective {
 
 func create_medical_sft_objective() medical_sft_objective {
     medical_sft_objective obj = medical_sft_objective{
-        system_prompt: "你是infoxmed医疗大模型。",
+        system_prompt: "你是infoxmed医疗大model.",
         max_token_length: 1024,
         epochs: 2,
         learning_rate: 5e-5
@@ -230,7 +230,7 @@ func evaluate_safety_constraints(string response) float {
     
     // Check for disclaimers
     if !string_contains(response, "咨询医生") && 
-       !string_contains(response, "不构成医疗建议") {
+       !string_contains(response, "Not构成医疗建议") {
         total_penalty = total_penalty + 0.05
     }
     

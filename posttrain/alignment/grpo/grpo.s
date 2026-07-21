@@ -9,7 +9,7 @@ package neurx.posttrain.grpo
 //   English text q English text G English textoutput {o₁,...,o_G}, English textrewardEnglish textfunction:
 //     Advantage_i = (r_i - mean(r)) / (std(r) + ε)
 //   English textgradientEnglish text (English text PPO clip + KL English text):
-//     L_GRPO = -E[ min(ρ_i · A_i, clip(ρ_i, 1-ε, 1+ε) · A_i) ] + β·KL
+//     L_GRPO = -E[ min(ρ_i - A_i, clip(ρ_i, 1-ε, 1+ε) - A_i) ] + β-KL
 //   English text ρ_i = π_θ(o_i|q) / π_ref(o_i|q)  (English text)
 //
 // English text PPO English text:

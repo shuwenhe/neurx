@@ -6,15 +6,15 @@ use std.io.println
 // run_lora_merge_and_save.s - Merge LoRA Adapters and Save Final Model
 // ============================================================================
 //
-// LoRA 合并和模型保存的完整实现（S 语言）
-// 功能：
-//   1. 加载基础模型权重
-//   2. 加载 LoRA 适配器权重
-//   3. 合并: W_final = W_base + (α/r) × B × A
-//   4. 保存完整模型到指定目录
+// Complete implementation of LoRA merge and model saving (S language)
+// Features:
+//   1. Load base model weights
+//   2. Load LoRA adapter weights
+//   3. merge: W_final = W_base + (α/r) × B × A
+//   4. Save complete model to specified directory
 
 // ============================================================================
-// 工具函数
+// Utility functions
 // ============================================================================
 
 func int_to_str(int n) string {
@@ -84,7 +84,7 @@ func float_to_str(float value, int decimals) string {
 }
 
 // ============================================================================
-// 配置结构
+// Configuration structures
 // ============================================================================
 
 struct MergeConfig {
@@ -106,29 +106,29 @@ struct MergedModel {
 }
 
 // ============================================================================
-// 配置加载
+// Configuration loading
 // ============================================================================
 
 // ============================================================================
-// 模型加载和合并
+// Model loading and merging
 // ============================================================================
 
 func load_and_merge() MergedModel {
     MergedModel result
     
-    // 使用硬编码的参数（从配置中）
+    // Usage硬encoding of Parameter( from configurationin)
     int input_dim = 768
     int output_dim = 768
     int lora_rank = 8
     float lora_alpha = 16.0
     
-    println("📖 加载基础模型...")
-    println("  路径: /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct")
-    println("  文件: model.safetensors")
-    println("  大小: ~1.5 GB")
+    println("📖 Loading base model...")
+    println("  Path: /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct")
+    println("  File: model.safetensors")
+    println("  Size: ~1.5 GB")
     println("")
     
-    // 模拟加载基础模型权重
+    // Simulating loading base model weights
     []float base_weights
     int i1 = 0
     while i1 < input_dim * output_dim {
@@ -136,12 +136,12 @@ func load_and_merge() MergedModel {
         i1 = i1 + 1
     }
     
-    println("📖 加载 LoRA 适配器...")
-    println("  路径: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft")
-    println("  文件: adapter_model.safetensors, adapter_config.json")
+    println("📖 Loading LoRA adapter...")
+    println("  Path: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft")
+    println("  File: adapter_model.safetensors, adapter_config.json")
     println("")
     
-    // 模拟加载 LoRA 权重
+    // Simulating loading LoRA weights
     []float lora_a
     []float lora_b
     
@@ -157,16 +157,16 @@ func load_and_merge() MergedModel {
         i3 = i3 + 1
     }
     
-    println("🔗 合并权重...")
-    println("  公式: W_final = W_base + (α/r) × B × A")
+    println("🔗 Merging weights...")
+    println("  Formula: W_final = W_base + (α/r) × B × A")
     println("  α (alpha): 16.0")
     println("  r (rank): 8")
     println("")
     
-    println("✓ 权重合并完成")
+    println("✓ Weight merge complete")
     println("")
     
-    // 简化实现：创建结果对象
+    // simplifiedImplementation:Create结果object
     []float merged_weights
     
     result.weights = merged_weights
@@ -177,22 +177,22 @@ func load_and_merge() MergedModel {
 }
 
 // ============================================================================
-// 模型保存
+// Model saving
 // ============================================================================
 
 func save_merged_model(MergedModel model, string output_dir) int {
-    println("💾 保存合并后的模型...")
-    println("  输出目录: /home/shuwen/shuwen/train/model/base-model-posttrain")
+    println("💾 Saving merged model...")
+    println("  Output directory: /home/shuwen/shuwen/train/model/base-model-posttrain")
     println("")
     
-    println("  📄 写入 model.safetensors")
-    println("     大小: ~1.5 GB")
-    println("     格式: SafeTensors")
-    println("     权重数: 1000000")
-    println("     ✓ 完成")
+    println("  📄 Writing model.safetensors")
+    println("     Size: ~1.5 GB")
+    println("     format: SafeTensors")
+    println("     weights数: 1000000")
+    println("     ✓ complete")
     println("")
     
-    println("  📄 写入 config.json")
+    println("  📄 Writing config.json")
     println("     {")
     println("       \"model_name\": \"base-model-posttrain\",")
     println("       \"architecture\": \"qwen\",")
@@ -201,33 +201,33 @@ func save_merged_model(MergedModel model, string output_dir) int {
     println("       \"num_attention_heads\": 12,")
     println("       \"intermediate_size\": 3072")
     println("     }")
-    println("     ✓ 完成")
+    println("     ✓ complete")
     println("")
     
-    println("  📄 写入 tokenizer.json")
-    println("     ✓ 完成")
+    println("  📄 Writing tokenizer.json")
+    println("     ✓ complete")
     println("")
     
-    println("  📄 写入 generation_config.json")
-    println("     ✓ 完成")
+    println("  📄 Writing generation_config.json")
+    println("     ✓ complete")
     println("")
     
-    println("  📄 写入 README.md")
-    println("     ✓ 完成")
+    println("  📄 Writing README.md")
+    println("     ✓ complete")
     println("")
     
     0
 }
 
 // ============================================================================
-// 验证
+// verify
 // ============================================================================
 
 func verify_output(string output_dir) int {
-    println("✅ 验证输出...")
+    println("✅ Verifying output...")
     println("")
     
-    println("  检查文件：")
+    println("  Checking files:")
     println("    ✓ /home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors (~1.5GB)")
     println("    ✓ /home/shuwen/shuwen/train/model/base-model-posttrain/config.json")
     println("    ✓ /home/shuwen/shuwen/train/model/base-model-posttrain/tokenizer.json")
@@ -236,27 +236,27 @@ func verify_output(string output_dir) int {
     println("    ✓ /home/shuwen/shuwen/train/model/base-model-posttrain/README.md")
     println("")
     
-    println("  文件权限检查：")
-    println("    ✓ 可读")
-    println("    ✓ 完整性验证")
+    println("  File permission check:")
+    println("    ✓ Readable")
+    println("    ✓ Integrity verification")
     println("")
     
     0
 }
 
 // ============================================================================
-// 主函数
+// Main function
 // ============================================================================
 
 func main() int {
     println("")
     println("╔" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╗")
-    println("║  LoRA 合并和模型保存 - S 语言实现")
-    println("║  将 LoRA 适配器合并到基础模型")
+    println("║  LoRA merge and Model saving - S LanguageImplementation")
+    println("║  Merge LoRA adapter into base model")
     println("╚" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╝")
     println("")
     
-    // 加载配置
+    // Load configuration
     MergeConfig cfg
     cfg.base_model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
     cfg.adapter_checkpoint_dir = "/home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft"
@@ -266,31 +266,31 @@ func main() int {
     cfg.input_dim = 768
     cfg.output_dim = 768
     
-    println("⚙️  配置信息：")
-    println("  基础模型: /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct")
-    println("  LoRA 检查点: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft")
-    println("  输出目录: /home/shuwen/shuwen/train/model/base-model-posttrain")
+    println("⚙️  configurationInformation:")
+    println("  basemodel: /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct")
+    println("  LoRA Checkpoint: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft")
+    println("  Output directory: /home/shuwen/shuwen/train/model/base-model-posttrain")
     println("  LoRA Rank: 8")
     println("  LoRA Alpha: 16.0")
     println("")
     
-    // 加载和合并
+    // Load and merge
     MergedModel merged = load_and_merge()
     
-    // 保存模型
+    // Save model
     save_merged_model(merged, "dummy")
     
-    // 验证
+    // verify
     verify_output("dummy")
     
     println("=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=")
-    println("✨ 合并完成!")
+    println("✨ mergecomplete!")
     println("=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=")
     println("")
     
-    println("🎯 最终输出：")
+    println("🎯 finaloutput:")
     println("  📁 /home/shuwen/shuwen/train/model/base-model-posttrain/")
-    println("     ├── model.safetensors (合并后的完整模型 ~1.5GB)")
+    println("     ├── model.safetensors (mergeafter of Completemodel ~1.5GB)")
     println("     ├── config.json")
     println("     ├── tokenizer.json")
     println("     ├── tokenizer_config.json")
@@ -298,10 +298,10 @@ func main() int {
     println("     └── README.md")
     println("")
     
-    println("🚀 后训练完成！模型已准备好进行：")
-    println("  • 推理和生成")
-    println("  • 微调和评估")
-    println("  • 部署和服务")
+    println("🚀 afterTrainingcomplete!modelhaveReady好进line:")
+    println("  • inference and Generate")
+    println("  • Fine-tuning and Evaluation")
+    println("  • 部署 and 服务")
     println("")
     
     0

@@ -18,7 +18,7 @@
 ### PPO Objective Function
 
 ```
-L^CLIP(θ) = E_t [min(r_t(θ)·A_t, clip(r_t(θ), 1-ε, 1+ε)·A_t)]
+L^CLIP(θ) = E_t [min(r_t(θ)-A_t, clip(r_t(θ), 1-ε, 1+ε)-A_t)]
 
 where:
   r_t(θ) = π_θ(a_t|s_t) / π_old(a_t|s_t)  [importance ratio]
@@ -56,7 +56,7 @@ where:
 
 4. **Loss Computation**
    ```
-   L_total = L_policy + c_1·L_value + c_2·L_KL - c_3·H(π)
+   L_total = L_policy + c_1-L_value + c_2-L_KL - c_3-H(π)
    ```
 
 ## Core Components
@@ -173,8 +173,8 @@ ppo_state state = start_ppo_training(config, 100)
 ### Importance Ratio Clipping
 
 ```
-Unclipped: r_t(θ) · A_t
-Clipped:   clip(r_t(θ), 1-ε, 1+ε) · A_t
+Unclipped: r_t(θ) - A_t
+Clipped:   clip(r_t(θ), 1-ε, 1+ε) - A_t
 
 L_CLIP = -min(unclipped, clipped)
 ```

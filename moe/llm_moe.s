@@ -34,8 +34,8 @@ use neurx.model.transformer.norm.{rms_norm, rms_normalize, layer_norm_config, ne
 // ============================================================================
 
 struct gpt_moe_config {
-    model_config base             // English text modelconfiguration (English text n_layer, n_embd, …)
-    moe_config moe              // MoE configuration (expert_dim, num_experts, top_k, …)
+    model_config base             // English text modelconfiguration (English text n_layer, n_embd, ...)
+    moe_config moe              // MoE configuration (expert_dim, num_experts, top_k, ...)
     int moe_frequency           // English textuseEnglish text MoE English text (1 = English text MoE, 2 = English text)
     float moe_aux_loss_weight   // aux loss English textlossEnglish textweight
 }

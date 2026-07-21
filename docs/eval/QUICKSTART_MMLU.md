@@ -1,21 +1,21 @@
-# MMLU 评估框架 - 快速开始指南
+# MMLU Evaluationframework - Quick Startguide
 
-## 🚀 5分钟快速上手
+## 🚀 5minutes快速上手
 
-### 1. 下载 MMLU 数据
+### 1. download MMLU Data
 
 ```bash
 cd /Users/shuwen/shuwen/train/neurx
 
-# 自动下载并准备数据 (首次需要3-5分钟)
+# 自动download并ReadyData (首次need3-5minutes)
 bash scripts/setup_mmlu_data.sh
 
-# 验证数据
+# VerificationData
 ls -la data/mmlu/test/*.csv | head -5
 ls -la data/mmlu/dev/*.csv | head -5
 ```
 
-**预期输出**:
+**expectedOutput**:
 ```
 MMLU Dataset Downloader
 =========================================
@@ -44,23 +44,23 @@ Dev set:   285 examples across 57 tasks
 Total:     14,327 items
 ```
 
-### 2. 运行 MMLU 基准评估
+### 2. Run MMLU 基准Evaluation
 
 ```bash
-# 设置环境变量
+# setting环境变量
 export NEURX_ROOT="."
 export NEURX_MODEL_PATH="./model/Qwen2.5-0.5B-Instruct"
 export NEURX_MMLU_DATA_ROOT="./data/mmlu"
 export NEURX_MMLU_SHOTS=5
 export NEURX_MMLU_BATCH_SIZE=32
 
-# 运行评估
+# RunEvaluation
 s run eval/run_mmlu_benchmark.s
 ```
 
-### 3. 查看结果
+### 3. View结果
 
-评估完成后会看到：
+EvaluationAfter completion会看 to :
 
 ```
 ========================================
@@ -85,43 +85,43 @@ Humanities:     48.9% (1864/3812)
 Other:          50.1% (1330/2653)
 ```
 
-## 📊 框架架构
+## 📊 frameworkarchitecture
 
 ```
 eval/
-├── mmlu_data.s              # 📥 数据加载
+├── mmlu_data.s              # 📥 Dataload
 │   └─ 57 tasks × 2 splits (test/dev)
 │
-├── mmlu_evaluator.s         # 🧠 评估逻辑
+├── mmlu_evaluator.s         # 🧠 Evaluation逻辑
 │   ├─ 5-shot prompt 构建
 │   ├─ Log-likelihood 计算
-│   └─ 准确率汇总
+│   └─ accuracy汇总
 │
-├── run_mmlu_benchmark.s     # 🏃 运行器
-│   ├─ 模型加载
-│   ├─ 数据装载
-│   ├─ 评估执行
+├── run_mmlu_benchmark.s     # 🏃 Rundevice
+│   ├─ Modelload
+│   ├─ Data装载
+│   ├─ EvaluationExecute
 │   └─ 结果展示
 │
-└── README_MMLU.md           # 📖 完整文档
+└── README_MMLU.md           # 📖 Completedocumentation
 ```
 
-## 🔧 配置选项
+## 🔧 Configurationoption
 
-| 环境变量 | 默认值 | 说明 |
+| 环境变量 | default值 | description |
 |---------|--------|------|
-| `NEURX_MMLU_DATA_ROOT` | `./data/mmlu` | MMLU 数据目录 |
-| `NEURX_MMLU_SHOTS` | `5` | Few-shot 样本数 |
-| `NEURX_MMLU_BATCH_SIZE` | `32` | 批处理大小 |
-| `NEURX_MODEL_PATH` | `./model/Qwen2.5-0.5B-Instruct` | 模型路径 |
+| `NEURX_MMLU_DATA_ROOT` | `./data/mmlu` | MMLU DataDirectory |
+| `NEURX_MMLU_SHOTS` | `5` | Few-shot sample数 |
+| `NEURX_MMLU_BATCH_SIZE` | `32` | 批ProcessSize |
+| `NEURX_MODEL_PATH` | `./model/Qwen2.5-0.5B-Instruct` | ModelPath |
 
-**示例：运行 0-shot 评估**:
+**Example:Run 0-shot Evaluation**:
 ```bash
 export NEURX_MMLU_SHOTS=0
 s run eval/run_mmlu_benchmark.s
 ```
 
-**示例：减少内存占用**:
+**Example:减少Memory占用**:
 ```bash
 export NEURX_MMLU_BATCH_SIZE=8
 s run eval/run_mmlu_benchmark.s
@@ -129,52 +129,52 @@ s run eval/run_mmlu_benchmark.s
 
 ## 📈 理解结果
 
-### 准确率指标
+### accuracy指标
 
-- **Overall Accuracy**: 所有 14K 题目的整体准确率
-- **Category Accuracy**: 按 STEM/Social/Humanities/Other 分类
-- **Task Accuracy**: 每个 57 个任务的准确率
+- **Overall Accuracy**: all 14K 题目 of 整体accuracy
+- **Category Accuracy**: 按 STEM/Social/Humanities/Other 分class
+- **Task Accuracy**: 每  57  任务 of accuracy
 
 ### 对标基准
 
-| 模型 | 参数量 | MMLU | 来源 |
+| Model | Parameter量 | MMLU | 来源 |
 |------|--------|------|------|
 | GPT-3.5 Turbo | 175B | 71.4% | OpenAI |
 | Claude 3 Haiku | 15B | 75.9% | Anthropic |
 | Qwen 0.5B (目标) | 0.5B | **78%+** | NeurX |
 | Claude 3 Sonnet | 200B | 88.3% | Anthropic |
 
-## 🎯 优化建议
+## 🎯 Optimize建议
 
-如果准确率低于目标 (78%)：
+如果accuracy低于目标 (78%):
 
-### 1. 分析错误分布
+### 1. analysisError分布
 ```bash
-# 输出详细错误分析
+# Output详细Erroranalysis
 export NEURX_DEBUG_EVAL=1
 s run eval/run_mmlu_benchmark.s > eval_debug.log
 ```
 
-### 2. 重点改进弱任务
-查看 STEM 或 Social Science 的详细错误，针对性改进。
+### 2. 重pointImprove弱任务
+View STEM  or  Social Science  of 详细Error,针对性Improve.
 
-### 3. 增加训练数据
-在弱任务数据上进行更多 SFT 训练。
+### 3. IncreaseTrainingData
+ in 弱任务Data上进line更多 SFT Training.
 
-### 4. 调整模型超参
-- 增加上下文长度 (支持更长 prompt)
-- 提高模型容量
-- 优化学习率
+### 4. 调整Model超参
+- Increase上下文长度 (support更长 prompt)
+- 提高Model容量
+- Optimizelearning_rate
 
-## 📝 集成到训练流程
+## 📝 integration to Trainingprocess
 
-在 `train/` 中定期评估：
+ in  `train/` in定期Evaluation:
 
 ```s
 use neurx.eval.mmlu_data
 use neurx.eval.mmlu_evaluator
 
-// 训练循环中
+// Trainingloopin
 if should_eval(step, 1000) {
     mmlu_dataset_state dataset = mmlu_data.load_mmlu_dataset("./data/mmlu")
     mmlu_eval_result result = mmlu_evaluator.evaluate_mmlu_benchmark(
@@ -190,21 +190,21 @@ if should_eval(step, 1000) {
 }
 ```
 
-## 🐛 常见问题
+## 🐛 FAQ
 
-### Q: 运行很慢
-**A**: MMLU 评估需要对 14K 题目逐个推理。预期时间：
-- GPU (V100): 2-3 小时
-- CPU: 12-24 小时
+### Q: Run很慢
+**A**: MMLU Evaluationneed对 14K 题目逐 inference.expectedTime:
+- GPU (V100): 2-3 hours
+- CPU: 12-24 hours
 
-### Q: 内存不足 (OOM)
-**A**: 减小 batch size：
+### Q: MemoryNot足 (OOM)
+**A**: 减小 batch size:
 ```bash
 export NEURX_MMLU_BATCH_SIZE=4
 ```
 
-### Q: 数据加载失败
-**A**: 确保数据目录结构：
+### Q: DataloadFailed
+**A**: 确保DataDirectorystructure:
 ```
 data/mmlu/
 ├── test/
@@ -217,41 +217,41 @@ data/mmlu/
     └── ...
 ```
 
-### Q: 准确率为 0%
-**A**: 检查：
-1. 模型是否正确加载
-2. Tokenizer 是否匹配
-3. Prompt 格式是否正确
+### Q: accuracy为 0%
+**A**: Check:
+1. Model是否正确load
+2. Tokenizer 是否match
+3. Prompt Format是否正确
 
 ## 🔗 相关资源
 
-- **完整文档**: [eval/README_MMLU.md](./README_MMLU.md)
+- **Completedocumentation**: [eval/README_MMLU.md](./README_MMLU.md)
 - **MMLU 论文**: https://arxiv.org/abs/2009.03300
-- **评估套件**: https://github.com/EleutherAI/lm-evaluation-harness
-- **PEFT 适配器**: [posttrain/adapter/README_PEFT.md](../posttrain/adapter/README_PEFT.md)
+- **Evaluation套件**: https://github.com/EleutherAI/lm-evaluation-harness
+- **PEFT adapter**: [posttrain/adapter/README_PEFT.md](../posttrain/adapter/README_PEFT.md)
 
-## ✅ 检查清单
+## ✅ Check清单
 
-- [ ] 已下载 MMLU 数据 (57 tasks)
-- [ ] 已验证数据完整性 (~14K 题目)
-- [ ] 已设置环境变量
-- [ ] 已运行基准评估
-- [ ] 已记录基准结果
-- [ ] 已集成到训练流程
+- [ ] havedownload MMLU Data (57 tasks)
+- [ ] haveVerificationDataComplete性 (~14K 题目)
+- [ ] havesetting环境变量
+- [ ] haveRun基准Evaluation
+- [ ] have记录基准结果
+- [ ] haveintegration to Trainingprocess
 
-## 📊 下一步
+## 📊 next step
 
-**立即行动** (本周):
-1. ✅ 搭建 MMLU 框架 (已完成)
-2. ⏳ 运行初始基准 (48-52% 预期)
-3. ⏳ 添加 GSM8K 数学推理评估
-4. ⏳ 添加 HumanEval 代码能力评估
+**立即line动** (本周):
+1. ✅ 搭建 MMLU framework (Completed)
+2. ⏳ Run初始基准 (48-52% expected)
+3. ⏳ 添加 GSM8K 数学inferenceEvaluation
+4. ⏳ 添加 HumanEval 代码能力Evaluation
 
-**优化方向** (2-4周):
-- 推理优化 (Medusa 推测解码)
-- 上下文扩展 (200K token 支持)
-- 模型改进 (新架构/更多数据)
+**Optimize方向** (2-4周):
+- inferenceOptimize (Medusa 推测decoding)
+- 上下文extension (200K token support)
+- ModelImprove (新architecture/更多Data)
 
 ---
 
-**需要帮助？** 查看完整文档或联系团队。
+**need帮助?** ViewCompletedocumentation or 联系团队.

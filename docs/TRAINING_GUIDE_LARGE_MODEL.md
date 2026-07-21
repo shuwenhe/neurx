@@ -146,9 +146,9 @@ English text `autograd/autograd_complete.s`:
 | English text | English text | English text |
 |------|------|------|
 | add(a,b) | a+b | ∂L/∂a=∂L/∂y, ∂L/∂b=∂L/∂y |
-| mul(a,b) | a×b | ∂L/∂a=b·∂L/∂y, ∂L/∂b=a·∂L/∂y |
+| mul(a,b) | a×b | ∂L/∂a=b-∂L/∂y, ∂L/∂b=a-∂L/∂y |
 | matmul(a,b) | a@b | ∂L/∂a=∂L/∂y@b^T, ∂L/∂b=a^T@∂L/∂y |
-| softmax(x) | exp(x)/Σexp(x) | ∂L/∂x = p·(∂L/∂y - (p·∂L/∂y).sum()) |
+| softmax(x) | exp(x)/Σexp(x) | ∂L/∂x = p-(∂L/∂y - (p-∂L/∂y).sum()) |
 | relu(x) | max(0,x) | ∂L/∂x = ∂L/∂y if x>0 else 0 |
 
 ### 3️⃣ AdamW optimizeEnglish text

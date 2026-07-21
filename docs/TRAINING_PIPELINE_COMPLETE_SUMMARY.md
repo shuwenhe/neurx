@@ -540,8 +540,8 @@ English textsuccessimplementationEnglish text**completeEnglish text, English tex
 **English text**: 100% ✅
 
 **English text**:
-- English texttimeEnglish text: O(batch·seq·hidden²)
-- English text: O(layers·batch·seq·hidden)
+- English texttimeEnglish text: O(batch-seq-hidden²)
+- English text: O(layers-batch-seq-hidden)
 - English text: support1-16English textgradientEnglish text
 - modelEnglish text: supportEnglish text100Bparameter
 

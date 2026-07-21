@@ -43,7 +43,7 @@ func cds_fact_consistency_reward(
 
 **Example**:
 ```
-Response: "缝叶缘膏药可缓解疼痛，禁用于肝脏病患者。"
+Response: "缝叶缘膏药可缓解疼痛,禁用于肝脏病患者."
 Verified facts: ["缝叶缘膏药缓解疼痛", "禁用于肝脏病患者"]
 → grounding_score = +8.0 (partially verified)
 ```

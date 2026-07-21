@@ -6,11 +6,11 @@ use std.io.println
 // run_posttrain_pipeline.s - Post-training Configuration & Orchestrator
 // ============================================================================
 //
-// 简化版后训练管道配置脚本
-// 功能:
-//   1. 显示后训练配置
-//   2. 验证输入输出路径
-//   3. 生成执行建议
+// simplified版afterTrainingpipelineconfigurationscript
+// function:
+//   1. 显示afterTrainingconfiguration
+//   2. verifyInputoutputpath
+//   3. GenerateExecute建议
 
 func int_to_str(int n) string {
     if n == 0 { return "0" }

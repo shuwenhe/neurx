@@ -247,7 +247,7 @@ func rm_bradley_terry_loss([]float chosen_r, []float rejected_r, int batch_size)
 // ============================================================================
 // 6. trainingstep (English textrewardEnglish textgradient + AdamW)
 //
-//   r = head · h + bias
+//   r = head - h + bias
 //   L = -log(sigmoid(r_c - r_r)),  English text p = sigmoid(r_c - r_r)
 //   dL/dr_c = -(1 - p),  dL/dr_r = (1 - p)
 //   dL/d head = (1 - p) * (h_r - h_c)

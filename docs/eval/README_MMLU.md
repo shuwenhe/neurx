@@ -1,44 +1,44 @@
-# MMLU 评估框架完整文档
+# MMLU EvaluationframeworkCompletedocumentation
 
 ## 概述
 
-这是为 NeurX 框架构建的完整 MMLU (Massive Multitask Language Understanding) 基准评估框架。用于验证模型在 57 个学科上的多任务理解能力。
+这是为 NeurX framework构建 of Complete MMLU (Massive Multitask Language Understanding) 基准Evaluationframework.用于VerificationModel in  57  学科上 of 多任务理解能力.
 
-**目标**: 验证 Qwen 0.5B 模型达到 78%+ MMLU 准确率
+**目标**: Verification Qwen 0.5B Model达 to  78%+ MMLU accuracy
 
-## 文件结构
+## Filestructure
 
 ```
 eval/
-├── mmlu_data.s              # MMLU 数据加载器 (376 行)
-├── mmlu_evaluator.s         # MMLU 5-shot 评估管道 (475 行)
-├── run_mmlu_benchmark.s     # 评估运行器脚本 (130 行)
-├── benchmark_eval.s         # 通用基准框架 (已存在)
-└── README_MMLU.md           # 此文档
+├── mmlu_data.s              # MMLU Dataloaddevice (376 line)
+├── mmlu_evaluator.s         # MMLU 5-shot Evaluationpipeline (475 line)
+├── run_mmlu_benchmark.s     # EvaluationRundevicescript (130 line)
+├── benchmark_eval.s         # 通用基准framework (have存 in )
+└── README_MMLU.md           # 此documentation
 ```
 
-## 模块详解
+## module详解
 
-### 1. MMLU 数据加载器 (`mmlu_data.s`)
+### 1. MMLU Dataloaddevice (`mmlu_data.s`)
 
-**功能**: 加载和管理 MMLU 数据集
+**function**: load and 管理 MMLU Dataset
 
-**核心结构**:
+**核心structure**:
 ```s
 struct mmlu_question {
     string task_name        // 任务名 (e.g., "abstract_algebra")
     string question         // 题目文本
-    string choice_a         // 选项 A
-    string choice_b         // 选项 B
-    string choice_c         // 选项 C
-    string choice_d         // 选项 D
+    string choice_a         // option A
+    string choice_b         // option B
+    string choice_c         // option C
+    string choice_d         // option D
     string correct_answer   // 正确答案 ("A", "B", "C", "D")
     int qid                 // 唯一题目 ID
 }
 
 struct mmlu_dataset_state {
-    map[string][]mmlu_question questions_by_task  // 按任务分组
-    map[string][]mmlu_question dev_by_task        // Few-shot 样本
+    map[string][]mmlu_question questions_by_task  // 按任务Group
+    map[string][]mmlu_question dev_by_task        // Few-shot sample
     int total_questions
     int total_dev
     bool is_loaded
@@ -49,28 +49,28 @@ struct mmlu_dataset_state {
 - **STEM** (19 任务): 数学、物理、化学、生物、计算机科学等
 - **Social Science** (13 任务): 经济学、政治学、心理学、法律等
 - **Humanities** (8 任务): 历史、文学、艺术、宗教等
-- **Other** (17 任务): 医学、商业道德、临床知识等
+- **Other** (17 任务): medical、商业道德、Clinical知识等
 
-**总计**: 57 个任务, ~14K 测试题
+**总计**: 57  任务, ~14K Test题
 
-### 2. MMLU 评估器 (`mmlu_evaluator.s`)
+### 2. MMLU Evaluationdevice (`mmlu_evaluator.s`)
 
-**功能**: 实现 5-shot 评估流程
+**function**: Implementation 5-shot Evaluationprocess
 
-**核心流程**:
+**核心process**:
 
 ```
 For each test question:
-  1. 构建 5-shot prompt (带 5 个示例)
+  1. 构建 5-shot prompt (带 5  Example)
   2. For each choice (A, B, C, D):
      - 计算 continuation log-likelihood
      - P(choice | prompt)
   3. 选择 argmax (按 token 数量归一化)
   4. 与正确答案比对
-  5. 累计准确率
+  5. 累计accuracy
 ```
 
-**关键函数**:
+**keyfunction**:
 
 ```s
 // 构建 few-shot prompt
@@ -79,7 +79,7 @@ func build_mmlu_fewshot_prompt(
     mmlu_question test_q
 ) string
 
-// 评估单个任务
+// Evaluation单 任务
 func evaluate_mmlu_task(
     language_model model,
     string task_name,
@@ -88,7 +88,7 @@ func evaluate_mmlu_task(
     mmlu_eval_config cfg
 ) mmlu_task_result
 
-// 运行完整基准
+// RunComplete基准
 func evaluate_mmlu_benchmark(
     language_model model,
     mmlu_dataset_state dataset,
@@ -96,42 +96,42 @@ func evaluate_mmlu_benchmark(
 ) mmlu_eval_result
 ```
 
-**输出**:
-- 整体准确率
-- 按任务准确率 (57 个)
-- 按类别准确率 (STEM, Social Science, Humanities, Other)
+**Output**:
+- 整体accuracy
+- 按任务accuracy (57  )
+- 按class别accuracy (STEM, Social Science, Humanities, Other)
 
-### 3. 评估运行器 (`run_mmlu_benchmark.s`)
+### 3. EvaluationRundevice (`run_mmlu_benchmark.s`)
 
-**功能**: 完整的命令行评估工具
+**function**: Complete of commandlineEvaluationtools
 
-**使用方法**:
+**Usagemethod**:
 
 ```bash
 cd /Users/shuwen/shuwen/train/neurx
 
-# 设置环境变量
+# setting环境变量
 export NEURX_ROOT="."
 export NEURX_MODEL_PATH="./model/Qwen2.5-0.5B-Instruct"
 export NEURX_MMLU_DATA_ROOT="./data/mmlu"
 export NEURX_MMLU_SHOTS=5
 export NEURX_MMLU_BATCH_SIZE=32
 
-# 运行评估
+# RunEvaluation
 s run eval/run_mmlu_benchmark.s
 ```
 
-## 集成指南
+## integrationguide
 
-### 1. 与训练流程集成
+### 1. 与Trainingprocessintegration
 
-在 `train/` 模块中定期运行评估:
+ in  `train/` modulein定期RunEvaluation:
 
 ```s
 use neurx.eval.mmlu_data
 use neurx.eval.mmlu_evaluator
 
-// 在训练循环中
+//  in Trainingloopin
 if should_eval(step, eval_interval) {
     mmlu_dataset_state dataset = mmlu_data.load_mmlu_dataset(data_root)
     mmlu_eval_result result = mmlu_evaluator.evaluate_mmlu_benchmark(
@@ -147,12 +147,12 @@ if should_eval(step, eval_interval) {
 }
 ```
 
-### 2. 与推理服务集成
+### 2. 与inference服务integration
 
-在 `inference/` 模块中验证模型质量:
+ in  `inference/` moduleinVerificationModelQuality:
 
 ```s
-// 部署前验证
+// 部署前Verification
 func verify_model_quality(string model_path) bool {
     model = load_model(model_path)
     dataset = load_mmlu_dataset(...)
@@ -163,14 +163,14 @@ func verify_model_quality(string model_path) bool {
 }
 ```
 
-### 3. 与对标框架集成
+### 3. 与对标frameworkintegration
 
 与其他基准组合:
 
 ```s
 struct multi_benchmark_result {
     float mmlu_accuracy          // MMLU
-    float gsm8k_accuracy         // 数学推理
+    float gsm8k_accuracy         // 数学inference
     float humaneval_accuracy     // 代码能力
     float truthfulqa_accuracy    // 真实性
 }
@@ -181,33 +181,33 @@ func run_all_benchmarks(...) multi_benchmark_result {
     humaneval = evaluate_humaneval_benchmark(...)
     truthfulqa = evaluate_truthfulqa_benchmark(...)
     
-    // 生成综合报告
+    // Generate综合report
 }
 ```
 
-## 数据格式
+## DataFormat
 
-### MMLU CSV 格式
+### MMLU CSV Format
 
-**测试集** (`test/{task}.csv`):
+**Testset** (`test/{task}.csv`):
 ```csv
 question|choice_a|choice_b|choice_c|choice_d|answer
 "What is 2+2?"|"3"|"4"|"5"|"6"|"B"
 "What is the capital of France?"|"London"|"Paris"|"Berlin"|"Madrid"|"B"
 ```
 
-**验证集** (`dev/{task}.csv`):
+**Verificationset** (`dev/{task}.csv`):
 ```csv
 (same format, typically 5 examples per task)
 ```
 
-### 数据加载
+### Dataload
 
 ```s
-// 自动从目录加载
+// 自动 from Directoryload
 dataset = mmlu_data.load_mmlu_dataset("./data/mmlu")
 
-// 手动加载特定任务
+// 手动load特定任务
 dev_examples = mmlu_data.load_mmlu_dev_examples(
     "./data/mmlu",
     "abstract_algebra",
@@ -220,11 +220,11 @@ test_questions = mmlu_data.load_mmlu_test_questions(
 )
 ```
 
-## 性能指标
+## Performance指标
 
-### 预期基准
+### expected基准
 
-| 模型 | 规模 | MMLU | 任务数 |
+| Model | 规modulo | MMLU | 任务数 |
 |------|------|------|--------|
 | GPT-3.5 | 175B | 71.4% | 57 |
 | Claude 3 Haiku | 15B | 75.9% | 57 |
@@ -232,17 +232,17 @@ test_questions = mmlu_data.load_mmlu_test_questions(
 | Qwen 0.5B | 0.5B | ? | 57 |
 | **目标** | 0.5B | **78%+** | 57 |
 
-### 评估成本估计
+### Evaluation成本Estimated
 
 - 总题目数: 14,000
 - 平均标记数/题: 150
 - 总标记数: 2.1M
-- 推理时间 (V100): ~2-3 小时
+- inferenceTime (V100): ~2-3 hours
 - 成本: ~$50-100 (AWS g4dn.12xlarge)
 
-## 实现细节
+## Implementation细节
 
-### Prompt 格式
+### Prompt Format
 
 ```
 Question: What is the capital of France?
@@ -254,9 +254,9 @@ D) Madrid
 Answer: 
 ```
 
-### 评分方法
+### 评分method
 
-对每个选项计算 log-likelihood:
+对每 option计算 log-likelihood:
 
 ```
 P(answer | question) = exp(log_prob(answer_tokens))
@@ -268,15 +268,15 @@ P(answer | question) = exp(log_prob(answer_tokens))
 score = sum(log_prob) / num_tokens
 ```
 
-选择分数最高的选项。
+选择分数最高 of option.
 
 ## 故障排查
 
-### 问题 1: 数据加载失败
+### question 1: DataloadFailed
 
-**症状**: `FileNotFoundError: ./data/mmlu/test/abstract_algebra.csv`
+**symptom**: `FileNotFoundError: ./data/mmlu/test/abstract_algebra.csv`
 
-**解决方案**: 确保数据目录结构:
+**resolve方案**: 确保DataDirectorystructure:
 ```
 data/
 └── mmlu/
@@ -290,80 +290,80 @@ data/
         └── ...
 ```
 
-### 问题 2: OOM (内存溢出)
+### question 2: OOM (Memory溢出)
 
-**症状**: GPU 内存不足
+**symptom**: GPU MemoryNot足
 
-**解决方案**: 减小 batch_size
+**resolve方案**: 减小 batch_size
 ```bash
 export NEURX_MMLU_BATCH_SIZE=8
 ```
 
-### 问题 3: 准确率为 0%
+### question 3: accuracy为 0%
 
-**症状**: 所有题目答案错误
+**symptom**: all题目答案Error
 
 **可能原因**:
-- 模型未正确加载
-- Tokenizer 错误
-- prompt 格式不匹配
+- Model未正确load
+- Tokenizer Error
+- prompt FormatNotmatch
 
-**调试**: 打印模型输出 logits
+**Debug**: 打印ModelOutput logits
 
-## 性能优化
+## PerformanceOptimize
 
-### 1. 批处理
+### 1. 批Process
 
 ```s
-// 分批评估相同任务的题目
+// 分批Evaluation相同任务 of 题目
 batch_size = 32
 for batch in chunks(test_questions, batch_size) {
     evaluate_batch(model, batch)
 }
 ```
 
-### 2. 缓存
+### 2. cache
 
 ```s
-// 缓存已评估的题目结果
+// cachehaveEvaluation of 题目结果
 cache: map[string]float = {}
 if cache.contains(question_id) {
     return cache[question_id]
 }
 ```
 
-### 3. 并行化
+### 3. parallel化
 
 ```s
-// 分布式评估 (不同任务在不同 GPU)
+// distributedEvaluation (Not同任务 in Not同 GPU)
 tasks_per_gpu = split_tasks(57, num_gpus)
 parallel_evaluate(tasks_per_gpu)
 ```
 
 ## 生产部署
 
-### 持续基准测试
+### 持续基准Test
 
-每次模型更新后自动运行:
+每次ModelUpdateafter自动Run:
 
 ```bash
-# 在 CI/CD 流程中
+#  in  CI/CD processin
 make eval-mmlu
 
-# 检查结果
+# Check结果
 if [ $(grep "accuracy" results.json | cut -d: -f2) -lt 0.75 ]; then
   echo "FAIL: Model accuracy below threshold"
   exit 1
 fi
 ```
 
-### 报告生成
+### reportGenerate
 
 ```
 artifacts/eval/
 ├── mmlu_results_2026-07-20.json    # 详细结果
 ├── mmlu_results_2026-07-20.csv     # 按任务
-└── mmlu_benchmark_report.md        # 可视化报告
+└── mmlu_benchmark_report.md        # 可视化report
 ```
 
 ### 趋势跟踪
@@ -377,18 +377,18 @@ MMLU Accuracy Trend:
   Gap: 29.5% to close
 ```
 
-## 参考文献
+## Reference文献
 
 - MMLU 论文: https://arxiv.org/abs/2009.03300
 - lm-evaluation-harness: https://github.com/EleutherAI/lm-evaluation-harness
-- PEFT 集成: `posttrain/adapter/README_PEFT.md`
+- PEFT integration: `posttrain/adapter/README_PEFT.md`
 
-## 下一步
+## next step
 
-1. ✅ 实现 MMLU 数据加载器
-2. ✅ 实现 5-shot 评估管道
-3. ✅ 创建评估运行器
-4. ⏳ 集成实际模型加载
-5. ⏳ 添加 GSM8K 数学推理评估
-6. ⏳ 添加 HumanEval 代码能力评估
+1. ✅ Implementation MMLU Dataloaddevice
+2. ✅ Implementation 5-shot Evaluationpipeline
+3. ✅ CreateEvaluationRundevice
+4. ⏳ integration实际Modelload
+5. ⏳ 添加 GSM8K 数学inferenceEvaluation
+6. ⏳ 添加 HumanEval 代码能力Evaluation
 7. ⏳ 构建综合基准仪表板

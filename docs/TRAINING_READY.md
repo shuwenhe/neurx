@@ -1,121 +1,121 @@
-# ✅ MedMCQA SFT 训练完整就绪
+# ✅ MedMCQA SFT TrainingCompleteReady
 
-## 📋 当前状态
+## 📋 Current status
 
-- ✅ 数据集转换完成：182,822 个医学问题
-  - 训练集：173,680 条 (95%)
-  - 验证集：9,142 条 (5%)
-  - 格式：JSONL (指令-输入-输出)
-  - 大小：136MB 训练 + 7.2MB 验证
+- ✅ DatasetConvertComplete:182,822  Medical question
+  - Trainingset:173,680 条 (95%)
+  - Verificationset:9,142 条 (5%)
+  - Format:JSONL (指令-Input-Output)
+  - Size:136MB Training + 7.2MB Verification
 
-- ✅ NeurX 框架配置完成
-  - 基础模型：Qwen2.5-0.5B-Instruct
-  - 数据文件：`neurx/dataset/medmcqa_sft/train.jsonl`
-  - LoRA 配置：rank=8, alpha=16
+- ✅ NeurX frameworkConfigurationComplete
+  - baseModel:Qwen2.5-0.5B-Instruct
+  - DataFile:`neurx/dataset/medmcqa_sft/train.jsonl`
+  - LoRA Configuration:rank=8, alpha=16
 
-- ✅ 所有脚本就绪
-  - 数据转换：`scripts/convert_medmcqa.sh`
-  - 完整训练：`scripts/train_medmcqa_sft.sh`
+- ✅ allscriptReady
+  - DataConvert:`scripts/convert_medmcqa.sh`
+  - CompleteTraining:`scripts/train_medmcqa_sft.sh`
 
-## 🚀 立即开始训练
+## 🚀 立即StartTraining
 
-### 方式 1：一行命令（推荐）
+### way 1:一linecommand(Recommendation)
 
 ```bash
 cd /home/shuwen/shuwen/train/neurx && bash scripts/train_medmcqa_sft.sh
 ```
 
-### 方式 2：分步执行
+### way 2:分步Execute
 
 ```bash
-# 1. 仅转换数据
+# 1. Only convertData
 cd /home/shuwen/shuwen/train/neurx
 bash scripts/convert_medmcqa.sh
 
-# 2. 运行训练
+# 2. RunTraining
 make posttrain
 
-# 3. 合并 LoRA 适配器
+# 3. Merge LoRA adapter
 make posttrain-merge-lora
 ```
 
-### 方式 3：试运行（不实际训练）
+### way 3:试Run(Not实际Training)
 
 ```bash
 bash scripts/train_medmcqa_sft.sh --dry-run
 ```
 
-## 📊 预期输出
+## 📊 expectedOutput
 
-| 阶段 | 时间 | 输出位置 |
+| Phase | Time | Outputlocation |
 |------|------|---------|
-| SFT 训练 | 2-4 小时 | `artifacts/checkpoints/lora_sft/` |
-| 模型合并 | 10 分钟 | `../model/base-model-posttrain/` |
+| SFT Training | 2-4 hours | `artifacts/checkpoints/lora_sft/` |
+| ModelMerge | 10 minutes | `../model/base-model-posttrain/` |
 
-## 🔍 验证数据示例
+## 🔍 VerificationDataExample
 
 ```bash
-# 查看第一条训练数据
+# View第一条TrainingData
 head -1 /home/shuwen/shuwen/train/neurx/dataset/medmcqa_sft/train.jsonl | python3 -m json.tool
 
-# 统计数据量
+# statisticsData量
 echo "Train:" && wc -l /home/shuwen/shuwen/train/neurx/dataset/medmcqa_sft/train.jsonl
 echo "Val:" && wc -l /home/shuwen/shuwen/train/neurx/dataset/medmcqa_sft/val.jsonl
 ```
 
-## 💾 关键文件位置
+## 💾 Key fileslocation
 
 ```
 /home/shuwen/shuwen/train/
 ├── dataset/
 │   └── medmcqa/
-│       └── train.json                    [原始数据]
+│       └── train.json                    [OriginalData]
 ├── neurx/
 │   ├── dataset/
 │   │   └── medmcqa_sft/
-│   │       ├── train.jsonl               [✓ 已生成]
-│   │       └── val.jsonl                 [✓ 已生成]
+│   │       ├── train.jsonl               [✓ haveGenerate]
+│   │       └── val.jsonl                 [✓ haveGenerate]
 │   ├── scripts/
-│   │   ├── convert_medmcqa.sh            [转换脚本]
-│   │   └── train_medmcqa_sft.sh          [训练脚本]
+│   │   ├── convert_medmcqa.sh            [Convertscript]
+│   │   └── train_medmcqa_sft.sh          [Trainingscript]
 │   ├── artifacts/
 │   │   ├── checkpoints/
-│   │   │   ├── lora_sft/                 [SFT 适配器]
-│   │   │   └── lora_adapter/             [最终适配器]
+│   │   │   ├── lora_sft/                 [SFT adapter]
+│   │   │   └── lora_adapter/             [finaladapter]
 │   │   └── logs/
-│   └── Makefile                          [已更新]
+│   └── Makefile                          [haveUpdate]
 └── model/
-    ├── Qwen2.5-0.5B-Instruct/            [基础模型]
-    └── base-model-posttrain/             [合并后的模型]
+    ├── Qwen2.5-0.5B-Instruct/            [baseModel]
+    └── base-model-posttrain/             [Mergeafter of Model]
 ```
 
-## 🎯 下一步
+## 🎯 next step
 
-### 立即执行（2-4 小时）
+### 立即Execute(2-4 hours)
 ```bash
 cd /home/shuwen/shuwen/train/neurx && bash scripts/train_medmcqa_sft.sh
 ```
 
-### 然后评测
+### 然after评测
 ```bash
 cd /home/shuwen/shuwen/train/neurx
 make eval-medical
 ```
 
-### 可选：继续对齐
+### Optional:继续Alignment
 ```bash
-# DPO 对齐（第2阶段）
+# DPO Alignment(第2Phase)
 cd /home/shuwen/shuwen/train/medical/Post_train/step2_DPO
 bash lora.sh
 
-# GRPO 优化（第3阶段）
+# GRPO Optimize(第3Phase)
 cd /home/shuwen/shuwen/train/medical/Post_train/step3_GRPO
 bash lora.sh
 ```
 
-## 📝 数据转换详情
+## 📝 DataConvert详情
 
-### 输入格式（MedMCQA）
+### InputFormat(MedMCQA)
 
 ```json
 {
@@ -131,7 +131,7 @@ bash lora.sh
 }
 ```
 
-### 输出格式（SFT）
+### OutputFormat(SFT)
 
 ```json
 {
@@ -141,39 +141,39 @@ bash lora.sh
 }
 ```
 
-## ⚙️ 自定义配置
+## ⚙️ customConfiguration
 
-编辑 `Makefile` 中的参数：
+Edit `Makefile` in of Parameter:
 
 ```makefile
-# 改变 LoRA 大小
-POSTTRAIN_LORA_RANK ?= 8        # 增大到 16 以提高表现力
+# 改变 LoRA Size
+POSTTRAIN_LORA_RANK ?= 8        # 增大 to  16 以提高表现力
 
-# 改变批大小（在配置文件中）
+# 改变批Size( in ConfigurationFilein)
 # vim posttrain/sft/config.json  
 ```
 
 ## 🐛 故障排查
 
-### 问题：找不到模型
+### question:找Not to Model
 ```bash
 ls -lh /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/
 ```
 
-### 问题：找不到数据
+### question:找Not to Data
 ```bash
 ls -lh /home/shuwen/shuwen/train/neurx/dataset/medmcqa_sft/
 ```
 
-### 问题：训练卡住
+### question:Training卡住
 ```bash
-# 查看日志
+# ViewLog
 tail -f /home/shuwen/shuwen/train/neurx/artifacts/logs/posttrain_*.log
 
-# 检查 GPU
+# Check GPU
 nvidia-smi
 ```
 
 ---
 
-**最后一步**：执行以下命令开始训练！
+**最after一步**:Execute以下commandStartTraining!

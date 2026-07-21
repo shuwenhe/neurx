@@ -456,7 +456,7 @@ func flash_attn_backward(
             tj = tj + 1
         }
 
-        // dV += P^T @ dOut  and  dOut_scaled = dOut - (dOut·O) for dQ/dK
+        // dV += P^T @ dOut  and  dOut_scaled = dOut - (dOut-O) for dQ/dK
         // Recompute P by re-running attention scores (no stored N×N matrix)
         []float dq_h = zeros(seq_len * D)
         []float dk_h = zeros(kv_len  * D)
@@ -530,7 +530,7 @@ func flash_attn_backward(
                 kj4 = kj4 + 1
             }
 
-            // dP[qi,kj] = dout_h[qi] · V[kj] - Di[qi]   (softmax backward)
+            // dP[qi,kj] = dout_h[qi] - V[kj] - Di[qi]   (softmax backward)
             []float dp = zeros(kv_len)
             int kj5 = 0
             for kj5 < kv_len {
