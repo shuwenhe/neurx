@@ -45,7 +45,7 @@ func init(
     int head_dim,
     int max_batch_size = 1,
     int max_seq_len = 8192
-) -> KVCacheManager {
+) {
 
     print(f"🗃️ Initializing KV Cache Manager:")
     print(f"   Layers: {num_layers}")
@@ -79,7 +79,7 @@ func update(
     tensor new_keys,       # [B, kv_heads, S_new, D]
     tensor new_values,      # [B, kv_heads, S_new, D]
     []int batch_indices     # Which batch items to update (-1 for all)
-) -> tuple[tensor, tensor] {
+) {
     """
     English text KV cache
 
@@ -111,7 +111,7 @@ func update(
 func get_cached_kv(
     self: KVCacheManager,
     int layer_idx
-) -> option[tuple[tensor, tensor]]:
+):
     """English textcomplete KV cache"""
 
     if layer_idx < len(self.layer_key_caches):
@@ -128,7 +128,7 @@ func reset(self: KVCacheManager):
     self.layer_value_caches.clear()
     self.cache_lengths = [0] * len(self.cache_lengths)
 
-func get_memory_usage(self: KVCacheManager) -> dict[str, int64]:
+func get_memory_usage(self: KVCacheManager):
     """English textuseEnglish text"""
 
     int64 total_k_memory = 0
@@ -206,7 +206,7 @@ func init_paged_attention(
     int gpu_memory_mb: int64 = 80 * 1024,  # 80GB H100
     int block_size: int = 16,
     float reserve_ratio: float = 0.9         # Use 90% of GPU memory for KV cache
-) -> PagedAttentionManager {
+) {
 
     # Calculate how many blocks we can fit
     int64 bytes_per_block = (
@@ -255,7 +255,7 @@ func allocate_sequence(
     self: PagedAttentionManager,
     int seq_id,
     int initial_length: int = 0
-) -> sequence_metadata:
+):
     """
     English text blocks
 
@@ -303,7 +303,7 @@ func extend_sequence(
     int seq_id,
     tensor new_keys,    # [1, kv_heads, new_tokens, D]
     tensor new_values    # [1, kv_heads, new_tokens, D]
-) -> void:
+):
     """
     extensionEnglish text KV cache (generateEnglish text token English text)
     """
@@ -352,7 +352,7 @@ func extend_sequence(
 
     meta.current_length += new_tokens
 
-func free_sequence(self: PagedAttentionManager, int seq_id) -> void:
+func free_sequence(self: PagedAttentionManager, int seq_id):
     """
     English text blocks
     """
@@ -376,7 +376,7 @@ func gather_kv_for_attention(
     int seq_id,
     int query_start_pos,
     int query_end_pos
-) -> tuple[tensor, tensor]:
+):
     """
     English text paged memory English textcompleteEnglish text KV English text attention compute
 
@@ -422,7 +422,7 @@ func gather_kv_for_attention(
     return (full_keys, full_values)
 
 # Internal helper
-func _find_free_block(self: PagedAttentionManager) -> int:
+func _find_free_block(self: PagedAttentionManager):
     """English text block"""
     for block in self.physical_blocks:
         if block.is_free:
@@ -488,7 +488,7 @@ func init_scheduler(
     int max_batch_size: int = 32,
     int max_queue_size: int = 256,
     string policy: string = "fcfs"
-) -> ContinuousBatchScheduler {
+) {
 
     print(f"\n📋 Initializing Continuous Batch Scheduler:")
     print(f"   Max Concurrent Requests: {max_batch_size}")
@@ -519,7 +519,7 @@ func add_request(
     float temperature: float = 0.7,
     float top_p: float = 0.9,
     int top_k: int = 50
-) -> int:
+):
     """
     English textinferencerequest
 
@@ -555,7 +555,7 @@ func add_request(
     self.waiting_queue.push(req)
     return req.request_id
 
-func schedule_batch(self: ContinuousBatchScheduler) -> list[inference_request]:
+func schedule_batch(self: ContinuousBatchScheduler):
     """
     English textrequest
 
@@ -600,7 +600,7 @@ func mark_completed(
     int request_id,
     string final_text,
     []int all_output_ids
-) -> void:
+):
     """
     English textrequestEnglish text
     """
@@ -641,7 +641,7 @@ func mark_completed(
         max((now() - self.scheduler_start).total_seconds(), 0.001)
     )
 
-func get_status_report(self: ContinuousBatchScheduler) -> string:
+func get_status_report(self: ContinuousBatchScheduler):
     """generatestateEnglish text"""
 
     report = f"""
@@ -701,7 +701,7 @@ func init_engine(
     int max_batch_size: int = 16,
     bool enable_paged_attention: bool = true,
     int gpu_memory_mb: int64 = 80 * 1024
-) -> inference_engine {
+) {
 
     print("\n" + "="*60)
     print("🚀 Initializing NEURX Inference Engine")
@@ -761,7 +761,7 @@ func generate(
     bool do_sample: bool = true,
     bool stream: bool = false,
     callback: option<function> = None  # Streaming callback
-) -> string:
+):
     """
     English textrequestEnglish textgenerate (English textfunction)
 
@@ -915,7 +915,7 @@ func sample_next_token(
     float top_p,
     int top_k,
     bool do_sample
-) -> int:
+):
     """
     English text logits English text token
 
@@ -972,7 +972,7 @@ func generate_batch(
     []string prompts,
     int max_new_tokens: int = 512,
     **kwargs
-) -> []string:
+):
     """
     English textgenerate (use continuous batching)
 
@@ -1043,7 +1043,7 @@ struct quantization_config {
     float scale_dtype    # Data type for scale factors ("fp32" | "fp16")
 }
 
-func create_default_quant_config() -> quantization_config:
+func create_default_quant_config():
     return quantization_config{
         qtype: NONE,
         group_size: 128,
@@ -1054,7 +1054,7 @@ func create_default_quant_config() -> quantization_config:
 func apply_quantization(
     neurx_model model,
     quantization_config config
-) -> neurx_model:
+):
     """
     English textmodelweight
 
@@ -1211,10 +1211,10 @@ func test_inference_system() {
 
 // Helper functions
 
-func ceil_div(int a, int b) -> int:
+func ceil_div(int a, int b):
     return (a + b - 1) // b
 
-func get_tensor_memory(tensor t) -> int64:
+func get_tensor_memory(tensor t):
     """English textuse (English text)"""
     int elements = 1
     for dim in shape(t):
@@ -1226,7 +1226,7 @@ func get_tensor_memory(tensor t) -> int64:
 
     return int64(elements) * element_size
 
-func truncate_at_special_tokens(string text) -> string:
+func truncate_at_special_tokens(string text):
     """English text token English text"""
     # Find common stop sequences
     []string stop_sequences = ["", "\n\n", "<|end_of_turn|>"]
@@ -1238,7 +1238,7 @@ func truncate_at_special_tokens(string text) -> string:
 
     return text.strip()
 
-def call_ai_judge(string prompt, string response) -> float:
+def call_ai_judge(string prompt, string response):
     """English text AI Judge modelEnglish text (English textmodel)"""
     # Placeholder: actualimplementationEnglish text API English textmodel
     return 0.5  # Default neutral score

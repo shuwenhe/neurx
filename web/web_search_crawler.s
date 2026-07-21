@@ -125,7 +125,7 @@ struct SearchStatistics {
 
 interface SearchEngineInterface {
     name: string { get }
-    search(query: string, config: WebSearchConfig) -> EngineSearchResult
+    search(query: string, config: WebSearchConfig)
 }
 
 struct EngineSearchResult {
@@ -153,7 +153,7 @@ class GoogleSearchEngine implements SearchEngineInterface {
         return this.name
     }
 
-    search(query: string, config: WebSearchConfig) -> EngineSearchResult {
+    search(query: string, config: WebSearchConfig) {
         start_time = current_time_millis()
 
         if this.api_key != null && this.cx_id != null {
@@ -165,7 +165,7 @@ class GoogleSearchEngine implements SearchEngineInterface {
         return result
     }
 
-    _search_via_api(query: string, config: WebSearchConfig, start_time: float) -> EngineSearchResult {
+    _search_via_api(query: string, config: WebSearchConfig, start_time: float) {
         # Use Google Custom Search JSON API
         params = {
             "key": this.api_key!,
@@ -207,7 +207,7 @@ class GoogleSearchEngine implements SearchEngineInterface {
         }
     }
 
-    _search_public(query: string, config: WebSearchConfig, start_time: float) -> EngineSearchResult {
+    _search_public(query: string, config: WebSearchConfig, start_time: float) {
         # Fallback: Use web scraping or alternative public API
         # Note: This is a simplified implementation; production should use proper APIs or services like SerpAPI
 
@@ -228,7 +228,7 @@ class GoogleSearchEngine implements SearchEngineInterface {
             }
     }
 
-    _duckduckgo_fallback(query: string, config: WebSearchConfig) -> EngineSearchResult {
+    _duckduckgo_fallback(query: string, config: WebSearchConfig) {
         # DuckDuckGo Instant Answer API (free, no key required)
         params = {
             "q": query,
@@ -278,7 +278,7 @@ class BingSearchEngine implements SearchEngineInterface {
         return this.name
     }
 
-    search(query: string, config: WebSearchConfig) -> EngineSearchResult {
+    search(query: string, config: WebSearchConfig) {
         start_time = current_time_millis()
 
         if this.api_key != null:
@@ -287,7 +287,7 @@ class BingSearchEngine implements SearchEngineInterface {
             return this._search_fallback(query, config, start_time)
     }
 
-    _search_via_api(query: string, config: WebSearchConfig, start_time: float) -> EngineSearchResult {
+    _search_via_api(query: string, config: WebSearchConfig, start_time: float) {
         headers = {
             "Ocp-Apim-Subscription-Key": this.api_key!
         }
@@ -334,7 +334,7 @@ class BingSearchEngine implements SearchEngineInterface {
         }
     }
 
-    _search_fallback(query: string, config: WebSearchConfig, start_time: float) -> EngineSearchResult {
+    _search_fallback(query: string, config: WebSearchConfig, start_time: float) {
         # Return empty with info message
         return EngineSearchResult{
             items=[],
@@ -367,7 +367,7 @@ class WebCrawler {
         this.html_cleaner = new HTMLCleaner(config=config)
     }
 
-    async crawl(url: string) -> tuple<CrawledContent?, string?> {
+    async crawl(url: string) {
         # Check cache first
         if this.config.cache_enabled && url in this.cache {
             cached = this.cache[url]
@@ -421,7 +421,7 @@ class WebCrawler {
             return (null, str(e))
     }
 
-    batch_crawl(urls: list<string>, max_concurrent: int = 3) -> dict<string, tuple<CrawledContent?, string?>> {
+    batch_crawl(urls: list<string>, max_concurrent: int = 3) {
         results: dict<string, tuple<CrawledContent?, string?>> = {}
 
         # Use semaphore to limit concurrent requests
@@ -438,7 +438,7 @@ class WebCrawler {
         return results
     }
 
-    _is_cache_expired(cached: CrawledContent) -> bool {
+    _is_cache_expired(cached: CrawledContent) {
         age_hours = (current_timestamp() - cached.extraction_timestamp) / 3600
         return age_hours > this.config.cache_ttl_hours
     }
@@ -453,7 +453,7 @@ class MainContentExtractor {
         this.config = config
     }
 
-    extract(html: string, base_url: string) -> ExtractionResult {
+    extract(html: string, base_url: string) {
         soup = parse_html(html)
 
         # Remove unwanted elements
@@ -497,7 +497,7 @@ class MainContentExtractor {
                     elem.decompose()
     }
 
-    _extract_metadata(soup: any, base_url: string) -> PageMetadata {
+    _extract_metadata(soup: any, base_url: string) {
         meta = PageMetadata{
             title=soup.title.string.trim() if soup.title else "",
             site_name="",
@@ -549,7 +549,7 @@ class MainContentExtractor {
         return meta
     }
 
-    _find_main_content(soup: any) -> any {
+    _find_main_content(soup: any) {
         # Heuristic-based main content detection (similar to Mozilla Readability)
         candidates: list<{element: any, score: float}> = []
 
@@ -604,7 +604,7 @@ class MainContentExtractor {
         return None
     }
 
-    _extract_structured(element: any) -> tuple<string, list<PageSection>> {
+    _extract_structured(element: any) {
         sections: list<PageSection> = []
         content_parts: list<string> = []
 
@@ -663,7 +663,7 @@ class HTMLCleaner {
         this.config = config
     }
 
-    clean(raw_text: string) -> string {
+    clean(raw_text: string) {
         text = raw_text
 
         if this.config.remove_scripts_styles:
@@ -718,7 +718,7 @@ class WebSearchSystem {
         this.result_aggregator = new ResultAggregator(config=config)
     }
 
-    async search(query: string, options?: SearchOptions) -> SearchResponse {
+    async search(query: string, options?: SearchOptions) {
         opts = options ?? new SearchOptions()
         start_total = current_time_millis()
 
@@ -729,7 +729,7 @@ class WebSearchSystem {
         engine_times: map<string, float> = {}
         used_engines: list<string> = []
 
-        tasks: list<tuple<string, () -> EngineSearchResult>> = []
+        tasks: list<tuple<string, ()
         for eng_name, engine in this.engines {
             tasks.append((eng_name, () => engine.search(query, this.config)))
         }
@@ -844,7 +844,7 @@ class WebSearchSystem {
         }
     }
 
-    _build_context_for_llm(query: string, top_results: list<SearchResultItem>) -> string {
+    _build_context_for_llm(query: string, top_results: list<SearchResultItem>) {
         parts: list<string> = []
         parts.append(f"Query: {query}\n")
         parts.append("=" * 60 + "\n")
@@ -868,7 +868,7 @@ class WebSearchSystem {
         return "\n".join(parts)
     }
 
-    _generate_summary_with_llm(query: string, context: string) -> LlmSummaryResult {
+    _generate_summary_with_llm(query: string, context: string) {
         prompt = f"""
 Based on the following search results for the query "{query}", provide:
 
@@ -925,7 +925,7 @@ Also provide a comma-separated ranking of the most relevant result indices (0-ba
         reranked_indices: list<int>?
     }
 
-    export_results(response: SearchResponse, format: string = "markdown", output_path?: string) -> string {
+    export_results(response: SearchResponse, format: string = "markdown", output_path?: string) {
         output: list<string> = []
 
         output.append(f"# Search Results: {response.query}\n")
@@ -997,7 +997,7 @@ class ResultAggregator {
         this.config = config
     }
 
-    deduplicate(items: list<SearchResultItem>) -> list<SearchResultItem> {
+    deduplicate(items: list<SearchResultItem>) {
         seen_urls: set<string> = set{}
         unique_items: list<SearchResultItem> = []
 
@@ -1012,7 +1012,7 @@ class ResultAggregator {
         return unique_items
     }
 
-    score_and_rank(items: list<SearchResultItem>, query: string) -> list<SearchResultItem> {
+    score_and_rank(items: list<SearchResultItem>, query: string) {
         # Score each result based on multiple signals
 
         scored_items: list<tuple<SearchResultItem, float>> = []
@@ -1061,7 +1061,7 @@ class ResultAggregator {
         return [item for item, _ in scored_items]
     }
 
-    _normalize_url(url: string) -> string {
+    _normalize_url(url: string) {
         parsed = urlparse(url)
         # Remove fragments, sort query params, lowercase
         normalized = f"{parsed.scheme}://{parsed.netloc}{parsed.path}"
@@ -1071,7 +1071,7 @@ class ResultAggregator {
         return normalized.to_lower()
     }
 
-    _is_high_quality_domain(domain: string) -> bool {
+    _is_high_quality_domain(domain: string) {
         quality_indicators = [
             ".edu", ".gov", ".org",  # TLDs
             "wikipedia.org", "arxiv.org", "github.com",
@@ -1084,11 +1084,11 @@ class ResultAggregator {
 
 // ==================== English textfunctionEnglish texttest ====================
 
-function create_web_search_system(config?: WebSearchConfig, llm_client?: any) -> WebSearchSystem {
+function create_web_search_system(config?: WebSearchConfig, llm_client?: any) {
     return new WebSearchSystem(config=config, llm_client=llm_client)
 }
 
-async function test_web_search_system() -> bool {
+async function test_web_search_system() {
     print("🧪 Testing NEURX WEB Search System...")
 
     # Create system without actual API keys (will use fallback modes)

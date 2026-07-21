@@ -133,7 +133,7 @@ class SandboxEnvironment {
         }
     }
 
-    execute(code_block: CodeBlock) -> ExecutionResult {
+    execute(code_block: CodeBlock) {
         let start_time = current_time_millis()
 
         // Step 1: Security check
@@ -196,7 +196,7 @@ class SandboxEnvironment {
         return result
     }
 
-    _security_check(code: string) -> SecurityCheckResult {
+    _security_check(code: string) {
         // Comprehensive security analysis of code
 
         issues: list<string> = []
@@ -246,7 +246,7 @@ class SandboxEnvironment {
         return SecurityCheckResult{allowed=true, reason=""}
     }
 
-    _post_process(result: ExecutionResult, code_block: CodeBlock) -> ExecutionResult {
+    _post_process(result: ExecutionResult, code_block: CodeBlock) {
         // Collect generated files
         if this.config.persist_files_between_calls {
             let files = scan_directory_for_new_files(
@@ -272,7 +272,7 @@ class SandboxEnvironment {
         return result
     }
 
-    _extract_matplotlib_plots() -> list<ImageData> {
+    _extract_matplotlib_plots() {
         plots: list<ImageData> = []
         // In real implementation, check for saved figure files or capture from backend
         // For now, scan for .png/.svg files created during execution
@@ -291,7 +291,7 @@ class SandboxEnvironment {
         return plots
     }
 
-    get_session_state() -> SessionState {
+    get_session_state() {
         return this.state
     }
 
@@ -341,7 +341,7 @@ class SessionState {
         this.total_execution_time_ms += record.result.execution_time_ms
     }
 
-    get_summary() -> SessionSummary {
+    get_summary() {
         return SessionSummary{
             session_id=this.session_id,
             duration_seconds=current_timestamp() - this.created_at,
@@ -353,7 +353,7 @@ class SessionState {
         }
     }
 
-    _compute_success_rate() -> float {
+    _compute_success_rate() {
         if this.execution_history.length == 0 {
             return 1.0
         }
@@ -399,7 +399,7 @@ class PythonRuntime {
         }
     }
 
-    execute(code: string, filename: string?) -> ExecutionResult {
+    execute(code: string, filename: string?) {
         // Write code to temporary file within sandbox
         let script_path = this.sandbox_dir + (filename ?? "execution_" + generate_short_uuid() + ".py")
         write_file(script_path, code)
@@ -490,7 +490,7 @@ class PythonRuntime {
         }
     }
 
-    _parse_python_error(stderr_output: string) -> ErrorInfo {
+    _parse_python_error(stderr_output: string) {
         lines = stderr_output.split("\n")
         error_type = ""
         message = ""
@@ -515,7 +515,7 @@ class PythonRuntime {
         }
     }
 
-    _extract_return_value(stdout: string) -> any {
+    _extract_return_value(stdout: string) {
         // Try to detect and parse printed values that could be expressions
         // This is a simplified version; real implementation would use AST analysis
         lines = stdout.strip().split("\n")
@@ -556,7 +556,7 @@ class JavaScriptRuntime {
         this.vm_context = create_javascript_vm()
     }
 
-    execute(code: string) -> ExecutionResult {
+    execute(code: string) {
         try {
             // Wrap code to capture console.log and return value
             wrapped_code = """
@@ -620,7 +620,7 @@ class ShellRuntime {
         }.filter(x => x != null).map(x => x!)
     }
 
-    execute(command: string) -> ExecutionResult {
+    execute(command: string) {
         // Validate command against whitelist
         base_command = command.split_whitespace()[0]
         if base_command not in this.allowed_commands {
@@ -686,7 +686,7 @@ class SQLRuntime {
         this.connection = connect_to_sqlite(db_path)
     }
 
-    execute(query: string) -> ExecutionResult {
+    execute(query: string) {
         try {
             // Parse SQL to determine type
             query_type = detect_sql_query_type(query)
@@ -776,7 +776,7 @@ class ResultFormatter {
         this.config = config
     }
 
-    format_for_llm(result: ExecutionResult) -> FormattedOutput {
+    format_for_llm(result: ExecutionResult) {
         // Format execution results for LLM consumption
         sections: list<string> = []
 
@@ -846,14 +846,14 @@ class ResultFormatter {
         }
     }
 
-    _truncate(text: string, max_chars: int) -> string {
+    _truncate(text: string, max_chars: int) {
         if text.length <= max_chars {
             return text
         }
         return text[:max_chars] + f"\n... [truncated, {text.length - max_chars} more chars]"
     }
 
-    _format_code_block(content: string, lang: string) -> string {
+    _format_code_block(content: string, lang: string) {
         return "```\n" + content + "\n```"
     }
 }
@@ -877,7 +877,7 @@ class DataAnalysisHelper {
     }
 
     // Auto-generate data exploration code
-    explore_dataset(csv_path: string, max_rows: int = 5) -> ExecutionResult {
+    explore_dataset(csv_path: string, max_rows: int = 5) {
         code = f"""
 import pandas as pd
 import numpy as np
@@ -929,7 +929,7 @@ print(f"Total: {{mem.sum() / 1024 / 1024:.2f}} MB")
 
     // Generate visualization code
     visualize_data(csv_path: string, chart_type: string, x_col: string, y_col: string?,
-                   group_by: string?) -> ExecutionResult {
+                   group_by: string?) {
         viz_templates: map<string, string> = {
             "bar": f"""
 import pandas as pd
@@ -1023,7 +1023,7 @@ print("Chart saved as chart_correlation.png")
     }
 
     // Run statistical tests
-    run_statistical_test(csv_path: string, test_type: string, col1: string, col2: string?) -> ExecutionResult {
+    run_statistical_test(csv_path: string, test_type: string, col1: string, col2: string?) {
         code = f"""
 import pandas as pd
 import numpy as np
@@ -1086,13 +1086,13 @@ class CodeInterpreter {
         this.data_helper = new DataAnalysisHelper(this.default_session!)
     }
 
-    create_session(session_name: string) -> SandboxEnvironment {
+    create_session(session_name: string) {
         let session = new SandboxEnvironment(config=this.config)
         this.active_sessions[session_name] = session
         return session
     }
 
-    execute_code(code: string, language?: string, session?: string) -> FormattedOutput {
+    execute_code(code: string, language?: string, session?: string) {
         let target_session = this.active_sessions[session ?? "default"] ?? this.default_session!
 
         let code_block = CodeBlock{
@@ -1105,45 +1105,45 @@ class CodeInterpreter {
     }
 
     // Convenience methods for common operations
-    run_python(code: string) -> FormattedOutput {
+    run_python(code: string) {
         return this.execute_code(code, "python")
     }
 
-    run_s(command: string) -> FormattedOutput {
+    run_s(command: string) {
         return this.execute_code(command, "s")
     }
 
-    run_shell(command: string) -> FormattedOutput {
+    run_shell(command: string) {
         return this.run_s(command)
     }
 
-    run_sql(query: string) -> FormattedOutput {
+    run_sql(query: string) {
         return this.execute_code(query, "sql")
     }
 
     // Data analysis helpers
-    analyze_csv(csv_path: string) -> FormattedOutput {
+    analyze_csv(csv_path: string) {
         let result = this.data_helper!.explore_dataset(csv_path)
         return this.formatter.format_for_llm(result)
     }
 
     plot_chart(csv_path: string, chart_type: string, x: string, y?: string,
-               group_by?: string) -> FormattedOutput {
+               group_by?: string) {
         let result = this.data_helper!.visualize_data(csv_path, chart_type, x, y, group_by)
         return this.formatter.format_for_llm(result)
     }
 
-    statistical_test(csv_path: string, test: string, col1: string, col2?: string) -> FormattedOutput {
+    statistical_test(csv_path: string, test: string, col1: string, col2?: string) {
         let result = this.data_helper!.run_statistical_test(csv_path, test, col1, col2)
         return this.formatter.format_for_llm(result)
     }
 
     // Session management
-    list_sessions() -> list<string> {
+    list_sessions() {
         return list(this.active_sessions.keys())
     }
 
-    get_session_summary(session_name: string) -> SessionSummary {
+    get_session_summary(session_name: string) {
         let session = this.active_sessions[session_name] ?? this.default_session!
         return session.get_session_state().get_summary()
     }
@@ -1165,11 +1165,11 @@ class CodeInterpreter {
 
 // ==================== English textfunctionEnglish texttest ====================
 
-function create_code_interpreter(config?: CodeInterpreterConfig) -> CodeInterpreter {
+function create_code_interpreter(config?: CodeInterpreterConfig) {
     return new CodeInterpreter(config=config)
 }
 
-function test_code_interpreter() -> bool {
+function test_code_interpreter() {
     print("🧪 Testing NEURX Code Interpreter...")
 
     ci = new CodeInterpreter()

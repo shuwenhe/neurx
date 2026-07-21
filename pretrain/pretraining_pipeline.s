@@ -329,7 +329,7 @@ func create_pretrain_state(config: pretrain_config) pretrain_state {
 func get_learning_rate(
     state: pretrain_state,
     step: int
-) -> float {
+) {
 
     pretrain_config cfg = state.config
 
@@ -365,7 +365,7 @@ func get_learning_rate(
 
 func sample_training_task(
     state: pretrain_state
-) -> pretrain_task_type {
+) {
 
     float rand_val = rand()
     float cumulative = 0.0
@@ -394,7 +394,7 @@ func prepare_clm_batch(
     tokenizer: tokenizer_state,
     batch_texts: []string,
     max_len: int
-) -> dict[str, any] {
+) {
     """
     English text CLM (Causal LM) batchdata
 
@@ -433,7 +433,7 @@ func prepare_mlm_batch(
     batch_texts: []string,
     max_len: int,
     mlm_probability: float = 0.15
-) -> dict[str, any] {
+) {
     """
     English text MLM (Masked LM) batchdata
 
@@ -497,7 +497,7 @@ func prepare_prefix_lm_batch(
     batch_continuations: []string, # continuation English text (English text)
     max_len: int,
     max_prefix_ratio: float = 0.7  # prefix English text
-) -> dict[str, any] {
+) {
     """
     English text PrefixLM batchdata
 
@@ -560,7 +560,7 @@ func train_step(
     batch: dict[str, any],
     scaler: GradScaler,
     rank: int = 0
-) -> float {
+) {
     """
     English textsteptraining
 
@@ -707,7 +707,7 @@ func evaluate(
     eval_dataloader: data_loader,
     tokenizer: tokenizer_state,
     max_eval_batches: int = 50
-) -> dict[str, float] {
+) {
     """
     English textevaluationmodel
 
@@ -1090,7 +1090,7 @@ func print_final_summary(pretrain_state state) {
 // ============================================================
 // toolfunction
 // ============================================================
-func format_duration(timedelta td) -> string {
+func format_duration(timedelta td) {
     int total_seconds = int(td.total_seconds())
     int days = total_seconds // 86400
     int hours = (total_seconds % 86400) // 3600
@@ -1108,7 +1108,7 @@ func format_duration(timedelta td) -> string {
 
 // English textGPUEnglish textuseEnglish text (MB)
 // English textfunctionEnglish textGPUEnglish textfunctionEnglish textuseEnglish text
-func get_gpu_memory_usage() -> float {
+func get_gpu_memory_usage() {
     """
     English textGPUEnglish textuseEnglish text(English text: MB)
     English textfloatEnglish text, English textuseEnglish textGPUEnglish text(MB)

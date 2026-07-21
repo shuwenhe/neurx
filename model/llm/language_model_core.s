@@ -819,7 +819,7 @@ func count_parameters(config: neurx_config) int {
 }
 
 // English text
-func format_number(num: int) -> string {
+func format_number(num: int) {
     if num >= 1_000_000_000_000:
         return "{num / 1_000_000_000}T"
     elif num >= 1_000_000_000:

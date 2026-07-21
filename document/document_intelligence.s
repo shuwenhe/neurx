@@ -168,7 +168,7 @@ class DocumentParser {
         }
     }
 
-    parse(file_path: string) -> ParsedDocument {
+    parse(file_path: string) {
         # Detect file format
         ext = get_file_extension(file_path).to_lower()
 
@@ -185,7 +185,7 @@ class DocumentParser {
         }
     }
 
-    parse_string(content: string, format_hint: string = "markdown") -> ParsedDocument {
+    parse_string(content: string, format_hint: string = "markdown") {
         match format_hint.to_lower() {
             "html" | "htm" => { return this.html_parser!.parse_string(content) }
             "md" | "markdown" => { return this.markdown_parser!.parse_string(content) }
@@ -196,7 +196,7 @@ class DocumentParser {
         }
     }
 
-    parse_batch(file_paths: list<string>) -> list<ParsedDocument> {
+    parse_batch(file_paths: list<string>) {
         results: list<ParsedDocument> = []
         for path in file_paths {
             try {
@@ -209,39 +209,39 @@ class DocumentParser {
         return results
     }
 
-    _parse_pdf(file_path: string) -> ParsedDocument {
+    _parse_pdf(file_path: string) {
         assert this.pdf_parser != null, "PDF parser not initialized"
         return this.pdf_parser!.parse(file_path)
     }
 
-    _parse_html(file_path: string) -> ParsedDocument {
+    _parse_html(file_path: string) {
         assert this.html_parser != null, "HTML parser not initialized"
         let content = read_text_file(file_path)
         return this.html_parser!.parse_string(content, source_url=file_path)
     }
 
-    _parse_markdown(file_path: string) -> ParsedDocument {
+    _parse_markdown(file_path: string) {
         assert this.markdown_parser != null, "Markdown parser not initialized"
         let content = read_text_file(file_path)
         return this.markdown_parser!.parse_string(content, source_path=file_path)
     }
 
-    _parse_docx(file_path: string) -> ParsedDocument {
+    _parse_docx(file_path: string) {
         assert this.office_parser != null, "Office parser not initialized"
         return this.office_parser!.parse_docx(file_path)
     }
 
-    _parse_pptx(file_path: string) -> ParsedDocument {
+    _parse_pptx(file_path: string) {
         assert this.office_parser != null, "Office parser not initialized"
         return this.office_parser!.parse_pptx(file_path)
     }
 
-    _parse_xlsx(file_path: string) -> ParsedDocument {
+    _parse_xlsx(file_path: string) {
         assert this.office_parser != null, "Office parser not initialized"
         return this.office_parser!.parse_xlsx(file_path)
     }
 
-    _parse_csv(file_path: string) -> ParsedDocument {
+    _parse_csv(file_path: string) {
         # CSV is simple - treat as single-table document
         data = read_csv_file(file_path)
         headers = data[0] if data.length > 0 else []
@@ -287,12 +287,12 @@ class DocumentParser {
         }
     }
 
-    _parse_plain_text(file_path: string) -> ParsedDocument {
+    _parse_plain_text(file_path: string) {
         content = read_text_file(file_path)
         return this._parse_plain_text_string(content, source_path=file_path)
     }
 
-    _parse_plain_text_string(content: string, source_path?: string) -> ParsedDocument {
+    _parse_plain_text_string(content: string, source_path?: string) {
         stats = compute_statistics(content)
 
         # Simple section splitting by double newlines
@@ -341,7 +341,7 @@ class PDFParser {
         this.config = config
     }
 
-    parse(file_path: string) -> ParsedDocument {
+    parse(file_path: string) {
         # Use PyMuPDF (fitz) or pdfplumber for high-quality extraction
         doc = open_pdf(file_path)
 
@@ -449,13 +449,13 @@ class PDFParser {
     }
 
     # Helper methods for PDF processing (would use actual libraries like fitz/pdfplumber)
-    extract_tables_from_pdf_page(page: any) -> list<ExtractedTable> {
+    extract_tables_from_pdf_page(page: any) {
         # Implementation would use camelot/tabula-py or pdfplumber's built-in table detection
         # Returns list of detected tables on the page
         return []  # Placeholder
     }
 
-    extract_image_from_pdf_block(doc: any, page_idx: int, image_block: map<string, any>) -> ExtractedImage? {
+    extract_image_from_pdf_block(doc: any, page_idx: int, image_block: map<string, any>) {
         # Extract image data from the PDF page at given coordinates
         return null  # Placeholder
     }
@@ -470,7 +470,7 @@ class HTMLParser {
         this.config = config
     }
 
-    parse_string(html_content: string, source_url?: string) -> ParsedDocument {
+    parse_string(html_content: string, source_url?: string) {
         # Parse HTML into DOM tree using BeautifulSoup/lxml
         soup = parse_html(html_content)
 
@@ -507,7 +507,7 @@ class HTMLParser {
         }
     }
 
-    _extract_metadata(soup: any, source_url?: string) -> DocumentMetadata {
+    _extract_metadata(soup: any, source_url?: string) {
         title = soup.title?.get_text().trim() ?? ""
 
         # Try to extract OpenGraph/Twitter card metadata
@@ -527,7 +527,7 @@ class HTMLParser {
         }
     }
 
-    _extract_main_content(soup: any) -> any {
+    _extract_main_content(soup: any) {
         # Heuristic-based main content extraction (similar to readability/Mozilla's Readability)
         candidates: list<{element: any, score: float}> = []
 
@@ -574,7 +574,7 @@ class HTMLParser {
         return soup.body ?? soup
     }
 
-    _convert_element(element: any, base_url?: string) -> ConversionResult {
+    _convert_element(element: any, base_url?: string) {
         sections: list<DocumentSection> = []
         tables: list<ExtractedTable> = []
         images: list<ExtractedImage> = []
@@ -701,7 +701,7 @@ class HTMLParser {
         }
     }
 
-    _extract_table(table_elem: any) -> TableConversionResult {
+    _extract_table(table_elem: any) {
         headers: list<string> = []
         rows: list<list<string>> = []
 
@@ -776,7 +776,7 @@ class MarkdownParser {
         this.config = config
     }
 
-    parse_string(markdown_content: string, source_path?: string) -> ParsedDocument {
+    parse_string(markdown_content: string, source_path?: string) {
         lines = markdown_content.split("\n")
 
         sections: list<DocumentSection> = []
@@ -955,7 +955,7 @@ class MarkdownParser {
         }
     }
 
-    parse_table_row(line: string) -> list<string> {
+    parse_table_row(line: string) {
         # Split by | and trim each cell
         parts = line.split("|").filter(p => p != null).map(p => p.trim())
         return parts
@@ -971,7 +971,7 @@ class OfficeDocumentParser {
         this.config = config
     }
 
-    parse_docx(file_path: string) -> ParsedDocument {
+    parse_docx(file_path: string) {
         # Use python-docx library
         doc = load_docx(file_path)
 
@@ -1073,7 +1073,7 @@ class OfficeDocumentParser {
         }
     }
 
-    parse_pptx(file_path: string) -> ParsedDocument {
+    parse_pptx(file_path: string) {
         # Use python-pptx
         pptx = load_pptx(file_path)
 
@@ -1121,7 +1121,7 @@ class OfficeDocumentParser {
         }
     }
 
-    parse_xlsx(file_path: string) -> ParsedDocument {
+    parse_xlsx(file_path: string) {
         # Use openpyxl or pandas
         wb = load_excel(file_path)
 
@@ -1175,7 +1175,7 @@ class OfficeDocumentParser {
 
 // ==================== helperfunction ====================
 
-function format_table_as_markdown(headers: list<string>, rows: list<list<string>>) -> string {
+function format_table_as_markdown(headers: list<string>, rows: list<list<string>>) {
     if headers.length == 0 { return "" }
 
     col_widths: list<int> = []
@@ -1213,7 +1213,7 @@ function format_table_as_markdown(headers: list<string>, rows: list<list<string>
     return header_line + "\n" + sep_line + "\n" + "\n".join(data_lines)
 }
 
-function compute_statistics(content: string) -> DocumentStatistics {
+function compute_statistics(content: string) {
     char_count = content.length
     word_count = len(content.split_whitespace())
     line_count = content.count("\n") + 1
@@ -1231,34 +1231,34 @@ function compute_statistics(content: string) -> DocumentStatistics {
     }
 }
 
-function clean_whitespace(text: string) -> string {
+function clean_whitespace(text: string) {
     # Collapse multiple whitespace characters into single space
     return regex.sub(r'\s+', ' ', text).strip()
 }
 
-function get_file_extension(path: string) -> string {
+function get_file_extension(path: string) {
     dot_idx = path.rfind(".")
     if dot_idx >= 0 && dot_idx < path.length - 1:
         return path[dot_idx + 1:].to_lower()
     return ""
 }
 
-function generate_uuid() -> string {
+function generate_uuid() {
     import uuid
     return str(uuid.uuid4())
 }
 
-def generate_short_uuid() -> string {
+def generate_short_uuid() {
     import uuid, shortuuid
     return shortuuid.uuid()[:8]
 
 // ==================== English textfunctionEnglish texttest ====================
 
-function create_document_parser(config?: DocumentParserConfig) -> DocumentParser {
+function create_document_parser(config?: DocumentParserConfig) {
     return new DocumentParser(config=config)
 }
 
-function test_document_parser() -> bool {
+function test_document_parser() {
     print("🧪 Testing NEURX document Parser...")
 
     parser = new DocumentParser()

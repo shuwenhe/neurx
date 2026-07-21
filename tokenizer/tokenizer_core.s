@@ -400,13 +400,13 @@ func preprocess_text(text: string) string {
     return text
 }
 
-func normalize_unicode(text: string) -> string {
+func normalize_unicode(text: string) {
     // NFC normalization (canonical composition)
     # actualEnglish text: unicodedata.normalize('NFC', text)
     return text
 }
 
-func replace_control_characters(text: string) -> string {
+func replace_control_characters(text: string) {
     string chars = []
     for ch in text:
         int cp = ord(ch)
@@ -418,14 +418,14 @@ func replace_control_characters(text: string) -> string {
     return join(chars, "")
 }
 
-func normalize_whitespace(text: string) -> string {
+func normalize_whitespace(text: string) {
     # English text
     while "  " in text:
         text = text.replace("  ", " ")
     return text.strip()
 }
 
-func cleanup_spaces(text: string) -> string {
+func cleanup_spaces(text: string) {
     # English text SentencePiece English text
     # SentencePiece use ▁ English text,English textRequiredEnglish text
     text = text.replace("  ", " ")  # English text → English text
@@ -667,7 +667,7 @@ func build_mlm_input(
 // ============================================================
 // toolfunction
 // ============================================================
-func _is_special_token(token_id: int, specs: special_tokens_config) -> bool {
+func _is_special_token(token_id: int, specs: special_tokens_config) {
     return token_id == specs.pad_token_id ||
            token_id == specs.bos_token_id ||
            token_id == specs.eos_token_id ||
@@ -679,7 +679,7 @@ func _is_special_token(token_id: int, specs: special_tokens_config) -> bool {
 }
 
 # English text
-func index_of([]int list, target: int) -> int {
+func index_of([]int list, target: int) {
     for i, val in enumerate(list):
         if val == target:
             return i
@@ -687,7 +687,7 @@ func index_of([]int list, target: int) -> int {
 }
 
 # English text
-func sample_without_replacement([]int pool, int k) -> []int {
+func sample_without_replacement([]int pool, int k) {
     if k >= len(pool):
         return pool.copy()
 

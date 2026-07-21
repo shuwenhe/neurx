@@ -211,15 +211,15 @@ class ToolRegistry {
             this.executors.remove(tool_name)
         }
 
-    get(tool_name: string) -> ToolDefinition? {
+    get(tool_name: string) {
         return this.tools.get(tool_name)
     }
 
-    get_executor(tool_name: string) -> ToolExecutor? {
+    get_executor(tool_name: string) {
         return this.executors.get(tool_name)
     }
 
-    list_tools(category?: string, tag?: string) -> list<ToolDefinition> {
+    list_tools(category?: string, tag?: string) {
         results: list<ToolDefinition> = []
 
         for name, defn in this.tools {
@@ -233,7 +233,7 @@ class ToolRegistry {
         return results
     }
 
-    search(query: string) -> list<ToolDefinition> {
+    search(query: string) {
         # Fuzzy search for tools matching query
         query_terms = set(query.to_lower().split())
         scored: list<tuple<ToolDefinition, float>> = []
@@ -265,7 +265,7 @@ class ToolRegistry {
         return [s[0] for s in scored]
     }
 
-    get_definitions_for_llm() -> list<map<string, any>> {
+    get_definitions_for_llm() {
         # Convert to LLM-friendly format (NeurX function calling style)
         result: list<map<string, any>> = []
 
@@ -284,7 +284,7 @@ class ToolRegistry {
         return result
     }
 
-    get_statistics() -> RegistryStatistics {
+    get_statistics() {
         return RegistryStatistics{
             total_tools=len(this.tools),
             categories={k: len(v) for k, v in this.categories.items()},
@@ -304,9 +304,9 @@ struct RegistryStatistics {
 // ==================== toolEnglish text ====================
 
 interface ToolExecutor {
-    execute(arguments: map<string, any>) -> ToolCallResult
-    get_name() -> string
-    validate_arguments(args: map<string, any>, schema: ParameterSchema) -> ValidationReport
+    execute(arguments: map<string, any>)
+    get_name()
+    validate_arguments(args: map<string, any>, schema: ParameterSchema)
 }
 
 struct ValidationReport {
@@ -333,7 +333,7 @@ class FunctionCallingEngine {
         this.call_tracker = new CallTracker()
     }
 
-    async process_user_request(user_message: string, available_tools?: list<ToolDefinition>) -> FunctionCallingResponse {
+    async process_user_request(user_message: string, available_tools?: list<ToolDefinition>) {
         total_start = current_time_millis()
 
         if this.config.verbose_logging:
@@ -385,7 +385,7 @@ class FunctionCallingEngine {
         return response
     }
 
-    async _single_stepExecution(user_msg: UserMessage, tools?: list<ToolDefinition>) -> FunctionCallingResponse {
+    async _single_stepExecution(user_msg: UserMessage, tools?: list<ToolDefinition>) {
         """Execute at most one round of tool calls, then generate final response."""
 
         # Step 1: Get LLM decision on whether to call tools and which ones
@@ -431,7 +431,7 @@ class FunctionCallingEngine {
         }
     }
 
-    async _multi_step_execution(user_msg: UserMessage, tools?: list<ToolDefinition>, max_rounds: int = 10) -> FunctionCallingResponse {
+    async _multi_step_execution(user_msg: UserMessage, tools?: list<ToolDefinition>, max_rounds: int = 10) {
         """Allow multiple rounds of tool calls until task completion."""
 
         tool_defs = tools ?? this.registry.list_tools()
@@ -494,14 +494,14 @@ class FunctionCallingEngine {
         }
     }
 
-    async _agent_loop_execution(user_msg: UserMessage, tools?: list<ToolDefinition>) -> FunctionCallingResponse {
+    async _agent_loop_execution(user_msg: UserMessage, tools?: list<ToolDefinition>) {
         """Full agent loop with planning, reflection, and self-correction capabilities."""
 
         # This would implement a more sophisticated loop similar to ReAct or Plan-and-Solve
         # For now, delegate to multi-step as a base implementation
         return await this._multi_step_execution(user_msg, tools)
 
-    async _auto_execution(user_msg: UserMessage, tools?: list<ToolDefinition>) -> FunctionCallingResponse {
+    async _auto_execution(user_msg: UserMessage, tools?: list<ToolDefinition>) {
         # Heuristic: simple queries likely don't need tools, complex ones might
         query_complexity = estimate_query_complexity(user_msg.content as string)
 
@@ -511,7 +511,7 @@ class FunctionCallingEngine {
             return await this._multi_step_execution(user_msg, tools)
     }
 
-    async _call_llm_with_tools(messages: list<any>, tools: list<ToolDefinition>) -> LLMRawResponse {
+    async _call_llm_with_tools(messages: list<any>, tools: list<ToolDefinition>) {
         """Make LLM API call with tool definitions."""
 
         tool_schemas = [serialize_for_llm(t) for t in tools]
@@ -527,7 +527,7 @@ class FunctionCallingEngine {
 
         return response
 
-    async _execute_tool_calls(calls: list<ToolCall>) -> list<ToolCall> {
+    async _execute_tool_calls(calls: list<ToolCall>) {
         """Execute multiple tool calls with dependency resolution and parallelism."""
 
         # Step 1: Parse arguments and validate
@@ -621,7 +621,7 @@ class FunctionCallingEngine {
         return all_results
     }
 
-    async _execute_single_call(call: ToolCall) -> ToolCall {
+    async _execute_single_call(call: ToolCall) {
         """Execute a single tool call with error handling and retries."""
 
         call.start_time = current_time()
@@ -687,7 +687,7 @@ class FunctionCallingEngine {
         this.call_tracker.reset()
     }
 
-    get_conversation_summary() -> ConversationSummary {
+    get_conversation_summary() {
         return ConversationSummary{
             total_messages=len(this.conversation_history),
             user_messages=sum(1 for m in this.conversation_history if m.role == "user"),
@@ -746,14 +746,14 @@ class CallTracker {
         this.parallel_batch_count = 0
         this.tools_used.clear()
 
-    get_recent_calls(count: int = 10) -> list<ToolCall> {
+    get_recent_calls(count: int = 10) {
         return this.history[-min(count, len(this.history)):]
     }
 }
 
 // ==================== English texttoolEnglish text ====================
 
-function create_builtin_web_search_tool() -> tuple<ToolDefinition, ToolExecutor> {
+function create_builtin_web_search_tool() {
     defn = ToolDefinition{
         name="web_search",
         description="Search the internet for current information, news, facts, or answers to questions. Useful when you need up-to-date data that may not be in training data.",
@@ -782,7 +782,7 @@ function create_builtin_web_search_tool() -> tuple<ToolDefinition, ToolExecutor>
     return (defn, executor)
 }
 
-function create_builtin_code_executor_tool() -> tuple<ToolDefinition, ToolExecutor> {
+function create_builtin_code_executor_tool() {
     defn = ToolDefinition{
         name="code_interpreter",
         description="Execute Python/JavaScript/Shell code in a sandboxed environment. Useful for calculations, data analysis, file operations, running scripts, and testing code snippets.",
@@ -812,7 +812,7 @@ function create_builtin_code_executor_tool() -> tuple<ToolDefinition, ToolExecut
     return (defn, executor)
 }
 
-function create_builtin_file_operations_tool() -> tuple<ToolDefinition, ToolExecutor> {
+function create_builtin_file_operations_tool() {
     defn = ToolDefinition{
         name="file_operations",
         description="Read, write, create, delete files and directories. Supports various file formats.",
@@ -850,15 +850,15 @@ function create_builtin_file_operations_tool() -> tuple<ToolDefinition, ToolExec
 
 // Executor implementations (simplified stubs - real implementations would use actual services)
 class WebSearchExecutor implements ToolExecutor {
-    get_name() -> string { return "web_search" }
+    get_name() { return "web_search" }
 
-    validate_arguments(args, schema) -> ValidationReport {
+    validate_arguments(args, schema) {
         if "query" not in args:
             return ValidationReport{is_valid=false, missing_params=["query"], invalid_params=[], warnings=[]}
         return ValidationReport{is_valid=true, missing_params=[], invalid_params=[], warnings=[]}
     }
 
-    async execute(args) -> ToolCallResult {
+    async execute(args) {
         // Would integrate with a search service
         mock_results = [
             {"title": f"Result for: {args['query']}", "url": "https://example.com", "snippet": "This is search result content..."}
@@ -873,15 +873,15 @@ class WebSearchExecutor implements ToolExecutor {
 }
 
 class CodeInterpreterExecutor implements ToolExecutor {
-    get_name() -> string { return "code_interpreter" }
+    get_name() { return "code_interpreter" }
 
-    validate_arguments(args, schema) -> ValidationReport {
+    validate_arguments(args, schema) {
         if "code" not in args:
             return ValidationReport{is_valid=false, missing_params=["code"], invalid_params=[], warnings=[]}
         return ValidationReport{is_valid=true, missing_params=[], invalid_params=[], warnings=[]}
     }
 
-    async execute(args) -> ToolCallResult {
+    async execute(args) {
         # Would use actual code interpreter service
         return ToolCallResult{
             success=true,
@@ -892,15 +892,15 @@ class CodeInterpreterExecutor implements ToolExecutor {
 }
 
 class FileOperationsExecutor implements ToolExecutor {
-    get_name() -> string { return "file_operations" }
+    get_name() { return "file_operations" }
 
-    validate_arguments(args, schema) -> ValidationReport {
+    validate_arguments(args, schema) {
         required = ["action", "path"]
         missing = [r for r in required if r not in args]
         return ValidationReport{is_valid=missing.empty(), missing_params=missing, invalid_params=[], warnings=[]}
     }
 
-    async execute(args) -> ToolCallResult {
+    async execute(args) {
         action = args["action"]
         path = args["path"]
 
@@ -934,7 +934,7 @@ class FileOperationsExecutor implements ToolExecutor {
 
 // ==================== English textfunctionEnglish texttest ====================
 
-function create_function_calling_engine(llm_client: any, config?: FunctionCallingConfig) -> FunctionCallingEngine {
+function create_function_calling_engine(llm_client: any, config?: FunctionCallingConfig) {
     engine = new FunctionCallingEngine(llm_client=llm_client, config=config)
 
     # Register built-in tools
@@ -950,7 +950,7 @@ function create_function_calling_engine(llm_client: any, config?: FunctionCallin
     return engine
 }
 
-async function test_function_calling() -> bool {
+async function test_function_calling() {
     print("🧪 Testing NEURX FUNCTION Calling System...")
 
     # Create mock LLM client
@@ -1021,7 +1021,7 @@ async function test_function_calling() -> bool {
 class MockLLMClientForFC {
     call_count: int = 0
 
-    async chat.completions.create(model, messages, tools, tool_choice, temperature, max_tokens) -> LLMRawResponse {
+    async chat.completions.create(model, messages, tools, tool_choice, temperature, max_tokens) {
         this.call_count += 1
 
         # Simulate different responses based on call count

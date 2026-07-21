@@ -91,15 +91,15 @@ struct RetrievalMetadata {
 // ==================== English textdataEnglish text ====================
 
 interface VectorDBInterface {
-    init(config: retrieval_system_config) -> void
-    insert(chunks: list<DocumentChunk>) -> void                           // English text
-    delete(chunk_ids: list<string>) -> void                               # English text
-    search(query_embedding: tensor, top_k: int) -> list<SearchResultItem>  // English textsearch
-    save(path: string) -> void                                           // English text
-    load(path: string) -> void                                           // English textload
-    count() -> int                                                       // English text
-    clear() -> void                                                      # English textdata
-    get_status() -> DBStatus                                             // English textdataEnglish textstateinformation
+    init(config: retrieval_system_config)
+    insert(chunks: list<DocumentChunk>)
+    delete(chunk_ids: list<string>)
+    search(query_embedding: tensor, top_k: int)
+    save(path: string)
+    load(path: string)
+    count()
+    clear()
+    get_status()
 }
 
 struct SearchResultItem {
@@ -153,7 +153,7 @@ class InMemoryVectorDB implements VectorDBInterface {
         this.last_updated = current_timestamp()
     }
 
-    search(query_embedding: tensor, top_k: int) -> list<SearchResultItem> {
+    search(query_embedding: tensor, top_k: int) {
         results: list<SearchResultItem> = []
 
         for chunk_id, doc_emb in this.embeddings {
@@ -204,7 +204,7 @@ class InMemoryVectorDB implements VectorDBInterface {
         this.last_updated = data["last_updated"]
     }
 
-    count() -> int {
+    count() {
         return this.documents.size()
     }
 
@@ -214,7 +214,7 @@ class InMemoryVectorDB implements VectorDBInterface {
         this.index_built = false
     }
 
-    get_status() -> DBStatus {
+    get_status() {
         total_mem = sum(emb.numel() * emb.element_size() for emb in this.embeddings.values())
         return DBStatus{
             total_documents=this.count(),
@@ -338,7 +338,7 @@ class FAISSVectorDB implements VectorDBInterface {
         }
     }
 
-    search(query_embedding: tensor, top_k: int) -> list<SearchResultItem> {
+    search(query_embedding: tensor, top_k: int) {
         // Ensure query is 2D: [1, dim]
         if query_embedding.ndim == 1 {
             query_embedding = query_embedding.unsqueeze(0)
@@ -403,7 +403,7 @@ class FAISSVectorDB implements VectorDBInterface {
         this.is_trained = true
     }
 
-    count() -> int {
+    count() {
         return this.index.ntotal
     }
 
@@ -413,7 +413,7 @@ class FAISSVectorDB implements VectorDBInterface {
         this.next_id = 0
     }
 
-    get_status() -> DBStatus {
+    get_status() {
         mem_bytes = faiss.index_memory_size(this.index) ?? 0
         return DBStatus{
             total_documents=this.count(),
@@ -475,7 +475,7 @@ class EmbeddingService {
             this.model.to(device="cuda")
     }
 
-    embed(texts: list<string>) -> list<tensor> {
+    embed(texts: list<string>) {
         embeddings: list<tensor> = []
 
         # Process in batches
@@ -519,12 +519,12 @@ class EmbeddingService {
         return embeddings
     }
 
-    embed_single(text: string) -> tensor {
+    embed_single(text: string) {
         results = this.embed([text])
         return results[0]
     }
 
-    _compute_embeddings(texts: list<string>) -> list<tensor> {
+    _compute_embeddings(texts: list<string>) {
         # Tokenize
         encoded = this.tokenizer(
             texts,
@@ -575,7 +575,7 @@ class LRUCache<K, V> {
         this.capacity = capacity
         this.cache = new OrderedMap<K, V>()
 
-    __getitem__(key: K) -> V {
+    __getitem__(key: K) {
         if key not in this.cache {
             raise KeyError(key)
         # Move to end (most recently used)
@@ -592,10 +592,10 @@ class LRUCache<K, V> {
             this.cache.popitem(last=false)
         this.cache[key] = value
 
-    __contains__(key: K) -> bool {
+    __contains__(key: K) {
         return key in this.cache
 
-    size() -> int {
+    size() {
         return this.cache.size()
     }
 }
@@ -614,7 +614,7 @@ class DocumentProcessor {
         )
     }
 
-    process_document(content: string, metadata: DocumentMetadata) -> list<DocumentChunk> {
+    process_document(content: string, metadata: DocumentMetadata) {
         // Split into chunks
         raw_chunks = this.splitter.split_text(content)
 
@@ -633,7 +633,7 @@ class DocumentProcessor {
         return chunks
     }
 
-    process_documents(documents: list<{content: string, metadata: DocumentMetadata}>) -> list<DocumentChunk> {
+    process_documents(documents: list<{content: string, metadata: DocumentMetadata}>) {
         all_chunks: list<DocumentChunk> = []
         for doc in documents {
             let chunks = this.process_document(doc.content, doc.metadata)
@@ -655,11 +655,11 @@ class RecursiveCharacterTextSplitter {
         this.separators = ["\n\n", "\n", ". ", ".", " ", ""]
     }
 
-    split_text(text: string) -> list<string> {
+    split_text(text: string) {
         return this._recursive_split(text, this.separators)
     }
 
-    _recursive_split(text: string, separators: list<string>) -> list<string> {
+    _recursive_split(text: string, separators: list<string>) {
         if separators.length == 0 {
             # Final fallback: split by character
             return this._split_by_length(text)
@@ -703,7 +703,7 @@ class RecursiveCharacterTextSplitter {
         return chunks
     }
 
-    _split_by_length(text: string) -> list<string> {
+    _split_by_length(text: string) {
         chunks: list<string> = []
         start = 0
         while start < text.length {
@@ -729,7 +729,7 @@ class QueryExpander {
         this.enabled = enabled
     }
 
-    expand(query: string, num_expansions: int = 3) -> QueryExpansionResult {
+    expand(query: string, num_expansions: int = 3) {
         if !this.enabled {
             return QueryExpansionResult{original=query, expanded=[]}
         }
@@ -769,7 +769,7 @@ Expanded queries:
         return QueryExpansionResult{original=query, expanded=[]}
     }
 
-    _simple_expand(query: string, num: int) -> list<string> {
+    _simple_expand(query: string, num: int) {
         # Basic expansion using rules/synonyms (fallback when LLM unavailable)
         synonyms_map: map<string, list<string>> = {
             "how": ["English text", "English text", "English text"],
@@ -853,7 +853,7 @@ class BM25Retriever {
         this.avg_doc_len = total_len / this.corpus.length if this.corpus.length > 0 else 1.0
     }
 
-    search(query: string, top_k: int) -> list<BM25Result> {
+    search(query: string, top_k: int) {
         query_tokens = this._tokenize(query.lower())
         scores: list<tuple<int, float>> = []
 
@@ -878,7 +878,7 @@ class BM25Retriever {
         return results
     }
 
-    _score_bm25(query_tokens: list<string>, doc_idx: int) -> float {
+    _score_bm25(query_tokens: list<string>, doc_idx: int) {
         doc_tf = this.tf[doc_idx]
         doc_len = sum(doc_tf.values())  # Total terms in document
 
@@ -902,7 +902,7 @@ class BM25Retriever {
         return score
     }
 
-    _tokenize(text: string) -> list<string> {
+    _tokenize(text: string) {
         # Simple tokenization (in production, use jieba for Chinese)
         return text.split_whitespace()
             .map(t => t.strip_punctuation().lower())
@@ -933,7 +933,7 @@ class CrossEncoderReranker {
         this.model.to(device=this.device)
     }
 
-    rerank(query: string, candidates: list<DocumentChunk>, top_k: int) -> list<RerankedResult> {
+    rerank(query: string, candidates: list<DocumentChunk>, top_k: int) {
         if candidates.length == 0 { return [] }
 
         # Prepare query-document pairs
@@ -1001,7 +1001,7 @@ class HybridFusionEngine {
 
     fuse(vector_results: list<SearchResultItem>,
          bm25_results: list<BM25Result>,
-         top_k: int) -> list<FusedResult> {
+         top_k: int) {
 
         match this.normalization_method {
             "rrf" => {
@@ -1022,7 +1022,7 @@ class HybridFusionEngine {
     _reciprocal_rank_fusion(vector_results: list<SearchResultItem>,
                             bm25_results: list<BM25Result>,
                             top_k: int,
-                            k_constant: int = 60) -> list<FusedResult> {
+                            k_constant: int = 60) {
         # RRF: score = Σ(1 / (k + rank_i))
         scores: map<string, float> = {}  # chunk_id -> fused_score
 
@@ -1049,7 +1049,7 @@ class HybridFusionEngine {
 
     _weighted_average_fusion(vector_results: list<SearchResultItem>,
                              bm25_results: list<BM25Result>,
-                             top_k: int) -> list<FusedResult> {
+                             top_k: int) {
         # Need normalized scores for fair comparison
         vec_scores: map<string, float> = {}
         kw_scores: map<string, float> = {}
@@ -1097,7 +1097,7 @@ class HybridFusionEngine {
 
     _normalized_score_fusion(vector_results: list<SearchResultItem>,
                              bm25_results: list<BM25Result>,
-                             top_k: int) -> list<FusedResult> {
+                             top_k: int) {
         # Similar to weighted average but uses z-score normalization
         # Implementation omitted for brevity (similar logic to above)
         return this._weighted_average_fusion(vector_results, bm25_results, top_k)
@@ -1170,7 +1170,7 @@ class RetrievalEngine {
 
     // === Core API Methods ===
 
-    ingest(documents: list<{content: string, metadata: DocumentMetadata}>, compute_embeddings: bool = true) -> IngestionReport {
+    ingest(documents: list<{content: string, metadata: DocumentMetadata}>, compute_embeddings: bool = true) {
         start_time = current_time_millis()
 
         // Step 1: Process documents (chunking)
@@ -1209,7 +1209,7 @@ class RetrievalEngine {
         }
     }
 
-    retrieve(query: string, top_k?: int) -> SearchResult {
+    retrieve(query: string, top_k?: int) {
         effective_top_k = top_k ?? this.config.top_k
         start_total = current_time_millis()
 
@@ -1306,7 +1306,7 @@ class RetrievalEngine {
         }
     }
 
-    generate_context_for_llm(search_result: SearchResult, max_tokens?: int) -> string {
+    generate_context_for_llm(search_result: SearchResult, max_tokens?: int) {
         effective_max_tokens = max_tokens ?? this.config.max_context_tokens
 
         context_parts: list<string> = []
@@ -1335,7 +1335,7 @@ class RetrievalEngine {
         }
     }
 
-    get_statistics() -> RAGStatistics {
+    get_statistics() {
         return RAGStatistics{
             total_documents=this.vector_db.count(),
             db_status=this.vector_db.get_status(),
@@ -1384,11 +1384,11 @@ struct RAGStatistics {
 
 // ==================== English textfunctionEnglish texttest ====================
 
-function create_retrieval_system(config?: retrieval_system_config, llm_client?: any) -> RetrievalEngine {
+function create_retrieval_system(config?: retrieval_system_config, llm_client?: any) {
     return new RetrievalEngine(config=config ?? new retrieval_system_config(), llm_client=llm_client)
 }
 
-function test_retrieval_system() -> bool {
+function test_retrieval_system() {
     print("🧪 Testing NEURX RAG System...")
 
     cfg = retrieval_system_config(vector_db_backend="in_memory", vector_dim=128, enable_reranking=false, enable_query_expansion=false)

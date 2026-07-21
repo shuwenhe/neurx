@@ -131,7 +131,7 @@ func float_to_e5m2(float x) int {
     (biased_exp << 2) | mant_bits
 }
 
-// FP8 (E4M3) -> Float32
+// FP8 (E4M3)
 func e4m3_to_float(int fp8) float {
     int sign = (fp8 >> 7) & 1
     int exp = (fp8 >> 3) & 0xF
@@ -153,7 +153,7 @@ func e4m3_to_float(int fp8) float {
     val
 }
 
-// FP8 (E5M2) -> Float32
+// FP8 (E5M2)
 func e5m2_to_float(int fp8) float {
     int sign = (fp8 >> 7) & 1
     int exp = (fp8 >> 2) & 0x1F

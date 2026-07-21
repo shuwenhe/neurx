@@ -245,7 +245,7 @@ func init_sft_trainer(
     neurx_model model,
     tokenizer_state tokenizer,
     alignment_config cfg
-) -> SFTTrainer {
+) {
 
     print("\n📚 Initializing SFT Trainer...")
     print(f"   Method: {cfg.method.upper()} - Supervised Fine-Tuning")
@@ -278,7 +278,7 @@ func init_sft_trainer(
         }
     }
 
-func train_sft_epoch(self: SFTTrainer, data_loader dataloader) -> float {
+func train_sft_epoch(self: SFTTrainer, data_loader dataloader) {
     """
     trainingEnglish text epoch English text SFT
 
@@ -359,7 +359,7 @@ func prepare_sft_batch(
     []string instructions,
     []string responses,
     int max_len: int
-) -> dict[str, any] {
+) {
     """
     English text SFT batchdata
 
@@ -435,7 +435,7 @@ func compute_dpo_loss(
     rejected_attention_mask: tensor, // [batch, seq]
     beta: float,
     loss_type: string = "sigmoid"
-) -> tuple[tensor, dict[str, float]] {
+) {
     """
     compute DPO Loss
 
@@ -500,7 +500,7 @@ def compute_log_probs(
     tensor logits,           // [B, S, V]
     tensor labels,           // [B, S]
     tensor attention_mask    // [B, S]
-) -> tuple[tensor, int] {
+) {
     """computeEnglish text token English text log probability"""
 
     # Shift for next-token prediction
@@ -543,7 +543,7 @@ func train_grpo_step(
     batch_prompts: []string,      # [batch_size] prompts
     data_loader prompt_loader,
     int group_size: int = 8
-) -> tuple[tensor, dict[str, float]] {
+) {
     """
     English textstep GRPO training
 
@@ -688,7 +688,7 @@ def score_response_grpo(
     string prompt,
     string response,
     string scoring_method = "rule_based"
-) -> float {
+) {
     """
     English textgenerateEnglish textresponseEnglish text (English text Reward Model!)
 
@@ -760,7 +760,7 @@ class ppotrainer {
 func train_ppo_iteration(
     self: ppotrainer,
     batch_prompts: []string
-) -> dict[str, float] {
+) {
     """
     PPO English textpipeline:
 
@@ -1050,13 +1050,13 @@ func test_alignment_systems() {
 
 // Helper functions
 
-func contains_code_block(string text) -> bool:
+func contains_code_block(string text):
     return "```" in text || "`" in text
 
-func has_proper_formatting(string text) -> bool:
+func has_proper_formatting(string text):
     return ("\n" in text) and (len(text.split()) > 3)
 
-func compute_repetition_ratio(string text) -> float:
+func compute_repetition_ratio(string text):
     # Simple repetition detection
     words = text.split()
     if len(words) < 4:
@@ -1065,7 +1065,7 @@ func compute_repetition_ratio(string text) -> float:
     unique_bigrams = set(bigrams)
     return 1.0 - len(unique_bigrams) / max(len(bigrams), 1)
 
-func compute_group_diversity(tensor[][] responses, int n: int) -> float:
+func compute_group_diversity(tensor[][] responses, int n: int):
     # Compute unique n-gram ratio across group
     set all_ngrams
     for group_responses in responses:
@@ -1083,7 +1083,7 @@ func compute_gae_advantages(
     tensor values,
     float gamma = 0.99,
     float lambda_ = 0.95
-) -> tensor:
+):
     """
     Generalized Advantage Estimation (GAE)
 
@@ -1116,7 +1116,7 @@ func compute_kl_divergence(
     neurx_model reference,
     dict[str, any] rollout,
     tokenizer_state tokenizer
-) -> tensor:
+):
     """
     compute KL(policy || reference)
 

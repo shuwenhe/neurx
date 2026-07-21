@@ -162,7 +162,7 @@ class OutlinePlanner {
         this.llm_client = llm_client
     }
 
-    async create_plan(topic: string, requirements?: string, existing_outline?: OutlineNode) -> WritingPlan {
+    async create_plan(topic: string, requirements?: string, existing_outline?: OutlineNode) {
         start_time = current_time_millis()
 
         print(f"📋 Creating outline for: {topic}")
@@ -203,7 +203,7 @@ class OutlinePlanner {
         return plan
     }
 
-    _build_planning_prompt(topic: string, requirements?: string, existing_outline?: OutlineNode) -> string {
+    _build_planning_prompt(topic: string, requirements?: string, existing_outline?: OutlineNode) {
         detail_instructions = match this.config.outline_detail_level {
             "brief" => """
 Provide a high-level outline with main sections only (2-3 levels deep).
@@ -295,7 +295,7 @@ IMPORTANT:
 Now create the outline:"""
     }
 
-    _parse_outline(llm_response_text: string, topic: string) -> OutlineNode {
+    _parse_outline(llm_response_text: string, topic: string) {
         # Extract JSON from response (handle potential markdown code blocks)
         json_str = extract_json_from_text(llm_response_text)
 
@@ -307,7 +307,7 @@ Now create the outline:"""
             return this._fallback_parse_outline(llm_response_text, topic)
     }
 
-    _fallback_parse_outline(text: string, topic: string) -> OutlineNode {
+    _fallback_parse_outline(text: string, topic: string) {
         # Parse text-based outline (markdown-style headings)
         lines = text.split("\n")
         root = OutlineNode{
@@ -376,7 +376,7 @@ class ContentGenerator {
             this.quality_checker = new QualityChecker(config=config, llm_client=llm_client)
     }
 
-    async generate_section(section: OutlineNode, context: GenerationContext) -> GeneratedSection {
+    async generate_section(section: OutlineNode, context: GenerationContext) {
         start_time = current_time_millis()
 
         print(f"✍️ Generating: {section.title} ({section.id})")
@@ -428,7 +428,7 @@ class ContentGenerator {
         return generated
     }
 
-    _build_generation_prompt(section: OutlineNode, context: GenerationContext) -> string {
+    _build_generation_prompt(section: OutlineNode, context: GenerationContext) {
         # Get previous and next sibling sections for continuity
         prev_context = get_previous_sibling_content(context.full_outline, section.id)
         next_hint = get_next_sibling_title(context.full_outline, section.id)
@@ -503,7 +503,7 @@ Now write the content for "{section.title}":
 """
     }
 
-    _get_temperature_for_section(section: OutlineNode) -> float {
+    _get_temperature_for_section(section: OutlineNode) {
         # Adjust creativity based on section type
         lower_title = section.title.to_lower()
 
@@ -517,7 +517,7 @@ Now write the content for "{section.title}":
             return 0.7  # Default moderate creativity
     }
 
-    _post_process(raw_text: string, section: OutlineNode) -> PostProcessResult {
+    _post_process(raw_text: string, section: OutlineNode) {
         changes: list<string> = []
         processed = raw_text
 
@@ -576,7 +576,7 @@ class QualityChecker {
         this.llm_client = llm_client
     }
 
-    async check(generated: GeneratedSection, context: GenerationContext) -> QualityCheckResult {
+    async check(generated: GeneratedSection, context: GenerationContext) {
         prompt = f"""You are a strict editor evaluating the quality of a written document section.
 
 ## Section to Evaluate
@@ -644,7 +644,7 @@ class QualityChecker {
         return result
     }
 
-    async check_coherence_between_sections(prev: GeneratedSection?, curr: GeneratedSection, next_preview?: string) -> CoherenceCheckResult {
+    async check_coherence_between_sections(prev: GeneratedSection?, curr: GeneratedSection, next_preview?: string) {
         # Check transition quality between consecutive sections
 
         prev_summary = summarize_section(prev.processed_text, max_words=50) if prev != None else "[START OF DOCUMENT]"
@@ -712,7 +712,7 @@ class LongWriterEngine {
         this.documents_history = []
     }
 
-    async write_document(topic: string, requirements?: string) -> LongDocument {
+    async write_document(topic: string, requirements?: string) {
         total_start = current_time_millis()
         api_calls = 0
         errors = []
@@ -839,7 +839,7 @@ class LongWriterEngine {
         return doc
     }
 
-    async revise_section(document: LongDocument, section_id: string, feedback?: string) -> LongDocument {
+    async revise_section(document: LongDocument, section_id: string, feedback?: string) {
         """Revise a specific section of an existing document."""
         section_to_revise = find_section_by_id(document.plan.outline, section_id)
 
@@ -868,7 +868,7 @@ class LongWriterEngine {
         return document
     }
 
-    export(document: LongDocument, output_format?: string, file_path?: string) -> string {
+    export(document: LongDocument, output_format?: string, file_path?: string) {
         fmt = output_format ?? this.config.output_format
 
         match fmt {
@@ -884,7 +884,7 @@ class LongWriterEngine {
 
 // ==================== helperfunction ====================
 
-function flatten_outline(root: OutlineNode) -> list<OutlineNode> {
+function flatten_outline(root: OutlineNode) {
     result: list<OutlineNode> = []
 
     def traverse(node: OutlineNode) {
@@ -898,12 +898,12 @@ function flatten_outline(root: OutlineNode) -> list<OutlineNode> {
     return result
 }
 
-function get_max_depth(root: OutlineNode) -> int {
+function get_max_depth(root: OutlineNode) {
     if root.children.empty():
         return root.level
     return max(get_max_depth(c) for c in root.children)
 
-function estimate_total_words(root: OutlineNode) -> int {
+function estimate_total_words(root: OutlineNode) {
     if root.estimated_words != None:
         base = root.estimated_words!
     else:
@@ -955,11 +955,11 @@ function print_generation_summary(doc: LongDocument) {
 
 // ==================== English textfunctionEnglish texttest ====================
 
-function create_long_writer(config?: LongWriterConfig, llm_client: any) -> LongWriterEngine {
+function create_long_writer(config?: LongWriterConfig, llm_client: any) {
     return new LongWriterEngine(config=config ?? new LongWriterConfig(), llm_client=llm_client)
 }
 
-async function test_long_writer() -> bool {
+async function test_long_writer() {
     print("🧪 Testing NEURX LONGWRITER Engine...")
 
     cfg = LongWriterConfig(
@@ -1028,7 +1028,7 @@ async function test_long_writer() -> bool {
 
 class MockLLMClient {
     async generate(prompt: string, temperature?: float, max_tokens?: int,
-                   response_format?: string, stop_sequences?: list<string>) -> LLMResponse {
+                   response_format?: string, stop_sequences?: list<string>) {
         # Return deterministic mock content for testing
         content_length = min(max_tokens ?? 256, 300)
 

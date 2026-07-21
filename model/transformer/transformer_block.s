@@ -128,7 +128,7 @@ func (tb *TransformerBlock) selfAttention(x *tensor.Tensor, causalMask *tensor.T
     v := tensor.MatMul(x, tb.attention.valueProj)           // (B, T, d_model)
     
     // Reshape for multi-head attention
-    // (B, T, d_model) -> (B, T, numHeads, headDim) -> (B, numHeads, T, headDim)
+    // (B, T, d_model)
     q = reshapeForHeads(q, tb.attention.numHeads)
     k = reshapeForHeads(k, tb.attention.numHeads)
     v = reshapeForHeads(v, tb.attention.numHeads)
@@ -153,7 +153,7 @@ func (tb *TransformerBlock) selfAttention(x *tensor.Tensor, causalMask *tensor.T
     // output = attn @ V
     output := tensor.MatMul(attn, v)  // (B, numHeads, T, headDim)
     
-    // Reshape back: (B, numHeads, T, headDim) -> (B, T, d_model)
+    // Reshape back: (B, numHeads, T, headDim)
     output = reshapeFromHeads(output, tb.attention.numHeads)
     
     // Output projection
@@ -262,14 +262,14 @@ func (ln *LayerNorm) Backward(gradOutput *tensor.Tensor) *tensor.Tensor {
 
 // reshapeForHeads reshapes tensor for multi-head attention
 func reshapeForHeads(x *tensor.Tensor, numHeads int) *tensor.Tensor {
-    // (batchSize, seqLen, hiddenDim) -> (batchSize, seqLen, numHeads, headDim)
+    // (batchSize, seqLen, hiddenDim)
     // -> (batchSize, numHeads, seqLen, headDim)
     return x  // Placeholder - full implementation in tensor library
 }
 
 // reshapeFromHeads reverses the reshape for multi-head attention
 func reshapeFromHeads(x *tensor.Tensor, numHeads int) *tensor.Tensor {
-    // (batchSize, numHeads, seqLen, headDim) -> (batchSize, seqLen, numHeads, headDim)
+    // (batchSize, numHeads, seqLen, headDim)
     // -> (batchSize, seqLen, hiddenDim)
     return x  // Placeholder
 }

@@ -112,7 +112,7 @@ func forward(
     layer_past_kv: option[tuple[tensor, tensor]],  # Past KV cache for inference
     use_cache: bool = false,
     output_attentions: bool = false
-) -> tuple[tensor, option[tuple[tensor, tensor]], option[tensor]] {
+) {
     """
     English text
 
@@ -280,7 +280,7 @@ func _standard_attention_forward(
     float scale,
     float dropout_p,
     bool return_attn_weights
-) -> tuple[tensor, option[tensor]] {
+) {
 
     # Compute attention scores: Q * K^T / sqrt(d)
     tensor attn_scores = matmul(query_states, key_states.transpose(-2, -1)) * scale
@@ -314,7 +314,7 @@ func _flash_attention_forward(
     tensor value_states,        // [B, heads, S_KV, D]
     option[tensor] causal_mask,  // Optional causal/prefix mask
     float scale
-) -> tensor {
+) {
     """
     Flash Attention 2 English text:
 
@@ -439,7 +439,7 @@ class MaskBuilder {
         int total_seq_len,
         []int prefix_lengths,  # English text sample English text prefix English text
         int kv_seq_len = -1    # KV English text (English textcacheEnglish text > seq_len)
-    ) -> tensor {
+    ) {
         """
         English text NEURX Prefix-LM Attention Mask
 
@@ -486,7 +486,7 @@ class MaskBuilder {
     static func build_causal_mask(
         int seq_len,
         int kv_seq_len = -1
-    ) -> tensor {
+    ) {
         """English text"""
 
         if kv_seq_len == -1:
@@ -498,7 +498,7 @@ class MaskBuilder {
     static func build_bidirectional_mask(
         int seq_len,
         int kv_seq_len = -1
-    ) -> tensor {
+    ) {
         """English text (English text)"""
 
         if kv_seq_len == -1:
@@ -511,7 +511,7 @@ class MaskBuilder {
         tensor base_mask,
         option[tensor] padding_mask,
         int kv_seq_len
-    ) -> tensor {
+    ) {
         """English text mask English text padding mask"""
 
         if padding_mask is None:
@@ -539,7 +539,7 @@ func compute_rope_embeddings(
     float base = 10000.0,
     scaling_type: int = 0,  # 0=none, 1=linear, 2=ntk, 3=yarn
     float factor = 1.0
-) -> tuple[tensor, tensor] {
+) {
     """
     compute RoPE English text cos/sin English text
 
@@ -585,7 +585,7 @@ func apply_rotary_emb(
     tensor x,                  // [B, H, S, D]
     tensor cos_vals,           // [1, S, 1, D/2]
     tensor sin_vals            // [1, S, 1, D/2]
-) -> tensor {
+) {
     """
     English text
 
@@ -614,7 +614,7 @@ func apply_rope_scaling(
     tensor freqs,           // [d/2] English text
     int scaling_type,       // English text
     float factor            // English text
-) -> tensor {
+) {
     """
     English text RoPE Scaling English textsupportEnglish text
 

@@ -98,7 +98,7 @@ class LoadBalanceLossComputer {
         this.config = config
     }
 
-    compute(router_logits: tensor, expert_mask: tensor) -> tuple<tensor, tensor> {
+    compute(router_logits: tensor, expert_mask: tensor) {
         // Compute both auxiliary loss and load balance loss
 
         batch_size, seq_len, num_experts = router_logits.shape
@@ -181,7 +181,7 @@ class MoEFFNLayer {
         if config.router_bias_init != 0.0:
             nn_init.constant_(this.router.gate_layer.bias, config.router_bias_init)
 
-    forward(hidden_states: tensor, attention_mask: tensor?) -> MoEForwardOutput {
+    forward(hidden_states: tensor, attention_mask: tensor?) {
         batch_size, seq_len, hidden_dim = hidden_states.shape
 
         // Step 1: Compute router logits and select experts
@@ -256,7 +256,7 @@ class MoEFFNLayer {
         }
     }
 
-    _apply_routing(router_logits: tensor) -> tuple<tensor, tensor> {
+    _apply_routing(router_logits: tensor) {
         match this.config.router_type {
             "topk" => { return this._top_k_routing(router_logits) }
             "soft" => { return this._soft_routing(router_logits) }
@@ -265,7 +265,7 @@ class MoEFFNLayer {
         }
     }
 
-    _top_k_routing(router_logits: tensor) -> tuple<tensor, tensor> {
+    _top_k_routing(router_logits: tensor) {
         # Standard Top-K routing used in most MoE implementations
         B, T, E = router_logits.shape
         k = min(this.router.top_k, E)
@@ -286,7 +286,7 @@ class MoEFFNLayer {
         return (weights, topk_indices)
     }
 
-    _soft_routing(router_logits: tensor) -> tuple<tensor, tensor> {
+    _soft_routing(router_logits: tensor) {
         # Soft routing: all experts participate with different weights
         # Useful for fine-grained control but computationally expensive
 
@@ -306,7 +306,7 @@ class MoEFFNLayer {
         return (normalized, topk_indices)
     }
 
-    _group_limited_routing(router_logits: tensor) -> tuple<tensor, tensor> {
+    _group_limited_routing(router_logits: tensor) {
         # Group-Limited Routing (GLaM / GShard style)
         # Split experts into groups, each token can only pick from its assigned group
 
@@ -341,7 +341,7 @@ class MoEFFNLayer {
         selected_experts: tensor,
         routing_weights: tensor,
         capacity: int
-    ) -> tensor {
+    ) {
         # Efficient dispatch using scatter/gather operations (similar to Megablocks/Tutel)
 
         B, T, H = hidden_states.shape
@@ -407,7 +407,7 @@ class MoEFFNLayer {
         return final_output.reshape(B, T, H)
     }
 
-    _apply_single_expert(tokens: tensor, expert: MoEExpert) -> tensor {
+    _apply_single_expert(tokens: tensor, expert: MoEExpert) {
         # Standard FFN: Up-project -> Activation -> Down-project
         # For SwiGLU: split into two halves, gate one half, multiply
 
@@ -425,7 +425,7 @@ class MoEFFNLayer {
         return down_output
     }
 
-    _compute_shared_expert_output(hidden_states: tensor) -> tensor {
+    _compute_shared_expert_output(hidden_states: tensor) {
         # Shared experts are applied to ALL tokens (like regular dense FFN)
         output = zeros_like(hidden_states)
 
@@ -447,7 +447,7 @@ class MoEFFNLayer {
         return output
     }
 
-    _compute_dispatch_statistics(expert_mask: tensor, capacity: int) -> DispatchPattern {
+    _compute_dispatch_statistics(expert_mask: tensor, capacity: int) {
         # Compute detailed statistics about how tokens were dispatched
 
         tokens_per_expert = expert_mask.sum(dim=(0, 1)).tolist()
@@ -501,7 +501,7 @@ class ExpertSpecializer {
         this.moe_layer = moe_layer
     }
 
-    compute_specialization_loss(moe_output: MoEForwardOutput) -> tensor {
+    compute_specialization_loss(moe_output: MoEForwardOutput) {
         if !this.config.enable_expert_specialization or this.moe_layer == null:
             return tensor(0.0)
 
@@ -521,7 +521,7 @@ class ExpertSpecializer {
         }
     }
 
-    _gradient_manipulation_loss(moe_output: MoEForwardOutput) -> tensor {
+    _gradient_manipulation_loss(moe_output: MoEForwardOutput) {
         # Encourage different experts to specialize on different patterns
         # Based on the idea that similar inputs should go to same experts
 
@@ -551,7 +551,7 @@ class ExpertSpecializer {
         return this.config.diversity_penalty * off_diag_penalty
     }
 
-    _diversity_regularization_loss() -> tensor {
+    _diversity_regularization_loss() {
         # Simple regularization on expert weights to encourage diversity
         # Penalize similar weight patterns across experts
 
@@ -577,7 +577,7 @@ class ExpertSpecializer {
         return this.config.diversity_penalty * total_penalty / (len(this.moe_layer!.experts) * (len(this.moe_layer!.experts) - 1) / 2)
     }
 
-    _hard_routing_auxiliary_loss(moe_output: MoEForwardOutput) -> tensor {
+    _hard_routing_auxiliary_loss(moe_output: MoEForwardOutput) {
         # Additional loss term for hard routing scenarios
         # Encourages confident (high probability) assignments
 
@@ -592,7 +592,7 @@ class ExpertSpecializer {
         return this.config.diversity_penalty * confidence_reward * 0.01  # Small coefficient
     }
 
-    analyze_expert_specialization(moe_layer: MoEFFNLayer) -> ExpertAnalysisReport {
+    analyze_expert_specialization(moe_layer: MoEFFNLayer) {
         # Analyze how specialized each expert has become
         # Returns detailed report on expert usage patterns
 
@@ -632,7 +632,7 @@ class ExpertSpecializer {
         }
     }
 
-    _detect_redundancy(expert_reports: list<IndividualExpertReport>) -> bool {
+    _detect_redundancy(expert_reports: list<IndividualExpertReport>) {
         # Heuristic: check if multiple experts have very similar magnitudes and patterns
         magnitudes = [r.weight_magnitude for r in expert_reports if r.is_active]
         if magnitudes.length < 2:
@@ -683,7 +683,7 @@ class ExpertManager {
         }
     }
 
-    prune_low_importance_experts(threshold?: float) -> PruningReport {
+    prune_low_importance_experts(threshold?: float) {
         effective_threshold = threshold ?? this.config.expert_pruning_threshold
 
         pruned_count = 0
@@ -706,7 +706,7 @@ class ExpertManager {
         }
     }
 
-    merge_similar_experts(similarity_threshold: float = 0.95) -> MergingReport {
+    merge_similar_experts(similarity_threshold: float = 0.95) {
         # Detect and merge highly similar experts to improve efficiency
 
         merge_operations: list<MergeOperation> = []
@@ -756,7 +756,7 @@ class ExpertManager {
         }
     }
 
-    get_global_efficiency_report() -> MoEEfficiencyReport {
+    get_global_efficiency_report() {
         # Aggregate statistics across all MoE layers
 
         total_params_before = 0
@@ -812,11 +812,11 @@ struct MoEEfficiencyReport {
 
 // ==================== English textfunctionEnglish texttest ====================
 
-function create_moe_ffn_layer(config?: MoEConfig) -> MoEFFNLayer {
+function create_moe_ffn_layer(config?: MoEConfig) {
     return new MoEFFNLayer(config=config ?? new MoEConfig())
 }
 
-function test_moe_system() -> bool {
+function test_moe_system() {
     print("🧪 Testing NEURX MOE Optimization System...")
 
     cfg = MoEConfig(

@@ -57,7 +57,7 @@ struct system_status {
     []string errors
 }
 
-func check_system_status() -> system_status {
+func check_system_status() {
 
     print("\n" + "="*70)
     print("🔍 Checking NEURX-5.2 Training System Status")

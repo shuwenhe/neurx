@@ -468,7 +468,7 @@ func build_rope_cache(rope_scaling_config cfg, int seq_len) rope_cache {
 // English text RoPE English text token English text Q English text K English text
 // input: x [head_dim], output: rotated_x [head_dim]
 // English text: [x0, x1, x2, x3, ..., x_{d-2}, x_{d-1}]
-// English text: (x_{2i}, x_{2i+1}) -> rotate by angle_i
+// English text: (x_{2i}, x_{2i+1})
 //
 // English text:
 //   x'_2i   = x_2i * cos(theta_i) - x_{2i+1} * sin(theta_i)
