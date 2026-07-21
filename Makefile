@@ -540,15 +540,31 @@ pretrain-watch: check-bash
 	@echo "Running NeurX large-model pre-training with live log monitoring"
 	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && $(MAKE) build-pretrain-manifest-s && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 $(MAKE) run-large-pretrain-s 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
 
-chat: check-bash build-cpu-inference
-	@mkdir -p $(LOG_DIR)
-	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
+chat: build-posttrain-chat-s
+	@echo "🚀 Checking available models..."
+	@if [ -f "/home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors" ]; then \
+		echo "✓ PostTrain model found: base-model-posttrain"; \
+		echo "Starting NeurX PostTrain Model Interactive Chat (S Language)"; \
+		mkdir -p artifacts/logs; \
+		$(CURDIR_UNIX)/artifacts/build/posttrain_chat/posttrain_chat 2>&1 | tee -a artifacts/logs/chat_posttrain_$(shell date +%Y%m%d_%H%M%S).log; \
+	elif [ -f "$(PRETRAIN_OUTPUT_DIR)/transformer_v2.ckpt" ]; then \
+		echo "✓ NeurX-1.3 checkpoint found"; \
 		echo "Starting NeurX NXTRFMV2 interactive CPU inference"; \
+		mkdir -p $(LOG_DIR); \
 		NEURX_INFER_CHECKPOINT_PATH="$${NEURX_INFER_CHECKPOINT_PATH:-$${NEURX_INFER_CHECKPOINT:-$(PRETRAIN_OUTPUT_DIR)/transformer_v2.ckpt}}" \
 		NEURX_TOKENIZER_VOCAB="$${NEURX_TOKENIZER_VOCAB:-$(CURDIR_UNIX)/data/corpus/vocab.json}" \
 		NEURX_TOKENIZER_MERGES="$${NEURX_TOKENIZER_MERGES:-$(CURDIR_UNIX)/data/corpus/merges.txt}" \
 		'$(CURDIR_UNIX)/artifacts/build/cpu_inference/neurx_cpu_inference' --interactive \
-		2>&1 | tee -a $(LOG_DIR)/chat_$(shell date +%Y%m%d_%H%M%S).log
+		2>&1 | tee -a $(LOG_DIR)/chat_$(shell date +%Y%m%d_%H%M%S).log; \
+	else \
+		echo "❌ No model found!"; \
+		echo "Available models:"; \
+		echo "  ✓ PostTrain: /home/shuwen/shuwen/train/model/base-model-posttrain/"; \
+		echo "  ✗ NeurX-1.3: $(PRETRAIN_OUTPUT_DIR)/transformer_v2.ckpt (missing)"; \
+		echo ""; \
+		echo "Run: make chat  (will use PostTrain model)"; \
+		exit 1; \
+	fi
 
 chat-posttrain: build-posttrain-chat-s
 	@echo "Starting NeurX PostTrain Model Interactive Chat"
