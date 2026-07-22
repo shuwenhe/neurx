@@ -110,8 +110,8 @@ POSTTRAIN_S_COMPILER ?= $(firstword $(wildcard $(CURDIR_UNIX)/../s/bin/s_seed $(
 LORA_MERGE_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/lora_merge
 LORA_MERGE_BIN := $(LORA_MERGE_BUILD_DIR)/lora_safetensors_merge$(BIN_EXT)
 LORA_MERGE_IR := $(LORA_MERGE_BUILD_DIR)/run_lora_merge.ir
-POSTTRAIN_ADAPTER_DIR ?= $(POSTTRAIN_OUTPUT_DIR)
-POSTTRAIN_MERGED_MODEL_DIR ?= /home/shuwen/shuwen/posttrain_merged
+POSTTRAIN_ADAPTER_DIR ?= /home/shuwen/shuwen/posttrain_adapter
+POSTTRAIN_MERGED_MODEL_DIR ?= $(POSTTRAIN_OUTPUT_DIR)
 POSTTRAIN_LORA_ALPHA ?= 16
 POSTTRAIN_LORA_RANK ?= 8
 
@@ -409,15 +409,23 @@ test-checkpoint-resume: check-bash
 
 POSTTRAIN_PYTHON ?= $(firstword $(wildcard /home/shuwen/venv/bin/python $(CURDIR_UNIX)/.venv/bin/python) python3)
 
-posttrain: check-bash
+posttrain: check-bash build-lora-merge
 	@echo "Starting real Qwen LoRA/SFT post-training..."
-	@mkdir -p '$(POSTTRAIN_OUTPUT_DIR)' '$(LOG_DIR)'
+	@mkdir -p '$(POSTTRAIN_ADAPTER_DIR)' '$(POSTTRAIN_OUTPUT_DIR)' '$(LOG_DIR)'
 	@cd '$(CURDIR_UNIX)' && \
 		set -o pipefail; \
 		NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)' \
 		NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)' \
-		NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)' \
+		NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_ADAPTER_DIR)' \
 		'$(POSTTRAIN_PYTHON)' scripts/real_lora_sft.py 2>&1 | tee -a '$(LOG_DIR)/posttrain_real_$(shell date +%Y%m%d_%H%M%S).log'
+	@echo "Merging LoRA into the standalone Qwen model..."
+	@'$(LORA_MERGE_BIN)' \
+		'$(POSTTRAIN_MODEL_PATH)' \
+		'$(POSTTRAIN_ADAPTER_DIR)' \
+		'$(POSTTRAIN_OUTPUT_DIR)' \
+		'$(POSTTRAIN_LORA_ALPHA)' \
+		'$(POSTTRAIN_LORA_RANK)'
+	@echo "Complete post-trained model saved to $(POSTTRAIN_OUTPUT_DIR)"
 
 posttrain-eval: check-bash
 	@echo "Evaluating the trained LoRA adapter..."
