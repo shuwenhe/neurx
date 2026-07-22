@@ -13,7 +13,7 @@ func main() int {
     string adapter_dir = runtime_env_get("NEURX_LORA_ADAPTER_DIR",
         project_root + "/artifacts/checkpoints/lora_adapter")
     string output_dir = runtime_env_get("NEURX_MERGED_MODEL_DIR",
-        project_root + "/../model/base-model-posttrain")
+        project_root + "/../posttrain")
     string alpha_str = runtime_env_get("NEURX_LORA_ALPHA", "16")
     string rank_str = runtime_env_get("NEURX_LORA_RANK", "8")
 

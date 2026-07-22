@@ -8,7 +8,7 @@ use std.collections
 
 func main() {
     neurxDir := "/home/shuwen/shuwen/train/neurx"
-    modelPath := "/home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors"
+    modelPath := "/home/shuwen/shuwen/posttrain/model.safetensors"
     
     stat, err := os.Stat(modelPath)
     if err != nil || stat.IsDir() {

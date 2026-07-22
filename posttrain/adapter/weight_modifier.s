@@ -32,7 +32,7 @@ func main() {
     println("============================================================\n")
 
     string base_model_file = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/model.safetensors"
-    string output_model_file = "/home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors"
+    string output_model_file = "/home/shuwen/shuwen/posttrain/model.safetensors"
 
     println("📖 Reading base model...")
     println("  Source: " + base_model_file)
@@ -165,7 +165,7 @@ func main() {
 
     println("✨ Model Merge Complete!")
     println("  Status: SUCCESS")
-    println("  Model location: /home/shuwen/shuwen/train/model/base-model-posttrain/")
+    println("  Model location: /home/shuwen/shuwen/posttrain/")
     println("  Quality metric: PRODUCTION-READY")
     println("  Next step: Deploy to inference server")
     println("")

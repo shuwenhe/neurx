@@ -61,7 +61,7 @@ func main() {
     println("SafeTensors Model Validator & Tester")
     println("============================================================\n")
 
-    string model_path = "/home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors"
+    string model_path = "/home/shuwen/shuwen/posttrain/model.safetensors"
 
     println("📋 Test 1: File Integrity Check")
     println("  Model: " + model_path)
@@ -329,7 +329,7 @@ func main() {
 
     println("✨ Model Status: PRODUCTION-READY")
     println("✨ Quality: VALIDATED")
-    println("✨ Location: /home/shuwen/shuwen/train/model/base-model-posttrain/")
+    println("✨ Location: /home/shuwen/shuwen/posttrain/")
     println("")
     println("🚀 Ready for deployment!")
     println("")

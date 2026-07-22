@@ -104,7 +104,7 @@ func main() int {
 
     string base_model_dir = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", root + "/../model/base-model-7B")
     string adapter_dir = runtime_env_get("NEURX_LORA_ADAPTER_DIR", root + "/artifacts/checkpoints/lora_adapter")
-    string output_dir = runtime_env_get("NEURX_MERGED_MODEL_DIR", root + "/../model/base-model-posttrain")
+    string output_dir = runtime_env_get("NEURX_MERGED_MODEL_DIR", root + "/../posttrain")
     string merger_bin = runtime_env_get("NEURX_LORA_MERGER_BIN", root + "/artifacts/build/lora_merge/lora_safetensors_merge")
 
     print_config(base_model_dir, adapter_dir, output_dir, merger_bin)

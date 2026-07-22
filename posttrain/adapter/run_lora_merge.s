@@ -8,7 +8,7 @@ func main() int {
     string merger_bin = runtime_env_get("NEURX_LORA_MERGER_BIN", project_root + "/artifacts/build/lora_merge/lora_safetensors_merge")
     string base_model = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", project_root + "/../model/base-model-7B")
     string adapter_dir = runtime_env_get("NEURX_LORA_ADAPTER_DIR", project_root + "/artifacts/checkpoints/lora_adapter")
-    string output_dir = runtime_env_get("NEURX_MERGED_MODEL_DIR", project_root + "/../model/base-model-posttrain")
+    string output_dir = runtime_env_get("NEURX_MERGED_MODEL_DIR", project_root + "/../posttrain")
     string alpha = runtime_env_get("NEURX_LORA_ALPHA", "16")
     string rank = runtime_env_get("NEURX_LORA_RANK", "8")
 

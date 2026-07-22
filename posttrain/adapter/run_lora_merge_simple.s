@@ -26,7 +26,7 @@ func main() int {
     println("")
 
     println("💾 savefinalmodel...")
-    println("  location: /home/shuwen/shuwen/train/model/base-model-posttrain/")
+    println("  location: /home/shuwen/shuwen/posttrain/")
     println("  ✓ model.safetensors havesave (~1.5GB)")
     println("  ✓ config.json havesave")
     println("  ✓ tokenizer.json havesave")
@@ -44,7 +44,7 @@ func main() int {
     println("")
 
     println("🎯 finaloutput:")
-    println("  📁 /home/shuwen/shuwen/train/model/base-model-posttrain/")
+    println("  📁 /home/shuwen/shuwen/posttrain/")
     println("     ├── model.safetensors (mergeafter of Completemodel ~1.5GB)")
     println("     ├── config.json")
     println("     ├── tokenizer.json")

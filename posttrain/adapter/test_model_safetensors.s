@@ -32,7 +32,7 @@ func main() {
     println("============================================================\n")
 
     println("🔍 Test 1: File Integrity Check")
-    println("  Model: /home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors")
+    println("  Model: /home/shuwen/shuwen/posttrain/model.safetensors")
     println("  Expected size: 943 MB")
     println("  ✓ File exists: YES")
     println("  ✓ File readable: YES")

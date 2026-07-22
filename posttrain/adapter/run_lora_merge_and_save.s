@@ -147,7 +147,7 @@ func load_and_merge() merged_model {
 
 func save_merged_model(merged_model model, string output_dir) int {
     println("💾 Saving merged model...")
-    println("  Output directory: /home/shuwen/shuwen/train/model/base-model-posttrain")
+    println("  Output directory: /home/shuwen/shuwen/posttrain")
     println("")
 
     println("  📄 Writing model.safetensors")
@@ -189,12 +189,12 @@ func verify_output(string output_dir) int {
     println("")
 
     println("  Checking files:")
-    println("    ✓ /home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors (~1.5GB)")
-    println("    ✓ /home/shuwen/shuwen/train/model/base-model-posttrain/config.json")
-    println("    ✓ /home/shuwen/shuwen/train/model/base-model-posttrain/tokenizer.json")
-    println("    ✓ /home/shuwen/shuwen/train/model/base-model-posttrain/tokenizer_config.json")
-    println("    ✓ /home/shuwen/shuwen/train/model/base-model-posttrain/generation_config.json")
-    println("    ✓ /home/shuwen/shuwen/train/model/base-model-posttrain/README.md")
+    println("    ✓ /home/shuwen/shuwen/posttrain/model.safetensors (~1.5GB)")
+    println("    ✓ /home/shuwen/shuwen/posttrain/config.json")
+    println("    ✓ /home/shuwen/shuwen/posttrain/tokenizer.json")
+    println("    ✓ /home/shuwen/shuwen/posttrain/tokenizer_config.json")
+    println("    ✓ /home/shuwen/shuwen/posttrain/generation_config.json")
+    println("    ✓ /home/shuwen/shuwen/posttrain/README.md")
     println("")
 
     println("  File permission check:")
@@ -216,7 +216,7 @@ func main() int {
     merge_config cfg
     cfg.base_model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
     cfg.adapter_checkpoint_dir = "/home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft"
-    cfg.output_model_dir = "/home/shuwen/shuwen/train/model/base-model-posttrain"
+    cfg.output_model_dir = "/home/shuwen/shuwen/posttrain"
     cfg.lora_rank = 8
     cfg.lora_alpha = 16.0
     cfg.input_dim = 768
@@ -225,7 +225,7 @@ func main() int {
     println("⚙️  configurationInformation:")
     println("  basemodel: /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct")
     println("  LoRA Checkpoint: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft")
-    println("  Output directory: /home/shuwen/shuwen/train/model/base-model-posttrain")
+    println("  Output directory: /home/shuwen/shuwen/posttrain")
     println("  LoRA Rank: 8")
     println("  LoRA Alpha: 16.0")
     println("")
@@ -242,7 +242,7 @@ func main() int {
     println("")
 
     println("🎯 finaloutput:")
-    println("  📁 /home/shuwen/shuwen/train/model/base-model-posttrain/")
+    println("  📁 /home/shuwen/shuwen/posttrain/")
     println("     ├── model.safetensors (mergeafter of Completemodel ~1.5GB)")
     println("     ├── config.json")
     println("     ├── tokenizer.json")

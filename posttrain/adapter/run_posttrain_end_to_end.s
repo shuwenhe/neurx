@@ -140,7 +140,7 @@ func step3_save() int {
     print_step("Step 3", "savefinalmodel")
 
     println("💾 save to 目标Directory...")
-    println("  Output directory: /home/shuwen/shuwen/train/model/base-model-posttrain/")
+    println("  Output directory: /home/shuwen/shuwen/posttrain/")
     println("")
 
     println("  writefile:")
@@ -168,7 +168,7 @@ func step4_summary() int {
     println("")
 
     println("🎯 finaloutput:")
-    println("  📁 /home/shuwen/shuwen/train/model/base-model-posttrain/")
+    println("  📁 /home/shuwen/shuwen/posttrain/")
     println("     ├── model.safetensors (1.5GB - mergeafter of Completemodel)")
     println("     ├── config.json (modelconfiguration)")
     println("     ├── tokenizer.json (分词device)")
@@ -188,7 +188,7 @@ func step4_summary() int {
     println("🚀 现 in 可以:")
     println("  1. Usagemodelenterlineinference")
     println("     model = AutoModelForCausalLM.from_pretrained(")
-    println("       '/home/shuwen/shuwen/train/model/base-model-posttrain')")
+    println("       '/home/shuwen/shuwen/posttrain')")
     println("")
     println("  2. enter一stepFine-tuning")
     println("     continueUsage LoRA  or 其他method")

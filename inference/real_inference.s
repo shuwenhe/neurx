@@ -775,7 +775,7 @@ func decode_token_sequence(int seed, int max_new_tokens) string {
 }
 
 func main() {
-    string configured_model = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors")
+    string configured_model = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain/model.safetensors")
     string model_path = configured_model
     if !runtime_file_exists(model_path) && runtime_file_exists(configured_model + "/model.safetensors") {
         model_path = configured_model + "/model.safetensors"

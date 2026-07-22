@@ -108,7 +108,7 @@ func main() {
 
     println("\n💾 Saving model...")
     println("  Merging LoRA into base model...")
-    println("  Output: /home/shuwen/shuwen/train/model/base-model-posttrain/")
+    println("  Output: /home/shuwen/shuwen/posttrain/")
     println("  Saving model.safetensors...")
     println("  Saving config.json...")
     println("  Saving tokenizer.json...")

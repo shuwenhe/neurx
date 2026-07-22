@@ -103,15 +103,15 @@ PRETRAIN_RUNNER_BIN := $(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_lar
 NEURX_SHARD_CMD ?= wikipedia
 NEURX_SHARD_RESUME ?= 1
 NEURX_SHARD_FORCE_REBUILD ?= 0
-POSTTRAIN_MODEL_PATH ?= $(CURDIR_UNIX)/../model/Qwen2.5-0.5B-Instruct
-POSTTRAIN_DATA_FILE ?= $(CURDIR_UNIX)/../dataset/medmcqa/train.jsonl
-POSTTRAIN_OUTPUT_DIR ?= $(CURDIR_UNIX)/artifacts/checkpoints/lora_sft
+POSTTRAIN_MODEL_PATH ?= /home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct
+POSTTRAIN_DATA_FILE ?= /home/shuwen/shuwen/dataset/medical/train.json
+POSTTRAIN_OUTPUT_DIR ?= /home/shuwen/shuwen/posttrain
 POSTTRAIN_S_COMPILER ?= $(firstword $(wildcard $(CURDIR_UNIX)/../s/bin/s_seed $(CURDIR_UNIX)/tools/s_wrapper.sh) $(S_COMPILER))
 LORA_MERGE_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/lora_merge
 LORA_MERGE_BIN := $(LORA_MERGE_BUILD_DIR)/lora_safetensors_merge$(BIN_EXT)
 LORA_MERGE_IR := $(LORA_MERGE_BUILD_DIR)/run_lora_merge.ir
-POSTTRAIN_ADAPTER_DIR ?= $(CURDIR_UNIX)/artifacts/checkpoints/lora_adapter
-POSTTRAIN_MERGED_MODEL_DIR ?= $(CURDIR_UNIX)/../model/base-model-posttrain
+POSTTRAIN_ADAPTER_DIR ?= $(POSTTRAIN_OUTPUT_DIR)
+POSTTRAIN_MERGED_MODEL_DIR ?= /home/shuwen/shuwen/posttrain_merged
 POSTTRAIN_LORA_ALPHA ?= 16
 POSTTRAIN_LORA_RANK ?= 8
 
@@ -419,6 +419,24 @@ posttrain: check-bash
 		NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)' \
 		'$(POSTTRAIN_PYTHON)' scripts/real_lora_sft.py 2>&1 | tee -a '$(LOG_DIR)/posttrain_real_$(shell date +%Y%m%d_%H%M%S).log'
 
+posttrain-eval: check-bash
+	@echo "Evaluating the trained LoRA adapter..."
+	@cd '$(CURDIR_UNIX)' && \
+		NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)' \
+		NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)' \
+		NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_ADAPTER_DIR)' \
+		'$(POSTTRAIN_PYTHON)' scripts/eval_lora_sft.py
+
+posttrain-merge: check-bash build-lora-merge
+	@echo "Merging the LoRA adapter into a standalone model..."
+	@'$(LORA_MERGE_BIN)' \
+		'$(POSTTRAIN_MODEL_PATH)' \
+		'$(POSTTRAIN_ADAPTER_DIR)' \
+		'$(POSTTRAIN_MERGED_MODEL_DIR)' \
+		'$(POSTTRAIN_LORA_ALPHA)' \
+		'$(POSTTRAIN_LORA_RANK)'
+	@echo "Standalone model saved to $(POSTTRAIN_MERGED_MODEL_DIR)"
+
 posttrain-simulated: check-bash build-s-ir-runner
 	@echo "Building NeurX posttrain entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/posttrain
@@ -477,30 +495,30 @@ posttrain-simulated: check-bash build-s-ir-runner
 	@echo ""
 	@echo "✨ 后训练完成！"
 	@echo "📁 生成输出模型..."
-	@mkdir -p /home/shuwen/shuwen/train/model/base-model-posttrain
-	@echo "  创建输出目录: /home/shuwen/shuwen/train/model/base-model-posttrain/"
+	@mkdir -p /home/shuwen/shuwen/posttrain
+	@echo "  创建输出目录: /home/shuwen/shuwen/posttrain/"
 	@cp /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/model.safetensors \
-		/home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors 2>/dev/null || true
+		/home/shuwen/shuwen/posttrain/model.safetensors 2>/dev/null || true
 	@cp /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/config.json \
-		/home/shuwen/shuwen/train/model/base-model-posttrain/config.json 2>/dev/null || true
+		/home/shuwen/shuwen/posttrain/config.json 2>/dev/null || true
 	@cp /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/generation_config.json \
-		/home/shuwen/shuwen/train/model/base-model-posttrain/generation_config.json 2>/dev/null || true
+		/home/shuwen/shuwen/posttrain/generation_config.json 2>/dev/null || true
 	@cp /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/tokenizer.json \
-		/home/shuwen/shuwen/train/model/base-model-posttrain/tokenizer.json 2>/dev/null || true
+		/home/shuwen/shuwen/posttrain/tokenizer.json 2>/dev/null || true
 	@cp /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/tokenizer_config.json \
-		/home/shuwen/shuwen/train/model/base-model-posttrain/tokenizer_config.json 2>/dev/null || true
+		/home/shuwen/shuwen/posttrain/tokenizer_config.json 2>/dev/null || true
 	@cp /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/vocab.json \
-		/home/shuwen/shuwen/train/model/base-model-posttrain/vocab.json 2>/dev/null || true
+		/home/shuwen/shuwen/posttrain/vocab.json 2>/dev/null || true
 	@cp /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/merges.txt \
-		/home/shuwen/shuwen/train/model/base-model-posttrain/merges.txt 2>/dev/null || true
+		/home/shuwen/shuwen/posttrain/merges.txt 2>/dev/null || true
 	@echo "  ✅ 已复制: model.safetensors"
 	@echo "  ✅ 已复制: config.json, generation_config.json"
 	@echo "  ✅ 已复制: tokenizer.json, tokenizer_config.json"
 	@echo "  ✅ 已复制: vocab.json, merges.txt"
 	@echo ""
 	@echo "✨ 后训练完成！"
-	@echo "📁 最终模型位置: /home/shuwen/shuwen/train/model/base-model-posttrain/"
-	@ls -lh /home/shuwen/shuwen/train/model/base-model-posttrain/ 2>/dev/null || echo "  目录已创建"
+	@echo "📁 最终模型位置: /home/shuwen/shuwen/posttrain/"
+	@ls -lh /home/shuwen/shuwen/posttrain/ 2>/dev/null || echo "  目录已创建"
 	@echo ""
 
 build-lora-merge: check-bash
@@ -547,7 +565,7 @@ posttrain-e2e: check-bash build-s-ir-runner
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_e2e/posttrain_e2e.ir' '$(S_RUNNER_BIN)' 2>&1 | tee -a $(LOG_DIR)/posttrain_e2e_$(shell date +%Y%m%d_%H%M%S).log
 	@echo ""
 	@echo "✨ Post-training pipeline complete!"
-	@echo "   Final model: /home/shuwen/shuwen/train/model/base-model-posttrain/"
+	@echo "   Final model: /home/shuwen/shuwen/posttrain/"
 
 pretrain-watch: check-bash
 	@echo "Running NeurX large-model pre-training with live log monitoring"
@@ -561,7 +579,7 @@ chat:
 
 chat-real-inference: build-neurx-interactive-inference-s
 	@echo "🚀 Running NeurX Real Inference Engine (Pure S)..."
-	@if [ -f "/home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors" ]; then \
+	@if [ -f "/home/shuwen/shuwen/posttrain/model.safetensors" ]; then \
 		echo "✓ Model found: base-model-posttrain"; \
 		echo "✓ Running pure S medical knowledge inference"; \
 		mkdir -p artifacts/logs; \
@@ -577,7 +595,7 @@ build-neurx-interactive-inference-s:
 
 real-inference: build-real-inference-s
 	@echo "🚀 Running NeurX Real Inference Engine (Pure S)..."
-	@if [ -f "/home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors" ]; then \
+	@if [ -f "/home/shuwen/shuwen/posttrain/model.safetensors" ]; then \
 		echo "✓ Model found: base-model-posttrain"; \
 		echo "✓ Running real Transformer computation"; \
 		mkdir -p artifacts/logs; \

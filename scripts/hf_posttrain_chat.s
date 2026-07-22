@@ -91,7 +91,7 @@ func main() {
     string root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/neurx")
     string configured_model = runtime_env_get(
         "NEURX_CHAT_MODEL_PATH",
-        "/home/shuwen/shuwen/train/model/base-model-posttrain"
+        "/home/shuwen/shuwen/posttrain"
     )
     string model_file = resolve_model_file(configured_model)
     string system_prompt = runtime_env_get(

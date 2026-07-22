@@ -113,7 +113,7 @@ func main() int {
 
     println("💾 Output Configuration")
     println("  LoRA Adapter      : /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft")
-    println("  Merged Model      : /home/shuwen/shuwen/train/model/base-model-posttrain")
+    println("  Merged Model      : /home/shuwen/shuwen/posttrain")
     println("  Logs Directory    : /home/shuwen/shuwen/train/neurx/artifacts/logs")
     println("  Merge After Train : true")
     println("")
@@ -157,12 +157,12 @@ func main() int {
     println("  This will:")
     println("    • Load base model weights")
     println("    • Apply LoRA adapter weights: W = W_base + (α/r) × B × A")
-    println("    • Save merged model to: /home/shuwen/shuwen/train/model/base-model-posttrain/")
+    println("    • Save merged model to: /home/shuwen/shuwen/posttrain/")
     println("")
 
     println("Step 3: Verify Output")
     println("  Command:")
-    println("    ls -lah /home/shuwen/shuwen/train/model/base-model-posttrain/")
+    println("    ls -lah /home/shuwen/shuwen/posttrain/")
     println("")
     println("  Expected output files:")
     println("    • model.safetensors          (merged model weights)")
@@ -174,7 +174,7 @@ func main() int {
     println("═══════════════════════════════════════════════════════════════")
     println("")
 
-    println("📁 Output Location: /home/shuwen/shuwen/train/model/base-model-posttrain/")
+    println("📁 Output Location: /home/shuwen/shuwen/posttrain/")
     println("✨ Post-training pipeline configured successfully!")
     println("")
 

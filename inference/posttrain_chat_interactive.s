@@ -118,7 +118,7 @@ func generate_response(string user_input) string {
 }
 
 func main() {
-    string MODEL_PATH = "/home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors"
+    string MODEL_PATH = "/home/shuwen/shuwen/posttrain/model.safetensors"
 
     if !runtime_file_exists(MODEL_PATH) {
         print("❌ Model not found\n")

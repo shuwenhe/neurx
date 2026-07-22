@@ -46,7 +46,7 @@ func main() {
     print("═══════════════════════════════════════════════════════════\n")
     print("SafeTensors Model Loading:\n")
     print("═══════════════════════════════════════════════════════════\n")
-    print("Path: /home/shuwen/shuwen/train/model/base-model-posttrain/\n")
+    print("Path: /home/shuwen/shuwen/posttrain/\n")
     print("Format: SafeTensors (BF16)\n")
     print("Size: 943 MB\n")
     print("Tensors: 291 weights loaded\n")
@@ -122,5 +122,5 @@ func main() {
     print("Inference Type: Real Forward Pass through Transformers\n")
     print("Generation: Token-by-token with sampling\n")
     print("Status: ✓ Fully Operational\n")
-    print("Location: /home/shuwen/shuwen/train/model/base-model-posttrain/\n\n")
+    print("Location: /home/shuwen/shuwen/posttrain/\n\n")
 }

@@ -62,7 +62,7 @@ func main() {
     println("============================================================\n")
 
     string base_model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
-    string output_dir = "/home/shuwen/shuwen/train/model/base-model-posttrain"
+    string output_dir = "/home/shuwen/shuwen/posttrain"
     int num_epochs = 3
     int batch_size = 32
     float learning_rate = 0.0005

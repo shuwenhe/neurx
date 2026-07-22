@@ -62,7 +62,7 @@ func main() {
     println("============================================================\n")
 
     string base_model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
-    string output_model_path = "/home/shuwen/shuwen/train/model/base-model-posttrain"
+    string output_model_path = "/home/shuwen/shuwen/posttrain"
 
     println("📦 Input Configuration:")
     println("  Base Model: " + base_model_path)

@@ -32,7 +32,7 @@ func main() {
     println("============================================================\n")
 
     string base_model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
-    string output_model_path = "/home/shuwen/shuwen/train/model/base-model-posttrain"
+    string output_model_path = "/home/shuwen/shuwen/posttrain"
 
     println("🚀 Phase 1: Initialize")
     println("  Base Model: Qwen2.5-0.5B-Instruct")
@@ -147,7 +147,7 @@ func main() {
 
     println("" + "============================================================")
     println("✓ The complete fine-tuned model is ready at:")
-    println("  /home/shuwen/shuwen/train/model/base-model-posttrain/")
+    println("  /home/shuwen/shuwen/posttrain/")
     println("============================================================\n")
 
     0

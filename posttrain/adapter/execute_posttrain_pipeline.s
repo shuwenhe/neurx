@@ -147,7 +147,7 @@ func step_show_configuration() int {
 
     println("  outputconfiguration:")
     println("    • LoRA adapter : /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft")
-    println("    • mergemodel    : /home/shuwen/shuwen/train/model/base-model-posttrain")
+    println("    • mergemodel    : /home/shuwen/shuwen/posttrain")
     println("    • LogDirectory    : /home/shuwen/shuwen/train/neurx/artifacts/logs")
     println("")
 
@@ -232,7 +232,7 @@ func step_verify_output() int {
     println("")
 
     println("  mergeafter of modellocation:")
-    println("    /home/shuwen/shuwen/train/model/base-model-posttrain/")
+    println("    /home/shuwen/shuwen/posttrain/")
     println("      • model.safetensors ✓")
     println("      • config.json ✓")
     println("      • tokenizer.json ✓")
@@ -295,11 +295,11 @@ func main() int {
     println("")
 
     println("4. verifyfinaloutput:")
-    println("   ls -lah /home/shuwen/shuwen/train/model/base-model-posttrain/")
+    println("   ls -lah /home/shuwen/shuwen/posttrain/")
     println("")
 
     println("🎯 outputlocation:")
-    println("   • afterTrainingmodel: /home/shuwen/shuwen/train/model/base-model-posttrain/")
+    println("   • afterTrainingmodel: /home/shuwen/shuwen/posttrain/")
     println("   • LoRA Checkpoint: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft/")
     println("")
 

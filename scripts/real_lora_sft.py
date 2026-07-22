@@ -26,9 +26,11 @@ class LoRALinear(nn.Module):
             parameter.requires_grad = False
 
     def forward(self, inputs):
-        adapter = torch.nn.functional.linear(self.dropout(inputs), self.lora_A)
+        base_output = self.base(inputs)
+        adapter_inputs = self.dropout(inputs).to(self.lora_A.dtype)
+        adapter = torch.nn.functional.linear(adapter_inputs, self.lora_A)
         adapter = torch.nn.functional.linear(adapter, self.lora_B)
-        return self.base(inputs) + adapter * self.scaling
+        return base_output + adapter.to(base_output.dtype) * self.scaling
 
 
 def env_int(name, default):
@@ -146,7 +148,7 @@ def main():
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
     print(f"Loading Qwen model on {device} ({dtype})", flush=True)
-    model = AutoModelForCausalLM.from_pretrained(model_path, local_files_only=True, torch_dtype=dtype)
+    model = AutoModelForCausalLM.from_pretrained(model_path, local_files_only=True, dtype=dtype)
     model.config.use_cache = False
     for parameter in model.parameters():
         parameter.requires_grad = False

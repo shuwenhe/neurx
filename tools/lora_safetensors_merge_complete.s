@@ -311,7 +311,7 @@ func main() int {
     cfg.adapter_dir = runtime_env_get("NEURX_LORA_ADAPTER_DIR",
         project_root + "/artifacts/checkpoints/lora_adapter")
     cfg.output_dir = runtime_env_get("NEURX_MERGED_MODEL_DIR",
-        project_root + "/../model/base-model-posttrain")
+        project_root + "/../posttrain")
     cfg.alpha = 16.0
     cfg.rank_override = 0.0
 

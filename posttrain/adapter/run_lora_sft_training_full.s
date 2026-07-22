@@ -323,7 +323,7 @@ func main() int {
 
     println("🔗 next step:")
     println("  1. Runmergescript: run_lora_merge.s")
-    println("  2. finalmodellocation: /home/shuwen/shuwen/train/model/base-model-posttrain/")
+    println("  2. finalmodellocation: /home/shuwen/shuwen/posttrain/")
     println("")
 
     0
