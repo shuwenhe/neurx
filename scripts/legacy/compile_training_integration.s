@@ -6,7 +6,7 @@ use std.io.println
 func main() int {
     let root = runtime_env_get("NEURX_ROOT", ".")
     println("NeurX S entry: compile_training_integration")
-    let command = "make -C " + runtime_shell_escape(root) + " -f Makefile -f Makefile.large_models integration-s"
+    let command = "make -C " + runtime_shell_escape(root) + " -f Makefile -f configs/Makefile.large_models integration-s"
     if !runtime_run_command(command).ok {
         println("error: compile_training_integration failed")
         return 1

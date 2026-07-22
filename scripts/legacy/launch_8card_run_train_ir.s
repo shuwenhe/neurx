@@ -6,7 +6,7 @@ use std.io.println
 func main() int {
     let root = runtime_env_get("NEURX_ROOT", ".")
     println("NeurX S entry: launch_8card_run_train_ir")
-    let command = "make -C " + runtime_shell_escape(root) + " -f Makefile -f Makefile.large_models run-train-model-ir-s"
+    let command = "make -C " + runtime_shell_escape(root) + " -f Makefile -f configs/Makefile.large_models run-train-model-ir-s"
     if !runtime_run_command(command).ok {
         println("error: launch_8card_run_train_ir failed")
         return 1

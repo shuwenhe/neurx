@@ -1,6 +1,0 @@
-[2026-07-03 10:07:28] You: hello
-[2026-07-03 10:07:28] NeurX: [phase] generate:start
-Generated:
-English text, English text.English text, English text:
-English text, English text.English text, English text:
-hello
