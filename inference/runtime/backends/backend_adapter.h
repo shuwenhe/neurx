@@ -17,8 +17,8 @@ struct AdapterStatus {
   static AdapterStatus failure(std::string message) { return {false, std::move(message)}; }
 };
 
-// Opaque device data owned by the model executor.  The scheduler owns request
-// metadata; adapters own streams, device pointers and vendor runtime calls.
+
+
 struct DeviceBatch {
   Batch schedule;
   const void* token_ids = nullptr;
@@ -34,8 +34,8 @@ struct DeviceBatch {
   void* kv_cache = nullptr;
   void* workspace = nullptr;
   std::size_t workspace_bytes = 0;
-  // Optional backend-specific sampling metadata. When enabled, logits remain
-  // on device and sampled_token_ids receives one int32 token per batch row.
+
+
   const void* sampling_params = nullptr;
   void* sampled_token_ids = nullptr;
   bool device_sampling = false;
@@ -54,4 +54,4 @@ class BackendAdapter {
   virtual AdapterStatus synchronize() = 0;
 };
 
-}  // namespace neurx::inference
+}

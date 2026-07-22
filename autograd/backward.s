@@ -48,7 +48,7 @@ func new_backward_state(string name) backward_state {
     }
 }
 
-// Getter functions to work around compiler type inference bug with struct field indexing
+
 func get_step(backward_state state, int index) string {
     state.steps[index]
 }

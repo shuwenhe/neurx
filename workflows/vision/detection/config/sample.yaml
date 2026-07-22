@@ -1,4 +1,4 @@
-# Sample config for vision/detection
+
 batch_size: 16
 image_size: 640
 max_steps: 1200

@@ -1,14 +1,14 @@
 package neurx.train.demo
 
-// NeurX GPT Training with Full checkpoint Support
-// completeEnglish text S languagetrainingimplementation - English text checkpoint save/load
+
+
 
 use std.fs.write_text_file as fs_write
 use std.fs.read_to_string as fs_read
 
-// ============================================
-// Config & State (configurationEnglish textstate)
-// ============================================
+
+
+
 
 struct training_config {
     int batch_size
@@ -76,9 +76,9 @@ func new_model_config() model_config {
     }
 }
 
-// ============================================
-// Helpers (helperfunction)
-// ============================================
+
+
+
 
 func my_mod(int a, int b) int {
     if b <= 0 { return 0 }
@@ -100,9 +100,9 @@ func compute_loss(int step, int tokens) float {
     loss
 }
 
-// ============================================
-// checkpoint I/O (checkpointEnglish text)
-// ============================================
+
+
+
 
 func format_checkpoint_content(int step, float loss, float best_loss, int best_step, bool trained, int param_count) string {
     string content = "checkpoint_v1\n"
@@ -147,7 +147,7 @@ func save_checkpoint_to_file(int step, float loss, float best_loss, int best_ste
 
     string content = format_checkpoint_content(step, loss, best_loss, best_step, trained, param_count)
 
-    // use S English textfileEnglish text
+
     var r1 = fs_write(file_path, content)
     if r1.is_ok() {
         var r2 = fs_write(manifest_path, file_path + "\n")
@@ -159,9 +159,9 @@ func save_checkpoint_to_file(int step, float loss, float best_loss, int best_ste
     "[ERROR] Save failed"
 }
 
-// ============================================
-// Training Logic (trainingEnglish text)
-// ============================================
+
+
+
 
 func do_train_step(training_state state, training_config tconfig) training_state {
     int next_step = state.step + 1
@@ -177,7 +177,7 @@ func do_train_step(training_state state, training_config tconfig) training_state
 
     bool trained = next_step >= tconfig.max_steps
 
-    // English text 10 stepEnglish textlog
+
     bool should_log = false
     int check_log = next_step
     while check_log >= 10 {
@@ -202,9 +202,9 @@ func check_should_save(int step, int save_every) bool {
     my_mod(step, save_every) == 0 && step > 0
 }
 
-// ============================================
-// Main Training Loop (maintrainingEnglish text)
-// ============================================
+
+
+
 
 func run_training(training_config tconfig) training_context {
     println("")
@@ -226,12 +226,12 @@ func run_training(training_config tconfig) training_context {
     println("Model initialized: ", mconfig.param_count, " parameters")
     println("")
 
-    // trainingEnglish text
+
     int i = 0
     while i < tconfig.max_steps {
         state = do_train_step(state, tconfig)
 
-        // English textRequiredsaveEnglish text checkpoint
+
         if check_should_save(state.step, tconfig.save_every_n_steps) {
             string step_name = "step_" + string(state.step)
             save_checkpoint_to_file(
@@ -245,22 +245,22 @@ func run_training(training_config tconfig) training_context {
         i = i + 1
     }
 
-    // English textstate
+
     training_context {
         final_state: state,
         model_param_count: mconfig.param_count,
     }
 }
 
-// English texttrainingresultEnglish text
+
 struct training_context {
     training_state final_state
     int model_param_count
 }
 
-// ============================================
-// Entry Point (English text)
-// ============================================
+
+
+
 
 func main() int {
     training_config tconfig = new_training_config(8, 32, 50, 0.001)

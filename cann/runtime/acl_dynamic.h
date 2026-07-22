@@ -153,4 +153,4 @@ inline const char* recent_error() {
   return message ? message : "CANN ACL call failed";
 }
 
-}  // namespace neurx::cann
+}

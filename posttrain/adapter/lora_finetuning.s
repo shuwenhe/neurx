@@ -1,7 +1,7 @@
-// ============================================
-// LoRA (Low-Rank Adaptation) Fine-tuning
-// Parameter-Efficient Fine-Tuning Framework
-// ============================================
+
+
+
+
 
 package main
 
@@ -12,7 +12,7 @@ import (
 
 type lora_config struct {
     int rank
-    int alpha  // LoRA scale
+    int alpha
     []string target_modules
     float64 dropout
     string task_type
@@ -22,8 +22,8 @@ type lora_config struct {
 type lora_layer struct {
     int rank
     int alpha
-    [][]float64 lora_a  // r × k
-    [][]float64 lora_b  // d × r
+    [][]float64 lora_a
+    [][]float64 lora_b
     float64 scaling
     float64 dropout_p
     string name
@@ -38,26 +38,26 @@ type lora_adapter struct {
     float64 scaling_factor
 }
 
-// ============================================
-// LoRA Initialization
-// ============================================
+
+
+
 
 func (adapter *lora_adapter) initialize_lora_modules(model PolicyModel) {
     fmt.Println("[LoRA] Initializing LoRA modules...")
-    
-    // Only add LoRA to attention and MLP layers
+
+
     for layer_idx := 0; layer_idx < model.num_layers; layer_idx++ {
-        // Attention Q, K, V projections
+
         for _, proj := range []string{"q_proj", "v_proj"} {
             name := fmt.Sprintf("layer_%d_%s", layer_idx, proj)
             adapter.create_lora_layer(name, model.hidden_size, model.hidden_size)
         }
-        
-        // MLP layers
+
+
         name := fmt.Sprintf("layer_%d_mlp", layer_idx)
         adapter.create_lora_layer(name, model.hidden_size*4, model.hidden_size)
     }
-    
+
     fmt.Printf("  Created %d LoRA modules\n", len(adapter.modules))
     fmt.Printf("  Total trainable parameters: %d\n", adapter.trainable_params)
 }
@@ -72,10 +72,10 @@ func (adapter *lora_adapter) create_lora_layer(name string, in_features int, out
         dropout_p: adapter.config.dropout,
         name: name,
     }
-    
+
     adapter.modules[name] = layer
-    
-    // Parameter count
+
+
     adapter.trainable_params += int64(adapter.config.rank*in_features + out_features*adapter.config.rank)
 }
 
@@ -84,7 +84,7 @@ func (adapter *lora_adapter) init_matrix(rows int, cols int, scale float64) [][]
     for i := 0; i < rows; i++ {
         matrix[i] = make([]float64, cols)
         for j := 0; j < cols; j++ {
-            // Gaussian initialization for A, zeros for B
+
             if scale == 0.0 {
                 matrix[i][j] = 0.0
             } else {
@@ -95,25 +95,25 @@ func (adapter *lora_adapter) init_matrix(rows int, cols int, scale float64) [][]
     return matrix
 }
 
-// ============================================
-// LoRA Forward Pass
-// ============================================
+
+
+
 
 func (layer *lora_layer) forward(x []float64) []float64 {
-    // LoRA: out = x @ W + (x @ A) @ B * scaling
-    
-    // Compute x @ A (hidden_size -> rank)
+
+
+
     xa := adapter.matrix_vector_mult(x, layer.lora_a)
-    
-    // Compute (x @ A) @ B (rank -> out_features)
+
+
     delta := adapter.matrix_vector_mult(xa, layer.lora_b)
-    
-    // Scale by alpha/rank
+
+
     output := make([]float64, len(delta))
     for i := range delta {
         output[i] = delta[i] * layer.scaling
     }
-    
+
     return output
 }
 
@@ -121,7 +121,7 @@ func (adapter *lora_adapter) matrix_vector_mult(vec []float64, matrix [][]float6
     if len(matrix) == 0 {
         return []float64{}
     }
-    
+
     result := make([]float64, len(matrix))
     for i := 0; i < len(matrix); i++ {
         sum := 0.0
@@ -130,31 +130,31 @@ func (adapter *lora_adapter) matrix_vector_mult(vec []float64, matrix [][]float6
         }
         result[i] = sum
     }
-    
+
     return result
 }
 
-// ============================================
-// LoRA Merging
-// ============================================
+
+
+
 
 func (adapter *lora_adapter) merge_lora_to_model() {
     fmt.Println("[LoRA] Merging LoRA weights into base model...")
-    
+
     for name, lora_layer := range adapter.modules {
-        // Compute merged weight: W_merged = W + (A @ B) * scaling
+
         merged := adapter.compute_merged_weight(lora_layer)
-        
-        // Replace model weights (simulated)
+
+
         fmt.Printf("  Merging %s\n", name)
         _ = merged
     }
-    
+
     fmt.Println("  LoRA merged successfully")
 }
 
 func (adapter *lora_adapter) compute_merged_weight(layer *lora_layer) [][]float64 {
-    // Compute A @ B
+
     ab := make([][]float64, len(layer.lora_b))
     for i := 0; i < len(layer.lora_b); i++ {
         ab[i] = make([]float64, len(layer.lora_a[0]))
@@ -164,15 +164,13 @@ func (adapter *lora_adapter) compute_merged_weight(layer *lora_layer) [][]float6
             }
         }
     }
-    
-    // Scale by alpha/rank
+
+
     for i := range ab {
         for j := range ab[i] {
             ab[i][j] *= layer.scaling
         }
     }
-    
+
     return ab
 }
-
-// (rest of file omitted for brevity in copy)

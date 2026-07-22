@@ -1,24 +1,24 @@
 package neurx.moe.transformer_backward
 
-// ============================================================================
-// MoE Backward Pass — exact gradients for router + expert FFNs
-//
-// Given d_output (gradient of the layer's output), computes:
-//   • d_router_weight  [H, E] — gradient of the gating network
-//   • d_experts[]      — per-expert gate/value/down weight gradients
-//   • d_hidden         [tokens, H] — gradient flowing back to the transformer
-//
-// Math sketch for one token t routed to expert e with gate weight g_e:
-//   output[t] = sum_k g_k * expert_k( hidden[t] )
-//
-//   d_expert_output[k] = d_output[t] * g_k               (∂L/∂expert_out)
-//   d_gate[k]           = d_output[t] - expert_out[k]    (∂L/∂g_k)
-//   d_hidden[t]        += sum_k g_k * d_expert_input[k]  (∂L/∂h)
-//
-// Router gradient (through softmax + gate weights):
-//   d_router_logit[e] = d_gate[e] (post softmax-backward wrt selected entries)
-//   d_router_weight  += hidden[t]^T @ d_router_logit[e]
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use neurx.moe.transformer.{
     moe_layer, moe_config, moe_expert, routing_decision, moe_output,
@@ -26,44 +26,44 @@ use neurx.moe.transformer.{
 }
 use neurx.model.llm.gpt.{gpt_alloc, gpt_matmul, gpt_swish, gpt_sigmoid}
 
-// ============================================================================
-// 1. English text
-// ============================================================================
+
+
+
 
 struct moe_expert_grads {
-    []float d_gate_weight     // [H, expert_dim]
-    []float d_value_weight    // [H, expert_dim]
-    []float d_down_weight     // [expert_dim, H]
+    []float d_gate_weight
+    []float d_value_weight
+    []float d_down_weight
 }
 
 struct moe_layer_grads {
-    []float d_router_weight   // [H, E]
+    []float d_router_weight
     []moe_expert_grads d_experts
-    []float d_hidden          // [tokens, H]
-    float d_aux_loss_scale    // scalar feedback from aux loss
+    []float d_hidden
+    float d_aux_loss_scale
 }
 
-// ============================================================================
-// 2. English text (SwiGLU)
-// ============================================================================
 
-// swish'(x) = sigma(x) + x * sigma(x) * (1 - sigma(x))
+
+
+
+
 func moe_swish_grad(float x) float {
     float s = gpt_sigmoid(x)
     s + x * s * (1.0 - s)
 }
 
-// English text SwiGLU English text:
-//   out = (swish(gate) * value) @ down
-// English text: token_hidden [H], gate_pre [D], value_pre [D], d_out [H]
-// English text (d_hidden [H], d_gate_w [H,D], d_value_w [H,D], d_down_w [D,H])
+
+
+
+
 func moe_expert_backward(
     moe_expert expert,
-    []float token_hidden,     // [H]
-    []float d_out,            // [H]
+    []float token_hidden,
+    []float d_out,
     int H, int D
 ) ([]float, moe_expert_grads) {
-    // English text gate_pre English text value_pre (English text)
+
     []float gate_pre = moe_alloc(D, 0.0)
     []float value_pre = moe_alloc(D, 0.0)
     int j = 0
@@ -87,8 +87,8 @@ func moe_expert_backward(
         j = j + 1
     }
 
-    // d_down_weight: d_out (H) x gv_out (D) → [D, H]
-    // d_gv_out = down_weight^T @ d_out
+
+
     []float d_gv = moe_alloc(D, 0.0)
     []float d_down_w = moe_alloc(D * H, 0.0)
     int d = 0
@@ -102,7 +102,7 @@ func moe_expert_backward(
         d = d + 1
     }
 
-    // d_swish_gate = d_gv * value_pre,  d_value_pre = d_gv * swish_gate
+
     []float d_swish_g = moe_alloc(D, 0.0)
     []float d_value_pre = moe_alloc(D, 0.0)
     j = 0
@@ -112,7 +112,7 @@ func moe_expert_backward(
         j = j + 1
     }
 
-    // d_gate_pre = d_swish_g * swish'(gate_pre)
+
     []float d_gate_pre = moe_alloc(D, 0.0)
     j = 0
     while j < D {
@@ -120,8 +120,8 @@ func moe_expert_backward(
         j = j + 1
     }
 
-    // d_gate_weight  [H, D]: h^T @ d_gate_pre
-    // d_value_weight [H, D]: h^T @ d_value_pre
+
+
     []float d_gate_w  = moe_alloc(H * D, 0.0)
     []float d_value_w = moe_alloc(H * D, 0.0)
     d = 0
@@ -135,7 +135,7 @@ func moe_expert_backward(
         d = d + 1
     }
 
-    // d_hidden from this expert: W_gate^T @ d_gate_pre + W_value^T @ d_value_pre
+
     []float d_h = moe_alloc(H, 0.0)
     d = 0
     while d < H {
@@ -158,11 +158,11 @@ func moe_expert_backward(
     (d_h, eg)
 }
 
-// ============================================================================
-// 3. English text (softmax gate gradient)
-// ============================================================================
 
-// softmax backward for one row
+
+
+
+
 func moe_softmax_bk([]float probs, []float d_logprob, int E) []float {
     float dot = 0.0
     int e = 0
@@ -176,15 +176,15 @@ func moe_softmax_bk([]float probs, []float d_logprob, int E) []float {
     d_scores
 }
 
-// ============================================================================
-// 4. complete MoE English text
-// ============================================================================
+
+
+
 
 func moe_backward(
     moe_layer layer,
-    []float hidden,            // [tokens, H] forward pass input
-    routing_decision route,    // forward pass routing decision
-    []float d_output,          // [tokens, H] upstream gradient
+    []float hidden,
+    routing_decision route,
+    []float d_output,
     int tokens
 ) moe_layer_grads {
     int H = layer.hidden_dim
@@ -195,7 +195,7 @@ func moe_backward(
     []float d_hidden = moe_alloc(tokens * H, 0.0)
     []float d_router_weight = moe_alloc(H * E, 0.0)
 
-    // initializeEnglish textgradientEnglish text
+
     []moe_expert_grads expert_grads = []moe_expert_grads{cap: E}
     int e = 0
     while e < E {
@@ -214,15 +214,15 @@ func moe_backward(
 
     int t = 0
     while t < tokens {
-        // English text token English text hidden English text
+
         []float h_t = moe_alloc(H, 0.0)
         int d = 0
         while d < H { h_t[d] = hidden[t * H + d]; d = d + 1 }
 
-        // English text token English text top-k English text d_gate English text (English text)
-        []float d_gate_logit = moe_alloc(E, 0.0)  // d_loss/d_router_prob[e]
 
-        // English text token English text router probs
+        []float d_gate_logit = moe_alloc(E, 0.0)
+
+
         []float probs_t = moe_alloc(E, 0.0)
         e = 0
         while e < E {
@@ -238,7 +238,7 @@ func moe_backward(
             if expert_counts[eid] < capacity {
                 expert_counts[eid] = expert_counts[eid] + 1
 
-                // d_expert_out = d_output[t] * gate_weight (∂L/∂expert_output)
+
                 []float d_eo = moe_alloc(H, 0.0)
                 d = 0
                 while d < H {
@@ -246,19 +246,19 @@ func moe_backward(
                     d = d + 1
                 }
 
-                // English text
+
                 []float d_h_e
                 moe_expert_grads eg
                 (d_h_e, eg) = moe_expert_backward(layer.experts[eid], h_t, d_eo, H, D)
 
-                // English text d_hidden[t]
+
                 d = 0
                 while d < H {
                     d_hidden[t * H + d] = d_hidden[t * H + d] + d_h_e[d]
                     d = d + 1
                 }
 
-                // English textweightgradient
+
                 int n = H * D
                 d = 0
                 while d < n {
@@ -273,8 +273,8 @@ func moe_backward(
                     d = d + 1
                 }
 
-                // d_gate_logit[eid]: ∂L/∂g_k = d_output[t] - expert_out[k]
-                // English textcomputeEnglish textoutputEnglish text (English textcache; English textcompute)
+
+
                 moe_expert ex = layer.experts[eid]
                 []float eo = moe_expert_forward(ex, h_t, H, D)
                 float dot_eo_do = 0.0
@@ -283,17 +283,17 @@ func moe_backward(
                     dot_eo_do = dot_eo_do + d_output[t * H + d] * eo[d]
                     d = d + 1
                 }
-                // English text normalize_top_k English text gate weightEnglish text:
-                // grad English text unnormalized gate prob[eid]
+
+
                 d_gate_logit[eid] = d_gate_logit[eid] + dot_eo_do
             }
             k = k + 1
         }
 
-        // Softmax English text → d_router_logit[t, :]
+
         []float d_router_logit = moe_softmax_bk(probs_t, d_gate_logit, E)
 
-        // d_router_weight += h_t^T @ d_router_logit
+
         d = 0
         while d < H {
             e = 0
@@ -315,9 +315,9 @@ func moe_backward(
     }
 }
 
-// ============================================================================
-// 5. AdamW English textparameterEnglish text
-// ============================================================================
+
+
+
 
 struct moe_adamw_state {
     []float m_router     []float v_router
@@ -402,9 +402,9 @@ func moe_adamw_step(moe_layer layer, moe_layer_grads grads, moe_adamw_state opt)
     (layer, opt)
 }
 
-// ============================================================================
-// 6. helper
-// ============================================================================
+
+
+
 
 func moe_alloc(int n, float v) []float {
     []float arr = []float{cap: n}

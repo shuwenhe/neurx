@@ -115,7 +115,7 @@ func add_log_entry(training_monitor monitor, log_level level, string message) tr
     if int(level) < int(monitor.config.log_level) {
         return monitor
     }
-    
+
     log_entry entry {
         timestamp: current_timestamp(),
         level: level,
@@ -125,15 +125,15 @@ func add_log_entry(training_monitor monitor, log_level level, string message) tr
         loss: 0.0,
         metric: 0.0,
     }
-    
+
     monitor.logs.push(entry)
-    
+
     print_log_entry(entry)
-    
+
     if len(monitor.logs) > 10000 {
         monitor.logs = monitor.logs[1000..len(monitor.logs)]
     }
-    
+
     monitor
 }
 
@@ -157,20 +157,20 @@ func level_to_string(log_level level) string {
 func update_metrics(training_monitor monitor, training_metrics metrics) training_monitor {
     monitor.current_metrics = metrics
     monitor.total_steps = monitor.total_steps + 1
-    
+
     if monitor.total_steps % monitor.config.metrics_interval == 0 {
         monitor.metrics_history.push([metrics])
         save_metrics(monitor)
     }
-    
+
     if monitor.config.enable_wandb {
         log_wandb(monitor, metrics)
     }
-    
+
     if monitor.config.enable_tensorboard {
         log_tensorboard(monitor, metrics)
     }
-    
+
     monitor
 }
 
@@ -230,16 +230,16 @@ func format_float(float x, int decimals) string {
             break
         }
     }
-    
+
     if dot_pos == 0 {
         return s + "." + make_string(decimals, '0')
     }
-    
+
     int needed = dot_pos + decimals + 1
     if len(s) < needed {
         return s + make_string(needed - len(s), '0')
     }
-    
+
     s[0..needed]
 }
 
@@ -247,11 +247,11 @@ func format_time(float seconds) string {
     int hours = int(seconds / 3600)
     int minutes = int((seconds % 3600) / 60)
     int secs = int(seconds % 60)
-    
+
     string h = if hours < 10 { "0" + string(hours) } else { string(hours) }
     string m = if minutes < 10 { "0" + string(minutes) } else { string(minutes) }
     string s = if secs < 10 { "0" + string(secs) } else { string(secs) }
-    
+
     h + ":" + m + ":" + s
 }
 
@@ -267,7 +267,7 @@ func log_training_step(training_monitor monitor, int step, int epoch, float loss
     string message = "Step " + string(step) + " | Epoch " + string(epoch) +
                      " | Loss: " + format_float(loss, 6) +
                      " | LR: " + format_float(lr, 8)
-    
+
     monitor = add_log_entry(monitor, log_level.INFO, message)
     monitor
 }
@@ -276,14 +276,14 @@ func log_validation(training_monitor monitor, int step, float val_loss, float va
     string message = "Validation | Step " + string(step) +
                      " | Loss: " + format_float(val_loss, 6) +
                      " | PPL: " + format_float(val_ppl, 4)
-    
+
     monitor = add_log_entry(monitor, log_level.INFO, message)
     monitor
 }
 
 func log_checkpoint(training_monitor monitor, string path, int step) training_monitor {
     string message = "checkpoint saved: " + path + " (step " + string(step) + ")"
-    
+
     monitor = add_log_entry(monitor, log_level.INFO, message)
     monitor
 }
@@ -293,7 +293,7 @@ func log_device_info(training_monitor monitor, mps.mps_context ctx) training_mon
         string info = mps.mps_get_device_info(ctx.devices[i])
         monitor = add_log_entry(monitor, log_level.INFO, info)
     }
-    
+
     monitor
 }
 
@@ -307,7 +307,7 @@ func log_start(training_monitor monitor, int total_steps, int epochs) training_m
     string message = "Training started | Total Steps: " + string(total_steps) +
                      " | Epochs: " + string(epochs) +
                      " | Time: " + current_timestamp()
-    
+
     monitor = add_log_entry(monitor, log_level.INFO, message)
     monitor
 }
@@ -315,7 +315,7 @@ func log_start(training_monitor monitor, int total_steps, int epochs) training_m
 func log_end(training_monitor monitor, float final_loss, float elapsed_time) training_monitor {
     string message = "Training completed | Final Loss: " + format_float(final_loss, 6) +
                      " | Elapsed Time: " + format_time(elapsed_time)
-    
+
     monitor = add_log_entry(monitor, log_level.INFO, message)
     monitor
 }
@@ -330,21 +330,21 @@ func current_timestamp() string {
 
 func calculate_throughput(training_monitor monitor, int samples, float step_time) float {
     monitor.step_times.push(step_time)
-    
+
     if len(monitor.step_times) > 100 {
         monitor.step_times = monitor.step_times[1..len(monitor.step_times)]
     }
-    
+
     float avg_time = 0.0
     for i := 0; i < len(monitor.step_times); i += 1 {
         avg_time = avg_time + monitor.step_times[i]
     }
     avg_time = avg_time / len(monitor.step_times)
-    
+
     if avg_time == 0.0 {
         return 0.0
     }
-    
+
     samples / avg_time
 }
 
@@ -353,12 +353,12 @@ func get_average_metrics(training_monitor monitor, int window) training_metrics 
     if n == 0 {
         return training_metrics{}
     }
-    
+
     int start = max(0, n - window)
-    
+
     training_metrics avg = training_metrics{}
     int count = 0
-    
+
     for i := start; i < n; i += 1 {
         training_metrics m = monitor.metrics_history[i][0]
         avg.loss = avg.loss + m.loss
@@ -372,7 +372,7 @@ func get_average_metrics(training_monitor monitor, int window) training_metrics 
         avg.loss_scale = avg.loss_scale + m.loss_scale
         count = count + 1
     }
-    
+
     if count > 0 {
         avg.loss = avg.loss / count
         avg.ppl = avg.ppl / count
@@ -384,7 +384,7 @@ func get_average_metrics(training_monitor monitor, int window) training_metrics 
         avg.grad_norm = avg.grad_norm / count
         avg.loss_scale = avg.loss_scale / count
     }
-    
+
     avg
 }
 

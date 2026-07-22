@@ -7,22 +7,22 @@ func main() {
     print("║  NeurX Interactive Model Chat (Pure S)       ║\n")
     print("║  Type questions, get medical responses       ║\n")
     print("╚═══════════════════════════════════════════════╝\n\n")
-    
+
     while true {
         print("You: ")
-        
+
         string cmd = "read -t 5 line && echo \"$line\" || echo \"\""
         string input = runtime_run_command_output(cmd)
-        
+
         if input == "exit" || input == "quit" {
             print("Goodbye!\n")
             return
         }
-        
+
         if len(input) == 0 {
             continue
         }
-        
+
         print("Assistant: Medical response to: " + input + "\n\n")
     }
 }

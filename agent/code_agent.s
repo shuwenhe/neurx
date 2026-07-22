@@ -1,19 +1,19 @@
 package neurx.agent.code_agent
 
-// code_agent: NeurX-style autonomous code agent
-// Usage:
-//   NEURX_CODE_AGENT_TASK="fix the bug in foo.s" NEURX_AGENT_MODEL_PATH=/path/to/model ./neurx_code_agent
-//
-// The agent will autonomously explore the codebase, plan, write/patch files,
-// build, test, and iterate until the task is complete or the step budget is exhausted.
-// All write/patch/delete operations are auto-approved (no human confirmation needed).
-//
-// Environment variables:
-//   NEURX_CODE_AGENT_TASK        - task description (required if not passed as argv[1])
-//   NEURX_CODE_AGENT_STEPS       - max steps (default 64)
-//   NEURX_CODE_AGENT_FULL_AUTO   - set to "1" to skip approval prompts (default: "1")
-//   NEURX_AGENT_MODEL_PATH       - model checkpoint path
-//   NEURX_AGENT_WORKSPACE_ROOT   - workspace root directory (default: ".")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use neurx.agent.runtime
 use neurx.agent.memory
@@ -88,7 +88,7 @@ func code_agent_parse_int(string s, int default_val) int {
     result
 }
 
-// clip a string for display
+
 func code_agent_clip(string s, int max_len) string {
     if len(s) <= max_len {
         return s
@@ -102,7 +102,7 @@ func code_agent_clip(string s, int max_len) string {
     out + "..."
 }
 
-// count staged pending changes from memory
+
 func code_agent_pending_count(agent_runtime_state state) int {
     agent_memory_lookup_result r = agent_memory_lookup_short(state.memory, "pending_change_count")
     if !r.found || trim(r.value) == "" {
@@ -111,12 +111,12 @@ func code_agent_pending_count(agent_runtime_state state) int {
     code_agent_parse_int(r.value, 0)
 }
 
-// read one line from stdin (for interactive approval prompts)
+
 func code_agent_read_line() string {
     trim(runtime_run_command_output("head -1 /dev/stdin 2>/dev/null"))
 }
 
-// read all of stdin (for pipe-mode task input)
+
 func code_agent_read_stdin() string {
     trim(runtime_run_command_output("cat /dev/stdin 2>/dev/null"))
 }
@@ -386,13 +386,13 @@ func code_agent_run(string task, string model_path, int max_steps, bool full_aut
     agent_runtime_state current = state
 
     while !current.finished && steps_done < max_steps {
-        // ── interrupt gate ──────────────────────────────────────────
+
         if current.interrupt.pending && full_auto {
-            // auto-approve: stage the change
+
             current = agent_runtime_step(current, "yes")
             steps_done = steps_done + 1
             code_agent_print_step(steps_done, current.last_action, current.last_observation)
-            // flush staged changes immediately so we don't re-trigger the same interrupt
+
             int pending = code_agent_pending_count(current)
             if pending > 0 {
                 current = agent_runtime_step_with_task(current, "apply_pending_changes", "apply pending changes")
@@ -400,7 +400,7 @@ func code_agent_run(string task, string model_path, int max_steps, bool full_aut
                 code_agent_print_step(steps_done, current.last_action, current.last_observation)
             }
         } else if current.interrupt.pending && !full_auto {
-            // interactive: ask via stdin
+
             println("[code_agent] ── approval required ───────────────────────")
             println("[code_agent]   action : ", current.interrupt.kind)
             println("[code_agent]   reason : ", current.interrupt.reason)
@@ -427,7 +427,7 @@ func code_agent_run(string task, string model_path, int max_steps, bool full_aut
             code_agent_print_step(steps_done, current.last_action, current.last_observation)
         }
 
-        // tick subagents
+
         if !agent_subagent_all_done(current.subagents) {
             current = agent_runtime_run_pending_subagents(current)
         }
@@ -473,7 +473,7 @@ func code_agent_print_answer(agent_runtime_state state) {
 }
 
 func main() int {
-    // resolve task: env var → stdin pipe
+
     string task = trim(runtime_env_get("NEURX_CODE_AGENT_TASK", ""))
     if task == "" {
         task = code_agent_read_stdin()

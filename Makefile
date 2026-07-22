@@ -34,12 +34,12 @@ endif
 
 .DEFAULT_GOAL := help
 
-# Color definitions
+
 BLUE := \033[0;34m
 GREEN := \033[0;32m
 YELLOW := \033[1;33m
 RED := \033[0;31m
-NC := \033[0m  # No Color
+NC := \033[0m
 
 CURDIR_UNIX := $(subst \,/,$(CURDIR))
 UNAME_S := $(shell uname -s 2>/dev/null)
@@ -175,7 +175,7 @@ infer: check-bash build-cpu-inference
 		2>&1 | tee -a $(LOG_DIR)/infer_$(shell date +%Y%m%d_%H%M%S).log
 
 
-# 'pretrain' target has been removed. Use specific pretrain-* targets (e.g. pretrain-s-p0, pretrain-npu)
+
 
 pretrain-npu: check-bash
 	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
@@ -975,9 +975,9 @@ test-smart-inference-s: check-bash
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/test_smart_inference/test_smart_inference.ir' 2>&1 | tee -a $(LOG_DIR)/test_smart_inference_$(shell date +%Y%m%d_%H%M%S).log
 
 
-# ============================================================================
-# S Language Data Processing Scripts (NEW)
-# ============================================================================
+
+
+
 
 DATA_SCRIPTS_DIR := $(CURDIR_UNIX)/artifacts/build/data_scripts
 DATA_SCRIPTS_IR := $(DATA_SCRIPTS_DIR)/data_scripts.ir
@@ -1002,7 +1002,7 @@ build-data-scripts: check-bash
 	@echo "  To compile: $(S_COMPILER) scripts/legacy/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline"
 	@echo "✓ S implementation available at scripts/legacy/data_pipeline.s"
 
-clean-s: 
+clean-s:
 	@echo "Building NeurX data cleaning entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/data_scripts
 	@mkdir -p $(LOG_DIR)
@@ -1764,7 +1764,7 @@ diagnose-autoscroll-s: check-bash
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/diagnose_autoscroll/diagnose_autoscroll.ir' 2>&1 | tee -a $(LOG_DIR)/diagnose_autoscroll_$(shell date +%Y%m%d_%H%M%S).log
 
 
-# Logs helper targets
+
 logs:
 	@mkdir -p $(LOG_DIR)
 	@echo "Available logs in $(LOG_DIR):"

@@ -1,15 +1,15 @@
 package main
 
-// ============================================================================
-// NeurX Multi-node Training Launcher (S Language Implementation)
-//
-// English text:
-//   1. English texthostfileEnglish textconfiguration
-//   2. computeEnglish texttrainingEnglish textworld_size
-//   3. generateNCCLEnglish textIDEnglish textstep
-//   4. English textrankstartCUDAtrainingEnglish text
-//   5. managementEnglish text(SSH)English text
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
 
 use std.fs
 use std.os
@@ -17,9 +17,9 @@ use std.process
 use std.strings
 use std.io
 
-// ============================================================================
-// configurationEnglish text
-// ============================================================================
+
+
+
 
 struct host_node {
     string hostname
@@ -35,7 +35,7 @@ struct launcher_config {
     string nccl_id_file
     string shard_list_file
 
-    // modelparameter
+
     int pretrain_steps
     int micro_batch
     int seq_len
@@ -59,9 +59,9 @@ struct process_info {
     int process_id
 }
 
-// ============================================================================
-// English text
-// ============================================================================
+
+
+
 
 func get_env_or_default(string key, string default_val) string {
     string val = os::getenv(key)
@@ -87,38 +87,38 @@ func get_env_float_or_default(string key, float default_val) float {
     return strings::parse_float(val)
 }
 
-// ============================================================================
-// fileEnglish text
-// ============================================================================
+
+
+
 
 func read_hostfile(string path) []host_node {
     []host_node nodes = []host_node{}
 
-    // English textfileEnglish text
+
     if !fs::exists(path) {
         io::eprintln("hostfile not found: " + path)
         return nodes
     }
 
-    // English textfilecontent
+
     string content = fs::read_file(path)
     if content == "" {
         io::eprintln("hostfile is empty: " + path)
         return nodes
     }
 
-    // English text
+
     []string lines = strings::split(content, "\n")
 
     for i := 0; i < len(lines); i++ {
         string line = strings::trim(lines[i])
 
-        // English text
+
         if line == "" || strings::has_prefix(line, "#") {
             continue
         }
 
-        // English text "hostname gpu_count"
+
         []string parts = strings::split(line, " ")
         if len(parts) < 1 {
             continue
@@ -143,30 +143,30 @@ func read_hostfile(string path) []host_node {
 }
 
 func count_gpus_local() int {
-    // English textusenvidia-smicomputeGPUcount
-    // English textimplementation, actualEnglish textsystemEnglish text
-    return 1  // default1English textGPU
+
+
+    return 1
 }
 
-// ============================================================================
-// NCCL IDEnglish text
-// ============================================================================
+
+
+
 
 func write_nccl_id_file(string path, string id_data) bool {
-    // English textdirectory
+
     string dir = fs::dirname(path)
     if !fs::exists(dir) {
         fs::mkdir_all(dir)
     }
 
-    // English textfile
+
     string tmp_path = path + ".tmp"
     if !fs::write_file(tmp_path, id_data) {
         io::eprintln("cannot write NCCL id to: " + tmp_path)
         return false
     }
 
-    // English text
+
     if !fs::rename(tmp_path, path) {
         io::eprintln("cannot rename NCCL id file")
         return false
@@ -182,16 +182,16 @@ func read_nccl_id_file(string path) string {
     return fs::read_file(path)
 }
 
-// ============================================================================
-// configurationinitialize
-// ============================================================================
+
+
+
 
 func create_launcher_config() launcher_config {
-    // English textdirectory
+
     string script_dir = os::working_dir()
     string root_dir = get_env_or_default("NEURX_ROOT", script_dir)
 
-    // English textconfiguration
+
     launcher_config cfg
     cfg.root_dir = root_dir
     cfg.hostfile = get_env_or_default("NEURX_HOSTFILE",
@@ -204,7 +204,7 @@ func create_launcher_config() launcher_config {
     cfg.shard_list_file = get_env_or_default("NEURX_PRETRAIN_SHARD_LIST_FILE",
                                               root_dir + "/artifacts/build/run_large_pretrain/shard_list.txt")
 
-    // modelparameter
+
     cfg.pretrain_steps = get_env_int_or_default("NEURX_PRETRAIN_STEPS", 1000000000)
     cfg.micro_batch = get_env_int_or_default("NEURX_PRETRAIN_MICRO_BATCH", 1)
     cfg.seq_len = get_env_int_or_default("NEURX_PRETRAIN_SEQ_LEN", 256)
@@ -224,45 +224,45 @@ func create_launcher_config() launcher_config {
     return cfg
 }
 
-// ============================================================================
-// mainstartEnglish text
-// ============================================================================
+
+
+
 
 func launch_multinode_pretrain() int {
-    // 1. English textconfiguration
+
     launcher_config cfg = create_launcher_config()
 
-    // 2. English texthostfile
+
     []host_node nodes = read_hostfile(cfg.hostfile)
     if len(nodes) == 0 {
         io::eprintln("hostfile has no valid nodes: " + cfg.hostfile)
         return 2
     }
 
-    // 3. computeworld_size
+
     int world_size = 0
     for i := 0; i < len(nodes); i++ {
         world_size += nodes[i].gpu_count
     }
 
-    // 4. English textmaster_addr
+
     string master_addr = get_env_or_default("MASTER_ADDR", nodes[0].hostname)
 
-    // 5. English text
+
     fs::remove_file(cfg.nccl_id_file)
 
-    // 6. English textoutputdirectory
+
     if !fs::exists(cfg.output_dir) {
         fs::mkdir_all(cfg.output_dir)
     }
 
-    // 7. English textstartinformation
+
     io::println("[multinode] nodes=" + strings::from_int(len(nodes)) +
                 " world_size=" + strings::from_int(world_size) +
                 " master=" + master_addr + ":" + strings::from_int(cfg.master_port))
     io::println("[multinode] shared NCCL id: " + cfg.nccl_id_file)
 
-    // 8. startEnglish textrankEnglish texttrainingEnglish text
+
     []process_info processes = []process_info{}
     int global_rank = 0
 
@@ -270,16 +270,16 @@ func launch_multinode_pretrain() int {
         host_node node = nodes[node_idx]
 
         for local_rank := 0; local_rank < node.gpu_count; local_rank++ {
-            // English text
+
             []string env_vars = build_env_vars(cfg, master_addr, world_size,
                                                global_rank, node.gpu_count,
                                                len(nodes))
 
-            // English text
+
             string cmd = build_command(cfg, global_rank, local_rank, node.gpu_count,
                                        len(nodes))
 
-            // startEnglish text
+
             int pid = launch_process(node.hostname, cfg.root_dir, cmd, env_vars,
                                      cfg.output_dir, global_rank, len(nodes) == 1)
 
@@ -300,7 +300,7 @@ func launch_multinode_pretrain() int {
         }
     }
 
-    // 9. English text
+
     int exit_code = 0
     for i := 0; i < len(processes); i++ {
         process_info proc = processes[i]
@@ -313,9 +313,9 @@ func launch_multinode_pretrain() int {
     return exit_code
 }
 
-// ============================================================================
-// helperfunction
-// ============================================================================
+
+
+
 
 func build_env_vars(launcher_config cfg, string master_addr, int world_size,
                     int rank, int local_gpus, int num_nodes) []string {
@@ -350,7 +350,7 @@ func build_env_vars(launcher_config cfg, string master_addr, int world_size,
 
 func build_command(launcher_config cfg, int rank, int local_rank,
                    int local_gpus, int num_nodes) string {
-    // English textRequiredrankdirectoryEnglish text
+
     string ckpt_path = cfg.output_dir + "/transformer_v2.ckpt"
     if num_nodes > 1 {
         ckpt_path = cfg.output_dir + "/rank_" + strings::from_int(rank) + "/transformer_v2.ckpt"
@@ -364,25 +364,25 @@ func build_command(launcher_config cfg, int rank, int local_rank,
 
 func launch_process(string hostname, string root_dir, string cmd,
                     []string env_vars, string output_dir, int rank, bool is_local) int {
-    // English textcompleteEnglish text
+
     string full_cmd = build_full_command(cmd, env_vars, output_dir, rank, is_local)
 
     if is_local {
-        // English textstart
+
         if is_local {
-            // English text: English textoutput
+
             full_cmd = full_cmd + " 2>&1 | tee -a " + output_dir + "/rank_" + strings::from_int(rank) + ".log &"
         } else {
-            // English text: English textrun
+
             full_cmd = full_cmd + " >" + output_dir + "/rank_" + strings::from_int(rank) + ".log 2>&1 &"
         }
     } else {
-        // English textSSHstart
+
         full_cmd = "ssh " + hostname + " 'cd " + root_dir + " && " + full_cmd +
                    " >" + output_dir + "/rank_" + strings::from_int(rank) + ".log 2>&1' &"
     }
 
-    // English text(SlanguageEnglish textos::executeEnglish textsystemEnglish text)
+
     int pid = os::execute(full_cmd)
     return pid
 }
@@ -391,20 +391,20 @@ func build_full_command(string cmd, []string env_vars, string output_dir,
                         int rank, bool show_output) string {
     string full = ""
 
-    // English text
+
     for i := 0; i < len(env_vars); i++ {
         full = full + "export " + env_vars[i] + "; "
     }
 
-    // English textactualEnglish text
+
     full = full + cmd
 
     return full
 }
 
-// ============================================================================
-// mainfunction
-// ============================================================================
+
+
+
 
 func main() int {
     return launch_multinode_pretrain()

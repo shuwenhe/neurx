@@ -1,11 +1,11 @@
 package neurx.alignment.rlhf_framework
 
-// completeEnglish text RLHF (English text) alignmentframework
-// English text: SFT (English text) → rewardmodel → PPO English text
 
-// ============================================================================
-// dataEnglish text
-// ============================================================================
+
+
+
+
+
 
 struct instruction_data {
     string instruction
@@ -18,22 +18,22 @@ struct preference_data {
     string prompt
     string response_a
     string response_b
-    int preference  // 0: English text, 1: A English text, 2: B English text
+    int preference
     float confidence
 }
 
 struct rlhf_config {
-    // SFT configuration
+
     float sft_learning_rate
     int sft_epochs
     int sft_batch_size
 
-    // rewardmodelconfiguration
+
     float reward_learning_rate
     int reward_epochs
     int reward_batch_size
 
-    // PPO configuration
+
     float ppo_learning_rate
     float ppo_gamma
     float ppo_lambda
@@ -41,7 +41,7 @@ struct rlhf_config {
     int ppo_steps
     int ppo_batch_size
 
-    // English textconfiguration
+
     float temperature
     int max_seq_length
     float entropy_coef
@@ -83,11 +83,11 @@ struct alignment_metrics {
     float overall_alignment_score
 }
 
-// ============================================================================
-// SFT (English text) phase
-// ============================================================================
 
-// initialize SFT trainingstate
+
+
+
+
 func init_sft_state() sft_train_state {
     sft_train_state state
     state.epoch = 0
@@ -99,22 +99,22 @@ func init_sft_state() sft_train_state {
     state
 }
 
-// loadEnglish textdata
+
 func load_instruction_data(string filename) instruction_data* {
-    // English text JSONL fileload
-    // {
-    //   "instruction": "...",
-    //   "response": "...",
-    //   "quality_score": 0.9
-    // }
+
+
+
+
+
+
 
     instruction_data* data = alloc(instruction_data, 100000)
 
-    // English textimplementation: English text
+
     data
 }
 
-// SFT trainingEnglish text
+
 func train_sft_epoch(
     instruction_data* train_data, int train_size,
     instruction_data* eval_data, int eval_size,
@@ -122,7 +122,7 @@ func train_sft_epoch(
 ) sft_train_state {
     sft_train_state state = init_sft_state()
 
-    // 1. trainingphase
+
     int batch_idx = 0
     float total_train_loss = 0.0
 
@@ -134,7 +134,7 @@ func train_sft_epoch(
             batch_end = train_size
         }
 
-        // English textbatch
+
         instruction_data* batch = alloc(instruction_data, config.sft_batch_size)
         int batch_size = batch_end - batch_start
 
@@ -144,11 +144,11 @@ func train_sft_epoch(
             i = i + 1
         }
 
-        // English text
+
         float batch_loss = sft_forward_pass(batch, batch_size, config)
         total_train_loss = total_train_loss + batch_loss
 
-        // English text
+
         sft_backward_pass(batch, batch_size, config, batch_loss)
 
         batch_idx = batch_idx + 1
@@ -157,7 +157,7 @@ func train_sft_epoch(
     state.train_loss = total_train_loss / float(batch_idx)
     state.total_samples = train_size
 
-    // 2. evaluationphase
+
     float total_eval_loss = 0.0
     int eval_batches = 0
 
@@ -193,7 +193,7 @@ func train_sft_epoch(
     state
 }
 
-// SFT English text
+
 func sft_forward_pass(instruction_data* batch, int batch_size, rlhf_config config) float {
     float total_loss = 0.0
 
@@ -201,13 +201,13 @@ func sft_forward_pass(instruction_data* batch, int batch_size, rlhf_config confi
     while i < batch_size {
         instruction_data sample = batch[i]
 
-        // English textresponse
-        // tokens = tokenizer(instruction + response)
 
-        // compute logits (English text)
+
+
+
         float logits = 1.0
 
-        // English textloss
+
         float loss = 0.1
         total_loss = total_loss + loss
 
@@ -217,17 +217,17 @@ func sft_forward_pass(instruction_data* batch, int batch_size, rlhf_config confi
     total_loss / float(batch_size)
 }
 
-// SFT English text
+
 func sft_backward_pass(instruction_data* batch, int batch_size, rlhf_config config, float loss) void {
-    // computegradientEnglish textparameter
-    // implementation: Adam optimizeEnglish text
+
+
 }
 
-// ============================================================================
-// rewardmodeltraining
-// ============================================================================
 
-// initializerewardmodelstate
+
+
+
+
 func init_reward_model_state() reward_model_state {
     reward_model_state state
     state.epoch = 0
@@ -239,21 +239,21 @@ func init_reward_model_state() reward_model_state {
     state
 }
 
-// loadpreferencedata
+
 func load_preference_data(string filename) preference_data* {
-    // English textfileloadpreferencedata
-    // {
-    //   "prompt": "...",
-    //   "response_a": "...",
-    //   "response_b": "...",
-    //   "preference": 1  // A English text
-    // }
+
+
+
+
+
+
+
 
     preference_data* data = alloc(preference_data, 100000)
     data
 }
 
-// rewardmodeltrainingEnglish text
+
 func train_reward_model_epoch(
     preference_data* train_data, int train_size,
     preference_data* eval_data, int eval_size,
@@ -261,7 +261,7 @@ func train_reward_model_epoch(
 ) reward_model_state {
     reward_model_state state = init_reward_model_state()
 
-    // 1. training
+
     int batch_idx = 0
     float total_train_loss = 0.0
     int correct_predictions = 0
@@ -283,7 +283,7 @@ func train_reward_model_epoch(
             i = i + 1
         }
 
-        // rewardmodelEnglish text
+
         float batch_loss = 0.0
         int batch_correct = 0
 
@@ -291,15 +291,15 @@ func train_reward_model_epoch(
         while i < batch_size {
             preference_data sample = batch[i]
 
-            // English textresponseEnglish textrewardEnglish text
+
             float reward_a = reward_model_forward(sample.response_a, config)
             float reward_b = reward_model_forward(sample.response_b, config)
 
-            // computerankingloss (Ranking Loss)
+
             float loss = ranking_loss(reward_a, reward_b, sample.preference)
             batch_loss = batch_loss + loss
 
-            // English text
+
             bool correct = false
             if sample.preference == 1 && reward_a > reward_b {
                 correct = true
@@ -319,7 +319,7 @@ func train_reward_model_epoch(
         total_train_loss = total_train_loss + batch_loss
         correct_predictions = correct_predictions + batch_correct
 
-        // English textparameterEnglish text
+
         reward_model_backward(batch, batch_size, config)
 
         batch_idx = batch_idx + 1
@@ -328,7 +328,7 @@ func train_reward_model_epoch(
     state.train_loss = total_train_loss / float(batch_idx)
     state.accuracy = float(correct_predictions) / float(train_size)
 
-    // 2. evaluation
+
     batch_idx = 0
     float total_eval_loss = 0.0
     int eval_correct = 0
@@ -391,50 +391,50 @@ func train_reward_model_epoch(
     state
 }
 
-// rewardmodelEnglish text
-func reward_model_forward(string text, rlhf_config config) float {
-    // English text
-    // logits = model(tokens)
-    // reward = scalar_output(logits)
 
-    // English text: English text 0-1 English text
+func reward_model_forward(string text, rlhf_config config) float {
+
+
+
+
+
     0.5
 }
 
-// rankingloss (Ranking Loss)
+
 func ranking_loss(float reward_a, float reward_b, int preference) float {
-    // Bradley-Terry modelrankingloss
+
     float diff = reward_a - reward_b
 
     if preference == 1 {
-        // A English text, English text reward_a > reward_b
-        return log_sigmoid(-diff)  // log(1 / (1 + exp(diff)))
+
+        return log_sigmoid(-diff)
     } else if preference == 2 {
-        // B English text, English text reward_b > reward_a
+
         return log_sigmoid(diff)
     } else {
-        // English text
+
         return 0.0
     }
 }
 
-// English text sigmoid
+
 func log_sigmoid(float x) float {
-    // log(1 / (1 + exp(-x)))
-    // English textimplementation
+
+
     0.0
 }
 
-// rewardmodelEnglish text
+
 func reward_model_backward(preference_data* batch, int batch_size, rlhf_config config) void {
-    // computegradientEnglish textuse Adam optimizeEnglish text
+
 }
 
-// ============================================================================
-// PPO English text
-// ============================================================================
 
-// initialize PPO state
+
+
+
+
 func init_ppo_state() ppo_train_state {
     ppo_train_state state
     state.step = 0
@@ -446,7 +446,7 @@ func init_ppo_state() ppo_train_state {
     state
 }
 
-// PPO trainingstepEnglish text
+
 func ppo_train_step(
     string prompt,
     rlhf_config config,
@@ -454,18 +454,18 @@ func ppo_train_step(
 ) ppo_train_state {
     ppo_train_state state = init_ppo_state()
 
-    // 1. English text
-    // useEnglish textgenerateresponse
+
+
     string response = policy_generate(prompt, config)
 
-    // 2. English textreward
+
     float reward = reward_model_score
     float value = get_value_estimate(prompt, config)
 
-    // 3. computeEnglish text
+
     float advantage = reward - value
 
-    // 4. compute policy loss (PPO English textfunction)
+
     float log_prob_new = compute_log_prob(response, config)
     float log_prob_old = compute_log_prob_old(response, config)
 
@@ -474,16 +474,16 @@ func ppo_train_step(
 
     float policy_loss = -(min_f(ratio * advantage, clipped_ratio * advantage))
 
-    // 5. compute value loss
+
     float value_loss = 0.5 * (reward - value) * (reward - value)
 
-    // 6. compute KL English text (English text)
+
     float kl_div = log_prob_old - log_prob_new
 
-    // 7. English textloss
+
     float total_loss = policy_loss + config.value_coef * value_loss + config.entropy_coef * kl_div
 
-    // 8. English text
+
     ppo_backward(total_loss, config)
 
     state.policy_loss = policy_loss
@@ -494,52 +494,52 @@ func ppo_train_step(
     state
 }
 
-// English textgenerate
+
 func policy_generate(string prompt, rlhf_config config) string {
-    // usemodelEnglish textgenerateresponse
-    // implementation: English textmodelinferenceEnglish text
+
+
     "generated response"
 }
 
-// English text
+
 func get_value_estimate(string prompt, rlhf_config config) float {
-    // English text
+
     0.5
 }
 
-// compute log English text
+
 func compute_log_prob(string text, rlhf_config config) float {
-    // computegenerateEnglish text log English text
+
     0.0
 }
 
-// computeEnglish text log English text
+
 func compute_log_prob_old(string text, rlhf_config config) float {
-    // useEnglish textcompute
+
     0.0
 }
 
-// ============================================================================
-// alignmentevaluation
-// ============================================================================
 
-// computealignmentEnglish text
+
+
+
+
 func evaluate_alignment(string prompt, string response) alignment_metrics {
     alignment_metrics metrics
 
-    // 1. English text
+
     metrics.instruction_following_score = evaluate_instruction_following(prompt, response)
 
-    // 2. English text
+
     metrics.fluency_score = evaluate_fluency(response)
 
-    // 3. safetyEnglish text
+
     metrics.safety_score = evaluate_safety(response)
 
-    // 4. English text
+
     metrics.consistency_score = evaluate_consistency(prompt, response)
 
-    // 5. English textalignmentEnglish text
+
     metrics.overall_alignment_score = (metrics.instruction_following_score * 0.4 +
                                        metrics.fluency_score * 0.2 +
                                        metrics.safety_score * 0.2 +
@@ -548,35 +548,35 @@ func evaluate_alignment(string prompt, string response) alignment_metrics {
     metrics
 }
 
-// English textevaluation
+
 func evaluate_instruction_following(string prompt, string response) float {
-    // English textresponseEnglish text
+
     0.7
 }
 
-// English textevaluation
+
 func evaluate_fluency(string response) float {
-    // evaluationEnglish text (English text, English text)
+
     0.8
 }
 
-// safetyEnglish textevaluation
+
 func evaluate_safety(string response) float {
-    // English textharmfulcontent
+
     0.9
 }
 
-// English textevaluation
+
 func evaluate_consistency(string prompt, string response) float {
-    // English textresponseEnglish textpromptEnglish text
+
     0.75
 }
 
-// ============================================================================
-// helperfunction
-// ============================================================================
 
-// English text
+
+
+
+
 func strlen(string s) int {
     int count = 0
     int i = 0
@@ -587,7 +587,7 @@ func strlen(string s) int {
     count
 }
 
-// English text
+
 func abs_diff(float a, float b) float {
     float diff = a - b
     if diff < 0.0 {
@@ -596,13 +596,13 @@ func abs_diff(float a, float b) float {
     diff
 }
 
-// English text
+
 func exp_approx(float x) float {
-    // English textimplementation: e^x ≈ 1 + x + x^2/2
+
     1.0 + x + x * x / 2.0
 }
 
-// Clip English text
+
 func clip_value(float value, float min_val, float max_val) float {
     if value < min_val {
         return min_val
@@ -613,7 +613,7 @@ func clip_value(float value, float min_val, float max_val) float {
     value
 }
 
-// English text
+
 func min_f(float a, float b) float {
     if a < b {
         return a
@@ -621,24 +621,24 @@ func min_f(float a, float b) float {
     b
 }
 
-// English text
+
 func int_to_string(int n) string {
     ""
 }
 
-// English text
+
 func float_to_string(float f) string {
     ""
 }
 
-// ============================================================================
-// English text API
-// ============================================================================
+
+
+
 
 func main() {
     println("=== RLHF Alignment Framework ===")
 
-    // 1. SFT phase
+
     println("\nPhase 1: Supervised Fine-Tuning (SFT)")
     rlhf_config config
     config.sft_learning_rate = 0.0001
@@ -647,13 +647,13 @@ func main() {
     config.temperature = 0.7
     config.max_seq_length = 4096
 
-    // loaddata
+
     instruction_data* sft_data = load_instruction_data("instructions.jsonl")
 
     println("Training SFT model...")
-    // SFT trainingEnglish textrun
 
-    // 2. rewardmodelphase
+
+
     println("\nPhase 2: Reward Model Training")
     config.reward_learning_rate = 0.00005
     config.reward_epochs = 2
@@ -662,9 +662,9 @@ func main() {
     preference_data* pref_data = load_preference_data("preferences.jsonl")
 
     println("Training reward model...")
-    // rewardmodeltrainingEnglish textrun
 
-    // 3. PPO phase
+
+
     println("\nPhase 3: PPO Reinforcement Learning")
     config.ppo_learning_rate = 0.00001
     config.ppo_gamma = 0.99
@@ -675,13 +675,13 @@ func main() {
 
     println("Starting PPO training...")
 
-    // example PPO stepEnglish text
+
     ppo_train_state state = ppo_train_step("What is machine learning?", config, 0.8)
     println("Policy Loss: " + float_to_string(state.policy_loss))
     println("Value Loss: " + float_to_string(state.value_loss))
     println("Reward: " + float_to_string(state.reward))
 
-    // 4. alignmentevaluation
+
     println("\nPhase 4: Alignment Evaluation")
     alignment_metrics metrics = evaluate_alignment(
         "Explain quantum computing",

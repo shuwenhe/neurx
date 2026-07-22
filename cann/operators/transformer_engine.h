@@ -64,11 +64,11 @@ class TransformerPrimitiveBackend {
                              const TensorView& output, Stream stream) = 0;
 };
 
-// Runs the decoder-only transformer using an externally supplied FP16
-// activation arena. Vendor-specific code only implements the primitive calls;
-// layer ordering, weight mapping and KV lifecycle remain deterministic here.
+
+
+
 Status execute_transformer(const inference::DeviceBatch& batch,
                            const Nxtrfmv2Model& model, PagedKvCache& cache,
                            TransformerPrimitiveBackend& backend);
 
-}  // namespace neurx::cann
+}

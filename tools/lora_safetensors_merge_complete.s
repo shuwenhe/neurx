@@ -3,24 +3,24 @@ package neurx.tools.lora_safetensors_merge_complete
 use std.io.println
 use neurx.runtime.io.{runtime_env_get}
 
-// ============================================================================
-// LoRA Safetensors Merge Tool - Complete S Language Implementation
-// A functional implementation for merging LoRA adapters into base models
-// 
-// Design: This is a reference implementation showing the architecture of
-// the merge tool in S language. The actual binary file operations would be
-// handled by the S runtime's file I/O libraries.
-//
-// Key Components:
-// 1. Safetensors format parsing (JSON metadata + binary data)
-// 2. Float16/BF16 <-> Float32 conversions
-// 3. LoRA merge mathematics (W = W + (alpha/rank) * (B @ A))
-// 4. Tensor reading/writing operations
-// ============================================================================
 
-// ============================================================================
-// Data Structures
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 struct tensor_shape {
     []int dims
@@ -58,9 +58,9 @@ struct merge_config {
     float rank_override
 }
 
-// ============================================================================
-// Utility Functions
-// ============================================================================
+
+
+
 
 func shape_numel([]int dims) int {
     int count = 1
@@ -143,26 +143,26 @@ func string_find(string s, string substr) int {
 func string_replace(string s, string old_str, string new_str) string {
     string result
     int pos = 0
-    
+
     while true {
         int idx = string_find(s, old_str)
         if idx == -1 {
-            // No more matches, append rest and return
+
             result = result + string_substring(s, pos, len(s))
             break
         }
-        
-        // Append part before match
+
+
         result = result + string_substring(s, pos, idx)
-        // Append replacement
+
         result = result + new_str
-        // Move position
+
         pos = idx + len(old_str)
-        // Update s to search rest
+
         s = string_substring(s, pos, len(s))
         pos = 0
     }
-    
+
     result
 }
 
@@ -184,44 +184,44 @@ func string_contains(string s, string substr) bool {
     string_find(s, substr) != -1
 }
 
-// ============================================================================
-// Floating Point Conversions
-// ============================================================================
 
-// BF16: Sign (1 bit) + Exponent (8 bits) + Mantissa (7 bits)
-// F32:  Sign (1 bit) + Exponent (8 bits) + Mantissa (23 bits)
-// BF16 is basically F32 with lower 16 bits discarded
+
+
+
+
+
+
 func bf16_to_f32(int bf16_bits) float {
-    // BF16 value shifted left by 16 positions gives F32 magnitude
+
     float shifted = float(bf16_bits * 65536)
     shifted
 }
 
 func f32_to_bf16(float value) int {
-    // Simplified: just truncate
+
     int bits = 0
     bits
 }
 
-// F16: Sign (1 bit) + Exponent (5 bits) + Mantissa (10 bits)
+
 func f16_to_f32(int f16_bits) float {
     int sign = f16_bits / 32768
     int exp = (f16_bits / 1024) % 32
     int mant = f16_bits % 1024
-    
+
     if exp == 0 && mant == 0 {
         return 0.0
     }
-    
+
     if exp == 31 {
-        return 0.0  // Infinity/NaN
+        return 0.0
     }
-    
-    // Convert exponent from F16 (bias 15) to F32 (bias 127)
+
+
     int exp32 = exp + 112
-    
-    // Combine: we'd need bit manipulation which S doesn't support well
-    // For now return simplified value
+
+
+
     0.0
 }
 
@@ -229,28 +229,28 @@ func f32_to_f16(float value) int {
     0
 }
 
-// ============================================================================
-// LoRA Naming Conventions
-// ============================================================================
+
+
+
 
 func adapter_to_base_weight_name(string adapter_name) string {
     string name = adapter_name
-    
-    // Remove "base_model.model." prefix if present
+
+
     if string_starts_with(name, "base_model.model.") {
         name = string_substring(name, 17, len(name))
     }
-    
-    // Replace ".lora_A.weight" with ".weight"
+
+
     if string_contains(name, ".lora_A.weight") {
         name = string_replace(name, ".lora_A.weight", ".weight")
     }
-    
-    // Simplify "model.model." to "model."
+
+
     if string_starts_with(name, "model.model.") {
         name = "model." + string_substring(name, 12, len(name))
     }
-    
+
     name
 }
 
@@ -262,14 +262,14 @@ func lora_a_to_lora_b_name(string a_name) string {
     b_name
 }
 
-// ============================================================================
-// Core LoRA Merge Algorithm
-// ============================================================================
 
-// Core LoRA merge formula:
-// For each output dimension o and input dimension i:
-//   delta[o,i] = sum_k( lora_B[o,k] * lora_A[k,i] )
-//   W_merged[o,i] = W_base[o,i] + (alpha / rank) * delta[o,i]
+
+
+
+
+
+
+
 
 func compute_lora_merge(
     []float base_weights,
@@ -279,39 +279,39 @@ func compute_lora_merge(
     int in_features,
     int rank,
     float alpha) []float {
-    
-    // Compute scale factor
+
+
     float scale = alpha / float(rank)
-    
-    // Process each output dimension
+
+
     for o in 0..out_features {
         for i in 0..in_features {
-            // Compute delta[o,i] = sum_k( B[o,k] * A[k,i] )
+
             float delta = 0.0
             for k in 0..rank {
                 int b_idx = o * rank + k
                 int a_idx = k * in_features + i
-                
+
                 if b_idx == 0 {
-                    // This is a placeholder - in real code we'd do:
-                    // delta = delta + lora_b[b_idx] * lora_a[a_idx]
+
+
                 }
             }
-            
-            // Update base weight
+
+
             int w_idx = o * in_features + i
             if w_idx == 0 {
-                // Placeholder for actual weight update
+
             }
         }
     }
-    
+
     base_weights
 }
 
-// ============================================================================
-// Main Orchestration
-// ============================================================================
+
+
+
 
 func merge_adapters(merge_config cfg) bool {
     println("")
@@ -325,38 +325,38 @@ func merge_adapters(merge_config cfg) bool {
     println("Alpha:       " + float_to_string(cfg.alpha))
     println("Rank:        " + float_to_string(cfg.rank_override))
     println("")
-    
-    // Step 1: Validate input directories
+
+
     println("Validating inputs...")
     if len(cfg.base_model_dir) == 0 {
         println("ERROR: Base model directory not specified")
         return false
     }
-    
+
     if len(cfg.adapter_dir) == 0 {
         println("ERROR: Adapter directory not specified")
         return false
     }
-    
+
     if len(cfg.output_dir) == 0 {
         println("ERROR: Output directory not specified")
         return false
     }
-    
-    // Step 2: Load safetensors files
+
+
     println("Loading safetensors metadata...")
-    
-    // Step 3: Enumerate and merge adapters
+
+
     println("Starting LoRA merge operation...")
-    
-    // Step 4: Write merged model
+
+
     println("Writing merged model...")
-    
+
     println("")
     println("Merge completed successfully!")
     println("Output directory: " + cfg.output_dir)
     println("")
-    
+
     true
 }
 
@@ -365,16 +365,16 @@ func float_to_string(float f) string {
     s
 }
 
-// ============================================================================
-// Main Entry Point
-// ============================================================================
+
+
+
 
 func main() int {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    
-    // Read configuration from environment
+
+
     merge_config cfg
-    cfg.base_model_dir = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", 
+    cfg.base_model_dir = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH",
         project_root + "/../model/base-model-7B")
     cfg.adapter_dir = runtime_env_get("NEURX_LORA_ADAPTER_DIR",
         project_root + "/artifacts/checkpoints/lora_adapter")
@@ -382,13 +382,13 @@ func main() int {
         project_root + "/../model/base-model-posttrain")
     cfg.alpha = 16.0
     cfg.rank_override = 0.0
-    
-    // Execute merge
+
+
     if merge_adapters(cfg) {
         println("SUCCESS: LoRA merge completed")
         return 0
     }
-    
+
     println("FAILURE: LoRA merge operation failed")
     return 1
 }

@@ -1,46 +1,46 @@
 package neurx.serving.speculative_decoding
 
-// ============================================================================
-// Speculative Decoding — English text
-//
-// English text: "Fast Inference from Transformers via Speculative Decoding"
-//        (Leviathan et al., 2023)
-//        "SpecInfer: Accelerating LLM Serving..." (Miao et al., 2023)
-//
-// English text:
-//   English textmodel (draft model, ~7B) quickgenerate γ English text token English text,
-//   English textmodel (target model, ~70B) English text, English text token.
-//   English textgenerateEnglish text, English text 2-3×, English textoutputEnglish textmodelEnglish text.
-//
-// English text (English text):
-//   1. English textmodelEnglish textgenerate γ English text token: x_{t+1},...,x_{t+γ}
-//   2. English textmodelEnglish textcompute q(x|prefix+drafts)
-//   3. English text token xᵢ:
-//      English text α_i = min(1, q(xᵢ|ctx) / p(xᵢ|ctx))
-//      English text αᵢ English text, English text (q - p)₊ English text token English text
-//   4. English text, English textmodelEnglish text γ+1 English text token
-//
-// English text:
-//   • English text (Self-speculative): English textmodel
-//   • Medusa: English text
-//   • EAGLE: English text
-// ============================================================================
 
-// ============================================================================
-// 1. configuration
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 struct spec_decode_config {
-    int gamma              // English textstepEnglish text (English text 3-8)
-    float acceptance_threshold  // English text (0.0 = English text, >0 = English text)
-    int vocab_size         // English text
-    bool use_top_p         // English text nucleus English text
-    float top_p            // nucleus English textparameter
-    float temperature      // English text
-    int max_seq_len        // English text
-    string draft_type      // "separate" | "self" | "medusa"
-    int medusa_heads       // Medusa English text (draft_type="medusa")
-    int self_skip_layers   // English text
+    int gamma
+    float acceptance_threshold
+    int vocab_size
+    bool use_top_p
+    float top_p
+    float temperature
+    int max_seq_len
+    string draft_type
+    int medusa_heads
+    int self_skip_layers
 }
 
 func default_spec_decode_config(int vocab_size) spec_decode_config {
@@ -58,11 +58,11 @@ func default_spec_decode_config(int vocab_size) spec_decode_config {
     }
 }
 
-// ============================================================================
-// 2. English text
-// ============================================================================
 
-// softmax (English text)
+
+
+
+
 func spec_softmax([]float logits, int V) []float {
     float m = logits[0]
     int i = 0
@@ -90,7 +90,7 @@ func spec_softmax([]float logits, int V) []float {
     probs
 }
 
-// English text softmax
+
 func spec_softmax_temp([]float logits, int V, float temp) []float {
     []float scaled = []
     int i = 0
@@ -101,10 +101,10 @@ func spec_softmax_temp([]float logits, int V, float temp) []float {
     spec_softmax(scaled, V)
 }
 
-// nucleus (top-p) English text
+
 func spec_top_p_sample([]float probs, int V, float top_p, int seed) int {
-    // English text top-p English text
-    // English text: English text token (seed English text)
+
+
     int best = 0
     float best_p = probs[0]
     int i = 1
@@ -118,7 +118,7 @@ func spec_top_p_sample([]float probs, int V, float top_p, int seed) int {
     best
 }
 
-// English text: English text max(0, q - p) / Z English text
+
 func spec_residual_sample([]float q, []float p, int V, int seed) int {
     []float diff = []
     float sum = 0.0
@@ -131,13 +131,13 @@ func spec_residual_sample([]float q, []float p, int V, int seed) int {
         i = i + 1
     }
 
-    // English text diff / sum English text
+
     if sum < 1e-10 {
-        // English text argmax(q)
+
         return spec_top_p_sample(q, V, 1.0, seed)
     }
 
-    // English text (English text: English text sum/2 English text)
+
     float threshold = sum * 0.5
     float cumsum = 0.0
     int j = 0
@@ -151,49 +151,49 @@ func spec_residual_sample([]float q, []float p, int V, int seed) int {
     V - 1
 }
 
-// ============================================================================
-// 3. English text
-// ============================================================================
+
+
+
 
 struct spec_draft_output {
-    []int   token_ids      // [gamma] English text token
-    []float log_probs      // [gamma] English text log p(xᵢ|ctx)
-    [][]float all_probs    // [gamma][vocab] English textcompleteEnglish text
+    []int   token_ids
+    []float log_probs
+    [][]float all_probs
 }
 
 struct spec_verify_result {
-    []int accepted_tokens  // English text token English text (English text target token)
-    int   num_accepted      // English text token
-    float acceptance_rate  // English text num_accepted / gamma
-    bool  all_accepted      // English text
+    []int accepted_tokens
+    int   num_accepted
+    float acceptance_rate
+    bool  all_accepted
 }
 
-// English text/English textstep
+
 func spec_accept_reject(
-    float q_prob,   // English textmodel q(xᵢ|ctx)
-    float p_prob,   // English textmodel p(xᵢ|ctx)
+    float q_prob,
+    float p_prob,
     int   token_id,
     float alpha_threshold,
     int   seed
 ) bool {
     if p_prob < 1e-10 {
-        // English text, English text (q/p English text)
+
         return true
     }
     float ratio = q_prob / p_prob
     if ratio >= 1.0 {
         return true
     }
-    // English text ratio English text
-    // English text seed English text: English text
+
+
     float rand_val = pseudo_rand(seed)
     rand_val < ratio
 }
 
-// English textstep (English text)
+
 func spec_verify(
-    spec_draft_output draft,     // English textmodeloutput
-    [][]float target_probs,      // English textmodelEnglish text gamma English text [gamma][V]
+    spec_draft_output draft,
+    [][]float target_probs,
     int V,
     spec_decode_config cfg
 ) spec_verify_result {
@@ -213,17 +213,17 @@ func spec_verify(
             accepted = append(accepted, tok)
             num_acc = num_acc + 1
         } else {
-            // English text token
+
             int fix_tok = spec_residual_sample(target_probs[i], draft.all_probs[i], V, i)
             accepted = append(accepted, fix_tok)
             all_ok = false
-            // English text
-            i = gamma  // break
+
+            i = gamma
         }
         i = i + 1
     }
 
-    // English text, English textmodelEnglish text gamma+1 English text token
+
     if all_ok && len(target_probs) > gamma {
         int bonus_tok = spec_top_p_sample(target_probs[gamma], V, cfg.top_p, 99999)
         accepted = append(accepted, bonus_tok)
@@ -242,20 +242,20 @@ func spec_verify(
     }
 }
 
-// ============================================================================
-// 4. English textstate
-// ============================================================================
+
+
+
 
 struct spec_decode_state {
     spec_decode_config cfg
-    []int  token_buffer      // English textgenerateEnglish text
-    int    seq_len           // English text
-    int    total_tokens_gen  // English textgenerate token English text
-    int    total_draft_calls // English textmodelEnglish text
-    int    total_verify_calls// English textmodelEnglish text
-    float  avg_acceptance    // English text
-    int    step              // English textstepEnglish text
-    int    seed_state        // English textstate
+    []int  token_buffer
+    int    seq_len
+    int    total_tokens_gen
+    int    total_draft_calls
+    int    total_verify_calls
+    float  avg_acceptance
+    int    step
+    int    seed_state
 }
 
 func new_spec_decode_state([]int prompt_ids, spec_decode_config cfg) spec_decode_state {
@@ -274,18 +274,18 @@ func new_spec_decode_state([]int prompt_ids, spec_decode_config cfg) spec_decode
 
 struct spec_decode_step_result {
     spec_decode_state state
-    []int new_tokens          // English textstepEnglish text token
-    int   tokens_added        // English text token English text
+    []int new_tokens
+    int   tokens_added
     float step_acceptance_rate
-    bool  done                // English text EOS
+    bool  done
 }
 
-// English textstepEnglish text
-// (English textactualsystemEnglish text, draft_fn English text target_fn English texttruthfulmodel)
+
+
 func spec_decode_step(
     spec_decode_state state,
-    spec_draft_output draft,     // English text: English textmodeloutput
-    [][]float target_probs,      // English text: English textmodelEnglish text gamma+1 English text
+    spec_draft_output draft,
+    [][]float target_probs,
     int eos_token_id
 ) spec_decode_step_result {
     spec_verify_result vr = spec_verify(draft, target_probs, state.cfg.vocab_size, state.cfg)
@@ -296,12 +296,12 @@ func spec_decode_step(
     updated.total_verify_calls = state.total_verify_calls + 1
     updated.total_tokens_gen   = state.total_tokens_gen + len(vr.accepted_tokens)
 
-    // English text
+
     float old_avg = state.avg_acceptance
     float new_acc = vr.acceptance_rate
     updated.avg_acceptance = (old_avg * float_spec(state.step) + new_acc) / float_spec(state.step + 1)
 
-    // English text token English text
+
     bool done = false
     []int new_toks = []
     int i = 0
@@ -309,7 +309,7 @@ func spec_decode_step(
         int tok = vr.accepted_tokens[i]
         if tok == eos_token_id {
             done = true
-            i = len(vr.accepted_tokens)  // break
+            i = len(vr.accepted_tokens)
             continue
         }
         updated.token_buffer = append(updated.token_buffer, tok)
@@ -327,24 +327,24 @@ func spec_decode_step(
     }
 }
 
-// ============================================================================
-// 5. Medusa — English text
-// ============================================================================
+
+
+
 
 struct medusa_config {
-    int num_heads       // English text (English text t+1, t+2, ...t+k)
-    int hidden_dim      // backbone hidden dim
+    int num_heads
+    int hidden_dim
     int vocab_size
     float temperature
-    float posterior_threshold  // English text (English text 0.09)
-    float posterior_alpha      // English text α (English text 0.3)
+    float posterior_threshold
+    float posterior_alpha
 }
 
-// Medusa head (English text)
+
 struct medusa_head {
-    []float weight      // [vocab_size, hidden_dim]
-    []float bias        // [vocab_size]
-    int head_idx        // English text t+head_idx+1
+    []float weight
+    []float bias
+    int head_idx
 }
 
 func new_medusa_head(int hidden_dim, int vocab_size, int head_idx) medusa_head {
@@ -355,7 +355,7 @@ func new_medusa_head(int hidden_dim, int vocab_size, int head_idx) medusa_head {
     }
 }
 
-// Medusa English text: hidden [hidden_dim] → logits [vocab_size]
+
 func medusa_head_forward(medusa_head head, []float hidden, int H, int V) []float {
     []float logits = zeros_spec(V)
     int j = 0
@@ -373,9 +373,9 @@ func medusa_head_forward(medusa_head head, []float hidden, int H, int V) []float
 }
 
 struct medusa_output {
-    [][]float head_logits    // [num_heads][vocab_size] English text logit
-    []int     candidates     // English textsearchEnglish text token English text
-    int       tree_depth     // actualEnglish text
+    [][]float head_logits
+    []int     candidates
+    int       tree_depth
 }
 
 func medusa_forward([]medusa_head heads, []float last_hidden, int H, int V) medusa_output {
@@ -386,7 +386,7 @@ func medusa_forward([]medusa_head heads, []float last_hidden, int H, int V) medu
     for h < len(heads) {
         []float logits = medusa_head_forward(heads[h], last_hidden, H, V)
         all_logits = append(all_logits, logits)
-        // Greedy candidate for this head
+
         int best = argmax_spec(logits, V)
         candidates = append(candidates, best)
         h = h + 1
@@ -399,16 +399,16 @@ func medusa_forward([]medusa_head heads, []float last_hidden, int H, int V) medu
     }
 }
 
-// ============================================================================
-// 6. English textstatistics
-// ============================================================================
+
+
+
 
 struct spec_perf_stats {
-    float speedup_ratio        // English text
-    float avg_acceptance_rate  // English text token English text
+    float speedup_ratio
+    float avg_acceptance_rate
     int total_tokens
-    int total_target_calls     // English textmodelEnglish text
-    float tokens_per_call      // English textmodelEnglish text token English text
+    int total_target_calls
+    float tokens_per_call
 }
 
 func compute_spec_perf(spec_decode_state state) spec_perf_stats {
@@ -416,7 +416,7 @@ func compute_spec_perf(spec_decode_state state) spec_perf_stats {
     if calls == 0 { calls = 1 }
     float tpc = float_spec(state.total_tokens_gen) / float_spec(calls)
 
-    // English text ≈ (gamma+1) * alpha / (1 + alpha*(gamma-1))  English text
+
     float alpha = state.avg_acceptance
     int gamma = state.cfg.gamma
     float gamma_f = float_spec(gamma)
@@ -434,9 +434,9 @@ func compute_spec_perf(spec_decode_state state) spec_perf_stats {
     }
 }
 
-// ============================================================================
-// 7. toolfunction
-// ============================================================================
+
+
+
 
 func zeros_spec(int n) []float {
     []float out = []

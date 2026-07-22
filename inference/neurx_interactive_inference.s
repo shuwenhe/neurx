@@ -1,13 +1,13 @@
-// NeurX Interactive Inference - Pure S Language
-// Real model inference with user input
+
+
 
 module neurx_interactive_inference
 
-// Deterministic model inference based on input
+
 func infer_medical_response(string user_input) string {
     string response = ""
-    
-    // Knowledge base matching
+
+
     if len(user_input) == 0 {
         response = "Please ask me a medical question."
     } else if user_input == "hello" {
@@ -41,31 +41,31 @@ func infer_medical_response(string user_input) string {
     } else {
         response = "I am a medical AI assistant. Please ask a specific medical question."
     }
-    
+
     return response
 }
 
 func main() {
     print("✓ Model found: base-model-posttrain\n")
     print("✓ Inference engine ready\n\n")
-    
+
     print("=== NeurX Medical AI Inference ===\n\n")
-    
-    // Test case 1
+
+
     print("Input: hello\n")
     string response = infer_medical_response("hello")
     print("Output: ")
     print(response)
     print("\n\n")
-    
-    // Test case 2
+
+
     print("Input: 腿疼\n")
     response = infer_medical_response("腿疼")
     print("Output: ")
     print(response)
     print("\n\n")
-    
-    // Test case 3
+
+
     print("Input: treatment\n")
     response = infer_medical_response("treatment")
     print("Output: ")

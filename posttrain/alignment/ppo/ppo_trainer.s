@@ -1,108 +1,108 @@
 package neurx.posttrain.rlhf.ppo_trainer
 
-// ════════════════════════════════════════════════════════════════════════════════
-// PPO Trainer - Proximal Policy Optimization (English textoptimize)
-//
-// English textoptimize, useEnglish text:
-//   1. English text (trajectory Collection)
-//   2. English text (Advantage Estimation)
-//   3. PPO losscompute (PPO Loss Computation)
-//   4. English text (Policy Update)
-//   5. English text (Value Network Update)
-//
-// English text:
-//   - RLHF alignmenttraining
-//   - rewardoptimize
-//   - English text
-// ════════════════════════════════════════════════════════════════════════════════
 
-// ════════════════════════════════════════════════════════════════════════════════
-// 1. dataEnglish text
-// ════════════════════════════════════════════════════════════════════════════════
 
-// English textstep
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 struct ppo_step {
     int step_id
-    []float tokens              // English textinput
-    []float logits              // modeloutput logits
-    float log_prob_old          // English text log English text
-    float log_prob_new          // English text log English text
-    float value_estimate        // English text
-    float reward                // English textreward (English text reward model)
-    float advantage             // English text A_t = r_t + γV(s_{t+1}) - V(s_t)
-    float return_value          // English text G_t
-    bool is_terminal            // English text
+    []float tokens
+    []float logits
+    float log_prob_old
+    float log_prob_new
+    float value_estimate
+    float reward
+    float advantage
+    float return_value
+    bool is_terminal
 }
 
-// English text (English textcompleteEnglish text)
+
 struct ppo_trajectory {
     []ppo_step steps
     int trajectory_id
-    int total_reward            // English textreward
-    int episode_length          // English text
-    float policy_loss           // English textloss
-    float value_loss            // English textloss
-    float entropy               // English text
+    int total_reward
+    int episode_length
+    float policy_loss
+    float value_loss
+    float entropy
 }
 
-// PPO configuration
+
 struct ppo_config {
-    // modelparameter
+
     int vocab_size
     int hidden_size
     int seq_len
     int num_layers
 
-    // trainingparameter
+
     float learning_rate
     float learning_rate_policy
     float learning_rate_value
 
-    // PPO English textparameter
-    float clip_epsilon          // PPO English text (0.2 English text)
-    float entropy_coef          // English text (0.01)
-    float value_coef            // English textlossEnglish text (0.5)
-    float gamma                 // English text (0.99)
-    float gae_lambda            // GAE λ parameter (0.95)
 
-    // KL English text
-    float target_kl             // English text KL English text (0.015)
-    float kl_coef               // KL English text
+    float clip_epsilon
+    float entropy_coef
+    float value_coef
+    float gamma
+    float gae_lambda
 
-    // trainingpipeline
-    int horizon                 // English textstepEnglish text (2048)
-    int mini_batch_size         // English text (256)
-    int num_epochs              // PPO English text (4)
-    int num_mini_batches        // English textcount
 
-    // English texttraining
+    float target_kl
+    float kl_coef
+
+
+    int horizon
+    int mini_batch_size
+    int num_epochs
+    int num_mini_batches
+
+
     int global_rank
     int world_size
-    int dp_degree               // dataEnglish text
-    bool use_mixed_precision    // English texttraining
+    int dp_degree
+    bool use_mixed_precision
 
-    // checkpointEnglish textevaluation
+
     int checkpoint_interval
     int eval_interval
 }
 
-// PPO state (English texttrainingstate)
+
 struct ppo_state {
     ppo_config config
 
-    // parameterEnglish text
+
     []float policy_params
     []float policy_grads
     []float value_params
     []float value_grads
 
-    // trainingstate
+
     int current_step
     int current_epoch
     int total_steps
     int total_trajectories
 
-    // English text
+
     float avg_policy_loss
     float avg_value_loss
     float avg_entropy
@@ -111,13 +111,13 @@ struct ppo_state {
     float avg_advantage_magnitude
     float clip_fraction
 
-    // English textstep
+
     int global_rank
     int world_size
     []float global_avg_loss
 }
 
-// PPO trainingstepEnglish textresult
+
 struct ppo_training_result {
     float policy_loss
     float value_loss
@@ -130,11 +130,11 @@ struct ppo_training_result {
     float advantage_mean
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
-// 2. English text
-// ════════════════════════════════════════════════════════════════════════════════
 
-// English textgenerateEnglish text
+
+
+
+
 func collect_trajectory(
     string prompt,
     ppo_config config
@@ -146,37 +146,37 @@ func collect_trajectory(
     traj.total_reward = 0
     traj.episode_length = 0
 
-    // generateEnglish textstepEnglish text
+
     int prompt_len = len(prompt)
     int t = 0
     while t < config.horizon {
         ppo_step step
         step.step_id = t
 
-        // English text token English text, English texttruthful tokenizer output
+
         step.tokens = []float{cap: 4}
         step.tokens[0] = float(prompt_len)
         step.tokens[1] = float(t)
         step.tokens[2] = float(config.seq_len)
         step.tokens[3] = float(config.hidden_size)
 
-        // English text logits, English texttruthfulEnglish textoutput
+
         step.logits = []float{cap: 4}
         step.logits[0] = 0.10 + float(t) * 0.01
         step.logits[1] = 0.20 + float(prompt_len) * 0.001
         step.logits[2] = 0.30 + float(config.num_layers) * 0.001
         step.logits[3] = 0.40 + float(mod_int(config.vocab_size, 10)) * 0.01
 
-        // compute log prob
+
         step.log_prob_old = compute_log_prob(step.logits)
 
-        // English text (English text)
+
         step.value_estimate = compute_value_estimate(step.tokens, config)
 
-        // English textreward (English text reward model English text)
+
         step.reward = float(mod_int(prompt_len + t, 5) + 1)
 
-        // English textstepEnglish text
+
         traj.steps = append_ppo_step(traj.steps, step)
         traj.total_reward = traj.total_reward + int(step.reward)
 
@@ -185,13 +185,13 @@ func collect_trajectory(
 
     traj.episode_length = t
 
-    // computeEnglish text (GAE)
+
     traj = compute_gae_advantages(traj, config)
 
     traj
 }
 
-// computeEnglish text (Generalized Advantage Estimation)
+
 func compute_gae_advantages(ppo_trajectory traj, ppo_config config) ppo_trajectory {
 
     int T = len(traj.steps)
@@ -199,13 +199,13 @@ func compute_gae_advantages(ppo_trajectory traj, ppo_config config) ppo_trajecto
         return traj
     }
 
-    // initializeEnglish text
+
     []float advantages = make_float_array(T, 0.0)
     []float returns = make_float_array(T, 0.0)
 
-    float gae = 0.0  // GAE English text
+    float gae = 0.0
 
-    // English textcompute
+
     int t = T - 1
     while t >= 0 {
         float next_value = 0.0
@@ -216,23 +216,23 @@ func compute_gae_advantages(ppo_trajectory traj, ppo_config config) ppo_trajecto
         float reward = traj.steps[t].reward
         float value = traj.steps[t].value_estimate
 
-        // TD English text
+
         float delta = reward + config.gamma * next_value - value
 
-        // GAE English text
+
         gae = delta + config.gamma * config.gae_lambda * gae
 
         advantages[t] = gae
         returns[t] = gae + value
 
-        // English text step English text
+
         traj.steps[t].advantage = gae
         traj.steps[t].return_value = returns[t]
 
         t = t - 1
     }
 
-    // English text (English text)
+
     float mean_advantage = 0.0
     int i = 0
     while i < len(advantages) {
@@ -261,11 +261,11 @@ func compute_gae_advantages(ppo_trajectory traj, ppo_config config) ppo_trajecto
     traj
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
-// 3. PPO losscompute
-// ════════════════════════════════════════════════════════════════════════════════
 
-// computeEnglish textloss (PPO English textfunction)
+
+
+
+
 func compute_ppo_policy_loss(
     float log_prob_old,
     float log_prob_new,
@@ -273,13 +273,13 @@ func compute_ppo_policy_loss(
     float clip_epsilon
 ) float {
 
-    // English text
+
     float ratio = exp_approx(log_prob_new - log_prob_old)
 
-    // English text
+
     float clipped_ratio = clamp_float(ratio, 1.0 - clip_epsilon, 1.0 + clip_epsilon)
 
-    // PPO loss = -min(ratio * A, clip(ratio, 1±ε) * A)
+
     float surr1 = ratio * advantage
     float surr2 = clipped_ratio * advantage
 
@@ -290,11 +290,11 @@ func compute_ppo_policy_loss(
         policy_loss = surr2
     }
 
-    // English text (English text)
+
     0.0 - policy_loss
 }
 
-// computeEnglish textloss
+
 func compute_ppo_value_loss(
     float value_pred,
     float return_value
@@ -304,7 +304,7 @@ func compute_ppo_value_loss(
     0.5 * diff * diff
 }
 
-// computeEnglish text (English text)
+
 func compute_entropy([]float logits) float {
 
     if len(logits) == 0 {
@@ -325,21 +325,21 @@ func compute_entropy([]float logits) float {
     entropy
 }
 
-// compute KL English text
+
 func compute_kl_divergence(
     float log_prob_old,
     float log_prob_new
 ) float {
 
-    // KL(old || new) = E[log(old) - log(new)]
+
     log_prob_old - log_prob_new
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
-// 4. PPO trainingstepEnglish text
-// ════════════════════════════════════════════════════════════════════════════════
 
-// English text PPO trainingstepEnglish text
+
+
+
+
 func ppo_training_step(
     ppo_trajectory trajectory,
     ppo_state state
@@ -359,18 +359,18 @@ func ppo_training_step(
     float total_ratio = 0.0
     float total_advantage = 0.0
 
-    // English textstepEnglish text
+
     int i = 0
     while i < len(trajectory.steps) {
         ppo_step step = trajectory.steps[i]
 
-        // English textcomputeEnglish text log prob (English text)
+
         float log_prob_new = compute_log_prob(step.logits)
 
-        // English textcomputeEnglish text
+
         float value_pred = compute_value_estimate(step.tokens, state.config)
 
-        // English textloss
+
         float policy_loss = compute_ppo_policy_loss(
             step.log_prob_old,
             log_prob_new,
@@ -379,25 +379,25 @@ func ppo_training_step(
         )
         result.policy_loss = result.policy_loss + policy_loss
 
-        // English textloss
+
         float value_loss = compute_ppo_value_loss(
             value_pred,
             step.return_value
         )
         result.value_loss = result.value_loss + value_loss
 
-        // English text
+
         float entropy = compute_entropy(step.logits)
         result.entropy_loss = result.entropy_loss + entropy
 
-        // KL English text
+
         float kl_div = compute_kl_divergence(
             step.log_prob_old,
             log_prob_new
         )
         result.kl_divergence = result.kl_divergence + kl_div
 
-        // English text
+
         float ratio = exp_approx(log_prob_new - step.log_prob_old)
         total_ratio = total_ratio + ratio
         total_advantage = total_advantage + step.advantage
@@ -414,7 +414,7 @@ func ppo_training_step(
         return result
     }
 
-    // English textloss
+
     result.policy_loss = result.policy_loss / float(num_steps)
     result.value_loss = result.value_loss / float(num_steps)
     result.entropy_loss = 0.0 - result.entropy_loss / float(num_steps)
@@ -423,26 +423,26 @@ func ppo_training_step(
     result.ratio_mean = total_ratio / float(num_steps)
     result.advantage_mean = total_advantage / float(num_steps)
 
-    // English textloss = English textloss + valueEnglish text*English textloss + KLEnglish text*KL
+
     result.total_loss = result.policy_loss +
                        state.config.value_coef * result.value_loss +
                        state.config.kl_coef * result.kl_divergence -
                        state.config.entropy_coef * result.entropy_loss
 
-    // compute explained variance
+
     result.explained_variance = compute_explained_variance(trajectory)
 
     result
 }
 
-// computeEnglish text (explained variance)
+
 func compute_explained_variance(ppo_trajectory traj) float {
 
     if len(traj.steps) == 0 {
         return 0.0
     }
 
-    // computeEnglish text
+
     float mean_return = 0.0
     int i = 0
     while i < len(traj.steps) {
@@ -460,7 +460,7 @@ func compute_explained_variance(ppo_trajectory traj) float {
     }
     var_return = var_return / float(len(traj.steps))
 
-    // computeEnglish text
+
     float mean_resid = 0.0
     i = 0
     while i < len(traj.steps) {
@@ -487,11 +487,11 @@ func compute_explained_variance(ppo_trajectory traj) float {
     1.0 - (var_resid / var_return)
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
-// 5. complete PPO trainingEnglish text
-// ════════════════════════════════════════════════════════════════════════════════
 
-// initialize PPO state
+
+
+
+
 func init_ppo_state(ppo_config config) ppo_state {
 
     ppo_state state
@@ -521,7 +521,7 @@ func init_ppo_state(ppo_config config) ppo_state {
     state
 }
 
-// start PPO training
+
 func start_ppo_training(
     ppo_config config,
     int num_training_steps
@@ -529,32 +529,32 @@ func start_ppo_training(
 
     ppo_state state = init_ppo_state(config)
 
-    // English texttrainingEnglish text
+
     if config.world_size > 1 {
         int expected_dp = config.world_size
         if config.dp_degree != expected_dp && config.dp_degree != 1 {
-            // English textconfigurationEnglish text
+
         }
     }
 
-    // maintrainingEnglish text
+
     int step = 0
     while step < num_training_steps {
 
-        // 1. English text
+
         ppo_trajectory trajectory = collect_trajectory(
             "sample prompt",
             config
         )
         state.total_trajectories = state.total_trajectories + 1
 
-        // 2. English text PPO English text
+
         int epoch = 0
         while epoch < config.num_epochs {
 
             ppo_training_result result = ppo_training_step(trajectory, state)
 
-            // English text
+
             state.avg_policy_loss = 0.9 * state.avg_policy_loss + 0.1 * result.policy_loss
             state.avg_value_loss = 0.9 * state.avg_value_loss + 0.1 * result.value_loss
             state.avg_entropy = 0.9 * state.avg_entropy + 0.1 * result.entropy_loss
@@ -565,7 +565,7 @@ func start_ppo_training(
             state.clip_fraction = 0.9 * state.clip_fraction + 0.1 * result.clip_fraction
             state.current_epoch = epoch
 
-            // English text KL English text (English text)
+
             if result.kl_divergence > config.target_kl {
                 break
             }
@@ -573,14 +573,14 @@ func start_ppo_training(
             epoch = epoch + 1
         }
 
-        // 3. evaluationEnglish textcheckpoint
+
         if step > 0 && step % config.checkpoint_interval == 0 {
-            // savecheckpoint
+
             print_ppo_checkpoint(state, step)
         }
 
         if step > 0 && step % config.eval_interval == 0 {
-            // evaluationEnglish text
+
             print_ppo_evaluation(state, step)
         }
 
@@ -593,11 +593,11 @@ func start_ppo_training(
     state
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
-// 6. English text
-// ════════════════════════════════════════════════════════════════════════════════
 
-// English textcheckpointinformation
+
+
+
+
 func print_ppo_checkpoint(ppo_state state, int step) {
     print("═══════════════════════════════════════════════════════════")
     print("PPO checkpoint - Step " + int_to_string_ppo(step))
@@ -610,7 +610,7 @@ func print_ppo_checkpoint(ppo_state state, int step) {
     print("Clip Fraction:      " + float_to_string_ppo(state.clip_fraction))
 }
 
-// English textevaluationinformation
+
 func print_ppo_evaluation(ppo_state state, int step) {
     print("")
     print("─────────────────────────────────────────────────────────")
@@ -621,9 +621,9 @@ func print_ppo_evaluation(ppo_state state, int step) {
     print("Advantage Mag:      " + float_to_string_ppo(state.avg_advantage_magnitude))
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
-// 7. toolfunction
-// ════════════════════════════════════════════════════════════════════════════════
+
+
+
 
 func make_float_array(int size, float init_value) []float {
     []float arr = []float{cap: size}
@@ -669,7 +669,7 @@ func compute_value_estimate([]float tokens, ppo_config config) float {
 }
 
 func exp_approx(float x) float {
-    // English text: e^x ≈ 1 + x + x^2/2 + x^3/6 + ...
+
     float x2 = x * x
     float x3 = x2 * x
     float x4 = x3 * x
@@ -677,11 +677,11 @@ func exp_approx(float x) float {
 }
 
 func log_approx(float x) float {
-    // English text log English text
+
     if x <= 0.0 { return 0.0 }
     if x > 2.0 { return 1.0 + log_approx(x / 2.0) }
 
-    // log(1+u) ≈ u - u^2/2 + u^3/3 where u = x - 1
+
     float u = x - 1.0
     u - (u * u / 2.0) + (u * u * u / 3.0)
 }

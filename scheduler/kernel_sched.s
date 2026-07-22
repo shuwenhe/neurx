@@ -1,45 +1,45 @@
 package neurx.scheduler.kernel_sched
 
-// scheduler/kernel_sched.s
-// AI task scheduler — analogue of Linux kernel/sched/core.c
-//
-// Linux maps:
-//   sched/core.c      → schedule() main loop
-//   sched/fair.c      → CFS fair scheduler
-//   sched/rt.c        → realtime scheduler
-//   sched/deadline.c  → EDF deadline scheduler
-//
-// NeurX maps:
-//   AI workloads are "runnable entities": agent steps, inference requests,
-//   training micro-batches, background services.
-//   Priority classes mirror Linux sched classes:
-//     SCHED_RT       → safety-critical (auto/robot real-time loops)
-//     SCHED_NORMAL   → interactive agent steps
-//     SCHED_IDLE     → background indexing, logging
 
-// Priority classes (mirrors Linux SCHED_* constants)
-int SCHED_RT     = 0   // hard real-time (< 10ms deadline)
-int SCHED_NORMAL = 1   // interactive / agent steps
-int SCHED_BATCH  = 2   // training micro-batches
-int SCHED_IDLE   = 3   // background: indexing, logging, GC
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int SCHED_RT     = 0
+int SCHED_NORMAL = 1
+int SCHED_BATCH  = 2
+int SCHED_IDLE   = 3
 
 struct task_struct {
-    int     pid             // unique task id (agent step, infer req, etc.)
+    int     pid
     string  name
-    int     sched_class     // SCHED_RT | SCHED_NORMAL | SCHED_BATCH | SCHED_IDLE
-    int     priority        // 0 (highest) .. 99
-    int     deadline_ms     // 0 = no deadline
-    int     state           // 0=runnable 1=running 2=waiting 3=done
-    int     cpu_affinity    // -1 = any
-    int     gpu_affinity    // -1 = any
-    int     vruntime        // virtual runtime (CFS analogue)
-    string  owner_agent     // which agent spawned this task
+    int     sched_class
+    int     priority
+    int     deadline_ms
+    int     state
+    int     cpu_affinity
+    int     gpu_affinity
+    int     vruntime
+    string  owner_agent
     int     created_at_ms
 }
 
 struct run_queue {
-    []task_struct  rt_queue      // realtime tasks (sorted by deadline)
-    []task_struct  normal_queue  // CFS red-black tree (simplified: sorted list)
+    []task_struct  rt_queue
+    []task_struct  normal_queue
     []task_struct  batch_queue
     []task_struct  idle_queue
     int            current_pid
@@ -57,7 +57,7 @@ func new_run_queue() run_queue {
     }
 }
 
-// enqueue_task: add a task to the appropriate queue (like Linux enqueue_task())
+
 func enqueue_task(rq run_queue, t task_struct) run_queue {
     if t.sched_class == SCHED_RT {
         rq.rt_queue = append(rq.rt_queue, t)
@@ -71,8 +71,8 @@ func enqueue_task(rq run_queue, t task_struct) run_queue {
     return rq
 }
 
-// pick_next_task: select next runnable task (like Linux pick_next_task())
-// Priority: RT > NORMAL > BATCH > IDLE
+
+
 func pick_next_task(rq run_queue) (run_queue, task_struct, bool) {
     if len(rq.rt_queue) > 0 {
         task_struct t = rq.rt_queue[0]

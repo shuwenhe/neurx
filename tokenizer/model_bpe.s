@@ -3,16 +3,16 @@ package neurx.tokenizer.model_bpe
 use neurx.strings
 use neurx.runtime.io.{io_println}
 
-// ============================================================================
-// BPE tokenizer
-//
-// This file keeps the public tokenizer surface simple and compile-safe:
-// - vocabulary and special tokens
-// - char-level tokenization
-// - optional pair-merge pass
-// - encode / decode / batch helpers
-// - cache statistics
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
 
 struct token_config {
     int vocab_size
@@ -52,9 +52,9 @@ struct bpe_cache_stats {
     int cache_misses
 }
 
-// ============================================================================
-// Init
-// ============================================================================
+
+
+
 
 func new_tokenizer_config() token_config {
     token_config {
@@ -115,9 +115,9 @@ func find_token_id([]string vocab_list, string token_str) int {
     -1
 }
 
-// ============================================================================
-// Encode
-// ============================================================================
+
+
+
 
 func encode(bpe_tokenizer tokenizer, string text) []int {
     tokenizer.cache_misses = tokenizer.cache_misses + 1
@@ -183,9 +183,9 @@ func merge_token_pair([]int tokens, int left, int right, int merge_id) []int {
     result
 }
 
-// ============================================================================
-// Decode
-// ============================================================================
+
+
+
 
 func decode(bpe_tokenizer tokenizer, []int token_ids) string {
     []string out_tokens = []string{cap: len(token_ids)}
@@ -248,9 +248,9 @@ func should_add_space_before(string token) bool {
     true
 }
 
-// ============================================================================
-// Batch Helpers
-// ============================================================================
+
+
+
 
 func encode_batch(bpe_tokenizer tokenizer, []string texts, int max_length) bpe_batch_result {
     []int flat_tokens = []int{cap: len(texts) * max_length}
@@ -314,9 +314,9 @@ func pad_sequence([]int tokens, int target_len, int pad_id) []int {
     padded
 }
 
-// ============================================================================
-// Stats / Utils
-// ============================================================================
+
+
+
 
 func get_vocab_size(bpe_tokenizer tokenizer) int {
     tokenizer.vocab.vocab_size
@@ -349,9 +349,9 @@ func print_statistics(bpe_tokenizer tokenizer) string {
     stats
 }
 
-// ============================================================================
-// Helpers
-// ============================================================================
+
+
+
 
 func copy_strings([]string values) []string {
     []string out = []string{cap: len(values)}

@@ -1,7 +1,7 @@
-// ============================================================================
-// Build CUDA Kernels - S Language Implementation
-// Uses PTX compilation to avoid glibc conflicts
-// ============================================================================
+
+
+
+
 
 package main
 
@@ -15,59 +15,59 @@ use neurx.runtime.io.{
     runtime_run_command_output,
 }
 
-// ============================================================================
-// Entry Point
-// ============================================================================
+
+
+
 
 func main() {
     println("[CUDA] Building Kernels (Simplified PTX Approach)")
     println("")
-    
-    // Step 1: Check nvcc
+
+
     string nvcc_check = runtime_run_command_output("which nvcc 2>/dev/null || echo 'not_found'")
     if contains_string(nvcc_check, "not_found") {
         println("[ERROR] nvcc not found. Install CUDA Toolkit")
         return
     }
     println("[OK] nvcc found")
-    
-    // Step 2: Detect environment
+
+
     string cuda_version = get_cuda_version()
     string gpu_arch = get_gpu_arch()
-    
+
     println("[INFO] CUDA Version: " + cuda_version)
     println("[INFO] GPU Architecture: sm_" + gpu_arch)
     println("")
-    
-    // Step 3: Create build directory
+
+
     string build_dir = "./artifacts/build/cuda_kernels"
     create_dir(build_dir)
-    
-    // Step 4: Get CUDA paths
+
+
     string cuda_home = get_cuda_home()
     string cuda_lib = cuda_home + "/lib64"
     println("[INFO] CUDA Home: " + cuda_home)
     println("[INFO] CUDA Lib: " + cuda_lib)
     println("")
-    
-    // Step 5: Compile to PTX
+
+
     println("[1/3] Generating PTX code...")
     bool ptx_ok = compile_to_ptx(build_dir, gpu_arch)
-    
-    // Step 6: Create wrapper
+
+
     println("[2/3] Creating C wrapper...")
     create_wrapper_c(build_dir)
-    
-    // Step 7: Compile wrapper
+
+
     println("[3/3] Compiling and linking...")
     bool link_ok = compile_wrapper(build_dir, cuda_home, cuda_lib)
-    
+
     if link_ok && runtime_file_exists(build_dir + "/libcuda_kernels.so") {
         println("")
         println("[SUCCESS] libcuda_kernels.so created successfully")
         string size_out = runtime_run_command_output("ls -lh " + build_dir + "/libcuda_kernels.so 2>/dev/null | awk '{print $5}' || echo '?'")
         println("  Size: " + trim(size_out))
-        
+
         create_env_metadata(build_dir, cuda_lib)
         println("[INFO] Environment metadata: " + build_dir + "/env.txt")
     } else {
@@ -75,9 +75,9 @@ func main() {
     }
 }
 
-// ============================================================================
-// CUDA Environment Detection
-// ============================================================================
+
+
+
 
 func get_cuda_version() string {
     string out = runtime_run_command_output("nvcc --version 2>/dev/null | grep 'release' | awk '{print $5}' | tr -d ',' || echo '12.0'")
@@ -90,13 +90,13 @@ func get_gpu_arch() string {
 }
 
 func get_cuda_home() string {
-    // First try CUDA_HOME env var
+
     string cuda_home = trim(runtime_env_get("CUDA_HOME", ""))
     if str_len(cuda_home) > 0 && runtime_file_exists(cuda_home + "/include/cuda.h") {
         return cuda_home
     }
-    
-    // Try standard locations
+
+
     string locations = "/usr/local/cuda /usr /opt/cuda"
     int i = 0
     while i < str_len(locations) {
@@ -106,23 +106,23 @@ func get_cuda_home() string {
         }
         i = i + 1
     }
-    
-    // Default
+
+
     "/usr"
 }
 
-// ============================================================================
-// Compilation Functions
-// ============================================================================
+
+
+
 
 func compile_to_ptx(string build_dir, string gpu_arch) bool {
     string cmd = "nvcc -ptx cuda/cuda_kernels.cu " +
         "-o " + build_dir + "/cuda_kernels.ptx " +
         "-arch=sm_" + gpu_arch + " " +
         "-std=c++11 -O3 2>&1"
-    
+
     string output = runtime_run_command_output(cmd)
-    
+
     if runtime_file_exists(build_dir + "/cuda_kernels.ptx") {
         println("[OK] PTX generated: " + build_dir + "/cuda_kernels.ptx")
         return true
@@ -140,24 +140,24 @@ func create_wrapper_c(string build_dir) {
 }
 
 func compile_wrapper(string build_dir, string cuda_home, string cuda_lib) bool {
-    // Compile wrapper.c to object file
+
     string obj_file = build_dir + "/cuda_kernels_wrapper.o"
     string compile_cmd = "gcc -c -fPIC " +
         build_dir + "/cuda_kernels_wrapper.c " +
         "-o " + obj_file + " " +
         "-I" + cuda_home + "/include " +
         "-I/usr/local/cuda/include 2>&1"
-    
+
     string compile_out = runtime_run_command_output(compile_cmd)
-    
+
     if !runtime_file_exists(obj_file) {
         println("[ERROR] Failed to compile wrapper")
         println("  " + compile_out)
         return false
     }
     println("[OK] Wrapper compiled: " + obj_file)
-    
-    // Link to shared library
+
+
     string so_file = build_dir + "/libcuda_kernels.so"
     string link_cmd = "gcc -shared -fPIC " +
         "-o " + so_file + " " +
@@ -167,16 +167,16 @@ func compile_wrapper(string build_dir, string cuda_home, string cuda_lib) bool {
         "-L/usr/local/cuda/lib64 " +
         "-lcudart -lcublas " +
         "-Wl,-rpath," + cuda_lib + " 2>&1"
-    
+
     string link_out = runtime_run_command_output(link_cmd)
-    
+
     if !runtime_file_exists(so_file) {
         println("[ERROR] Failed to link shared library")
         println("  " + link_out)
         return false
     }
     println("[OK] Linked: " + so_file)
-    
+
     true
 }
 
@@ -186,9 +186,9 @@ func create_env_metadata(string build_dir, string cuda_lib) {
     runtime_write_text_file(build_dir + "/env.txt", env_text)
 }
 
-// ============================================================================
-// Helper Functions
-// ============================================================================
+
+
+
 
 func create_dir(string path) {
     runtime_make_dirs(path)
@@ -263,10 +263,10 @@ func get_word(string s, int word_index) string {
     int start = 0
     bool in_word = false
     int len = str_len(s)
-    
+
     while i < len {
         bool is_space = s[i] == 32 || s[i] == 9 || s[i] == 10
-        
+
         if !is_space && !in_word {
             if word_count == word_index {
                 start = i
@@ -281,20 +281,20 @@ func get_word(string s, int word_index) string {
         }
         i = i + 1
     }
-    
+
     if in_word && word_count == word_index {
         return substring(s, start, len)
     }
-    
+
     ""
 }
 
-// ============================================================================
-// CUDA Wrapper C Source
-// ============================================================================
+
+
+
 
 func get_cuda_wrapper_c() string {
-    string c_code = 
+    string c_code =
 "/* CUDA Kernels Wrapper - Generated by S Build System */\n" +
 "#include <cuda_runtime.h>\n" +
 "#include <cublas_v2.h>\n" +

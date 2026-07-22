@@ -1,4 +1,4 @@
-# Sample config for diffusion/text2image
+
 batch_size: 8
 image_size: 512
 max_steps: 2000

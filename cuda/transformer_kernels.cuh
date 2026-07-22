@@ -66,7 +66,7 @@ __global__ void attention_fwd(const float* q,const float* k,const float* v,float
 }
 __global__ void attention_bwd(const float* q,const float* k,const float* v,const float* att,const float* dctx,float* dq,float* dk,float* dv,int t,int d,int heads) {
     int z=blockIdx.x*blockDim.x+threadIdx.x;if(z>=heads*t)return;int h=z/t,i=z%t,hd=d/heads;float scale=rsqrtf(float(hd));
-    extern __shared__ float work[]; // launch one thread per block for deterministic scratch
+    extern __shared__ float work[];
     float* da=work;float* ds=work+t;float dot=0;
     for(int j=0;j<=i;j++){float s=0;for(int p=0;p<hd;p++){s+=dctx[i*d+h*hd+p]*v[j*d+h*hd+p];atomicAdd(&dv[j*d+h*hd+p],att[(h*t+i)*t+j]*dctx[i*d+h*hd+p]);}da[j]=s;dot+=s*att[(h*t+i)*t+j];}
     for(int j=0;j<=i;j++)ds[j]=att[(h*t+i)*t+j]*(da[j]-dot);

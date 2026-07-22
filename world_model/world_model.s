@@ -1,7 +1,7 @@
-// world_model.s
-// World model: maintains a structured belief state about the environment,
-// tracks entity states, predicts outcomes of actions, and supports
-// planning by simulating hypothetical trajectories.
+
+
+
+
 
 struct world_state {
     string                 snapshot_id
@@ -46,7 +46,7 @@ func new_world_model() world_model_state {
     }
 }
 
-// update: apply an observation to advance the world state
+
 func world_model_update(wm world_model_state, action string, observation string) world_model_state {
     world_state next = wm.current
     next.step             = wm.current.step + 1
@@ -68,7 +68,7 @@ func world_model_update(wm world_model_state, action string, observation string)
     }
 }
 
-// predict: simulate the next world state given a hypothetical action
+
 func world_model_predict(wm world_model_state, hypothetical_action string) world_state {
     world_state predicted = wm.current
     predicted.step             = wm.current.step + 1
@@ -78,7 +78,7 @@ func world_model_predict(wm world_model_state, hypothetical_action string) world
     return predicted
 }
 
-// rollback: revert to a previous snapshot by step index
+
 func world_model_rollback(wm world_model_state, target_step int) world_model_state {
     for i = len(wm.history) - 1; i >= 0; i-- {
         if wm.history[i].step == target_step {

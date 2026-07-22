@@ -2,56 +2,56 @@ package neurx.posttrain.rlhf.examples
 
 use neurx.posttrain.rlhf.ppo_trainer.*
 
-// ════════════════════════════════════════════════════════════════════════════════
-// PPO Trainer example
-//
-// English textuse PPO English text RLHF alignmenttraining
-// ════════════════════════════════════════════════════════════════════════════════
 
-// English text PPO configuration
+
+
+
+
+
+
 func create_ppo_config() ppo_config {
     ppo_config {
-        // modelparameter
+
         vocab_size: 128000,
         hidden_size: 4096,
         seq_len: 2048,
         num_layers: 40,
 
-        // trainingparameter
+
         learning_rate: 5e-6,
         learning_rate_policy: 5e-6,
         learning_rate_value: 5e-6,
 
-        // PPO parameter
-        clip_epsilon: 0.2,          // English text PPO English text
-        entropy_coef: 0.01,         // English text
-        value_coef: 0.5,            // English textlossweight
-        gamma: 0.99,                // English text
-        gae_lambda: 0.95,           // GAE parameter
 
-        // KL English text
-        target_kl: 0.015,           // English text KL English text
-        kl_coef: 0.01,              // KL English text
+        clip_epsilon: 0.2,
+        entropy_coef: 0.01,
+        value_coef: 0.5,
+        gamma: 0.99,
+        gae_lambda: 0.95,
 
-        // trainingpipeline
-        horizon: 2048,              // English text
+
+        target_kl: 0.015,
+        kl_coef: 0.01,
+
+
+        horizon: 2048,
         mini_batch_size: 256,
-        num_epochs: 4,              // PPO English text
+        num_epochs: 4,
         num_mini_batches: 8,
 
-        // English texttraining
+
         global_rank: 0,
         world_size: 1,
         dp_degree: 1,
         use_mixed_precision: true,
 
-        // checkpoint
+
         checkpoint_interval: 100,
         eval_interval: 50,
     }
 }
 
-// example 1: English text PPO training
+
 func example_basic_ppo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 1: Basic PPO Training Loop                       ║")
@@ -59,7 +59,7 @@ func example_basic_ppo_training() {
     print("")
 
     ppo_config config = create_ppo_config()
-    config.horizon = 512              // English text horizon
+    config.horizon = 512
     config.num_epochs = 2
     config.checkpoint_interval = 10
     config.eval_interval = 5
@@ -73,7 +73,7 @@ func example_basic_ppo_training() {
     print("  Num Epochs:         2")
     print("")
 
-    // starttraining (English text, English textstepEnglish text)
+
     ppo_state state = start_ppo_training(config, 10)
 
     print("Training completed!")
@@ -84,7 +84,7 @@ func example_basic_ppo_training() {
     print("")
 }
 
-// example 2: English text PPO training
+
 func example_distributed_ppo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 2: Distributed PPO Training (Multi-GPU)          ║")
@@ -93,7 +93,7 @@ func example_distributed_ppo_training() {
 
     ppo_config config = create_ppo_config()
 
-    // English text 8 GPU English text
+
     config.world_size = 8
     config.dp_degree = 8
     config.global_rank = 0
@@ -115,7 +115,7 @@ func example_distributed_ppo_training() {
     print("  ✓ Per-rank metrics aggregation")
     print("")
 
-    // initializestate
+
     ppo_state state = init_ppo_state(config)
 
     print("[Training Setup]")
@@ -124,25 +124,25 @@ func example_distributed_ppo_training() {
     print("")
 }
 
-// example 3: PPO English textparameterEnglish text
+
 func example_hyperparameter_comparison() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 3: Hyperparameter Comparison                     ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
 
-    // configuration A: English text
+
     ppo_config config_a = create_ppo_config()
-    config_a.clip_epsilon = 0.1        // English text
+    config_a.clip_epsilon = 0.1
     config_a.value_coef = 0.3
     config_a.entropy_coef = 0.001
 
-    // configuration B: English text
+
     ppo_config config_b = create_ppo_config()
 
-    // configuration C: English text
+
     ppo_config config_c = create_ppo_config()
-    config_c.clip_epsilon = 0.3        // English text
+    config_c.clip_epsilon = 0.3
     config_c.value_coef = 0.7
     config_c.entropy_coef = 0.05
 
@@ -171,7 +171,7 @@ func example_hyperparameter_comparison() {
     print("")
 }
 
-// example 4: English textrewardmodelEnglish text
+
 func example_ppo_with_reward_model() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 4: PPO with Reward Model Integration             ║")
@@ -215,7 +215,7 @@ func example_ppo_with_reward_model() {
     print("")
 }
 
-// example 5: KL English text
+
 func example_kl_constraint_and_early_stopping() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 5: KL Constraint & Early Stopping                ║")
@@ -257,7 +257,7 @@ func example_kl_constraint_and_early_stopping() {
     print("")
 }
 
-// example 6: PPO trainingEnglish text (SFT → PPO)
+
 func example_complete_alignment_pipeline() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 6: Complete Alignment Pipeline                   ║")
@@ -300,7 +300,7 @@ func example_complete_alignment_pipeline() {
     print("")
 }
 
-// Main function
+
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -320,7 +320,7 @@ func main() {
     print("═════════════════════════════════════════════════════════════")
 }
 
-// helperfunction
+
 func float_to_string_ex(float f) string {
     int i_part = int(f)
     int f_part = int((f - float(i_part)) * 10000.0)

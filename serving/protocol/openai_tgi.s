@@ -1,8 +1,8 @@
 package neurx.serving.protocol.openai_tgi
 
-// Wire-format helpers shared by an OpenAI-compatible HTTP route and a
-// HuggingFace TGI-compatible streaming route. Network I/O is intentionally
-// outside this module so backpressure remains owned by the server transport.
+
+
+
 
 func serving_json_escape(string value) string {
     string out = ""

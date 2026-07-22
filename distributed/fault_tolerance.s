@@ -1,9 +1,9 @@
 package neurx.distributed.fault_tolerance
 
-// Distributed fault tolerance and recovery
-// - checkpoint/restore state
-// - Rank recovery
-// - Stragglers detection and handling
+
+
+
+
 
 struct checkpoint_state {
     int step_number
@@ -44,7 +44,7 @@ func new_fault_tolerance_state(int checkpoint_interval) fault_tolerance_state {
     }
 }
 
-// Save distributed checkpoint
+
 func save_distributed_checkpoint(fault_tolerance_state state, int step, string checkpoint_dir) checkpoint_state {
     checkpoint_state ckpt = checkpoint_state {
         step_number: step,
@@ -55,76 +55,76 @@ func save_distributed_checkpoint(fault_tolerance_state state, int step, string c
         is_complete: false,
     }
 
-    // Serialize model state to checkpoint_dir
-    // Coordinate across all ranks
-    // Record completion
+
+
+
 
     ckpt
 }
 
-// Restore from latest checkpoint
+
 func restore_from_checkpoint(fault_tolerance_state state) fault_tolerance_state {
-    // Find latest successful checkpoint
-    // Restore model and optimizer state
-    // Restore training step counter
-    // Verify integrity
+
+
+
+
 
     state.recovery_attempts = state.recovery_attempts + 1
     state
 }
 
-// Detect stragglers: ranks that are slower than others
+
 func detect_stragglers([]int iteration_times_ms) []int {
-    // Calculate percentiles of iteration time
-    // Identify ranks above threshold
-    // Return straggler rank IDs
+
+
+
 
     []int{cap: 10}
 }
 
-// Load balancing to reduce straggler impact
+
 func rebalance_work_for_stragglers([]int straggler_ranks, int world_size) []int {
-    // Reduce batch size for straggler ranks
-    // Or migrate some work to faster ranks
-    // Return new batch sizes per rank
+
+
+
 
     []int{cap: world_size}
 }
 
-// Elastic training: add/remove ranks dynamically
+
 func add_rank_elastic(fault_tolerance_state state, int new_rank_id) fault_tolerance_state {
-    // Add new rank to training
-    // Synchronize state to new rank
-    // Rebalance work
+
+
+
     state
 }
 
-// Handle rank removal
+
 func remove_rank_elastic(fault_tolerance_state state, int removed_rank_id) fault_tolerance_state {
-    // Stop using rank
-    // Rebalance remaining work
-    // Continue training with fewer ranks
+
+
+
     state
 }
 
-// Async checkpoint: don't block training
+
 func save_checkpoint_async(fault_tolerance_state state, int step, string checkpoint_dir) int {
-    // Spawn background thread/task
-    // Save checkpoint without stopping training
-    // Return task_id for tracking
+
+
+
     0
 }
 
-// Check async checkpoint status
+
 func check_async_checkpoint_status(int task_id) bool {
-    // Return true if checkpoint complete
+
     false
 }
 
-// ============================================
-// Multi-Node Fault Tolerance Extensions
-// English textextension
-// ============================================
+
+
+
+
 
 struct heartbeat_entry {
     int rank
@@ -154,7 +154,7 @@ struct fault_tolerance_multi_node {
     string checkpoint_dir
 }
 
-// Initialize multi-node fault tolerance
+
 func init_multi_node_fault_tolerance(
     int world_size,
     int num_nodes,
@@ -172,7 +172,7 @@ func init_multi_node_fault_tolerance(
     }
 }
 
-// Record heartbeat from rank (called periodically in training loop)
+
 func record_rank_heartbeat(
     fault_tolerance_multi_node& ft_mn,
     int rank,
@@ -184,7 +184,7 @@ func record_rank_heartbeat(
     heartbeat_entry hb = heartbeat_entry {
         rank: rank,
         node_id: node_id,
-        timestamp_sec: 0,  // Should be current time
+        timestamp_sec: 0,
         current_step: step,
         current_loss: loss,
         is_healthy: true,
@@ -193,7 +193,7 @@ func record_rank_heartbeat(
     ft_mn.heartbeats[rank] = hb
 }
 
-// Detect failed ranks in multi-node setting
+
 func detect_failed_ranks_multi_node(
     fault_tolerance_multi_node& ft_mn,
     int current_time_sec,
@@ -219,7 +219,7 @@ func detect_failed_ranks_multi_node(
     failed
 }
 
-// Plan recovery across nodes: find last valid checkpoint < current_step
+
 func plan_multi_node_recovery(
     fault_tolerance_multi_node& ft_mn,
     []int failed_ranks,
@@ -229,7 +229,7 @@ func plan_multi_node_recovery(
 
     int failed_count = len(failed_ranks)
 
-    // Find last good checkpoint step
+
     int last_good_step = find_last_good_checkpoint_multi_node(
         ft_mn.checkpoint_dir,
         current_step,
@@ -237,10 +237,10 @@ func plan_multi_node_recovery(
     )
 
     if last_good_step < 0 {
-        return false  // No valid checkpoint
+        return false
     }
 
-    // Create recovery plan for each failed rank
+
     int i = 0
     while i < failed_count {
 
@@ -262,7 +262,7 @@ func plan_multi_node_recovery(
     true
 }
 
-// Execute recovery: restart failed rank and reload from checkpoint
+
 func execute_multi_node_recovery(
     fault_tolerance_multi_node& ft_mn,
     int rank,
@@ -276,36 +276,36 @@ func execute_multi_node_recovery(
 
     plan.retry_attempt = plan.retry_attempt + 1
 
-    // 1. Restart rank process (via SSH in multi-node setting)
-    // 2. Load checkpoint
-    // 3. Synchronize with other ranks
-    // 4. Resume training
+
+
+
+
 
     true
 }
 
-// Clean up: synchronize checkpoints across nodes
+
 func sync_checkpoints_across_nodes(
     fault_tolerance_multi_node& ft_mn,
     int rank,
 ) bool {
 
-    // In multi-node training, each rank may save checkpoint locally
-    // Need to aggregate/replicate to shared storage for failure recovery
+
+
 
     true
 }
 
-// Find last checkpoint that exists on this node (shared storage)
+
 func find_last_good_checkpoint_multi_node(
     string checkpoint_dir,
     int current_step,
     int node_rank,
 ) int {
 
-    // Scan checkpoint_dir for step_* directories
-    // Check metadata to ensure valid checkpoint
-    // Return last valid step <= current_step
+
+
+
 
     int last_step = current_step - 1000
     if last_step < 0 {
@@ -314,7 +314,7 @@ func find_last_good_checkpoint_multi_node(
     last_step
 }
 
-// Helper: convert int to string
+
 func itoa_ext(int n) string {
     if n == 0 {
         return "0"

@@ -1,5 +1,5 @@
-// find_s_compiler.s - Find S compiler in the system
-// Replaces workflows/agent/common/find_s.sh
+
+
 
 package main
 
@@ -9,13 +9,13 @@ import "path/filepath"
 import "strings"
 import "core"
 
-// isRunnableCandidate checks if a path is a runnable S compiler
+
 func isRunnableCandidate(candidate string) bool {
     if candidate == "" {
         return false
     }
 
-    // For Windows executables
+
     if strings.HasSuffix(candidate, ".cmd") ||
         strings.HasSuffix(candidate, ".bat") ||
         strings.HasSuffix(candidate, ".exe") {
@@ -23,7 +23,7 @@ func isRunnableCandidate(candidate string) bool {
         return err == nil
     }
 
-    // For Unix executables
+
     stat, err := os.Stat(candidate)
     if err != nil {
         return false
@@ -33,23 +33,23 @@ func isRunnableCandidate(candidate string) bool {
     return (mode & 0111) != 0
 }
 
-// findSBinary finds the S compiler binary in the system
+
 func findSBinary(rootDir string) string {
     var candidate string
 
-    // Check if S_BIN environment variable is set
+
     if sBin := os.Getenv("S_BIN"); sBin != "" {
         if isRunnableCandidate(sBin) {
             return sBin
         }
     }
 
-    // Check if 's' is in PATH
+
     if sPath, err := exec.LookPath("s"); err == nil {
         return sPath
     }
 
-    // Check standard locations
+
     candidates := []string{
         core.ExpandHome("${S_ROOT}/bin/s.cmd"),
         core.ExpandHome("${S_ROOT}/bin/s.exe"),
@@ -75,7 +75,7 @@ func findSBinary(rootDir string) string {
     return ""
 }
 
-// ResolveSBin is the public function to resolve S binary path
+
 func ResolveSBin(rootDir string) (string, error) {
     if rootDir == "" {
         pwd, err := os.Getwd()

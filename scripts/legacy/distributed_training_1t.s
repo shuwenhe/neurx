@@ -6,9 +6,9 @@ import (
     "time"
 )
 
-// ============================================================================
-// DISTRIBUTED TRAINING ORCHESTRATOR FOR 1T MODEL
-// ============================================================================
+
+
+
 
 type distributed_trainer1_t struct {
     world_size: int
@@ -37,27 +37,27 @@ type checkpoint_manager struct {
     saved_checkpoints: int
 }
 
-// ============================================================================
-// DISTRIBUTED INITIALIZATION
-// ============================================================================
 
-func initialize_distributed_1t(world_size: int, rank: int, 
+
+
+
+func initialize_distributed_1t(world_size: int, rank: int,
                               local_rank: int): distributed_trainer1_t {
     trainer := distributed_trainer1_t{
         world_size: world_size,
         rank: rank,
         local_rank: local_rank,
         device_id: local_rank,
-        tp_group: rank / 64,     // Groups of 64 for tensor parallelism
-        pp_group: rank / 512,    // Groups of 512 for pipeline parallelism
-        dp_group: rank % 2,      // 2x data parallelism
+        tp_group: rank / 64,
+        pp_group: rank / 512,
+        dp_group: rank % 2,
     }
     return trainer
 }
 
-// ============================================================================
-// TENSOR PARALLELISM OPERATORS
-// ============================================================================
+
+
+
 
 type tensor_parallel_operator struct {
     tp_rank: int
@@ -66,25 +66,25 @@ type tensor_parallel_operator struct {
 }
 
 func (op *tensor_parallel_operator) split_linear_weight(weight_shape: [2]int): [2]int {
-    // Split output dimension across tensor parallel ranks
+
     out_features := weight_shape[0]
     in_features := weight_shape[1]
-    
+
     split_out := out_features / op.tp_size
-    
+
     return [2]int{split_out, in_features}
 }
 
 func (op *tensor_parallel_operator) all_reduce_loss(local_loss: float): float {
-    // Sum losses across all TP ranks
-    // In real implementation: use NCCL all_reduce
+
+
     global_loss := local_loss * float(op.tp_size)
     return global_loss / float(op.tp_size)
 }
 
-// ============================================================================
-// PIPELINE PARALLELISM ORCHESTRATION
-// ============================================================================
+
+
+
 
 type pipeline_stage struct {
     stage_id: int
@@ -99,10 +99,10 @@ type pipeline_scheduler struct {
     pipeline_stages: []*pipeline_stage
 }
 
-func (ps *pipeline_scheduler) create_pipeline_stages(num_stages: int, 
+func (ps *pipeline_scheduler) create_pipeline_stages(num_stages: int,
                                                    total_layers: int): {
     layers_per_stage := total_layers / num_stages
-    
+
     for i := 0; i < num_stages; i++ {
         stage := pipeline_stage{
             stage_id: i,
@@ -114,12 +114,12 @@ func (ps *pipeline_scheduler) create_pipeline_stages(num_stages: int,
     }
 }
 
-// ============================================================================
-// ZERO-3 OPTIMIZER STATE SHARDING
-// ============================================================================
+
+
+
 
 type zero_optimizer struct {
-    stage: int  // 1, 2, or 3
+    stage: int
     partition_optimizer_states: bool
     partition_gradients: bool
     partition_parameters: bool
@@ -127,7 +127,7 @@ type zero_optimizer struct {
 
 func create_zero_optimizer_1t(): zero_optimizer {
     zero := zero_optimizer{
-        stage: 3,  // Full sharding
+        stage: 3,
         partition_optimizer_states: true,
         partition_gradients: true,
         partition_parameters: true,
@@ -137,18 +137,18 @@ func create_zero_optimizer_1t(): zero_optimizer {
 
 func (z *zero_optimizer) estimate_memory_reduction(original_bytes: int64): int64 {
     if z.stage == 3 {
-        // Stage 3: ~4x reduction (parameters, gradients, optimizer across all GPUs)
+
         return original_bytes / 4
     } else if z.stage == 2 {
-        // Stage 2: ~2x reduction (gradients and optimizer)
+
         return original_bytes / 2
     }
     return original_bytes
 }
 
-// ============================================================================
-// GRADIENT ACCUMULATION AND SYNCHRONIZATION
-// ============================================================================
+
+
+
 
 type gradient_manager struct {
     accumulation_steps: int
@@ -160,7 +160,7 @@ type gradient_manager struct {
 func (gm *gradient_manager) accumulate_gradient(loss: float): bool {
     gm.accumulated_loss += loss
     gm.accumulated_step += 1
-    
+
     if gm.accumulated_step >= gm.accumulation_steps {
         gm.ready_to_update = true
         return true
@@ -181,9 +181,9 @@ func (gm *gradient_manager) reset() {
     gm.ready_to_update = false
 }
 
-// ============================================================================
-// ACTIVATION CHECKPOINTING
-// ============================================================================
+
+
+
 
 type activation_checkpointer struct {
     checkpoint_segments: int
@@ -191,20 +191,20 @@ type activation_checkpointer struct {
 }
 
 func (ac *activation_checkpointer) compute_memory_savings(): float {
-    // With checkpointing: reduce activation memory from O(n) to O(sqrt(n))
-    // Typically ~70% reduction
+
+
     return 0.70
 }
 
 func (ac *activation_checkpointer) configure_for_1t_model() {
-    // For 1T model with 96 layers, optimal: checkpoint every ~10 layers
-    ac.checkpoint_segments = 96 / 10  // 10 segments
+
+    ac.checkpoint_segments = 96 / 10
     ac.enabled = true
 }
 
-// ============================================================================
-// TRAINING LOOP WITH STATE MANAGEMENT
-// ============================================================================
+
+
+
 
 type training_loop1_t struct {
     trainer: distributed_trainer1_t
@@ -217,29 +217,29 @@ type training_loop1_t struct {
 
 func create_training_loop_1t(rank: int, world_size: int): training_loop1_t {
     trainer := initialize_distributed_1t(world_size, rank, rank % 8)
-    
+
     grad_mgr := gradient_manager{
         accumulation_steps: 512,
         accumulated_step: 0,
         accumulated_loss: 0.0,
         ready_to_update: false,
     }
-    
+
     zero_opt := create_zero_optimizer_1t()
-    
+
     act_checkpoint := activation_checkpointer{
         checkpoint_segments: 0,
         enabled: true,
     }
     act_checkpoint.configure_for_1t_model()
-    
+
     checkpoint_mgr := checkpoint_manager{
         checkpoint_dir: "./checkpoints/neurx_1t",
         save_interval: 1000,
         keep_last_n: 5,
         saved_checkpoints: 0,
     }
-    
+
     state := training_state{
         step: 0,
         epoch: 0,
@@ -249,7 +249,7 @@ func create_training_loop_1t(rank: int, world_size: int): training_loop1_t {
         tokens_per_second: 0.0,
         learning_rate: 1e-4,
     }
-    
+
     loop := training_loop1_t{
         trainer: trainer,
         grad_manager: grad_mgr,
@@ -258,30 +258,30 @@ func create_training_loop_1t(rank: int, world_size: int): training_loop1_t {
         checkpoint_mgr: checkpoint_mgr,
         state: state,
     }
-    
+
     return loop
 }
 
 func (loop *training_loop1_t) forward_pass(batch_tokens: int64): float {
-    // Simulate forward pass with activation checkpointing
+
     loss := 0.0
-    
-    // With 1T model: expect ~3 seconds per step
+
+
     time.Sleep(3 * time.Second)
-    
+
     return loss
 }
 
 func (loop *training_loop1_t) backward_pass() {
-    // Gradient computation with ZeRO-3
+
     fmt.Printf("[Step %d] Computing gradients with ZeRO-3\n", loop.state.step)
 }
 
 func (loop *training_loop1_t) optimizer_step() {
-    // Update weights with AdamW + learning rate schedule
+
     loop.state.step += 1
-    
-    // Cosine annealing scheduler
+
+
     progress := float(loop.state.step) / 500000.0
     cosine_factor := (1.0 + math.Cos(3.14159 * progress)) / 2.0
     loop.state.learning_rate = 1e-4 * cosine_factor
@@ -289,13 +289,13 @@ func (loop *training_loop1_t) optimizer_step() {
 
 func (loop *training_loop1_t) save_checkpoint() {
     loop.checkpoint_mgr.saved_checkpoints += 1
-    fmt.Printf("[checkpoint %d] Saved at step %d\n", 
+    fmt.Printf("[checkpoint %d] Saved at step %d\n",
               loop.checkpoint_mgr.saved_checkpoints, loop.state.step)
 }
 
-// ============================================================================
-// COMMUNICATION PATTERNS
-// ============================================================================
+
+
+
 
 type communication_optimizer struct {
     use_async_communication: bool
@@ -311,9 +311,9 @@ func (co *communication_optimizer) broadcast_weights_async(weight_size: int64): 
     fmt.Printf("  [COMM] Broadcast weights (%d MB) asynchronously\n", weight_size / (1024 * 1024))
 }
 
-// ============================================================================
-// MONITORING AND LOGGING
-// ============================================================================
+
+
+
 
 type performance_monitor struct {
     tokens_per_second: float
@@ -330,9 +330,9 @@ func (pm *performance_monitor) compute_throughput(batch_size: int, seq_len: int,
     return throughput
 }
 
-func (pm *performance_monitor) compute_flops(params: int64, batch_size: int, 
+func (pm *performance_monitor) compute_flops(params: int64, batch_size: int,
                                           seq_len: int): int64 {
-    // FLOPs = 2 * params * batch_size * seq_len (for forward and backward)
+
     flops := 2 * params * int64(batch_size) * int64(seq_len)
     return flops
 }
@@ -346,66 +346,66 @@ func (pm *performance_monitor) log_performance(state: training_state) {
     fmt.Printf("  Avg Loss: %.4f\n", state.avg_loss)
 }
 
-// ============================================================================
-// MAIN TRAINING ORCHESTRATION
-// ============================================================================
+
+
+
 
 func main() {
     rank := 0
     world_size := 1024
-    
+
     fmt.Println("\n" + "="*80)
     fmt.Println("🚀 DISTRIBUTED TRAINING FOR 1T MODEL")
     fmt.Println("="*80)
-    
-    // Create training loop
+
+
     loop := create_training_loop_1t(rank, world_size)
-    
+
     fmt.Printf("\nRank %d/%d initialized\n", rank, world_size)
     fmt.Printf("Tensor Parallelism Group: %d\n", loop.trainer.tp_group)
     fmt.Printf("Pipeline Stage Group: %d\n", loop.trainer.pp_group)
     fmt.Printf("Data Parallelism Group: %d\n", loop.trainer.dp_group)
-    
+
     fmt.Println("\n📊 Training Configuration:")
     fmt.Printf("  Global Batch Size: 4096 tokens/step\n")
     fmt.Printf("  Gradient Accumulation: %d steps\n", loop.grad_manager.accumulation_steps)
     fmt.Printf("  checkpoint Segments: %d\n", loop.activation_checkpointer.checkpoint_segments)
     fmt.Printf("  ZeRO Stage: %d\n", loop.zero_optimizer.stage)
-    
-    // Simulation of training loop
+
+
     fmt.Println("\n🔄 Starting training simulation (1000 steps)...")
-    
+
     for step := 0; step < 1000; step++ {
         loop.state.step = step
-        
-        // Forward pass
+
+
         loss := loop.forward_pass(4096 * 32768)
-        
-        // Accumulate gradients
+
+
         loop.grad_manager.accumulate_gradient(loss)
         loop.state.total_loss += loss
         loop.state.avg_loss = loop.state.total_loss / float(step + 1)
-        
-        // Backward + optimizer step when accumulated
+
+
         if loop.grad_manager.ready_to_update {
             loop.backward_pass()
             loop.optimizer_step()
             loop.grad_manager.reset()
         }
-        
-        // Save checkpoint
+
+
         if step > 0 && step % 1000 == 0 {
             loop.save_checkpoint()
         }
-        
-        // Log performance
+
+
         if step % 100 == 0 && step > 0 {
             monitor := performance_monitor{}
-            monitor.tokens_per_second = float(4096 * 32768) / 3.0  // 3 seconds per step
+            monitor.tokens_per_second = float(4096 * 32768) / 3.0
             monitor.log_performance(loop.state)
         }
     }
-    
+
     fmt.Println("\n✅ Training simulation complete")
     fmt.Println("Next: Deploy on H100 cluster with 1024 GPUs")
     fmt.Println("="*80 + "\n")

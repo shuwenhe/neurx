@@ -120,4 +120,4 @@ AdapterStatus sample_logits(const float* logits, std::size_t vocabulary,
   return AdapterStatus::success();
 }
 
-}  // namespace neurx::inference
+}

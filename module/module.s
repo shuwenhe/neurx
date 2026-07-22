@@ -3,13 +3,13 @@ package neurx.module
 use neurx.tensor.tensor
 use neurx.nn
 
-// PyTorch-like Module facade.
-//
-// This layer intentionally reuses neurx.nn.module and neurx.nn.parameter instead
-// of defining a second incompatible module type. It gives optimizer,
-// checkpoint, trainer, and model code one stable API surface:
-//
-//   module_new -> register params/buffers/children -> parameters -> state_dict
+
+
+
+
+
+
+
 
 func module_new(string name) nn.module {
     neurx.nn.new_module(name)

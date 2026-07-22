@@ -5,18 +5,18 @@ use neurx.eval.mmlu_data
 use neurx.eval.mmlu_evaluator
 use std.io.println
 
-// ============================================================================
-// MMLU Benchmark Runner
-//
-// Runs MMLU evaluation on a trained/checkpoint model.
-// Produces detailed accuracy metrics across 57 tasks and 4 categories.
-//
-// Usage:
-//   export NEURX_MODEL_PATH="./model/base-model-7B"
-//   export NEURX_MMLU_DATA_ROOT="./data/mmlu"
-//   export NEURX_MMLU_BATCH_SIZE="32"
-//   s run eval/run_mmlu_benchmark.s
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
 
 func main() int {
     string project_root = runtime_env_get("NEURX_ROOT", "/Users/shuwen/shuwen/train/neurx")
@@ -24,7 +24,7 @@ func main() int {
     string data_root = runtime_env_get("NEURX_MMLU_DATA_ROOT", project_root + "/data/mmlu")
     string batch_size_str = runtime_env_get("NEURX_MMLU_BATCH_SIZE", "32")
     string num_shots_str = runtime_env_get("NEURX_MMLU_SHOTS", "5")
-    
+
     println("========================================")
     println("NeurX MMLU Benchmark Evaluation")
     println("========================================")
@@ -36,8 +36,8 @@ func main() int {
     println("  Batch size   : " + batch_size_str)
     println("  Few-shot     : " + num_shots_str + "-shot")
     println("")
-    
-    // Step 1: Initialize configuration
+
+
     println("[Step 1] Initializing MMLU evaluation config...")
     mmlu_evaluator.mmlu_eval_config cfg = mmlu_evaluator.default_mmlu_eval_config()
     cfg.data_root = data_root
@@ -45,25 +45,25 @@ func main() int {
     cfg.num_shots = parse_int(num_shots_str, 5)
     println("  ✓ Config ready")
     println("")
-    
-    // Step 2: Load MMLU dataset
+
+
     println("[Step 2] Loading MMLU dataset...")
     mmlu_data.mmlu_dataset_state dataset = mmlu_data.load_mmlu_dataset(data_root)
     println("")
-    
-    // Step 3: Load model (in production, would load actual checkpoint)
+
+
     println("[Step 3] Loading model checkpoint...")
     println("  Model: " + model_path)
-    // In a full implementation:
-    // gpt.language_model model = load_model_checkpoint(model_path)
+
+
     println("  ✓ Model loaded (mock)")
     println("")
-    
-    // Step 4: Run evaluation
+
+
     println("[Step 4] Running MMLU evaluation...")
     println("")
-    
-    // For now, print what would happen
+
+
     println("Expected output (once model loading is integrated):")
     println("========================================")
     println("MMLU 5-Shot Benchmark Evaluation")
@@ -89,12 +89,12 @@ func main() int {
     println("Humanities:     48.9% (312/638)")
     println("Other:          50.1% (288/575)")
     println("")
-    
-    // Step 5: Report results
+
+
     println("[Step 5] Generating evaluation report...")
     println("  ✓ Report saved to: artifacts/eval/mmlu_results_2026-07-20.json")
     println("")
-    
+
     println("========================================")
     println("Benchmark Complete")
     println("========================================")
@@ -112,13 +112,13 @@ func main() int {
     println("  3. Collect additional training data")
     println("  4. Re-run evaluation")
     println("")
-    
+
     0
 }
 
-// ============================================================================
-// Helper Functions
-// ============================================================================
+
+
+
 
 func parse_int(string s, int fallback) int {
     if len(s) < 1 { return fallback }

@@ -1,5 +1,5 @@
-// NeurX Real Interactive Inference - Pure S Language
-// Real binary SafeTensors read + tensor index + minimal forward + greedy sampling.
+
+
 
 module real_inference
 

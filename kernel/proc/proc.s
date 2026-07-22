@@ -1,34 +1,34 @@
-// kernel/proc/proc.s
-// AI agent/process lifecycle — analogue of Linux kernel/fork.c + kernel/exit.c
-//
-// Linux maps:
-//   kernel/fork.c    → copy_process(), do_fork()
-//   kernel/exit.c    → do_exit(), wait_for_completion
-//   kernel/pid.c     → PID allocation
-//
-// NeurX maps:
-//   "process" = an agent instance with its own goal, memory, tool registry
-//   "thread"  = a sub-step within an agent (parallel tool calls, sub-agents)
-//   Lifecycle: CREATED → RUNNING → WAITING → ZOMBIE → REAPED
+
+
+
+
+
+
+
+
+
+
+
+
 
 int PROC_CREATED = 0
 int PROC_RUNNING = 1
-int PROC_WAITING = 2   // blocked on tool call / sub-agent
-int PROC_ZOMBIE  = 3   // finished, result not yet collected
-int PROC_REAPED  = 4   // result collected, resources freed
+int PROC_WAITING = 2
+int PROC_ZOMBIE  = 3
+int PROC_REAPED  = 4
 
 struct proc_descriptor {
     int    pid
-    int    ppid            // parent pid, -1 for root agents
+    int    ppid
     string name
     string goal
-    int    state           // PROC_*
-    int    sched_class     // from kernel/sched
-    int    exit_code       // 0 = success
+    int    state
+    int    sched_class
+    int    exit_code
     string exit_reason
     int    created_at_ms
     int    exited_at_ms
-    int    mem_region_id   // assigned memory region
+    int    mem_region_id
 }
 
 struct proc_table {
@@ -40,7 +40,7 @@ func new_proc_table() proc_table {
     return proc_table{procs: [], next_pid: 1}
 }
 
-// spawn: create a new agent process (do_fork equivalent)
+
 func proc_spawn(pt proc_table, ppid int, name string, goal string, sched_class int) (proc_table, int) {
     int pid = pt.next_pid
     proc_descriptor p = proc_descriptor{
@@ -61,7 +61,7 @@ func proc_spawn(pt proc_table, ppid int, name string, goal string, sched_class i
     return (pt, pid)
 }
 
-// exit: mark agent as zombie (do_exit equivalent)
+
 func proc_exit(pt proc_table, pid int, exit_code int, reason string) proc_table {
     int i = 0
     while i < len(pt.procs) {
@@ -75,7 +75,7 @@ func proc_exit(pt proc_table, pid int, exit_code int, reason string) proc_table 
     return pt
 }
 
-// wait: collect zombie child (waitpid equivalent)
+
 func proc_wait(pt proc_table, ppid int) (proc_table, proc_descriptor, bool) {
     int i = 0
     while i < len(pt.procs) {

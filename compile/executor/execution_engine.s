@@ -1,9 +1,9 @@
 package neurx.compile.executor.execution_engine
 
-// High-performance execution engine for compiled graphs
-// - Kernel dispatch and scheduling
-// - Stream management
-// - Synchronization and barrier handling
+
+
+
+
 
 use neurx.compile.ir.{ir_graph, ir_node}
 
@@ -38,7 +38,7 @@ func new_executor_config() executor_config {
     }
 }
 
-// Initialize execution context
+
 func new_execution_context(ir_graph graph, executor_config cfg) execution_context {
     execution_context {
         compiled_graph: graph,
@@ -49,53 +49,53 @@ func new_execution_context(ir_graph graph, executor_config cfg) execution_contex
     }
 }
 
-// Schedule kernel launches with stream awareness
+
 func schedule_kernel_launch(execution_context ctx, kernel_launch launch) execution_context {
-    // Find optimal stream based on current load
-    // Enqueue kernel
-    // Update context state
+
+
+
     ctx
 }
 
-// Execute entire compiled graph
+
 func execute_graph(execution_context ctx) execution_context {
-    // Traverse compiled graph
-    // Launch kernels in dependency order
-    // Handle synchronization points
-    // Record execution time
+
+
+
+
     ctx
 }
 
-// Synchronization: wait for all pending kernels
+
 func synchronize_execution(execution_context ctx) execution_context {
-    // Ensure all kernels are complete
-    // Collect results
+
+
     ctx
 }
 
-// Stream-aware kernel scheduling with load balancing
+
 func schedule_graph_with_streams(ir_graph graph, int num_streams) execution_context {
     executor_config cfg = new_executor_config()
     cfg.max_streams = num_streams
-    
+
     execution_context ctx = new_execution_context(graph, cfg)
-    
-    // Perform topological sort with stream assignment
-    // Minimize synchronization points
-    // Balance load across streams
-    
+
+
+
+
+
     ctx
 }
 
-// CUDA graph capture for efficient replay
+
 func capture_as_cuda_graph(execution_context ctx) string {
-    // Capture execution sequence as CUDA graph
-    // Return graph handle for efficient replay
+
+
     "cuda_graph_handle"
 }
 
-// Query execution statistics
+
 func get_execution_stats(execution_context ctx) string {
-    // Return stats summary
+
     "total_time=0,completed_kernels=0,streams_used=0"
 }

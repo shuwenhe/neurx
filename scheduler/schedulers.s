@@ -1,9 +1,9 @@
 package neurx.scheduler.schedulers
 
-// ── math helpers ─────────────────────────────────────────────────────────────
 
-// cos approximation valid for x in [0, π] via Taylor series
-// cos(x) = 1 - x²/2! + x⁴/4! - x⁶/6! + x⁸/8! - x¹⁰/10!
+
+
+
 func sched_cos_approx(float x) float {
     float x2 = x * x
     float x4 = x2 * x2
@@ -23,7 +23,7 @@ func sched_clamp(float v, float lo, float hi) float {
     v
 }
 
-// ── cosine annealing with linear warmup ──────────────────────────────────────
+
 
 struct cosine_scheduler_state {
     float base_lr
@@ -89,7 +89,7 @@ func cosine_scheduler_lr(cosine_scheduler_state sched) float {
     sched.current_lr
 }
 
-// ── linear warmup + linear decay ─────────────────────────────────────────────
+
 
 struct linear_scheduler_state {
     float base_lr
@@ -153,7 +153,7 @@ func linear_scheduler_lr(linear_scheduler_state sched) float {
     sched.current_lr
 }
 
-// ── step LR (multiply by gamma every step_size steps) ────────────────────────
+
 
 struct step_lr_state {
     float base_lr
@@ -205,7 +205,7 @@ func step_lr_lr(step_lr_state sched) float {
     sched.current_lr
 }
 
-// ── constant (no-op baseline) ─────────────────────────────────────────────────
+
 
 func constant_scheduler_step(float lr, int step) float {
     lr

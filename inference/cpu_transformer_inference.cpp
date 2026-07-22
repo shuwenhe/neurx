@@ -505,7 +505,7 @@ int sample_token(std::vector<float> logits, const std::vector<int>& history,
   return order[distribution(*generator)];
 }
 
-}  // namespace
+}
 
 struct Transformer::Impl {
   ModelInfo info;
@@ -754,4 +754,4 @@ std::string Transformer::generate(const std::string& prompt,
 const ModelInfo& Transformer::info() const { return impl_->info; }
 int Transformer::eos_token_id() const { return impl_->tokenizer.eos; }
 
-}  // namespace neurx::inference::cpu
+}

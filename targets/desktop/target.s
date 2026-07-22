@@ -1,24 +1,24 @@
-// targets/desktop/target.s
-// Desktop target: AI OS layer for PCs, laptops, and workstations.
-//
-// Constraints:
-//   - Full power envelope: up to 350W GPU TDP
-//   - Multi-GPU / NVLink support
-//   - Long-running background services
-//   - User-visible latency target: < 200ms first token
-//
-// Primary GPUs: NVIDIA RTX/H-series, AMD Radeon, Intel Arc
-// OS: Windows 11, Linux (Ubuntu/Fedora), macOS
-// Runtime: CUDA, ROCm, Metal, Vulkan Compute
+
+
+
+
+
+
+
+
+
+
+
+
 
 struct desktop_target_config {
-    string  os              // "windows" | "linux" | "macos"
-    string  gpu_vendor      // "nvidia" | "amd" | "intel" | "apple"
-    string  compute_runtime // "cuda" | "rocm" | "metal" | "vulkan"
+    string  os
+    string  gpu_vendor
+    string  compute_runtime
     int     max_power_w
     bool    multi_gpu
     bool    background_service
-    string  precision       // "fp32" | "fp16" | "bf16" | "int8"
+    string  precision
 }
 
 func default_desktop_target() desktop_target_config {

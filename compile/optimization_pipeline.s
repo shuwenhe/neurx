@@ -1,7 +1,7 @@
 package neurx.compile.optimizations
 
-// Complete compilation pipeline with all optimizations
-// Orchestrates: capture -> optimize -> lower -> execute
+
+
 
 use neurx.compile.ir.{ir_graph, ir_node}
 use neurx.compile.passes.fusion.{fusion_config, new_fusion_config, apply_fusion_passes}
@@ -43,68 +43,68 @@ func new_optimization_pipeline() optimization_pipeline {
     }
 }
 
-// Main optimization entry point
+
 func optimize_graph(optimization_pipeline pipeline, ir_graph input_graph) ir_graph {
     ir_graph result = input_graph
-    
-    // Try cache lookup first
+
+
     if pipeline.enable_cache {
-        // cache_result = cache_lookup(pipeline.cache_mgr, input_graph)
-        // if cache_result != nil {
-        //     return cache_result.optimized_graph
-        // }
+
+
+
+
     }
-    
-    // Stage 1: Elimination passes (remove redundancy first)
+
+
     result = apply_elimination_passes(result, pipeline.elim_cfg)
-    
-    // Stage 2: Memory optimization (reorder for efficiency)
+
+
     result = apply_memory_passes(result, pipeline.mem_cfg)
-    
-    // Stage 3: Fusion passes (combine operations)
+
+
     result = apply_fusion_passes(result, pipeline.fusion_cfg)
-    
-    // Stage 4: Final elimination pass (remove artifacts from previous stages)
+
+
     result = apply_elimination_passes(result, pipeline.elim_cfg)
-    
-    // Store in cache if enabled
+
+
     if pipeline.enable_cache {
-        // pipeline.cache_mgr = cache_store(pipeline.cache_mgr, result, []string{})
+
     }
-    
+
     result
 }
 
-// Multi-stage optimization with progressive refinement
+
 func optimize_graph_progressive(optimization_pipeline pipeline, ir_graph input_graph) ir_graph {
     ir_graph result = input_graph
-    
-    // Repeat optimization passes until convergence
+
+
     int max_iterations = 5
     int iteration = 0
     int prev_node_count = 0
-    
+
     while iteration < max_iterations {
-        int before_nodes = 0 // count nodes in result
-        
+        int before_nodes = 0
+
         result = apply_elimination_passes(result, pipeline.elim_cfg)
         result = apply_memory_passes(result, pipeline.mem_cfg)
         result = apply_fusion_passes(result, pipeline.fusion_cfg)
-        
-        int after_nodes = 0 // count nodes in result
-        
-        // Check for convergence
+
+        int after_nodes = 0
+
+
         if after_nodes == before_nodes {
             break
         }
-        
+
         iteration = iteration + 1
     }
-    
+
     result
 }
 
-// Get optimization statistics
+
 func get_optimization_stats(ir_graph original, ir_graph optimized) optimization_stats {
     optimization_stats {
         input_graph_hash: "original_hash",
@@ -118,17 +118,17 @@ func get_optimization_stats(ir_graph original, ir_graph optimized) optimization_
     }
 }
 
-// Full compile pipeline: optimize -> lower -> execute
+
 func compile_and_optimize(optimization_pipeline pipeline, ir_graph input_graph) ir_graph {
-    // Check cache
-    
-    // Optimize
+
+
+
     ir_graph optimized = optimize_graph_progressive(pipeline, input_graph)
-    
-    // Lower to backend
-    // ir_graph lowered = lower_to_backend(optimized)
-    
-    // Cache result
-    
+
+
+
+
+
+
     optimized
 }

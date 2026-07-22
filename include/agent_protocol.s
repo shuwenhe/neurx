@@ -1,10 +1,10 @@
 package neurx.include.agent_protocol
 
-// Full agent protocol — MCP-compatible message envelope.
-// Covers the complete request/response/tool-use/tool-result lifecycle,
-// modelled on NeurX-compatible Messages API and Model Context Protocol (MCP).
 
-// ── message type constants ────────────────────────────────────────────────────
+
+
+
+
 
 string AGENT_MSG_OBSERVATION = "observation"
 string AGENT_MSG_ACTION      = "action"
@@ -15,21 +15,21 @@ string AGENT_MSG_TOOL_RESULT = "tool_result"
 string AGENT_MSG_THINKING    = "thinking"
 string AGENT_MSG_ERROR       = "error"
 
-// ── role constants ────────────────────────────────────────────────────────────
+
 
 string AGENT_ROLE_USER      = "user"
 string AGENT_ROLE_ASSISTANT = "assistant"
 string AGENT_ROLE_SYSTEM    = "system"
 string AGENT_ROLE_TOOL      = "tool"
 
-// ── stop reason constants ─────────────────────────────────────────────────────
+
 
 string AGENT_STOP_END_TURN    = "end_turn"
 string AGENT_STOP_TOOL_USE    = "tool_use"
 string AGENT_STOP_MAX_TOKENS  = "max_tokens"
 string AGENT_STOP_INTERRUPTED = "interrupted"
 
-// ── error category constants ──────────────────────────────────────────────────
+
 
 string AGENT_ERR_INVALID_REQUEST = "invalid_request"
 string AGENT_ERR_TOOL_FAILED     = "tool_failed"
@@ -37,7 +37,7 @@ string AGENT_ERR_OVERLOADED      = "overloaded"
 string AGENT_ERR_SAFETY          = "safety_block"
 string AGENT_ERR_TIMEOUT         = "timeout"
 
-// ── data structures ───────────────────────────────────────────────────────────
+
 
 struct agent_message_header {
     string session_id
@@ -48,57 +48,57 @@ struct agent_message_header {
     int    sequence
 }
 
-// A single content block inside a message (text or tool_use or tool_result).
+
 struct agent_content_block {
-    string block_type    // "text" | "tool_use" | "tool_result" | "thinking"
-    string id            // tool_use_id (for tool_use and tool_result blocks)
-    string text          // for "text" and "thinking" blocks
-    string tool_name     // for "tool_use" blocks
-    string tool_input    // for "tool_use" blocks (serialised params)
-    string tool_content  // for "tool_result" blocks (serialised output)
-    bool   is_error      // for "tool_result" blocks
+    string block_type
+    string id
+    string text
+    string tool_name
+    string tool_input
+    string tool_content
+    bool   is_error
 }
 
-// A full protocol message (request or response).
+
 struct agent_protocol_message {
     agent_message_header   header
-    string                 role           // user | assistant | system | tool
+    string                 role
     []agent_content_block  content
     int                    content_count
-    string                 stop_reason    // end_turn | tool_use | max_tokens | interrupted
+    string                 stop_reason
     string                 model
     int                    input_tokens
     int                    output_tokens
 }
 
-// Tool use request block — sent by the assistant.
+
 struct agent_tool_use_message {
     string tool_use_id
     string name
-    string input          // serialised params (key=value pairs)
+    string input
 }
 
-// Tool result block — returned to the assistant.
+
 struct agent_tool_result_message {
     string tool_use_id
-    string content        // serialised output
+    string content
     bool   is_error
 }
 
-// Thinking block — private reasoning not shown to the user.
+
 struct agent_thinking_block {
-    string thinking       // raw thought text
+    string thinking
     int    budget_tokens
 }
 
-// Error envelope.
+
 struct agent_error_message {
     string category
     string message
-    int    http_status    // 0 when not applicable
+    int    http_status
 }
 
-// ── constructors ──────────────────────────────────────────────────────────────
+
 
 func new_agent_message_header(string session_id, string task_id, string msg_type, string source) agent_message_header {
     agent_message_header {
@@ -206,16 +206,16 @@ func agent_protocol_message_set_stop(agent_protocol_message msg, string stop_rea
     }
 }
 
-// ── convenience builders ──────────────────────────────────────────────────────
 
-// Build a user text message.
+
+
 func agent_protocol_user_text(string session_id, string task_id, string text) agent_protocol_message {
     agent_message_header hdr = new_agent_message_header(session_id, task_id, AGENT_MSG_ACTION, AGENT_ROLE_USER)
     agent_protocol_message msg = new_agent_protocol_message(hdr, AGENT_ROLE_USER)
     agent_protocol_message_add_block(msg, new_agent_content_text(text))
 }
 
-// Build an assistant message that contains a tool_use block.
+
 func agent_protocol_tool_use(string session_id, string task_id, string tool_use_id, string tool_name, string tool_input) agent_protocol_message {
     agent_message_header hdr = new_agent_message_header(session_id, task_id, AGENT_MSG_TOOL_USE, AGENT_ROLE_ASSISTANT)
     agent_protocol_message msg = new_agent_protocol_message(hdr, AGENT_ROLE_ASSISTANT)
@@ -223,14 +223,14 @@ func agent_protocol_tool_use(string session_id, string task_id, string tool_use_
     agent_protocol_message_set_stop(msg, AGENT_STOP_TOOL_USE)
 }
 
-// Build a user message returning a tool result.
+
 func agent_protocol_tool_result(string session_id, string task_id, string tool_use_id, string content, bool is_error) agent_protocol_message {
     agent_message_header hdr = new_agent_message_header(session_id, task_id, AGENT_MSG_TOOL_RESULT, AGENT_ROLE_TOOL)
     agent_protocol_message msg = new_agent_protocol_message(hdr, AGENT_ROLE_USER)
     agent_protocol_message_add_block(msg, new_agent_content_tool_result(tool_use_id, content, is_error))
 }
 
-// Build a final assistant text response.
+
 func agent_protocol_final_response(string session_id, string task_id, string text, string model, int in_tok, int out_tok) agent_protocol_message {
     agent_message_header hdr = new_agent_message_header(session_id, task_id, AGENT_MSG_RESULT, AGENT_ROLE_ASSISTANT)
     agent_protocol_message msg = new_agent_protocol_message(hdr, AGENT_ROLE_ASSISTANT)
@@ -248,14 +248,14 @@ func agent_protocol_final_response(string session_id, string task_id, string tex
     }
 }
 
-// Build an error message.
+
 func agent_protocol_error(string session_id, string task_id, string category, string error_msg, int http_status) agent_protocol_message {
     agent_message_header hdr = new_agent_message_header(session_id, task_id, AGENT_MSG_ERROR, AGENT_ROLE_SYSTEM)
     agent_protocol_message msg = new_agent_protocol_message(hdr, AGENT_ROLE_SYSTEM)
     agent_protocol_message_add_block(msg, new_agent_content_text(category + ": " + error_msg))
 }
 
-// ── inspection helpers ────────────────────────────────────────────────────────
+
 
 func agent_protocol_message_has_tool_use(agent_protocol_message msg) bool {
     int i = 0
@@ -295,7 +295,7 @@ func agent_protocol_first_tool_use(agent_protocol_message msg) agent_content_blo
     new_agent_content_text("")
 }
 
-// ── serialisation (human-readable) ───────────────────────────────────────────
+
 
 func agent_protocol_message_summary(agent_protocol_message msg) string {
     string stop = msg.stop_reason

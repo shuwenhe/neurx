@@ -359,7 +359,7 @@ void write_checkpoint(const std::string &output_dir,
     ckpt << "}\n";
 }
 
-}  // namespace
+}
 
 int main() {
     std::string project_root = env_str("NEURX_ROOT", ".");

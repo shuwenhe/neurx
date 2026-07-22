@@ -65,7 +65,7 @@ struct Param {
 struct Layer {
   int d,f; Param nq,nk,wq,wk,wv,wo,nf,wg,wu,wd;
   Layer(int dim,int ffn):d(dim),f(ffn),nq(d,false),nk(d,false),wq(d*d),wk(d*d),wv(d*d),wo(d*d),nf(d,false),wg(d*f),wu(d*f),wd(f*d){}
-  // nk is retained only as a sink for the unused legacy NXTRFMR1 norm slot.
+
   std::vector<Param*> params(){return{&nq,&wq,&wk,&wv,&wo,&nf,&wg,&wu,&wd};}
 };
 
@@ -375,7 +375,7 @@ static bool load_v2(Model&m,Tokenizer&t,JsonlStream&r,const std::string&path,uin
 
 static bool load_v1(Model&m,Tokenizer&t,const std::string&path,uint64_t&step){std::ifstream in(path,std::ios::binary);HeaderV1 h{};if(!in||!read_exact(in,&h,sizeof(h))||std::memcmp(h.magic,"NXTRFMR1",8))return false;if(t.kind!="byte_level"||m.vocab!=256||h.vocab!=m.vocab||h.seq!=m.seq||h.dim!=m.dim||h.heads!=m.heads||h.ffn!=m.ffn){std::fprintf(stderr,"NXTRFMR1 can only migrate with matching byte-level model dimensions\n");return false;}std::vector<Param*>old{&m.emb,&m.layers[0]->nq,&m.layers[0]->nk,&m.layers[0]->wq,&m.layers[0]->wk,&m.layers[0]->wv,&m.layers[0]->wo,&m.layers[0]->nf,&m.layers[0]->wg,&m.layers[0]->wu,&m.layers[0]->wd,&m.out};for(Param*p:old)if(!read_exact(in,p->v,p->n*4)||!read_exact(in,p->m,p->n*4)||!read_exact(in,p->s,p->n*4))return false;step=h.step;std::printf("[checkpoint] migrated NXTRFMR1 layer0; extra layers retain deterministic initialization\n");return true;}
 
-} // namespace
+}
 
 #ifndef NEURX_TRANSFORMER_NO_MAIN
 int main(){

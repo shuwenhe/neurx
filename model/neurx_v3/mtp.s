@@ -1,29 +1,29 @@
-// ============================================================================
-// Multi-Token Prediction (MTP) — NeurX reference implementation
-//
-// Paper: MTP reference architecture used by NeurX
-//
-// Core idea: predict D future tokens per position, boosting data efficiency.
-// Each MTP Module: embedding + Projection + 1-layer Transformer + Output Head
-// Loss: L_MTP = (1/D) * sum CE(p_i, t_i)
-// Also enables speculative decoding at inference time.
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
 
 package neurx.model.neurx.mtp
 
-// ============================================================================
-// 1. MTP Config
-// ============================================================================
+
+
+
 
 struct mtp_config {
-    int hidden_dim              // model hidden dim
-    int vocab_size              // vocabulary size
-    int num_mtp_layers          // D = future tokens to predict (e.g. 2)
-    int ff_intermediate_dim     // MTP Transformer Block FFN dim
-    int num_attention_heads     // MTP attention heads
-    int head_dim                // per-head dim
-    float rope_theta            // RoPE base theta
-    bool causal                 // causal attention
+    int hidden_dim
+    int vocab_size
+    int num_mtp_layers
+    int ff_intermediate_dim
+    int num_attention_heads
+    int head_dim
+    float rope_theta
+    bool causal
 }
 
 func new_mtp_config() mtp_config {
@@ -39,42 +39,42 @@ func new_mtp_config() mtp_config {
     }
 }
 
-// ============================================================================
-// 2. MTP Module Weights (single prediction layer)
-// ============================================================================
+
+
+
 
 struct mtp_module_weights {
-    []float proj_h              // [hidden_dim, hidden_dim]
-    []float emb_norm_weight     // [hidden_dim]
-    []float proj_emb            // [hidden_dim, hidden_dim]
+    []float proj_h
+    []float emb_norm_weight
+    []float proj_emb
 
-    // Transformer Block (1 layer, lightweight)
-    []float attn_norm_weight    // [hidden_dim]
-    []float q_weight            // [hidden_dim, num_heads * head_dim]
-    []float k_weight            // [hidden_dim, num_heads * head_dim]
-    []float v_weight            // [hidden_dim, num_heads * head_dim]
-    []float o_weight            // [num_heads * head_dim, hidden_dim]
 
-    []float ffn_norm_weight     // [hidden_dim]
-    []float ffn_w1              // [hidden_dim, ff_intermediate_dim]
-    []float ffn_w2              // [ff_intermediate_dim, hidden_dim]
+    []float attn_norm_weight
+    []float q_weight
+    []float k_weight
+    []float v_weight
+    []float o_weight
 
-    []float output_head         // [hidden_dim, vocab_size]
+    []float ffn_norm_weight
+    []float ffn_w1
+    []float ffn_w2
+
+    []float output_head
 }
 
-// ============================================================================
-// 3. Full MTP Weights
-// ============================================================================
+
+
+
 
 struct mtp_weights {
     mtp_config config
-    []float token_embedding      // [vocab_size, hidden_dim] (shared from main model)
-    []mtp_module_weights modules // D MTP modules
+    []float token_embedding
+    []mtp_module_weights modules
 }
 
-// ============================================================================
-// 4. Math Utilities
-// ============================================================================
+
+
+
 
 func zeros(int n) []float {
     []float out = []float{cap: n}
@@ -161,9 +161,9 @@ func rms_norm([]float x, int n, []float weight, float eps) []float {
     out
 }
 
-// ============================================================================
-// 5. MTP Module Weight Initialization
-// ============================================================================
+
+
+
 
 func new_mtp_module_weights(mtp_config cfg) mtp_module_weights {
     int d = cfg.hidden_dim
@@ -211,13 +211,13 @@ func new_mtp_weights(mtp_config cfg) mtp_weights {
     }
 }
 
-// ============================================================================
-// 6. MTP Module Single-Layer Forward
-// ============================================================================
+
+
+
 
 struct mtp_module_output {
-    []float hidden_state        // [seq_len, hidden_dim]
-    []float logits              // [seq_len, vocab_size]
+    []float hidden_state
+    []float logits
 }
 
 func mtp_module_forward(
@@ -231,7 +231,7 @@ func mtp_module_forward(
     int d_h = cfg.head_dim
     int hd = n_h * d_h
 
-    // Step 1: Combine = Proj_h(h_main) + Proj_emb(RMSNorm(Emb(t)))
+
     []float emb_input = zeros(seq_len * d)
     int s = 0
     while s < seq_len {
@@ -256,7 +256,7 @@ func mtp_module_forward(
         i = i + 1
     }
 
-    // Step 2: Transformer Block (1 layer)
+
     []float attn_normed = rms_norm(combined, seq_len * d, w.attn_norm_weight, 1e-6)
 
     []float q = matmul_2d(attn_normed, w.q_weight, seq_len, d, hd)
@@ -290,7 +290,7 @@ func mtp_module_forward(
         i = i + 1
     }
 
-    // Step 3: Output Head -> logits
+
     []float logits = matmul_2d(ffn_residual, w.output_head, seq_len, d, v)
 
     mtp_module_output {
@@ -299,9 +299,9 @@ func mtp_module_forward(
     }
 }
 
-// ============================================================================
-// 7. Multi-Head Attention (simplified, for MTP)
-// ============================================================================
+
+
+
 
 func multi_head_attention(
     []float q, []float k, []float v,
@@ -372,15 +372,15 @@ func multi_head_attention(
     output
 }
 
-// ============================================================================
-// 8. MTP Full Forward (all D layers)
-// ============================================================================
+
+
+
 
 struct mtp_forward_output {
-    [][]float all_logits        // [D][seq_len, vocab_size]
-    [][]float all_hidden        // [D][seq_len, hidden_dim]
+    [][]float all_logits
+    [][]float all_hidden
     float total_loss
-    []float per_module_loss     // [D]
+    []float per_module_loss
 }
 
 func mtp_forward(
@@ -439,9 +439,9 @@ func mtp_forward(
     }
 }
 
-// ============================================================================
-// 9. Cross-Entropy Loss
-// ============================================================================
+
+
+
 
 func cross_entropy_loss([]float logits, []int targets, int seq_len, int vocab_size) float {
     float total_loss = 0.0
@@ -486,13 +486,13 @@ func ln_approx(float x) float {
     2.0 * (y + y3 / 3.0 + y5 / 5.0 + y7 / 7.0)
 }
 
-// ============================================================================
-// 10. MTP Inference Mode (for speculative decoding)
-// ============================================================================
+
+
+
 
 struct mtp_speculative_output {
-    [][]int predicted_tokens     // [D][seq_len]
-    [][]float confidence         // [D][seq_len]
+    [][]int predicted_tokens
+    [][]float confidence
 }
 
 func mtp_inference(
@@ -519,7 +519,7 @@ func mtp_inference(
             w.token_embedding, cfg
         )
 
-        // Argmax prediction
+
         int best_token = 0
         float best_logit = -1e9
         int i = 0
@@ -535,7 +535,7 @@ func mtp_inference(
         pred_row[0] = best_token
         predicted[mtp_idx] = pred_row
 
-        // Confidence
+
         float max_logit = mtp_out.logits[0]
         i = 1
         while i < v {
@@ -564,9 +564,9 @@ func mtp_inference(
     }
 }
 
-// ============================================================================
-// 11. Combined Loss (for joint training)
-// ============================================================================
+
+
+
 
 func compute_combined_loss(
     float main_loss, mtp_forward_output mtp_output,
@@ -575,9 +575,9 @@ func compute_combined_loss(
     main_loss + mtp_weight * mtp_output.total_loss
 }
 
-// ============================================================================
-// 12. Module Info
-// ============================================================================
+
+
+
 
 func unit_name() string {
     "neurx/model/neurx/mtp"

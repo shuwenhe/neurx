@@ -8,13 +8,13 @@ func runtime_write_text_file(string path, string content) () {
     _ = __host_write_text_file(path, content)
 }
 
-// A deliberately small, self-contained S training reference.
-//
-// This is not a throughput implementation.  It is the executable correctness
-// baseline for the production trainer: causal attention, exact softmax
-// cross-entropy gradients, AdamW state, and restartable checkpoints all live in
-// one S compilation unit so an unresolved module can never silently turn the
-// training test into a simulation.
+
+
+
+
+
+
+
 
 struct train_cache {
     []float x

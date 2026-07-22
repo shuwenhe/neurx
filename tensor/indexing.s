@@ -154,7 +154,7 @@ func masked_select(tensor a, tensor mask) tensor {
         }
         i = i + 1
     }
-    // Create shape array before tensor literal (S compiler limitation)
+
     []int result_shape = []int{cap: 1}
     result_shape[0] = count
     tensor {
@@ -215,7 +215,7 @@ func nonzero(tensor a) tensor {
         }
         i = i + 1
     }
-    // Create shape array before tensor literal (S compiler limitation)
+
     []int result_shape2 = []int{cap: 1}
     result_shape2[0] = count
     tensor {
@@ -413,7 +413,7 @@ func pad(tensor a, int before, int after, float value) tensor {
         out[i] = value
         i = i + 1
     }
-    // Create shape array before tensor literal (S compiler limitation)
+
     []int result_shape3 = []int{cap: 1}
     result_shape3[0] = total
     tensor {
@@ -444,7 +444,7 @@ func slice(tensor a, int start, int end) tensor {
         out[i] = a.data[s + i]
         i = i + 1
     }
-    // Create shape array before tensor literal (S compiler limitation)
+
     []int slice_shape = []int{cap: 1}
     slice_shape[0] = total
     tensor {
@@ -463,7 +463,7 @@ func gather(tensor a, []int indices) tensor {
         out[i] = a.data[indices[i]]
         i = i + 1
     }
-    // Create shape array before tensor literal (S compiler limitation)
+
     []int gather_shape = []int{cap: 1}
     gather_shape[0] = n
     tensor {

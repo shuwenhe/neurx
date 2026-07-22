@@ -1,19 +1,19 @@
-// ============================================================================
-// NeurX Wikipedia Shard Processing
-//
-// S-language entry point for Wikipedia dump sharding.
-// This version keeps the implementation self-contained and shell-driven so it
-// can compile to IR and be used by `make shard` / `shard.sh` directly.
-// ============================================================================
+
+
+
+
+
+
+
 
 package neurx.shard.shard_wikipedia
 
 use std.os.command
 use neurx.runtime.io.runtime_env_get
 
-// ============================================================================
-// Configuration
-// ============================================================================
+
+
+
 
 struct wikipedia_config {
     string input_bz2_file
@@ -23,11 +23,11 @@ struct wikipedia_config {
     int max_pages
 }
 
-// ============================================================================
-// Global Configuration Variables
-// Using global variables instead of struct parameters due to S IR runtime
-// limitations with passing custom struct types as function arguments.
-// ============================================================================
+
+
+
+
+
 
 string g_input_bz2_file = ""
 string g_output_dir = ""
@@ -42,9 +42,9 @@ struct shard_metadata {
     int size_bytes
 }
 
-// ============================================================================
-// Small helpers
-// ============================================================================
+
+
+
 
 func string_char(int c) string {
     string(c)
@@ -282,9 +282,9 @@ func generate_manifest_json(int total_pages, int total_shards, []shard_metadata 
     json
 }
 
-// ============================================================================
-// Core processing
-// ============================================================================
+
+
+
 
 func process_wikipedia() int {
     println("")
@@ -314,7 +314,7 @@ func process_wikipedia() int {
     }
 
     string temp_xml = g_output_dir + "/.wikipedia_dump.xml"
-    // Clean up previous outputs.
+
     let _ = command("sh -c " + shell_escape("rm -f " + g_output_dir + "/shard_*.jsonl " + temp_xml))
 
     println("[*] Decompressing Wikipedia dump...")
@@ -344,8 +344,8 @@ func process_wikipedia() int {
     println("[*] Planned shards : " + int_to_str(total_shards))
     println("")
 
-    // The heavy lifting is done in Perl so the S entry remains compact and
-    // compilation-friendly while still producing JSONL shards.
+
+
     string perl_script = ""
     perl_script = perl_script + "use strict; use warnings; use JSON::PP qw(encode_json);\n"
     perl_script = perl_script + "my ($input, $out_dir, $docs_per_shard, $max_pages) = @ARGV;\n"
@@ -415,15 +415,15 @@ func process_wikipedia() int {
     return 0
 }
 
-// ============================================================================
-// Main entry
-// ============================================================================
+
+
+
 
 func main() int {
     string neurx_home = runtime_env_get("NEURX_HOME", ".")
     string dataset_root = neurx_home + "/dataset/pretrain"
 
-    // Initialize global configuration variables from environment
+
     g_input_bz2_file = runtime_env_get("ENWIKI_BZ2_FILE", dataset_root + "/raw/enwiki-latest-pages-articles.xml.bz2")
     g_output_dir = runtime_env_get("ENWIKI_SHARD_DIR", dataset_root + "/shard")
     g_manifest_file = runtime_env_get("ENWIKI_MANIFEST_FILE", dataset_root + "/manifest.json")

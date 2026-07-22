@@ -36,7 +36,7 @@ float fp16_to_float(uint16_t value) {
   return result;
 }
 
-}  // namespace
+}
 
 AscendWorker::AscendWorker(AscendExecutorConfig config,
                            cann::PrefixCacheConfig prefix_cache_config)
@@ -252,8 +252,8 @@ AdapterStatus AscendWorker::execute(
   }
   status = executor_.synchronize();
   if (!status.ok) {
-    // An asynchronous device failure makes these requests' newly written KV
-    // state unsafe to reuse.
+
+
     for (const auto& item : batch.items) executor_.release_request(item.request_id);
     return status;
   }
@@ -261,9 +261,9 @@ AdapterStatus AscendWorker::execute(
   if (batch.phase == Phase::prefill) {
     for (std::size_t row = 0; row < batch_size; ++row) {
       if (prefill_prompts[row].empty()) continue;
-      // Prefix caching is an optimization. A too-short prompt or a cache
-      // capacity race must not turn a successful model execution into a failed
-      // request.
+
+
+
       prefix_cache_.insert(batch.items[row].request_id,
                            prefill_prompts[row]);
     }
@@ -307,4 +307,4 @@ AdapterStatus AscendWorker::execute(
   return AdapterStatus::success();
 }
 
-}  // namespace neurx::inference
+}

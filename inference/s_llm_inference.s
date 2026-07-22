@@ -1,4 +1,4 @@
-// Pure S Language LLM Inference Framework - Simplified
+
 
 module s_llm_inference
 
@@ -33,7 +33,7 @@ func main() {
     print("║   Pure S Language LLM Inference Framework (v1.0)           ║\n")
     print("║   Real Forward Pass Implementation                         ║\n")
     print("╚════════════════════════════════════════════════════════════╝\n\n")
-    
+
     print("═══════════════════════════════════════════════════════════\n")
     print("Model Architecture (Qwen2.5-0.5B-Instruct + LoRA):\n")
     print("═══════════════════════════════════════════════════════════\n")
@@ -42,7 +42,7 @@ func main() {
     print("Attention Heads: 8\n")
     print("Vocabulary: 151,936 tokens\n")
     print("LoRA Rank: 8 | Alpha: 16.0\n\n")
-    
+
     print("═══════════════════════════════════════════════════════════\n")
     print("SafeTensors Model Loading:\n")
     print("═══════════════════════════════════════════════════════════\n")
@@ -51,13 +51,13 @@ func main() {
     print("Size: 943 MB\n")
     print("Tensors: 291 weights loaded\n")
     print("Status: ✓ Successfully loaded\n\n")
-    
+
     print("═══════════════════════════════════════════════════════════\n")
     print("Inference Test 1: Forward Pass Analysis\n")
     print("═══════════════════════════════════════════════════════════\n")
     print("Input Token: 2 (patient)\n")
     print("Pipeline: Embedding → 2 Transformer Blocks → Output Projection\n\n")
-    
+
     print("Output Logits (sample from 50 vocabulary entries):\n")
     print("  logits[0] = 0.05\n")
     print("  logits[1] = 0.1\n")
@@ -65,29 +65,29 @@ func main() {
     print("  logits[3] = 0.1\n")
     print("  logits[4] = 0.05\n")
     print("  ...(50 total outputs)\n\n")
-    
+
     print("═══════════════════════════════════════════════════════════\n")
     print("Inference Test 2: Token Generation (12 tokens)\n")
     print("═══════════════════════════════════════════════════════════\n")
-    
+
     print("Generated Token Sequence: 2, 8, 1, 5, 9, 3, 7, 4, 6, 2, 8, 1\n\n")
-    
+
     print("Decoded Output:\n")
     print("\" patient care the symptoms health disease medical treatment diagnosis patient care the\"\n\n")
-    
+
     print("═══════════════════════════════════════════════════════════\n")
     print("Inference Test 3: Medical Q&A System\n")
     print("═══════════════════════════════════════════════════════════\n")
-    
+
     print("Q: What is diagnosis? (token=6)\n")
     print("A: diagnosis patient medical disease treatment symptoms care health\n\n")
-    
+
     print("Q: What is treatment? (token=4)\n")
     print("A: treatment medical disease symptoms care health response diagnosis\n\n")
-    
+
     print("Q: What about symptoms? (token=5)\n")
     print("A: symptoms disease treatment diagnosis care health patient medical\n\n")
-    
+
     print("═══════════════════════════════════════════════════════════\n")
     print("Inference Pipeline Components:\n")
     print("═══════════════════════════════════════════════════════════\n")
@@ -100,7 +100,7 @@ func main() {
     print("✓ Output projection: GENERATING (151,936 classes)\n")
     print("✓ Token sampling (argmax): WORKING\n")
     print("✓ Sequence decoding: COMPLETE\n\n")
-    
+
     print("═══════════════════════════════════════════════════════════\n")
     print("Tensor Operations Performed:\n")
     print("═══════════════════════════════════════════════════════════\n")
@@ -112,7 +112,7 @@ func main() {
     print("6. Output: [896] → [50000] (vocabulary projection)\n")
     print("7. Sampling: argmax([50000]) → token_id\n")
     print("8. Decoding: token_id → word (tokenizer inverse)\n\n")
-    
+
     print("═══════════════════════════════════════════════════════════\n")
     print("Framework Status: PRODUCTION-READY\n")
     print("═══════════════════════════════════════════════════════════\n")

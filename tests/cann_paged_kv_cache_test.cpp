@@ -38,7 +38,7 @@ struct TestHeaderV2 {
 
 static_assert(sizeof(TestHeaderV2) == 140, "test checkpoint header ABI changed");
 
-}  // namespace
+}
 
 int main() {
   HostAllocator allocator;

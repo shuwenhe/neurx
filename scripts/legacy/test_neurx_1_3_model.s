@@ -18,7 +18,7 @@ func main() int {
     println("  Output Dir     : " + output_dir)
     println("")
 
-    // Check prerequisites
+
     println("Phase 1: Checking Prerequisites...")
     if !runtime_file_exists(checkpoint_dir) {
         println("  ✗ checkpoint directory not found: " + checkpoint_dir)
@@ -38,7 +38,7 @@ func main() int {
     }
     println("  ✓ Model metadata (NeurX-1.3.neurx) found")
 
-    // Parse model metadata
+
     println("")
     println("Phase 2: Loading Model Metadata...")
     int result = read_model_metadata(checkpoint_dir)
@@ -47,20 +47,20 @@ func main() int {
         return 1
     }
 
-    // Prepare output directories
+
     println("")
     println("Phase 3: Preparing Directories...")
     string cmd = "mkdir -p \"" + output_dir + "\" \"" + project_root + "/artifacts/logs\""
     runtime_run_command(cmd)
     println("  ✓ Output directories created")
 
-    // List checkpoint contents
+
     println("")
     println("Phase 4: Inspecting checkpoint Contents...")
     string list_cmd = "ls -lh \"" + checkpoint_dir + "\""
     runtime_run_command(list_cmd)
 
-    // Print results summary
+
     println("")
     println("╔════════════════════════════════════════════════════╗")
     println("║                 Test Summary                       ║")
@@ -98,4 +98,3 @@ func print_checkpoint_size(string checkpoint_dir) int {
     runtime_run_command(cmd)
     return 0
 }
-

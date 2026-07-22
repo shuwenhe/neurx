@@ -453,7 +453,7 @@ neurx::inference::AdapterStatus generate_batch(
   return AdapterStatus::success();
 }
 
-}  // namespace
+}
 
 int main() {
   const std::string checkpoint = environment("NEURX_CHECKPOINT");
@@ -596,7 +596,7 @@ int main() {
         batch.items = {{id, static_cast<int>(prompt.size())}};
         batch.total_tokens = static_cast<int>(prompt.size());
         neurx::inference::SamplingConfig sampling;
-        // Force the host-logits path without changing the model output.
+
         sampling.repetition_penalty = 1.000001F;
         neurx::inference::WorkerBatchResult result;
         const auto status =

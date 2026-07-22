@@ -1,54 +1,54 @@
-# NeurX Post-Training Configuration
-# afterTrainingConfigurationFile
 
-# ModelConfiguration (Model Configuration)
+
+
+
 model:
-  # baseModelPath (Base model directory)
+
   base_model_path: /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct
-  
-  # baseModel名称 (Base model name)
+
+
   model_name: Qwen2.5-0.5B-Instruct
-  
-  # ModelType (Model type)
+
+
   model_type: qwen
 
-# DataConfiguration (Data Configuration)
+
 data:
-  # TrainingDataPath (Training data file path)
+
   train_data_path: /home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl
-  
-  # VerificationDataPath (Validation data file path)
+
+
   val_data_path: /home/shuwen/shuwen/train/dataset/medmcqa/val.jsonl
-  
-  # DataFormat (Data format: sft, dpo, preference)
+
+
   data_format: sft
-  
-  # DatasetType (Dataset type)
+
+
   dataset_type: medmcqa
 
-# OutputConfiguration (Output Configuration)
+
 output:
-  # adapterCheckpointOutputDirectory (LoRA adapter checkpoint directory)
+
   adapter_output_dir: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft
-  
-  # Mergeafter of ModelOutputDirectory (Merged model output directory)
+
+
   merged_model_output_dir: /home/shuwen/shuwen/train/model/base-model-posttrain
-  
-  # LogOutputDirectory (Logging directory)
+
+
   log_dir: /home/shuwen/shuwen/train/neurx/artifacts/logs
 
-# LoRA Configuration (LoRA Configuration)
+
 lora:
-  # LoRA rank
+
   rank: 8
-  
-  # LoRA alpha
+
+
   alpha: 16
-  
-  # LoRA dropout
+
+
   dropout: 0.05
-  
-  # 目标module (Target modules)
+
+
   target_modules:
     - q_proj
     - v_proj
@@ -58,85 +58,85 @@ lora:
     - up_proj
     - down_proj
 
-# TrainingConfiguration (Training Configuration)
+
 training:
-  # Trainingmethod (Training method: sft, dpo, grpo)
+
   training_method: sft
-  
-  # Trainingcycle (Number of epochs)
+
+
   num_epochs: 3
-  
-  # batchSize (Batch size)
+
+
   batch_size: 32
-  
-  # gradient累积stepnumber (Gradient accumulation steps)
+
+
   gradient_accumulation_steps: 1
-  
-  # learning_rate (Learning rate)
+
+
   learning_rate: 0.0005
-  
-  # learning_rate调度device (Learning rate scheduler)
+
+
   lr_scheduler: cosine
-  
-  # 预热stepnumber (Warmup steps)
+
+
   warmup_steps: 100
-  
-  # maximumTrainingstepnumber (Maximum training steps)
+
+
   max_steps: -1
-  
-  # weightsdecay (Weight decay)
+
+
   weight_decay: 0.01
-  
-  # Optimizedevice (Optimizer)
+
+
   optimizer: adamw_8bit
-  
-  # gradient裁剪 (Gradient clipping)
+
+
   max_grad_norm: 1.0
 
-# ModelMergeConfiguration (Model Merge Configuration)
+
 merge:
-  # 是否Merge LoRA adapter (Merge LoRA adapters)
+
   merge_lora_after_training: true
-  
-  # Mergeway (Merge method)
+
+
   merge_method: linear
-  
-  # Merge比例 (Merge ratio)
+
+
   merge_ratio: 1.0
 
-# systemConfiguration (System Configuration)
+
 system:
-  # GPU Device (GPU devices)
+
   gpu_devices: "0"
-  
-  # 是否UsagedistributedTraining (Use distributed training)
+
+
   use_distributed: false
-  
-  # 种子 (Random seed)
+
+
   seed: 42
-  
-  # 是否启用混合precisionTraining (Enable mixed precision)
+
+
   fp16: false
   bf16: false
 
-# VerificationConfiguration (Validation Configuration)
+
 validation:
-  # Verification间隔 (Validation interval)
+
   validation_steps: 100
-  
-  # VerificationsetSize (Validation set size)
+
+
   validation_set_size: 0.1
-  
-  # Save model间隔 (Save checkpoint interval)
+
+
   save_steps: 100
 
-# projectConfiguration (Project Configuration)
+
 project:
-  # project名称 (Project name)
+
   project_name: medical-lora-sft
-  
-  # Run名称 (Run name)
+
+
   run_name: qwen2.5-0.5b-medmcqa-lora
-  
-  # project根Directory (Project root directory)
+
+
   project_root: /home/shuwen/shuwen/train/neurx

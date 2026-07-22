@@ -1,4 +1,4 @@
-# Sample config for vision/classification
+
 batch_size: 32
 image_size: 224
 max_steps: 1000

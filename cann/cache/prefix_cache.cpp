@@ -115,4 +115,4 @@ PrefixCacheStats PrefixCache::stats() const {
   return {entries_.size(), retained_blocks_, lookups_, hits_, evictions_};
 }
 
-}  // namespace neurx::cann
+}

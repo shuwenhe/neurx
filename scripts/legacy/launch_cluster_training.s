@@ -1,30 +1,30 @@
-#!/usr/bin/env s
 
-// ============================================
-// NeurX Multi-Node Cluster Launcher
-// English textstartEnglish text
-// English text: SSHstart, English textmanagement, logEnglish text
-// ============================================
+
+
+
+
+
+
 
 package main
 
 use neurx.runtime.io.{runtime_env_get}
 use neurx.strings.{string_concat}
 
-// ============================================
-// English textconfiguration
-// ============================================
+
+
+
 
 struct cluster_config {
     int num_nodes
-    []string node_addresses      // English textIP/mainEnglish text
+    []string node_addresses
     int gpus_per_node
     string master_node_address
     int master_port
     string ssh_key_path
     string ssh_user
-    string working_dir           // English textdirectory
-    string log_dir              // logdirectory
+    string working_dir
+    string log_dir
 }
 
 struct node_process_handle {
@@ -34,14 +34,14 @@ struct node_process_handle {
     bool is_running
 }
 
-// ============================================
-// English textconfigurationEnglish text
-// ============================================
 
-// English textconfigurationfileEnglish textconfiguration
+
+
+
+
 func parse_cluster_config() cluster_config {
 
-    // English text
+
     string node_list = runtime_env_get("NEURX_NODE_LIST", "localhost")
     int num_nodes = parse_int(runtime_env_get("NEURX_NUM_NODES", "1"), 1)
     int gpus_per_node = parse_int(runtime_env_get("NEURX_GPUS_PER_NODE", "1"), 1)
@@ -51,7 +51,7 @@ func parse_cluster_config() cluster_config {
     string working_dir = runtime_env_get("NEURX_WORKING_DIR", "/home/neurx")
     string log_dir = runtime_env_get("NEURX_LOG_DIR", "/mnt/nccl_shared/logs")
 
-    // English text (English text: "node1,node2,node3" English text "10.0.0.1,10.0.0.2,10.0.0.3")
+
     []string nodes = split_string(node_list, ",")
 
     cluster_config {
@@ -67,11 +67,11 @@ func parse_cluster_config() cluster_config {
     }
 }
 
-// ============================================
-// English textstart
-// ============================================
 
-// startEnglish texttrainingEnglish text
+
+
+
+
 func launch_cluster_training(
     cluster_config config,
 ) []node_process_handle {
@@ -89,7 +89,7 @@ func launch_cluster_training(
 
     []node_process_handle handles = []node_process_handle{cap: config.num_nodes}
 
-    // English textstartGPUtrainingEnglish text
+
     int node_idx = 0
     while node_idx < config.num_nodes {
 
@@ -97,14 +97,14 @@ func launch_cluster_training(
 
         print("[CLUSTER] Launching node " + itoa(node_idx) + " (" + node_addr + ")...")
 
-        // English textstartEnglish text
+
         string cmd = build_launch_command(
             config,
             node_idx,
             node_addr,
         )
 
-        // English textSSHEnglish text
+
         int pid = execute_remote_training(
             config,
             node_idx,
@@ -130,19 +130,19 @@ func launch_cluster_training(
     handles
 }
 
-// ============================================
-// English textgenerate
-// ============================================
 
-// English textstartEnglish text
+
+
+
+
 func build_launch_command(
     cluster_config config,
     int node_rank,
     string node_addr,
 ) string {
 
-    // English text: cd $WORKING_DIR && \
-    //       WORLD_SIZE=N RANK=rank MASTER_ADDR=master_ip ./pretrain/distributed_pretrain_multi_node_entry.s
+
+
 
     string world_size = itoa(config.num_nodes * config.gpus_per_node)
 
@@ -160,11 +160,11 @@ func build_launch_command(
     cmd
 }
 
-// ============================================
-// English text
-// ============================================
 
-// English textSSHEnglish texttraining
+
+
+
+
 func execute_remote_training(
     cluster_config config,
     int node_rank,
@@ -172,8 +172,8 @@ func execute_remote_training(
     string cmd,
 ) int {
 
-    // SSHEnglish text:
-    // ssh -i key_file user@host "nohup cmd > log 2>&1 &"
+
+
 
     string log_file = config.log_dir + "/node_" + itoa(node_rank) + ".log"
 
@@ -186,19 +186,19 @@ func execute_remote_training(
 
     print("[CLUSTER] Executing SSH command on " + node_addr)
 
-    // actualimplementationEnglish textsystemEnglish text
-    // int exit_code = exec_command(ssh_cmd)
 
-    // English textPID
+
+
+
     int simulated_pid = 10000 + node_rank
     simulated_pid
 }
 
-// ============================================
-// English textmonitoring
-// ============================================
 
-// monitoringEnglish textstate
+
+
+
+
 func monitor_cluster_processes(
     []node_process_handle handles,
     cluster_config config,
@@ -214,7 +214,7 @@ func monitor_cluster_processes(
 
         node_process_handle h = handles[i]
 
-        // English textrun
+
         bool still_running = check_remote_process(
             config,
             h.node_address,
@@ -238,29 +238,29 @@ func monitor_cluster_processes(
     handles
 }
 
-// English textrun
+
 func check_remote_process(
     cluster_config config,
     string node_addr,
     int pid,
 ) bool {
 
-    // SSH psEnglish text
+
     string cmd = "ssh -i " + config.ssh_key_path +
                  " " + config.ssh_user + "@" + node_addr +
                  " ps -p " + itoa(pid)
 
-    // actualimplementationEnglish text
-    // bool exists = (exec_command(cmd) == 0)
 
-    true  // English textrunEnglish text
+
+
+    true
 }
 
-// ============================================
-// logEnglish text
-// ============================================
 
-// English textlog
+
+
+
+
 func collect_cluster_logs(
     []node_process_handle handles,
     cluster_config config,
@@ -270,17 +270,17 @@ func collect_cluster_logs(
 
     string aggregated_log = config.log_dir + "/cluster_aggregated.log"
 
-    // English textlogfile
+
     print("[LOGS] Aggregating logs to: " + aggregated_log)
 
-    // English text
+
     int i = 0
     while i < len(handles) {
 
         node_process_handle h = handles[i]
         string node_log = config.log_dir + "/node_" + itoa(h.node_id) + ".log"
 
-        // English textSCPEnglish textlog
+
         string scp_cmd = "scp -i " + config.ssh_key_path +
                          " " + config.ssh_user + "@" + h.node_address +
                          ":" + node_log +
@@ -288,8 +288,8 @@ func collect_cluster_logs(
 
         print("[LOGS] Downloading log from node " + itoa(h.node_id))
 
-        // actualEnglish text
-        // exec_command(scp_cmd)
+
+
 
         i = i + 1
     }
@@ -297,11 +297,11 @@ func collect_cluster_logs(
     true
 }
 
-// ============================================
-// English text
-// ============================================
 
-// English texttrainingEnglish text
+
+
+
+
 func kill_cluster_training(
     []node_process_handle handles,
     cluster_config config,
@@ -316,15 +316,15 @@ func kill_cluster_training(
 
         node_process_handle h = handles[i]
 
-        // SSH killEnglish text
+
         string cmd = "ssh -i " + config.ssh_key_path +
                      " " + config.ssh_user + "@" + h.node_address +
                      " kill -9 " + itoa(h.process_id)
 
         print("[CLEANUP] Killing process on node " + itoa(h.node_id))
 
-        // actualEnglish textkill
-        // exec_command(cmd)
+
+
 
         killed = killed + 1
         i = i + 1
@@ -334,37 +334,37 @@ func kill_cluster_training(
     true
 }
 
-// ============================================
-// mainfunction
-// ============================================
+
+
+
 
 func main() {
 
-    // 1. English textconfiguration
+
     cluster_config config = parse_cluster_config()
 
-    // 2. startEnglish text
+
     []node_process_handle handles = launch_cluster_training(config)
 
     print("[MAIN] Waiting for training to complete...")
 
-    // 3. monitoringEnglish text
-    sleep_seconds(300)  // English textrun5English text
+
+    sleep_seconds(300)
 
     handles = monitor_cluster_processes(handles, config)
 
-    // 4. English textlog
+
     collect_cluster_logs(handles, config)
 
-    // 5. English text
+
     kill_cluster_training(handles, config)
 
     print("[MAIN] Multi-node training completed!")
 }
 
-// ============================================
-// helperfunction
-// ============================================
+
+
+
 
 func split_string(string s, string sep) []string {
     []string parts = []string{cap: 10}
@@ -453,5 +453,5 @@ func itoa(int n) string {
 }
 
 func sleep_seconds(int seconds) {
-    // actualimplementation: time.Sleep()
+
 }

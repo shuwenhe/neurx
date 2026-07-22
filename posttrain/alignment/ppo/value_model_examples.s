@@ -2,13 +2,13 @@ package neurx.posttrain.rlhf.value_model_examples
 
 use neurx.posttrain.rlhf.value_model_trainer.*
 
-// ════════════════════════════════════════════════════════════════════════════════
-// Value Model Trainer example
-//
-// English textuseEnglish texttrainingEnglish text
-// ════════════════════════════════════════════════════════════════════════════════
 
-// English textconfiguration
+
+
+
+
+
+
 func create_value_config() value_config {
     value_config {
         seq_len: 128,
@@ -35,14 +35,14 @@ func create_value_config() value_config {
     }
 }
 
-// example 1: English texttraining
+
 func example_basic_value_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 1: Basic Value Model Training                    ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
 
-    // English textconfigurationEnglish textstate
+
     value_config cfg = create_value_config()
     value_state state = new_value_state(cfg)
 
@@ -54,7 +54,7 @@ func example_basic_value_training() {
     print("  Lambda (GAE): " + float_to_string_ex(cfg.gae_lambda))
     print("")
 
-    // English textexampleEnglish text
+
     int num_trajectories = 5
     int steps_per_trajectory = 32
 
@@ -63,7 +63,7 @@ func example_basic_value_training() {
     print("  Steps per trajectory: " + int_to_string_ex(steps_per_trajectory))
     print("")
 
-    // starttraining
+
     []value_trajectory trajectories = []value_trajectory{cap: num_trajectories}
     int t = 0
     while t < num_trajectories {
@@ -77,7 +77,7 @@ func example_basic_value_training() {
             min_advantage: 0.0,
         }
 
-        // English textstepEnglish text
+
         int s = 0
         while s < steps_per_trajectory {
             value_trajectory_step step = value_trajectory_step {
@@ -90,14 +90,14 @@ func example_basic_value_training() {
                 is_terminal: (s == steps_per_trajectory - 1),
             }
 
-            // English text
+
             int i = 0
             while i < cfg.seq_len {
                 step.observation = append_float_ex(step.observation, 0.1)
                 i = i + 1
             }
 
-            // English textreward
+
             traj.total_reward = traj.total_reward + step.reward
 
             traj.steps = append_step_ex(traj.steps, step)
@@ -116,7 +116,7 @@ func example_basic_value_training() {
     print("")
 }
 
-// example 2: GAE English text
+
 func example_gae_advantage_estimation() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 2: GAE Advantage Estimation                      ║")
@@ -140,7 +140,7 @@ func example_gae_advantage_estimation() {
     print("  Step | Reward | V(s)  | V(s+1) | δ     | A(GAE) | G(return)")
     print("  ──── ┼─────── ┼─────── ┼─────── ┼─────── ┼──────── ┼─────────")
 
-    // exampledata
+
     []float rewards = []float{cap: 5}
     rewards = append_float_ex(rewards, 0.5)
     rewards = append_float_ex(rewards, 0.6)
@@ -165,7 +165,7 @@ func example_gae_advantage_estimation() {
         float v_next = if i < 4 { values[i + 1] } else { 0.0 }
 
         float delta = r + gamma * v_next - v
-        float advantage = delta  // English text
+        float advantage = delta
         float return_val = advantage + v
 
         string step_str = int_to_string_ex(i + 1)
@@ -189,14 +189,14 @@ func example_gae_advantage_estimation() {
     print("")
 }
 
-// example 3: English text GPU training
+
 func example_distributed_value_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 3: Distributed Multi-GPU Value Training          ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
 
-    // 8 GPU configuration
+
     int num_gpus = 8
     int global_batch_size = 256
     int batch_per_gpu = global_batch_size / num_gpus
@@ -230,7 +230,7 @@ func example_distributed_value_training() {
     print("")
 }
 
-// example 4: English text PPO English text
+
 func example_value_ppo_integration() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 4: Value Model Integration with PPO              ║")
@@ -271,7 +271,7 @@ func example_value_ppo_integration() {
     print("")
 }
 
-// example 5: English textoptimizeEnglish text
+
 func example_value_performance_monitoring() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 5: Value Model Performance Monitoring            ║")
@@ -319,7 +319,7 @@ func example_value_performance_monitoring() {
     print("")
 }
 
-// example 6: completeEnglish text
+
 func example_full_alignment_pipeline() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 6: Full Alignment Pipeline                       ║")
@@ -360,7 +360,7 @@ func example_full_alignment_pipeline() {
     print("")
 }
 
-// Main function
+
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -380,7 +380,7 @@ func main() {
     print("═════════════════════════════════════════════════════════════")
 }
 
-// helperfunction
+
 func float_to_string_ex(float f) string {
     string(int(f * 10000.0) / 10000.0)
 }

@@ -1,7 +1,7 @@
 package main
 
-// Simple real data training entry point
-// Demonstrates training with real JSONL dataset
+
+
 
 func main() int {
     println("========================================")
@@ -17,8 +17,8 @@ func main() int {
     println("  - Learning rate: 0.0002")
     println("  - Training steps: 2232 (based on actual data count)")
     println("")
-    
-    // Simplified training loop that demonstrates the concept
+
+
     int total_steps = 2232
     int step = 0
     float base_loss = 10.0
@@ -26,34 +26,34 @@ func main() int {
     float base_lr = 0.0002
     float min_lr = 0.00002
     int warmup_steps = 100
-    
+
     while step < total_steps {
         float progress = (step * 1.0) / (total_steps * 1.0)
-        
-        // Loss decay: cubic reduction from 10.0 to 0.975
+
+
         float decay = 1.0 - (progress * progress * progress)
         if decay < 0.05 {
             decay = 0.05
         }
         float loss = final_loss + (base_loss - final_loss) * decay
-        
-        // Learning rate warmup then plateau
+
+
         float current_lr = base_lr
         if step < warmup_steps {
             float warmup_progress = (step * 1.0) / (warmup_steps * 1.0)
             current_lr = min_lr + (base_lr - min_lr) * warmup_progress
         }
-        
-        // Log every 10 steps
+
+
         int log_interval = 10
         int step_mod = step - (step / log_interval) * log_interval
         if step_mod == 0 || step == 0 {
             println("Step " + fmt_progress(progress * 100.0, 2) + "% | Loss: " + fmt_loss(loss) + " | LR: " + fmt_lr(current_lr))
         }
-        
+
         step = step + 1
     }
-    
+
     println("")
     println("========================================")
     println("Training completed successfully")
@@ -61,7 +61,7 @@ func main() int {
     println("Final loss: " + fmt_loss(final_loss + (base_loss - final_loss) * 0.05))
     println("Total tokens processed: ~32.5M")
     println("")
-    
+
     0
 }
 
@@ -72,7 +72,7 @@ func fmt_progress(float p, int decimals) string {
         v = v - 1.0
         int_part = int_part + 1
     }
-    
+
     string s = ""
     if int_part < 10 {
         s = "0"
@@ -85,7 +85,7 @@ func fmt_progress(float p, int decimals) string {
             s = "00"
         }
     }
-    
+
     if int_part == 0 {
         return s + "0." + digit(0) + digit(0)
     }
@@ -98,7 +98,7 @@ func fmt_progress(float p, int decimals) string {
     if int_part == 99 {
         return "99." + digit(9) + digit(5)
     }
-    
+
     return s + "XX." + digit(0) + digit(0)
 }
 
@@ -109,10 +109,10 @@ func fmt_loss(float loss) string {
         v = v - 1.0
         int_part = int_part + 1
     }
-    
+
     string s = ""
     s = digit(int_part) + "."
-    
+
     v = v * 10.0
     int d1 = 0
     while v >= 1.0 {
@@ -120,7 +120,7 @@ func fmt_loss(float loss) string {
         d1 = d1 + 1
     }
     s = s + digit(d1)
-    
+
     v = v * 10.0
     int d2 = 0
     while v >= 1.0 {
@@ -128,7 +128,7 @@ func fmt_loss(float loss) string {
         d2 = d2 + 1
     }
     s = s + digit(d2)
-    
+
     v = v * 10.0
     int d3 = 0
     while v >= 1.0 {
@@ -136,7 +136,7 @@ func fmt_loss(float loss) string {
         d3 = d3 + 1
     }
     s = s + digit(d3)
-    
+
     v = v * 10.0
     int d4 = 0
     while v >= 1.0 {
@@ -144,7 +144,7 @@ func fmt_loss(float loss) string {
         d4 = d4 + 1
     }
     s = s + digit(d4)
-    
+
     return s
 }
 
@@ -155,7 +155,7 @@ func fmt_lr(float lr) string {
         v = v - 1.0
         int_part = int_part + 1
     }
-    
+
     return "0." + digit_pair(int_part / 1000000) + digit_pair((int_part / 10000) - (int_part / 1000000) * 100) + digit_pair((int_part / 100) - (int_part / 10000) * 100)
 }
 

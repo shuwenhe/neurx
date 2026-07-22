@@ -1,4 +1,4 @@
-// neurx/scripts/complete_system_build.s
+
 package main
 
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_shell_escape}

@@ -1,61 +1,61 @@
 package neurx.posttrain.reward.factual_consistency_reward
 
-// ════════════════════════════════════════════════════════════════════════════════
-// Factual Consistency Reward (English textreward)
-//
-// English textevaluationgenerateEnglish text, English texttruthfulEnglish text:
-//   1. English text (Fact Extraction)
-//   2. English text (Fact Verification)
-//   3. English text (Consistency Checking)
-//   4. English text (Hallucination Detection)
-//   5. English text (Citation Coverage)
-//
-// English text:
-//   - FAQ English text
-//   - English textgenerate
-//   - English text
-//   - English textcontent
-// ════════════════════════════════════════════════════════════════════════════════
 
-// ════════════════════════════════════════════════════════════════════════════════
-// 1. dataEnglish text
-// ════════════════════════════════════════════════════════════════════════════════
 
-// English text
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 struct fact {
-    string subject          // mainEnglish text (Who/What)
-    string predicate        // English text (What relation)
-    string obj              // English text (What object)
-    string temporal         // timeinformation (optional)
-    string location         // English textinformation (optional)
-    float confidence        // English text (0-1)
-    string source          // Source
+    string subject
+    string predicate
+    string obj
+    string temporal
+    string location
+    float confidence
+    string source
 }
 
-// English text (English text)
+
 struct fact_pair {
-    fact reference_fact     // English text
-    fact generated_fact     // generateEnglish text
-    float similarity        // English text (0-1)
-    bool is_consistent      // English text
-    string divergence_type  // English text: "missing", "extra", "contradiction", "hallucination"
+    fact reference_fact
+    fact generated_fact
+    float similarity
+    bool is_consistent
+    string divergence_type
 }
 
-// English text
+
 struct factual_content {
-    []fact facts            // English text
-    []string key_entities   // English text
-    []string temporal_refs   // timeEnglish text
+    []fact facts
+    []string key_entities
+    []string temporal_refs
     int total_facts
 }
 
-// English text
+
 struct consistency_report {
-    float consistency_score         // 0-1
-    float factual_accuracy          // 0-1
-    float hallucination_rate        // 0-1 (English text)
-    float coverage_score            // 0-1
-    float citation_coverage         // 0-1
+    float consistency_score
+    float factual_accuracy
+    float hallucination_rate
+    float coverage_score
+    float citation_coverage
 
     []fact_pair inconsistencies
     []string hallucinated_facts
@@ -68,37 +68,37 @@ struct consistency_report {
     int inconsistent_facts
 }
 
-// English textconfiguration
+
 struct factual_config {
-    // English textparameter
+
     int max_facts_per_doc
     bool extract_temporal
     bool extract_location
 
-    // English textparameter
+
     float similarity_threshold
     float confidence_threshold
 
-    // English text
+
     bool detect_hallucinations
     float hallucination_threshold
 
-    // English text
+
     bool require_citations
     bool check_citation_accuracy
 
-    // weight
+
     float accuracy_weight
     float hallucination_weight
     float coverage_weight
     float citation_weight
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
-// 2. English text
-// ════════════════════════════════════════════════════════════════════════════════
 
-// English textmainEnglish text
+
+
+
+
 func extract_facts(string text, factual_config config) factual_content {
 
     factual_content content
@@ -107,34 +107,34 @@ func extract_facts(string text, factual_config config) factual_content {
     content.temporal_refs = []string{}
     content.total_facts = 0
 
-    // English text (English text)
-    // English textactualimplementationEnglish textuseEnglish text NLP
 
-    // English textmainEnglish text
+
+
+
     []string sentences = split_sentences(text)
 
     int i = 0
     while i < len(sentences) && content.total_facts < config.max_facts_per_doc {
         string sent = sentences[i]
 
-        // English text
+
         if len(sent) < 10 {
             i = i + 1
             continue
         }
 
-        // English text
+
         fact f = extract_fact_from_sentence(sent)
 
         if len(f.subject) > 0 && len(f.obj) > 0 {
-            // computeEnglish text (English text)
+
             f.confidence = compute_fact_confidence(sent)
 
-            // English text
+
             content.facts = append_fact(content.facts, f)
             content.total_facts = content.total_facts + 1
 
-            // English texttimeinformation
+
             if config.extract_temporal {
                 string temp = extract_temporal_info(sent)
                 if len(temp) > 0 {
@@ -143,7 +143,7 @@ func extract_facts(string text, factual_config config) factual_content {
                 }
             }
 
-            // English textinformation
+
             if config.extract_location {
                 string loc = extract_location_info(sent)
                 if len(loc) > 0 {
@@ -151,7 +151,7 @@ func extract_facts(string text, factual_config config) factual_content {
                 }
             }
 
-            // English text
+
             if !contains_string(content.key_entities, f.subject) {
                 content.key_entities = append_string(content.key_entities, f.subject)
             }
@@ -166,11 +166,11 @@ func extract_facts(string text, factual_config config) factual_content {
     content
 }
 
-// English text
+
 func extract_fact_from_sentence(string sentence) fact {
     fact f
 
-    // English text 1: "Subject is Object"
+
     int is_pos = find_substring(sentence, " is ")
     if is_pos > 0 {
         f.subject = substring(sentence, 0, is_pos)
@@ -179,8 +179,8 @@ func extract_fact_from_sentence(string sentence) fact {
         return trim_fact(f)
     }
 
-    // English text 2: "Subject verb Object"
-    // English text: useEnglish textmainEnglish text
+
+
     []string words = split_words(sentence)
     if len(words) >= 3 {
         f.subject = words[0]
@@ -191,27 +191,27 @@ func extract_fact_from_sentence(string sentence) fact {
     trim_fact(f)
 }
 
-// computeEnglish text
+
 func compute_fact_confidence(string sentence) float {
     float conf = 0.5
 
-    // English text, English text
+
     int len_sent = len(sentence)
     if len_sent > 20 && len_sent < 200 {
         conf = conf + 0.2
     }
 
-    // English text/English text
+
     if contains_digit(sentence) {
         conf = conf + 0.15
     }
 
-    // English text
+
     if contains_quantifier(sentence) {
         conf = conf + 0.1
     }
 
-    // English text
+
     if contains_uncertainty_words(sentence) {
         conf = conf - 0.2
     }
@@ -222,9 +222,9 @@ func compute_fact_confidence(string sentence) float {
     conf
 }
 
-// English texttimeinformation
+
 func extract_temporal_info(string sentence) string {
-    // English texttimeEnglish text
+
     if contains_substring(sentence, "2024") || contains_substring(sentence, "2025") {
         return "2024-2025"
     }
@@ -237,9 +237,9 @@ func extract_temporal_info(string sentence) string {
     ""
 }
 
-// English textinformation
+
 func extract_location_info(string sentence) string {
-    // English text
+
     if contains_substring(sentence, "China") {
         return "China"
     }
@@ -252,11 +252,11 @@ func extract_location_info(string sentence) string {
     ""
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
-// 3. English text
-// ════════════════════════════════════════════════════════════════════════════════
 
-// English textgenerateEnglish text
+
+
+
+
 func verify_factual_consistency(
     factual_content reference_content,
     factual_content generated_content,
@@ -274,20 +274,20 @@ func verify_factual_consistency(
     report.consistent_facts = 0
     report.inconsistent_facts = 0
 
-    // English text
+
     int i = 0
     while i < len(reference_content.facts) {
         fact ref_fact = reference_content.facts[i]
 
-        // English textgeneratecontentEnglish text
+
         fact_pair best_match = find_best_matching_fact(ref_fact, generated_content.facts, config)
 
         if best_match.similarity >= config.similarity_threshold {
-            // English text
+
             report.consistent_facts = report.consistent_facts + 1
             report.inconsistencies = append_fact_pair(report.inconsistencies, best_match)
         } else {
-            // English text
+
             report.missing_facts = append_string(report.missing_facts,
                 fact_to_string(ref_fact))
         }
@@ -295,13 +295,13 @@ func verify_factual_consistency(
         i = i + 1
     }
 
-    // English text (generateEnglish text)
+
     if config.detect_hallucinations {
         i = 0
         while i < len(generated_content.facts) {
             fact gen_fact = generated_content.facts[i]
 
-            // English text
+
             bool found = false
             int j = 0
             while j < len(reference_content.facts) {
@@ -312,7 +312,7 @@ func verify_factual_consistency(
             }
 
             if !found && config.detect_hallucinations {
-                // English text (English textinferenceEnglish text)
+
                 if is_likely_hallucination(gen_fact, reference_content, config) {
                     report.hallucinated_facts = append_string(report.hallucinated_facts,
                         fact_to_string(gen_fact))
@@ -323,28 +323,28 @@ func verify_factual_consistency(
         }
     }
 
-    // computeEnglish text
+
     float consistency_score = 0.0
     if report.total_reference_facts > 0 {
         consistency_score = float(report.consistent_facts) / float(report.total_reference_facts)
     }
     report.consistency_score = consistency_score
 
-    // computeEnglish text (English text / English textgenerate)
+
     float accuracy = 0.0
     if report.total_generated_facts > 0 {
         accuracy = float(report.consistent_facts) / float(report.total_generated_facts)
     }
     report.factual_accuracy = accuracy
 
-    // computeEnglish text
+
     float hallucination_rate = 0.0
     if report.total_generated_facts > 0 {
         hallucination_rate = float(len(report.hallucinated_facts)) / float(report.total_generated_facts)
     }
     report.hallucination_rate = hallucination_rate
 
-    // computeEnglish text
+
     float coverage = 0.0
     if report.total_reference_facts > 0 {
         coverage = 1.0 - (float(len(report.missing_facts)) / float(report.total_reference_facts))
@@ -354,7 +354,7 @@ func verify_factual_consistency(
     report
 }
 
-// English text
+
 func find_best_matching_fact(
     fact reference,
     []fact candidates,
@@ -385,18 +385,18 @@ func find_best_matching_fact(
     best_pair
 }
 
-// computeEnglish text
+
 func fact_similarity(fact f1, fact f2) float {
 
-    // mainEnglish text
+
     float subject_sim = string_similarity(f1.subject, f2.subject)
     float predicate_sim = string_similarity(f1.predicate, f2.predicate)
     float object_sim = string_similarity(f1.obj, f2.obj)
 
-    // English text
+
     float similarity = subject_sim * 0.4 + predicate_sim * 0.3 + object_sim * 0.3
 
-    // time/English text
+
     if len(f1.temporal) > 0 && len(f2.temporal) > 0 {
         if string_equals(f1.temporal, f2.temporal) {
             similarity = similarity + 0.1
@@ -407,7 +407,7 @@ func fact_similarity(fact f1, fact f2) float {
     similarity
 }
 
-// English text (English text Jaccard)
+
 func string_similarity(string s1, string s2) float {
     if len(s1) == 0 && len(s2) == 0 {
         return 1.0
@@ -416,17 +416,17 @@ func string_similarity(string s1, string s2) float {
         return 0.0
     }
 
-    // English text
+
     if string_equals(s1, s2) {
         return 1.0
     }
 
-    // English text
+
     if contains_substring(s1, s2) || contains_substring(s2, s1) {
         return 0.8
     }
 
-    // English text (English text)
+
     int dist = edit_distance(s1, s2)
     int max_len = len(s1)
     if len(s2) > max_len {
@@ -438,22 +438,22 @@ func string_similarity(string s1, string s2) float {
     sim
 }
 
-// English text
+
 func is_likely_hallucination(fact f, factual_content reference, factual_config config) bool {
 
-    // English text:
-    // 1. English text
+
+
     if f.confidence < 0.3 {
         return true
     }
 
-    // 2. English text/English text
+
     bool is_rare = is_rare_combination(f, reference)
     if is_rare && f.confidence < 0.7 {
         return true
     }
 
-    // 3. English texttime/English text
+
     if len(f.temporal) > 0 && len(reference.temporal_refs) > 0 {
         if !temporal_is_compatible(f.temporal, reference.temporal_refs) {
             return true
@@ -463,7 +463,7 @@ func is_likely_hallucination(fact f, factual_content reference, factual_config c
     false
 }
 
-// English texttimeEnglish text
+
 func temporal_is_compatible(string fact_temporal, []string reference_temporals) bool {
     int i = 0
     while i < len(reference_temporals) {
@@ -478,50 +478,50 @@ func temporal_is_compatible(string fact_temporal, []string reference_temporals) 
     false
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
-// 4. rewardcompute
-// ════════════════════════════════════════════════════════════════════════════════
 
-// computeEnglish textreward
+
+
+
+
 func compute_factual_consistency_reward(
     string reference_text,
     string generated_text,
     factual_config config
 ) float {
 
-    // Step 1: English text
+
     factual_content reference_facts = extract_facts(reference_text, config)
     factual_content generated_facts = extract_facts(generated_text, config)
 
-    // Step 2: English text
+
     consistency_report report = verify_factual_consistency(
         reference_facts,
         generated_facts,
         config
     )
 
-    // Step 3: computeEnglish textreward
+
     float reward = 0.0
 
-    // English text (English textgenerateEnglish text)
+
     float accuracy_reward = report.factual_accuracy * config.accuracy_weight
     reward = reward + accuracy_reward
 
-    // English text (English text)
+
     float hallucination_penalty = (1.0 - report.hallucination_rate) * config.hallucination_weight
     reward = reward + hallucination_penalty
 
-    // English textreward (English text)
+
     float coverage_reward = report.coverage_score * config.coverage_weight
     reward = reward + coverage_reward
 
-    // English text (English text)
+
     if config.require_citations {
         float citation_reward = compute_citation_coverage(generated_text) * config.citation_weight
         reward = reward + citation_reward
     }
 
-    // English text [0, 1]
+
     float total_weight = config.accuracy_weight + config.hallucination_weight +
                         config.coverage_weight + config.citation_weight
     reward = reward / total_weight
@@ -532,10 +532,10 @@ func compute_factual_consistency_reward(
     reward
 }
 
-// computeEnglish text
+
 func compute_citation_coverage(string text) float {
 
-    // English text [1], [2] English text
+
     int citation_count = 0
     int i = 0
     while i < len(text) {
@@ -546,16 +546,16 @@ func compute_citation_coverage(string text) float {
     }
 
     if citation_count > 0 {
-        return 0.8  // English text
+        return 0.8
     }
-    0.2  // English text
+    0.2
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
-// 5. English text
-// ════════════════════════════════════════════════════════════════════════════════
 
-// generateEnglish text
+
+
+
+
 func generate_detailed_report(consistency_report report) string {
 
     string output = ""
@@ -564,7 +564,7 @@ func generate_detailed_report(consistency_report report) string {
     output = output + "FACTUAL CONSISTENCY REPORT\n"
     output = output + "════════════════════════════════════════════════════════════\n\n"
 
-    // English text
+
     output = output + "[Overall Scores]\n"
     output = output + "  Consistency Score:  " + float_to_string(report.consistency_score) + "/1.0\n"
     output = output + "  Factual Accuracy:   " + float_to_string(report.factual_accuracy) + "/1.0\n"
@@ -572,14 +572,14 @@ func generate_detailed_report(consistency_report report) string {
     output = output + "  Coverage Score:     " + float_to_string(report.coverage_score) + "/1.0\n"
     output = output + "  Citation Coverage:  " + float_to_string(report.citation_coverage) + "/1.0\n\n"
 
-    // English textstatistics
+
     output = output + "[Fact Statistics]\n"
     output = output + "  Reference Facts:    " + int_to_string(report.total_reference_facts) + "\n"
     output = output + "  Generated Facts:    " + string_int(report.total_generated_facts) + "\n"
     output = output + "  Consistent Facts:   " + string_int(report.consistent_facts) + "\n"
     output = output + "  Inconsistent Facts: " + string_int(report.inconsistent_facts) + "\n\n"
 
-    // English text
+
     if len(report.hallucinated_facts) > 0 {
         output = output + "[⚠️ Hallucinated Facts]\n"
         int i = 0
@@ -614,9 +614,9 @@ func generate_detailed_report(consistency_report report) string {
     output
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
-// 6. toolfunction
-// ════════════════════════════════════════════════════════════════════════════════
+
+
+
 
 func split_sentences(string text) []string {
     []string sentences = []string{}
@@ -812,7 +812,7 @@ func contains_uncertainty_words(string s) bool {
 }
 
 func is_rare_combination(fact f, factual_content reference) bool {
-    // English text
+
     int i = 0
     while i < len(reference.facts) {
         if string_equals(reference.facts[i].subject, f.subject) &&
@@ -825,7 +825,7 @@ func is_rare_combination(fact f, factual_content reference) bool {
 }
 
 func edit_distance(string s1, string s2) int {
-    // English textimplementation: English text
+
     int len1 = len(s1)
     int len2 = len(s2)
     if len1 > len2 {

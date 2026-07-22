@@ -4,8 +4,8 @@
 
 #include <cstdint>
 
-// Stable boundary between the generic executor and operators compiled with the
-// exact CANN toolkit installed in the target image.
+
+
 extern "C" {
 
 struct NeurxCannOperatorStatus {

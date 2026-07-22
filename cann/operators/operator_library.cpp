@@ -69,4 +69,4 @@ inference::KernelLauncher OperatorLibrary::decode_launcher() const {
   };
 }
 
-}  // namespace neurx::cann
+}

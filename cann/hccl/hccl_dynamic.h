@@ -54,4 +54,4 @@ inline Result destroy(Comm comm) {
   return fn ? fn(comm) : -1;
 }
 
-}  // namespace neurx::hccl
+}

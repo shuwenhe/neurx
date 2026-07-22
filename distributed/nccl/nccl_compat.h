@@ -4,8 +4,8 @@
 #include <dlfcn.h>
 #include <cstddef>
 
-// Minimal NCCL ABI declarations. This keeps the bridge buildable on hosts
-// that have the CUDA runtime but expose NCCL only as a deployment library.
+
+
 using ncclResult_t = int;
 using ncclComm_t = void*;
 using ncclDataType_t = int;

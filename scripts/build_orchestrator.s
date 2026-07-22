@@ -1,6 +1,6 @@
-// neurx/scripts/build_orchestrator.s
-// Build orchestration system - consolidates all build and compilation shell scripts
-// Replaces: compile_all_components.sh, build_ml_complete.sh, build-linux.sh, build-macos.sh, etc.
+
+
+
 
 package scripts
 
@@ -11,17 +11,17 @@ import (
     "runtime"
 )
 
-// ============================================================
-// Build Configuration
-// ============================================================
+
+
+
 
 enum BuildTarget {
     CPU,
     CUDA,
-    HIP,      // AMD
-    Metal,    // Apple
-    OneAPI,   // Intel
-    CANN,     // Huawei
+    HIP,
+    Metal,
+    OneAPI,
+    CANN,
 }
 
 enum BuildArch {
@@ -40,9 +40,9 @@ struct build_config {
     parallel      int
 }
 
-// ============================================================
-// Build Orchestrator
-// ============================================================
+
+
+
 
 struct build_orchestrator {
     logger      Logger
@@ -52,23 +52,23 @@ struct build_orchestrator {
     buildDir    string
 }
 
-// new_build_orchestrator creates a new build orchestrator
+
 func new_build_orchestrator() (*build_orchestrator, error) {
     logger := new_logger("build_orchestrator")
-    
+
     neurxRoot := get_env("NEURX_ROOT", "")
     if neurxRoot == "" {
         pwd, _ := os.Getwd()
         neurxRoot = pwd
     }
-    
+
     sRoot := filepath.Join(neurxRoot, "..", "s")
     buildDir := filepath.Join(neurxRoot, ".build")
-    
-    // Detect platform
+
+
     target := detect_build_target()
     arch := detect_build_arch()
-    
+
     config := build_config{
         target:        target,
         arch:          arch,
@@ -79,7 +79,7 @@ func new_build_orchestrator() (*build_orchestrator, error) {
         clean:         false,
         parallel:      4,
     }
-    
+
     return &build_orchestrator{
         logger:    logger,
         config:    config,
@@ -89,52 +89,52 @@ func new_build_orchestrator() (*build_orchestrator, error) {
     }, nil
 }
 
-// setup prepares build environment
+
 func (b *build_orchestrator) setup() error {
     b.logger.log("Setting up build environment...")
-    
+
     if err := mkdir(b.buildDir); err != nil {
         return err
     }
-    
-    // Log build configuration
+
+
     b.log_config()
-    
+
     return nil
 }
 
-// Clean removes build artifacts
+
 func (b *build_orchestrator) Clean() error {
     b.logger.log("Cleaning build artifacts...")
-    
+
     if err := remove_dir(b.buildDir); err != nil {
         b.logger.warn("Failed to clean build directory: %v", err)
     }
-    
-    // Clean individual components
+
+
     components := []string{"core", "training", "inference", "distributed"}
     for _, comp := range components {
         compDir := filepath.Join(b.neurxRoot, comp)
         if dir_exists(compDir) {
-            // Find and remove .o, .ir files
+
             files, _ := find_build_artifacts(compDir)
             for _, file := range files {
                 remove_file(file)
             }
         }
     }
-    
+
     b.logger.success("Build artifacts cleaned")
     return nil
 }
 
-// build_compiler builds the S compiler if needed
+
 func (b *build_orchestrator) build_compiler() error {
     b.logger.log("Checking S compiler...")
-    
+
     if !command_exists("s") && !file_exists(filepath.Join(b.sRoot, ".local", "bin", "s")) {
         b.logger.log("Building S compiler...")
-        
+
         result := exec_in_dir(b.sRoot, "make", "-j", fmt.Sprintf("%d", b.config.parallel))
         if result.ExitCode != 0 {
             b.logger.error("Compiler build failed: %s", result.Stderr)
@@ -144,32 +144,32 @@ func (b *build_orchestrator) build_compiler() error {
     } else {
         b.logger.success("S compiler already available")
     }
-    
+
     return nil
 }
 
-// build_core builds core NeurX components
+
 func (b *build_orchestrator) build_core() error {
     b.logger.log("Building core NeurX components...")
-    
+
     components := []string{
         "core/tensor.s",
         "core/autograd.s",
         "tokenizer/model_bpe.s",
         "optimizer/adamw.s",
     }
-    
+
     sCompiler := b.get_s_compiler()
-    
+
     for _, comp := range components {
         compPath := filepath.Join(b.neurxRoot, comp)
         if !file_exists(compPath) {
             b.logger.warn("Component not found: %s", compPath)
             continue
         }
-        
+
         outFile := filepath.Join(b.buildDir, filepath.Base(comp) + ".ir")
-        
+
         b.logger.log("Building %s...", filepath.Base(comp))
         result := exec_command(sCompiler, compPath, outFile)
         if result.ExitCode != 0 {
@@ -178,32 +178,32 @@ func (b *build_orchestrator) build_core() error {
         }
         b.logger.success("Built %s", filepath.Base(comp))
     }
-    
+
     return nil
 }
 
-// build_training builds training components
+
 func (b *build_orchestrator) build_training() error {
     b.logger.log("Building training components...")
-    
+
     components := []string{
         "training/train_loop.s",
         "training/checkpoint.s",
         "training/validator.s",
         "distributed/training_coordinator.s",
     }
-    
+
     sCompiler := b.get_s_compiler()
-    
+
     for _, comp := range components {
         compPath := filepath.Join(b.neurxRoot, comp)
         if !file_exists(compPath) {
             b.logger.warn("Component not found: %s", compPath)
             continue
         }
-        
+
         outFile := filepath.Join(b.buildDir, filepath.Base(comp) + ".ir")
-        
+
         b.logger.log("Building %s...", filepath.Base(comp))
         result := exec_command(sCompiler, compPath, outFile)
         if result.ExitCode != 0 {
@@ -212,31 +212,31 @@ func (b *build_orchestrator) build_training() error {
         }
         b.logger.success("Built %s", filepath.Base(comp))
     }
-    
+
     return nil
 }
 
-// build_inference builds inference components
+
 func (b *build_orchestrator) build_inference() error {
     b.logger.log("Building inference components...")
-    
+
     components := []string{
         "infer/inference_server.s",
         "infer/kv_cache_manager.s",
         "serving/speculative_decoding.s",
     }
-    
+
     sCompiler := b.get_s_compiler()
-    
+
     for _, comp := range components {
         compPath := filepath.Join(b.neurxRoot, comp)
         if !file_exists(compPath) {
             b.logger.warn("Component not found: %s", compPath)
             continue
         }
-        
+
         outFile := filepath.Join(b.buildDir, filepath.Base(comp) + ".ir")
-        
+
         b.logger.log("Building %s...", filepath.Base(comp))
         result := exec_command(sCompiler, compPath, outFile)
         if result.ExitCode != 0 {
@@ -245,66 +245,66 @@ func (b *build_orchestrator) build_inference() error {
         }
         b.logger.success("Built %s", filepath.Base(comp))
     }
-    
+
     return nil
 }
 
-// BuildAll builds all components
+
 func (b *build_orchestrator) BuildAll() error {
     b.logger.log("Building all NeurX components...")
-    
+
     if err := b.setup(); err != nil {
         return err
     }
-    
+
     if err := b.build_compiler(); err != nil {
         return err
     }
-    
+
     if err := b.build_core(); err != nil {
         return err
     }
-    
+
     if err := b.build_training(); err != nil {
         return err
     }
-    
+
     if err := b.build_inference(); err != nil {
         return err
     }
-    
+
     b.logger.success("All components built successfully")
     return nil
 }
 
-// run_tests runs build tests
+
 func (b *build_orchestrator) run_tests() error {
     if !b.config.tests {
         b.logger.log("Tests disabled")
         return nil
     }
-    
+
     b.logger.log("Running build tests...")
-    
+
     testDir := filepath.Join(b.neurxRoot, "tests")
     if !dir_exists(testDir) {
         b.logger.warn("Tests directory not found")
         return nil
     }
-    
+
     result := exec_in_dir(testDir, "make", "test")
     if result.ExitCode != 0 {
         b.logger.error("Tests failed: %s", result.Stderr)
         return fmt.Errorf("tests failed")
     }
-    
+
     b.logger.success("Tests passed")
     return nil
 }
 
-// ============================================================
-// Helper Functions
-// ============================================================
+
+
+
 
 func (b *build_orchestrator) get_s_compiler() string {
     if command_exists("s") {
@@ -324,7 +324,7 @@ Documentation: %v
 Parallel Jobs: %d
 Build Directory: %s
 `, target_string(b.config.target), arch_string(b.config.arch), b.config.optimization, b.config.debug, b.config.tests, b.config.documentation, b.config.parallel, b.buildDir)
-    
+
     logFile := filepath.Join(b.buildDir, "build_config.txt")
     write_file(logFile, config)
 }
@@ -360,7 +360,7 @@ func arch_string(a BuildArch) string {
 }
 
 func detect_build_target() BuildTarget {
-    // Try to detect GPU backend
+
     if command_exists("nvidia-smi") {
         return BuildTarget.CUDA
     }
@@ -399,47 +399,47 @@ func find_build_artifacts(dir string) ([]string, error) {
     return artifacts, nil
 }
 
-// ============================================================
-// Public Build Functions
-// ============================================================
 
-// build_everything builds all components
+
+
+
+
 func build_everything() error {
     builder, err := new_build_orchestrator()
     if err != nil {
         return err
     }
-    
+
     if builder.config.clean {
         if err := builder.Clean(); err != nil {
             return err
         }
     }
-    
+
     return builder.BuildAll()
 }
 
-// quick_build performs a quick build of core components
+
 func quick_build() error {
     builder, err := new_build_orchestrator()
     if err != nil {
         return err
     }
-    
+
     if err := builder.setup(); err != nil {
         return err
     }
-    
+
     return builder.build_core()
 }
 
-// clean_build cleans and rebuilds everything
+
 func clean_build() error {
     builder, err := new_build_orchestrator()
     if err != nil {
         return err
     }
-    
+
     builder.config.clean = true
     return builder.BuildAll()
 }

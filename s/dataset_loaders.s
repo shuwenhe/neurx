@@ -1,54 +1,54 @@
 package neurx.data
 
-// ============================================================================
-// Concrete Dataset Implementations
-// Text, JSON, Binary, Memory-Mapped formats
-// ============================================================================
 
-// ---- Error type ----
+
+
+
+
+
 struct error {
     string message
 }
 
-// ========================================================================
-// TEXT DATASET
-// One sample per line (or paragraph-separated)
-// Supports: plain text, with optional labels
-// ========================================================================
+
+
+
+
+
 
 func load_text_dataset(dataset ds) (dataset, error) {
     if len(ds.config.path) == 0 {
         return ds, error{message: "No path specified for text dataset"}
     }
-    
-    // Read file contents (simulated - in real impl would use file I/O)
+
+
     []string lines = read_lines(ds.config.path)
-    
+
     int max_samples = ds.config.max_samples
     if max_samples <= 0 || max_samples > len(lines) {
         max_samples = len(lines)
     }
-    
-    // Parse each line into a sample
+
+
     int total_tokens = 0
     int min_len = 999999
     int max_len = 0
-    
+
     for i in 0..max_samples {
         string line = trim_whitespace(lines[i])
-        
+
         if len(line) == 0 {
-            continue  // Skip empty lines
+            continue
         }
-        
-        // Tokenize: simple character-level for now
+
+
         []int tokens = tokenize_text(line)
-        
-        // Truncate if needed
+
+
         if ds.config.max_length > 0  len(tokens) > ds.config.max_length {
             tokens = truncate(tokens, ds.config.max_length)
         }
-        
+
         sample s {
             token_ids: tokens,
             text: line if ds.config.include_text else "",
@@ -56,16 +56,16 @@ func load_text_dataset(dataset ds) (dataset, error) {
             weight: 1.0,
             metadata: {},
         }
-        
+
         ds.samples.push(s)
-        
-        // Update stats
+
+
         total_tokens = total_tokens + len(tokens)
         if len(tokens) < min_len { min_len = len(tokens) }
         if len(tokens) > max_len { max_len = len(tokens) }
     }
-    
-    // Compute final statistics
+
+
     int n = len(ds.samples)
     ds.stats = dataset_stats {
         total_samples: n,
@@ -75,17 +75,17 @@ func load_text_dataset(dataset ds) (dataset, error) {
         max_length: max_len,
         length_distribution: compute_length_distribution(ds),
     }
-    
+
     ds.is_loaded = true
     (ds, nil)
 }
 
 func tokenize_text(string text) []int {
-    // Simple character-level tokenization (placeholder)
-    // In production, this would use BPE/SentencePiece tokenizer
+
+
     []int tokens = []int{cap: len(text)}
     for i in 0..len(text) {
-        tokens[i] = int(text[i])  // ASCII/UTF-8 byte value as token ID
+        tokens[i] = int(text[i])
     }
     tokens
 }
@@ -99,15 +99,15 @@ func truncate([]int tokens, int max_len) []int {
 }
 
 func trim_whitespace(string s) string {
-    // Simple whitespace trimming
+
     int start = 0
     int end = len(s) - 1
-    
+
     while start <= end  is_space(s[start]) { start = start + 1 }
     while end >= start  is_space(s[end]) { end = end - 1 }
-    
+
     if start > end { return "" }
-    
+
     substring(s, start, end - start + 1)
 }
 
@@ -115,10 +115,10 @@ func is_space(byte c) bool {
     c == 32 || c == 9 || c == 10 || c == 13
 }
 
-// Simulated file reading
+
 func read_lines(string path) []string {
-    // Placeholder: in real implementation, this reads from disk
-    // Returns dummy data for demonstration
+
+
     []string{
         "Hello world",
         "This is a sample sentence",

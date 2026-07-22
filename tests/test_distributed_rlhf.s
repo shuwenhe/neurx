@@ -1,16 +1,16 @@
 package neurx.testing.test_distributed_rlhf
 
-// ✅ NeurX English texttraining + RLHF systemtestEnglish text (S languageEnglish text)
-// English text:
-//   - English textcompiletest
-//   - English texttrainingEnglish text
-//   - English textuseEnglish text
-//   - RLHF pipelinetest
-//   - English text
 
-// ============================================================================
-// testresultEnglish text
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
 
 struct test_result {
     string name
@@ -66,9 +66,9 @@ func test_result_report(test_result result) bool {
     return result.failed == 0
 }
 
-// ============================================================================
-// 1. compileEnglish texttest
-// ============================================================================
+
+
+
 
 func test_compilation() test_result {
     test_result result = new_test_result("compiletest")
@@ -79,7 +79,7 @@ func test_compilation() test_result {
     println("============================================================")
     println("")
 
-    // English textfile
+
     []string files = [
         "neurx/distributed/data_parallel.s",
         "neurx/alignment/rlhf_complete.s",
@@ -90,8 +90,8 @@ func test_compilation() test_result {
     int i = 0
     while i < 4 {
         string file = files[i]
-        // English textfileEnglish text
-        bool exists = true  // English textfileEnglish text
+
+        bool exists = true
 
         test_result_assert_true(&result, exists, "fileEnglish text: " + file)
 
@@ -101,9 +101,9 @@ func test_compilation() test_result {
     result
 }
 
-// ============================================================================
-// 2. English texttrainingEnglish text
-// ============================================================================
+
+
+
 
 struct distributed_metrics {
     float dp_efficiency
@@ -116,9 +116,9 @@ func test_data_parallel() distributed_metrics {
     distributed_metrics metrics
 
     int gpu_count = 8
-    int base_throughput = 500  // tokens/s
+    int base_throughput = 500
 
-    // DP English text (DP English text)
+
     metrics.dp_efficiency = 1.0 - float(gpu_count - 1) * 0.01
     metrics.throughput = float(base_throughput) * float(gpu_count) * metrics.dp_efficiency
 
@@ -131,7 +131,7 @@ func test_tensor_parallel() distributed_metrics {
     int tp_size = 4
     int base_throughput = 500
 
-    // TP English text (English text)
+
     metrics.tp_efficiency = 1.0 - float(tp_size - 1) * 0.05
     metrics.throughput = float(base_throughput) * metrics.tp_efficiency
 
@@ -143,11 +143,11 @@ func test_pipeline_parallel() distributed_metrics {
 
     int pp_size = 4
 
-    // GPipe English text
+
     float gpipe_bubble = float(pp_size - 1) / float(pp_size)
     float gpipe_efficiency = 1.0 - gpipe_bubble
 
-    // 1F1B English text
+
     float onefone_bubble = 0.05
     metrics.pp_efficiency = 1.0 - onefone_bubble
 
@@ -163,7 +163,7 @@ func test_distributed_training() test_result {
     println("============================================================")
     println("")
 
-    // test DP
+
     println("📊 dataEnglish text (DP) test:")
     distributed_metrics dp_metrics = test_data_parallel()
     println("  GPU English text: 8")
@@ -171,7 +171,7 @@ func test_distributed_training() test_result {
     println("  extensionEnglish text: " + float_to_str(dp_metrics.dp_efficiency * 100.0, 1) + "%")
     test_result_assert_greater(&result, dp_metrics.dp_efficiency, 0.90, "DP extensionEnglish text >90%")
 
-    // test TP
+
     println("")
     println("📊 English text (TP) test:")
     distributed_metrics tp_metrics = test_tensor_parallel()
@@ -180,7 +180,7 @@ func test_distributed_training() test_result {
     println("  TP English text: " + float_to_str(tp_metrics.tp_efficiency * 100.0, 1) + "%")
     test_result_assert_greater(&result, tp_metrics.tp_efficiency, 0.80, "TP English text >80%")
 
-    // test PP
+
     println("")
     println("📊 English text (PP) test:")
     distributed_metrics pp_metrics = test_pipeline_parallel()
@@ -191,9 +191,9 @@ func test_distributed_training() test_result {
     result
 }
 
-// ============================================================================
-// 3. English texttest
-// ============================================================================
+
+
+
 
 struct memory_config {
     string name
@@ -240,10 +240,10 @@ func test_memory() test_result {
     println("============================================================")
     println("")
 
-    // testconfiguration
+
     memory_config[] configs = make(memory_config[], 5)
 
-    // 7B English text GPU
+
     configs[0].name = "7B English text GPU"
     configs[0].params = 7000000000
     configs[0].batch_size = 32
@@ -252,7 +252,7 @@ func test_memory() test_result {
     configs[0].tp_size = 1
     configs[0].zero_stage = 0
 
-    // 7B 8x DP
+
     configs[1].name = "7B 8x DP"
     configs[1].params = 7000000000
     configs[1].batch_size = 32
@@ -261,7 +261,7 @@ func test_memory() test_result {
     configs[1].tp_size = 1
     configs[1].zero_stage = 0
 
-    // 70B TP-4
+
     configs[2].name = "70B TP-4"
     configs[2].params = 70000000000
     configs[2].batch_size = 16
@@ -270,7 +270,7 @@ func test_memory() test_result {
     configs[2].tp_size = 4
     configs[2].zero_stage = 0
 
-    // 70B TP-4 ZeRO-2
+
     configs[3].name = "70B TP-4 ZeRO-2"
     configs[3].params = 70000000000
     configs[3].batch_size = 16
@@ -279,7 +279,7 @@ func test_memory() test_result {
     configs[3].tp_size = 4
     configs[3].zero_stage = 2
 
-    // 70B TP-4 ZeRO-3
+
     configs[4].name = "70B TP-4 ZeRO-3"
     configs[4].params = 70000000000
     configs[4].batch_size = 16
@@ -298,10 +298,10 @@ func test_memory() test_result {
 
         println(cfg.name + "              " + float_to_str(memory, 1) + "GB")
 
-        // English text
-        if i == 3 {  // 70B ZeRO-2
+
+        if i == 3 {
             test_result_assert_less(&result, memory, 100.0, "70B ZeRO-2: <100GB")
-        } else if i == 4 {  // 70B ZeRO-3
+        } else if i == 4 {
             test_result_assert_less(&result, memory, 50.0, "70B ZeRO-3: <50GB")
         }
 
@@ -311,9 +311,9 @@ func test_memory() test_result {
     result
 }
 
-// ============================================================================
-// 4. RLHF pipelinetest
-// ============================================================================
+
+
+
 
 func test_sft() test_result {
     test_result result = new_test_result("SFT test")
@@ -321,10 +321,10 @@ func test_sft() test_result {
     println("")
     println("📖 English text (SFT) test:")
 
-    // English textlossEnglish text
+
     []float losses = [2.5, 1.8, 1.2, 0.8, 0.5]
 
-    // English textlossEnglish text
+
     bool decreasing = true
     int i = 0
     while i < 4 {
@@ -336,7 +336,7 @@ func test_sft() test_result {
 
     test_result_assert_true(&result, decreasing, "SFT lossEnglish text")
 
-    // English textloss
+
     float final_loss = losses[4]
     println("  English textloss: " + float_to_str(final_loss, 2))
     test_result_assert_less(&result, final_loss, 1.0, "SFT English textloss <1.0")
@@ -350,10 +350,10 @@ func test_reward_model() test_result {
     println("")
     println("🏆 rewardmodeltest:")
 
-    // English text AUC English text
+
     []float aucs = [0.55, 0.65, 0.72, 0.76, 0.78]
 
-    // English text AUC English text
+
     bool increasing = true
     int i = 0
     while i < 4 {
@@ -365,7 +365,7 @@ func test_reward_model() test_result {
 
     test_result_assert_true(&result, increasing, "rewardmodel AUC English text")
 
-    // English text AUC
+
     float final_auc = aucs[4]
     println("  English text AUC: " + float_to_str(final_auc, 3))
     test_result_assert_greater(&result, final_auc, 0.75, "English text AUC >0.75")
@@ -379,7 +379,7 @@ func test_ppo() test_result {
     println("")
     println("🎯 PPO English texttest:")
 
-    // English textrewardEnglish text
+
     []float rewards = [0.65, 0.72, 0.78, 0.83, 0.87]
     float initial_reward = rewards[0]
     float final_reward = rewards[4]
@@ -391,7 +391,7 @@ func test_ppo() test_result {
 
     test_result_assert_greater(&result, improvement, 0.15, "rewardEnglish text >15%")
 
-    // English text KL English text
+
     []float kls = [0.012, 0.010, 0.008, 0.007, 0.006]
     float max_kl = kls[0]
     int i = 1
@@ -444,7 +444,7 @@ func test_rlhf() test_result {
     println("🧪 RLHF pipelineEnglish text")
     println("============================================================")
 
-    // runEnglish textphasetest
+
     test_result sft_result = test_sft()
     result.passed = result.passed + sft_result.passed
     result.failed = result.failed + sft_result.failed
@@ -464,9 +464,9 @@ func test_rlhf() test_result {
     result
 }
 
-// ============================================================================
-// 5. English texttest
-// ============================================================================
+
+
+
 
 func test_inference_benchmark() {
     println("")
@@ -522,14 +522,14 @@ func test_benchmark() test_result {
     test_training_benchmark()
     test_latency_benchmark()
 
-    result.passed = 12  // 12 English text
+    result.passed = 12
 
     result
 }
 
-// ============================================================================
-// helperfunction
-// ============================================================================
+
+
+
 
 func int_to_str(int n) string {
     if n == 0 {
@@ -576,9 +576,9 @@ func float_to_str(float f, int decimals) string {
     s
 }
 
-// ============================================================================
-// maintestfunction
-// ============================================================================
+
+
+
 
 func main() {
     println("")
@@ -587,19 +587,19 @@ func main() {
     println("============================================================")
     println("")
 
-    // runEnglish texttest
+
     test_result comp_result = test_compilation()
     test_result dist_result = test_distributed_training()
     test_result mem_result = test_memory()
     test_result rlhf_result = test_rlhf()
     test_result bench_result = test_benchmark()
 
-    // statisticsresult
+
     int total_passed = comp_result.passed + dist_result.passed + mem_result.passed + rlhf_result.passed + bench_result.passed
     int total_failed = comp_result.failed + dist_result.failed + mem_result.failed + rlhf_result.failed + bench_result.failed
     int total_tests = total_passed + total_failed
 
-    // outputEnglish text
+
     println("")
     println("============================================================")
     println("📋 testEnglish text")

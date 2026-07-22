@@ -3,30 +3,30 @@ package neurx.tools.lora_safetensors_merge_s
 use std.io.println
 use neurx.runtime.io.{runtime_env_get}
 
-// ============================================================================
-// LoRA Safetensors Merge Tool - S Language Implementation
-// 
-// This is a reference/wrapper implementation that shows the architecture
-// of merging LoRA adapters in S language. For production use, the C binary
-// version should be called via this wrapper.
-//
-// File: tools/lora_safetensors_merge.s
-// Usage: s run tools/lora_safetensors_merge.s
-//
-// Features:
-// - Calls optimized C implementation for actual merge
-// - Provides S language interface to merge pipeline
-// - Handles environment variable configuration
-// - Demonstrates LoRA math concepts in S code
-// ============================================================================
 
-// ============================================================================
-// Configuration (stored as strings)
-// ============================================================================
 
-// ============================================================================
-// String Utilities
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 func concat(string a, string b) string {
     a + b
@@ -40,9 +40,9 @@ func repeat_string(string s, int times) string {
     result
 }
 
-// ============================================================================
-// Output Formatting
-// ============================================================================
+
+
+
 
 func print_header() {
     println("")
@@ -90,9 +90,9 @@ func print_workflow() {
     println("")
 }
 
-// ============================================================================
-// LoRA Mathematics (Reference Implementation)
-// ============================================================================
+
+
+
 
 func calculate_tensor_numel(int dim0, int dim1) int {
     dim0 * dim1
@@ -106,9 +106,9 @@ func conceptual_lora_merge(float base_value, float lora_delta, float scale) floa
     base_value + (scale * lora_delta)
 }
 
-// ============================================================================
-// Safetensors Format Reference
-// ============================================================================
+
+
+
 
 func describe_safetensors_format() {
     println("Safetensors Format:")
@@ -126,9 +126,9 @@ func describe_safetensors_format() {
     println("")
 }
 
-// ============================================================================
-// LoRA Adapter Types Supported
-// ============================================================================
+
+
+
 
 func list_supported_adapter_types() {
     println("Supported LoRA Adapter Types:")
@@ -138,31 +138,31 @@ func list_supported_adapter_types() {
     println("")
 }
 
-// ============================================================================
-// Main Program
-// ============================================================================
+
+
+
 
 func main() int {
     print_header()
-    
-    // Load configuration from environment
+
+
     string root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    
+
     string base_model_dir = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", root + "/../model/base-model-7B")
     string adapter_dir = runtime_env_get("NEURX_LORA_ADAPTER_DIR", root + "/artifacts/checkpoints/lora_adapter")
     string output_dir = runtime_env_get("NEURX_MERGED_MODEL_DIR", root + "/../model/base-model-posttrain")
     string merger_bin = runtime_env_get("NEURX_LORA_MERGER_BIN", root + "/artifacts/build/lora_merge/lora_safetensors_merge")
-    
+
     print_config(base_model_dir, adapter_dir, output_dir, merger_bin)
-    
-    // Show algorithm information
+
+
     print_lora_merge_info()
     print_workflow()
-    
-    // Show format information
+
+
     describe_safetensors_format()
     list_supported_adapter_types()
-    
+
     println("========================================")
     println("Implementation Notes:")
     println("========================================")
@@ -185,6 +185,6 @@ func main() int {
     println("    " + adapter_dir + " \\")
     println("    " + output_dir)
     println("")
-    
+
     return 0
 }

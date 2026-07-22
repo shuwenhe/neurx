@@ -45,7 +45,7 @@ func runtime_shell_escape(string value) string {
     int i = 0
     while i < len(value) {
         string ch = string(value[i])
-        // '\'' ASCII is 39
+
         if int(ch) == 39 {
             out = neurx.strings.concat2(out, "'\"'\"'")
         } else {

@@ -1,19 +1,19 @@
-// =====================================================================
-// Math Operations Module for ML
-// MLtrainingEnglish text
-// =====================================================================
+
+
+
+
 
 package neurx.ml.math_ops
 
 use neurx.backends.compute_backend
 use neurx.tensor.{tensor, zeros}
 
-// =====================================================================
-// English text
-// =====================================================================
+
+
+
 
 func matmul_2d(tensor A, tensor B) tensor {
-    // English text: [m, n] @ [n, p] -> [m, p]
+
     int m = A.shape[0]
     int n = A.shape[1]
     int p = B.shape[1]
@@ -28,7 +28,7 @@ func matmul_2d(tensor A, tensor B) tensor {
 }
 
 func transpose_2d(tensor A) tensor {
-    // English text: [m, n] -> [n, m]
+
     int m = A.shape[0]
     int n = A.shape[1]
 
@@ -47,9 +47,9 @@ func transpose_2d(tensor A) tensor {
     result
 }
 
-// =====================================================================
-// English text
-// =====================================================================
+
+
+
 
 func scale_tensor(tensor A, float scale) tensor {
     tensor result = zeros(A.shape)
@@ -91,9 +91,9 @@ func mul_element_wise(tensor A, tensor B) tensor {
     result
 }
 
-// =====================================================================
-// English textfunction
-// =====================================================================
+
+
+
 
 func relu(tensor X) tensor {
     tensor result = zeros(X.shape)
@@ -124,12 +124,12 @@ func relu_backward(tensor dY, tensor X) tensor {
 }
 
 func gelu(tensor X) tensor {
-    // GELU: x * Phi(x) English text Phi English textCDF
-    // English text: 0.5 * x * (1 + tanh(sqrt(2/pi) * (x + 0.044715 * x^3)))
+
+
     tensor result = zeros(X.shape)
 
-    float c1 = 0.7978845608  // sqrt(2/pi)
-    float c2 = 0.044715      // parameter
+    float c1 = 0.7978845608
+    float c2 = 0.044715
 
     int i = 0
     while i < len(X.data) {
@@ -144,13 +144,13 @@ func gelu(tensor X) tensor {
     result
 }
 
-// =====================================================================
-// SoftmaxEnglish textSoftmaxgradient
-// =====================================================================
+
+
+
 
 func softmax(tensor logits) tensor {
-    // Softmax with numerical stability
-    // English text
+
+
     float max_val = logits.data[0]
     int i = 0
     while i < len(logits.data) {
@@ -160,7 +160,7 @@ func softmax(tensor logits) tensor {
         i = i + 1
     }
 
-    // e^(x - max) / sum(e^(x - max))
+
     float sum_exp = 0.0
     tensor exp_vals = zeros(logits.shape)
     i = 0
@@ -181,10 +181,10 @@ func softmax(tensor logits) tensor {
 }
 
 func softmax_backward(tensor grad_output, tensor softmax_output) tensor {
-    // dL/dx = p * (dL/dp - (p * dL/dp).sum())
+
     tensor result = zeros(grad_output.shape)
 
-    // compute (softmax * grad).sum()
+
     float sum_term = 0.0
     int i = 0
     while i < len(softmax_output.data) {
@@ -192,7 +192,7 @@ func softmax_backward(tensor grad_output, tensor softmax_output) tensor {
         i = i + 1
     }
 
-    // English textgradientEnglish text
+
     i = 0
     while i < len(grad_output.data) {
         result.data[i] = softmax_output.data[i] * (grad_output.data[i] - sum_term)
@@ -202,12 +202,12 @@ func softmax_backward(tensor grad_output, tensor softmax_output) tensor {
     result
 }
 
-// =====================================================================
-// Layer Normalization
-// =====================================================================
+
+
+
 
 func layer_norm(tensor X, float eps) tensor {
-    // computeEnglish text
+
     float mean = 0.0
     int i = 0
     while i < len(X.data) {
@@ -216,7 +216,7 @@ func layer_norm(tensor X, float eps) tensor {
     }
     mean = mean / float_from_int(len(X.data))
 
-    // computeEnglish text
+
     float variance = 0.0
     i = 0
     while i < len(X.data) {
@@ -226,7 +226,7 @@ func layer_norm(tensor X, float eps) tensor {
     }
     variance = variance / float_from_int(len(X.data))
 
-    // English text
+
     tensor result = zeros(X.shape)
     i = 0
     while i < len(X.data) {
@@ -237,12 +237,12 @@ func layer_norm(tensor X, float eps) tensor {
     result
 }
 
-// =====================================================================
-// lossfunction
-// =====================================================================
+
+
+
 
 func cross_entropy_loss(tensor logits, tensor targets) float {
-    // English text: English textlogitsEnglish text
+
     float loss = 0.0
     int i = 0
     while i < len(logits.data) {
@@ -267,9 +267,9 @@ func mse_loss(tensor predictions, tensor targets) float {
     loss / float_from_int(len(predictions.data))
 }
 
-// =====================================================================
-// toolfunction
-// =====================================================================
+
+
+
 
 func float_from_int(int x) float {
     0.0 + x
@@ -311,7 +311,7 @@ func log_approx(float x) float {
 }
 
 func tanh_approx(float x) float {
-    // tanh(x) ≈ (exp(2x) - 1) / (exp(2x) + 1)
+
     float e2x = exp_approx(2.0 * x)
     (e2x - 1.0) / (e2x + 1.0)
 }

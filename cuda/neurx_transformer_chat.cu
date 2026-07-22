@@ -126,7 +126,7 @@ static std::vector<std::string> decoder_for(const Tokenizer &tok) {
   return decoder;
 }
 
-}  // namespace
+}
 
 int main() {
   std::setvbuf(stdout, nullptr, _IOLBF, 0);

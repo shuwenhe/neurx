@@ -1,14 +1,14 @@
 package main
 
 func main() {
-    // testEnglish text (%) English text
+
 
     println("======================================================================")
     println("S languageEnglish text (%) English texttest")
     println("======================================================================")
     println("")
 
-    // English texttest
+
     a := 10
     b := 3
     result := a % b
@@ -17,7 +17,7 @@ func main() {
     println("  10 % 3 = " + string(result))
     println("")
 
-    // English texttest
+
     println("test 2: English text")
     r1 := 15 % 4
     r2 := 20 % 6
@@ -29,7 +29,7 @@ func main() {
     println("  5 % 2 = " + string(r4))
     println("")
 
-    // English textuse
+
     println("test 3: English textuse")
     x := 100
     y := 7

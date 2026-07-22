@@ -16,7 +16,7 @@ func new_agent_scheduler_state() agent_scheduler_state {
     }
 }
 
-// Getter functions to work around compiler type inference bug with struct field indexing
+
 func get_task(agent_scheduler_state state, int index) string {
     state.tasks[index]
 }

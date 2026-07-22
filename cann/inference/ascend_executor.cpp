@@ -67,4 +67,4 @@ bool AscendExecutor::release_request(const std::string& request_id) {
   return kv_cache_.release(request_id);
 }
 
-}  // namespace neurx::inference
+}

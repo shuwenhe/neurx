@@ -2,49 +2,49 @@ package neurx.posttrain.alignment.orpo_examples
 
 use neurx.posttrain.alignment.orpo_trainer
 
-// ════════════════════════════════════════════════════════════════════════════════
-// ORPO (Odds Ratio Preference Optimization) Trainer Examples
-//
-// English textuse ORPO English textpreferenceoptimizealignment
-// ════════════════════════════════════════════════════════════════════════════════
 
-// English text ORPO configuration
+
+
+
+
+
+
 func create_base_orpo_config() orpo_config {
     orpo_config {
-        // Model architecture
+
         seq_len: 128,
         hidden_size: 256,
         vocab_size: 32000,
 
-        // Optimization parameters
-        learning_rate: 5e-4,
-        beta: 0.05,              // KL divergence weight
-        gamma: 0.5,              // Log odds scaling
 
-        // Training parameters
+        learning_rate: 5e-4,
+        beta: 0.05,
+        gamma: 0.5,
+
+
         batch_size: 32,
         num_epochs: 3,
         gradient_accumulation_steps: 4,
         weight_decay: 0.01,
         max_grad_norm: 0.5,
 
-        // Reference model
+
         use_reference_model: true,
         kl_penalty_coef: 0.1,
 
-        // Distributed training
+
         global_rank: 0,
         world_size: 1,
         dp_degree: 1,
 
-        // Training mechanics
+
         use_mixed_precision: false,
         save_interval: 10,
         checkpoint_dir: "./checkpoints",
     }
 }
 
-// example 1: English text ORPO training
+
 func example_basic_orpo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 1: Basic ORPO Training                           ║")
@@ -72,7 +72,7 @@ func example_basic_orpo_training() {
     print("")
 }
 
-// example 2: English text (Log Odds) English text
+
 func example_log_odds_explanation() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 2: Log Odds Ratio Explanation                    ║")
@@ -114,7 +114,7 @@ func example_log_odds_explanation() {
     print("")
 }
 
-// example 3: KL English text
+
 func example_kl_constraint() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 3: KL Divergence Constraint                      ║")
@@ -154,7 +154,7 @@ func example_kl_constraint() {
     print("")
 }
 
-// example 4: English textmodelEnglish text
+
 func example_reference_model_comparison() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 4: Reference Model Role                          ║")
@@ -190,7 +190,7 @@ func example_reference_model_comparison() {
     print("")
 }
 
-// example 5: English texttrainingconfiguration
+
 func example_distributed_orpo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 5: Distributed ORPO Training (Multi-GPU)         ║")
@@ -233,7 +233,7 @@ func example_distributed_orpo_training() {
     print("")
 }
 
-// example 6: completealignmentEnglish text
+
 func example_full_orpo_alignment_pipeline() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 6: Full Alignment Pipeline with ORPO              ║")
@@ -285,7 +285,7 @@ func example_full_orpo_alignment_pipeline() {
     print("")
 }
 
-// Main
+
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -305,7 +305,7 @@ func main() {
     print("═════════════════════════════════════════════════════════════")
 }
 
-// Helper functions
+
 func int_to_string_ex(int i) string {
     string(i)
 }

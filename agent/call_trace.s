@@ -1,24 +1,24 @@
 package neurx.agent.call_trace
 
-// call_trace — records which neurx source files are called at each phase
-// of agent execution and writes a structured log.
-//
-// Usage:
-//   approval_memory = call_trace_append(approval_memory, step, "safety.check",
-//       "neurx/safety/safety.s", "agent_safety_check", true)
-//   ...
-//   call_trace_maybe_write(final_memory)   // at end of run_agent_steps
-//
-// Output format (one line per call):
-//   [step=N phase=<phase> module=<path/to/file.s> func=<func_name> status=ok|fail]
-//
-// The log is accumulated in agent memory under the key "call_trace_log".
-// It is written to the path in env NEURX_CALL_TRACE_LOG (default: .neurx_call_trace.log).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use neurx.agent.memory
 use neurx.runtime.io.{runtime_write_text_file, runtime_env_get}
 
-// ── Module path constants ────────────────────────────────────────────────────
+
 
 string CALL_TRACE_RUNTIME   = "neurx/agent/runtime.s"
 string CALL_TRACE_SAFETY    = "neurx/safety/safety.s"
@@ -45,7 +45,7 @@ string CALL_TRACE_MEMORY    = "neurx/memory/memory.s"
 
 string CALL_TRACE_MEM_KEY   = "call_trace_log"
 
-// ── Entry builder ────────────────────────────────────────────────────────────
+
 
 func call_trace_make_entry(int step, string phase, string module_path, string func_name, bool ok) string {
     string status = "ok"
@@ -55,7 +55,7 @@ func call_trace_make_entry(int step, string phase, string module_path, string fu
     "[step=" + string(step) + " phase=" + phase + " module=" + module_path + " func=" + func_name + " status=" + status + "]"
 }
 
-// ── Accumulate in memory ─────────────────────────────────────────────────────
+
 
 func call_trace_append(agent_memory_state memory, int step, string phase, string module_path, string func_name, bool ok) agent_memory_state {
     string entry = call_trace_make_entry(step, phase, module_path, func_name, ok)
@@ -67,7 +67,7 @@ func call_trace_append(agent_memory_state memory, int step, string phase, string
     }
 }
 
-// ── Read accumulated log ─────────────────────────────────────────────────────
+
 
 func call_trace_get_log(agent_memory_state memory) string {
     agent_memory_lookup_result r = agent_memory_lookup_long(memory, CALL_TRACE_MEM_KEY)
@@ -77,7 +77,7 @@ func call_trace_get_log(agent_memory_state memory) string {
     ""
 }
 
-// ── Write to file ────────────────────────────────────────────────────────────
+
 
 func call_trace_write_log(agent_memory_state memory, string path) string {
     string log_str = call_trace_get_log(memory)
@@ -95,8 +95,8 @@ func call_trace_default_log_path() string {
     ".neurx_call_trace.log"
 }
 
-// call_trace_maybe_write — write log to NEURX_CALL_TRACE_LOG (or default path).
-// Call at the end of run_agent_steps.
+
+
 func call_trace_maybe_write(agent_memory_state memory) string {
     string path = call_trace_default_log_path()
     call_trace_write_log(memory, path)

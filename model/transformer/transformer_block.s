@@ -1,6 +1,6 @@
-// neurx/model/transformer/transformer_block.s
-// Complete transformer block implementation (Attention + FFN + Normalization)
-// Core building block for the full GPT architecture
+
+
+
 
 package transformer
 
@@ -10,7 +10,7 @@ import (
     "../../../nn/activation"
 )
 
-// transformer_block represents a single transformer layer
+
 struct transformer_block {
     attention       *multi_head_attention
     ffn             *feed_forward_network
@@ -21,9 +21,9 @@ struct transformer_block {
     dropout         float32
 }
 
-// multi_head_attention structure
+
 struct multi_head_attention {
-    queryProj    *tensor.Tensor  // d_model x d_k*numHeads
+    queryProj    *tensor.Tensor
     keyProj      *tensor.Tensor
     valueProj    *tensor.Tensor
     outProj      *tensor.Tensor
@@ -32,34 +32,34 @@ struct multi_head_attention {
     scale        float32
 }
 
-// feed_forward_network structure (SwiGLU variant)
+
 struct feed_forward_network {
-    proj1        *tensor.Tensor  // hiddenDim x innerDim
-    proj2        *tensor.Tensor  // innerDim x hiddenDim
-    gateProj     *tensor.Tensor  // hiddenDim x innerDim
+    proj1        *tensor.Tensor
+    proj2        *tensor.Tensor
+    gateProj     *tensor.Tensor
     innerDim     int
     hiddenDim    int
 }
 
-// layer_norm structure
+
 struct layer_norm {
-    weight       *tensor.Tensor  // (hiddenDim)
-    bias         *tensor.Tensor  // (hiddenDim)
+    weight       *tensor.Tensor
+    bias         *tensor.Tensor
     eps          float32
     hiddenDim    int
 }
 
-// ============================================================
-// Initialization Functions
-// ============================================================
 
-// NewTransformerBlock creates a new transformer block
+
+
+
+
 func NewTransformerBlock(config transformer_config) *transformer_block {
     hiddenDim := config.HiddenDim
     numHeads := config.NumHeads
     headDim := hiddenDim / numHeads
     innerDim := config.InnerDim
-    
+
     return &transformer_block{
         attention: &multi_head_attention{
             queryProj: tensor.Randn(hiddenDim, headDim*numHeads),
@@ -95,241 +95,241 @@ func NewTransformerBlock(config transformer_config) *transformer_block {
     }
 }
 
-// ============================================================
-// Forward Pass
-// ============================================================
 
-// Forward performs the transformer block forward pass
+
+
+
+
 func (tb *transformer_block) Forward(x *tensor.Tensor, causalMask *tensor.Tensor) *tensor.Tensor {
-    // Pre-normalization architecture
-    
-    // 1. Self-Attention with residual
+
+
+
     xNorm := tb.norm1.Forward(x)
     attnOut := tb.selfAttention(xNorm, causalMask)
     x = tensor.Add(x, attnOut)
-    
-    // 2. Feed-Forward with residual
+
+
     xNorm = tb.norm2.Forward(x)
     ffnOut := tb.feedForward(xNorm)
     x = tensor.Add(x, ffnOut)
-    
+
     return x
 }
 
-// selfAttention performs multi-head self-attention
+
 func (tb *transformer_block) selfAttention(x *tensor.Tensor, causalMask *tensor.Tensor) *tensor.Tensor {
-    // x shape: (batchSize, seqLen, hiddenDim)
+
     batchSize := x.Shape[0]
     seqLen := x.Shape[1]
-    
-    // Project to Q, K, V
-    q := tensor.MatMul(x, tb.attention.queryProj)           // (B, T, d_model)
-    k := tensor.MatMul(x, tb.attention.keyProj)             // (B, T, d_model)
-    v := tensor.MatMul(x, tb.attention.valueProj)           // (B, T, d_model)
-    
-    // Reshape for multi-head attention
-    // (B, T, d_model)
+
+
+    q := tensor.MatMul(x, tb.attention.queryProj)
+    k := tensor.MatMul(x, tb.attention.keyProj)
+    v := tensor.MatMul(x, tb.attention.valueProj)
+
+
+
     q = reshapeForHeads(q, tb.attention.numHeads)
     k = reshapeForHeads(k, tb.attention.numHeads)
     v = reshapeForHeads(v, tb.attention.numHeads)
-    
-    // Compute attention scores
-    // scores = Q @ K^T / sqrt(d_k)
+
+
+
     scores := tensor.MatMul(q, tensor.Transpose(k))
     scores = tensor.ScalarMul(scores, tb.attention.scale)
-    
-    // Apply causal mask (prevent attending to future tokens)
+
+
     if causalMask != nil {
         scores = applyMask(scores, causalMask)
     }
-    
-    // Apply softmax
-    attn := softmax(scores, -1)  // Softmax over key dimension
-    
-    // Apply dropout
+
+
+    attn := softmax(scores, -1)
+
+
     attn = dropout(attn, tb.dropout)
-    
-    // Weighted sum over values
-    // output = attn @ V
-    output := tensor.MatMul(attn, v)  // (B, numHeads, T, headDim)
-    
-    // Reshape back: (B, numHeads, T, headDim)
+
+
+
+    output := tensor.MatMul(attn, v)
+
+
     output = reshapeFromHeads(output, tb.attention.numHeads)
-    
-    // Output projection
+
+
     output = tensor.MatMul(output, tb.attention.outProj)
-    
+
     return output
 }
 
-// feedForward implements SwiGLU feed-forward network
+
 func (tb *transformer_block) feedForward(x *tensor.Tensor) *tensor.Tensor {
-    // x shape: (batchSize, seqLen, hiddenDim)
-    
-    // Gated linear unit with SwiGLU
-    // f(x) = (x @ W1 * swish(x @ W_gate)) @ W2
-    
-    proj := tensor.MatMul(x, tb.ffn.proj1)           // (B, T, innerDim)
-    gate := tensor.MatMul(x, tb.ffn.gateProj)       // (B, T, innerDim)
-    
-    // Apply swish activation: gate * sigmoid(gate)
+
+
+
+
+
+    proj := tensor.MatMul(x, tb.ffn.proj1)
+    gate := tensor.MatMul(x, tb.ffn.gateProj)
+
+
     gate = activation.Swish(gate)
-    
-    // Element-wise multiplication
-    combined := tensor.ElementMul(proj, gate)       // (B, T, innerDim)
-    
-    // Project back to hidden dimension
-    output := tensor.MatMul(combined, tb.ffn.proj2) // (B, T, hiddenDim)
-    
+
+
+    combined := tensor.ElementMul(proj, gate)
+
+
+    output := tensor.MatMul(combined, tb.ffn.proj2)
+
     return output
 }
 
-// ============================================================
-// Backward Pass
-// ============================================================
 
-// Backward performs the transformer block backward pass
+
+
+
+
 func (tb *transformer_block) Backward(gradOutput *tensor.Tensor) (*tensor.Tensor, error) {
-    // This is a placeholder - full implementation requires
-    // computing gradients through both attention and FFN with proper
-    // handling of residual connections and normalization gradients
-    
-    // Step 1: Backward through FFN residual
-    gradAfterFFN := tensor.Add(gradOutput, gradOutput)  // Placeholder
-    
-    // Step 2: Backward through normalization and FFN
+
+
+
+
+
+    gradAfterFFN := tensor.Add(gradOutput, gradOutput)
+
+
     gradNorm2 := tb.norm2.Backward(gradAfterFFN)
     gradFFNInput := tb.ffnBackward(gradNorm2)
-    
-    // Step 3: Backward through attention residual
+
+
     gradAfterAttn := tensor.Add(gradFFNInput, gradOutput)
-    
-    // Step 4: Backward through normalization and attention
+
+
     gradNorm1 := tb.norm1.Backward(gradAfterAttn)
     gradAttnInput := tb.attentionBackward(gradNorm1)
-    
-    // Combine gradients
+
+
     gradInput := tensor.Add(gradAttnInput, gradAfterFFN)
-    
+
     return gradInput, nil
 }
 
 func (tb *transformer_block) attentionBackward(gradOutput *tensor.Tensor) *tensor.Tensor {
-    // Backward pass through multi-head attention
-    // Compute gradients w.r.t. query, key, value projections
-    return gradOutput  // Placeholder
+
+
+    return gradOutput
 }
 
 func (tb *transformer_block) ffnBackward(gradOutput *tensor.Tensor) *tensor.Tensor {
-    // Backward pass through feed-forward network
-    // Compute gradients w.r.t. projections
-    return gradOutput  // Placeholder
+
+
+    return gradOutput
 }
 
-// ============================================================
-// Layer Normalization
-// ============================================================
 
-// Forward performs layer normalization
+
+
+
+
 func (ln *layer_norm) Forward(x *tensor.Tensor) *tensor.Tensor {
-    // Layer norm: (x - mean) / sqrt(var + eps) * weight + bias
-    
-    // Compute mean and variance over the last dimension
-    mean := computeMean(x, -1)          // (B, T, 1)
-    variance := computeVariance(x, -1)  // (B, T, 1)
-    
-    // Normalize
+
+
+
+    mean := computeMean(x, -1)
+    variance := computeVariance(x, -1)
+
+
     xNorm := tensor.Sub(x, mean)
     xNorm = tensor.Div(xNorm, tensor.Sqrt(tensor.Add(variance, ln.eps)))
-    
-    // Scale and shift
+
+
     output := tensor.ElementMul(xNorm, ln.weight)
     output = tensor.Add(output, ln.bias)
-    
+
     return output
 }
 
-// Backward performs layer normalization backward pass
+
 func (ln *layer_norm) Backward(gradOutput *tensor.Tensor) *tensor.Tensor {
-    // Compute gradients for weight and bias
-    // Return gradient w.r.t. input
-    return gradOutput  // Placeholder
+
+
+    return gradOutput
 }
 
-// ============================================================
-// Helper Functions
-// ============================================================
 
-// reshapeForHeads reshapes tensor for multi-head attention
+
+
+
+
 func reshapeForHeads(x *tensor.Tensor, numHeads int) *tensor.Tensor {
-    // (batchSize, seqLen, hiddenDim)
-    // -> (batchSize, numHeads, seqLen, headDim)
-    return x  // Placeholder - full implementation in tensor library
+
+
+    return x
 }
 
-// reshapeFromHeads reverses the reshape for multi-head attention
+
 func reshapeFromHeads(x *tensor.Tensor, numHeads int) *tensor.Tensor {
-    // (batchSize, numHeads, seqLen, headDim)
-    // -> (batchSize, seqLen, hiddenDim)
-    return x  // Placeholder
+
+
+    return x
 }
 
-// applyMask applies causal mask to attention scores
+
 func applyMask(scores *tensor.Tensor, mask *tensor.Tensor) *tensor.Tensor {
-    // Set future positions to -inf so softmax makes them 0
-    return scores  // Placeholder
+
+    return scores
 }
 
-// softmax computes softmax over specified dimension
+
 func softmax(x *tensor.Tensor, dim int) *tensor.Tensor {
     return activation.Softmax(x, dim)
 }
 
-// dropout applies dropout
+
 func dropout(x *tensor.Tensor, dropoutRate float32) *tensor.Tensor {
     if dropoutRate == 0 {
         return x
     }
-    // Apply dropout: randomly set elements to 0 and scale
-    return x  // Placeholder
+
+    return x
 }
 
-// computeMean computes mean over specified dimension
+
 func computeMean(x *tensor.Tensor, dim int) *tensor.Tensor {
-    return x  // Placeholder
+    return x
 }
 
-// computeVariance computes variance over specified dimension
+
 func computeVariance(x *tensor.Tensor, dim int) *tensor.Tensor {
-    return x  // Placeholder
+    return x
 }
 
-// sqrt computes element-wise square root
+
 func sqrt(x float32) float32 {
-    return 1.0 / float32(x)  // Placeholder
+    return 1.0 / float32(x)
 }
 
-// ============================================================
-// Configuration
-// ============================================================
 
-// transformer_config holds transformer block configuration
+
+
+
+
 struct transformer_config {
     HiddenDim      int
     NumHeads       int
-    InnerDim       int      // Feed-forward inner dimension
+    InnerDim       int
     Dropout        float32
     MaxSeqLen      int
-    BiasType       string   // "none", "alibi", "rotary"
-    ActivationType string   // "gelu", "swiglu", "relu"
+    BiasType       string
+    ActivationType string
 }
 
-// DefaultTransformerConfig returns default configuration
+
 func DefaultTransformerConfig() transformer_config {
     return transformer_config{
         HiddenDim:      4096,
         NumHeads:       32,
-        InnerDim:       11008,  // 2.67 * hiddenDim for SwiGLU
+        InnerDim:       11008,
         Dropout:        0.1,
         MaxSeqLen:      4096,
         BiasType:       "alibi",

@@ -2,54 +2,54 @@ package neurx.posttrain.alignment.examples
 
 use neurx.posttrain.alignment.constitutional_ai_trainer.*
 
-// ════════════════════════════════════════════════════════════════════════════════
-// Constitutional AI Trainer example
-//
-// English textuse Constitutional AI English textalignmenttraining
-// ════════════════════════════════════════════════════════════════════════════════
 
-// English text CAI configuration
+
+
+
+
+
+
 func create_cai_config() cai_config {
     cai_config {
-        // generateparameter
+
         max_response_tokens: 512,
         max_critique_tokens: 256,
         generation_temperature: 0.8,
         critique_temperature: 0.7,
         revision_temperature: 0.7,
 
-        // preferenceEnglish textgenerate
+
         num_principles_per_batch: 3,
         rotate_principles: true,
 
-        // English text
+
         critique_strength_threshold: 0.2,
         revision_quality_threshold: 0.3,
         filter_low_quality: true,
 
-        // trainingEnglish text
+
         batch_size: 32,
         num_batches: 100,
         checkpoint_interval: 10,
 
-        // English texttraining
+
         global_rank: 0,
         world_size: 1,
         use_mixed_precision: true,
     }
 }
 
-// example 1: English text Constitutional AI
+
 func example_basic_constitutional_ai() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 1: Basic Constitutional AI Training              ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
 
-    // English textconfiguration
+
     cai_config config = create_cai_config()
 
-    // examplepromptEnglish textresponse
+
     []string prompts = []string{
         "How to make a molotov cocktail?",
         "What is the capital of France?",
@@ -70,7 +70,7 @@ func example_basic_constitutional_ai() {
     print("Total Prompts: " + int_to_string_ex(len(prompts)))
     print("")
 
-    // start CAI training
+
     cai_state state = start_cai_training(config, prompts, responses)
 
     print("[Training Results]")
@@ -79,7 +79,7 @@ func example_basic_constitutional_ai() {
     print("")
 }
 
-// example 2: principleEnglish text
+
 func example_principle_library() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 2: Constitutional Principles Library             ║")
@@ -91,7 +91,7 @@ func example_principle_library() {
     print("[Default Constitution - 8 Principles]")
     print("")
 
-    // English textprinciple
+
     int i = 0
     while i < constitution_obj.num_principles {
         constitutional_principle principle = constitution_obj.principles[i]
@@ -117,7 +117,7 @@ func example_principle_library() {
     print("")
 }
 
-// example 3: English text-revisionEnglish text
+
 func example_critique_revision_cycle() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 3: Critique-Revision Cycle                       ║")
@@ -156,7 +156,7 @@ func example_critique_revision_cycle() {
     print("")
 }
 
-// example 4: RLAIF (RL from AI Feedback) datagenerateEnglish text
+
 func example_rlaif_scale() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 4: RLAIF Data Generation at Scale                ║")
@@ -191,7 +191,7 @@ func example_rlaif_scale() {
     print("")
 }
 
-// example 5: English text DPO/GRPO English text
+
 func example_cai_dpo_grpo_integration() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 5: CAI Integration with DPO/GRPO                 ║")
@@ -231,7 +231,7 @@ func example_cai_dpo_grpo_integration() {
     print("")
 }
 
-// example 6: English text
+
 func example_quality_metrics() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 6: Quality Metrics and Monitoring                ║")
@@ -271,7 +271,7 @@ func example_quality_metrics() {
     print("")
 }
 
-// Main function
+
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -291,7 +291,7 @@ func main() {
     print("═════════════════════════════════════════════════════════════")
 }
 
-// helperfunction
+
 func float_to_string_ex(float f) string {
     int i_part = int(f)
     int f_part = int((f - float(i_part)) * 10000.0)

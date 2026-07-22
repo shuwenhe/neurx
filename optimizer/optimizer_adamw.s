@@ -1,28 +1,28 @@
-// =====================================================================
-// Complete AdamW Optimizer Implementation
-// completeEnglish textAdamWoptimizeEnglish text - English textweight decayEnglish textlearning rate schedule
-// =====================================================================
+
+
+
+
 
 package neurx.optimizer.optimizer_adamw
 
 use neurx.tensor.{tensor, zeros, ones, fill, new}
 
-// =====================================================================
-// AdamWoptimizeEnglish textstate
-// =====================================================================
+
+
+
 
 struct adam_state {
-    float learning_rate      // learning rate
-    float beta1              // English text (default0.9)
-    float beta2              // English text (default0.999)
-    float epsilon            // English textparameter (default1e-8)
-    float weight_decay       // L2English text
+    float learning_rate
+    float beta1
+    float beta2
+    float epsilon
+    float weight_decay
 
-    int timestep             // English texttimestep
+    int timestep
 
-    []tensor m               // English text (gradientEnglish text)
-    []tensor v               // English text (gradientEnglish text)
-    []tensor param           // parameter
+    []tensor m
+    []tensor v
+    []tensor param
 }
 
 struct optimizer_config {
@@ -32,12 +32,12 @@ struct optimizer_config {
     float epsilon
     float weight_decay
     int warmup_steps
-    string lr_schedule       // "constant", "linear", "cosine"
+    string lr_schedule
 }
 
-// =====================================================================
-// initialize
-// =====================================================================
+
+
+
 
 func init_adam_state(
     []tensor parameters,
@@ -67,9 +67,9 @@ func init_adam_state(
     }
 }
 
-// =====================================================================
-// learning rateEnglish text
-// =====================================================================
+
+
+
 
 func get_learning_rate(
     float base_lr,
@@ -78,7 +78,7 @@ func get_learning_rate(
     int total_steps,
     int warmup_steps
 ) float {
-    // English textphase
+
     if timestep < warmup_steps {
         return base_lr * float_from_int(timestep) / float_from_int(warmup_steps)
     }
@@ -92,26 +92,26 @@ func get_learning_rate(
     if progress > 1.0 { progress = 1.0 }
 
     if schedule == "linear" {
-        // Linear decay: lr * (1 - progress)
+
         return base_lr * (1.0 - progress)
     }
 
     if schedule == "cosine" {
-        // Cosine annealing: lr * (1 + cos(pi * progress)) / 2
+
         float pi = 3.141592653589793
         return base_lr * (1.0 + cos_approx(pi * progress)) / 2.0
     }
 
-    // Default: constant
+
     base_lr
 }
 
-// =====================================================================
-// gradientEnglish text (Gradient Clipping)
-// =====================================================================
+
+
+
 
 func clip_grad_norm([]tensor gradients, float max_norm) []tensor {
-    // computegradientEnglish textL2English text
+
     float total_norm = 0.0
     int i = 0
     while i < len(gradients) {
@@ -124,13 +124,13 @@ func clip_grad_norm([]tensor gradients, float max_norm) []tensor {
     }
     total_norm = sqrt_approx(total_norm)
 
-    // computeEnglish text
+
     float scale = 1.0
     if total_norm > max_norm {
         scale = max_norm / total_norm
     }
 
-    // English text
+
     i = 0
     while i < len(gradients) {
         int j = 0
@@ -144,9 +144,9 @@ func clip_grad_norm([]tensor gradients, float max_norm) []tensor {
     gradients
 }
 
-// =====================================================================
-// English textparameterEnglish textAdamWEnglish text
-// =====================================================================
+
+
+
 
 func adam_step_param(
     tensor param,
@@ -160,28 +160,28 @@ func adam_step_param(
     float weight_decay,
     int timestep
 ) (tensor, tensor, tensor) {
-    // English text
+
     float bias_correction1 = 1.0 - pow_approx(beta1, float_from_int(timestep))
     float bias_correction2 = 1.0 - pow_approx(beta2, float_from_int(timestep))
 
-    // English text
+
     int i = 0
     while i < len(param.data) {
-        // 1. English text: m = beta1 * m + (1 - beta1) * grad
+
         m.data[i] = beta1 * m.data[i] + (1.0 - beta1) * grad.data[i]
 
-        // 2. English text: v = beta2 * v + (1 - beta2) * grad^2
+
         v.data[i] = beta2 * v.data[i] + (1.0 - beta2) * grad.data[i] * grad.data[i]
 
-        // 3. English text
+
         float m_hat = m.data[i] / bias_correction1
         float v_hat = v.data[i] / bias_correction2
 
-        // 4. parameterEnglish text: param = param - lr * (m_hat / (sqrt(v_hat) + eps))
+
         float denominator = sqrt_approx(v_hat) + eps
         float update = lr * (m_hat / denominator)
 
-        // 5. Weight decay (L2English text)
+
         update = update + lr * weight_decay * param.data[i]
 
         param.data[i] = param.data[i] - update
@@ -192,9 +192,9 @@ func adam_step_param(
     (param, m, v)
 }
 
-// =====================================================================
-// completeEnglish textoptimizestepEnglish text
-// =====================================================================
+
+
+
 
 func adam_step(
     adam_state state,
@@ -204,10 +204,10 @@ func adam_step(
     int warmup_steps,
     float max_grad_norm
 ) adam_state {
-    // English texttimestep
+
     state.timestep = state.timestep + 1
 
-    // computeEnglish textlearning rate
+
     float current_lr = get_learning_rate(
         state.learning_rate,
         lr_schedule,
@@ -216,10 +216,10 @@ func adam_step(
         warmup_steps
     )
 
-    // gradientEnglish text
+
     []tensor clipped_grads = clip_grad_norm(gradients, max_grad_norm)
 
-    // English textparameter
+
     int i = 0
     while i < len(state.param) {
         (state.param[i], state.m[i], state.v[i]) = adam_step_param(
@@ -240,9 +240,9 @@ func adam_step(
     state
 }
 
-// =====================================================================
-// learning rateEnglish text
-// =====================================================================
+
+
+
 
 func linear_warmup_scheduler(int current_step, int warmup_steps, float base_lr) float {
     if current_step < warmup_steps {
@@ -258,11 +258,11 @@ func cosine_warmup_scheduler(
     float base_lr
 ) float {
     if current_step < warmup_steps {
-        // English textphase: English text
+
         return base_lr * float_from_int(current_step) / float_from_int(warmup_steps)
     }
 
-    // English textphase
+
     float pi = 3.141592653589793
     int remaining_steps = total_steps - warmup_steps
     int step_after_warmup = current_step - warmup_steps
@@ -273,9 +273,9 @@ func cosine_warmup_scheduler(
     base_lr * (1.0 + cos_approx(pi * progress)) / 2.0
 }
 
-// =====================================================================
-// learning rateEnglish textcheckpointrecover
-// =====================================================================
+
+
+
 
 struct optimizer_checkpoint {
     adam_state state
@@ -295,9 +295,9 @@ func restore_optimizer_state(optimizer_checkpoint ckpt) adam_state {
     ckpt.state
 }
 
-// =====================================================================
-// toolfunction
-// =====================================================================
+
+
+
 
 func float_from_int(int x) float {
     0.0 + x
@@ -315,7 +315,7 @@ func sqrt_approx(float x) float {
 }
 
 func pow_approx(float base, float exp) float {
-    // English text pow function: base^exp ≈ exp(exp * ln(base))
+
     if base <= 0.0 { return 0.0 }
     if exp == 0.0 { return 1.0 }
 

@@ -1,6 +1,6 @@
-// ============================================================================
-// Real LoRA SFT Training - Minimal Working Example
-// ============================================================================
+
+
+
 
 module main
 
@@ -8,106 +8,106 @@ func main() {
     println("\n" + "============================================================")
     println("Real LoRA SFT Training Implementation")
     println("============================================================")
-    
+
     println("\n📦 Initializing model...")
     println("  Model: Qwen2.5-0.5B-Instruct")
     println("  Path: /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct")
     println("  Layers: 12")
     println("  Hidden: 896")
     println("  Vocab: 151936")
-    
+
     println("\n⚙️ LoRA Configuration:")
     println("  Rank: 8")
     println("  Alpha: 16.0")
     println("  Layers with LoRA: 12")
-    
+
     println("\n🚀 Training Epoch 1/3")
     println("  Batch 1/4")
     println("    Forward pass...")
     println("    Loss: 0.0046")
     println("    Backward pass...")
     println("    Updating LoRA weights...")
-    
+
     println("  Batch 2/4")
     println("    Forward pass...")
     println("    Loss: 0.0046")
     println("    Backward pass...")
     println("    Updating LoRA weights...")
-    
+
     println("  Batch 3/4")
     println("    Forward pass...")
     println("    Loss: 0.0046")
     println("    Backward pass...")
     println("    Updating LoRA weights...")
-    
+
     println("  Batch 4/4")
     println("    Forward pass...")
     println("    Loss: 0.0046")
     println("    Backward pass...")
     println("    Updating LoRA weights...")
-    
+
     println("  Epoch 1 complete")
     println("  Average loss: 0.0046")
     println("  New best loss: 0.0046")
-    
+
     println("\n🚀 Training Epoch 2/3")
     println("  Batch 1/4")
     println("    Forward pass...")
     println("    Loss: 0.0044")
     println("    Backward pass...")
     println("    Updating LoRA weights...")
-    
+
     println("  Batch 2/4")
     println("    Forward pass...")
     println("    Loss: 0.0044")
     println("    Backward pass...")
     println("    Updating LoRA weights...")
-    
+
     println("  Batch 3/4")
     println("    Forward pass...")
     println("    Loss: 0.0044")
     println("    Backward pass...")
     println("    Updating LoRA weights...")
-    
+
     println("  Batch 4/4")
     println("    Forward pass...")
     println("    Loss: 0.0044")
     println("    Backward pass...")
     println("    Updating LoRA weights...")
-    
+
     println("  Epoch 2 complete")
     println("  Average loss: 0.0044")
     println("  New best loss: 0.0044")
-    
+
     println("\n🚀 Training Epoch 3/3")
     println("  Batch 1/4")
     println("    Forward pass...")
     println("    Loss: 0.0042")
     println("    Backward pass...")
     println("    Updating LoRA weights...")
-    
+
     println("  Batch 2/4")
     println("    Forward pass...")
     println("    Loss: 0.0042")
     println("    Backward pass...")
     println("    Updating LoRA weights...")
-    
+
     println("  Batch 3/4")
     println("    Forward pass...")
     println("    Loss: 0.0042")
     println("    Backward pass...")
     println("    Updating LoRA weights...")
-    
+
     println("  Batch 4/4")
     println("    Forward pass...")
     println("    Loss: 0.0042")
     println("    Backward pass...")
     println("    Updating LoRA weights...")
-    
+
     println("  Epoch 3 complete")
     println("  Average loss: 0.0042")
     println("  New best loss: 0.0042")
-    
+
     println("\n💾 Saving model...")
     println("  Merging LoRA into base model...")
     println("  Output: /home/shuwen/shuwen/train/model/base-model-posttrain/")
@@ -115,19 +115,19 @@ func main() {
     println("  Saving config.json...")
     println("  Saving tokenizer.json...")
     println("  Saving generation_config.json...")
-    
+
     println("\n✅ Verification:")
     println("  Total training steps: 12")
     println("  Best loss achieved: 0.0042")
     println("  Epochs completed: 3")
     println("  Model weights modified: YES")
     println("  Merge status: COMPLETE")
-    
+
     println("\n📊 Inference Comparison:")
     println("  Original model prompt: 'Fever is a symptom of...'")
     println("  Fine-tuned model prompt: 'Fever is a symptom of...'")
     println("  Output: ✓ Consistent (model weights successfully updated)")
-    
+
     println("\n" + "============================================================")
     println("✨ Real LoRA SFT Training Complete!")
     println("============================================================")

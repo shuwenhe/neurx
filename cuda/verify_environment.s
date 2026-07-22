@@ -6,59 +6,59 @@ use std.io.println
 func main() {
     println("[CUDA Environment Verification]")
     println("")
-    
-    // Color codes
+
+
     string BLUE = "\u001b[0;34m"
     string GREEN = "\u001b[0;32m"
     string RED = "\u001b[0;31m"
     string YELLOW = "\u001b[1;33m"
     string NC = "\u001b[0m"
-    
-    // ========================================================================
-    // CHECK 1: NVIDIA DRIVER
-    // ========================================================================
+
+
+
+
     print_header("NVIDIA CUDA Environment Check", BLUE, NC)
     println("")
-    
+
     print_info("Checking NVIDIA driver...", BLUE, NC)
-    
+
     string nvidia_smi = runtime_run_command_output("which nvidia-smi 2>/dev/null || true")
     if str_len(trim(nvidia_smi)) == 0 {
         print_error("nvidia-smi not found", RED, NC)
         println("  Install NVIDIA driver from https://www.nvidia.com/Download/driverDetails.aspx")
         return
     }
-    
+
     print_success("nvidia-smi found", GREEN, NC)
     println("")
-    
+
     string gpu_info = runtime_run_command_output("nvidia-smi 2>/dev/null || true")
     println(gpu_info)
-    
-    // ========================================================================
-    // CHECK 2: CUDA TOOLKIT
-    // ========================================================================
+
+
+
+
     println("")
     print_info("Checking CUDA Toolkit...", BLUE, NC)
-    
+
     string nvcc = runtime_run_command_output("which nvcc 2>/dev/null || true")
     if str_len(trim(nvcc)) == 0 {
         print_error("nvcc (CUDA compiler) not found", RED, NC)
         println("  Install CUDA Toolkit from https://developer.nvidia.com/cuda-downloads")
         return
     }
-    
+
     print_success("CUDA Toolkit found", GREEN, NC)
-    
+
     string cuda_version = runtime_run_command_output("nvcc --version 2>/dev/null | grep release | awk '{print $5}' | tr -d ',' || true")
     println("  Version: " + trim(cuda_version))
-    
-    // ========================================================================
-    // CHECK 3: cuBLAS
-    // ========================================================================
+
+
+
+
     println("")
     print_info("Checking cuBLAS...", BLUE, NC)
-    
+
     string cublas_check = runtime_run_command_output("ldconfig -p 2>/dev/null | grep cublas || echo 'not_found'")
     if contains_string(cublas_check, "not_found") || str_len(trim(cublas_check)) == 0 {
         print_warning("cuBLAS library not in ldconfig", YELLOW, NC)
@@ -66,62 +66,62 @@ func main() {
     } else {
         print_success("cuBLAS found in library path", GREEN, NC)
     }
-    
-    // ========================================================================
-    // CHECK 4: GPU DETECTION
-    // ========================================================================
+
+
+
+
     println("")
     print_header("GPU Detection", BLUE, NC)
-    
+
     string gpu_list = runtime_run_command_output("nvidia-smi -L 2>/dev/null || true")
     int gpu_count = count_lines(gpu_list)
-    
+
     print_info("GPU count: " + int_to_str(gpu_count), BLUE, NC)
-    
+
     if gpu_count == 0 {
         print_error("No NVIDIA GPUs detected", RED, NC)
         return
     }
-    
+
     print_success("GPUs available", GREEN, NC)
     println("")
-    
-    // Print GPU details
+
+
     string gpu_details = runtime_run_command_output("nvidia-smi --query-gpu=index,name,memory.total,compute_cap --format=csv,noheader 2>/dev/null || true")
     println(gpu_details)
-    
-    // ========================================================================
-    // CHECK 5: CUDA LIBRARIES
-    // ========================================================================
+
+
+
+
     println("")
     print_header("CUDA Libraries Check", BLUE, NC)
-    
+
     check_cuda_library("libcuda.so", BLUE, NC, GREEN, RED)
     check_cuda_library("libcudart.so", BLUE, NC, GREEN, RED)
     check_cuda_library("libcublas.so", BLUE, NC, GREEN, RED)
     check_cuda_library("libcurand.so", BLUE, NC, GREEN, RED)
     check_cuda_library("libcusparse.so", BLUE, NC, GREEN, RED)
-    
-    // ========================================================================
-    // CHECK 6: ENVIRONMENT VARIABLES
-    // ========================================================================
+
+
+
+
     println("")
     print_header("Environment Variables", BLUE, NC)
-    
+
     string cuda_home = runtime_run_command_output("echo $CUDA_HOME 2>/dev/null || echo 'not_set'")
     string ld_library = runtime_run_command_output("echo $LD_LIBRARY_PATH 2>/dev/null || echo 'not_set'")
     string path_var = runtime_run_command_output("echo $PATH 2>/dev/null || echo 'not_set'")
-    
+
     println("CUDA_HOME: " + trim(cuda_home))
     println("LD_LIBRARY_PATH: " + trim(ld_library))
     println("")
-    
-    // ========================================================================
-    // CHECK 7: NVCC COMPILATION TEST
-    // ========================================================================
+
+
+
+
     println("")
     print_header("NVCC Compilation Test", BLUE, NC)
-    
+
     string test_compile = runtime_run_command_output("nvcc --version 2>/dev/null | head -1 || true")
     if str_len(trim(test_compile)) > 0 {
         print_success("NVCC compilation available", GREEN, NC)
@@ -129,10 +129,10 @@ func main() {
     } else {
         print_warning("NVCC compilation test failed", YELLOW, NC)
     }
-    
-    // ========================================================================
-    // SUMMARY
-    // ========================================================================
+
+
+
+
     println("")
     print_header("Environment Check Complete", BLUE, NC)
     print_success("CUDA environment is ready for GPU training", GREEN, NC)

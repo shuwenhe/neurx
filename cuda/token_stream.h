@@ -11,9 +11,9 @@ inline void append_document_tokens(std::vector<int>& pending,
     pending.insert(pending.end(), document.begin(), document.end());
 }
 
-// Produces inputs plus the one-token-shifted final target. The final token is
-// retained as the first input of the next sequence, so a packed token stream is
-// consumed exactly once without dropping document tails.
+
+
+
 inline bool take_training_window(std::vector<int>& pending,
                                  std::size_t sequence_length,
                                  std::vector<int>& window) {
@@ -26,4 +26,4 @@ inline bool take_training_window(std::vector<int>& pending,
     return true;
 }
 
-}  // namespace neurx_training
+}

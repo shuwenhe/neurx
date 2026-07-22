@@ -3,9 +3,9 @@ package neurx.module.state_dict
 use neurx.tensor.tensor
 use neurx.nn
 
-// Explicit state_dict helpers for PyTorch-like save/load boundaries.
-// The serialized state is currently represented by the existing nn.module tree.
-// This keeps checkpoint integration simple while NeurX still uses S structs.
+
+
+
 
 struct named_tensor {
     string name

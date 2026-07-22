@@ -1,8 +1,8 @@
-// ============================================
-// RLHF PPO Training Framework
-// Proximal Policy Optimization with Reward Model
-// NeurX-level LLM alignment through RLHF
-// ============================================
+
+
+
+
+
 
 package main
 
@@ -15,9 +15,9 @@ import (
     "time"
 )
 
-// ============================================
-// Core Structures
-// ============================================
+
+
+
 
 type trajectory_step struct {
     step_id         int
@@ -42,16 +42,16 @@ type trajectory struct {
 
 type ppoconfig struct {
     learning_rate           float64
-    gamma                   float64  // discount factor
-    gae_lambda              float64  // GAE parameter
-    clip_ratio              float64  // PPO clip range
-    value_coeff             float64  // value loss weight
-    entropy_coeff           float64  // entropy bonus weight
-    max_grad_norm           float64  // gradient clipping
-    num_epochs              int      // PPO epochs per batch
-    batch_size              int      // batch size for training
-    mini_batch_size         int      // mini batch size
-    kl_penalty              float64  // KL divergence penalty
+    gamma                   float64
+    gae_lambda              float64
+    clip_ratio              float64
+    value_coeff             float64
+    entropy_coeff           float64
+    max_grad_norm           float64
+    num_epochs              int
+    batch_size              int
+    mini_batch_size         int
+    kl_penalty              float64
     warmup_steps            int
     total_steps             int
     checkpoint_interval     int
@@ -111,45 +111,45 @@ type reward_model struct {
 type optimizer struct {
     name                string
     learning_rate       float64
-    beta1               float64  // Adam parameter
-    beta2               float64  // Adam parameter
+    beta1               float64
+    beta2               float64
     epsilon             float64
     weight_decay        float64
     grad_accumulation   int
 }
 
-// ============================================
-// trajectory Collection
-// ============================================
+
+
+
 
 func (trainer *ppotrainer) collect_trajectories(num_trajectories int) []trajectory {
     fmt.Println("[PPO] Collecting trajectories...")
-    
+
     trajectories := []trajectory{}
-    
+
     for i := 0; i < num_trajectories; i++ {
-        // Generate trajectory from policy
+
         trajectory := trainer.generate_trajectory()
-        
-        // Get rewards from reward model
+
+
         trajectory.reward_sum = 0
         for j, step := range trajectory.steps {
-            // Reward model predicts reward for this transition
+
             reward := trainer.reward_model.predict_reward(step.tokens)
             trajectory.steps[j].rewards = []float64{reward}
             trajectory.reward_sum += reward
         }
-        
-        // Calculate returns and advantages
+
+
         trajectory.steps = trainer.calculate_advantages(trajectory.steps)
-        
+
         trajectories = append(trajectories, trajectory)
-        
+
         if (i+1) % 100 == 0 {
             fmt.Printf("  Collected %d trajectories (avg return: %.4f)\n", i+1, trajectory.episode_return)
         }
     }
-    
+
     return trajectories
 }
 
@@ -158,39 +158,39 @@ func (trainer *ppotrainer) generate_trajectory() trajectory {
         steps: []trajectory_step{},
         timestamp: time.Now().Unix(),
     }
-    
+
     max_length := 512
-    current_tokens := []int{} // Start token
-    
+    current_tokens := []int{}
+
     for len(current_tokens) < max_length {
-        // Policy inference
+
         log_probs := trainer.policy_model.forward(current_tokens)
-        
-        // sample next token
+
+
         next_token := trainer.sample_from_logits(log_probs)
-        
-        // Value prediction
+
+
         value := trainer.value_model.predict_value(current_tokens)
-        
-        // Log probability of sampled token
+
+
         log_prob := log_probs[next_token]
-        
+
         step := trajectory_step{
             step_id: len(trajectory.steps),
             tokens: append(current_tokens, next_token),
             log_probs: []float64{log_prob},
             values: []float64{value},
         }
-        
+
         trajectory.steps = append(trajectory.steps, step)
         current_tokens = append(current_tokens, next_token)
-        
-        // Stop on EOS token
-        if next_token == 2 { // EOS token ID
+
+
+        if next_token == 2 {
             break
         }
     }
-    
+
     trajectory.episode_length = len(trajectory.steps)
     trajectory.episode_return = 0
     for _, step := range trajectory.steps {
@@ -198,66 +198,66 @@ func (trainer *ppotrainer) generate_trajectory() trajectory {
             trajectory.episode_return += step.rewards[0]
         }
     }
-    
+
     return trajectory
 }
 
 func (trainer *ppotrainer) calculate_advantages(steps []trajectory_step) []trajectory_step {
-    // GAE (Generalized Advantage Estimation)
+
     gae := 0.0
     advantages := make([]float64, len(steps))
     returns := make([]float64, len(steps))
-    
+
     for t := len(steps) - 1; t >= 0; t-- {
         if t == len(steps)-1 {
             next_value := 0.0
         } else {
             next_value := steps[t+1].values[0]
         }
-        
+
         reward := steps[t].rewards[0]
         value := steps[t].values[0]
-        
+
         delta := reward + trainer.config.gamma*next_value - value
         gae = delta + trainer.config.gamma*trainer.config.gae_lambda*gae
-        
+
         advantages[t] = gae
         returns[t] = gae + value
-        
+
         steps[t].advantages = []float64{gae}
         steps[t].gae_advantages = []float64{returns[t]}
     }
-    
+
     return steps
 }
 
-// ============================================
-// PPO Loss Calculation
-// ============================================
+
+
+
 
 func (trainer *ppotrainer) calculate_ppo_loss(old_log_probs []float64, new_log_probs []float64, advantages []float64) float64 {
     ratio := []float64{}
     for i := range old_log_probs {
         ratio = append(ratio, math.Exp(new_log_probs[i] - old_log_probs[i]))
     }
-    
+
     surrogate1 := []float64{}
     for i, r := range ratio {
         surrogate1 = append(surrogate1, r*advantages[i])
     }
-    
+
     surrogate2 := []float64{}
     for i, r := range ratio {
-        clipped := math.Max(1-trainer.config.clip_ratio, 
+        clipped := math.Max(1-trainer.config.clip_ratio,
                            math.Min(1+trainer.config.clip_ratio, r))
         surrogate2 = append(surrogate2, clipped*advantages[i])
     }
-    
+
     loss := 0.0
     for i := range surrogate1 {
         loss -= math.Min(surrogate1[i], surrogate2[i])
     }
-    
+
     return loss / float64(len(surrogate1))
 }
 
@@ -292,86 +292,86 @@ func (trainer *ppotrainer) calculate_kl_divergence(old_logits []float64, new_log
     return kl
 }
 
-// ============================================
-// PPO Training Loop
-// ============================================
+
+
+
 
 func (trainer *ppotrainer) train_step(trajectories []trajectory) performance_metric {
     fmt.Println("[PPO] Training step...")
-    
+
     total_policy_loss := 0.0
     total_value_loss := 0.0
     total_kl := 0.0
     total_entropy := 0.0
     total_return := 0.0
-    
+
     num_batches := 0
-    
-    // PPO epochs
+
+
     for epoch := 0; epoch < trainer.config.num_epochs; epoch++ {
-        // Mini-batch training
+
         for batch_start := 0; batch_start < len(trajectories); batch_start += trainer.config.mini_batch_size {
             batch_end := batch_start + trainer.config.mini_batch_size
             if batch_end > len(trajectories) {
                 batch_end = len(trajectories)
             }
-            
+
             for i := batch_start; i < batch_end; i++ {
                 trajectory := trajectories[i]
-                
+
                 for _, step := range trajectory.steps {
-                    // New forward pass
+
                     new_log_probs := trainer.policy_model.forward(step.tokens)
                     new_log_prob := new_log_probs[step.tokens[len(step.tokens)-1]]
-                    
+
                     old_log_prob := step.log_probs[0]
                     advantage := step.advantages[0]
                     ret := step.gae_advantages[0]
-                    
-                    // PPO loss
+
+
                     ppo_loss := trainer.calculate_ppo_loss(
                         []float64{old_log_prob},
                         []float64{new_log_prob},
                         []float64{advantage},
                     )
-                    
-                    // Value loss
+
+
                     new_value := trainer.value_model.predict_value(step.tokens)
                     value_loss := trainer.calculate_value_loss(
                         []float64{ret},
                         []float64{new_value},
                     )
-                    
-                    // KL divergence penalty
+
+
                     kl := trainer.calculate_kl_divergence(
                         []float64{old_log_prob},
                         []float64{new_log_prob},
                     )
-                    
-                    // Total loss
-                    total_loss := ppo_loss + 
-                                 trainer.config.value_coeff*value_loss + 
+
+
+                    total_loss := ppo_loss +
+                                 trainer.config.value_coeff*value_loss +
                                  trainer.config.kl_penalty*kl
-                    
-                    // Gradient update (simulated)
+
+
                     trainer.optimizer.update_parameters(total_loss)
-                    
+
                     total_policy_loss += ppo_loss
                     total_value_loss += value_loss
                     total_kl += kl
                 }
-                
+
                 total_return += trajectory.episode_return
             }
-            
+
             num_batches += 1
         }
     }
-    
+
     trainer.step_count += 1
     trainer.episode_count += len(trajectories)
     trainer.total_reward += total_return
-    
+
     metric := performance_metric{
         step: trainer.step_count,
         episode_return: total_return / float64(len(trajectories)),
@@ -381,15 +381,15 @@ func (trainer *ppotrainer) train_step(trajectories []trajectory) performance_met
         entropy: total_entropy / float64(num_batches),
         reward_mean: total_return / float64(len(trajectories)),
     }
-    
+
     trainer.performance_history = append(trainer.performance_history, metric)
-    
+
     return metric
 }
 
-// ============================================
-// Sampling and Utilities
-// ============================================
+
+
+
 
 func (trainer *ppotrainer) sample_from_logits(logits []float64) int {
     max_logit := logits[0]
@@ -398,7 +398,7 @@ func (trainer *ppotrainer) sample_from_logits(logits []float64) int {
             max_logit = l
         }
     }
-    
+
     sum_exp := 0.0
     probs := []float64{}
     for _, l := range logits {
@@ -406,12 +406,12 @@ func (trainer *ppotrainer) sample_from_logits(logits []float64) int {
         sum_exp += exp_l
         probs = append(probs, exp_l)
     }
-    
+
     for i := range probs {
         probs[i] /= sum_exp
     }
-    
-    r := 0.5 // simulated random
+
+    r := 0.5
     cumsum := 0.0
     for i, p := range probs {
         cumsum += p
@@ -419,13 +419,13 @@ func (trainer *ppotrainer) sample_from_logits(logits []float64) int {
             return i
         }
     }
-    
+
     return len(probs) - 1
 }
 
-// ============================================
-// Model Implementations
-// ============================================
+
+
+
 
 func (model *PolicyModel) forward(tokens []int) []float64 {
     logits := make([]float64, model.vocab_size)
@@ -454,9 +454,9 @@ func (model *reward_model) predict_reward(tokens []int) float64 {
     return sum / float64(len(tokens))
 }
 
-// ============================================
-// Main Training Interface
-// ============================================
+
+
+
 
 func NewPPOTrainer(config ppoconfig) *ppotrainer {
     return &ppotrainer{
@@ -496,25 +496,25 @@ func (trainer *ppotrainer) train(num_steps int) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  PPO Training for NeurX-Level LLM Alignment           ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
-    
+
     for step := 0; step < num_steps; step++ {
-        // Collect trajectories
+
         trajectories := trainer.collect_trajectories(trainer.config.batch_size)
-        
-        // Train PPO step
+
+
         metric := trainer.train_step(trajectories)
-        
+
         if (step + 1) % trainer.config.checkpoint_interval == 0 {
             trainer.save_checkpoint(step + 1)
             fmt.Printf("\n[Step %d] Return: %.4f | Policy Loss: %.6f | Value Loss: %.6f | KL: %.6f\n",
                 metric.step, metric.episode_return, metric.policy_loss, metric.value_loss, metric.kl_divergence)
         }
-        
+
         if (step + 1) >= num_steps {
             break
         }
     }
-    
+
     trainer.print_summary()
 }
 
@@ -529,7 +529,7 @@ func (trainer *ppotrainer) print_summary() {
     fmt.Printf("Total Steps: %d\n", trainer.step_count)
     fmt.Printf("Total Episodes: %d\n", trainer.episode_count)
     fmt.Printf("Average Return: %.4f\n", trainer.total_reward/float64(trainer.episode_count))
-    
+
     if len(trainer.performance_history) > 0 {
         latest := trainer.performance_history[len(trainer.performance_history)-1]
         fmt.Printf("Final Policy Loss: %.6f\n", latest.policy_loss)
@@ -538,9 +538,9 @@ func (trainer *ppotrainer) print_summary() {
     }
 }
 
-// ============================================
-// Main Entry Point
-// ============================================
+
+
+
 
 func main() {
     config := ppoconfig{
@@ -560,7 +560,7 @@ func main() {
         checkpoint_interval: 500,
         eval_interval: 100,
     }
-    
+
     trainer := NewPPOTrainer(config)
-    trainer.train(10) // Demo: 10 steps
+    trainer.train(10)
 }

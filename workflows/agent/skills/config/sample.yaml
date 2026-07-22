@@ -1,4 +1,4 @@
-# Sample config for agent/skills
+
 max_generations: 20
 promotion_threshold: 85.0
 retire_threshold: 20.0

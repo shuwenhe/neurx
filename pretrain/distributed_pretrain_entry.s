@@ -1,10 +1,10 @@
-#!/usr/bin/env s
 
-// ============================================
-// NeurX Distributed Pretraining Entry Point
-// English textGPUEnglish texttrainingmainEnglish text
-// English text: English textstartEnglish text + CUDAEnglish text + dataEnglish text + gradientEnglish textstep
-// ============================================
+
+
+
+
+
+
 
 package main
 
@@ -18,9 +18,9 @@ use neurx.distributed.cuda_bridge.{
 }
 use neurx.runtime.io.{runtime_env_get}
 
-// ============================================
-// configurationEnglish text
-// ============================================
+
+
+
 
 struct training_config {
     string model_path
@@ -45,23 +45,23 @@ struct training_metrics {
     int line_idx
 }
 
-// ============================================
-// maintrainingEnglish text
-// ============================================
+
+
+
 
 func main() {
 
-    // 1. English textparameter
+
     training_config config = parse_config()
 
-    // 2. initializeEnglish text
+
     distributed_pretrain_launcher launcher = new_distributed_pretrain_launcher(
         config.config_path,
         config.micro_batch_size,
         config.gradient_accum_steps,
     )
 
-    // 3. English textrank 0English textoutputinitializeinformation
+
     if launcher.env.rank == 0 {
         launcher.log("="*50)
         launcher.log("NeurX Distributed Pretraining Started")
@@ -78,15 +78,15 @@ func main() {
         launcher.log("="*50)
     }
 
-    // 4. English textrankinformation(English text)
+
     launcher.log("Rank info: " + launcher.rank_info())
 
-    // 5. initializeGPUEnglish textstate
+
     cuda_bridge_log_status(launcher.cb)
 
-    // ============================================
-    // trainingEnglish text
-    // ============================================
+
+
+
 
     int global_step = 0
     int optimizer_step = 0
@@ -94,38 +94,38 @@ func main() {
 
     while epoch < config.num_epochs {
 
-        // English textrankEnglish textdataEnglish text
+
         int shard_idx = 0
         while shard_idx < len(launcher.shard_paths) {
 
             string shard_path = launcher.shard_paths[shard_idx]
 
-            // English textloaddataEnglish text
+
             int line_idx = 0
             int accum_step = 0
 
-            while line_idx < 1024 {  // English text1024English text
+            while line_idx < 1024 {
 
-                // 1. loadEnglish textdata
+
                 []float batch_data = load_batch(shard_path, line_idx)
 
-                // 2. English text (English textimplementation)
+
                 float loss = forward_pass(batch_data)
 
-                // 3. English textgradient (English textimplementation)
+
                 []float gradients = backward_pass(loss)
 
                 global_step = global_step + 1
                 accum_step = accum_step + 1
 
-                // 4. English textgradientstepEnglish textgradientEnglish textstep
+
                 if accum_step >= config.gradient_accum_steps {
 
-                    // ====== English text: gradientEnglish textstep ======
-                    // English textNCCL AllReduceEnglish textGPUEnglish textstepgradient
+
+
                     []float synced_gradients = launcher.sync_gradients_nccl(gradients)
 
-                    // 5. English textoptimizeEnglish textstep
+
                     launcher.optimizer_step(
                         optimizer_step,
                         config.learning_rate,
@@ -135,7 +135,7 @@ func main() {
                     optimizer_step = optimizer_step + 1
                     accum_step = 0
 
-                    // 6. logEnglish text (English textrank 0)
+
                     if optimizer_step % 100 == 0 && launcher.env.rank == 0 {
                         training_metrics metrics = training_metrics {
                             step: global_step,
@@ -150,10 +150,10 @@ func main() {
                         print_metrics(metrics)
                     }
 
-                    // 7. checkpointsave (English textrank 0)
+
                     if optimizer_step % config.save_interval == 0 && launcher.env.rank == 0 {
                         launcher.log("Saving checkpoint at step " + itoa(optimizer_step))
-                        // save_checkpoint(config.model_path, optimizer_step)
+
                     }
                 }
 
@@ -166,9 +166,9 @@ func main() {
         epoch = epoch + 1
     }
 
-    // ============================================
-    // trainingEnglish text
-    // ============================================
+
+
+
 
     if launcher.env.rank == 0 {
         launcher.log("="*50)
@@ -179,16 +179,16 @@ func main() {
         launcher.log("="*50)
     }
 
-    // English text
+
     launcher.finalize()
 }
 
-// ============================================
-// helperfunction
-// ============================================
+
+
+
 
 func parse_config() training_config {
-    // English textparameterEnglish textconfiguration
+
     training_config {
         model_path: "./checkpoint/NeurX-1.3/NeurX-1.3.neurx",
         dataset_path: "./dataset/pretrain/shard",
@@ -204,13 +204,13 @@ func parse_config() training_config {
 }
 
 func load_batch(string shard_path, int line_idx) []float {
-    // English textJSONLEnglish textloadEnglish text
-    // English texttokenizeddata
-    []float batch = []float{cap: 8 * 2048}  // 8English text, 2048 tokens
+
+
+    []float batch = []float{cap: 8 * 2048}
 
     int i = 0
     while i < len(batch) {
-        batch[i] = float(i % 256) / 256.0  // English texttoken embeddings
+        batch[i] = float(i % 256) / 256.0
         i = i + 1
     }
 
@@ -218,8 +218,8 @@ func load_batch(string shard_path, int line_idx) []float {
 }
 
 func forward_pass([]float batch_data) float {
-    // English text
-    // English textlossEnglish text
+
+
     float loss = 0.0
 
     int i = 0
@@ -232,13 +232,13 @@ func forward_pass([]float batch_data) float {
 }
 
 func backward_pass(float loss) []float {
-    // English text
-    // English textgradient
-    []float gradients = []float{cap: 1024}  // modelparameterEnglish text
+
+
+    []float gradients = []float{cap: 1024}
 
     int i = 0
     while i < len(gradients) {
-        gradients[i] = loss * 0.01  // English textgradientEnglish text
+        gradients[i] = loss * 0.01
         i = i + 1
     }
 
@@ -279,7 +279,7 @@ func itoa(int n) string {
 }
 
 func ftoa(float f) string {
-    // English text
+
     int int_part = int(f)
     int frac_part = int((f - float(int_part)) * 1000000)
 

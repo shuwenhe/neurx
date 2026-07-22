@@ -201,7 +201,7 @@ func agent_runtime_approval_matches(string granted, string task) bool {
     if g == "" || t == "" {
         return false
     }
-    // "all" grants approval for any task
+
     if g == "all" {
         return true
     }
@@ -979,7 +979,7 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
 
     agent_memory_state approval_memory = state.memory
     bool approval_granted = false
-    // NEURX_AUTO_APPROVE_TOOLS=1 skips the interrupt gate for all write operations
+
     string auto_approve_env = trim(runtime_env_get("NEURX_AUTO_APPROVE_TOOLS", ""))
     if auto_approve_env == "1" || auto_approve_env == "true" || auto_approve_env == "yes" {
         approval_granted = true
@@ -1007,13 +1007,13 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
         state.reasoning, state.plan.goal, state.last_observation
     )
 
-    // call trace: log the modules invoked before executor
+
     approval_memory = call_trace_append(approval_memory, state.steps + 1, "safety.check", CALL_TRACE_SAFETY, "agent_safety_check", true)
     approval_memory = call_trace_append(approval_memory, state.steps + 1, "reasoning", CALL_TRACE_REASONING, "agent_reasoning_for_goal", true)
     approval_memory = call_trace_append(approval_memory, state.steps + 1, "context.compress", CALL_TRACE_CONTEXT, "agent_context_smart_compress", true)
     agent_execute_result result = agent_execute_step(state.tools, approval_memory, state.plan.goal, state.plan.current_task, input, state.model_path)
     agent_memory_state execution_memory = result.memory
-    // call trace: log executor, tool dispatch, and model inference paths
+
     execution_memory = call_trace_append(execution_memory, state.steps + 1, "executor.step", CALL_TRACE_EXECUTOR, "agent_execute_step", result.ok)
     execution_memory = call_trace_append(execution_memory, state.steps + 1, "tool.dispatch", CALL_TRACE_TOOLS, result.tool_name, result.ok)
     execution_memory = call_trace_append(execution_memory, state.steps + 1, "infer.model", CALL_TRACE_INFER, "agent_model_infer", result.ok)
@@ -1047,7 +1047,7 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
         execution_memory = spawn_goal.state
     }
     agent_observation_state execution_observation = agent_observation_parse(result.observation)
-    // call trace: observation parsing
+
     execution_memory = call_trace_append(execution_memory, state.steps + 1, "observation.parse", CALL_TRACE_OBSERVE, "agent_observation_parse", !execution_observation.failed)
     bool repair_task = state.plan.current_task == "build" || state.plan.current_task == "test"
     if repair_task {
@@ -1103,7 +1103,7 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
     }
 
     agent_memory_state final_memory = result.memory
-    // call trace: log reflection, perception, and planning paths
+
     final_memory = call_trace_append(final_memory, state.steps + 1, "reflection", CALL_TRACE_REFLECT, "agent_reflect", !next_reflection.needs_correction)
     final_memory = call_trace_append(final_memory, state.steps + 1, "perception", CALL_TRACE_PERCEIVE, "agent_perceive", true)
     final_memory = call_trace_append(final_memory, state.steps + 1, "planner.next", CALL_TRACE_PLANNER, "agent_plan_next", !next_plan.needs_replan)
@@ -1175,7 +1175,7 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
     }
     agent_skill_registry_state next_skills = agent_runtime_update_skills(state, next_trace, result.memory)
     agent_skill_execution_state next_skill_execution = agent_skill_execute(next_skills, next_plan.current_task)
-    // call trace: log trace recording, skill update, and context build paths
+
     final_memory = call_trace_append(final_memory, state.steps + 1, "trace.append", CALL_TRACE_TRACE, "agent_trace_append", true)
     final_memory = call_trace_append(final_memory, state.steps + 1, "skills.update", CALL_TRACE_SKILLS, "agent_runtime_update_skills", true)
     final_memory = call_trace_append(final_memory, state.steps + 1, "skill.execute", CALL_TRACE_SKILL_EX, "agent_skill_execute", true)

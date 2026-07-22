@@ -1,11 +1,11 @@
 package neurx.pretrain.config.frontier_training_plan
 
-// Frontier-scale training readiness planner.
-//
-// This module does not encode any private GPT-5.5 specification. It defines
-// the engineering capabilities required for a GPT-5-class training run and
-// gives NeurX a structured way to block unsafe launches while key systems are
-// still partial or missing.
+
+
+
+
+
+
 
 struct frontier_model_target {
     string name
@@ -68,8 +68,8 @@ struct frontier_train_recipe {
 struct frontier_capability {
     string key
     string area
-    string status              // "ready", "partial", or "missing"
-    string priority            // "p0", "p1", or "p2"
+    string status
+    string priority
     bool launch_blocker
     string implementation_path
     string required_work

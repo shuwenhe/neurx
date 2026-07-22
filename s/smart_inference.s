@@ -2,12 +2,12 @@ package neurx.inference.smart
 
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, runtime_shell_escape}
 
-// NeurX English textinferencesystem - Slanguageimplementation
-// Smart Inference System in S Language
 
-// ============================================================================
-// dataEnglish text
-// ============================================================================
+
+
+
+
+
 
 struct knowledge_item {
     string text
@@ -32,9 +32,9 @@ struct inference_config {
     bool useGenericResponse
 }
 
-// ============================================================================
-// English texttool
-// ============================================================================
+
+
+
 
 func strlen(string s) int {
     int count = 0
@@ -86,7 +86,7 @@ func str_to_lower(string s) string {
 
 func char_to_string(int c) string {
     string result = ""
-    // SlanguageEnglish text
+
     result
 }
 
@@ -115,19 +115,19 @@ func count_word_occurrences(string text, string word) int {
     count
 }
 
-// ============================================================================
-// English textmanagement
-// ============================================================================
+
+
+
 
 func init_knowledge_base() {
-    // initializeEnglish text
-    // English textactualEnglish text, English textfileload
+
+
     println("✓ English textinitializeEnglish text")
 }
 
 func get_knowledge_item(int id) string {
-    // English textIDEnglish text
-    // English text
+
+
 
     if id == 0 {
         return "English text (AI) English text.English text, English textlanguageEnglish textAIEnglish textmainEnglish text.NeurXEnglish textframework, English texttrainingEnglish textlanguagemodelEnglish text."
@@ -152,20 +152,20 @@ func get_knowledge_item(int id) string {
 }
 
 func get_knowledge_base_size() int {
-    6  // English text
+    6
 }
 
-// ============================================================================
-// keywordsEnglish textcompute
-// ============================================================================
+
+
+
 
 func extract_keywords(string question) {
-    // English textkeywords
-    // English textresponseEnglish text
+
+
 
     string q_lower = str_to_lower(question)
 
-    // English textkeywordsEnglish text
+
     if str_contains(q_lower, "transformer") || str_contains(q_lower, "English text") {
         println("🔑 keywords: Transformer")
     }
@@ -184,20 +184,20 @@ func extract_keywords(string question) {
 }
 
 func calculate_similarity(string query, string doc) float {
-    // computequeryEnglish text
-    // English textJaccardEnglish text
+
+
 
     string q_lower = str_to_lower(query)
     string d_lower = str_to_lower(doc)
 
-    // English textcompute: keywordsEnglish text
+
     float score = 0.0
 
-    // English text
+
     if str_contains(d_lower, q_lower) {
         score = 0.8
     } else {
-        // English text
+
         int i = 0
         while i < strlen(q_lower) {
             if d_lower[i] == q_lower[i] {
@@ -211,7 +211,7 @@ func calculate_similarity(string query, string doc) float {
 }
 
 func find_relevant_documents(string question, int topK) {
-    // English text
+
 
     int kb_size = get_knowledge_base_size()
     float best_score = 0.0
@@ -236,9 +236,9 @@ func find_relevant_documents(string question, int topK) {
     }
 }
 
-// ============================================================================
-// English textgenerate
-// ============================================================================
+
+
+
 
 func generate_introduction_response() string {
     "🤖 NeurX English textinferencesystemEnglish text!\nEnglish text Transformer English text, AllowedEnglish text: \n• English text\n• NeurX frameworkEnglish text\n• optimizeEnglish textmodeltraining\n• Transformer English text\nEnglish text.\n\n💡 English textmainEnglish text!"
@@ -347,13 +347,13 @@ func generate_model_response(string question) string {
 }
 
 func answer_question(string question) string {
-    // English texttruthfulinferenceEnglish text, English textkeywordsEnglish text
+
     return generate_model_response(question)
 }
 
-// ============================================================================
-// English text
-// ============================================================================
+
+
+
 
 func show_help() {
     println("")
@@ -386,7 +386,7 @@ func show_help() {
 }
 
 func run_interactive_mode() {
-    // English textinferenceEnglish text
+
 
     println("")
     println("════════════════════════════════════════════════════════════════")
@@ -398,10 +398,10 @@ func run_interactive_mode() {
 
     int turn = 1
 
-    while turn <= 10 {  // SlanguageEnglish text: English text10English text
+    while turn <= 10 {
         print_text("[English text " + int_to_string(turn) + "] English text: ")
 
-        // English textinputEnglish textSlanguageEnglish text, English text
+
         string user_input = ""
 
         if turn == 1 {
@@ -433,17 +433,17 @@ func run_interactive_mode() {
             continue
         }
 
-        // English text
+
         println("")
         println("🤖 English text: " + user_input)
         extract_keywords(user_input)
         println("")
 
-        // English text
+
         find_relevant_documents(user_input, 3)
         println("")
 
-        // generateEnglish text
+
         string response = answer_question(user_input)
         println("[model]: " + response)
         println("")
@@ -452,9 +452,9 @@ func run_interactive_mode() {
     }
 }
 
-// ============================================================================
-// toolfunction
-// ============================================================================
+
+
+
 
 func int_to_string(int n) string {
     if n == 0 {
@@ -469,7 +469,7 @@ func int_to_string(int n) string {
     string result = ""
     while n > 0 {
         int digit = n % 10
-        // English text
+
         result = string(digit + 48) + result
         n = n / 10
     }
@@ -482,22 +482,22 @@ func int_to_string(int n) string {
 }
 
 func float_to_string(float f) string {
-    // English text: English text
+
     int int_part = int(f)
     int_to_string(int_part) + "%"
 }
 
 func int(float f) int {
-    0  // English text
+    0
 }
 
 func print_text(string s) {
     println(s)
 }
 
-// ============================================================================
-// mainfunction
-// ============================================================================
+
+
+
 
 func main() {
     println("")
@@ -506,11 +506,11 @@ func main() {
     println("════════════════════════════════════════════════════════════════")
     println("")
 
-    // initializesystem
+
     init_knowledge_base()
     println("")
 
-    // startEnglish text
+
     run_interactive_mode()
 
     println("")

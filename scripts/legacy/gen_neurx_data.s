@@ -1,16 +1,16 @@
-// Slanguageimplementation: generateNeurXEnglish textLLMtrainingdata
-// English textgenerateEnglish text, English texttrainingdataEnglish texttraining
+
+
 
 package main
 
-// dataEnglish text
+
 struct training_data {
     text: string
-    category: string  // python, llm_training, qa, distributed_training, etc.
+    category: string
     quality_score: float
 }
 
-// English text
+
 const (
     CATEGORY_PYTHON = "python"
     CATEGORY_LLM = "llm_training"
@@ -28,7 +28,7 @@ const (
     CATEGORY_PROJECT = "project"
 )
 
-// generatePythonEnglish textoptimizedata
+
 func generate_python_data(): training_data {
     text := "# PythonEnglish textoptimizeEnglish text..."
     return training_data{
@@ -38,7 +38,7 @@ func generate_python_data(): training_data {
     }
 }
 
-// generateLLMtrainingdata
+
 func generate_llm_training_data(): training_data {
     text := "# English textlanguagemodeltrainingEnglish text..."
     return training_data{
@@ -48,7 +48,7 @@ func generate_llm_training_data(): training_data {
     }
 }
 
-// generateEnglish text
+
 func generate_qa_data(): training_data {
     text := "# English text: English textusePythonimplementationquickrankingEnglish text?"
     return training_data{
@@ -58,7 +58,7 @@ func generate_qa_data(): training_data {
     }
 }
 
-// mainfunction
+
 func main() {
     println("🚀 generateNeurXEnglish textLLMtrainingdata...")
     println("")

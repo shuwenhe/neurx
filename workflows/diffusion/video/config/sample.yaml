@@ -1,4 +1,4 @@
-# Sample config for diffusion/video
+
 batch_size: 4
 frame_size: 256
 max_steps: 1000

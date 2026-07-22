@@ -1,34 +1,34 @@
 package neurx.attention.cuda
 
-// ============================================================================
-// CUDA Kernels - Scaled Dot-Product Attention (SDPA)
-# The core of Transformer models: Attention(Q, K, V) = softmax(QK^T / sqrt(d)) * V
-#
-# This is where FlashAttention optimization is critical for performance!
-# Reference: "FlashAttention: Fast and Memory-Efficient Exact Attention 
-#            with IO-Awareness" (Dao et al., 2022)
-# ============================================================================
 
-// ---- Attention Configuration ----
+
+
+
+
+
+
+
+
+
 struct attention_config {
-    int batch_size              // Number of sequences in batch
-    int num_heads               // Number of attention heads (e.g., 32)
-    int seq_len_q               // Query sequence length
-    int seq_len_kv              // Key/Value sequence length (usually = seq_len_q for self-attn)
-    int head_dim                // Dimension per head (e.g., 128 for GPT-3 style)
-    
-    float scale                 // 1.0 / sqrt(head_dim) for scaling
-    
-    // Causal masking (for autoregressive / decoder-only models like GPT)
-    bool is_causal              // Apply causal mask (prevent attending to future tokens)
-    
-    // Dropout (for training)
+    int batch_size
+    int num_heads
+    int seq_len_q
+    int seq_len_kv
+    int head_dim
+
+    float scale
+
+
+    bool is_causal
+
+
     bool use_dropout
     float dropout_probability
-    
-    // Performance options
-    bool use_flash_attention    // Use IO-aware tiling algorithm (HIGHLY RECOMMENDED!)
-    bool use_memory_efficient   // Trade compute for memory (for very long sequences)
+
+
+    bool use_flash_attention
+    bool use_memory_efficient
 }
 
 func default_attention_config(

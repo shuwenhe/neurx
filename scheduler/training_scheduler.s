@@ -12,7 +12,7 @@ struct lr_scheduler {
     string kind
 }
 
-// backward-compatible constructor — defaults to constant schedule
+
 func new_lr_scheduler(float lr) lr_scheduler {
     lr_scheduler {
         lr:           lr,
@@ -25,7 +25,7 @@ func new_lr_scheduler(float lr) lr_scheduler {
     }
 }
 
-// full constructor used when schedule type and params are known
+
 func new_named_lr_scheduler(float base_lr, float min_lr, int warmup_steps, int max_steps, string kind) lr_scheduler {
     lr_scheduler {
         lr:           base_lr,

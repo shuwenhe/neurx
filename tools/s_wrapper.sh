@@ -1,7 +1,7 @@
 #!/bin/bash
-# Simple wrapper to make different 's' invocations compatible.
-# If called as: s ir <input.s> -o <output.ir>
-# translate to: s <input.s> <output.ir>
+
+
+
 
 REAL_S="/usr/local/bin/s"
 if [ ! -x "$REAL_S" ]; then
@@ -15,7 +15,7 @@ fi
 
 if [ "$1" = "ir" ]; then
   shift
-  # handle: <input> -o <output>
+
   input="$1"
   shift
   if [ "$1" = "-o" ]; then
@@ -23,7 +23,7 @@ if [ "$1" = "ir" ]; then
     output="$1"
     exec "$REAL_S" "$input" "$output"
   else
-    # fallback: pass through
+
     exec "$REAL_S" ir "$input" "$@"
   fi
 else

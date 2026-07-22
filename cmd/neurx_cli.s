@@ -1,6 +1,6 @@
-// neurx/cmd/neurx_cli.s
-// Unified NeurX CLI - Main entry point replacing all 159+ shell scripts
-// Provides comprehensive command-line interface for all NeurX operations
+
+
+
 
 package main
 
@@ -11,9 +11,9 @@ import (
     "../scripts"
 )
 
-// ============================================================
-// CLI Command Structure
-// ============================================================
+
+
+
 
 struct Command {
     name        string
@@ -22,18 +22,18 @@ struct Command {
     handler     func([]string) error
 }
 
-// ============================================================
-// Command Handlers
-// ============================================================
 
-// Training commands
+
+
+
+
 func cmd_train(args []string) error {
     if len(args) == 0 {
         fmt.Println("Usage: neurx train <scale> [num_gpus]")
         fmt.Println("Scales: mini, small, medium, large, xl")
         return nil
     }
-    
+
     scale := args[0]
     numGpus := 1
     if len(args) > 1 {
@@ -41,7 +41,7 @@ func cmd_train(args []string) error {
             numGpus = n
         }
     }
-    
+
     return scripts.run_foundation_model_training(scale, numGpus)
 }
 
@@ -81,7 +81,7 @@ func cmd_launch_1t(args []string) error {
     return scripts.launch_1t_training(numGpus)
 }
 
-// Build commands
+
 func cmd_build(args []string) error {
     return scripts.build_everything()
 }
@@ -94,7 +94,7 @@ func cmd_build_clean(args []string) error {
     return scripts.clean_build()
 }
 
-// Inference commands
+
 func cmd_inference(args []string) error {
     if len(args) == 0 {
         fmt.Println("Usage: neurx inference <model_path>")
@@ -119,7 +119,7 @@ func cmd_benchmark(args []string) error {
     return scripts.run_inference_benchmark(modelPath)
 }
 
-// Utility commands
+
 func cmd_version(args []string) error {
     fmt.Println("NeurX CLI v1.0.0")
     fmt.Println("S Language Implementation")
@@ -133,37 +133,37 @@ func cmd_help(args []string) error {
 
 func cmd_status(args []string) error {
     logger := scripts.new_logger("Status")
-    
-    // Check build
+
+
     if scripts.dir_exists(".build") {
         logger.success("Build artifacts found")
     } else {
         logger.warn("No build artifacts found")
     }
-    
-    // Check checkpoints
+
+
     if scripts.dir_exists("checkpoints") {
         logger.success("Checkpoints directory found")
     } else {
         logger.warn("No checkpoints found")
     }
-    
-    // Check logs
+
+
     if scripts.dir_exists("logs") {
         logger.success("Logs directory found")
     } else {
         logger.warn("No logs found")
     }
-    
+
     return nil
 }
 
-// ============================================================
-// CLI Framework
-// ============================================================
+
+
+
 
 var commands = []Command{
-    // Training
+
     {
         name:        "train",
         description: "Start foundation model training",
@@ -194,7 +194,7 @@ var commands = []Command{
         usage:       "neurx launch-1t [num_gpus]",
         handler:     cmd_launch_1t,
     },
-    // Building
+
     {
         name:        "build",
         description: "Build all components",
@@ -213,7 +213,7 @@ var commands = []Command{
         usage:       "neurx build-clean",
         handler:     cmd_build_clean,
     },
-    // Inference
+
     {
         name:        "inference",
         description: "Start inference server",
@@ -232,7 +232,7 @@ var commands = []Command{
         usage:       "neurx benchmark [model_path]",
         handler:     cmd_benchmark,
     },
-    // Utilities
+
     {
         name:        "version",
         description: "Show version information",
@@ -253,9 +253,9 @@ var commands = []Command{
     },
 }
 
-// ============================================================
-// Main Implementation
-// ============================================================
+
+
+
 
 func find_command(name string) *Command {
     for i := 0; i < len(commands); i++ {
@@ -352,7 +352,7 @@ func show_detailed_help(cmd string) {
         fmt.Printf("Unknown command: %s\n", cmd)
         return
     }
-    
+
     fmt.Printf("Command: %s\n", command.name)
     fmt.Printf("Description: %s\n", command.description)
     fmt.Printf("Usage: %s\n", command.usage)
@@ -360,37 +360,37 @@ func show_detailed_help(cmd string) {
 
 func main() {
     logger := scripts.new_logger("CLI")
-    
-    // Parse command-line arguments
+
+
     args := os.Args[1:]
-    
+
     if len(args) == 0 {
         show_help()
         return
     }
-    
+
     cmdName := args[0]
-    
-    // Handle help for specific commands
+
+
     if cmdName == "help" && len(args) > 1 {
         show_detailed_help(args[1])
         return
     }
-    
-    // Find and execute command
+
+
     cmd := find_command(cmdName)
     if cmd == nil {
         logger.error("Unknown command: %s", cmdName)
         logger.log("Use 'neurx help' for usage information")
         os.Exit(1)
     }
-    
-    // exec_commandute command with remaining arguments
+
+
     var cmdArgs []string
     if len(args) > 1 {
         cmdArgs = args[1:]
     }
-    
+
     if err := cmd.handler(cmdArgs); err != nil {
         logger.error("Command failed: %v", err)
         os.Exit(1)

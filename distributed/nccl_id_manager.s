@@ -1,46 +1,46 @@
-#!/usr/bin/env s
 
-// ============================================
-// NeurX Multi-Node NCCL ID Manager
-// English textNCCLEnglish textIDmanagementEnglish text
-// English text: generate, English text, English textNCCL Unique ID
-// ============================================
+
+
+
+
+
+
 
 package neurx.distributed.nccl_manager
 
 use neurx.runtime.io.{runtime_env_get, create_directory, file_exists, runtime_write_text_file, runtime_read_text_file}
 use neurx.strings.{trim, string_concat}
 
-// ============================================
-// NCCL IDEnglish text
-// ============================================
+
+
+
 
 struct nccl_unique_id {
-    string id_value        // NCCL unique ID (256English text)
-    string timestamp       // generatetimeEnglish text
-    string master_node     // generateEnglish textIDEnglish textmainEnglish text
-    bool initialized       // English textinitialize
+    string id_value
+    string timestamp
+    string master_node
+    bool initialized
 }
 
 struct nccl_id_config {
-    string store_path      // IDEnglish textpath
-    string master_addr     // mainEnglish text
-    int master_port        // mainEnglish text
-    int timeout_seconds    // English texttime(English text)
-    int max_retries        // English text
+    string store_path
+    string master_addr
+    int master_port
+    int timeout_seconds
+    int max_retries
 }
 
-// ============================================
-// NCCL IDgenerate(mainEnglish text)
-// ============================================
 
-// English textmainEnglish textgenerateNCCL Unique ID
+
+
+
+
 func generate_nccl_unique_id() nccl_unique_id {
 
-    // actualimplementationEnglish textCUDA/NCCL APIgenerateID
-    // ncclGetUniqueId(&id)
 
-    // English textuseEnglish textID (256English text)
+
+
+
     string fake_id = "0123456789abcdef" +
                      "0123456789abcdef" +
                      "0123456789abcdef" +
@@ -66,17 +66,17 @@ func generate_nccl_unique_id() nccl_unique_id {
     }
 }
 
-// ============================================
-// NCCL IDEnglish text(mainEnglish text)
-// ============================================
 
-// English textNCCL IDsaveEnglish text(NFS/English textfilesystem)
+
+
+
+
 func save_nccl_id_to_shared_storage(
     nccl_unique_id id,
     string shared_storage_path,
 ) bool {
 
-    // English textdirectory
+
     if !create_directory(shared_storage_path) {
         print("[ERROR] Failed to create shared storage directory: " + shared_storage_path)
         return false
@@ -84,7 +84,7 @@ func save_nccl_id_to_shared_storage(
 
     string id_file = shared_storage_path + "/nccl_unique_id.txt"
 
-    // English text: ID\nTIMESTAMP\nMASTER_NODE
+
     string content = id.id_value + "\n" +
                      id.timestamp + "\n" +
                      id.master_node
@@ -98,11 +98,11 @@ func save_nccl_id_to_shared_storage(
     true
 }
 
-// ============================================
-// NCCL IDEnglish text(English text)
-// ============================================
 
-// English textNCCL ID(English text)
+
+
+
+
 func load_nccl_id_from_shared_storage(
     string shared_storage_path,
     int timeout_seconds,
@@ -111,14 +111,14 @@ func load_nccl_id_from_shared_storage(
     string id_file = shared_storage_path + "/nccl_unique_id.txt"
 
     int elapsed = 0
-    int poll_interval = 1  // 1English text
+    int poll_interval = 1
 
     while elapsed < timeout_seconds {
 
         if file_exists(id_file) {
             string content = runtime_read_text_file(id_file)
 
-            // English textcontent (English text: ID\nTIMESTAMP\nMASTER_NODE)
+
             []string lines = split_string(content, "\n")
 
             if len(lines) >= 3 {
@@ -136,7 +136,7 @@ func load_nccl_id_from_shared_storage(
 
         print("[NCCL_MANAGER] Waiting for NCCL ID... (" + itoa(elapsed) + "/" + itoa(timeout_seconds) + "s)")
 
-        // English text poll_interval English text
+
         sleep_seconds(poll_interval)
         elapsed = elapsed + poll_interval
     }
@@ -145,41 +145,41 @@ func load_nccl_id_from_shared_storage(
     (nccl_unique_id{}, false)
 }
 
-// ============================================
-// dataEnglish text(English text)
-// ============================================
 
-// useRedis/EtcdEnglish textNCCL ID
+
+
+
+
 struct nccl_id_store {
-    string store_type      // "file", "redis", "etcd"
-    string store_address   // English text
-    int store_port         // English text
+    string store_type
+    string store_address
+    int store_port
 }
 
-// saveNCCL IDEnglish text
+
 func save_nccl_id_to_distributed_store(
     nccl_id_store store,
     nccl_unique_id id,
 ) bool {
 
     if store.store_type == "file" {
-        // English textNFSEnglish text /mnt/nccl_shared
+
         return save_nccl_id_to_shared_storage(id, "/mnt/nccl_shared")
     }
 
     if store.store_type == "redis" {
-        // RedisEnglish text: SET nccl:unique_id "id_value"
+
         string cmd = "redis-cli -h " + store.store_address +
                      " -p " + itoa(store.store_port) +
                      " SET nccl:unique_id " + id.id_value
 
-        // English text
+
         print("[NCCL_MANAGER] Saving NCCL ID to Redis: " + store.store_address)
         return true
     }
 
     if store.store_type == "etcd" {
-        // EtcdEnglish text: etcdctl put nccl/unique_id "id_value"
+
         string cmd = "etcdctl --endpoints=" + store.store_address + ":" + itoa(store.store_port) +
                      " put nccl/unique_id " + id.id_value
 
@@ -191,7 +191,7 @@ func save_nccl_id_to_distributed_store(
     false
 }
 
-// English textNCCL ID
+
 func load_nccl_id_from_distributed_store(
     nccl_id_store store,
     int timeout_seconds,
@@ -202,11 +202,11 @@ func load_nccl_id_from_distributed_store(
     }
 
     if store.store_type == "redis" {
-        // Redis GETEnglish text
-        print("[NCCL_MANAGER] Loading NCCL ID from Redis: " + store.store_address)
-        // actualimplementationEnglish textredis-cli GET nccl:unique_id
 
-        // English textID
+        print("[NCCL_MANAGER] Loading NCCL ID from Redis: " + store.store_address)
+
+
+
         nccl_unique_id id = nccl_unique_id {
             id_value: "mock_id_from_redis",
             timestamp: get_timestamp(),
@@ -232,9 +232,9 @@ func load_nccl_id_from_distributed_store(
     (nccl_unique_id{}, false)
 }
 
-// ============================================
-// helperfunction
-// ============================================
+
+
+
 
 func split_string(string s, string sep) []string {
     []string parts = []string{cap: 10}
@@ -268,12 +268,12 @@ func split_string(string s, string sep) []string {
 }
 
 func sleep_seconds(int seconds) {
-    // English textactualimplementationEnglish texttime.Sleep()
-    // time.Sleep(time.Duration(seconds) * time.Second)
+
+
 }
 
 func get_timestamp() string {
-    // English text YYYYMMDD_HHMMSS
+
     "20260714_161200"
 }
 

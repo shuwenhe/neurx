@@ -1,35 +1,35 @@
-// kernel/gpu/gpu.s
-// GPU device and stream management — analogue of Linux drivers/gpu/drm/
-// CUDA Driver API / Metal Command Queue
-//
-// Linux maps:
-//   drivers/gpu/drm/         → DRM/KMS device model
-//   drivers/gpu/drm/scheduler/ → GPU job scheduler (drm_gpu_scheduler)
-//   include/drm/gpu_scheduler.h → entity/job/fence abstractions
-//
-// CUDA maps:
-//   cuDeviceGet / cuCtxCreate   → device enumeration + context
-//   cuStreamCreate              → stream (ordered queue of kernels)
-//   cuEventCreate / cuEventRecord → synchronization fences
-//   cuLaunchKernel              → kernel dispatch
-//
-// NeurX maps:
-//   GPU streams = ordered command queues for AI kernels.
-//   Jobs = individual kernel launches (matmul, attention, etc.)
-//   Fences = completion events used for host/device sync.
 
-// GPU device types
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 int GPU_NVIDIA = 0
 int GPU_AMD    = 1
-int GPU_APPLE  = 2   // Metal
-int GPU_ASCEND = 3   // Huawei CANN
+int GPU_APPLE  = 2
+int GPU_ASCEND = 3
 
-// Stream priority (mirrors CUDA stream priorities)
-int STREAM_HIGH   = 0   // inference / real-time
-int STREAM_NORMAL = 1   // training forward/backward
-int STREAM_LOW    = 2   // background transfer / prefetch
 
-// Job state
+int STREAM_HIGH   = 0
+int STREAM_NORMAL = 1
+int STREAM_LOW    = 2
+
+
 int JOB_PENDING   = 0
 int JOB_RUNNING   = 1
 int JOB_DONE      = 2
@@ -37,11 +37,11 @@ int JOB_ERROR     = 3
 
 struct gpu_device {
     int    gpu_id
-    int    gpu_type         // GPU_*
-    string name             // "NVIDIA H100", "Apple M3 Ultra", etc.
+    int    gpu_type
+    string name
     int    total_mem_mb
     int    free_mem_mb
-    int    sm_count         // streaming multiprocessors (or compute units)
+    int    sm_count
     int    max_streams
     bool   available
     string driver_version
@@ -50,7 +50,7 @@ struct gpu_device {
 struct gpu_stream {
     int    stream_id
     int    gpu_id
-    int    priority         // STREAM_*
+    int    priority
     bool   active
     int    pending_jobs
     int    completed_jobs
@@ -59,12 +59,12 @@ struct gpu_stream {
 struct gpu_job {
     int    job_id
     int    stream_id
-    string kernel_name      // e.g. "matmul_bf16", "flash_attention_v3"
-    int    grid_x           // launch grid
+    string kernel_name
+    int    grid_x
     int    grid_y
     int    block_size
     int    shared_mem_bytes
-    int    state            // JOB_*
+    int    state
     int    submitted_at_ms
     int    completed_at_ms
     string err
@@ -98,7 +98,7 @@ func new_gpu_state() gpu_state {
     }
 }
 
-// gpu_register: called by arch/cuda bindings at init (like drm_dev_register)
+
 func gpu_register(gs gpu_state, gpu_type int, name string, total_mem_mb int,
                   sm_count int, max_streams int, driver_version string) (gpu_state, int) {
     int id = len(gs.devices)
@@ -117,7 +117,7 @@ func gpu_register(gs gpu_state, gpu_type int, name string, total_mem_mb int,
     return (gs, id)
 }
 
-// stream_create: create a command stream on a GPU (cuStreamCreate equivalent)
+
 func gpu_stream_create(gs gpu_state, gpu_id int, priority int) (gpu_state, int) {
     int sid = gs.next_stream_id
     gpu_stream s = gpu_stream{
@@ -133,7 +133,7 @@ func gpu_stream_create(gs gpu_state, gpu_id int, priority int) (gpu_state, int) 
     return (gs, sid)
 }
 
-// submit_job: enqueue a kernel on a stream (cuLaunchKernel equivalent)
+
 func gpu_submit_job(gs gpu_state, stream_id int, kernel_name string,
                     grid_x int, grid_y int, block_size int, shared_mem_bytes int) (gpu_state, int) {
     int jid = gs.next_job_id
@@ -153,7 +153,7 @@ func gpu_submit_job(gs gpu_state, stream_id int, kernel_name string,
     gs.jobs = append(gs.jobs, j)
     gs.next_job_id = gs.next_job_id + 1
 
-    // increment pending count on stream
+
     int i = 0
     while i < len(gs.streams) {
         if gs.streams[i].stream_id == stream_id {
@@ -164,7 +164,7 @@ func gpu_submit_job(gs gpu_state, stream_id int, kernel_name string,
     return (gs, jid)
 }
 
-// record_fence: insert a sync point after current stream position (cuEventRecord)
+
 func gpu_record_fence(gs gpu_state, stream_id int) (gpu_state, int) {
     int fid = gs.next_fence_id
     gpu_fence f = gpu_fence{fence_id: fid, stream_id: stream_id, signaled: false}
@@ -173,7 +173,7 @@ func gpu_record_fence(gs gpu_state, stream_id int) (gpu_state, int) {
     return (gs, fid)
 }
 
-// complete_job: mark job done and signal its fence if any (called by driver ISR)
+
 func gpu_complete_job(gs gpu_state, job_id int) gpu_state {
     int i = 0
     while i < len(gs.jobs) {
@@ -181,7 +181,7 @@ func gpu_complete_job(gs gpu_state, job_id int) gpu_state {
             gs.jobs[i].state           = JOB_DONE
             gs.jobs[i].completed_at_ms = 0
 
-            // signal fences on this stream
+
             int sid = gs.jobs[i].stream_id
             int j = 0
             while j < len(gs.fences) {
@@ -191,7 +191,7 @@ func gpu_complete_job(gs gpu_state, job_id int) gpu_state {
                 j = j + 1
             }
 
-            // decrement pending on stream
+
             int k = 0
             while k < len(gs.streams) {
                 if gs.streams[k].stream_id == sid {
@@ -206,7 +206,7 @@ func gpu_complete_job(gs gpu_state, job_id int) gpu_state {
     return gs
 }
 
-// fence_wait: check if a fence is signaled (non-blocking poll, like cuEventQuery)
+
 func gpu_fence_query(gs gpu_state, fence_id int) bool {
     int i = 0
     while i < len(gs.fences) {

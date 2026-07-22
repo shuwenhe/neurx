@@ -1,7 +1,7 @@
 package neurx.model.transformer.layer_norm
 
-// Layer Normalization Module
-// Implements Layer Norm and RMS Norm with gradient computation
+
+
 
 struct layer_norm_config {
     int hidden_dim
@@ -34,9 +34,9 @@ struct rms_norm_output {
     []float variance
 }
 
-// =====================================================================
-// Helper Functions
-// =====================================================================
+
+
+
 
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
@@ -71,9 +71,9 @@ func sqrt_approx(float x) float {
     y
 }
 
-// =====================================================================
-// Layer Normalization
-// =====================================================================
+
+
+
 
 func new_layer_norm(layer_norm_config cfg) layer_norm_state {
     layer_norm_state {
@@ -92,19 +92,19 @@ func layer_normalize(
     int seq_len
 ) layer_norm_output {
     int hidden_dim = ln.hidden_dim
-    
+
     []float output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
     []float mean_out = allocate_vector(batch_size * seq_len, 0.0)
     []float var_out = allocate_vector(batch_size * seq_len, 0.0)
-    
+
     int b = 0
     while b < batch_size {
         int s = 0
         while s < seq_len {
             int base_idx = (b * seq_len + s) * hidden_dim
             int stat_idx = b * seq_len + s
-            
-            // Compute mean
+
+
             float mean = 0.0
             int d = 0
             while d < hidden_dim {
@@ -112,8 +112,8 @@ func layer_normalize(
                 d = d + 1
             }
             mean = mean / (hidden_dim * 1.0)
-            
-            // Compute variance
+
+
             float variance = 0.0
             d = 0
             while d < hidden_dim {
@@ -122,11 +122,11 @@ func layer_normalize(
                 d = d + 1
             }
             variance = variance / (hidden_dim * 1.0)
-            
+
             mean_out[stat_idx] = mean
             var_out[stat_idx] = variance
-            
-            // Normalize
+
+
             float std_dev = sqrt_approx(variance + ln.epsilon)
             d = 0
             while d < hidden_dim {
@@ -138,12 +138,12 @@ func layer_normalize(
                 output[base_idx + d] = scaled
                 d = d + 1
             }
-            
+
             s = s + 1
         }
         b = b + 1
     }
-    
+
     layer_norm_output {
         normalized: output,
         mean: mean_out,
@@ -161,36 +161,36 @@ func layer_norm_backward(
     int seq_len
 ) [][]float {
     int hidden_dim = ln.hidden_dim
-    
+
     []float grad_input = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
     []float grad_gamma = allocate_vector(hidden_dim, 0.0)
     []float grad_beta = allocate_vector(hidden_dim, 0.0)
-    
+
     int b = 0
     while b < batch_size {
         int s = 0
         while s < seq_len {
             int base_idx = (b * seq_len + s) * hidden_dim
             int stat_idx = b * seq_len + s
-            
+
             float mean_val = mean[stat_idx]
             float var_val = variance[stat_idx]
             float std_dev = sqrt_approx(var_val + ln.epsilon)
-            
-            // Accumulate grad_gamma and grad_beta
+
+
             int d = 0
             while d < hidden_dim {
                 float normalized = (input[base_idx + d] - mean_val) / std_dev
                 grad_gamma[d] = grad_gamma[d] + grad_output[base_idx + d] * normalized
-                
+
                 if ln.use_bias {
                     grad_beta[d] = grad_beta[d] + grad_output[base_idx + d]
                 }
-                
+
                 d = d + 1
             }
-            
-            // Compute grad_input
+
+
             float sum1 = 0.0
             float sum2 = 0.0
             d = 0
@@ -200,7 +200,7 @@ func layer_norm_backward(
                 sum2 = sum2 + grad_output[base_idx + d] * ln.gamma[d] * normalized
                 d = d + 1
             }
-            
+
             d = 0
             while d < hidden_dim {
                 float normalized = (input[base_idx + d] - mean_val) / std_dev
@@ -208,12 +208,12 @@ func layer_norm_backward(
                 grad_input[base_idx + d] = g / (std_dev * hidden_dim * 1.0)
                 d = d + 1
             }
-            
+
             s = s + 1
         }
         b = b + 1
     }
-    
+
     [][]float result = [][]float{cap: 3}
     result[0] = grad_input
     result[1] = grad_gamma
@@ -221,9 +221,9 @@ func layer_norm_backward(
     result
 }
 
-// =====================================================================
-// RMS Normalization
-// =====================================================================
+
+
+
 
 func new_rms_norm(layer_norm_config cfg) rms_norm_state {
     rms_norm_state {
@@ -240,18 +240,18 @@ func rms_normalize(
     int seq_len
 ) rms_norm_output {
     int hidden_dim = rn.hidden_dim
-    
+
     []float output = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
     []float var_out = allocate_vector(batch_size * seq_len, 0.0)
-    
+
     int b = 0
     while b < batch_size {
         int s = 0
         while s < seq_len {
             int base_idx = (b * seq_len + s) * hidden_dim
             int stat_idx = b * seq_len + s
-            
-            // Compute RMS (root mean square)
+
+
             float rms = 0.0
             int d = 0
             while d < hidden_dim {
@@ -260,22 +260,22 @@ func rms_normalize(
             }
             rms = rms / (hidden_dim * 1.0)
             rms = sqrt_approx(rms + rn.epsilon)
-            
+
             var_out[stat_idx] = rms
-            
-            // Normalize and scale
+
+
             d = 0
             while d < hidden_dim {
                 float normalized = input[base_idx + d] / rms
                 output[base_idx + d] = normalized * rn.gamma[d]
                 d = d + 1
             }
-            
+
             s = s + 1
         }
         b = b + 1
     }
-    
+
     rms_norm_output {
         normalized: output,
         variance: var_out,
@@ -291,28 +291,28 @@ func rms_norm_backward(
     int seq_len
 ) [][]float {
     int hidden_dim = rn.hidden_dim
-    
+
     []float grad_input = allocate_vector(batch_size * seq_len * hidden_dim, 0.0)
     []float grad_gamma = allocate_vector(hidden_dim, 0.0)
-    
+
     int b = 0
     while b < batch_size {
         int s = 0
         while s < seq_len {
             int base_idx = (b * seq_len + s) * hidden_dim
             int stat_idx = b * seq_len + s
-            
+
             float rms_val = variance[stat_idx]
-            
-            // Accumulate grad_gamma
+
+
             int d = 0
             while d < hidden_dim {
                 float normalized = input[base_idx + d] / rms_val
                 grad_gamma[d] = grad_gamma[d] + grad_output[base_idx + d] * normalized
                 d = d + 1
             }
-            
-            // Compute grad_input
+
+
             float sum_val = 0.0
             d = 0
             while d < hidden_dim {
@@ -321,19 +321,19 @@ func rms_norm_backward(
                 d = d + 1
             }
             sum_val = sum_val / (rms_val * rms_val)
-            
+
             d = 0
             while d < hidden_dim {
                 float grad = (grad_output[base_idx + d] * rn.gamma[d] - input[base_idx + d] * sum_val / (hidden_dim * 1.0)) / rms_val
                 grad_input[base_idx + d] = grad
                 d = d + 1
             }
-            
+
             s = s + 1
         }
         b = b + 1
     }
-    
+
     [][]float result = [][]float{cap: 2}
     result[0] = grad_input
     result[1] = grad_gamma

@@ -1,19 +1,19 @@
-// ============================================================================
-// NeurX Core Features Integration — neurx project
-//
-// Integrates reference innovations missing from standard neurx:
-//   1. MLA  — Multi-Head Latent Attention (93% KV cache reduction)
-//   2. MoE  — NeurX MoE (fine-grained + shared experts + loss-free balancing)
-//   3. MTP  — Multi-Token Prediction (predict D future tokens)
-//   4. GRPO — Group Relative Policy Optimization (critic-free RL)
-//   5. FP8  — Block-wise FP8 mixed precision training
-//
-// neurx already has: standard MHA/GQA, standard MoE (Top-K + aux loss),
-//   Flash Attention, DPO, PPO-style GRPO
-//
-// NeurX adds: MLA, fine-grained MoE (256 experts), aux-loss-free balancing,
-//   MTP (D=2), R1-style GRPO (group-relative + rule rewards), FP8 training
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 package neurx.model.neurx.main
 
@@ -23,35 +23,35 @@ use neurx.model.neurx.mtp
 use neurx.model.neurx.fp8_training
 use neurx.alignment.neurx_r1_grpo
 
-// ============================================================================
-// 1. NeurX-V3 Model Config
-// ============================================================================
+
+
+
 
 struct neurx_v3_config {
-    int hidden_dim               // 5120
-    int num_layers               // 60
-    int vocab_size               // 128000
+    int hidden_dim
+    int num_layers
+    int vocab_size
 
-    // MLA config
-    int num_heads                // 128
-    int kv_lora_rank             // 512
-    int q_lora_rank              // 1536
-    int rope_head_dim            // 64
 
-    // NeurX MoE config
-    int n_routed_experts         // 256
-    int n_shared_experts         // 2
-    int n_activated_experts      // 8
-    int ffn_dim                  // 1536
-    float bias_update_speed      // 0.001
+    int num_heads
+    int kv_lora_rank
+    int q_lora_rank
+    int rope_head_dim
 
-    // MTP config
-    int num_mtp_layers           // 2
-    int mtp_ffn_dim              // 12288
 
-    // Training config
-    int max_seq_len              // 4096
-    int batch_size               // 128
+    int n_routed_experts
+    int n_shared_experts
+    int n_activated_experts
+    int ffn_dim
+    float bias_update_speed
+
+
+    int num_mtp_layers
+    int mtp_ffn_dim
+
+
+    int max_seq_len
+    int batch_size
 }
 
 func new_neurx_v3_config() neurx_v3_config {
@@ -79,21 +79,21 @@ func new_neurx_v3_config() neurx_v3_config {
     }
 }
 
-// ============================================================================
-// 2. NeurX-V3 Transformer Block (MLA + NeurX MoE)
-// ============================================================================
+
+
+
 
 struct neurx_transformer_block {
-    mla.mla_weights mla_weights  // MLA attention (replaces standard MHA)
+    mla.mla_weights mla_weights
     []float mla_norm
 
-    moe.neurx_moe_weights moe_weights  // NeurX MoE FFN (replaces standard FFN/MoE)
+    moe.neurx_moe_weights moe_weights
     []float moe_norm
 }
 
-// ============================================================================
-// 3. Full NeurX-V3 Model
-// ============================================================================
+
+
+
 
 struct neurx_v3_model {
     neurx_v3_config config
@@ -101,17 +101,17 @@ struct neurx_v3_model {
     []float token_embedding
     []float position_embedding
 
-    []neurx_transformer_block blocks  // 60 layers
+    []neurx_transformer_block blocks
 
     []float final_norm
     []float lm_head
 
-    mtp.mtp_weights mtp_weights  // MTP modules (extra prediction heads)
+    mtp.mtp_weights mtp_weights
 }
 
-// ============================================================================
-// 4. KV Cache Savings Demo
-// ============================================================================
+
+
+
 
 func demonstrate_kv_cache_savings() {
     println("========================================")
@@ -154,9 +154,9 @@ func demonstrate_kv_cache_savings() {
     println("  MLA:          ~" + int_to_string(mla_total_kb / 1024) + " MB")
 }
 
-// ============================================================================
-// 5. NeurX MoE Demo
-// ============================================================================
+
+
+
 
 func demonstrate_moe() {
     println("")
@@ -189,7 +189,7 @@ func demonstrate_moe() {
     println("  Routed experts: " + int_to_string(len(w.routed_w1)))
     println("")
 
-    // Simulated forward
+
     int n_tokens = 4
     []float h = moe.zeros(n_tokens * cfg.hidden_dim)
     int i = 0
@@ -211,9 +211,9 @@ func demonstrate_moe() {
     println("  Utilization:  " + float_to_string(stats.utilization * 100.0) + "%")
 }
 
-// ============================================================================
-// 6. MTP Demo
-// ============================================================================
+
+
+
 
 func demonstrate_mtp() {
     println("")
@@ -238,7 +238,7 @@ func demonstrate_mtp() {
     mtp.mtp_weights w = mtp.new_mtp_weights(cfg)
     println("MTP weights initialized, modules: " + int_to_string(len(w.modules)))
 
-    // Simulated forward
+
     int seq_len = 4
     int d = cfg.hidden_dim
     []float main_hidden = mla.zeros(seq_len * d)
@@ -263,9 +263,9 @@ func demonstrate_mtp() {
     }
 }
 
-// ============================================================================
-// 7. GRPO Demo
-// ============================================================================
+
+
+
 
 func demonstrate_grpo() {
     println("")
@@ -287,7 +287,7 @@ func demonstrate_grpo() {
     println("  - A_i = (r_i - mean) / std (within group)")
     println("")
 
-    // Simulate group of outputs
+
     int G = cfg.group_size
     []neurx_r1_grpo.generation_output outputs = []neurx_r1_grpo.generation_output{cap: G}
     int i = 0
@@ -338,9 +338,9 @@ func demonstrate_grpo() {
     println("  No critic/value model needed!")
 }
 
-// ============================================================================
-// 8. Rule Rewards Demo
-// ============================================================================
+
+
+
 
 func demonstrate_rule_rewards() {
     println("")
@@ -369,9 +369,9 @@ func demonstrate_rule_rewards() {
     println("  Deterministic, explainable, no reward hacking")
 }
 
-// ============================================================================
-// 9. FP8 Training Demo
-// ============================================================================
+
+
+
 
 func demonstrate_fp8() {
     println("")
@@ -403,9 +403,9 @@ func demonstrate_fp8() {
     println("  Speedup:       " + float_to_string(monitor.speedup_estimated) + "x")
 }
 
-// ============================================================================
-// 10. Utility Functions
-// ============================================================================
+
+
+
 
 func int_to_string(int n) string {
     if n == 0 { return "0" }
@@ -469,9 +469,9 @@ func bool_to_string(bool b) string {
     "false"
 }
 
-// ============================================================================
-// 11. Module Info & Main Entry
-// ============================================================================
+
+
+
 
 func unit_name() string {
     "neurx/model/neurx/main"

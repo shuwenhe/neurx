@@ -1,25 +1,25 @@
 package neurx.backends.compute_backend
 
-// ============================================================================
-// Compute Backend — device dispatch + bit-accurate low precision
-//
-// Provides a single dispatch layer the training code calls, which routes to:
-//   • CUDA / GPU  (via extern FFI hooks — bound when the S runtime provides
-//                  the `extern` mechanism, analogous to libcuda/libnccl)
-//   • CPU         (real, working fallback implemented here)
-//
-// Also provides BIT-ACCURATE bf16 / fp16 / fp8 conversion via binary mantissa
-// quantization (the prior implementation used decimal-digit rounding, which is
-// not numerically equivalent to hardware low precision). Real mixed-precision
-// training requires the exact rounding behaviour modeled here.
-// ============================================================================
 
-// ============================================================================
-// 1. English textDescription
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 struct device_info {
-    string backend            // "cuda" | "cann" | "mps" | "cpu"
+    string backend
     int device_id
     bool has_tensor_cores
     bool supports_bf16
@@ -32,21 +32,21 @@ struct device_info {
 struct compute_context {
     device_info device
     bool gpu_available
-    string active_dtype       // "fp32" | "bf16" | "fp16"
+    string active_dtype
     int stream_id
 }
 
-// English text (English text: extern cuda_get_device_count(); English text CPU default)
+
 func detect_device() compute_context {
-    // extern hook (English text):
-    //   int n = cuda_device_count()
-    //   if n > 0 { return gpu context }
+
+
+
     compute_context {
         device: device_info {
             backend: "cpu",
             device_id: 0,
             has_tensor_cores: false,
-            supports_bf16: true,    // CPU English textsupport
+            supports_bf16: true,
             supports_fp16: true,
             supports_fp8: false,
             memory_gb: 0,
@@ -113,23 +113,23 @@ func resolve_compute_context(string preferred_backend, string preferred_dtype) c
     ctx
 }
 
-// ============================================================================
-// 2. English text
-//
-//   bf16: 1 English text + 8 English text + 7 English text  (= fp32 English text 16 English text)
-//   fp16: 1 English text + 5 English text + 10 English text
-//   fp8 (e4m3): 1 English text + 4 English text + 3 English text
-//
-//   English text  value = sign * mantissa * 2^exp  (mantissa ∈ [1,2)),
-//   English text mantissa English text N English text (2^bits English text), English text.
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
 
 func cb_abs(float x) float {
     if x < 0.0 { return -x }
     x
 }
 
-// English text mantissa ∈ [1,2) English text mantissa_bits English text
+
 func quantize_mantissa(float value, int mantissa_bits) float {
     if value == 0.0 {
         return 0.0
@@ -137,7 +137,7 @@ func quantize_mantissa(float value, int mantissa_bits) float {
     bool neg = value < 0.0
     float mag = cb_abs(value)
 
-    // English text [1, 2) × 2^exp
+
     int exp = 0
     while mag >= 2.0 {
         mag = mag * 0.5
@@ -148,14 +148,14 @@ func quantize_mantissa(float value, int mantissa_bits) float {
         exp = exp - 1
     }
 
-    // mag ∈ [1, 2);  English text frac ∈ [0, 1)
+
     float frac = mag - 1.0
 
-    // English text 2^mantissa_bits English text (round-to-nearest)
+
     float levels = cb_pow2(mantissa_bits)
     float scaled = frac * levels
     int rounded = cb_round(scaled)
-    // English text (frac English text 1.0 → mantissa = 2.0 → English text exp)
+
     if rounded >= cb_round(levels) {
         rounded = 0
         exp = exp + 1
@@ -201,22 +201,22 @@ func cb_round(float x) int {
     n
 }
 
-// BF16: 7 English text (English text)
+
 func to_bf16(float value) float {
     quantize_mantissa(value, 7)
 }
 
-// FP16: 10 English text
+
 func to_fp16(float value) float {
     quantize_mantissa(value, 10)
 }
 
-// FP8 E4M3: 3 English text
+
 func to_fp8_e4m3(float value) float {
     quantize_mantissa(value, 3)
 }
 
-// English text bf16 English text (English text bf16 English text)
+
 func array_to_bf16([]float arr) []float {
     int n = len(arr)
     []float out = []float{cap: n}
@@ -239,26 +239,26 @@ func array_to_fp16([]float arr) []float {
     out
 }
 
-// ============================================================================
-// 3. English text dispatch (GPU extern hook + CPU fallback)
-// ============================================================================
 
-// mainEnglish text: trainingEnglish textfunction; English text GPU English text CPU
+
+
+
+
 func backend_matmul(
     compute_context ctx,
     []float a, []float b,
     int m, int k, int n
 ) []float {
     if ctx.gpu_available {
-        // extern hook (English text):
-        //   return cuda_gemm(ctx.stream_id, a, b, m, k, n, ctx.active_dtype)
-        // English text → English text CPU
+
+
+
         return cpu_matmul(a, b, m, k, n)
     }
     cpu_matmul(a, b, m, k, n)
 }
 
-// CPU truthfulEnglish text (English text bf16 English text)
+
 func cpu_matmul([]float a, []float b, int m, int k, int n) []float {
     []float result = []float{cap: m * n}
     int idx = 0
@@ -282,20 +282,20 @@ func cpu_matmul([]float a, []float b, int m, int k, int n) []float {
     result
 }
 
-// English text: inputEnglish text bf16 English text, fp32 English text (English text Tensor Core English text)
+
 func backend_matmul_bf16(
     compute_context ctx,
     []float a, []float b,
     int m, int k, int n
 ) []float {
-    // inputEnglish text bf16 (English text)
+
     []float a_bf = array_to_bf16(a)
     []float b_bf = array_to_bf16(b)
-    // fp32 English text (Tensor Core English text fp32)
+
     return backend_matmul(ctx, a_bf, b_bf, m, k, n)
 }
 
-// English text active_dtype English textpath
+
 func backend_matmul_dispatch(
     compute_context ctx,
     []float a, []float b,
@@ -312,15 +312,15 @@ func backend_matmul_dispatch(
     return backend_matmul(ctx, a, b, m, k, n)
 }
 
-// ============================================================================
-// 4. English text dispatch (NCCL extern hook + CPU fallback)
-// ============================================================================
+
+
+
 
 struct comm_context {
     int world_size
     int rank
-    int comm_id               // NCCL communicator handle
-    string backend            // "nccl" | "gloo" | "local"
+    int comm_id
+    string backend
 }
 
 func new_comm_context(int world_size, int rank) comm_context {
@@ -332,22 +332,22 @@ func new_comm_context(int world_size, int rank) comm_context {
     }
 }
 
-// All-reduce dispatch: GPU English text NCCL, English text
+
 func backend_all_reduce(
     comm_context comm,
-    []float buffer            // English textdata, English text
+    []float buffer
 ) []float {
     if comm.backend == "nccl" && comm.world_size > 1 {
-        // extern hook (English text):
-        //   nccl_allreduce_f32(buffer, len(buffer), ncclSum, comm.comm_id)
-        //   English text (dataEnglish text)
+
+
+
         return buffer
     }
-    // English text: all-reduce English text (English text)
+
     buffer
 }
 
-// All-reduce English text rank English text (English text rank)
+
 func backend_all_reduce_pair([]float a, []float b) []float {
     int n = len(a)
     []float out = []float{cap: n}
@@ -361,33 +361,33 @@ func backend_all_reduce_pair([]float a, []float b) []float {
     out
 }
 
-// Broadcast: rank 0 → English text rank
+
 func backend_broadcast(comm_context comm, []float buffer, int root) []float {
     if comm.backend == "nccl" && comm.world_size > 1 {
-        // extern: nccl_broadcast_f32(buffer, len(buffer), root, comm.comm_id)
+
         return buffer
     }
     buffer
 }
 
-// ============================================================================
-// 5. English texttraininghelper
-// ============================================================================
+
+
+
 
 struct amp_state {
-    float loss_scale          // lossEnglish text (English text fp16 English text)
-    float scale_growth        // English text
-    float scale_backoff       // English text
-    int growth_interval       // English textstepEnglish text
+    float loss_scale
+    float scale_growth
+    float scale_backoff
+    int growth_interval
     int steps_since_overflow
     bool last_overflow
-    string compute_dtype      // "bf16" | "fp16"
+    string compute_dtype
 }
 
 func new_amp_state(string dtype) amp_state {
-    float init_scale = 65536.0   // 2^16, fp16 English text
+    float init_scale = 65536.0
     if dtype == "bf16" {
-        init_scale = 1.0          // bf16 English text fp32, English text
+        init_scale = 1.0
     }
     amp_state {
         loss_scale: init_scale,
@@ -400,12 +400,12 @@ func new_amp_state(string dtype) amp_state {
     }
 }
 
-// English textloss (English text)
+
 func amp_scale_loss(amp_state amp, float loss) float {
     loss * amp.loss_scale
 }
 
-// English textgradient (optimizeEnglish textstepEnglish text)
+
 func amp_unscale_grad(amp_state amp, []float grad) []float {
     float inv = 1.0 / amp.loss_scale
     int n = len(grad)
@@ -418,7 +418,7 @@ func amp_unscale_grad(amp_state amp, []float grad) []float {
     out
 }
 
-// English textgradientEnglish text (Inf/NaN English text: English text)
+
 func amp_check_overflow([]float grad) bool {
     int i = 0
     while i < len(grad) {
@@ -426,7 +426,7 @@ func amp_check_overflow([]float grad) bool {
         if g > 1e30 || g < -1e30 {
             return true
         }
-        // NaN English text: NaN != NaN
+
         if g != g {
             return true
         }
@@ -435,7 +435,7 @@ func amp_check_overflow([]float grad) bool {
     false
 }
 
-// English textlossEnglish text (English text)
+
 func amp_update_scale(amp_state amp, bool overflow) amp_state {
     if overflow {
         amp.loss_scale = amp.loss_scale * amp.scale_backoff
@@ -455,33 +455,33 @@ func amp_update_scale(amp_state amp, bool overflow) amp_state {
     amp
 }
 
-// ============================================================================
-// 6. English text (English text/English text)
-// ============================================================================
+
+
+
 
 struct memory_estimate {
-    int params_bytes          // parameterEnglish text
-    int gradients_bytes       // gradientEnglish text
-    int optimizer_bytes       // optimizeEnglish textstate (AdamW m+v)
-    int activations_bytes     // English text (English text)
+    int params_bytes
+    int gradients_bytes
+    int optimizer_bytes
+    int activations_bytes
     int total_bytes
     int total_gb
 }
 
-// English texttrainingEnglish text (parameterEnglish text, English text, batch×seq)
+
 func estimate_training_memory(int params, string dtype, int batch_tokens, int hidden, int layers) memory_estimate {
-    int param_byte = 4   // fp32 default
+    int param_byte = 4
     if dtype == "bf16" || dtype == "fp16" {
         param_byte = 2
     }
 
-    // English text: parameter bf16(2) + fp32 master(4); gradient bf16(2)
+
     int params_b = params * param_byte
-    int master_b = params * 4          // fp32 master copy
+    int master_b = params * 4
     int grad_b = params * param_byte
-    // AdamW: m + v, fp32 = 8 English text/parameter
+
     int opt_b = params * 8
-    // English text: ~ batch_tokens × hidden × layers × 2 English text (bf16, English text checkpoint English text)
+
     int act_b = batch_tokens * hidden * layers * 2
 
     int total = params_b + master_b + grad_b + opt_b + act_b
@@ -495,11 +495,11 @@ func estimate_training_memory(int params, string dtype, int batch_tokens, int hi
     }
 }
 
-// ============================================================================
-// 7. bf16 English text
-// ============================================================================
 
-// English text bf16 English text (English text ≤ 2^-8 ≈ 0.4%)
+
+
+
+
 func bf16_max_relative_error([]float arr) float {
     float max_err = 0.0
     int i = 0

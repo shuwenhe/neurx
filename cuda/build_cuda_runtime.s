@@ -1,6 +1,6 @@
-// ============================================================================
-// Build CUDA Runtime - S Language Implementation
-// ============================================================================
+
+
+
 
 package main
 
@@ -16,21 +16,21 @@ use neurx.runtime.io.{
 func main() {
     println("[CUDA Runtime] Building CUDA Runtime Library")
     println("")
-    
+
     string build_dir = "./artifacts/build/cuda_runtime"
     create_dir(build_dir)
-    
-    // Detect CUDA environment
+
+
     string cuda_home = get_cuda_home()
     string cuda_lib = cuda_home + "/lib64"
-    
+
     println("[INFO] CUDA Home: " + cuda_home)
     println("[INFO] CUDA Lib: " + cuda_lib)
     println("")
-    
-    // Compile C wrapper with CUDA/cuBLAS linkage
+
+
     println("[1/2] Compiling CUDA Runtime wrapper...")
-    
+
     string cmd = "gcc -shared -fPIC " +
         "-o " + build_dir + "/libcuda_runtime.so " +
         "cuda/cuda_wrapper_simple.cu " +
@@ -40,20 +40,20 @@ func main() {
         "-L/usr/local/cuda/lib64 " +
         "-lcudart -lcublas " +
         "-Wl,-rpath," + cuda_lib + " 2>&1"
-    
+
     string output = runtime_run_command_output(cmd)
-    
+
     if !runtime_file_exists(build_dir + "/libcuda_runtime.so") {
         println("[ERROR] Compilation failed")
         println("  " + output)
         return
     }
-    
+
     println("[OK] Runtime compiled")
-    
+
     println("[2/2] Creating environment metadata...")
     create_runtime_env_metadata(build_dir, cuda_lib)
-    
+
     println("")
     println("[SUCCESS] libcuda_runtime.so created")
     string size_info = runtime_run_command_output("ls -lh " + build_dir + "/libcuda_runtime.so 2>/dev/null | awk '{print $5}' || echo '?'")
@@ -65,15 +65,15 @@ func get_cuda_home() string {
     if str_len(cuda_home) > 0 && runtime_file_exists(cuda_home + "/include/cuda.h") {
         return cuda_home
     }
-    
+
     if runtime_file_exists("/usr/local/cuda/include/cuda.h") {
         return "/usr/local/cuda"
     }
-    
+
     if runtime_file_exists("/usr/include/cuda.h") {
         return "/usr"
     }
-    
+
     "/usr"
 }
 

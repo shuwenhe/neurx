@@ -1,10 +1,10 @@
-// ============================================================================
-// NeurX Wikipedia Shard Processing
-//
-// S implementation that actually shards the Wikipedia dump.
-// It streams the bz2 input through awk and writes shard_*.jsonl files plus a
-// manifest directly from this entry point.
-// ============================================================================
+
+
+
+
+
+
+
 
 package neurx.shard.shard_wikipedia
 
@@ -88,7 +88,7 @@ func get_docs_per_shard() string {
 }
 
 func emit_progress(string message) {
-    // outputEnglish texterror, English text
+
     runtime_run_command_output("printf '%s\\n' " + shell_escape(message) + " >&2")
 }
 

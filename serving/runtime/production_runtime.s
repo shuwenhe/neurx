@@ -1,8 +1,8 @@
 package neurx.serving.runtime.production_runtime
 
-// Production serving control plane written in S.
-// Device kernels are bound by CUDA/CANN adapters; this module owns admission,
-// homogeneous batching and the Prefill -> Decode request lifecycle.
+
+
+
 
 struct production_queue {
     []string request_ids
@@ -224,8 +224,8 @@ func production_submit(production_runtime_state state, string request_id, string
         state.prefix_cache_hits = state.prefix_cache_hits + 1
         state.kv_handoffs = state.kv_handoffs + 1
     }
-    // queued_tokens is a conservative reservation for unfinished prompt and
-    // the request's complete generation budget.
+
+
     state.queued_tokens = state.queued_tokens + future_tokens
     state.kv_tokens = state.kv_tokens + cached
     state.admitted_requests = state.admitted_requests + 1
@@ -407,8 +407,8 @@ func production_schedule_prefill(production_runtime_state state) production_sche
 }
 
 func production_schedule(production_runtime_state state) production_schedule_result {
-    // Decode-first bounds inter-token latency. Chunked prefill prevents a long
-    // prompt from monopolizing the device when no decode work is ready.
+
+
     if production_queue_size(state.decode_queue) > 0 {
         return production_schedule_decode(state)
     }
@@ -473,8 +473,8 @@ func production_complete_decode(production_runtime_state state, production_batch
                 if state.queued_tokens < 0 { state.queued_tokens = 0 }
             }
             state.completed_requests = state.completed_requests + 1
-            // Exact per-request KV accounting is supplied by the block manager;
-            // this counter is a conservative aggregate until release is called.
+
+
         } else {
             state.decode_queue = production_queue_push(state.decode_queue, batch.request_ids[i], batch.backend, batch.dtype, 0, batch.max_new_tokens[i], generated)
         }

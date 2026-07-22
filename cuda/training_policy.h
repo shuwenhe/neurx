@@ -121,4 +121,4 @@ inline GradientDecision gradient_decision(double squared_norm,
     return result;
 }
 
-}  // namespace neurx_training
+}

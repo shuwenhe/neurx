@@ -19,7 +19,7 @@ bool checked_add_product(std::size_t count, std::size_t width,
   return true;
 }
 
-}  // namespace
+}
 
 Status validate_310p_model(const ModelMetadata& model,
                            const KvCacheConfig& cache) {
@@ -133,8 +133,8 @@ Status build_transformer_batch_plan(
     return Status::failure("batch total token count does not match work items");
   }
 
-  // Reusable FP16 activation arena: hidden states, norm, Q/K/V, attention,
-  // projections, gate/up/SwiGLU, and one logits row per request.
+
+
   std::size_t scratch_elements = 0;
   if (!checked_add_product(result.token_count, 7 * result.hidden_size,
                            &scratch_elements) ||
@@ -197,4 +197,4 @@ Status build_paged_attention_metadata(const TransformerBatchPlan& plan,
   return Status::success();
 }
 
-}  // namespace neurx::cann
+}

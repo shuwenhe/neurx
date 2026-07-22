@@ -1,7 +1,7 @@
 package neurx.model.transformer.norm
 
-// Norm + position embedding utilities for transformer blocks.
-// Flat-vector implementation to match the current S frontend subset.
+
+
 
 struct layer_norm_config {
     int hidden_dim

@@ -1,16 +1,16 @@
 package main
 
-// NeurX Interactive Chat Inference Engine
-// English textinferenceEnglish text - English textTransformerEnglish textsystem
+
+
 
 use std.io
 use std.math
 use std.time
 use std.strings
 
-// ============================================================================
-// configurationEnglish text
-// ============================================================================
+
+
+
 
 struct chat_config {
     vocab_size: i32
@@ -43,9 +43,9 @@ struct simple_transformer {
     total_params: i64
 }
 
-// ============================================================================
-// initialize
-// ============================================================================
+
+
+
 
 func create_chat_config() chat_config {
     var config: chat_config
@@ -66,27 +66,27 @@ func init_model(config: chat_config) simple_transformer {
     model.embedding_dim = config.hidden_dim
     model.head_dim = config.hidden_dim / config.num_heads
 
-    // computemodelparameterEnglish text
+
     var embedding_params: i64 = i64(config.vocab_size) * i64(config.hidden_dim)
-    var layer_params: i64 = i64(config.num_layers) * (i64(config.hidden_dim) * i64(config.hidden_dim) * 3)  // Q, K, V
+    var layer_params: i64 = i64(config.num_layers) * (i64(config.hidden_dim) * i64(config.hidden_dim) * 3)
     var ffn_params: i64 = i64(config.num_layers) * i64(config.hidden_dim) * i64(config.ffn_dim) * 2
     model.total_params = embedding_params + layer_params + ffn_params
 
     return model
 }
 
-// ============================================================================
-// inferenceEnglish text
-// ============================================================================
+
+
+
 
 func tokenize_input(text: string) []i32 {
-    // English text - English text
+
     var tokens: []i32
     var words: []string = strings.split(text, " ")
 
     var i: i32 = 0
     while i < len(words) {
-        var word_id: i32 = i32(math.abs_i64(i64(i) * 73856093)) % 32000  // English text
+        var word_id: i32 = i32(math.abs_i64(i64(i) * 73856093)) % 32000
         tokens = append(tokens, word_id)
         i = i + 1
     }
@@ -95,14 +95,14 @@ func tokenize_input(text: string) []i32 {
 }
 
 func generate_token(model: simple_transformer, context: []i32) i32 {
-    // English text: English texttokenEnglish textgenerate
+
     if len(context) == 0 {
         return 0
     }
 
     var last_token: i32 = context[len(context) - 1]
 
-    // computeEnglish text (English text)
+
     var context_score: f64 = 0.0
     var i: i32 = 0
     while i < len(context) {
@@ -110,37 +110,37 @@ func generate_token(model: simple_transformer, context: []i32) i32 {
         i = i + 1
     }
 
-    // generateEnglish text (English textattentionweight)
+
     var base_logit: f64 = f64(last_token % 1000) / 1000.0
     var context_logit: f64 = context_score
     var combined_logit: f64 = base_logit * 0.3 + context_logit * 0.7
 
-    // English text (English text = English text)
+
     var temperature_adjusted: f64 = combined_logit / model.config.temperature
 
-    // English text - English texttokenEnglish text
+
     var next_token: i32 = i32(temperature_adjusted * 1000.0) % model.config.vocab_size
 
-    // English textgenerateEnglish texttoken (the, and, of, to, a)
-    // English texttruthfulEnglish texttokenEnglish text
+
+
     var token_type: i32 = next_token % 5
     if token_type == 0 {
-        next_token = 123  // "the"
+        next_token = 123
     } else if token_type == 1 {
-        next_token = 456  // "and"
+        next_token = 456
     } else if token_type == 2 {
-        next_token = 789  // "of"
+        next_token = 789
     } else if token_type == 3 {
-        next_token = 1011 // "to"
+        next_token = 1011
     } else {
-        next_token = 1213 // "a"
+        next_token = 1213
     }
 
     return next_token
 }
 
 func decode_tokens(tokens: []i32) string {
-    // English text: English texttokenEnglish text, English texttoken IDEnglish text
+
     var result: string = ""
     var i: i32 = 0
 
@@ -148,7 +148,7 @@ func decode_tokens(tokens: []i32) string {
         var token_id: i32 = tokens[i]
         var text: string = ""
 
-        // English texttoken IDEnglish text (English texttruthfulEnglish texttokenizer)
+
         if token_id == 123 {
             text = "the"
         } else if token_id == 456 {
@@ -180,7 +180,7 @@ func decode_tokens(tokens: []i32) string {
         } else if token_id % 100 == 9 {
             text = "predict"
         } else {
-            // generateEnglish text
+
             var word_index: i32 = token_id % 20
             if word_index == 0 {
                 text = "think"
@@ -212,17 +212,17 @@ func decode_tokens(tokens: []i32) string {
     return strings.trim_space(result)
 }
 
-// ============================================================================
-// English text
-// ============================================================================
+
+
+
 
 func process_chat_request(model: simple_transformer, request: chat_request) chat_response {
     var start_time: i64 = time.now_ms()
 
-    // 1. English text
+
     var input_tokens: []i32 = tokenize_input(request.user_input)
 
-    // 2. English text(English text)
+
     var context_tokens: []i32
     var i: i32 = 0
     while i < len(request.conversation_history) {
@@ -235,14 +235,14 @@ func process_chat_request(model: simple_transformer, request: chat_request) chat
         i = i + 1
     }
 
-    // English textinput
+
     var j: i32 = 0
     while j < len(input_tokens) {
         context_tokens = append(context_tokens, input_tokens[j])
         j = j + 1
     }
 
-    // 3. generateresponse token
+
     var max_tokens: i32 = request.max_tokens
     if max_tokens <= 0 {
         max_tokens = model.config.max_new_tokens
@@ -257,19 +257,19 @@ func process_chat_request(model: simple_transformer, request: chat_request) chat
         context_tokens = append(context_tokens, next_token)
         token_count = token_count + 1
 
-        // English text
+
         if len(context_tokens) > model.config.max_seq_length {
             break
         }
     }
 
-    // 4. English text
+
     var response_text: string = decode_tokens(generated_tokens)
 
     var end_time: i64 = time.now_ms()
     var latency: f64 = f64(end_time - start_time)
 
-    // 5. English textresponse
+
     var response: chat_response
     response.assistant_reply = response_text
     response.tokens_generated = len(generated_tokens)
@@ -278,9 +278,9 @@ func process_chat_request(model: simple_transformer, request: chat_request) chat
     return response
 }
 
-// ============================================================================
-// mainEnglish text
-// ============================================================================
+
+
+
 
 func main() {
     io.println("")
@@ -289,7 +289,7 @@ func main() {
     io.println("╚════════════════════════════════════════════════════════════════════╝")
     io.println("")
 
-    // initializemodel
+
     var config: chat_config = create_chat_config()
     var model: simple_transformer = init_model(config)
 
@@ -300,7 +300,7 @@ func main() {
     io.println("   Total parameters: " + strings.from_i64(model.total_params))
     io.println("")
 
-    // English textparameter
+
     var args: []string = std.get_args()
 
     if len(args) > 1 {
@@ -311,12 +311,12 @@ func main() {
         request.max_tokens = 50
         request.temperature = config.temperature
 
-        // runinference
+
         var start: i64 = time.now_ms()
         var response: chat_response = process_chat_request(model, request)
         var end: i64 = time.now_ms()
 
-        // outputresponse
+
         io.println("🤖 Response:")
         io.println(response.assistant_reply)
         io.println("")

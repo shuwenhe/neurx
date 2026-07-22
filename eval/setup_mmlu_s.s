@@ -1,9 +1,9 @@
-// ============================================================================
-// MMLU Data Downloader - Pure S Language Implementation
-//
-// Downloads MMLU dataset from HuggingFace using curl + S
-// No Python, no Bash. Pure S language with curl system calls.
-// ============================================================================
+
+
+
+
+
+
 
 package main
 
@@ -18,9 +18,9 @@ use neurx.runtime.io.{
     runtime_run_command_output,
 }
 
-// ============================================================================
-// MMLU Task Lists (57 total)
-// ============================================================================
+
+
+
 
 func all_mmlu_stem_tasks() []string {
     []string{
@@ -98,9 +98,9 @@ func all_mmlu_other_tasks() []string {
     }
 }
 
-// ============================================================================
-// Data Structures
-// ============================================================================
+
+
+
 
 struct mmlu_download_stats {
     int total_tasks
@@ -119,9 +119,9 @@ struct mmlu_csv_question {
     string correct_answer
 }
 
-// ============================================================================
-// Main Setup Function
-// ============================================================================
+
+
+
 
 func setup_mmlu_data_s(string data_root) mmlu_download_stats {
     mmlu_download_stats stats
@@ -130,26 +130,26 @@ func setup_mmlu_data_s(string data_root) mmlu_download_stats {
     stats.failed_count = 0
     stats.total_test_rows = 0
     stats.total_dev_rows = 0
-    
-    // Step 1: Create directories
+
+
     io_println("[Step 1] Creating data directories...")
     io_mkdir_recursive(data_root + "/test")
     io_mkdir_recursive(data_root + "/dev")
     io_mkdir_recursive(data_root + "/validation")
     io_println("  ✓ Directories created")
     io_println("")
-    
-    // Step 2: Download data
+
+
     io_println("[Step 2] Downloading MMLU dataset...")
     stats = download_all_mmlu_tasks(data_root, stats)
     io_println("")
-    
-    // Step 3: Verify data
+
+
     io_println("[Step 3] Verifying data integrity...")
     verify_data_integrity(data_root)
     io_println("")
-    
-    // Step 4: Report statistics
+
+
     io_println("[Step 4] Dataset Statistics:")
     io_println("  Total tasks: " + int_to_string(stats.total_tasks))
     io_println("  Downloaded: " + int_to_string(stats.successful_count) + "/" + int_to_string(stats.total_tasks))
@@ -157,78 +157,78 @@ func setup_mmlu_data_s(string data_root) mmlu_download_stats {
     io_println("  Total test questions: " + int_to_string(stats.total_test_rows))
     io_println("  Total dev examples: " + int_to_string(stats.total_dev_rows))
     io_println("")
-    
+
     if stats.successful_count >= 50 {
         io_println("✓ MMLU dataset ready for evaluation")
     } else {
         io_println("! Warning: Some tasks may be missing")
     }
-    
+
     return stats
 }
 
-// ============================================================================
-// Helper Functions
-// ============================================================================
+
+
+
 
 func download_all_mmlu_tasks(string data_root, mmlu_download_stats stats) mmlu_download_stats {
-    // Combine all task lists
+
     []string all_tasks = []string{}
-    
+
     []string stem_tasks = all_mmlu_stem_tasks()
     int idx = 0
     for idx < len(stem_tasks) {
         all_tasks = append(all_tasks, stem_tasks[idx])
         idx = idx + 1
     }
-    
+
     []string social_tasks = all_mmlu_social_tasks()
     idx = 0
     for idx < len(social_tasks) {
         all_tasks = append(all_tasks, social_tasks[idx])
         idx = idx + 1
     }
-    
+
     []string humanities_tasks = all_mmlu_humanities_tasks()
     idx = 0
     for idx < len(humanities_tasks) {
         all_tasks = append(all_tasks, humanities_tasks[idx])
         idx = idx + 1
     }
-    
+
     []string other_tasks = all_mmlu_other_tasks()
     idx = 0
     for idx < len(other_tasks) {
         all_tasks = append(all_tasks, other_tasks[idx])
         idx = idx + 1
     }
-    
-    // Download each task
+
+
     idx = 0
     for idx < len(all_tasks) {
         string task = all_tasks[idx]
         string category = get_task_category(task)
-        
+
         string test_file = data_root + "/test/" + task + ".csv"
         string dev_file = data_root + "/dev/" + task + ".csv"
-        
-        // Download test split
+
+
         string test_url = "https://huggingface.co/datasets/cais/mmlu/resolve/main/data/" + task + "/test-" + task + ".csv"
         bool test_ok = download_file_curl(test_url, test_file)
-        
-        // Download dev split
+
+
         string dev_url = "https://huggingface.co/datasets/cais/mmlu/resolve/main/data/" + task + "/dev-" + task + ".csv"
         bool dev_ok = download_file_curl(dev_url, dev_file)
-        
+
         if test_ok {
             int test_count = count_csv_rows(test_file)
             int dev_count = 0
             if dev_ok {
                 dev_count = count_csv_rows(dev_file)
             }
-            
+
             io_println("  ✓ " + task + " (" + category + "): test=" + int_to_string(test_count) + " dev=" + int_to_string(dev_count))
-            
+
             stats.successful_count = stats.successful_count + 1
             stats.total_test_rows = stats.total_test_rows + test_count
             stats.total_dev_rows = stats.total_dev_rows + dev_count
@@ -238,18 +238,18 @@ func download_all_mmlu_tasks(string data_root, mmlu_download_stats stats) mmlu_d
         }
         idx = idx + 1
     }
-    
+
     return stats
 }
 
 func download_file_curl(string url, string output_path) bool {
-    // Use curl to download file with retries
-    // Format: curl -sS -L --retry 3 --retry-delay 1 -o {output_path} {url}
-    
+
+
+
     string cmd = "curl -sS -L --retry 3 --retry-delay 1 -o " + output_path + " \"" + url + "\" 2>/dev/null"
     int _result = runtime_run_command(cmd)
-    
-    // Check if file was created
+
+
     return runtime_file_exists(output_path)
 }
 
@@ -262,7 +262,7 @@ func get_task_category(string task) string {
         }
         idx = idx + 1
     }
-    
+
     []string social_tasks = all_mmlu_social_tasks()
     idx = 0
     for idx < len(social_tasks) {
@@ -271,7 +271,7 @@ func get_task_category(string task) string {
         }
         idx = idx + 1
     }
-    
+
     []string humanities_tasks = all_mmlu_humanities_tasks()
     idx = 0
     for idx < len(humanities_tasks) {
@@ -280,22 +280,22 @@ func get_task_category(string task) string {
         }
         idx = idx + 1
     }
-    
+
     return "Other"
 }
 
 func count_csv_rows(string csv_path) int {
-    // Count lines in CSV file, subtract 1 for header
+
     if !runtime_file_exists(csv_path) {
         return 0
     }
-    
-    // Read file and count newlines
+
+
     string content = runtime_read_text_file(csv_path)
     if content == "" {
         return 0
     }
-    
+
     int line_count = 0
     int idx = 0
     for idx < len(content) {
@@ -304,29 +304,29 @@ func count_csv_rows(string csv_path) int {
         }
         idx = idx + 1
     }
-    
-    // Subtract 1 for header row
+
+
     if line_count > 0 {
         line_count = line_count - 1
     }
-    
+
     return line_count
 }
 
 func verify_data_integrity(string data_root) {
-    // Count test and dev CSV files
+
     string test_cmd = "find " + data_root + "/test -name '*.csv' 2>/dev/null | wc -l"
     string dev_cmd = "find " + data_root + "/dev -name '*.csv' 2>/dev/null | wc -l"
-    
+
     string test_output = runtime_run_command_output(test_cmd)
     string dev_output = runtime_run_command_output(dev_cmd)
-    
+
     int test_count = string_to_int(string_trim(test_output), 0)
     int dev_count = string_to_int(string_trim(dev_output), 0)
-    
+
     io_println("  Test files: " + int_to_string(test_count))
     io_println("  Dev files: " + int_to_string(dev_count))
-    
+
     if test_count >= 50 && dev_count >= 50 {
         io_println("  ✓ Data integrity verified")
     } else {
@@ -334,28 +334,28 @@ func verify_data_integrity(string data_root) {
     }
 }
 
-// ============================================================================
-// String Utility Functions
-// ============================================================================
+
+
+
 
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
     }
-    
+
     string sign = ""
     if n < 0 {
         sign = "-"
         n = -n
     }
-    
+
     string result = ""
     for n > 0 {
         int digit = n % 10
         result = string(rune(digit + int('0'))) + result
         n = n / 10
     }
-    
+
     return sign + result
 }
 
@@ -363,11 +363,11 @@ func string_to_int(string s, int fallback) int {
     if len(s) == 0 {
         return fallback
     }
-    
+
     int result = 0
     int idx = 0
-    
-    // Handle negative sign
+
+
     int sign = 1
     if idx < len(s) && (s[0] == '-' || s[0] == '+') {
         if s[0] == '-' {
@@ -375,28 +375,28 @@ func string_to_int(string s, int fallback) int {
         }
         idx = idx + 1
     }
-    
-    // Parse digits
+
+
     for idx < len(s) {
         int char_code = int(s[idx])
         int digit = char_code - int('0')
-        
+
         if digit < 0 || digit > 9 {
             return fallback
         }
-        
+
         result = result * 10 + digit
         idx = idx + 1
     }
-    
+
     return sign * result
 }
 
 func string_trim(string s) string {
     int start = 0
     int end = len(s)
-    
-    // Trim leading whitespace
+
+
     for start < end {
         int char_code = int(s[start])
         if char_code != int(' ') && char_code != int('\t') && char_code != int('\n') && char_code != int('\r') {
@@ -404,8 +404,8 @@ func string_trim(string s) string {
         }
         start = start + 1
     }
-    
-    // Trim trailing whitespace
+
+
     for end > start {
         int char_code = int(s[end - 1])
         if char_code != int(' ') && char_code != int('\t') && char_code != int('\n') && char_code != int('\r') {
@@ -413,18 +413,18 @@ func string_trim(string s) string {
         }
         end = end - 1
     }
-    
+
     return s[start:end]
 }
 
-// ============================================================================
-// Main Entry Point
-// ============================================================================
+
+
+
 
 func main() int {
     string project_root = io_get_env("NEURX_ROOT", ".")
     string data_root = io_get_env("NEURX_MMLU_DATA_ROOT", project_root + "/data/mmlu")
-    
+
     io_println("=========================================")
     io_println("MMLU Dataset Downloader (S Language)")
     io_println("=========================================")
@@ -434,9 +434,9 @@ func main() int {
     io_println("  Data root: " + data_root)
     io_println("  Source: HuggingFace (cais/mmlu)")
     io_println("")
-    
+
     mmlu_download_stats stats = setup_mmlu_data_s(data_root)
-    
+
     if stats.failed_count > 0 {
         io_println("")
         io_println("! Some downloads failed. Check error messages above.")

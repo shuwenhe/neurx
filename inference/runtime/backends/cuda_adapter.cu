@@ -37,4 +37,4 @@ AdapterStatus CudaAdapter::synchronize() {
              : AdapterStatus::failure("CUDA stream synchronization failed");
 }
 
-}  // namespace neurx::inference
+}

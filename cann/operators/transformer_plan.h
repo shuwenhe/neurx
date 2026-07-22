@@ -48,4 +48,4 @@ Status build_transformer_batch_plan(
 Status build_paged_attention_metadata(const TransformerBatchPlan& plan,
                                       PagedAttentionMetadata* metadata);
 
-}  // namespace neurx::cann
+}

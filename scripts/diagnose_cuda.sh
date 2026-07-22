@@ -1,6 +1,6 @@
 #!/bin/bash
-# NeurX CUDA Training Diagnostic
-# English textCUDAtrainingEnglish textconfiguration
+
+
 
 set -e
 
@@ -12,7 +12,7 @@ echo "🔍 NeurX CUDA Training Environment Diagnostic"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# 1. English textNVIDIA GPU
+
 echo "📌 Step 1: Checking NVIDIA GPU..."
 if command -v nvidia-smi &> /dev/null; then
     GPU_COUNT=$(nvidia-smi -L 2>/dev/null | grep -c '^GPU ' || echo 0)
@@ -24,7 +24,7 @@ else
 fi
 echo ""
 
-# 2. English textCUDAtrainingEnglish textfile
+
 echo "📌 Step 2: Checking CUDA training binary..."
 if [ ! -f "$CUDA_TRAIN_BIN" ]; then
     echo "   ❌ Binary not found: $CUDA_TRAIN_BIN"
@@ -34,7 +34,7 @@ echo "   ✓ Binary exists: $CUDA_TRAIN_BIN"
 ls -lh "$CUDA_TRAIN_BIN" | sed 's/^/   /'
 echo ""
 
-# 3. English textRequiredEnglish textfile
+
 echo "📌 Step 3: Checking required files..."
 REQUIRED_FILES=(
     "$CURDIR/data/corpus/vocab.json"
@@ -51,7 +51,7 @@ for file in "${REQUIRED_FILES[@]}"; do
 done
 echo ""
 
-# 4. runCUDAtrainingEnglish text(English text1step)
+
 echo "📌 Step 4: Testing CUDA binary (timeout 30s)..."
 echo "   Running: timeout 30s $CUDA_TRAIN_BIN"
 echo ""
@@ -59,7 +59,7 @@ echo ""
 mkdir -p "/tmp/neurx_diagnostic"
 TEST_OUTPUT="/tmp/neurx_diagnostic/test_output.txt"
 
-# English textconfigurationEnglish texttest
+
 export NEURX_ROOT="$CURDIR"
 export NEURX_PRETRAIN_OUTPUT_DIR="/tmp/neurx_diagnostic/checkpoint"
 export NEURX_PRETRAIN_STEPS=1
@@ -77,18 +77,18 @@ export WORLD_SIZE=1
 export CUDA_VISIBLE_DEVICES=0
 export NEURX_NCCL_ID_FILE="/tmp/neurx_diagnostic/nccl_id"
 
-# English textNCCLfileEnglish text
+
 mkdir -p "$(dirname "$NEURX_NCCL_ID_FILE")"
 touch "$NEURX_NCCL_ID_FILE"
 
-# runEnglish textfileEnglish textoutput
+
 timeout 30s "$CUDA_TRAIN_BIN" > "$TEST_OUTPUT" 2>&1 || EXIT_CODE=$?
 
 if [ -z "$EXIT_CODE" ]; then
     EXIT_CODE=0
 fi
 
-# English textoutput
+
 if [ -s "$TEST_OUTPUT" ]; then
     echo "   Output:"
     head -20 "$TEST_OUTPUT" | sed 's/^/   /'
@@ -97,7 +97,7 @@ else
 fi
 echo ""
 
-# 5. English text
+
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "📊 Summary:"
 if [ "$EXIT_CODE" -eq 0 ]; then

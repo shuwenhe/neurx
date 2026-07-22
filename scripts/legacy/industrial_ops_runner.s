@@ -1,16 +1,16 @@
 package main
 
-// ============================================================================
-// NeurX Industrial Feature Runner
-//
-// Real execution entry points for:
-//   - DPO preference data runs
-//   - RAG retrieval runs
-//   - Dataset governance / quality audits
-//
-// This file intentionally uses file-backed workflows so the features are
-// executable instead of remaining as documentation-only frameworks.
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
 
 use neurx.runtime.io.{io_mkdir_recursive, io_println, runtime_file_exists, runtime_read_text_file, runtime_write_text_file}
 
@@ -200,9 +200,9 @@ func max_int(int a, int b) int {
 }
 
 func float_to_string(float64 value) string {
-    // Minimal formatting helper for reports.
-    // The language runtime usually provides richer formatting, but this
-    // keeps the file self-contained.
+
+
+
     string out := ""
     if value < 0 {
         out = out + "-"
@@ -460,9 +460,9 @@ func run_all_industrial_ops(
     io_println("Governance report: " + gov.output_path)
 }
 
-// ---------------------------------------------------------------------------
-// CLI entry point
-// ---------------------------------------------------------------------------
+
+
+
 
 func ops_get_arg(map[string]string options, string key, string fallback) string {
     if value, ok := options[key]; ok {

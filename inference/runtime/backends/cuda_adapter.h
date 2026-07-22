@@ -4,8 +4,8 @@
 
 namespace neurx::inference {
 
-// CUDA runtime ownership stays in the .cu implementation. Model-specific
-// FlashAttention/GEMM launchers are injected so the control plane is reusable.
+
+
 class CudaAdapter final : public BackendAdapter {
  public:
   CudaAdapter(KernelLauncher prefill, KernelLauncher decode);
@@ -24,4 +24,4 @@ class CudaAdapter final : public BackendAdapter {
   bool ready_ = false;
 };
 
-}  // namespace neurx::inference
+}

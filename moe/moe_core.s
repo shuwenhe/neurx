@@ -1,6 +1,6 @@
 package neurx.moe.core
 
-// Executable S MoE core shared by sparse model architectures.
+
 
 struct moe_config {
     int hidden_dim

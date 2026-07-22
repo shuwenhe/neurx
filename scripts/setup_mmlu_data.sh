@@ -1,19 +1,19 @@
 #!/bin/bash
 
-# ============================================================================
-# MMLU Data Downloader & Preparer
-#
-# Downloads MMLU dataset from HuggingFace and prepares it for evaluation.
-# ============================================================================
+
+
+
+
+
 
 set -e
 
-# Configuration
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="${NEURX_ROOT:-.}"
 DATA_ROOT="${NEURX_MMLU_DATA_ROOT:${PROJECT_ROOT}/data/mmlu}"
 MMLU_HF_REPO="cais/mmlu"
-SPLIT_MODE="${1:-standard}"  # standard (0-shot, 5-shot, 25-shot splits)
+SPLIT_MODE="${1:-standard}"
 
 echo "========================================="
 echo "MMLU Dataset Downloader"
@@ -26,9 +26,9 @@ echo "  HF repo: ${MMLU_HF_REPO}"
 echo "  Split mode: ${SPLIT_MODE}"
 echo ""
 
-# ============================================================================
-# Step 1: Create directories
-# ============================================================================
+
+
+
 
 echo "[Step 1] Creating data directories..."
 mkdir -p "${DATA_ROOT}/test"
@@ -38,13 +38,13 @@ mkdir -p "${DATA_ROOT}/auxiliary"
 echo "  ✓ Directories created"
 echo ""
 
-# ============================================================================
-# Step 2: Download data (using HuggingFace datasets)
-# ============================================================================
+
+
+
 
 echo "[Step 2] Downloading MMLU dataset from HuggingFace..."
 
-# Check if python & datasets library available
+
 if ! command -v python3 &> /dev/null; then
     echo "  ✗ Python 3 not found. Please install Python 3 and huggingface-hub."
     exit 1
@@ -68,23 +68,23 @@ Path(data_root).mkdir(parents=True, exist_ok=True)
 print("  Downloading MMLU from HuggingFace...")
 print("")
 
-# List of all MMLU tasks
+
 tasks = [
-    # STEM (19)
+
     "abstract_algebra", "anatomy", "astronomy", "biology", "chemistry",
     "computer_science", "formal_logic", "high_school_biology", "high_school_chemistry",
     "high_school_computer_science", "high_school_mathematics", "high_school_physics",
     "high_school_statistics", "machine_learning", "mathematics", "medical_genetics",
     "physics", "professional_medicine", "virology",
-    # Social Science (13)
+
     "econometrics", "high_school_geography", "high_school_government_and_politics",
     "high_school_macroeconomics", "high_school_microeconomics", "high_school_psychology",
     "human_sexuality", "international_law", "jurisprudence", "logical_fallacies",
     "management", "marketing", "moral_disputes",
-    # Humanities (8)
+
     "ancient_greek", "art_history", "high_school_european_history",
     "high_school_us_history", "literature_in_english", "world_religions",
-    # Other (17)
+
     "business_ethics", "clinical_knowledge", "college_biology", "college_chemistry",
     "college_computer_science", "college_mathematics", "college_medicine",
     "college_physics", "conceptual_physics", "prehistory", "professional_accounting",
@@ -92,32 +92,32 @@ tasks = [
     "us_foreign_policy", "virology"
 ]
 
-# Download and save each task
+
 for task in tasks:
     try:
-        # Download the dataset
+
         dataset = load_dataset("cais/mmlu", task, split=None)
-        
-        # Save test split
+
+
         if "test" in dataset:
             test_df = dataset["test"].to_pandas()
             test_path = os.path.join(data_root, "test", f"{task}.csv")
             test_df.to_csv(test_path, index=False)
             print(f"  ✓ {task}: test ({len(test_df)} items)")
-        
-        # Save dev split
+
+
         if "dev" in dataset:
             dev_df = dataset["dev"].to_pandas()
             dev_path = os.path.join(data_root, "dev", f"{task}.csv")
             dev_df.to_csv(dev_path, index=False)
             print(f"         dev ({len(dev_df)} items)")
-        
-        # Save validation split
+
+
         if "validation" in dataset:
             val_df = dataset["validation"].to_pandas()
             val_path = os.path.join(data_root, "validation", f"{task}.csv")
             val_df.to_csv(val_path, index=False)
-    
+
     except Exception as e:
         print(f"  ! Warning: Failed to download {task}: {e}")
         continue
@@ -128,9 +128,9 @@ EOF
 
 echo ""
 
-# ============================================================================
-# Step 3: Verify data integrity
-# ============================================================================
+
+
+
 
 echo "[Step 3] Verifying data integrity..."
 
@@ -147,9 +147,9 @@ else
 fi
 echo ""
 
-# ============================================================================
-# Step 4: Generate statistics
-# ============================================================================
+
+
+
 
 echo "[Step 4] Generating dataset statistics..."
 
@@ -160,13 +160,13 @@ from pathlib import Path
 
 data_root = os.environ.get('DATA_ROOT', './data/mmlu')
 
-# Collect statistics
+
 stats = {
     "test": {"count": 0, "tasks": 0},
     "dev": {"count": 0, "tasks": 0}
 }
 
-# Count test set
+
 for csv_file in Path(f"{data_root}/test").glob("*.csv"):
     try:
         df = pd.read_csv(csv_file)
@@ -175,7 +175,7 @@ for csv_file in Path(f"{data_root}/test").glob("*.csv"):
     except:
         pass
 
-# Count dev set
+
 for csv_file in Path(f"{data_root}/dev").glob("*.csv"):
     try:
         df = pd.read_csv(csv_file)
@@ -191,9 +191,9 @@ EOF
 
 echo ""
 
-# ============================================================================
-# Step 5: Create metadata
-# ============================================================================
+
+
+
 
 echo "[Step 5] Creating dataset metadata..."
 
@@ -204,19 +204,19 @@ MMLU Dataset
 Downloaded from: https://huggingface.co/datasets/cais/mmlu
 
 Task Coverage:
-  - STEM (19 tasks): abstract_algebra, anatomy, astronomy, biology, chemistry, 
-                     computer_science, formal_logic, high_school_*, machine_learning, 
+  - STEM (19 tasks): abstract_algebra, anatomy, astronomy, biology, chemistry,
+                     computer_science, formal_logic, high_school_*, machine_learning,
                      mathematics, medical_genetics, physics, professional_medicine, virology
-  
-  - Social Science (13 tasks): econometrics, high_school_geography, 
-                               high_school_government_and_politics, 
+
+  - Social Science (13 tasks): econometrics, high_school_geography,
+                               high_school_government_and_politics,
                                high_school_macro/microeconomics, high_school_psychology,
                                human_sexuality, international_law, jurisprudence,
                                logical_fallacies, management, marketing, moral_disputes
-  
+
   - Humanities (8 tasks): ancient_greek, art_history, high_school_european_history,
                           high_school_us_history, literature_in_english, world_religions
-  
+
   - Other (17 tasks): business_ethics, clinical_knowledge, college_*,
                       conceptual_physics, prehistory, professional_accounting,
                       professional_law, public_relations, security_studies,
@@ -230,7 +230,7 @@ Data Splits:
 Citation:
   @article{hendrycks2020measuring,
     title={Measuring Massive Multitask Language Understanding},
-    author={Hendrycks, Dan and Burns, Collin and Basart, Steven and Zou, Andy 
+    author={Hendrycks, Dan and Burns, Collin and Basart, Steven and Zou, Andy
             and Mazeika, Mantas and Song, Dawn and Steinhardt, Jacob},
     journal={arXiv preprint arXiv:2009.03300},
     year={2020}
@@ -240,9 +240,9 @@ EOF
 echo "  ✓ Metadata created"
 echo ""
 
-# ============================================================================
-# Summary
-# ============================================================================
+
+
+
 
 echo "========================================="
 echo "MMLU Setup Complete"

@@ -1,19 +1,19 @@
 package neurx.data.dataset.corpus_loader
 
-// ============================================================================
-// Real Pre-Training Corpus Loader
-//
-// Implements the full data preparation pipeline for LLM pre-training:
-//   1. JSONL file reading (line-by-line via streaming reader)
-//   2. Multi-source mixing (web / code / books / academic / math)
-//   3. Quality filtering  (length, perplexity proxy, unicode, dedup hash)
-//   4. Greedy sequence packing  → [seq_len] token windows with BOS/EOS
-//   5. Shuffle buffer (in-memory ring for local shuffling)
-//   6. Continuous output of packed int-token batches
-//
-// This is the real replacement for make_synthetic_batch() in the training
-// pipeline; when connected it feeds actual text tokens to gpt_train_step.
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use neurx.data.streaming_reader.{
     streaming_reader_state, line_read_result,
@@ -25,28 +25,28 @@ use neurx.tokenizer.data_pipeline.{
 }
 use neurx.runtime.io.{runtime_read_text_file, runtime_file_exists, runtime_run_command_output}
 
-// ============================================================================
-// 1. configuration
-// ============================================================================
+
+
+
 
 struct data_source {
     string name
-    string path                 // directoryEnglish text JSONL filepath
-    float weight                // English textweight
-    string text_field           // JSONL English text (English text "text" English text "content")
-    bool is_code                // English text (English text)
+    string path
+    float weight
+    string text_field
+    bool is_code
 }
 
 struct corpus_config {
     []data_source sources
     int num_sources
-    int seq_len                 // English text
-    int batch_size              // English text
-    int shuffle_buffer          // English text (English text)
-    int min_doc_length          // English text (English text)
-    int max_doc_length          // English text (English text)
-    float min_quality_score     // English text (0-1)
-    bool enable_dedup           // English textdeduplication
+    int seq_len
+    int batch_size
+    int shuffle_buffer
+    int min_doc_length
+    int max_doc_length
+    float min_quality_score
+    bool enable_dedup
     int bos_token_id
     int eos_token_id
     int pad_token_id
@@ -96,24 +96,24 @@ func default_pretraining_corpus() corpus_config {
     }
 }
 
-// ============================================================================
-// 2. state
-// ============================================================================
+
+
+
 
 struct corpus_state {
     corpus_config config
     bpe_tokenizer_state tokenizer
-    []streaming_reader_state readers   // English textdataEnglish text reader
-    int current_source                 // English text
-    int rng                            // LCG English textstate
-    []string shuffle_buffer            // English text
+    []streaming_reader_state readers
+    int current_source
+    int rng
+    []string shuffle_buffer
     int buf_head
     int buf_size
     int total_docs_seen
     int total_tokens_seen
-    int docs_filtered                  // English text
-    int docs_deduped                   // deduplicationEnglish text
-    []int dedup_hashes                 // English text (English textdeduplication)
+    int docs_filtered
+    int docs_deduped
+    []int dedup_hashes
 }
 
 func new_corpus_state(corpus_config cfg) corpus_state {
@@ -130,7 +130,7 @@ func new_corpus_state(corpus_config cfg) corpus_state {
     }
 
     []string buf = []string{cap: cfg.shuffle_buffer}
-    []int hashes = []int{cap: 1000000}   // English text (English text)
+    []int hashes = []int{cap: 1000000}
 
     corpus_state {
         config: cfg,
@@ -181,12 +181,12 @@ func new_corpus_state_from_paths([]string paths, int batch_size, int seq_len, bo
     new_corpus_state(new_corpus_config_from_sources(sources, batch_size, seq_len, enable_dedup))
 }
 
-// ============================================================================
-// 3. JSONL English text (English text)
-// ============================================================================
 
-// English text JSONL English text: {"field": "value", ...}
-// English textimplementation: English text "field": English text
+
+
+
+
+
 func jsonl_extract_text(string line, string field) string {
     string pattern = "\"" + field + "\":"
     int plen = len(pattern)
@@ -196,28 +196,28 @@ func jsonl_extract_text(string line, string field) string {
         return ""
     }
     int start = pos + plen
-    // English text
+
     while start < llen && line[start] == 32 {
         start = start + 1
     }
     if start >= llen {
         return ""
     }
-    if line[start] != 34 {   // '"'
+    if line[start] != 34 {
         return ""
     }
-    start = start + 1   // English textstartEnglish text
+    start = start + 1
     string result = ""
     int i = start
     while i < llen {
         int c = line[i]
-        if c == 34 { break }     // English text
-        if c == 92 && i + 1 < llen {  // English text '\'
+        if c == 34 { break }
+        if c == 92 && i + 1 < llen {
             int nc = line[i + 1]
-            if nc == 110 { result = result + string(10); i = i + 2; continue }  // \n
-            if nc == 116 { result = result + string(9);  i = i + 2; continue }  // \t
-            if nc == 92  { result = result + string(92); i = i + 2; continue }  // \\
-            if nc == 34  { result = result + string(34); i = i + 2; continue }  // \"
+            if nc == 110 { result = result + string(10); i = i + 2; continue }
+            if nc == 116 { result = result + string(9);  i = i + 2; continue }
+            if nc == 92  { result = result + string(92); i = i + 2; continue }
+            if nc == 34  { result = result + string(34); i = i + 2; continue }
             i = i + 1
         }
         result = result + string(c)
@@ -226,7 +226,7 @@ func jsonl_extract_text(string line, string field) string {
     result
 }
 
-// English text
+
 func cl_find(string s, string pattern, int start) int {
     int slen = len(s)
     int plen = len(pattern)
@@ -244,11 +244,11 @@ func cl_find(string s, string pattern, int start) int {
     -1
 }
 
-// ============================================================================
-// 4. English text
-// ============================================================================
 
-// English text: English text + English text + English text
+
+
+
+
 func compute_quality_score(string text) float {
     int n = len(text)
     if n == 0 { return 0.0 }
@@ -296,7 +296,7 @@ func compute_quality_score(string text) float {
         avg_word_len = (total_word_len * 1.0) / (word_count * 1.0)
     }
 
-    // English text: English text > 0.9, English text > 0.5, English text 3-12
+
     float score = 0.0
     if print_ratio > 0.9 { score = score + 0.4 }
     if alpha_ratio > 0.3 { score = score + 0.3 }
@@ -306,14 +306,14 @@ func compute_quality_score(string text) float {
     score
 }
 
-// ============================================================================
-// 5. English textdeduplication (English text)
-// ============================================================================
+
+
+
 
 func doc_hash(string text) int {
     int h = 2166136261
     int i = 0
-    while i < len(text) && i < 2048 {  // English text 2KB
+    while i < len(text) && i < 2048 {
         h = h * 16777619
         h = h + text[i]
         if h < 0 { h = -h }
@@ -331,12 +331,12 @@ func corpus_is_duplicate(corpus_state state, int hash) bool {
     false
 }
 
-// ============================================================================
-// 6. English text (Greedy Sequence Packing)
-//
-//   English text token English text seq_len English text,
-//   English text EOS/BOS English text.English text ~2x.
-// ============================================================================
+
+
+
+
+
+
 
 struct packing_buffer {
     []int tokens
@@ -368,7 +368,7 @@ func pb_flush(packing_buffer buf) []int {
         if i < buf.length {
             out[i] = buf.tokens[i]
         } else {
-            out[i] = 0  // PAD
+            out[i] = 0
         }
         i = i + 1
     }
@@ -379,11 +379,11 @@ func pb_reset(packing_buffer buf) packing_buffer {
     packing_buffer { tokens: buf.tokens, length: 0, capacity: buf.capacity }
 }
 
-// ============================================================================
-// 7. English textdataEnglish text
-// ============================================================================
 
-// English textweightEnglish textdataEnglish text (English text)
+
+
+
+
 func corpus_select_source(corpus_state state) corpus_source_selection {
     state.rng = state.rng * 1664525 + 1013904223
     int rabs = state.rng
@@ -410,17 +410,17 @@ func corpus_select_source(corpus_state state) corpus_source_selection {
     }
 }
 
-// ============================================================================
-// 8. English textbatchgenerate (English texttruthful JSONL fileEnglish textgenerate token batch)
-// ============================================================================
+
+
+
 
 struct corpus_batch {
-    []int input_ids     // [batch_size * seq_len]
-    []int target_ids    // [batch_size * seq_len]  (shifted by 1)
+    []int input_ids
+    []int target_ids
     int batch_size
     int seq_len
     int total_tokens
-    []string source_names   // English textSourceName
+    []string source_names
 }
 
 struct corpus_source_selection {
@@ -446,11 +446,11 @@ struct corpus_token_stream_result {
     int tokens_collected
 }
 
-// English text:
-//   1. English text  →  English text streaming reader English text
-//   2. JSONL English text  →  English text
-//   3. English text / deduplication
-// English text (doc_text, updated_state, ok)
+
+
+
+
+
 func corpus_read_document(corpus_state state) corpus_document_result {
     int attempts = 0
     int max_attempts = 20
@@ -467,7 +467,7 @@ func corpus_read_document(corpus_state state) corpus_document_result {
 
         if !lr.success {
             if lr.end_of_file {
-                // English textstart (epoch wrap)
+
                 state.readers[src_idx] = reset_reader(state.readers[src_idx])
             }
             attempts = attempts + 1
@@ -518,9 +518,9 @@ func corpus_read_document(corpus_state state) corpus_document_result {
     }
 }
 
-// ============================================================================
-// 9. main API: generateEnglish textbatch
-// ============================================================================
+
+
+
 
 func corpus_next_batch(corpus_state state) corpus_batch_result {
     int seq_len = state.config.seq_len
@@ -544,7 +544,7 @@ func corpus_next_batch(corpus_state state) corpus_batch_result {
         ok = doc_result.ok
 
         if !ok {
-            // English text; English text PAD English text
+
             while seqs_ready < batch_size {
                 int pos = seqs_ready * seq_len
                 int t = 0
@@ -559,14 +559,14 @@ func corpus_next_batch(corpus_state state) corpus_batch_result {
             break
         }
 
-        // Tokenize
+
         []int token_ids = encode(state.tokenizer, doc_text)
         state.total_tokens_seen = state.total_tokens_seen + len(token_ids)
 
-        // English text BOS
+
         buf = pb_append(buf, bos)
 
-        // English text token English text packing buffer; English text
+
         int i = 0
         while i < len(token_ids) {
             buf = pb_append(buf, token_ids[i])
@@ -577,7 +577,7 @@ func corpus_next_batch(corpus_state state) corpus_batch_result {
                 int t = 0
                 while t < seq_len {
                     all_input[pos + t] = seq[t]
-                    // target = English text (next-token English text)
+
                     if t + 1 < seq_len {
                         all_target[pos + t] = seq[t + 1]
                     } else {
@@ -585,7 +585,7 @@ func corpus_next_batch(corpus_state state) corpus_batch_result {
                     }
                     t = t + 1
                 }
-                src_names[seqs_ready] = doc_text  // English text: actualEnglish textSourceEnglish text
+                src_names[seqs_ready] = doc_text
                 seqs_ready = seqs_ready + 1
                 buf = pb_reset(buf)
 
@@ -594,7 +594,7 @@ func corpus_next_batch(corpus_state state) corpus_batch_result {
             i = i + 1
         }
 
-        // English text, English text EOS
+
         buf = pb_append(buf, eos)
     }
 
@@ -651,9 +651,9 @@ func corpus_collect_token_ids(corpus_state state, int max_tokens) corpus_token_s
     }
 }
 
-// ============================================================================
-// 10. statistics
-// ============================================================================
+
+
+
 
 struct corpus_stats {
     int total_docs
@@ -682,9 +682,9 @@ func corpus_get_stats(corpus_state state) corpus_stats {
     }
 }
 
-// ============================================================================
-// 11. helper
-// ============================================================================
+
+
+
 
 func cl_substring(string s, int start, int end) string {
     string out = ""

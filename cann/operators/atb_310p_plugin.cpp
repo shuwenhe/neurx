@@ -217,7 +217,7 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
                       {static_cast<int64_t>(plan.token_count),
                        static_cast<int64_t>(plan.head_size / 2)}),
         host_i32(q_sequence_lengths_)};
-    // The 310P ATB RoPE path permits q/k output aliasing.
+
     pack.outTensors = {fp16(query), fp16(key)};
     return run(rope_, pack, "RoPE");
   }
@@ -983,8 +983,8 @@ Plugin& plugin() {
   return instance;
 }
 
-}  // namespace
-}  // namespace neurx::cann
+}
+}
 
 extern "C" uint32_t neurx_cann_operator_abi_version() { return 2; }
 

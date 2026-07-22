@@ -1,27 +1,27 @@
-// ============================================================================
-// NeurX-R1 Style GRPO (Group Relative Policy Optimization)
-//
-// Paper: "R1-style Group Relative Policy Optimization" (reference implementation)
-//
-// Core innovations:
-// 1. Group Relative Advantage: A_i = (r_i - mean) / std — no critic needed
-// 2. Rule-Based Rewards: format + accuracy (no neural reward model)
-// 3. KL Regularization: L = -clip_surrogate + beta * D_KL
-// 4. Cold Start: SFT warmup with CoT data before RL
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
 
 package neurx.alignment.neurx_r1_grpo
 
-// ============================================================================
-// 1. GRPO Config
-// ============================================================================
+
+
+
 
 struct grpo_config {
-    int group_size                // G = outputs per prompt (e.g. 4 or 8)
+    int group_size
     int num_prompts_per_batch
 
-    float clip_epsilon            // PPO clip range (e.g. 0.2)
-    float kl_beta                 // KL penalty coefficient (e.g. 0.04)
+    float clip_epsilon
+    float kl_beta
 
     float learning_rate
     float max_grad_norm
@@ -45,9 +45,9 @@ func new_grpo_config() grpo_config {
     }
 }
 
-// ============================================================================
-// 2. Data Structures
-// ============================================================================
+
+
+
 
 struct generation_output {
     string text
@@ -64,7 +64,7 @@ struct generation_group {
     []generation_output outputs
     float group_mean_reward
     float group_std_reward
-    []float advantages           // [G] — group-relative advantages
+    []float advantages
 }
 
 struct grpo_training_state {
@@ -83,11 +83,11 @@ struct grpo_training_state {
     []float accuracy_reward_history
 }
 
-// ============================================================================
-// 3. Rule-Based Rewards
-// ============================================================================
 
-// Format reward: check for <think> / </think> reasoning tags
+
+
+
+
 func compute_format_reward(string text) float {
     float reward = 0.0
 
@@ -98,7 +98,7 @@ func compute_format_reward(string text) float {
         reward = reward + 0.5
     }
 
-    // Check think comes before answer
+
     int think_pos = find_substring(text, "<think>")
     int answer_pos = find_substring(text, "</think>")
     if think_pos >= 0 && answer_pos >= 0 && think_pos < answer_pos {
@@ -108,7 +108,7 @@ func compute_format_reward(string text) float {
     reward
 }
 
-// Accuracy reward: check if output contains correct answer
+
 func compute_accuracy_reward(string output, string expected_answer) float {
     if contains_substring(output, expected_answer) {
         return 1.0
@@ -116,7 +116,7 @@ func compute_accuracy_reward(string output, string expected_answer) float {
     0.0
 }
 
-// Math reward: extract \boxed{} answer and compare
+
 func compute_math_reward(string output, string ground_truth) float {
     float format_r = compute_format_reward(output)
     float accuracy_r = 0.0
@@ -129,7 +129,7 @@ func compute_math_reward(string output, string ground_truth) float {
     format_r + accuracy_r
 }
 
-// Code reward: check test case pass rate
+
 func compute_code_reward(string output, []string test_cases, []string expected_outputs) float {
     float format_r = compute_format_reward(output)
 
@@ -155,9 +155,9 @@ func compute_code_reward(string output, []string test_cases, []string expected_o
     format_r + pass_rate
 }
 
-// ============================================================================
-// 4. String Utilities
-// ============================================================================
+
+
+
 
 func contains_substring(string s, string substr) bool {
     int s_len = len(s)
@@ -264,9 +264,9 @@ func find_substring_from(string s, string substr, int from) int {
     -1
 }
 
-// ============================================================================
-// 5. Math Utilities
-// ============================================================================
+
+
+
 
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
@@ -290,12 +290,12 @@ func exp_approx(float x) float {
     result
 }
 
-// ============================================================================
-// 6. Group Relative Advantage (Core Algorithm!)
-// ============================================================================
 
-// A_i = (r_i - mean(r_1..r_G)) / std(r_1..r_G)
-// Replaces value function / critic model entirely
+
+
+
+
+
 
 func compute_group_advantages([]generation_output outputs, int G) ([]float, float, float) {
     float sum_r = 0.0
@@ -333,12 +333,12 @@ func compute_group_advantages([]generation_output outputs, int G) ([]float, floa
     (advantages, mean_r, std_r)
 }
 
-// ============================================================================
-// 7. GRPO Loss Function
-// ============================================================================
 
-// L = -1/G * sum_i [ A_i * min(ratio, clip(ratio, 1-eps, 1+eps)) ]
-//     + beta * D_KL(pi_ref || pi_theta)
+
+
+
+
+
 
 func compute_grpo_loss(
     []float advantages, []float new_log_probs, []float old_log_probs,
@@ -349,11 +349,11 @@ func compute_grpo_loss(
 
     int i = 0
     while i < G {
-        // Importance sampling ratio: r_i = pi_theta / pi_old
+
         float log_ratio = new_log_probs[i] - old_log_probs[i]
         float ratio = exp_approx(log_ratio)
 
-        // PPO-style clipped surrogate
+
         float surr1 = ratio * advantages[i]
         float surr2 = 0.0
         if ratio < 1.0 - clip_eps {
@@ -370,7 +370,7 @@ func compute_grpo_loss(
 
         policy_loss = policy_loss + clipped_loss
 
-        // KL: D_KL(pi_ref || pi_theta) ~ log(pi_ref / pi_theta)
+
         float kl = ref_log_probs[i] - new_log_probs[i]
         total_kl = total_kl + kl
 
@@ -385,9 +385,9 @@ func compute_grpo_loss(
     (total_loss, policy_loss, total_kl)
 }
 
-// ============================================================================
-// 8. GRPO Training Step
-// ============================================================================
+
+
+
 
 struct grpo_step_result {
     float total_loss
@@ -405,10 +405,10 @@ func grpo_training_step(
     grpo_config cfg = state.config
     int G = cfg.group_size
 
-    // Compute group-relative advantages
+
     ([]float advantages, float mean_r, float std_r) = compute_group_advantages(group.outputs, G)
 
-    // Extract log probabilities
+
     []float new_log_probs = []float{cap: G}
     []float old_log_probs = []float{cap: G}
     []float ref_log_probs = []float{cap: G}
@@ -421,18 +421,18 @@ func grpo_training_step(
         i = i + 1
     }
 
-    // Compute GRPO loss
+
     (float total_loss, float policy_loss, float kl_div) = compute_grpo_loss(
         advantages, new_log_probs, old_log_probs, ref_log_probs,
         G, cfg.clip_epsilon, cfg.kl_beta
     )
 
-    // Update running statistics
+
     float alpha = 0.01
     float new_mean = state.running_mean_reward * (1.0 - alpha) + mean_r * alpha
     float new_std = state.running_std_reward * (1.0 - alpha) + std_r * alpha
 
-    // Compute average reward breakdown
+
     float avg_format = 0.0
     float avg_accuracy = 0.0
     i = 0
@@ -444,7 +444,7 @@ func grpo_training_step(
     avg_format = avg_format / G as float
     avg_accuracy = avg_accuracy / G as float
 
-    // Update state
+
     grpo_training_state new_state = state
     new_state.global_step = state.global_step + 1
     new_state.total_prompts_processed = state.total_prompts_processed + 1
@@ -472,9 +472,9 @@ func sum_float([]float arr) float {
     s
 }
 
-// ============================================================================
-// 9. Cold Start SFT
-// ============================================================================
+
+
+
 
 struct cold_start_data {
     string prompt
@@ -498,9 +498,9 @@ func grpo_training_init(grpo_config cfg) grpo_training_state {
     }
 }
 
-// ============================================================================
-// 10. Training Monitor
-// ============================================================================
+
+
+
 
 struct grpo_monitor {
     int step
@@ -526,14 +526,14 @@ func grpo_get_monitor(grpo_training_state state, grpo_step_result result) grpo_m
     }
 }
 
-// ============================================================================
-// 11. Reward Hacking Detection
-// ============================================================================
 
-// Detect reward hacking signals:
-// 1. KL divergence explosion (> 5x normal)
-// 2. High format reward but low accuracy
-// 3. Abnormal generation length growth
+
+
+
+
+
+
+
 
 func detect_reward_hacking(
     float kl_div, float format_r, float accuracy_r,
@@ -545,9 +545,9 @@ func detect_reward_hacking(
     false
 }
 
-// ============================================================================
-// 12. Module Info
-// ============================================================================
+
+
+
 
 func unit_name() string {
     "neurx/alignment/neurx_r1_grpo"

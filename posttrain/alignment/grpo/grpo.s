@@ -1,49 +1,49 @@
 package neurx.posttrain.grpo
 
-// ============================================================================
-// GRPO — Group Relative Policy Optimization
-//
-// English text: GRPO / R1-style reasoning reference implementations
-//
-// English text:
-//   English text q English text G English textoutput {o₁,...,o_G}, English textrewardEnglish textfunction:
-//     Advantage_i = (r_i - mean(r)) / (std(r) + ε)
-//   English textgradientEnglish text (English text PPO clip + KL English text):
-//     L_GRPO = -E[ min(ρ_i - A_i, clip(ρ_i, 1-ε, 1+ε) - A_i) ] + β-KL
-//   English text ρ_i = π_θ(o_i|q) / π_ref(o_i|q)  (English text)
-//
-// English text PPO English text:
-//   • English texttrainingEnglish text (English text 2× English text)
-//   • English textrewardEnglish text, English text
-//   • English textinference/English text: English text
-//
-// rewardEnglish text (R1-style):
-//   r_format: <think>...</think><answer>...</answer> English text +0.1
-//   r_accuracy: English text +1.0
-//   r_length: English text -0.01/100token
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use neurx.posttrain.config
 
-// ============================================================================
-// 1. configuration
-// ============================================================================
+
+
+
 
 struct grpo_config {
-    int group_size          // G: English textoutputEnglish text (English text 4-16)
-    float clip_eps          // PPO clip ε (English text 0.2)
-    float kl_coef           // KL English text β (English text 0.01-0.1)
-    float gamma             // English text (English textstepinferenceEnglish text 1.0)
-    int max_gen_len         // English textgenerateEnglish text
-    int min_gen_len         // English textgenerateEnglish text
-    float temperature       // English text
-    float top_p             // nucleus sampling
-    int num_iterations      // GRPO English text (English text 1-4)
-    bool use_format_reward  // English textreward
-    bool use_length_penalty // English text
-    float length_penalty_per_100  // English text100 token English text
-    float advantage_eps     // English text ε (English text0)
-    string reward_type      // "math" | "code" | "general"
+    int group_size
+    float clip_eps
+    float kl_coef
+    float gamma
+    int max_gen_len
+    int min_gen_len
+    float temperature
+    float top_p
+    int num_iterations
+    bool use_format_reward
+    bool use_length_penalty
+    float length_penalty_per_100
+    float advantage_eps
+    string reward_type
 }
 
 func default_grpo_config() grpo_config {
@@ -84,27 +84,27 @@ func neurx_r1_grpo_config() grpo_config {
     }
 }
 
-// ============================================================================
-// 2. English text GRPO data
-// ============================================================================
 
-// English text"English text"= English text G English textoutput
+
+
+
+
 struct grpo_group {
-    string question             // English text
-    string reference_answer     // English text (English text)
-    []string outputs            // [G] modelEnglish textoutput
-    []int    output_lengths     // [G] English textoutput token English text
-    []float  rewards            // [G] English textoutputEnglish textreward
-    []float  advantages         // [G] English text
-    []float  log_probs_policy   // [G] English text log π_θ(o|q)
-    []float  log_probs_ref      // [G] English text log π_ref(o|q)
+    string question
+    string reference_answer
+    []string outputs
+    []int    output_lengths
+    []float  rewards
+    []float  advantages
+    []float  log_probs_policy
+    []float  log_probs_ref
 }
 
-// ============================================================================
-// 3. rewardfunction
-// ============================================================================
 
-// English text <think>...</think><answer>...</answer>
+
+
+
+
 func check_format_reward(string output) float {
     bool has_think  = string_contains(output, "<think>") && string_contains(output, "</think>")
     bool has_answer = string_contains(output, "<answer>") && string_contains(output, "</answer>")
@@ -117,26 +117,26 @@ func check_format_reward(string output) float {
     0.0
 }
 
-// English text <answer>...</answer> English textcontentEnglish text
+
 func check_accuracy_reward(string output, string reference) float {
     string extracted = extract_answer_tag(output)
     if string_equals(extracted, reference) {
         return 1.0
     }
-    // English text: English text
+
     string trimmed_out = string_trim(extracted)
     string trimmed_ref = string_trim(reference)
     if string_equals(trimmed_out, trimmed_ref) {
         return 1.0
     }
-    // English text (English text)
+
     if string_contains(trimmed_out, trimmed_ref) {
         return 0.3
     }
     0.0
 }
 
-// English text: English text max_gen_len English text 50% startEnglish text
+
 func compute_length_penalty(int token_len, int max_len, float penalty_per_100) float {
     int threshold = max_len / 2
     if token_len <= threshold {
@@ -158,14 +158,14 @@ func compute_reward(string output, string reference, int token_len, grpo_config 
     r
 }
 
-// ============================================================================
-// 4. English textcompute (English text)
-// ============================================================================
+
+
+
 
 func compute_group_advantages([]float rewards, float eps) []float {
     int G = len(rewards)
 
-    // mean
+
     float mean = 0.0
     int i = 0
     for i < G {
@@ -174,7 +174,7 @@ func compute_group_advantages([]float rewards, float eps) []float {
     }
     mean = mean / float_grpo(G)
 
-    // std
+
     float var = 0.0
     int j = 0
     for j < G {
@@ -195,47 +195,47 @@ func compute_group_advantages([]float rewards, float eps) []float {
     adv
 }
 
-// ============================================================================
-// 5. GRPO English textfunction (English text English texttoken)
-// ============================================================================
 
-// computeEnglish textoutput i English text GRPO loss English text
-// log_ratio = log π_θ - log π_ref (English text token)
+
+
+
+
+
 func grpo_token_loss(float log_prob_policy, float log_prob_ref, float advantage, float clip_eps, float kl_coef) float {
     float log_ratio = log_prob_policy - log_prob_ref
     float ratio = exp_grpo(log_ratio)
 
-    // Clipped surrogate
+
     float obj1 = ratio * advantage
     float obj2 = clip_grpo(ratio, 1.0 - clip_eps, 1.0 + clip_eps) * advantage
-    float policy_loss = 0.0 - min_float(obj1, obj2)   // negative for gradient ascent
+    float policy_loss = 0.0 - min_float(obj1, obj2)
 
-    // KL penalty: KL(π_θ || π_ref) ≈ ratio - log_ratio - 1
+
     float kl = ratio - log_ratio - 1.0
 
     policy_loss + kl_coef * kl
 }
 
-// ============================================================================
-// 6. GRPO stepEnglish text (English text)
-// ============================================================================
+
+
+
 
 struct grpo_step_result {
-    float total_loss          // English text GRPO loss
-    float policy_loss         // English text loss
-    float kl_loss             // KL English text
-    float mean_reward         // English textreward
-    float reward_std          // rewardEnglish text
-    float mean_advantage      // English text (English text 0)
-    float clip_fraction       // clip English text
-    []float advantages        // [G] English textoutputEnglish text
-    int accepted_outputs      // English textrewardoutputEnglish text
+    float total_loss
+    float policy_loss
+    float kl_loss
+    float mean_reward
+    float reward_std
+    float mean_advantage
+    float clip_fraction
+    []float advantages
+    int accepted_outputs
 }
 
 func grpo_step(grpo_group group, grpo_config cfg) grpo_step_result {
     int G = len(group.outputs)
 
-    // computeEnglish textoutputEnglish textreward
+
     []float rewards = []
     int i = 0
     for i < G {
@@ -249,10 +249,10 @@ func grpo_step(grpo_group group, grpo_config cfg) grpo_step_result {
         i = i + 1
     }
 
-    // computeEnglish text
+
     []float adv = compute_group_advantages(rewards, cfg.advantage_eps)
 
-    // compute loss
+
     float total_loss = 0.0
     float kl_total   = 0.0
     float clips      = 0.0
@@ -261,7 +261,7 @@ func grpo_step(grpo_group group, grpo_config cfg) grpo_step_result {
         float log_ratio = group.log_probs_policy[j] - group.log_probs_ref[j]
         float ratio = exp_grpo(log_ratio)
 
-        // clip check
+
         float ratio_clipped = clip_grpo(ratio, 1.0 - cfg.clip_eps, 1.0 + cfg.clip_eps)
         float obj1 = ratio * adv[j]
         float obj2 = ratio_clipped * adv[j]
@@ -282,7 +282,7 @@ func grpo_step(grpo_group group, grpo_config cfg) grpo_step_result {
     total_loss = total_loss / fG
     kl_total   = kl_total / fG
 
-    // statistics
+
     float mean_r = 0.0
     int k = 0
     for k < G {
@@ -322,9 +322,9 @@ func grpo_step(grpo_group group, grpo_config cfg) grpo_step_result {
     }
 }
 
-// ============================================================================
-// 7. GRPO trainingEnglish textstate
-// ============================================================================
+
+
+
 
 struct grpo_trainer_state {
     grpo_config cfg
@@ -332,11 +332,11 @@ struct grpo_trainer_state {
     float total_reward
     float total_loss
     int total_groups
-    // English text (English textmonitoring)
-    float ema_reward       // English textreward
-    float ema_kl           // English text KL
-    float ema_clip_frac    // English text clip English text
-    float ema_decay        // EMA English text (0.98)
+
+    float ema_reward
+    float ema_kl
+    float ema_clip_frac
+    float ema_decay
 }
 
 func new_grpo_trainer(grpo_config cfg) grpo_trainer_state {
@@ -374,17 +374,17 @@ func grpo_train_step(grpo_trainer_state trainer, grpo_group group) grpo_train_st
     grpo_train_step_result { state: updated, step_result: result }
 }
 
-// ============================================================================
-// 8. English text (Curriculum) — English text
-// ============================================================================
 
-// English text
+
+
+
+
 struct grpo_curriculum_state {
-    float recent_accuracy    // English text N stepEnglish text
-    int adaptive_group_size  // English text
-    float adaptive_temp      // English text
-    int steps_since_update   // English textstepEnglish text
-    int update_interval      // English text N stepEnglish text
+    float recent_accuracy
+    int adaptive_group_size
+    float adaptive_temp
+    int steps_since_update
+    int update_interval
 }
 
 func new_grpo_curriculum(grpo_config base_cfg) grpo_curriculum_state {
@@ -406,14 +406,14 @@ func grpo_curriculum_update(grpo_curriculum_state cur, float step_accuracy, grpo
 
     if updated.steps_since_update >= cur.update_interval {
         updated.steps_since_update = 0
-        // English text → English text (English text temperature, English text group)
-        // English text → English text (English text temperature, English text group)
+
+
         if acc > 0.9 {
-            // English text, English text
+
             updated.adaptive_temp = min_float(base_cfg.temperature * 1.2, 1.0)
         } else {
             if acc < 0.3 {
-                // English text, English text
+
                 updated.adaptive_temp = base_cfg.temperature * 0.8
             }
         }
@@ -422,9 +422,9 @@ func grpo_curriculum_update(grpo_curriculum_state cur, float step_accuracy, grpo
     updated
 }
 
-// ============================================================================
-// 9. toolfunction
-// ============================================================================
+
+
+
 
 func float_grpo(int n) float {
     float v = 0.0
@@ -466,14 +466,14 @@ func min_float(float a, float b) float {
     b
 }
 
-// English texttool (English textrunEnglish text)
+
 func string_contains(string s, string sub) bool {
-    // runtime implementation
+
     false
 }
 
 func string_equals(string a, string b) bool {
-    // runtime implementation
+
     false
 }
 
@@ -482,7 +482,7 @@ func string_trim(string s) string {
 }
 
 func extract_answer_tag(string output) string {
-    // English text <answer>...</answer> content
-    // runtime implementation
+
+
     output
 }

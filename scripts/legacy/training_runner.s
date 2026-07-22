@@ -1,12 +1,12 @@
-#!/usr/bin/env s
 
-// ============================================================================
-// NeurX Training Runner
-//
-// Purpose: High-performance training driver for 1T MoE GPT models
-// Language: S (Go-like dialect)
-// Status: Phase 2 implementation
-// ============================================================================
+
+
+
+
+
+
+
+
 
 package main
 
@@ -21,9 +21,9 @@ import (
 	"time"
 )
 
-// ============================================================================
-// Configuration Types
-// ============================================================================
+
+
+
 
 type training_config struct {
 	ModelName       string `json:"model_name"`
@@ -77,9 +77,9 @@ type training_metrics struct {
 	Timestamp   string      `json:"timestamp"`
 }
 
-// ============================================================================
-// Global State
-// ============================================================================
+
+
+
 
 var gtraining_state = &training_state{
 	CurrentStep: 0,
@@ -111,12 +111,12 @@ var gConfig = &training_config{
 	Seed: 42,
 }
 
-// ============================================================================
-// Configuration Management
-// ============================================================================
+
+
+
 
 func loadConfigFromEnv() {
-	// Load from environment variables with fallbacks
+
 	if home := os.Getenv("NEURX_HOME"); home != "" {
 		gConfig.DataDir = filepath.Join(home, "dataset", "pretrain")
 		gConfig.OutputDir = filepath.Join(home, "artifacts", "output")
@@ -187,14 +187,14 @@ func saveConfigToFile(path string) error {
 	return nil
 }
 
-// ============================================================================
-// Training Lifecycle
-// ============================================================================
+
+
+
 
 func initializeTraining() error {
 	logInfo("Initializing training...")
 
-	// Create output directories
+
 	dirs := []string{
 		gConfig.OutputDir,
 		gConfig.CheckpointDir,
@@ -208,13 +208,13 @@ func initializeTraining() error {
 		}
 	}
 
-	// Validate data directory
+
 	stat, err := os.Stat(gConfig.DataDir)
 	if err != nil || !stat.IsDir() {
 		return fmt.Errorf("data directory not found: %s", gConfig.DataDir)
 	}
 
-	// Save initial config
+
 	configPath := filepath.Join(gConfig.OutputDir, "config_initial.json")
 	err = saveConfigToFile(configPath)
 	if err != nil {
@@ -236,7 +236,7 @@ func loadCheckpoint(path string) error {
 	}
 
 	if stat.IsDir() {
-		// Try to load state.json from checkpoint directory
+
 		statePath := filepath.Join(path, "state.json")
 		data, err := ioutil.ReadFile(statePath)
 		if err != nil {
@@ -268,7 +268,7 @@ func saveCheckpoint(step int64) error {
 		return err
 	}
 
-	// Save training state
+
 	statePath := filepath.Join(checkpointDir, "state.json")
 	data, err := json.MarshalIndent(gtraining_state, "", "  ")
 	if err != nil {
@@ -280,7 +280,7 @@ func saveCheckpoint(step int64) error {
 		return err
 	}
 
-	// Save config
+
 	configPath := filepath.Join(checkpointDir, "config.json")
 	err = saveConfigToFile(configPath)
 	if err != nil {
@@ -293,27 +293,27 @@ func saveCheckpoint(step int64) error {
 	return nil
 }
 
-// ============================================================================
-// Training Loop
-// ============================================================================
+
+
+
 
 func trainingStep(step int64) error {
-	// Simulate training computation
+
 	startTime := time.Now()
 
-	// Update training state
+
 	gtraining_state.CurrentStep = step
-	gtraining_state.AvgLoss = gtraining_state.AvgLoss*0.99 + 2.5*0.01 // Exponential moving average
+	gtraining_state.AvgLoss = gtraining_state.AvgLoss*0.99 + 2.5*0.01
 	gtraining_state.GradientNorm = calculateGradientNorm()
 
-	// Calculate learning rate with warmup
+
 	lr := calculateLearningRate(step)
 	gtraining_state.LearningRate = lr
 
 	elapsed := time.Since(startTime).Seconds()
 	gtraining_state.TimesPerStep = elapsed
 
-	// Calculate tokens per second
+
 	tokPerStep := int64(gConfig.BatchSize) * int64(gConfig.SeqLen)
 	gtraining_state.TokPerSec = float64(tokPerStep) / elapsed
 
@@ -323,7 +323,7 @@ func trainingStep(step int64) error {
 func evaluationStep(step int64) error {
 	logInfo(fmt.Sprintf("Running evaluation at step %d...", step))
 
-	// Simulate evaluation
+
 	evalLoss := 2.3
 	accuracy := 0.45
 
@@ -337,11 +337,11 @@ func evaluationStep(step int64) error {
 
 func calculateLearningRate(step int64) float64 {
 	if step < int64(gConfig.WarmupSteps) {
-		// Linear warmup
+
 		return gConfig.LearningRate * float64(step) / float64(gConfig.WarmupSteps)
 	}
 
-	// Cosine decay
+
 	decaySteps := int64(gConfig.TotalSteps) - int64(gConfig.WarmupSteps)
 	progress := float64(step-int64(gConfig.WarmupSteps)) / float64(decaySteps)
 
@@ -349,25 +349,25 @@ func calculateLearningRate(step int64) float64 {
 		progress = 1.0
 	}
 
-	// Cosine annealing
+
 	decayFactor := 0.5 * (1.0 + cosine(progress*3.14159))
 	return gConfig.LearningRate * decayFactor
 }
 
 func calculateGradientNorm() float64 {
-	// Simulate gradient norm calculation
+
 	return 0.5
 }
 
 func cosine(x float64) float64 {
-	// Simplified cosine approximation
-	// In real implementation, use math.Cos
+
+
 	return 1.0 - x*x/2.0
 }
 
-// ============================================================================
-// Main Training Loop
-// ============================================================================
+
+
+
 
 func runTraining() error {
 	logInfo("Starting training loop...")
@@ -375,14 +375,14 @@ func runTraining() error {
 		gConfig.ModelName, gConfig.ParamCount, gConfig.TotalSteps))
 
 	for step := int64(0); step < int64(gConfig.TotalSteps); step++ {
-		// Training step
+
 		err := trainingStep(step)
 		if err != nil {
 			logError("Training step failed: " + err.Error())
 			return err
 		}
 
-		// Evaluation
+
 		if step % int64(gConfig.EvalSteps) == 0 && step > 0 {
 			err := evaluationStep(step)
 			if err != nil {
@@ -390,7 +390,7 @@ func runTraining() error {
 			}
 		}
 
-		// checkpoint
+
 		if step % int64(gConfig.CheckpointSteps) == 0 && step > 0 {
 			err := saveCheckpoint(step)
 			if err != nil {
@@ -398,7 +398,7 @@ func runTraining() error {
 			}
 		}
 
-		// Log metrics every 10 steps
+
 		if step % 10 == 0 {
 			metric := training_metrics{
 				Step: step,
@@ -414,7 +414,7 @@ func runTraining() error {
 			logMetric(&metric)
 		}
 
-		// Log progress every 100 steps
+
 		if step % 100 == 0 {
 			logInfo(fmt.Sprintf("[Step %d/%d] Loss: %.4f, LR: %.6f, Tok/s: %.0f",
 				step, gConfig.TotalSteps, gtraining_state.AvgLoss,
@@ -422,7 +422,7 @@ func runTraining() error {
 		}
 	}
 
-	// Save final checkpoint
+
 	err := saveCheckpoint(int64(gConfig.TotalSteps))
 	if err != nil {
 		logWarn("Failed to save final checkpoint: " + err.Error())
@@ -432,9 +432,9 @@ func runTraining() error {
 	return nil
 }
 
-// ============================================================================
-// Utility Functions
-// ============================================================================
+
+
+
 
 func logInfo(msg string) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
@@ -454,7 +454,7 @@ func logError(msg string) {
 func logMetric(m *training_metrics) {
 	data, _ := json.Marshal(m)
 	metricsPath := filepath.Join(gConfig.LogDir, "metrics.jsonl")
-	
+
 	f, err := os.OpenFile(metricsPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		logWarn("Failed to write metrics: " + err.Error())
@@ -497,9 +497,9 @@ func printConfig() {
 	fmt.Println(string(data))
 }
 
-// ============================================================================
-// Main Entry Point
-// ============================================================================
+
+
+
 
 func main() {
 	if len(os.Args) < 2 {
@@ -509,10 +509,10 @@ func main() {
 
 	command := os.Args[1]
 
-	// Load configuration from environment
+
 	loadConfigFromEnv()
 
-	// Handle commands
+
 	switch command {
 	case "run":
 		err := initializeTraining()
@@ -528,9 +528,9 @@ func main() {
 		}
 
 	case "resume":
-		// Find latest checkpoint
+
 		latestCheckpoint := filepath.Join(gConfig.CheckpointDir, "checkpoint_step_0")
-		
+
 		entries, err := ioutil.ReadDir(gConfig.CheckpointDir)
 		if err == nil && len(entries) > 0 {
 			latestCheckpoint = filepath.Join(gConfig.CheckpointDir, entries[len(entries)-1].Name())

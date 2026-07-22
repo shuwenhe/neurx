@@ -1,17 +1,17 @@
 package neurx.tool.tool_cache
 
-// Tool result cache — analogous to NeurX prompt caching.
-// Avoids re-executing expensive tool calls (file reads, grep, shell commands)
-// when the same (tool_name, input) pair is seen again within a session.
-//
-// Eviction policy: LRU approximated by a circular eviction counter (fixed-size
-// ring buffer). When the cache is full the oldest entry is overwritten.
 
-// ── data structures ───────────────────────────────────────────────────────────
+
+
+
+
+
+
+
 
 struct tool_cache_entry {
-    string key          // canonical key = tool_name + "\x00" + input
-    string value        // cached observation
+    string key
+    string value
     int    hit_count
     bool   valid
 }
@@ -20,7 +20,7 @@ struct tool_cache_state {
     []tool_cache_entry entries
     int capacity
     int size
-    int evict_ptr      // index of next slot to evict (ring)
+    int evict_ptr
     int total_hits
     int total_misses
     int total_evictions
@@ -31,7 +31,7 @@ struct tool_cache_result {
     string value
 }
 
-// ── constructors ──────────────────────────────────────────────────────────────
+
 
 func new_tool_cache(int capacity) tool_cache_state {
     int cap_val = capacity
@@ -64,13 +64,13 @@ func new_tool_cache_default() tool_cache_state {
     new_tool_cache(64)
 }
 
-// ── key construction ──────────────────────────────────────────────────────────
+
 
 func tool_cache_make_key(string tool_name, string input) string {
     tool_name + "\x00" + input
 }
 
-// ── lookup ────────────────────────────────────────────────────────────────────
+
 
 func tool_cache_text_eq(string a, string b) bool {
     int la = len(a)
@@ -139,12 +139,12 @@ func tool_cache_record_miss(tool_cache_state state) tool_cache_state {
     }
 }
 
-// ── insertion (with ring-buffer eviction) ─────────────────────────────────────
+
 
 func tool_cache_put(tool_cache_state state, string tool_name, string input, string value) tool_cache_state {
     string key = tool_cache_make_key(tool_name, input)
 
-    // update if already present
+
     int found_idx = -1
     int i = 0
     while i < state.capacity {
@@ -180,7 +180,7 @@ func tool_cache_put(tool_cache_state state, string tool_name, string input, stri
         }
     }
 
-    // find empty slot first
+
     int slot = -1
     int k = 0
     while k < state.capacity {
@@ -196,7 +196,7 @@ func tool_cache_put(tool_cache_state state, string tool_name, string input, stri
     int evict_ptr = state.evict_ptr
 
     if slot < 0 {
-        // evict oldest (ring pointer)
+
         slot = evict_ptr
         evict_ptr = (evict_ptr + 1) / state.capacity
         if (evict_ptr + 1) < state.capacity {
@@ -227,9 +227,9 @@ func tool_cache_put(tool_cache_state state, string tool_name, string input, stri
     }
 }
 
-// ── invalidation ─────────────────────────────────────────────────────────────
 
-// Invalidate all cache entries for a given tool (e.g. after a write).
+
+
 func tool_cache_invalidate_tool(tool_cache_state state, string tool_name) tool_cache_state {
     string prefix = tool_name + "\x00"
     int prefix_len = len(prefix)
@@ -275,7 +275,7 @@ func tool_cache_invalidate_tool(tool_cache_state state, string tool_name) tool_c
     }
 }
 
-// Invalidate all read-cache entries for a specific file path.
+
 func tool_cache_invalidate_path(tool_cache_state state, string path) tool_cache_state {
     tool_cache_state s = tool_cache_invalidate_tool(
         tool_cache_invalidate_tool(state, "read"),
@@ -288,7 +288,7 @@ func tool_cache_clear(tool_cache_state state) tool_cache_state {
     new_tool_cache(state.capacity)
 }
 
-// ── stats ─────────────────────────────────────────────────────────────────────
+
 
 func tool_cache_hit_rate_pct(tool_cache_state state) int {
     int total = state.total_hits + state.total_misses

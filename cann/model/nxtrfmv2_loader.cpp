@@ -153,7 +153,7 @@ Status skip_training_state(std::ifstream& input, uint64_t elements) {
                : Status::failure("NXTRFMV2 optimizer state is truncated");
 }
 
-}  // namespace
+}
 
 Status inspect_nxtrfmv2(const std::string& path, ModelMetadata* metadata) {
   if (!metadata) return Status::failure("model metadata output is null");
@@ -417,4 +417,4 @@ const DeviceWeight* Nxtrfmv2Model::lm_head() const {
   return loaded_ && !weights_.empty() ? &weights_.back() : nullptr;
 }
 
-}  // namespace neurx::cann
+}

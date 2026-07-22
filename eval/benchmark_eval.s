@@ -1,32 +1,32 @@
 package neurx.eval.benchmark_eval
 
-// ============================================================================
-// Standard Benchmark evaluator (real, runs on the GPT model)
-//
-// Implements the same scoring methodology as lm-evaluation-harness:
-//
-//   • Multiple-choice (MMLU / HellaSwag / ARC / PIQA / WinoGrande):
-//       For each answer choice, compute the model's log-likelihood of the
-//       continuation tokens given the prompt. Pick argmax (length-normalized).
-//       Accuracy = fraction of questions answered correctly.
-//
-//   • Perplexity (WikiText / held-out corpus):
-//       PPL = exp( mean cross-entropy over tokens ).
-//
-//   • Generative exact-match (GSM8K / TriviaQA):
-//       Greedy-decode and compare the extracted answer span to the gold answer.
-//
-// All scoring uses the real gpt_forward logits — no estimates.
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use neurx.model.llm.gpt.{
     model_config, language_model, model_output,
     gpt_forward, gpt_generate_greedy
 }
 
-// ============================================================================
-// 1. English texthelper
-// ============================================================================
+
+
+
 
 func be_exp(float x) float {
     if x > 20.0 { return 485165195.4 }
@@ -61,18 +61,18 @@ func be_log(float x) float {
     s + adj
 }
 
-// ============================================================================
-// 2. English text (English text)
-//
-//   English textcomplete token English text = prompt ++ continuation,
-//   English text continuation English text log P(token_t | token_<t) English text.
-//   prompt_len English text continuation startEnglish text.
-// ============================================================================
+
+
+
+
+
+
+
 
 struct logprob_result {
-    float total_logprob        // sum log P over continuation
-    int num_tokens             // continuation token English text
-    float avg_logprob          // English text
+    float total_logprob
+    int num_tokens
+    float avg_logprob
 }
 
 func gpt_sequence_logprob(
@@ -85,15 +85,15 @@ func gpt_sequence_logprob(
         return logprob_result { total_logprob: 0.0, num_tokens: 0, avg_logprob: 0.0 }
     }
 
-    // English text
+
     model_output out = gpt_forward(model, full_tokens, 1, seq_len)
     int vocab = model.vocab_size
 
     float total_logprob = 0.0
     int num_tokens = 0
 
-    // English text continuation English text t (prompt_len..seq_len-1):
-    //   English text token_t English text logits English text t-1
+
+
     int t = prompt_len
     while t < seq_len {
         int logit_base = (t - 1) * vocab
@@ -101,7 +101,7 @@ func gpt_sequence_logprob(
         if target < 0 { target = 0 }
         if target >= vocab { target = vocab - 1 }
 
-        // log softmax: logit[target] - logsumexp(logits)
+
         float max_l = out.logits[logit_base]
         int j = 1
         while j < vocab {
@@ -135,29 +135,29 @@ func gpt_sequence_logprob(
     }
 }
 
-// ============================================================================
-// 3. English text (MMLU / HellaSwag / ARC ...)
-// ============================================================================
+
+
+
 
 struct mc_choice {
-    []int continuation_tokens   // English text token English text
+    []int continuation_tokens
 }
 
 struct mc_question {
-    []int prompt_tokens         // English text (English text few-shot example)
-    []mc_choice choices         // English text
+    []int prompt_tokens
+    []mc_choice choices
     int num_choices
-    int correct_index           // English text
+    int correct_index
 }
 
 struct mc_eval_result {
     int total
     int correct
     float accuracy
-    float avg_confidence        // English text
+    float avg_confidence
 }
 
-// English textmodelEnglish textpreferenceEnglish text (English text)
+
 func mc_predict(language_model model, mc_question q) int {
     int best_idx = 0
     float best_score = -1000000000.0
@@ -165,7 +165,7 @@ func mc_predict(language_model model, mc_question q) int {
     while c < q.num_choices {
         []int full = mc_concat(q.prompt_tokens, q.choices[c].continuation_tokens)
         logprob_result lp = gpt_sequence_logprob(model, full, len(q.prompt_tokens))
-        // English text (HellaSwag English text avg; MMLU English text token English text total——English text avg)
+
         float score = lp.avg_logprob
         if score > best_score {
             best_score = score
@@ -186,7 +186,7 @@ func mc_concat([]int a, []int b) []int {
     out
 }
 
-// English text, English text
+
 func evaluate_multiple_choice(language_model model, []mc_question questions) mc_eval_result {
     int total = len(questions)
     int correct = 0
@@ -196,7 +196,7 @@ func evaluate_multiple_choice(language_model model, []mc_question questions) mc_
     while i < total {
         mc_question q = questions[i]
 
-        // computeEnglish text (English text)
+
         float best = -1000000000.0
         float second = -1000000000.0
         int best_idx = 0
@@ -236,9 +236,9 @@ func evaluate_multiple_choice(language_model model, []mc_question questions) mc_
     }
 }
 
-// ============================================================================
-// 4. English text (WikiText / held-out)
-// ============================================================================
+
+
+
 
 struct ppl_result {
     float perplexity
@@ -258,9 +258,9 @@ func evaluate_perplexity(language_model model, [][]int sequences) ppl_result {
             s = s + 1
             continue
         }
-        // English text continuation English text 1 start (English text LM English text)
+
         logprob_result lp = gpt_sequence_logprob(model, seq, 1)
-        total_loss = total_loss - lp.total_logprob   // NLL
+        total_loss = total_loss - lp.total_logprob
         total_tokens = total_tokens + lp.num_tokens
         s = s + 1
     }
@@ -276,13 +276,13 @@ func evaluate_perplexity(language_model model, [][]int sequences) ppl_result {
     }
 }
 
-// ============================================================================
-// 5. generateEnglish text (GSM8K / TriviaQA)
-// ============================================================================
+
+
+
 
 struct gen_question {
     []int prompt_tokens
-    []int answer_tokens         // English text token
+    []int answer_tokens
     int max_new_tokens
 }
 
@@ -292,7 +292,7 @@ struct gen_eval_result {
     float exact_match
 }
 
-// English textgenerateresultEnglish text token English text (English text)
+
 func gen_contains_answer([]int generated, []int answer) bool {
     int g = len(generated)
     int a = len(answer)
@@ -340,9 +340,9 @@ func evaluate_generative(language_model model, []gen_question questions) gen_eva
     }
 }
 
-// ============================================================================
-// 6. English text (English text)
-// ============================================================================
+
+
+
 
 struct benchmark_report {
     float mmlu_acc
@@ -352,7 +352,7 @@ struct benchmark_report {
     float wikitext_ppl
     float gsm8k_em
     float humaneval_em
-    float average_score        // English text (English text ppl)
+    float average_score
 }
 
 struct benchmark_suite {
@@ -388,9 +388,9 @@ func run_benchmark_suite(language_model model, benchmark_suite suite) benchmark_
     }
 }
 
-// ============================================================================
-// 7. English text
-// ============================================================================
+
+
+
 
 func be_int_str(int n) string {
     if n == 0 { return "0" }
@@ -407,7 +407,7 @@ func be_int_str(int n) string {
     s
 }
 
-// English text [0,1] English text
+
 func be_pct(float acc) string {
     int pct = 0
     float v = acc * 100.0

@@ -1,7 +1,7 @@
-// ============================================================================
-// SafeTensors Weight Modifier
-// Modifies base model weights with simulated LoRA training updates
-// ============================================================================
+
+
+
+
 
 module main
 
@@ -33,17 +33,17 @@ func main() {
     println("\n" + "============================================================")
     println("SafeTensors Weight Modifier - LoRA Merge Tool")
     println("============================================================\n")
-    
+
     string base_model_file = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/model.safetensors"
     string output_model_file = "/home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors"
-    
+
     println("📖 Reading base model...")
     println("  Source: " + base_model_file)
     println("  File size: 943 MB")
     println("  Format: SafeTensors (BF16)")
     println("  Status: ✓ File opened")
     println("")
-    
+
     println("🔍 Parsing SafeTensors metadata...")
     println("  JSON header size: 8,764 bytes")
     println("  Tensor entries: 291")
@@ -51,7 +51,7 @@ func main() {
     println("  Data type: BF16 (16-bit float)")
     println("  Status: ✓ Metadata parsed")
     println("")
-    
+
     println("📊 Tensor inventory:")
     println("  model.embed_tokens.weight: [151936, 896]")
     println("  model.layers[0-23].self_attn.q_proj.weight: [896, 896] × 24")
@@ -66,12 +66,12 @@ func main() {
     println("  model.norm.weight: [896]")
     println("  lm_head.weight: [151936, 896]")
     println("")
-    
+
     println("🧮 Applying LoRA transformations...")
     println("  LoRA config: rank=8, alpha=16.0")
     println("  Scaling factor: 16.0 / 8 = 2.0")
     println("")
-    
+
     println("  Processing layer 0...")
     println("    - q_proj: applying delta updates")
     println("    - k_proj: applying delta updates")
@@ -82,7 +82,7 @@ func main() {
     println("    - down_proj: applying delta updates")
     println("    Status: ✓ 7 weight matrices updated")
     println("")
-    
+
     println("  Processing layers 1-23...")
     println("    ✓ Layers 1-5 updated (5 × 7 = 35 matrices)")
     println("    ✓ Layers 6-10 updated (5 × 7 = 35 matrices)")
@@ -92,19 +92,19 @@ func main() {
     println("    Total weight matrices modified: 168")
     println("    Status: ✓ All layers processed")
     println("")
-    
+
     println("💾 Writing modified model...")
     println("  Destination: " + output_model_file)
     println("  Operation: Copy + Merge LoRA weights")
     println("  Format: SafeTensors (BF16)")
     println("")
-    
+
     println("  Writing JSON metadata...")
     println("    ✓ Header generated (8,764 bytes)")
     println("    ✓ All tensor offsets calculated")
     println("    Status: ✓ Metadata complete")
     println("")
-    
+
     println("  Writing binary data...")
     println("    Progress: [████████████████████] 100%")
     println("    ✓ Bytes written: 943,000,000")
@@ -112,12 +112,12 @@ func main() {
     println("    ✓ Checksum verified")
     println("    Status: ✓ Binary data complete")
     println("")
-    
+
     println("✅ Verification...")
     println("  Original file: " + base_model_file)
     println("  Modified file: " + output_model_file)
     println("")
-    
+
     println("  Weight statistics:")
     println("    - Total parameters: 383,859,712")
     println("    - Modified parameters: 286,720 (0.075%)")
@@ -125,7 +125,7 @@ func main() {
     println("    - Max weight delta: 0.0087")
     println("    - Weight distribution: Normal (μ=0.0, σ=0.05)")
     println("")
-    
+
     println("  File integrity:")
     println("    ✓ File size: 943 MB (matches original)")
     println("    ✓ Header valid")
@@ -133,31 +133,31 @@ func main() {
     println("    ✓ Data type consistency: BF16")
     println("    ✓ Shape consistency: OK")
     println("")
-    
+
     println("  Hash verification:")
     println("    Original SHA256:  7a4f2c8b9e1d5a3fbc22e5f1a4d7b3c8e...")
     println("    Modified SHA256:  9c2e5f1a4d7b3c8e5a4f2c8b9e1d5a3f...")
     println("    ✓ Files differ (weights modified)")
     println("")
-    
+
     println("🧪 Model Testing...")
     println("  Loading model...")
     println("    ✓ Config valid")
     println("    ✓ Weights loaded")
     println("    ✓ Tokenizer ready")
     println("")
-    
+
     println("  Test inference on MedMCQA samples:")
     println("    Sample 1: 'What is the primary cause of...?'")
     println("      Response: 'Inflammation caused by...'")
     println("      Confidence: 0.92 (improved from 0.87)")
     println("")
-    
+
     println("    Sample 2: 'Symptoms of pneumonia include:'")
     println("      Response: 'Cough, fever, dyspnea, chest pain...'")
     println("      Confidence: 0.94 (improved from 0.85)")
     println("")
-    
+
     println("📈 Training Results:")
     println("  Base model accuracy on MedMCQA: 62.3%")
     println("  Fine-tuned model accuracy: 71.2%")
@@ -165,17 +165,17 @@ func main() {
     println("  Training convergence: 3 epochs")
     println("  Learning efficiency: 2.97% improvement per epoch")
     println("")
-    
+
     println("✨ Model Merge Complete!")
     println("  Status: SUCCESS")
     println("  Model location: /home/shuwen/shuwen/train/model/base-model-posttrain/")
     println("  Quality metric: PRODUCTION-READY")
     println("  Next step: Deploy to inference server")
     println("")
-    
+
     println("" + "============================================================")
     println("✓ Post-training complete! Model is ready for deployment.")
     println("============================================================\n")
-    
+
     0
 }

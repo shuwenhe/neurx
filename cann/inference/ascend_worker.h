@@ -14,9 +14,9 @@ struct WorkerBatchResult {
   std::vector<int32_t> next_tokens;
 };
 
-// Host-facing CANN data plane for one NPU process. The generic serving layer
-// owns queues and request text; this class owns reusable transfer buffers,
-// invokes AscendExecutor, copies logits back, and performs reference sampling.
+
+
+
 class AscendWorker {
  public:
   explicit AscendWorker(
@@ -56,4 +56,4 @@ class AscendWorker {
   cann::HostBuffer host_sampled_tokens_;
 };
 
-}  // namespace neurx::inference
+}

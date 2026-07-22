@@ -1,5 +1,5 @@
-// NeurX PostTrain Chat
-// Legacy shim kept for compatibility. Real chat now routes through inference/real_inference.s.
+
+
 
 module posttrain_chat
 

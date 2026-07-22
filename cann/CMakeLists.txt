@@ -62,8 +62,6 @@ if(BUILD_TESTING)
   add_test(NAME cann_prefix_cache COMMAND cann_prefix_cache_test)
 endif()
 
-# These sources are supplied on an Ascend build host because they require the
-# matching CANN toolkit and target-SoC compiler.
 option(NEURX_ENABLE_ATB_310P
        "Build the production Ascend310P ATB operator plugin" OFF)
 set(NEURX_CANN_OPERATOR_SOURCES "" CACHE STRING

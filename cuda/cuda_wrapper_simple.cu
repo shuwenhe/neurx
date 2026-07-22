@@ -1,15 +1,15 @@
-/* ============================================================================
-   NeurX CUDA Runtime C++ Wrapper Implementation (Simplified)
-   Pure CUDA without C standard library
-   ============================================================================ */
+
+
+
+
 
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
 #include <stdint.h>
 
-/* ============================================================================
-   Memory Management
-   ============================================================================ */
+
+
+
 
 extern "C" {
     int64_t cuda_malloc(int size) {
@@ -38,9 +38,9 @@ extern "C" {
         return 0;
     }
 
-    /* ========================================================================
-       cuBLAS Initialization
-       ======================================================================== */
+
+
+
 
     int64_t cublasCreate_wrapper() {
         cublasHandle_t handle;
@@ -58,9 +58,9 @@ extern "C" {
         return 0;
     }
 
-    /* ========================================================================
-       cuBLAS GEMM: C = alpha*op(A)*op(B) + beta*C
-       ======================================================================== */
+
+
+
 
     int cublasSgemm_wrapper(
         int64_t handle,
@@ -75,7 +75,7 @@ extern "C" {
     ) {
         cublasOperation_t opA = (transa == 0) ? CUBLAS_OP_N : CUBLAS_OP_T;
         cublasOperation_t opB = (transb == 0) ? CUBLAS_OP_N : CUBLAS_OP_T;
-        
+
         cublasSgemm_v2(
             (cublasHandle_t)handle,
             opA, opB,
@@ -89,9 +89,9 @@ extern "C" {
         return 0;
     }
 
-    /* ========================================================================
-       cuBLAS GEMV: y = alpha*op(A)*x + beta*y
-       ======================================================================== */
+
+
+
 
     int cublasSgemv_wrapper(
         int64_t handle,
@@ -104,7 +104,7 @@ extern "C" {
         int64_t y, int incy
     ) {
         cublasOperation_t op = (trans == 0) ? CUBLAS_OP_N : CUBLAS_OP_T;
-        
+
         cublasSgemv_v2(
             (cublasHandle_t)handle,
             op, m, n,
@@ -117,9 +117,9 @@ extern "C" {
         return 0;
     }
 
-    /* ========================================================================
-       Custom CUDA Kernels - Activation Functions
-       ======================================================================== */
+
+
+
 
     __global__ void relu_kernel(float *out, const float *in, int n) {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -149,31 +149,31 @@ extern "C" {
         return 0;
     }
 
-    /* ========================================================================
-       Softmax Kernel for Attention
-       ======================================================================== */
+
+
+
 
     __global__ void softmax_kernel(float *out, const float *in, int seq_len, int batch_size) {
         int b = blockIdx.x;
         int i = threadIdx.x;
-        
+
         if (b < batch_size && i < seq_len) {
             int idx = b * seq_len + i;
-            
-            // Find max for numerical stability
+
+
             float maxval = in[b * seq_len];
             for (int j = 0; j < seq_len; j++) {
                 float v = in[b * seq_len + j];
                 maxval = (v > maxval) ? v : maxval;
             }
-            
-            // Compute exp and sum
+
+
             float sum = 0.0f;
             for (int j = 0; j < seq_len; j++) {
                 sum += __expf(in[b * seq_len + j] - maxval);
             }
-            
-            // Compute softmax
+
+
             out[idx] = __expf(in[idx] - maxval) / sum;
         }
     }
@@ -183,9 +183,9 @@ extern "C" {
         return 0;
     }
 
-    /* ========================================================================
-       GPU Device Management
-       ======================================================================== */
+
+
+
 
     int cuda_get_device_count() {
         int count = 0;
@@ -198,4 +198,4 @@ extern "C" {
         return 0;
     }
 
-} // extern "C"
+}

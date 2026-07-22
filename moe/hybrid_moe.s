@@ -3,14 +3,14 @@ package neurx.moe.hybrid
 use neurx.moe.core.{moe_config, moe_weights, moe_result, new_moe_config, new_moe_weights, moe_forward}
 use neurx.attention.nda.{nda_config, nda_weights, nda_result, new_nda_config, new_nda_weights, nda_forward}
 
-// NeurX S hybrid sparse-model implementation.
-//
-// Implemented:
-//   - channel-gated delta attention with recurrent state
-//   - Gated latent attention (NoPE, compressed KV)
-//   - Stable latent-space top-k MoE with shared experts
-//   - attention residual retrieval across block depth
-//   - a 3 NDA : 1 global-attention hybrid backbone
+
+
+
+
+
+
+
+
 
 struct hybrid_moe_config {
     int hidden_dim
@@ -89,8 +89,8 @@ func tiny_hybrid_moe_config() hybrid_moe_config {
 }
 
 func production_hybrid_moe_shape() hybrid_moe_config {
-    // Large sparse configuration. Dimensions remain configurable because
-    // allocating every expert is not the portable self-test path.
+
+
     hybrid_moe_config {
         hidden_dim: 7168,
         state_dim: 128,
@@ -195,7 +195,7 @@ func swish(float x) float {
 }
 
 func situ(float x) float {
-    // Bounded sigmoid-tanh multiplicative activation.
+
     float s = sigmoid(x)
     float e2 = exp_approx(2.0 * x)
     float t = (e2 - 1.0) / (e2 + 1.0)
@@ -359,7 +359,7 @@ func attention_residual(
             while channel < h {
                 float q = query[t * h + channel] * weights.query_scale[channel]
                 float key = weights.depth_keys[depth * h + channel]
-                // Content similarity plus a learned depth key.
+
                 int history_index = depth * tokens * h + t * h + channel
                 scores[depth] = scores[depth] + q * (history[history_index] + key)
                 channel = channel + 1
@@ -481,7 +481,7 @@ func hybrid_moe_forward(hybrid_moe_model model, []float embeddings, int tokens) 
         group = group + 1
     }
 
-    // Output AttnRes retrieves from every registered block representation.
+
     attnres_result final_retrieval = attention_residual(model.residual, current, history, history_count, tokens)
     hybrid_moe_forward_result {
         output: rms_norm_tokens(final_retrieval.output, tokens, cfg.hidden_dim),
@@ -496,7 +496,7 @@ func hybrid_moe_forward(hybrid_moe_model model, []float embeddings, int tokens) 
 func finite_array([]float values) bool {
     int i = 0
     while i < len(values) {
-        // NaN is the only floating value not equal to itself.
+
         if values[i] != values[i] || values[i] > 1000000000.0 || values[i] < -1000000000.0 {
             return false
         }

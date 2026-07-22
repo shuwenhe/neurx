@@ -1,70 +1,70 @@
 package neurx.data.moe_1t_data_pipeline
 
-// ============================================================================
-// 1T MoE English textdataEnglish text
-//
-// English text:
-//   1. English text Token English text - English textloadEnglish textdataEnglish text
-//   2. English text - English text GPU English textdataEnglish text
-//   3. English textstepEnglish text - Token loadEnglish textcomputeEnglish text
-//   4. English textsupport - 32K tokens English text
-//   5. dataEnglish text
-//   6. English text(English text)
-//
-// dataEnglish text:
-//   ┌─────────────────────────────────┐
-//   │   Raw Data Shards (8192 files)  │
-//   │   ~1 PB total                   │
-//   └────────────┬────────────────────┘
-//                │
-//        ┌───────▼────────┐
-//        │   Tokenization │ (BPE, vocab=128K)
-//        └───────┬────────┘
-//                │
-//     ┌──────────▼──────────┐
-//     │   Token Validation  │ (checksum, range check)
-//     └──────────┬──────────┘
-//              │
-//   ┌──────────▼──────────┐
-//   │  Deduplication      │ (optional, ~5% dedup)
-//   └──────────┬──────────┘
-//            │
-//   ┌────────▼─────────┐
-//   │  Stratified      │ (sample by category)
-//   │  Sampling        │
-//   └────────┬─────────┘
-//          │
-//   ┌──────▼─────────────────────┐
-//   │  Distributed Sampling      │
-//   │  (DP_rank -> shard_idx)     │
-//   └──────┬─────────────────────┘
-//        │
-//   ┌────▼──────────────┐
-//   │  Async Prefetch   │ (next batch loading)
-//   │  (2 buffers)      │
-//   └────┬──────────────┘
-//      │
-//   ┌──▼───────────────────────────┐
-//   │  Context Window Assembly     │
-//   │  (seq_len=4096, stride=512)  │
-//   └──┬───────────────────────────┘
-//     │
-//   ┌─▼─────────────────────────┐
-//   │  Training Loop            │
-//   │  (1024 GPU cluster)       │
-//   └───────────────────────────┘
-//
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use neurx.strings
 use neurx.runtime.io.{io_println, io_file_exists, io_read_lines, io_mkdir_recursive}
 use neurx.tokenizer.bpe_trainer.{bpe_tokenizer_state}
 
-// ============================================================================
-// 1. dataEnglish textmanagement
-// ============================================================================
 
-// English textdataEnglish textdata
+
+
+
+
 struct data_shard_meta {
     string shard_id
     string file_path
@@ -72,30 +72,30 @@ struct data_shard_meta {
     int end_byte
     int num_tokens
     int num_documents
-    []int doc_boundaries  // English text shard English text
+    []int doc_boundaries
     string checksum
     int processed
 }
 
-// English textdirectoryEnglish text
+
 struct data_shard_directory {
     string root_path
     []data_shard_meta shards
     int total_shards
     int total_tokens_b
 
-    // English text
-    string sampling_strategy    // "sequential", "random", "stratified"
-    int random_seed
-    []float shard_weights       // English textweight
 
-    // English text
+    string sampling_strategy
+    int random_seed
+    []float shard_weights
+
+
     int current_shard_idx
     int tokens_consumed
     int shards_completed
 }
 
-// initializeEnglish textdirectory
+
 func moe_1t_load_shard_directory(string manifest_path) data_shard_directory {
     data_shard_directory dir = data_shard_directory {
         root_path: manifest_path,
@@ -110,57 +110,57 @@ func moe_1t_load_shard_directory(string manifest_path) data_shard_directory {
         shards_completed: 0,
     }
 
-    // English textactualEnglish text manifest file
-    // English textplaceholderimplementation
+
+
     io_println("Loading data shard directory from: " + manifest_path)
 
     dir
 }
 
-// ============================================================================
-// 2. Token English text
-// ============================================================================
 
-// English text Token batchEnglish text
+
+
+
+
 struct token_batch {
-    []int token_ids              // [batch_size * seq_len]
+    []int token_ids
     int batch_size
     int seq_len
     int num_tokens_total
-    []int document_ids           // English text ID
-    []int shard_indices          // English text
-    float importance_weights     // English textweight
+    []int document_ids
+    []int shard_indices
+    float importance_weights
     int epoch
     int batch_idx
 }
 
-// English text Token loadEnglish text
+
 struct moe_1t_token_loader {
     data_shard_directory shard_dir
     bpe_tokenizer_state tokenizer
 
-    // English text
+
     token_batch current_batch
     token_batch prefetch_batch
 
-    // English textconfiguration
+
     int dp_rank
     int dp_size
-    int dp_partition_size      // English text DP English text token English text
+    int dp_partition_size
 
-    // configuration
+
     int batch_size_tokens
     int seq_len
     int prefetch_queue_size
 
-    // statistics
+
     int batches_served
     int total_tokens_served
     int duplicate_tokens_skipped
     int validation_errors
 }
 
-// initialize Token loadEnglish text
+
 func moe_1t_token_loader_new(
     string manifest_path,
     bpe_tokenizer_state tokenizer,
@@ -216,12 +216,12 @@ func moe_1t_token_loader_new(
     loader
 }
 
-// ============================================================================
-// 3. English text
-// ============================================================================
 
-// English text DP English textcomputeEnglish textdataEnglish text
-// English text GPU English textdataEnglish text
+
+
+
+
+
 func moe_1t_assign_shard_partition(
     moe_1t_token_loader loader
 ) []int {
@@ -230,7 +230,7 @@ func moe_1t_assign_shard_partition(
     int dp_size = loader.dp_size
     int dp_rank = loader.dp_rank
 
-    // English text DP GPU English text
+
     int shards_per_dp = total_shards / dp_size
     if total_shards % dp_size > dp_rank {
         shards_per_dp = shards_per_dp + 1
@@ -252,11 +252,11 @@ func moe_1t_assign_shard_partition(
     assigned_shards
 }
 
-// ============================================================================
-// 4. Token English text
-// ============================================================================
 
-// English text Token ID English text
+
+
+
+
 func moe_1t_validate_tokens(
     []int tokens,
     int vocab_size
@@ -274,13 +274,13 @@ func moe_1t_validate_tokens(
     errors
 }
 
-// English text token English text (English text)
+
 func moe_1t_dedup_tokens(
     []int tokens,
     float max_dup_ratio
 ) []int {
 
-    // English text: English text token English text, English text
+
     int write_idx = 0
     int i = 0
     int consecutive_same = 1
@@ -292,7 +292,7 @@ func moe_1t_dedup_tokens(
             consecutive_same = 1
         }
 
-        // English text 3 English text token
+
         if consecutive_same <= 3 {
             tokens[write_idx] = tokens[i]
             write_idx = write_idx + 1
@@ -301,7 +301,7 @@ func moe_1t_dedup_tokens(
         i = i + 1
     }
 
-    // English text
+
     []int result = make([]int, write_idx)
     int j = 0
     while j < write_idx {
@@ -312,18 +312,18 @@ func moe_1t_dedup_tokens(
     result
 }
 
-// ============================================================================
-// 5. English text (English text)
-// ============================================================================
 
-// English textcomputeEnglish textweight
-// English text(English text)English textweight
+
+
+
+
+
 func moe_1t_compute_importance_weights(
     []float per_token_loss,
     float difficulty_factor
 ) float {
 
-    // computeEnglish textloss
+
     float avg_loss = 0.0
     int i = 0
     while i < len(per_token_loss) {
@@ -335,8 +335,8 @@ func moe_1t_compute_importance_weights(
         avg_loss = avg_loss / float(len(per_token_loss))
     }
 
-    // weight = exp(difficulty_factor * loss)
-    // English text
+
+
     float weight = 1.0 + (avg_loss * difficulty_factor)
     if weight < 0.1 {
         weight = 0.1
@@ -348,17 +348,17 @@ func moe_1t_compute_importance_weights(
     weight
 }
 
-// ============================================================================
-// 6. English textstepEnglish text
-// ============================================================================
 
-// English textsteploadEnglish text token (English text)
+
+
+
+
 func moe_1t_prefetch_next_batch(
     moe_1t_token_loader loader,
     int prefetch_id
 ) token_batch {
 
-    // English textstepload
+
     int batch_size = loader.batch_size_tokens
     int seq_len = loader.seq_len
 
@@ -384,27 +384,27 @@ func moe_1t_prefetch_next_batch(
     batch
 }
 
-// English textbatch
+
 func moe_1t_swap_buffers(
     moe_1t_token_loader loader,
     int next_batch_idx
 ) {
 
-    // English text
+
     token_batch temp = loader.current_batch
     loader.current_batch = loader.prefetch_batch
     loader.prefetch_batch = temp
 
-    // English textstartEnglish text
+
     loader.prefetch_batch = moe_1t_prefetch_next_batch(loader, next_batch_idx)
 }
 
-// ============================================================================
-// 7. English text
-// ============================================================================
 
-// English text token English text
-// supportEnglish text
+
+
+
+
+
 func moe_1t_assemble_context_window(
     []int token_stream,
     int window_len,
@@ -412,7 +412,7 @@ func moe_1t_assemble_context_window(
     int stride
 ) [][]int {
 
-    // English text
+
     [][]int windows = make([][]int, 0)
 
     int num_windows = (len(token_stream) - window_len) / stride
@@ -448,30 +448,30 @@ func moe_1t_assemble_context_window(
     windows
 }
 
-// ============================================================================
-// 8. mainEnglish text - English text
-// ============================================================================
 
-// English text token
+
+
+
+
 func moe_1t_get_next_batch(
     moe_1t_token_loader loader
 ) token_batch {
 
-    // English text
+
     token_batch batch = loader.current_batch
 
-    // English text
+
     int next_batch_idx = loader.batches_served + 1
     moe_1t_swap_buffers(loader, next_batch_idx)
 
-    // English textstatistics
+
     loader.batches_served = loader.batches_served + 1
     loader.total_tokens_served = loader.total_tokens_served + batch.num_tokens_total
 
     batch
 }
 
-// English textloadEnglish text epoch
+
 func moe_1t_reset_epoch(
     moe_1t_token_loader loader
 ) {
@@ -481,7 +481,7 @@ func moe_1t_reset_epoch(
     loader.shard_dir.tokens_consumed = 0
 }
 
-// English textloadEnglish textstatisticsinformation
+
 func moe_1t_get_loader_stats(
     moe_1t_token_loader loader
 ) string {
@@ -493,9 +493,9 @@ func moe_1t_get_loader_stats(
     stats
 }
 
-// ============================================================================
-// 9. toolfunction
-// ============================================================================
+
+
+
 
 func int_to_string(int n) string {
     if n == 0 {
@@ -542,6 +542,6 @@ func chr(int code) string {
 }
 
 func append([][]int arrays, []int arr) [][]int {
-    // English text
+
     arrays
 }

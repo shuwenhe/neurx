@@ -78,12 +78,12 @@ func agent_safety_check_destructive(string action, string input) agent_safety_re
     new_agent_safety_result_allow()
 }
 
-// agent_safety_check_s checks command strings for dangerous patterns.
-// Covers: remote code execution, disk destruction, fork bombs, recursive root deletes.
+
+
 func agent_safety_check_s(string cmd) agent_safety_result {
     string c = lower(trim(cmd))
 
-    // Remote code execution via pipe to shell interpreter
+
     if agent_safety_text_contains(c, "| bash") || agent_safety_text_contains(c, "|bash") {
         return new_agent_safety_result_block("remote_code_exec", "rce", 3)
     }
@@ -94,7 +94,7 @@ func agent_safety_check_s(string cmd) agent_safety_result {
         return new_agent_safety_result_block("remote_code_exec", "rce", 3)
     }
 
-    // Disk overwrite / destruction
+
     if agent_safety_text_contains(c, "dd ") && agent_safety_text_contains(c, "of=/dev/") {
         return new_agent_safety_result_block("disk_destroy", "data_loss", 3)
     }
@@ -108,7 +108,7 @@ func agent_safety_check_s(string cmd) agent_safety_result {
         return new_agent_safety_result_block("disk_destroy", "data_loss", 3)
     }
 
-    // Recursive delete of filesystem root or home
+
     if agent_safety_text_contains(c, "rm ") && agent_safety_text_contains(c, "-rf") {
         if agent_safety_text_contains(c, " / ") || agent_safety_text_contains(c, " /\n") {
             return new_agent_safety_result_block("delete_root", "data_loss", 3)
@@ -124,19 +124,19 @@ func agent_safety_check_s(string cmd) agent_safety_result {
         return new_agent_safety_result_block("delete_root_no_preserve", "data_loss", 3)
     }
 
-    // Fork bomb
+
     if agent_safety_text_contains(c, ":(){:|:&};:") || agent_safety_text_contains(c, ":(){ :|:& };:") {
         return new_agent_safety_result_block("fork_bomb", "dos", 3)
     }
 
-    // chmod world-writable on root paths
+
     if agent_safety_text_contains(c, "chmod") && agent_safety_text_contains(c, "777") {
         if agent_safety_text_contains(c, " / ") || agent_safety_text_contains(c, " /\n") || agent_safety_text_contains(c, "chmod 777 /") || agent_safety_text_contains(c, "chmod -r 777") {
             return new_agent_safety_result_block("chmod_world_write_root", "security", 2)
         }
     }
 
-    // Writing to sensitive files via redirect
+
     if agent_safety_text_contains(c, "/.ssh/authorized_keys") && (agent_safety_text_contains(c, ">") || agent_safety_text_contains(c, "tee ")) {
         return new_agent_safety_result_block("ssh_key_write", "security", 3)
     }

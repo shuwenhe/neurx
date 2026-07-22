@@ -1,26 +1,26 @@
 package neurx.moe.llm_1t
 
-// ============================================================================
-// NeurX 1T+ MoE Framework
-//
-// English text:
-//   - parameterEnglish text 1T+ English text
-//   - English text MoE extension, English text FLOPs English text dense FFN English text
-//   - English textmodelEnglish text, English text, dataEnglish text checkpoint English textframework
-//
-// explanation:
-//   English text MoE English textimplementation, English text 1T+ trainingEnglish textframeworkEnglish text.
-//   English text GPT / GPT-MoE / MoE English text, English textparameter,
-//   English text, English texttrainingEnglish text.
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use neurx.model.llm.gpt.{model_config, gpt_param_count}
 use neurx.moe.llm.{gpt_moe_config, gpt_moe_param_count}
 use neurx.moe.transformer.{moe_config, moe_stats, moe_compute_stats, new_moe_config}
 
-// ============================================================================
-// 1. English texttrainingEnglish text
-// ============================================================================
+
+
+
 
 struct moe_1t_scale_profile {
     string model_name
@@ -77,9 +77,9 @@ struct moe_1t_framework {
     moe_1t_training_plan training
 }
 
-// ============================================================================
-// 2. English textmodelEnglish text MoE configuration
-// ============================================================================
+
+
+
 
 func moe_1t_base_arch() model_config {
     model_config {
@@ -116,9 +116,9 @@ func moe_1t_model_config() gpt_moe_config {
     }
 }
 
-// ============================================================================
-// 3. English textcompute
-// ============================================================================
+
+
+
 
 func moe_1t_profile(gpt_moe_config cfg) moe_1t_scale_profile {
     int total_params = gpt_moe_param_count(cfg)
@@ -218,9 +218,9 @@ func moe_1t_framework_default() moe_1t_framework {
     }
 }
 
-// ============================================================================
-// 4. English textsummary
-// ============================================================================
+
+
+
 
 func int_to_string(int n) string {
     if n == 0 {
@@ -305,9 +305,9 @@ func int_from_float(float x) int {
     n
 }
 
-// ============================================================================
-// 5. mainEnglish text
-// ============================================================================
+
+
+
 
 func main() {
     moe_1t_framework fw = moe_1t_framework_default()

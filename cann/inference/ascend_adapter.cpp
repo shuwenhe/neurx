@@ -34,4 +34,4 @@ AdapterStatus AscendAdapter::synchronize() {
   return status.ok ? AdapterStatus::success() : AdapterStatus::failure(status.message);
 }
 
-}  // namespace neurx::inference
+}

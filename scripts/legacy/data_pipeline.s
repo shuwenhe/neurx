@@ -1,7 +1,7 @@
-// ============================================
-// NeurX Data Processing Pipeline (S Language)
-// Unified CLI for data cleaning and sharding
-// ============================================
+
+
+
+
 
 package main
 
@@ -18,7 +18,7 @@ import (
     "sort"
 )
 
-// Configuration structures
+
 type clean_config struct {
     RawDir         string
     CleanedDir     string
@@ -53,9 +53,9 @@ type manifest struct {
     Shards              []shard_metadata  `json:"shards"`
 }
 
-// ============================================
-// Main Entry Point
-// ============================================
+
+
+
 
 func main() {
     if len(os.Args) < 2 {
@@ -81,9 +81,9 @@ func main() {
     }
 }
 
-// ============================================
-// Commands
-// ============================================
+
+
+
 
 func cmdClean() {
     fmt.Println("")
@@ -152,9 +152,9 @@ func cmdPipeline() {
     cmdShard()
 }
 
-// ============================================
-// Configuration Helpers
-// ============================================
+
+
+
 
 func getCleanConfig() CleanConfig {
     home := getEnv("NEURX_HOME", ".")
@@ -179,9 +179,9 @@ func getShardConfig() ShardConfig {
     }
 }
 
-// ============================================
-// Core Cleaning Logic
-// ============================================
+
+
+
 
 func cleanData(config CleanConfig) error {
     files, err := findSourceFiles(config.RawDir)
@@ -237,7 +237,7 @@ func cleanData(config CleanConfig) error {
     fmt.Printf("  • Errors: %d\n", stats.Errors)
     fmt.Println("")
 
-    // Generate splits
+
     if err := generateSplits(config); err != nil {
         return err
     }
@@ -254,7 +254,7 @@ type clean_stats struct {
 
 func processFileContent(writer *bufio.Writer, content string, seen map[string]bool, stats *clean_stats) {
     lines := strings.Split(content, "\n")
-    
+
     for _, line := range lines {
         line = strings.TrimSpace(line)
         if line == "" {
@@ -268,7 +268,7 @@ func processFileContent(writer *bufio.Writer, content string, seen map[string]bo
             continue
         }
 
-        // Check for duplicates
+
         hash := hashKey(normalizeText(text))
         if seen[hash] {
             stats.Duplicates++
@@ -276,7 +276,7 @@ func processFileContent(writer *bufio.Writer, content string, seen map[string]bo
         }
         seen[hash] = true
 
-        // Write record
+
         record := createRecord(text)
         writer.WriteString(record + "\n")
         stats.TotalWritten++
@@ -329,9 +329,9 @@ func generateSplits(config CleanConfig) error {
     return nil
 }
 
-// ============================================
-// Core Sharding Logic
-// ============================================
+
+
+
 
 func generateShards(config ShardConfig) error {
     info, err := os.Stat(config.InputFile)
@@ -413,7 +413,7 @@ func generateShards(config ShardConfig) error {
         }
     }
 
-    // Write remaining data
+
     if currentCount > 0 {
         shardFile := formatShardFilename(config.ShardDir, currentShard)
         size, err := writeShardFile(shardFile, currentData)
@@ -449,9 +449,9 @@ func writeShardFile(path string, content string) (int64, error) {
     return info.Size(), nil
 }
 
-// ============================================
-// Utility Functions
-// ============================================
+
+
+
 
 func findSourceFiles(dir string) ([]string, error) {
     var files []string
@@ -467,9 +467,9 @@ func findSourceFiles(dir string) ([]string, error) {
         }
 
         name := strings.ToLower(entry.Name())
-        if strings.HasSuffix(name, ".jsonl") || 
-           strings.HasSuffix(name, ".txt") || 
-           strings.HasSuffix(name, ".xml") || 
+        if strings.HasSuffix(name, ".jsonl") ||
+           strings.HasSuffix(name, ".txt") ||
+           strings.HasSuffix(name, ".xml") ||
            strings.HasSuffix(name, ".xml.bz2") {
             files = append(files, filepath.Join(dir, entry.Name()))
         }
@@ -480,12 +480,12 @@ func findSourceFiles(dir string) ([]string, error) {
 }
 
 func extractText(line string) string {
-    // Extract "text" field from JSONL
+
     if !strings.Contains(line, "\"text\"") {
         return ""
     }
 
-    // Simple extraction: find text value
+
     idx := strings.Index(line, "\"text\"")
     if idx < 0 {
         return ""
@@ -509,7 +509,7 @@ func extractText(line string) string {
 func normalizeText(text string) string {
     text = strings.TrimSpace(text)
     text = strings.ToLower(text)
-    // Collapse whitespace
+
     parts := strings.Fields(text)
     return strings.Join(parts, " ")
 }
@@ -525,12 +525,12 @@ func createRecord(text string) string {
     if tokens < 1 {
         tokens = 1
     }
-    
+
     record := map[string]interface{}{
         "text":   text,
         "tokens": tokens,
     }
-    
+
     data, _ := json.Marshal(record)
     return string(data)
 }
@@ -622,7 +622,7 @@ func getEnv(key, defaultVal string) string {
 
 func getEnvInt(key string, defaultVal int) int {
     if val := os.Getenv(key); val != "" {
-        // Simple int parsing
+
         var num int
         fmt.Sscanf(val, "%d", &num)
         return num

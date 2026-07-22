@@ -1,17 +1,17 @@
-// ============================================
-// NeurX GPT Training - Full AI-Native Implementation
-// use S languagecompleteAIEnglish textGPTmodeltraining
-//
-// English text (5English text):
-//   1. tensor_core.s   → NEnglish text, English text, English text
-//   2. math_dl.s       → 80+ English textfunction (sin/exp/log/English text)
-//   3. autograd.s      → English text, English text, gradient
-//   4. nn.s            → Linear/embedding/MHA/GPTmodel
-//   5. training_io.s  → checkpoint v2, log, weightIO
-//
-// compile: s build train_v2.s -o neurx_train
-// run: ./neurx_train
-// ============================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 package neurx.train.v2
 
 use std.tensor_core as T
@@ -20,30 +20,30 @@ use std.autograd as AG
 use std.nn as NN
 use std.training_io as IO
 
-// ============================================
-// Training Configuration (trainingconfiguration)
-// ============================================
+
+
+
 
 struct train_config {
-    // Model architecture (modelEnglish text)
-    int vocab_size           // = 256 (byte-level)
-    int embed_dim            // = 128
-    int num_heads            // = 4
-    int ffn_dim              // = 512
-    int num_layers           // = 4
-    int max_seq_len          // = 32
 
-    // Training hyperparams (trainingEnglish textparameter)
-    float learning_rate      // = 0.001
-    string optimizer         // "adam"
-    float weight_decay       // = 0.01
-    float dropout_prob        // = 0.1
+    int vocab_size
+    int embed_dim
+    int num_heads
+    int ffn_dim
+    int num_layers
+    int max_seq_len
 
-    // Data settings (dataEnglish text)
-    int batch_size           // = 8
-    int seq_len              // = 32
-    int max_steps            // = 50
-    int save_every           // = 25
+
+    float learning_rate
+    string optimizer
+    float weight_decay
+    float dropout_prob
+
+
+    int batch_size
+    int seq_len
+    int max_steps
+    int save_every
 }
 
 func default_config() train_config {
@@ -70,9 +70,9 @@ func config_string(train_config cfg) string {
     s
 }
 
-// ============================================
-// Main Entry Point (English text)
-// ============================================
+
+
+
 
 func main() int {
     println("")
@@ -87,11 +87,11 @@ func main() int {
     println("========================================")
     println("")
 
-    // Step 1: configuration
+
     train_config cfg = default_config()
     println(config_string(cfg))
 
-    // Step 2: English textGPTmodel
+
     println("[1/5] Building GPT model...")
     NN.gptconfig gpt_cfg
     gpt_cfg.vocab_size = cfg.vocab_size
@@ -109,7 +109,7 @@ func main() int {
     println("[OK] Model ready: ", format_int(total_params), " parameters")
     println("")
 
-    // Step 3: English textoptimizeEnglish text
+
     println("[2/5] Setting up optimizer...")
     AG.Optimizer opt
     if cfg.optimizer == "adam" || cfg.optimizer == "adamw" {
@@ -120,14 +120,14 @@ func main() int {
     println("[OK] Optimizer: ", cfg.optimizer, " lr=", M.fmt_float(opt.lr, 6))
     println("")
 
-    // Step 4: English textdata (English textdataEnglish text)
+
     println("[3/5] Preparing synthetic data...")
     int data_len = cfg.max_steps * cfg.batch_size * cfg.seq_len * 2
     []int train_data = generate_data(data_len, cfg.vocab_size)
     println("[OK] Generated ", format_int(data_len), " training tokens")
     println("")
 
-    // Step 5: trainingEnglish text
+
     println("[4/5] Starting training loop...")
     println("")
     println("Step |  Loss   | Best    | GradNorm | LR       | Note")
@@ -138,40 +138,40 @@ func main() int {
 
     int step = 0
     while step < cfg.max_steps {
-        // --- English text ---
+
         []int input_ids = get_batch(train_data, step, cfg.batch_size * cfg.seq_len)
         []int target_ids = get_batch(train_data, step + 1, cfg.batch_size * cfg.seq_len)
 
-        // English textGPTmodelEnglish textlogits
+
         AG.AGTensor logits = NN.forward(model, input_ids, cfg.batch_size, cfg.seq_len)
 
-        // computeEnglish textloss
+
         []int targets = make_targets(target_ids, cfg.batch_size)
         AG.AGTensor loss_tensor = AG.ag_cross_entropy(logits, targets)
         float loss_val = AG.item(loss_tensor)
 
-        // English textstate
+
         state.global_step = state.global_step + 1
         if loss_val < state.best_loss {
             state.best_loss = loss_val
             state.best_step = step + 1
         }
 
-        // English textlossEnglish text
+
         int wi = mod(step, len(state.loss_history))
         state.loss_history[wi] = loss_val
 
-        // --- English text ---
+
         AG.zero_grad(model.all_params)
         var grads = AG.backward(loss_tensor)
         float grad_norm = AG.clip_grad_norm_(model.all_params, 1.0)
         state.grad_norm = grad_norm
 
-        // --- parameterEnglish text ---
+
         if cfg.optimizer == "adam" { AG.adam_step(opt, model.all_params) }
         else { AG.sgd_step(opt, model.all_params) }
 
-        // --- logEnglish text ---
+
         bool should_log = (((step + 1) - ((step + 1) / 10) * 10) == 0 || step == cfg.max_steps - 1 || loss_val < state.best_loss)
         if should_log {
             string note = ""
@@ -184,7 +184,7 @@ func main() int {
                         grad_norm, opt.lr, 0, note)
         }
 
-        // --- English textsavecheckpoint ---
+
         if should_save(step + 1, cfg.save_every) {
             var weights = AG.export_weights(model.all_params)
 
@@ -205,11 +205,11 @@ func main() int {
         step = step + 1
     }
 
-    // Step 6: English textsaveEnglish text
+
     println("")
     println("[5/5] Saving final checkpoints...")
 
-    // Final checkpoint
+
     var final_weights = AG.export_weights(model.all_params)
     NN.ModelConfigSnapshot final_snap = NN.make_config_snapshot(
         cfg.vocab_size, cfg.embed_dim, cfg.num_heads, cfg.ffn_dim,
@@ -219,10 +219,10 @@ func main() int {
                   state.best_loss, state.best_step, final_snap,
                   final_weights, state.loss_history)
 
-    // Save training log
+
     IO.save_log(output_dir + "/training_log.tsv")
 
-    // Print final summary
+
     println("")
     println("╔══════════════════════════════════════╗")
     println("║     Training Complete!               ║")
@@ -240,21 +240,21 @@ func main() int {
     println("")
 
     if state.current_loss < 2.0 {
-        return 0  // Success
+        return 0
     } else {
-        return 1  // May need tuning
+        return 1
     }
 }
 
-// ============================================
-// Data Generation & Loading (datagenerateEnglish textload)
-// ============================================
 
-// generateEnglish texttrainingdata (English textdemo, actualEnglish textfileEnglish text)
+
+
+
+
 func generate_data(int n_tokens, int vocab_size) []int {
     []int data = new int[n_tokens]
 
-    // English text + English text
+
     []int pattern = [1, 23, 45, 67, 89, 12, 34, 56]
     int pattern_len = 8
 
@@ -272,7 +272,7 @@ func generate_data(int n_tokens, int vocab_size) []int {
     data
 }
 
-// English textbatchEnglish textdata
+
 func get_batch([]int data, int offset, int count) []int {
     []int batch = new int[count]
     int actual_offset = o(offset - (offset / (len(data) - count)) * (len(data) - count))
@@ -284,7 +284,7 @@ func get_batch([]int data, int offset, int count) []int {
     batch
 }
 
-// English texttoken IDsEnglish texttarget class indices (English text)
+
 func make_targets([]int token_ids, int batch_size) []int {
     []int targets = new int[batch_size]
     int i = 0
@@ -296,18 +296,18 @@ func make_targets([]int token_ids, int batch_size) []int {
     targets
 }
 
-// English textRequiredsavecheckpoint
+
 func should_save(int step, int every) bool {
     if every <= 0 { return true }
     int r = step - (step / every) * every
     r == 0  step > 0
 }
 
-// ============================================
-// Display Utilities (English texttool)
-// ============================================
 
-// English texttrainingEnglish text
+
+
+
+
 func print_training_line(int step, float loss, float best, float gn, float lr, string note) void {
     string line = ""
     line = line + pad_int(step, 4) + " | "
@@ -319,7 +319,7 @@ func print_training_line(int step, float loss, float best, float gn, float lr, s
     println(line)
 }
 
-// English text
+
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     bool neg = n < 0
@@ -333,7 +333,7 @@ func int_to_str(int n) string {
     s
 }
 
-// English text
+
 func format_int(int n) string {
     if n == 0 { return "0" }
     bool neg = n < 0
@@ -353,14 +353,14 @@ func format_int(int n) string {
     s
 }
 
-// English text
+
 func pad_float(float val, int w, int d) string {
     string s = M.fmt_float(val, d)
     while len(s) < w { s = " " + s }
     s
 }
 
-// English text
+
 func pad_int(int n, int w) string {
     string s = int_to_str(n)
     while len(s) < w { s = " " + s }

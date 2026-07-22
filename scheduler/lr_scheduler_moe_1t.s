@@ -1,64 +1,64 @@
 package neurx.scheduler.lr_scheduler_moe_1t
 
-// ============================================================================
-// learning rateEnglish text (Cosine Annealing with Warmup)
-//
-// English text:
-//   Phase 1: Warmup (English text)
-//     LR = base_lr * (step / warmup_steps)
-//
-//   Phase 2: Annealing (English text)
-//     LR = base_lr * 0.5 * (1 + cos(π * (step - warmup) / (total - warmup)))
-//
-//   English text Phase 3: Final Constant (English text LR)
-//     LR = min_lr
-//
-// parameter:
-//   base_lr: English textlearning rate (2e-4 for 1T MoE)
-//   warmup_steps: English textstepEnglish text (10K for 3T tokens)
-//   total_steps: English textstepEnglish text (750K for 3T tokens)
-//   min_lr: English textlearning rate (2e-5)
-//
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use neurx.strings
 use neurx.runtime.io.{io_println}
 
-// ============================================================================
-// 1. English textconfigurationEnglish textstate
-// ============================================================================
+
+
+
 
 struct lr_schedule_config {
-    string schedule_type         // "cosine", "linear", "exponential", "constant"
+    string schedule_type
     float base_lr
     float min_lr
-    int warmup_steps             // English textstepEnglish text
-    int total_steps              // English texttrainingstepEnglish text
-    int decay_steps              // English text (English text)
-    float decay_rate             // English text
-    int cycle_steps              // English text (English text)
+    int warmup_steps
+    int total_steps
+    int decay_steps
+    float decay_rate
+    int cycle_steps
 }
 
 struct lr_scheduler_state {
     lr_schedule_config config
 
-    // English textstate
+
     int current_step
     float current_lr
-    float current_base_lr        // English text LR (English text)
+    float current_base_lr
 
-    // English text
-    []float lr_history           // [num_steps]
+
+    []float lr_history
     []int step_history
 
-    // statistics
+
     int num_schedules
     float avg_lr
     float max_lr
     float min_lr_achieved
 }
 
-// initializelearning rateEnglish text
+
 func lr_scheduler_new(
     float base_lr,
     int warmup_steps,
@@ -68,7 +68,7 @@ func lr_scheduler_new(
     lr_schedule_config cfg = lr_schedule_config {
         schedule_type: "cosine",
         base_lr: base_lr,
-        min_lr: base_lr / 10.0,     // defaultEnglish text LR English text LR English text 1/10
+        min_lr: base_lr / 10.0,
         warmup_steps: warmup_steps,
         total_steps: total_steps,
         decay_steps: total_steps,
@@ -92,11 +92,11 @@ func lr_scheduler_new(
     state
 }
 
-// ============================================================================
-// 2. Cosine Annealing Warmup English text (default)
-// ============================================================================
 
-// Cosine Annealing with Warmup
+
+
+
+
 func compute_cosine_annealing_lr(
     lr_scheduler_state state
 ) float {
@@ -110,23 +110,23 @@ func compute_cosine_annealing_lr(
     float lr = 0.0
 
     if step < warmup_steps {
-        // Warmup: English text
+
         lr = base_lr * float(step) / float(warmup_steps)
     } else {
-        // Annealing: English text
+
         float progress = float(step - warmup_steps) / float(total_steps - warmup_steps)
 
-        // English text [0, 1]
+
         if progress > 1.0 {
             progress = 1.0
         }
 
-        // cos(π * progress)
+
         float cos_val = cos(3.14159 * progress)
         lr = min_lr + (base_lr - min_lr) * 0.5 * (1.0 + cos_val)
     }
 
-    // English text LR English text
+
     if lr < min_lr {
         lr = min_lr
     }
@@ -138,9 +138,9 @@ func compute_cosine_annealing_lr(
     lr
 }
 
-// ============================================================================
-// 3. English text
-// ============================================================================
+
+
+
 
 func compute_linear_decay_lr(
     lr_scheduler_state state
@@ -155,10 +155,10 @@ func compute_linear_decay_lr(
     float lr = 0.0
 
     if step < warmup_steps {
-        // Warmup
+
         lr = base_lr * float(step) / float(warmup_steps)
     } else {
-        // English text
+
         float progress = float(step - warmup_steps) / float(total_steps - warmup_steps)
         if progress > 1.0 {
             progress = 1.0
@@ -174,9 +174,9 @@ func compute_linear_decay_lr(
     lr
 }
 
-// ============================================================================
-// 4. English text
-// ============================================================================
+
+
+
 
 func compute_exponential_decay_lr(
     lr_scheduler_state state
@@ -192,10 +192,10 @@ func compute_exponential_decay_lr(
     float lr = 0.0
 
     if step < warmup_steps {
-        // Warmup
+
         lr = base_lr * float(step) / float(warmup_steps)
     } else {
-        // English text: LR = base_lr * decay_rate^(step / total_steps)
+
         float exponent = float(step - warmup_steps) / float(total_steps - warmup_steps)
         lr = base_lr * pow(decay_rate, exponent)
     }
@@ -208,9 +208,9 @@ func compute_exponential_decay_lr(
     lr
 }
 
-// ============================================================================
-// 5. English textlearning rateEnglish text
-// ============================================================================
+
+
+
 
 func compute_one_cycle_lr(
     lr_scheduler_state state
@@ -218,26 +218,26 @@ func compute_one_cycle_lr(
 
     int step = state.current_step
     float base_lr = state.current_base_lr
-    float max_lr = base_lr * 10.0  // English text LR English text LR English text 10 English text
+    float max_lr = base_lr * 10.0
     float min_lr = state.config.min_lr
     int total_steps = state.config.total_steps
 
     float lr = 0.0
 
-    // English textphase
-    int step1 = total_steps / 30      // English textphaseEnglish text 1/30
-    int step2 = step1 * 24 / 25        // English textphaseEnglish text 24/30
+
+    int step1 = total_steps / 30
+    int step2 = step1 * 24 / 25
 
     if step < step1 {
-        // phase 1: min_lr → max_lr
+
         float progress = float(step) / float(step1)
         lr = min_lr + (max_lr - min_lr) * progress
     } else if step < step1 + step2 {
-        // phase 2: max_lr → min_lr
+
         float progress = float(step - step1) / float(step2)
         lr = max_lr - (max_lr - min_lr) * progress
     } else {
-        // phase 3: English text min_lr
+
         lr = min_lr
     }
 
@@ -245,9 +245,9 @@ func compute_one_cycle_lr(
     lr
 }
 
-// ============================================================================
-// 6. stepEnglish text (Step Decay)
-// ============================================================================
+
+
+
 
 func compute_step_decay_lr(
     lr_scheduler_state state,
@@ -262,10 +262,10 @@ func compute_step_decay_lr(
     float lr = 0.0
 
     if step < warmup_steps {
-        // Warmup
+
         lr = base_lr * float(step) / float(warmup_steps)
     } else {
-        // Step decay
+
         int decay_count = (step - warmup_steps) / step_size
         lr = base_lr * pow(gamma, float(decay_count))
     }
@@ -274,11 +274,11 @@ func compute_step_decay_lr(
     lr
 }
 
-// ============================================================================
-// 7. mainEnglish textfunction
-// ============================================================================
 
-// computeEnglish textlearning rate
+
+
+
+
 func compute_lr(
     lr_scheduler_state state
 ) float {
@@ -294,15 +294,15 @@ func compute_lr(
     } else if state.config.schedule_type == "constant" {
         lr = state.current_base_lr
     } else {
-        // defaultuse cosine
+
         lr = compute_cosine_annealing_lr(state)
     }
 
-    // English text
-    // state.lr_history.append(lr)
-    // state.step_history.append(state.current_step)
 
-    // English textstatistics
+
+
+
+
     state.num_schedules = state.num_schedules + 1
     state.avg_lr = (state.avg_lr * float(state.num_schedules - 1) + lr) / float(state.num_schedules)
 
@@ -316,7 +316,7 @@ func compute_lr(
     lr
 }
 
-// English textstep (English text optimizer.step() English text)
+
 func step(
     lr_scheduler_state state
 ) float {
@@ -327,11 +327,11 @@ func step(
     new_lr
 }
 
-// ============================================================================
-// 8. LR English texttool
-// ============================================================================
 
-// English textphaseEnglish text LR
+
+
+
+
 func get_warmup_lr(
     lr_scheduler_state state,
     int warmup_step
@@ -348,23 +348,23 @@ func get_warmup_lr(
     warmup_lr
 }
 
-// ============================================================================
-// 9. toolfunction
-// ============================================================================
+
+
+
 
 func cos(float x) float {
-    // cos(π * progress) English text
-    // English text [0, π] English text
+
+
     if x < 0.0 {
         x = -x
     }
 
-    // cos(π) = -1, cos(π/2) = 0, cos(0) = 1
+
     float pi = 3.14159
 
     float result = 1.0
 
-    // English text
+
     float term = 1.0
     int n = 1
     while n < 10 {
@@ -377,8 +377,8 @@ func cos(float x) float {
 }
 
 func pow(float base, float exponent) float {
-    // base^exponent
-    // English textimplementation
+
+
     if exponent == 0.0 {
         return 1.0
     }
@@ -389,14 +389,14 @@ func pow(float base, float exponent) float {
         return base
     }
 
-    // useEnglish text: base^exp = exp(exp * log(base))
-    float log_base = 1.0  // placeholder
+
+    float log_base = 1.0
     float result = exp(exponent * log_base)
     result
 }
 
 func exp(float x) float {
-    // e^x
+
     if x > 20.0 {
         return 485165195.0
     }
@@ -404,7 +404,7 @@ func exp(float x) float {
         return 0.0
     }
 
-    // English text
+
     float result = 1.0
     float term = 1.0
     int i = 1

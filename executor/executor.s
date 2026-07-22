@@ -435,7 +435,7 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
                 observation = "write:status=failed;reason=path_missing"
                 ok = false
             } else {
-                // Allow empty content: creates an empty file (touch semantics).
+
                 agent_workspace_result write_result = agent_workspace_write_file(write_path, write_content)
                 observation = write_result.observation
                 ok = write_result.ok
@@ -513,7 +513,7 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
             string code_content = parsed_action.content
             string multi_files = ""
             if code_content == "" {
-                // Auto-retrieve the existing file for context when 'retrieved' is empty
+
                 if code_path != "" {
                     agent_memory_lookup_result ar = agent_memory_lookup_long(next_memory, "retrieved")
                     if !ar.found || ar.value == "" {

@@ -22,7 +22,7 @@ func new_agent_perception_result(string kind, string content, string source) age
     }
 }
 
-// Getter functions to work around compiler type inference bug with struct field indexing
+
 func get_key(agent_perception_result result, int index) string {
     result.keys[index]
 }

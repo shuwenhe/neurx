@@ -113,8 +113,8 @@ func agent_context_maybe_compress(agent_context_state state) agent_context_state
     agent_context_compress(state, keep)
 }
 
-// agent_context_extract_dropped returns the text of segments that would be
-// discarded by a keep_last compression, for use as LLM summarization input.
+
+
 func agent_context_extract_dropped(agent_context_state state, int keep_last) string {
     int total = len(state.segments)
     int keep = keep_last
@@ -134,8 +134,8 @@ func agent_context_extract_dropped(agent_context_state state, int keep_last) str
     out
 }
 
-// agent_context_compress_with_summary replaces dropped segments with a single
-// summary segment, preserving semantic continuity across compression events.
+
+
 func agent_context_compress_with_summary(agent_context_state state, string summary, int keep_last) agent_context_state {
     int total = len(state.segments)
     int keep = keep_last
@@ -171,8 +171,8 @@ func agent_context_compress_with_summary(agent_context_state state, string summa
     }
 }
 
-// agent_context_smart_compress compresses context using an LLM summary when
-// model_path is available. Falls back to truncation when no model is set.
+
+
 func agent_context_smart_compress(agent_context_state state, string model_path) agent_context_state {
     if !agent_context_near_limit(state) {
         return state

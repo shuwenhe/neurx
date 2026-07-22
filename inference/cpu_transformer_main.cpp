@@ -30,7 +30,7 @@ void usage(const char* program) {
       << "         --repetition-penalty F --seed N --interactive --info\n";
 }
 
-}  // namespace
+}
 
 int main(int argc, char** argv) {
   std::string checkpoint =

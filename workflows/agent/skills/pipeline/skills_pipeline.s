@@ -1,19 +1,19 @@
 use neurx.agent
 use neurx.runtime.io.{runtime_write_text_file, runtime_file_exists}
 
-// Config (mirrors config/sample.yaml)
-// max_generations: 3 (full run uses 20)
-// min_success_rate: 0.80
-// retire_threshold: 0.20
-// output_dir: artifacts/checkpoints/agent/skills
+
+
+
+
+
 
 string out_prefix = "artifacts/checkpoints/agent/skills"
 string snapshot_path = out_prefix + "/snapshot.txt"
 string report_path   = out_prefix + "/report.txt"
 string trace_path    = out_prefix + "/trace.txt"
 
-// ─── Stage 1: Collect ────────────────────────────────────────────────────────
-// 5 benchmark inputs covering: search / retrieve / analysis / verify / plan
+
+
 
 []string bench_inputs = []string{cap: 5}
 bench_inputs[0] = "search for neurx framework agent documentation"
@@ -40,7 +40,7 @@ while gen < max_gen {
     gen = gen + 1
 }
 
-// ─── Stage 2: Evaluate ───────────────────────────────────────────────────────
+
 
 []string promoted = agent_promoted_skill_names(evolved)
 string eval_report = neurx.strings.concat2("promoted_count=", string(len(promoted)))
@@ -52,7 +52,7 @@ while ei < len(promoted) {
     ei = ei + 1
 }
 
-// ─── Stage 3: Candidate report ───────────────────────────────────────────────
+
 
 []string all_names = agent_skill_names(evolved)
 string candidate_report = neurx.strings.concat2("total_skills=", string(len(all_names)))
@@ -64,8 +64,8 @@ while ci < len(all_names) {
     ci = ci + 1
 }
 
-// ─── Stage 4: Monitor ────────────────────────────────────────────────────────
-// Retire skills below retire_threshold (0.20), then prune retired records
+
+
 
 int mi = 0
 while mi < len(all_names) {
@@ -77,14 +77,14 @@ while mi < len(all_names) {
 }
 evolved = agent_prune_skills(evolved)
 
-// ─── Stage 5: Persist ────────────────────────────────────────────────────────
+
 
 agent_persist_skill_snapshot(evolved, snapshot_path)
 
 string trace_summary = agent_trace_last_n_summary(evolved, 10)
 runtime_write_text_file(trace_path, trace_summary)
 
-// ─── Final report ────────────────────────────────────────────────────────────
+
 
 string stall_str = "false"
 if agent_is_stalled(evolved) {

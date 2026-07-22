@@ -1,37 +1,37 @@
 package neurx.monitoring.moe_1t_metrics
 
-// ============================================================================
-// 1T MoE English textmonitoringsystem
-//
-// English text:
-//   1. trainingEnglish text
-//      - loss, perplexity, tokens/sec
-//      - gradientEnglish text, weightEnglish text
-//
-//   2. MoE English text
-//      - English text
-//      - English text
-//      - English text
-//
-//   3. English text
-//      - AllGather/ReduceScatter/AllReduce English text
-//      - English text
-//      - English textcomputeEnglish text
-//
-//   4. systemEnglish text
-//      - GPU English text
-//      - English text/English text
-//      - English text
-//      - English texttime
-//
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use neurx.strings
 use neurx.runtime.io.{io_println, runtime_make_dirs, runtime_write_text_file, runtime_run_command_output}
 
-// ============================================================================
-// 1. English text
-// ============================================================================
+
+
+
 
 struct training_metrics {
     float loss
@@ -46,11 +46,11 @@ struct training_metrics {
 }
 
 struct moe_metrics {
-    []float expert_load           // [num_experts]
-    []float expert_utilization    // [num_experts]
-    []int expert_dropout_count    // [num_experts] English text token English text
-    float load_balance_ratio      // max_load / mean_load
-    float expert_diversity        // useEnglish text
+    []float expert_load
+    []float expert_utilization
+    []int expert_dropout_count
+    float load_balance_ratio
+    float expert_diversity
 }
 
 struct communication_metrics {
@@ -85,9 +85,9 @@ struct metrics_frame {
     system_metrics sys_metrics
 }
 
-// ============================================================================
-// 2. English text
-// ============================================================================
+
+
+
 
 struct metrics_collector {
     int global_rank
@@ -95,26 +95,26 @@ struct metrics_collector {
     int local_rank
     int local_world_size
 
-    // English text
+
     metrics_frame current_frame
 
-    // English text
+
     []metrics_frame frames_history
     int max_history_size
 
-    // English textstatistics
+
     float avg_loss
     float max_loss
     float min_loss
     int steps_logged
 
-    // outputconfiguration
-    int log_frequency            // English text N stepoutputEnglish text
+
+    int log_frequency
     int save_frequency
     string metrics_output_dir
 }
 
-// initializeEnglish text
+
 func metrics_collector_new(
     int global_rank,
     int world_size,
@@ -161,7 +161,7 @@ func metrics_collector_new(
             },
             sys_metrics: system_metrics {
                 gpu_memory_used_bytes: 0,
-                gpu_memory_total_bytes: 79 * 1024 * 1024 * 1024,  // 80GB
+                gpu_memory_total_bytes: 79 * 1024 * 1024 * 1024,
                 gpu_memory_percent: 0.0,
                 gpu_power_watts: 0.0,
                 gpu_temperature_celsius: 0.0,
@@ -188,11 +188,11 @@ func metrics_collector_new(
     collector
 }
 
-// ============================================================================
-// 3. trainingEnglish text
-// ============================================================================
 
-// English texttrainingEnglish text
+
+
+
+
 func update_training_metrics(
     metrics_collector collector,
     float loss,
@@ -209,7 +209,7 @@ func update_training_metrics(
     collector.current_frame.train_metrics.gradient_norm = gradient_norm
     collector.current_frame.train_metrics.weight_norm = collector.current_frame.train_metrics.weight_norm
 
-    // compute perplexity
+
     float perplexity = 0.0
     if loss > 0.0 {
         perplexity = exp(loss)
@@ -217,7 +217,7 @@ func update_training_metrics(
     collector.current_frame.train_metrics.perplexity = perplexity
     collector.current_frame.timestamp_ms = current_timestamp_ms()
 
-    // English textstatistics
+
     collector.avg_loss = (collector.avg_loss * float(collector.steps_logged) + loss) /
                         float(collector.steps_logged + 1)
 
@@ -229,15 +229,15 @@ func update_training_metrics(
     }
 }
 
-// ============================================================================
-// 4. MoE English text
-// ============================================================================
 
-// English text MoE English text
+
+
+
+
 func update_moe_metrics(
     metrics_collector collector,
-    []float expert_load,              // [num_experts]
-    []float expert_utilization,       // [num_experts]
+    []float expert_load,
+    []float expert_utilization,
     []int expert_dropout_count
 ) {
 
@@ -245,7 +245,7 @@ func update_moe_metrics(
     collector.current_frame.moe_metrics.expert_utilization = expert_utilization
     collector.current_frame.moe_metrics.expert_dropout_count = expert_dropout_count
 
-    // computeEnglish text
+
     float max_load = 0.0
     float sum_load = 0.0
     float active_experts = 0.0
@@ -274,17 +274,17 @@ func update_moe_metrics(
 
     collector.current_frame.moe_metrics.load_balance_ratio = load_balance
 
-    // English text = English text / English text
+
     if len(expert_load) > 0 {
         collector.current_frame.moe_metrics.expert_diversity = active_experts / float(len(expert_load))
     }
 }
 
-// ============================================================================
-// 5. English text
-// ============================================================================
 
-// English text
+
+
+
+
 func update_communication_metrics(
     metrics_collector collector,
     long allgather_bytes,
@@ -303,11 +303,11 @@ func update_communication_metrics(
     collector.current_frame.comm_metrics.reduce_scatter_time_ms = reduce_scatter_time_ms
 }
 
-// ============================================================================
-// 6. systemEnglish text
-// ============================================================================
 
-// English textsystemEnglish text
+
+
+
+
 func update_system_metrics(
     metrics_collector collector,
     long gpu_memory_used,
@@ -324,7 +324,7 @@ func update_system_metrics(
     collector.current_frame.sys_metrics.iteration_time_ms = iteration_time
     collector.current_frame.sys_metrics.wall_clock_time_ms = current_timestamp_ms()
 
-    // computeEnglish text
+
     long total_mem = collector.current_frame.sys_metrics.gpu_memory_total_bytes
     if total_mem > 0 {
         collector.current_frame.sys_metrics.gpu_memory_percent =
@@ -332,11 +332,11 @@ func update_system_metrics(
     }
 }
 
-// ============================================================================
-// 7. logoutput
-// ============================================================================
 
-// English text
+
+
+
+
 func log_step(
     metrics_collector collector,
     int step
@@ -345,7 +345,7 @@ func log_step(
     collector.current_frame.step = step
     collector.steps_logged = collector.steps_logged + 1
 
-    // English text
+
     if len(collector.frames_history) < collector.max_history_size {
         collector.frames_history = append_frame(collector.frames_history, collector.current_frame)
     }
@@ -353,13 +353,13 @@ func log_step(
         collector.frames_history = trim_history(collector.frames_history, collector.max_history_size)
     }
 
-    // English textoutputlog
+
     if step % collector.log_frequency == 0 {
         log_metrics_frame(collector.current_frame)
     }
 }
 
-// outputEnglish text
+
 func log_metrics_frame(metrics_frame frame) {
 
     string log_str = ""
@@ -375,23 +375,23 @@ func log_metrics_frame(metrics_frame frame) {
     io_println(log_str)
 }
 
-// ============================================================================
-// 8. English textstatistics
-// ============================================================================
 
-// English textstatistics (AllReduce)
+
+
+
+
 func collect_global_stats(
     metrics_collector collector,
     collective_state comm
 ) {
 
-    // English textactualimplementationEnglish text, RequiredEnglish text GPU English text AllReduce
-    // English textstatistics
+
+
 
     io_println("Global stats collected for rank=" + int_to_string(collector.global_rank))
 }
 
-// saveEnglish textfile
+
 func save_metrics(
     metrics_collector collector,
     string filename
@@ -401,9 +401,9 @@ func save_metrics(
     io_println("Metrics saved to " + filename)
 }
 
-// ============================================================================
-// 9. toolfunction
-// ============================================================================
+
+
+
 
 func append_frame([]metrics_frame frames, metrics_frame f) []metrics_frame {
     int n = len(frames)

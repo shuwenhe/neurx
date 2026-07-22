@@ -1,130 +1,130 @@
 package neurx.data.loader.dataloader
 
-// ═══════════════════════════════════════════════════════════════════
-// High-Performance Data Pipeline — English textdataEnglish text
-//
-// English text:
-//   • English text token English texttrainingRequiredEnglish textdataEnglish text (TB/English text)
-//   • GPU computeEnglish textdataloadEnglish text
-//   • dataSourceEnglish text: English text, English text, English text
-//   • dataEnglish text,RequiredEnglish text
-//
-// English text (English text DeepSpeed-DataPipeline / WebDataset):
-//
-//   ┌────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────┐
-//   │ Disk/Cloud │ →  │ Pre-fetch    │ →  │ Tokenize &   │ →  │ GPU      │
-//   │ Storage    │    │ Buffer      │    │ Transform     │    │ Memory   │
-//   │ (async)    │    │ (multi-file)│    │ (parallel)    │    │ (pinned)│
-//   └────────────┘    └──────────────┘    └──────────────┘    └──────────┘
-//         ↑                   ↑                    ↑               ↑
-//    IO Thread          CPU Threads         Worker Pool       Training Loop
-//
-// English text:
-//   ✓ English textstepEnglish text (Async Prefetch): GPU computeEnglish text,CPU English text batch
-//   ✓ English text (Memory Pool): English text malloc/free,English text GC English text
-//   ✓ Pinned Memory: English text,English text CPU→GPU DMA English text
-//   ✓ English textfileEnglish text: English textfile/English textdata
-//   ✓ English textdataEnglish text (Smart Binning/Packing): English text
-//   ✓ English text: English textdataEnglish text
-//   ✓ English textdataEnglish text: English text
-//   ✓ supportEnglish text: JSONL, Parquet, TFRecord, Arrow, MMAP
-// ═══════════════════════════════════════════════════════════════════
 
-// ============================================================================
-// 1. configurationEnglish text
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 enum data_format {
-    FORMAT_JSONL,              // English text JSON English text
-    FORMAT_PARQUET,            // Apache Parquet (English text,English text)
-    FORMAT_TFRECORD,           // TensorFlow Record English text
-    FORMAT_ARROW,              // Apache Arrow (English text)
-    FORMAT_MMAP,               // English textfile (English text)
-    FORMAT_CUSTOM,             // English text (English text)
+    FORMAT_JSONL,
+    FORMAT_PARQUET,
+    FORMAT_TFRECORD,
+    FORMAT_ARROW,
+    FORMAT_MMAP,
+    FORMAT_CUSTOM,
 }
 
 enum packing_strategy {
-    PACKING_NONE,              // English text,padding English text
-    PACKING_FIXED_LENGTH,      // English text/padding
-    PACKING_BINNING,           // English text:English text
-    PACKING_SMART_PACKING,     // English text:English text (recommended!)
+    PACKING_NONE,
+    PACKING_FIXED_LENGTH,
+    PACKING_BINNING,
+    PACKING_SMART_PACKING,
 }
 
 struct dataloader_config {
-    // dataEnglish textconfiguration
-    []string data_paths                // datafile/directoryEnglish text (support glob)
-    data_format format                 // fileEnglish text
 
-    // Batch configuration
-    int batch_size                     // English text batch English text
-    int max_seq_len                    // English text (padding/cutoff English text)
-    int min_seq_len                    // English text (English text)
+    []string data_paths
+    data_format format
 
-    // English text
-    packing_strategy packing           // English text
-    float packing_efficiency_target    // English text (English text 0.9 = 90% non-padding)
 
-    // English text
-    int num_workers                    // dataloadEnglish text (English text 4-16)
-    int prefetch_factor                // English text (English text worker English text batch)
-    bool pin_memory                    // useEnglish text (English text CPU→GPU)
-    int io_thread_count                // IO English text (English textfile)
-    int tokenize_thread_count          // Tokenization English text
+    int batch_size
+    int max_seq_len
+    int min_seq_len
 
-    // tokenizer configuration
-    string tokenizer_path              // tokenizer filepath
-    bool add_special_tokens            // English text token (BOS/EOS/PAD)
-    bool enable_rope_scaling           // English text RoPE position encoding
 
-    // English texttrainingsupport
-    bool distributed_sampling          // English text (English text rank English textdata)
-    int world_size                     // English text rank English text
-    int local_rank                     // English text rank
-    uint64 seed                        // English text (English text)
-    int shuffle_buffer_size            // Shuffle buffer English text (English text)
+    packing_strategy packing
+    float packing_efficiency_target
 
-    // dataEnglish text
-    bool enable_filtering              // English textdataEnglish text
-    float max_token_ratio_to_filter    // English text token English text (deduplication)
-    int min_chars_per_sample           // English text (English text/English text)
-    bool check_utf8_validity           // UTF-8 English text
 
-    // English textmonitoring
-    bool enable_profiling              // English text
-    int stats_report_interval          // statisticsEnglish text (batch English text)
+    int num_workers
+    int prefetch_factor
+    bool pin_memory
+    int io_thread_count
+    int tokenize_thread_count
+
+
+    string tokenizer_path
+    bool add_special_tokens
+    bool enable_rope_scaling
+
+
+    bool distributed_sampling
+    int world_size
+    int local_rank
+    uint64 seed
+    int shuffle_buffer_size
+
+
+    bool enable_filtering
+    float max_token_ratio_to_filter
+    int min_chars_per_sample
+    bool check_utf8_validity
+
+
+    bool enable_profiling
+    int stats_report_interval
 }
 
-// defaultconfiguration (English text NEURX-5.2 English texttrainingoptimize)
+
 func default_dataloader_config() dataloader_config {
     dataloader_config {
         data_paths: ["./data/pretrain/**/*.jsonl"],
         format: FORMAT_JSONL,
 
-        batch_size: 512,                  // per-GPU micro-batch size
-        max_seq_len: 4096,                // NEURX-5.2 trainingEnglish text
-        min_seq_len: 256,                 // English text
+        batch_size: 512,
+        max_seq_len: 4096,
+        min_seq_len: 256,
 
-        packing: PACKING_SMART_PACKING,   // English text (recommended!)
-        packing_efficiency_target: 0.92,  // 92% English text
+        packing: PACKING_SMART_PACKING,
+        packing_efficiency_target: 0.92,
 
-        num_workers: 8,                   // 8 English text worker English text
-        prefetch_factor: 2,               // English text 2 English text batch
+        num_workers: 8,
+        prefetch_factor: 2,
         pin_memory: true,
-        io_thread_count: 4,               // 4 English text IO English text
-        tokenize_thread_count: 8,         // 8 English text tokenization English text
+        io_thread_count: 4,
+        tokenize_thread_count: 8,
 
         tokenizer_path: "./tokenizer/tokenizer.model",
         add_special_tokens: true,
-        enable_rope_scaling: false,       // RoPE English text model English text
+        enable_rope_scaling: false,
 
         distributed_sampling: true,
         world_size: 64,
         local_rank: 0,
         seed: 42,
-        shuffle_buffer_size: 10000,       // 10K shuffle buffer
+        shuffle_buffer_size: 10000,
 
         enable_filtering: true,
-        max_token_ratio_to_filter: 0.7,   // >70% English text token English text
+        max_token_ratio_to_filter: 0.7,
         min_chars_per_sample: 100,
         check_utf8_validity: true,
 
@@ -133,51 +133,51 @@ func default_dataloader_config() dataloader_config {
     }
 }
 
-// ============================================================================
-// 2. English textdataEnglish text
-// ============================================================================
 
-// English texttrainingEnglish text (English text)
+
+
+
+
 struct raw_sample {
-    string text                         // English text
-    string source_file                  // Sourcefile
-    int64 file_offset                   // fileEnglish text (English textquickEnglish text)
-    int length_chars                    // English text
-    int estimated_tokens                // English text token English text
+    string text
+    string source_file
+    int64 file_offset
+    int length_chars
+    int estimated_tokens
 }
 
-// Tokenized English text
+
 struct tokenized_sample {
-    []int token_ids                     // Token ID English text [seq_len]
-    int seq_len                         // actualEnglish text
-    int attention_mask[]                // Attention mask [seq_len] (1=real, 0=pad)
-    []int position_ids                  // Position IDs (English textRequired)
-    int64 sample_id                     // English text ID (English textdeduplication/debug)
-    float weight                        // English textweight (English text upweighting English textdata)
-    string metadata                     // English textdata JSON (English text)
+    []int token_ids
+    int seq_len
+    int attention_mask[]
+    []int position_ids
+    int64 sample_id
+    float weight
+    string metadata
 }
 
-// English textcompleteEnglish text Batch (English textmodel)
+
 struct training_batch {
-    [][]int input_ids                    // [batch_size, seq_len] Token IDs
-    [][]int attention_mask              // [batch_size, seq_len]
-    [][]int position_ids                // [batch_size, seq_len] (optional)
-    []float labels                      // [batch_size * seq_len] English text labels (for LM loss)
+    [][]int input_ids
+    [][]int attention_mask
+    [][]int position_ids
+    []float labels
 
-    // Metadata
-    int batch_id                        // Batch ID (English text)
-    float effective_batch_ratio         // English textdataEnglish text (English text padding English text)
-    int actual_num_samples              // actualEnglish text (smart packing English text < batch_size)
 
-    // Timing info
-    float64 load_time_ms                // loadEnglish text
-    float64 tokenize_time_ms            // Tokenization English text
-    float64 total_prepare_time_ms       // English texttime
+    int batch_id
+    float effective_batch_ratio
+    int actual_num_samples
+
+
+    float64 load_time_ms
+    float64 tokenize_time_ms
+    float64 total_prepare_time_ms
 }
 
-// ============================================================================
-// 3. data_loader mainEnglish text
-// ============================================================================
+
+
+
 
 enum loader_status {
     LOADER_IDLE,
@@ -191,51 +191,51 @@ struct dataloader {
     dataloader_config config
     loader_status status
 
-    // filemanagement
-    []file_handle open_files            // English textfileEnglish text
-    []string all_data_files            // English textdatafileEnglish text
-    int current_file_index              // English textfileEnglish text
 
-    // English textsystem
-    sample_buffer raw_buffer            // English text (English text)
-    tokenized_buffer tokenized_buffer   // Tokenized English text (English text GPU)
-    training_batch[] gpu_queue          // GPU inputEnglish text (pinned memory)
+    []file_handle open_files
+    []string all_data_files
+    int current_file_index
 
-    // English text
-    thread_pool io_workers              // IO English text
-    thread_pool tokenize_workers        // Tokenize English text
 
-    // Shuffle & Sampling
-    rng_state shuffler                   // Shuffle RNG
-    distributed_sampler sampler         // English text
+    sample_buffer raw_buffer
+    tokenized_buffer tokenized_buffer
+    training_batch[] gpu_queue
 
-    // Smart Packing state
-    smart_packer packer                 // English text
 
-    // statisticsinformation
+    thread_pool io_workers
+    thread_pool tokenize_workers
+
+
+    rng_state shuffler
+    distributed_sampler sampler
+
+
+    smart_packer packer
+
+
     dataloader_stats stats
 
-    // English text
-    bool should_stop                    // English textrequestEnglish text
-    bool epoch_completed                // English text epoch English text
-    int current_epoch                   // English text epoch English text
-    int total_samples_processed         // English text
-    int total_batches_produced          // English text batch English text
+
+    bool should_stop
+    bool epoch_completed
+    int current_epoch
+    int total_samples_processed
+    int total_batches_produced
 }
 
 struct sample_buffer {
     raw_sample[] samples
-    int count                           // English textcount
-    int capacity                       // English text
-    bool is_full                        // English text
-    mutex lock                          // English text (English textsafety)
+    int count
+    int capacity
+    bool is_full
+    mutex lock
 }
 
 struct tokenized_buffer {
     tokenized_sample[] samples
     int count
     int capacity
-    bool is_ready                       // English textdata
+    bool is_ready
     mutex lock
 }
 
@@ -258,51 +258,51 @@ struct distributed_sampler {
     int samples_per_rank
     int current_index
     uint64 seed
-    []int shuffled_indices             // English text
+    []int shuffled_indices
 }
 
 struct smart_packer {
     packing_strategy strategy
-    int target_length                   // English text
+    int target_length
     float efficiency_threshold
-    []tokenized_sample current_batch_accumulator  // English text
-    int accumulated_tokens              // English text token English text
+    []tokenized_sample current_batch_accumulator
+    int accumulated_tokens
 }
 
 struct dataloader_stats {
-    int total_files_scanned             // English textfileEnglish text
-    int64 total_bytes_read              // English text
-    int total_samples_loaded            // loadEnglish text
-    int total_samples_after_filter      // English text
-    int total_batches_produced          // generateEnglish text batch English text
-    float avg_tokens_per_sample         // English text token English text
-    float packing_efficiency            // English text
-    float load_throughput_mb_s          // dataloadEnglish text (MB/s)
-    float tokenize_throughput_k_samples_s  // Tokenization English text (K samples/s)
-    float gpu_feed_throughput_batches_s     // GPU English text (batches/s)
-    int peak_memory_usage_mb            // English textuse (MB)
-    float total_time_spent_loading_pct  // loadEnglish text
-    float total_time_spent_tokenize_pct // Tokenize English text
-    float total_time_waiting_pct        // English text GPU English text
+    int total_files_scanned
+    int64 total_bytes_read
+    int total_samples_loaded
+    int total_samples_after_filter
+    int total_batches_produced
+    float avg_tokens_per_sample
+    float packing_efficiency
+    float load_throughput_mb_s
+    float tokenize_throughput_k_samples_s
+    float gpu_feed_throughput_batches_s
+    int peak_memory_usage_mb
+    float total_time_spent_loading_pct
+    float total_time_spent_tokenize_pct
+    float total_time_waiting_pct
 }
 
-// ============================================================================
-// 4. initialize
-// ============================================================================
+
+
+
 
 func init_dataloader(dataloader_config cfg) dataloader {
-    // English textdatafile
+
     []string files = scan_data_files(cfg.data_paths, cfg.format)
 
     if len(files) == 0 {
-        // error:English textdatafile
+
     }
 
-    // initializestatistics
+
     dataloader_stats init_stats
 
-    // initializeEnglish text
-    int raw_buf_size = cfg.batch_size * cfg.prefetch_factor * 4  // English text
+
+    int raw_buf_size = cfg.batch_size * cfg.prefetch_factor * 4
     sample_buffer raw_buf
     raw_buf.samples = []raw_sample{cap: raw_buf_size}
     raw_buf.count = 0
@@ -316,17 +316,17 @@ func init_dataloader(dataloader_config cfg) dataloader {
     tok_buf.capacity = tok_buf_size
     tok_buf.is_ready = false
 
-    // initializeEnglish text
+
     distributed_sampler samp
     samp.world_size = cfg.world_size
     samp.rank = cfg.local_rank
-    samp.total_samples = estimate_total_samples(files)  // English text
+    samp.total_samples = estimate_total_samples(files)
     samp.samples_per_rank = samp.total_samples / cfg.world_size
     samp.current_index = 0
     samp.seed = cfg.seed
     samp.shuffled_indices = generate_shuffled_indices(samp.total_samples, cfg.seed)
 
-    // initialize Smart Packer
+
     smart_packer pk
     pk.strategy = cfg.packing
     pk.target_length = cfg.max_seq_len
@@ -334,7 +334,7 @@ func init_dataloader(dataloader_config cfg) dataloader {
     pk.current_batch_accumulator = []tokenized_sample{}
     pk.accumulated_tokens = 0
 
-    // English text data_loader English text
+
     dataloader loader
     loader.config = cfg
     loader.status = LOADER_IDLE
@@ -356,17 +356,17 @@ func init_dataloader(dataloader_config cfg) dataloader {
 }
 
 func scan_data_files([]string paths, data_format fmt) []string {
-    // implementation: glob English text + fileEnglish text
+
     return []string{}
 }
 
 func estimate_total_samples([]string files) int {
-    // English text (English textfileEnglish textstatistics)
-    return 100000000  // placeholder: 100M samples
+
+    return 100000000
 }
 
 func generate_shuffled_indices(int n, uint64 seed) []int {
-    // Fisher-Yates shuffle generateEnglish text
+
     []int indices = []int{cap: n}
     int i = 0
     while i < n {
@@ -374,15 +374,15 @@ func generate_shuffled_indices(int n, uint64 seed) []int {
         i = i + 1
     }
 
-    // useEnglish textinitialize RNG
+
     rng_state rng
     rng.state = seed
-    rng.inc = 6364136223846793005  // LCG multiplier
+    rng.inc = 6364136223846793005
 
     i = n - 1
     while i > 0 {
         int j = random_int_range(&rng, 0, i)
-        // swap
+
         int temp = indices[i]
         indices[i] = indices[j]
         indices[j] = temp
@@ -392,43 +392,43 @@ func generate_shuffled_indices(int n, uint64 seed) []int {
     return indices
 }
 
-// ============================================================================
-// 5. English text
-// ============================================================================
 
-// English text batch (maintrainingEnglish text)
+
+
+
+
 func get_next_batch(ref dataloader loader) training_batch {
-    // English text GPU English text,RequiredEnglish text/English textdataEnglish text
+
     if len(loader.gpu_queue) == 0 || !is_batch_ready(loader.gpu_queue[0]) {
-        // English textstepEnglish textdataEnglish text
+
         prepare_next_batches(loader)
     }
 
-    // English text
+
     training_batch batch = dequeue_gpu_queue(loader)
 
-    // English textstatistics
+
     loader.total_batches_produced = loader.total_batches_produced + 1
     loader.stats.total_batches_produced = loader.stats.total_batches_produced + 1
 
     return batch
 }
 
-// English textstepEnglish text batches (English textrun)
+
 func prepare_next_batches(ref dataloader loader) {
     int batches_to_prepare = loader.config.prefetch_factor - len(loader.gpu_queue)
 
     int b = 0
     while b < batches_to_prepare && !loader.epoch_completed {
-        // 1. English text tokenized buffer English text
+
         []tokenized_sample samples = fetch_samples_from_tokenized_buffer(loader, loader.config.batch_size)
 
         if len(samples) == 0 {
-            // buffer English text,English text
+
             refill_tokenized_buffer(loader)
 
             if loader.tokenized_buffer.count == 0 {
-                // English textdataEnglish text,epoch English text
+
                 loader.epoch_completed = true
                 break
             }
@@ -436,19 +436,19 @@ func prepare_next_batches(ref dataloader loader) {
             samples = fetch_samples_from_tokenized_buffer(loader, loader.config.batch_size)
         }
 
-        // 2. English text batch (English text)
+
         training_batch batch = build_training_batch(loader, samples)
 
-        // 3. English text GPU English text
+
         enqueue_gpu_queue(loader, batch)
 
         b = b + 1
     }
 }
 
-// English text tokenized buffer English text
+
 func fetch_samples_from_tokenized_buffer(dataloader loader, int count) []tokenized_sample {
-    // English textimplementation:English text count English text
+
     []tokenized_sample result = []tokenized_sample{cap: count}
 
     int available = min_int(count, loader.tokenized_buffer.count)
@@ -458,7 +458,7 @@ func fetch_samples_from_tokenized_buffer(dataloader loader, int count) []tokeniz
         i = i + 1
     }
 
-    // English text (actualEnglish text)
+
     int remaining = loader.tokenized_buffer.count - available
     int j = 0
     while j < remaining {
@@ -470,22 +470,22 @@ func fetch_samples_from_tokenized_buffer(dataloader loader, int count) []tokeniz
     return result
 }
 
-// English text tokenized buffer (English textdata → tokenize)
+
 func refill_tokenized_buffer(ref dataloader loader) {
-    // 1. English textdata buffer
+
     refill_raw_buffer(loader)
 
-    // 2. English text tokenize
+
     int i = 0
     while i < loader.raw_buffer.count && loader.tokenized_buffer.count < loader.tokenized_buffer.capacity {
         raw_sample raw = loader.raw_buffer.samples[i]
 
-        // Tokenize
+
         tokenized_sample tok = tokenize_single(raw, loader.config)
 
-        // English text
+
         if passes_quality_filter(tok, loader.config) {
-            // English text tokenized buffer
+
             loader.tokenized_buffer.samples[loader.tokenized_buffer.count] = tok
             loader.tokenized_buffer.count = loader.tokenized_buffer.count + 1
 
@@ -495,12 +495,12 @@ func refill_tokenized_buffer(ref dataloader loader) {
         i = i + 1
     }
 
-    // English text raw data
+
     loader.raw_buffer.count = 0
     loader.raw_buffer.is_full = false
 }
 
-// English textdata buffer (English text)
+
 func refill_raw_buffer(ref dataloader loader) {
     if loader.raw_buffer.is_full { return }
 
@@ -508,26 +508,26 @@ func refill_raw_buffer(ref dataloader loader) {
     int loaded = 0
 
     while loaded < to_load && !loader.epoch_completed {
-        // English textfileEnglish text
+
         raw_sample sample = read_next_sample(loader)
 
         if sample.text == "" {
-            // fileEnglish text,English text
+
             loader.current_file_index = loader.current_file_index + 1
 
             if loader.current_file_index >= len(loader.all_data_files) {
-                // English texthelpfulEnglish text,epoch English text
+
                 loader.epoch_completed = true
 
-                // English textstate (startEnglish text epoch)
+
                 reset_for_new_epoch(loader)
                 break
             } else {
-                continue  // English textfile
+                continue
             }
         }
 
-        // English text buffer
+
         loader.raw_buffer.samples[loader.raw_buffer.count] = sample
         loader.raw_buffer.count = loader.raw_buffer.count + 1
         loaded = loaded + 1
@@ -540,9 +540,9 @@ func refill_raw_buffer(ref dataloader loader) {
     }
 }
 
-// English text (English text)
+
 func read_next_sample(dataloader loader) raw_sample {
-    // actualEnglish text format English text
+
     raw_sample sample
     sample.text = ""
     sample.source_file = loader.all_data_files[loader.current_file_index]
@@ -552,20 +552,20 @@ func read_next_sample(dataloader loader) raw_sample {
     return sample
 }
 
-// ============================================================================
-// 6. Tokenization
-// ============================================================================
+
+
+
 
 func tokenize_single(raw_sample raw, dataloader_config cfg) tokenized_sample {
-    // English text tokenizer (BPE / SentencePiece / WordPiece English text)
+
     []int token_ids = run_tokenizer(raw.text, cfg)
 
-    // English text
+
     if len(token_ids) > cfg.max_seq_len {
         token_ids = truncate(token_ids, cfg.max_seq_len)
     }
 
-    // English text token
+
     if cfg.add_special_tokens {
         token_ids = add_special_tokens(token_ids)
     }
@@ -582,10 +582,10 @@ func tokenize_single(raw_sample raw, dataloader_config cfg) tokenized_sample {
     return result
 }
 
-// (placeholder - actualEnglish text tokenizer C English text Python binding)
+
 func run_tokenizer(string text, dataloaderConfig cfg) []int {
-    // English text:English text token IDs
-    int estimated_len = len(text) / 4  // rough estimate
+
+    int estimated_len = len(text) / 4
     []int ids = []int{cap: estimated_len}
     int i = 0
     while i < estimated_len { ids[i] = i % 128000; i = i + 1 }
@@ -600,13 +600,13 @@ func truncate([]int ids, int max_len) []int {
 }
 
 func add_special_tokens([]int ids) []int {
-    // English text BOS (ID=1), EOS (ID=2)
+
     int new_len = len(ids) + 2
     []int result = []int{cap: new_len}
-    result[0] = 1  // BOS
+    result[0] = 1
     int i = 0
     while i < len(ids) { result[i+1] = ids[i]; i = i + 1 }
-    result[new_len-1] = 2  // EOS
+    result[new_len-1] = 2
     return result
 }
 
@@ -624,26 +624,26 @@ func create_position_ids(int seq_len) []int {
     return pos
 }
 
-// ============================================================================
-// 7. Smart Packing (English text)
-// ============================================================================
-//
-// English text: English text,padding English textcompute
-//
-// English text: English text "English text" English text
-//
-// example (target_length=10):
-//   sample A: [tok tok tok] (len=3)  + PAD x7 = 10 tokens (30% efficiency)
-//   sample B: [tok tok tok tok tok] (len=5) + PAD x5 = 10 tokens (50% efficiency)
-//
-// Smart Packing:
-//   Block: [tok_A tok_A tok_A EOS tok_B tok_B tok_B tok_B tok_B EOS PAD PAD] (len=10)
-//   Efficiency: 8/10 = 80%! (A English text B English text block)
-//
-// English text:
-//   - RequiredEnglish text (English text loss mask)
-//   - Attention mask RequiredEnglish text (sample boundary masking)
-//   - Labels English texttruthful token compute,PAD English text (loss = -100 English text mask=0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 func build_training_batch(dataloader loader, []tokenized_sample samples) training_batch {
     if loader.config.packing == PACKING_SMART_PACKING {
@@ -653,12 +653,12 @@ func build_training_batch(dataloader loader, []tokenized_sample samples) trainin
     }
 }
 
-// English text batch (padding English text)
+
 func build_standard_batch(dataloader loader, []tokenized_sample samples) training_batch {
     int batch_size = len(samples)
     int max_len_in_batch = 0
 
-    // English text
+
     int s = 0
     while s < batch_size {
         if samples[s].seq_len > max_len_in_batch {
@@ -667,12 +667,12 @@ func build_standard_batch(dataloader loader, []tokenized_sample samples) trainin
         s = s + 1
     }
 
-    // English text
+
     if max_len_in_batch > loader.config.max_seq_len {
         max_len_in_batch = loader.config.max_seq_len
     }
 
-    // English text
+
     [][]int input_ids = allocate_2d_int(batch_size, max_len_in_batch)
     [][]int attention_mask = allocate_2d_int(batch_size, max_len_in_batch)
     [][]int position_ids = allocate_2d_int(batch_size, max_len_in_batch)
@@ -686,20 +686,20 @@ func build_standard_batch(dataloader loader, []tokenized_sample samples) trainin
             position_ids[s][t] = samples[s].position_ids[t]
             t = t + 1
         }
-        // Padding English text
+
         while t < max_len_in_batch {
-            input_ids[s][t] = 0  // PAD token
-            attention_mask[s][t] = 0  // English textcompute
+            input_ids[s][t] = 0
+            attention_mask[s][t] = 0
             position_ids[s][t] = 0
             t = t + 1
         }
         s = s + 1
     }
 
-    // compute labels (shifted input_ids for LM loss)
+
     []float labels = build_labels(input_ids, batch_size, max_len_in_batch)
 
-    // computeEnglish text
+
     float total_real_tokens = 0.0
     s = 0
     while s < batch_size {
@@ -723,51 +723,51 @@ func build_standard_batch(dataloader loader, []tokenized_sample samples) trainin
     return batch
 }
 
-// Smart Packed batch (recommended!)
+
 func build_packed_batch(dataloader loader, []tokenized_sample samples) training_batch {
     int target_len = loader.config.max_seq_len
     int batch_size = loader.config.batch_size
 
-    // English text
+
     [][]int packed_input_ids = allocate_2d_int(batch_size, target_len)
     [][]int packed_attention_mask = allocate_2d_int(batch_size, target_len)
     [][]int packed_position_ids = allocate_2d_int(batch_size, target_len)
 
-    int packed_idx = 0  // English text batch English text packed sequence
-    int sample_idx = 0  // English textinputEnglish text
+    int packed_idx = 0
+    int sample_idx = 0
 
     while packed_idx < batch_size && sample_idx < len(samples) {
-        int offset = 0  // English text packed sequence English text
+        int offset = 0
 
-        // English text block
+
         while offset < target_len && sample_idx < len(samples) {
             tokenized_sample sample = samples[sample_idx]
             int remaining_space = target_len - offset
 
             if sample.seq_len <= remaining_space {
-                // AllowedcompleteEnglish text
+
                 copy_tokens(packed_input_ids[packed_idx], sample.token_ids, offset, sample.seq_len)
                 set_range(packed_attention_mask[packed_idx], offset, sample.seq_len, 1)
 
-                // Position IDs (English text packed,English textRequiredEnglish text)
+
                 set_consecutive(packed_position_ids[packed_idx], offset, sample.seq_len, offset)
 
                 offset = offset + sample.seq_len
                 sample_idx = sample_idx + 1
             } else {
-                // English text,English text block
+
                 break
             }
 
-            // English text (English text,English text EOS token)
+
             if offset < target_len {
-                packed_input_ids[packed_idx][offset] = 2  // EOS as separator
-                packed_attention_mask[packed_idx][offset] = 0  // separator English text loss
+                packed_input_ids[packed_idx][offset] = 2
+                packed_attention_mask[packed_idx][offset] = 0
                 offset = offset + 1
             }
         }
 
-        // Pad English text
+
         while offset < target_len {
             packed_input_ids[packed_idx][offset] = 0
             packed_attention_mask[packed_idx][offset] = 0
@@ -778,10 +778,10 @@ func build_packed_batch(dataloader loader, []tokenized_sample samples) training_
         packed_idx = packed_idx + 1
     }
 
-    // Labels
+
     []float labels = build_labels(packed_input_ids, packed_idx, target_len)
 
-    // computeEnglish text
+
     float real_tokens = calculate_real_token_count(packed_attention_mask, packed_idx, target_len)
     float efficiency = real_tokens / float_of_int(packed_idx * target_len)
 
@@ -792,7 +792,7 @@ func build_packed_batch(dataloader loader, []tokenized_sample samples) training_
     batch.labels = labels
     batch.batch_id = loader.total_batches_produced
     batch.effective_batch_ratio = efficiency
-    batch.actual_num_samples = sample_idx  // English text > batch_size English text packing
+    batch.actual_num_samples = sample_idx
     batch.load_time_ms = 0.0
     batch.tokenize_time_ms = 0.0
     batch.total_prepare_time_ms = 0.0
@@ -800,39 +800,39 @@ func build_packed_batch(dataloader loader, []tokenized_sample samples) training_
     return batch
 }
 
-// ============================================================================
-// 8. dataEnglish text
-// ============================================================================
+
+
+
 
 func passes_quality_filter(tokenized_sample tok, dataloader_config cfg) bool {
-    // 1. English text
+
     if tok.seq_len < cfg.min_seq_len {
-        return false  // English text
+        return false
     }
 
     if tok.seq_len > cfg.max_seq_len {
-        return false  // English text (English text tokenize English text,English text double-check)
+        return false
     }
 
-    // 2. English text (English text)
-    // (RequiredEnglish text tokenize English text,English text)
 
-    // 3. Token English text (English text)
+
+
+
     if cfg.enable_filtering && cfg.max_token_ratio_to_filter < 1.0 {
         float repetition_ratio = calculate_token_repetition_ratio(tok.token_ids)
         if repetition_ratio > cfg.max_token_ratio_to_filter {
-            return false  // English text/English textdata
+            return false
         }
     }
 
     return true
 }
 
-// compute token English text (English text)
+
 func calculate_token_repetition_ratio([]int tokens) float {
     if len(tokens) == 0 { return 0.0 }
 
-    // statistics unique tokens
+
     map(int, int) freq_map
     int i = 0
     while i < len(tokens) {
@@ -840,7 +840,7 @@ func calculate_token_repetition_ratio([]int tokens) float {
         i = i + 1
     }
 
-    // English text token English text
+
     int max_count = 0
     for pair in freq_map {
         if pair.value > max_count {
@@ -851,20 +851,20 @@ func calculate_token_repetition_ratio([]int tokens) float {
     return float_of_int(max_count) / float_of_int(len(tokens))
 }
 
-// ============================================================================
-// 9. English text
-// ============================================================================
 
-// English text rank English text
+
+
+
+
 func get_local_samples_for_rank(distributed_sampler samp, int num_samples_needed) []int {
     []int local_indices = []int{cap: num_samples_needed}
 
     int fetched = 0
     while fetched < num_samples_needed {
-        // English text
+
         int global_idx = samp.shuffled_indices[samp.current_index]
 
-        // English text rank
+
         if global_idx % samp.world_size == samp.rank {
             local_indices[fetched] = global_idx
             fetched = fetched + 1
@@ -872,10 +872,10 @@ func get_local_samples_for_rank(distributed_sampler samp, int num_samples_needed
 
         samp.current_index = samp.current_index + 1
 
-        // Wrap around
+
         if samp.current_index >= samp.total_samples {
             samp.current_index = 0
-            // Re-shuffle for new epoch
+
             samp.shuffled_indices = generate_shuffled_indices(samp.total_samples, samp.seed + 1)
         }
     }
@@ -883,23 +883,23 @@ func get_local_samples_for_rank(distributed_sampler samp, int num_samples_needed
     return local_indices
 }
 
-// Epoch English text
+
 func reset_for_new_epoch(ref dataloader loader) {
     loader.current_epoch = loader.current_epoch + 1
     loader.current_file_index = 0
     loader.sampler.current_index = 0
     loader.epoch_completed = false
 
-    // English text shuffle
+
     loader.sampler.shuffled_indices = generate_shuffled_indices(
         loader.sampler.total_samples,
         loader.config.seed + loader.current_epoch
     )
 }
 
-// ============================================================================
-// 10. English textmonitoring
-// ============================================================================
+
+
+
 
 func get_dataloader_stats(dataloader loader) dataloader_stats {
     return loader.stats
@@ -922,9 +922,9 @@ func print_dataloader_summary(dataloader loader) string {
     "  Samples This Epoch: " + string(loader.total_samples_processed)
 }
 
-// ============================================================================
-// 11. helperfunction
-// ============================================================================
+
+
+
 
 func min_int(int a, int b) int { if a < b { return a }; return b }
 func max_int(int a, int b) int { if a > b { return a }; return b }
@@ -960,7 +960,7 @@ func set_consecutive([]int arr, int start, int count, int from_val) {
 }
 
 func build_labels([][][]int input_ids, int batch, int seq) []float {
-    // Shifted input_ids: labels[t] = input_ids[t+1], last token label = -100 (ignore)
+
     int total = batch * seq
     []float labels = []float{cap: total}
     int b = 0
@@ -970,7 +970,7 @@ func build_labels([][][]int input_ids, int batch, int seq) []float {
             labels[b * seq + t] = float_of_int(input_ids[b][t + 1])
             t = t + 1
         }
-        labels[b * seq + seq - 1] = -100.0  // ignore last token
+        labels[b * seq + seq - 1] = -100.0
         b = b + 1
     }
     return labels

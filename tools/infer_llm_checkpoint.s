@@ -118,7 +118,7 @@ func split_lines(string s) []string {
                 idx = idx + 1
                 line = ""
             }
-                // skip possible \r\n pairs
+
             i = i + 1
             continue
         }
@@ -209,7 +209,7 @@ func str_to_int(string s, int fallback) int {
 }
 
 func str_to_float(string s) float {
-    // Very small parser using atof-like behavior (handles simple floats)
+
     if len(s) == 0 { return 0.0 }
     bool neg = false
     int i = 0

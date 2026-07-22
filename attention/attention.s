@@ -3,9 +3,9 @@ package neurx.attention
 use neurx.model.transformer.norm.{rope_embedding, rope_apply_result, apply_rope}
 use neurx.attention.flash_compute
 
-// Multi-head attention for transformer blocks.
-// Supports standard attention, GQA, MQA, and a flash-attention-style entry
-// that shares the same numerically stable core.
+
+
+
 
 struct attention_config {
     int hidden_dim
@@ -333,16 +333,16 @@ func forward_flash_attention(
     int num_heads = attn.config.num_heads
     int head_dim = attn.head_dim
     int total_tokens = seq_len
-    
+
     project_qkv_result projected = project_qkv(attn, hidden_states, total_tokens)
-    
+
     flash_compute.flash_attention_config config = flash_compute.new_flash_attention_config()
     config.enable_sequence_parallel = false
-    
+
     flash_compute.flash_attention_state state = flash_compute.new_flash_attention_state(
         1, seq_len, num_heads, head_dim, config
     )
-    
+
     []float causal_mask = allocate_vector(seq_len * seq_len, 1.0)
     int i = 0
     while i < seq_len {
@@ -353,27 +353,27 @@ func forward_flash_attention(
         }
         i = i + 1
     }
-    
+
     []float q_reshaped = reshape_for_flash(projected.query, seq_len, num_heads, head_dim)
     []float k_reshaped = reshape_for_flash(projected.key, seq_len, num_heads, head_dim)
     []float v_reshaped = reshape_for_flash(projected.value, seq_len, num_heads, head_dim)
-    
+
     []float attended = flash_compute.flash_attention_forward(
         q_reshaped, k_reshaped, v_reshaped, causal_mask, state
     )
-    
+
     []float attended_flat = reshape_from_flash(attended, seq_len, num_heads, head_dim)
-    
+
     []float output = matmul_flat(attended_flat, attn.output_weight, seq_len, hidden_dim, hidden_dim)
     output = apply_bias(output, attn.output_bias)
-    
+
     output
 }
 
 func reshape_for_flash([]float input, int seq_len, int num_heads, int head_dim) []float {
     int hidden_dim = num_heads * head_dim
     []float output = allocate_vector(seq_len * num_heads * head_dim, 0.0)
-    
+
     int i = 0
     while i < seq_len {
         int h = 0
@@ -387,14 +387,14 @@ func reshape_for_flash([]float input, int seq_len, int num_heads, int head_dim) 
         }
         i = i + 1
     }
-    
+
     output
 }
 
 func reshape_from_flash([]float input, int seq_len, int num_heads, int head_dim) []float {
     int hidden_dim = num_heads * head_dim
     []float output = allocate_vector(seq_len * hidden_dim, 0.0)
-    
+
     int i = 0
     while i < seq_len {
         int h = 0
@@ -408,7 +408,7 @@ func reshape_from_flash([]float input, int seq_len, int num_heads, int head_dim)
         }
         i = i + 1
     }
-    
+
     output
 }
 
@@ -419,8 +419,8 @@ func forward_with_cache(
     []float kv_cache_value,
     int cache_position_id
 ) []float {
-    // Minimal cache-aware hook. We keep the same output path and let the
-    // caller maintain the cache buffers.
+
+
     forward_attention(attn, query_states, cache_position_id + 1)
 }
 

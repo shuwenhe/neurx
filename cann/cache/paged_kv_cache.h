@@ -59,8 +59,8 @@ class AclDeviceAllocator final : public DeviceAllocator {
   void release(void* address) override;
 };
 
-// Owns one contiguous device allocation and deterministic request-to-block
-// metadata. Tensor layout within each block is owned by the attention kernels.
+
+
 class PagedKvCache {
  public:
   explicit PagedKvCache(KvCacheConfig config, DeviceAllocator* allocator = nullptr);
@@ -119,4 +119,4 @@ class PagedKvCache {
   std::map<std::string, RequestAllocation> requests_;
 };
 
-}  // namespace neurx::cann
+}

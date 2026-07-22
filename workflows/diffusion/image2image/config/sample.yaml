@@ -1,4 +1,4 @@
-# Sample config for diffusion/image2image
+
 batch_size: 8
 image_size: 512
 max_steps: 1500

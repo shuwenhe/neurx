@@ -1,10 +1,10 @@
 package main
 
-// S training - float-only output to avoid int_to_str issues
-// Key metrics shown as floats: loss, learning rate, progress as percentage
+
+
 
 func main() int {
-    // Training configuration
+
     int max_steps = 10000
     int log_interval = 10
     float base_lr = 0.0002
@@ -19,7 +19,7 @@ func main() int {
 
     int step = 0
     while step < max_steps {
-        // Compute realistic loss (cubic decay from 10.0 to 0.975)
+
         float progress = (step * 1.0) / (max_steps * 1.0)
         float base_loss = 10.0
         float final_loss = 0.975
@@ -29,7 +29,7 @@ func main() int {
         }
         float loss = final_loss + (base_loss - final_loss) * decay
 
-        // Compute warmup learning rate schedule
+
         float current_lr = base_lr
         if step < warmup_steps {
             float warmup_progress = (step * 1.0) / (warmup_steps * 1.0)
@@ -38,13 +38,13 @@ func main() int {
 
         last_loss = loss
 
-        // Log at intervals (every log_interval steps)
+
         int step_mod = step - (step / log_interval) * log_interval
         bool should_log = (step == 0)
         if step_mod == 0 {
             should_log = true
         }
-        
+
         if should_log {
             println("Progress: " + fmt_float(progress * 100.0, 2) + "% | Loss: " + fmt_float(loss, 4) + " | LR: " + fmt_float(current_lr, 8))
         }

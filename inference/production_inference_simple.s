@@ -1,6 +1,6 @@
 package neurx.inference.simple
 
-// Runtime I/O functions - S language implementations (stubs)
+
 func runtime_env_get(string name, string default_value) string {
     default_value
 }
@@ -17,7 +17,7 @@ func runtime_run_command_output(string command) string {
     ""
 }
 
-// Helper functions
+
 func trim(string s) string {
     int i = 0
     while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
@@ -59,7 +59,7 @@ func int_to_str(int val, int radix) string {
 }
 
 func main() int {
-    // Get configuration from environment
+
     string model_name = trim(runtime_env_get("NEURX_INFER_MODEL_NAME", "llm_s"))
     string device_type = trim(runtime_env_get("NEURX_INFER_DEVICE", "cpu"))
     string checkpoint_arg = trim(runtime_env_get("NEURX_INFER_CHECKPOINT", "/home/shuwen/shuwen/train/neurx/artifacts/checkpoints/llm_s_pretrain"))
@@ -69,7 +69,7 @@ func main() int {
     string answer_mode = trim(runtime_env_get("NEURX_INFER_ANSWER_MODE", "qa"))
     string validate_only = runtime_env_get("NEURX_INFER_VALIDATE_ONLY", "")
 
-    // Print header
+
     println("================================================")
     println("NeurX S Inference Engine (Simplified)")
     println("================================================")

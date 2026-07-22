@@ -8,9 +8,9 @@
 #include <utility>
 #include <vector>
 
-// Control-plane runtime for a decoder-only model.  Device adapters execute the
-// batches produced here; this layer deliberately owns no device memory and is
-// therefore deterministic and testable without CUDA/CANN hardware.
+
+
+
 namespace neurx::inference {
 
 enum class Backend { cuda, ascend, cpu };
@@ -106,8 +106,8 @@ struct RuntimeConfig {
   int max_prefill_batch_tokens = 4096;
   int max_prefill_requests = 16;
   int max_decode_batch_size = 64;
-  // Decode is scheduled first so time-to-next-token is bounded even while a
-  // large prompt is arriving.  Prefill remains independent and chunked.
+
+
   bool prioritize_decode = true;
 };
 
@@ -135,7 +135,7 @@ class DisaggregatedScheduler {
     Request request{std::move(id), std::move(key), prompt_tokens, prompt_tokens, max_new_tokens};
     const std::string request_id = request.id;
     requests_.emplace(request_id, std::move(request));
-    // Empty prompts skip prompt execution but still use the same decode lane.
+
     if (prompt_tokens == 0) {
       requests_.at(request_id).state = RequestState::queued_decode;
       decode_queue_.push_back(request_id);
@@ -144,8 +144,8 @@ class DisaggregatedScheduler {
     }
   }
 
-  // Returns at most one homogeneous device batch. Call complete_prefill or
-  // complete_decode before scheduling the same request again.
+
+
   Batch schedule() {
     if (config_.prioritize_decode && !decode_queue_.empty()) return take_decode_batch();
     if (!prefill_queue_.empty()) return take_prefill_batch();
@@ -170,8 +170,8 @@ class DisaggregatedScheduler {
     }
   }
 
-  // A decode completion produces exactly one token.  EOS must be supplied by
-  // the backend sampler; max_new_tokens is enforced here as a safety bound.
+
+
   void complete_decode(const std::string& id, bool eos = false) {
     Request& request = mutable_request(id, RequestState::decoding);
     ++request.generated_tokens;
@@ -238,4 +238,4 @@ class DisaggregatedScheduler {
   std::vector<std::string> decode_queue_;
 };
 
-}  // namespace neurx::inference
+}

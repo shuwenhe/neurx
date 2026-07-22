@@ -1,38 +1,38 @@
 package neurx.model.lora
 
-// ============================================================================
-// LoRA — Low-Rank Adaptation (Hu et al., 2021)
-// QLoRA — Quantized LoRA (Dettmers et al., 2023)
-//
-// English text:
-//   English texttrainingweight W ∈ R^{d×k}, English texttrainingEnglish text:
-//   W' = W + ΔW = W + B-A
-//   English text A ∈ R^{r×k}, B ∈ R^{d×r}, r << min(d,k)
-//   ΔW English textinitializeEnglish text 0: B=0, A~N(0,σ²)
-//   inferenceEnglish text: W_merged = W + (α/r)-B-A
-//
-// QLoRA extension:
-//   English textweight W English text NF4 (Normal Float 4-bit) English text INT8,
-//   English text, English text 65B parametermodel.
-//
-// supportEnglish text:
-//   • Linear (English text): Q, K, V, O English text, FFN gate/up/down
-//   • embedding (English text)
-// ============================================================================
 
-// ============================================================================
-// 1. configuration
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 struct lora_config {
-    int rank              // LoRA English text r (English text 4, 8, 16, 32, 64)
-    float alpha           // English text α (English text r English text 2r)
-    float dropout         // LoRA dropout (0.0 = English text)
-    string target_modules // English textNameEnglish text, English text "q,k,v,o,gate,up,down"
-    bool merge_weights    // inferenceEnglish text ΔW English text W
-    bool use_qlora        // English textweight (QLoRA)
-    string qlora_dtype    // "nf4" | "int8" (QLoRA English text)
-    float lora_lr         // LoRA English textlearning rate (English text 0 English text)
+    int rank
+    float alpha
+    float dropout
+    string target_modules
+    bool merge_weights
+    bool use_qlora
+    string qlora_dtype
+    float lora_lr
 }
 
 func default_lora_config() lora_config {
@@ -61,11 +61,11 @@ func qlora_config_7b() lora_config {
     }
 }
 
-// ============================================================================
-// 2. NF4 English text (QLoRA English textweightEnglish text)
-// ============================================================================
 
-// NF4 English text 16 English text (English text)
+
+
+
+
 func nf4_codebook() []float {
     []float nf4_values = []float{cap: 16}
     nf4_values[0] = -1.0
@@ -88,17 +88,17 @@ func nf4_codebook() []float {
 }
 
 struct nf4_tensor {
-    []int   codes       // [N] English text 4-bit English text (0-15)
-    float   absmax      // English text (English text)
-    int     num_elem    // English textcount
-    []float codebook    // NF4 English text
+    []int   codes
+    float   absmax
+    int     num_elem
+    []float codebook
 }
 
-// English text fp32 English text → NF4
+
 func quantize_nf4([]float w, int n) nf4_tensor {
     []float cb = nf4_codebook()
 
-    // compute absmax
+
     float amax = 0.0
     int i = 0
     for i < n {
@@ -112,8 +112,8 @@ func quantize_nf4([]float w, int n) nf4_tensor {
     []int codes = []int{}
     int j = 0
     for j < n {
-        float wn = w[j] / amax   // English text [-1, 1]
-        // English text
+        float wn = w[j] / amax
+
         int best_k = 0
         float best_d = 999.0
         int k = 0
@@ -138,7 +138,7 @@ func quantize_nf4([]float w, int n) nf4_tensor {
     }
 }
 
-// English text NF4 → fp32
+
 func dequantize_nf4(nf4_tensor t) []float {
     []float out = []float{}
     int i = 0
@@ -150,7 +150,7 @@ func dequantize_nf4(nf4_tensor t) []float {
     out
 }
 
-// English text: A [M,K], B [K,N] → C [M,N]  (transpose_b: B[N,K]^T)
+
 func matmul_lora([]float a, []float b, int M, int K, int N, bool transpose_b) []float {
     []float c = []float{cap: M * N}
     int i = 0
@@ -197,32 +197,32 @@ func pow_approx(float base, int exp) float {
     result
 }
 
-// ============================================================================
-// 3. LoRA English text
-// ============================================================================
+
+
+
 
 struct lora_linear {
-    // English textweight (English text)
-    []float base_weight     // [out_dim, in_dim]  fp32 or quantized
-    nf4_tensor base_nf4     // NF4 English textweight (QLoRA)
-    bool quantized          // English textuse NF4
 
-    // LoRA English text (English texttraining)
-    []float lora_A          // [rank, in_dim]   initialize: N(0, σ²)
-    []float lora_B          // [out_dim, rank]  initialize: 0
-    []float lora_A_grad     // dL/dA
-    []float lora_B_grad     // dL/dB
+    []float base_weight
+    nf4_tensor base_nf4
+    bool quantized
 
-    // configuration
+
+    []float lora_A
+    []float lora_B
+    []float lora_A_grad
+    []float lora_B_grad
+
+
     int in_dim
     int out_dim
     int rank
-    float scaling           // α / r
+    float scaling
     float dropout_rate
 
-    // English textcache (English text)
-    []float last_input      // English textinput [batch*seq, in_dim]
-    []float last_Ax         // B-A-x (LoRA English text, English text)
+
+    []float last_input
+    []float last_Ax
 }
 
 func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config cfg) lora_linear {
@@ -264,11 +264,11 @@ func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config c
     }
 }
 
-// ============================================================================
-// 4. LoRA English text
-// ============================================================================
 
-// x: [batch, in_dim] → out: [batch, out_dim]
+
+
+
+
 func lora_forward(lora_linear layer, []float x, int batch) lora_linear {
     []float y = []float{}
     []float ax = []float{}
@@ -366,13 +366,13 @@ func lora_forward_with_output(lora_linear layer, []float x, int batch) lora_forw
     lora_forward_result { updated_layer: updated, output: y }
 }
 
-// ============================================================================
-// 5. LoRA English text
-// ============================================================================
+
+
+
 
 struct lora_backward_result {
-    lora_linear updated_layer   // English textgradient
-    []float dx                  // [batch, in_dim] inputgradient
+    lora_linear updated_layer
+    []float dx
 }
 
 func lora_backward(lora_linear layer, []float dy, int batch) lora_backward_result {
@@ -453,18 +453,18 @@ func lora_backward(lora_linear layer, []float dy, int batch) lora_backward_resul
     lora_backward_result { updated_layer: updated, dx: dx }
 }
 
-// ============================================================================
-// 6. AdamW English text LoRA parameter
-// ============================================================================
+
+
+
 
 struct lora_adamw_state {
-    // A English text
-    []float mA      // English text (momentum)
-    []float vA      // English text (variance)
-    // B English text
+
+    []float mA
+    []float vA
+
     []float mB
     []float vB
-    // English textparameter
+
     float lr
     float beta1
     float beta2
@@ -523,9 +523,9 @@ func lora_adamw_step(lora_linear layer, lora_adamw_state opt) lora_adamw_result 
     lora_adamw_result { layer: upd, opt: o2 }
 }
 
-// ============================================================================
-// 7. weightEnglish text (inferenceEnglish text ΔW English text W)
-// ============================================================================
+
+
+
 
 func lora_merge_weights(lora_linear layer) lora_linear {
     []float merged = []float{}
@@ -559,9 +559,9 @@ func lora_merge_weights(lora_linear layer) lora_linear {
     result
 }
 
-// ============================================================================
-// 8. save / load LoRA English text (English textsave A, B, English textsaveEnglish text W)
-// ============================================================================
+
+
+
 
 struct lora_checkpoint {
     int in_dim
@@ -593,16 +593,16 @@ func lora_load_checkpoint(lora_linear layer, lora_checkpoint ckpt) lora_linear {
     updated
 }
 
-// ============================================================================
-// 9. statisticsinformation
-// ============================================================================
+
+
+
 
 struct lora_stats {
-    int total_base_params       // English textparameterEnglish text
-    int total_lora_params       // English texttraining LoRA parameterEnglish text
-    float trainable_ratio       // LoRA / total
+    int total_base_params
+    int total_lora_params
+    float trainable_ratio
     int rank
-    float memory_saved_mb       // English text (English text)
+    float memory_saved_mb
 }
 
 func lora_compute_stats(lora_linear layer) lora_stats {
@@ -610,7 +610,7 @@ func lora_compute_stats(lora_linear layer) lora_stats {
     int lora_params = layer.rank * (layer.in_dim + layer.out_dim)
     float ratio = (lora_params * 1.0) / ((base_params + lora_params) * 1.0)
 
-    // English text: English textweight NF4 English text 8× vs fp32
+
     float saved = 0.0
     if layer.quantized {
         float base_mb = (base_params * 4 * 1.0) / 1048576.0

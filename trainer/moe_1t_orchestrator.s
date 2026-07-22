@@ -1,38 +1,38 @@
 package neurx.trainer.moe_1t_orchestrator
 
-// ============================================================================
-// 1T MoE Training Orchestrator
-//
-// English text:
-//   1. English text 1024 GPU English text 4 English text (DP+TP+PP+EP)
-//   2. managementEnglish text token English text, support 1T+ token English text
-//   3. implementation ZeRO Stage 3 English textoptimize
-//   4. English text MoE English text
-//   5. managementEnglish textcheckpointEnglish textrecover
-//   6. monitoringEnglish text
-//
-// English text:
-//   ┌──────────────────────────────────┐
-//   │  MoE 1T Training Orchestrator    │
-//   └─────────────┬──────────────────┘
-//        ┌────────┴────────┬──────────┬──────────┬────────┐
-//        │                 │          │          │        │
-//     TP │              EP │       PP │       DP │   COMM │
-//   (TP8)│            (EP16)│      (PP8)│      (DP2)│  (NCCL)│
-//        │                 │          │          │        │
-//   ┌────▼─────────────────▼──────────▼──────────▼────────┐
-//   │     Distributed Training Loop                       │
-//   │  ┌──────────────────────────────────────────────┐  │
-//   │  │ 1. Data Pipeline (Token Stream)              │  │
-//   │  │ 2. Forward Pass (MoE + All-to-All)           │  │
-//   │  │ 3. Loss Computation + Aux Loss               │  │
-//   │  │ 4. Backward Pass (Gradient Async Allreduce)  │  │
-//   │  │ 5. Optimizer Step (ZeRO Stage 3 Shards)      │  │
-//   │  │ 6. checkpoint + Monitoring                   │  │
-//   │  └──────────────────────────────────────────────┘  │
-//   └────────────────────────────────────────────────────┘
-//
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use neurx.moe.llm_1t.{
     moe_1t_framework, moe_1t_scale_profile, moe_1t_parallel_plan,
@@ -45,22 +45,22 @@ use neurx.loss.llm_moe_1t_loss.{loss_state_new, compute_total_loss, compute_ce_g
 use neurx.distributed.collective.{collective_state}
 use neurx.runtime.io.{io_println, io_get_env, io_mkdir_recursive, runtime_file_exists, runtime_read_text_file}
 
-// ============================================================================
-// 1. English textstateEnglish text
-// ============================================================================
 
-// MoE English textstatistics
+
+
+
+
 struct moe_routing_stats {
     int total_tokens
-    []int expert_load        // [num_experts] — English text token English text
+    []int expert_load
     []float expert_load_ratio
-    float load_imbalance     // max_load / avg_load
+    float load_imbalance
     float communication_cost_ms
     float compute_cost_ms
     float aux_loss_value
 }
 
-// 1T trainingstepEnglish textstate
+
 struct moe_1t_step_state {
     int global_step
     int tokens_seen
@@ -74,12 +74,12 @@ struct moe_1t_step_state {
     int compute_time_us
 }
 
-// 1T trainingEnglish textmainEnglish text
+
 struct moe_1t_orchestrator {
     moe_1t_framework framework
     gpt_moe_config model_config
 
-    // English text
+
     int world_rank
     int world_size
     int tp_rank
@@ -91,39 +91,39 @@ struct moe_1t_orchestrator {
     int dp_rank
     int dp_size
 
-    // trainingstate
+
     gpt_moe_state model_state
     zero_optimizer_state optimizer_state
     collective_state comm
 
-    // dataEnglish text
+
     string data_manifest_path
     []string token_shards
     int current_shard_index
     int tokens_in_shard
 
-    // checkpointEnglish textrecover
+
     string checkpoint_dir
     int last_saved_step
     int training_step
     int resumeable
     string latest_checkpoint_path
 
-    // monitoring
+
     []moe_1t_step_state step_history
     int log_interval
     int eval_interval
     int save_interval
 
-    // runEnglish text
+
     int should_stop
     int fault_recovery_enabled
     int profile_enabled
 }
 
-// ============================================================================
-// 2. initializefunction
-// ============================================================================
+
+
+
 
 func moe_1t_trim(string s) string {
     int i = 0
@@ -359,11 +359,11 @@ func moe_1t_tp_global_offset(moe_1t_orchestrator orch) int {
     offset
 }
 
-// English textconfigurationinitializeEnglish text
+
 func moe_1t_orchestrator_new() moe_1t_orchestrator {
     moe_1t_framework fw = moe_1t_framework_default()
 
-    // English textinformation
+
     string rank_str = io_get_env("RANK", "0")
     string world_size_str = io_get_env("WORLD_SIZE", "1")
     string tp_rank_str = io_get_env("TP_RANK", "0")
@@ -386,10 +386,10 @@ func moe_1t_orchestrator_new() moe_1t_orchestrator {
     int dp_rank = string_to_int(dp_rank_str)
     int dp_size = string_to_int(dp_size_str)
 
-    // initializemodelstate
+
     gpt_moe_state model = new_gpt_moe_state(fw.model)
 
-    // initializeoptimizeEnglish textstate (ZeRO Stage 3)
+
     zero_optimizer_state optimizer = zero_optimizer_state {
         learning_rate: fw.training.peak_lr,
         min_lr: fw.training.min_lr,
@@ -405,19 +405,19 @@ func moe_1t_orchestrator_new() moe_1t_orchestrator {
         partitioned_grads: 1,
     }
 
-    // initializeEnglish text
+
     collective_state comm = collective_state {
         backend: "nccl",
         rank: world_rank,
         world_size: world_size,
     }
 
-    // English textcheckpointdirectory
+
     string checkpoint_dir = fw.training.checkpoint_dir
     io_mkdir_recursive(checkpoint_dir)
     []string shard_refs = moe_1t_manifest_refs(fw.training.data_manifest_path)
 
-    // initializeEnglish text
+
     moe_1t_orchestrator orch = moe_1t_orchestrator {
         framework: fw,
         model_config: fw.model,
@@ -461,11 +461,11 @@ func moe_1t_orchestrator_new() moe_1t_orchestrator {
     orch
 }
 
-// ============================================================================
-// 3. dataEnglish textfunction
-// ============================================================================
 
-// English text manifest load token English text
+
+
+
+
 func moe_1t_load_data_manifest(moe_1t_orchestrator orch) moe_1t_orchestrator {
     moe_1t_orchestrator next_orch = orch
     next_orch.token_shards = moe_1t_manifest_refs(orch.data_manifest_path)
@@ -477,8 +477,8 @@ func moe_1t_load_data_manifest(moe_1t_orchestrator orch) moe_1t_orchestrator {
     next_orch
 }
 
-// English text token (1T English text)
-// English textactualEnglish text, English text
+
+
 func moe_1t_get_next_batch(
     moe_1t_orchestrator orch,
     int batch_size_tokens,
@@ -516,11 +516,11 @@ func moe_1t_get_next_batch(
     (next_orch, tokens)
 }
 
-// ============================================================================
-// 4. MoE English text
-// ============================================================================
 
-// MoE English text, English text
+
+
+
+
 func moe_1t_forward_pass(
     moe_1t_orchestrator orch,
     []int batch_tokens,
@@ -537,30 +537,30 @@ func moe_1t_forward_pass(
         ep_size = 1
     }
 
-    // 1. English text
+
     int global_hidden_dim = orch.model_config.base.n_embd
     int local_hidden_dim = moe_1t_tp_local_hidden_dim(orch)
     int hidden_offset = moe_1t_tp_global_offset(orch)
     []float hidden = make([]float, batch_size * local_hidden_dim)
 
-    // 2. Transformer English text MoE English text
+
     int layer = 0
     int num_layers = orch.model_config.base.n_layer
 
     while layer < num_layers {
-        // Self-attention (English text)
-        // compute Q, K, V, English text TP English text
 
-        // MoE English text (English textuse MoE)
+
+
+
         if layer % orch.model_config.moe_frequency == 0 {
-            // English text: Top-K English text
+
             int top_k = orch.model_config.moe.top_k
 
-            // computeEnglish text
-            // English textRequiredEnglish text All-to-All English text
 
-            // English text token, English text top_k English text
-            // English text ep_size English text GPU English text
+
+
+
+
             int token_idx = 0
             while token_idx < batch_size {
                 int local_expert = moe_1t_positive_mod(batch_tokens[token_idx] + layer + orch.world_rank, orch.model_config.moe.num_experts)
@@ -575,7 +575,7 @@ func moe_1t_forward_pass(
         layer = layer + 1
     }
 
-    // TP: row-parallel outputEnglish text, English text
+
     []float logits = make([]float, batch_size * orch.model_config.base.vocab_size)
 
     []int expert_load = make([]int, orch.model_config.moe.num_experts)
@@ -622,7 +622,7 @@ func moe_1t_forward_pass(
         ratio_idx = ratio_idx + 1
     }
 
-    // Local TP shard projection: each rank only contributes its slice
+
     int local_offset = hidden_offset
     float projection_scale = 1.0 / float(global_hidden_dim)
     int h = 0
@@ -667,17 +667,17 @@ func moe_1t_forward_pass(
     (logits, stats)
 }
 
-// ============================================================================
-// 5. gradientEnglish textstepEnglish textoptimizeEnglish textstepEnglish text
-// ============================================================================
 
-// English textgradientEnglish textstep AllReduce (DDP + ZeRO Stage 3)
+
+
+
+
 func moe_1t_allreduce_gradients(
     moe_1t_orchestrator orch,
     []float gradients
 ) int {
-    // use NCCL English textstepEnglish textgradient
-    // English text ZeRO Stage 3, English textgradient
+
+
 
     if orch.world_size > 1 {
         int i = 0
@@ -687,20 +687,20 @@ func moe_1t_allreduce_gradients(
         }
     }
 
-    // English textstepEnglish text
+
     0
 }
 
-// English textoptimizeEnglish textstepEnglish text (AdamW with ZeRO Stage 3 sharding)
+
 func moe_1t_optimizer_step(
     moe_1t_orchestrator orch,
     float loss,
     float loss_scale,
     int global_step
 ) moe_1t_orchestrator {
-    // 1. English text GPU English textparameter
-    // 2. useEnglish textlossEnglish text BF16 English text
-    // 3. gradientEnglish text
+
+
+
 
     int step_index = global_step
     int warmup_steps = orch.framework.training.warmup_steps
@@ -735,11 +735,11 @@ func moe_1t_optimizer_step(
     orch
 }
 
-// ============================================================================
-// 6. checkpointEnglish textrecover
-// ============================================================================
 
-// saveEnglish textcheckpoint (English text, English text GPU English textsave)
+
+
+
+
 func moe_1t_zero_pad_int(int value, int width) string {
     string text = int_to_string(value)
     if len(text) >= width {
@@ -793,7 +793,7 @@ func moe_1t_save_checkpoint(
     orch
 }
 
-// loadcheckpointEnglish textrecoverEnglish textstate
+
 func moe_1t_load_checkpoint(
     moe_1t_orchestrator orch,
     string checkpoint_path
@@ -836,11 +836,11 @@ func moe_1t_load_checkpoint(
     (orch, resumed_step)
 }
 
-// ============================================================================
-// 7. English textmonitoringEnglish textlog
-// ============================================================================
 
-// English textstepEnglish text
+
+
+
+
 func moe_1t_log_step_metrics(
     moe_1t_orchestrator orch,
     moe_1t_step_state step_state
@@ -854,11 +854,11 @@ func moe_1t_log_step_metrics(
     }
 }
 
-// ============================================================================
-// 8. maintrainingEnglish text
-// ============================================================================
 
-// 1T modelEnglish textcompletetrainingEnglish text
+
+
+
+
 func moe_1t_training_loop(moe_1t_orchestrator orch) int {
     moe_1t_orchestrator state = moe_1t_load_data_manifest(orch)
     if state.world_rank == 0 {
@@ -874,8 +874,8 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
 
     while global_step < total_steps && state.should_stop == 0 {
         int current_step = state.training_step
-        // 1. loadEnglish text token
-        int batch_tokens_per_gpu = 512  // English text
+
+        int batch_tokens_per_gpu = 512
         int seq_len = 4096
         []int batch = []int{cap: 0}
         (state, batch) = moe_1t_get_next_batch(state, batch_tokens_per_gpu, seq_len)
@@ -887,10 +887,10 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
             continue
         }
 
-        // 2. English text + MoE English text
+
         ([]float logits, moe_routing_stats routing_stats) = moe_1t_forward_pass(state, batch, seq_len)
 
-        // 3. computeloss (cross-entropy + aux loss)
+
         int vocab_size = state.model_config.base.vocab_size
         []int labels = moe_1t_build_labels(batch, vocab_size)
         ([]int expert_indices, []float expert_weights) = moe_1t_build_top1_routing(state, batch)
@@ -906,7 +906,7 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
             1
         )
 
-        // 4. English text
+
         []float gradients = compute_ce_gradient(
             logits,
             labels,
@@ -917,11 +917,11 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
         moe_1t_allreduce_gradients(state, gradients)
         float grad_norm = moe_1t_average_abs(gradients)
 
-        // 5. optimizeEnglish textstepEnglish text
+
         state = moe_1t_optimizer_step(state, loss, 1.0, current_step)
         float lr = state.optimizer_state.learning_rate
 
-        // 6. English text
+
         moe_1t_step_state step_state = moe_1t_step_state {
             global_step: current_step,
             tokens_seen: (current_step + 1) * batch_tokens_per_gpu * state.world_size,
@@ -942,7 +942,7 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
         moe_1t_log_step_metrics(state, step_state)
         state.step_history.push(step_state)
 
-        // 7. English textsavecheckpoint
+
         if save_interval > 0 && current_step > 0 && current_step % save_interval == 0 {
             state = moe_1t_save_checkpoint(state, current_step, loss)
         }
@@ -957,9 +957,9 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
     0
 }
 
-// ============================================================================
-// 9. toolfunction
-// ============================================================================
+
+
+
 
 func string_to_int(string s) int {
     int result = 0

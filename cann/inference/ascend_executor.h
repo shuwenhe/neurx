@@ -16,9 +16,9 @@ struct AscendExecutorConfig {
   cann::KvCacheConfig kv_cache;
 };
 
-// Complete CANN data-plane owner. The generic scheduler supplies DeviceBatch
-// metadata; this class owns the device session, model, operator plugin and KV
-// memory associated with exactly one NPU worker.
+
+
+
 class AscendExecutor final : public BackendAdapter {
  public:
   explicit AscendExecutor(AscendExecutorConfig config);
@@ -41,12 +41,12 @@ class AscendExecutor final : public BackendAdapter {
  private:
   AscendExecutorConfig config_;
   AscendAdapter adapter_;
-  // Declared after the ACL session so dlclose destroys ATB plugin state before
-  // DeviceSession finalizes ACL during reverse-order member destruction.
+
+
   cann::OperatorLibrary operators_;
   cann::Nxtrfmv2Model model_;
   cann::PagedKvCache kv_cache_;
   bool ready_ = false;
 };
 
-}  // namespace neurx::inference
+}

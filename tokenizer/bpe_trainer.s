@@ -176,7 +176,7 @@ func apply_merge_pass([]string tokens, string left, string right, string merged)
     out
 }
 
-// Getter helpers avoid field-index inference issues in the S compiler.
+
 func bpe_merge_left(bpe_tokenizer_state tokenizer, int index) string {
     tokenizer.merge_lefts[index]
 }
@@ -498,7 +498,7 @@ func bpe_extract_jsonl_text(string line) string {
     bpe_normalize_text(value)
 }
 
-// stateEnglish textsupport
+
 struct bpe_split_state_dict {
     []string train_documents
     []string valid_documents

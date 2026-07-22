@@ -1,6 +1,6 @@
 package neurx.data.pipeline.deduplication
 
-// English textdatadeduplicationsystem - MinHash + Bloom Filter
+
 
 struct min_hash_signature {
     int* hash_values
@@ -31,21 +31,21 @@ struct document_similarity {
     bool is_duplicate
 }
 
-// ============================================================================
-// Bloom Filter implementation (quickdeduplication)
-// ============================================================================
 
-// initialize Bloom Filter
+
+
+
+
 func init_bloom_filter(int expected_documents, float false_positive_rate) bloom_filter {
     bloom_filter bf
 
-    // compute Bloom Filter English text
+
     float ln2_squared = 0.4804530139
     int size = -(int)(float(expected_documents) * ln_f(false_positive_rate) / ln2_squared)
 
     bf.size = size
     bf.bits = alloc(bool, size)
-    bf.hash_functions = 7  // English textconfiguration
+    bf.hash_functions = 7
     bf.insertions = 0
 
     int i = 0
@@ -57,7 +57,7 @@ func init_bloom_filter(int expected_documents, float false_positive_rate) bloom_
     bf
 }
 
-// Hash function 1
+
 func hash_function_1(string text) int {
     int hash = 5381
     int i = 0
@@ -75,7 +75,7 @@ func hash_function_1(string text) int {
     hash
 }
 
-// Hash function 2 (English text)
+
 func hash_function_2(string text) int {
     int hash = 33
     int i = 0
@@ -93,7 +93,7 @@ func hash_function_2(string text) int {
     hash
 }
 
-// Hash function 3
+
 func hash_function_3(string text) int {
     int hash = 1
     int i = 0
@@ -111,7 +111,7 @@ func hash_function_3(string text) int {
     hash
 }
 
-// English text Bloom Filter
+
 func bloom_add(bloom_filter bf, string text) void {
     int h1 = hash_function_1(text) % bf.size
     int h2 = hash_function_2(text) % bf.size
@@ -124,7 +124,7 @@ func bloom_add(bloom_filter bf, string text) void {
     bf.insertions = bf.insertions + 1
 }
 
-// English text
+
 func bloom_contains(bloom_filter bf, string text) bool {
     int h1 = hash_function_1(text) % bf.size
     int h2 = hash_function_2(text) % bf.size
@@ -137,39 +137,39 @@ func bloom_contains(bloom_filter bf, string text) bool {
     false
 }
 
-// ============================================================================
-// MinHash English textcompute (English textdeduplication)
-// ============================================================================
 
-// generateEnglish text MinHash English text
+
+
+
+
 func generate_minhash_signature(string text, int num_hashes) min_hash_signature {
     min_hash_signature sig
     sig.num_hashes = num_hashes
     sig.hash_values = alloc(int, num_hashes)
     sig.doc_length = strlen(text)
 
-    // initializeEnglish text
+
     int i = 0
     while i < num_hashes {
-        sig.hash_values[i] = 2147483647  // INT_MAX
+        sig.hash_values[i] = 2147483647
         i = i + 1
     }
 
-    // generate k-gram (English text)
+
     int text_len = strlen(text)
     i = 0
     while i < text_len - 1 {
-        // English text gram
+
         string gram = ""
         gram = char_to_string(text[i]) + char_to_string(text[i + 1])
 
-        // computeEnglish text
+
         int j = 0
         while j < num_hashes {
-            // useEnglish text
+
             int hash_value = compute_hash(gram, j * 17) % 2147483647
 
-            // saveEnglish text
+
             if hash_value < sig.hash_values[j] {
                 sig.hash_values[j] = hash_value
             }
@@ -183,7 +183,7 @@ func generate_minhash_signature(string text, int num_hashes) min_hash_signature 
     sig
 }
 
-// English text Hash compute
+
 func compute_hash(string text, int seed) int {
     int hash = seed
     int i = 0
@@ -201,7 +201,7 @@ func compute_hash(string text, int seed) int {
     hash
 }
 
-// computeEnglish text MinHash English text
+
 func jaccard_similarity(min_hash_signature sig1, min_hash_signature sig2) float {
     if sig1.num_hashes != sig2.num_hashes {
         return 0.0
@@ -221,11 +221,11 @@ func jaccard_similarity(min_hash_signature sig1, min_hash_signature sig2) float 
     similarity
 }
 
-// ============================================================================
-// deduplicationmainEnglish text
-// ============================================================================
 
-// English text
+
+
+
+
 func find_exact_duplicates(string* documents, int doc_count) bool* {
     bool* is_duplicate = alloc(bool, doc_count)
 
@@ -235,7 +235,7 @@ func find_exact_duplicates(string* documents, int doc_count) bool* {
         i = i + 1
     }
 
-    // Bloom Filter English textquickEnglish text
+
     bloom_filter bf = init_bloom_filter(doc_count, 0.001)
 
     i = 0
@@ -243,12 +243,12 @@ func find_exact_duplicates(string* documents, int doc_count) bool* {
         string text = documents[i]
 
         if bloom_contains(bf, text) {
-            // English text, English text
+
             int j = 0
             while j < i {
                 if str_equals(text, documents[j]) {
                     is_duplicate[i] = true
-                    j = doc_count  // English text
+                    j = doc_count
                 }
                 j = j + 1
             }
@@ -261,12 +261,12 @@ func find_exact_duplicates(string* documents, int doc_count) bool* {
     is_duplicate
 }
 
-// English text (English text MinHash)
+
 func find_similar_duplicates(string* documents, int doc_count, float similarity_threshold) document_similarity* {
     document_similarity* similarities = alloc(document_similarity, doc_count * doc_count / 2)
     int similarity_count = 0
 
-    // generateEnglish text MinHash English text
+
     min_hash_signature* signatures = alloc(min_hash_signature, doc_count)
     int i = 0
     while i < doc_count {
@@ -274,7 +274,7 @@ func find_similar_duplicates(string* documents, int doc_count, float similarity_
         i = i + 1
     }
 
-    // English text
+
     i = 0
     while i < doc_count {
         int j = i + 1
@@ -286,7 +286,7 @@ func find_similar_duplicates(string* documents, int doc_count, float similarity_
                 ds.doc1_id = int_to_string(i)
                 ds.doc2_id = int_to_string(j)
                 ds.similarity_score = sim
-                ds.is_duplicate = sim > 0.95  // English text
+                ds.is_duplicate = sim > 0.95
 
                 similarities[similarity_count] = ds
                 similarity_count = similarity_count + 1
@@ -300,24 +300,24 @@ func find_similar_duplicates(string* documents, int doc_count, float similarity_
     similarities
 }
 
-// ============================================================================
-// deduplicationEnglish text
-// ============================================================================
 
-// English textcompletededuplicationpipeline
+
+
+
+
 func deduplicate_documents(string* documents, int doc_count, float similarity_threshold) deduplication_stats {
     deduplication_stats stats
     stats.total_documents = doc_count
 
     int start_time = get_time_ms()
 
-    // 1. English text
+
     bool* exact_dups = find_exact_duplicates(documents, doc_count)
 
-    // 2. English text
+
     document_similarity* similar_dups = find_similar_duplicates(documents, doc_count, similarity_threshold)
 
-    // 3. English text
+
     int unique_count = 0
     int i = 0
     while i < doc_count {
@@ -335,9 +335,9 @@ func deduplicate_documents(string* documents, int doc_count, float similarity_th
     stats
 }
 
-// English textdeduplicationEnglish text
+
 func filter_unique_documents(string* documents, int doc_count, bool* is_duplicate) string* {
-    // English text
+
     int unique_count = 0
     int i = 0
     while i < doc_count {
@@ -347,7 +347,7 @@ func filter_unique_documents(string* documents, int doc_count, bool* is_duplicat
         i = i + 1
     }
 
-    // English text
+
     string* unique_docs = alloc(string, unique_count)
     int unique_idx = 0
 
@@ -363,11 +363,11 @@ func filter_unique_documents(string* documents, int doc_count, bool* is_duplicat
     unique_docs
 }
 
-// ============================================================================
-// helperfunction
-// ============================================================================
 
-// English text
+
+
+
+
 func str_equals(string s1, string s2) bool {
     if strlen(s1) != strlen(s2) {
         return false
@@ -384,7 +384,7 @@ func str_equals(string s1, string s2) bool {
     true
 }
 
-// English text
+
 func strlen(string s) int {
     int count = 0
     int i = 0
@@ -395,12 +395,12 @@ func strlen(string s) int {
     count
 }
 
-// English text
+
 func char_to_string(int c) string {
     ""
 }
 
-// English text
+
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -418,39 +418,39 @@ func int_to_string(int n) string {
     result
 }
 
-// English text
+
 func float(int n) float {
-    // English textimplementation
+
     0.0
 }
 
-// English texttime (English text)
+
 func get_time_ms() int {
     0
 }
 
-// English textfunction
+
 func ln_f(float x) float {
-    // English textimplementation
+
     0.0
 }
 
-// ============================================================================
-// English text API
-// ============================================================================
+
+
+
 
 func main() {
     println("Data Deduplication System")
 
-    // exampleEnglish text
+
     string* docs = alloc(string, 5)
     docs[0] = "hello world this is a test"
-    docs[1] = "hello world this is a test"  // English text
-    docs[2] = "hello world this is a demo"  // English text
+    docs[1] = "hello world this is a test"
+    docs[2] = "hello world this is a demo"
     docs[3] = "completely different text here"
     docs[4] = "hello world"
 
-    // English textdeduplication
+
     deduplication_stats stats = deduplicate_documents(docs, 5, 0.8)
 
     println("Total documents: " + int_to_string(stats.total_documents))

@@ -10,14 +10,14 @@ use neurx.moe.transformer.{
     moe_stats, moe_compute_stats, new_moe_config
 }
 
-// ============================================================================
-// GPT-5.5 style frontier spec
-//
-// This file does not reimplement the whole transformer kernel. It provides a
-// single, explicit S-language model spec for a GPT-5.5 class decoder-only
-// MoE model so the training pipeline has one source of truth for scale,
-// parallelism, and budget planning.
-// ============================================================================
+
+
+
+
+
+
+
+
 
 struct gpt_5_5_model_spec {
     string model_name

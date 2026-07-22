@@ -10,9 +10,9 @@
 #include <utility>
 #include <vector>
 
-// Small, deliberately unoptimised CPU oracle for NeurX Transformer kernels.
-// Row-major tensors; one sequence per batch. Every operation has an analytic
-// backward implementation so CUDA kernels can be checked against this file.
+
+
+
 
 using Vec = std::vector<double>;
 
@@ -41,8 +41,8 @@ struct Model {
     void zero_grad() { for (Param* p:params()) p->zero_grad(); }
 };
 
-// CPU reference AdamW.  This intentionally optimizes real parameter vectors
-// produced by backward(), rather than modelling an optimizer with metadata.
+
+
 struct AdamW {
     double lr=0.03, beta1=0.9, beta2=0.999, eps=1e-8, weight_decay=0.01;
     int64_t step_count=0;
@@ -93,12 +93,12 @@ static bool read_vec(std::ifstream& in,Vec& values,size_t expected) {
     return bool(in);
 }
 
-// The checkpoint includes model parameters, all AdamW moments, optimizer
-// hyperparameters, and the completed training step.  Any schema/configuration
-// mismatch fails closed instead of silently resuming with partial state.
+
+
+
 static bool save_checkpoint(const std::string& path,const Model& model,const AdamW& opt,int64_t train_step) {
     std::ofstream out(path,std::ios::binary|std::ios::trunc);
-    const uint64_t magic=0x4e45555258434b31ULL; // "NEURXCK1"
+    const uint64_t magic=0x4e45555258434b31ULL;
     if(!out || !write_scalar(out,magic)) return false;
     if(!write_scalar(out,model.c.vocab) || !write_scalar(out,model.c.seq) ||
        !write_scalar(out,model.c.dim) || !write_scalar(out,model.c.heads) ||
@@ -140,7 +140,7 @@ static Vec mm(const Vec& a,const Vec& b,int m,int k,int n) {
     return o;
 }
 
-// y=x*w. Accumulates dw and returns dx.
+
 static Vec mm_backward(const Vec& x,const Vec& w,const Vec& dy,Vec& dw,int m,int k,int n) {
     Vec dx(m*k);
     for(int i=0;i<m;i++) for(int j=0;j<n;j++) {
@@ -292,9 +292,9 @@ static void train_steps(Model& model,AdamW& optimizer,const std::vector<int>& x,
     }
 }
 
-// This is the end-to-end contract required before a GPU/S-language port can
-// claim resumable training: an interrupted AdamW run must be bit-identical to
-// the uninterrupted run when weights and optimizer state are restored.
+
+
+
 static bool checkpoint_resume_check() {
     Config cfg; std::vector<int>x={1,2,3,4},y={2,3,4,5};
     constexpr int total_steps=48, save_after=19;

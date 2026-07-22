@@ -1,5 +1,5 @@
 #!/bin/bash
-# Interactive wrapper for NeurX Model Chat
+
 
 MODEL_PATH="/home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors"
 
@@ -20,20 +20,20 @@ echo ""
 echo "═══════════════════════════════════════════════════════"
 echo ""
 
-# Run Python inference with S wrapper layer
+
 while true; do
     echo -n "You: "
     read -r user_input
-    
+
     if [ "$user_input" = "exit" ] || [ "$user_input" = "quit" ]; then
         echo "Goodbye!"
         break
     fi
-    
+
     if [ -z "$user_input" ]; then
         continue
     fi
-    
+
     echo ""
     echo "🧠 Processing..."
     echo "  [1] BPE Tokenization"

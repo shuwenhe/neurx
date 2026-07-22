@@ -41,7 +41,7 @@ bool valid(const TensorView& tensor) {
   return tensor.data && tensor.rows != 0 && tensor.columns != 0;
 }
 
-}  // namespace
+}
 
 Status execute_transformer(const inference::DeviceBatch& batch,
                            const Nxtrfmv2Model& model, PagedKvCache& cache,
@@ -134,4 +134,4 @@ Status execute_transformer(const inference::DeviceBatch& batch,
   return stage_status(status, "lm head");
 }
 
-}  // namespace neurx::cann
+}

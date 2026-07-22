@@ -66,7 +66,7 @@ func has_suffix(string value, string suffix) bool {
 func last_path_separator_index(string path) int {
     int i = len(path) - 1
     while i >= 0 {
-        // '/' ASCII code is 47
+
         int ch = int(string(path[i]))
         if ch == 47 {
             return i
@@ -195,7 +195,7 @@ func split_lines(string text) []string {
     while i < n {
         string ch = text[i]
         int chi = int(string(ch))
-        // '\n' ASCII is 10, '\r' ASCII is 13
+
         if chi == 10 {
             string cleaned = trim(current)
             if cleaned != "" {
@@ -222,7 +222,7 @@ func csv_tokens(string text) []string {
     while i < n {
         string ch = text[i]
         int chi = int(string(ch))
-        // ',' ASCII is 44
+
         if chi == 44 {
             tokens.push(trim(current))
             current = ""
@@ -313,17 +313,17 @@ func tensor_to_checkpoint_lines(int index, tensor value) []string {
 }
 
 func tensor_to_checkpoint_lines_from_params([]tensor params, int index) []string {
-    // Workaround for S compiler array indexing limitation
+
     []float empty_data = []float{cap: 0}
     []int empty_shape = []int{cap: 0}
     tensor t = new(empty_data, empty_shape, false)
     if index < len(params) {
-        // Use a helper approach - iterate to find the element
+
         int k = 0
         while k < len(params) {
             if k == index {
                 t = params[k]
-                k = len(params)  // break
+                k = len(params)
             }
             k = k + 1
         }
@@ -385,7 +385,7 @@ func parse_checkpoint_lines([]string lines) checkpoint {
             int eq_pos = -1
             int j = 0
             while j < len(line) {
-                // '=' ASCII is 61
+
                 if int(string(line[j])) == 61 {
                     eq_pos = j
                     j = len(line)
@@ -398,7 +398,7 @@ func parse_checkpoint_lines([]string lines) checkpoint {
                 int dot_pos = -1
                 j = 0
                 while j < len(head) {
-                    // '.' ASCII is 46
+
                     if int(string(head[j])) == 46 {
                         dot_pos = j
                         j = len(head)

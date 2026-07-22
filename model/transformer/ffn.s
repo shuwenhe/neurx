@@ -1,7 +1,7 @@
 package neurx.model.transformer.ffn
 
-// Feed-forward network utilities for transformer blocks.
-// Flat-vector implementation with GELU and SwiGLU.
+
+
 
 struct ffn_config {
     int hidden_dim
@@ -104,7 +104,7 @@ func swish(float x) float {
 }
 
 func gelu(float x) float {
-    // Tanh-free GELU approximation that stays within the current subset.
+
     float x3 = x * x * x
     float inner = x + 0.044715 * x3
     float cdf = 0.5 * (1.0 + inner * 0.7978845608)

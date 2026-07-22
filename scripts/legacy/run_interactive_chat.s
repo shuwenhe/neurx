@@ -3,7 +3,7 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command}
 use std.io.println
 
-// Interactive chat with full model inference simulation
+
 func main() int {
     println("╔════════════════════════════════════════════════════╗")
     println("║         NeurX-1.3 Interactive Chat System          ║")
@@ -20,7 +20,7 @@ func main() int {
     println("  Output Dir      : " + output_dir)
     println("")
 
-    // Phase 1: checkpoint validation
+
     println("Phase 1: checkpoint Validation...")
     string checkpoint_file = checkpoint_dir + "/transformer_v2.ckpt"
     string metadata_file = checkpoint_dir + "/NeurX-1.3.neurx"
@@ -38,7 +38,7 @@ func main() int {
     println("  ✓ Metadata loaded: " + metadata_file)
     println("")
 
-    // Phase 2: Model initialization
+
     println("Phase 2: Model Initialization...")
     println("  ✓ Loading tokenizer (BPE, vocab=374)")
     println("  ✓ Initializing transformer (dim=1024, heads=16, layers=24)")
@@ -49,13 +49,13 @@ func main() int {
     println("  ✓ Model fully loaded")
     println("")
 
-    // Phase 3: Chat interface
+
     println("╔════════════════════════════════════════════════════╗")
     println("║              Interactive Chat Ready                ║")
     println("╚════════════════════════════════════════════════════╝")
     println("")
 
-    // Example conversation
+
     println("User: NeurX AllowedEnglish text?")
     println("")
     println("Model: NeurX English textlanguageEnglish textsystem, English text: ")
@@ -70,7 +70,7 @@ func main() int {
     println("  English text: English text")
     println("")
 
-    // Phase 4: Session statistics
+
     println("Session Statistics:")
     string cmd_checkpoint_size = "ls -lh \"" + checkpoint_file + "\" | awk '{print $5}'"
     println("  checkpoint Size: " + runtime_run_command(cmd_checkpoint_size))
@@ -79,7 +79,7 @@ func main() int {
     println("  GPU Utilization: 37%")
     println("")
 
-    // Phase 5: Ready for input
+
     println("Input commands:")
     println("  'quit' - Exit chat")
     println("  'help' - Show help")

@@ -48,7 +48,7 @@ func new_agent_memory_state() agent_memory_state {
     }
 }
 
-// Getter functions to work around compiler type inference bug with struct field indexing
+
 func get_short_key(agent_memory_state state, int index) string {
     state.short_keys[index]
 }

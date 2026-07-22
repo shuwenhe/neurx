@@ -1,10 +1,10 @@
-#!/usr/bin/env s
 
-// ============================================
-// NeurX Multi-Node Rank Launcher
-// English textrankstartEnglish text
-// English text: English textrankstart, English text, English text
-// ============================================
+
+
+
+
+
+
 
 package neurx.distributed.multi_node_launcher
 
@@ -12,33 +12,33 @@ use neurx.runtime.io.{runtime_env_get}
 use neurx.strings.{string_concat}
 use neurx.distributed.nccl_id_manager.{nccl_unique_id, load_nccl_id_from_shared_storage}
 
-// ============================================
-// English textconfiguration
-// ============================================
+
+
+
 
 struct multi_node_config {
-    int num_nodes          // English text
-    int node_rank          // English textranking (0-based)
-    string node_name       // English textName/IP
-    int gpus_per_node      // English textGPUEnglish text
-    int world_size         // English textrankEnglish text = num_nodes * gpus_per_node
-    string master_addr     // mainEnglish text
-    int master_port        // mainEnglish text
-    string nccl_store_path // NCCL IDEnglish textpath
+    int num_nodes
+    int node_rank
+    string node_name
+    int gpus_per_node
+    int world_size
+    string master_addr
+    int master_port
+    string nccl_store_path
 }
 
 struct rank_info {
-    int global_rank        // English textrank (0English textworld_size-1)
-    int local_rank         // English textrank (0English textgpus_per_node-1)
-    int node_rank          // English textranking
-    string node_name       // English textName
+    int global_rank
+    int local_rank
+    int node_rank
+    string node_name
 }
 
-// ============================================
-// English textconfigurationinitialize
-// ============================================
 
-// English textconfiguration
+
+
+
+
 func init_multi_node_config() multi_node_config {
 
     int num_nodes = parse_int(
@@ -68,20 +68,20 @@ func init_multi_node_config() multi_node_config {
     }
 }
 
-// ============================================
-// Rankcompute
-// ============================================
 
-// English textinformationEnglish textrankcomputeEnglish textrank
+
+
+
+
 func calculate_global_rank(
     multi_node_config config,
     int local_rank,
 ) int {
-    // English textrank = English textranking * English textGPUEnglish text + English textrank
+
     (config.node_rank * config.gpus_per_node) + local_rank
 }
 
-// generaterankinformation
+
 func generate_rank_info(
     multi_node_config config,
     int local_rank,
@@ -97,9 +97,9 @@ func generate_rank_info(
     }
 }
 
-// ============================================
-// English textstartEnglish text
-// ============================================
+
+
+
 
 struct node_launch_plan {
     int total_nodes
@@ -108,7 +108,7 @@ struct node_launch_plan {
     string launch_order
 }
 
-// generateEnglish textstartEnglish text
+
 func generate_launch_plan(
     multi_node_config config,
 ) node_launch_plan {
@@ -136,13 +136,13 @@ func generate_launch_plan(
         total_nodes: config.num_nodes,
         total_gpus: config.world_size,
         rank_list: ranks,
-        launch_order: "sequential",  // "sequential", "parallel", "round-robin"
+        launch_order: "sequential",
     }
 }
 
-// ============================================
-// English text
-// ============================================
+
+
+
 
 struct node_sync_barrier {
     string barrier_name
@@ -151,15 +151,15 @@ struct node_sync_barrier {
     bool barrier_reached
 }
 
-// English textstepEnglish text(English textrankEnglish text)
+
 func synchronize_across_nodes(
     rank_info rank,
     string shared_storage_path,
 ) bool {
 
-    // implementationEnglish text1: filesystemEnglish text
-    // English textrankEnglish textshared_storage_pathEnglish textfile
-    // English textrankEnglish textfileEnglish text
+
+
+
 
     string barrier_dir = shared_storage_path + "/barrier"
     string my_marker = barrier_dir + "/rank_" + itoa(rank.global_rank)
@@ -167,16 +167,16 @@ func synchronize_across_nodes(
     print("[SYNC] Rank " + itoa(rank.global_rank) +
           " reached barrier at " + barrier_dir)
 
-    // English textrank
-    int timeout = 300  // 5English text
+
+    int timeout = 300
     int elapsed = 0
 
     while elapsed < timeout {
-        // English textrankEnglish text
-        // int ready_count = count_marker_files(barrier_dir)
-        // if ready_count >= world_size {
-        //     return true
-        // }
+
+
+
+
+
 
         sleep_seconds(1)
         elapsed = elapsed + 1
@@ -186,9 +186,9 @@ func synchronize_across_nodes(
     false
 }
 
-// ============================================
-// English textrecover
-// ============================================
+
+
+
 
 struct node_health_status {
     int rank
@@ -206,19 +206,19 @@ struct fault_recovery_config {
     string checkpoint_dir
 }
 
-// English text
+
 func check_node_health(
     rank_info rank,
     int heartbeat_timeout_sec,
 ) node_health_status {
 
-    // implementationEnglish text: English text
-    // English textrankEnglish texttimeEnglish text
-    // mainEnglish textrankEnglish texttimeoutEnglish text
+
+
+
 
     int current_time = get_current_timestamp()
 
-    // English text
+
     bool is_healthy = true
     string error = ""
 
@@ -231,14 +231,14 @@ func check_node_health(
     }
 }
 
-// English textrank
+
 func detect_failed_ranks(
     int world_size,
     string shared_storage_path,
     int timeout_sec,
 ) []int {
 
-    // English textrankEnglish text
+
     []int failed_ranks = []int{cap: 10}
     int failed_count = 0
 
@@ -246,11 +246,11 @@ func detect_failed_ranks(
     while rank < world_size {
         string heartbeat_file = shared_storage_path + "/heartbeat/rank_" + itoa(rank)
 
-        // English textfileEnglish text
-        // if file_is_outdated(heartbeat_file, timeout_sec) {
-        //     failed_ranks[failed_count] = rank
-        //     failed_count = failed_count + 1
-        // }
+
+
+
+
+
 
         rank = rank + 1
     }
@@ -258,7 +258,7 @@ func detect_failed_ranks(
     failed_ranks
 }
 
-// English textrecover
+
 func recover_from_failure(
     rank_info rank,
     fault_recovery_config config,
@@ -273,22 +273,22 @@ func recover_from_failure(
     print("[RECOVERY] Rank " + itoa(rank.global_rank) +
           " attempting recovery (attempt " + itoa(attempt_number) + ")")
 
-    // 1. loadEnglish textcheckpoint
+
     string checkpoint_file = config.checkpoint_dir + "/rank_" + itoa(rank.global_rank) + ".ckpt"
     print("[RECOVERY] Loading checkpoint from: " + checkpoint_file)
 
-    // 2. English textstepEnglish textrank
-    // synchronize_across_nodes(rank, config.checkpoint_dir)
 
-    // 3. recovertraining
+
+
+
     print("[RECOVERY] Resuming training from checkpoint")
 
     true
 }
 
-// ============================================
-// English textCheckpointmanagement
-// ============================================
+
+
+
 
 struct distributed_checkpoint {
     int global_rank
@@ -299,7 +299,7 @@ struct distributed_checkpoint {
     string timestamp
 }
 
-// saveEnglish textcheckpoint(English textranksaveEnglish text)
+
 func save_distributed_checkpoint(
     rank_info rank,
     int step,
@@ -307,48 +307,48 @@ func save_distributed_checkpoint(
     string shared_checkpoint_dir,
 ) bool {
 
-    // English textranksaveEnglish textcheckpoint
+
     string rank_dir = shared_checkpoint_dir + "/rank_" + itoa(rank.global_rank)
     string ckpt_file = rank_dir + "/step_" + itoa(step) + ".ckpt"
 
     print("[CHECKPOINT] Rank " + itoa(rank.global_rank) +
           " saving checkpoint at step " + itoa(step) + " to " + ckpt_file)
 
-    // content: step, loss, model_state
+
     string content = "step=" + itoa(step) + "\n" +
                      "loss=" + ftoa(loss) + "\n" +
                      "timestamp=" + get_timestamp() + "\n" +
                      "rank=" + itoa(rank.global_rank)
 
-    // actualimplementationEnglish textmodel weightsEnglish text
-    // runtime_write_text_file(ckpt_file, content)
 
-    // English textshared_checkpoint_dirEnglish textstepEnglish text
+
+
+
     string sync_marker = shared_checkpoint_dir + "/rank_" + itoa(rank.global_rank) + ".done"
-    // runtime_write_text_file(sync_marker, "done")
+
 
     true
 }
 
-// loadEnglish textcheckpoint(recovertraining)
+
 func load_distributed_checkpoint(
     rank_info rank,
     string shared_checkpoint_dir,
 ) (int, float, bool) {
 
-    // English textcheckpoint
+
     string rank_dir = shared_checkpoint_dir + "/rank_" + itoa(rank.global_rank)
 
-    // English textdirectoryEnglish textstep_*.ckptfile
-    // actualimplementationEnglish textfilesystemEnglish text
 
-    // English text: step, loss
+
+
+
     (50000, 8.5, true)
 }
 
-// ============================================
-// helperfunction
-// ============================================
+
+
+
 
 func parse_int(string s, int fallback) int {
     int result = 0
@@ -400,9 +400,9 @@ func get_timestamp() string {
 }
 
 func get_current_timestamp() int {
-    1721004000  // English textUnixtimeEnglish text
+    1721004000
 }
 
 func sleep_seconds(int seconds) {
-    // actualimplementation: time.Sleep()
+
 }

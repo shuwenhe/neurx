@@ -1,9 +1,9 @@
 package neurx.attention.nda
 
-// NeurX channel-gated delta attention implementation.
-//
-// This module owns the NDA projections, causal short convolutions, channel
-// decay/update gates, recurrent delta-rule state, and output projection.
+
+
+
+
 
 struct nda_config {
     int hidden_dim
@@ -273,7 +273,7 @@ func nda_forward(nda_weights weights, []float input, int tokens, []float initial
         float beta = nda_sigmoid(beta_logits[t])
         beta_values[t] = beta
 
-        // S <- (I - beta*k*k^T) Diag(alpha) S + beta*k*v^T.
+
         []float decayed = nda_zeros(d * d)
         i = 0
         while i < d {

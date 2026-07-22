@@ -105,7 +105,7 @@ Status PagedKvCache::initialize() {
   if (!allocated.ok) return allocated;
   free_blocks_.reserve(config_.block_count);
   block_refcounts_.assign(config_.block_count, 0);
-  // Pop from the back while preserving stable low-to-high allocation order.
+
   for (std::size_t index = config_.block_count; index > 0; --index) {
     free_blocks_.push_back(static_cast<uint32_t>(index - 1));
   }
@@ -371,4 +371,4 @@ KvCacheStats PagedKvCache::stats() const {
   return result;
 }
 
-}  // namespace neurx::cann
+}

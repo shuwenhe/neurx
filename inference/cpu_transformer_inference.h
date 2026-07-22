@@ -56,4 +56,4 @@ class Transformer {
 
 std::string resolve_checkpoint_path(const std::string& input);
 
-}  // namespace neurx::inference::cpu
+}

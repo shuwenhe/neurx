@@ -1,9 +1,9 @@
 package neurx.data.loader.distributed
 
-// Distributed dataloader for large-scale training
-// - Efficient data loading with prefetching
-// - Deduplication and quality filtering
-// - Dynamic batching and sampling
+
+
+
+
 
 use neurx.runtime.io.{runtime_run_command_output}
 use neurx.data.dataset.dataset.{dataset}
@@ -25,7 +25,7 @@ struct distributed_loader_config {
     bool enable_prefetch
     bool enable_dedup
     float quality_threshold
-    string shuffle_strategy  // "global", "local", "none"
+    string shuffle_strategy
 }
 
 struct distributed_dataloader {
@@ -74,11 +74,11 @@ func new_distributed_dataloader([]data_shard shards, distributed_loader_config c
     }
 }
 
-// Partition dataset into shards for distributed loading
+
 func create_data_shards(string dataset_dir, int num_ranks, int rank_id) []data_shard {
-    // Scan dataset directory
-    // Distribute files across ranks
-    // Each rank gets its subset of shards
+
+
+
 
     if !is_directory(dataset_dir) {
         []data_shard shards = []data_shard{cap: 1}
@@ -115,8 +115,8 @@ func create_data_shards(string dataset_dir, int num_ranks, int rank_id) []data_s
 }
 
 func list_data_shard_files(string dataset_dir) []string {
-    // Prefer gzipped JSONL shards produced by the dataset shard generator.
-    // Fall back to plain .jsonl shards if present.
+
+
     []string files = []string{cap: 100}
     string gz_scan_cmd = "find " + dataset_dir + " -maxdepth 1 -name '*.jsonl.gz' | sort"
     string raw_gz = runtime_run_command_output(gz_scan_cmd)
@@ -163,78 +163,78 @@ func list_data_shard_files(string dataset_dir) []string {
     files
 }
 
-// Efficiently load next batch with prefetching
+
 func next_batch_prefetch(distributed_dataloader loader) []int {
-    // Prefetch next batch in background
-    // Return current batch while loading next
-    // Hide I/O latency
-    
+
+
+
+
     []int{cap: 2048}
 }
 
-// Apply deduplication using bloom filter or hash set
+
 func deduplicate_samples(distributed_dataloader loader) distributed_dataloader {
-    // Build index of seen samples
-    // Track hashes of samples
-    // Remove duplicates when encountered
-    
+
+
+
+
     loader
 }
 
-// Quality filtering: remove low-quality samples
+
 func filter_by_quality(distributed_dataloader loader, []string quality_scores) []int {
-    // Filter samples by quality metrics
-    // Return indices of samples passing threshold
-    // Return only high-quality samples
-    
+
+
+
+
     []int{cap: 1000}
 }
 
-// Shuffle samples globally across all ranks
+
 func shuffle_global(distributed_dataloader loader) distributed_dataloader {
-    // Collect sample indices from all ranks
-    // Shuffle globally
-    // Redistribute to maintain load balance
-    
+
+
+
+
     loader
 }
 
-// Local shuffle within rank (cheaper than global)
+
 func shuffle_local(distributed_dataloader loader) distributed_dataloader {
-    // Shuffle samples within this rank only
-    // Fast but less shuffling
-    
+
+
+
     loader
 }
 
-// Move to next epoch
+
 func next_epoch(distributed_dataloader loader) distributed_dataloader {
-    // Increment epoch counter
-    // Reset sample counter
-    // Potentially reshuffle if configured
-    
+
+
+
+
     loader.current_epoch = loader.current_epoch + 1
     loader.current_step = 0
     loader
 }
 
-// Get statistics about data pipeline
+
 func get_loader_stats(distributed_dataloader loader) [string:int {
     [string:int{cap: 10}
 }
 
-// Async I/O workers for background loading
+
 func spawn_io_workers(distributed_dataloader loader, int num_workers) int {
-    // Create num_workers threads for I/O
-    // Each thread loads data independently
-    // Return handle for managing workers
-    
+
+
+
+
     0
 }
 
-// Get current batch position
+
 func get_batch_position(distributed_dataloader loader) int {
-    // Return current sample index
+
     loader.current_step * loader.config.batch_size
 }
 

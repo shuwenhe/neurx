@@ -1,29 +1,29 @@
-// ============================================================
-// 🚀 NEURX-5.2 Complete Training & Inference System
-//
-// English texttraining/inferencesystem:
-//   1. modelEnglish text (model/llm/neurx.s)
-//   2. tokenizer (tokenizer/tokenizer_core.s)
-//   3. English texttrainingframework (pretrain/pretraining_pipeline.s)
-//   4. English text (attention/attention_mechanism.s)
-//   5. alignmenttraining (posttrain/alignment_trainer.s)
-//   6. inferenceoptimize (inference/inference_engine.s)
-//
-// Usage:
-//   use neurx.complete_system.*
-//
-//   // quickstartEnglish texttraining
-//   start_neurx_pretraining(mode="full")
-//
-//   // quickstart SFT
-//   start_neurx_sft(data_path="./data/sft/")
-//
-//   // quickstart DPO alignment
-//   start_neurx_dpo(preferences_path="./data/dpo/")
-//
-//   // startinferenceEnglish text
-//   start_neurx_inference_server(port=8080)
-// ============================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 package neurx.complete_system
 
@@ -34,9 +34,9 @@ import neurx.attention.*
 import neurx.posttrain.alignment.*
 import neurx.inference.engine.*
 
-// ============================================================
-// 📋 systemstateEnglish text
-// ============================================================
+
+
+
 
 struct system_status {
     bool model_loaded
@@ -82,7 +82,7 @@ func check_system_status() {
         errors: []
     }
 
-    # Check Module 1: NEURX Architecture
+
     print("[1/6] Checking NEURX Architecture...")
     try:
         neurx_config test_cfg = create_neurx_200b_config_200b()
@@ -94,7 +94,7 @@ func check_system_status() {
         append(status.errors, f"NEURX Architecture error: {e}")
         print(f"   ❌ {e}")
 
-    # Check Module 2: tokenizer
+
     print("[2/6] Checking NEURX tokenizer...")
     try:
         tokenizer_state tok = create_tokenizer("vocab/neurx.model")
@@ -103,10 +103,10 @@ func check_system_status() {
         print(f"   ✅ NEURX tokenizer loaded (vocab size: {tok.vocab_size})")
     except Exception as e:
         append(status.warnings, "tokenizer using mock vocabulary (for testing)")
-        status.modules.tokenizer_loaded = true  # Still works with mock
+        status.modules.tokenizer_loaded = true
         print("   ⚠️ Using mock tokenizer (testing mode)")
 
-    # Check Module 3: Pretraining Framework
+
     print("[3/6] Checking Pretraining Framework...")
     try:
         pretrain_config pt_cfg = create_neurx_200b_pretrain_config()
@@ -118,7 +118,7 @@ func check_system_status() {
         append(status.errors, f"Pretraining error: {e}")
         print(f"   ❌ {e}")
 
-    # Check Module 4: Attention Mechanism
+
     print("[4/6] Checking Attention Mechanism...")
     try:
         attention_config attn_cfg {
@@ -142,7 +142,7 @@ func check_system_status() {
         append(status.errors, f"Attention error: {e}")
         print(f"   ❌ {e}")
 
-    # Check Module 5: Alignment System
+
     print("[5/6] Checking Alignment System...")
     try:
         alignment_config dpo_cfg = create_dpo_config()
@@ -156,7 +156,7 @@ func check_system_status() {
         append(status.errors, f"Alignment error: {e}")
         print(f"   ❌ {e}")
 
-    # Check Module 6: Inference Optimization
+
     print("[6/6] Checking Inference Optimization...")
     try:
         KVCacheManager kv_mgr = init(num_layers=4, num_kv_heads=8, head_dim=64)
@@ -174,7 +174,7 @@ func check_system_status() {
         append(status.errors, f"Inference error: {e}")
         print(f"   ❌ {e}")
 
-    # Summary
+
     int ready_count = sum([
         status.modules.architecture_loaded,
         status.modules.tokenizer_loaded,
@@ -204,14 +204,14 @@ func check_system_status() {
 
     return status
 
-// ============================================================
-// 🎯 English textstartfunction
-// ============================================================
+
+
+
 
 func start_neurx_training(
-    string mode = "full",           # "pretrain" | "sft" | "align" | "full"
-    string config_path = "",         # Custom config path (optional)
-    option<string> resume_from = none  # Resume from checkpoint
+    string mode = "full",
+    string config_path = "",
+    option<string> resume_from = none
 ):
     """
     English textstart NEURX-5.2 trainingpipeline
@@ -227,7 +227,7 @@ func start_neurx_training(
     print("Starting NEURX-5.2 Training Pipeline")
     print("🚀"*35 + "\n")
 
-    # Step 1: System Check
+
     system_status sys_status = check_system_status()
 
     if len(sys_status.errors) > 0:
@@ -266,14 +266,14 @@ func _start_pretraining(string config_path, option<string> resume_from):
     print("📖 PHASE 1: PRETRAINING")
     print("="*60)
 
-    # Load or create config
+
     pretrain_config cfg
     if config_path != "":
         cfg = load_config(config_path)
     else:
         cfg = create_neurx_200b_pretrain_config()
 
-    # Run pretraining
+
     run_pretraining(
         model_config_path=config_path if config_path != "" else none,
         resume_from_checkpoint=resume_from
@@ -290,24 +290,24 @@ func _start_sft(string config_path, option<string> resume_from):
     if config_path != "":
         sft_cfg = load_alignment_config(config_path)
 
-    # Load base model
+
     neurx_model model = load_neurx_model(sft_cfg.base_model_path)
     tokenizer_state tokenizer = create_tokenizer(sft_cfg.tokenizer_path)
 
-    # Initialize trainer
+
     sft_trainer trainer = init_sft_trainer(model, tokenizer, sft_cfg)
 
-    # Train
+
     for epoch in range(sft_cfg.num_train_epochs):
         print(f"\nEpoch {epoch+1}/{sft_cfg.num_train_epochs}")
         float epoch_loss = train_sft_epoch(trainer, dataloaders["train"])
         print(f"   Epoch Loss: {epoch_loss:.4f}")
 
-        # Evaluate periodically
+
         if (epoch+1) % eval_interval == 0:
             evaluate_sft(trainer, dataloaders["eval"])
 
-        # Save checkpoint
+
         save_checkpoint(model, f"{sft_cfg.output_dir}/epoch_{epoch+1}/")
 
 func _start_alignment(string config_path, option<string> resume_from):
@@ -316,7 +316,7 @@ func _start_alignment(string config_path, option<string> resume_from):
     print("🎯 PHASE 3: ALIGNMENT TRAINING")
     print("="*60)
 
-    # Default to DPO (most popular and effective)
+
     string align_method = "dpo"
 
     alignment_config align_cfg
@@ -334,7 +334,7 @@ func _start_alignment(string config_path, option<string> resume_from):
     print(f"   Method: {align_method.upper()}")
     print(f"   Data: {align_cfg.train_data_path}")
 
-    # Run alignment training
+
     run_alignment_training(align_cfg)
 
 func start_neurx_inference_server(int port = 8080, string model_path = "./checkpoints/neurx_final/"):
@@ -352,11 +352,11 @@ func start_neurx_inference_server(int port = 8080, string model_path = "./checkp
     print("🌐 Starting NEURX-5.2 Inference Server")
     print("="*60 + "\n")
 
-    # Load model
+
     neurx_model model = load_neurx_model(model_path)
     tokenizer_state tokenizer = create_tokenizer("./vocab/neurx.model")
 
-    # Initialize engine
+
     inference_engine engine = init_engine(
         model=model,
         tokenizer=tokenizer,
@@ -365,7 +365,7 @@ func start_neurx_inference_server(int port = 8080, string model_path = "./checkp
         gpu_memory_mb=get_gpu_memory_mb()
     )
 
-    # Start API server
+
     print(f"🚀 Server starting on port {port}...")
     print(f"\nEndpoints:")
     print(f"   POST /generate     - Single generation")
@@ -373,13 +373,13 @@ func start_neurx_inference_server(int port = 8080, string model_path = "./checkp
     print(f"   GET  /status       - Server status")
     print(f"   GET  /health       - Health check\n")
 
-    # Start serving (pseudo-code)
-    # app = create_fastapi_app(engine)
-    # uvicorn.run(app, host="0.0.0.0", port=port)
 
-// ============================================================
-// 🧪 runEnglish texttest
-// ============================================================
+
+
+
+
+
+
 
 func run_all_tests():
     """runEnglish texttest"""
@@ -390,7 +390,7 @@ func run_all_tests():
 
     bool all_passed = true
 
-    # Test 1: Architecture
+
     try:
         test_neurx_architecture()
         print("✅ Architecture Tests PASSED\n")
@@ -398,7 +398,7 @@ func run_all_tests():
         print("❌ Architecture Tests FAILED\n")
         all_passed = False
 
-    # Test 2: tokenizer
+
     try:
         test_tokenizer()
         print("✅ tokenizer Tests PASSED\n")
@@ -406,7 +406,7 @@ func run_all_tests():
         print("❌ tokenizer Tests FAILED\n")
         all_passed = False
 
-    # Test 3: Pretraining
+
     try:
         test_pretrain_framework()
         print("✅ Pretraining Tests PASSED\n")
@@ -414,7 +414,7 @@ func run_all_tests():
         print("❌ Pretraining Tests FAILED\n")
         all_passed = False
 
-    # Test 4: Attention
+
     try:
         test_attention()
         print("✅ Attention Tests PASSED\n")
@@ -422,7 +422,7 @@ func run_all_tests():
         print("❌ Attention Tests FAILED\n")
         all_passed = False
 
-    # Test 5: Alignment
+
     try:
         test_alignment_systems()
         print("✅ Alignment Tests PASSED\n")
@@ -430,7 +430,7 @@ func run_all_tests():
         print("❌ Alignment Tests FAILED\n")
         all_passed = False
 
-    # Test 6: Inference
+
     try:
         test_inference_system()
         print("✅ Inference Tests PASSED\n")
@@ -438,7 +438,7 @@ func run_all_tests():
         print("❌ Inference Tests FAILED\n")
         all_passed = False
 
-    # Final result
+
     print("#"*70)
     if all_passed:
         print("#  🎉 ALL TESTS PASSED! System is fully functional!  ")
@@ -446,9 +446,9 @@ func run_all_tests():
         print("#  ⚠️  SOME TESTS FAILED - Please check logs above  ")
     print("#"*70 + "\n")
 
-// ============================================================
-// 📖 useexample & English text
-// ============================================================
+
+
+
 
 func show_usage_examples():
     """
@@ -537,9 +537,9 @@ func show_usage_examples():
 """
     print(examples)
 
-// ============================================================
-// Main Entry Point
-// ============================================================
+
+
+
 
 func main():
     """mainEnglish text"""
@@ -560,10 +560,10 @@ func main():
     ╚═══════════════════════════════════════════════════════╝
     """)
 
-    # Show usage by default
+
     show_usage_examples()
 
-    # Run system check
+
     print("\n🔍 Running initial system check...\n")
     check_system_status()
 

@@ -35,7 +35,7 @@ float max_state_difference(Model &a, Model &b) {
   return maximum;
 }
 
-}  // namespace
+}
 
 int main() {
   constexpr int kTotalSteps = 6, kCheckpointStep = 2;

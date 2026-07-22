@@ -1,17 +1,17 @@
-// ---- trace/graph English text ----
+
 use neurx.autograd.tracer
 
-// trace -> ir_graph
+
 func trace_to_ir(tracer_state state, string name) ir_graph {
     ir_from_tracer(state, name)
 }
 
-// ir_graph -> trace
+
 func ir_to_trace(ir_graph graph) tracer_state {
     ir_to_tracer(graph)
 }
 
-// English text
+
 func hybrid_trace_graph(tracer_state state, string name, bool to_graph) any {
     if to_graph {
         return trace_to_ir(state, name)
@@ -56,7 +56,7 @@ struct ir_graph {
     bool linearized
 }
 
-// Getter functions to work around compiler type inference bug with struct field indexing
+
 func get_primitive(ir_graph graph, int index) string {
     graph.primitives[index]
 }
@@ -348,7 +348,7 @@ func transform_chain_to_jaxpr(transform_chain chain, string name) ir_graph {
 
 
 
-// ---- ir_graph English textoptimize pass framework ----
+
 
 type ir_pass = ir_graph
 
@@ -363,7 +363,7 @@ func run_ir_pass(ir_graph graph, string pass_name) ir_graph {
 }
 
 func optimize_ir(ir_graph graph) ir_graph {
-    // defaultEnglish text pass, English textextensionEnglish text pipeline
+
     ir_graph out = graph
     for name, pass in ir_pass_registry {
         out = pass(out)
@@ -371,7 +371,7 @@ func optimize_ir(ir_graph graph) ir_graph {
     out
 }
 
-// example pass: English text x + x => 2 * x
+
 func simple_fuse_add(ir_graph graph) ir_graph {
     []ir_eqn optimized_eqns = []ir_eqn{}
     int i = 0
@@ -406,7 +406,7 @@ func simple_fuse_add(ir_graph graph) ir_graph {
     }
 }
 
-// English textdefault pass
+
 
 func compile_jaxpr(ir_graph graph) string {
     if !graph.ready {

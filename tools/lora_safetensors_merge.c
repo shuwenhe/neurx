@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-/* Define _FILE_OFFSET_BITS for large file support */
+
 #ifndef _FILE_OFFSET_BITS
 #define _FILE_OFFSET_BITS 64
 #endif

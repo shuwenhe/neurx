@@ -1,14 +1,14 @@
 package neurx.convert_medmcqa
 
 use std.io.println
-use neurx.runtime.io.{runtime_env_get, runtime_read_text_file, runtime_write_text_file, 
+use neurx.runtime.io.{runtime_env_get, runtime_read_text_file, runtime_write_text_file,
                        runtime_file_exists, runtime_make_dirs}
 
-// ============================================================================
-// MedMCQA to SFT Converter - S Language Implementation
-// Input: 182,822 medical questions in JSONL format
-// Output: Train/Val SFT format (95%/5% split)
-// ============================================================================
+
+
+
+
+
 
 struct sft_example {
     string instruction
@@ -51,7 +51,7 @@ func extract_string_value(string line, string key) string {
         return ""
     }
     start = start + len(search_key)
-    int end = find_char(line, 34, start)  // Find closing quote
+    int end = find_char(line, 34, start)
     if end <= start {
         return ""
     }
@@ -113,28 +113,28 @@ func medmcqa_to_sft(string line) sft_example {
     int correct = extract_int_value(line, "cop")
     string explanation = extract_string_value(line, "exp")
     string subject = extract_string_value(line, "subject_name")
-    
+
     string instruction = "Answer the following medical multiple-choice question accurately."
-    
+
     string input = question + "\n\nOptions:\n"
     input = input + "A) " + opt_a + "\n"
     input = input + "B) " + opt_b + "\n"
     input = input + "C) " + opt_c + "\n"
     input = input + "D) " + opt_d
-    
+
     string output = ""
     []string labels = []string{"A", "B", "C", "D"}
     if correct >= 0 && correct < 4 {
         output = "Answer: " + labels[correct]
     }
-    
+
     if len(explanation) > 5 {
         output = output + "\n\nExplanation: " + explanation
     }
     if len(subject) > 0 {
         output = output + "\n\nSubject: " + subject
     }
-    
+
     sft_example{
         instruction: instruction,
         input_text: input,
@@ -162,24 +162,24 @@ func main() int {
     println("║ Output: Train/Val split (95%/5%)                             ║")
     println("╚════════════════════════════════════════════════════════════════╝")
     println("")
-    
+
     string neurx_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     string input_path = runtime_env_get("MEDMCQA_INPUT",
         "/home/shuwen/shuwen/train/dataset/medmcqa/train.json")
     string output_dir = runtime_env_get("MEDMCQA_OUTPUT_DIR",
         neurx_root + "/dataset/medmcqa_sft")
-    
+
     println("Input:  " + input_path)
     println("Output: " + output_dir)
     println("")
-    
+
     if !runtime_file_exists(input_path) {
         println("ERROR: Input file not found")
         return 1
     }
-    
+
     runtime_make_dirs(output_dir)
-    
+
     println("Reading data...")
     string content = runtime_read_text_file(input_path)
     if len(content) == 0 {
@@ -187,7 +187,7 @@ func main() int {
         return 1
     }
     println("✓ Read " + len(content) + " bytes")
-    
+
     println("Parsing JSONL...")
     []string lines = []string{}
     string current = ""
@@ -201,47 +201,47 @@ func main() int {
             current = current + content[i]
         }
     }
-    
+
     int total = len(lines)
     println("✓ Found " + total as string + " questions")
-    
+
     println("Converting to SFT format...")
     string train_output = ""
     string val_output = ""
     int train_size = (total * 95) / 100
-    
+
     for i in 0..total-1 {
         sft_example ex = medmcqa_to_sft(lines[i])
         string json_line = sft_to_json_line(ex) + "\n"
-        
+
         if i < train_size {
             train_output = train_output + json_line
         } else {
             val_output = val_output + json_line
         }
-        
+
         if (i+1) % 20000 == 0 {
             println("  " + (i+1) as string + " / " + total as string)
         }
     }
-    
+
     println("✓ Converted " + total as string + " examples")
     println("")
-    
+
     println("Writing files...")
     string train_file = output_dir + "/train.jsonl"
     string val_file = output_dir + "/val.jsonl"
-    
+
     runtime_write_text_file(train_file, train_output)
     println("✓ " + train_file + " (" + train_size as string + " examples)")
-    
+
     runtime_write_text_file(val_file, val_output)
     println("✓ " + val_file + " (" + (total - train_size) as string + " examples)")
-    
+
     println("")
     println("✅ Conversion complete!")
     println("")
     println("Next: make posttrain")
-    
+
     0
 }

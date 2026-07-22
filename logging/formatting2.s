@@ -1,22 +1,22 @@
 package neurx.logging
 
-// ============================================================================
-// More Formatting & Display Utilities
-// ============================================================================
 
-// Format in scientific notation (for learning rates, etc.)
+
+
+
+
 func format_scientific(float value) string {
     if value == 0.0 { return "0e+0" }
-    
+
     bool negative = false
     if value < 0.0 {
         negative = true
         value = -value
     }
-    
-    // Find exponent (power of 10)
+
+
     int exponent = 0
-    
+
     if value >= 1.0 {
         while value >= 10.0 {
             value = value / 10.0
@@ -28,24 +28,24 @@ func format_scientific(float value) string {
             exponent = exponent - 1
         }
     }
-    
-    // Now value is in [1, 10)
+
+
     string mantissa = float_to_string_with_decimals(value, 3)
-    
+
     string result = ""
     if negative { result = "-" }
     result = result + mantissa + "e"
-    
+
     if exponent >= 0 {
         result = result + "+" + int_to_string(exponent)
     } else {
         result = result + int_to_string(exponent)
     }
-    
+
     result
 }
 
-// Format duration in seconds to human-readable string
+
 func format_duration(float seconds) string {
     if seconds < 60.0 {
         return int_to_string(int(seconds)) + "s"
@@ -60,22 +60,22 @@ func format_duration(float seconds) string {
     }
 }
 
-// Compute rolling average of recent values (exponential moving average)
+
 func compute_rolling_average([]float values) float {
     if len(values) == 0 { return 0.0 }
-    
-    // Use exponential moving average with alpha=0.9
+
+
     float ema = values[0]
-    float alpha = 0.1  // Weight for new observations
-    
+    float alpha = 0.1
+
     for i in 1..len(values) {
         ema = alpha * values[i] + (1.0 - alpha) * ema
     }
-    
+
     ema
 }
 
-// Repeat character N times
+
 func repeat_char(byte c, int n) string {
     string s = ""
     for i in 0..n {
@@ -84,21 +84,21 @@ func repeat_char(byte c, int n) string {
     s
 }
 
-// Print to console with carriage return (overwrites current line)
+
 func print_overwrite(string message) {
-    print("\r" + message)  // \r returns cursor to beginning of line
+    print("\r" + message)
 }
 
-// Get substring (start index, length)
+
 func substring(string s, int start, int length) string {
     if start >= len(s) { return "" }
-    
+
     int end = min(start + length, len(s))
     string result = ""
-    
+
     for i in start..end {
         result = result + char_to_string(s[i])
     }
-    
+
     result
 }

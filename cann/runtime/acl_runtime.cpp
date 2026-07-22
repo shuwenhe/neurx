@@ -9,7 +9,7 @@ Status acl_failure(const char* operation) {
   return Status::failure(std::string(operation) + ": " + recent_error());
 }
 
-}  // namespace
+}
 
 DeviceSession::~DeviceSession() { shutdown(); }
 
@@ -110,4 +110,4 @@ void HostBuffer::reset() {
   size_ = 0;
 }
 
-}  // namespace neurx::cann
+}

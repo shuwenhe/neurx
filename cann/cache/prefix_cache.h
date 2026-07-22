@@ -29,9 +29,9 @@ struct PrefixCacheHit {
   std::size_t token_count = 0;
 };
 
-// Retains immutable, complete KV blocks and aliases them into new requests.
-// Partial blocks are deliberately excluded because subsequent decode writes
-// would otherwise modify KV state shared by multiple requests.
+
+
+
 class PrefixCache {
  public:
   PrefixCache(PagedKvCache* cache, PrefixCacheConfig config = {});
@@ -68,4 +68,4 @@ class PrefixCache {
   uint64_t evictions_ = 0;
 };
 
-}  // namespace neurx::cann
+}

@@ -2,15 +2,15 @@ package main
 
 use std.io.println
 
-// ============================================================================
-// run_posttrain_pipeline.s - Post-training Configuration & Orchestrator
-// ============================================================================
-//
-// simplified版afterTrainingpipelineconfigurationscript
-// function:
-//   1. displayafterTrainingconfiguration
-//   2. verifyInputoutputpath
-//   3. GenerateExecute建议
+
+
+
+
+
+
+
+
+
 
 func int_to_str(int n) string {
     if n == 0 { return "0" }
@@ -85,30 +85,30 @@ func main() int {
     println("║   LoRA SFT + Model Merge Pipeline                              ║")
     println("╚════════════════════════════════════════════════════════════════╝")
     println("")
-    
+
     println("📋 CONFIGURATION SUMMARY")
     println("═══════════════════════════════════════════════════════════════")
     println("")
-    
+
     println("📦 Model Configuration")
     println("  Base Model        : Qwen2.5-0.5B-Instruct")
     println("  Model Path        : /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct")
     println("  Model Type        : qwen")
     println("")
-    
+
     println("📊 Data Configuration")
     println("  Dataset           : MedMCQA")
     println("  Data Format       : SFT")
     println("  Training Data     : /home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl")
     println("  Validation Data   : /home/shuwen/shuwen/train/dataset/medmcqa/val.jsonl")
     println("")
-    
+
     println("🎯 LoRA Configuration")
     println("  Rank              : 8")
     println("  Alpha             : 16")
     println("  Dropout           : 0.050")
     println("")
-    
+
     println("🚀 Training Configuration")
     println("  Method            : SFT")
     println("  Epochs            : 3")
@@ -120,17 +120,17 @@ func main() int {
     println("  Weight Decay      : 0.0100")
     println("  Optimizer         : adamw_8bit")
     println("")
-    
+
     println("💾 Output Configuration")
     println("  LoRA Adapter      : /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft")
     println("  Merged Model      : /home/shuwen/shuwen/train/model/base-model-posttrain")
     println("  Logs Directory    : /home/shuwen/shuwen/train/neurx/artifacts/logs")
     println("  Merge After Train : true")
     println("")
-    
+
     println("═══════════════════════════════════════════════════════════════")
     println("")
-    
+
     println("✅ Configuration Validation")
     println("  ✓ Base model path validated")
     println("  ✓ Training data file exists")
@@ -139,11 +139,11 @@ func main() int {
     println("  ✓ LoRA parameters valid")
     println("  ✓ Training hyperparameters valid")
     println("")
-    
+
     println("🎯 EXECUTION STEPS")
     println("═══════════════════════════════════════════════════════════════")
     println("")
-    
+
     println("Step 1: Start LoRA SFT Training")
     println("  Command:")
     println("    cd /home/shuwen/shuwen/train/neurx")
@@ -157,7 +157,7 @@ func main() int {
     println("    • Train on MedMCQA dataset for 3 epochs")
     println("    • Save checkpoints to: artifacts/checkpoints/lora_sft/")
     println("")
-    
+
     println("Step 2: Merge LoRA Adapters to Base Model")
     println("  Command:")
     println("    /home/shuwen/shuwen/train/s/bin/s_seed \\")
@@ -169,7 +169,7 @@ func main() int {
     println("    • Apply LoRA adapter weights: W = W_base + (α/r) × B × A")
     println("    • Save merged model to: /home/shuwen/shuwen/train/model/base-model-posttrain/")
     println("")
-    
+
     println("Step 3: Verify Output")
     println("  Command:")
     println("    ls -lah /home/shuwen/shuwen/train/model/base-model-posttrain/")
@@ -180,13 +180,13 @@ func main() int {
     println("    • tokenizer.json             (tokenizer)")
     println("    • generation_config.json     (generation settings)")
     println("")
-    
+
     println("═══════════════════════════════════════════════════════════════")
     println("")
-    
+
     println("📁 Output Location: /home/shuwen/shuwen/train/model/base-model-posttrain/")
     println("✨ Post-training pipeline configured successfully!")
     println("")
-    
+
     0
 }

@@ -1,111 +1,111 @@
-# NeurX English texttrainingconfiguration
-# English textconfigurationfileEnglish texttrainingEnglish textparameter
+
+
 
 [model]
-# modelEnglish text
-name = "model_large"
-vocab_size = 50257          # GPT-2 English text
-hidden_dim = 1024           # English text (GPT-Medium)
-num_layers = 24             # TransformerEnglish textcount
-num_heads = 16              # English text
-ffn_dim = 4096              # FFNEnglish text
-max_seq_length = 2048       # English text
 
-# computeEnglish textparameter
-# English textparameter ≈ 1.3B (13English text)
-# English text ≈ 5GB (bf16English text)
+name = "model_large"
+vocab_size = 50257
+hidden_dim = 1024
+num_layers = 24
+num_heads = 16
+ffn_dim = 4096
+max_seq_length = 2048
+
+
+
+
 
 [training]
-# English texttrainingconfiguration
-total_steps = 50000         # English texttrainingstepEnglish text (English textoptimizeEnglish text)
-warmup_steps = 5000         # English textstepEnglish text
-learning_rate = 0.0002      # learning rate (RTX 4060 Tioptimize)
-lr_schedule = "cosine"      # learning rateEnglish text: linear, cosine, constant
-weight_decay = 0.01         # weightEnglish text (L2English text)
-gradient_clip_norm = 1.0    # gradientEnglish text
-max_grad_norm = 1.0         # English textgradientEnglish text
 
-# dataEnglish textoptimize
-enable_data_offload = true  # English textdataEnglish textoptimize
-enable_cpu_offload = true   # CPUEnglish text (optimizeEnglish text)
+total_steps = 50000
+warmup_steps = 5000
+learning_rate = 0.0002
+lr_schedule = "cosine"
+weight_decay = 0.01
+gradient_clip_norm = 1.0
+max_grad_norm = 1.0
 
-# English textconfiguration (RTX 4060 Tioptimize)
-batch_size = 64             # English text (gradientEnglish text)
-micro_batch_size = 8        # English text (English textstepGPUEnglish text)
-num_accumulation_steps = 8  # gradientEnglish textstepEnglish text (64/8=8step)
 
-# dataload
-num_workers = 4             # dataloadEnglish text (RTX 4060 Tioptimize)
-prefetch_factor = 2         # English textloadEnglish text
+enable_data_offload = true
+enable_cpu_offload = true
+
+
+batch_size = 64
+micro_batch_size = 8
+num_accumulation_steps = 8
+
+
+num_workers = 4
+prefetch_factor = 2
 
 [optimization]
-# optimizeEnglish textconfiguration
-optimizer = "adamw"         # adamw, adam, sgd
-betas = [0.9, 0.999]       # Adam betaparameter
-eps = 1e-8                  # Adam epsilon
 
-# English texttraining (RTX 4060 Tioptimize)
-mixed_precision = "bf16"    # bf16, fp16, fp32
-scale_loss = true           # lossEnglish text (for fp16)
+optimizer = "adamw"
+betas = [0.9, 0.999]
+eps = 1e-8
 
-# English textoptimize
-gradient_checkpointing = true    # English textgradientcheckpoint (English text)
-activation_checkpointing = true  # English textcheckpoint
-flash_attention = true           # Flash Attentionoptimize
-fused_kernels = true             # English textCUDAEnglish textoptimize
+
+mixed_precision = "bf16"
+scale_loss = true
+
+
+gradient_checkpointing = true
+activation_checkpointing = true
+flash_attention = true
+fused_kernels = true
 
 [checkpointing]
-# checkpointconfiguration
-save_interval = 5000        # savecheckpointEnglish text
-keep_last_n = 3             # English textNEnglish textcheckpoint
-save_optimizer_state = true # saveoptimizeEnglish textstate
-save_training_state = true  # savetrainingstate
+
+save_interval = 5000
+keep_last_n = 3
+save_optimizer_state = true
+save_training_state = true
 
 [distributed]
-# English texttrainingconfiguration.0 English textstartEnglish text WORLD_SIZE/NEURX_NUM_GPUS English text.
-world_size = 0              # English textuseEnglish text GPU, English textuseEnglish text WORLD_SIZE
-rank = 0                    # English textrank
-backend = "nccl"            # English text: nccl, gloo
+
+world_size = 0
+rank = 0
+backend = "nccl"
 find_unused_parameters = false
 
-# RTX 4060 Tioptimizeparameter
-pin_memory = true           # English textdataEnglish text
-prefetch_distance = 2       # English textloadEnglish text
-async_grad_reduce = true    # English textstepgradientEnglish text
+
+pin_memory = true
+prefetch_distance = 2
+async_grad_reduce = true
 
 [logging]
-# logconfiguration
-log_interval = 100          # logEnglish text
-log_dir = "artifacts/logs"  # logdirectory
-save_metrics = true         # saveEnglish text
-tensorboard = false         # TensorBoardsupport
+
+log_interval = 100
+log_dir = "artifacts/logs"
+save_metrics = true
+tensorboard = false
 
 [evaluation]
-# evaluationconfiguration
-eval_steps = 2500           # evaluationEnglish text
-eval_samples = 1000         # evaluationEnglish text
+
+eval_steps = 2500
+eval_samples = 1000
 eval_metrics = ["perplexity", "loss", "accuracy"]
 
 [data]
-# dataEnglish textconfiguration
+
 train_dataset_path = "data/pretrain_dataset.jsonl"
 val_dataset_path = "data/val_dataset.jsonl"
 cache_dir = "data/cache"
-tokenizer_name = "gpt2"     # useGPT-2English text
+tokenizer_name = "gpt2"
 max_seq_length = 2048
 
 [output]
-# outputconfiguration
+
 output_dir = "checkpoint/NeurX-1.3"
 model_name = "NeurX-1.3.neurx"
-resume_from_checkpoint = null  # English textcheckpointrecover
-seed = 42                   # English text
+resume_from_checkpoint = null
+seed = 42
 
 [hardware]
-# RTX 4060 TiEnglish textoptimizeconfiguration
-gpu_model = "RTX4060Ti"     # GPUEnglish text
-gpu_memory_mb = 16384       # GPUEnglish text
-fp16_loss_scale = 65536     # FP16lossEnglish text
-enable_tf32 = true          # English textTF32English text (NVIDIA Ampere+optimize)
-num_gpu_devices = 0         # 0 English textuseEnglish text GPU
-torch_compile = false       # PyTorchcompileoptimize (English text)
+
+gpu_model = "RTX4060Ti"
+gpu_memory_mb = 16384
+fp16_loss_scale = 65536
+enable_tf32 = true
+num_gpu_devices = 0
+torch_compile = false

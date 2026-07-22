@@ -1,22 +1,22 @@
-// =====================================================================
-// Complete Automatic Differentiation Framework
-// completeEnglish textframework - supportEnglish textTransformerEnglish text
-// =====================================================================
+
+
+
+
 
 package neurx.autograd.complete
 
 use neurx.tensor.{tensor, zeros, ones, fill, new}
 
-// =====================================================================
-// gradientcomputeEnglish textdataEnglish text
-// =====================================================================
+
+
+
 
 struct gradient_node {
     int id
-    tensor value           // English text
-    string operation       // English text: "add", "mul", "matmul", "softmax", "relu", "norm", English text
-    []int inputs           // inputEnglish textid
-    tensor grad            // English textgradient
+    tensor value
+    string operation
+    []int inputs
+    tensor grad
 }
 
 struct gradient_tape {
@@ -25,9 +25,9 @@ struct gradient_tape {
     bool recording
 }
 
-// =====================================================================
-// English text - English textcomputeEnglish text
-// =====================================================================
+
+
+
 
 func create_tape() gradient_tape {
     gradient_tape {
@@ -57,12 +57,12 @@ func add_node(gradient_tape tape, tensor value, string op, []int inputs) (gradie
     (tape, node_id)
 }
 
-// =====================================================================
-// English text
-// =====================================================================
+
+
+
 
 func ad_add(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tensor) {
-    // Element-wise addition
+
     tensor result = zeros(a.shape)
     int i = 0
     while i < len(a.data) {
@@ -76,7 +76,7 @@ func ad_add(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tensor)
 }
 
 func ad_mul(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tensor) {
-    // Element-wise multiplication
+
     tensor result = zeros(a.shape)
     int i = 0
     while i < len(a.data) {
@@ -90,7 +90,7 @@ func ad_mul(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tensor)
 }
 
 func ad_matmul(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tensor) {
-    // Matrix multiplication: [m, n] @ [n, p] -> [m, p]
+
     int m = a.shape[0]
     int n = a.shape[1]
     int p = b.shape[1]
@@ -119,7 +119,7 @@ func ad_matmul(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tens
 }
 
 func ad_transpose(gradient_tape tape, tensor a) (gradient_tape, int, tensor) {
-    // Transpose 2D matrix
+
     int m = a.shape[0]
     int n = a.shape[1]
 
@@ -140,7 +140,7 @@ func ad_transpose(gradient_tape tape, tensor a) (gradient_tape, int, tensor) {
 }
 
 func ad_softmax(gradient_tape tape, tensor logits) (gradient_tape, int, tensor) {
-    // Softmax: e^x / sum(e^x)
+
     tensor exp_logits = zeros(logits.shape)
     float max_val = logits.data[0]
     int i = 0
@@ -172,7 +172,7 @@ func ad_softmax(gradient_tape tape, tensor logits) (gradient_tape, int, tensor) 
 }
 
 func ad_relu(gradient_tape tape, tensor x) (gradient_tape, int, tensor) {
-    // ReLU: max(0, x)
+
     tensor result = zeros(x.shape)
     int i = 0
     while i < len(x.data) {
@@ -190,7 +190,7 @@ func ad_relu(gradient_tape tape, tensor x) (gradient_tape, int, tensor) {
 }
 
 func ad_layer_norm(gradient_tape tape, tensor x, float eps) (gradient_tape, int, tensor) {
-    // Layer Normalization: (x - mean) / sqrt(var + eps)
+
     float mean = 0.0
     int i = 0
     while i < len(x.data) {
@@ -220,12 +220,12 @@ func ad_layer_norm(gradient_tape tape, tensor x, float eps) (gradient_tape, int,
     (tape, node_id, result)
 }
 
-// =====================================================================
-// English text Backward Pass
-// =====================================================================
+
+
+
 
 func backward_add(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad_b) (tensor, tensor) {
-    // dL/da = dL/dout, dL/db = dL/dout
+
     int i = 0
     while i < len(grad.data) {
         grad_a.data[i] = grad_a.data[i] + grad.data[i]
@@ -236,7 +236,7 @@ func backward_add(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad_b)
 }
 
 func backward_mul(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad_b) (tensor, tensor) {
-    // dL/da = dL/dout * b, dL/db = dL/dout * a
+
     int i = 0
     while i < len(grad.data) {
         grad_a.data[i] = grad_a.data[i] + grad.data[i] * b.data[i]
@@ -247,13 +247,13 @@ func backward_mul(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad_b)
 }
 
 func backward_matmul(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad_b) (tensor, tensor) {
-    // dL/da = dL/dout @ b^T
-    // dL/db = a^T @ dL/dout
+
+
     int m = a.shape[0]
     int n = a.shape[1]
     int p = b.shape[1]
 
-    // Compute grad_a = grad @ b^T
+
     int i = 0
     while i < m {
         int j = 0
@@ -270,7 +270,7 @@ func backward_matmul(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad
         i = i + 1
     }
 
-    // Compute grad_b = a^T @ grad
+
     i = 0
     while i < n {
         int j = 0
@@ -291,8 +291,8 @@ func backward_matmul(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad
 }
 
 func backward_softmax(tensor grad, tensor softmax_output, tensor grad_input) tensor {
-    // dL/dx = softmax * (dL/dout - (softmax * dL/dout).sum())
-    // compute: (softmax * dL/dout).sum() English text
+
+
 
     int i = 0
     while i < len(grad.data) {
@@ -312,7 +312,7 @@ func backward_softmax(tensor grad, tensor softmax_output, tensor grad_input) ten
 }
 
 func backward_relu(tensor grad, tensor x, tensor grad_input) tensor {
-    // dL/dx = dL/dout if x > 0 else 0
+
     int i = 0
     while i < len(grad.data) {
         if x.data[i] > 0.0 {
@@ -323,26 +323,26 @@ func backward_relu(tensor grad, tensor x, tensor grad_input) tensor {
     grad_input
 }
 
-// =====================================================================
-// mainEnglish text
-// =====================================================================
+
+
+
 
 func backward_tape(
     gradient_tape tape,
     tensor final_grad
 ) []tensor {
-    // English textparameterEnglish textgradient
+
     int num_nodes = tape.node_counter
     []tensor gradients = []tensor{cap: num_nodes}
 
-    // initializeEnglish textgradient
+
     int i = 0
     while i < num_nodes {
         gradients.push(zeros(tape.nodes[i].value.shape))
         i = i + 1
     }
 
-    // English textcomputeEnglish text(English textranking)
+
     i = num_nodes - 1
     while i >= 0 {
         gradient_node node = tape.nodes[i]
@@ -388,12 +388,12 @@ func backward_tape(
     gradients
 }
 
-// =====================================================================
-// toolfunction
-// =====================================================================
+
+
+
 
 func get_node_id(tensor t) int {
-    // English text, actualRequiredtracking tensor id
+
     0
 }
 

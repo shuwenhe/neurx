@@ -76,4 +76,4 @@ class HostBuffer {
   std::size_t size_ = 0;
 };
 
-}  // namespace neurx::cann
+}

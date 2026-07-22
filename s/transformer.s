@@ -58,16 +58,16 @@ struct transformer_config {
 }
 
 struct transformer_layer {
-    tensor w_q       // Query projection
-    tensor w_k       // Key projection
-    tensor w_v       // Value projection
-    tensor w_o       // Output projection (attention)
-    tensor w_ff1     // FFN gate projection (SwiGLU) or up projection (ReLU MLP)
-    tensor w_ff2     // FFN down projection
-    tensor b_ff1     // FFN gate bias
-    tensor b_ff2     // FFN down bias
-    tensor w_up      // FFN value/up projection (SwiGLU only, empty for ReLU fallback)
-    tensor b_up      // FFN value/up bias (SwiGLU only)
+    tensor w_q
+    tensor w_k
+    tensor w_v
+    tensor w_o
+    tensor w_ff1
+    tensor w_ff2
+    tensor b_ff1
+    tensor b_ff2
+    tensor w_up
+    tensor b_up
 }
 
 struct transformer {
@@ -77,10 +77,10 @@ struct transformer {
 
 func transformer_init(cfg transformer_config) transformer {
     []transformer_layer mut_layers = []transformer_layer{cap: transformer_config.num_layers}
-    // Pre-create shape arrays to avoid complex array literals
+
     int i = 0
     while i < transformer_config.num_layers {
-        // Create shapes using helper approach
+
         []int shape_dmd = make_int_array_2(transformer_config.d_model, transformer_config.d_model)
         []int shape_dmff = make_int_array_2(transformer_config.d_model, transformer_config.d_ff)
         []int shape_ffdm = make_int_array_2(transformer_config.d_ff, transformer_config.d_model)
@@ -88,21 +88,21 @@ func transformer_init(cfg transformer_config) transformer {
         []int shape_dm = make_int_array_1(transformer_config.d_model)
 
         transformer_layer layer = transformer_layer {
-            // ── Attention weights (Kaiming init for linear layers) ──
-            w_q: kaiming_uniform(shape_dmd, 0),   // [d_model, d_model]
-            w_k: kaiming_uniform(shape_dmd, 0),   // [d_model, d_model]
-            w_v: kaiming_uniform(shape_dmd, 0),   // [d_model, d_model]
-            w_o: xavier_uniform(shape_dmd),       // Output proj: Xavier (combines all heads)
 
-            // ── SwiGLU FFN weights (Kaiming init for SiLU/ReLU variants) ──
-            w_ff1: kaiming_uniform(shape_dmff, 0),  // gate:  [d_model, d_ff]
-            w_up: kaiming_uniform(shape_dmff, 0),    // value: [d_model, d_ff] (SwiGLU up proj)
-            w_ff2: kaiming_uniform(shape_ffdm, 1),   // down:  [d_ff, d_model] (fan_out mode)
+            w_q: kaiming_uniform(shape_dmd, 0),
+            w_k: kaiming_uniform(shape_dmd, 0),
+            w_v: kaiming_uniform(shape_dmd, 0),
+            w_o: xavier_uniform(shape_dmd),
 
-            // Biases initialized to zeros
-            b_ff1: tensor_zeros(shape_ff),     // gate bias [d_ff]
-            b_up: tensor_zeros(shape_ff),      // value bias [d_ff] (SwiGLU)
-            b_ff2: tensor_zeros(shape_dm)      // down bias [d_model]
+
+            w_ff1: kaiming_uniform(shape_dmff, 0),
+            w_up: kaiming_uniform(shape_dmff, 0),
+            w_ff2: kaiming_uniform(shape_ffdm, 1),
+
+
+            b_ff1: tensor_zeros(shape_ff),
+            b_up: tensor_zeros(shape_ff),
+            b_ff2: tensor_zeros(shape_dm)
         }
         mut_layers[i] = layer
         i = i + 1
@@ -113,7 +113,7 @@ func transformer_init(cfg transformer_config) transformer {
     }
 }
 
-// Helper functions to create int arrays without inline literals
+
 func make_int_array_1(int v) []int {
     []out = []int{cap: 1}
     out[0] = v
@@ -127,12 +127,12 @@ func make_int_array_2(int a, int b) []int {
     out
 }
 
-// ── Weight Initialization Functions ─────────────────────────────────────────
-// Proper initialization is critical for training deep networks.
-// Without this, gradients can vanish/explode during backpropagation.
 
-// Simple pseudo-random number generator (LCG) for reproducible initialization
-// Using constants from Numerical Recipes: a=1664525, c=1013904223, m=2^32
+
+
+
+
+
 struct rng_state {
     int seed
 }
@@ -141,14 +141,14 @@ func new_rng(int seed) rng_state {
     rng_state { seed: seed }
 }
 
-// Returns random float in [0, 1)
+
 func rng_next(rng_state state) float {
-    // Linear congruential generator
+
     state.seed = (state.seed * 1664525 + 1013904223)  0x7FFFFFFF
-    float(state.seed) / 2147483648.0  // Normalize to [0, 1)
+    float(state.seed) / 2147483648.0
 }
 
-// Box-Muller transform to get normal distribution from uniform
+
 func rng_randn(rng_state state) float {
     float u1 = rng_next(state)
     while u1 < 0.0000000001 {
@@ -156,23 +156,23 @@ func rng_randn(rng_state state) float {
     }
     float u2 = rng_next(state)
     float r = sqrt_approx(-2.0 * log_approx(u1))
-    float theta = 6.283185307179586 * u2  // 2 * pi * u2
+    float theta = 6.283185307179586 * u2
     r * rope_cos(theta)
 }
 
-// ── Kaiming (He) Uniform Initialization ──────────────────────────────────────
-// Optimal for ReLU and its variants (including SiLU/SwiGLU).
-// Bounds: sqrt(6 / fan_in) where fan_in = input features
+
+
+
 
 func kaiming_uniform([]int shape, int fan_in_mode) tensor {
     int n = numel(shape)
     int fan_in = 1
     if len(shape) >= 2 {
         if fan_in_mode == 0 {
-            // fan_in from first dimension (for weight matrices [in, out])
+
             fan_in = shape[0]
         } else {
-            // fan_out mode
+
             fan_in = shape[len(shape) - 1]
         }
     } else {
@@ -180,11 +180,11 @@ func kaiming_uniform([]int shape, int fan_in_mode) tensor {
     }
 
     float bound = sqrt_approx(6.0 / float(fan_in))
-    rng_state rng = new_rng(42)  // Fixed seed for reproducibility
+    rng_state rng = new_rng(42)
     []float data = []float{cap: n}
     int i = 0
     while i < n {
-        // Uniform in [-bound, bound]
+
         float v = (rng_next(rng) * 2.0 - 1.0) * bound
         data[i] = v
         i = i + 1
@@ -192,8 +192,8 @@ func kaiming_uniform([]int shape, int fan_in_mode) tensor {
     new(data, copy_int(shape), true)
 }
 
-// ── Xavier/Glorot Uniform Initialization ────────────────────────────────────
-// Good for tanh/sigmoid activations. Bounds: sqrt(6 / (fan_in + fan_out))
+
+
 
 func xavier_uniform([]int shape) tensor {
     int n = numel(shape)
@@ -219,8 +219,8 @@ func xavier_uniform([]int shape) tensor {
     new(data, copy_int(shape), true)
 }
 
-// ── Kaiming Normal Initialization ───────────────────────────────────────────
-// std = sqrt(2 / fan_in), mean = 0. Used by PyTorch default.
+
+
 
 func kaiming_normal([]int shape, int fan_in_mode) tensor {
     int n = numel(shape)
@@ -247,12 +247,12 @@ func kaiming_normal([]int shape, int fan_in_mode) tensor {
     new(data, copy_int(shape), true)
 }
 
-// ── Small value initialization for embeddings ───────────────────────────────
-// Embeddings benefit from smaller initial values to prevent large logits.
+
+
 
 func embedding_init([]int shape) tensor {
     int n = numel(shape)
-    float std = 0.02  // Common practice for embeddings
+    float std = 0.02
     rng_state rng = new_rng(42)
     []float data = []float{cap: n}
     int i = 0
@@ -310,8 +310,8 @@ func transformer_load_state_dict(transformer state, transformer other) transform
 func transformer_forward(m transformer, x tensor) tensor {
     int i = 0
     tensor out = x
-    // Workaround for S compiler array indexing limitation with complex types
-    // Use iteration-based access instead of direct indexing
+
+
     []transformer_layer layers_copy = copy_layers(m.layers)
     while i < m.config.num_layers {
         if i < len(layers_copy) {
@@ -323,47 +323,47 @@ func transformer_forward(m transformer, x tensor) tensor {
 }
 
 func transformer_layer_forward(layer transformer_layer, x tensor, config transformer_config) tensor {
-    // ── Multi-head self-attention with causal mask ──
+
     tensor q = matmul(x, layer.w_q)
     tensor k = matmul(x, layer.w_k)
     tensor v = matmul(x, layer.w_v)
     tensor attn = multihead_attention(q, k, v, transformer_config.num_heads)
     tensor attn_out = matmul(attn, layer.w_o)
 
-    // Residual connection after attention
+
     tensor x2 = add(x, attn_out)
 
-    // ── SwiGLU Feed-Forward Network (replaces ReLU MLP) ──
-    // SwiGLU: output = (silu(xW_gate)) * (xW_up) @ W_down
-    // Used by LLaMA, NeurX, Mistral, etc.
+
+
+
     tensor swiglu_out = swiglu_ffn(x2, layer)
 
-    // Residual connection after FFN
+
     tensor out = add(x2, swiglu_out)
     return out
 }
 
-// ── SwiGLU FFN Forward Pass ─────────────────────────────────────────────────
-// Implements gated activation used in modern LLMs:
-//   gate = silu(x @ W_gate + b_gate)   [Swish activation]
-//   up   = x @ W_up + b_up             [linear projection]
-//   h    = gate * up                    [element-wise gating]
-//   out  = h @ W_down + b_down         [output projection]
+
+
+
+
+
+
 
 func swiglu_ffn(tensor x, transformer_layer layer) tensor {
     int n_data = len(layer.w_ff1.data)
     int n_up = len(layer.w_up.data)
 
     if n_up > 0 && n_data == n_up {
-        // Full SwiGLU: separate gate and up projections
-        tensor gate_hidden = add(matmul(x, layer.w_ff1), layer.b_ff1)  // gate path
-        tensor gate_act = silu(gate_hidden)                            // silu activation
-        tensor up_hidden = add(matmul(x, layer.w_up), layer.b_up)      // value path
-        tensor gated = mul(gate_act, up_hidden)                        // gating
-        tensor output = add(matmul(gated, layer.w_ff2), layer.b_ff2)   // down project
+
+        tensor gate_hidden = add(matmul(x, layer.w_ff1), layer.b_ff1)
+        tensor gate_act = silu(gate_hidden)
+        tensor up_hidden = add(matmul(x, layer.w_up), layer.b_up)
+        tensor gated = mul(gate_act, up_hidden)
+        tensor output = add(matmul(gated, layer.w_ff2), layer.b_ff2)
         output
     } else {
-        // Fallback to ReLU MLP when SwiGLU weights not initialized
+
         tensor ff1 = add(matmul(x, layer.w_ff1), layer.b_ff1)
         tensor ff1_act = relu(ff1)
         tensor ff2 = add(matmul(ff1_act, layer.w_ff2), layer.b_ff2)
@@ -371,7 +371,7 @@ func swiglu_ffn(tensor x, transformer_layer layer) tensor {
     }
 }
 
-// SiLU / Swish activation: x * sigmoid(x)
+
 func silu(tensor input) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
@@ -385,14 +385,14 @@ func silu(tensor input) tensor {
     new(out, copy_int(input.shape), input.requires_grad)
 }
 
-// ── Flash Attention Integration for 2T+ Models ──────────────────────────────
-// Memory-efficient attention: O(N) memory instead of O(N²)
-// Critical for long sequence training (8K-128K context)
+
+
+
 
 struct flash_attention_config {
-    int block_size_q       // Q block size (typically 128)
-    int block_size_kv      // KV block size (typically 128)
-    bool use_online_softmax // Numerical stability via online softmax
+    int block_size_q
+    int block_size_kv
+    bool use_online_softmax
 }
 
 func default_flash_attention_config() flash_attention_config {
@@ -403,12 +403,12 @@ func default_flash_attention_config() flash_attention_config {
     return cfg
 }
 
-// Flash Attention forward pass with block-wise computation
-// Reduces memory from O(seq_len²) to O(block_size * seq_len)
+
+
 func flash_attention_forward(
-    tensor q,           // [batch*heads, seq_len, head_dim]
-    tensor k,           // [batch*heads, seq_len, head_dim]
-    tensor v,           // [batch*heads, seq_len, head_dim]
+    tensor q,
+    tensor k,
+    tensor v,
     int num_heads,
     flash_attention_config config
 ) tensor {
@@ -431,7 +431,7 @@ func flash_attention_forward(
 
     float scale = 1.0 / sqrt_approx(float(head_dim))
 
-    // Initialize output accumulator
+
     []float output_data = []float{cap: batch_heads * seq_len * head_dim}
     int init_i = 0
     while init_i < batch_heads * seq_len * head_dim {
@@ -439,30 +439,30 @@ func flash_attention_forward(
         init_i = init_i + 1
     }
 
-    // Process Q blocks (outer loop)
+
     int q_block_start = 0
     while q_block_start < seq_len {
         int q_block_end = min(q_block_start + config.block_size_q, seq_len)
         int q_block_size = q_block_end - q_block_start
 
-        // Initialize running statistics for this Q block
+
         []float row_max = []float{cap: batch_heads * q_block_size}
         []float row_sum = []float{cap: batch_heads * q_block_size}
         int ri = 0
         while ri < batch_heads * q_block_size {
-            row_max[ri] = -1e9  // -inf initialization
+            row_max[ri] = -1e9
             row_sum[ri] = 0.0
             ri = ri + 1
         }
 
-        // Process KV blocks (inner loop)
+
         int kv_block_start = 0
         while kv_block_start < seq_len {
             int kv_block_end = min(kv_block_start + config.block_size_kv, seq_len)
             int kv_block_size = kv_block_end - kv_block_start
 
-            // Compute attention scores for this block pair: Q_block @ K_block^T
-            // scores shape: [batch_heads, q_block_size, kv_block_size]
+
+
             compute_flash_scores(
                 q, k,
                 q_block_start, q_block_size,
@@ -476,7 +476,7 @@ func flash_attention_forward(
             kv_block_start = kv_block_end
         }
 
-        // Normalize output by row sums (softmax normalization)
+
         normalize_flash_output(output_data, row_sum, q_block_start, q_block_size, batch_heads, head_dim, seq_len)
 
         q_block_start = q_block_end
@@ -485,7 +485,7 @@ func flash_attention_forward(
     new(output_data, copy_int(q.shape), q.requires_grad)
 }
 
-// Helper: compute attention scores for a single block pair and update running stats
+
 func compute_flash_scores(
     tensor q, tensor k,
     int q_start, int q_size,
@@ -502,18 +502,18 @@ func compute_flash_scores(
         while qi < q_size {
             int row_idx = h * q_size + qi
 
-            // Store old max for rescaling
+
             float old_max = row_max[row_idx]
 
-            // Compute dot products with K block
+
             int ki = 0
             while ki < kv_size {
                 float score = 0.0
                 int di = 0
                 while di < head_dim {
-                    // Q at position (h, q_start+qi, di)
+
                     int q_idx = ((h * total_seq_len + (q_start + qi)) * head_dim + di)
-                    // K at position (h, kv_start+ki, di)
+
                     int k_idx = ((h * total_seq_len + (kv_start + ki)) * head_dim + di)
 
                     if q_idx < len(q.data)  k_idx < len(k.data) {
@@ -523,30 +523,30 @@ func compute_flash_scores(
                 }
                 score = score * scale
 
-                // Apply causal mask: only attend to positions <= current
+
                 int q_pos = q_start + qi
                 int k_pos = kv_start + ki
                 if k_pos > q_pos {
-                    score = -1e9  // Mask out future positions
+                    score = -1e9
                 }
 
-                // Update running max
+
                 if score > row_max[row_idx] {
                     row_max[row_idx] = score
                 }
 
-                // Compute exp(score - new_max) and accumulate
+
                 float exp_score = exp_approx(score - row_max[row_idx])
                 row_sum[row_idx] = row_sum[row_idx] + exp_score
 
-                // Accumulate weighted value: exp_score * V
+
                 int vi = 0
                 while vi < head_dim {
                     int v_idx = ((h * total_seq_len + (kv_start + ki)) * head_dim + vi)
                     int out_idx = ((h * total_seq_len + (q_start + qi)) * head_dim + vi)
 
                     if v_idx < len(v.data)  out_idx < len(output_data) {
-                        // Rescale previous output by exp(old_max - new_max)
+
                         float rescale = exp_approx(old_max - row_max[row_idx])
                         output_data[out_idx] = output_data[out_idx] * rescale + exp_score * v.data[v_idx]
                     }
@@ -561,7 +561,7 @@ func compute_flash_scores(
     }
 }
 
-// Helper: normalize output by softmax sum
+
 func normalize_flash_output(
     []float output_data,
     []float row_sum,
@@ -577,7 +577,7 @@ func normalize_flash_output(
             int row_idx = h * q_size + qi
             float norm = row_sum[row_idx]
 
-            if norm > 1e-8 {  // Avoid division by zero
+            if norm > 1e-8 {
                 float inv_norm = 1.0 / norm
                 int di = 0
                 while di < head_dim {
@@ -594,8 +594,8 @@ func normalize_flash_output(
     }
 }
 
-// ── Multi-Head Attention with Flash Attention Support ───────────────────────
-// Automatically selects between standard and flash attention based on sequence length
+
+
 
 struct attention_mode {
     bool use_flash_attention
@@ -604,30 +604,30 @@ struct attention_mode {
 
 func default_attention_mode() attention_mode {
     attention_mode mode
-    mode.use_flash_attention = true  // Default to flash for 2T models
+    mode.use_flash_attention = true
     mode.flash_config = default_flash_attention_config()
     return mode
 }
 
 func multihead_attention_with_mode(tensor q, tensor k, tensor v, int num_heads, attention_mode mode) tensor {
     if mode.use_flash_attention {
-        // Use Flash Attention for memory efficiency
+
         flash_attention_forward(q, k, v, num_heads, mode.flash_config)
     } else {
-        // Fallback to standard attention
+
         scaled_dot_product_attention_causal(q, k, v, num_heads)
     }
 }
 
-// Update original multihead_attention to use flash by default
+
 func multihead_attention(tensor q, tensor k, tensor v, int num_heads) tensor {
     attention_mode mode = default_attention_mode()
     multihead_attention_with_mode(q, k, v, num_heads, mode)
 }
 
-// ── Causal Mask ──────────────────────────────────────────────────────────────
-// Generate a lower-triangular causal mask: 0 where allowed, -inf where masked.
-// Shape: [seq_len, seq_len]
+
+
+
 
 func make_causal_mask(int seq_len) tensor {
     int total = seq_len * seq_len
@@ -636,7 +636,7 @@ func make_causal_mask(int seq_len) tensor {
     while r < seq_len {
         int c = 0
         while c < seq_len {
-            // position (r, c): allow if c <= r (can attend to past + current)
+
             if c <= r {
                 data[r * seq_len + c] = 0.0
             } else {
@@ -649,15 +649,15 @@ func make_causal_mask(int seq_len) tensor {
     new(data, [seq_len, seq_len], false)
 }
 
-// ── Scaled Dot-Product Attention with Causal Mask ────────────────────────────
-// q, k, v: [batch * heads, seq_len, head_dim] or [seq_len, head_dim] for single
-// Applies causal mask so each position can only attend to itself and previous positions.
+
+
+
 
 func scaled_dot_product_attention_causal(tensor q, tensor k, tensor v, int num_heads) tensor {
     int ndim_q = len(q.shape)
     int ndim_k = len(k.shape)
 
-    // Determine sequence length and head_dim from shapes
+
     int seq_len = 1
     int head_dim = 1
     int batch_heads = 1
@@ -673,17 +673,17 @@ func scaled_dot_product_attention_causal(tensor q, tensor k, tensor v, int num_h
         }
     }
 
-    // Scale factor for attention scores
+
     float scale = 1.0 / sqrt_approx(float(head_dim))
 
-    // Build causal mask once
+
     tensor mask = make_causal_mask(seq_len)
 
-    // Compute attention scores: Q @ K^T / sqrt(d_k)
-    tensor kt = transpose(k) // [batch*heads, head_dim, seq_len] or [head_dim, seq_len]
-    tensor scores = matmul(q, kt) // [batch*heads, seq_len, seq_len] or [seq_len, seq_len]
 
-    // Apply scale
+    tensor kt = transpose(k)
+    tensor scores = matmul(q, kt)
+
+
     int n_scores = len(scores.data)
     int si = 0
     while si < n_scores {
@@ -691,41 +691,41 @@ func scaled_dot_product_attention_causal(tensor q, tensor k, tensor v, int num_h
         si = si + 1
     }
 
-    // Apply causal mask (add -inf to masked positions)
+
     int mi = 0
     while mi < n_scores {
         scores.data[mi] = scores.data[mi] + mask.data[mi]
         mi = mi + 1
     }
 
-    // Softmax over last dimension (keys dimension)
+
     tensor attn_weights = softmax_last_dim(scores)
 
-    // Apply to values: attn_weights @ V
+
     tensor output = matmul(attn_weights, v)
     return output
 }
 
-// ── Softmax on last dimension (for attention weights) ────────────────────────
-// Numerically stable softmax along the last axis.
+
+
 
 func softmax_last_dim(tensor input) tensor {
     int ndim = len(input.shape)
     if ndim == 1 {
         return softmax_1d_tensor(input)
     }
-    // For 2D: [rows, cols] -> softmax over cols
+
     if ndim == 2 {
         return softmax_2d_last(input)
     }
-    // For 3D: [batch, seq, dim] -> softmax over last dim
+
     softmax_3d_last(input)
 }
 
 func softmax_1d_tensor(tensor input) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
-    // Find max for numerical stability
+
     float max_v = input.data[0]
     int i = 1
     while i < n {
@@ -734,7 +734,7 @@ func softmax_1d_tensor(tensor input) tensor {
         }
         i = i + 1
     }
-    // exp and sum
+
     float denom = 0.0
     i = 0
     while i < n {
@@ -746,7 +746,7 @@ func softmax_1d_tensor(tensor input) tensor {
     if denom == 0.0 {
         denom = 1.0
     }
-    // Normalize
+
     i = 0
     while i < n {
         out[i] = out[i] / denom
@@ -762,7 +762,7 @@ func softmax_2d_last(tensor input) tensor {
     int r = 0
     while r < rows {
         int base = r * cols
-        // Find max in this row
+
         float max_v = input.data[base]
         int c = 1
         while c < cols {
@@ -771,7 +771,7 @@ func softmax_2d_last(tensor input) tensor {
             }
             c = c + 1
         }
-        // Exp and sum
+
         float denom = 0.0
         c = 0
         while c < cols {
@@ -783,7 +783,7 @@ func softmax_2d_last(tensor input) tensor {
         if denom == 0.0 {
             denom = 1.0
         }
-        // Normalize
+
         c = 0
         while c < cols {
             out[base + c] = out[base + c] / denom
@@ -805,7 +805,7 @@ func softmax_3d_last(tensor input) tensor {
         int b = 0
         while b < d1 {
             int base = (a * d1 + b) * d2
-            // Find max
+
             float max_v = input.data[base]
             int c = 1
             while c < d2 {
@@ -814,7 +814,7 @@ func softmax_3d_last(tensor input) tensor {
                 }
                 c = c + 1
             }
-            // Exp and sum
+
             float denom = 0.0
             c = 0
             while c < d2 {
@@ -826,7 +826,7 @@ func softmax_3d_last(tensor input) tensor {
             if denom == 0.0 {
                 denom = 1.0
             }
-            // Normalize
+
             c = 0
             while c < d2 {
                 out[base + c] = out[base + c] / denom
@@ -839,38 +839,38 @@ func softmax_3d_last(tensor input) tensor {
     new(out, copy_int(input.shape), input.requires_grad)
 }
 
-// ── RoPE (Rotary Position embedding) Precomputation ──────────────────────────
-// Generate cos and sin tables for rotary position embeddings.
-// Used by LLaMA, NeurX, PaLM, etc.
+
+
+
 
 struct rope_cache {
-    tensor cos_table   // [seq_len, head_dim/2]
-    tensor sin_table   // [seq_len, head_dim/2]
+    tensor cos_table
+    tensor sin_table
     int head_dim
     int max_seq_len
 }
 
-// Precompute cos/sin frequencies for RoPE
-// theta_i = 10000^(-2i/d_model) for pair dimension index i
+
+
 func precompute_rope(int max_seq_len, int head_dim) rope_cache {
     int half_dim = head_dim / 2
     if half_dim <= 0 {
         half_dim = 1
     }
 
-    // Compute frequency bands: theta_i = 1 / (10000^(2i/head_dim))
+
     []float freqs = []float{cap: half_dim}
     int i = 0
     while i < half_dim {
         float exponent = -2.0 * float(i) / float(head_dim)
-        // 10000^exponent = exp(exponent * ln(10000))
+
         float ln_base = log_approx(10000.0)
         float theta_val = exp_approx(exponent * ln_base)
         freqs[i] = theta_val
         i = i + 1
     }
 
-    // Compute position * frequency for each position
+
     []float cos_data = []float{cap: max_seq_len * half_dim}
     []float sin_data = []float{cap: max_seq_len * half_dim}
     int pos = 0
@@ -878,7 +878,7 @@ func precompute_rope(int max_seq_len, int head_dim) rope_cache {
         int j = 0
         while j < half_dim {
             float angle = float(pos) * freqs[j]
-            // Use Taylor series approximations
+
             cos_data[pos * half_dim + j] = rope_cos(angle)
             sin_data[pos * half_dim + j] = rope_sin(angle)
             j = j + 1
@@ -894,26 +894,26 @@ func precompute_rope(int max_seq_len, int head_dim) rope_cache {
     }
 }
 
-// Cos approximation for RoPE angles
+
 func rope_cos(float x) float {
     float x2 = x * x
     float x4 = x2 * x2
     float x6 = x4 * x2
-    // cos(x) ~ 1 - x^2/2 + x^4/24 - x^6/720
+
     1.0 - (x2 / 2.0) + (x4 / 24.0) - (x6 / 720.0)
 }
 
-// Sin approximation for RoPE angles
+
 func rope_sin(float x) float {
     float x2 = x * x
     float x3 = x2 * x
     float x5 = x3 * x2
-    // sin(x) ~ x - x^3/6 + x^5/120
+
     x - (x3 / 6.0) + (x5 / 120.0)
 }
 
-// Apply RoPE to a tensor (pairwise rotation)
-// input: [..., head_dim], rotates pairs of dimensions
+
+
 func apply_rope(tensor input, rope_cache cache, int start_pos) tensor {
     int n = len(input.data)
     int ndim = len(input.shape)
@@ -926,13 +926,13 @@ func apply_rope(tensor input, rope_cache cache, int start_pos) tensor {
     []float out = []float{cap: n}
     int flat = 0
     while flat < n {
-        // Determine which "row" we're in (sequence position within this batch element)
+
         int local_idx = f(flat - (flat / last_dim) * last_dim)
         int pair_idx = local_idx / 2
         int pos_in_pair = l(local_idx - (local_idx / 2) * 2)
 
         if pos_in_pair == 0 && pair_idx < half_dim && pair_idx < len(cache.cos_table.data) {
-            // Determine position offset for this element
+
             int elem_offset = flat / last_dim
             int seq_pos = (start_pos + elem_offset) - ((start_pos + elem_offset) / cache.max_seq_len) * cache.max_seq_len
             if seq_pos < 0 {
@@ -946,12 +946,12 @@ func apply_rope(tensor input, rope_cache cache, int start_pos) tensor {
             float cos_v = cache.cos_table.data[table_idx]
             float sin_v = cache.sin_table.data[table_idx]
             float x0 = input.data[flat]
-            // Get the paired element (next dimension)
+
             float x1 = 0.0
             if flat + 1 < n {
                 x1 = input.data[flat + 1]
             }
-            // Rotate: [x0, x1] -> [x0*cos - x1*sin, x0*sin + x1*cos]
+
             out[flat] = x0 * cos_v - x1 * sin_v
             if flat + 1 < n {
                 out[flat + 1] = x0 * sin_v + x1 * cos_v

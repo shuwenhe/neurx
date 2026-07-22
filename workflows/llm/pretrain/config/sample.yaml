@@ -1,4 +1,4 @@
-# Sample pretrain config for workflows/llm/pretrain
+
 dataset_manifest: "data/pretrain/mini_manifest.json"
 output_dir: "artifacts/checkpoints/run_20260518_001"
 checkpoint_root: "artifacts/checkpoints/two_t_pretrain"

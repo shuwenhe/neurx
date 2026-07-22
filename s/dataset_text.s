@@ -40,7 +40,7 @@ func count_lines(string text) int {
     bool has_content = false
     while i < n {
         string ch = substring(text, i, i + 1)
-        // newline / carriage return handling without numeric casts
+
         if strings_eq(ch, "\n") {
             lines = lines + 1
             has_content = false
@@ -67,7 +67,7 @@ func split_lines(string text) []string {
     int line_idx = 0
     while i < n {
         string ch = substring(text, i, i + 1)
-        // newline / carriage return handling without numeric casts
+
         if strings_eq(ch, "\n") {
             string cleaned = trim(current)
             if !strings_eq(cleaned, "") {

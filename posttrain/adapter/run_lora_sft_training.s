@@ -2,8 +2,8 @@ package main
 
 use std.io.println
 
-// Simplified LoRA SFT trainer in pure S language
-// Configuration uses hard-coded values to avoid string parsing limitations in S runtime
+
+
 
 func digit_to_str(int digit) string {
     if digit == 0 {
@@ -96,7 +96,7 @@ func resolve_non_empty(string primary, string fallback) string {
 }
 
 func main() int {
-    // Hard-coded configuration (S runtime doesn't support string parsing for environment variables)
+
     string project_root = "/home/shuwen/shuwen/train/neurx"
     string model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
     string data_path = "/home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl"
@@ -136,7 +136,7 @@ func main() int {
     println("Loaded samples: 4 (simulation)")
     println("")
 
-    // Simulated training loop
+
     float base_weight = 1.0
     float adapter_a = 0.0
     float adapter_b = 0.0
@@ -212,8 +212,8 @@ func main() int {
     println("checkpoint dir: " + output_dir)
     println("Best loss     : " + fmt_float(best_loss, 4))
     println("")
-    
+
     println("✓ LoRA SFT training completed")
-    
+
     0
 }

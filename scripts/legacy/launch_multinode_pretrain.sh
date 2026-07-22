@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-# Hostfile format: one node per line, "host gpus". The project directory and
-# NEURX_SHARED_NCCL_ID_FILE must be visible at the same path on every node.
+
+
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 HOSTFILE="${NEURX_HOSTFILE:-${ROOT}/configs/pretrain.hosts}"
 GPUS_PER_NODE="${NEURX_GPUS_PER_NODE:-}"
@@ -75,7 +75,7 @@ for node in "${HOSTS[@]}"; do
     gpus="${GPUS_PER_NODE:-$(nvidia-smi -L 2>/dev/null | wc -l)}"
   fi
   for ((local=0; local<gpus; local++)); do
-    # A single rank writes directly under OUT; distributed ranks use rank_N.
+
     if (( world == 1 )); then
       ckpt_path="$OUT/transformer_v2.ckpt"
     else
@@ -92,12 +92,12 @@ for node in "${HOSTS[@]}"; do
       else
         echo "[multinode] rank=$rank no usable transformer-v2 checkpoint; starting fresh"
       fi
-      # For local ranks, use tee to display to terminal AND log file
+
       if (( ${#HOSTS[@]} == 1 )); then
-        # Single-node: show output in real-time
+
         "${cmd[@]}" 2>&1 | tee -a "${OUT}/rank_${rank}.log" &
       else
-        # Multi-node: keep in background
+
         "${cmd[@]}" >"${OUT}/rank_${rank}.log" 2>&1 &
       fi
     else

@@ -1,8 +1,8 @@
 package neurx.serving.security.request_governance
 
-// API keys are represented only by fixed-size SHA-256 hexadecimal
-// fingerprints. Raw secrets must be hashed by the TLS/native transport before
-// entering this module and must never be logged.
+
+
+
 
 struct governance_state {
     []string tenant_ids

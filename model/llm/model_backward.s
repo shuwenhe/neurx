@@ -1,17 +1,17 @@
 package neurx.model.llm.base_backward
 
-// ============================================================================
-// GPT completeEnglish text (Backward Pass)
-//
-// implementationEnglish textlossEnglish textparametergradientEnglish textcompleteEnglish text:
-//   Loss → d_logits → d_final_norm → d_layers[N-1..0] → d_embedding
-//
-// English text:
-//   d_layer_out → (d_ffn → d_norm2 → d_attn → d_norm1) → d_layer_in
-//   English textcomputeEnglish textweightgradient (W_q/k/v/o, W_ffn_gate/value/down, gamma_norm)
-//
-// English text position-first [total_tokens, dim] English text gpt.s English text
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
 
 use neurx.model.llm.gpt.{
     model_config, language_model, transformer_layer,
@@ -26,15 +26,15 @@ use neurx.model.llm.gpt.{
 use neurx.model.transformer.norm.{rms_norm, rms_normalize}
 use neurx.model.transformer.ffn.{forward_swiglu_ffn, forward_standard_ffn}
 
-// ============================================================================
-// 1. English textcache (English text)
-// ============================================================================
+
+
+
 
 struct gpt_sdpa_cache {
-    []float q            // English text RoPE English text Q: [seq, n_head * head_dim]
-    []float k            // English text RoPE English text K: [seq, n_kv_head * head_dim]
-    []float v            // V: [seq, n_kv_head * head_dim]
-    []float weights      // English textweight: [n_head * seq * seq] (head-first)
+    []float q
+    []float k
+    []float v
+    []float weights
     int seq_len
     int n_head
     int n_kv_head
@@ -42,65 +42,65 @@ struct gpt_sdpa_cache {
 }
 
 struct transformer_layer_cache {
-    []float x_in         // English textinput [B*S, D]
-    []float normed1      // Pre-Attn RMSNorm output
-    []float q_proj       // Q English text (English text): [B*S, D]
-    []float k_proj       // K English text (English text): [B*S, kv_D]
-    []float v_proj       // V English text: [B*S, kv_D]
-    []float q_rope       // RoPE English text Q
-    []float k_rope       // RoPE English text K
-    []float attn_out     // SDPA output: [B*S, D]
-    []float attn_proj    // outputEnglish text: [B*S, D]
-    []float h_attn       // English text: [B*S, D]
-    []float normed2      // Pre-FFN RMSNorm output
-    []float ffn_gate_pre // SwiGLU gate English text: [B*S, ffn_dim]
-    []float ffn_val_pre  // SwiGLU value English text: [B*S, ffn_dim]
-    []float ffn_out      // FFN output: [B*S, D]
-    []gpt_sdpa_cache sdpa_per_batch  // English text SDPA cache
+    []float x_in
+    []float normed1
+    []float q_proj
+    []float k_proj
+    []float v_proj
+    []float q_rope
+    []float k_rope
+    []float attn_out
+    []float attn_proj
+    []float h_attn
+    []float normed2
+    []float ffn_gate_pre
+    []float ffn_val_pre
+    []float ffn_out
+    []gpt_sdpa_cache sdpa_per_batch
     int batch_size
     int seq_len
 }
 
 struct gpt_forward_cache {
-    []float embedding      // Token + Pos embedding output
+    []float embedding
     []transformer_layer_cache layers
-    []float final_normed   // English text RMSNorm output
-    []float logits         // LM Head output
+    []float final_normed
+    []float logits
     int batch_size
     int seq_len
     int n_layer
 }
 
-// ============================================================================
-// 2. gradientEnglish text
-// ============================================================================
+
+
+
 
 struct transformer_layer_grads {
-    []float d_norm1_gamma    // RMSNorm1 English textparametergradient
-    []float d_norm2_gamma    // RMSNorm2 English textparametergradient
-    []float d_wq             // Query weightgradient
-    []float d_wk             // Key weightgradient
-    []float d_wv             // Value weightgradient
-    []float d_wo             // Output weightgradient
-    []float d_wq_bias        // Q English textgradient (English text)
-    []float d_wk_bias        // K English textgradient
-    []float d_wv_bias        // V English textgradient
-    []float d_wo_bias        // O English textgradient
-    []float d_ffn_gate_w     // FFN Gate weightgradient
-    []float d_ffn_val_w      // FFN Value weightgradient
-    []float d_ffn_down_w     // FFN Down weightgradient
+    []float d_norm1_gamma
+    []float d_norm2_gamma
+    []float d_wq
+    []float d_wk
+    []float d_wv
+    []float d_wo
+    []float d_wq_bias
+    []float d_wk_bias
+    []float d_wv_bias
+    []float d_wo_bias
+    []float d_ffn_gate_w
+    []float d_ffn_val_w
+    []float d_ffn_down_w
 }
 
 struct gpt_param_grads {
-    []float d_wte            // Token embedding gradient [vocab, D]
-    []float d_wpe            // Pos embedding gradient [block, D]
-    []float d_final_gamma    // English text RMSNorm gamma gradient
-    []float d_lm_head        // LM Head gradient (English text not tie)
-    []transformer_layer_grads layers // English textgradient
+    []float d_wte
+    []float d_wpe
+    []float d_final_gamma
+    []float d_lm_head
+    []transformer_layer_grads layers
     int n_layer
 }
 
-// AdamW optimizeEnglish textstate
+
 struct gpt_adamw_state {
     []float m_wte
     []float v_wte
@@ -131,9 +131,9 @@ struct transformer_layer_adamw {
     []float m_ffn_down_w   []float v_ffn_down_w
 }
 
-// ============================================================================
-// 3. English texthelperfunction
-// ============================================================================
+
+
+
 
 func bk_alloc(int n) []float {
     []float v = []float{cap: n}
@@ -162,8 +162,8 @@ func bk_scale([]float v, float s) []float {
     out
 }
 
-// C = A @ B, dA = dC @ B^T
-// A:[m,k]  B:[k,n]  dC:[m,n]  → dA:[m,k]
+
+
 func bk_matmul_da([]float d_c, []float b, int m, int k, int n) []float {
     []float d_a = bk_alloc(m * k)
     int i = 0
@@ -184,8 +184,8 @@ func bk_matmul_da([]float d_c, []float b, int m, int k, int n) []float {
     d_a
 }
 
-// dB = A^T @ dC
-// A:[m,k]  B:[k,n]  dC:[m,n]  → dB:[k,n]
+
+
 func bk_matmul_db([]float a, []float d_c, int m, int k, int n) []float {
     []float d_b = bk_alloc(k * n)
     int l = 0
@@ -206,8 +206,8 @@ func bk_matmul_db([]float a, []float d_c, int m, int k, int n) []float {
     d_b
 }
 
-// Transposed matmul: C = A @ B^T → dA = dC @ B,  dB = dC^T @ A
-// A:[m,k]  B:[n,k]  dC:[m,n]  → dA:[m,k]
+
+
 func bk_matmul_t_da([]float d_c, []float b, int m, int k, int n) []float {
     []float d_a = bk_alloc(m * k)
     int i = 0
@@ -228,7 +228,7 @@ func bk_matmul_t_da([]float d_c, []float b, int m, int k, int n) []float {
     d_a
 }
 
-// dB = dC^T @ A, B:[n,k]
+
 func bk_matmul_t_db([]float a, []float d_c, int m, int k, int n) []float {
     []float d_b = bk_alloc(n * k)
     int j = 0
@@ -249,8 +249,8 @@ func bk_matmul_t_db([]float a, []float d_c, int m, int k, int n) []float {
     d_b
 }
 
-// GQA strided: C = A @ B_strided (B stored [k, full_n], use first n cols)
-// dA = dC @ B_strided^T(first n rows/cols)
+
+
 func bk_matmul_kv_da([]float d_c, []float b, int m, int k, int n, int full_n) []float {
     []float d_a = bk_alloc(m * k)
     int i = 0
@@ -291,8 +291,8 @@ func bk_matmul_kv_db([]float a, []float d_c, int m, int k, int n, int full_n) []
     d_b
 }
 
-// Softmax backward (Jacobian-vector product):
-// d_scores[i] = weights[i] * (d_weights[i] - dot(d_weights, weights))
+
+
 func bk_softmax_row([]float d_weights, []float weights, int size) []float {
     float dot = 0.0
     int i = 0
@@ -306,22 +306,22 @@ func bk_softmax_row([]float d_weights, []float weights, int size) []float {
     d_scores
 }
 
-// Swish derivative: d/dz [z * sigma(z)] = sigma(z) + z * sigma(z) * (1 - sigma(z))
+
 func bk_swish_grad(float z) float {
     float s = gpt_sigmoid(z)
     s + z * s * (1.0 - s)
 }
 
-// ============================================================================
-// 4. English textcacheEnglish text
-// ============================================================================
+
+
+
 
 func transformer_layer_forward_cached(
     transformer_layer layer,
     []float x,
     int batch_size,
     int seq_len,
-    []float rope_freqs   // rope.frequencies
+    []float rope_freqs
 ) ([]float, transformer_layer_cache) {
     int total = batch_size * seq_len
     int D = layer.hidden_dim
@@ -329,17 +329,17 @@ func transformer_layer_forward_cached(
     int nkv = layer.n_kv_head
     int hd = layer.head_dim
     int kv_D = nkv * hd
-    int ffn_D = len(layer.ffn.glu_ffn.gate_weight) / D  // infer ffn_dim
+    int ffn_D = len(layer.ffn.glu_ffn.gate_weight) / D
 
-    // Pre-Attn RMSNorm
+
     []float normed1 = rms_normalize(layer.norm1, x, batch_size, seq_len)
 
-    // QKV projections
+
     []float q_proj = gpt_matmul(normed1, layer.attn.query_weight, total, D, D)
     []float k_proj = gpt_matmul_kv(normed1, layer.attn.key_weight,   total, D, kv_D, D)
     []float v_proj = gpt_matmul_kv(normed1, layer.attn.value_weight, total, D, kv_D, D)
 
-    // QKV bias
+
     if layer.attn.config.use_qkv_bias {
         int i = 0
         while i < total {
@@ -355,7 +355,7 @@ func transformer_layer_forward_cached(
         }
     }
 
-    // RoPE
+
     []float q_rope = gpt_copy(q_proj)
     []float k_rope = gpt_copy(k_proj)
     int pair_dim = hd / 2
@@ -401,7 +401,7 @@ func transformer_layer_forward_cached(
         b = b + 1
     }
 
-    // SDPA + save per-batch attention weights
+
     []gpt_sdpa_cache sdpa_caches = []gpt_sdpa_cache{cap: batch_size}
     []float attn_out = bk_alloc(total * D)
     b = 0
@@ -416,7 +416,7 @@ func transformer_layer_forward_cached(
         i = 0
         while i < seq_len * kv_D { kb[i] = k_rope[off_k + i]; vb[i] = v_proj[off_k + i]; i = i+1 }
 
-        // Forward SDPA & capture weights
+
         []float sdpa_out = gpt_causal_sdpa(qb, kb, vb, seq_len, nh, nkv, hd)
         []float weights = bk_compute_attn_weights(qb, kb, seq_len, nh, nkv, hd)
 
@@ -429,7 +429,7 @@ func transformer_layer_forward_cached(
         b = b + 1
     }
 
-    // Output projection
+
     []float attn_proj = gpt_matmul(attn_out, layer.attn.output_weight, total, D, D)
     if layer.attn.config.use_qkv_bias {
         int i = 0
@@ -440,13 +440,13 @@ func transformer_layer_forward_cached(
         }
     }
 
-    // First residual
+
     []float h_attn = gpt_add(x, attn_proj)
 
-    // Pre-FFN RMSNorm
+
     []float normed2 = rms_normalize(layer.norm2, h_attn, batch_size, seq_len)
 
-    // FFN (SwiGLU): save gate_pre and val_pre for backward
+
     []float ffn_gate_pre = gpt_matmul(normed2, layer.ffn.glu_ffn.gate_weight, total, D, ffn_D)
     []float ffn_val_pre  = gpt_matmul(normed2, layer.ffn.glu_ffn.value_weight, total, D, ffn_D)
     int idx = 0
@@ -455,7 +455,7 @@ func transformer_layer_forward_cached(
         ffn_val_pre[idx]  = ffn_val_pre[idx]  + layer.ffn.glu_ffn.value_bias[idx % ffn_D]
         idx = idx + 1
     }
-    // swish(gate) * value
+
     []float gv_out = bk_alloc(total * ffn_D)
     idx = 0
     while idx < total * ffn_D {
@@ -469,7 +469,7 @@ func transformer_layer_forward_cached(
         idx = idx + 1
     }
 
-    // Second residual
+
     []float y = gpt_add(h_attn, ffn_out_full)
 
     transformer_layer_cache cache = transformer_layer_cache {
@@ -485,8 +485,8 @@ func transformer_layer_forward_cached(
     (y, cache)
 }
 
-// computeEnglish textweightEnglish text (English text backward)
-// English text [n_head, seq, seq] (head-first)
+
+
 func bk_compute_attn_weights(
     []float q, []float k,
     int seq_len, int nh, int nkv, int hd
@@ -526,7 +526,7 @@ func bk_compute_attn_weights(
     weights
 }
 
-// English textcacheEnglish textcompleteEnglish text
+
 func gpt_forward_cached(
     language_model model,
     []int token_ids,
@@ -573,11 +573,11 @@ func gpt_forward_cached(
     (fc, logits)
 }
 
-// ============================================================================
-// 5. English textlossEnglish text → d_logits
-// ============================================================================
 
-// English text d_logits [total_tokens, vocab_size]
+
+
+
+
 func gpt_ce_backward(
     []float logits,
     []int targets,
@@ -587,7 +587,7 @@ func gpt_ce_backward(
     []float d_logits = bk_alloc(total_tokens * vocab_size)
     int count = 0
 
-    // English text tokens
+
     int i = 0
     while i < total_tokens {
         if targets[i] >= 0 { count = count + 1 }
@@ -604,7 +604,7 @@ func gpt_ce_backward(
 
         int base = i * vocab_size
 
-        // Numerically stable softmax
+
         float max_l = logits[base]
         int j = 1
         while j < vocab_size {
@@ -618,7 +618,7 @@ func gpt_ce_backward(
             j = j + 1
         }
 
-        // d_logits[i,j] = (softmax[j] - 1[j==tgt]) * inv_count
+
         j = 0
         while j < vocab_size {
             float p = gpt_exp(logits[base+j] - max_l) / sum_exp
@@ -632,16 +632,16 @@ func gpt_ce_backward(
     d_logits
 }
 
-// ============================================================================
-// 6. RMSNorm English text
-// ============================================================================
 
-// y = (x / rms(x)) * gamma
-// English text (d_input, d_gamma)
+
+
+
+
+
 func bk_rmsn(
     rms_norm rn,
-    []float d_out,       // [B*S, D]
-    []float input,       // [B*S, D]
+    []float d_out,
+    []float input,
     int batch_size,
     int seq_len
 ) ([]float, []float) {
@@ -656,15 +656,15 @@ func bk_rmsn(
         while s < seq_len {
             int base = (b * seq_len + s) * D
 
-            // Compute rms
+
             float sq_sum = 0.0
             int d = 0
             while d < D { sq_sum = sq_sum + input[base+d] * input[base+d]; d = d+1 }
             float rms = gpt_sqrt(sq_sum / (D * 1.0) + eps)
             float inv_rms = 1.0 / rms
 
-            // x_norm[d] = input[d] / rms
-            // d_gamma[d] += d_out[d] * x_norm[d]
+
+
             d = 0
             while d < D {
                 float xn = input[base+d] * inv_rms
@@ -672,7 +672,7 @@ func bk_rmsn(
                 d = d + 1
             }
 
-            // d_input[i] = gamma[i] / rms * (d_out[i] - x_norm[i] * sum(d_out * gamma * x_norm) / D)
+
             float sum_term = 0.0
             d = 0
             while d < D {
@@ -696,9 +696,9 @@ func bk_rmsn(
     (d_input, d_gamma)
 }
 
-// ============================================================================
-// 7. SDPA English text (per-batch, position-first layout)
-// ============================================================================
+
+
+
 
 struct sdpa_bk_result {
     []float d_q
@@ -706,8 +706,8 @@ struct sdpa_bk_result {
     []float d_v
 }
 
-// d_out: [seq, n_head * head_dim]
-// English text (d_q [seq,D], d_k [seq,kv_D], d_v [seq,kv_D])
+
+
 func bk_causal_sdpa(
     []float d_out,
     gpt_sdpa_cache cache
@@ -728,15 +728,15 @@ func bk_causal_sdpa(
     while h < nh {
         int hk = h - (h / nkv) * nkv
 
-        // Per-query-position i
+
         int i = 0
         while i < S {
-            // Retrieve attention weights for row i of head h
+
             []float w_row = bk_alloc(S)
             int j = 0
             while j < S { w_row[j] = cache.weights[h*S*S + i*S + j]; j = j+1 }
 
-            // d_V: d_v[j, hk] += w[i,j] * d_out[i, h]
+
             int d = 0
             while d < hd {
                 j = 0
@@ -748,7 +748,7 @@ func bk_causal_sdpa(
                 d = d + 1
             }
 
-            // d_weights [i,j] = sum_d(d_out[i,h,d] * V[j,hk,d])
+
             []float d_w_row = bk_alloc(S)
             d = 0
             while d < hd {
@@ -759,13 +759,13 @@ func bk_causal_sdpa(
                 }
                 d = d + 1
             }
-            // Future positions get zero gradient (causal mask)
 
-            // Softmax backward
+
+
             []float d_scores = bk_softmax_row(d_w_row, w_row, S)
 
-            // d_Q[i,h] += d_scores[j] * K[j,hk] * scale
-            // d_K[j,hk] += d_scores[j] * Q[i,h] * scale
+
+
             d = 0
             while d < hd {
                 float dq = 0.0
@@ -787,9 +787,9 @@ func bk_causal_sdpa(
     sdpa_bk_result { d_q: d_q, d_k: d_k, d_v: d_v }
 }
 
-// ============================================================================
-// 8. RoPE English text (English text = English text)
-// ============================================================================
+
+
+
 
 func bk_rope_q([]float d_q_rope, int batch_size, int seq_len, int nh, int hd, int D, []float freqs) []float {
     []float d_q = gpt_copy(d_q_rope)
@@ -807,7 +807,7 @@ func bk_rope_q([]float d_q_rope, int batch_size, int seq_len, int nh, int hd, in
                     float cv = gpt_cos(angle)
                     float sv = gpt_sin(angle)
                     int base = tok * D + h * hd
-                    // Inverse rotation: multiply by R^T (cos, sin; -sin, cos)
+
                     float g0 = d_q_rope[base + 2*p]
                     float g1 = d_q_rope[base + 2*p+1]
                     d_q[base + 2*p]   =  g0 * cv + g1 * sv
@@ -854,15 +854,15 @@ func bk_rope_k([]float d_k_rope, int batch_size, int seq_len, int nkv, int hd, i
     d_k
 }
 
-// ============================================================================
-// 9. English text Transformer English text
-// ============================================================================
 
-// English text (d_input, transformer_layer_grads)
+
+
+
+
 func transformer_layer_backward(
     transformer_layer layer,
     transformer_layer_cache cache,
-    []float d_out,        // [B*S, D]
+    []float d_out,
     []float rope_freqs
 ) ([]float, transformer_layer_grads) {
     int total = cache.batch_size * cache.seq_len
@@ -873,17 +873,17 @@ func transformer_layer_backward(
     int kv_D = nkv * hd
     int ffn_D = len(layer.ffn.glu_ffn.gate_weight) / D
 
-    // ── English text: d_h_attn += d_out,  d_ffn_out = d_out ──────────────────
+
     []float d_ffn_out = bk_copy(d_out)
     []float d_h_attn  = bk_copy(d_out)
 
-    // ── FFN English text (SwiGLU) ─────────────────────────────────────────────────
-    // ffn_out = W_down @ (swish(gate_pre) * val_pre)
-    // d_gv = d_ffn_out @ W_down^T
+
+
+
     []float d_gv = bk_matmul_da(d_ffn_out, layer.ffn.glu_ffn.down_weight, total, ffn_D, D)
     []float d_ffn_down_w = bk_matmul_db(cache.ffn_gate_pre, d_ffn_out, total, ffn_D, D)
-    // ↑ English text gv_out (= swish_gate * val_pre), English text cache English text
-    // English text gv_out
+
+
     []float gv_out = bk_alloc(total * ffn_D)
     int idx = 0
     while idx < total * ffn_D {
@@ -892,7 +892,7 @@ func transformer_layer_backward(
     }
     d_ffn_down_w = bk_matmul_db(gv_out, d_ffn_out, total, ffn_D, D)
 
-    // d_swish_gate = d_gv * val_pre,  d_val_pre = d_gv * swish(gate)
+
     []float d_swish_gate = bk_alloc(total * ffn_D)
     []float d_val_pre    = bk_alloc(total * ffn_D)
     idx = 0
@@ -901,7 +901,7 @@ func transformer_layer_backward(
         d_val_pre[idx]    = d_gv[idx] * gpt_swish(cache.ffn_gate_pre[idx])
         idx = idx + 1
     }
-    // d_gate_pre = d_swish_gate * swish'(gate_pre)
+
     []float d_gate_pre = bk_alloc(total * ffn_D)
     idx = 0
     while idx < total * ffn_D {
@@ -909,30 +909,30 @@ func transformer_layer_backward(
         idx = idx + 1
     }
 
-    // d_normed2 = W_gate^T @ d_gate_pre + W_value^T @ d_val_pre
+
     []float d_normed2_from_gate  = bk_matmul_da(d_gate_pre, layer.ffn.glu_ffn.gate_weight,  total, D, ffn_D)
     []float d_normed2_from_value = bk_matmul_da(d_val_pre,  layer.ffn.glu_ffn.value_weight, total, D, ffn_D)
     []float d_normed2 = gpt_add(d_normed2_from_gate, d_normed2_from_value)
 
-    // weightgradient
+
     []float d_ffn_gate_w  = bk_matmul_db(cache.normed2, d_gate_pre, total, D, ffn_D)
     []float d_ffn_val_w   = bk_matmul_db(cache.normed2, d_val_pre,  total, D, ffn_D)
 
-    // ── Pre-FFN RMSNorm English text ──────────────────────────────────────────────
+
     []float d_h_attn2
     []float d_norm2_gamma
     (d_h_attn2, d_norm2_gamma) = bk_rmsn(layer.norm2, d_normed2, cache.h_attn, cache.batch_size, cache.seq_len)
     d_h_attn = bk_add_inplace(d_h_attn, d_h_attn2)
 
-    // ── English text: d_x_in += d_h_attn,  d_attn_proj = d_h_attn ────────────
+
     []float d_attn_proj = bk_copy(d_h_attn)
     []float d_x_residual = bk_copy(d_h_attn)
 
-    // ── outputEnglish text ──────────────────────────────────────────────────────
+
     []float d_attn_out = bk_matmul_da(d_attn_proj, layer.attn.output_weight, total, D, D)
     []float d_wo       = bk_matmul_db(cache.attn_out, d_attn_proj, total, D, D)
 
-    // ── SDPA English text (English text) ──────────────────────────────────────────────
+
     []float d_q_rope_all = bk_alloc(total * D)
     []float d_k_rope_all = bk_alloc(total * kv_D)
     []float d_v_all      = bk_alloc(total * kv_D)
@@ -958,26 +958,26 @@ func transformer_layer_backward(
         b = b + 1
     }
 
-    // ── RoPE English text ─────────────────────────────────────────────────────────
+
     []float d_q_proj = bk_rope_q(d_q_rope_all, cache.batch_size, cache.seq_len, nh, hd, D,    rope_freqs)
     []float d_k_proj = bk_rope_k(d_k_rope_all, cache.batch_size, cache.seq_len, nkv, hd, kv_D, rope_freqs)
 
-    // ── QKV English textweightgradient ──────────────────────────────────────────────────
+
     []float d_wq = bk_matmul_db(cache.normed1, d_q_proj, total, D, D)
     []float d_wk = bk_matmul_kv_db(cache.normed1, d_k_proj, total, D, kv_D, D)
     []float d_wv = bk_matmul_kv_db(cache.normed1, d_v_all,  total, D, kv_D, D)
 
-    // d_normed1 = W_q^T @ d_q + W_k^T @ d_k + W_v^T @ d_v
+
     []float d_normed1 = bk_matmul_da(d_q_proj, layer.attn.query_weight, total, D, D)
     d_normed1 = bk_add_inplace(d_normed1, bk_matmul_kv_da(d_k_proj, layer.attn.key_weight,   total, D, kv_D, D))
     d_normed1 = bk_add_inplace(d_normed1, bk_matmul_kv_da(d_v_all,  layer.attn.value_weight, total, D, kv_D, D))
 
-    // ── Pre-Attn RMSNorm English text ─────────────────────────────────────────────
+
     []float d_x_from_norm
     []float d_norm1_gamma
     (d_x_from_norm, d_norm1_gamma) = bk_rmsn(layer.norm1, d_normed1, cache.x_in, cache.batch_size, cache.seq_len)
 
-    // ── English textinputgradient ──────────────────────────────────────────────────────
+
     []float d_input = bk_add_inplace(d_x_residual, d_x_from_norm)
 
     transformer_layer_grads grads = transformer_layer_grads {
@@ -993,9 +993,9 @@ func transformer_layer_backward(
     (d_input, grads)
 }
 
-// ============================================================================
-// 10. completemodelEnglish text
-// ============================================================================
+
+
+
 
 func model_backward
     language_model model,
@@ -1006,15 +1006,15 @@ func model_backward
     int D = model.n_embd
     int V = model.vocab_size
 
-    // 1. CE loss → d_logits
+
     []float d_logits = gpt_ce_backward(fc.logits, targets, total, V)
 
-    // 2. LM Head English text
+
     []float d_final_normed
     []float d_lm_head
     []float d_final_gamma
     if model.config.tie_embeddings {
-        // logits = normed @ wte^T  →  d_normed = d_logits @ wte,  d_wte = d_logits^T @ normed
+
         d_final_normed = bk_matmul_t_da(d_logits, model.lm_head, total, D, V)
         d_lm_head      = bk_matmul_t_db(fc.final_normed, d_logits, total, D, V)
     } else {
@@ -1022,14 +1022,14 @@ func model_backward
         d_lm_head      = bk_matmul_db(fc.final_normed, d_logits, total, D, V)
     }
 
-    // 3. English text RMSNorm English text
-    // English text hidden (layer_cachesEnglish textoutput = final_norm English textinput)
+
+
     transformer_layer_cache last_cache = fc.layers[model.n_layer - 1]
     []float hidden_before_norm = gpt_add(last_cache.h_attn, last_cache.ffn_out)
     []float d_hidden
     (d_hidden, d_final_gamma) = bk_rmsn(model.final_norm, d_final_normed, hidden_before_norm, fc.batch_size, fc.seq_len)
 
-    // 4. English text (English text)
+
     []transformer_layer_grads layer_grads = []transformer_layer_grads{cap: model.n_layer}
     int l = model.n_layer - 1
     while l >= 0 {
@@ -1043,9 +1043,9 @@ func model_backward
         l = l - 1
     }
 
-    // 5. Token embedding English text
-    // embedding = wte[token_ids] + wpe[positions]
-    // d_wte: scatter d_hidden to token positions
+
+
+
     []float d_wte = bk_alloc(V * D)
     []float d_wpe = bk_alloc(model.block_size * D)
     int b2 = 0
@@ -1053,8 +1053,8 @@ func model_backward
         int s = 0
         while s < fc.seq_len {
             int tok_idx = b2 * fc.seq_len + s
-            // token id lookup (we need to pass token_ids through cache – use embedding to identify)
-            // d_wpe[s] += d_hidden[tok_idx]
+
+
             int d = 0
             while d < D {
                 d_wpe[s * D + d] = d_wpe[s * D + d] + d_hidden[tok_idx * D + d]
@@ -1075,9 +1075,9 @@ func model_backward
     }
 }
 
-// ============================================================================
-// 11. AdamW parameterEnglish text
-// ============================================================================
+
+
+
 
 func new_gpt_adamw_state(language_model model, float lr, float beta1, float beta2, float eps, float wd) gpt_adamw_state {
     int D = model.n_embd
@@ -1116,7 +1116,7 @@ func new_gpt_adamw_state(language_model model, float lr, float beta1, float beta
     }
 }
 
-// AdamW English textparameterEnglish text: θ ← θ - lr * m̂ / (√v̂ + ε) - lr*λ*θ
+
 func adamw_update_vec([]float param, []float grad, []float m, []float v, int step, float lr, float b1, float b2, float eps, float wd) []float {
     float bc1 = 1.0 - bk_pow(b1, step)
     float bc2 = 1.0 - bk_pow(b2, step)
@@ -1142,7 +1142,7 @@ func bk_pow(float base, int exp) float {
     r
 }
 
-// completemodel AdamW English textstepEnglish text
+
 func gpt_adamw_step(
     language_model model,
     gpt_param_grads grads,
@@ -1153,33 +1153,33 @@ func gpt_adamw_step(
     int s = o.step
     float lr = o.lr; float b1 = o.beta1; float b2 = o.beta2; float eps = o.eps; float wd = o.weight_decay
 
-    // English text embedding
+
     model.wte = adamw_update_vec(model.wte, grads.d_wte, o.m_wte, o.v_wte, s, lr, b1, b2, eps, wd)
     model.wpe = adamw_update_vec(model.wpe, grads.d_wpe, o.m_wpe, o.v_wpe, s, lr, b1, b2, eps, wd)
     model.lm_head = adamw_update_vec(model.lm_head, grads.d_lm_head, o.m_lm_head, o.v_lm_head, s, lr, b1, b2, eps, wd)
 
-    // English text final norm gamma (English textweightEnglish text)
+
     model.final_norm.gamma = adamw_update_vec(model.final_norm.gamma, grads.d_final_gamma, o.m_final_gamma, o.v_final_gamma, s, lr, b1, b2, eps, 0.0)
 
-    // English textparameter
+
     int l = 0
     while l < model.n_layer {
         transformer_layer layer = transformer_layer_at(model.layers, l)
         transformer_layer_grads lg = grads.layers[l]
         transformer_layer_adamw lo = o.layers[l]
 
-        // Attention weights
+
         layer.attn.query_weight  = adamw_update_vec(layer.attn.query_weight,  lg.d_wq, lo.m_wq, lo.v_wq, s, lr, b1, b2, eps, wd)
         layer.attn.key_weight    = adamw_update_vec(layer.attn.key_weight,    lg.d_wk, lo.m_wk, lo.v_wk, s, lr, b1, b2, eps, wd)
         layer.attn.value_weight  = adamw_update_vec(layer.attn.value_weight,  lg.d_wv, lo.m_wv, lo.v_wv, s, lr, b1, b2, eps, wd)
         layer.attn.output_weight = adamw_update_vec(layer.attn.output_weight, lg.d_wo, lo.m_wo, lo.v_wo, s, lr, b1, b2, eps, wd)
 
-        // FFN weights
+
         layer.ffn.glu_ffn.gate_weight  = adamw_update_vec(layer.ffn.glu_ffn.gate_weight,  lg.d_ffn_gate_w, lo.m_ffn_gate_w, lo.v_ffn_gate_w, s, lr, b1, b2, eps, wd)
         layer.ffn.glu_ffn.value_weight = adamw_update_vec(layer.ffn.glu_ffn.value_weight, lg.d_ffn_val_w,  lo.m_ffn_val_w,  lo.v_ffn_val_w,  s, lr, b1, b2, eps, wd)
         layer.ffn.glu_ffn.down_weight  = adamw_update_vec(layer.ffn.glu_ffn.down_weight,  lg.d_ffn_down_w, lo.m_ffn_down_w, lo.v_ffn_down_w, s, lr, b1, b2, eps, wd)
 
-        // Norm gamma (English textweightEnglish text)
+
         layer.norm1.gamma = adamw_update_vec(layer.norm1.gamma, lg.d_norm1_gamma, lo.m_norm1_gamma, lo.v_norm1_gamma, s, lr, b1, b2, eps, 0.0)
         layer.norm2.gamma = adamw_update_vec(layer.norm2.gamma, lg.d_norm2_gamma, lo.m_norm2_gamma, lo.v_norm2_gamma, s, lr, b1, b2, eps, 0.0)
 
@@ -1190,9 +1190,9 @@ func gpt_adamw_step(
     (model, o)
 }
 
-// ============================================================================
-// 12. completetrainingstepEnglish text (English text + English text + English text)
-// ============================================================================
+
+
+
 
 struct gpt_train_step_result {
     language_model model
@@ -1211,7 +1211,7 @@ func train_step
 ) gpt_train_step_result {
     int total = batch_size * seq_len
 
-    // English text next-token targets
+
     []int targets = gpt_alloc_int(total)
     int i = 0
     while i < total {
@@ -1224,18 +1224,18 @@ func train_step
         i = i + 1
     }
 
-    // English text (English textcache)
+
     gpt_forward_cache fc
     []float logits
     (fc, logits) = gpt_forward_cached(model, token_ids, batch_size, seq_len)
 
-    // losscompute
+
     float loss = gpt_compute_ce_loss(logits, targets, total, model.vocab_size)
 
-    // English text
+
     gpt_param_grads grads = gpt_backward(model, fc, targets)
 
-    // gradientEnglish text (English text L2 English text)
+
     float total_norm = 0.0
     total_norm = total_norm + bk_vec_norm_sq(grads.d_final_gamma)
     i = 0
@@ -1257,7 +1257,7 @@ func train_step
         grads = scale_all_grads(grads, clip_coeff)
     }
 
-    // AdamW parameterEnglish text
+
     language_model updated_model
     gpt_adamw_state updated_opt
     (updated_model, updated_opt) = gpt_adamw_step(model, grads, opt)
@@ -1270,9 +1270,9 @@ func train_step
     }
 }
 
-// ============================================================================
-// 13. helper
-// ============================================================================
+
+
+
 
 func gpt_compute_ce_loss([]float logits, []int targets, int total, int vocab) float {
     float loss = 0.0

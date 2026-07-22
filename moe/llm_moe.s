@@ -1,18 +1,18 @@
 package neurx.moe.llm
 
-// ============================================================================
-// Sparse GPT-MoE — interleaves dense + MoE transformer layers
-//
-// Architecture: N transformer blocks where every moe_frequency-th block
-// replaces the dense FFN with a Mixture-of-Experts FFN.
-// The attention mechanism, RMSNorm, RoPE, and residuals are identical to
-// dense GPT; only the FFN sub-layer differs for MoE blocks.
-//
-// Examples:
-//   • Mixtral-8x7B: every block is MoE (moe_frequency=1), 8 experts, top-2
-//   • reference-style:  every 2nd block is MoE (moe_frequency=2)
-//   • NeurX-MoE: every block MoE, 64 fine-grained experts, top-6
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use neurx.model.llm.gpt.{
     model_config, language_model, transformer_layer, model_output,
@@ -29,18 +29,18 @@ use neurx.moe.transformer.{
 }
 use neurx.model.transformer.norm.{rms_norm, rms_normalize, layer_norm_config, new_rms_norm}
 
-// ============================================================================
-// 1. 구성 구조체
-// ============================================================================
+
+
+
 
 struct gpt_moe_config {
-    model_config base             // English text modelconfiguration (English text n_layer, n_embd, ...)
-    moe_config moe              // MoE configuration (expert_dim, num_experts, top_k, ...)
-    int moe_frequency           // English textuseEnglish text MoE English text (1 = English text MoE, 2 = English text)
-    float moe_aux_loss_weight   // aux loss English textlossEnglish textweight
+    model_config base
+    moe_config moe
+    int moe_frequency
+    float moe_aux_loss_weight
 }
 
-// English text: Mixtral-8x7B English text (English text MoE, 8 English text, top-2)
+
 func gpt_moe_mixtral(model_config base) gpt_moe_config {
     gpt_moe_config {
         base: base,
@@ -50,7 +50,7 @@ func gpt_moe_mixtral(model_config base) gpt_moe_config {
     }
 }
 
-// English text: reference-4 English text (English text, 16 English text, top-2)
+
 func gpt_moe_gpt4_style(model_config base) gpt_moe_config {
     gpt_moe_config {
         base: base,
@@ -60,7 +60,7 @@ func gpt_moe_gpt4_style(model_config base) gpt_moe_config {
     }
 }
 
-// English text: NeurX-V3 English text (English text MoE, 64 English text, top-6)
+
 func gpt_moe_neurx_v3(model_config base) gpt_moe_config {
     gpt_moe_config {
         base: base,
@@ -70,50 +70,50 @@ func gpt_moe_neurx_v3(model_config base) gpt_moe_config {
     }
 }
 
-// ============================================================================
-// 2. GPT-MoE English text (English text; FFN English text MoE)
-// ============================================================================
+
+
+
 
 struct gpt_moe_block {
-    transformer_layer dense_block       // English text, norm1, norm2 English text GPT English text
-    moe_layer moe_ffn           // MoE FFN
-    bool is_moe                 // English text MoE (false = use dense_block.ffn)
+    transformer_layer dense_block
+    moe_layer moe_ffn
+    bool is_moe
     int layer_idx
 }
 
-// ============================================================================
-// 3. completemodel
-// ============================================================================
+
+
+
 
 struct gpt_moe_model {
     gpt_moe_config config
-    []float wte                 // [vocab, n_embd]
-    []float wpe                 // [block, n_embd]
+    []float wte
+    []float wpe
     []gpt_moe_block blocks
     rms_norm final_norm
     []float lm_head
-    []float rope_freqs          // English text language_model.rope.frequencies English text
+    []float rope_freqs
     int n_layer
     int vocab_size
     int n_embd
     int block_size
-    int num_moe_layers          // statistics MoE English textcount
+    int num_moe_layers
 }
 
 struct gpt_moe_output {
     []float logits
     []float last_hidden
-    float lm_loss               // languagemodelEnglish textloss
-    float aux_loss              // MoE English texthelperloss (English text)
-    float total_loss            // lm_loss + aux_loss
+    float lm_loss
+    float aux_loss
+    float total_loss
 }
 
-// ============================================================================
-// 4. initialize
-// ============================================================================
+
+
+
 
 func new_gpt_moe_model(gpt_moe_config cfg) gpt_moe_model {
-    // English text GPT modelEnglish textinitializeweight
+
     language_model base = new_language_model(cfg.base)
 
     int nl = cfg.base.n_layer
@@ -177,19 +177,19 @@ func gpt_moe_block_at([]gpt_moe_block blocks, int idx) gpt_moe_block {
     val
 }
 
-// Return type for block forward to avoid tuple return syntax issues
+
 struct gpt_moe_block_forward_ret {
     []float output
     float aux_loss
 }
 
-// ============================================================================
-// 5. English text
-// ============================================================================
+
+
+
 
 func gpt_moe_block_forward(
     gpt_moe_block block,
-    []float x,              // [B*S, H]
+    []float x,
     int batch_size,
     int seq_len,
     []float rope_freqs
@@ -201,15 +201,15 @@ func gpt_moe_block_forward(
     int hd = block.dense_block.head_dim
     int kv_D = nkv * hd
 
-    // ── Pre-Attn RMSNorm ──
+
     []float normed1 = rms_normalize(block.dense_block.norm1, x, batch_size, seq_len)
 
-    // ── QKV English text ──
+
     []float q = gpt_matmul(normed1, block.dense_block.attn.query_weight, total, H, H)
     []float k = gpt_matmul_kv(normed1, block.dense_block.attn.key_weight,   total, H, kv_D, H)
     []float v = gpt_matmul_kv(normed1, block.dense_block.attn.value_weight, total, H, kv_D, H)
 
-    // ── RoPE ──
+
     int pair_dim = hd / 2
     []float qr = gpt_copy(q)
     []float kr = gpt_copy(k)
@@ -253,7 +253,7 @@ func gpt_moe_block_forward(
         b = b + 1
     }
 
-    // ── English text SDPA ──
+
     []float attn_out = gpt_alloc(total * H, 0.0)
     b = 0
     while b < batch_size {
@@ -272,14 +272,14 @@ func gpt_moe_block_forward(
         b = b + 1
     }
 
-    // outputEnglish text
+
     []float attn_proj = gpt_matmul(attn_out, block.dense_block.attn.output_weight, total, H, H)
     []float h_attn = gpt_add(x, attn_proj)
 
-    // ── Pre-FFN RMSNorm ──
+
     []float normed2 = rms_normalize(block.dense_block.norm2, h_attn, batch_size, seq_len)
 
-    // ── FFN (MoE or dense) ──
+
     []float ffn_out
     float aux_loss = 0.0
     if block.is_moe {
@@ -287,14 +287,14 @@ func gpt_moe_block_forward(
         ffn_out = mo.hidden
         aux_loss = mo.aux_loss
     } else {
-        // English text transformer_layer English text FFN (SwiGLU English text)
+
         ffn_out = gpt_dense_ffn_forward(block.dense_block, normed2, total)
     }
 
     gpt_moe_block_forward_ret { output: gpt_add(h_attn, ffn_out), aux_loss: aux_loss }
 }
 
-// English text SwiGLU English text (English text is_moe=false English text)
+
 func gpt_dense_ffn_forward(transformer_layer layer, []float normed2, int total) []float {
     int H = layer.hidden_dim
     int ffn_D = len(layer.ffn.glu_ffn.gate_weight) / H
@@ -321,9 +321,9 @@ func gpt_dense_ffn_forward(transformer_layer layer, []float normed2, int total) 
     down
 }
 
-// ============================================================================
-// 6. complete GPT-MoE English text
-// ============================================================================
+
+
+
 
 func gpt_moe_forward(
     gpt_moe_model model,
@@ -335,10 +335,10 @@ func gpt_moe_forward(
     int V = model.vocab_size
     int total = batch_size * seq_len
 
-    // English text
+
     []float hidden = embed_tokens(model.wte, model.wpe, token_ids, batch_size, seq_len, H)
 
-    // English text
+
     float total_aux = 0.0
     int l = 0
     while l < model.n_layer {
@@ -351,10 +351,10 @@ func gpt_moe_forward(
         l = l + 1
     }
 
-    // English text norm
+
     []float normed = rms_normalize(model.final_norm, hidden, batch_size, seq_len)
 
-    // LM head
+
     []float logits
     if model.config.base.tie_embeddings {
         logits = gpt_matmul_t(normed, model.lm_head, total, H, V)
@@ -362,7 +362,7 @@ func gpt_moe_forward(
         logits = gpt_matmul(normed, model.lm_head, total, H, V)
     }
 
-    // English text aux loss (English text MoE English text aux English text / MoE English text)
+
     float avg_aux = 0.0
     if model.num_moe_layers > 0 {
         avg_aux = total_aux / (model.num_moe_layers * 1.0)
@@ -377,12 +377,12 @@ func gpt_moe_forward(
     }
 }
 
-// ============================================================================
-// 7. parameterEnglish textstatistics
-// ============================================================================
+
+
+
 
 func gpt_moe_param_count(gpt_moe_config cfg) int {
-    int base = gpt_param_count(cfg.base)   // English text + English text MoE FFN English text
+    int base = gpt_param_count(cfg.base)
     int nl = cfg.base.n_layer
     int H = cfg.base.n_embd
     int moe_freq = cfg.moe_frequency
@@ -390,14 +390,14 @@ func gpt_moe_param_count(gpt_moe_config cfg) int {
 
     int moe_count = nl / moe_freq
 
-    // English text MoE English text FFN parameter = 3 * H * ffn_dim
+
     int dense_ffn = 3 * H * cfg.base.ffn_dim
 
-    // MoE English textparameter = num_experts * per_expert + router
+
     int per_expert = 3 * H * cfg.moe.expert_dim
     int moe_layer_params = per_expert * cfg.moe.num_experts + H * cfg.moe.num_experts
 
-    // English text
+
     int delta = moe_count * (moe_layer_params - dense_ffn)
 
     base + delta

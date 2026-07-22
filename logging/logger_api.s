@@ -1,10 +1,10 @@
 package neurx.logging
 
-// ============================================================================
-// Logger API - High-level functions for logging during training
-// ============================================================================
 
-// Create new logger with given configuration
+
+
+
+
 func new_logger(logger_config cfg) logger {
     logger {
         config: cfg,
@@ -14,23 +14,23 @@ func new_logger(logger_config cfg) logger {
     }
 }
 
-// ========================================================================
-# LOG SCALAR METRIC
-# Most common operation: log a single value (loss, accuracy, lr, etc.)
-# ========================================================================
+
+
+
+
 
 func log_scalar(
     logger *lg,
     string name,
     float value,
-    int step,              // Global step (-1 = auto-increment)
+    int step,
     map[string]string tags
 ) {
-    if step < 0 { 
-        step = lg.current_step + lg.config.global_step_offset 
+    if step < 0 {
+        step = lg.current_step + lg.config.global_step_offset
     }
-    
-    // Add to buffer
+
+
     metric_entry entry {
         step: step,
         name: name,
@@ -39,22 +39,22 @@ func log_scalar(
         tags: tags,
         wall_time: current_time_seconds(),
     }
-    
+
     lg.metric_buffer.push(entry)
-    
-    // Console output (if enabled and frequency matches)
+
+
     if lg.config.log_to_console && should_log(lg) {
         print_scalar_to_console(lg.config, name, value, step, tags)
     }
-    
-    // Immediate write to backends (or buffer for batch writes)
+
+
     flush_if_needed(lg)
 }
 
-// ========================================================================
-# LOG HISTOGRAM
-# For distributions like gradient norms per layer, activation values, etc.
-# ========================================================================
+
+
+
+
 
 func log_histogram(
     logger *lg,
@@ -66,7 +66,7 @@ func log_histogram(
     if step < 0 {
         step = lg.current_step + lg.config.global_step_offset
     }
-    
+
     metric_entry entry {
         step: step,
         name: name,
@@ -75,14 +75,14 @@ func log_histogram(
         tags: tags,
         wall_time: current_time_seconds(),
     }
-    
+
     lg.metric_buffer.push(entry)
 }
 
-// ========================================================================
-# LOG TEXT / SAMPLES
-# For generated text samples, error messages, etc.
-# ========================================================================
+
+
+
+
 
 func log_text(
     logger *lg,
@@ -94,7 +94,7 @@ func log_text(
     if step < 0 {
         step = lg.current_step + lg.config.global_step_offset
     }
-    
+
     metric_entry entry {
         step: step,
         name: name,
@@ -102,16 +102,16 @@ func log_text(
         tags: tags,
         wall_time: current_time_seconds(),
     }
-    
-    // Store text in metadata (as we don't have a dedicated field)
+
+
     entry.metadata["text"] = text
-    
+
     lg.metric_buffer.push(entry)
 }
 
-// ========================================================================
-# LOG MESSAGE (for console/file logging of status messages)
-# ========================================================================
+
+
+
 
 func log_message(
     logger *lg,
@@ -124,10 +124,10 @@ func log_message(
         message: message,
         metadata: {},
     }
-    
+
     lg.message_buffer.push(entry)
-    
-    // Console output
+
+
     if lg.config.log_to_console && level >= lg.config.console_level {
         print_message_to_console(lg.config, entry)
     }

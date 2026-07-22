@@ -1,24 +1,24 @@
-// targets/mobile/target.s
-// Mobile target: AI OS layer for smartphones (iOS / Android).
-//
-// Constraints:
-//   - Power budget: < 3W sustained inference
-//   - Thermal throttle awareness
-//   - On-device privacy: no mandatory cloud offload
-//   - Background execution limits enforced by OS
-//
-// Primary SoCs: Apple A-series (ANE), Qualcomm Snapdragon (HTP), MediaTek (APU)
-// OS: iOS 17+, Android 14+
-// Runtime: CoreML, NNAPI, QNN
+
+
+
+
+
+
+
+
+
+
+
+
 
 struct mobile_target_config {
-    string  os             // "ios" | "android"
-    string  soc_family     // "apple_a" | "snapdragon" | "dimensity"
-    string  runtime        // "coreml" | "nnapi" | "qnn"
+    string  os
+    string  soc_family
+    string  runtime
     int     max_power_mw
     bool    on_device_only
     bool    background_allowed
-    string  precision      // "fp16" | "int8" | "int4"
+    string  precision
 }
 
 func default_mobile_target() mobile_target_config {

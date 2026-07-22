@@ -1,39 +1,39 @@
 package neurx.alignment.constitutional_ai
 
-// ============================================================================
-// Constitutional AI (CAI) — RLAIF self-critique & revision loop
-//
-// NeurX-style alignment technique. Instead of relying solely on human
-// preference labels, the model critiques and revises its own responses against
-// a set of written principles ("a constitution"), then learns from the
-// (revised ≻ original) preference pairs (RLAIF — RL from AI Feedback).
-//
-// Pipeline:
-//   1. Generate an initial response to a (potentially harmful) prompt.
-//   2. Self-critique: ask the model to identify how the response violates a
-//      principle.
-//   3. Revise: ask the model to rewrite the response to comply.
-//   4. Emit preference pair: revised (chosen) ≻ original (rejected).
-//   5. These pairs train the reward model / DPO — no human labels required.
-//
-// This module operates on the concrete language_model via its generation API and
-// produces preference pairs consumable by posttrain.reward.reward_model.
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use neurx.model.llm.gpt.{
     model_config, language_model,
     gpt_generate_greedy, gpt_generate_topk
 }
 
-// ============================================================================
-// 1. Constitution (principles)
-// ============================================================================
+
+
+
 
 struct constitutional_principle {
     string id
-    string critique_request    // English textmodelcritiqueEnglish textprompt
-    string revision_request    // English textmodelrevisionEnglish textprompt
-    int severity               // 1-5, English textseverityweight
+    string critique_request
+    string revision_request
+    int severity
 }
 
 struct constitution {
@@ -41,7 +41,7 @@ struct constitution {
     int num_principles
 }
 
-// NeurX English textprincipleEnglish text (helpful, harmless, honest)
+
 func default_constitution() constitution {
     []constitutional_principle ps = []constitutional_principle{cap: 8}
 
@@ -97,38 +97,38 @@ func default_constitution() constitution {
     constitution { principles: ps, num_principles: 8 }
 }
 
-// ============================================================================
-// 2. preferenceEnglish textoutput
-// ============================================================================
 
-// English text CAI generateEnglish textpreferenceEnglish text
+
+
+
+
 struct cai_preference_pair {
-    []int prompt_tokens        // English textprompt
-    []int chosen_tokens        // revisionEnglish text (English text)
-    []int rejected_tokens      // English text (English text)
-    string principle_id        // English textrevisionEnglish textprinciple
+    []int prompt_tokens
+    []int chosen_tokens
+    []int rejected_tokens
+    string principle_id
     int severity
-    float critique_strength    // critiqueEnglish text (0-1)
+    float critique_strength
 }
 
 struct cai_batch {
     []cai_preference_pair pairs
     int num_pairs
-    int num_revised            // actualEnglish textrevisionEnglish textcount
+    int num_revised
 }
 
-// ============================================================================
-// 3. English text token (English texttruthfulsystemEnglish text tokenizer English text; English text ID)
-// ============================================================================
 
-// English text CAI English text"English text"English text token.English text token English text.
+
+
+
+
 func cai_token_prompt_start() int { 50001 }
 func cai_token_response_start() int { 50002 }
 func cai_token_critique_start() int { 50003 }
 func cai_token_revision_start() int { 50004 }
-func cai_token_principle_base() int { 50100 }   // + principle index
+func cai_token_principle_base() int { 50100 }
 
-// English text token English text
+
 func cai_concat([]int a, []int b) []int {
     int n = len(a) + len(b)
     []int out = []int{cap: n}
@@ -145,11 +145,11 @@ func cai_single(int tok) []int {
     out
 }
 
-// ============================================================================
-// 4. English text CAI English text: generate → critique → revision
-// ============================================================================
 
-// English textpromptEnglish textcomplete critique-revise English text
+
+
+
+
 func cai_critique_revise(
     language_model model,
     []int prompt_tokens,
@@ -158,22 +158,22 @@ func cai_critique_revise(
     int max_response_tokens,
     int seed
 ) cai_preference_pair {
-    // 1. English text: prompt → response
+
     []int gen_input = cai_concat(prompt_tokens, cai_single(cai_token_response_start()))
     []int original_response = gpt_generate_topk(model, gen_input, max_response_tokens, 50, 0.8, seed)
 
-    // 2. English textcritique: [prompt][response][critique_marker][principle] → critique
+
     []int critique_context = cai_concat(prompt_tokens, original_response)
     critique_context = cai_concat(critique_context, cai_single(cai_token_critique_start()))
     critique_context = cai_concat(critique_context, cai_single(cai_token_principle_base() + principle_index))
     []int critique = gpt_generate_topk(model, critique_context, max_response_tokens / 2, 40, 0.7, seed + 1)
 
-    // 3. revision: [prompt][response][critique][revision_marker] → revised response
+
     []int revision_context = cai_concat(critique_context, critique)
     revision_context = cai_concat(revision_context, cai_single(cai_token_revision_start()))
     []int revised_response = gpt_generate_topk(model, revision_context, max_response_tokens, 50, 0.7, seed + 2)
 
-    // 4. critiqueEnglish text: English textcritiqueEnglish text (English textcritiqueEnglish text)
+
     float critique_strength = cai_estimate_critique_strength(critique, max_response_tokens / 2)
 
     cai_preference_pair {
@@ -186,7 +186,7 @@ func cai_critique_revise(
     }
 }
 
-// critiqueEnglish text (0=English text, 1=English text)
+
 func cai_estimate_critique_strength([]int critique, int max_len) float {
     if max_len <= 0 {
         return 0.0
@@ -198,9 +198,9 @@ func cai_estimate_critique_strength([]int critique, int max_len) float {
     ratio
 }
 
-// ============================================================================
-// 5. English text CAI: English textpromptgeneratepreferencedata
-// ============================================================================
+
+
+
 
 func cai_generate_preferences(
     language_model model,
@@ -215,7 +215,7 @@ func cai_generate_preferences(
 
     int i = 0
     while i < n {
-        // English textprinciple (English textcontentEnglish textprinciple)
+
         int pidx = i - (i / consti.num_principles) * consti.num_principles
         constitutional_principle principle = consti.principles[pidx]
 
@@ -229,7 +229,7 @@ func cai_generate_preferences(
         )
         pairs[i] = pair
 
-        // English textcritiqueEnglish text, English text"English textrevision"
+
         if pair.critique_strength > 0.15 {
             num_revised = num_revised + 1
         }
@@ -244,16 +244,16 @@ func cai_generate_preferences(
     }
 }
 
-// ============================================================================
-// 6. English textrewardmodelEnglish textpreferencebatch
-//
-//   English text cai_preference_pair English text chosen/rejected English text token English text
-//   (prompt + response, padding/truncate English text seq_len), English text reward_model training.
-// ============================================================================
+
+
+
+
+
+
 
 struct cai_flat_batch {
-    []int chosen_ids           // [batch * seq_len]
-    []int rejected_ids         // [batch * seq_len]
+    []int chosen_ids
+    []int rejected_ids
     int batch_size
     int seq_len
 }
@@ -261,21 +261,21 @@ struct cai_flat_batch {
 func cai_pad_sequence([]int prompt, []int response, int seq_len, int pad_id) []int {
     []int seq = []int{cap: seq_len}
     int idx = 0
-    // prompt
+
     int i = 0
     while i < len(prompt) && idx < seq_len {
         seq[idx] = prompt[i]
         idx = idx + 1
         i = i + 1
     }
-    // response
+
     int j = 0
     while j < len(response) && idx < seq_len {
         seq[idx] = response[j]
         idx = idx + 1
         j = j + 1
     }
-    // padding
+
     while idx < seq_len {
         seq[idx] = pad_id
         idx = idx + 1
@@ -311,16 +311,16 @@ func cai_to_flat_batch(cai_batch batch, int seq_len, int pad_id) cai_flat_batch 
     }
 }
 
-// ============================================================================
-// 7. CAI statistics / English text
-// ============================================================================
+
+
+
 
 struct cai_stats {
     int total_prompts
     int revised_count
     float revision_rate
     float avg_critique_strength
-    float weighted_severity      // English text severity English textcritiqueEnglish text
+    float weighted_severity
 }
 
 func cai_compute_stats(cai_batch batch) cai_stats {

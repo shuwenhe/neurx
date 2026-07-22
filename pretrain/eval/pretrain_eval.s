@@ -47,8 +47,8 @@ func update_pretrain_eval(pretrain_eval_state state, int step, float val_loss, f
 }
 
 func pretrain_eval_perplexity_from_loss(float loss) float {
-    // Perplexity is exp(mean negative log-likelihood). Range reduction keeps
-    // the Taylor series accurate without requiring a platform math intrinsic.
+
+
     if loss >= 20.0 {
         return 485165195.4097903
     }

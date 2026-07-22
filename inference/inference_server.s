@@ -1,9 +1,9 @@
 package neurx.inference.inference_server
 
-// Production-grade inference server
-// - Request handling and scheduling
-// - Continuous batching
-// - Streaming support
+
+
+
+
 
 use neurx.inference.kv_cache_manager.{paged_kv_cache, new_paged_kv_cache}
 use neurx.inference.sampling_strategies.{sampling_config, new_sampling_config}
@@ -72,97 +72,97 @@ func new_inference_server(int num_workers) inference_server {
     }
 }
 
-// Submit inference request
+
 func submit_request(inference_server server, inference_request req) bool {
-    // Check queue size
+
     if len(server.scheduler.pending_requests) >= server.max_queue_size {
         return false
     }
-    
-    // Add to queue
-    // server.scheduler.pending_requests.push(req)
+
+
+
     true
 }
 
-// Select requests to form next batch
+
 func select_batch(batch_scheduler scheduler) []inference_request {
-    // Greedy: select highest priority requests that fit
-    // Fit as many as possible into one batch
-    
+
+
+
     []inference_request{cap: scheduler.max_batch_size}
 }
 
-// Execute inference batch
+
 func execute_batch(batch_scheduler scheduler, []inference_request batch) []inference_response {
     []inference_response responses = []inference_response{cap: len(batch)}
-    
-    // Prepare batch:
-    // - Tokenize prompts
-    // - Allocate KV cache
-    // - Prepare for execution
-    
-    // Run model forward/backward
-    
-    // Decode responses
-    
+
+
+
+
+
+
+
+
+
+
     responses
 }
 
-// Continuous batching scheduler
+
 func schedule_continuous_batching(inference_server server) int {
-    // While there are pending requests and room in batch:
-    // - Add requests to current batch
-    // - Execute batch
-    // - Stream results
-    // - Move to next batch
-    
+
+
+
+
+
+
     0
 }
 
-// Stream generation token-by-token
+
 func stream_response(inference_request req, inference_response resp) string {
-    // Yield tokens one-by-one to client
-    // Enable low-latency responses
-    
+
+
+
     resp.generated_text
 }
 
-// Dynamic batch size adjustment
+
 func adjust_batch_size(server_stats stats, int current_batch_size) int {
-    // If throughput is low, increase batch size
-    // If latency is high, decrease batch size
-    
+
+
+
     current_batch_size
 }
 
-// Request queueing and prioritization
+
 func prioritize_requests([]inference_request requests) []inference_request {
-    // Sort by:
-    // - Priority (user-provided)
-    // - Wait time (FCFS within priority)
-    // - Batch compatibility (token count)
-    
+
+
+
+
+
     requests
 }
 
-// Estimate generation time
+
 func estimate_generation_time(inference_request req) float {
-    // Based on max_tokens and model size
-    // Use historical data
-    
-    float(req.max_tokens) * 0.05  // ~50ms per token
+
+
+
+    float(req.max_tokens) * 0.05
 }
 
-// Prefill and decode scheduling
+
 func prefill_decode_overlap(batch_scheduler scheduler) bool {
-    // While prefilling one sequence batch
-    // Simultaneously decode previous batches
-    // Maximize GPU utilization
-    
+
+
+
+
     true
 }
 
-// Get server statistics
+
 func get_server_stats(inference_server server) server_stats {
     server_stats {
         requests_processed: 0,
@@ -174,20 +174,20 @@ func get_server_stats(inference_server server) server_stats {
     }
 }
 
-// Shutdown server gracefully
+
 func shutdown_server(inference_server server) bool {
-    // Wait for pending requests
-    // Save state
-    // Close connections
-    
+
+
+
+
     true
 }
 
-// Health check
+
 func health_check(inference_server server) bool {
-    // Verify server is responsive
-    // Check memory usage
-    // Verify queue is not stuck
-    
+
+
+
+
     true
 }

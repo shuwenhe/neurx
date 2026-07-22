@@ -1,65 +1,65 @@
 package neurx.alignment.moe_1t_dpo_grpo_alignment
 
-// ============================================================================
-// 1T MoE English textcomplete DPO/GRPO alignmentframework
-//
-// English text NeurX modelEnglish text:
-//   1. DPO (Direct Preference Optimization) - English textpreference
-//   2. GRPO (Generative Reward Policy Optimization) - English textgenerateEnglish textreward
-//   3. English textalignment - support 32K token English textpreferenceEnglish text
-//   4. English textalignment - English text, safetyEnglish text, informationEnglish text
-//   5. English text - English text
-//   6. English text AI principle - English textalignment
-//
-// pipeline:
-//   ┌──────────────────────────────────┐
-//   │  SFT (Supervised Fine-tuning)    │
-//   │  Base model → instruction-tuned  │
-//   └─────────────┬────────────────────┘
-//                 │
-//        ┌────────▼─────────┐
-//        │  Human Feedback  │ (collected in parallel)
-//        │  Collection      │
-//        └────────┬─────────┘
-//                 │
-//   ┌─────────────▼──────────────────┐
-//   │  DPO Training                  │
-//   │  - Preference pair collection  │
-//   │  - Contrastive loss            │
-//   │  - 8 GPU, 2-4 weeks            │
-//   └─────────────┬──────────────────┘
-//                 │
-//   ┌─────────────▼──────────────────┐
-//   │  GRPO Training                 │
-//   │  - Generative reward modeling  │
-//   │  - PPO-like policy optimization│
-//   │  - 16 GPU, 3-5 weeks           │
-//   └─────────────┬──────────────────┘
-//                 │
-//   ┌─────────────▼──────────────────┐
-//   │  Constitutional AI             │
-//   │  - Explicit principle learning │
-//   │  - Value alignment verification│
-//   └─────────────┬──────────────────┘
-//                 │
-//   ┌─────────────▼──────────────────┐
-//   │  Evaluation & Deployment       │
-//   │  - Multi-benchmark scoring     │
-//   │  - A/B testing in production   │
-//   └────────────────────────────────┘
-//
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use neurx.strings
 use neurx.runtime.io.{io_println, io_mkdir_recursive}
 use neurx.moe.llm_1t.{moe_1t_framework}
 use neurx.distributed.collective.{collective_state}
 
-// ============================================================================
-// 1. SFT (Supervised Fine-tuning) configuration
-// ============================================================================
 
-// English textdataEnglish text
+
+
+
+
 struct sft_data_example {
     string instruction
     string input_context
@@ -68,7 +68,7 @@ struct sft_data_example {
     string domain
 }
 
-// SFT configuration
+
 struct sft_config {
     string data_path
     int num_examples
@@ -83,63 +83,63 @@ struct sft_config {
     int save_interval
 }
 
-// ============================================================================
-// 2. DPO (Direct Preference Optimization)
-// ============================================================================
 
-// English textpreferenceEnglish text: chosen vs rejected
+
+
+
+
 struct preference_pair {
     string prompt
     string chosen_response
     string rejected_response
-    float preference_score      // 1.0 = strong preference for chosen
-    []float per_token_preference // token-level preference signals
+    float preference_score
+    []float per_token_preference
     string annotator_id
     string domain
     int timestamp
 }
 
-// DPO trainingstate
+
 struct dpo_training_state {
     moe_1t_framework base_model
     int global_step
     int total_training_pairs
     int current_pair_index
     float current_loss
-    float beta                   // KL penalty coefficient
-    float temperature            // softmax temperature
+    float beta
+    float temperature
 
-    // alignmentstatistics
+
     float chosen_logprob_mean
     float rejected_logprob_mean
-    float margin                 // chosen_logprob - rejected_logprob
+    float margin
     float implicit_reward
 
-    // monitoring
+
     []float loss_history
     []float margin_history
 }
 
-// DPO Loss English text:
-// L_DPO = -log(sigma((beta * (log p_chosen - log p_rejected))))
-// English text sigma English text sigmoid function
-//
-// English textoptimizemodelpreferenceEnglish text, English textRequiredEnglish textrewardmodel
+
+
+
+
+
 func dpo_compute_loss(
     float chosen_logprob,
     float rejected_logprob,
     float beta
 ) float {
 
-    // compute log odds ratio
+
     float log_odds = beta * (chosen_logprob - rejected_logprob)
 
-    // English text sigmoid: -log(1 / (1 + exp(-log_odds)))
-    // = log(1 + exp(-log_odds))
+
+
     float loss = 0.0
 
     if log_odds > 0.0 {
-        // English textcompute
+
         loss = log_odds + log(1.0 + exp(-log_odds))
     } else {
         loss = log(1.0 + exp(log_odds))
@@ -148,7 +148,7 @@ func dpo_compute_loss(
     loss
 }
 
-// computeEnglish textrewardEnglish text (English textmonitoring)
+
 func dpo_compute_implicit_reward(
     float chosen_logprob,
     float rejected_logprob,
@@ -159,7 +159,7 @@ func dpo_compute_implicit_reward(
     reward
 }
 
-// initialize DPO training
+
 func dpo_training_new(
     moe_1t_framework base_model,
     float beta
@@ -186,25 +186,25 @@ func dpo_training_new(
     state
 }
 
-// DPO English textsteptraining
+
 func dpo_training_step(
     dpo_training_state state,
     preference_pair pair
 ) float {
 
-    // 1. English text: compute chosen English text rejected English text log English text
+
     float chosen_logprob = compute_logprob_from_response(pair.chosen_response, pair.prompt)
     float rejected_logprob = compute_logprob_from_response(pair.rejected_response, pair.prompt)
 
-    // 2. compute DPO Loss
+
     float loss = dpo_compute_loss(chosen_logprob, rejected_logprob, state.beta)
 
-    // 3. computeEnglish textreward
+
     float implicit_reward = dpo_compute_implicit_reward(
         chosen_logprob, rejected_logprob, state.beta
     )
 
-    // 4. English textstatistics
+
     state.chosen_logprob_mean = (state.chosen_logprob_mean * float(state.global_step) + chosen_logprob) /
                                  float(state.global_step + 1)
     state.rejected_logprob_mean = (state.rejected_logprob_mean * float(state.global_step) + rejected_logprob) /
@@ -215,15 +215,15 @@ func dpo_training_step(
 
     state.global_step = state.global_step + 1
 
-    // English text loss English text
+
     loss
 }
 
-// ============================================================================
-// 3. GRPO (Generative Reward Policy Optimization)
-// ============================================================================
 
-// generateEnglish textrewardmodel
+
+
+
+
 struct generative_reward_model {
     moe_1t_framework base_model
     string reward_head_path
@@ -231,9 +231,9 @@ struct generative_reward_model {
     float reward_scale
 }
 
-// GRPO trainingstate
+
 struct grpo_training_state {
-    dpo_training_state dpo_state          // English text DPO English text
+    dpo_training_state dpo_state
     generative_reward_model reward_model
 
     int grpo_steps_completed
@@ -241,19 +241,19 @@ struct grpo_training_state {
     float entropy_bonus_coeff
     float value_loss_coeff
 
-    // PPO English textparameter
+
     float clip_ratio
     int ppo_epochs_per_batch
     int mini_batch_size
 
-    // English text
+
     []float policy_loss_history
     []float value_loss_history
     []float kl_divergence_history
     float average_return
 }
 
-// English text DPO initialize GRPO
+
 func grpo_training_new(
     dpo_training_state dpo_state,
     float kl_penalty
@@ -288,7 +288,7 @@ func grpo_training_new(
     state
 }
 
-// GRPO English textsteptraining (English text PPO)
+
 func grpo_training_step(
     grpo_training_state state,
     string prompt,
@@ -298,40 +298,40 @@ func grpo_training_step(
     float old_value
 ) (float, float, float) {
 
-    // 1. computeEnglish text log English text
+
     float new_logprob = compute_logprob_from_response(generation, prompt)
 
-    // 2. computeEnglish text
+
     float ratio = exp(new_logprob - old_logprob)
 
-    // 3. compute clipped English textloss (PPO-style)
+
     float surr1 = ratio * advantage
     float surr2 = clip(ratio, 1.0 - state.clip_ratio, 1.0 + state.clip_ratio) * advantage
     float policy_loss = -minimum(surr1, surr2)
 
-    // 4. computeEnglish textfunctionloss
-    float value_pred = 0.5  // English textcompute
+
+    float value_pred = 0.5
     float value_loss = (value_pred - old_value) * (value_pred - old_value)
 
-    // 5. compute KL English text (English textmodelEnglish text)
+
     float kl_divergence = old_logprob - new_logprob
 
-    // 6. English textloss
+
     float total_loss = policy_loss +
                        state.value_loss_coeff * value_loss +
                        state.kl_penalty_coeff * kl_divergence
 
     state.grpo_steps_completed = state.grpo_steps_completed + 1
 
-    // English text (policy_loss, value_loss, kl_div)
+
     (policy_loss, value_loss, kl_divergence)
 }
 
-// ============================================================================
-// 4. Constitutional AI (English textalignment)
-// ============================================================================
 
-// English text AI principle
+
+
+
+
 struct constitution_principle {
     string principle_id
     string description
@@ -339,19 +339,19 @@ struct constitution_principle {
     float importance_weight
 }
 
-// Constitutional AI evaluationstate
+
 struct constitutional_ai_state {
     []constitution_principle principles
     moe_1t_framework base_model
     int num_principles
 
-    // principleEnglish textstatistics
+
     []float principle_compliance_scores
     []int principle_violation_counts
     float overall_alignment_score
 }
 
-// initializeEnglish text AI
+
 func constitutional_ai_new() constitutional_ai_state {
 
     []constitution_principle principles = make([]constitution_principle, 7)
@@ -407,14 +407,14 @@ func constitutional_ai_new() constitutional_ai_state {
 
     constitutional_ai_state state = constitutional_ai_state {
         principles: principles,
-        base_model: moe_1t_framework {},  // placeholder
+        base_model: moe_1t_framework {},
         num_principles: 7,
         principle_compliance_scores: make([]float, 7),
         principle_violation_counts: make([]int, 7),
         overall_alignment_score: 0.0,
     }
 
-    // initializeEnglish text
+
     int i = 0
     while i < 7 {
         state.principle_compliance_scores[i] = 1.0
@@ -425,14 +425,14 @@ func constitutional_ai_new() constitutional_ai_state {
     state
 }
 
-// evaluationresponseEnglish textprinciple
+
 func constitutional_ai_evaluate_response(
     constitutional_ai_state state,
     string prompt,
     string response
 ) float {
 
-    // English textprinciplecomputeEnglish text
+
     float total_score = 0.0
     float total_weight = 0.0
 
@@ -440,8 +440,8 @@ func constitutional_ai_evaluate_response(
     while i < len(state.principles) {
         constitution_principle principle = state.principles[i]
 
-        // English textuseEnglish textmodelEnglish textevaluationEnglish text
-        float score = 0.9  // placeholder
+
+        float score = 0.9
 
         total_score = total_score + score * principle.importance_weight
         total_weight = total_weight + principle.importance_weight
@@ -457,35 +457,35 @@ func constitutional_ai_evaluate_response(
     alignment_score
 }
 
-// ============================================================================
-// 5. completealignmenttrainingpipeline
-// ============================================================================
 
-// completeEnglish texttrainingEnglish text
+
+
+
+
 struct complete_posttraining_pipeline {
     moe_1t_framework base_model
 
-    // SFT phase
+
     sft_config sft_cfg
 
-    // DPO phase
+
     dpo_training_state dpo_state
     int dpo_training_steps
 
-    // GRPO phase
+
     grpo_training_state grpo_state
     int grpo_training_steps
 
-    // Constitutional AI
+
     constitutional_ai_state const_ai
 
-    // English textstatistics
+
     int total_training_steps
     float best_eval_score
     string checkpoint_dir
 }
 
-// initializecompleteEnglish text
+
 func complete_posttraining_new(
     moe_1t_framework base_model,
     string checkpoint_dir
@@ -527,37 +527,37 @@ func complete_posttraining_new(
     pipeline
 }
 
-// ============================================================================
-// 6. toolfunction
-// ============================================================================
 
-// computeresponseEnglish text (placeholder - actualEnglish textmodel)
+
+
+
+
 func compute_logprob_from_response(
     string response,
     string prompt
 ) float {
-    // actualEnglish textmodelEnglish textcompute
+
     0.5
 }
 
-// compute log odds ratio
+
 func log(float x) float {
-    // placeholder - English textuseEnglish text
+
     0.0
 }
 
-// English textfunction
+
 func exp(float x) float {
-    // placeholder - English textuseEnglish text
+
     2.718
 }
 
-// Sigmoid
+
 func sigmoid(float x) float {
     1.0 / (1.0 + exp(-x))
 }
 
-// Clip function
+
 func clip(float x, float min_val, float max_val) float {
     if x < min_val {
         min_val
@@ -568,7 +568,7 @@ func clip(float x, float min_val, float max_val) float {
     }
 }
 
-// English text
+
 func minimum(float a, float b) float {
     if a < b {
         a

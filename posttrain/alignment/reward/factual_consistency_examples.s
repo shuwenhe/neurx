@@ -2,41 +2,41 @@ package neurx.posttrain.reward.examples
 
 use neurx.posttrain.reward.factual_consistency_reward.*
 
-// ════════════════════════════════════════════════════════════════════════════════
-// Factual Consistency Reward example
-//
-// English textuseEnglish textrewardEnglish textevaluation
-// ════════════════════════════════════════════════════════════════════════════════
 
-// English textdefaultconfiguration
+
+
+
+
+
+
 func create_factual_config() factual_config {
     factual_config {
-        // English textparameter
+
         max_facts_per_doc: 20,
         extract_temporal: true,
         extract_location: true,
 
-        // English textparameter
+
         similarity_threshold: 0.7,
         confidence_threshold: 0.5,
 
-        // English text
+
         detect_hallucinations: true,
         hallucination_threshold: 0.3,
 
-        // English text
+
         require_citations: false,
         check_citation_accuracy: false,
 
-        // weight (English text = 1.0)
-        accuracy_weight: 0.4,      // generateEnglish text
-        hallucination_weight: 0.3,  // English text
-        coverage_weight: 0.2,       // English text
-        citation_weight: 0.1,       // English text
+
+        accuracy_weight: 0.4,
+        hallucination_weight: 0.3,
+        coverage_weight: 0.2,
+        citation_weight: 0.1,
     }
 }
 
-// example 1: English textevaluation
+
 func example_basic_factual_consistency() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 1: Basic Factual Consistency Evaluation          ║")
@@ -64,7 +64,7 @@ func example_basic_factual_consistency() {
     print("")
 }
 
-// example 2: English text
+
 func example_hallucination_detection() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 2: Hallucination Detection                       ║")
@@ -74,7 +74,7 @@ func example_hallucination_detection() {
     string reference = "Albert Einstein won the Nobel Prize in Physics in 1921. " +
                       "He developed the theory of relativity."
 
-    // English textgenerateEnglish text
+
     string generated_with_hallucination = "Albert Einstein won the Nobel Prize in Physics in 1921. " +
                                          "He also won the Nobel Prize in Chemistry in 1925. " +
                                          "He developed the theory of relativity and invented the telephone."
@@ -89,11 +89,11 @@ func example_hallucination_detection() {
     print("  " + generated_with_hallucination)
     print("")
 
-    // English text
+
     factual_content ref_facts = extract_facts(reference, config)
     factual_content gen_facts = extract_facts(generated_with_hallucination, config)
 
-    // English text
+
     consistency_report report = verify_factual_consistency(ref_facts, gen_facts, config)
 
     print("Analysis:")
@@ -114,7 +114,7 @@ func example_hallucination_detection() {
     print("")
 }
 
-// example 3: English text
+
 func example_medical_fact_checking() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 3: Medical Text Fact Checking                    ║")
@@ -152,7 +152,7 @@ func example_medical_fact_checking() {
     print("")
 }
 
-// example 4: English text
+
 func example_news_fact_checking() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 4: News Fact Checking                            ║")
@@ -177,7 +177,7 @@ func example_news_fact_checking() {
     print("  " + generated)
     print("")
 
-    // English text
+
     factual_content ref_facts = extract_facts(reference, config)
     factual_content gen_facts = extract_facts(generated, config)
     consistency_report report = verify_factual_consistency(ref_facts, gen_facts, config)
@@ -188,7 +188,7 @@ func example_news_fact_checking() {
     print("")
 }
 
-// example 5: English textgenerate
+
 func example_quality_comparison() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 5: Quality Comparison                            ║")
@@ -228,7 +228,7 @@ func example_quality_comparison() {
     print("")
 }
 
-// example 6: English text GRPO/DPO trainingEnglish textreward
+
 func example_reward_for_alignment() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 6: Factual Reward in Alignment Training          ║")
@@ -264,7 +264,7 @@ func example_reward_for_alignment() {
     print("")
 }
 
-// Main function
+
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -284,7 +284,7 @@ func main() {
     print("═════════════════════════════════════════════════════════════")
 }
 
-// helperfunction
+
 func float_to_string_example(float f) string {
     int i_part = int(f)
     int f_part = int((f - float(i_part)) * 1000.0)

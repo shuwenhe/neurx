@@ -168,7 +168,7 @@ void test_document_packing_preserves_tails() {
             "second window continues exactly from retained target");
 }
 
-}  // namespace
+}
 
 int main() {
     test_schedule_parsing();

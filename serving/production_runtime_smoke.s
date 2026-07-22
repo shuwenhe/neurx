@@ -15,7 +15,7 @@ func main() int {
     state = production_submit(state, "ascend-short", "ascend", "fp8", 4, 0, 2)
     if state.admitted_requests != 3 { return fail("admission") }
 
-    // Cached request enters decode directly and is prioritized.
+
     production_schedule_result scheduled = production_schedule(state)
     if !scheduled.batch.ok || scheduled.batch.phase != "decode" { return fail("decode-priority") }
     if scheduled.batch.backend != "cuda" || scheduled.batch.dtype != "fp8" { return fail("cuda-batch-key") }
@@ -28,7 +28,7 @@ func main() int {
     if scheduled.batch.backend != "cuda" || scheduled.batch.dtype != "bf16" { return fail("prefill-key") }
     state = production_complete_prefill(scheduled.state, scheduled.batch, true)
 
-    // Ascend and CUDA work remain in distinct batches.
+
     scheduled = production_schedule(state)
     if scheduled.batch.backend != "ascend" || scheduled.batch.dtype != "bf16" { return fail("ascend-normalization") }
     state = production_complete_prefill(scheduled.state, scheduled.batch, true)

@@ -8,10 +8,10 @@
 
 namespace neurx::cann {
 
-// ABI exported by a CANN operator plugin:
-//   uint32_t neurx_cann_operator_abi_version();
-//   NeurxCannOperatorStatus neurx_cann_prefill(const DeviceBatch&);
-//   NeurxCannOperatorStatus neurx_cann_decode(const DeviceBatch&);
+
+
+
+
 class OperatorLibrary {
  public:
   OperatorLibrary() = default;
@@ -33,4 +33,4 @@ class OperatorLibrary {
   RawLauncher decode_ = nullptr;
 };
 
-}  // namespace neurx::cann
+}

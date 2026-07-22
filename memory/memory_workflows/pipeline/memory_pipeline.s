@@ -1,18 +1,18 @@
 use neurx.agent
 use neurx.runtime.io.{runtime_write_text_file, runtime_file_exists}
 
-// Config (mirrors config/sample.yaml)
-// max_steps: 100 (capped to 8 per step budget per run)
-// output_dir: artifacts/checkpoints/agent/memory
+
+
+
 
 string out_prefix   = "artifacts/checkpoints/agent/memory"
 string mem_path     = out_prefix + "/memory.txt"
 string report_path  = out_prefix + "/report.txt"
 string trace_path   = out_prefix + "/trace.txt"
 
-// ─── Phase 1: Build memory ───────────────────────────────────────────────────
-// Run agent on a corpus of queries; let it populate short + long memory,
-// then persist memory to disk.
+
+
+
 
 []string phase1_inputs = []string{cap: 4}
 phase1_inputs[0] = "search and index neurx agent architecture overview"
@@ -28,10 +28,10 @@ agent_persist_memory(phase1, mem_path)
 
 string phase1_trace = agent_trace_last_n_summary(phase1, 8)
 
-// ─── Phase 2: Warm-start restore and retrieval ───────────────────────────────
-// Create a fresh agent that restores the persisted memory from Phase 1.
-// Then run retrieval queries; memory hit rate is measured by checking
-// whether expected keys are present before and after each query.
+
+
+
+
 
 agent_runtime_state phase2 = agent_warm_start(
     "memory_retrieval_phase",
@@ -51,8 +51,8 @@ phase2 = run_agent_batch(phase2, phase2_inputs, 8)
 
 int keys_after_phase2 = len(agent_memory_keys(phase2))
 
-// ─── Phase 3: Index + query eval ─────────────────────────────────────────────
-// Check presence of expected memory keys and build hit/miss report.
+
+
 
 []string expected_keys = []string{cap: 3}
 expected_keys[0] = "agent_architecture"
@@ -73,7 +73,7 @@ while ki < len(expected_keys) {
     ki = ki + 1
 }
 
-// ─── Phase 4: evaluator / report ─────────────────────────────────────────────
+
 
 string stall_str = "false"
 if agent_is_stalled(phase2) {

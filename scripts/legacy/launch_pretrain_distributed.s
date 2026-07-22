@@ -1,10 +1,10 @@
-#!/usr/bin/env s
 
-// ============================================
-// NeurX Multi-GPU Distributed Pretraining Launcher
-// English textGPUEnglish texttrainingstartEnglish text (English textSlanguageimplementation)
-// English text: startEnglish text, English textGPUEnglish textrun
-// ============================================
+
+
+
+
+
+
 
 package main
 
@@ -12,9 +12,9 @@ use neurx.runtime.io.{runtime_env_get, runtime_env_set, create_directory, file_e
 use neurx.runtime.process.{exec_process, exec_process_async, wait_process}
 use neurx.strings.{trim, string_concat, starts_with}
 
-// ============================================
-// configurationEnglish text
-// ============================================
+
+
+
 
 struct launcher_config {
     int num_gpus
@@ -38,12 +38,12 @@ struct gpu_info {
     bool available
 }
 
-// ============================================
-// configurationinitialize
-// ============================================
+
+
+
 
 func parse_args() launcher_config {
-    // English textparameterEnglish textconfiguration
+
 
     string num_gpus_str = runtime_env_get("NUM_GPUS", "1")
     int num_gpus = parse_int(num_gpus_str)
@@ -69,24 +69,24 @@ func parse_args() launcher_config {
         gradient_accum_steps: 8,
         num_epochs: 1,
         log_dir: "./artifacts/logs/distributed_pretrain",
-        log_file: "",  // English textmainEnglish text
+        log_file: "",
         verbose: true,
     }
 }
 
-// ============================================
-// GPUEnglish text
-// ============================================
+
+
+
 
 func query_gpu_info() []gpu_info {
-    // usenvidia-smiqueryGPUinformation
-    // English textGPUEnglish textinformation
 
-    // English text: nvidia-smi --query-gpu=index,name,memory.total --format=csv,noheader
 
-    []gpu_info gpus = []gpu_info{cap: 16}  // English textsupport16English textGPU
 
-    // English textGPUinformation(actualEnglish textnvidia-smi)
+
+
+    []gpu_info gpus = []gpu_info{cap: 16}
+
+
     gpu_info gpu0 = gpu_info {
         device_id: 0,
         name: "NVIDIA RTX 4090",
@@ -99,7 +99,7 @@ func query_gpu_info() []gpu_info {
 }
 
 func check_gpu_availability(int num_gpus) (bool, int) {
-    // English textGPU
+
 
     []gpu_info gpus = query_gpu_info()
 
@@ -116,12 +116,12 @@ func check_gpu_availability(int num_gpus) (bool, int) {
     (sufficient, available_count)
 }
 
-// ============================================
-// logEnglish textdirectorymanagement
-// ============================================
+
+
+
 
 func setup_directories(launcher_config config) bool {
-    // English textdirectory
+
 
     if !create_directory(config.log_dir) {
         print("[ERROR] Failed to create log directory: " + config.log_dir)
@@ -159,9 +159,9 @@ func print_config(launcher_config config) {
     print("==================================================")
 }
 
-// ============================================
-// English textstart
-// ============================================
+
+
+
 
 struct process_handle {
     int rank
@@ -170,21 +170,21 @@ struct process_handle {
     bool running
 }
 
-// English textrankstarttrainingEnglish text
+
 func launch_rank_process(
     launcher_config config,
     int rank,
     int world_size,
 ) process_handle {
 
-    // 1. English text
+
     runtime_env_set("RANK", itoa(rank))
     runtime_env_set("LOCAL_RANK", itoa(rank))
     runtime_env_set("WORLD_SIZE", itoa(world_size))
     runtime_env_set("MASTER_ADDR", config.master_addr)
     runtime_env_set("MASTER_PORT", itoa(config.master_port))
 
-    // 2. English text
+
     string cmd = "./pretrain/distributed_pretrain_entry.s " +
                  "--config=" + config.config_path +
                  " --model_path=" + config.model_path +
@@ -195,10 +195,10 @@ func launch_rank_process(
                  " --rank=" + itoa(rank) +
                  " --world_size=" + itoa(world_size)
 
-    // 3. startEnglish text(English textstep)
+
     string log_file = config.log_dir + "/rank_" + itoa(rank) + ".log"
 
-    // useEnglish textstepEnglish text, English text
+
     int pid = exec_process_async(cmd, log_file)
 
     process_handle {
@@ -209,7 +209,7 @@ func launch_rank_process(
     }
 }
 
-// startEnglish textrankEnglish text
+
 func launch_all_processes(
     launcher_config config,
     int world_size,
@@ -232,7 +232,7 @@ func launch_all_processes(
     handles
 }
 
-// English text
+
 func wait_all_processes(
     []process_handle handles,
 ) int {
@@ -246,7 +246,7 @@ func wait_all_processes(
         if handle.running {
             print("[INFO] Waiting for rank " + itoa(handle.rank) + " (PID " + itoa(handle.pid) + ")...")
 
-            // English text
+
             int exit_code = wait_process(handle.pid)
 
             if exit_code != 0 {
@@ -263,12 +263,12 @@ func wait_all_processes(
     overall_exit_code
 }
 
-// ============================================
-// logEnglish text
-// ============================================
+
+
+
 
 func aggregate_logs(launcher_config config, []process_handle handles) {
-    // English textrankEnglish textlogEnglish textmainlogfile
+
 
     print("[INFO] Aggregating logs from all ranks...")
 
@@ -276,19 +276,19 @@ func aggregate_logs(launcher_config config, []process_handle handles) {
     while rank < len(handles) {
         string rank_log = handles[rank].log_file
 
-        // English textranklogfileEnglish text
+
         if file_exists(rank_log) {
             print("[INFO] Rank " + itoa(rank) + " log: " + rank_log)
-            // TODO: English textmainlogfile
+
         }
 
         rank = rank + 1
     }
 }
 
-// ============================================
-// monitoringEnglish textstatistics
-// ============================================
+
+
+
 
 func print_final_stats(launcher_config config, int exit_code) {
     print("==================================================")
@@ -305,23 +305,23 @@ func print_final_stats(launcher_config config, int exit_code) {
     print("==================================================")
 }
 
-// ============================================
-// mainfunction
-// ============================================
+
+
+
 
 func main() {
 
-    // 1. English textconfiguration
+
     launcher_config config = parse_args()
 
-    // 2. generatelogfileEnglish text(English texttimeEnglish text)
+
     string timestamp = get_timestamp()
     config.log_file = config.log_dir + "/pretrain_" + timestamp + ".log"
 
-    // 3. English textconfiguration
+
     print_config(config)
 
-    // 4. English textGPUEnglish text
+
     print("[INFO] Checking GPU availability...")
     (bool sufficient, int available_gpus) := check_gpu_availability(config.num_gpus)
 
@@ -333,34 +333,34 @@ func main() {
         exit(1)
     }
 
-    // 5. English textdirectory
+
     if !setup_directories(config) {
         print("[ERROR] Failed to setup directories")
         exit(1)
     }
 
-    // 6. startEnglish texttrainingEnglish text
+
     print("[INFO] Launching " + itoa(config.num_gpus) + " training processes...")
 
     []process_handle handles = launch_all_processes(config, config.num_gpus)
 
-    // 7. English text
+
     print("[INFO] All processes started. Waiting for completion...")
 
     int exit_code = wait_all_processes(handles)
 
-    // 8. English textlog
+
     aggregate_logs(config, handles)
 
-    // 9. English textstatistics
+
     print_final_stats(config, exit_code)
 
     exit(exit_code)
 }
 
-// ============================================
-// helperfunction
-// ============================================
+
+
+
 
 func parse_int(string s) int {
     int result = 0
@@ -400,12 +400,12 @@ func itoa(int n) string {
 }
 
 func get_timestamp() string {
-    // English text YYYYMMDD_HHMMSS English texttimeEnglish text
-    // actualimplementationRequiredEnglish textsystemtimefunction
-    "20260714_161200"  // exampleEnglish text
+
+
+    "20260714_161200"
 }
 
 func exit(int code) {
-    // English text
-    // actualimplementationEnglish textOS exit
+
+
 }

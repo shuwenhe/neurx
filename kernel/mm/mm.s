@@ -1,18 +1,18 @@
-// kernel/mm/mm.s
-// AI OS memory manager — analogue of Linux mm/memory.c + mm/page_alloc.c
-//
-// Linux maps:
-//   mm/page_alloc.c  → buddy allocator
-//   mm/slub.c        → slab/object allocator
-//   mm/mmap.c        → virtual address space management
-//   mm/vmscan.c      → memory reclaim / LRU eviction
-//   mm/swap.c        → swap / offload
-//
-// NeurX maps:
-//   Manages three memory domains:
-//     HOST_MEM   → CPU DRAM (tensors, KV cache, activations)
-//     DEVICE_MEM → GPU/NPU HBM (model weights, buffers)
-//     SHARED_MEM → unified/zero-copy shared (CUDA managed, Metal shared)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 int HOST_MEM   = 0
 int DEVICE_MEM = 1
@@ -20,16 +20,16 @@ int SHARED_MEM = 2
 
 struct mem_region {
     int    region_id
-    int    domain          // HOST_MEM | DEVICE_MEM | SHARED_MEM
-    int    device_id       // which GPU/NPU, -1 for host
+    int    domain
+    int    device_id
     int    total_bytes
     int    used_bytes
-    int    page_size       // bytes, e.g. 4096 or 2MB huge pages
+    int    page_size
 }
 
 struct mem_alloc_result {
     int    region_id
-    int    offset          // byte offset within region
+    int    offset
     int    size_bytes
     bool   ok
     string err
@@ -47,7 +47,7 @@ func new_mem_state() mem_state {
     }
 }
 
-// register_region: add a memory pool (called at device init)
+
 func register_region(ms mem_state, domain int, device_id int, total_bytes int, page_size int) (mem_state, int) {
     mem_region r = mem_region{
         region_id:   ms.next_region_id,
@@ -63,9 +63,9 @@ func register_region(ms mem_state, domain int, device_id int, total_bytes int, p
     return (ms, id)
 }
 
-// mem_alloc: allocate from a region (buddy-style, simplified bump)
+
 func mem_alloc(ms mem_state, region_id int, size_bytes int) (mem_state, mem_alloc_result) {
-    int align = 256  // 256-byte alignment for SIMD/DMA
+    int align = 256
     int aligned = ((size_bytes + align - 1) / align) * align
 
     int i = 0
@@ -89,7 +89,7 @@ func mem_alloc(ms mem_state, region_id int, size_bytes int) (mem_state, mem_allo
     return (ms, mem_alloc_result{ok: false, err: "region_not_found"})
 }
 
-// mem_free: release bytes back to region (simplified: just decrement used)
+
 func mem_free(ms mem_state, region_id int, size_bytes int) mem_state {
     int i = 0
     while i < len(ms.regions) {
@@ -103,7 +103,7 @@ func mem_free(ms mem_state, region_id int, size_bytes int) mem_state {
     return ms
 }
 
-// mem_pressure: compute used/total ratio across all host regions
+
 func mem_pressure(ms mem_state) float {
     int total = 0
     int used  = 0

@@ -1,12 +1,12 @@
 package main
 
-// ============================================================================
-// NeurX COMPLETE PIPELINE SYSTEM
-// Compile → IR → Bundle → Runner → Forward → Loss → Backward → AdamW → Exit
-//
-// completeEnglish textcompile-run-trainingpipeline, English textcompleteEnglish texttrainingstepEnglish text
-// English textcompletepipelineimplementation
-// ============================================================================
+
+
+
+
+
+
+
 
 use std.io
 use std.math
@@ -15,9 +15,9 @@ use std.strings
 
 println := io.println
 
-// ============================================================================
-// STAGE 1: COMPILE & IR GENERATION
-// ============================================================================
+
+
+
 
 struct compile_config {
     source_file: string
@@ -34,7 +34,7 @@ struct ir_module {
     data_section: []string
 }
 
-// 1.1 compilephase - English text neurx compile
+
 func compile_neurx_code(config: compile_config) (bool, ir_module) {
     println("\n╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 1: COMPILE & IR GENERATION                     ║")
@@ -49,38 +49,38 @@ func compile_neurx_code(config: compile_config) (bool, ir_module) {
     println("   Optimization: -O" + strings.from_i32(config.optimization_level))
     println("")
 
-    // 1.1.1 English text
+
     println("🔍 Phase 1/5: Lexical Analysis")
     println("   ✓ Tokenization complete")
     println("   ✓ 42,567 tokens identified")
     println("")
 
-    // 1.1.2 English text
+
     println("🔍 Phase 2/5: Syntax Analysis")
     println("   ✓ AST construction complete")
     println("   ✓ Type checking passed")
     println("")
 
-    // 1.1.3 English text
+
     println("🔍 Phase 3/5: Semantic Analysis")
     println("   ✓ Symbol resolution complete")
     println("   ✓ Type inference passed")
     println("")
 
-    // 1.1.4 generateEnglish text
+
     println("🔍 Phase 4/5: IR Generation")
     println("   ✓ SSA form generation complete")
     println("   ✓ 8,234 IR instructions generated")
     println("")
 
-    // 1.1.5 English textoptimize
+
     println("🔍 Phase 5/5: Optimization")
     println("   ✓ Dead code elimination: 234 lines removed")
     println("   ✓ Function inlining: 12 functions inlined")
     println("   ✓ Loop unrolling: 5 loops optimized")
     println("")
 
-    // generate IR
+
     var ir: ir_module
     ir.name = "train_forward_backward"
     ir.version = "1.0"
@@ -88,7 +88,7 @@ func compile_neurx_code(config: compile_config) (bool, ir_module) {
     ir.instructions = []string{}
     ir.data_section = []string{}
 
-    // generateexample IR
+
     ir.instructions = append(ir.instructions, "module_init()")
     ir.instructions = append(ir.instructions, "alloc_tensor([32, 256], FP32)")
     ir.instructions = append(ir.instructions, "load_weights(embedding_table)")
@@ -107,9 +107,9 @@ func compile_neurx_code(config: compile_config) (bool, ir_module) {
     return true, ir
 }
 
-// ============================================================================
-// STAGE 2: DATA BUNDLING
-// ============================================================================
+
+
+
 
 struct Tensor {
     data: []f64
@@ -125,7 +125,7 @@ struct data_bundle {
     metadata: map[string]string
 }
 
-// 2.1 dataEnglish textphase
+
 func bundle_training_data(batch_size: i32, seq_len: i32, vocab_size: i32) data_bundle {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 2: DATA BUNDLING                                ║")
@@ -134,7 +134,7 @@ func bundle_training_data(batch_size: i32, seq_len: i32, vocab_size: i32) data_b
 
     println("📦 Preparing Training Data:")
 
-    // English textinputEnglish text
+
     var input_data: []f64 = []f64{}
     for i := 0; i < batch_size * seq_len; i = i + 1 {
         input_data = append(input_data, f64((i * 7 + 13) % vocab_size))
@@ -151,7 +151,7 @@ func bundle_training_data(batch_size: i32, seq_len: i32, vocab_size: i32) data_b
     println("   Input Device: GPU (CUDA)")
     println("")
 
-    // English text
+
     var target_data: []f64 = []f64{}
     for i := 0; i < batch_size * seq_len; i = i + 1 {
         target_data = append(target_data, f64(((i + 1) * 7 + 13) % vocab_size))
@@ -168,7 +168,7 @@ func bundle_training_data(batch_size: i32, seq_len: i32, vocab_size: i32) data_b
     println("   Target Device: GPU (CUDA)")
     println("")
 
-    // English textdataEnglish text
+
     var bundle: data_bundle
     bundle.batch_id = 0
     bundle.input_tensor = input_tensor
@@ -181,9 +181,9 @@ func bundle_training_data(batch_size: i32, seq_len: i32, vocab_size: i32) data_b
     return bundle
 }
 
-// ============================================================================
-// STAGE 3: RUNNER INITIALIZATION
-// ============================================================================
+
+
+
 
 struct model_config {
     hidden_dim: i32
@@ -207,7 +207,7 @@ struct Runner {
     batch: data_bundle
 }
 
-// 3.1 initializerunEnglish text
+
 func init_runner(config: model_config, batch: data_bundle, learning_rate: f64) Runner {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 3: RUNNER INITIALIZATION                        ║")
@@ -221,7 +221,7 @@ func init_runner(config: model_config, batch: data_bundle, learning_rate: f64) R
     println("   FFN Dimension: " + strings.from_i32(config.ffn_dim))
     println("")
 
-    // initializemodelparameter
+
     let total_params = config.vocab_size * config.hidden_dim +
                        config.num_layers * config.hidden_dim * config.num_heads +
                        config.num_layers * config.ffn_dim * config.hidden_dim
@@ -237,10 +237,10 @@ func init_runner(config: model_config, batch: data_bundle, learning_rate: f64) R
     println("   Parameter Memory: " + strings.format_size(i64(total_params) * 4) + " MB")
     println("")
 
-    // initializeoptimizeEnglish textstate (AdamW)
+
     var optimizer_state: map[string]Tensor = map[string]Tensor{}
 
-    // English text (momentum)
+
     var m_tensor: Tensor
     m_tensor.shape = model_params.shape
     m_tensor.dtype = "FP32"
@@ -248,7 +248,7 @@ func init_runner(config: model_config, batch: data_bundle, learning_rate: f64) R
     m_tensor.data = []f64{}
     optimizer_state["m"] = m_tensor
 
-    // English text (variance)
+
     var v_tensor: Tensor
     v_tensor.shape = model_params.shape
     v_tensor.dtype = "FP32"
@@ -262,7 +262,7 @@ func init_runner(config: model_config, batch: data_bundle, learning_rate: f64) R
     println("   Total Optimizer Memory: " + strings.format_size(i64(total_params) * 8) + " MB")
     println("")
 
-    // English texttrainingstate
+
     var state: training_state
     state.step = 0
     state.model_params = model_params
@@ -270,7 +270,7 @@ func init_runner(config: model_config, batch: data_bundle, learning_rate: f64) R
     state.learning_rate = learning_rate
     state.warmup_steps = 10
 
-    // English textrunEnglish text
+
     var runner: Runner
     runner.config = config
     runner.state = state
@@ -283,9 +283,9 @@ func init_runner(config: model_config, batch: data_bundle, learning_rate: f64) R
     return runner
 }
 
-// ============================================================================
-// STAGE 4: FORWARD PASS
-// ============================================================================
+
+
+
 
 struct forward_output {
     logits: Tensor
@@ -293,7 +293,7 @@ struct forward_output {
     cache: map[string]Tensor
 }
 
-// 4.1 English text
+
 func forward_pass(runner: Runner) (forward_output, f64) {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 4: FORWARD PASS                                 ║")
@@ -305,7 +305,7 @@ func forward_pass(runner: Runner) (forward_output, f64) {
     println("🔄 Forward Pass Execution:")
     println("")
 
-    // English text
+
     println("   1️⃣  embedding Layer")
     println("      Input: [" + strings.from_i32(runner.batch.input_tensor.shape[0]) + ", " +
                     strings.from_i32(runner.batch.input_tensor.shape[1]) + "]")
@@ -314,7 +314,7 @@ func forward_pass(runner: Runner) (forward_output, f64) {
     println("      ✓ Complete")
     println("")
 
-    // English text
+
     for i := 1; i <= runner.config.num_layers; i = i + 1 {
         println("   " + strings.from_i32(i + 1) + "️⃣  Transformer Block " + strings.from_i32(i))
         println("      Multi-Head Attention (" + strings.from_i32(runner.config.num_heads) + " heads)")
@@ -324,7 +324,7 @@ func forward_pass(runner: Runner) (forward_output, f64) {
         println("")
     }
 
-    // outputEnglish text
+
     println("   " + strings.from_i32(runner.config.num_layers + 2) + "️⃣  Output Projection")
     println("      → Logits [" + strings.from_i32(runner.batch.input_tensor.shape[0]) + ", " +
                    strings.from_i32(runner.batch.input_tensor.shape[1]) + ", " +
@@ -332,7 +332,7 @@ func forward_pass(runner: Runner) (forward_output, f64) {
     println("      ✓ Complete")
     println("")
 
-    // English textoutput
+
     var output: forward_output
     var logits: Tensor
     logits.shape = []i32{runner.batch.input_tensor.shape[0], runner.batch.input_tensor.shape[1], runner.config.vocab_size}
@@ -340,7 +340,7 @@ func forward_pass(runner: Runner) (forward_output, f64) {
     logits.device = "CUDA"
     logits.data = []f64{}
 
-    // generateEnglish text logits data (actualEnglish textmodeloutput)
+
     for i := 0; i < 32 * 2048 * 32000; i = i + 1 {
         logits.data = append(logits.data, math.sin(f64(i) / 1000.0))
     }
@@ -360,9 +360,9 @@ func forward_pass(runner: Runner) (forward_output, f64) {
     return output, f64(forward_time.Seconds())
 }
 
-// ============================================================================
-// STAGE 5: LOSS COMPUTATION
-// ============================================================================
+
+
+
 
 struct loss_metrics {
     total_loss: f64
@@ -371,7 +371,7 @@ struct loss_metrics {
     min_logit: f64
 }
 
-// 5.1 computeloss
+
 func compute_loss(output: forward_output, targets: Tensor) (loss_metrics, f64) {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 5: LOSS COMPUTATION                             ║")
@@ -383,14 +383,14 @@ func compute_loss(output: forward_output, targets: Tensor) (loss_metrics, f64) {
     println("📉 Loss Computation:")
     println("")
 
-    // computeEnglish textloss
+
     println("   Cross-Entropy Loss Calculation")
     println("   - Softmax over vocabulary (32,000 tokens)")
     println("   - Log probability of target tokens")
     println("   - Reduce mean over sequence")
     println("")
 
-    // English textlosscompute
+
     let avg_logit = 0.5
     let total_loss = -math.log(avg_logit + 0.01)
 
@@ -417,9 +417,9 @@ func compute_loss(output: forward_output, targets: Tensor) (loss_metrics, f64) {
     return metrics, f64(loss_time.Seconds())
 }
 
-// ============================================================================
-// STAGE 6: BACKWARD PASS
-// ============================================================================
+
+
+
 
 struct gradient_info {
     num_gradients: i32
@@ -429,7 +429,7 @@ struct gradient_info {
     grad_overflow: bool
 }
 
-// 6.1 English text
+
 func backward_pass(runner: Runner, output: forward_output, loss: f64) (gradient_info, f64) {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 6: BACKWARD PASS                                ║")
@@ -441,7 +441,7 @@ func backward_pass(runner: Runner, output: forward_output, loss: f64) (gradient_
     println("🔙 Backward Pass Execution:")
     println("")
 
-    // computegradient
+
     println("   Gradient Computation:")
     println("   1. Loss backpropagation from output layer")
     println("   2. Through transformer blocks in reverse order")
@@ -449,9 +449,9 @@ func backward_pass(runner: Runner, output: forward_output, loss: f64) (gradient_
     println("   4. Gradient accumulation for all parameters")
     println("")
 
-    // English textgradientcompute
+
     let num_params = runner.state.model_params.shape[0]
-    let total_norm_sq = 0.234  // English textgradientEnglish text
+    let total_norm_sq = 0.234
     let total_norm = math.sqrt(total_norm_sq)
 
     var grad_info: gradient_info
@@ -471,7 +471,7 @@ func backward_pass(runner: Runner, output: forward_output, loss: f64) (gradient_
     println("   - Overflow Detected: No")
     println("")
 
-    // gradientEnglish text
+
     let max_grad_norm = 1.0
     let grad_norm_after_clip = if grad_info.total_norm > max_grad_norm {
         max_grad_norm
@@ -494,9 +494,9 @@ func backward_pass(runner: Runner, output: forward_output, loss: f64) (gradient_
     return grad_info, f64(backward_time.Seconds())
 }
 
-// ============================================================================
-// STAGE 7: OPTIMIZER UPDATE (AdamW)
-// ============================================================================
+
+
+
 
 struct optimizer_update {
     step_count: i32
@@ -505,7 +505,7 @@ struct optimizer_update {
     weight_decay_applied: bool
 }
 
-// 7.1 AdamW optimizeEnglish text
+
 func adamw_optimizer_step(runner: Runner, grad_info: gradient_info, step: i32) (optimizer_update, f64) {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 7: OPTIMIZER UPDATE (AdamW)                     ║")
@@ -517,7 +517,7 @@ func adamw_optimizer_step(runner: Runner, grad_info: gradient_info, step: i32) (
     println("⚙️ AdamW Optimizer Step:")
     println("")
 
-    // learning rateEnglish text
+
     let warmup_steps = runner.state.warmup_steps
     var lr = runner.state.learning_rate
 
@@ -539,11 +539,11 @@ func adamw_optimizer_step(runner: Runner, grad_info: gradient_info, step: i32) (
     }
     println("")
 
-    // AdamW parameter
-    let beta1 = 0.9          // English text
-    let beta2 = 0.999        // English text
-    let epsilon = 1e-8       // English text
-    let weight_decay = 0.01  // L2 English text
+
+    let beta1 = 0.9
+    let beta2 = 0.999
+    let epsilon = 1e-8
+    let weight_decay = 0.01
 
     println("   AdamW Hyperparameters:")
     println("   - β₁ (momentum): " + strings.format_float(beta1, 3))
@@ -552,7 +552,7 @@ func adamw_optimizer_step(runner: Runner, grad_info: gradient_info, step: i32) (
     println("   - λ (weight decay): " + strings.format_float(weight_decay, 3))
     println("")
 
-    // parameterEnglish textcompute
+
     println("   Parameter Update:")
     println("   For each parameter θ:")
     println("   1. m_t = β₁ * m_{t-1} + (1-β₁) * g_t")
@@ -562,7 +562,7 @@ func adamw_optimizer_step(runner: Runner, grad_info: gradient_info, step: i32) (
     println("   5. θ_t = θ_{t-1} - α * (m̂_t / (√v̂_t + ε) + λ * θ_{t-1})")
     println("")
 
-    // computeEnglish text
+
     let bias_correction1 = 1.0 - math.pow(beta1, f64(step + 1))
     let bias_correction2 = 1.0 - math.pow(beta2, f64(step + 1))
 
@@ -571,7 +571,7 @@ func adamw_optimizer_step(runner: Runner, grad_info: gradient_info, step: i32) (
     println("   - v̂_t correction factor: " + strings.format_float(bias_correction2, 4))
     println("")
 
-    // parameterEnglish text
+
     let param_update_norm = lr * grad_info.total_norm * 0.01
 
     println("   Update Statistics:")
@@ -598,9 +598,9 @@ func adamw_optimizer_step(runner: Runner, grad_info: gradient_info, step: i32) (
     return update, f64(optimizer_time.Seconds())
 }
 
-// ============================================================================
-// STAGE 8: EXIT & SUMMARY
-// ============================================================================
+
+
+
 
 struct training_step {
     step_id: i32
@@ -614,7 +614,7 @@ struct training_step {
     learning_rate: f64
 }
 
-// 8.1 English textgenerateEnglish text
+
 func exit_and_summarize(
     step_id: i32,
     loss: f64,
@@ -675,9 +675,9 @@ func exit_and_summarize(
     return step
 }
 
-// ============================================================================
-// MAIN: ORCHESTRATE COMPLETE PIPELINE
-// ============================================================================
+
+
+
 
 func main() {
     println("╔════════════════════════════════════════════════════════╗")
@@ -689,9 +689,9 @@ func main() {
 
     let pipeline_start = time.now()
 
-    // ─────────────────────────────────────────────────────────────────
-    // Stage 1: Compile & IR
-    // ─────────────────────────────────────────────────────────────────
+
+
+
     var compile_config: compile_config
     compile_config.source_file = "workflows/llm/train_and_infer.s"
     compile_config.output_binary = "bin/train_and_infer"
@@ -705,14 +705,14 @@ func main() {
         return
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    // Stage 2: Bundle Data
-    // ─────────────────────────────────────────────────────────────────
+
+
+
     let data_bundle = bundle_training_data(32, 2048, 32000)
 
-    // ─────────────────────────────────────────────────────────────────
-    // Stage 3: Initialize Runner
-    // ─────────────────────────────────────────────────────────────────
+
+
+
     var model_config: model_config
     model_config.hidden_dim = 256
     model_config.num_layers = 6
@@ -722,30 +722,30 @@ func main() {
 
     let runner = init_runner(model_config, data_bundle, 0.0005)
 
-    // ─────────────────────────────────────────────────────────────────
-    // Stage 4: Forward Pass
-    // ─────────────────────────────────────────────────────────────────
+
+
+
     let (forward_output, forward_time) = forward_pass(runner)
 
-    // ─────────────────────────────────────────────────────────────────
-    // Stage 5: Loss Computation
-    // ─────────────────────────────────────────────────────────────────
+
+
+
     let (loss_metrics, loss_time) = compute_loss(forward_output, data_bundle.target_tensor)
 
-    // ─────────────────────────────────────────────────────────────────
-    // Stage 6: Backward Pass
-    // ─────────────────────────────────────────────────────────────────
+
+
+
     let (grad_info, backward_time) = backward_pass(runner, forward_output, loss_metrics.total_loss)
 
-    // ─────────────────────────────────────────────────────────────────
-    // Stage 7: Optimizer Update
-    // ─────────────────────────────────────────────────────────────────
+
+
+
     let (optimizer_update, optimizer_time) = adamw_optimizer_step(runner, grad_info, 0)
 
-    // ─────────────────────────────────────────────────────────────────
-    // Stage 8: Exit & Summarize
-    // ─────────────────────────────────────────────────────────────────
-    let compile_time = 0.5  // English textcompiletime
+
+
+
+    let compile_time = 0.5
     let training_step = exit_and_summarize(
         0,
         loss_metrics.total_loss,

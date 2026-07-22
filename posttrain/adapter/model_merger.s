@@ -2,11 +2,11 @@ package main
 
 use std.io.println
 
-// model_merger.s
-// Utilities to merge PEFT-compatible LoRA adapters into base model weights.
-// 
-// This module handles merging of adapter_model.safetensors (PEFT format) 
-// into the base model weights for inference.
+
+
+
+
+
 
 func merge_lora_adapters(string base_model_dir, string adapter_dir, string out_dir) int {
     println("Merging PEFT-compatible LoRA adapters:")
@@ -18,7 +18,7 @@ func merge_lora_adapters(string base_model_dir, string adapter_dir, string out_d
     println("  " + adapter_dir + "/adapter_model.safetensors")
     println("  " + adapter_dir + "/adapter_config.json")
     println("")
-    
+
     println("Implementation methods:")
     println("  1. S runtime merge:")
     println("     - posttrain/adapter/peft_adapter_saver.s (PEFT format reader)")
@@ -35,11 +35,11 @@ func merge_lora_adapters(string base_model_dir, string adapter_dir, string out_d
     println("     - from peft import AutoPeftModelForCausalLM")
     println("     - model.merge_and_unload()")
     println("")
-    
+
     0
 }
 
 func main() int {
-    // Example invocation when compiled as a runner
+
     merge_lora_adapters("/tmp/base", "/tmp/adapters", "/tmp/out")
 }

@@ -1,7 +1,7 @@
 package main
 
 func main() {
-    // testEnglish text (%) English text
+
 
     println("======================================================================")
     println("S languageEnglish text (%) English texttest")

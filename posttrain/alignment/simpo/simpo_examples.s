@@ -2,11 +2,11 @@ package neurx.posttrain.alignment.simpo_examples
 
 use neurx.posttrain.alignment.simpo_trainer.*
 
-// ════════════════════════════════════════════════════════════════════════════════
-// SimPO (Simple Preference Optimization) Trainer Examples
-//
-// English textpreferenceoptimizeimplementation
-// ════════════════════════════════════════════════════════════════════════════════
+
+
+
+
+
 
 func create_simpo_config() simpo_config {
     simpo_config {
@@ -28,7 +28,7 @@ func create_simpo_config() simpo_config {
     }
 }
 
-// Example 1: Basic SimPO Training
+
 func example_basic_simpo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 1: Basic SimPO Training                          ║")
@@ -83,7 +83,7 @@ func example_basic_simpo_training() {
     print("")
 }
 
-// Example 2: SimPO vs DPO vs ORPO Comparison
+
 func example_algorithm_comparison() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 2: Algorithm Comparison                          ║")
@@ -124,7 +124,7 @@ func example_algorithm_comparison() {
     print("")
 }
 
-// Example 3: Margin-Based Learning
+
 func example_margin_based_learning() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 3: Margin-Based Learning                         ║")
@@ -157,7 +157,7 @@ func example_margin_based_learning() {
     print("")
 }
 
-// Example 4: Training Dynamics
+
 func example_training_dynamics() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 4: Training Dynamics                             ║")
@@ -182,7 +182,7 @@ func example_training_dynamics() {
     print("")
 }
 
-// Example 5: Hyperparameter Sensitivity
+
 func example_hyperparameter_sensitivity() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 5: Hyperparameter Sensitivity                    ║")
@@ -212,7 +212,7 @@ func example_hyperparameter_sensitivity() {
     print("")
 }
 
-// Example 6: Complete Pipeline
+
 func example_complete_pipeline() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 6: Complete Alignment Pipeline with SimPO         ║")
@@ -261,7 +261,7 @@ func example_complete_pipeline() {
     print("")
 }
 
-// Main
+
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -281,7 +281,7 @@ func main() {
     print("═════════════════════════════════════════════════════════════")
 }
 
-// Helpers
+
 func int_to_string_ex(int i) string {
     string(i)
 }

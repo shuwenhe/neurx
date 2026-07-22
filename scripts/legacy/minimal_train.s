@@ -11,7 +11,7 @@ func main() {
         runtime_write_text_file(startup_marker_file, "started\n")
     }
     write_progress(progress_file, "trainer-main-entered")
-    
+
     string project_root = runtime_env_get("NEURX_ROOT", ".")
     string model_name = runtime_env_get("NEURX_PRETRAIN_MODEL_NAME", "NeurX-1.3")
     string manifest_path = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
@@ -222,7 +222,7 @@ func main() {
 
 func write_progress(string path, string text) {
     if str_len(path) > 0 {
-        // Use shell append for efficiency
+
         runtime_run_command_output("echo '" + text + "' >> " + shell_escape(path) + "; printf ok")
     }
 }

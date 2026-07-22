@@ -17,7 +17,7 @@ class HostAllocator final : public neurx::cann::DeviceAllocator {
   void release(void* address) override { ::operator delete(address); }
 };
 
-}  // namespace
+}
 
 int main() {
   HostAllocator allocator;

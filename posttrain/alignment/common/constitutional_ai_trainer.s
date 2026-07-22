@@ -1,37 +1,37 @@
 package neurx.posttrain.alignment.constitutional_ai_trainer
 
-// ════════════════════════════════════════════════════════════════════════════════
-// Constitutional AI Trainer (English text AI training)
-//
-// English textprincipleEnglish textrevisionEnglish text:
-//   1. principleEnglish text (Constitution Definition)
-//   2. English text (Self-Critique)
-//   3. English textrevision (Response Revision)
-//   4. preferenceEnglish textgenerate (Preference Pair Generation)
-//   5. English textalignment (RLAIF - RL from AI Feedback)
-//
-// English text:
-//   - English textalignmenttraining
-//   - English text
-//   - harmfulEnglish text
-//   - English textalignmentdatagenerate
-// ════════════════════════════════════════════════════════════════════════════════
 
-// ════════════════════════════════════════════════════════════════════════════════
-// 1. dataEnglish text
-// ════════════════════════════════════════════════════════════════════════════════
 
-// English textprinciple
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 struct constitutional_principle {
-    string id                       // principleID: "harmlessness", "honesty" English text
-    string description              // principleDescription
-    string critique_template        // critiquepromptEnglish text
-    string revision_template        // revisionpromptEnglish text
-    int severity                    // severityEnglish text (1-5)
-    float weight                    // weight (English textoptimizeEnglish text)
+    string id
+    string description
+    string critique_template
+    string revision_template
+    int severity
+    float weight
 }
 
-// principleEnglish text (English textprinciple)
+
 struct constitution {
     []constitutional_principle principles
     int num_principles
@@ -39,105 +39,105 @@ struct constitution {
     string name
 }
 
-// critiqueEnglish textrevisionresult
+
 struct critique_revision_result {
-    string original_response        // English text
-    string critique                 // AI English textcritique
-    string revised_response         // revisionEnglish text
-    string principle_id             // English textprinciple
-    float critique_strength         // critiqueEnglish text (0-1)
-    float revision_quality          // revisionEnglish text (0-1)
-    bool revision_occurred          // English textrevision
+    string original_response
+    string critique
+    string revised_response
+    string principle_id
+    float critique_strength
+    float revision_quality
+    bool revision_occurred
 }
 
-// CAI preferenceEnglish text
-struct cai_preference_pair {
-    string prompt                   // English textprompt
-    string chosen_response          // revisionEnglish text (English text)
-    string rejected_response        // English text (English text)
 
-    string principle_id             // English textprinciple
-    int principle_severity          // principleseverity
-    float critique_strength         // critiqueEnglish text
-    float revision_quality          // revisionEnglish text
+struct cai_preference_pair {
+    string prompt
+    string chosen_response
+    string rejected_response
+
+    string principle_id
+    int principle_severity
+    float critique_strength
+    float revision_quality
 
     int num_tokens_prompt
     int num_tokens_chosen
     int num_tokens_rejected
 }
 
-// CAI batch
+
 struct cai_batch {
     []cai_preference_pair pairs
     int num_pairs
-    int num_revised                 // English textrevisionEnglish textcount
-    int num_unchanged               // English textrevisionEnglish textcount
+    int num_revised
+    int num_unchanged
     float avg_critique_strength
     float avg_revision_quality
 }
 
-// CAI configuration
+
 struct cai_config {
-    // generateparameter
+
     int max_response_tokens
     int max_critique_tokens
     float generation_temperature
     float critique_temperature
     float revision_temperature
 
-    // preferenceEnglish textgenerate
-    int num_principles_per_batch    // English textuseEnglish textprinciple
-    bool rotate_principles          // English textprinciple
 
-    // English text
-    float critique_strength_threshold      // English textcritiqueEnglish text (0-1)
-    float revision_quality_threshold       // English textrevisionEnglish text (0-1)
-    bool filter_low_quality         // English text
+    int num_principles_per_batch
+    bool rotate_principles
 
-    // trainingEnglish text
+
+    float critique_strength_threshold
+    float revision_quality_threshold
+    bool filter_low_quality
+
+
     int batch_size
     int num_batches
     int checkpoint_interval
 
-    // English texttraining
+
     int global_rank
     int world_size
     bool use_mixed_precision
 }
 
-// CAI state
+
 struct cai_state {
     cai_config config
     constitution current_constitution
 
-    // trainingstatistics
+
     int total_prompts_processed
     int total_revisions
     float total_critique_strength
     float total_revision_quality
     int total_filtered_out
 
-    // principleEnglish text
+
     []int principle_usage_count
     []float principle_avg_critique_strength
     []float principle_revision_success_rate
 
-    // English text
-    float revision_rate             // English textrevisionEnglish text
-    float quality_threshold_rate    // English text
+
+    float revision_rate
+    float quality_threshold_rate
     float avg_tokens_per_pair
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
-// 2. principleEnglish text
-// ════════════════════════════════════════════════════════════════════════════════
 
-// English textdefaultprincipleEnglish text
+
+
+
+
 func create_default_constitution() constitution {
 
     []constitutional_principle principles = make_principle_array(8)
 
-    // principle 1: harmlessEnglish text
+
     principles[0] = constitutional_principle {
         id: "harmlessness",
         description: "Should not produce harmful, illegal, or unethical content",
@@ -147,7 +147,7 @@ func create_default_constitution() constitution {
         weight: 1.0,
     }
 
-    // principle 2: English text
+
     principles[1] = constitutional_principle {
         id: "honesty",
         description: "Should provide truthful and factually accurate information",
@@ -157,7 +157,7 @@ func create_default_constitution() constitution {
         weight: 0.9,
     }
 
-    // principle 3: English text
+
     principles[2] = constitutional_principle {
         id: "helpfulness",
         description: "Should provide helpful and directly relevant responses",
@@ -167,7 +167,7 @@ func create_default_constitution() constitution {
         weight: 0.8,
     }
 
-    // principle 4: English text
+
     principles[3] = constitutional_principle {
         id: "non_discrimination",
         description: "Should treat different groups fairly without bias",
@@ -177,7 +177,7 @@ func create_default_constitution() constitution {
         weight: 0.95,
     }
 
-    // principle 5: privacyEnglish text
+
     principles[4] = constitutional_principle {
         id: "privacy",
         description: "Should protect privacy and not disclose personal information",
@@ -187,7 +187,7 @@ func create_default_constitution() constitution {
         weight: 0.9,
     }
 
-    // principle 6: English text
+
     principles[5] = constitutional_principle {
         id: "legality",
         description: "Should refuse to provide guidance for illegal activities",
@@ -197,7 +197,7 @@ func create_default_constitution() constitution {
         weight: 1.0,
     }
 
-    // principle 7: English textsafety
+
     principles[6] = constitutional_principle {
         id: "child_safety",
         description: "Should prioritize child safety and protection",
@@ -207,7 +207,7 @@ func create_default_constitution() constitution {
         weight: 1.0,
     }
 
-    // principle 8: English text
+
     principles[7] = constitutional_principle {
         id: "transparency",
         description: "Should be transparent about AI limitations and identity",
@@ -225,11 +225,11 @@ func create_default_constitution() constitution {
     }
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
-// 3. English textrevision
-// ════════════════════════════════════════════════════════════════════════════════
 
-// English textpromptEnglish text-revisionEnglish text
+
+
+
+
 func perform_critique_revision(
     string prompt,
     string original_response,
@@ -241,7 +241,7 @@ func perform_critique_revision(
     result.original_response = original_response
     result.principle_id = principle.id
 
-    // Step 1: generatecritique
+
     string critique_prompt = "Prompt: " + prompt +
                             "\nResponse: " + original_response +
                             "\n" + principle.critique_template
@@ -253,11 +253,11 @@ func perform_critique_revision(
     )
     result.critique = critique
 
-    // Step 2: English textcritiqueEnglish text
+
     float critique_strength = estimate_critique_strength(critique, config.max_critique_tokens)
     result.critique_strength = critique_strength
 
-    // Step 3: English textcritiqueEnglish text, generaterevision
+
     float revision_quality = 0.0
     if critique_strength > 0.2 {
 
@@ -273,7 +273,7 @@ func perform_critique_revision(
         )
         result.revised_response = revised_response
 
-        // Step 4: English textrevisionEnglish text
+
         revision_quality = estimate_revision_quality(
             original_response,
             revised_response,
@@ -281,12 +281,12 @@ func perform_critique_revision(
         )
         result.revision_quality = revision_quality
 
-        // Step 5: English textrevision
+
         bool meaningful_revision = revision_quality > config.revision_quality_threshold
         result.revision_occurred = meaningful_revision
 
     } else {
-        // critiqueEnglish text, English textrevision
+
         result.revised_response = original_response
         result.revision_quality = 0.0
         result.revision_occurred = false
@@ -295,10 +295,10 @@ func perform_critique_revision(
     result
 }
 
-// English textcritiqueEnglish text (0-1)
+
 func estimate_critique_strength(string critique, int max_tokens) float {
 
-    // English textcritiqueEnglish textkeywordsEnglish text
+
     int critique_len = string_length(critique)
     float length_score = float(critique_len) / float(max_tokens * 50)
 
@@ -306,7 +306,7 @@ func estimate_critique_strength(string critique, int max_tokens) float {
         length_score = 1.0
     }
 
-    // keywordsEnglish text
+
     float keyword_score = 0.0
     if contains_substring(critique, "harmful") || contains_substring(critique, "dangerous") {
         keyword_score = keyword_score + 0.15
@@ -329,24 +329,24 @@ func estimate_critique_strength(string critique, int max_tokens) float {
     strength
 }
 
-// English textrevisionEnglish text (0-1)
+
 func estimate_revision_quality(
     string original,
     string revised,
     string critique
 ) float {
 
-    // English textrevisionEnglish text, keywordsEnglish text
+
     int orig_len = string_length(original)
     int rev_len = string_length(revised)
 
-    // revisionEnglish text (English text)
+
     int len_diff = abs_int(rev_len - orig_len)
     float len_score = float(len_diff) / float(orig_len + 1)
 
     if len_score > 1.0 { len_score = 1.0 }
 
-    // English textharmfulkeywordsEnglish text
+
     int harmful_in_orig = count_harmful_keywords(original)
     int harmful_in_rev = count_harmful_keywords(revised)
 
@@ -363,11 +363,11 @@ func estimate_revision_quality(
     quality
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
-// 4. batchEnglish textpreferenceEnglish textgenerate
-// ════════════════════════════════════════════════════════════════════════════════
 
-// English textpromptbatchgenerate CAI preferenceEnglish text
+
+
+
+
 func generate_cai_preference_pairs(
     []string prompts,
     []string responses,
@@ -393,11 +393,11 @@ func generate_cai_preference_pairs(
     int i = 0
     while i < len(prompts) {
 
-        // English textprinciple (English text)
+
         int principle_idx = i % constitution_obj.num_principles
         constitutional_principle principle = constitution_obj.principles[principle_idx]
 
-        // English text-revision
+
         critique_revision_result result = perform_critique_revision(
             prompts[i],
             responses[i],
@@ -405,7 +405,7 @@ func generate_cai_preference_pairs(
             config
         )
 
-        // English textpreferenceEnglish text
+
         cai_preference_pair pair
         pair.prompt = prompts[i]
         pair.principle_id = principle.id
@@ -414,23 +414,23 @@ func generate_cai_preference_pairs(
         pair.revision_quality = result.revision_quality
 
         if result.revision_occurred {
-            // revisionEnglish text: revisionEnglish text chosen, English text rejected
+
             pair.chosen_response = result.revised_response
             pair.rejected_response = result.original_response
             batch.num_revised = batch.num_revised + 1
         } else {
-            // English textrevision: useEnglish text
+
             pair.chosen_response = result.original_response
             pair.rejected_response = result.original_response
             batch.num_unchanged = batch.num_unchanged + 1
         }
 
-        // Token statistics
+
         pair.num_tokens_prompt = string_length(pair.prompt) / 4
         pair.num_tokens_chosen = string_length(pair.chosen_response) / 4
         pair.num_tokens_rejected = string_length(pair.rejected_response) / 4
 
-        // English text
+
         bool passes_filters = true
         if config.filter_low_quality {
             if result.critique_strength < config.critique_strength_threshold {
@@ -451,7 +451,7 @@ func generate_cai_preference_pairs(
         i = i + 1
     }
 
-    // computeEnglish text
+
     if batch.num_pairs > 0 {
         batch.avg_critique_strength = total_critique_strength / float(batch.num_pairs)
         batch.avg_revision_quality = total_revision_quality / float(batch.num_pairs)
@@ -460,11 +460,11 @@ func generate_cai_preference_pairs(
     batch
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
-// 5. complete CAI trainingEnglish text
-// ════════════════════════════════════════════════════════════════════════════════
 
-// initialize CAI state
+
+
+
+
 func init_cai_state(cai_config config, constitution constitution_obj) cai_state {
 
     cai_state state
@@ -488,23 +488,23 @@ func init_cai_state(cai_config config, constitution constitution_obj) cai_state 
     state
 }
 
-// start CAI training
+
 func start_cai_training(
     cai_config config,
     []string prompts,
     []string initial_responses
 ) cai_state {
 
-    // initialize
+
     constitution constitution_obj = create_default_constitution()
     cai_state state = init_cai_state(config, constitution_obj)
 
-    // English text
+
     if config.world_size > 1 {
-        // English text
+
     }
 
-    // generate CAI batch
+
     cai_batch batch = generate_cai_preference_pairs(
         prompts,
         initial_responses,
@@ -512,7 +512,7 @@ func start_cai_training(
         config
     )
 
-    // English textstate
+
     state.total_prompts_processed = len(prompts)
     state.total_revisions = batch.num_revised
     state.total_critique_strength = batch.avg_critique_strength * float(batch.num_pairs)
@@ -534,17 +534,17 @@ func start_cai_training(
         state.avg_tokens_per_pair = total_tokens / float(batch.num_pairs * 3)
     }
 
-    // English textstatistics
+
     print_cai_statistics(state, batch)
 
     state
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
-// 6. English text
-// ════════════════════════════════════════════════════════════════════════════════
 
-// English text CAI statisticsinformation
+
+
+
+
 func print_cai_statistics(cai_state state, cai_batch batch) {
     print("═══════════════════════════════════════════════════════════")
     print("Constitutional AI Training Statistics")
@@ -559,9 +559,9 @@ func print_cai_statistics(cai_state state, cai_batch batch) {
     print("═══════════════════════════════════════════════════════════")
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
-// 7. toolfunction
-// ════════════════════════════════════════════════════════════════════════════════
+
+
+
 
 func make_principle_array(int size) []constitutional_principle {
     []constitutional_principle arr = []constitutional_principle{}
@@ -587,7 +587,7 @@ func generate_text(string prompt, int max_tokens, float temperature) string {
 }
 
 func string_length(string s) int {
-    // English text
+
     int len = 0
     len
 }

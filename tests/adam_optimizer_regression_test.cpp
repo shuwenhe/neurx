@@ -138,7 +138,7 @@ void test_s_implementation_wires_persistent_state() {
             "saved first moments feed the next update");
 }
 
-}  // namespace
+}
 
 int main() {
     test_adam_state_accumulates();

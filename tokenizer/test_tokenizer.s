@@ -1,46 +1,46 @@
 package main
 
-// Test BPE tokenizer
 
-// Test 1: tokenizer configuration
+
+
 func test_tokenizer_config() {
     println("Test 1: tokenizer configuration")
-    
+
     let cfg = new_tokenizer_config()
-    
+
     if cfg.vocab_size == 50257 {
         println("  ✓ Vocab size correct (50257)")
     }
-    
+
     if cfg.add_bos_token && cfg.add_eos_token {
         println("  ✓ Special tokens enabled")
     }
-    
+
     if cfg.add_space_prefix {
         println("  ✓ Space prefix enabled")
     }
 }
 
-// Test 2: Vocabulary list creation
+
 func test_vocab_creation() {
     println("Test 2: Vocabulary creation")
-    
+
     []string vocab = []string{cap: 5}
     vocab.push("<pad>")
     vocab.push("<eos>")
     vocab.push("<bos>")
     vocab.push("<unk>")
     vocab.push("hello")
-    
+
     if len(vocab) == 5 {
         println("  ✓ Vocab list created")
     }
 }
 
-// Test 3: tokenizer initialization
+
 func test_tokenizer_init() {
     println("Test 3: tokenizer initialization")
-    
+
     []string vocab = []string{cap: 10}
     vocab.push("<pad>")
     vocab.push("<eos>")
@@ -52,150 +52,150 @@ func test_tokenizer_init() {
     vocab.push("o")
     vocab.push(" ")
     vocab.push("w")
-    
+
     let cfg = new_tokenizer_config()
     let tokenizer = new_bpe_tokenizer(vocab, cfg)
-    
+
     if tokenizer.vocab.vocab_size == 10 {
         println("  ✓ tokenizer initialized correctly")
     }
-    
+
     if tokenizer.bos_token_id == 2 {
         println("  ✓ Special token IDs found")
     }
 }
 
-// Test 4: Special token detection
+
 func test_special_token_detection() {
     println("Test 4: Special token detection")
-    
+
     let is_pad = is_special_token("<pad>")
     let is_eos = is_special_token("<eos>")
     let is_hello = is_special_token("hello")
-    
+
     if is_pad && is_eos && !is_hello {
         println("  ✓ Special token detection works")
     }
 }
 
-// Test 5: Space handling
+
 func test_space_handling() {
     println("Test 5: Space handling")
-    
+
     let needs_space_hello = should_add_space_before("hello")
     let needs_space_period = should_add_space_before(".")
-    
+
     if needs_space_hello && !needs_space_period {
         println("  ✓ Space handling correct")
     }
 }
 
-// Test 6: Padding
+
 func test_padding() {
     println("Test 6: Sequence padding")
-    
+
     []int tokens = []int{cap: 3}
     tokens.push(1)
     tokens.push(2)
     tokens.push(3)
-    
+
     let padded = pad_sequence(tokens, 5, 0)
-    
+
     if len(padded) == 5 {
         println("  ✓ Padding to length 5 works")
     }
 }
 
-// Test 7: Truncation
+
 func test_truncation() {
     println("Test 7: Sequence truncation")
-    
+
     []int tokens = []int{cap: 10}
     var i = 0
     while i < 10 {
         tokens.push(i)
         i = i + 1
     }
-    
+
     let truncated = pad_sequence(tokens, 5, 0)
-    
+
     if len(truncated) == 5 {
         println("  ✓ Truncation to length 5 works")
     }
 }
 
-// Test 8: Vocabulary size query
+
 func test_vocab_size() {
     println("Test 8: Vocabulary size query")
-    
+
     []string vocab = []string{cap: 100}
     var i = 0
     while i < 100 {
         vocab.push("token")
         i = i + 1
     }
-    
+
     let cfg = new_tokenizer_config()
     let tokenizer = new_bpe_tokenizer(vocab, cfg)
-    
+
     let size = get_vocab_size(tokenizer)
-    
+
     if size == 100 {
         println("  ✓ Vocab size query correct")
     }
 }
 
-// Test 9: Token ID lookup
+
 func test_token_id_lookup() {
     println("Test 9: Token ID lookup")
-    
+
     []string vocab = []string{cap: 5}
     vocab.push("<pad>")
     vocab.push("hello")
     vocab.push("world")
     vocab.push("!")
     vocab.push("<unk>")
-    
+
     let cfg = new_tokenizer_config()
     let tokenizer = new_bpe_tokenizer(vocab, cfg)
-    
+
     let token = id_to_token(tokenizer, 1)
     let id = token_to_id(tokenizer, "hello")
-    
+
     if token == "hello" {
         println("  ✓ ID to token works")
     }
-    
+
     if id == 1 {
         println("  ✓ Token to ID works")
     }
 }
 
-// Test 10: Cache statistics
+
 func test_cache_stats() {
     println("Test 10: Cache statistics")
-    
+
     []string vocab = []string{cap: 5}
     vocab.push("<pad>")
     vocab.push("<eos>")
     vocab.push("<bos>")
     vocab.push("<unk>")
     vocab.push("a")
-    
+
     let cfg = new_tokenizer_config()
     let tokenizer = new_bpe_tokenizer(vocab, cfg)
-    
+
     let stats = get_cache_stats(tokenizer)
-    
+
     if stats.cache_hits == 0 && stats.cache_misses == 0 {
         println("  ✓ Initial cache stats zero")
     }
 }
 
-// Test 11: Batch operations
+
 func test_batch_operations() {
     println("Test 11: Batch encode/decode")
-    
+
     []string vocab = []string{cap: 10}
     vocab.push("<pad>")
     vocab.push("<eos>")
@@ -207,46 +207,46 @@ func test_batch_operations() {
     vocab.push(" ")
     vocab.push("x")
     vocab.push("y")
-    
+
     let cfg = new_tokenizer_config()
     let tokenizer = new_bpe_tokenizer(vocab, cfg)
-    
+
     []string texts = []string{cap: 2}
     texts.push("abc")
     texts.push("xyz")
-    
+
     let batch = encode_batch(tokenizer, texts, 10)
     let decoded = decode_batch(tokenizer, batch)
-    
+
     if batch.batch_size == 2 && len(decoded) == 2 {
         println("  ✓ Batch operations work")
     }
 }
 
-// Test 12: End-to-end encoding
+
 func test_end_to_end_encode() {
     println("Test 12: End-to-end encoding")
-    
+
     []string vocab = []string{cap: 10}
     var i = 0
     while i < 10 {
         vocab.push("token_" + to_string_int(i))
         i = i + 1
     }
-    
+
     let cfg = new_tokenizer_config()
     let tokenizer = new_bpe_tokenizer(vocab, cfg)
-    
+
     let text = "hello"
     let token_ids = encode(tokenizer, text)
-    
-    // Should have BOS + tokens + EOS
+
+
     if len(token_ids) > 2 {
         println("  ✓ Encoding includes special tokens")
     }
 }
 
-// Helper to convert int to string
+
 func to_string_int(int x) string {
     if x == 0 { return "0" }
     if x == 1 { return "1" }
@@ -261,13 +261,13 @@ func to_string_int(int x) string {
     return "0"
 }
 
-// Main test runner
+
 func main() {
     println("============================================")
     println("BPE tokenizer Tests")
     println("============================================")
     println("")
-    
+
     test_tokenizer_config()
     println("")
     test_vocab_creation()
@@ -292,7 +292,7 @@ func main() {
     println("")
     test_end_to_end_encode()
     println("")
-    
+
     println("============================================")
     println("✓ All tokenizer tests completed!")
     println("============================================")

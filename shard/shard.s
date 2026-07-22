@@ -1,9 +1,9 @@
-// ============================================================================
-// NeurX Shard Manager
-//
-// S implementation of the unified shard CLI.
-// The shell wrapper only translates argv into environment variables.
-// ============================================================================
+
+
+
+
+
+
 
 package main
 
@@ -183,7 +183,7 @@ func run_wikipedia() int {
 
     runtime_run_command_output("rm -f " + shell_escape(completion_file))
 
-    string run_command = 
+    string run_command =
         "NEURX_HOME=" + shell_escape(root) +
         " S_COMPILER=" + shell_escape(compiler) +
         " S_COMPILER_EMIT_CWD=" + shell_escape(env_get("S_COMPILER_EMIT_CWD", root + "/../s")) +

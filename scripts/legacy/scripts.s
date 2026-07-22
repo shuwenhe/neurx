@@ -1,24 +1,24 @@
-// ============================================================================
-// NeurX Data Processing Scripts Entry Point (S Language Status Layer)
-// 
-// Minimal S language layer that:
-// - Reports data pipeline status  
-// - Acts as status entry point for build system
-// - Delegates actual work to shell scripts (via Makefile)
-// ============================================================================
+
+
+
+
+
+
+
+
 
 package main
 
 use neurx.runtime.io.{runtime_env_get}
 use std.io.println
 
-// ============================================================================
-// Simple Main Entry - just report status and exit
-// ============================================================================
+
+
+
 
 func main() int {
     let cmd = runtime_env_get("NEURX_SCRIPTS_CMD", "help")
-    
+
     if cmd == "clean" {
         println("")
         println("==================================================")

@@ -1,8 +1,8 @@
-// ============================================================================
-// CUDA Build Manager - S Language Implementation (Makefile alternative)
-// Usage: s ir cuda/build_cuda.s -o artifacts/build/cuda_manager.ir
-//        s_runner artifacts/build/cuda_manager.ir [target]
-// ============================================================================
+
+
+
+
+
 
 package main
 
@@ -13,18 +13,18 @@ use neurx.runtime.io.{
     runtime_run_command_output,
 }
 
-// ============================================================================
-// Main Entry Point
-// ============================================================================
+
+
+
 
 func main() {
     println("[CUDA Manager] NeurX GPU Build System")
     println("")
-    
-    // Get build target from environment
+
+
     string target = runtime_env_get("CUDA_TARGET", "build-all")
-    
-    // Route to appropriate handler
+
+
     if eq_string(target, "build-kernels") {
         build_kernels()
     } else if eq_string(target, "build-runtime") {
@@ -43,9 +43,9 @@ func main() {
     }
 }
 
-// ============================================================================
-// Build Targets
-// ============================================================================
+
+
+
 
 func build_all() {
     println("[BUILD] Complete CUDA System")
@@ -76,8 +76,8 @@ func clean_all() {
 
 func verify_environment() {
     println("[VERIFY] CUDA Environment")
-    
-    // Check nvcc
+
+
     string nvcc_out = runtime_run_command_output("which nvcc 2>/dev/null || echo 'not_found'")
     if contains_string(nvcc_out, "not_found") {
         println("[ERROR] nvcc not found")
@@ -86,8 +86,8 @@ func verify_environment() {
         return
     }
     println("[OK] nvcc found: " + trim(nvcc_out))
-    
-    // Check cuda libs
+
+
     string cuda_home = get_cuda_home()
     if !runtime_file_exists(cuda_home + "/lib64/libcudart.so") &&
        !runtime_file_exists("/usr/local/cuda/lib64/libcudart.so") {
@@ -95,47 +95,47 @@ func verify_environment() {
         return
     }
     println("[OK] CUDA Runtime library found")
-    
-    // Check cublas
+
+
     string cublas_check = runtime_run_command_output("ldconfig -p 2>/dev/null | grep cublas || echo 'not_found'")
     if contains_string(cublas_check, "not_found") {
         println("[WARNING] cuBLAS may not be installed")
     } else {
         println("[OK] cuBLAS found")
     }
-    
-    // Check GPU
+
+
     string gpu_check = runtime_run_command_output("nvidia-smi -L 2>/dev/null | head -1 || echo 'not_found'")
     if contains_string(gpu_check, "not_found") {
         println("[WARNING] GPU not detected")
     } else {
         println("[OK] GPU detected: " + trim(gpu_check))
     }
-    
+
     println("[SUCCESS] CUDA environment verified")
 }
 
-// ============================================================================
-// Utility Functions
-// ============================================================================
+
+
+
 
 func execute_s_script(string script_path) {
     string s_compiler = runtime_env_get("S_COMPILER", "/home/shuwen/.local/bin/s")
-    
+
     if !runtime_file_exists(s_compiler) {
         println("[ERROR] S compiler not found at " + s_compiler)
         println("  Set S_COMPILER environment variable")
         return
     }
-    
+
     if !runtime_file_exists(script_path) {
         println("[ERROR] Script not found: " + script_path)
         return
     }
-    
-    string ir_file = script_path  // Will compile and run
+
+    string ir_file = script_path
     string cmd = s_compiler + " ir " + script_path + " -o " + ir_file + ".ir && s_runner " + ir_file + ".ir"
-    
+
     string output = runtime_run_command_output(cmd)
     if str_len(trim(output)) > 0 {
         println(output)
@@ -147,11 +147,11 @@ func get_cuda_home() string {
     if str_len(cuda_home) > 0 {
         return cuda_home
     }
-    
+
     if runtime_file_exists("/usr/local/cuda/include/cuda.h") {
         return "/usr/local/cuda"
     }
-    
+
     "/usr"
 }
 

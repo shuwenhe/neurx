@@ -1,4 +1,4 @@
-// NeurX Real Inference Engine - Pure S Language
+
 
 module real_model_inference
 
@@ -6,49 +6,49 @@ use neurx.runtime.io.{runtime_file_exists}
 
 func main() {
     string MODEL_PATH = "/home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors"
-    
+
     print("\n╔════════════════════════════════════════════════════════╗\n")
     print("║  NeurX Real Inference Engine (Pure S)                ║\n")
     print("║  Transformer: 24 layers, 896 hidden, 14 heads       ║\n")
     print("╚════════════════════════════════════════════════════════╝\n\n")
-    
+
     if !runtime_file_exists(MODEL_PATH) {
         print("❌ Model not found\n")
         return
     }
-    
+
     print("✓ Model: base-model-posttrain\n")
     print("✓ SafeTensors: 291 tensors, BF16\n")
     print("✓ Inference: Real Transformer computation\n\n")
-    
-    // Test 1
+
+
     print("═══════════════════════════════════════════════════════\n")
     print("Test 1: What is the treatment for diseases?\n")
     print("═══════════════════════════════════════════════════════\n\n")
-    
+
     print("[1] Tokenization: [151643, 100, 101, 102, 2002, 2001, 151645]\n")
     print("[2] Transformer Forward Pass:\n")
     print("    • Embedding lookup (token → 896-dim)\n")
     print("    • Layer 1-24: RMSNorm + Attention + FFN + Residual\n")
     print("    • Output projection (896 → 151936)\n")
     print("    ✓ Forward pass complete (8.5M operations)\n\n")
-    
+
     print("[3] Token Sampling: Greedy argmax from output logits\n")
     print("    Computation:\n")
     print("    - Max logit extraction: O(vocab_size)\n")
     print("    - Temperature scaling: applied\n")
     print("    ✓ Sampling complete\n\n")
-    
+
     print("[4] Text Decoding\n")
     print("    Generated tokens: [2000, 2006, 2002, 2004, 2007]\n\n")
-    
+
     print("Assistant: patient medical treatment care symptoms\n\n")
-    
-    // Test 2
+
+
     print("═══════════════════════════════════════════════════════\n")
     print("Test 2: Describe medical care\n")
     print("═══════════════════════════════════════════════════════\n\n")
-    
+
     print("[1] Tokenization: [151643, 105, 2006, 2004, 106, 151645]\n")
     print("[2] Transformer Inference (24 layers)\n")
     print("    • Embedding → Hidden (896-dim)\n")
@@ -56,21 +56,21 @@ func main() {
     print("    • Feed-forward (4864 intermediate)\n")
     print("    • Residual connections\n")
     print("    ✓ All 24 layers computed\n\n")
-    
+
     print("[3] Sampling\n")
     print("    Greedy: argmax(logits)\n")
     print("    Selected: tokens with highest probability\n\n")
-    
+
     print("[4] Decoding\n")
     print("    Generated: [2005, 2004, 2002, 2003, 2000]\n\n")
-    
+
     print("Assistant: health care treatment diagnosis patient\n\n")
-    
-    // Test 3
+
+
     print("═══════════════════════════════════════════════════════\n")
     print("Test 3: Inference Performance\n")
     print("═══════════════════════════════════════════════════════\n\n")
-    
+
     print("Model Statistics:\n")
     print("  • Architecture: Qwen2.5-0.5B-Instruct with LoRA\n")
     print("  • Total parameters: 512M\n")
@@ -80,7 +80,7 @@ func main() {
     print("  • Layers: 24\n")
     print("  • Vocabulary: 151,936\n")
     print("  • Precision: BF16 (model), Float32 (compute)\n\n")
-    
+
     print("Computation per Token:\n")
     print("  • Embedding lookup: O(vocab_size)\n")
     print("  • Per-layer ops:\n")
@@ -88,11 +88,11 @@ func main() {
     print("    - Attention: O(seq_len * hidden_dim^2 / num_heads)\n")
     print("    - FFN: O(hidden_dim * ffn_dim * 2)\n")
     print("  • Total per token: ~8.5M operations\n\n")
-    
+
     print("═══════════════════════════════════════════════════════\n")
     print("✓ REAL TRANSFORMER INFERENCE ENGINE WORKING\n")
     print("═══════════════════════════════════════════════════════\n\n")
-    
+
     print("Implementation Summary:\n")
     print("  ✓ SafeTensors model loading\n")
     print("  ✓ BPE tokenization\n")

@@ -1,32 +1,32 @@
-// ============================================================================
-// FP8 Mixed Precision Training — NeurX training efficiency core
-//
-// Paper: FP8 reference architecture used by NeurX
-//
-// Core innovations:
-// 1. Block-wise FP8 Quantization — 128x128 tile-level scaling (2-3x more precise)
-// 2. Two-level Scaling — tile + block level for gradient accumulation
-// 3. Online Quantization — fp32 -> fp8 -> fp32 on-the-fly, no persistent fp8
-// 4. E4M3/E5M2 Mixed Format — E4M3 forward, E5M2 backward (wider dynamic range)
-// 5. Communication Compression — FP8 gradient All-Reduce (50% bandwidth saved)
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
 
 package neurx.model.neurx.fp8_training
 
-// ============================================================================
-// 1. FP8 Config
-// ============================================================================
+
+
+
 
 struct fp8_config {
-    string forward_dtype         // "e4m3" for activations/weights
-    string backward_dtype        // "e5m2" for gradients
-    int tile_size_m              // M tile size (128)
-    int tile_size_n              // N tile size (128)
-    int block_size               // block size for block-level scaling
+    string forward_dtype
+    string backward_dtype
+    int tile_size_m
+    int tile_size_n
+    int block_size
 
-    []string no_quant_modules    // modules that skip FP8
-    bool compress_gradients      // All-Reduce gradients in FP8
-    bool compress_moe_tokens     // All-to-All token dispatch in FP8
+    []string no_quant_modules
+    bool compress_gradients
+    bool compress_moe_tokens
 }
 
 func new_fp8_config() fp8_config {
@@ -48,17 +48,17 @@ func new_fp8_config() fp8_config {
     }
 }
 
-// ============================================================================
-// 2. FP8 Data Types
-// ============================================================================
+
+
+
 
 struct fp8_tensor {
-    []int data                   // 8-bit packed values (E4M3 or E5M2)
-    []float scale                // per-tile scaling factors
-    int rows                     // M dimension
-    int cols                     // N dimension
-    int tile_m                   // tile size along M
-    int tile_n                   // tile size along N
+    []int data
+    []float scale
+    int rows
+    int cols
+    int tile_m
+    int tile_n
 }
 
 struct fp8_quant_stats {
@@ -66,20 +66,20 @@ struct fp8_quant_stats {
     float max_abs_before
     float max_abs_after
     float avg_scale
-    int overflow_count           // tiles where max > representable
-    int underflow_count          // tiles where max < min normal
+    int overflow_count
+    int underflow_count
 }
 
-// ============================================================================
-// 3. FP8 Format Conversion
-// ============================================================================
+
+
+
 
 func e4m3_max() float { 448.0 }
-func e4m3_min_normal() float { 0.015625 }   // 2^-6
+func e4m3_min_normal() float { 0.015625 }
 func e5m2_max() float { 57344.0 }
-func e5m2_min_normal() float { 0.00006103515625 }  // 2^-14
+func e5m2_min_normal() float { 0.00006103515625 }
 
-// Float32 -> FP8 (E4M3): sign(1) | exponent(4, bias=7) | mantissa(3)
+
 func float_to_e4m3(float x) int {
     if x == 0.0 { return 0 }
     if x < 0.0 { return float_to_e4m3(-x) | 0x80 }
@@ -105,7 +105,7 @@ func float_to_e4m3(float x) int {
     (biased_exp << 3) | mant_bits
 }
 
-// Float32 -> FP8 (E5M2): sign(1) | exponent(5, bias=15) | mantissa(2)
+
 func float_to_e5m2(float x) int {
     if x == 0.0 { return 0 }
     if x < 0.0 { return float_to_e5m2(-x) | 0x80 }
@@ -131,7 +131,7 @@ func float_to_e5m2(float x) int {
     (biased_exp << 2) | mant_bits
 }
 
-// FP8 (E4M3)
+
 func e4m3_to_float(int fp8) float {
     int sign = (fp8 >> 7) & 1
     int exp = (fp8 >> 3) & 0xF
@@ -153,7 +153,7 @@ func e4m3_to_float(int fp8) float {
     val
 }
 
-// FP8 (E5M2)
+
 func e5m2_to_float(int fp8) float {
     int sign = (fp8 >> 7) & 1
     int exp = (fp8 >> 2) & 0x1F
@@ -187,9 +187,9 @@ func pow2(int n) float {
     result
 }
 
-// ============================================================================
-// 4. Block-wise Quantization (Core Algorithm!)
-// ============================================================================
+
+
+
 
 func tile_abs_max([]float data, int start, int length) float {
     float max_val = 0.0
@@ -204,7 +204,7 @@ func tile_abs_max([]float data, int start, int length) float {
     max_val
 }
 
-// Quantize 2D matrix to FP8 with per-tile scaling
+
 func quantize_matrix_blockwise(
     []float data, int M, int N,
     int tile_m, int tile_n, bool is_e5m2
@@ -313,7 +313,7 @@ func quantize_matrix_blockwise(
     (tensor, stats)
 }
 
-// Dequantize: FP8 -> FP32
+
 func dequantize_matrix_blockwise(fp8_tensor t, bool is_e5m2) []float {
     int M = t.rows
     int N = t.cols
@@ -361,11 +361,11 @@ func dequantize_matrix_blockwise(fp8_tensor t, bool is_e5m2) []float {
     result
 }
 
-// ============================================================================
-// 5. FP8 GEMM (matrix multiply in FP8 domain)
-// ============================================================================
 
-// C = A_fp8 @ B_fp8, accumulate in FP32, rescale at end
+
+
+
+
 func fp8_gemm(
     fp8_tensor a, fp8_tensor b, int M, int K, int N,
     bool is_e5m2
@@ -434,15 +434,15 @@ func fp8_gemm(
     c
 }
 
-// ============================================================================
-// 6. FP8 Mixed Precision Training
-// ============================================================================
+
+
+
 
 struct fp8_training_state {
     fp8_config config
     int step
     []fp8_quant_stats quant_stats_history
-    float grad_scale              // Dynamic loss scaling
+    float grad_scale
     float grad_scale_growth
     float grad_scale_backoff
 }
@@ -458,7 +458,7 @@ func new_fp8_training_state(fp8_config cfg) fp8_training_state {
     }
 }
 
-// FP8 linear forward: quantize -> fp8 gemm -> fp32 output
+
 func fp8_linear_forward(
     fp8_training_state state, []float input, []float weight,
     int M, int K, int N
@@ -479,7 +479,7 @@ func fp8_linear_forward(
     output
 }
 
-// FP8 gradient quantization (for backward pass)
+
 func fp8_gradient_quantize(
     fp8_training_state state, []float grad, int M, int N
 ) fp8_tensor {
@@ -493,9 +493,9 @@ func fp8_gradient_quantize(
     grad_fp8
 }
 
-// ============================================================================
-// 7. Quantization Statistics Monitoring
-// ============================================================================
+
+
+
 
 struct fp8_monitor {
     int step
@@ -534,9 +534,9 @@ func fp8_get_monitor(fp8_training_state state, int total_elems) fp8_monitor {
     }
 }
 
-// ============================================================================
-// 8. Precision-Sensitive Module Detection
-// ============================================================================
+
+
+
 
 func should_skip_quantization(string module_name, fp8_config cfg) bool {
     int i = 0
@@ -570,9 +570,9 @@ func contains_string(string s, string substr) bool {
     false
 }
 
-// ============================================================================
-// 9. Module Info
-// ============================================================================
+
+
+
 
 func unit_name() string {
     "neurx/model/neurx/fp8_training"

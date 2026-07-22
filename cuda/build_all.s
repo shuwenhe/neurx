@@ -1,7 +1,7 @@
-// ============================================================================
-// NeurX CUDA Build System - S Language Implementation
-// Unified CUDA build coordinator implemented in S.
-// ============================================================================
+
+
+
+
 
 package main
 
@@ -14,9 +14,9 @@ use neurx.runtime.io.{
     runtime_run_command_output,
 }
 
-// ============================================================================
-// Build Configuration
-// ============================================================================
+
+
+
 
 struct build_config {
     string cuda_home
@@ -32,33 +32,33 @@ struct build_result {
     int exit_code
 }
 
-// ============================================================================
-// Main Build Entry Point
-// ============================================================================
+
+
+
 
 func main() {
     println("[CUDA Build] NeurX CUDA System Builder (S Language)")
     println("")
-    
-    // Detect build target from environment or args
+
+
     string target = runtime_env_get("CUDA_BUILD_TARGET", "all")
-    
-    // Initialize build config
+
+
     build_config config = detect_cuda_environment()
     if !is_cuda_available(config) {
         println("[ERROR] CUDA Toolkit not found")
         println("  Install from: https://developer.nvidia.com/cuda-downloads")
         return
     }
-    
+
     println("[INFO] CUDA Environment Detected:")
     println("  Home: " + config.cuda_home)
     println("  Lib: " + config.cuda_lib)
     println("  Version: " + config.cuda_version)
     println("  GPU Arch: sm_" + config.gpu_arch)
     println("")
-    
-    // Execute build targets
+
+
     switch target {
         case "all" {
             build_cuda_runtime(config)
@@ -83,36 +83,36 @@ func main() {
     }
 }
 
-// ============================================================================
-// Build Targets
-// ============================================================================
+
+
+
 
 func build_cuda_runtime(build_config cfg) {
     println("[BUILD] CUDA Runtime Library")
     println("")
-    
+
     string build_dir = "./artifacts/build/cuda_runtime"
     create_directory(build_dir)
-    
-    // Step 1: Compile with gcc
+
+
     println("[1/3] Compiling C wrapper with gcc...")
-    
+
     build_result result = compile_cuda_runtime(cfg, build_dir)
     if !result.success {
         println("[ERROR] " + result.output)
         return
     }
-    
+
     println("[2/3] Creating shared library...")
     result = link_cuda_runtime(cfg, build_dir)
     if !result.success {
         println("[ERROR] " + result.output)
         return
     }
-    
+
     println("[3/3] Setting up environment...")
     create_env_script(build_dir, cfg)
-    
+
     println("")
     println("[SUCCESS] libcuda_runtime.so created")
     check_file_exists(build_dir + "/libcuda_runtime.so")
@@ -121,38 +121,38 @@ func build_cuda_runtime(build_config cfg) {
 func build_cuda_kernels(build_config cfg) {
     println("[BUILD] CUDA Kernels Library")
     println("")
-    
+
     string build_dir = "./artifacts/build/cuda_kernels"
     create_directory(build_dir)
-    
-    // Step 1: Generate PTX
+
+
     println("[1/4] Generating PTX code...")
     build_result result = compile_kernels_ptx(cfg, build_dir)
     if !result.success {
         println("[WARNING] PTX generation: " + result.output)
-        // Continue anyway
+
     }
-    
-    // Step 2: Create wrapper
+
+
     println("[2/4] Creating C wrapper...")
     create_cuda_wrapper(build_dir)
-    
-    // Step 3: Compile wrapper
+
+
     println("[3/4] Compiling wrapper...")
     result = compile_cuda_wrapper(cfg, build_dir)
     if !result.success {
         println("[ERROR] " + result.output)
         return
     }
-    
-    // Step 4: Link
+
+
     println("[4/4] Linking shared library...")
     result = link_cuda_kernels(cfg, build_dir)
     if !result.success {
         println("[ERROR] " + result.output)
         return
     }
-    
+
     println("")
     println("[SUCCESS] libcuda_kernels.so created")
     check_file_exists(build_dir + "/libcuda_kernels.so")
@@ -161,22 +161,22 @@ func build_cuda_kernels(build_config cfg) {
 func build_verify_env(build_config cfg) {
     println("[BUILD] Environment Verification Tool")
     println("")
-    
-    // Compile verify_environment.s to IR
+
+
     string ir_path = "./artifacts/build/verify_env/verify_env.ir"
     create_directory("./artifacts/build/verify_env")
-    
+
     string s_compiler = runtime_env_get("S_COMPILER", "/home/shuwen/.local/bin/s")
     if !runtime_file_exists(s_compiler) {
         println("[WARNING] S compiler not found at " + s_compiler)
         return
     }
-    
+
     println("[1/1] Compiling verify_environment.s...")
-    
+
     string cmd = s_compiler + " ir cuda/verify_environment.s -o " + ir_path
     string output = runtime_run_command_output(cmd)
-    
+
     if runtime_file_exists(ir_path) {
         println("[SUCCESS] verify_env.ir created")
     } else {
@@ -184,33 +184,33 @@ func build_verify_env(build_config cfg) {
     }
 }
 
-// ============================================================================
-// CUDA Environment Detection
-// ============================================================================
+
+
+
 
 func detect_cuda_environment() build_config {
     build_config cfg
     cfg.verbose = parse_bool(runtime_env_get("CUDA_BUILD_VERBOSE", "false"))
-    
-    // Detect nvcc
+
+
     string nvcc_out = runtime_run_command_output("which nvcc 2>/dev/null || echo 'not_found'")
     if contains_string(nvcc_out, "not_found") {
-        return cfg  // CUDA not found
+        return cfg
     }
-    
-    // Get CUDA home
+
+
     string cuda_home_out = runtime_run_command_output("nvcc -v 2>&1 | grep 'bin/nvcc' | head -1 | xargs dirname | xargs dirname || echo '/usr'")
     cfg.cuda_home = trim(cuda_home_out)
     cfg.cuda_lib = cfg.cuda_home + "/lib64"
-    
-    // Get CUDA version
+
+
     string version_out = runtime_run_command_output("nvcc --version 2>/dev/null | grep 'release' | awk '{print $5}' | tr -d ','")
     cfg.cuda_version = trim(version_out)
-    
-    // Get GPU arch
+
+
     string arch_out = runtime_run_command_output("nvidia-smi --query-gpu=compute_cap --format=csv,noheader 2>/dev/null | head -1 | tr -d '.' || echo '89'")
     cfg.gpu_arch = trim(arch_out)
-    
+
     cfg
 }
 
@@ -227,12 +227,12 @@ func is_cuda_available(build_config cfg) bool {
     true
 }
 
-// ============================================================================
-// Compilation Functions
-// ============================================================================
+
+
+
 
 func compile_cuda_runtime(build_config cfg, string build_dir) build_result {
-    // Use gcc to compile CUDA runtime wrapper
+
     string cmd = "gcc -shared -fPIC " +
         "-o " + build_dir + "/libcuda_runtime.so " +
         "cuda/cuda_wrapper_simple.cu " +
@@ -243,9 +243,9 @@ func compile_cuda_runtime(build_config cfg, string build_dir) build_result {
         "-lcublas " +
         "-Wl,-rpath," + cfg.cuda_lib + " " +
         "2>&1"
-    
+
     string output = runtime_run_command_output(cmd)
-    
+
     if runtime_file_exists(build_dir + "/libcuda_runtime.so") {
         build_result{success: true, output: output, exit_code: 0}
     } else {
@@ -254,7 +254,7 @@ func compile_cuda_runtime(build_config cfg, string build_dir) build_result {
 }
 
 func link_cuda_runtime(build_config cfg, string build_dir) build_result {
-    // Already linked in compile step
+
     build_result{success: true, output: "Linked successfully", exit_code: 0}
 }
 
@@ -263,9 +263,9 @@ func compile_kernels_ptx(build_config cfg, string build_dir) build_result {
         "-o " + build_dir + "/cuda_kernels.ptx " +
         "-arch=sm_" + cfg.gpu_arch + " " +
         "-std=c++11 -O3 2>&1"
-    
+
     string output = runtime_run_command_output(cmd)
-    
+
     bool success = str_len(trim(output)) > 0 && !contains_string(output, "error:")
     build_result{success: success, output: output, exit_code: success ? 0 : 1}
 }
@@ -275,9 +275,9 @@ func compile_cuda_wrapper(build_config cfg, string build_dir) build_result {
         build_dir + "/cuda_kernels_wrapper.c " +
         "-o " + build_dir + "/cuda_kernels_wrapper.o " +
         "-I/usr/local/cuda/include 2>&1"
-    
+
     string output = runtime_run_command_output(cmd)
-    
+
     if runtime_file_exists(build_dir + "/cuda_kernels_wrapper.o") {
         build_result{success: true, output: output, exit_code: 0}
     } else {
@@ -296,9 +296,9 @@ func link_cuda_kernels(build_config cfg, string build_dir) build_result {
         "-lcublas " +
         "-Wl,-rpath," + cfg.cuda_lib + " " +
         "2>&1"
-    
+
     string output = runtime_run_command_output(cmd)
-    
+
     if runtime_file_exists(build_dir + "/libcuda_kernels.so") {
         build_result{success: true, output: output, exit_code: 0}
     } else {
@@ -306,9 +306,9 @@ func link_cuda_kernels(build_config cfg, string build_dir) build_result {
     }
 }
 
-// ============================================================================
-// Helper Functions
-// ============================================================================
+
+
+
 
 func create_directory(string path) {
     runtime_run_command_output("mkdir -p " + path + " 2>&1")
@@ -343,7 +343,7 @@ func create_cuda_wrapper(string build_dir) {
         "int cuda_softmax(int64_t o, int64_t i, int sl, int bs) { return 0; }\n" +
         "int cuda_layer_norm(int64_t o, int64_t i, int64_t w, int64_t b, int n, float e) { return 0; }\n" +
         "int cuda_get_device_count() { int c = 0; cudaGetDeviceCount(&c); return c; }\n"
-    
+
     runtime_write_text_file(build_dir + "/cuda_kernels_wrapper.c", wrapper)
 }
 
@@ -354,9 +354,9 @@ func clean_build_artifacts() {
     println("[SUCCESS] Cleaned")
 }
 
-// ============================================================================
-// String Utilities
-// ============================================================================
+
+
+
 
 func str_len(string s) int {
     int n = 0
@@ -438,7 +438,7 @@ func to_lower(string s) string {
     int len = str_len(s)
     while i < len {
         int c = s[i]
-        if c >= 65 && c <= 90 {  // A-Z
+        if c >= 65 && c <= 90 {
             c = c + 32
         }
         out = out + string_char(c)

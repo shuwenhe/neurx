@@ -1,22 +1,22 @@
 package neurx.train.bridge
 
-// NeurX Training Bridge for S Language
-// English text S compileEnglish textrunEnglish text NeurX trainingframework
+
+
 
 use std.fs.write_text_file as write_file
 use std.fs.read_to_string as read_file
 
-// ============================================
-// checkpoint I/O (English text s/checkpoint.s)
-// ============================================
 
-// English text checkpoint file (English text save_checkpoint)
+
+
+
+
 func checkpoint_save(string path, string content) bool {
     var result = write_file(path, content)
     result.is_ok()
 }
 
-// English text checkpoint file (English text load_checkpoint)
+
 func checkpoint_load(string path) string {
     var result = read_file(path)
     if result.is_ok() {
@@ -25,15 +25,15 @@ func checkpoint_load(string path) string {
     ""
 }
 
-// English textfileEnglish text
+
 func file_exists(string path) bool {
     var result = read_file(path)
     result.is_ok()
 }
 
-// ============================================
-// Training Logging (traininglog)
-// ============================================
+
+
+
 
 func log_info(string message) () {
     println("[INFO] " + message)
@@ -66,11 +66,11 @@ func log_footer(string message) () {
     println("========================================")
 }
 
-// ============================================
-// Model Config Helpers (modelconfigurationhelper)
-// ============================================
 
-// English textparametercountEnglish text
+
+
+
+
 func format_param_count(int count) string {
     if count >= 1000000 {
         int millions = count / 1000000

@@ -1,12 +1,12 @@
 package neurx.logging
 
-// ============================================================================
-// Training Logger & Monitoring System
-// Supports: Console, File, TensorBoard, Weights & Biases (WandB)
-// Tracks: Loss, Learning Rate, Throughput, GPU Memory, Custom Metrics
-// ============================================================================
 
-// ---- Log Level ----
+
+
+
+
+
+
 enum log_level {
     DEBUG,
     INFO,
@@ -14,37 +14,37 @@ enum log_level {
     ERROR,
 }
 
-// ---- Metric Types ----
+
 enum metric_type {
-    SCALAR,       // Single value (loss, accuracy)
-    HISTOGRAM,    // Distribution (gradient norms, activation stats)
-    IMAGE,        // Image (attention maps, generated samples)
-    AUDIO,        // Audio waveform (for speech models)
-    TEXT,         // Text string (generated text samples)
-    TABLE,        // Table data (hyperparameters, results)
-    SCALAR_LIST,  // List of scalars (loss per step)
+    SCALAR,
+    HISTOGRAM,
+    IMAGE,
+    AUDIO,
+    TEXT,
+    TABLE,
+    SCALAR_LIST,
 }
 
-// ---- Log Entry ----
+
 struct log_entry {
-    float timestamp           // Unix timestamp
+    float timestamp
     log_level level
     string message
-    map[string]any metadata   // Additional structured data
+    map[string]any metadata
 }
 
-// ---- Metric Entry ----
+
 struct metric_entry {
-    int step                  // Global training step
-    string name               // Metric name ("train_loss", "lr", etc.)
+    int step
+    string name
     metric_type type
-    
-    // Value depends on type
+
+
     float scalar_value
-    []float histogram_values  // For histograms
-    []float scalar_list      // For line plots
-    map<string]string tags     // For grouping/filtering (e.g., "split": "train")
-    
-    // Metadata
-    float wall_time           // Real time when logged
+    []float histogram_values
+    []float scalar_list
+    map<string]string tags
+
+
+    float wall_time
 }

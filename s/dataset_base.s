@@ -1,27 +1,27 @@
 package neurx.data
 
-// ============================================================================
-// Dataset Abstraction - Base class for all data sources
-// Supports: text files, tokenized data, custom datasets
-// ============================================================================
 
-// ---- Data sample ----
+
+
+
+
+
 struct sample {
-    []int token_ids      // Token IDs (the main data)
-    string text          // Original text (optional)
-    int label            // Label for classification tasks (-1 if N/A)
-    float weight         // sample weight (1.0 default)
-    map[string]any metadata  // Additional metadata
+    []int token_ids
+    string text
+    int label
+    float weight
+    map[string]any metadata
 }
 
-// ---- Dataset Interface ----
+
 struct dataset_config {
     string name
-    string path              // File or directory path
-    int max_samples          // Max samples to load (-1 for all)
-    int max_length           // Max sequence length for truncation
-    bool include_text        // Whether to store original text
-    string format            // "text", "json", "bin", "memory_map", "custom"
+    string path
+    int max_samples
+    int max_length
+    bool include_text
+    string format
 }
 
 struct dataset_stats {
@@ -30,10 +30,10 @@ struct dataset_stats {
     float avg_length
     int min_length
     int max_length
-    []int length_distribution  // Histogram of sequence lengths
+    []int length_distribution
 }
 
-// Abstract dataset base
+
 struct dataset {
     dataset_config config
     dataset_stats stats
@@ -41,7 +41,7 @@ struct dataset {
     bool is_loaded
 }
 
-// Create new empty dataset
+
 func new_dataset(dataset_config cfg) dataset {
     dataset {
         config: cfg,
@@ -51,7 +51,7 @@ func new_dataset(dataset_config cfg) dataset {
     }
 }
 
-// Load dataset from configured source
+
 func load_dataset(dataset ds) (dataset, error) {
     switch ds.config.format {
         case "text":
@@ -67,16 +67,16 @@ func load_dataset(dataset ds) (dataset, error) {
     }
 }
 
-// Get sample by index (with bounds checking)
+
 func get_sample(dataset ds, int idx) (sample, error) {
     if !ds.is_loaded || idx < 0 || idx >= len(ds.samples) {
         return sample{}, error{message: "Invalid index or dataset not loaded"}
     }
-    
+
     (ds.samples[idx], nil)
 }
 
-// Get number of samples
+
 func len_dataset(dataset ds) int {
     if ds.is_loaded {
         return len(ds.samples)

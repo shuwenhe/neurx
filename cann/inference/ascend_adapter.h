@@ -25,4 +25,4 @@ class AscendAdapter final : public BackendAdapter {
   cann::DeviceSession session_;
 };
 
-}  // namespace neurx::inference
+}

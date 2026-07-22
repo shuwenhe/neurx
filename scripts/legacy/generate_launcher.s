@@ -1,22 +1,22 @@
 package neurx.script
 
-// ============================================================================
-// NeurX Multi-node Launcher Generator (S Language)
-//
-// English text: useSlanguagegenerateoptimizeEnglish textshellstartEnglish text
-// English text: configurationmanagement, parameterEnglish textSlanguageEnglish text, English textgenerateEnglish textshellEnglish text
-// ============================================================================
+
+
+
+
+
+
 
 use std.fs
 use std.os
 use std.strings
 
-// ============================================================================
-// configurationdataEnglish text
-// ============================================================================
+
+
+
 
 struct training_config {
-    // systemconfiguration
+
     string root_dir
     string hostfile
     string output_dir
@@ -26,7 +26,7 @@ struct training_config {
     int num_nodes
     int world_size
 
-    // modelparameter
+
     int pretrain_steps
     int micro_batch
     int seq_len
@@ -39,51 +39,51 @@ struct training_config {
     int transformer_layers
     int gradient_accumulation_steps
 
-    // tokenizer
+
     string tokenizer_vocab
     string tokenizer_merges
     string shard_list_file
 }
 
-// ============================================================================
-// configurationEnglish text
-// ============================================================================
+
+
+
 
 func load_config_from_env() training_config {
     training_config cfg
 
-    // English textNEURX_ROOT
+
     string root = os::getenv("NEURX_ROOT")
     if root == "" {
         root = os::working_dir()
     }
     cfg.root_dir = root
 
-    // English texthostfile
+
     cfg.hostfile = os::getenv("NEURX_HOSTFILE")
     if cfg.hostfile == "" {
         cfg.hostfile = root + "/configs/pretrain.hosts"
     }
 
-    // English textoutputdirectory
+
     cfg.output_dir = os::getenv("NEURX_PRETRAIN_OUTPUT_DIR")
     if cfg.output_dir == "" {
         cfg.output_dir = root + "/checkpoint/NeurX-1.3"
     }
 
-    // English textNCCL IDfilepath
+
     cfg.nccl_id_file = os::getenv("NEURX_SHARED_NCCL_ID_FILE")
     if cfg.nccl_id_file == "" {
         cfg.nccl_id_file = root + "/artifacts/nccl/unique_id"
     }
 
-    // English textmasterEnglish text
+
     cfg.master_addr = os::getenv("MASTER_ADDR")
     if cfg.master_addr == "" {
         cfg.master_addr = "localhost"
     }
 
-    // English textmasterEnglish text
+
     string port_str = os::getenv("MASTER_PORT")
     if port_str != "" {
         cfg.master_port = strings::parse_int(port_str)
@@ -91,7 +91,7 @@ func load_config_from_env() training_config {
         cfg.master_port = 29500
     }
 
-    // modelparameter
+
     cfg.pretrain_steps = parse_env_int("NEURX_PRETRAIN_STEPS", 1000000000)
     cfg.micro_batch = parse_env_int("NEURX_PRETRAIN_MICRO_BATCH", 1)
     cfg.seq_len = parse_env_int("NEURX_PRETRAIN_SEQ_LEN", 256)
@@ -104,7 +104,7 @@ func load_config_from_env() training_config {
     cfg.transformer_layers = parse_env_int("NEURX_TRANSFORMER_NUM_LAYERS", 24)
     cfg.gradient_accumulation_steps = parse_env_int("NEURX_GRADIENT_ACCUMULATION_STEPS", 8)
 
-    // tokenizer
+
     cfg.tokenizer_vocab = os::getenv("NEURX_TOKENIZER_VOCAB")
     if cfg.tokenizer_vocab == "" {
         cfg.tokenizer_vocab = root + "/data/corpus/vocab.json"
@@ -139,9 +139,9 @@ func parse_env_float(string key, float default_val) float {
     return strings::parse_float(val)
 }
 
-// ============================================================================
-// Hostfile English text
-// ============================================================================
+
+
+
 
 func parse_hostfile(string hostfile_path) []string {
     []string hosts = []string{}
@@ -157,12 +157,12 @@ func parse_hostfile(string hostfile_path) []string {
     for i := 0; i < len(lines); i++ {
         string line = strings::trim(lines[i])
 
-        // English text
+
         if line == "" || strings::has_prefix(line, "#") {
             continue
         }
 
-        // English textmainEnglish textGPUEnglish text
+
         []string parts = strings::split(line, " ")
         if len(parts) >= 1 {
             hosts.push(line)
@@ -172,14 +172,14 @@ func parse_hostfile(string hostfile_path) []string {
     return hosts
 }
 
-// ============================================================================
-// ShellEnglish textgenerate
-// ============================================================================
+
+
+
 
 func generate_launcher_script(training_config cfg, []string hosts) string {
     string script = ""
 
-    // English text
+
     script = script + "#!/usr/bin/env bash\n"
     script = script + "set -Eeuo pipefail\n"
     script = script + "\n"
@@ -187,7 +187,7 @@ func generate_launcher_script(training_config cfg, []string hosts) string {
     script = script + "# Config: " + cfg.root_dir + "\n"
     script = script + "\n"
 
-    // English text
+
     script = script + "# Configuration\n"
     script = script + "ROOT=\"" + cfg.root_dir + "\"\n"
     script = script + "HOSTFILE=\"" + cfg.hostfile + "\"\n"
@@ -197,7 +197,7 @@ func generate_launcher_script(training_config cfg, []string hosts) string {
     script = script + "MASTER_PORT=" + strings::from_int(cfg.master_port) + "\n"
     script = script + "\n"
 
-    // English text
+
     script = script + "# Base environment variables\n"
     script = script + "declare -a base_env=(\n"
     script = script + "  \"NEURX_ROOT=$ROOT\"\n"
@@ -223,7 +223,7 @@ func generate_launcher_script(training_config cfg, []string hosts) string {
     script = script + ")\n"
     script = script + "\n"
 
-    // English textmainEnglish text
+
     script = script + "# Cleanup function\n"
     script = script + "declare -a PIDS=()\n"
     script = script + "cleanup() {\n"
@@ -244,7 +244,7 @@ func generate_launcher_script(training_config cfg, []string hosts) string {
     script = script + "echo \"[multinode] shared NCCL id: $SHARED_ID\"\n"
     script = script + "\n"
 
-    // English textrankstartEnglish text
+
     script = script + "# Launch processes\n"
     script = script + "rank=0\n"
     script = script + "for node in " + generate_hosts_array(hosts) + "; do\n"
@@ -295,34 +295,34 @@ func generate_hosts_array([]string hosts) string {
     return result
 }
 
-// ============================================================================
-// mainfunction
-// ============================================================================
+
+
+
 
 func main() {
-    // 1. loadconfiguration
+
     training_config cfg = load_config_from_env()
 
-    // 2. English texthostfile
+
     []string hosts = parse_hostfile(cfg.hostfile)
     if len(hosts) == 0 {
         io::eprintln("ERROR: no valid hosts in hostfile")
         os::exit(2)
     }
 
-    // 3. computeworld_size
+
     cfg.num_nodes = len(hosts)
     cfg.world_size = 0
     for i := 0; i < len(hosts); i++ {
-        // English text: English textmainEnglish textGPUEnglish text
-        // actualEnglish text"host num_gpus"English text
-        cfg.world_size = cfg.world_size + 1  // default1English textGPU
+
+
+        cfg.world_size = cfg.world_size + 1
     }
 
-    // 4. generateEnglish text
+
     string script = generate_launcher_script(cfg, hosts)
 
-    // 5. outputEnglish textfile
+
     string output_script = cfg.root_dir + "/scripts/legacy/launch_multinode_pretrain_generated.sh"
     if !fs::write_file(output_script, script) {
         io::eprintln("ERROR: cannot write script to " + output_script)
@@ -331,7 +331,7 @@ func main() {
 
     io::println("✓ Generated launcher script: " + output_script)
 
-    // 6. English text
+
     os::chmod(output_script, 0755)
 
     io::println("✓ Ready to launch: bash " + output_script)

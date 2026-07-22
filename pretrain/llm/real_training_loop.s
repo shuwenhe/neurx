@@ -1,6 +1,6 @@
 package neurx.pretrain.llm.real_training_loop
 
-// truthfulEnglish texttrainingEnglish textimplementation - English textcompleteEnglish text, English textparameterEnglish text
+
 
 use neurx.pretrain.llm.real_training.{
     relu, relu_backward, softmax_last_dim, cross_entropy_loss,
@@ -16,19 +16,19 @@ use neurx.tensor.new
 use neurx.strings
 
 struct real_training_state {
-    // modelparameter
-    tensor weights_q    // QueryEnglish text
-    tensor weights_k    // KeyEnglish text
-    tensor weights_v    // ValueEnglish text
-    tensor weights_out  // outputEnglish text
-    tensor embedding    // English text
-    tensor lm_head      // languagemodelEnglish text
 
-    // optimizeEnglish textstate
-    []float adam_m      // English text
-    []float adam_v      // English text
+    tensor weights_q
+    tensor weights_k
+    tensor weights_v
+    tensor weights_out
+    tensor embedding
+    tensor lm_head
 
-    // configuration
+
+    []float adam_m
+    []float adam_v
+
+
     float learning_rate
     int total_steps
     int step
@@ -42,9 +42,9 @@ func shape1(int n) []int {
     s
 }
 
-// initializetruthfultrainingstate
+
 func init_real_training(int vocab_size, int hidden_dim, int num_layers, float lr) real_training_state {
-    // initializeweightEnglish text
+
     []float embed_data = []float{cap: vocab_size * hidden_dim}
     []float q_data = []float{cap: hidden_dim * hidden_dim}
     []float k_data = []float{cap: hidden_dim * hidden_dim}
@@ -52,12 +52,12 @@ func init_real_training(int vocab_size, int hidden_dim, int num_layers, float lr
     []float out_data = []float{cap: hidden_dim * hidden_dim}
     []float head_data = []float{cap: hidden_dim * vocab_size}
 
-    // English textinitialize (Kaiminginitialize)
+
     int i = 0
     float scale = 2.0 / (hidden_dim as float)
 
     while i < len(embed_data) {
-        embed_data[i] = (i - (i / 100) * 100) as float * 0.01 - 0.5  // English textinitialize
+        embed_data[i] = (i - (i / 100) * 100) as float * 0.01 - 0.5
         i = i + 1
     }
 
@@ -91,7 +91,7 @@ func init_real_training(int vocab_size, int hidden_dim, int num_layers, float lr
         i = i + 1
     }
 
-    // initializeoptimizeEnglish textstate
+
     int param_count = len(embed_data) + len(q_data) + len(k_data) + len(v_data) + len(out_data) + len(head_data)
     []float m_state = []float{cap: param_count}
     []float v_state = []float{cap: param_count}
@@ -113,23 +113,23 @@ func init_real_training(int vocab_size, int hidden_dim, int num_layers, float lr
     }
 }
 
-// English text: input -> English text -> Attention -> output
+
 func forward_pass(real_training_state state, tensor input_ids) tensor {
     tensor hidden = ops.embedding_lookup(state.embedding, input_ids, 0)
     ops.matmul(hidden, state.lm_head)
 }
 
-// computeloss
+
 func compute_loss(tensor logits, tensor targets) float {
     return cross_entropy_loss(logits, targets)
 }
 
-// English text
+
 func backward_pass(tensor logits, tensor targets) tensor {
     return grad_logits(logits, targets)
 }
 
-// parameterEnglish text
+
 func update_parameters(real_training_state state, tensor hidden, tensor grad) real_training_state {
     tensor hidden_t = transpose(hidden, 0, 1)
     tensor grad_lm_head = matmul(hidden_t, grad)
@@ -148,32 +148,32 @@ func update_parameters(real_training_state state, tensor hidden, tensor grad) re
     state
 }
 
-// English texttrainingstepEnglish text
+
 func training_step(
     real_training_state state,
     tensor input_ids,
     tensor target_ids
 ) real_training_state {
-    // 1. English text
+
     tensor logits = forward_pass(state, input_ids)
 
-    // 2. computeloss
+
     float loss = compute_loss(logits, target_ids)
 
-    // 3. English text
+
     tensor grad = backward_pass(logits, target_ids)
 
-    // 4. English textparameter
+
     tensor hidden = ops.embedding_lookup(state.embedding, input_ids, 0)
     real_training_state next_state = update_parameters(state, hidden, grad)
 
-    // 5. English textstate
+
     int batch_size = input_ids.shape[0]
     next_state.step = next_state.step + 1
     next_state.total_loss = next_state.total_loss + loss
     next_state.tokens_seen = next_state.tokens_seen + batch_size
 
-    // 6. English text
+
     if next_state.step / 100 * 100 == next_state.step {
         float avg_loss = next_state.total_loss / (next_state.step as float)
         print_training_progress(next_state.step, avg_loss, next_state.learning_rate, next_state.tokens_seen)
@@ -182,7 +182,7 @@ func training_step(
     next_state
 }
 
-// runcompleteEnglish texttrainingEnglish text
+
 func run_training_loop(
     string manifest_path,
     int num_steps,
@@ -205,13 +205,13 @@ func run_training_loop(
     println("Learning rate: " + fmt_float(learning_rate, 6))
     println("")
 
-    // initializestate
+
     real_training_state state = init_real_training(vocab_size, hidden_dim, 12, learning_rate)
     state.total_steps = num_steps
     []string data_paths = gpt_large_pretrain_manifest_refs(manifest_path)
     corpus_state corpus = new_corpus_state_from_paths(data_paths, batch_size, seq_len, true)
 
-    // trainingEnglish text
+
     int step = 0
     while step < num_steps {
         corpus_batch_result batch_result = corpus_next_batch(corpus)
@@ -222,7 +222,7 @@ func run_training_loop(
         tensor input_tensor = new_from_ints(batch_result.batch.input_ids, shape1(len(batch_result.batch.input_ids)))
         tensor target_tensor = one_hot_from_ints(batch_result.batch.target_ids, vocab_size)
 
-        // English texttrainingstepEnglish text
+
         state = training_step(state, input_tensor, target_tensor)
 
         step = step + 1
@@ -259,7 +259,7 @@ func one_hot_from_ints([]int values, int vocab_size) tensor {
     new(data, [n, vocab_size], true)
 }
 
-// English text
+
 func new_from_ints([]int values, []int shape) tensor {
     []float data = []float{cap: len(values)}
     int i = 0

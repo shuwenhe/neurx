@@ -17,4 +17,3 @@ func robotics_policy_load_state_dict(robotics_policy_state state, robotics_polic
 func robotics_policy_mark_trained(robotics_policy_state state) robotics_policy_state {
     neurx.model.robotics.policy.robotics_policy_mark_trained(state)
 }
-

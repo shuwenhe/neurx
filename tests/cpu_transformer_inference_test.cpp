@@ -71,7 +71,7 @@ std::string write_fixture() {
   return path.string();
 }
 
-}  // namespace
+}
 
 int main() {
   const std::string checkpoint = write_fixture();

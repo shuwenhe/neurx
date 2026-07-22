@@ -1,13 +1,13 @@
-# neurx Configuration File (TOML)
-# This is a sample configuration showing all available settings
+
+
 
 [agent]
 name = "neurx-agent"
 model = "neurx-reference-model"
 reasoning = "disabled"
 max_retries = 3
-execution_timeout_ms = 300000  # 5 minutes
-max_output_size = 1000000      # 1 MB
+execution_timeout_ms = 300000
+max_output_size = 1000000
 verbose_logging = false
 strict_mode = false
 auto_approve = false
@@ -18,7 +18,7 @@ enable_network_access = false
 
 [llm]
 provider = "remote"
-api_key = "${NEURX_API_KEY}"  # Environment variable
+api_key = "${NEURX_API_KEY}"
 model = "neurx-reference-model"
 
 max_tokens = 8000
@@ -29,11 +29,11 @@ max_retries = 3
 retry_delay_ms = 1000
 timeout_ms = 60000
 
-# Optional custom endpoint
-# endpoint = "https://api.example.com/v1/chat/completions"
+
+
 
 [storage]
-backend = "file-based"  # or "sqlite", "postgres"
+backend = "file-based"
 data_dir = "~/.neurx/data"
 
 [storage.file_paths]
@@ -41,17 +41,17 @@ threads_dir = "threads"
 checkpoints_dir = "checkpoints"
 logs_dir = "logs"
 
-# Uncomment for database backend
-# [storage.database]
-# host = "localhost"
-# port = 5432
-# database = "neurx"
-# username = "neurx_user"
-# password = "${DB_PASSWORD}"
+
+
+
+
+
+
+
 
 [approval]
-mode = "on-request"     # "never", "on-request", "granular", "always"
-reviewer = "user"       # "user", "auto-review", "guardian"
+mode = "on-request"
+reviewer = "user"
 auto_approve_on_retry = false
 auto_approve_read_only = true
 
@@ -74,18 +74,18 @@ file-system = "granular"
 network = "never"
 
 [logging]
-level = "info"          # "debug", "info", "warn", "error"
-format = "text"         # "text", "json"
-output = "console"      # "console", "file", "both"
+level = "info"
+format = "text"
+output = "console"
 log_file = "neurx.log"
 max_file_size_mb = 100
 max_backups = 10
 color_output = true
 
 enable_telemetry = false
-# telemetry_endpoint = "https://telemetry.example.com"
 
-# Tool-specific configurations
+
+
 
 [tools.shell]
 enabled = true
@@ -120,14 +120,9 @@ permissions = ["clone", "pull", "push", "commit"]
 enabled = false
 timeout_ms = 60000
 
-# Custom extension settings
+
 
 [custom]
-# Add custom key-value pairs here for extensions
+
 enable_custom_plugins = true
 plugin_directory = "~/.neurx/plugins"
-
-# Profile-specific overrides can be specified as:
-# [profile.development]
-# [profile.production]
-# [profile.testing]

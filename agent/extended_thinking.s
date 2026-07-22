@@ -1,20 +1,20 @@
 package neurx.agent.extended_thinking
 
-// Extended thinking — analogous to NeurX's "extended thinking" budget.
-// Before producing an answer the agent iterates a private reasoning loop up to
-// a configurable token/step budget, accumulating thoughts and revising its
-// working conclusion before committing to a final response.
-//
-// Usage:
-//   extended_thinking_state et = new_extended_thinking_state(goal, budget_steps)
-//   et = extended_thinking_run(et, input, model_path)
-//   string conclusion = extended_thinking_conclusion(et)
+
+
+
+
+
+
+
+
+
 
 use neurx.executor.executor.{agent_execute_step, agent_text_contains}
 use neurx.agent.tool_registry
 use neurx.agent.memory
 
-// ── data structures ───────────────────────────────────────────────────────────
+
 
 struct extended_thought {
     int    index
@@ -25,9 +25,9 @@ struct extended_thought {
 
 struct extended_thinking_state {
     string         goal
-    int            budget_steps      // max reasoning iterations
+    int            budget_steps
     int            steps_used
-    int            token_budget      // soft token cap (0 = unlimited)
+    int            token_budget
     int            tokens_used
     []extended_thought thoughts
     int            thought_count
@@ -37,7 +37,7 @@ struct extended_thinking_state {
     bool           budget_exceeded
 }
 
-// ── constructors ──────────────────────────────────────────────────────────────
+
 
 func new_extended_thinking_state(string goal, int budget_steps) extended_thinking_state {
     extended_thinking_state {
@@ -71,9 +71,9 @@ func new_extended_thinking_state_with_token_budget(string goal, int budget_steps
     }
 }
 
-// ── token estimation ──────────────────────────────────────────────────────────
 
-// Rough estimate: 1 token ≈ 4 characters.
+
+
 func extended_thinking_estimate_tokens(string text) int {
     int chars = len(text)
     int tokens = chars / 4
@@ -83,7 +83,7 @@ func extended_thinking_estimate_tokens(string text) int {
     tokens
 }
 
-// ── step execution ────────────────────────────────────────────────────────────
+
 
 func extended_thinking_append(extended_thinking_state state, string thought, string conclusion) extended_thinking_state {
     int n = state.thought_count
@@ -145,9 +145,9 @@ func extended_thinking_finalize(extended_thinking_state state) extended_thinking
     }
 }
 
-// ── reasoning loop ────────────────────────────────────────────────────────────
 
-// Build a reasoning prompt for a single extended-thinking step.
+
+
 func extended_thinking_build_prompt(extended_thinking_state state, string input, int step) string {
     string prompt = "goal: " + state.goal + "\n"
     prompt = prompt + "input: " + input + "\n"
@@ -163,18 +163,18 @@ func extended_thinking_build_prompt(extended_thinking_state state, string input,
     prompt
 }
 
-// Parse thought and conclusion from a model response.
+
 func extended_thinking_parse_thought(string response) string {
     int start = 0
     int end = len(response)
-    // look for <thought> ... </thought>
+
     int i = 0
     bool in_tag = false
     string thought_content = ""
     while i < len(response) - 6 {
         if string(response[i]) == "<" && string(response[i+1]) == "t" && string(response[i+2]) == "h" {
             in_tag = true
-            i = i + 8  // skip <thought>
+            i = i + 8
         } else if in_tag && string(response[i]) == "<" && string(response[i+1]) == "/" {
             break
         } else if in_tag {
@@ -187,7 +187,7 @@ func extended_thinking_parse_thought(string response) string {
     if trim(thought_content) != "" {
         return trim(thought_content)
     }
-    // fallback: first 200 chars
+
     if len(response) <= 200 {
         return response
     }
@@ -207,7 +207,7 @@ func extended_thinking_parse_conclusion(string response) string {
     while i < len(response) - 10 {
         if string(response[i]) == "<" && string(response[i+1]) == "c" && string(response[i+2]) == "o" {
             in_tag = true
-            i = i + 12  // skip <conclusion>
+            i = i + 12
         } else if in_tag && string(response[i]) == "<" && string(response[i+1]) == "/" {
             break
         } else if in_tag {
@@ -220,7 +220,7 @@ func extended_thinking_parse_conclusion(string response) string {
     if trim(content) != "" {
         return trim(content)
     }
-    // fallback: last non-empty line of response
+
     string last_line = ""
     string cur_line = ""
     int j = 0
@@ -241,7 +241,7 @@ func extended_thinking_parse_conclusion(string response) string {
     last_line
 }
 
-// Check if the model signalled that thinking is complete.
+
 func extended_thinking_is_done(string response) bool {
     agent_text_contains(response, "final_answer") ||
     agent_text_contains(response, "conclusion:done") ||
@@ -249,7 +249,7 @@ func extended_thinking_is_done(string response) bool {
     agent_text_contains(response, "I am confident")
 }
 
-// Run the full extended thinking loop.
+
 func extended_thinking_run(extended_thinking_state state, string input, string model_path) extended_thinking_state {
     agent_tool_registry_state tools = new_agent_tool_registry_state()
     agent_memory_state memory = new_agent_memory_state()
@@ -282,7 +282,7 @@ func extended_thinking_run(extended_thinking_state state, string input, string m
     extended_thinking_finalize(et)
 }
 
-// ── accessors ─────────────────────────────────────────────────────────────────
+
 
 func extended_thinking_conclusion(extended_thinking_state state) string {
     if trim(state.final_conclusion) != "" {

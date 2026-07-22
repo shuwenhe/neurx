@@ -1,100 +1,100 @@
 package neurx.monitoring.training_observability
 
-// ═══════════════════════════════════════════════════════════════════
-// Training Observability Platform — English texttrainingmonitoringEnglish texttool
-//
-// English text:
-//   "You can't optimize what you can't measure"
-//   — English textoptimize
-//
-// monitoringEnglish text (4 English text):
-//
-//   ┌──────────────────────────────────────────────────────────────┐
-//   │                  TRAINING OBSERVABILITY                     │
-//   ├─────────────┬─────────────┬─────────────┬───────────────────┤
-//   │ PERFORMANCE │    HEALTH   │  SYSTEM     │    DEBUG           │
-//   ├─────────────┼─────────────┼─────────────┼───────────────────┤
-//   │ • TFLOPS    │ • Loss      │ • GPU Util  │ • Gradient Norms  │
-//   │ • Throughput│ • LR curve  │ • Mem Usage │ • Activation Stats│
-//   │ • Latency   │ • Grad norm │ • IO Wait   │ • Attention Patts │
-//   │ • Bubble %  │ • Loss spike│ • Comm time │ • Weight Histogrm │
-//   │ • Efficiency│ • NaN/Inf   │ • CPU usage │ • Data Statistics  │
-//   └─────────────┴─────────────┴─────────────┴───────────────────┘
-//
-// English text:
-//   ✓ English text: English text metrics English text
-//   ✓ English text: English text
-//   ✓ English text: English text/English text GPU English text
-//   ✓ English text: savecompleteEnglish text
-//   ✓ English textsystem: English textconfigurationEnglish text + English text (webhook/email)
-//   ✓ Profiler English text: support Nsight Systems / PyTorch Profiler English text
-//   ✓ English textoutput: TensorBoard / WandB / English text dashboard
-//
-// useEnglish text:
-//   • English textmonitoringEnglish texttrainingEnglish text
-//   • quickEnglish text (compute vs IO vs communication)
-//   • English texttrainingEnglish text / loss English text
-//   • English text OOM English text
-//   • English textparameterconfigurationEnglish text
-// ═══════════════════════════════════════════════════════════════════
 
-// ============================================================================
-// 1. configurationEnglish text
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 enum log_backend {
-    LOG_TENSORBOARD,              // TensorBoard English text (English text)
-    LOG_WANDB,                    // Weights & Biases (English text)
-   _LOG_MLFLOW,                   // MLflow (English textmanagement)
-    LOG_CUSTOM,                    // English text JSON/CSV
-    LOG_CONSOLE,                  // English textoutput (English text)
-    LOG_ALL                        // English textoutputEnglish text
+    LOG_TENSORBOARD,
+    LOG_WANDB,
+   _LOG_MLFLOW,
+    LOG_CUSTOM,
+    LOG_CONSOLE,
+    LOG_ALL
 }
 
 enum alert_channel {
-    ALERT_WEBHOOK,                 // Webhook (Slack/DingTalk/English text)
-    ALERT_EMAIL,                   // Email
-    ALERT_CONSOLE,                 // English text
-    ALERT_LOGGER,                  // English textlogfile
+    ALERT_WEBHOOK,
+    ALERT_EMAIL,
+    ALERT_CONSOLE,
+    ALERT_LOGGER,
 }
 
 struct monitoring_config {
-    // English text
-    string experiment_name          // English textName (English text "NEURX-5.2-pretrain-v1")
-    string run_id                    // run ID (UUID English texttimeEnglish text)
 
-    // logEnglish text
-    log_backend primary_backend       // mainEnglish textlogEnglish text
-    []log_backend additional_backends  // English textlogEnglish text
-    string tensorboard_log_dir       // TensorBoard directory
-    string wandb_project             // WandB English text
+    string experiment_name
+    string run_id
 
-    // English text
-    int scalar_log_interval          // Scalar English text (steps), English text 10
-    int histogram_log_interval       // English text (steps), English text 500
-    int profile_interval             // English text Profile English text (steps), English text 1000
-    int system_stats_interval        // systemstatisticsEnglish text (seconds), English text 10
 
-    // English textconfiguration
-    bool enable_alerts               // English text
-    float loss_spike_threshold       // Loss English text (English text 10x English text loss)
-    float grad_explosion_threshold   // gradientEnglish text (English text grad_norm > 1000)
-    float gpu_memory_warning_pct     // GPU English text (English text 90%)
-    float gpu_memory_critical_pct    // GPU English text (English text 95%)
-    int consecutive_loss_spikes_to_alert // English text N English text loss spike English text
-    []alert_channel alert_channels    // English text
-    string webhook_url                // Webhook URL (English text Slack incoming webhook)
+    log_backend primary_backend
+    []log_backend additional_backends
+    string tensorboard_log_dir
+    string wandb_project
 
-    // advancedEnglish text
-    bool enable_profiling            // English text profiling (English text)
-    bool track_per_layer_stats       // English textstatistics (English text)
-    bool collect_attention_stats     // English textstatistics
-    bool monitor_data_pipeline       // monitoringdataloadEnglish textstate
-    bool enable_auto_diagnosis       // English text
-    bool save_full_history           // savecompleteEnglish textdata (English textinformation)
+
+    int scalar_log_interval
+    int histogram_log_interval
+    int profile_interval
+    int system_stats_interval
+
+
+    bool enable_alerts
+    float loss_spike_threshold
+    float grad_explosion_threshold
+    float gpu_memory_warning_pct
+    float gpu_memory_critical_pct
+    int consecutive_loss_spikes_to_alert
+    []alert_channel alert_channels
+    string webhook_url
+
+
+    bool enable_profiling
+    bool track_per_layer_stats
+    bool collect_attention_stats
+    bool monitor_data_pipeline
+    bool enable_auto_diagnosis
+    bool save_full_history
 }
 
-// defaultconfiguration (English text NEURX-5.2 trainingoptimize)
+
 func default_monitoring_config() monitoring_config {
     monitoring_config {
         experiment_name: "NEURX-5.2-Pretrain",
@@ -119,7 +119,7 @@ func default_monitoring_config() monitoring_config {
         alert_channels: [ALERT_CONSOLE],
         webhook_url: "",
 
-        enable_profiling: false,  // defaultEnglish text overhead
+        enable_profiling: false,
         track_per_layer_stats: true,
         collect_attention_stats: true,
         monitor_data_pipeline: true,
@@ -128,179 +128,179 @@ func default_monitoring_config() monitoring_config {
     }
 }
 
-// ============================================================================
-// 2. English text Metrics dataEnglish text
-// ============================================================================
 
-// English text Metric English text
+
+
+
+
 struct metric_record {
-    string name                       // English textName (English text "train/loss")
-    float value                       // English text
-    int64 timestamp_ms                // timeEnglish text
-    int step                          // trainingstepEnglish text
-    string tag                         // English text (English text,English text)
+    string name
+    float value
+    int64 timestamp_ms
+    int step
+    string tag
 }
 
-// English text (English text)
+
 struct histogram_metric {
     string name
     int step
     int64 timestamp_ms
-    []float bins                      // bin English text
-    []int counts                      // English text bin English text
+    []float bins
+    []int counts
     float min_val
     float max_val
     float mean
     float std_dev
-    float p50, p90, p99              // Percentiles
+    float p50, p90, p99
 }
 
-// English text (English texttimeEnglish textstate)
+
 struct performance_snapshot {
     int64 timestamp_ms
     int step
 
-    // Compute
-    float tflops_achieved             // actualEnglish text TFLOPS
-    float tflops_theoretical          // English text TFLOPS
-    float compute_utilization         // computeEnglish text (%)
-    float samples_per_second          // English text
-    float tokens_per_second           // Token English text
-    float steps_per_second            // Step English text
 
-    // Memory
-    float gpu_memory_used_gb          // English text (GB)
-    float gpu_memory_total_gb         // English text (GB)
-    float gpu_memory_peak_gb          // English text (GB)
-    float cpu_memory_used_gb           // CPU English textuse (GB)
+    float tflops_achieved
+    float tflops_theoretical
+    float compute_utilization
+    float samples_per_second
+    float tokens_per_second
+    float steps_per_second
 
-    // Communication
-    float allreduce_time_ms           // AllReduce English text
-    float allgather_time_ms           // AllGather English text
-    float point_to_point_time_ms      // P2P English text
-    float bandwidth_utilization       // English text
 
-    // Pipeline (if PP used)
-    float pipeline_bubble_ratio       // Pipeline bubble English text
-    int micro_batches_in_flight       // English text micro-batch English text
+    float gpu_memory_used_gb
+    float gpu_memory_total_gb
+    float gpu_memory_peak_gb
+    float cpu_memory_used_gb
 
-    // Data loading
-    float data_load_time_pct          // dataloadEnglish text
-    float data_queue_size             // dataEnglish text
 
-    // System
-    float cpu_usage_pct               // CPU useEnglish text
-    float gpu_sm_utilization_pct      // GPU SM English text
-    float gpu_mem_bandwidth_util_pct  // English text
-    float disk_io_mb_s               // English text IO English text
-    float network_rx_mb_s            // English text
-    float network_tx_mb_s            // English text
+    float allreduce_time_ms
+    float allgather_time_ms
+    float point_to_point_time_ms
+    float bandwidth_utilization
+
+
+    float pipeline_bubble_ratio
+    int micro_batches_in_flight
+
+
+    float data_load_time_pct
+    float data_queue_size
+
+
+    float cpu_usage_pct
+    float gpu_sm_utilization_pct
+    float gpu_mem_bandwidth_util_pct
+    float disk_io_mb_s
+    float network_rx_mb_s
+    float network_tx_mb_s
 }
 
-// Training Health English text
+
 struct training_health_snapshot {
     int64 timestamp_ms
     int step
 
-    // Core metrics
-    float current_loss                // English text step English text loss
-    float moving_avg_loss             // English text loss (English text N step)
-    float loss_variance               // Loss English text
-    float learning_rate               // English textlearning rate
-    float gradient_l2_norm            // gradient L2 English text
-    float gradient_max_abs           // gradientEnglish text
 
-    // Health checks
-    bool is_loss_nan                  // Loss English text NaN
-    bool is_loss_inf                  // Loss English text Inf
-    bool is_gradient_nan              // gradientEnglish text NaN
-    bool is_gradient_exploding        // gradientEnglish text
-    bool is_gpu_near_oom              // English text
-    bool is_stagnating               // Loss English text
-    bool is_diverging                 // Loss English text
+    float current_loss
+    float moving_avg_loss
+    float loss_variance
+    float learning_rate
+    float gradient_l2_norm
+    float gradient_max_abs
 
-    // Alerts triggered in this snapshot
-    []alert_info active_alerts        // English text
 
-    // Diagnostics (if enabled)
-    diagnosis_result auto_diagnosis  // English textresult
+    bool is_loss_nan
+    bool is_loss_inf
+    bool is_gradient_nan
+    bool is_gradient_exploding
+    bool is_gpu_near_oom
+    bool is_stagnating
+    bool is_diverging
+
+
+    []alert_info active_alerts
+
+
+    diagnosis_result auto_diagnosis
 }
 
-// English textinformation
+
 struct alert_info {
-    string alert_type                  // English text (loss_spike, grad_explode, oom_warning...)
-    severity_level severity           // English text (INFO / WARNING / CRITICAL)
-    string message                    // English text
-    float metric_value                // English text
-    float threshold_value             // English text
-    int triggered_at_step             // English text step
-    int64 triggered_at_timestamp      // English texttimeEnglish text
-    bool acknowledged                 // English text
-    string suggested_action           // English text
+    string alert_type
+    severity_level severity
+    string message
+    float metric_value
+    float threshold_value
+    int triggered_at_step
+    int64 triggered_at_timestamp
+    bool acknowledged
+    string suggested_action
 }
 
 enum severity_level {
-    SEVERITY_INFO,                   // informationEnglish text (English texttraining)
-    SEVERITY_WARNING,                // English text (RequiredEnglish text)
-    SEVERITY_CRITICAL,               // English text (RequiredEnglish text!)
+    SEVERITY_INFO,
+    SEVERITY_WARNING,
+    SEVERITY_CRITICAL,
 }
 
-// English textresult
+
 struct diagnosis_result {
-    string overall_status             // "healthy" / "warning" / "critical"
-    string summary                    // English text
-    []diagnosis_issue issues          // English text
-    []recommendation recommendations  // English text
-    float confidence_score            // English text (0-1)
+    string overall_status
+    string summary
+    []diagnosis_issue issues
+    []recommendation recommendations
+    float confidence_score
 }
 
 struct diagnosis_issue {
-    string category                    // English text ("performance" / "health" / "system")
-    string description                // English textDescription
-    float impact_score                // English text (0-10,English text)
-    string root_cause_hint            // English textprompt
+    string category
+    string description
+    float impact_score
+    string root_cause_hint
 }
 
 struct recommendation {
-    string action                      // English text
-    priority prio                     // English text (HIGH / MEDIUM / LOW)
-    expected_improvement             // English textDescription
-    complexity complexity            // English text (EASY / MEDIUM / HARD)
+    string action
+    priority prio
+    expected_improvement
+    complexity complexity
 }
 
 enum priority { PRIORITY_HIGH, PRIORITY_MEDIUM, PRIORITY_LOW }
 enum complexity { COMPLEXITY_EASY, COMPLEXITY_MEDIUM, COMPLEXITY_HARD }
 
-// ============================================================================
-// 3. Monitoring Manager mainEnglish text
-// ============================================================================
+
+
+
 
 struct monitoring_manager {
     monitoring_config config
     bool is_running
 
-    // Metrics English text
-    []metric_record scalar_history      // English text scalar English text
-    []histogram_metric histogram_history // English text
-    []performance_snapshot perf_snapshots  // English text
-    []training_health_snapshot health_snapshots  // English text
 
-    // English textstatecache (English textquickEnglish text)
+    []metric_record scalar_history
+    []histogram_metric histogram_history
+    []performance_snapshot perf_snapshots
+    []training_health_snapshot health_snapshots
+
+
     training_health_snapshot current_health
     performance_snapshot current_perf
 
-    // statisticsEnglish text (English text)
-    moving_window loss_window           // English text N English text loss English text
-    moving_window grad_window           // English text N English text grad norm English text
 
-    // alert system
-    []alert_info alert_history          // English text
-    int consecutive_loss_spike_count   // English text loss spike English text
+    moving_window loss_window
+    moving_window grad_window
 
-    // Profiler (English textstart)
+
+    []alert_info alert_history
+    int consecutive_loss_spike_count
+
+
     profiler_state profiler
 
-    // Writers (English text backend)
+
     tensorboard_writer tb_writer
     wandb_writer wb_writer
     console_writer console
@@ -322,36 +322,36 @@ struct profiler_state {
 
 struct tensorboard_writer {
     string log_dir
-    file_handle file_handles[10]  // English text category English textfile
+    file_handle file_handles[10]
 }
 struct wandb_writer { string project; string run_id }
 struct console_writer { bool verbose }
 
-// ============================================================================
-// 4. initialize & English textmanagement
-// ============================================================================
+
+
+
 
 func init_monitoring(monitoring_config cfg) monitoring_manager {
-    // English textdirectory
+
     create_directory(cfg.tensorboard_log_dir)
 
-    // initialize writers
+
     tensorboard_writer tbw
     tbw.log_dir = cfg.tensorboard_log_dir
 
     console_writer cw
     cw.verbose = true
 
-    // initializeEnglish text
+
     moving_window lw
-    lw.values = []float{cap: 100}  // English text 100 English text
+    lw.values = []float{cap: 100}
     lw.window_size = 100
     lw.current_index = 0
     lw.is_filled_once = false
 
-    moving_window gw = lw  // grad window English text
+    moving_window gw = lw
 
-    // initialize manager
+
     monitoring_manager mgr
     mgr.config = cfg
     mgr.is_running = false
@@ -379,20 +379,20 @@ func start_monitoring(ref monitoring_manager mgr) {
 func stop_monitoring(ref monitoring_manager mgr) {
     mgr.is_running = false
 
-    // Flush English text pending logs
+
     flush_all_writers(mgr)
 
-    // generateEnglish text
+
     generate_final_report(mgr)
 
     log_info("Monitoring stopped. Total records logged: " + string(len(mgr.scalar_history)))
 }
 
-// ============================================================================
-// 5. English text (English texttrainingEnglish text)
-// ============================================================================
 
-// English text (English text)
+
+
+
+
 func log_scalar(
     ref monitoring_manager mgr,
     string name,
@@ -407,10 +407,10 @@ func log_scalar(
     record.timestamp_ms = get_current_time_ms()
     record.step = step
 
-    // English text
+
     append(mgr.scalar_history, record)
 
-    // English textcache
+
     if name == "train/loss" {
         update_moving_window(ref mgr.loss_window, value)
         check_for_loss_anomalies(mgr, value, step)
@@ -419,13 +419,13 @@ func log_scalar(
         check_for_grad_anomalies(mgr, value, step)
     }
 
-    // English text backend (English text interval)
+
     if should_log_at_step(step, mgr.config.scalar_log_interval) {
         write_scalar_to_backends(mgr, record)
     }
 }
 
-// English text
+
 func log_histogram(
     ref monitoring_manager mgr,
     string name,
@@ -441,14 +441,14 @@ func log_histogram(
     hist.step = step
     hist.timestamp_ms = get_current_time_ms()
 
-    // computeEnglish textstatistics
+
     compute_histogram_statistics(values, ref hist)
 
     append(mgr.histogram_history, hist)
     write_histogram_to_backends(mgr, hist)
 }
 
-// English textcompleteEnglish text
+
 func log_performance_snapshot(ref monitoring_manager mgr, performance_snapshot snap) {
     if !mgr.is_running { return }
 
@@ -456,20 +456,20 @@ func log_performance_snapshot(ref monitoring_manager mgr, performance_snapshot s
     append(mgr.perf_snapshots, snap)
     mgr.current_perf = snap
 
-    // English text
+
     if mgr.config.enable_auto_diagnosis {
         diagnosis_result diag = run_auto_diagnosis(mgr, snap)
         mgr.current_health.auto_diagnosis = diag
     }
 
-    // English text backend
+
     write_perf_snapshot_to_backends(mgr, snap)
 
-    // Check alerts based on system stats
+
     check_system_health_alerts(mgr, snap)
 }
 
-// trainingEnglish text (English text step English text)
+
 func update_training_health(
     ref monitoring_manager mgr,
     float loss,
@@ -484,41 +484,41 @@ func update_training_health(
     health.learning_rate = lr
     health.gradient_l2_norm = grad_norm
 
-    // Moving average of loss
+
     health.moving_avg_loss = compute_moving_average(mgr.loss_window)
     health.loss_variance = compute_variance(mgr.loss_window)
 
-    // Health checks
+
     health.is_loss_nan = is_nan(loss)
     health.is_loss_inf = is_inf(loss)
     health.is_gradient_nan = is_nan(grad_norm)
     health.is_gradient_exploding = grad_norm > mgr.config.grad_explosion_threshold
 
-    // Stagnation detection
-    health.is_stagnating = detect_stagnation(mgr.loss_window, 0.001)  // <0.1% change over window
 
-    // Divergence detection
+    health.is_stagnating = detect_stagnation(mgr.loss_window, 0.001)
+
+
     health.is_diverging = detect_divergence(mgr.loss_window)
 
-    // Update cache
+
     mgr.current_health = health
     append(mgr.health_snapshots, health)
 
-    // Log key scalars
+
     log_scalar(mgr, "train/loss", loss, step)
     log_scalar(mgr, "train/loss_avg", health.moving_avg_loss, step)
     log_scalar(mgr, "train/learning_rate", lr, step)
     log_scalar(mgr, "train/gradient_norm", grad_norm, step)
 
-    // Log derived metrics
+
     if health.moving_avg_loss > 0 {
         log_scalar(mgr, "train/loss_std", sqrt_approx(health.loss_variance), step)
     }
 }
 
-// ============================================================================
-// 6. English text
-// ============================================================================
+
+
+
 
 func run_auto_diagnosis(
     monitoring_manager mgr,
@@ -528,9 +528,9 @@ func run_auto_diagnosis(
     []recommendation recs = []
     float confidence = 0.9
 
-    // === Performance Diagnosis ===
 
-    // 1. GPU utilization low?
+
+
     if perf.gpu_sm_utilization_pct < 50.0 {
         diagnosis_issue issue
         issue.category = "performance"
@@ -540,7 +540,7 @@ func run_auto_diagnosis(
         issue.root_cause_hint = "Possible bottleneck in data loading or communication"
         append(issues, issue)
 
-        // Recommendation
+
         if perf.data_load_time_pct > 30.0 {
             recommendation r
             r.action = "Increase num_workers or prefetch_factor in data_loader"
@@ -559,14 +559,14 @@ func run_auto_diagnosis(
         }
     }
 
-    // 2. Memory pressure?
+
     float mem_ratio = perf.gpu_memory_used_gb / perf.gpu_memory_total_gb
     if mem_ratio > mgr.config.gpu_memory_warning_pct {
         diagnosis_issue issue
         issue.category = "system"
         issue.description = "High GPU memory usage (" +
                            string(mem_ratio * 100, 1) + "%)"
-        issue.impact_score = 8.0 - (mem_ratio - 0.9) * 20  // English text
+        issue.impact_score = 8.0 - (mem_ratio - 0.9) * 20
         if issue.impact_score < 4.0 { issue.impact_score = 4.0 }
         if issue.impact_score > 10.0 { issue.impact_score = 10.0 }
         issue.root_cause_hint = "Consider activation checkpointing or smaller batch size"
@@ -580,7 +580,7 @@ func run_auto_diagnosis(
         append(recs, r)
     }
 
-    // 3. Pipeline bubble large?
+
     if perf.pipeline_bubble_ratio > 0.3 {
         diagnosis_issue issue
         issue.category = "performance"
@@ -598,9 +598,9 @@ func run_auto_diagnosis(
         append(recs, r)
     }
 
-    // === Health Diagnosis ===
 
-    // 4. Loss stagnation?
+
+
     if mgr.current_health.is_stagnating {
         diagnosis_issue issue
         issue.category = "health"
@@ -617,7 +617,7 @@ func run_auto_diagnosis(
         append(recs, r)
     }
 
-    // 5. Gradient issues?
+
     if mgr.current_health.is_gradient_exploding {
         diagnosis_issue issue
         issue.category = "health"
@@ -635,7 +635,7 @@ func run_auto_diagnosis(
         append(recs, r)
     }
 
-    // Determine overall status
+
     string status = "healthy"
     if len(issues) > 0 {
         status = "warning"
@@ -649,7 +649,7 @@ func run_auto_diagnosis(
         }
     }
 
-    // Build summary
+
     string summary = "Training is " + status
     if len(issues) > 0 {
         summary = summary + ". Found " + string(len(issues)) + " issue(s): "
@@ -676,17 +676,17 @@ func run_auto_diagnosis(
     return result
 }
 
-// ============================================================================
-// 7. alert system
-// ============================================================================
 
-// Loss anomaly check
+
+
+
+
 func check_for_loss_anomalies(ref monitoring_manager mgr, float loss, int step) {
     if !mgr.config.enable_alerts { return }
 
     float avg = compute_moving_average(mgr.loss_window)
 
-    // Spike detection
+
     if avg > 0 && loss > avg * mgr.config.loss_spike_threshold {
         mgr.consecutive_loss_spike_count = mgr.consecutive_loss_spike_count + 1
 
@@ -703,7 +703,7 @@ func check_for_loss_anomalies(ref monitoring_manager mgr, float loss, int step) 
         mgr.consecutive_loss_spike_count = 0
     }
 
-    // NaN/Inf detection
+
     if is_nan(loss) || is_inf(loss) {
         trigger_alert(mgr, "loss_nan_inf", SEVERITY_CRITICAL,
             "Loss is NaN or Inf: " + string(loss),
@@ -712,7 +712,7 @@ func check_for_loss_anomalies(ref monitoring_manager mgr, float loss, int step) 
     }
 }
 
-// Gradient anomaly check
+
 func check_for_grad_anomalies(ref monitoring_manager mgr, float grad_norm, int step) {
     if !mgr.config.enable_alerts { return }
 
@@ -724,11 +724,11 @@ func check_for_grad_anomalies(ref monitoring_manager mgr, float grad_norm, int s
     }
 }
 
-// System health check (from perf snapshot)
+
 func check_system_health_alerts(ref monitoring_manager mgr, performance_snapshot snap) {
     if !mgr.config.enable_alerts { return }
 
-    // Memory alerts
+
     float mem_pct = snap.gpu_memory_used_gb / snap.gpu_memory_total_gb
     if mem_pct > mgr.config.gpu_memory_critical_pct {
         trigger_alert(mgr, "oom_critical", SEVERITY_CRITICAL,
@@ -743,7 +743,7 @@ func check_system_health_alerts(ref monitoring_manager mgr, performance_snapshot
     }
 }
 
-// English text (English text)
+
 func trigger_alert(
     ref monitoring_manager mgr,
     string alert_type,
@@ -765,10 +765,10 @@ func trigger_alert(
     alert.acknowledged = false
     alert.suggested_action = suggested_action
 
-    // Add to history
+
     append(mgr.alert_history, alert)
 
-    // Log as scalar
+
     string severity_str = ""
     if sev == SEVERITY_INFO { severity_str = "INFO" }
     else if sev == SEVERITY_WARNING { severity_str = "WARNING" }
@@ -776,15 +776,15 @@ func trigger_alert(
 
     log_scalar(mgr, "alerts/" + alert_type, float_of_int(sev), step)
 
-    // Send to notification channels
+
     send_alert_notification(mgr, alert)
 
-    // Console output
+
     print("\n⚠️  [" + severity_str + "] " + alert.message +
           "\n   Suggestion: " + alert.suggested_action + "\n")
 }
 
-// English text
+
 func send_alert_notification(monitoring_manager mgr, alert_info alert) {
     int ch_idx = 0
     while ch_idx < len(mgr.config.alert_channels) {
@@ -793,51 +793,51 @@ func send_alert_notification(monitoring_manager mgr, alert_info alert) {
         if ch == ALERT_WEBHOOK && len(mgr.config.webhook_url) > 0 {
             send_webhook_alert(mgr.config.webhook_url, alert)
         } else if ch == ALERT_CONSOLE {
-            // Already printed above
+
         } else if ch == ALERT_LOGGER {
             write_to_log_file("[ALERT] " + alert.message)
         }
-        // ... email etc.
+
 
         ch_idx = ch_idx + 1
     }
 }
 
 func send_webhook_alert(string url, alert_info alert) {
-    // HTTP POST to webhook URL with JSON payload
-    // ...
+
+
 }
 
 func write_to_log_file(string msg) {
-    // Write message to training log file
+
     print(msg)
 }
 
-// ============================================================================
-// 8. helperfunction & English texttool
-// ============================================================================
+
+
+
 
 func create_directory(string path) {
-    // Create directory if it doesn't exist
-    // Implementation depends on OS and file system support
-    // For now, we rely on mkdir being called from Makefile
+
+
+
 }
 
 func log_info(string msg) {
-    // Print log message to console with timestamp and newline
-    // This ensures logs are visible during training
+
+
     print("[" + format_timestamp(get_current_time_ms()) + "] " + msg)
 }
 
 func get_current_time_ms() int64 {
-    // Get current time in milliseconds
-    // Fallback: use step-based pseudo time if system timer unavailable
+
+
     extern get_system_time_ms() int64
     return get_system_time_ms()
 }
 
 func format_timestamp(int64 time_ms) string {
-    // Format milliseconds as HH:MM:SS.mmm
+
     int64 secs = time_ms / 1000
     int64 ms = time_ms % 1000
     int hours = int((secs / 3600) % 24)
@@ -859,7 +859,7 @@ func format_timestamp(int64 time_ms) string {
 }
 
 func generate_run_id() string {
-    // Generate UUID-like ID from timestamp
+
     return "run_" + string(get_current_time_ms())
 }
 
@@ -943,7 +943,7 @@ func detect_stagnation(moving_window win, float threshold) bool {
 func detect_divergence(moving_window win) bool {
     if !win.is_filled_once { return false }
 
-    // Simple heuristic: recent losses are consistently higher than earlier ones
+
     float early_avg = 0.0
     float recent_avg = 0.0
     int quarter = win.window_size / 4
@@ -960,12 +960,12 @@ func detect_divergence(moving_window win) bool {
 
     if early_avg == 0.0 { return false }
 
-    // Diverging if recent > 2x early and both are significant
+
     return recent_avg > early_avg * 2.0 && early_avg > 0.01
 }
 
 func compute_histogram_statistics([]float values, ref histogram_metric hist) {
-    // Compute basic statistics
+
     int n = len(values)
     if n == 0 { return }
 
@@ -982,7 +982,7 @@ func compute_histogram_statistics([]float values, ref histogram_metric hist) {
 
     float mean = sum / float_of_int(n)
 
-    // Variance
+
     float var_sum = 0.0
     i = 0
     while i < n {
@@ -997,7 +997,7 @@ func compute_histogram_statistics([]float values, ref histogram_metric hist) {
     hist.mean = mean
     hist.std_dev = std
 
-    // Histogram bins (simplified: use 50 fixed bins)
+
     int num_bins = 50
     hist.bins = []float{cap: num_bins + 1}
     hist.counts = []int{cap: num_bins}
@@ -1014,7 +1014,7 @@ func compute_histogram_statistics([]float values, ref histogram_metric hist) {
     }
     hist.bins[num_bins] = max_val
 
-    // Count values in each bin
+
     i = 0
     while i < n {
         int bin_idx = int((values[i] - min_val) / bin_width)
@@ -1024,8 +1024,8 @@ func compute_histogram_statistics([]float values, ref histogram_metric hist) {
         i = i + 1
     }
 
-    // Compute percentiles (simplified: sort and pick)
-    // For efficiency in production, would use more sophisticated method
+
+
     sort_float_array(values)
     hist.p50 = values[n * 50 / 100]
     hist.p90 = values[n * 90 / 100]
@@ -1033,7 +1033,7 @@ func compute_histogram_statistics([]float values, ref histogram_metric hist) {
 }
 
 func sort_float_array(ref []float arr) {
-    // Simplified bubble sort (use quicksort in production)
+
     int n = len(arr)
     int i = 0
     while i < n - 1 {
@@ -1051,7 +1051,7 @@ func sort_float_array(ref []float arr) {
 }
 
 func is_nan(float x) bool {
-    // NaN check: x != x
+
     return !(x == x)
 }
 
@@ -1085,21 +1085,21 @@ func float_of_int(int n) float {
 }
 
 func string(float f, int prec) string {
-    // Format float to string - basic implementation
-    // Converts float to string representation
+
+
     extern float_to_string(float f) string
     return float_to_string(f)
 }
 
 func string(int i) string {
-    // Convert integer to string
+
     extern int_to_string(int i) string
     return int_to_string(i)
 }
 
-// Writer implementations
+
 func write_scalar_to_backends(monitoring_manager m, metric_record r) {
-    // Write metric to configured backends (console, tensorboard, wandb, etc.)
+
     if m.config.primary_backend == LOG_CONSOLE || m.config.primary_backend == LOG_ALL {
         string output = "[METRIC] " + r.name + "=" + string(r.value) + " @step " + string(r.step)
         log_info(output)
@@ -1108,13 +1108,13 @@ func write_scalar_to_backends(monitoring_manager m, metric_record r) {
 }
 
 func write_histogram_to_backends(monitoring_manager m, histogram_metric h) {
-    // Write histogram metric to backends
+
     string output = "[HIST] " + h.name + " @step " + string(h.step)
     log_info(output)
 }
 
 func write_perf_snapshot_to_backends(monitoring_manager m, performance_snapshot p) {
-    // Write performance snapshot to backends
+
     string output = "[PERF] throughput=" + string(p.tokens_per_second) + " tokens/s, " +
                     "gpu_util=" + string(p.gpu_sm_utilization_pct) + "%, " +
                     "mem=" + string(p.gpu_memory_used_gb) + "GB @step " + string(p.step)
@@ -1122,20 +1122,20 @@ func write_perf_snapshot_to_backends(monitoring_manager m, performance_snapshot 
 }
 
 func flush_all_writers(monitoring_manager m) {
-    // Flush all output writers to ensure logs are written
+
     log_info("Flushing all monitoring outputs...")
 }
 
 func generate_final_report(monitoring_manager m) {
-    // Generate and save final training report
+
     log_info("Training completed. Generated " + string(len(m.scalar_history)) + " metric records")
 }
 
-// ============================================================================
-// 9. NEURX-5.2 English textmonitoring Dashboard configuration
-// ============================================================================
 
-// English textrecommendedEnglish text NEURX-5.2 monitoringEnglish text
+
+
+
+
 func get_monitoring_dashboard_layout() string {
     return `
 ╔══════════════════════════════════════════════════════════════╗
@@ -1160,7 +1160,7 @@ func get_monitoring_dashboard_layout() string {
 `
 }
 
-// Print a one-line status summary
+
 func print_quick_status(monitoring_manager mgr) string {
     string status = "✅"
     if len(mgr.current_health.active_alerts) > 0 {

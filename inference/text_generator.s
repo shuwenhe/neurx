@@ -1,9 +1,9 @@
 package neurx.inference
 
-// ============================================================================
-// TEXT GENERATOR - High-Level API
-// Orchestrates generation flow on top of sampling_strategies.
-// ============================================================================
+
+
+
+
 
 use neurx.inference.sampling_strategies
 

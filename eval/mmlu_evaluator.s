@@ -5,31 +5,31 @@ use neurx.eval.benchmark_eval
 use neurx.model.llm.gpt
 use std.io.println
 
-// ============================================================================
-// MMLU 5-Shot Evaluator
-//
-// Implements MMLU evaluation with 5-shot examples following the
-// lm-evaluation-harness methodology.
-//
-// Process:
-// 1. For each test question, construct few-shot prompt with 5 examples
-// 2. Compute log-likelihood for each choice continuation
-// 3. Select argmax (normalized by token length)
-// 4. Compare to correct answer
-// 5. Report accuracy per task and overall
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 struct mmlu_fewshot_prompt {
-    []mmlu_data.mmlu_question examples  // 5-shot examples
-    mmlu_data.mmlu_question test_q      // Test question
+    []mmlu_data.mmlu_question examples
+    mmlu_data.mmlu_question test_q
 }
 
 struct mmlu_eval_config {
-    int num_shots              // Number of few-shot examples (default 5)
-    bool normalize_by_length   // Whether to normalize log-prob by token length
-    int max_seq_len            // Maximum sequence length
-    string data_root           // Root directory for MMLU data
-    string model_type          // Model type for prompt formatting
+    int num_shots
+    bool normalize_by_length
+    int max_seq_len
+    string data_root
+    string model_type
 }
 
 func default_mmlu_eval_config() mmlu_eval_config {
@@ -42,77 +42,77 @@ func default_mmlu_eval_config() mmlu_eval_config {
     }
 }
 
-// ============================================================================
-// 1. Prompt Construction
-// ============================================================================
 
-// Format a question for the prompt
+
+
+
+
 func format_mmlu_question(mmlu_data.mmlu_question q, bool include_answer) string {
     string prompt = "Question: " + q.question + "\n"
     prompt = prompt + "A) " + q.choice_a + "\n"
     prompt = prompt + "B) " + q.choice_b + "\n"
     prompt = prompt + "C) " + q.choice_c + "\n"
     prompt = prompt + "D) " + q.choice_d + "\n"
-    
+
     if include_answer {
         prompt = prompt + "Answer: " + q.correct_answer + "\n"
     }
     prompt
 }
 
-// Build 5-shot prompt for a question
+
 func build_mmlu_fewshot_prompt(
     []mmlu_data.mmlu_question examples,
     mmlu_data.mmlu_question test_q
 ) string {
     string prompt = ""
-    
-    // Add examples
+
+
     int i = 0
     while i < len(examples) {
         prompt = prompt + format_mmlu_question(examples[i], true)
         prompt = prompt + "\n"
         i = i + 1
     }
-    
-    // Add test question (without answer)
+
+
     prompt = prompt + format_mmlu_question(test_q, false)
     prompt = prompt + "Answer: "
-    
+
     prompt
 }
 
-// ============================================================================
-// 2. Choice Token Sequences
-// ============================================================================
 
-// Create token sequences for each choice
-// This is a simplified version - in production would use actual tokenizer
+
+
+
+
+
 func mmlu_get_choice_tokens(string choice, bool for_answer) []int {
     []int tokens = []int{}
-    
-    // Simplified: map choice letter to tokens
+
+
     if choice == "A" {
-        tokens = append(tokens, 362)  // "A"
+        tokens = append(tokens, 362)
     } else if choice == "B" {
-        tokens = append(tokens, 350)  // "B"
+        tokens = append(tokens, 350)
     } else if choice == "C" {
-        tokens = append(tokens, 315)  // "C"
+        tokens = append(tokens, 315)
     } else if choice == "D" {
-        tokens = append(tokens, 360)  // "D"
+        tokens = append(tokens, 360)
     }
-    
-    // If we're formatting as answer, may need full text
+
+
     if for_answer {
-        // tokens for full choice text
+
     }
-    
+
     tokens
 }
 
-// ============================================================================
-// 3. MMLU Evaluation Pipeline
-// ============================================================================
+
+
+
 
 struct mmlu_task_result {
     string task_name
@@ -129,7 +129,7 @@ struct mmlu_eval_result {
     string timestamp
 }
 
-// Evaluate a single task
+
 func evaluate_mmlu_task(
     gpt.language_model model,
     string task_name,
@@ -137,45 +137,45 @@ func evaluate_mmlu_task(
     []mmlu_data.mmlu_question dev_examples,
     mmlu_eval_config cfg
 ) mmlu_task_result {
-    
+
     int total = 0
     int correct = 0
-    
+
     int q_idx = 0
     while q_idx < len(test_questions) {
         mmlu_data.mmlu_question test_q = test_questions[q_idx]
-        
-        // Build few-shot prompt
+
+
         string prompt = build_mmlu_fewshot_prompt(dev_examples, test_q)
-        
-        // Tokenize prompt (simplified - would use real tokenizer)
+
+
         []int prompt_tokens = tokenize_prompt(prompt)
-        
-        // Evaluate each choice
+
+
         float best_score = -1000000000.0
         string best_choice = "A"
-        
+
         string choice = "A"
         int choice_idx = 0
         while choice_idx < 4 {
             []int choice_tokens = mmlu_get_choice_tokens(choice, true)
             []int full_seq = concat_token_sequences(prompt_tokens, choice_tokens)
-            
-            // Compute log-likelihood
+
+
             benchmark_eval.logprob_result lp = benchmark_eval.gpt_sequence_logprob(
                 model,
                 full_seq,
                 len(prompt_tokens)
             )
-            
-            // Score (use average log-prob)
+
+
             float score = lp.avg_logprob
-            
+
             if score > best_score {
                 best_score = score
                 best_choice = choice
             }
-            
+
             if choice == "A" {
                 choice = "B"
             } else if choice == "B" {
@@ -185,21 +185,21 @@ func evaluate_mmlu_task(
             }
             choice_idx = choice_idx + 1
         }
-        
-        // Check if correct
+
+
         if best_choice == test_q.correct_answer {
             correct = correct + 1
         }
-        
+
         total = total + 1
         q_idx = q_idx + 1
     }
-    
+
     float accuracy = 0.0
     if total > 0 {
         accuracy = (correct * 1.0) / (total * 1.0)
     }
-    
+
     mmlu_task_result {
         task_name: task_name,
         total: total,
@@ -208,16 +208,16 @@ func evaluate_mmlu_task(
     }
 }
 
-// ============================================================================
-// 4. Full MMLU Benchmark
-// ============================================================================
+
+
+
 
 func evaluate_mmlu_benchmark(
     gpt.language_model model,
     mmlu_data.mmlu_dataset_state dataset,
     mmlu_eval_config cfg
 ) mmlu_eval_result {
-    
+
     println("========================================")
     println("MMLU 5-Shot Benchmark Evaluation")
     println("========================================")
@@ -225,27 +225,27 @@ func evaluate_mmlu_benchmark(
     println("Shots: " + int_to_str(cfg.num_shots))
     println("Seq length: " + int_to_str(cfg.max_seq_len))
     println("")
-    
+
     []mmlu_task_result results = []mmlu_task_result{}
     int total_questions = 0
     int total_correct = 0
-    
-    // Get task list
+
+
     []mmlu_data.mmlu_task tasks = mmlu_data.mmlu_task_list()
-    
-    // Evaluate each task
+
+
     int task_idx = 0
     while task_idx < len(tasks) {
         mmlu_data.mmlu_task t = tasks[task_idx]
-        
+
         if t.is_included {
-            // Get dev examples and test questions for this task
+
             []mmlu_data.mmlu_question dev = dataset.dev_by_task[t.name]
             []mmlu_data.mmlu_question test = dataset.questions_by_task[t.name]
-            
+
             if len(test) > 0 {
                 println("[Eval] " + t.name + " (" + t.category + ")...")
-                
+
                 mmlu_task_result tr = evaluate_mmlu_task(
                     model,
                     t.name,
@@ -253,24 +253,24 @@ func evaluate_mmlu_benchmark(
                     dev,
                     cfg
                 )
-                
+
                 results = append(results, tr)
                 total_questions = total_questions + tr.total
                 total_correct = total_correct + tr.correct
-                
+
                 float acc_pct = tr.accuracy * 100.0
                 println("  ✓ " + t.name + ": " + fmt_float(acc_pct, 1) + "% (" + int_to_str(tr.correct) + "/" + int_to_str(tr.total) + ")")
             }
         }
-        
+
         task_idx = task_idx + 1
     }
-    
+
     float overall_acc = 0.0
     if total_questions > 0 {
         overall_acc = (total_correct * 1.0) / (total_questions * 1.0)
     }
-    
+
     println("")
     println("========================================")
     println("MMLU Results")
@@ -278,18 +278,18 @@ func evaluate_mmlu_benchmark(
     println("Overall Accuracy: " + fmt_float(overall_acc * 100.0, 2) + "%")
     println("Total: " + int_to_str(total_correct) + "/" + int_to_str(total_questions) + " correct")
     println("")
-    
-    // Results by category
+
+
     float stem_acc = 0.0; int stem_total = 0; int stem_correct = 0
     float social_acc = 0.0; int social_total = 0; int social_correct = 0
     float humanities_acc = 0.0; int humanities_total = 0; int humanities_correct = 0
     float other_acc = 0.0; int other_total = 0; int other_correct = 0
-    
+
     int r_idx = 0
     while r_idx < len(results) {
         mmlu_task_result r = results[r_idx]
-        
-        // Find task info
+
+
         int t_idx = 0
         string category = "Other"
         while t_idx < len(tasks) {
@@ -299,7 +299,7 @@ func evaluate_mmlu_benchmark(
             }
             t_idx = t_idx + 1
         }
-        
+
         if category == "STEM" {
             stem_total = stem_total + r.total
             stem_correct = stem_correct + r.correct
@@ -313,10 +313,10 @@ func evaluate_mmlu_benchmark(
             other_total = other_total + r.total
             other_correct = other_correct + r.correct
         }
-        
+
         r_idx = r_idx + 1
     }
-    
+
     if stem_total > 0 {
         stem_acc = (stem_correct * 1.0) / (stem_total * 1.0)
         println("STEM:          " + fmt_float(stem_acc * 100.0, 2) + "% (" + int_to_str(stem_correct) + "/" + int_to_str(stem_total) + ")")
@@ -333,9 +333,9 @@ func evaluate_mmlu_benchmark(
         other_acc = (other_correct * 1.0) / (other_total * 1.0)
         println("Other:         " + fmt_float(other_acc * 100.0, 2) + "% (" + int_to_str(other_correct) + "/" + int_to_str(other_total) + ")")
     }
-    
+
     println("")
-    
+
     mmlu_eval_result {
         overall_accuracy: overall_acc,
         task_results: results,
@@ -345,22 +345,22 @@ func evaluate_mmlu_benchmark(
     }
 }
 
-// ============================================================================
-// 5. Helper Functions
-// ============================================================================
 
-// Tokenize a prompt (simplified - would use real tokenizer)
+
+
+
+
 func tokenize_prompt(string prompt) []int {
     []int tokens = []int{}
     int i = 0
     while i < len(prompt) && i < 4096 {
-        tokens = append(tokens, i)  // Placeholder
+        tokens = append(tokens, i)
         i = i + 1
     }
     tokens
 }
 
-// Concatenate token sequences
+
 func concat_token_sequences([]int a, []int b) []int {
     []int result = []int{}
     int i = 0

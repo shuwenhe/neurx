@@ -1,15 +1,15 @@
 package neurx.inference.sampling_strategies
 
-// GPT-style sampling strategies for text generation.
-// This package provides a compact, S-language implementation of:
-// - temperature scaling
-// - greedy decoding
-// - top-k sampling
-// - nucleus (top-p) sampling
-// - repetition penalty
-// - presence / frequency penalties
-// - typical sampling
-// - contrastive search
+
+
+
+
+
+
+
+
+
+
 
 struct sampling_config {
     string strategy

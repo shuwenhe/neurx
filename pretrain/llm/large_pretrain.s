@@ -22,15 +22,15 @@ use neurx.ops
 use neurx.tensor.new
 use neurx.tensor.tensor
 
-// ============================================================================
-// File Reading with Progress Display
-// ============================================================================
+
+
+
 
 func get_file_size(string path) int {
     if !runtime_file_exists(path) {
         return 0
     }
-    216123783  // Placeholder for shard_00000.jsonl size
+    216123783
 }
 
 func format_bytes(int bytes) string {
@@ -54,7 +54,7 @@ func create_progress_bar(int percent, int width) string {
     if filled > width {
         filled = width
     }
-    
+
     string bar = "["
     int i = 0
     while i < width {
@@ -68,7 +68,7 @@ func create_progress_bar(int percent, int width) string {
         i = i + 1
     }
     bar = bar + "]"
-    
+
     return bar
 }
 
@@ -77,22 +77,22 @@ func read_text_file_with_estimated_progress(string path, int update_interval_ms)
         println("[io] ERROR: file not found: " + path)
         return ""
     }
-    
+
     int file_size = get_file_size(path)
     string size_str = format_bytes(file_size)
-    
+
     println("[io] reading: " + path)
     println("[io] size: " + size_str)
     println("[io] [>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>] 0% | allocating buffer...")
-    
-    // Read file with blocking I/O
+
+
     string text = runtime_read_text_file(path)
-    
+
     int loaded_size = len(text)
     string loaded_str = format_bytes(loaded_size)
-    
+
     println("[io] [========================================] 100% | complete, loaded " + loaded_str)
-    
+
     return text
 }
 
@@ -676,9 +676,9 @@ func split_lines(string text) []string {
     int i = 0
     int text_len = len(text)
     int last_progress = 0
-    
+
     println("[split] counting lines... (scanning " + format_bytes(text_len) + ")")
-    
+
     while i < text_len {
         if text[i] == 10 || text[i] == 13 {
             if in_line {
@@ -688,22 +688,22 @@ func split_lines(string text) []string {
         } else {
             in_line = true
         }
-        
-        // Progress output every 10%
+
+
         int progress = (i * 100) / text_len
         if progress != last_progress && progress % 10 == 0 {
             println("[split] " + int_to_str(progress, 0) + "% line counting...")
             last_progress = progress
         }
-        
+
         i = i + 1
     }
     if in_line {
         count = count + 1
     }
-    
+
     println("[split] ✓ found " + int_to_str(count, 0) + " lines, extracting...")
-    
+
     if count <= 0 {
         return []string{cap: 0}
     }
@@ -712,7 +712,7 @@ func split_lines(string text) []string {
     int out_idx = 0
     i = 0
     last_progress = 0
-    
+
     while i < text_len {
         if text[i] == 10 || text[i] == 13 {
             if i > line_start {
@@ -721,20 +721,20 @@ func split_lines(string text) []string {
             }
             line_start = i + 1
         }
-        
-        // Progress output every 10%
+
+
         int progress = (i * 100) / text_len
         if progress != last_progress && progress % 10 == 0 {
             println("[split] " + int_to_str(progress, 0) + "% line extraction...")
             last_progress = progress
         }
-        
+
         i = i + 1
     }
     if line_start < text_len {
         lines[out_idx] = gpt_large_pretrain_substring(text, line_start, text_len)
     }
-    
+
     println("[split] ✓ extraction complete: " + int_to_str(len(lines), 0) + " lines ready")
     lines
 }
@@ -950,7 +950,7 @@ func gpt_large_pretrain_documents_for_ref(string shard_ref) []string {
         return []string{cap: 0}
     }
     println("[init] reading shard text: " + shard_ref)
-    // Read file with progress display
+
     string text = read_text_file_with_estimated_progress(shard_ref, 1000)
     if len(text) == 0 {
         println("[init] ERROR: failed to read shard file")
@@ -971,7 +971,7 @@ func gpt_large_pretrain_documents_for_ref(string shard_ref) []string {
     int i = 0
     int total_lines = len(lines)
     int last_progress = 0
-    
+
     while i < total_lines {
         line_count = line_count + 1
         string line = trim(lines[i])
@@ -987,14 +987,14 @@ func gpt_large_pretrain_documents_for_ref(string shard_ref) []string {
                 doc_count = doc_count + 1
             }
         }
-        
-        // Progress every 10%
+
+
         int progress = (i * 100) / total_lines
         if progress != last_progress && progress % 10 == 0 {
             println("[init] parsing lines: " + int_to_str(progress, 0) + "% (" + int_to_str(i, 0) + "/" + int_to_str(total_lines, 0) + " lines, docs=" + int_to_str(doc_count, 0) + ")")
             last_progress = progress
         }
-        
+
         i = i + 1
     }
     println("[init] ✓ shard text complete: " + int_to_str(line_count, 0) + " lines, " + int_to_str(doc_count, 0) + " docs extracted")
@@ -2183,7 +2183,7 @@ func gpt_large_pretrain_execute(gpt_large_pretrain_state state) gpt_large_pretra
         steps_to_run = state.cfg.max_steps
     }
     println("[training] Starting training execution: " + int_to_str(steps_to_run, 0) + " steps (current global_step=" + int_to_str(state.loop.global_step, 0) + ")")
-    // Print active shard at start of execution for clearer console visibility
+
     println("TRAINING SHARD: " + state.active_shard_path)
     gpt_large_pretrain_state current = gpt_large_pretrain_run_and_save(state, steps_to_run)
     println("[training] Training execution complete")
@@ -2565,7 +2565,7 @@ func gpt_large_pretrain_step(gpt_large_pretrain_state state) gpt_large_pretrain_
     if next.loop.global_step < state.loop.global_step {
         return state
     }
-    
+
     float current_lr = state.cfg.lr
     if state.cfg.warmup_steps > 0 && next.loop.global_step < state.cfg.warmup_steps {
         current_lr = state.cfg.lr * (next.loop.global_step + 1) / state.cfg.warmup_steps
@@ -2588,7 +2588,7 @@ func gpt_large_pretrain_step(gpt_large_pretrain_state state) gpt_large_pretrain_
         next.corpus.total_tokens_seen,
         len(next.corpus.tokenizer.vocab)
     )
-    // Announce shard switch when active shard path changes
+
     string prev_shard = state.active_shard_path
     string new_shard = next.active_shard_path
     if prev_shard != new_shard {
@@ -2693,7 +2693,7 @@ pub func gpt_large_pretrain_launch() int {
     println("")
 
     gpt_large_pretrain_state final_state = gpt_large_pretrain_execute(state)
-    
+
     println("")
     println("════════════════════════════════════════════════════════════")
     println("✅ Training finished")

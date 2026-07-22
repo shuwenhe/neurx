@@ -1,14 +1,14 @@
 package neurx.agent.parallel_tool
 
-// Parallel tool dispatch — analogous to NeurX multi-tool use in a single turn.
-// The agent can fan-out N tool calls simultaneously and merge their observations
-// before advancing to the next reasoning step.
+
+
+
 
 use neurx.agent.tool_registry
 use neurx.agent.memory
 use neurx.tool.workspace_tools
 
-// ── data structures ───────────────────────────────────────────────────────────
+
 
 struct parallel_tool_call {
     string id
@@ -35,7 +35,7 @@ struct parallel_tool_batch_result {
     int fail_count
 }
 
-// ── constructors ──────────────────────────────────────────────────────────────
+
 
 func new_parallel_tool_call(string id, string tool_name, string input) parallel_tool_call {
     parallel_tool_call {
@@ -77,9 +77,9 @@ func new_parallel_tool_batch_result() parallel_tool_batch_result {
     }
 }
 
-// ── dispatch ──────────────────────────────────────────────────────────────────
 
-// Execute a single tool call and return its result.
+
+
 func parallel_tool_dispatch_one(parallel_tool_call call, agent_tool_registry_state tools) parallel_tool_result {
     bool enabled = agent_tool_registry_has_enabled(tools, call.tool_name)
     if !enabled {
@@ -131,7 +131,7 @@ func parallel_tool_dispatch_one(parallel_tool_call call, agent_tool_registry_sta
     }
 }
 
-// Dispatch all calls in a batch and collect results.
+
 func parallel_tool_dispatch(parallel_tool_batch batch, agent_tool_registry_state tools) parallel_tool_batch_result {
     int n = batch.count
     []parallel_tool_result results = []parallel_tool_result{cap: n}
@@ -156,9 +156,9 @@ func parallel_tool_dispatch(parallel_tool_batch batch, agent_tool_registry_state
     }
 }
 
-// ── result merging ────────────────────────────────────────────────────────────
 
-// Merge all tool results into a single observation string (separator-delimited).
+
+
 func parallel_tool_merge_observations(parallel_tool_batch_result batch_result) string {
     string merged = ""
     int i = 0
@@ -179,7 +179,7 @@ func parallel_tool_merge_observations(parallel_tool_batch_result batch_result) s
     merged
 }
 
-// Write merged results into agent memory (short-term, keyed by call id).
+
 func parallel_tool_store_results(parallel_tool_batch_result batch_result, agent_memory_state memory) agent_memory_state {
     agent_memory_state m = memory
     int i = 0
@@ -191,7 +191,7 @@ func parallel_tool_store_results(parallel_tool_batch_result batch_result, agent_
     m
 }
 
-// ── summary ───────────────────────────────────────────────────────────────────
+
 
 func parallel_tool_batch_summary(parallel_tool_batch_result batch_result) string {
     "parallel_tools count=" + string(batch_result.count) +

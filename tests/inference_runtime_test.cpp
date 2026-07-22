@@ -19,8 +19,8 @@ int main() {
   assert(ascend.dtype == "fp16" && ascend.collective == "none (single-card replica)" &&
          ascend.use_cuda_or_acl_graph);
 
-  // Runtime probing must fail explicitly on a development host without CANN;
-  // on an Ascend host it must leave the adapter ready for bound operators.
+
+
   neurx::inference::AscendAdapter ascend_adapter(nullptr, nullptr);
   const auto ascend_status = ascend_adapter.initialize(0);
   assert(ascend_status.ok ? ascend_adapter.ready() : !ascend_status.message.empty());
@@ -40,8 +40,8 @@ int main() {
   assert(prefill.total_tokens == 8 && prefill.items.size() == 1 && prefill.items[0].request_id == "cuda-long");
   scheduler.complete_prefill("cuda-long", 8);
 
-  // The remainder of cuda-long is prefetched, then it is handed off to an
-  // independent decode lane. Decode receives priority over new prefill work.
+
+
   prefill = scheduler.schedule();
   assert(prefill.phase == Phase::prefill && prefill.items[0].request_id == "cuda-short");
   scheduler.complete_prefill("cuda-short", 4);
@@ -51,7 +51,7 @@ int main() {
   scheduler.complete_decode("cuda-short");
   assert(scheduler.request("cuda-short").state == RequestState::queued_decode);
 
-  // CUDA and Ascend requests must never be mixed in one kernel launch.
+
   decode = scheduler.schedule();
   assert(decode.phase == Phase::decode && decode.key.backend == Backend::cuda);
   scheduler.complete_decode("cuda-short", true);

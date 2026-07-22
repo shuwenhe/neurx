@@ -383,7 +383,7 @@ func agent_workspace_run_command(string tool_name, string requested) agent_works
     if !planned.ok {
         return planned
     }
-    // Capture stderr too because build/test tools often emit logs there.
+
     string output = trim(runtime_run_command_output(planned.command + " 2>&1"))
     runtime_command_result run = runtime_run_command(planned.command)
     if run.ok {
@@ -462,7 +462,7 @@ func agent_workspace_replace_exact(string text, string old_text, string new_text
     }
 }
 
-// Split text into an array of lines (strips \r, no newline terminators)
+
 func agent_workspace_split_lines(string text) []string {
     int count = agent_workspace_count_lines(text)
     if count < 1 {
@@ -485,7 +485,7 @@ func agent_workspace_split_lines(string text) []string {
     result
 }
 
-// Normalize a line for fuzzy comparison: expand tabs, trim leading/trailing whitespace
+
 func agent_workspace_normalize_line(string line) string {
     string expanded = ""
     int i = 0
@@ -501,7 +501,7 @@ func agent_workspace_normalize_line(string line) string {
     trim(expanded)
 }
 
-// Fuzzy line-based replace: falls back to whitespace-normalized line matching
+
 func agent_workspace_replace_fuzzy(string content, string old_text, string new_text, bool replace_all) agent_workspace_patch_result {
     []string cl = agent_workspace_split_lines(content)
     []string ol = agent_workspace_split_lines(old_text)
@@ -510,7 +510,7 @@ func agent_workspace_replace_fuzzy(string content, string old_text, string new_t
     if no == 0 {
         return agent_workspace_patch_result_fail(agent_workspace_observation("patch", "no_progress", "reason=empty_old_text"), "")
     }
-    // Pre-compute normalized old lines
+
     []string norm_ol = []string{cap: no + 1}
     int oi = 0
     while oi < no {
@@ -522,7 +522,7 @@ func agent_workspace_replace_fuzzy(string content, string old_text, string new_t
     int replacements = 0
     int ci = 0
     while ci < nc {
-        // Try to match old_lines starting at ci
+
         bool match = no > 0 && ci + no <= nc
         if match {
             int mi = 0
@@ -543,7 +543,7 @@ func agent_workspace_replace_fuzzy(string content, string old_text, string new_t
             ci = ci + no
             replacements = replacements + 1
             if !replace_all {
-                // Append remaining lines as-is
+
                 while ci < nc {
                     if ci < nc - 1 {
                         out = out + cl[ci] + "\n"
@@ -591,7 +591,7 @@ func agent_workspace_apply_patch(string path, string old_text, string new_text, 
     string content = runtime_read_text_file(resolved)
     agent_workspace_patch_result replaced = agent_workspace_replace_exact(content, old_text, new_text, replace_all)
     if !replaced.ok {
-        // Exact match failed — try fuzzy whitespace-normalized line matching
+
         replaced = agent_workspace_replace_fuzzy(content, old_text, new_text, replace_all)
         if !replaced.ok {
             return agent_workspace_patch_result_fail(replaced.observation + ";path=" + resolved, resolved)
@@ -622,8 +622,8 @@ func agent_workspace_s(string command) agent_workspace_command_result {
     }
     string output = trim(runtime_run_command_output(command))
     runtime_command_result run = runtime_run_command(command)
-    // Cap command output to prevent context overflow. Large outputs (logs, find /,
-    // compilation noise) must be read with retrieve/grep instead.
+
+
     int max_out = 2000
     bool truncated = len(output) > max_out
     string capped = output

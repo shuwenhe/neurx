@@ -1,6 +1,6 @@
-// NeurX Production System - Performance Benchmarking
-// Pure S Language Implementation
-// Validates performance across different configurations
+
+
+
 
 package main
 
@@ -9,9 +9,9 @@ use std.strings
 use std.math
 use std.time
 
-// ============================================================================
-// DATA STRUCTURES FOR BENCHMARKING
-// ============================================================================
+
+
+
 
 struct model_config {
     name: string
@@ -29,10 +29,10 @@ struct gpu_benchmark {
     gpu_count: i32
     batch_size: i32
     tokens_per_sec: f64
-    throughput: f64          // total tokens/sec
-    memory_usage: f64        // GB
-    efficiency: f64          // %
-    communication_overhead: f64  // ms
+    throughput: f64
+    memory_usage: f64
+    efficiency: f64
+    communication_overhead: f64
 }
 
 struct performance_report {
@@ -44,9 +44,9 @@ struct performance_report {
     scaling_efficiency: f64
 }
 
-// ============================================================================
-// MODEL CONFIGURATION
-// ============================================================================
+
+
+
 
 func get_scaled_model() model_config {
     return model_config {
@@ -76,24 +76,24 @@ func get_base_model() model_config {
     }
 }
 
-// ============================================================================
-// BENCHMARK FUNCTIONS
-// ============================================================================
+
+
+
 
 func benchmark_single_gpu(model: model_config) gpu_benchmark {
     println("Benchmarking: Single GPU (A100)")
-    
-    // Performance calculations for A100-40GB
-    let forward_time = 6.0  // ms
-    let backward_time = 12.0  // ms
-    let optimizer_time = 2.0  // ms
-    
-    let step_time = forward_time + backward_time + optimizer_time  // 20ms
+
+
+    let forward_time = 6.0
+    let backward_time = 12.0
+    let optimizer_time = 2.0
+
+    let step_time = forward_time + backward_time + optimizer_time
     let tokens_per_step = model.batch_size * model.seq_length
     let tokens_per_sec = (tokens_per_step * 1000.0) / step_time
-    
-    let memory_usage = 2.0 + 0.4  // GB (activations + model)
-    
+
+    let memory_usage = 2.0 + 0.4
+
     let benchmark = gpu_benchmark {
         gpu_count: 1,
         batch_size: model.batch_size,
@@ -103,38 +103,38 @@ func benchmark_single_gpu(model: model_config) gpu_benchmark {
         efficiency: 100.0,
         communication_overhead: 0.0
     }
-    
+
     return benchmark
 }
 
 func benchmark_multi_gpu(model: model_config, gpu_count: i32) gpu_benchmark {
     println("Benchmarking: " + strings.from_i32(gpu_count) + " GPUs (DDP)")
-    
-    // Base timing from single GPU
-    let forward_time = 6.0  // ms
-    let backward_time = 12.0  // ms
-    let optimizer_time = 2.0  // ms
-    
-    // Communication overhead (NCCL AllReduce)
-    let base_comm = 0.58  // ms per GPU pair
-    let comm_overhead = (base_comm * math.log(math.from_i32(gpu_count)) * 1.5)  // hierarchical reduction
-    
+
+
+    let forward_time = 6.0
+    let backward_time = 12.0
+    let optimizer_time = 2.0
+
+
+    let base_comm = 0.58
+    let comm_overhead = (base_comm * math.log(math.from_i32(gpu_count)) * 1.5)
+
     let step_time = forward_time + backward_time + optimizer_time + comm_overhead
-    
-    // Scaling efficiency calculation
+
+
     let single_gpu_throughput = (model.batch_size * model.seq_length * 1000.0) / (forward_time + backward_time + optimizer_time)
     let multi_gpu_throughput = (model.batch_size * model.seq_length * math.from_i32(gpu_count) * 1000.0) / step_time
     let efficiency = (multi_gpu_throughput / (single_gpu_throughput * math.from_i32(gpu_count))) * 100.0
-    
-    // Scaling efficiency adjustment based on GPU count
+
+
     let adjusted_efficiency = efficiency
     if gpu_count > 16 {
-        // Efficiency drops for very large clusters
+
         adjusted_efficiency = efficiency * (100.0 / 105.0)
     }
-    
-    let memory_usage = 2.0 + 0.4  // Same memory per GPU
-    
+
+    let memory_usage = 2.0 + 0.4
+
     let benchmark = gpu_benchmark {
         gpu_count: gpu_count,
         batch_size: model.batch_size * gpu_count,
@@ -144,7 +144,7 @@ func benchmark_multi_gpu(model: model_config, gpu_count: i32) gpu_benchmark {
         efficiency: adjusted_efficiency,
         communication_overhead: comm_overhead
     }
-    
+
     return benchmark
 }
 
@@ -162,39 +162,39 @@ func benchmark_model(model: model_config) performance_report {
     println("  FF dimension: " + strings.from_i32(model.ff_dim))
     println("  Total parameters: " + format_large_number(model.num_params))
     println("")
-    
+
     let benchmarks = gpu_benchmark[]{}
-    
-    // Benchmark different GPU counts
+
+
     let gpu_counts = [1, 4, 16, 64]
-    
+
     for count in gpu_counts {
         let benchmark = benchmark_multi_gpu(model, count)
         benchmarks = append(benchmarks, benchmark)
-        
+
         let efficiency_str = strings.format("%.1f", benchmark.efficiency)
         let throughput_str = strings.format("%.0f", benchmark.throughput)
-        
+
         println("  " + strings.from_i32(count) + " GPU(s): " + throughput_str + " tokens/sec (" + efficiency_str + "% efficiency)")
     }
-    
+
     println("")
-    
-    // Calculate peak throughput
+
+
     let peak_throughput = 0.0
     for benchmark in benchmarks {
         if benchmark.throughput > peak_throughput {
             peak_throughput = benchmark.throughput
         }
     }
-    
-    // Calculate average scaling efficiency
+
+
     let total_efficiency = 0.0
     for benchmark in benchmarks {
         total_efficiency = total_efficiency + benchmark.efficiency
     }
     let avg_efficiency = total_efficiency / math.from_i32(len(benchmarks))
-    
+
     let report = performance_report {
         timestamp: time.format(time.now(), "2006-01-02T15:04:05Z07:00"),
         model: model,
@@ -203,13 +203,13 @@ func benchmark_model(model: model_config) performance_report {
         peak_throughput: peak_throughput,
         scaling_efficiency: avg_efficiency
     }
-    
+
     return report
 }
 
-// ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
+
+
+
 
 func format_large_number(n: i64) string {
     if n > 1000000000 {
@@ -229,7 +229,7 @@ func print_performance_summary(reports: performance_report[]) {
     println("PERFORMANCE SUMMARY")
     println("═" + strings.repeat("═", 61))
     println("")
-    
+
     for report in reports {
         println("Model: " + report.model.name)
         println("  Total parameters: " + format_large_number(report.total_params))
@@ -245,19 +245,19 @@ func print_scaling_analysis(report: performance_report) {
     println("║  SCALING ANALYSIS: " + report.model.name + strings.repeat(" ", 35 - len(report.model.name)) + "║")
     println("╚" + strings.repeat("═", 61) + "╝")
     println("")
-    
+
     println("GPU Count │ Throughput    │ Efficiency │ Comm Overhead")
     println("─" + strings.repeat("─", 60))
-    
+
     for benchmark in report.benchmarks {
         let gpu_str = strings.from_i32(benchmark.gpu_count) + " GPU" + (if benchmark.gpu_count > 1 then "s" else "")
         let throughput_str = strings.format("%.0f", benchmark.throughput) + " toks/s"
         let efficiency_str = strings.format("%.1f", benchmark.efficiency) + "%"
         let comm_str = strings.format("%.1f", benchmark.communication_overhead) + " ms"
-        
+
         println(gpu_str + strings.repeat(" ", 10 - len(gpu_str)) + "│ " + throughput_str + strings.repeat(" ", 14 - len(throughput_str)) + "│ " + efficiency_str + strings.repeat(" ", 11 - len(efficiency_str)) + "│ " + comm_str)
     }
-    
+
     println("")
     println("Scaling characteristics:")
     println("  • Linear scaling up to 16 GPUs")
@@ -268,9 +268,9 @@ func print_scaling_analysis(report: performance_report) {
     println("")
 }
 
-// ============================================================================
-// VALIDATION FUNCTIONS
-// ============================================================================
+
+
+
 
 func validate_performance_targets() {
     println("")
@@ -278,14 +278,14 @@ func validate_performance_targets() {
     println("║  PERFORMANCE TARGET VALIDATION                          ║")
     println("╚" + strings.repeat("═", 61) + "╝")
     println("")
-    
+
     println("Target benchmarks:")
     println("  Single GPU:   6.5K tokens/sec    ✅")
     println("  4 GPUs:      24K tokens/sec     ✅")
     println("  16 GPUs:     90K tokens/sec     ✅")
     println("  64 GPUs:    300K tokens/sec     ✅")
     println("")
-    
+
     println("Memory usage targets:")
     println("  Model parameters:  100M (400 MB)                ✅")
     println("  Per-GPU activations: 14 GB                      ✅")
@@ -293,20 +293,20 @@ func validate_performance_targets() {
     println("  Optimizer state: 1 GB                           ✅")
     println("  Total per GPU: ~16 GB                           ✅")
     println("")
-    
+
     println("Scaling efficiency targets:")
     println("  4 GPUs:  ~95% efficiency                        ✅")
     println("  16 GPUs: ~90% efficiency                        ✅")
     println("  64 GPUs: ~85% efficiency                        ✅")
     println("")
-    
+
     println("All targets met! ✅")
     println("")
 }
 
-// ============================================================================
-// MAIN BENCHMARKING
-// ============================================================================
+
+
+
 
 func main() {
     println("")
@@ -314,18 +314,18 @@ func main() {
     println("║  NEURX PRODUCTION SYSTEM - PERFORMANCE BENCHMARKING   ║")
     println("╚" + strings.repeat("═", 61) + "╝")
     println("")
-    
-    // Benchmark scaled model
+
+
     let scaled_model = get_scaled_model()
     let scaled_report = benchmark_model(scaled_model)
-    
-    // Print detailed analysis
+
+
     print_scaling_analysis(scaled_report)
-    
-    // Validate performance targets
+
+
     validate_performance_targets()
-    
-    // Summary
+
+
     println("═" + strings.repeat("═", 61))
     println("")
     println("🎯 PERFORMANCE SUMMARY")

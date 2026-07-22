@@ -17,7 +17,7 @@ struct tracer_state {
     []string tags
 }
 
-// Getter functions to work around compiler type inference bug with struct field indexing
+
 func get_op(tracer_state state, int index) string {
     state.ops[index]
 }

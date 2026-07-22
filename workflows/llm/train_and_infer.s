@@ -1,24 +1,24 @@
 package main
 
-// NeurX Complete Training & Inference System
-// completeEnglish texttrainingEnglish textinferencesystemimplementation
-//
-// English text:
-// 1. modelEnglish textinitialize
-// 2. dataload
-// 3. trainingEnglish text(gradientEnglish text)
-// 4. losscomputeEnglish text
-// 5. modelcheckpointsave
-// 6. inferenceEnglish textgenerate
+
+
+
+
+
+
+
+
+
+
 
 use std.io
 use std.math
 use std.time
 use std.strings
 
-// ============================================================================
-// modelconfiguration
-// ============================================================================
+
+
+
 
 struct model_config {
     vocab_size: i32
@@ -53,9 +53,9 @@ struct inference_result {
     latency_ms: f64
 }
 
-// ============================================================================
-// toolfunction
-// ============================================================================
+
+
+
 
 func println(s: string) {
     io.println(s)
@@ -77,16 +77,16 @@ func format_large_number(n: i64) string {
     }
 }
 
-// ============================================================================
-// modelimplementation
-// ============================================================================
+
+
+
 
 struct transformer_model {
     config: model_config
-    embedding_table: [][]f64          // [vocab_size, hidden_dim]
-    attention_weights: [][]f64        // [num_heads, hidden_dim]
-    ffn_weights: [][]f64             // [ffn_dim, hidden_dim]
-    layer_norms: [][]f64             // [num_layers, hidden_dim]
+    embedding_table: [][]f64
+    attention_weights: [][]f64
+    ffn_weights: [][]f64
+    layer_norms: [][]f64
 }
 
 func create_model(config: model_config) transformer_model {
@@ -99,19 +99,19 @@ func create_model(config: model_config) transformer_model {
     println("   Layers: " + strings.from_i32(config.num_layers))
     println("   Attention heads: " + strings.from_i32(config.num_heads))
 
-    // Initialize embedding table
+
     let emb_size = i64(config.vocab_size) * i64(config.hidden_dim)
     model.embedding_table = [][]f64{}
 
-    // Initialize attention weights
+
     let attn_size = i64(config.num_heads) * i64(config.hidden_dim)
     model.attention_weights = [][]f64{}
 
-    // Initialize FFN weights
+
     let ffn_size = i64(config.ffn_dim) * i64(config.hidden_dim)
     model.ffn_weights = [][]f64{}
 
-    // Initialize layer norms
+
     model.layer_norms = [][]f64{}
 
     let total_params = emb_size + attn_size + ffn_size
@@ -120,9 +120,9 @@ func create_model(config: model_config) transformer_model {
     return model
 }
 
-// ============================================================================
-// dataload
-// ============================================================================
+
+
+
 
 struct data_batch {
     input_ids: []i32
@@ -140,7 +140,7 @@ func create_dummy_batch(config: model_config) data_batch {
     batch.input_ids = []i32{}
     batch.labels = []i32{}
 
-    // Generate deterministic data pattern
+
     for i := 0; i < total_tokens; i = i + 1 {
         let token_id = i32((i * 7 + 13) % config.vocab_size)
         batch.input_ids = append(batch.input_ids, token_id)
@@ -150,32 +150,32 @@ func create_dummy_batch(config: model_config) data_batch {
     return batch
 }
 
-// ============================================================================
-// trainingEnglish text
-// ============================================================================
+
+
+
 
 func compute_loss(model: transformer_model, batch: data_batch) f64 {
-    // Simplified loss computation: cross-entropy approximation
+
     let num_tokens = f64(len(batch.labels))
 
-    // Simulate forward pass producing logits
-    let avg_logit_score = 0.5  // Simplified
 
-    // Cross-entropy loss approximation
-    let loss = -math.log(avg_logit_score + 0.01)  // Add epsilon to avoid log(0)
+    let avg_logit_score = 0.5
+
+
+    let loss = -math.log(avg_logit_score + 0.01)
 
     return loss
 }
 
 func train_step(model: transformer_model, batch: data_batch, lr: f64) (transformer_model, f64) {
-    // Forward pass
+
     let loss = compute_loss(model, batch)
 
-    // Backward pass (simplified gradient descent)
+
     let learning_rate_scaled = lr * 0.001
 
-    // Update weights (simplified)
-    // In real implementation: model weights -= learning_rate * gradients
+
+
 
     return (model, loss)
 }
@@ -204,28 +204,28 @@ func train_epoch(model: transformer_model, config: training_config, epoch: i32) 
     let start_time = time.now()
 
     for step := 0; step < config.steps_per_epoch; step = step + 1 {
-        // Create batch
+
         let batch = create_dummy_batch(model.config)
 
-        // Compute learning rate with warmup
+
         var lr = config.learning_rate
         if step < config.warmup_steps {
             lr = config.learning_rate * f64(step) / f64(config.warmup_steps)
         }
 
-        // Training step
+
         let (updated_model, loss) = train_step(model_state, batch, lr)
         model_state = updated_model
 
         cumulative_loss = cumulative_loss + loss
         let avg_loss = cumulative_loss / f64(step + 1)
 
-        // Calculate throughput
+
         let elapsed = time.since(start_time).seconds()
         let total_tokens = i64(step + 1) * i64(batch.batch_size) * i64(batch.seq_len)
         let throughput = f64(total_tokens) / elapsed
 
-        // Print progress
+
         if (step + 1) % 10 == 0 {
             let metrics = training_metrics {
                 step: step + 1,
@@ -249,9 +249,9 @@ func train_epoch(model: transformer_model, config: training_config, epoch: i32) 
     return (model_state, avg_epoch_loss)
 }
 
-// ============================================================================
-// checkpointmanagement
-// ============================================================================
+
+
+
 
 func save_checkpoint(model: transformer_model, epoch: i32) {
     let checkpoint_path = "checkpoints/epoch_" + strings.from_i32(epoch) + ".ckpt"
@@ -260,14 +260,14 @@ func save_checkpoint(model: transformer_model, epoch: i32) {
 
 func load_checkpoint(checkpoint_path: string) transformer_model {
     println("📂 Loading checkpoint: " + checkpoint_path)
-    // Simplified - in real impl would restore weights from file
+
     var model: transformer_model
     return model
 }
 
-// ============================================================================
-// inferenceimplementation
-// ============================================================================
+
+
+
 
 func generate_text(model: transformer_model, prompt: string, max_tokens: i32) inference_result {
     println("")
@@ -277,7 +277,7 @@ func generate_text(model: transformer_model, prompt: string, max_tokens: i32) in
 
     let start_time = time.now()
 
-    // Simplified generation: concatenate tokens
+
     var generated = prompt
     let token_map = []string{
         "the", "of", "to", "in", "a", "is", "and", "it", "for", "that",
@@ -312,9 +312,9 @@ func print_inference_result(result: inference_result) {
     println("   Throughput: " + format_float(tokens_per_sec, 0) + " tokens/sec")
 }
 
-// ============================================================================
-// mainEnglish text
-// ============================================================================
+
+
+
 
 func main() {
     println("")
@@ -324,7 +324,7 @@ func main() {
     println("╚" + strings.repeat("═", 68) + "╝")
     println("")
 
-    // Configuration
+
     let model_config = model_config {
         vocab_size: 32000,
         hidden_dim: 256,
@@ -343,7 +343,7 @@ func main() {
         max_grad_norm: 1.0
     }
 
-    // PHASE 1: Model Creation
+
     println("")
     println("═" + strings.repeat("═", 69) + "")
     println("PHASE 1: Model Initialization")
@@ -356,7 +356,7 @@ func main() {
     println("")
     println("✅ Model created with " + format_large_number(total_params) + " parameters")
 
-    // PHASE 2: Training
+
     println("")
     println("═" + strings.repeat("═", 69) + "")
     println("PHASE 2: Model Training")
@@ -378,21 +378,21 @@ func main() {
     println("✅ Training completed!")
     println("   Best loss: " + format_float(best_loss, 4))
 
-    // PHASE 3: Inference
+
     println("")
     println("═" + strings.repeat("═", 69) + "")
     println("PHASE 3: Model Inference")
     println("═" + strings.repeat("═", 69) + "")
 
-    // Inference 1
+
     let result1 = generate_text(model, "The future of AI is", 20)
     print_inference_result(result1)
 
-    // Inference 2
+
     let result2 = generate_text(model, "Machine learning enables", 15)
     print_inference_result(result2)
 
-    // PHASE 4: Performance Summary
+
     println("")
     println("═" + strings.repeat("═", 69) + "")
     println("PHASE 4: Summary")

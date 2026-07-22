@@ -1,17 +1,17 @@
 package neurx.inference
 
-// ============================================================================
-// Generator Helper Functions
-// ============================================================================
+
+
+
 
 use neurx.inference.sampling.sampling_utils
 use neurx.inference.sampling.sampling_utils2
 use neurx.inference.sampling.sampling_utils3
 use neurx.inference.sampling.sampling_utils4
 
-// ========================================================================
-// GREEDY STEP - Simple argmax selection (used in generate loop)
-// ========================================================================
+
+
+
 
 func greedy_step(
     []float logits,
@@ -19,33 +19,33 @@ func greedy_step(
     uint64 rng_state
 ) (int, uint64) {
     if cfg.do_sample  cfg.temperature > 0.0 {
-        // sample with temperature even though it's "greedy" mode
+
         return sample_from_softmax(logits, cfg.temperature, rng_state)
     }
-    
-    // Pure greedy: just take argmax
+
+
     (argmax(logits), rng_state)
 }
 
-// ========================================================================
-// EXTRACT GENERATED PART of sequence (excluding prompt tokens)
-// ========================================================================
+
+
+
 
 func extract_generated_part([]int full_ids, int prompt_length) []int {
     int gen_len = len(full_ids) - prompt_length
     if gen_len <= 0 { return [] }
-    
+
     []int generated = []int{cap: gen_len}
     for i in 0..gen_len {
         generated[i] = full_ids[prompt_length + i]
     }
-    
+
     generated
 }
 
-// ========================================================================
-// CHECK IF ALL SEQUENCES FINISHED with EOS token
-// ========================================================================
+
+
+
 
 func check_all_finished([][]int sequences, int eos_id) bool {
     for seq in sequences {
@@ -56,24 +56,24 @@ func check_all_finished([][]int sequences, int eos_id) bool {
                 break
             }
         }
-        if !has_eos { 
-            return false 
+        if !has_eos {
+            return false
         }
     }
-    
+
     true
 }
 
-// ========================================================================
-// COMPUTE AVERAGE SCORE across all sequences and steps
-// ========================================================================
+
+
+
 
 func compute_avg_score([][][]float all_scores) float {
     if len(all_scores) == 0 { return 0.0 }
-    
+
     float total = 0.0
     int count = 0
-    
+
     for seq_scores in all_scores {
         for step_scores in seq_scores {
             for score in step_scores {
@@ -82,6 +82,6 @@ func compute_avg_score([][][]float all_scores) float {
             }
         }
     }
-    
+
     if count > 0 { total / float(count) } else { 0.0 }
 }
