@@ -1,33 +1,7 @@
 package neurx.model.llm.long_context_32k
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.strings
 use neurx.runtime.io.{io_println}
-
-
-
-
 
 struct rope_config {
     int dim
@@ -41,13 +15,10 @@ struct rope_config {
 struct rope_state {
     rope_config config
 
-
     rope_cache cache
-
 
     []float freqs
     []float scaled_freqs
-
 
     float extrapolation_ratio
     float freq_min
@@ -66,7 +37,6 @@ struct rope_qk_result {
     []float rotated_k
 }
 
-
 func rope_config_new(
     int dim,
     int max_seq_len
@@ -84,18 +54,12 @@ func rope_config_new(
     cfg
 }
 
-
-
-
-
-
 func compute_rope_frequencies(
     rope_config config
 ) []float {
 
     int dim = config.dim
     []float freqs = []float{cap: dim / 2}
-
 
     int i = 0
     while i < dim / 2 {
@@ -108,11 +72,6 @@ func compute_rope_frequencies(
     freqs
 }
 
-
-
-
-
-
 func apply_ntk_scaling(
     rope_config config,
     []float freqs,
@@ -121,16 +80,11 @@ func apply_ntk_scaling(
 
     []float scaled_freqs = []float{cap: len(freqs)}
 
-
-
-
-
     float alpha = config.alpha
     if context_len > config.max_seq_len {
         float ratio = float(context_len) / float(config.max_seq_len)
         alpha = pow(ratio, float(config.dim) / float(config.dim - 2))
     }
-
 
     int i = 0
     while i < len(freqs) {
@@ -141,7 +95,6 @@ func apply_ntk_scaling(
     scaled_freqs
 }
 
-
 func apply_linear_interpolation_scaling(
     rope_config config,
     []float freqs,
@@ -150,17 +103,12 @@ func apply_linear_interpolation_scaling(
 
     []float scaled_freqs = []float{cap: len(freqs)}
 
-
-
-
     float scale = float(context_len) / float(config.max_seq_len)
 
     int i = 0
     while i < len(freqs) {
 
         float freq_idx_normalized = float(i) / float(len(freqs))
-
-
 
         if freq_idx_normalized < 0.25 {
             scaled_freqs[i] = freqs[i]
@@ -175,11 +123,6 @@ func apply_linear_interpolation_scaling(
 
     scaled_freqs
 }
-
-
-
-
-
 
 func precompute_rope_cache(
     rope_config config,
@@ -214,12 +157,6 @@ func precompute_rope_cache(
     }
 }
 
-
-
-
-
-
-
 func apply_rope_to_qk(
     rope_state rope,
     []float query,
@@ -239,7 +176,6 @@ func apply_rope_to_qk(
         while s < seq_len {
             int pos = b * seq_len + s
 
-
             int h = 0
             while h < num_heads {
 
@@ -257,7 +193,6 @@ func apply_rope_to_qk(
 
                     rotated_q[pos * num_heads * head_dim + h * head_dim + 2 * d] = rotated_q_d0
                     rotated_q[pos * num_heads * head_dim + h * head_dim + 2 * d + 1] = rotated_q_d1
-
 
                     float k_d0 = key[pos * num_heads * head_dim + h * head_dim + 2 * d]
                     float k_d1 = key[pos * num_heads * head_dim + h * head_dim + 2 * d + 1]
@@ -286,18 +221,11 @@ func apply_rope_to_qk(
     }
 }
 
-
-
-
-
-
 func rope_state_new(
     rope_config config
 ) rope_state {
 
-
     []float freqs = compute_rope_frequencies(config)
-
 
     []float scaled_freqs = freqs
     if config.scaling_type == "ntk" {
@@ -305,7 +233,6 @@ func rope_state_new(
     } else if config.scaling_type == "linear" {
         scaled_freqs = apply_linear_interpolation_scaling(config, freqs, config.max_seq_len)
     }
-
 
     rope_cache cache = precompute_rope_cache(config, scaled_freqs)
 
@@ -319,7 +246,6 @@ func rope_state_new(
         freq_max: 0.0,
     }
 
-
     if len(scaled_freqs) > 0 {
         state.freq_min = scaled_freqs[len(scaled_freqs) - 1]
         state.freq_max = scaled_freqs[0]
@@ -327,11 +253,6 @@ func rope_state_new(
 
     state
 }
-
-
-
-
-
 
 func handle_longer_context(
     rope_state rope,
@@ -342,26 +263,13 @@ func handle_longer_context(
         return
     }
 
-
     rope.extrapolation_ratio = float(actual_seq_len) / float(rope.config.max_seq_len)
-
-
-
-
-
-
 
     io_println("Handling context longer than max_seq_len: " +
               int_to_string(actual_seq_len) + " > " + int_to_string(rope.config.max_seq_len))
 }
 
-
-
-
-
 func cos(float x) float {
-
-
 
     float x2 = x * x
     float result = 1.0
@@ -378,8 +286,6 @@ func cos(float x) float {
 }
 
 func sin(float x) float {
-
-
 
     float x2 = x * x
     float result = x
@@ -406,7 +312,6 @@ func pow(float base, float exp) float {
     if exp == 1.0 {
         return base
     }
-
 
     float log_base = 0.5
     float result = exp_func(exp * log_base)

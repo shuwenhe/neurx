@@ -1,18 +1,8 @@
 
 
-
-
-
-
-
-
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
 #include <cmath>
-
-
-
-
 
 __global__ void error_loss_kernel(
     float *pred, const float *target, float *loss,
@@ -50,10 +40,6 @@ extern "C" float cuda_error_loss_kernel(
     return h_loss / static_cast<float>(size);
 }
 
-
-
-
-
 __global__ void sgd_update_kernel(
     float *weights, const float *gradients,
     float lr, float inv_batch, int n
@@ -86,10 +72,6 @@ extern "C" int cuda_sgd_update_kernel(
     cudaDeviceSynchronize();
     return 0;
 }
-
-
-
-
 
 __global__ void relu_forward_kernel(float *out, const float *in, int n) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -148,10 +130,6 @@ extern "C" int cuda_relu_backward(
     return 0;
 }
 
-
-
-
-
 __global__ void softmax_kernel(
     float *out, const float *in,
     int seq_len, int batch_size
@@ -162,18 +140,15 @@ __global__ void softmax_kernel(
     for (int i = threadIdx.x; i < seq_len; i += blockDim.x) {
         int idx = b * seq_len + i;
 
-
         float maxval = in[b * seq_len];
         for (int j = 0; j < seq_len; j++) {
             maxval = fmaxf(maxval, in[b * seq_len + j]);
         }
 
-
         float sum = 0.0f;
         for (int j = 0; j < seq_len; j++) {
             sum += expf(in[b * seq_len + j] - maxval);
         }
-
 
         out[idx] = expf(in[idx] - maxval) / sum;
     }
@@ -195,17 +170,12 @@ extern "C" int cuda_softmax(
     return 0;
 }
 
-
-
-
-
 __global__ void layer_norm_kernel(
     float *out, const float *in, const float *weight, const float *bias,
     int n, float eps
 ) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx >= n) return;
-
 
     float normalized = in[idx];
 
@@ -242,10 +212,6 @@ extern "C" int cuda_layer_norm(
     cudaDeviceSynchronize();
     return 0;
 }
-
-
-
-
 
 extern "C" int cuda_get_device_count() {
     int count = 0;

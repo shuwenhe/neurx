@@ -1,39 +1,5 @@
 package neurx.optimizer.fsdp_optimizer
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 int SHARDING_FULL_SHARD = 0
 int SHARDING_GRAD_SHARD = 1
 int SHARDING_NO_SHARD = 2
@@ -41,33 +7,26 @@ int SHARDING_NO_SHARD = 2
 int BACKEND_NCCL_FSDP = 0
 int BACKEND_CUSTOM = 1
 
-
-
 struct fsdp_config {
     int sharding_policy
     int dp_degree
     int dp_rank
     int backend
 
-
     bool cpu_offload_params
     bool cpu_offload_grads
     int cpu_offload_pin_memory
-
 
     bool flatten_parameters
     int prefetch_num_forward_layers
     int prefetch_num_backward_layers
 
-
     bool use_activation_checkpointing
     bool use_gradient_checkpointing
-
 
     bool use_mixed_precision
     int param_dtype
     int reduce_dtype
-
 
     bool verbose_logging
 }
@@ -80,7 +39,6 @@ struct fsdp_param_shard {
     int original_shape_rank
     bool requires_grad
 
-
     bool is_currently_gathered
     int gather_refcount
 }
@@ -90,39 +48,31 @@ struct fsdp_optimizer_state {
     []double exp_avg
     []double exp_avg_sq
 
-
     int step_count
 }
 
 struct fsdp_unit_state {
     fsdp_config config
 
-
     []double local_param_shard
     []double local_grad_shard
     fsdp_optimizer_state optimizer
 
-
     []double full_param_buffer
     bool full_buffer_is_valid
-
 
     []fsdp_param_shard param_shards
     int total_local_elements
     int total_global_elements
 
-
     int pg_world_size
     int pg_my_rank
-
 
     int num_allgathers
     int num_reducescatters
     double time_in_allgather_ms
     double time_in_reducescatter_ms
 }
-
-
 
 func mod_fsdn(int val, int div) int {
     if div <= 0 { return 0 }
@@ -131,7 +81,6 @@ func mod_fsdn(int val, int div) int {
     while r < 0 { r = r + div }
     return r
 }
-
 
 func default_fsdp_config_2t(int dp_degree, int dp_rank) fsdp_config {
     fsdp_config cfg
@@ -159,7 +108,6 @@ func default_fsdp_config_2t(int dp_degree, int dp_rank) fsdp_config {
     return cfg
 }
 
-
 func init_fsdp(
     fsdp_config cfg,
     []double initial_model_params,
@@ -177,7 +125,6 @@ func init_fsdp(
     state.time_in_allgather_ms = 0.0
     state.time_in_reducescatter_ms = 0.0
 
-
     int total_global = 0
     int i = 0
     while i < len(param_sizes) {
@@ -185,7 +132,6 @@ func init_fsdp(
         i = i + 1
     }
     state.total_global_elements = total_global
-
 
     int base_count = total_global / cfg.dp_degree
     int remainder = mod_fsdn(total_global, cfg.dp_degree)
@@ -196,7 +142,6 @@ func init_fsdp(
     }
     state.total_local_elements = my_local_count
 
-
     int my_start_offset = 0
     int j = 0
     while j < cfg.dp_rank {
@@ -206,11 +151,8 @@ func init_fsdp(
         j = j + 1
     }
 
-
     state.local_param_shard = []double{cap: my_local_count}
     state.local_grad_shard = []double{cap: my_local_count}
-
-
 
     int k = 0
     while k < my_local_count {
@@ -223,7 +165,6 @@ func init_fsdp(
         }
         k = k + 1
     }
-
 
     state.param_shards = []fsdp_param_shard{cap: len(param_sizes)}
     int running_global_offset = 0
@@ -248,7 +189,6 @@ func init_fsdp(
 
         running_global_offset = running_global_offset + param_sizes[m]
 
-
         if running_global_offset > my_start_offset
            running_local_offset < my_local_count {
 
@@ -258,9 +198,7 @@ func init_fsdp(
         m = m + 1
     }
 
-
     state.full_param_buffer = []double{cap: total_global}
-
 
     state.optimizer.exp_avg = []double{cap: my_local_count}
     state.optimizer.exp_avg_sq = []double{cap: my_local_count}
@@ -269,22 +207,13 @@ func init_fsdp(
     return state
 }
 
-
-
-
-
-
-
-
 func pre_forward_allgather(
     ref fsdp_unit_state state,
     []string param_names_needed) {
 
-
     if state.config.sharding_policy != SHARDING_FULL_SHARD { return }
 
     double t_start = 0.0
-
 
     int idx = 0
     while idx < len(param_names_needed) {
@@ -297,8 +226,6 @@ func pre_forward_allgather(
         idx = idx + 1
     }
 
-
-
     perform_allgather(state)
 
     state.full_buffer_is_valid = true
@@ -306,8 +233,6 @@ func pre_forward_allgather(
     double elapsed = 0.0
     state.time_in_allgather_ms = state.time_in_allgather_ms + elapsed
 }
-
-
 
 func post_forward_unshard(
     ref fsdp_unit_state state,
@@ -328,7 +253,6 @@ func post_forward_unshard(
         idx = idx + 1
     }
 
-
     bool any_gathered = false
     int j = 0
     while j < len(state.param_shards) {
@@ -342,7 +266,6 @@ func post_forward_unshard(
     }
 }
 
-
 func get_full_param(fsdp_unit_state state, string param_name) []double {
     int pidx = find_param_idx(state, param_name)
     if pidx < 0 { return []double{} }
@@ -351,11 +274,9 @@ func get_full_param(fsdp_unit_state state, string param_name) []double {
 
     if !state.full_buffer_is_valid || !ps.is_currently_gathered {
 
-
         perform_allgather(state)
         state.full_buffer_is_valid = true
     }
-
 
     []double result = []double{cap: ps.num_elements}
     int k = 0
@@ -366,13 +287,6 @@ func get_full_param(fsdp_unit_state state, string param_name) []double {
 
     return result
 }
-
-
-
-
-
-
-
 
 func post_backward_reducescatter(
     ref fsdp_unit_state state,
@@ -386,12 +300,8 @@ func post_backward_reducescatter(
     int idx = 0
     while idx < len(full_grad_tensors) {
 
-
-
         idx = idx + 1
     }
-
-
 
     perform_reducescatter(state, full_grad_tensors)
 
@@ -399,11 +309,6 @@ func post_backward_reducescatter(
     double elapsed = 0.0
     state.time_in_reducescatter_ms = state.time_in_reducescatter_ms + elapsed
 }
-
-
-
-
-
 
 func fsdp_optimizer_step(
     ref fsdp_unit_state state,
@@ -416,41 +321,33 @@ func fsdp_optimizer_step(
     int t = state.optimizer.step_count + 1
     state.optimizer.step_count = t
 
-
     double bias_correction1 = 1.0 - pow_dbl(beta1, double(t))
     double bias_correction2 = 1.0 - pow_dbl(beta2, double(t))
     double sqrt_bias_corr2 = sqrt_dbl(bias_correction2)
-
 
     int i = 0
     while i < state.total_local_elements {
         double param = state.local_param_shard[i]
         double grad = state.local_grad_shard[i]
 
-
         if weight_decay != 0.0 {
             grad = grad + weight_decay * param
         }
 
-
         state.optimizer.exp_avg[i] = beta1 * state.optimizer.exp_avg[i] +
                                       (1.0 - beta1) * grad
 
-
         state.optimizer.exp_avg_sq[i] = beta2 * state.optimizer.exp_avg_sq[i] +
                                          (1.0 - beta2) * grad * grad
-
 
         double denom = (sqrt_dbl(state.optimizer.exp_avg_sq[i]) / sqrt_bias_corr2) + eps
         double step_size = learning_rate / bias_correction1
         double update = step_size * state.optimizer.exp_avg[i] / denom
 
-
         state.local_param_shard[i] = param - update
 
         i = i + 1
     }
-
 
     i = 0
     while i < state.total_local_elements {
@@ -459,17 +356,12 @@ func fsdp_optimizer_step(
     }
 }
 
-
-
-
 func perform_allgather(ref fsdp_unit_state state) {
-
 
     int world_size = state.pg_world_size
     int rank = state.pg_my_rank
     int local_n = state.total_local_elements
     int global_n = state.total_global_elements
-
 
     int my_base_offset = 0
     int j = 0
@@ -487,7 +379,6 @@ func perform_allgather(ref fsdp_unit_state state) {
         }
         k = k + 1
     }
-
 
     int r = 0
     while r < world_size {
@@ -517,14 +408,11 @@ func perform_allgather(ref fsdp_unit_state state) {
     }
 }
 
-
 func perform_reducescatter(ref fsdp_unit_state state, [][]double full_grads) {
-
 
     int world_size = state.pg_world_size
     int rank = state.pg_my_rank
     int local_n = state.total_local_elements
-
 
     int i = 0
     while i < local_n {
@@ -536,14 +424,12 @@ func perform_reducescatter(ref fsdp_unit_state state, [][]double full_grads) {
         i = i + 1
     }
 
-
     i = 0
     while i < local_n {
         state.local_grad_shard[i] = 0.0
         i = i + 1
     }
 }
-
 
 func find_param_idx(fsdp_unit_state state, string name) int {
     int i = 0
@@ -553,8 +439,6 @@ func find_param_idx(fsdp_unit_state state, string name) int {
     }
     return -1
 }
-
-
 
 func pow_dbl(double base, double exp) double {
     double result = 1.0
@@ -581,8 +465,6 @@ func sqrt_dbl(double x) double {
     return guess
 }
 
-
-
 struct fsdp_stats {
     double avg_time_allgather_ms
     double avg_time_reducescatter_ms
@@ -605,7 +487,6 @@ func compute_fsdp_stats(fsdp_unit_state state) fsdp_stats {
         stats.avg_time_reducescatter_ms = state.time_in_reducescatter_ms / double(state.num_reducescatters)
     }
 
-
     if state.config.sharding_policy == SHARDING_FULL_SHARD {
         stats.memory_savings_ratio = double(state.config.dp_degree)
     } else if state.config.sharding_policy == SHARDING_GRAD_SHARD {
@@ -614,7 +495,6 @@ func compute_fsdp_stats(fsdp_unit_state state) fsdp_stats {
         stats.memory_savings_ratio = 1.0
     }
 
-
     double comm_time = state.time_in_allgather_ms + state.time_in_reducescatter_ms
     double estimated_compute_time = 100.0
     stats.communication_overhead_pct = comm_time / (comm_time + estimated_compute_time) * 100.0
@@ -622,22 +502,9 @@ func compute_fsdp_stats(fsdp_unit_state state) fsdp_stats {
     return stats
 }
 
-
 func print_fsdp_summary(fsdp_unit_state state, fsdp_stats stats) {
 
-
-
-
-
-
-
-
-
-
-
-
 }
-
 
 func recommend_fsdp_for_2t(int num_gpus, int tp_degree, int pp_degree) fsdp_config {
     int effective_dp = num_gpus / (tp_degree * pp_degree)

@@ -2,13 +2,6 @@ package neurx.posttrain.adapter.peft_adapter_merger
 
 use std.io.println
 
-
-
-
-
-
-
-
 struct peft_adapter_merge_config {
     string base_model_path
     string adapter_path
@@ -25,18 +18,6 @@ struct merge_result {
     string output_path
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 func parse_adapter_config(string config_json) peft_adapter_merge_config {
 
     int rank_start = find_json_number(config_json, "\"r\"")
@@ -50,7 +31,6 @@ func parse_adapter_config(string config_json) peft_adapter_merge_config {
 
 func find_json_number(string json, string key) int {
 
-
     100
 }
 
@@ -59,14 +39,7 @@ func find_json_float(string json, string key) float {
     16.0
 }
 
-
-
-
-
-
-
 func read_safetensors_header(string file_path) string {
-
 
     println("[Merger] Reading safetensors header from " + file_path)
     ""
@@ -83,20 +56,8 @@ struct safetensors_tensor {
 func parse_safetensors_tensors(string header) []safetensors_tensor {
     []safetensors_tensor tensors = []safetensors_tensor{}
 
-
-
-
-
-
     tensors
 }
-
-
-
-
-
-
-
 
 func apply_lora_to_weight(
     []float base_weight,
@@ -110,14 +71,12 @@ func apply_lora_to_weight(
 
     []float ba = matmul_lora(lora_b, lora_a, out_dim, rank, in_dim)
 
-
     float scaling = alpha / (rank as float)
     int i = 0
     while i < len(ba) {
         ba[i] = ba[i] * scaling
         i = i + 1
     }
-
 
     []float result = []float{}
     int j = 0
@@ -128,7 +87,6 @@ func apply_lora_to_weight(
 
     result
 }
-
 
 func matmul_lora([]float a, []float b, int m, int r, int n) []float {
     []float c = []float{cap: m * n}
@@ -151,10 +109,6 @@ func matmul_lora([]float a, []float b, int m, int r, int n) []float {
     c
 }
 
-
-
-
-
 func merge_peft_adapter(peft_adapter_merge_config cfg) merge_result {
     println("========================================")
     println("PEFT Adapter Merge")
@@ -166,35 +120,28 @@ func merge_peft_adapter(peft_adapter_merge_config cfg) merge_result {
     println("Alpha       : " + fmt_float(cfg.alpha, 1))
     println("")
 
-
     println("[Step 1] Loading adapter configuration...")
     string config_path = cfg.adapter_path + "/adapter_config.json"
 
     println("  ✓ Loaded adapter config")
-
 
     println("[Step 2] Loading adapter_model.safetensors...")
     string safetensors_path = cfg.adapter_path + "/adapter_model.safetensors"
     []safetensors_tensor tensor_meta = parse_safetensors_tensors("")
     println("  ✓ Loaded " + int_to_str(len(tensor_meta)) + " tensors from safetensors")
 
-
     println("[Step 3] Loading base model weights...")
 
     println("  ✓ Loaded base model")
-
 
     println("[Step 4] Merging LoRA adapters into base model...")
     int layers_merged = 0
     int total_params = 0
 
-
-
     layers_merged = 96
     total_params = cfg.rank * 4096 * 2 * layers_merged / 4
 
     println("  ✓ Merged " + int_to_str(layers_merged) + " adapter layers")
-
 
     println("[Step 5] Saving merged model...")
 
@@ -216,21 +163,15 @@ func merge_peft_adapter(peft_adapter_merge_config cfg) merge_result {
     }
 }
 
-
-
-
-
 struct merged_model_state {
 
     map[string][]float merged_weights
-
 
     int hidden_dim
     int num_layers
     int vocab_size
     bool is_merged
 }
-
 
 func create_merged_model(
     map[string][]float base_weights,
@@ -242,19 +183,13 @@ func create_merged_model(
     int num_layers
 ) merged_model_state {
 
-
-
     int layer = 0
     while layer < num_layers {
 
         []string projections = []string{"q_proj", "v_proj", "o_proj", "k_proj"}
 
-
-
-
         layer = layer + 1
     }
-
 
     merged_model_state {
         merged_weights: map[string][]float{ "placeholder": []float{} },
@@ -264,10 +199,6 @@ func create_merged_model(
         is_merged: true,
     }
 }
-
-
-
-
 
 func int_to_str(int n) string {
     if n == 0 { return "0" }

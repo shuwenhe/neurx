@@ -2,13 +2,6 @@ package neurx.posttrain.alignment.orpo_examples
 
 use neurx.posttrain.alignment.orpo_trainer
 
-
-
-
-
-
-
-
 func create_base_orpo_config() orpo_config {
     orpo_config {
 
@@ -16,11 +9,9 @@ func create_base_orpo_config() orpo_config {
         hidden_size: 256,
         vocab_size: 32000,
 
-
         learning_rate: 5e-4,
         beta: 0.05,
         gamma: 0.5,
-
 
         batch_size: 32,
         num_epochs: 3,
@@ -28,22 +19,18 @@ func create_base_orpo_config() orpo_config {
         weight_decay: 0.01,
         max_grad_norm: 0.5,
 
-
         use_reference_model: true,
         kl_penalty_coef: 0.1,
-
 
         global_rank: 0,
         world_size: 1,
         dp_degree: 1,
-
 
         use_mixed_precision: false,
         save_interval: 10,
         checkpoint_dir: "./checkpoints",
     }
 }
-
 
 func example_basic_orpo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -71,7 +58,6 @@ func example_basic_orpo_training() {
     print("  ORPO training call is scaffolded in orpo_trainer.s")
     print("")
 }
-
 
 func example_log_odds_explanation() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -114,7 +100,6 @@ func example_log_odds_explanation() {
     print("")
 }
 
-
 func example_kl_constraint() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 3: KL Divergence Constraint                      ║")
@@ -154,7 +139,6 @@ func example_kl_constraint() {
     print("")
 }
 
-
 func example_reference_model_comparison() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 4: Reference Model Role                          ║")
@@ -189,7 +173,6 @@ func example_reference_model_comparison() {
     print("    L = -log(sigmoid(gamma * margin)) + lambda * D_KL")
     print("")
 }
-
 
 func example_distributed_orpo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -232,7 +215,6 @@ func example_distributed_orpo_training() {
     print("  • At epoch boundaries (state sync)")
     print("")
 }
-
 
 func example_full_orpo_alignment_pipeline() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -285,7 +267,6 @@ func example_full_orpo_alignment_pipeline() {
     print("")
 }
 
-
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -304,7 +285,6 @@ func main() {
     print("     All ORPO examples completed!                           ")
     print("═════════════════════════════════════════════════════════════")
 }
-
 
 func int_to_string_ex(int i) string {
     string(i)

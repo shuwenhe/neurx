@@ -1,8 +1,5 @@
 
 
-
-
-
 package main
 
 use std.io.println
@@ -13,10 +10,6 @@ use neurx.runtime.io.{
     runtime_write_text_file,
     runtime_run_command_output,
 }
-
-
-
-
 
 struct build_config {
     string cuda_home
@@ -32,17 +25,11 @@ struct build_result {
     int exit_code
 }
 
-
-
-
-
 func main() {
     println("[CUDA Build] NeurX CUDA System Builder (S Language)")
     println("")
 
-
     string target = runtime_env_get("CUDA_BUILD_TARGET", "all")
-
 
     build_config config = detect_cuda_environment()
     if !is_cuda_available(config) {
@@ -57,7 +44,6 @@ func main() {
     println("  Version: " + config.cuda_version)
     println("  GPU Arch: sm_" + config.gpu_arch)
     println("")
-
 
     switch target {
         case "all" {
@@ -83,17 +69,12 @@ func main() {
     }
 }
 
-
-
-
-
 func build_cuda_runtime(build_config cfg) {
     println("[BUILD] CUDA Runtime Library")
     println("")
 
     string build_dir = "./artifacts/build/cuda_runtime"
     create_directory(build_dir)
-
 
     println("[1/3] Compiling C wrapper with gcc...")
 
@@ -125,7 +106,6 @@ func build_cuda_kernels(build_config cfg) {
     string build_dir = "./artifacts/build/cuda_kernels"
     create_directory(build_dir)
 
-
     println("[1/4] Generating PTX code...")
     build_result result = compile_kernels_ptx(cfg, build_dir)
     if !result.success {
@@ -133,10 +113,8 @@ func build_cuda_kernels(build_config cfg) {
 
     }
 
-
     println("[2/4] Creating C wrapper...")
     create_cuda_wrapper(build_dir)
-
 
     println("[3/4] Compiling wrapper...")
     result = compile_cuda_wrapper(cfg, build_dir)
@@ -144,7 +122,6 @@ func build_cuda_kernels(build_config cfg) {
         println("[ERROR] " + result.output)
         return
     }
-
 
     println("[4/4] Linking shared library...")
     result = link_cuda_kernels(cfg, build_dir)
@@ -161,7 +138,6 @@ func build_cuda_kernels(build_config cfg) {
 func build_verify_env(build_config cfg) {
     println("[BUILD] Environment Verification Tool")
     println("")
-
 
     string ir_path = "./artifacts/build/verify_env/verify_env.ir"
     create_directory("./artifacts/build/verify_env")
@@ -184,29 +160,21 @@ func build_verify_env(build_config cfg) {
     }
 }
 
-
-
-
-
 func detect_cuda_environment() build_config {
     build_config cfg
     cfg.verbose = parse_bool(runtime_env_get("CUDA_BUILD_VERBOSE", "false"))
-
 
     string nvcc_out = runtime_run_command_output("which nvcc 2>/dev/null || echo 'not_found'")
     if contains_string(nvcc_out, "not_found") {
         return cfg
     }
 
-
     string cuda_home_out = runtime_run_command_output("nvcc -v 2>&1 | grep 'bin/nvcc' | head -1 | xargs dirname | xargs dirname || echo '/usr'")
     cfg.cuda_home = trim(cuda_home_out)
     cfg.cuda_lib = cfg.cuda_home + "/lib64"
 
-
     string version_out = runtime_run_command_output("nvcc --version 2>/dev/null | grep 'release' | awk '{print $5}' | tr -d ','")
     cfg.cuda_version = trim(version_out)
-
 
     string arch_out = runtime_run_command_output("nvidia-smi --query-gpu=compute_cap --format=csv,noheader 2>/dev/null | head -1 | tr -d '.' || echo '89'")
     cfg.gpu_arch = trim(arch_out)
@@ -226,10 +194,6 @@ func is_cuda_available(build_config cfg) bool {
     }
     true
 }
-
-
-
-
 
 func compile_cuda_runtime(build_config cfg, string build_dir) build_result {
 
@@ -306,10 +270,6 @@ func link_cuda_kernels(build_config cfg, string build_dir) build_result {
     }
 }
 
-
-
-
-
 func create_directory(string path) {
     runtime_run_command_output("mkdir -p " + path + " 2>&1")
 }
@@ -353,10 +313,6 @@ func clean_build_artifacts() {
     runtime_run_command_output("rm -rf ./artifacts/build/cuda_kernels 2>&1")
     println("[SUCCESS] Cleaned")
 }
-
-
-
-
 
 func str_len(string s) int {
     int n = 0

@@ -1,23 +1,10 @@
 
 
-
-
-
-
-
-
-
-
 package neurx.script.data_utils
 
 use std.io
 use std.os
 use std.strings
-
-
-
-
-
 
 struct json_value {
     string type
@@ -25,7 +12,6 @@ struct json_value {
     []json_value array_val
     map[string]json_value obj_val
 }
-
 
 func json_encode_string(s: string) string {
 
@@ -50,7 +36,6 @@ func json_encode_string(s: string) string {
     result = result + "\""
     result
 }
-
 
 func json_decode_string(s: string) string {
     if !string_has_prefix(s, "\"") || !string_has_suffix(s, "\"") {
@@ -92,7 +77,6 @@ func json_decode_string(s: string) string {
     result
 }
 
-
 func json_object_to_string(fields: map[string]string, indent: int) string {
     let mut result = "{\n"
     let pad = string_repeat(" ", indent)
@@ -109,10 +93,6 @@ func json_object_to_string(fields: map[string]string, indent: int) string {
     result = result + "\n" + pad + "}"
     result
 }
-
-
-
-
 
 func path_join(parts: []string) string {
     string_join(parts, "/")
@@ -144,10 +124,6 @@ func path_is_dir(path: string) bool {
     runtime_is_dir(path)
 }
 
-
-
-
-
 func file_read_text(path: string) (string, bool) {
     runtime_read_text_file(path)
 }
@@ -178,7 +154,6 @@ func file_size(path: string) i64 {
     runtime_file_size(path)
 }
 
-
 func file_count_lines(path: string) (i64, bool) {
     let (content, ok) = file_read_text(path)
     if !ok {
@@ -188,7 +163,6 @@ func file_count_lines(path: string) (i64, bool) {
     let lines = string_split(content, "\n")
     (i64(len(lines)), true)
 }
-
 
 func dir_list_files(path: string, suffixes: []string) []string {
     if !path_is_dir(path) {
@@ -211,10 +185,6 @@ func dir_list_files(path: string, suffixes: []string) []string {
     result
 }
 
-
-
-
-
 func string_repeat(s: string, count: int) string {
     let mut result = ""
     for i = 0; i < count; i = i + 1 {
@@ -223,21 +193,15 @@ func string_repeat(s: string, count: int) string {
     result
 }
 
-
 func normalize_whitespace(s: string) string {
     let parts = string_split(string_trim(s), " ")
     string_join(parts, " ")
 }
 
-
 func hash_key(s: string) string {
 
     "hash_" + string_to_lower(s[0 : min(10, len(s))])
 }
-
-
-
-
 
 func ensure_dir(path: string) bool {
     if path_exists(path) {
@@ -258,10 +222,6 @@ func clear_dir(path: string) bool {
     true
 }
 
-
-
-
-
 func get_env(key: string, default_val: string) string {
     let val = runtime_env_get(key)
     if val == "" {
@@ -281,10 +241,6 @@ func get_env_int(key: string, default_val: int) int {
     }
 }
 
-
-
-
-
 pub func log_info(msg: string) {
     println(msg)
 }
@@ -300,10 +256,6 @@ pub func log_error(msg: string) {
 pub func log_success(msg: string) {
     println("✓ " + msg)
 }
-
-
-
-
 
 func min(a: i64, b: i64) i64 {
     if a < b { a } else { b }

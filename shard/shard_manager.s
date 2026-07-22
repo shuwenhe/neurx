@@ -1,12 +1,9 @@
 
 
-
-
 package neurx.shard.shard_manager
 
 use neurx.strings
 use neurx.runtime.io.{runtime_file_exists, runtime_dir_exists, runtime_make_dirs, runtime_write_text_file, runtime_read_text_file, runtime_run_command_output, runtime_shell_escape}
-
 
 struct shard_manager_config {
 
@@ -14,25 +11,20 @@ struct shard_manager_config {
     int64 min_shard_size_mb
     int64 max_shard_size_mb
 
-
     string partition_strategy
     string boundary_alignment
-
 
     int num_ranks
     bool balance_by_token_count
     bool enable_replication
-
 
     string shard_dir
     string file_extension
     bool compress_shards
     int compression_level
 
-
     bool build_index
     bool include_checksums
-
 
     int max_retries_on_failure
 }
@@ -55,7 +47,6 @@ func default_tb_shard_config() shard_manager_config:
     cfg.include_checksums = true
     cfg.max_retries_on_failure = 3
     return cfg
-
 
 func default_training_dataset_path() string:
     "./data/training_data.jsonl"
@@ -127,7 +118,6 @@ func build_training_dataset_manifest(string dataset_path) dataset_manifest:
 
     manifest
 
-
 struct shard_info {
     int shard_id
     string filename
@@ -137,33 +127,25 @@ struct shard_info {
     int64 token_count
     float quality_score
 
-
     int64 start_offset_in_dataset
     int64 end_offset_in_dataset
 
-
     []int assigned_ranks
     int primary_rank
-
 
     bool is_fully_written
     bool is_validated
     string checksum_sha256
     int version
 
-
     int access_count
     float avg_read_time_ms
 }
-
-
-
 
 struct dataset_manifest {
     string dataset_name
     string dataset_version
     string source_path
-
 
     int64 total_size_bytes
     int64 total_compressed_bytes
@@ -171,32 +153,25 @@ struct dataset_manifest {
     int total_document_count
     int64 total_token_count
 
-
     []shard_info shards
 
-
     shard_manager_config config_used
-
 
     int64 creation_timestamp
     string created_by
     string parent_dataset
 }
 
-
 struct shard_manager_state {
     shard_manager_config config
     dataset_manifest manifest
-
 
     string current_operation
     float operation_progress
     int current_shard_being_processed
 
-
     []shard_info recently_accessed
     int max_cache_size
-
 
     []string error_log
     int error_count
@@ -215,9 +190,6 @@ func new_shard_manager(shard_manager_config config) shard_manager_state:
     mgr.error_count = 0
 
     return mgr
-
-
-
 
 struct partition_result:
     dataset_manifest manifest
@@ -239,7 +211,6 @@ func partition_dataset(
     partition_result result
     result.success = false
 
-
     print("Analyzing input dataset: ", input_path)
     dataset_analysis analysis = analyze_input_dataset(input_path, mgr.config)
 
@@ -254,13 +225,11 @@ func partition_dataset(
     print("  document count: ", analysis.document_count)
     print("  Estimated tokens: ", analysis.estimated_tokens)
 
-
     print("Determining shard boundaries...")
     []shard_boundary boundaries = calculate_shard_boundaries(analysis, mgr.config)
 
     print("Will create ", len(boundaries), " shards")
     mgr.manifest.total_shard_count = len(boundaries)
-
 
     if !create_directory(output_dir):
         result.error_message = "Failed to create output directory: " + output_dir
@@ -271,7 +240,6 @@ func partition_dataset(
     string shard_base_path = output_dir + "/" + dataset_name
     mgr.config.shard_dir = shard_base_path
 
-
     print("Writing shards...")
     []shard_info all_shards = []shard_info{cap: len(boundaries)}
 
@@ -281,7 +249,6 @@ func partition_dataset(
 
         mgr.current_shard_being_processed = s
         mgr.operation_progress = float(s) / float(len(boundaries))
-
 
         shard_write_result write_res = write_single_shard(
             mgr,
@@ -305,7 +272,6 @@ func partition_dataset(
 
         s = s + 1
 
-
     print("Building dataset manifest...")
     dataset_manifest manifest
     manifest.dataset_name = dataset_name
@@ -319,7 +285,6 @@ func partition_dataset(
     manifest.creation_timestamp = get_current_time_ms()
     manifest.created_by = "neurx_shard_manager_v1.0"
 
-
     int64 comp_total = 0
     s = 0
     while s < len(all_shards):
@@ -327,16 +292,13 @@ func partition_dataset(
         s = s + 1
     manifest.total_compressed_bytes = comp_total
 
-
     save_manifest(manifest, shard_base_path + "/manifest.json")
-
 
     if mgr.config.include_checksums:
         print("Validating shards...")
         validate_all_shards(manifest)
 
     int end_time = get_current_time_ms()
-
 
     result.manifest = manifest
     result.success = true
@@ -356,7 +318,6 @@ func partition_dataset(
 
     return result
 
-
 struct dataset_analysis:
     bool is_valid
     string error_reason
@@ -374,11 +335,9 @@ func analyze_input_dataset(string path, shard_manager_config cfg) dataset_analys
     dataset_analysis analysis
     analysis.is_valid = false
 
-
     if !file_exists(path):
         analysis.error_reason = "Path does not exist: " + path
         return analysis
-
 
     bool is_dir = is_directory(path)
 
@@ -391,13 +350,11 @@ func analyze_input_dataset(string path, shard_manager_config cfg) dataset_analys
             analysis.error_reason = "No data files found in directory"
             return analysis
 
-
         int i = 0
         while i < len(analysis.source_files):
             analysis.total_size_bytes = analysis.total_size_bytes +
                                         get_file_size(analysis.source_files[i])
             i = i + 1
-
 
         analysis.document_count = estimate_doc_count_from_files(
             analysis.source_files,
@@ -410,7 +367,6 @@ func analyze_input_dataset(string path, shard_manager_config cfg) dataset_analys
         analysis.is_single_file = true
         analysis.total_size_bytes = get_file_size(path)
 
-
         analysis.document_count = estimate_line_count(path, analysis.total_size_bytes)
 
     analysis.total_size_gb = float(analysis.total_size_bytes) / (1048576.0 * 1024.0)
@@ -420,7 +376,6 @@ func analyze_input_dataset(string path, shard_manager_config cfg) dataset_analys
     analysis.is_valid = true
 
     return analysis
-
 
 struct shard_boundary:
     int64 start_byte
@@ -460,7 +415,6 @@ func calculate_shard_boundaries(
 
     return boundaries
 
-
 func find_split_points_single_file(
     string filepath,
     int64 total_size,
@@ -488,7 +442,6 @@ func find_split_points_single_file(
             })
             break
 
-
         int64 actual_end = proposed_end
 
         if alignment == "line":
@@ -500,12 +453,10 @@ func find_split_points_single_file(
         else:
             actual_end = proposed_end
 
-
         if actual_end - current_start < min_size:
             actual_end = current_start + min_size
             if actual_end > total_size:
                 actual_end = total_size
-
 
         if actual_end - current_start > max_size:
             actual_end = current_start + max_size
@@ -521,7 +472,6 @@ func find_split_points_single_file(
         shard_id = shard_id + 1
 
     return boundaries
-
 
 struct shard_write_result:
     shard_info info
@@ -539,10 +489,8 @@ func write_single_shard(
     shard_write_result result
     result.success = false
 
-
     string filename = base_path + "_shard_" + format_int_with_leading_zeros(shard_id, 6) +
                       mgr.config.file_extension
-
 
     []byte raw_data = read_file_range(source_path, boundary.start_byte,
                                       boundary.end_byte - boundary.start_byte)
@@ -551,11 +499,9 @@ func write_single_shard(
         result.error_msg = "Failed to read data range from source"
         return result
 
-
     []byte data_to_write = raw_data
     if mgr.config.compress_shards:
         data_to_write = compress_data(raw_data, mgr.config.compression_level)
-
 
     bool write_ok = write_all_bytes(filename, data_to_write)
 
@@ -563,11 +509,9 @@ func write_single_shard(
         result.error_msg = "Failed to write shard file: " + filename
         return result
 
-
     string checksum = ""
     if mgr.config.include_checksums:
         checksum = compute_sha256(data_to_write)
-
 
     shard_info info
     info.shard_id = shard_id
@@ -586,7 +530,6 @@ func write_single_shard(
     info.access_count = 0
     info.avg_read_time_ms = 0.0
 
-
     info.assigned_ranks = assign_shard_to_ranks(shard_id, mgr.config.num_ranks)
     info.primary_rank = info.assigned_ranks[0]
 
@@ -594,24 +537,14 @@ func write_single_shard(
     result.success = true
     return result
 
-
-
-
 func assign_shard_to_ranks(int shard_id, int num_ranks) []int:
 
     []int ranks = []int{cap: 2}
 
-
     int primary_rank = s(shard_id - (shard_id / num_ranks) * num_ranks)
     ranks.push(primary_rank)
 
-
-
-
-
-
     return ranks
-
 
 func get_shards_for_rank(dataset_manifest manifest, int rank_id) []shard_info:
 
@@ -620,7 +553,6 @@ func get_shards_for_rank(dataset_manifest manifest, int rank_id) []shard_info:
     int s = 0
     while s < len(manifest.shards):
         shard_info shard = manifest.shards[s]
-
 
         int r = 0
         while r < len(shard.assigned_ranks):
@@ -633,22 +565,12 @@ func get_shards_for_rank(dataset_manifest manifest, int rank_id) []shard_info:
 
     return my_shards
 
-
 func rebalance_shards(
     dataset_manifest manifest,
     []float rank_performance_scores
 ) dataset_manifest:
 
-
-
-
-
-
-
     return manifest
-
-
-
 
 struct incremental_update_result:
     dataset_manifest updated_manifest
@@ -666,30 +588,19 @@ func add_incremental_data(
     incremental_update_result result
     result.success = false
 
-
     dataset_analysis new_analysis = analyze_input_dataset(new_data_path, mgr.config)
 
     if !new_analysis.is_valid:
         result.message = "Invalid new data: " + new_analysis.error_reason
         return result
 
-
     print("Adding incremental data: ", new_analysis.total_size_gb, " GB")
 
-
     int next_shard_id = len(existing_manifest.shards)
-
-
-
-
-
-
 
     result.success = true
     result.message = "Incremental update completed successfully"
     return result
-
-
 
 func sum_document_counts([]shard_info shards) int:
     int total = 0
@@ -747,7 +658,6 @@ func validate_all_shards(dataset_manifest manifest) void:
         i = i + 1
     }
     print("Validated shards: ", validated, "/", len(manifest.shards))
-
 
 func file_exists(string path) bool: return runtime_file_exists(path)
 func is_directory(string path) bool: return runtime_dir_exists(path)

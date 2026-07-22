@@ -1,13 +1,5 @@
 package neurx.inference.sampling
 
-
-
-
-
-
-
-
-
 func normalize([]float arr) []float {
     float sum = 0.0
     for v in arr { sum = sum + v }
@@ -29,22 +21,14 @@ func normalize([]float arr) []float {
     normalized
 }
 
-
-
-
-
-
-
 func argsort_descending([]float arr) []int {
     int n = len(arr)
     if n == 0 { return [] }
-
 
     []int indices = []int{cap: n}
     for i in 0..n {
         indices[i] = i
     }
-
 
     for i in 0..n - 1 {
         int max_idx = i

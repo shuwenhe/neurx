@@ -1,10 +1,5 @@
 package neurx.compile.executor.execution_engine
 
-
-
-
-
-
 use neurx.compile.ir.{ir_graph, ir_node}
 
 struct kernel_launch {
@@ -38,7 +33,6 @@ func new_executor_config() executor_config {
     }
 }
 
-
 func new_execution_context(ir_graph graph, executor_config cfg) execution_context {
     execution_context {
         compiled_graph: graph,
@@ -49,30 +43,20 @@ func new_execution_context(ir_graph graph, executor_config cfg) execution_contex
     }
 }
 
-
 func schedule_kernel_launch(execution_context ctx, kernel_launch launch) execution_context {
-
-
 
     ctx
 }
-
 
 func execute_graph(execution_context ctx) execution_context {
 
-
-
-
     ctx
 }
-
 
 func synchronize_execution(execution_context ctx) execution_context {
 
-
     ctx
 }
-
 
 func schedule_graph_with_streams(ir_graph graph, int num_streams) execution_context {
     executor_config cfg = new_executor_config()
@@ -80,20 +64,13 @@ func schedule_graph_with_streams(ir_graph graph, int num_streams) execution_cont
 
     execution_context ctx = new_execution_context(graph, cfg)
 
-
-
-
-
     ctx
 }
 
-
 func capture_as_cuda_graph(execution_context ctx) string {
-
 
     "cuda_graph_handle"
 }
-
 
 func get_execution_stats(execution_context ctx) string {
 

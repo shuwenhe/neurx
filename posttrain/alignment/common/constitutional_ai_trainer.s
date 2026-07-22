@@ -1,27 +1,5 @@
 package neurx.posttrain.alignment.constitutional_ai_trainer
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct constitutional_principle {
     string id
     string description
@@ -31,14 +9,12 @@ struct constitutional_principle {
     float weight
 }
 
-
 struct constitution {
     []constitutional_principle principles
     int num_principles
     string constitution_id
     string name
 }
-
 
 struct critique_revision_result {
     string original_response
@@ -49,7 +25,6 @@ struct critique_revision_result {
     float revision_quality
     bool revision_occurred
 }
-
 
 struct cai_preference_pair {
     string prompt
@@ -66,7 +41,6 @@ struct cai_preference_pair {
     int num_tokens_rejected
 }
 
-
 struct cai_batch {
     []cai_preference_pair pairs
     int num_pairs
@@ -76,7 +50,6 @@ struct cai_batch {
     float avg_revision_quality
 }
 
-
 struct cai_config {
 
     int max_response_tokens
@@ -85,31 +58,25 @@ struct cai_config {
     float critique_temperature
     float revision_temperature
 
-
     int num_principles_per_batch
     bool rotate_principles
-
 
     float critique_strength_threshold
     float revision_quality_threshold
     bool filter_low_quality
 
-
     int batch_size
     int num_batches
     int checkpoint_interval
-
 
     int global_rank
     int world_size
     bool use_mixed_precision
 }
 
-
 struct cai_state {
     cai_config config
     constitution current_constitution
-
 
     int total_prompts_processed
     int total_revisions
@@ -117,26 +84,18 @@ struct cai_state {
     float total_revision_quality
     int total_filtered_out
 
-
     []int principle_usage_count
     []float principle_avg_critique_strength
     []float principle_revision_success_rate
-
 
     float revision_rate
     float quality_threshold_rate
     float avg_tokens_per_pair
 }
 
-
-
-
-
-
 func create_default_constitution() constitution {
 
     []constitutional_principle principles = make_principle_array(8)
-
 
     principles[0] = constitutional_principle {
         id: "harmlessness",
@@ -147,7 +106,6 @@ func create_default_constitution() constitution {
         weight: 1.0,
     }
 
-
     principles[1] = constitutional_principle {
         id: "honesty",
         description: "Should provide truthful and factually accurate information",
@@ -156,7 +114,6 @@ func create_default_constitution() constitution {
         severity: 4,
         weight: 0.9,
     }
-
 
     principles[2] = constitutional_principle {
         id: "helpfulness",
@@ -167,7 +124,6 @@ func create_default_constitution() constitution {
         weight: 0.8,
     }
 
-
     principles[3] = constitutional_principle {
         id: "non_discrimination",
         description: "Should treat different groups fairly without bias",
@@ -176,7 +132,6 @@ func create_default_constitution() constitution {
         severity: 5,
         weight: 0.95,
     }
-
 
     principles[4] = constitutional_principle {
         id: "privacy",
@@ -187,7 +142,6 @@ func create_default_constitution() constitution {
         weight: 0.9,
     }
 
-
     principles[5] = constitutional_principle {
         id: "legality",
         description: "Should refuse to provide guidance for illegal activities",
@@ -197,7 +151,6 @@ func create_default_constitution() constitution {
         weight: 1.0,
     }
 
-
     principles[6] = constitutional_principle {
         id: "child_safety",
         description: "Should prioritize child safety and protection",
@@ -206,7 +159,6 @@ func create_default_constitution() constitution {
         severity: 5,
         weight: 1.0,
     }
-
 
     principles[7] = constitutional_principle {
         id: "transparency",
@@ -225,11 +177,6 @@ func create_default_constitution() constitution {
     }
 }
 
-
-
-
-
-
 func perform_critique_revision(
     string prompt,
     string original_response,
@@ -240,7 +187,6 @@ func perform_critique_revision(
     critique_revision_result result
     result.original_response = original_response
     result.principle_id = principle.id
-
 
     string critique_prompt = "Prompt: " + prompt +
                             "\nResponse: " + original_response +
@@ -253,10 +199,8 @@ func perform_critique_revision(
     )
     result.critique = critique
 
-
     float critique_strength = estimate_critique_strength(critique, config.max_critique_tokens)
     result.critique_strength = critique_strength
-
 
     float revision_quality = 0.0
     if critique_strength > 0.2 {
@@ -273,14 +217,12 @@ func perform_critique_revision(
         )
         result.revised_response = revised_response
 
-
         revision_quality = estimate_revision_quality(
             original_response,
             revised_response,
             critique
         )
         result.revision_quality = revision_quality
-
 
         bool meaningful_revision = revision_quality > config.revision_quality_threshold
         result.revision_occurred = meaningful_revision
@@ -295,9 +237,7 @@ func perform_critique_revision(
     result
 }
 
-
 func estimate_critique_strength(string critique, int max_tokens) float {
-
 
     int critique_len = string_length(critique)
     float length_score = float(critique_len) / float(max_tokens * 50)
@@ -305,7 +245,6 @@ func estimate_critique_strength(string critique, int max_tokens) float {
     if length_score > 1.0 {
         length_score = 1.0
     }
-
 
     float keyword_score = 0.0
     if contains_substring(critique, "harmful") || contains_substring(critique, "dangerous") {
@@ -329,23 +268,19 @@ func estimate_critique_strength(string critique, int max_tokens) float {
     strength
 }
 
-
 func estimate_revision_quality(
     string original,
     string revised,
     string critique
 ) float {
 
-
     int orig_len = string_length(original)
     int rev_len = string_length(revised)
-
 
     int len_diff = abs_int(rev_len - orig_len)
     float len_score = float(len_diff) / float(orig_len + 1)
 
     if len_score > 1.0 { len_score = 1.0 }
-
 
     int harmful_in_orig = count_harmful_keywords(original)
     int harmful_in_rev = count_harmful_keywords(revised)
@@ -362,11 +297,6 @@ func estimate_revision_quality(
 
     quality
 }
-
-
-
-
-
 
 func generate_cai_preference_pairs(
     []string prompts,
@@ -393,10 +323,8 @@ func generate_cai_preference_pairs(
     int i = 0
     while i < len(prompts) {
 
-
         int principle_idx = i % constitution_obj.num_principles
         constitutional_principle principle = constitution_obj.principles[principle_idx]
-
 
         critique_revision_result result = perform_critique_revision(
             prompts[i],
@@ -404,7 +332,6 @@ func generate_cai_preference_pairs(
             principle,
             config
         )
-
 
         cai_preference_pair pair
         pair.prompt = prompts[i]
@@ -425,11 +352,9 @@ func generate_cai_preference_pairs(
             batch.num_unchanged = batch.num_unchanged + 1
         }
 
-
         pair.num_tokens_prompt = string_length(pair.prompt) / 4
         pair.num_tokens_chosen = string_length(pair.chosen_response) / 4
         pair.num_tokens_rejected = string_length(pair.rejected_response) / 4
-
 
         bool passes_filters = true
         if config.filter_low_quality {
@@ -451,7 +376,6 @@ func generate_cai_preference_pairs(
         i = i + 1
     }
 
-
     if batch.num_pairs > 0 {
         batch.avg_critique_strength = total_critique_strength / float(batch.num_pairs)
         batch.avg_revision_quality = total_revision_quality / float(batch.num_pairs)
@@ -459,11 +383,6 @@ func generate_cai_preference_pairs(
 
     batch
 }
-
-
-
-
-
 
 func init_cai_state(cai_config config, constitution constitution_obj) cai_state {
 
@@ -488,22 +407,18 @@ func init_cai_state(cai_config config, constitution constitution_obj) cai_state 
     state
 }
 
-
 func start_cai_training(
     cai_config config,
     []string prompts,
     []string initial_responses
 ) cai_state {
 
-
     constitution constitution_obj = create_default_constitution()
     cai_state state = init_cai_state(config, constitution_obj)
-
 
     if config.world_size > 1 {
 
     }
-
 
     cai_batch batch = generate_cai_preference_pairs(
         prompts,
@@ -511,7 +426,6 @@ func start_cai_training(
         constitution_obj,
         config
     )
-
 
     state.total_prompts_processed = len(prompts)
     state.total_revisions = batch.num_revised
@@ -534,16 +448,10 @@ func start_cai_training(
         state.avg_tokens_per_pair = total_tokens / float(batch.num_pairs * 3)
     }
 
-
     print_cai_statistics(state, batch)
 
     state
 }
-
-
-
-
-
 
 func print_cai_statistics(cai_state state, cai_batch batch) {
     print("═══════════════════════════════════════════════════════════")
@@ -558,10 +466,6 @@ func print_cai_statistics(cai_state state, cai_batch batch) {
     print("Revision Rate:          " + float_to_string_cai(state.revision_rate * 100.0) + "%")
     print("═══════════════════════════════════════════════════════════")
 }
-
-
-
-
 
 func make_principle_array(int size) []constitutional_principle {
     []constitutional_principle arr = []constitutional_principle{}

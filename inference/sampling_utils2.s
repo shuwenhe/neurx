@@ -1,9 +1,5 @@
 package neurx.inference.sampling
 
-
-
-
-
 func min(int a, int b) int {
     if a < b { a } else { b }
 }
@@ -19,14 +15,6 @@ func copy_int_array([]int arr) []int {
     }
     copy
 }
-
-
-
-
-
-
-
-
 
 func apply_temperature([]float logits, float temp) []float {
     if temp <= 0.0 {

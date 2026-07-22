@@ -7,15 +7,11 @@ func main() {
     println("[CUDA Environment Verification]")
     println("")
 
-
     string BLUE = "\u001b[0;34m"
     string GREEN = "\u001b[0;32m"
     string RED = "\u001b[0;31m"
     string YELLOW = "\u001b[1;33m"
     string NC = "\u001b[0m"
-
-
-
 
     print_header("NVIDIA CUDA Environment Check", BLUE, NC)
     println("")
@@ -35,9 +31,6 @@ func main() {
     string gpu_info = runtime_run_command_output("nvidia-smi 2>/dev/null || true")
     println(gpu_info)
 
-
-
-
     println("")
     print_info("Checking CUDA Toolkit...", BLUE, NC)
 
@@ -53,9 +46,6 @@ func main() {
     string cuda_version = runtime_run_command_output("nvcc --version 2>/dev/null | grep release | awk '{print $5}' | tr -d ',' || true")
     println("  Version: " + trim(cuda_version))
 
-
-
-
     println("")
     print_info("Checking cuBLAS...", BLUE, NC)
 
@@ -66,9 +56,6 @@ func main() {
     } else {
         print_success("cuBLAS found in library path", GREEN, NC)
     }
-
-
-
 
     println("")
     print_header("GPU Detection", BLUE, NC)
@@ -86,12 +73,8 @@ func main() {
     print_success("GPUs available", GREEN, NC)
     println("")
 
-
     string gpu_details = runtime_run_command_output("nvidia-smi --query-gpu=index,name,memory.total,compute_cap --format=csv,noheader 2>/dev/null || true")
     println(gpu_details)
-
-
-
 
     println("")
     print_header("CUDA Libraries Check", BLUE, NC)
@@ -101,9 +84,6 @@ func main() {
     check_cuda_library("libcublas.so", BLUE, NC, GREEN, RED)
     check_cuda_library("libcurand.so", BLUE, NC, GREEN, RED)
     check_cuda_library("libcusparse.so", BLUE, NC, GREEN, RED)
-
-
-
 
     println("")
     print_header("Environment Variables", BLUE, NC)
@@ -116,9 +96,6 @@ func main() {
     println("LD_LIBRARY_PATH: " + trim(ld_library))
     println("")
 
-
-
-
     println("")
     print_header("NVCC Compilation Test", BLUE, NC)
 
@@ -129,9 +106,6 @@ func main() {
     } else {
         print_warning("NVCC compilation test failed", YELLOW, NC)
     }
-
-
-
 
     println("")
     print_header("Environment Check Complete", BLUE, NC)

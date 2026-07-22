@@ -1,8 +1,5 @@
 
 
-
-
-
 package main
 
 import (
@@ -49,10 +46,6 @@ type cost_optimizer struct {
     total_cost          float64
     optimization_strategies []optimization_strategy
 }
-
-
-
-
 
 func (co *cost_optimizer) initialize(config cost_model) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
@@ -106,10 +99,6 @@ func (co *cost_optimizer) set_resource_allocation(
     fmt.Printf("  ✓ Allocation set\n")
 }
 
-
-
-
-
 func (co *cost_optimizer) calculate_step_cost(
     step int64,
     gpu_count int,
@@ -134,7 +123,6 @@ func (co *cost_optimizer) record_metrics(
     tokens_per_second float64,
     memory_usage_gb float64,
     gpu_utilization float64) {
-
 
     duration_per_step := 1.0
     step_cost := co.calculate_step_cost(
@@ -166,20 +154,14 @@ func (co *cost_optimizer) record_metrics(
     }
 }
 
-
-
-
-
 func (co *cost_optimizer) optimize_batch_size(
     available_memory_gb float64) int {
 
     fmt.Printf("\n[Optimization] Optimizing batch size\n")
     fmt.Printf("  Available Memory: %.1f GB\n", available_memory_gb)
 
-
     memory_per_sample_gb := 0.5
     max_batch_size := int(available_memory_gb / memory_per_sample_gb)
-
 
     optimal_batch_size := 32
     if max_batch_size >= 64 {
@@ -193,10 +175,6 @@ func (co *cost_optimizer) optimize_batch_size(
 
     return optimal_batch_size
 }
-
-
-
-
 
 func (co *cost_optimizer) optimize_gpu_utilization() []optimization_strategy {
     fmt.Printf("\n[Optimization] GPU Utilization Optimization Strategies\n")
@@ -244,10 +222,6 @@ func (co *cost_optimizer) optimize_gpu_utilization() []optimization_strategy {
     return strategies
 }
 
-
-
-
-
 func (co *cost_optimizer) analyze_cost_benefit() {
     fmt.Printf("\n┌────────────────────────────────────────┐\n")
     fmt.Printf("│  Cost-Benefit Analysis                 │\n")
@@ -279,10 +253,6 @@ func (co *cost_optimizer) analyze_cost_benefit() {
     }
 }
 
-
-
-
-
 func (co *cost_optimizer) recommend_auto_scaling(
     current_throughput float64,
     target_throughput float64,
@@ -301,10 +271,6 @@ func (co *cost_optimizer) recommend_auto_scaling(
         fmt.Printf("  Recommendation: Increase resources by %.0f%%\n", deficit_percent)
     }
 }
-
-
-
-
 
 func (co *cost_optimizer) get_cost_report() {
     fmt.Printf("\n┌────────────────────────────────────────┐\n")
@@ -341,10 +307,6 @@ func (co *cost_optimizer) get_cost_report() {
     fmt.Printf("  Cost per Token: $%.2e\n", total_cost/(last.tokens_per_second*1000))
 }
 
-
-
-
-
 func NewCostOptimizer() *cost_optimizer {
     return &cost_optimizer{
         metrics_history: make([]resource_metrics, 0),
@@ -363,16 +325,13 @@ func (co *cost_optimizer) run_complete_cost_optimization_cycle() {
 
     co.initialize(config)
 
-
     co.set_resource_allocation(4, 32, 512, "fp16")
-
 
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Batch Size Optimization               │")
     fmt.Println("└────────────────────────────────────────┘")
 
     optimal_bs := co.optimize_batch_size(96.0)
-
 
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Simulating Training with Cost         │")
@@ -392,19 +351,15 @@ func (co *cost_optimizer) run_complete_cost_optimization_cycle() {
         )
     }
 
-
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Optimization Strategies               │")
     fmt.Println("└────────────────────────────────────────┘")
 
     co.optimize_gpu_utilization()
 
-
     co.analyze_cost_benefit()
 
-
     co.recommend_auto_scaling(800.0, 900.0, 0.0025)
-
 
     co.get_cost_report()
 

@@ -1,11 +1,5 @@
 package neurx.distributed.synchronization
 
-
-
-
-
-
-
 struct rank_state {
     int rank_id
     int world_size
@@ -64,15 +58,10 @@ func new_synchronization_state(int world_size, string backend) synchronization_s
     }
 }
 
-
 func allreduce_with_timeout(synchronization_state state, string tensor_name, int timeout_ms) bool {
-
-
-
 
     true
 }
-
 
 func detect_deadlock(synchronization_state state) bool {
     int current_time_ms = 0
@@ -93,29 +82,22 @@ func detect_deadlock(synchronization_state state) bool {
     false
 }
 
-
 func barrier_sync(synchronization_state state) synchronization_state {
-
 
     state
 }
-
 
 func send_heartbeat(synchronization_state state, int rank_id) synchronization_state {
 
     state
 }
 
-
 func check_rank_health(synchronization_state state) int {
-
 
     state.world_size
 }
 
-
 func recover_from_rank_failure(synchronization_state state, int failed_rank_id) synchronization_state {
-
 
     state
 }

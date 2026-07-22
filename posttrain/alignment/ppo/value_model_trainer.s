@@ -1,26 +1,5 @@
 package neurx.posttrain.rlhf.value_model_trainer
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct value_network {
     [][]float hidden_weights
     []float hidden_bias
@@ -29,7 +8,6 @@ struct value_network {
 
     int seq_len
     int hidden_size
-
 
     [][]float hidden_w_m
     [][]float hidden_w_v
@@ -48,7 +26,6 @@ struct value_network {
     float weight_decay
 }
 
-
 struct value_config {
 
     int seq_len
@@ -56,28 +33,23 @@ struct value_config {
     int num_layers
     float learning_rate
 
-
     float gamma
     float gae_lambda
     int batch_size
     int num_epochs
 
-
     float weight_decay
     float value_loss_coef
     float max_grad_norm
-
 
     int global_rank
     int world_size
     int dp_degree
 
-
     bool use_mixed_precision
     string checkpoint_dir
     int checkpoint_interval
 }
-
 
 struct value_trajectory_step {
     []float observation
@@ -89,7 +61,6 @@ struct value_trajectory_step {
     bool is_terminal
 }
 
-
 struct value_trajectory {
     []value_trajectory_step steps
     int trajectory_id
@@ -99,7 +70,6 @@ struct value_trajectory {
     float max_advantage
     float min_advantage
 }
-
 
 struct value_state {
     value_network network
@@ -123,7 +93,6 @@ struct value_state {
     bool initialized
 }
 
-
 struct value_metrics {
     float loss
     float mse
@@ -135,15 +104,9 @@ struct value_metrics {
     int step
 }
 
-
-
-
-
-
 func create_value_network(value_config cfg) value_network {
     int hidden_size = cfg.hidden_size
     int seq_len = cfg.seq_len
-
 
     [][]float h_w = make_matrix(hidden_size, seq_len, 0.0)
     []float h_b = make_array(hidden_size, 0.0)
@@ -209,14 +172,8 @@ func new_value_state(value_config cfg) value_state {
     }
 }
 
-
-
-
-
-
 func value_network_forward(value_network net, []float observation) float {
     int hidden_size = net.hidden_size
-
 
     []float hidden = make_array(hidden_size, 0.0)
     int i = 0
@@ -233,7 +190,6 @@ func value_network_forward(value_network net, []float observation) float {
         i = i + 1
     }
 
-
     float value = net.output_bias
     i = 0
     while i < hidden_size {
@@ -244,7 +200,6 @@ func value_network_forward(value_network net, []float observation) float {
     value
 }
 
-
 func value_network_forward_batch(value_network net, [][]float observations) []float {
     []float values = make_array(len(observations), 0.0)
     int i = 0
@@ -254,11 +209,6 @@ func value_network_forward_batch(value_network net, [][]float observations) []fl
     }
     values
 }
-
-
-
-
-
 
 func compute_td_residual(
     float reward,
@@ -274,8 +224,6 @@ func compute_td_residual(
     reward + bootstrap_value - value_t
 }
 
-
-
 func compute_gae_advantages(
     []value_trajectory_step steps,
     float gamma,
@@ -285,7 +233,6 @@ func compute_gae_advantages(
     []float advantages = make_array(T, 0.0)
 
     float gae = 0.0
-
 
     int t = T - 1
     while t >= 0 {
@@ -313,7 +260,6 @@ func compute_gae_advantages(
     advantages
 }
 
-
 func compute_returns(
     []value_trajectory_step steps,
     []float advantages
@@ -329,11 +275,6 @@ func compute_returns(
 
     returns
 }
-
-
-
-
-
 
 func compute_value_loss(
     []float value_predictions,
@@ -352,10 +293,8 @@ func compute_value_loss(
     loss / (n as float)
 }
 
-
 func compute_regularization_loss(value_network net, float weight_decay) float {
     float loss = 0.0
-
 
     int i = 0
     while i < net.hidden_size {
@@ -367,7 +306,6 @@ func compute_regularization_loss(value_network net, float weight_decay) float {
         i = i + 1
     }
 
-
     i = 0
     while i < net.hidden_size {
         loss = loss + net.output_weight[i] * net.output_weight[i]
@@ -376,11 +314,6 @@ func compute_regularization_loss(value_network net, float weight_decay) float {
 
     loss * weight_decay
 }
-
-
-
-
-
 
 func adamw_update(
     float param,
@@ -397,9 +330,7 @@ func adamw_update(
 
     float m_new = beta1 * m + (1.0 - beta1) * grad
 
-
     float v_new = beta2 * v + (1.0 - beta2) * grad * grad
-
 
     float bias_correction1 = 1.0 - pow_approx(beta1, step as float)
     float bias_correction2 = 1.0 - pow_approx(beta2, step as float)
@@ -407,10 +338,8 @@ func adamw_update(
     float m_hat = m_new / bias_correction1
     float v_hat = v_new / bias_correction2
 
-
     float sqrt_v = sqrt_approx(v_hat + eps)
     float update = lr * m_hat / sqrt_v
-
 
     if weight_decay > 0.0 {
         update = update + lr * weight_decay * param
@@ -421,7 +350,6 @@ func adamw_update(
     (param_new, m_new, v_new)
 }
 
-
 func value_training_step(
     value_state state,
     []value_trajectory_step trajectory_steps,
@@ -431,15 +359,11 @@ func value_training_step(
     value_config cfg = state.config
     value_network net = state.network
 
-
     []float value_predictions = value_network_forward_batch(net, observations)
-
 
     float value_loss = compute_value_loss(value_predictions, target_returns)
     float reg_loss = compute_regularization_loss(net, cfg.weight_decay)
     float total_loss = value_loss + reg_loss
-
-
 
     float grad_scale = 1.0 / (len(observations) as float)
 
@@ -452,7 +376,6 @@ func value_training_step(
             if j < len(observations[i]) {
                 float grad = 2.0 * error * observations[i][j] * grad_scale
 
-
                 int h = i % net.hidden_size
                 net.hidden_weights[h][j] = net.hidden_weights[h][j] - cfg.learning_rate * grad
             }
@@ -461,7 +384,6 @@ func value_training_step(
 
         i = i + 1
     }
-
 
     state.network = net
     state.total_loss = total_loss
@@ -472,17 +394,11 @@ func value_training_step(
     state
 }
 
-
-
-
-
-
 func process_trajectory(
     value_state state,
     value_trajectory trajectory
 ) value_trajectory {
     value_config cfg = state.config
-
 
     []float advantages = compute_gae_advantages(
         trajectory.steps,
@@ -490,9 +406,7 @@ func process_trajectory(
         cfg.gae_lambda
     )
 
-
     []float returns = compute_returns(trajectory.steps, advantages)
-
 
     int i = 0
     while i < len(trajectory.steps) {
@@ -500,7 +414,6 @@ func process_trajectory(
         trajectory.steps[i].return_value = returns[i]
         i = i + 1
     }
-
 
     float sum_advantage = 0.0
     float max_adv = -999999.0
@@ -523,7 +436,6 @@ func process_trajectory(
     trajectory
 }
 
-
 func start_value_training(
     value_config cfg,
     []value_trajectory trajectories
@@ -535,7 +447,6 @@ func start_value_training(
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
 
-
     int epoch = 0
     while epoch < cfg.num_epochs {
         float total_epoch_loss = 0.0
@@ -545,9 +456,7 @@ func start_value_training(
         while t < len(trajectories) {
             value_trajectory traj = trajectories[t]
 
-
             traj = process_trajectory(state, traj)
-
 
             [][]float observations = make_matrix(len(traj.steps), cfg.seq_len, 0.0)
             []float targets = make_array(len(traj.steps), 0.0)
@@ -560,7 +469,6 @@ func start_value_training(
                 }
                 s = s + 1
             }
-
 
             state = value_training_step(state, traj.steps, observations, targets)
 
@@ -592,11 +500,6 @@ func start_value_training(
     state
 }
 
-
-
-
-
-
 func evaluate_value_network(
     value_network net,
     [][]float test_observations,
@@ -623,7 +526,6 @@ func evaluate_value_network(
     int n = len(predictions)
     mse = mse / (n as float)
     mae = mae / (n as float)
-
 
     float mean_target = 0.0
     i = 0
@@ -658,10 +560,6 @@ func evaluate_value_network(
         step: 0,
     }
 }
-
-
-
-
 
 func make_array(int n, float v) []float {
     []float arr = []float{cap: n}

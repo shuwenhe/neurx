@@ -8,14 +8,6 @@ func runtime_write_text_file(string path, string content) () {
     _ = __host_write_text_file(path, content)
 }
 
-
-
-
-
-
-
-
-
 struct train_cache {
     []float x
     []float q

@@ -1,19 +1,9 @@
 
 
-
-
-
-
-
-
 package neurx.shard.shard_wikipedia
 
 use std.os.command
 use neurx.runtime.io.runtime_env_get
-
-
-
-
 
 struct wikipedia_config {
     string input_bz2_file
@@ -22,12 +12,6 @@ struct wikipedia_config {
     int docs_per_shard
     int max_pages
 }
-
-
-
-
-
-
 
 string g_input_bz2_file = ""
 string g_output_dir = ""
@@ -41,10 +25,6 @@ struct shard_metadata {
     int num_documents
     int size_bytes
 }
-
-
-
-
 
 func string_char(int c) string {
     string(c)
@@ -282,10 +262,6 @@ func generate_manifest_json(int total_pages, int total_shards, []shard_metadata 
     json
 }
 
-
-
-
-
 func process_wikipedia() int {
     println("")
     println("╔══════════════════════════════════════════════════════════╗")
@@ -343,8 +319,6 @@ func process_wikipedia() int {
     println("[*] Pages to shard: " + int_to_str(total_pages))
     println("[*] Planned shards : " + int_to_str(total_shards))
     println("")
-
-
 
     string perl_script = ""
     perl_script = perl_script + "use strict; use warnings; use JSON::PP qw(encode_json);\n"
@@ -415,14 +389,9 @@ func process_wikipedia() int {
     return 0
 }
 
-
-
-
-
 func main() int {
     string neurx_home = runtime_env_get("NEURX_HOME", ".")
     string dataset_root = neurx_home + "/dataset/pretrain"
-
 
     g_input_bz2_file = runtime_env_get("ENWIKI_BZ2_FILE", dataset_root + "/raw/enwiki-latest-pages-articles.xml.bz2")
     g_output_dir = runtime_env_get("ENWIKI_SHARD_DIR", dataset_root + "/shard")

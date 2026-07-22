@@ -1,11 +1,5 @@
 
 
-
-
-
-
-
-
 package main
 
 import (
@@ -16,7 +10,6 @@ import (
     "crypto/sha256"
     "time"
 )
-
 
 type checkpoint_metadata struct {
     step: int
@@ -30,19 +23,16 @@ type checkpoint_metadata struct {
     config_hash: string
 }
 
-
 type checkpoint_manager struct {
     checkpoint_dir: string
     max_checkpoints: int
     checkpoints: []checkpoint_metadata
 }
 
-
 func (cm *checkpoint_manager) init(checkpoint_dir: string, max_checkpoints: int) error {
     cm.checkpoint_dir = checkpoint_dir
     cm.max_checkpoints = max_checkpoints
     cm.checkpoints = make([]checkpoint_metadata, 0)
-
 
     if err := os.MkdirAll(checkpoint_dir, 0755); err != nil {
         return err
@@ -50,7 +40,6 @@ func (cm *checkpoint_manager) init(checkpoint_dir: string, max_checkpoints: int)
 
     return nil
 }
-
 
 func (cm *checkpoint_manager) save_checkpoint(
     step: int,
@@ -62,14 +51,12 @@ func (cm *checkpoint_manager) save_checkpoint(
     perplexity: float,
     learning_rate: float) error {
 
-
     checkpoint_name := "checkpoint-" + format_int(step)
     checkpoint_path := filepath.Join(cm.checkpoint_dir, checkpoint_name)
 
     if err := os.MkdirAll(checkpoint_path, 0755); err != nil {
         return err
     }
-
 
     model_json, _ := json.Marshal(model_state)
     if err := ioutil.WriteFile(
@@ -79,7 +66,6 @@ func (cm *checkpoint_manager) save_checkpoint(
         return err
     }
 
-
     optimizer_json, _ := json.Marshal(optimizer_state)
     if err := ioutil.WriteFile(
         filepath.Join(checkpoint_path, "optimizer_state.json"),
@@ -88,7 +74,6 @@ func (cm *checkpoint_manager) save_checkpoint(
         return err
     }
 
-
     config_json, _ := json.Marshal(config)
     if err := ioutil.WriteFile(
         filepath.Join(checkpoint_path, "config.json"),
@@ -96,7 +81,6 @@ func (cm *checkpoint_manager) save_checkpoint(
         0644); err != nil {
         return err
     }
-
 
     metadata := checkpoint_metadata{
         step: step,
@@ -110,7 +94,6 @@ func (cm *checkpoint_manager) save_checkpoint(
         config_hash: compute_hash(config_json),
     }
 
-
     metadata_json, _ := json.Marshal(metadata)
     if err := ioutil.WriteFile(
         filepath.Join(checkpoint_path, "metadata.json"),
@@ -121,12 +104,10 @@ func (cm *checkpoint_manager) save_checkpoint(
 
     cm.checkpoints = append(cm.checkpoints, metadata)
 
-
     cm.cleanup_old_checkpoints()
 
     return nil
 }
-
 
 func (cm *checkpoint_manager) load_latest(): (map[string]interface{}, error) {
     if len(cm.checkpoints) == 0 {
@@ -137,39 +118,32 @@ func (cm *checkpoint_manager) load_latest(): (map[string]interface{}, error) {
     return cm.load_checkpoint(latest.step)
 }
 
-
 func (cm *checkpoint_manager) load_checkpoint(step: int): (map[string]interface{}, error) {
     checkpoint_name := "checkpoint-" + format_int(step)
     checkpoint_path := filepath.Join(cm.checkpoint_dir, checkpoint_name)
 
-
     if _, err := os.Stat(checkpoint_path); os.IsNotExist(err) {
         return nil, error("checkpoint not found: " + checkpoint_name)
     }
-
 
     metadata_path := filepath.Join(checkpoint_path, "metadata.json")
     metadata_bytes, _ := ioutil.ReadFile(metadata_path)
     var metadata checkpoint_metadata
     json.Unmarshal(metadata_bytes, &metadata)
 
-
     if err := cm.validate_checkpoint(checkpoint_path, metadata); err != nil {
         return nil, err
     }
-
 
     model_path := filepath.Join(checkpoint_path, "model_state.json")
     model_bytes, _ := ioutil.ReadFile(model_path)
     var model_state map[string]interface{}
     json.Unmarshal(model_bytes, &model_state)
 
-
     optimizer_path := filepath.Join(checkpoint_path, "optimizer_state.json")
     optimizer_bytes, _ := ioutil.ReadFile(optimizer_path)
     var optimizer_state map[string]interface{}
     json.Unmarshal(optimizer_bytes, &optimizer_state)
-
 
     return map[string]interface{}{
         "metadata": metadata,
@@ -178,11 +152,9 @@ func (cm *checkpoint_manager) load_checkpoint(step: int): (map[string]interface{
     }, nil
 }
 
-
 func (cm *checkpoint_manager) validate_checkpoint(
     checkpoint_path: string,
     metadata: checkpoint_metadata) error {
-
 
     model_path := filepath.Join(checkpoint_path, "model_state.json")
     model_bytes, err := ioutil.ReadFile(model_path)
@@ -193,7 +165,6 @@ func (cm *checkpoint_manager) validate_checkpoint(
     if compute_hash(model_bytes) != metadata.model_hash {
         return error("Model state hash mismatch")
     }
-
 
     config_path := filepath.Join(checkpoint_path, "config.json")
     config_bytes, err := ioutil.ReadFile(config_path)
@@ -207,7 +178,6 @@ func (cm *checkpoint_manager) validate_checkpoint(
 
     return nil
 }
-
 
 func (cm *checkpoint_manager) list_checkpoints(): []map[string]interface{} {
     result := make([]map[string]interface{}, len(cm.checkpoints))
@@ -226,7 +196,6 @@ func (cm *checkpoint_manager) list_checkpoints(): []map[string]interface{} {
     return result
 }
 
-
 func (cm *checkpoint_manager) get_checkpoint_info(step: int): map[string]interface{} {
     for _, metadata := range cm.checkpoints {
         if metadata.step == step {
@@ -244,12 +213,10 @@ func (cm *checkpoint_manager) get_checkpoint_info(step: int): map[string]interfa
     return nil
 }
 
-
 func (cm *checkpoint_manager) cleanup_old_checkpoints() error {
     if len(cm.checkpoints) <= cm.max_checkpoints {
         return nil
     }
-
 
     num_to_delete := len(cm.checkpoints) - cm.max_checkpoints
 
@@ -262,12 +229,10 @@ func (cm *checkpoint_manager) cleanup_old_checkpoints() error {
         }
     }
 
-
     cm.checkpoints = cm.checkpoints[num_to_delete:]
 
     return nil
 }
-
 
 func (cm *checkpoint_manager) export_stats(): string {
     if len(cm.checkpoints) == 0 {
@@ -288,7 +253,6 @@ func (cm *checkpoint_manager) export_stats(): string {
     return string(json_bytes)
 }
 
-
 func (cm *checkpoint_manager) get_best_perplexity(): float {
     if len(cm.checkpoints) == 0 {
         return 0.0
@@ -304,7 +268,6 @@ func (cm *checkpoint_manager) get_best_perplexity(): float {
     return best
 }
 
-
 func compute_hash(data: []byte): string {
     h := sha256.Sum256(data)
     return fmt.Sprintf("%x", h)
@@ -314,7 +277,6 @@ func format_int(i: int): string {
     return fmt.Sprintf("%d", i)
 }
 
-
 func main() {
 
     cm := &checkpoint_manager{}
@@ -322,7 +284,6 @@ func main() {
         println("Error initializing checkpoint manager:", err.Error())
         return
     }
-
 
     for step := 100; step <= 500; step += 100 {
         model_state := map[string]interface{}{
@@ -353,7 +314,6 @@ func main() {
             println("✓ Saved checkpoint at step", step)
         }
     }
-
 
     println("\n" + cm.export_stats())
 }

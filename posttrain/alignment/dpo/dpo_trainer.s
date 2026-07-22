@@ -1,22 +1,5 @@
 package neurx.posttrain.dpo.dpo_trainer
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.posttrain.dpo.dpo_state.*
 use neurx.loss.dpo_loss.*
 use neurx.posttrain.dpo.dpo_step.*
@@ -28,11 +11,6 @@ use neurx.checkpoint.distributed.*
 use neurx.data.loader.dataloader.*
 use neurx.monitoring.training_observability.*
 
-
-
-
-
-
 struct dpo_preference_pair {
     []int prompt_tokens
     []int chosen_response_tokens
@@ -42,7 +20,6 @@ struct dpo_preference_pair {
     string domain
 }
 
-
 struct dpo_dataset {
     []dpo_preference_pair pairs
     int size
@@ -50,16 +27,13 @@ struct dpo_dataset {
     float quality_score
     int train_test_split
 
-
     float avg_prompt_len
     float avg_response_len
     []float domain_distribution
 }
 
-
 struct dpo_train_config {
     string method
-
 
     int batch_size
     int gradient_accum_steps
@@ -68,38 +42,31 @@ struct dpo_train_config {
     string lr_schedule_type
     int total_training_steps
 
-
     float adam_beta1
     float adam_beta2
     float adam_epsilon
     float weight_decay
     float max_grad_norm
 
-
     float dpo_beta
     float label_smoothing
     string dpo_loss_type
     bool use_reference_free
 
-
     string precision
     bool use_gradient_checkpointing
     bool use_flash_attention
-
 
     int save_interval
     int eval_interval
     int log_interval
     string checkpoint_dir
 
-
     int num_workers
     bool pin_memory
 
-
     string output_dir
 }
-
 
 struct dpo_trainer_state {
 
@@ -107,10 +74,8 @@ struct dpo_trainer_state {
     neurx_model reference_model
     tokenizer_state tokenizer
 
-
     dpo_train_config config
     dpo_dataset dataset
-
 
     int global_rank
     int local_rank
@@ -118,13 +83,11 @@ struct dpo_trainer_state {
     int dp_rank
     int dp_degree
 
-
     int current_step
     int current_epoch
     float current_learning_rate
     float best_eval_metric
     int best_step
-
 
     float running_loss
     float running_reward_margin
@@ -132,16 +95,13 @@ struct dpo_trainer_state {
     float running_rejected_reward
     float running_accuracy
 
-
     []float loss_history
     []float margin_history
     []float accuracy_history
 
-
     dataloader train_loader
     dataloader eval_loader
 }
-
 
 struct dpo_train_result {
     bool success
@@ -153,17 +113,10 @@ struct dpo_train_result {
     string eval_report_path
 }
 
-
-
-
-
 func load_dpo_dataset(
     string data_path,
     float train_test_ratio
 ) dpo_dataset {
-
-
-
 
     dpo_dataset {
         pairs: []dpo_preference_pair{},
@@ -176,7 +129,6 @@ func load_dpo_dataset(
         domain_distribution: []float{},
     }
 }
-
 
 func validate_dpo_dataset(dpo_dataset dataset) bool {
     if dataset.size == 0 {
@@ -193,10 +145,6 @@ func validate_dpo_dataset(dpo_dataset dataset) bool {
 
     true
 }
-
-
-
-
 
 func create_dpo_trainer(
     neurx_model model,
@@ -246,10 +194,6 @@ func create_dpo_trainer(
     }
 }
 
-
-
-
-
 func compute_learning_rate(
     dpo_trainer_state trainer,
     int current_step,
@@ -258,14 +202,12 @@ func compute_learning_rate(
 
     dpo_train_config cfg = trainer.config
 
-
     int warmup_steps = int(float_of_int(total_steps) * cfg.lr_warmup_ratio)
 
     if current_step < warmup_steps {
         float progress = float_of_int(current_step) / float_of_int(warmup_steps)
         return cfg.learning_rate * progress
     }
-
 
     if cfg.lr_schedule_type == "cosine" {
         int remaining_steps = total_steps - warmup_steps
@@ -292,10 +234,6 @@ func cos_approx(float x) float {
     1.0 - (x2 / 2.0) + (x4 / 24.0) - (x6 / 720.0)
 }
 
-
-
-
-
 struct dpo_training_step_result {
     float loss
     float margin
@@ -303,7 +241,6 @@ struct dpo_training_step_result {
     float chosen_reward
     float rejected_reward
 }
-
 
 func dpo_training_step(
     ref dpo_trainer_state trainer,
@@ -322,20 +259,10 @@ func dpo_training_step(
     while i < batch_size {
         dpo_preference_pair pair = batch[i]
 
-
-
-
-
-
-
-
-
-
         float chosen_logp = 0.0
         float rejected_logp = 0.0
         float ref_chosen_logp = 0.0
         float ref_rejected_logp = 0.0
-
 
         dpo_state dpo_st = new_default_dpo_state()
         dpo_step_result step_result = dpo_step(
@@ -351,7 +278,6 @@ func dpo_training_step(
         total_chosen_reward = total_chosen_reward + step_result.chosen_reward
         total_rejected_reward = total_rejected_reward + step_result.rejected_reward
 
-
         if chosen_logp > rejected_logp {
             total_accuracy = total_accuracy + 1.0
         }
@@ -359,13 +285,11 @@ func dpo_training_step(
         i = i + 1
     }
 
-
     float avg_loss = total_loss / float_of_int(batch_size)
     float avg_margin = total_margin / float_of_int(batch_size)
     float avg_accuracy = total_accuracy / float_of_int(batch_size)
     float avg_chosen = total_chosen_reward / float_of_int(batch_size)
     float avg_rejected = total_rejected_reward / float_of_int(batch_size)
-
 
     trainer.running_loss = 0.9 * trainer.running_loss + 0.1 * avg_loss
     trainer.running_reward_margin = 0.9 * trainer.running_reward_margin + 0.1 * avg_margin
@@ -382,10 +306,6 @@ func dpo_training_step(
     }
 }
 
-
-
-
-
 func start_dpo_training(
     ref dpo_trainer_state trainer
 ) dpo_train_result {
@@ -399,32 +319,24 @@ func start_dpo_training(
         print_dpo_dataset_stats(trainer.dataset)
     }
 
-
     int step = 0
     while step < cfg.total_training_steps {
 
-
         trainer.current_learning_rate = compute_learning_rate(trainer, step, cfg.total_training_steps)
-
 
         []dpo_preference_pair batch = []dpo_preference_pair{}
 
-
-
         if len(batch) > 0 {
             dpo_training_step_result result = dpo_training_step(ref trainer, batch)
-
 
             trainer.loss_history = append(trainer.loss_history, result.loss)
             trainer.margin_history = append(trainer.margin_history, result.margin)
             trainer.accuracy_history = append(trainer.accuracy_history, result.accuracy)
         }
 
-
         if cfg.log_interval > 0 && step % cfg.log_interval == 0 && global_rank == 0 {
             print_dpo_training_progress(trainer)
         }
-
 
         if cfg.eval_interval > 0 && step % cfg.eval_interval == 0 && step > 0 {
             float eval_loss = dpo_evaluate(trainer)
@@ -434,7 +346,6 @@ func start_dpo_training(
 
             }
         }
-
 
         if cfg.save_interval > 0 && step % cfg.save_interval == 0 && step > 0 {
             save_dpo_checkpoint(trainer, step)
@@ -459,30 +370,16 @@ func start_dpo_training(
     }
 }
 
-
-
-
-
 func dpo_evaluate(dpo_trainer_state trainer) float {
 
-
-
     float avg_loss = 0.0
-
 
     avg_loss
 }
 
-
-
-
-
 func save_dpo_checkpoint(dpo_trainer_state trainer, int step) {
 
-
     string checkpoint_path = trainer.config.checkpoint_dir + "/step_" + string(step)
-
-
 
     if trainer.global_rank == 0 {
         print("[DPO] checkpoint saved: " + checkpoint_path)
@@ -491,18 +388,11 @@ func save_dpo_checkpoint(dpo_trainer_state trainer, int step) {
 
 func load_dpo_checkpoint(string checkpoint_path) (dpo_trainer_state, int) {
 
-
     dpo_trainer_state trainer = dpo_trainer_state{}
     int step = 0
 
-
-
     (trainer, step)
 }
-
-
-
-
 
 func print_dpo_training_header() {
     print("╔════════════════════════════════════════════════════════════╗")

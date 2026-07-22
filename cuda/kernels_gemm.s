@@ -1,34 +1,22 @@
 package neurx.cuda
 
-
-
-
-
-
-
-
 struct gemm_config {
 
     int M
     int K
     int N
 
-
     bool trans_a
     bool trans_b
-
 
     float alpha
     float beta
 
-
     string compute_dtype
-
 
     bool use_tensor_cores
     int tile_size
 }
-
 
 func default_gemm_config(int M, int K, int N) gemm_config {
     gemm_config {
@@ -43,11 +31,6 @@ func default_gemm_config(int M, int K, int N) gemm_config {
     }
 }
 
-
-
-
-
-
 func launch_gemm(
     cuda_context ctx,
     uint64 ptr_a,
@@ -59,34 +42,9 @@ func launch_gemm(
         return error{message: "CUDA context not initialized"}
     }
 
-
     if cfg.M <= 0 || cfg.K <= 0 || cfg.N <= 0 {
         return error{message: "Invalid matrix dimensions"}
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     float flops = 2.0 * float(cfg.M) * float(cfg.K) * float(cfg.N)
     int memory_bytes = (cfg.M * cfg.K + cfg.K * cfg.N + cfg.M * cfg.N) * 2

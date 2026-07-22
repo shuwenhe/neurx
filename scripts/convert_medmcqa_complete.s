@@ -4,21 +4,6 @@ use std.io.println
 use neurx.runtime.io.{runtime_env_get, runtime_read_text_file, runtime_write_text_file,
                        runtime_file_exists, runtime_make_dirs, runtime_run_command_output}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct question_data {
     string qid
     string question
@@ -34,14 +19,7 @@ struct sft_record {
     string output
 }
 
-
-
-
-
-
 func parse_jsonl_question(string line) question_data {
-
-
 
     question_data q = question_data{
         qid: "",
@@ -52,7 +30,6 @@ func parse_jsonl_question(string line) question_data {
         explanation: ""
     }
 
-
     int qid_start = find_substring(line, "\"qid\":\"")
     if qid_start >= 0 {
         qid_start = qid_start + 8
@@ -61,7 +38,6 @@ func parse_jsonl_question(string line) question_data {
             q.qid = substring(line, qid_start, qid_end)
         }
     }
-
 
     int q_start = find_substring(line, "\"question\":\"")
     if q_start >= 0 {
@@ -73,7 +49,6 @@ func parse_jsonl_question(string line) question_data {
         }
     }
 
-
     int ans_start = find_substring(line, "\"correct_answer\":")
     if ans_start >= 0 {
         ans_start = ans_start + 17
@@ -84,7 +59,6 @@ func parse_jsonl_question(string line) question_data {
         }
     }
 
-
     int cat_start = find_substring(line, "\"category\":\"")
     if cat_start >= 0 {
         cat_start = cat_start + 12
@@ -94,12 +68,10 @@ func parse_jsonl_question(string line) question_data {
         }
     }
 
-
     q.options = extract_options_from_json(line)
 
     q
 }
-
 
 func extract_options_from_json(string line) []string {
     []string opts = []string{}
@@ -116,7 +88,6 @@ func extract_options_from_json(string line) []string {
 
     if opt_end > opt_start {
         string options_str = substring(line, opt_start, opt_end)
-
 
         int count = 0
         int i = 0
@@ -136,14 +107,12 @@ func extract_options_from_json(string line) []string {
         }
     }
 
-
     while len(opts) < 4 {
         opts = opts + ["Option placeholder"]
     }
 
     opts
 }
-
 
 func find_substring(string text, string pattern) int {
     if len(pattern) > len(text) {
@@ -260,13 +229,8 @@ func parse_int(string s) int {
     result
 }
 
-
-
-
-
 func question_to_sft(question_data q) sft_record {
     string instruction = "Answer the following medical multiple-choice question accurately."
-
 
     string input = q.question + "\n\nOptions:\n"
 
@@ -274,7 +238,6 @@ func question_to_sft(question_data q) sft_record {
     for i in 0..len(q.options)-1 {
         input = input + labels[i] + ") " + q.options[i] + "\n"
     }
-
 
     string output = ""
     if q.correct_answer >= 0 && q.correct_answer < 4 {
@@ -293,10 +256,6 @@ func question_to_sft(question_data q) sft_record {
         output: output
     }
 }
-
-
-
-
 
 func escape_for_json(string s) string {
     string result = ""
@@ -332,16 +291,11 @@ func sft_to_jsonl(sft_record rec) string {
     json
 }
 
-
-
-
-
 func main() int {
     println("╔═══════════════════════════════════════════════════════════════╗")
     println("║ MedMCQA → SFT Dataset Converter (S Language Implementation)  ║")
     println("╚═══════════════════════════════════════════════════════════════╝")
     println("")
-
 
     string neurx_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     string input_file = runtime_env_get("MEDMCQA_INPUT",
@@ -355,7 +309,6 @@ func main() int {
     println("  Output dir:    " + output_dir)
     println("")
 
-
     if !runtime_file_exists(input_file) {
         println("❌ ERROR: Input file not found")
         println("   Path: " + input_file)
@@ -364,11 +317,9 @@ func main() int {
 
     println("✓ Input file found")
 
-
     runtime_make_dirs(output_dir)
     println("✓ Output directory ready")
     println("")
-
 
     println("Reading MedMCQA data...")
     string file_content = runtime_read_text_file(input_file)
@@ -379,7 +330,6 @@ func main() int {
     }
 
     println("✓ Read " + len(file_content) + " bytes")
-
 
     println("Parsing questions...")
     []string lines = []string{}
@@ -404,7 +354,6 @@ func main() int {
     println("✓ Parsed " + total_questions as string + " questions")
     println("")
 
-
     println("Converting to SFT format...")
     []sft_record train_records = []sft_record{}
     []sft_record val_records = []sft_record{}
@@ -427,7 +376,6 @@ func main() int {
     println("  Val set:   " + len(val_records) as string + " examples")
     println("")
 
-
     println("Writing train.jsonl...")
     string train_content = ""
     for i in 0..len(train_records)-1 {
@@ -437,7 +385,6 @@ func main() int {
     string train_output = output_dir + "/train.jsonl"
     runtime_write_text_file(train_output, train_content)
     println("✓ Written to: " + train_output)
-
 
     println("Writing val.jsonl...")
     string val_content = ""

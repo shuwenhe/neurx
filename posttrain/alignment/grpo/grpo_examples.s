@@ -4,17 +4,9 @@ use neurx.posttrain.grpo.grpo_trainer.*
 use neurx.model.llm.neurx.*
 use neurx.tokenizer.neurx.*
 
-
-
-
-
-
-
-
 func create_grpo_example_config() grpo_train_config {
     grpo_train_config {
         method: "grpo",
-
 
         batch_size: 8,
         group_size: 8,
@@ -24,13 +16,11 @@ func create_grpo_example_config() grpo_train_config {
         lr_schedule_type: "cosine",
         total_training_steps: 50000,
 
-
         adam_beta1: 0.9,
         adam_beta2: 0.95,
         adam_epsilon: 1e-8,
         weight_decay: 0.01,
         max_grad_norm: 1.0,
-
 
         clip_epsilon: 0.2,
         kl_coef: 0.04,
@@ -38,22 +28,18 @@ func create_grpo_example_config() grpo_train_config {
         use_length_penalty: true,
         length_penalty_per_100tokens: 0.005,
 
-
         max_gen_len: 8192,
         temperature: 0.7,
         top_p: 0.95,
-
 
         precision: "bf16",
         use_gradient_checkpointing: true,
         use_flash_attention: true,
 
-
         save_interval: 2500,
         eval_interval: 1000,
         log_interval: 50,
         checkpoint_dir: "./checkpoints/grpo/",
-
 
         num_workers: 4,
         pin_memory: true,
@@ -61,7 +47,6 @@ func create_grpo_example_config() grpo_train_config {
         output_dir: "./outputs/grpo/",
     }
 }
-
 
 func create_grpo_example_dataset() grpo_dataset {
     grpo_dataset {
@@ -74,22 +59,18 @@ func create_grpo_example_dataset() grpo_dataset {
     }
 }
 
-
 func example_basic_grpo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║        Example 1: Basic GRPO Training for Math             ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
 
-
     neurx_model model = load_pretrained_grpo_model("neurx_200b")
     neurx_model reference_model = load_pretrained_grpo_model("neurx_200b")
     tokenizer_state tokenizer = load_tokenizer_grpo()
 
-
     grpo_train_config config = create_grpo_example_config()
     grpo_dataset dataset = create_grpo_example_dataset()
-
 
     grpo_trainer_state trainer = create_grpo_trainer(
         model,
@@ -107,7 +88,6 @@ func example_basic_grpo_training() {
     print("  - Max generation: " + string(config.max_gen_len) + " tokens")
     print("")
 
-
     grpo_train_result result = start_grpo_training(ref trainer)
 
     print("")
@@ -116,7 +96,6 @@ func example_basic_grpo_training() {
     print("  Avg Reward: " + string_float(result.avg_reward))
     print("  checkpoint: " + result.checkpoint_path)
 }
-
 
 func example_grpo_group_size_comparison() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -166,7 +145,6 @@ func example_grpo_group_size_comparison() {
     print("  - G=8 often provides good trade-off")
 }
 
-
 func example_distributed_grpo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║       Example 3: Distributed GRPO on 64 GPUs              ║")
@@ -207,7 +185,6 @@ func example_distributed_grpo_training() {
     }
 }
 
-
 func example_alignment_methods_comparison() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 4: GRPO vs PPO vs DPO Comparison                 ║")
@@ -241,7 +218,6 @@ func example_alignment_methods_comparison() {
     print("  → Prefer DPO: General instruction following")
 }
 
-
 func example_grpo_long_context() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║   Example 5: GRPO with Long Context (32K tokens)          ║")
@@ -264,7 +240,6 @@ func example_grpo_long_context() {
     print("  ✓ Better context utilization")
     print("  ✓ Suitable for code generation")
 }
-
 
 func example_custom_reward_functions() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -294,7 +269,6 @@ func example_custom_reward_functions() {
     print("")
 }
 
-
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -302,19 +276,13 @@ func main() {
     print("═════════════════════════════════════════════════════════════")
     print("")
 
-
-
-
     example_alignment_methods_comparison()
-
-
 
     print("")
     print("═════════════════════════════════════════════════════════════")
     print("     All examples completed!                                 ")
     print("═════════════════════════════════════════════════════════════")
 }
-
 
 func load_pretrained_grpo_model(string model_name) neurx_model {
     neurx_model{}

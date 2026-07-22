@@ -1,8 +1,5 @@
 package neurx.model.transformer.ffn
 
-
-
-
 struct ffn_config {
     int hidden_dim
     int intermediate_dim

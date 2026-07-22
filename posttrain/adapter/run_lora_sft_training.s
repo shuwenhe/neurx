@@ -2,9 +2,6 @@ package main
 
 use std.io.println
 
-
-
-
 func digit_to_str(int digit) string {
     if digit == 0 {
         return "0"
@@ -135,7 +132,6 @@ func main() int {
     println("For production training, integration with PyTorch/HuggingFace is recommended")
     println("Loaded samples: 4 (simulation)")
     println("")
-
 
     float base_weight = 1.0
     float adapter_a = 0.0

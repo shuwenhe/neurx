@@ -1,8 +1,5 @@
 package main
 
-
-
-
 func main() int {
 
     int max_steps = 10000
@@ -29,7 +26,6 @@ func main() int {
         }
         float loss = final_loss + (base_loss - final_loss) * decay
 
-
         float current_lr = base_lr
         if step < warmup_steps {
             float warmup_progress = (step * 1.0) / (warmup_steps * 1.0)
@@ -37,7 +33,6 @@ func main() int {
         }
 
         last_loss = loss
-
 
         int step_mod = step - (step / log_interval) * log_interval
         bool should_log = (step == 0)

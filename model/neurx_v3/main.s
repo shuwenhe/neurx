@@ -1,20 +1,5 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 package neurx.model.neurx.main
 
 use neurx.attention.mla
@@ -23,21 +8,15 @@ use neurx.model.neurx.mtp
 use neurx.model.neurx.fp8_training
 use neurx.alignment.neurx_r1_grpo
 
-
-
-
-
 struct neurx_v3_config {
     int hidden_dim
     int num_layers
     int vocab_size
 
-
     int num_heads
     int kv_lora_rank
     int q_lora_rank
     int rope_head_dim
-
 
     int n_routed_experts
     int n_shared_experts
@@ -45,10 +24,8 @@ struct neurx_v3_config {
     int ffn_dim
     float bias_update_speed
 
-
     int num_mtp_layers
     int mtp_ffn_dim
-
 
     int max_seq_len
     int batch_size
@@ -79,10 +56,6 @@ func new_neurx_v3_config() neurx_v3_config {
     }
 }
 
-
-
-
-
 struct neurx_transformer_block {
     mla.mla_weights mla_weights
     []float mla_norm
@@ -90,10 +63,6 @@ struct neurx_transformer_block {
     moe.neurx_moe_weights moe_weights
     []float moe_norm
 }
-
-
-
-
 
 struct neurx_v3_model {
     neurx_v3_config config
@@ -108,10 +77,6 @@ struct neurx_v3_model {
 
     mtp.mtp_weights mtp_weights
 }
-
-
-
-
 
 func demonstrate_kv_cache_savings() {
     println("========================================")
@@ -154,10 +119,6 @@ func demonstrate_kv_cache_savings() {
     println("  MLA:          ~" + int_to_string(mla_total_kb / 1024) + " MB")
 }
 
-
-
-
-
 func demonstrate_moe() {
     println("")
     println("========================================")
@@ -189,7 +150,6 @@ func demonstrate_moe() {
     println("  Routed experts: " + int_to_string(len(w.routed_w1)))
     println("")
 
-
     int n_tokens = 4
     []float h = moe.zeros(n_tokens * cfg.hidden_dim)
     int i = 0
@@ -210,10 +170,6 @@ func demonstrate_moe() {
     println("  Load balance: max/avg = " + float_to_string(stats.load_imbalance_ratio))
     println("  Utilization:  " + float_to_string(stats.utilization * 100.0) + "%")
 }
-
-
-
-
 
 func demonstrate_mtp() {
     println("")
@@ -237,7 +193,6 @@ func demonstrate_mtp() {
 
     mtp.mtp_weights w = mtp.new_mtp_weights(cfg)
     println("MTP weights initialized, modules: " + int_to_string(len(w.modules)))
-
 
     int seq_len = 4
     int d = cfg.hidden_dim
@@ -263,10 +218,6 @@ func demonstrate_mtp() {
     }
 }
 
-
-
-
-
 func demonstrate_grpo() {
     println("")
     println("========================================")
@@ -286,7 +237,6 @@ func demonstrate_grpo() {
     println("  - Rule Rewards: deterministic, not neural RM")
     println("  - A_i = (r_i - mean) / std (within group)")
     println("")
-
 
     int G = cfg.group_size
     []neurx_r1_grpo.generation_output outputs = []neurx_r1_grpo.generation_output{cap: G}
@@ -338,10 +288,6 @@ func demonstrate_grpo() {
     println("  No critic/value model needed!")
 }
 
-
-
-
-
 func demonstrate_rule_rewards() {
     println("")
     println("========================================")
@@ -368,10 +314,6 @@ func demonstrate_rule_rewards() {
     println("")
     println("  Deterministic, explainable, no reward hacking")
 }
-
-
-
-
 
 func demonstrate_fp8() {
     println("")
@@ -402,10 +344,6 @@ func demonstrate_fp8() {
     println("  Memory saved:  " + float_to_string(monitor.memory_saved_percent) + "%")
     println("  Speedup:       " + float_to_string(monitor.speedup_estimated) + "x")
 }
-
-
-
-
 
 func int_to_string(int n) string {
     if n == 0 { return "0" }
@@ -468,10 +406,6 @@ func bool_to_string(bool b) string {
     if b { return "true" }
     "false"
 }
-
-
-
-
 
 func unit_name() string {
     "neurx/model/neurx/main"

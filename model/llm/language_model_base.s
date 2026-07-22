@@ -1,20 +1,5 @@
 package neurx.model.llm.base
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.attention.{
     attention_config, multi_head_attention,
     new_attention_config, new_multi_head_attention,
@@ -30,10 +15,6 @@ use neurx.model.transformer.norm.{
     rope_embedding, new_rope_embedding, apply_rope, rope_apply_result,
     position_embedding_config
 }
-
-
-
-
 
 struct model_config {
     string name
@@ -51,10 +32,6 @@ struct model_config {
     bool tie_embeddings
 }
 
-
-
-
-
 struct transformer_layer {
     multi_head_attention attn
     feed_forward_network ffn
@@ -66,10 +43,6 @@ struct transformer_layer {
     int head_dim
     string activation
 }
-
-
-
-
 
 struct language_model {
     model_config config
@@ -91,11 +64,6 @@ struct model_output {
     float loss
 }
 
-
-
-
-
-
 func model_small() model_config {
     model_config {
         name: "model-small",
@@ -113,7 +81,6 @@ func model_small() model_config {
         tie_embeddings: true,
     }
 }
-
 
 func model_medium() model_config {
     model_config {
@@ -133,7 +100,6 @@ func model_medium() model_config {
     }
 }
 
-
 func model_large_config() model_config {
     model_config {
         name: "model-large-config",
@@ -151,7 +117,6 @@ func model_large_config() model_config {
         tie_embeddings: true,
     }
 }
-
 
 func model_xl() model_config {
     model_config {
@@ -171,7 +136,6 @@ func model_xl() model_config {
     }
 }
 
-
 func model_6b() model_config {
     model_config {
         name: "model-6.7b",
@@ -189,7 +153,6 @@ func model_6b() model_config {
         tie_embeddings: false,
     }
 }
-
 
 func model_13b() model_config {
     model_config {
@@ -209,7 +172,6 @@ func model_13b() model_config {
     }
 }
 
-
 func model_35_level() model_config {
     model_config {
         name: "model-35-level",
@@ -228,7 +190,6 @@ func model_35_level() model_config {
     }
 }
 
-
 func custom_model_config(int n_embd, int n_layer, int n_head, int block_size, string activation) model_config {
     model_config {
         name: "custom",
@@ -246,10 +207,6 @@ func custom_model_config(int n_embd, int n_layer, int n_head, int block_size, st
         tie_embeddings: true,
     }
 }
-
-
-
-
 
 func alloc_tensor(int size, float init_val) []float {
     []float v = []float{cap: size}
@@ -281,8 +238,6 @@ func add_tensors([]float a, []float b) []float {
     out
 }
 
-
-
 func matmul_transpose[]float a, []float b, int m, int k, int n) []float {
     []float result = gpt_alloc(m * n, 0.0)
     int i = 0
@@ -302,7 +257,6 @@ func matmul_transpose[]float a, []float b, int m, int k, int n) []float {
     }
     result
 }
-
 
 func matmul[]float a, []float b, int m, int k, int n) []float {
     []float result = gpt_alloc(m * n, 0.0)
@@ -384,7 +338,6 @@ func tensor_sqrtfloat x) float {
     y
 }
 
-
 func tensor_cosfloat x) float {
     float pi = 3.141592653589793
     float two_pi = 6.283185307179586
@@ -443,7 +396,6 @@ func gelu_activationfloat x) float {
     0.5 * x * (1.0 + inner * 0.7978845608)
 }
 
-
 func softmax_row[]float scores, int size) []float {
     []float out = gpt_alloc(size, 0.0)
     float max_val = scores[0]
@@ -471,9 +423,6 @@ func softmax_row[]float scores, int size) []float {
     }
     out
 }
-
-
-
 
 func matmul_kv[]float a, []float b, int m, int k, int n, int full_n) []float {
     []float result = gpt_alloc(m * n, 0.0)
@@ -508,19 +457,13 @@ func init_weightsint size, float scale) []float {
     w
 }
 
-
-
-
-
 func new_transformer_layermodel_config cfg) transformer_layer {
     int hidden_dim = cfg.n_embd
     int head_dim = hidden_dim / cfg.n_head
     int kv_dim = head_dim * cfg.n_kv_head
 
-
     attention_config attn_cfg = new_attention_config(hidden_dim, cfg.n_head, cfg.n_kv_head, "causal")
     attn_cfg.use_qkv_bias = cfg.use_bias
-
 
     ffn_config ffn_cfg = new_ffn_config(hidden_dim, cfg.ffn_dim, cfg.activation, "standard")
     feed_forward_network ffn_mod
@@ -529,7 +472,6 @@ func new_transformer_layermodel_config cfg) transformer_layer {
     } else {
         ffn_mod = new_standard_ffn(ffn_cfg)
     }
-
 
     layer_norm_config ln_cfg = layer_norm_config {
         hidden_dim: hidden_dim,
@@ -554,14 +496,11 @@ func new_transformer_layermodel_config cfg) transformer_layer {
 func new_language_modelmodel_config cfg) language_model {
     int hidden_dim = cfg.n_embd
 
-
     float wte_scale = gpt_sqrt(2.0 / (hidden_dim * 1.0)) * 0.02
     []float wte = gpt_init_weights(cfg.vocab_size * hidden_dim, wte_scale)
 
-
     float wpe_scale = 0.01
     []float wpe = gpt_init_weights(cfg.block_size * hidden_dim, wpe_scale)
-
 
     []transformer_layer layers = []transformer_layer{cap: cfg.n_layer}
     int i = 0
@@ -570,14 +509,12 @@ func new_language_modelmodel_config cfg) language_model {
         i = i + 1
     }
 
-
     layer_norm_config final_ln_cfg = layer_norm_config {
         hidden_dim: hidden_dim,
         epsilon: 1e-6,
         use_bias: false,
         norm_type: "rmsnorm",
     }
-
 
     []float lm_head_w
     if cfg.tie_embeddings {
@@ -586,7 +523,6 @@ func new_language_modelmodel_config cfg) language_model {
         float lm_scale = gpt_sqrt(2.0 / (hidden_dim * 1.0)) * 0.02
         lm_head_w = gpt_init_weights(hidden_dim * cfg.vocab_size, lm_scale)
     }
-
 
     int head_dim = hidden_dim / cfg.n_head
     position_embedding_config rope_cfg = position_embedding_config {
@@ -612,13 +548,6 @@ func new_language_modelmodel_config cfg) language_model {
     }
 }
 
-
-
-
-
-
-
-
 func embed_tokens(
     []float wte,
     []float wpe,
@@ -636,7 +565,6 @@ func embed_tokens(
         while s < seq_len {
             int idx = b * seq_len + s
             int tok_id = token_ids[idx]
-
 
             if tok_id < 0 {
                 tok_id = 0
@@ -666,12 +594,6 @@ func embed_tokens(
     }
     out
 }
-
-
-
-
-
-
 
 func causal_sdpa
     []float query,
@@ -722,9 +644,7 @@ func causal_sdpa
                 j = j + 1
             }
 
-
             []float weights = gpt_softmax_row(scores, total)
-
 
             int d = 0
             while d < head_dim {
@@ -747,11 +667,6 @@ func causal_sdpa
 
     output
 }
-
-
-
-
-
 
 func transformer_layer_at([]transformer_layer layers, int idx) transformer_layer {
     transformer_layer val = layers[0]
@@ -779,16 +694,12 @@ func transformer_layer_forward(
     int head_dim = layer.head_dim
     int kv_hidden = n_kv_head * head_dim
 
-
     []float normed1 = rms_normalize(layer.norm1, x, batch_size, seq_len)
-
-
 
     []float q_out = gpt_matmul(normed1, layer.attn.query_weight, total_tokens, hidden_dim, hidden_dim)
 
     []float k_out = gpt_matmul_kv(normed1, layer.attn.key_weight,   total_tokens, hidden_dim, kv_hidden, hidden_dim)
     []float v_out = gpt_matmul_kv(normed1, layer.attn.value_weight, total_tokens, hidden_dim, kv_hidden, hidden_dim)
-
 
     if layer.attn.config.use_qkv_bias {
         int i = 0
@@ -807,9 +718,6 @@ func transformer_layer_forward(
             i = i + 1
         }
     }
-
-
-
 
     []float q_rope = gpt_copy(q_out)
     []float k_rope = gpt_copy(k_out)
@@ -830,7 +738,6 @@ func transformer_layer_forward(
                     float cos_val = gpt_cos(angle)
                     float sin_val = gpt_sin(angle)
 
-
                     int q_base = tok_idx * hidden_dim + h * head_dim
                     float q0 = q_rope[q_base + 2 * pair]
                     float q1 = q_rope[q_base + 2 * pair + 1]
@@ -841,7 +748,6 @@ func transformer_layer_forward(
                 }
                 h = h + 1
             }
-
 
             int hk = 0
             while hk < n_kv_head {
@@ -868,7 +774,6 @@ func transformer_layer_forward(
         b = b + 1
     }
 
-
     []float attn_out = gpt_alloc(total_tokens * hidden_dim, 0.0)
     b = 0
     while b < batch_size {
@@ -876,7 +781,6 @@ func transformer_layer_forward(
         int q_offset = batch_offset * hidden_dim
         int k_offset = batch_offset * kv_hidden
         int v_offset = batch_offset * kv_hidden
-
 
         []float q_batch = gpt_alloc(seq_len * hidden_dim, 0.0)
         []float k_batch = gpt_alloc(seq_len * kv_hidden, 0.0)
@@ -893,9 +797,7 @@ func transformer_layer_forward(
             i = i + 1
         }
 
-
         []float sdpa_out = gpt_causal_sdpa(q_batch, k_batch, v_batch, seq_len, n_head, n_kv_head, head_dim)
-
 
         int o = 0
         while o < seq_len * hidden_dim {
@@ -904,7 +806,6 @@ func transformer_layer_forward(
         }
         b = b + 1
     }
-
 
     []float attn_proj = gpt_matmul(attn_out, layer.attn.output_weight, total_tokens, hidden_dim, hidden_dim)
     if layer.attn.config.use_qkv_bias {
@@ -919,12 +820,9 @@ func transformer_layer_forward(
         }
     }
 
-
     []float h_attn = gpt_add(x, attn_proj)
 
-
     []float normed2 = rms_normalize(layer.norm2, h_attn, batch_size, seq_len)
-
 
     []float ffn_out
     if layer.activation == "swiglu" || layer.activation == "geglu" {
@@ -933,15 +831,8 @@ func transformer_layer_forward(
         ffn_out = forward_standard_ffn(layer.ffn, normed2, total_tokens)
     }
 
-
     gpt_add(h_attn, ffn_out)
 }
-
-
-
-
-
-
 
 func model_forward
     language_model model,
@@ -953,9 +844,7 @@ func model_forward
     int vocab_size = model.vocab_size
     int total = batch_size * seq_len
 
-
     []float hidden = embed_tokens(model.wte, model.wpe, token_ids, batch_size, seq_len, n_embd)
-
 
     int l = 0
     while l < model.n_layer {
@@ -964,11 +853,7 @@ func model_forward
         l = l + 1
     }
 
-
     []float normed_final = rms_normalize(model.final_norm, hidden, batch_size, seq_len)
-
-
-
 
     []float logits
     if model.config.tie_embeddings {
@@ -983,12 +868,6 @@ func model_forward
         loss: -1.0,
     }
 }
-
-
-
-
-
-
 
 func gpt_loss(
     []float logits,
@@ -1013,7 +892,6 @@ func gpt_loss(
 
         int base = i * vocab_size
 
-
         float max_logit = logits[base]
         int j = 1
         while j < vocab_size {
@@ -1023,7 +901,6 @@ func gpt_loss(
             j = j + 1
         }
 
-
         float lse = 0.0
         j = 0
         while j < vocab_size {
@@ -1031,7 +908,6 @@ func gpt_loss(
             j = j + 1
         }
         float log_lse = gpt_log(lse) + max_logit
-
 
         float target_logit = logits[base + tgt]
         loss = loss + (log_lse - target_logit)
@@ -1044,11 +920,6 @@ func gpt_loss(
     }
     loss / (count * 1.0)
 }
-
-
-
-
-
 
 func gpt_generate_greedy(
     language_model model,
@@ -1080,9 +951,7 @@ func gpt_generate_greedy(
             s = s + 1
         }
 
-
         model_output out = gpt_forward(model, input_ids, 1, input_len)
-
 
         int last_base = (input_len - 1) * model.vocab_size
         int best_tok = 0
@@ -1099,12 +968,10 @@ func gpt_generate_greedy(
         context[cur_len] = best_tok
         cur_len = cur_len + 1
 
-
         if best_tok == 50256 || best_tok == 128001 || best_tok == 2 {
             break
         }
     }
-
 
     int new_len = cur_len - prompt_len
     []int result = gpt_alloc_int(new_len)
@@ -1115,7 +982,6 @@ func gpt_generate_greedy(
     }
     result
 }
-
 
 func gpt_generate_topk(
     language_model model,
@@ -1154,7 +1020,6 @@ func gpt_generate_topk(
         model_output out = gpt_forward(model, input_ids, 1, input_len)
         int last_base = (input_len - 1) * model.vocab_size
 
-
         []float scaled = gpt_alloc(model.vocab_size, 0.0)
         if temperature > 0.0001 {
             int v = 0
@@ -1170,12 +1035,10 @@ func gpt_generate_topk(
             }
         }
 
-
         int actual_k = top_k
         if actual_k <= 0 || actual_k > model.vocab_size {
             actual_k = model.vocab_size
         }
-
 
         []int top_indices = gpt_alloc_int(actual_k)
         []float top_vals = gpt_alloc(actual_k, -1000000.0)
@@ -1196,9 +1059,7 @@ func gpt_generate_topk(
             v = v + 1
         }
 
-
         []float top_probs = gpt_softmax_row(top_vals, actual_k)
-
 
         rng_state = rng_state * 1664525 + 1013904223
         int rng_abs = rng_state
@@ -1239,7 +1100,6 @@ func gpt_generate_topk(
     result
 }
 
-
 func gpt_generate_nucleus(
     language_model model,
     []int prompt,
@@ -1277,7 +1137,6 @@ func gpt_generate_nucleus(
         model_output out = gpt_forward(model, input_ids, 1, input_len)
         int last_base = (input_len - 1) * model.vocab_size
 
-
         []float scaled = gpt_alloc(model.vocab_size, 0.0)
         float temp = temperature
         if temp < 0.0001 {
@@ -1289,7 +1148,6 @@ func gpt_generate_nucleus(
             v = v + 1
         }
         []float probs = gpt_softmax_row(scaled, model.vocab_size)
-
 
         []int sorted_idx = gpt_alloc_int(model.vocab_size)
         v = 0
@@ -1323,7 +1181,6 @@ func gpt_generate_nucleus(
         if nucleus_size == 0 {
             nucleus_size = 1
         }
-
 
         rng_state = rng_state * 22695477 + 1
         int rng_abs2 = rng_state
@@ -1363,11 +1220,6 @@ func gpt_generate_nucleus(
     result
 }
 
-
-
-
-
-
 func gpt_alloc_int(int size) []int {
     []int v = []int{cap: size}
     int i = 0
@@ -1378,7 +1230,6 @@ func gpt_alloc_int(int size) []int {
     v
 }
 
-
 func gpt_param_count(model_config cfg) int {
     int d = cfg.n_embd
     int v = cfg.vocab_size
@@ -1388,13 +1239,9 @@ func gpt_param_count(model_config cfg) int {
     int ffn = cfg.ffn_dim
     int ctx = cfg.block_size
 
-
     int wte_params = v * d
 
-
     int wpe_params = ctx * d
-
-
 
     int kv_dim = kv_h * (d / h)
     int attn_params = d * d + d * kv_dim + d * kv_dim + d * d
@@ -1412,7 +1259,6 @@ func gpt_param_count(model_config cfg) int {
     int layer_params = attn_params + ffn_params + norm_params
     int all_layer_params = l * layer_params
 
-
     int final_params = d
     int lm_head_params = 0
     if !cfg.tie_embeddings {
@@ -1421,7 +1267,6 @@ func gpt_param_count(model_config cfg) int {
 
     wte_params + wpe_params + all_layer_params + final_params + lm_head_params
 }
-
 
 func gpt_describe(model_config cfg) string {
     int params = gpt_param_count(cfg)
@@ -1458,11 +1303,9 @@ func int_to_str_simple(int n) string {
     s
 }
 
-
 func gpt_perplexity(float loss) float {
     gpt_exp(loss)
 }
-
 
 func gpt_forward_with_loss(
     language_model model,

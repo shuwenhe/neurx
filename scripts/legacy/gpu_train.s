@@ -1,9 +1,5 @@
 
 
-
-
-
-
 package main
 
 use std.io.println
@@ -15,20 +11,14 @@ use neurx.runtime.io.{
     runtime_run_command_output,
 }
 
-
-
-
-
 extern func cuda_malloc(int size) int64
 extern func cuda_free(int64 ptr) int
 extern func cuda_memcpy_h2d(int64 dst, int src_ptr, int size) int
 extern func cuda_memcpy_d2h(int dst_ptr, int64 src, int size) int
 extern func cuda_device_synchronize() int
 
-
 extern func cublasCreate() int64
 extern func cublasDestroy(int64 handle) int
-
 
 extern func cublasSgemm(
     int64 handle, int transa, int transb,
@@ -38,15 +28,10 @@ extern func cublasSgemm(
     int64 C, int ldc
 ) int
 
-
 extern func cuda_error_loss_kernel(int64 pred, int64 target, int size) float
 extern func cuda_sgd_update_kernel(int64 weights, int64 grads, float lr, int size) int
 extern func cuda_relu_forward(int64 out, int64 in, int size) int
 extern func cuda_relu_backward(int64 grad_in, int64 grad_out, int64 in, int size) int
-
-
-
-
 
 struct gpu_context {
     int64 cublas_handle
@@ -63,14 +48,9 @@ struct gpu_buffer {
     int element_count
 }
 
-
-
-
-
 func main() {
     println("[GPU] NeurX S-based GPU Training")
     println("")
-
 
     string num_gpus_str = runtime_env_get("NEURX_PRETRAIN_GPU_COUNT", "1")
     int num_gpus = parse_int(num_gpus_str, 1)
@@ -88,7 +68,6 @@ func main() {
     println("  Learning Rate: " + float_to_str(lr))
     println("")
 
-
     gpu_context ctx = init_gpu_context(batch_size, seq_len, hidden_dim, lr)
     if !ctx.initialized {
         println("[ERROR] Failed to initialize GPU context")
@@ -97,7 +76,6 @@ func main() {
 
     println("[GPU] Context initialized successfully")
     println("")
-
 
     string shard_list_file = runtime_env_get("NEURX_SHARD_LIST", "artifacts/build/run_large_pretrain/shard_list.txt")
     if !runtime_file_exists(shard_list_file) {
@@ -108,7 +86,6 @@ func main() {
     string shard_list_content = runtime_read_text_file(shard_list_file)
     int shard_count = count_lines(shard_list_content)
     println("[GPU] Loading " + int_to_str(shard_count) + " shards")
-
 
     int total_steps = 0
     int max_steps = parse_int(runtime_env_get("NEURX_PRETRAIN_STEPS", "1000000000"), 1000000000)
@@ -126,7 +103,6 @@ func main() {
 
         println("[GPU] Processing shard " + int_to_str(line_idx + 1) + ": " + basename(current_shard))
 
-
         int shard_steps = process_shard_gpu(ctx, current_shard, total_steps, max_steps, log_interval)
         total_steps = total_steps + shard_steps
 
@@ -141,13 +117,8 @@ func main() {
     println("[GPU] Training complete!")
     println("  Total steps: " + int_to_str(total_steps))
 
-
     cleanup_gpu_context(ctx)
 }
-
-
-
-
 
 func init_gpu_context(int batch_size, int seq_len, int hidden_dim, float lr) gpu_context {
     println("[GPU] Initializing CUDA context...")
@@ -184,10 +155,6 @@ func cleanup_gpu_context(gpu_context ctx) {
     }
 }
 
-
-
-
-
 func allocate_gpu_buffer(int element_count, int element_size) gpu_buffer {
     int total_bytes = element_count * element_size
     println("[GPU] Allocating " + int_to_str(total_bytes) + " bytes")
@@ -211,10 +178,6 @@ func free_gpu_buffer(gpu_buffer buf) {
     }
 }
 
-
-
-
-
 func process_shard_gpu(
     gpu_context ctx,
     string shard_path,
@@ -232,7 +195,6 @@ func process_shard_gpu(
 
     println("  Lines: " + int_to_str(line_count))
 
-
     int batch_idx = 0
     int total_processed = 0
     int steps = 0
@@ -243,7 +205,6 @@ func process_shard_gpu(
         gpu_buffer batch_target = allocate_gpu_buffer(ctx.batch_size * ctx.seq_len, 4)
         gpu_buffer batch_output = allocate_gpu_buffer(ctx.batch_size * ctx.seq_len, 4)
         gpu_buffer batch_grads = allocate_gpu_buffer(ctx.batch_size * ctx.seq_len, 4)
-
 
         println("  [Forward] Batch " + int_to_str(batch_idx))
         int status = cublasSgemm(
@@ -266,14 +227,12 @@ func process_shard_gpu(
             return steps
         }
 
-
         println("  [Loss] Computing error loss")
         float loss = cuda_error_loss_kernel(
             batch_output.device_ptr,
             batch_target.device_ptr,
             batch_output.element_count
         )
-
 
         println("  [Backward] Batch " + int_to_str(batch_idx))
         cuda_relu_backward(
@@ -283,7 +242,6 @@ func process_shard_gpu(
             batch_input.element_count
         )
 
-
         cuda_sgd_update_kernel(
             batch_input.device_ptr,
             batch_grads.device_ptr,
@@ -291,20 +249,16 @@ func process_shard_gpu(
             batch_input.element_count
         )
 
-
         cuda_device_synchronize()
-
 
         if (steps + 1) % log_interval == 0 {
             println("  Step " + int_to_str(start_step + steps) + ": loss=" + float_to_str(loss))
         }
 
-
         free_gpu_buffer(batch_input)
         free_gpu_buffer(batch_target)
         free_gpu_buffer(batch_output)
         free_gpu_buffer(batch_grads)
-
 
         batch_idx = batch_idx + ctx.batch_size
         steps = steps + 1
@@ -314,10 +268,6 @@ func process_shard_gpu(
     println("  Processed: " + int_to_str(total_processed) + " lines in " + int_to_str(steps) + " steps")
     steps
 }
-
-
-
-
 
 func parse_int(string s, int default_val) int {
     int result = default_val

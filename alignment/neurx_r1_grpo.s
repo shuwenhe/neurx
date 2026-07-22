@@ -1,20 +1,6 @@
 
 
-
-
-
-
-
-
-
-
-
-
 package neurx.alignment.neurx_r1_grpo
-
-
-
-
 
 struct grpo_config {
     int group_size
@@ -44,10 +30,6 @@ func new_grpo_config() grpo_config {
         top_p: 0.95,
     }
 }
-
-
-
-
 
 struct generation_output {
     string text
@@ -83,11 +65,6 @@ struct grpo_training_state {
     []float accuracy_reward_history
 }
 
-
-
-
-
-
 func compute_format_reward(string text) float {
     float reward = 0.0
 
@@ -98,7 +75,6 @@ func compute_format_reward(string text) float {
         reward = reward + 0.5
     }
 
-
     int think_pos = find_substring(text, "<think>")
     int answer_pos = find_substring(text, "</think>")
     if think_pos >= 0 && answer_pos >= 0 && think_pos < answer_pos {
@@ -108,14 +84,12 @@ func compute_format_reward(string text) float {
     reward
 }
 
-
 func compute_accuracy_reward(string output, string expected_answer) float {
     if contains_substring(output, expected_answer) {
         return 1.0
     }
     0.0
 }
-
 
 func compute_math_reward(string output, string ground_truth) float {
     float format_r = compute_format_reward(output)
@@ -128,7 +102,6 @@ func compute_math_reward(string output, string ground_truth) float {
 
     format_r + accuracy_r
 }
-
 
 func compute_code_reward(string output, []string test_cases, []string expected_outputs) float {
     float format_r = compute_format_reward(output)
@@ -154,10 +127,6 @@ func compute_code_reward(string output, []string test_cases, []string expected_o
 
     format_r + pass_rate
 }
-
-
-
-
 
 func contains_substring(string s, string substr) bool {
     int s_len = len(s)
@@ -264,10 +233,6 @@ func find_substring_from(string s, string substr, int from) int {
     -1
 }
 
-
-
-
-
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float y = x
@@ -289,13 +254,6 @@ func exp_approx(float x) float {
     }
     result
 }
-
-
-
-
-
-
-
 
 func compute_group_advantages([]generation_output outputs, int G) ([]float, float, float) {
     float sum_r = 0.0
@@ -333,13 +291,6 @@ func compute_group_advantages([]generation_output outputs, int G) ([]float, floa
     (advantages, mean_r, std_r)
 }
 
-
-
-
-
-
-
-
 func compute_grpo_loss(
     []float advantages, []float new_log_probs, []float old_log_probs,
     []float ref_log_probs, int G, float clip_eps, float beta
@@ -352,7 +303,6 @@ func compute_grpo_loss(
 
         float log_ratio = new_log_probs[i] - old_log_probs[i]
         float ratio = exp_approx(log_ratio)
-
 
         float surr1 = ratio * advantages[i]
         float surr2 = 0.0
@@ -370,7 +320,6 @@ func compute_grpo_loss(
 
         policy_loss = policy_loss + clipped_loss
 
-
         float kl = ref_log_probs[i] - new_log_probs[i]
         total_kl = total_kl + kl
 
@@ -384,10 +333,6 @@ func compute_grpo_loss(
 
     (total_loss, policy_loss, total_kl)
 }
-
-
-
-
 
 struct grpo_step_result {
     float total_loss
@@ -405,9 +350,7 @@ func grpo_training_step(
     grpo_config cfg = state.config
     int G = cfg.group_size
 
-
     ([]float advantages, float mean_r, float std_r) = compute_group_advantages(group.outputs, G)
-
 
     []float new_log_probs = []float{cap: G}
     []float old_log_probs = []float{cap: G}
@@ -421,17 +364,14 @@ func grpo_training_step(
         i = i + 1
     }
 
-
     (float total_loss, float policy_loss, float kl_div) = compute_grpo_loss(
         advantages, new_log_probs, old_log_probs, ref_log_probs,
         G, cfg.clip_epsilon, cfg.kl_beta
     )
 
-
     float alpha = 0.01
     float new_mean = state.running_mean_reward * (1.0 - alpha) + mean_r * alpha
     float new_std = state.running_std_reward * (1.0 - alpha) + std_r * alpha
-
 
     float avg_format = 0.0
     float avg_accuracy = 0.0
@@ -443,7 +383,6 @@ func grpo_training_step(
     }
     avg_format = avg_format / G as float
     avg_accuracy = avg_accuracy / G as float
-
 
     grpo_training_state new_state = state
     new_state.global_step = state.global_step + 1
@@ -472,10 +411,6 @@ func sum_float([]float arr) float {
     s
 }
 
-
-
-
-
 struct cold_start_data {
     string prompt
     string chain_of_thought
@@ -497,10 +432,6 @@ func grpo_training_init(grpo_config cfg) grpo_training_state {
         accuracy_reward_history: []float{cap: 0},
     }
 }
-
-
-
-
 
 struct grpo_monitor {
     int step
@@ -526,15 +457,6 @@ func grpo_get_monitor(grpo_training_state state, grpo_step_result result) grpo_m
     }
 }
 
-
-
-
-
-
-
-
-
-
 func detect_reward_hacking(
     float kl_div, float format_r, float accuracy_r,
     float normal_kl, int normal_length, int current_length
@@ -544,10 +466,6 @@ func detect_reward_hacking(
     if current_length > normal_length * 3 { return true }
     false
 }
-
-
-
-
 
 func unit_name() string {
     "neurx/alignment/neurx_r1_grpo"

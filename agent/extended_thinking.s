@@ -1,20 +1,8 @@
 package neurx.agent.extended_thinking
 
-
-
-
-
-
-
-
-
-
-
 use neurx.executor.executor.{agent_execute_step, agent_text_contains}
 use neurx.agent.tool_registry
 use neurx.agent.memory
-
-
 
 struct extended_thought {
     int    index
@@ -36,8 +24,6 @@ struct extended_thinking_state {
     bool           finished
     bool           budget_exceeded
 }
-
-
 
 func new_extended_thinking_state(string goal, int budget_steps) extended_thinking_state {
     extended_thinking_state {
@@ -71,9 +57,6 @@ func new_extended_thinking_state_with_token_budget(string goal, int budget_steps
     }
 }
 
-
-
-
 func extended_thinking_estimate_tokens(string text) int {
     int chars = len(text)
     int tokens = chars / 4
@@ -82,8 +65,6 @@ func extended_thinking_estimate_tokens(string text) int {
     }
     tokens
 }
-
-
 
 func extended_thinking_append(extended_thinking_state state, string thought, string conclusion) extended_thinking_state {
     int n = state.thought_count
@@ -145,9 +126,6 @@ func extended_thinking_finalize(extended_thinking_state state) extended_thinking
     }
 }
 
-
-
-
 func extended_thinking_build_prompt(extended_thinking_state state, string input, int step) string {
     string prompt = "goal: " + state.goal + "\n"
     prompt = prompt + "input: " + input + "\n"
@@ -162,7 +140,6 @@ func extended_thinking_build_prompt(extended_thinking_state state, string input,
     prompt = prompt + "instruction: Think step by step. Output a <thought> block and an updated <conclusion> block.\n"
     prompt
 }
-
 
 func extended_thinking_parse_thought(string response) string {
     int start = 0
@@ -241,14 +218,12 @@ func extended_thinking_parse_conclusion(string response) string {
     last_line
 }
 
-
 func extended_thinking_is_done(string response) bool {
     agent_text_contains(response, "final_answer") ||
     agent_text_contains(response, "conclusion:done") ||
     agent_text_contains(response, "<done>") ||
     agent_text_contains(response, "I am confident")
 }
-
 
 func extended_thinking_run(extended_thinking_state state, string input, string model_path) extended_thinking_state {
     agent_tool_registry_state tools = new_agent_tool_registry_state()
@@ -281,8 +256,6 @@ func extended_thinking_run(extended_thinking_state state, string input, string m
     }
     extended_thinking_finalize(et)
 }
-
-
 
 func extended_thinking_conclusion(extended_thinking_state state) string {
     if trim(state.final_conclusion) != "" {

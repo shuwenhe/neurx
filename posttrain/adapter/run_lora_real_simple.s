@@ -1,18 +1,11 @@
 
 
-
-
 module main
-
-
-
-
 
 struct Tensor {
     []float data
     []int shape
 }
-
 
 struct lora_weights {
     string name
@@ -21,7 +14,6 @@ struct lora_weights {
     float alpha
     int rank
 }
-
 
 struct training_config {
     string model_path
@@ -34,17 +26,12 @@ struct training_config {
     int num_layers
 }
 
-
 struct training_state {
     int current_epoch
     int total_steps
     float total_loss
     float best_loss
 }
-
-
-
-
 
 func int_to_string(int n) string {
     if n == 0 {
@@ -128,10 +115,6 @@ func repeat_string(string s, int count) string {
     return result
 }
 
-
-
-
-
 func create_vector(int size, float value) Tensor {
     Tensor t
     t.data = []
@@ -162,10 +145,6 @@ func zeros(int rows, int cols) Tensor {
     return create_matrix(rows, cols, 0.0)
 }
 
-
-
-
-
 func load_model_config(string model_path) training_config {
     training_config config
     config.model_path = model_path
@@ -179,10 +158,6 @@ func load_model_config(string model_path) training_config {
     return config
 }
 
-
-
-
-
 func forward_pass(Tensor input_ids) float {
     println("Forward pass...")
 
@@ -191,18 +166,10 @@ func forward_pass(Tensor input_ids) float {
     return logits
 }
 
-
-
-
-
 func compute_loss(float logits, float labels) float {
     float loss = 0.5
     return loss
 }
-
-
-
-
 
 func train_epoch(training_config config, training_state state) float {
     println("Epoch " + int_to_string(state.current_epoch + 1) + "/" + int_to_string(config.num_epochs))
@@ -258,20 +225,12 @@ func train_model(training_config config) training_state {
     return state
 }
 
-
-
-
-
 func save_model(training_config config, training_state state) {
     println("\nSaving model...")
     println("  Output: " + config.model_path + "/../base-model-posttrain/")
     println("  Total steps: " + int_to_string(state.total_steps))
     println("  Best loss: " + float_to_string(state.best_loss))
 }
-
-
-
-
 
 func verify_results(training_state state) {
     println("\nVerifying results...")
@@ -280,10 +239,6 @@ func verify_results(training_state state) {
     println("  Best loss: " + float_to_string(state.best_loss))
     println("  Weights modified: YES")
 }
-
-
-
-
 
 func main() {
     println("\n" + repeat_string("=", 60))

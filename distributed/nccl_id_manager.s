@@ -1,19 +1,9 @@
 
 
-
-
-
-
-
-
 package neurx.distributed.nccl_manager
 
 use neurx.runtime.io.{runtime_env_get, create_directory, file_exists, runtime_write_text_file, runtime_read_text_file}
 use neurx.strings.{trim, string_concat}
-
-
-
-
 
 struct nccl_unique_id {
     string id_value
@@ -30,16 +20,7 @@ struct nccl_id_config {
     int max_retries
 }
 
-
-
-
-
-
 func generate_nccl_unique_id() nccl_unique_id {
-
-
-
-
 
     string fake_id = "0123456789abcdef" +
                      "0123456789abcdef" +
@@ -66,16 +47,10 @@ func generate_nccl_unique_id() nccl_unique_id {
     }
 }
 
-
-
-
-
-
 func save_nccl_id_to_shared_storage(
     nccl_unique_id id,
     string shared_storage_path,
 ) bool {
-
 
     if !create_directory(shared_storage_path) {
         print("[ERROR] Failed to create shared storage directory: " + shared_storage_path)
@@ -83,7 +58,6 @@ func save_nccl_id_to_shared_storage(
     }
 
     string id_file = shared_storage_path + "/nccl_unique_id.txt"
-
 
     string content = id.id_value + "\n" +
                      id.timestamp + "\n" +
@@ -97,11 +71,6 @@ func save_nccl_id_to_shared_storage(
     print("[NCCL_MANAGER] Saved NCCL ID to shared storage: " + id_file)
     true
 }
-
-
-
-
-
 
 func load_nccl_id_from_shared_storage(
     string shared_storage_path,
@@ -117,7 +86,6 @@ func load_nccl_id_from_shared_storage(
 
         if file_exists(id_file) {
             string content = runtime_read_text_file(id_file)
-
 
             []string lines = split_string(content, "\n")
 
@@ -136,7 +104,6 @@ func load_nccl_id_from_shared_storage(
 
         print("[NCCL_MANAGER] Waiting for NCCL ID... (" + itoa(elapsed) + "/" + itoa(timeout_seconds) + "s)")
 
-
         sleep_seconds(poll_interval)
         elapsed = elapsed + poll_interval
     }
@@ -145,17 +112,11 @@ func load_nccl_id_from_shared_storage(
     (nccl_unique_id{}, false)
 }
 
-
-
-
-
-
 struct nccl_id_store {
     string store_type
     string store_address
     int store_port
 }
-
 
 func save_nccl_id_to_distributed_store(
     nccl_id_store store,
@@ -172,7 +133,6 @@ func save_nccl_id_to_distributed_store(
         string cmd = "redis-cli -h " + store.store_address +
                      " -p " + itoa(store.store_port) +
                      " SET nccl:unique_id " + id.id_value
-
 
         print("[NCCL_MANAGER] Saving NCCL ID to Redis: " + store.store_address)
         return true
@@ -191,7 +151,6 @@ func save_nccl_id_to_distributed_store(
     false
 }
 
-
 func load_nccl_id_from_distributed_store(
     nccl_id_store store,
     int timeout_seconds,
@@ -204,8 +163,6 @@ func load_nccl_id_from_distributed_store(
     if store.store_type == "redis" {
 
         print("[NCCL_MANAGER] Loading NCCL ID from Redis: " + store.store_address)
-
-
 
         nccl_unique_id id = nccl_unique_id {
             id_value: "mock_id_from_redis",
@@ -231,10 +188,6 @@ func load_nccl_id_from_distributed_store(
     print("[ERROR] Unknown store type: " + store.store_type)
     (nccl_unique_id{}, false)
 }
-
-
-
-
 
 func split_string(string s, string sep) []string {
     []string parts = []string{cap: 10}
@@ -268,7 +221,6 @@ func split_string(string s, string sep) []string {
 }
 
 func sleep_seconds(int seconds) {
-
 
 }
 

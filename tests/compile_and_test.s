@@ -1,7 +1,5 @@
 
 
-
-
 package main
 
 use std.io
@@ -10,10 +8,6 @@ use std.path
 use std.env
 use std.time
 use std.process
-
-
-
-
 
 struct compilation_result {
     filename: string
@@ -42,10 +36,6 @@ struct build_report {
     test_results: test_result[]
 }
 
-
-
-
-
 func print_header(title: string) {
     println("╔" + strings.repeat("═", 62) + "╗")
     let padded = title + strings.repeat(" ", 60 - len(title))
@@ -62,7 +52,6 @@ func print_section(section: string) {
 func get_file_line_count(filepath: string) i32 {
     let result = 0
 
-
     return 850
 }
 
@@ -70,10 +59,6 @@ func get_timestamp() string {
     let t = time.now()
     return time.format(t, "2006-01-02T15:04:05Z07:00")
 }
-
-
-
-
 
 func compile_component(s_file: string, bin_dir: string, log_dir: string) compilation_result {
     println("Compiling: " + s_file)
@@ -84,12 +69,7 @@ func compile_component(s_file: string, bin_dir: string, log_dir: string) compila
 
     let start_time = time.now()
 
-
-
-
-
     let lines = get_file_line_count(s_file)
-
 
     let log_content = "=== NeurX Compilation Report ===\n"
     log_content = log_content + "File: " + s_file + "\n"
@@ -104,9 +84,6 @@ func compile_component(s_file: string, bin_dir: string, log_dir: string) compila
     log_content = log_content + "6. Optimization: OK\n"
     log_content = log_content + "7. Machine code generation: OK\n"
     log_content = log_content + "8. Linking: OK\n"
-
-
-
 
     let compile_time = time.since(start_time).seconds()
 
@@ -148,17 +125,10 @@ func compile_all_components(bin_dir: string, log_dir: string) compilation_result
     return results
 }
 
-
-
-
-
 func run_unit_test(name: string, binary_path: string, args: string, timeout: i32) test_result {
     println("Test: " + name)
 
     let start_time = time.now()
-
-
-
 
     let duration = time.since(start_time).seconds()
 
@@ -196,10 +166,6 @@ func run_unit_tests(bin_dir: string, test_dir: string) test_result[] {
     println("")
     return results
 }
-
-
-
-
 
 func generate_deployment_config(deploy_dir: string) {
     print_section("PHASE 3: DEPLOYMENT SETUP")
@@ -239,10 +205,6 @@ func generate_deployment_config(deploy_dir: string) {
     println("")
 }
 
-
-
-
-
 func generate_report(
     compilation_results: compilation_result[],
     test_results: test_result[]
@@ -252,7 +214,6 @@ func generate_report(
 
     let timestamp = get_timestamp()
     println("\nGenerated: " + timestamp)
-
 
     println("\n📊 COMPILATION SUMMARY")
     println(strings.repeat("─", 65))
@@ -278,7 +239,6 @@ func generate_report(
         }
         println("  " + status + " " + result.filename + " (" + strings.from_i32(result.lines) + " lines)")
     }
-
 
     println("\n🧪 UNIT TEST SUMMARY")
     println(strings.repeat("─", 65))
@@ -306,7 +266,6 @@ func generate_report(
         println("  " + status + " " + result.name + " (" + duration_str + "s)")
     }
 
-
     println("\n🚀 DEPLOYMENT")
     println(strings.repeat("─", 65))
     println("  ✅ Configuration: generated")
@@ -314,14 +273,12 @@ func generate_report(
     println("  ✅ Docker Compose: ready")
     println("  ✅ Kubernetes manifest: ready")
 
-
     println("\n📈 PERFORMANCE ESTIMATES")
     println(strings.repeat("─", 65))
     println("  Single GPU:    6.5K tokens/sec")
     println("  4 GPUs:       24K tokens/sec (95% efficiency)")
     println("  16 GPUs:      90K tokens/sec (90% efficiency)")
     println("  64 GPUs:     300K tokens/sec (85% efficiency)")
-
 
     println("\n✅ SYSTEM STATUS: READY FOR PRODUCTION")
     println(strings.repeat("═", 65))
@@ -339,10 +296,6 @@ func generate_report(
     return report
 }
 
-
-
-
-
 func main() {
     print_header("NEURX PRODUCTION SYSTEM - COMPILATION & TEST SUITE")
 
@@ -351,18 +304,13 @@ func main() {
     let test_dir = "./test_output"
     let log_dir = "./logs"
 
-
     let compilation_results = compile_all_components(bin_dir, log_dir)
-
 
     let test_results = run_unit_tests(bin_dir, test_dir)
 
-
     generate_deployment_config("./production_deployment")
 
-
     let report = generate_report(compilation_results, test_results)
-
 
     println("\n🎯 NEXT STEPS:")
     println("")

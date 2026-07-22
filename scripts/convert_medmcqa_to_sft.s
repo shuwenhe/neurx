@@ -4,12 +4,6 @@ use std.io.println
 use neurx.runtime.io.{runtime_env_get, runtime_read_text_file, runtime_write_text_file,
                        runtime_file_exists, runtime_make_dirs}
 
-
-
-
-
-
-
 struct sft_example {
     string instruction
     string input_text

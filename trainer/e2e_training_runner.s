@@ -1,11 +1,5 @@
 package neurx.trainer.e2e_training_runner
 
-
-
-
-
-
-
 use neurx.core.bundle
 use neurx.core.autograd
 use neurx.model.mini_transformer
@@ -16,10 +10,6 @@ import math
 import time
 import io
 
-
-
-
-
 struct training_config {
 
     vocab_size: int
@@ -29,7 +19,6 @@ struct training_config {
     num_heads: int
     seq_length: int
 
-
     batch_size: int
     num_epochs: int
     num_steps: int
@@ -37,15 +26,10 @@ struct training_config {
     weight_decay: float
     warmup_steps: int
 
-
     log_interval: int
     checkpoint_interval: int
     output_dir: string
 }
-
-
-
-
 
 struct mini_language_model {
     vocab_size: int
@@ -54,13 +38,11 @@ struct mini_language_model {
     num_layers: int
     seq_length: int
 
-
     token_embedding: bundle.Tensor
     position_embedding: bundle.Tensor
 
     transformer_layers: []transformer_layer
     output_projection: bundle.Tensor
-
 
     last_loss: float
     gradients_computed: bool
@@ -72,15 +54,10 @@ struct transformer_layer {
     attention_output: bundle.Tensor
     attention_norm: bundle.Tensor
 
-
     fc1: bundle.Tensor
     fc2: bundle.Tensor
     fc_norm: bundle.Tensor
 }
-
-
-
-
 
 func generate_synthetic_data(
     batch_size: int,
@@ -105,10 +82,6 @@ func generate_synthetic_data(
     data
 }
 
-
-
-
-
 func create_mini_gpt(config training_config) mini_language_model {
     model := mini_language_model{
         vocab_size: config.vocab_size,
@@ -119,7 +92,6 @@ func create_mini_gpt(config training_config) mini_language_model {
         gradients_computed: false,
     }
 
-
     model.token_embedding = bundle.Tensor{
         shape: [config.vocab_size, config.embedding_dim],
         data: initialize_normal(config.vocab_size * config.embedding_dim, 0.0, 0.02),
@@ -129,7 +101,6 @@ func create_mini_gpt(config training_config) mini_language_model {
         shape: [config.seq_length, config.embedding_dim],
         data: initialize_normal(config.seq_length * config.embedding_dim, 0.0, 0.02),
     }
-
 
     model.transformer_layers = make([]transformer_layer, config.num_layers)
 
@@ -163,7 +134,6 @@ func create_mini_gpt(config training_config) mini_language_model {
         model.transformer_layers[i] = layer
     }
 
-
     model.output_projection = bundle.Tensor{
         shape: [config.hidden_dim, config.vocab_size],
         data: initialize_normal(config.hidden_dim * config.vocab_size, 0.0, 0.02),
@@ -172,10 +142,6 @@ func create_mini_gpt(config training_config) mini_language_model {
     model
 }
 
-
-
-
-
 func forward_pass(
     model: mini_language_model,
     input_ids: []int,
@@ -183,29 +149,22 @@ func forward_pass(
     seq_length: int
 ) (bundle.Tensor, bundle.Tensor) {
 
-
-
     embeddings := bundle.Tensor{
         shape: [batch_size, seq_length, model.embedding_dim],
         data: make([]float, batch_size * seq_length * model.embedding_dim),
     }
 
-
     for i := 0; i < batch_size; i += 1 {
         for j := 0; j < seq_length; j += 1 {
             token_idx := input_ids[i * seq_length + j]
 
-
         }
     }
-
 
     hidden_states := embeddings
     for layer_idx := 0; layer_idx < model.num_layers; layer_idx += 1 {
 
-
     }
-
 
     logits := bundle.Tensor{
         shape: [batch_size, seq_length, model.vocab_size],
@@ -215,14 +174,7 @@ func forward_pass(
     logits, hidden_states
 }
 
-
-
-
-
 func compute_loss(logits: bundle.Tensor, targets: []int) float {
-
-
-
 
     batch_size := logits.shape[0]
     seq_length := logits.shape[1]
@@ -236,7 +188,6 @@ func compute_loss(logits: bundle.Tensor, targets: []int) float {
             if j < len(targets) {
                 target_idx := targets[i * seq_length + j]
 
-
                 max_logit := -1e9
                 for k := 0; k < vocab_size; k += 1 {
                     idx := (i * seq_length + j) * vocab_size + k
@@ -247,7 +198,6 @@ func compute_loss(logits: bundle.Tensor, targets: []int) float {
                     }
                 }
 
-
                 sum_exp := 0.0
                 for k := 0; k < vocab_size; k += 1 {
                     idx := (i * seq_length + j) * vocab_size + k
@@ -255,7 +205,6 @@ func compute_loss(logits: bundle.Tensor, targets: []int) float {
                         sum_exp += math.Exp(logits.data[idx] - max_logit)
                     }
                 }
-
 
                 if target_idx >= 0 && target_idx < vocab_size {
                     target_idx_offset := (i * seq_length + j) * vocab_size + target_idx
@@ -276,10 +225,6 @@ func compute_loss(logits: bundle.Tensor, targets: []int) float {
     0.0
 }
 
-
-
-
-
 func run_training(config: training_config) {
 
     log_file := fmt.Sprintf("%s/training.log", config.output_dir)
@@ -287,9 +232,7 @@ func run_training(config: training_config) {
 
     log := logger_new(log_file, loss_file)
 
-
     log_config(log, config)
-
 
     fmt.Printf("\n📦 Creating Mini GPT model...\n")
     fmt.Printf("   Vocab size: %d\n", config.vocab_size)
@@ -300,7 +243,6 @@ func run_training(config: training_config) {
     fmt.Printf("   ✅ Model created successfully\n")
     log_message(log, fmt.Sprintf("Model created: %d params", count_parameters(model)))
 
-
     optimizer := adamw_optimizer_new(
         config.learning_rate,
         config.weight_decay,
@@ -309,12 +251,10 @@ func run_training(config: training_config) {
     )
     log_message(log, "Optimizer: AdamW initialized")
 
-
     fmt.Printf("\n📊 Generating synthetic training data...\n")
     data := generate_synthetic_data(config.batch_size, config.seq_length, config.vocab_size, config.num_steps)
     fmt.Printf("   ✅ Generated %d batches\n", len(data))
     log_message(log, fmt.Sprintf("Generated %d training batches", len(data)))
-
 
     fmt.Printf("\n🚀 Starting training...\n")
     log_message(log, "=== TRAINING START ===")
@@ -327,22 +267,12 @@ func run_training(config: training_config) {
         batch_input := data[step % len(data)]
         batch_targets := data[(step + 1) % len(data)]
 
-
         logits, hidden := forward_pass(model, batch_input, config.batch_size, config.seq_length)
-
 
         loss := compute_loss(logits, batch_targets)
         losses = append(losses, loss)
 
-
-
-
-
-
-
-
         lr := compute_learning_rate(step, config.num_steps, config.learning_rate, config.warmup_steps)
-
 
         if step % config.log_interval == 0 {
             elapsed := time.Since(start_time).Seconds()
@@ -358,7 +288,6 @@ func run_training(config: training_config) {
             log_loss(log, step, loss)
         }
 
-
         if step > 0 && step % config.checkpoint_interval == 0 {
             checkpoint_path := fmt.Sprintf("%s/checkpoint_step_%d.pt", config.output_dir, step)
             save_checkpoint(checkpoint_path, model, optimizer, step)
@@ -366,7 +295,6 @@ func run_training(config: training_config) {
             log_message(log, fmt.Sprintf("checkpoint saved: %s", checkpoint_path))
         }
     }
-
 
     elapsed := time.Since(start_time).Seconds()
     fmt.Printf("\n✅ Training completed in %.2f seconds\n", elapsed)
@@ -377,15 +305,12 @@ func run_training(config: training_config) {
     log_message(log, fmt.Sprintf("Final loss: %.4f", losses[len(losses)-1]))
     log_message(log, fmt.Sprintf("Total time: %.2f seconds", elapsed))
 
-
     fmt.Printf("\n🔍 Numerical Verification:\n")
     verify_training(model, losses, log)
-
 
     fmt.Printf("\n📈 Generating loss curve...\n")
     generate_loss_curve(losses, config.output_dir)
     fmt.Printf("   ✅ Loss curve saved\n")
-
 
     logger_close(log)
 
@@ -394,10 +319,6 @@ func run_training(config: training_config) {
     fmt.Printf("   • losses.csv - Loss values per step\n")
     fmt.Printf("   • loss_curve.txt - ASCII loss visualization\n")
 }
-
-
-
-
 
 func count_parameters(model: mini_language_model) int {
     count := model.token_embedding.num_elements()
@@ -458,13 +379,11 @@ func verify_training(model: mini_language_model, losses: []float, log: logger) {
     fmt.Printf("   Max loss: %.4f\n", find_max_loss(losses))
     fmt.Printf("   Avg loss: %.4f\n", compute_avg_loss(losses))
 
-
     if losses[len(losses)-1] < losses[0] {
         fmt.Printf("   ✅ Loss decreasing - Training converging\n")
     } else {
         fmt.Printf("   ⚠️  Loss not decreasing - Check hyperparameters\n")
     }
-
 
     has_nan := false
     for i := 0; i < len(losses); i += 1 {
@@ -542,7 +461,6 @@ func generate_loss_curve(losses: []float, output_dir: string) {
         }
     }
 
-
     for i := 0; i < len(losses) && i < num_cols; i += 1 {
         loss := losses[i]
         row := int((1.0 - (loss - min_loss) / range_loss) * float(num_rows - 1))
@@ -550,7 +468,6 @@ func generate_loss_curve(losses: []float, output_dir: string) {
             grid[row][i] = '*'
         }
     }
-
 
     for row := 0; row < num_rows; row += 1 {
         output += fmt.Sprintf("%6.2f | ", max_loss - (float(row) / float(num_rows)) * range_loss)
@@ -567,14 +484,9 @@ func generate_loss_curve(losses: []float, output_dir: string) {
     output += "\n"
     output += fmt.Sprintf("         0%s%d (steps)\n", strings.Repeat(" ", num_cols - 15), len(losses))
 
-
     curve_file := fmt.Sprintf("%s/loss_curve.txt", output_dir)
     write_file(curve_file, output)
 }
-
-
-
-
 
 struct logger {
     log_file: string
@@ -622,10 +534,6 @@ func write_file(path: string, content: string) {
 
 }
 
-
-
-
-
 func main() {
     fmt.Printf("╔════════════════════════════════════════════════════════════════╗\n")
     fmt.Printf("║     NeurX Industrial-Grade Training System                     ║\n")
@@ -641,14 +549,12 @@ func main() {
         num_heads: 4,
         seq_length: 64,
 
-
         batch_size: 32,
         num_epochs: 1,
         num_steps: 100,
         learning_rate: 1e-3,
         weight_decay: 1e-4,
         warmup_steps: 10,
-
 
         log_interval: 10,
         checkpoint_interval: 50,

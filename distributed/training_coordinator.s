@@ -1,10 +1,5 @@
 package neurx.distributed.training_coordinator
 
-
-
-
-
-
 use neurx.distributed.synchronization.{synchronization_state, new_synchronization_state}
 use neurx.distributed.fault_tolerance.{fault_tolerance_state, new_fault_tolerance_state, save_distributed_checkpoint, restore_from_checkpoint}
 use neurx.distributed.performance_monitor.{performance_monitor, new_performance_monitor, update_rank_metrics}
@@ -42,24 +37,17 @@ func new_distributed_training_state(int rank_id, int world_size, parallel_strate
     }
 }
 
-
 func init_distributed_training(distributed_training_state state) distributed_training_state {
-
-
-
-
 
     state.training_active = true
     state
 }
-
 
 func execute_distributed_step(distributed_training_state state,
                                int compute_time_ms,
                                int comm_time_ms,
                                float gpu_util,
                                float mem_used) distributed_training_state {
-
 
     state.perf_monitor = update_rank_metrics(state.perf_monitor,
                                              state.rank_id,
@@ -72,7 +60,6 @@ func execute_distributed_step(distributed_training_state state,
 
     state.current_step = state.current_step + 1
 
-
     if s(state.current_step - (state.current_step / 100) * 100) == 0 {
 
     }
@@ -80,65 +67,35 @@ func execute_distributed_step(distributed_training_state state,
     state
 }
 
-
 func handle_checkpoint_step(distributed_training_state state) distributed_training_state {
-
-
-
-
-
 
     state
 }
 
-
 func handle_interruption_and_recover(distributed_training_state state) distributed_training_state {
-
-
-
 
     state.training_active = true
     state
 }
 
-
 func finalize_distributed_training(distributed_training_state state) distributed_training_state {
-
-
-
-
 
     state.training_active = false
     state
 }
 
-
 func get_training_progress(distributed_training_state state) string {
-
-
-
-
-
 
     "Training Progress Report"
 }
 
-
 func adjust_parallel_strategy(distributed_training_state state, parallel_strategy new_strategy) distributed_training_state {
-
-
-
 
     state.strategy = new_strategy
     state
 }
 
-
 func periodic_health_check(distributed_training_state state) distributed_training_state {
-
-
-
-
 
     state
 }

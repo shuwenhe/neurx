@@ -1,64 +1,9 @@
 package neurx.alignment.moe_1t_dpo_grpo_alignment
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.strings
 use neurx.runtime.io.{io_println, io_mkdir_recursive}
 use neurx.moe.llm_1t.{moe_1t_framework}
 use neurx.distributed.collective.{collective_state}
-
-
-
-
-
 
 struct sft_data_example {
     string instruction
@@ -67,7 +12,6 @@ struct sft_data_example {
     float quality_score
     string domain
 }
-
 
 struct sft_config {
     string data_path
@@ -83,11 +27,6 @@ struct sft_config {
     int save_interval
 }
 
-
-
-
-
-
 struct preference_pair {
     string prompt
     string chosen_response
@@ -99,7 +38,6 @@ struct preference_pair {
     int timestamp
 }
 
-
 struct dpo_training_state {
     moe_1t_framework base_model
     int global_step
@@ -109,21 +47,14 @@ struct dpo_training_state {
     float beta
     float temperature
 
-
     float chosen_logprob_mean
     float rejected_logprob_mean
     float margin
     float implicit_reward
 
-
     []float loss_history
     []float margin_history
 }
-
-
-
-
-
 
 func dpo_compute_loss(
     float chosen_logprob,
@@ -131,10 +62,7 @@ func dpo_compute_loss(
     float beta
 ) float {
 
-
     float log_odds = beta * (chosen_logprob - rejected_logprob)
-
-
 
     float loss = 0.0
 
@@ -148,7 +76,6 @@ func dpo_compute_loss(
     loss
 }
 
-
 func dpo_compute_implicit_reward(
     float chosen_logprob,
     float rejected_logprob,
@@ -158,7 +85,6 @@ func dpo_compute_implicit_reward(
     float reward = beta * (chosen_logprob - rejected_logprob)
     reward
 }
-
 
 func dpo_training_new(
     moe_1t_framework base_model,
@@ -186,24 +112,19 @@ func dpo_training_new(
     state
 }
 
-
 func dpo_training_step(
     dpo_training_state state,
     preference_pair pair
 ) float {
 
-
     float chosen_logprob = compute_logprob_from_response(pair.chosen_response, pair.prompt)
     float rejected_logprob = compute_logprob_from_response(pair.rejected_response, pair.prompt)
 
-
     float loss = dpo_compute_loss(chosen_logprob, rejected_logprob, state.beta)
-
 
     float implicit_reward = dpo_compute_implicit_reward(
         chosen_logprob, rejected_logprob, state.beta
     )
-
 
     state.chosen_logprob_mean = (state.chosen_logprob_mean * float(state.global_step) + chosen_logprob) /
                                  float(state.global_step + 1)
@@ -215,14 +136,8 @@ func dpo_training_step(
 
     state.global_step = state.global_step + 1
 
-
     loss
 }
-
-
-
-
-
 
 struct generative_reward_model {
     moe_1t_framework base_model
@@ -230,7 +145,6 @@ struct generative_reward_model {
     int hidden_dim
     float reward_scale
 }
-
 
 struct grpo_training_state {
     dpo_training_state dpo_state
@@ -241,18 +155,15 @@ struct grpo_training_state {
     float entropy_bonus_coeff
     float value_loss_coeff
 
-
     float clip_ratio
     int ppo_epochs_per_batch
     int mini_batch_size
-
 
     []float policy_loss_history
     []float value_loss_history
     []float kl_divergence_history
     float average_return
 }
-
 
 func grpo_training_new(
     dpo_training_state dpo_state,
@@ -288,7 +199,6 @@ func grpo_training_new(
     state
 }
 
-
 func grpo_training_step(
     grpo_training_state state,
     string prompt,
@@ -298,24 +208,18 @@ func grpo_training_step(
     float old_value
 ) (float, float, float) {
 
-
     float new_logprob = compute_logprob_from_response(generation, prompt)
 
-
     float ratio = exp(new_logprob - old_logprob)
-
 
     float surr1 = ratio * advantage
     float surr2 = clip(ratio, 1.0 - state.clip_ratio, 1.0 + state.clip_ratio) * advantage
     float policy_loss = -minimum(surr1, surr2)
 
-
     float value_pred = 0.5
     float value_loss = (value_pred - old_value) * (value_pred - old_value)
 
-
     float kl_divergence = old_logprob - new_logprob
-
 
     float total_loss = policy_loss +
                        state.value_loss_coeff * value_loss +
@@ -323,14 +227,8 @@ func grpo_training_step(
 
     state.grpo_steps_completed = state.grpo_steps_completed + 1
 
-
     (policy_loss, value_loss, kl_divergence)
 }
-
-
-
-
-
 
 struct constitution_principle {
     string principle_id
@@ -339,18 +237,15 @@ struct constitution_principle {
     float importance_weight
 }
 
-
 struct constitutional_ai_state {
     []constitution_principle principles
     moe_1t_framework base_model
     int num_principles
 
-
     []float principle_compliance_scores
     []int principle_violation_counts
     float overall_alignment_score
 }
-
 
 func constitutional_ai_new() constitutional_ai_state {
 
@@ -414,7 +309,6 @@ func constitutional_ai_new() constitutional_ai_state {
         overall_alignment_score: 0.0,
     }
 
-
     int i = 0
     while i < 7 {
         state.principle_compliance_scores[i] = 1.0
@@ -425,13 +319,11 @@ func constitutional_ai_new() constitutional_ai_state {
     state
 }
 
-
 func constitutional_ai_evaluate_response(
     constitutional_ai_state state,
     string prompt,
     string response
 ) float {
-
 
     float total_score = 0.0
     float total_weight = 0.0
@@ -439,7 +331,6 @@ func constitutional_ai_evaluate_response(
     int i = 0
     while i < len(state.principles) {
         constitution_principle principle = state.principles[i]
-
 
         float score = 0.9
 
@@ -457,34 +348,23 @@ func constitutional_ai_evaluate_response(
     alignment_score
 }
 
-
-
-
-
-
 struct complete_posttraining_pipeline {
     moe_1t_framework base_model
 
-
     sft_config sft_cfg
-
 
     dpo_training_state dpo_state
     int dpo_training_steps
 
-
     grpo_training_state grpo_state
     int grpo_training_steps
 
-
     constitutional_ai_state const_ai
-
 
     int total_training_steps
     float best_eval_score
     string checkpoint_dir
 }
-
 
 func complete_posttraining_new(
     moe_1t_framework base_model,
@@ -527,11 +407,6 @@ func complete_posttraining_new(
     pipeline
 }
 
-
-
-
-
-
 func compute_logprob_from_response(
     string response,
     string prompt
@@ -540,23 +415,19 @@ func compute_logprob_from_response(
     0.5
 }
 
-
 func log(float x) float {
 
     0.0
 }
-
 
 func exp(float x) float {
 
     2.718
 }
 
-
 func sigmoid(float x) float {
     1.0 / (1.0 + exp(-x))
 }
-
 
 func clip(float x, float min_val, float max_val) float {
     if x < min_val {
@@ -567,7 +438,6 @@ func clip(float x, float min_val, float max_val) float {
         x
     }
 }
-
 
 func minimum(float a, float b) float {
     if a < b {

@@ -1,11 +1,5 @@
 package neurx.logging
 
-
-
-
-
-
-
 struct wandb_run {
     bool active
     string run_id
@@ -13,14 +7,11 @@ struct wandb_run {
     string project
     string entity
 
-
     map[string]string config
-
 
     int metrics_logged
     int steps_logged
 }
-
 
 func init_wandb(
     logger_config cfg,
@@ -29,7 +20,6 @@ func init_wandb(
     if !cfg.log_to_wandb {
         return wandb_run{active: false}
     }
-
 
     string run_id = generate_uuid()
 
@@ -40,13 +30,11 @@ func init_wandb(
         project: cfg.wandb_project,
         entity: cfg.wandb_entity,
 
-
         config: merge_maps(cfg.wandb_config, additional_config),
 
         metrics_logged: 0,
         steps_logged: 0,
     }
-
 
     log_wandb_config(r)
 
@@ -54,11 +42,6 @@ func init_wandb(
 
     r
 }
-
-
-
-
-
 
 func wandb_log_metric(
     wandb_run *run,
@@ -69,23 +52,16 @@ func wandb_log_metric(
 ) {
     if !run.active { return }
 
-
     map<string]any payload = {}
     payload[name] = value
     payload["_step"] = step
     payload["_timestamp"] = current_time_seconds()
 
-
     for key in tags {
         payload["tag_" + key] = tags[key]
     }
 
-
-
-
-
     run.metrics_logged = run.metrics_logged + 1
-
 
     if run.metrics_logged % 100 == 0 {
         flush_wandb(run)

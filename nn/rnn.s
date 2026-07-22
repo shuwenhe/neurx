@@ -2,8 +2,6 @@ package neurx.nn.rnn
 
 use neurx.tensor.tensor
 
-
-
 func exp_approx(float x) float {
     if x > 20.0 {
         return 485165195.0
@@ -73,9 +71,6 @@ func shape3(int a, int b, int c) []int {
     s
 }
 
-
-
-
 func mat_vec([]float weight, int rows, int cols, []float vec) []float {
     []float out = []float{cap: rows}
     int r = 0
@@ -91,7 +86,6 @@ func mat_vec([]float weight, int rows, int cols, []float vec) []float {
     }
     out
 }
-
 
 func vec_add([]float a, []float b, int n) []float {
     []float out = []float{cap: n}
@@ -123,9 +117,6 @@ func zeros(int n) []float {
     out
 }
 
-
-
-
 struct rnn_cell_state {
     int input_size
     int hidden_size
@@ -146,7 +137,6 @@ func new_rnn_cell(int input_size, int hidden_size) rnn_cell_state {
     }
 }
 
-
 func rnn_cell_forward(rnn_cell_state cell, []float x, []float h_prev) []float {
     int hs = cell.hidden_size
     []float gi = mat_vec(cell.weight_ih, hs, cell.input_size, x)
@@ -160,9 +150,6 @@ func rnn_cell_forward(rnn_cell_state cell, []float x, []float h_prev) []float {
     }
     out
 }
-
-
-
 
 struct rnn_output {
     []float last_hidden
@@ -200,14 +187,6 @@ func rnn_forward(rnn_cell_state cell, []float input, int seq_len, []float h0) rn
         hidden_size: hs,
     }
 }
-
-
-
-
-
-
-
-
 
 struct lstm_cell_state {
     int input_size
@@ -269,8 +248,6 @@ func lstm_cell_forward(lstm_cell_state cell, []float x, []float h_prev, []float 
     }
 }
 
-
-
 struct lstm_output {
     []float last_hidden
     []float last_cell
@@ -311,12 +288,6 @@ func lstm_forward(lstm_cell_state cell, []float input, int seq_len, []float h0, 
         hidden_size: hs,
     }
 }
-
-
-
-
-
-
 
 struct gru_cell_state {
     int input_size
@@ -383,8 +354,6 @@ func gru_cell_forward(gru_cell_state cell, []float x, []float h_prev) []float {
     }
     h_next
 }
-
-
 
 struct gru_output {
     []float last_hidden

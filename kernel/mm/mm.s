@@ -1,19 +1,5 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 int HOST_MEM   = 0
 int DEVICE_MEM = 1
 int SHARED_MEM = 2
@@ -47,7 +33,6 @@ func new_mem_state() mem_state {
     }
 }
 
-
 func register_region(ms mem_state, domain int, device_id int, total_bytes int, page_size int) (mem_state, int) {
     mem_region r = mem_region{
         region_id:   ms.next_region_id,
@@ -62,7 +47,6 @@ func register_region(ms mem_state, domain int, device_id int, total_bytes int, p
     ms.next_region_id = ms.next_region_id + 1
     return (ms, id)
 }
-
 
 func mem_alloc(ms mem_state, region_id int, size_bytes int) (mem_state, mem_alloc_result) {
     int align = 256
@@ -89,7 +73,6 @@ func mem_alloc(ms mem_state, region_id int, size_bytes int) (mem_state, mem_allo
     return (ms, mem_alloc_result{ok: false, err: "region_not_found"})
 }
 
-
 func mem_free(ms mem_state, region_id int, size_bytes int) mem_state {
     int i = 0
     while i < len(ms.regions) {
@@ -102,7 +85,6 @@ func mem_free(ms mem_state, region_id int, size_bytes int) mem_state {
     }
     return ms
 }
-
 
 func mem_pressure(ms mem_state) float {
     int total = 0

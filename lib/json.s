@@ -1,10 +1,6 @@
 package neurx.lib.json
 
-
-
-
 use neurx.lib.fileio.{trim_string, split_string, starts_with, ends_with, replace_string}
-
 
 const int JSON_NULL = 0
 const int JSON_BOOL = 1
@@ -13,7 +9,6 @@ const int JSON_STRING = 3
 const int JSON_ARRAY = 4
 const int JSON_OBJECT = 5
 
-
 struct json_value {
     int value_type
     string str_value
@@ -21,13 +16,11 @@ struct json_value {
     int bool_value
 }
 
-
 struct json_object {
     []string keys
     []string values
     int count
 }
-
 
 func parse_json_string(string json_str) string {
 
@@ -37,7 +30,6 @@ func parse_json_string(string json_str) string {
         return ""
     }
 
-
     string first_char = str[0 : 1]
     string last_char = str[len(str) - 1 : len(str)]
 
@@ -45,9 +37,7 @@ func parse_json_string(string json_str) string {
         return ""
     }
 
-
     string content = str[1 : len(str) - 1]
-
 
     content = replace_string(content, "\\\"", "\"")
     content = replace_string(content, "\\\\", "\\")
@@ -58,7 +48,6 @@ func parse_json_string(string json_str) string {
     content
 }
 
-
 func parse_json_number(string num_str) float {
     string str = trim_string(num_str)
 
@@ -66,11 +55,9 @@ func parse_json_number(string num_str) float {
         return 0.0
     }
 
-
     bool is_negative = false
     float result = 0.0
     int i = 0
-
 
     if i < len(str) {
         string ch = str[i : i + 1]
@@ -80,14 +67,12 @@ func parse_json_number(string num_str) float {
         }
     }
 
-
     while i < len(str) {
         string ch = str[i : i + 1]
 
         if ch == "." {
             break
         }
-
 
         int digit = 0
         if ch == "0" {
@@ -117,7 +102,6 @@ func parse_json_number(string num_str) float {
         result = result * 10.0 + (digit as float)
         i = i + 1
     }
-
 
     if i < len(str) {
         string ch = str[i : i + 1]
@@ -167,11 +151,8 @@ func parse_json_number(string num_str) float {
     result
 }
 
-
-
 func extract_json_field(string json_line, string field_name) string {
     string trimmed = trim_string(json_line)
-
 
     if len(trimmed) < 2 {
         return ""
@@ -184,7 +165,6 @@ func extract_json_field(string json_line, string field_name) string {
         return ""
     }
 
-
     string search_key = "\"" + field_name + "\""
     int key_pos = find_substring(trimmed, search_key)
 
@@ -192,14 +172,12 @@ func extract_json_field(string json_line, string field_name) string {
         return ""
     }
 
-
     int colon_pos = key_pos + len(search_key)
     int colon_idx = find_char_at_or_after(trimmed, colon_pos, ':')
 
     if colon_idx < 0 {
         return ""
     }
-
 
     int value_start = colon_idx + 1
     while value_start < len(trimmed) {
@@ -213,7 +191,6 @@ func extract_json_field(string json_line, string field_name) string {
     if value_start >= len(trimmed) {
         return ""
     }
-
 
     string first_value_char = trimmed[value_start : value_start + 1]
 
@@ -235,7 +212,6 @@ func extract_json_field(string json_line, string field_name) string {
                     }
                     check_pos = check_pos - 1
                 }
-
 
                 int remainder = backslash_count - (backslash_count / 2) * 2
                 if remainder == 0 {
@@ -267,7 +243,6 @@ func extract_json_field(string json_line, string field_name) string {
     }
 }
 
-
 func find_substring(string text, string substr) int {
     if len(substr) == 0 || len(substr) > len(text) {
         return -1
@@ -296,7 +271,6 @@ func find_substring(string text, string substr) int {
     -1
 }
 
-
 func find_char_at_or_after(string text, int start_pos, string ch) int {
     int i = start_pos
     while i < len(text) {
@@ -308,7 +282,6 @@ func find_char_at_or_after(string text, int start_pos, string ch) int {
     }
     -1
 }
-
 
 func extract_object_value(string json, int start_pos) string {
     int brace_count = 0
@@ -330,7 +303,6 @@ func extract_object_value(string json, int start_pos) string {
     ""
 }
 
-
 func extract_array_value(string json, int start_pos) string {
     int bracket_count = 0
     int i = start_pos
@@ -351,8 +323,6 @@ func extract_array_value(string json, int start_pos) string {
     ""
 }
 
-
-
 func parse_jsonl_line(string line) json_object {
     json_object obj
     obj.count = 0
@@ -362,20 +332,16 @@ func parse_jsonl_line(string line) json_object {
         return obj
     }
 
-
     obj
 }
-
 
 func json_string_to_string(string json_str) string {
     return parse_json_string(json_str)
 }
 
-
 func json_string_to_float(string json_str) float {
     return parse_json_number(json_str)
 }
-
 
 func json_string_to_int(string json_str) int {
     float f = parse_json_number(json_str)

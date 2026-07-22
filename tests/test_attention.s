@@ -1,23 +1,17 @@
 package main
 
-
-
-
 struct tensor {
     []float data
     int rows
     int cols
 }
 
-
 func test_basic_attention_forward() {
-
 
     let seq_len = 3
     let hidden_dim = 8
     let num_heads = 2
     let head_dim = 4
-
 
     []float input = []float{}
     var i = 0
@@ -25,7 +19,6 @@ func test_basic_attention_forward() {
         input.push(0.1)
         i = i + 1
     }
-
 
     []float wq = []float{}
     i = 0
@@ -38,17 +31,13 @@ func test_basic_attention_forward() {
         i = i + 1
     }
 
-
     println("✓ Test 1: Basic attention forward pass")
 }
-
 
 func test_attention_causal_mask() {
     let seq_len = 4
     let hidden_dim = 8
     let num_heads = 2
-
-
 
     []float attn_weights = []float{}
 
@@ -69,7 +58,6 @@ func test_attention_causal_mask() {
     println("✓ Test 2: Attention with causal masking")
 }
 
-
 func test_multi_head_dimensions() {
     let hidden_dim = 768
     let num_heads = 12
@@ -82,12 +70,10 @@ func test_multi_head_dimensions() {
     }
 }
 
-
 func test_attention_output_shape() {
     let batch_size = 2
     let seq_len = 5
     let hidden_dim = 16
-
 
     []float input = []float{}
     var i = 0
@@ -96,8 +82,6 @@ func test_attention_output_shape() {
         i = i + 1
     }
 
-
-
     let expected_size = batch_size * seq_len * hidden_dim
 
     if len(input) == expected_size {
@@ -105,31 +89,22 @@ func test_attention_output_shape() {
     }
 }
 
-
 func test_scaled_dot_product() {
     let seq_len = 2
     let head_dim = 4
     let scale = 1.0 / sqrt_approx(float(head_dim))
-
-
-
 
     if scale > 0.0 && scale < 1.0 {
         println("✓ Test 5: Scale factor computed correctly")
     }
 }
 
-
 func test_softmax_stability() {
 
     []float scores = []float{1000.0, 1001.0, 1002.0}
 
-
-
-
     println("✓ Test 6: Softmax numerical stability (framework check)")
 }
-
 
 func test_gqa_dimensions() {
     let num_heads = 12
@@ -141,11 +116,9 @@ func test_gqa_dimensions() {
     }
 }
 
-
 func test_attention_gradient_shape() {
     let seq_len = 3
     let hidden_dim = 8
-
 
     []float d_output = []float{}
     var i = 0
@@ -154,14 +127,10 @@ func test_attention_gradient_shape() {
         i = i + 1
     }
 
-
-
-
     if len(d_output) == seq_len * hidden_dim {
         println("✓ Test 8: Attention gradient shape correct")
     }
 }
-
 
 func test_multiple_heads() {
     let seq_len = 2
@@ -181,13 +150,11 @@ func test_multiple_heads() {
     }
 }
 
-
 func test_end_to_end_small() {
 
     let hidden_dim = 8
     let num_heads = 2
     let seq_len = 2
-
 
     let head_dim = hidden_dim / num_heads
     let scale = 1.0 / sqrt_approx(float(head_dim))
@@ -196,7 +163,6 @@ func test_end_to_end_small() {
         println("✓ Test 10: End-to-end small model setup valid")
     }
 }
-
 
 func sqrt_approx(float x) float {
     if x <= 0.0 {
@@ -212,7 +178,6 @@ func sqrt_approx(float x) float {
     }
     return result
 }
-
 
 func main() {
     println("========================================")

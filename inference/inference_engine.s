@@ -1,25 +1,10 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
 package neurx.inference.neurx
 
 import neurx.model.llm.neurx.*
 import neurx.attention.*
 import neurx.tokenizer.neurx.*
-
-
-
-
 
 struct kv_cache_entry {
     tensor key_cache
@@ -32,7 +17,6 @@ class KVCacheManager {
     int num_kv_heads
     int head_dim
     int max_cache_len
-
 
     []tensor layer_key_caches
     []tensor layer_value_caches
@@ -54,7 +38,6 @@ func init(
     print(f"   Max Batch Size: {max_batch_size}")
     print(f"   Max Seq Len: {max_seq_len}")
 
-
     long total_memory_bytes = (
         long(num_layers) * max_batch_size * max_seq_len * num_kv_heads * head_dim * 2 * 2
     )
@@ -66,7 +49,6 @@ func init(
         num_kv_heads: num_kv_heads,
         head_dim: head_dim,
         max_cache_len: max_seq_len,
-
 
         layer_key_caches: [],
         layer_value_caches: [],
@@ -152,17 +134,6 @@ func get_memory_usage(self: KVCacheManager):
         "num_active_entries": len(self.layer_key_caches),
     }
 
-
-
-
-
-
-
-
-
-
-
-
 struct memory_block {
     int block_id
     tensor key_data
@@ -208,7 +179,6 @@ func init_paged_attention(
     float reserve_ratio: float = 0.9
 ) {
 
-
     int64 bytes_per_block = (
         long(block_size) * num_kv_heads * head_dim * dtype_size * 2
     )
@@ -220,7 +190,6 @@ func init_paged_attention(
     print(f"   Bytes per Block: {bytes_per_block:,} ({bytes_per_block / 1024:.1f} KB)")
     print(f"   Total Blocks: {num_blocks:,}")
     print(f"   Total KV Cache Capacity: {(num_blocks * bytes_per_block) / (1024**3):.2f} GB")
-
 
     memory_block[] blocks
     for i in range(num_blocks):
@@ -269,7 +238,6 @@ func allocate_sequence(
 
     int blocks_needed = max(1, ceil_div(initial_length, self.block_size))
 
-
     []int allocated_blocks
     for i in range(blocks_needed):
         int block_id = _find_free_block()
@@ -278,7 +246,6 @@ func allocate_sequence(
         self.physical_blocks[block_id].is_free = false
         self.physical_blocks[block_id].ref_count += 1
         append(allocated_blocks, block_id)
-
 
     sequence_metadata meta {
         seq_id: seq_id,
@@ -289,7 +256,6 @@ func allocate_sequence(
     }
 
     self.active_sequences[seq_id] = meta
-
 
     self.stats.total_allocated_blocks += blocks_needed
     self.stats.free_blocks -= blocks_needed
@@ -314,10 +280,8 @@ func extend_sequence(
     sequence_metadata meta = self.active_sequences[seq_id]
     int new_tokens = shape(new_keys)[2]
 
-
     int global_token_offset = meta.current_length
     int local_offset_in_block = global_token_offset % self.block_size
-
 
     int tokens_written = 0
     while tokens_written < new_tokens:
@@ -338,7 +302,6 @@ func extend_sequence(
         int physical_block_id = meta.block_table[block_index]
         int space_in_block = self.block_size - offset_within_block
         int tokens_to_write = min(space_in_block, new_tokens - tokens_written)
-
 
         self.physical_blocks[physical_block_id].key_data[
             offset_within_block : offset_within_block + tokens_to_write
@@ -387,20 +350,16 @@ func gather_kv_for_attention(
     sequence_metadata meta = self.active_sequences[seq_id]
     int total_kv_len = meta.current_length
 
-
     tensor full_keys(1, self.num_kv_heads, total_kv_len, self.head_dim)
     tensor full_values(1, self.num_kv_heads, total_kv_len, self.head_dim)
-
 
     int dst_pos = 0
     for logical_block_idx, physical_block_id in enumerate(meta.block_table):
         int start_in_block = 0
         int end_in_block = self.block_size
 
-
         if logical_block_idx == 0:
             start_in_block = 0
-
 
         if logical_block_idx == len(meta.block_table) - 1:
             tokens_in_last_block = meta.current_length % self.block_size
@@ -409,7 +368,6 @@ func gather_kv_for_attention(
         int copy_len = min(end_in_block - start_in_block, total_kv_len - dst_pos)
         if copy_len <= 0:
             break
-
 
         full_keys[:, :, dst_pos : dst_pos + copy_len] = \
             self.physical_blocks[physical_block_id].key_data[start_in_block : start_in_block + copy_len]
@@ -421,18 +379,12 @@ func gather_kv_for_attention(
 
     return (full_keys, full_values)
 
-
 func _find_free_block(self: PagedAttentionManager):
     """English text block"""
     for block in self.physical_blocks:
         if block.is_free:
             return block.block_id
     return -1
-
-
-
-
-
 
 enum request_status {
     WAITING
@@ -460,7 +412,6 @@ struct inference_request {
     string generated_text
     int generated_length
     tensor[] output_token_ids
-
 
     int ttft_ms
     float tokens_per_second
@@ -565,7 +516,6 @@ func schedule_batch(self: ContinuousBatchScheduler):
     - Priority: English text
     """
 
-
     while len(self.active_requests) < self.max_batch_size && !self.waiting_queue.empty():
         inference_request req = self.waiting_queue.front()
         self.waiting_queue.pop()
@@ -573,7 +523,6 @@ func schedule_batch(self: ContinuousBatchScheduler):
         req.status = PROCESSING
         req.start_time = now()
         self.active_requests[req.request_id] = req
-
 
     list<inference_request> batch = list(self.active_requests.values())
 
@@ -586,7 +535,6 @@ func schedule_batch(self: ContinuousBatchScheduler):
             pass
         case _:
             pass
-
 
     self.stats.peak_concurrent_requests = max(
         self.stats.peak_concurrent_requests,
@@ -615,26 +563,21 @@ func mark_completed(
     req.output_token_ids = all_output_ids
     req.generated_length = len(all_output_ids) - req.prompt_length
 
-
     req.ttft_ms = (req.start_time - req.created_time).total_seconds() * 1000
     if req.generated_length > 0:
         generation_time = (req.completed_time - req.start_time).total_seconds()
         req.tokens_per_second = req.generated_length / max(generation_time, 0.001)
 
-
     del self.active_requests[request_id]
     self.completed_requests[request_id] = req
 
-
     self.stats.total_requests_served += 1
     self.stats.total_tokens_generated += req.generated_length
-
 
     n = self.stats.total_requests_served
     self.stats.avg_ttft_ms = (
         self.stats.avg_ttft_md * (n - 1) + req.ttft_ms
     ) / n
-
 
     self.stats.avg_throughput_tps = (
         float(self.stats.total_tokens_generated) /
@@ -661,17 +604,12 @@ func get_status_report(self: ContinuousBatchScheduler):
 """
     return report
 
-
-
-
-
 class inference_engine {
     neurx_model model
     tokenizer_state tokenizer
     KVCacheManager kv_manager
     option[PagedAttentionManager] paged_manager
     ContinuousBatchScheduler scheduler
-
 
     struct gen_config {
         float default_temperature = 0.7
@@ -685,7 +623,6 @@ class inference_engine {
         bool use_cache = true
         bool early_stopping = False
     } gen_config
-
 
     struct perf_stats {
         int64 total_forward_time_us
@@ -707,14 +644,11 @@ func init_engine(
     print("🚀 Initializing NEURX Inference Engine")
     print("="*60)
 
-
     neurx_config cfg = model.config
     int num_kv_heads = cfg.num_key_value_heads
     int head_dim = cfg.hidden_size / cfg.num_attention_heads
 
-
     KVCacheManager kv_mgr = init(num_layers=cfg.num_layers, num_kv_heads=num_kv_heads, head_dim=head_dim)
-
 
     option[PagedAttentionManager] paged_mgr = none
     if enable_paged_attention:
@@ -724,7 +658,6 @@ func init_engine(
             gpu_memory_mb=gpu_memory_mb,
             block_size=16
         ))
-
 
     ContinuousBatchScheduler sched = init_scheduler(max_batch_size=max_batch_size)
 
@@ -781,7 +714,6 @@ func generate(
 
     timer.start("generate_total")
 
-
     timer.start("encode")
     dict[str, any] encoded = encode(
         self.tokenizer,
@@ -796,9 +728,7 @@ func generate(
 
     print(f"\n🔤 Generating (prompt length: {prompt_len}, max new tokens: {max_new_tokens})")
 
-
     timer.start("prefill")
-
 
     self.kv_manager.reset()
 
@@ -813,7 +743,6 @@ func generate(
 
     tensor logits = outputs["logits"][:, -1, :]
 
-
     if "past_kv" in outputs:
 
         pass
@@ -822,13 +751,11 @@ func generate(
     int ttft_ms = timer.get_elapsed_ms("prefill")
     print(f"   ⏱ Prefill (TTFT): {ttft_ms:.1f} ms")
 
-
     []int generated_ids = []
     string generated_text = ""
 
     for step in range(max_new_tokens):
         timer.start("decode_step")
-
 
         int next_token_id = sample_next_token(
             logits=logits,
@@ -840,7 +767,6 @@ func generate(
 
         append(generated_ids, next_token_id)
 
-
         string new_token_text = decode(
             self.tokenizer,
             [next_token_id],
@@ -848,19 +774,15 @@ func generate(
         )
         generated_text += new_token_text
 
-
         if stream && callback != None:
             callback!(new_token_text, step, max_new_tokens)
-
 
         if next_token_id == self.tokenizer.special_tokens.eos_token_id:
             print(f"   🛑 EOS reached at step {step+1}")
             break
 
-
         tensor next_input = tensor([[next_token_id]])
         int next_position = prompt_len + step + 1
-
 
         timer.start("forward_cached")
         outputs = neurx_forward(
@@ -874,7 +796,6 @@ func generate(
 
         logits = outputs["logits"][:, -1, :]
 
-
         if "new_kv" in outputs:
 
             pass
@@ -883,13 +804,11 @@ func generate(
 
     timer.stop("generate_total")
 
-
     float total_time = timer.get_elapsed_sec("generate_total")
     int num_generated = len(generated_ids)
 
     float tokens_per_sec = num_generated / max(total_time - ttft_ms/1000, 0.001)
     float latency_per_token = (total_time*1000 - ttft_ms) / max(num_generated, 1)
-
 
     self.perf_stats.total_generate_calls += 1
     self.perf_stats.total_tokens_generated += num_generated
@@ -903,7 +822,6 @@ func generate(
     print(f"      Total Time: {total_time:.2f}s")
     print(f"      Tokens/sec: {tokens_per_sec:.1f}")
     print(f"      Latency/token: {latency_per_token:.2f}ms")
-
 
     generated_text = truncate_at_special_tokens(generated_text)
 
@@ -930,13 +848,10 @@ func sample_next_token(
 
         return int(logits.argmax(dim=-1).item())
 
-
     if temperature > 0 && temperature != 1.0:
         logits = logits / temperature
 
-
     tensor probs = softmax(logits, dim=-1)
-
 
     if top_k > 0 && top_k < len(probs):
 
@@ -944,24 +859,20 @@ func sample_next_token(
         probs[indices_to_remove] = 0.0
         probs = probs / probs.sum()
 
-
     if top_p < 1.0:
         sorted_probs, sorted_indices = sort(probs, descending=True)
         cumulative_probs = cumsum(sorted_probs, dim=-1)
-
 
         sorted_indices_to_remove = cumulative_probs > top_p
 
         sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1].clone()
         sorted_indices_to_remove[..., 0] = 0
 
-
         indices_to_remove = zeros_like(probs).scatter_(
             dim=-1, index=sorted_indices, src=sorted_indices_to_remove
         )
         probs[indices_to_remove] = 0.0
         probs = probs / probs.sum()
-
 
     int next_token_id = multinomial(probs, num_samples=1).item()
 
@@ -979,7 +890,6 @@ func generate_batch(
     English text,English textuseEnglish text generate()
     """
 
-
     []int request_ids = []
     for prompt in prompts:
         dict[str, any] encoded = encode(self.tokenizer, prompt, return_tensors=True)
@@ -991,7 +901,6 @@ func generate_batch(
         )
         append(request_ids, rid)
 
-
     []string results = []
     while len(results) < len(prompts):
 
@@ -1000,7 +909,6 @@ func generate_batch(
         if len(batch) == 0:
             sleep(0.001)
             continue
-
 
         for req in batch:
             string text = self.generate(
@@ -1021,11 +929,6 @@ func generate_batch(
                 append(results, text)
 
     return results
-
-
-
-
-
 
 enum quantization_type {
     NONE
@@ -1084,7 +987,6 @@ func apply_quantization(
         case _:
             print("No quantization applied.")
 
-
     int original_params = count_parameters(model.config)
     int compressed_params = estimate_compressed_size(model, config)
     float ratio = float(compressed_params) / float(original_params)
@@ -1096,19 +998,13 @@ func apply_quantization(
 
     return model
 
-
-
-
-
 func test_inference_system() {
     print("\n" + "="*70)
     print("Testing NEURX Inference Optimization System")
     print("="*70)
 
-
     print("\n[Test 1] Testing KV Cache Manager...")
     KVCacheManager kv_mgr = init(num_layers=4, num_kv_heads=8, head_dim=64)
-
 
     for layer in range(4):
         tensor new_k = randn(1, 8, 10, 64)
@@ -1121,7 +1017,6 @@ func test_inference_system() {
     print(f"   Memory usage: {mem_info['total_memory_bytes'] / 1024:.1f} KB")
     print("✅ KV Cache Manager works!")
 
-
     print("\n[Test 2] Testing Paged Attention Manager...")
     PagedAttentionManager paged_mgr = init_paged_attention(
         num_kv_heads=8,
@@ -1130,18 +1025,15 @@ func test_inference_system() {
         block_size=16
     )
 
-
     sequence_metadata seq_meta = paged_mgr.allocate_sequence(seq_id=1, initial_length=50)
     assert(len(seq_meta.block_table) > 0)
     assert(seq_meta.current_length == 50)
-
 
     tensor new_k = randn(1, 8, 20, 64)
     tensor new_v = randn(1, 8, 20, 64)
     paged_mgr.extend_sequence(seq_id=1, new_keys=new_k, new_values=new_v)
 
     assert(paged_mgr.active_sequences[1].current_length == 70)
-
 
     paged_mgr.free_sequence(seq_id=1)
     assert(1 not in paged_mgr.active_sequences)
@@ -1150,10 +1042,8 @@ func test_inference_system() {
     print(f"   Free blocks after free: {paged_mgr.stats.free_blocks}")
     print("✅ Paged Attention Manager works!")
 
-
     print("\n[Test 3] Testing Continuous Batching Scheduler...")
     ContinuousBatchScheduler sched = init_scheduler(max_batch_size=4)
-
 
     tensor dummy_input = tensor([[1, 2, 3]])
     int id1 = sched.add_request("Hello", dummy_input, max_output_len=100)
@@ -1163,17 +1053,14 @@ func test_inference_system() {
     assert(id1 > 0 && id2 > 0 && id3 > 0)
     assert(len(sched.waiting_queue) == 3)
 
-
     list<inference_request> batch = sched.schedule_batch()
     assert(len(batch) == 3)
     assert(batch[0].status == PROCESSING)
-
 
     sched.mark_completed(id1, "Hi there!", [1, 2, 3, 4])
 
     print(sched.get_status_report())
     print("✅ Continuous Batching Scheduler works!")
-
 
     print("\n[Test 4] Testing token sampling strategies...")
     tensor test_logits = zeros(1, 10000)
@@ -1188,12 +1075,10 @@ func test_inference_system() {
     int temp_id = sample_next_token(test_logits, temperature=0.5, top_p=1.0, top_k=0, do_sample=True)
     print(f"   Temp-sampled: {temp_id} (likely 42 or nearby)")
 
-
     int topk_id = sample_next_token(test_logits, temperature=1.0, top_p=1.0, top_k=2, do_sample=True)
     assert(topk_id in [42, 123])
     print(f"   Top-k=2 sampled: {topk_id}")
     print("✅ Token sampling works!")
-
 
     print("\n[Test 5] Testing quantization configuration...")
     quantization_config qconfig = create_default_quant_config()
@@ -1209,8 +1094,6 @@ func test_inference_system() {
     print("All inference optimization tests passed! ✨")
     print("="*70 + "\n")
 
-
-
 func ceil_div(int a, int b):
     return (a + b - 1)
 
@@ -1220,9 +1103,7 @@ func get_tensor_memory(tensor t):
     for dim in shape(t):
         elements *= dim
 
-
     int element_size = 4
-
 
     return int64(elements) * element_size
 

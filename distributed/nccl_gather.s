@@ -1,19 +1,5 @@
 package neurx.distributed
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 func nccl_allgather(
     nccl_communicator *comm,
     uint64 send_buffer,
@@ -24,8 +10,6 @@ func nccl_allgather(
     if !comm->initialized {
         return error{message: "NCCL communicator not initialized"}
     }
-
-
 
     int send_bytes = count * get_dtype_size(dtype)
     int total_bytes = send_bytes * comm->config.world_size
@@ -39,14 +23,6 @@ func nccl_allgather(
     nil
 }
 
-
-
-
-
-
-
-
-
 func nccl_reducescatter(
     nccl_communicator *comm,
     uint64 recv_buffer,
@@ -58,8 +34,6 @@ func nccl_reducescatter(
     if !comm->initialized {
         return error{message: "NCCL communicator not initialized"}
     }
-
-
 
     int send_bytes = count * get_dtype_size(dtype) * comm->config.world_size
     int recv_bytes = count * get_dtype_size(dtype)

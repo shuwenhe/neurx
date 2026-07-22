@@ -1,9 +1,5 @@
 package neurx.scheduler.schedulers
 
-
-
-
-
 func sched_cos_approx(float x) float {
     float x2 = x * x
     float x4 = x2 * x2
@@ -22,8 +18,6 @@ func sched_clamp(float v, float lo, float hi) float {
     }
     v
 }
-
-
 
 struct cosine_scheduler_state {
     float base_lr
@@ -89,8 +83,6 @@ func cosine_scheduler_lr(cosine_scheduler_state sched) float {
     sched.current_lr
 }
 
-
-
 struct linear_scheduler_state {
     float base_lr
     float min_lr
@@ -153,8 +145,6 @@ func linear_scheduler_lr(linear_scheduler_state sched) float {
     sched.current_lr
 }
 
-
-
 struct step_lr_state {
     float base_lr
     float gamma
@@ -204,8 +194,6 @@ func step_lr_step(step_lr_state sched, int step) step_lr_state {
 func step_lr_lr(step_lr_state sched) float {
     sched.current_lr
 }
-
-
 
 func constant_scheduler_step(float lr, int step) float {
     lr

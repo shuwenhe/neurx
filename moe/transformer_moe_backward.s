@@ -1,34 +1,10 @@
 package neurx.moe.transformer_backward
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.moe.transformer.{
     moe_layer, moe_config, moe_expert, routing_decision, moe_output,
     moe_route, moe_expert_forward, moe_capacity
 }
 use neurx.model.llm.gpt.{gpt_alloc, gpt_matmul, gpt_swish, gpt_sigmoid}
-
-
-
-
 
 struct moe_expert_grads {
     []float d_gate_weight
@@ -43,19 +19,10 @@ struct moe_layer_grads {
     float d_aux_loss_scale
 }
 
-
-
-
-
-
 func moe_swish_grad(float x) float {
     float s = gpt_sigmoid(x)
     s + x * s * (1.0 - s)
 }
-
-
-
-
 
 func moe_expert_backward(
     moe_expert expert,
@@ -87,8 +54,6 @@ func moe_expert_backward(
         j = j + 1
     }
 
-
-
     []float d_gv = moe_alloc(D, 0.0)
     []float d_down_w = moe_alloc(D * H, 0.0)
     int d = 0
@@ -102,7 +67,6 @@ func moe_expert_backward(
         d = d + 1
     }
 
-
     []float d_swish_g = moe_alloc(D, 0.0)
     []float d_value_pre = moe_alloc(D, 0.0)
     j = 0
@@ -112,15 +76,12 @@ func moe_expert_backward(
         j = j + 1
     }
 
-
     []float d_gate_pre = moe_alloc(D, 0.0)
     j = 0
     while j < D {
         d_gate_pre[j] = d_swish_g[j] * moe_swish_grad(gate_pre[j])
         j = j + 1
     }
-
-
 
     []float d_gate_w  = moe_alloc(H * D, 0.0)
     []float d_value_w = moe_alloc(H * D, 0.0)
@@ -134,7 +95,6 @@ func moe_expert_backward(
         }
         d = d + 1
     }
-
 
     []float d_h = moe_alloc(H, 0.0)
     d = 0
@@ -158,11 +118,6 @@ func moe_expert_backward(
     (d_h, eg)
 }
 
-
-
-
-
-
 func moe_softmax_bk([]float probs, []float d_logprob, int E) []float {
     float dot = 0.0
     int e = 0
@@ -175,10 +130,6 @@ func moe_softmax_bk([]float probs, []float d_logprob, int E) []float {
     }
     d_scores
 }
-
-
-
-
 
 func moe_backward(
     moe_layer layer,
@@ -194,7 +145,6 @@ func moe_backward(
 
     []float d_hidden = moe_alloc(tokens * H, 0.0)
     []float d_router_weight = moe_alloc(H * E, 0.0)
-
 
     []moe_expert_grads expert_grads = []moe_expert_grads{cap: E}
     int e = 0
@@ -219,9 +169,7 @@ func moe_backward(
         int d = 0
         while d < H { h_t[d] = hidden[t * H + d]; d = d + 1 }
 
-
         []float d_gate_logit = moe_alloc(E, 0.0)
-
 
         []float probs_t = moe_alloc(E, 0.0)
         e = 0
@@ -238,7 +186,6 @@ func moe_backward(
             if expert_counts[eid] < capacity {
                 expert_counts[eid] = expert_counts[eid] + 1
 
-
                 []float d_eo = moe_alloc(H, 0.0)
                 d = 0
                 while d < H {
@@ -246,18 +193,15 @@ func moe_backward(
                     d = d + 1
                 }
 
-
                 []float d_h_e
                 moe_expert_grads eg
                 (d_h_e, eg) = moe_expert_backward(layer.experts[eid], h_t, d_eo, H, D)
-
 
                 d = 0
                 while d < H {
                     d_hidden[t * H + d] = d_hidden[t * H + d] + d_h_e[d]
                     d = d + 1
                 }
-
 
                 int n = H * D
                 d = 0
@@ -273,8 +217,6 @@ func moe_backward(
                     d = d + 1
                 }
 
-
-
                 moe_expert ex = layer.experts[eid]
                 []float eo = moe_expert_forward(ex, h_t, H, D)
                 float dot_eo_do = 0.0
@@ -284,15 +226,12 @@ func moe_backward(
                     d = d + 1
                 }
 
-
                 d_gate_logit[eid] = d_gate_logit[eid] + dot_eo_do
             }
             k = k + 1
         }
 
-
         []float d_router_logit = moe_softmax_bk(probs_t, d_gate_logit, E)
-
 
         d = 0
         while d < H {
@@ -314,10 +253,6 @@ func moe_backward(
         d_aux_loss_scale: layer.config.aux_loss_weight,
     }
 }
-
-
-
-
 
 struct moe_adamw_state {
     []float m_router     []float v_router
@@ -401,10 +336,6 @@ func moe_adamw_step(moe_layer layer, moe_layer_grads grads, moe_adamw_state opt)
     }
     (layer, opt)
 }
-
-
-
-
 
 func moe_alloc(int n, float v) []float {
     []float arr = []float{cap: n}

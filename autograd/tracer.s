@@ -17,7 +17,6 @@ struct tracer_state {
     []string tags
 }
 
-
 func get_op(tracer_state state, int index) string {
     state.ops[index]
 }

@@ -1,36 +1,5 @@
 package neurx.tokenizer.chat_template
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct chat_message {
     string role
     string content
@@ -50,10 +19,6 @@ func new_conversation([]chat_message msgs, bool gen_prompt) chat_conversation {
         system_prompt: "",
     }
 }
-
-
-
-
 
 struct template_config {
     string format
@@ -158,14 +123,8 @@ func alpaca_config() template_config {
     }
 }
 
-
-
-
-
-
 func apply_chat_template(chat_conversation conv, template_config tmpl) string {
     string result = ""
-
 
     if tmpl.add_bos {
         result = str_cat(result, tmpl.bos_token)
@@ -178,7 +137,6 @@ func apply_chat_template(chat_conversation conv, template_config tmpl) string {
         result = str_cat(result, turn)
         i = i + 1
     }
-
 
     if conv.add_generation_prompt {
         result = str_cat(result, format_generation_prompt(tmpl))
@@ -206,7 +164,6 @@ func format_turn(chat_message msg, template_config tmpl, bool is_first, string d
     if msg.role == "assistant" {
         return format_assistant(content, tmpl, true)
     }
-
 
     format_tool(msg.name, content, tmpl)
 }
@@ -244,7 +201,6 @@ func format_system(string content, template_config tmpl) string {
         return format_user(content, tmpl)
     }
 
-
     string r = str_cat(tmpl.system_token, content)
     str_cat(r, tmpl.nl)
 }
@@ -280,11 +236,9 @@ func format_user(string content, template_config tmpl) string {
         return r
     }
 
-
     string r = str_cat(tmpl.user_token, content)
     str_cat(r, tmpl.nl)
 }
-
 
 func format_assistant(string content, template_config tmpl, bool add_eos) string {
     if tmpl.format == "chatml" {
@@ -332,7 +286,6 @@ func format_assistant(string content, template_config tmpl, bool add_eos) string
         return r
     }
 
-
     string r = str_cat(tmpl.assistant_token, content)
     if add_eos {
         r = str_cat(r, tmpl.eos_token)
@@ -377,18 +330,12 @@ func format_generation_prompt(template_config tmpl) string {
     tmpl.assistant_token
 }
 
-
-
-
-
-
 struct sft_sample {
     string full_text
     []int  loss_mask
     int    input_len
     int    target_len
 }
-
 
 func format_sft_sample(chat_conversation conv, template_config tmpl) sft_sample {
 
@@ -403,7 +350,6 @@ func format_sft_sample(chat_conversation conv, template_config tmpl) sft_sample 
 
     int prompt_len = str_len(prompt_text)
     int full_len   = str_len(full_text)
-
 
     []int mask = []
     int i = 0
@@ -425,7 +371,6 @@ func format_sft_sample(chat_conversation conv, template_config tmpl) sft_sample 
     }
 }
 
-
 func drop_last_assistant([]chat_message msgs) []chat_message {
     int n = len(msgs)
     if n == 0 { return msgs }
@@ -441,10 +386,6 @@ func drop_last_assistant([]chat_message msgs) []chat_message {
     }
     msgs
 }
-
-
-
-
 
 struct sft_batch {
     []string texts
@@ -468,10 +409,6 @@ func format_sft_batch([]chat_conversation convs, template_config tmpl) sft_batch
         batch_size: len(convs),
     }
 }
-
-
-
-
 
 struct special_tokens {
     string bos
@@ -530,10 +467,6 @@ func neurx_r1_special_tokens() special_tokens {
         extra: ["<｜User｜>", "<｜Assistant｜>"],
     }
 }
-
-
-
-
 
 func str_cat(string a, string b) string {
 

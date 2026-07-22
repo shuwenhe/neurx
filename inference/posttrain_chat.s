@@ -1,6 +1,5 @@
 
 
-
 module posttrain_chat
 
 func main() {

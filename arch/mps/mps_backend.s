@@ -87,7 +87,6 @@ func mps_allocate_tensor([]int shape, mps_device device) mps_tensor {
         gpu_buffer: nil,
     }
 
-
     tensor
 }
 
@@ -100,7 +99,6 @@ func mps_copy_to_device(mps_tensor tensor, []float data) mps_tensor {
     for i := 0; i < n; i += 1 {
         tensor.data[i] = data[i]
     }
-
 
     tensor
 }
@@ -274,7 +272,6 @@ func mps_tensor_transpose(mps_tensor input, int dim0, int dim1) mps_tensor {
     new_shape[dim1] = input.shape[dim0]
 
     mps_tensor result = mps_allocate_tensor(new_shape, input.device)
-
 
     if len(input.shape) == 2 {
         int rows = input.shape[0]

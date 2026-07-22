@@ -1,18 +1,5 @@
 package neurx.inference.sampling
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 func apply_repetition_penalty(
     []float logits,
     []int generated_ids,
@@ -24,12 +11,10 @@ func apply_repetition_penalty(
 
     []float penalized = copy_float_array(logits)
 
-
     map<int]bool seen = {}
     for id in generated_ids {
         seen[id] = true
     }
-
 
     for t in 0..len(logits) {
         if t in seen  seen[t] {
@@ -53,13 +38,6 @@ func copy_float_array([]float arr) []float {
     }
     copy
 }
-
-
-
-
-
-
-
 
 func compute_length_penalty(int length, float alpha) float {
     float lp = (float(5 + length) / 6.0)

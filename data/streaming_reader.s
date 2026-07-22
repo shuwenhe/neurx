@@ -1,28 +1,21 @@
 
 
-
-
 package neurx.data.streaming_reader
 
 use neurx.strings
-
 
 struct stream_reader_config {
 
     int64 chunk_size_bytes
 
-
     int read_ahead_buffers
     int buffer_size_mb
-
 
     bool use_mmap
     bool mmap_populate
 
-
     string default_encoding
     bool handle_bom
-
 
     bool enable_direct_io
     int io_thread_count
@@ -42,7 +35,6 @@ func default_tb_stream_reader_config() stream_reader_config {
     return cfg
 }
 
-
 struct file_metadata {
     string filepath
     int64 file_size_bytes
@@ -54,7 +46,6 @@ struct file_metadata {
     string checksum_md5
     float quality_score
 }
-
 
 struct data_chunk {
     int chunk_id
@@ -68,33 +59,27 @@ struct data_chunk {
     int last_access_time
 }
 
-
 struct streaming_reader_state {
     file_metadata meta
     stream_reader_config config
-
 
     []data_chunk chunks
     int num_chunks
     int current_chunk_idx
 
-
     int max_loaded_chunks
     []int loaded_chunk_indices
-
 
     int64 current_byte_pos
     int current_line_in_chunk
     int total_lines_processed
     int total_tokens_processed
 
-
     bool is_initialized
     bool end_of_file_reached
     bool error_state
     string last_error_message
 }
-
 
 func init_streaming_reader(
     string filepath,
@@ -112,7 +97,6 @@ func init_streaming_reader(
     reader.end_of_file_reached = false
     reader.error_state = false
 
-
     reader.meta = analyze_file_metadata(filepath, config)
 
     if reader.meta.file_size_bytes <= 0:
@@ -120,29 +104,23 @@ func init_streaming_reader(
         reader.last_error_message = "File not found or empty: " + filepath
         return reader
 
-
     reader = divide_into_chunks(reader)
-
 
     reader.max_loaded_chunks = config.read_ahead_buffers + 2
 
     reader.is_initialized = true
     return reader
 
-
 func analyze_file_metadata(string filepath, stream_reader_config config) file_metadata {
     file_metadata meta
     meta.filepath = filepath
 
-
     meta.file_size_bytes = get_file_size(filepath)
     meta.file_size_gb = meta.file_size_bytes / (1024 * 1024 * 1024)
-
 
     if meta.file_size_bytes > 0:
         []byte header = read_file_header(filepath, 8192)
         (meta.encoding, meta.has_bom) = detect_encoding(header, config.default_encoding)
-
 
         if meta.file_size_bytes > 10 * 1024 * 1024:
 
@@ -152,10 +130,7 @@ func analyze_file_metadata(string filepath, stream_reader_config config) file_me
             meta.line_count = count_all_lines_small_file(filepath)
             meta.quality_score = 1.0
 
-
         meta.estimated_token_count = meta.file_size_bytes / 3
-
-
 
         if meta.file_size_bytes < 100 * 1024 * 1024 * 1024:
             meta.checksum_md5 = compute_file_checksum(filepath)
@@ -171,11 +146,9 @@ func analyze_file_metadata(string filepath, stream_reader_config config) file_me
 
     return meta
 
-
 func divide_into_chunks(streaming_reader_state reader) streaming_reader_state {
     int64 file_size = reader.meta.file_size_bytes
     int64 chunk_size = reader.config.chunk_size_bytes
-
 
     int num_chunks = int(file_size / chunk_size)
     if f(file_size - (file_size / chunk_size) * chunk_size) != 0:
@@ -185,7 +158,6 @@ func divide_into_chunks(streaming_reader_state reader) streaming_reader_state {
         num_chunks = 1
 
     reader.num_chunks = num_chunks
-
 
     reader.chunks = []data_chunk{cap: num_chunks}
 
@@ -201,7 +173,6 @@ func divide_into_chunks(streaming_reader_state reader) streaming_reader_state {
             end_offset = file_size
             reader.end_of_file_reached = true
         else:
-
 
             end_offset = find_next_newline(reader.meta.filepath, end_offset)
 
@@ -219,9 +190,6 @@ func divide_into_chunks(streaming_reader_state reader) streaming_reader_state {
     reader.loaded_chunk_indices = []int{cap: reader.max_loaded_chunks}
 
     return reader
-
-
-
 
 struct line_read_result {
     string line_content
@@ -242,7 +210,6 @@ func read_next_line(streaming_reader_state reader) line_read_result {
             updated_reader: reader
         }
 
-
     reader = ensure_chunk_loaded(reader, reader.current_chunk_idx)
 
     if reader.error_state:
@@ -255,7 +222,6 @@ func read_next_line(streaming_reader_state reader) line_read_result {
         }
 
     data_chunk current_chunk = reader.chunks[reader.current_chunk_idx]
-
 
     string line
     bool line_found
@@ -281,14 +247,11 @@ func read_next_line(streaming_reader_state reader) line_read_result {
             reader.current_chunk_idx = reader.current_chunk_idx + 1
             reader.current_line_in_chunk = 0
 
-
             return read_next_line(reader)
-
 
     reader.current_line_in_chunk = reader.current_line_in_chunk + 1
     reader.total_lines_processed = reader.total_lines_processed + 1
     reader.current_byte_pos = current_chunk.start_byte_offset + get_line_byte_offset(current_chunk, reader.current_line_in_chunk - 1)
-
 
     reader.chunks[reader.current_chunk_idx].access_count =
         reader.chunks[reader.current_chunk_idx].access_count + 1
@@ -301,7 +264,6 @@ func read_next_line(streaming_reader_state reader) line_read_result {
         end_of_file: false,
         updated_reader: reader
     }
-
 
 func ensure_chunk_loaded(streaming_reader_state reader, int chunk_idx) streaming_reader_state {
 
@@ -317,18 +279,14 @@ func ensure_chunk_loaded(streaming_reader_state reader, int chunk_idx) streaming
         move_to_front_of_lru(reader.loaded_chunk_indices, chunk_idx)
         return reader
 
-
-
     if len(reader.loaded_chunk_indices) >= reader.max_loaded_chunks:
 
         int victim_idx = reader.loaded_chunk_indices[len(reader.loaded_chunk_indices) - 1]
         unload_chunk(reader, victim_idx)
 
-
     reader = load_chunk_from_disk(reader, chunk_idx)
 
     return reader
-
 
 func load_chunk_from_disk(streaming_reader_state reader, int chunk_idx) streaming_reader_state {
 
@@ -350,11 +308,9 @@ func load_chunk_from_disk(streaming_reader_state reader, int chunk_idx) streamin
     chunk.is_loaded = true
     reader.chunks[chunk_idx] = chunk
 
-
     insert_at_front_of_lru(reader.loaded_chunk_indices, chunk_idx)
 
     return reader
-
 
 func unload_chunk(streaming_reader_state reader, int chunk_idx) streaming_reader_state {
 
@@ -369,13 +325,9 @@ func unload_chunk(streaming_reader_state reader, int chunk_idx) streaming_reader
     chunk.is_loaded = false
     reader.chunks[chunk_idx] = chunk
 
-
     remove_from_lru(reader.loaded_chunk_indices, chunk_idx)
 
     return reader
-
-
-
 
 struct batch_read_result {
     []string lines
@@ -383,7 +335,6 @@ struct batch_read_result {
     bool end_of_file
     streaming_reader_state updated_reader
 }
-
 
 func read_batch_of_lines(
     streaming_reader_state reader,
@@ -414,25 +365,20 @@ func read_batch_of_lines(
         updated_reader: reader
     }
 
-
 func seek_to_approximate_line(
     streaming_reader_state reader,
     int target_line_number
 ) streaming_reader_state {
 
-
     float lines_per_chunk = float(reader.meta.line_count) / float(reader.num_chunks)
     int estimated_chunk = int(float(target_line_number) / lines_per_chunk)
-
 
     if estimated_chunk < 0:
         estimated_chunk = 0
     if estimated_chunk >= reader.num_chunks:
         estimated_chunk = reader.num_chunks - 1
 
-
     reader = ensure_chunk_loaded(reader, estimated_chunk)
-
 
     int offset_within_chunk = t(target_line_number - (target_line_number / int) * int)(lines_per_chunk)
     reader.current_chunk_idx = estimated_chunk
@@ -440,9 +386,7 @@ func seek_to_approximate_line(
 
     return reader
 
-
 func reset_reader(streaming_reader_state reader) streaming_reader_state {
-
 
     int i = 0
     while i < len(reader.loaded_chunk_indices):
@@ -457,7 +401,6 @@ func reset_reader(streaming_reader_state reader) streaming_reader_state {
     reader.end_of_file_reached = false
 
     return reader
-
 
 struct reader_progress {
     int64 bytes_processed
@@ -483,10 +426,6 @@ func get_progress(streaming_reader_state reader) reader_progress {
         mb_per_second: 0.0
     }
 
-
-
-
-
 func get_file_size(string path) int64:
 
     return 0
@@ -500,7 +439,6 @@ func detect_encoding([]byte header, string default_enc) (string, bool):
     return (default_enc, false)
 
 func sample_file_quality(string path, int64 size) (int, float):
-
 
     return (0, 0.0)
 

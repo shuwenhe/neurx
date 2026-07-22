@@ -1,29 +1,5 @@
 package neurx.model.lora
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct lora_config {
     int rank
     float alpha
@@ -61,11 +37,6 @@ func qlora_config_7b() lora_config {
     }
 }
 
-
-
-
-
-
 func nf4_codebook() []float {
     []float nf4_values = []float{cap: 16}
     nf4_values[0] = -1.0
@@ -94,10 +65,8 @@ struct nf4_tensor {
     []float codebook
 }
 
-
 func quantize_nf4([]float w, int n) nf4_tensor {
     []float cb = nf4_codebook()
-
 
     float amax = 0.0
     int i = 0
@@ -138,7 +107,6 @@ func quantize_nf4([]float w, int n) nf4_tensor {
     }
 }
 
-
 func dequantize_nf4(nf4_tensor t) []float {
     []float out = []float{}
     int i = 0
@@ -149,7 +117,6 @@ func dequantize_nf4(nf4_tensor t) []float {
     }
     out
 }
-
 
 func matmul_lora([]float a, []float b, int M, int K, int N, bool transpose_b) []float {
     []float c = []float{cap: M * N}
@@ -197,29 +164,22 @@ func pow_approx(float base, int exp) float {
     result
 }
 
-
-
-
-
 struct lora_linear {
 
     []float base_weight
     nf4_tensor base_nf4
     bool quantized
 
-
     []float lora_A
     []float lora_B
     []float lora_A_grad
     []float lora_B_grad
-
 
     int in_dim
     int out_dim
     int rank
     float scaling
     float dropout_rate
-
 
     []float last_input
     []float last_Ax
@@ -263,11 +223,6 @@ func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config c
         }
     }
 }
-
-
-
-
-
 
 func lora_forward(lora_linear layer, []float x, int batch) lora_linear {
     []float y = []float{}
@@ -366,10 +321,6 @@ func lora_forward_with_output(lora_linear layer, []float x, int batch) lora_forw
     lora_forward_result { updated_layer: updated, output: y }
 }
 
-
-
-
-
 struct lora_backward_result {
     lora_linear updated_layer
     []float dx
@@ -453,10 +404,6 @@ func lora_backward(lora_linear layer, []float dy, int batch) lora_backward_resul
     lora_backward_result { updated_layer: updated, dx: dx }
 }
 
-
-
-
-
 struct lora_adamw_state {
 
     []float mA
@@ -523,10 +470,6 @@ func lora_adamw_step(lora_linear layer, lora_adamw_state opt) lora_adamw_result 
     lora_adamw_result { layer: upd, opt: o2 }
 }
 
-
-
-
-
 func lora_merge_weights(lora_linear layer) lora_linear {
     []float merged = []float{}
     int in_dim = layer.in_dim
@@ -559,10 +502,6 @@ func lora_merge_weights(lora_linear layer) lora_linear {
     result
 }
 
-
-
-
-
 struct lora_checkpoint {
     int in_dim
     int out_dim
@@ -593,10 +532,6 @@ func lora_load_checkpoint(lora_linear layer, lora_checkpoint ckpt) lora_linear {
     updated
 }
 
-
-
-
-
 struct lora_stats {
     int total_base_params
     int total_lora_params
@@ -609,7 +544,6 @@ func lora_compute_stats(lora_linear layer) lora_stats {
     int base_params = layer.in_dim * layer.out_dim
     int lora_params = layer.rank * (layer.in_dim + layer.out_dim)
     float ratio = (lora_params * 1.0) / ((base_params + lora_params) * 1.0)
-
 
     float saved = 0.0
     if layer.quantized {

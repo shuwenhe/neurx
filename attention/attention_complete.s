@@ -1,8 +1,5 @@
 
 
-
-
-
 package neurx.attention.complete
 
 use neurx.tensor.{tensor, new, zeros, ones, fill, reshape}
@@ -38,7 +35,6 @@ struct multihead_attention_state {
 
     attention_cache cache
 
-
     tensor grad_W_Q
     tensor grad_W_K
     tensor grad_W_V
@@ -48,10 +44,6 @@ struct multihead_attention_state {
     tensor grad_b_V
     tensor grad_b_O
 }
-
-
-
-
 
 func xavier_init_attention(int in_dim, int out_dim) tensor {
     float limit = sqrt(6.0 / float_from_int(in_dim + out_dim))
@@ -119,11 +111,6 @@ func init_multihead_attention(int num_heads, int d_model) multihead_attention_st
     }
 }
 
-
-
-
-
-
 func split_heads(tensor X, int num_heads, int batch_size, int seq_len) tensor {
     int head_dim = X.shape[1] / num_heads
     int total_tokens = batch_size * seq_len
@@ -135,12 +122,7 @@ func merge_heads(tensor X, int num_heads, int batch_size, int seq_len) tensor {
     reshape(X, [batch_size * seq_len, d_model])
 }
 
-
 func linear_forward(tensor X, tensor W, tensor b) tensor {
-
-
-
-
 
     int rank = len(X.shape)
     int leading = 1
@@ -153,7 +135,6 @@ func linear_forward(tensor X, tensor W, tensor b) tensor {
     tensor flat_input = reshape(X, [leading, X.shape[rank - 1]])
     tensor output = matmul_2d(flat_input, W)
 
-
     i = 0
     while i < len(output.data) {
         output.data[i] = output.data[i] + b.data[i % len(b.data)]
@@ -165,17 +146,11 @@ func linear_forward(tensor X, tensor W, tensor b) tensor {
 
 func scaled_dot_product_attention(tensor Q, tensor K, tensor V, float scale) tensor {
 
-
-
-
-
     tensor K_T = transpose_2d(K)
     tensor scores = matmul_2d(Q, K_T)
     scores = scale_tensor(scores, scale)
 
-
     tensor attention_weights = softmax(scores)
-
 
     tensor output = matmul_2d(attention_weights, V)
 
@@ -183,8 +158,6 @@ func scaled_dot_product_attention(tensor Q, tensor K, tensor V, float scale) ten
 }
 
 func multihead_attention_forward(multihead_attention_state state, tensor X) multihead_attention_state {
-
-
 
     tensor Q = linear_forward(X, state.W_Q, state.b_Q)
     tensor K = linear_forward(X, state.W_K, state.b_K)
@@ -198,23 +171,17 @@ func multihead_attention_forward(multihead_attention_state state, tensor X) mult
         seq_len = X.shape[1]
     }
 
-
     tensor Q_heads = split_heads(Q, state.num_heads, batch_size, seq_len)
     tensor K_heads = split_heads(K, state.num_heads, batch_size, seq_len)
     tensor V_heads = split_heads(V, state.num_heads, batch_size, seq_len)
 
-
     float scale = 1.0 / sqrt(float_from_int(state.head_dim))
-
 
     tensor attn_output = scaled_dot_product_attention(Q_heads, K_heads, V_heads, scale)
 
-
     tensor concat_output = merge_heads(attn_output, state.num_heads, batch_size, seq_len)
 
-
     tensor output = linear_forward(concat_output, state.W_O, state.b_O)
-
 
     state.cache = attention_cache{
         Q: Q,
@@ -236,41 +203,28 @@ func multihead_attention_forward(multihead_attention_state state, tensor X) mult
     state
 }
 
-
-
-
-
 func multihead_attention_backward(
     multihead_attention_state state,
     tensor grad_output,
     tensor input_X
 ) (multihead_attention_state, tensor) {
 
-
-
-
-
     state.grad_W_O = matmul_2d(transpose_2d(grad_output), state.cache.concat_output)
     state.grad_b_O = sum_columns(grad_output)
     tensor grad_concat = matmul_2d(grad_output, transpose_2d(state.W_O))
     tensor grad_concat_heads = split_heads(grad_concat, state.num_heads, batch_size_of(input_X), seq_len_of(input_X))
 
-
     tensor grad_attention_weights = matmul_2d(grad_concat_heads, transpose_2d(state.cache.V_heads))
 
-
     tensor grad_scores = softmax_backward(grad_attention_weights, state.cache.attention_weights)
-
 
     float scale = 1.0 / sqrt(float_from_int(state.head_dim))
     tensor grad_Q_heads = matmul_2d(grad_scores, state.cache.K_heads)
     tensor grad_K_heads = matmul_2d(transpose_2d(grad_scores), state.cache.Q_heads)
     tensor grad_V_heads = matmul_2d(transpose_2d(state.cache.attention_weights), grad_concat_heads)
 
-
     grad_Q_heads = scale_tensor(grad_Q_heads, scale)
     grad_K_heads = scale_tensor(grad_K_heads, scale)
-
 
     int batch_size = 1
     int seq_len = 1
@@ -291,7 +245,6 @@ func multihead_attention_backward(
     state.grad_b_K = sum_columns(grad_K)
     state.grad_b_V = sum_columns(grad_V)
 
-
     tensor grad_input = add_tensors(
         add_tensors(
             matmul_2d(grad_Q, transpose_2d(state.W_Q)),
@@ -302,10 +255,6 @@ func multihead_attention_backward(
 
     (state, grad_input)
 }
-
-
-
-
 
 func float_from_int(int x) float {
     0.0 + x

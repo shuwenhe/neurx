@@ -1,12 +1,6 @@
 
 
-
-
-
-
 module web_search_crawler
-
-
 
 struct web_search_config {
 
@@ -14,17 +8,14 @@ struct web_search_config {
     max_results_per_engine: int = 10
     total_max_results: int = 20
 
-
     google_api_key?: string
     google_cx_id?: string
     bing_api_key?: string
-
 
     language: string = "zh-CN"
     region: string = "CN"
     safe_search: string = "moderate"
     time_range: string = ""
-
 
     enable_crawling: bool = true
     crawl_timeout_seconds: int = 15
@@ -34,13 +25,11 @@ struct web_search_config {
     follow_redirects: bool = true
     user_agent: string = "NEURX-Bot/1.0 (Research Crawler; +https://neurx.ai)"
 
-
     remove_scripts_styles: bool = true
     normalize_whitespace: bool = true
     extract_metadata: bool = true
     extract_images_info: bool = false
     extract_links: bool = false
-
 
     deduplicate_results: bool = true
     rerank_with_llm: bool = false
@@ -57,7 +46,6 @@ struct search_resultItem {
     rank_in_engine: int
     relevance_score?: float
     published_date?: string
-
 
     crawled_content?: crawled_content?
     crawl_status?: string
@@ -103,10 +91,8 @@ struct search_response {
     aggregated_from_engines: list<string>
     search_time_ms: float
 
-
     summary?: string
     key_findings: list<string>?
-
 
     stats: search_statistics
 }
@@ -121,8 +107,6 @@ struct search_statistics {
     cache_hit_count: int
 }
 
-
-
 interface SearchEngineInterface {
     name: string { get }
     search(query: string, config: web_search_config)
@@ -136,8 +120,6 @@ struct engine_search_result {
     has_more: bool
     error?: string
 }
-
-
 
 class GoogleSearchEngine implements SearchEngineInterface {
     name = "Google"
@@ -209,12 +191,9 @@ class GoogleSearchEngine implements SearchEngineInterface {
 
     _search_public(query: string, config: web_search_config, start_time: float) {
 
-
-
         try {
 
             ddg_result = this._duckduckgo_fallback(query, config)
-
 
             for item in ddg_result.items:
                 item.source_engine = this.name
@@ -242,7 +221,6 @@ class GoogleSearchEngine implements SearchEngineInterface {
 
         items: list<search_resultItem> = []
 
-
         if "Abstract" in data and not data["Abstract"].empty():
             items.append(search_resultItem{
                 url=data.get("AbstractURL", ""),
@@ -252,9 +230,6 @@ class GoogleSearchEngine implements SearchEngineInterface {
                 rank_in_engine=1
             })
 
-
-
-
         return engine_search_result{
             items=items,
             total_estimated=len(items),
@@ -263,8 +238,6 @@ class GoogleSearchEngine implements SearchEngineInterface {
         }
     }
 }
-
-
 
 class BingSearchEngine implements SearchEngineInterface {
     name = "Bing"
@@ -346,8 +319,6 @@ class BingSearchEngine implements SearchEngineInterface {
     }
 }
 
-
-
 class WebCrawler {
     config: web_search_config
     session: HTTPSession
@@ -387,9 +358,7 @@ class WebCrawler {
             if len(html_content) > this.config.max_content_length * 5:
                 html_content = html_content[:this.config.max_content_length * 5]
 
-
             extracted = this.content_extractor.extract(html_content, url)
-
 
             cleaned_text = this.html_cleaner.clean(extracted.text_content)
 
@@ -402,7 +371,6 @@ class WebCrawler {
                 extraction_timestamp=current_timestamp(),
                 word_count=len(cleaned_text.split())
             }
-
 
             if this.config.cache_enabled:
                 this.cache[url] = crawled
@@ -424,13 +392,11 @@ class WebCrawler {
     batch_crawl(urls: list<string>, max_concurrent: int = 3) {
         results: dict<string, tuple<crawled_content?, string?>> = {}
 
-
         semaphore = Semaphore(max_concurrent)
 
         async def crawl_single(url: string) {
             async with semaphore:
                 results[url] = await this.crawl(url)
-
 
         tasks = [crawl_single(url) for url in urls]
         run_concurrently(tasks)
@@ -444,8 +410,6 @@ class WebCrawler {
     }
 }
 
-
-
 class MainContentExtractor {
     config: web_search_config
 
@@ -456,15 +420,11 @@ class MainContentExtractor {
     extract(html: string, base_url: string) {
         soup = parse_html(html)
 
-
         self._remove_unwanted(soup)
-
 
         metadata = self._extract_metadata(soup, base_url)
 
-
         main_element = this._find_main_content(soup)
-
 
         if main_element != None:
             text_content, sections = this._extract_structured(main_element)
@@ -505,7 +465,6 @@ class MainContentExtractor {
             canonical_url=base_url
         }
 
-
         desc_tag = soup.find("meta", attrs={"name": "description"})
         if desc_tag != None:
             meta.description = desc_tag.get("content", "").strip()
@@ -519,7 +478,6 @@ class MainContentExtractor {
             date_tag = soup.find("meta", attrs={"name": "date"})
         if date_tag != None:
             meta.publish_date = date_tag.get("content", "")
-
 
         og_data: dict<string, string> = {}
         og_tags = soup.find_all("meta", property=re.compile(r'^og:'))
@@ -536,11 +494,9 @@ class MainContentExtractor {
             if "og:site_name" in og_data:
                 meta.site_name = og_data["og:site_name"]
 
-
         canonical = soup.find("link", rel="canonical")
         if canonical != None:
             meta.canonical_url = resolve_url(base_url, canonical.get("href", ""))
-
 
         html_tag = soup.find("html")
         if html_tag != None:
@@ -560,7 +516,6 @@ class MainContentExtractor {
             if text_len < 150:
                 continue
 
-
             tag = elem.name
             if tag == "article":
                 score += 25
@@ -574,7 +529,6 @@ class MainContentExtractor {
                 if kw in class_id_str.lower():
                     score += 15
 
-
             link_elements = elem.find_all("a")
             text = elem.get_text()
             if len(text) > 0 and len(link_elements) > 0:
@@ -584,9 +538,7 @@ class MainContentExtractor {
                 elif link_density > 0.6:
                     score -= 25
 
-
             score += math.log(max(text_len, 1))
-
 
             negative_keywords = ["comment", "sidebar", "footer", "widget", "ad-", "promo",
                                   "related", "sponsor", "newsletter", "signup", "subscribe"]
@@ -637,7 +589,6 @@ class MainContentExtractor {
                 sections.append(page_section{heading=null, level=0, content=f"> {quote_text}"})
                 content_parts.append(f"\n> {quote_text}\n\n")
 
-
             for child in node.children:
                 process_node(child, depth + 1)
 
@@ -654,8 +605,6 @@ class MainContentExtractor {
     }
 }
 
-
-
 class HTMLCleaner {
     config: web_search_config
 
@@ -671,7 +620,6 @@ class HTMLCleaner {
             text = regex.sub(r'<script[^>]*>.*?</script>', '', text, flags=regex.DOTALL)
             text = regex.sub(r'<style[^>]*>.*?</style>', '', text, flags=regex.DOTALL)
 
-
         text = regex.sub(r'<[^>]+>', ' ', text)
 
         if this.config.normalize_whitespace:
@@ -681,14 +629,11 @@ class HTMLCleaner {
             text = regex.sub(r'\n{3,}', '\n\n', text)
             text = text.strip()
 
-
         text = unescape(text)
 
         return text
     }
 }
-
-
 
 class WebSearchSystem {
     config: web_search_config
@@ -702,7 +647,6 @@ class WebSearchSystem {
         this.engines = map<string, SearchEngineInterface>{}
         this.llm_client = llm_client
 
-
         if "google" in this.config.search_engines:
             google = new GoogleSearchEngine(this.config.google_api_key, this.config.google_cx_id)
             this.engines["google"] = google
@@ -711,9 +655,7 @@ class WebSearchSystem {
             bing = new BingSearchEngine(this.config.bing_api_key)
             this.engines["bing"] = bing
 
-
         this.crawler = new WebCrawler(config=this.config)
-
 
         this.result_aggregator = new ResultAggregator(config=config)
     }
@@ -724,7 +666,6 @@ class WebSearchSystem {
 
         print(f"🔍 Searching: {query}")
 
-
         all_items: list<search_resultItem> = []
         engine_times: map<string, float> = {}
         used_engines: list<string> = []
@@ -733,7 +674,6 @@ class WebSearchSystem {
         for eng_name, engine in this.engines {
             tasks.append((eng_name, () => engine.search(query, this.config)))
         }
-
 
         engine_results = await run_tasks_concurrently(tasks, max_workers=len(this.engines))
 
@@ -751,7 +691,6 @@ class WebSearchSystem {
                 status_icon = "✅" if result.error == None else "❌"
                 print(f"   {status_icon} {eng_name}: {len(result.items)} results ({result.query_time_ms:.0f}ms)")
 
-
         if this.config.deduplicate_results and all_items.length > 0:
             before_dedup = len(all_items)
             all_items = this.result_aggregator.deduplicate(all_items)
@@ -759,14 +698,11 @@ class WebSearchSystem {
             if opts.verbose and deduped_count > 0:
                 print(f"   🗑️ Removed {deduped_count} duplicate results")
 
-
         if all_items.length > 0:
             all_items = this.result_aggregator.score_and_rank(all_items, query)
 
-
         if len(all_items) > this.config.total_max_results:
             all_items = all_items[:this.config.total_max_results]
-
 
         crawl_times: list<float> = []
         crawl_success = 0
@@ -781,7 +717,6 @@ class WebSearchSystem {
             crawl_start = current_time_millis()
             crawl_results = await this.crawler.batch_crawl(urls_to_crawl, max_concurrent=3)
             crawl_total_time = current_time_millis() - crawl_start
-
 
             for i, item in enumerate(all_items):
                 if item.url in crawl_results:
@@ -798,7 +733,6 @@ class WebSearchSystem {
                     item.rank_in_engine = i + 1
                     crawl_times.append(crawl_total_time / max(len(urls_to_crawl), 1))
 
-
         summary = None
         key_findings: list<string>? = None
 
@@ -810,7 +744,6 @@ class WebSearchSystem {
             summary_result = this._generate_summary_with_llm(query, context)
             summary = summary_result.summary
             key_findings = summary_result.key_findings
-
 
             if this.config.rerank_with_llm and summary_result.reranked_indices != None:
                 all_items = [all_items[i] for i in summary_result.reranked_indices!]
@@ -891,7 +824,6 @@ Also provide a comma-separated ranking of the most relevant result indices (0-ba
 """
 
         response = this.llm_client!.generate(prompt, temperature=0.3, max_tokens=600)
-
 
         summary_match = regex.search(r'## Summary\n(.*?)(?=##|\Z)', response.text, regex.DOTALL)
         findings_match = regex.search(r'## Key Findings\n(.*?)(=\Z)', response.text, regex.DOTALL)
@@ -988,8 +920,6 @@ struct search_options {
     corrected_query?: string
 }
 
-
-
 class ResultAggregator {
     config: web_search_config
 
@@ -1014,31 +944,25 @@ class ResultAggregator {
 
     score_and_rank(items: list<search_resultItem>, query: string) {
 
-
         scored_items: list<tuple<search_resultItem, float>> = []
         query_terms = set(query.to_lower().split_whitespace())
 
         for item in items {
             score = 0.0
 
-
             title_lower = item.title.to_lower()
             title_matches = sum(1 for term in query_terms if term in title_lower)
             score += title_matches * 15.0
-
 
             snippet_lower = (item.snippet ?? "").to_lower()
             snippet_matches = sum(1 for term in query_terms if term in snippet_lower)
             score += snippet_matches * 8.0
 
-
             score += (20.0 / (item.rank_in_engine + 1))
-
 
             domain = extract_domain(item.url)
             if this._is_high_quality_domain(domain):
                 score += 5.0
-
 
             if item.published_date != None:
                 days_old = days_since(item.published_date!)
@@ -1047,14 +971,12 @@ class ResultAggregator {
                 elif days_old < 180:
                     score += 5.0
 
-
             if len(item.url) > 120:
                 score -= 3.0
 
             item.relevance_score = round(score, 2)
             scored_items.append((item, score))
         }
-
 
         scored_items.sort_by_descending(x => x[1])
 
@@ -1082,15 +1004,12 @@ class ResultAggregator {
     }
 }
 
-
-
 function create_web_search_system(config?: web_search_config, llm_client?: any) {
     return new WebSearchSystem(config=config, llm_client=llm_client)
 }
 
 async function test_web_search_system() {
     print("🧪 Testing NEURX WEB Search System...")
-
 
     cfg = web_search_config(
         enable_crawling=false,
@@ -1099,11 +1018,9 @@ async function test_web_search_system() {
     )
     ws = create_web_search_system(cfg)
 
-
     print("  ✓ Test 1: System Initialization & Engine Setup")
     assert len(ws.engines) >= 1, "At least one search engine should be initialized"
     assert ws.crawler != None, "Crawler should be initialized"
-
 
     print("  ✓ Test 2: URL Normalization & Deduplication")
     agg = ws.result_aggregator
@@ -1116,17 +1033,14 @@ async function test_web_search_system() {
     unique = agg.deduplicate(test_items)
     assert len(unique) == 3, f"Dedup failed: expected 3, got {len(unique)}"
 
-
     print("  ✓ Test 3: Result Scoring & Ranking")
     scored = agg.score_and_rank(unique, "test query example")
     assert len(scored) == len(unique), "Scoring should preserve all items"
     assert scored[0].relevance_score != None, "Relevance scores should be assigned"
 
-
     for i in range(len(scored) - 1):
         assert scored[i].relevance_score! >= scored[i+1].relevance_score!, \
                f"Results should be sorted by score: {scored[i].relevance_score} >= {scored[i+1].relevance_score}"
-
 
     print("  ✓ Test 4: HTML Cleaning")
     cleaner = new HTMLCleaner(cfg)
@@ -1138,7 +1052,6 @@ async function test_web_search_system() {
     print("\n✅ All Web Search System Tests Passed!")
     return true
 }
-
 
 export {
     web_search_config, search_resultItem, crawled_content, page_metadata, page_section,

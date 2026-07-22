@@ -64,9 +64,6 @@ class TransformerPrimitiveBackend {
                              const TensorView& output, Stream stream) = 0;
 };
 
-
-
-
 Status execute_transformer(const inference::DeviceBatch& batch,
                            const Nxtrfmv2Model& model, PagedKvCache& cache,
                            TransformerPrimitiveBackend& backend);

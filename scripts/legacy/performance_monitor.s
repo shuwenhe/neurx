@@ -1,8 +1,5 @@
 
 
-
-
-
 package main
 
 import (
@@ -56,10 +53,6 @@ type alert struct {
     message                 string
 }
 
-
-
-
-
 func (monitor *performance_monitor) collect_metrics() performance_metrics {
     sample_idx := float64(len(monitor.metrics_history))
     perplexity := 100.0 / (float64(len(monitor.metrics_history)/100) + 1.0)
@@ -81,17 +74,12 @@ func (monitor *performance_monitor) collect_metrics() performance_metrics {
 
     monitor.metrics_history = append(monitor.metrics_history, metrics)
 
-
     if len(monitor.metrics_history) > monitor.config.metrics_window {
         monitor.metrics_history = monitor.metrics_history[1:]
     }
 
     return metrics
 }
-
-
-
-
 
 func (monitor *performance_monitor) assess_health() system_health_status {
     status := system_health_status{
@@ -108,7 +96,6 @@ func (monitor *performance_monitor) assess_health() system_health_status {
     }
 
     latest := monitor.metrics_history[len(monitor.metrics_history)-1]
-
 
     if latest.memory_usage_gb > 30.0 {
         status.memory_status = "warning"
@@ -149,10 +136,6 @@ func (monitor *performance_monitor) assess_health() system_health_status {
     return status
 }
 
-
-
-
-
 func (monitor *performance_monitor) check_alerts() []alert {
     alerts := []alert{}
 
@@ -161,7 +144,6 @@ func (monitor *performance_monitor) check_alerts() []alert {
     }
 
     latest := monitor.metrics_history[len(monitor.metrics_history)-1]
-
 
     if threshold, ok := monitor.config.alert_thresholds["throughput_min"]; ok {
         if latest.throughput < threshold {
@@ -177,7 +159,6 @@ func (monitor *performance_monitor) check_alerts() []alert {
         }
     }
 
-
     if threshold, ok := monitor.config.alert_thresholds["latency_max"]; ok {
         if latest.latency_ms > threshold {
             alerts = append(alerts, alert{
@@ -191,7 +172,6 @@ func (monitor *performance_monitor) check_alerts() []alert {
             })
         }
     }
-
 
     if threshold, ok := monitor.config.alert_thresholds["memory_max"]; ok {
         if latest.memory_usage_gb > threshold {
@@ -210,7 +190,6 @@ func (monitor *performance_monitor) check_alerts() []alert {
             })
         }
     }
-
 
     if threshold, ok := monitor.config.alert_thresholds["gpu_utilization_max"]; ok {
         if latest.gpu_utilization > threshold {
@@ -231,10 +210,6 @@ func (monitor *performance_monitor) check_alerts() []alert {
     return alerts
 }
 
-
-
-
-
 func (monitor *performance_monitor) generate_recommendations() {
     monitor.recommendations = []string{}
 
@@ -245,30 +220,25 @@ func (monitor *performance_monitor) generate_recommendations() {
     latest := monitor.metrics_history[len(monitor.metrics_history)-1]
     prev := monitor.metrics_history[len(monitor.metrics_history)-2]
 
-
     if latest.memory_usage_gb > prev.memory_usage_gb*1.1 {
         monitor.recommendations = append(monitor.recommendations,
             "Consider reducing batch size to lower memory usage")
     }
-
 
     if latest.latency_ms > prev.latency_ms*1.15 {
         monitor.recommendations = append(monitor.recommendations,
             "Latency increasing - consider enabling inference optimization")
     }
 
-
     if latest.gpu_utilization < 50.0 {
         monitor.recommendations = append(monitor.recommendations,
             "GPU underutilized - consider increasing batch size")
     }
 
-
     if latest.gpu_utilization > 90.0 {
         monitor.recommendations = append(monitor.recommendations,
             "GPU saturated - consider reducing batch size")
     }
-
 
     if len(monitor.metrics_history) > 10 {
         recent_ppls := []float64{}
@@ -283,10 +253,6 @@ func (monitor *performance_monitor) generate_recommendations() {
         }
     }
 }
-
-
-
-
 
 func (monitor *performance_monitor) print_dashboard() {
     if len(monitor.metrics_history) == 0 {
@@ -350,10 +316,6 @@ func (monitor *performance_monitor) snapshot_summary() string {
         len(health.alerts),
     )
 }
-
-
-
-
 
 func NewPerformanceMonitor() *performance_monitor {
     return &performance_monitor{

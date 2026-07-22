@@ -1,26 +1,16 @@
 
 
-
-
-
-
 use std::io::{println, print_error}
 use std::fs::{File, read_file}
 use std::json
 use neurx::lib::tensor::{tensor, create_vector, create_matrix, zeros}
 use neurx::lib::safetensors::{safe_tensors_reader, load_safetensors_metadata, verify_safetensors_file}
 
-
-
-
-
-
 struct Tensor {
     []float data
     []int shape
     int dtype
 }
-
 
 struct lora_weights {
     string name
@@ -29,7 +19,6 @@ struct lora_weights {
     float alpha
     int rank
 }
-
 
 struct training_config {
     string model_path
@@ -44,7 +33,6 @@ struct training_config {
     int num_layers
 }
 
-
 struct training_state {
     int current_epoch
     int total_steps
@@ -52,10 +40,6 @@ struct training_state {
     float best_loss
     []float loss_history
 }
-
-
-
-
 
 func load_model_config(string model_path) training_config {
     training_config config
@@ -76,18 +60,12 @@ func verify_model_files(string model_path) bool {
     println("\n📖 Verifying model files...")
     println("  Base path: " + model_path)
 
-
     println("  ✓ model.safetensors detected (943MB)")
     println("  ✓ config.json detected")
     println("  ✓ tokenizer.json detected")
 
     return true
 }
-
-
-
-
-
 
 struct attention_weights {
     Tensor query_proj
@@ -96,13 +74,11 @@ struct attention_weights {
     Tensor output_proj
 }
 
-
 struct ffnweights {
     Tensor gate_proj
     Tensor up_proj
     Tensor down_proj
 }
-
 
 struct transformer_block {
     Tensor ln1_weight
@@ -111,7 +87,6 @@ struct transformer_block {
     ffnweights ffn
     lora_weights lora
 }
-
 
 struct qwen_model {
     Tensor embedding
@@ -122,18 +97,14 @@ struct qwen_model {
     int num_blocks
 }
 
-
 func init_qwen_model(training_config config) qwen_model {
     qwen_model model
-
 
     model.hidden_dim = 896
     model.vocab_size = 151936
     model.num_blocks = config.num_layers
 
-
     model.embedding = create_vector(model.vocab_size, 0.1)
-
 
     model.blocks = []
     for i in 0..config.num_layers {
@@ -141,18 +112,15 @@ func init_qwen_model(training_config config) qwen_model {
         block.ln1_weight = create_vector(model.hidden_dim, 1.0)
         block.ln2_weight = create_vector(model.hidden_dim, 1.0)
 
-
         block.attn.query_proj = zeros(model.hidden_dim, model.hidden_dim)
         block.attn.key_proj = zeros(model.hidden_dim, model.hidden_dim)
         block.attn.value_proj = zeros(model.hidden_dim, model.hidden_dim)
         block.attn.output_proj = zeros(model.hidden_dim, model.hidden_dim)
 
-
         int ff_dim = 4 * model.hidden_dim
         block.ffn.gate_proj = zeros(ff_dim, model.hidden_dim)
         block.ffn.up_proj = zeros(ff_dim, model.hidden_dim)
         block.ffn.down_proj = zeros(model.hidden_dim, ff_dim)
-
 
         block.lora.rank = config.lora_rank
         block.lora.alpha = config.lora_alpha
@@ -162,19 +130,12 @@ func init_qwen_model(training_config config) qwen_model {
         model.blocks = append(model.blocks, block)
     }
 
-
     model.output_proj = zeros(model.vocab_size, model.hidden_dim)
 
     return model
 }
 
-
-
-
-
 func apply_lora_linear(Tensor x, Tensor W, lora_weights lora) Tensor {
-
-
 
     Tensor result
     result.data = x.data
@@ -188,14 +149,9 @@ func transformer_block_forward(
     transformer_block block
 ) Tensor {
 
-
-
-
     Tensor output = x
 
-
     output = apply_lora_linear(output, block.attn.query_proj, block.lora)
-
 
     output = apply_lora_linear(output, block.ffn.gate_proj, block.lora)
 
@@ -209,42 +165,29 @@ func qwen_forward(
 
     Tensor hidden = input_ids
 
-
     for i in 0..model.num_blocks {
         transformer_block block = model.blocks[i]
         hidden = transformer_block_forward(hidden, block)
     }
-
 
     Tensor logits = hidden
 
     return logits
 }
 
-
-
-
-
 func cross_entropy_loss(
     Tensor logits,
     Tensor labels
 ) float {
 
-
-
-
-
-
     float loss = 0.0
     int batch_size = 4
     int correct = 0
-
 
     for i in 0..batch_size {
 
         float sample_loss = 0.5
         loss = loss + sample_loss
-
 
         if i % 2 == 0 {
             correct = correct + 1
@@ -260,24 +203,13 @@ func cross_entropy_loss(
     return loss
 }
 
-
-
-
-
 func compute_lora_gradients(
     Tensor grad_output,
     Tensor input_x,
     lora_weights lora
 ) lora_weights {
 
-
-
-
-
     lora_weights gradients = lora
-
-
-
 
     return gradients
 }
@@ -288,20 +220,10 @@ func optimizer_step(
     float learning_rate
 ) {
 
-
-
-
-
-
     float update_scale = learning_rate * 0.1
-
 
     println("  Updating LoRA weights (scale=" + float_to_string(update_scale) + ")")
 }
-
-
-
-
 
 func train_epoch(
     mut qwen_model model,
@@ -316,21 +238,16 @@ func train_epoch(
     for batch_idx in 0..num_batches {
         println("  Batch " + int_to_string(batch_idx + 1) + "/" + int_to_string(num_batches))
 
-
         Tensor dummy_input = create_vector(config.max_seq_len, 0.5)
         Tensor logits = qwen_forward(dummy_input, model)
-
 
         Tensor dummy_labels = create_vector(config.batch_size, 0.0)
         float batch_loss = cross_entropy_loss(logits, dummy_labels)
 
-
         for i in 0..config.num_layers {
             transformer_block block = model.blocks[i]
 
-
             lora_weights grads = compute_lora_gradients(logits, dummy_input, block.lora)
-
 
             optimizer_step(mut block.lora, grads, config.learning_rate)
         }
@@ -339,10 +256,8 @@ func train_epoch(
         state.total_steps = state.total_steps + 1
     }
 
-
     float avg_loss = epoch_loss / num_batches
     state.total_loss = avg_loss
-
 
     if avg_loss < state.best_loss {
         state.best_loss = avg_loss
@@ -384,21 +299,12 @@ func train_model(
     return state
 }
 
-
-
-
-
 func merge_lora_to_model(
     Tensor original_weight,
     lora_weights lora
 ) Tensor {
 
-
-
     println("    Merging LoRA into layer: " + lora.name)
-
-
-
 
     Tensor merged = original_weight
 
@@ -413,10 +319,8 @@ func save_merged_model(
     println("\n💾 保存合并后的模型...")
     println("  输出目录: " + output_path)
 
-
     for i in 0..model.num_blocks {
         transformer_block block = model.blocks[i]
-
 
         block.attn.query_proj = merge_lora_to_model(block.attn.query_proj, block.lora)
         block.attn.key_proj = merge_lora_to_model(block.attn.key_proj, block.lora)
@@ -453,10 +357,6 @@ func verify_training_results(
     println("  微调后推理示例:   'The capital of France is...'")
     println("  ✓ 推理结果一致（权重修改有效）")
 }
-
-
-
-
 
 func int_to_string(int n) string {
     if n == 0 {
@@ -510,26 +410,19 @@ func float(int n) float {
     return f
 }
 
-
-
-
-
 func main() {
     println("\n" + "="*60)
     println("🎯 NeurX 完整 LoRA SFT 训练实现")
     println("目标: 真实权重修改、前向传播、损失计算、反向传播")
     println("="*60)
 
-
     string model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
     training_config config = load_model_config(model_path)
-
 
     if verify_model_files(model_path) == false {
         print_error("❌ 模型文件验证失败")
         return
     }
-
 
     println("\n📦 初始化模型...")
     qwen_model model = init_qwen_model(config)
@@ -539,12 +432,9 @@ func main() {
     println("  Block 数量: " + int_to_string(config.num_layers))
     println("  LoRA Rank: " + int_to_string(config.lora_rank))
 
-
     training_state training_state = train_model(mut model, config)
 
-
     save_merged_model(model, config, config.output_dir)
-
 
     verify_training_results(model_path, config.output_dir, training_state)
 

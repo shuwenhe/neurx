@@ -1,8 +1,5 @@
 
 
-
-
-
 package main
 
 import (
@@ -67,10 +64,6 @@ type rate_limiter struct {
     rejected_requests   int64
 }
 
-
-
-
-
 func (server *apiserver) initialize() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  REST API Service                                     ║")
@@ -112,10 +105,6 @@ func (server *apiserver) register_routes() {
     }
     fmt.Println()
 }
-
-
-
-
 
 func (server *apiserver) handle_health_check(req apirequest) apiresponse {
     response := apiresponse{
@@ -161,7 +150,6 @@ func (server *apiserver) handle_completion(req apirequest) apiresponse {
     prompt := req.body["prompt"]
     max_tokens := 100
 
-
     generated := fmt.Sprintf("%s [Generated %d tokens]", prompt, max_tokens)
 
     response := apiresponse{
@@ -201,7 +189,6 @@ func (server *apiserver) handle_chat_completion(req apirequest) apiresponse {
 func (server *apiserver) handle_embeddings(req apirequest) apiresponse {
     text := req.body["text"]
 
-
     embedding := "[0.1, 0.2, 0.3, ...]"
 
     response := apiresponse{
@@ -219,10 +206,6 @@ func (server *apiserver) handle_embeddings(req apirequest) apiresponse {
     }
     return response
 }
-
-
-
-
 
 func (server *apiserver) route_request(req apirequest) apiresponse {
     switch req.endpoint {
@@ -255,10 +238,6 @@ func (server *apiserver) process_request(req apirequest) apiresponse {
 
     return response
 }
-
-
-
-
 
 func (queue *request_queue) enqueue(req apirequest) bool {
     if len(queue.pending_requests) >= queue.queue_size {
@@ -300,10 +279,6 @@ func (queue *request_queue) process_queue(server *apiserver) {
     }
 }
 
-
-
-
-
 func (limiter *rate_limiter) allow_request() bool {
     if limiter.current_concurrent >= limiter.max_concurrent {
         limiter.rejected_requests++
@@ -329,10 +304,6 @@ func (limiter *rate_limiter) report_stats() {
     fmt.Printf("  Rejected: %d\n", limiter.rejected_requests)
 }
 
-
-
-
-
 func (server *apiserver) start() {
     server.initialize()
     server.register_models()
@@ -350,7 +321,6 @@ func (server *apiserver) handle_incoming_requests() {
     fmt.Println("┌────────────────────────────────────────┐")
     fmt.Println("│  Processing Incoming Requests          │")
     fmt.Println("└────────────────────────────────────────┘\n")
-
 
     requests := []apirequest{
         {
@@ -408,10 +378,6 @@ func (server *apiserver) print_stats() {
     fmt.Printf("Models: %d\n", len(server.models))
     fmt.Printf("Max Connections: %d\n", server.max_connections)
 }
-
-
-
-
 
 func NewAPIServer(host string, port int) *apiserver {
     return &apiserver{

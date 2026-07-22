@@ -1,8 +1,5 @@
 package neurx.model.transformer.layer_norm
 
-
-
-
 struct layer_norm_config {
     int hidden_dim
     float epsilon
@@ -33,10 +30,6 @@ struct rms_norm_output {
     []float normalized
     []float variance
 }
-
-
-
-
 
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
@@ -71,10 +64,6 @@ func sqrt_approx(float x) float {
     y
 }
 
-
-
-
-
 func new_layer_norm(layer_norm_config cfg) layer_norm_state {
     layer_norm_state {
         hidden_dim: cfg.hidden_dim,
@@ -104,7 +93,6 @@ func layer_normalize(
             int base_idx = (b * seq_len + s) * hidden_dim
             int stat_idx = b * seq_len + s
 
-
             float mean = 0.0
             int d = 0
             while d < hidden_dim {
@@ -112,7 +100,6 @@ func layer_normalize(
                 d = d + 1
             }
             mean = mean / (hidden_dim * 1.0)
-
 
             float variance = 0.0
             d = 0
@@ -125,7 +112,6 @@ func layer_normalize(
 
             mean_out[stat_idx] = mean
             var_out[stat_idx] = variance
-
 
             float std_dev = sqrt_approx(variance + ln.epsilon)
             d = 0
@@ -177,7 +163,6 @@ func layer_norm_backward(
             float var_val = variance[stat_idx]
             float std_dev = sqrt_approx(var_val + ln.epsilon)
 
-
             int d = 0
             while d < hidden_dim {
                 float normalized = (input[base_idx + d] - mean_val) / std_dev
@@ -189,7 +174,6 @@ func layer_norm_backward(
 
                 d = d + 1
             }
-
 
             float sum1 = 0.0
             float sum2 = 0.0
@@ -221,10 +205,6 @@ func layer_norm_backward(
     result
 }
 
-
-
-
-
 func new_rms_norm(layer_norm_config cfg) rms_norm_state {
     rms_norm_state {
         hidden_dim: cfg.hidden_dim,
@@ -251,7 +231,6 @@ func rms_normalize(
             int base_idx = (b * seq_len + s) * hidden_dim
             int stat_idx = b * seq_len + s
 
-
             float rms = 0.0
             int d = 0
             while d < hidden_dim {
@@ -262,7 +241,6 @@ func rms_normalize(
             rms = sqrt_approx(rms + rn.epsilon)
 
             var_out[stat_idx] = rms
-
 
             d = 0
             while d < hidden_dim {
@@ -304,14 +282,12 @@ func rms_norm_backward(
 
             float rms_val = variance[stat_idx]
 
-
             int d = 0
             while d < hidden_dim {
                 float normalized = input[base_idx + d] / rms_val
                 grad_gamma[d] = grad_gamma[d] + grad_output[base_idx + d] * normalized
                 d = d + 1
             }
-
 
             float sum_val = 0.0
             d = 0

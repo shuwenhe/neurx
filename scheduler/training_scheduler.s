@@ -12,7 +12,6 @@ struct lr_scheduler {
     string kind
 }
 
-
 func new_lr_scheduler(float lr) lr_scheduler {
     lr_scheduler {
         lr:           lr,
@@ -24,7 +23,6 @@ func new_lr_scheduler(float lr) lr_scheduler {
         kind:         "constant",
     }
 }
-
 
 func new_named_lr_scheduler(float base_lr, float min_lr, int warmup_steps, int max_steps, string kind) lr_scheduler {
     lr_scheduler {

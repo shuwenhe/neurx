@@ -7,10 +7,6 @@ import (
     "strconv"
 )
 
-
-
-
-
 type model_config1_t struct {
     model_name: string
     num_params: int
@@ -59,10 +55,6 @@ type training_optimization1_t struct {
     max_grad_norm: float
 }
 
-
-
-
-
 func create_1t_config(): model_config1_t {
     config := model_config1_t{
         model_name: "neurx-1t",
@@ -84,10 +76,6 @@ func create_1t_config(): model_config1_t {
     return config
 }
 
-
-
-
-
 func create_distributed_config_1t(): distributed_config1_t {
     config := distributed_config1_t{
         tensor_parallel_size: 64,
@@ -100,7 +88,6 @@ func create_distributed_config_1t(): distributed_config1_t {
     return config
 }
 
-
 func calculate_parallelism_dims(total_gpus: int): (int, int, int) {
 
     tp_size := 64
@@ -109,28 +96,18 @@ func calculate_parallelism_dims(total_gpus: int): (int, int, int) {
     return tp_size, pp_size, dp_size
 }
 
-
-
-
-
 func estimate_memory_1t(config: model_config1_t, dist_config: distributed_config1_t,
                        micro_batch_size: int): memory_analysis1_t {
 
     num_params := float(config.num_params)
 
-
     weights_bytes := num_params * 2.0
     weights_tb := weights_bytes / (1024.0 * 1024.0 * 1024.0 * 1024.0)
 
-
     gradients_tb := weights_tb
-
-
 
     dp_size := float(dist_config.data_parallel_size)
     optimizer_states_tb := weights_tb * 2.0 / dp_size
-
-
 
     bytes_per_token := float(config.hidden_dim) * 2.0 * 2.0
     seq_len := float(config.max_seq_len)
@@ -140,23 +117,19 @@ func estimate_memory_1t(config: model_config1_t, dist_config: distributed_config
     activation_gb := activation_bytes / (1024.0 * 1024.0 * 1024.0)
     activation_tb := activation_gb / 1024.0
 
-
     if config.activation_checkpointing {
         activation_tb = activation_tb * 0.3
     }
 
-
     tp_size := float(dist_config.tensor_parallel_size)
     weights_per_gpu_tb := weights_tb / tp_size
     gradients_per_gpu_tb := gradients_tb / tp_size
-
 
     optimizer_per_gpu_tb := optimizer_states_tb / tp_size
 
     total_per_gpu_tb := weights_per_gpu_tb + gradients_per_gpu_tb +
                         optimizer_per_gpu_tb + activation_tb
     total_per_gpu_gb := total_per_gpu_tb * 1024.0
-
 
     total_system_tb := weights_tb + gradients_tb + (weights_tb * 2.0)
 
@@ -169,10 +142,6 @@ func estimate_memory_1t(config: model_config1_t, dist_config: distributed_config
         total_system_tb: total_system_tb,
     }
 }
-
-
-
-
 
 func create_training_config_1t(): training_optimization1_t {
     config := training_optimization1_t{
@@ -189,10 +158,6 @@ func create_training_config_1t(): training_optimization1_t {
     return config
 }
 
-
-
-
-
 type hardware_requirements struct {
     num_h100_gpus: int
     total_memory_tb: float
@@ -206,18 +171,9 @@ func calculate_hardware_requirements(): hardware_requirements {
 
     num_gpus := 1024
 
-
-
     total_memory_tb := 80.0 * float(num_gpus) / 1024.0
 
-
-
-
-
-
-
     training_days := 4
-
 
     cost_per_gpu_hour := 2.48
     total_hours := float(training_days) * 24.0
@@ -234,10 +190,6 @@ func calculate_hardware_requirements(): hardware_requirements {
 
     return req
 }
-
-
-
-
 
 type training_pipeline1_t struct {
     config: model_config1_t
@@ -323,10 +275,6 @@ func (p *training_pipeline1_t) print_summary() {
     fmt.Println("\n" + "="*80)
 }
 
-
-
-
-
 func (p *training_pipeline1_t) initialize_distributed_environment() {
     fmt.Println("\n[INIT] Initializing distributed training environment...")
     fmt.Printf("  Setting up %d GPU processes\n", p.dist_config.total_gpus)
@@ -363,26 +311,18 @@ func (p *training_pipeline1_t) run_training() {
     fmt.Println("  Status: ✓ Training initiated (requires 1024 GPUs)")
 }
 
-
-
-
-
 func main() {
     fmt.Println("🎯 NeurX 1T Model Training Framework")
     fmt.Println("Industrial-Grade Large Language Model")
 
-
     pipeline := create_training_pipeline_1t()
 
-
     pipeline.print_summary()
-
 
     pipeline.initialize_distributed_environment()
     pipeline.initialize_model()
     pipeline.setup_optimization()
     pipeline.run_training()
-
 
     fmt.Println("\n💾 Configuration saved for deployment")
     fmt.Println("Command: s run scripts/legacy/model_trainer_1t.s")

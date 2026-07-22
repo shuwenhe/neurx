@@ -4,8 +4,6 @@
 #include <dlfcn.h>
 #include <cstddef>
 
-
-
 using ncclResult_t = int;
 using ncclComm_t = void*;
 using ncclDataType_t = int;

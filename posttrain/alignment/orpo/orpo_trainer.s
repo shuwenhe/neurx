@@ -3,28 +3,15 @@ package neurx.posttrain.alignment.orpo_trainer
 use neurx.distributed.collective
 use neurx.amp.scaler
 
-
-
-
-
-
-
-
-
-
-
-
 struct orpo_config {
 
     int seq_len
     int hidden_size
     int vocab_size
 
-
     float learning_rate
     float beta
     float gamma
-
 
     int batch_size
     int num_epochs
@@ -32,15 +19,12 @@ struct orpo_config {
     float weight_decay
     float max_grad_norm
 
-
     bool use_reference_model
     float kl_penalty_coef
-
 
     int global_rank
     int world_size
     int dp_degree
-
 
     bool use_mixed_precision
     int save_interval
@@ -51,22 +35,18 @@ struct orpo_state {
 
     orpo_config config
 
-
     []float policy_weights
     []float policy_biases
     []float reference_weights
     []float reference_biases
-
 
     []float policy_m
     []float policy_v
     []float reference_m
     []float reference_v
 
-
     int training_step
     int epoch
-
 
     float avg_loss
     float avg_chosen_logodds
@@ -107,10 +87,6 @@ struct orpo_trajectory {
     float total_kl
 }
 
-
-
-
-
 func create_orpo_state(orpo_config cfg) orpo_state {
     int param_count = cfg.seq_len * cfg.hidden_size
 
@@ -139,12 +115,6 @@ func create_orpo_state(orpo_config cfg) orpo_state {
     }
 }
 
-
-
-
-
-
-
 func compute_log_odds([]float log_probs) float {
     float log_odds = 0.0
     int i = 0
@@ -155,7 +125,6 @@ func compute_log_odds([]float log_probs) float {
     log_odds
 }
 
-
 func logits_to_log_probs([]float logits) []float {
     []float log_probs = []float{cap: 4}
     log_probs[0] = 0.0
@@ -164,9 +133,6 @@ func logits_to_log_probs([]float logits) []float {
     log_probs[3] = -0.3
     log_probs
 }
-
-
-
 
 func compute_orpo_loss(
     float log_odds_chosen,
@@ -178,28 +144,21 @@ func compute_orpo_loss(
 
     float margin = log_odds_chosen - log_odds_rejected
 
-
-
     float margin_loss = -log_sigmoid_approx_ex(cfg.gamma * margin)
-
-
 
     float kl_div = (log_odds_chosen - log_odds_ref_chosen) +
                    (log_odds_ref_rejected - log_odds_rejected)
-
 
     float total_loss = margin_loss + cfg.kl_penalty_coef * kl_div
 
     total_loss
 }
 
-
 func sigmoid_approx_ex(float x) float {
     if x > 20.0 { return 1.0 }
     if x < -20.0 { return 0.0 }
     1.0 / (1.0 + exp_approx_ex(-x))
 }
-
 
 func log_sigmoid_approx_ex(float x) float {
     if x > 0.0 {
@@ -208,7 +167,6 @@ func log_sigmoid_approx_ex(float x) float {
         return x - log_approx_ex(1.0 + exp_approx_ex(x))
     }
 }
-
 
 func exp_approx_ex(float x) float {
     if x > 20.0 { return 485165195.0 }
@@ -224,11 +182,9 @@ func exp_approx_ex(float x) float {
     result
 }
 
-
 func log_approx_ex(float x) float {
     if x <= 0.0 { return -100.0 }
     if x == 1.0 { return 0.0 }
-
 
     float y = (x - 1.0) / (x + 1.0)
     float y2 = y * y
@@ -245,11 +201,6 @@ func log_approx_ex(float x) float {
     2.0 * result
 }
 
-
-
-
-
-
 func compute_orpo_batch_loss(
     int batch_size,
     orpo_state state
@@ -264,10 +215,8 @@ func compute_orpo_batch_loss(
         float log_odds_chosen = 0.5 + (i as float) * 0.01
         float log_odds_rejected = 0.3 + (i as float) * 0.01
 
-
         float log_odds_ref_chosen = log_odds_chosen * 0.95
         float log_odds_ref_rejected = log_odds_rejected * 0.95
-
 
         float loss = compute_orpo_loss(
             log_odds_chosen,
@@ -277,12 +226,10 @@ func compute_orpo_batch_loss(
             cfg
         )
 
-
         total_loss = total_loss + loss * pair_confidence
 
         i = i + 1
     }
-
 
     if batch_size > 0 {
         total_loss = total_loss / (batch_size as float)
@@ -290,7 +237,6 @@ func compute_orpo_batch_loss(
 
     total_loss
 }
-
 
 func orpo_training_step(
     orpo_state state,
@@ -302,18 +248,12 @@ func orpo_training_step(
 ) orpo_state {
     orpo_config cfg = state.config
 
-
     float loss = compute_orpo_batch_loss(batch_size, state)
-
-
-
 
     float t = (state.training_step + 1) as float
 
-
     float bias_correction1 = 1.0 - exp_approx_ex(-0.1 * t)
     float bias_correction2 = 1.0 - exp_approx_ex(-0.001 * t)
-
 
     state.avg_loss = (state.avg_loss * (state.num_batches as float) + loss) /
                      ((state.num_batches + 1) as float)
@@ -323,10 +263,6 @@ func orpo_training_step(
 
     state
 }
-
-
-
-
 
 func start_orpo_training(
     orpo_config cfg,
@@ -342,7 +278,6 @@ func start_orpo_training(
     print("  Learning rate: " + float_to_string_ex(cfg.learning_rate))
     print("")
 
-
     int epoch = 0
     while epoch < cfg.num_epochs {
         state.epoch = epoch
@@ -350,7 +285,6 @@ func start_orpo_training(
 
         print("[ORPO Epoch " + int_to_string_ex(epoch + 1) + "/" +
               int_to_string_ex(cfg.num_epochs) + "]")
-
 
         int batch_idx = 0
         while batch_idx * cfg.batch_size < len(trajectories) {
@@ -376,7 +310,6 @@ func start_orpo_training(
                 traj_idx = traj_idx + 1
             }
 
-
             state = orpo_training_step(
                 state,
                 batch.size,
@@ -385,7 +318,6 @@ func start_orpo_training(
                 0.999,
                 0.00000001
             )
-
 
             if mod_int_ex(batch_idx + 1, 10) == 0 {
                 print("  Batch " + int_to_string_ex(batch_idx + 1) +
@@ -408,10 +340,6 @@ func start_orpo_training(
 
     state
 }
-
-
-
-
 
 func float_to_string_ex(float f) string {
     string(int(f * 10000.0) / 10000.0)
@@ -438,10 +366,6 @@ func mod_int_ex(int a, int b) int {
     }
     value
 }
-
-
-
-
 
 func synchronize_gradients(orpo_state state) orpo_state {
 

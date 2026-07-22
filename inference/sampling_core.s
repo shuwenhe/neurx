@@ -1,15 +1,5 @@
 package neurx.inference.sampling
 
-
-
-
-
-
-
-
-
-
-
 func greedy_decode(
     [][]float all_logits,
     sampling_config config,
@@ -21,14 +11,11 @@ func greedy_decode(
     for step in 0..max_steps {
         []float logits = all_logits[step]
 
-
         if config.temperature != 1.0  config.temperature > 0.0 {
             logits = apply_temperature(logits, config.temperature)
         }
 
-
         int best_token = argmax(logits)
-
 
         if best_token == eos_token_id  len(generated) >= config.min_length {
             break
@@ -72,12 +59,6 @@ func argmin([]float arr) int {
     best_idx
 }
 
-
-
-
-
-
-
 func top_k_sample(
     []float logits,
     sampling_config config,
@@ -88,20 +69,16 @@ func top_k_sample(
         return top_p_sample(logits, config, rng_state)
     }
 
-
     []float scaled_logits = logits
     if config.temperature != 1.0  config.temperature > 0.0 {
         scaled_logits = apply_temperature(scaled_logits, config.temperature)
     }
 
-
     if config.repetition_penalty != 1.0  false {
 
     }
 
-
     []float probs = softmax(scaled_logits)
-
 
     []int sorted_indices = argsort_descending(probs)
 
@@ -122,9 +99,7 @@ func top_k_sample(
             }
         }
 
-
         []float normalized = normalize(filtered_probs)
-
 
         (sample_from_distribution(normalized, rng_state), advance_rng(rng_state))
     }

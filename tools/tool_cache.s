@@ -1,14 +1,5 @@
 package neurx.tool.tool_cache
 
-
-
-
-
-
-
-
-
-
 struct tool_cache_entry {
     string key
     string value
@@ -30,8 +21,6 @@ struct tool_cache_result {
     bool   hit
     string value
 }
-
-
 
 func new_tool_cache(int capacity) tool_cache_state {
     int cap_val = capacity
@@ -64,13 +53,9 @@ func new_tool_cache_default() tool_cache_state {
     new_tool_cache(64)
 }
 
-
-
 func tool_cache_make_key(string tool_name, string input) string {
     tool_name + "\x00" + input
 }
-
-
 
 func tool_cache_text_eq(string a, string b) bool {
     int la = len(a)
@@ -139,11 +124,8 @@ func tool_cache_record_miss(tool_cache_state state) tool_cache_state {
     }
 }
 
-
-
 func tool_cache_put(tool_cache_state state, string tool_name, string input, string value) tool_cache_state {
     string key = tool_cache_make_key(tool_name, input)
-
 
     int found_idx = -1
     int i = 0
@@ -179,7 +161,6 @@ func tool_cache_put(tool_cache_state state, string tool_name, string input, stri
             total_evictions: state.total_evictions,
         }
     }
-
 
     int slot = -1
     int k = 0
@@ -227,9 +208,6 @@ func tool_cache_put(tool_cache_state state, string tool_name, string input, stri
     }
 }
 
-
-
-
 func tool_cache_invalidate_tool(tool_cache_state state, string tool_name) tool_cache_state {
     string prefix = tool_name + "\x00"
     int prefix_len = len(prefix)
@@ -275,7 +253,6 @@ func tool_cache_invalidate_tool(tool_cache_state state, string tool_name) tool_c
     }
 }
 
-
 func tool_cache_invalidate_path(tool_cache_state state, string path) tool_cache_state {
     tool_cache_state s = tool_cache_invalidate_tool(
         tool_cache_invalidate_tool(state, "read"),
@@ -287,8 +264,6 @@ func tool_cache_invalidate_path(tool_cache_state state, string path) tool_cache_
 func tool_cache_clear(tool_cache_state state) tool_cache_state {
     new_tool_cache(state.capacity)
 }
-
-
 
 func tool_cache_hit_rate_pct(tool_cache_state state) int {
     int total = state.total_hits + state.total_misses

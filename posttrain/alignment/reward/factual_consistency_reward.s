@@ -1,27 +1,5 @@
 package neurx.posttrain.reward.factual_consistency_reward
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct fact {
     string subject
     string predicate
@@ -32,7 +10,6 @@ struct fact {
     string source
 }
 
-
 struct fact_pair {
     fact reference_fact
     fact generated_fact
@@ -41,14 +18,12 @@ struct fact_pair {
     string divergence_type
 }
 
-
 struct factual_content {
     []fact facts
     []string key_entities
     []string temporal_refs
     int total_facts
 }
-
 
 struct consistency_report {
     float consistency_score
@@ -68,36 +43,26 @@ struct consistency_report {
     int inconsistent_facts
 }
 
-
 struct factual_config {
 
     int max_facts_per_doc
     bool extract_temporal
     bool extract_location
 
-
     float similarity_threshold
     float confidence_threshold
-
 
     bool detect_hallucinations
     float hallucination_threshold
 
-
     bool require_citations
     bool check_citation_accuracy
-
 
     float accuracy_weight
     float hallucination_weight
     float coverage_weight
     float citation_weight
 }
-
-
-
-
-
 
 func extract_facts(string text, factual_config config) factual_content {
 
@@ -107,22 +72,16 @@ func extract_facts(string text, factual_config config) factual_content {
     content.temporal_refs = []string{}
     content.total_facts = 0
 
-
-
-
-
     []string sentences = split_sentences(text)
 
     int i = 0
     while i < len(sentences) && content.total_facts < config.max_facts_per_doc {
         string sent = sentences[i]
 
-
         if len(sent) < 10 {
             i = i + 1
             continue
         }
-
 
         fact f = extract_fact_from_sentence(sent)
 
@@ -130,10 +89,8 @@ func extract_facts(string text, factual_config config) factual_content {
 
             f.confidence = compute_fact_confidence(sent)
 
-
             content.facts = append_fact(content.facts, f)
             content.total_facts = content.total_facts + 1
-
 
             if config.extract_temporal {
                 string temp = extract_temporal_info(sent)
@@ -143,14 +100,12 @@ func extract_facts(string text, factual_config config) factual_content {
                 }
             }
 
-
             if config.extract_location {
                 string loc = extract_location_info(sent)
                 if len(loc) > 0 {
                     f.location = loc
                 }
             }
-
 
             if !contains_string(content.key_entities, f.subject) {
                 content.key_entities = append_string(content.key_entities, f.subject)
@@ -166,10 +121,8 @@ func extract_facts(string text, factual_config config) factual_content {
     content
 }
 
-
 func extract_fact_from_sentence(string sentence) fact {
     fact f
-
 
     int is_pos = find_substring(sentence, " is ")
     if is_pos > 0 {
@@ -178,8 +131,6 @@ func extract_fact_from_sentence(string sentence) fact {
         f.predicate = "is"
         return trim_fact(f)
     }
-
-
 
     []string words = split_words(sentence)
     if len(words) >= 3 {
@@ -191,26 +142,21 @@ func extract_fact_from_sentence(string sentence) fact {
     trim_fact(f)
 }
 
-
 func compute_fact_confidence(string sentence) float {
     float conf = 0.5
-
 
     int len_sent = len(sentence)
     if len_sent > 20 && len_sent < 200 {
         conf = conf + 0.2
     }
 
-
     if contains_digit(sentence) {
         conf = conf + 0.15
     }
 
-
     if contains_quantifier(sentence) {
         conf = conf + 0.1
     }
-
 
     if contains_uncertainty_words(sentence) {
         conf = conf - 0.2
@@ -221,7 +167,6 @@ func compute_fact_confidence(string sentence) float {
 
     conf
 }
-
 
 func extract_temporal_info(string sentence) string {
 
@@ -237,7 +182,6 @@ func extract_temporal_info(string sentence) string {
     ""
 }
 
-
 func extract_location_info(string sentence) string {
 
     if contains_substring(sentence, "China") {
@@ -251,11 +195,6 @@ func extract_location_info(string sentence) string {
     }
     ""
 }
-
-
-
-
-
 
 func verify_factual_consistency(
     factual_content reference_content,
@@ -274,11 +213,9 @@ func verify_factual_consistency(
     report.consistent_facts = 0
     report.inconsistent_facts = 0
 
-
     int i = 0
     while i < len(reference_content.facts) {
         fact ref_fact = reference_content.facts[i]
-
 
         fact_pair best_match = find_best_matching_fact(ref_fact, generated_content.facts, config)
 
@@ -295,12 +232,10 @@ func verify_factual_consistency(
         i = i + 1
     }
 
-
     if config.detect_hallucinations {
         i = 0
         while i < len(generated_content.facts) {
             fact gen_fact = generated_content.facts[i]
-
 
             bool found = false
             int j = 0
@@ -323,13 +258,11 @@ func verify_factual_consistency(
         }
     }
 
-
     float consistency_score = 0.0
     if report.total_reference_facts > 0 {
         consistency_score = float(report.consistent_facts) / float(report.total_reference_facts)
     }
     report.consistency_score = consistency_score
-
 
     float accuracy = 0.0
     if report.total_generated_facts > 0 {
@@ -337,13 +270,11 @@ func verify_factual_consistency(
     }
     report.factual_accuracy = accuracy
 
-
     float hallucination_rate = 0.0
     if report.total_generated_facts > 0 {
         hallucination_rate = float(len(report.hallucinated_facts)) / float(report.total_generated_facts)
     }
     report.hallucination_rate = hallucination_rate
-
 
     float coverage = 0.0
     if report.total_reference_facts > 0 {
@@ -353,7 +284,6 @@ func verify_factual_consistency(
 
     report
 }
-
 
 func find_best_matching_fact(
     fact reference,
@@ -385,17 +315,13 @@ func find_best_matching_fact(
     best_pair
 }
 
-
 func fact_similarity(fact f1, fact f2) float {
-
 
     float subject_sim = string_similarity(f1.subject, f2.subject)
     float predicate_sim = string_similarity(f1.predicate, f2.predicate)
     float object_sim = string_similarity(f1.obj, f2.obj)
 
-
     float similarity = subject_sim * 0.4 + predicate_sim * 0.3 + object_sim * 0.3
-
 
     if len(f1.temporal) > 0 && len(f2.temporal) > 0 {
         if string_equals(f1.temporal, f2.temporal) {
@@ -407,7 +333,6 @@ func fact_similarity(fact f1, fact f2) float {
     similarity
 }
 
-
 func string_similarity(string s1, string s2) float {
     if len(s1) == 0 && len(s2) == 0 {
         return 1.0
@@ -416,16 +341,13 @@ func string_similarity(string s1, string s2) float {
         return 0.0
     }
 
-
     if string_equals(s1, s2) {
         return 1.0
     }
 
-
     if contains_substring(s1, s2) || contains_substring(s2, s1) {
         return 0.8
     }
-
 
     int dist = edit_distance(s1, s2)
     int max_len = len(s1)
@@ -438,21 +360,16 @@ func string_similarity(string s1, string s2) float {
     sim
 }
 
-
 func is_likely_hallucination(fact f, factual_content reference, factual_config config) bool {
-
-
 
     if f.confidence < 0.3 {
         return true
     }
 
-
     bool is_rare = is_rare_combination(f, reference)
     if is_rare && f.confidence < 0.7 {
         return true
     }
-
 
     if len(f.temporal) > 0 && len(reference.temporal_refs) > 0 {
         if !temporal_is_compatible(f.temporal, reference.temporal_refs) {
@@ -462,7 +379,6 @@ func is_likely_hallucination(fact f, factual_content reference, factual_config c
 
     false
 }
-
 
 func temporal_is_compatible(string fact_temporal, []string reference_temporals) bool {
     int i = 0
@@ -478,21 +394,14 @@ func temporal_is_compatible(string fact_temporal, []string reference_temporals) 
     false
 }
 
-
-
-
-
-
 func compute_factual_consistency_reward(
     string reference_text,
     string generated_text,
     factual_config config
 ) float {
 
-
     factual_content reference_facts = extract_facts(reference_text, config)
     factual_content generated_facts = extract_facts(generated_text, config)
-
 
     consistency_report report = verify_factual_consistency(
         reference_facts,
@@ -500,27 +409,21 @@ func compute_factual_consistency_reward(
         config
     )
 
-
     float reward = 0.0
-
 
     float accuracy_reward = report.factual_accuracy * config.accuracy_weight
     reward = reward + accuracy_reward
 
-
     float hallucination_penalty = (1.0 - report.hallucination_rate) * config.hallucination_weight
     reward = reward + hallucination_penalty
 
-
     float coverage_reward = report.coverage_score * config.coverage_weight
     reward = reward + coverage_reward
-
 
     if config.require_citations {
         float citation_reward = compute_citation_coverage(generated_text) * config.citation_weight
         reward = reward + citation_reward
     }
-
 
     float total_weight = config.accuracy_weight + config.hallucination_weight +
                         config.coverage_weight + config.citation_weight
@@ -532,9 +435,7 @@ func compute_factual_consistency_reward(
     reward
 }
 
-
 func compute_citation_coverage(string text) float {
-
 
     int citation_count = 0
     int i = 0
@@ -551,11 +452,6 @@ func compute_citation_coverage(string text) float {
     0.2
 }
 
-
-
-
-
-
 func generate_detailed_report(consistency_report report) string {
 
     string output = ""
@@ -564,7 +460,6 @@ func generate_detailed_report(consistency_report report) string {
     output = output + "FACTUAL CONSISTENCY REPORT\n"
     output = output + "════════════════════════════════════════════════════════════\n\n"
 
-
     output = output + "[Overall Scores]\n"
     output = output + "  Consistency Score:  " + float_to_string(report.consistency_score) + "/1.0\n"
     output = output + "  Factual Accuracy:   " + float_to_string(report.factual_accuracy) + "/1.0\n"
@@ -572,13 +467,11 @@ func generate_detailed_report(consistency_report report) string {
     output = output + "  Coverage Score:     " + float_to_string(report.coverage_score) + "/1.0\n"
     output = output + "  Citation Coverage:  " + float_to_string(report.citation_coverage) + "/1.0\n\n"
 
-
     output = output + "[Fact Statistics]\n"
     output = output + "  Reference Facts:    " + int_to_string(report.total_reference_facts) + "\n"
     output = output + "  Generated Facts:    " + string_int(report.total_generated_facts) + "\n"
     output = output + "  Consistent Facts:   " + string_int(report.consistent_facts) + "\n"
     output = output + "  Inconsistent Facts: " + string_int(report.inconsistent_facts) + "\n\n"
-
 
     if len(report.hallucinated_facts) > 0 {
         output = output + "[⚠️ Hallucinated Facts]\n"
@@ -613,10 +506,6 @@ func generate_detailed_report(consistency_report report) string {
     output = output + "════════════════════════════════════════════════════════════\n"
     output
 }
-
-
-
-
 
 func split_sentences(string text) []string {
     []string sentences = []string{}

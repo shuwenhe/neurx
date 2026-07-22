@@ -1,11 +1,5 @@
 
 
-
-
-
-
-
-
 package main
 
 import (
@@ -14,7 +8,6 @@ import (
     "math"
 )
 
-
 type tokenizer struct {
     vocab: map[string]int
     inv_vocab: map[int]string
@@ -22,12 +15,10 @@ type tokenizer struct {
     special_tokens: map[string]int
 }
 
-
 func (t *tokenizer) init(vocab_size: int) {
     t.vocab_size = vocab_size
     t.vocab = make(map[string]int)
     t.inv_vocab = make(map[int]string)
-
 
     t.special_tokens = map[string]int{
         "[PAD]": 0,
@@ -39,7 +30,6 @@ func (t *tokenizer) init(vocab_size: int) {
         "[MASK]": 6,
     }
 
-
     idx := 0
     for token, id := range t.special_tokens {
         t.vocab[token] = id
@@ -48,10 +38,8 @@ func (t *tokenizer) init(vocab_size: int) {
     }
 }
 
-
 func (t *tokenizer) encode(text: string): []int {
     tokens := make([]int, 0)
-
 
     words := split_whitespace(text)
 
@@ -60,7 +48,6 @@ func (t *tokenizer) encode(text: string): []int {
         if len(tokens) == 0 {
             tokens = append(tokens, t.special_tokens["[BOS]"])
         }
-
 
         for _, ch := range word {
             if id, exists := t.vocab[string(ch)]; exists {
@@ -71,12 +58,10 @@ func (t *tokenizer) encode(text: string): []int {
             }
         }
 
-
         if id, exists := t.vocab[" "]; exists {
             tokens = append(tokens, id)
         }
     }
-
 
     if len(tokens) > 0 {
         tokens = append(tokens, t.special_tokens["[EOS]"])
@@ -84,7 +69,6 @@ func (t *tokenizer) encode(text: string): []int {
 
     return tokens
 }
-
 
 func (t *tokenizer) decode(tokens: []int): string {
     text := ""
@@ -96,7 +80,6 @@ func (t *tokenizer) decode(tokens: []int): string {
     return text
 }
 
-
 func (t *tokenizer) vocab_stats(): map[string]interface{} {
     return map[string]interface{}{
         "vocab_size": t.vocab_size,
@@ -106,18 +89,15 @@ func (t *tokenizer) vocab_stats(): map[string]interface{} {
     }
 }
 
-
 func (t *tokenizer) encode_batch(texts: []string, max_length: int, padding: bool): [][]int {
     batch := make([][]int, len(texts))
 
     for i, text := range texts {
         tokens := t.encode(text)
 
-
         if len(tokens) > max_length {
             tokens = tokens[:max_length]
         }
-
 
         if padding && len(tokens) < max_length {
             pad_token := t.special_tokens["[PAD]"]
@@ -131,7 +111,6 @@ func (t *tokenizer) encode_batch(texts: []string, max_length: int, padding: bool
 
     return batch
 }
-
 
 func split_whitespace(s: string): []string {
 
@@ -156,21 +135,17 @@ func split_whitespace(s: string): []string {
     return result
 }
 
-
 func main() {
 
     tokenizer := &tokenizer{}
     tokenizer.init(128000)
-
 
     training_texts := []string{
         "Transformers have revolutionized natural language processing.",
         "Large language models require significant computational resources.",
     }
 
-
     batch := tokenizer.encode_batch(training_texts, 4096, true)
-
 
     for i, tokens := range batch {
         stats := map[string]interface{}{
@@ -182,7 +157,6 @@ func main() {
         json_data, _ := json.Marshal(stats)
         println(string(json_data))
     }
-
 
     vocab_stats := tokenizer.vocab_stats()
     stats_json, _ := json.Marshal(vocab_stats)

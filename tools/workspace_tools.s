@@ -462,7 +462,6 @@ func agent_workspace_replace_exact(string text, string old_text, string new_text
     }
 }
 
-
 func agent_workspace_split_lines(string text) []string {
     int count = agent_workspace_count_lines(text)
     if count < 1 {
@@ -485,7 +484,6 @@ func agent_workspace_split_lines(string text) []string {
     result
 }
 
-
 func agent_workspace_normalize_line(string line) string {
     string expanded = ""
     int i = 0
@@ -500,7 +498,6 @@ func agent_workspace_normalize_line(string line) string {
     }
     trim(expanded)
 }
-
 
 func agent_workspace_replace_fuzzy(string content, string old_text, string new_text, bool replace_all) agent_workspace_patch_result {
     []string cl = agent_workspace_split_lines(content)
@@ -622,7 +619,6 @@ func agent_workspace_s(string command) agent_workspace_command_result {
     }
     string output = trim(runtime_run_command_output(command))
     runtime_command_result run = runtime_run_command(command)
-
 
     int max_out = 2000
     bool truncated = len(output) > max_out

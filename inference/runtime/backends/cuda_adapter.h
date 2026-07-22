@@ -4,8 +4,6 @@
 
 namespace neurx::inference {
 
-
-
 class CudaAdapter final : public BackendAdapter {
  public:
   CudaAdapter(KernelLauncher prefill, KernelLauncher decode);

@@ -2,13 +2,6 @@ package neurx.posttrain.reward.examples
 
 use neurx.posttrain.reward.factual_consistency_reward.*
 
-
-
-
-
-
-
-
 func create_factual_config() factual_config {
     factual_config {
 
@@ -16,18 +9,14 @@ func create_factual_config() factual_config {
         extract_temporal: true,
         extract_location: true,
 
-
         similarity_threshold: 0.7,
         confidence_threshold: 0.5,
-
 
         detect_hallucinations: true,
         hallucination_threshold: 0.3,
 
-
         require_citations: false,
         check_citation_accuracy: false,
-
 
         accuracy_weight: 0.4,
         hallucination_weight: 0.3,
@@ -35,7 +24,6 @@ func create_factual_config() factual_config {
         citation_weight: 0.1,
     }
 }
-
 
 func example_basic_factual_consistency() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -64,7 +52,6 @@ func example_basic_factual_consistency() {
     print("")
 }
 
-
 func example_hallucination_detection() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 2: Hallucination Detection                       ║")
@@ -73,7 +60,6 @@ func example_hallucination_detection() {
 
     string reference = "Albert Einstein won the Nobel Prize in Physics in 1921. " +
                       "He developed the theory of relativity."
-
 
     string generated_with_hallucination = "Albert Einstein won the Nobel Prize in Physics in 1921. " +
                                          "He also won the Nobel Prize in Chemistry in 1925. " +
@@ -89,10 +75,8 @@ func example_hallucination_detection() {
     print("  " + generated_with_hallucination)
     print("")
 
-
     factual_content ref_facts = extract_facts(reference, config)
     factual_content gen_facts = extract_facts(generated_with_hallucination, config)
-
 
     consistency_report report = verify_factual_consistency(ref_facts, gen_facts, config)
 
@@ -113,7 +97,6 @@ func example_hallucination_detection() {
     }
     print("")
 }
-
 
 func example_medical_fact_checking() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -152,7 +135,6 @@ func example_medical_fact_checking() {
     print("")
 }
 
-
 func example_news_fact_checking() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 4: News Fact Checking                            ║")
@@ -177,7 +159,6 @@ func example_news_fact_checking() {
     print("  " + generated)
     print("")
 
-
     factual_content ref_facts = extract_facts(reference, config)
     factual_content gen_facts = extract_facts(generated, config)
     consistency_report report = verify_factual_consistency(ref_facts, gen_facts, config)
@@ -187,7 +168,6 @@ func example_news_fact_checking() {
     print("  Accuracy: " + float_to_string_example(report.factual_accuracy * 100.0) + "%")
     print("")
 }
-
 
 func example_quality_comparison() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -228,7 +208,6 @@ func example_quality_comparison() {
     print("")
 }
 
-
 func example_reward_for_alignment() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 6: Factual Reward in Alignment Training          ║")
@@ -264,7 +243,6 @@ func example_reward_for_alignment() {
     print("")
 }
 
-
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -283,7 +261,6 @@ func main() {
     print("     All examples completed!                                 ")
     print("═════════════════════════════════════════════════════════════")
 }
-
 
 func float_to_string_example(float f) string {
     int i_part = int(f)

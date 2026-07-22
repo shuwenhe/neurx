@@ -1,12 +1,6 @@
 
 
-
-
-
-
 module moe_optimization
-
-
 
 struct moe_config {
 
@@ -16,12 +10,10 @@ struct moe_config {
     num_selected_experts: int = 2
     num_shared_experts: int = 1
 
-
     load_balancing_method: string = "auxiliary_loss"
     loss_coef: float = 0.01
     aux_loss_coef: float = 0.001
     z_loss_coef: float = 0.0001
-
 
     router_type: string = "topk"
     router_bias_init: float = -2.0
@@ -29,11 +21,9 @@ struct moe_config {
     capacity_factor: float = 1.25
     drop_token: bool = true
 
-
     enable_expert_specialization: bool = true
     specialization_method: string = "gradient_manipulation"
     diversity_penalty: float = 0.1
-
 
     use_sparse_attention: bool = false
     expert_group_size: int = 1
@@ -100,25 +90,16 @@ class LoadBalanceLossComputer {
 
     compute(router_logits: tensor, expert_mask: tensor) {
 
-
         batch_size, seq_len, num_experts = router_logits.shape
-
-
 
         expert_counts = expert_mask.sum(dim=(0, 1)).float()
         total_tokens = batch_size * seq_len
         expert_fraction = expert_counts / (total_tokens + 1e-10)
 
-
-
         router_probs = softmax(router_logits.float(), dim=-1)
         mean_prob = router_probs.mean(dim=(0, 1))
 
-
-
         load_balance_loss = num_experts * (expert_fraction * mean_prob).sum()
-
-
 
         aux_loss = cross_entropy(
             mean_prob.unsqueeze(0).expand(batch_size * seq_len, -1),
@@ -128,8 +109,6 @@ class LoadBalanceLossComputer {
         return (load_balance_loss * this.config.loss_coef, aux_loss * this.config.aux_loss_coef)
     }
 }
-
-
 
 class MoEFFNLayer {
     config: moe_config
@@ -144,7 +123,6 @@ class MoEFFNLayer {
         this.loss_computer = new LoadBalanceLossComputer(config)
         this.training = true
 
-
         this.experts = []
         for i in range(config.num_experts):
             let expert = moe_expert{
@@ -155,7 +133,6 @@ class MoEFFNLayer {
                 is_active=true
             }
             this.experts.append(expert)
-
 
         this.shared_experts = []
         if config.num_shared_experts > 0:
@@ -170,20 +147,17 @@ class MoEFFNLayer {
                 this.shared_experts.append(shared_exp)
             }
 
-
         this.router = new moe_router(
             hidden_dim=config.hidden_size,
             num_experts=config.num_experts,
             config=config
         )
 
-
         if config.router_bias_init != 0.0:
             nn_init.constant_(this.router.gate_layer.bias, config.router_bias_init)
 
     forward(hidden_states: tensor, attention_mask: tensor?) {
         batch_size, seq_len, hidden_dim = hidden_states.shape
-
 
         router_input = hidden_states
 
@@ -194,20 +168,12 @@ class MoEFFNLayer {
 
         router_logits = this.router.gate_layer.forward(router_input)
 
-
-
         routing_weights, selected_experts = this._apply_routing(router_logits)
-
-
-
 
         expert_mask = zeros_like(routing_weights)
         expert_mask.scatter_(-1, selected_experts, 1.0)
 
-
-
         capacity = int((batch_size * seq_len / this.config.num_experts) * this.config.capacity_factor)
-
 
         expert_outputs = this._dispatch_and_compute(
             hidden_states,
@@ -215,8 +181,6 @@ class MoEFFNLayer {
             routing_weights,
             capacity
         )
-
-
 
         if this.shared_experts.length > 0 && this.config.apply_residual:
             shared_output = this._compute_shared_expert_output(hidden_states)
@@ -228,12 +192,10 @@ class MoEFFNLayer {
 
             expert_outputs = expert_outputs + hidden_states
 
-
         aux_loss: tensor? = null
         lb_loss: tensor? = null
         if this.training {
             lb_loss_val, aux_loss_val = this.loss_computer.compute(router_logits, expert_mask)
-
 
             if this.config.z_loss_coef > 0:
                 z_loss = (router_logits ** 2).mean() * this.config.z_loss_coef
@@ -241,7 +203,6 @@ class MoEFFNLayer {
 
             lb_loss = lb_loss_val
             aux_loss = aux_loss_val
-
 
         dispatch_stats = this._compute_dispatch_statistics(expert_mask, capacity)
 
@@ -270,14 +231,10 @@ class MoEFFNLayer {
         B, T, E = router_logits.shape
         k = min(this.router.top_k, E)
 
-
         topk_values, topk_indices = router_logits.topk(k, dim=-1, sorted=False)
-
-
 
         weights = zeros_like(router_logits)
         weights.scatter_(-1, topk_indices, 1.0)
-
 
         if this.config.normalize_router:
             topk_probs = softmax(topk_values, dim=-1)
@@ -288,18 +245,13 @@ class MoEFFNLayer {
 
     _soft_routing(router_logits: tensor) {
 
-
-
         probs = softmax(router_logits.float(), dim=-1)
-
 
         k = min(this.router.top_k, router_logits.shape[-1])
         _, topk_indices = probs.topk(k, dim=-1)
 
-
         masked_probs = zeros_like(probs)
         masked_probs.scatter_(-1, topk_indices, probs.gather(-1, topk_indices))
-
 
         normalized = masked_probs / (masked_probs.sum(dim=-1, keepdim=true) + 1e-9)
 
@@ -308,23 +260,17 @@ class MoEFFNLayer {
 
     _group_limited_routing(router_logits: tensor) {
 
-
-
         B, T, E = router_logits.shape
         group_size = this.config.expert_group_size
         num_groups = E
         k_per_group = max(1, this.router.top_k
 
-
         grouped_logits = router_logits.reshape(B, T, num_groups, group_size)
-
 
         topk_vals, topk_idx_in_group = grouped_logits.topk(k_per_group, dim=-1)
 
-
         base_indices = arange(num_groups).unsqueeze(0).unsqueeze(0).unsqueeze(-1) * group_size
         global_topk_idx = (base_indices.expand(B, T, -1, -1) + topk_idx_in_group).reshape(B, T, -1)
-
 
         weights = zeros_like(router_logits)
         if this.config.normalize_router:
@@ -343,17 +289,12 @@ class MoEFFNLayer {
         capacity: int
     ) {
 
-
         B, T, H = hidden_states.shape
         _, _, K = selected_experts.shape
-
 
         flat_hidden = hidden_states.reshape(-1, H)
         flat_indices = selected_experts.reshape(-1, K)
         flat_weights = routing_weights.reshape(-1, routing_weights.shape[-1])
-
-
-
 
         final_output = zeros_like(flat_hidden)
 
@@ -362,9 +303,7 @@ class MoEFFNLayer {
             weights_for_k = flat_indices.new_zeros(B * T, self.config.num_experts)
             weights_for_k.scatter_(1, expert_ids_for_k.unsqueeze(1), 1.0)
 
-
             w = (flat_weights * weights_for_k).sum(dim=-1)
-
 
             expert_output = zeros(B*T, H, device=hidden_states.device)
 
@@ -374,7 +313,6 @@ class MoEFFNLayer {
 
                 if mask_e.sum() == 0:
                     continue
-
 
                 count_e = mask_e.sum().item()
                 if count_e > capacity and this.config.drop_token:
@@ -387,18 +325,14 @@ class MoEFFNLayer {
                     new_mask[kept_indices] = True
                     mask_e = new_mask
 
-
                 tokens_for_expert = flat_hidden[mask_e]
-
 
                 if this.experts[e_idx].is_active:
                     expert_out = this._apply_single_expert(tokens_for_expert, this.experts[e_idx])
                 else:
                     expert_out = zeros_like(tokens_for_expert)
 
-
                 expert_out = expert_out * w[mask_e].unsqueeze(-1)
-
 
                 expert_output[mask_e] = expert_out
 
@@ -409,10 +343,7 @@ class MoEFFNLayer {
 
     _apply_single_expert(tokens: tensor, expert: moe_expert) {
 
-
-
         up_output = expert.up_proj.forward(tokens)
-
 
         if this.config.intermediate_size % 2 == 0:
             half_dim = this.config.intermediate_size
@@ -432,14 +363,12 @@ class MoEFFNLayer {
         for shared_exp in this.shared_experts:
             up_out = shared_exp.up_proj.forward(hidden_states)
 
-
             half_dim = this.config.intermediate_size
             gate_part, value_part = up_out[:, :, :half_dim], up_out[:, :, half_dim:]
             activated = shared_exp.gate.forward(gate_part) * value_part
 
             down_out = shared_exp.down_proj.forward(activated)
             output = output + down_out
-
 
         if this.shared_experts.length > 0:
             output = output / this.shared_experts.length
@@ -449,7 +378,6 @@ class MoEFFNLayer {
 
     _compute_dispatch_statistics(expert_mask: tensor, capacity: int) {
 
-
         tokens_per_expert = expert_mask.sum(dim=(0, 1)).tolist()
         total_tokens = expert_mask.sum().item()
 
@@ -457,7 +385,6 @@ class MoEFFNLayer {
         for count in tokens_per_expert:
             utilization = min(count / (total_tokens / this.config.num_experts + 1e-6), 1.0)
             expert_utilization.append(utilization)
-
 
         arr = tensor(tokens_per_expert).float()
         variance = ((arr - arr.mean()) ** 2).mean().item()
@@ -467,10 +394,8 @@ class MoEFFNLayer {
         min_load = min(tokens_per_experts)
         imbalance_ratio = max_load / (min_load + 1e-6)
 
-
         router_prob_distribution = expert_mask.sum(dim=(0, 1)).float() / (total_tokens + 1e-6)
         entropy = -(router_prob_distribution * (router_prob_distribution + 1e-10).log()).sum().item()
-
 
         dropped = max(0, total_tokens - this.config.num_experts * capacity)
 
@@ -486,8 +411,6 @@ class MoEFFNLayer {
         }
     }
 }
-
-
 
 class ExpertSpecializer {
     config: moe_config
@@ -523,27 +446,17 @@ class ExpertSpecializer {
 
     _gradient_manipulation_loss(moe_output: moe_forward_output) {
 
-
-
         router_logits = moe_output.router_logits
         B, T, E = router_logits.shape
 
-
-
-
-
         expert_selections = (router_logits > 0).float()
 
-
         expert_vectors = expert_selections.permute(2, 0, 1).reshape(E, -1)
-
 
         norms = expert_vectors.norm(p=2, dim=1, keepdim=true).clamp(min=1e-8)
         normalized_vectors = expert_vectors / norms
 
-
         similarity_matrix = matmul(normalized_vectors, normalized_vectors.T)
-
 
         identity = eye(E, device=router_logits.device)
         off_diag_penalty = (similarity_matrix * (1 - identity)).abs().mean()
@@ -552,8 +465,6 @@ class ExpertSpecializer {
     }
 
     _diversity_regularization_loss() {
-
-
 
         if this.moe_layer == null:
             return tensor(0.0)
@@ -564,7 +475,6 @@ class ExpertSpecializer {
             for j in range(i + 1, len(this.moe_layer!.experts)):
                 exp_i = this.moe_layer!.experts[i]
                 exp_j = this.moe_layer!.experts[j]
-
 
                 w_i = exp_i.up_proj.weight.flatten()
                 w_j = exp_j.up_proj.weight.flatten()
@@ -579,12 +489,8 @@ class ExpertSpecializer {
 
     _hard_routing_auxiliary_loss(moe_output: moe_forward_output) {
 
-
-
         router_logits = moe_output.router_logits
         router_probs = softmax(router_logits, dim=-1)
-
-
 
         topk_probs = router_probs.max(dim=-1)[0]
         confidence_reward = -topk_probs.log().mean()
@@ -594,15 +500,12 @@ class ExpertSpecializer {
 
     analyze_expert_specialization(moe_layer: MoEFFNLayer) {
 
-
-
         reports: list<individual_expert_report> = []
 
         for expert in moe_layer.experts:
 
             up_weight_norm = expert.up_proj.weight.norm(dim=1).mean().item()
             down_weight_norm = expert.down_proj.weight.norm(dim=1).mean().item()
-
 
             weight_magnitude = (expert.up_proj.weight.abs().mean() + expert.down_proj.weight.abs().mean()).item()
 
@@ -615,7 +518,6 @@ class ExpertSpecializer {
                 specialization_score=expert.specialization_score,
                 importance_weight=expert.importance_weight
             })
-
 
         active_count = sum(1 for r in reports if r.is_active)
         avg_specialization = mean(r.specialization_score for r in reports)
@@ -641,7 +543,6 @@ class ExpertSpecializer {
         std_dev = standard_deviation(magnitudes)
         mean_mag = mean(magnitudes)
 
-
         cv = std_dev / (mean_mag + 1e-8)
         return cv < 0.1
     }
@@ -665,8 +566,6 @@ struct individual_expert_report {
     specialization_score: float
     importance_weight: float
 }
-
-
 
 class ExpertManager {
     moe_layers: list<MoEFFNLayer>
@@ -708,7 +607,6 @@ class ExpertManager {
 
     merge_similar_experts(similarity_threshold: float = 0.95) {
 
-
         merge_operations: list<merge_operation> = []
 
         for layer in this.moe_layers:
@@ -718,7 +616,6 @@ class ExpertManager {
                 for j in range(i + 1, len(active_experts)):
                     exp_a = active_experts[i]
                     exp_b = active_experts[j]
-
 
                     sim_up = cosine_similarity(
                         exp_a.up_proj.weight.flatten().unsqueeze(0),
@@ -741,11 +638,9 @@ class ExpertManager {
                             action="merge"
                         })
 
-
                         with no_grad():
                             exp_a.up_proj.weight.data = (exp_a.up_proj.weight.data + exp_b.up_proj.weight.data) / 2
                             exp_a.down_proj.weight.data = (exp_a.down_proj.weight.data + exp_b.down_proj.weight.data) / 2
-
 
                         exp_b.is_active = False
 
@@ -757,7 +652,6 @@ class ExpertManager {
     }
 
     get_global_efficiency_report() {
-
 
         total_params_before = 0
         total_params_after = 0
@@ -810,8 +704,6 @@ struct moe_efficiency_report {
     theoretical_flops_reduction: string
 }
 
-
-
 function create_moe_ffn_layer(config?: moe_config) {
     return new MoEFFNLayer(config=config ?? new moe_config())
 }
@@ -830,14 +722,12 @@ function test_moe_system() {
 
     moe_layer = new MoEFFNLayer(cfg)
 
-
     print("  ✓ Test 1: MoE Forward Pass")
     dummy_input = randn(2, 16, 256)
     output = moe_layer.forward(dummy_input, null)
     assert output.output.shape == dummy_input.shape, f"Output shape mismatch: {output.output.shape}"
     assert output.aux_loss != null, "Auxiliary loss should be computed during training"
     assert output.dispatch_pattern.total_tokens == 32, f"Token count wrong: {output.dispatch_pattern.total_tokens}"
-
 
     print("  ✓ Test 2: Dispatch Pattern Statistics")
     stats = output.dispatch_pattern
@@ -846,7 +736,6 @@ function test_moe_system() {
     assert stats.entropy >= 0, "Entropy should be non-negative"
     print(f"      - Expert utilization: {[f'{u:.2f}' for u in stats.expert_utilization]}")
     print(f"      - Load balance ratio: {stats.max_load_imbalance_ratio:.2f}x")
-
 
     print("  ✓ Test 3: Expert Specialization Analysis")
     specializer = new ExpertSpecializer(cfg)
@@ -861,13 +750,11 @@ function test_moe_system() {
     for report in analysis.expert_reports:
         assert report.up_projection_l2_norm > 0, "Norm should be positive"
 
-
     print("  ✓ Test 4: Expert Management")
     manager = new ExpertManager([moe_layer], cfg)
     eff_report = manager.get_global_efficiency_report()
     assert eff_report.total_moe_layers == 1
     assert eff_report.active_experts_per_layer[0] == cfg.num_experts
-
 
     prune_report = manager.prune_low_importance_experts(threshold=999.0)
     assert prune_report.remaining_active > 0, "Should still have active experts"
@@ -875,7 +762,6 @@ function test_moe_system() {
     print("\n✅ All MoE Optimization Tests Passed!")
     return true
 }
-
 
 export {
     moe_config, moe_forward_output, dispatch_pattern, moe_expert, moe_router,

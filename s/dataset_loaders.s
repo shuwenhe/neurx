@@ -1,26 +1,13 @@
 package neurx.data
 
-
-
-
-
-
-
 struct error {
     string message
 }
-
-
-
-
-
-
 
 func load_text_dataset(dataset ds) (dataset, error) {
     if len(ds.config.path) == 0 {
         return ds, error{message: "No path specified for text dataset"}
     }
-
 
     []string lines = read_lines(ds.config.path)
 
@@ -28,7 +15,6 @@ func load_text_dataset(dataset ds) (dataset, error) {
     if max_samples <= 0 || max_samples > len(lines) {
         max_samples = len(lines)
     }
-
 
     int total_tokens = 0
     int min_len = 999999
@@ -41,9 +27,7 @@ func load_text_dataset(dataset ds) (dataset, error) {
             continue
         }
 
-
         []int tokens = tokenize_text(line)
-
 
         if ds.config.max_length > 0  len(tokens) > ds.config.max_length {
             tokens = truncate(tokens, ds.config.max_length)
@@ -59,12 +43,10 @@ func load_text_dataset(dataset ds) (dataset, error) {
 
         ds.samples.push(s)
 
-
         total_tokens = total_tokens + len(tokens)
         if len(tokens) < min_len { min_len = len(tokens) }
         if len(tokens) > max_len { max_len = len(tokens) }
     }
-
 
     int n = len(ds.samples)
     ds.stats = dataset_stats {
@@ -81,7 +63,6 @@ func load_text_dataset(dataset ds) (dataset, error) {
 }
 
 func tokenize_text(string text) []int {
-
 
     []int tokens = []int{cap: len(text)}
     for i in 0..len(text) {
@@ -115,9 +96,7 @@ func is_space(byte c) bool {
     c == 32 || c == 9 || c == 10 || c == 13
 }
 
-
 func read_lines(string path) []string {
-
 
     []string{
         "Hello world",

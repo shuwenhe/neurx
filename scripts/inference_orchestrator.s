@@ -1,7 +1,5 @@
 
 
-
-
 package scripts
 
 import (
@@ -10,10 +8,6 @@ import (
     "path/filepath"
     "strings"
 )
-
-
-
-
 
 enum InferenceBackend {
     ONNX,
@@ -38,17 +32,12 @@ struct inference_config {
     logDir       string
 }
 
-
-
-
-
 struct inference_orchestrator {
     logger  Logger
     config  inference_config
     sCompiler string
     neurxRoot string
 }
-
 
 func new_inference_orchestrator(modelPath string) (*inference_orchestrator, error) {
     logger := new_logger("inference_orchestrator")
@@ -91,7 +80,6 @@ func new_inference_orchestrator(modelPath string) (*inference_orchestrator, erro
     }, nil
 }
 
-
 func (i *inference_orchestrator) setup() error {
     i.logger.log("Setting up inference environment...")
 
@@ -99,12 +87,10 @@ func (i *inference_orchestrator) setup() error {
         return err
     }
 
-
     i.log_config()
 
     return nil
 }
-
 
 func (i *inference_orchestrator) Compile() error {
     i.logger.log("Compiling inference server...")
@@ -116,7 +102,6 @@ func (i *inference_orchestrator) Compile() error {
 
     irFile := filepath.Join(buildDir, "inference_server.ir")
     binFile := filepath.Join(buildDir, "inference_server")
-
 
     sourceFile := filepath.Join(i.neurxRoot, "infer", "inference_server.s")
     if !file_exists(sourceFile) {
@@ -142,7 +127,6 @@ func (i *inference_orchestrator) Compile() error {
     return nil
 }
 
-
 func (i *inference_orchestrator) start_server() error {
     i.logger.log("Starting inference server...")
 
@@ -155,7 +139,6 @@ func (i *inference_orchestrator) start_server() error {
 
     logFile := filepath.Join(i.config.logDir, "inference_server.log")
 
-
     cmd := fmt.Sprintf("cd %s && ", i.neurxRoot)
     cmd += fmt.Sprintf("NEURX_MODEL=%s ", i.config.modelPath)
     cmd += fmt.Sprintf("NEURX_BACKEND=%s ", backend_string(i.config.backend))
@@ -166,14 +149,12 @@ func (i *inference_orchestrator) start_server() error {
 
     i.logger.log("exec_commanduting: %s", cmd)
 
-
     go func() {
         result := shell(cmd)
         if result.ExitCode != 0 {
             i.logger.error("Server failed: %s", result.Stderr)
         }
     }()
-
 
     i.logger.log("Waiting for server to start (checking port %d)...", i.config.port)
     for i := 0; i < 30; i++ {
@@ -187,7 +168,6 @@ func (i *inference_orchestrator) start_server() error {
     return fmt.Errorf("server failed to start within timeout")
 }
 
-
 func (i *inference_orchestrator) interactive() error {
     i.logger.log("Starting interactive inference session...")
 
@@ -197,7 +177,6 @@ func (i *inference_orchestrator) interactive() error {
 
     }
 
-
     result := shell(binFile)
     if result.ExitCode != 0 {
         i.logger.error("Session failed: %s", result.Stderr)
@@ -206,7 +185,6 @@ func (i *inference_orchestrator) interactive() error {
 
     return nil
 }
-
 
 func (i *inference_orchestrator) chat() error {
     i.logger.log("Starting chat interface...")
@@ -224,7 +202,6 @@ func (i *inference_orchestrator) chat() error {
     binFile := filepath.Join(buildDir, "chat")
     irFile := filepath.Join(buildDir, "chat.ir")
 
-
     i.logger.log("Compiling chat tool...")
     result := exec_command(i.sCompiler, sourceFile, irFile)
     if result.ExitCode != 0 {
@@ -235,7 +212,6 @@ func (i *inference_orchestrator) chat() error {
     if result.ExitCode != 0 {
         return fmt.Errorf("binary generation failed")
     }
-
 
     cmd := fmt.Sprintf("cd %s && ", i.neurxRoot)
     cmd += fmt.Sprintf("NEURX_MODEL=%s ", i.config.modelPath)
@@ -250,7 +226,6 @@ func (i *inference_orchestrator) chat() error {
 
     return nil
 }
-
 
 func (i *inference_orchestrator) benchmark() error {
     i.logger.log("Running inference benchmarks...")
@@ -268,7 +243,6 @@ func (i *inference_orchestrator) benchmark() error {
     binFile := filepath.Join(buildDir, "benchmark")
     irFile := filepath.Join(buildDir, "benchmark.ir")
 
-
     i.logger.log("Compiling benchmark tool...")
     result := exec_command(i.sCompiler, sourceFile, irFile)
     if result.ExitCode != 0 {
@@ -279,7 +253,6 @@ func (i *inference_orchestrator) benchmark() error {
     if result.ExitCode != 0 {
         return fmt.Errorf("binary generation failed")
     }
-
 
     logFile := filepath.Join(i.config.logDir, "benchmark.log")
     cmd := fmt.Sprintf("cd %s && ", i.neurxRoot)
@@ -296,10 +269,6 @@ func (i *inference_orchestrator) benchmark() error {
     i.logger.success("benchmark results saved to %s", logFile)
     return nil
 }
-
-
-
-
 
 func (i *inference_orchestrator) is_server_ready() bool {
 
@@ -346,11 +315,6 @@ func backend_string(backend InferenceBackend) string {
     }
 }
 
-
-
-
-
-
 func run_inference_server(modelPath string) error {
     orchestrator, err := new_inference_orchestrator(modelPath)
     if err != nil {
@@ -363,7 +327,6 @@ func run_inference_server(modelPath string) error {
 
     return orchestrator.start_server()
 }
-
 
 func run_interactive_inference(modelPath string) error {
     orchestrator, err := new_inference_orchestrator(modelPath)
@@ -378,7 +341,6 @@ func run_interactive_inference(modelPath string) error {
     return orchestrator.interactive()
 }
 
-
 func run_chat_interface(modelPath string) error {
     orchestrator, err := new_inference_orchestrator(modelPath)
     if err != nil {
@@ -391,7 +353,6 @@ func run_chat_interface(modelPath string) error {
 
     return orchestrator.chat()
 }
-
 
 func run_inference_benchmark(modelPath string) error {
     orchestrator, err := new_inference_orchestrator(modelPath)

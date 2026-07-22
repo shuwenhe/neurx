@@ -1,8 +1,5 @@
 
 
-
-
-
 package main
 
 import (
@@ -64,10 +61,6 @@ type evaluation_example struct {
     metadata            map[string]interface{}
 }
 
-
-
-
-
 func (framework *evaluation_framework) load_mmlu() benchmark_dataset {
     fmt.Println("[Evaluation] Loading MMLU (Massive Multitask Language Understanding)...")
 
@@ -84,7 +77,6 @@ func (framework *evaluation_framework) load_mmlu() benchmark_dataset {
         "college_physics", "computer_security", "conceptual_physics",
         "econometrics", "electrical_engineering", "elementary_mathematics",
     }
-
 
     for _, cat := range categories {
         for i := 0; i < 100; i++ {
@@ -192,10 +184,6 @@ func (framework *evaluation_framework) load_hellaswag() benchmark_dataset {
     return dataset
 }
 
-
-
-
-
 func (framework *evaluation_framework) evaluate_accuracy(predictions []string, references []string) float64 {
     correct := 0
     for i, pred := range predictions {
@@ -279,19 +267,11 @@ func (framework *evaluation_framework) evaluate_perplexity(logits []float64, lab
     return math.Exp(avg_loss)
 }
 
-
-
-
-
 func (framework *evaluation_framework) generate_prediction(question string, max_tokens int) string {
 
     prediction := "The answer is: " + question[len(question)-10:]
     return prediction
 }
-
-
-
-
 
 func (framework *evaluation_framework) run_benchmark(dataset benchmark_dataset) benchmark_result {
     fmt.Printf("[Evaluation] Running %s benchmark...\n", dataset.name)
@@ -307,7 +287,6 @@ func (framework *evaluation_framework) run_benchmark(dataset benchmark_dataset) 
     for i := 0; i < num_eval; i++ {
         example := dataset.examples[i]
 
-
         prediction := framework.generate_prediction(example.question, 256)
         predictions = append(predictions, prediction)
         references = append(references, example.reference_answer)
@@ -316,7 +295,6 @@ func (framework *evaluation_framework) run_benchmark(dataset benchmark_dataset) 
             fmt.Printf("  Evaluated %d/%d\n", i+1, num_eval)
         }
     }
-
 
     accuracy := framework.evaluate_accuracy(predictions, references)
     f1 := framework.evaluate_f1(predictions, references)
@@ -331,7 +309,6 @@ func (framework *evaluation_framework) run_benchmark(dataset benchmark_dataset) 
         memory_used: 8 * 1024 * 1024 * 1024,
         category_scores: make(map[string]float64),
     }
-
 
     for cat := range dataset.categories {
         cat_correct := 0
@@ -354,22 +331,16 @@ func (framework *evaluation_framework) run_benchmark(dataset benchmark_dataset) 
     return result
 }
 
-
-
-
-
 func (framework *evaluation_framework) run_full_evaluation() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Comprehensive Evaluation Framework                   ║")
     fmt.Println("║  Multi-Dimensional Assessment                         ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
 
-
     framework.benchmarks["MMLU"] = framework.load_mmlu()
     framework.benchmarks["TruthfulQA"] = framework.load_truthful_qa()
     framework.benchmarks["GSM8K"] = framework.load_gsm8k()
     framework.benchmarks["HellaSwag"] = framework.load_hellaswag()
-
 
     for _, dataset := range framework.benchmarks {
         result := framework.run_benchmark(dataset)
@@ -381,10 +352,6 @@ func (framework *evaluation_framework) run_full_evaluation() {
 
     framework.print_report()
 }
-
-
-
-
 
 func (framework *evaluation_framework) print_report() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
@@ -414,10 +381,6 @@ func (framework *evaluation_framework) print_report() {
     fmt.Printf("═══════════════════════════════════════════════════════\n")
 }
 
-
-
-
-
 func (framework *evaluation_framework) compare_with_baseline() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Model Comparison with reference systems               ║")
@@ -446,10 +409,6 @@ func (framework *evaluation_framework) compare_with_baseline() {
             status, result.benchmark_name, result.score, baseline_score, gap)
     }
 }
-
-
-
-
 
 func NewEvaluationFramework(config evaluation_config) *evaluation_framework {
     return &evaluation_framework{

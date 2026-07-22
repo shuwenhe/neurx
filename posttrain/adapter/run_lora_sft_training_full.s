@@ -2,22 +2,6 @@ package main
 
 use std.io.println
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct training_config {
     string base_model_path
     string train_data_path
@@ -54,10 +38,6 @@ struct training_metrics {
     int current_epoch
     int current_step
 }
-
-
-
-
 
 func int_to_str(int n) string {
     if n == 0 { return "0" }
@@ -125,19 +105,13 @@ func float_to_str(float value, int decimals) string {
     out
 }
 
-
-
-
-
 func load_config() training_config {
     training_config cfg
-
 
     cfg.base_model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
     cfg.train_data_path = "/home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl"
     cfg.val_data_path = "/home/shuwen/shuwen/train/dataset/medmcqa/val.jsonl"
     cfg.output_dir = "/home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft"
-
 
     cfg.num_epochs = 3
     cfg.batch_size = 32
@@ -147,17 +121,12 @@ func load_config() training_config {
     cfg.weight_decay = 0.01
     cfg.max_grad_norm = 1.0
 
-
     cfg.lora_rank = 8
     cfg.lora_alpha = 16
     cfg.lora_dropout = 0.05
 
     cfg
 }
-
-
-
-
 
 func init_lora_adapter(int input_dim, int output_dim, int rank, float alpha) model_state {
     model_state state
@@ -166,7 +135,6 @@ func init_lora_adapter(int input_dim, int output_dim, int rank, float alpha) mod
     state.output_dim = output_dim
     state.rank = rank
     state.alpha = alpha
-
 
     []float lora_a
     []float lora_b
@@ -186,7 +154,6 @@ func init_lora_adapter(int input_dim, int output_dim, int rank, float alpha) mod
     state.lora_a = lora_a
     state.lora_b = lora_b
 
-
     []float base_weights
     int i3 = 0
     while i3 < output_dim * input_dim {
@@ -198,19 +165,10 @@ func init_lora_adapter(int input_dim, int output_dim, int rank, float alpha) mod
     state
 }
 
-
-
-
-
 func count_training_samples(string filepath) int {
-
 
     100
 }
-
-
-
-
 
 func run_training(training_config cfg) training_metrics {
     println("🚀 Start LoRA SFT afterTraining")
@@ -228,16 +186,13 @@ func run_training(training_config cfg) training_metrics {
     println("  • learning_rate: " + float_to_str(cfg.learning_rate, 6))
     println("")
 
-
     training_metrics metrics
     metrics.total_loss = 0.0
     metrics.total_samples = 0
     metrics.current_epoch = 0
     metrics.current_step = 0
 
-
     model_state model = init_lora_adapter(768, 768, cfg.lora_rank, cfg.lora_alpha as float)
-
 
     println("🎓 Trainingenterlinein...")
     println("")
@@ -249,12 +204,10 @@ func run_training(training_config cfg) training_metrics {
         float epoch_loss = 0.0
         int epoch_samples = 0
 
-
         int batch = 0
         while batch < 10 {
             float batch_loss = 0.0
             int batch_samples = cfg.batch_size
-
 
             int sample = 0
             while sample < batch_samples {
@@ -270,9 +223,7 @@ func run_training(training_config cfg) training_metrics {
             epoch_loss = epoch_loss + batch_loss
             epoch_samples = epoch_samples + batch_samples
 
-
             float learning_rate = cfg.learning_rate
-
 
             float wd_loss = 0.0
             int w = 0
@@ -299,17 +250,12 @@ func run_training(training_config cfg) training_metrics {
 
     metrics.avg_loss = metrics.total_loss / (metrics.total_samples as float)
 
-
     println("💾 Save model...")
     println("")
     save_model(model, cfg.output_dir)
 
     metrics
 }
-
-
-
-
 
 func save_model(model_state model, string output_dir) int {
     println("  write adapter_model.safetensors...")
@@ -327,10 +273,6 @@ func save_model(model_state model, string output_dir) int {
 
     0
 }
-
-
-
-
 
 func export_merged_model(model_state model, string base_model_dir, string output_dir) int {
     println("🔗 merge LoRA weights to basemodel...")
@@ -350,10 +292,6 @@ func export_merged_model(model_state model, string base_model_dir, string output
     0
 }
 
-
-
-
-
 func main() int {
     println("")
     println("╔" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╗")
@@ -362,9 +300,7 @@ func main() int {
     println("╚" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╝")
     println("")
 
-
     training_config cfg = load_config()
-
 
     training_metrics metrics = run_training(cfg)
 

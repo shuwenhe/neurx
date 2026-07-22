@@ -1,8 +1,5 @@
 
 
-
-
-
 package main
 
 import (
@@ -68,10 +65,6 @@ type inference_stats struct {
     cache_hit_rate      float64
 }
 
-
-
-
-
 func (engine *inference_engine) initialize_kv_cache() {
     fmt.Println("[Inference] Initializing KV Cache...")
 
@@ -120,10 +113,6 @@ func (engine *inference_engine) get_cached_kv(layer_idx int, seq_len int) ([][]f
     return keys, values
 }
 
-
-
-
-
 func (engine *inference_engine) create_batch(requests []inference_request) [][]int {
     batch := [][]int{}
 
@@ -154,16 +143,9 @@ func (engine *inference_engine) process_batch(batch [][]int) [][]float64 {
     return logits
 }
 
-
-
-
-
 func (engine *inference_engine) flash_attention_forward(q []float64, k []float64, v []float64) []float64 {
 
-
-
     scores := engine.compute_attention_scores(q, k)
-
 
     max_score := scores[0]
     for _, s := range scores {
@@ -181,7 +163,6 @@ func (engine *inference_engine) flash_attention_forward(q []float64, k []float64
     for i := range scores {
         scores[i] /= exp_sum
     }
-
 
     output := make([]float64, len(v))
     for i := range output {
@@ -207,30 +188,19 @@ func (engine *inference_engine) compute_attention_scores(q []float64, k []float6
     return scores
 }
 
-
-
-
-
 func (engine *inference_engine) enable_tensor_parallelism(num_replicas int) {
     fmt.Printf("[Inference] Enabling Tensor Parallelism (%d replicas)\n", num_replicas)
-
-
 
     heads_per_replica := engine.model.hidden_size / num_replicas
 
     fmt.Printf("  Heads per replica: %d\n", heads_per_replica)
 }
 
-
-
-
-
 func (engine *inference_engine) sample_token(logits []float64, temperature float64, top_p float64) int {
 
     for i := range logits {
         logits[i] /= temperature
     }
-
 
     max_logit := logits[0]
     for _, l := range logits {
@@ -251,12 +221,10 @@ func (engine *inference_engine) sample_token(logits []float64, temperature float
         probs[i] /= sum_exp
     }
 
-
     sorted_indices := make([]int, len(probs))
     for i := range sorted_indices {
         sorted_indices[i] = i
     }
-
 
     cumsum := 0.0
     for i, p := range probs {
@@ -279,9 +247,7 @@ func (engine *inference_engine) generate(request inference_request) inference_re
 
         use_cache := engine.config.use_kv_cache
 
-
         logits := engine.model_forward(current_tokens)
-
 
         next_token := engine.sample_token(
             logits,
@@ -292,11 +258,9 @@ func (engine *inference_engine) generate(request inference_request) inference_re
         generated_tokens = append(generated_tokens, next_token)
         current_tokens = append(current_tokens, next_token)
 
-
         if next_token == 2 {
             break
         }
-
 
         if len(current_tokens) > engine.config.max_seq_length {
             break
@@ -329,13 +293,8 @@ func (engine *inference_engine) model_forward(tokens []int) []float64 {
     return logits
 }
 
-
-
-
-
 func (engine *inference_engine) handle_request(request inference_request) inference_response {
     engine.request_queue = append(engine.request_queue, request)
-
 
     if len(engine.request_queue) >= engine.config.max_batch_size ||
        time.Since(time.Unix(request.timestamp, 0)) > time.Millisecond*100 {
@@ -364,10 +323,6 @@ func (engine *inference_engine) process_batch_requests() []inference_response {
     return responses
 }
 
-
-
-
-
 func (engine *inference_engine) print_stats() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Inference Performance Statistics                     ║")
@@ -389,10 +344,6 @@ func (engine *inference_engine) print_stats() {
     fmt.Printf("  Tensor Parallelism: %v\n", engine.config.use_tensor_parallel)
     fmt.Printf("  Quantization: %s\n", engine.config.quantization_type)
 }
-
-
-
-
 
 func NewInferenceEngine(config inference_config, model PolicyModel) *inference_engine {
     engine := &inference_engine{
@@ -420,7 +371,6 @@ func (engine *inference_engine) start_serving() {
     if engine.config.use_tensor_parallel {
         engine.enable_tensor_parallelism(engine.config.num_replicas)
     }
-
 
     for i := 0; i < 5; i++ {
         req := inference_request{

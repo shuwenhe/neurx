@@ -1,31 +1,21 @@
 package neurx.logging
 
-
-
-
-
-
-
 struct training_metrics {
 
     float current_loss
     []float recent_losses
     float avg_loss
 
-
     float samples_per_second
     float tokens_per_second
     float avg_step_time
 
-
     float current_lr
-
 
     float gpu_memory_used_gb
     float gpu_memory_total_gb
     float cpu_percent
     float memory_used_gb
-
 
     int global_step
     int steps_in_epoch
@@ -33,16 +23,13 @@ struct training_metrics {
     int epoch
     int total_epochs
 
-
     float validation_loss
     float accuracy
     float perplexity
 
-
     float best_validation_loss
     int best_step
 }
-
 
 func new_training_metrics() training_metrics {
     training_metrics {

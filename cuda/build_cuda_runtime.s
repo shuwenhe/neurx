@@ -1,7 +1,5 @@
 
 
-
-
 package main
 
 use std.io.println
@@ -20,14 +18,12 @@ func main() {
     string build_dir = "./artifacts/build/cuda_runtime"
     create_dir(build_dir)
 
-
     string cuda_home = get_cuda_home()
     string cuda_lib = cuda_home + "/lib64"
 
     println("[INFO] CUDA Home: " + cuda_home)
     println("[INFO] CUDA Lib: " + cuda_lib)
     println("")
-
 
     println("[1/2] Compiling CUDA Runtime wrapper...")
 

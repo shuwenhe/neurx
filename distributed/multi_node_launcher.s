@@ -1,20 +1,10 @@
 
 
-
-
-
-
-
-
 package neurx.distributed.multi_node_launcher
 
 use neurx.runtime.io.{runtime_env_get}
 use neurx.strings.{string_concat}
 use neurx.distributed.nccl_id_manager.{nccl_unique_id, load_nccl_id_from_shared_storage}
-
-
-
-
 
 struct multi_node_config {
     int num_nodes
@@ -33,11 +23,6 @@ struct rank_info {
     int node_rank
     string node_name
 }
-
-
-
-
-
 
 func init_multi_node_config() multi_node_config {
 
@@ -68,11 +53,6 @@ func init_multi_node_config() multi_node_config {
     }
 }
 
-
-
-
-
-
 func calculate_global_rank(
     multi_node_config config,
     int local_rank,
@@ -80,7 +60,6 @@ func calculate_global_rank(
 
     (config.node_rank * config.gpus_per_node) + local_rank
 }
-
 
 func generate_rank_info(
     multi_node_config config,
@@ -97,17 +76,12 @@ func generate_rank_info(
     }
 }
 
-
-
-
-
 struct node_launch_plan {
     int total_nodes
     int total_gpus
     []rank_info rank_list
     string launch_order
 }
-
 
 func generate_launch_plan(
     multi_node_config config,
@@ -140,10 +114,6 @@ func generate_launch_plan(
     }
 }
 
-
-
-
-
 struct node_sync_barrier {
     string barrier_name
     int participating_ranks
@@ -151,15 +121,10 @@ struct node_sync_barrier {
     bool barrier_reached
 }
 
-
 func synchronize_across_nodes(
     rank_info rank,
     string shared_storage_path,
 ) bool {
-
-
-
-
 
     string barrier_dir = shared_storage_path + "/barrier"
     string my_marker = barrier_dir + "/rank_" + itoa(rank.global_rank)
@@ -167,16 +132,10 @@ func synchronize_across_nodes(
     print("[SYNC] Rank " + itoa(rank.global_rank) +
           " reached barrier at " + barrier_dir)
 
-
     int timeout = 300
     int elapsed = 0
 
     while elapsed < timeout {
-
-
-
-
-
 
         sleep_seconds(1)
         elapsed = elapsed + 1
@@ -185,10 +144,6 @@ func synchronize_across_nodes(
     print("[WARNING] Barrier timeout after " + itoa(elapsed) + " seconds")
     false
 }
-
-
-
-
 
 struct node_health_status {
     int rank
@@ -206,18 +161,12 @@ struct fault_recovery_config {
     string checkpoint_dir
 }
 
-
 func check_node_health(
     rank_info rank,
     int heartbeat_timeout_sec,
 ) node_health_status {
 
-
-
-
-
     int current_time = get_current_timestamp()
-
 
     bool is_healthy = true
     string error = ""
@@ -231,13 +180,11 @@ func check_node_health(
     }
 }
 
-
 func detect_failed_ranks(
     int world_size,
     string shared_storage_path,
     int timeout_sec,
 ) []int {
-
 
     []int failed_ranks = []int{cap: 10}
     int failed_count = 0
@@ -246,18 +193,11 @@ func detect_failed_ranks(
     while rank < world_size {
         string heartbeat_file = shared_storage_path + "/heartbeat/rank_" + itoa(rank)
 
-
-
-
-
-
-
         rank = rank + 1
     }
 
     failed_ranks
 }
-
 
 func recover_from_failure(
     rank_info rank,
@@ -273,22 +213,13 @@ func recover_from_failure(
     print("[RECOVERY] Rank " + itoa(rank.global_rank) +
           " attempting recovery (attempt " + itoa(attempt_number) + ")")
 
-
     string checkpoint_file = config.checkpoint_dir + "/rank_" + itoa(rank.global_rank) + ".ckpt"
     print("[RECOVERY] Loading checkpoint from: " + checkpoint_file)
-
-
-
-
 
     print("[RECOVERY] Resuming training from checkpoint")
 
     true
 }
-
-
-
-
 
 struct distributed_checkpoint {
     int global_rank
@@ -299,7 +230,6 @@ struct distributed_checkpoint {
     string timestamp
 }
 
-
 func save_distributed_checkpoint(
     rank_info rank,
     int step,
@@ -307,48 +237,31 @@ func save_distributed_checkpoint(
     string shared_checkpoint_dir,
 ) bool {
 
-
     string rank_dir = shared_checkpoint_dir + "/rank_" + itoa(rank.global_rank)
     string ckpt_file = rank_dir + "/step_" + itoa(step) + ".ckpt"
 
     print("[CHECKPOINT] Rank " + itoa(rank.global_rank) +
           " saving checkpoint at step " + itoa(step) + " to " + ckpt_file)
 
-
     string content = "step=" + itoa(step) + "\n" +
                      "loss=" + ftoa(loss) + "\n" +
                      "timestamp=" + get_timestamp() + "\n" +
                      "rank=" + itoa(rank.global_rank)
 
-
-
-
-
     string sync_marker = shared_checkpoint_dir + "/rank_" + itoa(rank.global_rank) + ".done"
-
 
     true
 }
-
 
 func load_distributed_checkpoint(
     rank_info rank,
     string shared_checkpoint_dir,
 ) (int, float, bool) {
 
-
     string rank_dir = shared_checkpoint_dir + "/rank_" + itoa(rank.global_rank)
-
-
-
-
 
     (50000, 8.5, true)
 }
-
-
-
-
 
 func parse_int(string s, int fallback) int {
     int result = 0

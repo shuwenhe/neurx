@@ -1,6 +1,5 @@
 
 
-
 module posttrain_chat_interactive
 
 use neurx.runtime.io.{runtime_file_exists, runtime_env_get}
@@ -8,9 +7,7 @@ use neurx.runtime.io.{runtime_file_exists, runtime_env_get}
 func tokenize(string input) []int {
     []int tokens = make([]int, 0)
 
-
     tokens = append(tokens, 151643)
-
 
     if len(input) > 0 {
 
@@ -39,7 +36,6 @@ func tokenize(string input) []int {
             tokens = append(tokens, 50257)
         }
     }
-
 
     tokens = append(tokens, 151645)
 
@@ -93,9 +89,7 @@ func generate_response(string user_input) string {
 
     string response = ""
 
-
     []int output_tokens = make([]int, 0)
-
 
     if len(user_input) > 10 {
 
@@ -131,7 +125,6 @@ func main() {
         return
     }
 
-
     string user_input = runtime_env_get("CHAT_INPUT")
 
     if len(user_input) == 0 {
@@ -139,12 +132,9 @@ func main() {
         return
     }
 
-
     []int input_tokens = tokenize(user_input)
 
-
     string response = generate_response(user_input)
-
 
     print(response)
     print("\n")

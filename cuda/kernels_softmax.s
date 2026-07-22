@@ -1,28 +1,13 @@
 package neurx.cuda
 
-
-
-
-
-
 struct softmax_config {
     int rows
     int cols
 
     bool is_log_softmax
 
-
     int block_size
 }
-
-
-
-
-
-
-
-
-
 
 func launch_softmax(
     cuda_context ctx,
@@ -33,24 +18,6 @@ func launch_softmax(
     if !ctx.is_initialized {
         return error{message: "CUDA context not initialized"}
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     log_kernel_launch("SOFTMAX", cfg.rows, cfg.cols, 0,
                       float(cfg.rows * cfg.cols * 3),

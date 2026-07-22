@@ -1,8 +1,5 @@
 package main
 
-
-
-
 func test_tokenizer_config() {
     println("Test 1: tokenizer configuration")
 
@@ -21,7 +18,6 @@ func test_tokenizer_config() {
     }
 }
 
-
 func test_vocab_creation() {
     println("Test 2: Vocabulary creation")
 
@@ -36,7 +32,6 @@ func test_vocab_creation() {
         println("  ✓ Vocab list created")
     }
 }
-
 
 func test_tokenizer_init() {
     println("Test 3: tokenizer initialization")
@@ -65,7 +60,6 @@ func test_tokenizer_init() {
     }
 }
 
-
 func test_special_token_detection() {
     println("Test 4: Special token detection")
 
@@ -78,7 +72,6 @@ func test_special_token_detection() {
     }
 }
 
-
 func test_space_handling() {
     println("Test 5: Space handling")
 
@@ -89,7 +82,6 @@ func test_space_handling() {
         println("  ✓ Space handling correct")
     }
 }
-
 
 func test_padding() {
     println("Test 6: Sequence padding")
@@ -105,7 +97,6 @@ func test_padding() {
         println("  ✓ Padding to length 5 works")
     }
 }
-
 
 func test_truncation() {
     println("Test 7: Sequence truncation")
@@ -123,7 +114,6 @@ func test_truncation() {
         println("  ✓ Truncation to length 5 works")
     }
 }
-
 
 func test_vocab_size() {
     println("Test 8: Vocabulary size query")
@@ -144,7 +134,6 @@ func test_vocab_size() {
         println("  ✓ Vocab size query correct")
     }
 }
-
 
 func test_token_id_lookup() {
     println("Test 9: Token ID lookup")
@@ -171,7 +160,6 @@ func test_token_id_lookup() {
     }
 }
 
-
 func test_cache_stats() {
     println("Test 10: Cache statistics")
 
@@ -191,7 +179,6 @@ func test_cache_stats() {
         println("  ✓ Initial cache stats zero")
     }
 }
-
 
 func test_batch_operations() {
     println("Test 11: Batch encode/decode")
@@ -223,7 +210,6 @@ func test_batch_operations() {
     }
 }
 
-
 func test_end_to_end_encode() {
     println("Test 12: End-to-end encoding")
 
@@ -240,12 +226,10 @@ func test_end_to_end_encode() {
     let text = "hello"
     let token_ids = encode(tokenizer, text)
 
-
     if len(token_ids) > 2 {
         println("  ✓ Encoding includes special tokens")
     }
 }
-
 
 func to_string_int(int x) string {
     if x == 0 { return "0" }
@@ -260,7 +244,6 @@ func to_string_int(int x) string {
     if x == 9 { return "9" }
     return "0"
 }
-
 
 func main() {
     println("============================================")

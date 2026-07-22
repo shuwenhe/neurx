@@ -1,9 +1,5 @@
 package neurx.distributed
 
-
-
-
-
 struct pipeline_parallel_config {
     int pp_degree
     int pp_rank
@@ -44,7 +40,6 @@ func pp_mod_nonneg(int value, int divisor) int {
     current
 }
 
-
 func new_pipeline_parallel_config(
     int pp_degree,
     int pp_rank,
@@ -64,7 +59,6 @@ func new_pipeline_parallel_config(
     return cfg
 }
 
-
 func new_pipeline_stage_config(
     int stage_id,
     int pp_degree,
@@ -74,10 +68,8 @@ func new_pipeline_stage_config(
     pipeline_stage_config stage_cfg
     stage_cfg.stage_id = stage_id
 
-
     int layers_per_stage = num_layers / pp_degree
     int remainder = pp_mod_nonneg(num_layers, pp_degree)
-
 
     if stage_id < remainder {
         stage_cfg.num_layers_in_stage = layers_per_stage + 1
@@ -93,7 +85,6 @@ func new_pipeline_stage_config(
     return stage_cfg
 }
 
-
 func new_pipeline_parallel_state(
     pipeline_parallel_config cfg,
     pipeline_stage_config stage_cfg) pipeline_parallel_state {
@@ -106,25 +97,17 @@ func new_pipeline_parallel_state(
     return state
 }
 
-
-
-
-
-
-
 struct gpipe_state {
     [][][]double microbatch_activations
     [][]double stage_gradients
     int completed_microbatches
 }
 
-
 func gpipe_forward_stage(
     [][]double microbatch_input,
     [][]double stage_weights,
     pipeline_parallel_state pp_state,
     gpipe_state schedule_state) [][]double {
-
 
     [][]double output = microbatch_input
 
@@ -135,18 +118,12 @@ func gpipe_forward_stage(
         layer_idx = layer_idx + 1
     }
 
-
     if !pp_state.config.use_activation_checkpointing {
 
     }
 
     return output
 }
-
-
-
-
-
 
 struct f1b1_state {
     [][]double forward_queue
@@ -155,19 +132,13 @@ struct f1b1_state {
     int b_counter
 }
 
-
 func f1b1_forward_stage(
     [][]double microbatch_input,
     [][]double stage_weights,
     pipeline_parallel_state pp_state,
     f1b1_state schedule_state) [][]double {
 
-
-
-
-
     [][]double output = microbatch_input
-
 
     int layer_idx = 0
     while layer_idx < pp_state.stage_config.num_layers_in_stage {
@@ -180,7 +151,6 @@ func f1b1_forward_stage(
     return output
 }
 
-
 func f1b1_backward_stage(
     [][]double output_grad,
     [][]double stage_weights,
@@ -188,12 +158,7 @@ func f1b1_backward_stage(
     pipeline_parallel_state pp_state,
     f1b1_state schedule_state) [][]double {
 
-
-
-
-
     [][]double input_grad = output_grad
-
 
     int layer_idx = pp_state.stage_config.num_layers_in_stage - 1
     while layer_idx >= 0 {
@@ -206,24 +171,17 @@ func f1b1_backward_stage(
     return input_grad
 }
 
-
-
-
-
-
 struct interleaved_pipeline_state {
     int num_model_copies
     []f1b1_state model_schedules
     int next_model_id
 }
 
-
 func interleaved_forward_stage(
     [][]double microbatch_input,
     [][]double stage_weights,
     pipeline_parallel_state pp_state,
     interleaved_pipeline_state schedule_state) [][]double {
-
 
     int model_id = s(schedule_state.next_model_id - (schedule_state.next_model_id / schedule_state.num_model_copies) * schedule_state.num_model_copies)
 
@@ -236,22 +194,12 @@ func interleaved_forward_stage(
     return output
 }
 
-
-
-
 func send_activation_to_next_stage(
     [][]double activation,
     int next_stage_rank,
     int microbatch_id) {
 
-
-
-
-
-
-
 }
-
 
 func recv_activation_from_prev_stage(
     int prev_stage_rank,
@@ -260,27 +208,17 @@ func recv_activation_from_prev_stage(
     int expected_shape_1,
     int expected_shape_2) [][]double {
 
-
-
-
     [][]double activation
-
-
-
 
     return activation
 }
-
 
 func send_gradient_to_prev_stage(
     [][]double gradient,
     int prev_stage_rank,
     int microbatch_id) {
 
-
-
 }
-
 
 func recv_gradient_from_next_stage(
     int next_stage_rank,
@@ -291,16 +229,8 @@ func recv_gradient_from_next_stage(
 
     [][]double gradient
 
-
-
-
     return gradient
 }
-
-
-
-
-
 
 func recompute_activation_for_backward(
     [][]double input_activation,
@@ -308,18 +238,10 @@ func recompute_activation_for_backward(
     pipeline_parallel_state pp_state,
     int layer_id) [][]double {
 
-
-
-
     [][]double recomputed = input_activation
-
-
-
 
     return recomputed
 }
-
-
 
 struct pipeline_metrics {
     double utilization
@@ -329,32 +251,20 @@ struct pipeline_metrics {
     double actual_speedup
 }
 
-
 func calculate_pipeline_efficiency(
     pipeline_parallel_config config,
     pipeline_metrics metrics) double {
 
-
-
-
     if metrics.total_time <= 0.0 {
         return 0.0
     }
-
 
     metrics.utilization = 1.0 - (metrics.bubble_time / metrics.total_time)
 
     return metrics.utilization
 }
 
-
-
-
 func recommended_2t_pipeline_config() pipeline_parallel_config {
-
-
-
-
 
     pipeline_parallel_config cfg
     cfg.pp_degree = 16
@@ -365,10 +275,7 @@ func recommended_2t_pipeline_config() pipeline_parallel_config {
     return cfg
 }
 
-
 func recommended_2t_ultra_pipeline_config() pipeline_parallel_config {
-
-
 
     pipeline_parallel_config cfg
     cfg.pp_degree = 32

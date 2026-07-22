@@ -2,7 +2,6 @@ package main
 
 use std.io.println
 
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -31,16 +30,13 @@ func float_to_str(float value) string {
     return int_to_str(int_part)
 }
 
-
 func string_char(int code) string {
-
 
     ""
 }
     println("========================================")
     println("NeurX LoRA Supervised Fine-Tuning")
     println("========================================")
-
 
     int epochs = 3
     int feature_dim = 32
@@ -58,7 +54,6 @@ func string_char(int code) string {
     println("Note: This is a simplified S language LoRA SFT runner")
     println("For production training, use PyTorch with HuggingFace Transformers")
     println("")
-
 
     float base_weight = 1.0
     float adapter_a = 0.0
@@ -79,16 +74,13 @@ func string_char(int code) string {
             float x = 0.02 * ((sample + 1) as float)
             float y = 0.01 * ((sample + 1) as float)
 
-
             float pred = base_weight * x + adapter_scale * adapter_a * adapter_b * x
             float diff = pred - y
-
 
             float grad_base = 2.0 * diff * x
             float grad_a = 2.0 * diff * x * adapter_b * adapter_scale
             float grad_b = 2.0 * diff * x * adapter_a * adapter_scale
             float loss = diff * diff
-
 
             base_weight = base_weight - learning_rate * grad_base
             adapter_a = adapter_a - learning_rate * grad_a

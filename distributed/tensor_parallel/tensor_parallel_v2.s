@@ -1,36 +1,5 @@
 package neurx.distributed.tensor_parallel_v2
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct tp_v2_config {
     int tp_degree
     int tp_rank
@@ -44,28 +13,23 @@ struct tp_v2_config {
 struct tp_v2_state {
     tp_v2_config config
 
-
     int local_hidden_dim
     int local_num_heads
     int local_num_kv_heads
     int head_dim
     int local_ffn_dim
 
-
     [][]double w_q_local
     [][]double w_k_local
     [][]double w_v_local
     [][]double w_o_local
 
-
     [][]double w_gate_local
     [][]double w_up_local
     [][]double w_down_local
 
-
     []double norm1_gamma
     []double norm2_gamma
-
 
     double time_attn_ms
     double time_mlp_ms
@@ -80,11 +44,9 @@ func tp_mod(int val, int div) int {
     return r
 }
 
-
 func init_tp_v2(tp_v2_config cfg) tp_v2_state {
     tp_v2_state state
     state.config = cfg
-
 
     int h_rem = tp_mod(cfg.hidden_dim, cfg.tp_degree)
     int head_rem = tp_mod(cfg.num_attention_heads, cfg.tp_degree)
@@ -94,16 +56,11 @@ func init_tp_v2(tp_v2_config cfg) tp_v2_state {
     state.head_dim = cfg.hidden_dim / cfg.num_attention_heads
     state.local_num_kv_heads = cfg.num_kv_heads / cfg.tp_degree
 
-
-
-
     state.local_ffn_dim = cfg.ffn_intermediate_dim / cfg.tp_degree
-
 
     int h = cfg.hidden_dim
     int lh = state.local_hidden_dim
     int lffn = state.local_ffn_dim
-
 
     state.w_q_local = alloc_matrix(lh, h)
     state.w_k_local = alloc_matrix(lh, h)
@@ -113,7 +70,6 @@ func init_tp_v2(tp_v2_config cfg) tp_v2_state {
     state.w_gate_local = alloc_matrix(lffn, h)
     state.w_up_local = alloc_matrix(lffn, h)
     state.w_down_local = alloc_matrix(h, lffn)
-
 
     state.norm1_gamma = []double{cap: h}
     state.norm2_gamma = []double{cap: h}
@@ -132,7 +88,6 @@ func init_tp_v2(tp_v2_config cfg) tp_v2_state {
     return state
 }
 
-
 func alloc_matrix(int rows, int cols) [][]double {
     [][]double m = [][][]double{cap: rows}
     int i = 0
@@ -143,14 +98,10 @@ func alloc_matrix(int rows, int cols) [][]double {
     return m
 }
 
-
-
-
 func tp_attention_forward(
     tp_v2_state state,
     [][]double input,
     bool causal_mask) [][]double {
-
 
     int batch_size = len(input)
     int seq_len = 0
@@ -162,31 +113,18 @@ func tp_attention_forward(
     int nkh = state.local_num_kv_heads
     int d = state.head_dim
 
-
     [][]double normalized = rmsnorm_forward(input, state.norm1_gamma, 1e-6)
-
-
-
 
     [][]double q_local = matmul2d(normalized, transpose_matrix(state.w_q_local))
     [][]double k_local = matmul2d(normalized, transpose_matrix(state.w_k_local))
     [][]double v_local = matmul2d(normalized, transpose_matrix(state.w_v_local))
 
-
-
     [][]double q_heads = reshape_to_heads(q_local, batch_size, seq_len, nh, d)
     [][]double k_heads = reshape_to_heads(k_local, batch_size, seq_len, nkh, d)
     [][]double v_heads = reshape_to_heads(v_local, batch_size, seq_len, nkh, d)
 
-
-
     q_heads = apply_rope(q_heads, batch_size, seq_len, nh, d, state.config)
     k_heads = apply_rope(k_heads, batch_size, seq_len, nkh, d, state.config)
-
-
-
-
-
 
     int n_kv_groups = nh / nkh
 
@@ -199,23 +137,16 @@ func tp_attention_forward(
         while h_idx < nh {
             int kv_h_idx = h_idx / n_kv_groups
 
-
-
             [][]double scores = compute_attn_scores(q_heads[b][h_idx], k_heads[b][kv_h_idx], seq_len, d)
-
 
             double scale = 1.0 / sqrt_double(double(d))
             scores = scale_matrix(scores, scale)
-
 
             if causal_mask {
                 scores = apply_causal_mask(scores, seq_len)
             }
 
-
             [][]double attn_weights = softmax_2d(scores, 1)
-
-
 
             attn_out[b][h_idx] = matmul2d(attn_weights, v_heads[b][kv_h_idx])
 
@@ -224,27 +155,16 @@ func tp_attention_forward(
         b = b + 1
     }
 
-
-
     [][]double concat_out = concat_heads(attn_out, batch_size, seq_len, nh, d)
-
-
-
 
     [][]double attn_proj = matmul2d(concat_out, transpose_matrix(state.w_o_local))
 
-
-
     attn_proj = tp_allreduce_sum(attn_proj, state)
-
 
     [][]double output = add_matrices(input, attn_proj)
 
     return output
 }
-
-
-
 
 func tp_mlp_forward(
     tp_v2_state state,
@@ -256,75 +176,40 @@ func tp_mlp_forward(
     int H = state.config.hidden_dim
     int lffn = state.local_ffn_dim
 
-
     [][]double normalized = rmsnorm_forward(input, state.norm2_gamma, 1e-6)
-
-
 
     [][]double gate = matmul2d(normalized, transpose_matrix(state.w_gate_local))
 
-
-
     [][]double up = matmul2d(normalized, transpose_matrix(state.w_up_local))
-
-
-
 
     [][]double activated = silu_activation(gate)
     [][]double gated = elementwise_mul(activated, up)
 
-
-
     [][]double proj = matmul2d(gated, transpose_matrix(state.w_down_local))
 
-
     proj = tp_allreduce_sum(proj, state)
-
 
     [][]double output = add_matrices(input, proj)
 
     return output
 }
 
-
-
-
 func tp_transformer_block_forward(
     ref tp_v2_state state,
     [][]double input,
     bool causal_mask) [][]double {
 
-
     [][]double attn_out = tp_attention_forward(state, input, causal_mask)
-
 
     [][]double mlp_out = tp_mlp_forward(state, attn_out)
 
     return mlp_out
 }
 
-
-
-
 func tp_allreduce_sum([][][]double tensor, tp_v2_state state) [][][]double {
-
-
-
-
-
-
-
-
-
-
-
-
 
     return tensor
 }
-
-
-
 
 func matmul2d([][]double a, [][]double b) [][]double {
     int M = len(a)
@@ -352,7 +237,6 @@ func matmul2d([][]double a, [][]double b) [][]double {
     return c
 }
 
-
 func transpose_matrix([][]double m) [][]double {
     int rows = len(m)
     int cols = 0
@@ -370,7 +254,6 @@ func transpose_matrix([][]double m) [][]double {
     }
     return t
 }
-
 
 func add_matrices([][]double a, [][]double b) [][]double {
     int rows = len(a)
@@ -390,7 +273,6 @@ func add_matrices([][]double a, [][]double b) [][]double {
     return c
 }
 
-
 func elementwise_mul([][]double a, [][]double b) [][]double {
     int rows = len(a)
     int cols = 0
@@ -409,7 +291,6 @@ func elementwise_mul([][]double a, [][]double b) [][]double {
     return c
 }
 
-
 func scale_matrix([][]double m, double scalar) [][]double {
     int rows = len(m)
     int i = 0
@@ -423,7 +304,6 @@ func scale_matrix([][]double m, double scalar) [][]double {
     }
     return m
 }
-
 
 func rmsnorm_forward([][]double input, []double gamma, double eps) [][]double {
     int rows = len(input)
@@ -443,7 +323,6 @@ func rmsnorm_forward([][]double input, []double gamma, double eps) [][]double {
         }
         double mean_sq = sum_sq / double(cols)
 
-
         double inv_norm = 1.0 / sqrt_double(mean_sq + eps)
 
         int k = 0
@@ -455,7 +334,6 @@ func rmsnorm_forward([][]double input, []double gamma, double eps) [][]double {
     }
     return output
 }
-
 
 func silu_activation([][]double m) [][]double {
     int rows = len(m)
@@ -473,7 +351,6 @@ func silu_activation([][]double m) [][]double {
     return m
 }
 
-
 func exp_approx(double x) double {
 
     if x > 20.0 { return 22026.46579 }
@@ -490,7 +367,6 @@ func exp_approx(double x) double {
     return result
 }
 
-
 func sqrt_double(double x) double {
     if x <= 0.0 { return 0.0 }
     double g = x / 2.0
@@ -503,7 +379,6 @@ func sqrt_double(double x) double {
     }
     return g
 }
-
 
 func softmax_2d([][]double logits, int axis) [][]double {
     int rows = len(logits)
@@ -522,7 +397,6 @@ func softmax_2d([][]double logits, int axis) [][]double {
             j = j + 1
         }
 
-
         double sum_exp = 0.0
         int k = 0
         while k < cols {
@@ -530,7 +404,6 @@ func softmax_2d([][]double logits, int axis) [][]double {
             sum_exp = sum_exp + output[i][k]
             k = k + 1
         }
-
 
         int m = 0
         while m < cols {
@@ -541,7 +414,6 @@ func softmax_2d([][]double logits, int axis) [][]double {
     }
     return output
 }
-
 
 func reshape_to_heads([][]double x, int B, int S, int nh, int d) [][][]double {
     [][][]double result = [][][]double{cap: B}
@@ -571,7 +443,6 @@ func reshape_to_heads([][]double x, int B, int S, int nh, int d) [][][]double {
     return result
 }
 
-
 func concat_heads([][][]double x, int B, int S, int nh, int d) [][]double {
     [][]double result = alloc_matrix(B, S * nh * d)
     int b = 0
@@ -597,7 +468,6 @@ func concat_heads([][][]double x, int B, int S, int nh, int d) [][]double {
     return result
 }
 
-
 func apply_causal_mask([][]double scores, int seq_len) [][]double {
     int i = 0
     while i < seq_len {
@@ -612,7 +482,6 @@ func apply_causal_mask([][]double scores, int seq_len) [][]double {
     }
     return scores
 }
-
 
 func compute_attn_scores([][]double q_head, [][]double k_head, int seq_len, int d) [][]double {
     [][]double scores = alloc_matrix(seq_len, seq_len)
@@ -634,11 +503,7 @@ func compute_attn_scores([][]double q_head, [][]double k_head, int seq_len, int 
     return scores
 }
 
-
 func apply_rope([][][]double x, int B, int S, int nh, int d, tp_v2_config cfg) [][][]double {
-
-
-
 
     int half_d = d / 2
 

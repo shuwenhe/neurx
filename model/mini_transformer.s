@@ -1,16 +1,7 @@
 package neurx.model
 
-
-
-
-
-
 import fmt
 import math
-
-
-
-
 
 struct Tensor {
     shape: []int
@@ -43,10 +34,6 @@ func tensor_shape_string(t: Tensor) string {
     result
 }
 
-
-
-
-
 struct mini_transformer {
 
     vocab_size: int
@@ -56,14 +43,12 @@ struct mini_transformer {
     seq_len: int
     num_heads: int
 
-
     token_embed: Tensor
     pos_embed: Tensor
 
     layers: []transformer_layer
 
     output_proj: Tensor
-
 
     param_count: int
 }
@@ -75,20 +60,14 @@ struct transformer_layer {
     v_proj: Tensor
     out_proj: Tensor
 
-
     fc1: Tensor
     fc2: Tensor
-
 
     norm1_gamma: Tensor
     norm1_beta: Tensor
     norm2_gamma: Tensor
     norm2_beta: Tensor
 }
-
-
-
-
 
 func create_mini_transformer(
     vocab_size: int,
@@ -99,13 +78,11 @@ func create_mini_transformer(
     num_heads: int
 ) mini_transformer {
 
-
     token_embed := tensor_new([]int{vocab_size, embed_dim})
     for i := 0; i < len(token_embed.data); i += 1 {
 
         token_embed.data[i] = (float(i%1000) / 1000.0) * math.Sqrt(2.0 / float(vocab_size + embed_dim))
     }
-
 
     pos_embed := tensor_new([]int{seq_len, embed_dim})
     for i := 0; i < seq_len; i += 1 {
@@ -119,7 +96,6 @@ func create_mini_transformer(
             }
         }
     }
-
 
     layers := make([]transformer_layer, num_layers)
     for l := 0; l < num_layers; l += 1 {
@@ -136,7 +112,6 @@ func create_mini_transformer(
             norm2_beta: tensor_new([]int{embed_dim}),
         }
 
-
         for i := 0; i < len(layer.q_proj.data); i += 1 {
             layer.q_proj.data[i] = (float(i%1000) / 1000.0 - 0.5) * 0.1
             layer.k_proj.data[i] = (float(i%1000) / 1000.0 - 0.5) * 0.1
@@ -152,7 +127,6 @@ func create_mini_transformer(
             layer.fc2.data[i] = (float(i%1000) / 1000.0 - 0.5) * 0.1
         }
 
-
         for i := 0; i < len(layer.norm1_gamma.data); i += 1 {
             layer.norm1_gamma.data[i] = 1.0
             layer.norm1_beta.data[i] = 0.0
@@ -163,12 +137,10 @@ func create_mini_transformer(
         layers[l] = layer
     }
 
-
     output_proj := tensor_new([]int{embed_dim, vocab_size})
     for i := 0; i < len(output_proj.data); i += 1 {
         output_proj.data[i] = (float(i%1000) / 1000.0 - 0.5) * 0.1
     }
-
 
     param_count := vocab_size * embed_dim
     param_count += seq_len * embed_dim
@@ -196,17 +168,12 @@ func create_mini_transformer(
     }
 }
 
-
-
-
-
 func forward(
     model: mini_transformer,
     input_ids: []int,
     batch_size: int,
     seq_length: int
 ) Tensor {
-
 
     embeddings := Tensor{
         shape: []int{batch_size, seq_length, model.embed_dim},
@@ -225,7 +192,6 @@ func forward(
                     embeddings.data[idx_emb] = model.token_embed.data[idx_tok]
                 }
 
-
                 for d := 0; d < model.embed_dim; d += 1 {
                     idx_emb := (b * seq_length + s) * model.embed_dim + d
                     idx_pos := s * model.embed_dim + d
@@ -235,18 +201,14 @@ func forward(
         }
     }
 
-
     x := embeddings
     for l := 0; l < model.num_layers; l += 1 {
         layer := model.layers[l]
 
-
         x = apply_attention(x, layer, batch_size, seq_length, model.embed_dim, model.num_heads)
-
 
         x = apply_ffn(x, layer, batch_size, seq_length, model.embed_dim)
     }
-
 
     logits := Tensor{
         shape: []int{batch_size, seq_length, model.vocab_size},
@@ -273,10 +235,6 @@ func forward(
     logits
 }
 
-
-
-
-
 func apply_attention(
     x: Tensor,
     layer: transformer_layer,
@@ -285,7 +243,6 @@ func apply_attention(
     embed_dim: int,
     num_heads: int
 ) Tensor {
-
 
     head_dim := embed_dim / num_heads
 
@@ -325,7 +282,6 @@ func apply_ffn(
 
     hidden_dim := 4 * embed_dim
 
-
     hidden := Tensor{
         shape: []int{batch_size, seq_length, hidden_dim},
         data: make([]float, batch_size * seq_length * hidden_dim),
@@ -349,7 +305,6 @@ func apply_ffn(
         }
     }
 
-
     output := Tensor{
         shape: x.shape,
         data: make([]float, len(x.data)),
@@ -366,7 +321,6 @@ func apply_ffn(
                     sum += hidden.data[hidden_idx] * layer.fc2.data[fc2_idx]
                 }
 
-
                 x_idx := (b * seq_length + s) * embed_dim + d
                 output_idx := (b * seq_length + s) * embed_dim + d
                 output.data[output_idx] = x.data[x_idx] + sum
@@ -381,10 +335,6 @@ func gelu(x: float) float {
 
     return x * 0.5 * (1.0 + math.Tanh(math.Sqrt(2.0/math.Pi) * (x + 0.044715 * x * x * x)))
 }
-
-
-
-
 
 func compute_cross_entropy_loss(
     logits: Tensor,
@@ -403,8 +353,6 @@ func compute_cross_entropy_loss(
 
             if target_idx >= 0 && target_idx < vocab_size {
 
-
-
                 max_logit := -1e9
                 for v := 0; v < vocab_size; v += 1 {
                     logit_idx := (b * seq_length + s) * vocab_size + v
@@ -413,13 +361,11 @@ func compute_cross_entropy_loss(
                     }
                 }
 
-
                 sum_exp := 0.0
                 for v := 0; v < vocab_size; v += 1 {
                     logit_idx := (b * seq_length + s) * vocab_size + v
                     sum_exp += math.Exp(logits.data[logit_idx] - max_logit)
                 }
-
 
                 target_logit_idx := (b * seq_length + s) * vocab_size + target_idx
                 loss := -(logits.data[target_logit_idx] - max_logit - math.Log(sum_exp))
@@ -437,10 +383,6 @@ func compute_cross_entropy_loss(
     0.0
 }
 
-
-
-
-
 func compute_gradients(
     model: mini_transformer,
     logits: Tensor,
@@ -451,8 +393,6 @@ func compute_gradients(
 
     gradients := make(map[string]Tensor)
     vocab_size := model.vocab_size
-
-
 
     logit_grads := Tensor{
         shape: logits.shape,
@@ -479,7 +419,6 @@ func compute_gradients(
                     sum_exp += math.Exp(logits.data[logit_idx] - max_logit)
                 }
 
-
                 for v := 0; v < vocab_size; v += 1 {
                     logit_idx := (b * seq_length + s) * vocab_size + v
                     softmax_v := math.Exp(logits.data[logit_idx] - max_logit) / sum_exp
@@ -494,15 +433,7 @@ func compute_gradients(
         }
     }
 
-
-
-
-
     output_proj_grad := tensor_new(model.output_proj.shape)
-
-
-
-
 
     for d := 0; d < model.embed_dim; d += 1 {
         for v := 0; v < vocab_size; v += 1 {
@@ -519,8 +450,6 @@ func compute_gradients(
     }
 
     gradients["output_proj"] = output_proj_grad
-
-
 
     token_embed_grad := tensor_new(model.token_embed.shape)
 
@@ -539,8 +468,6 @@ func compute_gradients(
 
     gradients["token_embed"] = token_embed_grad
 
-
-
     for layer_idx := 0; layer_idx < model.num_layers; layer_idx += 1 {
         layer_grad_prefix := fmt.Sprintf("layer_%d_", layer_idx)
 
@@ -549,8 +476,6 @@ func compute_gradients(
         v_grad := tensor_new(model.layers[layer_idx].v_proj.shape)
         fc1_grad := tensor_new(model.layers[layer_idx].fc1.shape)
         fc2_grad := tensor_new(model.layers[layer_idx].fc2.shape)
-
-
 
         for i := 0; i < len(q_grad.data); i += 1 {
             q_grad.data[i] = 0.0001 * (float(i%100) / 100.0 - 0.5)
@@ -578,10 +503,6 @@ func compute_gradients(
     gradients
 }
 
-
-
-
-
 struct adam_w_state {
 
     m_states: map[string]Tensor
@@ -601,7 +522,6 @@ func adamw_update(
 ) {
 
     state.t = state.t + 1
-
 
     if output_grad, has_output := gradients["output_proj"]; has_output {
         if state.m_states["output_proj"].shape == nil || len(state.m_states["output_proj"].shape) == 0 {
@@ -623,7 +543,6 @@ func adamw_update(
         )
     }
 
-
     if embed_grad, has_embed := gradients["token_embed"]; has_embed {
         if state.m_states["token_embed"].shape == nil || len(state.m_states["token_embed"].shape) == 0 {
             state.m_states["token_embed"] = tensor_new(model.token_embed.shape)
@@ -644,10 +563,8 @@ func adamw_update(
         )
     }
 
-
     for layer_idx := 0; layer_idx < len(model.layers); layer_idx += 1 {
         layer_prefix := fmt.Sprintf("layer_%d_", layer_idx)
-
 
         if q_grad, has_q := gradients[layer_prefix + "q_proj"]; has_q {
             state_key := layer_prefix + "q_proj"
@@ -669,7 +586,6 @@ func adamw_update(
             )
         }
 
-
         if fc1_grad, has_fc1 := gradients[layer_prefix + "fc1"]; has_fc1 {
             state_key := layer_prefix + "fc1"
             if state.m_states[state_key].shape == nil || len(state.m_states[state_key].shape) == 0 {
@@ -689,7 +605,6 @@ func adamw_update(
                 weight_decay,
             )
         }
-
 
         if fc2_grad, has_fc2 := gradients[layer_prefix + "fc2"]; has_fc2 {
             state_key := layer_prefix + "fc2"
@@ -713,7 +628,6 @@ func adamw_update(
     }
 }
 
-
 func update_parameter(
     param: &Tensor,
     grad: Tensor,
@@ -730,22 +644,16 @@ func update_parameter(
     for i := 0; i < len(param.data); i += 1 {
         g := grad.data[i]
 
-
         m.data[i] = beta1 * m.data[i] + (1.0 - beta1) * g
-
 
         m2 := g * g
         v.data[i] = beta2 * v.data[i] + (1.0 - beta2) * m2
 
-
         m_hat := m.data[i] / (1.0 - math.Pow(beta1, float(t)))
-
 
         v_hat := v.data[i] / (1.0 - math.Pow(beta2, float(t)))
 
-
         param.data[i] = param.data[i] * (1.0 - wd * lr)
-
 
         param.data[i] = param.data[i] - lr * (m_hat / (math.Sqrt(v_hat) + eps))
     }

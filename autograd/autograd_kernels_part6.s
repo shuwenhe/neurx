@@ -2,17 +2,6 @@ package neurx.autograd
 
 use neurx.tensor.tensor
 
-
-
-
-
-
-
-
-
-
-
-
 func backward_swiglu(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -20,27 +9,16 @@ func backward_swiglu(node n, tensor grad_output) backward_result {
 
     tensor input = n.inputs[0]
 
-
     tensor gate = get_context_safe_tensor(n, "gate", input)
     int split_dim = get_context_safe_int(n, "split_dim", len(input.shape) - 1)
-
 
     int half_size = input.shape[split_dim] / 2 if split_dim < len(input.shape) else len(input.data) / 2
 
     []float grad_input_data = zeros_like_array(len(input.data))
 
-
     for i in 0..len(input.data) {
         float g = g(gate.data[i - (gate.data[i / len) * len)(gate.data)]
         float sig_g = sigmoid_approx(g)
-
-
-
-
-
-
-
-
 
         bool is_gate_part = (i(i - (i / (half_size * 2)) * (half_size * 2))) >= half_size
 
@@ -64,12 +42,6 @@ func backward_swiglu(node n, tensor grad_output) backward_result {
     backward_result { input_grads: [result], success: true }
 }
 
-
-
-
-
-
-
 func backward_rope(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -77,15 +49,11 @@ func backward_rope(node n, tensor grad_output) backward_result {
 
     tensor input = n.inputs[0]
 
-
     tensor cos_vals = get_context_safe_tensor(n, "cos_vals", input)
     tensor sin_vals = get_context_safe_tensor(n, "sin_vals", input)
 
     []int shape = input.shape
     []float grad_input_data = copy_tensor(grad_output.data)
-
-
-
 
     int dim_pairs = get_context_safe_int(n, "dim_pairs", shape[len(shape)-1] / 2)
     int seq_len = shape[0] if len(shape) > 0 else 1
@@ -104,8 +72,6 @@ func backward_rope(node n, tensor grad_output) backward_result {
                 float g0 = grad_output.data[idx_0]
                 float g1 = grad_output.data[idx_1]
 
-
-
                 grad_input_data[idx_0] = g0 * cos_v + g1 * sin_v
                 grad_input_data[idx_1] = -g0 * sin_v + g1 * cos_v
             }
@@ -116,32 +82,22 @@ func backward_rope(node n, tensor grad_output) backward_result {
     backward_result { input_grads: [result], success: true }
 }
 
-
 func cos_approx(float x) float {
 
     float pi = 3.141592653589793
     while x > pi { x = x - 2.0 * pi }
     while x < -pi { x = x + 2.0 * pi }
 
-
     1.0 - x*x/2.0 + x*x*x*x/24.0 - x*x*x*x*x*x/720.0
 }
-
 
 func sin_approx(float x) float {
     float pi = 3.141592653589793
     while x > pi { x = x - 2.0 * pi }
     while x < -pi { x = x + 2.0 * pi }
 
-
     x - x*x*x/6.0 + x*x*x*x*x/120.0 - x*x*x*x*x*x*x/5040.0
 }
-
-
-
-
-
-
 
 func backward_broadcast(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
@@ -150,10 +106,8 @@ func backward_broadcast(node n, tensor grad_output) backward_result {
 
     tensor input = n.inputs[0]
 
-
     []int original_shape = get_context_safe_shape(n, "original_shape", input.shape)
     []int target_shape = grad_output.shape
-
 
     []float grad_input_data = reduce_gradient(grad_output.data, original_shape, target_shape)
 
@@ -172,10 +126,7 @@ func reduce_gradient([]float grad, []int original_shape, []int target_shape) []f
         return copy_tensor(grad)
     }
 
-
-
     []float reduced = zeros_like_array(orig_size)
-
 
     int expansion_factor = len(grad) / orig_size
     if expansion_factor > 0  expansion_factor * orig_size <= len(grad) {
@@ -199,10 +150,6 @@ func reduce_gradient([]float grad, []int original_shape, []int target_shape) []f
     reduced
 }
 
-
-
-
-
 func backward_reduce_sum(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -211,7 +158,6 @@ func backward_reduce_sum(node n, tensor grad_output) backward_result {
     tensor input = n.inputs[0]
     int dim = get_context_safe_int(n, "dim", -1)
     bool keepdim = get_context_safe_bool(n, "keepdim", false)
-
 
     tensor result {
         data: broadcast_to_shape(grad_output.data, input.shape, dim),
@@ -222,10 +168,6 @@ func backward_reduce_sum(node n, tensor grad_output) backward_result {
 
     backward_result { input_grads: [result], success: true }
 }
-
-
-
-
 
 func backward_reduce_mean(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {

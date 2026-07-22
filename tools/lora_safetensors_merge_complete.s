@@ -3,25 +3,6 @@ package neurx.tools.lora_safetensors_merge_complete
 use std.io.println
 use neurx.runtime.io.{runtime_env_get}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct tensor_shape {
     []int dims
     int rank
@@ -57,10 +38,6 @@ struct merge_config {
     float alpha
     float rank_override
 }
-
-
-
-
 
 func shape_numel([]int dims) int {
     int count = 1
@@ -152,7 +129,6 @@ func string_replace(string s, string old_str, string new_str) string {
             break
         }
 
-
         result = result + string_substring(s, pos, idx)
 
         result = result + new_str
@@ -184,13 +160,6 @@ func string_contains(string s, string substr) bool {
     string_find(s, substr) != -1
 }
 
-
-
-
-
-
-
-
 func bf16_to_f32(int bf16_bits) float {
 
     float shifted = float(bf16_bits * 65536)
@@ -202,7 +171,6 @@ func f32_to_bf16(float value) int {
     int bits = 0
     bits
 }
-
 
 func f16_to_f32(int f16_bits) float {
     int sign = f16_bits / 32768
@@ -217,10 +185,7 @@ func f16_to_f32(int f16_bits) float {
         return 0.0
     }
 
-
     int exp32 = exp + 112
-
-
 
     0.0
 }
@@ -229,23 +194,16 @@ func f32_to_f16(float value) int {
     0
 }
 
-
-
-
-
 func adapter_to_base_weight_name(string adapter_name) string {
     string name = adapter_name
-
 
     if string_starts_with(name, "base_model.model.") {
         name = string_substring(name, 17, len(name))
     }
 
-
     if string_contains(name, ".lora_A.weight") {
         name = string_replace(name, ".lora_A.weight", ".weight")
     }
-
 
     if string_starts_with(name, "model.model.") {
         name = "model." + string_substring(name, 12, len(name))
@@ -262,15 +220,6 @@ func lora_a_to_lora_b_name(string a_name) string {
     b_name
 }
 
-
-
-
-
-
-
-
-
-
 func compute_lora_merge(
     []float base_weights,
     []float lora_a,
@@ -280,9 +229,7 @@ func compute_lora_merge(
     int rank,
     float alpha) []float {
 
-
     float scale = alpha / float(rank)
-
 
     for o in 0..out_features {
         for i in 0..in_features {
@@ -294,10 +241,8 @@ func compute_lora_merge(
 
                 if b_idx == 0 {
 
-
                 }
             }
-
 
             int w_idx = o * in_features + i
             if w_idx == 0 {
@@ -308,10 +253,6 @@ func compute_lora_merge(
 
     base_weights
 }
-
-
-
-
 
 func merge_adapters(merge_config cfg) bool {
     println("")
@@ -325,7 +266,6 @@ func merge_adapters(merge_config cfg) bool {
     println("Alpha:       " + float_to_string(cfg.alpha))
     println("Rank:        " + float_to_string(cfg.rank_override))
     println("")
-
 
     println("Validating inputs...")
     if len(cfg.base_model_dir) == 0 {
@@ -343,12 +283,9 @@ func merge_adapters(merge_config cfg) bool {
         return false
     }
 
-
     println("Loading safetensors metadata...")
 
-
     println("Starting LoRA merge operation...")
-
 
     println("Writing merged model...")
 
@@ -365,13 +302,8 @@ func float_to_string(float f) string {
     s
 }
 
-
-
-
-
 func main() int {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-
 
     merge_config cfg
     cfg.base_model_dir = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH",
@@ -382,7 +314,6 @@ func main() int {
         project_root + "/../model/base-model-posttrain")
     cfg.alpha = 16.0
     cfg.rank_override = 0.0
-
 
     if merge_adapters(cfg) {
         println("SUCCESS: LoRA merge completed")

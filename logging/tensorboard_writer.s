@@ -1,31 +1,20 @@
 package neurx.logging
 
-
-
-
-
-
-
-
 struct tensorboard_writer {
     bool initialized
     string log_dir
     string current_file
     int events_written
 
-
     file_handle output_file
 }
-
 
 func create_tensorboard_writer(string log_dir) tensorboard_writer {
 
     ensure_directory_exists(log_dir)
 
-
     string filename = "events.out.tfevents." + get_timestamp_string() + "." + get_hostname()
     string filepath = join_path(log_dir, filename)
-
 
     file_handle f = open_file_for_writing(filepath)
 
@@ -38,11 +27,6 @@ func create_tensorboard_writer(string log_dir) tensorboard_writer {
     }
 }
 
-
-
-
-
-
 func tb_write_scalar(
     tensorboard_writer *writer,
     string tag,
@@ -51,9 +35,7 @@ func tb_write_scalar(
 ) {
     if !writer.initialized { return }
 
-
     []byte summary_data = encode_scalar_summary(tag, value, step)
-
 
     write_event(writer.output_file, step, summary_data)
 

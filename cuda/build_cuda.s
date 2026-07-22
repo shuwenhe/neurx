@@ -1,9 +1,5 @@
 
 
-
-
-
-
 package main
 
 use std.io.println
@@ -13,17 +9,11 @@ use neurx.runtime.io.{
     runtime_run_command_output,
 }
 
-
-
-
-
 func main() {
     println("[CUDA Manager] NeurX GPU Build System")
     println("")
 
-
     string target = runtime_env_get("CUDA_TARGET", "build-all")
-
 
     if eq_string(target, "build-kernels") {
         build_kernels()
@@ -42,10 +32,6 @@ func main() {
         build_all()
     }
 }
-
-
-
-
 
 func build_all() {
     println("[BUILD] Complete CUDA System")
@@ -77,7 +63,6 @@ func clean_all() {
 func verify_environment() {
     println("[VERIFY] CUDA Environment")
 
-
     string nvcc_out = runtime_run_command_output("which nvcc 2>/dev/null || echo 'not_found'")
     if contains_string(nvcc_out, "not_found") {
         println("[ERROR] nvcc not found")
@@ -87,7 +72,6 @@ func verify_environment() {
     }
     println("[OK] nvcc found: " + trim(nvcc_out))
 
-
     string cuda_home = get_cuda_home()
     if !runtime_file_exists(cuda_home + "/lib64/libcudart.so") &&
        !runtime_file_exists("/usr/local/cuda/lib64/libcudart.so") {
@@ -96,14 +80,12 @@ func verify_environment() {
     }
     println("[OK] CUDA Runtime library found")
 
-
     string cublas_check = runtime_run_command_output("ldconfig -p 2>/dev/null | grep cublas || echo 'not_found'")
     if contains_string(cublas_check, "not_found") {
         println("[WARNING] cuBLAS may not be installed")
     } else {
         println("[OK] cuBLAS found")
     }
-
 
     string gpu_check = runtime_run_command_output("nvidia-smi -L 2>/dev/null | head -1 || echo 'not_found'")
     if contains_string(gpu_check, "not_found") {
@@ -114,10 +96,6 @@ func verify_environment() {
 
     println("[SUCCESS] CUDA environment verified")
 }
-
-
-
-
 
 func execute_s_script(string script_path) {
     string s_compiler = runtime_env_get("S_COMPILER", "/home/shuwen/.local/bin/s")

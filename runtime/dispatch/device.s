@@ -1,17 +1,5 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 int DEV_CPU  = 0
 int DEV_GPU  = 1
 int DEV_NPU  = 2
@@ -57,7 +45,6 @@ func new_dispatch_state() dispatch_state {
     }
 }
 
-
 func register_device(ds dispatch_state, params register_device_params) dispatch_state {
     device_info d = device_info{
         dev_id:          ds.next_dev_id,
@@ -77,9 +64,6 @@ func register_device(ds dispatch_state, params register_device_params) dispatch_
     return ds
 }
 
-
-
-
 func pick_device(ds dispatch_state, op_type string, tensor_size_mb int) device_pick_result {
 
     if op_type == "control" || op_type == "scalar" {
@@ -95,7 +79,6 @@ func pick_device(ds dispatch_state, op_type string, tensor_size_mb int) device_p
             i = i + 1
         }
     }
-
 
     if tensor_size_mb > 1 {
 
@@ -115,7 +98,6 @@ func pick_device(ds dispatch_state, op_type string, tensor_size_mb int) device_p
             }
         }
     }
-
 
     int i = 0
     while i < len(ds.devices) {
@@ -144,7 +126,6 @@ func pick_device(ds dispatch_state, op_type string, tensor_size_mb int) device_p
     }
     return failed
 }
-
 
 func update_device_mem(ds dispatch_state, name string, delta_mb int) dispatch_state {
     int i = 0

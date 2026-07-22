@@ -4,8 +4,6 @@
 
 #include <cstdint>
 
-
-
 extern "C" {
 
 struct NeurxCannOperatorStatus {

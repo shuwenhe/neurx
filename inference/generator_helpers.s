@@ -1,17 +1,9 @@
 package neurx.inference
 
-
-
-
-
 use neurx.inference.sampling.sampling_utils
 use neurx.inference.sampling.sampling_utils2
 use neurx.inference.sampling.sampling_utils3
 use neurx.inference.sampling.sampling_utils4
-
-
-
-
 
 func greedy_step(
     []float logits,
@@ -23,13 +15,8 @@ func greedy_step(
         return sample_from_softmax(logits, cfg.temperature, rng_state)
     }
 
-
     (argmax(logits), rng_state)
 }
-
-
-
-
 
 func extract_generated_part([]int full_ids, int prompt_length) []int {
     int gen_len = len(full_ids) - prompt_length
@@ -42,10 +29,6 @@ func extract_generated_part([]int full_ids, int prompt_length) []int {
 
     generated
 }
-
-
-
-
 
 func check_all_finished([][]int sequences, int eos_id) bool {
     for seq in sequences {
@@ -63,10 +46,6 @@ func check_all_finished([][]int sequences, int eos_id) bool {
 
     true
 }
-
-
-
-
 
 func compute_avg_score([][][]float all_scores) float {
     if len(all_scores) == 0 { return 0.0 }

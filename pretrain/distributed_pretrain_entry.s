@@ -1,11 +1,5 @@
 
 
-
-
-
-
-
-
 package main
 
 use neurx.distributed.launcher.{
@@ -17,10 +11,6 @@ use neurx.distributed.cuda_bridge.{
     cuda_bridge_log_status,
 }
 use neurx.runtime.io.{runtime_env_get}
-
-
-
-
 
 struct training_config {
     string model_path
@@ -45,22 +35,15 @@ struct training_metrics {
     int line_idx
 }
 
-
-
-
-
 func main() {
 
-
     training_config config = parse_config()
-
 
     distributed_pretrain_launcher launcher = new_distributed_pretrain_launcher(
         config.config_path,
         config.micro_batch_size,
         config.gradient_accum_steps,
     )
-
 
     if launcher.env.rank == 0 {
         launcher.log("="*50)
@@ -78,15 +61,9 @@ func main() {
         launcher.log("="*50)
     }
 
-
     launcher.log("Rank info: " + launcher.rank_info())
 
-
     cuda_bridge_log_status(launcher.cb)
-
-
-
-
 
     int global_step = 0
     int optimizer_step = 0
@@ -94,37 +71,28 @@ func main() {
 
     while epoch < config.num_epochs {
 
-
         int shard_idx = 0
         while shard_idx < len(launcher.shard_paths) {
 
             string shard_path = launcher.shard_paths[shard_idx]
-
 
             int line_idx = 0
             int accum_step = 0
 
             while line_idx < 1024 {
 
-
                 []float batch_data = load_batch(shard_path, line_idx)
 
-
                 float loss = forward_pass(batch_data)
-
 
                 []float gradients = backward_pass(loss)
 
                 global_step = global_step + 1
                 accum_step = accum_step + 1
 
-
                 if accum_step >= config.gradient_accum_steps {
 
-
-
                     []float synced_gradients = launcher.sync_gradients_nccl(gradients)
-
 
                     launcher.optimizer_step(
                         optimizer_step,
@@ -134,7 +102,6 @@ func main() {
 
                     optimizer_step = optimizer_step + 1
                     accum_step = 0
-
 
                     if optimizer_step % 100 == 0 && launcher.env.rank == 0 {
                         training_metrics metrics = training_metrics {
@@ -149,7 +116,6 @@ func main() {
 
                         print_metrics(metrics)
                     }
-
 
                     if optimizer_step % config.save_interval == 0 && launcher.env.rank == 0 {
                         launcher.log("Saving checkpoint at step " + itoa(optimizer_step))
@@ -166,10 +132,6 @@ func main() {
         epoch = epoch + 1
     }
 
-
-
-
-
     if launcher.env.rank == 0 {
         launcher.log("="*50)
         launcher.log("Distributed Pretraining Completed!")
@@ -179,13 +141,8 @@ func main() {
         launcher.log("="*50)
     }
 
-
     launcher.finalize()
 }
-
-
-
-
 
 func parse_config() training_config {
 
@@ -205,7 +162,6 @@ func parse_config() training_config {
 
 func load_batch(string shard_path, int line_idx) []float {
 
-
     []float batch = []float{cap: 8 * 2048}
 
     int i = 0
@@ -219,7 +175,6 @@ func load_batch(string shard_path, int line_idx) []float {
 
 func forward_pass([]float batch_data) float {
 
-
     float loss = 0.0
 
     int i = 0
@@ -232,7 +187,6 @@ func forward_pass([]float batch_data) float {
 }
 
 func backward_pass(float loss) []float {
-
 
     []float gradients = []float{cap: 1024}
 

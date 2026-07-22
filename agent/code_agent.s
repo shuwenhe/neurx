@@ -1,20 +1,5 @@
 package neurx.agent.code_agent
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.agent.runtime
 use neurx.agent.memory
 use neurx.runtime.io.{runtime_env_get, runtime_run_command_output, runtime_write_text_file}
@@ -88,7 +73,6 @@ func code_agent_parse_int(string s, int default_val) int {
     result
 }
 
-
 func code_agent_clip(string s, int max_len) string {
     if len(s) <= max_len {
         return s
@@ -102,7 +86,6 @@ func code_agent_clip(string s, int max_len) string {
     out + "..."
 }
 
-
 func code_agent_pending_count(agent_runtime_state state) int {
     agent_memory_lookup_result r = agent_memory_lookup_short(state.memory, "pending_change_count")
     if !r.found || trim(r.value) == "" {
@@ -111,11 +94,9 @@ func code_agent_pending_count(agent_runtime_state state) int {
     code_agent_parse_int(r.value, 0)
 }
 
-
 func code_agent_read_line() string {
     trim(runtime_run_command_output("head -1 /dev/stdin 2>/dev/null"))
 }
-
 
 func code_agent_read_stdin() string {
     trim(runtime_run_command_output("cat /dev/stdin 2>/dev/null"))
@@ -426,7 +407,6 @@ func code_agent_run(string task, string model_path, int max_steps, bool full_aut
             steps_done = steps_done + 1
             code_agent_print_step(steps_done, current.last_action, current.last_observation)
         }
-
 
         if !agent_subagent_all_done(current.subagents) {
             current = agent_runtime_run_pending_subagents(current)

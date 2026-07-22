@@ -1,7 +1,5 @@
 package neurx.pretrain.llm.real_training_loop
 
-
-
 use neurx.pretrain.llm.real_training.{
     relu, relu_backward, softmax_last_dim, cross_entropy_loss,
     matmul, transpose, sum_first_dim,
@@ -24,10 +22,8 @@ struct real_training_state {
     tensor embedding
     tensor lm_head
 
-
     []float adam_m
     []float adam_v
-
 
     float learning_rate
     int total_steps
@@ -42,7 +38,6 @@ func shape1(int n) []int {
     s
 }
 
-
 func init_real_training(int vocab_size, int hidden_dim, int num_layers, float lr) real_training_state {
 
     []float embed_data = []float{cap: vocab_size * hidden_dim}
@@ -51,7 +46,6 @@ func init_real_training(int vocab_size, int hidden_dim, int num_layers, float lr
     []float v_data = []float{cap: hidden_dim * hidden_dim}
     []float out_data = []float{cap: hidden_dim * hidden_dim}
     []float head_data = []float{cap: hidden_dim * vocab_size}
-
 
     int i = 0
     float scale = 2.0 / (hidden_dim as float)
@@ -91,7 +85,6 @@ func init_real_training(int vocab_size, int hidden_dim, int num_layers, float lr
         i = i + 1
     }
 
-
     int param_count = len(embed_data) + len(q_data) + len(k_data) + len(v_data) + len(out_data) + len(head_data)
     []float m_state = []float{cap: param_count}
     []float v_state = []float{cap: param_count}
@@ -113,22 +106,18 @@ func init_real_training(int vocab_size, int hidden_dim, int num_layers, float lr
     }
 }
 
-
 func forward_pass(real_training_state state, tensor input_ids) tensor {
     tensor hidden = ops.embedding_lookup(state.embedding, input_ids, 0)
     ops.matmul(hidden, state.lm_head)
 }
 
-
 func compute_loss(tensor logits, tensor targets) float {
     return cross_entropy_loss(logits, targets)
 }
 
-
 func backward_pass(tensor logits, tensor targets) tensor {
     return grad_logits(logits, targets)
 }
-
 
 func update_parameters(real_training_state state, tensor hidden, tensor grad) real_training_state {
     tensor hidden_t = transpose(hidden, 0, 1)
@@ -148,7 +137,6 @@ func update_parameters(real_training_state state, tensor hidden, tensor grad) re
     state
 }
 
-
 func training_step(
     real_training_state state,
     tensor input_ids,
@@ -157,22 +145,17 @@ func training_step(
 
     tensor logits = forward_pass(state, input_ids)
 
-
     float loss = compute_loss(logits, target_ids)
-
 
     tensor grad = backward_pass(logits, target_ids)
 
-
     tensor hidden = ops.embedding_lookup(state.embedding, input_ids, 0)
     real_training_state next_state = update_parameters(state, hidden, grad)
-
 
     int batch_size = input_ids.shape[0]
     next_state.step = next_state.step + 1
     next_state.total_loss = next_state.total_loss + loss
     next_state.tokens_seen = next_state.tokens_seen + batch_size
-
 
     if next_state.step / 100 * 100 == next_state.step {
         float avg_loss = next_state.total_loss / (next_state.step as float)
@@ -181,7 +164,6 @@ func training_step(
 
     next_state
 }
-
 
 func run_training_loop(
     string manifest_path,
@@ -205,12 +187,10 @@ func run_training_loop(
     println("Learning rate: " + fmt_float(learning_rate, 6))
     println("")
 
-
     real_training_state state = init_real_training(vocab_size, hidden_dim, 12, learning_rate)
     state.total_steps = num_steps
     []string data_paths = gpt_large_pretrain_manifest_refs(manifest_path)
     corpus_state corpus = new_corpus_state_from_paths(data_paths, batch_size, seq_len, true)
-
 
     int step = 0
     while step < num_steps {
@@ -221,7 +201,6 @@ func run_training_loop(
         }
         tensor input_tensor = new_from_ints(batch_result.batch.input_ids, shape1(len(batch_result.batch.input_ids)))
         tensor target_tensor = one_hot_from_ints(batch_result.batch.target_ids, vocab_size)
-
 
         state = training_step(state, input_tensor, target_tensor)
 
@@ -258,7 +237,6 @@ func one_hot_from_ints([]int values, int vocab_size) tensor {
     }
     new(data, [n, vocab_size], true)
 }
-
 
 func new_from_ints([]int values, []int shape) tensor {
     []float data = []float{cap: len(values)}

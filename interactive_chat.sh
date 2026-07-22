@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 MODEL_PATH="/home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors"
 
 if [ ! -f "$MODEL_PATH" ]; then
@@ -19,7 +18,6 @@ echo "🧠 Model: 24 layers, 896 hidden, 14 heads"
 echo ""
 echo "═══════════════════════════════════════════════════════"
 echo ""
-
 
 while true; do
     echo -n "You: "

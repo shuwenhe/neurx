@@ -2,13 +2,6 @@ package neurx.posttrain.rlhf.value_model_examples
 
 use neurx.posttrain.rlhf.value_model_trainer.*
 
-
-
-
-
-
-
-
 func create_value_config() value_config {
     value_config {
         seq_len: 128,
@@ -35,13 +28,11 @@ func create_value_config() value_config {
     }
 }
 
-
 func example_basic_value_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 1: Basic Value Model Training                    ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
-
 
     value_config cfg = create_value_config()
     value_state state = new_value_state(cfg)
@@ -54,7 +45,6 @@ func example_basic_value_training() {
     print("  Lambda (GAE): " + float_to_string_ex(cfg.gae_lambda))
     print("")
 
-
     int num_trajectories = 5
     int steps_per_trajectory = 32
 
@@ -62,7 +52,6 @@ func example_basic_value_training() {
     print("  Number of trajectories: " + int_to_string_ex(num_trajectories))
     print("  Steps per trajectory: " + int_to_string_ex(steps_per_trajectory))
     print("")
-
 
     []value_trajectory trajectories = []value_trajectory{cap: num_trajectories}
     int t = 0
@@ -77,7 +66,6 @@ func example_basic_value_training() {
             min_advantage: 0.0,
         }
 
-
         int s = 0
         while s < steps_per_trajectory {
             value_trajectory_step step = value_trajectory_step {
@@ -90,13 +78,11 @@ func example_basic_value_training() {
                 is_terminal: (s == steps_per_trajectory - 1),
             }
 
-
             int i = 0
             while i < cfg.seq_len {
                 step.observation = append_float_ex(step.observation, 0.1)
                 i = i + 1
             }
-
 
             traj.total_reward = traj.total_reward + step.reward
 
@@ -115,7 +101,6 @@ func example_basic_value_training() {
     state = start_value_training(cfg, trajectories)
     print("")
 }
-
 
 func example_gae_advantage_estimation() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -139,7 +124,6 @@ func example_gae_advantage_estimation() {
     print("[Example trajectory]")
     print("  Step | Reward | V(s)  | V(s+1) | δ     | A(GAE) | G(return)")
     print("  ──── ┼─────── ┼─────── ┼─────── ┼─────── ┼──────── ┼─────────")
-
 
     []float rewards = []float{cap: 5}
     rewards = append_float_ex(rewards, 0.5)
@@ -189,13 +173,11 @@ func example_gae_advantage_estimation() {
     print("")
 }
 
-
 func example_distributed_value_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 3: Distributed Multi-GPU Value Training          ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
-
 
     int num_gpus = 8
     int global_batch_size = 256
@@ -229,7 +211,6 @@ func example_distributed_value_training() {
     print("  8 GPUs:     7.75x (97% efficiency)")
     print("")
 }
-
 
 func example_value_ppo_integration() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -270,7 +251,6 @@ func example_value_ppo_integration() {
     print("   - Continue to next iteration")
     print("")
 }
-
 
 func example_value_performance_monitoring() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -319,7 +299,6 @@ func example_value_performance_monitoring() {
     print("")
 }
 
-
 func example_full_alignment_pipeline() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 6: Full Alignment Pipeline                       ║")
@@ -360,7 +339,6 @@ func example_full_alignment_pipeline() {
     print("")
 }
 
-
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -379,7 +357,6 @@ func main() {
     print("     All examples completed!                                 ")
     print("═════════════════════════════════════════════════════════════")
 }
-
 
 func float_to_string_ex(float f) string {
     string(int(f * 10000.0) / 10000.0)

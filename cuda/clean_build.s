@@ -1,7 +1,5 @@
 
 
-
-
 package main
 
 use std.io.println

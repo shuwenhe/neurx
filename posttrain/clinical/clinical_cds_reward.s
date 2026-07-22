@@ -1,31 +1,6 @@
 package neurx.posttrain.clinical
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.posttrain.reward.{reward_model, reward_train_result}
-
-
-
-
 
 struct medical_fact {
     string entity
@@ -44,11 +19,8 @@ struct fact_verification_result {
     float grounding_score
 }
 
-
 func extract_medical_facts(string response) []medical_fact {
     []medical_fact facts = []
-
-
 
     []string dosage_patterns = [
         "给药.*mg",
@@ -58,8 +30,6 @@ func extract_medical_facts(string response) []medical_fact {
         "每次.*毫克"
     ]
 
-
-
     []string contra_patterns = [
         "禁忌.*",
         "禁用.*",
@@ -68,8 +38,6 @@ func extract_medical_facts(string response) []medical_fact {
         "avoid.*"
     ]
 
-
-
     []string mechanism_patterns = [
         "Function机制",
         "机制是",
@@ -77,8 +45,6 @@ func extract_medical_facts(string response) []medical_fact {
         "mechanism.*",
         "cause.*"
     ]
-
-
 
     if contains(response, "禁忌") {
         facts = append(facts, medical_fact{
@@ -98,15 +64,12 @@ func extract_medical_facts(string response) []medical_fact {
     return facts
 }
 
-
 func verify_facts_against_mcp([]medical_fact extracted, string mcp_context) fact_verification_result {
     fact_verification_result result = fact_verification_result{
         extracted_facts: extracted,
         total_verified: 0,
         total_hallucinated: 0
     }
-
-
 
     int verified = 0
     for i = 0; i < len(extracted); i = i + 1 {
@@ -125,10 +88,6 @@ func verify_facts_against_mcp([]medical_fact extracted, string mcp_context) fact
     } else {
         result.fact_accuracy = 1.0
     }
-
-
-
-
 
     if result.total_hallucinated == 0 {
         result.grounding_score = 10.0
@@ -150,18 +109,10 @@ func cds_fact_consistency_reward(
 
     []medical_fact facts = extract_medical_facts(response)
 
-
     fact_verification_result verification = verify_facts_against_mcp(facts, mcp_context)
-
 
     return verification.grounding_score
 }
-
-
-
-
-
-
 
 func cds_length_penalty_reward(
     string response,
@@ -170,13 +121,11 @@ func cds_length_penalty_reward(
 
     int ideal_length = 400
 
-
     if approx_token_count > 600 {
         int excess = approx_token_count - 600
         float penalty_per_100 = 0.01
         return 0.0 - ((excess / 100.0) * penalty_per_100 * 10.0)
     }
-
 
     if approx_token_count >= 300 && approx_token_count <= 500 {
         return 0.0
@@ -189,10 +138,6 @@ func cds_length_penalty_reward(
     return 0.0
 }
 
-
-
-
-
 struct clarification_analysis {
     bool has_underspecified_prompt
     int clarification_count
@@ -200,11 +145,6 @@ struct clarification_analysis {
 }
 
 func detect_underspecified_medical_question(string prompt) bool {
-
-
-
-
-
 
     []string missing_indicators = [
         "患者",
@@ -223,7 +163,6 @@ func detect_underspecified_medical_question(string prompt) bool {
             missing_count = missing_count + 1
         }
     }
-
 
     return missing_count > 4
 }
@@ -258,11 +197,9 @@ func cds_clarification_bonus_reward(
         clarification_count: count_clarification_questions(response)
     }
 
-
     if !analysis.has_underspecified_prompt {
         return 0.0
     }
-
 
     float bonus = (analysis.clarification_count * 2.0)
     if bonus > 10.0 {
@@ -272,38 +209,19 @@ func cds_clarification_bonus_reward(
     return bonus
 }
 
-
-
-
-
 struct reward_model_output {
     float score
     float confidence
     []float logits
 }
 
-
-
 func cds_external_reward_model(
     string prompt,
     string response
 ) float {
 
-
-
-
-
-
-
-
-
-
     return 0.0
 }
-
-
-
-
 
 struct cds_reward_breakdown {
     float fact_consistency
@@ -338,16 +256,11 @@ func compute_cds_reward(
     return breakdown
 }
 
-
-
-
-
 func contains(string text, string pattern) bool {
 
     if len(text) == 0 || len(pattern) == 0 {
         return false
     }
-
 
     int text_len = len(text)
     int pattern_len = len(pattern)

@@ -1,44 +1,8 @@
 package neurx.distributed.zero_gradient_reduce
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.strings
 use neurx.runtime.io.{io_println}
 use neurx.distributed.collective.{collective_state, allreduce_async, reduce_scatter_async}
-
-
-
-
 
 struct zero_stage3_config {
     int rank
@@ -55,10 +19,8 @@ struct gradient_partition {
     int end_param_idx
     int num_params
 
-
     []float gradients
     []float accumulated_grad
-
 
     int num_backward_calls
     float grad_norm_local
@@ -67,23 +29,18 @@ struct gradient_partition {
 struct zero_stage3_state {
     zero_stage3_config config
 
-
     []gradient_partition partitions
 
-
     []float gradient_buffer_full
-
 
     long total_allreduce_bytes
     long total_reduce_scatter_bytes
     int num_reduce_operations
     float avg_reduce_time_ms
 
-
     int allreduce_in_flight
     int allreduce_handle
 }
-
 
 func zero_stage3_new(
     int rank,
@@ -100,7 +57,6 @@ func zero_stage3_new(
         overlap_reduce_backward: 1,
         max_gradient_buffer_mb: 512,
     }
-
 
     []gradient_partition partitions = make([]gradient_partition, world_size)
 
@@ -141,11 +97,6 @@ func zero_stage3_new(
     state
 }
 
-
-
-
-
-
 func zero_stage3_accumulate_gradients(
     zero_stage3_state state,
     []float layer_gradients,
@@ -153,14 +104,11 @@ func zero_stage3_accumulate_gradients(
     int param_end_idx
 ) {
 
-
     int i = 0
     while i < len(state.partitions) {
         gradient_partition partition = state.partitions[i]
 
-
         if param_start_idx < partition.end_param_idx && param_end_idx > partition.start_param_idx {
-
 
             int overlap_start = param_start_idx
             if overlap_start < partition.start_param_idx {
@@ -171,7 +119,6 @@ func zero_stage3_accumulate_gradients(
             if overlap_end > partition.end_param_idx {
                 overlap_end = partition.end_param_idx
             }
-
 
             int j = overlap_start
             while j < overlap_end {
@@ -194,15 +141,6 @@ func zero_stage3_accumulate_gradients(
     }
 }
 
-
-
-
-
-
-
-
-
-
 func zero_stage3_allreduce_reduce_scatter(
     zero_stage3_state state,
     collective_state comm,
@@ -215,14 +153,7 @@ func zero_stage3_allreduce_reduce_scatter(
         return -1
     }
 
-
-
-
-
-
-
     int total_params = len(state.gradient_buffer_full)
-
 
     int p = 0
     while p < len(state.partitions) {
@@ -238,17 +169,14 @@ func zero_stage3_allreduce_reduce_scatter(
         p = p + 1
     }
 
-
     int handle = allreduce_async(comm, state.gradient_buffer_full, total_params)
     state.allreduce_in_flight = 1
     state.allreduce_handle = handle
-
 
     state.total_allreduce_bytes = state.total_allreduce_bytes + (total_params * 4)
 
     handle
 }
-
 
 func zero_stage3_finalize_reduce_scatter(
     zero_stage3_state state,
@@ -260,16 +188,9 @@ func zero_stage3_finalize_reduce_scatter(
         return
     }
 
-
-
-
-
-
-
     int i = 0
     while i < len(state.partitions) {
         gradient_partition partition = state.partitions[i]
-
 
         int j = 0
         while j < partition.num_params {
@@ -286,21 +207,12 @@ func zero_stage3_finalize_reduce_scatter(
     state.num_reduce_operations = state.num_reduce_operations + 1
 }
 
-
-
-
-
-
 func zero_stage3_start_async_reduce(
     zero_stage3_state state,
     collective_state comm
 ) int {
 
-
-
-
     int total_params = len(state.gradient_buffer_full)
-
 
     int p = 0
     while p < len(state.partitions) {
@@ -316,7 +228,6 @@ func zero_stage3_start_async_reduce(
         p = p + 1
     }
 
-
     int handle = allreduce_async(comm, state.gradient_buffer_full, total_params)
 
     state.allreduce_in_flight = 1
@@ -324,7 +235,6 @@ func zero_stage3_start_async_reduce(
 
     handle
 }
-
 
 func zero_stage3_wait_async_reduce(
     zero_stage3_state state
@@ -334,17 +244,8 @@ func zero_stage3_wait_async_reduce(
         return
     }
 
-
-
-
-
     zero_stage3_finalize_reduce_scatter(state, collective_state {})
 }
-
-
-
-
-
 
 func zero_stage3_compute_local_grad_norm(
     zero_stage3_state state,
@@ -373,12 +274,10 @@ func zero_stage3_compute_local_grad_norm(
     norm
 }
 
-
 func zero_stage3_compute_global_grad_norm(
     zero_stage3_state state,
     collective_state comm
 ) float {
-
 
     []float local_norms_sq = make([]float, len(state.partitions))
 
@@ -387,8 +286,6 @@ func zero_stage3_compute_global_grad_norm(
         local_norms_sq[i] = state.partitions[i].grad_norm_local * state.partitions[i].grad_norm_local
         i = i + 1
     }
-
-
 
     float total_norm_sq = 0.0
     i = 0
@@ -405,26 +302,18 @@ func zero_stage3_compute_global_grad_norm(
     global_norm
 }
 
-
-
-
-
-
 func zero_stage3_clip_gradients(
     zero_stage3_state state,
     collective_state comm,
     float max_grad_norm
 ) {
 
-
     float global_norm = zero_stage3_compute_global_grad_norm(state, comm)
-
 
     float clip_coeff = 1.0
     if global_norm > max_grad_norm {
         clip_coeff = max_grad_norm / global_norm
     }
-
 
     int i = 0
     while i < len(state.partitions) {
@@ -440,11 +329,6 @@ func zero_stage3_clip_gradients(
     }
 }
 
-
-
-
-
-
 func zero_stage3_optimizer_step(
     zero_stage3_state state,
     []float parameters,
@@ -455,26 +339,15 @@ func zero_stage3_optimizer_step(
     float weight_decay
 ) {
 
-
     int i = 0
     while i < len(state.partitions) {
         gradient_partition partition = state.partitions[i]
-
-
-
 
         int j = 0
         while j < partition.num_params {
             int param_idx = partition.start_param_idx + j
             float grad = partition.gradients[j]
             float param = parameters[param_idx]
-
-
-
-
-
-
-
 
             float update = grad * learning_rate
             if weight_decay > 0.0 {
@@ -489,10 +362,6 @@ func zero_stage3_optimizer_step(
         i = i + 1
     }
 }
-
-
-
-
 
 func sqrt(float x) float {
 

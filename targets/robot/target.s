@@ -1,16 +1,5 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
 struct robot_target_config {
     string  platform
     int     control_hz

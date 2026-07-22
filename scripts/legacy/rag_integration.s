@@ -1,8 +1,5 @@
 
 
-
-
-
 package main
 
 import (
@@ -63,10 +60,6 @@ type ragintegration struct {
     knowledge_base_size int
 }
 
-
-
-
-
 func (rag *ragintegration) initialize(config retrieval_system_config) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  RAG Integration System                               ║")
@@ -120,10 +113,6 @@ func (rag *ragintegration) load_knowledge_base(
     fmt.Printf("  ✓ Knowledge base loaded\n")
 }
 
-
-
-
-
 func (rag *ragintegration) generate_embeddings() {
     fmt.Printf("\n[Embeddings] Generating embeddings\n")
     fmt.Printf("  Documents: %d\n", len(rag.vector_db.documents))
@@ -132,7 +121,6 @@ func (rag *ragintegration) generate_embeddings() {
 
     for doc_id := range rag.vector_db.documents {
         embedding_id := fmt.Sprintf("emb_%s", doc_id)
-
 
         vector := make([]float64, 768)
         for j := 0; j < 768; j++ {
@@ -153,10 +141,6 @@ func (rag *ragintegration) generate_embeddings() {
     rag.vector_db.index_built = true
     fmt.Printf("  ✓ Embeddings generated: %d\n", len(rag.vector_db.embeddings))
 }
-
-
-
-
 
 func (rag *ragintegration) cosine_similarity(vec1 []float64, vec2 []float64) float64 {
     if len(vec1) != len(vec2) {
@@ -183,14 +167,9 @@ func (rag *ragintegration) cosine_similarity(vec1 []float64, vec2 []float64) flo
     return dot_product / (norm1 * norm2)
 }
 
-
-
-
-
 func (rag *ragintegration) retrieve_relevant_documents(
     query string,
     query_embedding []float64) []retrieval_result {
-
 
     if rag.config.cache_enabled {
         if cached, exists := rag.cache[query]; exists {
@@ -204,7 +183,6 @@ func (rag *ragintegration) retrieve_relevant_documents(
     fmt.Printf("  Top-K: %d\n", rag.config.top_k)
 
     results := make([]retrieval_result, 0)
-
 
     for _, emb := range rag.vector_db.embeddings {
         similarity := rag.cosine_similarity(query_embedding, emb.vector)
@@ -220,7 +198,6 @@ func (rag *ragintegration) retrieve_relevant_documents(
         }
     }
 
-
     for i := 0; i < len(results); i++ {
         for j := i + 1; j < len(results); j++ {
             if results[j].similarity_score > results[i].similarity_score {
@@ -229,18 +206,15 @@ func (rag *ragintegration) retrieve_relevant_documents(
         }
     }
 
-
     if len(results) > rag.config.top_k {
         results = results[:rag.config.top_k]
     }
-
 
     for i := range results {
         results[i].rank = i + 1
     }
 
     fmt.Printf("  Retrieved: %d documents\n", len(results))
-
 
     if rag.config.cache_enabled {
         rag.cache[query] = results
@@ -268,10 +242,6 @@ func (rag *ragintegration) display_retrieval_results(results []retrieval_result)
     }
 }
 
-
-
-
-
 func (rag *ragintegration) augment_context(
     query string,
     results []retrieval_result) string {
@@ -292,10 +262,6 @@ func (rag *ragintegration) augment_context(
     fmt.Printf("  Context size: %d chars\n", len(augmented_context))
     return augmented_context
 }
-
-
-
-
 
 func (rag *ragintegration) record_retrieval_metrics(
     query string,
@@ -346,10 +312,6 @@ func (rag *ragintegration) get_rag_statistics() {
     }
 }
 
-
-
-
-
 func NewRAGIntegration() *ragintegration {
     return &ragintegration{
         vector_db:   vector_database{},
@@ -370,16 +332,13 @@ func (rag *ragintegration) run_complete_rag_cycle() {
 
     rag.initialize(config)
 
-
     rag.load_knowledge_base(1000, 150)
-
 
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Building Vector Index                 │")
     fmt.Println("└────────────────────────────────────────┘")
 
     rag.generate_embeddings()
-
 
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Processing Queries                    │")
@@ -398,16 +357,12 @@ func (rag *ragintegration) run_complete_rag_cycle() {
             query_embedding[i] = math.Cos(float64(i)*0.01) * 0.5
         }
 
-
         results := rag.retrieve_relevant_documents(query, query_embedding)
-
 
         rag.display_retrieval_results(results)
 
-
         augmented := rag.augment_context(query, results)
         fmt.Printf("  Augmented context size: %d chars\n", len(augmented))
-
 
         var top_sim float64 = 0.0
         if len(results) > 0 {
@@ -415,7 +370,6 @@ func (rag *ragintegration) run_complete_rag_cycle() {
         }
         rag.record_retrieval_metrics(query, len(results), top_sim, 15)
     }
-
 
     rag.get_rag_statistics()
 

@@ -1,11 +1,5 @@
 
 
-
-
-
-
-
-
 package main
 
 import (
@@ -15,7 +9,6 @@ import (
     "strconv"
 )
 
-
 type distributed_config struct {
 
     backend: string
@@ -24,38 +17,27 @@ type distributed_config struct {
     master_addr: string
     master_port: string
 
-
     data_parallel: bool
     model_parallel: bool
-
 
     gradient_as_bucket_view: bool
     bucket_cap_mb: int
     find_unused_parameters: bool
 
-
     sync_gradients: bool
     static_graph: bool
 }
-
 
 type distributed_process struct {
     config: distributed_config
     is_master: bool
 
-
     initialized: bool
     device_id: int
-
 
     grad_buckets: [][]float
     bucket_size: int
 }
-
-
-
-
-
 
 func (dp *distributed_process) init_from_env(backend: string) error {
     config := distributed_config{
@@ -71,7 +53,6 @@ func (dp *distributed_process) init_from_env(backend: string) error {
         sync_gradients: true,
         static_graph: false,
     }
-
 
     if rank_str := os.Getenv("RANK"); rank_str != "" {
         if r, err := strconv.Atoi(rank_str); err == nil {
@@ -102,39 +83,23 @@ func (dp *distributed_process) init_from_env(backend: string) error {
     return nil
 }
 
-
-
-
-
-
 func (dp *distributed_process) all_reduce_grad(grad_norm: float): float {
     if !dp.config.sync_gradients || dp.config.world_size == 1 {
         return grad_norm
     }
 
-
-
     reduced_grad := grad_norm * float(dp.config.world_size)
-
 
     return reduced_grad / float(dp.config.world_size)
 }
-
 
 func (dp *distributed_process) broadcast_parameters(param: float): float {
     if dp.config.world_size == 1 {
         return param
     }
 
-
-
     return param
 }
-
-
-
-
-
 
 func (dp *distributed_process) build_grad_buckets(total_params: int) {
     if dp.config.world_size == 1 {
@@ -156,7 +121,6 @@ func (dp *distributed_process) build_grad_buckets(total_params: int) {
     }
 }
 
-
 func (dp *distributed_process) reduce_bucket(bucket_idx: int) {
     if bucket_idx >= len(dp.grad_buckets) {
         return
@@ -164,17 +128,11 @@ func (dp *distributed_process) reduce_bucket(bucket_idx: int) {
 
     bucket := dp.grad_buckets[bucket_idx]
 
-
     for i := 0; i < len(bucket); i++ {
         bucket[i] = bucket[i] * float(dp.config.world_size)
         bucket[i] = bucket[i] / float(dp.config.world_size)
     }
 }
-
-
-
-
-
 
 type data_partitioner struct {
     world_size: int
@@ -182,7 +140,6 @@ type data_partitioner struct {
     total_samples: int
     local_batch_size: int
 }
-
 
 func (dp *data_partitioner) get_local_indices(): []int {
     indices := make([]int, 0)
@@ -209,15 +166,10 @@ func (dp *data_partitioner) get_local_indices(): []int {
     return indices
 }
 
-
 func (dp *data_partitioner) get_local_batch_size(): int {
     total_batch := dp.local_batch_size * dp.world_size
     return total_batch / dp.world_size
 }
-
-
-
-
 
 type distributed_sampler struct {
     num_samples: int
@@ -227,7 +179,6 @@ type distributed_sampler struct {
     seed: int
     epoch: int
 }
-
 
 func (ds *distributed_sampler) get_indices(): []int {
     indices := make([]int, 0)
@@ -244,15 +195,9 @@ func (ds *distributed_sampler) get_indices(): []int {
     return indices
 }
 
-
 func (ds *distributed_sampler) set_epoch(epoch: int) {
     ds.epoch = epoch
 }
-
-
-
-
-
 
 type communication_metrics struct {
     allreduce_count: int
@@ -262,7 +207,6 @@ type communication_metrics struct {
     computation_time_ms: float
 }
 
-
 func (cm *communication_metrics) get_efficiency(): float {
     total_time := cm.communication_time_ms + cm.computation_time_ms
     if total_time == 0 {
@@ -271,25 +215,14 @@ func (cm *communication_metrics) get_efficiency(): float {
     return cm.computation_time_ms / total_time * 100.0
 }
 
-
-
-
-
-
 type multi_node_config struct {
     num_nodes: int
     processes_per_node: int
     node_rank: int
 
-
     nccl_debug: string
     timeout_minutes: int
 }
-
-
-
-
-
 
 func (dp *distributed_process) get_stats(): map[string]interface{} {
     return map[string]interface{}{
@@ -306,29 +239,17 @@ func (dp *distributed_process) get_stats(): map[string]interface{} {
     }
 }
 
-
-
-
-
-
 func (dp *distributed_process) is_main_process(): bool {
     return dp.is_master
 }
 
-
 func (dp *distributed_process) barrier() {
 
-
 }
-
 
 func (dp *distributed_process) destroy_process_group() {
     dp.initialized = false
 }
-
-
-
-
 
 type distributed_context struct {
     process: *distributed_process
@@ -345,10 +266,6 @@ func (dc *distributed_context) exit() {
         dc.process.destroy_process_group()
     }
 }
-
-
-
-
 
 type launch_config struct {
     num_processes: int
@@ -398,10 +315,6 @@ func create_launch_config_from_env(): launch_config {
     return config
 }
 
-
-
-
-
 func main() {
 
     process := &distributed_process{}
@@ -412,12 +325,10 @@ func main() {
 
     println("✅ Distributed Training Initialized")
 
-
     stats := process.get_stats()
     stats_json, _ := json.Marshal(stats)
     println("\n📊 Distributed Config:")
     println(string(stats_json))
-
 
     partitioner := &data_partitioner{
         world_size: process.config.world_size,
@@ -431,7 +342,6 @@ func main() {
     fmt.Printf("  Samples assigned: %d\n", len(indices))
     fmt.Printf("  Local batch size: %d\n", partitioner.get_local_batch_size())
 
-
     sampler := &distributed_sampler{
         num_samples: 10000,
         world_size: process.config.world_size,
@@ -444,13 +354,11 @@ func main() {
     fmt.Printf("\n🎲 Distributed Sampler (Rank %d):\n", process.config.rank)
     fmt.Printf("  sample count: %d\n", len(sampler_indices))
 
-
     println("\n📡 Gradient Synchronization Simulation:")
     avg_grad_norm := 1.5
     synced_grad := process.all_reduce_grad(avg_grad_norm)
     fmt.Printf("  Original grad norm: %.4f\n", avg_grad_norm)
     fmt.Printf("  Synchronized grad norm: %.4f\n", synced_grad)
-
 
     println("\n🚀 Launch Configuration:")
     launch_config := create_launch_config_from_env()

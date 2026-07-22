@@ -1,6 +1,5 @@
 package neurx.inference.simple
 
-
 func runtime_env_get(string name, string default_value) string {
     default_value
 }
@@ -16,7 +15,6 @@ func runtime_read_text_file(string path) string {
 func runtime_run_command_output(string command) string {
     ""
 }
-
 
 func trim(string s) string {
     int i = 0
@@ -68,7 +66,6 @@ func main() int {
     string prompt_from_env = runtime_env_get("NEURX_INFER_PROMPT", runtime_env_get("NEURX_INFERENCE_INPUT", "NeurX AllowedEnglish text?"))
     string answer_mode = trim(runtime_env_get("NEURX_INFER_ANSWER_MODE", "qa"))
     string validate_only = runtime_env_get("NEURX_INFER_VALIDATE_ONLY", "")
-
 
     println("================================================")
     println("NeurX S Inference Engine (Simplified)")

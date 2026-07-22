@@ -4,17 +4,9 @@ use neurx.posttrain.dpo.dpo_trainer.*
 use neurx.model.llm.neurx.*
 use neurx.tokenizer.neurx.*
 
-
-
-
-
-
-
-
 func create_dpo_example_config() dpo_train_config {
     dpo_train_config {
         method: "dpo",
-
 
         batch_size: 16,
         gradient_accum_steps: 4,
@@ -23,30 +15,25 @@ func create_dpo_example_config() dpo_train_config {
         lr_schedule_type: "cosine",
         total_training_steps: 100000,
 
-
         adam_beta1: 0.9,
         adam_beta2: 0.95,
         adam_epsilon: 1e-8,
         weight_decay: 0.01,
         max_grad_norm: 1.0,
 
-
         dpo_beta: 0.1,
         label_smoothing: 0.0,
         dpo_loss_type: "sigmoid",
         use_reference_free: false,
 
-
         precision: "bf16",
         use_gradient_checkpointing: true,
         use_flash_attention: true,
-
 
         save_interval: 5000,
         eval_interval: 2000,
         log_interval: 100,
         checkpoint_dir: "./checkpoints/dpo/",
-
 
         num_workers: 4,
         pin_memory: true,
@@ -54,7 +41,6 @@ func create_dpo_example_config() dpo_train_config {
         output_dir: "./outputs/dpo/",
     }
 }
-
 
 func create_dpo_example_dataset() dpo_dataset {
     dpo_dataset {
@@ -69,28 +55,23 @@ func create_dpo_example_dataset() dpo_dataset {
     }
 }
 
-
 func example_basic_dpo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║          Example 1: Basic DPO Training                    ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
 
-
     neurx_model model = load_pretrained_model("neurx_200b")
     neurx_model reference_model = load_pretrained_model("neurx_200b")
     tokenizer_state tokenizer = load_tokenizer()
 
-
     dpo_train_config config = create_dpo_example_config()
     dpo_dataset dataset = create_dpo_example_dataset()
-
 
     if !validate_dpo_dataset(dataset) {
         print("ERROR: Invalid dataset")
         return
     }
-
 
     dpo_trainer_state trainer = create_dpo_trainer(
         model,
@@ -102,7 +83,6 @@ func example_basic_dpo_training() {
         1
     )
 
-
     dpo_train_result result = start_dpo_training(ref trainer)
 
     print("")
@@ -112,33 +92,24 @@ func example_basic_dpo_training() {
     print("  checkpoint: " + result.checkpoint_path)
 }
 
-
 func example_distributed_dpo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║      Example 2: Distributed DPO on 64 GPUs                ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
 
-
-
-
-
-
     int global_rank = 0
     int world_size = 64
-
 
     neurx_model model = load_pretrained_model("neurx_200b")
     neurx_model reference_model = load_pretrained_model("neurx_200b")
     tokenizer_state tokenizer = load_tokenizer()
-
 
     dpo_train_config config = create_dpo_example_config()
     config.batch_size = 16 * 8
     config.total_training_steps = 50000
 
     dpo_dataset dataset = create_dpo_example_dataset()
-
 
     dpo_trainer_state trainer = create_dpo_trainer(
         model,
@@ -153,7 +124,6 @@ func example_distributed_dpo_training() {
     print("Starting distributed DPO training on " + string(world_size) + " GPUs")
     print("Rank " + string(global_rank) + " starting...")
 
-
     dpo_train_result result = start_dpo_training(ref trainer)
 
     if global_rank == 0 {
@@ -164,13 +134,11 @@ func example_distributed_dpo_training() {
     }
 }
 
-
 func example_dpo_with_different_betas() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║     Example 3: DPO with Different Beta Values             ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
-
 
     []float betas = []float{0.05, 0.1, 0.2, 0.5}
 
@@ -213,7 +181,6 @@ func example_dpo_with_different_betas() {
     print("✓ Comparison complete! Check outputs/dpo/ for details")
 }
 
-
 func example_dpo_resume_from_checkpoint() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║      Example 4: DPO Resume from checkpoint                ║")
@@ -222,7 +189,6 @@ func example_dpo_resume_from_checkpoint() {
 
     string checkpoint_path = "./checkpoints/dpo/step_50000"
 
-
     (dpo_trainer_state trainer, int resume_step) = load_dpo_checkpoint(checkpoint_path)
 
     print("Resuming training from step " + string(resume_step))
@@ -230,13 +196,11 @@ func example_dpo_resume_from_checkpoint() {
     print("  Learning Rate: " + string_float(trainer.current_learning_rate))
     print("  Best Metric: " + string_float(trainer.best_eval_metric))
 
-
     dpo_train_result result = start_dpo_training(ref trainer)
 
     print("")
     print("✓ Resume completed!")
 }
-
 
 func example_dpo_vs_rlhf_comparison() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -266,17 +230,12 @@ func example_dpo_vs_rlhf_comparison() {
     print("")
 }
 
-
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
     print("     NEURX DPO (Direct Preference Optimization) Examples     ")
     print("═════════════════════════════════════════════════════════════")
     print("")
-
-
-
-
 
     example_dpo_vs_rlhf_comparison()
 
@@ -285,7 +244,6 @@ func main() {
     print("     All examples completed!                                 ")
     print("═════════════════════════════════════════════════════════════")
 }
-
 
 func load_pretrained_model(string model_name) neurx_model {
 

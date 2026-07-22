@@ -1,8 +1,5 @@
 
 
-
-
-
 package main
 
 import (
@@ -59,10 +56,6 @@ type dpotrainer struct {
     best_loss           float64
 }
 
-
-
-
-
 func (trainer *dpotrainer) initialize(config dpoconfig) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Direct Preference Optimization (DPO) Trainer         ║")
@@ -98,7 +91,6 @@ func (trainer *dpotrainer) load_preference_data(
         quality_score:    quality_score,
     }
 
-
     for i := 0; i < size; i++ {
         pair := preference_pair{
             prompt:            fmt.Sprintf("prompt_%d", i),
@@ -111,23 +103,16 @@ func (trainer *dpotrainer) load_preference_data(
     }
 }
 
-
-
-
-
 func (trainer *dpotrainer) compute_dpo_loss(pair preference_pair) float64 {
 
     chosen_logit := trainer.model_logits[pair.chosen_response]
     rejected_logit := trainer.model_logits[pair.rejected_response]
 
-
     ref_chosen_logit := trainer.reference_logits[pair.chosen_response]
     ref_rejected_logit := trainer.reference_logits[pair.rejected_response]
 
-
     pi_chosen_logp := chosen_logit - ref_chosen_logit
     pi_rejected_logp := rejected_logit - ref_rejected_logit
-
 
     logit_diff := pi_chosen_logp - pi_rejected_logp
     dpo_loss := -math.Log(sigmoid(trainer.config.beta * logit_diff))
@@ -151,17 +136,11 @@ func (trainer *dpotrainer) compute_batch_loss(batch []preference_pair) float64 {
     return avg_loss
 }
 
-
-
-
-
 func (trainer *dpotrainer) train_dpo_step(
     step int64,
     batch []preference_pair) {
 
-
     loss := trainer.compute_batch_loss(batch)
-
 
     var chosen_logit, rejected_logit, margin float64 = 0, 0, 0
     if len(batch) > 0 {
@@ -170,7 +149,6 @@ func (trainer *dpotrainer) train_dpo_step(
         margin = chosen_logit - rejected_logit
     }
 
-
     var correct int = 0
     for _, pair := range batch {
         if trainer.model_logits[pair.chosen_response] > trainer.model_logits[pair.rejected_response] {
@@ -178,7 +156,6 @@ func (trainer *dpotrainer) train_dpo_step(
         }
     }
     accuracy := float64(correct) / float64(len(batch))
-
 
     metric := dpometrics{
         step:            step,
@@ -202,10 +179,6 @@ func (trainer *dpotrainer) train_dpo_step(
         fmt.Printf("  Margin: %.4f\n", margin)
     }
 }
-
-
-
-
 
 func (trainer *dpotrainer) evaluate_dpo(test_pairs []preference_pair) float64 {
     fmt.Printf("\n[Evaluation] Evaluating DPO model\n")
@@ -231,10 +204,6 @@ func (trainer *dpotrainer) evaluate_dpo(test_pairs []preference_pair) float64 {
 
     return accuracy
 }
-
-
-
-
 
 func (trainer *dpotrainer) compare_with_rlhf() {
     fmt.Printf("\n┌────────────────────────────────────────┐\n")
@@ -264,10 +233,6 @@ func (trainer *dpotrainer) compare_with_rlhf() {
     }
 }
 
-
-
-
-
 func (trainer *dpotrainer) get_dpo_summary() {
     fmt.Printf("\n┌────────────────────────────────────────┐\n")
     fmt.Printf("│  DPO Training Summary                  │\n")
@@ -286,7 +251,6 @@ func (trainer *dpotrainer) get_dpo_summary() {
         fmt.Printf("  Margin: %.4f → %.4f\n",
             first.margin, last.margin)
 
-
         loss_improvement := (first.loss - last.loss) / first.loss * 100
         acc_improvement := (last.accuracy - first.accuracy) * 100
 
@@ -299,10 +263,6 @@ func (trainer *dpotrainer) get_dpo_summary() {
     fmt.Printf("  Total Pairs: %d\n", trainer.dataset.size)
     fmt.Printf("  Quality Score: %.2f%%\n", trainer.dataset.quality_score*100)
 }
-
-
-
-
 
 func NewDPOTrainer() *dpotrainer {
     return &dpotrainer{
@@ -326,9 +286,7 @@ func (trainer *dpotrainer) run_complete_dpo_cycle() {
 
     trainer.initialize(config)
 
-
     trainer.load_preference_data(5000, 0.96)
-
 
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Simulating Model Logits               │")
@@ -340,7 +298,6 @@ func (trainer *dpotrainer) run_complete_dpo_cycle() {
         trainer.reference_logits[pair.chosen_response] = pair.chosen_reward * 1.5
         trainer.reference_logits[pair.rejected_response] = pair.rejected_reward * 1.5
     }
-
 
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  DPO Training                          │")
@@ -354,7 +311,6 @@ func (trainer *dpotrainer) run_complete_dpo_cycle() {
         trainer.train_dpo_step(step, batch)
     }
 
-
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Evaluation                            │")
     fmt.Println("└────────────────────────────────────────┘")
@@ -362,9 +318,7 @@ func (trainer *dpotrainer) run_complete_dpo_cycle() {
     test_pairs := trainer.dataset.preference_pairs[:500]
     trainer.evaluate_dpo(test_pairs)
 
-
     trainer.compare_with_rlhf()
-
 
     trainer.get_dpo_summary()
 

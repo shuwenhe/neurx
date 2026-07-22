@@ -1,10 +1,5 @@
 package neurx.cuda
 
-
-
-
-
-
 struct embedding_config {
     int num_embeddings
     int embedding_dim
@@ -13,16 +8,6 @@ struct embedding_config {
     bool padding_idx_set
     int padding_idx
 }
-
-
-
-
-
-
-
-
-
-
 
 func launch_embedding_forward(
     cuda_context ctx,
@@ -35,42 +20,12 @@ func launch_embedding_forward(
         return error{message: "CUDA context not initialized"}
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     log_kernel_launch("EMBEDDING_FWD", cfg.num_tokens, cfg.embedding_dim, 0,
                       float(cfg.num_tokens * cfg.embedding_dim),
                       cfg.num_tokens * cfg.embedding_dim * 4)
 
     nil
 }
-
-
-
-
-
-
-
 
 func launch_embedding_backward(
     cuda_context ctx,
@@ -82,9 +37,6 @@ func launch_embedding_backward(
     if !ctx.is_initialized {
         return error{message: "CUDA context not initialized"}
     }
-
-
-
 
     log_kernel_launch("EMBEDDING_BWD", cfg.num_tokens, cfg.embedding_dim, 0,
                       float(cfg.num_tokens * cfg.embedding_dim),

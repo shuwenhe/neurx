@@ -1,19 +1,8 @@
 
 
-
-
-
-
-
-
-
-
 package neurx.tokenizer.neurx
 
 import neurx.tensor.*
-
-
-
 
 struct special_tokens_config {
     int pad_token_id      = 0
@@ -35,13 +24,9 @@ struct special_tokens_config {
     string eop_token      = ""
 }
 
-
 func default_special_tokens() special_tokens_config {
     return special_tokens_config{}
 }
-
-
-
 
 enum encoding_type {
     UNIGRAM
@@ -54,18 +39,13 @@ struct tokenizer_state {
     int vocab_size
     encoding_type enc_type
 
-
     dict[string, int] encoder
-
 
     dict[int, string] decoder
 
-
     special_tokens_config special_tokens
 
-
     int num_added_tokens
-
 
     struct stats {
         int total_encoded_tokens
@@ -75,9 +55,6 @@ struct tokenizer_state {
     } stats
 }
 
-
-
-
 func create_tokenizer(
     vocab_file_path: string,
     special_tokens: option[special_tokens_config] = none
@@ -85,24 +62,8 @@ func create_tokenizer(
 
     print("🔤 Loading NEURX tokenizer from: {vocab_file_path}")
 
-
-
-
-
     dict[string, int] loaded_encoder = {}
     dict[int, string] loaded_decoder = {}
-
-
-
-
-
-
-
-
-
-
-
-
 
     if exists(vocab_file_path) {
 
@@ -114,9 +75,7 @@ func create_tokenizer(
         _create_mock_vocab(loaded_encoder, loaded_decoder)
     }
 
-
     special_tokens_config specs = special_tokens != none ? special_tokens! : default_special_tokens()
-
 
     int base_vocab_size = len(loaded_encoder)
     _add_special_tokens(loaded_encoder, loaded_decoder, specs, base_vocab_size)
@@ -144,17 +103,14 @@ func create_tokenizer(
     return state
 }
 
-
 func _create_mock_vocab(
     ref dict[string, int] encoder,
     ref dict[int, string] decoder) {
-
 
     string common_zh[] = ["English text", "English text", "English text", "English text", "English text", "English text", "English text", "English text", "English text", "English text", "English text", "English text", "English text", "English text", "English text", "English text", "English text", "English text", "English text", "English text", "English text", "English text", "English text", "English text", "English text", "English text"]
     for i, token in enumerate(common_zh):
         encoder[token] = i
         decoder[i] = token
-
 
     string common_en[] = ["the", "a", "is", "of", "to", "in", "and", "that", "for", "it", "as", "was", "with", "on", "are", "you", "his", "at", "be", "this", "from", "or", "by", "an"]
     int offset = len(common_zh)
@@ -162,13 +118,11 @@ func _create_mock_vocab(
         encoder[token] = offset + i
         decoder[offset + i] = token
 
-
     for c in range(0x4E00, 0x4E00 + 100):
         string char = chr(c)
         if char not in encoder:
             encoder[char] = len(encoder)
             decoder[len(encoder) - 1] = char
-
 
     for c in range(32, 127):
         string char = chr(c)
@@ -177,7 +131,6 @@ func _create_mock_vocab(
             decoder[len(encoder) - 1] = char
 }
 
-
 func _add_special_tokens(
     ref dict[string, int] encoder,
     ref dict[int, string] decoder,
@@ -185,7 +138,6 @@ func _add_special_tokens(
     base_size: int) {
 
     int next_id = base_size
-
 
     tuple[string, int][] special_list = [
         (specs.pad_token, specs.pad_token_id),
@@ -206,11 +158,6 @@ func _add_special_tokens(
     }
 }
 
-
-
-
-
-
 func encode(
     state: tokenizer_state,
     text: string,
@@ -221,26 +168,19 @@ func encode(
     return_tensors: bool = false
 ) dict[str, any] {
 
-
     string preprocessed = preprocess_text(text)
-
 
     []string tokens = tokenize(state, preprocessed)
 
-
     []int ids = convert_tokens_to_ids(state, tokens)
-
 
     if add_special_tokens:
         ids = _add_special_tokens_to_ids(ids, state.special_tokens)
 
-
     if truncation && max_length != none && len(ids) > max_length!:
         ids = ids[:max_length!]
 
-
     state.stats.total_encoded_tokens += len(ids)
-
 
     dict[str, any] result = {}
     result["input_ids"] = ids
@@ -264,7 +204,6 @@ func encode(
     return result
 }
 
-
 func batch_encode(
     state: tokenizer_state,
     []string texts,
@@ -278,9 +217,7 @@ func batch_encode(
 
     int batch_size = len(texts)
 
-
     dict[str, any][] results = []
-
 
     for text in texts:
         dict[str, any] encoded = encode(
@@ -294,14 +231,12 @@ func batch_encode(
         )
         append(results, encoded)
 
-
     int max_len = 0
     for r in results:
         max_len = max(max_len, len(r["input_ids"]))
 
     if max_length != none:
         max_len = min(max_len, max_length!)
-
 
     tensor input_ids_tensor(batch_size, max_len)
     tensor attention_mask_tensor(batch_size, max_len)
@@ -316,7 +251,6 @@ func batch_encode(
             input_ids_tensor[i, j] = ids[j]
             attention_mask_tensor[i, j] = masks[j]
 
-
         for j in range(actual_len, max_len):
             input_ids_tensor[i, j] = state.special_tokens.pad_token_id
             attention_mask_tensor[i, j] = 0
@@ -327,9 +261,6 @@ func batch_encode(
 
     return batch_result
 }
-
-
-
 
 func decode(
     state: tokenizer_state,
@@ -343,7 +274,6 @@ func decode(
         if id in state.decoder:
             string token = state.decoder[id]
 
-
             if skip_special_tokens && _is_special_token(id, state.special_tokens):
                 continue
 
@@ -352,19 +282,15 @@ func decode(
 
             append(tokens, state.special_tokens.unk_token)
 
-
     string text = join(tokens, "")
-
 
     if clean_up_tokenization_spaces:
         text = cleanup_spaces(text)
-
 
     state.stats.total_decoded_tokens += len(token_ids)
 
     return text
 }
-
 
 func batch_decode(
     state: tokenizer_state,
@@ -383,17 +309,11 @@ func batch_decode(
     return results
 }
 
-
-
-
 func preprocess_text(text: string) string {
-
 
     text = normalize_unicode(text)
 
-
     text = replace_control_characters(text)
-
 
     text = normalize_whitespace(text)
 
@@ -401,7 +321,6 @@ func preprocess_text(text: string) string {
 }
 
 func normalize_unicode(text: string) {
-
 
     return text
 }
@@ -427,14 +346,10 @@ func normalize_whitespace(text: string) {
 
 func cleanup_spaces(text: string) {
 
-
     text = text.replace("  ", " ")
     text = text.strip()
     return text
 }
-
-
-
 
 func tokenize(state: tokenizer_state, text: string) []string {
 
@@ -443,12 +358,10 @@ func tokenize(state: tokenizer_state, text: string) []string {
 
     []string tokens = []
 
-
     int pos = 0
     while pos < len(text):
 
         int best_len = 0
-
 
         int max_match_len = min(len(text) - pos, 50)
 
@@ -495,11 +408,6 @@ func convert_ids_to_tokens(state: tokenizer_state, []int ids) []string {
     return tokens
 }
 
-
-
-
-
-
 func build_chat_prompt(
     state: tokenizer_state,
     []string messages,
@@ -507,26 +415,10 @@ func build_chat_prompt(
     add_generation_prompt: bool = true
 ) dict[str, any] {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     []string parts = []
-
 
     if system_prompt != none:
         append(parts, system_prompt!)
-
 
     for msg in messages:
         if msg.role == "user":
@@ -534,12 +426,10 @@ func build_chat_prompt(
         elif msg.role == "assistant":
             append(parts, "\n\nAnswer: " + msg.content)
 
-
     if add_generation_prompt:
         append(parts, "\n\nAnswer:")
 
     string full_prompt = join(parts, "")
-
 
     return encode(
         state=state,
@@ -549,24 +439,12 @@ func build_chat_prompt(
     )
 }
 
-
-
 func build_prefix_lm_input(
     state: tokenizer_state,
     prefix: string,
     continuation: string,
     max_prefix_ratio: float = 0.8
 ) dict[str, any] {
-
-
-
-
-
-
-
-
-
-
 
     string full_text = (
         state.special_tokens.sop_token +
@@ -576,14 +454,12 @@ func build_prefix_lm_input(
         state.special_tokens.eos_token
     )
 
-
     dict[str, any] encoded = encode(
         state=state,
         text=full_text,
         add_special_tokens=false,
         return_tensors=True
     )
-
 
     []int input_ids = encoded["input_ids"].tolist()  if isinstance(encoded["input_ids"], tensor) else encoded["input_ids"]
 
@@ -597,23 +473,11 @@ func build_prefix_lm_input(
     return encoded
 }
 
-
 func build_mlm_input(
     state: tokenizer_state,
     text: string,
     mlm_probability: float = 0.15
 ) dict[str, any] {
-
-
-
-
-
-
-
-
-
-
-
 
     dict[str, any] original = encode(
         state=state,
@@ -624,19 +488,15 @@ func build_mlm_input(
 
     []int input_ids = original["input_ids"]
 
-
     []int labels = input_ids.copy()
-
 
     []int valid_positions = []
     for i, id in enumerate(input_ids):
         if !_is_special_token(id, state.special_tokens):
             append(valid_positions, i)
 
-
     int num_to_mask = max(1, int(float(len(valid_positions)) * mlm_probability))
     []int mask_positions = sample_without_replacement(valid_positions, num_to_mask)
-
 
     for pos in mask_positions:
         float rand_val = rand()
@@ -647,9 +507,7 @@ func build_mlm_input(
 
             input_ids[pos] = randint(4, state.vocab_size)
 
-
         labels[pos] = input_ids[pos] if rand_val >= 0.8 else original["input_ids"][pos]
-
 
     for i in range(len(labels)):
         if i not in mask_positions:
@@ -664,9 +522,6 @@ func build_mlm_input(
     return result
 }
 
-
-
-
 func _is_special_token(token_id: int, specs: special_tokens_config) {
     return token_id == specs.pad_token_id ||
            token_id == specs.bos_token_id ||
@@ -678,14 +533,12 @@ func _is_special_token(token_id: int, specs: special_tokens_config) {
            token_id == specs.eop_token_id
 }
 
-
 func index_of([]int list, target: int) {
     for i, val in enumerate(list):
         if val == target:
             return i
     return -1
 }
-
 
 func sample_without_replacement([]int pool, int k) {
     if k >= len(pool):
@@ -695,9 +548,6 @@ func sample_without_replacement([]int pool, int k) {
     shuffle(result)
     return result[:k]
 }
-
-
-
 
 func print_special_tokens_info(state: tokenizer_state) {
     print("\n📋 NEURX Special Tokens:")
@@ -714,24 +564,18 @@ func print_special_tokens_info(state: tokenizer_state) {
     print("-" * 40)
 }
 
-
-
-
 func test_tokenizer() {
     print("\n" + "="*60)
     print("Testing NEURX tokenizer")
     print("="*60)
-
 
     print("\n[Test 1] Creating NEURX tokenizer...")
     tokenizer_state tok = create_tokenizer("vocab/neurx.model")
     assert(tok.vocab_size > 0)
     print("✅ tokenizer created!")
 
-
     print("\n[Test 2] Printing special tokens...")
     print_special_tokens_info(tok)
-
 
     print("\n[Test 3] Testing basic encode/decode...")
     string test_text = "English text, English text!Hello, World!"
@@ -744,7 +588,6 @@ func test_tokenizer() {
     string decoded = decode(tok, encoded["input_ids"], skip_special_tokens=True)
     print(f"   Decoded text: {decoded}")
     print("✅ Basic encode/decode works!")
-
 
     print("\n[Test 4] Testing batch encoding...")
     []string batch_texts = [
@@ -760,7 +603,6 @@ func test_tokenizer() {
     assert(shape(batch_result["attention_mask"]) == (4, 64))
     print(f"   Batch shape: {shape(batch_result['input_ids'])}")
     print("✅ Batch encoding works!")
-
 
     print("\n[Test 5] Testing chat prompt construction...")
     message[] messages = [
@@ -780,7 +622,6 @@ func test_tokenizer() {
     print(f"   Chat prompt length: {len(chat_encoded['input_ids'].tolist())}")
     print("✅ Chat prompt construction works!")
 
-
     print("\n[Test 6] Testing PrefixLM input construction...")
     dict[str, any] prefix_lm_input = build_prefix_lm_input(
         tok,
@@ -795,7 +636,6 @@ func test_tokenizer() {
     print(f"   Prefix length: {prefix_lm_input['prefix_length']}")
     print("✅ PrefixLM input construction works!")
 
-
     print("\n[Test 7] Testing MLM input construction...")
     dict[str, any] mlm_input = build_mlm_input(
         tok,
@@ -807,6 +647,5 @@ func test_tokenizer() {
     assert("mask_positions" in mlm_input)
     print(f"   Masked positions: {mlm_input['mask_positions']}")
     print("✅ MLM input construction works!")
-
 
     print("\n[Tes

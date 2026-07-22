@@ -1,12 +1,5 @@
 package neurx.api.llm_compat
 
-
-
-
-
-
-
-
 struct chat_message {
     string role
     string content
@@ -92,14 +85,8 @@ struct api_config {
     int batch_size
 }
 
-
-
-
-
-
 func validate_chat_completion_request(chat_completion_request req) api_error {
     api_error err
-
 
     if strlen(req.model) == 0 {
         err.error_code = 400
@@ -114,7 +101,6 @@ func validate_chat_completion_request(chat_completion_request req) api_error {
         err.error_type = "invalid_request_error"
         return err
     }
-
 
     int i = 0
     while i < req.messages_count {
@@ -134,7 +120,6 @@ func validate_chat_completion_request(chat_completion_request req) api_error {
             return err
         }
 
-
         if !is_valid_role(msg.role) {
             err.error_code = 400
             err.error_message = "Invalid message role"
@@ -144,7 +129,6 @@ func validate_chat_completion_request(chat_completion_request req) api_error {
 
         i = i + 1
     }
-
 
     if req.temperature < 0.0 || req.temperature > 2.0 {
         err.error_code = 400
@@ -167,11 +151,9 @@ func validate_chat_completion_request(chat_completion_request req) api_error {
         return err
     }
 
-
     err.error_code = 0
     err
 }
-
 
 func is_valid_role(string role) bool {
     if str_equals(role, "system") {
@@ -186,27 +168,17 @@ func is_valid_role(string role) bool {
     false
 }
 
-
-
-
-
-
 func handle_chat_completion(chat_completion_request req, api_config config) chat_completion_response {
     chat_completion_response resp
-
 
     api_error err = validate_chat_completion_request(req)
     if err.error_code != 0 {
 
-
     }
-
 
     string full_prompt = build_chat_prompt(req.messages, req.messages_count)
 
-
     string generated_text = generate_response(full_prompt, req.temperature, req.max_tokens, config)
-
 
     resp.id = generate_request_id()
     resp.object = "chat.completion"
@@ -214,10 +186,8 @@ func handle_chat_completion(chat_completion_request req, api_config config) chat
     resp.model = req.model
     resp.finish_reason = "stop"
 
-
     resp.message.role = "assistant"
     resp.message.content = generated_text
-
 
     resp.usage_prompt_tokens = count_tokens(full_prompt)
     resp.usage_completion_tokens = count_tokens(generated_text)
@@ -226,7 +196,6 @@ func handle_chat_completion(chat_completion_request req, api_config config) chat
     resp
 }
 
-
 func build_chat_prompt(chat_message* messages, int count) string {
     string prompt = ""
 
@@ -234,38 +203,20 @@ func build_chat_prompt(chat_message* messages, int count) string {
     while i < count {
         chat_message msg = messages[i]
 
-
         prompt = prompt + "<" + msg.role + ">: " + msg.content + "\n"
 
         i = i + 1
     }
-
 
     prompt = prompt + "<assistant>: "
 
     prompt
 }
 
-
 func generate_response(string prompt, float temperature, int max_tokens, api_config config) string {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     "This is a generated response to: " + prompt
 }
-
 
 func count_tokens(string text) int {
 
@@ -283,22 +234,14 @@ func count_tokens(string text) int {
     count
 }
 
-
-
-
-
-
 func handle_completion(completion_request req, api_config config) completion_response {
     completion_response resp
-
 
     if strlen(req.model) == 0 || strlen(req.prompt) == 0 {
 
     }
 
-
     string completion_text = generate_completion(req.prompt, req.temperature, req.max_tokens, config)
-
 
     resp.id = generate_request_id()
     resp.object = "text_completion"
@@ -307,7 +250,6 @@ func handle_completion(completion_request req, api_config config) completion_res
     resp.text = completion_text
     resp.finish_reason = "stop"
 
-
     resp.usage_prompt_tokens = count_tokens(req.prompt)
     resp.usage_completion_tokens = count_tokens(completion_text)
     resp.usage_total_tokens = resp.usage_prompt_tokens + resp.usage_completion_tokens
@@ -315,28 +257,19 @@ func handle_completion(completion_request req, api_config config) completion_res
     resp
 }
 
-
 func generate_completion(string prompt, float temperature, int max_tokens, api_config config) string {
 
     "Generated completion for: " + prompt
 }
 
-
-
-
-
-
 func handle_embeddings(embedding_request req, api_config config) embedding_response {
     embedding_response resp
-
 
     if strlen(req.model) == 0 || strlen(req.input) == 0 {
 
     }
 
-
     float* embedding = generate_embedding(req.input)
-
 
     resp.object = "list"
     resp.model = req.model
@@ -346,19 +279,9 @@ func handle_embeddings(embedding_request req, api_config config) embedding_respo
     resp
 }
 
-
 func generate_embedding(string text) float* {
 
-
-
-
-
-
-
-
-
     float* embedding = alloc(float, 768)
-
 
     int i = 0
     while i < 768 {
@@ -369,21 +292,12 @@ func generate_embedding(string text) float* {
     embedding
 }
 
-
-
-
-
-
 func stream_chat_completion(chat_completion_request req, api_config config) void {
 
     if !req.stream {
 
         return
     }
-
-
-
-
 
     string full_prompt = build_chat_prompt(req.messages, req.messages_count)
 
@@ -392,32 +306,18 @@ func stream_chat_completion(chat_completion_request req, api_config config) void
 
         string next_token = generate_next_token(full_prompt, tokens_generated)
 
-
-
-
-
-
-
         tokens_generated = tokens_generated + 1
-
 
         if is_stop_token(next_token, req.stop, req.stop_count) {
             break
         }
     }
 
-
-
-
-
-
 }
-
 
 func generate_next_token(string prompt, int position) string {
     "token"
 }
-
 
 func is_stop_token(string token, string* stop_tokens, int stop_count) bool {
     int i = 0
@@ -430,23 +330,15 @@ func is_stop_token(string token, string* stop_tokens, int stop_count) bool {
     false
 }
 
-
-
-
-
-
 func generate_request_id() string {
-
 
     "chatcmpl-" + int_to_string(get_current_timestamp())
 }
-
 
 func get_current_timestamp() int {
 
     0
 }
-
 
 func str_equals(string s1, string s2) bool {
     if strlen(s1) != strlen(s2) {
@@ -464,7 +356,6 @@ func str_equals(string s1, string s2) bool {
     true
 }
 
-
 func strlen(string s) int {
     int count = 0
     int i = 0
@@ -474,7 +365,6 @@ func strlen(string s) int {
     }
     count
 }
-
 
 func int_to_string(int n) string {
     if n == 0 {
@@ -502,18 +392,12 @@ func int_to_string(int n) string {
     result
 }
 
-
 func char_to_string(int c) string {
     ""
 }
 
-
-
-
-
 func main() {
     println("=== NeurX Compatible API Service ===")
-
 
     api_config config
     config.max_tokens_default = 256
@@ -523,7 +407,6 @@ func main() {
     config.timeout_seconds = 30
     config.enable_streaming = true
     config.enable_batching = false
-
 
     println("\n1. Testing Chat Completion API")
     chat_completion_request chat_req
@@ -542,7 +425,6 @@ func main() {
     println("Response: " + chat_resp.message.content)
     println("Tokens: " + int_to_string(chat_resp.usage_total_tokens))
 
-
     println("\n2. Testing Completion API")
     completion_request comp_req
     comp_req.model = "neurx-7b"
@@ -552,7 +434,6 @@ func main() {
 
     completion_response comp_resp = handle_completion(comp_req, config)
     println("Completion: " + comp_resp.text)
-
 
     println("\n3. Testing Embeddings API")
     embedding_request emb_req

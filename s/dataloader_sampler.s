@@ -1,11 +1,5 @@
 package neurx.data
 
-
-
-
-
-
-
 struct sampler_config {
     int total_samples
     int batch_size
@@ -23,7 +17,6 @@ struct sampler {
     int epoch
 }
 
-
 func new_sampler(sampler_config cfg) sampler {
 
     []int indices = []int{cap: cfg.total_samples}
@@ -39,16 +32,10 @@ func new_sampler(sampler_config cfg) sampler {
     }
 }
 
-
-
-
-
-
 func reset_sequential(sampler s) sampler {
     s.current_position = 0
     s
 }
-
 
 func next_batch_sequential(sampler s) ([]int, bool) {
     if s.current_position >= len(s.indices) {
@@ -83,11 +70,6 @@ func extract_indices([]int src, int start, int count) []int {
     result
 }
 
-
-
-
-
-
 func reset_random(sampler s) sampler {
 
     s.current_position = 0
@@ -100,7 +82,6 @@ func reset_random(sampler s) sampler {
         for i in len(s.indices)-1 .. 1 {
             int j = random_int_range(rng_state, 0, i)
 
-
             int temp = s.indices[i]
             s.indices[i] = s.indices[j]
             s.indices[j] = temp
@@ -111,7 +92,6 @@ func reset_random(sampler s) sampler {
 
     s
 }
-
 
 func advance_rng(uint64 state) uint64 {
     state = state xor (state << 13)
@@ -142,12 +122,6 @@ func random_int_range(uint64 rng, int min, int max) int {
     min + int(r(r - (r / uint64) * uint64)(range_val))
 }
 
-
-
-
-
-
-
 struct distributed_sampler {
     sampler base
     int num_samples_per_rank
@@ -162,11 +136,9 @@ func create_distributed_sampler(
     cfg.num_replicas = num_replicas
     cfg.rank = rank
 
-
     int total = cfg.total_samples
     int per_rank = total / num_replicas
     int remainder = t(total - (total / num_replicas) * num_replicas)
-
 
     if rank < remainder {
         per_rank = per_rank + 1
@@ -181,10 +153,8 @@ func create_distributed_sampler(
     }
 }
 
-
 func reset_distributed(distributed_sampler ds) distributed_sampler {
     ds.base = reset_random(ds.base)
-
 
     ds.base.indices = generate_distributed_indices(
         ds.base.config,
@@ -202,11 +172,9 @@ func generate_distributed_indices(
 ) []int {
     []int indices = []int{cap: count}
 
-
     for i in 0..count {
         indices[i] = offset + i
     }
-
 
     if cfg.shuffle {
         uint64 rng = cfg.seed + uint64(ds.base.epoch * 7919)
@@ -223,16 +191,9 @@ func generate_distributed_indices(
     indices
 }
 
-
 func next_batch_distributed(distributed_sampler ds) ([]int, bool) {
     next_batch_sequential(ds.base)
 }
-
-
-
-
-
-
 
 struct weighted_sampler {
     sampler base
@@ -253,7 +214,6 @@ func create_weighted_sampler(
         running_sum = running_sum + weights[i]
         cumsum[i] = running_sum
     }
-
 
     int num_samples = cfg.total_samples
     if !cfg.drop_last {
@@ -289,7 +249,6 @@ func next_batch_weighted(weighted_sampler ws) ([]int, bool) {
 
 func draw_weighted_sample(weighted_sampler ws) int {
     float r = random_float_01(advance_rng(uint64(ws.base.current_position)))
-
 
     return binary_search_cumsum(ws.cumulative_weights, r)
 }

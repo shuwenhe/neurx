@@ -1,26 +1,20 @@
 
 
-
-
 package neurx.data.async_prefetch
 
 use neurx.data.streaming_reader.{streaming_reader_state, read_batch_of_lines}
 use neurx.tokenizer.data_pipeline.{tokenizer_config, default_llm_tokenizer_config, bpe_tokenizer_state, init_bpe_tokenizer, encode}
 
-
 struct prefetch_config {
 
     int prefetch_queue_size
-
 
     int num_io_threads
     int num_tokenizer_threads
     bool pin_memory
 
-
     float target_throughput_gbs
     int max_latency_ms
-
 
     int max_queue_size_bytes
     bool enable_backpressure
@@ -38,9 +32,6 @@ func default_prefetch_config() prefetch_config {
     cfg.enable_backpressure = true
     return cfg
 
-
-
-
 struct prefetched_batch {
     int batch_id
     []int input_ids
@@ -49,7 +40,6 @@ struct prefetched_batch {
     []float loss_weights
     int batch_size
     int seq_len
-
 
     float preprocessing_time_ms
     float io_time_ms
@@ -60,9 +50,6 @@ struct prefetched_batch {
     int priority
 }
 
-
-
-
 struct prefetch_queue {
     []prefetched_batch buffer
     int capacity
@@ -70,11 +57,9 @@ struct prefetch_queue {
     int tail
     int count
 
-
     mutex lock
     condition_variable not_full
     condition_variable not_empty
-
 
     int total_enqueued
     int total_dequeued
@@ -97,7 +82,6 @@ func new_prefetch_queue(int capacity) prefetch_queue {
     q.max_queue_depth_observed = 0
     return q
 
-
 func enqueue(prefetch_queue q, prefetched_batch batch) bool {
     if q.enable_backpressure and q.count >= q.capacity * 0.9:
 
@@ -116,7 +100,6 @@ func enqueue(prefetch_queue q, prefetched_batch batch) bool {
 
     signal(q.not_empty)
     return true
-
 
 func dequeue(prefetch_queue q) prefetched_batch {
     if q.count == 0:
@@ -145,28 +128,22 @@ int get_utilization(prefetch_queue q):
         return 0
     return (q.count * 100) / q.capacity
 
-
-
-
 struct async_prefetch_manager {
     prefetch_config config
     streaming_reader_state reader
     prefetch_queue queue
     bpe_tokenizer_state tokenizer
 
-
     []thread_handle io_workers
     []thread_handle tokenizer_workers
     bool workers_running
     int next_batch_id_to_produce
-
 
     int64 total_bytes_loaded
     int total_batches_produced
     float avg_io_throughput_mbps
     float avg_tokenization_throughput_ktokens_s
     int64 start_time_ns
-
 
     int backpressure_events_count
     int starvation_events_count
@@ -193,7 +170,6 @@ func new_async_prefetch_manager(
     mgr.starvation_events_count = 0
     return mgr
 
-
 func start_workers(async_prefetch_manager mgr) async_prefetch_manager:
 
     if mgr.workers_running:
@@ -202,13 +178,11 @@ func start_workers(async_prefetch_manager mgr) async_prefetch_manager:
     mgr.workers_running = true
     mgr.start_time_ns = get_time_nanoseconds()
 
-
     int i = 0
     while i < mgr.config.num_io_threads:
         thread_handle t = spawn_thread(io_worker_function, mgr)
         mgr.io_workers.push(t)
         i = i + 1
-
 
     i = 0
     while i < mgr.config.num_tokenizer_threads:
@@ -218,14 +192,12 @@ func start_workers(async_prefetch_manager mgr) async_prefetch_manager:
 
     return mgr
 
-
 func stop_workers(async_prefetch_manager mgr) async_prefetch_manager:
 
     if !mgr.workers_running:
         return mgr
 
     mgr.workers_training = false
-
 
     int i = 0
     while i < len(mgr.io_workers):
@@ -239,7 +211,6 @@ func stop_workers(async_prefetch_manager mgr) async_prefetch_manager:
 
     return mgr
 
-
 struct batch_fetch_result:
     prefetched_batch batch
     bool success
@@ -249,7 +220,6 @@ struct batch_fetch_result:
 func fetch_next_batch(async_prefetch_manager mgr) batch_fetch_result:
 
     int start_wait = get_time_milliseconds()
-
 
     if is_empty(mgr.queue):
 
@@ -277,9 +247,6 @@ func fetch_next_batch(async_prefetch_manager mgr) batch_fetch_result:
             wait_time_ms: wait_time
         }
 
-
-
-
 func io_worker_function(async_prefetch_manager mgr) void:
 
     while mgr.workers_running:
@@ -288,7 +255,6 @@ func io_worker_function(async_prefetch_manager mgr) void:
 
             sleep_ms(1)
             continue
-
 
         batch_read_result raw_data = read_batch_of_lines(
             mgr.reader,
@@ -302,9 +268,7 @@ func io_worker_function(async_prefetch_manager mgr) void:
             else:
                 break
 
-
         mgr.reader = raw_data.updated_reader
-
 
         if len(mgr.tokenizer_workers) > 0:
 
@@ -313,11 +277,9 @@ func io_worker_function(async_prefetch_manager mgr) void:
 
             prefetched_batch batch = tokenize_batch(mgr, raw_data.lines, raw_data.count)
 
-
             bool enqueued = enqueue(mgr.queue, batch)
             if !enqueued:
                 mgr.backpressure_events_count = mgr.backpressure_events_count + 1
-
 
 func tokenizer_worker_function(async_prefetch_manager mgr) void:
 
@@ -330,18 +292,15 @@ func tokenizer_worker_function(async_prefetch_manager mgr) void:
             sleep_ms(1)
             continue
 
-
         prefetched_batch batch = tokenize_batch(
             mgr,
             raw_lines,
             len(raw_lines)
         )
 
-
         bool enqueued = enqueue(mgr.queue, batch)
         if !enqueued:
             mgr.backpressure_events_count = mgr.backpressure_events_count + 1
-
 
 func tokenize_batch(
     async_prefetch_manager mgr,
@@ -350,7 +309,6 @@ func tokenize_batch(
 ) prefetched_batch:
 
     int start_time = get_time_milliseconds()
-
 
     int tokens_per_line = mgr.reader.config.seq_len
     int total_tokens = line_count * tokens_per_line
@@ -367,11 +325,9 @@ func tokenize_batch(
     while line_idx < line_count:
         string line = raw_lines[line_idx]
 
-
         if len(line) < 10:
             line_idx = line_idx + 1
             continue
-
 
         []int token_ids = tokenize_single_line(mgr, line, tokens_per_line)
 
@@ -379,14 +335,12 @@ func tokenize_batch(
             line_idx = line_idx + 1
             continue
 
-
         int t = 0
         while t < tokens_per_line:
             int pos = valid_samples * tokens_per_line + t
 
             if t < len(token_ids):
                 input_ids[pos] = token_ids[t]
-
 
                 if t + 1 < len(token_ids):
                     target_ids[pos] = token_ids[t + 1]
@@ -401,7 +355,6 @@ func tokenize_batch(
 
             t = t + 1
 
-
         loss_weights[valid_samples] = 1.0
 
         valid_samples = valid_samples + 1
@@ -410,7 +363,6 @@ func tokenize_batch(
 
     int end_time = get_time_milliseconds()
     float elapsed = float(end_time - start_time)
-
 
     prefetched_batch batch
     batch.batch_id = mgr.next_batch_id_to_produce
@@ -430,12 +382,9 @@ func tokenize_batch(
     batch.enqueue_time_ms = start_time
     batch.priority = 0
 
-
     mgr.total_bytes_loaded = mgr.total_bytes_loaded + estimate_bytes_from_lines(raw_lines, line_count)
 
     return batch
-
-
 
 struct prefetch_stats {
 
@@ -443,17 +392,14 @@ struct prefetch_stats {
     float tokenization_speed_ktok_s
     float effective_throughput
 
-
     float avg_batch_latency_ms
     float p99_batch_latency_ms
     float min_queue_depth
-
 
     float gpu_utilization_estimate
     int starvation_count
     int backpressure_count
     float queue_utilization_pct
-
 
     int active_io_threads
     int active_tokenizer_threads
@@ -467,19 +413,15 @@ func get_prefetch_stats(async_prefetch_manager mgr) prefetch_stats:
 
     prefetch_stats stats
 
-
     if elapsed_sec > 0:
         stats.io_throughput_mbps = (float(mgr.total_bytes_loaded) / (1024*1024)) / elapsed_sec
         stats.tokenization_speed_ktok_s = float(mgr.total_batches_produced * 32 * 2048) / elapsed_sec / 1000
 
-
     stats.queue_utilization_pct = float(get_utilization(mgr.queue))
     stats.min_queue_depth = mgr.queue.min_depth_ever
 
-
     stats.starvation_count = mgr.starvation_events_count
     stats.backpressure_count = mgr.backpressure_events_count
-
 
     if mgr.total_batches_produced > 100:
         float starvation_ratio = float(mgr.starvation_count) / float(mgr.total_batches_produced)
@@ -488,8 +430,6 @@ func get_prefetch_stats(async_prefetch_manager mgr) prefetch_stats:
         stats.gpu_utilization_estimate = 0.0
 
     return stats
-
-
 
 func empty_prefetched_batch() prefetched_batch:
     return prefetched_batch{
@@ -510,7 +450,6 @@ func empty_prefetched_batch() prefetched_batch:
     }
 
 func tokenize_single_line(async_prefetch_manager mgr, string line, int max_tokens) []int:
-
 
     []int token_ids = encode(mgr.tokenizer, line)
 
@@ -547,7 +486,6 @@ func sleep_ms(int ms) void:
 
     return
 
-
 struct thread_handle:
     int id
 
@@ -556,7 +494,6 @@ func thread_handle(func callback, void* arg) thread_handle:
 
 func join_thread(thread_handle handle) void:
     return
-
 
 struct mutex:
     int locked
@@ -575,7 +512,6 @@ func wait(condition_variable cv, mutex m) void:
 
 func signal(condition_variable cv) void:
     return
-
 
 func pass_raw_data_to_tokenizers(async_prefetch_manager mgr, []string lines) void:
 

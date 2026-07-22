@@ -1,20 +1,9 @@
 
 
-
-
-
-
-
-
-
 package main
 
 use neurx.runtime.io.{runtime_env_get}
 use std.io.println
-
-
-
-
 
 func main() int {
     let cmd = runtime_env_get("NEURX_SCRIPTS_CMD", "help")

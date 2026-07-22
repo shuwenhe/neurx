@@ -1,8 +1,5 @@
 
 
-
-
-
 package main
 
 import (
@@ -66,10 +63,6 @@ type experiment_manager struct {
     best_experiment     string
 }
 
-
-
-
-
 func (manager *experiment_manager) initialize() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Industrial Experiment Management System              ║")
@@ -109,10 +102,6 @@ func (manager *experiment_manager) create_experiment(
     return config
 }
 
-
-
-
-
 func (manager *experiment_manager) add_hyperparameter(
     experiment_id string,
     param_name string,
@@ -141,10 +130,6 @@ func (manager *experiment_manager) log_hyperparameters(experiment_id string) {
     }
 }
 
-
-
-
-
 func (manager *experiment_manager) record_metrics(
     experiment_id string,
     step int64,
@@ -169,7 +154,6 @@ func (manager *experiment_manager) record_metrics(
         }
 
         result.metrics_history = append(result.metrics_history, metric)
-
 
         if val_loss < result.best_loss {
             result.best_loss = val_loss
@@ -201,10 +185,6 @@ func (manager *experiment_manager) get_metrics_summary(experiment_id string) {
         }
     }
 }
-
-
-
-
 
 func (manager *experiment_manager) compare_experiments(
     exp_ids []string,
@@ -259,10 +239,6 @@ func (manager *experiment_manager) compare_experiments(
     return comparison
 }
 
-
-
-
-
 func (manager *experiment_manager) mark_experiment_complete(
     experiment_id string,
     converged bool) {
@@ -301,10 +277,6 @@ func (manager *experiment_manager) get_experiment_history() {
     }
 }
 
-
-
-
-
 func (manager *experiment_manager) export_experiment_config(experiment_id string) string {
     if result, exists := manager.experiments[experiment_id]; exists {
         config_str := fmt.Sprintf("# Experiment: %s\n", result.config.name)
@@ -328,10 +300,6 @@ func (manager *experiment_manager) export_experiment_config(experiment_id string
     return ""
 }
 
-
-
-
-
 func (manager *experiment_manager) find_best_experiment() string {
     var best_exp string = ""
     var best_ppl float64 = math.MaxFloat64
@@ -351,10 +319,6 @@ func (manager *experiment_manager) find_best_experiment() string {
     return best_exp
 }
 
-
-
-
-
 func NewExperimentManager() *experiment_manager {
     return &experiment_manager{
         experiments:        make(map[string]experiment_result),
@@ -366,7 +330,6 @@ func NewExperimentManager() *experiment_manager {
 
 func (manager *experiment_manager) run_complete_experiment_cycle() {
     manager.initialize()
-
 
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Creating and Running Experiments      │")
@@ -402,14 +365,12 @@ func (manager *experiment_manager) run_complete_experiment_cycle() {
         manager.experiments[exp.id] = result
         manager.current_experiment = exp.id
 
-
         manager.add_hyperparameter(exp.id, "learning_rate", exp.lr, "float")
         manager.add_hyperparameter(exp.id, "weight_decay", exp.wd, "float")
         manager.add_hyperparameter(exp.id, "batch_size", "32", "int")
         manager.add_hyperparameter(exp.id, "warmup_steps", "1000", "int")
 
         manager.log_hyperparameters(exp.id)
-
 
         converged := false
         for step := int64(1000); step <= 5000; step += 1000 {
@@ -437,7 +398,6 @@ func (manager *experiment_manager) run_complete_experiment_cycle() {
         manager.get_metrics_summary(exp.id)
     }
 
-
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Comparing Experiments                 │")
     fmt.Println("└────────────────────────────────────────┘")
@@ -446,10 +406,8 @@ func (manager *experiment_manager) run_complete_experiment_cycle() {
     comparison := manager.compare_experiments(exp_ids, "perplexity")
     manager.comparison_history = append(manager.comparison_history, comparison)
 
-
     manager.get_experiment_history()
     manager.find_best_experiment()
-
 
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Exporting Best Configuration          │")

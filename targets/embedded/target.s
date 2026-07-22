@@ -1,17 +1,5 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 struct embedded_target_config {
     string  mcu_family
     int     ram_kb

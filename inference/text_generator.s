@@ -1,10 +1,5 @@
 package neurx.inference
 
-
-
-
-
-
 use neurx.inference.sampling_strategies
 
 struct generator_config {

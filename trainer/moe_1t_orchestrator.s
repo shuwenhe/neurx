@@ -1,39 +1,5 @@
 package neurx.trainer.moe_1t_orchestrator
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.moe.llm_1t.{
     moe_1t_framework, moe_1t_scale_profile, moe_1t_parallel_plan,
     moe_1t_training_plan, moe_1t_framework_default, moe_1t_summary
@@ -45,11 +11,6 @@ use neurx.loss.llm_moe_1t_loss.{loss_state_new, compute_total_loss, compute_ce_g
 use neurx.distributed.collective.{collective_state}
 use neurx.runtime.io.{io_println, io_get_env, io_mkdir_recursive, runtime_file_exists, runtime_read_text_file}
 
-
-
-
-
-
 struct moe_routing_stats {
     int total_tokens
     []int expert_load
@@ -59,7 +20,6 @@ struct moe_routing_stats {
     float compute_cost_ms
     float aux_loss_value
 }
-
 
 struct moe_1t_step_state {
     int global_step
@@ -74,11 +34,9 @@ struct moe_1t_step_state {
     int compute_time_us
 }
 
-
 struct moe_1t_orchestrator {
     moe_1t_framework framework
     gpt_moe_config model_config
-
 
     int world_rank
     int world_size
@@ -91,17 +49,14 @@ struct moe_1t_orchestrator {
     int dp_rank
     int dp_size
 
-
     gpt_moe_state model_state
     zero_optimizer_state optimizer_state
     collective_state comm
-
 
     string data_manifest_path
     []string token_shards
     int current_shard_index
     int tokens_in_shard
-
 
     string checkpoint_dir
     int last_saved_step
@@ -109,21 +64,15 @@ struct moe_1t_orchestrator {
     int resumeable
     string latest_checkpoint_path
 
-
     []moe_1t_step_state step_history
     int log_interval
     int eval_interval
     int save_interval
 
-
     int should_stop
     int fault_recovery_enabled
     int profile_enabled
 }
-
-
-
-
 
 func moe_1t_trim(string s) string {
     int i = 0
@@ -359,10 +308,8 @@ func moe_1t_tp_global_offset(moe_1t_orchestrator orch) int {
     offset
 }
 
-
 func moe_1t_orchestrator_new() moe_1t_orchestrator {
     moe_1t_framework fw = moe_1t_framework_default()
-
 
     string rank_str = io_get_env("RANK", "0")
     string world_size_str = io_get_env("WORLD_SIZE", "1")
@@ -386,9 +333,7 @@ func moe_1t_orchestrator_new() moe_1t_orchestrator {
     int dp_rank = string_to_int(dp_rank_str)
     int dp_size = string_to_int(dp_size_str)
 
-
     gpt_moe_state model = new_gpt_moe_state(fw.model)
-
 
     zero_optimizer_state optimizer = zero_optimizer_state {
         learning_rate: fw.training.peak_lr,
@@ -405,18 +350,15 @@ func moe_1t_orchestrator_new() moe_1t_orchestrator {
         partitioned_grads: 1,
     }
 
-
     collective_state comm = collective_state {
         backend: "nccl",
         rank: world_rank,
         world_size: world_size,
     }
 
-
     string checkpoint_dir = fw.training.checkpoint_dir
     io_mkdir_recursive(checkpoint_dir)
     []string shard_refs = moe_1t_manifest_refs(fw.training.data_manifest_path)
-
 
     moe_1t_orchestrator orch = moe_1t_orchestrator {
         framework: fw,
@@ -461,11 +403,6 @@ func moe_1t_orchestrator_new() moe_1t_orchestrator {
     orch
 }
 
-
-
-
-
-
 func moe_1t_load_data_manifest(moe_1t_orchestrator orch) moe_1t_orchestrator {
     moe_1t_orchestrator next_orch = orch
     next_orch.token_shards = moe_1t_manifest_refs(orch.data_manifest_path)
@@ -476,8 +413,6 @@ func moe_1t_load_data_manifest(moe_1t_orchestrator orch) moe_1t_orchestrator {
     }
     next_orch
 }
-
-
 
 func moe_1t_get_next_batch(
     moe_1t_orchestrator orch,
@@ -516,11 +451,6 @@ func moe_1t_get_next_batch(
     (next_orch, tokens)
 }
 
-
-
-
-
-
 func moe_1t_forward_pass(
     moe_1t_orchestrator orch,
     []int batch_tokens,
@@ -537,29 +467,19 @@ func moe_1t_forward_pass(
         ep_size = 1
     }
 
-
     int global_hidden_dim = orch.model_config.base.n_embd
     int local_hidden_dim = moe_1t_tp_local_hidden_dim(orch)
     int hidden_offset = moe_1t_tp_global_offset(orch)
     []float hidden = make([]float, batch_size * local_hidden_dim)
-
 
     int layer = 0
     int num_layers = orch.model_config.base.n_layer
 
     while layer < num_layers {
 
-
-
-
         if layer % orch.model_config.moe_frequency == 0 {
 
             int top_k = orch.model_config.moe.top_k
-
-
-
-
-
 
             int token_idx = 0
             while token_idx < batch_size {
@@ -574,7 +494,6 @@ func moe_1t_forward_pass(
 
         layer = layer + 1
     }
-
 
     []float logits = make([]float, batch_size * orch.model_config.base.vocab_size)
 
@@ -622,7 +541,6 @@ func moe_1t_forward_pass(
         ratio_idx = ratio_idx + 1
     }
 
-
     int local_offset = hidden_offset
     float projection_scale = 1.0 / float(global_hidden_dim)
     int h = 0
@@ -667,17 +585,10 @@ func moe_1t_forward_pass(
     (logits, stats)
 }
 
-
-
-
-
-
 func moe_1t_allreduce_gradients(
     moe_1t_orchestrator orch,
     []float gradients
 ) int {
-
-
 
     if orch.world_size > 1 {
         int i = 0
@@ -687,10 +598,8 @@ func moe_1t_allreduce_gradients(
         }
     }
 
-
     0
 }
-
 
 func moe_1t_optimizer_step(
     moe_1t_orchestrator orch,
@@ -698,9 +607,6 @@ func moe_1t_optimizer_step(
     float loss_scale,
     int global_step
 ) moe_1t_orchestrator {
-
-
-
 
     int step_index = global_step
     int warmup_steps = orch.framework.training.warmup_steps
@@ -734,11 +640,6 @@ func moe_1t_optimizer_step(
     orch.training_step = global_step + 1
     orch
 }
-
-
-
-
-
 
 func moe_1t_zero_pad_int(int value, int width) string {
     string text = int_to_string(value)
@@ -793,7 +694,6 @@ func moe_1t_save_checkpoint(
     orch
 }
 
-
 func moe_1t_load_checkpoint(
     moe_1t_orchestrator orch,
     string checkpoint_path
@@ -836,11 +736,6 @@ func moe_1t_load_checkpoint(
     (orch, resumed_step)
 }
 
-
-
-
-
-
 func moe_1t_log_step_metrics(
     moe_1t_orchestrator orch,
     moe_1t_step_state step_state
@@ -853,11 +748,6 @@ func moe_1t_log_step_metrics(
         io_println(log_msg)
     }
 }
-
-
-
-
-
 
 func moe_1t_training_loop(moe_1t_orchestrator orch) int {
     moe_1t_orchestrator state = moe_1t_load_data_manifest(orch)
@@ -887,9 +777,7 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
             continue
         }
 
-
         ([]float logits, moe_routing_stats routing_stats) = moe_1t_forward_pass(state, batch, seq_len)
-
 
         int vocab_size = state.model_config.base.vocab_size
         []int labels = moe_1t_build_labels(batch, vocab_size)
@@ -906,7 +794,6 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
             1
         )
 
-
         []float gradients = compute_ce_gradient(
             logits,
             labels,
@@ -917,10 +804,8 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
         moe_1t_allreduce_gradients(state, gradients)
         float grad_norm = moe_1t_average_abs(gradients)
 
-
         state = moe_1t_optimizer_step(state, loss, 1.0, current_step)
         float lr = state.optimizer_state.learning_rate
-
 
         moe_1t_step_state step_state = moe_1t_step_state {
             global_step: current_step,
@@ -942,7 +827,6 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
         moe_1t_log_step_metrics(state, step_state)
         state.step_history.push(step_state)
 
-
         if save_interval > 0 && current_step > 0 && current_step % save_interval == 0 {
             state = moe_1t_save_checkpoint(state, current_step, loss)
         }
@@ -956,10 +840,6 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
 
     0
 }
-
-
-
-
 
 func string_to_int(string s) int {
     int result = 0

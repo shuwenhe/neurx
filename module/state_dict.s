@@ -3,10 +3,6 @@ package neurx.module.state_dict
 use neurx.tensor.tensor
 use neurx.nn
 
-
-
-
-
 struct named_tensor {
     string name
     tensor value

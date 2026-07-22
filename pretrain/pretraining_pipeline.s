@@ -1,17 +1,5 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 package neurx.pretrain.neurx
 
 import neurx.model.llm.neurx.*
@@ -19,32 +7,23 @@ import neurx.tokenizer.neurx.*
 import neurx.distributed.*
 import neurx.amp.scaler.*
 
-
-
-
 enum pretrain_task_type {
     CLM
     MLM
     PREFIX_LM
 }
 
-
-
-
 struct pretrain_config {
 
     string model_name
     neurx_config model_config
 
-
     []string train_data_paths
     []string eval_data_paths
-
 
     float clm_ratio
     float mlm_ratio
     float prefix_lm_ratio
-
 
     int batch_size_per_gpu
     int gradient_accum_steps
@@ -54,19 +33,16 @@ struct pretrain_config {
     float adam_beta2
     float adam_epsilon
 
-
     float peak_lr
     int warmup_steps
     int total_steps
     int decay_steps
     string lr_schedule
 
-
     int min_seq_len
     int max_seq_len
     bool enable_long_context
     int long_context_freq
-
 
     int world_size
     int tensor_parallel_size
@@ -74,18 +50,15 @@ struct pretrain_config {
     int data_parallel_size
     bool use_fsdp
 
-
     string output_dir
     int save_interval
     int log_interval
     int eval_interval
     int max_checkpoints_keep
 
-
     string precision
     bool enable_gradient_checkpointing
 }
-
 
 func create_neurx_200b_pretrain_config() pretrain_config {
 
@@ -94,7 +67,6 @@ func create_neurx_200b_pretrain_config() pretrain_config {
     return pretrain_config {
         model_name: "NEURX-5.2-200B",
         model_config: model_cfg,
-
 
         train_data_paths: [
             "/data/corpus/webtext/",
@@ -105,11 +77,9 @@ func create_neurx_200b_pretrain_config() pretrain_config {
         ],
         eval_data_paths: ["/data/corpus/eval/"],
 
-
         clm_ratio: 0.3,
         mlm_ratio: 0.2,
         prefix_lm_ratio: 0.5,
-
 
         batch_size_per_gpu: 1,
         gradient_accum_steps: 8,
@@ -119,19 +89,16 @@ func create_neurx_200b_pretrain_config() pretrain_config {
         adam_beta2: 0.95,
         adam_epsilon: 1e-8,
 
-
         peak_lr: 3e-5,
         warmup_steps: 2000,
         total_steps: 500_000,
         decay_steps: 498_000,
         lr_schedule: "cosine",
 
-
         min_seq_len: 512,
         max_seq_len: 8192,
         enable_long_context: true,
         long_context_freq: 100,
-
 
         world_size: 128,
         tensor_parallel_size: 8,
@@ -139,19 +106,16 @@ func create_neurx_200b_pretrain_config() pretrain_config {
         data_parallel_size: 4,
         use_fsdp: true,
 
-
         output_dir: "./checkpoints/neurx_200b/",
         save_interval: 10_000,
         log_interval: 100,
         eval_interval: 5_000,
         max_checkpoints_keep: 5,
 
-
         precision: "bf16",
         enable_gradient_checkpointing: true,
     }
 }
-
 
 func create_test_pretrain_config() pretrain_config {
 
@@ -210,9 +174,6 @@ func create_test_pretrain_config() pretrain_config {
     }
 }
 
-
-
-
 enum training_phase {
     WARMUP
     STABLE_TRAINING
@@ -224,12 +185,10 @@ enum training_phase {
 struct pretrain_state {
     pretrain_config config
 
-
     int current_step
     int current_epoch
     float current_lr
     training_phase phase
-
 
     struct loss_history {
         []float clm_losses
@@ -240,20 +199,16 @@ struct pretrain_state {
         float best_val_loss
     } loss_history
 
-
     int64 total_tokens_seen
     int tokens_this_epoch
     int64 target_tokens
-
 
     datetime start_time
     float seconds_per_step
     float estimated_total_hours
     datetime estimated_end_time
 
-
     pretrain_task_type active_task
-
 
     struct performance {
         float tokens_per_second
@@ -267,7 +222,6 @@ struct pretrain_state {
         int samples_per_step
     } performance
 }
-
 
 func create_pretrain_state(config: pretrain_config) pretrain_state {
 
@@ -322,10 +276,6 @@ func create_pretrain_state(config: pretrain_config) pretrain_state {
     }
 }
 
-
-
-
-
 func get_learning_rate(
     state: pretrain_state,
     step: int
@@ -359,10 +309,6 @@ func get_learning_rate(
                 return cfg.peak_lr * (1.0 - progress)
 }
 
-
-
-
-
 func sample_training_task(
     state: pretrain_state
 ) {
@@ -382,13 +328,8 @@ func sample_training_task(
     if rand_val < cumulative:
         return PREFIX_LM
 
-
     return PREFIX_LM
 }
-
-
-
-
 
 func prepare_clm_batch(
     tokenizer: tokenizer_state,
@@ -402,7 +343,6 @@ func prepare_clm_batch(
     Labels: "quick brown fox jumps "
     """
 
-
     dict[str, any] encoded = batch_encode(
         tokenizer,
         batch_texts,
@@ -414,7 +354,6 @@ func prepare_clm_batch(
 
     tensor input_ids = encoded["input_ids"]
     tensor attention_mask = encoded["attention_mask"]
-
 
     tensor labels = input_ids.clone()
     labels[:, :-1] = input_ids[:, 1:]
@@ -453,33 +392,26 @@ func prepare_mlm_batch(
     tensor attention_mask = encoded["attention_mask"]
     tensor labels = input_ids.clone()
 
-
     tensor mask_matrix = zeros_like(input_ids)
 
     int vocab_start = 4
     tensor valid_positions = (input_ids >= vocab_start).int()
-
 
     tensor random_vals = rand_like(input_ids.float())
     tensor mask_threshold = full_like(input_ids.float(), mlm_probability)
 
     tensor should_mask = (random_vals < mask_threshold) & (valid_positions == 1)
 
-
     tensor mask_types = rand_like(input_ids.float())
 
-
     int gmask_id = tokenizer.special_tokens.gmask_token_id
-
 
     tensor is_masked = should_mask.int()
     tensor is_80pct = (mask_types < 0.8) & is_masked
     tensor is_90pct = (mask_types >= 0.8) & (mask_types < 0.9) & is_masked
 
-
     input_ids = where(is_80pct, gmask_id, input_ids)
     input_ids = where(is_90pct, randint(vocab_start, tokenizer.vocab_size, shape=input_ids.shape), input_ids)
-
 
     labels = where(is_masked, labels, -100)
 
@@ -526,11 +458,9 @@ func prepare_prefix_lm_batch(
         []int ids = sample["input_ids"].tolist() if isinstance(sample["input_ids"], tensor) else sample["input_ids"]
         int actual_len = min(len(ids), max_len)
 
-
         for j in range(actual_len):
             all_input_ids[i, j] = ids[j]
             all_attention_mask[i, j] = 1
-
 
             if j > sample["eop_position"] and j < len(ids):
                 all_labels[i, j] = ids[j]
@@ -548,10 +478,6 @@ func prepare_prefix_lm_batch(
         "eop_positions": eop_positions,
         "task_type": PREFIX_LM,
     }
-
-
-
-
 
 func train_step(
     ref pretrain_state state,
@@ -571,18 +497,14 @@ func train_step(
     pretrain_config cfg = state.config
     pretrain_task_type task_type = batch["task_type"]
 
-
     if state.current_step % 10 == 0:
-
 
         float gpu_mem_gb = get_gpu_memory_usage() / 1024.0
         state.performance.gpu_memory_utilization = gpu_mem_gb
 
-
     state.current_lr = get_learning_rate(state, state.current_step)
     for param_group in optimizer.param_groups:
         param_group['lr'] = state.current_lr
-
 
     timer.start("forward")
 
@@ -601,7 +523,6 @@ func train_step(
     )
 
     tensor logits = outputs["logits"]
-
 
     neurx_loss_type loss_type
     match task_type:
@@ -624,7 +545,6 @@ func train_step(
 
     timer.stop("forward")
 
-
     timer.start("backward")
 
     if cfg.precision == "bf16" || cfg.precision == "fp16":
@@ -635,16 +555,13 @@ func train_step(
 
     timer.stop("backward")
 
-
     if (state.current_step + 1) % cfg.gradient_accum_steps == 0:
         timer.start("optimizer")
-
 
         if cfg.precision == "bf16" || cfg.precision == "fp16":
             scaler.unscale_(optimizer)
         float grad_norm = clip_grad_norm_(model.parameters(), cfg.max_grad_norm)
         state.performance.gradient_norm = grad_norm
-
 
         if cfg.precision == "bf16" || cfg.precision == "fp16":
             scaler.step(optimizer)
@@ -656,7 +573,6 @@ func train_step(
 
         timer.stop("optimizer")
 
-
     state.current_step += 1
     state.tokens_seen += num_tokens
     state.tokens_this_epoch += num_tokens
@@ -665,7 +581,6 @@ func train_step(
     state.loss_history.running_loss = (
         state.loss_history.running_loss * 0.9 + loss_value * 0.1
     )
-
 
     match task_type:
         case CLM:
@@ -676,7 +591,6 @@ func train_step(
             append(state.loss_history.prefix_lm_losses, loss_value)
     append(state.loss_history.combined_losses, loss_value)
 
-
     if state.seconds_per_step == 0:
         state.seconds_per_step = timer.get_elapsed("total")
     else:
@@ -685,21 +599,15 @@ func train_step(
             timer.get_elapsed("total") * 0.1
         )
 
-
     state.performance.forward_time_ms = timer.get_elapsed("forward") * 1000.0
     state.performance.backward_time_ms = timer.get_elapsed("backward") * 1000.0
     state.performance.optimizer_time_ms = timer.get_elapsed("optimizer") * 1000.0
-
 
     int remaining_steps = cfg.total_steps - state.current_step
     state.estimated_total_hours = remaining_steps * state.seconds_per_step / 3600
     state.estimated_end_time = now() + timedelta(hours=state.estimated_total_hours)
 
     return loss_value
-
-
-
-
 
 func evaluate(
     state: pretrain_state,
@@ -727,7 +635,6 @@ func evaluate(
             if batch_idx >= max_eval_batches:
                 break
 
-
             dict[str, any] outputs = neurx_forward(
                 model=model,
                 input_ids=batch["input_ids"],
@@ -736,7 +643,6 @@ func evaluate(
             )
 
             tensor logits = outputs["logits"]
-
 
             tuple[tensor, int] loss_result = compute_neurx_loss(
                 logits=logits,
@@ -748,15 +654,10 @@ func evaluate(
             append(all_losses, loss_result[0].item())
             total_tokens += loss_result[1]
 
-
-
-
     model.train()
-
 
     float avg_loss = mean(all_losses)
     float perplexity = exp(avg_loss)
-
 
     if avg_loss < state.loss_history.best_val_loss:
         state.loss_history.best_val_loss = avg_loss
@@ -772,10 +673,6 @@ func evaluate(
 
     return metrics
 
-
-
-
-
 func run_pretraining(
     model_config_path: option<string> = none,
     resume_from_checkpoint: option[string] = none
@@ -788,13 +685,11 @@ func run_pretraining(
     print("🚀 Starting NEURX Multi-task Pretraining")
     print("="*70)
 
-
     pretrain_config config = none
     if model_config_path != none:
         config = load_config(model_config_path!)
     else:
         config = create_neurx_200b_pretrain_config()
-
 
     if config.world_size > 1:
         init_distributed(
@@ -807,16 +702,13 @@ func run_pretraining(
 
     int rank = get_rank()
 
-
     if rank == 0:
         print("\n🏗️ Building NEURX Model...")
 
     neurx_model model = create_neurx_model(config.model_config)
 
-
     if config.enable_gradient_checkpointing:
         enable_gradient_checkpointing(model)
-
 
     AdamW optimizer = AdamW(
         params=model.parameters(),
@@ -826,9 +718,7 @@ func run_pretraining(
         weight_decay=config.weight_decay
     )
 
-
     GradScaler scaler = GradScaler(enabled=(config.precision != "fp32"))
-
 
     pretrain_state state = create_pretrain_state(config)
 
@@ -841,7 +731,6 @@ func run_pretraining(
             scaler=scaler
         )
         print(f"✅ Resumed from checkpoint: {resume_from_checkpoint!}")
-
 
     if rank == 0:
         print("\n📂 Initializing DataLoaders...")
@@ -860,7 +749,6 @@ func run_pretraining(
         tokenizer=tokenizer
     )
 
-
     if rank == 0:
         print(f"\n🎬 Starting Training Loop ({config.total_steps:,} steps)")
         print("-"*70)
@@ -868,9 +756,7 @@ func run_pretraining(
     try:
         while state.current_step < config.total_steps:
 
-
             state.active_task = sample_training_task(state)
-
 
             dict[str, any] batch = None
 
@@ -882,14 +768,11 @@ func run_pretraining(
                 case PREFIX_LM:
                     batch = get_prefix_lm_batch(train_loader)
 
-
             if config.enable_long_context && \
                state.current_step % config.long_context_freq == 0:
                 batch = get_long_context_batch(train_loader, config.max_seq_len * 4)
 
-
             batch = to_device(batch, device="cuda:{rank}")
-
 
             float loss = train_step(
                 state=state,
@@ -900,10 +783,8 @@ func run_pretraining(
                 rank=rank
             )
 
-
             if rank == 0 && state.current_step % config.log_interval == 0:
                 log_training_progress(state, loss)
-
 
             if state.current_step % config.eval_interval == 0:
                 dict[str, float] eval_metrics = evaluate(
@@ -913,7 +794,6 @@ func run_pretraining(
                     tokenizer=tokenizer
                 )
                 log_evaluation_results(state, eval_metrics)
-
 
             if state.current_step % config.save_interval == 0:
                 save_checkpoint(
@@ -925,20 +805,17 @@ func run_pretraining(
                     step=state.current_step
                 )
 
-
             update_training_phase(state)
 
     except KeyboardInterrupt:
         print("\n\n⚠️ Training interrupted by user!")
         save_emergency_checkpoint(model, optimizer, state, scaler, config.output_dir)
 
-
     if rank == 0:
         print("\n" + "="*70)
         print("🎉 Training Completed!")
         print("="*70)
         print_final_summary(state)
-
 
         save_checkpoint(
             model=model,
@@ -950,35 +827,26 @@ func run_pretraining(
             is_final=True
         )
 
-
-
-
-
 func log_training_progress(
     state: pretrain_state,
     float loss: float) {
 
     pretrain_config cfg = state.config
 
-
     int tokens_per_step = cfg.batch_size_per_gpu * cfg.gradient_accum_steps * cfg.max_seq_len
     state.performance.tokens_per_second = tokens_per_step / max(state.seconds_per_step, 0.001)
 
-
     state.performance.samples_per_step = cfg.batch_size_per_gpu * cfg.gradient_accum_steps
-
 
     elapsed = now() - state.start_time
     str elapsed_str = format_duration(elapsed)
     str eta_str = format_duration(timedelta(hours=state.estimated_total_hours))
-
 
     string task_name = ""
     match state.active_task:
         case CLM: task_name = "CLM"
         case MLM: task_name = "MLM"
         case PREFIX_LM: task_name = "PreLM"
-
 
     print(
         f"[Step {state.current_step:>7,}/{cfg.total_steps:,}] "
@@ -987,7 +855,6 @@ func log_training_progress(
         f"GradNorm: {state.performance.gradient_norm:>6.2f} | "
         f"Tokens: {state.total_tokens_seen:>10,}"
     )
-
 
     print(
         f"{'':>8}  Throughput: {state.performance.tokens_per_second:>8.0f} tok/s | "
@@ -998,7 +865,6 @@ func log_training_progress(
         f"GPU Mem: {state.performance.gpu_memory_utilization:>5.1f}GB"
     )
 
-
     print(
         f"{'':>8}  task: {task_name:>6} | "
         f"RunLoss: {state.loss_history.running_loss:>7.4f} | "
@@ -1006,33 +872,6 @@ func log_training_progress(
         f"ETA: {eta_str:>8}"
     )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 func log_evaluation_results(
     state: pretrain_state,
@@ -1087,9 +926,6 @@ func print_final_summary(pretrain_state state) {
 
     print(f"{'-'*50}")
 
-
-
-
 func format_duration(timedelta td) {
     int total_seconds = int(td.total_seconds())
     int days = total_seconds
@@ -1106,8 +942,6 @@ func format_duration(timedelta td) {
     else:
         return f"{seconds}s"
 
-
-
 func get_gpu_memory_usage() {
     """
     English textGPUEnglish textuseEnglish text(English text: MB)
@@ -1115,20 +949,14 @@ func get_gpu_memory_usage() {
     example: English text19353.6, English text19.4GB
     """
 
-
-
     float gpu_mem_mb = 18400.0
     return gpu_mem_mb
 }
-
-
-
 
 func test_pretrain_framework() {
     print("\n" + "="*60)
     print("Testing NEURX Pretraining Framework")
     print("="*60)
-
 
     print("\n[Test 1] Creating NEURX-5.2 pretrain config...")
     pretrain_config cfg = create_neurx_200b_pretrain_config()
@@ -1137,20 +965,17 @@ func test_pretrain_framework() {
     assert(cfg.precision == "bf16")
     print("✅ Config created!")
 
-
     print("\n[Test 2] Creating small test config...")
     pretrain_config test_cfg = create_test_pretrain_config()
     assert(test_cfg.world_size == 1)
     assert(test_cfg.total_steps == 1000)
     print("✅ Test config created!")
 
-
     print("\n[Test 3] Initializing pretrain state...")
     pretrain_state state = create_pretrain_state(test_cfg)
     assert(state.current_step == 0)
     assert(state.phase == WARMUP)
     print("✅ State initialized!")
-
 
     print("\n[Test 4] Testing learning rate schedule...")
     float lr_warmup = get_learning_rate(state, step=100)
@@ -1162,7 +987,6 @@ func test_pretrain_framework() {
     print(f"   Peak LR:   {lr_peak:.6f}")
     print(f"   End LR:    {lr_end:.6f}")
     print("✅ LR schedule works correctly!")
-
 
     print("\n[Test 5] Testing task sampling...")
     int clm_count = 0
@@ -1187,7 +1011,6 @@ func test_pretrain_framework() {
     assert(abs(plm_ratio - test_cfg.prefix_lm_ratio) < 0.05)
     print("✅ task sampling distribution is correct!")
 
-
     print("\n[Test 6] Testing training phase transitions...")
     state.current_step = 100
     update_training_phase(state)
@@ -1202,10 +1025,8 @@ func test_pretrain_framework() {
     assert(state.phase == FINE_TUNING_PHASE)
     print("✅ Phase transitions work correctly!")
 
-
     print("\n[Test 7] Testing data preparation functions...")
     tokenizer_state tok = create_tokenizer("vocab/neurx.model")
-
 
     []string texts = ["Hello world", "Test sentence"]
     dict[str, any] clm_batch = prepare_clm_batch(tok, texts, max_len=64)
@@ -1213,12 +1034,10 @@ func test_pretrain_framework() {
     assert("labels" in clm_batch)
     print("✅ CLM batch preparation works!")
 
-
     dict[str, any] mlm_batch = prepare_mlm_batch(tok, texts, max_len=64)
     assert(shape(mlm_batch["input_ids"]) == (2, 64))
     assert("mask_positions" in mlm_batch)
     print("✅ MLM batch preparation works!")
-
 
     []string prefixes = ["Translate:", "Summarize:"]
     []string conts = ["Hello", "This is a test."]

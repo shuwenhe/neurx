@@ -1,7 +1,5 @@
 package neurx.tokenizer.vocab_builder
 
-
-
 struct token_pair {
     string left
     string right
@@ -24,18 +22,12 @@ struct builder_progress {
     string status
 }
 
-
-
-
-
-
 func count_all_pairs(string* texts, int text_count) map[string]int {
     map[string]int pair_frequencies
 
     int i = 0
     while i < text_count {
         string text = texts[i]
-
 
         int text_len = strlen(text)
         int j = 0
@@ -45,7 +37,6 @@ func count_all_pairs(string* texts, int text_count) map[string]int {
             pair_key = pair_key + char_to_string(text[j])
             pair_key = pair_key + "_"
             pair_key = pair_key + char_to_string(text[j + 1])
-
 
             if pair_key in pair_frequencies {
                 pair_frequencies[pair_key] = pair_frequencies[pair_key] + 1
@@ -62,17 +53,12 @@ func count_all_pairs(string* texts, int text_count) map[string]int {
     pair_frequencies
 }
 
-
 func find_most_frequent_pair(map[string]int pair_freq) string {
     string best_pair = ""
     int best_frequency = 0
 
-
-
-
     best_pair
 }
-
 
 func merge_pair_in_texts(string* texts, int text_count, string left, string right, string merged) string* {
     string* new_texts = alloc(string, text_count)
@@ -82,7 +68,6 @@ func merge_pair_in_texts(string* texts, int text_count, string left, string righ
         string text = texts[i]
         string new_text = ""
 
-
         int j = 0
         int text_len = strlen(text)
 
@@ -91,7 +76,6 @@ func merge_pair_in_texts(string* texts, int text_count, string left, string righ
             bool matches = false
 
             if j < text_len - strlen(left) - strlen(right) {
-
 
             }
 
@@ -111,18 +95,12 @@ func merge_pair_in_texts(string* texts, int text_count, string left, string righ
     new_texts
 }
 
-
-
-
-
-
 func build_bpe_vocab(string* corpus_texts, int text_count, vocab_builder_config config) BPEVocab {
     BPEVocab vocab
     vocab.vocab_size = config.target_vocab_size
     vocab.token_count = 256
     vocab.version = "0.1.0"
     vocab.tokens = alloc(BPEToken, config.target_vocab_size)
-
 
     int i = 0
     while i < 256 {
@@ -134,14 +112,12 @@ func build_bpe_vocab(string* corpus_texts, int text_count, vocab_builder_config 
         i = i + 1
     }
 
-
     string* current_texts = copy_texts(corpus_texts, text_count)
 
     int merge_op = 0
     while merge_op < config.max_merge_ops && vocab.token_count < config.target_vocab_size {
 
         map[string]int pair_freq = count_all_pairs(current_texts, text_count)
-
 
         string best_pair = find_most_frequent_pair(pair_freq)
 
@@ -150,19 +126,14 @@ func build_bpe_vocab(string* corpus_texts, int text_count, vocab_builder_config 
             break
         }
 
-
         BPEToken new_token
         new_token.id = vocab.token_count
         new_token.text = best_pair
         new_token.frequency = pair_freq[best_pair]
         vocab.tokens[vocab.token_count] = new_token
 
-
-
-
         vocab.token_count = vocab.token_count + 1
         merge_op = merge_op + 1
-
 
         if config.save_intermediate && merge_op % 100 == 0 {
             println("BPE Progress: " + int_to_string(vocab.token_count) + "/" + int_to_string(config.target_vocab_size))
@@ -171,11 +142,6 @@ func build_bpe_vocab(string* corpus_texts, int text_count, vocab_builder_config 
 
     vocab
 }
-
-
-
-
-
 
 func sort_vocab_by_frequency(BPEVocab vocab) BPEVocab {
 
@@ -191,7 +157,6 @@ func sort_vocab_by_frequency(BPEVocab vocab) BPEVocab {
             j = j + 1
         }
 
-
         if max_idx != i {
             BPEToken temp = vocab.tokens[i]
             vocab.tokens[i] = vocab.tokens[max_idx]
@@ -203,7 +168,6 @@ func sort_vocab_by_frequency(BPEVocab vocab) BPEVocab {
 
     vocab
 }
-
 
 func add_special_tokens(BPEVocab vocab) BPEVocab {
     if vocab.token_count < vocab.vocab_size {
@@ -249,11 +213,6 @@ func add_special_tokens(BPEVocab vocab) BPEVocab {
     vocab
 }
 
-
-
-
-
-
 func calculate_coverage(BPEVocab vocab, string* test_texts, int test_count) float {
     int total_tokens = 0
     int unk_tokens = 0
@@ -261,8 +220,6 @@ func calculate_coverage(BPEVocab vocab, string* test_texts, int test_count) floa
     int i = 0
     while i < test_count {
         string text = test_texts[i]
-
-
 
         i = i + 1
     }
@@ -275,14 +232,7 @@ func calculate_coverage(BPEVocab vocab, string* test_texts, int test_count) floa
     coverage
 }
 
-
-
-
-
-
 func save_as_hf_vocab(BPEVocab vocab, string output_path) bool {
-
-
 
     string json_content = "{"
 
@@ -300,25 +250,13 @@ func save_as_hf_vocab(BPEVocab vocab, string output_path) bool {
 
     json_content = json_content + "}"
 
-
-
-
     true
 }
-
 
 func save_merge_rules(BPEVocab vocab, string output_path) bool {
 
-
-
-
     true
 }
-
-
-
-
-
 
 func strlen(string s) int {
     int count = 0
@@ -330,11 +268,9 @@ func strlen(string s) int {
     count
 }
 
-
 func char_to_string(int c) string {
     ""
 }
-
 
 func int_to_string(int n) string {
     if n == 0 {
@@ -353,7 +289,6 @@ func int_to_string(int n) string {
     result
 }
 
-
 func copy_texts(string* texts, int text_count) string* {
     string* new_texts = alloc(string, text_count)
 
@@ -366,19 +301,12 @@ func copy_texts(string* texts, int text_count) string* {
     new_texts
 }
 
-
 func float_to_string(float f) string {
 
     ""
 }
 
-
-
-
-
 func main() {
-
-
 
     vocab_builder_config config
     config.target_vocab_size = 50000
@@ -387,24 +315,19 @@ func main() {
     config.save_intermediate = true
     config.output_dir = "./vocab_output"
 
-
     string* corpus = alloc(string, 3)
     corpus[0] = "hello world this is a sample text"
     corpus[1] = "the quick brown fox jumps over the lazy dog"
     corpus[2] = "machine learning is a subset of artificial intelligence"
 
-
     println("Starting BPE vocabulary building...")
     BPEVocab vocab = build_bpe_vocab(corpus, 3, config)
-
 
     vocab = sort_vocab_by_frequency(vocab)
     vocab = add_special_tokens(vocab)
 
-
     println("Final vocabulary size: " + int_to_string(vocab.token_count))
     println("Saving vocabulary...")
-
 
     save_as_hf_vocab(vocab, "./vocab.json")
     save_merge_rules(vocab, "./merges.txt")

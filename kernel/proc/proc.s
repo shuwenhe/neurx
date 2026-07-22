@@ -1,16 +1,5 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
 int PROC_CREATED = 0
 int PROC_RUNNING = 1
 int PROC_WAITING = 2
@@ -40,7 +29,6 @@ func new_proc_table() proc_table {
     return proc_table{procs: [], next_pid: 1}
 }
 
-
 func proc_spawn(pt proc_table, ppid int, name string, goal string, sched_class int) (proc_table, int) {
     int pid = pt.next_pid
     proc_descriptor p = proc_descriptor{
@@ -61,7 +49,6 @@ func proc_spawn(pt proc_table, ppid int, name string, goal string, sched_class i
     return (pt, pid)
 }
 
-
 func proc_exit(pt proc_table, pid int, exit_code int, reason string) proc_table {
     int i = 0
     while i < len(pt.procs) {
@@ -74,7 +61,6 @@ func proc_exit(pt proc_table, pid int, exit_code int, reason string) proc_table 
     }
     return pt
 }
-
 
 func proc_wait(pt proc_table, ppid int) (proc_table, proc_descriptor, bool) {
     int i = 0

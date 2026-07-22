@@ -1,13 +1,5 @@
 package neurx.attention.flash_v3
 
-
-
-
-
-
-
-
-
 struct flash_attention_v3_config {
     int block_size_q
     int block_size_k
@@ -44,11 +36,6 @@ struct attention_stats {
     float attention_entropy
 }
 
-
-
-
-
-
 func compute_block_attention(
     float* query_block,
     float* key_block,
@@ -58,8 +45,6 @@ func compute_block_attention(
     int head_dim
 ) float* {
     float* output = alloc(float, block_size_q * head_dim)
-
-
 
     float* attention_scores = alloc(float, block_size_q * block_size_k)
 
@@ -81,8 +66,6 @@ func compute_block_attention(
         i = i + 1
     }
 
-
-
     float* softmax_output = alloc(float, block_size_q * block_size_k)
 
     i = 0
@@ -97,7 +80,6 @@ func compute_block_attention(
             j = j + 1
         }
 
-
         float row_sum = 0.0
         j = 0
         while j < block_size_k {
@@ -107,7 +89,6 @@ func compute_block_attention(
             j = j + 1
         }
 
-
         j = 0
         while j < block_size_k {
             softmax_output[i * block_size_k + j] = softmax_output[i * block_size_k + j] / row_sum
@@ -116,7 +97,6 @@ func compute_block_attention(
 
         i = i + 1
     }
-
 
     i = 0
     while i < block_size_q {
@@ -138,11 +118,6 @@ func compute_block_attention(
     output
 }
 
-
-
-
-
-
 func init_paged_kv_cache(
     int page_size,
     int max_pages
@@ -161,7 +136,6 @@ func init_paged_kv_cache(
     cache
 }
 
-
 func add_to_paged_kv_cache(
     paged_kv_cache cache,
     float* new_keys,
@@ -178,12 +152,10 @@ func add_to_paged_kv_cache(
             tokens_to_add = available_space
         }
 
-
         int i = 0
         while i < tokens_to_add {
             int source_idx = tokens_added + i
             int dest_idx = cache.current_page_idx * cache.page_size + cache.tokens_in_current_page + i
-
 
             int j = 0
             while j < 64 {
@@ -198,7 +170,6 @@ func add_to_paged_kv_cache(
         cache.tokens_in_current_page = cache.tokens_in_current_page + tokens_to_add
         tokens_added = tokens_added + tokens_to_add
 
-
         if cache.tokens_in_current_page >= cache.page_size {
             cache.current_page_idx = cache.current_page_idx + 1
             cache.tokens_in_current_page = 0
@@ -207,10 +178,6 @@ func add_to_paged_kv_cache(
 
     cache
 }
-
-
-
-
 
 struct flash_attention_v3_engine {
     flash_attention_v3_config config
@@ -222,7 +189,6 @@ struct flash_attention_v3_engine {
     int total_tokens_processed
 }
 
-
 func init_flash_attention_v3(
     flash_attention_v3_config config,
     int max_sequence_length
@@ -232,11 +198,9 @@ func init_flash_attention_v3(
     engine.config = config
     engine.total_tokens_processed = 0
 
-
     if config.use_paged_kv_cache {
         engine.kv_cache = init_paged_kv_cache(128, max_sequence_length / 128)
     }
-
 
     if config.use_speculative_decode {
         engine.speculative.draft_tokens = alloc(int, max_sequence_length)
@@ -246,7 +210,6 @@ func init_flash_attention_v3(
 
     engine
 }
-
 
 func flash_attention_v3_forward(
     float* query,
@@ -258,7 +221,6 @@ func flash_attention_v3_forward(
 ) float* {
     float* output = alloc(float, batch_size * seq_len * engine.config.head_dim)
 
-
     int q_block_idx = 0
     while q_block_idx * engine.config.block_size_q < seq_len {
         int q_start = q_block_idx * engine.config.block_size_q
@@ -268,13 +230,10 @@ func flash_attention_v3_forward(
             q_end = seq_len
         }
 
-
         int q_size = q_end - q_start
-
 
         float* block_output = alloc(float, q_size * engine.config.head_dim)
         float* block_sum = alloc(float, q_size)
-
 
         int kv_block_idx = 0
         while kv_block_idx * engine.config.block_size_k < seq_len {
@@ -285,7 +244,6 @@ func flash_attention_v3_forward(
                 kv_end = seq_len
             }
 
-
             if engine.config.causal_mask && kv_end > q_start {
                 if kv_start >= q_end {
                     kv_block_idx = kv_block_idx + 1
@@ -295,11 +253,9 @@ func flash_attention_v3_forward(
 
             int kv_size = kv_end - kv_start
 
-
             float* query_block = alloc(float, q_size * engine.config.head_dim)
             float* key_block = alloc(float, kv_size * engine.config.head_dim)
             float* value_block = alloc(float, kv_size * engine.config.head_dim)
-
 
             int i = 0
             while i < q_size {
@@ -325,12 +281,10 @@ func flash_attention_v3_forward(
                 i = i + 1
             }
 
-
             float* block_attn = compute_block_attention(
                 query_block, key_block, value_block,
                 q_size, kv_size, engine.config.head_dim
             )
-
 
             i = 0
             while i < q_size {
@@ -346,7 +300,6 @@ func flash_attention_v3_forward(
 
             kv_block_idx = kv_block_idx + 1
         }
-
 
         int i = 0
         while i < q_size {
@@ -366,11 +319,6 @@ func flash_attention_v3_forward(
     output
 }
 
-
-
-
-
-
 func generate_draft_tokens(
     float* draft_logits,
     int draft_count,
@@ -379,9 +327,6 @@ func generate_draft_tokens(
 
     int i = 0
     while i < draft_count {
-
-
-
 
         speculative.draft_tokens[i] = 0
         speculative.draft_probabilities[i] = 0.95
@@ -393,16 +338,12 @@ func generate_draft_tokens(
     speculative
 }
 
-
 func verify_draft_tokens(
     int* draft_tokens,
     float* target_logits,
     float* draft_probabilities,
     int draft_count
 ) bool {
-
-
-
 
     int accepted = 0
     int i = 0
@@ -420,11 +361,6 @@ func verify_draft_tokens(
     accepted == draft_count
 }
 
-
-
-
-
-
 func batched_inference(
     float* query_batch,
     float* key_batch,
@@ -434,7 +370,6 @@ func batched_inference(
     flash_attention_v3_engine engine
 ) float* {
     float* output = alloc(float, batch_size * seq_len * engine.config.head_dim)
-
 
     int b = 0
     while b < batch_size {
@@ -447,7 +382,6 @@ func batched_inference(
             engine
         )
 
-
         int i = 0
         while i < seq_len * engine.config.head_dim {
             output[b * seq_len * engine.config.head_dim + i] = batch_output[i]
@@ -459,10 +393,6 @@ func batched_inference(
 
     output
 }
-
-
-
-
 
 func sqrt_f(float x) float {
     if x < 0.0 {
@@ -486,10 +416,6 @@ func log_f(float x) float {
 
     0.0
 }
-
-
-
-
 
 func main() {
     println("=== Flash Attention v3 Engine ===")

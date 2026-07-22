@@ -1,10 +1,5 @@
 package neurx.inference.inference_server
 
-
-
-
-
-
 use neurx.inference.kv_cache_manager.{paged_kv_cache, new_paged_kv_cache}
 use neurx.inference.sampling_strategies.{sampling_config, new_sampling_config}
 
@@ -72,96 +67,55 @@ func new_inference_server(int num_workers) inference_server {
     }
 }
 
-
 func submit_request(inference_server server, inference_request req) bool {
 
     if len(server.scheduler.pending_requests) >= server.max_queue_size {
         return false
     }
 
-
-
     true
 }
 
-
 func select_batch(batch_scheduler scheduler) []inference_request {
-
-
 
     []inference_request{cap: scheduler.max_batch_size}
 }
 
-
 func execute_batch(batch_scheduler scheduler, []inference_request batch) []inference_response {
     []inference_response responses = []inference_response{cap: len(batch)}
-
-
-
-
-
-
-
-
-
 
     responses
 }
 
-
 func schedule_continuous_batching(inference_server server) int {
-
-
-
-
-
 
     0
 }
 
-
 func stream_response(inference_request req, inference_response resp) string {
-
-
 
     resp.generated_text
 }
 
-
 func adjust_batch_size(server_stats stats, int current_batch_size) int {
-
-
 
     current_batch_size
 }
 
-
 func prioritize_requests([]inference_request requests) []inference_request {
-
-
-
-
 
     requests
 }
 
-
 func estimate_generation_time(inference_request req) float {
-
-
 
     float(req.max_tokens) * 0.05
 }
 
-
 func prefill_decode_overlap(batch_scheduler scheduler) bool {
-
-
-
 
     true
 }
-
 
 func get_server_stats(inference_server server) server_stats {
     server_stats {
@@ -174,20 +128,12 @@ func get_server_stats(inference_server server) server_stats {
     }
 }
 
-
 func shutdown_server(inference_server server) bool {
-
-
-
 
     true
 }
 
-
 func health_check(inference_server server) bool {
-
-
-
 
     true
 }

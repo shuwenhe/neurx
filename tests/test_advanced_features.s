@@ -1,8 +1,5 @@
 
 
-
-
-
 package neurx.test.advanced_features
 
 import (
@@ -11,10 +8,6 @@ import (
     "neurx/training/gradient_accumulation"
     "neurx/distributed/tensor_parallel"
 )
-
-
-
-
 
 func test_vectorization_basic() bool {
 
@@ -25,9 +18,7 @@ func test_vectorization_basic() bool {
 
     var C = vectorization.element_wise_add(A, B)
 
-
     var D = vectorization.element_wise_mul(A, B)
-
 
     return C[0] == 3.0 && D[0] == 2.0
 }
@@ -40,7 +31,6 @@ func test_vectorization_dot_product() bool {
 
     var result = vectorization.dot_product(A, B)
 
-
     return result == 32.0
 }
 
@@ -49,7 +39,6 @@ func test_vectorization_vector_norm() bool {
     A[0] = 3.0; A[1] = 4.0; A[2] = 0.0
 
     var norm = vectorization.vector_norm(A)
-
 
     return norm >= 4.9 && norm <= 5.1
 }
@@ -60,13 +49,8 @@ func test_vectorization_reduce_sum() bool {
 
     var sum = vectorization.reduce_sum(A)
 
-
     return sum == 10.0
 }
-
-
-
-
 
 func test_mixed_precision_config() bool {
     var config = mixed_precision.new_mixed_precision_config()
@@ -88,13 +72,10 @@ func test_mixed_precision_state() bool {
 func test_loss_scale_scheduler() bool {
     var scheduler = mixed_precision.new_loss_scale_scheduler(65536.0, 2000, 2.0, 0.5)
 
-
     var initial_scale = scheduler.current_scale
-
 
     scheduler = mixed_precision.update_loss_scale(scheduler, true)
     var after_overflow = scheduler.current_scale
-
 
     return after_overflow < initial_scale && after_overflow == initial_scale * 0.5
 }
@@ -120,10 +101,6 @@ func test_gradient_scaling() bool {
 
     return scaled[0] == 0.0001 && scaled[1] == 0.0002
 }
-
-
-
-
 
 func test_accumulation_basic() bool {
     var accum = gradient_accumulation.new_accumulated_gradients(10)
@@ -153,17 +130,14 @@ func test_accumulation_complete() bool {
     var i = 0
     while i < 5 { step_grad[i] = 0.1; i = i + 1 }
 
-
     i = 0
     while i < 3 {
         accum = gradient_accumulation.accumulate_gradients(accum, step_grad, 1.0, 1.0)
         i = i + 1
     }
 
-
     accum = gradient_accumulation.check_accumulation_complete(accum, 4)
     if accum.is_ready { return false }
-
 
     accum = gradient_accumulation.accumulate_gradients(accum, step_grad, 1.0, 1.0)
     accum = gradient_accumulation.check_accumulation_complete(accum, 4)
@@ -189,10 +163,6 @@ func test_accumulation_reset() bool {
            accum.loss_sum == 0.0 &&
            accum.gradients[0] == 0.0
 }
-
-
-
-
 
 func test_distributed_state() bool {
     var state = tensor_parallel.new_distributed_state(0, 8, 4)
@@ -238,10 +208,6 @@ func test_update_communication_stats() bool {
            stats.total_communication_time == 10.0
 }
 
-
-
-
-
 func test_mixed_training_config() bool {
 
     var vec_config = vectorization.new_vectorization_stats()
@@ -259,9 +225,7 @@ func test_vectorization_with_mixed_precision() bool {
     var A: []float = []float(4)
     A[0] = 1.0; A[1] = 2.0; A[2] = 3.0; A[3] = 4.0
 
-
     var sum = vectorization.reduce_sum(A)
-
 
     var gradients: [][]float = [][]float(4)
     gradients[0] = 0.01; gradients[1] = 0.02; gradients[2] = 0.03; gradients[3] = 0.04
@@ -271,14 +235,9 @@ func test_vectorization_with_mixed_precision() bool {
     return sum == 10.0 && scaled[0] == 0.00001
 }
 
-
-
-
-
 func run_all_advanced_tests() int {
     var passed = 0
     var total = 0
-
 
     total = total + 1
     if test_vectorization_basic() { passed = passed + 1 }
@@ -291,7 +250,6 @@ func run_all_advanced_tests() int {
 
     total = total + 1
     if test_vectorization_reduce_sum() { passed = passed + 1 }
-
 
     total = total + 1
     if test_mixed_precision_config() { passed = passed + 1 }
@@ -308,7 +266,6 @@ func run_all_advanced_tests() int {
     total = total + 1
     if test_gradient_scaling() { passed = passed + 1 }
 
-
     total = total + 1
     if test_accumulation_basic() { passed = passed + 1 }
 
@@ -324,7 +281,6 @@ func run_all_advanced_tests() int {
     total = total + 1
     if test_accumulation_reset() { passed = passed + 1 }
 
-
     total = total + 1
     if test_distributed_state() { passed = passed + 1 }
 
@@ -339,7 +295,6 @@ func run_all_advanced_tests() int {
 
     total = total + 1
     if test_update_communication_stats() { passed = passed + 1 }
-
 
     total = total + 1
     if test_mixed_training_config() { passed = passed + 1 }

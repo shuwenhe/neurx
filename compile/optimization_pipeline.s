@@ -1,8 +1,5 @@
 package neurx.compile.optimizations
 
-
-
-
 use neurx.compile.ir.{ir_graph, ir_node}
 use neurx.compile.passes.fusion.{fusion_config, new_fusion_config, apply_fusion_passes}
 use neurx.compile.passes.elimination.{elimination_config, new_elimination_config, apply_elimination_passes}
@@ -43,30 +40,20 @@ func new_optimization_pipeline() optimization_pipeline {
     }
 }
 
-
 func optimize_graph(optimization_pipeline pipeline, ir_graph input_graph) ir_graph {
     ir_graph result = input_graph
 
-
     if pipeline.enable_cache {
-
-
-
 
     }
 
-
     result = apply_elimination_passes(result, pipeline.elim_cfg)
-
 
     result = apply_memory_passes(result, pipeline.mem_cfg)
 
-
     result = apply_fusion_passes(result, pipeline.fusion_cfg)
 
-
     result = apply_elimination_passes(result, pipeline.elim_cfg)
-
 
     if pipeline.enable_cache {
 
@@ -75,10 +62,8 @@ func optimize_graph(optimization_pipeline pipeline, ir_graph input_graph) ir_gra
     result
 }
 
-
 func optimize_graph_progressive(optimization_pipeline pipeline, ir_graph input_graph) ir_graph {
     ir_graph result = input_graph
-
 
     int max_iterations = 5
     int iteration = 0
@@ -93,7 +78,6 @@ func optimize_graph_progressive(optimization_pipeline pipeline, ir_graph input_g
 
         int after_nodes = 0
 
-
         if after_nodes == before_nodes {
             break
         }
@@ -103,7 +87,6 @@ func optimize_graph_progressive(optimization_pipeline pipeline, ir_graph input_g
 
     result
 }
-
 
 func get_optimization_stats(ir_graph original, ir_graph optimized) optimization_stats {
     optimization_stats {
@@ -118,17 +101,9 @@ func get_optimization_stats(ir_graph original, ir_graph optimized) optimization_
     }
 }
 
-
 func compile_and_optimize(optimization_pipeline pipeline, ir_graph input_graph) ir_graph {
 
-
-
     ir_graph optimized = optimize_graph_progressive(pipeline, input_graph)
-
-
-
-
-
 
     optimized
 }

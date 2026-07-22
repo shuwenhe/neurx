@@ -108,7 +108,6 @@ func new_loss() loss {
 
 func cross_entropy_loss(tensor input, tensor target) tensor {
 
-
     int n = len(input.data)
     int ndim = len(input.shape)
 
@@ -123,7 +122,6 @@ func cross_entropy_loss(tensor input, tensor target) tensor {
         while b < batch_size {
             int base = b * num_classes
 
-
             float max_v = input.data[base]
             int c = 1
             while c < num_classes {
@@ -132,7 +130,6 @@ func cross_entropy_loss(tensor input, tensor target) tensor {
                 }
                 c = c + 1
             }
-
 
             float log_sum_exp = 0.0
             float sum_exp = 0.0
@@ -146,7 +143,6 @@ func cross_entropy_loss(tensor input, tensor target) tensor {
                 log_sum_exp = log_approx(sum_exp) + max_v
             }
 
-
             int target_class = 0
             if b < len(target.data) {
                 int tc = target.data[b] as int
@@ -154,7 +150,6 @@ func cross_entropy_loss(tensor input, tensor target) tensor {
                     target_class = tc
                 }
             }
-
 
             float sample_loss = log_sum_exp - input.data[base + target_class]
             total_loss = total_loss + sample_loss

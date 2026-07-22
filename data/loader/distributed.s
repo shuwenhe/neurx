@@ -1,10 +1,5 @@
 package neurx.data.loader.distributed
 
-
-
-
-
-
 use neurx.runtime.io.{runtime_run_command_output}
 use neurx.data.dataset.dataset.{dataset}
 
@@ -74,11 +69,7 @@ func new_distributed_dataloader([]data_shard shards, distributed_loader_config c
     }
 }
 
-
 func create_data_shards(string dataset_dir, int num_ranks, int rank_id) []data_shard {
-
-
-
 
     if !is_directory(dataset_dir) {
         []data_shard shards = []data_shard{cap: 1}
@@ -115,7 +106,6 @@ func create_data_shards(string dataset_dir, int num_ranks, int rank_id) []data_s
 }
 
 func list_data_shard_files(string dataset_dir) []string {
-
 
     []string files = []string{cap: 100}
     string gz_scan_cmd = "find " + dataset_dir + " -maxdepth 1 -name '*.jsonl.gz' | sort"
@@ -163,75 +153,46 @@ func list_data_shard_files(string dataset_dir) []string {
     files
 }
 
-
 func next_batch_prefetch(distributed_dataloader loader) []int {
-
-
-
 
     []int{cap: 2048}
 }
 
-
 func deduplicate_samples(distributed_dataloader loader) distributed_dataloader {
-
-
-
 
     loader
 }
 
-
 func filter_by_quality(distributed_dataloader loader, []string quality_scores) []int {
-
-
-
 
     []int{cap: 1000}
 }
 
-
 func shuffle_global(distributed_dataloader loader) distributed_dataloader {
-
-
-
 
     loader
 }
-
 
 func shuffle_local(distributed_dataloader loader) distributed_dataloader {
 
-
-
     loader
 }
 
-
 func next_epoch(distributed_dataloader loader) distributed_dataloader {
-
-
-
 
     loader.current_epoch = loader.current_epoch + 1
     loader.current_step = 0
     loader
 }
 
-
 func get_loader_stats(distributed_dataloader loader) [string:int {
     [string:int{cap: 10}
 }
 
-
 func spawn_io_workers(distributed_dataloader loader, int num_workers) int {
-
-
-
 
     0
 }
-
 
 func get_batch_position(distributed_dataloader loader) int {
 

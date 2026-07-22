@@ -1,35 +1,5 @@
 package neurx.serving.speculative_decoding
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct spec_decode_config {
     int gamma
     float acceptance_threshold
@@ -58,11 +28,6 @@ func default_spec_decode_config(int vocab_size) spec_decode_config {
     }
 }
 
-
-
-
-
-
 func spec_softmax([]float logits, int V) []float {
     float m = logits[0]
     int i = 0
@@ -90,7 +55,6 @@ func spec_softmax([]float logits, int V) []float {
     probs
 }
 
-
 func spec_softmax_temp([]float logits, int V, float temp) []float {
     []float scaled = []
     int i = 0
@@ -101,9 +65,7 @@ func spec_softmax_temp([]float logits, int V, float temp) []float {
     spec_softmax(scaled, V)
 }
 
-
 func spec_top_p_sample([]float probs, int V, float top_p, int seed) int {
-
 
     int best = 0
     float best_p = probs[0]
@@ -118,7 +80,6 @@ func spec_top_p_sample([]float probs, int V, float top_p, int seed) int {
     best
 }
 
-
 func spec_residual_sample([]float q, []float p, int V, int seed) int {
     []float diff = []
     float sum = 0.0
@@ -131,12 +92,10 @@ func spec_residual_sample([]float q, []float p, int V, int seed) int {
         i = i + 1
     }
 
-
     if sum < 1e-10 {
 
         return spec_top_p_sample(q, V, 1.0, seed)
     }
-
 
     float threshold = sum * 0.5
     float cumsum = 0.0
@@ -151,10 +110,6 @@ func spec_residual_sample([]float q, []float p, int V, int seed) int {
     V - 1
 }
 
-
-
-
-
 struct spec_draft_output {
     []int   token_ids
     []float log_probs
@@ -167,7 +122,6 @@ struct spec_verify_result {
     float acceptance_rate
     bool  all_accepted
 }
-
 
 func spec_accept_reject(
     float q_prob,
@@ -185,11 +139,9 @@ func spec_accept_reject(
         return true
     }
 
-
     float rand_val = pseudo_rand(seed)
     rand_val < ratio
 }
-
 
 func spec_verify(
     spec_draft_output draft,
@@ -223,7 +175,6 @@ func spec_verify(
         i = i + 1
     }
 
-
     if all_ok && len(target_probs) > gamma {
         int bonus_tok = spec_top_p_sample(target_probs[gamma], V, cfg.top_p, 99999)
         accepted = append(accepted, bonus_tok)
@@ -241,10 +192,6 @@ func spec_verify(
         all_accepted: all_ok,
     }
 }
-
-
-
-
 
 struct spec_decode_state {
     spec_decode_config cfg
@@ -280,8 +227,6 @@ struct spec_decode_step_result {
     bool  done
 }
 
-
-
 func spec_decode_step(
     spec_decode_state state,
     spec_draft_output draft,
@@ -296,11 +241,9 @@ func spec_decode_step(
     updated.total_verify_calls = state.total_verify_calls + 1
     updated.total_tokens_gen   = state.total_tokens_gen + len(vr.accepted_tokens)
 
-
     float old_avg = state.avg_acceptance
     float new_acc = vr.acceptance_rate
     updated.avg_acceptance = (old_avg * float_spec(state.step) + new_acc) / float_spec(state.step + 1)
-
 
     bool done = false
     []int new_toks = []
@@ -327,10 +270,6 @@ func spec_decode_step(
     }
 }
 
-
-
-
-
 struct medusa_config {
     int num_heads
     int hidden_dim
@@ -339,7 +278,6 @@ struct medusa_config {
     float posterior_threshold
     float posterior_alpha
 }
-
 
 struct medusa_head {
     []float weight
@@ -354,7 +292,6 @@ func new_medusa_head(int hidden_dim, int vocab_size, int head_idx) medusa_head {
         head_idx: head_idx,
     }
 }
-
 
 func medusa_head_forward(medusa_head head, []float hidden, int H, int V) []float {
     []float logits = zeros_spec(V)
@@ -399,10 +336,6 @@ func medusa_forward([]medusa_head heads, []float last_hidden, int H, int V) medu
     }
 }
 
-
-
-
-
 struct spec_perf_stats {
     float speedup_ratio
     float avg_acceptance_rate
@@ -415,7 +348,6 @@ func compute_spec_perf(spec_decode_state state) spec_perf_stats {
     int calls = state.total_verify_calls
     if calls == 0 { calls = 1 }
     float tpc = float_spec(state.total_tokens_gen) / float_spec(calls)
-
 
     float alpha = state.avg_acceptance
     int gamma = state.cfg.gamma
@@ -433,10 +365,6 @@ func compute_spec_perf(spec_decode_state state) spec_perf_stats {
         tokens_per_call: tpc,
     }
 }
-
-
-
-
 
 func zeros_spec(int n) []float {
     []float out = []

@@ -1,20 +1,10 @@
 
 
-
-
-
-
-
-
 package main
 
 use neurx.runtime.io.{runtime_env_get, runtime_env_set, create_directory, file_exists}
 use neurx.runtime.process.{exec_process, exec_process_async, wait_process}
 use neurx.strings.{trim, string_concat, starts_with}
-
-
-
-
 
 struct launcher_config {
     int num_gpus
@@ -38,12 +28,7 @@ struct gpu_info {
     bool available
 }
 
-
-
-
-
 func parse_args() launcher_config {
-
 
     string num_gpus_str = runtime_env_get("NUM_GPUS", "1")
     int num_gpus = parse_int(num_gpus_str)
@@ -74,18 +59,9 @@ func parse_args() launcher_config {
     }
 }
 
-
-
-
-
 func query_gpu_info() []gpu_info {
 
-
-
-
-
     []gpu_info gpus = []gpu_info{cap: 16}
-
 
     gpu_info gpu0 = gpu_info {
         device_id: 0,
@@ -99,7 +75,6 @@ func query_gpu_info() []gpu_info {
 }
 
 func check_gpu_availability(int num_gpus) (bool, int) {
-
 
     []gpu_info gpus = query_gpu_info()
 
@@ -116,12 +91,7 @@ func check_gpu_availability(int num_gpus) (bool, int) {
     (sufficient, available_count)
 }
 
-
-
-
-
 func setup_directories(launcher_config config) bool {
-
 
     if !create_directory(config.log_dir) {
         print("[ERROR] Failed to create log directory: " + config.log_dir)
@@ -159,10 +129,6 @@ func print_config(launcher_config config) {
     print("==================================================")
 }
 
-
-
-
-
 struct process_handle {
     int rank
     int pid
@@ -170,20 +136,17 @@ struct process_handle {
     bool running
 }
 
-
 func launch_rank_process(
     launcher_config config,
     int rank,
     int world_size,
 ) process_handle {
 
-
     runtime_env_set("RANK", itoa(rank))
     runtime_env_set("LOCAL_RANK", itoa(rank))
     runtime_env_set("WORLD_SIZE", itoa(world_size))
     runtime_env_set("MASTER_ADDR", config.master_addr)
     runtime_env_set("MASTER_PORT", itoa(config.master_port))
-
 
     string cmd = "./pretrain/distributed_pretrain_entry.s " +
                  "--config=" + config.config_path +
@@ -195,9 +158,7 @@ func launch_rank_process(
                  " --rank=" + itoa(rank) +
                  " --world_size=" + itoa(world_size)
 
-
     string log_file = config.log_dir + "/rank_" + itoa(rank) + ".log"
-
 
     int pid = exec_process_async(cmd, log_file)
 
@@ -208,7 +169,6 @@ func launch_rank_process(
         running: pid > 0,
     }
 }
-
 
 func launch_all_processes(
     launcher_config config,
@@ -232,7 +192,6 @@ func launch_all_processes(
     handles
 }
 
-
 func wait_all_processes(
     []process_handle handles,
 ) int {
@@ -245,7 +204,6 @@ func wait_all_processes(
 
         if handle.running {
             print("[INFO] Waiting for rank " + itoa(handle.rank) + " (PID " + itoa(handle.pid) + ")...")
-
 
             int exit_code = wait_process(handle.pid)
 
@@ -263,19 +221,13 @@ func wait_all_processes(
     overall_exit_code
 }
 
-
-
-
-
 func aggregate_logs(launcher_config config, []process_handle handles) {
-
 
     print("[INFO] Aggregating logs from all ranks...")
 
     int rank = 0
     while rank < len(handles) {
         string rank_log = handles[rank].log_file
-
 
         if file_exists(rank_log) {
             print("[INFO] Rank " + itoa(rank) + " log: " + rank_log)
@@ -285,10 +237,6 @@ func aggregate_logs(launcher_config config, []process_handle handles) {
         rank = rank + 1
     }
 }
-
-
-
-
 
 func print_final_stats(launcher_config config, int exit_code) {
     print("==================================================")
@@ -305,22 +253,14 @@ func print_final_stats(launcher_config config, int exit_code) {
     print("==================================================")
 }
 
-
-
-
-
 func main() {
 
-
     launcher_config config = parse_args()
-
 
     string timestamp = get_timestamp()
     config.log_file = config.log_dir + "/pretrain_" + timestamp + ".log"
 
-
     print_config(config)
-
 
     print("[INFO] Checking GPU availability...")
     (bool sufficient, int available_gpus) := check_gpu_availability(config.num_gpus)
@@ -333,34 +273,25 @@ func main() {
         exit(1)
     }
 
-
     if !setup_directories(config) {
         print("[ERROR] Failed to setup directories")
         exit(1)
     }
 
-
     print("[INFO] Launching " + itoa(config.num_gpus) + " training processes...")
 
     []process_handle handles = launch_all_processes(config, config.num_gpus)
-
 
     print("[INFO] All processes started. Waiting for completion...")
 
     int exit_code = wait_all_processes(handles)
 
-
     aggregate_logs(config, handles)
-
 
     print_final_stats(config, exit_code)
 
     exit(exit_code)
 }
-
-
-
-
 
 func parse_int(string s) int {
     int result = 0
@@ -401,11 +332,9 @@ func itoa(int n) string {
 
 func get_timestamp() string {
 
-
     "20260714_161200"
 }
 
 func exit(int code) {
-
 
 }

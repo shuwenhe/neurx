@@ -1,28 +1,18 @@
 package neurx.distributed
 
-
-
-
-
-
-
 struct nccl_config {
     int world_size
     int rank
 
-
     string backend
-
 
     bool use_nvlinks
     int nccl_threads
     string blocking_mode
 
-
     float timeout_secs
     bool debug_enabled
 }
-
 
 struct nccl_communicator {
     bool initialized
@@ -31,30 +21,19 @@ struct nccl_communicator {
     int world_size
     nccl_config config
 
-
     int bytes_sent
     int bytes_received
     int num_collective_ops
 
-
     []float64 op_times
 }
-
-
-
-
-
 
 func init_nccl(nccl_config cfg) (nccl_communicator, error) {
     if cfg.rank < 0 || cfg.rank >= cfg.world_size {
         return nccl_communicator{}, error{message: "Invalid rank"}
     }
 
-
-
     unique_id := nccl_runtime_call("ncclGetUniqueId", [], 0).bytes_value
-
-
 
     result := nccl_runtime_call("ncclCommInitRank", [
         cfg.world_size,
@@ -84,7 +63,6 @@ func cleanup_nccl(nccl_communicator comm) error {
         return nil
     }
 
-
     result := nccl_runtime_call("ncclCommDestroy", [comm.comm_handle], 0)
     if result.error_code != 0 {
         return error{message: "ncclCommDestroy failed"}
@@ -100,14 +78,6 @@ func cleanup_nccl(nccl_communicator comm) error {
 
     nil
 }
-
-
-
-
-
-
-
-
 
 func nccl_allreduce(
     nccl_communicator comm,
@@ -127,10 +97,8 @@ func nccl_allreduce(
 
     start_time := get_timestamp()
 
-
     nccl_op := map_reduce_op(reduce_op)
     nccl_dtype := map_dtype(dtype)
-
 
     result := nccl_runtime_call("ncclAllReduce", [
         send_buf, recv_buf, count, nccl_dtype, nccl_op, comm.comm_handle
@@ -139,7 +107,6 @@ func nccl_allreduce(
     if result.error_code != 0 {
         return error{message: "ncclAllReduce failed"}
     }
-
 
     bytes_transferred := count * dtype_size(dtype)
     comm.bytes_sent += bytes_transferred
@@ -156,8 +123,6 @@ func nccl_allreduce(
     nil
 }
 
-
-
 func nccl_allgather(
     nccl_communicator comm,
     uint64 send_buf,
@@ -173,7 +138,6 @@ func nccl_allgather(
 
     nccl_dtype := map_dtype(dtype)
 
-
     result := nccl_runtime_call("ncclAllGather", [
         send_buf, recv_buf, send_count, nccl_dtype, comm.comm_handle
     ], 0)
@@ -181,7 +145,6 @@ func nccl_allgather(
     if result.error_code != 0 {
         return error{message: "ncclAllGather failed"}
     }
-
 
     total_bytes := send_count * comm.world_size * dtype_size(dtype)
     comm.bytes_sent += send_count * dtype_size(dtype)
@@ -192,9 +155,6 @@ func nccl_allgather(
 
     nil
 }
-
-
-
 
 func nccl_reduce_scatter(
     nccl_communicator comm,
@@ -213,7 +173,6 @@ func nccl_reduce_scatter(
     nccl_op := map_reduce_op(reduce_op)
     nccl_dtype := map_dtype(dtype)
 
-
     result := nccl_runtime_call("ncclReduceScatter", [
         send_buf, recv_buf, recv_count, nccl_dtype, nccl_op, comm.comm_handle
     ], 0)
@@ -226,8 +185,6 @@ func nccl_reduce_scatter(
 
     nil
 }
-
-
 
 func nccl_broadcast(
     nccl_communicator comm,
@@ -249,7 +206,6 @@ func nccl_broadcast(
 
     nccl_dtype := map_dtype(dtype)
 
-
     result := nccl_runtime_call("ncclBroadcast", [
         send_buf, recv_buf, count, nccl_dtype, root_rank, comm.comm_handle
     ], 0)
@@ -265,8 +221,6 @@ func nccl_broadcast(
 
     nil
 }
-
-
 
 func nccl_send(
     nccl_communicator comm,
@@ -284,7 +238,6 @@ func nccl_send(
     }
 
     nccl_dtype := map_dtype(dtype)
-
 
     result := nccl_runtime_call("ncclSend", [
         send_buf, count, nccl_dtype, peer_rank, comm.comm_handle
@@ -314,7 +267,6 @@ func nccl_recv(
 
     nccl_dtype := map_dtype(dtype)
 
-
     result := nccl_runtime_call("ncclRecv", [
         recv_buf, count, nccl_dtype, peer_rank, comm.comm_handle
     ], 0)
@@ -329,10 +281,6 @@ func nccl_recv(
 
     nil
 }
-
-
-
-
 
 func map_reduce_op(string op) int {
 
@@ -378,7 +326,6 @@ func dtype_size(string dtype) int {
 
 func nccl_runtime_call(string api_name, []any args, int flags) (any, error) {
 
-
     any{}
 }
 
@@ -387,15 +334,7 @@ func get_timestamp() float64 {
     0.0
 }
 
-
-
-
-
-
 func nccl_barrier(nccl_communicator comm) error {
-
-
-
 
     dummy_buf := make([]float32, 1)
     result := nccl_runtime_call("ncclBarrier", [comm.comm_handle], 0)
@@ -406,10 +345,6 @@ func nccl_barrier(nccl_communicator comm) error {
 
     nil
 }
-
-
-
-
 
 func print_comm_stats(nccl_communicator comm) {
     avg_op_time := 0.0

@@ -1,8 +1,5 @@
 #!/bin/bash
 
-
-
-
 REAL_S="/usr/local/bin/s"
 if [ ! -x "$REAL_S" ]; then
   REAL_S=$(command -v s 2>/dev/null || true)

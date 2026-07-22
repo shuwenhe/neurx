@@ -2,17 +2,6 @@ package neurx.autograd
 
 use neurx.tensor.tensor
 
-
-
-
-
-
-
-
-
-
-
-
 func backward_matmul(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 2 {
         return backward_result { input_grads: [], success: false }
@@ -21,13 +10,10 @@ func backward_matmul(node n, tensor grad_output) backward_result {
     tensor a = n.inputs[0]
     tensor b = n.inputs[1]
 
-
     []int shape_a = get_context_safe(n, "shape_a", a.shape)
     []int shape_b = get_context_safe(n, "shape_b", b.shape)
 
-
     tensor grad_a = matmul_transpose_b(grad_output.data, b.data, shape_a, shape_b)
-
 
     tensor grad_b = matmul_transpose_a(a.data, grad_output.data, shape_a, shape_b)
 
@@ -37,9 +23,7 @@ func backward_matmul(node n, tensor grad_output) backward_result {
     }
 }
 
-
 func matmul_transpose_b([]float grad, []float b, []int shape_grad, []int shape_b) tensor {
-
 
     int M = shape_grad[0]
     int K = shape_grad[1] if len(shape_grad) > 1 else shape_b[0]
@@ -64,9 +48,7 @@ func matmul_transpose_b([]float grad, []float b, []int shape_grad, []int shape_b
     tensor { data: result, grad: [], shape: [M, N], requires_grad: true }
 }
 
-
 func matmul_transpose_a([]float a, []float grad, []int shape_a, []int shape_grad) tensor {
-
 
     int M = shape_a[0]
     int K = shape_a[1] if len(shape_a) > 1 else shape_grad[0]
@@ -91,12 +73,6 @@ func matmul_transpose_a([]float a, []float grad, []int shape_a, []int shape_grad
     tensor { data: result, grad: [], shape: [M, N], requires_grad: true }
 }
 
-
-
-
-
-
-
 func backward_add(node n, tensor grad_output) backward_result {
     []tensor grads
 
@@ -106,7 +82,6 @@ func backward_add(node n, tensor grad_output) backward_result {
     } else if len(n.inputs) == 2 {
         tensor grad_a = copy_tensor_with_grad(grad_output)
         tensor grad_b = copy_tensor_with_grad(grad_output)
-
 
         if len(n.inputs[0].shape) != len(grad_output.shape) ||
            !shapes_equal(n.inputs[0].shape, grad_output.shape) {
@@ -152,12 +127,6 @@ func shapes_equal([]int a, []int b) bool {
     true
 }
 
-
-
-
-
-
-
 func backward_mul(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 2 {
         return backward_result { input_grads: [copy_tensor_with_grad(grad_output)], success: true }
@@ -166,10 +135,8 @@ func backward_mul(node n, tensor grad_output) backward_result {
     tensor a = n.inputs[0]
     tensor b = n.inputs[1]
 
-
     []float grad_a_data = elementwise_mul(grad_output.data, b.data)
     tensor grad_a { data: grad_a_data, grad: [], shape: a.shape, requires_grad: true }
-
 
     []float grad_b_data = elementwise_mul(grad_output.data, a.data)
     tensor grad_b { data: grad_b_data, grad: [], shape: b.shape, requires_grad: true }
@@ -190,19 +157,12 @@ func min_len([]float a, []float b) int {
     if len(a) < len(b) { len(a) } else { len(b) }
 }
 
-
-
-
-
-
-
 func backward_sub(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 2 {
         return backward_result { input_grads: [copy_tensor_with_grad(grad_output)], success: true }
     }
 
     tensor grad_a = copy_tensor_with_grad(grad_output)
-
 
     []float neg_grad = negate(grad_output.data)
     tensor grad_b { data: neg_grad, grad: [], shape: n.inputs[1].shape, requires_grad: true }
@@ -218,12 +178,6 @@ func negate([]float data) []float {
     out
 }
 
-
-
-
-
-
-
 func backward_div(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 2 {
         return backward_result { input_grads: [copy_tensor_with_grad(grad_output)], success: true }
@@ -232,10 +186,8 @@ func backward_div(node n, tensor grad_output) backward_result {
     tensor a = n.inputs[0]
     tensor b = n.inputs[1]
 
-
     []float grad_a_data = elementwise_div(grad_output.data, b.data)
     tensor grad_a { data: grad_a_data, grad: [], shape: a.shape, requires_grad: true }
-
 
     []float b_squared = elementwise_mul(b.data, b.data)
     []float numerator = elementwise_mul(elementwise_mul(grad_output.data, a.data), float_to_array(-1.0))

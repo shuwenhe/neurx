@@ -1,20 +1,9 @@
 package neurx.inference.sampling
 
-
-
-
-
-
-
-
-
-
 func sample_from_distribution([]float probs, uint64 rng_state) int {
     if len(probs) == 0 { return -1 }
 
-
     float r = random_float_01(advance_rng(rng_state))
-
 
     float cumsum = 0.0
 
@@ -25,14 +14,8 @@ func sample_from_distribution([]float probs, uint64 rng_state) int {
         }
     }
 
-
     len(probs) - 1
 }
-
-
-
-
-
 
 func sample_from_softmax(
     []float logits,

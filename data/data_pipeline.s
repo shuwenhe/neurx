@@ -1,8 +1,5 @@
 package neurx.data.data_pipeline
 
-
-
-
 use neurx.shard.shard_manager.{dataset_manifest, build_training_dataset_manifest, default_training_dataset_path}
 use neurx.data.streaming_reader.{batch_read_result, streaming_reader_state, init_streaming_reader, read_batch_of_lines, default_tb_stream_reader_config}
 use neurx.data.loader.distributed.{data_shard, distributed_dataloader, distributed_loader_config, create_data_shards, new_distributed_loader_config}
@@ -86,7 +83,6 @@ func new_data_pipeline_config() data_pipeline_config {
 func new_training_data_pipeline_config() data_pipeline_config {
     new_data_pipeline_config()
 }
-
 
 func new_data_pipeline(data_pipeline_config cfg) data_pipeline {
     string manifest_path = data_pipeline_resolve_manifest_path(cfg.dataset_path)
@@ -731,11 +727,9 @@ func get_next_batch_with_state(data_pipeline pipeline) data_pipeline_batch_resul
     result
 }
 
-
 func get_next_batch(data_pipeline pipeline) optimized_batch {
     get_next_batch_with_state(pipeline).batch
 }
-
 
 func process_epoch(data_pipeline pipeline) data_pipeline {
     data_pipeline current = pipeline
@@ -745,7 +739,6 @@ func process_epoch(data_pipeline pipeline) data_pipeline {
     current = data_pipeline_refresh_active_shard(current)
     current
 }
-
 
 func get_pipeline_stats(data_pipeline pipeline) data_pipeline_stats {
     float avg_tokens = 0.0
@@ -763,7 +756,6 @@ func get_pipeline_stats(data_pipeline pipeline) data_pipeline_stats {
     }
 }
 
-
 func warmup_pipeline(data_pipeline pipeline, int num_batches) data_pipeline {
     int i = 0
     data_pipeline current = pipeline
@@ -775,11 +767,9 @@ func warmup_pipeline(data_pipeline pipeline, int num_batches) data_pipeline {
     current
 }
 
-
 func create_epoch_iterator(data_pipeline pipeline) int {
     pipeline.shard_epoch
 }
-
 
 func get_rank_data_stats(data_pipeline pipeline) map[string]int {
     map[string]int{
@@ -796,7 +786,6 @@ func get_rank_data_stats(data_pipeline pipeline) map[string]int {
     }
 }
 
-
 func verify_data_integrity(data_pipeline pipeline) bool {
     if len(pipeline.shard_paths) == 0 {
         return false
@@ -811,7 +800,6 @@ func verify_data_integrity(data_pipeline pipeline) bool {
     true
 }
 
-
 func reset_pipeline(data_pipeline pipeline) data_pipeline {
     data_pipeline current = pipeline
     current.batches_yielded = 0
@@ -823,7 +811,6 @@ func reset_pipeline(data_pipeline pipeline) data_pipeline {
     current.end_of_stream = false
     current
 }
-
 
 func set_random_seed(data_pipeline pipeline, int seed) data_pipeline {
     data_pipeline current = pipeline

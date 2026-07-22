@@ -1,8 +1,5 @@
 
 
-
-
-
 package main
 
 import (
@@ -80,13 +77,8 @@ type bradley_terry_loss struct {
     preference_label    int
 }
 
-
-
-
-
 func (trainer *reward_model_trainer) load_preference_data(data_path string) {
     fmt.Printf("[Reward Model] Loading preference data from %s\n", data_path)
-
 
     for i := 0; i < 1000; i++ {
         example := preference_data{
@@ -116,7 +108,6 @@ func (trainer *reward_model_trainer) preprocess_example(example preference_data)
     features_a := trainer.embed_tokens(tokens_a)
     features_b := trainer.embed_tokens(tokens_b)
 
-
     combined := append(features_a, features_b...)
 
     return combined, example.preferred
@@ -142,10 +133,6 @@ func (trainer *reward_model_trainer) embed_tokens(tokens []int) []float64 {
     return embeddings
 }
 
-
-
-
-
 func (trainer *reward_model_trainer) bradley_terry_loss(reward_a float64, reward_b float64, preference int) float64 {
     if preference == 0 {
 
@@ -170,28 +157,18 @@ func (trainer *reward_model_trainer) sigmoid(x float64) float64 {
     return 1.0 / (1.0 + math.Exp(-x))
 }
 
-
-
-
-
 func (trainer *reward_model_trainer) predict_reward(text string) float64 {
     tokens := trainer.tokenize(text)
     embeddings := trainer.embed_tokens(tokens)
-
 
     hidden := 0.0
     for i, emb := range embeddings {
         hidden += emb * math.Cos(float64(i) / 10.0)
     }
 
-
     reward := trainer.sigmoid(hidden)
     return reward
 }
-
-
-
-
 
 func (trainer *reward_model_trainer) train_step(batch []preference_data) float64 {
     total_loss := 0.0
@@ -202,10 +179,8 @@ func (trainer *reward_model_trainer) train_step(batch []preference_data) float64
         reward_a := trainer.predict_reward(example.response_a)
         reward_b := trainer.predict_reward(example.response_b)
 
-
         loss := trainer.bradley_terry_loss(reward_a, reward_b, example.preferred)
         total_loss += loss
-
 
         prediction := 0
         if reward_b > reward_a {
@@ -323,10 +298,6 @@ func (trainer *reward_model_trainer) calculate_auc(logits []float64, labels []in
     return float64(correct) / float64(pairs)
 }
 
-
-
-
-
 func NewRewardModelTrainer(config reward_model_config) *reward_model_trainer {
     return &reward_model_trainer{
         config: config,
@@ -388,7 +359,6 @@ func (trainer *reward_model_trainer) train() {
                 fmt.Printf("  Batch %d/%d - Loss: %.6f\n", batch+1, num_batches, loss)
             }
         }
-
 
         val_metric := trainer.evaluate(trainer.val_dataset)
         fmt.Printf("  Validation - Loss: %.6f, Accuracy: %.4f, ECE: %.4f, AUC: %.4f\n",

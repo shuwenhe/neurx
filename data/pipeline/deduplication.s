@@ -1,7 +1,5 @@
 package neurx.data.pipeline.deduplication
 
-
-
 struct min_hash_signature {
     int* hash_values
     int num_hashes
@@ -31,14 +29,8 @@ struct document_similarity {
     bool is_duplicate
 }
 
-
-
-
-
-
 func init_bloom_filter(int expected_documents, float false_positive_rate) bloom_filter {
     bloom_filter bf
-
 
     float ln2_squared = 0.4804530139
     int size = -(int)(float(expected_documents) * ln_f(false_positive_rate) / ln2_squared)
@@ -57,7 +49,6 @@ func init_bloom_filter(int expected_documents, float false_positive_rate) bloom_
     bf
 }
 
-
 func hash_function_1(string text) int {
     int hash = 5381
     int i = 0
@@ -74,7 +65,6 @@ func hash_function_1(string text) int {
 
     hash
 }
-
 
 func hash_function_2(string text) int {
     int hash = 33
@@ -93,7 +83,6 @@ func hash_function_2(string text) int {
     hash
 }
 
-
 func hash_function_3(string text) int {
     int hash = 1
     int i = 0
@@ -111,7 +100,6 @@ func hash_function_3(string text) int {
     hash
 }
 
-
 func bloom_add(bloom_filter bf, string text) void {
     int h1 = hash_function_1(text) % bf.size
     int h2 = hash_function_2(text) % bf.size
@@ -123,7 +111,6 @@ func bloom_add(bloom_filter bf, string text) void {
 
     bf.insertions = bf.insertions + 1
 }
-
 
 func bloom_contains(bloom_filter bf, string text) bool {
     int h1 = hash_function_1(text) % bf.size
@@ -137,24 +124,17 @@ func bloom_contains(bloom_filter bf, string text) bool {
     false
 }
 
-
-
-
-
-
 func generate_minhash_signature(string text, int num_hashes) min_hash_signature {
     min_hash_signature sig
     sig.num_hashes = num_hashes
     sig.hash_values = alloc(int, num_hashes)
     sig.doc_length = strlen(text)
 
-
     int i = 0
     while i < num_hashes {
         sig.hash_values[i] = 2147483647
         i = i + 1
     }
-
 
     int text_len = strlen(text)
     i = 0
@@ -163,12 +143,10 @@ func generate_minhash_signature(string text, int num_hashes) min_hash_signature 
         string gram = ""
         gram = char_to_string(text[i]) + char_to_string(text[i + 1])
 
-
         int j = 0
         while j < num_hashes {
 
             int hash_value = compute_hash(gram, j * 17) % 2147483647
-
 
             if hash_value < sig.hash_values[j] {
                 sig.hash_values[j] = hash_value
@@ -182,7 +160,6 @@ func generate_minhash_signature(string text, int num_hashes) min_hash_signature 
 
     sig
 }
-
 
 func compute_hash(string text, int seed) int {
     int hash = seed
@@ -200,7 +177,6 @@ func compute_hash(string text, int seed) int {
 
     hash
 }
-
 
 func jaccard_similarity(min_hash_signature sig1, min_hash_signature sig2) float {
     if sig1.num_hashes != sig2.num_hashes {
@@ -221,11 +197,6 @@ func jaccard_similarity(min_hash_signature sig1, min_hash_signature sig2) float 
     similarity
 }
 
-
-
-
-
-
 func find_exact_duplicates(string* documents, int doc_count) bool* {
     bool* is_duplicate = alloc(bool, doc_count)
 
@@ -234,7 +205,6 @@ func find_exact_duplicates(string* documents, int doc_count) bool* {
         is_duplicate[i] = false
         i = i + 1
     }
-
 
     bloom_filter bf = init_bloom_filter(doc_count, 0.001)
 
@@ -261,11 +231,9 @@ func find_exact_duplicates(string* documents, int doc_count) bool* {
     is_duplicate
 }
 
-
 func find_similar_duplicates(string* documents, int doc_count, float similarity_threshold) document_similarity* {
     document_similarity* similarities = alloc(document_similarity, doc_count * doc_count / 2)
     int similarity_count = 0
-
 
     min_hash_signature* signatures = alloc(min_hash_signature, doc_count)
     int i = 0
@@ -273,7 +241,6 @@ func find_similar_duplicates(string* documents, int doc_count, float similarity_
         signatures[i] = generate_minhash_signature(documents[i], 128)
         i = i + 1
     }
-
 
     i = 0
     while i < doc_count {
@@ -300,23 +267,15 @@ func find_similar_duplicates(string* documents, int doc_count, float similarity_
     similarities
 }
 
-
-
-
-
-
 func deduplicate_documents(string* documents, int doc_count, float similarity_threshold) deduplication_stats {
     deduplication_stats stats
     stats.total_documents = doc_count
 
     int start_time = get_time_ms()
 
-
     bool* exact_dups = find_exact_duplicates(documents, doc_count)
 
-
     document_similarity* similar_dups = find_similar_duplicates(documents, doc_count, similarity_threshold)
-
 
     int unique_count = 0
     int i = 0
@@ -335,7 +294,6 @@ func deduplicate_documents(string* documents, int doc_count, float similarity_th
     stats
 }
 
-
 func filter_unique_documents(string* documents, int doc_count, bool* is_duplicate) string* {
 
     int unique_count = 0
@@ -346,7 +304,6 @@ func filter_unique_documents(string* documents, int doc_count, bool* is_duplicat
         }
         i = i + 1
     }
-
 
     string* unique_docs = alloc(string, unique_count)
     int unique_idx = 0
@@ -362,11 +319,6 @@ func filter_unique_documents(string* documents, int doc_count, bool* is_duplicat
 
     unique_docs
 }
-
-
-
-
-
 
 func str_equals(string s1, string s2) bool {
     if strlen(s1) != strlen(s2) {
@@ -384,7 +336,6 @@ func str_equals(string s1, string s2) bool {
     true
 }
 
-
 func strlen(string s) int {
     int count = 0
     int i = 0
@@ -395,11 +346,9 @@ func strlen(string s) int {
     count
 }
 
-
 func char_to_string(int c) string {
     ""
 }
-
 
 func int_to_string(int n) string {
     if n == 0 {
@@ -418,30 +367,22 @@ func int_to_string(int n) string {
     result
 }
 
-
 func float(int n) float {
 
     0.0
 }
 
-
 func get_time_ms() int {
     0
 }
-
 
 func ln_f(float x) float {
 
     0.0
 }
 
-
-
-
-
 func main() {
     println("Data Deduplication System")
-
 
     string* docs = alloc(string, 5)
     docs[0] = "hello world this is a test"
@@ -449,7 +390,6 @@ func main() {
     docs[2] = "hello world this is a demo"
     docs[3] = "completely different text here"
     docs[4] = "hello world"
-
 
     deduplication_stats stats = deduplicate_documents(docs, 5, 0.8)
 

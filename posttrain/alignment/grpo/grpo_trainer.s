@@ -1,22 +1,5 @@
 package neurx.posttrain.grpo.grpo_trainer
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.model.llm.neurx.*
 use neurx.tokenizer.neurx.*
 use neurx.amp.scaler.*
@@ -25,24 +8,17 @@ use neurx.checkpoint.distributed.*
 use neurx.data.loader.dataloader.*
 use neurx.monitoring.training_observability.*
 
-
-
-
-
-
 struct generation_output {
     string text
     []int token_ids
     []float log_probs
     float total_log_prob
 
-
     float format_reward
     float accuracy_reward
     float length_penalty
     float total_reward
 }
-
 
 struct grpo_generation_group {
     string prompt
@@ -51,12 +27,10 @@ struct grpo_generation_group {
     []generation_output outputs
     []float advantages
 
-
     float group_mean_reward
     float group_std_reward
     int accepted_outputs
 }
-
 
 struct grpo_dataset {
     []string prompts
@@ -64,15 +38,12 @@ struct grpo_dataset {
     int size
     string source_path
 
-
     int group_size
     float quality_score
 }
 
-
 struct grpo_train_config {
     string method
-
 
     int batch_size
     int group_size
@@ -82,13 +53,11 @@ struct grpo_train_config {
     string lr_schedule_type
     int total_training_steps
 
-
     float adam_beta1
     float adam_beta2
     float adam_epsilon
     float weight_decay
     float max_grad_norm
-
 
     float clip_epsilon
     float kl_coef
@@ -96,22 +65,18 @@ struct grpo_train_config {
     bool use_length_penalty
     float length_penalty_per_100tokens
 
-
     int max_gen_len
     float temperature
     float top_p
-
 
     string precision
     bool use_gradient_checkpointing
     bool use_flash_attention
 
-
     int save_interval
     int eval_interval
     int log_interval
     string checkpoint_dir
-
 
     int num_workers
     bool pin_memory
@@ -119,17 +84,14 @@ struct grpo_train_config {
     string output_dir
 }
 
-
 struct grpo_trainer_state {
 
     neurx_model model
     neurx_model reference_model
     tokenizer_state tokenizer
 
-
     grpo_train_config config
     grpo_dataset dataset
-
 
     int global_rank
     int local_rank
@@ -137,13 +99,11 @@ struct grpo_trainer_state {
     int dp_rank
     int dp_degree
 
-
     int current_step
     int current_epoch
     float current_learning_rate
     float best_eval_metric
     int best_step
-
 
     float running_loss
     float running_policy_loss
@@ -152,16 +112,13 @@ struct grpo_trainer_state {
     float running_group_reward
     float running_advantage_magnitude
 
-
     []float loss_history
     []float reward_history
     []float kl_history
 
-
     dataloader train_loader
     dataloader eval_loader
 }
-
 
 struct grpo_train_result {
     bool success
@@ -173,17 +130,11 @@ struct grpo_train_result {
     string checkpoint_path
 }
 
-
-
-
-
-
 func compute_format_reward(string response) float {
 
     if str_contains(response, "<think>") && str_contains(response, "</think>") {
         return 0.5
     }
-
 
     if str_contains(response, "<answer>") && str_contains(response, "</answer>") {
         return 0.5
@@ -192,13 +143,11 @@ func compute_format_reward(string response) float {
     0.0
 }
 
-
 func compute_accuracy_reward(string response, string reference) float {
 
     if response == reference {
         return 1.0
     }
-
 
     if str_contains(response, reference) {
         return 0.5
@@ -207,7 +156,6 @@ func compute_accuracy_reward(string response, string reference) float {
     0.0
 }
 
-
 func compute_length_penalty(int token_count, float penalty_per_100) float {
     float penalty = float_of_int(token_count) / 100.0 * penalty_per_100
     if penalty > 1.0 {
@@ -215,7 +163,6 @@ func compute_length_penalty(int token_count, float penalty_per_100) float {
     }
     0.0 - penalty
 }
-
 
 func compute_generation_reward(
     generation_output output,
@@ -237,17 +184,12 @@ func compute_generation_reward(
     updated
 }
 
-
-
-
-
 func compute_group_advantages(
     []generation_output outputs,
     float advantage_eps
 ) ([]float, float, float) {
 
     int G = len(outputs)
-
 
     float sum_rewards = 0.0
     int i = 0
@@ -256,7 +198,6 @@ func compute_group_advantages(
         i = i + 1
     }
     float mean_reward = sum_rewards / float_of_int(G)
-
 
     float sum_sq = 0.0
     i = 0
@@ -267,12 +208,10 @@ func compute_group_advantages(
     }
     float variance = sum_sq / float_of_int(G)
 
-
     float std_reward = sqrt_approx(variance)
     if std_reward < advantage_eps {
         std_reward = advantage_eps
     }
-
 
     []float advantages = []float{}
     i = 0
@@ -284,10 +223,6 @@ func compute_group_advantages(
 
     (advantages, mean_reward, std_reward)
 }
-
-
-
-
 
 struct grpo_loss_result {
     float total_loss
@@ -313,13 +248,11 @@ func compute_grpo_loss(
     float total_kl = 0.0
     int clipped = 0
 
-
     int i = 0
     while i < G {
 
         float log_ratio = new_log_probs_sum - old_log_probs_sum
         float ratio = exp_approx_grpo(log_ratio)
-
 
         float advantage = advantages[i]
         float surr1 = ratio * advantage
@@ -332,11 +265,9 @@ func compute_grpo_loss(
         float clipped_obj = min_float(surr1, surr2)
         float policy_loss = 0.0 - clipped_obj
 
-
         if ratio > 1.0 + clip_epsilon || ratio < 1.0 - clip_epsilon {
             clipped = clipped + 1
         }
-
 
         float kl = ref_log_probs_sum - new_log_probs_sum
 
@@ -345,7 +276,6 @@ func compute_grpo_loss(
 
         i = i + 1
     }
-
 
     float fG = float_of_int(G)
     float avg_policy_loss = total_policy_loss / fG
@@ -361,10 +291,6 @@ func compute_grpo_loss(
         clipped_count: clipped,
     }
 }
-
-
-
-
 
 func compute_grpo_learning_rate(
     grpo_trainer_state trainer,
@@ -389,16 +315,11 @@ func compute_grpo_learning_rate(
         return cfg.learning_rate * cosine_decay
     }
 
-
     int remaining = total_steps - warmup_steps
     int progress_step = current_step - warmup_steps
     float progress = float_of_int(progress_step) / float_of_int(remaining)
     cfg.learning_rate * (1.0 - progress)
 }
-
-
-
-
 
 struct grpo_step_result {
     float loss
@@ -416,18 +337,14 @@ func grpo_training_step(
 
     grpo_train_config cfg = trainer.config
 
-
     ([]float advantages, float mean_r, float std_r) = compute_group_advantages(
         group.outputs,
         1e-8
     )
 
-
-
     float new_log_sum = 0.0
     float old_log_sum = 0.0
     float ref_log_sum = 0.0
-
 
     grpo_loss_result loss_result = compute_grpo_loss(
         group.outputs,
@@ -439,7 +356,6 @@ func grpo_training_step(
         cfg.kl_coef
     )
 
-
     float avg_adv_mag = 0.0
     int i = 0
     while i < len(advantages) {
@@ -449,7 +365,6 @@ func grpo_training_step(
         i = i + 1
     }
     avg_adv_mag = avg_adv_mag / float_of_int(len(advantages))
-
 
     trainer.running_loss = 0.9 * trainer.running_loss + 0.1 * loss_result.total_loss
     trainer.running_policy_loss = 0.9 * trainer.running_policy_loss + 0.1 * loss_result.policy_loss
@@ -468,10 +383,6 @@ func grpo_training_step(
     }
 }
 
-
-
-
-
 func start_grpo_training(
     ref grpo_trainer_state trainer
 ) grpo_train_result {
@@ -487,21 +398,13 @@ func start_grpo_training(
     int step = 0
     while step < cfg.total_training_steps {
 
-
         trainer.current_learning_rate = compute_grpo_learning_rate(
             trainer,
             step,
             cfg.total_training_steps
         )
 
-
-
-
-
-
-
         grpo_generation_group group = create_dummy_grpo_group()
-
 
         grpo_step_result result = grpo_training_step(ref trainer, group)
 
@@ -509,16 +412,13 @@ func start_grpo_training(
         trainer.reward_history = append(trainer.reward_history, result.group_reward)
         trainer.kl_history = append(trainer.kl_history, result.kl_loss)
 
-
         if cfg.log_interval > 0 && step % cfg.log_interval == 0 && global_rank == 0 {
             print_grpo_training_progress(trainer)
         }
 
-
         if cfg.eval_interval > 0 && step % cfg.eval_interval == 0 && step > 0 {
 
         }
-
 
         if cfg.save_interval > 0 && step % cfg.save_interval == 0 && step > 0 {
             save_grpo_checkpoint(trainer, step)
@@ -543,10 +443,6 @@ func start_grpo_training(
     }
 }
 
-
-
-
-
 func save_grpo_checkpoint(grpo_trainer_state trainer, int step) {
     string checkpoint_path = trainer.config.checkpoint_dir + "/step_" + string(step)
 
@@ -554,10 +450,6 @@ func save_grpo_checkpoint(grpo_trainer_state trainer, int step) {
         print("[GRPO] checkpoint saved: " + checkpoint_path)
     }
 }
-
-
-
-
 
 func print_grpo_training_header() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -601,10 +493,6 @@ func print_grpo_training_complete(grpo_trainer_state trainer) {
     print("  checkpoint: " + trainer.config.checkpoint_dir)
     print("")
 }
-
-
-
-
 
 func append_float(ref []float arr, float value) {
 

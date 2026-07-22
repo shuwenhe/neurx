@@ -8,9 +8,6 @@
 #include <utility>
 #include <vector>
 
-
-
-
 namespace neurx::inference {
 
 enum class Backend { cuda, ascend, cpu };
@@ -107,7 +104,6 @@ struct RuntimeConfig {
   int max_prefill_requests = 16;
   int max_decode_batch_size = 64;
 
-
   bool prioritize_decode = true;
 };
 
@@ -144,8 +140,6 @@ class DisaggregatedScheduler {
     }
   }
 
-
-
   Batch schedule() {
     if (config_.prioritize_decode && !decode_queue_.empty()) return take_decode_batch();
     if (!prefill_queue_.empty()) return take_prefill_batch();
@@ -169,8 +163,6 @@ class DisaggregatedScheduler {
       prefill_queue_.push_back(id);
     }
   }
-
-
 
   void complete_decode(const std::string& id, bool eos = false) {
     Request& request = mutable_request(id, RequestState::decoding);

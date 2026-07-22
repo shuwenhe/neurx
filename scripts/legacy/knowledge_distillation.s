@@ -1,8 +1,5 @@
 
 
-
-
-
 package main
 
 import (
@@ -37,17 +34,12 @@ type distillation_framework struct {
     best_loss               float64
 }
 
-
-
-
-
 func (framework *distillation_framework) apply_temperature(logits []float64, temperature float64) []float64 {
 
     scaled := make([]float64, len(logits))
     for i, logit := range logits {
         scaled[i] = logit / temperature
     }
-
 
     max_logit := scaled[0]
     for _, l := range scaled {
@@ -71,10 +63,6 @@ func (framework *distillation_framework) apply_temperature(logits []float64, tem
     return probs
 }
 
-
-
-
-
 func (framework *distillation_framework) compute_distillation_loss(
     student_logits []float64,
     teacher_logits []float64,
@@ -83,7 +71,6 @@ func (framework *distillation_framework) compute_distillation_loss(
     student_probs := framework.apply_temperature(student_logits, temperature)
     teacher_probs := framework.apply_temperature(teacher_logits, temperature)
 
-
     kl_div := 0.0
     for i := 0; i < len(teacher_probs) && i < len(student_probs); i++ {
         if teacher_probs[i] > 1e-10 && student_probs[i] > 1e-10 {
@@ -91,21 +78,14 @@ func (framework *distillation_framework) compute_distillation_loss(
         }
     }
 
-
     return kl_div * temperature * temperature
 }
-
-
-
-
 
 func (framework *distillation_framework) compute_student_loss(
     student_logits []float64,
     target_indices []int) float64 {
 
-
     loss := 0.0
-
 
     max_logit := student_logits[0]
     for _, l := range student_logits {
@@ -131,10 +111,6 @@ func (framework *distillation_framework) compute_student_loss(
     return loss / float64(len(target_indices))
 }
 
-
-
-
-
 func (framework *distillation_framework) compute_total_loss(
     student_logits []float64,
     teacher_logits []float64,
@@ -144,10 +120,8 @@ func (framework *distillation_framework) compute_total_loss(
     student_loss := framework.compute_student_loss(student_logits, target_indices)
     distill_loss := framework.compute_distillation_loss(student_logits, teacher_logits, temperature)
 
-
     total_loss := framework.config.student_weight*student_loss +
                   framework.config.distill_weight*distill_loss
-
 
     student_acc := 0.5 + student_loss*0.1
     teacher_acc := 0.8
@@ -163,10 +137,6 @@ func (framework *distillation_framework) compute_total_loss(
         kl_divergence: kl_div,
     }
 }
-
-
-
-
 
 func (framework *distillation_framework) train_step(
     batch_logits [][]float64,
@@ -190,10 +160,6 @@ func (framework *distillation_framework) train_step(
     avg_loss := total_loss / float64(len(batch_logits))
     return avg_loss
 }
-
-
-
-
 
 func (framework *distillation_framework) train(num_steps int) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
@@ -243,20 +209,14 @@ func (framework *distillation_framework) train(num_steps int) {
     }
 }
 
-
-
-
-
 func (framework *distillation_framework) analyze_compression() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Distillation Compression Analysis                    ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
 
-
     teacher_size := framework.teacher_model.num_layers *
                    framework.teacher_model.hidden_size *
                    framework.teacher_model.vocab_size * 4
-
 
     student_size := int(float64(teacher_size) / framework.config.compression_ratio)
 
@@ -269,7 +229,6 @@ func (framework *distillation_framework) analyze_compression() {
     fmt.Printf("  Compression Ratio: %.1fx\n", compression_ratio)
     fmt.Printf("  Memory Saved: %.1f%%\n", memory_saved*100)
 
-
     fmt.Printf("\nExpected Performance:\n")
     fmt.Printf("  Teacher PPL: 35.7\n")
     fmt.Printf("  Student PPL: 42-45 (80-90%% of teacher)\n")
@@ -277,26 +236,16 @@ func (framework *distillation_framework) analyze_compression() {
     fmt.Printf("  Accuracy Drop: 5-10%%\n")
 }
 
-
-
-
-
 func (framework *distillation_framework) get_temperature(step int, total_steps int) float64 {
     progress := float64(step) / float64(total_steps)
 
-
     initial_temp := 20.0
     final_temp := 4.0
-
 
     temp := initial_temp + (final_temp-initial_temp)*progress
 
     return temp
 }
-
-
-
-
 
 func NewDistillationFramework(
     config distillation_config,
@@ -317,9 +266,7 @@ func (framework *distillation_framework) distill() {
     fmt.Println("║  Knowledge Distillation Pipeline                      ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝\n")
 
-
     framework.train(1000)
-
 
     framework.analyze_compression()
 

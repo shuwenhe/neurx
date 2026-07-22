@@ -21,7 +21,6 @@ func main() {
     print("✓ SafeTensors: 291 tensors, BF16\n")
     print("✓ Inference: Real Transformer computation\n\n")
 
-
     print("═══════════════════════════════════════════════════════\n")
     print("Test 1: What is the treatment for diseases?\n")
     print("═══════════════════════════════════════════════════════\n\n")
@@ -44,7 +43,6 @@ func main() {
 
     print("Assistant: patient medical treatment care symptoms\n\n")
 
-
     print("═══════════════════════════════════════════════════════\n")
     print("Test 2: Describe medical care\n")
     print("═══════════════════════════════════════════════════════\n\n")
@@ -65,7 +63,6 @@ func main() {
     print("    Generated: [2005, 2004, 2002, 2003, 2000]\n\n")
 
     print("Assistant: health care treatment diagnosis patient\n\n")
-
 
     print("═══════════════════════════════════════════════════════\n")
     print("Test 3: Inference Performance\n")

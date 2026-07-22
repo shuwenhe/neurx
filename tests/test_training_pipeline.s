@@ -1,8 +1,5 @@
 
 
-
-
-
 package neurx.test.training_pipeline_suite
 
 import (
@@ -12,10 +9,6 @@ import (
     "neurx/model"
     "neurx/nn"
 )
-
-
-
-
 
 func test_forward_pass_basic() bool {
 
@@ -35,10 +28,8 @@ func test_forward_pass_basic() bool {
         i = i + 1
     }
 
-
     var result: training_pipeline.forward_pass_result =
         training_pipeline.forward_pass(model_state, input_ids, 32, 512)
-
 
     if result.batch_size != 32 {
         return false
@@ -68,7 +59,6 @@ func test_forward_pass_logits_shape() bool {
 
     var result: training_pipeline.forward_pass_result =
         training_pipeline.forward_pass(model_state, input_ids, 8, 256)
-
 
     if len(result.logits) < 8 * 256 {
         return false
@@ -109,10 +99,6 @@ func test_forward_pass_different_batch_sizes() bool {
     return true
 }
 
-
-
-
-
 func test_backward_pass_basic() bool {
 
     var model_state: model.transformer_state
@@ -132,7 +118,6 @@ func test_backward_pass_basic() bool {
 
     var result: training_pipeline.backward_pass_result =
         training_pipeline.backward_pass(forward_result, model_state, target_ids, 65536.0)
-
 
     if result.gradient_norm < 0.0 {
         return false
@@ -161,11 +146,8 @@ func test_backward_pass_gradient_overflow_detection() bool {
 
     var target_ids: []int = []int(32 * 512)
 
-
     var result: training_pipeline.backward_pass_result =
         training_pipeline.backward_pass(forward_result, model_state, target_ids, 0.0001)
-
-
 
     return true
 }
@@ -190,7 +172,6 @@ func test_gradient_clipping() bool {
     var result: training_pipeline.backward_pass_result =
         training_pipeline.backward_pass(forward_result, model_state, target_ids, 65536.0)
 
-
     if result.gradient_clipped {
 
         return true
@@ -198,10 +179,6 @@ func test_gradient_clipping() bool {
 
     return true
 }
-
-
-
-
 
 func test_gradient_scaling_basic() bool {
 
@@ -235,7 +212,6 @@ func test_loss_scale_update_on_overflow() bool {
     var current_scale: float = 65536.0
     var new_scale: float = training_pipeline.update_loss_scale(current_scale, true, 0)
 
-
     if new_scale >= current_scale {
         return false
     }
@@ -251,7 +227,6 @@ func test_loss_scale_update_growth() bool {
     var current_scale: float = 1024.0
     var new_scale: float = training_pipeline.update_loss_scale(current_scale, false, 2001)
 
-
     if new_scale <= current_scale {
         return false
     }
@@ -263,13 +238,11 @@ func test_loss_scale_bounds() bool {
 
     var scale: float = 65536.0
 
-
     var increased: float = training_pipeline.update_loss_scale(scale, false, 2001)
     if increased > 65536.0 {
 
         return false
     }
-
 
     var decreased: float = 1.0
     var final_scale: float = training_pipeline.update_loss_scale(decreased, true, 0)
@@ -280,10 +253,6 @@ func test_loss_scale_bounds() bool {
     return true
 }
 
-
-
-
-
 func test_gradient_accumulation_basic() bool {
 
     var accumulated: gradient_accumulation.accumulated_gradients
@@ -291,7 +260,6 @@ func test_gradient_accumulation_basic() bool {
     accumulated.steps_accumulated = 0
     accumulated.accumulated_loss = 0.0
     accumulated.is_ready = false
-
 
     var step = 0
     while step < 4 {
@@ -315,7 +283,6 @@ func test_accumulation_readiness() bool {
     var accumulated: gradient_accumulation.accumulated_gradients
     accumulated.accumulation_steps = 4
     accumulated.steps_accumulated = 2
-
 
     if accumulated.steps_accumulated >= accumulated.accumulation_steps {
         accumulated.is_ready = true
@@ -345,7 +312,6 @@ func test_gradient_accumulation_reset() bool {
     accumulated.accumulated_loss = 22.0
     accumulated.is_ready = true
 
-
     accumulated.steps_accumulated = 0
     accumulated.accumulated_loss = 0.0
     accumulated.is_ready = false
@@ -362,10 +328,6 @@ func test_gradient_accumulation_reset() bool {
 
     return true
 }
-
-
-
-
 
 func test_checkpoint_creation() bool {
 
@@ -419,12 +381,10 @@ func test_checkpoint_interval_decision() bool {
 
     var interval: int = 500
 
-
     var save1: bool = training_pipeline.should_save_checkpoint(100, interval)
     if save1 {
         return false
     }
-
 
     var save2: bool = training_pipeline.should_save_checkpoint(500, interval)
     if !save2 {
@@ -438,10 +398,6 @@ func test_checkpoint_interval_decision() bool {
 
     return true
 }
-
-
-
-
 
 func test_training_step_complete_pipeline() bool {
 
@@ -465,7 +421,6 @@ func test_training_step_complete_pipeline() bool {
     var input_ids: []int = []int(32 * 512)
     var target_ids: []int = []int(32 * 512)
 
-
     var result: training_pipeline.training_step_result =
         training_pipeline.training_step(
             input_ids,
@@ -475,7 +430,6 @@ func test_training_step_complete_pipeline() bool {
             config,
             training_state.loss_scale
         )
-
 
     if result.loss < 0.0 {
         return false
@@ -501,11 +455,9 @@ func test_mixed_precision_integration() bool {
     mp_state.loss_scale = 65536.0
     mp_state.master_weights = model_state.weight_matrices
 
-
     var config: training_pipeline.training_config
     config.use_mixed_precision = true
     config.batch_size = 32
-
 
     if !config.use_mixed_precision {
         return false
@@ -524,7 +476,6 @@ func test_gradient_accumulation_integration() bool {
     accumulated.accumulation_steps = 4
     accumulated.steps_accumulated = 0
 
-
     var step = 0
     while step < 4 {
         accumulated.accumulated_loss = accumulated.accumulated_loss + 5.5
@@ -541,7 +492,6 @@ func test_gradient_accumulation_integration() bool {
         return false
     }
 
-
     var avg_loss: float = accumulated.accumulated_loss / float(accumulated.accumulation_steps)
     if avg_loss < 5.0 || avg_loss > 6.0 {
         return false
@@ -550,16 +500,11 @@ func test_gradient_accumulation_integration() bool {
     return true
 }
 
-
-
-
-
 func test_throughput_calculation() bool {
 
     var batch_size: int = 32
     var seq_length: int = 512
     var tokens_per_sample: int = batch_size * seq_length
-
 
     var total_tokens: int = tokens_per_sample * 100
     var time_ms: int = 10000
@@ -584,14 +529,9 @@ func test_perplexity_calculation() bool {
     return true
 }
 
-
-
-
-
 func run_all_training_pipeline_tests() bool {
     var passed: int = 0
     var total: int = 0
-
 
     total = total + 1
     if test_forward_pass_basic() { passed = passed + 1 }
@@ -602,7 +542,6 @@ func run_all_training_pipeline_tests() bool {
     total = total + 1
     if test_forward_pass_different_batch_sizes() { passed = passed + 1 }
 
-
     total = total + 1
     if test_backward_pass_basic() { passed = passed + 1 }
 
@@ -611,7 +550,6 @@ func run_all_training_pipeline_tests() bool {
 
     total = total + 1
     if test_gradient_clipping() { passed = passed + 1 }
-
 
     total = total + 1
     if test_gradient_scaling_basic() { passed = passed + 1 }
@@ -625,7 +563,6 @@ func run_all_training_pipeline_tests() bool {
     total = total + 1
     if test_loss_scale_bounds() { passed = passed + 1 }
 
-
     total = total + 1
     if test_gradient_accumulation_basic() { passed = passed + 1 }
 
@@ -634,7 +571,6 @@ func run_all_training_pipeline_tests() bool {
 
     total = total + 1
     if test_gradient_accumulation_reset() { passed = passed + 1 }
-
 
     total = total + 1
     if test_checkpoint_creation() { passed = passed + 1 }
@@ -645,7 +581,6 @@ func run_all_training_pipeline_tests() bool {
     total = total + 1
     if test_checkpoint_interval_decision() { passed = passed + 1 }
 
-
     total = total + 1
     if test_training_step_complete_pipeline() { passed = passed + 1 }
 
@@ -654,7 +589,6 @@ func run_all_training_pipeline_tests() bool {
 
     total = total + 1
     if test_gradient_accumulation_integration() { passed = passed + 1 }
-
 
     total = total + 1
     if test_throughput_calculation() { passed = passed + 1 }

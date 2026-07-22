@@ -1,31 +1,8 @@
 package neurx.attention.flash_v2
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.attention.core.{
     attention_config, multi_head_attention_module
 }
-
-
-
-
 
 struct flash_attn_config {
     int block_q
@@ -52,11 +29,6 @@ func new_flash_attn_config(int head_dim, int num_q_heads, int num_kv_heads, bool
     }
 }
 
-
-
-
-
-
 struct flash_block_acc {
     []float output
     []float row_max
@@ -71,15 +43,10 @@ func new_flash_block_acc(int block_q, int head_dim) flash_block_acc {
     }
 }
 
-
 struct flash_attn_output {
     []float out
     []float lse
 }
-
-
-
-
 
 func sqrt_approx(float x) float {
 
@@ -146,16 +113,6 @@ func max_float(float a, float b) float {
     b
 }
 
-
-
-
-
-
-
-
-
-
-
 func flash_attn_forward_head(
     []float q, []float k, []float v,
     int seq_len, int kv_len, int head_dim,
@@ -164,10 +121,8 @@ func flash_attn_forward_head(
 ) []float {
     []float out = zeros(seq_len * head_dim)
 
-
     []float row_max = fill(seq_len, -1e9)
     []float row_sum = zeros(seq_len)
-
 
     int q_block_start = 0
     for q_block_start < seq_len {
@@ -177,11 +132,9 @@ func flash_attn_forward_head(
         }
         int Br = q_block_end - q_block_start
 
-
         []float acc_o   = zeros(Br * head_dim)
         []float acc_max = fill(Br, -1e9)
         []float acc_sum = zeros(Br)
-
 
         int kv_block_start = 0
         for kv_block_start < kv_len {
@@ -191,12 +144,10 @@ func flash_attn_forward_head(
             }
             int Bc = kv_block_end - kv_block_start
 
-
             if causal && kv_block_start >= q_block_end {
                 kv_block_start = kv_block_start + block_kv
                 continue
             }
-
 
             []float s = zeros(Br * Bc)
             int qi = 0
@@ -217,7 +168,6 @@ func flash_attn_forward_head(
                 qi = qi + 1
             }
 
-
             if causal {
                 int qi2 = 0
                 for qi2 < Br {
@@ -233,7 +183,6 @@ func flash_attn_forward_head(
                     qi2 = qi2 + 1
                 }
             }
-
 
             int qi3 = 0
             for qi3 < Br {
@@ -251,7 +200,6 @@ func flash_attn_forward_head(
                 float m_new = max_float(m_old, row_m)
                 acc_max[qi3] = m_new
 
-
                 float rescale = exp_stable(m_old - m_new)
                 acc_sum[qi3] = acc_sum[qi3] * rescale
 
@@ -260,7 +208,6 @@ func flash_attn_forward_head(
                     acc_o[qi3 * head_dim + d2] = acc_o[qi3 * head_dim + d2] * rescale
                     d2 = d2 + 1
                 }
-
 
                 float row_lsum = 0.0
                 int kj4 = 0
@@ -284,7 +231,6 @@ func flash_attn_forward_head(
             kv_block_start = kv_block_start + block_kv
         }
 
-
         int qi5 = 0
         for qi5 < Br {
             float inv_sum = 1.0
@@ -298,7 +244,6 @@ func flash_attn_forward_head(
                 d4 = d4 + 1
             }
 
-
             row_sum[q_block_start + qi5] = acc_sum[qi5]
             row_max[q_block_start + qi5] = acc_max[qi5]
 
@@ -310,13 +255,6 @@ func flash_attn_forward_head(
 
     out
 }
-
-
-
-
-
-
-
 
 struct flash_attn_fwd_state {
     flash_attn_config config
@@ -342,7 +280,6 @@ func flash_attn_forward(
 
         int kv_h = h / kv_group
 
-
         []float q_h = zeros(seq_len * D)
         int ti = 0
         for ti < seq_len {
@@ -353,7 +290,6 @@ func flash_attn_forward(
             }
             ti = ti + 1
         }
-
 
         []float k_h = zeros(kv_len * D)
         []float v_h = zeros(kv_len * D)
@@ -368,14 +304,12 @@ func flash_attn_forward(
             tj = tj + 1
         }
 
-
         []float head_out = flash_attn_forward_head(
             q_h, k_h, v_h,
             seq_len, kv_len, D,
             cfg.block_q, cfg.block_kv,
             cfg.softmax_scale, cfg.causal
         )
-
 
         int ti2 = 0
         for ti2 < seq_len {
@@ -396,10 +330,6 @@ func flash_attn_forward(
         lse: lse,
     }
 }
-
-
-
-
 
 struct flash_attn_grad_result {
     []float dq
@@ -426,7 +356,6 @@ func flash_attn_backward(
     int h = 0
     for h < H_q {
         int kv_h = h / kv_group
-
 
         []float q_h    = zeros(seq_len * D)
         []float k_h    = zeros(kv_len  * D)
@@ -456,12 +385,9 @@ func flash_attn_backward(
             tj = tj + 1
         }
 
-
-
         []float dq_h = zeros(seq_len * D)
         []float dk_h = zeros(kv_len  * D)
         []float dv_h = zeros(kv_len  * D)
-
 
         []float Di = zeros(seq_len)
         int ri = 0
@@ -475,7 +401,6 @@ func flash_attn_backward(
             Di[ri] = s
             ri = ri + 1
         }
-
 
         int qi = 0
         for qi < seq_len {
@@ -501,7 +426,6 @@ func flash_attn_backward(
                 kj = kj + 1
             }
 
-
             float sum_exp = 0.0
             int kj2 = 0
             for kj2 < kv_len {
@@ -518,7 +442,6 @@ func flash_attn_backward(
                 kj3 = kj3 + 1
             }
 
-
             int kj4 = 0
             for kj4 < kv_len {
                 float p = scores[kj4]
@@ -529,7 +452,6 @@ func flash_attn_backward(
                 }
                 kj4 = kj4 + 1
             }
-
 
             []float dp = zeros(kv_len)
             int kj5 = 0
@@ -543,8 +465,6 @@ func flash_attn_backward(
                 dp[kj5] = (dot2 - Di[qi]) * scores[kj5]
                 kj5 = kj5 + 1
             }
-
-
 
             int kj6 = 0
             for kj6 < kv_len {
@@ -561,7 +481,6 @@ func flash_attn_backward(
             qi = qi + 1
         }
 
-
         int ti2 = 0
         for ti2 < seq_len {
             int d8 = 0
@@ -571,7 +490,6 @@ func flash_attn_backward(
             }
             ti2 = ti2 + 1
         }
-
 
         int tj2 = 0
         for tj2 < kv_len {
@@ -589,10 +507,6 @@ func flash_attn_backward(
 
     flash_attn_grad_result { dq: dq, dk: dk, dv: dv }
 }
-
-
-
-
 
 struct flash_mha_state {
     flash_attn_config cfg
@@ -614,7 +528,6 @@ func new_flash_mha(int hidden_dim, int num_q_heads, int num_kv_heads, bool causa
     }
 }
 
-
 func flash_mha_forward(flash_mha_state mha, []float x, int seq_len) []float {
     int H_q  = mha.cfg.num_q_heads
     int H_kv = mha.cfg.num_kv_heads
@@ -622,30 +535,20 @@ func flash_mha_forward(flash_mha_state mha, []float x, int seq_len) []float {
     int hidden = H_q * D
     int kv_dim = H_kv * D
 
-
     []float q = matmul_2d(x, mha.wq, seq_len, hidden, hidden)
     []float k = matmul_2d(x, mha.wk, seq_len, hidden, kv_dim)
     []float v = matmul_2d(x, mha.wv, seq_len, hidden, kv_dim)
-
 
     []float q_mh = reshape_to_heads(q, seq_len, H_q, D)
     []float k_mh = reshape_to_heads(k, seq_len, H_kv, D)
     []float v_mh = reshape_to_heads(v, seq_len, H_kv, D)
 
-
     flash_attn_fwd_state fwd = flash_attn_forward(mha.cfg, q_mh, k_mh, v_mh, seq_len, seq_len)
-
 
     []float merged = merge_heads(fwd.output, seq_len, H_q, D)
 
-
     matmul_2d(merged, mha.wo, seq_len, hidden, hidden)
 }
-
-
-
-
-
 
 func matmul_2d([]float a, []float b, int M, int K, int N) []float {
     []float c = zeros(M * N)
@@ -666,7 +569,6 @@ func matmul_2d([]float a, []float b, int M, int K, int N) []float {
     }
     c
 }
-
 
 func reshape_to_heads([]float x, int seq, int heads, int D) []float {
 

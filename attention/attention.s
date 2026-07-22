@@ -3,10 +3,6 @@ package neurx.attention
 use neurx.model.transformer.norm.{rope_embedding, rope_apply_result, apply_rope}
 use neurx.attention.flash_compute
 
-
-
-
-
 struct attention_config {
     int hidden_dim
     int num_heads
@@ -419,7 +415,6 @@ func forward_with_cache(
     []float kv_cache_value,
     int cache_position_id
 ) []float {
-
 
     forward_attention(attn, query_states, cache_position_id + 1)
 }

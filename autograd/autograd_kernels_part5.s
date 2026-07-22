@@ -2,23 +2,12 @@ package neurx.autograd
 
 use neurx.tensor.tensor
 
-
-
-
-
-
-
-
-
-
-
 func backward_exp(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
     }
 
     tensor input = n.inputs[0]
-
 
     tensor output_exp = get_context_safe_tensor(n, "output", input)
 
@@ -27,12 +16,6 @@ func backward_exp(node n, tensor grad_output) backward_result {
     tensor result { data: grad_data, grad: [], shape: input.shape, requires_grad: true }
     backward_result { input_grads: [result], success: true }
 }
-
-
-
-
-
-
 
 func backward_log(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
@@ -54,12 +37,6 @@ func backward_log(node n, tensor grad_output) backward_result {
     backward_result { input_grads: [result], success: true }
 }
 
-
-
-
-
-
-
 func backward_concat(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -72,7 +49,6 @@ func backward_concat(node n, tensor grad_output) backward_result {
     for i in 0..len(n.inputs) {
         tensor inp = n.inputs[i]
         int size = inp.shape[dim] if dim < len(inp.shape) else len(inp.data)
-
 
         []float grad_slice = extract_slice(grad_output.data, offset, size, dim, inp.shape)
 
@@ -125,13 +101,6 @@ func extract_slice([]float data, int start, int size, int dim, []int target_shap
     result
 }
 
-
-
-
-
-
-
-
 func backward_cross_entropy_loss(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 2 {
         return backward_result { input_grads: [], success: false }
@@ -140,12 +109,7 @@ func backward_cross_entropy_loss(node n, tensor grad_output) backward_result {
     tensor logits = n.inputs[0]
     tensor targets = n.inputs[1]
 
-
     tensor probs = get_context_safe_tensor(n, "softmax_probs", logits)
-
-
-
-
 
     float loss_scale = grad_output.data[0] if len(grad_output.data) > 0 else 1.0
 
@@ -172,7 +136,6 @@ func backward_cross_entropy_loss(node n, tensor grad_output) backward_result {
     }
 
     tensor grad_logits_t { data: grad_logits, grad: [], shape: shape, requires_grad: true }
-
 
     tensor grad_targets_zeros {
         data: zeros_like_array(len(targets.data)),

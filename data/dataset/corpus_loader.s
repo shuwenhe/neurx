@@ -1,20 +1,5 @@
 package neurx.data.dataset.corpus_loader
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.data.streaming_reader.{
     streaming_reader_state, line_read_result,
     init_streaming_reader, read_next_line, default_tb_stream_reader_config,
@@ -24,10 +9,6 @@ use neurx.tokenizer.data_pipeline.{
     bpe_tokenizer_state, encode, init_bpe_tokenizer, default_llm_tokenizer_config
 }
 use neurx.runtime.io.{runtime_read_text_file, runtime_file_exists, runtime_run_command_output}
-
-
-
-
 
 struct data_source {
     string name
@@ -95,10 +76,6 @@ func default_pretraining_corpus() corpus_config {
         pad_token_id: 0,
     }
 }
-
-
-
-
 
 struct corpus_state {
     corpus_config config
@@ -181,12 +158,6 @@ func new_corpus_state_from_paths([]string paths, int batch_size, int seq_len, bo
     new_corpus_state(new_corpus_config_from_sources(sources, batch_size, seq_len, enable_dedup))
 }
 
-
-
-
-
-
-
 func jsonl_extract_text(string line, string field) string {
     string pattern = "\"" + field + "\":"
     int plen = len(pattern)
@@ -226,7 +197,6 @@ func jsonl_extract_text(string line, string field) string {
     result
 }
 
-
 func cl_find(string s, string pattern, int start) int {
     int slen = len(s)
     int plen = len(pattern)
@@ -243,11 +213,6 @@ func cl_find(string s, string pattern, int start) int {
     }
     -1
 }
-
-
-
-
-
 
 func compute_quality_score(string text) float {
     int n = len(text)
@@ -296,7 +261,6 @@ func compute_quality_score(string text) float {
         avg_word_len = (total_word_len * 1.0) / (word_count * 1.0)
     }
 
-
     float score = 0.0
     if print_ratio > 0.9 { score = score + 0.4 }
     if alpha_ratio > 0.3 { score = score + 0.3 }
@@ -305,10 +269,6 @@ func compute_quality_score(string text) float {
 
     score
 }
-
-
-
-
 
 func doc_hash(string text) int {
     int h = 2166136261
@@ -330,13 +290,6 @@ func corpus_is_duplicate(corpus_state state, int hash) bool {
     }
     false
 }
-
-
-
-
-
-
-
 
 struct packing_buffer {
     []int tokens
@@ -379,11 +332,6 @@ func pb_reset(packing_buffer buf) packing_buffer {
     packing_buffer { tokens: buf.tokens, length: 0, capacity: buf.capacity }
 }
 
-
-
-
-
-
 func corpus_select_source(corpus_state state) corpus_source_selection {
     state.rng = state.rng * 1664525 + 1013904223
     int rabs = state.rng
@@ -409,10 +357,6 @@ func corpus_select_source(corpus_state state) corpus_source_selection {
         state: state,
     }
 }
-
-
-
-
 
 struct corpus_batch {
     []int input_ids
@@ -445,11 +389,6 @@ struct corpus_token_stream_result {
     int batches_read
     int tokens_collected
 }
-
-
-
-
-
 
 func corpus_read_document(corpus_state state) corpus_document_result {
     int attempts = 0
@@ -518,10 +457,6 @@ func corpus_read_document(corpus_state state) corpus_document_result {
     }
 }
 
-
-
-
-
 func corpus_next_batch(corpus_state state) corpus_batch_result {
     int seq_len = state.config.seq_len
     int batch_size = state.config.batch_size
@@ -559,13 +494,10 @@ func corpus_next_batch(corpus_state state) corpus_batch_result {
             break
         }
 
-
         []int token_ids = encode(state.tokenizer, doc_text)
         state.total_tokens_seen = state.total_tokens_seen + len(token_ids)
 
-
         buf = pb_append(buf, bos)
-
 
         int i = 0
         while i < len(token_ids) {
@@ -593,7 +525,6 @@ func corpus_next_batch(corpus_state state) corpus_batch_result {
             }
             i = i + 1
         }
-
 
         buf = pb_append(buf, eos)
     }
@@ -651,10 +582,6 @@ func corpus_collect_token_ids(corpus_state state, int max_tokens) corpus_token_s
     }
 }
 
-
-
-
-
 struct corpus_stats {
     int total_docs
     int filtered_docs
@@ -681,10 +608,6 @@ func corpus_get_stats(corpus_state state) corpus_stats {
         total_tokens_b: state.total_tokens_seen / 1000000000,
     }
 }
-
-
-
-
 
 func cl_substring(string s, int start, int end) string {
     string out = ""

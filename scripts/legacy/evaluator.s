@@ -1,11 +1,5 @@
 
 
-
-
-
-
-
-
 package main
 
 import (
@@ -13,7 +7,6 @@ import (
     "io"
     "encoding/json"
 )
-
 
 type evaluation_metrics struct {
     step: int
@@ -26,13 +19,11 @@ type evaluation_metrics struct {
     timestamp: string
 }
 
-
 type evaluator struct {
     batch_size: int
     accumulation_steps: int
     history: []evaluation_metrics
 }
-
 
 func (e *evaluator) init(batch_size: int, accumulation_steps: int) {
     e.batch_size = batch_size
@@ -40,16 +31,12 @@ func (e *evaluator) init(batch_size: int, accumulation_steps: int) {
     e.history = make([]evaluation_metrics, 0)
 }
 
-
-
 func calculate_perplexity(loss: float): float {
     if loss < 0 {
         return -1.0
     }
     return math.Exp(loss)
 }
-
-
 
 func calculate_cross_entropy(logits: []float, labels: []int): float {
     total_loss := 0.0
@@ -61,14 +48,12 @@ func calculate_cross_entropy(logits: []float, labels: []int): float {
 
         predicted := logits[i]
 
-
         if predicted <= 0 {
             predicted = 1e-10
         }
         if predicted > 1.0 {
             predicted = 1.0 - 1e-10
         }
-
 
         loss_val := -math.Log(predicted)
         total_loss += loss_val
@@ -80,14 +65,12 @@ func calculate_cross_entropy(logits: []float, labels: []int): float {
     return 0.0
 }
 
-
 func (e *evaluator) evaluate(
     step: int,
     train_loss: float,
     val_logits: [][]float,
     val_labels: [][]int,
     speed: float) evaluation_metrics {
-
 
     val_loss := 0.0
     for i := 0; i < len(val_labels); i++ {
@@ -101,10 +84,8 @@ func (e *evaluator) evaluate(
         val_loss = val_loss / float(len(val_labels))
     }
 
-
     train_ppl := calculate_perplexity(train_loss)
     val_ppl := calculate_perplexity(val_loss)
-
 
     metrics := evaluation_metrics{
         step: step,
@@ -121,7 +102,6 @@ func (e *evaluator) evaluate(
     return metrics
 }
 
-
 func (e *evaluator) best_perplexity(): float {
     if len(e.history) == 0 {
         return math.MaxFloat
@@ -137,7 +117,6 @@ func (e *evaluator) best_perplexity(): float {
     return best
 }
 
-
 func (e *evaluator) convergence_info(): map[string]interface{} {
     if len(e.history) < 2 {
         return map[string]interface{}{
@@ -150,7 +129,6 @@ func (e *evaluator) convergence_info(): map[string]interface{} {
     last := e.history[len(e.history)-1]
 
     improvement := (first.val_perplexity - last.val_perplexity) / first.val_perplexity * 100
-
 
     is_converged := false
     if len(e.history) > 10 {
@@ -175,7 +153,6 @@ func (e *evaluator) convergence_info(): map[string]interface{} {
     }
 }
 
-
 func (e *evaluator) generate_report(): string {
     report := "=== NeurX Training Evaluation Report ===\n\n"
 
@@ -183,13 +160,11 @@ func (e *evaluator) generate_report(): string {
         return report + "No evaluation data available\n"
     }
 
-
     best_val_ppl := e.best_perplexity()
     report += "Perplexity Evolution:\n"
     report += "├─ Initial: " + format_float(e.history[0].val_perplexity) + "\n"
     report += "├─ Best: " + format_float(best_val_ppl) + "\n"
     report += "└─ Final: " + format_float(e.history[len(e.history)-1].val_perplexity) + "\n\n"
-
 
     conv := e.convergence_info()
     report += "Convergence Status:\n"
@@ -201,7 +176,6 @@ func (e *evaluator) generate_report(): string {
     } else {
         report += "→ Training...\n"
     }
-
 
     report += "\nLast 5 Evaluations:\n"
     start := len(e.history) - 5
@@ -220,7 +194,6 @@ func (e *evaluator) generate_report(): string {
     return report
 }
 
-
 func (e *evaluator) export_json(): string {
     data := map[string]interface{}{
         "total_evaluations": len(e.history),
@@ -233,7 +206,6 @@ func (e *evaluator) export_json(): string {
     return string(json_bytes)
 }
 
-
 func format_float(f: float): string {
 
     return fmt.Sprintf("%.4f", f)
@@ -243,12 +215,10 @@ func format_int(i: int): string {
     return fmt.Sprintf("%d", i)
 }
 
-
 func main() {
 
     evaluator := &evaluator{}
     evaluator.init(32, 4)
-
 
     steps := []int{100, 500, 1000, 2000}
     initial_ppl := 1000.0
@@ -257,7 +227,6 @@ func main() {
 
         train_loss := math.Log(initial_ppl - float(i*150))
 
-
         val_logits := make([][]float, 10)
         val_labels := make([][]int, 10)
         for j := 0; j < 10; j++ {
@@ -265,17 +234,13 @@ func main() {
             val_labels[j] = []int{1}
         }
 
-
         metrics := evaluator.evaluate(step, train_loss, val_logits, val_labels, 1000.0)
-
 
         json_data, _ := json.Marshal(metrics)
         println(string(json_data))
     }
 
-
     println("\n" + evaluator.generate_report())
-
 
     println("\nJSON Export:")
     println(evaluator.export_json())

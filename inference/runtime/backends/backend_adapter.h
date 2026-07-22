@@ -17,8 +17,6 @@ struct AdapterStatus {
   static AdapterStatus failure(std::string message) { return {false, std::move(message)}; }
 };
 
-
-
 struct DeviceBatch {
   Batch schedule;
   const void* token_ids = nullptr;
@@ -34,7 +32,6 @@ struct DeviceBatch {
   void* kv_cache = nullptr;
   void* workspace = nullptr;
   std::size_t workspace_bytes = 0;
-
 
   const void* sampling_params = nullptr;
   void* sampled_token_ids = nullptr;

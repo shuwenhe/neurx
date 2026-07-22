@@ -22,7 +22,6 @@ func new_agent_perception_result(string kind, string content, string source) age
     }
 }
 
-
 func get_key(agent_perception_result result, int index) string {
     result.keys[index]
 }

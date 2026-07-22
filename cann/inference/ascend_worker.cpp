@@ -253,7 +253,6 @@ AdapterStatus AscendWorker::execute(
   status = executor_.synchronize();
   if (!status.ok) {
 
-
     for (const auto& item : batch.items) executor_.release_request(item.request_id);
     return status;
   }
@@ -261,8 +260,6 @@ AdapterStatus AscendWorker::execute(
   if (batch.phase == Phase::prefill) {
     for (std::size_t row = 0; row < batch_size; ++row) {
       if (prefill_prompts[row].empty()) continue;
-
-
 
       prefix_cache_.insert(batch.items[row].request_id,
                            prefill_prompts[row]);

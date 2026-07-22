@@ -14,9 +14,6 @@ struct WorkerBatchResult {
   std::vector<int32_t> next_tokens;
 };
 
-
-
-
 class AscendWorker {
  public:
   explicit AscendWorker(

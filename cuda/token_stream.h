@@ -11,9 +11,6 @@ inline void append_document_tokens(std::vector<int>& pending,
     pending.insert(pending.end(), document.begin(), document.end());
 }
 
-
-
-
 inline bool take_training_window(std::vector<int>& pending,
                                  std::size_t sequence_length,
                                  std::vector<int>& window) {

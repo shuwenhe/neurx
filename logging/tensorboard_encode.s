@@ -1,23 +1,14 @@
 package neurx.logging
 
-
-
-
-
-
-
 func encode_scalar_summary(
     string tag,
     float value,
     int step
 ) []byte {
 
-
-
     string content = "scalar:" + tag + ":" + float_to_string(value) + ":" + int_to_string(step)
     string_to_bytes(content)
 }
-
 
 func write_event(
     file_handle f,
@@ -25,15 +16,7 @@ func write_event(
     []byte data
 ) {
 
-
-
-
-
 }
-
-
-
-
 
 func float_to_string(float x) string {
 
@@ -41,12 +24,10 @@ func float_to_string(float x) string {
         return int_to_string(int(x)) + ".0"
     }
 
-
     int int_part = int(x)
     float frac = abs_float(x - float(int_part))
 
     string result = int_to_string(int_part) + "."
-
 
     for i in 0..6 {
         frac = frac * 10.0
@@ -75,7 +56,6 @@ func int_to_string(int x) string {
         digits.push('0' + byte(x % 10))
         x = x / 10
     }
-
 
     string result = ""
     if negative { result = "-" }

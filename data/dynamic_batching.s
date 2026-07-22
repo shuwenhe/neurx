@@ -1,37 +1,28 @@
 
 
-
-
-
 package neurx.data.dynamic_batching
 
 use neurx.strings
-
 
 struct packing_config:
 
     int max_seq_len
     int target_batch_size
 
-
     string packing_strategy
     bool enable_cross_sample_packing
     float min_utilization_threshold
     int max_sequences_per_batch
 
-
     bool use_length_bucketing
     int num_length_buckets
-
 
     int pad_token_id
     bool pad_to_power_of_two
     bool truncate_long_sequences
 
-
     bool scale_loss_by_length
     bool apply_position_ids
-
 
     bool async_packing
     int prefetch_queue_size
@@ -60,9 +51,6 @@ func default_2t_packing_config() packing_config:
 
     return cfg
 
-
-
-
 struct packed_batch:
 
     []int input_ids
@@ -71,24 +59,18 @@ struct packed_batch:
     []int sample_boundaries
     []float loss_weights
 
-
     int num_sequences
     int total_tokens
     int total_slots
     float utilization_ratio
     int max_sequence_in_batch
 
-
     []int original_lengths
     []int sequence_indices
-
 
     float avg_quality_score
     int batch_id
     bool is_final_in_epoch
-
-
-
 
 struct sequence_buffer:
     int sequence_id
@@ -97,24 +79,18 @@ struct sequence_buffer:
     float quality_score
     bool should_truncate
 
-
-
-
 struct bin_packer_state:
     packing_config config
-
 
     []sequence_buffer current_bin_contents
     int current_bin_used_tokens
     int current_bin_capacity
-
 
     int total_batches_produced
     int total_sequences_processed
     float cumulative_utilization
     int total_padding_wasted
     int total_real_tokens
-
 
     []packed_batch output_queue
     int max_queue_size
@@ -136,9 +112,6 @@ func new_bin_packer(packing_config config) bin_packer_state:
 
     return packer
 
-
-
-
 struct add_sequence_result:
     bool batch_completed
     packed_batch completed_batch
@@ -153,7 +126,6 @@ func add_sequence(
     result.batch_completed = false
     result.updated_state = packer
 
-
     if len(seq.token_ids) > packer.config.max_seq_len and packer.config.truncate_long_sequences:
         seq.token_ids = seq.token_ids[0:packer.config.max_seq_len]
         seq.should_truncate = true
@@ -166,7 +138,6 @@ func add_sequence(
         result.updated_state = packer
         return result
 
-
     bool fits_in_current_bin = can_fit_in_bin(packer, seq_len)
 
     if !fits_in_current_bin:
@@ -178,19 +149,15 @@ func add_sequence(
                 result.batch_completed = true
                 result.completed_batch = completed
 
-
                 packer = update_statistics(packer, completed)
-
 
         packer.current_bin_contents = []sequence_buffer{cap: packer.config.max_sequences_per_batch}
         packer.current_bin_used_tokens = 0
-
 
     packer.current_bin_contents.push(seq)
     packer.current_bin_used_tokens = packer.current_bin_used_tokens + seq_len
     packer.total_sequences_processed = packer.total_sequences_processed + 1
     packer.total_real_tokens = packer.total_real_tokens + seq_len
-
 
     if is_bin_ready_to_finalize(packer):
         packed_batch completed = finalize_current_bin(packer)
@@ -201,53 +168,40 @@ func add_sequence(
 
             packer = update_statistics(packer, completed)
 
-
             packer.current_bin_contents = []sequence_buffer{cap: packer.config.max_sequences_per_batch}
             packer.current_bin_used_tokens = 0
 
     result.updated_state = packer
     return result
 
-
 func can_fit_in_bin(bin_packer_state packer, int seq_len) bool:
 
-
     int potential_new_total = packer.current_bin_used_tokens + seq_len
-
 
     if len(packer.current_bin_contents) >= packer.config.max_sequences_per_batch:
         return false
 
-
-
     if potential_new_total > packer.current_bin_capacity:
         return false
-
-
 
     if len(packer.current_bin_contents) > 0:
         float seq_fraction = float(seq_len) / float(potential_new_total)
         if seq_fraction > 0.7 and len(packer.current_bin_contents) < 3:
 
-
             return false
 
     return true
-
 
 func is_bin_ready_to_finalize(bin_packer_state packer) bool:
 
     if len(packer.current_bin_contents) == 0:
         return false
 
-
     if len(packer.current_bin_contents) >= packer.config.target_batch_size:
         return true
 
-
     if packer.current_bin_used_tokens >= packer.current_bin_capacity * 0.95:
         return true
-
 
     if len(packer.current_bin_contents) >= packer.config.target_batch_size / 2:
 
@@ -257,14 +211,12 @@ func is_bin_ready_to_finalize(bin_packer_state packer) bool:
 
     return False
 
-
 func finalize_current_bin(bin_packer_state packer) packed_batch:
 
     int num_seqs = len(packer.current_bin_contents)
 
     if num_seqs == 0:
         return empty_packed_batch()
-
 
     int max_len = 0
     int i = 0
@@ -273,12 +225,10 @@ func finalize_current_bin(bin_packer_state packer) packed_batch:
             max_len = len(packer.current_bin_contents[i].token_ids)
         i = i + 1
 
-
     if packer.config.pad_to_power_of_two and max_len > 1:
         max_len = next_power_of_two(max_len)
         if max_len > packer.config.max_seq_len:
             max_len = packer.config.max_seq_len
-
 
     int total_slots = num_seqs * max_len
     []int input_ids = []int{cap: total_slots}
@@ -288,7 +238,6 @@ func finalize_current_bin(bin_packer_state packer) packed_batch:
     []float loss_weights = []float{cap: num_seqs}
     []int original_lengths = []int{cap: num_seqs}
     []int sequence_indices = []int{cap: num_seqs}
-
 
     int boundary_pos = 0
     sample_boundaries[0] = boundary_pos
@@ -300,7 +249,6 @@ func finalize_current_bin(bin_packer_state packer) packed_batch:
     while i < num_seqs:
         sequence_buffer seq = packer.current_bin_contents[i]
         int seq_len = len(seq.token_ids)
-
 
         int t = 0
         while t < max_len:
@@ -318,10 +266,8 @@ func finalize_current_bin(bin_packer_state packer) packed_batch:
 
             t = t + 1
 
-
         boundary_pos = boundary_pos + max_len
         sample_boundaries[i + 1] = boundary_pos
-
 
         if seq_len > 0:
             if packer.config.scale_loss_by_length:
@@ -337,9 +283,7 @@ func finalize_current_bin(bin_packer_state packer) packed_batch:
 
         i = i + 1
 
-
     float utilization = float(real_token_count) / float(total_slots)
-
 
     packed_batch batch
     batch.input_ids = input_ids
@@ -360,12 +304,10 @@ func finalize_current_bin(bin_packer_state packer) packed_batch:
 
     return batch
 
-
 func update_statistics(bin_packer_state packer, packed_batch batch) bin_packer_state:
 
     packer.total_batches_produced = packer.total_batches_produced + 1
     packer.total_padding_wasted = packer.total_padding_wasted + (batch.total_slots - batch.total_tokens)
-
 
     int n = packer.total_batches_produced
     packer.cumulative_utilization =
@@ -373,12 +315,10 @@ func update_statistics(bin_packer_state packer, packed_batch batch) bin_packer_s
 
     return packer
 
-
 func calculate_current_utilization(bin_packer_state packer) float:
 
     if len(packer.current_bin_contents) == 0:
         return 0.0
-
 
     int max_len_in_bin = 0
     int i = 0
@@ -395,10 +335,6 @@ func calculate_current_utilization(bin_packer_state packer) float:
         return 0.0
 
     return float(packer.current_bin_used_tokens) / float(estimated_total_slots)
-
-
-
-
 
 struct cross_packed_batch:
 
@@ -439,14 +375,12 @@ func pack_samples_crosswise(
         sequence_buffer seq = sequences[s]
         int seq_len = len(seq.token_ids)
 
-
         int remaining_space = max_combined_length - current_pos
         if seq_len > remaining_space:
             seq_len = remaining_space
 
         if seq_len <= 0:
             break
-
 
         int t = 0
         while t < seq_len:
@@ -455,9 +389,7 @@ func pack_samples_crosswise(
             result.segment_ids[current_pos + t] = sample_idx
             t = t + 1
 
-
         result.sample_boundaries[s + 1] = current_pos + seq_len
-
 
         if config.scale_loss_by_length:
             result.loss_weights[s] = float(seq_len) / float(max_combined_length)
@@ -472,7 +404,6 @@ func pack_samples_crosswise(
 
         s = s + 1
 
-
     while current_pos < max_combined_length:
         result.input_ids[current_pos] = config.pad_token_id
         result.attention_masks[current_pos] = 0
@@ -485,8 +416,6 @@ func pack_samples_crosswise(
     result.avg_quality_score = total_quality / float(max(result.num_original_samples, 1))
 
     return result
-
-
 
 struct packing_statistics:
     int total_batches_produced
@@ -514,12 +443,9 @@ func get_packing_statistics(bin_packer_state packer) packing_statistics:
     else:
         stats.padding_percentage = 0.0
 
-
-
     stats.gpu_utilization_estimate = packer.cumulative_utilization * 0.95
 
     return stats
-
 
 func print_packing_report(packing_statistics stats) void:
 
@@ -545,8 +471,6 @@ func print_packing_report(packing_statistics stats) void:
         print("  Status: ACCEPTABLE (room for improvement)")
     else:
         print("  Status: POOR (review configuration)")
-
-
 
 func empty_packed_batch() packed_batch:
     return packed_batch{

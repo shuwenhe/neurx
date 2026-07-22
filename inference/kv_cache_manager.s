@@ -1,10 +1,5 @@
 package neurx.inference.kv_cache_manager
 
-
-
-
-
-
 struct page_config {
     int page_size_tokens
     int num_pages
@@ -82,7 +77,6 @@ func new_paged_kv_cache(kv_cache_config cfg) paged_kv_cache {
     }
 }
 
-
 func allocate_pages(paged_kv_cache cache, int num_tokens_needed) []int {
     int pages_needed = (num_tokens_needed + cache.config.page_size_tokens - 1) / cache.config.page_size_tokens
 
@@ -106,7 +100,6 @@ func allocate_pages(paged_kv_cache cache, int num_tokens_needed) []int {
     allocated
 }
 
-
 func free_pages(paged_kv_cache cache, []int page_ids) paged_kv_cache {
 
     int i = 0
@@ -119,14 +112,10 @@ func free_pages(paged_kv_cache cache, []int page_ids) paged_kv_cache {
     cache
 }
 
-
 func evict_page(paged_kv_cache cache) int {
-
-
 
     0
 }
-
 
 func update_cache_usage(paged_kv_cache cache, int page_id, int new_tokens) paged_kv_cache {
     cache.pages[page_id].used_tokens = new_tokens
@@ -138,31 +127,21 @@ func update_cache_usage(paged_kv_cache cache, int page_id, int new_tokens) paged
     cache
 }
 
-
 func get_cache_stats(paged_kv_cache cache) [string:int {
     [string:int{cap: 10}
 }
 
-
 func compress_kv_cache(paged_kv_cache cache) paged_kv_cache {
-
-
 
     cache
 }
-
 
 func prefill_cache(paged_kv_cache cache, []int prompt_tokens) paged_kv_cache {
 
-
-
     cache
 }
 
-
 func append_token_to_cache(paged_kv_cache cache, int token_id) paged_kv_cache {
-
-
 
     cache
 }

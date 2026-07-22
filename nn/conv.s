@@ -2,8 +2,6 @@ package neurx.nn.conv
 
 use neurx.tensor.tensor
 
-
-
 func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
@@ -53,11 +51,6 @@ func shape4(int a, int b, int c, int d) []int {
 func out_size(int in_size, int kernel, int stride, int padding, int dilation) int {
     (in_size + 2 * padding - dilation * (kernel - 1) - 1) / stride + 1
 }
-
-
-
-
-
 
 struct conv1d_state {
     int in_channels
@@ -142,11 +135,6 @@ func conv1d_forward(conv1d_state layer, tensor input) tensor {
     }
     neurx.tensor.new(out, shape3(batch, out_ch, out_len), input.requires_grad)
 }
-
-
-
-
-
 
 struct conv2d_state {
     int in_channels
@@ -249,9 +237,6 @@ func conv2d_forward(conv2d_state layer, tensor input) tensor {
     neurx.tensor.new(out, shape4(batch, out_ch, out_h, out_w), input.requires_grad)
 }
 
-
-
-
 struct convtranspose1d_state {
     int in_channels
     int out_channels
@@ -343,9 +328,6 @@ func convtranspose1d_forward(convtranspose1d_state layer, tensor input) tensor {
     }
     neurx.tensor.new(out, shape3(batch, out_ch, out_len), input.requires_grad)
 }
-
-
-
 
 struct convtranspose2d_state {
     int in_channels

@@ -1,19 +1,10 @@
 use neurx.agent
 use neurx.runtime.io.{runtime_write_text_file, runtime_file_exists}
 
-
-
-
-
-
-
 string out_prefix = "artifacts/checkpoints/agent/skills"
 string snapshot_path = out_prefix + "/snapshot.txt"
 string report_path   = out_prefix + "/report.txt"
 string trace_path    = out_prefix + "/trace.txt"
-
-
-
 
 []string bench_inputs = []string{cap: 5}
 bench_inputs[0] = "search for neurx framework agent documentation"
@@ -40,8 +31,6 @@ while gen < max_gen {
     gen = gen + 1
 }
 
-
-
 []string promoted = agent_promoted_skill_names(evolved)
 string eval_report = neurx.strings.concat2("promoted_count=", string(len(promoted)))
 int ei = 0
@@ -51,8 +40,6 @@ while ei < len(promoted) {
     eval_report = neurx.strings.concat6(eval_report, "\n  skill=", neurx.strings.string_at(promoted, ei), " success_rate=", string(sr_pct), "%")
     ei = ei + 1
 }
-
-
 
 []string all_names = agent_skill_names(evolved)
 string candidate_report = neurx.strings.concat2("total_skills=", string(len(all_names)))
@@ -64,9 +51,6 @@ while ci < len(all_names) {
     ci = ci + 1
 }
 
-
-
-
 int mi = 0
 while mi < len(all_names) {
     float sr3 = agent_skill_success_rate(evolved, all_names[mi])
@@ -77,14 +61,10 @@ while mi < len(all_names) {
 }
 evolved = agent_prune_skills(evolved)
 
-
-
 agent_persist_skill_snapshot(evolved, snapshot_path)
 
 string trace_summary = agent_trace_last_n_summary(evolved, 10)
 runtime_write_text_file(trace_path, trace_summary)
-
-
 
 string stall_str = "false"
 if agent_is_stalled(evolved) {

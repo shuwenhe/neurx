@@ -2,16 +2,6 @@ package neurx.autograd
 
 use neurx.tensor.tensor
 
-
-
-
-
-
-
-
-
-
-
 func backward_softmax(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -19,12 +9,9 @@ func backward_softmax(node n, tensor grad_output) backward_result {
 
     tensor input = n.inputs[0]
 
-
     tensor softmax_output = get_context_safe_tensor(n, "softmax_output", input)
 
-
     int dim = get_context_safe_int(n, "dim", len(input.shape) - 1)
-
 
     []int shape = softmax_output.shape
 
@@ -33,7 +20,6 @@ func backward_softmax(node n, tensor grad_output) backward_result {
         int batch_size = 1
         int seq_len = 1
         int vocab_size = shape[len(shape)-1]
-
 
         if len(shape) >= 2 {
             batch_size = shape[0]
@@ -54,7 +40,6 @@ func backward_softmax(node n, tensor grad_output) backward_result {
                 dot_product = dot_product + grad_output.data[idx] * softmax_output.data[idx]
             }
 
-
             for col in 0..row_size {
                 int idx = row * row_size + col
                 grad_input[idx] = softmax_output.data[idx] * (grad_output.data[idx] - dot_product)
@@ -65,7 +50,6 @@ func backward_softmax(node n, tensor grad_output) backward_result {
         return backward_result { input_grads: [result], success: true }
     }
 
-
     []float grad_data = []float{cap: len(input.data)}
     for i in 0..len(input.data) {
         float y = softmax_output.data[i]
@@ -75,12 +59,6 @@ func backward_softmax(node n, tensor grad_output) backward_result {
     tensor result { data: grad_data, grad: [], shape: shape, requires_grad: true }
     backward_result { input_grads: [result], success: true }
 }
-
-
-
-
-
-
 
 func backward_log_softmax(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
@@ -106,7 +84,6 @@ func backward_log_softmax(node n, tensor grad_output) backward_result {
             grad_sum = grad_sum + grad_output.data[idx]
         }
 
-
         for col in 0..row_size {
             int idx = row * row_size + col
             grad_input[idx] = grad_output.data[idx] - softmax_output.data[idx] * grad_sum
@@ -116,12 +93,6 @@ func backward_log_softmax(node n, tensor grad_output) backward_result {
     tensor result { data: grad_input, grad: [], shape: shape, requires_grad: true }
     backward_result { input_grads: [result], success: true }
 }
-
-
-
-
-
-
 
 func backward_relu(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
@@ -143,13 +114,6 @@ func backward_relu(node n, tensor grad_output) backward_result {
     backward_result { input_grads: [result], success: true }
 }
 
-
-
-
-
-
-
-
 func backward_gelu(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -168,9 +132,7 @@ func backward_gelu(node n, tensor grad_output) backward_result {
         float tanh_val = tanh_approx(inner)
         float cdf = 0.5 * (1.0 + tanh_val)
 
-
         float pdf = exp_approx(-0.5 * x * x) / 2.5066282746310002
-
 
         float gelu_grad = cdf + x * pdf
 
@@ -181,13 +143,11 @@ func backward_gelu(node n, tensor grad_output) backward_result {
     backward_result { input_grads: [result], success: true }
 }
 
-
 func tanh_approx(float x) float {
 
     float sig = sigmoid_approx(2.0 * x)
     2.0 * sig - 1.0
 }
-
 
 func sigmoid_approx(float x) float {
     if x > 20.0 { return 1.0 }
@@ -195,19 +155,15 @@ func sigmoid_approx(float x) float {
     1.0 / (1.0 + exp_approx(-x))
 }
 
-
 func exp_approx(float x) float {
     if x > 700.0 { return 1e308 }
     if x < -700.0 { return 0.0 }
-
 
     float ln2 = 0.6931471805599453
     int k = int(float_to_int(x / ln2))
     float r = x - float(k) * ln2
 
-
     float result = 1.0 + r + r*r/2.0 + r*r*r/6.0 + r*r*r*r/24.0 + r*r*r*r*r/120.0
-
 
     float power_of_2 = 1.0
     if k > 0 {
@@ -231,13 +187,6 @@ func float_to_array(float x) []float {
     []float{x}
 }
 
-
-
-
-
-
-
-
 func backward_silu(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -249,9 +198,6 @@ func backward_silu(node n, tensor grad_output) backward_result {
     for i in 0..len(input.data) {
         float x = input.data[i]
         float sig = sigmoid_approx(x)
-
-
-
 
         float silu_grad = sig * (1.0 + x * (1.0 - sig))
 

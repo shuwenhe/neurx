@@ -1,8 +1,5 @@
 
 
-
-
-
 package main
 
 import (
@@ -53,10 +50,6 @@ type dataset_statistics struct {
     data_types          map[string]int64
 }
 
-
-
-
-
 func (loader *data_loader) register_source(source data_source) {
     loader.config.sources = append(loader.config.sources, source)
     fmt.Printf("[Dataset] Registered source: %s (%s)\n", source.name, source.source_type)
@@ -72,16 +65,11 @@ func (loader *data_loader) validate_sources() bool {
     return true
 }
 
-
-
-
-
 func (loader *data_loader) load_from_huggingface(source data_source) []data_sample {
 
     fmt.Printf("[HuggingFace] Loading: %s/%s\n", source.name, source.split)
 
     samples := make([]data_sample, 0)
-
 
     for i := 0; i < source.size; i++ {
         sample := data_sample{
@@ -90,7 +78,6 @@ func (loader *data_loader) load_from_huggingface(source data_source) []data_samp
             token_type_ids: make([]int, 512),
             labels:         make([]int, 512),
         }
-
 
         for j := 0; j < 512; j++ {
             val := (i*512 + j) % 128000
@@ -120,7 +107,6 @@ func (loader *data_loader) load_from_local(source data_source) []data_sample {
             token_type_ids: make([]int, 512),
             labels:         make([]int, 512),
         }
-
 
         for j := 0; j < 512; j++ {
             sample.input_ids[j] = (i + j) % 128000
@@ -160,10 +146,6 @@ func (loader *data_loader) load_from_s3(source data_source) []data_sample {
     return samples
 }
 
-
-
-
-
 func (loader *data_loader) load_all_sources() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Real Dataset Integration System                      ║")
@@ -200,10 +182,6 @@ func (loader *data_loader) load_all_sources() {
     loader.load_time_ms = total_start
 }
 
-
-
-
-
 func (loader *data_loader) create_batches() [][]data_sample {
     batches := make([][]data_sample, 0)
 
@@ -237,16 +215,11 @@ func (loader *data_loader) shuffle_data() {
     fmt.Println("[Dataset] Data shuffled")
 }
 
-
-
-
-
 func (loader *data_loader) analyze_dataset() dataset_statistics {
     stats := dataset_statistics{
         total_samples: int64(len(loader.loaded_samples)),
         data_types:    make(map[string]int64),
     }
-
 
     total_length := 0.0
     unique_tokens := make(map[int]bool)
@@ -284,20 +257,12 @@ func (loader *data_loader) verify_data_quality() bool {
     return quality_ratio > 0.95
 }
 
-
-
-
-
 func (loader *data_loader) setup_cache() {
     if loader.config.cache_enabled {
         fmt.Printf("[Cache] Initializing cache (%dGB max)\n", loader.config.max_cache_size_gb)
         fmt.Println("[Cache] Cache setup complete")
     }
 }
-
-
-
-
 
 func (loader *data_loader) get_next_batch() []data_sample {
     if loader.current_index >= len(loader.loaded_samples) {
@@ -314,10 +279,6 @@ func (loader *data_loader) get_next_batch() []data_sample {
 
     return batch
 }
-
-
-
-
 
 func NewDataLoader(config dataset_config) *data_loader {
     return &data_loader{
@@ -345,7 +306,6 @@ func (loader *data_loader) initialize() {
 func (loader *data_loader) run_full_pipeline() {
     loader.initialize()
 
-
     loader.register_source(data_source{
         source_type: "huggingface",
         name:        "wikitext",
@@ -367,20 +327,15 @@ func (loader *data_loader) run_full_pipeline() {
         size:        2000,
     })
 
-
     loader.load_all_sources()
 
-
     loader.setup_cache()
-
 
     if loader.config.shuffle {
         loader.shuffle_data()
     }
 
-
     loader.verify_data_quality()
-
 
     stats := loader.analyze_dataset()
 
@@ -393,7 +348,6 @@ func (loader *data_loader) run_full_pipeline() {
     fmt.Printf("Vocab Size: %d\n", stats.vocab_size)
     fmt.Printf("Data Sources: %d\n", len(loader.config.sources))
     fmt.Printf("Load Time: %.2fms\n\n", loader.load_time_ms)
-
 
     batches := loader.create_batches()
 

@@ -1,10 +1,5 @@
 package neurx.cuda
 
-
-
-
-
-
 struct layernorm_config {
     int batch_size
     int normalized_size
@@ -12,17 +7,6 @@ struct layernorm_config {
     float eps
     bool compute_stats_only
 }
-
-
-
-
-
-
-
-
-
-
-
 
 func launch_layernorm(
     cuda_context ctx,
@@ -35,45 +19,6 @@ func launch_layernorm(
     if !ctx.is_initialized {
         return error{message: "CUDA context not initialized"}
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     log_kernel_launch("LAYER_NORM", cfg.batch_size, cfg.normalized_size, 0,
                       float(cfg.batch_size * cfg.normalized_size * 7),

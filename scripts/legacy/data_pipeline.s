@@ -1,8 +1,5 @@
 
 
-
-
-
 package main
 
 import (
@@ -17,7 +14,6 @@ import (
     "encoding/json"
     "sort"
 )
-
 
 type clean_config struct {
     RawDir         string
@@ -53,10 +49,6 @@ type manifest struct {
     Shards              []shard_metadata  `json:"shards"`
 }
 
-
-
-
-
 func main() {
     if len(os.Args) < 2 {
         printHelp()
@@ -80,10 +72,6 @@ func main() {
         os.Exit(1)
     }
 }
-
-
-
-
 
 func cmdClean() {
     fmt.Println("")
@@ -152,10 +140,6 @@ func cmdPipeline() {
     cmdShard()
 }
 
-
-
-
-
 func getCleanConfig() CleanConfig {
     home := getEnv("NEURX_HOME", ".")
     return CleanConfig{
@@ -178,10 +162,6 @@ func getShardConfig() ShardConfig {
         LinesPerShard: getEnvInt("LINES_PER_SHARD", 100),
     }
 }
-
-
-
-
 
 func cleanData(config CleanConfig) error {
     files, err := findSourceFiles(config.RawDir)
@@ -237,7 +217,6 @@ func cleanData(config CleanConfig) error {
     fmt.Printf("  • Errors: %d\n", stats.Errors)
     fmt.Println("")
 
-
     if err := generateSplits(config); err != nil {
         return err
     }
@@ -268,14 +247,12 @@ func processFileContent(writer *bufio.Writer, content string, seen map[string]bo
             continue
         }
 
-
         hash := hashKey(normalizeText(text))
         if seen[hash] {
             stats.Duplicates++
             continue
         }
         seen[hash] = true
-
 
         record := createRecord(text)
         writer.WriteString(record + "\n")
@@ -328,10 +305,6 @@ func generateSplits(config CleanConfig) error {
 
     return nil
 }
-
-
-
-
 
 func generateShards(config ShardConfig) error {
     info, err := os.Stat(config.InputFile)
@@ -413,7 +386,6 @@ func generateShards(config ShardConfig) error {
         }
     }
 
-
     if currentCount > 0 {
         shardFile := formatShardFilename(config.ShardDir, currentShard)
         size, err := writeShardFile(shardFile, currentData)
@@ -449,10 +421,6 @@ func writeShardFile(path string, content string) (int64, error) {
     return info.Size(), nil
 }
 
-
-
-
-
 func findSourceFiles(dir string) ([]string, error) {
     var files []string
 
@@ -484,7 +452,6 @@ func extractText(line string) string {
     if !strings.Contains(line, "\"text\"") {
         return ""
     }
-
 
     idx := strings.Index(line, "\"text\"")
     if idx < 0 {

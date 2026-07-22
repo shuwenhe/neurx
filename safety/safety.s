@@ -78,11 +78,8 @@ func agent_safety_check_destructive(string action, string input) agent_safety_re
     new_agent_safety_result_allow()
 }
 
-
-
 func agent_safety_check_s(string cmd) agent_safety_result {
     string c = lower(trim(cmd))
-
 
     if agent_safety_text_contains(c, "| bash") || agent_safety_text_contains(c, "|bash") {
         return new_agent_safety_result_block("remote_code_exec", "rce", 3)
@@ -93,7 +90,6 @@ func agent_safety_check_s(string cmd) agent_safety_result {
     if agent_safety_text_contains(c, "| python") || agent_safety_text_contains(c, "|python") {
         return new_agent_safety_result_block("remote_code_exec", "rce", 3)
     }
-
 
     if agent_safety_text_contains(c, "dd ") && agent_safety_text_contains(c, "of=/dev/") {
         return new_agent_safety_result_block("disk_destroy", "data_loss", 3)
@@ -107,7 +103,6 @@ func agent_safety_check_s(string cmd) agent_safety_result {
     if agent_safety_text_contains(c, "shred /dev/") || agent_safety_text_contains(c, "fdisk /dev/") || agent_safety_text_contains(c, "parted /dev/") {
         return new_agent_safety_result_block("disk_destroy", "data_loss", 3)
     }
-
 
     if agent_safety_text_contains(c, "rm ") && agent_safety_text_contains(c, "-rf") {
         if agent_safety_text_contains(c, " / ") || agent_safety_text_contains(c, " /\n") {
@@ -124,18 +119,15 @@ func agent_safety_check_s(string cmd) agent_safety_result {
         return new_agent_safety_result_block("delete_root_no_preserve", "data_loss", 3)
     }
 
-
     if agent_safety_text_contains(c, ":(){:|:&};:") || agent_safety_text_contains(c, ":(){ :|:& };:") {
         return new_agent_safety_result_block("fork_bomb", "dos", 3)
     }
-
 
     if agent_safety_text_contains(c, "chmod") && agent_safety_text_contains(c, "777") {
         if agent_safety_text_contains(c, " / ") || agent_safety_text_contains(c, " /\n") || agent_safety_text_contains(c, "chmod 777 /") || agent_safety_text_contains(c, "chmod -r 777") {
             return new_agent_safety_result_block("chmod_world_write_root", "security", 2)
         }
     }
-
 
     if agent_safety_text_contains(c, "/.ssh/authorized_keys") && (agent_safety_text_contains(c, ">") || agent_safety_text_contains(c, "tee ")) {
         return new_agent_safety_result_block("ssh_key_write", "security", 3)

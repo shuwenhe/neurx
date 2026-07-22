@@ -1,9 +1,6 @@
 
 
-
-
 module main
-
 
 func int_to_str(int n) string {
     if n == 0 { return "0" }
@@ -64,7 +61,6 @@ func main() {
     println("Complete LoRA SFT Training with File Generation")
     println("============================================================\n")
 
-
     string base_model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
     string output_dir = "/home/shuwen/shuwen/train/model/base-model-posttrain"
     int num_epochs = 3
@@ -80,7 +76,6 @@ func main() {
     println("  LoRA Alpha: " + fmt_float(lora_alpha, 2))
     println("  Learning Rate: " + fmt_float(learning_rate, 6))
     println("")
-
 
     float best_loss = 0.0046
     float current_loss = 0.0046
@@ -115,7 +110,6 @@ func main() {
     println("💾 Model Generation Phase:")
     println("  Creating output directory: " + output_dir)
     println("  Merging LoRA adapters into base model...")
-
 
     println("  - Writing model.safetensors (943 MB)")
     println("  - Writing config.json")

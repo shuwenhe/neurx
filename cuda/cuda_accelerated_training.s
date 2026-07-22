@@ -1,15 +1,7 @@
 package neurx.cuda_backend
 
-
-
-
-
 use std.io
 use std.math
-
-
-
-
 
 struct cuda_device {
     device_id: int
@@ -29,7 +21,6 @@ struct cuda_context {
 func get_device_count() int {
 
     fmt.printfln("🖥️  Querying CUDA devices...")
-
 
     4
 }
@@ -70,10 +61,6 @@ func destroy_cuda_context(cuda_context* ctx) {
     ctx.is_initialized = false
 }
 
-
-
-
-
 struct gpu_memory_allocator {
     device_id: int
     total_allocated: int64
@@ -96,7 +83,6 @@ func gpu_malloc(gpu_memory_allocator* alloc, int64 size) int64 {
                      size, alloc.max_allocated - alloc.total_allocated)
         return -1
     }
-
 
     ptr := int64(1000000 + alloc.total_allocated)
 
@@ -128,10 +114,6 @@ func gpu_memory_info(gpu_memory_allocator alloc) {
                  float64(alloc.max_allocated) / (1024 * 1024),
                  pct)
 }
-
-
-
-
 
 struct transfer_stats {
     bytes_transferred: int64
@@ -182,10 +164,6 @@ func cuda_memcpy_d2d(int64 src_ptr, int64 dst_ptr, int bytes, cuda_context ctx) 
     }
 }
 
-
-
-
-
 struct kernel_launch_config {
     grid_dim: int
     block_dim: int
@@ -201,17 +179,14 @@ func launch_kernel(kernel_launch_config config, int data_size) {
                  data_size, float64(data_size) / float64(threads_total))
 }
 
-
 func cuda_gemm(int64 a_ptr, int64 b_ptr, int64 c_ptr,
                int m, int n, int k,
                cuda_context ctx) {
     fmt.printfln("   CUDA GEMM: [%d x %d] @ [%d x %d] -> [%d x %d]",
                  m, k, k, n, m, n)
 
-
     flops := int64(2 * m * n * k)
     tensor_cores := flops / 128
-
 
     tflops := 312.0
     time_ms := float64(flops) / (tflops * 1e12) * 1000
@@ -219,10 +194,6 @@ func cuda_gemm(int64 a_ptr, int64 b_ptr, int64 c_ptr,
     fmt.printfln("   Compute: %d FLOPS (%.1f ms on A100 at %.0f TFLOPS)",
                  flops, time_ms, tflops)
 }
-
-
-
-
 
 struct cuda_stream {
     stream_id: int64
@@ -251,10 +222,6 @@ func stream_synchronize(cuda_stream* stream, cuda_context ctx) {
 func cuda_synchronize(cuda_context ctx) {
     fmt.printfln("   Device %d synchronizing...", ctx.device.device_id)
 }
-
-
-
-
 
 struct multi_gpu_context {
     num_devices: int
@@ -290,10 +257,6 @@ func init_multi_gpu_context(int num_gpus) multi_gpu_context {
         streams: streams,
     }
 }
-
-
-
-
 
 struct cuda_profiler {
     kernel_times: []float64
@@ -332,21 +295,15 @@ func print_profiling_summary(cuda_profiler prof) {
                  prof.total_compute_time / (prof.total_transfer_time + 0.001))
 }
 
-
-
-
-
 func gpu_forward_pass_example(int batch_size, int seq_len, int hidden_dim, int vocab_size) {
     fmt.printfln("\n🚀 GPU Forward Pass Example")
     fmt.printfln("═════════════════════════════════════════════════════\n")
-
 
     ctx := init_cuda_context(0)
     alloc := create_memory_allocator(0, 40 * 1024 * 1024 * 1024)
     prof := create_profiler()
 
     fmt.printfln("📊 Allocating GPU memory...\n")
-
 
     input_size := int64(batch_size * seq_len) * 8
     embedding_size := int64(vocab_size * hidden_dim) * 8
@@ -363,7 +320,6 @@ func gpu_forward_pass_example(int batch_size, int seq_len, int hidden_dim, int v
     fmt.printfln("")
 
     fmt.printfln("⚙️  Computing operations...\n")
-
 
     fmt.printfln("1. embedding lookup:")
     cuda_gemm(input_ptr, embedding_ptr, hidden_ptr,
@@ -395,7 +351,6 @@ func gpu_forward_pass_example(int batch_size, int seq_len, int hidden_dim, int v
     fmt.printfln("")
     print_profiling_summary(prof)
 
-
     fmt.printfln("\n🧹 Cleaning up GPU memory...")
     gpu_free(&alloc, input_ptr)
     gpu_free(&alloc, embedding_ptr)
@@ -406,22 +361,15 @@ func gpu_forward_pass_example(int batch_size, int seq_len, int hidden_dim, int v
     fmt.printfln("\n✅ GPU operations complete!\n")
 }
 
-
-
-
-
 func main() {
     fmt.printfln("\n═════════════════════════════════════════════════════")
     fmt.printfln("CUDA BACKEND - GPU Acceleration for NeurX")
     fmt.printfln("═════════════════════════════════════════════════════\n")
 
-
     num_gpus := get_device_count()
     fmt.printfln("Available CUDA devices: %d\n", num_gpus)
 
-
     multi_gpu := init_multi_gpu_context(4)
-
 
     gpu_forward_pass_example(32, 2048, 256, 32000)
 }

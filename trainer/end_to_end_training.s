@@ -1,24 +1,7 @@
 package neurx.trainer.end_to_end_training
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 use std.io
 use std.math
-
-
-
-
 
 struct data_bundle {
     input_ids: [][]int
@@ -54,15 +37,10 @@ func create_dummy_data_bundle(int batch_size, int seq_len, int vocab_size) data_
     }
 }
 
-
-
-
-
 struct tensor {
     data: []float64
     shape: []int
     size: int
-
 
     grad: []float64
     requires_grad: bool
@@ -111,27 +89,19 @@ func zero_grad(tensor t) {
     }
 }
 
-
-
-
-
 struct mini_transformer {
 
     embedding_weight: tensor
-
 
     q_proj: tensor
     k_proj: tensor
     v_proj: tensor
     out_proj: tensor
 
-
     fc1: tensor
     fc2: tensor
 
-
     lm_head: tensor
-
 
     vocab_size: int
     hidden_dim: int
@@ -158,7 +128,6 @@ func create_mini_transformer(int vocab_size, int hidden_dim, int ff_dim, int num
         num_heads: num_heads,
     }
 
-
     init_weights(&model.embedding_weight)
     init_weights(&model.q_proj)
     init_weights(&model.k_proj)
@@ -177,10 +146,6 @@ func init_weights(tensor t) {
     }
 }
 
-
-
-
-
 func transformer_forward(
     mini_transformer model,
     data_bundle batch
@@ -189,17 +154,13 @@ func transformer_forward(
     seq_len := batch.seq_len
     hidden_dim := model.hidden_dim
 
-
     embedded := tensor_embedding(model.embedding_weight, batch.input_ids)
-
 
     attention_out := simple_attention(
         embedded, model.q_proj, model.k_proj, model.v_proj,
         model.out_proj, model.num_heads)
 
-
     ff_out := feed_forward(attention_out, model.fc1, model.fc2)
-
 
     logits := tensor_linear(ff_out, model.lm_head)
 
@@ -236,22 +197,17 @@ func simple_attention(
     int num_heads
 ) tensor {
 
-
-
     batch_size := input.shape[0]
     seq_len := input.shape[1]
     hidden_dim := input.shape[2]
-
 
     q := tensor_linear(input, q_proj)
     k := tensor_linear(input, k_proj)
     v := tensor_linear(input, v_proj)
 
-
     scale := 1.0 / math.sqrt(float64(hidden_dim))
 
     output := create_tensor(input.shape)
-
 
     for b := 0; b < batch_size; b += 1 {
         for t := 0; t < seq_len; t += 1 {
@@ -274,7 +230,6 @@ func simple_attention(
                 }
             }
 
-
             sum_exp := 0.0
             for s := 0; s <= t; s += 1 {
                 scores[s] = math.exp(scores[s] - max_score)
@@ -285,7 +240,6 @@ func simple_attention(
                 scores[s] = scores[s] / sum_exp
             }
 
-
             for h := 0; h < hidden_dim; h += 1 {
                 attn_val := 0.0
 
@@ -295,7 +249,6 @@ func simple_attention(
                 }
 
                 out_idx := b * seq_len * hidden_dim + t * hidden_dim + h
-
 
                 proj_val := 0.0
                 for h2 := 0; h2 < hidden_dim; h2 += 1 {
@@ -313,14 +266,10 @@ func simple_attention(
 
 func feed_forward(tensor input, tensor fc1, tensor fc2) tensor {
 
-
-
-
     batch_size := input.shape[0]
     seq_len := input.shape[1]
     hidden_dim := input.shape[2]
     ff_dim := fc1.shape[1]
-
 
     hidden := create_tensor([batch_size, seq_len, ff_dim])
 
@@ -342,7 +291,6 @@ func feed_forward(tensor input, tensor fc1, tensor fc2) tensor {
         }
     }
 
-
     output := create_tensor([batch_size, seq_len, hidden_dim])
 
     for b := 0; b < batch_size; b += 1 {
@@ -363,9 +311,6 @@ func feed_forward(tensor input, tensor fc1, tensor fc2) tensor {
 }
 
 func tensor_linear(tensor input, tensor weight) tensor {
-
-
-
 
     batch_size := input.shape[0]
     seq_len := input.shape[1]
@@ -390,10 +335,6 @@ func tensor_linear(tensor input, tensor weight) tensor {
 
     output
 }
-
-
-
-
 
 func cross_entropy_loss(tensor logits, [][]int labels) float64 {
     batch_size := len(labels)
@@ -437,17 +378,12 @@ func cross_entropy_loss(tensor logits, [][]int labels) float64 {
     }
 }
 
-
-
-
-
 struct adamw_optimizer {
     learning_rate: float64
     beta1: float64
     beta2: float64
     epsilon: float64
     weight_decay: float64
-
 
     first_moment: map[string]tensor
     second_moment: map[string]tensor
@@ -477,7 +413,6 @@ func adamw_step(
 
     opt.t = opt.t + 1
 
-
     param_key := "param_" + string(opt.t)
 
     if len(opt.first_moment) == 0 {
@@ -488,25 +423,18 @@ func adamw_step(
     m := opt.first_moment[param_key]
     v := opt.second_moment[param_key]
 
-
     for i := 0; i < param.size; i += 1 {
         m.data[i] = opt.beta1 * m.data[i] + (1.0 - opt.beta1) * param.grad[i]
 
         v.data[i] = opt.beta2 * v.data[i] + (1.0 - opt.beta2) * (param.grad[i] * param.grad[i])
 
-
         m_hat := m.data[i] / (1.0 - math.pow(opt.beta1, float64(opt.t)))
 
         v_hat := v.data[i] / (1.0 - math.pow(opt.beta2, float64(opt.t)))
 
-
         param.data[i] = param.data[i] - opt.learning_rate * (m_hat / (math.sqrt(v_hat) + opt.epsilon))
     }
 }
-
-
-
-
 
 func run_training_loop(
     int num_epochs,
@@ -517,7 +445,6 @@ func run_training_loop(
     println("🚀 End-to-End Training System")
     println("=" * 70)
     println("")
-
 
     batch_size := 4
     seq_len := 8
@@ -537,7 +464,6 @@ func run_training_loop(
     printf("  Number of epochs: %d\n", num_epochs)
     println("")
 
-
     println("🏗️  Creating model...")
     model := create_mini_transformer(vocab_size, hidden_dim, ff_dim, num_heads)
     println("✅ Model created")
@@ -547,9 +473,7 @@ func run_training_loop(
     printf("   LM Head: %s\n", tensor_shape_string(model.lm_head.shape))
     println("")
 
-
     optimizer := create_adamw_optimizer(learning_rate)
-
 
     println("📈 Starting training...")
     println("=" * 70)
@@ -564,16 +488,10 @@ func run_training_loop(
 
             batch := create_dummy_data_bundle(batch_size, seq_len, vocab_size)
 
-
             logits := transformer_forward(model, batch)
-
 
             loss := cross_entropy_loss(logits, batch.labels)
             losses = append(losses, loss)
-
-
-
-
 
             adamw_step(optimizer, model.lm_head)
             adamw_step(optimizer, model.embedding_weight)
@@ -593,12 +511,10 @@ func run_training_loop(
     println("=" * 70)
     println("")
 
-
     println("📉 Loss Curve:")
     print_loss_curve(losses)
 
     println("")
-
 
     println("✓ Numerical Verification:")
     verify_training_progress(losses)
@@ -614,7 +530,6 @@ func print_loss_curve([]float64 losses) {
         return
     }
 
-
     min_loss := losses[0]
     max_loss := losses[0]
 
@@ -626,7 +541,6 @@ func print_loss_curve([]float64 losses) {
             max_loss = losses[i]
         }
     }
-
 
     for i := 0; i < len(losses); i += 1 {
         normalized := (losses[i] - min_loss) / (max_loss - min_loss + 1e-8)
@@ -661,7 +575,6 @@ func verify_training_progress([]float64 losses) {
         println("  ⚠️  Loss did not decrease")
     }
 
-
     has_nan := false
     for i := 0; i < len(losses); i += 1 {
         if is_nan(losses[i]) {
@@ -681,10 +594,6 @@ func is_nan(float64 x) bool {
     x != x
 }
 
-
-
-
-
 var random_seed: int = 42
 
 func seed_rng(int s) {
@@ -696,10 +605,6 @@ func random_float() float64 {
     float64(random_seed) / 2147483647.0
 }
 
-
-
-
-
 func main() {
     println("╔══════════════════════════════════════════════════════════════════════╗")
     println("║  NeurX Industrial-Grade Training - End-to-End Verification        ║")
@@ -708,15 +613,12 @@ func main() {
     println("╚══════════════════════════════════════════════════════════════════════╝")
     println("")
 
-
     num_epochs := 2
     steps_per_epoch := 10
     learning_rate := 0.001
 
     run_training_loop(num_epochs, steps_per_epoch, learning_rate)
 }
-
-
 
 func string(int n) string {
     if n == 0 {
@@ -759,8 +661,6 @@ func print_char(string s, int n) string {
     }
     result
 }
-
-
 
 infix "*" (left: string, right: int): string {
     print_char(left, right)

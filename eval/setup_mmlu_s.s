@@ -1,10 +1,5 @@
 
 
-
-
-
-
-
 package main
 
 use neurx.runtime.io.{
@@ -17,10 +12,6 @@ use neurx.runtime.io.{
     runtime_run_command,
     runtime_run_command_output,
 }
-
-
-
-
 
 func all_mmlu_stem_tasks() []string {
     []string{
@@ -98,10 +89,6 @@ func all_mmlu_other_tasks() []string {
     }
 }
 
-
-
-
-
 struct mmlu_download_stats {
     int total_tasks
     int successful_count
@@ -119,10 +106,6 @@ struct mmlu_csv_question {
     string correct_answer
 }
 
-
-
-
-
 func setup_mmlu_data_s(string data_root) mmlu_download_stats {
     mmlu_download_stats stats
     stats.total_tasks = 57
@@ -131,7 +114,6 @@ func setup_mmlu_data_s(string data_root) mmlu_download_stats {
     stats.total_test_rows = 0
     stats.total_dev_rows = 0
 
-
     io_println("[Step 1] Creating data directories...")
     io_mkdir_recursive(data_root + "/test")
     io_mkdir_recursive(data_root + "/dev")
@@ -139,16 +121,13 @@ func setup_mmlu_data_s(string data_root) mmlu_download_stats {
     io_println("  ✓ Directories created")
     io_println("")
 
-
     io_println("[Step 2] Downloading MMLU dataset...")
     stats = download_all_mmlu_tasks(data_root, stats)
     io_println("")
 
-
     io_println("[Step 3] Verifying data integrity...")
     verify_data_integrity(data_root)
     io_println("")
-
 
     io_println("[Step 4] Dataset Statistics:")
     io_println("  Total tasks: " + int_to_string(stats.total_tasks))
@@ -166,10 +145,6 @@ func setup_mmlu_data_s(string data_root) mmlu_download_stats {
 
     return stats
 }
-
-
-
-
 
 func download_all_mmlu_tasks(string data_root, mmlu_download_stats stats) mmlu_download_stats {
 
@@ -203,7 +178,6 @@ func download_all_mmlu_tasks(string data_root, mmlu_download_stats stats) mmlu_d
         idx = idx + 1
     }
 
-
     idx = 0
     for idx < len(all_tasks) {
         string task = all_tasks[idx]
@@ -212,10 +186,8 @@ func download_all_mmlu_tasks(string data_root, mmlu_download_stats stats) mmlu_d
         string test_file = data_root + "/test/" + task + ".csv"
         string dev_file = data_root + "/dev/" + task + ".csv"
 
-
         string test_url = "https://huggingface.co/datasets/cais/mmlu/resolve/main/data/" + task + "/test-" + task + ".csv"
         bool test_ok = download_file_curl(test_url, test_file)
-
 
         string dev_url = "https://huggingface.co/datasets/cais/mmlu/resolve/main/data/" + task + "/dev-" + task + ".csv"
         bool dev_ok = download_file_curl(dev_url, dev_file)
@@ -244,11 +216,8 @@ func download_all_mmlu_tasks(string data_root, mmlu_download_stats stats) mmlu_d
 
 func download_file_curl(string url, string output_path) bool {
 
-
-
     string cmd = "curl -sS -L --retry 3 --retry-delay 1 -o " + output_path + " \"" + url + "\" 2>/dev/null"
     int _result = runtime_run_command(cmd)
-
 
     return runtime_file_exists(output_path)
 }
@@ -290,7 +259,6 @@ func count_csv_rows(string csv_path) int {
         return 0
     }
 
-
     string content = runtime_read_text_file(csv_path)
     if content == "" {
         return 0
@@ -304,7 +272,6 @@ func count_csv_rows(string csv_path) int {
         }
         idx = idx + 1
     }
-
 
     if line_count > 0 {
         line_count = line_count - 1
@@ -333,10 +300,6 @@ func verify_data_integrity(string data_root) {
         io_println("  ! Warning: Some files may be missing")
     }
 }
-
-
-
-
 
 func int_to_string(int n) string {
     if n == 0 {
@@ -367,7 +330,6 @@ func string_to_int(string s, int fallback) int {
     int result = 0
     int idx = 0
 
-
     int sign = 1
     if idx < len(s) && (s[0] == '-' || s[0] == '+') {
         if s[0] == '-' {
@@ -375,7 +337,6 @@ func string_to_int(string s, int fallback) int {
         }
         idx = idx + 1
     }
-
 
     for idx < len(s) {
         int char_code = int(s[idx])
@@ -396,7 +357,6 @@ func string_trim(string s) string {
     int start = 0
     int end = len(s)
 
-
     for start < end {
         int char_code = int(s[start])
         if char_code != int(' ') && char_code != int('\t') && char_code != int('\n') && char_code != int('\r') {
@@ -404,7 +364,6 @@ func string_trim(string s) string {
         }
         start = start + 1
     }
-
 
     for end > start {
         int char_code = int(s[end - 1])
@@ -416,10 +375,6 @@ func string_trim(string s) string {
 
     return s[start:end]
 }
-
-
-
-
 
 func main() int {
     string project_root = io_get_env("NEURX_ROOT", ".")

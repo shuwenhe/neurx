@@ -1,9 +1,5 @@
 package neurx.distributed
 
-
-
-
-
 struct sequence_parallel_config {
     int sp_degree
     int sp_rank
@@ -34,7 +30,6 @@ func sp_mod_nonneg(int value, int divisor) int {
     current
 }
 
-
 func new_sequence_parallel_config(
     int sp_degree,
     int sp_rank,
@@ -51,7 +46,6 @@ func new_sequence_parallel_config(
     return cfg
 }
 
-
 func new_sequence_parallel_state(
     sequence_parallel_config cfg,
     int global_seq_len,
@@ -64,7 +58,6 @@ func new_sequence_parallel_state(
     state.batch_size = batch_size
     state.hidden_dim = hidden_dim
 
-
     int remainder = sp_mod_nonneg(global_seq_len, cfg.sp_degree)
     if remainder != 0 {
 
@@ -75,11 +68,6 @@ func new_sequence_parallel_state(
     return state
 }
 
-
-
-
-
-
 struct ulysses_sp_state {
     [][]double local_query
     [][]double local_key
@@ -87,7 +75,6 @@ struct ulysses_sp_state {
     [][][]double all_keys
     [][][]double all_values
 }
-
 
 func ulysses_sp_all_gather_kv(
     [][]double query,
@@ -97,17 +84,8 @@ func ulysses_sp_all_gather_kv(
 
     ulysses_sp_state state_ptr
 
-
-
-
-
-
-
-
-
     return state_ptr
 }
-
 
 func ulysses_sp_attention_forward(
     [][]double local_query,
@@ -121,22 +99,10 @@ func ulysses_sp_attention_forward(
     int seq_global = sp_state.global_seq_len
     int hidden = sp_state.hidden_dim
 
-
-
-
-
-
-
     [][]double output
-
 
     return output
 }
-
-
-
-
-
 
 struct ring_attention_state {
     [][]double query_chunk
@@ -145,7 +111,6 @@ struct ring_attention_state {
     [][]double output_accumulator
     int ring_step
 }
-
 
 func ring_attention_forward(
     [][]double query,
@@ -156,39 +121,16 @@ func ring_attention_forward(
 
     ring_attention_state state_ptr
 
-
-
-
-
-
-
-
-
-
-
-
-
     [][]double output
 
     int iteration = 0
     while iteration < sp_state.config.sp_degree {
-
-
-
-
-
-
 
         iteration = iteration + 1
     }
 
     return output
 }
-
-
-
-
-
 
 func unified_sequence_parallel_attention(
     [][]double query,
@@ -198,25 +140,9 @@ func unified_sequence_parallel_attention(
     sequence_parallel_state sp_state,
     double scale) [][]double {
 
-
-
-
-
-
-
-
-
-
-
-
     [][]double output
     return output
 }
-
-
-
-
-
 
 func compute_sequence_parallel_attention_backward(
     [][]double output_grad,
@@ -226,20 +152,10 @@ func compute_sequence_parallel_attention_backward(
     sequence_parallel_state sp_state,
     double scale) [][]double {
 
-
-
-
-
     [][]double query_grad = output_grad
-
-
-
 
     return query_grad
 }
-
-
-
 
 func estimate_sp_memory(
     int batch_size,
@@ -249,27 +165,11 @@ func estimate_sp_memory(
     int num_layers,
     int sp_degree) double {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     double memory_without_sp = double(batch_size) * double(seq_len) * double(seq_len) * double(hidden_dim) / double(num_heads)
     double memory_with_sp = memory_without_sp / double(sp_degree)
 
     return memory_with_sp
 }
-
-
-
 
 func estimate_sp_communication_volume(
     int batch_size,
@@ -295,13 +195,7 @@ func estimate_sp_communication_volume(
     return volume
 }
 
-
-
-
 func recommended_2t_sequence_parallel_config() sequence_parallel_config {
-
-
-
 
     sequence_parallel_config cfg
     cfg.sp_degree = 4
@@ -311,10 +205,7 @@ func recommended_2t_sequence_parallel_config() sequence_parallel_config {
     return cfg
 }
 
-
 func recommended_2t_combined_parallel_config() sequence_parallel_config {
-
-
 
     sequence_parallel_config cfg
     cfg.sp_degree = 4

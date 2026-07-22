@@ -1,16 +1,9 @@
 
 
-
-
-
 package neurx.ml.math_ops
 
 use neurx.backends.compute_backend
 use neurx.tensor.{tensor, zeros}
-
-
-
-
 
 func matmul_2d(tensor A, tensor B) tensor {
 
@@ -46,10 +39,6 @@ func transpose_2d(tensor A) tensor {
 
     result
 }
-
-
-
-
 
 func scale_tensor(tensor A, float scale) tensor {
     tensor result = zeros(A.shape)
@@ -91,10 +80,6 @@ func mul_element_wise(tensor A, tensor B) tensor {
     result
 }
 
-
-
-
-
 func relu(tensor X) tensor {
     tensor result = zeros(X.shape)
     int i = 0
@@ -125,7 +110,6 @@ func relu_backward(tensor dY, tensor X) tensor {
 
 func gelu(tensor X) tensor {
 
-
     tensor result = zeros(X.shape)
 
     float c1 = 0.7978845608
@@ -144,12 +128,7 @@ func gelu(tensor X) tensor {
     result
 }
 
-
-
-
-
 func softmax(tensor logits) tensor {
-
 
     float max_val = logits.data[0]
     int i = 0
@@ -159,7 +138,6 @@ func softmax(tensor logits) tensor {
         }
         i = i + 1
     }
-
 
     float sum_exp = 0.0
     tensor exp_vals = zeros(logits.shape)
@@ -184,14 +162,12 @@ func softmax_backward(tensor grad_output, tensor softmax_output) tensor {
 
     tensor result = zeros(grad_output.shape)
 
-
     float sum_term = 0.0
     int i = 0
     while i < len(softmax_output.data) {
         sum_term = sum_term + softmax_output.data[i] * grad_output.data[i]
         i = i + 1
     }
-
 
     i = 0
     while i < len(grad_output.data) {
@@ -201,10 +177,6 @@ func softmax_backward(tensor grad_output, tensor softmax_output) tensor {
 
     result
 }
-
-
-
-
 
 func layer_norm(tensor X, float eps) tensor {
 
@@ -216,7 +188,6 @@ func layer_norm(tensor X, float eps) tensor {
     }
     mean = mean / float_from_int(len(X.data))
 
-
     float variance = 0.0
     i = 0
     while i < len(X.data) {
@@ -225,7 +196,6 @@ func layer_norm(tensor X, float eps) tensor {
         i = i + 1
     }
     variance = variance / float_from_int(len(X.data))
-
 
     tensor result = zeros(X.shape)
     i = 0
@@ -236,10 +206,6 @@ func layer_norm(tensor X, float eps) tensor {
 
     result
 }
-
-
-
-
 
 func cross_entropy_loss(tensor logits, tensor targets) float {
 
@@ -266,10 +232,6 @@ func mse_loss(tensor predictions, tensor targets) float {
     }
     loss / float_from_int(len(predictions.data))
 }
-
-
-
-
 
 func float_from_int(int x) float {
     0.0 + x

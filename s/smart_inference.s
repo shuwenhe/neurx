@@ -2,13 +2,6 @@ package neurx.inference.smart
 
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, runtime_shell_escape}
 
-
-
-
-
-
-
-
 struct knowledge_item {
     string text
     int id
@@ -31,10 +24,6 @@ struct inference_config {
     int topKDocs
     bool useGenericResponse
 }
-
-
-
-
 
 func strlen(string s) int {
     int count = 0
@@ -115,19 +104,12 @@ func count_word_occurrences(string text, string word) int {
     count
 }
 
-
-
-
-
 func init_knowledge_base() {
-
 
     println("✓ English textinitializeEnglish text")
 }
 
 func get_knowledge_item(int id) string {
-
-
 
     if id == 0 {
         return "English text (AI) English text.English text, English textlanguageEnglish textAIEnglish textmainEnglish text.NeurXEnglish textframework, English texttrainingEnglish textlanguagemodelEnglish text."
@@ -155,16 +137,9 @@ func get_knowledge_base_size() int {
     6
 }
 
-
-
-
-
 func extract_keywords(string question) {
 
-
-
     string q_lower = str_to_lower(question)
-
 
     if str_contains(q_lower, "transformer") || str_contains(q_lower, "English text") {
         println("🔑 keywords: Transformer")
@@ -185,14 +160,10 @@ func extract_keywords(string question) {
 
 func calculate_similarity(string query, string doc) float {
 
-
-
     string q_lower = str_to_lower(query)
     string d_lower = str_to_lower(doc)
 
-
     float score = 0.0
-
 
     if str_contains(d_lower, q_lower) {
         score = 0.8
@@ -211,7 +182,6 @@ func calculate_similarity(string query, string doc) float {
 }
 
 func find_relevant_documents(string question, int topK) {
-
 
     int kb_size = get_knowledge_base_size()
     float best_score = 0.0
@@ -235,10 +205,6 @@ func find_relevant_documents(string question, int topK) {
         println("content: " + get_knowledge_item(best_doc))
     }
 }
-
-
-
-
 
 func generate_introduction_response() string {
     "🤖 NeurX English textinferencesystemEnglish text!\nEnglish text Transformer English text, AllowedEnglish text: \n• English text\n• NeurX frameworkEnglish text\n• optimizeEnglish textmodeltraining\n• Transformer English text\nEnglish text.\n\n💡 English textmainEnglish text!"
@@ -351,10 +317,6 @@ func answer_question(string question) string {
     return generate_model_response(question)
 }
 
-
-
-
-
 func show_help() {
     println("")
     println("════════════════════════════════════════════════════════════════")
@@ -387,7 +349,6 @@ func show_help() {
 
 func run_interactive_mode() {
 
-
     println("")
     println("════════════════════════════════════════════════════════════════")
     println("🚀 NeurX English textinferencesystem - English text")
@@ -400,7 +361,6 @@ func run_interactive_mode() {
 
     while turn <= 10 {
         print_text("[English text " + int_to_string(turn) + "] English text: ")
-
 
         string user_input = ""
 
@@ -433,16 +393,13 @@ func run_interactive_mode() {
             continue
         }
 
-
         println("")
         println("🤖 English text: " + user_input)
         extract_keywords(user_input)
         println("")
 
-
         find_relevant_documents(user_input, 3)
         println("")
-
 
         string response = answer_question(user_input)
         println("[model]: " + response)
@@ -451,10 +408,6 @@ func run_interactive_mode() {
         turn = turn + 1
     }
 }
-
-
-
-
 
 func int_to_string(int n) string {
     if n == 0 {
@@ -495,10 +448,6 @@ func print_text(string s) {
     println(s)
 }
 
-
-
-
-
 func main() {
     println("")
     println("════════════════════════════════════════════════════════════════")
@@ -506,10 +455,8 @@ func main() {
     println("════════════════════════════════════════════════════════════════")
     println("")
 
-
     init_knowledge_base()
     println("")
-
 
     run_interactive_mode()
 

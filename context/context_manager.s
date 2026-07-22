@@ -113,8 +113,6 @@ func agent_context_maybe_compress(agent_context_state state) agent_context_state
     agent_context_compress(state, keep)
 }
 
-
-
 func agent_context_extract_dropped(agent_context_state state, int keep_last) string {
     int total = len(state.segments)
     int keep = keep_last
@@ -133,8 +131,6 @@ func agent_context_extract_dropped(agent_context_state state, int keep_last) str
     }
     out
 }
-
-
 
 func agent_context_compress_with_summary(agent_context_state state, string summary, int keep_last) agent_context_state {
     int total = len(state.segments)
@@ -170,8 +166,6 @@ func agent_context_compress_with_summary(agent_context_state state, string summa
         compressed: true,
     }
 }
-
-
 
 func agent_context_smart_compress(agent_context_state state, string model_path) agent_context_state {
     if !agent_context_near_limit(state) {

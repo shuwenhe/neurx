@@ -2,8 +2,6 @@ package neurx.nn.activations
 
 use neurx.tensor.tensor
 
-
-
 func exp_approx(float x) float {
     if x > 20.0 {
         return 485165195.0
@@ -67,7 +65,6 @@ func copy_int([]int data) []int {
     out
 }
 
-
 func get_tensor_data(tensor t, int index) float {
     t.data[index]
 }
@@ -88,7 +85,6 @@ func relu(tensor input) tensor {
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
 
-
 func leaky_relu(tensor input, float negative_slope) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
@@ -104,7 +100,6 @@ func leaky_relu(tensor input, float negative_slope) tensor {
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
-
 
 func elu(tensor input, float alpha) tensor {
     int n = len(input.data)
@@ -122,7 +117,6 @@ func elu(tensor input, float alpha) tensor {
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
 
-
 func sigmoid(tensor input) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
@@ -134,7 +128,6 @@ func sigmoid(tensor input) tensor {
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
 
-
 func tanh(tensor input) tensor {
     int n = len(input.data)
     []float out = []float{cap: n}
@@ -145,8 +138,6 @@ func tanh(tensor input) tensor {
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
-
-
 
 func gelu(tensor input) tensor {
     int n = len(input.data)
@@ -161,7 +152,6 @@ func gelu(tensor input) tensor {
     }
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
-
 
 func silu(tensor input) tensor {
     int n = len(input.data)
@@ -288,7 +278,6 @@ func softsign(tensor input) tensor {
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
 
-
 func softmax_1d([]float values) []float {
     int n = len(values)
     []float out = []float{cap: n}
@@ -318,7 +307,6 @@ func softmax_1d([]float values) []float {
     }
     out
 }
-
 
 func softmax(tensor input) tensor {
     int rows = input.shape[0]
@@ -356,7 +344,6 @@ func softmax(tensor input) tensor {
     neurx.tensor.new(out, copy_int(input.shape), input.requires_grad)
 }
 
-
 func log_softmax(tensor input) tensor {
     tensor sm = softmax(input)
     int n = len(sm.data)
@@ -377,7 +364,6 @@ func log_approx(float x) float {
     if x <= 0.0 {
         return -100.0
     }
-
 
     float z = (x - 1.0) / (x + 1.0)
     float z2 = z * z

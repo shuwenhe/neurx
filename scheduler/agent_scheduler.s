@@ -16,7 +16,6 @@ func new_agent_scheduler_state() agent_scheduler_state {
     }
 }
 
-
 func get_task(agent_scheduler_state state, int index) string {
     state.tasks[index]
 }

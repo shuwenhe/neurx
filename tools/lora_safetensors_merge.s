@@ -3,31 +3,6 @@ package neurx.tools.lora_safetensors_merge_s
 use std.io.println
 use neurx.runtime.io.{runtime_env_get}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 func concat(string a, string b) string {
     a + b
 }
@@ -39,10 +14,6 @@ func repeat_string(string s, int times) string {
     }
     result
 }
-
-
-
-
 
 func print_header() {
     println("")
@@ -90,10 +61,6 @@ func print_workflow() {
     println("")
 }
 
-
-
-
-
 func calculate_tensor_numel(int dim0, int dim1) int {
     dim0 * dim1
 }
@@ -105,10 +72,6 @@ func calculate_scale_factor(float alpha, float rank) float {
 func conceptual_lora_merge(float base_value, float lora_delta, float scale) float {
     base_value + (scale * lora_delta)
 }
-
-
-
-
 
 func describe_safetensors_format() {
     println("Safetensors Format:")
@@ -126,10 +89,6 @@ func describe_safetensors_format() {
     println("")
 }
 
-
-
-
-
 func list_supported_adapter_types() {
     println("Supported LoRA Adapter Types:")
     println("  - Standard LoRA: lora_A and lora_B weight matrices")
@@ -138,13 +97,8 @@ func list_supported_adapter_types() {
     println("")
 }
 
-
-
-
-
 func main() int {
     print_header()
-
 
     string root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
 
@@ -155,10 +109,8 @@ func main() int {
 
     print_config(base_model_dir, adapter_dir, output_dir, merger_bin)
 
-
     print_lora_merge_info()
     print_workflow()
-
 
     describe_safetensors_format()
     list_supported_adapter_types()

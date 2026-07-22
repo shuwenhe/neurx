@@ -1,9 +1,5 @@
 package neurx.serving.security.request_governance
 
-
-
-
-
 struct governance_state {
     []string tenant_ids
     []string key_fingerprints

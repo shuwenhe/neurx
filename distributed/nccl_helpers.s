@@ -1,10 +1,5 @@
 package neurx.distributed
 
-
-
-
-
-
 func get_dtype_size(string dtype) int {
     switch dtype {
         case "fp32":
@@ -21,7 +16,6 @@ func get_dtype_size(string dtype) int {
             4
     }
 }
-
 
 func log_collective_op(
     string op_name,

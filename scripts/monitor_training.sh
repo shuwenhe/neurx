@@ -1,14 +1,10 @@
 #!/bin/bash
 
-
-
-
 set -e
 
 NEURX_ROOT="${NEURX_ROOT:-.}"
 LOG_DIR="${LOG_DIR:-$NEURX_ROOT/checkpoint/NeurX-1.3/logs}"
 ARTIFACT_LOG_DIR="${ARTIFACT_LOG_DIR:-$NEURX_ROOT/artifacts/logs}"
-
 
 find_latest_log() {
     local dir="$1"
@@ -36,7 +32,6 @@ echo "📊 Monitoring training progress..."
 echo "📄 Log file: $LOG_FILE"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-
 
 tail -f "$LOG_FILE" | while IFS= read -r line; do
 

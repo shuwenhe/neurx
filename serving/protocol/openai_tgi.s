@@ -1,9 +1,5 @@
 package neurx.serving.protocol.openai_tgi
 
-
-
-
-
 func serving_json_escape(string value) string {
     string out = ""
     int i = 0

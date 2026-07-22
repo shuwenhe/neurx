@@ -1,41 +1,8 @@
 package neurx.attention.ring
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.attention.flash_v2.{
     flash_attn_config, flash_attn_forward_head, flash_attn_backward
 }
-
-
-
-
 
 struct ring_attn_config {
     int sp_degree
@@ -53,10 +20,8 @@ struct ring_attn_config {
     bool causal_mask
     float softmax_scale
 
-
     bool use_async_comm
     int comm_overlap_depth
-
 
     bool gradient_checkpointing
 }
@@ -91,34 +56,25 @@ func default_ring_attn_config(
     }
 }
 
-
 struct ring_attn_state {
     ring_attn_config config
-
 
     [][][]float local_q
     [][][]float local_k
     [][][]float local_v
 
-
     [][]float remote_k_buffer
     [][]float remote_v_buffer
-
 
     [][][]float attn_output
     [][][]float row_max_accum
     [][][]float row_sum_accum
-
 
     int current_ring_step
     float total_time_ms
     float comm_time_ms
     float compute_time_ms
 }
-
-
-
-
 
 func init_ring_attn_state(ring_attn_config cfg) ring_attn_state {
     int L = cfg.local_seq_len
@@ -129,15 +85,12 @@ func init_ring_attn_state(ring_attn_config cfg) ring_attn_state {
     ring_attn_state {
         config: cfg,
 
-
         local_q: allocate_3d_tensor(H, L, D),
         local_k: allocate_3d_tensor(Hkv, L, D),
         local_v: allocate_3d_tensor(Hkv, L, D),
 
-
         remote_k_buffer: allocate_2d_tensor(L, D),
         remote_v_buffer: allocate_2d_tensor(L, D),
-
 
         attn_output: allocate_3d_tensor(H, L, D),
         row_max_accum: allocate_3d_tensor(H, L, 1),
@@ -149,10 +102,6 @@ func init_ring_attn_state(ring_attn_config cfg) ring_attn_state {
         compute_time_ms: 0.0,
     }
 }
-
-
-
-
 
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
@@ -226,7 +175,6 @@ func fill(int n, float val) []float {
     out
 }
 
-
 func allocate_2d_tensor(int rows, int cols) [][]float {
     [][]float t = [][]float{cap: rows}
     int i = 0
@@ -247,35 +195,6 @@ func allocate_3d_tensor(int d1, int d2, int d3) [][][]float {
     return t
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 func ring_attention_forward(
     ref ring_attn_state state,
     [][][]float q_input,
@@ -289,11 +208,9 @@ func ring_attention_forward(
     int Hkv = state.config.kv_heads
     int D = state.config.head_dim
 
-
     state.local_q = q_input
     state.local_k = k_input
     state.local_v = v_input
-
 
     int h = 0
     while h < H {
@@ -311,12 +228,10 @@ func ring_attention_forward(
         h = h + 1
     }
 
-
     int step = 0
     while step < P {
 
         int source_rank = mod_ring(rank - step, P)
-
 
         [][]float current_k
         [][]float current_v
@@ -331,7 +246,6 @@ func ring_attention_forward(
             current_v = state.remote_v_buffer
         }
 
-
         h = 0
         while h < H {
 
@@ -339,7 +253,6 @@ func ring_attention_forward(
             if Hkv > 0 && Hkv < H {
                 kv_h = h / (H / Hkv)
             }
-
 
             [][]float q_h = q_input[h]
             [][]float k_h
@@ -353,7 +266,6 @@ func ring_attention_forward(
                 v_h = current_v
             }
 
-
             ring_attn_update_step(
                 state,
                 q_h, k_h, v_h,
@@ -364,7 +276,6 @@ func ring_attention_forward(
             h = h + 1
         }
 
-
         if step < P - 1 {
             prepare_next_ring_comm(state, source_rank)
         }
@@ -372,7 +283,6 @@ func ring_attention_forward(
         state.current_ring_step = step + 1
         step = step + 1
     }
-
 
     h = 0
     while h < H {
@@ -395,7 +305,6 @@ func ring_attention_forward(
     return state.attn_output
 }
 
-
 func ring_attn_update_step(
     ref ring_attn_state state,
     [][]float q_local,
@@ -415,18 +324,13 @@ func ring_attn_update_step(
     int kv_L = len(kv_block)
     if kv_L == 0 { kv_L = L }
 
-
-
-
     int global_offset = (source_rank - rank) * L
     if global_offset < 0 { global_offset = 0 }
-
 
     int qi = 0
     while qi < L {
         float old_max = state.row_max_accum[head_idx][qi][0]
         float old_sum = state.row_max_accum[head_idx][qi][0]
-
 
         []float scores = fill(kv_L, 0.0)
         int kj = 0
@@ -441,7 +345,6 @@ func ring_attn_update_step(
             kj = kj + 1
         }
 
-
         if causal {
             int qi_global = rank * L + qi
             kj = 0
@@ -454,7 +357,6 @@ func ring_attn_update_step(
             }
         }
 
-
         float new_max = old_max
         kj = 0
         while kj < kv_L && kj < L {
@@ -464,7 +366,6 @@ func ring_attn_update_step(
             kj = kj + 1
         }
 
-
         float rescale = exp_stable(old_max - new_max)
         state.row_sum_accum[head_idx][qi][0] = state.row_sum_accum[head_idx][qi][0] * rescale
         int d = 0
@@ -473,13 +374,11 @@ func ring_attn_update_step(
             d = d + 1
         }
 
-
         float row_lsum = 0.0
         kj = 0
         while kj < kv_L && kj < L {
             float p = exp_stable(scores[kj] - new_max)
             row_lsum = row_lsum + p
-
 
             d = 0
             while d < D {
@@ -490,7 +389,6 @@ func ring_attn_update_step(
             kj = kj + 1
         }
 
-
         state.row_max_accum[head_idx][qi][0] = new_max
         state.row_sum_accum[head_idx][qi][0] = state.row_sum_accum[head_idx][qi][0] + row_lsum
 
@@ -498,17 +396,12 @@ func ring_attn_update_step(
     }
 }
 
-
 func prepare_next_ring_comm(ref ring_attn_state state, int current_source_rank) {
     int P = state.config.sp_degree
     int rank = state.config.sp_rank
 
-
     int target_rank = mod_ring(rank + 1, P)
     int send_source = mod_ring(rank - state.current_ring_step, P)
-
-
-
 
     if send_source == rank {
 
@@ -528,24 +421,11 @@ func prepare_next_ring_comm(ref ring_attn_state state, int current_source_rank) 
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 struct ring_attn_grad_result {
     [][][]float dq
     [][][]float dk
     [][][]float dv
 }
-
 
 func ring_attention_backward(
     ring_attn_state fwd_state,
@@ -556,14 +436,9 @@ func ring_attention_backward(
     int D = fwd_state.config.head_dim
     int P = fwd_state.config.sp_degree
 
-
     [][][]float dq = allocate_3d_tensor(H, L, D)
     [][][]float dk = allocate_3d_tensor(H, L, D)
     [][][]float dv = allocate_3d_tensor(H, L, D)
-
-
-
-
 
     ring_attn_grad_result {
         dq: dq,
@@ -572,25 +447,6 @@ func ring_attention_backward(
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct sequence_parallel_config {
     int sp_degree
     int sp_rank
@@ -598,7 +454,6 @@ struct sequence_parallel_config {
     int hidden_dim
     bool use_ring_reduce
 }
-
 
 func sp_layernorm_forward(
     sequence_parallel_config sp_cfg,
@@ -609,13 +464,10 @@ func sp_layernorm_forward(
 
     if !sp_cfg.use_ring_reduce {
 
-
         [][]float gathered = simulate_allgather(sp_cfg, local_hidden, L, H)
         int total_L = len(gathered)
 
-
         [][]float normalized = layernorm_full_sequence(gathered, total_L, H)
-
 
         [][]float local_result = extract_local_portion(normalized, sp_cfg.sp_rank, L, H)
         return local_result
@@ -625,11 +477,9 @@ func sp_layernorm_forward(
     }
 }
 
-
 func simulate_allgather(sequence_parallel_config sp_cfg, [][]float input, int L, int H) [][]float {
     int P = sp_cfg.sp_degree
     int total_L = L * P
-
 
     [][]float gathered = allocate_2d_tensor(total_L, H)
     int rank = sp_cfg.sp_rank
@@ -657,7 +507,6 @@ func simulate_allgather(sequence_parallel_config sp_cfg, [][]float input, int L,
     return gathered
 }
 
-
 func layernorm_full_sequence([][]float x, int seq_len, int dim) [][]float {
     float eps = 1e-6
 
@@ -674,7 +523,6 @@ func layernorm_full_sequence([][]float x, int seq_len, int dim) [][]float {
         }
         mean = mean / float_of_int(dim)
 
-
         float var = 0.0
         d = 0
         while d < dim {
@@ -683,7 +531,6 @@ func layernorm_full_sequence([][]float x, int seq_len, int dim) [][]float {
             d = d + 1
         }
         var = var / float_of_int(dim)
-
 
         float inv_std = 1.0 / sqrt_approx(var + eps)
         d = 0
@@ -697,7 +544,6 @@ func layernorm_full_sequence([][]float x, int seq_len, int dim) [][]float {
 
     return out
 }
-
 
 func extract_local_portion([][]float full, int rank, int L, int H) [][]float {
     int offset = rank * L
@@ -716,7 +562,6 @@ func extract_local_portion([][]float full, int rank, int L, int H) [][]float {
     return local
 }
 
-
 func sp_layernorm_ring_reduce(
     sequence_parallel_config sp_cfg,
     [][]float local_hidden
@@ -724,7 +569,6 @@ func sp_layernorm_ring_reduce(
     int L = sp_cfg.seq_len / sp_cfg.sp_degree
     int H = sp_cfg.hidden_dim
     int P = sp_cfg.sp_degree
-
 
     []float local_sum = fill(H, 0.0)
     []float local_sq_sum = fill(H, 0.0)
@@ -740,12 +584,10 @@ func sp_layernorm_ring_reduce(
         s = s + 1
     }
 
-
     []float global_sum = ring_allreduce_sum(local_sum, sp_cfg)
     []float global_sq_sum = ring_allreduce_sum(local_sq_sum, sp_cfg)
 
     int total_seq_len = L * P
-
 
     [][]float out = allocate_2d_tensor(L, H)
     float eps = 1e-6
@@ -767,11 +609,9 @@ func sp_layernorm_ring_reduce(
     return out
 }
 
-
 func ring_allreduce_sum([]float input, sequence_parallel_config sp_cfg) []float {
     int P = sp_cfg.sp_degree
     int N = len(input)
-
 
     []float result = fill(N, 0.0)
     int i = 0
@@ -783,10 +623,6 @@ func ring_allreduce_sum([]float input, sequence_parallel_config sp_cfg) []float 
     return result
 }
 
-
-
-
-
 struct ring_attn_stats {
     float gflops
     float bandwidth_gb_s
@@ -795,7 +631,6 @@ struct ring_attn_stats {
     int supported_seq_length
 }
 
-
 func estimate_ring_attn_performance(ring_attn_config cfg) ring_attn_stats {
     int S = cfg.seq_len
     int P = cfg.sp_degree
@@ -803,32 +638,19 @@ func estimate_ring_attn_performance(ring_attn_config cfg) ring_attn_stats {
     int H = cfg.num_heads
     int D = cfg.head_dim
 
-
-
-
     float flops = 2.0 * float_of_int(S * S) * float_of_int(D) * float_of_int(H) / float_of_int(P)
-
-
-
-
 
     float mem_bytes = 5.0 * float_of_int(H * L * D) * 4.0
     float mem_gb = mem_bytes / (1024.0 * 1024.0 * 1024.0)
 
-
-
-
     float comm_bytes = 2.0 * float_of_int(P - 1) * float_of_int(L * D) * 4.0
     float comm_gb = comm_bytes / (1024.0 * 1024.0 * 1024.0)
-
 
     float bandwidth = 100.0
     float comm_time_s = comm_gb / bandwidth
 
-
     float compute_throughput = 50e12
     float compute_time_s = flops / compute_throughput
-
 
     float standard_mem = 5.0 * float_of_int(S * H * D) * 4.0 / (1024^3)
     float speedup = standard_mem / mem_gb
@@ -841,7 +663,6 @@ func estimate_ring_attn_performance(ring_attn_config cfg) ring_attn_stats {
         supported_seq_length: S,
     }
 }
-
 
 func print_ring_attn_summary(ring_attn_config cfg) string {
     ring_attn_stats stats = estimate_ring_attn_performance(cfg)

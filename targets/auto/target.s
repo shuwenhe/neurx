@@ -1,16 +1,5 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
 struct auto_target_config {
     string  soc_family
     bool    functional_safety

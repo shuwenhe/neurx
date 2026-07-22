@@ -10,10 +10,6 @@
 #include <utility>
 #include <vector>
 
-
-
-
-
 using Vec = std::vector<double>;
 
 struct Config { int vocab=16, seq=4, dim=8, heads=2, ffn=16; };
@@ -40,8 +36,6 @@ struct Model {
     std::vector<Param*> params() { return {&emb,&nq,&nk,&wq,&wk,&wv,&wo,&nf,&wg,&wu,&wd,&out}; }
     void zero_grad() { for (Param* p:params()) p->zero_grad(); }
 };
-
-
 
 struct AdamW {
     double lr=0.03, beta1=0.9, beta2=0.999, eps=1e-8, weight_decay=0.01;
@@ -93,9 +87,6 @@ static bool read_vec(std::ifstream& in,Vec& values,size_t expected) {
     return bool(in);
 }
 
-
-
-
 static bool save_checkpoint(const std::string& path,const Model& model,const AdamW& opt,int64_t train_step) {
     std::ofstream out(path,std::ios::binary|std::ios::trunc);
     const uint64_t magic=0x4e45555258434b31ULL;
@@ -139,7 +130,6 @@ static Vec mm(const Vec& a,const Vec& b,int m,int k,int n) {
     }
     return o;
 }
-
 
 static Vec mm_backward(const Vec& x,const Vec& w,const Vec& dy,Vec& dw,int m,int k,int n) {
     Vec dx(m*k);
@@ -291,9 +281,6 @@ static void train_steps(Model& model,AdamW& optimizer,const std::vector<int>& x,
         Cache cache; forward(model,x,y,cache); backward(model,y,cache); optimizer.step(model);
     }
 }
-
-
-
 
 static bool checkpoint_resume_check() {
     Config cfg; std::vector<int>x={1,2,3,4},y={2,3,4,5};

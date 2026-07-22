@@ -1,32 +1,9 @@
 package neurx.eval.benchmark_eval
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.model.llm.gpt.{
     model_config, language_model, model_output,
     gpt_forward, gpt_generate_greedy
 }
-
-
-
-
 
 func be_exp(float x) float {
     if x > 20.0 { return 485165195.4 }
@@ -61,14 +38,6 @@ func be_log(float x) float {
     s + adj
 }
 
-
-
-
-
-
-
-
-
 struct logprob_result {
     float total_logprob
     int num_tokens
@@ -85,14 +54,11 @@ func gpt_sequence_logprob(
         return logprob_result { total_logprob: 0.0, num_tokens: 0, avg_logprob: 0.0 }
     }
 
-
     model_output out = gpt_forward(model, full_tokens, 1, seq_len)
     int vocab = model.vocab_size
 
     float total_logprob = 0.0
     int num_tokens = 0
-
-
 
     int t = prompt_len
     while t < seq_len {
@@ -100,7 +66,6 @@ func gpt_sequence_logprob(
         int target = full_tokens[t]
         if target < 0 { target = 0 }
         if target >= vocab { target = vocab - 1 }
-
 
         float max_l = out.logits[logit_base]
         int j = 1
@@ -135,10 +100,6 @@ func gpt_sequence_logprob(
     }
 }
 
-
-
-
-
 struct mc_choice {
     []int continuation_tokens
 }
@@ -156,7 +117,6 @@ struct mc_eval_result {
     float accuracy
     float avg_confidence
 }
-
 
 func mc_predict(language_model model, mc_question q) int {
     int best_idx = 0
@@ -186,7 +146,6 @@ func mc_concat([]int a, []int b) []int {
     out
 }
 
-
 func evaluate_multiple_choice(language_model model, []mc_question questions) mc_eval_result {
     int total = len(questions)
     int correct = 0
@@ -195,7 +154,6 @@ func evaluate_multiple_choice(language_model model, []mc_question questions) mc_
     int i = 0
     while i < total {
         mc_question q = questions[i]
-
 
         float best = -1000000000.0
         float second = -1000000000.0
@@ -236,10 +194,6 @@ func evaluate_multiple_choice(language_model model, []mc_question questions) mc_
     }
 }
 
-
-
-
-
 struct ppl_result {
     float perplexity
     float avg_loss
@@ -276,10 +230,6 @@ func evaluate_perplexity(language_model model, [][]int sequences) ppl_result {
     }
 }
 
-
-
-
-
 struct gen_question {
     []int prompt_tokens
     []int answer_tokens
@@ -291,7 +241,6 @@ struct gen_eval_result {
     int correct
     float exact_match
 }
-
 
 func gen_contains_answer([]int generated, []int answer) bool {
     int g = len(generated)
@@ -340,10 +289,6 @@ func evaluate_generative(language_model model, []gen_question questions) gen_eva
     }
 }
 
-
-
-
-
 struct benchmark_report {
     float mmlu_acc
     float hellaswag_acc
@@ -388,10 +333,6 @@ func run_benchmark_suite(language_model model, benchmark_suite suite) benchmark_
     }
 }
 
-
-
-
-
 func be_int_str(int n) string {
     if n == 0 { return "0" }
     bool neg = n < 0
@@ -406,7 +347,6 @@ func be_int_str(int n) string {
     if neg { s = "-" + s }
     s
 }
-
 
 func be_pct(float acc) string {
     int pct = 0

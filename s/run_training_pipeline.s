@@ -1,6 +1,5 @@
 
 
-
 package main
 
 import "os"
@@ -9,7 +8,6 @@ import "path/filepath"
 import "strings"
 import "exec"
 import "core"
-
 
 type training_config struct {
     ScriptDir      string
@@ -20,7 +18,6 @@ type training_config struct {
     MaterializeWarmupSteps int
     MaterializeCorpusPath  string
 }
-
 
 func SetupTrainingConfig(trainBin string) (*training_config, error) {
     scriptDir := core.ResolveScriptDir()
@@ -41,14 +38,12 @@ func SetupTrainingConfig(trainBin string) (*training_config, error) {
         MaterializeCorpusPath:  core.GetEnv("NEURX_CORPUS_PATH", filepath.Join(neurxDir, "data/corpus/train_corpus.txt")),
     }
 
-
     if err := core.MkdirAll(config.CheckpointDir); err != nil {
         return nil, fmt.Errorf("failed to create checkpoint dir: %v", err)
     }
 
     return config, nil
 }
-
 
 func PrintHeader(config *training_config) {
     fmt.Println("========================================")
@@ -59,23 +54,19 @@ func PrintHeader(config *training_config) {
     fmt.Println("")
 }
 
-
 func RunTraining(config *training_config) (string, error) {
 
     if !core.FileExists(config.TrainBin) {
         return "", fmt.Errorf("[ERROR] Training binary not found: %s", config.TrainBin)
     }
 
-
     os.Chmod(config.TrainBin, 0755)
-
 
     oldCwd, _ := os.Getwd()
     os.Chdir(config.NeurXDir)
     defer os.Chdir(oldCwd)
 
     fmt.Println("--- Running S Training ---")
-
 
     cmd := exec.Command(config.TrainBin)
     output, _ := cmd.CombinedOutput()
@@ -86,10 +77,8 @@ func RunTraining(config *training_config) (string, error) {
     return result, nil
 }
 
-
 func ParseTrainingOutput(output string) map[string]string {
     result := make(map[string]string)
-
 
     if idx := strings.Index(output, "Total Steps:"); idx >= 0 {
         parts := strings.Fields(output[idx:])
@@ -98,7 +87,6 @@ func ParseTrainingOutput(output string) map[string]string {
         }
     }
 
-
     if idx := strings.Index(output, "Final Loss:"); idx >= 0 {
         parts := strings.Fields(output[idx:])
         if len(parts) >= 3 {
@@ -106,14 +94,12 @@ func ParseTrainingOutput(output string) map[string]string {
         }
     }
 
-
     if idx := strings.Index(output, "Best Loss:"); idx >= 0 {
         parts := strings.Fields(output[idx:])
         if len(parts) >= 3 {
             result["bestLoss"] = parts[2]
         }
     }
-
 
     if _, ok := result["steps"]; !ok {
         result["steps"] = "50"
@@ -128,18 +114,14 @@ func ParseTrainingOutput(output string) map[string]string {
     return result
 }
 
-
 func GenerateCheckpoints(config *training_config, metrics map[string]string) error {
     fmt.Println("")
     fmt.Println("--- Generating checkpoint Files ---")
-
 
     os.Setenv("NEURX_OUTPUT_DIR", config.CheckpointDir)
     os.Setenv("NEURX_S_PRETRAIN_STEPS", metrics["steps"])
     os.Setenv("NEURX_S_PRETRAIN_WARMUP_STEPS", fmt.Sprintf("%d", config.MaterializeWarmupSteps))
     os.Setenv("NEURX_CORPUS_PATH", config.MaterializeCorpusPath)
-
-
 
     for _, filename := range []string{"final_model.neurx", "best_model.neurx"} {
         checkpointFile := filepath.Join(config.CheckpointDir, filename)
@@ -150,7 +132,6 @@ func GenerateCheckpoints(config *training_config, metrics map[string]string) err
 
     return nil
 }
-
 
 func ListCheckpoints(config *training_config) {
     fmt.Println("")
@@ -166,7 +147,6 @@ func ListCheckpoints(config *training_config) {
         return nil
     })
 }
-
 
 func PrintFooter(config *training_config) {
     fmt.Println("")

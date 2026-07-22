@@ -1,27 +1,18 @@
 
 
-
-
-
-
 module code_interpreter
-
-
 
 struct code_interpreter_config {
 
     execution_timeout_seconds: int = 120
     total_session_timeout: int = 600
 
-
     max_memory_mb: int = 512
     max_output_size_bytes: int = 10 * 1024 * 1024
     max_file_size_mb: int = 10
 
-
     supported_languages: list<string> = ["python", "javascript", "s", "sql"]
     default_language: string = "python"
-
 
     sandbox_enabled: bool = true
     allow_network_access: bool = false
@@ -35,11 +26,9 @@ struct code_interpreter_config {
         "eval", "exec", "compile", "open"
     ]
 
-
     working_directory: string = "/tmp/code_interpreter_sessions/"
     install_dependencies: bool = true
     persist_files_between_calls: bool = true
-
 
     enable_plotting: bool = true
     enable_dataframe_display: bool = true
@@ -83,14 +72,11 @@ struct code_block {
     filename: string?
 }
 
-
-
 class SandboxEnvironment {
     config: code_interpreter_config
     session_id: string
     working_dir: string
     state: SessionState
-
 
     python_runtime: PythonRuntime?
     javascript_runtime: JavaScriptRuntime?
@@ -102,9 +88,7 @@ class SandboxEnvironment {
         this.session_id = generate_uuid()
         this.working_dir = config.working_directory + this.session_id + "/"
 
-
         create_directory(this.working_dir)
-
 
         this.state = new SessionState(
             session_id=this.session_id,
@@ -113,7 +97,6 @@ class SandboxEnvironment {
             files_created=list<string>{},
             execution_history=list<execution_record>{}
         )
-
 
         if "python" in config.supported_languages {
             this.python_runtime = new PythonRuntime(
@@ -136,7 +119,6 @@ class SandboxEnvironment {
     execute(code_block: code_block) {
         let start_time = current_time_millis()
 
-
         let security_result = this._security_check(code_block.code)
         if !security_result.allowed {
             return execution_result{
@@ -149,7 +131,6 @@ class SandboxEnvironment {
                 memory_used_mb=0
             }
         }
-
 
         result: execution_result
         match code_block.language.lower() {
@@ -181,10 +162,8 @@ class SandboxEnvironment {
             }
         }
 
-
         result.execution_time_ms = current_time_millis() - start_time
         result = this._post_process(result, code_block)
-
 
         this.state.add_execution_record(execution_record{
             code=code_block.code,
@@ -198,9 +177,7 @@ class SandboxEnvironment {
 
     _security_check(code: string) {
 
-
         issues: list<string> = []
-
 
         dangerous_patterns = [
             ("__import__", "Dynamic import detected"),
@@ -226,18 +203,15 @@ class SandboxEnvironment {
             }
         }
 
-
         if "while True:" in code || "while(1)" in code || "while(true)" in code {
 
             if "break" not in code && "return" not in code:
                 issues.append("Potential infinite loop without break condition")
         }
 
-
         large_allocations = [
             (r"\[\s*0\s*\]\s*\*\s*(\d{6,})", "Large array allocation may exceed memory limit")
         ]
-
 
         if issues.length > 0 {
             return security_check_result{allowed=false, reason="\n".join(issues)}
@@ -255,17 +229,14 @@ class SandboxEnvironment {
             )
             result.generated_files = files
 
-
             for f in files {
                 this.state.files_created.append(f.path)
             }
         }
 
-
         if code_block.language == "python" && this.config.enable_plotting && result.success {
             result.plots = this._extract_matplotlib_plots()
         }
-
 
         result.memory_used_mb = estimate_memory_usage(result.output.length)
 
@@ -274,8 +245,6 @@ class SandboxEnvironment {
 
     _extract_matplotlib_plots() {
         plots: list<image_data> = []
-
-
 
         plot_files = find_files_with_extension(this.working_dir, [".png", ".svg", ".jpeg"])
         for plot_file in plot_files {
@@ -314,8 +283,6 @@ struct security_check_result {
     allowed: bool
     reason: string
 }
-
-
 
 class SessionState {
     session_id: string
@@ -379,8 +346,6 @@ struct session_summary {
     success_rate: float
 }
 
-
-
 class PythonRuntime {
     sandbox_dir: string
     memory_limit: int
@@ -392,7 +357,6 @@ class PythonRuntime {
         this.sandbox_dir = sandbox_dir
         this.memory_limit = memory_limit
         this.timeout = timeout
-
 
         if !check_command_available(this.interpreter_path) {
             throw error(f"Python interpreter not found: {this.interpreter_path}")
@@ -406,7 +370,6 @@ class PythonRuntime {
 
         try {
 
-
             let cmd = [
                 this.interpreter_path,
                 "-u",
@@ -414,14 +377,12 @@ class PythonRuntime {
                 script_path
             ]
 
-
             env_vars = {
                 "PYTHONPATH": this.sandbox_dir,
                 "HOME": this.sandbox_dir,
                 "TMPDIR": this.sandbox_dir,
                 "PYTHONDONTWRITEBYTECODE": "1"
             }
-
 
             let proc = subprocess_run(
                 cmd,
@@ -432,10 +393,8 @@ class PythonRuntime {
                 env=env_vars
             )
 
-
             output = proc.stdout
             error_output = proc.stderr
-
 
             if proc.returncode != 0 {
                 let error_info = this._parse_python_error(error_output)
@@ -451,7 +410,6 @@ class PythonRuntime {
                     memory_used_mb=0
                 }
             }
-
 
             return_value = this._extract_return_value(output)
 
@@ -517,21 +475,17 @@ class PythonRuntime {
 
     _extract_return_value(stdout: string) {
 
-
         lines = stdout.strip().split("\n")
         if lines.length > 0 {
             last_line = lines[-1]
-
 
             try {
                 return json_parse(last_line)
             }
 
-
             try {
                 return parseFloat(last_line)
             }
-
 
             return last_line
         }
@@ -545,13 +499,10 @@ struct error_info {
     traceback: list<string>
 }
 
-
-
 class JavaScriptRuntime {
     vm_context: any
 
     init() {
-
 
         this.vm_context = create_javascript_vm()
     }
@@ -602,8 +553,6 @@ class JavaScriptRuntime {
         }
     }
 }
-
-
 
 class ShellRuntime {
     allow_network: bool
@@ -674,8 +623,6 @@ class ShellRuntime {
     }
 }
 
-
-
 class SQLRuntime {
     db_path: string
     connection: DatabaseConnection?
@@ -698,9 +645,7 @@ class SQLRuntime {
                     columns = cursor.column_names
                     rows = cursor.fetchall()
 
-
                     output = format_sql_table(columns, rows)
-
 
                     return_value = sql_query_result{
                         columns=columns,
@@ -767,8 +712,6 @@ struct sql_query_result {
     row_count: int
 }
 
-
-
 class ResultFormatter {
     config: code_interpreter_config
 
@@ -780,18 +723,15 @@ class ResultFormatter {
 
         sections: list<string> = []
 
-
         status_icon = result.success ? "✅" : "❌"
         status_text = result.success ? "Success" : f"Error ({result.error_type})"
         sections.append(f"{status_icon} **Status**: {status_text}")
-
 
         if result.output.length > 0 {
             truncated_output = this._truncate(result.output, max_chars=5000)
             formatted_output = this._format_code_block(truncated_output, "output")
             sections.append(f"**Output**:\n{formatted_output}")
         }
-
 
         if result.error != null {
             formatted_error = this._format_code_block(result.error!, "error")
@@ -803,7 +743,6 @@ class ResultFormatter {
             }
         }
 
-
         metrics_parts: list<string> = []
         metrics_parts.append(f"Time: {result.execution_time_ms:.1f}ms")
         metrics_parts.append(f"Lines: {result.line_count}")
@@ -811,7 +750,6 @@ class ResultFormatter {
             metrics_parts.append(f"Memory: ~{result.memory_used_mb:.1f}MB")
         }
         sections.append(f"*Metrics*: {', '.join(metrics_parts)}")
-
 
         if result.generated_files != null && result.generated_files!.length > 0 {
             file_list: list<string> = []
@@ -821,7 +759,6 @@ class ResultFormatter {
             sections.append("**Generated Files**:\n" + "\n".join(file_list))
         }
 
-
         if result.plots != null && result.plots!.length > 0 {
             plot_descriptions: list<string> = []
             for i, plot in enumerate(result.plots!) {
@@ -829,7 +766,6 @@ class ResultFormatter {
             }
             sections.append("**Plots Generated**: " + ", ".join(plot_descriptions))
         }
-
 
         if result.return_value != null {
             rv_str = format_value_for_display(result.return_value!)
@@ -865,8 +801,6 @@ struct formatted_output {
     has_files: bool
 }
 
-
-
 class DataAnalysisHelper {
     sandbox: SandboxEnvironment
     formatter: ResultFormatter
@@ -875,7 +809,6 @@ class DataAnalysisHelper {
         this.sandbox = sandbox
         this.formatter = new ResultFormatter(sandbox.config)
     }
-
 
     explore_dataset(csv_path: string, max_rows: int = 5) {
         code = f"""
@@ -926,7 +859,6 @@ print(f"Total: {{mem.sum() / 1024 / 1024:.2f}} MB")
         let result = this.sandbox.execute(code_block)
         return result
     }
-
 
     visualize_data(csv_path: string, chart_type: string, x_col: string, y_col: string?,
                    group_by: string?) {
@@ -1022,7 +954,6 @@ print("Chart saved as chart_correlation.png")
         return this.sandbox.execute(code_block)
     }
 
-
     run_statistical_test(csv_path: string, test_type: string, col1: string, col2: string?) {
         code = f"""
 import pandas as pd
@@ -1066,8 +997,6 @@ else:
     }
 }
 
-
-
 class CodeInterpreter {
     config: code_interpreter_config
     sandbox: SandboxEnvironment?
@@ -1080,7 +1009,6 @@ class CodeInterpreter {
         this.config = config ?? new code_interpreter_config()
         this.formatter = new ResultFormatter(this.config)
         this.active_sessions = map<string, SandboxEnvironment>{}
-
 
         this.default_session = this.create_session("default")
         this.data_helper = new DataAnalysisHelper(this.default_session!)
@@ -1104,7 +1032,6 @@ class CodeInterpreter {
         return this.formatter.format_for_llm(result)
     }
 
-
     run_python(code: string) {
         return this.execute_code(code, "python")
     }
@@ -1121,7 +1048,6 @@ class CodeInterpreter {
         return this.execute_code(query, "sql")
     }
 
-
     analyze_csv(csv_path: string) {
         let result = this.data_helper!.explore_dataset(csv_path)
         return this.formatter.format_for_llm(result)
@@ -1137,7 +1063,6 @@ class CodeInterpreter {
         let result = this.data_helper!.run_statistical_test(csv_path, test, col1, col2)
         return this.formatter.format_for_llm(result)
     }
-
 
     list_sessions() {
         return list(this.active_sessions.keys())
@@ -1163,8 +1088,6 @@ class CodeInterpreter {
     }
 }
 
-
-
 function create_code_interpreter(config?: code_interpreter_config) {
     return new CodeInterpreter(config=config)
 }
@@ -1173,7 +1096,6 @@ function test_code_interpreter() {
     print("🧪 Testing NEURX Code Interpreter...")
 
     ci = new CodeInterpreter()
-
 
     print("  ✓ Test 1: Basic Python Execution")
     result1 = ci.run_python("""
@@ -1184,18 +1106,15 @@ print(f"The answer is: {{y}}")
     assert result1.raw.success, f"Python exec failed: {result1.raw.error}"
     assert "84" in result1.raw.output, "Unexpected output"
 
-
     print("  ✓ Test 2: Security Violation Detection")
     result2 = ci.run_python("import os; os.system('rm -rf /')")
     assert !result2.raw.success, "Should block dangerous code"
     assert result2.raw.error_type == "SecurityError", "Should be security error"
 
-
     print("  ✓ Test 3: Safe Shell Command Execution")
     result3 = ci.run_s("echo 'Hello from s'")
     assert result3.raw.success, "S exec failed"
     assert "Hello from s" in result3.raw.output, "Unexpected s output"
-
 
     print("  ✓ Test 4: SQL Execution")
     result4 = ci.run_sql("""
@@ -1205,13 +1124,11 @@ SELECT * FROM users ORDER BY age DESC;
 """)
     assert result4.raw.success, "SQL failed"
 
-
     print("  ✓ Test 5: State Persistence Across Calls")
     ci.run_python("counter = 0")
     ci.run_python("counter += 1")
     result5 = ci.run_python("print(counter)")
     assert "1" in result5.raw.output, "State should persist"
-
 
     print("  ✓ Test 6: Data Analysis Helper")
 
@@ -1225,13 +1142,11 @@ print("CSV created")
     summary = ci.analyze_csv(ci.default_session!.working_dir + "sample.csv")
     assert summary.raw.success, "Data analysis failed"
 
-
     ci.cleanup()
 
     print("\n✅ All Code Interpreter Tests Passed!")
     return true
 }
-
 
 export {
     code_interpreter_config, execution_result, file_info, image_data, code_block,

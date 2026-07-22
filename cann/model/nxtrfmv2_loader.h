@@ -59,7 +59,6 @@ enum class LayerWeightKind : std::size_t {
 Status inspect_nxtrfmv2(const std::string& path, ModelMetadata* metadata);
 uint16_t float_to_fp16_bits(float value);
 
-
 Status quantize_int8_per_channel(const float* input, std::size_t rows,
                                  std::size_t columns, int8_t* output,
                                  uint16_t* scales);

@@ -1,32 +1,7 @@
 package neurx.scheduler.lr_scheduler_moe_1t
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.strings
 use neurx.runtime.io.{io_println}
-
-
-
-
 
 struct lr_schedule_config {
     string schedule_type
@@ -42,22 +17,18 @@ struct lr_schedule_config {
 struct lr_scheduler_state {
     lr_schedule_config config
 
-
     int current_step
     float current_lr
     float current_base_lr
 
-
     []float lr_history
     []int step_history
-
 
     int num_schedules
     float avg_lr
     float max_lr
     float min_lr_achieved
 }
-
 
 func lr_scheduler_new(
     float base_lr,
@@ -92,11 +63,6 @@ func lr_scheduler_new(
     state
 }
 
-
-
-
-
-
 func compute_cosine_annealing_lr(
     lr_scheduler_state state
 ) float {
@@ -116,16 +82,13 @@ func compute_cosine_annealing_lr(
 
         float progress = float(step - warmup_steps) / float(total_steps - warmup_steps)
 
-
         if progress > 1.0 {
             progress = 1.0
         }
 
-
         float cos_val = cos(3.14159 * progress)
         lr = min_lr + (base_lr - min_lr) * 0.5 * (1.0 + cos_val)
     }
-
 
     if lr < min_lr {
         lr = min_lr
@@ -137,10 +100,6 @@ func compute_cosine_annealing_lr(
     state.current_lr = lr
     lr
 }
-
-
-
-
 
 func compute_linear_decay_lr(
     lr_scheduler_state state
@@ -174,10 +133,6 @@ func compute_linear_decay_lr(
     lr
 }
 
-
-
-
-
 func compute_exponential_decay_lr(
     lr_scheduler_state state
 ) float {
@@ -208,10 +163,6 @@ func compute_exponential_decay_lr(
     lr
 }
 
-
-
-
-
 func compute_one_cycle_lr(
     lr_scheduler_state state
 ) float {
@@ -223,7 +174,6 @@ func compute_one_cycle_lr(
     int total_steps = state.config.total_steps
 
     float lr = 0.0
-
 
     int step1 = total_steps / 30
     int step2 = step1 * 24 / 25
@@ -244,10 +194,6 @@ func compute_one_cycle_lr(
     state.current_lr = lr
     lr
 }
-
-
-
-
 
 func compute_step_decay_lr(
     lr_scheduler_state state,
@@ -274,11 +220,6 @@ func compute_step_decay_lr(
     lr
 }
 
-
-
-
-
-
 func compute_lr(
     lr_scheduler_state state
 ) float {
@@ -298,11 +239,6 @@ func compute_lr(
         lr = compute_cosine_annealing_lr(state)
     }
 
-
-
-
-
-
     state.num_schedules = state.num_schedules + 1
     state.avg_lr = (state.avg_lr * float(state.num_schedules - 1) + lr) / float(state.num_schedules)
 
@@ -316,7 +252,6 @@ func compute_lr(
     lr
 }
 
-
 func step(
     lr_scheduler_state state
 ) float {
@@ -326,11 +261,6 @@ func step(
     float new_lr = compute_lr(state)
     new_lr
 }
-
-
-
-
-
 
 func get_warmup_lr(
     lr_scheduler_state state,
@@ -348,22 +278,15 @@ func get_warmup_lr(
     warmup_lr
 }
 
-
-
-
-
 func cos(float x) float {
-
 
     if x < 0.0 {
         x = -x
     }
 
-
     float pi = 3.14159
 
     float result = 1.0
-
 
     float term = 1.0
     int n = 1
@@ -378,7 +301,6 @@ func cos(float x) float {
 
 func pow(float base, float exponent) float {
 
-
     if exponent == 0.0 {
         return 1.0
     }
@@ -388,7 +310,6 @@ func pow(float base, float exponent) float {
     if exponent == 1.0 {
         return base
     }
-
 
     float log_base = 1.0
     float result = exp(exponent * log_base)
@@ -403,7 +324,6 @@ func exp(float x) float {
     if x < -20.0 {
         return 0.0
     }
-
 
     float result = 1.0
     float term = 1.0

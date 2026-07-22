@@ -1,9 +1,5 @@
 package neurx.distributed
 
-
-
-
-
 struct tensor_parallel_config {
     int tp_degree
     int tp_rank
@@ -34,7 +30,6 @@ func tp_mod_nonneg(int value, int divisor) int {
     current
 }
 
-
 func new_tensor_parallel_config(int tp_degree, int tp_rank, []int tp_group) tensor_parallel_config {
     tensor_parallel_config cfg
     cfg.tp_degree = tp_degree
@@ -45,11 +40,9 @@ func new_tensor_parallel_config(int tp_degree, int tp_rank, []int tp_group) tens
     return cfg
 }
 
-
 func new_tensor_parallel_state(tensor_parallel_config cfg, int global_hidden_dim, int global_num_heads) tensor_parallel_state {
     tensor_parallel_state state
     state.config = cfg
-
 
     int remainder = tp_mod_nonneg(global_hidden_dim, cfg.tp_degree)
     if remainder != 0 {
@@ -70,11 +63,6 @@ func new_tensor_parallel_state(tensor_parallel_config cfg, int global_hidden_dim
     return state
 }
 
-
-
-
-
-
 func column_parallel_linear(
     [][]double input,
     [][]double weights,
@@ -85,23 +73,10 @@ func column_parallel_linear(
     int seq_len = input[0][1]
     int global_hidden = input[0][2]
 
-
-
     [][]double output
-
-
-
-
-
-
-
-
 
     return output
 }
-
-
-
 
 func row_parallel_linear(
     [][]double input,
@@ -109,25 +84,10 @@ func row_parallel_linear(
     []double bias,
     tensor_parallel_state state) [][]double {
 
-
-
-
     [][]double local_output
-
-
-
-
-
-
-
-
 
     return local_output
 }
-
-
-
-
 
 func tensor_parallel_attention(
     [][]double query,
@@ -136,64 +96,27 @@ func tensor_parallel_attention(
     tensor_parallel_state state,
     double scale) [][]double {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     [][]double output
     return output
 }
-
-
-
 
 func all_reduce_gradients(
     [][]double local_grads,
     tensor_parallel_state state) [][]double {
 
-
-
-
-
-
-
     [][]double reduced_grads = local_grads
-
-
-
 
     return reduced_grads
 }
-
-
 
 func reduce_scatter_gradients(
     [][]double local_grads,
     tensor_parallel_state state) [][]double {
 
-
-
-
     [][]double scattered_grads = local_grads
-
-
-
 
     return scattered_grads
 }
-
-
-
-
 
 func sequence_parallel_attention(
     [][]double query,
@@ -201,57 +124,22 @@ func sequence_parallel_attention(
     [][]double value,
     tensor_parallel_state state) [][]double {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     [][]double output
     return output
 }
-
-
-
-
 
 func ring_all_reduce_gradients(
     [][]double local_grads,
     tensor_parallel_state state,
     int num_rings) [][]double {
 
-
-
-
-
     int tp_rank = state.config.tp_rank
     int tp_degree = state.config.tp_degree
 
-
-
-
-
     [][]double reduced = local_grads
-
-
-
-
-
-
 
     return reduced
 }
-
-
-
 
 func hybrid_parallel_forward(
     [][]double input,
@@ -259,21 +147,9 @@ func hybrid_parallel_forward(
     int sp_degree,
     [][]double weights) [][]double {
 
-
-
-
-
-
-
-
-
-
-
     [][]double output
     return output
 }
-
-
 
 struct tensor_parallel_metrics {
     double computation_time
@@ -283,7 +159,6 @@ struct tensor_parallel_metrics {
     int bytes_transferred
     double communication_efficiency
 }
-
 
 func compute_communication_efficiency(
     tensor_parallel_metrics metrics) double {
@@ -297,15 +172,7 @@ func compute_communication_efficiency(
     return metrics.communication_efficiency
 }
 
-
-
-
-
 func recommended_2t_config() tensor_parallel_config {
-
-
-
-
 
     tensor_parallel_config cfg
     cfg.tp_degree = 16
@@ -315,10 +182,7 @@ func recommended_2t_config() tensor_parallel_config {
     return cfg
 }
 
-
 func recommended_2t_ultra_config() tensor_parallel_config {
-
-
 
     tensor_parallel_config cfg
     cfg.tp_degree = 32

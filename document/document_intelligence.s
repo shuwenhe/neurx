@@ -1,17 +1,10 @@
 
 
-
-
-
-
 module document_parser
-
-
 
 struct document_parser_config {
 
     enabled_formats: list<string> = ["pdf", "html", "markdown", "docx", "pptx", "xlsx", "txt", "csv"]
-
 
     pdf_extract_images: bool = true
     pdf_ocr_enabled: bool = false
@@ -19,33 +12,27 @@ struct document_parser_config {
     pdf_preserve_layout: bool = true
     pdf_extract_tables: bool = true
 
-
     html_clean_html: bool = true
     html_extract_main_content: bool = true
     html_remove_elements: list<string> = ["script", "style", "nav", "footer", "header", "aside"]
     html_keep_links: bool = true
-
 
     md_extract_code_blocks: bool = true
     md_extract_tables: bool = true
     md_handle_front_matter: bool = true
     md_parse_math: bool = true
 
-
     office_extract_embedded: bool = true
     office_resolve_styles: bool = true
-
 
     table_detection_method: string = "auto"
     table_header_detection: bool = true
     table_merge_cell_support: bool = true
 
-
     output_format: string = "markdown"
     max_file_size_mb: int = 100
     chunk_size: int = 1000
     chunk_overlap: int = 200
-
 
     enable_metadata_extraction: bool = true
     enable_section_detection: bool = true
@@ -141,8 +128,6 @@ struct document_statistics {
     estimated_reading_time_minutes: float
 }
 
-
-
 class DocumentParser {
     config: document_parser_config
     pdf_parser: PDFParser?
@@ -152,7 +137,6 @@ class DocumentParser {
 
     init(config?: document_parser_config) {
         this.config = config ?? new document_parser_config()
-
 
         if "pdf" in this.config.enabled_formats {
             this.pdf_parser = new PDFParser(config=this.config)
@@ -295,7 +279,6 @@ class DocumentParser {
     _parse_plain_text_string(content: string, source_path?: string) {
         stats = compute_statistics(content)
 
-
         raw_sections = content.split("\n\n")
         sections: list<document_section> = []
         pos = 0
@@ -332,8 +315,6 @@ class DocumentParser {
     }
 }
 
-
-
 class PDFParser {
     config: document_parser_config
 
@@ -355,7 +336,6 @@ class PDFParser {
         for page_num in range(doc.page_count):
             page = doc.load_page(page_num)
 
-
             if this.config.pdf_preserve_layout {
                 text_dict = page.get_text("dict")
 
@@ -369,7 +349,6 @@ class PDFParser {
                             line_text = "".join(span["text"] for span in line["spans"])
                             lines_text += line_text + "\n"
                         page_text_parts.append(lines_text.strip())
-
 
                         if block["lines"].length > 0 && block["lines"][0]["spans"].length > 0:
                             first_span = block["lines"][0]["spans"][0]
@@ -402,7 +381,6 @@ class PDFParser {
 
             full_text_parts.append(page_text)
 
-
             if this.config.pdf_extract_tables {
                 tables_on_page = extract_tables_from_pdf_page(page)
                 all_tables.extend(tables_on_page)
@@ -410,7 +388,6 @@ class PDFParser {
             current_pos += len(page_text) + 2
 
         full_text = "\n\n--- Page Break ---\n\n".join(full_text_parts)
-
 
         if all_sections.empty() {
             pages_texts = full_text.split("--- Page Break ---")
@@ -448,9 +425,7 @@ class PDFParser {
         }
     }
 
-
     extract_tables_from_pdf_page(page: any) {
-
 
         return []
     }
@@ -460,8 +435,6 @@ class PDFParser {
         return null
     }
 }
-
-
 
 class HTMLParser {
     config: document_parser_config
@@ -474,21 +447,17 @@ class HTMLParser {
 
         soup = parse_html(html_content)
 
-
         if this.config.html_clean_html {
             for selector in this.config.html_remove_elements {
                 soup.find_all(selector).each(el => el.decompose())
             }
 
-
         meta = this._extract_metadata(soup, source_url)
-
 
         if this.config.html_extract_main_content:
             main_content = this._extract_main_content(soup)
         } else:
             main_content = soup.body ?? soup
-
 
         result = this._convert_element(main_content, source_url)
 
@@ -510,7 +479,6 @@ class HTMLParser {
     _extract_metadata(soup: any, source_url?: string) {
         title = soup.title?.get_text().trim() ?? ""
 
-
         og_title = soup.find("meta", property="og:title")?.get("content")
         description = soup.find("meta", attrs={"name": "description"})?.get("content")
         author_meta = soup.find("meta", attrs={"name": "author"})?.get("content")
@@ -531,14 +499,12 @@ class HTMLParser {
 
         candidates: list<{element: any, score: float}> = []
 
-
         for elem in soup.find_all(["div", "article", "main", "section"]) {
             score = 0.0
 
             text_length = len(elem.get_text())
             if text_length > 100:
                 score += math.log(text_length)
-
 
             tag_name = elem.name
             if tag_name in ["article", "main"]:
@@ -549,12 +515,10 @@ class HTMLParser {
                 if term in class_id_str.to_lower():
                     score += 15
 
-
             negative_terms = ["comment", "sidebar", "footer", "header", "nav", "menu", "widget", "ad"]
             for term in negative_terms:
                 if term in class_id_str.to_lower():
                     score -= 30
-
 
             links = elem.find_all("a")
             text = elem.get_text()
@@ -565,7 +529,6 @@ class HTMLParser {
 
             if score > 0:
                 candidates.append({element=elem, score=score})
-
 
         if candidates.length > 0:
             candidates.sort_by_descending(c => c.score)
@@ -685,7 +648,6 @@ class HTMLParser {
                 content_parts.append(list_text)
                 pos += len(list_text)
 
-
             for child in node.children:
                 process_node(child, depth + 1)
 
@@ -704,7 +666,6 @@ class HTMLParser {
     _extract_table(table_elem: any) {
         headers: list<string> = []
         rows: list<list<string>> = []
-
 
         thead = table_elem.find("thead")
         if thead:
@@ -726,7 +687,6 @@ class HTMLParser {
                     if avg_length < 30:
                         headers = [td.get_text().strip() for td in td_cells]
 
-
         tbody = table_elem.find("tbody") ?? table_elem
         for tr in tbody.find_all("tr")[1 if (headers.length > 0 and !thead) else 0:]:
             cells: list<string> = []
@@ -734,7 +694,6 @@ class HTMLParser {
                 cells.append(td.get_text().strip().replace("\n", " "))
             if cells.length > 0:
                 rows.append(cells)
-
 
         md_repr = format_table_as_markdown(headers, rows)
 
@@ -766,8 +725,6 @@ struct table_conversion_result {
     table: extracted_table
     markdown: string
 }
-
-
 
 class MarkdownParser {
     config: document_parser_config
@@ -801,7 +758,6 @@ class MarkdownParser {
         while i < lines.length:
             line = lines[i]
 
-
             if line.startswith("```") {
                 if !in_code_block:
                     in_code_block = true
@@ -826,12 +782,10 @@ class MarkdownParser {
                 i++
                 continue
 
-
             heading_match = regex.match(r'^(#{1,6})\s+(.+)$', line)
             if heading_match != null {
                 level = heading_match.group(1).length
                 title = heading_match.group(2).trim()
-
 
                 if current_section != null {
                     current_section!.end_position = pos
@@ -851,14 +805,12 @@ class MarkdownParser {
                 i++
                 continue
 
-
             if line.trim().startswith("|") and "|" in line[1:]:
                 if !in_table:
                     in_table = true
                     table_start_idx = i
 
                     table_headers = parse_table_row(line)
-
 
                 separator_match = regex.match(r'^\|[\s\-:]+\|', line.trim())
                 if separator_match == null:
@@ -888,7 +840,6 @@ class MarkdownParser {
                 table_rows = []
                 table_headers = []
 
-
             img_match = regex.match(r'!\[([^\]]*)\]\(([^)]+)\)', line)
             if img_match != null {
                 alt = img_match.group(1)
@@ -902,10 +853,6 @@ class MarkdownParser {
                     position=(pos, i)
                 })
 
-
-
-
-
             content_parts.append(line + "\n")
             pos += len(line) + 1
 
@@ -913,7 +860,6 @@ class MarkdownParser {
                 current_section!.content += line + "\n"
 
             i++
-
 
         if in_table and table_rows.length > 0:
             md_table = format_table_as_markdown(table_headers, table_rows)
@@ -926,7 +872,6 @@ class MarkdownParser {
         if current_section != null:
             current_section!.end_position = pos
             sections.append(current_section!)
-
 
         if sections.empty():
             sections.append(document_section{
@@ -962,8 +907,6 @@ class MarkdownParser {
     }
 }
 
-
-
 class OfficeDocumentParser {
     config: document_parser_config
 
@@ -981,7 +924,6 @@ class OfficeDocumentParser {
         content_parts: list<string> = []
         pos = 0
 
-
         para_idx = 0
         for para in doc.paragraphs:
             style_name = para.style.name if para.style else "Normal"
@@ -992,7 +934,6 @@ class OfficeDocumentParser {
                 pos += 1
                 para_idx++
                 continue
-
 
             if style_name.starts_with("Heading") or style_name.starts_with("Title"):
                 level_match = regex.search(r'\d+', style_name)
@@ -1019,7 +960,6 @@ class OfficeDocumentParser {
 
             para_idx++
 
-
         for t_idx, table in enumerate(doc.tables) {
             headers: list<string> = []
             rows: list<list<string>> = []
@@ -1044,7 +984,6 @@ class OfficeDocumentParser {
                 })
                 content_parts.append(md_table + "\n\n")
                 pos += len(md_table) + 2
-
 
         if this.config.office_extract_embedded:
             for rel in doc.part.rels.values():
@@ -1083,7 +1022,6 @@ class OfficeDocumentParser {
 
         for slide_idx, slide in enumerate(pptx.slides):
             slide_title = slide.shapes.title?.text.trim() ?? f"Slide {slide_idx + 1}"
-
 
             shape_texts: list<string> = []
             for shape in slide.shapes:
@@ -1173,8 +1111,6 @@ class OfficeDocumentParser {
     }
 }
 
-
-
 function format_table_as_markdown(headers: list<string>, rows: list<list<string>>) {
     if headers.length == 0 { return "" }
 
@@ -1186,18 +1122,15 @@ function format_table_as_markdown(headers: list<string>, rows: list<list<string>
                 max_w = max(max_w, row[h_idx].length)
         col_widths.append(max_w)
 
-
     header_line = "| "
     for i, h in enumerate(headers):
         header_line += h.ljust(col_widths[i]) + " | "
     header_line = header_line.trim() + "|"
 
-
     sep_line = "| "
     for w in col_widths:
         sep_line += "-".repeat(w) + " | "
     sep_line = sep_line.trim() + "|"
-
 
     data_lines: list<string> = []
     for row in rows:
@@ -1252,8 +1185,6 @@ def generate_short_uuid() {
     import uuid, shortuuid
     return shortuuid.uuid()[:8]
 
-
-
 function create_document_parser(config?: document_parser_config) {
     return new DocumentParser(config=config)
 }
@@ -1262,7 +1193,6 @@ function test_document_parser() {
     print("🧪 Testing NEURX document Parser...")
 
     parser = new DocumentParser()
-
 
     print("  ✓ Test 1: Markdown Parsing")
     sample_md = """
@@ -1300,7 +1230,6 @@ AI is transforming industries.
     assert md_result.code_blocks.length == 1, f"Expected 1 code block, got {md_result.code_blocks.length}"
     assert md_result.statistics.word_count > 50, f"Word count too low: {md_result.statistics.word_count}"
 
-
     print("  ✓ Test 2: HTML Parsing")
     sample_html = """
 <!DOCTYPE html>
@@ -1323,7 +1252,6 @@ AI is transforming industries.
     assert html_result.tables.length == 1, "Table extraction failed"
     assert "Navigation" not in html_result.content, "Nav element not properly removed"
 
-
     print("  ✓ Test 3: Statistics Calculation")
     stats = html_result.statistics
     assert stats.total_characters > 0, "Char count should be > 0"
@@ -1332,7 +1260,6 @@ AI is transforming industries.
     print("\n✅ All document Parser Tests Passed!")
     return true
 }
-
 
 export {
     document_parser_config, parsed_document, document_metadata,

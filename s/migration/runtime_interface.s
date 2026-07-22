@@ -3,9 +3,6 @@ package neurx.migration.runtime_interface
 use neurx.strings
 use neurx.runtime.io.{runtime_read_text_file, runtime_file_exists}
 
-
-
-
 func read_file(string path) string {
     runtime_read_text_file(path)
 }

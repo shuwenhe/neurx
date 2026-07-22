@@ -1,23 +1,5 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 int CAP_TOOL_EXEC    = 1
 int CAP_FILE_READ    = 2
 int CAP_FILE_WRITE   = 4
@@ -25,7 +7,6 @@ int CAP_NET_OUTBOUND = 8
 int CAP_SPAWN_AGENT  = 16
 int CAP_GPU_ALLOC    = 32
 int CAP_ADMIN        = 255
-
 
 int LSM_ALLOW = 0
 int LSM_DENY  = 1
@@ -55,11 +36,9 @@ func new_lsm_state(enforcing bool) lsm_state {
     }
 }
 
-
 func get_allowed_tool(security_context ctx, int index) string {
     ctx.allowed_tools[index]
 }
-
 
 func lsm_register(ls lsm_state, ctx security_context) lsm_state {
     ls.contexts = append(ls.contexts, ctx)
@@ -76,7 +55,6 @@ func lsm_find_context(ls lsm_state, agent_pid int) (security_context, bool) {
     }
     return (security_context{}, false)
 }
-
 
 func lsm_check_tool_call(ls lsm_state, agent_pid int, tool_name string) (lsm_state, int) {
     security_context ctx = security_context{}
@@ -110,7 +88,6 @@ func lsm_check_tool_call(ls lsm_state, agent_pid int, tool_name string) (lsm_sta
     return (ls, LSM_ALLOW)
 }
 
-
 func lsm_check_spawn(ls lsm_state, agent_pid int, child_goal string) (lsm_state, int) {
     security_context ctx = security_context{}
     bool found = false
@@ -121,7 +98,6 @@ func lsm_check_spawn(ls lsm_state, agent_pid int, child_goal string) (lsm_state,
     }
     return (ls, LSM_ALLOW)
 }
-
 
 func lsm_check_network(ls lsm_state, agent_pid int, url string) (lsm_state, int) {
     security_context ctx = security_context{}

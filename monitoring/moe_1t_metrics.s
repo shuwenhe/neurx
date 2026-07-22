@@ -1,37 +1,7 @@
 package neurx.monitoring.moe_1t_metrics
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.strings
 use neurx.runtime.io.{io_println, runtime_make_dirs, runtime_write_text_file, runtime_run_command_output}
-
-
-
-
 
 struct training_metrics {
     float loss
@@ -85,35 +55,26 @@ struct metrics_frame {
     system_metrics sys_metrics
 }
 
-
-
-
-
 struct metrics_collector {
     int global_rank
     int world_size
     int local_rank
     int local_world_size
 
-
     metrics_frame current_frame
-
 
     []metrics_frame frames_history
     int max_history_size
-
 
     float avg_loss
     float max_loss
     float min_loss
     int steps_logged
 
-
     int log_frequency
     int save_frequency
     string metrics_output_dir
 }
-
 
 func metrics_collector_new(
     int global_rank,
@@ -188,11 +149,6 @@ func metrics_collector_new(
     collector
 }
 
-
-
-
-
-
 func update_training_metrics(
     metrics_collector collector,
     float loss,
@@ -209,14 +165,12 @@ func update_training_metrics(
     collector.current_frame.train_metrics.gradient_norm = gradient_norm
     collector.current_frame.train_metrics.weight_norm = collector.current_frame.train_metrics.weight_norm
 
-
     float perplexity = 0.0
     if loss > 0.0 {
         perplexity = exp(loss)
     }
     collector.current_frame.train_metrics.perplexity = perplexity
     collector.current_frame.timestamp_ms = current_timestamp_ms()
-
 
     collector.avg_loss = (collector.avg_loss * float(collector.steps_logged) + loss) /
                         float(collector.steps_logged + 1)
@@ -229,11 +183,6 @@ func update_training_metrics(
     }
 }
 
-
-
-
-
-
 func update_moe_metrics(
     metrics_collector collector,
     []float expert_load,
@@ -244,7 +193,6 @@ func update_moe_metrics(
     collector.current_frame.moe_metrics.expert_load = expert_load
     collector.current_frame.moe_metrics.expert_utilization = expert_utilization
     collector.current_frame.moe_metrics.expert_dropout_count = expert_dropout_count
-
 
     float max_load = 0.0
     float sum_load = 0.0
@@ -274,16 +222,10 @@ func update_moe_metrics(
 
     collector.current_frame.moe_metrics.load_balance_ratio = load_balance
 
-
     if len(expert_load) > 0 {
         collector.current_frame.moe_metrics.expert_diversity = active_experts / float(len(expert_load))
     }
 }
-
-
-
-
-
 
 func update_communication_metrics(
     metrics_collector collector,
@@ -303,11 +245,6 @@ func update_communication_metrics(
     collector.current_frame.comm_metrics.reduce_scatter_time_ms = reduce_scatter_time_ms
 }
 
-
-
-
-
-
 func update_system_metrics(
     metrics_collector collector,
     long gpu_memory_used,
@@ -324,18 +261,12 @@ func update_system_metrics(
     collector.current_frame.sys_metrics.iteration_time_ms = iteration_time
     collector.current_frame.sys_metrics.wall_clock_time_ms = current_timestamp_ms()
 
-
     long total_mem = collector.current_frame.sys_metrics.gpu_memory_total_bytes
     if total_mem > 0 {
         collector.current_frame.sys_metrics.gpu_memory_percent =
             float(gpu_memory_used) / float(total_mem) * 100.0
     }
 }
-
-
-
-
-
 
 func log_step(
     metrics_collector collector,
@@ -345,7 +276,6 @@ func log_step(
     collector.current_frame.step = step
     collector.steps_logged = collector.steps_logged + 1
 
-
     if len(collector.frames_history) < collector.max_history_size {
         collector.frames_history = append_frame(collector.frames_history, collector.current_frame)
     }
@@ -353,12 +283,10 @@ func log_step(
         collector.frames_history = trim_history(collector.frames_history, collector.max_history_size)
     }
 
-
     if step % collector.log_frequency == 0 {
         log_metrics_frame(collector.current_frame)
     }
 }
-
 
 func log_metrics_frame(metrics_frame frame) {
 
@@ -375,22 +303,13 @@ func log_metrics_frame(metrics_frame frame) {
     io_println(log_str)
 }
 
-
-
-
-
-
 func collect_global_stats(
     metrics_collector collector,
     collective_state comm
 ) {
 
-
-
-
     io_println("Global stats collected for rank=" + int_to_string(collector.global_rank))
 }
-
 
 func save_metrics(
     metrics_collector collector,
@@ -400,10 +319,6 @@ func save_metrics(
     runtime_write_text_file(filename, payload)
     io_println("Metrics saved to " + filename)
 }
-
-
-
-
 
 func append_frame([]metrics_frame frames, metrics_frame f) []metrics_frame {
     int n = len(frames)

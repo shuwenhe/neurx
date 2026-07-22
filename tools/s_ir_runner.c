@@ -34,7 +34,6 @@ int main(int argc, char **argv) {
     const char *ir_path = NULL;
     const char *entry = "main";
 
-
     setvbuf(stdout, NULL, _IOLBF, 0);
     setvbuf(stderr, NULL, _IONBF, 0);
 

@@ -40,12 +40,10 @@ func main() {
 
         println("[shard] " + int_to_str(shard_index + 1) + "/" + int_to_str(shard_count) + " : " + extract_filename(shard_path))
 
-
         string full_content = runtime_read_text_file(shard_path)
         int content_len = str_len(full_content)
         int shard_lines = 0
         int shard_steps_before = step
-
 
         int i = 0
         while i < content_len && step < max_steps && docs_seen < max_docs {

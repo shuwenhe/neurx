@@ -1,7 +1,5 @@
 
 
-
-
 package scripts
 
 import (
@@ -10,10 +8,6 @@ import (
     "path/filepath"
     "runtime"
 )
-
-
-
-
 
 enum BuildTarget {
     CPU,
@@ -40,10 +34,6 @@ struct build_config {
     parallel      int
 }
 
-
-
-
-
 struct build_orchestrator {
     logger      Logger
     config      build_config
@@ -51,7 +41,6 @@ struct build_orchestrator {
     sRoot       string
     buildDir    string
 }
-
 
 func new_build_orchestrator() (*build_orchestrator, error) {
     logger := new_logger("build_orchestrator")
@@ -64,7 +53,6 @@ func new_build_orchestrator() (*build_orchestrator, error) {
 
     sRoot := filepath.Join(neurxRoot, "..", "s")
     buildDir := filepath.Join(neurxRoot, ".build")
-
 
     target := detect_build_target()
     arch := detect_build_arch()
@@ -89,7 +77,6 @@ func new_build_orchestrator() (*build_orchestrator, error) {
     }, nil
 }
 
-
 func (b *build_orchestrator) setup() error {
     b.logger.log("Setting up build environment...")
 
@@ -97,12 +84,10 @@ func (b *build_orchestrator) setup() error {
         return err
     }
 
-
     b.log_config()
 
     return nil
 }
-
 
 func (b *build_orchestrator) Clean() error {
     b.logger.log("Cleaning build artifacts...")
@@ -110,7 +95,6 @@ func (b *build_orchestrator) Clean() error {
     if err := remove_dir(b.buildDir); err != nil {
         b.logger.warn("Failed to clean build directory: %v", err)
     }
-
 
     components := []string{"core", "training", "inference", "distributed"}
     for _, comp := range components {
@@ -127,7 +111,6 @@ func (b *build_orchestrator) Clean() error {
     b.logger.success("Build artifacts cleaned")
     return nil
 }
-
 
 func (b *build_orchestrator) build_compiler() error {
     b.logger.log("Checking S compiler...")
@@ -147,7 +130,6 @@ func (b *build_orchestrator) build_compiler() error {
 
     return nil
 }
-
 
 func (b *build_orchestrator) build_core() error {
     b.logger.log("Building core NeurX components...")
@@ -182,7 +164,6 @@ func (b *build_orchestrator) build_core() error {
     return nil
 }
 
-
 func (b *build_orchestrator) build_training() error {
     b.logger.log("Building training components...")
 
@@ -216,7 +197,6 @@ func (b *build_orchestrator) build_training() error {
     return nil
 }
 
-
 func (b *build_orchestrator) build_inference() error {
     b.logger.log("Building inference components...")
 
@@ -249,7 +229,6 @@ func (b *build_orchestrator) build_inference() error {
     return nil
 }
 
-
 func (b *build_orchestrator) BuildAll() error {
     b.logger.log("Building all NeurX components...")
 
@@ -277,7 +256,6 @@ func (b *build_orchestrator) BuildAll() error {
     return nil
 }
 
-
 func (b *build_orchestrator) run_tests() error {
     if !b.config.tests {
         b.logger.log("Tests disabled")
@@ -301,10 +279,6 @@ func (b *build_orchestrator) run_tests() error {
     b.logger.success("Tests passed")
     return nil
 }
-
-
-
-
 
 func (b *build_orchestrator) get_s_compiler() string {
     if command_exists("s") {
@@ -399,11 +373,6 @@ func find_build_artifacts(dir string) ([]string, error) {
     return artifacts, nil
 }
 
-
-
-
-
-
 func build_everything() error {
     builder, err := new_build_orchestrator()
     if err != nil {
@@ -419,7 +388,6 @@ func build_everything() error {
     return builder.BuildAll()
 }
 
-
 func quick_build() error {
     builder, err := new_build_orchestrator()
     if err != nil {
@@ -432,7 +400,6 @@ func quick_build() error {
 
     return builder.build_core()
 }
-
 
 func clean_build() error {
     builder, err := new_build_orchestrator()

@@ -1,33 +1,6 @@
 package neurx.posttrain.grpo
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.posttrain.config
-
-
-
-
 
 struct grpo_config {
     int group_size
@@ -84,11 +57,6 @@ func neurx_r1_grpo_config() grpo_config {
     }
 }
 
-
-
-
-
-
 struct grpo_group {
     string question
     string reference_answer
@@ -99,11 +67,6 @@ struct grpo_group {
     []float  log_probs_policy
     []float  log_probs_ref
 }
-
-
-
-
-
 
 func check_format_reward(string output) float {
     bool has_think  = string_contains(output, "<think>") && string_contains(output, "</think>")
@@ -116,7 +79,6 @@ func check_format_reward(string output) float {
     }
     0.0
 }
-
 
 func check_accuracy_reward(string output, string reference) float {
     string extracted = extract_answer_tag(output)
@@ -135,7 +97,6 @@ func check_accuracy_reward(string output, string reference) float {
     }
     0.0
 }
-
 
 func compute_length_penalty(int token_len, int max_len, float penalty_per_100) float {
     int threshold = max_len / 2
@@ -158,13 +119,8 @@ func compute_reward(string output, string reference, int token_len, grpo_config 
     r
 }
 
-
-
-
-
 func compute_group_advantages([]float rewards, float eps) []float {
     int G = len(rewards)
-
 
     float mean = 0.0
     int i = 0
@@ -173,7 +129,6 @@ func compute_group_advantages([]float rewards, float eps) []float {
         i = i + 1
     }
     mean = mean / float_grpo(G)
-
 
     float var = 0.0
     int j = 0
@@ -195,30 +150,18 @@ func compute_group_advantages([]float rewards, float eps) []float {
     adv
 }
 
-
-
-
-
-
-
 func grpo_token_loss(float log_prob_policy, float log_prob_ref, float advantage, float clip_eps, float kl_coef) float {
     float log_ratio = log_prob_policy - log_prob_ref
     float ratio = exp_grpo(log_ratio)
-
 
     float obj1 = ratio * advantage
     float obj2 = clip_grpo(ratio, 1.0 - clip_eps, 1.0 + clip_eps) * advantage
     float policy_loss = 0.0 - min_float(obj1, obj2)
 
-
     float kl = ratio - log_ratio - 1.0
 
     policy_loss + kl_coef * kl
 }
-
-
-
-
 
 struct grpo_step_result {
     float total_loss
@@ -235,7 +178,6 @@ struct grpo_step_result {
 func grpo_step(grpo_group group, grpo_config cfg) grpo_step_result {
     int G = len(group.outputs)
 
-
     []float rewards = []
     int i = 0
     for i < G {
@@ -249,9 +191,7 @@ func grpo_step(grpo_group group, grpo_config cfg) grpo_step_result {
         i = i + 1
     }
 
-
     []float adv = compute_group_advantages(rewards, cfg.advantage_eps)
-
 
     float total_loss = 0.0
     float kl_total   = 0.0
@@ -260,7 +200,6 @@ func grpo_step(grpo_group group, grpo_config cfg) grpo_step_result {
     for j < G {
         float log_ratio = group.log_probs_policy[j] - group.log_probs_ref[j]
         float ratio = exp_grpo(log_ratio)
-
 
         float ratio_clipped = clip_grpo(ratio, 1.0 - cfg.clip_eps, 1.0 + cfg.clip_eps)
         float obj1 = ratio * adv[j]
@@ -281,7 +220,6 @@ func grpo_step(grpo_group group, grpo_config cfg) grpo_step_result {
     float fG = float_grpo(G)
     total_loss = total_loss / fG
     kl_total   = kl_total / fG
-
 
     float mean_r = 0.0
     int k = 0
@@ -321,10 +259,6 @@ func grpo_step(grpo_group group, grpo_config cfg) grpo_step_result {
         accepted_outputs: accepted,
     }
 }
-
-
-
-
 
 struct grpo_trainer_state {
     grpo_config cfg
@@ -374,11 +308,6 @@ func grpo_train_step(grpo_trainer_state trainer, grpo_group group) grpo_train_st
     grpo_train_step_result { state: updated, step_result: result }
 }
 
-
-
-
-
-
 struct grpo_curriculum_state {
     float recent_accuracy
     int adaptive_group_size
@@ -407,7 +336,6 @@ func grpo_curriculum_update(grpo_curriculum_state cur, float step_accuracy, grpo
     if updated.steps_since_update >= cur.update_interval {
         updated.steps_since_update = 0
 
-
         if acc > 0.9 {
 
             updated.adaptive_temp = min_float(base_cfg.temperature * 1.2, 1.0)
@@ -421,10 +349,6 @@ func grpo_curriculum_update(grpo_curriculum_state cur, float step_accuracy, grpo
 
     updated
 }
-
-
-
-
 
 func float_grpo(int n) float {
     float v = 0.0
@@ -466,7 +390,6 @@ func min_float(float a, float b) float {
     b
 }
 
-
 func string_contains(string s, string sub) bool {
 
     false
@@ -482,7 +405,6 @@ func string_trim(string s) string {
 }
 
 func extract_answer_tag(string output) string {
-
 
     output
 }

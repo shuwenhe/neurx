@@ -1,7 +1,5 @@
 
 
-
-
 package scripts
 
 import (
@@ -10,10 +8,6 @@ import (
     "path/filepath"
     "strings"
 )
-
-
-
-
 
 enum DataFormat {
     JSONL,
@@ -38,16 +32,11 @@ struct data_config {
     numWorkers      int
 }
 
-
-
-
-
 struct data_orchestrator {
     logger   Logger
     config   data_config
     neurxRoot string
 }
-
 
 func new_data_orchestrator(inputPath string) (*data_orchestrator, error) {
     logger := new_logger("data_orchestrator")
@@ -86,7 +75,6 @@ func new_data_orchestrator(inputPath string) (*data_orchestrator, error) {
     }, nil
 }
 
-
 func (d *data_orchestrator) setup() error {
     d.logger.log("Setting up data environment...")
 
@@ -99,14 +87,12 @@ func (d *data_orchestrator) setup() error {
     return nil
 }
 
-
 func (d *data_orchestrator) validate_input() error {
     d.logger.log("Validating input data...")
 
     if !file_exists(d.config.inputPath) {
         return fmt.Errorf("input file not found: %s", d.config.inputPath)
     }
-
 
     info, err := os.Stat(d.config.inputPath)
     if err != nil {
@@ -116,7 +102,6 @@ func (d *data_orchestrator) validate_input() error {
     sizeMB := float64(info.Size()) / (1024 * 1024)
     d.logger.log("Input size: %.2f MB", sizeMB)
 
-
     if !d.is_valid_format(d.config.inputPath) {
         return fmt.Errorf("invalid data format")
     }
@@ -125,10 +110,8 @@ func (d *data_orchestrator) validate_input() error {
     return nil
 }
 
-
 func (d *data_orchestrator) process_data() error {
     d.logger.log("Processing data...")
-
 
     if d.config.deduplication {
         d.logger.log("Deduplicating data...")
@@ -137,7 +120,6 @@ func (d *data_orchestrator) process_data() error {
         }
     }
 
-
     if d.config.qualityFilter {
         d.logger.log("Applying quality filters...")
         if err := d.filter_quality(); err != nil {
@@ -145,14 +127,12 @@ func (d *data_orchestrator) process_data() error {
         }
     }
 
-
     if d.config.languageFilter {
         d.logger.log("Filtering by language...")
         if err := d.filter_language(); err != nil {
             d.logger.warn("Language filtering failed: %v", err)
         }
     }
-
 
     d.logger.log("Tokenizing data...")
     if err := d.tokenize_data(); err != nil {
@@ -162,7 +142,6 @@ func (d *data_orchestrator) process_data() error {
     d.logger.success("Data processing completed")
     return nil
 }
-
 
 func (d *data_orchestrator) split(trainRatio float32, valRatio float32) error {
     d.logger.log("Splitting data into train/val/test sets...")
@@ -176,7 +155,6 @@ func (d *data_orchestrator) split(trainRatio float32, valRatio float32) error {
 
     d.logger.log("Train: %.1f%%, Val: %.1f%%, Test: %.1f%%",
         trainRatio*100, valRatio*100, testRatio*100)
-
 
     trainDir := filepath.Join(filepath.Dir(d.config.outputPath), "train")
     valDir := filepath.Join(filepath.Dir(d.config.outputPath), "val")
@@ -192,20 +170,17 @@ func (d *data_orchestrator) split(trainRatio float32, valRatio float32) error {
     return nil
 }
 
-
 func (d *data_orchestrator) convert(toFormat DataFormat) error {
     d.logger.log("Converting data format...")
 
     d.logger.log("From: %s", format_string(d.config.format))
     d.logger.log("To: %s", format_string(toFormat))
 
-
     d.config.format = toFormat
 
     d.logger.success("Format conversion completed")
     return nil
 }
-
 
 func (d *data_orchestrator) statistics() error {
     d.logger.log("Generating data statistics...")
@@ -236,10 +211,6 @@ Workers: %d
     d.logger.success("statistics saved to %s", statsFile)
     return nil
 }
-
-
-
-
 
 func (d *data_orchestrator) is_valid_format(path string) bool {
     ext := strings.ToLower(filepath.Ext(path))
@@ -320,11 +291,6 @@ func format_string(format DataFormat) string {
     }
 }
 
-
-
-
-
-
 func process_dataset(inputPath string) error {
     orchestrator, err := new_data_orchestrator(inputPath)
     if err != nil {
@@ -346,7 +312,6 @@ func process_dataset(inputPath string) error {
     return orchestrator.statistics()
 }
 
-
 func split_dataset(inputPath string, trainRatio float32, valRatio float32) error {
     orchestrator, err := new_data_orchestrator(inputPath)
     if err != nil {
@@ -359,7 +324,6 @@ func split_dataset(inputPath string, trainRatio float32, valRatio float32) error
 
     return orchestrator.split(trainRatio, valRatio)
 }
-
 
 func convert_data_format(inputPath string, outputFormat string) error {
     orchestrator, err := new_data_orchestrator(inputPath)
@@ -387,7 +351,6 @@ func convert_data_format(inputPath string, outputFormat string) error {
 
     return orchestrator.convert(format)
 }
-
 
 func clean_dataset(inputPath string) error {
     return process_dataset(inputPath)

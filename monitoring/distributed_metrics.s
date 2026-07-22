@@ -1,9 +1,6 @@
 
 
-
-
 module distributed_monitoring
-
 
 enum metric_type {
     COUNTER,
@@ -11,7 +8,6 @@ enum metric_type {
     HISTOGRAM,
     TIMER,
 }
-
 
 structure metric_definition {
     name: string
@@ -21,7 +17,6 @@ structure metric_definition {
     tags: vector
 }
 
-
 structure metric_value {
     timestamp: float
     value: float
@@ -29,22 +24,18 @@ structure metric_value {
     tags: vector
 }
 
-
 structure training_metrics {
     global_step: int
     epoch: int
     timestamp: float
 
-
     loss: float
     loss_ema: float
     loss_std: float
 
-
     tokens_per_second: float
     samples_per_second: float
     tflops_per_gpu: float
-
 
     forward_time: float
     backward_time: float
@@ -52,11 +43,9 @@ structure training_metrics {
     communication_time: float
     data_loading_time: float
 
-
     reserved_memory_gb: float
     allocated_memory_gb: float
     peak_memory_gb: float
-
 
     all_reduce_time: float
     all_to_all_time: float
@@ -64,18 +53,15 @@ structure training_metrics {
     reduce_scatter_time: float
     communication_volume_gb: float
 
-
     gradient_norm: float
     gradient_max: float
     gradient_min: float
     num_nan_gradients: int
 }
 
-
 structure rank_metrics {
     rank: int
     metrics: training_metrics
-
 
     gpu_utilization: float
     gpu_memory_used_gb: float
@@ -83,25 +69,20 @@ structure rank_metrics {
     network_recv_gb: float
 }
 
-
 structure metrics_aggregator {
     window_size: int
     history: vector
     current_metrics: training_metrics
 
-
     all_rank_metrics: vector
-
 
     loss_history: vector
     throughput_history: vector
-
 
     loss_spike_threshold: float
     throughput_drop_threshold: float
     memory_threshold_gb: float
 }
-
 
 structure anomaly_detector {
 
@@ -109,12 +90,10 @@ structure anomaly_detector {
     gradient_explosion_threshold: float
     throughput_drop_threshold: float
 
-
     prev_loss: float
     prev_throughput: float
     anomaly_count: int
 }
-
 
 func new_metrics_aggregator(window_size: int): metrics_aggregator {
     var agg: metrics_aggregator
@@ -130,7 +109,6 @@ func new_metrics_aggregator(window_size: int): metrics_aggregator {
 
     return agg
 }
-
 
 func collect_training_metrics(
     global_step: int,
@@ -158,21 +136,16 @@ func collect_training_metrics(
     metrics.epoch = epoch
     metrics.timestamp = get_time()
 
-
     metrics.loss = loss
     metrics.loss_ema = 0.9 * metrics.loss_ema + 0.1 * loss
-
 
     var total_time_ms: float = forward_time_ms + backward_time_ms + optimizer_time_ms + communication_time_ms
     var tokens_processed: int = batch_size * sequence_length
     metrics.tokens_per_second = float(tokens_processed) / (total_time_ms / 1000.0)
     metrics.samples_per_second = float(batch_size) / (total_time_ms / 1000.0)
 
-
-
     var estimated_flops: float = 32.0e15
     metrics.tflops_per_gpu = (estimated_flops * 2.0) / (total_time_ms / 1000.0) / 1e12
-
 
     metrics.forward_time = forward_time_ms
     metrics.backward_time = backward_time_ms
@@ -180,14 +153,11 @@ func collect_training_metrics(
     metrics.communication_time = communication_time_ms
     metrics.data_loading_time = data_load_time_ms
 
-
     metrics.reserved_memory_gb = reserved_memory_gb
     metrics.allocated_memory_gb = allocated_memory_gb
     metrics.peak_memory_gb = peak_memory_gb
 
-
     metrics.communication_volume_gb = comm_volume_gb
-
 
     metrics.gradient_norm = compute_vector_norm(gradients)
     metrics.gradient_max = compute_vector_max(gradients)
@@ -203,7 +173,6 @@ func collect_training_metrics(
 
     return metrics
 }
-
 
 func collect_rank_metrics(
     rank: int,
@@ -225,7 +194,6 @@ func collect_rank_metrics(
     return rank_m
 }
 
-
 func aggregate_metrics_across_ranks(
     all_rank_metrics: vector,
     num_ranks: int,
@@ -238,11 +206,9 @@ func aggregate_metrics_across_ranks(
         return agg_metrics
     }
 
-
     agg_metrics.global_step = all_rank_metrics[0].metrics.global_step
     agg_metrics.epoch = all_rank_metrics[0].metrics.epoch
     agg_metrics.timestamp = get_time()
-
 
     var sum_loss: float = 0.0
     var sum_tokens_per_sec: float = 0.0
@@ -261,7 +227,6 @@ func aggregate_metrics_across_ranks(
         sum_comm_volume = sum_comm_volume + rank_m.communication_volume_gb
     }
 
-
     agg_metrics.loss = sum_loss / float(num_ranks)
     agg_metrics.tokens_per_second = sum_tokens_per_sec / float(num_ranks)
     agg_metrics.tflops_per_gpu = sum_tflops / float(num_ranks)
@@ -272,7 +237,6 @@ func aggregate_metrics_across_ranks(
     return agg_metrics
 }
 
-
 func detect_anomalies(
     current_metrics: training_metrics,
     detector: anomaly_detector
@@ -280,7 +244,6 @@ func detect_anomalies(
 
     var is_anomaly: bool = false
     var description: string = ""
-
 
     if detector.prev_loss > 0.0 {
         var loss_ratio: float = current_metrics.loss / detector.prev_loss
@@ -292,12 +255,10 @@ func detect_anomalies(
     }
     detector.prev_loss = current_metrics.loss
 
-
     if current_metrics.gradient_max > detector.gradient_explosion_threshold {
         is_anomaly = true
         description = "Gradient explosion: max_grad = " + str(current_metrics.gradient_max)
     }
-
 
     if detector.prev_throughput > 0.0 {
         var throughput_ratio: float = current_metrics.tokens_per_second / detector.prev_throughput
@@ -309,12 +270,10 @@ func detect_anomalies(
     }
     detector.prev_throughput = current_metrics.tokens_per_second
 
-
     if is_nan(current_metrics.loss) || current_metrics.num_nan_gradients > 0 {
         is_anomaly = true
         description = "NaN detected in loss or gradients"
     }
-
 
     if current_metrics.peak_memory_gb > detector.throughput_drop_threshold {
         is_anomaly = true
@@ -327,7 +286,6 @@ func detect_anomalies(
 
     return (is_anomaly, description)
 }
-
 
 func compute_timing_breakdown(
     metrics: training_metrics
@@ -349,7 +307,6 @@ func compute_timing_breakdown(
     return (pct_forward, pct_backward, pct_optimizer, pct_communication, pct_data_load)
 }
 
-
 func identify_communication_bottlenecks(
     metrics: training_metrics,
     num_ranks: int,
@@ -358,7 +315,6 @@ func identify_communication_bottlenecks(
 
     var bottleneck_info: string = ""
 
-
     var total_compute_time: float = metrics.forward_time + metrics.backward_time + metrics.optimizer_time
     var comm_ratio: float = metrics.communication_time / total_compute_time
 
@@ -366,13 +322,11 @@ func identify_communication_bottlenecks(
         bottleneck_info = "High communication overhead: " + str(comm_ratio * 100.0) + "%"
     }
 
-
     var avg_comm_per_layer: float = metrics.communication_time / float(num_layers)
 
     if avg_comm_per_layer > 100.0 {
         bottleneck_info = bottleneck_info + "\nLarge all-reduce latency: " + str(avg_comm_per_layer) + "ms per layer"
     }
-
 
     var all_reduce_ratio: float = metrics.all_reduce_time / metrics.communication_time
     if all_reduce_ratio > 0.5 {
@@ -382,7 +336,6 @@ func identify_communication_bottlenecks(
     return bottleneck_info
 }
 
-
 func print_metrics_summary(
     metrics: training_metrics,
     aggregator: metrics_aggregator
@@ -390,37 +343,27 @@ func print_metrics_summary(
 
     var (pct_fwd, pct_bwd, pct_opt, pct_comm, pct_data) = compute_timing_breakdown(metrics)
 
-
     println("===== Training Metrics (Step " + str(metrics.global_step) + ") =====")
 
-
     println("Loss: " + str(metrics.loss) + " (EMA: " + str(metrics.loss_ema) + ")")
-
 
     println("Throughput: " + str(metrics.tokens_per_second) + " tokens/sec")
     println("TFLOPS/GPU: " + str(metrics.tflops_per_gpu) + " TFLOPS")
 
-
     println("Timing: " + str(pct_fwd) + "% fwd, " + str(pct_bwd) + "% bwd, " + str(pct_opt) + "% opt, " +
             str(pct_comm) + "% comm, " + str(pct_data) + "% data")
 
-
     println("Memory: " + str(metrics.allocated_memory_gb) + "GB / " + str(metrics.reserved_memory_gb) + "GB reserved")
-
 
     println("Grad norm: " + str(metrics.gradient_norm) + " (max: " + str(metrics.gradient_max) + ")")
 }
-
 
 func export_metrics_to_file(
     metrics: training_metrics,
     output_file: string
 ): void {
 
-
-
 }
-
 
 func new_anomaly_detector(): anomaly_detector {
     var detector: anomaly_detector
@@ -434,7 +377,6 @@ func new_anomaly_detector(): anomaly_detector {
     return detector
 }
 
-
 func compute_vector_norm(v: vector): float {
     var norm_sq: float = 0.0
 
@@ -444,7 +386,6 @@ func compute_vector_norm(v: vector): float {
 
     return sqrt(norm_sq)
 }
-
 
 func compute_vector_max(v: vector): float {
     var max_val: float = -inf
@@ -458,7 +399,6 @@ func compute_vector_max(v: vector): float {
     return max_val
 }
 
-
 func compute_vector_min(v: vector): float {
     var min_val: float = inf
 
@@ -471,20 +411,16 @@ func compute_vector_min(v: vector): float {
     return min_val
 }
 
-
 func get_time(): float {
     return 0.0
 }
-
 
 func is_nan(val: float): bool {
     return val != val
 }
 
-
 func println(msg: string): void {
 }
-
 
 func recommended_monitoring_config_2t(): metrics_aggregator {
     return new_metrics_aggregator(1000)

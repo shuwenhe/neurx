@@ -1,10 +1,5 @@
 package neurx.attention.nda
 
-
-
-
-
-
 struct nda_config {
     int hidden_dim
     int state_dim
@@ -272,7 +267,6 @@ func nda_forward(nda_weights weights, []float input, int tokens, []float initial
         }
         float beta = nda_sigmoid(beta_logits[t])
         beta_values[t] = beta
-
 
         []float decayed = nda_zeros(d * d)
         i = 0

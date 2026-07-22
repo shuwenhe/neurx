@@ -1,19 +1,5 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct ipc_message {
     int    msg_id
     int    from_pid
@@ -40,7 +26,6 @@ func new_ipc_state() ipc_state {
     return ipc_state{queues: [], next_qid: 1, next_msg_id: 1}
 }
 
-
 func msgget(is ipc_state, name string, max_depth int) (ipc_state, int) {
 
     int i = 0
@@ -56,7 +41,6 @@ func msgget(is ipc_state, name string, max_depth int) (ipc_state, int) {
     is.next_qid = is.next_qid + 1
     return (is, qid)
 }
-
 
 func msgsnd(is ipc_state, qid int, from_pid int, to_pid int, msg_type string, payload string) ipc_state {
     int i = 0
@@ -77,7 +61,6 @@ func msgsnd(is ipc_state, qid int, from_pid int, to_pid int, msg_type string, pa
     }
     return is
 }
-
 
 func msgrcv(is ipc_state, qid int, to_pid int) (ipc_state, ipc_message, bool) {
     int qi = 0
@@ -107,9 +90,6 @@ func msgrcv(is ipc_state, qid int, to_pid int) (ipc_state, ipc_message, bool) {
     return (is, ipc_message{}, false)
 }
 
-
-
-
 struct semaphore {
     int    sem_id
     string name
@@ -134,7 +114,6 @@ func sem_create(ss sem_state, name string, initial int, max_val int) (sem_state,
     return (ss, id)
 }
 
-
 func sem_down(ss sem_state, sem_id int) (sem_state, bool) {
     int i = 0
     while i < len(ss.sems) {
@@ -149,7 +128,6 @@ func sem_down(ss sem_state, sem_id int) (sem_state, bool) {
     }
     return (ss, false)
 }
-
 
 func sem_up(ss sem_state, sem_id int) sem_state {
     int i = 0

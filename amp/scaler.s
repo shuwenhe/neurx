@@ -1,13 +1,5 @@
 package neurx.amp.scaler
 
-
-
-
-
-
-
-
-
 struct mixed_precision_config {
     string precision_type
     float loss_scale
@@ -41,17 +33,11 @@ struct dynamic_quantization {
     float* activation_max
 }
 
-
-
-
-
-
 func is_nan_or_inf(float value) bool {
 
     if value != value {
         return true
     }
-
 
     if value > 1000000.0 || value < -1000000.0 {
         return true
@@ -59,7 +45,6 @@ func is_nan_or_inf(float value) bool {
 
     false
 }
-
 
 func check_gradient_overflow(float* gradients, int gradient_count) bool {
     int i = 0
@@ -71,7 +56,6 @@ func check_gradient_overflow(float* gradients, int gradient_count) bool {
     }
     false
 }
-
 
 func update_loss_scale(
     mixed_precision_state state,
@@ -94,7 +78,6 @@ func update_loss_scale(
 
         state.stable_steps = state.stable_steps + 1
 
-
         if state.stable_steps >= config.loss_scale_window {
             state.loss_scale = state.loss_scale * config.loss_scale_up_factor
             state.stable_steps = 0
@@ -109,11 +92,6 @@ func update_loss_scale(
 
     state
 }
-
-
-
-
-
 
 func scale_gradients(
     float* gradients,
@@ -135,14 +113,12 @@ func scale_gradients(
     result
 }
 
-
 func clip_gradients(
     float* gradients,
     int gradient_count,
     float max_norm
 ) float* {
     float* clipped = alloc(float, gradient_count)
-
 
     float norm = 0.0
     int i = 0
@@ -151,7 +127,6 @@ func clip_gradients(
         i = i + 1
     }
     norm = sqrt_f(norm)
-
 
     float clip_coeff = 1.0
     if norm > max_norm {
@@ -166,10 +141,6 @@ func clip_gradients(
 
     clipped
 }
-
-
-
-
 
 struct mixed_precision_optimizer {
     string optimizer_type
@@ -187,7 +158,6 @@ struct mixed_precision_optimizer {
     mixed_precision_config amp_config
 }
 
-
 func init_mixed_precision_optimizer(
     int parameter_count,
     float learning_rate,
@@ -203,10 +173,8 @@ func init_mixed_precision_optimizer(
     optimizer.weight_decay = 0.01
     optimizer.parameter_count = parameter_count
 
-
     optimizer.m = alloc(float, parameter_count)
     optimizer.v = alloc(float, parameter_count)
-
 
     optimizer.amp_state.loss_scale = 65536.0
     optimizer.amp_state.overflow_counter = 0
@@ -220,7 +188,6 @@ func init_mixed_precision_optimizer(
     optimizer
 }
 
-
 func mixed_precision_adam_step(
     mixed_precision_optimizer optimizer,
     float* params,
@@ -228,7 +195,6 @@ func mixed_precision_adam_step(
     float* loss,
     int step
 ) mixed_precision_optimizer {
-
 
     bool overflow = is_nan_or_inf(loss[0])
 
@@ -243,16 +209,7 @@ func mixed_precision_adam_step(
         return optimizer
     }
 
-
-
-
-
     float* clipped_gradients = clip_gradients(gradients, optimizer.parameter_count, optimizer.amp_config.grad_clip_value)
-
-
-
-
-
 
     int i = 0
     while i < optimizer.parameter_count {
@@ -260,14 +217,11 @@ func mixed_precision_adam_step(
         optimizer.m[i] = optimizer.betas_1 * optimizer.m[i] +
                         (1.0 - optimizer.betas_1) * clipped_gradients[i]
 
-
         optimizer.v[i] = optimizer.betas_2 * optimizer.v[i] +
                         (1.0 - optimizer.betas_2) * clipped_gradients[i] * clipped_gradients[i]
 
-
         float m_hat = optimizer.m[i] / (1.0 - pow_f(optimizer.betas_1, float(step)))
         float v_hat = optimizer.v[i] / (1.0 - pow_f(optimizer.betas_2, float(step)))
-
 
         float update = optimizer.learning_rate * m_hat / (sqrt_f(v_hat) + optimizer.epsilon)
         params[i] = params[i] - update - optimizer.weight_decay * params[i]
@@ -275,15 +229,10 @@ func mixed_precision_adam_step(
         i = i + 1
     }
 
-
     optimizer.amp_state = update_loss_scale(optimizer.amp_state, optimizer.amp_config, false)
 
     optimizer
 }
-
-
-
-
 
 struct gradient_checkpoint {
     float* activation_snapshots
@@ -291,7 +240,6 @@ struct gradient_checkpoint {
     int checkpoint_size
     bool needs_recompute
 }
-
 
 func save_gradient_checkpoint(
     float* activations,
@@ -305,7 +253,6 @@ func save_gradient_checkpoint(
     checkpoint.checkpoint_size = size
     checkpoint.needs_recompute = false
 
-
     int i = 0
     while i < size {
         checkpoint.activation_snapshots[i] = activations[i]
@@ -314,7 +261,6 @@ func save_gradient_checkpoint(
 
     checkpoint
 }
-
 
 func restore_gradient_checkpoint(gradient_checkpoint checkpoint) float* {
     float* restored = alloc(float, checkpoint.checkpoint_size)
@@ -328,10 +274,6 @@ func restore_gradient_checkpoint(gradient_checkpoint checkpoint) float* {
     restored
 }
 
-
-
-
-
 struct distributed_training_state {
     int world_size
     int rank
@@ -341,7 +283,6 @@ struct distributed_training_state {
     int gradient_accumulation_counter
 }
 
-
 func synchronize_gradients(
     float* gradients,
     int gradient_count,
@@ -350,9 +291,6 @@ func synchronize_gradients(
     if state.world_size <= 1 {
         return gradients
     }
-
-
-
 
     float* synchronized = alloc(float, gradient_count)
 
@@ -366,7 +304,6 @@ func synchronize_gradients(
 
     synchronized
 }
-
 
 func accumulate_gradients(
     float* current_gradients,
@@ -385,10 +322,6 @@ func accumulate_gradients(
     result
 }
 
-
-
-
-
 struct mixed_precision_training_loop {
     mixed_precision_optimizer optimizer
     distributed_training_state dist_state
@@ -401,7 +334,6 @@ struct mixed_precision_training_loop {
     int overflow_steps
 }
 
-
 func training_step(
     float* model_params,
     float* gradients,
@@ -410,7 +342,6 @@ func training_step(
     int step
 ) mixed_precision_training_loop {
 
-
     if loop.total_steps == 0 {
         loop.running_loss[0] = loss
     } else {
@@ -418,20 +349,16 @@ func training_step(
                               (1.0 - loop.loss_smoothing_factor) * loss
     }
 
-
     float* synced_gradients = synchronize_gradients(gradients, 512, loop.dist_state)
-
 
     if loop.dist_state.gradient_accumulation_counter == 0 {
 
     }
 
-
     float* loss_ptr = alloc(float, 1)
     loss_ptr[0] = loss
 
     loop.optimizer = mixed_precision_adam_step(loop.optimizer, model_params, synced_gradients, loss_ptr, step)
-
 
     if loop.optimizer.amp_state.in_overflow_state {
         loop.overflow_steps = loop.overflow_steps + 1
@@ -443,10 +370,6 @@ func training_step(
     loop
 }
 
-
-
-
-
 struct training_metrics {
     float loss
     float learning_rate
@@ -457,7 +380,6 @@ struct training_metrics {
     float gpu_memory_used_gb
     float training_time_hours
 }
-
 
 func compute_training_metrics(
     mixed_precision_training_loop loop,
@@ -486,10 +408,6 @@ func compute_training_metrics(
     metrics
 }
 
-
-
-
-
 func pow_f(float base, float exp) float {
     1.0
 }
@@ -507,13 +425,8 @@ func sqrt_f(float x) float {
     guess
 }
 
-
-
-
-
 func main() {
     println("=== Mixed Precision Training System ===")
-
 
     mixed_precision_config amp_config
     amp_config.precision_type = "bf16"
@@ -522,7 +435,6 @@ func main() {
     amp_config.loss_scale_down_factor = 2.0
     amp_config.loss_scale_window = 2000
     amp_config.grad_clip_value = 1.0
-
 
     mixed_precision_optimizer optimizer = init_mixed_precision_optimizer(100000, 0.0001, amp_config)
 

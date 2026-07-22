@@ -425,7 +425,6 @@ func ready_for_binary_op(grad_graph graph, int left, int right) bool {
     same_shape(graph.nodes[left].shape, graph.nodes[right].shape)
 }
 
-
 func matmul_node(grad_graph graph, int left, int right) grad_graph {
     grad_node lhs = graph.nodes[left]
     grad_node rhs = graph.nodes[right]
@@ -452,7 +451,6 @@ func matmul_node(grad_graph graph, int left, int right) grad_graph {
     }
 }
 
-
 func create_dynamic_graph() grad_graph {
     grad_graph {
         nodes: []grad_node{cap: 0},
@@ -478,7 +476,6 @@ func execute_dynamic_graph(grad_graph graph, int output_id) []float {
     }
     out
 }
-
 
 func compute_higher_order_grad(grad_graph graph, int output_id) grad_graph {
     grad_graph first_order_graph = backward(graph, output_id)

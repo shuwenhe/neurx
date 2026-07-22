@@ -3,10 +3,6 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_text_file, runtime_run_command_output}
 use std.io.println
 
-
-
-
-
 struct training_state {
     int current_step
     int completed_docs
@@ -67,7 +63,6 @@ func main() {
         return
     }
 
-
     println("[PRETRAIN-GPU] Phase 1: checkpoint Detection")
     bool has_checkpoint = checkpoint_exists(output_dir)
 
@@ -76,7 +71,6 @@ func main() {
     if has_checkpoint {
         println("[PRETRAIN-GPU] ✓ Found existing checkpoint at " + output_dir)
         state = load_training_state(output_dir)
-
 
         if resume_mode == "no" {
             println("[PRETRAIN-GPU] Resume disabled (NEURX_PRETRAIN_RESUME=no)")
@@ -95,13 +89,11 @@ func main() {
         println("[PRETRAIN-GPU] Starting fresh training from step 0")
     }
 
-
     println("[PRETRAIN-GPU] Phase 2: Environment Setup")
 
     string shard_list_text = runtime_read_text_file(shard_list_file)
     int shard_count = count_lines(shard_list_text)
     println("[PRETRAIN-GPU] Found " + int_to_str(shard_count) + " shards")
-
 
     string resume_step_str = int_to_str(state.current_step)
     string resume_docs_str = int_to_str(state.completed_docs)
@@ -124,9 +116,7 @@ func main() {
         println("  - Weights checkpoint: " + latest_weights_path)
     }
 
-
     save_training_state(output_dir, state)
-
 
     if resume_flag == "1" {
         create_cuda_resume_state(checkpoint_state_file, state, latest_weights_path)
@@ -145,10 +135,6 @@ func main() {
     }
     println("[PRETRAIN-GPU] Resume state will be automatically saved every NEURX_PRETRAIN_SAVE_INTERVAL steps.")
 }
-
-
-
-
 
 func checkpoint_exists(string checkpoint_dir) bool {
     string state_file = checkpoint_dir + "/training_state.txt"
@@ -185,7 +171,6 @@ func parse_training_state(string content) training_state {
         return state
     }
 
-
     int step_idx = index_of(content, "step=")
     if step_idx >= 0 {
         int val = parse_int_at(content, step_idx + 5)
@@ -194,7 +179,6 @@ func parse_training_state(string content) training_state {
         }
     }
 
-
     int docs_idx = index_of(content, "docs=")
     if docs_idx >= 0 {
         int val = parse_int_at(content, docs_idx + 5)
@@ -202,7 +186,6 @@ func parse_training_state(string content) training_state {
             state.completed_docs = val
         }
     }
-
 
     int shards_idx = index_of(content, "shards=")
     if shards_idx >= 0 {
@@ -232,10 +215,6 @@ func update_training_state(string checkpoint_dir, int step, int docs, int shards
     }
     save_training_state(checkpoint_dir, state)
 }
-
-
-
-
 
 func index_of(string s, string needle) int {
     int s_len = str_len(s)
@@ -282,7 +261,6 @@ func int(float f) int {
     0
 }
 
-
 func initialize_gpu_contexts(int num_gpus) {
     println("[PRETRAIN-GPU] Initializing " + int_to_str(num_gpus) + " GPU context(s)...")
     int i = 0
@@ -326,7 +304,6 @@ func process_shard_on_gpu(int gpu_id, int shard_idx, int shard_count, string sha
     processed
 }
 
-
 func synchronize_all_gpus(int num_gpus) {
     println("[PRETRAIN-GPU] Synchronizing all GPU streams...")
     int i = 0
@@ -365,7 +342,6 @@ func shell_escape(string s) string {
     }
     out + "'"
 }
-
 
 func write_progress(string path, string text) {
     if str_len(path) > 0 {
@@ -506,7 +482,6 @@ func string_char(int c) string {
     string(c)
 }
 
-
 func detect_gpus() int {
     int count = parse_int(runtime_env_get("NEURX_CUDA_DEVICE_COUNT", "0"), 0)
     if count > 0 {
@@ -516,7 +491,6 @@ func detect_gpus() int {
     }
     count
 }
-
 
 func initialize_gpu_contexts(int num_gpus) {
     println("[PRETRAIN-GPU] Initializing " + int_to_str(num_gpus) + " GPU context(s)...")
@@ -561,7 +535,6 @@ func process_shard_on_gpu(int gpu_id, int shard_idx, int shard_count, string sha
     processed
 }
 
-
 func synchronize_all_gpus(int num_gpus) {
     println("[PRETRAIN-GPU] Synchronizing all GPU streams...")
     int i = 0
@@ -600,7 +573,6 @@ func shell_escape(string s) string {
     }
     out + "'"
 }
-
 
 func write_progress(string path, string text) {
     if str_len(path) > 0 {
@@ -749,12 +721,7 @@ func str_len(string s) int {
     n
 }
 
-
-
-
-
 func find_latest_checkpoint_weights(string checkpoint_dir, int resume_step) string {
-
 
     string cmd = "ls -1 '" + checkpoint_dir + "/checkpoint_step_'*.weights.f32 2>/dev/null | sort -V | tail -1"
     string latest = runtime_run_command_output(cmd)
@@ -763,7 +730,6 @@ func find_latest_checkpoint_weights(string checkpoint_dir, int resume_step) stri
 }
 
 func create_cuda_resume_state(string state_file, training_state state, string weights_path) {
-
 
     string content = ""
     content = content + "completed_step=" + int_to_str(state.current_step) + "\n"

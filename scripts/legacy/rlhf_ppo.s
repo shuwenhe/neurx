@@ -1,9 +1,5 @@
 
 
-
-
-
-
 package main
 
 import (
@@ -14,10 +10,6 @@ import (
     "strings"
     "time"
 )
-
-
-
-
 
 type trajectory_step struct {
     step_id         int
@@ -118,10 +110,6 @@ type optimizer struct {
     grad_accumulation   int
 }
 
-
-
-
-
 func (trainer *ppotrainer) collect_trajectories(num_trajectories int) []trajectory {
     fmt.Println("[PPO] Collecting trajectories...")
 
@@ -131,7 +119,6 @@ func (trainer *ppotrainer) collect_trajectories(num_trajectories int) []trajecto
 
         trajectory := trainer.generate_trajectory()
 
-
         trajectory.reward_sum = 0
         for j, step := range trajectory.steps {
 
@@ -139,7 +126,6 @@ func (trainer *ppotrainer) collect_trajectories(num_trajectories int) []trajecto
             trajectory.steps[j].rewards = []float64{reward}
             trajectory.reward_sum += reward
         }
-
 
         trajectory.steps = trainer.calculate_advantages(trajectory.steps)
 
@@ -166,12 +152,9 @@ func (trainer *ppotrainer) generate_trajectory() trajectory {
 
         log_probs := trainer.policy_model.forward(current_tokens)
 
-
         next_token := trainer.sample_from_logits(log_probs)
 
-
         value := trainer.value_model.predict_value(current_tokens)
-
 
         log_prob := log_probs[next_token]
 
@@ -184,7 +167,6 @@ func (trainer *ppotrainer) generate_trajectory() trajectory {
 
         trajectory.steps = append(trajectory.steps, step)
         current_tokens = append(current_tokens, next_token)
-
 
         if next_token == 2 {
             break
@@ -230,10 +212,6 @@ func (trainer *ppotrainer) calculate_advantages(steps []trajectory_step) []traje
 
     return steps
 }
-
-
-
-
 
 func (trainer *ppotrainer) calculate_ppo_loss(old_log_probs []float64, new_log_probs []float64, advantages []float64) float64 {
     ratio := []float64{}
@@ -292,10 +270,6 @@ func (trainer *ppotrainer) calculate_kl_divergence(old_logits []float64, new_log
     return kl
 }
 
-
-
-
-
 func (trainer *ppotrainer) train_step(trajectories []trajectory) performance_metric {
     fmt.Println("[PPO] Training step...")
 
@@ -306,7 +280,6 @@ func (trainer *ppotrainer) train_step(trajectories []trajectory) performance_met
     total_return := 0.0
 
     num_batches := 0
-
 
     for epoch := 0; epoch < trainer.config.num_epochs; epoch++ {
 
@@ -328,13 +301,11 @@ func (trainer *ppotrainer) train_step(trajectories []trajectory) performance_met
                     advantage := step.advantages[0]
                     ret := step.gae_advantages[0]
 
-
                     ppo_loss := trainer.calculate_ppo_loss(
                         []float64{old_log_prob},
                         []float64{new_log_prob},
                         []float64{advantage},
                     )
-
 
                     new_value := trainer.value_model.predict_value(step.tokens)
                     value_loss := trainer.calculate_value_loss(
@@ -342,17 +313,14 @@ func (trainer *ppotrainer) train_step(trajectories []trajectory) performance_met
                         []float64{new_value},
                     )
 
-
                     kl := trainer.calculate_kl_divergence(
                         []float64{old_log_prob},
                         []float64{new_log_prob},
                     )
 
-
                     total_loss := ppo_loss +
                                  trainer.config.value_coeff*value_loss +
                                  trainer.config.kl_penalty*kl
-
 
                     trainer.optimizer.update_parameters(total_loss)
 
@@ -387,10 +355,6 @@ func (trainer *ppotrainer) train_step(trajectories []trajectory) performance_met
     return metric
 }
 
-
-
-
-
 func (trainer *ppotrainer) sample_from_logits(logits []float64) int {
     max_logit := logits[0]
     for _, l := range logits {
@@ -423,10 +387,6 @@ func (trainer *ppotrainer) sample_from_logits(logits []float64) int {
     return len(probs) - 1
 }
 
-
-
-
-
 func (model *PolicyModel) forward(tokens []int) []float64 {
     logits := make([]float64, model.vocab_size)
     for i := range logits {
@@ -453,10 +413,6 @@ func (model *reward_model) predict_reward(tokens []int) float64 {
     }
     return sum / float64(len(tokens))
 }
-
-
-
-
 
 func NewPPOTrainer(config ppoconfig) *ppotrainer {
     return &ppotrainer{
@@ -501,7 +457,6 @@ func (trainer *ppotrainer) train(num_steps int) {
 
         trajectories := trainer.collect_trajectories(trainer.config.batch_size)
 
-
         metric := trainer.train_step(trajectories)
 
         if (step + 1) % trainer.config.checkpoint_interval == 0 {
@@ -537,10 +492,6 @@ func (trainer *ppotrainer) print_summary() {
         fmt.Printf("Final KL Divergence: %.6f\n", latest.kl_divergence)
     }
 }
-
-
-
-
 
 func main() {
     config := ppoconfig{

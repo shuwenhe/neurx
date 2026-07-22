@@ -1,13 +1,5 @@
 
 
-
-
-
-
-
-
-
-
 package main
 
 import (
@@ -20,10 +12,6 @@ import (
 	"encoding/json"
 	"time"
 )
-
-
-
-
 
 type training_config struct {
 	ModelName       string `json:"model_name"`
@@ -77,10 +65,6 @@ type training_metrics struct {
 	Timestamp   string      `json:"timestamp"`
 }
 
-
-
-
-
 var gtraining_state = &training_state{
 	CurrentStep: 0,
 	CurrentEpoch: 0,
@@ -110,10 +94,6 @@ var gConfig = &training_config{
 	MixedPrecision: "fp16",
 	Seed: 42,
 }
-
-
-
-
 
 func loadConfigFromEnv() {
 
@@ -187,13 +167,8 @@ func saveConfigToFile(path string) error {
 	return nil
 }
 
-
-
-
-
 func initializeTraining() error {
 	logInfo("Initializing training...")
-
 
 	dirs := []string{
 		gConfig.OutputDir,
@@ -208,12 +183,10 @@ func initializeTraining() error {
 		}
 	}
 
-
 	stat, err := os.Stat(gConfig.DataDir)
 	if err != nil || !stat.IsDir() {
 		return fmt.Errorf("data directory not found: %s", gConfig.DataDir)
 	}
-
 
 	configPath := filepath.Join(gConfig.OutputDir, "config_initial.json")
 	err = saveConfigToFile(configPath)
@@ -268,7 +241,6 @@ func saveCheckpoint(step int64) error {
 		return err
 	}
 
-
 	statePath := filepath.Join(checkpointDir, "state.json")
 	data, err := json.MarshalIndent(gtraining_state, "", "  ")
 	if err != nil {
@@ -279,7 +251,6 @@ func saveCheckpoint(step int64) error {
 	if err != nil {
 		return err
 	}
-
 
 	configPath := filepath.Join(checkpointDir, "config.json")
 	err = saveConfigToFile(configPath)
@@ -293,26 +264,19 @@ func saveCheckpoint(step int64) error {
 	return nil
 }
 
-
-
-
-
 func trainingStep(step int64) error {
 
 	startTime := time.Now()
 
-
 	gtraining_state.CurrentStep = step
 	gtraining_state.AvgLoss = gtraining_state.AvgLoss*0.99 + 2.5*0.01
 	gtraining_state.GradientNorm = calculateGradientNorm()
-
 
 	lr := calculateLearningRate(step)
 	gtraining_state.LearningRate = lr
 
 	elapsed := time.Since(startTime).Seconds()
 	gtraining_state.TimesPerStep = elapsed
-
 
 	tokPerStep := int64(gConfig.BatchSize) * int64(gConfig.SeqLen)
 	gtraining_state.TokPerSec = float64(tokPerStep) / elapsed
@@ -322,7 +286,6 @@ func trainingStep(step int64) error {
 
 func evaluationStep(step int64) error {
 	logInfo(fmt.Sprintf("Running evaluation at step %d...", step))
-
 
 	evalLoss := 2.3
 	accuracy := 0.45
@@ -341,14 +304,12 @@ func calculateLearningRate(step int64) float64 {
 		return gConfig.LearningRate * float64(step) / float64(gConfig.WarmupSteps)
 	}
 
-
 	decaySteps := int64(gConfig.TotalSteps) - int64(gConfig.WarmupSteps)
 	progress := float64(step-int64(gConfig.WarmupSteps)) / float64(decaySteps)
 
 	if progress > 1.0 {
 		progress = 1.0
 	}
-
 
 	decayFactor := 0.5 * (1.0 + cosine(progress*3.14159))
 	return gConfig.LearningRate * decayFactor
@@ -361,13 +322,8 @@ func calculateGradientNorm() float64 {
 
 func cosine(x float64) float64 {
 
-
 	return 1.0 - x*x/2.0
 }
-
-
-
-
 
 func runTraining() error {
 	logInfo("Starting training loop...")
@@ -382,7 +338,6 @@ func runTraining() error {
 			return err
 		}
 
-
 		if step % int64(gConfig.EvalSteps) == 0 && step > 0 {
 			err := evaluationStep(step)
 			if err != nil {
@@ -390,14 +345,12 @@ func runTraining() error {
 			}
 		}
 
-
 		if step % int64(gConfig.CheckpointSteps) == 0 && step > 0 {
 			err := saveCheckpoint(step)
 			if err != nil {
 				logWarn("checkpoint failed: " + err.Error())
 			}
 		}
-
 
 		if step % 10 == 0 {
 			metric := training_metrics{
@@ -414,14 +367,12 @@ func runTraining() error {
 			logMetric(&metric)
 		}
 
-
 		if step % 100 == 0 {
 			logInfo(fmt.Sprintf("[Step %d/%d] Loss: %.4f, LR: %.6f, Tok/s: %.0f",
 				step, gConfig.TotalSteps, gtraining_state.AvgLoss,
 				gtraining_state.LearningRate, gtraining_state.TokPerSec))
 		}
 	}
-
 
 	err := saveCheckpoint(int64(gConfig.TotalSteps))
 	if err != nil {
@@ -431,10 +382,6 @@ func runTraining() error {
 	logInfo("Training completed successfully!")
 	return nil
 }
-
-
-
-
 
 func logInfo(msg string) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
@@ -497,10 +444,6 @@ func printConfig() {
 	fmt.Println(string(data))
 }
 
-
-
-
-
 func main() {
 	if len(os.Args) < 2 {
 		printUsage()
@@ -509,9 +452,7 @@ func main() {
 
 	command := os.Args[1]
 
-
 	loadConfigFromEnv()
-
 
 	switch command {
 	case "run":

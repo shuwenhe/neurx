@@ -1,15 +1,5 @@
 package neurx.inference.sampling
 
-
-
-
-
-
-
-
-
-
-
 func top_p_sample(
     []float logits,
     sampling_config config,
@@ -24,15 +14,11 @@ func top_p_sample(
         }
     }
 
-
     []float scaled_logits = apply_temperature(logits, config.temperature)
-
 
     []float probs = softmax(scaled_logits)
 
-
     []int sorted_indices = argsort_descending(probs)
-
 
     float cumsum = 0.0
     int cutoff_idx = len(sorted_indices) - 1
@@ -43,16 +29,12 @@ func top_p_sample(
 
         cumsum = cumsum + prob
 
-
-
-
         if i == 0 || cumsum < config.top_p {
             cutoff_idx = i
         } else {
             break
         }
     }
-
 
     []int filtered_indices = []
     []float filtered_probs = []
@@ -64,27 +46,17 @@ func top_p_sample(
         }
     }
 
-
     if len(filtered_indices) == 0 {
         return (sorted_indices[0], advance_rng(rng_state))
     }
 
-
     []float normalized = normalize(filtered_probs)
-
 
     int sampled_idx = sample_from_distribution(normalized, rng_state)
     int selected_token = filtered_indices[sampled_idx] if sampled_idx < len(filtered_indices) else filtered_indices[0]
 
     (selected_token, advance_rng(rng_state))
 }
-
-
-
-
-
-
-
 
 func beam_search_decode(
     [][]float all_logits,
@@ -95,7 +67,6 @@ func beam_search_decode(
     int num_beams = max(1, config.num_beams)
     int max_length = min(config.max_length, len(all_logits))
 
-
     []beam_state beams = []
     beams.push(beam_state {
         token_ids: [],
@@ -103,9 +74,7 @@ func beam_search_decode(
         is_finished: false,
     })
 
-
     []beam_state finished_beams = []
-
 
     for step in 0..max_length {
         if len(beams) == 0 {
@@ -113,7 +82,6 @@ func beam_search_decode(
         }
 
         []beam_state candidates = []
-
 
         for b in 0..len(beams) {
             beam beam = beams[b]
@@ -124,18 +92,14 @@ func beam_search_decode(
                 continue
             }
 
-
             []float logits = all_logits[step]
-
 
             float length_penalty_factor = compute_length_penalty(
                 len(beam.token_ids),
                 config.length_penalty
             )
 
-
             []float log_probs = log_softmax(logits)
-
 
             for t in 0..len(log_probs) {
                 float new_score = beam.score + log_probs[t] * length_penalty_factor
@@ -154,11 +118,9 @@ func beam_search_decode(
             }
         }
 
-
         if len(candidates) > num_beams {
             candidates = select_top_k_beams(candidates, num_beams)
         }
-
 
         beams = []
         for c in 0..len(candidates) {
@@ -169,23 +131,19 @@ func beam_search_decode(
             }
         }
 
-
         if config.early_stopping  len(finished_beams) >= num_beams {
             break
         }
     }
 
-
     for b in 0..len(beams) {
         finished_beams.push(beams[b])
     }
-
 
     if len(finished_beams) > 0 {
         beam best = find_best_beam(finished_beams)
         return best.token_ids
     }
-
 
     []
 }

@@ -1,17 +1,11 @@
 
 
-
-
 package main
 
 use std.io
 use std.strings
 use std.path
 use std.env
-
-
-
-
 
 struct deployment_config {
     cluster_name: string
@@ -31,10 +25,6 @@ struct gpu_config {
     total_memory: i64
     available_memory: i64
 }
-
-
-
-
 
 func generate_slurm_script(config: deployment_config, output_path: string) bool {
     let num_nodes = config.num_nodes
@@ -108,10 +98,6 @@ echo "Training completed!"
     return true
 }
 
-
-
-
-
 func generate_docker_compose(config: deployment_config, output_path: string) bool {
     let num_nodes = config.num_nodes
     let gpus_per_node = config.gpus_per_node
@@ -120,7 +106,6 @@ func generate_docker_compose(config: deployment_config, output_path: string) boo
 
 services:
 `
-
 
     for i in 0 to num_nodes {
         let service_name = "training-node-" + strings.from_i32(i)
@@ -165,10 +150,6 @@ networks:
     println("Generated Docker Compose: " + output_path)
     return true
 }
-
-
-
-
 
 func generate_kubernetes_deployment(config: deployment_config, output_path: string) bool {
     let num_nodes = config.num_nodes
@@ -309,10 +290,6 @@ spec:
     return true
 }
 
-
-
-
-
 func generate_cluster_config(config: deployment_config, output_path: string) bool {
     let total_batch = config.batch_size_per_gpu * config.num_nodes * 4
 
@@ -360,17 +337,12 @@ func generate_cluster_config(config: deployment_config, output_path: string) boo
     return true
 }
 
-
-
-
-
 func main() {
     println("")
     println("╔" + strings.repeat("═", 62) + "╗")
     println("║  NEURX DEPLOYMENT CONFIGURATION GENERATOR               ║")
     println("╚" + strings.repeat("═", 62) + "╝")
     println("")
-
 
     let config = deployment_config {
         cluster_name: "neurx-prod",
@@ -394,19 +366,15 @@ func main() {
     println("  Training epochs: " + strings.from_i32(config.num_epochs))
     println("")
 
-
     println("📁 Creating directories...")
-
 
     println("  ✅ deploy/production/scripts/")
     println("  ✅ deploy/production/configs/")
     println("")
 
-
     println("🔧 GENERATING DEPLOYMENT ARTIFACTS:")
     println("─" + strings.repeat("─", 61))
     println("")
-
 
     let slurm_ok = generate_slurm_script(config, "deploy/production/scripts/slurm_submit.sh")
     if slurm_ok {
@@ -414,13 +382,11 @@ func main() {
     }
     println("")
 
-
     let docker_ok = generate_docker_compose(config, "deploy/production/docker-compose.yml")
     if docker_ok {
         println("  ✅ Docker Compose configuration generated")
     }
     println("")
-
 
     let k8s_ok = generate_kubernetes_deployment(config, "deploy/production/kubernetes_deployment.yaml")
     if k8s_ok {
@@ -428,13 +394,11 @@ func main() {
     }
     println("")
 
-
     let cluster_ok = generate_cluster_config(config, "deploy/production/configs/cluster_config.json")
     if cluster_ok {
         println("  ✅ Cluster configuration generated")
     }
     println("")
-
 
     println("═" + strings.repeat("═", 61))
     println("")

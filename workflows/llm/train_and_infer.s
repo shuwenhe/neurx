@@ -1,24 +1,9 @@
 package main
 
-
-
-
-
-
-
-
-
-
-
-
 use std.io
 use std.math
 use std.time
 use std.strings
-
-
-
-
 
 struct model_config {
     vocab_size: i32
@@ -53,10 +38,6 @@ struct inference_result {
     latency_ms: f64
 }
 
-
-
-
-
 func println(s: string) {
     io.println(s)
 }
@@ -77,10 +58,6 @@ func format_large_number(n: i64) string {
     }
 }
 
-
-
-
-
 struct transformer_model {
     config: model_config
     embedding_table: [][]f64
@@ -99,18 +76,14 @@ func create_model(config: model_config) transformer_model {
     println("   Layers: " + strings.from_i32(config.num_layers))
     println("   Attention heads: " + strings.from_i32(config.num_heads))
 
-
     let emb_size = i64(config.vocab_size) * i64(config.hidden_dim)
     model.embedding_table = [][]f64{}
-
 
     let attn_size = i64(config.num_heads) * i64(config.hidden_dim)
     model.attention_weights = [][]f64{}
 
-
     let ffn_size = i64(config.ffn_dim) * i64(config.hidden_dim)
     model.ffn_weights = [][]f64{}
-
 
     model.layer_norms = [][]f64{}
 
@@ -119,10 +92,6 @@ func create_model(config: model_config) transformer_model {
 
     return model
 }
-
-
-
-
 
 struct data_batch {
     input_ids: []i32
@@ -140,7 +109,6 @@ func create_dummy_batch(config: model_config) data_batch {
     batch.input_ids = []i32{}
     batch.labels = []i32{}
 
-
     for i := 0; i < total_tokens; i = i + 1 {
         let token_id = i32((i * 7 + 13) % config.vocab_size)
         batch.input_ids = append(batch.input_ids, token_id)
@@ -150,17 +118,11 @@ func create_dummy_batch(config: model_config) data_batch {
     return batch
 }
 
-
-
-
-
 func compute_loss(model: transformer_model, batch: data_batch) f64 {
 
     let num_tokens = f64(len(batch.labels))
 
-
     let avg_logit_score = 0.5
-
 
     let loss = -math.log(avg_logit_score + 0.01)
 
@@ -171,11 +133,7 @@ func train_step(model: transformer_model, batch: data_batch, lr: f64) (transform
 
     let loss = compute_loss(model, batch)
 
-
     let learning_rate_scaled = lr * 0.001
-
-
-
 
     return (model, loss)
 }
@@ -207,12 +165,10 @@ func train_epoch(model: transformer_model, config: training_config, epoch: i32) 
 
         let batch = create_dummy_batch(model.config)
 
-
         var lr = config.learning_rate
         if step < config.warmup_steps {
             lr = config.learning_rate * f64(step) / f64(config.warmup_steps)
         }
-
 
         let (updated_model, loss) = train_step(model_state, batch, lr)
         model_state = updated_model
@@ -220,11 +176,9 @@ func train_epoch(model: transformer_model, config: training_config, epoch: i32) 
         cumulative_loss = cumulative_loss + loss
         let avg_loss = cumulative_loss / f64(step + 1)
 
-
         let elapsed = time.since(start_time).seconds()
         let total_tokens = i64(step + 1) * i64(batch.batch_size) * i64(batch.seq_len)
         let throughput = f64(total_tokens) / elapsed
-
 
         if (step + 1) % 10 == 0 {
             let metrics = training_metrics {
@@ -249,10 +203,6 @@ func train_epoch(model: transformer_model, config: training_config, epoch: i32) 
     return (model_state, avg_epoch_loss)
 }
 
-
-
-
-
 func save_checkpoint(model: transformer_model, epoch: i32) {
     let checkpoint_path = "checkpoints/epoch_" + strings.from_i32(epoch) + ".ckpt"
     println("💾 Saving checkpoint: " + checkpoint_path)
@@ -265,10 +215,6 @@ func load_checkpoint(checkpoint_path: string) transformer_model {
     return model
 }
 
-
-
-
-
 func generate_text(model: transformer_model, prompt: string, max_tokens: i32) inference_result {
     println("")
     println("🎯 Inference")
@@ -276,7 +222,6 @@ func generate_text(model: transformer_model, prompt: string, max_tokens: i32) in
     println("Prompt: " + prompt)
 
     let start_time = time.now()
-
 
     var generated = prompt
     let token_map = []string{
@@ -312,10 +257,6 @@ func print_inference_result(result: inference_result) {
     println("   Throughput: " + format_float(tokens_per_sec, 0) + " tokens/sec")
 }
 
-
-
-
-
 func main() {
     println("")
     println("╔" + strings.repeat("═", 68) + "╗")
@@ -323,7 +264,6 @@ func main() {
     println("║           English text S languageimplementationEnglish textcompleteEnglish textsystem                        ║")
     println("╚" + strings.repeat("═", 68) + "╝")
     println("")
-
 
     let model_config = model_config {
         vocab_size: 32000,
@@ -343,7 +283,6 @@ func main() {
         max_grad_norm: 1.0
     }
 
-
     println("")
     println("═" + strings.repeat("═", 69) + "")
     println("PHASE 1: Model Initialization")
@@ -355,7 +294,6 @@ func main() {
                        i64(model_config.ffn_dim) * i64(model_config.hidden_dim)
     println("")
     println("✅ Model created with " + format_large_number(total_params) + " parameters")
-
 
     println("")
     println("═" + strings.repeat("═", 69) + "")
@@ -378,20 +316,16 @@ func main() {
     println("✅ Training completed!")
     println("   Best loss: " + format_float(best_loss, 4))
 
-
     println("")
     println("═" + strings.repeat("═", 69) + "")
     println("PHASE 3: Model Inference")
     println("═" + strings.repeat("═", 69) + "")
 
-
     let result1 = generate_text(model, "The future of AI is", 20)
     print_inference_result(result1)
 
-
     let result2 = generate_text(model, "Machine learning enables", 15)
     print_inference_result(result2)
-
 
     println("")
     println("═" + strings.repeat("═", 69) + "")

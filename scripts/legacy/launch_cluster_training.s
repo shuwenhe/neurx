@@ -1,19 +1,9 @@
 
 
-
-
-
-
-
-
 package main
 
 use neurx.runtime.io.{runtime_env_get}
 use neurx.strings.{string_concat}
-
-
-
-
 
 struct cluster_config {
     int num_nodes
@@ -34,13 +24,7 @@ struct node_process_handle {
     bool is_running
 }
 
-
-
-
-
-
 func parse_cluster_config() cluster_config {
-
 
     string node_list = runtime_env_get("NEURX_NODE_LIST", "localhost")
     int num_nodes = parse_int(runtime_env_get("NEURX_NUM_NODES", "1"), 1)
@@ -50,7 +34,6 @@ func parse_cluster_config() cluster_config {
     string ssh_user = runtime_env_get("NEURX_SSH_USER", "root")
     string working_dir = runtime_env_get("NEURX_WORKING_DIR", "/home/neurx")
     string log_dir = runtime_env_get("NEURX_LOG_DIR", "/mnt/nccl_shared/logs")
-
 
     []string nodes = split_string(node_list, ",")
 
@@ -66,11 +49,6 @@ func parse_cluster_config() cluster_config {
         log_dir: log_dir,
     }
 }
-
-
-
-
-
 
 func launch_cluster_training(
     cluster_config config,
@@ -89,7 +67,6 @@ func launch_cluster_training(
 
     []node_process_handle handles = []node_process_handle{cap: config.num_nodes}
 
-
     int node_idx = 0
     while node_idx < config.num_nodes {
 
@@ -97,13 +74,11 @@ func launch_cluster_training(
 
         print("[CLUSTER] Launching node " + itoa(node_idx) + " (" + node_addr + ")...")
 
-
         string cmd = build_launch_command(
             config,
             node_idx,
             node_addr,
         )
-
 
         int pid = execute_remote_training(
             config,
@@ -130,19 +105,11 @@ func launch_cluster_training(
     handles
 }
 
-
-
-
-
-
 func build_launch_command(
     cluster_config config,
     int node_rank,
     string node_addr,
 ) string {
-
-
-
 
     string world_size = itoa(config.num_nodes * config.gpus_per_node)
 
@@ -160,20 +127,12 @@ func build_launch_command(
     cmd
 }
 
-
-
-
-
-
 func execute_remote_training(
     cluster_config config,
     int node_rank,
     string node_addr,
     string cmd,
 ) int {
-
-
-
 
     string log_file = config.log_dir + "/node_" + itoa(node_rank) + ".log"
 
@@ -186,18 +145,9 @@ func execute_remote_training(
 
     print("[CLUSTER] Executing SSH command on " + node_addr)
 
-
-
-
-
     int simulated_pid = 10000 + node_rank
     simulated_pid
 }
-
-
-
-
-
 
 func monitor_cluster_processes(
     []node_process_handle handles,
@@ -213,7 +163,6 @@ func monitor_cluster_processes(
     while i < len(handles) {
 
         node_process_handle h = handles[i]
-
 
         bool still_running = check_remote_process(
             config,
@@ -238,28 +187,18 @@ func monitor_cluster_processes(
     handles
 }
 
-
 func check_remote_process(
     cluster_config config,
     string node_addr,
     int pid,
 ) bool {
 
-
     string cmd = "ssh -i " + config.ssh_key_path +
                  " " + config.ssh_user + "@" + node_addr +
                  " ps -p " + itoa(pid)
 
-
-
-
     true
 }
-
-
-
-
-
 
 func collect_cluster_logs(
     []node_process_handle handles,
@@ -270,16 +209,13 @@ func collect_cluster_logs(
 
     string aggregated_log = config.log_dir + "/cluster_aggregated.log"
 
-
     print("[LOGS] Aggregating logs to: " + aggregated_log)
-
 
     int i = 0
     while i < len(handles) {
 
         node_process_handle h = handles[i]
         string node_log = config.log_dir + "/node_" + itoa(h.node_id) + ".log"
-
 
         string scp_cmd = "scp -i " + config.ssh_key_path +
                          " " + config.ssh_user + "@" + h.node_address +
@@ -288,19 +224,11 @@ func collect_cluster_logs(
 
         print("[LOGS] Downloading log from node " + itoa(h.node_id))
 
-
-
-
         i = i + 1
     }
 
     true
 }
-
-
-
-
-
 
 func kill_cluster_training(
     []node_process_handle handles,
@@ -316,15 +244,11 @@ func kill_cluster_training(
 
         node_process_handle h = handles[i]
 
-
         string cmd = "ssh -i " + config.ssh_key_path +
                      " " + config.ssh_user + "@" + h.node_address +
                      " kill -9 " + itoa(h.process_id)
 
         print("[CLEANUP] Killing process on node " + itoa(h.node_id))
-
-
-
 
         killed = killed + 1
         i = i + 1
@@ -334,37 +258,24 @@ func kill_cluster_training(
     true
 }
 
-
-
-
-
 func main() {
 
-
     cluster_config config = parse_cluster_config()
-
 
     []node_process_handle handles = launch_cluster_training(config)
 
     print("[MAIN] Waiting for training to complete...")
 
-
     sleep_seconds(300)
 
     handles = monitor_cluster_processes(handles, config)
 
-
     collect_cluster_logs(handles, config)
-
 
     kill_cluster_training(handles, config)
 
     print("[MAIN] Multi-node training completed!")
 }
-
-
-
-
 
 func split_string(string s, string sep) []string {
     []string parts = []string{cap: 10}

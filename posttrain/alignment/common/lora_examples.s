@@ -1,7 +1,5 @@
 package neurx.posttrain.alignment.lora_examples
 
-
-
 use neurx.posttrain.alignment.lora_trainer.{
     lora_config, lora_state, lora_linear, lora_trajectory,
     default_lora_config, create_lora_state, lora_training_step,
@@ -9,15 +7,10 @@ use neurx.posttrain.alignment.lora_trainer.{
     init_gaussian, fill_lora, create_lora_linear,
 }
 
-
-
-
-
 func example_1_basic_lora_finetuning() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ Example 1: Basic LoRA Fine-tuning (Rank-8)             ║")
     println("╚════════════════════════════════════════════════════════╝")
-
 
     lora_config cfg = lora_config {
         seq_len: 64,
@@ -46,7 +39,6 @@ func example_1_basic_lora_finetuning() {
         qlora_dtype: "",
     }
 
-
     []lora_trajectory trajectories = []lora_trajectory{}
     int i = 0
     while i < 10 {
@@ -62,10 +54,8 @@ func example_1_basic_lora_finetuning() {
         i = i + 1
     }
 
-
     println("Training LoRA with rank-8 for 1 epoch...")
     lora_state state = start_lora_training(cfg, trajectories)
-
 
     lora_stats stats = lora_compute_stats(state)
     println("Base parameters: " + int_to_str(stats.total_base_params))
@@ -76,17 +66,12 @@ func example_1_basic_lora_finetuning() {
     println("")
 }
 
-
-
-
-
 func example_2_rank_tradeoff() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ Example 2: Rank Trade-off Analysis                     ║")
     println("╚════════════════════════════════════════════════════════╝")
 
     []int ranks = []int{4, 8, 16, 32}
-
 
     lora_config base_cfg = default_lora_config()
     base_cfg.seq_len = 128
@@ -95,7 +80,6 @@ func example_2_rank_tradeoff() {
     base_cfg.num_epochs = 1
     base_cfg.warmup_steps = 50
     base_cfg.total_steps = 1000
-
 
     []lora_trajectory trajectories = []lora_trajectory{}
     int i = 0
@@ -138,10 +122,6 @@ func example_2_rank_tradeoff() {
     println("")
 }
 
-
-
-
-
 func example_3_multilayer_lora() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ Example 3: Multi-Layer LoRA Adaptation                 ║")
@@ -174,7 +154,6 @@ func example_3_multilayer_lora() {
         qlora_dtype: "",
     }
 
-
     println("Initializing LoRA state for 16-layer model...")
     lora_state state = create_lora_state(cfg)
 
@@ -182,7 +161,6 @@ func example_3_multilayer_lora() {
     println("✓ Created " + int_to_str(cfg.num_layers) + " LoRA layers")
     println("✓ Total LoRA parameters: " + int_to_str(stats.total_lora_params))
     println("✓ Trainable ratio: " + fmt_float(stats.trainable_ratio, 2) + "%")
-
 
     println("\nTraining progress:")
     int step = 0
@@ -202,15 +180,10 @@ func example_3_multilayer_lora() {
     println("")
 }
 
-
-
-
-
 func example_4_task_specific_lora() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ Example 4: task-Specific LoRA Configuration            ║")
     println("╚════════════════════════════════════════════════════════╝")
-
 
     []string tasks = []string{"classification", "generation", "qa"}
     []int task_ranks = []int{8, 16, 24}
@@ -225,10 +198,6 @@ func example_4_task_specific_lora() {
         string task = tasks[i]
         int rank = task_ranks[i]
         float lr = task_lrs[i]
-
-
-
-
 
         lora_config cfg = default_lora_config()
         cfg.rank = rank
@@ -248,10 +217,6 @@ func example_4_task_specific_lora() {
     }
     println("")
 }
-
-
-
-
 
 func example_5_distributed_lora() {
     println("╔════════════════════════════════════════════════════════╗")
@@ -306,10 +271,6 @@ func example_5_distributed_lora() {
     println("  - Gradient synchronization: ~5ms per step (minimal overhead)")
     println("")
 }
-
-
-
-
 
 func example_6_qlora_quantization() {
     println("╔════════════════════════════════════════════════════════╗")
@@ -367,10 +328,6 @@ func example_6_qlora_quantization() {
     println("  - Suitable for fine-tuning on consumer GPUs (24GB V100)")
     println("")
 }
-
-
-
-
 
 func int_to_str(int n) string {
     if n == 0 {

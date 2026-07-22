@@ -1,17 +1,11 @@
 
 
-
-
 package main
 
 use std.io
 use std.strings
 use std.path
 use std.env
-
-
-
-
 
 struct component_status {
     name: string
@@ -30,10 +24,6 @@ struct system_health_check {
     components: component_status[]
     recommendations: []string
 }
-
-
-
-
 
 func verify_component(name: string, file_path: string, expected_lines: i32) component_status {
 
@@ -54,7 +44,6 @@ func verify_component(name: string, file_path: string, expected_lines: i32) comp
 func check_all_components() component_status[] {
     let components = component_status[]{}
 
-
     let scaled = verify_component(
         "Scaled Training System",
         "trainer/scaled_training_system.s",
@@ -62,7 +51,6 @@ func check_all_components() component_status[] {
     )
     scaled.description = "6-layer Transformer, 256-dim, 100M params"
     components = append(components, scaled)
-
 
     let data = verify_component(
         "Real Data Loader",
@@ -72,7 +60,6 @@ func check_all_components() component_status[] {
     data.description = "WikiText-2, C4, 32K BPE tokenizer"
     components = append(components, data)
 
-
     let cuda = verify_component(
         "CUDA Accelerated Training",
         "cuda/cuda_accelerated_training.s",
@@ -80,7 +67,6 @@ func check_all_components() component_status[] {
     )
     cuda.description = "GPU memory, transfers, kernels"
     components = append(components, cuda)
-
 
     let ddp = verify_component(
         "DDP Distributed Training",
@@ -90,7 +76,6 @@ func check_all_components() component_status[] {
     ddp.description = "NCCL AllReduce, process groups"
     components = append(components, ddp)
 
-
     let compile = verify_component(
         "Compilation & Testing",
         "tests/compile_and_test.s",
@@ -99,7 +84,6 @@ func check_all_components() component_status[] {
     compile.description = "Full test suite"
     components = append(components, compile)
 
-
     let deploy = verify_component(
         "Deployment Configuration",
         "deploy/generate_deployment_configs.s",
@@ -107,7 +91,6 @@ func check_all_components() component_status[] {
     )
     deploy.description = "SLURM, Docker, Kubernetes"
     components = append(components, deploy)
-
 
     let perf = verify_component(
         "Performance Benchmark",
@@ -119,10 +102,6 @@ func check_all_components() component_status[] {
 
     return components
 }
-
-
-
-
 
 func calculate_health_score(components: component_status[]) f64 {
     let ready = 0
@@ -166,7 +145,6 @@ func perform_system_check() system_health_check {
         print_component_status(component)
     }
 
-
     let ready = 0
     for component in components {
         if component.status == "ready" {
@@ -197,10 +175,6 @@ func perform_system_check() system_health_check {
 
     return check
 }
-
-
-
-
 
 func verify_integration() {
     println("")
@@ -234,10 +208,6 @@ func verify_integration() {
     println("  Meets throughput and efficiency targets")
     println("")
 }
-
-
-
-
 
 func check_deployment_readiness() {
     println("")
@@ -278,10 +248,6 @@ func check_deployment_readiness() {
     println("✅ ALL CHECKLIST ITEMS COMPLETE")
     println("")
 }
-
-
-
-
 
 func print_final_report() {
     println("")
@@ -341,20 +307,13 @@ func print_final_report() {
     println("")
 }
 
-
-
-
-
 func main() {
 
     let health = perform_system_check()
 
-
     verify_integration()
 
-
     check_deployment_readiness()
-
 
     print_final_report()
 

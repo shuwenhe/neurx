@@ -1,12 +1,5 @@
 package neurx.pretrain.config.frontier_training_plan
 
-
-
-
-
-
-
-
 struct frontier_model_target {
     string name
     string architecture

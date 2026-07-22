@@ -2,21 +2,6 @@ package main
 
 use std.io.println
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -83,10 +68,6 @@ func float_to_str(float value, int decimals) string {
     out
 }
 
-
-
-
-
 struct merge_config {
     string base_model_path
     string adapter_checkpoint_dir
@@ -105,17 +86,8 @@ struct merged_model {
     int total_size
 }
 
-
-
-
-
-
-
-
-
 func load_and_merge() merged_model {
     merged_model result
-
 
     int input_dim = 768
     int output_dim = 768
@@ -128,7 +100,6 @@ func load_and_merge() merged_model {
     println("  Size: ~1.5 GB")
     println("")
 
-
     []float base_weights
     int i1 = 0
     while i1 < input_dim * output_dim {
@@ -140,7 +111,6 @@ func load_and_merge() merged_model {
     println("  Path: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft")
     println("  File: adapter_model.safetensors, adapter_config.json")
     println("")
-
 
     []float lora_a
     []float lora_b
@@ -166,7 +136,6 @@ func load_and_merge() merged_model {
     println("✓ Weight merge complete")
     println("")
 
-
     []float merged_weights
 
     result.weights = merged_weights
@@ -175,10 +144,6 @@ func load_and_merge() merged_model {
 
     result
 }
-
-
-
-
 
 func save_merged_model(merged_model model, string output_dir) int {
     println("💾 Saving merged model...")
@@ -219,10 +184,6 @@ func save_merged_model(merged_model model, string output_dir) int {
     0
 }
 
-
-
-
-
 func verify_output(string output_dir) int {
     println("✅ Verifying output...")
     println("")
@@ -244,10 +205,6 @@ func verify_output(string output_dir) int {
     0
 }
 
-
-
-
-
 func main() int {
     println("")
     println("╔" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╗")
@@ -255,7 +212,6 @@ func main() int {
     println("║  Merge LoRA adapter into base model")
     println("╚" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╝")
     println("")
-
 
     merge_config cfg
     cfg.base_model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
@@ -274,12 +230,9 @@ func main() int {
     println("  LoRA Alpha: 16.0")
     println("")
 
-
     merged_model merged = load_and_merge()
 
-
     save_merged_model(merged, "dummy")
-
 
     verify_output("dummy")
 

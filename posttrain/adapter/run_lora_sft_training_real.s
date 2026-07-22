@@ -1,8 +1,5 @@
 package main
 
-
-
-
 use std.io.println
 use neurx.lib.fileio.{read_file_lines, split_string, trim_string, starts_with, file_exists}
 use neurx.lib.json.{extract_json_field, json_string_to_float, json_string_to_int}
@@ -10,13 +7,11 @@ use neurx.lib.tensor.{Vector, Matrix, create_vector, create_matrix, matrix_vecto
 use neurx.lib.nn.{lora_linear_layer, create_lora_linear_layer, lora_forward}
 use neurx.lib.loss.{mse_loss_forward, mse_loss_backward, create_adam_optimizer, adam_optimizer, adam_step}
 
-
 struct training_example {
     string instruction
     string input
     string output
 }
-
 
 struct training_state {
     int total_examples
@@ -28,8 +23,6 @@ struct training_state {
     int examples_seen
     int tokens_seen
 }
-
-
 
 func int_to_str(int n) string {
     if n == 0 {
@@ -96,18 +89,15 @@ func format_float(float value, int decimals) string {
     out
 }
 
-
 func parse_jsonl_example(string line) training_example {
     training_example ex
     ex.instruction = ""
     ex.input = ""
     ex.output = ""
 
-
     string instruction_val = extract_json_field(line, "instruction")
     string input_val = extract_json_field(line, "input")
     string output_val = extract_json_field(line, "output")
-
 
     ex.instruction = trim_json_string(instruction_val)
     ex.input = trim_json_string(input_val)
@@ -119,12 +109,8 @@ func parse_jsonl_example(string line) training_example {
 func trim_json_string(string s) string {
     string trimmed = trim_string(s)
 
-
-
-
     trimmed
 }
-
 
 func simple_hash(string text) int {
     int hash = 5381
@@ -140,11 +126,9 @@ func simple_hash(string text) int {
         hash = 0 - hash
     }
 
-
     int remainder = hash - (hash / 10000) * 10000
     remainder
 }
-
 
 func create_training_state(int total_examples) training_state {
     training_state state
@@ -158,7 +142,6 @@ func create_training_state(int total_examples) training_state {
     state.tokens_seen = 0
     state
 }
-
 
 func main() int {
 
@@ -188,7 +171,6 @@ func main() int {
     println("  Max samples:     " + int_to_str(max_samples))
     println("")
 
-
     if !file_exists(data_path) {
         println("Error: Data file not found: " + data_path)
         return -1
@@ -196,12 +178,8 @@ func main() int {
 
     println("Loading training data...")
 
-
-
-
     training_example[] examples
     int num_examples = 0
-
 
     training_example ex1
     ex1.instruction = "What is the capital of France?"
@@ -241,12 +219,9 @@ func main() int {
     println("Loaded " + int_to_str(num_examples) + " examples")
     println("")
 
-
     lora_linear_layer lora_layer = create_lora_linear_layer(hidden_dim, hidden_dim, rank, alpha, learning_rate, 42)
 
-
     adam_optimizer optimizer = create_adam_optimizer(learning_rate)
-
 
     training_state state = create_training_state(num_examples)
 
@@ -263,7 +238,6 @@ func main() int {
             Vector input_vec = create_vector(hidden_dim)
             Vector target_vec = create_vector(hidden_dim)
 
-
             int i = 0
             while i < hidden_dim {
                 float hash_val = (simple_hash(examples[sample_idx].output) + i) as float
@@ -272,12 +246,9 @@ func main() int {
                 i = i + 1
             }
 
-
             Vector pred = lora_forward(lora_layer, input_vec)
 
-
             float loss = mse_loss_forward(pred, target_vec)
-
 
             Vector grad_output = mse_loss_backward(pred, target_vec)
 

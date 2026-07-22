@@ -1,14 +1,5 @@
 
 
-
-
-
-
-
-
-
-
-
 package neurx.shard.data_shard
 
 use neurx.script.data_utils.{
@@ -37,10 +28,6 @@ use neurx.script.data_utils.{
 }
 use neurx.strings.{string_split, string_join}
 
-
-
-
-
 struct shard_config {
     string input_file
     string shard_dir
@@ -67,11 +54,6 @@ struct shard_manifest {
     []shard_metadata shards
 }
 
-
-
-
-
-
 func new_shard_config_from_env() shard_config {
     let neurx_home = get_env("NEURX_HOME", ".")
     let dataset_root = get_env("DATASET_ROOT", path_join([]string{neurx_home, "dataset", "pretrain"}))
@@ -85,7 +67,6 @@ func new_shard_config_from_env() shard_config {
     }
 }
 
-
 func generate_shards(config: shard_config) bool {
     log_info("")
     log_info("╔════════════════════════════════════════════╗")
@@ -93,12 +74,10 @@ func generate_shards(config: shard_config) bool {
     log_info("╚════════════════════════════════════════════╝")
     log_info("")
 
-
     if !path_exists(config.input_file) {
         log_error("Input file not found: " + config.input_file)
         return false
     }
-
 
     let (total_lines, ok) = file_count_lines(config.input_file)
     if !ok {
@@ -111,12 +90,10 @@ func generate_shards(config: shard_config) bool {
     log_info("  • Total lines: " + i64_to_string(total_lines))
     log_info("")
 
-
     if total_lines == 0 {
         log_warn("No documents found in input file")
         return write_empty_manifest(config)
     }
-
 
     let ideal_shards = div_round_up(total_lines, i64(config.min_lines_per_shard))
     let actual_shards = i64(min(i64(config.max_shards), ideal_shards))
@@ -128,19 +105,16 @@ func generate_shards(config: shard_config) bool {
     log_info("  • Lines per shard: " + i64_to_string(lines_per_shard))
     log_info("")
 
-
     if !ensure_dir(config.shard_dir) {
         log_error("Failed to create shard directory: " + config.shard_dir)
         return false
     }
-
 
     if !clear_dir(config.shard_dir) {
         log_warn("Failed to clear existing shards")
     }
 
     log_info("✂️ Generating shards...")
-
 
     let (content, ok) = file_read_text(config.input_file)
     if !ok {
@@ -157,14 +131,12 @@ func generate_shards(config: shard_config) bool {
     for i = 0; i < len(lines); i = i + 1 {
         let line = lines[i]
 
-
         if line == "" && i == len(lines) - 1 {
             continue
         }
 
         shard_data = shard_data + line + "\n"
         shard_line_count = shard_line_count + 1
-
 
         if i64(shard_line_count) >= lines_per_shard || i == len(lines) - 1 {
             let shard_file = format_shard_filename(config.shard_dir, shard_index)
@@ -190,7 +162,6 @@ func generate_shards(config: shard_config) bool {
     log_success("Generated " + i64_to_string(i64(shard_index)) + " shards")
     log_info("")
 
-
     log_info("📋 Writing manifest...")
     let manifest = build_manifest(config, all_shards)
     if !write_manifest(config.manifest_file, manifest) {
@@ -201,7 +172,6 @@ func generate_shards(config: shard_config) bool {
     log_success("manifest written to " + config.manifest_file)
     log_info("")
 
-
     log_info("📊 Summary:")
     log_info("  • Total shards: " + i64_to_string(i64(len(all_shards))))
     log_info("  • Total documents: " + i64_to_string(manifest.total_documents))
@@ -211,10 +181,6 @@ func generate_shards(config: shard_config) bool {
     log_success("Shard generation completed successfully")
     true
 }
-
-
-
-
 
 func format_shard_filename(shard_dir: string, index: int) string {
     path_join([]string{shard_dir, format_shard_id(index) + ".jsonl"})
@@ -299,25 +265,15 @@ func write_manifest(path: string, manifest: shard_manifest) bool {
     file_write_text(path, json)
 }
 
-
-
-
-
 func get_timestamp() string {
-
 
     "2026-07-07T00:00:00Z"
 }
 
 func i64_to_string(n: i64) string {
 
-
     ""
 }
-
-
-
-
 
 func main() i32 {
     let config = new_shard_config_from_env()

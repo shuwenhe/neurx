@@ -1,63 +1,16 @@
 package neurx.distributed.training_3d
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct parallel_dims {
     int tp_degree
     int pp_degree
     int dp_degree
 
-
     int total_gpus
-
 
     int global_rank
     int tp_rank
     int pp_rank
     int dp_rank
-
 
     int tp_group_id
     int pp_group_id
@@ -76,12 +29,10 @@ struct model_parallel_config {
     int max_seq_len
     float dropout
 
-
     bool use_moe
     int moe_num_experts
     int moe_top_k
     float moe_capacity_factor
-
 
     parallel dims
 }
@@ -92,7 +43,6 @@ struct training_config {
     int micro_batch_size
     int gradient_accum_steps
 
-
     float learning_rate
     float lr_min
     float weight_decay
@@ -100,24 +50,20 @@ struct training_config {
     int total_training_steps
     string lr_schedule_type
 
-
     string optimizer_name
     float adam_beta1
     float adam_beta2
     float adam_epsilon
     float max_grad_norm
 
-
     bool use_bf16
     bool use_fp16
     float loss_scale
     bool dynamic_loss_scaling
 
-
     int save_interval
     string checkpoint_dir
     bool async_checkpoint
-
 
     int eval_interval
     int logging_interval
@@ -126,10 +72,6 @@ struct training_config {
     bool use_rope_scaling
     int rope_target_length
 }
-
-
-
-
 
 enum training_phase {
     PHASE_IDLE,
@@ -147,47 +89,37 @@ struct orchestrator_state {
     int current_step
     int current_epoch
 
-
     []pipeline_stage_state pp_stages
     pipeline_schedule schedule
-
 
     int micro_batch_counter
     float accumulated_loss
 
-
     performance_stats stats
     memory_stats mem_stats
-
 
     float step_start_time
     float epoch_start_time
     float total_train_time
 }
 
-
 struct pipeline_stage_state {
     int stage_id
     int first_layer_idx
     int last_layer_idx
 
-
     []int layer_indices
-
 
     [][]float input_buffer
     [][]float output_buffer
 
-
     []bool needs_gradient_checkpoint
     [][][]float activation_cache
-
 
     float forward_time_ms
     float backward_time_ms
     float comm_time_ms
 }
-
 
 enum schedule_type {
     SCHEDULE_1F1B,
@@ -203,7 +135,6 @@ struct pipeline_schedule {
     int steady_microbatches
     int cooldown_microbatches
     float bubble_ratio
-
 
     []schedule_instruction instructions
 }
@@ -222,11 +153,6 @@ struct schedule_instruction {
     int dependency_id
 }
 
-
-
-
-
-
 func create_parallel_config(
     int total_gpus,
     int tp, int pp, int dp,
@@ -236,7 +162,6 @@ func create_parallel_config(
     if tp * pp * dp != total_gpus {
 
     }
-
 
     int pp_size = tp * dp
     int pp_id = global_rank / pp_size
@@ -260,21 +185,17 @@ func create_parallel_config(
     }
 }
 
-
 func validate_model_parallel_config(model_parallel_config cfg) bool {
     bool valid = true
     parallel dims = cfg.dims
-
 
     if cfg.num_attention_heads % dims.tp_degree != 0 {
         valid = false
     }
 
-
     if cfg.hidden_dim % dims.tp_degree != 0 {
         valid = false
     }
-
 
     if cfg.num_kv_heads < cfg.num_attention_heads {
         if cfg.num_kv_heads % dims.tp_degree != 0 &&
@@ -283,14 +204,12 @@ func validate_model_parallel_config(model_parallel_config cfg) bool {
         }
     }
 
-
     if cfg.num_layers % dims.pp_degree != 0 {
 
     }
 
     return valid
 }
-
 
 func init_orchestrator(
     model_parallel_config model_cfg,
@@ -300,7 +219,6 @@ func init_orchestrator(
     if !validate_model_parallel_config(model_cfg) {
 
     }
-
 
     int pp = model_cfg.dims.pp_degree
     int layers_per_stage = model_cfg.num_layers / pp
@@ -312,7 +230,6 @@ func init_orchestrator(
         int start_layer = s * layers_per_stage + min_int(s, remaining_layers)
         int end_layer = start_layer + layers_per_stage - 1
         if s < remaining_layers { end_layer = end_layer + 1 }
-
 
         []int layer_ids = []int{cap: end_layer - start_layer + 1}
         int l = start_layer
@@ -331,17 +248,14 @@ func init_orchestrator(
         s = s + 1
     }
 
-
     int num_micro_batches = train_cfg.gradient_accum_steps
     pipeline_schedule sched = build_1f1b_schedule(pp, num_micro_batches)
-
 
     perf_stats init_stats
     init_stats.total_flops = 0.0
     init_stats.total_comm_bytes = 0.0
     init_stats.steps_per_second = 0.0
     init_stats.tflops = 0.0
-
 
     mem_stats init_mem
     init_mem.peak_gpu_memory_gb = 0.0
@@ -365,7 +279,6 @@ func init_orchestrator(
         total_train_time: 0.0,
     }
 }
-
 
 func append([]int arr, int val) []int {
     int n = len(arr)
@@ -393,27 +306,6 @@ func float_of_int(int n) float {
     return r
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 func build_1f1b_schedule(int num_stages, int num_micro_batches) pipeline_schedule {
 
     int num_warmup = num_stages - 1
@@ -423,14 +315,11 @@ func build_1f1b_schedule(int num_stages, int num_micro_batches) pipeline_schedul
 
     int num_cooldown = num_stages - 1
 
-
     float bubble = float_of_int(num_stages - 1) / float_of_int(num_micro_batches + num_stages - 1)
-
 
     []schedule_instruction instrs = []schedule_instruction{}
 
     int instruction_id = 0
-
 
     int mb = 0
     while mb < num_warmup && mb < num_micro_batches {
@@ -451,7 +340,6 @@ func build_1f1b_schedule(int num_stages, int num_micro_batches) pipeline_schedul
         mb = mb + 1
     }
 
-
     int steady_mb = num_warmup
     while steady_mb < num_warmup + num_steady && steady_mb < num_micro_batches {
         int s = 0
@@ -463,7 +351,6 @@ func build_1f1b_schedule(int num_stages, int num_micro_batches) pipeline_schedul
             fwd_instr.stage_id = s
             fwd_instr.dependency_id = -1
             instrs = append(instrs, fwd_instr)
-
 
             if steady_mb >= num_warmup {
                 int bw_mb = steady_mb - num_warmup
@@ -482,7 +369,6 @@ func build_1f1b_schedule(int num_stages, int num_micro_batches) pipeline_schedul
         }
         steady_mb = steady_mb + 1
     }
-
 
     int cooldown_mb = max_int(num_warmup + num_steady, 0)
     while cooldown_mb < num_micro_batches + num_cooldown {
@@ -515,28 +401,19 @@ func build_1f1b_schedule(int num_stages, int num_micro_batches) pipeline_schedul
     }
 }
 
-
-
-
-
-
 func training_step(ref orchestrator_state orch, batch_data data) float {
     orch.current_phase = PHASE_FORWARD
     float step_time_start = get_current_time_ms()
-
 
     int micro_batch_id = 0
     while micro_batch_id < orch.train_cfg.gradient_accum_steps {
 
         micro_batch_data micro_data = get_micro_batch(data, micro_batch_id)
 
-
         execute_pipeline_forward(orch, micro_data, micro_batch_id)
-
 
         float loss = compute_loss(orch)
         orch.accumulated_loss = orch.accumulated_loss + loss
-
 
         execute_pipeline_backward(orch, micro_batch_id)
 
@@ -544,30 +421,22 @@ func training_step(ref orchestrator_state orch, batch_data data) float {
         orch.micro_batch_counter = orch.micro_batch_counter + 1
     }
 
-
     orch.current_phase = PHASE_OPTIMIZER_STEP
-
 
     synchronize_gradients_across_dp(orch)
 
-
     clip_gradients(orch, orch.train_cfg.max_grad_norm)
-
 
     optimizer_step(orch)
 
-
     zero_grads(orch)
-
 
     float step_time = get_current_time_ms() - step_time_start
     update_performance_stats(orch, step_time)
 
-
     if orch.current_step % orch.train_cfg.logging_interval == 0 {
         log_training_progress(orch)
     }
-
 
     if orch.train_cfg.save_interval > 0 &&
        orch.current_step % orch.train_cfg.save_interval == 0 {
@@ -578,7 +447,6 @@ func training_step(ref orchestrator_state orch, batch_data data) float {
         }
     }
 
-
     orch.current_step = orch.current_step + 1
     orch.micro_batch_counter = 0
     orch.accumulated_loss = 0.0
@@ -587,7 +455,6 @@ func training_step(ref orchestrator_state orch, batch_data data) float {
     return orch.accumulated_loss / float_of_int(orch.train_cfg.gradient_accum_steps)
 }
 
-
 func execute_pipeline_forward(
     ref orchestrator_state orch,
     micro_batch_data data,
@@ -595,7 +462,6 @@ func execute_pipeline_forward(
 ) {
     int my_stage = orch.model_cfg.dims.pp_rank
     int num_stages = orch.model_cfg.dims.pp_degree
-
 
     if my_stage > 0 {
         orch.pp_stages[my_stage].input_buffer = recv_activation_from_previous_stage(
@@ -606,14 +472,12 @@ func execute_pipeline_forward(
         orch.pp_stages[my_stage].input_buffer = data.input_tokens
     }
 
-
     [][]float output = run_stage_forward(
         orch,
         orch.pp_stages[my_stage],
         orch.pp_stages[my_stage].input_buffer,
         micro_batch_id
     )
-
 
     if my_stage < num_stages - 1 {
         send_activation_to_next_stage(my_stage, output, micro_batch_id)
@@ -622,7 +486,6 @@ func execute_pipeline_forward(
         orch.pp_stages[my_stage].output_buffer = output
     }
 }
-
 
 func run_stage_forward(
     ref orchestrator_state orch,
@@ -637,7 +500,6 @@ func run_stage_forward(
     while idx < num_layers_in_stage {
         int layer_idx = stage.layer_indices[idx]
 
-
         current_hidden = transformer_layer_forward(
             orch.model_cfg,
             layer_idx,
@@ -651,7 +513,6 @@ func run_stage_forward(
     return current_hidden
 }
 
-
 func transformer_layer_forward(
     model_parallel_config cfg,
     int layer_idx,
@@ -661,15 +522,11 @@ func transformer_layer_forward(
 
     hidden_states = apply_rmsnorm(hidden_states, layer_idx, cfg)
 
-
     hidden_states = multi_head_attention_forward(cfg, layer_idx, hidden_states)
-
 
     hidden_states = residual_add(hidden_states,  hidden_states)
 
-
     hidden_states = apply_rmsnorm(hidden_states, layer_idx + 1000, cfg)
-
 
     if cfg.use_moe {
         hidden_states = moe_ffn_forward(cfg, layer_idx, hidden_states)
@@ -677,12 +534,10 @@ func transformer_layer_forward(
         hidden_states = swiglu_ffn_forward(cfg, layer_idx, hidden_states)
     }
 
-
     hidden_states = residual_add(hidden_states,  hidden_states)
 
     return hidden_states
 }
-
 
 func apply_rmsnorm([][]float x, int norm_idx, model_parallel_config cfg) [][]float { x }
 func multi_head_attention_forward(model_parallelConfig cfg, int layer, [][]float x) [][]float { x }
@@ -690,32 +545,16 @@ func swiglu_ffn_forward(model_parallelConfig cfg, int layer, [][]float x) [][]fl
 func moe_ffn_forward(model_parallelConfig cfg, int layer, [][]float x) [][]float { x }
 func residual_add([][]float a, [][]float b) [][]float { a }
 
-
 func execute_pipeline_backward(ref orchestrator_state orch, int micro_batch_id) {
 
-
-
-
-
-
 }
-
-
-
-
-
 
 func synchronize_gradients_across_dp(ref orchestrator_state orch) {
     parallel dims = orch.model_cfg.dims
 
-
-
-
-
     int p = 0
     while p < get_num_parameters(orch) {
         []float grad = get_parameter_grad(orch, p)
-
 
         if is_fsdp_enabled(orch) {
             grad = reduce_scatter_across_dp(grad, dims.dp_group_id, dims.dp_degree)
@@ -727,7 +566,6 @@ func synchronize_gradients_across_dp(ref orchestrator_state orch) {
         p = p + 1
     }
 }
-
 
 func clip_gradients(ref orchestrator_state orch, float max_norm) {
 
@@ -741,7 +579,6 @@ func clip_gradients(ref orchestrator_state orch, float max_norm) {
     }
     total_norm = sqrt_approx(total_norm)
 
-
     if total_norm > max_norm {
         float scale = max_norm / total_norm
         p = 0
@@ -751,7 +588,6 @@ func clip_gradients(ref orchestrator_state orch, float max_norm) {
         }
     }
 }
-
 
 func optimizer_step(ref orchestrator_state orch) {
     training_config tc = orch.train_cfg
@@ -764,7 +600,6 @@ func optimizer_step(ref orchestrator_state orch) {
         []float exp_avg = get_exp_avg(orch, p)
         []float exp_avg_sq = get_exp_avg_sq(orch, p)
 
-
         float bias_corr1 = 1.0 - pow_float(tc.adam_beta1, float_of_int(t))
         float bias_corr2 = 1.0 - pow_float(tc.adam_beta2, float_of_int(t))
         float step_size = tc.learning_rate / bias_corr1
@@ -775,16 +610,13 @@ func optimizer_step(ref orchestrator_state orch) {
             exp_avg[i] = tc.adam_beta1 * exp_avg[i] + (1.0 - tc.adam_beta1) * grad[i]
             exp_avg_sq[i] = tc.adam_beta2 * exp_avg_sq[i] + (1.0 - tc.adam_beta2) * grad[i] * grad[i]
 
-
             float denom = sqrt_approx(exp_avg_sq[i] / bias_corr2) + tc.adam_epsilon
             float update = step_size * exp_avg[i] / denom
-
 
             param[i] = param[i] - tc.weight_decay * tc.learning_rate * param[i] - update
 
             i = i + 1
         }
-
 
         set_parameter(orch, p, param)
         set_exp_avg(orch, p, exp_avg)
@@ -793,7 +625,6 @@ func optimizer_step(ref orchestrator_state orch) {
         p = p + 1
     }
 }
-
 
 func zero_grads(ref orchestrator_state orch) {
     int p = 0
@@ -807,10 +638,6 @@ func zero_grads(ref orchestrator_state orch) {
         p = p + 1
     }
 }
-
-
-
-
 
 struct performance_stats {
     float total_flops
@@ -832,25 +659,19 @@ struct memory_stats {
     float gradient_memory_gb
 }
 
-
 func update_performance_stats(ref orchestrator_state orch, float step_time_ms) {
     orch.stats.steps_per_second = 1000.0 / step_time_ms
-
 
     int H = orch.model_cfg.hidden_dim
     int L = orch.model_cfg.num_layers
     int S = orch.model_cfg.max_seq_len
     int B = orch.train_cfg.global_batch_size
 
-
-
-
     float flops_per_step = 72.0 * float_of_int(L) * float_of_int(H * H) * float_of_int(B * S)
 
     orch.stats.tflops = flops_per_step / (step_time_ms / 1000.0) / 1e12
     orch.stats.total_flops = orch.stats.total_flops + flops_per_step
 }
-
 
 func log_training_progress(orchestrator_state orch) {
     float avg_loss = orch.accumulated_loss / float_of_int(max_int(orch.micro_batch_counter, 1))
@@ -863,10 +684,8 @@ func log_training_progress(orchestrator_state orch) {
         "TFLOPS: " + string(orch.stats.tflops, 1) + " " +
         "GPU Mem: " + string(orch.mem_stats.current_gpu_memory_gb, 1) + " GB"
 
-
     print(progress)
 }
-
 
 func current_learning_rate(orchestrator_state orch) float {
     training_config tc = orch.train_cfg
@@ -893,7 +712,6 @@ func current_learning_rate(orchestrator_state orch) float {
 
     lr
 }
-
 
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
@@ -945,7 +763,6 @@ func scale_vector(ref []float v, float s) {
     while i < len(v) { v[i] = v[i] * s; i = i + 1 }
 }
 
-
 func recv_activation_from_previous_stage(int from_stage, int mb_id) [][]float { return allocate_2d(128, 8192) }
 func send_activation_to_next_stage(int to_stage, [][]float act, int mb_id) {}
 func reduce_scatter_across_dp([]float g, int group, int degree) []float { return g }
@@ -983,21 +800,6 @@ func print(string s) {}
 func string(int i) string { return "" }
 func string(float f, int prec) string { return "" }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 func create_neurx_200b_config_for_64gpus() model_parallel_config {
     parallel dims = create_parallel_config(64, 8, 4, 2, 0)
 
@@ -1014,15 +816,9 @@ func create_neurx_200b_config_for_64gpus() model_parallel_config {
 
         use_moe: false,
 
-
-
-
-
-
         dims: dims,
     }
 }
-
 
 func create_128gpu_training_config() training_config {
     training_config {
@@ -1061,7 +857,6 @@ func create_128gpu_training_config() training_config {
     }
 }
 
-
 func print_full_config_summary(model_parallel_config mcfg, training_config tcfg) string {
     parallel dims = mcfg.dims
 
@@ -1096,16 +891,7 @@ func print_full_config_summary(model_parallel_config mcfg, training_config tcfg)
     "╚══════════════════════════════════════════════════════════╝"
 }
 
-
 func estimate_params(model_parallel_config cfg) float {
-
-
-
-
-
-
-
-
 
     float embed = float_of_int(cfg.vocab_size * cfg.hidden_dim)
 
@@ -1119,7 +905,6 @@ func estimate_params(model_parallel_config cfg) float {
     float per_layer = attn_per_layer + ffn_per_layer + norm_per_layer
 
     float total = embed + float_of_int(cfg.num_layers) * per_layer + float_of_int(cfg.hidden_dim)
-
 
     return total / 1e9
 }

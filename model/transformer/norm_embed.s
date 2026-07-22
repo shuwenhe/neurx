@@ -1,8 +1,5 @@
 package neurx.model.transformer.norm
 
-
-
-
 struct layer_norm_config {
     int hidden_dim
     float epsilon

@@ -1,10 +1,5 @@
 
 
-
-
-
-
-
 package main
 
 use std.os.{command, getenv}

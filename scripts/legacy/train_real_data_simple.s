@@ -1,8 +1,5 @@
 package main
 
-
-
-
 func main() int {
     println("========================================")
     println("NeurX Real Data Training")
@@ -18,7 +15,6 @@ func main() int {
     println("  - Training steps: 2232 (based on actual data count)")
     println("")
 
-
     int total_steps = 2232
     int step = 0
     float base_loss = 10.0
@@ -30,20 +26,17 @@ func main() int {
     while step < total_steps {
         float progress = (step * 1.0) / (total_steps * 1.0)
 
-
         float decay = 1.0 - (progress * progress * progress)
         if decay < 0.05 {
             decay = 0.05
         }
         float loss = final_loss + (base_loss - final_loss) * decay
 
-
         float current_lr = base_lr
         if step < warmup_steps {
             float warmup_progress = (step * 1.0) / (warmup_steps * 1.0)
             current_lr = min_lr + (base_lr - min_lr) * warmup_progress
         }
-
 
         int log_interval = 10
         int step_mod = step - (step / log_interval) * log_interval

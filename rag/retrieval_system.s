@@ -1,12 +1,6 @@
 
 
-
-
-
-
 module rag_system
-
-
 
 struct retrieval_system_config {
 
@@ -17,26 +11,21 @@ struct retrieval_system_config {
     nprobe: int = 10
     nlist: int = 100
 
-
     top_k: int = 5
     rerank_top_k: int = 3
     similarity_threshold: float = 0.7
     max_chunk_length: int = 512
 
-
     embedding_model_name: string = "bge-large-zh-v1.5"
     embedding_batch_size: int = 32
     normalize_embeddings: bool = true
 
-
     vector_weight: float = 0.7
     keyword_weight: float = 0.3
-
 
     enable_reranking: bool = true
     reranker_model: string = "bge-reranker-v2-m3"
     reranker_score_threshold: float = 0.5
-
 
     enable_hybrid_search: bool = true
     enable_query_expansion: bool = true
@@ -88,8 +77,6 @@ struct retrieval_metadata {
     used_query_expansion: bool
 }
 
-
-
 interface VectorDBInterface {
     init(config: retrieval_system_config)
     insert(chunks: list<document_chunk>)
@@ -115,8 +102,6 @@ struct dbstatus {
     is_initialized: bool
     last_updated: float
 }
-
-
 
 class InMemoryVectorDB implements VectorDBInterface {
     config: retrieval_system_config
@@ -167,7 +152,6 @@ class InMemoryVectorDB implements VectorDBInterface {
                 })
             }
         }
-
 
         results.sort_by_descending(r => r.score)
 
@@ -226,8 +210,6 @@ class InMemoryVectorDB implements VectorDBInterface {
     }
 }
 
-
-
 class FAISSVectorDB implements VectorDBInterface {
     config: retrieval_system_config
     index: any
@@ -278,7 +260,6 @@ class FAISSVectorDB implements VectorDBInterface {
             _ => throw error(f"Unsupported FAISS index type: {config.index_type}")
         }
 
-
         if "IVF" in config.index_type {
             this.index.nprobe = config.nprobe
         }
@@ -286,7 +267,6 @@ class FAISSVectorDB implements VectorDBInterface {
 
     insert(chunks: list<document_chunk>) {
         if chunks.length == 0 { return }
-
 
         valid_chunks: list<(document_chunk, tensor)> = []
         for chunk in chunks {
@@ -297,25 +277,20 @@ class FAISSVectorDB implements VectorDBInterface {
 
         if valid_chunks.length == 0 { return }
 
-
         embeddings_matrix = stack([emb for _, emb in valid_chunks])
-
 
         if this.config.normalize_embeddings || this.config.metric == "cosine" {
             embeddings_matrix = l2_normalize(embeddings_matrix, axis=1)
         }
-
 
         if !this.is_trained && embeddings_matrix.shape[0] >= 256 {
             this.index.train(embeddings_matrix)
             this.is_trained = true
         }
 
-
         start_id = this.next_id
         ids_to_add = arange(start_id, start_id + valid_chunks.length).astype('int64')
         this.index.add_with_ids(embeddings_matrix, ids_to_add)
-
 
         for i, (chunk, _) in enumerate(valid_chunks) {
             this.id_to_chunk[start_id + i] = chunk
@@ -325,7 +300,6 @@ class FAISSVectorDB implements VectorDBInterface {
     }
 
     delete(chunk_ids: list<string>) {
-
 
         for chunk_id in chunk_ids {
 
@@ -344,11 +318,9 @@ class FAISSVectorDB implements VectorDBInterface {
             query_embedding = query_embedding.unsqueeze(0)
         }
 
-
         if this.config.normalize_embeddings || this.config.metric == "cosine" {
             query_embedding = l2_normalize(query_embedding, axis=1)
         }
-
 
         k_actual = min(top_k * 2, this.index.ntotal)
         if k_actual == 0 { return [] }
@@ -359,12 +331,9 @@ class FAISSVectorDB implements VectorDBInterface {
         for i in range(distances.shape[1]) {
             int_id = indices[0][i]
 
-
             if int_id < 0 || int_id not in this.id_to_chunk { continue }
 
             score = distances[0][i]
-
-
 
             if this.config.metric == "l2" {
                 score = 1.0 / (1.0 + score)
@@ -386,7 +355,6 @@ class FAISSVectorDB implements VectorDBInterface {
 
     save(path: string) {
         faiss.write_index(this.index, path + ".index")
-
 
         mapping_data = [(int_id, serialize(chunk)) for int_id, chunk in this.id_to_chunk]
         write_pickle_file(path + ".mapping", {"mapping": mapping_data, "next_id": this.next_id})
@@ -425,8 +393,6 @@ class FAISSVectorDB implements VectorDBInterface {
     }
 }
 
-
-
 class EmbeddingService {
     model_name: string
     model: any
@@ -438,7 +404,6 @@ class EmbeddingService {
         this.model_name = model_name
         this.config = config
         this.cache = new LRUCache(capacity=10000)
-
 
         match model_name.split("/")[0].split("-")[0].to_lower() {
             "bge" => {
@@ -469,7 +434,6 @@ class EmbeddingService {
             }
         }
 
-
         this.model.eval()
         if has_gpu():
             this.model.to(device="cuda")
@@ -478,10 +442,8 @@ class EmbeddingService {
     embed(texts: list<string>) {
         embeddings: list<tensor> = []
 
-
         for batch_start in range(0, texts.length, this.config.embedding_batch_size) {
             batch_texts = texts[batch_start : batch_start + this.config.embedding_batch_size]
-
 
             uncached_texts: list<string> = []
             uncached_indices: list<int> = []
@@ -497,10 +459,8 @@ class EmbeddingService {
                 }
             }
 
-
             if uncached_texts.length > 0 {
                 batch_embeddings = this._compute_embeddings(uncached_texts)
-
 
                 for j, emb in enumerate(batch_embeddings) {
                     original_idx = uncached_indices[j]
@@ -509,7 +469,6 @@ class EmbeddingService {
                     cached_results[original_idx] = emb
                 }
             }
-
 
             for i in range(batch_texts.length) {
                 embeddings.append(cached_results[i])
@@ -534,15 +493,11 @@ class EmbeddingService {
             return_tensors="pt"
         )
 
-
         if has_gpu() {
             encoded = {k: v.to("cuda") for k, v in encoded}
 
-
         with no_grad():
             outputs = this.model(**encoded)
-
-
 
         attention_mask = encoded["attention_mask"]
         hidden_states = outputs.last_hidden_state
@@ -553,10 +508,8 @@ class EmbeddingService {
 
         embeddings = sum_embeddings / sum_mask
 
-
         if this.config.normalize_embeddings {
             embeddings = l2_normalize(embeddings, p=2, dim=1)
-
 
         result: list<tensor> = []
         for i in range(embeddings.shape[0]):
@@ -565,7 +518,6 @@ class EmbeddingService {
         return result
     }
 }
-
 
 class LRUCache<K, V> {
     capacity: int
@@ -600,8 +552,6 @@ class LRUCache<K, V> {
     }
 }
 
-
-
 class DocumentProcessor {
     config: retrieval_system_config
     splitter: TextSplitter
@@ -617,7 +567,6 @@ class DocumentProcessor {
     process_document(content: string, metadata: document_metadata) {
 
         raw_chunks = this.splitter.split_text(content)
-
 
         chunks: list<document_chunk> = []
         for i, chunk_text in enumerate(raw_chunks) {
@@ -642,7 +591,6 @@ class DocumentProcessor {
         return all_chunks
     }
 }
-
 
 class RecursiveCharacterTextSplitter {
     chunk_size: int
@@ -683,7 +631,6 @@ class RecursiveCharacterTextSplitter {
                 if !current_chunk.empty() {
                     chunks.append(current_chunk)
 
-
                     overlap_text = current_chunk[-this.chunk_overlap:] if this.chunk_overlap > 0 else ""
                     current_chunk = overlap_text + part
                 } else {
@@ -718,8 +665,6 @@ class RecursiveCharacterTextSplitter {
     }
 }
 
-
-
 class QueryExpander {
     llm_client: any
     enabled: bool
@@ -733,7 +678,6 @@ class QueryExpander {
         if !this.enabled {
             return query_expansion_result{original=query, expanded=[]}
         }
-
 
         prompt = f"""
 Given the following user query, generate {num_expansions} alternative phrasings
@@ -750,7 +694,6 @@ Expanded queries:
 """
 
         response = this.llm_client.generate(prompt, temperature=0.7, max_tokens=150)
-
 
         try {
             expanded_queries = json_parse(response.text.strip())
@@ -807,8 +750,6 @@ struct query_expansion_result {
     expanded: list<string>
 }
 
-
-
 class BM25Retriever {
     corpus: list<string>
     doc_ids: list<string>
@@ -862,7 +803,6 @@ class BM25Retriever {
             scores.append((doc_idx, score))
         }
 
-
         scores.sort_by_descending(s => s[1])
 
         results: list<bm25_result> = []
@@ -890,9 +830,7 @@ class BM25Retriever {
             df_val = this.df[term]
             n = this.corpus.length
 
-
             idf = log((n - df_val + 0.5) / (df_val + 0.5) + 1.0)
-
 
             tf_component = (tf_val * (this.k1 + 1)) / (tf_val + this.k1 * (1 - this.b + this.b * doc_len / this.avg_doc_len))
 
@@ -915,8 +853,6 @@ struct bm25_result {
     score: float
 }
 
-
-
 class CrossEncoderReranker {
     model: any
     tokenizer: any
@@ -927,7 +863,6 @@ class CrossEncoderReranker {
         this.model_name = model_name
         this.device = "cuda" if has_gpu() else "cpu"
 
-
         this.model, this.tokenizer = load_cross_encoder_model(model_name)
         this.model.eval()
         this.model.to(device=this.device)
@@ -936,12 +871,10 @@ class CrossEncoderReranker {
     rerank(query: string, candidates: list<document_chunk>, top_k: int) {
         if candidates.length == 0 { return [] }
 
-
         pairs: list<tuple<string, string>> = []
         for candidate in candidates {
             pairs.append((query, candidate.content))
         }
-
 
         features = this.tokenizer(
             pairs,
@@ -951,14 +884,11 @@ class CrossEncoderReranker {
             return_tensors="pt"
         ).to(this.device)
 
-
         with no_grad():
             scores = this.model(**features).logits.squeeze(-1)
 
-
         if scores.ndim == 2 && scores.shape[1] == 2:
             scores = softmax(scores, dim=-1)[:, 1]
-
 
         scored_candidates: list<tuple<document_chunk, float>> = []
         for i, candidate in enumerate(candidates) {
@@ -966,7 +896,6 @@ class CrossEncoderReranker {
         }
 
         scored_candidates.sort_by_descending(x => x[1])
-
 
         results: list<reranked_result> = []
         for candidate, score in scored_candidates[:top_k] {
@@ -984,8 +913,6 @@ struct reranked_result {
     chunk: document_chunk
     rerank_score: float
 }
-
-
 
 class HybridFusionEngine {
     vector_weight: float
@@ -1026,16 +953,13 @@ class HybridFusionEngine {
 
         scores: map<string, float> = {}
 
-
         for rank, vr in enumerate(vector_results):
             rrf_score = 1.0 / (k_constant + rank + 1)
             scores[vr.chunk_id] = scores.get(vr.chunk_id, 0.0) + rrf_score * this.vector_weight
 
-
         for rank, br in enumerate(bm25_results):
             rrf_score = 1.0 / (k_constant + rank + 1)
             scores[br.chunk_id] = scores.get(br.chunk_id, 0.0) + rrf_score * this.keyword_weight
-
 
         sorted_scores = list(scores.items()).sort_by_descending(x => x[1])
 
@@ -1054,7 +978,6 @@ class HybridFusionEngine {
         vec_scores: map<string, float> = {}
         kw_scores: map<string, float> = {}
 
-
         if vector_results.length > 0 {
             min_v = min(vr.score for vr in vector_results)
             max_v = max(vr.score for vr in vector_results)
@@ -1064,7 +987,6 @@ class HybridFusionEngine {
                 vec_scores[vr.chunk_id] = norm_score
             }
         }
-
 
         if bm25_results.length > 0 {
             min_b = min(br.score for br in bm25_results)
@@ -1076,7 +998,6 @@ class HybridFusionEngine {
             }
         }
 
-
         combined: map<string, float> = {}
         all_ids = set(list(vec_scores.keys()) + list(kw_scores.keys()))
 
@@ -1085,7 +1006,6 @@ class HybridFusionEngine {
             k_s = kw_scores.get(chunk_id, 0.0) * this.keyword_weight
             combined[chunk_id] = v_s + k_s
         }
-
 
         sorted_combined = list(combined.items()).sort_by_descending(x => x[1])
         results: list<fused_result> = []
@@ -1099,7 +1019,6 @@ class HybridFusionEngine {
                              bm25_results: list<bm25_result>,
                              top_k: int) {
 
-
         return this._weighted_average_fusion(vector_results, bm25_results, top_k)
     }
 }
@@ -1108,8 +1027,6 @@ struct fused_result {
     chunk_id: string
     fused_score: float
 }
-
-
 
 class RetrievalEngine {
     config: retrieval_system_config
@@ -1126,15 +1043,12 @@ class RetrievalEngine {
         this.config = config
         this.documents_store = map<string, document_chunk>{}
 
-
         this.document_processor = new DocumentProcessor(config=config)
-
 
         this.embedding_service = new EmbeddingService(
             model_name=config.embedding_model_name,
             config=config
         )
-
 
         match config.vector_db_backend.to_lower() {
             "faiss" => {
@@ -1148,7 +1062,6 @@ class RetrievalEngine {
                 this.vector_db = new InMemoryVectorDB(config=config)
             }
         }
-
 
         if llm_client != null && config.enable_query_expansion {
             this.query_expander = new QueryExpander(llm_client=llm_client!)
@@ -1168,14 +1081,10 @@ class RetrievalEngine {
         )
     }
 
-
-
     ingest(documents: list<{content: string, metadata: document_metadata}>, compute_embeddings: bool = true) {
         start_time = current_time_millis()
 
-
         chunks = this.document_processor.process_documents(documents)
-
 
         if compute_embeddings {
             chunk_texts = [c.content for c in chunks]
@@ -1186,14 +1095,11 @@ class RetrievalEngine {
             }
         }
 
-
         this.vector_db.insert(chunks)
-
 
         for chunk in chunks {
             this.documents_store[chunk.id] = chunk
         }
-
 
         if this.bm25_retriever != null {
             this.bm25_retriever!.build_index(chunks)
@@ -1213,7 +1119,6 @@ class RetrievalEngine {
         effective_top_k = top_k ?? this.config.top_k
         start_total = current_time_millis()
 
-
         expanded_query = query
         if this.query_expander != null && this.config.enable_query_expansion {
             exp_result = this.query_expander!.expand(query, num_expansions=3)
@@ -1223,12 +1128,10 @@ class RetrievalEngine {
             }
         }
 
-
         vec_start = current_time_millis()
         query_embedding = this.embedding_service.embed_single(query)
         vec_results = this.vector_db.search(query_embedding, effective_top_k * 2)
         vec_time = current_time_millis() - vec_start
-
 
         bm25_results: list<bm25_result> = []
         bm25_time = 0.0
@@ -1237,7 +1140,6 @@ class RetrievalEngine {
             bm25_results = this.bm25_retriever!.search(query, effective_top_k * 2)
             bm25_time = current_time_millis() - bm25_start
         }
-
 
         fuse_start = current_time_millis()
         fused_results: list<fused_result> = []
@@ -1253,7 +1155,6 @@ class RetrievalEngine {
         }
 
         fuse_time = current_time_millis() - fuse_start
-
 
         final_chunks: list<document_chunk> = []
         final_scores: list<float> = []
@@ -1316,7 +1217,6 @@ class RetrievalEngine {
             if total_tokens + chunk.token_count > effective_max_tokens {
                 break
             }
-
 
             source_info = chunk.metadata.source_path ?? chunk.metadata.source_id
             formatted = f"[{this.config.citation.format(index=i)}] {source_info}\n{chunk.content}\n"
@@ -1382,8 +1282,6 @@ struct rag_statistics {
     query_expansion_enabled: bool
 }
 
-
-
 function create_retrieval_system(config?: retrieval_system_config, llm_client?: any) {
     return new RetrievalEngine(config=config ?? new retrieval_system_config(), llm_client=llm_client)
 }
@@ -1393,7 +1291,6 @@ function test_retrieval_system() {
 
     cfg = retrieval_system_config(vector_db_backend="in_memory", vector_dim=128, enable_reranking=false, enable_query_expansion=false)
     rag = create_retrieval_system(cfg)
-
 
     print("  ✓ Test 1: document Ingestion & Chunking")
     sample_docs = [
@@ -1415,7 +1312,6 @@ function test_retrieval_system() {
     assert report.documents_ingested == 3, f"Ingestion count mismatch: {report.documents_ingested}"
     assert report.chunks_created >= 3, f"Chunks created too few: {report.chunks_created}"
 
-
     print("  ✓ Test 2: Vector Similarity Search")
 
     chunks = list(rag.documents_store.values())
@@ -1428,14 +1324,12 @@ function test_retrieval_system() {
     search_results = rag.vector_db.search(query_vec, top_k=3)
     assert search_results.length <= 3, f"Too many results: {search_results.length}"
 
-
     print("  ✓ Test 3: BM25 Keyword Search")
     if rag.bm25_retriever != null {
         rag.bm25_retriever!.build_index(chunks)
         bm25_res = rag.bm25_retriever!.search("English text NEURX", top_k=3)
         assert bm25_res.length > 0, "BM25 should find results"
     }
-
 
     print("  ✓ Test 4: Full Retrieve Pipeline")
 
@@ -1445,7 +1339,6 @@ function test_retrieval_system() {
     print("\n✅ All RAG System Tests Passed!")
     return true
 }
-
 
 export {
     retrieval_system_config, document_chunk, document_metadata, search_result, retrieval_metadata,

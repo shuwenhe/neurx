@@ -1,9 +1,5 @@
 
 
-
-
-
-
 module safetensors
 
 struct tensor_info {
@@ -21,11 +17,6 @@ struct safe_tensors_reader {
     int tensor_count
 }
 
-
-
-
-
-
 func bytes_to_uint32(string data, int offset) int {
     int b0 = data[offset] - '0'
     int b1 = data[offset + 1] - '0'
@@ -34,7 +25,6 @@ func bytes_to_uint32(string data, int offset) int {
 
     return b0 + (b1 << 8) + (b2 << 16) + (b3 << 24)
 }
-
 
 func bytes_to_uint64(string data, int offset) int64 {
     int64 b0 = data[offset] - '0'
@@ -50,17 +40,11 @@ func bytes_to_uint64(string data, int offset) int64 {
            (b4 << 32) + (b5 << 40) + (b6 << 48) + (b7 << 56)
 }
 
-
-
-
-
-
 func find_json_value(string json, string key) (int, int) {
     string search_key = "\"" + key + "\":"
     int pos = 0
     int start = -1
     int end = -1
-
 
     while pos + search_key.length < json.length {
         int match = 1
@@ -84,11 +68,9 @@ func find_json_value(string json, string key) (int, int) {
         return -1, 0
     }
 
-
     while start < json.length && json[start] == ' ' {
         start = start + 1
     }
-
 
     if json[start] == '"' {
 
@@ -120,11 +102,9 @@ func find_json_value(string json, string key) (int, int) {
     return start, end - start
 }
 
-
 func parse_json_string(string json, int start, int length) string {
     return json.substring(start, start + length)
 }
-
 
 func parse_json_array(string json, int start, int length) []int {
     []int result = []
@@ -137,14 +117,12 @@ func parse_json_array(string json, int start, int length) []int {
             i = i + 1
         }
 
-
         if i < array_str.length && array_str[i] >= '0' && array_str[i] <= '9' {
             string num_str = ""
             while i < array_str.length && array_str[i] >= '0' && array_str[i] <= '9' {
                 num_str = num_str + array_str[i]
                 i = i + 1
             }
-
 
             int num = 0
             int j = 0
@@ -161,19 +139,10 @@ func parse_json_array(string json, int start, int length) []int {
     return result
 }
 
-
-
-
-
-
 func parse_safetensors_json(string json_metadata) safe_tensors_reader {
     safe_tensors_reader reader
     reader.tensors = []
     reader.tensor_count = 0
-
-
-
-
 
     int start, int length = find_json_value(json_metadata, "model.embed_tokens.weight")
 
@@ -185,7 +154,6 @@ func parse_safetensors_json(string json_metadata) safe_tensors_reader {
     return reader
 }
 
-
 func load_safetensors_metadata(string filepath) safe_tensors_reader {
     safe_tensors_reader reader
     reader.filepath = filepath
@@ -194,17 +162,8 @@ func load_safetensors_metadata(string filepath) safe_tensors_reader {
 
     println("Loading SafeTensors metadata from: " + filepath)
 
-
-
-
-
-
-
-
-
     return reader
 }
-
 
 func verify_safetensors_file(safe_tensors_reader reader) bool {
     println("Verifying SafeTensors file...")
@@ -217,7 +176,6 @@ func verify_safetensors_file(safe_tensors_reader reader) bool {
     println("✓ Found " + int_to_string(reader.tensor_count) + " tensors")
     return true
 }
-
 
 func print_safetensors_tensors(safe_tensors_reader reader) {
     println("=== SafeTensors Tensors ===")
@@ -235,11 +193,6 @@ func print_safetensors_tensors(safe_tensors_reader reader) {
         shown = shown + 1
     }
 }
-
-
-
-
-
 
 func int_to_string(int n) string {
     if n == 0 {
@@ -267,7 +220,6 @@ func int_to_string(int n) string {
     return result
 }
 
-
 func list_tensors(safe_tensors_reader reader) {
     println("\n=== SafeTensors File: " + reader.filepath + " ===")
     println("Total tensors: " + int_to_string(reader.tensor_count))
@@ -280,12 +232,10 @@ func list_tensors(safe_tensors_reader reader) {
 
         tensor_info info = reader.tensors[i]
 
-
         int total_elements = 1
         for j in 0..info.shape.length {
             total_elements = total_elements * info.shape[j]
         }
-
 
         int bytes_per_element = 2
         if info.dtype == "F32" {

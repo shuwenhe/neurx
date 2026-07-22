@@ -22,10 +22,6 @@ use neurx.ops
 use neurx.tensor.new
 use neurx.tensor.tensor
 
-
-
-
-
 func get_file_size(string path) int {
     if !runtime_file_exists(path) {
         return 0
@@ -84,7 +80,6 @@ func read_text_file_with_estimated_progress(string path, int update_interval_ms)
     println("[io] reading: " + path)
     println("[io] size: " + size_str)
     println("[io] [>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>] 0% | allocating buffer...")
-
 
     string text = runtime_read_text_file(path)
 
@@ -689,7 +684,6 @@ func split_lines(string text) []string {
             in_line = true
         }
 
-
         int progress = (i * 100) / text_len
         if progress != last_progress && progress % 10 == 0 {
             println("[split] " + int_to_str(progress, 0) + "% line counting...")
@@ -721,7 +715,6 @@ func split_lines(string text) []string {
             }
             line_start = i + 1
         }
-
 
         int progress = (i * 100) / text_len
         if progress != last_progress && progress % 10 == 0 {
@@ -987,7 +980,6 @@ func gpt_large_pretrain_documents_for_ref(string shard_ref) []string {
                 doc_count = doc_count + 1
             }
         }
-
 
         int progress = (i * 100) / total_lines
         if progress != last_progress && progress % 10 == 0 {

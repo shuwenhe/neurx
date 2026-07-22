@@ -1,11 +1,5 @@
 
 
-
-
-
-
-
-
 package main
 
 use neurx.distributed.multi_node_launcher.{
@@ -24,19 +18,13 @@ use neurx.distributed.nccl_id_manager.{
 }
 use neurx.runtime.io.{runtime_env_get}
 
-
-
-
-
 func main() {
 
     print("="*60)
     print("NeurX Multi-Node Distributed Pretraining Entry")
     print("="*60)
 
-
     multi_node_config config = init_multi_node_config()
-
 
     int local_rank = parse_int(runtime_env_get("LOCAL_RANK", "0"), 0)
     rank_info rank = generate_rank_info(config, local_rank)
@@ -51,15 +39,12 @@ func main() {
     print("  - Master address: " + config.master_addr + ":" + itoa(config.master_port))
     print("  - NCCL store path: " + config.nccl_store_path)
 
-
     nccl_unique_id nccl_id = {}
 
     if rank.global_rank == 0 {
         print("[MAIN] Rank 0 is master, generating NCCL Unique ID...")
 
-
         nccl_id = generate_nccl_unique_id()
-
 
         bool saved = save_nccl_id_to_shared_storage(nccl_id, config.nccl_store_path)
         if !saved {
@@ -69,7 +54,6 @@ func main() {
 
         print("[MAIN] NCCL ID saved and ready for other ranks")
     }
-
 
     print("[MAIN] Rank " + itoa(rank.global_rank) + " waiting for NCCL ID...")
 
@@ -86,7 +70,6 @@ func main() {
     nccl_id = loaded_id
     print("[MAIN] Rank " + itoa(rank.global_rank) + " loaded NCCL ID from shared storage")
 
-
     print("[MAIN] Rank " + itoa(rank.global_rank) + " reached sync barrier")
 
     bool synced = synchronize_across_nodes(rank, config.nccl_store_path)
@@ -95,12 +78,7 @@ func main() {
         return
     }
 
-
     print("[MAIN] Rank " + itoa(rank.global_rank) + " initializing NCCL communicator...")
-
-
-
-
 
     int resume_step = 0
     float resume_loss = 0.0
@@ -120,7 +98,6 @@ func main() {
         }
     }
 
-
     print("[MAIN] Starting training loop...")
 
     int max_steps = parse_int(runtime_env_get("NEURX_PRETRAIN_STEPS", "50000"), 50000)
@@ -130,14 +107,11 @@ func main() {
     int step = resume_step
     while step < max_steps {
 
-
         float loss = simulate_training_step(step)
-
 
         if step % log_interval == 0 && rank.global_rank == 0 {
             print("[TRAIN] step=" + itoa(step) + " loss=" + ftoa(loss))
         }
-
 
         if step > 0 && step % save_interval == 0 {
             print("[CHECKPOINT] Rank " + itoa(rank.global_rank) +
@@ -155,7 +129,6 @@ func main() {
             }
         }
 
-
         if step % (save_interval / 2) == 0 {
             node_health_status health = check_node_health(rank, 30)
             if !health.is_healthy {
@@ -171,20 +144,12 @@ func main() {
     print("  - Rank: " + itoa(rank.global_rank))
 }
 
-
-
-
-
 func simulate_training_step(int step) float {
 
     float base_loss = 10.0
     float loss = base_loss * (1.0 / float(step + 1))
     loss
 }
-
-
-
-
 
 func parse_int(string s, int fallback) int {
     int result = 0

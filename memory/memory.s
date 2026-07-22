@@ -48,7 +48,6 @@ func new_agent_memory_state() agent_memory_state {
     }
 }
 
-
 func get_short_key(agent_memory_state state, int index) string {
     state.short_keys[index]
 }

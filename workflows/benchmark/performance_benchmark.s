@@ -1,17 +1,11 @@
 
 
-
-
 package main
 
 use std.io
 use std.strings
 use std.math
 use std.time
-
-
-
-
 
 struct model_config {
     name: string
@@ -44,10 +38,6 @@ struct performance_report {
     scaling_efficiency: f64
 }
 
-
-
-
-
 func get_scaled_model() model_config {
     return model_config {
         name: "Scaled Transformer",
@@ -76,13 +66,8 @@ func get_base_model() model_config {
     }
 }
 
-
-
-
-
 func benchmark_single_gpu(model: model_config) gpu_benchmark {
     println("Benchmarking: Single GPU (A100)")
-
 
     let forward_time = 6.0
     let backward_time = 12.0
@@ -110,22 +95,18 @@ func benchmark_single_gpu(model: model_config) gpu_benchmark {
 func benchmark_multi_gpu(model: model_config, gpu_count: i32) gpu_benchmark {
     println("Benchmarking: " + strings.from_i32(gpu_count) + " GPUs (DDP)")
 
-
     let forward_time = 6.0
     let backward_time = 12.0
     let optimizer_time = 2.0
-
 
     let base_comm = 0.58
     let comm_overhead = (base_comm * math.log(math.from_i32(gpu_count)) * 1.5)
 
     let step_time = forward_time + backward_time + optimizer_time + comm_overhead
 
-
     let single_gpu_throughput = (model.batch_size * model.seq_length * 1000.0) / (forward_time + backward_time + optimizer_time)
     let multi_gpu_throughput = (model.batch_size * model.seq_length * math.from_i32(gpu_count) * 1000.0) / step_time
     let efficiency = (multi_gpu_throughput / (single_gpu_throughput * math.from_i32(gpu_count))) * 100.0
-
 
     let adjusted_efficiency = efficiency
     if gpu_count > 16 {
@@ -165,7 +146,6 @@ func benchmark_model(model: model_config) performance_report {
 
     let benchmarks = gpu_benchmark[]{}
 
-
     let gpu_counts = [1, 4, 16, 64]
 
     for count in gpu_counts {
@@ -180,14 +160,12 @@ func benchmark_model(model: model_config) performance_report {
 
     println("")
 
-
     let peak_throughput = 0.0
     for benchmark in benchmarks {
         if benchmark.throughput > peak_throughput {
             peak_throughput = benchmark.throughput
         }
     }
-
 
     let total_efficiency = 0.0
     for benchmark in benchmarks {
@@ -206,10 +184,6 @@ func benchmark_model(model: model_config) performance_report {
 
     return report
 }
-
-
-
-
 
 func format_large_number(n: i64) string {
     if n > 1000000000 {
@@ -268,10 +242,6 @@ func print_scaling_analysis(report: performance_report) {
     println("")
 }
 
-
-
-
-
 func validate_performance_targets() {
     println("")
     println("╔" + strings.repeat("═", 61) + "╗")
@@ -304,10 +274,6 @@ func validate_performance_targets() {
     println("")
 }
 
-
-
-
-
 func main() {
     println("")
     println("╔" + strings.repeat("═", 61) + "╗")
@@ -315,16 +281,12 @@ func main() {
     println("╚" + strings.repeat("═", 61) + "╝")
     println("")
 
-
     let scaled_model = get_scaled_model()
     let scaled_report = benchmark_model(scaled_model)
 
-
     print_scaling_analysis(scaled_report)
 
-
     validate_performance_targets()
-
 
     println("═" + strings.repeat("═", 61))
     println("")

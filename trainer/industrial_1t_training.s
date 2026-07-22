@@ -1,25 +1,6 @@
 package neurx.trainer.industrial_1t_training
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_run_command_output, runtime_write_text_file}
-
-
-
-
 
 struct industrial_batch {
     tokens: []int
@@ -153,10 +134,6 @@ struct industrial_checkpoint_load_result {
     data_shard_index: int
     data_line_index: int
 }
-
-
-
-
 
 func industrial_chr(int code) string {
     if code == 48 { return "0" }
@@ -979,10 +956,6 @@ func industrial_init_params(int param_count) []float {
     params
 }
 
-
-
-
-
 func industrial_manifest_paths(string manifest_path) []string {
     []string paths = []string{cap: 0}
     if !runtime_file_exists(manifest_path) {
@@ -1180,10 +1153,6 @@ func industrial_next_batch(industrial_dataset_state ds) industrial_batch_result 
     }
 }
 
-
-
-
-
 func industrial_dist_from_env() industrial_dist_state {
     industrial_dist_state {
         rank: industrial_parse_int(runtime_env_get("RANK", "0")),
@@ -1260,10 +1229,6 @@ func industrial_print_dist_summary(industrial_dist_state dist) {
         " ep=" + industrial_int_to_string(dist.ep_size)
     )
 }
-
-
-
-
 
 func industrial_mp_default() industrial_mp_state {
     industrial_mp_state {
@@ -1593,10 +1558,6 @@ func industrial_mixed_precision_step(
         overflow: 0,
     }
 }
-
-
-
-
 
 func industrial_checkpoint_new(string base_dir) industrial_checkpoint_state {
     string manifest_path = base_dir + "/latest_checkpoint.txt"
@@ -1988,10 +1949,6 @@ func industrial_checkpoint_load(
     }
 }
 
-
-
-
-
 func industrial_trainer_new(
     string manifest_path,
     string checkpoint_dir,
@@ -2146,10 +2103,6 @@ func industrial_run_training(
         )
     }
 }
-
-
-
-
 
 struct industrial_enterprise_pipeline_result {
     string checkpoint_path
@@ -2465,10 +2418,6 @@ func industrial_run_enterprise_pipeline(
         eval_perplexity: industrial_exp_approx(restored.loss),
     }
 }
-
-
-
-
 
 func main() {
     string manifest_path = runtime_env_get("NEURX_1T_MANIFEST", "./data/training_data_shards/manifest.txt")

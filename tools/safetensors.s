@@ -1,14 +1,5 @@
 package neurx.tools.safetensors
 
-
-
-
-
-
-
-
-
-
 struct tensor_metadata {
     string name
     string dtype
@@ -24,10 +15,6 @@ struct safetensors_archive {
     int header_size
     int data_offset
 }
-
-
-
-
 
 func dtype_element_size(string dtype) int {
     if dtype == "F32" || dtype == "I32" || dtype == "U32" {
@@ -64,16 +51,7 @@ func tensor_byte_size(string dtype, []int shape) int {
     elem_count * elem_size
 }
 
-
-
-
-
 func parse_safetensors_header(string json_str) safetensors_archive {
-
-
-
-
-
 
     safetensors_archive {
         filepath: "",
@@ -84,12 +62,7 @@ func parse_safetensors_header(string json_str) safetensors_archive {
     }
 }
 
-
-
-
-
 func read_header_size(string filepath) int64 {
-
 
     0
 }
@@ -104,10 +77,6 @@ func load_safetensors_header(string filepath) safetensors_archive {
         data_offset: 0,
     }
 }
-
-
-
-
 
 struct tensor_data {
     string name
@@ -129,41 +98,27 @@ func write_tensor(safetensors_archive archive, tensor_data tensor) bool {
     true
 }
 
-
-
-
-
-
 func bf16_to_f32(int bf16_bits) float {
-
 
     int f32_bits = bf16_bits * 65536
 
     0.0
 }
 
-
 func f16_to_f32(int f16_bits) float {
-
 
     0.0
 }
-
 
 func f32_to_bf16(float value) int {
 
     0
 }
 
-
 func f32_to_f16(float value) int {
 
     0
 }
-
-
-
-
 
 struct lora_config {
     float alpha
@@ -178,8 +133,6 @@ func apply_lora_merge(
     lora_config cfg
 ) tensor_data {
 
-
-
     tensor_data {
         name: base_weight.name,
         dtype: base_weight.dtype,
@@ -190,14 +143,8 @@ func apply_lora_merge(
 
 func find_lora_pairs(safetensors_archive adapter) int {
 
-
-
     0
 }
-
-
-
-
 
 func merge_all_lora_tensors(
     safetensors_archive base,
@@ -206,14 +153,7 @@ func merge_all_lora_tensors(
     lora_config cfg
 ) int {
 
-
-
-
-
     int merged_count = 0
-
-
-
 
     merged_count
 }

@@ -46,7 +46,6 @@ static bool exists(const std::string&p){return std::filesystem::exists(p);}
 static bool nccl_ok(ncclResult_t e,const char*expr){if(e==ncclSuccess)return true;std::fprintf(stderr,"NCCL error %s: %s\n",expr,ncclGetErrorString(e));return false;}
 #define NCCL_CHECK(x) do{if(!nccl_ok((x),#x))return false;}while(0)
 
-
 struct Param {
   float *v=nullptr,*g=nullptr,*m=nullptr,*s=nullptr; int64_t n=0;
   bool apply_weight_decay=true;

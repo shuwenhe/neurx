@@ -1,15 +1,5 @@
 package neurx.attention.cuda
 
-
-
-
-
-
-
-
-
-
-
 struct attention_config {
     int batch_size
     int num_heads
@@ -19,13 +9,10 @@ struct attention_config {
 
     float scale
 
-
     bool is_causal
-
 
     bool use_dropout
     float dropout_probability
-
 
     bool use_flash_attention
     bool use_memory_efficient

@@ -1,11 +1,6 @@
 
 
-
-
-
-
 module multimodal_vision
-
 
 struct vision_config {
 
@@ -17,19 +12,15 @@ struct vision_config {
     num_hidden_layers: int = 24
     intermediate_size: int = 4096
 
-
     clip_embed_dim: int = 768
     projection_dim: int = 512
-
 
     video_max_frames: int = 64
     video_fps_sample: float = 1.0
 
-
     vision_lang_align_dim: int = 4096
     use_visual_adapter: bool = true
     adapter_hidden_dim: int = 5120
-
 
     enable_multi_image: bool = true
     max_images: int = 16
@@ -71,8 +62,6 @@ struct vision_metadata {
     frame_count: int
 }
 
-
-
 class ViTEncoder {
     config: vision_config
     embeddings: ViTPatchEmbeddings
@@ -84,7 +73,6 @@ class ViTEncoder {
     init(config: vision_config) {
         this.config = config
 
-
         this.embeddings = new ViTPatchEmbeddings(
             img_size=config.image_size,
             patch_size=config.patch_size,
@@ -92,14 +80,12 @@ class ViTEncoder {
             embed_dim=config.hidden_size
         )
 
-
         this.encoder = new ViTEncoderBlocks(
             hidden_size=config.hidden_size,
             num_layers=config.num_hidden_layers,
             num_heads=config.num_attention_heads,
             intermediate_size=config.intermediate_size
         )
-
 
         this.pooler = new VisionPooler(pool_type="cls_token")
 
@@ -109,25 +95,16 @@ class ViTEncoder {
 
     forward(pixel_values: tensor) {
 
-
-
         let embeddings_output = this.embeddings.forward(pixel_values)
-
-
 
         let encoder_output = this.encoder.forward(
             hidden_states=embeddings_output.hidden_states,
             attention_mask=embeddings_output.attention_mask
         )
 
-
-
         let normalized = this.layernorm.forward(encoder_output.last_hidden_state)
 
-
         let pooled = this.pooler.forward(normalized)
-
-
 
         let spatial_features = normalized[:, 1:, :]
 
@@ -158,8 +135,6 @@ class ViTEncoder {
     }
 }
 
-
-
 class ViTPatchEmbeddings {
     projection: Conv2D
     cls_token: Parameter
@@ -176,8 +151,6 @@ class ViTPatchEmbeddings {
         this.embed_dim = embed_dim
         this.num_patches = (img_size / patch_size) ** 2
 
-
-
         this.projection = new Conv2D(
             in_channels=in_channels,
             out_channels=embed_dim,
@@ -186,9 +159,7 @@ class ViTPatchEmbeddings {
             bias=true
         )
 
-
         this.cls_token = Parameter(shape=(1, 1, embed_dim))
-
 
         this.position_embeddings = Parameter(
             shape=(1, this.num_patches + 1, embed_dim)
@@ -198,22 +169,14 @@ class ViTPatchEmbeddings {
     forward(pixel_values: tensor) {
         batch_size = pixel_values.shape[0]
 
-
-
-
         let x = this.projection.forward(pixel_values)
 
-
-
         let patches = x.flatten(start_dim=2).transpose(1, 2)
-
 
         let cls_tokens = this.cls_token.expand(batch_size, -1, -1)
         let embeddings = concatenate([cls_tokens, patches], dim=1)
 
-
         let embeddings_with_pos = embeddings + this.position_embeddings
-
 
         let attention_mask = ones((batch_size, this.num_patches + 1))
 
@@ -228,8 +191,6 @@ struct embeddings_output {
     hidden_states: tensor
     attention_mask: tensor
 }
-
-
 
 class ViTEncoderBlocks {
     layers: list<ViTLayer>
@@ -300,7 +261,6 @@ class ViTLayer {
         let attention_output = this.attention.forward(normalized, attention_mask)
         let residual = hidden_states + attention_output.hidden_states
 
-
         let normalized2 = this.layernorm_after.forward(residual)
         let intermediate_output = this.intermediate.forward(normalized2)
         let ffn_output = this.output.forward(intermediate_output, residual)
@@ -316,8 +276,6 @@ struct layer_output {
     hidden_states: tensor
     attention_weights: tensor?
 }
-
-
 
 class ViTAttention {
     query: Linear
@@ -342,21 +300,15 @@ class ViTAttention {
     forward(hidden_states: tensor, attention_mask: tensor?) {
         batch_size, seq_len, _ = hidden_states.shape
 
-
         let q = this.query.forward(hidden_states)
         let k = this.key.forward(hidden_states)
         let v = this.value.forward(hidden_states)
-
-
 
         let q_reshaped = q.reshape(batch_size, seq_len, this.num_heads, this.head_dim).transpose(1, 2)
         let k_reshaped = k.reshape(batch_size, seq_len, this.num_heads, this.head_dim).transpose(1, 2)
         let v_reshaped = v.reshape(batch_size, seq_len, this.num_heads, this.head_dim).transpose(1, 2)
 
-
         let attn_scores = matmul(q_reshaped, k_reshaped.transpose(-2, -1)) * this.scale
-
-
 
         if attention_mask != null {
 
@@ -364,13 +316,9 @@ class ViTAttention {
             attn_scores = attn_scores.masked_fill(expanded_mask == 0, float('-inf'))
         }
 
-
         let attn_probs = softmax(attn_scores, dim=-1)
 
-
         let context = matmul(attn_probs, v_reshaped)
-
-
 
         let context_concat = context.transpose(1, 2).reshape(batch_size, seq_len, -1)
         let output = this.output_proj.forward(context_concat)
@@ -386,8 +334,6 @@ struct attention_output {
     hidden_states: tensor
     attention_weights: tensor?
 }
-
-
 
 class Intermediate {
     dense: Linear
@@ -419,8 +365,6 @@ class Output {
         return x + residual
     }
 }
-
-
 
 enum PoolType {
     CLS_TOKEN
@@ -468,7 +412,6 @@ class VisionPooler {
     }
 }
 
-
 class LearnableAttentionPool {
     query: Parameter
     attention: ViTAttention
@@ -489,11 +432,7 @@ class LearnableAttentionPool {
     }
 }
 
-
-
 class VisualAdapter {
-
-
 
     input_dim: int
     output_dim: int
@@ -508,7 +447,6 @@ class VisualAdapter {
         this.output_dim = output_dim
         this.hidden_dim = hidden_dim
 
-
         this.layers = Sequential([
             Linear(input_dim, hidden_dim),
             GELU(),
@@ -520,16 +458,12 @@ class VisualAdapter {
 
     forward(vision_features: tensor) {
 
-
-
         let projected = this.layers.forward(vision_features)
         let normalized = this.layer_norm.forward(projected)
 
         return normalized
     }
 }
-
-
 
 class CLIPContrastiveModel {
     vision_encoder: ViTEncoder
@@ -560,7 +494,6 @@ class CLIPContrastiveModel {
             bias=false
         )
 
-
         this.logit_scale = Parameter(tensor([0.07]).log())
     }
 
@@ -569,21 +502,15 @@ class CLIPContrastiveModel {
         let vision_out = this.vision_encoder.forward(image_input.pixel_values)
         let image_features = this.vision_projection.forward(vision_out.pooled_features)
 
-
-
         let text_features = this.text_encoder.forward(text_input)
         let text_embeds = this.text_projection.forward(text_features)
-
-
 
         let image_norm = l2_normalize(image_features, dim=-1)
         let text_norm = l2_normalize(text_embeds, dim=-1)
 
-
         logit_scale = this.logit_scale.exp()
         let logits_per_image = matmul(image_norm, text_norm.transpose(0, 1)) * logit_scale
         let logits_per_text = logits_per_image.transpose(0, 1)
-
 
         let loss = this._contrastive_loss(logits_per_image, logits_per_text)
 
@@ -617,8 +544,6 @@ struct clipoutput {
     contrastive_loss: tensor
     similarity_score: tensor
 }
-
-
 
 class CLIPTextEncoder {
     token_embedding: embedding
@@ -657,20 +582,15 @@ class CLIPTextEncoder {
 
         let tokens = this._tokenize(text)
 
-
         let x = this.token_embedding.forward(tokens) + this.positional_embedding
 
-
         let causal_mask = this._create_causal_mask(x.shape[0])
-
 
         for block in this.transformer_blocks {
             x = block.forward(x, attention_mask=causal_mask)
         }
 
-
         x = this.final_layer_norm.forward(x)
-
 
         let text_features = x[-1, :]
 
@@ -678,7 +598,6 @@ class CLIPTextEncoder {
     }
 
     _tokenize(text: string) {
-
 
         tokens = [49406]
 
@@ -697,7 +616,6 @@ class CLIPTextEncoder {
         return mask
     }
 }
-
 
 class CLIPTransformerBlock {
     self_attn: multi_head_attention
@@ -718,15 +636,12 @@ class CLIPTransformerBlock {
         let attn_out = this.self_attn.forward(normed, normed, normed, attention_mask)
         let residual = hidden_states + attn_out
 
-
         let normed2 = this.layer_norm2.forward(residual)
         let mlp_out = this.mlp.forward(normed2)
 
         return residual + mlp_out
     }
 }
-
-
 
 class VideoProcessor {
     config: vision_config
@@ -750,8 +665,6 @@ class VideoProcessor {
 
         let sampled_frames = this.frame_sampler.sample_frames(video_input)
 
-
-
         frame_features: list<tensor> = []
         for frame in sampled_frames {
 
@@ -761,13 +674,9 @@ class VideoProcessor {
 
         }
 
-
         let all_frame_features = stack(frame_features, dim=0)
 
-
         let temporal_features = this.temporal_encoder.forward(all_frame_features)
-
-
 
         let video_pooled = temporal_features.mean(dim=0)
 
@@ -788,7 +697,6 @@ struct video_vision_output {
     num_frames: int
     frame_timestamps: list<float>
 }
-
 
 class FrameSampler {
     max_frames: int
@@ -829,7 +737,6 @@ class FrameSampler {
     }
 }
 
-
 class TemporalEncoder {
     position_embedding: Parameter
     transformer_layers: list<TemporalTransformerBlock>
@@ -854,9 +761,7 @@ class TemporalEncoder {
 
         num_frames = frame_features.shape[0]
 
-
         let x = frame_features + this.position_embedding[:num_frames, :]
-
 
         for layer in this.transformer_layers {
             x = layer.forward(x)
@@ -885,15 +790,12 @@ class TemporalTransformerBlock {
         let attn_out = this.self_attn.forward(normed, normed, normed, null)
         x = x + attn_out
 
-
         let normed2 = this.norm2.forward(x)
         x = x + this.mlp.forward(normed2)
 
         return x
     }
 }
-
-
 
 class MultiImageProcessor {
     config: vision_config
@@ -921,13 +823,11 @@ class MultiImageProcessor {
     process_multiple_images(images: list<image_input>) {
         assert images.length <= this.config.max_images, "Too many images"
 
-
         image_results: list<vision_output> = []
         for img in images {
             let result = this.vit_encoder.forward(img.pixel_values)
             image_results.append(result)
         }
-
 
         adapted_features: list<tensor> = []
         for result in image_results {
@@ -937,7 +837,6 @@ class MultiImageProcessor {
                 adapted_features.append(adapted)
             }
         }
-
 
         if this.cross_image_attention != null && adapted_features.length > 1 {
             let fused = this.cross_image_attention!.forward(adapted_features)
@@ -969,7 +868,6 @@ struct multimodal_embedding_result {
     metadata: vision_metadata?
 }
 
-
 class CrossImageAttention {
     query: Linear
     key: Linear
@@ -994,9 +892,7 @@ class CrossImageAttention {
 
         let concatenated = concatenate(image_features_list, dim=1)
 
-
         batch_size, total_patches, _ = concatenated.shape
-
 
         let q = this.query.forward(concatenated).reshape(batch_size, total_patches, this.num_heads, this.head_dim).transpose(1, 2)
         let k = this.key.forward(concatenated).reshape(batch_size, total_patches, this.num_heads, this.head_dim).transpose(1, 2)
@@ -1011,15 +907,12 @@ class CrossImageAttention {
     }
 }
 
-
-
 class ImagePreprocessor {
     config: vision_config
     transforms: list<ImageTransform>
 
     init(config: vision_config) {
         this.config = config
-
 
         this.transforms = [
             Resize(size=(config.image_size, config.image_size)),
@@ -1033,11 +926,9 @@ class ImagePreprocessor {
 
         image = load_image(image_path)
 
-
         for transform in this.transforms {
             image = transform.apply(image)
         }
-
 
         let pixel_values = image.unsqueeze(0)
 
@@ -1055,13 +946,11 @@ class ImagePreprocessor {
             let img_input = this.preprocess(path)
             processed.append(img_input.pixel_values)
 
-
             if adaptive_resolution && this.config.image_resolution_adaptive {
 
                 pass
             }
         }
-
 
         return concatenate(processed, dim=0)
     }
@@ -1070,13 +959,9 @@ class ImagePreprocessor {
 
         metadata = {}
 
-
-
         return metadata
     }
 }
-
-
 
 class MultimodalVisionModel {
     config: vision_config
@@ -1091,7 +976,6 @@ class MultimodalVisionModel {
         this.config = config
         this.language_model = lm_model
 
-
         this.vision_encoder = new ViTEncoder(config=config)
         this.visual_adapter = new VisualAdapter(
             input_dim=config.hidden_size,
@@ -1099,7 +983,6 @@ class MultimodalVisionModel {
             output_dim=config.vision_lang_align_dim
         )
         this.image_preprocessor = new ImagePreprocessor(config=config)
-
 
         if config.enable_multi_image {
             this.multi_image_processor = new MultiImageProcessor(config=config)
@@ -1110,21 +993,15 @@ class MultimodalVisionModel {
         }
     }
 
-
     understand_image(image_path: string, question: string) {
 
         let img_input = this.image_preprocessor.preprocess(image_path)
 
-
         let vision_out = this.vision_encoder.forward(img_input.pixel_values)
-
 
         let visual_tokens = this.visual_adapter.forward(vision_out.spatial_features!)
 
-
-
         let prompt = this._build_multimodal_prompt(question, visual_tokens)
-
 
         let response = this.language_model.generate(prompt)
 
@@ -1136,10 +1013,8 @@ class MultimodalVisionModel {
         }
     }
 
-
     reason_over_multiple_images(image_paths: list<string>, question: string) {
         assert this.multi_image_processor != null, "Multi-image processing not enabled"
-
 
         images: list<image_input> = []
         for path in image_paths {
@@ -1147,12 +1022,9 @@ class MultimodalVisionModel {
             images.append(img)
         }
 
-
         let multi_result = this.multi_image_processor!.process_multiple_images(images)
 
-
         let prompt = this._build_multi_image_prompt(question, multi_result)
-
 
         let response = this.language_model.generate(prompt)
 
@@ -1164,24 +1036,18 @@ class MultimodalVisionModel {
         }
     }
 
-
     understand_video(video_path: string, question: string) {
         assert this.video_processor != null, "Video processing not enabled"
 
-
         let video = this._load_video(video_path)
 
-
         let video_result = this.video_processor!.process_video(video, this.vision_encoder)
-
 
         let video_tokens = this.visual_adapter.forward(
             video_result.per_frame_features.unsqueeze(0)
         )
 
-
         let prompt = this._build_video_prompt(question, video_result, video_tokens)
-
 
         let response = this.language_model.generate(prompt)
 
@@ -1194,7 +1060,6 @@ class MultimodalVisionModel {
     }
 
     _build_multimodal_prompt(question: string, visual_tokens: tensor) {
-
 
         return "<image>\n" + question
     }
@@ -1214,7 +1079,6 @@ class MultimodalVisionModel {
 
     _load_video(video_path: string) {
 
-
         frames = extract_frames_from_video(video_path)
         return video_input {
             frames=frames,
@@ -1233,10 +1097,7 @@ struct vision_language_output {
     confidence: float
 }
 
-
-
 function create_multimodal_vision(model_variant: string = "neurx-4v-plus") {
-
 
     match model_variant.lower() {
         "neurx-4v-9b" => {
@@ -1264,16 +1125,12 @@ function create_multimodal_vision(model_variant: string = "neurx-4v-plus") {
         _ => throw error(f"Unknown model variant: {model_variant}")
     }
 
-
     lm_model = null
     return new MultimodalVisionModel(config=cfg, lm_model=lm_model)
 }
 
-
-
 function test_multimodal_vision_system() {
     print("🧪 Testing MULTIMODAL-VISION Vision System...")
-
 
     print("  ✓ Test 1: ViT Encoder Forward Pass")
     cfg = vision_config(image_size=224, patch_size=16, hidden_size=768, num_hidden_layers=12, num_attention_heads=12)
@@ -1283,13 +1140,11 @@ function test_multimodal_vision_system() {
     assert output.image_features.shape == (2, 197, 768), "ViT shape mismatch"
     assert output.pooled_features.shape == (2, 768), "Pooling shape mismatch"
 
-
     print("  ✓ Test 2: Visual Adapter Projection")
     adapter = new VisualAdapter(input_dim=768, hidden_dim=3072, output_dim=4096)
     dummy_features = randn(2, 196, 768)
     projected = adapter.forward(dummy_features)
     assert projected.shape == (2, 196, 4096), "Adapter shape mismatch"
-
 
     print("  ✓ Test 3: Multi-Image Processing")
     multi_cfg = vision_config(enable_multi_image=true, max_images=4, hidden_size=768)
@@ -1302,7 +1157,6 @@ function test_multimodal_vision_system() {
     multi_result = multi_proc.process_multiple_images(imgs)
     assert multi_result.num_images == 3, "Multi-image count mismatch"
 
-
     print("  ✓ Test 4: Video Frame Processing")
     vid_cfg = vision_config(support_video=true, video_max_frames=8)
     vid_proc = new VideoProcessor(config=vid_cfg)
@@ -1314,7 +1168,6 @@ function test_multimodal_vision_system() {
     vid_out = vid_proc.process_video(dummy_video, vit)
     assert vid_out.num_frames <= 8, "Frame count should be capped at max_frames"
 
-
     print("  ✓ Test 5: CLIP Contrastive Learning")
     clip_cfg = vision_config(hidden_size=768, clip_embed_dim=512, projection_dim=512)
     clip_model = new CLIPContrastiveModel(vision_config=clip_cfg)
@@ -1325,7 +1178,6 @@ function test_multimodal_vision_system() {
     print("\n✅ All MULTIMODAL-VISION Vision Tests Passed!")
     return true
 }
-
 
 export {
     vision_config, image_input, video_input, vision_output, vision_metadata,

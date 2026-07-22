@@ -5,19 +5,6 @@ use neurx.eval.mmlu_data
 use neurx.eval.mmlu_evaluator
 use std.io.println
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 func main() int {
     string project_root = runtime_env_get("NEURX_ROOT", "/Users/shuwen/shuwen/train/neurx")
     string model_path = runtime_env_get("NEURX_MODEL_PATH", project_root + "/../model/base-model-7B")
@@ -37,7 +24,6 @@ func main() int {
     println("  Few-shot     : " + num_shots_str + "-shot")
     println("")
 
-
     println("[Step 1] Initializing MMLU evaluation config...")
     mmlu_evaluator.mmlu_eval_config cfg = mmlu_evaluator.default_mmlu_eval_config()
     cfg.data_root = data_root
@@ -46,23 +32,18 @@ func main() int {
     println("  ✓ Config ready")
     println("")
 
-
     println("[Step 2] Loading MMLU dataset...")
     mmlu_data.mmlu_dataset_state dataset = mmlu_data.load_mmlu_dataset(data_root)
     println("")
 
-
     println("[Step 3] Loading model checkpoint...")
     println("  Model: " + model_path)
-
 
     println("  ✓ Model loaded (mock)")
     println("")
 
-
     println("[Step 4] Running MMLU evaluation...")
     println("")
-
 
     println("Expected output (once model loading is integrated):")
     println("========================================")
@@ -90,7 +71,6 @@ func main() int {
     println("Other:          50.1% (288/575)")
     println("")
 
-
     println("[Step 5] Generating evaluation report...")
     println("  ✓ Report saved to: artifacts/eval/mmlu_results_2026-07-20.json")
     println("")
@@ -115,10 +95,6 @@ func main() int {
 
     0
 }
-
-
-
-
 
 func parse_int(string s, int fallback) int {
     if len(s) < 1 { return fallback }

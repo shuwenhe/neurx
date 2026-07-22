@@ -16,17 +16,10 @@ struct SamplingConfig {
   uint64_t seed = 0;
 };
 
-
-
-
-
 AdapterStatus sample_logits(const float* logits, std::size_t vocabulary,
                             const SamplingConfig& config,
                             const std::vector<int32_t>& token_history,
                             int32_t* token);
-
-
-
 
 bool supports_atb_device_sampling(const SamplingConfig& config,
                                   std::size_t vocabulary);

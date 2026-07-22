@@ -1,11 +1,5 @@
 package neurx.data
 
-
-
-
-
-
-
 struct collator_config {
     int max_length
     int pad_token_id
@@ -16,20 +10,17 @@ struct collator_config {
     string padding_side
 }
 
-
 struct batch {
     []int input_ids
     []int attention_mask
     []int labels
     []int position_ids
 
-
     int batch_size
     int seq_length
     []int original_lengths
     map[string]any extra
 }
-
 
 func default_collator_config() collator_config {
     collator_config {
@@ -42,11 +33,6 @@ func default_collator_config() collator_config {
     }
 }
 
-
-
-
-
-
 func collate_fn(
     []sample samples,
     collator_config cfg
@@ -55,12 +41,9 @@ func collate_fn(
         return empty_batch()
     }
 
-
     int max_len = find_max_length(samples)
 
-
     int target_len = determine_target_length(max_len, cfg)
-
 
     int batch_size = len(samples)
 
@@ -72,12 +55,10 @@ func collate_fn(
         labels = create_2d_array(batch_size, target_len, -100)
     }
 
-
     []int original_lengths = []int{cap: batch_size}
 
     for i in 0..batch_size {
         sample s = samples[i]
-
 
         []int token_ids = s.token_ids
         if len(token_ids) > target_len {
@@ -87,14 +68,11 @@ func collate_fn(
         int actual_len = len(token_ids)
         original_lengths[i] = actual_len
 
-
         copy_with_padding(input_ids, token_ids, i, target_len, cfg.padding_side, cfg.pad_token_id)
         copy_with_padding(attention_mask, ones(actual_len), i, target_len, cfg.padding_side, 0)
 
-
         if cfg.include_labels  len(labels) > 0  s.label >= 0 {
             if s.label == -1 {
-
 
                 copy_with_padding(labels, token_ids, i, target_len, cfg.padding_side, -100)
             } else {
@@ -103,7 +81,6 @@ func collate_fn(
             }
         }
     }
-
 
     batch {
         input_ids: input_ids,
@@ -187,7 +164,6 @@ func apply_truncation([]int tokens, int max_len, string strategy) []int {
         result
     }
 }
-
 
 func copy_with_padding(
     []int dst,

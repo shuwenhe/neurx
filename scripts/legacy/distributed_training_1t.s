@@ -6,10 +6,6 @@ import (
     "time"
 )
 
-
-
-
-
 type distributed_trainer1_t struct {
     world_size: int
     rank: int
@@ -37,10 +33,6 @@ type checkpoint_manager struct {
     saved_checkpoints: int
 }
 
-
-
-
-
 func initialize_distributed_1t(world_size: int, rank: int,
                               local_rank: int): distributed_trainer1_t {
     trainer := distributed_trainer1_t{
@@ -54,10 +46,6 @@ func initialize_distributed_1t(world_size: int, rank: int,
     }
     return trainer
 }
-
-
-
-
 
 type tensor_parallel_operator struct {
     tp_rank: int
@@ -77,14 +65,9 @@ func (op *tensor_parallel_operator) split_linear_weight(weight_shape: [2]int): [
 
 func (op *tensor_parallel_operator) all_reduce_loss(local_loss: float): float {
 
-
     global_loss := local_loss * float(op.tp_size)
     return global_loss / float(op.tp_size)
 }
-
-
-
-
 
 type pipeline_stage struct {
     stage_id: int
@@ -114,10 +97,6 @@ func (ps *pipeline_scheduler) create_pipeline_stages(num_stages: int,
     }
 }
 
-
-
-
-
 type zero_optimizer struct {
     stage: int
     partition_optimizer_states: bool
@@ -145,10 +124,6 @@ func (z *zero_optimizer) estimate_memory_reduction(original_bytes: int64): int64
     }
     return original_bytes
 }
-
-
-
-
 
 type gradient_manager struct {
     accumulation_steps: int
@@ -181,17 +156,12 @@ func (gm *gradient_manager) reset() {
     gm.ready_to_update = false
 }
 
-
-
-
-
 type activation_checkpointer struct {
     checkpoint_segments: int
     enabled: bool
 }
 
 func (ac *activation_checkpointer) compute_memory_savings(): float {
-
 
     return 0.70
 }
@@ -201,10 +171,6 @@ func (ac *activation_checkpointer) configure_for_1t_model() {
     ac.checkpoint_segments = 96 / 10
     ac.enabled = true
 }
-
-
-
-
 
 type training_loop1_t struct {
     trainer: distributed_trainer1_t
@@ -266,7 +232,6 @@ func (loop *training_loop1_t) forward_pass(batch_tokens: int64): float {
 
     loss := 0.0
 
-
     time.Sleep(3 * time.Second)
 
     return loss
@@ -281,7 +246,6 @@ func (loop *training_loop1_t) optimizer_step() {
 
     loop.state.step += 1
 
-
     progress := float(loop.state.step) / 500000.0
     cosine_factor := (1.0 + math.Cos(3.14159 * progress)) / 2.0
     loop.state.learning_rate = 1e-4 * cosine_factor
@@ -292,10 +256,6 @@ func (loop *training_loop1_t) save_checkpoint() {
     fmt.Printf("[checkpoint %d] Saved at step %d\n",
               loop.checkpoint_mgr.saved_checkpoints, loop.state.step)
 }
-
-
-
-
 
 type communication_optimizer struct {
     use_async_communication: bool
@@ -310,10 +270,6 @@ func (co *communication_optimizer) all_reduce_grads_async(grad_size: int64): {
 func (co *communication_optimizer) broadcast_weights_async(weight_size: int64): {
     fmt.Printf("  [COMM] Broadcast weights (%d MB) asynchronously\n", weight_size / (1024 * 1024))
 }
-
-
-
-
 
 type performance_monitor struct {
     tokens_per_second: float
@@ -346,10 +302,6 @@ func (pm *performance_monitor) log_performance(state: training_state) {
     fmt.Printf("  Avg Loss: %.4f\n", state.avg_loss)
 }
 
-
-
-
-
 func main() {
     rank := 0
     world_size := 1024
@@ -357,7 +309,6 @@ func main() {
     fmt.Println("\n" + "="*80)
     fmt.Println("🚀 DISTRIBUTED TRAINING FOR 1T MODEL")
     fmt.Println("="*80)
-
 
     loop := create_training_loop_1t(rank, world_size)
 
@@ -372,20 +323,16 @@ func main() {
     fmt.Printf("  checkpoint Segments: %d\n", loop.activation_checkpointer.checkpoint_segments)
     fmt.Printf("  ZeRO Stage: %d\n", loop.zero_optimizer.stage)
 
-
     fmt.Println("\n🔄 Starting training simulation (1000 steps)...")
 
     for step := 0; step < 1000; step++ {
         loop.state.step = step
 
-
         loss := loop.forward_pass(4096 * 32768)
-
 
         loop.grad_manager.accumulate_gradient(loss)
         loop.state.total_loss += loss
         loop.state.avg_loss = loop.state.total_loss / float(step + 1)
-
 
         if loop.grad_manager.ready_to_update {
             loop.backward_pass()
@@ -393,11 +340,9 @@ func main() {
             loop.grad_manager.reset()
         }
 
-
         if step > 0 && step % 1000 == 0 {
             loop.save_checkpoint()
         }
-
 
         if step % 100 == 0 && step > 0 {
             monitor := performance_monitor{}

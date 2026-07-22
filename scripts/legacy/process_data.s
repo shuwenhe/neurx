@@ -1,11 +1,6 @@
 package main
 
-
-
-
 func main() int {
-
-
 
     println("")
     println("==================================================")

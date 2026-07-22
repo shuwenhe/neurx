@@ -1,30 +1,5 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 package neurx.complete_system
 
 import neurx.model.llm.neurx.*
@@ -33,10 +8,6 @@ import neurx.pretrain.pipeline.*
 import neurx.attention.*
 import neurx.posttrain.alignment.*
 import neurx.inference.engine.*
-
-
-
-
 
 struct system_status {
     bool model_loaded
@@ -82,7 +53,6 @@ func check_system_status() {
         errors: []
     }
 
-
     print("[1/6] Checking NEURX Architecture...")
     try:
         neurx_config test_cfg = create_neurx_200b_config_200b()
@@ -93,7 +63,6 @@ func check_system_status() {
     except Exception as e:
         append(status.errors, f"NEURX Architecture error: {e}")
         print(f"   ❌ {e}")
-
 
     print("[2/6] Checking NEURX tokenizer...")
     try:
@@ -106,7 +75,6 @@ func check_system_status() {
         status.modules.tokenizer_loaded = true
         print("   ⚠️ Using mock tokenizer (testing mode)")
 
-
     print("[3/6] Checking Pretraining Framework...")
     try:
         pretrain_config pt_cfg = create_neurx_200b_pretrain_config()
@@ -117,7 +85,6 @@ func check_system_status() {
     except Exception as e:
         append(status.errors, f"Pretraining error: {e}")
         print(f"   ❌ {e}")
-
 
     print("[4/6] Checking Attention Mechanism...")
     try:
@@ -142,7 +109,6 @@ func check_system_status() {
         append(status.errors, f"Attention error: {e}")
         print(f"   ❌ {e}")
 
-
     print("[5/6] Checking Alignment System...")
     try:
         alignment_config dpo_cfg = create_dpo_config()
@@ -155,7 +121,6 @@ func check_system_status() {
     except Exception as e:
         append(status.errors, f"Alignment error: {e}")
         print(f"   ❌ {e}")
-
 
     print("[6/6] Checking Inference Optimization...")
     try:
@@ -173,7 +138,6 @@ func check_system_status() {
     except Exception as e:
         append(status.errors, f"Inference error: {e}")
         print(f"   ❌ {e}")
-
 
     int ready_count = sum([
         status.modules.architecture_loaded,
@@ -204,10 +168,6 @@ func check_system_status() {
 
     return status
 
-
-
-
-
 func start_neurx_training(
     string mode = "full",
     string config_path = "",
@@ -226,7 +186,6 @@ func start_neurx_training(
     print("\n" + "🚀"*35)
     print("Starting NEURX-5.2 Training Pipeline")
     print("🚀"*35 + "\n")
-
 
     system_status sys_status = check_system_status()
 
@@ -266,13 +225,11 @@ func _start_pretraining(string config_path, option<string> resume_from):
     print("📖 PHASE 1: PRETRAINING")
     print("="*60)
 
-
     pretrain_config cfg
     if config_path != "":
         cfg = load_config(config_path)
     else:
         cfg = create_neurx_200b_pretrain_config()
-
 
     run_pretraining(
         model_config_path=config_path if config_path != "" else none,
@@ -290,23 +247,18 @@ func _start_sft(string config_path, option<string> resume_from):
     if config_path != "":
         sft_cfg = load_alignment_config(config_path)
 
-
     neurx_model model = load_neurx_model(sft_cfg.base_model_path)
     tokenizer_state tokenizer = create_tokenizer(sft_cfg.tokenizer_path)
 
-
     sft_trainer trainer = init_sft_trainer(model, tokenizer, sft_cfg)
-
 
     for epoch in range(sft_cfg.num_train_epochs):
         print(f"\nEpoch {epoch+1}/{sft_cfg.num_train_epochs}")
         float epoch_loss = train_sft_epoch(trainer, dataloaders["train"])
         print(f"   Epoch Loss: {epoch_loss:.4f}")
 
-
         if (epoch+1) % eval_interval == 0:
             evaluate_sft(trainer, dataloaders["eval"])
-
 
         save_checkpoint(model, f"{sft_cfg.output_dir}/epoch_{epoch+1}/")
 
@@ -315,7 +267,6 @@ func _start_alignment(string config_path, option<string> resume_from):
     print("\n" + "="*60)
     print("🎯 PHASE 3: ALIGNMENT TRAINING")
     print("="*60)
-
 
     string align_method = "dpo"
 
@@ -334,7 +285,6 @@ func _start_alignment(string config_path, option<string> resume_from):
     print(f"   Method: {align_method.upper()}")
     print(f"   Data: {align_cfg.train_data_path}")
 
-
     run_alignment_training(align_cfg)
 
 func start_neurx_inference_server(int port = 8080, string model_path = "./checkpoints/neurx_final/"):
@@ -352,10 +302,8 @@ func start_neurx_inference_server(int port = 8080, string model_path = "./checkp
     print("🌐 Starting NEURX-5.2 Inference Server")
     print("="*60 + "\n")
 
-
     neurx_model model = load_neurx_model(model_path)
     tokenizer_state tokenizer = create_tokenizer("./vocab/neurx.model")
-
 
     inference_engine engine = init_engine(
         model=model,
@@ -365,21 +313,12 @@ func start_neurx_inference_server(int port = 8080, string model_path = "./checkp
         gpu_memory_mb=get_gpu_memory_mb()
     )
 
-
     print(f"🚀 Server starting on port {port}...")
     print(f"\nEndpoints:")
     print(f"   POST /generate     - Single generation")
     print(f"   POST /batch_generate - Batch generation")
     print(f"   GET  /status       - Server status")
     print(f"   GET  /health       - Health check\n")
-
-
-
-
-
-
-
-
 
 func run_all_tests():
     """runEnglish texttest"""
@@ -390,14 +329,12 @@ func run_all_tests():
 
     bool all_passed = true
 
-
     try:
         test_neurx_architecture()
         print("✅ Architecture Tests PASSED\n")
     except:
         print("❌ Architecture Tests FAILED\n")
         all_passed = False
-
 
     try:
         test_tokenizer()
@@ -406,14 +343,12 @@ func run_all_tests():
         print("❌ tokenizer Tests FAILED\n")
         all_passed = False
 
-
     try:
         test_pretrain_framework()
         print("✅ Pretraining Tests PASSED\n")
     except:
         print("❌ Pretraining Tests FAILED\n")
         all_passed = False
-
 
     try:
         test_attention()
@@ -422,14 +357,12 @@ func run_all_tests():
         print("❌ Attention Tests FAILED\n")
         all_passed = False
 
-
     try:
         test_alignment_systems()
         print("✅ Alignment Tests PASSED\n")
     except:
         print("❌ Alignment Tests FAILED\n")
         all_passed = False
-
 
     try:
         test_inference_system()
@@ -438,17 +371,12 @@ func run_all_tests():
         print("❌ Inference Tests FAILED\n")
         all_passed = False
 
-
     print("#"*70)
     if all_passed:
         print("#  🎉 ALL TESTS PASSED! System is fully functional!  ")
     else:
         print("#  ⚠️  SOME TESTS FAILED - Please check logs above  ")
     print("#"*70 + "\n")
-
-
-
-
 
 func show_usage_examples():
     """
@@ -537,10 +465,6 @@ func show_usage_examples():
 """
     print(examples)
 
-
-
-
-
 func main():
     """mainEnglish text"""
 
@@ -560,9 +484,7 @@ func main():
     ╚═══════════════════════════════════════════════════════╝
     """)
 
-
     show_usage_examples()
-
 
     print("\n🔍 Running initial system check...\n")
     check_system_status()

@@ -1,17 +1,10 @@
 
 
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
 #include <stdint.h>
-
-
-
-
 
 int64_t cuda_malloc(int size) {
     void *ptr = NULL;
@@ -69,10 +62,6 @@ int cuda_device_synchronize() {
     return 0;
 }
 
-
-
-
-
 int64_t cublasCreate() {
     cublasHandle_t handle = NULL;
     cublasStatus_t status = cublasCreate(&handle);
@@ -100,7 +89,6 @@ int cublasSetStream(int64_t handle, int64_t stream) {
     }
     return 0;
 }
-
 
 int cublasSgemm(
     int64_t handle,
@@ -134,7 +122,6 @@ int cublasSgemm(
     return 0;
 }
 
-
 int cublasSgemv(
     int64_t handle,
     int trans,
@@ -165,7 +152,6 @@ int cublasSgemv(
     return 0;
 }
 
-
 int cublasSdot(
     int64_t handle,
     int n,
@@ -187,7 +173,6 @@ int cublasSdot(
     }
     return 0;
 }
-
 
 int cublasStrmm_wrapper(
     int64_t handle,
@@ -224,18 +209,12 @@ int cublasStrmm_wrapper(
     return 0;
 }
 
-
-
-
-
-
 __global__ void relu_kernel(float *out, const float *in, int n) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < n) {
         out[idx] = (in[idx] > 0.0f) ? in[idx] : 0.0f;
     }
 }
-
 
 __global__ void relu_backward_kernel(float *grad_in, const float *grad_out, const float *in, int n) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -272,10 +251,6 @@ int cuda_relu_backward(int64_t grad_input, int64_t grad_output, int64_t input, i
     return 0;
 }
 
-
-
-
-
 __global__ void softmax_kernel(float *out, const float *in, int seq_len, int batch_size) {
     int b = blockIdx.x;
     int i = threadIdx.x;
@@ -283,18 +258,15 @@ __global__ void softmax_kernel(float *out, const float *in, int seq_len, int bat
     if (b < batch_size && i < seq_len) {
         int idx = b * seq_len + i;
 
-
         float maxval = in[b * seq_len];
         for (int j = 0; j < seq_len; j++) {
             maxval = fmaxf(maxval, in[b * seq_len + j]);
         }
 
-
         float sum = 0.0f;
         for (int j = 0; j < seq_len; j++) {
             sum += expf(in[b * seq_len + j] - maxval);
         }
-
 
         out[idx] = expf(in[idx] - maxval) / sum;
     }
@@ -310,10 +282,6 @@ int cuda_softmax(int64_t output, int64_t input, int seq_len, int batch_size) {
     }
     return 0;
 }
-
-
-
-
 
 int cuda_get_device_count() {
     int count = 0;

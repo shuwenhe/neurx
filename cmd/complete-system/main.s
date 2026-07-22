@@ -1,7 +1,5 @@
 
 
-
-
 package main
 
 import (
@@ -18,10 +16,6 @@ import (
     "../../cmd"
     "../../scripts"
 )
-
-
-
-
 
 func main() {
     args := os.Args[1:]
@@ -52,10 +46,6 @@ func main() {
     }
 }
 
-
-
-
-
 func runTraining(args []string) {
     fmt.Println("🚀 Starting NeurX Training Pipeline (Pure S Implementation)")
     fmt.Println("=" * 60)
@@ -76,7 +66,6 @@ func runTraining(args []string) {
     fmt.Printf("  Scale: %s\n", scale)
     fmt.Printf("  GPUs: %d\n", numGPUs)
 
-
     var modelConfig llm.gptconfig
     switch scale {
     case "mini":
@@ -95,7 +84,6 @@ func runTraining(args []string) {
     }
 
     fmt.Printf("  Model Parameters: %d\n", llm.NewGPT(modelConfig).NumParams())
-
 
     trainingConfig := training.training_config{
         ModelScale:        scale,
@@ -117,7 +105,6 @@ func runTraining(args []string) {
         RandomSeed:        42,
     }
 
-
     fmt.Println("\n" + "=" * 60)
     fmt.Println("📈 Training Starting...")
     fmt.Println("=" * 60 + "\n")
@@ -138,10 +125,6 @@ func runTraining(args []string) {
     fmt.Printf("\n✅ Training completed in %v\n", elapsed)
 }
 
-
-
-
-
 func runInference(args []string) {
     fmt.Println("🔮 Starting NeurX Inference (Pure S Implementation)")
     fmt.Println("=" * 60)
@@ -155,7 +138,6 @@ func runInference(args []string) {
 
     fmt.Printf("📦 Loading model from: %s\n", modelPath)
 
-
     model, err := llm.LoadCheckpoint(modelPath)
     if err != nil {
         fmt.Printf("❌ Failed to load model: %v\n", err)
@@ -165,7 +147,6 @@ func runInference(args []string) {
     fmt.Printf("✅ Model loaded successfully\n")
     fmt.Printf("📊 Model parameters: %d\n", model.NumParams())
 
-
     fmt.Println("\n" + "=" * 60)
     fmt.Println("🚀 Starting Inference Server...")
     fmt.Println("=" * 60 + "\n")
@@ -174,10 +155,6 @@ func runInference(args []string) {
         fmt.Printf("❌ Inference failed: %v\n", err)
     }
 }
-
-
-
-
 
 func runDistributed(args []string) {
     fmt.Println("🌐 Starting NeurX Distributed Training (Pure S Implementation)")
@@ -208,10 +185,6 @@ func runDistributed(args []string) {
     }
 }
 
-
-
-
-
 func runBenchmark(args []string) {
     fmt.Println("⏱️  Running NeurX Benchmark (Pure S Implementation)")
     fmt.Println("=" * 60)
@@ -231,7 +204,6 @@ func runBenchmark(args []string) {
 
             startTime := time.Now()
 
-
             throughput := runBenchmarkStep(scale, numGPUs)
 
             elapsed := time.Since(startTime).Seconds()
@@ -240,7 +212,6 @@ func runBenchmark(args []string) {
             fmt.Printf(" ✅ Throughput: %.0f samples/s\n", throughput)
         }
     }
-
 
     fmt.Println("\n" + "=" * 60)
     fmt.Println("📈 Benchmark Results:")
@@ -257,16 +228,9 @@ func runBenchmark(args []string) {
 
 func runBenchmarkStep(scale string, numGPUs int) float32 {
 
-
-
-
     baseThroughput := float32(100)
     return baseThroughput * float32(numGPUs)
 }
-
-
-
-
 
 func runBuild(args []string) {
     fmt.Println("🔨 Building NeurX (Pure S Implementation)")
@@ -320,10 +284,6 @@ func cleanBuild() {
     fmt.Println("  Rebuilding components...")
     buildAllComponents()
 }
-
-
-
-
 
 func showHelp() {
     fmt.Println(`
@@ -409,11 +369,6 @@ For more information, visit: https://github.com/neurx/neurx
 `)
 }
 
-
-
-
-
-
 func operator*(s string, n int) string {
     result := ""
     for i := 0; i < n; i++ {
@@ -421,7 +376,6 @@ func operator*(s string, n int) string {
     }
     return result
 }
-
 
 func init() {
     fmt.Println("NeurX - Complete S Language Implementation")

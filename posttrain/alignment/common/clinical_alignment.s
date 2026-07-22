@@ -1,31 +1,8 @@
 package neurx.posttrain.alignment.clinical
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.posttrain.config
 use neurx.posttrain.data
 use neurx.eval.six_dimension
-
-
-
-
 
 struct test_set_info {
     string dataset_name
@@ -49,8 +26,6 @@ func create_test_set_info() test_set_info {
         test_question_ids: []
     }
 
-
-
     info.test_question_ids = [
         "medmcqa_1", "medmcqa_2", "medmcqa_3",
         "hle_1", "hle_2", "hle_3"
@@ -68,7 +43,6 @@ func check_training_data_contamination(
         contaminated_samples: 0,
         contaminated_ids: []
     }
-
 
     for i = 0; i < len(training_sample_ids); i = i + 1 {
         string sample_id = training_sample_ids[i]
@@ -88,10 +62,6 @@ func check_training_data_contamination(
 
     return result
 }
-
-
-
-
 
 struct medical_sft_objective {
     string system_prompt
@@ -170,10 +140,6 @@ func create_medical_grpo_objective() medical_grpo_objective {
     return obj
 }
 
-
-
-
-
 struct medical_safety_constraint {
     string constraint_name
     string description
@@ -228,7 +194,6 @@ func evaluate_safety_constraints(string response) float {
         }
     }
 
-
     if !string_contains(response, "咨询医生") &&
        !string_contains(response, "Not构成医疗建议") {
         total_penalty = total_penalty + 0.05
@@ -236,10 +201,6 @@ func evaluate_safety_constraints(string response) float {
 
     return total_penalty
 }
-
-
-
-
 
 struct quality_checkpoint {
     int step
@@ -270,7 +231,6 @@ func evaluate_checkpoint_quality(
     if len(evals) == 0 {
         return ckpt
     }
-
 
     float sum_grounding = 0.0
     float sum_coverage = 0.0
@@ -314,10 +274,6 @@ func evaluate_checkpoint_quality(
     return ckpt
 }
 
-
-
-
-
 struct clinical_alignment_coordinator {
     test_set_info test_info
     medical_sft_objective sft_obj
@@ -360,10 +316,6 @@ func coordinator_record_checkpoint(
     return coord
 }
 
-
-
-
-
 struct pre_training_validation_result {
     bool data_clean
     bool constraints_configured
@@ -384,33 +336,24 @@ func validate_before_training(
         ready_to_train: false
     }
 
-
     contamination_check_result contamination = check_training_data_contamination(
         training_sample_ids,
         coord.test_info
     )
     result.data_clean = contamination.is_clean
 
-
     []medical_safety_constraint constraints = get_medical_safety_constraints()
     result.constraints_configured = len(constraints) > 0
 
-
     result.objectives_set = true
 
-
     result.test_set_locked = len(coord.test_info.test_question_ids) > 0
-
 
     result.ready_to_train = result.data_clean && result.constraints_configured &&
                            result.objectives_set && result.test_set_locked
 
     return result
 }
-
-
-
-
 
 func string_contains(string text, string pattern) bool {
 

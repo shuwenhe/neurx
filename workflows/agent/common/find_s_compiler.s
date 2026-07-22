@@ -1,6 +1,5 @@
 
 
-
 package main
 
 import "os"
@@ -9,12 +8,10 @@ import "path/filepath"
 import "strings"
 import "core"
 
-
 func isRunnableCandidate(candidate string) bool {
     if candidate == "" {
         return false
     }
-
 
     if strings.HasSuffix(candidate, ".cmd") ||
         strings.HasSuffix(candidate, ".bat") ||
@@ -22,7 +19,6 @@ func isRunnableCandidate(candidate string) bool {
         _, err := os.Stat(candidate)
         return err == nil
     }
-
 
     stat, err := os.Stat(candidate)
     if err != nil {
@@ -33,10 +29,8 @@ func isRunnableCandidate(candidate string) bool {
     return (mode & 0111) != 0
 }
 
-
 func findSBinary(rootDir string) string {
     var candidate string
-
 
     if sBin := os.Getenv("S_BIN"); sBin != "" {
         if isRunnableCandidate(sBin) {
@@ -44,11 +38,9 @@ func findSBinary(rootDir string) string {
         }
     }
 
-
     if sPath, err := exec.LookPath("s"); err == nil {
         return sPath
     }
-
 
     candidates := []string{
         core.ExpandHome("${S_ROOT}/bin/s.cmd"),
@@ -74,7 +66,6 @@ func findSBinary(rootDir string) string {
 
     return ""
 }
-
 
 func ResolveSBin(rootDir string) (string, error) {
     if rootDir == "" {

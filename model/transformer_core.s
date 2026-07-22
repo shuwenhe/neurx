@@ -1,13 +1,5 @@
 package neurx.model.gpt_transformer
 
-
-
-
-
-
-
-
-
 struct gptconfig {
 
     int hidden_size
@@ -18,12 +10,10 @@ struct gptconfig {
     int vocab_size
     int max_position_embeddings
 
-
     float dropout_rate
     float layer_scale_init
     bool use_gradient_checkpointing
     bool use_flash_attention
-
 
     string activation_function
     string norm_type
@@ -57,11 +47,6 @@ struct layer_scale {
     int hidden_size
 }
 
-
-
-
-
-
 func init_rotary_embedding(int dim, int max_seq_len) rotary_embedding {
     rotary_embedding rope
 
@@ -71,10 +56,6 @@ func init_rotary_embedding(int dim, int max_seq_len) rotary_embedding {
     rope.cos_cached = alloc(float, max_seq_len * dim)
     rope.sin_cached = alloc(float, max_seq_len * dim)
 
-
-
-
-
     int i = 0
     while i < max_seq_len {
         int j = 0
@@ -82,9 +63,7 @@ func init_rotary_embedding(int dim, int max_seq_len) rotary_embedding {
 
             float inv_freq = 1.0 / pow_f(rope.base, float(j) / float(dim))
 
-
             float angle = float(i) * inv_freq
-
 
             rope.cos_cached[i * dim + j] = cos_f(angle)
             rope.sin_cached[i * dim + j] = sin_f(angle)
@@ -97,7 +76,6 @@ func init_rotary_embedding(int dim, int max_seq_len) rotary_embedding {
     rope
 }
 
-
 func apply_rotary_embedding(
     float* query,
     float* key,
@@ -105,16 +83,12 @@ func apply_rotary_embedding(
     rotary_embedding rope
 ) void {
 
-
-
-
     int i = 0
     while i < seq_len {
         int j = 0
         while j < rope.dim {
             float cos_val = rope.cos_cached[i * rope.dim + j]
             float sin_val = rope.sin_cached[i * rope.dim + j]
-
 
             float q_real = query[i * rope.dim + j]
             float q_imag = query[i * rope.dim + j + 1]
@@ -124,7 +98,6 @@ func apply_rotary_embedding(
 
             query[i * rope.dim + j] = q_real_new
             query[i * rope.dim + j + 1] = q_imag_new
-
 
             float k_real = key[i * rope.dim + j]
             float k_imag = key[i * rope.dim + j + 1]
@@ -141,20 +114,12 @@ func apply_rotary_embedding(
     }
 }
 
-
-
-
-
-
 func init_alibi_bias(int num_heads, int max_seq_len) ali_bi_bias {
     ali_bi_bias alibi
 
     alibi.num_heads = num_heads
     alibi.max_seq_len = max_seq_len
     alibi.slopes = alloc(float, num_heads)
-
-
-
 
     int h = 0
     while h < num_heads {
@@ -166,13 +131,10 @@ func init_alibi_bias(int num_heads, int max_seq_len) ali_bi_bias {
     alibi
 }
 
-
 func compute_alibi_bias(
     int seq_len,
     ali_bi_bias alibi
 ) float* {
-
-
 
     float* bias = alloc(float, alibi.num_heads * seq_len * seq_len)
 
@@ -197,14 +159,8 @@ func compute_alibi_bias(
     bias
 }
 
-
-
-
-
-
 func rms_norm(float* x, int size, float eps) float* {
     float* output = alloc(float, size)
-
 
     float sum_squares = 0.0
     int i = 0
@@ -215,7 +171,6 @@ func rms_norm(float* x, int size, float eps) float* {
 
     float rms = sqrt_f(sum_squares / float(size) + eps)
 
-
     i = 0
     while i < size {
         output[i] = x[i] / rms
@@ -224,7 +179,6 @@ func rms_norm(float* x, int size, float eps) float* {
 
     output
 }
-
 
 struct rms_norm_layer {
     float* weight
@@ -235,7 +189,6 @@ struct rms_norm_layer {
 func apply_rms_norm_layer(float* x, rms_norm_layer norm) float* {
     float* normalized = rms_norm(x, norm.hidden_size, norm.eps)
 
-
     int i = 0
     while i < norm.hidden_size {
         normalized[i] = normalized[i] * norm.weight[i]
@@ -244,12 +197,6 @@ func apply_rms_norm_layer(float* x, rms_norm_layer norm) float* {
 
     normalized
 }
-
-
-
-
-
-
 
 func swiGLU_activation(
     float* x,
@@ -261,7 +208,6 @@ func swiGLU_activation(
     int hidden_size
 ) float* {
     float* output = alloc(float, hidden_size)
-
 
     float* gate_input = alloc(float, hidden_size)
     int i = 0
@@ -275,7 +221,6 @@ func swiGLU_activation(
         gate_input[i] = sigmoid_f(sum + bias_v[i])
         i = i + 1
     }
-
 
     i = 0
     while i < hidden_size {
@@ -292,12 +237,6 @@ func swiGLU_activation(
     output
 }
 
-
-
-
-
-
-
 func apply_layer_scale(float* residual, layer_scale scale, float init_value) float* {
     float* output = alloc(float, scale.hidden_size)
 
@@ -309,7 +248,6 @@ func apply_layer_scale(float* residual, layer_scale scale, float init_value) flo
 
     output
 }
-
 
 func init_layer_scale(int hidden_size, float init_value) layer_scale {
     layer_scale ls
@@ -326,10 +264,6 @@ func init_layer_scale(int hidden_size, float init_value) layer_scale {
     ls
 }
 
-
-
-
-
 struct improved_attention_layer {
     int num_heads
     int head_dim
@@ -339,7 +273,6 @@ struct improved_attention_layer {
     ali_bi_bias alibi
     layer_scale scale
 }
-
 
 func improved_multihead_attention(
     float* query,
@@ -353,12 +286,9 @@ func improved_multihead_attention(
 
     int hidden_size = layer.num_heads * layer.head_dim
 
-
     apply_rotary_embedding(query, key, seq_len, layer.rope)
 
-
     float* attention_scores = alloc(float, batch_size * layer.num_heads * seq_len * seq_len)
-
 
     int b = 0
     while b < batch_size {
@@ -377,9 +307,7 @@ func improved_multihead_attention(
                         k = k + 1
                     }
 
-
                     score = score / sqrt_f(float(layer.head_dim))
-
 
                     float* alibi_bias = compute_alibi_bias(seq_len, layer.alibi)
                     int alibi_idx = h * seq_len * seq_len + i * seq_len + j
@@ -397,12 +325,7 @@ func improved_multihead_attention(
         b = b + 1
     }
 
-
-
-
-
     float* attention_output = alloc(float, batch_size * seq_len * hidden_size)
-
 
     apply_layer_scale(attention_output, layer.scale, 0.01)
 
@@ -412,10 +335,6 @@ func improved_multihead_attention(
 
     output
 }
-
-
-
-
 
 struct transformer_block {
     improved_attention_layer attention
@@ -428,7 +347,6 @@ struct transformer_block {
     layer_scale scale_ffn
 }
 
-
 func transformer_block_forward(
     float* x,
     int batch_size,
@@ -438,20 +356,13 @@ func transformer_block_forward(
 ) transformer_output {
     transformer_output output
 
-
-
     float* x_norm = apply_rms_norm_layer(x, block.norm1)
-
 
     transformer_output attn_out = improved_multihead_attention(x_norm, x_norm, x_norm, batch_size, seq_len, block.attention)
 
-
     float* attn_residual = alloc(float, batch_size * seq_len * config.hidden_size)
 
-
-
     float* x_norm2 = apply_rms_norm_layer(attn_out.hidden_states, block.norm2)
-
 
     float* ffn_out = swiGLU_activation(x_norm2, block.ffn_w, block.ffn_v, 0, 0, config.hidden_size, config.intermediate_size)
 
@@ -461,10 +372,6 @@ func transformer_block_forward(
 
     output
 }
-
-
-
-
 
 struct gptmodel {
     gptconfig config
@@ -480,20 +387,16 @@ struct gptmodel {
     int total_params
 }
 
-
 func init_language_model(gptconfig config) gptmodel {
     gptmodel model
 
     model.config = config
     model.total_params = 0
 
-
     model.token_embeddings = alloc(float, config.vocab_size * config.hidden_size)
     model.total_params = model.total_params + config.vocab_size * config.hidden_size
 
-
     model.rope = init_rotary_embedding(config.head_dim, config.max_position_embeddings)
-
 
     model.layers = alloc(transformer_block, config.num_layers)
 
@@ -504,9 +407,6 @@ func init_language_model(gptconfig config) gptmodel {
         model.layers[i].attention.head_dim = config.head_dim
         model.layers[i].attention.rope = model.rope
 
-
-
-
         int layer_params = 3 * config.hidden_size * config.hidden_size +
                           2 * config.hidden_size * config.intermediate_size
         model.total_params = model.total_params + layer_params
@@ -514,13 +414,11 @@ func init_language_model(gptconfig config) gptmodel {
         i = i + 1
     }
 
-
     model.lm_head = alloc(float, config.vocab_size * config.hidden_size)
     model.total_params = model.total_params + config.vocab_size * config.hidden_size
 
     model
 }
-
 
 func model_forward
     int* input_ids,
@@ -530,9 +428,7 @@ func model_forward
 ) transformer_output {
     transformer_output output
 
-
     float* x = alloc(float, batch_size * seq_len * model.config.hidden_size)
-
 
     int i = 0
     while i < model.config.num_layers {
@@ -541,11 +437,7 @@ func model_forward
         i = i + 1
     }
 
-
     x = apply_rms_norm_layer(x, model.final_norm)
-
-
-
 
     output.hidden_states = x
     output.batch_size = batch_size
@@ -553,10 +445,6 @@ func model_forward
 
     output
 }
-
-
-
-
 
 func pow_f(float base, float exp) float {
 
@@ -596,13 +484,8 @@ func sqrt_f(float x) float {
     guess
 }
 
-
-
-
-
 func main() {
     println("=== Industrial GPT Transformer ===")
-
 
     gptconfig config
     config.hidden_size = 4096
@@ -615,12 +498,10 @@ func main() {
     config.dropout_rate = 0.1
     config.use_flash_attention = true
 
-
     gptmodel model = init_language_model(config)
 
     println("Model parameters: " + int_to_string(model.total_params / 1000000) + "M")
     println("GPT-7B initialized successfully")
-
 
     int* input_ids = alloc(int, 32)
     transformer_output output = gpt_forward(input_ids, 1, 32, model)

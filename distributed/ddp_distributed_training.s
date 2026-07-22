@@ -1,16 +1,7 @@
 package neurx.distributed_training
 
-
-
-
-
-
 use std.io
 use std.math
-
-
-
-
 
 struct process_group {
     rank: int
@@ -53,10 +44,6 @@ func get_world_size() int {
     4
 }
 
-
-
-
-
 struct nccl_communicator {
     rank: int
     world_size: int
@@ -75,11 +62,9 @@ func init_nccl_communicator(int rank, int world_size, int device_id) nccl_commun
     }
 }
 
-
 func allreduce_gradients([]float64 gradients, nccl_communicator comm) {
     fmt.printfln("   AllReduce: syncing %d gradient elements across %d ranks",
                  len(gradients), comm.world_size)
-
 
     for i := 0; i < len(gradients); i += 1 {
         gradients[i] /= float64(comm.world_size)
@@ -87,7 +72,6 @@ func allreduce_gradients([]float64 gradients, nccl_communicator comm) {
 
     fmt.printfln("   ✓ Gradient synchronization complete")
 }
-
 
 func allgather_tensors([]float64 local_tensor, [][]float64 gathered_tensors, nccl_communicator comm) {
     fmt.printfln("   AllGather: gathering %d elements from %d ranks",
@@ -103,30 +87,21 @@ func allgather_tensors([]float64 local_tensor, [][]float64 gathered_tensors, ncc
     fmt.printfln("   ✓ AllGather complete")
 }
 
-
 func reduce_scatter_gradients([][]float64 scattered_grads, nccl_communicator comm) {
     fmt.printfln("   ReduceScatter: reducing and scattering across %d ranks", comm.world_size)
-
 
     fmt.printfln("   ✓ ReduceScatter complete")
 }
 
-
 func broadcast_parameters([]float64 params, int src_rank, nccl_communicator comm) {
     fmt.printfln("   Broadcast: syncing parameters from rank %d to all ranks", src_rank)
-
 
     fmt.printfln("   ✓ Broadcast complete")
 }
 
-
 func barrier(nccl_communicator comm) {
     fmt.printfln("   Barrier: synchronizing all %d processes", comm.world_size)
 }
-
-
-
-
 
 struct gradient_synchronizer {
     world_size: int
@@ -155,10 +130,6 @@ func accumulate_gradients(gradient_synchronizer* sync, []float64 grads) {
 func should_sync(gradient_synchronizer sync) bool {
     sync.sync_count % sync.sync_frequency == 0
 }
-
-
-
-
 
 struct ddp_trainer {
     rank: int
@@ -213,10 +184,6 @@ func ddp_barrier(ddp_trainer* trainer) {
     barrier(trainer.nccl_comm)
 }
 
-
-
-
-
 func compute_distributed_loss([]float64 local_losses, ddp_trainer trainer) float64 {
 
     local_loss := 0.0
@@ -224,7 +191,6 @@ func compute_distributed_loss([]float64 local_losses, ddp_trainer trainer) float
         local_loss += local_losses[i]
     }
     local_loss /= float64(len(local_losses))
-
 
     global_loss := local_loss / float64(trainer.world_size)
 
@@ -235,10 +201,6 @@ func compute_distributed_loss([]float64 local_losses, ddp_trainer trainer) float
 
     global_loss
 }
-
-
-
-
 
 struct distributed_batch_sampler {
     dataset_size: int
@@ -282,10 +244,6 @@ func next_batch_indices(distributed_batch_sampler* sampler) []int {
     indices
 }
 
-
-
-
-
 func run_distributed_training_example() {
     fmt.printfln("\n═════════════════════════════════════════════════════")
     fmt.printfln("DISTRIBUTED TRAINING - DDP Example")
@@ -296,7 +254,6 @@ func run_distributed_training_example() {
     batch_size := 32
     num_batches := 100
     param_count := 256 * 32000
-
 
     fmt.printfln("🚀 Initializing DDP Training")
     fmt.printfln("──────────────────────────────────────────────────────\n")
@@ -309,9 +266,7 @@ func run_distributed_training_example() {
     fmt.printfln("   Total batch size: %d", trainer.total_batch_size)
     fmt.printfln("   Total parameters: %d\n", param_count)
 
-
     sampler := create_distributed_sampler(10000, batch_size, rank, world_size)
-
 
     fmt.printfln("🔄 Training Loop")
     fmt.printfln("──────────────────────────────────────────────────────\n")
@@ -322,27 +277,21 @@ func run_distributed_training_example() {
 
         batch_indices := next_batch_indices(&sampler)
 
-
         local_losses := make([]float64, len(batch_indices))
         for i := 0; i < len(batch_indices); i += 1 {
 
             local_losses[i] = 4.5 - float64(step) * 0.01
         }
 
-
         global_loss := compute_distributed_loss(local_losses, trainer)
         total_loss += global_loss
-
 
         gradients := make([]float64, param_count)
         for i := 0; i < len(gradients); i += 1 {
             gradients[i] = math.random() * 0.01
         }
 
-
         ddp_sync_gradients(&trainer, gradients)
-
-
 
         if (step + 1) % 20 == 0 {
             fmt.printfln("[Rank %d] Step %d: loss = %.4f (synced batches: %d)\n",
@@ -350,11 +299,9 @@ func run_distributed_training_example() {
         }
     }
 
-
     fmt.printfln("\n⏳ Final Synchronization")
     fmt.printfln("──────────────────────────────────────────────────────\n")
     ddp_barrier(&trainer)
-
 
     fmt.printfln("📈 Training Summary")
     fmt.printfln("──────────────────────────────────────────────────────")
@@ -366,10 +313,6 @@ func run_distributed_training_example() {
     fmt.printfln("✅ Distributed training complete!\n")
 }
 
-
-
-
-
 func analyze_scaling(int num_gpus, int batch_size, int model_params) {
     fmt.printfln("\n📊 DDP Scaling Analysis")
     fmt.printfln("═════════════════════════════════════════════════════\n")
@@ -380,7 +323,6 @@ func analyze_scaling(int num_gpus, int batch_size, int model_params) {
     fmt.printfln("   Total batch size: %d", batch_size * num_gpus)
     fmt.printfln("   Model parameters: %d\n", model_params)
 
-
     gradient_size := int64(model_params * 8)
     communication_volume := gradient_size * int64(num_gpus - 1)
 
@@ -388,13 +330,11 @@ func analyze_scaling(int num_gpus, int batch_size, int model_params) {
     fmt.printfln("   Gradient size: %.2f MB", float64(gradient_size) / (1024 * 1024))
     fmt.printfln("   AllReduce volume: %.2f MB", float64(communication_volume) / (1024 * 1024))
 
-
     nccl_bandwidth := 600.0
     comm_time := float64(communication_volume) / (nccl_bandwidth * 1e9)
 
     fmt.printfln("   NCCL bandwidth: %.0f GB/s", nccl_bandwidth)
     fmt.printfln("   Communication time: %.3f ms\n", comm_time * 1000)
-
 
     tflops := 312.0
     compute_flops := int64(2 * batch_size * model_params)
@@ -403,7 +343,6 @@ func analyze_scaling(int num_gpus, int batch_size, int model_params) {
     fmt.printfln("Compute Analysis:")
     fmt.printfln("   Model TFLOPS: %.0f", tflops)
     fmt.printfln("   Compute time per step: %.3f ms", compute_time * 1000)
-
 
     total_time := compute_time + comm_time
     comm_fraction := comm_time / total_time
@@ -418,19 +357,13 @@ func analyze_scaling(int num_gpus, int batch_size, int model_params) {
     fmt.printfln("\n✓ Analysis complete\n")
 }
 
-
-
-
-
 func main() {
     fmt.printfln("\n═════════════════════════════════════════════════════")
     fmt.printfln("DISTRIBUTED DATA PARALLEL (DDP) TRAINING")
     fmt.printfln("Multi-GPU training with NCCL synchronization")
     fmt.printfln("═════════════════════════════════════════════════════")
 
-
     run_distributed_training_example()
-
 
     analyze_scaling(4, 32, 256 * 32000)
 }

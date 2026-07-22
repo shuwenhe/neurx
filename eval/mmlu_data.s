@@ -2,20 +2,6 @@ package neurx.eval.mmlu_data
 
 use std.io.println
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct mmlu_task {
     string name
     string category
@@ -34,10 +20,8 @@ struct mmlu_question {
     int qid
 }
 
-
 func mmlu_task_list() []mmlu_task {
     []mmlu_task tasks = []mmlu_task{}
-
 
     tasks = append(tasks, mmlu_task{name: "abstract_algebra", category: "STEM", num_questions: 100, is_included: true})
     tasks = append(tasks, mmlu_task{name: "anatomy", category: "STEM", num_questions: 135, is_included: true})
@@ -59,7 +43,6 @@ func mmlu_task_list() []mmlu_task {
     tasks = append(tasks, mmlu_task{name: "professional_medicine", category: "STEM", num_questions: 272, is_included: true})
     tasks = append(tasks, mmlu_task{name: "virology", category: "STEM", num_questions: 166, is_included: true})
 
-
     tasks = append(tasks, mmlu_task{name: "econometrics", category: "Social Science", num_questions: 114, is_included: true})
     tasks = append(tasks, mmlu_task{name: "high_school_geography", category: "Social Science", num_questions: 198, is_included: true})
     tasks = append(tasks, mmlu_task{name: "high_school_government_and_politics", category: "Social Science", num_questions: 193, is_included: true})
@@ -74,7 +57,6 @@ func mmlu_task_list() []mmlu_task {
     tasks = append(tasks, mmlu_task{name: "marketing", category: "Social Science", num_questions: 234, is_included: true})
     tasks = append(tasks, mmlu_task{name: "moral_disputes", category: "Social Science", num_questions: 346, is_included: true})
 
-
     tasks = append(tasks, mmlu_task{name: "ancient_greek", category: "Humanities", num_questions: 102, is_included: true})
     tasks = append(tasks, mmlu_task{name: "art_history", category: "Humanities", num_questions: 246, is_included: true})
     tasks = append(tasks, mmlu_task{name: "high_school_european_history", category: "Humanities", num_questions: 248, is_included: true})
@@ -83,7 +65,6 @@ func mmlu_task_list() []mmlu_task {
     tasks = append(tasks, mmlu_task{name: "literature_in_english", category: "Humanities", num_questions: 305, is_included: true})
     tasks = append(tasks, mmlu_task{name: "moral_disputes", category: "Humanities", num_questions: 346, is_included: true})
     tasks = append(tasks, mmlu_task{name: "world_religions", category: "Humanities", num_questions: 171, is_included: true})
-
 
     tasks = append(tasks, mmlu_task{name: "business_ethics", category: "Other", num_questions: 100, is_included: true})
     tasks = append(tasks, mmlu_task{name: "clinical_knowledge", category: "Other", num_questions: 265, is_included: true})
@@ -96,10 +77,6 @@ func mmlu_task_list() []mmlu_task {
 
     tasks
 }
-
-
-
-
 
 struct mmlu_dataset_state {
     map[string][]mmlu_question questions_by_task
@@ -121,16 +98,7 @@ func new_mmlu_dataset_state(string data_root) mmlu_dataset_state {
     }
 }
 
-
-
-
-
-
 func parse_mmlu_csv_line(string line, string task_name, int qid) mmlu_question {
-
-
-
-
 
     mmlu_question {
         task_name: task_name,
@@ -144,11 +112,8 @@ func parse_mmlu_csv_line(string line, string task_name, int qid) mmlu_question {
     }
 }
 
-
 func load_mmlu_dev_examples(string data_root, string task_name, int num_examples) []mmlu_question {
     []mmlu_question dev = []mmlu_question{}
-
-
 
     int i = 0
     while i < num_examples {
@@ -167,11 +132,8 @@ func load_mmlu_dev_examples(string data_root, string task_name, int num_examples
     dev
 }
 
-
 func load_mmlu_test_questions(string data_root, string task_name) []mmlu_question {
     []mmlu_question test = []mmlu_question{}
-
-
 
     int i = 0
     while i < 10 {
@@ -190,7 +152,6 @@ func load_mmlu_test_questions(string data_root, string task_name) []mmlu_questio
     test
 }
 
-
 func load_mmlu_dataset(string data_root) mmlu_dataset_state {
     mmlu_dataset_state state = new_mmlu_dataset_state(data_root)
 
@@ -207,7 +168,6 @@ func load_mmlu_dataset(string data_root) mmlu_dataset_state {
             state.dev_by_task[t.name] = dev
             state.total_dev = state.total_dev + len(dev)
 
-
             []mmlu_question test = load_mmlu_test_questions(data_root, t.name)
             state.questions_by_task[t.name] = test
             state.total_questions = state.total_questions + len(test)
@@ -223,10 +183,6 @@ func load_mmlu_dataset(string data_root) mmlu_dataset_state {
     println("[MMLU Loader] Total: " + int_to_str(state.total_questions) + " test questions, " + int_to_str(state.total_dev) + " dev examples")
     state
 }
-
-
-
-
 
 func int_to_str(int n) string {
     if n == 0 { return "0" }

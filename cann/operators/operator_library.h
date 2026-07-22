@@ -8,10 +8,6 @@
 
 namespace neurx::cann {
 
-
-
-
-
 class OperatorLibrary {
  public:
   OperatorLibrary() = default;

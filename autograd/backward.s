@@ -48,7 +48,6 @@ func new_backward_state(string name) backward_state {
     }
 }
 
-
 func get_step(backward_state state, int index) string {
     state.steps[index]
 }

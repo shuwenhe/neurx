@@ -1,7 +1,5 @@
 
 
-
-
 module main
 
 func main() {

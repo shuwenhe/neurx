@@ -1,11 +1,5 @@
 
 
-
-
-
-
-
-
 package neurx.shard.shard_wikipedia
 
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}

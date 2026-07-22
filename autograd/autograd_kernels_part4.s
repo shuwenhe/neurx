@@ -2,16 +2,6 @@ package neurx.autograd
 
 use neurx.tensor.tensor
 
-
-
-
-
-
-
-
-
-
-
 func backward_sum(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -63,12 +53,6 @@ func broadcast_to_shape([]float grad, []int target_shape, int dim) []float {
     out
 }
 
-
-
-
-
-
-
 func backward_mean(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -112,12 +96,6 @@ func zeros_like_array(int size) []float {
     out
 }
 
-
-
-
-
-
-
 func backward_transpose(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -127,9 +105,7 @@ func backward_transpose(node n, tensor grad_output) backward_result {
     int dim0 = get_context_safe_int(n, "dim0", 0)
     int dim1 = get_context_safe_int(n, "dim1", 1)
 
-
     []int grad_shape = grad_output.shape
-
 
     []int input_shape = copy_shape(grad_shape)
     if len(input_shape) > max_int(dim0, dim1) {
@@ -137,7 +113,6 @@ func backward_transpose(node n, tensor grad_output) backward_result {
         input_shape[dim0] = input_shape[dim1]
         input_shape[dim1] = tmp
     }
-
 
     []float grad_data = transpose_2d(grad_output.data, grad_shape, dim0, dim1)
 
@@ -188,19 +163,12 @@ func compute_index([]float data, []int shape, int outer, int i, int j, int d0, i
     outer * shape[d0] * shape[d1] + i * shape[d1] + j
 }
 
-
-
-
-
-
-
 func backward_reshape(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
     }
 
     tensor input = n.inputs[0]
-
 
     tensor result {
         data: copy_tensor(grad_output.data),
@@ -212,12 +180,6 @@ func backward_reshape(node n, tensor grad_output) backward_result {
     backward_result { input_grads: [result], success: true }
 }
 
-
-
-
-
-
-
 func backward_pow(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 2 {
         return backward_result { input_grads: [], success: false }
@@ -226,12 +188,10 @@ func backward_pow(node n, tensor grad_output) backward_result {
     tensor base = n.inputs[0]
     tensor exponent = n.inputs[1]
 
-
     bool is_constant_exponent = len(exponent.data) == 1  !exponent.requires_grad
 
     if is_constant_exponent {
         float exp_val = exponent.data[0]
-
 
         []float grad_base_data = []float{cap: len(base.data)}
         for i in 0..len(base.data) {
@@ -243,9 +203,6 @@ func backward_pow(node n, tensor grad_output) backward_result {
 
         return backward_result { input_grads: [grad_base, grad_exp_zeros], success: true }
     }
-
-
-
 
     []float grad_a_data = []float{cap: len(base.data)}
     []float grad_b_data = []float{cap: len(exponent.data)]
@@ -277,11 +234,9 @@ func pow_approx(float base, float exp) float {
         return 0.0
     }
 
-
     if base > 0.0 {
         return exp_approx(log_approx(base) * exp)
     }
-
 
     int e = int(exp)
     float result = 1.0
@@ -301,13 +256,10 @@ func log_approx(float x) float {
         return -1e10
     }
 
-
     if abs_float(x - 1.0) < 0.5 {
         float y = x - 1.0
         return y - y*y/2.0 + y*y*y/3.0 - y*y*y*y/4.0 + y*y*y*y*y/5.0
     }
-
-
 
     float ln2 = 0.6931471805599453
     float m = x
@@ -321,7 +273,6 @@ func log_approx(float x) float {
         m = m * 2.0
         k = k - 1
     }
-
 
     float y = m - 1.0
     float log_m = y - y*y/2.0 + y*y*y/3.0 - y*y*y*y/4.0

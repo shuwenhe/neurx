@@ -1,26 +1,8 @@
 package neurx.moe.llm_1t
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.model.llm.gpt.{model_config, gpt_param_count}
 use neurx.moe.llm.{gpt_moe_config, gpt_moe_param_count}
 use neurx.moe.transformer.{moe_config, moe_stats, moe_compute_stats, new_moe_config}
-
-
-
-
 
 struct moe_1t_scale_profile {
     string model_name
@@ -77,10 +59,6 @@ struct moe_1t_framework {
     moe_1t_training_plan training
 }
 
-
-
-
-
 func moe_1t_base_arch() model_config {
     model_config {
         name: "neurx-moe-1t",
@@ -115,10 +93,6 @@ func moe_1t_model_config() gpt_moe_config {
         moe_aux_loss_weight: 0.0025,
     }
 }
-
-
-
-
 
 func moe_1t_profile(gpt_moe_config cfg) moe_1t_scale_profile {
     int total_params = gpt_moe_param_count(cfg)
@@ -218,10 +192,6 @@ func moe_1t_framework_default() moe_1t_framework {
     }
 }
 
-
-
-
-
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -304,10 +274,6 @@ func int_from_float(float x) int {
     }
     n
 }
-
-
-
-
 
 func main() {
     moe_1t_framework fw = moe_1t_framework_default()

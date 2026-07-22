@@ -1,29 +1,14 @@
 
 
-
-
-
-
-
-
-
-
-
-
 package neurx.posttrain.alignment
 
 import neurx.model.llm.neurx.*
 import neurx.tokenizer.neurx.*
 import neurx.amp.scaler.*
 
-
-
-
-
 struct alignment_config {
     string method
     string model_name
-
 
     int batch_size
     int gradient_accum_steps
@@ -31,28 +16,22 @@ struct alignment_config {
     float weight_decay
     int max_grad_norm
 
-
     string train_data_path
     string eval_data_path
     int num_train_epochs
     int eval_interval
     int save_interval
 
-
     int max_seq_len
-
 
     string precision
     bool use_gradient_checkpointing
 
-
     float dpo_beta
     string dpo_loss_type
 
-
     int grpo_group_size
     float grpo_clip_epsilon
-
 
     float ppo_clip_range
     float ppo_kl_coef
@@ -60,10 +39,8 @@ struct alignment_config {
     int ppo_epochs
     string reward_model_path
 
-
     string output_dir
 }
-
 
 func create_dpo_config() alignment_config {
     return alignment_config {
@@ -87,10 +64,8 @@ func create_dpo_config() alignment_config {
         precision: "bf16",
         use_gradient_checkpointing: true,
 
-
         dpo_beta: 0.1,
         dpo_loss_type: "sigmoid",
-
 
         grpo_group_size: 0,
         grpo_clip_epsilon: 0.0,
@@ -103,7 +78,6 @@ func create_dpo_config() alignment_config {
         output_dir: "./checkpoints/dpo/"
     }
 }
-
 
 func create_grpo_config() alignment_config {
     return alignment_config {
@@ -127,10 +101,8 @@ func create_grpo_config() alignment_config {
         precision: "bf16",
         use_gradient_checkpointing: true,
 
-
         grpo_group_size: 8,
         grpo_clip_epsilon: 0.2,
-
 
         dpo_beta: 0.0,
         dpo_loss_type: "",
@@ -143,7 +115,6 @@ func create_grpo_config() alignment_config {
         output_dir: "./checkpoints/grpo/"
     }
 }
-
 
 func create_ppo_config() alignment_config {
     return alignment_config {
@@ -167,13 +138,11 @@ func create_ppo_config() alignment_config {
         precision: "bf16",
         use_gradient_checkpointing: true,
 
-
         ppo_clip_range: 0.2,
         ppo_kl_coef: 0.02,
         ppo_entropy_coef: 0.01,
         ppo_epochs: 4,
         reward_model_path: "./models/reward_model.pt",
-
 
         dpo_beta: 0.0,
         dpo_loss_type: "",
@@ -183,7 +152,6 @@ func create_ppo_config() alignment_config {
         output_dir: "./checkpoints/ppo/"
     }
 }
-
 
 func create_sft_config() alignment_config {
     return alignment_config {
@@ -207,7 +175,6 @@ func create_sft_config() alignment_config {
         precision: "bf16",
         use_gradient_checkpointing: true,
 
-
         dpo_beta: 0.0,
         dpo_loss_type: "",
         grpo_group_size: 0,
@@ -221,11 +188,6 @@ func create_sft_config() alignment_config {
         output_dir: "./checkpoints/sft/"
     }
 }
-
-
-
-
-
 
 class sft_trainer {
     neurx_model model
@@ -252,7 +214,6 @@ func init_sft_trainer(
     print(f"   Learning Rate: {cfg.learning_rate}")
     print(f"   Epochs: {cfg.num_train_epochs}")
     print(f"   Max Seq Len: {cfg.max_seq_len}")
-
 
     trainable_params = filter(lambda p: p.requires_grad, model.parameters())
     AdamW optimizer = AdamW(
@@ -306,7 +267,6 @@ func train_sft_epoch(self: sft_trainer, data_loader dataloader) {
         tensor attention_mask = encoded["attention_mask"].to(device="cuda")
         tensor labels = encoded["labels"].to(device="cuda")
 
-
         dict[str, any] outputs = neurx_forward(
             self.model,
             input_ids=input_ids,
@@ -316,19 +276,16 @@ func train_sft_epoch(self: sft_trainer, data_loader dataloader) {
 
         tensor logits = outputs["logits"]
 
-
         tensor loss = cross_entropy_loss(
             logits.view(-1, logits.shape[-1]),
             labels.view(-1),
             ignore_index=-100
         )
 
-
         if self.config.precision == "bf16":
             self.scaler.scale(loss).backward()
         else:
             loss.backward()
-
 
         if (batch_idx + 1) % self.config.gradient_accum_steps == 0:
             clip_grad_norm_(self.model.parameters(), self.config.max_grad_norm)
@@ -341,7 +298,6 @@ func train_sft_epoch(self: sft_trainer, data_loader dataloader) {
 
             self.optimizer.zero_grad(set_to_none=True)
             self.state.current_step += 1
-
 
         total_loss += loss.item()
         num_batches += 1
@@ -377,7 +333,6 @@ func prepare_sft_batch(
         )
         append(full_texts, text)
 
-
     dict[str, any] encoded = batch_encode(
         tokenizer,
         full_texts,
@@ -391,15 +346,11 @@ func prepare_sft_batch(
     tensor input_ids = encoded["input_ids"]
     tensor attention_mask = encoded["attention_mask"]
 
-
     tensor labels = input_ids.clone()
     labels[:, :-1] = input_ids[:, 1:]
     labels[:, -1] = -100
 
-
-
     for i in range(shape(input_ids)[0]):
-
 
         pass
 
@@ -408,12 +359,6 @@ func prepare_sft_batch(
         "attention_mask": attention_mask,
         "labels": labels
     }
-
-
-
-
-
-
 
 class dpotrainer {
     neurx_model model
@@ -450,20 +395,15 @@ func compute_dpo_loss(
     - π_ref: English textmodel (English text pre-trained / SFT model)
     """
 
-
     tuple[chosen_log_prob, _] = compute_log_probs(chosen_logits, chosen_labels, chosen_attention_mask)
     tuple[rejected_log_prob, _] = compute_log_probs(rejected_logits, rejected_labels, rejected_attention_mask)
-
 
     tuple[ref_chosen_log_prob, _] = get_reference_log_probs(self, chosen_labels, chosen_attention_mask, is_chosen=True)
     tuple[ref_rejected_log_prob, _] = get_reference_log_probs(self, rejected_labels, rejected_attention_mask, is_chosen=False)
 
-
-
     tensor delta_chosen = chosen_log_prob - ref_chosen_log_prob
     tensor delta_rejected = rejected_log_prob - ref_rejected_log_prob
     tensor delta_pi = delta_chosen - delta_rejected
-
 
     tensor loss
     match loss_type:
@@ -477,20 +417,17 @@ func compute_dpo_loss(
 
         case "ipo":
 
-
             tensor diff = beta * delta_pi - (1.0 / (2.0 * beta))
             loss = (diff ** 2).mean()
 
         case _:
             raise ValueError(f"Unknown DPO loss type: {loss_type}")
 
-
     dict[str, float] metrics = {}
     metrics["chosen_reward"] = chosen_log_prob.mean().item()
     metrics["rejected_reward"] = rejected_log_prob.mean().item()
     metrics["reward_margin"] = (chosen_log_prob - rejected_log_prob).mean().item()
     metrics["avg_dpo_loss"] = loss.item()
-
 
     metrics["approx_win_rate"] = float((delta_pi > 0).float().mean().item())
 
@@ -503,30 +440,19 @@ def compute_log_probs(
 ) {
     """computeEnglish text token English text log probability"""
 
-
     logits = logits[:, :-1, :].contiguous()
     labels = labels[:, 1:].contiguous()
     mask = attention_mask[:, 1:].contiguous()
 
-
     tensor log_probs = log_softmax(logits, dim=-1)
 
-
     token_log_probs = gather(log_probs, dim=-1, index=labels.unsqueeze(-1)).squeeze(-1)
-
 
     masked_log_probs = (token_log_probs * mask).sum(dim=-1) / (mask.sum(dim=-1) + 1e-9)
 
     int total_tokens = int(mask.sum().item())
 
     return (masked_log_probs, total_tokens)
-
-
-
-
-
-
-
 
 class GRPOTrainer {
     neurx_model model
@@ -561,7 +487,6 @@ func train_grpo_step(
     print(f"   Prompts: {batch_size}, Groups per prompt: {group_size}")
     print(f"   Total samples this step: {total_samples}")
 
-
     timer.start("generation")
     tensor all_responses[][]
     tensor all_log_probs[]
@@ -589,16 +514,11 @@ func train_grpo_step(
     timer.stop("generation")
     print(f"   ⏱ Generation time: {timer.get_elapsed('generation'):.1f}s")
 
-
     timer.start("scoring")
     tensor scores(batch_size, group_size)
 
     for i in range(batch_size):
         for g in range(group_size):
-
-
-
-
 
             score = score_response_grpo(
                 prompt=batch_prompts[i],
@@ -611,18 +531,13 @@ func train_grpo_step(
     print(f"   📊 Scoring time: {timer.get_elapsed('scoring'):.1f}s")
     print(f"   Score stats: min={scores.min():.2f}, max={scores.max():.2f}, mean={scores.mean():.2f}")
 
-
-
     tensor group_means = scores.mean(dim=-1, keepdim=True)
     tensor advantages = scores - group_means
-
 
     tensor std_advantages = advantages.std(dim=-1, keepdim=True)
     advantages = advantages / (std_advantages + 1e-9)
 
-
     advantages = clamp(advantages, min=-self.config.grpo_clip_epsilon, max=self.config.grpo_clip_epsilon)
-
 
     timer.start("loss_computation")
     tensor total_loss = 0.0
@@ -632,7 +547,6 @@ func train_grpo_step(
 
             tensor old_log_prob = all_log_probs[i][g]
 
-
             tensor new_log_prob = recompute_log_prob(
                 self.model,
                 self.tokenizer,
@@ -640,23 +554,18 @@ func train_grpo_step(
                 response=all_responses[i][g]
             )
 
-
             tensor ratio = exp(new_log_prob - old_log_prob)
-
 
             tensor surr1 = ratio * advantages[i, g]
             tensor surr2 = clamp(ratio, 1.0 - 0.2, 1.0 + 0.2) * advantages[i, g]
-
 
             tensor loss_i = -min(surr1, surr2)
 
             total_loss = total_loss + loss_i
 
-
     total_loss = total_loss / total_samples
 
     timer.stop("loss_computation")
-
 
     if self.config.precision == "bf16":
         GradScaler.scale(total_loss).backward()
@@ -667,14 +576,12 @@ func train_grpo_step(
     self.optimizer.step()
     self.optimizer.zero_grad(set_to_none=True)
 
-
     dict[str, float] metrics = {}
     metrics["grpo_loss"] = total_loss.item()
     metrics["mean_score"] = scores.mean().item()
     metrics["max_score"] = scores.max().item()
     metrics["min_score"] = scores.min().item()
     metrics["score_std"] = scores.std().item()
-
 
     metrics["diversity"] = compute_group_diversity(all_responses, n=3)
 
@@ -701,26 +608,19 @@ def score_response_grpo(
         case "rule_based":
             float score = 0.0
 
-
             int resp_len = len(response)
             if 20 <= resp_len <= 2000:
                 score += 0.2
             elif 200 < resp_len <= 800:
                 score += 0.3
 
-
             if contains_code_block(response):
                 score += 0.1
             if has_proper_formatting(response):
                 score += 0.1
 
-
-
-
-
             float repetition_ratio = compute_repetition_ratio(response)
             score += (1.0 - repetition_ratio) * 0.2
-
 
             score = clamp(score, 0.0, 1.0)
 
@@ -733,12 +633,6 @@ def score_response_grpo(
 
         case _:
             raise ValueError(f"Unknown scoring method: {scoring_method}")
-
-
-
-
-
-
 
 class ppotrainer {
     neurx_model policy_model
@@ -774,7 +668,6 @@ func train_ppo_iteration(
 
     int batch_size = len(batch_prompts)
 
-
     timer.start("rollout")
     tensor rollout_data[]
 
@@ -791,7 +684,6 @@ func train_ppo_iteration(
 
     timer.stop("rollout")
 
-
     timer.start("reward_value")
 
     tensor rewards(batch_size)
@@ -805,16 +697,13 @@ func train_ppo_iteration(
             response=rollout["response_text"]
         )
 
-
         values[i] = self.value_model.predict(
             full_text=rollout["full_text"]
         )
 
-
         old_log_probs[i] = rollout["total_log_prob"]
 
     timer.stop("reward_value")
-
 
     tensor advantages = compute_gae_advantages(
         rewards=rewards,
@@ -823,9 +712,7 @@ func train_ppo_iteration(
         lambda_=0.95
     )
 
-
     advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-9)
-
 
     timer.start("update")
 
@@ -843,7 +730,6 @@ func train_ppo_iteration(
                 self.tokenizer
             )
 
-
             tensor kl_div = compute_kl_divergence(
                 self.policy_model,
                 self.reference_model,
@@ -851,9 +737,7 @@ func train_ppo_iteration(
                 self.tokenizer
             )
 
-
             tensor ratio = exp(new_log_prob - old_log_probs[i])
-
 
             tensor surr1 = ratio * advantages[i]
             tensor surr2 = clamp(
@@ -862,22 +746,18 @@ func train_ppo_iteration(
                 1.0 + self.config.ppo_clip_range
             ) * advantages[i]
 
-
             tensor policy_loss = -min(surr1, surr2).mean()
             tensor kl_loss = kl_div.mean() * self.config.ppo_kl_coef
             tensor entropy_loss = -entropy.mean() * self.config.ppo_entropy_coef
 
             tensor combined_loss = policy_loss + kl_loss + entropy_loss
 
-
             combined_loss.backward()
-
 
             tensor value_pred = self.value_model.predict(rollout["full_text"])
             tensor target_value = rewards[i]
             tensor critic_loss = mse_loss(value_pred, target_value)
             critic_loss.backward()
-
 
             clip_grad_norm_(list(self.policy_model.parameters()) + list(self.value_model.parameters()), self.config.max_grad_norm)
 
@@ -886,7 +766,6 @@ func train_ppo_iteration(
 
             self.actor_optimizer.zero_grad()
             self.critic_optimizer.zero_grad()
-
 
             total_policy_loss += policy_loss.item()
             total_critic_loss += critic_loss.item()
@@ -915,10 +794,6 @@ func train_ppo_iteration(
     self.state.mean_reward = iteration_metrics["mean_reward"]
 
     return iteration_metrics
-
-
-
-
 
 func log_sft_progress(state: sft_trainer.state, float loss) {
     elapsed = now() - state.start_time
@@ -957,15 +832,10 @@ func log_alignment_progress(
                 f"Entropy: {metrics['entropy']:.4f}"
             )
 
-
-
-
-
 func test_alignment_systems() {
     print("\n" + "="*70)
     print("Testing NEURX Alignment Training Systems")
     print("="*70)
-
 
     print("\n[Test 1] Creating alignment configs...")
     alignment_config dpo_cfg = create_dpo_config()
@@ -982,15 +852,12 @@ func test_alignment_systems() {
     assert(ppo_cfg.ppo_clip_range == 0.2)
     print("✅ All configs created successfully!")
 
-
     print("\n[Test 2] Testing DPO loss computation...")
 
     tensor chosen_logits = randn(2, 64, 32000)
     tensor rejected_logits = randn(2, 64, 32000)
     tensor labels = randint(0, 32000, shape=(2, 64))
     tensor mask = ones(2, 64)
-
-
 
     tuple[dpo_loss, dpo_metrics] = compute_dpo_loss(
         chosen_logits=chosen_logits,
@@ -1009,7 +876,6 @@ func test_alignment_systems() {
     print(f"   Win Rate: {dpo_metrics['win_rate']:.1%}")
     print("✅ DPO loss works!")
 
-
     print("\n[Test 3] Testing GRPO response scoring...")
     float rule_score = score_response_grpo(
         prompt="What is machine learning?",
@@ -1020,7 +886,6 @@ func test_alignment_systems() {
     print(f"   Rule-based score: {rule_score:.3f}")
     print("✅ GRPO scoring works!")
 
-
     print("\n[Test 4] Testing GAE advantage estimation...")
     tensor rewards = tensor([1.0, 0.5, 0.8, -0.2, 1.2])
     tensor values = tensor([0.8, 0.6, 0.7, 0.4, 0.9])
@@ -1030,7 +895,6 @@ func test_alignment_systems() {
     print(f"   Values: {values.tolist()}")
     print(f"   Advantages: {[round(a, 3) for a in advantages.tolist()]}")
     print("✅ GAE computation works!")
-
 
     print("\n[Test 5] Testing log probability computation...")
     tensor test_logits = randn(2, 32, 100)
@@ -1047,8 +911,6 @@ func test_alignment_systems() {
     print("\n" + "="*70)
     print("All alignment system tests passed! ✨")
     print("="*70 + "\n")
-
-
 
 func contains_code_block(string text):
     return "```" in text || "`" in text
@@ -1075,7 +937,6 @@ func compute_group_diversity(tensor[][] responses, int n: int):
                 ngram = tuple(words[i:i+n])
                 all_ngrams.add(ngram)
 
-
     return float(len(all_ngrams)) / max(responses.size * responses[0].size, 1)
 
 func compute_gae_advantages(
@@ -1095,16 +956,13 @@ func compute_gae_advantages(
     tensor advantages(T)
     tensor last_advantage = 0.0
 
-
     for t in reversed(range(T)):
         if t == T - 1:
             next_value = 0.0
         else:
             next_value = values[t + 1]
 
-
         tensor delta = rewards[t] + gamma * next_value - values[t]
-
 
         advantages[t] = delta + gamma * lambda_ * last_advantage
         last_advantage = advantages[t]
@@ -1123,14 +981,11 @@ func compute_kl_divergence(
     KL(p||q) = Σ p(x) * log(p(x) / q(x))
     """
 
-
     tensor policy_logits = forward_and_get_logits(policy, rollout)
     tensor ref_logits = forward_and_get_logits(reference, rollout)
 
-
     tensor policy_log_probs = log_softmax(policy_logits, dim=-1)
     tensor ref_log_probs = log_softmax(ref_logits, dim=-1)
-
 
     tensor kl = (policy_log_probs - ref_log_probs) * exp(policy_log_probs)
     return kl.sum(dim=-1).mean()

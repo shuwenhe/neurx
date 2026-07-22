@@ -1,9 +1,5 @@
 package neurx.serving.runtime.production_runtime
 
-
-
-
-
 struct production_queue {
     []string request_ids
     []string backends
@@ -225,7 +221,6 @@ func production_submit(production_runtime_state state, string request_id, string
         state.kv_handoffs = state.kv_handoffs + 1
     }
 
-
     state.queued_tokens = state.queued_tokens + future_tokens
     state.kv_tokens = state.kv_tokens + cached
     state.admitted_requests = state.admitted_requests + 1
@@ -408,7 +403,6 @@ func production_schedule_prefill(production_runtime_state state) production_sche
 
 func production_schedule(production_runtime_state state) production_schedule_result {
 
-
     if production_queue_size(state.decode_queue) > 0 {
         return production_schedule_decode(state)
     }
@@ -473,7 +467,6 @@ func production_complete_decode(production_runtime_state state, production_batch
                 if state.queued_tokens < 0 { state.queued_tokens = 0 }
             }
             state.completed_requests = state.completed_requests + 1
-
 
         } else {
             state.decode_queue = production_queue_push(state.decode_queue, batch.request_ids[i], batch.backend, batch.dtype, 0, batch.max_new_tokens[i], generated)

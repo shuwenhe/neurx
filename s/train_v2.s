@@ -1,17 +1,5 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 package neurx.train.v2
 
 use std.tensor_core as T
@@ -19,10 +7,6 @@ use std.math_dl as M
 use std.autograd as AG
 use std.nn as NN
 use std.training_io as IO
-
-
-
-
 
 struct train_config {
 
@@ -33,12 +17,10 @@ struct train_config {
     int num_layers
     int max_seq_len
 
-
     float learning_rate
     string optimizer
     float weight_decay
     float dropout_prob
-
 
     int batch_size
     int seq_len
@@ -70,10 +52,6 @@ func config_string(train_config cfg) string {
     s
 }
 
-
-
-
-
 func main() int {
     println("")
     println("========================================")
@@ -87,10 +65,8 @@ func main() int {
     println("========================================")
     println("")
 
-
     train_config cfg = default_config()
     println(config_string(cfg))
-
 
     println("[1/5] Building GPT model...")
     NN.gptconfig gpt_cfg
@@ -109,7 +85,6 @@ func main() int {
     println("[OK] Model ready: ", format_int(total_params), " parameters")
     println("")
 
-
     println("[2/5] Setting up optimizer...")
     AG.Optimizer opt
     if cfg.optimizer == "adam" || cfg.optimizer == "adamw" {
@@ -120,13 +95,11 @@ func main() int {
     println("[OK] Optimizer: ", cfg.optimizer, " lr=", M.fmt_float(opt.lr, 6))
     println("")
 
-
     println("[3/5] Preparing synthetic data...")
     int data_len = cfg.max_steps * cfg.batch_size * cfg.seq_len * 2
     []int train_data = generate_data(data_len, cfg.vocab_size)
     println("[OK] Generated ", format_int(data_len), " training tokens")
     println("")
-
 
     println("[4/5] Starting training loop...")
     println("")
@@ -142,14 +115,11 @@ func main() int {
         []int input_ids = get_batch(train_data, step, cfg.batch_size * cfg.seq_len)
         []int target_ids = get_batch(train_data, step + 1, cfg.batch_size * cfg.seq_len)
 
-
         AG.AGTensor logits = NN.forward(model, input_ids, cfg.batch_size, cfg.seq_len)
-
 
         []int targets = make_targets(target_ids, cfg.batch_size)
         AG.AGTensor loss_tensor = AG.ag_cross_entropy(logits, targets)
         float loss_val = AG.item(loss_tensor)
-
 
         state.global_step = state.global_step + 1
         if loss_val < state.best_loss {
@@ -157,20 +127,16 @@ func main() int {
             state.best_step = step + 1
         }
 
-
         int wi = mod(step, len(state.loss_history))
         state.loss_history[wi] = loss_val
-
 
         AG.zero_grad(model.all_params)
         var grads = AG.backward(loss_tensor)
         float grad_norm = AG.clip_grad_norm_(model.all_params, 1.0)
         state.grad_norm = grad_norm
 
-
         if cfg.optimizer == "adam" { AG.adam_step(opt, model.all_params) }
         else { AG.sgd_step(opt, model.all_params) }
-
 
         bool should_log = (((step + 1) - ((step + 1) / 10) * 10) == 0 || step == cfg.max_steps - 1 || loss_val < state.best_loss)
         if should_log {
@@ -183,7 +149,6 @@ func main() int {
             IO.log_entry(step + 1, loss_val, state.best_loss,
                         grad_norm, opt.lr, 0, note)
         }
-
 
         if should_save(step + 1, cfg.save_every) {
             var weights = AG.export_weights(model.all_params)
@@ -205,10 +170,8 @@ func main() int {
         step = step + 1
     }
 
-
     println("")
     println("[5/5] Saving final checkpoints...")
-
 
     var final_weights = AG.export_weights(model.all_params)
     NN.ModelConfigSnapshot final_snap = NN.make_config_snapshot(
@@ -219,9 +182,7 @@ func main() int {
                   state.best_loss, state.best_step, final_snap,
                   final_weights, state.loss_history)
 
-
     IO.save_log(output_dir + "/training_log.tsv")
-
 
     println("")
     println("╔══════════════════════════════════════╗")
@@ -246,14 +207,8 @@ func main() int {
     }
 }
 
-
-
-
-
-
 func generate_data(int n_tokens, int vocab_size) []int {
     []int data = new int[n_tokens]
-
 
     []int pattern = [1, 23, 45, 67, 89, 12, 34, 56]
     int pattern_len = 8
@@ -272,7 +227,6 @@ func generate_data(int n_tokens, int vocab_size) []int {
     data
 }
 
-
 func get_batch([]int data, int offset, int count) []int {
     []int batch = new int[count]
     int actual_offset = o(offset - (offset / (len(data) - count)) * (len(data) - count))
@@ -283,7 +237,6 @@ func get_batch([]int data, int offset, int count) []int {
     }
     batch
 }
-
 
 func make_targets([]int token_ids, int batch_size) []int {
     []int targets = new int[batch_size]
@@ -296,17 +249,11 @@ func make_targets([]int token_ids, int batch_size) []int {
     targets
 }
 
-
 func should_save(int step, int every) bool {
     if every <= 0 { return true }
     int r = step - (step / every) * every
     r == 0  step > 0
 }
-
-
-
-
-
 
 func print_training_line(int step, float loss, float best, float gn, float lr, string note) void {
     string line = ""
@@ -318,7 +265,6 @@ func print_training_line(int step, float loss, float best, float gn, float lr, s
     line = line + note
     println(line)
 }
-
 
 func int_to_str(int n) string {
     if n == 0 { return "0" }
@@ -332,7 +278,6 @@ func int_to_str(int n) string {
     if neg { s = "-" + s }
     s
 }
-
 
 func format_int(int n) string {
     if n == 0 { return "0" }
@@ -353,13 +298,11 @@ func format_int(int n) string {
     s
 }
 
-
 func pad_float(float val, int w, int d) string {
     string s = M.fmt_float(val, d)
     while len(s) < w { s = " " + s }
     s
 }
-
 
 func pad_int(int n, int w) string {
     string s = int_to_str(n)

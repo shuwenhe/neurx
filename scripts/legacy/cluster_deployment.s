@@ -1,8 +1,5 @@
 
 
-
-
-
 package main
 
 import (
@@ -65,10 +62,6 @@ type job_scheduler struct {
     job_queue           []map[string]string
 }
 
-
-
-
-
 func (manager *cluster_manager) initialize_cluster() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Cluster Deployment & Orchestration System            ║")
@@ -124,10 +117,6 @@ func (manager *cluster_manager) validate_cluster_setup() bool {
     return healthy >= len(manager.nodes) / 2
 }
 
-
-
-
-
 func (manager *cluster_manager) setup_distributed_env() {
     fmt.Println("\n┌────────────────────────────────────────┐")
     fmt.Println("│  Setting Up Distributed Environment    │")
@@ -154,10 +143,6 @@ func (manager *cluster_manager) launch_training_job(deployment deployment_spec) 
 
     fmt.Printf("  └─ All replicas launched\n")
 }
-
-
-
-
 
 func (manager *cluster_manager) deploy_via_kubernetes(deployment deployment_spec) {
     fmt.Println("\n┌────────────────────────────────────────┐")
@@ -189,10 +174,6 @@ func (manager *cluster_manager) deploy_via_kubernetes(deployment deployment_spec
 
     fmt.Println("\n✓ Kubernetes deployment manifest generated")
 }
-
-
-
-
 
 func (monitor *cluster_monitor) collect_metrics() {
     fmt.Println("\n┌────────────────────────────────────────┐")
@@ -260,10 +241,6 @@ func (monitor *cluster_monitor) assess_health() {
     fmt.Printf("  Healthy Nodes: %d/%d\n", healthy_count, len(monitor.manager.nodes))
 }
 
-
-
-
-
 func (scheduler *job_scheduler) submit_job(job_name string) {
     job := make(map[string]string)
     job["name"] = job_name
@@ -298,10 +275,6 @@ func (scheduler *job_scheduler) complete_jobs() {
     scheduler.running_jobs = []string{}
 }
 
-
-
-
-
 func (manager *cluster_manager) handle_node_failure(node_id int) {
     fmt.Printf("\n[FaultTolerance] Node %d failed\n", node_id)
 
@@ -316,10 +289,6 @@ func (manager *cluster_manager) handle_node_failure(node_id int) {
     }
 }
 
-
-
-
-
 func NewClusterManager(config cluster_config) *cluster_manager {
     return &cluster_manager{
         config:        config,
@@ -333,7 +302,6 @@ func NewClusterManager(config cluster_config) *cluster_manager {
 
 func (manager *cluster_manager) run_full_deployment() {
     manager.initialize_cluster()
-
 
     for i := 0; i < 4; i++ {
         node := node_spec{
@@ -350,12 +318,9 @@ func (manager *cluster_manager) run_full_deployment() {
         manager.add_node(node)
     }
 
-
     manager.validate_cluster_setup()
 
-
     manager.setup_distributed_env()
-
 
     deployment := deployment_spec{
         deployment_name: "neurx-training",
@@ -375,12 +340,9 @@ func (manager *cluster_manager) run_full_deployment() {
         },
     }
 
-
     manager.launch_training_job(deployment)
 
-
     manager.deploy_via_kubernetes(deployment)
-
 
     monitor := &cluster_monitor{
         manager:    manager,
@@ -391,7 +353,6 @@ func (manager *cluster_manager) run_full_deployment() {
 
     monitor.collect_metrics()
     monitor.assess_health()
-
 
     scheduler := &job_scheduler{
         pending_jobs:   []string{},

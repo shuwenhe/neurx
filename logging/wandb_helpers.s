@@ -1,10 +1,5 @@
 package neurx.logging
 
-
-
-
-
-
 func generate_uuid() string {
 
     string uuid = ""
@@ -34,7 +29,6 @@ func advance_rng(uint64 state) uint64 {
     state
 }
 
-
 func log_wandb_config(wandb_run run) {
     if !run.active { return }
 
@@ -44,14 +38,11 @@ func log_wandb_config(wandb_run run) {
     }
 }
 
-
 func flush_wandb(wandb_run *run) {
     if !run.active { return }
 
-
     run.steps_logged = run.steps_logged + 1
 }
-
 
 func merge_maps(
     map[string]string a,

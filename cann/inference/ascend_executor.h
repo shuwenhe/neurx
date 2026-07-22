@@ -16,9 +16,6 @@ struct AscendExecutorConfig {
   cann::KvCacheConfig kv_cache;
 };
 
-
-
-
 class AscendExecutor final : public BackendAdapter {
  public:
   explicit AscendExecutor(AscendExecutorConfig config);
@@ -41,7 +38,6 @@ class AscendExecutor final : public BackendAdapter {
  private:
   AscendExecutorConfig config_;
   AscendAdapter adapter_;
-
 
   cann::OperatorLibrary operators_;
   cann::Nxtrfmv2Model model_;

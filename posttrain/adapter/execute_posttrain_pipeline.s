@@ -2,24 +2,6 @@ package main
 
 use std.io.println
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 func println_separator() int {
     println("═══════════════════════════════════════════════════════════════")
     0
@@ -107,10 +89,6 @@ func float_to_str(float value, int decimals) string {
     out
 }
 
-
-
-
-
 func step_verify_environment() int {
     println_subheader("Step 1: verify环境")
 
@@ -141,10 +119,6 @@ func step_verify_environment() int {
     println("✅ 环境verifycomplete")
     0
 }
-
-
-
-
 
 func step_show_configuration() int {
     println_subheader("Step 2: configurationConfirm")
@@ -181,10 +155,6 @@ func step_show_configuration() int {
     0
 }
 
-
-
-
-
 func step_run_lora_training() int {
     println_subheader("Step 3: Launch LoRA SFT Training")
 
@@ -218,10 +188,6 @@ func step_run_lora_training() int {
     0
 }
 
-
-
-
-
 func step_merge_lora() int {
     println_subheader("Step 4: merge LoRA adapter to basemodel")
 
@@ -251,10 +217,6 @@ func step_merge_lora() int {
 
     0
 }
-
-
-
-
 
 func step_verify_output() int {
     println_subheader("Step 5: Verify output")
@@ -287,10 +249,6 @@ func step_verify_output() int {
     0
 }
 
-
-
-
-
 func main() int {
     println("")
     println_separator()
@@ -301,22 +259,17 @@ func main() int {
     println_separator()
     println("")
 
-
     step_verify_environment()
     println("")
-
 
     step_show_configuration()
     println("")
 
-
     step_run_lora_training()
     println("")
 
-
     step_merge_lora()
     println("")
-
 
     step_verify_output()
     println("")

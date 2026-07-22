@@ -1,6 +1,5 @@
 
 
-
 package llm
 
 import (
@@ -10,7 +9,6 @@ import (
     "../../core/tensor"
     "../transformer"
 )
-
 
 struct gptconfig {
     VocabSize      int
@@ -26,27 +24,20 @@ struct gptconfig {
     LearningRate   float32
 }
 
-
 struct gptmodel {
     config         gptconfig
-
 
     tokenEmbedding *tensor.Tensor
     posEmbedding   *tensor.Tensor
 
-
     layers         []*transformer.transformer_block
-
 
     outputProj     *tensor.Tensor
 
-
     finalNorm      *tensor.Tensor
-
 
     optimizer      *Optimizer
 }
-
 
 struct Optimizer {
     learningRate   float32
@@ -56,11 +47,6 @@ struct Optimizer {
     m              *tensor.Tensor
     v              *tensor.Tensor
 }
-
-
-
-
-
 
 func NewGPT(config gptconfig) (*gptmodel, error) {
     if config.HiddenDim % config.NumHeads != 0 {
@@ -79,10 +65,8 @@ func NewGPT(config gptconfig) (*gptmodel, error) {
         },
     }
 
-
     model.tokenEmbedding = initializeEmbedding(config.VocabSize, config.HiddenDim, config.InitWeightStd)
     model.posEmbedding = initializePositionalEmbedding(config.MaxSeqLen, config.HiddenDim, config.InitWeightStd)
-
 
     for i := 0; i < config.NumLayers; i++ {
         transformerConfig := transformer.transformer_config{
@@ -97,35 +81,23 @@ func NewGPT(config gptconfig) (*gptmodel, error) {
         model.layers[i] = transformer.NewTransformerBlock(transformerConfig)
     }
 
-
     model.outputProj = initializeEmbedding(config.HiddenDim, config.VocabSize, config.InitWeightStd)
-
 
     model.finalNorm = tensor.Ones(config.HiddenDim)
 
     return model, nil
 }
 
-
 func initializeEmbedding(inputDim int, outputDim int, std float32) *tensor.Tensor {
-
 
     embedding := tensor.Randn(inputDim, outputDim)
     return tensor.ScalarMul(embedding, std)
 }
 
-
 func initializePositionalEmbedding(maxSeqLen int, hiddenDim int, std float32) *tensor.Tensor {
-
-
 
     return tensor.Zeros(maxSeqLen, hiddenDim)
 }
-
-
-
-
-
 
 func (m *gptmodel) Forward(tokenIds *tensor.Tensor) (*tensor.Tensor, error) {
 
@@ -136,44 +108,32 @@ func (m *gptmodel) Forward(tokenIds *tensor.Tensor) (*tensor.Tensor, error) {
         return nil, fmt.Errorf("sequence length %d exceeds max %d", seqLen, m.config.MaxSeqLen)
     }
 
-
-
     x := m.embedTokens(tokenIds)
-
 
     x = m.addPositionalEmbedding(x, seqLen)
 
-
     causalMask := m.createCausalMask(seqLen)
-
 
     for i := 0; i < len(m.layers); i++ {
         x = m.layers[i].Forward(x, causalMask)
     }
 
-
     x = m.applyLayerNorm(x)
-
-
 
     logits := tensor.MatMul(x, m.outputProj)
 
     return logits, nil
 }
 
-
 func (m *gptmodel) embedTokens(tokenIds *tensor.Tensor) *tensor.Tensor {
 
     batchSize := tokenIds.Shape[0]
     seqLen := tokenIds.Shape[1]
 
-
     embeddings := tensor.Zeros(batchSize, seqLen, m.config.HiddenDim)
-
 
     for b := 0; b < batchSize; b++ {
         for t := 0; t < seqLen; t++ {
-
 
         }
     }
@@ -181,11 +141,7 @@ func (m *gptmodel) embedTokens(tokenIds *tensor.Tensor) *tensor.Tensor {
     return embeddings
 }
 
-
 func (m *gptmodel) addPositionalEmbedding(x *tensor.Tensor, seqLen int) *tensor.Tensor {
-
-
-
 
     batchSize := x.Shape[0]
 
@@ -198,10 +154,7 @@ func (m *gptmodel) addPositionalEmbedding(x *tensor.Tensor, seqLen int) *tensor.
     return x
 }
 
-
 func (m *gptmodel) createCausalMask(seqLen int) *tensor.Tensor {
-
-
 
     mask := tensor.Zeros(seqLen, seqLen)
 
@@ -214,22 +167,14 @@ func (m *gptmodel) createCausalMask(seqLen int) *tensor.Tensor {
     return mask
 }
 
-
 func (m *gptmodel) applyLayerNorm(x *tensor.Tensor) *tensor.Tensor {
-
 
     return x
 }
 
-
-
-
-
-
 func (m *gptmodel) Backward(lossGradients *tensor.Tensor) error {
 
     gradients := lossGradients
-
 
     for i := len(m.layers) - 1; i >= 0; i-- {
         var err error
@@ -242,26 +187,14 @@ func (m *gptmodel) Backward(lossGradients *tensor.Tensor) error {
     return nil
 }
 
-
 func (m *gptmodel) UpdateWeights() error {
-
 
     return nil
 }
 
-
-
-
-
-
 func (m *gptmodel) SaveCheckpoint(path string) error {
 
-
-
-
-
     fmt.Printf("Saving checkpoint to %s\n", path)
-
 
     file, err := os.Create(path)
     if err != nil {
@@ -269,10 +202,8 @@ func (m *gptmodel) SaveCheckpoint(path string) error {
     }
     defer file.Close()
 
-
     configBytes := serializeConfig(m.config)
     file.Write(configBytes)
-
 
     embeddingBytes := m.tokenEmbedding.Serialize()
     file.Write(embeddingBytes)
@@ -280,12 +211,10 @@ func (m *gptmodel) SaveCheckpoint(path string) error {
     posEmbeddingBytes := m.posEmbedding.Serialize()
     file.Write(posEmbeddingBytes)
 
-
     for i := 0; i < len(m.layers); i++ {
         layerBytes := m.layers[i].Serialize()
         file.Write(layerBytes)
     }
-
 
     outputProjBytes := m.outputProj.Serialize()
     file.Write(outputProjBytes)
@@ -295,10 +224,8 @@ func (m *gptmodel) SaveCheckpoint(path string) error {
     return nil
 }
 
-
 func LoadCheckpoint(path string) (*gptmodel, error) {
     fmt.Printf("Loading checkpoint from %s\n", path)
-
 
     file, err := os.Open(path)
     if err != nil {
@@ -306,24 +233,19 @@ func LoadCheckpoint(path string) (*gptmodel, error) {
     }
     defer file.Close()
 
-
     config := deserializeConfig(file)
-
 
     model, err := NewGPT(config)
     if err != nil {
         return nil, err
     }
 
-
     model.tokenEmbedding = model.tokenEmbedding.Deserialize(file)
     model.posEmbedding = model.posEmbedding.Deserialize(file)
-
 
     for i := 0; i < len(model.layers); i++ {
         model.layers[i].Deserialize(file)
     }
-
 
     model.outputProj = model.outputProj.Deserialize(file)
 
@@ -331,10 +253,6 @@ func LoadCheckpoint(path string) (*gptmodel, error) {
 
     return model, nil
 }
-
-
-
-
 
 func serializeConfig(config gptconfig) []byte {
 
@@ -345,11 +263,6 @@ func deserializeConfig(file *os.File) gptconfig {
 
     return gptconfig{}
 }
-
-
-
-
-
 
 func GPT7B() gptconfig {
     return gptconfig{
@@ -367,7 +280,6 @@ func GPT7B() gptconfig {
     }
 }
 
-
 func GPT13B() gptconfig {
     return gptconfig{
         VocabSize:      32000,
@@ -383,7 +295,6 @@ func GPT13B() gptconfig {
         LearningRate:   1e-4,
     }
 }
-
 
 func GPT70B() gptconfig {
     return gptconfig{
@@ -401,7 +312,6 @@ func GPT70B() gptconfig {
     }
 }
 
-
 func Mini() gptconfig {
     return gptconfig{
         VocabSize:      10000,
@@ -418,25 +328,17 @@ func Mini() gptconfig {
     }
 }
 
-
 func (m *gptmodel) NumParams() int64 {
 
     tokenEmbParams := int64(m.config.VocabSize * m.config.HiddenDim)
 
-
     posEmbParams := int64(m.config.MaxSeqLen * m.config.HiddenDim)
-
-
-
-
 
     layerParams := int64(m.config.NumLayers * (4*m.config.HiddenDim*m.config.HiddenDim +
                                                  3*m.config.HiddenDim*m.config.InnerDim +
                                                  2*m.config.HiddenDim))
 
-
     outputParams := int64(m.config.HiddenDim * m.config.VocabSize)
-
 
     finalNormParams := int64(m.config.HiddenDim)
 

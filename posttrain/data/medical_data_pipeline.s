@@ -1,29 +1,5 @@
 package neurx.posttrain.data.medical
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct mysql_config {
     string host
     int port
@@ -43,40 +19,28 @@ struct medical_article {
     []string keywords
 }
 
-
-
-
-
 func clean_medical_content(string raw_content) string {
     string cleaned = raw_content
-
 
     cleaned = remove_pattern(cleaned, "Authors:.*\\n")
     cleaned = remove_pattern(cleaned, "Section Editors:.*\\n")
     cleaned = remove_pattern(cleaned, "Deputy Editor:.*\\n")
 
-
     cleaned = remove_pattern(cleaned, "Translator:.*\\n")
-
 
     cleaned = remove_pattern(cleaned, "all专题都会依据新发table of 证据.*[.\\n]")
 
-
     cleaned = remove_pattern(cleaned, "\\[\\d+(?:[-,]\\d+)*\\]")
-
 
     cleaned = remove_pattern(cleaned, "(graph片?\\d+)")
     cleaned = remove_pattern(cleaned, "(table\\d+)")
     cleaned = remove_pattern(cleaned, "\\(Figure \\d+\\)")
     cleaned = remove_pattern(cleaned, "\\(Table \\d+\\)")
 
-
     cleaned = remove_pattern(cleaned, "(参见下文[''\"'].*[''\"'])")
     cleaned = remove_pattern(cleaned, "(参见\".*\")")
 
-
     cleaned = remove_pattern(cleaned, "引言—")
-
 
     cleaned = normalize_whitespace(cleaned)
 
@@ -85,26 +49,18 @@ func clean_medical_content(string raw_content) string {
 
 func remove_pattern(string text, string pattern) string {
 
-
     return text
 }
 
 func normalize_whitespace(string text) string {
 
-
     return text
 }
-
-
-
-
 
 func extract_disease_terms(string title, string subtitle) []string {
     []string disease_terms = []
 
-
     string combined = title + " " + subtitle
-
 
     []string non_disease_terms = [
         "筛查", "diagnosis", "治疗", "Evaluation", "管理",
@@ -114,32 +70,25 @@ func extract_disease_terms(string title, string subtitle) []string {
         "screening", "diagnosis", "treatment", "management"
     ]
 
-
-
     []string candidates = split_string(combined, " ")
 
     for i = 0; i < len(candidates); i = i + 1 {
         string candidate = candidates[i]
 
-
         if len(candidate) <= 2 {
             continue
         }
-
 
         if contains_digit(candidate) || contains_special_chars(candidate) {
             continue
         }
 
-
         if is_in_list(candidate, non_disease_terms) {
             continue
         }
 
-
         disease_terms = append_string(disease_terms, candidate)
     }
-
 
     if len(disease_terms) == 0 {
         disease_terms = append_string(disease_terms, "健康question")
@@ -192,10 +141,6 @@ func string_contains(string text, string pattern) bool {
     return false
 }
 
-
-
-
-
 struct seed_template {
     string template
     string intent_type
@@ -244,7 +189,6 @@ func simplify_question(string question) string {
         simplified = remove_substring(simplified, polite_phrases[i])
     }
 
-
     simplified = trim_punctuation(simplified)
 
     return simplified
@@ -257,10 +201,6 @@ func remove_substring(string text, string pattern) string {
 func trim_punctuation(string text) string {
     return text
 }
-
-
-
-
 
 struct question_intent {
     string type
@@ -289,7 +229,6 @@ func detect_intent(string question) question_intent {
 
 func extract_relevant_content(string question, string full_content, question_intent intent) string {
 
-
     []string definition_patterns = [
         "定义", "概念", "是指", "是一种"
     ]
@@ -309,7 +248,6 @@ func extract_relevant_content(string question, string full_content, question_int
         patterns = mechanism_patterns
     }
 
-
     string result = ""
     []string sentences = split_sentences(full_content)
 
@@ -326,7 +264,6 @@ func extract_relevant_content(string question, string full_content, question_int
             result = result + sentences[i] + " "
         }
     }
-
 
     if len(result) > 500 {
         result = substring(result, 0, 500)
@@ -346,13 +283,7 @@ func substring(string text, int start, int end) string {
     return text
 }
 
-
-
-
-
 func compute_simhash(string text) int {
-
-
 
     int hash = 0
     for i = 0; i < len(text); i = i + 1 {
@@ -381,7 +312,6 @@ func hamming_distance(int hash1, int hash2) int {
 func is_duplicate_content(string new_content, []int existing_hashes) bool {
     int new_hash = compute_simhash(new_content)
 
-
     for i = 0; i < len(existing_hashes); i = i + 1 {
         int distance = hamming_distance(new_hash, existing_hashes[i])
         if distance < 8 {
@@ -391,10 +321,6 @@ func is_duplicate_content(string new_content, []int existing_hashes) bool {
 
     return false
 }
-
-
-
-
 
 struct instruction_sample {
     []message messages
@@ -409,13 +335,8 @@ struct message {
 
 func sample_to_jsonl(instruction_sample sample) string {
 
-
     return "{}"
 }
-
-
-
-
 
 struct pipeline_stats {
     int total_articles_read
@@ -444,7 +365,6 @@ func process_medical_articles(
     for i = 0; i < len(articles); i = i + 1 {
         medical_article article = articles[i]
 
-
         string cleaned = clean_medical_content(article.plain_content)
         if len(cleaned) == 0 {
             continue
@@ -452,9 +372,7 @@ func process_medical_articles(
 
         stats.valid_articles = stats.valid_articles + 1
 
-
         []string disease_terms = extract_disease_terms(article.title, article.subtitle)
-
 
         []seed_template templates = get_seed_templates()
 
@@ -464,21 +382,17 @@ func process_medical_articles(
             for k = 0; k < len(questions); k = k + 1 {
                 string question = questions[k]
 
-
                 if is_in_list(question, existing_questions) {
                     continue
                 }
 
-
                 question_intent intent = detect_intent(question)
                 string answer = extract_relevant_content(question, cleaned, intent)
-
 
                 if is_duplicate_content(answer, existing_hashes) {
                     stats.duplicates_removed = stats.duplicates_removed + 1
                     continue
                 }
-
 
                 []message msgs = []
                 msgs = append_message(msgs, message{ role: "user", content: question })
@@ -489,7 +403,6 @@ func process_medical_articles(
                     metadata_source: "medical_article",
                     metadata_domain: article.specialty_name
                 }
-
 
                 string jsonl_line = sample_to_jsonl(sample)
                 write_line(output_file, jsonl_line)
@@ -503,10 +416,6 @@ func process_medical_articles(
 
     return stats
 }
-
-
-
-
 
 func split_string(string text, string delimiter) []string {
     []string parts = []

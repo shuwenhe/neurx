@@ -29,9 +29,6 @@ struct PrefixCacheHit {
   std::size_t token_count = 0;
 };
 
-
-
-
 class PrefixCache {
  public:
   PrefixCache(PagedKvCache* cache, PrefixCacheConfig config = {});

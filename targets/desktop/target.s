@@ -1,16 +1,5 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
 struct desktop_target_config {
     string  os
     string  gpu_vendor

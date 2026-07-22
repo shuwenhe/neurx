@@ -1,12 +1,9 @@
 
 
-
 module neurx_interactive_inference
-
 
 func infer_medical_response(string user_input) string {
     string response = ""
-
 
     if len(user_input) == 0 {
         response = "Please ask me a medical question."
@@ -51,20 +48,17 @@ func main() {
 
     print("=== NeurX Medical AI Inference ===\n\n")
 
-
     print("Input: hello\n")
     string response = infer_medical_response("hello")
     print("Output: ")
     print(response)
     print("\n\n")
 
-
     print("Input: 腿疼\n")
     response = infer_medical_response("腿疼")
     print("Output: ")
     print(response)
     print("\n\n")
-
 
     print("Input: treatment\n")
     response = infer_medical_response("treatment")

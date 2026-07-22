@@ -1,24 +1,8 @@
 package neurx.trainer.scaled_training_system
 
-
-
-
-
-
-
-
-
-
-
-
-
 use std.io
 use std.math
 use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file}
-
-
-
-
 
 struct data_bundle {
     input_ids: [][]int
@@ -29,7 +13,6 @@ struct data_bundle {
     num_tokens: int
     source: string
 }
-
 
 func create_synthetic_data_bundle(int batch_size, int seq_len, int vocab_size) data_bundle {
     input_ids := make([][]int, batch_size)
@@ -175,7 +158,6 @@ func scaled_bundle_from_text(
     }
 }
 
-
 func load_wikitext_batch(string dataset_path, int batch_size, int seq_len) data_bundle {
     fmt.printfln("Loading WikiText from: %s", dataset_path)
 
@@ -189,7 +171,6 @@ func load_wikitext_batch(string dataset_path, int batch_size, int seq_len) data_
     create_synthetic_data_bundle(batch_size, seq_len, 32000)
 }
 
-
 func load_c4_batch(string dataset_path, int batch_size, int seq_len) data_bundle {
     fmt.printfln("Loading C4 from: %s", dataset_path)
 
@@ -202,10 +183,6 @@ func load_c4_batch(string dataset_path, int batch_size, int seq_len) data_bundle
 
     create_synthetic_data_bundle(batch_size, seq_len, 32000)
 }
-
-
-
-
 
 struct tensor {
     data: []float64
@@ -251,10 +228,6 @@ func tensor_randn([]int shape, float64 mean, float64 std) tensor {
     }
 }
 
-
-
-
-
 struct scaled_transformer {
 
     vocab_size: int
@@ -264,24 +237,19 @@ struct scaled_transformer {
     num_heads: int
     max_seq_len: int
 
-
     embedding_weight: tensor
     pos_embedding: tensor
-
 
     q_proj: tensor
     k_proj: tensor
     v_proj: tensor
     out_proj: tensor
 
-
     fc1: tensor
     fc2: tensor
 
-
     ln_gamma: tensor
     ln_beta: tensor
-
 
     lm_head: tensor
 }
@@ -290,7 +258,6 @@ func create_scaled_transformer(int vocab_size, int hidden_dim, int num_layers) s
     ff_dim := hidden_dim * 4
     num_heads := 8
     max_seq_len := 2048
-
 
     init_scale := 1.0 / math.sqrt(float64(hidden_dim))
 
@@ -320,7 +287,6 @@ func create_scaled_transformer(int vocab_size, int hidden_dim, int num_layers) s
     }
 }
 
-
 func multi_head_attention(tensor query, tensor key, tensor value, int num_heads) tensor {
 
     for i := 0; i < len(query.data); i += 1 {
@@ -329,7 +295,6 @@ func multi_head_attention(tensor query, tensor key, tensor value, int num_heads)
     query
 }
 
-
 func feed_forward(tensor x, tensor fc1_w, tensor fc2_w) tensor {
 
     for i := 0; i < len(x.data); i += 1 {
@@ -337,7 +302,6 @@ func feed_forward(tensor x, tensor fc1_w, tensor fc2_w) tensor {
     }
     x
 }
-
 
 func layer_norm(tensor x, tensor gamma, tensor beta, float64 eps) tensor {
 
@@ -361,7 +325,6 @@ func layer_norm(tensor x, tensor gamma, tensor beta, float64 eps) tensor {
     x
 }
 
-
 func scaled_transformer_forward(scaled_transformer model, [][]int input_ids, int batch_size, int seq_len) tensor {
 
     embeddings := tensor_zeros([]int{batch_size, seq_len, model.hidden_dim})
@@ -378,7 +341,6 @@ func scaled_transformer_forward(scaled_transformer model, [][]int input_ids, int
         }
     }
 
-
     for b := 0; b < batch_size; b += 1 {
         for t := 0; t < seq_len; t += 1 {
             for h := 0; h < model.hidden_dim; h += 1 {
@@ -388,18 +350,15 @@ func scaled_transformer_forward(scaled_transformer model, [][]int input_ids, int
         }
     }
 
-
     hidden := embeddings
     for layer := 0; layer < model.num_layers; layer += 1 {
 
         hidden = multi_head_attention(hidden, hidden, hidden, model.num_heads)
         hidden = layer_norm(hidden, model.ln_gamma, model.ln_beta, 1e-6)
 
-
         hidden = feed_forward(hidden, model.fc1, model.fc2)
         hidden = layer_norm(hidden, model.ln_gamma, model.ln_beta, 1e-6)
     }
-
 
     output := tensor_zeros([]int{batch_size, seq_len, model.vocab_size})
     for i := 0; i < len(hidden.data); i += 1 {
@@ -411,14 +370,9 @@ func scaled_transformer_forward(scaled_transformer model, [][]int input_ids, int
     output
 }
 
-
-
-
-
 func cross_entropy_loss_with_mask(tensor logits, [][]int labels, [][]int mask) float64 {
     loss := 0.0
     count := 0
-
 
     batch_size := len(labels)
     seq_len := len(labels[0]) if batch_size > 0 else 0
@@ -449,17 +403,12 @@ func cross_entropy_loss_with_mask(tensor logits, [][]int labels, [][]int mask) f
     }
 }
 
-
-
-
-
 struct adamw_optimizer_extended {
     learning_rate: float64
     beta1: float64
     beta2: float64
     epsilon: float64
     weight_decay: float64
-
 
     first_moment: []float64
     second_moment: []float64
@@ -490,24 +439,17 @@ func adamw_step_extended(adamw_optimizer_extended* opt, []float64* params, []flo
 
         grad := grads[i]
 
-
         opt.first_moment[i] = opt.beta1 * opt.first_moment[i] + (1 - opt.beta1) * grad
         opt.second_moment[i] = opt.beta2 * opt.second_moment[i] + (1 - opt.beta2) * grad * grad
 
         m_hat := opt.first_moment[i] / (1 - math.pow(opt.beta1, float64(opt.step_count)))
         v_hat := opt.second_moment[i] / (1 - math.pow(opt.beta2, float64(opt.step_count)))
 
-
         wd_term := opt.weight_decay * (*params)[i]
-
 
         (*params)[i] = (*params)[i] - opt.learning_rate * (m_hat / (math.sqrt(v_hat) + opt.epsilon) + wd_term)
     }
 }
-
-
-
-
 
 struct cuda_device_interface {
     device_id: int
@@ -541,10 +483,6 @@ func cuda_memcpy_d2h(int64 device_ptr, []float64* host_data) {
     fmt.printfln("Copying %d bytes from GPU device", len(*host_data) * 8)
 }
 
-
-
-
-
 struct ddp_process_group {
     rank: int
     world_size: int
@@ -567,7 +505,6 @@ func all_reduce_gradients([]float64 gradients, ddp_process_group group) {
 
     fmt.printfln("Reducing gradients across %d processes", group.world_size)
 
-
     for i := 0; i < len(gradients); i += 1 {
         gradients[i] /= float64(group.world_size)
     }
@@ -577,15 +514,10 @@ func barrier_synchronize(ddp_process_group group) {
     fmt.printfln("Synchronizing all processes (rank %d)", group.rank)
 }
 
-
-
-
-
 func run_scaled_training_loop(int num_epochs, int steps_per_epoch, string data_source, bool use_gpu, bool use_ddp) {
     fmt.printfln("\n╔════════════════════════════════════════════════════════╗")
     fmt.printfln("║  SCALED TRAINING SYSTEM - PRODUCTION READY             ║")
     fmt.printfln("╚════════════════════════════════════════════════════════╝\n")
-
 
     vocab_size := 32000
     hidden_dim := 256
@@ -605,13 +537,11 @@ func run_scaled_training_loop(int num_epochs, int steps_per_epoch, string data_s
     fmt.printfln("   GPU acceleration: %v", use_gpu)
     fmt.printfln("   Distributed training: %v\n", use_ddp)
 
-
     if use_gpu {
         device_info := get_cuda_device_info(0)
         fmt.printfln("🖥️  GPU Device: %s", device_info.compute_capability)
         fmt.printfln("   Memory: %.2f GB\n", float64(device_info.total_memory) / (1024 * 1024 * 1024))
     }
-
 
     var ddp_group ddp_process_group
     if use_ddp {
@@ -619,15 +549,12 @@ func run_scaled_training_loop(int num_epochs, int steps_per_epoch, string data_s
         fmt.printfln("⚙️  DDP initialized: rank 0/4\n")
     }
 
-
     fmt.printfln("🏗️  Creating scaled transformer model...")
     model := create_scaled_transformer(vocab_size, hidden_dim, num_layers)
     total_params := vocab_size*hidden_dim + hidden_dim*hidden_dim*num_layers + hidden_dim*4*hidden_dim*num_layers + hidden_dim*vocab_size
     fmt.printfln("   Total parameters: %d\n", total_params)
 
-
     optimizer := create_adamw_optimizer_extended(total_params, learning_rate)
-
 
     fmt.printfln("📈 Training Progress:")
     fmt.printfln("────────────────────────────────────────────────────────\n")
@@ -648,22 +575,17 @@ func run_scaled_training_loop(int num_epochs, int steps_per_epoch, string data_s
                 batch = create_synthetic_data_bundle(batch_size, seq_len, vocab_size)
             }
 
-
             logits := scaled_transformer_forward(model, batch.input_ids, batch_size, seq_len)
 
-
             loss := cross_entropy_loss_with_mask(logits, batch.labels, batch.attention_mask)
-
 
             if use_ddp {
                 all_reduce_gradients(logits.grad, ddp_group)
             }
 
-
             for i := 0; i < len(logits.grad); i += 1 {
                 logits.grad[i] = 1.0 / float64(batch_size)
             }
-
 
             adamw_step_extended(&optimizer, &model.embedding_weight.data, logits.grad)
 
@@ -681,7 +603,6 @@ func run_scaled_training_loop(int num_epochs, int steps_per_epoch, string data_s
     avg_final_loss := total_loss / float64(num_epochs * steps_per_epoch)
     fmt.printfln("📊 Final Average Loss: %.4f\n", avg_final_loss)
 
-
     fmt.printfln("💾 Saving checkpoint...")
     fmt.printfln("   Model: checkpoint.pt")
     fmt.printfln("   Optimizer: optimizer.pt\n")
@@ -693,26 +614,15 @@ func run_scaled_training_loop(int num_epochs, int steps_per_epoch, string data_s
     }
 }
 
-
-
-
-
 func main() {
     fmt.printfln("\n═══════════════════════════════════════════════════════")
     fmt.printfln("NeurX SCALED TRAINING SYSTEM")
     fmt.printfln("256-dim hidden, 6 layers, GPU + DDP support")
     fmt.printfln("═══════════════════════════════════════════════════════\n")
 
-
     num_epochs := 2
     steps_per_epoch := 20
 
-
     run_scaled_training_loop(num_epochs, steps_per_epoch, "synthetic", false, false)
-
-
-
-
-
 
 }

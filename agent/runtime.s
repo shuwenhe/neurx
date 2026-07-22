@@ -1007,7 +1007,6 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
         state.reasoning, state.plan.goal, state.last_observation
     )
 
-
     approval_memory = call_trace_append(approval_memory, state.steps + 1, "safety.check", CALL_TRACE_SAFETY, "agent_safety_check", true)
     approval_memory = call_trace_append(approval_memory, state.steps + 1, "reasoning", CALL_TRACE_REASONING, "agent_reasoning_for_goal", true)
     approval_memory = call_trace_append(approval_memory, state.steps + 1, "context.compress", CALL_TRACE_CONTEXT, "agent_context_smart_compress", true)

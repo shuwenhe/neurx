@@ -3,15 +3,6 @@ package neurx.moe.hybrid
 use neurx.moe.core.{moe_config, moe_weights, moe_result, new_moe_config, new_moe_weights, moe_forward}
 use neurx.attention.nda.{nda_config, nda_weights, nda_result, new_nda_config, new_nda_weights, nda_forward}
 
-
-
-
-
-
-
-
-
-
 struct hybrid_moe_config {
     int hidden_dim
     int state_dim
@@ -89,7 +80,6 @@ func tiny_hybrid_moe_config() hybrid_moe_config {
 }
 
 func production_hybrid_moe_shape() hybrid_moe_config {
-
 
     hybrid_moe_config {
         hidden_dim: 7168,
@@ -480,7 +470,6 @@ func hybrid_moe_forward(hybrid_moe_model model, []float embeddings, int tokens) 
         last_expert_weights = global_moe.expert_weights
         group = group + 1
     }
-
 
     attnres_result final_retrieval = attention_residual(model.residual, current, history, history_count, tokens)
     hybrid_moe_forward_result {

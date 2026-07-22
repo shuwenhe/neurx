@@ -119,7 +119,6 @@ func prefix_cache_insert_with_key(prefix_cache_state state, string key, int pref
         next_evictions = next_evictions + 1
     }
 
-
     if key == state.last_key {
         next_last_key = key
         next_last_key_tokens = tokens

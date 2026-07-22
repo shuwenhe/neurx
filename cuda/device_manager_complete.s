@@ -1,23 +1,14 @@
 package neurx.cuda
 
-
-
-
-
-
-
 struct cuda_device {
     int id
     string name
 
-
     int total_memory_bytes
     int free_memory_bytes
 
-
     int major_version
     int minor_version
-
 
     int max_threads_per_block
     int max_shared_mem_per_block
@@ -29,27 +20,18 @@ struct cuda_device {
     bool supports_tensor_cores
 }
 
-
 struct cuda_context {
     cuda_device device
     bool is_initialized
     uint64 stream
     uint64 cublas_handle
 
-
     int allocated_memory_bytes
     map[string]uint64 allocations
     map[string]int allocation_sizes
 }
 
-
-
-
-
-
 func get_device_count() int {
-
-
 
     result := cuda_runtime_call("cudaGetDeviceCount", [], 0)
     return result.int_value
@@ -60,7 +42,6 @@ func get_device_properties(int device_id) (cuda_device, error) {
     if device_id < 0 || device_id >= get_device_count() {
         return cuda_device{}, error{message: "Invalid device ID"}
     }
-
 
     props := cuda_runtime_call("cudaGetDeviceProperties", [device_id], 0)
 
@@ -83,18 +64,12 @@ func get_device_properties(int device_id) (cuda_device, error) {
 
 func select_device(int device_id) error {
 
-
     result := cuda_runtime_call("cudaSetDevice", [device_id], 0)
     if result.error_code != 0 {
         return error{message: "Failed to select device"}
     }
     return nil
 }
-
-
-
-
-
 
 func init_cuda_context(int device_id) (cuda_context, error) {
 
@@ -103,20 +78,14 @@ func init_cuda_context(int device_id) (cuda_context, error) {
         return cuda_context{}, err
     }
 
-
     device_props, err := get_device_properties(device_id)
     if err != nil {
         return cuda_context{}, err
     }
 
-
-
     stream := cuda_runtime_call("cudaStreamCreate", [], 0).uint64_value
 
-
-
     cublas_h := cuda_runtime_call("cublasCreate", [], 0).uint64_value
-
 
     cuda_runtime_call("cublasSetStream", [cublas_h, stream], 0)
 
@@ -136,7 +105,6 @@ func cleanup_cuda_context(cuda_context ctx) error {
         return nil
     }
 
-
     for _, ptr := range ctx.allocations {
         cuda_runtime_call("cudaFree", [ptr], 0)
     }
@@ -144,9 +112,7 @@ func cleanup_cuda_context(cuda_context ctx) error {
     ctx.allocation_sizes = make(map[string]int)
     ctx.allocated_memory_bytes = 0
 
-
     cuda_runtime_call("cudaStreamDestroy", [ctx.stream], 0)
-
 
     cuda_runtime_call("cublasDestroy", [ctx.cublas_handle], 0)
     ctx.stream = 0
@@ -155,11 +121,6 @@ func cleanup_cuda_context(cuda_context ctx) error {
 
     return nil
 }
-
-
-
-
-
 
 func cuda_malloc(cuda_context ctx, int num_bytes, string label) (uint64, error) {
     if !ctx.is_initialized {
@@ -170,11 +131,9 @@ func cuda_malloc(cuda_context ctx, int num_bytes, string label) (uint64, error) 
         return 0, error{message: "Invalid allocation size"}
     }
 
-
     if ctx.allocated_memory_bytes + num_bytes > ctx.device.total_memory_bytes {
         return 0, error{message: "Out of GPU memory"}
     }
-
 
     result := cuda_runtime_call("cudaMalloc", [num_bytes], 0)
     if result.error_code != 0 {
@@ -190,7 +149,6 @@ func cuda_malloc(cuda_context ctx, int num_bytes, string label) (uint64, error) 
 }
 
 func cuda_malloc_pinned(int num_bytes, string label) (uint64, error) {
-
 
     result := cuda_runtime_call("cudaMallocHost", [num_bytes], 0)
     if result.error_code != 0 {
@@ -213,7 +171,6 @@ func cuda_free(cuda_context ctx, string label) error {
 
 func cuda_memcpy_h2d(uint64 device_ptr, uint64 host_ptr, int num_bytes) error {
 
-
     result := cuda_runtime_call("cudaMemcpyH2D", [device_ptr, host_ptr, num_bytes], 0)
     if result.error_code != 0 {
         return error{message: "cudaMemcpyH2D failed"}
@@ -222,7 +179,6 @@ func cuda_memcpy_h2d(uint64 device_ptr, uint64 host_ptr, int num_bytes) error {
 }
 
 func cuda_memcpy_d2h(uint64 host_ptr, uint64 device_ptr, int num_bytes) error {
-
 
     result := cuda_runtime_call("cudaMemcpyD2H", [host_ptr, device_ptr, num_bytes], 0)
     if result.error_code != 0 {
@@ -233,7 +189,6 @@ func cuda_memcpy_d2h(uint64 host_ptr, uint64 device_ptr, int num_bytes) error {
 
 func cuda_memcpy_d2d(uint64 dest_ptr, uint64 src_ptr, int num_bytes) error {
 
-
     result := cuda_runtime_call("cudaMemcpyD2D", [dest_ptr, src_ptr, num_bytes], 0)
     if result.error_code != 0 {
         return error{message: "cudaMemcpyD2D failed"}
@@ -241,13 +196,7 @@ func cuda_memcpy_d2d(uint64 dest_ptr, uint64 src_ptr, int num_bytes) error {
     return nil
 }
 
-
-
-
-
-
 func cuda_synchronize(cuda_context ctx) error {
-
 
     result := cuda_runtime_call("cudaStreamSynchronize", [ctx.stream], 0)
     if result.error_code != 0 {
@@ -258,7 +207,6 @@ func cuda_synchronize(cuda_context ctx) error {
 
 func cuda_device_synchronize() error {
 
-
     result := cuda_runtime_call("cudaDeviceSynchronize", [], 0)
     if result.error_code != 0 {
         return error{message: "cudaDeviceSynchronize failed"}
@@ -266,13 +214,7 @@ func cuda_device_synchronize() error {
     return nil
 }
 
-
-
-
-
 func cuda_runtime_call(string api_name, []int args, int flags) (any, error) {
-
-
 
     return any{}, nil
 }
@@ -283,10 +225,6 @@ func get_allocation_size(cuda_context ctx, string label) int {
     }
     return 0
 }
-
-
-
-
 
 func get_memory_stats(cuda_context ctx) map[string]int {
     return map[string]int{

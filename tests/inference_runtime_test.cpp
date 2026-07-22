@@ -19,8 +19,6 @@ int main() {
   assert(ascend.dtype == "fp16" && ascend.collective == "none (single-card replica)" &&
          ascend.use_cuda_or_acl_graph);
 
-
-
   neurx::inference::AscendAdapter ascend_adapter(nullptr, nullptr);
   const auto ascend_status = ascend_adapter.initialize(0);
   assert(ascend_status.ok ? ascend_adapter.ready() : !ascend_status.message.empty());
@@ -40,8 +38,6 @@ int main() {
   assert(prefill.total_tokens == 8 && prefill.items.size() == 1 && prefill.items[0].request_id == "cuda-long");
   scheduler.complete_prefill("cuda-long", 8);
 
-
-
   prefill = scheduler.schedule();
   assert(prefill.phase == Phase::prefill && prefill.items[0].request_id == "cuda-short");
   scheduler.complete_prefill("cuda-short", 4);
@@ -50,7 +46,6 @@ int main() {
   assert(decode.items.size() == 1 && decode.items[0].request_id == "cuda-short");
   scheduler.complete_decode("cuda-short");
   assert(scheduler.request("cuda-short").state == RequestState::queued_decode);
-
 
   decode = scheduler.schedule();
   assert(decode.phase == Phase::decode && decode.key.backend == Backend::cuda);

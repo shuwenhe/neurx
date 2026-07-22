@@ -1,25 +1,10 @@
 package main
 
-
-
-
-
-
-
-
-
-
-
-
 use std.fs
 use std.os
 use std.process
 use std.strings
 use std.io
-
-
-
-
 
 struct host_node {
     string hostname
@@ -34,7 +19,6 @@ struct launcher_config {
     string output_dir
     string nccl_id_file
     string shard_list_file
-
 
     int pretrain_steps
     int micro_batch
@@ -58,10 +42,6 @@ struct process_info {
     int global_rank
     int process_id
 }
-
-
-
-
 
 func get_env_or_default(string key, string default_val) string {
     string val = os::getenv(key)
@@ -87,19 +67,13 @@ func get_env_float_or_default(string key, float default_val) float {
     return strings::parse_float(val)
 }
 
-
-
-
-
 func read_hostfile(string path) []host_node {
     []host_node nodes = []host_node{}
-
 
     if !fs::exists(path) {
         io::eprintln("hostfile not found: " + path)
         return nodes
     }
-
 
     string content = fs::read_file(path)
     if content == "" {
@@ -107,17 +81,14 @@ func read_hostfile(string path) []host_node {
         return nodes
     }
 
-
     []string lines = strings::split(content, "\n")
 
     for i := 0; i < len(lines); i++ {
         string line = strings::trim(lines[i])
 
-
         if line == "" || strings::has_prefix(line, "#") {
             continue
         }
-
 
         []string parts = strings::split(line, " ")
         if len(parts) < 1 {
@@ -144,13 +115,8 @@ func read_hostfile(string path) []host_node {
 
 func count_gpus_local() int {
 
-
     return 1
 }
-
-
-
-
 
 func write_nccl_id_file(string path, string id_data) bool {
 
@@ -159,13 +125,11 @@ func write_nccl_id_file(string path, string id_data) bool {
         fs::mkdir_all(dir)
     }
 
-
     string tmp_path = path + ".tmp"
     if !fs::write_file(tmp_path, id_data) {
         io::eprintln("cannot write NCCL id to: " + tmp_path)
         return false
     }
-
 
     if !fs::rename(tmp_path, path) {
         io::eprintln("cannot rename NCCL id file")
@@ -182,15 +146,10 @@ func read_nccl_id_file(string path) string {
     return fs::read_file(path)
 }
 
-
-
-
-
 func create_launcher_config() launcher_config {
 
     string script_dir = os::working_dir()
     string root_dir = get_env_or_default("NEURX_ROOT", script_dir)
-
 
     launcher_config cfg
     cfg.root_dir = root_dir
@@ -203,7 +162,6 @@ func create_launcher_config() launcher_config {
                                            root_dir + "/artifacts/nccl/unique_id")
     cfg.shard_list_file = get_env_or_default("NEURX_PRETRAIN_SHARD_LIST_FILE",
                                               root_dir + "/artifacts/build/run_large_pretrain/shard_list.txt")
-
 
     cfg.pretrain_steps = get_env_int_or_default("NEURX_PRETRAIN_STEPS", 1000000000)
     cfg.micro_batch = get_env_int_or_default("NEURX_PRETRAIN_MICRO_BATCH", 1)
@@ -224,14 +182,9 @@ func create_launcher_config() launcher_config {
     return cfg
 }
 
-
-
-
-
 func launch_multinode_pretrain() int {
 
     launcher_config cfg = create_launcher_config()
-
 
     []host_node nodes = read_hostfile(cfg.hostfile)
     if len(nodes) == 0 {
@@ -239,29 +192,23 @@ func launch_multinode_pretrain() int {
         return 2
     }
 
-
     int world_size = 0
     for i := 0; i < len(nodes); i++ {
         world_size += nodes[i].gpu_count
     }
 
-
     string master_addr = get_env_or_default("MASTER_ADDR", nodes[0].hostname)
 
-
     fs::remove_file(cfg.nccl_id_file)
-
 
     if !fs::exists(cfg.output_dir) {
         fs::mkdir_all(cfg.output_dir)
     }
 
-
     io::println("[multinode] nodes=" + strings::from_int(len(nodes)) +
                 " world_size=" + strings::from_int(world_size) +
                 " master=" + master_addr + ":" + strings::from_int(cfg.master_port))
     io::println("[multinode] shared NCCL id: " + cfg.nccl_id_file)
-
 
     []process_info processes = []process_info{}
     int global_rank = 0
@@ -275,10 +222,8 @@ func launch_multinode_pretrain() int {
                                                global_rank, node.gpu_count,
                                                len(nodes))
 
-
             string cmd = build_command(cfg, global_rank, local_rank, node.gpu_count,
                                        len(nodes))
-
 
             int pid = launch_process(node.hostname, cfg.root_dir, cmd, env_vars,
                                      cfg.output_dir, global_rank, len(nodes) == 1)
@@ -300,7 +245,6 @@ func launch_multinode_pretrain() int {
         }
     }
 
-
     int exit_code = 0
     for i := 0; i < len(processes); i++ {
         process_info proc = processes[i]
@@ -312,10 +256,6 @@ func launch_multinode_pretrain() int {
 
     return exit_code
 }
-
-
-
-
 
 func build_env_vars(launcher_config cfg, string master_addr, int world_size,
                     int rank, int local_gpus, int num_nodes) []string {
@@ -382,7 +322,6 @@ func launch_process(string hostname, string root_dir, string cmd,
                    " >" + output_dir + "/rank_" + strings::from_int(rank) + ".log 2>&1' &"
     }
 
-
     int pid = os::execute(full_cmd)
     return pid
 }
@@ -391,20 +330,14 @@ func build_full_command(string cmd, []string env_vars, string output_dir,
                         int rank, bool show_output) string {
     string full = ""
 
-
     for i := 0; i < len(env_vars); i++ {
         full = full + "export " + env_vars[i] + "; "
     }
-
 
     full = full + cmd
 
     return full
 }
-
-
-
-
 
 func main() int {
     return launch_multinode_pretrain()

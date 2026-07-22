@@ -133,8 +133,6 @@ Status build_transformer_batch_plan(
     return Status::failure("batch total token count does not match work items");
   }
 
-
-
   std::size_t scratch_elements = 0;
   if (!checked_add_product(result.token_count, 7 * result.hidden_size,
                            &scratch_elements) ||

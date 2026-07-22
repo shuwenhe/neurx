@@ -12,14 +12,12 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-
 DEFAULT_PROMPTS = [
     [1, 2, 3, 4, 5, 6, 7, 8],
     [11, 17, 23, 31, 41, 53, 67, 79],
     [2, 2, 3, 5, 8, 13, 21, 34],
     [101, 97, 89, 83, 79, 73, 71, 67],
 ]
-
 
 def worker_urls(base_url, count):
     parsed = urllib.parse.urlsplit(base_url)
@@ -41,7 +39,6 @@ def worker_urls(base_url, count):
         for index in range(count)
     ]
 
-
 def request_json(url, path, payload=None, timeout=300):
     data = None if payload is None else json.dumps(payload).encode("utf-8")
     request = urllib.request.Request(
@@ -58,7 +55,6 @@ def request_json(url, path, payload=None, timeout=300):
         raise RuntimeError(f"{url}{path}: HTTP {error.code}: {body}") from error
     return json.loads(body)
 
-
 def percentile(values, percentage):
     ordered = sorted(values)
     if not ordered:
@@ -71,7 +67,6 @@ def percentile(values, percentage):
     return ordered[lower] + (ordered[upper] - ordered[lower]) * (
         position - lower
     )
-
 
 def load_prompts(path):
     if not path:
@@ -89,7 +84,6 @@ def load_prompts(path):
     ):
         raise ValueError("prompts file must be a non-empty JSON array of token arrays")
     return value
-
 
 def completion_batch(url, prompts, max_new_tokens, seed):
     started = time.perf_counter()
@@ -109,7 +103,6 @@ def completion_batch(url, prompts, max_new_tokens, seed):
     if int(response["requests"]) != len(prompts):
         raise RuntimeError(f"{url}: batch response row count is inconsistent")
     return int(response["generated_tokens"]), elapsed
-
 
 def collect(args):
     if (
@@ -198,7 +191,6 @@ def collect(args):
     print(json.dumps(report["performance"], indent=2, sort_keys=True))
     print(f"saved {args.precision} report to {args.output}")
 
-
 def compare(args):
     fp16 = json.loads(Path(args.fp16).read_text(encoding="utf-8"))
     int8 = json.loads(Path(args.int8).read_text(encoding="utf-8"))
@@ -266,7 +258,6 @@ def compare(args):
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0 if passed else 1
 
-
 def parser():
     root = argparse.ArgumentParser()
     commands = root.add_subparsers(dest="command", required=True)
@@ -295,7 +286,6 @@ def parser():
     compare_parser.set_defaults(function=compare)
     return root
 
-
 def main():
     args = parser().parse_args()
     try:
@@ -304,7 +294,6 @@ def main():
     except (OSError, RuntimeError, ValueError, KeyError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 2
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

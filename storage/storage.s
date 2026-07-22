@@ -1,35 +1,13 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 int IO_READ       = 0
 int IO_WRITE      = 1
 int IO_READAHEAD  = 2
 int IO_FLUSH      = 3
 
-
 int IOPRIO_RT     = 0
 int IOPRIO_NORMAL = 1
 int IOPRIO_IDLE   = 2
-
 
 int IOREQ_PENDING    = 0
 int IOREQ_SUBMITTED  = 1
@@ -87,7 +65,6 @@ func new_storage_state(depth int, total_mb int) storage_state {
     }
 }
 
-
 func io_submit(ss storage_state, op int, path string, offset int,
                length int, priority int, owner_pid int) (storage_state, int) {
     int rid = ss.ring.next_req_id
@@ -109,7 +86,6 @@ func io_submit(ss storage_state, op int, path string, offset int,
     return (ss, rid)
 }
 
-
 func io_complete(ss storage_state, req_id int, err string) storage_state {
     int i = 0
     while i < len(ss.ring.submission_queue) {
@@ -122,7 +98,6 @@ func io_complete(ss storage_state, req_id int, err string) storage_state {
                 r.err   = err
             }
             ss.ring.completion_queue = append(ss.ring.completion_queue, r)
-
 
             []io_request sq = []
             int j = 0
@@ -140,7 +115,6 @@ func io_complete(ss storage_state, req_id int, err string) storage_state {
     return ss
 }
 
-
 func io_poll(ss storage_state, owner_pid int) (storage_state, []io_request) {
     []io_request done = []
     []io_request remaining = []
@@ -157,12 +131,10 @@ func io_poll(ss storage_state, owner_pid int) (storage_state, []io_request) {
     return (ss, done)
 }
 
-
 func storage_readahead(ss storage_state, path string, offset int,
                        length int, owner_pid int) (storage_state, int) {
     return io_submit(ss, IO_READAHEAD, path, offset, length, IOPRIO_IDLE, owner_pid)
 }
-
 
 func storage_checkpoint_write(ss storage_state, path string,
                                data_bytes int, owner_pid int) (storage_state, int) {

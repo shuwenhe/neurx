@@ -2,7 +2,6 @@
 import os
 import sys
 
-
 def main() -> int:
     try:
         import torch
@@ -79,7 +78,6 @@ def main() -> int:
         messages.append({"role": "assistant", "content": response})
 
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

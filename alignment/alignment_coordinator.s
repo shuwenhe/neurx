@@ -1,10 +1,5 @@
 package neurx.alignment.alignment_coordinator
 
-
-
-
-
-
 use neurx.alignment.supervised_finetuning.{sft_config, new_sft_config, sft_trainer}
 use neurx.alignment.rlhf_training.{ppo_config, new_ppo_config, rlhf_trainer}
 
@@ -79,103 +74,61 @@ func new_alignment_trainer(alignment_config cfg) alignment_trainer {
     }
 }
 
-
 func run_sft_stage(alignment_trainer trainer, []string sft_data) alignment_trainer {
-
-
-
 
     int epoch = 0
     while epoch < trainer.config.num_sft_epochs {
 
-
-
-
         epoch = epoch + 1
     }
-
 
     trainer.current_stage_index = 1
     trainer
 }
 
-
 func run_rlhf_stage(alignment_trainer trainer, []string preference_data) alignment_trainer {
-
-
-
 
     int iteration = 0
     while iteration < trainer.config.num_rlhf_iterations {
 
-
-
-
-
-
         iteration = iteration + 1
     }
-
 
     trainer.current_stage_index = 2
     trainer
 }
 
-
 func evaluate_alignment(string model_path, []string test_prompts) [string:float {
     [string:float metrics = [string:float{cap: 10}
 
-
     metrics["instruction_following"] = 0.0
-
 
     metrics["coherence"] = 0.0
 
-
     metrics["accuracy"] = 0.0
 
-
     metrics["toxicity"] = 0.0
-
 
     metrics["bias_score"] = 0.0
 
     metrics
 }
 
-
 func run_safety_evaluation(string model_path) [string:bool {
     [string:bool results = [string:bool{cap: 10}
 
-
     results["jailbreak_resistant"] = true
-
 
     results["no_harmful_outputs"] = true
 
-
     results["low_bias"] = true
-
 
     results["low_hallucination"] = true
 
     results
 }
 
-
 func run_full_alignment_pipeline(alignment_trainer trainer) alignment_trainer {
-
-
-
-
-
-
-
-
-
-
-
-
 
     if trainer.config.enable_safety_checks {
 
@@ -183,7 +136,6 @@ func run_full_alignment_pipeline(alignment_trainer trainer) alignment_trainer {
 
     trainer
 }
-
 
 func save_alignment_checkpoint(alignment_trainer trainer, string checkpoint_dir) bool {
     alignment_checkpoint ckpt = alignment_checkpoint {
@@ -194,10 +146,8 @@ func save_alignment_checkpoint(alignment_trainer trainer, string checkpoint_dir)
         timestamp_ms: 0,
     }
 
-
     true
 }
-
 
 func resume_from_checkpoint(string checkpoint_path) alignment_trainer {
     alignment_trainer {
@@ -209,31 +159,18 @@ func resume_from_checkpoint(string checkpoint_path) alignment_trainer {
     }
 }
 
-
 func create_model_version(alignment_trainer trainer, string version_tag) string {
-
-
-
 
     version_tag
 }
 
-
 func compare_model_versions([]string version_ids) [string:float {
     [string:float comparison = [string:float{cap: 10}
-
-
-
 
     comparison
 }
 
-
 func generate_alignment_report(alignment_trainer trainer) string {
-
-
-
-
 
     "Alignment Report"
 }

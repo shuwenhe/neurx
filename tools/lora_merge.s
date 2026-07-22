@@ -2,17 +2,6 @@ package neurx.tools.lora_merge
 
 use std.io.println
 
-
-
-
-
-
-
-
-
-
-
-
 struct safetensors_header {
     string name
     string dtype
@@ -26,10 +15,6 @@ struct safetensors_index {
     []safetensors_header tensors
     map[string]safetensors_header tensor_map
 }
-
-
-
-
 
 func path_join(string dir, string filename) string {
     if len(dir) == 0 {
@@ -81,12 +66,7 @@ func string_contains(string s, string substr) bool {
     false
 }
 
-
-
-
-
 func apply_lora_scale(float value, float lora_a, float lora_b, float alpha, int rank) float {
-
 
     if rank <= 0 {
         return value
@@ -96,13 +76,7 @@ func apply_lora_scale(float value, float lora_a, float lora_b, float alpha, int 
     value + delta
 }
 
-
-
-
-
 func parse_safetensors_metadata(string json_str) []safetensors_header {
-
-
 
     []safetensors_header{}
 }
@@ -115,10 +89,6 @@ func load_safetensors_index(string filepath) safetensors_index {
     }
 }
 
-
-
-
-
 func file_exists(string path) bool {
 
     len(path) > 0
@@ -126,14 +96,9 @@ func file_exists(string path) bool {
 
 func copy_directory(string src, string dst) bool {
 
-
     println("Copying directory: " + src + " -> " + dst)
     true
 }
-
-
-
-
 
 struct merge_config {
     string base_dir
@@ -155,7 +120,6 @@ func merge_lora_adapters(merge_config cfg) bool {
     println("Rank            : " + int_to_str(cfg.rank))
     println("")
 
-
     println("📖 Loading safetensors indexes...")
     safetensors_index base_idx = load_safetensors_index(
         path_join(cfg.base_dir, "model.safetensors")
@@ -164,24 +128,14 @@ func merge_lora_adapters(merge_config cfg) bool {
         path_join(cfg.adapter_dir, "adapter_model.safetensors")
     )
 
-
     println("📋 Copying model directory...")
     if !copy_directory(cfg.base_dir, cfg.output_dir) {
         println("✗ Failed to copy model directory")
         return false
     }
 
-
     println("🔄 Merging LoRA tensors...")
     int merged_count = 0
-
-
-
-
-
-
-
-
 
     merged_count = 8
 
@@ -196,10 +150,6 @@ func merge_lora_adapters(merge_config cfg) bool {
 
     true
 }
-
-
-
-
 
 func digit_to_str(int digit) string {
     if digit == 0 { return "0" }
@@ -264,14 +214,7 @@ func fmt_float(float value, int decimals) string {
     out
 }
 
-
-
-
-
 func main() int {
-
-
-
 
     merge_config cfg = merge_config {
         base_dir: "/path/to/base/model",

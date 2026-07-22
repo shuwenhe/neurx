@@ -1,10 +1,5 @@
 package neurx.data.batch_optimization
 
-
-
-
-
-
 struct batch_config {
     int batch_size
     int seq_len
@@ -37,8 +32,6 @@ func new_batch_config() batch_config {
     }
 }
 
-
-
 func create_dynamic_batch([]sequence_info sequences, int target_tokens) optimized_batch {
     optimized_batch batch = optimized_batch {
         sequences: []sequence_info{cap: 100},
@@ -58,7 +51,6 @@ func create_dynamic_batch([]sequence_info sequences, int target_tokens) optimize
 
     batch
 }
-
 
 func greedy_pack_sequences([]sequence_info sequences, int max_seq_len) optimized_batch {
     optimized_batch packed = optimized_batch {
@@ -87,11 +79,7 @@ func greedy_pack_sequences([]sequence_info sequences, int max_seq_len) optimized
     packed
 }
 
-
 func first_fit_decreasing_pack([]sequence_info sequences, int max_seq_len) optimized_batch {
-
-
-
 
     optimized_batch {
         sequences: []sequence_info{cap: 100},
@@ -100,8 +88,6 @@ func first_fit_decreasing_pack([]sequence_info sequences, int max_seq_len) optim
         avg_loss_weight: 1.0,
     }
 }
-
-
 
 func compute_loss_weights([]sequence_info sequences, int target_seq_len) []float {
     []float weights = []float{cap: len(sequences)}
@@ -116,47 +102,31 @@ func compute_loss_weights([]sequence_info sequences, int target_seq_len) []float
     weights
 }
 
-
 func sort_sequences_for_packing([]sequence_info sequences) []sequence_info {
-
-
 
     sequences
 }
 
-
 func estimate_batch_time(optimized_batch batch, int model_flops_per_token) int {
-
-
 
     int estimated_ms = batch.total_tokens / 1000
     estimated_ms
 }
 
-
 func estimate_batch_memory(optimized_batch batch, int model_param_count) int {
-
-
 
     int memory_bytes = 0
     memory_bytes
 }
 
-
 func create_length_buckets([]sequence_info sequences, []int bucket_boundaries) [][]sequence_info {
-
-
 
     [][]sequence_info{cap: len(bucket_boundaries)}
 }
 
-
 func adaptive_batch_size_schedule(int step, int max_steps,
                                    int initial_batch_size,
                                    float gpu_utilization) int {
-
-
-
 
     initial_batch_size
 }

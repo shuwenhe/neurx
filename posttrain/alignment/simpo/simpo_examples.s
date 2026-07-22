@@ -2,12 +2,6 @@ package neurx.posttrain.alignment.simpo_examples
 
 use neurx.posttrain.alignment.simpo_trainer.*
 
-
-
-
-
-
-
 func create_simpo_config() simpo_config {
     simpo_config {
         seq_len: 128,
@@ -27,7 +21,6 @@ func create_simpo_config() simpo_config {
         save_interval: 10,
     }
 }
-
 
 func example_basic_simpo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -83,7 +76,6 @@ func example_basic_simpo_training() {
     print("")
 }
 
-
 func example_algorithm_comparison() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 2: Algorithm Comparison                          ║")
@@ -124,7 +116,6 @@ func example_algorithm_comparison() {
     print("")
 }
 
-
 func example_margin_based_learning() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 3: Margin-Based Learning                         ║")
@@ -157,7 +148,6 @@ func example_margin_based_learning() {
     print("")
 }
 
-
 func example_training_dynamics() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 4: Training Dynamics                             ║")
@@ -181,7 +171,6 @@ func example_training_dynamics() {
     print("  • Convergence in ~2-3 epochs")
     print("")
 }
-
 
 func example_hyperparameter_sensitivity() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -211,7 +200,6 @@ func example_hyperparameter_sensitivity() {
     print("  1e-3 | Fast      | Risky     | May diverge")
     print("")
 }
-
 
 func example_complete_pipeline() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -261,7 +249,6 @@ func example_complete_pipeline() {
     print("")
 }
 
-
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -280,7 +267,6 @@ func main() {
     print("     All SimPO examples completed!                          ")
     print("═════════════════════════════════════════════════════════════")
 }
-
 
 func int_to_string_ex(int i) string {
     string(i)

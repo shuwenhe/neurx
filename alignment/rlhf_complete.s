@@ -1,13 +1,5 @@
 package neurx.alignment.rlhf_complete
 
-
-
-
-
-
-
-
-
 struct sft_config {
     int num_epochs
     int batch_size
@@ -33,7 +25,6 @@ struct sft_trainer {
     int step_counter
 }
 
-
 func sft_training_step(
     float* model_logits,
     int* target_tokens,
@@ -51,9 +42,7 @@ func sft_training_step(
         while j < seq_len {
             int target_idx = target_tokens[i * seq_len + j]
 
-
             float log_prob = model_logits[i * seq_len * vocab_size + j * vocab_size + target_idx]
-
 
             float sample_loss = -log_prob
             loss = loss + sample_loss
@@ -69,10 +58,6 @@ func sft_training_step(
 
     loss
 }
-
-
-
-
 
 struct reward_model_config {
     int num_epochs
@@ -97,7 +82,6 @@ struct reward_model_trainer {
     float accuracy
 }
 
-
 func ranknet_loss(
     float* chosen_scores,
     float* rejected_scores,
@@ -110,9 +94,7 @@ func ranknet_loss(
 
         float score_diff = chosen_scores[i] - rejected_scores[i]
 
-
         float sigmoid_val = 1.0 / (1.0 + exp_f(-score_diff))
-
 
         float sample_loss = -log_f(sigmoid_val)
         loss = loss + sample_loss
@@ -123,7 +105,6 @@ func ranknet_loss(
     loss / float(batch_size)
 }
 
-
 func reward_model_inference(
     string response,
     float* reward_model_params
@@ -132,10 +113,6 @@ func reward_model_inference(
     float score = 0.0
     score
 }
-
-
-
-
 
 struct ppoconfig {
     int num_epochs
@@ -163,7 +140,6 @@ struct ppotrainer {
     float total_policy_loss
     float total_value_loss
 }
-
 
 func compute_advantages(
     float* rewards,
@@ -196,7 +172,6 @@ func compute_advantages(
     advantages
 }
 
-
 func ppo_policy_loss(
     float* log_probs_new,
     float* log_probs_old,
@@ -210,7 +185,6 @@ func ppo_policy_loss(
     while i < batch_size {
 
         float ratio = exp_f(log_probs_new[i] - log_probs_old[i])
-
 
         float clipped_ratio = ratio
         if ratio > 1.0 + epsilon {
@@ -229,7 +203,6 @@ func ppo_policy_loss(
     loss / float(batch_size)
 }
 
-
 func ppo_value_loss(
     float* value_predictions,
     float* returns,
@@ -246,7 +219,6 @@ func ppo_value_loss(
 
     loss / float(batch_size)
 }
-
 
 func compute_kl_divergence(
     float* log_probs_new,
@@ -266,10 +238,6 @@ func compute_kl_divergence(
     kl / float(batch_size)
 }
 
-
-
-
-
 struct evaluation_config {
     int num_eval_samples
     string* eval_prompts
@@ -287,41 +255,31 @@ struct evaluation_metrics {
     float overall_score
 }
 
-
 func evaluate_helpfulness(
     string prompt,
     string response
 ) float {
 
-
-
     float score = 3.0
     score
 }
-
 
 func evaluate_harmlessness(
     string response
 ) float {
 
-
-
     float score = 4.0
     score
 }
-
 
 func evaluate_honesty(
     string prompt,
     string response
 ) float {
 
-
-
     float score = 4.0
     score
 }
-
 
 func evaluate_consistency(
     string* responses,
@@ -331,7 +289,6 @@ func evaluate_consistency(
     float score = 3.5
     score
 }
-
 
 func comprehensive_evaluation(
     string prompt,
@@ -346,7 +303,6 @@ func comprehensive_evaluation(
     metrics.honesty_score = evaluate_honesty(prompt, responses[0])
     metrics.consistency_score = evaluate_consistency(responses, num_responses)
 
-
     float total_weight = config.helpfulness_weight + config.harmlessness_weight +
                         config.honesty_weight + config.consistency_weight
 
@@ -359,30 +315,22 @@ func comprehensive_evaluation(
     metrics
 }
 
-
-
-
-
 struct rlhf_pipeline {
 
     sft_trainer sft_trainer
     float sft_best_loss
 
-
     reward_model_trainer reward_trainer
     float reward_auc
 
-
     ppotrainer ppo_trainer
     float best_reward
-
 
     evaluation_metrics eval_metrics
 
     int total_iterations
     bool converged
 }
-
 
 func init_rlhf_pipeline() rlhf_pipeline {
     rlhf_pipeline pipeline
@@ -396,7 +344,6 @@ func init_rlhf_pipeline() rlhf_pipeline {
     pipeline
 }
 
-
 func rlhf_iteration(
     rlhf_pipeline pipeline,
     sft_dataset sft_data,
@@ -404,17 +351,13 @@ func rlhf_iteration(
     int iteration
 ) rlhf_pipeline {
 
-
     if iteration < 5 {
         pipeline.sft_best_loss = 0.5
     }
 
-
     pipeline.reward_auc = 0.75
 
-
     pipeline.best_reward = 0.7 + float(iteration) * 0.01
-
 
     if iteration > 10 {
         pipeline.converged = true
@@ -423,10 +366,6 @@ func rlhf_iteration(
     pipeline.total_iterations = pipeline.total_iterations + 1
     pipeline
 }
-
-
-
-
 
 func exp_f(float x) float {
     1.0 + x + x * x / 2.0
@@ -442,10 +381,6 @@ func min_f(float a, float b) float {
     }
     b
 }
-
-
-
-
 
 func main() {
     println("=== Complete RLHF Alignment System ===")

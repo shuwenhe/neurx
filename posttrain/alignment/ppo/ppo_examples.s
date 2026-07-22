@@ -2,13 +2,6 @@ package neurx.posttrain.rlhf.examples
 
 use neurx.posttrain.rlhf.ppo_trainer.*
 
-
-
-
-
-
-
-
 func create_ppo_config() ppo_config {
     ppo_config {
 
@@ -17,11 +10,9 @@ func create_ppo_config() ppo_config {
         seq_len: 2048,
         num_layers: 40,
 
-
         learning_rate: 5e-6,
         learning_rate_policy: 5e-6,
         learning_rate_value: 5e-6,
-
 
         clip_epsilon: 0.2,
         entropy_coef: 0.01,
@@ -29,28 +20,23 @@ func create_ppo_config() ppo_config {
         gamma: 0.99,
         gae_lambda: 0.95,
 
-
         target_kl: 0.015,
         kl_coef: 0.01,
-
 
         horizon: 2048,
         mini_batch_size: 256,
         num_epochs: 4,
         num_mini_batches: 8,
 
-
         global_rank: 0,
         world_size: 1,
         dp_degree: 1,
         use_mixed_precision: true,
 
-
         checkpoint_interval: 100,
         eval_interval: 50,
     }
 }
-
 
 func example_basic_ppo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -73,7 +59,6 @@ func example_basic_ppo_training() {
     print("  Num Epochs:         2")
     print("")
 
-
     ppo_state state = start_ppo_training(config, 10)
 
     print("Training completed!")
@@ -84,7 +69,6 @@ func example_basic_ppo_training() {
     print("")
 }
 
-
 func example_distributed_ppo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 2: Distributed PPO Training (Multi-GPU)          ║")
@@ -92,7 +76,6 @@ func example_distributed_ppo_training() {
     print("")
 
     ppo_config config = create_ppo_config()
-
 
     config.world_size = 8
     config.dp_degree = 8
@@ -115,7 +98,6 @@ func example_distributed_ppo_training() {
     print("  ✓ Per-rank metrics aggregation")
     print("")
 
-
     ppo_state state = init_ppo_state(config)
 
     print("[Training Setup]")
@@ -124,22 +106,18 @@ func example_distributed_ppo_training() {
     print("")
 }
 
-
 func example_hyperparameter_comparison() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 3: Hyperparameter Comparison                     ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
 
-
     ppo_config config_a = create_ppo_config()
     config_a.clip_epsilon = 0.1
     config_a.value_coef = 0.3
     config_a.entropy_coef = 0.001
 
-
     ppo_config config_b = create_ppo_config()
-
 
     ppo_config config_c = create_ppo_config()
     config_c.clip_epsilon = 0.3
@@ -170,7 +148,6 @@ func example_hyperparameter_comparison() {
     print("  Higher entropy_coef    → More exploration, less exploitation")
     print("")
 }
-
 
 func example_ppo_with_reward_model() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -215,7 +192,6 @@ func example_ppo_with_reward_model() {
     print("")
 }
 
-
 func example_kl_constraint_and_early_stopping() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 5: KL Constraint & Early Stopping                ║")
@@ -256,7 +232,6 @@ func example_kl_constraint_and_early_stopping() {
     print("  ✓ Improves training stability")
     print("")
 }
-
 
 func example_complete_alignment_pipeline() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -300,7 +275,6 @@ func example_complete_alignment_pipeline() {
     print("")
 }
 
-
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -319,7 +293,6 @@ func main() {
     print("     All examples completed!                                 ")
     print("═════════════════════════════════════════════════════════════")
 }
-
 
 func float_to_string_ex(float f) string {
     int i_part = int(f)

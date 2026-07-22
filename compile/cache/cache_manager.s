@@ -1,10 +1,5 @@
 package neurx.compile.cache.cache_manager
 
-
-
-
-
-
 use neurx.compile.ir.{ir_graph, ir_node}
 
 struct cache_entry {
@@ -47,32 +42,18 @@ func new_cache_manager(string cache_dir, int max_size_mb) cache_manager {
     }
 }
 
-
-
 func generate_cache_key(ir_graph graph) string {
-
-
 
     "cache_key_hash"
 }
 
-
 func compute_graph_signature(ir_graph graph) string {
-
-
-
-
 
     "signature"
 }
 
-
 func cache_lookup(cache_manager mgr, ir_graph graph) cache_entry {
     string key = generate_cache_key(graph)
-
-
-
-
 
     cache_entry {
         cache_key: key,
@@ -85,7 +66,6 @@ func cache_lookup(cache_manager mgr, ir_graph graph) cache_entry {
     }
 }
 
-
 func cache_store(cache_manager mgr, ir_graph graph, []string kernels) cache_manager {
     cache_entry entry = cache_entry {
         cache_key: generate_cache_key(graph),
@@ -97,41 +77,27 @@ func cache_store(cache_manager mgr, ir_graph graph, []string kernels) cache_mana
         access_count: 0,
     }
 
-
-
-
-
     mgr
 }
-
 
 func evict_lru_entries(cache_manager mgr, int bytes_needed) cache_manager {
 
-
-
     mgr
 }
 
-
 func save_cache_to_disk(cache_manager mgr) bool {
-
 
     true
 }
 
-
 func load_cache_from_disk(string cache_dir) cache_manager {
-
-
 
     new_cache_manager(cache_dir, 1024)
 }
 
-
 func get_cache_stats(cache_manager mgr) cache_stats {
     mgr.stats
 }
-
 
 func clear_cache(cache_manager mgr) cache_manager {
     mgr.stats.total_entries = 0

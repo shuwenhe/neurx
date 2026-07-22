@@ -1,26 +1,5 @@
 package neurx.distributed
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 func nccl_allreduce(
     nccl_communicator *comm,
     uint64 buffer_ptr,
@@ -32,17 +11,6 @@ func nccl_allreduce(
     if !comm->initialized {
         return error{message: "NCCL communicator not initialized"}
     }
-
-
-
-
-
-
-
-
-
-
-
 
     int bytes = count * get_dtype_size(dtype)
 

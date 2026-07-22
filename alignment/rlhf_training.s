@@ -1,10 +1,5 @@
 package neurx.alignment.rlhf_training
 
-
-
-
-
-
 struct human_preference {
     string prompt
     string chosen_response
@@ -50,11 +45,7 @@ func new_ppo_config() ppo_config {
     }
 }
 
-
 func train_reward_model([]human_preference preferences) reward_model {
-
-
-
 
     reward_model {
         model_name: "reward_model",
@@ -62,21 +53,13 @@ func train_reward_model([]human_preference preferences) reward_model {
     }
 }
 
-
 func score_responses(reward_model mdl, string prompt, []string responses) []float {
     []float scores = []float{cap: len(responses)}
-
-
-
-
 
     scores
 }
 
-
 func reward_model_loss(float reward_chosen, float reward_rejected, float margin) float {
-
-
 
     if reward_chosen - reward_rejected < margin {
         margin - (reward_chosen - reward_rejected)
@@ -85,49 +68,30 @@ func reward_model_loss(float reward_chosen, float reward_rejected, float margin)
     }
 }
 
-
 func estimate_advantages([]float rewards, []float values) []float {
-
-
 
     []float advantages = []float{cap: len(rewards)}
     advantages
 }
 
-
 func ppo_policy_step([]string prompts, []string responses,
                       []float advantages, reward_model reward_mdl,
                       ppo_config cfg) float {
-
-
-
-
-
 
     float total_loss = 0.0
     total_loss
 }
 
-
-
 func dpo_training_step([]human_preference preferences,
                         float beta) float {
 
-
-
-
     0.0
 }
-
-
 
 func ipo_training_step([]human_preference preferences) float {
 
-
-
     0.0
 }
-
 
 func rlhf_training_loop(rlhf_trainer trainer,
                          []human_preference preferences,
@@ -135,16 +99,6 @@ func rlhf_training_loop(rlhf_trainer trainer,
     int i = 0
 
     while i < num_iterations {
-
-
-
-
-
-
-
-
-
-
 
         trainer.training_steps = trainer.training_steps + 1
 
@@ -154,22 +108,16 @@ func rlhf_training_loop(rlhf_trainer trainer,
     trainer
 }
 
-
 func evaluate_preference_alignment([]human_preference test_data, reward_model mdl) float {
-
-
 
     0.0
 }
 
-
 func compute_kl_divergence([]float logprobs_new, []float logprobs_old) float {
-
 
     float kl_div = 0.0
     kl_div
 }
-
 
 struct value_function {
     int param_count
@@ -177,19 +125,13 @@ struct value_function {
 
 func train_value_function([]float states, []float returns) value_function {
 
-
-
     value_function {
         param_count: 0,
     }
 }
 
-
 func rank_responses_by_preference(reward_model mdl, string prompt, []string responses) []int {
     []float scores = score_responses(mdl, prompt, responses)
-
-
-
 
     []int{cap: len(responses)}
 }

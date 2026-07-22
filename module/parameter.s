@@ -3,8 +3,6 @@ package neurx.module.parameter
 use neurx.tensor.tensor
 use neurx.nn
 
-
-
 func parameter_new(tensor value, string name) nn.parameter {
     neurx.nn.new_parameter(value, name)
 }

@@ -30,11 +30,6 @@ use neurx.model.transformer.transformer_backward.{
     backward_pass_output
 }
 
-
-
-
-
-
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
@@ -54,10 +49,6 @@ func copy_vector([]float src) []float {
     }
     out
 }
-
-
-
-
 
 func create_small_transformer_config() transformer_forward_config {
     transformer_forward_config {
@@ -91,10 +82,6 @@ func create_medium_transformer_config() transformer_forward_config {
     }
 }
 
-
-
-
-
 func initialize_transformer_layer(int hidden_dim, int intermediate_dim) transformer_layer_state {
     layer_norm_config ln_cfg = layer_norm_config {
         hidden_dim: hidden_dim,
@@ -123,7 +110,6 @@ func initialize_transformer_layer(int hidden_dim, int intermediate_dim) transfor
 func initialize_transformer_state(transformer_forward_config cfg) transformer_forward_state {
     int head_dim = cfg.hidden_dim / cfg.num_heads
 
-
     []transformer_layer_state layers = []transformer_layer_state{cap: cfg.num_layers}
     int layer_idx = 0
     while layer_idx < cfg.num_layers {
@@ -131,10 +117,8 @@ func initialize_transformer_state(transformer_forward_config cfg) transformer_fo
         layer_idx = layer_idx + 1
     }
 
-
     []float token_embedding = allocate_vector(cfg.vocab_size * cfg.hidden_dim, 0.1)
     []float lm_head_weight = allocate_vector(cfg.vocab_size * cfg.hidden_dim, 0.1)
-
 
     position_encoding_config pos_cfg = position_encoding_config {
         hidden_dim: cfg.hidden_dim,
@@ -143,7 +127,6 @@ func initialize_transformer_state(transformer_forward_config cfg) transformer_fo
         rope_base: 10000.0,
     }
     var pos_enc = new_absolute_position_encoding(pos_cfg)
-
 
     layer_norm_config ln_cfg = layer_norm_config {
         hidden_dim: cfg.hidden_dim,
@@ -168,10 +151,6 @@ func initialize_transformer_state(transformer_forward_config cfg) transformer_fo
         config: cfg,
     }
 }
-
-
-
-
 
 struct training_batch {
     []int input_ids
@@ -212,7 +191,6 @@ func training_step(
     int batch_size = batch.batch_size
     int seq_len = batch.seq_len
 
-
     var forward_output = transformer_forward_pass(
         transformer,
         batch.input_ids,
@@ -221,7 +199,6 @@ func training_step(
     )
 
     []float logits = forward_output.logits
-
 
     var loss_result = compute_cross_entropy_loss_with_gradient(
         logits,
@@ -234,7 +211,6 @@ func training_step(
     []float loss_values = loss_result[0]
     []float grad_logits = loss_result[1]
 
-
     float total_loss = 0.0
     int i = 0
     while i < batch_size * seq_len {
@@ -242,7 +218,6 @@ func training_step(
         i = i + 1
     }
     total_loss = total_loss / (batch_size * seq_len * 1.0)
-
 
     var backward_output = transformer_backward_pass(
         grad_logits,
@@ -257,7 +232,6 @@ func training_step(
         transformer.vocab_size
     )
 
-
     []float metrics = allocate_vector(3, 0.0)
     metrics[0] = total_loss
     metrics[1] = 0.0
@@ -266,52 +240,35 @@ func training_step(
     metrics
 }
 
-
-
-
-
 func example_small_transformer_training() {
 
     var transformer_cfg = create_small_transformer_config()
 
-
     var transformer = initialize_transformer_state(transformer_cfg)
-
 
     float learning_rate = 0.001
     int num_steps = 5
     int batch_size = 2
     int seq_len = 8
 
-
     int step = 0
     while step < num_steps {
 
         var batch = create_dummy_batch(batch_size, seq_len, transformer_cfg.vocab_size)
 
-
         var metrics = training_step(transformer, batch, learning_rate)
 
         float loss = metrics[0]
-
-
-
 
         step = step + 1
     }
 }
 
-
-
-
-
 func example_inference_forward_pass() {
 
     var transformer_cfg = create_medium_transformer_config()
 
-
     var transformer = initialize_transformer_state(transformer_cfg)
-
 
     int batch_size = 1
     int seq_len = 16
@@ -323,7 +280,6 @@ func example_inference_forward_pass() {
         i = i + 1
     }
 
-
     var output = transformer_forward_pass(
         transformer,
         input_ids,
@@ -333,11 +289,9 @@ func example_inference_forward_pass() {
 
     []float logits = output.logits
 
-
     int seq_idx = 0
     while seq_idx < seq_len {
         int logit_idx = seq_idx * transformer_cfg.vocab_size
-
 
         float max_logit = logits[logit_idx]
         int max_vocab_idx = 0
@@ -351,24 +305,15 @@ func example_inference_forward_pass() {
             v = v + 1
         }
 
-
-
-
         seq_idx = seq_idx + 1
     }
 }
-
-
-
-
 
 func example_multi_batch_training() {
 
     var transformer_cfg = create_small_transformer_config()
 
-
     var transformer = initialize_transformer_state(transformer_cfg)
-
 
     float learning_rate = 0.0005
     int num_epochs = 2
@@ -386,7 +331,6 @@ func example_multi_batch_training() {
 
             var batch = create_dummy_batch(batch_size, seq_len, transformer_cfg.vocab_size)
 
-
             var metrics = training_step(transformer, batch, learning_rate)
 
             float loss = metrics[0]
@@ -398,20 +342,10 @@ func example_multi_batch_training() {
 
         float avg_loss = epoch_loss / (batch_count * 1.0)
 
-
-
-
         epoch = epoch + 1
     }
 }
 
-
-
-
-
 func main() {
-
-
-
 
 }

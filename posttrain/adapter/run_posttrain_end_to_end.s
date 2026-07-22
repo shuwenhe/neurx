@@ -2,16 +2,6 @@ package main
 
 use std.io.println
 
-
-
-
-
-
-
-
-
-
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -218,15 +208,11 @@ func main() int {
     println("║  output: /model/base-model-posttrain/")
     println("╚" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╝")
 
-
     step1_train()
-
 
     step2_merge()
 
-
     step3_save()
-
 
     step4_summary()
 

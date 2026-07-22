@@ -1,15 +1,8 @@
 
 
-
-
-
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
 #include <stdint.h>
-
-
-
-
 
 extern "C" {
     int64_t cuda_malloc(int size) {
@@ -38,10 +31,6 @@ extern "C" {
         return 0;
     }
 
-
-
-
-
     int64_t cublasCreate_wrapper() {
         cublasHandle_t handle;
         cublasCreate_v2(&handle);
@@ -57,10 +46,6 @@ extern "C" {
         cublasSetStream_v2((cublasHandle_t)handle, (cudaStream_t)stream);
         return 0;
     }
-
-
-
-
 
     int cublasSgemm_wrapper(
         int64_t handle,
@@ -89,10 +74,6 @@ extern "C" {
         return 0;
     }
 
-
-
-
-
     int cublasSgemv_wrapper(
         int64_t handle,
         int trans,
@@ -116,10 +97,6 @@ extern "C" {
         );
         return 0;
     }
-
-
-
-
 
     __global__ void relu_kernel(float *out, const float *in, int n) {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -149,10 +126,6 @@ extern "C" {
         return 0;
     }
 
-
-
-
-
     __global__ void softmax_kernel(float *out, const float *in, int seq_len, int batch_size) {
         int b = blockIdx.x;
         int i = threadIdx.x;
@@ -160,19 +133,16 @@ extern "C" {
         if (b < batch_size && i < seq_len) {
             int idx = b * seq_len + i;
 
-
             float maxval = in[b * seq_len];
             for (int j = 0; j < seq_len; j++) {
                 float v = in[b * seq_len + j];
                 maxval = (v > maxval) ? v : maxval;
             }
 
-
             float sum = 0.0f;
             for (int j = 0; j < seq_len; j++) {
                 sum += __expf(in[b * seq_len + j] - maxval);
             }
-
 
             out[idx] = __expf(in[idx] - maxval) / sum;
         }
@@ -182,10 +152,6 @@ extern "C" {
         softmax_kernel<<<batch_size, seq_len>>>((float*)output, (const float*)input, seq_len, batch_size);
         return 0;
     }
-
-
-
-
 
     int cuda_get_device_count() {
         int count = 0;

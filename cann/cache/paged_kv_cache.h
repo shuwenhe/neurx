@@ -59,8 +59,6 @@ class AclDeviceAllocator final : public DeviceAllocator {
   void release(void* address) override;
 };
 
-
-
 class PagedKvCache {
  public:
   explicit PagedKvCache(KvCacheConfig config, DeviceAllocator* allocator = nullptr);

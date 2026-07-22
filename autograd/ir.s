@@ -1,16 +1,13 @@
 
 use neurx.autograd.tracer
 
-
 func trace_to_ir(tracer_state state, string name) ir_graph {
     ir_from_tracer(state, name)
 }
 
-
 func ir_to_trace(ir_graph graph) tracer_state {
     ir_to_tracer(graph)
 }
-
 
 func hybrid_trace_graph(tracer_state state, string name, bool to_graph) any {
     if to_graph {
@@ -55,7 +52,6 @@ struct ir_graph {
     bool ready
     bool linearized
 }
-
 
 func get_primitive(ir_graph graph, int index) string {
     graph.primitives[index]
@@ -346,10 +342,6 @@ func transform_chain_to_jaxpr(transform_chain chain, string name) ir_graph {
     }
 }
 
-
-
-
-
 type ir_pass = ir_graph
 
 var ir_pass_registry = map[string]ir_pass{}
@@ -370,7 +362,6 @@ func optimize_ir(ir_graph graph) ir_graph {
     }
     out
 }
-
 
 func simple_fuse_add(ir_graph graph) ir_graph {
     []ir_eqn optimized_eqns = []ir_eqn{}
@@ -405,8 +396,6 @@ func simple_fuse_add(ir_graph graph) ir_graph {
         linearized: graph.linearized,
     }
 }
-
-
 
 func compile_jaxpr(ir_graph graph) string {
     if !graph.ready {

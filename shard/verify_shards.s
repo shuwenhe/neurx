@@ -1,15 +1,11 @@
 package main
 
-
-
-
 func main() int {
     println("")
     println("==================================================")
     println("  NeurX Data Shard Verification")
     println("==================================================")
     println("")
-
 
     println("Shard directory: dataset/pretrain/shard/")
     println("Expected shards: 128")

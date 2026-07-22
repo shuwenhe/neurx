@@ -1,19 +1,6 @@
 
 
-
-
-
-
-
-
-
-
-
 package neurx.model.neurx.mtp
-
-
-
-
 
 struct mtp_config {
     int hidden_dim
@@ -39,15 +26,10 @@ func new_mtp_config() mtp_config {
     }
 }
 
-
-
-
-
 struct mtp_module_weights {
     []float proj_h
     []float emb_norm_weight
     []float proj_emb
-
 
     []float attn_norm_weight
     []float q_weight
@@ -62,19 +44,11 @@ struct mtp_module_weights {
     []float output_head
 }
 
-
-
-
-
 struct mtp_weights {
     mtp_config config
     []float token_embedding
     []mtp_module_weights modules
 }
-
-
-
-
 
 func zeros(int n) []float {
     []float out = []float{cap: n}
@@ -161,10 +135,6 @@ func rms_norm([]float x, int n, []float weight, float eps) []float {
     out
 }
 
-
-
-
-
 func new_mtp_module_weights(mtp_config cfg) mtp_module_weights {
     int d = cfg.hidden_dim
     int v = cfg.vocab_size
@@ -211,10 +181,6 @@ func new_mtp_weights(mtp_config cfg) mtp_weights {
     }
 }
 
-
-
-
-
 struct mtp_module_output {
     []float hidden_state
     []float logits
@@ -230,7 +196,6 @@ func mtp_module_forward(
     int n_h = cfg.num_attention_heads
     int d_h = cfg.head_dim
     int hd = n_h * d_h
-
 
     []float emb_input = zeros(seq_len * d)
     int s = 0
@@ -255,7 +220,6 @@ func mtp_module_forward(
         combined[i] = combined_h[i] + combined_emb[i]
         i = i + 1
     }
-
 
     []float attn_normed = rms_norm(combined, seq_len * d, w.attn_norm_weight, 1e-6)
 
@@ -290,7 +254,6 @@ func mtp_module_forward(
         i = i + 1
     }
 
-
     []float logits = matmul_2d(ffn_residual, w.output_head, seq_len, d, v)
 
     mtp_module_output {
@@ -298,10 +261,6 @@ func mtp_module_forward(
         logits: logits,
     }
 }
-
-
-
-
 
 func multi_head_attention(
     []float q, []float k, []float v,
@@ -372,10 +331,6 @@ func multi_head_attention(
     output
 }
 
-
-
-
-
 struct mtp_forward_output {
     [][]float all_logits
     [][]float all_hidden
@@ -439,10 +394,6 @@ func mtp_forward(
     }
 }
 
-
-
-
-
 func cross_entropy_loss([]float logits, []int targets, int seq_len, int vocab_size) float {
     float total_loss = 0.0
 
@@ -486,10 +437,6 @@ func ln_approx(float x) float {
     2.0 * (y + y3 / 3.0 + y5 / 5.0 + y7 / 7.0)
 }
 
-
-
-
-
 struct mtp_speculative_output {
     [][]int predicted_tokens
     [][]float confidence
@@ -519,7 +466,6 @@ func mtp_inference(
             w.token_embedding, cfg
         )
 
-
         int best_token = 0
         float best_logit = -1e9
         int i = 0
@@ -534,7 +480,6 @@ func mtp_inference(
         []int pred_row = []int{cap: 1}
         pred_row[0] = best_token
         predicted[mtp_idx] = pred_row
-
 
         float max_logit = mtp_out.logits[0]
         i = 1
@@ -564,20 +509,12 @@ func mtp_inference(
     }
 }
 
-
-
-
-
 func compute_combined_loss(
     float main_loss, mtp_forward_output mtp_output,
     float mtp_weight
 ) float {
     main_loss + mtp_weight * mtp_output.total_loss
 }
-
-
-
-
 
 func unit_name() string {
     "neurx/model/neurx/mtp"

@@ -6,10 +6,6 @@ use neurx.model.transformer.layer_norm.{
     rms_norm_backward
 }
 
-
-
-
-
 struct backward_pass_output {
     []float grad_input_ids
     []float grad_hidden_states
@@ -27,10 +23,6 @@ struct gradient_accumulator {
     []float grad_w_down
     []float grad_bias_terms
 }
-
-
-
-
 
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
@@ -72,10 +64,6 @@ func scale_vector([]float v, float scale) []float {
     out
 }
 
-
-
-
-
 func compute_cross_entropy_loss_with_gradient(
     []float logits,
     []int target_ids,
@@ -85,7 +73,6 @@ func compute_cross_entropy_loss_with_gradient(
 ) [][]float {
     []float loss_vec = allocate_vector(batch_size * seq_len, 0.0)
     []float grad_logits = allocate_vector(batch_size * seq_len * vocab_size, 0.0)
-
 
     float total_loss = 0.0
     int b = 0
@@ -107,7 +94,6 @@ func compute_cross_entropy_loss_with_gradient(
                     v = v + 1
                 }
 
-
                 float sum_exp = 0.0
                 v = 0
                 while v < vocab_size {
@@ -121,7 +107,6 @@ func compute_cross_entropy_loss_with_gradient(
                     sum_exp = sum_exp + exp_val
                     v = v + 1
                 }
-
 
                 v = 0
                 while v < vocab_size {
@@ -157,10 +142,6 @@ func compute_cross_entropy_loss_with_gradient(
     result
 }
 
-
-
-
-
 func lm_head_backward(
     []float grad_logits,
     []float hidden_states,
@@ -180,7 +161,6 @@ func lm_head_backward(
             int hidden_idx = (b * seq_len + s) * hidden_dim
             int logit_idx = (b * seq_len + s) * vocab_size
 
-
             int d = 0
             while d < hidden_dim {
                 float grad_d = 0.0
@@ -192,7 +172,6 @@ func lm_head_backward(
                 grad_hidden[hidden_idx + d] = grad_d
                 d = d + 1
             }
-
 
             int v = 0
             while v < vocab_size {
@@ -215,10 +194,6 @@ func lm_head_backward(
     result
 }
 
-
-
-
-
 func feed_forward_backward(
     []float grad_output,
     []float hidden_states,
@@ -239,7 +214,6 @@ func feed_forward_backward(
         while s < seq_len {
             int base_idx = (b * seq_len + s) * hidden_dim
 
-
             []float grad_intermediate = allocate_vector(intermediate_dim, 0.0)
             int d = 0
             while d < hidden_dim {
@@ -251,14 +225,12 @@ func feed_forward_backward(
                 d = d + 1
             }
 
-
             int i = 0
             while i < intermediate_dim {
 
                 grad_intermediate[i] = grad_intermediate[i] * 0.5
                 i = i + 1
             }
-
 
             d = 0
             while d < hidden_dim {
@@ -272,7 +244,6 @@ func feed_forward_backward(
                 grad_hidden[base_idx + d] = grad_d
                 d = d + 1
             }
-
 
             d = 0
             while d < hidden_dim {
@@ -295,10 +266,6 @@ func feed_forward_backward(
     result[2] = grad_w_down
     result
 }
-
-
-
-
 
 func attention_backward(
     []float grad_output,
@@ -327,11 +294,9 @@ func attention_backward(
         while s < seq_len {
             int base_idx = (b * seq_len + s) * hidden_dim
 
-
             int d = 0
             while d < hidden_dim {
                 float grad_d = grad_output[base_idx + d]
-
 
                 int i = 0
                 while i < hidden_dim {
@@ -342,7 +307,6 @@ func attention_backward(
                 d = d + 1
             }
 
-
             d = 0
             while d < hidden_dim {
                 float grad_d = 0.0
@@ -351,7 +315,6 @@ func attention_backward(
                     grad_d = grad_d + grad_output[base_idx + i] * wo[i * hidden_dim + d]
                     i = i + 1
                 }
-
 
                 grad_wq[d] = grad_wq[d] + grad_d
                 grad_wk[d] = grad_wk[d] + grad_d
@@ -375,10 +338,6 @@ func attention_backward(
     result
 }
 
-
-
-
-
 func transformer_layer_backward(
     []float grad_output,
     []float hidden_states_in,
@@ -400,7 +359,6 @@ func transformer_layer_backward(
 ) [][]float {
     []float grad_input = copy_vector(grad_output)
 
-
     var ffn_grads = feed_forward_backward(
         grad_output,
         hidden_states_out,
@@ -412,13 +370,11 @@ func transformer_layer_backward(
         intermediate_dim
     )
 
-
     int i = 0
     while i < batch_size * seq_len * hidden_dim {
         grad_input[i] = grad_input[i] + ffn_grads[0][i]
         i = i + 1
     }
-
 
     var attn_grads = attention_backward(
         grad_input,
@@ -433,7 +389,6 @@ func transformer_layer_backward(
         num_heads,
         false
     )
-
 
     grad_input = attn_grads[0]
 
@@ -451,10 +406,6 @@ func transformer_layer_backward(
     result
 }
 
-
-
-
-
 func transformer_backward_pass(
     []float loss_gradient,
     [][]float layer_outputs,
@@ -470,7 +421,6 @@ func transformer_backward_pass(
     []float grad_hidden = copy_vector(loss_gradient)
     [][]float grad_layer_weights = [][]float{cap: num_layers}
 
-
     var lm_grads = lm_head_backward(
         grad_hidden,
         layer_outputs[num_layers - 1],
@@ -483,7 +433,6 @@ func transformer_backward_pass(
 
     grad_hidden = copy_vector(lm_grads[0])
     []float grad_lm_head = copy_vector(lm_grads[1])
-
 
     int layer_idx = num_layers - 1
     while layer_idx >= 0 {

@@ -1,16 +1,8 @@
 package main
 
-
-
-
-
 import fmt
 import os
 import neurx.model
-
-
-
-
 
 struct train_config {
     vocab_size: int
@@ -42,10 +34,6 @@ func get_default_config() train_config {
     config
 }
 
-
-
-
-
 func load_shard_data(shard_path: string) []int {
 
     content, _ := os.ReadFile(shard_path)
@@ -58,15 +46,10 @@ func load_shard_data(shard_path: string) []int {
     tokens
 }
 
-
-
-
-
 func main() {
     config := get_default_config()
 
     fmt.Printf("[STARTUP] initializing tiny transformer training\n")
-
 
     model := neurx.model.create_mini_transformer(
         config.vocab_size,
@@ -79,13 +62,11 @@ func main() {
 
     fmt.Printf("[PROGRESS] model created - params: %d\n", model.param_count)
 
-
     opt_state := neurx.model.adam_w_state{
         m_states: make(map[string]neurx.model.Tensor),
         v_states: make(map[string]neurx.model.Tensor),
         t: 0,
     }
-
 
     shard_dir := "./data/shards/"
     shards, _ := os.ReadDir(shard_dir)
@@ -95,16 +76,13 @@ func main() {
     total_steps := 0
     total_loss := 0.0
 
-
     if len(shards) > 0 {
         fmt.Printf("[Epoch 1/1] starting\n")
-
 
         shard_entry := shards[0]
         shard_path := shard_dir + shard_entry.Name()
 
         fmt.Printf("[Slice 1/%d] %s | loading\n", len(shards), shard_entry.Name())
-
 
         tokens := load_shard_data(shard_path)
 
@@ -118,9 +96,7 @@ func main() {
                 target_tokens[i] = tokens[i + 1]
             }
 
-
             logits := neurx.model.forward(model, input_tokens, 1, config.seq_len)
-
 
             loss := neurx.model.compute_cross_entropy_loss(
                 logits,
@@ -130,7 +106,6 @@ func main() {
                 config.vocab_size,
             )
 
-
             gradients := neurx.model.compute_gradients(
                 model,
                 logits,
@@ -138,7 +113,6 @@ func main() {
                 1,
                 config.seq_len,
             )
-
 
             neurx.model.adamw_update(
                 &model,

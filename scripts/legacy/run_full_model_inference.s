@@ -3,7 +3,6 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command}
 use std.io.println
 
-
 func trim(string s) string {
     int i = 0
     while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
@@ -41,7 +40,6 @@ func main() int {
     println("  Output dir       : " + output_dir)
     println("")
 
-
     println("Phase 1: Validating checkpoint...")
     string checkpoint_file = checkpoint_dir + "/transformer_v2.ckpt"
     string metadata_file = checkpoint_dir + "/NeurX-1.3.neurx"
@@ -61,13 +59,11 @@ func main() int {
     println("  ✓ Metadata file found: " + metadata_file)
     println("")
 
-
     println("Phase 2: Loading checkpoint statistics...")
     string cmd_stat = "ls -lh \"" + checkpoint_file + "\" | awk '{print $5}'"
     println("  checkpoint size: " + runtime_run_command(cmd_stat))
     println("  checkpoint path: " + checkpoint_file)
     println("")
-
 
     println("Phase 3: Loading model metadata...")
     string cmd_metadata = "cat \"" + metadata_file + "\""
@@ -75,11 +71,9 @@ func main() int {
     runtime_run_command(cmd_metadata)
     println("")
 
-
     println("Phase 4: Model inference preparation...")
     println("  Status: Ready to load model layers")
     println("")
-
 
     println("Phase 5: Inference execution plan...")
     println("  ✓ Loading checkpoint: " + checkpoint_file)
@@ -93,7 +87,6 @@ func main() int {
     println("    - Context length : 256")
     println("  ✓ Loading transformer layers:")
 
-
     int layer = 0
     while layer < 24 {
         if layer == 0 || layer == 4 || layer == 8 || layer == 12 || layer == 16 || layer == 20 {
@@ -106,7 +99,6 @@ func main() int {
     println("  ✓ checkpoint fully loaded into memory")
     println("")
 
-
     println("Phase 6: Generating output...")
     let prompt = runtime_env_get("NEURX_INFER_PROMPT", "NeurX AllowedEnglish text?")
     println("  Prompt: " + prompt)
@@ -117,7 +109,6 @@ func main() int {
     println("  [Full implementation requires CUDA runtime]")
     println("  ────────────────────────────────────────────────")
     println("")
-
 
     println("╔════════════════════════════════════════════════════╗")
     println("║                Inference Complete                 ║")

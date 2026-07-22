@@ -1,11 +1,5 @@
 
 
-
-
-
-
-
-
 package main
 
 import (
@@ -14,7 +8,6 @@ import (
     "fmt"
     "encoding/json"
 )
-
 
 type training_metrics struct {
     step: int
@@ -27,7 +20,6 @@ type training_metrics struct {
     memory_used: float
 }
 
-
 type training_monitor struct {
     start_time: time.Time
     steps: []training_metrics
@@ -35,7 +27,6 @@ type training_monitor struct {
     log_file: string
     update_interval: int
 }
-
 
 func (tm *training_monitor) init(
     total_steps: int,
@@ -48,7 +39,6 @@ func (tm *training_monitor) init(
     tm.log_file = log_file
     tm.update_interval = update_interval
 
-
     f, err := os.Create(log_file)
     if err != nil {
         return err
@@ -57,7 +47,6 @@ func (tm *training_monitor) init(
 
     return nil
 }
-
 
 func (tm *training_monitor) log_step(
     step: int,
@@ -69,14 +58,12 @@ func (tm *training_monitor) log_step(
 
     elapsed := time.Since(tm.start_time).Seconds()
 
-
     avg_step_time := 0.0
     if step > 0 {
         avg_step_time = elapsed / float(step)
     }
     remaining_steps := tm.total_steps - step
     eta := avg_step_time * float(remaining_steps)
-
 
     metrics := training_metrics{
         step: step,
@@ -91,21 +78,17 @@ func (tm *training_monitor) log_step(
 
     tm.steps = append(tm.steps, metrics)
 
-
     if step % tm.update_interval == 0 {
         tm.print_progress(metrics)
     }
 
-
     tm.log_to_file(metrics)
 }
-
 
 func (tm *training_monitor) print_progress(metrics: training_metrics) {
     progress := float(metrics.step) / float(tm.total_steps) * 100.0
     bar_length := 50
     filled := int(progress / 100.0 * float(bar_length))
-
 
     bar := "["
     for i := 0; i < bar_length; i++ {
@@ -119,10 +102,8 @@ func (tm *training_monitor) print_progress(metrics: training_metrics) {
     }
     bar += "]"
 
-
     eta_str := format_time(metrics.eta)
     elapsed_str := format_time(metrics.time_elapsed)
-
 
     status := fmt.Sprintf(
         "%s %.1f%% | Step %d/%d | Loss: %.4f | LR: %.2e | Speed: %.0f tok/s | Mem: %.1fMB | Elapsed: %s | ETA: %s",
@@ -132,7 +113,6 @@ func (tm *training_monitor) print_progress(metrics: training_metrics) {
 
     println(status)
 }
-
 
 func (tm *training_monitor) log_to_file(metrics: training_metrics) {
     f, err := os.OpenFile(tm.log_file, os.O_APPEND|os.O_WRONLY, 0644)
@@ -145,7 +125,6 @@ func (tm *training_monitor) log_to_file(metrics: training_metrics) {
     f.WriteString(string(json_data) + "\n")
 }
 
-
 func (tm *training_monitor) get_stats(): map[string]interface{} {
     if len(tm.steps) == 0 {
         return map[string]interface{}{
@@ -155,7 +134,6 @@ func (tm *training_monitor) get_stats(): map[string]interface{} {
 
     first := tm.steps[0]
     last := tm.steps[len(tm.steps)-1]
-
 
     avg_loss := 0.0
     min_loss := last.loss
@@ -172,7 +150,6 @@ func (tm *training_monitor) get_stats(): map[string]interface{} {
     }
     avg_loss = avg_loss / float(len(tm.steps))
 
-
     improvement := (first.loss - last.loss) / first.loss * 100.0
 
     return map[string]interface{}{
@@ -188,7 +165,6 @@ func (tm *training_monitor) get_stats(): map[string]interface{} {
         "estimated_total_time": last.time_elapsed + last.eta,
     }
 }
-
 
 func (tm *training_monitor) generate_report(): string {
     stats := tm.get_stats()
@@ -215,7 +191,6 @@ func (tm *training_monitor) generate_report(): string {
     return report
 }
 
-
 func (tm *training_monitor) export_json(): string {
     data := map[string]interface{}{
         "training_info": tm.get_stats(),
@@ -225,7 +200,6 @@ func (tm *training_monitor) export_json(): string {
     json_bytes, _ := json.Marshal(data)
     return string(json_bytes)
 }
-
 
 func format_time(seconds: float): string {
     if seconds < 0 {
@@ -245,7 +219,6 @@ func format_time(seconds: float): string {
     }
 }
 
-
 func main() {
 
     monitor := &training_monitor{}
@@ -253,7 +226,6 @@ func main() {
         println("Error:", err.Error())
         return
     }
-
 
     for step := 100; step <= 1000; step += 100 {
         loss := 5.0 - float(step/100)*0.4 + (math.Sin(float(step))*0.1)
@@ -264,9 +236,7 @@ func main() {
         monitor.log_step(step, 1, loss, lr, throughput, memory)
     }
 
-
     println("\n" + monitor.generate_report())
-
 
     println("\nJSON Export:")
     println(monitor.export_json())

@@ -318,19 +318,11 @@ func scale_tensor(tensor value, float scale) tensor {
     new(data, copy_int(value.shape), value.requires_grad)
 }
 
-
 struct gpt_large_backward_result {
     transformer updated_backbone
     tensor grad_input
     []transformer_layer_optimizer_state backbone_optimizers
 }
-
-
-
-
-
-
-
 
 func transformer_backward(
     transformer backbone,
@@ -340,14 +332,10 @@ func transformer_backward(
 ) gpt_large_backward_result {
     int num_layers = len(backbone.layers)
 
-
-
     []tensor layer_inputs = []tensor{cap: num_layers + 1}
     []tensor layer_outputs = []tensor{cap: num_layers}
 
-
     layer_inputs[0] = input_hidden
-
 
     tensor current = input_hidden
     int li = 0
@@ -356,14 +344,10 @@ func transformer_backward(
 
         layer_inputs[li + 1] = current
 
-
-
-
         current = transformer_layer_forward(layer, current, backbone.config)
         layer_outputs[li] = current
         li = li + 1
     }
-
 
     tensor grad_current = grad_output
     []transformer_layer_optimizer_state current_optimizers = layer_optimizers
@@ -373,13 +357,11 @@ func transformer_backward(
         transformer_layer_optimizer_state layer_optimizer = layer_optimizer_state_at(current_optimizers, bi)
         tensor x_input = layer_inputs[bi + 1]
 
-
         transformer_block_backward_result bw = transformer_block_backward(
             layer, x_input, grad_current, layer_optimizer
         )
         backbone.layers = transformer_layer_set(backbone.layers, bi, bw.updated_layer)
         current_optimizers = layer_optimizer_state_set(current_optimizers, bi, bw.optimizer_state)
-
 
         grad_current = bw.grad_input
         bi = bi - 1
@@ -391,7 +373,6 @@ func transformer_backward(
         backbone_optimizers: current_optimizers,
     }
 }
-
 
 struct backward_result {
     tensor grad_input
@@ -436,23 +417,11 @@ func backward_single_layer(
     transformer_layer_optimizer_state opt
 ) backward_result {
 
-
-
-
-
-
-
-
-
-
-
-
     tensor grad_x2_residual = grad_out
     transformer_layer updated_layer = layer
     transformer_layer_optimizer_state updated_opt = opt
     tensor attn_forward_approx = approximate_attention_forward(layer, x)
     tensor ffn_input = add(x, attn_forward_approx)
-
 
     ffn_backward_result ffn_bw = backward_swiglu_ffn(
         layer, ffn_input, grad_out, opt
@@ -462,10 +431,7 @@ func backward_single_layer(
     updated_layer = ffn_bw.updated_layer
     updated_opt = ffn_bw.optimizer_state
 
-
-
     tensor grad_x_identity = grad_x2_residual
-
 
     attn_backward_result attn_bw = backward_attention(
         updated_layer, x, grad_x2_residual, updated_opt
@@ -473,12 +439,10 @@ func backward_single_layer(
     updated_layer = attn_bw.updated_layer
     updated_opt = attn_bw.optimizer_state
 
-
     tensor grad_x_total = add(grad_x_identity, attn_bw.grad_to_x)
 
     backward_result { grad_input: grad_x_total, updated_layer: updated_layer, optimizer_state: updated_opt }
 }
-
 
 struct ffn_backward_result {
     tensor grad_to_x2
@@ -493,26 +457,9 @@ func backward_swiglu_ffn(
     transformer_layer_optimizer_state opt
 ) ffn_backward_result {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     int has_swiglu = len(layer.w_up.data) > 0 && len(layer.w_ff1.data) == len(layer.w_up.data)
 
     if has_swiglu {
-
 
         tensor gated_t = transpose(mul(sigmoid(matmul(x2, layer.w_ff1)), matmul(x2, layer.w_up)), 0, 1)
         tensor grad_w_ff2 = matmul(gated_t, grad_ffn_out)
@@ -520,19 +467,13 @@ func backward_swiglu_ffn(
 
         tensor d_gated = matmul(grad_ffn_out, transpose(layer.w_ff2, 0, 1))
 
-
-
         tensor gate_hidden = add(matmul(x2, layer.w_ff1), layer.b_ff1)
         tensor up_hidden = add(matmul(x2, layer.w_up), layer.b_up)
         tensor gate_act = silu(gate_hidden)
 
-
         tensor d_gate_act = mul(d_gated, up_hidden)
 
         tensor d_up_hidden = mul(d_gated, gate_act)
-
-
-
 
         tensor sig_gate = sigmoid(gate_hidden)
         tensor one_minus_sig = sub(tensor_ones_like(sig_gate), sig_gate)
@@ -542,13 +483,11 @@ func backward_swiglu_ffn(
 
         tensor d_gate_hidden = mul(d_gate_act, dsilu_dz)
 
-
         tensor x2_t = transpose(x2, 0, 1)
         tensor grad_w_gate = matmul(x2_t, d_gate_hidden)
         tensor grad_w_up = matmul(x2_t, d_up_hidden)
         tensor grad_b_gate = sum_first_dim(d_gate_hidden, false)
         tensor grad_b_up = sum_first_dim(d_up_hidden, false)
-
 
         tensor grad_from_gate = matmul(d_gate_hidden, transpose(layer.w_ff1, 0, 1))
         tensor grad_from_up = matmul(d_up_hidden, transpose(layer.w_up, 0, 1))
@@ -575,9 +514,6 @@ func backward_swiglu_ffn(
 
         ffn_backward_result { grad_to_x2: grad_to_x2, updated_layer: layer, optimizer_state: opt }
     } else {
-
-
-
 
         tensor grad_w_ff2 = matmul(transpose(x2, 0, 1), grad_ffn_out)
         tensor grad_b_ff2 = sum_first_dim(grad_ffn_out, false)
@@ -607,7 +543,6 @@ func backward_swiglu_ffn(
     }
 }
 
-
 func relu_backward_mask(tensor input) tensor {
     int n = len(input.data)
     []float data = []float{cap: n}
@@ -623,7 +558,6 @@ func relu_backward_mask(tensor input) tensor {
     new(data, copy_int(input.shape), false)
 }
 
-
 func tensor_ones_like(tensor input) tensor {
     int n = len(input.data)
     []float data = []float{cap: n}
@@ -634,7 +568,6 @@ func tensor_ones_like(tensor input) tensor {
     }
     new(data, copy_int(input.shape), false)
 }
-
 
 struct attn_backward_result {
     tensor grad_to_x
@@ -649,28 +582,9 @@ func backward_attention(
     transformer_layer_optimizer_state opt
 ) attn_backward_result {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     tensor q = matmul(x, layer.w_q)
     tensor k = matmul(x, layer.w_k)
     tensor v = matmul(x, layer.w_v)
-
-
 
     tensor attn_approx = matmul(softmax_last_dim(matmul(q, transpose(k, 0, 1))), v)
     tensor attn_t = transpose(attn_approx, 0, 1)
@@ -679,15 +593,11 @@ func backward_attention(
 
     tensor d_attn = matmul(grad_attn_out, transpose(layer.w_o, 0, 1))
 
-
-
     tensor attn_weights = softmax_last_dim(matmul(q, transpose(k, 0, 1)))
     tensor attn_weights_t = transpose(attn_weights, 0, 1)
     tensor d_v = matmul(attn_weights_t, d_attn)
     tensor grad_w_v = matmul(transpose(x, 0, 1), d_v)
     tensor grad_b_v = sum_first_dim(d_v, false)
-
-
 
     int head_dim = layer.w_q.shape[1]
     float scale = 1.0 / sqrt_approx(head_dim * 1.0)
@@ -699,12 +609,10 @@ func backward_attention(
     tensor grad_b_q = sum_first_dim(d_q, false)
     tensor grad_b_k = sum_first_dim(d_k, false)
 
-
     tensor grad_from_q = matmul(d_q, transpose(layer.w_q, 0, 1))
     tensor grad_from_k = matmul(d_k, transpose(layer.w_k, 0, 1))
     tensor grad_from_v = matmul(d_v, transpose(layer.w_v, 0, 1))
     tensor grad_to_x = add(add(grad_from_q, grad_from_k), grad_from_v)
-
 
     adamw_step_output step_w_o = adamw_step_state(opt.w_o, layer.w_o, grad_w_o)
     opt.w_o = step_w_o.optimizer
@@ -900,7 +808,6 @@ func gpt_large_training_update(gpt_large_training_state state, tensor input_ids,
     tensor probabilities = softmax_last_dim(logits)
     tensor targets = one_hot_tensor(target_ids, state.model.vocab_size)
 
-
     tensor grad_logits = sub(probabilities, targets)
     float scale = 1.0
     if valid_tokens > 0 {
@@ -908,24 +815,19 @@ func gpt_large_training_update(gpt_large_training_state state, tensor input_ids,
     }
     grad_logits = scale_tensor(grad_logits, scale)
 
-
     tensor hidden_t = transpose(hidden, 0, 1)
     tensor grad_head_weight = matmul(hidden_t, grad_logits)
     tensor grad_head_bias = sum_first_dim(grad_logits, false)
     tensor grad_hidden = matmul(grad_logits, transpose(state.lm_head_weight, 0, 1))
-
 
     adamw_step_output head_weight_step = adamw_step_state(state.optimizer, state.lm_head_weight, grad_head_weight)
     adamw_step_output head_bias_step = adamw_step_state(head_weight_step.optimizer, state.lm_head_bias, grad_head_bias)
     tensor next_head_weight = head_weight_step.params
     tensor next_head_bias = head_bias_step.params
 
-
-
     gpt_large_backward_result bw = transformer_backward(
         state.backbone, hidden, grad_hidden, state.backbone_optimizers
     )
-
 
     tensor next_embedding = embedding_apply_grad(state.token_embedding, input_ids, bw.grad_input, state.optimizer.lr)
 

@@ -1,23 +1,5 @@
 package neurx.scheduler.kernel_sched
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 int SCHED_RT     = 0
 int SCHED_NORMAL = 1
 int SCHED_BATCH  = 2
@@ -57,7 +39,6 @@ func new_run_queue() run_queue {
     }
 }
 
-
 func enqueue_task(rq run_queue, t task_struct) run_queue {
     if t.sched_class == SCHED_RT {
         rq.rt_queue = append(rq.rt_queue, t)
@@ -70,8 +51,6 @@ func enqueue_task(rq run_queue, t task_struct) run_queue {
     }
     return rq
 }
-
-
 
 func pick_next_task(rq run_queue) (run_queue, task_struct, bool) {
     if len(rq.rt_queue) > 0 {

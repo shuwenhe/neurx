@@ -1,15 +1,8 @@
 
 
-
-
-
 package neurx.optimizer.optimizer_adamw
 
 use neurx.tensor.{tensor, zeros, ones, fill, new}
-
-
-
-
 
 struct adam_state {
     float learning_rate
@@ -34,10 +27,6 @@ struct optimizer_config {
     int warmup_steps
     string lr_schedule
 }
-
-
-
-
 
 func init_adam_state(
     []tensor parameters,
@@ -66,10 +55,6 @@ func init_adam_state(
         param: parameters,
     }
 }
-
-
-
-
 
 func get_learning_rate(
     float base_lr,
@@ -102,13 +87,8 @@ func get_learning_rate(
         return base_lr * (1.0 + cos_approx(pi * progress)) / 2.0
     }
 
-
     base_lr
 }
-
-
-
-
 
 func clip_grad_norm([]tensor gradients, float max_norm) []tensor {
 
@@ -124,12 +104,10 @@ func clip_grad_norm([]tensor gradients, float max_norm) []tensor {
     }
     total_norm = sqrt_approx(total_norm)
 
-
     float scale = 1.0
     if total_norm > max_norm {
         scale = max_norm / total_norm
     }
-
 
     i = 0
     while i < len(gradients) {
@@ -143,10 +121,6 @@ func clip_grad_norm([]tensor gradients, float max_norm) []tensor {
 
     gradients
 }
-
-
-
-
 
 func adam_step_param(
     tensor param,
@@ -164,23 +138,18 @@ func adam_step_param(
     float bias_correction1 = 1.0 - pow_approx(beta1, float_from_int(timestep))
     float bias_correction2 = 1.0 - pow_approx(beta2, float_from_int(timestep))
 
-
     int i = 0
     while i < len(param.data) {
 
         m.data[i] = beta1 * m.data[i] + (1.0 - beta1) * grad.data[i]
 
-
         v.data[i] = beta2 * v.data[i] + (1.0 - beta2) * grad.data[i] * grad.data[i]
-
 
         float m_hat = m.data[i] / bias_correction1
         float v_hat = v.data[i] / bias_correction2
 
-
         float denominator = sqrt_approx(v_hat) + eps
         float update = lr * (m_hat / denominator)
-
 
         update = update + lr * weight_decay * param.data[i]
 
@@ -191,10 +160,6 @@ func adam_step_param(
 
     (param, m, v)
 }
-
-
-
-
 
 func adam_step(
     adam_state state,
@@ -207,7 +172,6 @@ func adam_step(
 
     state.timestep = state.timestep + 1
 
-
     float current_lr = get_learning_rate(
         state.learning_rate,
         lr_schedule,
@@ -216,9 +180,7 @@ func adam_step(
         warmup_steps
     )
 
-
     []tensor clipped_grads = clip_grad_norm(gradients, max_grad_norm)
-
 
     int i = 0
     while i < len(state.param) {
@@ -240,10 +202,6 @@ func adam_step(
     state
 }
 
-
-
-
-
 func linear_warmup_scheduler(int current_step, int warmup_steps, float base_lr) float {
     if current_step < warmup_steps {
         return base_lr * float_from_int(current_step) / float_from_int(warmup_steps)
@@ -262,7 +220,6 @@ func cosine_warmup_scheduler(
         return base_lr * float_from_int(current_step) / float_from_int(warmup_steps)
     }
 
-
     float pi = 3.141592653589793
     int remaining_steps = total_steps - warmup_steps
     int step_after_warmup = current_step - warmup_steps
@@ -272,10 +229,6 @@ func cosine_warmup_scheduler(
 
     base_lr * (1.0 + cos_approx(pi * progress)) / 2.0
 }
-
-
-
-
 
 struct optimizer_checkpoint {
     adam_state state
@@ -294,10 +247,6 @@ func save_optimizer_state(adam_state state, int step, float loss) optimizer_chec
 func restore_optimizer_state(optimizer_checkpoint ckpt) adam_state {
     ckpt.state
 }
-
-
-
-
 
 func float_from_int(int x) float {
     0.0 + x

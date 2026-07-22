@@ -5,20 +5,6 @@ use neurx.eval.benchmark_eval
 use neurx.model.llm.gpt
 use std.io.println
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct mmlu_fewshot_prompt {
     []mmlu_data.mmlu_question examples
     mmlu_data.mmlu_question test_q
@@ -42,11 +28,6 @@ func default_mmlu_eval_config() mmlu_eval_config {
     }
 }
 
-
-
-
-
-
 func format_mmlu_question(mmlu_data.mmlu_question q, bool include_answer) string {
     string prompt = "Question: " + q.question + "\n"
     prompt = prompt + "A) " + q.choice_a + "\n"
@@ -60,13 +41,11 @@ func format_mmlu_question(mmlu_data.mmlu_question q, bool include_answer) string
     prompt
 }
 
-
 func build_mmlu_fewshot_prompt(
     []mmlu_data.mmlu_question examples,
     mmlu_data.mmlu_question test_q
 ) string {
     string prompt = ""
-
 
     int i = 0
     while i < len(examples) {
@@ -75,22 +54,14 @@ func build_mmlu_fewshot_prompt(
         i = i + 1
     }
 
-
     prompt = prompt + format_mmlu_question(test_q, false)
     prompt = prompt + "Answer: "
 
     prompt
 }
 
-
-
-
-
-
-
 func mmlu_get_choice_tokens(string choice, bool for_answer) []int {
     []int tokens = []int{}
-
 
     if choice == "A" {
         tokens = append(tokens, 362)
@@ -102,17 +73,12 @@ func mmlu_get_choice_tokens(string choice, bool for_answer) []int {
         tokens = append(tokens, 360)
     }
 
-
     if for_answer {
 
     }
 
     tokens
 }
-
-
-
-
 
 struct mmlu_task_result {
     string task_name
@@ -129,7 +95,6 @@ struct mmlu_eval_result {
     string timestamp
 }
 
-
 func evaluate_mmlu_task(
     gpt.language_model model,
     string task_name,
@@ -145,12 +110,9 @@ func evaluate_mmlu_task(
     while q_idx < len(test_questions) {
         mmlu_data.mmlu_question test_q = test_questions[q_idx]
 
-
         string prompt = build_mmlu_fewshot_prompt(dev_examples, test_q)
 
-
         []int prompt_tokens = tokenize_prompt(prompt)
-
 
         float best_score = -1000000000.0
         string best_choice = "A"
@@ -161,13 +123,11 @@ func evaluate_mmlu_task(
             []int choice_tokens = mmlu_get_choice_tokens(choice, true)
             []int full_seq = concat_token_sequences(prompt_tokens, choice_tokens)
 
-
             benchmark_eval.logprob_result lp = benchmark_eval.gpt_sequence_logprob(
                 model,
                 full_seq,
                 len(prompt_tokens)
             )
-
 
             float score = lp.avg_logprob
 
@@ -185,7 +145,6 @@ func evaluate_mmlu_task(
             }
             choice_idx = choice_idx + 1
         }
-
 
         if best_choice == test_q.correct_answer {
             correct = correct + 1
@@ -208,10 +167,6 @@ func evaluate_mmlu_task(
     }
 }
 
-
-
-
-
 func evaluate_mmlu_benchmark(
     gpt.language_model model,
     mmlu_data.mmlu_dataset_state dataset,
@@ -230,9 +185,7 @@ func evaluate_mmlu_benchmark(
     int total_questions = 0
     int total_correct = 0
 
-
     []mmlu_data.mmlu_task tasks = mmlu_data.mmlu_task_list()
-
 
     int task_idx = 0
     while task_idx < len(tasks) {
@@ -279,7 +232,6 @@ func evaluate_mmlu_benchmark(
     println("Total: " + int_to_str(total_correct) + "/" + int_to_str(total_questions) + " correct")
     println("")
 
-
     float stem_acc = 0.0; int stem_total = 0; int stem_correct = 0
     float social_acc = 0.0; int social_total = 0; int social_correct = 0
     float humanities_acc = 0.0; int humanities_total = 0; int humanities_correct = 0
@@ -288,7 +240,6 @@ func evaluate_mmlu_benchmark(
     int r_idx = 0
     while r_idx < len(results) {
         mmlu_task_result r = results[r_idx]
-
 
         int t_idx = 0
         string category = "Other"
@@ -345,11 +296,6 @@ func evaluate_mmlu_benchmark(
     }
 }
 
-
-
-
-
-
 func tokenize_prompt(string prompt) []int {
     []int tokens = []int{}
     int i = 0
@@ -359,7 +305,6 @@ func tokenize_prompt(string prompt) []int {
     }
     tokens
 }
-
 
 func concat_token_sequences([]int a, []int b) []int {
     []int result = []int{}

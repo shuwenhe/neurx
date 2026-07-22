@@ -1,8 +1,5 @@
 
 
-
-
-
 struct world_state {
     string                 snapshot_id
     []string               entity_ids
@@ -46,7 +43,6 @@ func new_world_model() world_model_state {
     }
 }
 
-
 func world_model_update(wm world_model_state, action string, observation string) world_model_state {
     world_state next = wm.current
     next.step             = wm.current.step + 1
@@ -68,7 +64,6 @@ func world_model_update(wm world_model_state, action string, observation string)
     }
 }
 
-
 func world_model_predict(wm world_model_state, hypothetical_action string) world_state {
     world_state predicted = wm.current
     predicted.step             = wm.current.step + 1
@@ -77,7 +72,6 @@ func world_model_predict(wm world_model_state, hypothetical_action string) world
     predicted.snapshot_id      = "predicted_" + string(predicted.step)
     return predicted
 }
-
 
 func world_model_rollback(wm world_model_state, target_step int) world_model_state {
     for i = len(wm.history) - 1; i >= 0; i-- {

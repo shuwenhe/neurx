@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-
-
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 HOSTFILE="${NEURX_HOSTFILE:-${ROOT}/configs/pretrain.hosts}"
 GPUS_PER_NODE="${NEURX_GPUS_PER_NODE:-}"

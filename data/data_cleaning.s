@@ -1,18 +1,10 @@
 package neurx.data.data_cleaning
 
-
-
-
-
 use neurx.strings.{string_contains, string_index_of, string_split, string_trim, string_length}
 use neurx.runtime.io.{
     io_println, io_file_exists, io_read_lines, io_mkdir_recursive,
     io_write_file, io_list_files, io_file_size
 }
-
-
-
-
 
 struct cleaning_config {
     string raw_dir
@@ -33,10 +25,6 @@ struct cleaning_stats {
     int long_documents
     long total_tokens_estimate
 }
-
-
-
-
 
 func new_cleaning_config() cleaning_config {
     cleaning_config {
@@ -62,19 +50,13 @@ func new_cleaning_stats() cleaning_stats {
     }
 }
 
-
-
-
-
 struct cleaning_result {
     string cleaned_text
     bool is_valid
     cleaning_stats stats
 }
 
-
 func simple_hash(string text) string {
-
 
     int len = string_length(text)
     string prefix = ""
@@ -86,12 +68,10 @@ func simple_hash(string text) string {
     return prefix + "_" + string(len)
 }
 
-
 func is_empty_text(string text) bool {
     string trimmed = string_trim(text)
     return string_length(trimmed) == 0
 }
-
 
 func clean_record(string line) cleaning_result {
     cleaning_stats stats = new_cleaning_stats()
@@ -102,11 +82,7 @@ func clean_record(string line) cleaning_result {
     result.is_valid = false
     result.cleaned_text = ""
 
-
-
-
     string text = ""
-
 
     int text_start = string_index_of(line, "\"text\":")
     if text_start >= 0 {
@@ -121,7 +97,6 @@ func clean_record(string line) cleaning_result {
         }
     }
 
-
     if is_empty_text(text) {
         result.stats.empty_documents = 1
         return result
@@ -129,7 +104,6 @@ func clean_record(string line) cleaning_result {
 
     string trimmed = string_trim(text)
     int text_len = string_length(trimmed)
-
 
     if text_len < 50 {
         result.stats.short_documents = 1
@@ -141,7 +115,6 @@ func clean_record(string line) cleaning_result {
         trimmed = substring(trimmed, 0, 100000)
     }
 
-
     string cleaned = "{\"text\":\"" + trimmed + "\",\"source\":\"raw\",\"length\":" + string(text_len) + "}"
     result.is_valid = true
     result.cleaned_text = cleaned
@@ -151,13 +124,8 @@ func clean_record(string line) cleaning_result {
     return result
 }
 
-
-
-
-
 func clean_raw_data(cleaning_config cfg) cleaning_stats {
     io_println("🔄 startdatacleanpipeline...\n")
-
 
     io_mkdir_recursive(cfg.cleaned_dir)
 
@@ -165,11 +133,7 @@ func clean_raw_data(cleaning_config cfg) cleaning_stats {
     []string seen_texts = []string{cap: 10000}
     int seen_count = 0
 
-
     []string raw_files = io_list_files(cfg.raw_dir, "*.jsonl")
-
-
-
 
     io_println("📖 startEnglish text " + string(len(raw_files)) + " English textfile...\n")
 
@@ -181,7 +145,6 @@ func clean_raw_data(cleaning_config cfg) cleaning_stats {
 
         for j := 0; j < len(lines); j = j + 1 {
             string line = lines[j]
-
 
             cleaning_result cr = clean_record(line)
 
@@ -205,9 +168,6 @@ func clean_raw_data(cleaning_config cfg) cleaning_stats {
                 if is_duplicate {
                     total_stats.duplicates_removed = total_stats.duplicates_removed + 1
                 } else {
-
-
-
 
                     if seen_count < len(seen_texts) {
                         seen_texts[seen_count] = hash
@@ -237,37 +197,23 @@ func clean_raw_data(cleaning_config cfg) cleaning_stats {
     return total_stats
 }
 
-
-
-
-
 func generate_dataset_splits(cleaning_config cfg) {
     io_println("\n📊 generatedataEnglish text...")
 
     []string all_lines = io_read_lines(cfg.output_file)
     int total = len(all_lines)
 
-
     int train_size = (total * 80) / 100
     int val_size = (total * 10) / 100
 
-
     io_println("  ✓ generatetrainingEnglish text: " + string(train_size) + " English text")
 
-
-
     io_println("  ✓ generateEnglish text: " + string(val_size) + " English text")
-
-
 
     int test_size = total - train_size - val_size
     io_println("  ✓ generatetestEnglish text: " + string(test_size) + " English text")
 
 }
-
-
-
-
 
 func run_data_cleaning() {
     cleaning_config cfg = new_cleaning_config()

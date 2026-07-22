@@ -1,13 +1,5 @@
 
 
-
-
-
-
-
-
-
-
 package main
 
 import (
@@ -20,10 +12,6 @@ import (
 	"encoding/json"
 	"time"
 )
-
-
-
-
 
 type inference_server_config struct {
 	ServerName      string `json:"server_name"`
@@ -83,10 +71,6 @@ type server_metrics struct {
 	UptimeSeconds      int64   `json:"uptime_seconds"`
 }
 
-
-
-
-
 var gConfig = &InferenceServerConfig{
 	ServerName: "neurx-inference",
 	Host: "0.0.0.0",
@@ -117,10 +101,6 @@ var gMetrics = &server_metrics{
 }
 
 var gServerStartTime = time.Now()
-
-
-
-
 
 func loadConfigFromEnv() {
 	if home := os.Getenv("NEURX_HOME"); home != "" {
@@ -195,13 +175,8 @@ func loadConfigFromFile(path string) error {
 	return nil
 }
 
-
-
-
-
 func initializeModel() error {
 	logInfo("Initializing model...")
-
 
 	stat, err := os.Stat(gConfig.ModelPath)
 	if err != nil {
@@ -212,7 +187,6 @@ func initializeModel() error {
 	logInfo(fmt.Sprintf("Model loaded: %s (size: %d MB)",
 		filepath.Base(gConfig.ModelPath), modelSizeMB))
 
-
 	if gConfig.EnableQuantized {
 		logInfo(fmt.Sprintf("Quantization enabled: %s", gConfig.QuantizationType))
 	}
@@ -220,13 +194,8 @@ func initializeModel() error {
 	return nil
 }
 
-
-
-
-
 func processInferenceRequest(req *inference_request) (*inference_response, error) {
 	startTime := time.Now()
-
 
 	if req.Prompt == "" {
 		return nil, fmt.Errorf("prompt is empty")
@@ -236,18 +205,14 @@ func processInferenceRequest(req *inference_request) (*inference_response, error
 		req.MaxTokens = gConfig.MaxSequenceLen
 	}
 
-
 	promptTokens := len(strings.Fields(req.Prompt))
-
 
 	generatedTokens := req.MaxTokens
 	if req.Temperature > 1.0 {
 		generatedTokens = req.MaxTokens / 2
 	}
 
-
 	generated := "This is a simulated response. In production, this would contain actual model output."
-
 
 	elapsed := time.Since(startTime).Seconds()
 	totalTokens := promptTokens + generatedTokens
@@ -264,7 +229,6 @@ func processInferenceRequest(req *inference_request) (*inference_response, error
 		Timestamp: time.Now().Format("2006-01-02T15:04:05Z"),
 	}
 
-
 	gMetrics.TotalRequests++
 	gMetrics.SuccessfulRequests++
 	gMetrics.AvgLatency = (gMetrics.AvgLatency*float64(gMetrics.SuccessfulRequests-1) + elapsed) /
@@ -280,10 +244,6 @@ func processInferenceRequest(req *inference_request) (*inference_response, error
 	return response, nil
 }
 
-
-
-
-
 func handleInferenceRequest(jsonData []byte) ([]byte, error) {
 	var req inference_request
 
@@ -292,13 +252,11 @@ func handleInferenceRequest(jsonData []byte) ([]byte, error) {
 		return nil, fmt.Errorf("invalid request format: %v", err)
 	}
 
-
 	resp, err := processInferenceRequest(&req)
 	if err != nil {
 		gMetrics.FailedRequests++
 		return nil, err
 	}
-
 
 	respData, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
@@ -336,10 +294,6 @@ func handleHealthCheck() ([]byte, error) {
 	return data, nil
 }
 
-
-
-
-
 func logInfo(msg string) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] INFO: %s\n", timestamp, msg)
@@ -355,19 +309,12 @@ func logError(msg string) {
 	fmt.Printf("[%s] ERROR: %s\n", timestamp, msg)
 }
 
-
-
-
-
 func startServer() error {
 	logInfo("Starting inference server...")
 	logInfo(fmt.Sprintf("Server: %s:%d", gConfig.Host, gConfig.Port))
 	logInfo(fmt.Sprintf("Model: %s", gConfig.ModelPath))
 	logInfo(fmt.Sprintf("Config: batch_size=%d, seq_len=%d, workers=%d",
 		gConfig.MaxBatchSize, gConfig.MaxSequenceLen, gConfig.WorkerThreads))
-
-
-
 
 	logInfo("Server started successfully!")
 	logInfo("Endpoints:")
@@ -378,14 +325,9 @@ func startServer() error {
 	return nil
 }
 
-
-
-
-
 func runInteractiveMode() {
 	logInfo("Entering interactive mode (simulation)...")
 	logInfo("Type 'quit' to exit")
-
 
 	requests := []string{
 		`{"prompt":"What is artificial intelligence?","max_tokens":100}`,
@@ -409,10 +351,6 @@ func runInteractiveMode() {
 
 	logInfo("Interactive mode completed")
 }
-
-
-
-
 
 func printUsage() {
 	fmt.Println("NeurX Inference Server - Usage:")
@@ -481,10 +419,6 @@ func runBenchmark() {
 	fmt.Printf("  Max latency: %.3f s\n", gMetrics.MaxLatency)
 }
 
-
-
-
-
 func main() {
 	if len(os.Args) < 2 {
 		printUsage()
@@ -493,9 +427,7 @@ func main() {
 
 	command := os.Args[1]
 
-
 	loadConfigFromEnv()
-
 
 	err := validateConfig()
 	if err != nil {
@@ -503,13 +435,11 @@ func main() {
 		os.Exit(1)
 	}
 
-
 	err = initializeModel()
 	if err != nil {
 		logError("Model initialization failed: " + err.Error())
 		os.Exit(1)
 	}
-
 
 	switch command {
 	case "start":
@@ -518,7 +448,6 @@ func main() {
 			logError(err.Error())
 			os.Exit(1)
 		}
-
 
 		fmt.Println("Server running. Press Ctrl+C to stop.")
 		select {}

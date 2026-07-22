@@ -1,18 +1,11 @@
 package neurx.logging
 
-
-
-
-
-
 func format_percent(float value, int width, int decimals) string {
     string formatted = format_float(value, width, decimals) + "%"
-
 
     while len(formatted) < width {
         formatted = " " + formatted
     }
-
 
     if len(formatted) > width + 1 {
         formatted = substring(formatted, 0, width + 1)
@@ -21,10 +14,8 @@ func format_percent(float value, int width, int decimals) string {
     formatted
 }
 
-
 func format_float(float value, int width, int decimals) string {
     string s = float_to_string_with_decimals(value, decimals)
-
 
     if len(s) < width {
         for i in 0..(width - len(s)) {
@@ -37,7 +28,6 @@ func format_float(float value, int width, int decimals) string {
     s
 }
 
-
 func float_to_string_with_decimals(float value, int decimals) string {
     if value == 0.0 {
         return "0." + repeat_char('0', decimals)
@@ -49,14 +39,12 @@ func float_to_string_with_decimals(float value, int decimals) string {
         value = -value
     }
 
-
     int integer_part = int(value)
     float fractional = value - float(integer_part)
 
     string result = ""
     if negative { result = "-" }
     result = result + int_to_string(integer_part) + "."
-
 
     for i in 0..decimals {
         fractional = fractional * 10.0

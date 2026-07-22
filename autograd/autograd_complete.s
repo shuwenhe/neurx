@@ -1,15 +1,8 @@
 
 
-
-
-
 package neurx.autograd.complete
 
 use neurx.tensor.{tensor, zeros, ones, fill, new}
-
-
-
-
 
 struct gradient_node {
     int id
@@ -24,10 +17,6 @@ struct gradient_tape {
     int node_counter
     bool recording
 }
-
-
-
-
 
 func create_tape() gradient_tape {
     gradient_tape {
@@ -56,10 +45,6 @@ func add_node(gradient_tape tape, tensor value, string op, []int inputs) (gradie
 
     (tape, node_id)
 }
-
-
-
-
 
 func ad_add(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tensor) {
 
@@ -220,10 +205,6 @@ func ad_layer_norm(gradient_tape tape, tensor x, float eps) (gradient_tape, int,
     (tape, node_id, result)
 }
 
-
-
-
-
 func backward_add(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad_b) (tensor, tensor) {
 
     int i = 0
@@ -248,11 +229,9 @@ func backward_mul(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad_b)
 
 func backward_matmul(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad_b) (tensor, tensor) {
 
-
     int m = a.shape[0]
     int n = a.shape[1]
     int p = b.shape[1]
-
 
     int i = 0
     while i < m {
@@ -269,7 +248,6 @@ func backward_matmul(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad
         }
         i = i + 1
     }
-
 
     i = 0
     while i < n {
@@ -291,8 +269,6 @@ func backward_matmul(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad
 }
 
 func backward_softmax(tensor grad, tensor softmax_output, tensor grad_input) tensor {
-
-
 
     int i = 0
     while i < len(grad.data) {
@@ -323,10 +299,6 @@ func backward_relu(tensor grad, tensor x, tensor grad_input) tensor {
     grad_input
 }
 
-
-
-
-
 func backward_tape(
     gradient_tape tape,
     tensor final_grad
@@ -335,13 +307,11 @@ func backward_tape(
     int num_nodes = tape.node_counter
     []tensor gradients = []tensor{cap: num_nodes}
 
-
     int i = 0
     while i < num_nodes {
         gradients.push(zeros(tape.nodes[i].value.shape))
         i = i + 1
     }
-
 
     i = num_nodes - 1
     while i >= 0 {
@@ -387,10 +357,6 @@ func backward_tape(
 
     gradients
 }
-
-
-
-
 
 func get_node_id(tensor t) int {
 

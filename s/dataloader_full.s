@@ -1,11 +1,5 @@
 package neurx.data
 
-
-
-
-
-
-
 struct dataloader_config {
     int batch_size
     bool shuffle
@@ -15,33 +9,26 @@ struct dataloader_config {
     bool drop_last
     int persistent_workers
 
-
     float timeout_secs
     int max_retries
-
 
     int world_size
     int rank
 
-
     collator_config collator
 }
-
 
 struct dataloader {
     dataset ds
     sampler samp
     dataloader_config config
 
-
     int current_epoch
     int total_batches
     int batches_served
 
-
     []batch prefetch_buffer
 }
-
 
 func new_dataloader(
     dataset ds,
@@ -57,7 +44,6 @@ func new_dataloader(
         rank: cfg.rank,
         drop_last: cfg.drop_last,
     }
-
 
     int total_samples = len_dataset(ds)
     if cfg.world_size > 1 {
@@ -80,15 +66,9 @@ func new_dataloader(
     }
 }
 
-
-
-
-
-
 func reset_epoch(dataloader dl) dataloader {
     dl.current_epoch = dl.current_epoch + 1
     dl.batches_served = 0
-
 
     if dl.config.shuffle {
         dl.samp = reset_random(dl.samp)
@@ -96,24 +76,17 @@ func reset_epoch(dataloader dl) dataloader {
         dl.samp = reset_sequential(dl.samp)
     }
 
-
     dl.prefetch_buffer = []
     dl = fill_prefetch_buffer(dl)
 
     dl
 }
 
-
-
-
-
-
 func next_batch(dataloader dl) (batch, bool) {
 
     if len(dl.prefetch_buffer) > 0 {
         batch b = dl.prefetch_buffer.pop_front()
         dl.batches_served = dl.batches_served + 1
-
 
         if len(dl.prefetch_buffer) < dl.config.prefetch_factor {
             dl = fill_prefetch_buffer(dl)
@@ -131,9 +104,7 @@ func next_batch(dataloader dl) (batch, bool) {
             (empty_batch(), true)
         }
 
-
         []sample samples = load_samples_for_indices(dl.ds, indices)
-
 
         batch b = collate_fn(samples, dl.config.collator)
         dl.batches_served = dl.batches_served + 1
@@ -141,7 +112,6 @@ func next_batch(dataloader dl) (batch, bool) {
         (b, false)
     }
 }
-
 
 func load_samples_for_indices(dataset ds, []int indices) []sample {
     []sample samples = []int{cap: len(indices)}
@@ -160,11 +130,6 @@ func load_samples_for_indices(dataset ds, []int indices) []sample {
     samples
 }
 
-
-
-
-
-
 func fill_prefetch_buffer(dataloader dl) dataloader {
     int target_count = dl.config.prefetch_factor * 2
 
@@ -177,7 +142,6 @@ func fill_prefetch_buffer(dataloader dl) dataloader {
             break
         }
 
-
         []sample samples = load_samples_for_indices(dl.ds, indices)
         batch b = collate_fn(samples, dl.config.collator)
 
@@ -186,11 +150,6 @@ func fill_prefetch_buffer(dataloader dl) dataloader {
 
     dl
 }
-
-
-
-
-
 
 struct bucket_config {
     int num_buckets
@@ -240,7 +199,6 @@ func assign_to_bucket(int seq_len, bucket_config bcfg) int {
     float normalized = float(seq_len - bcfg.min_bucket_size) / range_val
     int bucket = int(normalized * float(bcfg.num_buckets))
 
-
     if bucket < 0 { bucket = 0 }
     if bucket >= bcfg.num_buckets { bucket = bcfg.num_buckets - 1 }
 
@@ -253,7 +211,6 @@ func generate_bucket_order(map[int][]int buckets) []int {
     for key in buckets {
         order.push(key)
     }
-
 
     for i in 0..len(order)-1 {
         for j in 0..len(order)-i-1 {

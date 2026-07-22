@@ -1,16 +1,5 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
 struct mobile_target_config {
     string  os
     string  soc_family

@@ -1,14 +1,5 @@
 package neurx.scheduler.lr_scheduler
 
-
-
-
-
-
-
-
-
-
 struct lr_schedule_config {
     float base_lr
     float min_lr
@@ -23,10 +14,6 @@ struct lr_scheduler {
     float current_lr
 }
 
-
-
-
-
 func new_lr_scheduler(lr_schedule_config cfg) lr_scheduler {
     lr_scheduler {
         config: cfg,
@@ -34,11 +21,6 @@ func new_lr_scheduler(lr_schedule_config cfg) lr_scheduler {
         current_lr: cfg.base_lr,
     }
 }
-
-
-
-
-
 
 func compute_warmup_lr(float base_lr, int warmup_steps, int current_step) float {
     if current_step >= warmup_steps {
@@ -49,11 +31,8 @@ func compute_warmup_lr(float base_lr, int warmup_steps, int current_step) float 
         return base_lr
     }
 
-
     return base_lr * (float(current_step) / float(warmup_steps))
 }
-
-
 
 func compute_cosine_lr(
     float base_lr,
@@ -67,16 +46,12 @@ func compute_cosine_lr(
         return compute_warmup_lr(base_lr, warmup_steps, current_step)
     }
 
-
     let steps_after_warmup = float(current_step - warmup_steps)
     let total_decay_steps = float(total_steps - warmup_steps)
 
     if total_decay_steps <= 0.0 {
         return base_lr
     }
-
-
-
 
     let progress = steps_after_warmup / total_decay_steps
     if progress >= 1.0 {
@@ -88,7 +63,6 @@ func compute_cosine_lr(
 
     return max_approx(lr, min_lr)
 }
-
 
 func compute_linear_lr(
     float base_lr,
@@ -102,7 +76,6 @@ func compute_linear_lr(
         return compute_warmup_lr(base_lr, warmup_steps, current_step)
     }
 
-
     let steps_after_warmup = float(current_step - warmup_steps)
     let total_decay_steps = float(total_steps - warmup_steps)
 
@@ -115,11 +88,9 @@ func compute_linear_lr(
         return min_lr
     }
 
-
     let lr = base_lr + (min_lr - base_lr) * progress
     return max_approx(lr, min_lr)
 }
-
 
 func compute_constant_lr(float base_lr, int warmup_steps, int current_step) float {
     if current_step < warmup_steps {
@@ -127,11 +98,6 @@ func compute_constant_lr(float base_lr, int warmup_steps, int current_step) floa
     }
     return base_lr
 }
-
-
-
-
-
 
 func lr_scheduler_step(lr_scheduler sched) lr_scheduler {
     let current_step = sched.current_step
@@ -166,21 +132,13 @@ func lr_scheduler_step(lr_scheduler sched) lr_scheduler {
     }
 }
 
-
 func get_current_lr(lr_scheduler sched) float {
     return sched.current_lr
 }
 
-
 func get_current_step(lr_scheduler sched) int {
     return sched.current_step
 }
-
-
-
-
-
-
 
 func new_llm_scheduler(
     float base_lr,
@@ -200,8 +158,6 @@ func new_llm_scheduler(
     return new_lr_scheduler(cfg)
 }
 
-
-
 func new_finetune_scheduler(
     float base_lr,
     int total_steps
@@ -219,11 +175,6 @@ func new_finetune_scheduler(
     return new_lr_scheduler(cfg)
 }
 
-
-
-
-
-
 func cosine_approx(float x) float {
 
     var x_reduced = x
@@ -233,7 +184,6 @@ func cosine_approx(float x) float {
     while x_reduced < -3.14159 {
         x_reduced = x_reduced + 6.28318
     }
-
 
     let x2 = x_reduced * x_reduced
     let result = 1.0
@@ -245,14 +195,12 @@ func cosine_approx(float x) float {
     return result
 }
 
-
 func max_approx(float a, float b) float {
     if a > b {
         return a
     }
     return b
 }
-
 
 func abs_approx(float x) float {
     if x < 0.0 {

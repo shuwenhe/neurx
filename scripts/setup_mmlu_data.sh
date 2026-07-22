@@ -1,13 +1,6 @@
 #!/bin/bash
 
-
-
-
-
-
-
 set -e
-
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="${NEURX_ROOT:-.}"
@@ -26,10 +19,6 @@ echo "  HF repo: ${MMLU_HF_REPO}"
 echo "  Split mode: ${SPLIT_MODE}"
 echo ""
 
-
-
-
-
 echo "[Step 1] Creating data directories..."
 mkdir -p "${DATA_ROOT}/test"
 mkdir -p "${DATA_ROOT}/dev"
@@ -38,12 +27,7 @@ mkdir -p "${DATA_ROOT}/auxiliary"
 echo "  ✓ Directories created"
 echo ""
 
-
-
-
-
 echo "[Step 2] Downloading MMLU dataset from HuggingFace..."
-
 
 if ! command -v python3 &> /dev/null; then
     echo "  ✗ Python 3 not found. Please install Python 3 and huggingface-hub."
@@ -68,7 +52,6 @@ Path(data_root).mkdir(parents=True, exist_ok=True)
 print("  Downloading MMLU from HuggingFace...")
 print("")
 
-
 tasks = [
 
     "abstract_algebra", "anatomy", "astronomy", "biology", "chemistry",
@@ -92,12 +75,10 @@ tasks = [
     "us_foreign_policy", "virology"
 ]
 
-
 for task in tasks:
     try:
 
         dataset = load_dataset("cais/mmlu", task, split=None)
-
 
         if "test" in dataset:
             test_df = dataset["test"].to_pandas()
@@ -105,13 +86,11 @@ for task in tasks:
             test_df.to_csv(test_path, index=False)
             print(f"  ✓ {task}: test ({len(test_df)} items)")
 
-
         if "dev" in dataset:
             dev_df = dataset["dev"].to_pandas()
             dev_path = os.path.join(data_root, "dev", f"{task}.csv")
             dev_df.to_csv(dev_path, index=False)
             print(f"         dev ({len(dev_df)} items)")
-
 
         if "validation" in dataset:
             val_df = dataset["validation"].to_pandas()
@@ -128,10 +107,6 @@ EOF
 
 echo ""
 
-
-
-
-
 echo "[Step 3] Verifying data integrity..."
 
 test_count=$(find "${DATA_ROOT}/test" -name "*.csv" | wc -l)
@@ -147,10 +122,6 @@ else
 fi
 echo ""
 
-
-
-
-
 echo "[Step 4] Generating dataset statistics..."
 
 python3 << 'EOF'
@@ -160,12 +131,10 @@ from pathlib import Path
 
 data_root = os.environ.get('DATA_ROOT', './data/mmlu')
 
-
 stats = {
     "test": {"count": 0, "tasks": 0},
     "dev": {"count": 0, "tasks": 0}
 }
-
 
 for csv_file in Path(f"{data_root}/test").glob("*.csv"):
     try:
@@ -174,7 +143,6 @@ for csv_file in Path(f"{data_root}/test").glob("*.csv"):
         stats["test"]["tasks"] += 1
     except:
         pass
-
 
 for csv_file in Path(f"{data_root}/dev").glob("*.csv"):
     try:
@@ -190,10 +158,6 @@ print(f"  Total:     {stats['test']['count'] + stats['dev']['count']:,} items")
 EOF
 
 echo ""
-
-
-
-
 
 echo "[Step 5] Creating dataset metadata..."
 
@@ -239,10 +203,6 @@ EOF
 
 echo "  ✓ Metadata created"
 echo ""
-
-
-
-
 
 echo "========================================="
 echo "MMLU Setup Complete"

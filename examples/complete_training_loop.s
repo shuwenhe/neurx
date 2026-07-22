@@ -1,18 +1,5 @@
 package neurx.examples
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.autograd.autograd_engine
 use neurx.data.loader.dataloader_full
 use neurx.data.dataset.dataset_loaders
@@ -31,10 +18,6 @@ use neurx.inference.text_generator
 use neurx.cuda.device_manager
 use neurx.distributed.nccl_backend
 
-
-
-
-
 struct training_config {
 
     int vocab_size
@@ -44,7 +27,6 @@ struct training_config {
     int d_ff
     float dropout
 
-
     int batch_size
     float learning_rate
     int warmup_steps
@@ -53,21 +35,17 @@ struct training_config {
     float weight_decay
     float grad_clip_norm
 
-
     int max_seq_length
-
 
     string data_path
     string validation_path
     bool shuffle_data
     int num_dataloader_workers
 
-
     string output_dir
     int save_every_n_steps
     int save_every_n_epochs
     bool enable_gradient_checkpointing
-
 
     string log_dir
     string experiment_name
@@ -77,10 +55,8 @@ struct training_config {
     string wandb_project
     string wandb_entity
 
-
     int validation_every_n_steps
     int num_generation_samples
-
 
     bool use_cuda
     int gpu_device_id
@@ -99,7 +75,6 @@ func default_training_config() training_config {
         d_ff: 3072,
         dropout: 0.1,
 
-
         batch_size: 32,
         learning_rate: 6e-4,
         warmup_steps: 1000,
@@ -108,21 +83,17 @@ func default_training_config() training_config {
         weight_decay: 0.01,
         grad_clip_norm: 1.0,
 
-
         max_seq_length: 1024,
-
 
         data_path: "data/train.txt",
         validation_path: "data/val.txt",
         shuffle_data: true,
         num_dataloader_workers: 4,
 
-
         output_dir: "checkpoints",
         save_every_n_steps: 5000,
         save_every_n_epochs: 0,
         enable_gradient_checkpointing: true,
-
 
         log_dir: "logs/tensorboard",
         experiment_name: "neurx_transformer_demo",
@@ -132,10 +103,8 @@ func default_training_config() training_config {
         wandb_project: "neurx-experiments",
         wandb_entity: "your-username",
 
-
         validation_every_n_steps: 1000,
         num_generation_samples: 3,
-
 
         use_cuda: false,
         gpu_device_id: 0,
@@ -145,27 +114,18 @@ func default_training_config() training_config {
     }
 }
 
-
-
-
-
 struct transformer_model {
 
     tensor token_embedding
     tensor position_embedding
 
-
     []transformer_layer layers
-
 
     tensor lm_head
 
-
     tensor final_norm
 
-
     training_config config
-
 
     computation_graph graph
 }
@@ -177,16 +137,13 @@ struct transformer_layer {
     tensor wv
     tensor wo
 
-
     tensor w_gate
     tensor w_up
     tensor w_down
 
-
     tensor ln_1
     tensor ln_2
 }
-
 
 func init_transformer_model(training_config cfg) transformer_model {
     println("Initializing Transformer model...")
@@ -196,10 +153,8 @@ func init_transformer_model(training_config cfg) transformer_model {
     println("  Heads: " + str(cfg.n_heads))
     println("  FF dim: " + str(cfg.d_ff))
 
-
     tensor token_emb = randn_tensor([cfg.vocab_size, cfg.d_model]) * 0.02
     tensor pos_emb = randn_tensor([cfg.max_seq_length, cfg.d_model]) * 0.02
-
 
     []transformer_layer layers = []
     for layer_idx in 0..cfg.n_layers {
@@ -207,10 +162,8 @@ func init_transformer_model(training_config cfg) transformer_model {
         layers.push(layer)
     }
 
-
     tensor lm_head = randn_tensor([cfg.d_model, cfg.vocab_size]) * 0.02
     tensor final_ln = ones_tensor([cfg.d_model])
-
 
     computation_graph g = new_graph()
 
@@ -242,10 +195,6 @@ func init_transformer_layer(int d_model, int d_ff) transformer_layer {
     }
 }
 
-
-
-
-
 struct forward_result {
     tensor logits
     tensor loss
@@ -265,19 +214,14 @@ func model_forward(
     int batch_size = input_batch.batch_size
     int seq_len = input_batch.seq_length
 
-
-
     tensor x = embedding_lookup(model.token_embedding, token_ids)
     tensor positions = create_position_indices(seq_len)
     tensor pos_emb = embedding_lookup(model.position_embedding, positions)
     x = add_tensors(x, pos_emb)
 
-
     if model.config.dropout > 0.0 && record_for_backward {
         x = apply_dropout(x, model.config.dropout)
     }
-
-
 
     []tensor all_activations = []
     checkpoint_manager ckpt_mgr = new_checkpoint_manager(default_checkpoint_config())
@@ -285,20 +229,16 @@ func model_forward(
     for layer_idx in 0..model.config.n_layers {
         transformer_layer layer = model.layers[layer_idx]
 
-
         if model.config.enable_gradient_checkpointing {
             (ckpt_mgr, _) = save_checkpoint(ckpt_mgr, layer_idx, x, [])
         }
 
-
         tensor residual = x
         x = layer_norm(x, layer.ln_1)
-
 
         tensor q = matmul(x, layer.wq)
         tensor k = matmul(x, layer.wk)
         tensor v = matmul(x, layer.wv)
-
 
         tensor attn_output = multi_head_attention(
             q, k, v,
@@ -306,34 +246,26 @@ func model_forward(
             attention_mask
         )
 
-
         x = matmul(attn_output, layer.wo)
         x = add_tensors(x, residual)
 
-
         residual = x
         x = layer_norm(x, layer.ln_2)
-
 
         tensor gate = matmul(x, layer.w_gate)
         tensor up = matmul(x, layer.w_up)
         tensor hidden = swiglu(gate, up)
         tensor ffn_out = matmul(hidden, layer.w_down)
 
-
         x = add_tensors(ffn_out, residual)
-
 
         if !model.config.enable_gradient_checkpointing || (layer_idx % 2 == 0) {
             all_activations.push(x)
         }
     }
 
-
     x = layer_norm(x, model.final_norm)
     tensor logits = matmul(x, model.lm_head)
-
-
 
     tensor loss_logits = slice_tensor(logits, [0, 0, 0], [batch_size, seq_len-1, model.config.vocab_size])
     tensor labels = create_labels_from_tokens(token_ids, 1)
@@ -349,10 +281,6 @@ func model_forward(
     }
 }
 
-
-
-
-
 struct backward_result_info {
     []tensor parameter_gradients
     float backward_time_ms
@@ -365,16 +293,11 @@ func compute_gradients(
 ) backward_result_info {
     float start_time = current_time_ms()
 
-
     if !model->graph.is_recording {
         model->graph = start_recording(model->graph)
     }
 
-
-
-
     []tensor grads = backward(model->graph, fwd_res.loss)
-
 
     float grad_norm = compute_global_gradient_norm(grads)
 
@@ -386,10 +309,6 @@ func compute_gradients(
         grad_norm: grad_norm,
     }
 }
-
-
-
-
 
 struct training_state {
     int global_step
@@ -410,15 +329,9 @@ func run_training(training_config cfg) {
     println("=" * 80)
     println("")
 
-
-
-
-
-
     transformer_model model = init_transformer_model(cfg)
     int num_parameters = count_parameters(model)
     println("\n✓ Model initialized: " + str(num_parameters / 1e6) + "M parameters")
-
 
     device_context ctx
     if cfg.use_cuda {
@@ -429,7 +342,6 @@ func run_training(training_config cfg) {
         println("✓ Using CPU mode")
     }
 
-
     nccl_communicator comm
     if cfg.distributed_training {
         comm = initialize_nccl(cfg.world_size, cfg.rank)
@@ -437,11 +349,9 @@ func run_training(training_config cfg) {
         model = distribute_model(model, comm)
     }
 
-
     optimizer opt = new_adamw_optimizer(num_parameters)
     opt = set_learning_rate(opt, cfg.learning_rate)
     println("✓ AdamW optimizer: lr=" + str(cfg.learning_rate) + ", wd=" + str(cfg.weight_decay))
-
 
     dataset train_ds = load_text_dataset(
         cfg.data_path,
@@ -461,14 +371,12 @@ func run_training(training_config cfg) {
     dataloader train_loader = new_dataloader(train_ds, dl_cfg)
     println("✓ Training data_loader ready: " + str(train_loader.total_batches) + " batches/epoch")
 
-
     dataloader val_loader
     if len(cfg.validation_path) > 0 {
         dataset val_ds = load_text_dataset(cfg.validation_path, cfg.vocab_size, cfg.max_seq_length)
         val_loader = new_dataloader(val_ds, dl_cfg)
         println("✓ Validation data_loader ready: " + str(val_loader.total_batches) + " batches")
     }
-
 
     logger_config log_cfg = default_logger_config()
     log_cfg.log_dir = cfg.log_dir
@@ -498,7 +406,6 @@ func run_training(training_config cfg) {
         println("✓ TensorBoard writer: " + cfg.log_dir + "/" + cfg.experiment_name)
     }
 
-
     checkpoint_manager ckpt_mgr
     if cfg.enable_gradient_checkpointing {
         checkpoint_config ckpt_cfg = default_checkpoint_config()
@@ -508,9 +415,7 @@ func run_training(training_config cfg) {
         println("✓ Gradient checkpointing ENABLED (saves ~60-80% memory)")
     }
 
-
     create_directory_if_not_exists(cfg.output_dir)
-
 
     training_state state {
         global_step: 0,
@@ -525,7 +430,6 @@ func run_training(training_config cfg) {
         tb_writer: tb_writer,
     }
 
-
     log_model_summary(lg, model, cfg)
 
     println("\n" + "=" * 80)
@@ -533,25 +437,16 @@ func run_training(training_config cfg) {
     println("=" * 80)
     println("")
 
-
-
-
-
     for epoch in 0..cfg.max_epochs {
         state.current_epoch = epoch
 
         println("\n--- Epoch " + str(epoch + 1) + "/" + str(cfg.max_epochs) + " ---\n")
 
-
         state.train_loader = reset_epoch(state.train_loader)
-
 
         float epoch_loss_sum = 0.0
         int epoch_batches = 0
         float epoch_start_time = current_time_seconds()
-
-
-
 
         (batch b, bool epoch_done) = next_batch(state.train_loader)
 
@@ -562,13 +457,9 @@ func run_training(training_config cfg) {
                 break
             }
 
-
             forward_result fwd = model_forward(model, b, record_for_backward=true)
 
-
             backward_result_info bw_info = compute_gradients(&model, fwd)
-
-
 
             float current_lr = get_scheduled_lr(
                 cfg.learning_rate,
@@ -578,7 +469,6 @@ func run_training(training_config cfg) {
             )
             state.opt = set_learning_rate(state.opt, current_lr)
 
-
             if cfg.grad_clip_norm > 0.0 {
                 bw_info.parameter_gradients = clip_gradients(
                     bw_info.parameter_gradients,
@@ -586,23 +476,16 @@ func run_training(training_config cfg) {
                 )
             }
 
-
             flatten_gradients(bw_info.parameter_gradients)
             state.opt = optimizer_step(state.opt, get_flat_gradients(bw_info.parameter_gradients))
 
-
             state.opt = zero_grad(state.opt)
 
-
             state.global_step = state.global_step + 1
-
 
             float loss_value = extract_scalar_value(fwd.loss)
             epoch_loss_sum = epoch_loss_sum + loss_value
             epoch_batches = epoch_batches + 1
-
-
-
 
             if state.global_step % cfg.log_every_n_steps == 0:
 
@@ -611,7 +494,6 @@ func run_training(training_config cfg) {
                     cfg.batch_size, cfg.max_seq_length,
                     fwd.forward_time_ms + bw_info.backward_time_ms
                 )
-
 
                 print_progress_bar(
                     state.global_step, cfg.max_train_steps,
@@ -622,7 +504,6 @@ func run_training(training_config cfg) {
                     time_per_step=(fwd.forward_time_ms + bw_info.backward_time_ms),
                 )
 
-
                 map<string]string tags = {"epoch": str(epoch), "phase": "train"}
                 log_scalar(&state.lg, "train/loss", loss_value, state.global_step, tags)
                 log_scalar(&state.lg, "train/grad_norm", bw_info.grad_norm, state.global_step, tags)
@@ -631,19 +512,16 @@ func run_training(training_config cfg) {
                 log_scalar(&state.lg, "train/forward_time", fwd.forward_time_ms, state.global_step, tags)
                 log_scalar(&state.lg, "train/backward_time", bw_info.backward_time_ms, state.global_step, tags)
 
-
                 if cfg.use_wandb {
                     wandb_log_metric(&wb_run, "train/loss", loss_value, state.global_step, tags)
                     wandb_log_metric(&wb_run, "train/lr", current_lr, state.global_step, tags)
                     wandb_log_metric(&wb_run, "train/grad_norm", bw_info.grad_norm, state.global_step, tags)
                 }
 
-
                 if cfg.use_tensorboard {
                     write_scalar(tb_writer, "Loss/train", loss_value, state.global_step)
                     write_scalar(tb_writer, "Train/LearningRate", current_lr, state.global_step)
                     write_scalar(tb_writer, "Train/GradNorm", bw_info.grad_norm, state.global_step)
-
 
                     if state.global_step % (cfg.log_every_n_steps * 10) == 0:
                         []float grad_values = extract_flat_grad_values(bw_info.parameter_gradients)
@@ -653,9 +531,6 @@ func run_training(training_config cfg) {
                                        grad_values, state.global_step)
                 }
 
-
-
-
             if cfg.validation_every_n_steps > 0 &&
                state.global_step % cfg.validation_every_n_steps == 0:
 
@@ -663,7 +538,6 @@ func run_training(training_config cfg) {
 
                 float val_loss = run_validation(model, state.val_loader, cfg)
                 float val_perplexity = exp(val_loss)
-
 
                 map[string]string val_tags = {"epoch": str(epoch), "phase": "validation"}
                 log_scalar(&state.lg, "val/loss", val_loss, state.global_step, val_tags)
@@ -677,20 +551,14 @@ func run_training(training_config cfg) {
                     write_scalar(tb_writer, "Loss/validation", val_loss, state.global_step)
                     write_scalar(tb_writer, "Validation/Perplexity", val_perplexity, state.global_step)
 
-
                 if val_loss < state.best_validation_loss:
                     state.best_validation_loss = val_loss
                     println("✓ New best validation loss: " + str(val_loss))
 
-
                     save_best_model(model, state.opt, state.global_step,
                                    cfg.output_dir, val_loss)
 
-
                 generate_validation_samples(model, cfg, state.global_step)
-
-
-
 
             should_save = false
             if cfg.save_every_n_steps > 0 &&
@@ -711,9 +579,7 @@ func run_training(training_config cfg) {
                 save_model_checkpoint(ckpt, cfg.output_dir, step=state.global_step)
                 println("✓ checkpoint saved successfully")
 
-
             (b, epoch_done) = next_batch(state.train_loader)
-
 
         float epoch_time = current_time_seconds() - epoch_start_time
         float avg_loss = epoch_loss_sum / float(max(epoch_batches, 1))
@@ -723,27 +589,19 @@ func run_training(training_config cfg) {
         println("    Time: " + format_duration(epoch_time))
         println("    Steps: " + str(state.global_step))
 
-
         if cfg.save_every_n_epochs > 0 && (epoch + 1) % cfg.save_every_n_epochs == 0:
             save_model_checkpoint(create_checkpoint(...), cfg.output_dir, epoch=epoch+1)
-
 
         if cfg.max_train_steps > 0 && state.global_step >= cfg.max_train_steps:
             break
     }
-
-
-
-
 
     println("\n" + "=" * 80)
     println("TRAINING COMPLETED")
     println("=" * 80)
     print_final_summary(state, cfg)
 
-
     save_final_model(model, state.opt, state.global_step, cfg.output_dir)
-
 
     if cfg.use_wandb:
         finish_wandb(wb_run)
@@ -755,10 +613,6 @@ func run_training(training_config cfg) {
     println("   View TensorBoard: tensorboard --logdir=" + cfg.log_dir)
     if cfg.use_wandb:
         println("   View WandB: " + wb_run.run_url)
-
-
-
-
 
 func run_validation(
     transformer_model model,
@@ -785,16 +639,10 @@ func run_validation(
 
         (b, done) = next_batch(val_loader)
 
-
     model = train_mode(model)
-
 
     total_loss / float(total_samples)
 }
-
-
-
-
 
 func generate_validation_samples(
     transformer_model model,
@@ -808,19 +656,16 @@ func generate_validation_samples(
     """
     println("\n🎯 Generating validation samples (step " + str(current_step) + ")...")
 
-
     []string prompts = [
         "The future of artificial intelligence is",
         "Once upon a time,",
         "In a world where machines can",
     ]
 
-
     generator_config gen_cfg = default_generator_config()
     gen_cfg.max_new_tokens = 64
     gen_cfg.return_scores = false
     gen_cfg.return_full_text = true
-
 
     func []int forward_fn([]int token_ids):
 
@@ -833,7 +678,6 @@ func generate_validation_samples(
         forward_result fwd = model_forward(model, dummy_batch, record_for_backward=false)
 
         extract_last_token_logits(fwd.logits)
-
 
     strategies = ["greedy", "top_p"]
 
@@ -851,9 +695,7 @@ func generate_validation_samples(
 
             []int prompt_ids = simple_tokenize(prompt)
 
-
             generation_result result = generate(prompt_ids, forward_fn, gen_cfg)
-
 
             generated_text = simple_decode(result.sequences[0])
 
@@ -863,30 +705,21 @@ func generate_validation_samples(
 
     println("  ✓ Text generation validated successfully")
 
-
-
-
-
-
 func count_parameters(transformer_model model) int:
     int count = 0
 
-
     count += numel(model.token_embedding)
     count += numel(model.position_embedding)
-
 
     for layer in model.layers:
         count += numel(layer.wq) + numel(layer.wk) + numel(layer.wv) + numel(layer.wo)
         count += numel(layer.w_gate) + numel(layer.w_up) + numel(layer.w_down)
         count += numel(layer.ln_1) + numel(layer.ln_2)
 
-
     count += numel(model.lm_head)
     count += numel(model.final_norm)
 
     return count
-
 
 func move_model_to_gpu(transformer_model model, device_context ctx) transformer_model:
     model.token_embedding = to_gpu(model.token_embedding, ctx)
@@ -907,7 +740,6 @@ func move_model_to_gpu(transformer_model model, device_context ctx) transformer_
 
     return model
 
-
 func clip_gradients([]tensor grads, float max_norm) []tensor:
     """Gradient clipping to prevent exploding gradients"""
     float total_norm = 0.0
@@ -924,14 +756,12 @@ func clip_gradients([]tensor grads, float max_norm) []tensor:
 
     return grads
 
-
 func simple_tokenize(string text) []int:
     """Mock tokenization: convert characters to ASCII codes"""
     []int tokens = [1]
     for char in text:
         tokens.push(int(char) % 50257)
     return tokens
-
 
 func simple_decode([]int token_ids) string:
     """Mock decode: convert token IDs to characters"""
@@ -942,7 +772,6 @@ func simple_decode([]int token_ids) string:
         else:
             result = result + "▢"
     return result
-
 
 func print_final_summary(training_state state, training_config cfg):
     println("\n" + "=" * 60)
@@ -963,40 +792,24 @@ func print_final_summary(training_state state, training_config cfg):
     if cfg.distributed_training:
         println("Distributed:     ✓ " + str(cfg.world_size) + " GPUs")
 
-
-
-
-
 func main():
     """Main entry point for training"""
 
-
     training_config cfg = default_training_config()
-
 
     if has_command_arg("--config"):
         string config_path = get_command_arg("--config")
         cfg = load_config_from_json(config_path)
-
 
     println("\n📋 Training Configuration:")
     println("-" * 40)
     print_config_pretty(cfg)
     println()
 
-
     run_training(cfg)
-
 
 if is_main_module():
     main()
-
-
-
-
-
-
-
 
 func make_tensor([]float data, []int shape, bool requires_grad) tensor:
     tensor {
@@ -1494,7 +1307,6 @@ func create_directory_if_not_exists(string path):
     import os
     os.makedirs(path, exist_ok=True)
 
-
 func load_config_from_json(string path) training_config:
     """Load training config from JSON file"""
     import json
@@ -1502,7 +1314,6 @@ func load_config_from_json(string path) training_config:
 
     with open(path, 'r') as f:
         overrides = json.load(f)
-
 
     for key, value in overrides.items():
         if hasattr(cfg, key):
@@ -1569,7 +1380,6 @@ func eval_mode(transformer_model model) transformer_model:
 func train_mode(transformer_model model) transformer_model:
     """Switch model back to training mode"""
     return model
-
 
 func has_command_arg(string arg) bool:
     """Check if argument was provided on command line"""

@@ -1,10 +1,5 @@
 package neurx.tests
 
-
-
-
-
-
 use neurx.cuda.device_manager
 use neurx.distributed.nccl_backend
 use neurx.engine.training_orchestrator
@@ -13,10 +8,6 @@ use neurx.model.transformer
 use neurx.amp.scaler
 use neurx.optimizer.adamw
 use neurx.tokenizer.data_pipeline
-
-
-
-
 
 struct test_result {
     string name
@@ -39,7 +30,6 @@ func run_all_tests() {
 
     total_passed := 0
     total_failed := 0
-
 
     suite1 := run_cuda_tests()
     total_passed += suite1.num_passed
@@ -65,7 +55,6 @@ func run_all_tests() {
     total_passed += suite6.num_passed
     total_failed += suite6.num_failed
 
-
     println("\n" + "=" * 70)
     println("📊 FINAL RESULTS")
     println("=" * 70)
@@ -80,25 +69,16 @@ func run_all_tests() {
     }
 }
 
-
-
-
-
 func run_cuda_tests() test_suite {
     suite := test_suite{name: "CUDA Device Management", results: make([]test_result, 0)}
 
-
     suite.results = append(suite.results, test_cuda_device_detection())
-
 
     suite.results = append(suite.results, test_cuda_device_selection())
 
-
     suite.results = append(suite.results, test_cuda_memory_allocation())
 
-
     suite.results = append(suite.results, test_cuda_memcpy())
-
 
     suite.results = append(suite.results, test_cuda_synchronization())
 
@@ -152,7 +132,6 @@ func test_cuda_device_selection() test_result {
 func test_cuda_memory_allocation() test_result {
     start := get_timestamp()
 
-
     ctx, err := init_cuda_context(0)
     if err != nil {
         return test_result{
@@ -162,7 +141,6 @@ func test_cuda_memory_allocation() test_result {
             duration_ms: (get_timestamp() - start) * 1000,
         }
     }
-
 
     ptr, err := cuda_malloc(ctx, 10*1024*1024, "test_alloc")
     passed := err == nil && ptr != 0
@@ -193,14 +171,11 @@ func test_cuda_memcpy() test_result {
         }
     }
 
-
     num_bytes := 1024 * 1024
     host_ptr, _ := cuda_malloc_pinned(num_bytes, "host")
     device_ptr, _ := cuda_malloc(ctx, num_bytes, "device")
 
-
     err1 := cuda_memcpy_h2d(device_ptr, host_ptr, num_bytes)
-
 
     err2 := cuda_memcpy_d2h(host_ptr, device_ptr, num_bytes)
 
@@ -245,13 +220,8 @@ func test_cuda_synchronization() test_result {
     }
 }
 
-
-
-
-
 func run_nccl_tests() test_suite {
     suite := test_suite{name: "NCCL Communication", results: make([]test_result, 0)}
-
 
     suite.results = append(suite.results, test_nccl_initialization())
     suite.results = append(suite.results, test_nccl_barrier())
@@ -320,10 +290,6 @@ func test_nccl_barrier() test_result {
     }
 }
 
-
-
-
-
 func run_model_tests() test_suite {
     suite := test_suite{name: "Model Architecture", results: make([]test_result, 0)}
 
@@ -338,7 +304,6 @@ func run_model_tests() test_suite {
 func test_transformer_forward_pass() test_result {
     start := get_timestamp()
 
-
     cfg := transformer_config{
         vocab_size: 1000,
         hidden_dim: 128,
@@ -350,11 +315,9 @@ func test_transformer_forward_pass() test_result {
     ctx, _ := init_cuda_context(0)
     model := create_transformer_model(cfg, ctx)
 
-
     batch_size := 2
     seq_length := 16
     input_ids := make([][]int, batch_size)
-
 
     logits := model.forward(input_ids)
     passed := logits != nil
@@ -372,9 +335,6 @@ func test_transformer_forward_pass() test_result {
 func test_transformer_backward_pass() test_result {
     start := get_timestamp()
 
-
-
-
     test_result{
         name: "Transformer Backward Pass",
         passed: true,
@@ -386,9 +346,6 @@ func test_transformer_backward_pass() test_result {
 func test_attention_computation() test_result {
     start := get_timestamp()
 
-
-
-
     test_result{
         name: "Multi-Head Attention",
         passed: true,
@@ -396,10 +353,6 @@ func test_attention_computation() test_result {
         duration_ms: (get_timestamp() - start) * 1000,
     }
 }
-
-
-
-
 
 func run_optimizer_tests() test_suite {
     suite := test_suite{name: "Optimizer", results: make([]test_result, 0)}
@@ -413,7 +366,6 @@ func run_optimizer_tests() test_suite {
 
 func test_adamw_optimizer() test_result {
     start := get_timestamp()
-
 
     optimizer := adamw_optimizer{
         learning_rate: 0.001,
@@ -443,10 +395,8 @@ func test_learning_rate_schedule() test_result {
         lr_schedule: "cosine",
     }
 
-
     lr_start := compute_learning_rate(0, cfg)
     lr_end := compute_learning_rate(cfg.max_steps - 1, cfg)
-
 
     passed := lr_start > 0 && lr_end > 0
 
@@ -457,10 +407,6 @@ func test_learning_rate_schedule() test_result {
         duration_ms: (get_timestamp() - start) * 1000,
     }
 }
-
-
-
-
 
 func run_integration_tests() test_suite {
     suite := test_suite{name: "Integration", results: make([]test_result, 0)}
@@ -485,7 +431,6 @@ func run_industrial_training_tests() test_suite {
 func test_end_to_end_training_step() test_result {
     start := get_timestamp()
 
-
     cfg := training_config{
         model_name: "test_model",
         vocab_size: 1000,
@@ -500,7 +445,6 @@ func test_end_to_end_training_step() test_result {
         distributed_backend: "none",
         precision: "fp32",
     }
-
 
     state, err := create_training_orchestrator(cfg)
     passed := err == nil && state.model != nil
@@ -520,9 +464,6 @@ func test_end_to_end_training_step() test_result {
 func test_checkpoint_save_load() test_result {
     start := get_timestamp()
 
-
-
-
     test_result{
         name: "checkpoint Save/Load",
         passed: true,
@@ -534,11 +475,9 @@ func test_checkpoint_save_load() test_result {
 func test_mixed_precision() test_result {
     start := get_timestamp()
 
-
     fp32_value := 1.0
     bf16_value := cast_to_bf16(fp32_value)
     fp32_back := cast_to_fp32(bf16_value)
-
 
     error := abs(fp32_value - fp32_back)
     passed := error < 0.01
@@ -570,14 +509,9 @@ func test_industrial_training_smoke() test_result {
     }
 }
 
-
-
-
-
 func run_performance_tests() {
     println("\n📈 Performance Benchmarks")
     println("=" * 70)
-
 
     benchmark_gpu_throughput()
     benchmark_communication_bandwidth()
@@ -589,10 +523,8 @@ func benchmark_gpu_throughput() {
 
     ctx, _ := init_cuda_context(0)
 
-
     size := 1024 * 1024 * 1024
     ptr, _ := cuda_malloc(ctx, size, "throughput_bench")
-
 
     start := get_timestamp()
     for i := 0; i < 10; i += 1 {
@@ -629,12 +561,10 @@ func benchmark_model_inference() {
     ctx, _ := init_cuda_context(0)
     model := create_transformer_model(cfg, ctx)
 
-
     input_ids := make([][]int, 1)
     for i := 0; i < 3; i += 1 {
         model.forward(input_ids)
     }
-
 
     num_runs := 10
     start := get_timestamp()
@@ -649,10 +579,6 @@ func benchmark_model_inference() {
 
     cleanup_cuda_context(ctx)
 }
-
-
-
-
 
 func print_test_suite_results(test_suite suite) {
     println("\n" + "=" * 70)

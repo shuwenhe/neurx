@@ -1,8 +1,5 @@
 
 
-
-
-
 package main
 
 import (
@@ -43,10 +40,6 @@ type multi_task_learner struct {
     uncertainty_weights     map[int]float64
 }
 
-
-
-
-
 func (mtl *multi_task_learner) register_task(task_name string, data_size int, weight float64) int {
     task_id := len(mtl.tasks)
 
@@ -70,10 +63,6 @@ func (mtl *multi_task_learner) register_task(task_name string, data_size int, we
     return task_id
 }
 
-
-
-
-
 func (mtl *multi_task_learner) shared_forward(input []int) []float64 {
 
     hidden := make([]float64, mtl.config.shared_hidden_size)
@@ -84,10 +73,6 @@ func (mtl *multi_task_learner) shared_forward(input []int) []float64 {
 
     return hidden
 }
-
-
-
-
 
 func (mtl *multi_task_learner) task_forward(shared_hidden []float64, task_id int) []float64 {
 
@@ -105,10 +90,6 @@ func (mtl *multi_task_learner) task_forward(shared_hidden []float64, task_id int
     return output
 }
 
-
-
-
-
 func (mtl *multi_task_learner) compute_multi_task_loss(
     batch_inputs [][]int,
     batch_targets [][]int,
@@ -123,17 +104,13 @@ func (mtl *multi_task_learner) compute_multi_task_loss(
     for i := 0; i < len(batch_inputs); i++ {
         task_id := task_ids[i]
 
-
         shared := mtl.shared_forward(batch_inputs[i])
 
-
         output := mtl.task_forward(shared, task_id)
-
 
         task_loss := mtl.compute_task_loss(output, batch_targets[i])
         losses[task_id] += task_loss
     }
-
 
     for task_id := range losses {
         losses[task_id] /= float64(len(batch_inputs) + 1)
@@ -170,10 +147,6 @@ func (mtl *multi_task_learner) compute_task_loss(output []float64, target []int)
     return loss / float64(len(target)+1)
 }
 
-
-
-
-
 func (mtl *multi_task_learner) get_task_weight(task_id int) float64 {
     switch mtl.config.loss_balancing {
     case "fixed":
@@ -201,10 +174,6 @@ func (mtl *multi_task_learner) adaptive_weight(task_id int) float64 {
     return 1.0 / recent_loss
 }
 
-
-
-
-
 func (mtl *multi_task_learner) train_step(
     batch_inputs [][]int,
     batch_targets [][]int,
@@ -220,16 +189,11 @@ func (mtl *multi_task_learner) train_step(
 
         mtl.task_losses[task_id] = append(mtl.task_losses[task_id], loss)
 
-
         mtl.task_performance[task_id] = 1.0 / (1.0 + loss)
     }
 
     return total_loss / float64(len(losses)+1)
 }
-
-
-
-
 
 func (mtl *multi_task_learner) train(num_steps int) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
@@ -272,10 +236,6 @@ func (mtl *multi_task_learner) train(num_steps int) {
     }
 }
 
-
-
-
-
 func (mtl *multi_task_learner) analyze_performance() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Multi-task Learning Performance Analysis             ║")
@@ -308,10 +268,6 @@ func (mtl *multi_task_learner) analyze_performance() {
     }
 }
 
-
-
-
-
 func NewMultiTaskLearner(config multi_task_config) *multi_task_learner {
     return &multi_task_learner{
         config: config,
@@ -331,9 +287,7 @@ func (mtl *multi_task_learner) run() {
     mtl.register_task("Summarization", 6000, 0.6)
     mtl.register_task("Classification", 7000, 0.7)
 
-
     mtl.train(1000)
-
 
     mtl.analyze_performance()
 

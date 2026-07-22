@@ -1,8 +1,5 @@
 package neurx.model.transformer.position_encoding
 
-
-
-
 struct position_encoding_config {
     int hidden_dim
     int max_seq_len
@@ -28,10 +25,6 @@ struct rope_position_encoding {
     float rope_base
     []float frequencies
 }
-
-
-
-
 
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
@@ -149,10 +142,6 @@ func log_approx(float x) float {
     result * 2.0
 }
 
-
-
-
-
 func new_absolute_position_encoding(position_encoding_config cfg) absolute_position_encoding {
     int hidden_dim = cfg.hidden_dim
     int max_seq_len = cfg.max_seq_len
@@ -226,10 +215,6 @@ func get_position_encoding(
     output
 }
 
-
-
-
-
 func new_learned_position_encoding(position_encoding_config cfg) learned_position_encoding {
     int hidden_dim = cfg.hidden_dim
     int max_seq_len = cfg.max_seq_len
@@ -272,10 +257,6 @@ func get_learned_position_encoding(
 
     output
 }
-
-
-
-
 
 func new_rope_position_encoding(position_encoding_config cfg) rope_position_encoding {
     int hidden_dim = cfg.hidden_dim
@@ -347,10 +328,6 @@ func apply_rope_position(
     result[1] = k_out
     result
 }
-
-
-
-
 
 func add_position_encoding_to_hidden(
     []float hidden_states,

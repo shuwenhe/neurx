@@ -1,6 +1,5 @@
 
 
-
 module real_inference
 
 use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file}

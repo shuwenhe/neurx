@@ -1,7 +1,5 @@
 #!/bin/bash
 
-
-
 set -e
 
 CURDIR="/home/shuwen/shuwen/train/neurx"
@@ -11,7 +9,6 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "🔍 NeurX CUDA Training Environment Diagnostic"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-
 
 echo "📌 Step 1: Checking NVIDIA GPU..."
 if command -v nvidia-smi &> /dev/null; then
@@ -24,7 +21,6 @@ else
 fi
 echo ""
 
-
 echo "📌 Step 2: Checking CUDA training binary..."
 if [ ! -f "$CUDA_TRAIN_BIN" ]; then
     echo "   ❌ Binary not found: $CUDA_TRAIN_BIN"
@@ -33,7 +29,6 @@ fi
 echo "   ✓ Binary exists: $CUDA_TRAIN_BIN"
 ls -lh "$CUDA_TRAIN_BIN" | sed 's/^/   /'
 echo ""
-
 
 echo "📌 Step 3: Checking required files..."
 REQUIRED_FILES=(
@@ -51,14 +46,12 @@ for file in "${REQUIRED_FILES[@]}"; do
 done
 echo ""
 
-
 echo "📌 Step 4: Testing CUDA binary (timeout 30s)..."
 echo "   Running: timeout 30s $CUDA_TRAIN_BIN"
 echo ""
 
 mkdir -p "/tmp/neurx_diagnostic"
 TEST_OUTPUT="/tmp/neurx_diagnostic/test_output.txt"
-
 
 export NEURX_ROOT="$CURDIR"
 export NEURX_PRETRAIN_OUTPUT_DIR="/tmp/neurx_diagnostic/checkpoint"
@@ -77,17 +70,14 @@ export WORLD_SIZE=1
 export CUDA_VISIBLE_DEVICES=0
 export NEURX_NCCL_ID_FILE="/tmp/neurx_diagnostic/nccl_id"
 
-
 mkdir -p "$(dirname "$NEURX_NCCL_ID_FILE")"
 touch "$NEURX_NCCL_ID_FILE"
-
 
 timeout 30s "$CUDA_TRAIN_BIN" > "$TEST_OUTPUT" 2>&1 || EXIT_CODE=$?
 
 if [ -z "$EXIT_CODE" ]; then
     EXIT_CODE=0
 fi
-
 
 if [ -s "$TEST_OUTPUT" ]; then
     echo "   Output:"
@@ -96,7 +86,6 @@ else
     echo "   (No output received)"
 fi
 echo ""
-
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "📊 Summary:"

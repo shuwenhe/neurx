@@ -3,40 +3,24 @@ package neurx.posttrain.alignment.simpo_trainer
 use neurx.distributed.collective
 use neurx.amp.scaler
 
-
-
-
-
-
-
-
-
-
-
-
-
 struct simpo_config {
 
     int seq_len
     int hidden_size
     int vocab_size
 
-
     float learning_rate
     float beta
     float alpha
-
 
     int batch_size
     int num_epochs
     float weight_decay
     float max_grad_norm
 
-
     int global_rank
     int world_size
     int dp_degree
-
 
     string checkpoint_dir
     int save_interval
@@ -46,20 +30,16 @@ struct simpo_state {
 
     simpo_config config
 
-
     []float weights
     []float biases
 
-
     []float optimizer_m
     []float optimizer_v
-
 
     int training_step
     int epoch
     float avg_loss
     float avg_margin
-
 
     int num_batches_processed
     float best_loss
@@ -75,10 +55,6 @@ struct simpo_batch {
     []simpo_preference_pair pairs
     int size
 }
-
-
-
-
 
 func create_simpo_state(simpo_config cfg) simpo_state {
     int param_count = cfg.seq_len * cfg.hidden_size
@@ -98,11 +74,6 @@ func create_simpo_state(simpo_config cfg) simpo_state {
     }
 }
 
-
-
-
-
-
 func compute_log_prob_sum([]float log_probs) float {
     float sum_log_prob = 0.0
     int i = 0
@@ -113,9 +84,6 @@ func compute_log_prob_sum([]float log_probs) float {
     sum_log_prob
 }
 
-
-
-
 func compute_simpo_loss(
     float log_prob_chosen,
     float log_prob_rejected,
@@ -124,20 +92,16 @@ func compute_simpo_loss(
 
     float margin = log_prob_chosen - log_prob_rejected
 
-
-
     float loss = -log_sigmoid_simple(beta * margin)
 
     loss
 }
-
 
 func sigmoid_simple(float x) float {
     if x > 20.0 { return 1.0 }
     if x < -20.0 { return 0.0 }
     1.0 / (1.0 + exp_simple(x))
 }
-
 
 func log_sigmoid_simple(float x) float {
     if x > 0.0 {
@@ -146,7 +110,6 @@ func log_sigmoid_simple(float x) float {
         return x - log_simple(1.0 + exp_simple(x))
     }
 }
-
 
 func exp_simple(float x) float {
     if x > 20.0 { return 485165195.0 }
@@ -161,7 +124,6 @@ func exp_simple(float x) float {
     }
     result
 }
-
 
 func log_simple(float x) float {
     if x <= 0.0 { return -100.0 }
@@ -180,10 +142,6 @@ func log_simple(float x) float {
     2.0 * result
 }
 
-
-
-
-
 func compute_simpo_batch_loss(
     simpo_batch batch,
     simpo_state state
@@ -194,10 +152,6 @@ func compute_simpo_batch_loss(
     int i = 0
     while i < batch.size {
         simpo_preference_pair pair = batch.pairs[i]
-
-
-
-
 
         []float chosen_log_probs = []float{cap: len_tokens_ex(pair.chosen_tokens)}
         []float rejected_log_probs = []float{cap: len_tokens_ex(pair.rejected_tokens)}
@@ -215,19 +169,15 @@ func compute_simpo_batch_loss(
             j = j + 1
         }
 
-
         float log_prob_chosen = compute_log_prob_sum(chosen_log_probs)
         float log_prob_rejected = compute_log_prob_sum(rejected_log_probs)
 
-
         float pair_loss = compute_simpo_loss(log_prob_chosen, log_prob_rejected, cfg.beta)
-
 
         total_loss = total_loss + pair_loss * pair.confidence
 
         i = i + 1
     }
-
 
     if batch.size > 0 {
         total_loss = total_loss / (batch.size as float)
@@ -235,10 +185,6 @@ func compute_simpo_batch_loss(
 
     total_loss
 }
-
-
-
-
 
 func simpo_training_step(
     simpo_state state,
@@ -248,13 +194,11 @@ func simpo_training_step(
 
     float loss = compute_simpo_batch_loss(batch, state)
 
-
     state.avg_loss = (state.avg_loss * (state.num_batches_processed as float) + loss) /
                      ((state.num_batches_processed + 1) as float)
 
     state.num_batches_processed = state.num_batches_processed + 1
     state.training_step = state.training_step + 1
-
 
     if loss < state.best_loss {
         state.best_loss = loss
@@ -262,10 +206,6 @@ func simpo_training_step(
 
     state
 }
-
-
-
-
 
 func start_simpo_training(
     simpo_config cfg,
@@ -279,7 +219,6 @@ func start_simpo_training(
     print("  Beta (margin scale): " + float_to_string_ex(cfg.beta))
     print("")
 
-
     int epoch = 0
     while epoch < cfg.num_epochs {
         state.epoch = epoch
@@ -288,14 +227,11 @@ func start_simpo_training(
         print("[SimPO Epoch " + int_to_string_ex(epoch + 1) + "/" +
               int_to_string_ex(cfg.num_epochs) + "]")
 
-
         int batch_idx = 0
         while batch_idx < len_batch_ex(batches) {
             simpo_batch batch = batches[batch_idx]
 
-
             state = simpo_training_step(state, batch, cfg.learning_rate)
-
 
             if (batch_idx + 1) % 5 == 0 {
                 print("  Batch " + int_to_string_ex(batch_idx + 1) +
@@ -321,10 +257,6 @@ func start_simpo_training(
     state
 }
 
-
-
-
-
 func int_to_string_ex(int i) string {
     string(i)
 }
@@ -348,10 +280,6 @@ func len_batch_ex([]simpo_batch batches) int {
 func append_lp([]float arr, float lp) []float {
     arr
 }
-
-
-
-
 
 func synchronize_gradients_simpo(simpo_state state) simpo_state {
     if state.config.world_size > 1 {

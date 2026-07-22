@@ -1,15 +1,5 @@
 
 
-
-
-
-
-
-
-
-
-
-
 package neurx.script.data_clean
 
 use neurx.script.data_utils.{
@@ -34,10 +24,6 @@ use neurx.script.data_utils.{
 }
 use neurx.strings.{string_split, string_join, string_contains, string_trim}
 
-
-
-
-
 struct clean_config {
     string raw_dir
     string cleaned_dir
@@ -61,10 +47,6 @@ struct dataset_splits {
     string test_file
 }
 
-
-
-
-
 func new_clean_config_from_env() clean_config {
     let neurx_home = get_env("NEURX_HOME", ".")
 
@@ -78,17 +60,12 @@ func new_clean_config_from_env() clean_config {
     }
 }
 
-
-
-
-
 pub func clean_data(config: clean_config) bool {
     log_info("")
     log_info("╔════════════════════════════════════════════╗")
     log_info("║     NeurX Data Cleaning (S Lang)           ║")
     log_info("╚════════════════════════════════════════════╝")
     log_info("")
-
 
     if !ensure_dir(config.cleaned_dir) {
         log_error("Failed to create cleaned directory")
@@ -101,7 +78,6 @@ pub func clean_data(config: clean_config) bool {
     log_info("  • manifest: " + config.manifest_file)
     log_info("")
 
-
     let sources = find_source_files(config.raw_dir)
     if len(sources) == 0 {
         log_warn("No raw data files found in " + config.raw_dir)
@@ -110,7 +86,6 @@ pub func clean_data(config: clean_config) bool {
 
     log_info("📚 Found " + i64_to_string(i64(len(sources))) + " source files")
     log_info("")
-
 
     let mut stats = clean_stats{
         total_processed: 0,
@@ -141,7 +116,6 @@ pub func clean_data(config: clean_config) bool {
     log_info("  • Errors: " + i64_to_string(stats.errors))
     log_info("")
 
-
     if !finalize_dataset(config, &stats) {
         log_error("Failed to finalize dataset splits")
         return false
@@ -151,18 +125,10 @@ pub func clean_data(config: clean_config) bool {
     true
 }
 
-
-
-
-
 func find_source_files(raw_dir: string) []string {
     let supported = []string{".jsonl", ".txt", ".xml", ".xml.bz2"}
     dir_list_files(raw_dir, supported)
 }
-
-
-
-
 
 func process_source_file(config: clean_config, source_file: string, stats: &clean_stats, seen_hashes: map[string]bool) bool {
     let (content, ok) = file_read_text(source_file)
@@ -173,7 +139,6 @@ func process_source_file(config: clean_config, source_file: string, stats: &clea
     }
 
     let fname = path_basename(source_file)
-
 
     if string_contains(fname, ".jsonl") {
         process_jsonl(config, content, stats, seen_hashes)
@@ -198,13 +163,11 @@ func process_jsonl(config: clean_config, content: string, stats: &clean_stats, s
 
         stats.total_processed = stats.total_processed + 1
 
-
         let text = extract_text_from_jsonl(trimmed)
         if text == "" {
             stats.empty_records_skipped = stats.empty_records_skipped + 1
             continue
         }
-
 
         let hkey = hash_key(normalize_whitespace(text))
         if seen_hashes[hkey] {
@@ -212,7 +175,6 @@ func process_jsonl(config: clean_config, content: string, stats: &clean_stats, s
             continue
         }
         seen_hashes[hkey] = true
-
 
         let record = create_cleaned_record(text, "jsonl")
         if file_append_text(config.output_file, record + "\n") {
@@ -237,14 +199,12 @@ func process_text(config: clean_config, content: string, stats: &clean_stats, se
 
         stats.total_processed = stats.total_processed + 1
 
-
         let hkey = hash_key(normalize_whitespace(text))
         if seen_hashes[hkey] {
             stats.duplicates_skipped = stats.duplicates_skipped + 1
             continue
         }
         seen_hashes[hkey] = true
-
 
         let record = create_cleaned_record(text, "txt")
         if file_append_text(config.output_file, record + "\n") {
@@ -259,8 +219,6 @@ func process_text(config: clean_config, content: string, stats: &clean_stats, se
 
 func process_xml(config: clean_config, content: string, stats: &clean_stats, seen_hashes: map[string]bool) bool {
 
-
-
     let mut text_blocks = []string{}
     let lines = string_split(content, "\n")
     let mut in_tag = false
@@ -268,7 +226,6 @@ func process_xml(config: clean_config, content: string, stats: &clean_stats, see
 
     for _, line in lines {
         let trimmed = string_trim(line)
-
 
         if string_contains(trimmed, "<") && string_contains(trimmed, ">") {
             if current_text != "" {
@@ -283,7 +240,6 @@ func process_xml(config: clean_config, content: string, stats: &clean_stats, see
     if current_text != "" {
         text_blocks = append(text_blocks, current_text)
     }
-
 
     for _, text in text_blocks {
         let cleaned = string_trim(text)
@@ -311,10 +267,6 @@ func process_xml(config: clean_config, content: string, stats: &clean_stats, see
     true
 }
 
-
-
-
-
 func create_cleaned_record(text: string, source: string) string {
 
     let encoded_text = escape_json_string(text)
@@ -325,18 +277,14 @@ func create_cleaned_record(text: string, source: string) string {
 
 func extract_text_from_jsonl(jsonl_line: string) string {
 
-
-
     if !string_contains(jsonl_line, "\"text\"") {
         return ""
     }
-
 
     let start_idx = find_substring(jsonl_line, "\"text\"")
     if start_idx < 0 {
         return ""
     }
-
 
     let mut i = start_idx + 6
     while i < len(jsonl_line) && jsonl_line[i] != '"' {
@@ -349,7 +297,6 @@ func extract_text_from_jsonl(jsonl_line: string) string {
 
     i = i + 1
     let text_start = i
-
 
     while i < len(jsonl_line) {
         if jsonl_line[i] == '"' && (i == 0 || jsonl_line[i - 1] != '\\') {
@@ -394,10 +341,6 @@ func estimate_tokens(text: string) i64 {
     i64(max(1, len(text) / 4))
 }
 
-
-
-
-
 func finalize_dataset(config: clean_config, stats: &clean_stats) bool {
     log_info("")
     log_info("📋 Finalizing dataset splits (train/val/test)...")
@@ -407,7 +350,6 @@ func finalize_dataset(config: clean_config, stats: &clean_stats) bool {
         log_warn("No cleaned data found")
         return write_empty_manifest(config)
     }
-
 
     let train_size = total_lines * 8 / 10
     let val_size = total_lines / 10
@@ -424,14 +366,12 @@ func finalize_dataset(config: clean_config, stats: &clean_stats) bool {
         test_file: path_join([]string{config.cleaned_dir, "test.jsonl"}),
     }
 
-
     if !split_dataset(config.output_file, splits, train_size, val_size) {
         log_error("Failed to split dataset")
         return false
     }
 
     log_success("Dataset splits created successfully")
-
 
     if !write_cleaned_manifest(config, splits, total_lines, stats) {
         log_error("Failed to write manifest")
@@ -508,10 +448,6 @@ func write_empty_manifest(config: clean_config) bool {
     file_write_text(config.manifest_file, manifest)
 }
 
-
-
-
-
 func find_substring(s: string, substr: string) i32 {
     for i = 0; i <= len(s) - len(substr); i = i + 1 {
         let mut match_ok = true
@@ -541,10 +477,6 @@ func string(ch: u8) string {
 
     ""
 }
-
-
-
-
 
 pub func main() i32 {
     let config = new_clean_config_from_env()

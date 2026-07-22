@@ -1,15 +1,5 @@
 package neurx.inference.sampling
 
-
-
-
-
-
-
-
-
-
-
 func get_blocked_tokens(
     []int generated_ids,
     int no_repeat_ngram_size,
@@ -19,16 +9,13 @@ func get_blocked_tokens(
         return []
     }
 
-
     map<int]bool blocked = {}
     int start = len(generated_ids) - (no_repeat_ngram_size - 1)
-
 
     []int recent_prefix = []
     for i in start .. len(generated_ids) {
         recent_prefix.push(generated_ids[i])
     }
-
 
     for pos in 0..(len(generated_ids) - no_repeat_ngram_size + 1) {
         bool match = true
@@ -41,13 +28,11 @@ func get_blocked_tokens(
             }
         }
 
-
         if match  (pos + no_repeat_ngram_size - 1) < len(generated_ids) {
             int blocked_token = generated_ids[pos + no_repeat_ngram_size - 1]
             blocked[blocked_token] = true
         }
     }
-
 
     []int blocked_tokens = []
     for id in blocked {
@@ -69,7 +54,6 @@ func apply_ngram_blocking(
     if len(blocked) == 0 {
         return logits
     }
-
 
     []float filtered = copy_float_array(logits)
     float neg_inf = -1e10

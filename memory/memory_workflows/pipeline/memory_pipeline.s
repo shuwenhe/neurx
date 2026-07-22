@@ -1,18 +1,10 @@
 use neurx.agent
 use neurx.runtime.io.{runtime_write_text_file, runtime_file_exists}
 
-
-
-
-
 string out_prefix   = "artifacts/checkpoints/agent/memory"
 string mem_path     = out_prefix + "/memory.txt"
 string report_path  = out_prefix + "/report.txt"
 string trace_path   = out_prefix + "/trace.txt"
-
-
-
-
 
 []string phase1_inputs = []string{cap: 4}
 phase1_inputs[0] = "search and index neurx agent architecture overview"
@@ -27,11 +19,6 @@ int keys_after_phase1 = len(agent_memory_keys(phase1))
 agent_persist_memory(phase1, mem_path)
 
 string phase1_trace = agent_trace_last_n_summary(phase1, 8)
-
-
-
-
-
 
 agent_runtime_state phase2 = agent_warm_start(
     "memory_retrieval_phase",
@@ -51,9 +38,6 @@ phase2 = run_agent_batch(phase2, phase2_inputs, 8)
 
 int keys_after_phase2 = len(agent_memory_keys(phase2))
 
-
-
-
 []string expected_keys = []string{cap: 3}
 expected_keys[0] = "agent_architecture"
 expected_keys[1] = "tensor_ops"
@@ -72,8 +56,6 @@ while ki < len(expected_keys) {
     key_report = key_report + "  key=" + expected_keys[ki] + " " + hit_str + "\n"
     ki = ki + 1
 }
-
-
 
 string stall_str = "false"
 if agent_is_stalled(phase2) {

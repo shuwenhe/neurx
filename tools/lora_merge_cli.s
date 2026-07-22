@@ -3,13 +3,6 @@ package neurx.tools.lora_merge_cli
 use neurx.runtime.io.{runtime_env_get}
 use std.io.println
 
-
-
-
-
-
-
-
 func main() int {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     string merger_bin = runtime_env_get("NEURX_LORA_MERGER_BIN",
@@ -40,7 +33,6 @@ func main() int {
     println("Running C-optimized merger...")
     println("")
 
-
     string command = merger_bin + " " +
         base_model + " " +
         adapter_dir + " " +
@@ -50,10 +42,6 @@ func main() int {
 
     println("Command: " + command)
     println("")
-
-
-
-
 
     0
 }

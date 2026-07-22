@@ -1,8 +1,5 @@
 
 
-
-
-
 package main
 
 import (
@@ -56,10 +53,6 @@ type synthesis_quality_stats struct {
     passed_quality_filter   int
 }
 
-
-
-
-
 func (engine *data_synthesis_engine) generate_synthetic_examples() {
     fmt.Println("[DataSynthesis] Generating synthetic examples...")
 
@@ -68,7 +61,6 @@ func (engine *data_synthesis_engine) generate_synthetic_examples() {
     for i := 0; i < engine.config.num_synthetic_samples; i++ {
         task_idx := i % len(tasks)
         task := tasks[task_idx]
-
 
         prompt := engine.generate_prompt(task, i)
         response := engine.generate_response(prompt, task)
@@ -178,7 +170,6 @@ func (engine *data_synthesis_engine) evaluate_quality(prompt string, response st
     coherence_score := 0.8
     relevance_score := 0.85
 
-
     quality := 0.3*length_score + 0.4*coherence_score + 0.3*relevance_score
     quality += math.Sin(float64(len(prompt))*0.1) * 0.1
 
@@ -196,7 +187,6 @@ func (engine *data_synthesis_engine) calculate_diversity(prompt string, response
 
     unique_tokens := make(map[string]bool)
 
-
     for i := 0; i < len(response); i++ {
         if i+3 < len(response) {
             unique_tokens[response[i:i+3]] = true
@@ -211,10 +201,6 @@ func (engine *data_synthesis_engine) calculate_diversity(prompt string, response
     return diversity
 }
 
-
-
-
-
 func (engine *data_synthesis_engine) generate_preference_pairs() {
     fmt.Println("[DataSynthesis] Generating preference pairs...")
 
@@ -222,7 +208,6 @@ func (engine *data_synthesis_engine) generate_preference_pairs() {
         prompt := engine.generate_prompt("qa", i)
         response_a := engine.generate_response(prompt, "qa")
         response_b := engine.generate_response(prompt, "coding")
-
 
         quality_a := engine.evaluate_quality(prompt, response_a)
         quality_b := engine.evaluate_quality(prompt, response_b)
@@ -254,10 +239,6 @@ func (engine *data_synthesis_engine) generate_preference_pairs() {
         }
     }
 }
-
-
-
-
 
 func (engine *data_synthesis_engine) analyze_quality() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
@@ -307,10 +288,6 @@ func (engine *data_synthesis_engine) analyze_quality() {
     fmt.Printf("\nPreference Pairs: %d generated\n", len(engine.preference_pairs))
 }
 
-
-
-
-
 func (engine *data_synthesis_engine) export_to_jsonl() {
     fmt.Println("\n[DataSynthesis] Exporting to JSONL format...")
 
@@ -318,10 +295,6 @@ func (engine *data_synthesis_engine) export_to_jsonl() {
     fmt.Printf("  Preference pairs: %d\n", len(engine.preference_pairs))
     fmt.Println("  Format: JSONL (JSON Lines)")
 }
-
-
-
-
 
 func NewDataSynthesisEngine(config data_synthesis_config) *data_synthesis_engine {
     return &data_synthesis_engine{

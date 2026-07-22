@@ -1,33 +1,9 @@
 package neurx.alignment.constitutional_ai
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.model.llm.gpt.{
     model_config, language_model,
     gpt_generate_greedy, gpt_generate_topk
 }
-
-
-
-
 
 struct constitutional_principle {
     string id
@@ -40,7 +16,6 @@ struct constitution {
     []constitutional_principle principles
     int num_principles
 }
-
 
 func default_constitution() constitution {
     []constitutional_principle ps = []constitutional_principle{cap: 8}
@@ -97,11 +72,6 @@ func default_constitution() constitution {
     constitution { principles: ps, num_principles: 8 }
 }
 
-
-
-
-
-
 struct cai_preference_pair {
     []int prompt_tokens
     []int chosen_tokens
@@ -117,17 +87,11 @@ struct cai_batch {
     int num_revised
 }
 
-
-
-
-
-
 func cai_token_prompt_start() int { 50001 }
 func cai_token_response_start() int { 50002 }
 func cai_token_critique_start() int { 50003 }
 func cai_token_revision_start() int { 50004 }
 func cai_token_principle_base() int { 50100 }
-
 
 func cai_concat([]int a, []int b) []int {
     int n = len(a) + len(b)
@@ -145,11 +109,6 @@ func cai_single(int tok) []int {
     out
 }
 
-
-
-
-
-
 func cai_critique_revise(
     language_model model,
     []int prompt_tokens,
@@ -162,17 +121,14 @@ func cai_critique_revise(
     []int gen_input = cai_concat(prompt_tokens, cai_single(cai_token_response_start()))
     []int original_response = gpt_generate_topk(model, gen_input, max_response_tokens, 50, 0.8, seed)
 
-
     []int critique_context = cai_concat(prompt_tokens, original_response)
     critique_context = cai_concat(critique_context, cai_single(cai_token_critique_start()))
     critique_context = cai_concat(critique_context, cai_single(cai_token_principle_base() + principle_index))
     []int critique = gpt_generate_topk(model, critique_context, max_response_tokens / 2, 40, 0.7, seed + 1)
 
-
     []int revision_context = cai_concat(critique_context, critique)
     revision_context = cai_concat(revision_context, cai_single(cai_token_revision_start()))
     []int revised_response = gpt_generate_topk(model, revision_context, max_response_tokens, 50, 0.7, seed + 2)
-
 
     float critique_strength = cai_estimate_critique_strength(critique, max_response_tokens / 2)
 
@@ -186,7 +142,6 @@ func cai_critique_revise(
     }
 }
 
-
 func cai_estimate_critique_strength([]int critique, int max_len) float {
     if max_len <= 0 {
         return 0.0
@@ -197,10 +152,6 @@ func cai_estimate_critique_strength([]int critique, int max_len) float {
     }
     ratio
 }
-
-
-
-
 
 func cai_generate_preferences(
     language_model model,
@@ -229,7 +180,6 @@ func cai_generate_preferences(
         )
         pairs[i] = pair
 
-
         if pair.critique_strength > 0.15 {
             num_revised = num_revised + 1
         }
@@ -243,13 +193,6 @@ func cai_generate_preferences(
         num_revised: num_revised,
     }
 }
-
-
-
-
-
-
-
 
 struct cai_flat_batch {
     []int chosen_ids
@@ -310,10 +253,6 @@ func cai_to_flat_batch(cai_batch batch, int seq_len, int pad_id) cai_flat_batch 
         seq_len: seq_len,
     }
 }
-
-
-
-
 
 struct cai_stats {
     int total_prompts

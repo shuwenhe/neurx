@@ -1,10 +1,5 @@
 package neurx.logging
 
-
-
-
-
-
 func new_logger(logger_config cfg) logger {
     logger {
         config: cfg,
@@ -13,11 +8,6 @@ func new_logger(logger_config cfg) logger {
         message_buffer: [],
     }
 }
-
-
-
-
-
 
 func log_scalar(
     logger *lg,
@@ -30,7 +20,6 @@ func log_scalar(
         step = lg.current_step + lg.config.global_step_offset
     }
 
-
     metric_entry entry {
         step: step,
         name: name,
@@ -42,19 +31,12 @@ func log_scalar(
 
     lg.metric_buffer.push(entry)
 
-
     if lg.config.log_to_console && should_log(lg) {
         print_scalar_to_console(lg.config, name, value, step, tags)
     }
 
-
     flush_if_needed(lg)
 }
-
-
-
-
-
 
 func log_histogram(
     logger *lg,
@@ -79,11 +61,6 @@ func log_histogram(
     lg.metric_buffer.push(entry)
 }
 
-
-
-
-
-
 func log_text(
     logger *lg,
     string name,
@@ -103,15 +80,10 @@ func log_text(
         wall_time: current_time_seconds(),
     }
 
-
     entry.metadata["text"] = text
 
     lg.metric_buffer.push(entry)
 }
-
-
-
-
 
 func log_message(
     logger *lg,
@@ -126,7 +98,6 @@ func log_message(
     }
 
     lg.message_buffer.push(entry)
-
 
     if lg.config.log_to_console && level >= lg.config.console_level {
         print_message_to_console(lg.config, entry)

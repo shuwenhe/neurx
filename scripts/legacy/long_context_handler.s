@@ -1,8 +1,5 @@
 
 
-
-
-
 package main
 
 import (
@@ -39,10 +36,6 @@ type cache_stats struct {
     avg_cache_time          float64
 }
 
-
-
-
-
 func (encoder *ro_pepositional_encoding) compute_rope_frequencies() []float64 {
     frequencies := make([]float64, encoder.dimensions)
 
@@ -66,7 +59,6 @@ func (encoder *ro_pepositional_encoding) apply_rope(
 
     frequencies := encoder.compute_rope_frequencies()
 
-
     rotated_q := make([]float64, len(query))
     rotated_k := make([]float64, len(key))
 
@@ -78,10 +70,8 @@ func (encoder *ro_pepositional_encoding) apply_rope(
             cos_val := math.Cos(angle)
             sin_val := math.Sin(angle)
 
-
             rotated_q[i] = query[i]*cos_val - query[i+1]*sin_val
             rotated_q[i+1] = query[i]*sin_val + query[i+1]*cos_val
-
 
             rotated_k[i] = key[i]*cos_val - key[i+1]*sin_val
             rotated_k[i+1] = key[i]*sin_val + key[i+1]*cos_val
@@ -116,10 +106,6 @@ func (handler *long_context_handler) estimate_memory_mb(token_count int) float64
     }
     return float64(token_count) * width * 0.000008
 }
-
-
-
-
 
 func (handler *long_context_handler) chunk_sequence(
     tokens []int,
@@ -164,7 +150,6 @@ func (handler *long_context_handler) process_with_overlap(
         chunk_output := process_func(chunk)
         handler.record_cache_request(i > 0, float64(len(chunk_output))/1000.0)
 
-
         if i == 0 {
             result = append(result, chunk_output...)
         } else {
@@ -180,10 +165,6 @@ func (handler *long_context_handler) process_with_overlap(
     return result
 }
 
-
-
-
-
 func (handler *long_context_handler) apply_sliding_window_attention(
     query []float64,
     key_cache [][]float64,
@@ -197,7 +178,6 @@ func (handler *long_context_handler) apply_sliding_window_attention(
 
     window_size := position - window_start + 1
 
-
     attention_scores := make([]float64, window_size)
 
     for i := 0; i < window_size; i++ {
@@ -210,7 +190,6 @@ func (handler *long_context_handler) apply_sliding_window_attention(
             attention_scores[i] = score / math.Sqrt(float64(len(query)))
         }
     }
-
 
     max_score := attention_scores[0]
     for _, s := range attention_scores {
@@ -229,7 +208,6 @@ func (handler *long_context_handler) apply_sliding_window_attention(
         attention_scores[i] /= exp_sum
     }
 
-
     output := make([]float64, len(query))
     for i := 0; i < window_size; i++ {
         cache_idx := window_start + i
@@ -243,10 +221,6 @@ func (handler *long_context_handler) apply_sliding_window_attention(
     return output
 }
 
-
-
-
-
 func (handler *long_context_handler) expand_context_window(
     current_max int,
     target_max int) {
@@ -257,18 +231,12 @@ func (handler *long_context_handler) expand_context_window(
 
     fmt.Printf("[LongContext] Expanding context window: %d → %d tokens\n", current_max, target_max)
 
-
     handler.positional_encoding.max_seq_length = target_max
-
 
     fmt.Printf("  Reallocating KV cache for new size\n")
     fmt.Printf("  Memory requirement: %.2f GB (estimated)\n",
         float64(target_max)*2.0*768.0*2.0/1e9)
 }
-
-
-
-
 
 func (handler *long_context_handler) process_long_sequence(
     tokens []int,
@@ -318,10 +286,6 @@ func (handler *long_context_handler) process_with_chunks(
     return handler.process_with_overlap(tokens, model_forward)
 }
 
-
-
-
-
 func (handler *long_context_handler) print_stats() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Long Context Handler - Performance Statistics       ║")
@@ -352,10 +316,6 @@ func (handler *long_context_handler) print_stats() {
     fmt.Printf("  Extended (32K+): Long-form generation\n")
     fmt.Printf("  Estimated memory for max length: %.2f MB\n", handler.estimate_memory_mb(handler.config.max_seq_length))
 }
-
-
-
-
 
 func NewLongContextHandler(config long_context_config) *long_context_handler {
     return &long_context_handler{

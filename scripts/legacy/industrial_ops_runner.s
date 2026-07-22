@@ -1,17 +1,5 @@
 package main
 
-
-
-
-
-
-
-
-
-
-
-
-
 use neurx.runtime.io.{io_mkdir_recursive, io_println, runtime_file_exists, runtime_read_text_file, runtime_write_text_file}
 
 type industrial_run_summary struct {
@@ -200,8 +188,6 @@ func max_int(int a, int b) int {
 }
 
 func float_to_string(float64 value) string {
-
-
 
     string out := ""
     if value < 0 {
@@ -459,10 +445,6 @@ func run_all_industrial_ops(
     io_println("RAG report: " + rag.output_path)
     io_println("Governance report: " + gov.output_path)
 }
-
-
-
-
 
 func ops_get_arg(map[string]string options, string key, string fallback) string {
     if value, ok := options[key]; ok {

@@ -1,8 +1,5 @@
 
 
-
-
-
 package neurx.script.gpu_train
 
 use std.io.println
@@ -25,10 +22,6 @@ use neurx.cuda.runtime.{
 use neurx.common.parse.{parse_int, parse_float}
 use neurx.common.string.{trim, substring, str_len, int_to_str, float_to_str}
 
-
-
-
-
 type gpu_training_config = struct {
     max_steps: int
     batch_size: int
@@ -48,13 +41,11 @@ type gpu_model = struct {
     num_layers: int
     num_heads: int
 
-
     embedding_weight_gpu: int64
     embeddings_layernorm_gpu: int64
 
     transformer_weights_gpu: int64
     transformer_bias_gpu: int64
-
 
     m_gpu: int64
     v_gpu: int64
@@ -67,13 +58,7 @@ type training_state = struct {
     batches_completed: int
 }
 
-
-
-
-
 func main() {
-
-
 
     int max_steps = parse_int(runtime_env_get("NEURX_PRETRAIN_STEPS"), 1000000000)
     int batch_size = parse_int(runtime_env_get("NEURX_PRETRAIN_BATCH_SIZE"), 32)
@@ -88,8 +73,6 @@ func main() {
     println("Learning rate: " + float_to_str(lr))
     println("")
 
-
-
     int device_count = get_device_count()
     println("CUDA devices available: " + int_to_str(device_count))
 
@@ -101,8 +84,6 @@ func main() {
     string device_name = get_device_name(device_id)
     println("Using device: " + device_name)
     println("")
-
-
 
     gpu_model model = gpu_model {
         embedding_size: 768,
@@ -117,16 +98,13 @@ func main() {
         v_gpu: 0
     }
 
-
     int vocab_size = 50000
     model.embedding_weight_gpu = cuda_malloc(vocab_size * model.embedding_size * 4)
     model.embeddings_layernorm_gpu = cuda_malloc(model.embedding_size * 4)
 
-
     int total_weight_size = model.num_layers * model.hidden_size * model.hidden_size
     model.transformer_weights_gpu = cuda_malloc(total_weight_size * 4)
     model.transformer_bias_gpu = cuda_malloc(model.num_layers * model.hidden_size * 4)
-
 
     int total_params = vocab_size * model.embedding_size + model.embedding_size + total_weight_size + model.num_layers * model.hidden_size
     model.m_gpu = cuda_malloc(total_params * 4)
@@ -137,8 +115,6 @@ func main() {
     println("Transformer parameters: " + int_to_str(total_weight_size / 1000000) + "M")
     println("")
 
-
-
     training_state state = training_state {
         step: 0,
         total_loss: 0.0,
@@ -146,13 +122,10 @@ func main() {
         batches_completed: 0
     }
 
-
     int64 cublas_handle = cublas_create()
-
 
     string manifest_path = "/home/shuwen/shuwen/train/neurx/dataset/pretrain/manifest.json"
     string manifest_content = runtime_read_text_file(manifest_path)
-
 
     int shard_count = count_lines(manifest_content)
 
@@ -168,7 +141,6 @@ func main() {
 
         string shard_content = runtime_read_text_file(shard_file)
 
-
         int line_start = 0
         int line_end = 0
         int line_idx = 0
@@ -181,10 +153,6 @@ func main() {
 
             string line = substring(shard_content, line_start, line_end)
 
-
-
-
-
             float batch_loss = gpu_forward_backward_pass(
                 cublas_handle, model,
                 batch_size, seq_len,
@@ -195,17 +163,12 @@ func main() {
             state.samples_seen = state.samples_seen + 1
             state.step = state.step + 1
 
-
-
             if state.step % 100 == 0 {
                 float avg_loss = state.total_loss / float(state.samples_seen)
                 println("Step " + int_to_str(state.step) +
                         " | Loss: " + float_to_str(avg_loss) +
                         " | Samples: " + int_to_str(state.samples_seen))
             }
-
-
-
 
             if state.step % 4 == 0 {
                 adam_step(total_params,
@@ -226,8 +189,6 @@ func main() {
         shard_idx = shard_idx + 1
     }
 
-
-
     cublas_destroy(cublas_handle)
 
     cuda_free(model.embedding_weight_gpu)
@@ -244,16 +205,9 @@ func main() {
     println("Final average loss: " + float_to_str(state.total_loss / float(state.samples_seen)))
 }
 
-
-
-
-
 func gpu_forward_backward_pass(int64 cublas_handle, gpu_model model,
                                int batch_size, int seq_len,
                                string document) float {
-
-
-
 
     []int tokens = new int[seq_len]
     int token_count = 0
@@ -264,20 +218,12 @@ func gpu_forward_backward_pass(int64 cublas_handle, gpu_model model,
         i = i + 1
     }
 
-
     while token_count < seq_len {
         tokens[token_count] = 0
         token_count = token_count + 1
     }
 
-
-
     int64 batch_x_gpu = cuda_malloc(batch_size * seq_len * model.embedding_size * 4)
-
-
-
-
-
 
     int64 hidden_gpu = batch_x_gpu
 
@@ -286,12 +232,10 @@ func gpu_forward_backward_pass(int64 cublas_handle, gpu_model model,
 
         int64 layer_output_gpu = cuda_malloc(batch_size * seq_len * model.embedding_size * 4)
 
-
         int64 q_gpu = linear_forward(batch_size * seq_len, model.embedding_size,
                                      model.num_heads * 64,
                                      hidden_gpu, model.transformer_weights_gpu,
                                      model.transformer_bias_gpu)
-
 
         int64 relu_gpu = relu_forward(batch_size * seq_len * model.hidden_size, q_gpu)
 
@@ -300,7 +244,6 @@ func gpu_forward_backward_pass(int64 cublas_handle, gpu_model model,
         layer = layer + 1
     }
 
-
     int64 logits_gpu = linear_forward(batch_size * seq_len, model.embedding_size,
                                       50000,
                                       hidden_gpu, model.embedding_weight_gpu,
@@ -308,10 +251,7 @@ func gpu_forward_backward_pass(int64 cublas_handle, gpu_model model,
 
     int64 probs_gpu = softmax_forward(batch_size * seq_len, 50000, logits_gpu)
 
-
     float loss = 0.0
-
-
 
     []int target_tokens = tokens
     int64 dlogits_gpu = cuda_malloc(batch_size * seq_len * 50000 * 4)
@@ -319,9 +259,7 @@ func gpu_forward_backward_pass(int64 cublas_handle, gpu_model model,
     cross_entropy_backward(batch_size * seq_len, 50000,
                            probs_gpu, target_tokens, dlogits_gpu)
 
-
     int64 dhidden_gpu = dlogits_gpu
-
 
     cuda_free(batch_x_gpu)
     cuda_free(hidden_gpu)
@@ -332,10 +270,6 @@ func gpu_forward_backward_pass(int64 cublas_handle, gpu_model model,
 
     loss
 }
-
-
-
-
 
 func count_lines(string s) int {
     int count = 0

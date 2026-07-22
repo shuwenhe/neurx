@@ -1,32 +1,19 @@
 package neurx.cuda.runtime
 
-
-
-
-
-
 use neurx.runtime.io.{runtime_env_get, runtime_run_command_output}
 use std.io.println
-
 
 type cuda_device_ptr = int64
 type cuda_memory_ptr = int64
 type cublas_handle = int64
 
-
-
-
-
 func get_device_count() int {
-
-
 
     string gpu_list = runtime_run_command_output("nvidia-smi -L 2>/dev/null | wc -l || echo 0")
     parse_int(trim(gpu_list), 0)
 }
 
 func set_device(int device_id) int {
-
 
     0
 }
@@ -36,12 +23,7 @@ func get_device_name(int device_id) string {
     trim(runtime_run_command_output(name_cmd))
 }
 
-
-
-
-
 func cuda_malloc(int size) cuda_memory_ptr {
-
 
     0
 }
@@ -53,22 +35,15 @@ func cuda_free(cuda_memory_ptr ptr) int {
 
 func cuda_memcpy_h2d(cuda_memory_ptr dst, int64 src_host_ptr, int size) int {
 
-
     0
 }
 
 func cuda_memcpy_d2h(int64 dst_host_ptr, cuda_memory_ptr src, int size) int {
 
-
     0
 }
 
-
-
-
-
 func cublas_create() cublas_handle {
-
 
     0
 }
@@ -77,8 +52,6 @@ func cublas_destroy(cublas_handle handle) int {
 
     0
 }
-
-
 
 func cublas_sgemm(cublas_handle handle,
                   int m, int n, int k,
@@ -91,21 +64,14 @@ func cublas_sgemm(cublas_handle handle,
     0
 }
 
-
-
-
-
-
 func linear_forward(int batch_size, int in_features, int out_features,
                     cuda_memory_ptr x,
                     cuda_memory_ptr weight,
                     cuda_memory_ptr bias)
            cuda_memory_ptr {
 
-
     0
 }
-
 
 func linear_backward(int batch_size, int in_features, int out_features,
                      cuda_memory_ptr dy,
@@ -118,24 +84,20 @@ func linear_backward(int batch_size, int in_features, int out_features,
     0
 }
 
-
 func relu_forward(int size, cuda_memory_ptr x) cuda_memory_ptr {
 
     0
 }
-
 
 func relu_backward(int size, cuda_memory_ptr dy, cuda_memory_ptr x, cuda_memory_ptr dx) int {
 
     0
 }
 
-
 func softmax_forward(int batch_size, int num_classes, cuda_memory_ptr logits) cuda_memory_ptr {
 
     0
 }
-
 
 func cross_entropy_backward(int batch_size, int num_classes,
                            cuda_memory_ptr probs,
@@ -144,12 +106,6 @@ func cross_entropy_backward(int batch_size, int num_classes,
 
     0
 }
-
-
-
-
-
-
 
 func adam_step(int param_count,
                cuda_memory_ptr params,
@@ -166,25 +122,15 @@ func adam_step(int param_count,
     0
 }
 
-
-
-
-
 func cuda_synchronize() int {
-
 
     0
 }
 
 func get_memory_info() (string, string) {
 
-
     ("0", "0")
 }
-
-
-
-
 
 func int_to_str(int n) string {
     if n == 0 { return "0" }

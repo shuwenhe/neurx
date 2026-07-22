@@ -1,8 +1,5 @@
 
 
-
-
-
 package main
 
 import (
@@ -66,13 +63,8 @@ type sft_metric struct {
     int64 timestamp
 }
 
-
-
-
-
 func (trainer *sft_trainer) load_instruction_data(data_path string) {
     fmt.Printf("[SFT] Loading instruction data from %s\n", data_path)
-
 
     categories := []string{"math", "writing", "coding", "qa", "reasoning"}
 
@@ -87,7 +79,6 @@ func (trainer *sft_trainer) load_instruction_data(data_path string) {
             difficulty: (i % 5) + 1,
             quality_score: 0.7 + float64(i%30)/100.0,
         }
-
 
         full_text := fmt.Sprintf("%s %s %s", example.instruction, example.input, example.output)
         example.tokens = trainer.tokenize(full_text)
@@ -115,16 +106,11 @@ func (trainer *sft_trainer) tokenize(text string) []int {
     return tokens
 }
 
-
-
-
-
 func (trainer *sft_trainer) causal_language_modeling_loss(logits [][]float64, labels []int) float64 {
     loss := 0.0
 
     for i := 0; i < len(labels)-1; i++ {
         target_token := labels[i+1]
-
 
         max_logit := logits[i][0]
         for j := range logits[i] {
@@ -149,10 +135,6 @@ func (trainer *sft_trainer) perplexity(loss float64) float64 {
     return math.Exp(loss)
 }
 
-
-
-
-
 func (trainer *sft_trainer) create_batch(examples []instruction_example) ([][]int, [][]int) {
     inputs := [][]int{}
     labels := [][]int{}
@@ -161,7 +143,6 @@ func (trainer *sft_trainer) create_batch(examples []instruction_example) ([][]in
         if len(example.tokens) < trainer.config.max_seq_length {
             input := example.tokens
             label := example.tokens[1:]
-
 
             for len(input) < trainer.config.max_seq_length {
                 input = append(input, 0)
@@ -176,10 +157,6 @@ func (trainer *sft_trainer) create_batch(examples []instruction_example) ([][]in
     return inputs, labels
 }
 
-
-
-
-
 func (trainer *sft_trainer) train_step(batch_inputs [][]int, batch_labels [][]int) float64 {
     total_loss := 0.0
 
@@ -187,17 +164,13 @@ func (trainer *sft_trainer) train_step(batch_inputs [][]int, batch_labels [][]in
 
         logits := trainer.model_forward(batch_inputs[i])
 
-
         loss := trainer.causal_language_modeling_loss(logits, batch_labels[i])
         total_loss += loss
-
 
         trainer.optimizer.backward(loss)
     }
 
-
     trainer.optimizer.clip_grad_norm(1.0)
-
 
     trainer.optimizer.step()
     trainer.step_count += 1
@@ -209,7 +182,6 @@ func (trainer *sft_trainer) model_forward(tokens []int) [][]float64 {
     batch_size := 1
     vocab_size := 128000
     seq_len := len(tokens)
-
 
     logits := make([][]float64, seq_len)
     for i := 0; i < seq_len; i++ {
@@ -223,10 +195,6 @@ func (trainer *sft_trainer) model_forward(tokens []int) [][]float64 {
     return logits
 }
 
-
-
-
-
 func (trainer *sft_trainer) evaluate(dataset instruction_dataset) sft_metric {
     fmt.Printf("[SFT] Evaluating on %d examples\n", len(dataset.examples))
 
@@ -238,9 +206,7 @@ func (trainer *sft_trainer) evaluate(dataset instruction_dataset) sft_metric {
             continue
         }
 
-
         logits := trainer.model_forward(example.tokens)
-
 
         labels := example.tokens[1:]
         loss := trainer.causal_language_modeling_loss(logits, labels)
@@ -261,10 +227,6 @@ func (trainer *sft_trainer) evaluate(dataset instruction_dataset) sft_metric {
     return metric
 }
 
-
-
-
-
 func (trainer *sft_trainer) get_learning_rate() float64 {
     if trainer.step_count < trainer.config.warmup_steps {
 
@@ -276,10 +238,6 @@ func (trainer *sft_trainer) get_learning_rate() float64 {
         return trainer.config.learning_rate * 0.5 * (1.0 + math.Cos(math.Pi*progress))
     }
 }
-
-
-
-
 
 func (trainer *sft_trainer) calculate_bleu(reference []int, generated []int, n_gram int) float64 {
     if len(generated) == 0 {
@@ -318,7 +276,6 @@ func (trainer *sft_trainer) calculate_rouge_l(reference []int, generated []int) 
         return 0.0
     }
 
-
     lcs := trainer.compute_lcs(reference, generated)
     recall := float64(lcs) / float64(len(reference))
     precision := float64(lcs) / float64(len(generated))
@@ -353,10 +310,6 @@ func (trainer *sft_trainer) compute_lcs(a []int, b []int) int {
 
     return dp[len(a)][len(b)]
 }
-
-
-
-
 
 func NewSFTTrainer(config sft_config) *sft_trainer {
     return &sft_trainer{

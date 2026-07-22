@@ -1,10 +1,5 @@
 package neurx.model.integration
 
-
-
-
-
-
 struct training_batch {
     [][]int token_ids
     [][]int input_ids
@@ -41,18 +36,12 @@ struct training_state {
 
 struct model_trainer {
 
-
     training_config config
     training_state state
-
-
-
-
 
     [string:double loss_history
     [string:double eval_metrics
 }
-
 
 func create_training_batch(
     []string texts,
@@ -60,12 +49,6 @@ func create_training_batch(
     int batch_size,
     int max_seq_len
 ) training_batch {
-
-
-
-
-
-
 
     int num_sequences = len(texts)
 
@@ -79,7 +62,6 @@ func create_training_batch(
         num_tokens: long(num_sequences * max_seq_len),
     }
 }
-
 
 func new_model_trainer(
     training_config cfg
@@ -101,28 +83,13 @@ func new_model_trainer(
     }
 }
 
-
 func training_step(
     model_trainer trainer,
     training_batch batch
 
-
 ) double {
 
-
-
-
-
-
     double loss = 0.0
-
-
-
-
-
-
-
-
 
     trainer.state.current_loss = loss
     trainer.state.total_loss = trainer.state.total_loss + loss
@@ -132,7 +99,6 @@ func training_step(
     loss
 }
 
-
 func eval_step(
     model_trainer trainer,
     [][]int eval_ids,
@@ -140,17 +106,7 @@ func eval_step(
 
 ) double {
 
-
-
-
-
-
     double eval_loss = 0.0
-
-
-
-
-
 
     trainer.state.eval_count = trainer.state.eval_count + 1
 
@@ -162,12 +118,10 @@ func eval_step(
     eval_loss
 }
 
-
 func train_epoch(
     model_trainer trainer,
     []training_batch batches,
     int eval_every_n_steps
-
 
 ) double {
     double epoch_loss = 0.0
@@ -177,18 +131,12 @@ func train_epoch(
     while batch_idx < num_batches {
         training_batch batch = batches[batch_idx]
 
-
         double loss = training_step(trainer, batch)
         epoch_loss = epoch_loss + loss
 
-
         if t(trainer.state.current_step - (trainer.state.current_step / eval_every_n_steps) * eval_every_n_steps) == 0  eval_every_n_steps > 0 {
 
-
-
-
         }
-
 
         if t(trainer.state.current_step - (trainer.state.current_step / trainer.config.save_steps) * trainer.config.save_steps) == 0  trainer.config.save_steps > 0 {
 
@@ -197,19 +145,16 @@ func train_epoch(
         batch_idx = batch_idx + 1
     }
 
-
     trainer.state.current_epoch = trainer.state.current_epoch + 1
 
     epoch_loss / double(num_batches)
 }
-
 
 func get_learning_rate(
     training_config cfg,
     int current_step
 ) double {
     double lr = cfg.learning_rate
-
 
     if current_step < cfg.warmup_steps {
         lr = cfg.learning_rate * double(current_step) / double(cfg.warmup_steps)
@@ -226,11 +171,9 @@ func get_learning_rate(
     lr
 }
 
-
 func get_training_stats(model_trainer trainer) [string:string {
     [string:string{cap: 20}
 }
-
 
 func get_average_loss(model_trainer trainer) double {
     if trainer.state.current_step > 0 {
@@ -240,42 +183,29 @@ func get_average_loss(model_trainer trainer) double {
     }
 }
 
-
 func save_checkpoint(
     model_trainer trainer,
     string checkpoint_path
 
-
 ) bool {
-
-
-
-
 
     true
 }
-
 
 func load_checkpoint(
     string checkpoint_path,
     model_trainer trainer
 
-
 ) model_trainer {
-
-
-
 
     trainer
 }
-
 
 func compute_training_metrics(
     model_trainer trainer
 ) [string:double {
     [string:double{cap: 10}
 }
-
 
 func estimate_training_time(
     training_config cfg,
@@ -288,19 +218,16 @@ func estimate_training_time(
     time_seconds
 }
 
-
 func print_training_summary(model_trainer trainer) string {
     string summary = "Training Summary:\n"
 
     summary
 }
 
-
 func cos(double x) double {
 
     0.0
 }
-
 
 func pi() double {
     3.141592653589793

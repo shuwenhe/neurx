@@ -1,7 +1,5 @@
 
 
-
-
 package main
 
 import (
@@ -11,21 +9,12 @@ import (
     "../scripts"
 )
 
-
-
-
-
 struct Command {
     name        string
     description string
     usage       string
     handler     func([]string) error
 }
-
-
-
-
-
 
 func cmd_train(args []string) error {
     if len(args) == 0 {
@@ -81,7 +70,6 @@ func cmd_launch_1t(args []string) error {
     return scripts.launch_1t_training(numGpus)
 }
 
-
 func cmd_build(args []string) error {
     return scripts.build_everything()
 }
@@ -93,7 +81,6 @@ func cmd_build_quick(args []string) error {
 func cmd_build_clean(args []string) error {
     return scripts.clean_build()
 }
-
 
 func cmd_inference(args []string) error {
     if len(args) == 0 {
@@ -119,7 +106,6 @@ func cmd_benchmark(args []string) error {
     return scripts.run_inference_benchmark(modelPath)
 }
 
-
 func cmd_version(args []string) error {
     fmt.Println("NeurX CLI v1.0.0")
     fmt.Println("S Language Implementation")
@@ -134,20 +120,17 @@ func cmd_help(args []string) error {
 func cmd_status(args []string) error {
     logger := scripts.new_logger("Status")
 
-
     if scripts.dir_exists(".build") {
         logger.success("Build artifacts found")
     } else {
         logger.warn("No build artifacts found")
     }
 
-
     if scripts.dir_exists("checkpoints") {
         logger.success("Checkpoints directory found")
     } else {
         logger.warn("No checkpoints found")
     }
-
 
     if scripts.dir_exists("logs") {
         logger.success("Logs directory found")
@@ -157,10 +140,6 @@ func cmd_status(args []string) error {
 
     return nil
 }
-
-
-
-
 
 var commands = []Command{
 
@@ -252,10 +231,6 @@ var commands = []Command{
         handler:     cmd_help,
     },
 }
-
-
-
-
 
 func find_command(name string) *Command {
     for i := 0; i < len(commands); i++ {
@@ -361,7 +336,6 @@ func show_detailed_help(cmd string) {
 func main() {
     logger := scripts.new_logger("CLI")
 
-
     args := os.Args[1:]
 
     if len(args) == 0 {
@@ -371,12 +345,10 @@ func main() {
 
     cmdName := args[0]
 
-
     if cmdName == "help" && len(args) > 1 {
         show_detailed_help(args[1])
         return
     }
-
 
     cmd := find_command(cmdName)
     if cmd == nil {
@@ -384,7 +356,6 @@ func main() {
         logger.log("Use 'neurx help' for usage information")
         os.Exit(1)
     }
-
 
     var cmdArgs []string
     if len(args) > 1 {

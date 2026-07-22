@@ -1,8 +1,5 @@
 
 
-
-
-
 module main
 
 func int_to_str(int n) string {
