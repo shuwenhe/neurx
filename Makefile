@@ -540,18 +540,9 @@ pretrain-watch: check-bash
 	@echo "Running NeurX large-model pre-training with live log monitoring"
 	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && $(MAKE) build-pretrain-manifest-s && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 $(MAKE) run-large-pretrain-s 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
 
-chat: build-real-inference-s
-	@echo "🚀 Starting NeurX PostTrain Model Interactive Chat..."
-	@if [ -f "/home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors" ]; then \
-		echo "✓ Model found: base-model-posttrain"; \
-		echo "✓ Running 100% S Language Real Inference"; \
-		mkdir -p artifacts/logs; \
-		$(CURDIR_UNIX)/artifacts/build/real_inference/real_inference 2>&1 | tee -a artifacts/logs/chat_posttrain_$(shell date +%Y%m%d_%H%M%S).log; \
-	else \
-		echo "❌ No PostTrain model found!"; \
-		echo "Expected path: /home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors"; \
-		exit 1; \
-	fi
+chat:
+	@chmod +x $(CURDIR_UNIX)/posttrain_chat_interactive.sh
+	@$(CURDIR_UNIX)/posttrain_chat_interactive.sh
 
 real-inference: build-real-inference-s
 	@echo "🚀 Running NeurX Real Inference Engine (Pure S)..."
