@@ -419,6 +419,10 @@ posttrain: check-bash build-lora-merge
 		NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_ADAPTER_DIR)' \
 		'$(POSTTRAIN_PYTHON)' scripts/real_lora_sft.py 2>&1 | tee -a '$(LOG_DIR)/posttrain_real_$(shell date +%Y%m%d_%H%M%S).log'
 	@echo "Merging LoRA into the standalone Qwen model..."
+	@rm -f \
+		'$(POSTTRAIN_OUTPUT_DIR)/adapter_model.safetensors' \
+		'$(POSTTRAIN_OUTPUT_DIR)/adapter_config.json' \
+		'$(POSTTRAIN_OUTPUT_DIR)/training_state.json'
 	@'$(LORA_MERGE_BIN)' \
 		'$(POSTTRAIN_MODEL_PATH)' \
 		'$(POSTTRAIN_ADAPTER_DIR)' \
