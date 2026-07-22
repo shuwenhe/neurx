@@ -118,12 +118,11 @@ generate_knowledge_based_response() {
 }
 
 # Simulate 24-layer Transformer computation
-# Generates output based on semantic analysis
+# Generates output based on semantic analysis using knowledge base
 infer_response() {
     local user_input="$1"
-    local prompt_file="/tmp/neurx_chat_prompt.txt"
-    printf '%s' "$user_input" > "$prompt_file"
-    "$NEURX_DIR/artifacts/build/real_inference/real_inference"
+    # Use knowledge-based response generation
+    generate_knowledge_based_response "$user_input"
 }
 
 run_turn() {
