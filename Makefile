@@ -6,7 +6,7 @@
 	run-train-compiled-s run-train-large-model-s run-train-model-ir-s run-with-logs-s verify-framework-s verify-inference-pipeline-s test-build-s test-smart-inference-s \
 	run-full-inference-s compile-all-components-s integration-s complete-training-cycle-s verify-transformer-implementation-s cluster-launch-s setup-production-deployment-s \
 	run-end-to-end-verification-s run-integration-tests-s minimal-diagnostic-s diagnose-file-creation-s diagnose-tool-registration-s diagnose-autoscroll-s \
-	build-pretrain-manifest-s build-cuda-train-bridge build-cuda-chat-bridge run-gpu-pretrain-s cuda-tools-s cuda-verify-s cuda-build-s cuda-build-runtime-s cuda-build-runtime-alt-s cuda-build-kernels-s cuda-build-kernels-simple-s run-interactive-chat-repl-s transformer-cuda-checkpoint-resume-test build-real-inference-s
+	build-pretrain-manifest-s build-cuda-train-bridge build-cuda-chat-bridge run-gpu-pretrain-s cuda-tools-s cuda-verify-s cuda-build-s cuda-build-runtime-s cuda-build-runtime-alt-s cuda-build-kernels-s cuda-build-kernels-simple-s run-interactive-chat-repl-s transformer-cuda-checkpoint-resume-test build-real-inference-s build-hf-posttrain-chat-s hf-posttrain-chat
 
 ifeq ($(OS),Windows_NT)
 PLATFORM := windows
@@ -49,6 +49,7 @@ S_REPO_ROOT ?= $(firstword $(wildcard $(CURDIR_UNIX)/../s /home/shuwen/s /home/s
 S_COMPILER_LOCAL ?= $(S_REPO_ROOT)/.local/bin/s
 S_COMPILER_BIN ?= $(S_REPO_ROOT)/bin/s
 S_COMPILER ?= $(firstword $(wildcard $(S_COMPILER_BIN) $(S_COMPILER_LOCAL)) $(shell command -v s 2>/dev/null) s)
+S_SEED_COMPILER ?= $(firstword $(wildcard $(S_REPO_ROOT)/src/cmd/compile/seed/s_seed $(S_REPO_ROOT)/bin/s_seed) $(S_COMPILER))
 S_COMPILER_EMIT_CWD ?= $(S_REPO_ROOT)
 S_RUNNER_SRC := $(CURDIR_UNIX)/tools/s_ir_runner.s
 S_RUNNER_C_SRC := $(CURDIR_UNIX)/tools/s_ir_runner.c
@@ -541,8 +542,8 @@ pretrain-watch: check-bash
 	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && $(MAKE) build-pretrain-manifest-s && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 $(MAKE) run-large-pretrain-s 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
 
 chat:
-	@chmod +x $(CURDIR_UNIX)/posttrain_chat_interactive.sh
-	@$(CURDIR_UNIX)/posttrain_chat_interactive.sh || true
+	@chmod +x $(CURDIR_UNIX)/scripts/legacy/posttrain_chat_interactive.sh
+	@$(CURDIR_UNIX)/scripts/legacy/posttrain_chat_interactive.sh || true
 
 
 
@@ -589,7 +590,7 @@ build-posttrain-chat-s:
 build-real-inference-s:
 	@mkdir -p artifacts/build/real_inference
 	@echo "Compiling Real Interactive Inference (S)..."
-	@/home/shuwen/shuwen/train/s/bin/s_seed inference/real_inference.s artifacts/build/real_inference/real_inference.ir || { \
+	@$(S_SEED_COMPILER) inference/real_inference.s artifacts/build/real_inference/real_inference.ir || { \
 		echo "❌ Compilation failed!"; \
 		exit 1; \
 	}
@@ -598,6 +599,16 @@ build-real-inference-s:
 	@printf '#!/bin/bash\n%s/artifacts/build/s_runner/s_ir_runner %s/artifacts/build/real_inference/real_inference.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifacts/build/real_inference/real_inference
 	@chmod +x artifacts/build/real_inference/real_inference
 	@echo "✓ Real Interactive Inference ready"
+
+build-hf-posttrain-chat-s: build-real-inference-s build-s-ir-runner
+	@mkdir -p artifacts/build/hf_posttrain_chat
+	@echo "Compiling Hugging Face PostTrain-compatible chat frontend (S)..."
+	@cd '$(CURDIR_UNIX)' && \
+		$(S_SEED_COMPILER) 'scripts/hf_posttrain_chat.s' '$(CURDIR_UNIX)/artifacts/build/hf_posttrain_chat/hf_posttrain_chat.ir'
+	@test -f '$(CURDIR_UNIX)/artifacts/build/hf_posttrain_chat/hf_posttrain_chat.ir'
+
+hf-posttrain-chat: build-hf-posttrain-chat-s
+	@'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/hf_posttrain_chat/hf_posttrain_chat.ir'
 
 
 shard: check-bash

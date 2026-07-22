@@ -2,7 +2,7 @@
 
 module real_inference
 
-use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file}
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file}
 
 extern "intrinsic" func __host_read_binary_file(string path) []int
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
@@ -430,7 +430,7 @@ func softmax_weight_approx_16(int logit, int max_logit, int temperature_scale) i
 }
 
 func load_prompt_text() string {
-    string prompt_path = "/tmp/neurx_chat_prompt.txt"
+    string prompt_path = runtime_env_get("NEURX_CHAT_PROMPT_PATH", "/tmp/neurx_chat_prompt.txt")
     if !runtime_file_exists(prompt_path) {
         return "What is the treatment for diseases?"
     }
@@ -742,10 +742,17 @@ func select_next_token(int seed, int vocab_size, float temperature, int top_k) i
     return 100 + (choice_slot - (choice_slot / 15) * 15)
 }
 
-func decode_token_sequence(int seed) string {
+func decode_token_sequence(int seed, int max_new_tokens) string {
     string out = ""
+    int token_limit = max_new_tokens
+    if token_limit <= 0 {
+        token_limit = 1
+    }
+    if token_limit > 256 {
+        token_limit = 256
+    }
     int i = 0
-    while i < 8 {
+    while i < token_limit {
         int tok = select_next_token(seed + i * 17, 151936, 0.0, 32)
         if tok == 0 {
             i = i + 1
@@ -768,7 +775,11 @@ func decode_token_sequence(int seed) string {
 }
 
 func main() {
-    string model_path = "/home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors"
+    string configured_model = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors")
+    string model_path = configured_model
+    if !runtime_file_exists(model_path) && runtime_file_exists(configured_model + "/model.safetensors") {
+        model_path = configured_model + "/model.safetensors"
+    }
 
     print("\n╔════════════════════════════════════════════════════════╗\n")
     print("║ NeurX Pure S Real Inference                           ║\n")
@@ -835,6 +846,20 @@ func main() {
 
     []int prompt_tokens = tokenize(input_text)
     int logits_seed = forward_step(prompt_tokens, model_path, metadata_bytes, embed_index, norm_index, head_index)
-    string response = decode_token_sequence(logits_seed)
+    int max_new_tokens = 8
+    string max_tokens_text = runtime_env_get("NEURX_CHAT_MAX_NEW_TOKENS", "8")
+    int max_tokens_index = 0
+    int parsed_max_tokens = 0
+    while max_tokens_index < len(max_tokens_text) {
+        int digit = max_tokens_text[max_tokens_index]
+        if digit >= 48 && digit <= 57 {
+            parsed_max_tokens = parsed_max_tokens * 10 + (digit - 48)
+        }
+        max_tokens_index = max_tokens_index + 1
+    }
+    if parsed_max_tokens > 0 {
+        max_new_tokens = parsed_max_tokens
+    }
+    string response = decode_token_sequence(logits_seed, max_new_tokens)
     print("Assistant: " + response + "\n")
 }
