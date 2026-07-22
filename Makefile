@@ -542,7 +542,23 @@ pretrain-watch: check-bash
 
 chat:
 	@chmod +x $(CURDIR_UNIX)/posttrain_chat_interactive.sh
-	@$(CURDIR_UNIX)/posttrain_chat_interactive.sh
+	@$(CURDIR_UNIX)/posttrain_chat_interactive.sh || true
+
+chat-real-inference: build-neurx-interactive-inference-s
+	@echo "🚀 Running NeurX Real Inference Engine (Pure S)..."
+	@if [ -f "/home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors" ]; then \
+		echo "✓ Model found: base-model-posttrain"; \
+		echo "✓ Running pure S medical knowledge inference"; \
+		mkdir -p artifacts/logs; \
+		$(CURDIR_UNIX)/artifacts/build/s_runner/s_ir_runner $(CURDIR_UNIX)/artifacts/build/neurx_interactive_inference/neurx_interactive_inference.ir 2>&1; \
+	else \
+		echo "❌ Model not found"; \
+	fi
+
+build-neurx-interactive-inference-s:
+	@mkdir -p artifacts/build/neurx_interactive_inference
+	@echo "Compiling NeurX Interactive Inference (S)..."
+	@$(S_COMPILER) inference/neurx_interactive_inference.s artifacts/build/neurx_interactive_inference/neurx_interactive_inference.ir 2>&1
 
 real-inference: build-real-inference-s
 	@echo "🚀 Running NeurX Real Inference Engine (Pure S)..."
