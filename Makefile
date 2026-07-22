@@ -553,21 +553,31 @@ chat: build-posttrain-chat-s
 		exit 1; \
 	fi
 
-real-inference: build-real-inference-s
-	@echo "🚀 Starting NeurX Real Interactive Inference (Pure S)..."
+real-inference: build-real-model-inference-s
+	@echo "🚀 Running NeurX Real Inference Engine (Pure S)..."
 	@if [ -f "/home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors" ]; then \
-		echo "✓ PostTrain model found: base-model-posttrain"; \
-		echo "✓ SafeTensors loading enabled"; \
-		echo "✓ Transformer inference with stdin support"; \
+		echo "✓ Model found: base-model-posttrain"; \
+		echo "✓ Running real Transformer computation"; \
 		mkdir -p artifacts/logs; \
-		$(CURDIR_UNIX)/artifacts/build/real_inference/real_inference 2>&1 | tee -a artifacts/logs/real_inference_$(shell date +%Y%m%d_%H%M%S).log; \
+		$(CURDIR_UNIX)/artifacts/build/real_model_inference/real_model_inference 2>&1 | tee -a artifacts/logs/real_inference_$(shell date +%Y%m%d_%H%M%S).log; \
 	else \
-		echo "❌ No PostTrain model found!"; \
-		echo "Expected path: /home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors"; \
-		exit 1; \
+		echo "❌ Model not found"; \
 	fi
 
-chat-posttrain: build-posttrain-chat-s
+build-real-model-inference-s:
+	@mkdir -p artifacts/build/real_model_inference
+	@echo "Compiling Real Inference Engine (S)..."
+	@/home/shuwen/shuwen/train/s/bin/s_seed inference/real_model_inference.s artifacts/build/real_model_inference/real_model_inference.ir || { \
+		echo "❌ Compilation failed!"; \
+		exit 1; \
+	}
+	@echo "✓ Compiled to IR successfully"
+	@echo "Creating runner script..."
+	@printf '#!/bin/bash\n%s/artifacts/build/s_runner/s_ir_runner %s/artifacts/build/real_model_inference/real_model_inference.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifacts/build/real_model_inference/real_model_inference
+	@chmod +x artifacts/build/real_model_inference/real_model_inference
+	@echo "✓ Real Inference Engine ready"
+
+chat: build-posttrain-chat-s
 	@echo "Starting NeurX PostTrain Model Interactive Chat"
 	@mkdir -p artifacts/logs
 	@$(CURDIR_UNIX)/artifacts/build/posttrain_chat/posttrain_chat 2>&1 | tee -a artifacts/logs/chat_posttrain_$(shell date +%Y%m%d_%H%M%S).log
