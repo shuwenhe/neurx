@@ -241,6 +241,45 @@ func tensor_multihead_signature([]int tensor_bytes, int head_count, int head_dim
     return total
 }
 
+func embedding_token_signature([]int embedding_bytes, int token_id, int hidden_dim, int salt) int {
+    int token = token_id
+    if token < 0 {
+        token = 0 - token
+    }
+    int stride = hidden_dim
+    if stride <= 0 {
+        stride = 1
+    }
+    int start = token * stride
+    int stop = start + stride
+    int total = 0
+    int i = start
+    while i < stop && i < len(embedding_bytes) {
+        total = total + embedding_bytes[i]
+        i = i + 1
+    }
+    return tensor_signature(embedding_bytes, salt + total + token * 13)
+}
+
+func tensor_window_signature([]int tensor_bytes, int start, int width, int salt) int {
+    int begin = start
+    if begin < 0 {
+        begin = 0
+    }
+    int span = width
+    if span <= 0 {
+        span = 1
+    }
+    int end = begin + span
+    int total = 0
+    int i = begin
+    while i < end && i < len(tensor_bytes) {
+        total = total + tensor_bytes[i]
+        i = i + 1
+    }
+    return tensor_signature(tensor_bytes, salt + total + begin * 19 + span * 7)
+}
+
 func attention_head_signature([]int tensor_bytes, int head_idx, int head_dim, int salt) int {
     int chunk = head_dim
     if chunk <= 0 {
@@ -255,6 +294,34 @@ func attention_head_signature([]int tensor_bytes, int head_idx, int head_dim, in
         i = i + 1
     }
     return tensor_signature(tensor_bytes, salt + sum + head_idx * 41)
+}
+
+func attention_head_triplet_signature([]int q_bytes, []int k_bytes, []int v_bytes, int head_idx, int head_dim, int salt) int {
+    int q_start = head_idx * head_dim
+    int k_start = head_idx * head_dim
+    int v_start = head_idx * head_dim
+    int q_sig = tensor_window_signature(q_bytes, q_start, head_dim, salt + head_idx * 3)
+    int k_sig = tensor_window_signature(k_bytes, k_start, head_dim, salt + head_idx * 5)
+    int v_sig = tensor_window_signature(v_bytes, v_start, head_dim, salt + head_idx * 7)
+    int merged = q_sig + v_sig - k_sig
+    return tensor_signature(v_bytes, merged + salt + head_idx * 11)
+}
+
+func lm_head_token_signature([]int head_bytes, int token_slot, int salt) int {
+    int slot = token_slot
+    if slot < 0 {
+        slot = 0 - slot
+    }
+    int chunk = 64
+    int start = slot * chunk
+    int stop = start + chunk
+    int total = 0
+    int i = start
+    while i < stop && i < len(head_bytes) {
+        total = total + head_bytes[i]
+        i = i + 1
+    }
+    return tensor_signature(head_bytes, salt + total + slot * 37)
 }
 
 func tokenize(string text) []int {
@@ -381,10 +448,14 @@ func layer_forward_score(int hidden, []int metadata, string model_path, int laye
     int o_head_sig = 0
     int head = 0
     while head < 14 {
+        int triplet_sig = attention_head_triplet_signature(q_bytes, k_bytes, v_bytes, head, 64, hidden + layer_idx * 13)
         q_head_sig = q_head_sig + attention_head_signature(q_bytes, head, 64, hidden + layer_idx * 3)
         k_head_sig = k_head_sig + attention_head_signature(k_bytes, head, 64, hidden + layer_idx * 5)
         v_head_sig = v_head_sig + attention_head_signature(v_bytes, head, 64, hidden + layer_idx * 7)
         o_head_sig = o_head_sig + attention_head_signature(o_bytes, head, 64, hidden + layer_idx * 11)
+        q_head_sig = q_head_sig + triplet_sig
+        v_head_sig = v_head_sig + triplet_sig / 2
+        o_head_sig = o_head_sig + tensor_window_signature(o_bytes, head * 64, 64, hidden + layer_idx * 17)
         head = head + 1
     }
 
@@ -405,15 +476,30 @@ func forward_step([]int prompt_tokens, string model_path, []int metadata, []int 
         i = i + 1
     }
 
-    int hidden = token_sum + tensor_signature(read_tensor_bytes(model_path, embed_index), token_mix)
+    []int embed_bytes = read_tensor_bytes(model_path, embed_index)
+    []int head_bytes = read_tensor_bytes(model_path, lm_head_index)
+    int hidden = token_sum + tensor_signature(embed_bytes, token_mix)
     hidden = hidden + len(prompt_tokens) * 97
+    int token_idx = 0
+    while token_idx < len(prompt_tokens) && token_idx < 8 {
+        hidden = hidden + embedding_token_signature(embed_bytes, prompt_tokens[token_idx], 896, hidden + token_idx * 23)
+        token_idx = token_idx + 1
+    }
     i = 0
     while i < 24 {
         hidden = layer_forward_score(hidden, metadata, model_path, i)
         i = i + 1
     }
     hidden = hidden + tensor_signature(read_tensor_bytes(model_path, final_norm_index), hidden)
-    hidden = hidden + tensor_signature(read_tensor_bytes(model_path, lm_head_index), hidden + 11)
+    hidden = hidden + tensor_signature(head_bytes, hidden + 11)
+
+    int lm_mix = 0
+    int slot = 0
+    while slot < 16 {
+        lm_mix = lm_mix + lm_head_token_signature(head_bytes, slot, hidden + slot * 7)
+        slot = slot + 1
+    }
+    hidden = hidden + lm_mix
     50000 + (hidden - (hidden / 100000) * 100000)
 }
 
@@ -488,17 +574,27 @@ func select_next_token(int seed, int vocab_size, float temperature, int top_k) i
     }
 
     int total_weight = 0
+    int temperature_scale = 1000
+    if temperature > 0.0 {
+        temperature_scale = 2000
+    }
     i = 0
     while i < effective_top {
         int shifted = candidates[i] - max_logit
         if shifted < 0 {
             shifted = 0 - shifted
         }
-        int denom = 1 + shifted + shifted * shifted
-        if temperature > 0.0 {
-            denom = denom + 1
+        int exp_approx = 100000
+        int step = 0
+        while step < shifted && step < 8 {
+            exp_approx = exp_approx / 2
+            if exp_approx <= 1 {
+                exp_approx = 1
+                break
+            }
+            step = step + 1
         }
-        int weight = 100000 / denom
+        int weight = temperature_scale * exp_approx / 100000
         if weight <= 0 {
             weight = 1
         }
