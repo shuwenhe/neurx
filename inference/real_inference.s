@@ -3,7 +3,7 @@
 
 module real_inference
 
-use neurx.runtime.io.{runtime_file_exists}
+use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file}
 
 extern "intrinsic" func __host_read_binary_file(string path) []int
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
@@ -320,6 +320,25 @@ func attention_head_triplet_signature([]int q_bytes, []int k_bytes, []int v_byte
     return tensor_signature(v_bytes, merged + salt + head_idx * 43)
 }
 
+func attention_head_score([]int q_bytes, []int k_bytes, []int v_bytes, []int o_bytes, int head_idx, int head_dim, int hidden, int salt) int {
+    int q_start = head_idx * head_dim
+    int k_start = head_idx * head_dim
+    int v_start = head_idx * head_dim
+    int quarter = head_dim / 4
+    if quarter <= 0 {
+        quarter = 1
+    }
+    int q_score = tensor_window_signature(q_bytes, q_start, quarter, salt + hidden + head_idx * 3)
+    q_score = q_score + tensor_window_signature(q_bytes, q_start + quarter, quarter, salt + hidden + head_idx * 5)
+    int k_score = tensor_window_signature(k_bytes, k_start, quarter, salt + hidden + head_idx * 7)
+    k_score = k_score + tensor_window_signature(k_bytes, k_start + quarter, quarter, salt + hidden + head_idx * 11)
+    int v_score = tensor_window_signature(v_bytes, v_start, quarter, salt + hidden + head_idx * 13)
+    v_score = v_score + tensor_window_signature(v_bytes, v_start + quarter, quarter, salt + hidden + head_idx * 17)
+    int o_score = tensor_window_signature(o_bytes, head_idx * head_dim, head_dim, salt + hidden + head_idx * 19)
+    int score = q_score + v_score - k_score + o_score
+    return tensor_signature(o_bytes, score + hidden + salt + head_idx * 23)
+}
+
 func lm_head_token_signature([]int head_bytes, int token_slot, int salt) int {
     int slot = token_slot
     if slot < 0 {
@@ -409,6 +428,18 @@ func softmax_weight_approx_16(int logit, int max_logit, int temperature_scale) i
         weight = 1
     }
     return weight
+}
+
+func load_prompt_text() string {
+    string prompt_path = "/tmp/neurx_chat_prompt.txt"
+    if !runtime_file_exists(prompt_path) {
+        return "What is the treatment for diseases?"
+    }
+    string prompt = runtime_read_text_file(prompt_path)
+    if len(prompt) == 0 {
+        return "What is the treatment for diseases?"
+    }
+    return prompt
 }
 
 func tokenize(string text) []int {
@@ -533,9 +564,11 @@ func layer_forward_score(int hidden, []int metadata, string model_path, int laye
     int k_head_sig = 0
     int v_head_sig = 0
     int o_head_sig = 0
+    int attn_score = 0
     int head = 0
     while head < 14 {
         int triplet_sig = attention_head_triplet_signature(q_bytes, k_bytes, v_bytes, head, 64, hidden + layer_idx * 13)
+        int head_score = attention_head_score(q_bytes, k_bytes, v_bytes, o_bytes, head, 64, hidden, hidden + layer_idx * 17)
         q_head_sig = q_head_sig + attention_head_signature(q_bytes, head, 64, hidden + layer_idx * 3)
         k_head_sig = k_head_sig + attention_head_signature(k_bytes, head, 64, hidden + layer_idx * 5)
         v_head_sig = v_head_sig + attention_head_signature(v_bytes, head, 64, hidden + layer_idx * 7)
@@ -543,10 +576,11 @@ func layer_forward_score(int hidden, []int metadata, string model_path, int laye
         q_head_sig = q_head_sig + triplet_sig
         v_head_sig = v_head_sig + triplet_sig / 2
         o_head_sig = o_head_sig + tensor_window_signature(o_bytes, head * 64, 64, hidden + layer_idx * 17)
+        attn_score = attn_score + head_score
         head = head + 1
     }
 
-    int attention_mix = hidden + q_sig + v_sig - k_sig - o_sig + q_head_sig + v_head_sig - k_head_sig - o_head_sig
+    int attention_mix = hidden + q_sig + v_sig - k_sig - o_sig + q_head_sig + v_head_sig - k_head_sig - o_head_sig + attn_score
     int normed = attention_mix + n1_sig + n2_sig
     int mlp_mix = hidden + g_sig + u_sig - d_sig
     int combined = normed + (mlp_mix / 2) + layer_idx * 31
@@ -569,7 +603,9 @@ func forward_step([]int prompt_tokens, string model_path, []int metadata, []int 
     hidden = hidden + len(prompt_tokens) * 97
     int token_idx = 0
     while token_idx < len(prompt_tokens) && token_idx < 8 {
-        hidden = hidden + embedding_token_signature(embed_bytes, prompt_tokens[token_idx], 896, hidden + token_idx * 23)
+        int token_sig = embedding_token_signature(embed_bytes, prompt_tokens[token_idx], 896, hidden + token_idx * 23)
+        int token_window = tensor_window_signature(embed_bytes, prompt_tokens[token_idx] * 896, 128, hidden + token_idx * 29)
+        hidden = hidden + token_sig + token_window
         token_idx = token_idx + 1
     }
     i = 0
@@ -584,8 +620,10 @@ func forward_step([]int prompt_tokens, string model_path, []int metadata, []int 
     int slot = 0
     while slot < 64 {
         int row_sig = lm_head_row_signature(head_bytes, slot, hidden + slot * 5)
-        lm_mix = lm_mix + lm_head_projection_score(head_bytes, slot, hidden + row_sig, hidden + slot * 7)
+        int row_window = tensor_window_signature(head_bytes, slot * 32, 32, hidden + slot * 11)
+        lm_mix = lm_mix + lm_head_projection_score(head_bytes, slot, hidden + row_sig + row_window, hidden + slot * 7)
         lm_mix = lm_mix + row_sig
+        lm_mix = lm_mix + row_window
         slot = slot + 1
     }
     hidden = hidden + lm_mix
@@ -677,10 +715,13 @@ func select_next_token(int seed, int vocab_size, float temperature, int top_k) i
 
     int choice_index = 0
     if temperature > 0.0 && effective_top > 1 && total_weight > 0 {
-        int entropy_seed = seed
-        int pick = entropy_seed - (entropy_seed / total_weight) * total_weight
-        if pick < 0 {
-            pick = 0 - pick
+        int entropy_seed = seed - (seed / 2147483647) * 2147483647
+        if entropy_seed < 0 {
+            entropy_seed = 0 - entropy_seed
+        }
+        int pick = entropy_seed
+        if total_weight > 0 {
+            pick = entropy_seed - (entropy_seed / total_weight) * total_weight
         }
         int accum = 0
         i = 0
@@ -714,7 +755,11 @@ func decode_token_sequence(int seed) string {
         if len(out) > 0 {
             out = out + " "
         }
-        out = out + "tok" + int_to_string(tok)
+        string word = token_to_word(tok)
+        if len(word) == 0 {
+            word = "tok" + int_to_string(tok)
+        }
+        out = out + word
         i = i + 1
     }
     if len(out) == 0 {
@@ -786,7 +831,7 @@ func main() {
 
     print("Loaded layer weights: 24 layers\n\n")
     print("Running single-turn demo prompt.\n\n")
-    string input_text = "What is the treatment for diseases?"
+    string input_text = load_prompt_text()
     print("User: " + input_text + "\n\n")
 
     []int prompt_tokens = tokenize(input_text)

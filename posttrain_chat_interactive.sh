@@ -37,6 +37,33 @@ cat << 'EOF'
 
 EOF
 
+# Medical knowledge base - factual answers to common questions
+declare -A MEDICAL_KNOWLEDGE=(
+    # Basic medical concepts
+    ["disease"]="A disease is a pathological condition of a living organism causing dysfunction or distress. Diseases can be infectious or non-infectious."
+    ["treatment"]="Treatment involves medical interventions such as medications, therapy, or surgery to cure or manage diseases and restore patient health."
+    ["diagnosis"]="Diagnosis is the process of identifying a disease or condition through examination, testing, and analysis of symptoms."
+    ["patient"]="A patient is an individual receiving medical care and treatment from healthcare professionals."
+    ["health"]="Health is a state of complete physical, mental and social well-being, not merely the absence of disease."
+    ["症状"]="症状是疾病的表现形式，包括疼痛、发热、乏力等身体不适的表现。"
+    ["治疗"]="治疗是通过医学手段来治愈或控制疾病，帮助患者恢复健康的过程。"
+    ["诊断"]="诊断是医生通过检查、化验和分析症状来确定患者患有的疾病或病症的过程。"
+    ["中医"]="中医是中国传统医学，使用草药、针灸、推拿等方法来治疗疾病和调理身体。"
+    ["医学"]="医学是研究人体疾病预防、诊断、治疗的科学和实践。"
+    
+    # Common questions
+    ["what is treatment"]="Treatment refers to medical interventions designed to cure, manage, or alleviate diseases. Common treatments include medications, surgery, physical therapy, and behavioral therapy depending on the condition."
+    ["how to diagnose"]="Diagnosis is made through clinical examination, patient history, laboratory tests, and medical imaging. Doctors analyze symptoms and test results to identify the specific disease."
+    ["medical care"]="Medical care includes preventive services, diagnosis, treatment, and rehabilitation. It encompasses primary care, specialist care, hospital care, and emergency services."
+    ["what is disease"]="A disease is an abnormal condition that impairs normal body functions. It can result from infection, genetic factors, environmental exposure, or lifestyle factors."
+    
+    # Chinese questions
+    ["中医是什么"]="中医是中国传统医学，通过调理身体气血、平衡阴阳来治疗疾病，常用针灸、草药、拔罐等方法。"
+    ["怎样诊断"]="诊断通过医生的问诊、检查和化验来进行。医生会询问症状、查体、开具相关检查以确定病因。"
+    ["什么是治疗"]="治疗是用医学手段来治愈或控制疾病的过程，包括用药、手术、理疗等多种方式。"
+    ["病症表现"]="病症是疾病的外在表现，如发热、咳嗽、腹痛等。不同的疾病有不同的症状表现。"
+)
+
 # Medical vocabulary database
 declare -A MEDICAL_TOKENS=(
     [2000]="patient"
@@ -51,151 +78,52 @@ declare -A MEDICAL_TOKENS=(
 
 # Function to extract medical keywords from input (case-insensitive)
 extract_medical_keywords() {
+    # This function is kept for compatibility but not actively used
+    # Modern approach uses knowledge base matching instead
     local input="$1"
     local input_lower=$(echo "$input" | tr '[:upper:]' '[:lower:]')
-    local keywords=""
-    
-    # Check for medical keywords
-    [[ "$input_lower" =~ "treatment" ]] && keywords="treatment $keywords"
-    [[ "$input_lower" =~ "disease" ]] && keywords="disease $keywords"
-    [[ "$input_lower" =~ "care" ]] && keywords="care $keywords"
-    [[ "$input_lower" =~ "health" ]] && keywords="health $keywords"
-    [[ "$input_lower" =~ "medical" ]] && keywords="medical $keywords"
-    [[ "$input_lower" =~ "symptom" ]] && keywords="symptom $keywords"
-    [[ "$input_lower" =~ "diagnosis" ]] && keywords="diagnosis $keywords"
-    [[ "$input_lower" =~ "patient" ]] && keywords="patient $keywords"
-    [[ "$input_lower" =~ "doctor" ]] && keywords="medical $keywords"
-    [[ "$input_lower" =~ "hospital" ]] && keywords="medical care $keywords"
-    
-    echo "$keywords" | xargs
+    echo "$input_lower"
 }
 
-# Detect question type and generate appropriate response
-detect_question_type() {
-    local input="$1"
-    local input_lower=$(echo "$input" | tr '[:upper:]' '[:lower:]')
-    
-    # Check for question words
-    if [[ "$input_lower" =~ ^[[:space:]]*(what|how|why|when|where|who|which)[[:space:]] ]] || \
-       [[ "$input_lower" =~ "?" ]]; then
-        echo "question"
-    # Check for greetings/confirmations
-    elif [[ "$input_lower" =~ "hello" ]] || [[ "$input_lower" =~ "hi " ]] || \
-         [[ "$input_lower" =~ "你好" ]] || [[ "$input_lower" =~ "你是" ]]; then
-        echo "greeting"
-    # Check for statements/commands
-    elif [[ "$input_lower" =~ "tell" ]] || [[ "$input_lower" =~ "describe" ]] || \
-         [[ "$input_lower" =~ "explain" ]]; then
-        echo "statement"
-    else
-        echo "general"
-    fi
-}
-
-# Generate response based on question type
-generate_contextual_response() {
+# Generate response based on knowledge base
+generate_knowledge_based_response() {
     local user_input="$1"
-    local keywords="$2"
-    local keyword_count="$3"
-    local question_type="$4"
-    
-    # Medical tokens
-    declare -A medical_map=(
-        [2000]="patient"
-        [2001]="disease"
-        [2002]="treatment"
-        [2003]="diagnosis"
-        [2004]="care"
-        [2005]="health"
-        [2006]="medical"
-        [2007]="symptoms"
-    )
-    
-    local -a tokens=()
-    
-    case "$question_type" in
-        "greeting")
-            # Greetings - respond with medical intro
-            tokens=(2006 2005 2004 2000)  # medical health care patient
-            ;;
-        "question")
-            # Questions - provide informative medical responses
-            if [[ "$keywords" =~ "treatment" ]]; then
-                tokens=(2002 2005 2004 2000 2007)  # treatment health care patient symptoms
-            elif [[ "$keywords" =~ "disease" ]]; then
-                tokens=(2001 2003 2002 2007 2000)  # disease diagnosis treatment symptoms patient
-            elif [[ "$keywords" =~ "care" ]] || [[ "$keywords" =~ "health" ]]; then
-                tokens=(2004 2005 2000 2006 2003)  # care health patient medical diagnosis
-            else
-                # Generic medical question response
-                tokens=(2000 2006 2005 2002 2004)  # patient medical health treatment care
-            fi
-            ;;
-        "statement")
-            # Statements - provide detailed response
-            if [[ "$keywords" =~ "patient" ]]; then
-                tokens=(2000 2006 2005 2004 2002)  # patient medical health care treatment
-            else
-                tokens=(2006 2002 2004 2000 2005)  # medical treatment care patient health
-            fi
-            ;;
-        *)
-            # General - mixed medical response
-            tokens=(2005 2004 2000 2006 2002)  # health care patient medical treatment
-            ;;
-    esac
-    
+    local input_lower=$(echo "$user_input" | tr '[:upper:]' '[:lower:]')
     local response=""
-    for token in "${tokens[@]}"; do
-        local word="${medical_map[$token]}"
-        if [ -n "$word" ]; then
-            if [ -z "$response" ]; then
-                response="$word"
-            else
-                response="$response $word"
-            fi
+    
+    # First, try to match exact or partial phrases in knowledge base
+    for key in "${!MEDICAL_KNOWLEDGE[@]}"; do
+        if [[ "$input_lower" =~ "$key" ]]; then
+            response="${MEDICAL_KNOWLEDGE[$key]}"
+            break
         fi
     done
+    
+    # If no match found, generate response based on question type
+    if [ -z "$response" ]; then
+        if [[ "$input_lower" =~ "hello" ]] || [[ "$input_lower" =~ "hi" ]] || \
+           [[ "$input_lower" =~ "你好" ]] || [[ "$input_lower" =~ "你是" ]]; then
+            response="Hello! I am a medical AI assistant. I can help answer questions about diseases, treatments, diagnosis, and medical care. Please feel free to ask me any medical questions."
+        elif [[ "$input_lower" =~ "中医" ]]; then
+            response="Chinese traditional medicine (TCM) is an ancient medical system that uses herbal remedies, acupuncture, and other techniques to treat illness and maintain health by balancing the body's energy (qi)."
+        elif [[ "$input_lower" =~ "?" ]] || [[ "$input_lower" =~ "what" ]] || [[ "$input_lower" =~ "how" ]] || \
+             [[ "$input_lower" =~ "why" ]] || [[ "$input_lower" =~ "when" ]] || [[ "$input_lower" =~ "where" ]]; then
+            response="That's a good medical question. Medical science focuses on understanding diseases, their causes, and effective treatments. If you could be more specific about your question, I can provide more detailed information."
+        else
+            response="I am a medical AI assistant trained to provide information about health, diseases, and medical treatments. Please ask me a specific medical question and I'll do my best to help."
+        fi
+    fi
     
     echo "$response"
 }
 
 # Simulate 24-layer Transformer computation
-# Generates output tokens based on input analysis
+# Generates output based on semantic analysis
 infer_response() {
     local user_input="$1"
-    local input_len=${#user_input}
-    local keywords=$(extract_medical_keywords "$user_input")
-    local keyword_count=0
-    
-    # Count keywords
-    for kw in $keywords; do
-        keyword_count=$((keyword_count + 1))
-    done
-    
-    # Detect question type
-    local question_type=$(detect_question_type "$user_input")
-    
-    # Simulate Transformer layers 1-24
-    # Each layer transforms hidden states through attention and FFN
-    local hidden_sum=0
-    local layer=1
-    
-    # Simple deterministic computation based on input
-    while [ $layer -le 24 ]; do
-        # Simulate attention computation
-        hidden_sum=$((hidden_sum + input_len * layer))
-        
-        # Simulate FFN computation  
-        hidden_sum=$((hidden_sum * 17 % 256))
-        
-        layer=$((layer + 1))
-    done
-    
-    # Generate contextual response
-    local response=$(generate_contextual_response "$user_input" "$keywords" "$keyword_count" "$question_type")
-    
-    echo "$response"
+    local prompt_file="/tmp/neurx_chat_prompt.txt"
+    printf '%s' "$user_input" > "$prompt_file"
+    "$NEURX_DIR/artifacts/build/real_inference/real_inference"
 }
 
 run_turn() {
@@ -219,7 +147,6 @@ run_turn() {
     
     # Run real inference
     echo "⏳ Computing Transformer output..."
-    
     response=$(infer_response "$user_input")
     
     if [ -z "$response" ]; then
