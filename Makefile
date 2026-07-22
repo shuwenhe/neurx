@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test build-cpu-inference serving-native-socket-test posttrain posttrain-e2e posttrain-merge-lora build-lora-merge pretrain-watch chat check-bash check-nvcc shard split logs logs-tail \
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test build-cpu-inference serving-native-socket-test posttrain posttrain-e2e posttrain-merge-lora build-lora-merge pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -6,7 +6,7 @@
 	run-train-compiled-s run-train-large-model-s run-train-model-ir-s run-with-logs-s verify-framework-s verify-inference-pipeline-s test-build-s test-smart-inference-s \
 	run-full-inference-s compile-all-components-s integration-s complete-training-cycle-s verify-transformer-implementation-s cluster-launch-s setup-production-deployment-s \
 	run-end-to-end-verification-s run-integration-tests-s minimal-diagnostic-s diagnose-file-creation-s diagnose-tool-registration-s diagnose-autoscroll-s \
-	build-pretrain-manifest-s build-cuda-train-bridge build-cuda-chat-bridge run-gpu-pretrain-s cuda-tools-s cuda-verify-s cuda-build-s cuda-build-runtime-s cuda-build-runtime-alt-s cuda-build-kernels-s cuda-build-kernels-simple-s run-interactive-chat-repl-s transformer-cuda-checkpoint-resume-test
+	build-pretrain-manifest-s build-cuda-train-bridge build-cuda-chat-bridge run-gpu-pretrain-s cuda-tools-s cuda-verify-s cuda-build-s cuda-build-runtime-s cuda-build-runtime-alt-s cuda-build-kernels-s cuda-build-kernels-simple-s run-interactive-chat-repl-s transformer-cuda-checkpoint-resume-test build-real-inference-s
 
 ifeq ($(OS),Windows_NT)
 PLATFORM := windows
@@ -553,6 +553,20 @@ chat: build-posttrain-chat-s
 		exit 1; \
 	fi
 
+real-inference: build-real-inference-s
+	@echo "🚀 Starting NeurX Real Interactive Inference (Pure S)..."
+	@if [ -f "/home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors" ]; then \
+		echo "✓ PostTrain model found: base-model-posttrain"; \
+		echo "✓ SafeTensors loading enabled"; \
+		echo "✓ Transformer inference with stdin support"; \
+		mkdir -p artifacts/logs; \
+		$(CURDIR_UNIX)/artifacts/build/real_inference/real_inference 2>&1 | tee -a artifacts/logs/real_inference_$(shell date +%Y%m%d_%H%M%S).log; \
+	else \
+		echo "❌ No PostTrain model found!"; \
+		echo "Expected path: /home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors"; \
+		exit 1; \
+	fi
+
 chat-posttrain: build-posttrain-chat-s
 	@echo "Starting NeurX PostTrain Model Interactive Chat"
 	@mkdir -p artifacts/logs
@@ -561,7 +575,7 @@ chat-posttrain: build-posttrain-chat-s
 build-posttrain-chat-s:
 	@mkdir -p artifacts/build/posttrain_chat
 	@echo "Compiling PostTrain Chat (S)..."
-	@'$(S_COMPILER)' inference/posttrain_chat.s artifacts/build/posttrain_chat/posttrain_chat.ir || { \
+	@/home/shuwen/shuwen/train/s/bin/s_seed inference/posttrain_chat.s artifacts/build/posttrain_chat/posttrain_chat.ir || { \
 		echo "❌ Compilation failed!"; \
 		exit 1; \
 	}
@@ -570,6 +584,19 @@ build-posttrain-chat-s:
 	@printf '#!/bin/bash\n%s/artifacts/build/s_runner/s_ir_runner %s/artifacts/build/posttrain_chat/posttrain_chat.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifacts/build/posttrain_chat/posttrain_chat
 	@chmod +x artifacts/build/posttrain_chat/posttrain_chat
 	@echo "✓ PostTrain Chat ready"
+
+build-real-inference-s:
+	@mkdir -p artifacts/build/real_inference
+	@echo "Compiling Real Interactive Inference (S)..."
+	@/home/shuwen/shuwen/train/s/bin/s_seed inference/real_inference.s artifacts/build/real_inference/real_inference.ir || { \
+		echo "❌ Compilation failed!"; \
+		exit 1; \
+	}
+	@echo "✓ Compiled to IR successfully"
+	@echo "Creating Real Inference runner script..."
+	@printf '#!/bin/bash\n%s/artifacts/build/s_runner/s_ir_runner %s/artifacts/build/real_inference/real_inference.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifacts/build/real_inference/real_inference
+	@chmod +x artifacts/build/real_inference/real_inference
+	@echo "✓ Real Interactive Inference ready"
 
 
 shard: check-bash

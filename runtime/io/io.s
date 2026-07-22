@@ -64,6 +64,12 @@ func runtime_read_text_file(string path) string {
     ""
 }
 
+extern "intrinsic" func __host_read_binary_file(string path) []int
+
+func runtime_read_binary_file(string path) []int {
+    __host_read_binary_file(path)
+}
+
 func runtime_write_text_file(string path, string content) () {
     fs_write_text_file(path, content)
 }
