@@ -542,7 +542,11 @@ pretrain-watch: check-bash
 
 chat:
 	@chmod +x $(CURDIR_UNIX)/posttrain_chat_interactive.sh
-	@$(CURDIR_UNIX)/posttrain_chat_interactive.sh
+	@if [ -n "$$CHAT_PROMPT" ]; then \
+		CHAT_PROMPT="$$CHAT_PROMPT" $(CURDIR_UNIX)/posttrain_chat_interactive.sh; \
+	else \
+		$(CURDIR_UNIX)/posttrain_chat_interactive.sh; \
+	fi
 
 real-inference: build-real-inference-s
 	@echo "🚀 Running NeurX Real Inference Engine (Pure S)..."

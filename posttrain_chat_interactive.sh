@@ -198,25 +198,23 @@ infer_response() {
     echo "$response"
 }
 
-# Interactive loop
-while true; do
-    echo -n "You: "
-    read -r user_input
+run_turn() {
+    local user_input="$1"
     
     # Handle commands
     if [ "$user_input" = "exit" ] || [ "$user_input" = "quit" ]; then
         echo ""
         echo "👋 Goodbye!"
-        break
+        return 0
     fi
     
     if [ "$user_input" = "clear" ]; then
         clear
-        continue
+        return 0
     fi
     
     if [ -z "$user_input" ]; then
-        continue
+        return 0
     fi
     
     # Run real inference
@@ -231,4 +229,22 @@ while true; do
     fi
     
     echo ""
+    return 0
+}
+
+if [ $# -gt 0 ]; then
+    run_turn "$*"
+    exit 0
+fi
+
+if [ -n "${CHAT_PROMPT:-}" ]; then
+    run_turn "$CHAT_PROMPT"
+    exit 0
+fi
+
+# Interactive loop
+while true; do
+    echo -n "You: "
+    read -r user_input
+    run_turn "$user_input"
 done

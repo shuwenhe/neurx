@@ -300,11 +300,24 @@ func attention_head_triplet_signature([]int q_bytes, []int k_bytes, []int v_byte
     int q_start = head_idx * head_dim
     int k_start = head_idx * head_dim
     int v_start = head_idx * head_dim
-    int q_sig = tensor_window_signature(q_bytes, q_start, head_dim, salt + head_idx * 3)
-    int k_sig = tensor_window_signature(k_bytes, k_start, head_dim, salt + head_idx * 5)
-    int v_sig = tensor_window_signature(v_bytes, v_start, head_dim, salt + head_idx * 7)
-    int merged = q_sig + v_sig - k_sig
-    return tensor_signature(v_bytes, merged + salt + head_idx * 11)
+    int quarter = head_dim / 4
+    if quarter <= 0 {
+        quarter = 1
+    }
+    int q_a = tensor_window_signature(q_bytes, q_start, quarter, salt + head_idx * 3)
+    int q_b = tensor_window_signature(q_bytes, q_start + quarter, quarter, salt + head_idx * 5)
+    int q_c = tensor_window_signature(q_bytes, q_start + quarter * 2, quarter, salt + head_idx * 7)
+    int q_d = tensor_window_signature(q_bytes, q_start + quarter * 3, head_dim - quarter * 3, salt + head_idx * 11)
+    int k_a = tensor_window_signature(k_bytes, k_start, quarter, salt + head_idx * 13)
+    int k_b = tensor_window_signature(k_bytes, k_start + quarter, quarter, salt + head_idx * 17)
+    int k_c = tensor_window_signature(k_bytes, k_start + quarter * 2, quarter, salt + head_idx * 19)
+    int k_d = tensor_window_signature(k_bytes, k_start + quarter * 3, head_dim - quarter * 3, salt + head_idx * 23)
+    int v_a = tensor_window_signature(v_bytes, v_start, quarter, salt + head_idx * 29)
+    int v_b = tensor_window_signature(v_bytes, v_start + quarter, quarter, salt + head_idx * 31)
+    int v_c = tensor_window_signature(v_bytes, v_start + quarter * 2, quarter, salt + head_idx * 37)
+    int v_d = tensor_window_signature(v_bytes, v_start + quarter * 3, head_dim - quarter * 3, salt + head_idx * 41)
+    int merged = q_a + q_b + q_c + q_d + v_a + v_b + v_c + v_d - k_a - k_b - k_c - k_d
+    return tensor_signature(v_bytes, merged + salt + head_idx * 43)
 }
 
 func lm_head_token_signature([]int head_bytes, int token_slot, int salt) int {
@@ -345,13 +358,13 @@ func lm_head_row_signature([]int head_bytes, int row_idx, int salt) int {
         row = 0 - row
     }
     int start = row * 32
-    int total = 0
-    int i = start
-    while i < start + 32 && i < len(head_bytes) {
-        total = total + head_bytes[i]
-        i = i + 1
-    }
-    return tensor_signature(head_bytes, salt + total + row * 23)
+    int half = 16
+    int q1 = tensor_window_signature(head_bytes, start, half, salt + row * 3)
+    int q2 = tensor_window_signature(head_bytes, start + half, half, salt + row * 5)
+    int q3 = tensor_window_signature(head_bytes, start + 32, half, salt + row * 7)
+    int q4 = tensor_window_signature(head_bytes, start + 32 + half, half, salt + row * 11)
+    int total = q1 + q2 + q3 + q4 + row * 23
+    return tensor_signature(head_bytes, salt + total)
 }
 
 func softmax_weight_approx(int logit, int max_logit, int temperature_scale) int {
@@ -383,7 +396,7 @@ func softmax_weight_approx_16(int logit, int max_logit, int temperature_scale) i
     }
     int exp_approx = 100000
     int step = 0
-    while step < shifted && step < 16 {
+    while step < shifted && step < 32 {
         exp_approx = exp_approx / 2
         if exp_approx <= 1 {
             exp_approx = 1
