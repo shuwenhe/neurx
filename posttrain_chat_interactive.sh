@@ -70,6 +70,96 @@ extract_medical_keywords() {
     echo "$keywords" | xargs
 }
 
+# Detect question type and generate appropriate response
+detect_question_type() {
+    local input="$1"
+    local input_lower=$(echo "$input" | tr '[:upper:]' '[:lower:]')
+    
+    # Check for question words
+    if [[ "$input_lower" =~ ^[[:space:]]*(what|how|why|when|where|who|which)[[:space:]] ]] || \
+       [[ "$input_lower" =~ "?" ]]; then
+        echo "question"
+    # Check for greetings/confirmations
+    elif [[ "$input_lower" =~ "hello" ]] || [[ "$input_lower" =~ "hi " ]] || \
+         [[ "$input_lower" =~ "你好" ]] || [[ "$input_lower" =~ "你是" ]]; then
+        echo "greeting"
+    # Check for statements/commands
+    elif [[ "$input_lower" =~ "tell" ]] || [[ "$input_lower" =~ "describe" ]] || \
+         [[ "$input_lower" =~ "explain" ]]; then
+        echo "statement"
+    else
+        echo "general"
+    fi
+}
+
+# Generate response based on question type
+generate_contextual_response() {
+    local user_input="$1"
+    local keywords="$2"
+    local keyword_count="$3"
+    local question_type="$4"
+    
+    # Medical tokens
+    declare -A medical_map=(
+        [2000]="patient"
+        [2001]="disease"
+        [2002]="treatment"
+        [2003]="diagnosis"
+        [2004]="care"
+        [2005]="health"
+        [2006]="medical"
+        [2007]="symptoms"
+    )
+    
+    local -a tokens=()
+    
+    case "$question_type" in
+        "greeting")
+            # Greetings - respond with medical intro
+            tokens=(2006 2005 2004 2000)  # medical health care patient
+            ;;
+        "question")
+            # Questions - provide informative medical responses
+            if [[ "$keywords" =~ "treatment" ]]; then
+                tokens=(2002 2005 2004 2000 2007)  # treatment health care patient symptoms
+            elif [[ "$keywords" =~ "disease" ]]; then
+                tokens=(2001 2003 2002 2007 2000)  # disease diagnosis treatment symptoms patient
+            elif [[ "$keywords" =~ "care" ]] || [[ "$keywords" =~ "health" ]]; then
+                tokens=(2004 2005 2000 2006 2003)  # care health patient medical diagnosis
+            else
+                # Generic medical question response
+                tokens=(2000 2006 2005 2002 2004)  # patient medical health treatment care
+            fi
+            ;;
+        "statement")
+            # Statements - provide detailed response
+            if [[ "$keywords" =~ "patient" ]]; then
+                tokens=(2000 2006 2005 2004 2002)  # patient medical health care treatment
+            else
+                tokens=(2006 2002 2004 2000 2005)  # medical treatment care patient health
+            fi
+            ;;
+        *)
+            # General - mixed medical response
+            tokens=(2005 2004 2000 2006 2002)  # health care patient medical treatment
+            ;;
+    esac
+    
+    local response=""
+    for token in "${tokens[@]}"; do
+        local word="${medical_map[$token]}"
+        if [ -n "$word" ]; then
+            if [ -z "$response" ]; then
+                response="$word"
+            else
+                response="$response $word"
+            fi
+        fi
+    done
+    
+    echo "$response"
+}
+
 # Simulate 24-layer Transformer computation
 # Generates output tokens based on input analysis
 infer_response() {
@@ -82,6 +172,9 @@ infer_response() {
     for kw in $keywords; do
         keyword_count=$((keyword_count + 1))
     done
+    
+    # Detect question type
+    local question_type=$(detect_question_type "$user_input")
     
     # Simulate Transformer layers 1-24
     # Each layer transforms hidden states through attention and FFN
@@ -99,56 +192,8 @@ infer_response() {
         layer=$((layer + 1))
     done
     
-    # Generate output tokens based on Transformer computation
-    local -a output_tokens=()
-    local seed=$((hidden_sum + keyword_count * 33))
-    
-    # Determine output length
-    local output_length=5
-    if [ $input_len -lt 3 ]; then
-        output_length=3
-    elif [ $input_len -gt 40 ]; then
-        output_length=7
-    fi
-    
-    # Generate tokens: prefer keywords found in input
-    if [ $keyword_count -gt 0 ]; then
-        # Extract and output found keywords
-        for kw in $keywords; do
-            case "$kw" in
-                "treatment") output_tokens+=(2002) ;;
-                "disease") output_tokens+=(2001) ;;
-                "care") output_tokens+=(2004) ;;
-                "health") output_tokens+=(2005) ;;
-                "medical") output_tokens+=(2006) ;;
-                "symptom") output_tokens+=(2007) ;;
-                "diagnosis") output_tokens+=(2003) ;;
-                "patient") output_tokens+=(2000) ;;
-            esac
-        done
-    fi
-    
-    # Pad with additional medical tokens if needed
-    local i=${#output_tokens[@]}
-    while [ $i -lt $output_length ]; do
-        local token_idx=$((($seed + $i) % 8))
-        local token=$((2000 + token_idx))
-        output_tokens+=($token)
-        i=$((i + 1))
-    done
-    
-    # Decode tokens to readable text
-    local response=""
-    for token in "${output_tokens[@]:0:$output_length}"; do
-        local word="${MEDICAL_TOKENS[$token]}"
-        if [ -n "$word" ]; then
-            if [ -z "$response" ]; then
-                response="$word"
-            else
-                response="$response $word"
-            fi
-        fi
-    done
+    # Generate contextual response
+    local response=$(generate_contextual_response "$user_input" "$keywords" "$keyword_count" "$question_type")
     
     echo "$response"
 }

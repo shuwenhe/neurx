@@ -324,6 +324,80 @@ func lm_head_token_signature([]int head_bytes, int token_slot, int salt) int {
     return tensor_signature(head_bytes, salt + total + slot * 37)
 }
 
+func lm_head_projection_score([]int head_bytes, int token_slot, int hidden, int salt) int {
+    int slot = token_slot
+    if slot < 0 {
+        slot = 0 - slot
+    }
+    int base = lm_head_token_signature(head_bytes, slot, salt)
+    int window = tensor_window_signature(head_bytes, slot * 64, 64, salt + hidden + slot * 13)
+    int proj = base + window + hidden * 3 + slot * 19
+    proj = proj - ((proj / 100000) * 100000)
+    if proj < 0 {
+        proj = 0 - proj
+    }
+    return proj
+}
+
+func lm_head_row_signature([]int head_bytes, int row_idx, int salt) int {
+    int row = row_idx
+    if row < 0 {
+        row = 0 - row
+    }
+    int start = row * 32
+    int total = 0
+    int i = start
+    while i < start + 32 && i < len(head_bytes) {
+        total = total + head_bytes[i]
+        i = i + 1
+    }
+    return tensor_signature(head_bytes, salt + total + row * 23)
+}
+
+func softmax_weight_approx(int logit, int max_logit, int temperature_scale) int {
+    int shifted = logit - max_logit
+    if shifted < 0 {
+        shifted = 0 - shifted
+    }
+    int exp_approx = 100000
+    int step = 0
+    while step < shifted && step < 10 {
+        exp_approx = exp_approx / 2
+        if exp_approx <= 1 {
+            exp_approx = 1
+            break
+        }
+        step = step + 1
+    }
+    int weight = temperature_scale * exp_approx / 100000
+    if weight <= 0 {
+        weight = 1
+    }
+    return weight
+}
+
+func softmax_weight_approx_16(int logit, int max_logit, int temperature_scale) int {
+    int shifted = logit - max_logit
+    if shifted < 0 {
+        shifted = 0 - shifted
+    }
+    int exp_approx = 100000
+    int step = 0
+    while step < shifted && step < 16 {
+        exp_approx = exp_approx / 2
+        if exp_approx <= 1 {
+            exp_approx = 1
+            break
+        }
+        step = step + 1
+    }
+    int weight = temperature_scale * exp_approx / 100000
+    if weight <= 0 {
+        weight = 1
+    }
+    return weight
+}
+
 func tokenize(string text) []int {
     []int tokens
     tokens = []int{cap: 32}
@@ -495,8 +569,10 @@ func forward_step([]int prompt_tokens, string model_path, []int metadata, []int 
 
     int lm_mix = 0
     int slot = 0
-    while slot < 16 {
-        lm_mix = lm_mix + lm_head_token_signature(head_bytes, slot, hidden + slot * 7)
+    while slot < 64 {
+        int row_sig = lm_head_row_signature(head_bytes, slot, hidden + slot * 5)
+        lm_mix = lm_mix + lm_head_projection_score(head_bytes, slot, hidden + row_sig, hidden + slot * 7)
+        lm_mix = lm_mix + row_sig
         slot = slot + 1
     }
     hidden = hidden + lm_mix
@@ -580,24 +656,7 @@ func select_next_token(int seed, int vocab_size, float temperature, int top_k) i
     }
     i = 0
     while i < effective_top {
-        int shifted = candidates[i] - max_logit
-        if shifted < 0 {
-            shifted = 0 - shifted
-        }
-        int exp_approx = 100000
-        int step = 0
-        while step < shifted && step < 8 {
-            exp_approx = exp_approx / 2
-            if exp_approx <= 1 {
-                exp_approx = 1
-                break
-            }
-            step = step + 1
-        }
-        int weight = temperature_scale * exp_approx / 100000
-        if weight <= 0 {
-            weight = 1
-        }
+        int weight = softmax_weight_approx_16(candidates[i], max_logit, temperature_scale)
         weights[i] = weight
         total_weight = total_weight + weight
         i = i + 1
