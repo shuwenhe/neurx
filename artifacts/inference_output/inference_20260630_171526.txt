@@ -1,1 +1,0 @@
-DEBUG checkpoint_arg=/Users/feifei/shuwen/neurx/artifacts/checkpoints/llm_s_pretrain

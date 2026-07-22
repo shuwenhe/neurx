@@ -1,7 +1,0 @@
-{"role": "system", "content": "NeurX LLM English textinferencesystemEnglish textstart"}
-{"role": "user", "content": "hello", "turn": 1}
-{"role": "assistant", "content": "NeurXinferencesystemEnglish textinput: "hello"", "turn": 1}
-{"role": "user", "content": "English text", "turn": 2}
-{"role": "assistant", "content": "NeurXinferencesystemEnglish textinput: "English text"", "turn": 2}
-{"role": "user", "content": "hello", "turn": 3}
-{"role": "assistant", "content": "NeurXinferencesystemEnglish textinput: "hello"", "turn": 3}
