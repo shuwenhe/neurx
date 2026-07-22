@@ -622,7 +622,7 @@ struct neurx_model {
     tensor word_embeddings          // [vocab_size, hidden_size]
     position_embeddings            // [max_pos, hidden_size] (English text,English text 2D PE)
     transformer_blocks[]           // English text Transformer English text
-    tensor final_layer_norm_gamma   // English text LayerNorm
+    tensor final_layer_norm_gamma   // English text layer_norm
     tensor lm_head                 // outputEnglish text (English text embedding English text)
 
     // English text (English text)
@@ -713,7 +713,7 @@ func create_neurx_model(config: neurx_config) neurx_model {
         append(blocks, block)
     }
 
-    // Final LayerNorm
+    // Final layer_norm
     tensor final_norm = ones(config.hidden_size)
     final_norm = parameter(final_norm, name="model.norm.weight")
 
@@ -777,7 +777,7 @@ func count_parameters(config: neurx_config) int {
         params += config.hidden_size * kv_dim
         // O projection
         params += config.hidden_size * config.hidden_size
-        // 2x LayerNorm (RMSNorm English text gamma)
+        // 2x layer_norm (RMSNorm English text gamma)
         params += config.hidden_size * 2
 
         // FFN (SwiGLU): gate, up, down projections
@@ -795,7 +795,7 @@ func count_parameters(config: neurx_config) int {
         }
     }
 
-    // Final LayerNorm
+    // Final layer_norm
     params += config.hidden_size
 
     // LM Head (English text embedding)

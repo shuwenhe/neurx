@@ -582,7 +582,7 @@ func compute_gradients(
 // PARAMETER UPDATE - SGD with Momentum (AdamW-style)
 // ========================================================================
 
-struct AdamW_State {
+struct adam_w_state {
     // For each parameter, store: [name] -> {m: momentum, v: variance}
     m_states: map[string]Tensor      // First moment (momentum)
     v_states: map[string]Tensor      // Second moment (variance)
@@ -592,7 +592,7 @@ struct AdamW_State {
 func adamw_update(
     model: &mini_transformer,
     gradients: map[string]Tensor,
-    state: &AdamW_State,
+    state: &adam_w_state,
     learning_rate: float,
     beta1: float,          // Momentum decay (default 0.9)
     beta2: float,          // Variance decay (default 0.999)

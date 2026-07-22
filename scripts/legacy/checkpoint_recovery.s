@@ -49,7 +49,7 @@ type checkpoint struct {
     metadata            checkpoint_metadata
     model_weights       [][]float64
     optimizer_state     optimizer_state
-    training_state      TrainingState
+    training_state      training_state
     distributed_state   map[string]string
     custom_data         map[string]string
 }
@@ -99,7 +99,7 @@ func (manager *checkpoint_manager) save_checkpoint(
     val_loss float64,
     model_weights [][]float64,
     opt_state optimizer_state,
-    train_state TrainingState) {
+    train_state training_state) {
     
     checkpoint_id := fmt.Sprintf("ckpt-step-%d-epoch-%d", step, epoch)
     
@@ -164,7 +164,7 @@ func (manager *checkpoint_manager) load_checkpoint(checkpoint_id string) checkpo
     return checkpoint
 }
 
-func (manager *checkpoint_manager) restore_training_state(checkpoint checkpoint) TrainingState {
+func (manager *checkpoint_manager) restore_training_state(checkpoint checkpoint) training_state {
     fmt.Println("\n[Recovery] Restoring training state...")
     
     state := checkpoint.training_state

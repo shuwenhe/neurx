@@ -14,7 +14,7 @@ struct Tensor {
 }
 
 // LoRA 权重
-struct LoRAWeights {
+struct lora_weights {
     string name
     Tensor A
     Tensor B
@@ -23,7 +23,7 @@ struct LoRAWeights {
 }
 
 // 训练配置
-struct TrainingConfig {
+struct training_config {
     string model_path
     int batch_size
     int num_epochs
@@ -35,7 +35,7 @@ struct TrainingConfig {
 }
 
 // 训练状态
-struct TrainingState {
+struct training_state {
     int current_epoch
     int total_steps
     float total_loss
@@ -166,8 +166,8 @@ func zeros(int rows, int cols) Tensor {
 // 模型配置
 // ============================================================================
 
-func load_model_config(string model_path) TrainingConfig {
-    TrainingConfig config
+func load_model_config(string model_path) training_config {
+    training_config config
     config.model_path = model_path
     config.batch_size = 4
     config.num_epochs = 3
@@ -204,7 +204,7 @@ func compute_loss(float logits, float labels) float {
 // 训练循环
 // ============================================================================
 
-func train_epoch(TrainingConfig config, TrainingState state) float {
+func train_epoch(training_config config, training_state state) float {
     println("Epoch " + int_to_string(state.current_epoch + 1) + "/" + int_to_string(config.num_epochs))
     
     float epoch_loss = 0.0
@@ -232,8 +232,8 @@ func train_epoch(TrainingConfig config, TrainingState state) float {
     return avg_loss
 }
 
-func train_model(TrainingConfig config) TrainingState {
-    TrainingState state
+func train_model(training_config config) training_state {
+    training_state state
     state.current_epoch = 0
     state.total_steps = 0
     state.best_loss = 999999.0
@@ -262,7 +262,7 @@ func train_model(TrainingConfig config) TrainingState {
 // 权重保存
 // ============================================================================
 
-func save_model(TrainingConfig config, TrainingState state) {
+func save_model(training_config config, training_state state) {
     println("\nSaving model...")
     println("  Output: " + config.model_path + "/../base-model-posttrain/")
     println("  Total steps: " + int_to_string(state.total_steps))
@@ -273,7 +273,7 @@ func save_model(TrainingConfig config, TrainingState state) {
 // 验证
 // ============================================================================
 
-func verify_results(TrainingState state) {
+func verify_results(training_state state) {
     println("\nVerifying results...")
     println("  Total steps: " + int_to_string(state.total_steps))
     println("  Final loss: " + float_to_string(state.total_loss))
@@ -291,7 +291,7 @@ func main() {
     println(repeat_string("=", 60))
     
     string model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
-    TrainingConfig config = load_model_config(model_path)
+    training_config config = load_model_config(model_path)
     
     println("\nModel Configuration:")
     println("  Path: " + config.model_path)
@@ -300,7 +300,7 @@ func main() {
     println("  LoRA rank: " + int_to_string(config.lora_rank))
     println("  Learning rate: " + float_to_string(config.learning_rate))
     
-    TrainingState state = train_model(config)
+    training_state state = train_model(config)
     
     save_model(config, state)
     

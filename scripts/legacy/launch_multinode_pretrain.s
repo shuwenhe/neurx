@@ -21,12 +21,12 @@ use std.io
 // configurationEnglish text
 // ============================================================================
 
-struct HostNode {
+struct host_node {
     string hostname
     int gpu_count
 }
 
-struct LauncherConfig {
+struct launcher_config {
     string root_dir
     string hostfile
     string master_addr
@@ -51,7 +51,7 @@ struct LauncherConfig {
     string tokenizer_merges
 }
 
-struct ProcessInfo {
+struct process_info {
     int rank
     string hostname
     int local_rank
@@ -91,8 +91,8 @@ func get_env_float_or_default(string key, float default_val) float {
 // fileEnglish text
 // ============================================================================
 
-func read_hostfile(string path) []HostNode {
-    []HostNode nodes = []HostNode{}
+func read_hostfile(string path) []host_node {
+    []host_node nodes = []host_node{}
 
     // English textfileEnglish text
     if !fs::exists(path) {
@@ -136,7 +136,7 @@ func read_hostfile(string path) []HostNode {
             gpu_count = count_gpus_local()
         }
 
-        nodes.push(HostNode{hostname: hostname, gpu_count: gpu_count})
+        nodes.push(host_node{hostname: hostname, gpu_count: gpu_count})
     }
 
     return nodes
@@ -186,13 +186,13 @@ func read_nccl_id_file(string path) string {
 // configurationinitialize
 // ============================================================================
 
-func create_launcher_config() LauncherConfig {
+func create_launcher_config() launcher_config {
     // English textdirectory
     string script_dir = os::working_dir()
     string root_dir = get_env_or_default("NEURX_ROOT", script_dir)
 
     // English textconfiguration
-    LauncherConfig cfg
+    launcher_config cfg
     cfg.root_dir = root_dir
     cfg.hostfile = get_env_or_default("NEURX_HOSTFILE",
                                        root_dir + "/configs/pretrain.hosts")
@@ -230,10 +230,10 @@ func create_launcher_config() LauncherConfig {
 
 func launch_multinode_pretrain() int {
     // 1. English textconfiguration
-    LauncherConfig cfg = create_launcher_config()
+    launcher_config cfg = create_launcher_config()
 
     // 2. English texthostfile
-    []HostNode nodes = read_hostfile(cfg.hostfile)
+    []host_node nodes = read_hostfile(cfg.hostfile)
     if len(nodes) == 0 {
         io::eprintln("hostfile has no valid nodes: " + cfg.hostfile)
         return 2
@@ -263,11 +263,11 @@ func launch_multinode_pretrain() int {
     io::println("[multinode] shared NCCL id: " + cfg.nccl_id_file)
 
     // 8. startEnglish textrankEnglish texttrainingEnglish text
-    []ProcessInfo processes = []ProcessInfo{}
+    []process_info processes = []process_info{}
     int global_rank = 0
 
     for node_idx := 0; node_idx < len(nodes); node_idx++ {
-        HostNode node = nodes[node_idx]
+        host_node node = nodes[node_idx]
 
         for local_rank := 0; local_rank < node.gpu_count; local_rank++ {
             // English text
@@ -284,7 +284,7 @@ func launch_multinode_pretrain() int {
                                      cfg.output_dir, global_rank, len(nodes) == 1)
 
             if pid > 0 {
-                ProcessInfo proc
+                process_info proc
                 proc.rank = global_rank
                 proc.hostname = node.hostname
                 proc.local_rank = local_rank
@@ -303,7 +303,7 @@ func launch_multinode_pretrain() int {
     // 9. English text
     int exit_code = 0
     for i := 0; i < len(processes); i++ {
-        ProcessInfo proc = processes[i]
+        process_info proc = processes[i]
         int status = process::wait(proc.process_id)
         if status != 0 {
             exit_code = status
@@ -317,7 +317,7 @@ func launch_multinode_pretrain() int {
 // helperfunction
 // ============================================================================
 
-func build_env_vars(LauncherConfig cfg, string master_addr, int world_size,
+func build_env_vars(launcher_config cfg, string master_addr, int world_size,
                     int rank, int local_gpus, int num_nodes) []string {
     []string env_vars = []string{}
 
@@ -348,7 +348,7 @@ func build_env_vars(LauncherConfig cfg, string master_addr, int world_size,
     return env_vars
 }
 
-func build_command(LauncherConfig cfg, int rank, int local_rank,
+func build_command(launcher_config cfg, int rank, int local_rank,
                    int local_gpus, int num_nodes) string {
     // English textRequiredrankdirectoryEnglish text
     string ckpt_path = cfg.output_dir + "/transformer_v2.ckpt"

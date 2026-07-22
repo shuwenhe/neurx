@@ -12,7 +12,7 @@ use std.strings
 // configurationEnglish text
 // ============================================================================
 
-struct ChatConfig {
+struct chat_config {
     vocab_size: i32
     hidden_dim: i32
     num_layers: i32
@@ -23,21 +23,21 @@ struct ChatConfig {
     temperature: f64
 }
 
-struct ChatRequest {
+struct chat_request {
     user_input: string
     conversation_history: []string
     max_tokens: i32
     temperature: f64
 }
 
-struct ChatResponse {
+struct chat_response {
     assistant_reply: string
     tokens_generated: i32
     latency_ms: f64
 }
 
-struct SimpleTransformer {
-    config: ChatConfig
+struct simple_transformer {
+    config: chat_config
     embedding_dim: i32
     head_dim: i32
     total_params: i64
@@ -47,8 +47,8 @@ struct SimpleTransformer {
 // initialize
 // ============================================================================
 
-func create_chat_config() ChatConfig {
-    var config: ChatConfig
+func create_chat_config() chat_config {
+    var config: chat_config
     config.vocab_size = 32000
     config.hidden_dim = 256
     config.num_layers = 6
@@ -60,8 +60,8 @@ func create_chat_config() ChatConfig {
     return config
 }
 
-func init_model(config: ChatConfig) SimpleTransformer {
-    var model: SimpleTransformer
+func init_model(config: chat_config) simple_transformer {
+    var model: simple_transformer
     model.config = config
     model.embedding_dim = config.hidden_dim
     model.head_dim = config.hidden_dim / config.num_heads
@@ -94,7 +94,7 @@ func tokenize_input(text: string) []i32 {
     return tokens
 }
 
-func generate_token(model: SimpleTransformer, context: []i32) i32 {
+func generate_token(model: simple_transformer, context: []i32) i32 {
     // English text: English texttokenEnglish textgenerate
     if len(context) == 0 {
         return 0
@@ -216,7 +216,7 @@ func decode_tokens(tokens: []i32) string {
 // English text
 // ============================================================================
 
-func process_chat_request(model: SimpleTransformer, request: ChatRequest) ChatResponse {
+func process_chat_request(model: simple_transformer, request: chat_request) chat_response {
     var start_time: i64 = time.now_ms()
 
     // 1. English text
@@ -270,7 +270,7 @@ func process_chat_request(model: SimpleTransformer, request: ChatRequest) ChatRe
     var latency: f64 = f64(end_time - start_time)
 
     // 5. English textresponse
-    var response: ChatResponse
+    var response: chat_response
     response.assistant_reply = response_text
     response.tokens_generated = len(generated_tokens)
     response.latency_ms = latency
@@ -290,8 +290,8 @@ func main() {
     io.println("")
 
     // initializemodel
-    var config: ChatConfig = create_chat_config()
-    var model: SimpleTransformer = init_model(config)
+    var config: chat_config = create_chat_config()
+    var model: simple_transformer = init_model(config)
 
     io.println("🤖 Model Initialized")
     io.println("   Vocab size: " + strings.from_i32(config.vocab_size))
@@ -306,14 +306,14 @@ func main() {
     if len(args) > 1 {
         var user_input: string = args[1]
 
-        var request: ChatRequest
+        var request: chat_request
         request.user_input = user_input
         request.max_tokens = 50
         request.temperature = config.temperature
 
         // runinference
         var start: i64 = time.now_ms()
-        var response: ChatResponse = process_chat_request(model, request)
+        var response: chat_response = process_chat_request(model, request)
         var end: i64 = time.now_ms()
 
         // outputresponse

@@ -13,7 +13,7 @@ use std.time
 // DATA STRUCTURES FOR BENCHMARKING
 // ============================================================================
 
-struct ModelConfig {
+struct model_config {
     name: string
     vocab_size: i32
     hidden_dim: i32
@@ -25,7 +25,7 @@ struct ModelConfig {
     num_params: i64
 }
 
-struct GPUBenchmark {
+struct gpu_benchmark {
     gpu_count: i32
     batch_size: i32
     tokens_per_sec: f64
@@ -35,10 +35,10 @@ struct GPUBenchmark {
     communication_overhead: f64  // ms
 }
 
-struct PerformanceReport {
+struct performance_report {
     timestamp: string
-    model: ModelConfig
-    benchmarks: GPUBenchmark[]
+    model: model_config
+    benchmarks: gpu_benchmark[]
     total_params: i64
     peak_throughput: f64
     scaling_efficiency: f64
@@ -48,8 +48,8 @@ struct PerformanceReport {
 // MODEL CONFIGURATION
 // ============================================================================
 
-func get_scaled_model() ModelConfig {
-    return ModelConfig {
+func get_scaled_model() model_config {
+    return model_config {
         name: "Scaled Transformer",
         vocab_size: 32000,
         hidden_dim: 256,
@@ -62,8 +62,8 @@ func get_scaled_model() ModelConfig {
     }
 }
 
-func get_base_model() ModelConfig {
-    return ModelConfig {
+func get_base_model() model_config {
+    return model_config {
         name: "Base Transformer",
         vocab_size: 1024,
         hidden_dim: 32,
@@ -80,7 +80,7 @@ func get_base_model() ModelConfig {
 // BENCHMARK FUNCTIONS
 // ============================================================================
 
-func benchmark_single_gpu(model: ModelConfig) GPUBenchmark {
+func benchmark_single_gpu(model: model_config) gpu_benchmark {
     println("Benchmarking: Single GPU (A100)")
     
     // Performance calculations for A100-40GB
@@ -94,7 +94,7 @@ func benchmark_single_gpu(model: ModelConfig) GPUBenchmark {
     
     let memory_usage = 2.0 + 0.4  // GB (activations + model)
     
-    let benchmark = GPUBenchmark {
+    let benchmark = gpu_benchmark {
         gpu_count: 1,
         batch_size: model.batch_size,
         tokens_per_sec: tokens_per_sec,
@@ -107,7 +107,7 @@ func benchmark_single_gpu(model: ModelConfig) GPUBenchmark {
     return benchmark
 }
 
-func benchmark_multi_gpu(model: ModelConfig, gpu_count: i32) GPUBenchmark {
+func benchmark_multi_gpu(model: model_config, gpu_count: i32) gpu_benchmark {
     println("Benchmarking: " + strings.from_i32(gpu_count) + " GPUs (DDP)")
     
     // Base timing from single GPU
@@ -135,7 +135,7 @@ func benchmark_multi_gpu(model: ModelConfig, gpu_count: i32) GPUBenchmark {
     
     let memory_usage = 2.0 + 0.4  // Same memory per GPU
     
-    let benchmark = GPUBenchmark {
+    let benchmark = gpu_benchmark {
         gpu_count: gpu_count,
         batch_size: model.batch_size * gpu_count,
         tokens_per_sec: (model.batch_size * model.seq_length * 1000.0) / (forward_time + backward_time + optimizer_time),
@@ -148,7 +148,7 @@ func benchmark_multi_gpu(model: ModelConfig, gpu_count: i32) GPUBenchmark {
     return benchmark
 }
 
-func benchmark_model(model: ModelConfig) PerformanceReport {
+func benchmark_model(model: model_config) performance_report {
     println("")
     println("═" + strings.repeat("═", 61))
     println("MODEL: " + model.name)
@@ -163,7 +163,7 @@ func benchmark_model(model: ModelConfig) PerformanceReport {
     println("  Total parameters: " + format_large_number(model.num_params))
     println("")
     
-    let benchmarks = GPUBenchmark[]{}
+    let benchmarks = gpu_benchmark[]{}
     
     // Benchmark different GPU counts
     let gpu_counts = [1, 4, 16, 64]
@@ -195,7 +195,7 @@ func benchmark_model(model: ModelConfig) PerformanceReport {
     }
     let avg_efficiency = total_efficiency / math.from_i32(len(benchmarks))
     
-    let report = PerformanceReport {
+    let report = performance_report {
         timestamp: time.format(time.now(), "2006-01-02T15:04:05Z07:00"),
         model: model,
         benchmarks: benchmarks,
@@ -223,7 +223,7 @@ func format_large_number(n: i64) string {
     }
 }
 
-func print_performance_summary(reports: PerformanceReport[]) {
+func print_performance_summary(reports: performance_report[]) {
     println("")
     println("═" + strings.repeat("═", 61))
     println("PERFORMANCE SUMMARY")
@@ -239,7 +239,7 @@ func print_performance_summary(reports: PerformanceReport[]) {
     }
 }
 
-func print_scaling_analysis(report: PerformanceReport) {
+func print_scaling_analysis(report: performance_report) {
     println("")
     println("╔" + strings.repeat("═", 61) + "╗")
     println("║  SCALING ANALYSIS: " + report.model.name + strings.repeat(" ", 35 - len(report.model.name)) + "║")

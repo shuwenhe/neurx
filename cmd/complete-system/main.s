@@ -77,7 +77,7 @@ func runTraining(args []string) {
     fmt.Printf("  GPUs: %d\n", numGPUs)
     
     // Get model configuration based on scale
-    var modelConfig llm.GPTConfig
+    var modelConfig llm.gptconfig
     switch scale {
     case "mini":
         modelConfig = llm.Mini()

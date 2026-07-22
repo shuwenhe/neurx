@@ -212,7 +212,7 @@ type training_loop1_t struct {
     zero_optimizer: zero_optimizer
     activation_checkpointer: activation_checkpointer
     checkpoint_mgr: checkpoint_manager
-    state: TrainingState
+    state: training_state
 }
 
 func create_training_loop_1t(rank: int, world_size: int): training_loop1_t {
@@ -337,7 +337,7 @@ func (pm *performance_monitor) compute_flops(params: int64, batch_size: int,
     return flops
 }
 
-func (pm *performance_monitor) log_performance(state: TrainingState) {
+func (pm *performance_monitor) log_performance(state: training_state) {
     fmt.Printf("\n[Step %d] Performance Metrics:\n", state.step)
     fmt.Printf("  Tokens/sec: %.0f\n", state.tokens_per_second)
     fmt.Printf("  TFLOPs/sec: %.1f\n", float(pm.compute_flops(1000000000000, 4096, 32768)) / 1e12 / 3.0)

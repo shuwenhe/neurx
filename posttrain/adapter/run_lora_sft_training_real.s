@@ -7,18 +7,18 @@ use std.io.println
 use neurx.lib.fileio.{read_file_lines, split_string, trim_string, starts_with, file_exists}
 use neurx.lib.json.{extract_json_field, json_string_to_float, json_string_to_int}
 use neurx.lib.tensor.{Vector, Matrix, create_vector, create_matrix, matrix_vector_multiply, vector_add, vector_subtract, vector_scale}
-use neurx.lib.nn.{LoRALinearLayer, create_lora_linear_layer, lora_forward}
-use neurx.lib.loss.{mse_loss_forward, mse_loss_backward, create_adam_optimizer, AdamOptimizer, adam_step}
+use neurx.lib.nn.{lora_linear_layer, create_lora_linear_layer, lora_forward}
+use neurx.lib.loss.{mse_loss_forward, mse_loss_backward, create_adam_optimizer, adam_optimizer, adam_step}
 
 // Training data point
-struct TrainingExample {
+struct training_example {
     string instruction
     string input
     string output
 }
 
 // Training state
-struct TrainingState {
+struct training_state {
     int total_examples
     int current_epoch
     int current_step
@@ -97,8 +97,8 @@ func format_float(float value, int decimals) string {
 }
 
 // Parses a JSONL line into training example
-func parse_jsonl_example(string line) TrainingExample {
-    TrainingExample ex
+func parse_jsonl_example(string line) training_example {
+    training_example ex
     ex.instruction = ""
     ex.input = ""
     ex.output = ""
@@ -146,8 +146,8 @@ func simple_hash(string text) int {
 }
 
 // Creates training state
-func create_training_state(int total_examples) TrainingState {
-    TrainingState state
+func create_training_state(int total_examples) training_state {
+    training_state state
     state.total_examples = total_examples
     state.current_epoch = 0
     state.current_step = 0
@@ -199,39 +199,39 @@ func main() int {
     // For now, simulate loading data (S language doesn't have full file I/O yet)
     // In a real implementation, would read from JSONL file
     
-    TrainingExample[] examples
+    training_example[] examples
     int num_examples = 0
     
     // Simulate 5 examples
-    TrainingExample ex1
+    training_example ex1
     ex1.instruction = "What is the capital of France?"
     ex1.input = ""
     ex1.output = "Paris"
     examples[0] = ex1
     num_examples = 1
     
-    TrainingExample ex2
+    training_example ex2
     ex2.instruction = "What is the capital of Germany?"
     ex2.input = ""
     ex2.output = "Berlin"
     examples[1] = ex2
     num_examples = 2
     
-    TrainingExample ex3
+    training_example ex3
     ex3.instruction = "What is the capital of Spain?"
     ex3.input = ""
     ex3.output = "Madrid"
     examples[2] = ex3
     num_examples = 3
     
-    TrainingExample ex4
+    training_example ex4
     ex4.instruction = "What is the capital of Italy?"
     ex4.input = ""
     ex4.output = "Rome"
     examples[3] = ex4
     num_examples = 4
     
-    TrainingExample ex5
+    training_example ex5
     ex5.instruction = "What is the capital of Greece?"
     ex5.input = ""
     ex5.output = "Athens"
@@ -242,13 +242,13 @@ func main() int {
     println("")
     
     // Create LoRA layer
-    LoRALinearLayer lora_layer = create_lora_linear_layer(hidden_dim, hidden_dim, rank, alpha, learning_rate, 42)
+    lora_linear_layer lora_layer = create_lora_linear_layer(hidden_dim, hidden_dim, rank, alpha, learning_rate, 42)
     
     // Create optimizer
-    AdamOptimizer optimizer = create_adam_optimizer(learning_rate)
+    adam_optimizer optimizer = create_adam_optimizer(learning_rate)
     
     // Training loop
-    TrainingState state = create_training_state(num_examples)
+    training_state state = create_training_state(num_examples)
     
     int epoch = 0
     while epoch < epochs {

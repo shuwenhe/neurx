@@ -45,16 +45,16 @@ struct retrieval_system_config {
     citation_format: string = "[doc{index}]"       # English text
 }
 
-struct DocumentChunk {
+struct document_chunk {
     id: string                                     // Chunk ID (UUID)
     content: string                                // English textcontent
-    metadata: DocumentMetadata                     // English textdata
+    metadata: document_metadata                     // English textdata
     embedding: tensor?                             // English textcomputeEnglish text (English text)
     chunk_index: int                               // English text
     token_count: int                               // Token countEnglish text
 }
 
-struct DocumentMetadata {
+struct document_metadata {
     source_id: string                              // SourceEnglish text ID
     source_path: string?                           // filepathEnglish text URL
     title: string                                  // English texttitle
@@ -69,15 +69,15 @@ struct DocumentMetadata {
     relevance_score?: float                        // English text (English text)
 }
 
-struct SearchResult {
-    chunks: list<DocumentChunk>                    // English text
+struct search_result {
+    chunks: list<document_chunk>                    // English text
     scores: list<float>                            // English text/English text
     query: string                                  // English textquery
     expanded_query: string?                        # extensionEnglish textquery
-    retrieval_metadata: RetrievalMetadata          # English textdata
+    retrieval_metadata: retrieval_metadata          # English textdata
 }
 
-struct RetrievalMetadata {
+struct retrieval_metadata {
     total_scanned: int                             // English text
     total_returned: int                            // English textresultEnglish text
     vector_search_time_ms: float                   # English textsearchEnglish text
@@ -92,7 +92,7 @@ struct RetrievalMetadata {
 
 interface VectorDBInterface {
     init(config: retrieval_system_config)
-    insert(chunks: list<DocumentChunk>)
+    insert(chunks: list<document_chunk>)
     delete(chunk_ids: list<string>)
     search(query_embedding: tensor, top_k: int)
     save(path: string)
@@ -102,13 +102,13 @@ interface VectorDBInterface {
     get_status()
 }
 
-struct SearchResultItem {
+struct search_resultItem {
     chunk_id: string
     score: float
-    metadata: DocumentMetadata
+    metadata: document_metadata
 }
 
-struct DBStatus {
+struct dbstatus {
     total_documents: int
     index_type: string
     memory_usage_mb: float
@@ -121,7 +121,7 @@ struct DBStatus {
 class InMemoryVectorDB implements VectorDBInterface {
     config: retrieval_system_config
     embeddings: map<str, tensor>              // chunk_id -> embedding
-    documents: map<str, DocumentChunk>        // chunk_id -> document chunk
+    documents: map<str, document_chunk>        // chunk_id -> document chunk
     index_built: bool = false
     created_at: float
     last_updated: float
@@ -129,12 +129,12 @@ class InMemoryVectorDB implements VectorDBInterface {
     init(config: retrieval_system_config) {
         this.config = config
         this.embeddings = map<str, tensor>{}
-        this.documents = map<str, DocumentChunk>{}
+        this.documents = map<str, document_chunk>{}
         this.created_at = current_timestamp()
         this.last_updated = this.created_at
     }
 
-    insert(chunks: list<DocumentChunk>) {
+    insert(chunks: list<document_chunk>) {
         for chunk in chunks {
             if chunk.embedding != null {
                 this.embeddings[chunk.id] = chunk.embedding!
@@ -154,13 +154,13 @@ class InMemoryVectorDB implements VectorDBInterface {
     }
 
     search(query_embedding: tensor, top_k: int) {
-        results: list<SearchResultItem> = []
+        results: list<search_resultItem> = []
 
         for chunk_id, doc_emb in this.embeddings {
             let score = compute_similarity(query_embedding, doc_emb, this.config.metric)
 
             if score >= this.config.similarity_threshold {
-                results.append(SearchResultItem{
+                results.append(search_resultItem{
                     chunk_id=chunk_id,
                     score=score,
                     metadata=this.documents[chunk_id].metadata
@@ -216,7 +216,7 @@ class InMemoryVectorDB implements VectorDBInterface {
 
     get_status() {
         total_mem = sum(emb.numel() * emb.element_size() for emb in this.embeddings.values())
-        return DBStatus{
+        return dbstatus{
             total_documents=this.count(),
             index_type="In-Memory (Brute Force)",
             memory_usage_mb=total_mem / (1024 * 1024),
@@ -231,13 +231,13 @@ class InMemoryVectorDB implements VectorDBInterface {
 class FAISSVectorDB implements VectorDBInterface {
     config: retrieval_system_config
     index: any  // faiss.Index object
-    id_to_chunk: map<int, DocumentChunk>
+    id_to_chunk: map<int, document_chunk>
     next_id: int = 0
     is_trained: bool = false
 
     init(config: retrieval_system_config) {
         this.config = config
-        this.id_to_chunk = map<int, DocumentChunk>{}
+        this.id_to_chunk = map<int, document_chunk>{}
         this._create_index(config)
     }
 
@@ -284,11 +284,11 @@ class FAISSVectorDB implements VectorDBInterface {
         }
     }
 
-    insert(chunks: list<DocumentChunk>) {
+    insert(chunks: list<document_chunk>) {
         if chunks.length == 0 { return }
 
         // Collect embeddings that are not null
-        valid_chunks: list<(DocumentChunk, tensor)> = []
+        valid_chunks: list<(document_chunk, tensor)> = []
         for chunk in chunks {
             if chunk.embedding != null {
                 valid_chunks.append((chunk, chunk.embedding!))
@@ -355,7 +355,7 @@ class FAISSVectorDB implements VectorDBInterface {
 
         distances, indices = this.index.search(query_embedding, k_actual)
 
-        results: list<SearchResultItem> = []
+        results: list<search_resultItem> = []
         for i in range(distances.shape[1]) {
             int_id = indices[0][i]
 
@@ -371,7 +371,7 @@ class FAISSVectorDB implements VectorDBInterface {
             }
 
             if score >= this.config.similarity_threshold {
-                results.append(SearchResultItem{
+                results.append(search_resultItem{
                     chunk_id=this.id_to_chunk[int_id].id,
                     score=float(score),
                     metadata=this.id_to_chunk[int_id].metadata
@@ -415,7 +415,7 @@ class FAISSVectorDB implements VectorDBInterface {
 
     get_status() {
         mem_bytes = faiss.index_memory_size(this.index) ?? 0
-        return DBStatus{
+        return dbstatus{
             total_documents=this.count(),
             index_type=f"FAISS ({this.config.index_type})",
             memory_usage_mb=mem_bytes / (1024 * 1024),
@@ -614,14 +614,14 @@ class DocumentProcessor {
         )
     }
 
-    process_document(content: string, metadata: DocumentMetadata) {
+    process_document(content: string, metadata: document_metadata) {
         // Split into chunks
         raw_chunks = this.splitter.split_text(content)
 
-        // Wrap into DocumentChunk objects with IDs and metadata
-        chunks: list<DocumentChunk> = []
+        // Wrap into document_chunk objects with IDs and metadata
+        chunks: list<document_chunk> = []
         for i, chunk_text in enumerate(raw_chunks) {
-            chunks.append(DocumentChunk{
+            chunks.append(document_chunk{
                 id=generate_uuid(),
                 content=chunk_text,
                 metadata={...metadata, ...{"chunk_index": i}},
@@ -633,8 +633,8 @@ class DocumentProcessor {
         return chunks
     }
 
-    process_documents(documents: list<{content: string, metadata: DocumentMetadata}>) {
-        all_chunks: list<DocumentChunk> = []
+    process_documents(documents: list<{content: string, metadata: document_metadata}>) {
+        all_chunks: list<document_chunk> = []
         for doc in documents {
             let chunks = this.process_document(doc.content, doc.metadata)
             all_chunks.extend(chunks)
@@ -731,7 +731,7 @@ class QueryExpander {
 
     expand(query: string, num_expansions: int = 3) {
         if !this.enabled {
-            return QueryExpansionResult{original=query, expanded=[]}
+            return query_expansion_result{original=query, expanded=[]}
         }
 
         # Use LLM to generate query variations/expansions
@@ -755,7 +755,7 @@ Expanded queries:
         try {
             expanded_queries = json_parse(response.text.strip())
             if isinstance(expanded_queries, list) && expanded_queries.length == num_expansions {
-                return QueryExpansionResult{
+                return query_expansion_result{
                     original=query,
                     expanded=expanded_queries
                 }
@@ -763,10 +763,10 @@ Expanded queries:
         } catch {
             # Fallback: simple synonym expansion
             expanded = this._simple_expand(query, num_expansions)
-            return QueryExpansionResult{original=query, expanded=expanded}
+            return query_expansion_result{original=query, expanded=expanded}
         }
 
-        return QueryExpansionResult{original=query, expanded=[]}
+        return query_expansion_result{original=query, expanded=[]}
     }
 
     _simple_expand(query: string, num: int) {
@@ -802,7 +802,7 @@ Expanded queries:
     }
 }
 
-struct QueryExpansionResult {
+struct query_expansion_result {
     original: string
     expanded: list<string>
 }
@@ -826,7 +826,7 @@ class BM25Retriever {
         this.avg_doc_len = 0.0
     }
 
-    build_index(documents: list<DocumentChunk>) {
+    build_index(documents: list<document_chunk>) {
         this.doc_ids = [doc.id for doc in documents]
         this.corpus = [doc.content.lower() for doc in documents]
 
@@ -865,10 +865,10 @@ class BM25Retriever {
         # Sort by score descending
         scores.sort_by_descending(s => s[1])
 
-        results: list<BM25Result> = []
+        results: list<bm25_result> = []
         for doc_idx, score in scores[:top_k] {
             if score > 0 {
-                results.append(BM25Result{
+                results.append(bm25_result{
                     chunk_id=this.doc_ids[doc_idx],
                     score=score
                 })
@@ -910,7 +910,7 @@ class BM25Retriever {
     }
 }
 
-struct BM25Result {
+struct bm25_result {
     chunk_id: string
     score: float
 }
@@ -933,7 +933,7 @@ class CrossEncoderReranker {
         this.model.to(device=this.device)
     }
 
-    rerank(query: string, candidates: list<DocumentChunk>, top_k: int) {
+    rerank(query: string, candidates: list<document_chunk>, top_k: int) {
         if candidates.length == 0 { return [] }
 
         # Prepare query-document pairs
@@ -960,7 +960,7 @@ class CrossEncoderReranker {
             scores = softmax(scores, dim=-1)[:, 1]  # Probability of relevant class
 
         # Pair scores with candidates and sort
-        scored_candidates: list<tuple<DocumentChunk, float>> = []
+        scored_candidates: list<tuple<document_chunk, float>> = []
         for i, candidate in enumerate(candidates) {
             scored_candidates.append((candidate, float(scores[i])))
         }
@@ -968,9 +968,9 @@ class CrossEncoderReranker {
         scored_candidates.sort_by_descending(x => x[1])
 
         # Return top-k
-        results: list<RerankedResult> = []
+        results: list<reranked_result> = []
         for candidate, score in scored_candidates[:top_k] {
-            results.append(RerankedResult{
+            results.append(reranked_result{
                 chunk=candidate,
                 rerank_score=score
             })
@@ -980,8 +980,8 @@ class CrossEncoderReranker {
     }
 }
 
-struct RerankedResult {
-    chunk: DocumentChunk
+struct reranked_result {
+    chunk: document_chunk
     rerank_score: float
 }
 
@@ -999,8 +999,8 @@ class HybridFusionEngine {
         this.normalization_method = method
     }
 
-    fuse(vector_results: list<SearchResultItem>,
-         bm25_results: list<BM25Result>,
+    fuse(vector_results: list<search_resultItem>,
+         bm25_results: list<bm25_result>,
          top_k: int) {
 
         match this.normalization_method {
@@ -1019,8 +1019,8 @@ class HybridFusionEngine {
         }
     }
 
-    _reciprocal_rank_fusion(vector_results: list<SearchResultItem>,
-                            bm25_results: list<BM25Result>,
+    _reciprocal_rank_fusion(vector_results: list<search_resultItem>,
+                            bm25_results: list<bm25_result>,
                             top_k: int,
                             k_constant: int = 60) {
         # RRF: score = Σ(1 / (k + rank_i))
@@ -1039,16 +1039,16 @@ class HybridFusionEngine {
         # Sort by fused score
         sorted_scores = list(scores.items()).sort_by_descending(x => x[1])
 
-        results: list<FusedResult> = []
+        results: list<fused_result> = []
         for chunk_id, score in sorted_scores[:top_k] {
-            results.append(FusedResult{chunk_id=chunk_id, fused_score=score})
+            results.append(fused_result{chunk_id=chunk_id, fused_score=score})
         }
 
         return results
     }
 
-    _weighted_average_fusion(vector_results: list<SearchResultItem>,
-                             bm25_results: list<BM25Result>,
+    _weighted_average_fusion(vector_results: list<search_resultItem>,
+                             bm25_results: list<bm25_result>,
                              top_k: int) {
         # Need normalized scores for fair comparison
         vec_scores: map<string, float> = {}
@@ -1088,15 +1088,15 @@ class HybridFusionEngine {
 
         # Sort and return top-k
         sorted_combined = list(combined.items()).sort_by_descending(x => x[1])
-        results: list<FusedResult> = []
+        results: list<fused_result> = []
         for chunk_id, score in sorted_combined[:top_k] {
-            results.append(FusedResult{chunk_id=chunk_id, fused_score=score})
+            results.append(fused_result{chunk_id=chunk_id, fused_score=score})
         }
         return results
     }
 
-    _normalized_score_fusion(vector_results: list<SearchResultItem>,
-                             bm25_results: list<BM25Result>,
+    _normalized_score_fusion(vector_results: list<search_resultItem>,
+                             bm25_results: list<bm25_result>,
                              top_k: int) {
         # Similar to weighted average but uses z-score normalization
         # Implementation omitted for brevity (similar logic to above)
@@ -1104,7 +1104,7 @@ class HybridFusionEngine {
     }
 }
 
-struct FusedResult {
+struct fused_result {
     chunk_id: string
     fused_score: float
 }
@@ -1120,11 +1120,11 @@ class RetrievalEngine {
     bm25_retriever: BM25Retriever?
     reranker: CrossEncoderReranker?
     fusion_engine: HybridFusionEngine
-    documents_store: map<string, DocumentChunk>  # chunk_id -> full document chunk
+    documents_store: map<string, document_chunk>  # chunk_id -> full document chunk
 
     init(config: retrieval_system_config, llm_client?: any) {
         this.config = config
-        this.documents_store = map<string, DocumentChunk>{}
+        this.documents_store = map<string, document_chunk>{}
 
         # Initialize components
         this.document_processor = new DocumentProcessor(config=config)
@@ -1170,7 +1170,7 @@ class RetrievalEngine {
 
     // === Core API Methods ===
 
-    ingest(documents: list<{content: string, metadata: DocumentMetadata}>, compute_embeddings: bool = true) {
+    ingest(documents: list<{content: string, metadata: document_metadata}>, compute_embeddings: bool = true) {
         start_time = current_time_millis()
 
         // Step 1: Process documents (chunking)
@@ -1200,7 +1200,7 @@ class RetrievalEngine {
         }
 
         elapsed = current_time_millis() - start_time
-        return IngestionReport{
+        return ingestion_report{
             documents_ingested=documents.length,
             chunks_created=chunks.length,
             has_embeddings=compute_embeddings,
@@ -1230,7 +1230,7 @@ class RetrievalEngine {
         vec_time = current_time_millis() - vec_start
 
         // Step 3: Keyword Search (if hybrid)
-        bm25_results: list<BM25Result> = []
+        bm25_results: list<bm25_result> = []
         bm25_time = 0.0
         if this.bm25_retriever != null && this.config.enable_hybrid_search {
             bm25_start = current_time_millis()
@@ -1240,28 +1240,28 @@ class RetrievalEngine {
 
         // Step 4: Fuse results
         fuse_start = current_time_millis()
-        fused_results: list<FusedResult> = []
+        fused_results: list<fused_result> = []
 
         if bm25_results.length > 0 && vec_results.length > 0 {
             fused_results = this.fusion_engine.fuse(vec_results, bm25_results, effective_top_k)
         } else if vec_results.length > 0 {
             # Only vector results
-            fused_results = [FusedResult{chunk_id=v.chunk_id, fused_score=v.score} for v in vec_results[:effective_top_k]]
+            fused_results = [fused_result{chunk_id=v.chunk_id, fused_score=v.score} for v in vec_results[:effective_top_k]]
         } else if bm25_results.length > 0 {
             # Only keyword results
-            fused_results = [FusedResult{chunk_id=b.chunk_id, fused_score=b.score} for b in bm25_results[:effective_top_k]]
+            fused_results = [fused_result{chunk_id=b.chunk_id, fused_score=b.score} for b in bm25_results[:effective_top_k]]
         }
 
         fuse_time = current_time_millis() - fuse_start
 
         # Step 5: Reranking (if enabled)
-        final_chunks: list<DocumentChunk> = []
+        final_chunks: list<document_chunk> = []
         final_scores: list<float> = []
         rerank_time = 0.0
 
         if this.reranker != null && this.config.enable_reranking && fused_results.length > 0 {
             # Gather candidate documents
-            candidates: list<DocumentChunk> = []
+            candidates: list<document_chunk> = []
             for fr in fused_results {
                 if fr.chunk_id in this.documents_store {
                     candidates.append(this.documents_store[fr.chunk_id])
@@ -1288,12 +1288,12 @@ class RetrievalEngine {
 
         total_time = current_time_millis() - start_total
 
-        return SearchResult{
+        return search_result{
             chunks=final_chunks,
             scores=final_scores,
             query=query,
             expanded_query=expanded_query if expanded_query != query else null,
-            retrieval_metadata=RetrievalMetadata{
+            retrieval_metadata=retrieval_metadata{
                 total_scanned=this.vector_db.count(),
                 total_returned=final_chunks.length,
                 vector_search_time_ms=vec_time,
@@ -1306,7 +1306,7 @@ class RetrievalEngine {
         }
     }
 
-    generate_context_for_llm(search_result: SearchResult, max_tokens?: int) {
+    generate_context_for_llm(search_result: search_result, max_tokens?: int) {
         effective_max_tokens = max_tokens ?? this.config.max_context_tokens
 
         context_parts: list<string> = []
@@ -1336,7 +1336,7 @@ class RetrievalEngine {
     }
 
     get_statistics() {
-        return RAGStatistics{
+        return rag_statistics{
             total_documents=this.vector_db.count(),
             db_status=this.vector_db.get_status(),
             embedding_cache_size=this.embedding_service.cache.size(),
@@ -1365,17 +1365,17 @@ class RetrievalEngine {
     }
 }
 
-struct IngestionReport {
+struct ingestion_report {
     documents_ingested: int
     chunks_created: int
     has_embeddings: bool
     processing_time_ms: float
-    db_status: DBStatus
+    db_status: dbstatus
 }
 
-struct RAGStatistics {
+struct rag_statistics {
     total_documents: int
-    db_status: DBStatus
+    db_status: dbstatus
     embedding_cache_size: int
     bm25_ready: bool
     reranker_ready: bool
@@ -1399,15 +1399,15 @@ function test_retrieval_system() {
     sample_docs = [
         {
             content="English textcomputeEnglish text, English textRequiredEnglish textsystem.English text.",
-            metadata=DocumentMetadata{source_id="doc1", title="AI Introduction", document_type="text"}
+            metadata=document_metadata{source_id="doc1", title="AI Introduction", document_type="text"}
         },
         {
             content="English text, English text, English text(CNN)English text(RNN).TransformerEnglish textlanguageEnglish text.",
-            metadata=DocumentMetadata{source_id="doc2", title="Deep Learning Overview", document_type="text"}
+            metadata=document_metadata{source_id="doc2", title="Deep Learning Overview", document_type="text"}
         },
         {
             content="NEURX(General Language Model)English textAIEnglish textlanguagemodelEnglish text.NEURX-4supportEnglish text, English text, toolEnglish text.MULTIMODAL-VISIONEnglish text.",
-            metadata=DocumentMetadata{source_id="doc3", title="NEURX Model Series", document_type="text"}
+            metadata=document_metadata{source_id="doc3", title="NEURX Model Series", document_type="text"}
         }
     ]
 
@@ -1448,10 +1448,10 @@ function test_retrieval_system() {
 
 // Export public API
 export {
-    retrieval_system_config, DocumentChunk, DocumentMetadata, SearchResult, RetrievalMetadata,
+    retrieval_system_config, document_chunk, document_metadata, search_result, retrieval_metadata,
     VectorDBInterface, InMemoryVectorDB, FAISSVectorDB,
     EmbeddingService, DocumentProcessor, QueryExpander,
     BM25Retriever, CrossEncoderReranker, HybridFusionEngine,
-    RetrievalEngine, IngestionReport, RAGStatistics,
+    RetrievalEngine, ingestion_report, rag_statistics,
     create_retrieval_system, test_rag_system
 }

@@ -15,7 +15,7 @@ use neurx.runtime.io.runtime_env_get
 // Configuration
 // ============================================================================
 
-struct WikipediaConfig {
+struct wikipedia_config {
     string input_bz2_file
     string output_dir
     string manifest_file

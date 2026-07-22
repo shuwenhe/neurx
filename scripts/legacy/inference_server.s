@@ -224,7 +224,7 @@ func initializeModel() error {
 // Inference Processing
 // ============================================================================
 
-func processInferenceRequest(req *InferenceRequest) (*InferenceResponse, error) {
+func processInferenceRequest(req *inference_request) (*inference_response, error) {
 	startTime := time.Now()
 
 	// Validate request
@@ -253,7 +253,7 @@ func processInferenceRequest(req *InferenceRequest) (*InferenceResponse, error) 
 	totalTokens := promptTokens + generatedTokens
 	throughputMS := elapsed * 1000.0 / float64(totalTokens)
 
-	response := &InferenceResponse{
+	response := &inference_response{
 		RequestID: fmt.Sprintf("req_%d", time.Now().UnixNano()),
 		Generated: generated,
 		TokenCount: generatedTokens,
@@ -285,7 +285,7 @@ func processInferenceRequest(req *InferenceRequest) (*InferenceResponse, error) 
 // ============================================================================
 
 func handleInferenceRequest(jsonData []byte) ([]byte, error) {
-	var req InferenceRequest
+	var req inference_request
 
 	err := json.Unmarshal(jsonData, &req)
 	if err != nil {
@@ -448,7 +448,7 @@ func printConfig() {
 func runBenchmark() {
 	logInfo("Running inference benchmark...")
 
-	testRequests := []InferenceRequest{
+	testRequests := []inference_request{
 		{Prompt: "Short prompt", MaxTokens: 50, Temperature: 0.7},
 		{Prompt: "Medium length prompt for testing inference server capabilities", MaxTokens: 100, Temperature: 0.8},
 		{Prompt: "Very long prompt: " + strings.Repeat("word ", 50), MaxTokens: 200, Temperature: 0.9},

@@ -8,8 +8,8 @@ const int FILE_READ = 0
 const int FILE_WRITE = 1
 const int FILE_APPEND = 2
 
-// FileHandle represents an open file
-struct FileHandle {
+// file_handle represents an open file
+struct file_handle {
     string path
     int mode
     int is_open
@@ -17,8 +17,8 @@ struct FileHandle {
     int position
 }
 
-// LineReader for reading files line by line
-struct LineReader {
+// line_reader for reading files line by line
+struct line_reader {
     string filepath
     []string lines
     int current_line
@@ -27,8 +27,8 @@ struct LineReader {
 
 // Opens a file and returns a handle
 // This is a simplified implementation for text files
-func open_file(string path, int mode) FileHandle {
-    FileHandle handle
+func open_file(string path, int mode) file_handle {
+    file_handle handle
     handle.path = path
     handle.mode = mode
     handle.is_open = 1
@@ -38,13 +38,13 @@ func open_file(string path, int mode) FileHandle {
 }
 
 // Closes a file handle
-func close_file(FileHandle handle) int {
+func close_file(file_handle handle) int {
     handle.is_open = 0
     0
 }
 
 // Writes a string to a file
-func write_string(FileHandle handle, string content) int {
+func write_string(file_handle handle, string content) int {
     if handle.is_open == 0 {
         return -1
     }
@@ -53,7 +53,7 @@ func write_string(FileHandle handle, string content) int {
 }
 
 // Writes a line (with newline) to a file
-func write_line(FileHandle handle, string line) int {
+func write_line(file_handle handle, string line) int {
     if handle.is_open == 0 {
         return -1
     }
@@ -162,7 +162,7 @@ func remove_file(string path) int {
 
 // Appends content to file (create if not exists)
 func append_to_file(string path, string content) int {
-    FileHandle handle = open_file(path, FILE_APPEND)
+    file_handle handle = open_file(path, FILE_APPEND)
     write_string(handle, content)
     close_file(handle)
     0

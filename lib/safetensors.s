@@ -6,7 +6,7 @@
 
 module safetensors
 
-struct TensorInfo {
+struct tensor_info {
     string name
     []int shape
     string dtype
@@ -14,9 +14,9 @@ struct TensorInfo {
     int64 length
 }
 
-struct SafeTensorsReader {
+struct safe_tensors_reader {
     string filepath
-    []TensorInfo tensors
+    []tensor_info tensors
     map[string]int name_to_idx
     int tensor_count
 }
@@ -166,8 +166,8 @@ func parse_json_array(string json, int start, int length) []int {
 // ============================================================================
 
 // 从 JSON 元数据中解析所有张量信息
-func parse_safetensors_json(string json_metadata) SafeTensorsReader {
-    SafeTensorsReader reader
+func parse_safetensors_json(string json_metadata) safe_tensors_reader {
+    safe_tensors_reader reader
     reader.tensors = []
     reader.tensor_count = 0
     
@@ -186,8 +186,8 @@ func parse_safetensors_json(string json_metadata) SafeTensorsReader {
 }
 
 // 从文件加载 SafeTensors 元数据
-func load_safetensors_metadata(string filepath) SafeTensorsReader {
-    SafeTensorsReader reader
+func load_safetensors_metadata(string filepath) safe_tensors_reader {
+    safe_tensors_reader reader
     reader.filepath = filepath
     reader.tensors = []
     reader.tensor_count = 0
@@ -206,7 +206,7 @@ func load_safetensors_metadata(string filepath) SafeTensorsReader {
 }
 
 // 验证 SafeTensors 文件
-func verify_safetensors_file(SafeTensorsReader reader) bool {
+func verify_safetensors_file(safe_tensors_reader reader) bool {
     println("Verifying SafeTensors file...")
     
     if reader.tensor_count == 0 {
@@ -219,7 +219,7 @@ func verify_safetensors_file(SafeTensorsReader reader) bool {
 }
 
 // 打印张量列表
-func print_safetensors_tensors(SafeTensorsReader reader) {
+func print_safetensors_tensors(safe_tensors_reader reader) {
     println("=== SafeTensors Tensors ===")
     println("Total: " + int_to_string(reader.tensor_count))
     
@@ -230,7 +230,7 @@ func print_safetensors_tensors(SafeTensorsReader reader) {
             break
         }
         
-        TensorInfo info = reader.tensors[i]
+        tensor_info info = reader.tensors[i]
         println("  " + info.name + " (" + info.dtype + ")")
         shown = shown + 1
     }
@@ -268,7 +268,7 @@ func int_to_string(int n) string {
 }
 
 // 列出张量信息
-func list_tensors(SafeTensorsReader reader) {
+func list_tensors(safe_tensors_reader reader) {
     println("\n=== SafeTensors File: " + reader.filepath + " ===")
     println("Total tensors: " + int_to_string(reader.tensor_count))
     
@@ -278,7 +278,7 @@ func list_tensors(SafeTensorsReader reader) {
             break
         }
         
-        TensorInfo info = reader.tensors[i]
+        tensor_info info = reader.tensors[i]
         
         // 计算张量大小
         int total_elements = 1

@@ -544,6 +544,8 @@ chat:
 	@chmod +x $(CURDIR_UNIX)/posttrain_chat_interactive.sh
 	@$(CURDIR_UNIX)/posttrain_chat_interactive.sh || true
 
+
+
 chat-real-inference: build-neurx-interactive-inference-s
 	@echo "🚀 Running NeurX Real Inference Engine (Pure S)..."
 	@if [ -f "/home/shuwen/shuwen/train/model/base-model-posttrain/model.safetensors" ]; then \

@@ -7,8 +7,8 @@
 
 module safetensors_reader
 
-// TensorMetadata 存储张量元信息
-struct TensorMetadata {
+// tensor_metadata 存储张量元信息
+struct tensor_metadata {
     string name              // 张量名称
     []int shape              // 形状：[dim1, dim2, ...]
     string dtype             // 数据类型："F32", "BF16", "F16" 等
@@ -16,11 +16,11 @@ struct TensorMetadata {
     int64 data_length        // 数据长度（字节数）
 }
 
-// SafetensorsFile 表示一个打开的 SafeTensors 文件
-struct SafetensorsFile {
+// safetensors_file 表示一个打开的 SafeTensors 文件
+struct safetensors_file {
     string file_path
     int64 file_size
-    []TensorMetadata tensors
+    []tensor_metadata tensors
     map[string]int tensor_name_to_index
 }
 
@@ -135,8 +135,8 @@ func extract_array_values(string json, int start_pos) ([]int, int) {
 // ============================================================================
 
 // 读取 SafeTensors 文件头
-func load_safetensors_header(string file_path) SafetensorsFile {
-    SafetensorsFile result
+func load_safetensors_header(string file_path) safetensors_file {
+    safetensors_file result
     result.file_path = file_path
     
     // TODO: 打开文件并读取头部
@@ -149,7 +149,7 @@ func load_safetensors_header(string file_path) SafetensorsFile {
 }
 
 // 验证 SafeTensors 文件完整性
-func verify_safetensors(SafetensorsFile file) bool {
+func verify_safetensors(safetensors_file file) bool {
     println("Verifying SafeTensors file: " + file.file_path)
     
     if file.tensors.length == 0 {
@@ -164,8 +164,8 @@ func verify_safetensors(SafetensorsFile file) bool {
 }
 
 // 获取张量元数据
-func get_tensor_metadata(SafetensorsFile file, string tensor_name) TensorMetadata {
-    TensorMetadata empty_meta
+func get_tensor_metadata(safetensors_file file, string tensor_name) tensor_metadata {
+    tensor_metadata empty_meta
     
     if tensor_name not in file.tensor_name_to_index {
         println("❌ Tensor not found: " + tensor_name)
@@ -177,7 +177,7 @@ func get_tensor_metadata(SafetensorsFile file, string tensor_name) TensorMetadat
 }
 
 // 打印张量信息
-func print_tensor_info(SafetensorsFile file) {
+func print_tensor_info(safetensors_file file) {
     println("=== SafeTensors Tensors ===")
     
     int count = 0
@@ -187,7 +187,7 @@ func print_tensor_info(SafetensorsFile file) {
             break
         }
         
-        TensorMetadata meta = file.tensors[i]
+        tensor_metadata meta = file.tensors[i]
         println(meta.name + ": shape=[...], dtype=" + meta.dtype)
         count = count + 1
     }

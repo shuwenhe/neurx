@@ -3,7 +3,7 @@
 
 module transformer_engine
 
-struct TransformerConfig {
+struct transformer_config {
     int vocab_size
     int hidden_size
     int num_layers
@@ -13,21 +13,21 @@ struct TransformerConfig {
     int max_seq_length
 }
 
-struct TransformerState {
-    TransformerConfig config
+struct transformer_state {
+    transformer_config config
     string model_path
     bool is_loaded
     int layers_loaded
 }
 
-struct AttentionOutput {
+struct attention_output {
     []float hidden_state
     []float attention_weights
 }
 
 // Initialize transformer model
-func init_transformer(string model_path) TransformerState {
-    TransformerState state
+func init_transformer(string model_path) transformer_state {
+    transformer_state state
     state.config.vocab_size = 151936
     state.config.hidden_size = 896
     state.config.num_layers = 24
@@ -44,7 +44,7 @@ func init_transformer(string model_path) TransformerState {
 }
 
 // Load weights from SafeTensors
-func load_weights(ref TransformerState state) bool {
+func load_weights(ref transformer_state state) bool {
     // In real implementation:
     // 1. Open SafeTensors file
     // 2. Read embedding weights
@@ -144,7 +144,7 @@ func rms_norm_forward([]float hidden, float eps) []float {
 
 // Single transformer block
 func transformer_block_forward([]float hidden, 
-                              TransformerConfig config) []float {
+                              transformer_config config) []float {
     // 1. Layer norm
     []float normed = rms_norm_forward(hidden, config.rms_norm_eps)
     
@@ -174,7 +174,7 @@ func transformer_block_forward([]float hidden,
 }
 
 // Full forward pass
-func forward_pass(TransformerState state, []int token_ids) []float {
+func forward_pass(transformer_state state, []int token_ids) []float {
     // 1. Embedding
     [][]float embeddings = embedding_forward(token_ids, state.config.hidden_size)
     []float hidden = embeddings[len(embeddings) - 1]  // Last token

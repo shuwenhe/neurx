@@ -51,8 +51,8 @@ type inference_engine struct {
     config              inference_config
     model               PolicyModel
     kv_cache            *kvcache
-    request_queue       []InferenceRequest
-    response_cache      map[string]InferenceResponse
+    request_queue       []inference_request
+    response_cache      map[string]inference_response
     performance_stats   inference_stats
 }
 
@@ -124,7 +124,7 @@ func (engine *inference_engine) get_cached_kv(layer_idx int, seq_len int) ([][]f
 // Batch Processing
 // ============================================
 
-func (engine *inference_engine) create_batch(requests []InferenceRequest) [][]int {
+func (engine *inference_engine) create_batch(requests []inference_request) [][]int {
     batch := [][]int{}
     
     max_len := 0
@@ -269,7 +269,7 @@ func (engine *inference_engine) sample_token(logits []float64, temperature float
     return 0
 }
 
-func (engine *inference_engine) generate(request InferenceRequest) InferenceResponse {
+func (engine *inference_engine) generate(request inference_request) inference_response {
     start_time := time.Now()
     
     generated_tokens := []int{}
@@ -308,7 +308,7 @@ func (engine *inference_engine) generate(request InferenceRequest) InferenceResp
     elapsed := time.Since(start_time).Seconds() * 1000 // ms
     throughput := float64(len(generated_tokens)) / (elapsed / 1000.0) // tokens/sec
     
-    return InferenceResponse{
+    return inference_response{
         request_id: request.request_id,
         generated_tokens: generated_tokens,
         generated_text: fmt.Sprintf("Generated %d tokens", len(generated_tokens)),
@@ -333,7 +333,7 @@ func (engine *inference_engine) model_forward(tokens []int) []float64 {
 // Serving Interface
 // ============================================
 
-func (engine *inference_engine) handle_request(request InferenceRequest) InferenceResponse {
+func (engine *inference_engine) handle_request(request inference_request) inference_response {
     engine.request_queue = append(engine.request_queue, request)
     
     // Batch processing
@@ -343,14 +343,14 @@ func (engine *inference_engine) handle_request(request InferenceRequest) Inferen
         for _, resp := range responses {
             engine.response_cache[resp.request_id] = resp
         }
-        engine.request_queue = []InferenceRequest{}
+        engine.request_queue = []inference_request{}
     }
     
     return engine.response_cache[request.request_id]
 }
 
-func (engine *inference_engine) process_batch_requests() []InferenceResponse {
-    responses := []InferenceResponse{}
+func (engine *inference_engine) process_batch_requests() []inference_response {
+    responses := []inference_response{}
     
     for _, req := range engine.request_queue {
         resp := engine.generate(req)
@@ -398,8 +398,8 @@ func NewInferenceEngine(config inference_config, model PolicyModel) *inference_e
     engine := &inference_engine{
         config: config,
         model: model,
-        request_queue: []InferenceRequest{},
-        response_cache: make(map[string]InferenceResponse),
+        request_queue: []inference_request{},
+        response_cache: make(map[string]inference_response),
         performance_stats: inference_stats{},
     }
     
@@ -423,7 +423,7 @@ func (engine *inference_engine) start_serving() {
     
     // Simulate serving requests
     for i := 0; i < 5; i++ {
-        req := InferenceRequest{
+        req := inference_request{
             request_id: fmt.Sprintf("req_%d", i),
             prompt: []int{1, 2, 3, 4, 5},
             max_tokens: 128,

@@ -15,7 +15,7 @@ use std.process
 // DATA STRUCTURES
 // ============================================================================
 
-struct CompilationResult {
+struct compilation_result {
     filename: string
     status: string      // "success" or "failed"
     lines: i32
@@ -24,7 +24,7 @@ struct CompilationResult {
     error_msg: string
 }
 
-struct TestResult {
+struct test_result {
     name: string
     status: string      // "passed", "failed", "timeout"
     duration: f64
@@ -32,14 +32,14 @@ struct TestResult {
     output: string
 }
 
-struct BuildReport {
+struct build_report {
     timestamp: string
     total_files: i32
     successful_files: i32
     total_tests: i32
     passed_tests: i32
-    compilation_results: CompilationResult[]
-    test_results: TestResult[]
+    compilation_results: compilation_result[]
+    test_results: test_result[]
 }
 
 // ============================================================================
@@ -75,7 +75,7 @@ func get_timestamp() string {
 // COMPILATION FUNCTIONS
 // ============================================================================
 
-func compile_component(s_file: string, bin_dir: string, log_dir: string) CompilationResult {
+func compile_component(s_file: string, bin_dir: string, log_dir: string) compilation_result {
     println("Compiling: " + s_file)
     
     let output_name = strings.trim_suffix(s_file, ".s")
@@ -112,7 +112,7 @@ func compile_component(s_file: string, bin_dir: string, log_dir: string) Compila
     
     println("  ✅ Success (" + strings.from_i32(lines) + " lines)")
     
-    let result = CompilationResult {
+    let result = compilation_result {
         filename: s_file,
         status: "success",
         lines: lines,
@@ -124,7 +124,7 @@ func compile_component(s_file: string, bin_dir: string, log_dir: string) Compila
     return result
 }
 
-func compile_all_components(bin_dir: string, log_dir: string) CompilationResult[] {
+func compile_all_components(bin_dir: string, log_dir: string) compilation_result[] {
     print_section("PHASE 1: COMPILATION")
     
     let components = [
@@ -134,7 +134,7 @@ func compile_all_components(bin_dir: string, log_dir: string) CompilationResult[
         "distributed/ddp_distributed_training.s"
     ]
     
-    let results = CompilationResult[]{}
+    let results = compilation_result[]{}
     
     for component in components {
         let result = compile_component(component, bin_dir, log_dir)
@@ -152,7 +152,7 @@ func compile_all_components(bin_dir: string, log_dir: string) CompilationResult[
 // TESTING FUNCTIONS
 // ============================================================================
 
-func run_unit_test(name: string, binary_path: string, args: string, timeout: i32) TestResult {
+func run_unit_test(name: string, binary_path: string, args: string, timeout: i32) test_result {
     println("Test: " + name)
     
     let start_time = time.now()
@@ -164,7 +164,7 @@ func run_unit_test(name: string, binary_path: string, args: string, timeout: i32
     
     println("  ✅ Passed (" + strings.format("%.2f", duration) + "s)")
     
-    let result = TestResult {
+    let result = test_result {
         name: name,
         status: "passed",
         duration: duration,
@@ -175,7 +175,7 @@ func run_unit_test(name: string, binary_path: string, args: string, timeout: i32
     return result
 }
 
-func run_unit_tests(bin_dir: string, test_dir: string) TestResult[] {
+func run_unit_tests(bin_dir: string, test_dir: string) test_result[] {
     print_section("PHASE 2: UNIT TESTS")
     
     let tests = []struct{name: string, binary: string, args: string, timeout: i32}{
@@ -185,7 +185,7 @@ func run_unit_tests(bin_dir: string, test_dir: string) TestResult[] {
         {name: "DDP Training (Single Process)", binary: "ddp_distributed_training", args: "--rank=0 --world_size=1 --num_steps=5", timeout: 10},
     }
     
-    let results = TestResult[]{}
+    let results = test_result[]{}
     
     for test in tests {
         let binary_path = bin_dir + "/" + test.binary
@@ -244,9 +244,9 @@ func generate_deployment_config(deploy_dir: string) {
 // ============================================================================
 
 func generate_report(
-    compilation_results: CompilationResult[],
-    test_results: TestResult[]
-) BuildReport {
+    compilation_results: compilation_result[],
+    test_results: test_result[]
+) build_report {
     
     print_header("TEST REPORT")
     
@@ -326,7 +326,7 @@ func generate_report(
     println("\n✅ SYSTEM STATUS: READY FOR PRODUCTION")
     println(strings.repeat("═", 65))
     
-    let report = BuildReport {
+    let report = build_report {
         timestamp: timestamp,
         total_files: total_files,
         successful_files: success_count,

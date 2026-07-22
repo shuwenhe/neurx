@@ -4,7 +4,7 @@ package neurx.cuda
 // CUDA Kernels - Layer Normalization & RMS Normalization
 # ============================================================================
 
-// ---- LayerNorm Config ----
+// ---- layer_norm Config ----
 struct layernorm_config {
     int batch_size              // Number of independent vectors to normalize
     int normalized_size         // Dimension of each vector (usually 4096 or similar)

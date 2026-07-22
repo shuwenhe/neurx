@@ -9,7 +9,7 @@ module function_calling
 
 // ==================== English textconfigurationEnglish text ====================
 
-struct FunctionCallingConfig {
+struct function_calling_config {
     // English text
     execution_mode: string = "auto"               # auto | single_step | multi_step | agent_loop
     max_tool_calls_per_turn: int = 5             # English texttoolEnglish text
@@ -36,32 +36,32 @@ struct FunctionCallingConfig {
     log_all_intermediate_steps: bool = false      # English textstepEnglish text
 }
 
-struct ToolDefinition {
+struct tool_definition {
     name: string                                   # toolName (English text)
     description: string                            # English textDescription (LLM English textuse)
-    parameters: ParameterSchema                    # JSON Schema English textparameterEnglish text
+    parameters: parameter_schema                    # JSON Schema English textparameterEnglish text
     category?: string                              # English text (English text "search", "code", "data", "system")
     tags?: list<string>                            # English textsearch/English text
     requires_permission: bool = false              # English textRequiredEnglish text
     is_dangerous: bool = false                     # English text
-    rate_limit?: RateLimit                         # English text
+    rate_limit?: rate_limit                         # English text
     timeout_seconds: float = 30.0                  # English texttime
     metadata?: map<string, any>                    # English textdata
 }
 
-struct ParameterSchema {
+struct parameter_schema {
     type: string                                    # object | array | string | number | integer | boolean | null
-    properties?: map<string, PropertyDefinition>   # English text type=object English text, English text
+    properties?: map<string, property_definition>   # English text type=object English text, English text
     required?: list<string>                        # English textparameterEnglish text
-    items?: ParameterSchema                        # English text type=array English text, English text
+    items?: parameter_schema                        # English text type=array English text, English text
     enum?: list<any>                               # English text (English text)
     format?: string                                # English text (English text email, uri, date-time)
     description?: string                           # parameterDescription
     default?: any                                  # defaultEnglish text
-    additionalProperties?: bool | ParameterSchema   # English text
+    additionalProperties?: bool | parameter_schema   # English text
 }
 
-struct PropertyDefinition {
+struct property_definition {
     type: string
     description: string
     enum?: list<any>
@@ -69,26 +69,26 @@ struct PropertyDefinition {
     format?: string
     min?: int | float
     max?: int | float
-    items?: ParameterSchema                       # For arrays
-    properties?: map<string, PropertyDefinition>   # For nested objects
+    items?: parameter_schema                       # For arrays
+    properties?: map<string, property_definition>   # For nested objects
     required?: list<string>
 }
 
-struct RateLimit {
+struct rate_limit {
     calls_per_minute: int = 60
     calls_per_day: int = 1000
     current_calls_today: int = 0
     last_reset_date: string = ""
 }
 
-struct ToolCall {
+struct tool_call {
     id: string                                     # English text ID (UUID)
     name: string                                   # toolName
     arguments: string                              # JSON English textparameter
     parsed_arguments: map<string, any>?            # English textparameterEnglish text
     status: CallStatus = CallStatus.PENDING        # English textstate
-    result?: ToolCallResult                        # English textresult
-    error?: ToolCallError                          # errorinformation
+    result?: tool_call_result                        # English textresult
+    error?: tool_call_error                          # errorinformation
     start_time: float?                             # starttimeEnglish text
     end_time: float?                               # English texttimeEnglish text
     duration_ms?: float                            # English text
@@ -107,7 +107,7 @@ enum CallStatus {
     CANCELLED                                      # English text
 }
 
-struct ToolCallResult {
+struct tool_call_result {
     success: bool                                  # English textsuccess
     content: any                                   # English textcontent (AllowedEnglish text, English text, English text)
     content_type: string = "text"                  # text | json | image | binary | table | code
@@ -116,7 +116,7 @@ struct ToolCallResult {
     metadata?: map<string, any>                    # resultEnglish textdata
 }
 
-struct ToolCallError {
+struct tool_call_error {
     code: string                                   # errorEnglish text (INVALID_ARGS | TIMEOUT | PERMISSION_DENIED | NOT_FOUND | EXECUTION_ERROR)
     message: string                                # English texterrorEnglish text
     details?: map<string, any>                    # English texterrorinformation (English text)
@@ -124,42 +124,42 @@ struct ToolCallError {
     suggestion?: string                            # English text
 }
 
-struct FunctionCallingResponse {
-    tool_calls: list<ToolCall>                     # English texttoolEnglish text
+struct function_calling_response {
+    tool_calls: list<tool_call>                     # English texttoolEnglish text
     final_text_response: string?                   # LLM English text (English texttoolEnglish text)
     finished_reason: string                       # stop | tool_calls | length | content_filter
     total_tokens_used: int?                        # English text token useEnglish text
-    intermediate_messages: list<AssistantMessage>  # English text
-    execution_summary: ExecutionSummary?           # English textsummary
+    intermediate_messages: list<assistant_message>  # English text
+    execution_summary: execution_summary?           # English textsummary
 }
 
-struct AssistantMessage {
+struct assistant_message {
     role: string = "assistant"
-    content: string? | list<ContentBlock>
-    tool_calls?: list<ToolCall>                    # modelEnglish textrequest
+    content: string? | list<content_block>
+    tool_calls?: list<tool_call>                    # modelEnglish textrequest
     reasoning_content?: string                     # inferenceEnglish text (English text extended thinking)
 }
 
-struct ContentBlock {
+struct content_block {
     type: string                                   # text | tool_use | tool_result
     text?: string
     id?: string
     name?: string
     input?: map<string, any>
 
-struct UserMessage {
+struct user_message {
     role: string = "user"
-    content: string | list<ContentBlock>
-    tool_results?: list<ToolCallResultBlock>       # toolEnglish textresult
+    content: string | list<content_block>
+    tool_results?: list<tool_call_result_block>       # toolEnglish textresult
 }
 
-struct ToolCallResultBlock {
+struct tool_call_result_block {
     tool_call_id: string
     content: any
     is_error: bool = false
 }
 
-struct ExecutionSummary {
+struct execution_summary {
     total_tool_calls_initiated: int                # English text
     total_tool_calls_completed: int               # successEnglish text
     total_tool_calls_failed: int                  # failureEnglish text
@@ -173,18 +173,18 @@ struct ExecutionSummary {
 // ==================== toolEnglish text ====================
 
 class ToolRegistry {
-    tools: map<string, ToolDefinition>
+    tools: map<string, tool_definition>
     executors: map<string, ToolExecutor>
     categories: map<string, list<string>>
-    config: FunctionCallingConfig
+    config: function_calling_config
 
-    init(config?: FunctionCallingConfig) {
-        this.config = config ?? new FunctionCallingConfig()
-        this.tools = map<string, ToolDefinition>{}
+    init(config?: function_calling_config) {
+        this.config = config ?? new function_calling_config()
+        this.tools = map<string, tool_definition>{}
         this.executors = map<string, ToolExecutor>{}
         this.categories = map<string, list<string>>{}
 
-    register(definition: ToolDefinition, executor: ToolExecutor) {
+    register(definition: tool_definition, executor: ToolExecutor) {
         if definition.name in this.tools:
             throw error(f"Tool '{definition.name}' already registered. Use update() to modify.")
 
@@ -220,7 +220,7 @@ class ToolRegistry {
     }
 
     list_tools(category?: string, tag?: string) {
-        results: list<ToolDefinition> = []
+        results: list<tool_definition> = []
 
         for name, defn in this.tools {
             if category != None && defn.category != category:
@@ -236,7 +236,7 @@ class ToolRegistry {
     search(query: string) {
         # Fuzzy search for tools matching query
         query_terms = set(query.to_lower().split())
-        scored: list<tuple<ToolDefinition, float>> = []
+        scored: list<tuple<tool_definition, float>> = []
 
         for name, defn in this.tools {
             score = 0.0
@@ -285,7 +285,7 @@ class ToolRegistry {
     }
 
     get_statistics() {
-        return RegistryStatistics{
+        return registry_statistics{
             total_tools=len(this.tools),
             categories={k: len(v) for k, v in this.categories.items()},
             dangerous_tools=sum(1 for t in this.tools.values() if t.is_dangerous),
@@ -294,7 +294,7 @@ class ToolRegistry {
     }
 }
 
-struct RegistryStatistics {
+struct registry_statistics {
     total_tools: int
     categories: map<string, int>
     dangerous_tools: int
@@ -306,10 +306,10 @@ struct RegistryStatistics {
 interface ToolExecutor {
     execute(arguments: map<string, any>)
     get_name()
-    validate_arguments(args: map<string, any>, schema: ParameterSchema)
+    validate_arguments(args: map<string, any>, schema: parameter_schema)
 }
 
-struct ValidationReport {
+struct validation_report {
     is_valid: bool
     missing_params: list<string>
     invalid_params: list<map<string, string>>  // param_name -> error_message
@@ -321,19 +321,19 @@ struct ValidationReport {
 class FunctionCallingEngine {
     registry: ToolRegistry
     llm_client: any
-    config: FunctionCallingConfig
-    conversation_history: list<UserMessage | AssistantMessage>
+    config: function_calling_config
+    conversation_history: list<user_message | assistant_message>
     call_tracker: CallTracker
 
-    init(llm_client: any, config?: FunctionCallingConfig, registry?: ToolRegistry) {
+    init(llm_client: any, config?: function_calling_config, registry?: ToolRegistry) {
         this.llm_client = llm_client
-        this.config = config ?? new FunctionCallingConfig()
+        this.config = config ?? new function_calling_config()
         this.registry = registry ?? new ToolRegistry(this.config)
         this.conversation_history = []
         this.call_tracker = new CallTracker()
     }
 
-    async process_user_request(user_message: string, available_tools?: list<ToolDefinition>) {
+    async process_user_request(user_message: string, available_tools?: list<tool_definition>) {
         total_start = current_time_millis()
 
         if this.config.verbose_logging:
@@ -344,7 +344,7 @@ class FunctionCallingEngine {
             print(f"Available Tools: {available_tools?.length ?? this.registry.get_statistics().total_tools}\n")
 
         # Add user message to history
-        user_msg = UserMessage{content=user_message}
+        user_msg = user_message{content=user_message}
         this.conversation_history.append(user_msg)
 
         match this.config.execution_mode {
@@ -368,7 +368,7 @@ class FunctionCallingEngine {
         completed_calls = [tc for tc in response.tool_calls if tc.status == CallStatus.COMPLETED]
         failed_calls = [tc for tc in response.tool_calls if tc.status == CallStatus.FAILED or tc.status == CallStatus.TIMEOUT]
 
-        response.execution_summary = ExecutionSummary{
+        response.execution_summary = execution_summary{
             total_tool_calls_initiated=len(response.tool_calls),
             total_tool_calls_completed=len(completed_calls),
             total_tool_calls_failed=len(failed_calls),
@@ -385,7 +385,7 @@ class FunctionCallingEngine {
         return response
     }
 
-    async _single_stepExecution(user_msg: UserMessage, tools?: list<ToolDefinition>) {
+    async _single_stepExecution(user_msg: user_message, tools?: list<tool_definition>) {
         """Execute at most one round of tool calls, then generate final response."""
 
         # Step 1: Get LLM decision on whether to call tools and which ones
@@ -400,7 +400,7 @@ class FunctionCallingEngine {
 
         # Step 2: If no tool calls, return text response directly
         if assistant_msg.tool_calls == null || assistant_msg.tool_calls!.empty():
-            return FunctionCallingResponse{
+            return function_calling_response{
                 tool_calls=[],
                 finished_reason="stop",
                 final_text_response=get_text_from_message(assistant_msg),
@@ -412,7 +412,7 @@ class FunctionCallingEngine {
 
         # Step 4: Return results back to LLM for final synthesis
         tool_result_blocks = create_result_blocks(executed_calls)
-        follow_up_msg = UserMessage{tool_results=tool_result_blocks}
+        follow_up_msg = user_message{tool_results=tool_result_blocks}
         this.conversation_history.append(follow_up_msg)
 
         # Step 5: Generate final response with tool context
@@ -423,7 +423,7 @@ class FunctionCallingEngine {
         final_msg = parse_assistant_message(final_llm_resp)
         this.conversation_history.append(final_msg)
 
-        return FunctionCallingResponse{
+        return function_calling_response{
             tool_calls=executed_calls,
             finished_reason=final_llm_resp.finished_reason ?? "stop",
             final_text_response=get_text_from_message(final_msg),
@@ -431,11 +431,11 @@ class FunctionCallingEngine {
         }
     }
 
-    async _multi_step_execution(user_msg: UserMessage, tools?: list<ToolDefinition>, max_rounds: int = 10) {
+    async _multi_step_execution(user_msg: user_message, tools?: list<tool_definition>, max_rounds: int = 10) {
         """Allow multiple rounds of tool calls until task completion."""
 
         tool_defs = tools ?? this.registry.list_tools()
-        all_executed_calls: list<ToolCall> = []
+        all_executed_calls: list<tool_call> = []
         rounds = 0
 
         while rounds < max_rounds:
@@ -455,7 +455,7 @@ class FunctionCallingEngine {
 
             # Check if LLM wants to stop (no more tool calls)
             if assistant_msg.tool_calls == null or assistant_msg.tool_calls!.empty():
-                return FunctionCallingResponse{
+                return function_calling_response{
                     tool_calls=all_executed_calls,
                     finished_reason="stop",
                     final_text_response=get_text_from_message(assistant_msg),
@@ -478,7 +478,7 @@ class FunctionCallingEngine {
 
             # Feed results back
             result_blocks = create_result_blocks(executed)
-            this.conversation_history.append(UserMessage{tool_results=result_blocks})
+            this.conversation_history.append(user_message{tool_results=result_blocks})
 
         # Max rounds reached, force final response
         final_resp = await this._call_llm_with_tools(
@@ -486,7 +486,7 @@ class FunctionCallingEngine {
             tools=tool_defs
         )
 
-        return FunctionCallingResponse{
+        return function_calling_response{
             tool_calls=all_executed_calls,
             finished_reason="length",
             final_text_response=parse_assistant_message(final_resp).text,
@@ -494,14 +494,14 @@ class FunctionCallingEngine {
         }
     }
 
-    async _agent_loop_execution(user_msg: UserMessage, tools?: list<ToolDefinition>) {
+    async _agent_loop_execution(user_msg: user_message, tools?: list<tool_definition>) {
         """Full agent loop with planning, reflection, and self-correction capabilities."""
 
         # This would implement a more sophisticated loop similar to ReAct or Plan-and-Solve
         # For now, delegate to multi-step as a base implementation
         return await this._multi_step_execution(user_msg, tools)
 
-    async _auto_execution(user_msg: UserMessage, tools?: list<ToolDefinition>) {
+    async _auto_execution(user_msg: user_message, tools?: list<tool_definition>) {
         # Heuristic: simple queries likely don't need tools, complex ones might
         query_complexity = estimate_query_complexity(user_msg.content as string)
 
@@ -511,7 +511,7 @@ class FunctionCallingEngine {
             return await this._multi_step_execution(user_msg, tools)
     }
 
-    async _call_llm_with_tools(messages: list<any>, tools: list<ToolDefinition>) {
+    async _call_llm_with_tools(messages: list<any>, tools: list<tool_definition>) {
         """Make LLM API call with tool definitions."""
 
         tool_schemas = [serialize_for_llm(t) for t in tools]
@@ -527,11 +527,11 @@ class FunctionCallingEngine {
 
         return response
 
-    async _execute_tool_calls(calls: list<ToolCall>) {
+    async _execute_tool_calls(calls: list<tool_call>) {
         """Execute multiple tool calls with dependency resolution and parallelism."""
 
         # Step 1: Parse arguments and validate
-        validated_calls: list<ToolCall> = []
+        validated_calls: list<tool_call> = []
         for call in calls {
             try {
                 parsed = json_parse(call.arguments)
@@ -540,7 +540,7 @@ class FunctionCallingEngine {
                 tool_def = this.registry.get(call.name)
                 if tool_def == None {
                     call.status = CallStatus.FAILED
-                    call.error = ToolCallError{
+                    call.error = tool_call_error{
                         code="NOT_FOUND",
                         message=f"Unknown tool: {call.name}",
                         recoverable=false
@@ -553,7 +553,7 @@ class FunctionCallingEngine {
 
                 if !validation.is_valid {
                     call.status = CallStatus.FAILED
-                    call.error = ToolCallError{
+                    call.error = tool_call_error{
                         code="INVALID_ARGS",
                         message=f"Invalid arguments: {', '.join(validation.missing_params + [p for p in validation.invalid_params])}",
                         details={"missing": validation.missing_params, "invalid": validation.invalid_params},
@@ -569,7 +569,7 @@ class FunctionCallingEngine {
 
             } catch Exception as e {
                 call.status = CallStatus.FAILED
-                call.error = ToolCallError{
+                call.error = tool_call_error{
                     code="INVALID_ARGS",
                     message=f"Failed to parse arguments: {e.message}",
                     details={"raw_arguments": call.arguments},
@@ -580,8 +580,8 @@ class FunctionCallingEngine {
         }
 
         # Step 2: Permission check for sensitive operations
-        pending_permission: list<ToolCall> = []
-        ready_to_execute: list<ToolCall> = []
+        pending_permission: list<tool_call> = []
+        ready_to_execute: list<tool_call> = []
 
         for call in validated_calls {
             if call.status != CallStatus.PENDING:
@@ -595,7 +595,7 @@ class FunctionCallingEngine {
                 ready_to_execute.append(call)
 
         # Step 3: Execute ready calls (parallelize independent ones)
-        executed: list<ToolCall> = []
+        executed: list<tool_call> = []
 
         if ready_to_execute.length > 0:
             # Group by dependencies (simple version: assume all are independent for now)
@@ -621,7 +621,7 @@ class FunctionCallingEngine {
         return all_results
     }
 
-    async _execute_single_call(call: ToolCall) {
+    async _execute_single_call(call: tool_call) {
         """Execute a single tool call with error handling and retries."""
 
         call.start_time = current_time()
@@ -643,7 +643,7 @@ class FunctionCallingEngine {
             call.status = CallStatus.COMPLETED if result.success else CallStatus.FAILED
 
             if !result.success:
-                call.error = ToolCallError{
+                call.error = tool_call_error{
                     code="EXECUTION_ERROR",
                     message=result.content?.toString() ?? "Tool execution failed",
                     recoverable=true
@@ -661,7 +661,7 @@ class FunctionCallingEngine {
             call.end_time = current_time()
             call.duration_ms = (call.end_time! - call.start_time!) * 1000
             call.status = CallStatus.TIMEOUT
-            call.error = ToolCallError{
+            call.error = tool_call_error{
                 code="TIMEOUT",
                 message=f"Tool execution timed out after {tool_def.timeout_seconds}s",
                 recoverable=false
@@ -671,7 +671,7 @@ class FunctionCallingEngine {
             call.end_time = current_time()
             call.duration_ms = (call.end_time! - call.start_time!) * 1000
             call.status = CallStatus.FAILED
-            call.error = ToolCallError{
+            call.error = tool_call_error{
                 code="EXECUTION_ERROR",
                 message=str(e),
                 details={"exception_type": e.__class__.__name__},
@@ -688,7 +688,7 @@ class FunctionCallingEngine {
     }
 
     get_conversation_summary() {
-        return ConversationSummary{
+        return conversation_summary{
             total_messages=len(this.conversation_history),
             user_messages=sum(1 for m in this.conversation_history if m.role == "user"),
             assistant_messages=sum(1 for m in this.conversation_history if m.role == "assistant"),
@@ -699,7 +699,7 @@ class FunctionCallingEngine {
     }
 }
 
-struct ConversationSummary {
+struct conversation_summary {
     total_messages: int
     user_messages: int
     assistant_messages: int
@@ -711,7 +711,7 @@ struct ConversationSummary {
 // ==================== English text ====================
 
 class CallTracker {
-    history: list<ToolCall>
+    history: list<tool_call>
     total_calls: int = 0
     successful_calls: int = 0
     failed_calls: int = 0
@@ -721,7 +721,7 @@ class CallTracker {
     init() {
         this.history = []
 
-    record_call(call: ToolCall) {
+    record_call(call: tool_call) {
         this.history.append(call)
         this.total_calls += 1
         this.tools_used.add(call.name)
@@ -754,17 +754,17 @@ class CallTracker {
 // ==================== English texttoolEnglish text ====================
 
 function create_builtin_web_search_tool() {
-    defn = ToolDefinition{
+    defn = tool_definition{
         name="web_search",
         description="Search the internet for current information, news, facts, or answers to questions. Useful when you need up-to-date data that may not be in training data.",
-        parameters=ParameterSchema{
+        parameters=parameter_schema{
             type="object",
             properties={
-                "query": PropertyDefinition{
+                "query": property_definition{
                     type="string",
                     description="The search query string"
                 },
-                "num_results": PropertyDefinition{
+                "num_results": property_definition{
                     type="integer",
                     description="Number of results to return (default: 5, max: 20)",
                     default=5,
@@ -783,17 +783,17 @@ function create_builtin_web_search_tool() {
 }
 
 function create_builtin_code_executor_tool() {
-    defn = ToolDefinition{
+    defn = tool_definition{
         name="code_interpreter",
         description="Execute Python/JavaScript/Shell code in a sandboxed environment. Useful for calculations, data analysis, file operations, running scripts, and testing code snippets.",
-        parameters=ParameterSchema{
+        parameters=parameter_schema{
             type="object",
             properties={
-                "code": PropertyDefinition{
+                "code": property_definition{
                     type="string",
                     description="The code to execute"
                 },
-                "language": PropertyDefinition{
+                "language": property_definition{
                     type="string",
                     description="Programming language (python, javascript, s, sql)",
                     enum=["python", "javascript", "s", "sql"],
@@ -813,26 +813,26 @@ function create_builtin_code_executor_tool() {
 }
 
 function create_builtin_file_operations_tool() {
-    defn = ToolDefinition{
+    defn = tool_definition{
         name="file_operations",
         description="Read, write, create, delete files and directories. Supports various file formats.",
-        parameters=ParameterSchema{
+        parameters=parameter_schema{
             type="object",
             properties={
-                "action": PropertyDefinition{
+                "action": property_definition{
                     type="string",
                     description="The file operation to perform",
                     enum=["read", "write", "append", "create_directory", "delete", "list_dir", "exists"]
                 },
-                "path": PropertyDefinition{
+                "path": property_definition{
                     type="string",
                     description="File or directory path"
                 },
-                "content": PropertyDefinition{
+                "content": property_definition{
                     type="string",
                     description="Content to write (required for write/append actions)"
                 },
-                "encoding": PropertyDefinition{
+                "encoding": property_definition{
                     type="string",
                     description="File encoding (default: utf-8)",
                     default="utf-8"
@@ -854,8 +854,8 @@ class WebSearchExecutor implements ToolExecutor {
 
     validate_arguments(args, schema) {
         if "query" not in args:
-            return ValidationReport{is_valid=false, missing_params=["query"], invalid_params=[], warnings=[]}
-        return ValidationReport{is_valid=true, missing_params=[], invalid_params=[], warnings=[]}
+            return validation_report{is_valid=false, missing_params=["query"], invalid_params=[], warnings=[]}
+        return validation_report{is_valid=true, missing_params=[], invalid_params=[], warnings=[]}
     }
 
     async execute(args) {
@@ -863,7 +863,7 @@ class WebSearchExecutor implements ToolExecutor {
         mock_results = [
             {"title": f"Result for: {args['query']}", "url": "https://example.com", "snippet": "This is search result content..."}
         ]
-        return ToolCallResult{
+        return tool_call_result{
             success=true,
             content=json.dumps(mock_results),
             content_type="json",
@@ -877,13 +877,13 @@ class CodeInterpreterExecutor implements ToolExecutor {
 
     validate_arguments(args, schema) {
         if "code" not in args:
-            return ValidationReport{is_valid=false, missing_params=["code"], invalid_params=[], warnings=[]}
-        return ValidationReport{is_valid=true, missing_params=[], invalid_params=[], warnings=[]}
+            return validation_report{is_valid=false, missing_params=["code"], invalid_params=[], warnings=[]}
+        return validation_report{is_valid=true, missing_params=[], invalid_params=[], warnings=[]}
     }
 
     async execute(args) {
         # Would use actual code interpreter service
-        return ToolCallResult{
+        return tool_call_result{
             success=true,
             content=f"Code executed successfully.\nOutput:\n[Simulated output for {args.get('language', 'python')} code]",
             content_type="text"
@@ -897,7 +897,7 @@ class FileOperationsExecutor implements ToolExecutor {
     validate_arguments(args, schema) {
         required = ["action", "path"]
         missing = [r for r in required if r not in args]
-        return ValidationReport{is_valid=missing.empty(), missing_params=missing, invalid_params=[], warnings=[]}
+        return validation_report{is_valid=missing.empty(), missing_params=missing, invalid_params=[], warnings=[]}
     }
 
     async execute(args) {
@@ -908,33 +908,33 @@ class FileOperationsExecutor implements ToolExecutor {
             match action {
                 "read" => {
                     content = read_file(path)
-                    return ToolCallResult{success=true, content=content, content_type="text"}
+                    return tool_call_result{success=true, content=content, content_type="text"}
                 }
                 "write" => {
                     write_file(path, args["content"])
-                    return ToolCallResult{success=true, content=f"File written: {path}", content_type="text"}
+                    return tool_call_result{success=true, content=f"File written: {path}", content_type="text"}
                 }
                 "list_dir" => {
                     entries = list_dir(path)
-                    return ToolCallResult{success=true, content=entries, content_type="json"}
+                    return tool_call_result{success=true, content=entries, content_type="json"}
                 }
                 "exists" => {
                     exists = file_exists(path)
-                    return ToolCallResult{success=true, content={"exists": exists}, content_type="json"}
+                    return tool_call_result{success=true, content={"exists": exists}, content_type="json"}
                 }
                 _ => {
-                    return ToolCallResult{success=false, content=f"Unsupported action: {action}", content_type="error"}
+                    return tool_call_result{success=false, content=f"Unsupported action: {action}", content_type="error"}
                 }
             }
         } catch Exception as e {
-            return ToolCallResult{success=false, content=str(e), content_type="error"}
+            return tool_call_result{success=false, content=str(e), content_type="error"}
         }
     }
 }
 
 // ==================== English textfunctionEnglish texttest ====================
 
-function create_function_calling_engine(llm_client: any, config?: FunctionCallingConfig) {
+function create_function_calling_engine(llm_client: any, config?: function_calling_config) {
     engine = new FunctionCallingEngine(llm_client=llm_client, config=config)
 
     # Register built-in tools
@@ -957,7 +957,7 @@ async function test_function_calling() {
     mock_llc = MockLLMClientForFC()
 
     # Create engine with built-in tools
-    fc_engine = create_function_calling_engine(mock_llc, FunctionCallingConfig(verbose_logging=false))
+    fc_engine = create_function_calling_engine(mock_llc, function_calling_config(verbose_logging=false))
 
     # Test 1: Tool registration and discovery
     print("  ✓ Test 1: Tool Registration")
@@ -974,10 +974,10 @@ async function test_function_calling() {
     # Test 3: Argument validation
     print("  ✓ Test 3: Argument Validation")
     web_exec = fc_engine.registry.get_executor("web_search")!
-    valid_report = web_exec.validate_arguments({"query": "test"}, ParameterSchema{type="object", properties={}, required=["query"]})
+    valid_report = web_exec.validate_arguments({"query": "test"}, parameter_schema{type="object", properties={}, required=["query"]})
     assert valid_report.is_valid, "Valid args should pass"
 
-    invalid_report = web_exec.validate_arguments({}, ParameterSchema{type="object", properties={}, required=["query"]})
+    invalid_report = web_exec.validate_arguments({}, parameter_schema{type="object", properties={}, required=["query"]})
     assert !invalid_report.is_valid, "Missing args should fail"
     assert "query" in invalid_report.missing_params, "'query' should be in missing params"
 
@@ -1027,7 +1027,7 @@ class MockLLMClientForFC {
         # Simulate different responses based on call count
         if this.call_count == 1 {
             # First call: request tool use
-            return LLMRawResponse{
+            return llm_raw_response{
                 finished_reason="tool_calls",
                 choices=[{
                     message={
@@ -1046,7 +1046,7 @@ class MockLLMClientForFC {
             }
         } else {
             # Second call: generate final answer based on tool results
-            return LLMRawResponse{
+            return llm_raw_response{
                 finished_reason="stop",
                 choices=[{
                     message={
@@ -1059,19 +1059,19 @@ class MockLLMClientForFC {
     }
 }
 
-struct LLMRawResponse {
+struct llm_raw_response {
     finished_reason?: string
     choices: list<map<string, any>>
 }
 
 // Export public API
 export {
-    FunctionCallingConfig, ToolDefinition, ParameterSchema, PropertyDefinition,
-    ToolCall, CallStatus, ToolCallResult, ToolCallError, RateLimit,
-    FunctionCallingResponse, AssistantMessage, UserMessage, ContentBlock, ToolCallResultBlock,
-    ExecutionSummary,
-    ToolRegistry, ToolExecutor, ValidationReport, RegistryStatistics,
-    FunctionCallingEngine, CallTracker, ConversationSummary,
+    function_calling_config, tool_definition, parameter_schema, property_definition,
+    tool_call, CallStatus, tool_call_result, tool_call_error, rate_limit,
+    function_calling_response, assistant_message, user_message, content_block, tool_call_result_block,
+    execution_summary,
+    ToolRegistry, ToolExecutor, validation_report, registry_statistics,
+    FunctionCallingEngine, CallTracker, conversation_summary,
     create_function_calling_engine, test_function_calling,
     create_builtin_web_search_tool, create_builtin_code_executor_tool, create_builtin_file_operations_tool
 }

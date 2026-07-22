@@ -81,7 +81,7 @@ type training_metrics struct {
 // Global State
 // ============================================================================
 
-var gTrainingState = &training_state{
+var gtraining_state = &training_state{
 	CurrentStep: 0,
 	CurrentEpoch: 0,
 	TotalLoss: 0.0,
@@ -243,15 +243,15 @@ func loadCheckpoint(path string) error {
 			return err
 		}
 
-		var state TrainingState
+		var state training_state
 		err = json.Unmarshal(data, &state)
 		if err != nil {
 			return err
 		}
 
-		gTrainingState = &state
+		gtraining_state = &state
 		logInfo(fmt.Sprintf("Resumed from step %d, epoch %d",
-			gTrainingState.CurrentStep, gTrainingState.CurrentEpoch))
+			gtraining_state.CurrentStep, gtraining_state.CurrentEpoch))
 
 		return nil
 	}
@@ -270,7 +270,7 @@ func saveCheckpoint(step int64) error {
 
 	// Save training state
 	statePath := filepath.Join(checkpointDir, "state.json")
-	data, err := json.MarshalIndent(gTrainingState, "", "  ")
+	data, err := json.MarshalIndent(gtraining_state, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -287,7 +287,7 @@ func saveCheckpoint(step int64) error {
 		return err
 	}
 
-	gTrainingState.LastCheckpoint = checkpointDir
+	gtraining_state.LastCheckpoint = checkpointDir
 	logInfo("checkpoint saved: " + checkpointDir)
 
 	return nil
@@ -302,20 +302,20 @@ func trainingStep(step int64) error {
 	startTime := time.Now()
 
 	// Update training state
-	gTrainingState.CurrentStep = step
-	gTrainingState.AvgLoss = gTrainingState.AvgLoss*0.99 + 2.5*0.01 // Exponential moving average
-	gTrainingState.GradientNorm = calculateGradientNorm()
+	gtraining_state.CurrentStep = step
+	gtraining_state.AvgLoss = gtraining_state.AvgLoss*0.99 + 2.5*0.01 // Exponential moving average
+	gtraining_state.GradientNorm = calculateGradientNorm()
 
 	// Calculate learning rate with warmup
 	lr := calculateLearningRate(step)
-	gTrainingState.LearningRate = lr
+	gtraining_state.LearningRate = lr
 
 	elapsed := time.Since(startTime).Seconds()
-	gTrainingState.TimesPerStep = elapsed
+	gtraining_state.TimesPerStep = elapsed
 
 	// Calculate tokens per second
 	tokPerStep := int64(gConfig.BatchSize) * int64(gConfig.SeqLen)
-	gTrainingState.TokPerSec = float64(tokPerStep) / elapsed
+	gtraining_state.TokPerSec = float64(tokPerStep) / elapsed
 
 	return nil
 }
@@ -327,8 +327,8 @@ func evaluationStep(step int64) error {
 	evalLoss := 2.3
 	accuracy := 0.45
 
-	gTrainingState.LastEvalLoss = evalLoss
-	gTrainingState.EvalAccuracy = accuracy
+	gtraining_state.LastEvalLoss = evalLoss
+	gtraining_state.EvalAccuracy = accuracy
 
 	logInfo(fmt.Sprintf("  Eval Loss: %.4f, Accuracy: %.4f", evalLoss, accuracy))
 
@@ -400,14 +400,14 @@ func runTraining() error {
 
 		// Log metrics every 10 steps
 		if step % 10 == 0 {
-			metric := TrainingMetrics{
+			metric := training_metrics{
 				Step: step,
-				TrainLoss: gTrainingState.AvgLoss,
-				EvalLoss: gTrainingState.LastEvalLoss,
-				Accuracy: gTrainingState.EvalAccuracy,
-				LearningRate: gTrainingState.LearningRate,
-				TimePerStep: gTrainingState.TimesPerStep,
-				TokPerSec: gTrainingState.TokPerSec,
+				TrainLoss: gtraining_state.AvgLoss,
+				EvalLoss: gtraining_state.LastEvalLoss,
+				Accuracy: gtraining_state.EvalAccuracy,
+				LearningRate: gtraining_state.LearningRate,
+				TimePerStep: gtraining_state.TimesPerStep,
+				TokPerSec: gtraining_state.TokPerSec,
 				Timestamp: time.Now().Format("2006-01-02 15:04:05"),
 			}
 
@@ -417,8 +417,8 @@ func runTraining() error {
 		// Log progress every 100 steps
 		if step % 100 == 0 {
 			logInfo(fmt.Sprintf("[Step %d/%d] Loss: %.4f, LR: %.6f, Tok/s: %.0f",
-				step, gConfig.TotalSteps, gTrainingState.AvgLoss,
-				gTrainingState.LearningRate, gTrainingState.TokPerSec))
+				step, gConfig.TotalSteps, gtraining_state.AvgLoss,
+				gtraining_state.LearningRate, gtraining_state.TokPerSec))
 		}
 	}
 
@@ -451,7 +451,7 @@ func logError(msg string) {
 	fmt.Printf("[%s] ERROR: %s\n", timestamp, msg)
 }
 
-func logMetric(m *TrainingMetrics) {
+func logMetric(m *training_metrics) {
 	data, _ := json.Marshal(m)
 	metricsPath := filepath.Join(gConfig.LogDir, "metrics.jsonl")
 	

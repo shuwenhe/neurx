@@ -19,7 +19,7 @@ struct mixed_precision_config {
     float grad_clip_value        // gradientEnglish text: 1.0
 }
 
-struct MixedPrecisionState {
+struct mixed_precision_state {
     float loss_scale
     int overflow_counter
     int stable_steps
@@ -28,13 +28,13 @@ struct MixedPrecisionState {
     bool in_overflow_state
 }
 
-struct GradientScaling {
+struct gradient_scaling {
     float scale_factor           // English text
     float* scaled_gradients      // English textgradient
     int gradient_count
 }
 
-struct DynamicQuantization {
+struct dynamic_quantization {
     float quantization_scale
     int overflow_count
     float* activation_min        // English textstatistics
@@ -74,10 +74,10 @@ func check_gradient_overflow(float* gradients, int gradient_count) bool {
 
 // English textlossEnglish text (Dynamic Loss Scaling)
 func update_loss_scale(
-    MixedPrecisionState state,
+    mixed_precision_state state,
     mixed_precision_config config,
     bool overflow_occurred
-) MixedPrecisionState {
+) mixed_precision_state {
 
     if overflow_occurred {
         // English text: English text loss scale
@@ -119,8 +119,8 @@ func scale_gradients(
     float* gradients,
     int gradient_count,
     float scale_factor
-) GradientScaling {
-    GradientScaling result
+) gradient_scaling {
+    gradient_scaling result
 
     result.scale_factor = scale_factor
     result.scaled_gradients = alloc(float, gradient_count)
@@ -171,7 +171,7 @@ func clip_gradients(
 // 3. English textoptimizeEnglish text (Mixed Precision Optimizer)
 // ============================================================================
 
-struct MixedPrecisionOptimizer {
+struct mixed_precision_optimizer {
     string optimizer_type        // "Adam", "AdamW", "SGD"
     float learning_rate
     float betas_1                // Adam: beta1 = 0.9
@@ -183,7 +183,7 @@ struct MixedPrecisionOptimizer {
     float* v                     // Second moment (variance)
     int parameter_count
 
-    MixedPrecisionState amp_state
+    mixed_precision_state amp_state
     mixed_precision_config amp_config
 }
 
@@ -192,8 +192,8 @@ func init_mixed_precision_optimizer(
     int parameter_count,
     float learning_rate,
     mixed_precision_config amp_config
-) MixedPrecisionOptimizer {
-    MixedPrecisionOptimizer optimizer
+) mixed_precision_optimizer {
+    mixed_precision_optimizer optimizer
 
     optimizer.optimizer_type = "AdamW"
     optimizer.learning_rate = learning_rate
@@ -222,12 +222,12 @@ func init_mixed_precision_optimizer(
 
 // English text Adam stepEnglish text
 func mixed_precision_adam_step(
-    MixedPrecisionOptimizer optimizer,
+    mixed_precision_optimizer optimizer,
     float* params,
     float* gradients,
     float* loss,
     int step
-) MixedPrecisionOptimizer {
+) mixed_precision_optimizer {
 
     // 1. English textlossEnglish text
     bool overflow = is_nan_or_inf(loss[0])
@@ -285,7 +285,7 @@ func mixed_precision_adam_step(
 // 4. gradientcheckpoint (Gradient Checkpointing)
 // ============================================================================
 
-struct GradientCheckpoint {
+struct gradient_checkpoint {
     float* activation_snapshots  // saveEnglish text
     int layer_index
     int checkpoint_size
@@ -297,8 +297,8 @@ func save_gradient_checkpoint(
     float* activations,
     int size,
     int layer_index
-) GradientCheckpoint {
-    GradientCheckpoint checkpoint
+) gradient_checkpoint {
+    gradient_checkpoint checkpoint
 
     checkpoint.activation_snapshots = alloc(float, size)
     checkpoint.layer_index = layer_index
@@ -316,7 +316,7 @@ func save_gradient_checkpoint(
 }
 
 // recovergradientcheckpoint (English textcomputeEnglish text)
-func restore_gradient_checkpoint(GradientCheckpoint checkpoint) float* {
+func restore_gradient_checkpoint(gradient_checkpoint checkpoint) float* {
     float* restored = alloc(float, checkpoint.checkpoint_size)
 
     int i = 0
@@ -332,7 +332,7 @@ func restore_gradient_checkpoint(GradientCheckpoint checkpoint) float* {
 // 5. English texttrainingEnglish textstep (Distributed Training Synchronization)
 // ============================================================================
 
-struct DistributedTrainingState {
+struct distributed_training_state {
     int world_size
     int rank
     string backend               // "nccl" or "gloo"
@@ -345,7 +345,7 @@ struct DistributedTrainingState {
 func synchronize_gradients(
     float* gradients,
     int gradient_count,
-    DistributedTrainingState state
+    distributed_training_state state
 ) float* {
     if state.world_size <= 1 {
         return gradients  // English text GPU, English textstep
@@ -372,7 +372,7 @@ func accumulate_gradients(
     float* current_gradients,
     float* accumulated_gradients,
     int gradient_count,
-    DistributedTrainingState state
+    distributed_training_state state
 ) float* {
     float* result = alloc(float, gradient_count)
 
@@ -389,9 +389,9 @@ func accumulate_gradients(
 // 6. completeEnglish texttrainingEnglish text
 // ============================================================================
 
-struct MixedPrecisionTrainingLoop {
-    MixedPrecisionOptimizer optimizer
-    DistributedTrainingState dist_state
+struct mixed_precision_training_loop {
+    mixed_precision_optimizer optimizer
+    distributed_training_state dist_state
 
     float* running_loss
     int loss_smoothing_factor    // 0.9
@@ -406,9 +406,9 @@ func training_step(
     float* model_params,
     float* gradients,
     float loss,
-    MixedPrecisionTrainingLoop loop,
+    mixed_precision_training_loop loop,
     int step
-) MixedPrecisionTrainingLoop {
+) mixed_precision_training_loop {
 
     // 1. English textloss
     if loop.total_steps == 0 {
@@ -447,7 +447,7 @@ func training_step(
 // 7. English textmonitoring
 // ============================================================================
 
-struct TrainingMetrics {
+struct training_metrics {
     float loss                   // English textloss
     float learning_rate          // English textlearning rate
     float loss_scale             // English text loss scale
@@ -460,12 +460,12 @@ struct TrainingMetrics {
 
 // computetrainingEnglish text
 func compute_training_metrics(
-    MixedPrecisionTrainingLoop loop,
+    mixed_precision_training_loop loop,
     int total_samples,
     int elapsed_seconds,
     float gpu_memory_gb
-) TrainingMetrics {
-    TrainingMetrics metrics
+) training_metrics {
+    training_metrics metrics
 
     metrics.loss = loop.running_loss[0]
     metrics.learning_rate = loop.optimizer.learning_rate
@@ -524,7 +524,7 @@ func main() {
     amp_config.grad_clip_value = 1.0
 
     // initializeoptimizeEnglish text
-    MixedPrecisionOptimizer optimizer = init_mixed_precision_optimizer(100000, 0.0001, amp_config)
+    mixed_precision_optimizer optimizer = init_mixed_precision_optimizer(100000, 0.0001, amp_config)
 
     println("Loss scale: " + float_to_string(optimizer.amp_state.loss_scale))
     println("Optimizer initialized successfully")

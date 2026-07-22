@@ -2,14 +2,14 @@ package neurx.tokenizer.vocab_builder
 
 // BPE English text - English text 50K English text
 
-struct TokenPair {
+struct token_pair {
     string left
     string right
     int frequency
     int rank
 }
 
-struct VocabBuilderConfig {
+struct vocab_builder_config {
     int target_vocab_size
     int min_frequency
     int max_merge_ops
@@ -17,7 +17,7 @@ struct VocabBuilderConfig {
     string output_dir
 }
 
-struct BuilderProgress {
+struct builder_progress {
     int current_vocab_size
     int current_merges
     float progress_percent
@@ -116,7 +116,7 @@ func merge_pair_in_texts(string* texts, int text_count, string left, string righ
 // ============================================================================
 
 // English text BPE English text
-func build_bpe_vocab(string* corpus_texts, int text_count, VocabBuilderConfig config) BPEVocab {
+func build_bpe_vocab(string* corpus_texts, int text_count, vocab_builder_config config) BPEVocab {
     BPEVocab vocab
     vocab.vocab_size = config.target_vocab_size
     vocab.token_count = 256  // initializeEnglish text
@@ -380,7 +380,7 @@ func main() {
     // example: English text BPE English text
 
     // 1. configuration
-    VocabBuilderConfig config
+    vocab_builder_config config
     config.target_vocab_size = 50000
     config.min_frequency = 5
     config.max_merge_ops = 50000

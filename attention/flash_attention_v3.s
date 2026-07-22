@@ -8,7 +8,7 @@ package neurx.attention.flash_v3
 // English textdataEnglish text
 // ============================================================================
 
-struct FlashAttentionV3Config {
+struct flash_attention_v3_config {
     int block_size_q             // Query English text: 128
     int block_size_k             // Key/Value English text: 128
     int head_dim                 // English text: 64
@@ -19,7 +19,7 @@ struct FlashAttentionV3Config {
     float dropout_p              // Dropout English text
 }
 
-struct PagedKVCache {
+struct paged_kv_cache {
     float* key_pages             // English text KV cache
     float* value_pages
     int page_size                // English text token English text
@@ -29,14 +29,14 @@ struct PagedKVCache {
     int max_cache_tokens
 }
 
-struct SpeculativeDecoding {
+struct speculative_decoding {
     int* draft_tokens            // English textmodelEnglish text token
     float* draft_probabilities   // English text
     int draft_count              // English textcount
     bool accept_all              // English text
 }
 
-struct AttentionStats {
+struct attention_stats {
     float* softmax_values        // Softmax outputstatistics
     float max_attention_weight
     float min_attention_weight
@@ -146,8 +146,8 @@ func compute_block_attention(
 func init_paged_kv_cache(
     int page_size,
     int max_pages
-) PagedKVCache {
-    PagedKVCache cache
+) paged_kv_cache {
+    paged_kv_cache cache
 
     cache.page_size = page_size
     cache.num_pages = max_pages
@@ -163,11 +163,11 @@ func init_paged_kv_cache(
 
 // English text KV English textcache
 func add_to_paged_kv_cache(
-    PagedKVCache cache,
+    paged_kv_cache cache,
     float* new_keys,
     float* new_values,
     int token_count
-) PagedKVCache {
+) paged_kv_cache {
 
     int tokens_added = 0
     while tokens_added < token_count {
@@ -212,11 +212,11 @@ func add_to_paged_kv_cache(
 // 3. Flash Attention v3 English text
 // ============================================================================
 
-struct FlashAttentionV3Engine {
-    FlashAttentionV3Config config
-    PagedKVCache kv_cache
-    SpeculativeDecoding speculative
-    AttentionStats stats
+struct flash_attention_v3_engine {
+    flash_attention_v3_config config
+    paged_kv_cache kv_cache
+    speculative_decoding speculative
+    attention_stats stats
 
     float* fused_output          // English textoutput
     int total_tokens_processed
@@ -224,10 +224,10 @@ struct FlashAttentionV3Engine {
 
 // initialize Flash Attention v3
 func init_flash_attention_v3(
-    FlashAttentionV3Config config,
+    flash_attention_v3_config config,
     int max_sequence_length
-) FlashAttentionV3Engine {
-    FlashAttentionV3Engine engine
+) flash_attention_v3_engine {
+    flash_attention_v3_engine engine
 
     engine.config = config
     engine.total_tokens_processed = 0
@@ -254,7 +254,7 @@ func flash_attention_v3_forward(
     float* value,
     int seq_len,
     int batch_size,
-    FlashAttentionV3Engine engine
+    flash_attention_v3_engine engine
 ) float* {
     float* output = alloc(float, batch_size * seq_len * engine.config.head_dim)
 
@@ -374,8 +374,8 @@ func flash_attention_v3_forward(
 func generate_draft_tokens(
     float* draft_logits,
     int draft_count,
-    SpeculativeDecoding speculative
-) SpeculativeDecoding {
+    speculative_decoding speculative
+) speculative_decoding {
 
     int i = 0
     while i < draft_count {
@@ -431,7 +431,7 @@ func batched_inference(
     float* value_batch,
     int batch_size,
     int seq_len,
-    FlashAttentionV3Engine engine
+    flash_attention_v3_engine engine
 ) float* {
     float* output = alloc(float, batch_size * seq_len * engine.config.head_dim)
 
@@ -494,7 +494,7 @@ func log_f(float x) float {
 func main() {
     println("=== Flash Attention v3 Engine ===")
 
-    FlashAttentionV3Config config
+    flash_attention_v3_config config
     config.block_size_q = 128
     config.block_size_k = 128
     config.head_dim = 64
@@ -503,7 +503,7 @@ func main() {
     config.use_paged_kv_cache = true
     config.use_speculative_decode = false
 
-    FlashAttentionV3Engine engine = init_flash_attention_v3(config, 32768)
+    flash_attention_v3_engine engine = init_flash_attention_v3(config, 32768)
 
     println("Flash Attention v3 initialized")
     println("Block size: 128x128")

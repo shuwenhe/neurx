@@ -12,8 +12,8 @@ import (
     "std/math"
 )
 
-// QualityMetrics English text
-struct QualityMetrics {
+// quality_metrics English text
+struct quality_metrics {
     total_lines: i64
     valid_docs: i64
     invalid_docs: i64
@@ -29,18 +29,18 @@ struct QualityMetrics {
     issues: []string
 }
 
-// QualityAssessor English textevaluationEnglish text
-struct QualityAssessor {
+// quality_assessor English textevaluationEnglish text
+struct quality_assessor {
     sample_size: i64
-    metrics: QualityMetrics
+    metrics: quality_metrics
     seen_hashes: set<string>
 }
 
 // NewQualityAssessor English textevaluationEnglish text
-func NewQualityAssessor(sample_size: i64) QualityAssessor {
-    return QualityAssessor{
+func NewQualityAssessor(sample_size: i64) quality_assessor {
+    return quality_assessor{
         sample_size: sample_size,
-        metrics: QualityMetrics{
+        metrics: quality_metrics{
             total_lines: 0,
             valid_docs: 0,
             invalid_docs: 0,
@@ -56,7 +56,7 @@ func NewQualityAssessor(sample_size: i64) QualityAssessor {
 }
 
 // calculateQualityScore computeEnglish text
-func (qa: *QualityAssessor) calculateQualityScore(text: string) f64 {
+func (qa: *quality_assessor) calculateQualityScore(text: string) f64 {
     if len(text) == 0 {
         return 0.0
     }
@@ -155,7 +155,7 @@ func detectLanguage(text: string) string {
 }
 
 // AssessFile evaluationfile
-func (qa: *QualityAssessor) AssessFile(filepath: string) QualityMetrics {
+func (qa: *quality_assessor) AssessFile(filepath: string) quality_metrics {
     println("📊 evaluationfile: " + filepath)
 
     file := io.Open(filepath, "r")
@@ -258,7 +258,7 @@ func (qa: *QualityAssessor) AssessFile(filepath: string) QualityMetrics {
 }
 
 // PrintReport English text
-func (metrics: QualityMetrics) PrintReport() {
+func (metrics: quality_metrics) PrintReport() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║         📊 NeurX dataEnglish textevaluationEnglish text                      ║")
     println("╚════════════════════════════════════════════════════════╝")

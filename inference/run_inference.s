@@ -7,7 +7,7 @@ package main
 // modelconfigurationEnglish text
 // ============================================================
 
-struct ModelConfig {
+struct model_config {
     int vocab_size
     int hidden_dim
     int num_layers
@@ -17,14 +17,14 @@ struct ModelConfig {
     int max_seq_len
 }
 
-struct TrainingMetrics {
+struct training_metrics {
     int step
     float final_loss
     float best_loss
     float learning_rate
 }
 
-struct InferenceResult {
+struct inference_result {
     string prompt
     string generated_text
     int num_tokens
@@ -75,8 +75,8 @@ func max_float(float a, float b) float {
 // modelinitialize
 // ============================================================
 
-func init_model_config() ModelConfig {
-    ModelConfig {
+func init_model_config() model_config {
+    model_config {
         vocab_size: 128000,
         hidden_dim: 768,
         num_layers: 12,
@@ -87,8 +87,8 @@ func init_model_config() ModelConfig {
     }
 }
 
-func init_training_metrics() TrainingMetrics {
-    TrainingMetrics {
+func init_training_metrics() training_metrics {
+    training_metrics {
         step: 100,
         final_loss: 2.0807,
         best_loss: 3.6019,
@@ -139,7 +139,7 @@ func print_header() {
     println("")
 }
 
-func print_model_info(ModelConfig config, TrainingMetrics metrics) {
+func print_model_info(model_config config, training_metrics metrics) {
     println("📋 modelinformation:")
     print("  • English text:        ")
     print(config.vocab_size)
@@ -256,8 +256,8 @@ func print_inference_stats(int num_samples, int max_tokens) {
 
 func run_inference_demo() {
     // initializeconfiguration
-    ModelConfig config = init_model_config()
-    TrainingMetrics metrics = init_training_metrics()
+    model_config config = init_model_config()
+    training_metrics metrics = init_training_metrics()
 
     // English text
     print_header()

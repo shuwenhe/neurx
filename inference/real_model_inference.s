@@ -52,7 +52,7 @@ func main() {
     print("[1] Tokenization: [151643, 105, 2006, 2004, 106, 151645]\n")
     print("[2] Transformer Inference (24 layers)\n")
     print("    • Embedding → Hidden (896-dim)\n")
-    print("    • RMSNorm + MultiHeadAttention (14 heads)\n")
+    print("    • RMSNorm + multi_head_attention (14 heads)\n")
     print("    • Feed-forward (4864 intermediate)\n")
     print("    • Residual connections\n")
     print("    ✓ All 24 layers computed\n\n")

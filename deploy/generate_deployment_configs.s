@@ -13,7 +13,7 @@ use std.env
 // DATA STRUCTURES FOR DEPLOYMENT CONFIG
 // ============================================================================
 
-struct DeploymentConfig {
+struct deployment_config {
     cluster_name: string
     num_nodes: i32
     gpus_per_node: i32
@@ -24,7 +24,7 @@ struct DeploymentConfig {
     warmup_steps: i32
 }
 
-struct GPUConfig {
+struct gpu_config {
     device_id: i32
     device_name: string
     compute_capability: string
@@ -36,7 +36,7 @@ struct GPUConfig {
 // SLURM CONFIGURATION
 // ============================================================================
 
-func generate_slurm_script(config: DeploymentConfig, output_path: string) bool {
+func generate_slurm_script(config: deployment_config, output_path: string) bool {
     let num_nodes = config.num_nodes
     let gpus_per_node = config.gpus_per_node
     let total_tasks = num_nodes * gpus_per_node
@@ -112,7 +112,7 @@ echo "Training completed!"
 // DOCKER COMPOSE CONFIGURATION
 // ============================================================================
 
-func generate_docker_compose(config: DeploymentConfig, output_path: string) bool {
+func generate_docker_compose(config: deployment_config, output_path: string) bool {
     let num_nodes = config.num_nodes
     let gpus_per_node = config.gpus_per_node
     
@@ -170,7 +170,7 @@ networks:
 // KUBERNETES CONFIGURATION
 // ============================================================================
 
-func generate_kubernetes_deployment(config: DeploymentConfig, output_path: string) bool {
+func generate_kubernetes_deployment(config: deployment_config, output_path: string) bool {
     let num_nodes = config.num_nodes
     let gpus_per_node = config.gpus_per_node
     let total_replicas = num_nodes
@@ -313,7 +313,7 @@ spec:
 // CLUSTER CONFIGURATION JSON
 // ============================================================================
 
-func generate_cluster_config(config: DeploymentConfig, output_path: string) bool {
+func generate_cluster_config(config: deployment_config, output_path: string) bool {
     let total_batch = config.batch_size_per_gpu * config.num_nodes * 4  // assuming 4 GPUs per node
     
     let config_json = `{
@@ -372,7 +372,7 @@ func main() {
     println("")
     
     // Create config
-    let config = DeploymentConfig {
+    let config = deployment_config {
         cluster_name: "neurx-prod",
         num_nodes: 4,
         gpus_per_node: 4,

@@ -2,13 +2,13 @@ package neurx.model.gpt_transformer
 
 // 🏭 English text GPT Transformer English text
 // English text: Model-3.5/4 English text
-// English text: RMSNorm, ALiBi, RotaryEmbedding, SwiGLU, LayerScale
+// English text: RMSNorm, ALiBi, rotary_embedding, SwiGLU, layer_scale
 
 // ============================================================================
 // English textdataEnglish text
 // ============================================================================
 
-struct GPTConfig {
+struct gptconfig {
     // modelEnglish text
     int hidden_size              // 768/1024/2048
     int num_layers               // 12/24/32/80
@@ -30,7 +30,7 @@ struct GPTConfig {
     float layer_norm_eps         // 1e-6
 }
 
-struct RotaryEmbedding {
+struct rotary_embedding {
     int dim
     float* cos_cached            // English textcomputeEnglish text cos English text
     float* sin_cached            // English textcomputeEnglish text sin English text
@@ -38,13 +38,13 @@ struct RotaryEmbedding {
     float base                   // default 10000
 }
 
-struct ALiBiBias {
+struct ali_bi_bias {
     int num_heads
     float* slopes               // English text
     int max_seq_len
 }
 
-struct TransformerOutput {
+struct transformer_output {
     float* hidden_states        // [batch, seq_len, hidden_size]
     float* attention_weights    // [batch, num_heads, seq_len, seq_len]
     int batch_size
@@ -52,7 +52,7 @@ struct TransformerOutput {
     int compute_time_ms
 }
 
-struct LayerScale {
+struct layer_scale {
     float* scale                // per-token scaling
     int hidden_size
 }
@@ -62,8 +62,8 @@ struct LayerScale {
 // ============================================================================
 
 // initializeEnglish text
-func init_rotary_embedding(int dim, int max_seq_len) RotaryEmbedding {
-    RotaryEmbedding rope
+func init_rotary_embedding(int dim, int max_seq_len) rotary_embedding {
+    rotary_embedding rope
 
     rope.dim = dim
     rope.cache_size = max_seq_len
@@ -102,7 +102,7 @@ func apply_rotary_embedding(
     float* query,
     float* key,
     int seq_len,
-    RotaryEmbedding rope
+    rotary_embedding rope
 ) void {
     // q' = R_m @ q
     // k' = R_m @ k
@@ -146,8 +146,8 @@ func apply_rotary_embedding(
 // ============================================================================
 
 // initialize ALiBi English text
-func init_alibi_bias(int num_heads, int max_seq_len) ALiBiBias {
-    ALiBiBias alibi
+func init_alibi_bias(int num_heads, int max_seq_len) ali_bi_bias {
+    ali_bi_bias alibi
 
     alibi.num_heads = num_heads
     alibi.max_seq_len = max_seq_len
@@ -169,7 +169,7 @@ func init_alibi_bias(int num_heads, int max_seq_len) ALiBiBias {
 // compute ALiBi English text
 func compute_alibi_bias(
     int seq_len,
-    ALiBiBias alibi
+    ali_bi_bias alibi
 ) float* {
     // generateEnglish text
     // bias[i,j] = slope * (j - i)
@@ -226,13 +226,13 @@ func rms_norm(float* x, int size, float eps) float* {
 }
 
 // RMSNorm English text (English textparameter)
-struct RMSNormLayer {
+struct rms_norm_layer {
     float* weight                // English textparameter
     int hidden_size
     float eps
 }
 
-func apply_rms_norm_layer(float* x, RMSNormLayer norm) float* {
+func apply_rms_norm_layer(float* x, rms_norm_layer norm) float* {
     float* normalized = rms_norm(x, norm.hidden_size, norm.eps)
 
     // English text
@@ -298,7 +298,7 @@ func swiGLU_activation(
 
 // English text Layer Scale
 // English textparameter
-func apply_layer_scale(float* residual, LayerScale scale, float init_value) float* {
+func apply_layer_scale(float* residual, layer_scale scale, float init_value) float* {
     float* output = alloc(float, scale.hidden_size)
 
     int i = 0
@@ -311,8 +311,8 @@ func apply_layer_scale(float* residual, LayerScale scale, float init_value) floa
 }
 
 // initialize Layer Scale
-func init_layer_scale(int hidden_size, float init_value) LayerScale {
-    LayerScale ls
+func init_layer_scale(int hidden_size, float init_value) layer_scale {
+    layer_scale ls
 
     ls.hidden_size = hidden_size
     ls.scale = alloc(float, hidden_size)
@@ -330,14 +330,14 @@ func init_layer_scale(int hidden_size, float init_value) LayerScale {
 // 6. English text (English text Flash Attention)
 // ============================================================================
 
-struct ImprovedAttentionLayer {
+struct improved_attention_layer {
     int num_heads
     int head_dim
     float dropout_rate
     bool use_flash_attention
-    RotaryEmbedding rope
-    ALiBiBias alibi
-    LayerScale scale
+    rotary_embedding rope
+    ali_bi_bias alibi
+    layer_scale scale
 }
 
 // English text (completeEnglish text)
@@ -347,9 +347,9 @@ func improved_multihead_attention(
     float* value,              // [batch, seq_len, hidden_size]
     int batch_size,
     int seq_len,
-    ImprovedAttentionLayer layer
-) TransformerOutput {
-    TransformerOutput output
+    improved_attention_layer layer
+) transformer_output {
+    transformer_output output
 
     int hidden_size = layer.num_heads * layer.head_dim
 
@@ -417,15 +417,15 @@ func improved_multihead_attention(
 // 7. Transformer English text (Layer)
 // ============================================================================
 
-struct TransformerBlock {
-    ImprovedAttentionLayer attention
-    RMSNormLayer norm1
-    RMSNormLayer norm2
+struct transformer_block {
+    improved_attention_layer attention
+    rms_norm_layer norm1
+    rms_norm_layer norm2
 
     float* ffn_w                // FFN weight
     float* ffn_v                // SwiGLU English textweight
-    LayerScale scale_attn
-    LayerScale scale_ffn
+    layer_scale scale_attn
+    layer_scale scale_ffn
 }
 
 // English text Transformer English text
@@ -433,23 +433,23 @@ func transformer_block_forward(
     float* x,
     int batch_size,
     int seq_len,
-    TransformerBlock block,
-    GPTConfig config
-) TransformerOutput {
-    TransformerOutput output
+    transformer_block block,
+    gptconfig config
+) transformer_output {
+    transformer_output output
 
     // 1. English text
-    // x_norm = LayerNorm(x)
+    // x_norm = layer_norm(x)
     float* x_norm = apply_rms_norm_layer(x, block.norm1)
 
     // attn_out = Attention(x_norm) + x
-    TransformerOutput attn_out = improved_multihead_attention(x_norm, x_norm, x_norm, batch_size, seq_len, block.attention)
+    transformer_output attn_out = improved_multihead_attention(x_norm, x_norm, x_norm, batch_size, seq_len, block.attention)
 
     // English text Layer Scale
     float* attn_residual = alloc(float, batch_size * seq_len * config.hidden_size)
 
     // 2. FFN English text
-    // x_norm2 = LayerNorm(attn_out)
+    // x_norm2 = layer_norm(attn_out)
     float* x_norm2 = apply_rms_norm_layer(attn_out.hidden_states, block.norm2)
 
     // ffn_out = SwiGLU(x_norm2) + attn_out
@@ -466,14 +466,14 @@ func transformer_block_forward(
 // 8. complete GPT model
 // ============================================================================
 
-struct GPTModel {
-    GPTConfig config
+struct gptmodel {
+    gptconfig config
 
     float* token_embeddings     // [vocab_size, hidden_size]
-    RotaryEmbedding rope
+    rotary_embedding rope
 
-    TransformerBlock* layers    // [num_layers]
-    RMSNormLayer final_norm
+    transformer_block* layers    // [num_layers]
+    rms_norm_layer final_norm
 
     float* lm_head              // [vocab_size, hidden_size]
 
@@ -481,8 +481,8 @@ struct GPTModel {
 }
 
 // initialize GPT model
-func init_language_model(GPTConfig config) GPTModel {
-    GPTModel model
+func init_language_model(gptconfig config) gptmodel {
+    gptmodel model
 
     model.config = config
     model.total_params = 0
@@ -495,7 +495,7 @@ func init_language_model(GPTConfig config) GPTModel {
     model.rope = init_rotary_embedding(config.head_dim, config.max_position_embeddings)
 
     // initialize Transformer English text
-    model.layers = alloc(TransformerBlock, config.num_layers)
+    model.layers = alloc(transformer_block, config.num_layers)
 
     int i = 0
     while i < config.num_layers {
@@ -526,9 +526,9 @@ func model_forward
     int* input_ids,            // [batch_size, seq_len]
     int batch_size,
     int seq_len,
-    GPTModel model
-) TransformerOutput {
-    TransformerOutput output
+    gptmodel model
+) transformer_output {
+    transformer_output output
 
     // 1. Token embedding
     float* x = alloc(float, batch_size * seq_len * model.config.hidden_size)
@@ -536,7 +536,7 @@ func model_forward
     // 2. English text Transformer English text
     int i = 0
     while i < model.config.num_layers {
-        TransformerOutput block_out = transformer_block_forward(x, batch_size, seq_len, model.layers[i], model.config);
+        transformer_output block_out = transformer_block_forward(x, batch_size, seq_len, model.layers[i], model.config);
         x = block_out.hidden_states
         i = i + 1
     }
@@ -604,7 +604,7 @@ func main() {
     println("=== Industrial GPT Transformer ===")
 
     // configuration GPT-7B
-    GPTConfig config
+    gptconfig config
     config.hidden_size = 4096
     config.num_layers = 32
     config.num_heads = 32
@@ -616,14 +616,14 @@ func main() {
     config.use_flash_attention = true
 
     // initializemodel
-    GPTModel model = init_language_model(config)
+    gptmodel model = init_language_model(config)
 
     println("Model parameters: " + int_to_string(model.total_params / 1000000) + "M")
     println("GPT-7B initialized successfully")
 
     // testEnglish text
     int* input_ids = alloc(int, 32)
-    TransformerOutput output = gpt_forward(input_ids, 1, 32, model)
+    transformer_output output = gpt_forward(input_ids, 1, 32, model)
 
     println("Forward pass completed")
     println("Output shape: [1, 32, " + int_to_string(config.hidden_size) + "]")

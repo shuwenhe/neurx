@@ -358,7 +358,7 @@ func (trainer *sft_trainer) compute_lcs(a []int, b []int) int {
 // Main Training Interface
 // ============================================
 
-func NewSFTTrainer(config SFTConfig) *sft_trainer {
+func NewSFTTrainer(config sft_config) *sft_trainer {
     return &sft_trainer{
         config: config,
         model: policy_model{

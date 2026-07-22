@@ -161,7 +161,7 @@ struct transformer_model {
     tensor lm_head              // [d_model, vocab_size] (often tied with token_embedding)
     
     // Normalization
-    tensor final_norm           // LayerNorm before output
+    tensor final_norm           // layer_norm before output
     
     // Configuration
     training_config config
@@ -183,8 +183,8 @@ struct transformer_layer {
     tensor w_down               // Down projection [d_ff, d_model]
     
     // Layer norms
-    tensor ln_1                 // Pre-attention LayerNorm
-    tensor ln_2                 // Pre-FFN LayerNorm
+    tensor ln_1                 // Pre-attention layer_norm
+    tensor ln_2                 // Pre-FFN layer_norm
 }
 
 // Initialize model weights (Xavier/Kaiming initialization)
@@ -209,7 +209,7 @@ func init_transformer_model(training_config cfg) transformer_model {
     
     // Output head
     tensor lm_head = randn_tensor([cfg.d_model, cfg.vocab_size]) * 0.02
-    tensor final_ln = ones_tensor([cfg.d_model])  // LayerNorm initialized to identity
+    tensor final_ln = ones_tensor([cfg.d_model])  // layer_norm initialized to identity
     
     // Initialize computation graph for autograd
     computation_graph g = new_graph()
@@ -290,7 +290,7 @@ func model_forward(
             (ckpt_mgr, _) = save_checkpoint(ckpt_mgr, layer_idx, x, [])
         }
         
-        // Pre-attention LayerNorm
+        // Pre-attention layer_norm
         tensor residual = x  // Save residual connection
         x = layer_norm(x, layer.ln_1)
         
@@ -310,7 +310,7 @@ func model_forward(
         x = matmul(attn_output, layer.wo)
         x = add_tensors(x, residual)
         
-        // Pre-FFN LayerNorm
+        // Pre-FFN layer_norm
         residual = x
         x = layer_norm(x, layer.ln_2)
         

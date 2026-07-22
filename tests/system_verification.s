@@ -13,7 +13,7 @@ use std.env
 // DATA STRUCTURES FOR SYSTEM VERIFICATION
 // ============================================================================
 
-struct ComponentStatus {
+struct component_status {
     name: string
     file_path: string
     size_bytes: i64
@@ -22,12 +22,12 @@ struct ComponentStatus {
     description: string
 }
 
-struct SystemHealthCheck {
+struct system_health_check {
     timestamp: string
     total_components: i32
     ready_components: i32
     health_score: f64
-    components: ComponentStatus[]
+    components: component_status[]
     recommendations: []string
 }
 
@@ -35,11 +35,11 @@ struct SystemHealthCheck {
 // COMPONENT VERIFICATION
 // ============================================================================
 
-func verify_component(name: string, file_path: string, expected_lines: i32) ComponentStatus {
+func verify_component(name: string, file_path: string, expected_lines: i32) component_status {
     // Simulate file checking
     let exists = true  // In production: check if file exists
     
-    let component = ComponentStatus {
+    let component = component_status {
         name: name,
         file_path: file_path,
         size_bytes: expected_lines * 50,  // Approximate
@@ -51,8 +51,8 @@ func verify_component(name: string, file_path: string, expected_lines: i32) Comp
     return component
 }
 
-func check_all_components() ComponentStatus[] {
-    let components = ComponentStatus[]{}
+func check_all_components() component_status[] {
+    let components = component_status[]{}
     
     // Scaled training system
     let scaled = verify_component(
@@ -124,7 +124,7 @@ func check_all_components() ComponentStatus[] {
 // HEALTH CHECK FUNCTIONS
 // ============================================================================
 
-func calculate_health_score(components: ComponentStatus[]) f64 {
+func calculate_health_score(components: component_status[]) f64 {
     let ready = 0
     for component in components {
         if component.status == "ready" {
@@ -135,7 +135,7 @@ func calculate_health_score(components: ComponentStatus[]) f64 {
     return (ready * 100.0) / len(components)
 }
 
-func print_component_status(component: ComponentStatus) {
+func print_component_status(component: component_status) {
     let status_icon = "✅"
     if component.status != "ready" {
         status_icon = "❌"
@@ -148,7 +148,7 @@ func print_component_status(component: ComponentStatus) {
     println("")
 }
 
-func perform_system_check() SystemHealthCheck {
+func perform_system_check() system_health_check {
     println("")
     println("╔" + strings.repeat("═", 61) + "╗")
     println("║  SYSTEM HEALTH CHECK & VERIFICATION                   ║")
@@ -186,7 +186,7 @@ func perform_system_check() SystemHealthCheck {
         recommendations = append(recommendations, "All components should be present for production deployment")
     }
     
-    let check = SystemHealthCheck {
+    let check = system_health_check {
         timestamp: time.format(time.now(), "2006-01-02T15:04:05Z07:00"),
         total_components: len(components),
         ready_components: ready,

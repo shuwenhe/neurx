@@ -8,7 +8,7 @@ module web_search_crawler
 
 // ==================== English textconfigurationEnglish text ====================
 
-struct WebSearchConfig {
+struct web_search_config {
     // searchEnglish textconfiguration
     search_engines: list<string> = ["google", "bing"]  # English textrankingEnglish textsearchEnglish text
     max_results_per_engine: int = 10                   # English textresultEnglish text
@@ -49,7 +49,7 @@ struct WebSearchConfig {
     cache_ttl_hours: int = 24                        # cacheEnglish text (English text)
 }
 
-struct SearchResultItem {
+struct search_resultItem {
     url: string                                       # English text URL
     title: string                                     # title
     snippet: string                                   # searchEnglish textsummary/English text
@@ -59,22 +59,22 @@ struct SearchResultItem {
     published_date?: string                           # publish date (English text)
 
     // crawlEnglish textextensionEnglish text
-    crawled_content?: CrawledContent?                 # English textcompletecontent
+    crawled_content?: crawled_content?                 # English textcompletecontent
     crawl_status?: string                             # success | failed | timeout | blocked
     crawl_error?: string                              # errorinformation
 }
 
-struct CrawledContent {
+struct crawled_content {
     raw_html_size: int                                # English text HTML English text (English text)
     text_content: string                              # English textcontent
     cleaned_text: string                              # cleanEnglish text (English text LLM English text)
-    metadata: PageMetadata                           # English textdata
-    sections: list<PageSection>?                     # English textsection
+    metadata: page_metadata                           # English textdata
+    sections: list<page_section>?                     # English textsection
     extraction_timestamp: float                      # English texttimeEnglish text
     word_count: int                                  # English text
 }
 
-struct PageMetadata {
+struct page_metadata {
     title: string                                    # English texttitle
     description: string?                             # Meta description
     author: string?                                  # author
@@ -89,17 +89,17 @@ struct PageMetadata {
     og_data: map<string, string>?                    # OpenGraph data
 }
 
-struct PageSection {
+struct page_section {
     heading: string?                                 # sectiontitle (English text)
     level: int                                       # titleEnglish text (H1-H6, 0 English texttitle)
     content: string                                  # contentEnglish text
 }
 
-struct SearchResponse {
+struct search_response {
     query: string                                    # English textquery
     corrected_query?: string                         # searchEnglish textquery (English text)
     total_results_found: int                         # English textresultEnglish text
-    results: list<SearchResultItem>                  # rankingEnglish textresultEnglish text
+    results: list<search_resultItem>                  # rankingEnglish textresultEnglish text
     aggregated_from_engines: list<string>            # actualuseEnglish textsearchEnglish text
     search_time_ms: float                            # English text (English text)
 
@@ -108,10 +108,10 @@ struct SearchResponse {
     key_findings: list<string>?                     # English text (English text)
 
     # statisticsinformation
-    stats: SearchStatistics                          # English textstatistics
+    stats: search_statistics                          # English textstatistics
 }
 
-struct SearchStatistics {
+struct search_statistics {
     engine_query_times_ms: map<string, float>        # English textqueryEnglish text
     crawl_times_ms: list<float>                      # English text
     total_crawl_time_ms: float                       # English text
@@ -125,11 +125,11 @@ struct SearchStatistics {
 
 interface SearchEngineInterface {
     name: string { get }
-    search(query: string, config: WebSearchConfig)
+    search(query: string, config: web_search_config)
 }
 
-struct EngineSearchResult {
-    items: list<SearchResultItem>                    # English textresult
+struct engine_search_result {
+    items: list<search_resultItem>                    # English textresult
     total_estimated: int                             # English textresultEnglish text
     corrected_query?: string                         # English textquery
     query_time_ms: float                             # English text
@@ -153,7 +153,7 @@ class GoogleSearchEngine implements SearchEngineInterface {
         return this.name
     }
 
-    search(query: string, config: WebSearchConfig) {
+    search(query: string, config: web_search_config) {
         start_time = current_time_millis()
 
         if this.api_key != null && this.cx_id != null {
@@ -165,7 +165,7 @@ class GoogleSearchEngine implements SearchEngineInterface {
         return result
     }
 
-    _search_via_api(query: string, config: WebSearchConfig, start_time: float) {
+    _search_via_api(query: string, config: web_search_config, start_time: float) {
         # Use Google Custom Search JSON API
         params = {
             "key": this.api_key!,
@@ -183,14 +183,14 @@ class GoogleSearchEngine implements SearchEngineInterface {
         data = json_decode(response.body)
 
         if "error" in data:
-            return EngineSearchResult{
+            return engine_search_result{
                 items=[], total_estimated=0, query_time_ms=current_time_millis() - start_time,
                 has_more=false, error=data["error"]["message"]
             }
 
-        items: list<SearchResultItem> = []
+        items: list<search_resultItem> = []
         for i, item in enumerate(data.get("items", [])) {
-            items.append(SearchResultItem{
+            items.append(search_resultItem{
                 url=item["link"],
                 title=item.get("title", ""),
                 snippet=item.get("snippet", ""),
@@ -199,7 +199,7 @@ class GoogleSearchEngine implements SearchEngineInterface {
                 published_date=item.get("pagemap", {}).get("metatags", [{}])[0].get("article:published_time")
             })
 
-        return EngineSearchResult{
+        return engine_search_result{
             items=items,
             total_estimated=data.get("searchInformation", {}).get("totalResults", 0),
             query_time_ms=current_time_millis() - start_time,
@@ -207,7 +207,7 @@ class GoogleSearchEngine implements SearchEngineInterface {
         }
     }
 
-    _search_public(query: string, config: WebSearchConfig, start_time: float) {
+    _search_public(query: string, config: web_search_config, start_time: float) {
         # Fallback: Use web scraping or alternative public API
         # Note: This is a simplified implementation; production should use proper APIs or services like SerpAPI
 
@@ -222,13 +222,13 @@ class GoogleSearchEngine implements SearchEngineInterface {
             return ddg_result
 
         } catch Exception as e:
-            return EngineSearchResult{
+            return engine_search_result{
                 items=[], total_estimated=0, query_time_ms=current_time_millis() - start_time,
                 has_more=false, error=f"Google search failed: {e.message}"
             }
     }
 
-    _duckduckgo_fallback(query: string, config: WebSearchConfig) {
+    _duckduckgo_fallback(query: string, config: web_search_config) {
         # DuckDuckGo Instant Answer API (free, no key required)
         params = {
             "q": query,
@@ -240,11 +240,11 @@ class GoogleSearchEngine implements SearchEngineInterface {
         response = http_get("https://api.duckduckgo.com/", params=params)
         data = json_decode(response.body)
 
-        items: list<SearchResultItem> = []
+        items: list<search_resultItem> = []
 
         # DuckDuckGo may return abstract/answer directly
         if "Abstract" in data and not data["Abstract"].empty():
-            items.append(SearchResultItem{
+            items.append(search_resultItem{
                 url=data.get("AbstractURL", ""),
                 title=data.get("Heading", ""),
                 snippet=data["Abstract"],
@@ -255,7 +255,7 @@ class GoogleSearchEngine implements SearchEngineInterface {
         # Also try to get regular results (would need html scraping of DDG lite version)
         # For simplicity, returning just the instant answer
 
-        return EngineSearchResult{
+        return engine_search_result{
             items=items,
             total_estimated=len(items),
             query_time_ms=response.elapsed * 1000,
@@ -278,7 +278,7 @@ class BingSearchEngine implements SearchEngineInterface {
         return this.name
     }
 
-    search(query: string, config: WebSearchConfig) {
+    search(query: string, config: web_search_config) {
         start_time = current_time_millis()
 
         if this.api_key != null:
@@ -287,7 +287,7 @@ class BingSearchEngine implements SearchEngineInterface {
             return this._search_fallback(query, config, start_time)
     }
 
-    _search_via_api(query: string, config: WebSearchConfig, start_time: float) {
+    _search_via_api(query: string, config: web_search_config, start_time: float) {
         headers = {
             "Ocp-Apim-Subscription-Key": this.api_key!
         }
@@ -315,9 +315,9 @@ class BingSearchEngine implements SearchEngineInterface {
         )
         data = json_decode(response.body)
 
-        items: list<SearchResultItem> = []
+        items: list<search_resultItem> = []
         for i, item in enumerate(data.get("webPages", {}).get("value", [])):
-            items.append(SearchResultItem{
+            items.append(search_resultItem{
                 url=item["url"],
                 title=item.get("name", ""),
                 snippet=item.get("snippet", ""),
@@ -326,7 +326,7 @@ class BingSearchEngine implements SearchEngineInterface {
                 published_date=item.get("dateLastCrawled")
             })
 
-        return EngineSearchResult{
+        return engine_search_result{
             items=items,
             total_estimated=data.get("webPages", {}).get("totalEstimatedMatches", 0),
             query_time_ms=current_time_millis() - start_time,
@@ -334,9 +334,9 @@ class BingSearchEngine implements SearchEngineInterface {
         }
     }
 
-    _search_fallback(query: string, config: WebSearchConfig, start_time: float) {
+    _search_fallback(query: string, config: web_search_config, start_time: float) {
         # Return empty with info message
-        return EngineSearchResult{
+        return engine_search_result{
             items=[],
             total_estimated=0,
             query_time_ms=current_time_millis() - start_time,
@@ -349,13 +349,13 @@ class BingSearchEngine implements SearchEngineInterface {
 // ==================== web pagecrawlEnglish text ====================
 
 class WebCrawler {
-    config: WebSearchConfig
+    config: web_search_config
     session: HTTPSession
-    cache: LRUCache<string, CrawledContent>
+    cache: LRUCache<string, crawled_content>
     content_extractor: MainContentExtractor
     html_cleaner: HTMLCleaner
 
-    init(config: WebSearchConfig) {
+    init(config: web_search_config) {
         this.config = config
         this.session = new HTTPSession(
             timeout=config.crawl_timeout_seconds,
@@ -393,7 +393,7 @@ class WebCrawler {
             # Clean text
             cleaned_text = this.html_cleaner.clean(extracted.text_content)
 
-            crawled = CrawledContent{
+            crawled = crawled_content{
                 raw_html_size=len(html_content.encode('utf-8')),
                 text_content=extracted.text_content,
                 cleaned_text=cleaned_text,
@@ -422,7 +422,7 @@ class WebCrawler {
     }
 
     batch_crawl(urls: list<string>, max_concurrent: int = 3) {
-        results: dict<string, tuple<CrawledContent?, string?>> = {}
+        results: dict<string, tuple<crawled_content?, string?>> = {}
 
         # Use semaphore to limit concurrent requests
         semaphore = Semaphore(max_concurrent)
@@ -438,7 +438,7 @@ class WebCrawler {
         return results
     }
 
-    _is_cache_expired(cached: CrawledContent) {
+    _is_cache_expired(cached: crawled_content) {
         age_hours = (current_timestamp() - cached.extraction_timestamp) / 3600
         return age_hours > this.config.cache_ttl_hours
     }
@@ -447,9 +447,9 @@ class WebCrawler {
 // ==================== mainEnglish textcontentEnglish text (Readability-like) ====================
 
 class MainContentExtractor {
-    config: WebSearchConfig
+    config: web_search_config
 
-    init(config: WebSearchConfig) {
+    init(config: web_search_config) {
         this.config = config
     }
 
@@ -498,7 +498,7 @@ class MainContentExtractor {
     }
 
     _extract_metadata(soup: any, base_url: string) {
-        meta = PageMetadata{
+        meta = page_metadata{
             title=soup.title.string.trim() if soup.title else "",
             site_name="",
             domain=extract_domain(base_url),
@@ -605,20 +605,20 @@ class MainContentExtractor {
     }
 
     _extract_structured(element: any) {
-        sections: list<PageSection> = []
+        sections: list<page_section> = []
         content_parts: list<string> = []
 
         def process_node(node: any, depth: int = 0) {
             if node.name in ["h1", "h2", "h3", "h4", "h5", "h6"]:
                 level = int(node.name[1])
                 text = node.get_text().strip()
-                sections.append(PageSection{heading=text, level=level, content=""})
+                sections.append(page_section{heading=text, level=level, content=""})
                 content_parts.append("\n" + "#" * level + " " + text + "\n")
 
             elif node.name == "p":
                 text = clean_whitespace(node.get_text())
                 if !text.empty():
-                    sections.append(PageSection{heading=null, level=0, content=text})
+                    sections.append(page_section{heading=null, level=0, content=text})
                     content_parts.append(text + "\n\n")
 
             elif node.name in ["ul", "ol"]:
@@ -629,12 +629,12 @@ class MainContentExtractor {
                         items.append(item_text)
                 marker = "-" if node.name == "ul" else "1."
                 list_text = "\n".join(f"{marker} {item}" for item in items) + "\n\n"
-                sections.append(PageSection{heading=null, level=0, content=list_text.strip()})
+                sections.append(page_section{heading=null, level=0, content=list_text.strip()})
                 content_parts.append(list_text)
 
             elif node.name == "blockquote":
                 quote_text = node.get_text().strip()
-                sections.append(PageSection{heading=null, level=0, content=f"> {quote_text}"})
+                sections.append(page_section{heading=null, level=0, content=f"> {quote_text}"})
                 content_parts.append(f"\n> {quote_text}\n\n")
 
             # Process children
@@ -649,17 +649,17 @@ class MainContentExtractor {
 
     struct ExtractionResult {
         text_content: string
-        metadata: PageMetadata
-        sections: list<PageSection>
+        metadata: page_metadata
+        sections: list<page_section>
     }
 }
 
 // ==================== HTML cleanEnglish text ====================
 
 class HTMLCleaner {
-    config: WebSearchConfig
+    config: web_search_config
 
-    init(config: WebSearchConfig) {
+    init(config: web_search_config) {
         this.config = config
     }
 
@@ -691,14 +691,14 @@ class HTMLCleaner {
 // ==================== NEURX WEB Search mainsystem ====================
 
 class WebSearchSystem {
-    config: WebSearchConfig
+    config: web_search_config
     engines: map<string, SearchEngineInterface>
     crawler: WebCrawler
     result_aggregator: ResultAggregator
     llm_client: any?  # Optional LLM for summarization/reranking
 
-    init(config?: WebSearchConfig, llm_client?: any) {
-        this.config = config ?? new WebSearchConfig()
+    init(config?: web_search_config, llm_client?: any) {
+        this.config = config ?? new web_search_config()
         this.engines = map<string, SearchEngineInterface>{}
         this.llm_client = llm_client
 
@@ -718,14 +718,14 @@ class WebSearchSystem {
         this.result_aggregator = new ResultAggregator(config=config)
     }
 
-    async search(query: string, options?: SearchOptions) {
-        opts = options ?? new SearchOptions()
+    async search(query: string, options?: search_options) {
+        opts = options ?? new search_options()
         start_total = current_time_millis()
 
         print(f"🔍 Searching: {query}")
 
         # Step 1: Query multiple engines in parallel
-        all_items: list<SearchResultItem> = []
+        all_items: list<search_resultItem> = []
         engine_times: map<string, float> = {}
         used_engines: list<string> = []
 
@@ -823,7 +823,7 @@ class WebSearchSystem {
             if crawl_success + crawl_fail > 0:
                 print(f"      Crawled: {crawl_success} success, {crawl_fail} failed")
 
-        return SearchResponse{
+        return search_response{
             query=query,
             corrected_query=opts.corrected_query,
             total_results_found=len(all_items),  # Could use engine estimates for more accurate count
@@ -832,7 +832,7 @@ class WebSearchSystem {
             search_time_ms=total_time,
             summary=summary,
             key_findings=key_findings,
-            stats=SearchStatistics{
+            stats=search_statistics{
                 engine_query_times_ms=engine_times,
                 crawl_times_ms=crawl_times,
                 total_crawl_time_ms=sum(crawl_times) if crawl_times.length > 0 else 0,
@@ -844,7 +844,7 @@ class WebSearchSystem {
         }
     }
 
-    _build_context_for_llm(query: string, top_results: list<SearchResultItem>) {
+    _build_context_for_llm(query: string, top_results: list<search_resultItem>) {
         parts: list<string> = []
         parts.append(f"Query: {query}\n")
         parts.append("=" * 60 + "\n")
@@ -925,7 +925,7 @@ Also provide a comma-separated ranking of the most relevant result indices (0-ba
         reranked_indices: list<int>?
     }
 
-    export_results(response: SearchResponse, format: string = "markdown", output_path?: string) {
+    export_results(response: search_response, format: string = "markdown", output_path?: string) {
         output: list<string> = []
 
         output.append(f"# Search Results: {response.query}\n")
@@ -981,7 +981,7 @@ Also provide a comma-separated ranking of the most relevant result indices (0-ba
     }
 }
 
-struct SearchOptions {
+struct search_options {
     crawl_results: bool = true
     generate_summary: bool = true
     verbose: bool = true
@@ -991,15 +991,15 @@ struct SearchOptions {
 // ==================== resultEnglish textdeduplication ====================
 
 class ResultAggregator {
-    config: WebSearchConfig
+    config: web_search_config
 
-    init(config: WebSearchConfig) {
+    init(config: web_search_config) {
         this.config = config
     }
 
-    deduplicate(items: list<SearchResultItem>) {
+    deduplicate(items: list<search_resultItem>) {
         seen_urls: set<string> = set{}
-        unique_items: list<SearchResultItem> = []
+        unique_items: list<search_resultItem> = []
 
         for item in items:
             # Normalize URL for comparison
@@ -1012,10 +1012,10 @@ class ResultAggregator {
         return unique_items
     }
 
-    score_and_rank(items: list<SearchResultItem>, query: string) {
+    score_and_rank(items: list<search_resultItem>, query: string) {
         # Score each result based on multiple signals
 
-        scored_items: list<tuple<SearchResultItem, float>> = []
+        scored_items: list<tuple<search_resultItem, float>> = []
         query_terms = set(query.to_lower().split_whitespace())
 
         for item in items {
@@ -1084,7 +1084,7 @@ class ResultAggregator {
 
 // ==================== English textfunctionEnglish texttest ====================
 
-function create_web_search_system(config?: WebSearchConfig, llm_client?: any) {
+function create_web_search_system(config?: web_search_config, llm_client?: any) {
     return new WebSearchSystem(config=config, llm_client=llm_client)
 }
 
@@ -1092,7 +1092,7 @@ async function test_web_search_system() {
     print("🧪 Testing NEURX WEB Search System...")
 
     # Create system without actual API keys (will use fallback modes)
-    cfg = WebSearchConfig(
+    cfg = web_search_config(
         enable_crawling=false,
         max_results_per_engine=3,
         total_max_results=5
@@ -1108,10 +1108,10 @@ async function test_web_search_system() {
     print("  ✓ Test 2: URL Normalization & Deduplication")
     agg = ws.result_aggregator
     test_items = [
-        SearchResultItem{url="https://example.com/page?id=123&ref=search", title="Test 1", snippet="...", source_engine="google", rank_in_engine=1},
-        SearchResultItem{url="HTTPS://EXAMPLE.COM/PAGE?ID=123&REF=OTHER", title="Test 2", snippet="...", source_engine="bing", rank_in_engine=1},  # Same page, different case/order
-        SearchResultItem{url="https://example.com/other-page", title="Test 3", snippet="...", source_engine="google", rank_in_engine=2},
-        SearchResultItem{url="https://different-site.com/article", title="Test 4", snippet="...", source_engine="bing", rank_in_engine=3}
+        search_resultItem{url="https://example.com/page?id=123&ref=search", title="Test 1", snippet="...", source_engine="google", rank_in_engine=1},
+        search_resultItem{url="HTTPS://EXAMPLE.COM/PAGE?ID=123&REF=OTHER", title="Test 2", snippet="...", source_engine="bing", rank_in_engine=1},  # Same page, different case/order
+        search_resultItem{url="https://example.com/other-page", title="Test 3", snippet="...", source_engine="google", rank_in_engine=2},
+        search_resultItem{url="https://different-site.com/article", title="Test 4", snippet="...", source_engine="bing", rank_in_engine=3}
     ]
     unique = agg.deduplicate(test_items)
     assert len(unique) == 3, f"Dedup failed: expected 3, got {len(unique)}"
@@ -1141,8 +1141,8 @@ async function test_web_search_system() {
 
 // Export public API
 export {
-    WebSearchConfig, SearchResultItem, CrawledContent, PageMetadata, PageSection,
-    SearchResponse, SearchStatistics,
-    WebSearchSystem, SearchOptions,
+    web_search_config, search_resultItem, crawled_content, page_metadata, page_section,
+    search_response, search_statistics,
+    WebSearchSystem, search_options,
     create_web_search_system, test_web_search_system
 }

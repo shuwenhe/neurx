@@ -9,7 +9,7 @@ module longwriter_engine
 
 // ==================== English textconfigurationEnglish text ====================
 
-struct LongWriterConfig {
+struct long_writer_config {
     // English textgenerateparameter
     max_total_tokens: int = 32000                 # English text token English text (supportEnglish textoutput)
     max_section_tokens: int = 4096                # English textsectionEnglish text token English text
@@ -51,7 +51,7 @@ struct LongWriterConfig {
     template_id?: string                          # useEnglish text ID
 }
 
-struct OutlineNode {
+struct outline_node {
     id: string                                     # English text ID (English text "1.2.3")
     title: string                                  # sectiontitle
     level: int                                     # English text (1=H1, 2=H2, ...)
@@ -59,7 +59,7 @@ struct OutlineNode {
     estimated_words?: int                          # English text
     keywords?: list<string>                        # keywords/mainEnglish text
     must_include?: list<string>                   # English textcontentEnglish text
-    children: list<OutlineNode>                    # English text (English textsection)
+    children: list<outline_node>                    # English text (English textsection)
 
     // generateEnglish text
     content?: string                               # generateEnglish textcontent
@@ -77,24 +77,24 @@ enum SectionStatus {
     REVISED                                        # English textrevision
 }
 
-struct WritingPlan {
+struct writing_plan {
     topic: string                                  # English textmainEnglish text/title
-    outline: OutlineNode                           # English text
+    outline: outline_node                           # English text
     total_estimated_words: int                     # English text
     sections_count: int                            # English textsectionEnglish text
     max_depth: int                                 # English text
-    metadata: PlanMetadata                         # English textdata
-    constraints: WritingConstraints?              # English text
+    metadata: plan_metadata                         # English textdata
+    constraints: writing_constraints?              # English text
 }
 
-struct PlanMetadata {
+struct plan_metadata {
     created_at: float                              # English texttime
     model_used: string                             # useEnglish textmodel
     planning_time_ms: float                        # English text
     version: int = 1                               # English text (English textrevisionEnglish text)
 }
 
-struct WritingConstraints {
+struct writing_constraints {
     min_total_words: int?                          # English text
     max_total_words: int?                          # English text
     forbidden_topics: list<string>?               # English textmainEnglish text
@@ -103,22 +103,22 @@ struct WritingConstraints {
     audience_level: string = "general"            # beginner | intermediate | expert
 }
 
-struct LongDocument {
+struct long_document {
     title: string
-    plan: WritingPlan
-    sections: list<OutlineNode>                    # English textsectionEnglish text (English text)
+    plan: writing_plan
+    sections: list<outline_node>                    # English textsectionEnglish text (English text)
     full_text: string                              # completeEnglish text
-    toc: TableOfContents?                         # directoryEnglish text
-    statistics: DocumentStatistics                 # statisticsinformation
-    generation_metadata: GenerationMetadata        # generateEnglish textdata
+    toc: table_of_contents?                         # directoryEnglish text
+    statistics: document_statistics                 # statisticsinformation
+    generation_metadata: generation_metadata        # generateEnglish textdata
 }
 
-struct TableOfContents {
-    entries: list<TocEntry>                       # directoryEnglish text
+struct table_of_contents {
+    entries: list<toc_entry>                       # directoryEnglish text
     format: string                                 # English text
 }
 
-struct TocEntry {
+struct toc_entry {
     level: int
     number: string                                 # English text "1.2.3"
     title: string
@@ -126,7 +126,7 @@ struct TocEntry {
     word_count?: int
 }
 
-struct DocumentStatistics {
+struct document_statistics {
     total_words: int
     total_characters: int
     total_sections: int
@@ -139,7 +139,7 @@ struct DocumentStatistics {
     quality_scores: map<string, float>             # English text
 }
 
-struct GenerationMetadata {
+struct generation_metadata {
     model_name: string
     total_tokens_generated: int
     total_prompt_tokens: int
@@ -154,15 +154,15 @@ struct GenerationMetadata {
 // ==================== English text ====================
 
 class OutlinePlanner {
-    config: LongWriterConfig
+    config: long_writer_config
     llm_client: any
 
-    init(config: LongWriterConfig, llm_client: any) {
+    init(config: long_writer_config, llm_client: any) {
         this.config = config
         this.llm_client = llm_client
     }
 
-    async create_plan(topic: string, requirements?: string, existing_outline?: OutlineNode) {
+    async create_plan(topic: string, requirements?: string, existing_outline?: outline_node) {
         start_time = current_time_millis()
 
         print(f"📋 Creating outline for: {topic}")
@@ -185,13 +185,13 @@ class OutlinePlanner {
         flat_sections = flatten_outline(root_node)
         total_words = estimate_total_words(root_node)
 
-        plan = WritingPlan{
+        plan = writing_plan{
             topic=topic,
             outline=root_node,
             total_estimated_words=total_words,
             sections_count=len(flat_sections),
             max_depth=get_max_depth(root_node),
-            metadata=PlanMetadata{
+            metadata=plan_metadata{
                 created_at=current_timestamp(),
                 model_used=this.config.quality_model,
                 planning_time_ms=current_time_millis() - start_time
@@ -203,7 +203,7 @@ class OutlinePlanner {
         return plan
     }
 
-    _build_planning_prompt(topic: string, requirements?: string, existing_outline?: OutlineNode) {
+    _build_planning_prompt(topic: string, requirements?: string, existing_outline?: outline_node) {
         detail_instructions = match this.config.outline_detail_level {
             "brief" => """
 Provide a high-level outline with main sections only (2-3 levels deep).
@@ -310,7 +310,7 @@ Now create the outline:"""
     _fallback_parse_outline(text: string, topic: string) {
         # Parse text-based outline (markdown-style headings)
         lines = text.split("\n")
-        root = OutlineNode{
+        root = outline_node{
             id="root",
             title=topic,
             level=0,
@@ -318,7 +318,7 @@ Now create the outline:"""
             status=SectionStatus.COMPLETED  # Root is always done
         }
 
-        node_stack: list<tuple<OutlineNode, int>> = [(root, 0)]
+        node_stack: list<tuple<outline_node, int>> = [(root, 0)]
 
         for line in lines:
             stripped = line.strip()
@@ -346,7 +346,7 @@ Now create the outline:"""
 
             parent, _ = node_stack[-1]
 
-            new_node = OutlineNode{
+            new_node = outline_node{
                 id=f"{parent.id}.{len(parent.children) + 1}" if parent.id != "root" else str(len(parent.children) + 1),
                 title=title,
                 level=level,
@@ -364,11 +364,11 @@ Now create the outline:"""
 // ==================== contentgenerateEnglish text ====================
 
 class ContentGenerator {
-    config: LongWriterConfig
+    config: long_writer_config
     llm_client: any
     quality_checker: QualityChecker?
 
-    init(config: LongWriterConfig, llm_client: any) {
+    init(config: long_writer_config, llm_client: any) {
         this.config = config
         this.llm_client = llm_client
 
@@ -376,7 +376,7 @@ class ContentGenerator {
             this.quality_checker = new QualityChecker(config=config, llm_client=llm_client)
     }
 
-    async generate_section(section: OutlineNode, context: GenerationContext) {
+    async generate_section(section: outline_node, context: generation_context) {
         start_time = current_time_millis()
 
         print(f"✍️ Generating: {section.title} ({section.id})")
@@ -404,7 +404,7 @@ class ContentGenerator {
 
         elapsed = current_time_millis() - start_time
 
-        generated = GeneratedSection{
+        generated = generated_section{
             section=section,
             raw_text=raw_content,
             processed_text=processed.text,
@@ -428,7 +428,7 @@ class ContentGenerator {
         return generated
     }
 
-    _build_generation_prompt(section: OutlineNode, context: GenerationContext) {
+    _build_generation_prompt(section: outline_node, context: generation_context) {
         # Get previous and next sibling sections for continuity
         prev_context = get_previous_sibling_content(context.full_outline, section.id)
         next_hint = get_next_sibling_title(context.full_outline, section.id)
@@ -503,7 +503,7 @@ Now write the content for "{section.title}":
 """
     }
 
-    _get_temperature_for_section(section: OutlineNode) {
+    _get_temperature_for_section(section: outline_node) {
         # Adjust creativity based on section type
         lower_title = section.title.to_lower()
 
@@ -517,7 +517,7 @@ Now write the content for "{section.title}":
             return 0.7  # Default moderate creativity
     }
 
-    _post_process(raw_text: string, section: OutlineNode) {
+    _post_process(raw_text: string, section: outline_node) {
         changes: list<string> = []
         processed = raw_text
 
@@ -535,21 +535,21 @@ Now write the content for "{section.title}":
         processed = ensure_paragraph_breaks(processed)
         changes.append("Ensured proper paragraph breaks")
 
-        return PostProcessResult{text=processed, formatting_changes=changes}
+        return post_process_result{text=processed, formatting_changes=changes}
     }
 }
 
-struct GenerationContext {
+struct generation_context {
     document_topic: string
-    full_outline: OutlineNode
+    full_outline: outline_node
     total_sections: int
     tokens_used_so_far: int
     completed_sections: list<string>  # IDs of already-completed sections
     global_constraints: map<string, string>  # Key facts/terms established in earlier sections
 }
 
-struct GeneratedSection {
-    section: OutlineNode
+struct generated_section {
+    section: outline_node
     raw_text: string
     processed_text: string
     formatting_changes: list<string>
@@ -560,7 +560,7 @@ struct GeneratedSection {
     revision_suggested: bool = false
 }
 
-struct PostProcessResult {
+struct post_process_result {
     text: string
     formatting_changes: list<string>
 }
@@ -568,15 +568,15 @@ struct PostProcessResult {
 // ==================== English text ====================
 
 class QualityChecker {
-    config: LongWriterConfig
+    config: long_writer_config
     llm_client: any
 
-    init(config: LongWriterConfig, llm_client: any) {
+    init(config: long_writer_config, llm_client: any) {
         this.config = config
         this.llm_client = llm_client
     }
 
-    async check(generated: GeneratedSection, context: GenerationContext) {
+    async check(generated: generated_section, context: generation_context) {
         prompt = f"""You are a strict editor evaluating the quality of a written document section.
 
 ## Section to Evaluate
@@ -644,7 +644,7 @@ class QualityChecker {
         return result
     }
 
-    async check_coherence_between_sections(prev: GeneratedSection?, curr: GeneratedSection, next_preview?: string) {
+    async check_coherence_between_sections(prev: generated_section?, curr: generated_section, next_preview?: string) {
         # Check transition quality between consecutive sections
 
         prev_summary = summarize_section(prev.processed_text, max_words=50) if prev != None else "[START OF DOCUMENT]"
@@ -671,7 +671,7 @@ Respond briefly in 3-4 sentences."""
 
         response = await this.llm_client.generate(prompt, temperature=0.3, max_tokens=200)
 
-        return CoherenceCheckResult{
+        return coherence_check_result{
             feedback=response.text,
             smooth_transition="yes" in response.text.to_lower(),
             has_bridge_phrase="transition" in response.text.to_lower() or "connect" in response.text.to_lower()
@@ -679,7 +679,7 @@ Respond briefly in 3-4 sentences."""
     }
 }
 
-struct QualityCheckResult {
+struct quality_check_result {
     scores: map<string, float>
     overall_score: float
     needs_revision: bool
@@ -689,7 +689,7 @@ struct QualityCheckResult {
     feedback: string  # Human-readable summary
 }
 
-struct CoherenceCheckResult {
+struct coherence_check_result {
     feedback: string
     smooth_transition: bool
     has_bridge_phrase: bool
@@ -698,13 +698,13 @@ struct CoherenceCheckResult {
 // ==================== Long Writer mainsystem ====================
 
 class LongWriterEngine {
-    config: LongWriterConfig
+    config: long_writer_config
     llm_client: any
     planner: OutlinePlanner
     generator: ContentGenerator
-    documents_history: list<LongDocument>
+    documents_history: list<long_document>
 
-    init(config: LongWriterConfig, llm_client: any) {
+    init(config: long_writer_config, llm_client: any) {
         this.config = config
         this.llm_client = llm_client
         this.planner = new OutlinePlanner(config=config, llm_client=llm_client)
@@ -735,7 +735,7 @@ class LongWriterEngine {
         print(f"\n--- PHASE 2: CONTENT GENERATION ---\n")
 
         flat_sections = flatten_outline(plan.outline).filter(s => s.level > 0)  # Exclude root
-        generated_sections: list<GeneratedSection> = []
+        generated_sections: list<generated_section> = []
         tokens_used = 0
         revised_count = 0
         quality_passes = 0
@@ -744,7 +744,7 @@ class LongWriterEngine {
         global_constraints: map<string, string> = {}
 
         for i, section in enumerate(flat_sections) {
-            context = GenerationContext{
+            context = generation_context{
                 document_topic=topic,
                 full_outline=plan.outline,
                 total_sections=len(flat_sections),
@@ -811,14 +811,14 @@ class LongWriterEngine {
         # Compute statistics
         stats = compute_long_doc_statistics(generated_sections, full_text, total_start)
 
-        doc = LongDocument{
+        doc = long_document{
             title=topic,
             plan=plan,
             sections=flatten_outline(plan.outline).filter(s => s.level > 0),
             full_text=full_text,
             toc=toc,
             statistics=stats,
-            generation_metadata=GenerationMetadata{
+            generation_metadata=generation_metadata{
                 model_name=this.config.quality_model,
                 total_tokens_generated=tokens_used,
                 total_prompt_tokens=sum(s.tokens_used for s in generated_sections),  # Approximation
@@ -839,7 +839,7 @@ class LongWriterEngine {
         return doc
     }
 
-    async revise_section(document: LongDocument, section_id: string, feedback?: string) {
+    async revise_section(document: long_document, section_id: string, feedback?: string) {
         """Revise a specific section of an existing document."""
         section_to_revise = find_section_by_id(document.plan.outline, section_id)
 
@@ -868,7 +868,7 @@ class LongWriterEngine {
         return document
     }
 
-    export(document: LongDocument, output_format?: string, file_path?: string) {
+    export(document: long_document, output_format?: string, file_path?: string) {
         fmt = output_format ?? this.config.output_format
 
         match fmt {
@@ -884,10 +884,10 @@ class LongWriterEngine {
 
 // ==================== helperfunction ====================
 
-function flatten_outline(root: OutlineNode) {
-    result: list<OutlineNode> = []
+function flatten_outline(root: outline_node) {
+    result: list<outline_node> = []
 
-    def traverse(node: OutlineNode) {
+    def traverse(node: outline_node) {
         if node.id != "root" or node.children.empty():  # Include root only if no children
             result.append(node)
         for child in node.children:
@@ -898,12 +898,12 @@ function flatten_outline(root: OutlineNode) {
     return result
 }
 
-function get_max_depth(root: OutlineNode) {
+function get_max_depth(root: outline_node) {
     if root.children.empty():
         return root.level
     return max(get_max_depth(c) for c in root.children)
 
-function estimate_total_words(root: OutlineNode) {
+function estimate_total_words(root: outline_node) {
     if root.estimated_words != None:
         base = root.estimated_words!
     else:
@@ -912,7 +912,7 @@ function estimate_total_words(root: OutlineNode) {
     child_sum = sum(estimate_total_words(c) for c in root.children)
     return base + child_sum
 
-function display_outline(root: OutlineNode, indent: int = 0) {
+function display_outline(root: outline_node, indent: int = 0) {
     prefix = "  " * indent
     icon = match root.level {
         0 => "📚"
@@ -934,7 +934,7 @@ function display_outline(root: OutlineNode, indent: int = 0) {
     for child in root.children:
         display_outline(child, indent + 1)
 
-function print_generation_summary(doc: LongDocument) {
+function print_generation_summary(doc: long_document) {
     s = doc.statistics
     m = doc.generation_metadata
 
@@ -955,14 +955,14 @@ function print_generation_summary(doc: LongDocument) {
 
 // ==================== English textfunctionEnglish texttest ====================
 
-function create_long_writer(config?: LongWriterConfig, llm_client: any) {
-    return new LongWriterEngine(config=config ?? new LongWriterConfig(), llm_client=llm_client)
+function create_long_writer(config?: long_writer_config, llm_client: any) {
+    return new LongWriterEngine(config=config ?? new long_writer_config(), llm_client=llm_client)
 }
 
 async function test_long_writer() {
     print("🧪 Testing NEURX LONGWRITER Engine...")
 
-    cfg = LongWriterConfig(
+    cfg = long_writer_config(
         max_section_tokens=512,
         quality_check_enabled=false,  # Disable for test speed
         output_format="markdown",
@@ -992,7 +992,7 @@ async function test_long_writer() {
     # Test 3: Content generation (single section)
     print("  ✓ Test 3: Single Section Generation")
     first_section = flat[0]
-    gen_context = GenerationContext{
+    gen_context = generation_context{
         document_topic=plan.topic,
         full_outline=plan.outline,
         total_sections=len(flat),
@@ -1034,7 +1034,7 @@ class MockLLMClient {
 
         # Generate plausible-looking content based on prompt
         if "outline" in prompt.to_lower():
-            return LLMResponse(text=json.dumps({
+            return llm_response(text=json.dumps({
                 "title": "AI in Healthcare Overview",
                 "sections": [
                     {"id": "1", "title": "Introduction", "level": 1, "description": "Overview of AI in healthcare", "estimated_words": 400, "children": []},
@@ -1042,7 +1042,7 @@ class MockLLMClient {
                     {"id": "3", "title": "Treatment Optimization", "level": 1, "description": "Personalized treatment plans using AI", "estimated_words": 550, "children": []},
                     {"id": "4", "title": "Conclusion", "level": 1, "description": "Future outlook and challenges", "estimated_words": 300, "children": []}
                 ]
-            }), usage=UsageInfo(prompt_tokens=len(prompt.split()), completion_tokens=200))
+            }), usage=usage_info(prompt_tokens=len(prompt.split()), completion_tokens=200))
         else:
             # Generate generic content
             paragraphs: list<string> = []
@@ -1052,30 +1052,30 @@ class MockLLMClient {
                 paragraphs.append(para.trim())
                 words_written += len(para.split())
 
-            return LLMResponse(
+            return llm_response(
                 text="\n\n".join(paragraphs)[:content_length],
-                usage=UsageInfo(prompt_tokens=100, completion_tokens=min(content_length, 300))
+                usage=usage_info(prompt_tokens=100, completion_tokens=min(content_length, 300))
             )
     }
 }
 
-struct UsageInfo {
+struct usage_info {
     prompt_tokens: int
     completion_tokens: int
 }
 
-struct LLMResponse {
+struct llm_response {
     text: string
-    usage: UsageInfo
+    usage: usage_info
 }
 
 // Export public API
 export {
-    LongWriterConfig, OutlineNode, SectionStatus, WritingPlan, PlanMetadata,
-    WritingConstraints, LongDocument, TableOfContents, TocEntry,
-    DocumentStatistics, GenerationMetadata,
-    ContentGenerator, GeneratedSection, PostProcessResult,
-    QualityChecker, QualityCheckResult, CoherenceCheckResult,
+    long_writer_config, outline_node, SectionStatus, writing_plan, plan_metadata,
+    writing_constraints, long_document, table_of_contents, toc_entry,
+    document_statistics, generation_metadata,
+    ContentGenerator, generated_section, post_process_result,
+    QualityChecker, quality_check_result, coherence_check_result,
     LongWriterEngine,
     create_long_writer, test_long_writer
 }

@@ -11,8 +11,8 @@ import (
     "../transformer"
 )
 
-// GPTConfig holds GPT model configuration
-struct GPTConfig {
+// gptconfig holds GPT model configuration
+struct gptconfig {
     VocabSize      int      // Size of vocabulary
     MaxSeqLen      int      // Maximum sequence length
     HiddenDim      int      // Hidden dimension (d_model)
@@ -26,16 +26,16 @@ struct GPTConfig {
     LearningRate   float32  // Base learning rate
 }
 
-// GPTModel represents the complete GPT model
-struct GPTModel {
-    config         GPTConfig
+// gptmodel represents the complete GPT model
+struct gptmodel {
+    config         gptconfig
     
     // Embeddings
     tokenEmbedding *tensor.Tensor  // (vocabSize, hiddenDim)
     posEmbedding   *tensor.Tensor  // (maxSeqLen, hiddenDim)
     
     // Transformer layers
-    layers         []*transformer.TransformerBlock
+    layers         []*transformer.transformer_block
     
     // Output projection
     outputProj     *tensor.Tensor  // (hiddenDim, vocabSize)
@@ -62,15 +62,15 @@ struct Optimizer {
 // ============================================================
 
 // NewGPT creates a new GPT model from configuration
-func NewGPT(config GPTConfig) (*GPTModel, error) {
+func NewGPT(config gptconfig) (*gptmodel, error) {
     if config.HiddenDim % config.NumHeads != 0 {
         return nil, fmt.Errorf("hiddenDim must be divisible by numHeads: %d %% %d != 0", 
             config.HiddenDim, config.NumHeads)
     }
     
-    model := &GPTModel{
+    model := &gptmodel{
         config: config,
-        layers: make([]*transformer.TransformerBlock, config.NumLayers),
+        layers: make([]*transformer.transformer_block, config.NumLayers),
         optimizer: &Optimizer{
             learningRate: config.LearningRate,
             adamBeta1:    0.9,
@@ -85,7 +85,7 @@ func NewGPT(config GPTConfig) (*GPTModel, error) {
     
     // Initialize transformer layers
     for i := 0; i < config.NumLayers; i++ {
-        transformerConfig := transformer.TransformerConfig{
+        transformerConfig := transformer.transformer_config{
             HiddenDim:      config.HiddenDim,
             NumHeads:       config.NumHeads,
             InnerDim:       config.InnerDim,
@@ -127,7 +127,7 @@ func initializePositionalEmbedding(maxSeqLen int, hiddenDim int, std float32) *t
 // ============================================================
 
 // Forward performs the forward pass through the GPT model
-func (m *GPTModel) Forward(tokenIds *tensor.Tensor) (*tensor.Tensor, error) {
+func (m *gptmodel) Forward(tokenIds *tensor.Tensor) (*tensor.Tensor, error) {
     // tokenIds shape: (batchSize, seqLen)
     batchSize := tokenIds.Shape[0]
     seqLen := tokenIds.Shape[1]
@@ -162,7 +162,7 @@ func (m *GPTModel) Forward(tokenIds *tensor.Tensor) (*tensor.Tensor, error) {
 }
 
 // embedTokens converts token IDs to embeddings
-func (m *GPTModel) embedTokens(tokenIds *tensor.Tensor) *tensor.Tensor {
+func (m *gptmodel) embedTokens(tokenIds *tensor.Tensor) *tensor.Tensor {
     // Look up embeddings for each token
     batchSize := tokenIds.Shape[0]
     seqLen := tokenIds.Shape[1]
@@ -182,7 +182,7 @@ func (m *GPTModel) embedTokens(tokenIds *tensor.Tensor) *tensor.Tensor {
 }
 
 // addPositionalEmbedding adds positional embeddings (RoPE)
-func (m *GPTModel) addPositionalEmbedding(x *tensor.Tensor, seqLen int) *tensor.Tensor {
+func (m *gptmodel) addPositionalEmbedding(x *tensor.Tensor, seqLen int) *tensor.Tensor {
     // Apply RoPE (Rotary Position embedding)
     // This involves rotating query and key vectors by position-dependent angles
     
@@ -199,7 +199,7 @@ func (m *GPTModel) addPositionalEmbedding(x *tensor.Tensor, seqLen int) *tensor.
 }
 
 // createCausalMask creates causal mask for autoregressive generation
-func (m *GPTModel) createCausalMask(seqLen int) *tensor.Tensor {
+func (m *gptmodel) createCausalMask(seqLen int) *tensor.Tensor {
     // Create lower triangular matrix for causal masking
     // Mask[i, j] = 1 if j <= i (can attend to), 0 otherwise (cannot attend to)
     
@@ -215,7 +215,7 @@ func (m *GPTModel) createCausalMask(seqLen int) *tensor.Tensor {
 }
 
 // applyLayerNorm applies final layer normalization
-func (m *GPTModel) applyLayerNorm(x *tensor.Tensor) *tensor.Tensor {
+func (m *gptmodel) applyLayerNorm(x *tensor.Tensor) *tensor.Tensor {
     // Layer norm: (x - mean) / sqrt(var + eps) * weight + bias
     // Using simplification for now
     return x
@@ -226,7 +226,7 @@ func (m *GPTModel) applyLayerNorm(x *tensor.Tensor) *tensor.Tensor {
 // ============================================================
 
 // Backward computes gradients
-func (m *GPTModel) Backward(lossGradients *tensor.Tensor) error {
+func (m *gptmodel) Backward(lossGradients *tensor.Tensor) error {
     // Backward pass through all layers
     gradients := lossGradients
     
@@ -243,7 +243,7 @@ func (m *GPTModel) Backward(lossGradients *tensor.Tensor) error {
 }
 
 // UpdateWeights updates model weights using AdamW
-func (m *GPTModel) UpdateWeights() error {
+func (m *gptmodel) UpdateWeights() error {
     // AdamW optimizer step
     // This would update all model parameters
     return nil
@@ -254,7 +254,7 @@ func (m *GPTModel) UpdateWeights() error {
 // ============================================================
 
 // SaveCheckpoint saves the model to a checkpoint file
-func (m *GPTModel) SaveCheckpoint(path string) error {
+func (m *gptmodel) SaveCheckpoint(path string) error {
     // Serialize:
     // 1. Configuration
     // 2. All weights (embeddings, transformer layers, output proj)
@@ -296,7 +296,7 @@ func (m *GPTModel) SaveCheckpoint(path string) error {
 }
 
 // LoadCheckpoint loads the model from a checkpoint file
-func LoadCheckpoint(path string) (*GPTModel, error) {
+func LoadCheckpoint(path string) (*gptmodel, error) {
     fmt.Printf("Loading checkpoint from %s\n", path)
     
     // Read checkpoint file
@@ -336,14 +336,14 @@ func LoadCheckpoint(path string) (*GPTModel, error) {
 // Helper Functions
 // ============================================================
 
-func serializeConfig(config GPTConfig) []byte {
+func serializeConfig(config gptconfig) []byte {
     // Serialize config to binary format
     return []byte{}  // Placeholder
 }
 
-func deserializeConfig(file *os.File) GPTConfig {
+func deserializeConfig(file *os.File) gptconfig {
     // Deserialize config from binary format
-    return GPTConfig{}  // Placeholder
+    return gptconfig{}  // Placeholder
 }
 
 // ============================================================
@@ -351,8 +351,8 @@ func deserializeConfig(file *os.File) GPTConfig {
 // ============================================================
 
 // GPT7B returns a 7B parameter GPT configuration
-func GPT7B() GPTConfig {
-    return GPTConfig{
+func GPT7B() gptconfig {
+    return gptconfig{
         VocabSize:      32000,
         MaxSeqLen:      4096,
         HiddenDim:      4096,
@@ -368,8 +368,8 @@ func GPT7B() GPTConfig {
 }
 
 // GPT13B returns a 13B parameter GPT configuration
-func GPT13B() GPTConfig {
-    return GPTConfig{
+func GPT13B() gptconfig {
+    return gptconfig{
         VocabSize:      32000,
         MaxSeqLen:      4096,
         HiddenDim:      5120,
@@ -385,8 +385,8 @@ func GPT13B() GPTConfig {
 }
 
 // GPT70B returns a 70B parameter GPT configuration
-func GPT70B() GPTConfig {
-    return GPTConfig{
+func GPT70B() gptconfig {
+    return gptconfig{
         VocabSize:      32000,
         MaxSeqLen:      8192,
         HiddenDim:      8192,
@@ -402,8 +402,8 @@ func GPT70B() GPTConfig {
 }
 
 // Mini returns a mini GPT configuration for testing
-func Mini() GPTConfig {
-    return GPTConfig{
+func Mini() gptconfig {
+    return gptconfig{
         VocabSize:      10000,
         MaxSeqLen:      512,
         HiddenDim:      256,
@@ -419,7 +419,7 @@ func Mini() GPTConfig {
 }
 
 // NumParams calculates total parameters in model
-func (m *GPTModel) NumParams() int64 {
+func (m *gptmodel) NumParams() int64 {
     // Token embedding: vocabSize * hiddenDim
     tokenEmbParams := int64(m.config.VocabSize * m.config.HiddenDim)
     

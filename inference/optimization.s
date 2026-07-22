@@ -7,7 +7,7 @@ package neurx.inference.optimization
 // dataEnglish text
 // ============================================================================
 
-struct FlashAttentionConfig {
+struct flash_attention_config {
     int block_size
     bool use_flash_attention
     bool use_kv_cache
@@ -25,14 +25,14 @@ struct kvcache {
     bool is_dirty
 }
 
-struct AttentionOutput {
+struct attention_output {
     float* output         // [batch, seq_len, hidden_dim]
     float* attention_weights  // [batch, num_heads, seq_len, seq_len]
     int output_length
     int compute_time_ms
 }
 
-struct TokenGenerationState {
+struct token_generation_state {
     int* token_ids        // English textgenerateEnglish text token
     int token_count
     float* logits         // English text logits
@@ -40,7 +40,7 @@ struct TokenGenerationState {
     bool is_complete
 }
 
-struct InferenceRequest {
+struct inference_request {
     string prompt
     int max_tokens
     float temperature
@@ -51,7 +51,7 @@ struct InferenceRequest {
     int stop_count
 }
 
-struct InferenceResponse {
+struct inference_response {
     string generated_text
     int* token_ids
     int token_count
@@ -59,16 +59,16 @@ struct InferenceResponse {
     int inference_time_ms
 }
 
-struct BatchScheduler {
-    InferenceRequest* pending_requests
+struct batch_scheduler {
+    inference_request* pending_requests
     int pending_count
-    InferenceRequest* active_requests
+    inference_request* active_requests
     int active_count
     int max_batch_size
     int max_queue_size
 }
 
-struct OptimizationMetrics {
+struct optimization_metrics {
     float throughput_tokens_per_second
     float latency_ms
     float memory_usage_mb
@@ -81,7 +81,7 @@ struct OptimizationMetrics {
 // ============================================================================
 
 // initialize Flash Attention
-func init_flash_attention(FlashAttentionConfig config) void {
+func init_flash_attention(flash_attention_config config) void {
     // English text CUDA English text
     // initializeEnglish text
 }
@@ -94,9 +94,9 @@ func flash_attention_forward(
     int seq_len,
     int hidden_dim,
     int num_heads,
-    FlashAttentionConfig config
-) AttentionOutput {
-    AttentionOutput output
+    flash_attention_config config
+) attention_output {
+    attention_output output
 
     int head_dim = hidden_dim / num_heads
 
@@ -169,7 +169,7 @@ func compute_block_attention(
     int q_start, int q_end,
     int kv_start, int kv_end,
     int head_dim, int num_heads,
-    FlashAttentionConfig config
+    flash_attention_config config
 ) float* {
     int q_block_size = q_end - q_start
     int kv_block_size = kv_end - kv_start
@@ -285,12 +285,12 @@ func clear_kv_cache(kvcache cache) void {
 // ============================================================================
 
 // initializeEnglish text
-func init_batch_scheduler(int max_batch_size, int max_queue_size) BatchScheduler {
-    BatchScheduler scheduler
+func init_batch_scheduler(int max_batch_size, int max_queue_size) batch_scheduler {
+    batch_scheduler scheduler
 
-    scheduler.pending_requests = alloc(InferenceRequest, max_queue_size)
+    scheduler.pending_requests = alloc(inference_request, max_queue_size)
     scheduler.pending_count = 0
-    scheduler.active_requests = alloc(InferenceRequest, max_batch_size)
+    scheduler.active_requests = alloc(inference_request, max_batch_size)
     scheduler.active_count = 0
     scheduler.max_batch_size = max_batch_size
     scheduler.max_queue_size = max_queue_size
@@ -299,7 +299,7 @@ func init_batch_scheduler(int max_batch_size, int max_queue_size) BatchScheduler
 }
 
 // English textinferencerequestEnglish text
-func enqueue_inference_request(BatchScheduler scheduler, InferenceRequest req) bool {
+func enqueue_inference_request(batch_scheduler scheduler, inference_request req) bool {
     if scheduler.pending_count >= scheduler.max_queue_size {
         return false  // English text
     }
@@ -311,7 +311,7 @@ func enqueue_inference_request(BatchScheduler scheduler, InferenceRequest req) b
 }
 
 // English textrequest
-func schedule_next_batch(BatchScheduler scheduler) int {
+func schedule_next_batch(batch_scheduler scheduler) int {
     int batch_count = 0
 
     // English textrequestEnglish text
@@ -336,7 +336,7 @@ func schedule_next_batch(BatchScheduler scheduler) int {
 }
 
 // English textstepinference (English textrequest)
-func run_inference_step(BatchScheduler scheduler, FlashAttentionConfig attention_config) void {
+func run_inference_step(batch_scheduler scheduler, flash_attention_config attention_config) void {
     if scheduler.active_count == 0 {
         return
     }
@@ -351,7 +351,7 @@ func run_inference_step(BatchScheduler scheduler, FlashAttentionConfig attention
     // 3. English text token
     int req_idx = 0
     while req_idx < batch_size {
-        InferenceRequest req = scheduler.active_requests[req_idx]
+        inference_request req = scheduler.active_requests[req_idx]
 
         // English text token
         int next_token = sample_token_from_logits(
@@ -393,8 +393,8 @@ func sample_token_from_logits(float temperature, float top_p, int top_k) int {
 // ============================================================================
 
 // completeinferencepipeline
-func optimized_inference(InferenceRequest req, FlashAttentionConfig attention_config) InferenceResponse {
-    InferenceResponse resp
+func optimized_inference(inference_request req, flash_attention_config attention_config) inference_response {
+    inference_response resp
 
     int start_time = get_time_ms()
 
@@ -402,7 +402,7 @@ func optimized_inference(InferenceRequest req, FlashAttentionConfig attention_co
     // tokens = tokenizer.encode(req.prompt)
 
     // 2. initializegeneratestate
-    TokenGenerationState state
+    token_generation_state state
     state.token_ids = alloc(int, req.max_tokens)
     state.token_count = 0
     state.is_complete = false
@@ -414,7 +414,7 @@ func optimized_inference(InferenceRequest req, FlashAttentionConfig attention_co
     int step = 0
     while step < req.max_tokens && !state.is_complete {
         // English text (use Flash Attention)
-        // AttentionOutput attention_out = flash_attention_forward(...)
+        // attention_output attention_out = flash_attention_forward(...)
 
         // English text token
         int next_token = sample_token_from_logits(req.temperature, req.top_p, 0)
@@ -507,7 +507,7 @@ func main() {
     println("=== Inference Optimization System ===")
 
     // configuration
-    FlashAttentionConfig attention_config
+    flash_attention_config attention_config
     attention_config.block_size = 64
     attention_config.use_flash_attention = true
     attention_config.use_kv_cache = true
@@ -518,10 +518,10 @@ func main() {
     init_flash_attention(attention_config)
 
     // English text
-    BatchScheduler scheduler = init_batch_scheduler(32, 100)
+    batch_scheduler scheduler = init_batch_scheduler(32, 100)
 
     // English textinferencerequest
-    InferenceRequest req1
+    inference_request req1
     req1.prompt = "What is artificial intelligence?"
     req1.max_tokens = 256
     req1.temperature = 0.7
@@ -537,7 +537,7 @@ func main() {
 
     // English textinference
     println("\nRunning optimized inference...")
-    InferenceResponse resp = optimized_inference(req1, attention_config)
+    inference_response resp = optimized_inference(req1, attention_config)
     println("Response: " + resp.generated_text)
     println("Tokens generated: " + int_to_string(resp.token_count))
     println("Inference time: " + int_to_string(resp.inference_time_ms) + "ms")

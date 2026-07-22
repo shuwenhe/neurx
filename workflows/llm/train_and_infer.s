@@ -20,7 +20,7 @@ use std.strings
 // modelconfiguration
 // ============================================================================
 
-struct ModelConfig {
+struct model_config {
     vocab_size: i32
     hidden_dim: i32
     num_layers: i32
@@ -38,7 +38,7 @@ struct training_config {
     max_grad_norm: f64
 }
 
-struct TrainingMetrics {
+struct training_metrics {
     step: i32
     loss: f64
     avg_loss: f64
@@ -46,7 +46,7 @@ struct TrainingMetrics {
     throughput: f64
 }
 
-struct InferenceResult {
+struct inference_result {
     prompt: string
     generated: string
     num_tokens: i32
@@ -81,16 +81,16 @@ func format_large_number(n: i64) string {
 // modelimplementation
 // ============================================================================
 
-struct TransformerModel {
-    config: ModelConfig
+struct transformer_model {
+    config: model_config
     embedding_table: [][]f64          // [vocab_size, hidden_dim]
     attention_weights: [][]f64        // [num_heads, hidden_dim]
     ffn_weights: [][]f64             // [ffn_dim, hidden_dim]
     layer_norms: [][]f64             // [num_layers, hidden_dim]
 }
 
-func create_model(config: ModelConfig) TransformerModel {
-    var model: TransformerModel
+func create_model(config: model_config) transformer_model {
+    var model: transformer_model
     model.config = config
 
     println("📦 Creating Transformer Model")
@@ -124,15 +124,15 @@ func create_model(config: ModelConfig) TransformerModel {
 // dataload
 // ============================================================================
 
-struct DataBatch {
+struct data_batch {
     input_ids: []i32
     labels: []i32
     batch_size: i32
     seq_len: i32
 }
 
-func create_dummy_batch(config: ModelConfig) DataBatch {
-    var batch: DataBatch
+func create_dummy_batch(config: model_config) data_batch {
+    var batch: data_batch
     batch.batch_size = config.batch_size
     batch.seq_len = config.seq_len
 
@@ -154,7 +154,7 @@ func create_dummy_batch(config: ModelConfig) DataBatch {
 // trainingEnglish text
 // ============================================================================
 
-func compute_loss(model: TransformerModel, batch: DataBatch) f64 {
+func compute_loss(model: transformer_model, batch: data_batch) f64 {
     // Simplified loss computation: cross-entropy approximation
     let num_tokens = f64(len(batch.labels))
 
@@ -167,7 +167,7 @@ func compute_loss(model: TransformerModel, batch: DataBatch) f64 {
     return loss
 }
 
-func train_step(model: TransformerModel, batch: DataBatch, lr: f64) (TransformerModel, f64) {
+func train_step(model: transformer_model, batch: data_batch, lr: f64) (transformer_model, f64) {
     // Forward pass
     let loss = compute_loss(model, batch)
 
@@ -180,7 +180,7 @@ func train_step(model: TransformerModel, batch: DataBatch, lr: f64) (Transformer
     return (model, loss)
 }
 
-func print_training_progress(metrics: TrainingMetrics) {
+func print_training_progress(metrics: training_metrics) {
     let step_str = strings.from_i32(metrics.step)
     let loss_str = format_float(metrics.loss, 4)
     let avg_loss_str = format_float(metrics.avg_loss, 4)
@@ -194,7 +194,7 @@ func print_training_progress(metrics: TrainingMetrics) {
             " | Tokens/sec: " + throughput_str)
 }
 
-func train_epoch(model: TransformerModel, config: training_config, epoch: i32) (TransformerModel, f64) {
+func train_epoch(model: transformer_model, config: training_config, epoch: i32) (transformer_model, f64) {
     println("")
     println("🔄 Epoch " + strings.from_i32(epoch + 1))
     println(strings.repeat("─", 70))
@@ -227,7 +227,7 @@ func train_epoch(model: TransformerModel, config: training_config, epoch: i32) (
 
         // Print progress
         if (step + 1) % 10 == 0 {
-            let metrics = TrainingMetrics {
+            let metrics = training_metrics {
                 step: step + 1,
                 loss: loss,
                 avg_loss: avg_loss,
@@ -253,15 +253,15 @@ func train_epoch(model: TransformerModel, config: training_config, epoch: i32) (
 // checkpointmanagement
 // ============================================================================
 
-func save_checkpoint(model: TransformerModel, epoch: i32) {
+func save_checkpoint(model: transformer_model, epoch: i32) {
     let checkpoint_path = "checkpoints/epoch_" + strings.from_i32(epoch) + ".ckpt"
     println("💾 Saving checkpoint: " + checkpoint_path)
 }
 
-func load_checkpoint(checkpoint_path: string) TransformerModel {
+func load_checkpoint(checkpoint_path: string) transformer_model {
     println("📂 Loading checkpoint: " + checkpoint_path)
     // Simplified - in real impl would restore weights from file
-    var model: TransformerModel
+    var model: transformer_model
     return model
 }
 
@@ -269,7 +269,7 @@ func load_checkpoint(checkpoint_path: string) TransformerModel {
 // inferenceimplementation
 // ============================================================================
 
-func generate_text(model: TransformerModel, prompt: string, max_tokens: i32) InferenceResult {
+func generate_text(model: transformer_model, prompt: string, max_tokens: i32) inference_result {
     println("")
     println("🎯 Inference")
     println("────────────────────────────────────")
@@ -291,7 +291,7 @@ func generate_text(model: TransformerModel, prompt: string, max_tokens: i32) Inf
 
     let latency = time.since(start_time).milliseconds()
 
-    var result: InferenceResult
+    var result: inference_result
     result.prompt = prompt
     result.generated = generated
     result.num_tokens = max_tokens
@@ -300,7 +300,7 @@ func generate_text(model: TransformerModel, prompt: string, max_tokens: i32) Inf
     return result
 }
 
-func print_inference_result(result: InferenceResult) {
+func print_inference_result(result: inference_result) {
     println("")
     println("📝 Generated Text:")
     println("   " + result.generated)
@@ -325,7 +325,7 @@ func main() {
     println("")
 
     // Configuration
-    let model_config = ModelConfig {
+    let model_config = model_config {
         vocab_size: 32000,
         hidden_dim: 256,
         num_layers: 6,

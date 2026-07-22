@@ -87,7 +87,7 @@ func float_to_str(float value, int decimals) string {
 // Configuration structures
 // ============================================================================
 
-struct MergeConfig {
+struct merge_config {
     string base_model_path
     string adapter_checkpoint_dir
     string output_model_dir
@@ -98,7 +98,7 @@ struct MergeConfig {
     int output_dim
 }
 
-struct MergedModel {
+struct merged_model {
     []float weights
     string config_json
     string model_name
@@ -113,8 +113,8 @@ struct MergedModel {
 // Model loading and merging
 // ============================================================================
 
-func load_and_merge() MergedModel {
-    MergedModel result
+func load_and_merge() merged_model {
+    merged_model result
     
     // Usage硬encoding of Parameter( from configurationin)
     int input_dim = 768
@@ -180,7 +180,7 @@ func load_and_merge() MergedModel {
 // Model saving
 // ============================================================================
 
-func save_merged_model(MergedModel model, string output_dir) int {
+func save_merged_model(merged_model model, string output_dir) int {
     println("💾 Saving merged model...")
     println("  Output directory: /home/shuwen/shuwen/train/model/base-model-posttrain")
     println("")
@@ -257,7 +257,7 @@ func main() int {
     println("")
     
     // Load configuration
-    MergeConfig cfg
+    merge_config cfg
     cfg.base_model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
     cfg.adapter_checkpoint_dir = "/home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft"
     cfg.output_model_dir = "/home/shuwen/shuwen/train/model/base-model-posttrain"
@@ -275,7 +275,7 @@ func main() int {
     println("")
     
     // Load and merge
-    MergedModel merged = load_and_merge()
+    merged_model merged = load_and_merge()
     
     // Save model
     save_merged_model(merged, "dummy")

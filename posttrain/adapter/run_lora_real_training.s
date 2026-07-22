@@ -8,7 +8,7 @@ use std::io::{println, print_error}
 use std::fs::{File, read_file}
 use std::json
 use neurx::lib::tensor::{tensor, create_vector, create_matrix, zeros}
-use neurx::lib::safetensors::{SafeTensorsReader, load_safetensors_metadata, verify_safetensors_file}
+use neurx::lib::safetensors::{safe_tensors_reader, load_safetensors_metadata, verify_safetensors_file}
 
 // ============================================================================
 // 数据结构定义
@@ -22,7 +22,7 @@ struct Tensor {
 }
 
 // LoRA 权重
-struct LoRAWeights {
+struct lora_weights {
     string name              // 层名称
     Tensor A                 // 下投影 [r, in]
     Tensor B                 // 上投影 [out, r]
@@ -31,7 +31,7 @@ struct LoRAWeights {
 }
 
 // 配置参数
-struct TrainingConfig {
+struct training_config {
     string model_path
     string dataset_path
     string output_dir
@@ -45,7 +45,7 @@ struct TrainingConfig {
 }
 
 // 训练状态
-struct TrainingState {
+struct training_state {
     int current_epoch
     int total_steps
     float total_loss
@@ -57,8 +57,8 @@ struct TrainingState {
 // 第一部分：模型加载（Day 1）
 // ============================================================================
 
-func load_model_config(string model_path) TrainingConfig {
-    TrainingConfig config
+func load_model_config(string model_path) training_config {
+    training_config config
     config.model_path = model_path
     config.batch_size = 4
     config.num_epochs = 3
@@ -89,7 +89,7 @@ func verify_model_files(string model_path) bool {
 // ============================================================================
 
 // 注意力权重结构
-struct AttentionWeights {
+struct attention_weights {
     Tensor query_proj       // [hidden, hidden]
     Tensor key_proj         // [hidden, hidden]
     Tensor value_proj       // [hidden, hidden]
@@ -97,25 +97,25 @@ struct AttentionWeights {
 }
 
 // FFN 权重结构
-struct FFNWeights {
+struct ffnweights {
     Tensor gate_proj        // [ff_dim, hidden]
     Tensor up_proj          // [ff_dim, hidden]  
     Tensor down_proj        // [hidden, ff_dim]
 }
 
 // 一个 Transformer Block 的权重
-struct TransformerBlock {
+struct transformer_block {
     Tensor ln1_weight       // 层归一化
-    AttentionWeights attn
+    attention_weights attn
     Tensor ln2_weight
-    FFNWeights ffn
-    LoRAWeights lora        // LoRA 适配器
+    ffnweights ffn
+    lora_weights lora        // LoRA 适配器
 }
 
 // Qwen 模型结构
-struct QwenModel {
+struct qwen_model {
     Tensor embedding
-    []TransformerBlock blocks
+    []transformer_block blocks
     Tensor output_proj
     int hidden_dim
     int vocab_size
@@ -123,8 +123,8 @@ struct QwenModel {
 }
 
 // 初始化简化的模型（用于演示）
-func init_qwen_model(TrainingConfig config) QwenModel {
-    QwenModel model
+func init_qwen_model(training_config config) qwen_model {
+    qwen_model model
     
     // 基础参数
     model.hidden_dim = 896
@@ -137,7 +137,7 @@ func init_qwen_model(TrainingConfig config) QwenModel {
     // 初始化 blocks（简化版本）
     model.blocks = []
     for i in 0..config.num_layers {
-        TransformerBlock block
+        transformer_block block
         block.ln1_weight = create_vector(model.hidden_dim, 1.0)
         block.ln2_weight = create_vector(model.hidden_dim, 1.0)
         
@@ -172,7 +172,7 @@ func init_qwen_model(TrainingConfig config) QwenModel {
 // 第三部分：前向传播（Day 2）
 // ============================================================================
 
-func apply_lora_linear(Tensor x, Tensor W, LoRAWeights lora) Tensor {
+func apply_lora_linear(Tensor x, Tensor W, lora_weights lora) Tensor {
     // 简化的前向传播：y = W @ x + (α/r) * B @ A @ x
     // 由于 S 语言限制，这里做简化处理
     
@@ -185,11 +185,11 @@ func apply_lora_linear(Tensor x, Tensor W, LoRAWeights lora) Tensor {
 
 func transformer_block_forward(
     Tensor x,
-    TransformerBlock block
+    transformer_block block
 ) Tensor {
     // 简化的 block 前向传播：
-    // 1. LayerNorm + Attention + Residual
-    // 2. LayerNorm + FFN + Residual
+    // 1. layer_norm + Attention + Residual
+    // 2. layer_norm + FFN + Residual
     
     Tensor output = x
     
@@ -204,14 +204,14 @@ func transformer_block_forward(
 
 func qwen_forward(
     Tensor input_ids,
-    QwenModel model
+    qwen_model model
 ) Tensor {
     // 简化的前向传播流程
     Tensor hidden = input_ids
     
     // 依次通过每个 block
     for i in 0..model.num_blocks {
-        TransformerBlock block = model.blocks[i]
+        transformer_block block = model.blocks[i]
         hidden = transformer_block_forward(hidden, block)
     }
     
@@ -267,14 +267,14 @@ func cross_entropy_loss(
 func compute_lora_gradients(
     Tensor grad_output,
     Tensor input_x,
-    LoRAWeights lora
-) LoRAWeights {
+    lora_weights lora
+) lora_weights {
     // 简化的梯度计算
     // 在真实场景中需要：
     // ∂loss/∂A = (α/r) * B.T @ grad @ x.T
     // ∂loss/∂B = grad @ A @ x.T / (α/r)
     
-    LoRAWeights gradients = lora
+    lora_weights gradients = lora
     
     // 模拟梯度更新
     // 实际应用中需要矩阵运算
@@ -283,8 +283,8 @@ func compute_lora_gradients(
 }
 
 func optimizer_step(
-    mut LoRAWeights weights,
-    LoRAWeights gradients,
+    mut lora_weights weights,
+    lora_weights gradients,
     float learning_rate
 ) {
     // SGD 优化：w = w - lr * grad
@@ -304,9 +304,9 @@ func optimizer_step(
 // ============================================================================
 
 func train_epoch(
-    mut QwenModel model,
-    TrainingConfig config,
-    mut TrainingState state
+    mut qwen_model model,
+    training_config config,
+    mut training_state state
 ) float {
     println("\nEpoch " + int_to_string(state.current_epoch + 1) + "/" + int_to_string(config.num_epochs))
     
@@ -326,10 +326,10 @@ func train_epoch(
         
         // ========== 反向传播 ==========
         for i in 0..config.num_layers {
-            TransformerBlock block = model.blocks[i]
+            transformer_block block = model.blocks[i]
             
             // 计算梯度
-            LoRAWeights grads = compute_lora_gradients(logits, dummy_input, block.lora)
+            lora_weights grads = compute_lora_gradients(logits, dummy_input, block.lora)
             
             // 优化器更新
             optimizer_step(mut block.lora, grads, config.learning_rate)
@@ -355,10 +355,10 @@ func train_epoch(
 }
 
 func train_model(
-    mut QwenModel model,
-    TrainingConfig config
-) TrainingState {
-    TrainingState state
+    mut qwen_model model,
+    training_config config
+) training_state {
+    training_state state
     state.current_epoch = 0
     state.total_steps = 0
     state.best_loss = 999999.0
@@ -390,7 +390,7 @@ func train_model(
 
 func merge_lora_to_model(
     Tensor original_weight,
-    LoRAWeights lora
+    lora_weights lora
 ) Tensor {
     // 合并公式：W' = W + (α/r) * B @ A
     // 简化实现
@@ -406,8 +406,8 @@ func merge_lora_to_model(
 }
 
 func save_merged_model(
-    QwenModel model,
-    TrainingConfig config,
+    qwen_model model,
+    training_config config,
     string output_path
 ) {
     println("\n💾 保存合并后的模型...")
@@ -415,7 +415,7 @@ func save_merged_model(
     
     // 合并 LoRA 权重到模型
     for i in 0..model.num_blocks {
-        TransformerBlock block = model.blocks[i]
+        transformer_block block = model.blocks[i]
         
         // 合并到各个投影层
         block.attn.query_proj = merge_lora_to_model(block.attn.query_proj, block.lora)
@@ -433,7 +433,7 @@ func save_merged_model(
 func verify_training_results(
     string original_path,
     string output_path,
-    TrainingState state
+    training_state state
 ) {
     println("\n✅ 验证训练结果...")
     println("\n📊 训练统计:")
@@ -522,7 +522,7 @@ func main() {
     
     // 配置
     string model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
-    TrainingConfig config = load_model_config(model_path)
+    training_config config = load_model_config(model_path)
     
     // 验证模型文件
     if verify_model_files(model_path) == false {
@@ -532,7 +532,7 @@ func main() {
     
     // 加载模型
     println("\n📦 初始化模型...")
-    QwenModel model = init_qwen_model(config)
+    qwen_model model = init_qwen_model(config)
     println("  ✓ Qwen2.5-0.5B 模型已加载")
     println("  隐藏维度: 896")
     println("  词汇表大小: 151936")
@@ -540,7 +540,7 @@ func main() {
     println("  LoRA Rank: " + int_to_string(config.lora_rank))
     
     // 训练
-    TrainingState training_state = train_model(mut model, config)
+    training_state training_state = train_model(mut model, config)
     
     // 保存
     save_merged_model(model, config, config.output_dir)

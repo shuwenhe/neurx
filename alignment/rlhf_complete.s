@@ -8,7 +8,7 @@ package neurx.alignment.rlhf_complete
 // 1. English text (Supervised Fine-Tuning)
 // ============================================================================
 
-struct SFTConfig {
+struct sft_config {
     int num_epochs               // trainingEnglish text
     int batch_size               // English text
     float learning_rate          // learning rate
@@ -19,15 +19,15 @@ struct SFTConfig {
     bool use_mixed_precision
 }
 
-struct SFTDataset {
+struct sft_dataset {
     string* instructions         // English text
     string* outputs              // output
     int num_samples
     int max_length
 }
 
-struct SFTTrainer {
-    SFTConfig config
+struct sft_trainer {
+    sft_config config
     float total_loss
     float* loss_history
     int step_counter
@@ -40,7 +40,7 @@ func sft_training_step(
     int batch_size,
     int seq_len,
     int vocab_size,
-    SFTTrainer trainer
+    sft_trainer trainer
 ) float {
     // computeEnglish textloss
     float loss = 0.0
@@ -363,9 +363,9 @@ func comprehensive_evaluation(
 // 5. complete RLHF pipeline
 // ============================================================================
 
-struct RLHFPipeline {
+struct rlhf_pipeline {
     // phase 1: SFT
-    SFTTrainer sft_trainer
+    sft_trainer sft_trainer
     float sft_best_loss
 
     // phase 2: rewardmodel
@@ -384,8 +384,8 @@ struct RLHFPipeline {
 }
 
 // initialize RLHF pipeline
-func init_rlhf_pipeline() RLHFPipeline {
-    RLHFPipeline pipeline
+func init_rlhf_pipeline() rlhf_pipeline {
+    rlhf_pipeline pipeline
 
     pipeline.sft_best_loss = 1000.0
     pipeline.reward_auc = 0.0
@@ -398,11 +398,11 @@ func init_rlhf_pipeline() RLHFPipeline {
 
 // RLHF English text
 func rlhf_iteration(
-    RLHFPipeline pipeline,
-    SFTDataset sft_data,
+    rlhf_pipeline pipeline,
+    sft_dataset sft_data,
     preference_data pref_data,
     int iteration
-) RLHFPipeline {
+) rlhf_pipeline {
 
     // phase 1: SFT English text (English text)
     if iteration < 5 {
@@ -450,7 +450,7 @@ func min_f(float a, float b) float {
 func main() {
     println("=== Complete RLHF Alignment System ===")
 
-    RLHFPipeline pipeline = init_rlhf_pipeline()
+    rlhf_pipeline pipeline = init_rlhf_pipeline()
 
     println("RLHF Pipeline initialized")
     println("Stage 1: SFT - Supervised Fine-Tuning")

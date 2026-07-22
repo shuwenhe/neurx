@@ -3,7 +3,7 @@
 
 module qwen_tokenizer
 
-struct TokenizerConfig {
+struct tokenizer_config {
     string vocab_path
     string merges_path
     int vocab_size
@@ -12,8 +12,8 @@ struct TokenizerConfig {
 }
 
 // Initialize tokenizer from files
-func init_tokenizer(string vocab_path, string merges_path) TokenizerConfig {
-    TokenizerConfig config
+func init_tokenizer(string vocab_path, string merges_path) tokenizer_config {
+    tokenizer_config config
     config.vocab_path = vocab_path
     config.merges_path = merges_path
     config.vocab_size = 151936
@@ -27,7 +27,7 @@ func init_tokenizer(string vocab_path, string merges_path) TokenizerConfig {
 }
 
 // Encode text to token IDs
-func encode_text(TokenizerConfig config, string text) []int {
+func encode_text(tokenizer_config config, string text) []int {
     []int tokens
     
     // 1. Split into characters (byte-level BPE)
@@ -46,7 +46,7 @@ func encode_text(TokenizerConfig config, string text) []int {
 }
 
 // Decode token IDs to text
-func decode_tokens(TokenizerConfig config, []int tokens) string {
+func decode_tokens(tokenizer_config config, []int tokens) string {
     string result = ""
     
     for i in 0..len(tokens) {
@@ -84,7 +84,7 @@ func int_to_str(int n) string {
 }
 
 // Get special tokens
-func get_special_tokens(TokenizerConfig config) map[string]int {
+func get_special_tokens(tokenizer_config config) map[string]int {
     map[string]int special
     special["bos_token_id"] = 151643
     special["eos_token_id"] = 151645

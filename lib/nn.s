@@ -6,7 +6,7 @@ package neurx.lib.nn
 use neurx.lib.tensor.{Vector, Matrix, create_vector, create_matrix, random_matrix, vector_scale, matrix_scale, matrix_multiply, matrix_vector_multiply, matrix_add, vector_add, outer_product}
 
 // Linear layer: y = Wx + b
-struct LinearLayer {
+struct linear_layer {
     Matrix weight      // Weight matrix (out_features x in_features)
     Vector bias        // Bias vector (out_features)
     int in_features
@@ -15,7 +15,7 @@ struct LinearLayer {
 }
 
 // LoRA adapter: adds low-rank matrices A and B to frozen weights
-struct LoRAAdapter {
+struct lora_adapter {
     Matrix lora_a      // (in_features x rank)
     Matrix lora_b      // (rank x out_features)
     float alpha        // Scaling factor
@@ -26,23 +26,23 @@ struct LoRAAdapter {
 }
 
 // LoRA linear layer: combines base weight with LoRA
-struct LoRALinearLayer {
+struct lora_linear_layer {
     Matrix base_weight      // Frozen base weight
     Vector base_bias        // Bias (trainable or frozen)
-    LoRAAdapter adapter     // LoRA adapter
+    lora_adapter adapter     // LoRA adapter
     int in_features
     int out_features
 }
 
 // Embedding layer
-struct EmbeddingLayer {
+struct embedding_layer {
     Matrix embeddings       // (vocab_size x embedding_dim)
     int vocab_size
     int embedding_dim
 }
 
-// LayerNorm
-struct LayerNorm {
+// layer_norm
+struct layer_norm {
     Vector gamma            // Scale parameter
     Vector beta             // Shift parameter
     float epsilon           // Small constant for numerical stability
@@ -50,8 +50,8 @@ struct LayerNorm {
 }
 
 // Creates a linear layer with random initialization
-func create_linear_layer(int in_features, int out_features, float lr, int seed) LinearLayer {
-    LinearLayer layer
+func create_linear_layer(int in_features, int out_features, float lr, int seed) linear_layer {
+    linear_layer layer
     layer.in_features = in_features
     layer.out_features = out_features
     layer.learning_rate = lr
@@ -79,7 +79,7 @@ func create_linear_layer(int in_features, int out_features, float lr, int seed) 
 }
 
 // Forward pass of linear layer: y = Wx + b
-func linear_forward(LinearLayer layer, Vector x) Vector {
+func linear_forward(linear_layer layer, Vector x) Vector {
     // y = Wx
     Vector y = matrix_vector_multiply(layer.weight, x)
     
@@ -89,8 +89,8 @@ func linear_forward(LinearLayer layer, Vector x) Vector {
 }
 
 // Creates a LoRA adapter
-func create_lora_adapter(int in_features, int out_features, int rank, float alpha, float lr, int seed) LoRAAdapter {
-    LoRAAdapter adapter
+func create_lora_adapter(int in_features, int out_features, int rank, float alpha, float lr, int seed) lora_adapter {
+    lora_adapter adapter
     adapter.in_features = in_features
     adapter.out_features = out_features
     adapter.rank = rank
@@ -108,7 +108,7 @@ func create_lora_adapter(int in_features, int out_features, int rank, float alph
 }
 
 // LoRA forward: output = W_base @ x + (alpha/rank) * (B @ A) @ x
-func lora_forward(LoRALinearLayer layer, Vector x) Vector {
+func lora_forward(lora_linear_layer layer, Vector x) Vector {
     // Base output: W_base @ x + b
     Vector output = matrix_vector_multiply(layer.base_weight, x)
     output = vector_add(output, layer.base_bias)
@@ -130,8 +130,8 @@ func lora_forward(LoRALinearLayer layer, Vector x) Vector {
 }
 
 // Creates a LoRA linear layer
-func create_lora_linear_layer(int in_features, int out_features, int rank, float alpha, float lr, int seed) LoRALinearLayer {
-    LoRALinearLayer layer
+func create_lora_linear_layer(int in_features, int out_features, int rank, float alpha, float lr, int seed) lora_linear_layer {
+    lora_linear_layer layer
     layer.in_features = in_features
     layer.out_features = out_features
     
@@ -150,8 +150,8 @@ func create_lora_linear_layer(int in_features, int out_features, int rank, float
 }
 
 // Creates an embedding layer
-func create_embedding_layer(int vocab_size, int embedding_dim, int seed) EmbeddingLayer {
-    EmbeddingLayer layer
+func create_embedding_layer(int vocab_size, int embedding_dim, int seed) embedding_layer {
+    embedding_layer layer
     layer.vocab_size = vocab_size
     layer.embedding_dim = embedding_dim
     
@@ -165,7 +165,7 @@ func create_embedding_layer(int vocab_size, int embedding_dim, int seed) Embeddi
 }
 
 // Embedding lookup: returns embedding vector for token ID
-func embedding_lookup(EmbeddingLayer layer, int token_id) Vector {
+func embedding_lookup(embedding_layer layer, int token_id) Vector {
     Vector result = create_vector(layer.embedding_dim)
     
     if token_id < 0 || token_id >= layer.vocab_size {
@@ -182,9 +182,9 @@ func embedding_lookup(EmbeddingLayer layer, int token_id) Vector {
     result
 }
 
-// Creates LayerNorm
-func create_layer_norm(int hidden_size) LayerNorm {
-    LayerNorm ln
+// Creates layer_norm
+func create_layer_norm(int hidden_size) layer_norm {
+    layer_norm ln
     ln.hidden_size = hidden_size
     ln.epsilon = 0.00001  // 1e-5
     
@@ -202,8 +202,8 @@ func create_layer_norm(int hidden_size) LayerNorm {
     ln
 }
 
-// LayerNorm forward pass: normalize and scale/shift
-func layer_norm_forward(LayerNorm ln, Vector x) Vector {
+// layer_norm forward pass: normalize and scale/shift
+func layer_norm_forward(layer_norm ln, Vector x) Vector {
     // Compute mean
     float mean = 0.0
     int i = 0
@@ -282,7 +282,7 @@ func dropout(Vector x, float dropout_rate, int seed) Vector {
 }
 
 // Batch normalization statistics
-struct BatchNormStats {
+struct batch_norm_stats {
     Vector running_mean
     Vector running_var
     float momentum
@@ -290,8 +290,8 @@ struct BatchNormStats {
 }
 
 // Create batch norm stats tracker
-func create_batch_norm_stats(int feature_size) BatchNormStats {
-    BatchNormStats stats
+func create_batch_norm_stats(int feature_size) batch_norm_stats {
+    batch_norm_stats stats
     stats.feature_size = feature_size
     stats.momentum = 0.9
     

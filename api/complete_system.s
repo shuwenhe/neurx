@@ -295,7 +295,7 @@ func _start_sft(string config_path, option<string> resume_from):
     tokenizer_state tokenizer = create_tokenizer(sft_cfg.tokenizer_path)
 
     # Initialize trainer
-    SFTTrainer trainer = init_sft_trainer(model, tokenizer, sft_cfg)
+    sft_trainer trainer = init_sft_trainer(model, tokenizer, sft_cfg)
 
     # Train
     for epoch in range(sft_cfg.num_train_epochs):

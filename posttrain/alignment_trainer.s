@@ -227,7 +227,7 @@ func create_sft_config() alignment_config {
 // English textalignmentEnglish text,English textdataEnglish text fine-tune
 // ============================================================
 
-class SFTTrainer {
+class sft_trainer {
     neurx_model model
     tokenizer_state tokenizer
     AdamW optimizer
@@ -278,7 +278,7 @@ func init_sft_trainer(
         }
     }
 
-func train_sft_epoch(self: SFTTrainer, data_loader dataloader) {
+func train_sft_epoch(self: sft_trainer, data_loader dataloader) {
     """
     trainingEnglish text epoch English text SFT
 
@@ -920,7 +920,7 @@ func train_ppo_iteration(
 // English textlogoutput
 // ============================================================
 
-func log_sft_progress(state: SFTTrainer.state, float loss) {
+func log_sft_progress(state: sft_trainer.state, float loss) {
     elapsed = now() - state.start_time
     print(
         f"[SFT Step {state.current_step:>6}] "

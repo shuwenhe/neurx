@@ -6,31 +6,31 @@ package neurx.lib.loss
 use neurx.lib.tensor.{Vector, Matrix, create_vector, create_matrix, vector_scale, vector_subtract, matrix_scale}
 
 // Mean Squared Error Loss
-struct MSELoss {
+struct mse_loss {
     string name
 }
 
 // Cross-Entropy Loss
-struct CrossEntropyLoss {
+struct cross_entropy_loss {
     float epsilon
     string name
 }
 
 // Binary Cross-Entropy Loss
-struct BCELoss {
+struct bceloss {
     float epsilon
     string name
 }
 
 // Smooth L1 Loss (Huber Loss)
-struct SmoothL1Loss {
+struct smooth_l1_loss {
     float delta
     string name
 }
 
 // Creates MSE loss
-func create_mse_loss() MSELoss {
-    MSELoss loss
+func create_mse_loss() mse_loss {
+    mse_loss loss
     loss.name = "MSE"
     loss
 }
@@ -71,8 +71,8 @@ func mse_loss_backward(Vector pred, Vector target) Vector {
 }
 
 // Creates cross-entropy loss
-func create_cross_entropy_loss() CrossEntropyLoss {
-    CrossEntropyLoss loss
+func create_cross_entropy_loss() cross_entropy_loss {
+    cross_entropy_loss loss
     loss.epsilon = 0.0000001  // 1e-7 for numerical stability
     loss.name = "CrossEntropy"
     loss
@@ -142,8 +142,8 @@ func cross_entropy_loss_backward(Vector pred, Vector target) Vector {
 }
 
 // Creates binary cross-entropy loss
-func create_bce_loss() BCELoss {
-    BCELoss loss
+func create_bce_loss() bceloss {
+    bceloss loss
     loss.epsilon = 0.0000001
     loss.name = "BCE"
     loss
@@ -214,8 +214,8 @@ func bce_loss_forward(Vector pred, Vector target) float {
 }
 
 // Creates smooth L1 loss
-func create_smooth_l1_loss() SmoothL1Loss {
-    SmoothL1Loss loss
+func create_smooth_l1_loss() smooth_l1_loss {
+    smooth_l1_loss loss
     loss.delta = 1.0
     loss.name = "SmoothL1"
     loss
@@ -256,7 +256,7 @@ func smooth_l1_loss_forward(Vector pred, Vector target) float {
 // ===== OPTIMIZERS =====
 
 // SGD optimizer state
-struct SGDOptimizer {
+struct sgd_optimizer {
     float learning_rate
     float momentum
     float weight_decay
@@ -264,7 +264,7 @@ struct SGDOptimizer {
 }
 
 // Adam optimizer state
-struct AdamOptimizer {
+struct adam_optimizer {
     float learning_rate
     float beta1
     float beta2
@@ -275,8 +275,8 @@ struct AdamOptimizer {
 }
 
 // Creates SGD optimizer
-func create_sgd_optimizer(float lr, float momentum, float weight_decay) SGDOptimizer {
-    SGDOptimizer opt
+func create_sgd_optimizer(float lr, float momentum, float weight_decay) sgd_optimizer {
+    sgd_optimizer opt
     opt.learning_rate = lr
     opt.momentum = momentum
     opt.weight_decay = weight_decay
@@ -284,7 +284,7 @@ func create_sgd_optimizer(float lr, float momentum, float weight_decay) SGDOptim
 }
 
 // SGD update step
-func sgd_step(SGDOptimizer opt, Vector params, Vector grads) Vector {
+func sgd_step(sgd_optimizer opt, Vector params, Vector grads) Vector {
     if params.size != grads.size {
         return params
     }
@@ -314,8 +314,8 @@ func sgd_step(SGDOptimizer opt, Vector params, Vector grads) Vector {
 }
 
 // Creates Adam optimizer
-func create_adam_optimizer(float lr) AdamOptimizer {
-    AdamOptimizer opt
+func create_adam_optimizer(float lr) adam_optimizer {
+    adam_optimizer opt
     opt.learning_rate = lr
     opt.beta1 = 0.9
     opt.beta2 = 0.999
@@ -325,7 +325,7 @@ func create_adam_optimizer(float lr) AdamOptimizer {
 }
 
 // Adam update step
-func adam_step(AdamOptimizer opt, Vector params, Vector grads) Vector {
+func adam_step(adam_optimizer opt, Vector params, Vector grads) Vector {
     if params.size != grads.size {
         return params
     }
@@ -373,7 +373,7 @@ func adam_step(AdamOptimizer opt, Vector params, Vector grads) Vector {
 }
 
 // RMSprop optimizer state
-struct RMSpropOptimizer {
+struct rmsprop_optimizer {
     float learning_rate
     float alpha
     float epsilon
@@ -381,8 +381,8 @@ struct RMSpropOptimizer {
 }
 
 // Creates RMSprop optimizer
-func create_rmsprop_optimizer(float lr) RMSpropOptimizer {
-    RMSpropOptimizer opt
+func create_rmsprop_optimizer(float lr) rmsprop_optimizer {
+    rmsprop_optimizer opt
     opt.learning_rate = lr
     opt.alpha = 0.99
     opt.epsilon = 0.00000001
@@ -390,7 +390,7 @@ func create_rmsprop_optimizer(float lr) RMSpropOptimizer {
 }
 
 // RMSprop update step
-func rmsprop_step(RMSpropOptimizer opt, Vector params, Vector grads) Vector {
+func rmsprop_step(rmsprop_optimizer opt, Vector params, Vector grads) Vector {
     if params.size != grads.size {
         return params
     }

@@ -24,7 +24,7 @@ use std.training_io as IO
 // Training Configuration (trainingconfiguration)
 // ============================================
 
-struct TrainConfig {
+struct train_config {
     // Model architecture (modelEnglish text)
     int vocab_size           // = 256 (byte-level)
     int embed_dim            // = 128
@@ -46,8 +46,8 @@ struct TrainConfig {
     int save_every           // = 25
 }
 
-func default_config() TrainConfig {
-    TrainConfig {
+func default_config() train_config {
+    train_config {
         vocab_size: 256, embed_dim: 128, num_heads: 4,
         ffn_dim: 512, num_layers: 4, max_seq_len: 32,
         learning_rate: 0.001, optimizer: "adam",
@@ -57,7 +57,7 @@ func default_config() TrainConfig {
     }
 }
 
-func config_string(TrainConfig cfg) string {
+func config_string(train_config cfg) string {
     string s = ""
     s = s + "=== NeurX GPT Training Config ===\n"
     s = s + "Model:\n"
@@ -88,12 +88,12 @@ func main() int {
     println("")
 
     // Step 1: configuration
-    TrainConfig cfg = default_config()
+    train_config cfg = default_config()
     println(config_string(cfg))
 
     // Step 2: English textGPTmodel
     println("[1/5] Building GPT model...")
-    NN.GPTConfig gpt_cfg
+    NN.gptconfig gpt_cfg
     gpt_cfg.vocab_size = cfg.vocab_size
     gpt_cfg.embed_dim = cfg.embed_dim
     gpt_cfg.num_heads = cfg.num_heads
@@ -102,7 +102,7 @@ func main() int {
     gpt_cfg.max_seq_len = cfg.max_seq_len
     gpt_cfg.dropout_prob = cfg.dropout_prob
 
-    NN.GPTModel model = NN.make_gpt(gpt_cfg)
+    NN.gptmodel model = NN.make_gpt(gpt_cfg)
     NN.print_gpt_summary(model)
 
     int total_params = NN.gpt_total_params(model)

@@ -114,7 +114,7 @@ func list_dir(path string) ([]string, error) {
 // find_files finds files matching a pattern
 func find_files(dir string, pattern string) ([]string, error) {
     var results []string
-    err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+    err := filepath.Walk(dir, func(path string, info os.file_info, err error) error {
         if err != nil {
             return err
         }

@@ -8,7 +8,7 @@ module document_parser
 
 // ==================== English textconfigurationEnglish text ====================
 
-struct DocumentParserConfig {
+struct document_parser_config {
     // supportEnglish text
     enabled_formats: list<string> = ["pdf", "html", "markdown", "docx", "pptx", "xlsx", "txt", "csv"]
 
@@ -52,19 +52,19 @@ struct DocumentParserConfig {
     enable_page_numbering: bool = true             # English textinformation (PDF)
 }
 
-struct ParsedDocument {
+struct parsed_document {
     content: string                                # mainEnglish textcontent (English textoutput_formatEnglish text)
-    metadata: DocumentMetadata                     # English textdata
-    sections: list<DocumentSection>                # section/English text
-    tables: list<ExtractedTable>                  # English text
-    images: list<ExtractedImage>                 # English text
-    links: list<ExtractedLink>                    # English text (HTML)
-    code_blocks: list<CodeBlock>                 # English text (Markdown)
-    statistics: DocumentStatistics                # English textstatisticsinformation
+    metadata: document_metadata                     # English textdata
+    sections: list<document_section>                # section/English text
+    tables: list<extracted_table>                  # English text
+    images: list<extracted_image>                 # English text
+    links: list<extracted_link>                    # English text (HTML)
+    code_blocks: list<code_block>                 # English text (Markdown)
+    statistics: document_statistics                # English textstatisticsinformation
     raw_structure: any?                            # English textdata (English textDOMEnglish text)
 }
 
-struct DocumentMetadata {
+struct document_metadata {
     filename: string                               # English textfileEnglish text
     file_path: string                              # filepath
     file_format: string                            # English text: pdf/html/md/docx/...
@@ -80,7 +80,7 @@ struct DocumentMetadata {
     encoding: string?                              # English text
 }
 
-struct DocumentSection {
+struct document_section {
     id: string                                     # Section ID
     title: string                                  # sectiontitle (English text)
     level: int                                     # English text (H1=1, H2=2, ...)
@@ -88,10 +88,10 @@ struct DocumentSection {
     start_position: int                            # English text
     end_position: int                              # English text
     page_number?: int                              # English text (PDF)
-    subsections: list<DocumentSection>?            # English textsection
+    subsections: list<document_section>?            # English textsection
 }
 
-struct ExtractedTable {
+struct extracted_table {
     id: string                                     # Table ID
     headers: list<string>                          # English text
     rows: list<list<string>>                       # English textdata
@@ -105,7 +105,7 @@ struct ExtractedTable {
     bbox?: tuple<float, float, float, float>?      # English text (x1, y1, x2, y2) English textPDF
 }
 
-struct ExtractedImage {
+struct extracted_image {
     id: string                                     # Image ID
     data: bytes                                    # English textdata
     format: string                                 # English text (png/jpeg/svg/...)
@@ -116,20 +116,20 @@ struct ExtractedImage {
     position: tuple<int, int>?                     # English text (char_offset, line_number)
 }
 
-struct ExtractedLink {
+struct extracted_link {
     url: string                                    # English textURL
     text: string                                   # English text
     link_type: string                              # internal | external | anchor
 }
 
-struct CodeBlock {
+struct code_block {
     language: string                               # English textlanguageEnglish text
     code: string                                   # English textcontent
     start_line: int                                # English text
     end_line: int                                  # English text
 }
 
-struct DocumentStatistics {
+struct document_statistics {
     total_characters: int                          # English text
     total_words: int                               # English text
     total_lines: int                               # English text
@@ -144,14 +144,14 @@ struct DocumentStatistics {
 // ==================== mainEnglish text ====================
 
 class DocumentParser {
-    config: DocumentParserConfig
+    config: document_parser_config
     pdf_parser: PDFParser?
     html_parser: HTMLParser?
     markdown_parser: MarkdownParser?
     office_parser: OfficeDocumentParser?
 
-    init(config?: DocumentParserConfig) {
-        this.config = config ?? new DocumentParserConfig()
+    init(config?: document_parser_config) {
+        this.config = config ?? new document_parser_config()
 
         # Initialize format-specific parsers
         if "pdf" in this.config.enabled_formats {
@@ -197,7 +197,7 @@ class DocumentParser {
     }
 
     parse_batch(file_paths: list<string>) {
-        results: list<ParsedDocument> = []
+        results: list<parsed_document> = []
         for path in file_paths {
             try {
                 let doc = this.parse(path)
@@ -247,7 +247,7 @@ class DocumentParser {
         headers = data[0] if data.length > 0 else []
         rows = data[1:]
 
-        table = ExtractedTable{
+        table = extracted_table{
             id="table_0",
             headers=headers,
             rows=rows,
@@ -261,9 +261,9 @@ class DocumentParser {
 
         stats = compute_statistics(content)
 
-        return ParsedDocument{
+        return parsed_document{
             content=content,
-            metadata=DocumentMetadata{
+            metadata=document_metadata{
                 filename=get_filename(file_path),
                 file_path=file_path,
                 file_format="csv",
@@ -271,7 +271,7 @@ class DocumentParser {
                 mime_type="text/csv",
                 word_count=stats.total_words
             },
-            sections=[DocumentSection{
+            sections=[document_section{
                 id="sec_0",
                 title="CSV Data",
                 level=1,
@@ -297,11 +297,11 @@ class DocumentParser {
 
         # Simple section splitting by double newlines
         raw_sections = content.split("\n\n")
-        sections: list<DocumentSection> = []
+        sections: list<document_section> = []
         pos = 0
         for i, sec_content in enumerate(raw_sections) {
             sec_len = sec_content.length
-            sections.append(DocumentSection{
+            sections.append(document_section{
                 id=f"sec_{i}",
                 title="",  # Plain text has no explicit titles
                 level=1,
@@ -312,9 +312,9 @@ class DocumentParser {
             pos += sec_len + 2  # +2 for \n\n
         }
 
-        return ParsedDocument{
+        return parsed_document{
             content=content,
-            metadata=DocumentMetadata{
+            metadata=document_metadata{
                 filename=source_path ? get_filename(source_path!) : "unknown.txt",
                 file_path=source_path ?? "",
                 file_format="txt",
@@ -335,9 +335,9 @@ class DocumentParser {
 // ==================== PDF English text ====================
 
 class PDFParser {
-    config: DocumentParserConfig
+    config: document_parser_config
 
-    init(config: DocumentParserConfig) {
+    init(config: document_parser_config) {
         this.config = config
     }
 
@@ -346,9 +346,9 @@ class PDFParser {
         doc = open_pdf(file_path)
 
         full_text_parts: list<string> = []
-        all_sections: list<DocumentSection> = []
-        all_tables: list<ExtractedTable> = []
-        all_images: list<ExtractedImage> = []
+        all_sections: list<document_section> = []
+        all_tables: list<extracted_table> = []
+        all_images: list<extracted_image> = []
 
         current_pos = 0
 
@@ -378,7 +378,7 @@ class PDFParser {
 
                             if font_size > 14 && is_bold && len(lines_text.strip()) < 100:
                                 # Likely a heading
-                                all_sections.append(DocumentSection{
+                                all_sections.append(document_section{
                                     id=f"sec_{all_sections.length}",
                                     title=lines_text.strip(),
                                     level=min(int((font_size - 10) / 2), 6),  # Rough heading level estimate
@@ -415,7 +415,7 @@ class PDFParser {
         if all_sections.empty() {
             pages_texts = full_text.split("--- Page Break ---")
             for i, pt in enumerate(pages_texts) {
-                all_sections.append(DocumentSection{
+                all_sections.append(document_section{
                     id=f"page_{i}",
                     title=f"Page {i + 1}",
                     level=1,
@@ -428,9 +428,9 @@ class PDFParser {
 
         stats = compute_statistics(full_text)
 
-        return ParsedDocument{
+        return parsed_document{
             content=full_text,
-            metadata=DocumentMetadata{
+            metadata=document_metadata{
                 filename=get_filename(file_path),
                 file_path=file_path,
                 file_format="pdf",
@@ -464,9 +464,9 @@ class PDFParser {
 // ==================== HTML English text ====================
 
 class HTMLParser {
-    config: DocumentParserConfig
+    config: document_parser_config
 
-    init(config: DocumentParserConfig) {
+    init(config: document_parser_config) {
         this.config = config
     }
 
@@ -494,7 +494,7 @@ class HTMLParser {
 
         stats = compute_statistics(result.content)
 
-        return ParsedDocument{
+        return parsed_document{
             content=result.content,
             metadata=meta,
             sections=result.sections,
@@ -515,7 +515,7 @@ class HTMLParser {
         description = soup.find("meta", attrs={"name": "description"})?.get("content")
         author_meta = soup.find("meta", attrs={"name": "author"})?.get("content")
 
-        return DocumentMetadata{
+        return document_metadata{
             filename=source_url ? extract_filename_from_url(source_url!) : "",
             file_path=source_url ?? "",
             file_format="html",
@@ -575,11 +575,11 @@ class HTMLParser {
     }
 
     _convert_element(element: any, base_url?: string) {
-        sections: list<DocumentSection> = []
-        tables: list<ExtractedTable> = []
-        images: list<ExtractedImage> = []
-        links: list<ExtractedLink> = []
-        code_blocks: list<CodeBlock> = []
+        sections: list<document_section> = []
+        tables: list<extracted_table> = []
+        images: list<extracted_image> = []
+        links: list<extracted_link> = []
+        code_blocks: list<code_block> = []
         content_parts: list<string> = []
 
         pos = 0
@@ -593,7 +593,7 @@ class HTMLParser {
                 text = node.get_text().strip()
                 content_parts.append("#".repeat(level) + " " + text + "\n\n")
 
-                sections.append(DocumentSection{
+                sections.append(document_section{
                     id=f"h{level}_{sections.length}",
                     title=text,
                     level=level,
@@ -631,7 +631,7 @@ class HTMLParser {
                 elif not (src.starts_with("http://") || src.starts_with("https://")):
                     src = resolve_relative_url(base_url ?? "", src)
 
-                images.append(ExtractedImage{
+                images.append(extracted_image{
                     id=f"img_{images.length}",
                     data=b"",  # Would need to download actual image
                     format=get_extension_from_url(src),
@@ -648,7 +648,7 @@ class HTMLParser {
                 text = node.get_text().strip()
                 if !href.empty() and !text.empty():
                     link_type = "external" if href.starts_with("http") else ("anchor" if href.starts_with("#") else "internal")
-                    links.append(ExtractedImage{url=href, text=text, link_type=link_type})
+                    links.append(extracted_image{url=href, text=text, link_type=link_type})
                     content_parts.append(f"[{text}]({href})")
                     pos += len(f"[{text}]({href})")
 
@@ -665,7 +665,7 @@ class HTMLParser {
                         break
 
                 code_text = node.get_text()
-                code_blocks.append(CodeBlock{
+                code_blocks.append(code_block{
                     language=lang,
                     code=code_text,
                     start_line=0,
@@ -691,7 +691,7 @@ class HTMLParser {
 
         process_node(element)
 
-        return ConversionResult{
+        return conversion_result{
             content="\n".join(content_parts),
             sections=sections,
             tables=tables,
@@ -738,8 +738,8 @@ class HTMLParser {
         # Generate Markdown representation
         md_repr = format_table_as_markdown(headers, rows)
 
-        return TableConversionResult{
-            table=ExtractedTable{
+        return table_conversion_result{
+            table=extracted_table{
                 id=f"table_{generate_short_uuid()}",
                 headers=headers,
                 rows=rows,
@@ -753,40 +753,40 @@ class HTMLParser {
     }
 }
 
-struct ConversionResult {
+struct conversion_result {
     content: string
-    sections: list<DocumentSection>
-    tables: list<ExtractedTable>
-    images: list<ExtractedImage>
-    links: list<ExtractedLink>
-    code_blocks: list<CodeBlock>
+    sections: list<document_section>
+    tables: list<extracted_table>
+    images: list<extracted_image>
+    links: list<extracted_link>
+    code_blocks: list<code_block>
 }
 
-struct TableConversionResult {
-    table: ExtractedTable
+struct table_conversion_result {
+    table: extracted_table
     markdown: string
 }
 
 // ==================== Markdown English text ====================
 
 class MarkdownParser {
-    config: DocumentParserConfig
+    config: document_parser_config
 
-    init(config: DocumentParserConfig) {
+    init(config: document_parser_config) {
         this.config = config
     }
 
     parse_string(markdown_content: string, source_path?: string) {
         lines = markdown_content.split("\n")
 
-        sections: list<DocumentSection> = []
-        tables: list<ExtractedTable> = []
-        code_blocks: list<CodeBlock> = []
-        images: list<ExtractedImage> = []
-        links: list<ExtractedLink> = []
+        sections: list<document_section> = []
+        tables: list<extracted_table> = []
+        code_blocks: list<code_block> = []
+        images: list<extracted_image> = []
+        links: list<extracted_link> = []
         content_parts: list<string> = []
 
-        current_section: DocumentSection? = null
+        current_section: document_section? = null
         in_code_block = false
         code_lang = ""
         code_lines: list<string> = []
@@ -810,7 +810,7 @@ class MarkdownParser {
                     code_start_line = i + 1
                 } else:
                     # End of code block
-                    code_blocks.append(CodeBlock{
+                    code_blocks.append(code_block{
                         language=code_lang,
                         code="\n".join(code_lines),
                         start_line=code_start_line,
@@ -837,7 +837,7 @@ class MarkdownParser {
                     current_section!.end_position = pos
                     sections.append(current_section!)
 
-                current_section = DocumentSection{
+                current_section = document_section{
                     id=f"h{level}_{sections.length}",
                     title=title,
                     level=level,
@@ -872,7 +872,7 @@ class MarkdownParser {
                 # End of table
                 if in_table and table_rows.length > 0:
                     md_table = format_table_as_markdown(table_headers, table_rows)
-                    tables.append(ExtractedTable{
+                    tables.append(extracted_table{
                         id=f"tbl_{tables.length}",
                         headers=table_headers,
                         rows=table_rows,
@@ -893,7 +893,7 @@ class MarkdownParser {
             if img_match != null {
                 alt = img_match.group(1)
                 url = img_match.group(2)
-                images.append(ExtractedImage{
+                images.append(extracted_image{
                     id=f"img_{images.length}",
                     data=b"",
                     format=get_extension_from_url(url),
@@ -917,7 +917,7 @@ class MarkdownParser {
         # Handle final state
         if in_table and table_rows.length > 0:
             md_table = format_table_as_markdown(table_headers, table_rows)
-            tables.append(ExtractedTable{
+            tables.append(extracted_table{
                 id=f"tbl_{tables.length}", headers=table_headers, rows=table_rows,
                 markdown_representation=md_table, row_count=table_rows.length,
                 column_count=table_headers.length, confidence=0.95
@@ -929,7 +929,7 @@ class MarkdownParser {
 
         # Fallback: if no sections found, create one big section
         if sections.empty():
-            sections.append(DocumentSection{
+            sections.append(document_section{
                 id="sec_0", title="", level=1,
                 content=markdown_content, start_position=0,
                 end_position=markdown_content.length
@@ -938,9 +938,9 @@ class MarkdownParser {
         full_content = "\n".join(content_parts)
         stats = compute_statistics(full_content)
 
-        return ParsedDocument{
+        return parsed_document{
             content=full_content,
-            metadata=DocumentMetadata{
+            metadata=document_metadata{
                 filename=source_path ? get_filename(source_path!) : "document.md",
                 file_path=source_path ?? "", file_format="markdown",
                 file_size_bytes=len(full_content.encode('utf-8')),
@@ -965,9 +965,9 @@ class MarkdownParser {
 // ==================== Office English text (DOCX/PPTX/XLSX) ====================
 
 class OfficeDocumentParser {
-    config: DocumentParserConfig
+    config: document_parser_config
 
-    init(config: DocumentParserConfig) {
+    init(config: document_parser_config) {
         this.config = config
     }
 
@@ -975,9 +975,9 @@ class OfficeDocumentParser {
         # Use python-docx library
         doc = load_docx(file_path)
 
-        sections: list<DocumentSection> = []
-        tables: list<ExtractedTable> = []
-        images: list<ExtractedImage> = []
+        sections: list<document_section> = []
+        tables: list<extracted_table> = []
+        images: list<extracted_image> = []
         content_parts: list<string> = []
         pos = 0
 
@@ -998,7 +998,7 @@ class OfficeDocumentParser {
                 level_match = regex.search(r'\d+', style_name)
                 level = int(level_match.group()) if level_match else 1
 
-                sections.append(DocumentSection{
+                sections.append(document_section{
                     id=f"sec_{sections.length}",
                     title=text,
                     level=level,
@@ -1036,7 +1036,7 @@ class OfficeDocumentParser {
 
             if headers.length > 0 and rows.length > 0:
                 md_table = format_table_as_markdown(headers, rows)
-                tables.append(ExtractedTable{
+                tables.append(extracted_table{
                     id=f"table_{t_idx}", headers=headers, rows=rows,
                     markdown_representation=md_table,
                     row_count=rows.length, column_count=headers.length,
@@ -1050,7 +1050,7 @@ class OfficeDocumentParser {
             for rel in doc.part.rels.values():
                 if "image" in rel.reltype:
                     image_data = rel.target_part.blob
-                    images.append(ExtractedImage{
+                    images.append(extracted_image{
                         id=f"img_{images.length}",
                         data=image_data,
                         format=guess_image_format(image_data[:4]),
@@ -1060,9 +1060,9 @@ class OfficeDocumentParser {
         full_content = "\n".join(content_parts)
         stats = compute_statistics(full_content)
 
-        return ParsedDocument{
+        return parsed_document{
             content=full_content,
-            metadata=DocumentMetadata{
+            metadata=document_metadata{
                 filename=get_filename(file_path), file_path=file_path,
                 file_format="docx", file_size_bytes=get_file_size(file_path),
                 mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -1077,7 +1077,7 @@ class OfficeDocumentParser {
         # Use python-pptx
         pptx = load_pptx(file_path)
 
-        sections: list<DocumentSection> = []
+        sections: list<document_section> = []
         content_parts: list<string> = []
         pos = 0
 
@@ -1092,7 +1092,7 @@ class OfficeDocumentParser {
 
             slide_content = "\n".join(shape_texts)
 
-            sections.append(DocumentSection{
+            sections.append(document_section{
                 id=f"slide_{slide_idx}",
                 title=slide_title,
                 level=1,
@@ -1108,9 +1108,9 @@ class OfficeDocumentParser {
         full_content = "\n".join(content_parts)
         stats = compute_statistics(full_content)
 
-        return ParsedDocument{
+        return parsed_document{
             content=full_content,
-            metadata=DocumentMetadata{
+            metadata=document_metadata{
                 filename=get_filename(file_path), file_path=file_path,
                 file_format="pptx", file_size_bytes=get_file_size(file_path),
                 mime_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
@@ -1126,7 +1126,7 @@ class OfficeDocumentParser {
         wb = load_excel(file_path)
 
         sheets_content: list<string> = []
-        all_tables: list<ExtractedTable> = []
+        all_tables: list<extracted_table> = []
 
         for sheet_name, sheet in wb.items():
             sheet_data = sheet.values
@@ -1139,7 +1139,7 @@ class OfficeDocumentParser {
 
             md_table = format_table_as_markdown(headers, data_rows)
 
-            all_tables.append(ExtractedTable{
+            all_tables.append(extracted_table{
                 id=f"sheet_{all_tables.length}",
                 headers=headers,
                 rows=data_rows,
@@ -1154,15 +1154,15 @@ class OfficeDocumentParser {
         full_content = "\n".join(sheets_content)
         stats = compute_statistics(full_content)
 
-        return ParsedDocument{
+        return parsed_document{
             content=full_content,
-            metadata=DocumentMetadata{
+            metadata=document_metadata{
                 filename=get_filename(file_path), file_path=file_path,
                 file_format="xlsx", file_size_bytes=get_file_size(file_path),
                 mime_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 word_count=stats.total_words
             },
-            sections=[DocumentSection{
+            sections=[document_section{
                 id="sec_0", title="Excel Data", level=1,
                 content=full_content, start_position=0,
                 end_position=full_content.length
@@ -1218,7 +1218,7 @@ function compute_statistics(content: string) {
     word_count = len(content.split_whitespace())
     line_count = content.count("\n") + 1
 
-    return DocumentStatistics{
+    return document_statistics{
         total_characters=char_count,
         total_words=word_count,
         total_lines=line_count,
@@ -1254,7 +1254,7 @@ def generate_short_uuid() {
 
 // ==================== English textfunctionEnglish texttest ====================
 
-function create_document_parser(config?: DocumentParserConfig) {
+function create_document_parser(config?: document_parser_config) {
     return new DocumentParser(config=config)
 }
 
@@ -1335,8 +1335,8 @@ AI is transforming industries.
 
 // Export public API
 export {
-    DocumentParserConfig, ParsedDocument, DocumentMetadata,
-    DocumentSection, ExtractedTable, ExtractedImage, CodeBlock,
-    DocumentStatistics, DocumentParser,
+    document_parser_config, parsed_document, document_metadata,
+    document_section, extracted_table, extracted_image, code_block,
+    document_statistics, DocumentParser,
     create_document_parser, test_document_parser
 }

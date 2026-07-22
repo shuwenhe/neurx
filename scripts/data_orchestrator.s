@@ -23,7 +23,7 @@ enum DataFormat {
     TFRecord,
 }
 
-struct DataConfig {
+struct data_config {
     inputPath       string
     outputPath      string
     format          DataFormat
@@ -42,15 +42,15 @@ struct DataConfig {
 // Data Orchestrator
 // ============================================================
 
-struct DataOrchestrator {
+struct data_orchestrator {
     logger   Logger
-    config   DataConfig
+    config   data_config
     neurxRoot string
 }
 
 // new_data_orchestrator creates a new data orchestrator
-func new_data_orchestrator(inputPath string) (*DataOrchestrator, error) {
-    logger := new_logger("DataOrchestrator")
+func new_data_orchestrator(inputPath string) (*data_orchestrator, error) {
+    logger := new_logger("data_orchestrator")
     
     neurxRoot := get_env("NEURX_ROOT", "")
     if neurxRoot == "" {
@@ -64,7 +64,7 @@ func new_data_orchestrator(inputPath string) (*DataOrchestrator, error) {
     
     outputPath := filepath.Join(neurxRoot, "data", "processed", filepath.Base(inputPath))
     
-    config := DataConfig{
+    config := data_config{
         inputPath:      inputPath,
         outputPath:     outputPath,
         format:         DataFormat.JSONL,
@@ -79,7 +79,7 @@ func new_data_orchestrator(inputPath string) (*DataOrchestrator, error) {
         numWorkers:     4,
     }
     
-    return &DataOrchestrator{
+    return &data_orchestrator{
         logger:    logger,
         config:    config,
         neurxRoot: neurxRoot,
@@ -87,7 +87,7 @@ func new_data_orchestrator(inputPath string) (*DataOrchestrator, error) {
 }
 
 // setup prepares data directory
-func (d *DataOrchestrator) setup() error {
+func (d *data_orchestrator) setup() error {
     d.logger.log("Setting up data environment...")
     
     outputDir := filepath.Dir(d.config.outputPath)
@@ -100,7 +100,7 @@ func (d *DataOrchestrator) setup() error {
 }
 
 // validate_input validates input data
-func (d *DataOrchestrator) validate_input() error {
+func (d *data_orchestrator) validate_input() error {
     d.logger.log("Validating input data...")
     
     if !file_exists(d.config.inputPath) {
@@ -126,7 +126,7 @@ func (d *DataOrchestrator) validate_input() error {
 }
 
 // process_data processes and filters data
-func (d *DataOrchestrator) process_data() error {
+func (d *data_orchestrator) process_data() error {
     d.logger.log("Processing data...")
     
     // Step 1: Deduplication
@@ -164,7 +164,7 @@ func (d *DataOrchestrator) process_data() error {
 }
 
 // Split splits data into train/val/test sets
-func (d *DataOrchestrator) split(trainRatio float32, valRatio float32) error {
+func (d *data_orchestrator) split(trainRatio float32, valRatio float32) error {
     d.logger.log("Splitting data into train/val/test sets...")
     
     trainRatio = trainRatio
@@ -193,7 +193,7 @@ func (d *DataOrchestrator) split(trainRatio float32, valRatio float32) error {
 }
 
 // Convert converts between data formats
-func (d *DataOrchestrator) convert(toFormat DataFormat) error {
+func (d *data_orchestrator) convert(toFormat DataFormat) error {
     d.logger.log("Converting data format...")
     
     d.logger.log("From: %s", format_string(d.config.format))
@@ -207,7 +207,7 @@ func (d *DataOrchestrator) convert(toFormat DataFormat) error {
 }
 
 // statistics generates data statistics
-func (d *DataOrchestrator) statistics() error {
+func (d *data_orchestrator) statistics() error {
     d.logger.log("Generating data statistics...")
     
     stats := fmt.Sprintf(`Data statistics:
@@ -241,7 +241,7 @@ Workers: %d
 // Helper Functions
 // ============================================================
 
-func (d *DataOrchestrator) is_valid_format(path string) bool {
+func (d *data_orchestrator) is_valid_format(path string) bool {
     ext := strings.ToLower(filepath.Ext(path))
     validExts := []string{".jsonl", ".parquet", ".hdf5", ".arrow", ".tfrecord"}
     for _, valid := range validExts {
@@ -252,35 +252,35 @@ func (d *DataOrchestrator) is_valid_format(path string) bool {
     return false
 }
 
-func (d *DataOrchestrator) deduplicate_data() error {
+func (d *data_orchestrator) deduplicate_data() error {
     // Placeholder for deduplication logic
     d.logger.log("Running deduplication pass...")
     sleep_seconds(2)
     return nil
 }
 
-func (d *DataOrchestrator) filter_quality() error {
+func (d *data_orchestrator) filter_quality() error {
     // Placeholder for quality filtering
     d.logger.log("Filtering by quality score...")
     sleep_seconds(2)
     return nil
 }
 
-func (d *DataOrchestrator) filter_language() error {
+func (d *data_orchestrator) filter_language() error {
     // Placeholder for language filtering
     d.logger.log("Detecting and filtering languages...")
     sleep_seconds(2)
     return nil
 }
 
-func (d *DataOrchestrator) tokenize_data() error {
+func (d *data_orchestrator) tokenize_data() error {
     // Placeholder for tokenization
     d.logger.log("Tokenizing with BPE...")
     sleep_seconds(2)
     return nil
 }
 
-func (d *DataOrchestrator) log_config() {
+func (d *data_orchestrator) log_config() {
     config := fmt.Sprintf(`Data Processing Configuration
 Input: %s
 Output: %s

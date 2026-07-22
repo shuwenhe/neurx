@@ -8,7 +8,7 @@ module moe_optimization
 
 // ==================== English textconfigurationEnglish text ====================
 
-struct MoEConfig {
+struct moe_config {
     // English textparameter
     hidden_size: int = 4096
     intermediate_size: int = 14336        # FFN English text (English text = hidden * ~3.5)
@@ -42,18 +42,18 @@ struct MoEConfig {
     expert_pruning_threshold: float = 0.001  # Expert English text (English text)
 }
 
-struct MoEForwardOutput {
+struct moe_forward_output {
     output: tensor                        # [batch, seq_len, hidden]
     aux_loss: tensor?                     # helperloss (English text)
     load_balance_loss: tensor?            # English textloss
     router_logits: tensor                 # [batch, seq_len, num_experts] - English text
     expert_mask: tensor                   # [batch, seq_len, num_experts] - English text (one-hot English text soft)
     expert_weights: tensor                # [batch, seq_len, num_experts] - weight
-    dispatch_pattern: DispatchPattern     # English textstatisticsinformation
+    dispatch_pattern: dispatch_pattern     # English textstatisticsinformation
     perexpert_output?: list<tensor>       # English textoutput (English text/English text)
 }
 
-struct DispatchPattern {
+struct dispatch_pattern {
     total_tokens: int                     # English text token English text
     tokens_per_expert: list<int>          # English text expert English text token count
     expert_utilization: list<float>       # Expert English text (0-1)
@@ -64,7 +64,7 @@ struct DispatchPattern {
     dropped_tokens: int                   # English text token English text
 }
 
-struct MoEExpert {
+struct moe_expert {
     id: int                               # Expert ID
     up_proj: Linear                      # English text (hidden -> intermediate)
     down_proj: Linear                    # English text (intermediate -> hidden)
@@ -74,14 +74,14 @@ struct MoEExpert {
     is_active: bool = true                # English text (English text)
 }
 
-struct MoERouter {
+struct moe_router {
     gate_layer: Linear                    # English text [hidden -> num_experts]
     bias: Parameter?                      # English text
     noise: Normal?                        # trainingEnglish text
     router_type: string
     top_k: int
 
-    init(hidden_dim: int, num_experts: int, config: MoEConfig) {
+    init(hidden_dim: int, num_experts: int, config: moe_config) {
         this.gate_layer = new Linear(in_features=hidden_dim, out_features=num_experts, bias=true)
         this.router_type = config.router_type
         this.top_k = config.num_selected_experts
@@ -92,9 +92,9 @@ struct MoERouter {
 }
 
 class LoadBalanceLossComputer {
-    config: MoEConfig
+    config: moe_config
 
-    init(config: MoEConfig) {
+    init(config: moe_config) {
         this.config = config
     }
 
@@ -132,14 +132,14 @@ class LoadBalanceLossComputer {
 // ==================== English text MoE FFN English text ====================
 
 class MoEFFNLayer {
-    config: MoEConfig
-    experts: list<MoEExpert>
-    shared_experts: list<MoEExpert>
-    router: MoERouter
+    config: moe_config
+    experts: list<moe_expert>
+    shared_experts: list<moe_expert>
+    router: moe_router
     loss_computer: LoadBalanceLossComputer
     training: bool = true
 
-    init(config: MoEConfig) {
+    init(config: moe_config) {
         this.config = config
         this.loss_computer = new LoadBalanceLossComputer(config)
         this.training = true
@@ -147,7 +147,7 @@ class MoEFFNLayer {
         # Initialize experts
         this.experts = []
         for i in range(config.num_experts):
-            let expert = MoEExpert{
+            let expert = moe_expert{
                 id=i,
                 up_proj=new Linear(config.hidden_size, config.intermediate_size),
                 down_proj=new Linear(config.intermediate_size, config.hidden_size),
@@ -160,7 +160,7 @@ class MoEFFNLayer {
         this.shared_experts = []
         if config.num_shared_experts > 0:
             for i in range(config.num_shared_experts) {
-                let shared_exp = MoEExpert{
+                let shared_exp = moe_expert{
                     id=config.num_experts + i,
                     up_proj=new Linear(config.hidden_size, config.intermediate_size),
                     down_proj=new Linear(config.intermediate_size, config.hidden_size),
@@ -171,7 +171,7 @@ class MoEFFNLayer {
             }
 
         # Initialize router
-        this.router = new MoERouter(
+        this.router = new moe_router(
             hidden_dim=config.hidden_size,
             num_experts=config.num_experts,
             config=config
@@ -245,7 +245,7 @@ class MoEFFNLayer {
         # Step 8: Collect dispatch statistics
         dispatch_stats = this._compute_dispatch_statistics(expert_mask, capacity)
 
-        return MoEForwardOutput{
+        return moe_forward_output{
             output=expert_outputs,
             aux_loss=aux_loss,
             load_balance_loss=lb_loss,
@@ -407,7 +407,7 @@ class MoEFFNLayer {
         return final_output.reshape(B, T, H)
     }
 
-    _apply_single_expert(tokens: tensor, expert: MoEExpert) {
+    _apply_single_expert(tokens: tensor, expert: moe_expert) {
         # Standard FFN: Up-project -> Activation -> Down-project
         # For SwiGLU: split into two halves, gate one half, multiply
 
@@ -474,7 +474,7 @@ class MoEFFNLayer {
         # Dropped tokens estimation
         dropped = max(0, total_tokens - this.config.num_experts * capacity)
 
-        return DispatchPattern{
+        return dispatch_pattern{
             total_tokens=int(total_tokens),
             tokens_per_expert=tokens_per_expert,
             expert_utilization=expert_utilization,
@@ -490,10 +490,10 @@ class MoEFFNLayer {
 // ==================== Expert English text ====================
 
 class ExpertSpecializer {
-    config: MoEConfig
+    config: moe_config
     moe_layer: MoEFFNLayer?
 
-    init(config: MoEConfig) {
+    init(config: moe_config) {
         this.config = config
     }
 
@@ -501,7 +501,7 @@ class ExpertSpecializer {
         this.moe_layer = moe_layer
     }
 
-    compute_specialization_loss(moe_output: MoEForwardOutput) {
+    compute_specialization_loss(moe_output: moe_forward_output) {
         if !this.config.enable_expert_specialization or this.moe_layer == null:
             return tensor(0.0)
 
@@ -521,7 +521,7 @@ class ExpertSpecializer {
         }
     }
 
-    _gradient_manipulation_loss(moe_output: MoEForwardOutput) {
+    _gradient_manipulation_loss(moe_output: moe_forward_output) {
         # Encourage different experts to specialize on different patterns
         # Based on the idea that similar inputs should go to same experts
 
@@ -577,7 +577,7 @@ class ExpertSpecializer {
         return this.config.diversity_penalty * total_penalty / (len(this.moe_layer!.experts) * (len(this.moe_layer!.experts) - 1) / 2)
     }
 
-    _hard_routing_auxiliary_loss(moe_output: MoEForwardOutput) {
+    _hard_routing_auxiliary_loss(moe_output: moe_forward_output) {
         # Additional loss term for hard routing scenarios
         # Encourages confident (high probability) assignments
 
@@ -596,7 +596,7 @@ class ExpertSpecializer {
         # Analyze how specialized each expert has become
         # Returns detailed report on expert usage patterns
 
-        reports: list<IndividualExpertReport> = []
+        reports: list<individual_expert_report> = []
 
         for expert in moe_layer.experts:
             # Analyze weight statistics
@@ -606,7 +606,7 @@ class ExpertSpecializer {
             # Weight magnitude indicates activity level
             weight_magnitude = (expert.up_proj.weight.abs().mean() + expert.down_proj.weight.abs().mean()).item()
 
-            reports.append(IndividualExpertReport{
+            reports.append(individual_expert_report{
                 expert_id=expert.id,
                 is_active=expert.is_active,
                 up_projection_l2_norm=up_weight_norm,
@@ -622,7 +622,7 @@ class ExpertSpecializer {
         max_importance = max(r.importance_weight for r in reports)
         min_importance = min(r.importance_weight for r in reports)
 
-        return ExpertAnalysisReport{
+        return expert_analysis_report{
             num_total_experts=len(reports),
             num_active_experts=active_count,
             expert_reports=reports,
@@ -632,7 +632,7 @@ class ExpertSpecializer {
         }
     }
 
-    _detect_redundancy(expert_reports: list<IndividualExpertReport>) {
+    _detect_redundancy(expert_reports: list<individual_expert_report>) {
         # Heuristic: check if multiple experts have very similar magnitudes and patterns
         magnitudes = [r.weight_magnitude for r in expert_reports if r.is_active]
         if magnitudes.length < 2:
@@ -647,16 +647,16 @@ class ExpertSpecializer {
     }
 }
 
-struct ExpertAnalysisReport {
+struct expert_analysis_report {
     num_total_experts: int
     num_active_experts: int
-    expert_reports: list<IndividualExpertReport>
+    expert_reports: list<individual_expert_report>
     average_specialization_score: float
     importance_range: tuple<float, float>
     redundancy_detected: bool
 }
 
-struct IndividualExpertReport {
+struct individual_expert_report {
     expert_id: int
     is_active: bool
     up_projection_l2_norm: float
@@ -671,9 +671,9 @@ struct IndividualExpertReport {
 class ExpertManager {
     moe_layers: list<MoEFFNLayer>
     specializer: ExpertSpecializer
-    config: MoEConfig
+    config: moe_config
 
-    init(moe_layers: list<MoEFFNLayer>, config: MoEConfig) {
+    init(moe_layers: list<MoEFFNLayer>, config: moe_config) {
         this.moe_layers = moe_layers
         this.config = config
         this.specializer = new ExpertSpecializer(config)
@@ -698,7 +698,7 @@ class ExpertManager {
                     pruned_ids.add(report.expert_id)
                     pruned_count += 1
 
-        return PruningReport{
+        return pruning_report{
             experts_pruned=pruned_count,
             pruned_expert_ids=list(pruned_ids),
             threshold_used=effective_threshold,
@@ -709,7 +709,7 @@ class ExpertManager {
     merge_similar_experts(similarity_threshold: float = 0.95) {
         # Detect and merge highly similar experts to improve efficiency
 
-        merge_operations: list<MergeOperation> = []
+        merge_operations: list<merge_operation> = []
 
         for layer in this.moe_layers:
             active_experts = [e for e in layer.experts if e.is_active]
@@ -733,7 +733,7 @@ class ExpertManager {
                     avg_sim = (sim_up + sim_down) / 2
 
                     if avg_sim > similarity_threshold:
-                        merge_operations.append(MergeOperation{
+                        merge_operations.append(merge_operation{
                             layer_index=this.moe_layers.index(layer),
                             expert_a_id=exp_a.id,
                             expert_b_id=exp_b.id,
@@ -749,7 +749,7 @@ class ExpertManager {
                         # Deactivate merged expert
                         exp_b.is_active = False
 
-        return MergingReport{
+        return merging_report{
             merges_performed=merge_operations.length,
             operations=merge_operations,
             estimated_memory_savings_pct=merge_operations.length * 100 / (this.config.num_experts * len(this.moe_layers))
@@ -761,7 +761,7 @@ class ExpertManager {
 
         total_params_before = 0
         total_params_after = 0
-        all_dispatch_patterns: list<DispatchPattern> = []
+        all_dispatch_patterns: list<dispatch_pattern> = []
 
         for layer in this.moe_layers:
             for expert in layer.experts:
@@ -771,7 +771,7 @@ class ExpertManager {
 
         sparsity = 1.0 - (total_params_after / total_params_after) if total_params_after > 0 else 0.0
 
-        return MoEEfficiencyReport{
+        return moe_efficiency_report{
             total_experts_per_layer=this.config.num_experts,
             total_moe_layers=len(this.moe_layers),
             active_experts_per_layer=[sum(1 for e in l.experts if e.is_active) for l in this.moe_layers],
@@ -781,20 +781,20 @@ class ExpertManager {
     }
 }
 
-struct PruningReport {
+struct pruning_report {
     experts_pruned: int
     pruned_expert_ids: list<int>
     threshold_used: float
     remaining_active: int
 }
 
-struct MergingReport {
+struct merging_report {
     merges_performed: int
-    operations: list<MergeOperation>
+    operations: list<merge_operation>
     estimated_memory_savings_pct: float
 }
 
-struct MergeOperation {
+struct merge_operation {
     layer_index: int
     expert_a_id: int
     expert_b_id: int
@@ -802,7 +802,7 @@ struct MergeOperation {
     action: string
 }
 
-struct MoEEfficiencyReport {
+struct moe_efficiency_report {
     total_experts_per_layer: int
     total_moe_layers: int
     active_experts_per_layer: list<int>
@@ -812,14 +812,14 @@ struct MoEEfficiencyReport {
 
 // ==================== English textfunctionEnglish texttest ====================
 
-function create_moe_ffn_layer(config?: MoEConfig) {
-    return new MoEFFNLayer(config=config ?? new MoEConfig())
+function create_moe_ffn_layer(config?: moe_config) {
+    return new MoEFFNLayer(config=config ?? new moe_config())
 }
 
 function test_moe_system() {
     print("🧪 Testing NEURX MOE Optimization System...")
 
-    cfg = MoEConfig(
+    cfg = moe_config(
         hidden_size=256,
         intermediate_size=512,
         num_experts=4,
@@ -878,9 +878,9 @@ function test_moe_system() {
 
 // Export public API
 export {
-    MoEConfig, MoEForwardOutput, DispatchPattern, MoEExpert, MoERouter,
+    moe_config, moe_forward_output, dispatch_pattern, moe_expert, moe_router,
     MoEFFNLayer, LoadBalanceLossComputer,
-    ExpertSpecializer, ExpertAnalysisReport, IndividualExpertReport,
-    ExpertManager, PruningReport, MergingReport, MergeOperation, MoEEfficiencyReport,
+    ExpertSpecializer, expert_analysis_report, individual_expert_report,
+    ExpertManager, pruning_report, merging_report, merge_operation, moe_efficiency_report,
     create_moe_ffn_layer, test_moe_system
 }

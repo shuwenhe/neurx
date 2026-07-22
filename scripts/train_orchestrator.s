@@ -112,7 +112,7 @@ func get_scale_config(scale TrainingScale) struct {
 // Training Orchestrator
 // ============================================================
 
-struct TrainOrchestrator {
+struct train_orchestrator {
     logger Logger
     config training_config
     sCompiler string
@@ -120,8 +120,8 @@ struct TrainOrchestrator {
 }
 
 // new_train_orchestrator creates a new training orchestrator
-func new_train_orchestrator(scale TrainingScale, numGpus int) (*TrainOrchestrator, error) {
-    logger := new_logger("TrainOrchestrator")
+func new_train_orchestrator(scale TrainingScale, numGpus int) (*train_orchestrator, error) {
+    logger := new_logger("train_orchestrator")
 
     // Determine NeurX root
     neurxRoot := get_env("NEURX_ROOT", "")
@@ -154,7 +154,7 @@ func new_train_orchestrator(scale TrainingScale, numGpus int) (*TrainOrchestrato
     config.checkpointDir = filepath.Join(neurxRoot, "checkpoints", fmt.Sprintf("%s_%s", scaleString(scale), config.timestamp))
     config.outputDir = filepath.Join(neurxRoot, "outputs", fmt.Sprintf("%s_%s", scaleString(scale), config.timestamp))
 
-    return &TrainOrchestrator{
+    return &train_orchestrator{
         logger:    logger,
         config:    config,
         sCompiler: sCompiler,
@@ -163,7 +163,7 @@ func new_train_orchestrator(scale TrainingScale, numGpus int) (*TrainOrchestrato
 }
 
 // setup prepares directories and environment
-func (t *TrainOrchestrator) setup() error {
+func (t *train_orchestrator) setup() error {
     t.logger.log("Setting up training environment...")
 
     // Create directories
@@ -179,7 +179,7 @@ func (t *TrainOrchestrator) setup() error {
 }
 
 // check_environment verifies GPU availability and dependencies
-func (t *TrainOrchestrator) check_environment() error {
+func (t *train_orchestrator) check_environment() error {
     t.logger.log("Checking environment...")
 
     // Check GPU availability
@@ -200,7 +200,7 @@ func (t *TrainOrchestrator) check_environment() error {
 }
 
 // Compile compiles the training module
-func (t *TrainOrchestrator) Compile() error {
+func (t *train_orchestrator) Compile() error {
     t.logger.log("Compiling NeurX training module...")
 
     sourceFile := filepath.Join(t.config.outputDir, "neurx_training.s")
@@ -236,7 +236,7 @@ func (t *TrainOrchestrator) Compile() error {
 }
 
 // Run executes the training
-func (t *TrainOrchestrator) Run() error {
+func (t *train_orchestrator) Run() error {
     t.logger.log("Starting training...")
 
     binFile := filepath.Join(t.config.outputDir, "neurx_train")
@@ -263,7 +263,7 @@ func (t *TrainOrchestrator) Run() error {
 }
 
 // Monitor monitors training progress
-func (t *TrainOrchestrator) Monitor() error {
+func (t *train_orchestrator) Monitor() error {
     t.logger.log("Starting training monitor...")
 
     logFile := filepath.Join(t.config.logDir, "train.log")
@@ -293,7 +293,7 @@ func (t *TrainOrchestrator) Monitor() error {
 // Helper Functions
 // ============================================================
 
-func (t *TrainOrchestrator) detectGPUs() (int, string) {
+func (t *train_orchestrator) detectGPUs() (int, string) {
     // Check for NVIDIA GPUs
     if command_exists("nvidia-smi") {
         result := exec_command("nvidia-smi", "--query-gpu=name", "--format=csv,noheader")
@@ -315,7 +315,7 @@ func (t *TrainOrchestrator) detectGPUs() (int, string) {
     return 1, "CPU"
 }
 
-func (t *TrainOrchestrator) log_config() error {
+func (t *train_orchestrator) log_config() error {
     config := fmt.Sprintf(`╔══════════════════════════════════════════════════╗
 ║   NeurX Foundation Model Training               ║
 ║   English text: English text NeurX English text                    ║
@@ -333,7 +333,7 @@ func (t *TrainOrchestrator) log_config() error {
     return write_file(logFile, config)
 }
 
-func (t *TrainOrchestrator) generateTrainingSource(outputPath string) error {
+func (t *train_orchestrator) generateTrainingSource(outputPath string) error {
     // Generate S source based on scale
     scaleConfig := get_scale_config(t.config.scale)
 

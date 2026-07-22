@@ -108,7 +108,7 @@ func main() {
     print("2. Attention: [896] × [896] → [896] (self-attention)\n")
     print("3. MLP: [896] → [3584] → [896] (feed-forward)\n")
     print("4. Residual: [896] + [896] → [896] (skip connection)\n")
-    print("5. LayerNorm: [896] → [896] (normalization)\n")
+    print("5. layer_norm: [896] → [896] (normalization)\n")
     print("6. Output: [896] → [50000] (vocabulary projection)\n")
     print("7. Sampling: argmax([50000]) → token_id\n")
     print("8. Decoding: token_id → word (tokenizer inverse)\n\n")

@@ -4,7 +4,7 @@
 module safetensors_io
 
 // Tensor metadata
-struct TensorMeta {
+struct tensor_meta {
     string name
     []int shape
     string dtype
@@ -13,9 +13,9 @@ struct TensorMeta {
 }
 
 // SafeTensors file reader
-struct SafeTensorsFile {
+struct safe_tensors_file {
     string path
-    []TensorMeta tensors
+    []tensor_meta tensors
     int tensor_count
 }
 
@@ -43,8 +43,8 @@ func read_uint64_le(string data, int offset) int64 {
 }
 
 // Parse SafeTensors header
-func parse_safetensors_header(string filepath) SafeTensorsFile {
-    SafeTensorsFile file
+func parse_safetensors_header(string filepath) safe_tensors_file {
+    safe_tensors_file file
     file.path = filepath
     file.tensors = []
     file.tensor_count = 0
@@ -59,7 +59,7 @@ func parse_safetensors_header(string filepath) SafeTensorsFile {
 }
 
 // Load specific tensor weight
-func load_tensor_weight(SafeTensorsFile file, string tensor_name) []float {
+func load_tensor_weight(safe_tensors_file file, string tensor_name) []float {
     []float weights
     
     // Find tensor in index
@@ -76,7 +76,7 @@ func load_tensor_weight(SafeTensorsFile file, string tensor_name) []float {
 }
 
 // Get model config from SafeTensors metadata
-func get_model_info(SafeTensorsFile file) map[string]string {
+func get_model_info(safe_tensors_file file) map[string]string {
     map[string]string info
     info["vocab_size"] = "151936"
     info["hidden_size"] = "896"

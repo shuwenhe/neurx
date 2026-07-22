@@ -52,7 +52,7 @@ class NeurxAttention {
     tensor o_proj_weight        // [hidden, hidden]
 
     // Layer Norms
-    tensor layernorm_qk_gamma   // [hidden] - QK English text LayerNorm (NEURX English textoptimize)
+    tensor layernorm_qk_gamma   // [hidden] - QK English text layer_norm (NEURX English textoptimize)
 
     // RoPE cache
     option[rope_cache] rope_cos_cache
@@ -148,7 +148,7 @@ func forward(
     tensor key_states = matmul(hidden_states, self.k_proj_weight.T)    # [B, S, kv_dim]
     tensor value_states = matmul(hidden_states, self.v_proj_weight.T)  # [B, S, kv_dim]
 
-    # Apply LayerNorm to Q and K (NEURX optimization)
+    # Apply layer_norm to Q and K (NEURX optimization)
     query_states = layer_norm(query_states, self.layernorm_qk_gamma)
     key_states = layer_norm(key_states, self.layernorm_qk_gamma)
 

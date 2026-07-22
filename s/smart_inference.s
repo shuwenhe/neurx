@@ -9,17 +9,17 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_
 // dataEnglish text
 // ============================================================================
 
-struct KnowledgeItem {
+struct knowledge_item {
     string text
     int id
 }
 
-struct KeywordMatch {
+struct keyword_match {
     string keyword
     int count
 }
 
-struct SimilarityResult {
+struct similarity_result {
     int docId
     float score
     string text

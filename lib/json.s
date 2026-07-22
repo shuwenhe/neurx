@@ -14,7 +14,7 @@ const int JSON_ARRAY = 4
 const int JSON_OBJECT = 5
 
 // JSON value representation
-struct JSONValue {
+struct json_value {
     int value_type
     string str_value
     float num_value
@@ -22,7 +22,7 @@ struct JSONValue {
 }
 
 // JSON object - key-value pairs
-struct JSONObject {
+struct json_object {
     []string keys
     []string values
     int count
@@ -353,8 +353,8 @@ func extract_array_value(string json, int start_pos) string {
 
 // Parses a JSON line from JSONL file format
 // Returns field values as strings
-func parse_jsonl_line(string line) JSONObject {
-    JSONObject obj
+func parse_jsonl_line(string line) json_object {
+    json_object obj
     obj.count = 0
     
     string trimmed = trim_string(line)

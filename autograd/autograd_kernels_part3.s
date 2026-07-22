@@ -34,7 +34,7 @@ func backward_layer_norm(node n, tensor grad_output) backward_result {
     []float grad_gamma_data = zeros_like_array(len(gamma.data))
     []float grad_beta_data = zeros_like_array(len(beta_param.data))
     
-    // For LayerNorm, we normalize over the last D dimensions
+    // For layer_norm, we normalize over the last D dimensions
     int batch_size = 1
     int feature_size = normalized_shape_size
     
@@ -99,7 +99,7 @@ func backward_layer_norm(node n, tensor grad_output) backward_result {
 // ========================================================================
 // 12. RMS NORM BACKWARD (used in LLaMA-style models)
 //    Forward: y = x / sqrt(mean(x^2) + eps) * gamma
-//    Backward: Simpler than LayerNorm since no mean centering
+//    Backward: Simpler than layer_norm since no mean centering
 // ========================================================================
 
 func backward_rms_norm(node n, tensor grad_output) backward_result {

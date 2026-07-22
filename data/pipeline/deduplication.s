@@ -2,21 +2,21 @@ package neurx.data.pipeline.deduplication
 
 // English textdatadeduplicationsystem - MinHash + Bloom Filter
 
-struct MinHashSignature {
+struct min_hash_signature {
     int* hash_values
     int num_hashes
     string document_id
     int doc_length
 }
 
-struct BloomFilter {
+struct bloom_filter {
     bool* bits
     int size
     int hash_functions
     int insertions
 }
 
-struct DeduplicationStats {
+struct deduplication_stats {
     int total_documents
     int unique_documents
     int duplicate_documents
@@ -24,7 +24,7 @@ struct DeduplicationStats {
     int computation_time_ms
 }
 
-struct DocumentSimilarity {
+struct document_similarity {
     string doc1_id
     string doc2_id
     float similarity_score
@@ -36,8 +36,8 @@ struct DocumentSimilarity {
 // ============================================================================
 
 // initialize Bloom Filter
-func init_bloom_filter(int expected_documents, float false_positive_rate) BloomFilter {
-    BloomFilter bf
+func init_bloom_filter(int expected_documents, float false_positive_rate) bloom_filter {
+    bloom_filter bf
 
     // compute Bloom Filter English text
     float ln2_squared = 0.4804530139
@@ -112,7 +112,7 @@ func hash_function_3(string text) int {
 }
 
 // English text Bloom Filter
-func bloom_add(BloomFilter bf, string text) void {
+func bloom_add(bloom_filter bf, string text) void {
     int h1 = hash_function_1(text) % bf.size
     int h2 = hash_function_2(text) % bf.size
     int h3 = hash_function_3(text) % bf.size
@@ -125,7 +125,7 @@ func bloom_add(BloomFilter bf, string text) void {
 }
 
 // English text
-func bloom_contains(BloomFilter bf, string text) bool {
+func bloom_contains(bloom_filter bf, string text) bool {
     int h1 = hash_function_1(text) % bf.size
     int h2 = hash_function_2(text) % bf.size
     int h3 = hash_function_3(text) % bf.size
@@ -142,8 +142,8 @@ func bloom_contains(BloomFilter bf, string text) bool {
 // ============================================================================
 
 // generateEnglish text MinHash English text
-func generate_minhash_signature(string text, int num_hashes) MinHashSignature {
-    MinHashSignature sig
+func generate_minhash_signature(string text, int num_hashes) min_hash_signature {
+    min_hash_signature sig
     sig.num_hashes = num_hashes
     sig.hash_values = alloc(int, num_hashes)
     sig.doc_length = strlen(text)
@@ -202,7 +202,7 @@ func compute_hash(string text, int seed) int {
 }
 
 // computeEnglish text MinHash English text
-func jaccard_similarity(MinHashSignature sig1, MinHashSignature sig2) float {
+func jaccard_similarity(min_hash_signature sig1, min_hash_signature sig2) float {
     if sig1.num_hashes != sig2.num_hashes {
         return 0.0
     }
@@ -236,7 +236,7 @@ func find_exact_duplicates(string* documents, int doc_count) bool* {
     }
 
     // Bloom Filter English textquickEnglish text
-    BloomFilter bf = init_bloom_filter(doc_count, 0.001)
+    bloom_filter bf = init_bloom_filter(doc_count, 0.001)
 
     i = 0
     while i < doc_count {
@@ -262,12 +262,12 @@ func find_exact_duplicates(string* documents, int doc_count) bool* {
 }
 
 // English text (English text MinHash)
-func find_similar_duplicates(string* documents, int doc_count, float similarity_threshold) DocumentSimilarity* {
-    DocumentSimilarity* similarities = alloc(DocumentSimilarity, doc_count * doc_count / 2)
+func find_similar_duplicates(string* documents, int doc_count, float similarity_threshold) document_similarity* {
+    document_similarity* similarities = alloc(document_similarity, doc_count * doc_count / 2)
     int similarity_count = 0
 
     // generateEnglish text MinHash English text
-    MinHashSignature* signatures = alloc(MinHashSignature, doc_count)
+    min_hash_signature* signatures = alloc(min_hash_signature, doc_count)
     int i = 0
     while i < doc_count {
         signatures[i] = generate_minhash_signature(documents[i], 128)
@@ -282,7 +282,7 @@ func find_similar_duplicates(string* documents, int doc_count, float similarity_
             float sim = jaccard_similarity(signatures[i], signatures[j])
 
             if sim >= similarity_threshold {
-                DocumentSimilarity ds
+                document_similarity ds
                 ds.doc1_id = int_to_string(i)
                 ds.doc2_id = int_to_string(j)
                 ds.similarity_score = sim
@@ -305,8 +305,8 @@ func find_similar_duplicates(string* documents, int doc_count, float similarity_
 // ============================================================================
 
 // English textcompletededuplicationpipeline
-func deduplicate_documents(string* documents, int doc_count, float similarity_threshold) DeduplicationStats {
-    DeduplicationStats stats
+func deduplicate_documents(string* documents, int doc_count, float similarity_threshold) deduplication_stats {
+    deduplication_stats stats
     stats.total_documents = doc_count
 
     int start_time = get_time_ms()
@@ -315,7 +315,7 @@ func deduplicate_documents(string* documents, int doc_count, float similarity_th
     bool* exact_dups = find_exact_duplicates(documents, doc_count)
 
     // 2. English text
-    DocumentSimilarity* similar_dups = find_similar_duplicates(documents, doc_count, similarity_threshold)
+    document_similarity* similar_dups = find_similar_duplicates(documents, doc_count, similarity_threshold)
 
     // 3. English text
     int unique_count = 0
@@ -451,7 +451,7 @@ func main() {
     docs[4] = "hello world"
 
     // English textdeduplication
-    DeduplicationStats stats = deduplicate_documents(docs, 5, 0.8)
+    deduplication_stats stats = deduplicate_documents(docs, 5, 0.8)
 
     println("Total documents: " + int_to_string(stats.total_documents))
     println("Unique documents: " + int_to_string(stats.unique_documents))

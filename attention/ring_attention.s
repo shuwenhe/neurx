@@ -576,7 +576,7 @@ func ring_attention_backward(
 // 6. Sequence Parallelism (English textsupport)
 // ============================================================================
 //
-// English text,English text (FFN, LayerNorm English text) English textRequiredEnglish text:
+// English text,English text (FFN, layer_norm English text) English textRequiredEnglish text:
 //
 // English text:
 //   1. All-Gather: English textcompleteEnglish text,English textcompute,English text scatter English text
@@ -599,7 +599,7 @@ struct sequence_parallel_config {
     bool use_ring_reduce      // true: ring reduce; false: all-gather
 }
 
-// Sequence Parallel: LayerNorm (RequiredEnglish textcompleteEnglish textcompute mean/variance)
+// Sequence Parallel: layer_norm (RequiredEnglish textcompleteEnglish textcompute mean/variance)
 func sp_layernorm_forward(
     sequence_parallel_config sp_cfg,
     [][]float local_hidden    // [local_seq_len, hidden_dim],
@@ -613,7 +613,7 @@ func sp_layernorm_forward(
         [][]float gathered = simulate_allgather(sp_cfg, local_hidden, L, H)
         int total_L = len(gathered)
 
-        // 2. English textcompleteEnglish textcompute LayerNorm
+        // 2. English textcompleteEnglish textcompute layer_norm
         [][]float normalized = layernorm_full_sequence(gathered, total_L, H)
 
         // 3. English text
@@ -657,7 +657,7 @@ func simulate_allgather(sequence_parallel_config sp_cfg, [][]float input, int L,
     return gathered
 }
 
-// completeEnglish text LayerNorm
+// completeEnglish text layer_norm
 func layernorm_full_sequence([][]float x, int seq_len, int dim) [][]float {
     float eps = 1e-6
 
@@ -716,7 +716,7 @@ func extract_local_portion([][]float full, int rank, int L, int H) [][]float {
     return local
 }
 
-// Ring Reduce English text LayerNorm
+// Ring Reduce English text layer_norm
 func sp_layernorm_ring_reduce(
     sequence_parallel_config sp_cfg,
     [][]float local_hidden

@@ -18,7 +18,7 @@ use neurx.runtime.io.{
 // Build Configuration
 // ============================================================================
 
-struct BuildConfig {
+struct build_config {
     string cuda_home
     string cuda_lib
     string gpu_arch
@@ -26,7 +26,7 @@ struct BuildConfig {
     bool verbose
 }
 
-struct BuildResult {
+struct build_result {
     bool success
     string output
     int exit_code
@@ -44,7 +44,7 @@ func main() {
     string target = runtime_env_get("CUDA_BUILD_TARGET", "all")
     
     // Initialize build config
-    BuildConfig config = detect_cuda_environment()
+    build_config config = detect_cuda_environment()
     if !is_cuda_available(config) {
         println("[ERROR] CUDA Toolkit not found")
         println("  Install from: https://developer.nvidia.com/cuda-downloads")
@@ -87,7 +87,7 @@ func main() {
 // Build Targets
 // ============================================================================
 
-func build_cuda_runtime(BuildConfig cfg) {
+func build_cuda_runtime(build_config cfg) {
     println("[BUILD] CUDA Runtime Library")
     println("")
     
@@ -97,7 +97,7 @@ func build_cuda_runtime(BuildConfig cfg) {
     // Step 1: Compile with gcc
     println("[1/3] Compiling C wrapper with gcc...")
     
-    BuildResult result = compile_cuda_runtime(cfg, build_dir)
+    build_result result = compile_cuda_runtime(cfg, build_dir)
     if !result.success {
         println("[ERROR] " + result.output)
         return
@@ -118,7 +118,7 @@ func build_cuda_runtime(BuildConfig cfg) {
     check_file_exists(build_dir + "/libcuda_runtime.so")
 }
 
-func build_cuda_kernels(BuildConfig cfg) {
+func build_cuda_kernels(build_config cfg) {
     println("[BUILD] CUDA Kernels Library")
     println("")
     
@@ -127,7 +127,7 @@ func build_cuda_kernels(BuildConfig cfg) {
     
     // Step 1: Generate PTX
     println("[1/4] Generating PTX code...")
-    BuildResult result = compile_kernels_ptx(cfg, build_dir)
+    build_result result = compile_kernels_ptx(cfg, build_dir)
     if !result.success {
         println("[WARNING] PTX generation: " + result.output)
         // Continue anyway
@@ -158,7 +158,7 @@ func build_cuda_kernels(BuildConfig cfg) {
     check_file_exists(build_dir + "/libcuda_kernels.so")
 }
 
-func build_verify_env(BuildConfig cfg) {
+func build_verify_env(build_config cfg) {
     println("[BUILD] Environment Verification Tool")
     println("")
     
@@ -188,8 +188,8 @@ func build_verify_env(BuildConfig cfg) {
 // CUDA Environment Detection
 // ============================================================================
 
-func detect_cuda_environment() BuildConfig {
-    BuildConfig cfg
+func detect_cuda_environment() build_config {
+    build_config cfg
     cfg.verbose = parse_bool(runtime_env_get("CUDA_BUILD_VERBOSE", "false"))
     
     // Detect nvcc
@@ -214,7 +214,7 @@ func detect_cuda_environment() BuildConfig {
     cfg
 }
 
-func is_cuda_available(BuildConfig cfg) bool {
+func is_cuda_available(build_config cfg) bool {
     if str_len(trim(cfg.cuda_version)) == 0 {
         return false
     }
@@ -231,7 +231,7 @@ func is_cuda_available(BuildConfig cfg) bool {
 // Compilation Functions
 // ============================================================================
 
-func compile_cuda_runtime(BuildConfig cfg, string build_dir) BuildResult {
+func compile_cuda_runtime(build_config cfg, string build_dir) build_result {
     // Use gcc to compile CUDA runtime wrapper
     string cmd = "gcc -shared -fPIC " +
         "-o " + build_dir + "/libcuda_runtime.so " +
@@ -247,18 +247,18 @@ func compile_cuda_runtime(BuildConfig cfg, string build_dir) BuildResult {
     string output = runtime_run_command_output(cmd)
     
     if runtime_file_exists(build_dir + "/libcuda_runtime.so") {
-        BuildResult{success: true, output: output, exit_code: 0}
+        build_result{success: true, output: output, exit_code: 0}
     } else {
-        BuildResult{success: false, output: output, exit_code: 1}
+        build_result{success: false, output: output, exit_code: 1}
     }
 }
 
-func link_cuda_runtime(BuildConfig cfg, string build_dir) BuildResult {
+func link_cuda_runtime(build_config cfg, string build_dir) build_result {
     // Already linked in compile step
-    BuildResult{success: true, output: "Linked successfully", exit_code: 0}
+    build_result{success: true, output: "Linked successfully", exit_code: 0}
 }
 
-func compile_kernels_ptx(BuildConfig cfg, string build_dir) BuildResult {
+func compile_kernels_ptx(build_config cfg, string build_dir) build_result {
     string cmd = "nvcc -ptx cuda/cuda_kernels.cu " +
         "-o " + build_dir + "/cuda_kernels.ptx " +
         "-arch=sm_" + cfg.gpu_arch + " " +
@@ -267,10 +267,10 @@ func compile_kernels_ptx(BuildConfig cfg, string build_dir) BuildResult {
     string output = runtime_run_command_output(cmd)
     
     bool success = str_len(trim(output)) > 0 && !contains_string(output, "error:")
-    BuildResult{success: success, output: output, exit_code: success ? 0 : 1}
+    build_result{success: success, output: output, exit_code: success ? 0 : 1}
 }
 
-func compile_cuda_wrapper(BuildConfig cfg, string build_dir) BuildResult {
+func compile_cuda_wrapper(build_config cfg, string build_dir) build_result {
     string cmd = "gcc -c -fPIC " +
         build_dir + "/cuda_kernels_wrapper.c " +
         "-o " + build_dir + "/cuda_kernels_wrapper.o " +
@@ -279,13 +279,13 @@ func compile_cuda_wrapper(BuildConfig cfg, string build_dir) BuildResult {
     string output = runtime_run_command_output(cmd)
     
     if runtime_file_exists(build_dir + "/cuda_kernels_wrapper.o") {
-        BuildResult{success: true, output: output, exit_code: 0}
+        build_result{success: true, output: output, exit_code: 0}
     } else {
-        BuildResult{success: false, output: output, exit_code: 1}
+        build_result{success: false, output: output, exit_code: 1}
     }
 }
 
-func link_cuda_kernels(BuildConfig cfg, string build_dir) BuildResult {
+func link_cuda_kernels(build_config cfg, string build_dir) build_result {
     string cmd = "gcc -shared -fPIC " +
         "-o " + build_dir + "/libcuda_kernels.so " +
         build_dir + "/cuda_kernels_wrapper.o " +
@@ -300,9 +300,9 @@ func link_cuda_kernels(BuildConfig cfg, string build_dir) BuildResult {
     string output = runtime_run_command_output(cmd)
     
     if runtime_file_exists(build_dir + "/libcuda_kernels.so") {
-        BuildResult{success: true, output: output, exit_code: 0}
+        build_result{success: true, output: output, exit_code: 0}
     } else {
-        BuildResult{success: false, output: output, exit_code: 1}
+        build_result{success: false, output: output, exit_code: 1}
     }
 }
 
@@ -324,7 +324,7 @@ func check_file_exists(string path) {
     }
 }
 
-func create_env_script(string build_dir, BuildConfig cfg) {
+func create_env_script(string build_dir, build_config cfg) {
     string text = "CUDA_HOME=" + cfg.cuda_home + "\n" +
         "CUDA_LIBRARY_PATH=" + cfg.cuda_lib + ":" + build_dir + "\n"
     runtime_write_text_file(build_dir + "/env.txt", text)

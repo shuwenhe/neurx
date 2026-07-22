@@ -8,7 +8,7 @@ module code_interpreter
 
 // ==================== English textconfiguration ====================
 
-struct CodeInterpreterConfig {
+struct code_interpreter_config {
     // English text
     execution_timeout_seconds: int = 120        // English texttime
     total_session_timeout: int = 600            // English texttime
@@ -46,7 +46,7 @@ struct CodeInterpreterConfig {
     image_format: string = "png"               # outputEnglish text (svg/png/jpeg)
 }
 
-struct ExecutionResult {
+struct execution_result {
     success: bool                              // English textsuccess
     output: string                             // stdout output
     error: string?                             // stderr errorinformation (English text)
@@ -54,14 +54,14 @@ struct ExecutionResult {
     traceback: list<string>?                   // completeEnglish text
     return_value: any                          // English text (English text)
     variables: map<string, any>?              // English textstate (English text)
-    generated_files: list<FileInfo>?           // generateEnglish textfileEnglish text
-    plots: list<ImageData>?                    // generateEnglish text
+    generated_files: list<file_info>?           // generateEnglish textfileEnglish text
+    plots: list<image_data>?                    // generateEnglish text
     execution_time_ms: float                   // English text (English text)
     memory_used_mb: float                      // English textuseEnglish text (MB)
     line_count: int                            // English text
 }
 
-struct FileInfo {
+struct file_info {
     path: string                               // filepath
     size_bytes: int                            // fileEnglish text
     content_type: string                       // MIME English text
@@ -69,7 +69,7 @@ struct FileInfo {
     is_image: bool                             // English textfile
 }
 
-struct ImageData {
+struct image_data {
     data: bytes                                // English textdata
     format: string                             // English text (png/svg/jpeg)
     width: int                                 // English text
@@ -77,7 +77,7 @@ struct ImageData {
     alt_text: string?                          // DescriptionEnglish text
 }
 
-struct CodeBlock {
+struct code_block {
     language: string                           // English textlanguage (python/javascripts/legacy/s/sql)
     code: string                               // English textcontent
     filename: string?                          // English textfileEnglish text (English textsave)
@@ -86,7 +86,7 @@ struct CodeBlock {
 // ==================== English text ====================
 
 class SandboxEnvironment {
-    config: CodeInterpreterConfig
+    config: code_interpreter_config
     session_id: string
     working_dir: string
     state: SessionState
@@ -97,7 +97,7 @@ class SandboxEnvironment {
     s_runtime: ShellRuntime?
     sql_runtime: SQLRuntime?
 
-    init(config: CodeInterpreterConfig) {
+    init(config: code_interpreter_config) {
         this.config = config
         this.session_id = generate_uuid()
         this.working_dir = config.working_directory + this.session_id + "/"
@@ -111,7 +111,7 @@ class SandboxEnvironment {
             created_at=current_timestamp(),
             variables=map<string, any>{},
             files_created=list<string>{},
-            execution_history=list<ExecutionRecord>{}
+            execution_history=list<execution_record>{}
         )
 
         // initializelanguagerunEnglish text
@@ -133,13 +133,13 @@ class SandboxEnvironment {
         }
     }
 
-    execute(code_block: CodeBlock) {
+    execute(code_block: code_block) {
         let start_time = current_time_millis()
 
         // Step 1: Security check
         let security_result = this._security_check(code_block.code)
         if !security_result.allowed {
-            return ExecutionResult{
+            return execution_result{
                 success=false,
                 output="",
                 error=security_result.reason,
@@ -151,7 +151,7 @@ class SandboxEnvironment {
         }
 
         // Step 2: Language dispatch
-        result: ExecutionResult
+        result: execution_result
         match code_block.language.lower() {
             "python" | "py" => {
                 assert this.python_runtime != null, "Python runtime not initialized"
@@ -170,7 +170,7 @@ class SandboxEnvironment {
                 result = this.sql_runtime!.execute(code_block.code)
             }
             _ => {
-                result = ExecutionResult{
+                result = execution_result{
                     success=false,
                     output="",
                     error=f"Unsupported language: {code_block.language}. Supported: {', '.join(this.config.supported_languages)}",
@@ -186,7 +186,7 @@ class SandboxEnvironment {
         result = this._post_process(result, code_block)
 
         // Step 4: Update session state
-        this.state.add_execution_record(ExecutionRecord{
+        this.state.add_execution_record(execution_record{
             code=code_block.code,
             language=code_block.language,
             result=result,
@@ -240,13 +240,13 @@ class SandboxEnvironment {
         // ... regex matching ...
 
         if issues.length > 0 {
-            return SecurityCheckResult{allowed=false, reason="\n".join(issues)}
+            return security_check_result{allowed=false, reason="\n".join(issues)}
         }
 
-        return SecurityCheckResult{allowed=true, reason=""}
+        return security_check_result{allowed=true, reason=""}
     }
 
-    _post_process(result: ExecutionResult, code_block: CodeBlock) {
+    _post_process(result: execution_result, code_block: code_block) {
         // Collect generated files
         if this.config.persist_files_between_calls {
             let files = scan_directory_for_new_files(
@@ -273,14 +273,14 @@ class SandboxEnvironment {
     }
 
     _extract_matplotlib_plots() {
-        plots: list<ImageData> = []
+        plots: list<image_data> = []
         // In real implementation, check for saved figure files or capture from backend
         // For now, scan for .png/.svg files created during execution
 
         plot_files = find_files_with_extension(this.working_dir, [".png", ".svg", ".jpeg"])
         for plot_file in plot_files {
             img_data = read_file_as_bytes(plot_file)
-            plots.append(ImageData{
+            plots.append(image_data{
                 data=img_data,
                 format=get_file_extension(plot_file),
                 width=0,  # Would need to parse image header
@@ -310,7 +310,7 @@ class SandboxEnvironment {
     }
 }
 
-struct SecurityCheckResult {
+struct security_check_result {
     allowed: bool
     reason: string
 }
@@ -323,11 +323,11 @@ class SessionState {
     last_execution_time: float = 0
     variables: map<string, any>
     files_created: list<string>
-    execution_history: list<ExecutionRecord>
+    execution_history: list<execution_record>
     total_execution_time_ms: float = 0
 
     init(session_id: string, created_at: float, variables: map<string, any>,
-         files_created: list<string>, execution_history: list<ExecutionRecord>) {
+         files_created: list<string>, execution_history: list<execution_record>) {
         this.session_id = session_id
         this.created_at = created_at
         this.variables = variables
@@ -335,14 +335,14 @@ class SessionState {
         this.execution_history = execution_history
     }
 
-    add_execution_record(record: ExecutionRecord) {
+    add_execution_record(record: execution_record) {
         this.execution_history.append(record)
         this.last_execution_time = record.timestamp
         this.total_execution_time_ms += record.result.execution_time_ms
     }
 
     get_summary() {
-        return SessionSummary{
+        return session_summary{
             session_id=this.session_id,
             duration_seconds=current_timestamp() - this.created_at,
             num_executions=this.execution_history.length,
@@ -362,14 +362,14 @@ class SessionState {
     }
 }
 
-struct ExecutionRecord {
+struct execution_record {
     code: string
     language: string
-    result: ExecutionResult
+    result: execution_result
     timestamp: float
 }
 
-struct SessionSummary {
+struct session_summary {
     session_id: string
     duration_seconds: float
     num_executions: int
@@ -439,7 +439,7 @@ class PythonRuntime {
             // Detect errors
             if proc.returncode != 0 {
                 let error_info = this._parse_python_error(error_output)
-                return ExecutionResult{
+                return execution_result{
                     success=false,
                     output=output,
                     error=error_info.message,
@@ -455,7 +455,7 @@ class PythonRuntime {
             // Try to extract return value (last expression)
             return_value = this._extract_return_value(output)
 
-            return ExecutionResult{
+            return execution_result{
                 success=true,
                 output=output,
                 error=null,
@@ -469,7 +469,7 @@ class PythonRuntime {
 
         } catch TimeoutExpired {
             kill_process(this.process)
-            return ExecutionResult{
+            return execution_result{
                 success=false,
                 output="",
                 error=f"Execution timed out after {this.timeout} seconds",
@@ -479,7 +479,7 @@ class PythonRuntime {
                 memory_used_mb=0
             }
         } catch Exception as e {
-            return ExecutionResult{
+            return execution_result{
                 success=false,
                 output="",
                 error=str(e),
@@ -508,7 +508,7 @@ class PythonRuntime {
             }
         }
 
-        return ErrorInfo{
+        return error_info{
             error_type=error_type ?: "UnknownError",
             message=message ?: stderr_output,
             traceback=traceback
@@ -539,7 +539,7 @@ class PythonRuntime {
     }
 }
 
-struct ErrorInfo {
+struct error_info {
     error_type: string
     message: string
     traceback: list<string>
@@ -581,7 +581,7 @@ class JavaScriptRuntime {
 
             let result = run_in_vm(this.vm_context, wrapped_code)
 
-            return ExecutionResult{
+            return execution_result{
                 success=true,
                 output=result.output,
                 error=null,
@@ -591,7 +591,7 @@ class JavaScriptRuntime {
                 memory_used_mb=0
             }
         } catch Exception as e {
-            return ExecutionResult{
+            return execution_result{
                 success=false,
                 output="",
                 error=str(e),
@@ -624,7 +624,7 @@ class ShellRuntime {
         // Validate command against whitelist
         base_command = command.split_whitespace()[0]
         if base_command not in this.allowed_commands {
-            return ExecutionResult{
+            return execution_result{
                 success=false,
                 output="",
                 error=f"Command '{base_command}' is not allowed in sandbox",
@@ -643,7 +643,7 @@ class ShellRuntime {
                 shell=false
             )
 
-            return ExecutionResult{
+            return execution_result{
                 success=proc.returncode == 0,
                 output=proc.stdout,
                 error=proc.stderr if proc.stderr.length > 0 else null,
@@ -653,7 +653,7 @@ class ShellRuntime {
                 memory_used_mb=0
             }
         } catch TimeoutExpired {
-            return ExecutionResult{
+            return execution_result{
                 success=false,
                 output="",
                 error="Shell command timed out after 30 seconds",
@@ -662,7 +662,7 @@ class ShellRuntime {
                 memory_used_mb=0
             }
         } catch Exception as e {
-            return ExecutionResult{
+            return execution_result{
                 success=false,
                 output="",
                 error=str(e),
@@ -702,13 +702,13 @@ class SQLRuntime {
                     output = format_sql_table(columns, rows)
 
                     // Return structured data
-                    return_value = SQLQueryResult{
+                    return_value = sql_query_result{
                         columns=columns,
                         rows=rows,
                         row_count=rows.length
                     }
 
-                    return ExecutionResult{
+                    return execution_result{
                         success=true,
                         output=output,
                         return_value=return_value,
@@ -723,7 +723,7 @@ class SQLRuntime {
                     this.connection!.execute(query)
                     affected_rows = this.connection!.rows_affected
 
-                    return ExecutionResult{
+                    return execution_result{
                         success=true,
                         output=f"Query executed successfully. Affected rows: {affected_rows}",
                         return_value={"affected_rows": affected_rows},
@@ -734,7 +734,7 @@ class SQLRuntime {
                 }
 
                 _ => {
-                    return ExecutionResult{
+                    return execution_result{
                         success=false,
                         output="",
                         error=f"Unsupported SQL query type: {query_type}",
@@ -745,7 +745,7 @@ class SQLRuntime {
                 }
             }
         } catch SQLException as e {
-            return ExecutionResult{
+            return execution_result{
                 success=false,
                 output="",
                 error=e.message,
@@ -761,7 +761,7 @@ class SQLRuntime {
     }
 }
 
-struct SQLQueryResult {
+struct sql_query_result {
     columns: list<string>
     rows: list<list<any>>
     row_count: int
@@ -770,13 +770,13 @@ struct SQLQueryResult {
 // ==================== resultEnglish text ====================
 
 class ResultFormatter {
-    config: CodeInterpreterConfig
+    config: code_interpreter_config
 
-    init(config: CodeInterpreterConfig) {
+    init(config: code_interpreter_config) {
         this.config = config
     }
 
-    format_for_llm(result: ExecutionResult) {
+    format_for_llm(result: execution_result) {
         // Format execution results for LLM consumption
         sections: list<string> = []
 
@@ -838,7 +838,7 @@ class ResultFormatter {
             }
         }
 
-        return FormattedOutput{
+        return formatted_output{
             raw=result,
             formatted_text="\n\n".join(sections),
             has_visualizations=(result.plots?.length ?? 0) > 0,
@@ -858,8 +858,8 @@ class ResultFormatter {
     }
 }
 
-struct FormattedOutput {
-    raw: ExecutionResult
+struct formatted_output {
+    raw: execution_result
     formatted_text: string
     has_visualizations: bool
     has_files: bool
@@ -922,7 +922,7 @@ print("=" * 60)
 mem = df.memory_usage(deep=True)
 print(f"Total: {{mem.sum() / 1024 / 1024:.2f}} MB")
 """
-        let code_block = CodeBlock{language="python", code=code}
+        let code_block = code_block{language="python", code=code}
         let result = this.sandbox.execute(code_block)
         return result
     }
@@ -1009,7 +1009,7 @@ print("Chart saved as chart_correlation.png")
         }
 
         if chart_type.to_lower() not in viz_templates {
-            return ExecutionResult{
+            return execution_result{
                 success=false,
                 error=f"Unsupported chart type: {chart_type}. Supported: {', '.join(viz_templates.keys())}",
                 error_type="VisualizationError",
@@ -1018,7 +1018,7 @@ print("Chart saved as chart_correlation.png")
         }
 
         code = viz_templates[chart_type.to_lower()]
-        let code_block = CodeBlock{language="python", code=code}
+        let code_block = code_block{language="python", code=code}
         return this.sandbox.execute(code_block)
     }
 
@@ -1061,7 +1061,7 @@ elif test_type == "pearson":
 else:
     print(f"Unknown test type: {{test_type}}")
 """
-        let code_block = CodeBlock{language="python", code=code}
+        let code_block = code_block{language="python", code=code}
         return this.sandbox.execute(code_block)
     }
 }
@@ -1069,15 +1069,15 @@ else:
 // ==================== NEURX Code Interpreter mainEnglish text ====================
 
 class CodeInterpreter {
-    config: CodeInterpreterConfig
+    config: code_interpreter_config
     sandbox: SandboxEnvironment?
     data_helper: DataAnalysisHelper?
     formatter: ResultFormatter
     active_sessions: map<string, SandboxEnvironment>
     default_session: SandboxEnvironment?
 
-    init(config?: CodeInterpreterConfig) {
-        this.config = config ?? new CodeInterpreterConfig()
+    init(config?: code_interpreter_config) {
+        this.config = config ?? new code_interpreter_config()
         this.formatter = new ResultFormatter(this.config)
         this.active_sessions = map<string, SandboxEnvironment>{}
 
@@ -1095,7 +1095,7 @@ class CodeInterpreter {
     execute_code(code: string, language?: string, session?: string) {
         let target_session = this.active_sessions[session ?? "default"] ?? this.default_session!
 
-        let code_block = CodeBlock{
+        let code_block = code_block{
             language=language ?? this.config.default_language,
             code=code
         }
@@ -1165,7 +1165,7 @@ class CodeInterpreter {
 
 // ==================== English textfunctionEnglish texttest ====================
 
-function create_code_interpreter(config?: CodeInterpreterConfig) {
+function create_code_interpreter(config?: code_interpreter_config) {
     return new CodeInterpreter(config=config)
 }
 
@@ -1234,7 +1234,7 @@ print("CSV created")
 
 // Export public API
 export {
-    CodeInterpreterConfig, ExecutionResult, FileInfo, ImageData, CodeBlock,
+    code_interpreter_config, execution_result, file_info, image_data, code_block,
     CodeInterpreter, SandboxEnvironment,
     DataAnalysisHelper, ResultFormatter,
     create_code_interpreter, test_code_interpreter

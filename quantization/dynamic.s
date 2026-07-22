@@ -28,7 +28,7 @@ struct quantization_stats {
     float percentile_99
 }
 
-struct QuantizedTensor {
+struct quantized_tensor {
     int8* data_int8          // English textdata (INT8)
     int4* data_int4          // English textdata (INT4)
     float* scale             // English text
@@ -38,20 +38,20 @@ struct QuantizedTensor {
     bool is_symmetric
 }
 
-struct QuantizationCalibration {
+struct quantization_calibration {
     quantization_stats* layer_stats    // English textstatisticsinformation
     int layer_count
     float* scale_values               // English text
     int8* zero_points                 // English text
 }
 
-struct DequantizedTensor {
+struct dequantized_tensor {
     float* data
     int size
     int compute_time_ms
 }
 
-struct GPTQConfig {
+struct gptqconfig {
     int block_size
     int perplexity_weight_bits
     float damping
@@ -59,7 +59,7 @@ struct GPTQConfig {
     string calibration_dataset
 }
 
-struct QuantizationMetrics {
+struct quantization_metrics {
     float accuracy_drop
     float speed_improvement
     float memory_reduction_ratio
@@ -122,8 +122,8 @@ func compute_quantization_stats(float* tensor, int size) quantization_stats {
 }
 
 // INT8 English text
-func quantize_int8_symmetric(float* tensor, int size) QuantizedTensor {
-    QuantizedTensor quantized
+func quantize_int8_symmetric(float* tensor, int size) quantized_tensor {
+    quantized_tensor quantized
 
     // 1. computeEnglish text
     quantization_stats stats = compute_quantization_stats(tensor, size)
@@ -175,8 +175,8 @@ func quantize_int8_symmetric(float* tensor, int size) QuantizedTensor {
 }
 
 // INT8 English text
-func quantize_int8_asymmetric(float* tensor, int size) QuantizedTensor {
-    QuantizedTensor quantized
+func quantize_int8_asymmetric(float* tensor, int size) quantized_tensor {
+    quantized_tensor quantized
 
     // 1. computeEnglish text
     quantization_stats stats = compute_quantization_stats(tensor, size)
@@ -234,11 +234,11 @@ func quantize_int8_asymmetric(float* tensor, int size) QuantizedTensor {
 // ============================================================================
 
 // INT4 English text (English text 2 English text INT4 English text 1 English text INT8)
-func quantize_int4(float* tensor, int size) QuantizedTensor {
-    QuantizedTensor quantized
+func quantize_int4(float* tensor, int size) quantized_tensor {
+    quantized_tensor quantized
 
     // 1. English textcompute INT8 English text
-    QuantizedTensor int8_quantized = quantize_int8_symmetric(tensor, size)
+    quantized_tensor int8_quantized = quantize_int8_symmetric(tensor, size)
 
     // 2. English text INT4
     quantized.data_int4 = alloc(int4, size / 2)
@@ -278,8 +278,8 @@ func quantize_int4(float* tensor, int size) QuantizedTensor {
 // ============================================================================
 
 // INT8 English text
-func dequantize_int8(QuantizedTensor quantized) DequantizedTensor {
-    DequantizedTensor result
+func dequantize_int8(quantized_tensor quantized) dequantized_tensor {
+    dequantized_tensor result
 
     int start_time = get_time_ms()
 
@@ -305,8 +305,8 @@ func dequantize_int8(QuantizedTensor quantized) DequantizedTensor {
 }
 
 // INT4 English text
-func dequantize_int4(QuantizedTensor quantized) DequantizedTensor {
-    DequantizedTensor result
+func dequantize_int4(quantized_tensor quantized) dequantized_tensor {
+    dequantized_tensor result
 
     int start_time = get_time_ms()
 
@@ -360,8 +360,8 @@ func load_calibration_data(string filepath) float* {
 func calibrate_quantization(
     float* tensor, int size,
     quantization_config config
-) QuantizedTensor {
-    QuantizedTensor quantized
+) quantized_tensor {
+    quantized_tensor quantized
 
     // 1. computeEnglish text
     int histogram_bins = 128
@@ -424,8 +424,8 @@ func quantize_per_layer(
     float* layer_weights, int size,
     int num_layers,
     quantization_config config
-) QuantizationCalibration {
-    QuantizationCalibration calib
+) quantization_calibration {
+    quantization_calibration calib
 
     calib.layer_count = num_layers
     calib.layer_stats = alloc(quantization_stats, num_layers)
@@ -458,7 +458,7 @@ func quantize_per_layer(
 // ============================================================================
 
 // GPTQ initialize
-func init_gptq_quantization(GPTQConfig config) void {
+func init_gptq_quantization(gptqconfig config) void {
     // loadEnglish textdata
     // float* calib_data = load_calibration_data(config.calibration_dataset)
 
@@ -467,8 +467,8 @@ func init_gptq_quantization(GPTQConfig config) void {
 }
 
 // English text GPTQ English text
-func gptq_quantize(float* layer_weights, int layer_size, GPTQConfig config) QuantizedTensor {
-    QuantizedTensor quantized
+func gptq_quantize(float* layer_weights, int layer_size, gptqconfig config) quantized_tensor {
+    quantized_tensor quantized
 
     // 1. English text
     int block_size = config.block_size
@@ -538,8 +538,8 @@ func compute_quantization_error(float* weights, int size, float scale) float {
 func compute_quantization_metrics(
     float* original_output, int original_size,
     float* quantized_output, int quantized_size
-) QuantizationMetrics {
-    QuantizationMetrics metrics
+) quantization_metrics {
+    quantization_metrics metrics
 
     // 1. English text (RMSE)
     float rmse = 0.0
@@ -659,24 +659,24 @@ func main() {
 
     // 1. INT8 English text
     println("\n1. INT8 Symmetric Quantization")
-    QuantizedTensor quantized_int8 = quantize_int8_symmetric(tensor, 1000)
+    quantized_tensor quantized_int8 = quantize_int8_symmetric(tensor, 1000)
     println("Quantized size: " + int_to_string(quantized_int8.size))
     println("Scale: " + float_to_string(quantized_int8.scale[0]))
 
     // 2. English text
     println("\n2. Dequantization")
-    DequantizedTensor dequantized = dequantize_int8(quantized_int8)
+    dequantized_tensor dequantized = dequantize_int8(quantized_int8)
     println("Dequantized size: " + int_to_string(dequantized.size))
     println("Compute time: " + int_to_string(dequantized.compute_time_ms) + "ms")
 
     // 3. INT4 English text
     println("\n3. INT4 Quantization")
-    QuantizedTensor quantized_int4 = quantize_int4(tensor, 1000)
+    quantized_tensor quantized_int4 = quantize_int4(tensor, 1000)
     println("INT4 size: " + int_to_string(quantized_int4.size / 2))
 
     // 4. English text
     println("\n4. Quantization Metrics")
-    QuantizationMetrics metrics = compute_quantization_metrics(tensor, 1000, dequantized.data, 1000)
+    quantization_metrics metrics = compute_quantization_metrics(tensor, 1000, dequantized.data, 1000)
     println("Memory reduction: " + float_to_string(metrics.memory_reduction_ratio))
     println("Speed improvement: " + float_to_string(metrics.speed_improvement) + "x")
 

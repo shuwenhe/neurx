@@ -8,7 +8,7 @@ package neurx.distributed.data_parallel
 // English textdataEnglish text
 // ============================================================================
 
-struct DataParallelConfig {
+struct data_parallel_config {
     int world_size              // English text GPU English text
     int rank                    // English text GPU English text
     string backend              // "nccl" (GPU) English text "gloo" (CPU)
@@ -18,7 +18,7 @@ struct DataParallelConfig {
     int bucket_size_mb          // gradientEnglish text
 }
 
-struct DataParallelState {
+struct data_parallel_state {
     int world_size
     int rank
     float* gradients            // gradientEnglish text
@@ -37,7 +37,7 @@ struct DataParallelState {
     bool overflow_detected      // English text
 }
 
-struct DistributedTrainingMetrics {
+struct distributed_training_metrics {
     float synchronization_time
     float computation_time
     float communication_overhead
@@ -55,9 +55,9 @@ func init_data_parallel(
     int world_size,
     int rank,
     int gradient_count,
-    DataParallelConfig config
-) DataParallelState {
-    DataParallelState state
+    data_parallel_config config
+) data_parallel_state {
+    data_parallel_state state
 
     state.world_size = world_size
     state.rank = rank
@@ -94,7 +94,7 @@ func init_data_parallel(
 func allreduce_gradients(
     float* gradients,
     int gradient_count,
-    DataParallelState state
+    data_parallel_state state
 ) float* {
     float* synchronized = alloc(float, gradient_count)
 
@@ -149,7 +149,7 @@ func allreduce_gradients(
 func async_allreduce_gradients(
     float* gradients,
     int gradient_count,
-    DataParallelState state
+    data_parallel_state state
 ) float* {
     // English textstep AllReduce: English text, English textcompute
     // actualimplementationEnglish textuse NCCL English text
@@ -218,7 +218,7 @@ func bucket_gradients(
     float* gradients,
     int gradient_count,
     int bucket_size,
-    DataParallelState state
+    data_parallel_state state
 ) float* {
     float* bucketed = alloc(float, gradient_count)
 
@@ -353,10 +353,10 @@ func data_parallel_training_step(
     float* model_params,
     float* gradients,
     float loss,
-    DataParallelState state,
+    data_parallel_state state,
     int accumulation_steps,
     int current_step
-) DataParallelState {
+) data_parallel_state {
 
     // 1. English textgradientEnglish text
     bool gradient_ok = check_gradient_quality(gradients, state.gradient_count)
@@ -406,12 +406,12 @@ func data_parallel_training_step(
 
 // computedataEnglish text
 func compute_distributed_metrics(
-    DataParallelState state,
+    data_parallel_state state,
     float total_time_ms,
     float compute_time_ms,
     float comm_time_ms
-) DistributedTrainingMetrics {
-    DistributedTrainingMetrics metrics
+) distributed_training_metrics {
+    distributed_training_metrics metrics
 
     metrics.total_steps = state.step_counter
     metrics.gradient_overflows = 0  // English textcompute
@@ -454,7 +454,7 @@ func main() {
     println("=== Data Parallel Training System ===")
 
     // configuration
-    DataParallelConfig config
+    data_parallel_config config
     config.world_size = 8
     config.rank = 0
     config.backend = "nccl"
@@ -462,7 +462,7 @@ func main() {
     config.bucket_size_mb = 25
 
     // initialize
-    DataParallelState state = init_data_parallel(8, 0, 512, config)
+    data_parallel_state state = init_data_parallel(8, 0, 512, config)
 
     println("Data Parallel initialized")
     println("World size: 8 GPUs")

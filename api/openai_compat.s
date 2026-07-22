@@ -7,14 +7,14 @@ package neurx.api.llm_compat
 // dataEnglish text
 // ============================================================================
 
-struct ChatMessage {
+struct chat_message {
     string role      // "system", "user", "assistant"
     string content
 }
 
-struct ChatCompletionRequest {
+struct chat_completion_request {
     string model
-    ChatMessage* messages
+    chat_message* messages
     int messages_count
     float temperature
     int max_tokens
@@ -26,19 +26,19 @@ struct ChatCompletionRequest {
     int stop_count
 }
 
-struct ChatCompletionResponse {
+struct chat_completion_response {
     string id
     string object
     int created_timestamp
     string model
     string finish_reason
-    ChatMessage message
+    chat_message message
     int usage_prompt_tokens
     int usage_completion_tokens
     int usage_total_tokens
 }
 
-struct CompletionRequest {
+struct completion_request {
     string model
     string prompt
     int max_tokens
@@ -50,7 +50,7 @@ struct CompletionRequest {
     int stop_count
 }
 
-struct CompletionResponse {
+struct completion_response {
     string id
     string object
     int created_timestamp
@@ -62,26 +62,26 @@ struct CompletionResponse {
     int usage_total_tokens
 }
 
-struct EmbeddingRequest {
+struct embedding_request {
     string model
     string input
     string encoding_format  // "float" English text "base64"
 }
 
-struct EmbeddingResponse {
+struct embedding_response {
     string object
     string model
     float* embedding
     int embedding_dimension
 }
 
-struct APIError {
+struct api_error {
     int error_code
     string error_message
     string error_type
 }
 
-struct APIConfig {
+struct api_config {
     int max_tokens_default
     int max_tokens_limit
     float temperature_default
@@ -97,8 +97,8 @@ struct APIConfig {
 // ============================================================================
 
 // English text Chat Completion request
-func validate_chat_completion_request(ChatCompletionRequest req) APIError {
-    APIError err
+func validate_chat_completion_request(chat_completion_request req) api_error {
+    api_error err
 
     // English text
     if strlen(req.model) == 0 {
@@ -118,7 +118,7 @@ func validate_chat_completion_request(ChatCompletionRequest req) APIError {
     // English text
     int i = 0
     while i < req.messages_count {
-        ChatMessage msg = req.messages[i]
+        chat_message msg = req.messages[i]
 
         if strlen(msg.role) == 0 {
             err.error_code = 400
@@ -191,11 +191,11 @@ func is_valid_role(string role) bool {
 // ============================================================================
 
 // English text Chat Completion request
-func handle_chat_completion(ChatCompletionRequest req, APIConfig config) ChatCompletionResponse {
-    ChatCompletionResponse resp
+func handle_chat_completion(chat_completion_request req, api_config config) chat_completion_response {
+    chat_completion_response resp
 
     // 1. English textrequest
-    APIError err = validate_chat_completion_request(req)
+    api_error err = validate_chat_completion_request(req)
     if err.error_code != 0 {
         // English texterrorresponse
         // implementation: errorEnglish textlogEnglish text
@@ -227,12 +227,12 @@ func handle_chat_completion(ChatCompletionRequest req, APIConfig config) ChatCom
 }
 
 // English textpromptEnglish text
-func build_chat_prompt(ChatMessage* messages, int count) string {
+func build_chat_prompt(chat_message* messages, int count) string {
     string prompt = ""
 
     int i = 0
     while i < count {
-        ChatMessage msg = messages[i]
+        chat_message msg = messages[i]
 
         // English text: <role>: <content>
         prompt = prompt + "<" + msg.role + ">: " + msg.content + "\n"
@@ -247,7 +247,7 @@ func build_chat_prompt(ChatMessage* messages, int count) string {
 }
 
 // generateresponseEnglish text
-func generate_response(string prompt, float temperature, int max_tokens, APIConfig config) string {
+func generate_response(string prompt, float temperature, int max_tokens, api_config config) string {
     // 1. English textpromptEnglish text token
     // tokens = tokenizer.encode(prompt)
 
@@ -288,8 +288,8 @@ func count_tokens(string text) int {
 // ============================================================================
 
 // English text Completion request
-func handle_completion(CompletionRequest req, APIConfig config) CompletionResponse {
-    CompletionResponse resp
+func handle_completion(completion_request req, api_config config) completion_response {
+    completion_response resp
 
     // 1. English textrequest
     if strlen(req.model) == 0 || strlen(req.prompt) == 0 {
@@ -316,7 +316,7 @@ func handle_completion(CompletionRequest req, APIConfig config) CompletionRespon
 }
 
 // generateEnglish text
-func generate_completion(string prompt, float temperature, int max_tokens, APIConfig config) string {
+func generate_completion(string prompt, float temperature, int max_tokens, api_config config) string {
     // English text generate_response English text, English text
     "Generated completion for: " + prompt
 }
@@ -326,8 +326,8 @@ func generate_completion(string prompt, float temperature, int max_tokens, APICo
 // ============================================================================
 
 // English text Embeddings request
-func handle_embeddings(EmbeddingRequest req, APIConfig config) EmbeddingResponse {
-    EmbeddingResponse resp
+func handle_embeddings(embedding_request req, api_config config) embedding_response {
+    embedding_response resp
 
     // 1. English textrequest
     if strlen(req.model) == 0 || strlen(req.input) == 0 {
@@ -374,7 +374,7 @@ func generate_embedding(string text) float* {
 // ============================================================================
 
 // generateEnglish text Chat Completion
-func stream_chat_completion(ChatCompletionRequest req, APIConfig config) void {
+func stream_chat_completion(chat_completion_request req, api_config config) void {
     // 1. English textrequest
     if !req.stream {
         // useEnglish text
@@ -515,7 +515,7 @@ func main() {
     println("=== NeurX Compatible API Service ===")
 
     // configuration
-    APIConfig config
+    api_config config
     config.max_tokens_default = 256
     config.max_tokens_limit = 4096
     config.temperature_default = 0.7
@@ -526,9 +526,9 @@ func main() {
 
     // example 1: Chat Completion
     println("\n1. Testing Chat Completion API")
-    ChatCompletionRequest chat_req
+    chat_completion_request chat_req
     chat_req.model = "neurx-7b"
-    chat_req.messages = alloc(ChatMessage, 2)
+    chat_req.messages = alloc(chat_message, 2)
     chat_req.messages[0].role = "system"
     chat_req.messages[0].content = "You are a helpful assistant."
     chat_req.messages[1].role = "user"
@@ -538,28 +538,28 @@ func main() {
     chat_req.max_tokens = 256
     chat_req.stream = false
 
-    ChatCompletionResponse chat_resp = handle_chat_completion(chat_req, config)
+    chat_completion_response chat_resp = handle_chat_completion(chat_req, config)
     println("Response: " + chat_resp.message.content)
     println("Tokens: " + int_to_string(chat_resp.usage_total_tokens))
 
     // example 2: Completion API
     println("\n2. Testing Completion API")
-    CompletionRequest comp_req
+    completion_request comp_req
     comp_req.model = "neurx-7b"
     comp_req.prompt = "The meaning of life is"
     comp_req.temperature = 0.7
     comp_req.max_tokens = 256
 
-    CompletionResponse comp_resp = handle_completion(comp_req, config)
+    completion_response comp_resp = handle_completion(comp_req, config)
     println("Completion: " + comp_resp.text)
 
     // example 3: Embeddings API
     println("\n3. Testing Embeddings API")
-    EmbeddingRequest emb_req
+    embedding_request emb_req
     emb_req.model = "neurx-embedding"
     emb_req.input = "This is a test sentence for embedding"
 
-    EmbeddingResponse emb_resp = handle_embeddings(emb_req, config)
+    embedding_response emb_resp = handle_embeddings(emb_req, config)
     println("embedding dimension: " + int_to_string(emb_resp.embedding_dimension))
 
     println("\n=== API Tests Complete ===")

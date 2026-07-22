@@ -10,7 +10,7 @@ use std.io.println
 // Data Structures
 // ============================================================================
 
-struct ModelConfig {
+struct model_config {
     int vocab_size
     int hidden_size
     int num_heads
@@ -19,8 +19,8 @@ struct ModelConfig {
     int context_length
 }
 
-struct InferenceContext {
-    ModelConfig config
+struct inference_context {
+    model_config config
     string checkpoint_path
     bool model_loaded
 }
@@ -78,13 +78,13 @@ func read_stdin_line() string {
 // Model Inference Functions
 // ============================================================================
 
-func load_model_config(string checkpoint_dir) ModelConfig {
+func load_model_config(string checkpoint_dir) model_config {
     // Load NeurX-1.3.neurx metadata
     string metadata_path = checkpoint_dir + "/NeurX-1.3.neurx"
     string metadata = runtime_read_text_file(metadata_path)
 
     // Parse JSON config (simplified - extract key values)
-    ModelConfig config
+    model_config config
     config.vocab_size = 374
     config.hidden_size = 1024
     config.num_heads = 16
@@ -95,8 +95,8 @@ func load_model_config(string checkpoint_dir) ModelConfig {
     return config
 }
 
-func initialize_inference_context(string checkpoint_dir) InferenceContext {
-    InferenceContext ctx
+func initialize_inference_context(string checkpoint_dir) inference_context {
+    inference_context ctx
     ctx.config = load_model_config(checkpoint_dir)
     ctx.checkpoint_path = checkpoint_dir + "/transformer_v2.ckpt"
     ctx.model_loaded = runtime_file_exists(ctx.checkpoint_path)
@@ -122,7 +122,7 @@ func modulo(int a, int b) int {
 }
 
 // Simulate transformer forward pass
-func model_forward(InferenceContext ctx, int input_token) int {
+func model_forward(inference_context ctx, int input_token) int {
     // Simplified transformer forward pass
     // Generate next token based on input
     int next_token = modulo(input_token + 17, ctx.config.vocab_size)
@@ -142,7 +142,7 @@ func decode_token(int token) string {
 }
 
 // Real model inference
-func model_generate_response(InferenceContext ctx, string user_input) string {
+func model_generate_response(inference_context ctx, string user_input) string {
     // Tokenize input
     int input_token = tokenize_input(user_input)
 
@@ -174,7 +174,7 @@ func model_generate_response(InferenceContext ctx, string user_input) string {
     model_response
 }
 
-func generate_response(string user_input, InferenceContext ctx) string {
+func generate_response(string user_input, inference_context ctx) string {
     // If model is properly loaded, use real inference
     if ctx.model_loaded {
         // Use keyword matching as fallback while keeping model inference structure
@@ -255,7 +255,7 @@ func main() int {
     let checkpoint_dir = runtime_env_get("NEURX_CHECKPOINT_DIR", project_root + "/checkpoint/NeurX-1.3")
 
     println("Phase 1: Loading Model...")
-    InferenceContext ctx = initialize_inference_context(checkpoint_dir)
+    inference_context ctx = initialize_inference_context(checkpoint_dir)
 
     if ctx.model_loaded {
         println("  ✓ checkpoint loaded: " + ctx.checkpoint_path)

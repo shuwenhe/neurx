@@ -15,7 +15,7 @@ import (
     "encoding/json"
 )
 
-// TrainingMetrics captures single step metrics
+// training_metrics captures single step metrics
 type training_metrics struct {
     step: int
     epoch: int
@@ -78,7 +78,7 @@ func (tm *training_monitor) log_step(
     eta := avg_step_time * float(remaining_steps)
     
     // Create metrics
-    metrics := TrainingMetrics{
+    metrics := training_metrics{
         step: step,
         epoch: epoch,
         loss: loss,
@@ -101,7 +101,7 @@ func (tm *training_monitor) log_step(
 }
 
 // Print progress bar
-func (tm *training_monitor) print_progress(metrics: TrainingMetrics) {
+func (tm *training_monitor) print_progress(metrics: training_metrics) {
     progress := float(metrics.step) / float(tm.total_steps) * 100.0
     bar_length := 50
     filled := int(progress / 100.0 * float(bar_length))
@@ -134,7 +134,7 @@ func (tm *training_monitor) print_progress(metrics: TrainingMetrics) {
 }
 
 // Log to file
-func (tm *training_monitor) log_to_file(metrics: TrainingMetrics) {
+func (tm *training_monitor) log_to_file(metrics: training_metrics) {
     f, err := os.OpenFile(tm.log_file, os.O_APPEND|os.O_WRONLY, 0644)
     if err != nil {
         return

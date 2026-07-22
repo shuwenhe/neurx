@@ -12,7 +12,7 @@ import neurx.model
 // CONFIGURATION
 // ============================================================================
 
-struct TrainConfig {
+struct train_config {
     vocab_size: int
     embed_dim: int
     hidden_dim: int
@@ -26,8 +26,8 @@ struct TrainConfig {
     log_interval: int
 }
 
-func get_default_config() TrainConfig {
-    config := TrainConfig{
+func get_default_config() train_config {
+    config := train_config{
         vocab_size: 256,
         embed_dim: 64,
         hidden_dim: 256,
@@ -80,7 +80,7 @@ func main() {
     fmt.Printf("[PROGRESS] model created - params: %d\n", model.param_count)
     
     // Initialize optimizer state
-    opt_state := neurx.model.AdamW_State{
+    opt_state := neurx.model.adam_w_state{
         m_states: make(map[string]neurx.model.Tensor),
         v_states: make(map[string]neurx.model.Tensor),
         t: 0,

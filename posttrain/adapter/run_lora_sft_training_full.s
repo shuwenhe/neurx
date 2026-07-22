@@ -18,7 +18,7 @@ use std.io.println
 // Configuration structures体
 // ============================================================================
 
-struct TrainingConfig {
+struct training_config {
     string base_model_path
     string train_data_path
     string val_data_path
@@ -37,7 +37,7 @@ struct TrainingConfig {
     float lora_dropout
 }
 
-struct ModelState {
+struct model_state {
     []float base_weights
     []float lora_a
     []float lora_b
@@ -47,7 +47,7 @@ struct ModelState {
     float alpha
 }
 
-struct TrainingMetrics {
+struct training_metrics {
     float total_loss
     float avg_loss
     int total_samples
@@ -129,8 +129,8 @@ func float_to_str(float value, int decimals) string {
 // Configuration loading
 // ============================================================================
 
-func load_config() TrainingConfig {
-    TrainingConfig cfg
+func load_config() training_config {
+    training_config cfg
     
     // modelconfiguration
     cfg.base_model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
@@ -159,8 +159,8 @@ func load_config() TrainingConfig {
 // modelinitialize
 // ============================================================================
 
-func init_lora_adapter(int input_dim, int output_dim, int rank, float alpha) ModelState {
-    ModelState state
+func init_lora_adapter(int input_dim, int output_dim, int rank, float alpha) model_state {
+    model_state state
     
     state.input_dim = input_dim
     state.output_dim = output_dim
@@ -212,7 +212,7 @@ func count_training_samples(string filepath) int {
 // Trainingloop
 // ============================================================================
 
-func run_training(TrainingConfig cfg) TrainingMetrics {
+func run_training(training_config cfg) training_metrics {
     println("🚀 Start LoRA SFT afterTraining")
     println("=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=")
     println("")
@@ -229,14 +229,14 @@ func run_training(TrainingConfig cfg) TrainingMetrics {
     println("")
     
     // initialize指标
-    TrainingMetrics metrics
+    training_metrics metrics
     metrics.total_loss = 0.0
     metrics.total_samples = 0
     metrics.current_epoch = 0
     metrics.current_step = 0
     
     // initializemodel
-    ModelState model = init_lora_adapter(768, 768, cfg.lora_rank, cfg.lora_alpha as float)
+    model_state model = init_lora_adapter(768, 768, cfg.lora_rank, cfg.lora_alpha as float)
     
     // Trainingloop
     println("🎓 Trainingenterlinein...")
@@ -311,7 +311,7 @@ func run_training(TrainingConfig cfg) TrainingMetrics {
 // Model saving
 // ============================================================================
 
-func save_model(ModelState model, string output_dir) int {
+func save_model(model_state model, string output_dir) int {
     println("  write adapter_model.safetensors...")
     println("  location: " + output_dir + "/adapter_model.safetensors")
     println("")
@@ -332,7 +332,7 @@ func save_model(ModelState model, string output_dir) int {
 // merge and export
 // ============================================================================
 
-func export_merged_model(ModelState model, string base_model_dir, string output_dir) int {
+func export_merged_model(model_state model, string base_model_dir, string output_dir) int {
     println("🔗 merge LoRA weights to basemodel...")
     println("")
     
@@ -363,10 +363,10 @@ func main() int {
     println("")
     
     // Load configuration
-    TrainingConfig cfg = load_config()
+    training_config cfg = load_config()
     
     // RunTraining
-    TrainingMetrics metrics = run_training(cfg)
+    training_metrics metrics = run_training(cfg)
     
     println("=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=")
     println("✨ afterTrainingcomplete!")

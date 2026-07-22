@@ -10,19 +10,19 @@ import (
     "../../../nn/activation"
 )
 
-// TransformerBlock represents a single transformer layer
-struct TransformerBlock {
-    attention       *MultiHeadAttention
-    ffn             *FeedForwardNetwork
-    norm1           *LayerNorm
-    norm2           *LayerNorm
+// transformer_block represents a single transformer layer
+struct transformer_block {
+    attention       *multi_head_attention
+    ffn             *feed_forward_network
+    norm1           *layer_norm
+    norm2           *layer_norm
     hiddenDim       int
     numHeads        int
     dropout         float32
 }
 
-// MultiHeadAttention structure
-struct MultiHeadAttention {
+// multi_head_attention structure
+struct multi_head_attention {
     queryProj    *tensor.Tensor  // d_model x d_k*numHeads
     keyProj      *tensor.Tensor
     valueProj    *tensor.Tensor
@@ -32,8 +32,8 @@ struct MultiHeadAttention {
     scale        float32
 }
 
-// FeedForwardNetwork structure (SwiGLU variant)
-struct FeedForwardNetwork {
+// feed_forward_network structure (SwiGLU variant)
+struct feed_forward_network {
     proj1        *tensor.Tensor  // hiddenDim x innerDim
     proj2        *tensor.Tensor  // innerDim x hiddenDim
     gateProj     *tensor.Tensor  // hiddenDim x innerDim
@@ -41,8 +41,8 @@ struct FeedForwardNetwork {
     hiddenDim    int
 }
 
-// LayerNorm structure
-struct LayerNorm {
+// layer_norm structure
+struct layer_norm {
     weight       *tensor.Tensor  // (hiddenDim)
     bias         *tensor.Tensor  // (hiddenDim)
     eps          float32
@@ -54,14 +54,14 @@ struct LayerNorm {
 // ============================================================
 
 // NewTransformerBlock creates a new transformer block
-func NewTransformerBlock(config TransformerConfig) *TransformerBlock {
+func NewTransformerBlock(config transformer_config) *transformer_block {
     hiddenDim := config.HiddenDim
     numHeads := config.NumHeads
     headDim := hiddenDim / numHeads
     innerDim := config.InnerDim
     
-    return &TransformerBlock{
-        attention: &MultiHeadAttention{
+    return &transformer_block{
+        attention: &multi_head_attention{
             queryProj: tensor.Randn(hiddenDim, headDim*numHeads),
             keyProj:   tensor.Randn(hiddenDim, headDim*numHeads),
             valueProj: tensor.Randn(hiddenDim, headDim*numHeads),
@@ -70,20 +70,20 @@ func NewTransformerBlock(config TransformerConfig) *TransformerBlock {
             headDim:   headDim,
             scale:     1.0 / sqrt(float32(headDim)),
         },
-        ffn: &FeedForwardNetwork{
+        ffn: &feed_forward_network{
             proj1:     tensor.Randn(hiddenDim, innerDim),
             proj2:     tensor.Randn(innerDim, hiddenDim),
             gateProj:  tensor.Randn(hiddenDim, innerDim),
             innerDim:  innerDim,
             hiddenDim: hiddenDim,
         },
-        norm1: &LayerNorm{
+        norm1: &layer_norm{
             weight:    tensor.Ones(hiddenDim),
             bias:      tensor.Zeros(hiddenDim),
             eps:       1e-5,
             hiddenDim: hiddenDim,
         },
-        norm2: &LayerNorm{
+        norm2: &layer_norm{
             weight:    tensor.Ones(hiddenDim),
             bias:      tensor.Zeros(hiddenDim),
             eps:       1e-5,
@@ -100,7 +100,7 @@ func NewTransformerBlock(config TransformerConfig) *TransformerBlock {
 // ============================================================
 
 // Forward performs the transformer block forward pass
-func (tb *TransformerBlock) Forward(x *tensor.Tensor, causalMask *tensor.Tensor) *tensor.Tensor {
+func (tb *transformer_block) Forward(x *tensor.Tensor, causalMask *tensor.Tensor) *tensor.Tensor {
     // Pre-normalization architecture
     
     // 1. Self-Attention with residual
@@ -117,7 +117,7 @@ func (tb *TransformerBlock) Forward(x *tensor.Tensor, causalMask *tensor.Tensor)
 }
 
 // selfAttention performs multi-head self-attention
-func (tb *TransformerBlock) selfAttention(x *tensor.Tensor, causalMask *tensor.Tensor) *tensor.Tensor {
+func (tb *transformer_block) selfAttention(x *tensor.Tensor, causalMask *tensor.Tensor) *tensor.Tensor {
     // x shape: (batchSize, seqLen, hiddenDim)
     batchSize := x.Shape[0]
     seqLen := x.Shape[1]
@@ -163,7 +163,7 @@ func (tb *TransformerBlock) selfAttention(x *tensor.Tensor, causalMask *tensor.T
 }
 
 // feedForward implements SwiGLU feed-forward network
-func (tb *TransformerBlock) feedForward(x *tensor.Tensor) *tensor.Tensor {
+func (tb *transformer_block) feedForward(x *tensor.Tensor) *tensor.Tensor {
     // x shape: (batchSize, seqLen, hiddenDim)
     
     // Gated linear unit with SwiGLU
@@ -189,7 +189,7 @@ func (tb *TransformerBlock) feedForward(x *tensor.Tensor) *tensor.Tensor {
 // ============================================================
 
 // Backward performs the transformer block backward pass
-func (tb *TransformerBlock) Backward(gradOutput *tensor.Tensor) (*tensor.Tensor, error) {
+func (tb *transformer_block) Backward(gradOutput *tensor.Tensor) (*tensor.Tensor, error) {
     // This is a placeholder - full implementation requires
     // computing gradients through both attention and FFN with proper
     // handling of residual connections and normalization gradients
@@ -214,13 +214,13 @@ func (tb *TransformerBlock) Backward(gradOutput *tensor.Tensor) (*tensor.Tensor,
     return gradInput, nil
 }
 
-func (tb *TransformerBlock) attentionBackward(gradOutput *tensor.Tensor) *tensor.Tensor {
+func (tb *transformer_block) attentionBackward(gradOutput *tensor.Tensor) *tensor.Tensor {
     // Backward pass through multi-head attention
     // Compute gradients w.r.t. query, key, value projections
     return gradOutput  // Placeholder
 }
 
-func (tb *TransformerBlock) ffnBackward(gradOutput *tensor.Tensor) *tensor.Tensor {
+func (tb *transformer_block) ffnBackward(gradOutput *tensor.Tensor) *tensor.Tensor {
     // Backward pass through feed-forward network
     // Compute gradients w.r.t. projections
     return gradOutput  // Placeholder
@@ -231,7 +231,7 @@ func (tb *TransformerBlock) ffnBackward(gradOutput *tensor.Tensor) *tensor.Tenso
 // ============================================================
 
 // Forward performs layer normalization
-func (ln *LayerNorm) Forward(x *tensor.Tensor) *tensor.Tensor {
+func (ln *layer_norm) Forward(x *tensor.Tensor) *tensor.Tensor {
     // Layer norm: (x - mean) / sqrt(var + eps) * weight + bias
     
     // Compute mean and variance over the last dimension
@@ -250,7 +250,7 @@ func (ln *LayerNorm) Forward(x *tensor.Tensor) *tensor.Tensor {
 }
 
 // Backward performs layer normalization backward pass
-func (ln *LayerNorm) Backward(gradOutput *tensor.Tensor) *tensor.Tensor {
+func (ln *layer_norm) Backward(gradOutput *tensor.Tensor) *tensor.Tensor {
     // Compute gradients for weight and bias
     // Return gradient w.r.t. input
     return gradOutput  // Placeholder
@@ -313,8 +313,8 @@ func sqrt(x float32) float32 {
 // Configuration
 // ============================================================
 
-// TransformerConfig holds transformer block configuration
-struct TransformerConfig {
+// transformer_config holds transformer block configuration
+struct transformer_config {
     HiddenDim      int
     NumHeads       int
     InnerDim       int      // Feed-forward inner dimension
@@ -325,8 +325,8 @@ struct TransformerConfig {
 }
 
 // DefaultTransformerConfig returns default configuration
-func DefaultTransformerConfig() TransformerConfig {
-    return TransformerConfig{
+func DefaultTransformerConfig() transformer_config {
+    return transformer_config{
         HiddenDim:      4096,
         NumHeads:       32,
         InnerDim:       11008,  // 2.67 * hiddenDim for SwiGLU

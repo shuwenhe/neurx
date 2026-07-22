@@ -156,7 +156,7 @@ func ListCheckpoints(config *training_config) {
     fmt.Println("")
     fmt.Println("--- checkpoint Files Generated ---")
 
-    filepath.Walk(config.CheckpointDir, func(path string, info os.FileInfo, err error) error {
+    filepath.Walk(config.CheckpointDir, func(path string, info os.file_info, err error) error {
         if err != nil {
             return nil
         }

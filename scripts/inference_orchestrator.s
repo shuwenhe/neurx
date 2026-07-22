@@ -42,7 +42,7 @@ struct inference_config {
 // Inference Orchestrator
 // ============================================================
 
-struct InferenceOrchestrator {
+struct inference_orchestrator {
     logger  Logger
     config  inference_config
     sCompiler string
@@ -50,8 +50,8 @@ struct InferenceOrchestrator {
 }
 
 // new_inference_orchestrator creates a new inference orchestrator
-func new_inference_orchestrator(modelPath string) (*InferenceOrchestrator, error) {
-    logger := new_logger("InferenceOrchestrator")
+func new_inference_orchestrator(modelPath string) (*inference_orchestrator, error) {
+    logger := new_logger("inference_orchestrator")
     
     neurxRoot := get_env("NEURX_ROOT", "")
     if neurxRoot == "" {
@@ -83,7 +83,7 @@ func new_inference_orchestrator(modelPath string) (*InferenceOrchestrator, error
         logDir:           filepath.Join(neurxRoot, "logs", "inference"),
     }
     
-    return &InferenceOrchestrator{
+    return &inference_orchestrator{
         logger:    logger,
         config:    config,
         sCompiler: sCompiler,
@@ -92,7 +92,7 @@ func new_inference_orchestrator(modelPath string) (*InferenceOrchestrator, error
 }
 
 // setup prepares inference environment
-func (i *InferenceOrchestrator) setup() error {
+func (i *inference_orchestrator) setup() error {
     i.logger.log("Setting up inference environment...")
     
     if err := mkdir(i.config.logDir); err != nil {
@@ -106,7 +106,7 @@ func (i *InferenceOrchestrator) setup() error {
 }
 
 // Compile compiles the inference server
-func (i *InferenceOrchestrator) Compile() error {
+func (i *inference_orchestrator) Compile() error {
     i.logger.log("Compiling inference server...")
     
     buildDir := filepath.Join(i.neurxRoot, ".build", "inference")
@@ -143,7 +143,7 @@ func (i *InferenceOrchestrator) Compile() error {
 }
 
 // start_server starts the inference server
-func (i *InferenceOrchestrator) start_server() error {
+func (i *inference_orchestrator) start_server() error {
     i.logger.log("Starting inference server...")
     
     binFile := filepath.Join(i.neurxRoot, ".build", "inference", "inference_server")
@@ -188,7 +188,7 @@ func (i *InferenceOrchestrator) start_server() error {
 }
 
 // interactive starts an interactive inference session
-func (i *InferenceOrchestrator) interactive() error {
+func (i *inference_orchestrator) interactive() error {
     i.logger.log("Starting interactive inference session...")
     
     binFile := filepath.Join(i.neurxRoot, ".build", "inference", "inference_interactive")
@@ -208,7 +208,7 @@ func (i *InferenceOrchestrator) interactive() error {
 }
 
 // chat starts a chat interface
-func (i *InferenceOrchestrator) chat() error {
+func (i *inference_orchestrator) chat() error {
     i.logger.log("Starting chat interface...")
     
     sourceFile := filepath.Join(i.neurxRoot, "tools", "chat.s")
@@ -252,7 +252,7 @@ func (i *InferenceOrchestrator) chat() error {
 }
 
 // benchmark runs inference benchmarks
-func (i *InferenceOrchestrator) benchmark() error {
+func (i *inference_orchestrator) benchmark() error {
     i.logger.log("Running inference benchmarks...")
     
     sourceFile := filepath.Join(i.neurxRoot, "eval", "benchmark_eval.s")
@@ -301,13 +301,13 @@ func (i *InferenceOrchestrator) benchmark() error {
 // Helper Functions
 // ============================================================
 
-func (i *InferenceOrchestrator) is_server_ready() bool {
+func (i *inference_orchestrator) is_server_ready() bool {
     // Try to connect to server port
     result := exec_command("curl", "-s", fmt.Sprintf("http://localhost:%d/health", i.config.port))
     return result.ExitCode == 0
 }
 
-func (i *InferenceOrchestrator) log_config() {
+func (i *inference_orchestrator) log_config() {
     config := fmt.Sprintf(`Inference Configuration
 Model: %s
 Backend: %s

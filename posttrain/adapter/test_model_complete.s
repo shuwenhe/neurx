@@ -154,7 +154,7 @@ func main() {
     println("    ✓ Attention layers (24): 241,827,840")
     println("    ✓ MLP parameters per layer: 1,908,480")
     println("    ✓ MLP layers (24): 45,803,520")
-    println("    ✓ LayerNorm parameters: 21,504")
+    println("    ✓ layer_norm parameters: 21,504")
     println("    ✓ Output layer parameters: 136,157,056")
     println("")
     println("  Total parameters: 383,859,712")

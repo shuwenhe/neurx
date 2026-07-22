@@ -7,7 +7,7 @@ package neurx.alignment.rlhf_framework
 // dataEnglish text
 // ============================================================================
 
-struct InstructionData {
+struct instruction_data {
     string instruction
     string response
     float quality_score
@@ -22,7 +22,7 @@ struct preference_data {
     float confidence
 }
 
-struct RLHFConfig {
+struct rlhf_config {
     // SFT configuration
     float sft_learning_rate
     int sft_epochs
@@ -48,7 +48,7 @@ struct RLHFConfig {
     float value_coef
 }
 
-struct SFTTrainState {
+struct sft_train_state {
     int epoch
     int batch
     float train_loss
@@ -57,7 +57,7 @@ struct SFTTrainState {
     int total_samples
 }
 
-struct RewardModelState {
+struct reward_model_state {
     int epoch
     int batch
     float train_loss
@@ -66,7 +66,7 @@ struct RewardModelState {
     float auc_score
 }
 
-struct PPOTrainState {
+struct ppo_train_state {
     int step
     int episode
     float policy_loss
@@ -75,7 +75,7 @@ struct PPOTrainState {
     float kl_divergence
 }
 
-struct AlignmentMetrics {
+struct alignment_metrics {
     float instruction_following_score
     float fluency_score
     float safety_score
@@ -88,8 +88,8 @@ struct AlignmentMetrics {
 // ============================================================================
 
 // initialize SFT trainingstate
-func init_sft_state() SFTTrainState {
-    SFTTrainState state
+func init_sft_state() sft_train_state {
+    sft_train_state state
     state.epoch = 0
     state.batch = 0
     state.train_loss = 0.0
@@ -100,7 +100,7 @@ func init_sft_state() SFTTrainState {
 }
 
 // loadEnglish textdata
-func load_instruction_data(string filename) InstructionData* {
+func load_instruction_data(string filename) instruction_data* {
     // English text JSONL fileload
     // {
     //   "instruction": "...",
@@ -108,7 +108,7 @@ func load_instruction_data(string filename) InstructionData* {
     //   "quality_score": 0.9
     // }
 
-    InstructionData* data = alloc(InstructionData, 100000)
+    instruction_data* data = alloc(instruction_data, 100000)
 
     // English textimplementation: English text
     data
@@ -116,11 +116,11 @@ func load_instruction_data(string filename) InstructionData* {
 
 // SFT trainingEnglish text
 func train_sft_epoch(
-    InstructionData* train_data, int train_size,
-    InstructionData* eval_data, int eval_size,
-    RLHFConfig config
-) SFTTrainState {
-    SFTTrainState state = init_sft_state()
+    instruction_data* train_data, int train_size,
+    instruction_data* eval_data, int eval_size,
+    rlhf_config config
+) sft_train_state {
+    sft_train_state state = init_sft_state()
 
     // 1. trainingphase
     int batch_idx = 0
@@ -135,7 +135,7 @@ func train_sft_epoch(
         }
 
         // English textbatch
-        InstructionData* batch = alloc(InstructionData, config.sft_batch_size)
+        instruction_data* batch = alloc(instruction_data, config.sft_batch_size)
         int batch_size = batch_end - batch_start
 
         int i = 0
@@ -171,7 +171,7 @@ func train_sft_epoch(
         }
 
         int batch_size = batch_end - batch_start
-        InstructionData* batch = alloc(InstructionData, batch_size)
+        instruction_data* batch = alloc(instruction_data, batch_size)
 
         int i = 0
         while i < batch_size {
@@ -194,12 +194,12 @@ func train_sft_epoch(
 }
 
 // SFT English text
-func sft_forward_pass(InstructionData* batch, int batch_size, RLHFConfig config) float {
+func sft_forward_pass(instruction_data* batch, int batch_size, rlhf_config config) float {
     float total_loss = 0.0
 
     int i = 0
     while i < batch_size {
-        InstructionData sample = batch[i]
+        instruction_data sample = batch[i]
 
         // English textresponse
         // tokens = tokenizer(instruction + response)
@@ -218,7 +218,7 @@ func sft_forward_pass(InstructionData* batch, int batch_size, RLHFConfig config)
 }
 
 // SFT English text
-func sft_backward_pass(InstructionData* batch, int batch_size, RLHFConfig config, float loss) void {
+func sft_backward_pass(instruction_data* batch, int batch_size, rlhf_config config, float loss) void {
     // computegradientEnglish textparameter
     // implementation: Adam optimizeEnglish text
 }
@@ -228,8 +228,8 @@ func sft_backward_pass(InstructionData* batch, int batch_size, RLHFConfig config
 // ============================================================================
 
 // initializerewardmodelstate
-func init_reward_model_state() RewardModelState {
-    RewardModelState state
+func init_reward_model_state() reward_model_state {
+    reward_model_state state
     state.epoch = 0
     state.batch = 0
     state.train_loss = 0.0
@@ -257,9 +257,9 @@ func load_preference_data(string filename) preference_data* {
 func train_reward_model_epoch(
     preference_data* train_data, int train_size,
     preference_data* eval_data, int eval_size,
-    RLHFConfig config
-) RewardModelState {
-    RewardModelState state = init_reward_model_state()
+    rlhf_config config
+) reward_model_state {
+    reward_model_state state = init_reward_model_state()
 
     // 1. training
     int batch_idx = 0
@@ -392,7 +392,7 @@ func train_reward_model_epoch(
 }
 
 // rewardmodelEnglish text
-func reward_model_forward(string text, RLHFConfig config) float {
+func reward_model_forward(string text, rlhf_config config) float {
     // English text
     // logits = model(tokens)
     // reward = scalar_output(logits)
@@ -426,7 +426,7 @@ func log_sigmoid(float x) float {
 }
 
 // rewardmodelEnglish text
-func reward_model_backward(preference_data* batch, int batch_size, RLHFConfig config) void {
+func reward_model_backward(preference_data* batch, int batch_size, rlhf_config config) void {
     // computegradientEnglish textuse Adam optimizeEnglish text
 }
 
@@ -435,8 +435,8 @@ func reward_model_backward(preference_data* batch, int batch_size, RLHFConfig co
 // ============================================================================
 
 // initialize PPO state
-func init_ppo_state() PPOTrainState {
-    PPOTrainState state
+func init_ppo_state() ppo_train_state {
+    ppo_train_state state
     state.step = 0
     state.episode = 0
     state.policy_loss = 0.0
@@ -449,10 +449,10 @@ func init_ppo_state() PPOTrainState {
 // PPO trainingstepEnglish text
 func ppo_train_step(
     string prompt,
-    RLHFConfig config,
+    rlhf_config config,
     float reward_model_score
-) PPOTrainState {
-    PPOTrainState state = init_ppo_state()
+) ppo_train_state {
+    ppo_train_state state = init_ppo_state()
 
     // 1. English text
     // useEnglish textgenerateresponse
@@ -495,26 +495,26 @@ func ppo_train_step(
 }
 
 // English textgenerate
-func policy_generate(string prompt, RLHFConfig config) string {
+func policy_generate(string prompt, rlhf_config config) string {
     // usemodelEnglish textgenerateresponse
     // implementation: English textmodelinferenceEnglish text
     "generated response"
 }
 
 // English text
-func get_value_estimate(string prompt, RLHFConfig config) float {
+func get_value_estimate(string prompt, rlhf_config config) float {
     // English text
     0.5
 }
 
 // compute log English text
-func compute_log_prob(string text, RLHFConfig config) float {
+func compute_log_prob(string text, rlhf_config config) float {
     // computegenerateEnglish text log English text
     0.0
 }
 
 // computeEnglish text log English text
-func compute_log_prob_old(string text, RLHFConfig config) float {
+func compute_log_prob_old(string text, rlhf_config config) float {
     // useEnglish textcompute
     0.0
 }
@@ -524,8 +524,8 @@ func compute_log_prob_old(string text, RLHFConfig config) float {
 // ============================================================================
 
 // computealignmentEnglish text
-func evaluate_alignment(string prompt, string response) AlignmentMetrics {
-    AlignmentMetrics metrics
+func evaluate_alignment(string prompt, string response) alignment_metrics {
+    alignment_metrics metrics
 
     // 1. English text
     metrics.instruction_following_score = evaluate_instruction_following(prompt, response)
@@ -640,7 +640,7 @@ func main() {
 
     // 1. SFT phase
     println("\nPhase 1: Supervised Fine-Tuning (SFT)")
-    RLHFConfig config
+    rlhf_config config
     config.sft_learning_rate = 0.0001
     config.sft_epochs = 3
     config.sft_batch_size = 32
@@ -648,7 +648,7 @@ func main() {
     config.max_seq_length = 4096
 
     // loaddata
-    InstructionData* sft_data = load_instruction_data("instructions.jsonl")
+    instruction_data* sft_data = load_instruction_data("instructions.jsonl")
 
     println("Training SFT model...")
     // SFT trainingEnglish textrun
@@ -676,14 +676,14 @@ func main() {
     println("Starting PPO training...")
 
     // example PPO stepEnglish text
-    PPOTrainState state = ppo_train_step("What is machine learning?", config, 0.8)
+    ppo_train_state state = ppo_train_step("What is machine learning?", config, 0.8)
     println("Policy Loss: " + float_to_string(state.policy_loss))
     println("Value Loss: " + float_to_string(state.value_loss))
     println("Reward: " + float_to_string(state.reward))
 
     // 4. alignmentevaluation
     println("\nPhase 4: Alignment Evaluation")
-    AlignmentMetrics metrics = evaluate_alignment(
+    alignment_metrics metrics = evaluate_alignment(
         "Explain quantum computing",
         "Quantum computing is a revolutionary computing paradigm..."
     )

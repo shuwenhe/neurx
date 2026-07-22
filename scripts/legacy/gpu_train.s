@@ -48,7 +48,7 @@ extern func cuda_relu_backward(int64 grad_in, int64 grad_out, int64 in, int size
 // GPU Training Context
 // ============================================================================
 
-struct GPUContext {
+struct gpu_context {
     int64 cublas_handle
     bool initialized
     int batch_size
@@ -57,7 +57,7 @@ struct GPUContext {
     float learning_rate
 }
 
-struct GPUBuffer {
+struct gpu_buffer {
     int64 device_ptr
     int size_bytes
     int element_count
@@ -89,7 +89,7 @@ func main() {
     println("")
     
     // Initialize GPU context
-    GPUContext ctx = init_gpu_context(batch_size, seq_len, hidden_dim, lr)
+    gpu_context ctx = init_gpu_context(batch_size, seq_len, hidden_dim, lr)
     if !ctx.initialized {
         println("[ERROR] Failed to initialize GPU context")
         return
@@ -149,13 +149,13 @@ func main() {
 // GPU Context Management
 // ============================================================================
 
-func init_gpu_context(int batch_size, int seq_len, int hidden_dim, float lr) GPUContext {
+func init_gpu_context(int batch_size, int seq_len, int hidden_dim, float lr) gpu_context {
     println("[GPU] Initializing CUDA context...")
     
     int64 handle = cublasCreate()
     if handle == 0 {
         println("[ERROR] Failed to create cuBLAS handle")
-        return GPUContext{
+        return gpu_context{
             cublas_handle: 0,
             initialized: false,
             batch_size: batch_size,
@@ -167,7 +167,7 @@ func init_gpu_context(int batch_size, int seq_len, int hidden_dim, float lr) GPU
     
     println("[GPU] cuBLAS handle created: " + int64_to_str(handle))
     
-    GPUContext{
+    gpu_context{
         cublas_handle: handle,
         initialized: true,
         batch_size: batch_size,
@@ -177,7 +177,7 @@ func init_gpu_context(int batch_size, int seq_len, int hidden_dim, float lr) GPU
     }
 }
 
-func cleanup_gpu_context(GPUContext ctx) {
+func cleanup_gpu_context(gpu_context ctx) {
     if ctx.initialized && ctx.cublas_handle != 0 {
         println("[GPU] Destroying CUDA context...")
         cublasDestroy(ctx.cublas_handle)
@@ -188,7 +188,7 @@ func cleanup_gpu_context(GPUContext ctx) {
 // GPU Memory Management
 // ============================================================================
 
-func allocate_gpu_buffer(int element_count, int element_size) GPUBuffer {
+func allocate_gpu_buffer(int element_count, int element_size) gpu_buffer {
     int total_bytes = element_count * element_size
     println("[GPU] Allocating " + int_to_str(total_bytes) + " bytes")
     
@@ -197,14 +197,14 @@ func allocate_gpu_buffer(int element_count, int element_size) GPUBuffer {
         println("[ERROR] CUDA malloc failed")
     }
     
-    GPUBuffer{
+    gpu_buffer{
         device_ptr: ptr,
         size_bytes: total_bytes,
         element_count: element_count,
     }
 }
 
-func free_gpu_buffer(GPUBuffer buf) {
+func free_gpu_buffer(gpu_buffer buf) {
     if buf.device_ptr != 0 {
         cuda_free(buf.device_ptr)
         println("[GPU] Freed " + int_to_str(buf.size_bytes) + " bytes")
@@ -216,7 +216,7 @@ func free_gpu_buffer(GPUBuffer buf) {
 // ============================================================================
 
 func process_shard_gpu(
-    GPUContext ctx,
+    gpu_context ctx,
     string shard_path,
     int start_step,
     int max_steps,
@@ -239,10 +239,10 @@ func process_shard_gpu(
     
     while batch_idx < line_count && (start_step + steps) < max_steps {
         // Load batch to GPU
-        GPUBuffer batch_input = allocate_gpu_buffer(ctx.batch_size * ctx.seq_len, 4)
-        GPUBuffer batch_target = allocate_gpu_buffer(ctx.batch_size * ctx.seq_len, 4)
-        GPUBuffer batch_output = allocate_gpu_buffer(ctx.batch_size * ctx.seq_len, 4)
-        GPUBuffer batch_grads = allocate_gpu_buffer(ctx.batch_size * ctx.seq_len, 4)
+        gpu_buffer batch_input = allocate_gpu_buffer(ctx.batch_size * ctx.seq_len, 4)
+        gpu_buffer batch_target = allocate_gpu_buffer(ctx.batch_size * ctx.seq_len, 4)
+        gpu_buffer batch_output = allocate_gpu_buffer(ctx.batch_size * ctx.seq_len, 4)
+        gpu_buffer batch_grads = allocate_gpu_buffer(ctx.batch_size * ctx.seq_len, 4)
         
         // Forward pass on GPU
         println("  [Forward] Batch " + int_to_str(batch_idx))
