@@ -407,7 +407,19 @@ test-checkpoint-resume: check-bash
 	@mkdir -p $(CURDIR_UNIX)/tests
 	@bash $(CURDIR_UNIX)/tests/checkpoint_resume_e2e.sh
 
-posttrain: check-bash build-s-ir-runner
+POSTTRAIN_PYTHON ?= $(firstword $(wildcard /home/shuwen/venv/bin/python $(CURDIR_UNIX)/.venv/bin/python) python3)
+
+posttrain: check-bash
+	@echo "Starting real Qwen LoRA/SFT post-training..."
+	@mkdir -p '$(POSTTRAIN_OUTPUT_DIR)' '$(LOG_DIR)'
+	@cd '$(CURDIR_UNIX)' && \
+		set -o pipefail; \
+		NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)' \
+		NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)' \
+		NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)' \
+		'$(POSTTRAIN_PYTHON)' scripts/real_lora_sft.py 2>&1 | tee -a '$(LOG_DIR)/posttrain_real_$(shell date +%Y%m%d_%H%M%S).log'
+
+posttrain-simulated: check-bash build-s-ir-runner
 	@echo "Building NeurX posttrain entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/posttrain
 	@if ! [ -x "$(POSTTRAIN_S_COMPILER)" ] && ! command -v "$(POSTTRAIN_S_COMPILER)" >/dev/null 2>&1; then \
