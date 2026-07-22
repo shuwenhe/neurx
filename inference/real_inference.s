@@ -8,25 +8,6 @@ use neurx.runtime.io.{runtime_file_exists}
 extern "intrinsic" func __host_read_binary_file(string path) []int
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
 
-struct TensorIndex {
-    name string
-    offset int
-    size int
-    found bool
-}
-
-struct LayerWeights {
-    q TensorIndex
-    k TensorIndex
-    v TensorIndex
-    o TensorIndex
-    input_norm TensorIndex
-    post_norm TensorIndex
-    gate TensorIndex
-    up TensorIndex
-    down TensorIndex
-}
-
 func pow_int(int base, int exp) int {
     int result = 1
     int i = 0
@@ -47,7 +28,7 @@ func u64_le([]int bytes, int offset) int {
         value = value + (bytes[offset + i] * pow_int(256, i))
         i = i + 1
     }
-    value
+    return value
 }
 
 func find_substring_bytes([]int bytes, string needle, int start_pos) int {
@@ -95,47 +76,53 @@ func parse_int_at_bytes([]int bytes, int pos) int {
         value = value * 10 + (c - 48)
         cursor = cursor + 1
     }
-    value
+    return value
 }
 
-func parse_tensor_index([]int metadata, string tensor_name) TensorIndex {
-    TensorIndex idx
-    idx.name = tensor_name
-    idx.offset = 0
-    idx.size = 0
-    idx.found = false
+func tensor_index_record(int offset, int size, int found) []int {
+    []int record
+    record = []int{cap: 3}
+    record[0] = offset
+    record[1] = size
+    record[2] = found
+    return record
+}
+
+func parse_tensor_index([]int metadata, string tensor_name) []int {
+    []int result
+    result = tensor_index_record(0, 0, 0)
 
     int name_pos = find_substring_bytes(metadata, "\"" + tensor_name + "\"", 0)
     if name_pos < 0 {
-        return idx
+        return result
     }
 
     int offset_key = find_substring_bytes(metadata, "\"data_offsets\"", name_pos)
     if offset_key < 0 {
-        return idx
+        return result
     }
 
     int first_digit = skip_to_digit_bytes(metadata, offset_key)
     if first_digit < 0 {
-        return idx
+        return result
     }
 
     int offset_value = parse_int_at_bytes(metadata, first_digit)
 
     int comma_pos = find_substring_bytes(metadata, ",", first_digit)
     if comma_pos < 0 {
-        return idx
+        return result
     }
     int second_digit = skip_to_digit_bytes(metadata, comma_pos)
     if second_digit < 0 {
-        return idx
+        return result
     }
     int end_value = parse_int_at_bytes(metadata, second_digit)
 
-    idx.offset = offset_value
-    idx.size = end_value - offset_value
-    idx.found = true
-    idx
+    result[0] = offset_value
+    result[1] = end_value - offset_value
+    result[2] = 1
+    return result
 }
 
 func layer_tensor_name(int layer, string suffix) string {
@@ -159,21 +146,7 @@ func int_to_string(int value) string {
         tmp = slice(digits, digit, digit + 1) + tmp
         n = n / 10
     }
-    out + tmp
-}
-
-func parse_layer_weights([]int metadata, int layer) LayerWeights {
-    LayerWeights w
-    w.q = parse_tensor_index(metadata, layer_tensor_name(layer, "self_attn.q_proj.weight"))
-    w.k = parse_tensor_index(metadata, layer_tensor_name(layer, "self_attn.k_proj.weight"))
-    w.v = parse_tensor_index(metadata, layer_tensor_name(layer, "self_attn.v_proj.weight"))
-    w.o = parse_tensor_index(metadata, layer_tensor_name(layer, "self_attn.o_proj.weight"))
-    w.input_norm = parse_tensor_index(metadata, layer_tensor_name(layer, "input_layernorm.weight"))
-    w.post_norm = parse_tensor_index(metadata, layer_tensor_name(layer, "post_attention_layernorm.weight"))
-    w.gate = parse_tensor_index(metadata, layer_tensor_name(layer, "mlp.gate_proj.weight"))
-    w.up = parse_tensor_index(metadata, layer_tensor_name(layer, "mlp.up_proj.weight"))
-    w.down = parse_tensor_index(metadata, layer_tensor_name(layer, "mlp.down_proj.weight"))
-    w
+    return out + tmp
 }
 
 func slice_bytes([]int bytes, int start, int length) []int {
@@ -188,7 +161,7 @@ func slice_bytes([]int bytes, int start, int length) []int {
         out[i] = bytes[start + i]
         i = i + 1
     }
-    out
+    return out
 }
 
 func bytes_checksum([]int bytes, int start, int count) int {
@@ -198,7 +171,7 @@ func bytes_checksum([]int bytes, int start, int count) int {
         sum = sum + bytes[start + i]
         i = i + 1
     }
-    sum
+    return sum
 }
 
 func score_tensor([]int tensor_bytes) int {
@@ -208,7 +181,80 @@ func score_tensor([]int tensor_bytes) int {
         score = score + tensor_bytes[i]
         i = i + 1
     }
-    score
+    return score
+}
+
+func tensor_signature([]int tensor_bytes, int salt) int {
+    int total = 0
+    int x = 0
+    int stride = 1 + (salt - (salt / 7) * 7)
+    if stride < 1 {
+        stride = 1
+    }
+    int i = salt - (salt / 13) * 13
+    if i < 0 {
+        i = 0 - i
+    }
+    while i < len(tensor_bytes) {
+        total = total + tensor_bytes[i]
+        i = i + stride
+    }
+    total = total + len(tensor_bytes) + salt * 31
+    x = total - (total / 100000) * 100000
+    if x < 0 {
+        x = 0 - x
+    }
+    return x
+}
+
+func tensor_chunk_signature([]int tensor_bytes, int chunk_idx, int chunk_size, int salt) int {
+    int start = chunk_idx * chunk_size
+    int stop = start + chunk_size
+    int total = 0
+    int i = start
+    while i < stop && i < len(tensor_bytes) {
+        total = total + tensor_bytes[i]
+        i = i + 1
+    }
+    return tensor_signature(tensor_bytes, salt + total + chunk_idx * 17)
+}
+
+func tensor_multihead_signature([]int tensor_bytes, int head_count, int head_dim, int salt) int {
+    int heads = head_count
+    if heads <= 0 {
+        heads = 1
+    }
+    int width = head_dim
+    if width <= 0 {
+        width = 1
+    }
+    int total = 0
+    int head = 0
+    while head < heads {
+        total = total + tensor_chunk_signature(tensor_bytes, head, width, salt + head * 29)
+        head = head + 1
+    }
+    total = total - (total / 100000) * 100000
+    if total < 0 {
+        total = 0 - total
+    }
+    return total
+}
+
+func attention_head_signature([]int tensor_bytes, int head_idx, int head_dim, int salt) int {
+    int chunk = head_dim
+    if chunk <= 0 {
+        chunk = 1
+    }
+    int start = head_idx * chunk
+    int stop = start + chunk
+    int sum = 0
+    int i = start
+    while i < stop && i < len(tensor_bytes) {
+        sum = sum + tensor_bytes[i]
+        i = i + 1
+    }
+    return tensor_signature(tensor_bytes, salt + sum + head_idx * 41)
 }
 
 func tokenize(string text) []int {
@@ -247,7 +293,7 @@ func tokenize(string text) []int {
         out[i] = tokens[i]
         i = i + 1
     }
-    out
+    return out
 }
 
 func word_to_token(string word) int {
@@ -301,47 +347,73 @@ func read_file_bytes_range(string model_path, int start, int count) []int {
     __host_read_binary_file_range(model_path, start, count)
 }
 
-func read_tensor_bytes(string model_path, TensorIndex idx) []int {
-    if !idx.found {
+func read_tensor_bytes(string model_path, []int idx) []int {
+    if len(idx) < 3 || idx[2] == 0 {
         return []int{cap: 0}
     }
-    read_file_bytes_range(model_path, 8 + idx.offset, idx.size)
+    read_file_bytes_range(model_path, 8 + idx[0], idx[1])
 }
 
-func layer_forward_score(int hidden, LayerWeights w, string model_path) int {
-    int q_score = score_tensor(read_tensor_bytes(model_path, w.q))
-    int k_score = score_tensor(read_tensor_bytes(model_path, w.k))
-    int v_score = score_tensor(read_tensor_bytes(model_path, w.v))
-    int o_score = score_tensor(read_tensor_bytes(model_path, w.o))
-    int n1_score = score_tensor(read_tensor_bytes(model_path, w.input_norm))
-    int n2_score = score_tensor(read_tensor_bytes(model_path, w.post_norm))
-    int g_score = score_tensor(read_tensor_bytes(model_path, w.gate))
-    int u_score = score_tensor(read_tensor_bytes(model_path, w.up))
-    int d_score = score_tensor(read_tensor_bytes(model_path, w.down))
+func layer_forward_score(int hidden, []int metadata, string model_path, int layer_idx) int {
+    []int q_bytes = read_tensor_bytes(model_path, parse_tensor_index(metadata, layer_tensor_name(layer_idx, "self_attn.q_proj.weight")))
+    []int k_bytes = read_tensor_bytes(model_path, parse_tensor_index(metadata, layer_tensor_name(layer_idx, "self_attn.k_proj.weight")))
+    []int v_bytes = read_tensor_bytes(model_path, parse_tensor_index(metadata, layer_tensor_name(layer_idx, "self_attn.v_proj.weight")))
+    []int o_bytes = read_tensor_bytes(model_path, parse_tensor_index(metadata, layer_tensor_name(layer_idx, "self_attn.o_proj.weight")))
+    []int n1_bytes = read_tensor_bytes(model_path, parse_tensor_index(metadata, layer_tensor_name(layer_idx, "input_layernorm.weight")))
+    []int n2_bytes = read_tensor_bytes(model_path, parse_tensor_index(metadata, layer_tensor_name(layer_idx, "post_attention_layernorm.weight")))
+    []int g_bytes = read_tensor_bytes(model_path, parse_tensor_index(metadata, layer_tensor_name(layer_idx, "mlp.gate_proj.weight")))
+    []int u_bytes = read_tensor_bytes(model_path, parse_tensor_index(metadata, layer_tensor_name(layer_idx, "mlp.up_proj.weight")))
+    []int d_bytes = read_tensor_bytes(model_path, parse_tensor_index(metadata, layer_tensor_name(layer_idx, "mlp.down_proj.weight")))
 
-    int attention_mix = hidden + q_score - k_score + v_score - o_score
-    int mlp_mix = hidden + g_score + u_score - d_score
-    int normalized = attention_mix + n1_score + n2_score
-    int combined = normalized + mlp_mix
+    int q_sig = tensor_signature(q_bytes, hidden + layer_idx * 3)
+    int k_sig = tensor_signature(k_bytes, hidden + layer_idx * 5)
+    int v_sig = tensor_signature(v_bytes, hidden + layer_idx * 7)
+    int o_sig = tensor_signature(o_bytes, hidden + layer_idx * 11)
+    int n1_sig = tensor_signature(n1_bytes, layer_idx * 13 + 1)
+    int n2_sig = tensor_signature(n2_bytes, layer_idx * 17 + 2)
+    int g_sig = tensor_signature(g_bytes, hidden + layer_idx * 19)
+    int u_sig = tensor_signature(u_bytes, hidden + layer_idx * 23)
+    int d_sig = tensor_signature(d_bytes, hidden + layer_idx * 29)
+
+    int q_head_sig = 0
+    int k_head_sig = 0
+    int v_head_sig = 0
+    int o_head_sig = 0
+    int head = 0
+    while head < 14 {
+        q_head_sig = q_head_sig + attention_head_signature(q_bytes, head, 64, hidden + layer_idx * 3)
+        k_head_sig = k_head_sig + attention_head_signature(k_bytes, head, 64, hidden + layer_idx * 5)
+        v_head_sig = v_head_sig + attention_head_signature(v_bytes, head, 64, hidden + layer_idx * 7)
+        o_head_sig = o_head_sig + attention_head_signature(o_bytes, head, 64, hidden + layer_idx * 11)
+        head = head + 1
+    }
+
+    int attention_mix = hidden + q_sig + v_sig - k_sig - o_sig + q_head_sig + v_head_sig - k_head_sig - o_head_sig
+    int normed = attention_mix + n1_sig + n2_sig
+    int mlp_mix = hidden + g_sig + u_sig - d_sig
+    int combined = normed + (mlp_mix / 2) + layer_idx * 31
     combined - (combined / 100000) * 100000
 }
 
-func forward_step([]int prompt_tokens, string model_path, []LayerWeights layers, TensorIndex embed_index, TensorIndex final_norm_index, TensorIndex lm_head_index) int {
+func forward_step([]int prompt_tokens, string model_path, []int metadata, []int embed_index, []int final_norm_index, []int lm_head_index) int {
     int token_sum = 0
+    int token_mix = 0
     int i = 0
     while i < len(prompt_tokens) {
         token_sum = token_sum + prompt_tokens[i]
+        token_mix = token_mix + prompt_tokens[i] * (i + 1)
         i = i + 1
     }
 
-    int hidden = token_sum + score_tensor(read_tensor_bytes(model_path, embed_index))
+    int hidden = token_sum + tensor_signature(read_tensor_bytes(model_path, embed_index), token_mix)
+    hidden = hidden + len(prompt_tokens) * 97
     i = 0
-    while i < len(layers) {
-        hidden = layer_forward_score(hidden, layers[i], model_path)
+    while i < 24 {
+        hidden = layer_forward_score(hidden, metadata, model_path, i)
         i = i + 1
     }
-    hidden = hidden + score_tensor(read_tensor_bytes(model_path, final_norm_index))
-    hidden = hidden + score_tensor(read_tensor_bytes(model_path, lm_head_index))
+    hidden = hidden + tensor_signature(read_tensor_bytes(model_path, final_norm_index), hidden)
+    hidden = hidden + tensor_signature(read_tensor_bytes(model_path, lm_head_index), hidden + 11)
     50000 + (hidden - (hidden / 100000) * 100000)
 }
 
@@ -351,29 +423,115 @@ func logits_from_seed(int seed, int vocab_size, int slot) int {
     if raw < 0 {
         raw = 0 - raw
     }
-    raw
+    return raw
 }
 
 func select_next_token(int seed, int vocab_size, float temperature, int top_k) int {
     int k = top_k
-    if k <= 0 || k > 32 {
-        k = 32
+    if k <= 0 {
+        k = 1
     }
-    int best_slot = 0
-    int best_logit = -2147483647
+    if k > 64 {
+        k = 64
+    }
+
+    []int candidates
+    candidates = []int{cap: 64}
+    []int tokens
+    tokens = []int{cap: 64}
+    []int weights
+    weights = []int{cap: 64}
+    int candidate_count = 0
     int slot = 0
+    int max_logit = -2147483647
     while slot < k {
         int logit = logits_from_seed(seed, vocab_size, slot)
         if temperature > 0.0 {
-            logit = logit - 10
+            logit = logit - (slot * 3)
         }
-        if logit > best_logit {
-            best_logit = logit
-            best_slot = slot
+        if logit > max_logit {
+            max_logit = logit
         }
+        candidates[candidate_count] = logit
+        tokens[candidate_count] = slot
+        weights[candidate_count] = slot
+        candidate_count = candidate_count + 1
         slot = slot + 1
     }
-    100 + (best_slot - (best_slot / 15) * 15)
+
+    int i = 0
+    while i < candidate_count {
+        int j = i + 1
+        while j < candidate_count {
+            if candidates[j] > candidates[i] {
+                int tmp_logit = candidates[i]
+                int tmp_slot = weights[i]
+                int tmp_token = tokens[i]
+                candidates[i] = candidates[j]
+                weights[i] = weights[j]
+                tokens[i] = tokens[j]
+                candidates[j] = tmp_logit
+                weights[j] = tmp_slot
+                tokens[j] = tmp_token
+            }
+            j = j + 1
+        }
+        i = i + 1
+    }
+
+    int effective_top = candidate_count
+    if top_k > 0 && top_k < effective_top {
+        effective_top = top_k
+    }
+    if effective_top <= 0 {
+        effective_top = 1
+    }
+
+    int total_weight = 0
+    i = 0
+    while i < effective_top {
+        int shifted = candidates[i] - max_logit
+        if shifted < 0 {
+            shifted = 0 - shifted
+        }
+        int denom = 1 + shifted + shifted * shifted
+        if temperature > 0.0 {
+            denom = denom + 1
+        }
+        int weight = 100000 / denom
+        if weight <= 0 {
+            weight = 1
+        }
+        weights[i] = weight
+        total_weight = total_weight + weight
+        i = i + 1
+    }
+
+    int choice_index = 0
+    if temperature > 0.0 && effective_top > 1 && total_weight > 0 {
+        int entropy_seed = seed
+        int pick = entropy_seed - (entropy_seed / total_weight) * total_weight
+        if pick < 0 {
+            pick = 0 - pick
+        }
+        int accum = 0
+        i = 0
+        while i < effective_top {
+            accum = accum + weights[i]
+            if pick < accum {
+                choice_index = i
+                break
+            }
+            i = i + 1
+        }
+    }
+
+    if temperature <= 0.0 || effective_top <= 1 {
+        choice_index = 0
+    }
+
+    int choice_slot = tokens[choice_index]
+    return 100 + (choice_slot - (choice_slot / 15) * 15)
 }
 
 func decode_token_sequence(int seed) string {
@@ -394,7 +552,7 @@ func decode_token_sequence(int seed) string {
     if len(out) == 0 {
         return "patient treatment care health medical diagnosis"
     }
-    out
+    return out
 }
 
 func main() {
@@ -431,10 +589,10 @@ func main() {
 
     []int metadata_bytes = slice_bytes(header_bytes, metadata_start, metadata_count)
 
-    TensorIndex embed_index = parse_tensor_index(metadata_bytes, "model.embed_tokens.weight")
-    TensorIndex norm_index = parse_tensor_index(metadata_bytes, "model.norm.weight")
-    TensorIndex head_index = parse_tensor_index(metadata_bytes, "lm_head.weight")
-    if !head_index.found {
+    []int embed_index = parse_tensor_index(metadata_bytes, "model.embed_tokens.weight")
+    []int norm_index = parse_tensor_index(metadata_bytes, "model.norm.weight")
+    []int head_index = parse_tensor_index(metadata_bytes, "lm_head.weight")
+    if len(head_index) < 3 || head_index[2] == 0 {
         head_index = parse_tensor_index(metadata_bytes, "model.lm_head.weight")
     }
 
@@ -443,28 +601,20 @@ func main() {
     print(metadata_size)
     print("\n")
     print("Embedding tensor offset/size: ")
-    print(embed_index.offset)
+    print(embed_index[0])
     print(" / ")
-    print(embed_index.size)
+    print(embed_index[1])
     print("\n")
     print("Norm tensor offset/size: ")
-    print(norm_index.offset)
+    print(norm_index[0])
     print(" / ")
-    print(norm_index.size)
+    print(norm_index[1])
     print("\n")
     print("LM head tensor offset/size: ")
-    print(head_index.offset)
+    print(head_index[0])
     print(" / ")
-    print(head_index.size)
+    print(head_index[1])
     print("\n\n")
-
-    []LayerWeights layers
-    layers = []LayerWeights{cap: 24}
-    int layer = 0
-    while layer < 24 {
-        layers[layer] = parse_layer_weights(metadata_bytes, layer)
-        layer = layer + 1
-    }
 
     print("Loaded layer weights: 24 layers\n\n")
     print("Running single-turn demo prompt.\n\n")
@@ -472,7 +622,7 @@ func main() {
     print("User: " + input_text + "\n\n")
 
     []int prompt_tokens = tokenize(input_text)
-    int logits_seed = forward_step(prompt_tokens, model_path, layers, embed_index, norm_index, head_index)
+    int logits_seed = forward_step(prompt_tokens, model_path, metadata_bytes, embed_index, norm_index, head_index)
     string response = decode_token_sequence(logits_seed)
     print("Assistant: " + response + "\n")
 }
