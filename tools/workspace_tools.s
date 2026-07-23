@@ -605,7 +605,7 @@ func agent_workspace_patch_file(string path, string old_text, string new_text, b
 func agent_workspace_repo_map(int max_files) string {
     string root = agent_workspace_root()
     string cap_str = string(max_files)
-    string cmd = "find " + runtime_shell_escape(root) + " -type f \\( -name '*.s' -o -name '*.md' -o -name 'CMakeLists.txt' -o -name 'Makefile' \\) -not -path '*/.git/*' -not -path '*/build/*' -not -path '*/node_modules/*' | sort | head -" + cap_str
+    string cmd = "find " + runtime_shell_escape(root) + " -type f \\( -name '*.s' -o -name '*.md' -o -name 'CMakeLists.txt' -o -name 'Makefile' \\) -not -path '*/.gitbuildnode_modules/*' | sort | head -" + cap_str
     string output = runtime_run_command_output(cmd)
     if trim(output) == "" {
         return agent_workspace_observation("repo_map", "no_progress", "reason=empty")

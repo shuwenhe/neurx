@@ -811,7 +811,7 @@ class WebSearchExecutor implements ToolExecutor {
     async execute(args) {
 
         mock_results = [
-            {"title": f"Result for: {args['query']}", "url": "https://example.com", "snippet": "This is search result content..."}
+            {"title": f"Result for: {args['query']}", "url": "https:
         ]
         return tool_call_result{
             success=true,

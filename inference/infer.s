@@ -415,14 +415,14 @@ func infer_remote_descriptor_backend(string model_path) string {
     if backend != "" {
         return lower(trim(backend))
     }
-    if infer_text_contains(model_path, "url=http://") || infer_text_contains(model_path, "url=https://") {
+    if infer_text_contains(model_path, "url=http:
         return "remote"
     }
     ""
 }
 
 func infer_remote_response_text(string response_path) string {
-    string parser = "jq -r '.choices[0].message.content // .choices[0].text // \"\"' " + runtime_shell_escape(response_path) + " 2>/dev/null"
+    string parser = "jq -r '.choices[0].message.content 
     trim(runtime_run_command_output(parser))
 }
 

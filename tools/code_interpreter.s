@@ -519,7 +519,7 @@ class JavaScriptRuntime {
                     try {
                         ${code}
 
-                        // Capture last expression value (simplified)
+                        
                         const __result = typeof __last_expression !== 'undefined' ? __last_expression : undefined;
                         console.log = originalLog;
                         return { output: __output.join('\\n'), returnValue: __result };

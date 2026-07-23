@@ -300,13 +300,13 @@ func (t *train_orchestrator) generateTrainingSource(outputPath string) error {
 
     scaleConfig := get_scale_config(t.config.scale)
 
-    source := fmt.Sprintf(`// Auto-generated training source
+    source := fmt.Sprintf(`
 package main
 
 import "fmt"
 
 func main() {
-    // Training configuration for %s scale
+    
     params := %d
     gpus := %d
     batchSize := %d
@@ -322,7 +322,7 @@ func main() {
     fmt.Printf("  Sequence Length: %%d\\n", seqLen)
     fmt.Printf("  Layers: %%d\\n", layers)
 
-    // Training loop would go here
+    
     fmt.Println("Training loop started...")
 }
 `, scaleString(t.config.scale), scaleConfig.params, scaleConfig.gpus, scaleConfig.batch, scaleConfig.lr, scaleConfig.seqLen, scaleConfig.layers)

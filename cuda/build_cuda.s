@@ -67,7 +67,7 @@ func verify_environment() {
     if contains_string(nvcc_out, "not_found") {
         println("[ERROR] nvcc not found")
         println("  Install CUDA Toolkit from:")
-        println("  https://developer.nvidia.com/cuda-downloads")
+        println("  https:
         return
     }
     println("[OK] nvcc found: " + trim(nvcc_out))

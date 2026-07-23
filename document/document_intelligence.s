@@ -589,9 +589,9 @@ class HTMLParser {
                 src = node.get("src") ?? ""
                 alt = node.get("alt") ?? ""
 
-                if src.starts_with("//"):
+                if src.starts_with("
                     src = "https:" + src
-                elif not (src.starts_with("http://") || src.starts_with("https://")):
+                elif not (src.starts_with("http:
                     src = resolve_relative_url(base_url ?? "", src)
 
                 images.append(extracted_image{

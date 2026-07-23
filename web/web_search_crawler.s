@@ -23,7 +23,7 @@ struct web_search_config {
     max_content_length: int = 50000
     extract_main_content: bool = true
     follow_redirects: bool = true
-    user_agent: string = "NEURX-Bot/1.0 (Research Crawler; +https://neurx.ai)"
+    user_agent: string = "NEURX-Bot/1.0 (Research Crawler; +https:
 
     remove_scripts_styles: bool = true
     normalize_whitespace: bool = true
@@ -161,7 +161,7 @@ class GoogleSearchEngine implements SearchEngineInterface {
         if !config.time_range.empty():
             params["dateRestrict"] = config.time_range
 
-        response = http_get("https://www.googleapis.com/customsearch/v1", params=params)
+        response = http_get("https:
         data = json_decode(response.body)
 
         if "error" in data:
@@ -216,7 +216,7 @@ class GoogleSearchEngine implements SearchEngineInterface {
             "skip_disambig": "1"
         }
 
-        response = http_get("https://api.duckduckgo.com/", params=params)
+        response = http_get("https:
         data = json_decode(response.body)
 
         items: list<search_resultItem> = []
@@ -282,7 +282,7 @@ class BingSearchEngine implements SearchEngineInterface {
             }
 
         response = http_get(
-            "https://api.bing.microsoft.com/v7.0/search",
+            "https:
             headers=headers,
             params=params
         )
@@ -986,7 +986,7 @@ class ResultAggregator {
     _normalize_url(url: string) {
         parsed = urlparse(url)
 
-        normalized = f"{parsed.scheme}://{parsed.netloc}{parsed.path}"
+        normalized = f"{parsed.scheme}:
         if parsed.query:
             params = sorted(parsed.query.split("&"))
             normalized += "?" + "&".join(params)
@@ -1025,10 +1025,10 @@ async function test_web_search_system() {
     print("  ✓ Test 2: URL Normalization & Deduplication")
     agg = ws.result_aggregator
     test_items = [
-        search_resultItem{url="https://example.com/page?id=123&ref=search", title="Test 1", snippet="...", source_engine="google", rank_in_engine=1},
-        search_resultItem{url="HTTPS://EXAMPLE.COM/PAGE?ID=123&REF=OTHER", title="Test 2", snippet="...", source_engine="bing", rank_in_engine=1},
-        search_resultItem{url="https://example.com/other-page", title="Test 3", snippet="...", source_engine="google", rank_in_engine=2},
-        search_resultItem{url="https://different-site.com/article", title="Test 4", snippet="...", source_engine="bing", rank_in_engine=3}
+        search_resultItem{url="https:
+        search_resultItem{url="HTTPS:
+        search_resultItem{url="https:
+        search_resultItem{url="https:
     ]
     unique = agg.deduplicate(test_items)
     assert len(unique) == 3, f"Dedup failed: expected 3, got {len(unique)}"

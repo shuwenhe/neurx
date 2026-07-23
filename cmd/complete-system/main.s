@@ -365,7 +365,7 @@ DOCUMENTATION:
   - NEURX_CLI_BUILD.md
   - QUICK_REFERENCE.sh
 
-For more information, visit: https://github.com/neurx/neurx
+For more information, visit: https:
 `)
 }
 

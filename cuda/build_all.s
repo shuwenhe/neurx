@@ -34,7 +34,7 @@ func main() {
     build_config config = detect_cuda_environment()
     if !is_cuda_available(config) {
         println("[ERROR] CUDA Toolkit not found")
-        println("  Install from: https://developer.nvidia.com/cuda-downloads")
+        println("  Install from: https:
         return
     }
 
@@ -291,11 +291,11 @@ func create_env_script(string build_dir, build_config cfg) {
 }
 
 func create_cuda_wrapper(string build_dir) {
-    string wrapper = "/* Minimal CUDA Wrapper - S Language Build System */\n" +
+    string wrapper = "\n" +
         "#include <cuda_runtime.h>\n" +
         "#include <cublas_v2.h>\n" +
         "\n" +
-        "/* Stub implementations */\n" +
+        "\n" +
         "int cuda_error_loss_kernel(int64_t p, int64_t t, int n) { return 0; }\n" +
         "int cuda_sgd_update_kernel(int64_t w, int64_t g, float lr, int n) { return 0; }\n" +
         "int cuda_relu_forward(int64_t o, int64_t i, int n) { return 0; }\n" +

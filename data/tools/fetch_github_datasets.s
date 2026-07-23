@@ -71,8 +71,8 @@ func clone_from_file(string root, string list_file, bool force) int {
         if line != "" {
             string repo = first_token(line)
             string url = repo
-            if !starts_with(url, "http://") && !starts_with(url, "https://") {
-                url = "https://github.com/" + repo + ".git"
+            if !starts_with(url, "http:
+                url = "https:
             }
             string name = basename(repo)
             string dest = root + "/" + name
@@ -124,22 +124,22 @@ func clone_repo(string url, string dest) bool {
 
 func known_repo(string key) string {
     if key == "human-eval" {
-        return runtime_env_get("NEURX_HUMAN_EVAL_REPO_URL", "https://github.com/human-eval/human-eval.git")
+        return runtime_env_get("NEURX_HUMAN_EVAL_REPO_URL", "https:
     }
     if key == "mbpp" {
-        return "https://github.com/google-research/google-research.git"
+        return "https:
     }
     if key == "apps" {
-        return "https://github.com/hendrycks/apps.git"
+        return "https:
     }
     if key == "codexglue" || key == "codex-glue" || key == "codex_glue" {
-        return "https://github.com/microsoft/CodeXGLUE.git"
+        return "https:
     }
     if key == "code-search-net" || key == "codesearchnet" || key == "code_search_net" {
-        return "https://github.com/github/CodeSearchNet.git"
+        return "https:
     }
     if key == "codeparrot" {
-        return "https://github.com/anton-l/codeparrot.git"
+        return "https:
     }
     ""
 }

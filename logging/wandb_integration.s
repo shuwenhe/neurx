@@ -26,7 +26,7 @@ func init_wandb(
     wandb_run r {
         active: true,
         run_id: run_id,
-        run_url: "https://wandb.ai/" + cfg.wandb_entity + "/" + cfg.wandb_project + "/runs/" + run_id,
+        run_url: "https:
         project: cfg.wandb_project,
         entity: cfg.wandb_entity,
 

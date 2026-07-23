@@ -47,15 +47,15 @@ func main() int {
     println("#include \"../llm/RemoteProvider.h\"")
     println("")
     println("int main() {")
-    println("    // English text")
+    println("    
     println("    auto analyzer = std::make_unique<LLMCodeAnalyzer>();")
     println("")
-    println("    // configuration LLM")
+    println("    
     println("    auto provider = new RemoteProvider();")
     println("    provider->setApiKey(getenv(\"NEURX_API_KEY\"));")
     println("    analyzer->setLLMProvider(provider);")
     println("")
-    println("    // English text")
+    println("    
     println("    auto result = analyzer->analyzeCode(\"def hello(): print('world')\",")
     println("                                        ProgrammingLanguage::Python);")
     println("")

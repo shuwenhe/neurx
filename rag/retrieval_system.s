@@ -252,7 +252,7 @@ class FAISSVectorDB implements VectorDBInterface {
             "IVF_PQ" => {
 
                 quantizer = faiss.IndexFlatL2(dim)
-                m = min(48, dim // 2)
+                m = min(48, dim 
                 nbits = 8
                 this.index = faiss.IndexIVFPQ(quantizer, dim, config.nlist, m, nbits)
                 this.is_trained = false
@@ -560,7 +560,7 @@ class DocumentProcessor {
         this.config = config
         this.splitter = new RecursiveCharacterTextSplitter(
             chunk_size=config.max_chunk_length,
-            chunk_overlap=config.max_chunk_length // 5,
+            chunk_overlap=config.max_chunk_length 
         )
     }
 

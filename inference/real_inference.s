@@ -6,6 +6,7 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_fi
 
 extern "intrinsic" func __host_read_binary_file(string path) []int
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
+extern "intrinsic" func __host_slice(string text, int start, int end) string
 
 func pow_int(int base, int exp) int {
     int result = 1
@@ -24,7 +25,8 @@ func u64_le([]int bytes, int offset) int {
     int value = 0
     int i = 0
     while i < 8 {
-        value = value + (bytes[offset + i] * pow_int(256, i))
+        int byte_value = bytes[offset + i]
+        value = value + (byte_value * pow_int(256, i))
         i = i + 1
     }
     return value
@@ -142,7 +144,7 @@ func int_to_string(int value) string {
     string tmp = ""
     while n > 0 {
         int digit = n - (n / 10) * 10
-        tmp = slice(digits, digit, digit + 1) + tmp
+        tmp = __host_slice(digits, digit, digit + 1) + tmp
         n = n / 10
     }
     return out + tmp
@@ -459,7 +461,7 @@ func tokenize(string text) []int {
                 word = ""
             }
         } else {
-            word = word + slice(text, i, i + 1)
+            word = word + __host_slice(text, i, i + 1)
         }
         i = i + 1
     }

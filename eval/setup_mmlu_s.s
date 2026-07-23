@@ -186,10 +186,10 @@ func download_all_mmlu_tasks(string data_root, mmlu_download_stats stats) mmlu_d
         string test_file = data_root + "/test/" + task + ".csv"
         string dev_file = data_root + "/dev/" + task + ".csv"
 
-        string test_url = "https://huggingface.co/datasets/cais/mmlu/resolve/main/data/" + task + "/test-" + task + ".csv"
+        string test_url = "https:
         bool test_ok = download_file_curl(test_url, test_file)
 
-        string dev_url = "https://huggingface.co/datasets/cais/mmlu/resolve/main/data/" + task + "/dev-" + task + ".csv"
+        string dev_url = "https:
         bool dev_ok = download_file_curl(dev_url, dev_file)
 
         if test_ok {

@@ -74,7 +74,7 @@ func (server *apiserver) initialize() {
     fmt.Printf("  Host: %s\n", server.host)
     fmt.Printf("  Port: %d\n", server.port)
     fmt.Printf("  Max Connections: %d\n", server.max_connections)
-    fmt.Printf("  URL: http://%s:%d\n\n", server.host, server.port)
+    fmt.Printf("  URL: http:
 }
 
 func (server *apiserver) register_models() {

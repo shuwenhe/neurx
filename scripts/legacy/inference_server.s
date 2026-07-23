@@ -318,9 +318,9 @@ func startServer() error {
 
 	logInfo("Server started successfully!")
 	logInfo("Endpoints:")
-	logInfo(fmt.Sprintf("  POST http://%s:%d/v1/completions - Generate text", gConfig.Host, gConfig.Port))
-	logInfo(fmt.Sprintf("  GET  http://%s:%d/health - Health check", gConfig.Host, gConfig.Port))
-	logInfo(fmt.Sprintf("  GET  http://%s:%d/metrics - Server metrics", gConfig.Host, gConfig.Port))
+	logInfo(fmt.Sprintf("  POST http:
+	logInfo(fmt.Sprintf("  GET  http:
+	logInfo(fmt.Sprintf("  GET  http:
 
 	return nil
 }

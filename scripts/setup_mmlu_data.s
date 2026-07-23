@@ -52,7 +52,7 @@ func main() {
     metadata := `MMLU Dataset
 ============
 
-Downloaded from: https://huggingface.co/datasets/cais/mmlu
+Downloaded from: https:
 
 Task Coverage:
   - STEM (19 tasks)

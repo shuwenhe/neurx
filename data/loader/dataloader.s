@@ -55,7 +55,7 @@ struct dataloader_config {
 
 func default_dataloader_config() dataloader_config {
     dataloader_config {
-        data_paths: ["./data/pretrain/**/*.jsonl"],
+        data_paths: ["./data/pretrain*.jsonl"],
         format: FORMAT_JSONL,
 
         batch_size: 512,

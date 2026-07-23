@@ -391,10 +391,10 @@ func show_usage_examples():
 ║                                                              ║
 ║  📘 PRETRAINING (English texttraining)                                     ║
 ║                                                              ║
-║  // English text                                                 ║
+║  
 ║  start_neurx_training(mode="pretrain")                        ║
 ║                                                              ║
-║  // English textconfiguration                                                 ║
+║  
 ║  start_neurx_training(                                        ║
 ║      mode="pretrain",                                         ║
 ║      config_path="./configs/my_neurx_config.json",                ║
@@ -404,7 +404,7 @@ func show_usage_examples():
 ║  ══════════════════════════════════════════════════════════  ║
 ║  📚 SUPERVISED FINE-TUNING (English text)                         ║
 ║                                                              ║
-║  // English textdataEnglish text                                           ║
+║  
 ║  start_neurx_training(mode="sft",                             ║
 ║      config_path="./configs/sft_config.json"                    ║
 ║  )                                                           ║
@@ -412,21 +412,21 @@ func show_usage_examples():
 ║  ══════════════════════════════════════════════════════════  ║
 ║  🎯 ALIGNMENT TRAINING (alignmenttraining)                              ║
 ║                                                              ║
-║  // DPO (recommended, English text Reward Model)                               ║
+║  
 ║  start_neurx_training(mode="align",                            ║
 ║      config_path="./configs/dpo_config.json"                    ║
 ║  )                                                           ║
 ║                                                              ║
-║  // GRPO (NeurX-R1 English text, English textoptimize)                           ║
-║  // English text config English text method="grpo"                             ║
+║  
+║  
 ║                                                              ║
-║  // PPO (English text RLHF, Required Reward Model)                          ║
-║  // English text config English text method="ppo"                              ║
+║  
+║  
 ║                                                              ║
 ║  ══════════════════════════════════════════════════════════  ║
 ║  🌐 INFERENCE SERVER (inferenceEnglish text)                                 ║
 ║                                                              ║
-║  // startinferenceEnglish text                                               ║
+║  
 ║  start_neurx_inference_server(                                 ║
 ║      port=8080,                                              ║
 ║      model_path="./checkpoints/neurx_final/"                    ║
@@ -435,16 +435,16 @@ func show_usage_examples():
 ║  ══════════════════════════════════════════════════════════  ║
 ║  🧪 TESTING (testEnglish text)                                          ║
 ║                                                              ║
-║  // runcompletetestEnglish text                                            ║
+║  
 ║  run_all_tests()                                              ║
 ║                                                              ║
-║  // English textsystemstate                                               ║
+║  
 ║  check_system_status()                                         ║
 ║                                                              ║
 ║  ══════════════════════════════════════════════════════════  ║
 ║  🔧 ADVANCED USAGE (advancedEnglish text)                                    ║
 ║                                                              ║
-║  // English textmodelconfiguration                                               ║
+║  
 ║  neurx_config my_cfg = create_custom_neurx_config(                  ║
 ║      vocab_size=151552,                                       ║
 ║      hidden_size=5120,                                        ║
@@ -455,10 +455,10 @@ func show_usage_examples():
 ║      enable_moe=false                                         ║
 ║  )                                                           ║
 ║                                                              ║
-║  // English text                                               ║
+║  
 ║  neurx_config vision_cfg = create_vision_9b_config()              ║
 ║                                                              ║
-║  // English text MoE English text                                               ║
+║  
 ║  neurx_config moe_cfg = create_moe_200b_config_200b()             ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝

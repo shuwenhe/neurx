@@ -21,7 +21,7 @@ func main() {
     string nvidia_smi = runtime_run_command_output("which nvidia-smi 2>/dev/null || true")
     if str_len(trim(nvidia_smi)) == 0 {
         print_error("nvidia-smi not found", RED, NC)
-        println("  Install NVIDIA driver from https://www.nvidia.com/Download/driverDetails.aspx")
+        println("  Install NVIDIA driver from https:
         return
     }
 
@@ -37,7 +37,7 @@ func main() {
     string nvcc = runtime_run_command_output("which nvcc 2>/dev/null || true")
     if str_len(trim(nvcc)) == 0 {
         print_error("nvcc (CUDA compiler) not found", RED, NC)
-        println("  Install CUDA Toolkit from https://developer.nvidia.com/cuda-downloads")
+        println("  Install CUDA Toolkit from https:
         return
     }
 

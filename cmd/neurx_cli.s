@@ -317,7 +317,7 @@ EXAMPLES:
   # Start inference server
   $ neurx inference ./model.bin
 
-For more information, visit: https://github.com/neurx/neurx
+For more information, visit: https:
 `)
 }
 

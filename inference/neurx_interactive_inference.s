@@ -1,7 +1,8 @@
 module neurx_interactive_inference
 
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_write_text_file, runtime_run_command_output, trim}
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, trim}
 
+extern "intrinsic" func __host_write_text_file(string path, string content) int
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 
 func read_user_line() string {
@@ -13,11 +14,11 @@ func resolve_model_file(string configured_path) string {
     if len(path) == 0 {
         return "/home/shuwen/shuwen/posttrain/model.safetensors"
     }
-    if runtime_file_exists(path) {
-        return path
-    }
     if runtime_file_exists(path + "/model.safetensors") {
         return path + "/model.safetensors"
+    }
+    if runtime_file_exists(path) {
+        return path
     }
     path
 }
@@ -53,9 +54,9 @@ func main() {
         }
 
         string prompt_text = "System: " + system_prompt + "\nUser: " + user_text + "\nAssistant:"
-        runtime_write_text_file(prompt_file, prompt_text)
+        _ = __host_write_text_file(prompt_file, prompt_text)
 
-        string command = "NEURX_CHAT_MODEL_PATH=" + runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain") +
+        string command = "NEURX_CHAT_MODEL_PATH=" + model_file +
             " NEURX_CHAT_PROMPT_PATH=" + prompt_file +
             " " + runner
         string output = runtime_run_command_output(command)

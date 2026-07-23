@@ -272,7 +272,7 @@ func (i *inference_orchestrator) benchmark() error {
 
 func (i *inference_orchestrator) is_server_ready() bool {
 
-    result := exec_command("curl", "-s", fmt.Sprintf("http://localhost:%d/health", i.config.port))
+    result := exec_command("curl", "-s", fmt.Sprintf("http:
     return result.ExitCode == 0
 }
 

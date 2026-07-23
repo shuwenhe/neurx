@@ -57,28 +57,28 @@ func main() int {
     println("")
     println("🚀 quickstartexample: ")
     println("")
-    println("// initializesystem")
+    println("
     println("auto system = std::make_unique<NeurXToolSystem>();")
     println("system->initialize();")
     println("")
-    println("// English texttool")
+    println("
     println("ToolSchema schema;")
     println("schema.toolId = \"my_tool\";")
     println("schema.name = \"English texttool\";")
     println("system->registerTool(schema);")
     println("")
-    println("// English texttool")
+    println("
     println("auto result = system->executeTool(\"my_tool\", \"capability\", ")
     println("    {{\"param\", \"value\"}}, \"user123\");")
     println("")
-    println("// English textrecommended")
+    println("
     println("system->getToolDiscovery()->recommendTools(\"English text\",")
     println("    [](const auto &tools) { ")
     println("        for (auto &t : tools) qDebug() << t.name; ")
     println("    }")
     println(");")
     println("")
-    println("// English text")
+    println("
     println("system->getPermissionManager()->checkToolAccess(\"my_tool\", \"user123\",")
     println("    [](bool granted, auto reason) {")
     println("        qDebug() << \"Access:\" << granted;")
