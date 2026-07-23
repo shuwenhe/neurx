@@ -598,9 +598,27 @@ pretrain-watch: check-bash
 	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && $(MAKE) build-pretrain-manifest-s && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 $(MAKE) run-large-pretrain-s 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
 
 chat:
-	@$(MAKE) chat-real-inference
+	@$(MAKE) chat-with-model
 
 
+
+chat-with-model: build-s-ir-runner build-real-inference-with-model-s
+	@echo "🚀 Running NeurX Real Model Inference..."
+	@echo "✓ Using true model weights for inference"; \
+	mkdir -p artifacts/logs; \
+	$(CURDIR_UNIX)/artifacts/build/real_inference_with_model/real_inference_with_model 2>&1
+
+chat-real-model: build-s-ir-runner build-real-inference-interactive-s
+	@echo "🚀 Running NeurX Real Model Inference (Interactive)..."
+	@echo "✓ Model loaded with Chinese support"; \
+	mkdir -p artifacts/logs; \
+	$(CURDIR_UNIX)/artifacts/build/real_inference_interactive/real_inference_interactive 2>&1
+
+chat-fast-inference: build-s-ir-runner build-fast-chat-inference-s
+	@echo "🚀 Running NeurX Fast Chat Inference (Pure S)..."
+	@echo "✓ Running fast medical knowledge inference"; \
+	mkdir -p artifacts/logs; \
+	$(CURDIR_UNIX)/artifacts/build/fast_chat_inference/fast_chat_inference 2>&1
 
 chat-real-inference: build-s-ir-runner build-real-inference-s build-neurx-interactive-inference-s
 	@echo "🚀 Running NeurX Real Inference Engine (Pure S)..."
@@ -659,6 +677,45 @@ build-real-inference-s:
 	@printf '#!/bin/bash\n%s/artifacts/build/s_runner/s_ir_runner %s/artifacts/build/real_inference/real_inference.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifacts/build/real_inference/real_inference
 	@chmod +x artifacts/build/real_inference/real_inference
 	@echo "✓ Real Interactive Inference ready"
+
+build-fast-chat-inference-s:
+	@mkdir -p artifacts/build/fast_chat_inference
+	@echo "Compiling Fast Chat Inference (S)..."
+	@$(S_SEED_COMPILER) inference/fast_chat_inference.s artifacts/build/fast_chat_inference/fast_chat_inference.ir || { \
+		echo "❌ Compilation failed!"; \
+		exit 1; \
+	}
+	@echo "✓ Compiled to IR successfully"
+	@echo "Creating Fast Chat Inference runner script..."
+	@printf '#!/bin/bash\n%s/artifacts/build/s_runner/s_ir_runner %s/artifacts/build/fast_chat_inference/fast_chat_inference.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifacts/build/fast_chat_inference/fast_chat_inference
+	@chmod +x artifacts/build/fast_chat_inference/fast_chat_inference
+	@echo "✓ Fast Chat Inference ready"
+
+build-real-inference-interactive-s:
+	@mkdir -p artifacts/build/real_inference_interactive
+	@echo "Compiling Real Inference Interactive (S)..."
+	@$(S_SEED_COMPILER) inference/real_inference_interactive.s artifacts/build/real_inference_interactive/real_inference_interactive.ir || { \
+		echo "❌ Compilation failed!"; \
+		exit 1; \
+	}
+	@echo "✓ Compiled to IR successfully"
+	@echo "Creating Real Inference Interactive runner script..."
+	@printf '#!/bin/bash\n%s/artifacts/build/s_runner/s_ir_runner %s/artifacts/build/real_inference_interactive/real_inference_interactive.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifacts/build/real_inference_interactive/real_inference_interactive
+	@chmod +x artifacts/build/real_inference_interactive/real_inference_interactive
+	@echo "✓ Real Inference Interactive ready"
+
+build-real-inference-with-model-s:
+	@mkdir -p artifacts/build/real_inference_with_model
+	@echo "Compiling Real Inference with Model Weights (S)..."
+	@$(S_SEED_COMPILER) inference/real_inference_with_model.s artifacts/build/real_inference_with_model/real_inference_with_model.ir || { \
+		echo "❌ Compilation failed!"; \
+		exit 1; \
+	}
+	@echo "✓ Compiled to IR successfully"
+	@echo "Creating Real Inference with Model runner script..."
+	@printf '#!/bin/bash\n%s/artifacts/build/s_runner/s_ir_runner %s/artifacts/build/real_inference_with_model/real_inference_with_model.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifacts/build/real_inference_with_model/real_inference_with_model
+	@chmod +x artifacts/build/real_inference_with_model/real_inference_with_model
+	@echo "✓ Real Inference with Model ready"
 
 build-hf-posttrain-chat-s: build-real-inference-s build-s-ir-runner
 	@mkdir -p artifacts/build/hf_posttrain_chat
