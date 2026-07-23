@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test build-cpu-inference serving-native-socket-test posttrain posttrain-e2e posttrain-merge-lora build-lora-merge pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail \
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test serving-native-socket-test posttrain posttrain-e2e posttrain-merge-lora build-lora-merge pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -164,15 +164,12 @@ hybrid-moe-s: check-bash build-s-ir-runner
 	@cd '$(CURDIR_UNIX)' && \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/hybrid_moe_s/hybrid_moe.ir'
 
-infer: check-bash build-cpu-inference
+infer: check-bash build-real-inference-s
 	@mkdir -p $(LOG_DIR)
 	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
-		echo "Running NeurX NXTRFMV2 CPU inference"; \
-		NEURX_INFER_CHECKPOINT_PATH="$${NEURX_INFER_CHECKPOINT_PATH:-$${NEURX_INFER_CHECKPOINT:-$(PRETRAIN_OUTPUT_DIR)/transformer_v2.ckpt}}" \
-		NEURX_INFER_PROMPT="$${NEURX_INFER_PROMPT:-NeurX can}" \
-		NEURX_TOKENIZER_VOCAB="$${NEURX_TOKENIZER_VOCAB:-$(CURDIR_UNIX)/data/corpus/vocab.json}" \
-		NEURX_TOKENIZER_MERGES="$${NEURX_TOKENIZER_MERGES:-$(CURDIR_UNIX)/data/corpus/merges.txt}" \
-		'$(CURDIR_UNIX)/artifacts/build/cpu_inference/neurx_cpu_inference' \
+		echo "Running NeurX S inference"; \
+		NEURX_CHAT_MODEL_PATH="$${NEURX_CHAT_MODEL_PATH:-$(POSTTRAIN_OUTPUT_DIR)}" \
+		'$(CURDIR_UNIX)/artifacts/build/real_inference/real_inference' \
 		2>&1 | tee -a $(LOG_DIR)/infer_$(shell date +%Y%m%d_%H%M%S).log
 
 
@@ -1267,20 +1264,10 @@ inference-runtime-test:
 		-ldl -o artifacts/build/inference_runtime/inference_runtime_test
 	@artifacts/build/inference_runtime/inference_runtime_test
 
-build-cpu-inference:
-	@mkdir -p artifacts/build/cpu_inference
-	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		inference/cpu_transformer_inference.cpp \
-		inference/cpu_transformer_main.cpp \
-		-o artifacts/build/cpu_inference/neurx_cpu_inference
-
 cpu-inference-test:
-	@mkdir -p artifacts/build/cpu_inference
-	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
-		inference/cpu_transformer_inference.cpp \
-		tests/cpu_transformer_inference_test.cpp \
-		-o artifacts/build/cpu_inference/cpu_transformer_inference_test
-	@artifacts/build/cpu_inference/cpu_transformer_inference_test
+	@$(MAKE) build-real-inference-s
+	@NEURX_CHAT_MODEL_PATH="$${NEURX_CHAT_MODEL_PATH:-$(POSTTRAIN_OUTPUT_DIR)}" \
+		$(CURDIR_UNIX)/artifacts/build/real_inference/real_inference
 
 serving-native-socket-test:
 	@mkdir -p artifacts/build/serving_native
