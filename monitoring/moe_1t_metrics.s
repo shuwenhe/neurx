@@ -478,7 +478,7 @@ func long_to_string(long x) string {
 }
 
 func current_timestamp_ms() long {
-    string raw = runtime_run_command_output("python3 -c 'import time; print(int(time.time()*1000))'")
+    string raw = runtime_run_command_output("date +%s%3N")
     long value = long(parse_int_str(raw))
     if value > 0 {
         return value

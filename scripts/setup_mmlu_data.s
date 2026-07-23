@@ -38,26 +38,9 @@ func main() {
     io.Println("  ✓ Directories created")
     io.Println("")
     
-    io.Println("[Step 2] Downloading MMLU dataset from HuggingFace...")
-    
-    cmd := exec.Command("python3", "-c", `
-import os
-from datasets import load_dataset
-
-data_root = os.environ.get('DATA_ROOT', './data/mmlu')
-tasks = [
-    "abstract_algebra", "anatomy", "astronomy", "biology", "chemistry",
-    "computer_science", "formal_logic", "high_school_biology",
-]
-
-for task in tasks:
-    try:
-        dataset = load_dataset("cais/mmlu", task, split=None)
-        print(f"✓ Downloaded: {task}")
-    except Exception as e:
-        print(f"! Warning: {task}: {e}")
-`)
-    cmd.Env = append(os.Environ(), "DATA_ROOT=" + dataRoot)
+    io.Println("[Step 2] Downloading MMLU dataset from the S pipeline...")
+    cmd := exec.Command("s", "run", "eval/setup_mmlu_s.s")
+    cmd.Env = append(os.Environ(), "NEURX_ROOT="+projectRoot, "NEURX_MMLU_DATA_ROOT="+dataRoot)
     cmd.Output()
     
     io.Println("")

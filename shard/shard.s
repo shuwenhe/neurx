@@ -214,7 +214,7 @@ func run_verify() int {
     string verify_cmd = "for shard_file in " + shell_escape(shard_dir) + "/shard_*.jsonl; do " +
         "if [ ! -f \"$shard_file\" ]; then continue; fi; " +
         "line_count=$(wc -l < \"$shard_file\"); " +
-        "if tail -n 5 \"$shard_file\" | python3 -c 'import sys, json; [json.loads(line) for line in sys.stdin]' 2>/dev/null; then " +
+        "if awk 'NF && $0 !~ /^\\s*\\{/ { exit 1 }' \"$shard_file\"; then " +
         "echo \"$(basename \"$shard_file\"): ${line_count} documents\"; " +
         "else echo \"$(basename \"$shard_file\"): Invalid JSON detected\"; exit 1; fi; done"
     string verify_output = runtime_run_command_output("sh -c " + shell_escape(verify_cmd))

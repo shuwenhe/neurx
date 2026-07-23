@@ -7,7 +7,6 @@
 
 
 S_COMPILER ?= s
-PYTHON ?= python3
 BASH := bash
 PROJECT_ROOT := $(shell pwd)
 BIN_DIR := $(PROJECT_ROOT)/bin

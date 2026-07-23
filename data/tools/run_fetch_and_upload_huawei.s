@@ -15,7 +15,7 @@ func main() int {
         return 1
     }
 
-    string cmd = "mkdir -p " + runtime_shell_escape(out_dir) + " && cd " + runtime_shell_escape(project_root) + " && python3 tools/stack_streamer.py --dataset " + runtime_shell_escape(dataset) + " --lang " + runtime_shell_escape(lang) + " --licenses " + runtime_shell_escape(licenses) + " --shard-size " + runtime_shell_escape(shard_size) + " --out-dir " + runtime_shell_escape(out_dir) + " --max-files 0 --progress && command -v obsutil >/dev/null 2>&1 && obsutil cp -r " + runtime_shell_escape(out_dir + "/") + " " + runtime_shell_escape(bucket) + " -u"
+    string cmd = "echo 'stack_streamer.py removed; use the S data pipeline instead' && exit 1"
     if !runtime_run_command(cmd).ok {
         return 1
     }

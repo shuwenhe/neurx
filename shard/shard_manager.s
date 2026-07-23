@@ -748,7 +748,7 @@ func format_int_with_leading_zeros(int val, int width) string {
     s
 }
 func get_current_time_ms() int {
-    string out = trim(runtime_run_command_output("python3 -c 'import time; print(int(time.time() * 1000))'"))
+    string out = trim(runtime_run_command_output("date +%s%3N"))
     int current = 0
     int i = 0
     while i < len(out) {
