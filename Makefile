@@ -407,9 +407,16 @@ test-checkpoint-resume: check-bash
 	@mkdir -p $(CURDIR_UNIX)/tests
 	@bash $(CURDIR_UNIX)/tests/checkpoint_resume_e2e.sh
 
-POSTTRAIN_PYTHON ?= $(firstword $(wildcard /home/shuwen/venv/bin/python $(CURDIR_UNIX)/.venv/bin/python) python3)
+build-posttrain-sft-s:
+	@mkdir -p artifacts/build/posttrain_sft
+	@echo "Compiling real LoRA/SFT post-training (S)..."
+	@$(S_SEED_COMPILER) scripts/real_lora_sft.s artifacts/build/posttrain_sft/real_lora_sft.ir || { \
+		echo "❌ Compilation failed!"; \
+		exit 1; \
+	}
+	@echo "✓ Compiled to IR successfully"
 
-posttrain: check-bash build-lora-merge
+posttrain: check-bash build-lora-merge build-posttrain-sft-s
 	@echo "Starting real Qwen LoRA/SFT post-training..."
 	@mkdir -p '$(POSTTRAIN_ADAPTER_DIR)' '$(POSTTRAIN_OUTPUT_DIR)' '$(LOG_DIR)'
 	@cd '$(CURDIR_UNIX)' && \
@@ -417,7 +424,7 @@ posttrain: check-bash build-lora-merge
 		NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)' \
 		NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)' \
 		NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_ADAPTER_DIR)' \
-		'$(POSTTRAIN_PYTHON)' scripts/real_lora_sft.py 2>&1 | tee -a '$(LOG_DIR)/posttrain_real_$(shell date +%Y%m%d_%H%M%S).log'
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/real_lora_sft.ir' 2>&1 | tee -a '$(LOG_DIR)/posttrain_real_$(shell date +%Y%m%d_%H%M%S).log'
 	@echo "Merging LoRA into the standalone Qwen model..."
 	@rm -f \
 		'$(POSTTRAIN_OUTPUT_DIR)/adapter_model.safetensors' \
@@ -431,13 +438,23 @@ posttrain: check-bash build-lora-merge
 		'$(POSTTRAIN_LORA_RANK)'
 	@echo "Complete post-trained model saved to $(POSTTRAIN_OUTPUT_DIR)"
 
-posttrain-eval: check-bash
-	@echo "Evaluating the trained LoRA adapter..."
+build-posttrain-eval-s:
+	@mkdir -p artifacts/build/posttrain_eval
+	@echo "Compiling LoRA post-train evaluation (S)..."
+	@$(S_SEED_COMPILER) scripts/eval_lora_sft.s artifacts/build/posttrain_eval/eval_lora_sft.ir || { \
+		echo "❌ Compilation failed!"; \
+		exit 1; \
+	}
+	@echo "✓ Compiled to IR successfully"
+
+posttrain-eval: build-posttrain-eval-s build-real-inference-s
+	@echo "Evaluating the trained LoRA adapter with S runtime..."
 	@cd '$(CURDIR_UNIX)' && \
-		NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)' \
+		NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_OUTPUT_DIR)' \
 		NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)' \
-		NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_ADAPTER_DIR)' \
-		'$(POSTTRAIN_PYTHON)' scripts/eval_lora_sft.py
+		NEURX_POSTTRAIN_EVAL_RUNNER='$(CURDIR_UNIX)/artifacts/build/real_inference/real_inference' \
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/posttrain_eval/eval_lora_sft.ir'
 
 posttrain-merge: check-bash build-lora-merge
 	@echo "Merging the LoRA adapter into a standalone model..."
