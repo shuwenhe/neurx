@@ -1,12 +1,9 @@
 package neurx.optimizer.muon
 
-// Muon Optimizer - Momentum-based second-order optimizer
-// Based on research in adaptive learning rates using gradient covariance
-
 struct muon_config {
     float learning_rate
-    float beta          // momentum coefficient
-    float c              // curvature coefficient
+    float beta
+    float c
     float weight_decay
     int   warmup_steps
 }
@@ -15,7 +12,7 @@ struct muon_param_state {
     []float param
     []float momentum
     []float whitened_grad
-    [][]float grad_cov   // gradient covariance matrix
+    [][]float grad_cov
     int    step
 }
 
@@ -26,7 +23,6 @@ struct muon_optimizer {
     float current_lr
 }
 
-// Initialize a new Muon optimizer
 func new_muon(muon_config cfg) muon_optimizer {
     muon_optimizer {
         config: cfg,
@@ -36,7 +32,6 @@ func new_muon(muon_config cfg) muon_optimizer {
     }
 }
 
-// Register parameter for optimization
 func muon_register_param(
     muon_optimizer opt,
     []float param,
@@ -54,7 +49,6 @@ func muon_register_param(
     return opt
 }
 
-// Compute learning rate with warmup schedule
 func muon_compute_lr(muon_optimizer opt) float {
     float warmup_steps = float(opt.config.warmup_steps)
     float global_step = float(opt.global_step)
@@ -66,14 +60,12 @@ func muon_compute_lr(muon_optimizer opt) float {
     }
 }
 
-// Set learning rate
 func muon_set_learning_rate(muon_optimizer opt, float new_lr) muon_optimizer {
     opt.config.learning_rate = new_lr
     opt.current_lr = muon_compute_lr(opt)
     return opt
 }
 
-// Compute vector norms for normalization
 func compute_vector_norm([]float v, int size) float {
     float sum_sq = 0.0
     var i = 0
@@ -85,7 +77,6 @@ func compute_vector_norm([]float v, int size) float {
     return sqrt_approx(sum_sq)
 }
 
-// Whiten gradient using covariance
 func whiten_gradient(
     []float grad,
     [][]float grad_cov,
@@ -106,7 +97,6 @@ func whiten_gradient(
     }
 }
 
-// Update parameters with Muon optimizer
 func muon_update_param(
     muon_param_state state,
     []float gradients,
@@ -120,11 +110,8 @@ func muon_update_param(
     state.step = state.step + 1
     let step = float(state.step)
 
-    // Compute gradient norm for whitening
     let grad_norm = compute_vector_norm(gradients, param_size)
     let epsilon = 1e-8
-
-    // Update gradient covariance estimate (exponential moving average)
     var i = 0
     while i < param_size {
         var j = 0
@@ -136,19 +123,13 @@ func muon_update_param(
         i = i + 1
     }
 
-    // Whiten gradient using covariance
     whiten_gradient(gradients, state.grad_cov, state.whitened_grad, param_size, epsilon)
-
-    // Apply momentum to whitened gradient
     i = 0
     while i < param_size {
         let g = state.whitened_grad[i]
         state.momentum[i] = beta * state.momentum[i] + (1.0 - beta) * g
 
-        // Apply weight decay (decoupled)
         let param_update = state.momentum[i] + c * weight_decay * state.param[i]
-
-        // Update parameter
         state.param[i] = state.param[i] - learning_rate * param_update
 
         i = i + 1
@@ -157,7 +138,6 @@ func muon_update_param(
     return state
 }
 
-// Perform optimization step
 func muon_step(
     muon_optimizer opt,
     [][]float all_gradients,
@@ -185,12 +165,8 @@ func muon_step(
     return opt
 }
 
-// Get current optimizer state for checkpointing
 func muon_get_state(muon_optimizer opt) {
-    // State saving logic would go here
 }
 
-// Load optimizer state from checkpoint
 func muon_load_state(muon_optimizer opt) {
-    // State loading logic would go here
 }
