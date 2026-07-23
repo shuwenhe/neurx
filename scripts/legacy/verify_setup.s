@@ -9,7 +9,6 @@ func main() int {
     println("")
     println("Project root: " + project_root)
     println("")
-    println("  python3    : " + binary_status("python3"))
     println("  neurx      : " + binary_status("neurx"))
     println("  s compiler : " + binary_status("s"))
     println("  script dir : " + check_path("script"))

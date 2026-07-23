@@ -351,7 +351,7 @@ class PythonRuntime {
     memory_limit: int
     timeout: int
     process?: ProcessHandle
-    interpreter_path: string = "python3"
+    interpreter_path: string = "python"
 
     init(sandbox_dir: string, memory_limit: int, timeout: int) {
         this.sandbox_dir = sandbox_dir
@@ -564,7 +564,7 @@ class ShellRuntime {
             "ls", "pwd", "echo", "cat", "head", "tail", "wc", "grep", "find",
             "date", "uname", "whoami", "df", "du", "sort", "uniq", "cut",
             "awk", "sed", "tr", "base64", "md5sum", "sha256sum",
-            "python3", "pip", "git", "curl" if allow_network else null,
+            "python", "pip", "git", "curl" if allow_network else null,
             "wget" if allow_network else null
         }.filter(x => x != null).map(x => x!)
     }
