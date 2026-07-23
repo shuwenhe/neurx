@@ -598,12 +598,11 @@ pretrain-watch: check-bash
 	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && $(MAKE) build-pretrain-manifest-s && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 $(MAKE) run-large-pretrain-s 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
 
 chat:
-	@chmod +x $(CURDIR_UNIX)/scripts/legacy/posttrain_chat_interactive.sh
-	@$(CURDIR_UNIX)/scripts/legacy/posttrain_chat_interactive.sh || true
+	@$(MAKE) chat-real-inference
 
 
 
-chat-real-inference: build-neurx-interactive-inference-s
+chat-real-inference: build-s-ir-runner build-real-inference-s build-neurx-interactive-inference-s
 	@echo "🚀 Running NeurX Real Inference Engine (Pure S)..."
 	@if [ -f "/home/shuwen/shuwen/posttrain/model.safetensors" ]; then \
 		echo "✓ Model found: base-model-posttrain"; \
@@ -617,7 +616,12 @@ chat-real-inference: build-neurx-interactive-inference-s
 build-neurx-interactive-inference-s:
 	@mkdir -p artifacts/build/neurx_interactive_inference
 	@echo "Compiling NeurX Interactive Inference (S)..."
-	@$(S_COMPILER) inference/neurx_interactive_inference.s artifacts/build/neurx_interactive_inference/neurx_interactive_inference.ir 2>&1
+	@rm -f artifacts/build/neurx_interactive_inference/neurx_interactive_inference.ir
+	@$(S_SEED_COMPILER) ir inference/neurx_interactive_inference.s -o artifacts/build/neurx_interactive_inference/neurx_interactive_inference.ir 2>&1 || true
+	@if [ ! -f artifacts/build/neurx_interactive_inference/neurx_interactive_inference.ir ]; then \
+		$(S_SEED_COMPILER) inference/neurx_interactive_inference.s artifacts/build/neurx_interactive_inference/neurx_interactive_inference.ir 2>&1 || exit 1; \
+	fi
+	@test -f artifacts/build/neurx_interactive_inference/neurx_interactive_inference.ir
 
 real-inference: build-real-inference-s
 	@echo "🚀 Running NeurX Real Inference Engine (Pure S)..."

@@ -1,68 +1,69 @@
-
-
 module neurx_interactive_inference
 
-func infer_medical_response(string user_input) string {
-    string response = ""
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_write_text_file, runtime_run_command_output, trim}
 
-    if len(user_input) == 0 {
-        response = "Please ask me a medical question."
-    } else if user_input == "hello" {
-        response = "Hello! I am a medical AI assistant. I can help answer questions about diseases, treatments, diagnosis, and medical care."
-    } else if user_input == "腿疼" {
-        response = "腿疼可能由肌肉拉伤、关节炎、神经压迫引起。建议休息、热敷或冷敷。"
-    } else if user_input == "中医" {
-        response = "中医是中国传统医学，使用草药、针灸、推拿等方法来治疗疾病。"
-    } else if user_input == "你可以回答什么" {
-        response = "我可以回答关于疾病、症状、治疗方法、诊断、预防和一般健康信息的问题。"
-    } else if user_input == "头痛" {
-        response = "Head pain can be caused by tension, migraines, dehydration, stress. Rest and hydration may help."
-    } else if user_input == "腹痛" {
-        response = "Abdominal pain can result from digestive issues or infections. If severe, seek medical attention."
-    } else if user_input == "咳嗽" {
-        response = "A cough is often caused by cold, flu, or allergies. Drink water and rest."
-    } else if user_input == "发热" {
-        response = "Fever is elevated body temperature. Stay hydrated and get rest."
-    } else if user_input == "乏力" {
-        response = "Fatigue is extreme tiredness. Ensure adequate sleep and exercise."
-    } else if user_input == "treatment" {
-        response = "Treatment refers to medical interventions designed to cure or manage diseases."
-    } else if user_input == "disease" {
-        response = "A disease is a pathological condition causing dysfunction."
-    } else if user_input == "diagnosis" {
-        response = "Diagnosis is identifying a disease through clinical examination and tests."
-    } else if user_input == "health" {
-        response = "Health is complete physical, mental and social well-being."
-    } else if user_input == "help" {
-        response = "I can help with questions about diseases, symptoms, treatments, and health."
-    } else {
-        response = "I am a medical AI assistant. Please ask a specific medical question."
+extern "intrinsic" func __sys_read_string(int fd, int count) string
+
+func read_user_line() string {
+    trim(__sys_read_string(0, 4096))
+}
+
+func resolve_model_file(string configured_path) string {
+    string path = trim(configured_path)
+    if len(path) == 0 {
+        return "/home/shuwen/shuwen/posttrain/model.safetensors"
     }
-
-    return response
+    if runtime_file_exists(path) {
+        return path
+    }
+    if runtime_file_exists(path + "/model.safetensors") {
+        return path + "/model.safetensors"
+    }
+    path
 }
 
 func main() {
-    print("✓ Model found: base-model-posttrain\n")
-    print("✓ Inference engine ready\n\n")
+    string root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/neurx")
+    string model_file = resolve_model_file(runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain"))
+    string runner = runtime_env_get("NEURX_CHAT_INFERENCE_RUNNER", root + "/artifacts/build/real_inference/real_inference")
+    string prompt_file = runtime_env_get("NEURX_CHAT_PROMPT_PATH", "/tmp/neurx_chat_prompt.txt")
+    string system_prompt = runtime_env_get("NEURX_CHAT_SYSTEM_PROMPT", "You are a helpful medical assistant.")
 
-    print("=== NeurX Medical AI Inference ===\n\n")
+    if !runtime_file_exists(model_file) {
+        print("error: model not found: " + model_file + "\n")
+        return
+    }
+    if !runtime_file_exists(runner) {
+        print("error: inference runner not found: " + runner + "\n")
+        print("Run `make build-real-inference-s` first.\n")
+        return
+    }
 
-    print("Input: hello\n")
-    string response = infer_medical_response("hello")
-    print("Output: ")
-    print(response)
-    print("\n\n")
+    print("Loaded model: " + model_file + "\n")
+    print("Type /exit or quit to stop.\n\n")
 
-    print("Input: 腿疼\n")
-    response = infer_medical_response("腿疼")
-    print("Output: ")
-    print(response)
-    print("\n\n")
+    while true {
+        print("You: ")
+        string user_text = read_user_line()
+        if len(user_text) == 0 {
+            return
+        }
+        if user_text == "/exit" || user_text == "exit" || user_text == "quit" {
+            return
+        }
 
-    print("Input: treatment\n")
-    response = infer_medical_response("treatment")
-    print("Output: ")
-    print(response)
-    print("\n")
+        string prompt_text = "System: " + system_prompt + "\nUser: " + user_text + "\nAssistant:"
+        runtime_write_text_file(prompt_file, prompt_text)
+
+        string command = "NEURX_CHAT_MODEL_PATH=" + runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain") +
+            " NEURX_CHAT_PROMPT_PATH=" + prompt_file +
+            " " + runner
+        string output = runtime_run_command_output(command)
+        string response = trim(output)
+        if len(response) == 0 {
+            response = "(empty response)"
+        }
+
+        print("Assistant: " + response + "\n\n")
+    }
 }
