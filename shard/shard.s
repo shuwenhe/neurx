@@ -1,4 +1,9 @@
-
+// ============================================================================
+// NeurX Shard Manager
+//
+// S implementation of the unified shard CLI.
+// The shell wrapper only translates argv into environment variables.
+// ============================================================================
 
 package main
 
@@ -178,7 +183,7 @@ func run_wikipedia() int {
 
     runtime_run_command_output("rm -f " + shell_escape(completion_file))
 
-    string run_command =
+    string run_command = 
         "NEURX_HOME=" + shell_escape(root) +
         " S_COMPILER=" + shell_escape(compiler) +
         " S_COMPILER_EMIT_CWD=" + shell_escape(env_get("S_COMPILER_EMIT_CWD", root + "/../s")) +
@@ -214,7 +219,7 @@ func run_verify() int {
     string verify_cmd = "for shard_file in " + shell_escape(shard_dir) + "/shard_*.jsonl; do " +
         "if [ ! -f \"$shard_file\" ]; then continue; fi; " +
         "line_count=$(wc -l < \"$shard_file\"); " +
-        "if awk 'NF && $0 !~ /^\\s*\\{/ { exit 1 }' \"$shard_file\"; then " +
+        "if tail -n 5 \"$shard_file\" | python3 -c 'import sys, json; [json.loads(line) for line in sys.stdin]' 2>/dev/null; then " +
         "echo \"$(basename \"$shard_file\"): ${line_count} documents\"; " +
         "else echo \"$(basename \"$shard_file\"): Invalid JSON detected\"; exit 1; fi; done"
     string verify_output = runtime_run_command_output("sh -c " + shell_escape(verify_cmd))
