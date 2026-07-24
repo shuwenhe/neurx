@@ -1,9 +1,9 @@
-// ============================================================================
-// NeurX Shard Manager
-//
-// S implementation of the unified shard CLI.
-// The shell wrapper only translates argv into environment variables.
-// ============================================================================
+
+
+
+
+
+
 
 package main
 
@@ -14,9 +14,9 @@ func string_char(int c) string {
 }
 
 func trim(string s) string {
-    int begin = 0
+    var begin = 0
     while begin < len(s) {
-        string ch = string_char(s[begin])
+        var ch = string_char(s[begin])
         if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
             begin = begin + 1
         } else {
@@ -24,9 +24,9 @@ func trim(string s) string {
         }
     }
 
-    int end = len(s)
+    var end = len(s)
     while end > begin {
-        string ch = string_char(s[end - 1])
+        var ch = string_char(s[end - 1])
         if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
             end = end - 1
         } else {
@@ -34,8 +34,8 @@ func trim(string s) string {
         }
     }
 
-    string out = ""
-    int i = begin
+    var out = ""
+    var i = begin
     while i < end {
         out = out + string_char(s[i])
         i = i + 1
@@ -44,13 +44,13 @@ func trim(string s) string {
 }
 
 func parse_int(string s, int fallback) int {
-    string text = trim(s)
+    var text = trim(s)
     if len(text) == 0 {
         return fallback
     }
 
-    int sign = 1
-    int i = 0
+    var sign = 1
+    var i = 0
     if string_char(text[0]) == "-" {
         sign = -1
         i = 1
@@ -58,9 +58,9 @@ func parse_int(string s, int fallback) int {
         i = 1
     }
 
-    int value = 0
+    var value = 0
     while i < len(text) {
-        int digit = text[i] - 48
+        var digit = text[i] - 48
         if digit < 0 || digit > 9 {
             return fallback
         }
@@ -72,10 +72,10 @@ func parse_int(string s, int fallback) int {
 }
 
 func shell_escape(string s) string {
-    string out = "'"
-    int i = 0
+    var out = "'"
+    var i = 0
     while i < len(s) {
-        string ch = string_char(s[i])
+        var ch = string_char(s[i])
         if ch == "'" {
             out = out + "'\"'\"'"
         } else {
@@ -92,15 +92,15 @@ func int_to_str(int n) string {
         return "0"
     }
 
-    int value = n
+    var value = n
     bool negative = n < 0
     if negative {
         value = 0 - value
     }
 
-    string out = ""
+    var out = ""
     while value > 0 {
-        int digit = value - (value / 10) * 10
+        var digit = value - (value / 10) * 10
         out = string_char(digit + 48) + out
         value = value / 10
     }
