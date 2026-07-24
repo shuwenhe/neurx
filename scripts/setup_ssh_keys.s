@@ -15,7 +15,7 @@ func main() int {
     string pub_key = key_path + ".pub"
     string worker_pass = runtime_env_get("WORKER_PASS", "")
 
-    // Ensure key exists
+    
     if !runtime_run_command("test -f " + runtime_shell_escape(key_path)).ok {
         _ = runtime_run_command("mkdir -p " + runtime_shell_escape(home + "/.ssh"))
         string gen_cmd = "ssh-keygen -t rsa -b 4096 -f " + runtime_shell_escape(key_path) + " -N '' -C neurx-ssh-key"
@@ -32,10 +32,10 @@ func main() int {
         return 3
     }
 
-    // Build a shell loop to copy the key to each host (uses ssh-copy-id if available)
+    
     string sh_cmd = "hosts=\"" + hosts + "\"; for host in $hosts; do echo Copying key to $host; "
 
-    // prefer ssh-copy-id, support sshpass when WORKER_PASS provided
+    
     sh_cmd = sh_cmd + "if command -v ssh-copy-id >/dev/null 2>&1; then "
     if worker_pass != "" {
         sh_cmd = sh_cmd + "if command -v sshpass >/dev/null 2>&1; then sshpass -p '" + worker_pass + "' ssh-copy-id -i " + runtime_shell_escape(pub_key) + " -o StrictHostKeyChecking=no $host; else ssh-copy-id -i " + runtime_shell_escape(pub_key) + " -o StrictHostKeyChecking=no $host || true; fi; "
