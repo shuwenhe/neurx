@@ -93,7 +93,7 @@ func int_to_str(int n) string {
     }
 
     var value = n
-    bool negative = n < 0
+    var negative = n < 0
     if negative {
         value = 0 - value
     }
