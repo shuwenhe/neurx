@@ -43,13 +43,16 @@ func format_bytes(int bytes) string {
 }
 
 func create_progress_bar(int percent, int width) string {
-    int filled = (percent * width) / 100
+    int filled
+    filled = (percent * width) / 100
     if filled > width {
         filled = width
     }
 
-    string bar = "["
-    int i = 0
+    string bar
+    bar = "["
+    int i
+    i = 0
     while i < width {
         if i < filled {
             bar = bar + "="
