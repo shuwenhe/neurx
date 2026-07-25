@@ -66,53 +66,7 @@ struct gpt_large_pretrain_eval_result {
     dataloader_state valid_loader
 }
 
-func trim(string s) string {
-    int i = 0
-    while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
-        i = i + 1
-    }
 
-    int j = len(s) - 1
-    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
-        j = j - 1
-    }
-
-    if j < i {
-        return ""
-    }
-
-    string out = ""
-    int k = i
-    while k <= j {
-        out = out + string_char(s[k])
-        k = k + 1
-    }
-    out
-}
-
-func string_char(int c) string {
-    string(c)
-}
-
-func int_to_str(int n, int fallback) string {
-    int value = n
-    if value == 0 {
-        return "0"
-    }
-    bool neg = value < 0
-    if neg {
-        value = -value
-    }
-    string s = ""
-    while value > 0 {
-        s = string_char(value - (value / 10) * 10 + 48) + s
-        value = value / 10
-    }
-    if neg {
-        s = "-" + s
-    }
-    s
-}
 
 func join_ints([]int values) string {
     string out = ""
