@@ -226,7 +226,7 @@ func gpt_large_pretrain_string_at([]string values, int idx) string {
     if i < 0 {
         return ""
     }
-    values[i]
+    return values[i]
 }
 
 func gpt_large_pretrain_int_at([]int values, int idx) int {
