@@ -61,6 +61,14 @@ if(BUILD_TESTING)
   target_compile_options(cann_prefix_cache_test PRIVATE
     -Wall -Wextra -Werror)
   add_test(NAME cann_prefix_cache COMMAND cann_prefix_cache_test)
+
+  add_executable(cann_matmul_test
+    ../tests/cann_matmul_test.cpp
+  )
+  target_link_libraries(cann_matmul_test PRIVATE neurx_cann_runtime)
+  target_compile_options(cann_matmul_test PRIVATE
+    -Wall -Wextra -Werror)
+  add_test(NAME cann_matmul COMMAND cann_matmul_test)
 endif()
 
 option(NEURX_ENABLE_ATB_310P
