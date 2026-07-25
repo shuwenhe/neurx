@@ -22,74 +22,9 @@ use neurx.ops
 use neurx.tensor.new
 use neurx.tensor.tensor
 
-func get_file_size(string path) int {
-    if !runtime_file_exists(path) {
-        return 0
-    }
-    return int(runtime_file_size(path))
-}
+use neurx.data.file_reader_with_progress.{trim, int_to_str, get_file_size, format_bytes, create_progress_bar, read_text_file_with_estimated_progress, format_progress_percent, read_text_file_with_progress}
 
-func format_bytes(int bytes) string {
-    if bytes < 1024 {
-        return int_to_str(bytes, 0) + " B"
-    }
-    if bytes < 1024 * 1024 {
-        return int_to_str(bytes / 1024, 0) + " KB"
-    }
-    if bytes < 1024 * 1024 * 1024 {
-        return int_to_str(bytes / (1024 * 1024), 0) + " MB"
-    }
-    return int_to_str(bytes / (1024 * 1024 * 1024), 0) + " GB"
-}
 
-func create_progress_bar(int percent, int width) string {
-    int filled
-    filled = (percent * width) / 100
-    if filled > width {
-        filled = width
-    }
-
-    string bar
-    bar = "["
-    int i
-    i = 0
-    while i < width {
-        if i < filled {
-            bar = bar + "="
-        } else if i == filled && percent < 100 {
-            bar = bar + ">"
-        } else {
-            bar = bar + " "
-        }
-        i = i + 1
-    }
-    bar = bar + "]"
-
-    return bar
-}
-
-func read_text_file_with_estimated_progress(string path, int update_interval_ms) string {
-    if !runtime_file_exists(path) {
-        println("[io] ERROR: file not found: " + path)
-        return ""
-    }
-
-    int file_size = get_file_size(path)
-    string size_str = format_bytes(file_size)
-
-    println("[io] reading: " + path)
-    println("[io] size: " + size_str)
-    println("[io] [>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>] 0% | allocating buffer...")
-
-    string text = runtime_read_text_file(path)
-
-    int loaded_size = len(text)
-    string loaded_str = format_bytes(loaded_size)
-
-    println("[io] [========================================] 100% | complete, loaded " + loaded_str)
-
-    return text
-}
 
 struct gpt_large_pretrain_state {
     pretrain_config cfg
