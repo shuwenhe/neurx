@@ -964,7 +964,7 @@ run-large-pretrain-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/run_large_pretrain
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='/app/shuwen/s/bin/s_seed' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)'; \
+		S_COMPILER='/tmp/s_wrapper_debug.sh' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)'; \
 		if "$(S_COMPILER)" --help 2>&1 | grep -q "<input.s> <output.ir>"; then \
 			"$(S_COMPILER)" '$(PRETRAIN_ENTRY_SOURCE)' '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_large_pretrain.ir' 2>&1 || exit 1; \
 		else \
