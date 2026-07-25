@@ -34,15 +34,12 @@ func format_bytes(int bytes) string {
         return int_to_str(bytes, 0) + " B"
     }
     if bytes < 1024 * 1024 {
-        int kb = bytes / 1024
-        return int_to_str(kb, 0) + " KB"
+        return int_to_str(bytes / 1024, 0) + " KB"
     }
     if bytes < 1024 * 1024 * 1024 {
-        int mb = bytes / (1024 * 1024)
-        return int_to_str(mb, 0) + " MB"
+        return int_to_str(bytes / (1024 * 1024), 0) + " MB"
     }
-    int gb = bytes / (1024 * 1024 * 1024)
-    return int_to_str(gb, 0) + " GB"
+    return int_to_str(bytes / (1024 * 1024 * 1024), 0) + " GB"
 }
 
 func create_progress_bar(int percent, int width) string {
