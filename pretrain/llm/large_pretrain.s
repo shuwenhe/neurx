@@ -22,9 +22,74 @@ use neurx.ops
 use neurx.tensor.new
 use neurx.tensor.tensor
 
-use neurx.data.file_reader_with_progress.{trim, int_to_str, get_file_size, format_bytes, create_progress_bar, read_text_file_with_estimated_progress, format_progress_percent, read_text_file_with_progress}
+func get_file_size(string path) int {
+    if !runtime_file_exists(path) {
+        return 0
+    }
+    return int(runtime_file_size(path))
+}
 
+func format_bytes(int bytes) string {
+    if bytes < 1024 {
+        return int_to_str(bytes, 0) + " B"
+    }
+    if bytes < 1024 * 1024 {
+        int kb = bytes / 1024
+        return int_to_str(kb, 0) + " KB"
+    }
+    if bytes < 1024 * 1024 * 1024 {
+        int mb = bytes / (1024 * 1024)
+        return int_to_str(mb, 0) + " MB"
+    }
+    int gb = bytes / (1024 * 1024 * 1024)
+    return int_to_str(gb, 0) + " GB"
+}
 
+func create_progress_bar(int percent, int width) string {
+    int filled = (percent * width) / 100
+    if filled > width {
+        filled = width
+    }
+
+    string bar = "["
+    int i = 0
+    while i < width {
+        if i < filled {
+            bar = bar + "="
+        } else if i == filled && percent < 100 {
+            bar = bar + ">"
+        } else {
+            bar = bar + " "
+        }
+        i = i + 1
+    }
+    bar = bar + "]"
+
+    return bar
+}
+
+func read_text_file_with_estimated_progress(string path, int update_interval_ms) string {
+    if !runtime_file_exists(path) {
+        println("[io] ERROR: file not found: " + path)
+        return ""
+    }
+
+    int file_size = get_file_size(path)
+    string size_str = format_bytes(file_size)
+
+    println("[io] reading: " + path)
+    println("[io] size: " + size_str)
+    println("[io] [>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>] 0% | allocating buffer...")
+
+    string text = runtime_read_text_file(path)
+
+    int loaded_size = len(text)
+    string loaded_str = format_bytes(loaded_size)
+
+    println("[io] [========================================] 100% | complete, loaded " + loaded_str)
+
+    return text
+}
 
 struct gpt_large_pretrain_state {
     pretrain_config cfg
@@ -66,7 +131,53 @@ struct gpt_large_pretrain_eval_result {
     dataloader_state valid_loader
 }
 
+func trim(string s) string {
+    int i = 0
+    while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
+        i = i + 1
+    }
 
+    int j = len(s) - 1
+    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
+        j = j - 1
+    }
+
+    if j < i {
+        return ""
+    }
+
+    string out = ""
+    int k = i
+    while k <= j {
+        out = out + string_char(s[k])
+        k = k + 1
+    }
+    out
+}
+
+func string_char(int c) string {
+    string(c)
+}
+
+func int_to_str(int n, int fallback) string {
+    int value = n
+    if value == 0 {
+        return "0"
+    }
+    bool neg = value < 0
+    if neg {
+        value = -value
+    }
+    string s = ""
+    while value > 0 {
+        s = string_char(value - (value / 10) * 10 + 48) + s
+        value = value / 10
+    }
+    if neg {
+        s = "-" + s
+    }
+    s
+}
 
 func join_ints([]int values) string {
     string out = ""
