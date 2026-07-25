@@ -1,7 +1,11 @@
 package main
 
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_run_command_output, trim}
-use std.io.println
+// Local logger to avoid import collisions
+func manifest_log(string s) int {
+    _ = runtime_run_command_output("printf '%s\\n' " + shell_escape(s))
+    0
+}
 
 extern "intrinsic" func __host_write_text_file(string path, string content) int
 
@@ -14,33 +18,33 @@ func string_char(int c) string {
 }
 
 func main() int {
-    string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    string shard_dir = runtime_env_get("NEURX_PRETRAIN_SHARD_DIR", project_root + "/dataset/pretrain/shard")
-    string manifest_file = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
-    string force_rebuild = runtime_env_get("NEURX_PRETRAIN_REBUILD_MANIFEST", "0")
-    string work_dir = project_root + "/artifacts/build/build_pretrain_manifest"
-    string shard_list_file = work_dir + "/shard_list.txt"
-    string doc_count_file = work_dir + "/doc_count.txt"
-    string size_bytes_file = work_dir + "/size_bytes.txt"
-    string shard_count_file = work_dir + "/shard_count.txt"
-    string total_documents_file = work_dir + "/total_documents.txt"
-    string total_size_bytes_file = work_dir + "/total_size_bytes.txt"
-    string average_docs_file = work_dir + "/average_docs.txt"
+    let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
+    let shard_dir = runtime_env_get("NEURX_PRETRAIN_SHARD_DIR", project_root + "/dataset/pretrain/shard")
+    let manifest_file = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
+    let force_rebuild = runtime_env_get("NEURX_PRETRAIN_REBUILD_MANIFEST", "0")
+    let work_dir = project_root + "/artifacts/build/build_pretrain_manifest"
+    let shard_list_file = work_dir + "/shard_list.txt"
+    let doc_count_file = work_dir + "/doc_count.txt"
+    let size_bytes_file = work_dir + "/size_bytes.txt"
+    let shard_count_file = work_dir + "/shard_count.txt"
+    let total_documents_file = work_dir + "/total_documents.txt"
+    let total_size_bytes_file = work_dir + "/total_size_bytes.txt"
+    let average_docs_file = work_dir + "/average_docs.txt"
 
-    println("NeurX Pretrain manifest Builder (S Lang)")
-    println("")
-    println("Project root : " + project_root)
-    println("Shard dir    : " + shard_dir)
-    println("manifest     : " + manifest_file)
-    println("")
+    manifest_log("NeurX Pretrain manifest Builder (S Lang)")
+    manifest_log("")
+    manifest_log("Project root : " + project_root)
+    manifest_log("Shard dir    : " + shard_dir)
+    manifest_log("manifest     : " + manifest_file)
+    manifest_log("")
 
     if !runtime_file_exists(shard_dir) {
-        println("❌ shard directory not found: " + shard_dir)
+                manifest_log("❌ shard directory not found: " + shard_dir)
         return 1
     }
 
     if force_rebuild != "1" && runtime_file_exists(manifest_file) {
-        println("[pretrain-manifest] using existing manifest: " + manifest_file)
+        manifest_log("[pretrain-manifest] using existing manifest: " + manifest_file)
         return 0
     }
 
@@ -55,19 +59,19 @@ func main() int {
     runtime_write_text_file(average_docs_file, "0\n")
 
     if trim(runtime_run_command_output("find " + shell_escape(shard_dir) + " -maxdepth 1 -type f -name 'shard_*.jsonl' -print | sort > " + shell_escape(shard_list_file) + "; printf ok")) != "ok" {
-        println("❌ failed to enumerate shards in: " + shard_dir)
+        manifest_log("❌ failed to enumerate shards in: " + shard_dir)
         return 1
     }
 
-    string shard_output = trim(runtime_read_text_file(shard_list_file))
+    let shard_output = trim(runtime_read_text_file(shard_list_file))
     if shard_output == "" {
-        println("❌ no shard files found in: " + shard_dir)
+        manifest_log("❌ no shard files found in: " + shard_dir)
         return 1
     }
 
     int total_documents = 0
     int total_size_bytes = 0
-    string json_header = "{\n"
+    let json_header = "{\n"
     json_header = json_header + "  \"dataset_name\": \"neurx-pretrain-wikipedia\",\n"
     json_header = json_header + "  \"version\": \"1.0\",\n"
     json_header = json_header + "  \"source_dir\": " + json_escape(shard_dir) + ",\n"
@@ -76,18 +80,18 @@ func main() int {
 
     int shard_count = 0
     int i = 0
-    string current_path = ""
+    let current_path = ""
     while i <= len(shard_output) {
         bool at_end = i == len(shard_output)
         bool at_newline = !at_end && shard_output[i] == 10
         if at_end || at_newline {
-            string shard_path = trim(current_path)
+            let shard_path = trim(current_path)
             current_path = ""
             if shard_path != "" {
                 _ = runtime_run_command_output("wc -l < " + shell_escape(shard_path) + " > " + shell_escape(doc_count_file) + "; printf ok")
                 _ = runtime_run_command_output("wc -c < " + shell_escape(shard_path) + " > " + shell_escape(size_bytes_file) + "; printf ok")
-                string doc_count_text = trim(runtime_read_text_file(doc_count_file))
-                string size_bytes_text = trim(runtime_read_text_file(size_bytes_file))
+                let doc_count_text = trim(runtime_read_text_file(doc_count_file))
+                let size_bytes_text = trim(runtime_read_text_file(size_bytes_file))
                 if doc_count_text == "" {
                     doc_count_text = "0"
                 }
@@ -99,7 +103,7 @@ func main() int {
                 _ = runtime_run_command_output("sh -c " + shell_escape("count=$(cat " + shell_escape(shard_count_file) + "); new=$((count + 1)); printf '%s\\n' \"$new\" > " + shell_escape(shard_count_file) + "; printf ok"))
                 _ = runtime_run_command_output("sh -c " + shell_escape("total=$(cat " + shell_escape(total_documents_file) + "); new=$((total + " + doc_count_text + ")); printf '%s\\n' \"$new\" > " + shell_escape(total_documents_file) + "; printf ok"))
                 _ = runtime_run_command_output("sh -c " + shell_escape("total=$(cat " + shell_escape(total_size_bytes_file) + "); new=$((total + " + size_bytes_text + ")); printf '%s\\n' \"$new\" > " + shell_escape(total_size_bytes_file) + "; printf ok"))
-                string shard_json = ""
+                let shard_json = ""
                 if shard_count > 0 {
                     shard_json = ",\n"
                 }
@@ -118,9 +122,9 @@ func main() int {
         i = i + 1
     }
 
-    string shard_count_text = trim(runtime_read_text_file(shard_count_file))
-    string total_documents_text = trim(runtime_read_text_file(total_documents_file))
-    string total_size_bytes_text = trim(runtime_read_text_file(total_size_bytes_file))
+    let shard_count_text = trim(runtime_read_text_file(shard_count_file))
+    let total_documents_text = trim(runtime_read_text_file(total_documents_file))
+    let total_size_bytes_text = trim(runtime_read_text_file(total_size_bytes_file))
     if shard_count_text == "" {
         shard_count_text = "0"
     }
@@ -133,22 +137,22 @@ func main() int {
     if parse_int(shard_count_text, 0) > 0 {
         _ = runtime_run_command_output("sh -c " + shell_escape("total=$(cat " + shell_escape(total_documents_file) + "); count=$(cat " + shell_escape(shard_count_file) + "); avg=$((total / count)); printf '%s\\n' \"$avg\" > " + shell_escape(average_docs_file) + "; printf ok"))
     }
-    string average_docs_text = trim(runtime_read_text_file(average_docs_file))
+    let average_docs_text = trim(runtime_read_text_file(average_docs_file))
     if average_docs_text == "" {
         average_docs_text = "0"
     }
 
-    string json_footer = "\n  ],\n"
+    let json_footer = "\n  ],\n"
     json_footer = json_footer + "  \"total_shards\": " + shard_count_text + ",\n"
     json_footer = json_footer + "  \"total_documents\": " + total_documents_text + ",\n"
     json_footer = json_footer + "  \"total_size_bytes\": " + total_size_bytes_text + ",\n"
     json_footer = json_footer + "  \"average_docs_per_shard\": " + average_docs_text + "\n"
     json_footer = json_footer + "}\n"
     runtime_write_text_file(manifest_file, runtime_read_text_file(manifest_file) + json_footer)
-    println("[pretrain-manifest] wrote manifest: " + manifest_file)
-    println("[pretrain-manifest] shard files: " + shard_count_text)
-    println("[pretrain-manifest] documents  : " + total_documents_text)
-    println("[pretrain-manifest] bytes      : " + total_size_bytes_text)
+    manifest_log("[pretrain-manifest] wrote manifest: " + manifest_file)
+    manifest_log("[pretrain-manifest] shard files: " + shard_count_text)
+    manifest_log("[pretrain-manifest] documents  : " + total_documents_text)
+    manifest_log("[pretrain-manifest] bytes      : " + total_size_bytes_text)
     0
 }
 
