@@ -10,6 +10,7 @@ add_library(neurx_cann_runtime STATIC
   cache/paged_kv_cache.cpp
   cache/prefix_cache.cpp
   model/nxtrfmv2_loader.cpp
+  operators/matmul_bridge.cpp
   operators/operator_library.cpp
   operators/transformer_engine.cpp
   operators/transformer_plan.cpp

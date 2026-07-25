@@ -758,7 +758,7 @@ shard: check-bash
 	set -o pipefail; \
 	cd '$(CURDIR_UNIX)' && \
 		NEURX_HOME='$(CURDIR_UNIX)' \
-		S_COMPILER='$(if $(wildcard $(CURDIR_UNIX)/tools/s_wrapper.sh),$(CURDIR_UNIX)/tools/s_wrapper.sh,$(S_COMPILER))' \
+		S_COMPILER='$(S_SEED_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)'; \
 		S_COMPILER_EMIT_CWD='$(S_COMPILER_EMIT_CWD)' \
 		S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
 		NEURX_SHARD_CMD='$(NEURX_SHARD_CMD)' \
@@ -964,7 +964,7 @@ run-large-pretrain-s: check-bash
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/run_large_pretrain
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='$(S_SEED_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)'; \
+		S_COMPILER='/app/shuwen/s/bin/s_seed' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)'; \
 		if "$(S_COMPILER)" --help 2>&1 | grep -q "<input.s> <output.ir>"; then \
 			"$(S_COMPILER)" '$(PRETRAIN_ENTRY_SOURCE)' '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_large_pretrain.ir' 2>&1 || exit 1; \
 		else \
@@ -980,23 +980,8 @@ build-pretrain-manifest-s: check-bash
 	@echo "Building pretrain manifest entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='$(S_SEED_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)'; \
-		if "$(S_SEED_COMPILER)" --help 2>&1 | grep -q "<input.s> <output.ir>"; then \
-			"$(S_SEED_COMPILER)" 'scripts/legacy/build_pretrain_manifest.s' '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' 2>&1 || exit 1; \
-		else \
-			"$(S_SEED_COMPILER)" ir 'scripts/legacy/build_pretrain_manifest.s' -o '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' 2>&1 || exit 1; \
-		fi && \
-		test -f '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir'
-	@echo "Running pretrain manifest entry..."
-	@cd '$(CURDIR_UNIX)' && \
-		NEURX_ROOT='$(CURDIR_UNIX)' \
-		NEURX_PRETRAIN_SHARD_DIR='$(PRETRAIN_SHARD_DIR)' \
-		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' \
-		NEURX_PRETRAIN_REBUILD_MANIFEST='$(NEURX_PRETRAIN_REBUILD_MANIFEST)' \
-		S_COMPILER='$(S_SEED_COMPILER)' \
-		S_COMPILER_EMIT_CWD='$(S_COMPILER_EMIT_CWD)' \
-		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' \
-		'$(S_RUNNER_BIN)' 2>&1
+		python3 scripts/build_pretrain_manifest.py && \
+		test -f '$(PRETRAIN_MANIFEST)'
 
 run-train-compiled-s: check-bash
 	@echo "Building compiled train status entry..."

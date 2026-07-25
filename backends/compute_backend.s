@@ -205,11 +205,23 @@ func backend_matmul(
     int m, int k, int n
 ) []float {
     if ctx.gpu_available {
-
+        // prefer native CANN implementation when available
+        if ctx.device.backend == "cann" {
+            []float out = []float{cap: m * n}
+            // initialize out buffer
+            int idx = 0
+            while idx < m * n { out[idx] = 0.0; idx = idx + 1 }
+            __neurx_cann_matmul(a, b, out, m, k, n)
+            return out
+        }
+        // fall back to CPU implementation if no native backend bound
         return cpu_matmul(a, b, m, k, n)
     }
     cpu_matmul(a, b, m, k, n)
 }
+
+// Bridge to the native C implementation provided by the CANN runtime library.
+extern "intrinsic" func __neurx_cann_matmul([]float a, []float b, []float out, int m, int k, int n) ()
 
 func cpu_matmul([]float a, []float b, int m, int k, int n) []float {
     []float result = []float{cap: m * n}
