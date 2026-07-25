@@ -12,6 +12,7 @@ use neurx.checkpoint.pretrain.{pretrain_checkpoint_state, pretrain_checkpoint_bu
 use neurx.pretrain.config.{pretrain_config, pretrain_config_state_dict, pretrain_config_load_state_dict}
 use neurx.pretrain.eval.{pretrain_eval_state, new_pretrain_eval_state, update_pretrain_eval, pretrain_eval_perplexity_from_loss, pretrain_eval_state_dict, pretrain_eval_load_state_dict}
 use neurx.pretrain.loop.{pretrain_loop_state, new_pretrain_loop_state, pretrain_step, pretrain_reset_micro_step, pretrain_loop_state_dict, pretrain_loop_load_state_dict}
+use neurx.pretrain.data.{pretrain_data_state, new_pretrain_data_state, advance_tokens, advance_samples, pretrain_data_state_dict, pretrain_data_load_state_dict}
 use neurx.checkpoint.{save_checkpoint, load_checkpoint, checkpoint_step, checkpoint_loss, checkpoint_params}
 use neurx.compression.release.{compression_release_config, prepare_compression_release}
 use neurx.deployment.chain.{default_model_deployment_config}
