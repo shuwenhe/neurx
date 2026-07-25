@@ -26,7 +26,7 @@ func get_file_size(string path) int {
     if !runtime_file_exists(path) {
         return 0
     }
-    216123783
+    return int(runtime_file_size(path))
 }
 
 func format_bytes(int bytes) string {
