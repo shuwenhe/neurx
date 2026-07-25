@@ -2715,7 +2715,6 @@ pub func gpt_large_pretrain_launch() int {
     string release_dir = gpt_large_pretrain_prepare_release(final_state)
     println("Compression release written to: " + release_dir)
     println("════════════════════════════════════════════════════════════")
-    0
 }
 
 func main() int {
