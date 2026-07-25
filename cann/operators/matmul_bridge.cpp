@@ -4,6 +4,7 @@
 #include <dlfcn.h>
 #include <atomic>
 #include <iostream>
+#include "aclnn_matmul_wrapper.h"
 
 static std::atomic<int> g_cann_probe{-1};
 
@@ -80,6 +81,15 @@ extern "C" void __neurx_cann_matmul(const float* a, const float* b, float* out, 
   // 3. Launch the matmul kernel (aclmdlExecute or custom operator plugin API).
   // 4. Copy result back to `out` (aclrtMemcpy) and free device buffers.
   // 5. Return success status to the S runtime; on failure, fall back to CPU matmul.
+
+  // If ACL runtime was initialized, try to use the ACLNN wrapper. The
+  // wrapper will attempt to exercise device allocation/copies and will
+  // fall back to CPU matmul if a device kernel is not available.
+  if (has_cann && initialized.load(std::memory_order_acquire) != 0) {
+    int rc = neurx_aclnn_matmul(a, b, out, m, k, n);
+    if (rc == 0) return;
+    std::cerr << "[matmul_bridge] neurx_aclnn_matmul returned " << rc << ", falling back to CPU\n";
+  }
 
   // CPU fallback (naive) - correct by construction
   int mn = m * n;

@@ -969,11 +969,19 @@ func gpt_large_pretrain_documents_for_ref(string shard_ref) []string {
             if is_jsonl {
                 string doc = trim(gpt_large_pretrain_json_string_value(line, "text", ""))
                 if doc != "" {
-                    docs.push(doc)
+                        docs = append(docs, doc)
                     doc_count = doc_count + 1
                 }
             } else {
-                docs.push(line)
+                int docs_push_len = len(docs)
+                []string docs_push_tmp = []string{cap: docs_push_len + 1}
+                int docs_push_i = 0
+                while docs_push_i < docs_push_len {
+                    docs_push_tmp[docs_push_i] = docs[docs_push_i]
+                    docs_push_i = docs_push_i + 1
+                }
+                docs_push_tmp[docs_push_len] = line
+                docs = docs_push_tmp
                 doc_count = doc_count + 1
             }
         }
@@ -999,8 +1007,16 @@ func gpt_large_pretrain_documents_for_refs([]string shard_refs) []string {
         println("[init] loading shard " + int_to_str(i + 1, 0) + "/" + int_to_str(len(shard_refs), 0) + ": " + shard_ref)
         []string shard_documents = gpt_large_pretrain_documents_for_ref(shard_ref)
         int j = 0
-        while j < len(shard_documents) {
-            documents.push(shard_documents[j])
+            while j < len(shard_documents) {
+            int documents_push_len = len(documents)
+            []string documents_push_tmp = []string{cap: documents_push_len + 1}
+            int documents_push_i = 0
+            while documents_push_i < documents_push_len {
+                documents_push_tmp[documents_push_i] = documents[documents_push_i]
+                documents_push_i = documents_push_i + 1
+            }
+            documents_push_tmp[documents_push_len] = shard_documents[j]
+            documents = documents_push_tmp
             j = j + 1
         }
         println("[init] shard docs loaded: " + int_to_str(len(shard_documents), 0) + ", total docs=" + int_to_str(len(documents), 0))
