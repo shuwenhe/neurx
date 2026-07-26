@@ -7,10 +7,11 @@ shards = sorted(glob.glob(os.path.join(shard_dir, 'shard_*.jsonl')))
 if not shards:
     print('no shards found in', shard_dir)
     exit(1)
+print(f'found {len(shards)} shards in {shard_dir}')
 shard_entries = []
 total_docs = 0
 total_bytes = 0
-for p in shards:
+for idx, p in enumerate(shards, start=1):
     try:
         with open(p, 'rb') as f:
             lines = sum(1 for _ in f)
@@ -18,6 +19,8 @@ for p in shards:
     except Exception as e:
         print('skipping', p, 'error', e)
         continue
+    if idx == 1 or idx == len(shards) or idx % max(1, len(shards) // 10) == 0:
+        print(f'[manifest] {idx}/{len(shards)} {os.path.basename(p)}')
     shard_entries.append({
         'shard_id': os.path.basename(p),
         'file_path': p,

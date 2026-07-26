@@ -48,12 +48,17 @@ yaml_list_value() {
   ' <<<"$item"
 }
 
+log_step() {
+  echo "[pretrain-npu] $1"
+}
+
 if [[ "${PLATFORM:-linux}" != "linux" ]]; then
   echo "error: Ascend CANN pretraining is supported on Linux hosts only."
   echo "       Current platform: ${PLATFORM:-unknown}"
   exit 1
 fi
 
+log_step "step 1/8: locating Ascend toolkit"
 ascend_home="${ASCEND_HOME_PATH:-/usr/local/Ascend/ascend-toolkit/latest}"
 if [[ ! -d "$ascend_home" ]]; then
   echo "error: Ascend Toolkit not found: $ascend_home"
@@ -61,6 +66,7 @@ if [[ ! -d "$ascend_home" ]]; then
   exit 1
 fi
 
+log_step "step 2/8: locating Ascend runtime libraries"
 acl_lib=""
 for candidate in "$ascend_home/lib64/libascendcl.so" "$ascend_home/runtime/lib64/libascendcl.so"; do
   if [[ -f "$candidate" ]]; then
@@ -74,6 +80,7 @@ if [[ -z "$acl_lib" ]]; then
   exit 1
 fi
 
+log_step "step 3/8: checking NPU availability"
 npu_smi_bin="${NPU_SMI:-$(command -v npu-smi 2>/dev/null || true)}"
 if [[ -z "$npu_smi_bin" && -x /usr/local/Ascend/driver/tools/npu-smi ]]; then
   npu_smi_bin=/usr/local/Ascend/driver/tools/npu-smi
@@ -84,6 +91,7 @@ if [[ -z "$npu_smi_bin" ]] || ! "$npu_smi_bin" info >/dev/null 2>&1; then
   exit 1
 fi
 
+log_step "step 4/8: loading cluster config"
 visible_devices="${ASCEND_RT_VISIBLE_DEVICES:-${NEURX_NPU_VISIBLE_DEVICES:-0}}"
 if [[ -f "$config_file" ]]; then
   visible_devices="${visible_devices:-$(yaml_value "$config_file" visible_devices)}"
@@ -132,12 +140,14 @@ if [[ -f "$config_file" ]]; then
   fi
 fi
 
+log_step "step 5/8: validating world size and HCCL runtime"
 if [[ ! "$requested_world_size" =~ ^[0-9]+$ ]] || [[ "$requested_world_size" -lt 1 ]]; then
   echo "error: WORLD_SIZE must be a positive integer."
   echo "       Received: $requested_world_size"
   exit 1
 fi
 
+log_step "step 6/8: preparing pretrain manifest and runtime environment"
 if [[ "$requested_world_size" -gt 1 && "${#worker_hosts[@]}" -lt 1 ]]; then
   echo "error: world size > 1 but no workers were configured."
   exit 1
@@ -157,14 +167,22 @@ fi
 
 if [[ "$requested_world_size" -gt 1 ]]; then
   hccl_lib=""
-  for candidate in "$ascend_home/lib64/libhccl.so" "$ascend_home/runtime/lib64/libhccl.so" "$ascend_home/hccl/lib64/libhccl.so"; do
+  for candidate in \
+    "$ascend_home/lib64/libhccl.so" \
+    "$ascend_home/runtime/lib64/libhccl.so" \
+    "$ascend_home/hccl/lib64/libhccl.so" \
+    "$ascend_home/aarch64-linux/lib64/libhccl.so" \
+    "$ascend_home/lib64/libhccl_v2.so" \
+    "$ascend_home/lib64/libhccl_fwk.so" \
+    "$ascend_home/lib64/libhccl_legacy.so" \
+    "$ascend_home/lib64/libhccl_plf.so"; do
     if [[ -f "$candidate" ]]; then
       hccl_lib="$candidate"
       break
     fi
   done
   if [[ -z "$hccl_lib" ]]; then
-    echo "error: multi-NPU pretraining requested but libhccl.so was not found."
+    echo "error: multi-NPU pretraining requested but no HCCL runtime library was found."
     exit 1
   fi
 fi
@@ -184,6 +202,7 @@ export LD_LIBRARY_PATH="$ascend_home/lib64:$ascend_home/runtime/lib64:$ascend_ho
 export ASCEND_OPP_PATH="${ASCEND_OPP_PATH:-$ascend_home/opp}"
 export ASCEND_AICPU_PATH="${ASCEND_AICPU_PATH:-$ascend_home}"
 
+log_step "step 7/8: building pretrain manifest"
 make build-pretrain-manifest-s
 
 common_env=(
@@ -209,21 +228,37 @@ common_env=(
 )
 
 if [[ "$requested_world_size" -gt 1 ]]; then
-  echo "[pretrain-npu] checking worker SSH connectivity"
+  log_step "step 8/8: checking workers and synchronizing code"
   for idx in "${!worker_hosts[@]}"; do
     host="${worker_hosts[$idx]}"
     vis="${worker_visibles[$idx]}"
+    log_step "worker $((idx + 1))/$(( ${#worker_hosts[@]} )): probing $host"
     if ! ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=no "$host" "$npu_smi_bin info >/dev/null 2>&1"; then
       echo "error: worker host is not reachable or npu-smi failed on $host."
       echo "       Check SSH access, NPU driver state, and worker host permissions."
       exit 1
     fi
+    log_step "worker $((idx + 1))/$(( ${#worker_hosts[@]} )): syncing code to $host"
+    if ! ssh -o StrictHostKeyChecking=no "$host" "mkdir -p '$root_dir'"; then
+      echo "error: failed to create remote code directory on $host."
+      exit 1
+    fi
+    if ! rsync -az --delete \
+      --exclude '.git' \
+      --exclude 'artifacts' \
+      --exclude 'checkpoint' \
+      --exclude '.agents' \
+      --exclude '.codex' \
+      "$root_dir/" "$host:$root_dir/"; then
+      echo "error: failed to sync code to worker $host."
+      exit 1
+    fi
     rank=$((idx + 1))
-    echo "[pretrain-npu] starting worker rank=$rank on $host"
+    log_step "worker $((idx + 1))/$(( ${#worker_hosts[@]} )): starting rank=$rank on $host"
     remote_cmd="cd '$root_dir' && env ${common_env[*]} NEURX_NPU_ROLE=worker RANK=$rank LOCAL_RANK=0 MASTER_ADDR='$master_addr' MASTER_PORT='$master_port' NEURX_NPU_MASTER_ADDR='$master_addr' NEURX_NPU_MASTER_PORT='$master_port' ASCEND_RT_VISIBLE_DEVICES='$vis' NEURX_NPU_VISIBLE_DEVICES='$vis' WORLD_SIZE='$requested_world_size' make run-large-pretrain-s"
     ssh -o StrictHostKeyChecking=no "$host" "bash -lc $(printf '%q' "$remote_cmd")" &
   done
 fi
 
-echo "[pretrain-npu] starting master locally"
+log_step "starting master locally (rank=0)"
 env "${common_env[@]}" NEURX_NPU_ROLE=master RANK=0 LOCAL_RANK=0 MASTER_ADDR="$master_addr" MASTER_PORT="$master_port" NEURX_NPU_MASTER_ADDR="$master_addr" NEURX_NPU_MASTER_PORT="$master_port" make run-large-pretrain-s

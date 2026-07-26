@@ -28,7 +28,8 @@ func get_file_size(string path) int {
     if !runtime_file_exists(path) {
         return 0
     }
-    return int(runtime_file_size(path))
+    string content = runtime_read_text_file(path)
+    return len(content)
 }
 
 func format_bytes(int bytes) string {
