@@ -66,6 +66,10 @@ CUDA_CHAT_BRIDGE_BIN := $(CUDA_CHAT_BRIDGE_BUILD_DIR)/neurx_transformer_chat$(BI
 ASCEND_HOME_DEFAULT ?= /usr/local/Ascend/ascend-toolkit/latest
 ASCEND_SOC_VERSION ?= Ascend910B1
 NPU_PRETRAIN_CONFIG ?= $(CURDIR_UNIX)/cann/configs/ascend_910b_train.json
+NPU_PRETRAIN_MASTER_ADDR ?= 112.29.145.3
+NPU_PRETRAIN_MASTER_PORT ?= 29500
+NPU_PRETRAIN_WORKER_HOST ?= root@112.29.145.15
+NPU_PRETRAIN_WORKER_VISIBLE_DEVICES ?= 0
 CC ?= cc
 LOG_DIR := $(CURDIR_UNIX)/artifacts/logs
 INDUSTRIAL_MANIFEST ?= $(CURDIR_UNIX)/data/training_data_shards/manifest.txt
@@ -176,95 +180,12 @@ infer: check-bash build-real-inference-s
 
 
 pretrain-npu: check-bash
-	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
-		if [ '$(PLATFORM)' != 'linux' ]; then \
-			echo "error: Ascend CANN pretraining is supported on Linux hosts only."; \
-			echo "       Current platform: $(PLATFORM)"; \
-			exit 1; \
-		fi; \
-		ASCEND_HOME="$${ASCEND_HOME_PATH:-$(ASCEND_HOME_DEFAULT)}"; \
-		if [ ! -d "$$ASCEND_HOME" ]; then \
-			echo "error: Ascend Toolkit not found: $$ASCEND_HOME"; \
-			echo "       Set ASCEND_HOME_PATH, then run: make pretrain-npu"; \
-			exit 1; \
-		fi; \
-		ACL_LIB=""; \
-		for candidate in \
-			"$$ASCEND_HOME/lib64/libascendcl.so" \
-			"$$ASCEND_HOME/runtime/lib64/libascendcl.so"; do \
-			if [ -f "$$candidate" ]; then ACL_LIB="$$candidate"; break; fi; \
-		done; \
-		if [ -z "$$ACL_LIB" ]; then \
-			echo "error: libascendcl.so was not found under $$ASCEND_HOME."; \
-			echo "       Install the CANN runtime package or correct ASCEND_HOME_PATH."; \
-			exit 1; \
-		fi; \
-		NPU_SMI_BIN="$${NPU_SMI:-$$(command -v npu-smi 2>/dev/null || true)}"; \
-		if [ -z "$$NPU_SMI_BIN" ] && [ -x /usr/local/Ascend/driver/tools/npu-smi ]; then \
-			NPU_SMI_BIN=/usr/local/Ascend/driver/tools/npu-smi; \
-		fi; \
-		if [ -z "$$NPU_SMI_BIN" ] || ! "$$NPU_SMI_BIN" info >/dev/null 2>&1; then \
-			echo "error: no usable Ascend NPU was detected with npu-smi."; \
-			echo "       Check the Ascend driver and device permissions."; \
-			exit 1; \
-		fi; \
-		VISIBLE_DEVICES="$${ASCEND_RT_VISIBLE_DEVICES:-0}"; \
-		if [[ ! "$$VISIBLE_DEVICES" =~ ^[0-9]+(,[0-9]+)*$$ ]]; then \
-			echo "error: ASCEND_RT_VISIBLE_DEVICES must be a comma-separated device list."; \
-			echo "       Received: $$VISIBLE_DEVICES"; \
-			exit 1; \
-		fi; \
-		DEVICE_COUNT="$$(printf '%s' "$$VISIBLE_DEVICES" | awk -F, '{print NF}')"; \
-		if [ "$$DEVICE_COUNT" -gt 1 ]; then \
-			HCCL_LIB=""; \
-			for candidate in \
-				"$$ASCEND_HOME/lib64/libhccl.so" \
-				"$$ASCEND_HOME/runtime/lib64/libhccl.so" \
-				"$$ASCEND_HOME/hccl/lib64/libhccl.so"; do \
-				if [ -f "$$candidate" ]; then HCCL_LIB="$$candidate"; break; fi; \
-			done; \
-			if [ -z "$$HCCL_LIB" ]; then \
-				echo "error: multi-NPU pretraining requested but libhccl.so was not found."; \
-				exit 1; \
-			fi; \
-		fi; \
-		if [ ! -f '$(NPU_PRETRAIN_CONFIG)' ]; then \
-			echo "error: NPU pretrain config not found: $(NPU_PRETRAIN_CONFIG)"; \
-			exit 1; \
-		fi; \
-		mkdir -p '$(PRETRAIN_LOG_DIR)'; \
-		echo "=== NeurX Ascend NPU Pretraining ==="; \
-		echo "[pretrain-npu] toolkit: $$ASCEND_HOME"; \
-		echo "[pretrain-npu] runtime: $$ACL_LIB"; \
-		echo "[pretrain-npu] SoC: $(ASCEND_SOC_VERSION)"; \
-		echo "[pretrain-npu] visible devices: $$VISIBLE_DEVICES ($$DEVICE_COUNT)"; \
-		echo "[pretrain-npu] config: $(NPU_PRETRAIN_CONFIG)"; \
-		echo "[pretrain-npu] note: native CANN training operators are not yet bound; the S trainer uses portable kernels."; \
-		export ASCEND_HOME_PATH="$$ASCEND_HOME"; \
-		export PATH="$$ASCEND_HOME/bin:$$ASCEND_HOME/compiler/ccec_compiler/bin:$$PATH"; \
-		export LD_LIBRARY_PATH="$$ASCEND_HOME/lib64:$$ASCEND_HOME/runtime/lib64:$$ASCEND_HOME/compiler/lib64:$${LD_LIBRARY_PATH:-}"; \
-		export ASCEND_OPP_PATH="$${ASCEND_OPP_PATH:-$$ASCEND_HOME/opp}"; \
-		export ASCEND_AICPU_PATH="$${ASCEND_AICPU_PATH:-$$ASCEND_HOME}"; \
-		$(MAKE) build-pretrain-manifest-s && \
-		NEURX_ROOT='$(CURDIR_UNIX)' \
-		NEURX_COMPUTE_BACKEND=cann \
-		NEURX_DDP_BACKEND=hccl \
-		NEURX_PRETRAIN_BACKEND=hccl \
-		DDP_BACKEND=hccl \
-		NEURX_NPU_PRETRAIN_CONFIG='$(NPU_PRETRAIN_CONFIG)' \
-		NEURX_ASCEND_SOC_VERSION='$(ASCEND_SOC_VERSION)' \
-		NEURX_NPU_DEVICE_COUNT="$$DEVICE_COUNT" \
-		ASCEND_RT_VISIBLE_DEVICES="$$VISIBLE_DEVICES" \
-		WORLD_SIZE="$$DEVICE_COUNT" \
-		NEURX_PRETRAIN_MANIFEST='$(PRETRAIN_MANIFEST)' \
-		NEURX_PRETRAIN_MODEL_NAME='$(PRETRAIN_MODEL_NAME)' \
-		NEURX_PRETRAIN_OUTPUT_DIR='$(PRETRAIN_OUTPUT_DIR)' \
-		NEURX_PRETRAIN_STEPS='$(PRETRAIN_STEPS)' \
-		NEURX_PRETRAIN_MICRO_BATCH="$${NEURX_PRETRAIN_MICRO_BATCH:-4}" \
-		NEURX_PRETRAIN_SEQ_LEN="$${NEURX_PRETRAIN_SEQ_LEN:-256}" \
-		NEURX_PRETRAIN_LR="$${NEURX_PRETRAIN_LR:-0.0002}" \
-		NEURX_PRETRAIN_SAVE_INTERVAL="$${NEURX_PRETRAIN_SAVE_INTERVAL:-$(PRETRAIN_SAVE_INTERVAL)}" \
-		$(MAKE) run-large-pretrain-s 2>&1 | tee -a '$(PRETRAIN_LOG_DIR)/pretrain_npu_$(shell date +%Y%m%d_%H%M%S).log'
+	@NEURX_NPU_WORLD_SIZE="$${NEURX_NPU_WORLD_SIZE:-$${WORLD_SIZE:-2}}" \
+	NEURX_NPU_MASTER_ADDR="$${NEURX_NPU_MASTER_ADDR:-$(NPU_PRETRAIN_MASTER_ADDR)}" \
+	NEURX_NPU_MASTER_PORT="$${NEURX_NPU_MASTER_PORT:-$(NPU_PRETRAIN_MASTER_PORT)}" \
+	NEURX_NPU_WORKER_HOST="$${NEURX_NPU_WORKER_HOST:-$(NPU_PRETRAIN_WORKER_HOST)}" \
+	NEURX_NPU_WORKER_VISIBLE_DEVICES="$${NEURX_NPU_WORKER_VISIBLE_DEVICES:-$(NPU_PRETRAIN_WORKER_VISIBLE_DEVICES)}" \
+	bash $(CURDIR_UNIX)/scripts/pretrain_npu_launch.sh
 
 pretrain-gpu-single-node: check-bash
 	@mkdir -p $(PRETRAIN_LOG_DIR)
