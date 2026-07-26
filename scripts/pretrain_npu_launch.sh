@@ -253,6 +253,11 @@ if [[ "$requested_world_size" -gt 1 ]]; then
       echo "error: failed to sync code to worker $host."
       exit 1
     fi
+    log_step "worker $((idx + 1))/$(( ${#worker_hosts[@]} )): building s_ir_runner on $host"
+    if ! ssh -o StrictHostKeyChecking=no "$host" "cd '$root_dir' && make build-s-ir-runner"; then
+      echo "error: failed to build s_ir_runner on $host."
+      exit 1
+    fi
     rank=$((idx + 1))
     log_step "worker $((idx + 1))/$(( ${#worker_hosts[@]} )): starting rank=$rank on $host"
     remote_cmd="cd '$root_dir' && env ${common_env[*]} NEURX_NPU_ROLE=worker RANK=$rank LOCAL_RANK=0 MASTER_ADDR='$master_addr' MASTER_PORT='$master_port' NEURX_NPU_MASTER_ADDR='$master_addr' NEURX_NPU_MASTER_PORT='$master_port' ASCEND_RT_VISIBLE_DEVICES='$vis' NEURX_NPU_VISIBLE_DEVICES='$vis' WORLD_SIZE='$requested_world_size' make run-large-pretrain-s"
@@ -261,4 +266,6 @@ if [[ "$requested_world_size" -gt 1 ]]; then
 fi
 
 log_step "starting master locally (rank=0)"
+log_step "building s_ir_runner locally"
+make build-s-ir-runner
 env "${common_env[@]}" NEURX_NPU_ROLE=master RANK=0 LOCAL_RANK=0 MASTER_ADDR="$master_addr" MASTER_PORT="$master_port" NEURX_NPU_MASTER_ADDR="$master_addr" NEURX_NPU_MASTER_PORT="$master_port" make run-large-pretrain-s
