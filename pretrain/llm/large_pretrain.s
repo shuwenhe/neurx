@@ -4,6 +4,7 @@ use neurx.runtime.io.{runtime_file_exists, runtime_make_dirs, runtime_read_text_
 use neurx.moe.llm_1t.{moe_1t_framework_default, moe_1t_summary}
 use neurx.data.loader.dataloader.{dataloader_state, dataloader_config, dataloader_step_output, dataloader_state_dict, dataloader_load_state_dict, has_next, next_batch, new_state, reset_state, with_config, set_shuffle, set_drop_last, new_config}
 use neurx.model.llm.gpt_large_train.{gpt_large_state, gpt_large_training_config, gpt_large_training_state, transformer_layer_optimizer_state, transformer_layer, new_gpt_large_training_config, new_gpt_large_training_state, gpt_large_training_forward, gpt_large_training_loss, gpt_large_training_update, gpt_large_training_state_dict, gpt_large_training_load_state_dict, transformer_backward, gpt_large_backward_result}
+use neurx.model.llm.base_large_train.{layer_optimizer_state_at, transformer_layer_at, transformer_layer_set}
 use neurx.model.llm.model_large_train.{adamw_step_state, adamw_step_output, embedding_apply_grad, sum_first_dim, sub, softmax_last_dim, one_hot_tensor}
 use neurx.pretrain.distributed.{pretrain_ddp_state, pretrain_ddp_state_dict, pretrain_ddp_load_state_dict, new_pretrain_ddp_state_from_env, pretrain_ddp_enabled, pretrain_ddp_sync_tensor, pretrain_ddp_step, pretrain_ddp_rank, pretrain_ddp_world_size}
 use neurx.optimizer.pretrain_adamw.{pretrain_optimizer_state, pretrain_optimizer_step_state, new_pretrain_optimizer_state, pretrain_optimizer_step, pretrain_optimizer_state_dict, pretrain_optimizer_load_state_dict}
@@ -1763,7 +1764,7 @@ func gpt_large_pretrain_save_optimizer_state(gpt_large_pretrain_state state) () 
     runtime_write_text_file(gpt_large_pretrain_optimizer_head_path(base_path), gpt_large_pretrain_adamw_metadata_text("head", state.training.optimizer))
     int i = 0
     while i < len(state.training.backbone_optimizers) {
-        transformer_layer_optimizer_state layer_opt = state.training.backbone_optimizers[i]
+        transformer_layer_optimizer_state layer_opt = layer_optimizer_state_at(state.training.backbone_optimizers, i)
         string prefix = "layer." + int_to_str(i, 0)
         string layer_text = ""
         layer_text = layer_text + gpt_large_pretrain_adamw_metadata_text(prefix + ".w_q", layer_opt.w_q)
@@ -1880,7 +1881,7 @@ func gpt_large_pretrain_restore_optimizer_state(gpt_large_pretrain_state state, 
         }
         string layer_text = runtime_read_text_file(layer_path)
         string prefix = "layer." + int_to_str(i, 0)
-        transformer_layer_optimizer_state current_layer_opt = restored.training.backbone_optimizers[i]
+        transformer_layer_optimizer_state current_layer_opt = layer_optimizer_state_at(restored.training.backbone_optimizers, i)
         restored.training.backbone_optimizers[i] = transformer_layer_optimizer_state {
             w_q: gpt_large_pretrain_adamw_from_metadata(layer_text, prefix + ".w_q", current_layer_opt.w_q),
             w_k: gpt_large_pretrain_adamw_from_metadata(layer_text, prefix + ".w_k", current_layer_opt.w_k),
@@ -1916,7 +1917,7 @@ func gpt_large_pretrain_apply_checkpoint_params(gpt_large_pretrain_state state, 
 
     int layer_idx = 0
     while layer_idx < len(state.training.backbone.layers) && cursor + 10 <= len(params) {
-        transformer_layer layer = state.training.backbone.layers[layer_idx]
+        transformer_layer layer = transformer_layer_at(state.training.backbone.layers, layer_idx)
         layer.w_q = copy_tensor(params[cursor]); cursor = cursor + 1
         layer.w_k = copy_tensor(params[cursor]); cursor = cursor + 1
         layer.w_v = copy_tensor(params[cursor]); cursor = cursor + 1
@@ -1927,7 +1928,7 @@ func gpt_large_pretrain_apply_checkpoint_params(gpt_large_pretrain_state state, 
         layer.b_ff1 = copy_tensor(params[cursor]); cursor = cursor + 1
         layer.b_up = copy_tensor(params[cursor]); cursor = cursor + 1
         layer.b_ff2 = copy_tensor(params[cursor]); cursor = cursor + 1
-        state.training.backbone.layers[layer_idx] = layer
+        state.training.backbone.layers = transformer_layer_set(state.training.backbone.layers, layer_idx, layer)
         layer_idx = layer_idx + 1
     }
     state
@@ -2205,7 +2206,7 @@ func gpt_large_pretrain_validation_metrics(gpt_large_pretrain_state state) gpt_l
     tensor target_ids = tensor_from_ints(batch_output.batch.target_ids, shape1(target_len))
     tensor hidden = embedding_lookup(state.training.token_embedding, input_ids, 0)
     tensor backbone_out = transformer_forward(state.training.backbone, hidden)
-    tensor logits = ops.lm_head_logits(backbone_out, state.training.lm_head_weight, state.training.lm_head_bias)
+    tensor logits = lm_head_logits(backbone_out, state.training.lm_head_weight, state.training.lm_head_bias)
     float val_loss = gpt_large_pretrain_loss_value(state.training, logits, target_ids)
     float ppl = pretrain_eval_perplexity_from_loss(val_loss)
     gpt_large_pretrain_eval_result {
@@ -2226,7 +2227,7 @@ func gpt_large_pretrain_test_metrics(gpt_large_pretrain_state state) gpt_large_p
     tensor target_ids = tensor_from_ints(batch_output.batch.target_ids, shape1(target_len))
     tensor hidden = embedding_lookup(state.training.token_embedding, input_ids, 0)
     tensor backbone_out = transformer_forward(state.training.backbone, hidden)
-    tensor logits = ops.lm_head_logits(backbone_out, state.training.lm_head_weight, state.training.lm_head_bias)
+    tensor logits = lm_head_logits(backbone_out, state.training.lm_head_weight, state.training.lm_head_bias)
     float test_loss = gpt_large_pretrain_loss_value(state.training, logits, target_ids)
     float ppl = pretrain_eval_perplexity_from_loss(test_loss)
     gpt_large_pretrain_eval_result {
@@ -2265,7 +2266,7 @@ func embedding_grad_tensor(tensor token_ids, tensor grad_hidden, int vocab_size,
 func gpt_large_pretrain_forward_logits(gpt_large_pretrain_state state, tensor input_ids) tensor {
     tensor hidden = embedding_lookup(state.training.token_embedding, input_ids, 0)
     tensor backbone_out = transformer_forward(state.training.backbone, hidden)
-    ops.lm_head_logits(backbone_out, state.training.lm_head_weight, state.training.lm_head_bias)
+    lm_head_logits(backbone_out, state.training.lm_head_weight, state.training.lm_head_bias)
 }
 
 func gpt_large_pretrain_optimizer_update(gpt_large_pretrain_state state, dataloader_step_output train_output, dataloader_step_output valid_output) gpt_large_pretrain_state {
@@ -2275,7 +2276,7 @@ func gpt_large_pretrain_optimizer_update(gpt_large_pretrain_state state, dataloa
     tensor target_ids = tensor_from_ints(train_output.batch.target_ids, shape1(train_target_len))
     tensor hidden = embedding_lookup(state.training.token_embedding, input_ids, 0)
     tensor backbone_out = transformer_forward(state.training.backbone, hidden)
-    tensor logits = ops.lm_head_logits(backbone_out, state.training.lm_head_weight, state.training.lm_head_bias)
+    tensor logits = lm_head_logits(backbone_out, state.training.lm_head_weight, state.training.lm_head_bias)
     tensor loss_tensor = gpt_large_training_loss(state.training, logits, target_ids)
     float loss_value = 0.0
     if len(loss_tensor.data) > 0 {
@@ -2305,7 +2306,7 @@ func gpt_large_pretrain_optimizer_update(gpt_large_pretrain_state state, dataloa
     tensor valid_target_ids = tensor_from_ints(valid_output.batch.target_ids, shape1(valid_target_len))
     tensor valid_hidden = embedding_lookup(next_training.token_embedding, valid_input_ids, 0)
     tensor valid_backbone_out = transformer_forward(next_training.backbone, valid_hidden)
-    tensor valid_logits = ops.lm_head_logits(valid_backbone_out, next_training.lm_head_weight, next_training.lm_head_bias)
+    tensor valid_logits = lm_head_logits(valid_backbone_out, next_training.lm_head_weight, next_training.lm_head_bias)
     validation_loss = gpt_large_pretrain_loss_value(next_training, valid_logits, valid_target_ids)
     validation_perplexity = pretrain_eval_perplexity_from_loss(validation_loss)
     if validation_loss < best_validation_loss {
@@ -2637,7 +2638,7 @@ func gpt_large_pretrain_complete(gpt_large_pretrain_state state) bool {
     state.loop.finished
 }
 
-pub func gpt_large_pretrain_launch() int {
+func gpt_large_pretrain_launch() int {
     gpt_large_pretrain_state state = gpt_large_pretrain_run_from_env()
     println("")
     println("========================================")
@@ -2715,6 +2716,7 @@ pub func gpt_large_pretrain_launch() int {
     string release_dir = gpt_large_pretrain_prepare_release(final_state)
     println("Compression release written to: " + release_dir)
     println("════════════════════════════════════════════════════════════")
+    return 0
 }
 
 func main() int {
