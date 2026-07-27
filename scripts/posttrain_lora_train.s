@@ -241,7 +241,7 @@ func run_posttrain_lora_sft() int {
     deltas.max_abs = adapter_max_abs
     deltas.changed_count = adapter_nonzero
     string adapter_path = output_dir + "/adapter_model.safetensors"
-    runtime_write_text_file(adapter_path, "{\n  \"format\": \"stub\",\n  \"note\": \"pure S placeholder adapter\"\n}\n")
+    runtime_write_text_file(adapter_path, "")
     runtime_write_text_file(output_dir + "/adapter_config.json", build_adapter_config_json_simple(
         model_path,
         rank,
