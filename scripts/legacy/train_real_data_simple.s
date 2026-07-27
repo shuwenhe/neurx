@@ -8,7 +8,7 @@ func main() int {
     println("  /home/shuwen/shuwen/train/neurx/dataset/pretrain/shard/")
     println("")
     println("Configuration:")
-    println("  - Batch size: 32 documents")
+    println("  - batch_2 size: 32 documents")
     println("  - Seq length: 2048 tokens")
     println("  - Learning rate: 0.0002")
     println("  - Training steps: 2232 (based on actual data count)")

@@ -279,7 +279,7 @@ func (dvc *data_version_control) generate_governance_report(
                 quality,
                 compliance_pass)
         }
-        fmt.Printf("\nOverall Compliance Status: ")
+        fmt.Printf("\nOverall Compliance status: ")
         all_pass := true
         for _, version := range versions {
             for _, passed := range version.compliance_checks {

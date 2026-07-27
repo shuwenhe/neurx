@@ -180,7 +180,7 @@ func start_simpo_training(
 ) simpo_state {
     simpo_state state = create_simpo_state(cfg)
     print("[SimPO Training] Starting...")
-    print("  Config: seq_len=" + int_to_string_ex(cfg.seq_len))
+    print("  config: seq_len=" + int_to_string_ex(cfg.seq_len))
     print("  Learning rate: " + float_to_string_ex(cfg.learning_rate))
     print("  Beta (margin scale): " + float_to_string_ex(cfg.beta))
     print("")
@@ -195,7 +195,7 @@ func start_simpo_training(
             simpo_batch batch = batches[batch_idx]
             state = simpo_training_step(state, batch, cfg.learning_rate)
             if (batch_idx + 1) % 5 == 0 {
-                print("  Batch " + int_to_string_ex(batch_idx + 1) +
+                print("  batch_2 " + int_to_string_ex(batch_idx + 1) +
                       ": Loss=" + float_to_string_ex(state.avg_loss))
             }
             batch_idx = batch_idx + 1

@@ -4,7 +4,7 @@
 
 namespace neurx::cann {
 
-struct TensorView {
+struct tensor_view {
   void* data = nullptr;
   std::size_t rows = 0;
   std::size_t columns = 0;
@@ -14,22 +14,22 @@ class TransformerPrimitiveBackend {
  public:
   virtual ~TransformerPrimitiveBackend() = default;
 
-  virtual Status embedding(const void* token_ids, const DeviceWeight& table,
-                           const TensorView& output, Stream stream) = 0;
-  virtual Status rms_norm(const TensorView& input, const DeviceWeight& scale,
-                          const TensorView& output, Stream stream) = 0;
-  virtual Status linear(const TensorView& input, const DeviceWeight& weight,
-                        const TensorView& output, Stream stream) = 0;
-  virtual Status rope(const TensorView& query, const TensorView& key,
-                      const TransformerBatchPlan& plan, Stream stream) = 0;
-  virtual Status attention_qkv_rope(
-      const TensorView& input, const DeviceWeight& norm_scale,
-      const DeviceWeight& query_weight, const DeviceWeight& key_weight,
-      const DeviceWeight& value_weight, const TensorView& normalized,
-      const TensorView& query, const TensorView& key,
-      const TensorView& value, const TransformerBatchPlan& plan,
+  virtual status embedding(const void* token_ids, const device_weight& table,
+                           const tensor_view& output, Stream stream) = 0;
+  virtual status rms_norm(const tensor_view& input, const device_weight& scale,
+                          const tensor_view& output, Stream stream) = 0;
+  virtual status linear(const tensor_view& input, const device_weight& weight,
+                        const tensor_view& output, Stream stream) = 0;
+  virtual status rope(const tensor_view& query, const tensor_view& key,
+                      const transformer_batch_plan& plan, Stream stream) = 0;
+  virtual status attention_qkv_rope(
+      const tensor_view& input, const device_weight& norm_scale,
+      const device_weight& query_weight, const device_weight& key_weight,
+      const device_weight& value_weight, const tensor_view& normalized,
+      const tensor_view& query, const tensor_view& key,
+      const tensor_view& value, const transformer_batch_plan& plan,
       Stream stream) {
-    Status status = rms_norm(input, norm_scale, normalized, stream);
+    status status = rms_norm(input, norm_scale, normalized, stream);
     if (!status.ok) return status;
     status = linear(normalized, query_weight, query, stream);
     if (!status.ok) return status;
@@ -38,33 +38,33 @@ class TransformerPrimitiveBackend {
     status = linear(normalized, value_weight, value, stream);
     return status.ok ? rope(query, key, plan, stream) : status;
   }
-  virtual Status store_kv(const TensorView& key, const TensorView& value,
+  virtual status store_kv(const tensor_view& key, const tensor_view& value,
                           std::size_t layer,
-                          const TransformerBatchPlan& plan,
+                          const transformer_batch_plan& plan,
                           PagedKvCache& cache, Stream stream) = 0;
-  virtual Status attention(const TensorView& query, const TensorView& key,
-                           const TensorView& value, std::size_t layer,
-                           const TransformerBatchPlan& plan,
-                           PagedKvCache& cache, const TensorView& output,
+  virtual status attention(const tensor_view& query, const tensor_view& key,
+                           const tensor_view& value, std::size_t layer,
+                           const transformer_batch_plan& plan,
+                           PagedKvCache& cache, const tensor_view& output,
                            Stream stream) = 0;
-  virtual Status add(const TensorView& left, const TensorView& right,
-                     const TensorView& output, Stream stream) = 0;
-  virtual Status add_rms_norm(const TensorView& left,
-                              const TensorView& right,
-                              const DeviceWeight& scale,
-                              const TensorView& residual,
-                              const TensorView& normalized, Stream stream) {
-    Status status = add(left, right, residual, stream);
+  virtual status add(const tensor_view& left, const tensor_view& right,
+                     const tensor_view& output, Stream stream) = 0;
+  virtual status add_rms_norm(const tensor_view& left,
+                              const tensor_view& right,
+                              const device_weight& scale,
+                              const tensor_view& residual,
+                              const tensor_view& normalized, Stream stream) {
+    status status = add(left, right, residual, stream);
     return status.ok ? rms_norm(residual, scale, normalized, stream) : status;
   }
-  virtual Status swiglu(const TensorView& gate, const TensorView& up,
-                        const TensorView& output, Stream stream) = 0;
-  virtual Status gather_last(const TensorView& hidden,
-                             const TransformerBatchPlan& plan,
-                             const TensorView& output, Stream stream) = 0;
+  virtual status swiglu(const tensor_view& gate, const tensor_view& up,
+                        const tensor_view& output, Stream stream) = 0;
+  virtual status gather_last(const tensor_view& hidden,
+                             const transformer_batch_plan& plan,
+                             const tensor_view& output, Stream stream) = 0;
 };
 
-Status execute_transformer(const inference::DeviceBatch& batch,
+status execute_transformer(const inference::device_batch& batch,
                            const Nxtrfmv2Model& model, PagedKvCache& cache,
                            TransformerPrimitiveBackend& backend);
 

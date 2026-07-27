@@ -6,7 +6,7 @@ func main() int {
     if cmd == "clean" {
         println("")
         println("==================================================")
-        println("  NeurX Data Cleaning Status")
+        println("  NeurX Data Cleaning status")
         println("==================================================")
         println("")
         println("Data cleaning pipeline active")
@@ -15,7 +15,7 @@ func main() int {
     } else if cmd == "shard" {
         println("")
         println("==================================================")
-        println("  NeurX Data Sharding Status")
+        println("  NeurX Data Sharding status")
         println("==================================================")
         println("")
         println("Data sharding pipeline active")
@@ -23,7 +23,7 @@ func main() int {
         0
     } else {
         println("")
-        println("NeurX Data Processing (S Language Status Layer)")
+        println("NeurX Data Processing (S Language status Layer)")
         println("")
         println("This entry point provides status reporting for the")
         println("NeurX data processing pipeline.")

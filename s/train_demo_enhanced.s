@@ -1,7 +1,7 @@
 package neurx.train.demo
 use std.math.{exp, log, sqrt, tanh, sigmoid, relu, gelu,
               abs, max, min, mod, pow, EPSILON}
-use std.tensor.{Tensor, tensor, zeros, ones, randn, xavier_uniform, kaiming_normal,
+use std.tensor.{tensor_2, tensor, zeros, ones, randn, xavier_uniform, kaiming_normal,
                  arange, linspace, eye, scalar,
                  add, sub, mul, div, matmul_2d, dot, outer,
                  reshape, flatten, squeeze, unsqueeze, transpose, permute, view,
@@ -73,10 +73,10 @@ func model_config_string(gptconfig cfg) string {
     s = s + "\n"
     s = s + "Training:\n"
     s = s + "  Learning Rate:" + format_float(cfg.learning_rate) + "\n"
-    s = s + "  Optimizer:    " + cfg.optimizer + "\n"
+    s = s + "  optimizer_2:    " + cfg.optimizer + "\n"
     s = s + "  Weight Decay: " + format_float(cfg.weight_decay) + "\n"
     s = s + "  Dropout:      " + format_float(cfg.dropout_prob) + "\n"
-    s = s + "  Batch Size:   " + string(cfg.batch_size) + "\n"
+    s = s + "  batch_2 Size:   " + string(cfg.batch_size) + "\n"
     s = s + "  Max Steps:    " + string(cfg.max_steps) + "\n"
     s = s + "  Device:       " + cfg.device + "\n"
     s
@@ -184,7 +184,7 @@ func count_params(gptmodel self) int {
 
 func print_model_summary(gptmodel self) void {
     println("============================================================")
-    println("GPT Model Summary")
+    println("GPT model Summary")
     println("============================================================")
     print(model_config_string(self.config))
     println("------------------------------------------------------------")
@@ -200,7 +200,7 @@ func print_model_summary(gptmodel self) void {
     int head_params = count_parameters(self.output_head)
     println("Token embedding:", token_params, "params")
     println("Pos embedding:", pos_params, "params")
-    println("Transformer Blocks:", block_params, "params (x", len(self.blocks), ")")
+    println("transformer_2 Blocks:", block_params, "params (x", len(self.blocks), ")")
     println("Final layer_norm:", norm_params, "params")
     println("Output Head:", head_params, "params")
     println("------------------------------------------------------------")
@@ -277,7 +277,7 @@ func generate_synthetic_data(int n_tokens, int vocab_size) []int {
     data
 }
 
-struct Batch {
+struct batch_2 {
     []int input_ids
     []int target_ids
 }
@@ -368,7 +368,7 @@ func run_training(gptconfig config) training_result {
     println("╔══════════════════════════════════════════════════╗")
     println("║        NeurX GPT Training - Enhanced Edition     ║")
     println("║              Powered by S Language               ║")
-    println("║              AI-Native Tensor Library            ║")
+    println("║              AI-Native tensor_2 Library            ║")
     println("╚══════════════════════════════════════════════════╝")
     println("")
     print(model_config_string(config))
@@ -397,7 +397,7 @@ func run_training(gptconfig config) training_result {
             0.9,
             config.weight_decay
         )
-    println("  Optimizer: ", config.optimizer, " (lr=", config.learning_rate, ")")
+    println("  optimizer_2: ", config.optimizer, " (lr=", config.learning_rate, ")")
     println("")
     println("[3/5] Preparing training data...")
     int total_train_tokens = config.max_steps * config.batch_size * config.seq_len * 2

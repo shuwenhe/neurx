@@ -11,14 +11,14 @@
 
 namespace neurx::cann {
 
-struct RequestKvPlan {
+struct request_kv_plan {
   std::string request_id;
   std::size_t sequence_tokens = 0;
   std::vector<uint32_t> blocks;
   std::vector<int32_t> write_slots;
 };
 
-struct TransformerBatchPlan {
+struct transformer_batch_plan {
   inference::Phase phase = inference::Phase::prefill;
   std::size_t batch_size = 0;
   std::size_t token_count = 0;
@@ -30,22 +30,22 @@ struct TransformerBatchPlan {
   std::size_t vocabulary = 0;
   std::size_t max_blocks_per_request = 0;
   std::size_t scratch_bytes = 0;
-  std::vector<RequestKvPlan> requests;
+  std::vector<request_kv_plan> requests;
 };
 
-struct PagedAttentionMetadata {
+struct paged_attention_metadata {
   std::size_t rows = 0;
   std::size_t block_table_stride = 0;
   std::vector<int32_t> block_tables;
   std::vector<int32_t> context_lengths;
 };
 
-Status validate_310p_model(const ModelMetadata& model,
-                           const KvCacheConfig& cache);
-Status build_transformer_batch_plan(
-    const inference::DeviceBatch& batch, const Nxtrfmv2Model& model,
-    const PagedKvCache& cache, TransformerBatchPlan* plan);
-Status build_paged_attention_metadata(const TransformerBatchPlan& plan,
-                                      PagedAttentionMetadata* metadata);
+status validate_310p_model(const model_metadata& model,
+                           const kv_cache_config_2& cache);
+status build_transformer_batch_plan(
+    const inference::device_batch& batch, const Nxtrfmv2Model& model,
+    const PagedKvCache& cache, transformer_batch_plan* plan);
+status build_paged_attention_metadata(const transformer_batch_plan& plan,
+                                      paged_attention_metadata* metadata);
 
 }

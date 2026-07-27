@@ -22,11 +22,11 @@ func init(
     int max_batch_size = 1,
     int max_seq_len = 8192
 ) {
-    print(f"🗃️ Initializing KV Cache Manager:")
+    print(f"🗃️ Initializing KV cache Manager:")
     print(f"   Layers: {num_layers}")
     print(f"   KV Heads: {num_kv_heads}")
     print(f"   Head Dim: {head_dim}")
-    print(f"   Max Batch Size: {max_batch_size}")
+    print(f"   Max batch_2 Size: {max_batch_size}")
     print(f"   Max Seq Len: {max_seq_len}")
     long total_memory_bytes = (
         long(num_layers) * max_batch_size * max_seq_len * num_kv_heads * head_dim * 2 * 2
@@ -153,7 +153,7 @@ func init_paged_attention(
     print(f"   Block Size: {block_size} tokens")
     print(f"   Bytes per Block: {bytes_per_block:,} ({bytes_per_block / 1024:.1f} KB)")
     print(f"   Total Blocks: {num_blocks:,}")
-    print(f"   Total KV Cache Capacity: {(num_blocks * bytes_per_block) / (1024**3):.2f} GB")
+    print(f"   Total KV cache Capacity: {(num_blocks * bytes_per_block) / (1024**3):.2f} GB")
     memory_block[] blocks
     for i in range(num_blocks):
         append(blocks, memory_block{
@@ -354,7 +354,7 @@ func init_scheduler(
     int max_queue_size: int = 256,
     string policy: string = "fcfs"
 ) {
-    print(f"\n📋 Initializing Continuous Batch Scheduler:")
+    print(f"\n📋 Initializing Continuous batch_2 Scheduler:")
     print(f"   Max Concurrent Requests: {max_batch_size}")
     print(f"   Max Queue Size: {max_queue_size}")
     print(f"   Scheduling Policy: {policy.upper()}")
@@ -388,7 +388,7 @@ func add_request(
         request_id for tracking
     """
     if len(self.waiting_queue) >= self.max_queue_size:
-        raise QueueFullError("Request queue is full. Try again later.")
+        raise QueueFullError("request queue is full. Try again later.")
     static int next_id = 0
     next_id += 1
     inference_request req {
@@ -475,7 +475,7 @@ func get_status_report(self: ContinuousBatchScheduler):
     """generatestateEnglish text"""
     report = f"""
 ╔══════════════════════════════════════════╗
-║     Continuous Batching Status Report        ║
+║     Continuous Batching status Report        ║
 ╠══════════════════════════════════════════╣
 ║ Active Requests:  {len(self.active_requests):>6}                ║
 ║ Waiting Queue:    {len(self.waiting_queue):>6}                ║
@@ -538,7 +538,7 @@ func init_engine(
         ))
     ContinuousBatchScheduler sched = init_scheduler(max_batch_size=max_batch_size)
     print(f"\n✅ Inference Engine Ready!")
-    print(f"   Model: {cfg.name}")
+    print(f"   model: {cfg.name}")
     print(f"   Vocab Size: {cfg.vocab_size:,}")
     print(f"   Hidden Size: {cfg.hidden_size}")
     print(f"   Layers: {cfg.num_layers}")
@@ -807,7 +807,7 @@ func test_inference_system() {
     print("\n" + "="*70)
     print("Testing NEURX Inference Optimization System")
     print("="*70)
-    print("\n[Test 1] Testing KV Cache Manager...")
+    print("\n[Test 1] Testing KV cache Manager...")
     KVCacheManager kv_mgr = init(num_layers=4, num_kv_heads=8, head_dim=64)
     for layer in range(4):
         tensor new_k = randn(1, 8, 10, 64)
@@ -815,9 +815,9 @@ func test_inference_system() {
         kv_mgr.update(layer, new_k, new_v)
     dict mem_info = kv_mgr.get_memory_usage()
     assert(mem_info["num_active_entries"] == 4)
-    print(f"   Cache entries: {mem_info['num_active_entries']}")
+    print(f"   cache entries: {mem_info['num_active_entries']}")
     print(f"   Memory usage: {mem_info['total_memory_bytes'] / 1024:.1f} KB")
-    print("✅ KV Cache Manager works!")
+    print("✅ KV cache Manager works!")
     print("\n[Test 2] Testing Paged Attention Manager...")
     PagedAttentionManager paged_mgr = init_paged_attention(
         num_kv_heads=8,

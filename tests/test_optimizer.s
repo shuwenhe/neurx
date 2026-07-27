@@ -1,12 +1,12 @@
 package main
 func test_adamw_init() {
-    println("Test 1: AdamW initialization")
+    println("Test 1: adam_w initialization")
     let lr = 1e-4
     let beta1 = 0.9
     let beta2 = 0.999
     let wd = 0.01
     if lr > 0.0 && beta1 < 1.0 && beta2 < 1.0 {
-        println("  ✓ Config parameters valid")
+        println("  ✓ config parameters valid")
     }
 }
 
@@ -166,7 +166,7 @@ func cos_approx(float x) float {
 
 func main() {
     println("============================================")
-    println("AdamW Optimizer & LR Scheduler Tests")
+    println("adam_w optimizer_2 & LR Scheduler Tests")
     println("============================================")
     println("")
     test_adamw_init()

@@ -189,7 +189,7 @@ func hash_input(string input) int {
 func main() {
     string MODEL_PATH = "/home/shuwen/shuwen/posttrain/model.safetensors"
     if !runtime_file_exists(MODEL_PATH) {
-        print("❌ Model not found\n")
+        print("❌ model not found\n")
         return
     }
     print("═══════════════════════════════════════════════════════\n")
@@ -206,7 +206,7 @@ func main() {
     input_tokens = append(input_tokens, 101)
     input_tokens = append(input_tokens, 2002)
     input_tokens = append(input_tokens, 151645)
-    print("[2] Transformer Forward Pass (24 layers)...\n")
+    print("[2] transformer_2 Forward Pass (24 layers)...\n")
     []float32 logits = forward(input_tokens)
     print("    ✓ Forward pass complete\n\n")
     print("[3] Token Generation...\n")

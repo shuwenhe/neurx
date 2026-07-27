@@ -36,7 +36,7 @@ struct performance_report {
 
 func get_scaled_model() model_config {
     return model_config {
-        name: "Scaled Transformer",
+        name: "Scaled transformer_2",
         vocab_size: 32000,
         hidden_dim: 256,
         num_layers: 6,
@@ -50,7 +50,7 @@ func get_scaled_model() model_config {
 
 func get_base_model() model_config {
     return model_config {
-        name: "Base Transformer",
+        name: "Base transformer_2",
         vocab_size: 1024,
         hidden_dim: 32,
         num_layers: 1,
@@ -117,7 +117,7 @@ func benchmark_model(model: model_config) performance_report {
     println("MODEL: " + model.name)
     println("═" + strings.repeat("═", 61))
     println("")
-    println("Model Configuration:")
+    println("model Configuration:")
     println("  Vocabulary size: " + strings.from_i32(model.vocab_size))
     println("  Hidden dimension: " + strings.from_i32(model.hidden_dim))
     println("  Number of layers: " + strings.from_i32(model.num_layers))
@@ -176,7 +176,7 @@ func print_performance_summary(reports: performance_report[]) {
     println("═" + strings.repeat("═", 61))
     println("")
     for report in reports {
-        println("Model: " + report.model.name)
+        println("model: " + report.model.name)
         println("  Total parameters: " + format_large_number(report.total_params))
         println("  Peak throughput: " + strings.format("%.0f", report.peak_throughput) + " tokens/sec")
         println("  Average efficiency: " + strings.format("%.1f", report.scaling_efficiency) + "%")
@@ -222,10 +222,10 @@ func validate_performance_targets() {
     println("  64 GPUs:    300K tokens/sec     ✅")
     println("")
     println("Memory usage targets:")
-    println("  Model parameters:  100M (400 MB)                ✅")
+    println("  model parameters:  100M (400 MB)                ✅")
     println("  Per-GPU activations: 14 GB                      ✅")
     println("  Gradients: 400 MB                               ✅")
-    println("  Optimizer state: 1 GB                           ✅")
+    println("  optimizer_2 state: 1 GB                           ✅")
     println("  Total per GPU: ~16 GB                           ✅")
     println("")
     println("Scaling efficiency targets:")
@@ -251,7 +251,7 @@ func main() {
     println("")
     println("🎯 PERFORMANCE SUMMARY")
     println("")
-    println("Model: Scaled Transformer (256-dim, 6 layers)")
+    println("model: Scaled transformer_2 (256-dim, 6 layers)")
     println("  Total parameters: 100M")
     println("  Peak throughput: 300K tokens/sec (64 GPUs)")
     println("")

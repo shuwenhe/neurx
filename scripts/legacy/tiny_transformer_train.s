@@ -53,8 +53,8 @@ func main() {
     )
     fmt.Printf("[PROGRESS] model created - params: %d\n", model.param_count)
     opt_state := neurx.model.adam_w_state{
-        m_states: make(map[string]neurx.model.Tensor),
-        v_states: make(map[string]neurx.model.Tensor),
+        m_states: make(map[string]neurx.model.tensor_2),
+        v_states: make(map[string]neurx.model.tensor_2),
         t: 0,
     }
     shard_dir := "./data/shards/"

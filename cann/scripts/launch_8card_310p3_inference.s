@@ -46,7 +46,7 @@ func main() {
             "NEURX_CHECKPOINT=" + checkpoint,
             "NEURX_CANN_OPERATOR_LIBRARY=" + operatorLibrary,
         )
-        cmd := exec.Command(workerBin)
+        cmd := exec.command(workerBin)
         cmd.Env = env
         process, err := cmd.Start()
         if err != nil {

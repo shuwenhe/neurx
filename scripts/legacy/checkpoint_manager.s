@@ -138,7 +138,7 @@ func (cm *checkpoint_manager) validate_checkpoint(
         return error("Failed to read model state")
     }
     if compute_hash(model_bytes) != metadata.model_hash {
-        return error("Model state hash mismatch")
+        return error("model state hash mismatch")
     }
     config_path := filepath.Join(checkpoint_path, "config.json")
     config_bytes, err := ioutil.ReadFile(config_path)
@@ -146,7 +146,7 @@ func (cm *checkpoint_manager) validate_checkpoint(
         return error("Failed to read config")
     }
     if compute_hash(config_bytes) != metadata.config_hash {
-        return error("Config hash mismatch")
+        return error("config hash mismatch")
     }
     return nil
 }

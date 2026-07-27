@@ -77,7 +77,7 @@ func (manager *experiment_manager) create_experiment(
     dataset_name string) experiment_config {
     fmt.Printf("\n[Experiment] Creating experiment: %s\n", experiment_id)
     fmt.Printf("  Name: %s\n", name)
-    fmt.Printf("  Model: %s\n", model_name)
+    fmt.Printf("  model: %s\n", model_name)
     fmt.Printf("  Dataset: %s\n", dataset_name)
     config := experiment_config{
         experiment_id:   experiment_id,
@@ -225,7 +225,7 @@ func (manager *experiment_manager) mark_experiment_complete(
         }
         manager.experiments[experiment_id] = result
         fmt.Printf("\n[Experiment] Marked as complete: %s\n", experiment_id)
-        fmt.Printf("  Status: %s\n", result.config.status)
+        fmt.Printf("  status: %s\n", result.config.status)
         fmt.Printf("  Duration: %d seconds\n", result.training_duration)
         fmt.Printf("  Converged: %v\n", converged)
     }
@@ -233,7 +233,7 @@ func (manager *experiment_manager) mark_experiment_complete(
 
 func (manager *experiment_manager) get_experiment_history() {
     fmt.Println("\n[History] Experiment History:")
-    fmt.Println("  ID                    Status      Loss        PPL         Time")
+    fmt.Println("  ID                    status      Loss        PPL         Time")
     fmt.Println("  ──────────────────────────────────────────────────────────────")
     for exp_id, result := range manager.experiments {
         status := result.config.status
@@ -249,7 +249,7 @@ func (manager *experiment_manager) export_experiment_config(experiment_id string
     if result, exists := manager.experiments[experiment_id]; exists {
         config_str := fmt.Sprintf("# Experiment: %s\n", result.config.name)
         config_str += fmt.Sprintf("ID: %s\n", experiment_id)
-        config_str += fmt.Sprintf("Model: %s\n", result.config.model_name)
+        config_str += fmt.Sprintf("model: %s\n", result.config.model_name)
         config_str += fmt.Sprintf("Dataset: %s\n", result.config.dataset_name)
         config_str += fmt.Sprintf("\n# Hyperparameters\n")
         for _, param := range result.config.hyperparameters {

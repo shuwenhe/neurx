@@ -66,7 +66,7 @@ func (co *cost_optimizer) set_resource_allocation(
     precision string) {
     fmt.Printf("\n[Allocation] Setting resource allocation\n")
     fmt.Printf("  GPUs: %d\n", gpu_count)
-    fmt.Printf("  Batch Size: %d\n", batch_size)
+    fmt.Printf("  batch_2 Size: %d\n", batch_size)
     fmt.Printf("  Sequence Length: %d\n", sequence_length)
     fmt.Printf("  Precision: %s\n", precision)
     gpu_ids := make([]string, 0)
@@ -148,7 +148,7 @@ func (co *cost_optimizer) optimize_batch_size(
     } else if max_batch_size >= 48 {
         optimal_batch_size = 48
     }
-    fmt.Printf("  Max Batch Size: %d\n", max_batch_size)
+    fmt.Printf("  Max batch_2 Size: %d\n", max_batch_size)
     fmt.Printf("  Recommended: %d\n", optimal_batch_size)
     return optimal_batch_size
 }
@@ -169,7 +169,7 @@ func (co *cost_optimizer) optimize_gpu_utilization() []optimization_strategy {
             expected_saving: 0.35,
         },
         {
-            strategy_name:  "Batch Size Increase",
+            strategy_name:  "batch_2 Size Increase",
             target_metric:  "cost",
             constraint:     "memory",
             expected_saving: 0.25,
@@ -285,7 +285,7 @@ func (co *cost_optimizer) run_complete_cost_optimization_cycle() {
     co.initialize(config)
     co.set_resource_allocation(4, 32, 512, "fp16")
     fmt.Println("\n┌────────────────────────────────────────┐")
-    fmt.Println("│  Batch Size Optimization               │")
+    fmt.Println("│  batch_2 Size Optimization               │")
     fmt.Println("└────────────────────────────────────────┘")
     optimal_bs := co.optimize_batch_size(96.0)
     fmt.Println("\n┌────────────────────────────────────────┐")

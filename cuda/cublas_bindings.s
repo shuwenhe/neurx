@@ -85,7 +85,7 @@ func gpu_matrix_multiply(
         return -1
     }
     if A.cols != B.rows {
-        println("[ERROR] Matrix dimension mismatch: A.cols=" + int_to_str(A.cols) + " != B.rows=" + int_to_str(B.rows))
+        println("[ERROR] matrix dimension mismatch: A.cols=" + int_to_str(A.cols) + " != B.rows=" + int_to_str(B.rows))
         return -1
     }
     int status = cublasSgemm(

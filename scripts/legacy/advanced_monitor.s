@@ -265,7 +265,7 @@ func (atm *advanced_training_monitor) generate_report(): string {
     report += "🚀 Performance:\n"
     report += "├─ Average Throughput: " + fmt.Sprintf("%.0f", stats["average_throughput"]) + " tok/s\n"
     report += "├─ Steps Completed: " + fmt.Sprintf("%d", stats["total_steps"]) + "\n"
-    report += "└─ Status: "
+    report += "└─ status: "
     if stats["is_converged"].(bool) {
         report += "✅ Converged\n"
     } else {

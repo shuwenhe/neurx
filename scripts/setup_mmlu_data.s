@@ -32,7 +32,7 @@ func main() {
     io.Println("  ✓ Directories created")
     io.Println("")
     io.Println("[Step 2] Downloading MMLU dataset from the S pipeline...")
-    cmd := exec.Command("s", "run", "eval/setup_mmlu_s.s")
+    cmd := exec.command("s", "run", "eval/setup_mmlu_s.s")
     cmd.Env = append(os.Environ(), "NEURX_ROOT="+projectRoot, "NEURX_MMLU_DATA_ROOT="+dataRoot)
     cmd.Output()
     io.Println("")

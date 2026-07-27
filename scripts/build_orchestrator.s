@@ -30,7 +30,7 @@ struct build_config {
 }
 
 struct build_orchestrator {
-    logger      Logger
+    logger      logger_2
     config      build_config
     neurxRoot   string
     sRoot       string

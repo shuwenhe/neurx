@@ -67,7 +67,7 @@ func main() int {
     println("================================================")
     println("NeurX S Inference Engine (Simplified)")
     println("================================================")
-    println("Model: " + model_name)
+    println("model: " + model_name)
     println("Device: " + device_type)
     println("checkpoint: " + checkpoint_arg)
     println("Seed: " + seed)

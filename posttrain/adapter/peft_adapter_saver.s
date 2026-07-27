@@ -158,8 +158,8 @@ func write_adapter_safetensors(adapter_checkpoint ckpt, string output_file) bool
 func write_adapter_config(peft_adapter_config cfg, string output_dir) bool {
     string config_path = output_dir + "/adapter_config.json"
     string config_json = generate_adapter_config_json(cfg)
-    println("[PEFT Config] Writing " + config_path)
-    println("[PEFT Config] Config: " + config_json)
+    println("[PEFT config] Writing " + config_path)
+    println("[PEFT config] config: " + config_json)
     true
 }
 
@@ -184,7 +184,7 @@ func save_adapter_checkpoint(
     println("PEFT Adapter Checkpoint Save")
     println("========================================")
     println("Output dir : " + output_dir)
-    println("Model name : " + model_name)
+    println("model name : " + model_name)
     println("Rank       : " + int_to_str(rank))
     println("Alpha      : " + fmt_float(alpha, 1))
     println("")

@@ -9,17 +9,17 @@ func main() {
     modelPath := "/home/shuwen/shuwen/posttrain/model.safetensors"
     stat, err := os.Stat(modelPath)
     if err != nil || stat.IsDir() {
-        io.Println("❌ Model not found: " + modelPath)
+        io.Println("❌ model not found: " + modelPath)
         os.Exit(1)
     }
-    io.Println("✓ Model found: base-model-posttrain")
+    io.Println("✓ model found: base-model-posttrain")
     io.Println("")
     io.Println("╔════════════════════════════════════════════════════════════╗")
-    io.Println("║   NeurX PostTrain Model - Interactive Chat                ║")
-    io.Println("║   Real Transformer Inference Engine (Pure S)              ║")
+    io.Println("║   NeurX PostTrain model - Interactive Chat                ║")
+    io.Println("║   Real transformer_2 Inference Engine (Pure S)              ║")
     io.Println("║                                                            ║")
-    io.Println("║   Model: Qwen2.5-0.5B-Instruct + LoRA                     ║")
-    io.Println("║   • 24-layer Transformer                                  ║")
+    io.Println("║   model: Qwen2.5-0.5B-Instruct + LoRA                     ║")
+    io.Println("║   • 24-layer transformer_2                                  ║")
     io.Println("║   • 896 hidden dimension                                  ║")
     io.Println("║   • 14 attention heads                                    ║")
     io.Println("║   • 151,936 vocabulary (medical domain)                   ║")
@@ -57,7 +57,7 @@ func main() {
             break
         }
         if userInput == "clear" {
-            exec.Command("clear").Run()
+            exec.command("clear").Run()
             continue
         }
         if userInput == "" {
@@ -68,7 +68,7 @@ func main() {
         if response == "" {
             response = "I am a medical AI assistant. Please ask a specific medical question."
         }
-        io.Println("⏳ Computing Transformer output...")
+        io.Println("⏳ Computing transformer_2 output...")
         io.Println("Assistant: " + response)
         io.Println("")
     }

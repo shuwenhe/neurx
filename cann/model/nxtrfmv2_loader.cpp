@@ -12,7 +12,7 @@ namespace neurx::cann {
 namespace {
 
 #pragma pack(push, 1)
-struct HeaderV2 {
+struct header_v2 {
   char magic[8];
   uint32_t version;
   uint32_t header_bytes;
@@ -40,7 +40,7 @@ struct HeaderV2 {
 };
 #pragma pack(pop)
 
-static_assert(sizeof(HeaderV2) == 140, "NXTRFMV2 header ABI changed");
+static_assert(sizeof(header_v2) == 140, "NXTRFMV2 header ABI changed");
 
 constexpr uint64_t kMaxPathBytes = 1ULL << 20;
 constexpr uint64_t kMaxPendingTokens = 1ULL << 28;
@@ -51,33 +51,33 @@ bool read_exact(std::ifstream& input, void* destination, std::size_t bytes) {
   return input.good() || input.gcount() == static_cast<std::streamsize>(bytes);
 }
 
-Status read_header(std::ifstream& input, HeaderV2* header) {
+status read_header(std::ifstream& input, header_v2* header) {
   if (!header || !read_exact(input, header, sizeof(*header))) {
-    return Status::failure("cannot read NXTRFMV2 checkpoint header");
+    return status::failure("cannot read NXTRFMV2 checkpoint header");
   }
   if (std::memcmp(header->magic, "NXTRFMV2", 8) != 0 ||
       header->version != 2 || header->header_bytes != sizeof(*header)) {
-    return Status::failure("unsupported checkpoint format; expected NXTRFMV2 version 2");
+    return status::failure("unsupported checkpoint format; expected NXTRFMV2 version 2");
   }
   if (header->vocab == 0 || header->seq == 0 || header->dim == 0 ||
       header->heads == 0 || header->ffn == 0 || header->layers == 0 ||
       header->param_count == 0 || header->dim % header->heads != 0) {
-    return Status::failure("NXTRFMV2 model dimensions are invalid");
+    return status::failure("NXTRFMV2 model dimensions are invalid");
   }
   const uint64_t expected_parameters =
       2 + static_cast<uint64_t>(header->layers) * 9;
   if (header->param_count != expected_parameters) {
-    return Status::failure("NXTRFMV2 parameter tensor count does not match model layers");
+    return status::failure("NXTRFMV2 parameter tensor count does not match model layers");
   }
   if (header->vocab_path_bytes > kMaxPathBytes ||
       header->merges_path_bytes > kMaxPathBytes ||
       header->pending_count > kMaxPendingTokens) {
-    return Status::failure("NXTRFMV2 metadata exceeds safety limits");
+    return status::failure("NXTRFMV2 metadata exceeds safety limits");
   }
-  return Status::success();
+  return status::success();
 }
 
-ModelMetadata metadata_from(const HeaderV2& header) {
+model_metadata metadata_from(const header_v2& header) {
   return {header.step,
           header.tokenizer_hash,
           header.tokenizer_kind,
@@ -90,7 +90,7 @@ ModelMetadata metadata_from(const HeaderV2& header) {
           header.param_count};
 }
 
-std::string weight_name(uint64_t index, const HeaderV2& header) {
+std::string weight_name(uint64_t index, const header_v2& header) {
   if (index == 0) return "token_embedding";
   const uint64_t tensors_per_layer = 9;
   const uint64_t layer_tensors = static_cast<uint64_t>(header.layers) * tensors_per_layer;
@@ -106,7 +106,7 @@ std::string weight_name(uint64_t index, const HeaderV2& header) {
   return "tensor." + std::to_string(index);
 }
 
-uint64_t expected_weight_elements(uint64_t index, const HeaderV2& header) {
+uint64_t expected_weight_elements(uint64_t index, const header_v2& header) {
   const uint64_t dim = header.dim;
   if (index == 0) return static_cast<uint64_t>(header.vocab) * dim;
   const uint64_t layer_tensors = static_cast<uint64_t>(header.layers) * 9;
@@ -119,13 +119,13 @@ uint64_t expected_weight_elements(uint64_t index, const HeaderV2& header) {
   return dim * header.vocab;
 }
 
-struct WeightShape {
+struct weight_shape {
   uint64_t rows;
   uint64_t columns;
   bool matrix;
 };
 
-WeightShape weight_shape(uint64_t index, const HeaderV2& header) {
+weight_shape weight_shape(uint64_t index, const header_v2& header) {
   const uint64_t dim = header.dim;
   if (index == 0) return {header.vocab, dim, false};
   const uint64_t layer_tensors = static_cast<uint64_t>(header.layers) * 9;
@@ -141,29 +141,29 @@ WeightShape weight_shape(uint64_t index, const HeaderV2& header) {
   return {dim, header.vocab, true};
 }
 
-Status skip_training_state(std::ifstream& input, uint64_t elements) {
+status skip_training_state(std::ifstream& input, uint64_t elements) {
   constexpr uint64_t state_copies = 3;
   if (elements > static_cast<uint64_t>(std::numeric_limits<std::streamoff>::max()) /
                      (sizeof(float) * state_copies)) {
-    return Status::failure("NXTRFMV2 optimizer-state offset overflows streamoff");
+    return status::failure("NXTRFMV2 optimizer-state offset overflows streamoff");
   }
   input.seekg(static_cast<std::streamoff>(elements * sizeof(float) * state_copies),
               std::ios::cur);
-  return input ? Status::success()
-               : Status::failure("NXTRFMV2 optimizer state is truncated");
+  return input ? status::success()
+               : status::failure("NXTRFMV2 optimizer state is truncated");
 }
 
 }
 
-Status inspect_nxtrfmv2(const std::string& path, ModelMetadata* metadata) {
-  if (!metadata) return Status::failure("model metadata output is null");
+status inspect_nxtrfmv2(const std::string& path, model_metadata* metadata) {
+  if (!metadata) return status::failure("model metadata output is null");
   std::ifstream input(path, std::ios::binary);
-  if (!input) return Status::failure("cannot open checkpoint: " + path);
-  HeaderV2 header{};
-  const Status status = read_header(input, &header);
+  if (!input) return status::failure("cannot open checkpoint: " + path);
+  header_v2 header{};
+  const status status = read_header(input, &header);
   if (!status.ok) return status;
   *metadata = metadata_from(header);
-  return Status::success();
+  return status::success();
 }
 
 uint16_t float_to_fp16_bits(float value) {
@@ -207,11 +207,11 @@ uint16_t float_to_fp16_bits(float value) {
                                half_mantissa);
 }
 
-Status quantize_int8_per_channel(const float* input, std::size_t rows,
+status quantize_int8_per_channel(const float* input, std::size_t rows,
                                  std::size_t columns, int8_t* output,
                                  uint16_t* scales) {
   if (!input || !output || !scales || rows == 0 || columns == 0) {
-    return Status::failure("INT8 per-channel quantization arguments are invalid");
+    return status::failure("INT8 per-channel quantization arguments are invalid");
   }
   std::vector<float> channel_scales(columns, 1.0F);
   for (std::size_t column = 0; column < columns; ++column) {
@@ -219,7 +219,7 @@ Status quantize_int8_per_channel(const float* input, std::size_t rows,
     for (std::size_t row = 0; row < rows; ++row) {
       const float value = input[row * columns + column];
       if (!std::isfinite(value)) {
-        return Status::failure("INT8 quantization input contains NaN or infinity");
+        return status::failure("INT8 quantization input contains NaN or infinity");
       }
       maximum = std::max(maximum, std::fabs(value));
     }
@@ -234,25 +234,25 @@ Status quantize_int8_per_channel(const float* input, std::size_t rows,
           std::max(-127.0F, std::min(127.0F, quantized)));
     }
   }
-  return Status::success();
+  return status::success();
 }
 
-Status Nxtrfmv2Model::load(const std::string& path, DeviceSession& session,
-                           const ModelLoadOptions& options) {
+status Nxtrfmv2Model::load(const std::string& path, DeviceSession& session,
+                           const model_load_options& options) {
   reset();
-  if (!session.ready()) return Status::failure("CANN device session is not initialized");
+  if (!session.ready()) return status::failure("CANN device session is not initialized");
   if (set_current_context(session.context()) != kSuccess) {
-    return Status::failure(std::string("aclrtSetCurrentContext: ") + recent_error());
+    return status::failure(std::string("aclrtSetCurrentContext: ") + recent_error());
   }
 
   std::ifstream input(path, std::ios::binary);
-  if (!input) return Status::failure("cannot open checkpoint: " + path);
-  HeaderV2 header{};
-  Status status = read_header(input, &header);
+  if (!input) return status::failure("cannot open checkpoint: " + path);
+  header_v2 header{};
+  status status = read_header(input, &header);
   if (!status.ok) return status;
   if (options.expected_tokenizer_hash != 0 &&
       header.tokenizer_hash != options.expected_tokenizer_hash) {
-    return Status::failure("checkpoint tokenizer hash does not match configured tokenizer");
+    return status::failure("checkpoint tokenizer hash does not match configured tokenizer");
   }
   metadata_ = metadata_from(header);
 
@@ -261,10 +261,10 @@ Status Nxtrfmv2Model::load(const std::string& path, DeviceSession& session,
       header.pending_count * sizeof(int32_t);
   if (metadata_bytes >
       static_cast<uint64_t>(std::numeric_limits<std::streamoff>::max())) {
-    return Status::failure("NXTRFMV2 metadata offset overflows streamoff");
+    return status::failure("NXTRFMV2 metadata offset overflows streamoff");
   }
   input.seekg(static_cast<std::streamoff>(metadata_bytes), std::ios::cur);
-  if (!input) return Status::failure("NXTRFMV2 metadata is truncated");
+  if (!input) return status::failure("NXTRFMV2 metadata is truncated");
 
   std::vector<float> fp32(kTransferElements);
   std::vector<uint16_t> fp16(kTransferElements);
@@ -274,14 +274,14 @@ Status Nxtrfmv2Model::load(const std::string& path, DeviceSession& session,
     uint64_t elements = 0;
     if (!read_exact(input, &elements, sizeof(elements)) || elements == 0) {
       reset();
-      return Status::failure("NXTRFMV2 weight block header is invalid");
+      return status::failure("NXTRFMV2 weight block header is invalid");
     }
     if (elements != expected_weight_elements(index, header)) {
       reset();
-      return Status::failure(weight_name(index, header) +
+      return status::failure(weight_name(index, header) +
                              ": checkpoint tensor shape is inconsistent");
     }
-    const WeightShape shape = weight_shape(index, header);
+    const weight_shape shape = weight_shape(index, header);
     const bool quantized =
         options.precision == ModelPrecision::int8_weight_only && shape.matrix;
     const std::size_t element_bytes =
@@ -290,10 +290,10 @@ Status Nxtrfmv2Model::load(const std::string& path, DeviceSession& session,
                                                                : sizeof(uint16_t));
     if (elements > std::numeric_limits<std::size_t>::max() / element_bytes) {
       reset();
-      return Status::failure("NXTRFMV2 weight allocation overflows size_t");
+      return status::failure("NXTRFMV2 weight allocation overflows size_t");
     }
 
-    DeviceWeight weight;
+    device_weight weight;
     weight.name = weight_name(index, header);
     weight.elements = elements;
     weight.rows = shape.rows;
@@ -306,18 +306,18 @@ Status Nxtrfmv2Model::load(const std::string& path, DeviceSession& session,
     status = weight.storage.allocate(static_cast<std::size_t>(elements) * element_bytes);
     if (!status.ok) {
       reset();
-      return Status::failure(weight.name + ": " + status.message);
+      return status::failure(weight.name + ": " + status.message);
     }
 
     if (quantized) {
       if (elements > std::numeric_limits<std::size_t>::max() / sizeof(float)) {
         reset();
-        return Status::failure(weight.name + ": host quantization allocation overflows");
+        return status::failure(weight.name + ": host quantization allocation overflows");
       }
       std::vector<float> values(static_cast<std::size_t>(elements));
       if (!read_exact(input, values.data(), values.size() * sizeof(float))) {
         reset();
-        return Status::failure(weight.name + ": checkpoint weight data is truncated");
+        return status::failure(weight.name + ": checkpoint weight data is truncated");
       }
       std::vector<int8_t> int8(values.size());
       std::vector<uint16_t> scales(static_cast<std::size_t>(shape.columns));
@@ -326,12 +326,12 @@ Status Nxtrfmv2Model::load(const std::string& path, DeviceSession& session,
           static_cast<std::size_t>(shape.columns), int8.data(), scales.data());
       if (!status.ok) {
         reset();
-        return Status::failure(weight.name + ": " + status.message);
+        return status::failure(weight.name + ": " + status.message);
       }
       status = weight.scales.allocate(scales.size() * sizeof(uint16_t));
       if (!status.ok) {
         reset();
-        return Status::failure(weight.name + ": " + status.message);
+        return status::failure(weight.name + ": " + status.message);
       }
       if (memcpy_async(weight.storage.data(), weight.storage.size(), int8.data(),
                        int8.size(), MemcpyKind::host_to_device,
@@ -340,13 +340,13 @@ Status Nxtrfmv2Model::load(const std::string& path, DeviceSession& session,
                        scales.size() * sizeof(uint16_t),
                        MemcpyKind::host_to_device, session.stream()) != kSuccess) {
         reset();
-        return Status::failure(weight.name + ": INT8 weight upload failed: " +
+        return status::failure(weight.name + ": INT8 weight upload failed: " +
                                recent_error());
       }
       status = session.synchronize();
       if (!status.ok) {
         reset();
-        return Status::failure(weight.name + ": " + status.message);
+        return status::failure(weight.name + ": " + status.message);
       }
     }
 
@@ -356,7 +356,7 @@ Status Nxtrfmv2Model::load(const std::string& path, DeviceSession& session,
           std::min<uint64_t>(kTransferElements, elements - copied));
       if (!read_exact(input, fp32.data(), chunk * sizeof(float))) {
         reset();
-        return Status::failure(weight.name + ": checkpoint weight data is truncated");
+        return status::failure(weight.name + ": checkpoint weight data is truncated");
       }
       const void* source = fp32.data();
       if (options.precision != ModelPrecision::fp32) {
@@ -371,26 +371,26 @@ Status Nxtrfmv2Model::load(const std::string& path, DeviceSession& session,
       if (memcpy_async(destination, bytes, source, bytes,
                        MemcpyKind::host_to_device, session.stream()) != kSuccess) {
         reset();
-        return Status::failure(weight.name + ": aclrtMemcpyAsync failed: " +
+        return status::failure(weight.name + ": aclrtMemcpyAsync failed: " +
                                recent_error());
       }
       status = session.synchronize();
       if (!status.ok) {
         reset();
-        return Status::failure(weight.name + ": " + status.message);
+        return status::failure(weight.name + ": " + status.message);
       }
       copied += chunk;
     }
     status = skip_training_state(input, elements);
     if (!status.ok) {
       reset();
-      return Status::failure(weight.name + ": " + status.message);
+      return status::failure(weight.name + ": " + status.message);
     }
     weights_.push_back(std::move(weight));
   }
   loaded_ = true;
   precision_ = options.precision;
-  return Status::success();
+  return status::success();
 }
 
 void Nxtrfmv2Model::reset() {
@@ -400,11 +400,11 @@ void Nxtrfmv2Model::reset() {
   loaded_ = false;
 }
 
-const DeviceWeight* Nxtrfmv2Model::token_embedding() const {
+const device_weight* Nxtrfmv2Model::token_embedding() const {
   return loaded_ && !weights_.empty() ? &weights_.front() : nullptr;
 }
 
-const DeviceWeight* Nxtrfmv2Model::layer_weight(
+const device_weight* Nxtrfmv2Model::layer_weight(
     std::size_t layer, LayerWeightKind kind) const {
   if (!loaded_ || layer >= metadata_.layers) return nullptr;
   constexpr std::size_t tensors_per_layer = 9;
@@ -413,7 +413,7 @@ const DeviceWeight* Nxtrfmv2Model::layer_weight(
   return index < weights_.size() ? &weights_[index] : nullptr;
 }
 
-const DeviceWeight* Nxtrfmv2Model::lm_head() const {
+const device_weight* Nxtrfmv2Model::lm_head() const {
   return loaded_ && !weights_.empty() ? &weights_.back() : nullptr;
 }
 

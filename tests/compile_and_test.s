@@ -171,7 +171,7 @@ func generate_deployment_config(deploy_dir: string) {
 `
     println("Generated: cluster_config.json")
     println("  Cluster: 4×4 GPUs (16 total)")
-    println("  Model: 256-dim, 6 layers")
+    println("  model: 256-dim, 6 layers")
     println("  Data: 300M tokens (C4 dataset)")
     println("")
 }

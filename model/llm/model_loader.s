@@ -22,21 +22,21 @@ struct gptconfig {
 
 struct gptmodel {
     config         gptconfig
-    tokenEmbedding *tensor.Tensor
-    posEmbedding   *tensor.Tensor
+    tokenEmbedding *tensor.tensor_2
+    posEmbedding   *tensor.tensor_2
     layers         []*transformer.transformer_block
-    outputProj     *tensor.Tensor
-    finalNorm      *tensor.Tensor
-    optimizer      *Optimizer
+    outputProj     *tensor.tensor_2
+    finalNorm      *tensor.tensor_2
+    optimizer      *optimizer_2
 }
 
-struct Optimizer {
+struct optimizer_2 {
     learningRate   float32
     adamBeta1      float32
     adamBeta2      float32
     adamEps        float32
-    m              *tensor.Tensor
-    v              *tensor.Tensor
+    m              *tensor.tensor_2
+    v              *tensor.tensor_2
 }
 
 func NewGPT(config gptconfig) (*gptmodel, error) {
@@ -47,7 +47,7 @@ func NewGPT(config gptconfig) (*gptmodel, error) {
     model := &gptmodel{
         config: config,
         layers: make([]*transformer.transformer_block, config.NumLayers),
-        optimizer: &Optimizer{
+        optimizer: &optimizer_2{
             learningRate: config.LearningRate,
             adamBeta1:    0.9,
             adamBeta2:    0.95,
@@ -73,16 +73,16 @@ func NewGPT(config gptconfig) (*gptmodel, error) {
     return model, nil
 }
 
-func initializeEmbedding(inputDim int, outputDim int, std float32) *tensor.Tensor {
+func initializeEmbedding(inputDim int, outputDim int, std float32) *tensor.tensor_2 {
     embedding := tensor.Randn(inputDim, outputDim)
     return tensor.ScalarMul(embedding, std)
 }
 
-func initializePositionalEmbedding(maxSeqLen int, hiddenDim int, std float32) *tensor.Tensor {
+func initializePositionalEmbedding(maxSeqLen int, hiddenDim int, std float32) *tensor.tensor_2 {
     return tensor.Zeros(maxSeqLen, hiddenDim)
 }
 
-func (m *gptmodel) Forward(tokenIds *tensor.Tensor) (*tensor.Tensor, error) {
+func (m *gptmodel) Forward(tokenIds *tensor.tensor_2) (*tensor.tensor_2, error) {
     batchSize := tokenIds.Shape[0]
     seqLen := tokenIds.Shape[1]
     if seqLen > m.config.MaxSeqLen {
@@ -99,7 +99,7 @@ func (m *gptmodel) Forward(tokenIds *tensor.Tensor) (*tensor.Tensor, error) {
     return logits, nil
 }
 
-func (m *gptmodel) embedTokens(tokenIds *tensor.Tensor) *tensor.Tensor {
+func (m *gptmodel) embedTokens(tokenIds *tensor.tensor_2) *tensor.tensor_2 {
     batchSize := tokenIds.Shape[0]
     seqLen := tokenIds.Shape[1]
     embeddings := tensor.Zeros(batchSize, seqLen, m.config.HiddenDim)
@@ -110,7 +110,7 @@ func (m *gptmodel) embedTokens(tokenIds *tensor.Tensor) *tensor.Tensor {
     return embeddings
 }
 
-func (m *gptmodel) addPositionalEmbedding(x *tensor.Tensor, seqLen int) *tensor.Tensor {
+func (m *gptmodel) addPositionalEmbedding(x *tensor.tensor_2, seqLen int) *tensor.tensor_2 {
     batchSize := x.Shape[0]
     for b := 0; b < batchSize; b++ {
         for t := 0; t < seqLen; t++ {
@@ -119,7 +119,7 @@ func (m *gptmodel) addPositionalEmbedding(x *tensor.Tensor, seqLen int) *tensor.
     return x
 }
 
-func (m *gptmodel) createCausalMask(seqLen int) *tensor.Tensor {
+func (m *gptmodel) createCausalMask(seqLen int) *tensor.tensor_2 {
     mask := tensor.Zeros(seqLen, seqLen)
     for i := 0; i < seqLen; i++ {
         for j := 0; j <= i; j++ {
@@ -128,11 +128,11 @@ func (m *gptmodel) createCausalMask(seqLen int) *tensor.Tensor {
     return mask
 }
 
-func (m *gptmodel) applyLayerNorm(x *tensor.Tensor) *tensor.Tensor {
+func (m *gptmodel) applyLayerNorm(x *tensor.tensor_2) *tensor.tensor_2 {
     return x
 }
 
-func (m *gptmodel) Backward(lossGradients *tensor.Tensor) error {
+func (m *gptmodel) Backward(lossGradients *tensor.tensor_2) error {
     gradients := lossGradients
     for i := len(m.layers) - 1; i >= 0; i-- {
         var err error

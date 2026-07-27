@@ -346,13 +346,13 @@ func print_packing_report(packing_statistics stats) void:
     float compute_saved = (1.0 - wasted_compute_ratio) * 100.0
     print("  Effective compute saved: ~", compute_saved, "% vs naive padding")
     if stats.avg_utilization > 0.9:
-        print("  Status: EXCELLENT (enterprise-grade efficiency)")
+        print("  status: EXCELLENT (enterprise-grade efficiency)")
     elif stats.avg_utilization > 0.8:
-        print("  Status: GOOD (production-ready)")
+        print("  status: GOOD (production-ready)")
     elif stats.avg_utilization > 0.7:
-        print("  Status: ACCEPTABLE (room for improvement)")
+        print("  status: ACCEPTABLE (room for improvement)")
     else:
-        print("  Status: POOR (review configuration)")
+        print("  status: POOR (review configuration)")
 func empty_packed_batch() packed_batch:
     return packed_batch{
         input_ids: []int{cap: 0},

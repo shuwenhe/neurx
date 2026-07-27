@@ -65,7 +65,7 @@ echo "Master port: $MASTER_PORT"
 echo "Total nodes: ` + strings.from_i32(num_nodes) + `"
 echo "GPUs per node: ` + strings.from_i32(gpus_per_node) + `"
 echo "Total tasks: $WORLD_SIZE"
-echo "Batch size: ` + strings.from_i32(batch_size) + `"
+echo "batch_2 size: ` + strings.from_i32(batch_size) + `"
 echo "=========================================="
 # Run training
 srun neurx run scaled_training_system \
@@ -330,7 +330,7 @@ func main() {
     println("  Total nodes: " + strings.from_i32(config.num_nodes))
     println("  GPUs per node: " + strings.from_i32(config.gpus_per_node))
     println("  Total GPUs: " + strings.from_i32(config.num_nodes * config.gpus_per_node))
-    println("  Batch size per GPU: " + strings.from_i32(config.batch_size_per_gpu))
+    println("  batch_2 size per GPU: " + strings.from_i32(config.batch_size_per_gpu))
     println("  Sequence length: " + strings.from_i32(config.sequence_length))
     println("  Training epochs: " + strings.from_i32(config.num_epochs))
     println("")
@@ -375,7 +375,7 @@ func main() {
     println("    │   ├── cluster_config.json      (Cluster topology)")
     println("    │   └── kubernetes_deployment.yaml (K8s manifest)")
     println("    ├── docker-compose.yml           (Docker Compose)")
-    println("    ├── checkpoints/                 (Model checkpoints)")
+    println("    ├── checkpoints/                 (model checkpoints)")
     println("    ├── logs/                        (Training logs)")
     println("    └── results/                     (Results directory)")
     println("")

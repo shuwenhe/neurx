@@ -5,40 +5,40 @@
 namespace neurx::cann {
 namespace {
 
-Status acl_failure(const char* operation) {
-  return Status::failure(std::string(operation) + ": " + recent_error());
+status acl_failure(const char* operation) {
+  return status::failure(std::string(operation) + ": " + recent_error());
 }
 
 }
 
 DeviceSession::~DeviceSession() { shutdown(); }
 
-Status DeviceSession::initialize(int device_id) {
+status DeviceSession::initialize(int device_id) {
   if (ready_) {
-    return device_id == device_id_ ? Status::success()
-                                   : Status::failure("CANN session is already bound to another device");
+    return device_id == device_id_ ? status::success()
+                                   : status::failure("CANN session is already bound to another device");
   }
-  if (!available()) return Status::failure("CANN ACL runtime library is unavailable");
+  if (!available()) return status::failure("CANN ACL runtime library is unavailable");
   if (init() != kSuccess) return acl_failure("aclInit");
   acl_initialized_ = true;
   device_id_ = device_id;
   if (set_device(device_id_) != kSuccess) {
-    const Status status = acl_failure("aclrtSetDevice");
+    const status status = acl_failure("aclrtSetDevice");
     shutdown();
     return status;
   }
   if (create_context(&context_, device_id_) != kSuccess) {
-    const Status status = acl_failure("aclrtCreateContext");
+    const status status = acl_failure("aclrtCreateContext");
     shutdown();
     return status;
   }
   if (create_stream(&stream_) != kSuccess) {
-    const Status status = acl_failure("aclrtCreateStream");
+    const status status = acl_failure("aclrtCreateStream");
     shutdown();
     return status;
   }
   ready_ = true;
-  return Status::success();
+  return status::success();
 }
 
 void DeviceSession::shutdown() {
@@ -60,9 +60,9 @@ void DeviceSession::shutdown() {
   ready_ = false;
 }
 
-Status DeviceSession::synchronize() const {
-  if (!ready_) return Status::failure("CANN device session is not initialized");
-  return synchronize_stream(stream_) == kSuccess ? Status::success()
+status DeviceSession::synchronize() const {
+  if (!ready_) return status::failure("CANN device session is not initialized");
+  return synchronize_stream(stream_) == kSuccess ? status::success()
                                                   : acl_failure("aclrtSynchronizeStream");
 }
 
@@ -80,12 +80,12 @@ DeviceBuffer& DeviceBuffer::operator=(DeviceBuffer&& other) noexcept {
   return *this;
 }
 
-Status DeviceBuffer::allocate(std::size_t bytes) {
+status DeviceBuffer::allocate(std::size_t bytes) {
   reset();
-  if (bytes == 0) return Status::failure("device allocation size must be positive");
+  if (bytes == 0) return status::failure("device allocation size must be positive");
   if (malloc_device(&data_, bytes) != kSuccess) return acl_failure("aclrtMalloc");
   size_ = bytes;
-  return Status::success();
+  return status::success();
 }
 
 void DeviceBuffer::reset() {
@@ -96,12 +96,12 @@ void DeviceBuffer::reset() {
 
 HostBuffer::~HostBuffer() { reset(); }
 
-Status HostBuffer::allocate(std::size_t bytes) {
+status HostBuffer::allocate(std::size_t bytes) {
   reset();
-  if (bytes == 0) return Status::failure("host allocation size must be positive");
+  if (bytes == 0) return status::failure("host allocation size must be positive");
   if (malloc_host(&data_, bytes) != kSuccess) return acl_failure("aclrtMallocHost");
   size_ = bytes;
-  return Status::success();
+  return status::success();
 }
 
 void HostBuffer::reset() {

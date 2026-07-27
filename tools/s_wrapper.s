@@ -27,19 +27,19 @@ func main() {
         if len(args) >= 2 && args[1] == "-o" {
             input := args[0]
             output := args[2]
-            cmd := exec.Command(realS, input, output)
+            cmd := exec.command(realS, input, output)
             cmd.Stdout = os.Stdout
             cmd.Stderr = os.Stderr
             cmd.Run()
             return
         }
-        cmd := exec.Command(append([]string{realS, "ir"}, args...)...)
+        cmd := exec.command(append([]string{realS, "ir"}, args...)...)
         cmd.Stdout = os.Stdout
         cmd.Stderr = os.Stderr
         cmd.Run()
         return
     }
-    cmd := exec.Command(append([]string{realS}, args...)...)
+    cmd := exec.command(append([]string{realS}, args...)...)
     cmd.Stdout = os.Stdout
     cmd.Stderr = os.Stderr
     cmd.Run()

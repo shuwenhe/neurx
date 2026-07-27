@@ -4,7 +4,7 @@ use std.os
 use std.path
 use std.time
 use std.exec
-struct TestConfig {
+struct test_config {
     scriptDir string
     projectRoot string
     checkpointDir string
@@ -14,26 +14,26 @@ struct TestConfig {
     maxSteps int
 }
 
-func logTest(config TestConfig, message string) error {
+func logTest(config test_config, message string) error {
     timestamp = time.Now().Format(time.RFC3339)
     line = "[TEST] " + message
     io.Println(line)
     return io.AppendFile(config.testLog, line + "\n")
 }
 
-func logInfo(config TestConfig, message string) error {
+func logInfo(config test_config, message string) error {
     line = "[INFO] " + message
     io.Println(line)
     return io.AppendFile(config.testLog, line + "\n")
 }
 
-func logError(config TestConfig, message string) error {
+func logError(config test_config, message string) error {
     line = "[ERROR] " + message
     io.Println(line)
     return io.AppendFile(config.testLog, line + "\n")
 }
 
-func logSection(config TestConfig, title string) error {
+func logSection(config test_config, title string) error {
     io.Println("")
     line = "==== " + title + " ===="
     io.Println(line)
@@ -60,7 +60,7 @@ func readStateFile(filePath string) map[string]string {
 func main() {
     scriptDir = os.Args[0]
     projectRoot = scriptDir + "/../../.."
-    config := TestConfig{
+    config := test_config{
         scriptDir: scriptDir,
         projectRoot: projectRoot,
         checkpointDir: projectRoot + "/checkpoint/NeurX-1.3-test",
@@ -90,7 +90,7 @@ func main() {
         "NEURX_PRETRAIN_SAVE_INTERVAL": "3",
         "NEURX_PRETRAIN_RESUME": "0",
     }
-    cmd := exec.Command("make", "pretrain-gpu-fresh")
+    cmd := exec.command("make", "pretrain-gpu-fresh")
     cmd.Dir = config.projectRoot
     cmd.Env = env
     output, err := cmd.CombinedOutput()
@@ -108,7 +108,7 @@ func main() {
     logTest(config, "Starting resumed training from step " + phase1Step + "...")
     env["NEURX_PRETRAIN_STEPS"] = string(config.maxSteps)
     env["NEURX_PRETRAIN_RESUME"] = "1"
-    cmd = exec.Command("make", "pretrain-gpu")
+    cmd = exec.command("make", "pretrain-gpu")
     cmd.Dir = config.projectRoot
     cmd.Env = env
     output, err = cmd.CombinedOutput()

@@ -139,7 +139,7 @@ func (framework *distillation_framework) train_step(
 func (framework *distillation_framework) train(num_steps int) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Knowledge Distillation Training                      ║")
-    fmt.Println("║  Teacher → Student Model Compression                 ║")
+    fmt.Println("║  Teacher → Student model Compression                 ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝\n")
     fmt.Printf("Configuration:\n")
     fmt.Printf("  Temperature: %.2f\n", framework.config.temperature)

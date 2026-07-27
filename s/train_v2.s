@@ -34,8 +34,8 @@ func default_config() train_config {
 
 func config_string(train_config cfg) string {
     string s = ""
-    s = s + "=== NeurX GPT Training Config ===\n"
-    s = s + "Model:\n"
+    s = s + "=== NeurX GPT Training config ===\n"
+    s = s + "model:\n"
     s = s + "  vocab_size=" + int_to_str(cfg.vocab_size) + "\n"
     s = s + "  embed_dim=" + int_to_str(cfg.embed_dim) + "\n"
     s = s + "  heads=" + int_to_str(cfg.num_heads) + " layers=" + int_to_str(cfg.num_layers) + "\n"
@@ -50,7 +50,7 @@ func main() int {
     println("========================================")
     println("  NeurX GPT - S Language AI-Native Training")
     println("  All 5 Core DL Capabilities Integrated:")
-    println("    [v] Tensor Core (N-dim, broadcast)")
+    println("    [v] tensor_2 Core (N-dim, broadcast)")
     println("    [v] Math Library (80+ functions)")
     println("    [v] Autograd (auto differentiation)")
     println("    [v] NN Modules (Linear/GPT/Attention)")
@@ -71,16 +71,16 @@ func main() int {
     NN.gptmodel model = NN.make_gpt(gpt_cfg)
     NN.print_gpt_summary(model)
     int total_params = NN.gpt_total_params(model)
-    println("[OK] Model ready: ", format_int(total_params), " parameters")
+    println("[OK] model ready: ", format_int(total_params), " parameters")
     println("")
     println("[2/5] Setting up optimizer...")
-    AG.Optimizer opt
+    AG.optimizer_2 opt
     if cfg.optimizer == "adam" || cfg.optimizer == "adamw" {
         opt = AG.make_adam(cfg.learning_rate, 0.9, 0.999, cfg.weight_decay, 1e-8)
     } else {
         opt = AG.make_sgd(cfg.learning_rate, 0.9, cfg.weight_decay)
     }
-    println("[OK] Optimizer: ", cfg.optimizer, " lr=", M.fmt_float(opt.lr, 6))
+    println("[OK] optimizer_2: ", cfg.optimizer, " lr=", M.fmt_float(opt.lr, 6))
     println("")
     println("[3/5] Preparing synthetic data...")
     int data_len = cfg.max_steps * cfg.batch_size * cfg.seq_len * 2

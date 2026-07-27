@@ -3,7 +3,7 @@ use std.exec
 use std.os
 use std.path
 use std.strings
-struct MultiNodeConfig {
+struct multi_node_config_2 {
     root string
     hostfile string
     masterAddr string
@@ -28,14 +28,14 @@ func parseHostFile(hostfile string) []string {
 }
 
 func getGpuCount(host string) int {
-    cmd := exec.Command("ssh", host, "nvidia-smi -L | wc -l")
+    cmd := exec.command("ssh", host, "nvidia-smi -L | wc -l")
     output, _ := cmd.Output()
     count := 0
     strings.TrimSpace(string(output))
     return count
 }
 
-func launchOnHost(host string, rank int, config MultiNodeConfig) {
+func launchOnHost(host string, rank int, config multi_node_config_2) {
     env := os.Environ()
     env = append(env,
         "NEURX_ROOT=" + config.root,
@@ -48,7 +48,7 @@ func launchOnHost(host string, rank int, config MultiNodeConfig) {
         "MASTER_PORT=" + config.masterPort,
         "CUDA_VISIBLE_DEVICES=0",
     )
-    cmd := exec.Command(config.root + "/artifacts/build/cuda_train/neurx_cuda_train_bridge")
+    cmd := exec.command(config.root + "/artifacts/build/cuda_train/neurx_cuda_train_bridge")
     cmd.Env = env
     cmd.Dir = config.root
     cmd.Stdout = os.Stdout
@@ -65,7 +65,7 @@ func main() {
     if hostfile == "" {
         hostfile = root + "/configs/pretrain.hosts"
     }
-    config := MultiNodeConfig{
+    config := multi_node_config_2{
         root: root,
         hostfile: hostfile,
         masterAddr: os.Getenv("MASTER_ADDR"),

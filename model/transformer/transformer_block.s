@@ -15,26 +15,26 @@ struct transformer_block {
 }
 
 struct multi_head_attention {
-    queryProj    *tensor.Tensor
-    keyProj      *tensor.Tensor
-    valueProj    *tensor.Tensor
-    outProj      *tensor.Tensor
+    queryProj    *tensor.tensor_2
+    keyProj      *tensor.tensor_2
+    valueProj    *tensor.tensor_2
+    outProj      *tensor.tensor_2
     numHeads     int
     headDim      int
     scale        float32
 }
 
 struct feed_forward_network {
-    proj1        *tensor.Tensor
-    proj2        *tensor.Tensor
-    gateProj     *tensor.Tensor
+    proj1        *tensor.tensor_2
+    proj2        *tensor.tensor_2
+    gateProj     *tensor.tensor_2
     innerDim     int
     hiddenDim    int
 }
 
 struct layer_norm {
-    weight       *tensor.Tensor
-    bias         *tensor.Tensor
+    weight       *tensor.tensor_2
+    bias         *tensor.tensor_2
     eps          float32
     hiddenDim    int
 }
@@ -79,7 +79,7 @@ func NewTransformerBlock(config transformer_config) *transformer_block {
     }
 }
 
-func (tb *transformer_block) Forward(x *tensor.Tensor, causalMask *tensor.Tensor) *tensor.Tensor {
+func (tb *transformer_block) Forward(x *tensor.tensor_2, causalMask *tensor.tensor_2) *tensor.tensor_2 {
     xNorm := tb.norm1.Forward(x)
     attnOut := tb.selfAttention(xNorm, causalMask)
     x = tensor.Add(x, attnOut)
@@ -89,7 +89,7 @@ func (tb *transformer_block) Forward(x *tensor.Tensor, causalMask *tensor.Tensor
     return x
 }
 
-func (tb *transformer_block) selfAttention(x *tensor.Tensor, causalMask *tensor.Tensor) *tensor.Tensor {
+func (tb *transformer_block) selfAttention(x *tensor.tensor_2, causalMask *tensor.tensor_2) *tensor.tensor_2 {
     batchSize := x.Shape[0]
     seqLen := x.Shape[1]
     q := tensor.MatMul(x, tb.attention.queryProj)
@@ -111,7 +111,7 @@ func (tb *transformer_block) selfAttention(x *tensor.Tensor, causalMask *tensor.
     return output
 }
 
-func (tb *transformer_block) feedForward(x *tensor.Tensor) *tensor.Tensor {
+func (tb *transformer_block) feedForward(x *tensor.tensor_2) *tensor.tensor_2 {
     proj := tensor.MatMul(x, tb.ffn.proj1)
     gate := tensor.MatMul(x, tb.ffn.gateProj)
     gate = activation.Swish(gate)
@@ -120,7 +120,7 @@ func (tb *transformer_block) feedForward(x *tensor.Tensor) *tensor.Tensor {
     return output
 }
 
-func (tb *transformer_block) Backward(gradOutput *tensor.Tensor) (*tensor.Tensor, error) {
+func (tb *transformer_block) Backward(gradOutput *tensor.tensor_2) (*tensor.tensor_2, error) {
     gradAfterFFN := tensor.Add(gradOutput, gradOutput)
     gradNorm2 := tb.norm2.Backward(gradAfterFFN)
     gradFFNInput := tb.ffnBackward(gradNorm2)
@@ -131,15 +131,15 @@ func (tb *transformer_block) Backward(gradOutput *tensor.Tensor) (*tensor.Tensor
     return gradInput, nil
 }
 
-func (tb *transformer_block) attentionBackward(gradOutput *tensor.Tensor) *tensor.Tensor {
+func (tb *transformer_block) attentionBackward(gradOutput *tensor.tensor_2) *tensor.tensor_2 {
     return gradOutput
 }
 
-func (tb *transformer_block) ffnBackward(gradOutput *tensor.Tensor) *tensor.Tensor {
+func (tb *transformer_block) ffnBackward(gradOutput *tensor.tensor_2) *tensor.tensor_2 {
     return gradOutput
 }
 
-func (ln *layer_norm) Forward(x *tensor.Tensor) *tensor.Tensor {
+func (ln *layer_norm) Forward(x *tensor.tensor_2) *tensor.tensor_2 {
     mean := computeMean(x, -1)
     variance := computeVariance(x, -1)
     xNorm := tensor.Sub(x, mean)
@@ -149,38 +149,38 @@ func (ln *layer_norm) Forward(x *tensor.Tensor) *tensor.Tensor {
     return output
 }
 
-func (ln *layer_norm) Backward(gradOutput *tensor.Tensor) *tensor.Tensor {
+func (ln *layer_norm) Backward(gradOutput *tensor.tensor_2) *tensor.tensor_2 {
     return gradOutput
 }
 
-func reshapeForHeads(x *tensor.Tensor, numHeads int) *tensor.Tensor {
+func reshapeForHeads(x *tensor.tensor_2, numHeads int) *tensor.tensor_2 {
     return x
 }
 
-func reshapeFromHeads(x *tensor.Tensor, numHeads int) *tensor.Tensor {
+func reshapeFromHeads(x *tensor.tensor_2, numHeads int) *tensor.tensor_2 {
     return x
 }
 
-func applyMask(scores *tensor.Tensor, mask *tensor.Tensor) *tensor.Tensor {
+func applyMask(scores *tensor.tensor_2, mask *tensor.tensor_2) *tensor.tensor_2 {
     return scores
 }
 
-func softmax(x *tensor.Tensor, dim int) *tensor.Tensor {
+func softmax(x *tensor.tensor_2, dim int) *tensor.tensor_2 {
     return activation.Softmax(x, dim)
 }
 
-func dropout(x *tensor.Tensor, dropoutRate float32) *tensor.Tensor {
+func dropout(x *tensor.tensor_2, dropoutRate float32) *tensor.tensor_2 {
     if dropoutRate == 0 {
         return x
     }
     return x
 }
 
-func computeMean(x *tensor.Tensor, dim int) *tensor.Tensor {
+func computeMean(x *tensor.tensor_2, dim int) *tensor.tensor_2 {
     return x
 }
 
-func computeVariance(x *tensor.Tensor, dim int) *tensor.Tensor {
+func computeVariance(x *tensor.tensor_2, dim int) *tensor.tensor_2 {
     return x
 }
 

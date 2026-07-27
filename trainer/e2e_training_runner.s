@@ -31,21 +31,21 @@ struct mini_language_model {
     hidden_dim: int
     num_layers: int
     seq_length: int
-    token_embedding: bundle.Tensor
-    position_embedding: bundle.Tensor
+    token_embedding: bundle.tensor_2
+    position_embedding: bundle.tensor_2
     transformer_layers: []transformer_layer
-    output_projection: bundle.Tensor
+    output_projection: bundle.tensor_2
     last_loss: float
     gradients_computed: bool
 }
 
 struct transformer_layer {
-    attention_qkv: bundle.Tensor
-    attention_output: bundle.Tensor
-    attention_norm: bundle.Tensor
-    fc1: bundle.Tensor
-    fc2: bundle.Tensor
-    fc_norm: bundle.Tensor
+    attention_qkv: bundle.tensor_2
+    attention_output: bundle.tensor_2
+    attention_norm: bundle.tensor_2
+    fc1: bundle.tensor_2
+    fc2: bundle.tensor_2
+    fc_norm: bundle.tensor_2
 }
 
 func generate_synthetic_data(
@@ -74,45 +74,45 @@ func create_mini_gpt(config training_config) mini_language_model {
         seq_length: config.seq_length,
         gradients_computed: false,
     }
-    model.token_embedding = bundle.Tensor{
+    model.token_embedding = bundle.tensor_2{
         shape: [config.vocab_size, config.embedding_dim],
         data: initialize_normal(config.vocab_size * config.embedding_dim, 0.0, 0.02),
     }
-    model.position_embedding = bundle.Tensor{
+    model.position_embedding = bundle.tensor_2{
         shape: [config.seq_length, config.embedding_dim],
         data: initialize_normal(config.seq_length * config.embedding_dim, 0.0, 0.02),
     }
     model.transformer_layers = make([]transformer_layer, config.num_layers)
     for i := 0; i < config.num_layers; i += 1 {
         layer := transformer_layer{
-            attention_qkv: bundle.Tensor{
+            attention_qkv: bundle.tensor_2{
                 shape: [config.embedding_dim, 3 * config.hidden_dim],
                 data: initialize_normal(config.embedding_dim * 3 * config.hidden_dim, 0.0, 0.02),
             },
-            attention_output: bundle.Tensor{
+            attention_output: bundle.tensor_2{
                 shape: [config.hidden_dim, config.embedding_dim],
                 data: initialize_normal(config.hidden_dim * config.embedding_dim, 0.0, 0.02),
             },
-            attention_norm: bundle.Tensor{
+            attention_norm: bundle.tensor_2{
                 shape: [config.embedding_dim],
                 data: initialize_ones(config.embedding_dim),
             },
-            fc1: bundle.Tensor{
+            fc1: bundle.tensor_2{
                 shape: [config.embedding_dim, 4 * config.hidden_dim],
                 data: initialize_normal(config.embedding_dim * 4 * config.hidden_dim, 0.0, 0.02),
             },
-            fc2: bundle.Tensor{
+            fc2: bundle.tensor_2{
                 shape: [4 * config.hidden_dim, config.embedding_dim],
                 data: initialize_normal(4 * config.hidden_dim * config.embedding_dim, 0.0, 0.02),
             },
-            fc_norm: bundle.Tensor{
+            fc_norm: bundle.tensor_2{
                 shape: [config.embedding_dim],
                 data: initialize_ones(config.embedding_dim),
             },
         }
         model.transformer_layers[i] = layer
     }
-    model.output_projection = bundle.Tensor{
+    model.output_projection = bundle.tensor_2{
         shape: [config.hidden_dim, config.vocab_size],
         data: initialize_normal(config.hidden_dim * config.vocab_size, 0.0, 0.02),
     }
@@ -124,8 +124,8 @@ func forward_pass(
     input_ids: []int,
     batch_size: int,
     seq_length: int
-) (bundle.Tensor, bundle.Tensor) {
-    embeddings := bundle.Tensor{
+) (bundle.tensor_2, bundle.tensor_2) {
+    embeddings := bundle.tensor_2{
         shape: [batch_size, seq_length, model.embedding_dim],
         data: make([]float, batch_size * seq_length * model.embedding_dim),
     }
@@ -137,14 +137,14 @@ func forward_pass(
     hidden_states := embeddings
     for layer_idx := 0; layer_idx < model.num_layers; layer_idx += 1 {
     }
-    logits := bundle.Tensor{
+    logits := bundle.tensor_2{
         shape: [batch_size, seq_length, model.vocab_size],
         data: make([]float, batch_size * seq_length * model.vocab_size),
     }
     logits, hidden_states
 }
 
-func compute_loss(logits: bundle.Tensor, targets: []int) float {
+func compute_loss(logits: bundle.tensor_2, targets: []int) float {
     batch_size := logits.shape[0]
     seq_length := logits.shape[1]
     vocab_size := logits.shape[2]
@@ -197,15 +197,15 @@ func run_training(config: training_config) {
     fmt.Printf("   embedding dim: %d\n", config.embedding_dim)
     fmt.Printf("   Layers: %d\n", config.num_layers)
     model := create_mini_gpt(config)
-    fmt.Printf("   ✅ Model created successfully\n")
-    log_message(log, fmt.Sprintf("Model created: %d params", count_parameters(model)))
+    fmt.Printf("   ✅ model created successfully\n")
+    log_message(log, fmt.Sprintf("model created: %d params", count_parameters(model)))
     optimizer := adamw_optimizer_new(
         config.learning_rate,
         config.weight_decay,
         0.9,
         0.999,
     )
-    log_message(log, "Optimizer: AdamW initialized")
+    log_message(log, "optimizer_2: adam_w initialized")
     fmt.Printf("\n📊 Generating synthetic training data...\n")
     data := generate_synthetic_data(config.batch_size, config.seq_length, config.vocab_size, config.num_steps)
     fmt.Printf("   ✅ Generated %d batches\n", len(data))
@@ -433,7 +433,7 @@ func log_config(log: logger, config: training_config) {
     log_message(log, fmt.Sprintf("Vocab size: %d", config.vocab_size))
     log_message(log, fmt.Sprintf("embedding dim: %d", config.embedding_dim))
     log_message(log, fmt.Sprintf("Layers: %d", config.num_layers))
-    log_message(log, fmt.Sprintf("Batch size: %d", config.batch_size))
+    log_message(log, fmt.Sprintf("batch_2 size: %d", config.batch_size))
     log_message(log, fmt.Sprintf("Learning rate: %.2e", config.learning_rate))
     log_message(log, fmt.Sprintf("Epochs: %d", config.num_epochs))
 }

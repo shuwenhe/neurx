@@ -96,7 +96,7 @@ func get_scale_config(scale TrainingScale) struct {
 }
 
 struct train_orchestrator {
-    logger Logger
+    logger logger_2
     config training_config
     sCompiler string
     neurxRoot string
@@ -248,7 +248,7 @@ func (t *train_orchestrator) detectGPUs() (int, string) {
 
 func (t *train_orchestrator) log_config() error {
     config := fmt.Sprintf(`╔══════════════════════════════════════════════════╗
-║   NeurX Foundation Model Training               ║
+║   NeurX Foundation model Training               ║
 ║   English text: English text NeurX English text                    ║
 ╠══════════════════════════════════════════════════╣
 ║ English text: %s
@@ -277,7 +277,7 @@ func main() {
     fmt.Printf("Training Configuration:\\n")
     fmt.Printf("  Parameters: %%d\\n", params)
     fmt.Printf("  GPUs: %%d\\n", gpus)
-    fmt.Printf("  Batch Size: %%d\\n", batchSize)
+    fmt.Printf("  batch_2 Size: %%d\\n", batchSize)
     fmt.Printf("  Learning Rate: %%.2e\\n", learningRate)
     fmt.Printf("  Sequence Length: %%d\\n", seqLen)
     fmt.Printf("  Layers: %%d\\n", layers)

@@ -432,7 +432,7 @@ func main() {
     config.max_seq_length = 4096
     instruction_data* sft_data = load_instruction_data("instructions.jsonl")
     println("Training SFT model...")
-    println("\nPhase 2: Reward Model Training")
+    println("\nPhase 2: Reward model Training")
     config.reward_learning_rate = 0.00005
     config.reward_epochs = 2
     config.reward_batch_size = 32

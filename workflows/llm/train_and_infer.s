@@ -67,7 +67,7 @@ struct transformer_model {
 func create_model(config: model_config) transformer_model {
     var model: transformer_model
     model.config = config
-    println("📦 Creating Transformer Model")
+    println("📦 Creating transformer_2 model")
     println("   Vocabulary size: " + strings.from_i32(config.vocab_size))
     println("   Hidden dimension: " + strings.from_i32(config.hidden_dim))
     println("   Layers: " + strings.from_i32(config.num_layers))
@@ -244,17 +244,17 @@ func main() {
     }
     println("")
     println("═" + strings.repeat("═", 69) + "")
-    println("PHASE 1: Model Initialization")
+    println("PHASE 1: model Initialization")
     println("═" + strings.repeat("═", 69) + "")
     var model = create_model(model_config)
     let total_params = i64(model_config.vocab_size) * i64(model_config.hidden_dim) +
                        i64(model_config.num_heads) * i64(model_config.hidden_dim) +
                        i64(model_config.ffn_dim) * i64(model_config.hidden_dim)
     println("")
-    println("✅ Model created with " + format_large_number(total_params) + " parameters")
+    println("✅ model created with " + format_large_number(total_params) + " parameters")
     println("")
     println("═" + strings.repeat("═", 69) + "")
-    println("PHASE 2: Model Training")
+    println("PHASE 2: model Training")
     println("═" + strings.repeat("═", 69) + "")
     var best_loss = 999999.0
     for epoch := 0; epoch < train_config.num_epochs; epoch = epoch + 1 {
@@ -270,7 +270,7 @@ func main() {
     println("   Best loss: " + format_float(best_loss, 4))
     println("")
     println("═" + strings.repeat("═", 69) + "")
-    println("PHASE 3: Model Inference")
+    println("PHASE 3: model Inference")
     println("═" + strings.repeat("═", 69) + "")
     let result1 = generate_text(model, "The future of AI is", 20)
     print_inference_result(result1)

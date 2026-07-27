@@ -6,11 +6,11 @@
 #include <cstdio>
 
 using neurx::inference::Backend;
-using neurx::inference::BatchKey;
+using neurx::inference::batch_key;
 using neurx::inference::DisaggregatedScheduler;
 using neurx::inference::Phase;
 using neurx::inference::RequestState;
-using neurx::inference::RuntimeConfig;
+using neurx::inference::runtime_config_2;
 
 int main() {
   const auto cuda = neurx::inference::make_execution_plan(Backend::cuda, true);
@@ -24,7 +24,7 @@ int main() {
   assert(ascend_status.ok ? ascend_adapter.ready() : !ascend_status.message.empty());
   const bool hccl_runtime_present = neurx::hccl::available();
 
-  RuntimeConfig config;
+  runtime_config_2 config;
   config.max_prefill_batch_tokens = 8;
   config.max_prefill_requests = 1;
   config.max_decode_batch_size = 4;

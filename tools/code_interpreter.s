@@ -492,7 +492,7 @@ class ShellRuntime {
             return execution_result{
                 success=false,
                 output="",
-                error=f"Command '{base_command}' is not allowed in sandbox",
+                error=f"command '{base_command}' is not allowed in sandbox",
                 error_type="PermissionDeniedError",
                 line_count=count_lines(command),
                 memory_used_mb=0
@@ -619,7 +619,7 @@ class ResultFormatter {
         sections: list<string> = []
         status_icon = result.success ? "✅" : "❌"
         status_text = result.success ? "Success" : f"Error ({result.error_type})"
-        sections.append(f"{status_icon} **Status**: {status_text}")
+        sections.append(f"{status_icon} **status**: {status_text}")
         if result.output.length > 0 {
             truncated_output = this._truncate(result.output, max_chars=5000)
             formatted_output = this._format_code_block(truncated_output, "output")
@@ -796,7 +796,7 @@ numeric_df = df.select_dtypes(include=[np.number])
 plt.figure(figsize=(12, 10))
 corr = numeric_df.corr()
 sns.heatmap(corr, annot=True, cmap='coolwarm', center=0, fmt='.2f')
-plt.title('Correlation Matrix')
+plt.title('Correlation matrix')
 plt.tight_layout()
 plt.savefig('chart_correlation.png', dpi=150, bbox_inches='tight')
 print("Chart saved as chart_correlation.png")
@@ -941,7 +941,7 @@ print(f"The answer is: {{y}}")
     result2 = ci.run_python("import os; os.system('rm -rf /')")
     assert !result2.raw.success, "Should block dangerous code"
     assert result2.raw.error_type == "SecurityError", "Should be security error"
-    print("  ✓ Test 3: Safe Shell Command Execution")
+    print("  ✓ Test 3: Safe Shell command Execution")
     result3 = ci.run_s("echo 'Hello from s'")
     assert result3.raw.success, "S exec failed"
     assert "Hello from s" in result3.raw.output, "Unexpected s output"

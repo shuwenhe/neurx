@@ -29,7 +29,7 @@ struct web_search_config {
     cache_ttl_hours: int = 24
 }
 
-struct search_resultItem {
+struct search_result_item {
     url: string
     title: string
     snippet: string
@@ -77,7 +77,7 @@ struct search_response {
     query: string
     corrected_query?: string
     total_results_found: int
-    results: list<search_resultItem>
+    results: list<search_result_item>
     aggregated_from_engines: list<string>
     search_time_ms: float
     summary?: string
@@ -100,7 +100,7 @@ interface SearchEngineInterface {
 }
 
 struct engine_search_result {
-    items: list<search_resultItem>
+    items: list<search_result_item>
     total_estimated: int
     corrected_query?: string
     query_time_ms: float
@@ -145,9 +145,9 @@ class GoogleSearchEngine implements SearchEngineInterface {
                 items=[], total_estimated=0, query_time_ms=current_time_millis() - start_time,
                 has_more=false, error=data["error"]["message"]
             }
-        items: list<search_resultItem> = []
+        items: list<search_result_item> = []
         for i, item in enumerate(data.get("items", [])) {
-            items.append(search_resultItem{
+            items.append(search_result_item{
                 url=item["link"],
                 title=item.get("title", ""),
                 snippet=item.get("snippet", ""),
@@ -183,9 +183,9 @@ class GoogleSearchEngine implements SearchEngineInterface {
         }
         response = http_get("https:
         data = json_decode(response.body)
-        items: list<search_resultItem> = []
+        items: list<search_result_item> = []
         if "Abstract" in data and not data["Abstract"].empty():
-            items.append(search_resultItem{
+            items.append(search_result_item{
                 url=data.get("AbstractURL", ""),
                 title=data.get("Heading", ""),
                 snippet=data["Abstract"],
@@ -240,9 +240,9 @@ class BingSearchEngine implements SearchEngineInterface {
             params=params
         )
         data = json_decode(response.body)
-        items: list<search_resultItem> = []
+        items: list<search_result_item> = []
         for i, item in enumerate(data.get("webPages", {}).get("value", [])):
-            items.append(search_resultItem{
+            items.append(search_result_item{
                 url=item["url"],
                 title=item.get("name", ""),
                 snippet=item.get("snippet", ""),
@@ -352,7 +352,7 @@ class MainContentExtractor {
         else:
             body = soup.find("body") ?? soup
             text_content, sections = this._extract_structured(body)
-        return ExtractionResult{
+        return extraction_result{
             text_content=text_content,
             metadata=metadata,
             sections=sections
@@ -485,7 +485,7 @@ class MainContentExtractor {
         full_text = "".join(content_parts).strip()
         return (full_text, sections)
     }
-    struct ExtractionResult {
+    struct extraction_result {
         text_content: string
         metadata: page_metadata
         sections: list<page_section>
@@ -534,7 +534,7 @@ class WebSearchSystem {
         opts = options ?? new search_options()
         start_total = current_time_millis()
         print(f"🔍 Searching: {query}")
-        all_items: list<search_resultItem> = []
+        all_items: list<search_result_item> = []
         engine_times: map<string, float> = {}
         used_engines: list<string> = []
         tasks: list<tuple<string, ()
@@ -622,7 +622,7 @@ class WebSearchSystem {
             }
         }
     }
-    _build_context_for_llm(query: string, top_results: list<search_resultItem>) {
+    _build_context_for_llm(query: string, top_results: list<search_result_item>) {
         parts: list<string> = []
         parts.append(f"Query: {query}\n")
         parts.append("=" * 60 + "\n")
@@ -671,13 +671,13 @@ Also provide a comma-separated ranking of the most relevant result indices (0-ba
             try:
                 reranked_indices = [int(x.trim()) for x in indices_str.split(",")]
             }
-        return LlmSummaryResult{
+        return llm_summary_result{
             summary=summary,
             key_findings=key_findings if key_findings.length > 0 else None,
             reranked_indices=reranked_indices
         }
     }
-    struct LlmSummaryResult {
+    struct llm_summary_result {
         summary: string
         key_findings: list<string>?
         reranked_indices: list<int>?
@@ -735,9 +735,9 @@ class ResultAggregator {
     init(config: web_search_config) {
         this.config = config
     }
-    deduplicate(items: list<search_resultItem>) {
+    deduplicate(items: list<search_result_item>) {
         seen_urls: set<string> = set{}
-        unique_items: list<search_resultItem> = []
+        unique_items: list<search_result_item> = []
         for item in items:
             normalized = self._normalize_url(item.url)
             if normalized not in seen_urls:
@@ -745,8 +745,8 @@ class ResultAggregator {
                 unique_items.append(item)
         return unique_items
     }
-    score_and_rank(items: list<search_resultItem>, query: string) {
-        scored_items: list<tuple<search_resultItem, float>> = []
+    score_and_rank(items: list<search_result_item>, query: string) {
+        scored_items: list<tuple<search_result_item, float>> = []
         query_terms = set(query.to_lower().split_whitespace())
         for item in items {
             score = 0.0
@@ -809,10 +809,10 @@ async function test_web_search_system() {
     print("  ✓ Test 2: URL Normalization & Deduplication")
     agg = ws.result_aggregator
     test_items = [
-        search_resultItem{url="https:
-        search_resultItem{url="HTTPS:
-        search_resultItem{url="https:
-        search_resultItem{url="https:
+        search_result_item{url="https:
+        search_result_item{url="HTTPS:
+        search_result_item{url="https:
+        search_result_item{url="https:
     ]
     unique = agg.deduplicate(test_items)
     assert len(unique) == 3, f"Dedup failed: expected 3, got {len(unique)}"
@@ -833,7 +833,7 @@ async function test_web_search_system() {
     return true
 }
 export {
-    web_search_config, search_resultItem, crawled_content, page_metadata, page_section,
+    web_search_config, search_result_item, crawled_content, page_metadata, page_section,
     search_response, search_statistics,
     WebSearchSystem, search_options,
     create_web_search_system, test_web_search_system

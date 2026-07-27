@@ -2,7 +2,7 @@ package main
 use std.io.println
 use neurx.lib.fileio.{read_file_lines, split_string, trim_string, starts_with, file_exists}
 use neurx.lib.json.{extract_json_field, json_string_to_float, json_string_to_int}
-use neurx.lib.tensor.{Vector, Matrix, create_vector, create_matrix, matrix_vector_multiply, vector_add, vector_subtract, vector_scale}
+use neurx.lib.tensor.{vector, matrix, create_vector, create_matrix, matrix_vector_multiply, vector_add, vector_subtract, vector_scale}
 use neurx.lib.nn.{lora_linear_layer, create_lora_linear_layer, lora_forward}
 use neurx.lib.loss.{mse_loss_forward, mse_loss_backward, create_adam_optimizer, adam_optimizer, adam_step}
 struct training_example {
@@ -206,8 +206,8 @@ func main() int {
         int epoch_steps = 0
         int sample_idx = 0
         while sample_idx < num_examples {
-            Vector input_vec = create_vector(hidden_dim)
-            Vector target_vec = create_vector(hidden_dim)
+            vector input_vec = create_vector(hidden_dim)
+            vector target_vec = create_vector(hidden_dim)
             int i = 0
             while i < hidden_dim {
                 float hash_val = (simple_hash(examples[sample_idx].output) + i) as float
@@ -215,9 +215,9 @@ func main() int {
                 target_vec.data[i] = (hash_val / 10000.0) * 0.05
                 i = i + 1
             }
-            Vector pred = lora_forward(lora_layer, input_vec)
+            vector pred = lora_forward(lora_layer, input_vec)
             float loss = mse_loss_forward(pred, target_vec)
-            Vector grad_output = mse_loss_backward(pred, target_vec)
+            vector grad_output = mse_loss_backward(pred, target_vec)
             epoch_loss = epoch_loss + loss
             epoch_steps = epoch_steps + 1
             state.examples_seen = state.examples_seen + 1

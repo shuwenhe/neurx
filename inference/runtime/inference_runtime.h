@@ -23,7 +23,7 @@ inline const char* backend_name(Backend backend) {
   return "unknown";
 }
 
-struct BackendCapabilities {
+struct backend_capabilities {
   Backend backend;
   bool fp16;
   bool bf16;
@@ -35,7 +35,7 @@ struct BackendCapabilities {
   const char* kv_transfer;
 };
 
-inline BackendCapabilities capabilities(Backend backend) {
+inline backend_capabilities capabilities(Backend backend) {
   switch (backend) {
     case Backend::cuda:
       return {backend, true, true, true, true, true, "FlashAttention/paged-attention", "NCCL", "cudaMemcpyPeerAsync/RDMA"};
@@ -47,7 +47,7 @@ inline BackendCapabilities capabilities(Backend backend) {
   throw std::logic_error("unreachable backend");
 }
 
-struct ExecutionPlan {
+struct execution_plan {
   Backend backend;
   std::string dtype;
   std::string attention;
@@ -57,7 +57,7 @@ struct ExecutionPlan {
   bool fuse_logits_sampling;
 };
 
-inline ExecutionPlan make_execution_plan(Backend backend, bool fp8_requested) {
+inline execution_plan make_execution_plan(Backend backend, bool fp8_requested) {
   const auto caps = capabilities(backend);
   return {backend,
           fp8_requested && caps.fp8
@@ -70,16 +70,16 @@ inline ExecutionPlan make_execution_plan(Backend backend, bool fp8_requested) {
           backend != Backend::cpu};
 }
 
-struct BatchKey {
+struct batch_key {
   Backend backend = Backend::cpu;
   std::string dtype = "fp32";
 
-  bool operator==(const BatchKey& other) const { return backend == other.backend && dtype == other.dtype; }
+  bool operator==(const batch_key& other) const { return backend == other.backend && dtype == other.dtype; }
 };
 
-struct Request {
+struct request {
   std::string id;
-  BatchKey key;
+  batch_key key;
   int prompt_tokens = 0;
   int remaining_prompt_tokens = 0;
   int max_new_tokens = 0;
@@ -87,19 +87,19 @@ struct Request {
   RequestState state = RequestState::queued_prefill;
 };
 
-struct WorkItem {
+struct work_item {
   std::string request_id;
   int token_count = 0;
 };
 
-struct Batch {
+struct batch_2 {
   Phase phase = Phase::prefill;
-  BatchKey key;
-  std::vector<WorkItem> items;
+  batch_key key;
+  std::vector<work_item> items;
   int total_tokens = 0;
 };
 
-struct RuntimeConfig {
+struct runtime_config_2 {
   int max_prefill_batch_tokens = 4096;
   int max_prefill_requests = 16;
   int max_decode_batch_size = 64;
@@ -107,7 +107,7 @@ struct RuntimeConfig {
   bool prioritize_decode = true;
 };
 
-struct RuntimeMetrics {
+struct runtime_metrics {
   uint64_t prefills_started = 0;
   uint64_t decode_steps = 0;
   uint64_t prefetched_tokens = 0;
@@ -117,18 +117,18 @@ struct RuntimeMetrics {
 
 class DisaggregatedScheduler {
  public:
-  explicit DisaggregatedScheduler(RuntimeConfig config) : config_(config) {
+  explicit DisaggregatedScheduler(runtime_config_2 config) : config_(config) {
     if (config_.max_prefill_batch_tokens <= 0 || config_.max_prefill_requests <= 0 ||
         config_.max_decode_batch_size <= 0) {
       throw std::invalid_argument("inference scheduler limits must be positive");
     }
   }
 
-  void submit(std::string id, BatchKey key, int prompt_tokens, int max_new_tokens) {
+  void submit(std::string id, batch_key key, int prompt_tokens, int max_new_tokens) {
     if (id.empty() || requests_.count(id) || prompt_tokens < 0 || max_new_tokens <= 0) {
       throw std::invalid_argument("invalid or duplicate inference request");
     }
-    Request request{std::move(id), std::move(key), prompt_tokens, prompt_tokens, max_new_tokens};
+    request request{std::move(id), std::move(key), prompt_tokens, prompt_tokens, max_new_tokens};
     const std::string request_id = request.id;
     requests_.emplace(request_id, std::move(request));
 
@@ -140,7 +140,7 @@ class DisaggregatedScheduler {
     }
   }
 
-  Batch schedule() {
+  batch_2 schedule() {
     if (config_.prioritize_decode && !decode_queue_.empty()) return take_decode_batch();
     if (!prefill_queue_.empty()) return take_prefill_batch();
     if (!decode_queue_.empty()) return take_decode_batch();
@@ -148,7 +148,7 @@ class DisaggregatedScheduler {
   }
 
   void complete_prefill(const std::string& id, int processed_tokens) {
-    Request& request = mutable_request(id, RequestState::prefilling);
+    request& request = mutable_request(id, RequestState::prefilling);
     if (processed_tokens <= 0 || processed_tokens > request.remaining_prompt_tokens) {
       throw std::invalid_argument("invalid prefill completion token count");
     }
@@ -165,7 +165,7 @@ class DisaggregatedScheduler {
   }
 
   void complete_decode(const std::string& id, bool eos = false) {
-    Request& request = mutable_request(id, RequestState::decoding);
+    request& request = mutable_request(id, RequestState::decoding);
     ++request.generated_tokens;
     ++metrics_.decode_steps;
     ++metrics_.generated_tokens;
@@ -177,25 +177,25 @@ class DisaggregatedScheduler {
     }
   }
 
-  const Request& request(const std::string& id) const {
+  const request& request(const std::string& id) const {
     const auto it = requests_.find(id);
     if (it == requests_.end()) throw std::out_of_range("unknown inference request");
     return it->second;
   }
-  const RuntimeMetrics& metrics() const { return metrics_; }
+  const runtime_metrics& metrics() const { return metrics_; }
 
  private:
-  Batch take_decode_batch() {
+  batch_2 take_decode_batch() {
     return take_homogeneous_batch(decode_queue_, Phase::decode, config_.max_decode_batch_size, 0);
   }
 
-  Batch take_prefill_batch() {
+  batch_2 take_prefill_batch() {
     return take_homogeneous_batch(prefill_queue_, Phase::prefill, config_.max_prefill_requests,
                                   config_.max_prefill_batch_tokens);
   }
 
-  Batch take_homogeneous_batch(std::vector<std::string>& queue, Phase phase, int item_limit, int token_limit) {
-    Batch batch;
+  batch_2 take_homogeneous_batch(std::vector<std::string>& queue, Phase phase, int item_limit, int token_limit) {
+    batch_2 batch;
     batch.phase = phase;
     const std::string first_id = queue.front();
     batch.key = requests_.at(first_id).key;
@@ -203,7 +203,7 @@ class DisaggregatedScheduler {
     while (!queue.empty() && static_cast<int>(batch.items.size()) < item_limit) {
       const std::string id = queue.front();
       queue.erase(queue.begin());
-      Request& request = requests_.at(id);
+      request& request = requests_.at(id);
       if (!(request.key == batch.key)) { deferred.push_back(id); continue; }
       const int tokens = phase == Phase::decode ? 1 : std::min(request.remaining_prompt_tokens, token_limit - batch.total_tokens);
       if (tokens <= 0) { deferred.push_back(id); continue; }
@@ -217,15 +217,15 @@ class DisaggregatedScheduler {
     return batch;
   }
 
-  Request& mutable_request(const std::string& id, RequestState expected) {
-    Request& request = const_cast<Request&>(this->request(id));
+  request& mutable_request(const std::string& id, RequestState expected) {
+    request& request = const_cast<request&>(this->request(id));
     if (request.state != expected) throw std::logic_error("inference request completed in wrong phase");
     return request;
   }
 
-  RuntimeConfig config_;
-  RuntimeMetrics metrics_;
-  std::map<std::string, Request> requests_;
+  runtime_config_2 config_;
+  runtime_metrics metrics_;
+  std::map<std::string, request> requests_;
   std::vector<std::string> prefill_queue_;
   std::vector<std::string> decode_queue_;
 };

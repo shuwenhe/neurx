@@ -8,7 +8,7 @@
 
 namespace {
 
-struct AdamState {
+struct adam_state_2 {
     std::vector<double> m;
     std::vector<double> v;
     int step = 0;
@@ -32,7 +32,7 @@ void require_close(double actual, double expected, double tolerance,
 
 std::vector<double> adam_step(const std::vector<double>& params,
                               const std::vector<double>& grads,
-                              AdamState& state, double lr, double beta1,
+                              adam_state_2& state, double lr, double beta1,
                               double beta2, double eps,
                               double weight_decay = 0.0) {
     if (state.m.empty()) {
@@ -67,7 +67,7 @@ std::string read_file(const std::string& path) {
 }
 
 void test_adam_state_accumulates() {
-    AdamState state;
+    adam_state_2 state;
     std::vector<double> params{1.0};
     params = adam_step(params, {0.1}, state, 0.01, 0.9, 0.999, 1e-8);
     require_close(params[0], 0.990000001, 1e-9, "Adam first update");
@@ -83,24 +83,24 @@ void test_adam_state_accumulates() {
 }
 
 void test_adamw_is_decoupled() {
-    AdamState state;
+    adam_state_2 state;
     const std::vector<double> out =
         adam_step({2.0}, {0.0}, state, 0.1, 0.9, 0.999, 1e-8, 0.1);
     require_close(out[0], 1.98, 1e-12,
-                  "AdamW zero-gradient update is only weight decay");
+                  "adam_w zero-gradient update is only weight decay");
     require_close(state.m[0], 0.0, 0.0,
-                  "AdamW weight decay does not enter first moment");
+                  "adam_w weight decay does not enter first moment");
     require_close(state.v[0], 0.0, 0.0,
-                  "AdamW weight decay does not enter second moment");
+                  "adam_w weight decay does not enter second moment");
 }
 
 void test_state_resume_matches_continuous_run() {
-    AdamState continuous;
+    adam_state_2 continuous;
     std::vector<double> continuous_params{1.0, -2.0};
     continuous_params = adam_step(continuous_params, {0.2, -0.1}, continuous,
                                   0.001, 0.9, 0.999, 1e-8, 0.01);
 
-    AdamState resumed = continuous;
+    adam_state_2 resumed = continuous;
     std::vector<double> resumed_params = continuous_params;
     continuous_params = adam_step(continuous_params, {-0.4, 0.3}, continuous,
                                   0.001, 0.9, 0.999, 1e-8, 0.01);
@@ -126,7 +126,7 @@ void test_s_implementation_wires_persistent_state() {
     require(optim.find("float decayed_param = params.data[i] * "
                        "(1.0 - optimizer.lr * optimizer.weight_decay)") !=
                 std::string::npos,
-            "AdamW uses decoupled weight decay");
+            "adam_w uses decoupled weight decay");
     require(optimizer.find("else if group.kind == \"adam\"") !=
                 std::string::npos,
             "high-level Adam dispatch is present");
@@ -145,6 +145,6 @@ int main() {
     test_adamw_is_decoupled();
     test_state_resume_matches_continuous_run();
     test_s_implementation_wires_persistent_state();
-    std::cout << "Adam/AdamW optimizer regression tests passed\n";
+    std::cout << "Adam/adam_w optimizer regression tests passed\n";
     return 0;
 }

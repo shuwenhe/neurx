@@ -112,7 +112,7 @@ func model_export_metadata_text(model_export_config config, string manifest_path
 
 func model_export_card_text(model_export_config config, string quant_text, string distill_text) string {
     string out = ""
-    out = out + "# Model Export Card\n"
+    out = out + "# model Export Card\n"
     out = out + "name: " + config.model_name + "\n"
     out = out + "format: " + config.export_format + "\n"
     out = out + "runtime: " + config.target_runtime + "\n"

@@ -787,7 +787,7 @@ func main() {
     if len(head_index) < 3 || head_index[2] == 0 {
         head_index = parse_tensor_index(metadata_bytes, "model.lm_head.weight")
     }
-    print("Model: " + model_path + "\n")
+    print("model: " + model_path + "\n")
     print("SafeTensors metadata size: ")
     print(metadata_size)
     print("\n")

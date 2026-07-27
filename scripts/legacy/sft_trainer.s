@@ -38,7 +38,7 @@ type sft_config struct {
 type sft_trainer struct {
     sft_config config
     policy_model model
-    Optimizer optimizer
+    optimizer_2 optimizer
     instruction_dataset dataset
     instruction_dataset val_dataset
     int step_count
@@ -274,7 +274,7 @@ func NewSFTTrainer(config sft_config) *sft_trainer {
             hidden_size: 768,
             vocab_size: 128000,
         },
-        optimizer: Optimizer{
+        optimizer: optimizer_2{
             name: "adamw",
             learning_rate: config.learning_rate,
             beta1: 0.9,

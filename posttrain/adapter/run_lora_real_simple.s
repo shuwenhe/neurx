@@ -1,13 +1,13 @@
 module main
-struct Tensor {
+struct tensor_2 {
     []float data
     []int shape
 }
 
 struct lora_weights {
     string name
-    Tensor A
-    Tensor B
+    tensor_2 A
+    tensor_2 B
     float alpha
     int rank
 }
@@ -102,8 +102,8 @@ func repeat_string(string s, int count) string {
     return result
 }
 
-func create_vector(int size, float value) Tensor {
-    Tensor t
+func create_vector(int size, float value) tensor_2 {
+    tensor_2 t
     t.data = []
     int i = 0
     while i < size {
@@ -114,8 +114,8 @@ func create_vector(int size, float value) Tensor {
     return t
 }
 
-func create_matrix(int rows, int cols, float value) Tensor {
-    Tensor t
+func create_matrix(int rows, int cols, float value) tensor_2 {
+    tensor_2 t
     t.data = []
     int total = rows * cols
     int i = 0
@@ -128,7 +128,7 @@ func create_matrix(int rows, int cols, float value) Tensor {
     return t
 }
 
-func zeros(int rows, int cols) Tensor {
+func zeros(int rows, int cols) tensor_2 {
     return create_matrix(rows, cols, 0.0)
 }
 
@@ -145,7 +145,7 @@ func load_model_config(string model_path) training_config {
     return config
 }
 
-func forward_pass(Tensor input_ids) float {
+func forward_pass(tensor_2 input_ids) float {
     println("Forward pass...")
     float logits = 0.0
     return logits
@@ -162,7 +162,7 @@ func train_epoch(training_config config, training_state state) float {
     int batch_size = 4
     int batch_idx = 0
     while batch_idx < batch_size {
-        println("  Batch " + int_to_string(batch_idx + 1) + "/" + int_to_string(batch_size))
+        println("  batch_2 " + int_to_string(batch_idx + 1) + "/" + int_to_string(batch_size))
         float batch_loss = 0.0046
         epoch_loss = epoch_loss + batch_loss
         state.total_steps = state.total_steps + 1
@@ -220,7 +220,7 @@ func main() {
     training_config config = load_model_config(model_path)
     println("\nModel Configuration:")
     println("  Path: " + config.model_path)
-    println("  Batch size: " + int_to_string(config.batch_size))
+    println("  batch_2 size: " + int_to_string(config.batch_size))
     println("  Epochs: " + int_to_string(config.num_epochs))
     println("  LoRA rank: " + int_to_string(config.lora_rank))
     println("  Learning rate: " + float_to_string(config.learning_rate))

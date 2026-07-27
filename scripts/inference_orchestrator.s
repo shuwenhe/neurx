@@ -29,7 +29,7 @@ struct inference_config {
 }
 
 struct inference_orchestrator {
-    logger  Logger
+    logger  logger_2
     config  inference_config
     sCompiler string
     neurxRoot string
@@ -232,15 +232,15 @@ func (i *inference_orchestrator) is_server_ready() bool {
 
 func (i *inference_orchestrator) log_config() {
     config := fmt.Sprintf(`Inference Configuration
-Model: %s
+model: %s
 Backend: %s
-Batch Size: %d
+batch_2 Size: %d
 Max Tokens: %d
 Temperature: %.2f
 Top-K: %d
 Top-P: %.2f
 Repetition Penalty: %.2f
-KV Cache: %v
+KV cache: %v
 Speculative Decoding: %v
 Server Port: %d
 Log Directory: %s

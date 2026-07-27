@@ -106,16 +106,16 @@ func find_files(dir string, pattern string) ([]string, error) {
     return results, err
 }
 
-struct exec_commandResult {
-    Command string
+struct exec_command_result {
+    command string
     Stdout  string
     Stderr  string
     ExitCode int
     error   error
 }
 
-func exec_command(cmd string, args ...string) exec_commandResult {
-    command := exec.Command(cmd, args...)
+func exec_command(cmd string, args ...string) exec_command_result {
+    command := exec.command(cmd, args...)
     var stdout strings.Builder
     var stderr strings.Builder
     command.Stdout = &stdout
@@ -129,8 +129,8 @@ func exec_command(cmd string, args ...string) exec_commandResult {
             exitCode = 1
         }
     }
-    return exec_commandResult{
-        Command:  cmd,
+    return exec_command_result{
+        command:  cmd,
         Stdout:   stdout.String(),
         Stderr:   stderr.String(),
         ExitCode: exitCode,
@@ -138,8 +138,8 @@ func exec_command(cmd string, args ...string) exec_commandResult {
     }
 }
 
-func exec_in_dir(dir string, cmd string, args ...string) exec_commandResult {
-    command := exec.Command(cmd, args...)
+func exec_in_dir(dir string, cmd string, args ...string) exec_command_result {
+    command := exec.command(cmd, args...)
     command.Dir = dir
     var stdout strings.Builder
     var stderr strings.Builder
@@ -154,8 +154,8 @@ func exec_in_dir(dir string, cmd string, args ...string) exec_commandResult {
             exitCode = 1
         }
     }
-    return exec_commandResult{
-        Command:  cmd,
+    return exec_command_result{
+        command:  cmd,
         Stdout:   stdout.String(),
         Stderr:   stderr.String(),
         ExitCode: exitCode,
@@ -163,8 +163,8 @@ func exec_in_dir(dir string, cmd string, args ...string) exec_commandResult {
     }
 }
 
-func shell(command string) exec_commandResult {
-    cmd := exec.Command("bash", "-c", command)
+func shell(command string) exec_command_result {
+    cmd := exec.command("bash", "-c", command)
     var stdout strings.Builder
     var stderr strings.Builder
     cmd.Stdout = &stdout
@@ -178,8 +178,8 @@ func shell(command string) exec_commandResult {
             exitCode = 1
         }
     }
-    return exec_commandResult{
-        Command:  command,
+    return exec_command_result{
+        command:  command,
         Stdout:   stdout.String(),
         Stderr:   stderr.String(),
         ExitCode: exitCode,
@@ -232,16 +232,16 @@ func dir_path(path string) string {
     return filepath.Dir(path)
 }
 
-struct Logger {
+struct logger_2 {
     prefix    string
     timestamp bool
 }
 
-func new_logger(prefix string) Logger {
-    return Logger{prefix: prefix, timestamp: true}
+func new_logger(prefix string) logger_2 {
+    return logger_2{prefix: prefix, timestamp: true}
 }
 
-func (l Logger) log(msg string, args ...interface{}) {
+func (l logger_2) log(msg string, args ...interface{}) {
     output := fmt.Sprintf("[INFO] %s: %s\n", l.prefix, fmt.Sprintf(msg, args...))
     if l.timestamp {
         output = fmt.Sprintf("[%s] %s", time.Now().Format("15:04:05"), output)
@@ -249,7 +249,7 @@ func (l Logger) log(msg string, args ...interface{}) {
     fmt.Print(output)
 }
 
-func (l Logger) error(msg string, args ...interface{}) {
+func (l logger_2) error(msg string, args ...interface{}) {
     output := fmt.Sprintf("[ERROR] %s: %s\n", l.prefix, fmt.Sprintf(msg, args...))
     if l.timestamp {
         output = fmt.Sprintf("[%s] %s", time.Now().Format("15:04:05"), output)
@@ -257,7 +257,7 @@ func (l Logger) error(msg string, args ...interface{}) {
     fmt.Fprint(os.Stderr, output)
 }
 
-func (l Logger) warn(msg string, args ...interface{}) {
+func (l logger_2) warn(msg string, args ...interface{}) {
     output := fmt.Sprintf("[WARN] %s: %s\n", l.prefix, fmt.Sprintf(msg, args...))
     if l.timestamp {
         output = fmt.Sprintf("[%s] %s", time.Now().Format("15:04:05"), output)
@@ -265,7 +265,7 @@ func (l Logger) warn(msg string, args ...interface{}) {
     fmt.Print(output)
 }
 
-func (l Logger) success(msg string, args ...interface{}) {
+func (l logger_2) success(msg string, args ...interface{}) {
     output := fmt.Sprintf("[✓] %s: %s\n", l.prefix, fmt.Sprintf(msg, args...))
     if l.timestamp {
         output = fmt.Sprintf("[%s] %s", time.Now().Format("15:04:05"), output)

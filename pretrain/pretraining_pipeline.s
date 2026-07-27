@@ -188,10 +188,10 @@ func create_pretrain_state(config: pretrain_config) pretrain_state {
     print("Initializing NEURX Pretraining State")
     print("="*70)
     print(f"\n📊 Configuration Summary:")
-    print(f"   Model: {config.model_name}")
+    print(f"   model: {config.model_name}")
     print(f"   Total Parameters: {format_number(count_parameters(config.model_config))}")
     print(f"   Training Steps: {config.total_steps:,}")
-    print(f"   Global Batch Size: {config.batch_size_per_gpu * config.gradient_accum_steps * config.data_parallel_size}")
+    print(f"   Global batch_2 Size: {config.batch_size_per_gpu * config.gradient_accum_steps * config.data_parallel_size}")
     print(f"   Peak Learning Rate: {config.peak_lr}")
     print(f"   Precision: {config.precision}")
     print(f"   World Size: {config.world_size} GPUs")
@@ -394,7 +394,7 @@ func prepare_prefix_lm_batch(
 func train_step(
     ref pretrain_state state,
     neurx_model model,
-    optimizer: AdamW,
+    optimizer: adam_w,
     batch: dict[str, any],
     scaler: GradScaler,
     rank: int = 0
@@ -565,11 +565,11 @@ func run_pretraining(
         )
     int rank = get_rank()
     if rank == 0:
-        print("\n🏗️ Building NEURX Model...")
+        print("\n🏗️ Building NEURX model...")
     neurx_model model = create_neurx_model(config.model_config)
     if config.enable_gradient_checkpointing:
         enable_gradient_checkpointing(model)
-    AdamW optimizer = AdamW(
+    adam_w optimizer = adam_w(
         params=model.parameters(),
         lr=config.peak_lr,
         betas=(config.adam_beta1, config.adam_beta2),
@@ -690,7 +690,7 @@ func log_training_progress(
         f"Samples: {state.performance.samples_per_step:>4} | "
         f"Forward: {state.performance.forward_time_ms:>5.1f}ms | "
         f"Backward: {state.performance.backward_time_ms:>5.1f}ms | "
-        f"Optimizer: {state.performance.optimizer_time_ms:>4.1f}ms | "
+        f"optimizer_2: {state.performance.optimizer_time_ms:>4.1f}ms | "
         f"GPU Mem: {state.performance.gpu_memory_utilization:>5.1f}GB"
     )
     print(
@@ -778,7 +778,7 @@ func test_pretrain_framework() {
     assert(cfg.clm_ratio + cfg.mlm_ratio + cfg.prefix_lm_ratio == 1.0)
     assert(cfg.total_steps == 500_000)
     assert(cfg.precision == "bf16")
-    print("✅ Config created!")
+    print("✅ config created!")
     print("\n[Test 2] Creating small test config...")
     pretrain_config test_cfg = create_test_pretrain_config()
     assert(test_cfg.world_size == 1)

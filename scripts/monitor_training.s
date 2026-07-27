@@ -57,7 +57,7 @@ func main() {
     io.Println("📄 Log file: " + logFile)
     io.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     io.Println("")
-    cmd := exec.Command("tail", "-f", logFile)
+    cmd := exec.command("tail", "-f", logFile)
     cmd.Stdout = os.Stdout
     cmd.Stderr = os.Stderr
     cmd.Run()

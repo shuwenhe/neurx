@@ -11,12 +11,12 @@
 
 namespace neurx::cann {
 
-struct PrefixCacheConfig {
+struct prefix_cache_config {
   std::size_t max_entries = 256;
   std::size_t max_retained_blocks = 128;
 };
 
-struct PrefixCacheStats {
+struct prefix_cache_stats {
   std::size_t entries = 0;
   std::size_t retained_blocks = 0;
   uint64_t lookups = 0;
@@ -24,39 +24,39 @@ struct PrefixCacheStats {
   uint64_t evictions = 0;
 };
 
-struct PrefixCacheHit {
+struct prefix_cache_hit {
   bool matched = false;
   std::size_t token_count = 0;
 };
 
 class PrefixCache {
  public:
-  PrefixCache(PagedKvCache* cache, PrefixCacheConfig config = {});
+  PrefixCache(PagedKvCache* cache, prefix_cache_config config = {});
   ~PrefixCache();
   PrefixCache(const PrefixCache&) = delete;
   PrefixCache& operator=(const PrefixCache&) = delete;
 
-  Status insert(const std::string& request_id,
+  status insert(const std::string& request_id,
                 const std::vector<int32_t>& tokens);
-  Status attach_longest(const std::string& request_id,
+  status attach_longest(const std::string& request_id,
                         const std::vector<int32_t>& tokens,
                         std::size_t maximum_prefix_tokens,
-                        PrefixCacheHit* hit);
+                        prefix_cache_hit* hit);
   void ensure_free_blocks(std::size_t required_free_blocks);
   void clear();
-  PrefixCacheStats stats() const;
+  prefix_cache_stats stats() const;
 
  private:
-  struct Entry {
+  struct entry {
     std::vector<int32_t> tokens;
     std::vector<uint32_t> blocks;
   };
 
-  using Entries = std::list<Entry>;
+  using Entries = std::list<entry>;
   void evict_lru_locked();
 
   PagedKvCache* cache_ = nullptr;
-  PrefixCacheConfig config_;
+  prefix_cache_config config_;
   mutable std::mutex mutex_;
   Entries entries_;
   std::size_t retained_blocks_ = 0;

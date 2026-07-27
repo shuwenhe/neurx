@@ -131,7 +131,7 @@ func get_knowledge_base_size() int {
 func extract_keywords(string question) {
     string q_lower = str_to_lower(question)
     if str_contains(q_lower, "transformer") || str_contains(q_lower, "English text") {
-        println("🔑 keywords: Transformer")
+        println("🔑 keywords: transformer_2")
     }
     if str_contains(q_lower, "English text") || str_contains(q_lower, "ai") {
         println("🔑 keywords: AI")
@@ -186,11 +186,11 @@ func find_relevant_documents(string question, int topK) {
 }
 
 func generate_introduction_response() string {
-    "🤖 NeurX English textinferencesystemEnglish text!\nEnglish text Transformer English text, AllowedEnglish text: \n• English text\n• NeurX frameworkEnglish text\n• optimizeEnglish textmodeltraining\n• Transformer English text\nEnglish text.\n\n💡 English textmainEnglish text!"
+    "🤖 NeurX English textinferencesystemEnglish text!\nEnglish text transformer_2 English text, AllowedEnglish text: \n• English text\n• NeurX frameworkEnglish text\n• optimizeEnglish textmodeltraining\n• transformer_2 English text\nEnglish text.\n\n💡 English textmainEnglish text!"
 }
 
 func generate_features_response() string {
-    "✨ NeurX frameworkEnglish textmainEnglish text: \n1. English text Transformer implementation\n2. supportEnglish texttraining\n3. English textconfigurationsystem\n4. completeEnglish textmonitoringEnglish textlog\n5. optimizeEnglish textinferenceEnglish text\n6. supportEnglish textoptimizeEnglish text\n7. English textcheckpointmanagement"
+    "✨ NeurX frameworkEnglish textmainEnglish text: \n1. English text transformer_2 implementation\n2. supportEnglish texttraining\n3. English textconfigurationsystem\n4. completeEnglish textmonitoringEnglish textlog\n5. optimizeEnglish textinferenceEnglish text\n6. supportEnglish textoptimizeEnglish text\n7. English textcheckpointmanagement"
 }
 
 func generate_usage_response() string {
@@ -198,7 +198,7 @@ func generate_usage_response() string {
 }
 
 func generate_generic_response(string question) string {
-    "🤔 English text '" + question + "' English text.\n\nEnglish textmainEnglish textcontent: \n• English text\n• Transformer English text\n• optimizeEnglish text (Adam, SGD, AdamW)\n• English texttrainingEnglish text\n• NeurX frameworkEnglish text\n\n💡 English text, English text!"
+    "🤔 English text '" + question + "' English text.\n\nEnglish textmainEnglish textcontent: \n• English text\n• transformer_2 English text\n• optimizeEnglish text (Adam, SGD, adam_w)\n• English texttrainingEnglish text\n• NeurX frameworkEnglish text\n\n💡 English text, English text!"
 }
 
 func resolve_real_inference_runner() string {
@@ -290,8 +290,8 @@ func show_help() {
     println("1. English text")
     println("   English text: English text?")
     println("")
-    println("2. Transformer English text")
-    println("   English text: Transformer English text?")
+    println("2. transformer_2 English text")
+    println("   English text: transformer_2 English text?")
     println("")
     println("3. optimizeEnglish text")
     println("   English text: Adam optimizeEnglish text?")
@@ -323,7 +323,7 @@ func run_interactive_mode() {
         print_text("[English text " + int_to_string(turn) + "] English text: ")
         string user_input = ""
         if turn == 1 {
-            user_input = "English text Transformer?"
+            user_input = "English text transformer_2?"
             println(user_input)
         }
         if turn == 2 {

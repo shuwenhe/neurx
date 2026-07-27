@@ -401,7 +401,7 @@ func sqrt_f(float x) float {
 }
 
 func main() {
-    println("=== Industrial GPT Transformer ===")
+    println("=== Industrial GPT transformer_2 ===")
     gptconfig config
     config.hidden_size = 4096
     config.num_layers = 32
@@ -413,7 +413,7 @@ func main() {
     config.dropout_rate = 0.1
     config.use_flash_attention = true
     gptmodel model = init_language_model(config)
-    println("Model parameters: " + int_to_string(model.total_params / 1000000) + "M")
+    println("model parameters: " + int_to_string(model.total_params / 1000000) + "M")
     println("GPT-7B initialized successfully")
     int* input_ids = alloc(int, 32)
     transformer_output output = gpt_forward(input_ids, 1, 32, model)

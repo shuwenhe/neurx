@@ -250,10 +250,10 @@ func (handler *long_context_handler) print_stats() {
         hit_rate := float64(handler.cache_stats.cache_hits) / float64(handler.cache_stats.total_requests) * 100
         fmt.Printf("\nCache Statistics:\n")
         fmt.Printf("  Total Requests: %d\n", handler.cache_stats.total_requests)
-        fmt.Printf("  Cache Hits: %d\n", handler.cache_stats.cache_hits)
-        fmt.Printf("  Cache Misses: %d\n", handler.cache_stats.cache_misses)
+        fmt.Printf("  cache Hits: %d\n", handler.cache_stats.cache_hits)
+        fmt.Printf("  cache Misses: %d\n", handler.cache_stats.cache_misses)
         fmt.Printf("  Hit Rate: %.1f%%\n", hit_rate)
-        fmt.Printf("  Avg Cache Time: %.2f ms\n", handler.cache_stats.avg_cache_time)
+        fmt.Printf("  Avg cache Time: %.2f ms\n", handler.cache_stats.avg_cache_time)
     }
     fmt.Printf("\nSupported Lengths:\n")
     fmt.Printf("  Short (4K): Standard inference\n")
@@ -283,7 +283,7 @@ func (handler *long_context_handler) demonstrate() {
     fmt.Println("  ✓ Rotary Position embedding (RoPE)")
     fmt.Println("  ✓ Sliding Window Attention")
     fmt.Println("  ✓ Chunked Processing with Overlap")
-    fmt.Println("  ✓ Memory-Efficient KV Cache")
+    fmt.Println("  ✓ Memory-Efficient KV cache")
     fmt.Println("  ✓ Context Window Expansion")
     fmt.Printf("\nCapabilities:\n")
     fmt.Printf("  Base: %d tokens\n", handler.config.max_seq_length)

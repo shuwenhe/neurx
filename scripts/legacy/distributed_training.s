@@ -285,7 +285,7 @@ func main() {
     println("✅ Distributed Training Initialized")
     stats := process.get_stats()
     stats_json, _ := json.Marshal(stats)
-    println("\n📊 Distributed Config:")
+    println("\n📊 Distributed config:")
     println(string(stats_json))
     partitioner := &data_partitioner{
         world_size: process.config.world_size,

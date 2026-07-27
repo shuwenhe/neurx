@@ -3,7 +3,7 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use std.io.println
 func main() int {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-    println("NeurX Model IR Train Status (S Lang)")
+    println("NeurX model IR Train status (S Lang)")
     println("")
     println("Project root: " + project_root)
     println("")

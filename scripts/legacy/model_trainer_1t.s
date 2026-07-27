@@ -197,7 +197,7 @@ func (p *training_pipeline1_t) print_summary() {
     fmt.Println("🚀 NEURX 1T PARAMETER MODEL - TRAINING CONFIGURATION")
     fmt.Println("="*80)
     fmt.Println("\n📊 MODEL ARCHITECTURE:")
-    fmt.Printf("  Model Name: %s\n", p.config.model_name)
+    fmt.Printf("  model Name: %s\n", p.config.model_name)
     fmt.Printf("  Parameters: %.2f T (%.2e)\n",
               float(p.config.num_params)/1e12, float(p.config.num_params))
     fmt.Printf("  Hidden Dimension: %d\n", p.config.hidden_dim)
@@ -208,21 +208,21 @@ func (p *training_pipeline1_t) print_summary() {
     fmt.Printf("  Max Sequence Length: %d\n", p.config.max_seq_len)
     fmt.Println("\n🔀 DISTRIBUTED TRAINING:")
     fmt.Printf("  Total GPUs: %d (H100 cluster)\n", p.dist_config.total_gpus)
-    fmt.Printf("  Tensor Parallelism: %d\n", p.dist_config.tensor_parallel_size)
+    fmt.Printf("  tensor_2 Parallelism: %d\n", p.dist_config.tensor_parallel_size)
     fmt.Printf("  Pipeline Parallelism: %d stages\n", p.dist_config.pipeline_parallel_stages)
     fmt.Printf("  Data Parallelism: %d\n", p.dist_config.data_parallel_size)
     fmt.Printf("  Sequence Parallelism: %v\n", p.dist_config.sequence_parallel)
     fmt.Printf("  ZeRO Stage: %d\n", p.dist_config.zero_stage)
     fmt.Println("\n💾 MEMORY REQUIREMENTS:")
-    fmt.Printf("  Model Weights: %.2f TB\n", p.memory_analysis.model_weights_tb)
+    fmt.Printf("  model Weights: %.2f TB\n", p.memory_analysis.model_weights_tb)
     fmt.Printf("  Gradients: %.2f TB\n", p.memory_analysis.gradients_tb)
-    fmt.Printf("  Optimizer States: %.2f TB\n", p.memory_analysis.optimizer_states_tb)
+    fmt.Printf("  optimizer_2 States: %.2f TB\n", p.memory_analysis.optimizer_states_tb)
     fmt.Printf("  Activation Memory: %.4f TB\n", p.memory_analysis.activation_memory_tb)
     fmt.Printf("  Per GPU Memory: %.1f GB\n", p.memory_analysis.total_per_gpu_gb)
     fmt.Printf("  Total System Memory: %.2f TB\n", p.memory_analysis.total_system_tb)
     fmt.Println("\n⚙️  TRAINING HYPERPARAMETERS:")
-    fmt.Printf("  Global Batch Size: %d\n", p.train_config.batch_size_global)
-    fmt.Printf("  Micro Batch Size: %d\n", p.train_config.micro_batch_size)
+    fmt.Printf("  Global batch_2 Size: %d\n", p.train_config.batch_size_global)
+    fmt.Printf("  Micro batch_2 Size: %d\n", p.train_config.micro_batch_size)
     fmt.Printf("  Gradient Accumulation Steps: %d\n", p.train_config.gradient_accumulation_steps)
     fmt.Printf("  Learning Rate: %.2e\n", p.train_config.learning_rate)
     fmt.Printf("  Warmup Steps: %d\n", p.train_config.warmup_steps)
@@ -248,10 +248,10 @@ func (p *training_pipeline1_t) print_summary() {
 func (p *training_pipeline1_t) initialize_distributed_environment() {
     fmt.Println("\n[INIT] Initializing distributed training environment...")
     fmt.Printf("  Setting up %d GPU processes\n", p.dist_config.total_gpus)
-    fmt.Printf("  Tensor Parallelism: %d\n", p.dist_config.tensor_parallel_size)
+    fmt.Printf("  tensor_2 Parallelism: %d\n", p.dist_config.tensor_parallel_size)
     fmt.Printf("  Pipeline Parallelism: %d\n", p.dist_config.pipeline_parallel_stages)
     fmt.Printf("  Data Parallelism: %d\n", p.dist_config.data_parallel_size)
-    fmt.Println("  Status: ✓ Distributed environment ready")
+    fmt.Println("  status: ✓ Distributed environment ready")
 }
 
 func (p *training_pipeline1_t) initialize_model() {
@@ -259,31 +259,31 @@ func (p *training_pipeline1_t) initialize_model() {
     fmt.Printf("  Parameters: %.2fT\n", float(p.config.num_params)/1e12)
     fmt.Printf("  Architecture: %d layers x %d hidden dims x %d heads\n",
               p.config.num_layers, p.config.hidden_dim, p.config.num_heads)
-    fmt.Println("  Status: ✓ Model initialized with tensor parallelism")
+    fmt.Println("  status: ✓ model initialized with tensor parallelism")
 }
 
 func (p *training_pipeline1_t) setup_optimization() {
     fmt.Println("\n[OPTIM] Setting up optimizer and scheduler...")
-    fmt.Printf("  Optimizer: AdamW with weight decay %.2e\n", 0.01)
+    fmt.Printf("  optimizer_2: adam_w with weight decay %.2e\n", 0.01)
     fmt.Printf("  Learning Rate: %.2e (peak)\n", p.train_config.learning_rate)
     fmt.Printf("  Warmup Steps: %d\n", p.train_config.warmup_steps)
     fmt.Printf("  LR Scheduler: Cosine annealing\n")
-    fmt.Println("  Status: ✓ Optimizer and scheduler ready")
+    fmt.Println("  status: ✓ optimizer_2 and scheduler ready")
 }
 
 func (p *training_pipeline1_t) run_training() {
     fmt.Println("\n[TRAIN] Starting 1T model training...")
     fmt.Printf("  Total Steps: %d\n", p.train_config.total_steps)
-    fmt.Printf("  Global Batch Size: %d tokens per step\n",
+    fmt.Printf("  Global batch_2 Size: %d tokens per step\n",
               p.train_config.batch_size_global * p.config.max_seq_len)
     fmt.Printf("  Checkpointing: Every %d steps\n", p.train_config.save_checkpoint_steps)
     fmt.Printf("  Expected Duration: %d days\n", 4)
-    fmt.Println("  Status: ✓ Training initiated (requires 1024 GPUs)")
+    fmt.Println("  status: ✓ Training initiated (requires 1024 GPUs)")
 }
 
 func main() {
-    fmt.Println("🎯 NeurX 1T Model Training Framework")
-    fmt.Println("Industrial-Grade Large Language Model")
+    fmt.Println("🎯 NeurX 1T model Training Framework")
+    fmt.Println("Industrial-Grade Large Language model")
     pipeline := create_training_pipeline_1t()
     pipeline.print_summary()
     pipeline.initialize_distributed_environment()
@@ -291,6 +291,6 @@ func main() {
     pipeline.setup_optimization()
     pipeline.run_training()
     fmt.Println("\n💾 Configuration saved for deployment")
-    fmt.Println("Command: s run scripts/legacy/model_trainer_1t.s")
+    fmt.Println("command: s run scripts/legacy/model_trainer_1t.s")
     fmt.Println("\n✅ Ready for 1T model training on H100 cluster")
 }

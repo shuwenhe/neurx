@@ -105,7 +105,7 @@ func main() {
         launcher.log("="*50)
         launcher.log("Distributed Pretraining Completed!")
         launcher.log("  - Total steps: " + itoa(global_step))
-        launcher.log("  - Optimizer steps: " + itoa(optimizer_step))
+        launcher.log("  - optimizer_2 steps: " + itoa(optimizer_step))
         launcher.log("  - Total epochs: " + itoa(config.num_epochs))
         launcher.log("="*50)
     }

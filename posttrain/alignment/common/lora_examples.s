@@ -208,7 +208,7 @@ func example_5_distributed_lora() {
     println("Distributed Training Configuration:")
     println("  - World size: " + int_to_str(world_size) + " GPUs")
     println("  - Global batch size: " + int_to_str(cfg.batch_size * world_size))
-    println("  - Model layers: " + int_to_str(cfg.num_layers))
+    println("  - model layers: " + int_to_str(cfg.num_layers))
     println("  - LoRA rank: " + int_to_str(cfg.rank))
     lora_state state = create_lora_state(cfg)
     lora_stats stats = lora_compute_stats(state)
@@ -248,7 +248,7 @@ func example_6_qlora_quantization() {
         use_qlora: true,
         qlora_dtype: "nf4",
     }
-    println("QLoRA Configuration for 7B Model:")
+    println("QLoRA Configuration for 7B model:")
     println("  - Base weight quantization: NF4 (Normal Float 4-bit)")
     println("  - LoRA rank: " + int_to_str(cfg.rank))
     println("  - LoRA alpha: " + fmt_float(cfg.alpha, 1))

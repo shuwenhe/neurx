@@ -171,7 +171,7 @@ func example_dpo_vs_rlhf_comparison() {
     print("┌─────────────────────────────────────────────────────────┐")
     print("│ Aspect              │ DPO        │ RLHF                  │")
     print("├─────────────────────────────────────────────────────────┤")
-    print("│ Reward Model        │ No         │ Yes (required)        │")
+    print("│ Reward model        │ No         │ Yes (required)        │")
     print("│ Training Stability  │ High       │ Medium                │")
     print("│ Speed               │ Fast       │ Slow                  │")
     print("│ KL Divergence       │ Implicit   │ Explicit              │")

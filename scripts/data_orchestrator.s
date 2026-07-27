@@ -29,7 +29,7 @@ struct data_config {
 }
 
 struct data_orchestrator {
-    logger   Logger
+    logger   logger_2
     config   data_config
     neurxRoot string
 }

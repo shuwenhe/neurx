@@ -2,7 +2,7 @@ package main
 func main() int {
     println("")
     println("==================================================")
-    println("  NeurX Data Processing Status")
+    println("  NeurX Data Processing status")
     println("==================================================")
     println("")
     println("Data pipeline: All shards ready for training")

@@ -611,7 +611,7 @@ func gpt_large_training_run(gpt_large_state state, gpt_large_training_config cfg
 }
 
 func gpt_large_training_summary(gpt_large_state state, gpt_large_training_config cfg) string {
-    string out = "Model: " + gpt_large_summary(state) + "\n"
+    string out = "model: " + gpt_large_summary(state) + "\n"
     out = out + "Steps: " + int_to_str(state.training_steps, 0) + "\n"
     out = out + "Tokens: " + int_to_str(state.seen_tokens, 0) + "\n"
     out = out + "Train Loss: " + fmt_float(state.train_loss, 6) + "\n"
@@ -667,10 +667,10 @@ func main() int {
         state = gpt_large_load_checkpoint_if_available(state, cfg)
     }
     println("=======================================================================")
-    println("NeurX Transformer LLM Training")
+    println("NeurX transformer_2 LLM Training")
     println("=======================================================================")
-    println("Model: " + gpt_large_summary(state))
-    println("Batch Size: " + int_to_str(cfg.batch_size, 0))
+    println("model: " + gpt_large_summary(state))
+    println("batch_2 Size: " + int_to_str(cfg.batch_size, 0))
     println("Seq Len: " + int_to_str(cfg.seq_len, 0))
     println("Steps: " + int_to_str(cfg.max_steps, 0))
     println("Warmup: " + int_to_str(cfg.warmup_steps, 0))

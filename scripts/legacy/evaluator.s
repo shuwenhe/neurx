@@ -143,10 +143,10 @@ func (e *evaluator) generate_report(): string {
     report += "├─ Best: " + format_float(best_val_ppl) + "\n"
     report += "└─ Final: " + format_float(e.history[len(e.history)-1].val_perplexity) + "\n\n"
     conv := e.convergence_info()
-    report += "Convergence Status:\n"
+    report += "Convergence status:\n"
     report += "├─ Total Steps: " + format_int(conv["total_steps"].(int)) + "\n"
     report += "├─ Improvement: " + format_float(conv["improvement_percent"].(float)) + "%\n"
-    report += "└─ Status: "
+    report += "└─ status: "
     if conv["is_converged"].(bool) {
         report += "✓ Converged\n"
     } else {

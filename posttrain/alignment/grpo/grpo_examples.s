@@ -159,7 +159,7 @@ func example_alignment_methods_comparison() {
     print("┌──────────────────────────────────────────────────────────┐")
     print("│ Aspect           │ DPO    │ GRPO    │ PPO                │")
     print("├──────────────────────────────────────────────────────────┤")
-    print("│ Reward Model     │ No     │ Rules   │ Yes (required)     │")
+    print("│ Reward model     │ No     │ Rules   │ Yes (required)     │")
     print("│ Value Network    │ No     │ No      │ Yes                │")
     print("│ Group Relative   │ No     │ Yes     │ No                 │")
     print("│ Training Time    │ Fast   │ Medium  │ Slow               │")

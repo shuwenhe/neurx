@@ -112,7 +112,7 @@ func estimate_memory(config: large_model_config, batch_size: int): memory_estima
 
 func print_config(config: large_model_config, memory: memory_estimate) {
     fmt.Printf("\n")
-    fmt.Printf("Model: %s\n", config.model_name)
+    fmt.Printf("model: %s\n", config.model_name)
     fmt.Printf("Parameters: %.2f Billion\n", float(config.num_params) / 1e9)
     fmt.Printf("Hidden Dimension: %d\n", config.hidden_dim)
     fmt.Printf("Layers: %d\n", config.num_layers)
@@ -129,9 +129,9 @@ func print_config(config: large_model_config, memory: memory_estimate) {
     fmt.Printf("  ZeRO Stage: %d\n", config.zero_stage)
     fmt.Printf("\n")
     fmt.Printf("Memory Requirements (per GPU with batch_size=8):\n")
-    fmt.Printf("  Model Weights: %.2f GB\n", memory.model_weights_gb)
+    fmt.Printf("  model Weights: %.2f GB\n", memory.model_weights_gb)
     fmt.Printf("  Gradients: %.2f GB\n", memory.gradients_gb)
-    fmt.Printf("  Optimizer States: %.2f GB\n", memory.optimizer_states_gb)
+    fmt.Printf("  optimizer_2 States: %.2f GB\n", memory.optimizer_states_gb)
     fmt.Printf("  Activations: %.2f GB\n", memory.activation_gb)
     fmt.Printf("  Total (with 20 percent margin): %.2f GB\n", memory.total_gb)
     fmt.Printf("\n")
@@ -171,19 +171,19 @@ func main() {
     memory := estimate_memory(config, 8)
     if is_master {
         fmt.Printf("\n")
-        fmt.Printf("7B Model Trainer Initialization\n")
+        fmt.Printf("7B model Trainer Initialization\n")
         fmt.Printf("==============================\n")
         print_config(config, memory)
         if memory.total_gb > 80.0 {
             fmt.Printf("Warning: Memory exceeds H100 capacity\n")
         } else {
-            fmt.Printf("Status: Memory fits in H100 (80 GB)\n")
+            fmt.Printf("status: Memory fits in H100 (80 GB)\n")
         }
         fmt.Printf("\nDistributed Setup:\n")
         fmt.Printf("  World Size: %d GPUs\n", world_size)
         fmt.Printf("  Current Rank: %d\n", rank)
-        fmt.Printf("  Global Batch Size: %d\n", 8 * world_size)
-        fmt.Printf("  Effective Batch (with accumulation): %d\n", 8 * config.gradient_accumulation_steps * world_size)
+        fmt.Printf("  Global batch_2 Size: %d\n", 8 * world_size)
+        fmt.Printf("  Effective batch_2 (with accumulation): %d\n", 8 * config.gradient_accumulation_steps * world_size)
         fmt.Printf("\n")
         fmt.Printf("Ready for 7B model training!\n")
         fmt.Printf("\n")

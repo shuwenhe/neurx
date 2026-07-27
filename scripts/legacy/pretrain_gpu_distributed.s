@@ -53,7 +53,7 @@ func main() {
         println("  - Master addr: " + master_addr + ":" + int_to_str(master_port))
     }
     println("  === Paths ===")
-    println("  - Config: " + config_path)
+    println("  - config: " + config_path)
     println("  - Output: " + output_dir)
     println("  - Shard list: " + shard_list_file)
     println("  === Training ===")
@@ -61,7 +61,7 @@ func main() {
     println("  - Log interval: " + int_to_str(log_interval))
     println("  - Save interval: " + int_to_str(save_interval))
     if !runtime_file_exists(config_path) {
-        println("[ERROR] Config not found: " + config_path)
+        println("[ERROR] config not found: " + config_path)
         return
     }
     if !runtime_file_exists(shard_list_file) {
@@ -111,7 +111,7 @@ func main() {
         write_progress(progress_file, "ddp-init rank=" + int_to_str(rank) + " world=" + int_to_str(world_size) + " gpus=" + int_to_str(available_gpus) + " shards=" + int_to_str(shard_count) + " distributed=" + (if is_distributed { "yes" } else { "no" }))
         println("[PRETRAIN-GPU-DDP] Phase 4: Ready to Train")
         println("[PRETRAIN-GPU-DDP] ✓ All " + int_to_str(world_size) + " GPUs ready for training")
-        println("[PRETRAIN-GPU-DDP] ✓ Config: " + config_path)
+        println("[PRETRAIN-GPU-DDP] ✓ config: " + config_path)
         println("[PRETRAIN-GPU-DDP] Starting training with DDP...")
     }
 }

@@ -15,23 +15,23 @@ void AscendAdapter::bind_launchers(KernelLauncher prefill,
   decode_ = std::move(decode);
 }
 
-AdapterStatus AscendAdapter::initialize(int device_id) {
+adapter_status AscendAdapter::initialize(int device_id) {
   const auto status = session_.initialize(device_id);
-  return status.ok ? AdapterStatus::success() : AdapterStatus::failure(status.message);
+  return status.ok ? adapter_status::success() : adapter_status::failure(status.message);
 }
 
-AdapterStatus AscendAdapter::execute(const DeviceBatch& batch) {
-  if (!session_.ready()) return AdapterStatus::failure("Ascend adapter is not initialized");
-  DeviceBatch launch = batch;
+adapter_status AscendAdapter::execute(const device_batch& batch) {
+  if (!session_.ready()) return adapter_status::failure("Ascend adapter is not initialized");
+  device_batch launch = batch;
   if (!launch.stream) launch.stream = session_.stream();
   KernelLauncher launcher = launch.schedule.phase == Phase::prefill ? prefill_ : decode_;
-  if (!launcher) return AdapterStatus::failure("CANN operator launcher is not bound");
+  if (!launcher) return adapter_status::failure("CANN operator launcher is not bound");
   return launcher(launch);
 }
 
-AdapterStatus AscendAdapter::synchronize() {
+adapter_status AscendAdapter::synchronize() {
   const auto status = session_.synchronize();
-  return status.ok ? AdapterStatus::success() : AdapterStatus::failure(status.message);
+  return status.ok ? adapter_status::success() : adapter_status::failure(status.message);
 }
 
 }

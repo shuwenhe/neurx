@@ -132,7 +132,7 @@ func (manager *checkpoint_manager) load_checkpoint(checkpoint_id string) checkpo
     fmt.Printf("  Step: %d\n", checkpoint.metadata.step)
     fmt.Printf("  Epoch: %d\n", checkpoint.metadata.epoch)
     fmt.Printf("  Train Loss: %.6f\n", checkpoint.metadata.training_loss)
-    fmt.Printf("  Model Size: %dMB\n", checkpoint.metadata.model_size_mb)
+    fmt.Printf("  model Size: %dMB\n", checkpoint.metadata.model_size_mb)
     fmt.Printf("  State Size: %dMB\n", checkpoint.metadata.state_size_mb)
     fmt.Printf("  ✓ checkpoint loaded\n")
     return checkpoint
@@ -153,13 +153,13 @@ func (manager *checkpoint_manager) restore_training_state(checkpoint checkpoint)
 func (manager *checkpoint_manager) restore_optimizer_state(checkpoint checkpoint) optimizer_state {
     fmt.Println("\n[Recovery] Restoring optimizer state...")
     opt_state := checkpoint.optimizer_state
-    fmt.Printf("  Optimizer: %s\n", opt_state.optimizer_type)
+    fmt.Printf("  optimizer_2: %s\n", opt_state.optimizer_type)
     fmt.Printf("  Learning Rate: %.2e\n", opt_state.learning_rate)
     fmt.Printf("  Beta1: %.4f\n", opt_state.beta1)
     fmt.Printf("  Beta2: %.4f\n", opt_state.beta2)
     fmt.Printf("  Momentum Entries: %d\n", len(opt_state.momentum))
     fmt.Printf("  Velocity Entries: %d\n", len(opt_state.velocity))
-    fmt.Printf("  ✓ Optimizer state restored\n")
+    fmt.Printf("  ✓ optimizer_2 state restored\n")
     return opt_state
 }
 

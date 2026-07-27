@@ -151,7 +151,7 @@ func evaluate_mmlu_benchmark(
     println("========================================")
     println("MMLU 5-Shot Benchmark Evaluation")
     println("========================================")
-    println("Model: " + cfg.model_type)
+    println("model: " + cfg.model_type)
     println("Shots: " + int_to_str(cfg.num_shots))
     println("Seq length: " + int_to_str(cfg.max_seq_len))
     println("")

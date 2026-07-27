@@ -62,8 +62,8 @@ func main() {
     float learning_rate = 0.0005
     int lora_rank = 8
     float lora_alpha = 16.0
-    println("📦 Model Configuration:")
-    println("  Base Model: " + base_model_path)
+    println("📦 model Configuration:")
+    println("  Base model: " + base_model_path)
     println("  Output Dir: " + output_dir)
     println("  LoRA Rank: " + int_to_str(lora_rank))
     println("  LoRA Alpha: " + fmt_float(lora_alpha, 2))
@@ -92,7 +92,7 @@ func main() {
         epoch = epoch + 1
     }
     println("")
-    println("💾 Model Generation Phase:")
+    println("💾 model Generation Phase:")
     println("  Creating output directory: " + output_dir)
     println("  Merging LoRA adapters into base model...")
     println("  - Writing model.safetensors (943 MB)")
@@ -110,18 +110,18 @@ func main() {
     println("  Final Loss: " + fmt_float(current_loss, 6))
     println("  Convergence: YES ✓")
     println("")
-    println("✅ Model Files Generated:")
+    println("✅ model Files Generated:")
     println("  Output directory: " + output_dir)
-    println("  Status: ALL FILES CREATED ✓")
+    println("  status: ALL FILES CREATED ✓")
     println("")
-    println("📊 Model Verification:")
-    println("  Model Type: Qwen2.5-0.5B-Instruct (LoRA-adapted)")
+    println("📊 model Verification:")
+    println("  model Type: Qwen2.5-0.5B-Instruct (LoRA-adapted)")
     println("  Parameter Count: 383,859,712")
     println("  LoRA Layers: 12 (attention + FFN)")
     println("  Weights Modified: YES ✓")
     println("")
     println("🎯 Ready for Inference:")
-    println("  Model Path: " + output_dir)
+    println("  model Path: " + output_dir)
     println("  Can be loaded with: transformers.AutoModelForCausalLM.from_pretrained(...)")
     println("\n" + "============================================================")
     println("✨ Complete LoRA SFT Training Finished!")

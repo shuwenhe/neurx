@@ -62,7 +62,7 @@ type inference_stats struct {
 }
 
 func (engine *inference_engine) initialize_kv_cache() {
-    fmt.Println("[Inference] Initializing KV Cache...")
+    fmt.Println("[Inference] Initializing KV cache...")
     cache_size := engine.config.max_batch_size *
                  engine.config.max_seq_length *
                  engine.model.hidden_size
@@ -77,7 +77,7 @@ func (engine *inference_engine) initialize_kv_cache() {
         engine.kv_cache.value_cache[i] = make([]float64, engine.model.hidden_size)
     }
     cache_memory := float64(cache_size*16) / 1e9
-    fmt.Printf("  KV Cache size: %.2f GB\n", cache_memory)
+    fmt.Printf("  KV cache size: %.2f GB\n", cache_memory)
 }
 
 func (engine *inference_engine) update_kv_cache(layer_idx int, tokens []int, values []float64) {
@@ -165,7 +165,7 @@ func (engine *inference_engine) compute_attention_scores(q []float64, k []float6
 }
 
 func (engine *inference_engine) enable_tensor_parallelism(num_replicas int) {
-    fmt.Printf("[Inference] Enabling Tensor Parallelism (%d replicas)\n", num_replicas)
+    fmt.Printf("[Inference] Enabling tensor_2 Parallelism (%d replicas)\n", num_replicas)
     heads_per_replica := engine.model.hidden_size / num_replicas
     fmt.Printf("  Heads per replica: %d\n", heads_per_replica)
 }
@@ -284,9 +284,9 @@ func (engine *inference_engine) print_stats() {
     fmt.Printf("Average Latency: %.2f ms\n", avg_latency)
     fmt.Printf("Throughput: %.1f tokens/sec\n", throughput)
     fmt.Printf("\nOptimizations Enabled:\n")
-    fmt.Printf("  KV Cache: %v\n", engine.config.use_kv_cache)
+    fmt.Printf("  KV cache: %v\n", engine.config.use_kv_cache)
     fmt.Printf("  Flash Attention: %v\n", engine.config.use_flash_attention)
-    fmt.Printf("  Tensor Parallelism: %v\n", engine.config.use_tensor_parallel)
+    fmt.Printf("  tensor_2 Parallelism: %v\n", engine.config.use_tensor_parallel)
     fmt.Printf("  Quantization: %s\n", engine.config.quantization_type)
 }
 
@@ -322,7 +322,7 @@ func (engine *inference_engine) start_serving() {
             timestamp: time.Now().Unix(),
         }
         resp := engine.generate(req)
-        fmt.Printf("Request %s: %.2f ms, %.1f tok/s\n",
+        fmt.Printf("request %s: %.2f ms, %.1f tok/s\n",
             req.request_id, resp.latency_ms, resp.tokens_per_second)
     }
     engine.print_stats()

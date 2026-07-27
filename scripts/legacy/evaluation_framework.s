@@ -328,7 +328,7 @@ func (framework *evaluation_framework) print_report() {
 
 func (framework *evaluation_framework) compare_with_baseline() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
-    fmt.Println("║  Model Comparison with reference systems               ║")
+    fmt.Println("║  model Comparison with reference systems               ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
     baseline := map[string]float64{
         "MMLU": 0.867,

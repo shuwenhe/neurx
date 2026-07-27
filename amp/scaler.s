@@ -142,7 +142,7 @@ func init_mixed_precision_optimizer(
     mixed_precision_config amp_config
 ) mixed_precision_optimizer {
     mixed_precision_optimizer optimizer
-    optimizer.optimizer_type = "AdamW"
+    optimizer.optimizer_type = "adam_w"
     optimizer.learning_rate = learning_rate
     optimizer.betas_1 = 0.9
     optimizer.betas_2 = 0.999
@@ -368,7 +368,7 @@ func main() {
     amp_config.grad_clip_value = 1.0
     mixed_precision_optimizer optimizer = init_mixed_precision_optimizer(100000, 0.0001, amp_config)
     println("Loss scale: " + float_to_string(optimizer.amp_state.loss_scale))
-    println("Optimizer initialized successfully")
+    println("optimizer_2 initialized successfully")
 }
 
 func float_to_string(float f) string {

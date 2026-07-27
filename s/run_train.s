@@ -71,7 +71,7 @@ func main() int {
     println("Training Pipeline Complete!")
     println("========================================")
     println("")
-    println("Model files saved to: " + checkpoint_dir + "/")
+    println("model files saved to: " + checkpoint_dir + "/")
     println("  - final_model.neurx")
     println("  - best_model.neurx")
     println("  - latest_checkpoint.txt")

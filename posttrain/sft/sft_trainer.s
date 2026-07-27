@@ -478,8 +478,8 @@ func print_sft_training_header() {
 }
 
 func print_sft_config(sft_train_config cfg) {
-    println("[SFT Config]")
-    println("  Batch Size: " + int_to_str(cfg.batch_size))
+    println("[SFT config]")
+    println("  batch_2 Size: " + int_to_str(cfg.batch_size))
     println("  Learning Rate: " + fmt_float(cfg.learning_rate, 6))
     println("  Max Sequence Length: " + int_to_str(cfg.max_seq_len))
     println("  Precision: " + cfg.precision)

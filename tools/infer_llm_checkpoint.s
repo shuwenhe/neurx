@@ -374,7 +374,7 @@ func main() int {
     println("checkpoint path: " + checkpoint_path)
     println("Step: " + int_to_str(step, 0))
     println("Loss: " + pad_float(loss, 8, 6))
-    println("Param count: " + int_to_str(param_count, 0))
+    println("param count: " + int_to_str(param_count, 0))
     if weight_rows > 0 && weight_cols > 0 {
         println("Weight shape: " + int_to_str(weight_rows, 0) + "x" + int_to_str(weight_cols, 0))
     }

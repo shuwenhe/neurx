@@ -5,11 +5,11 @@
 
 namespace neurx::cann {
 
-KvCacheConfig KvCacheConfig::fp16_transformer(
+kv_cache_config_2 kv_cache_config_2::fp16_transformer(
     std::size_t block_count_value, std::size_t tokens_per_block_value,
     std::size_t layers_value, std::size_t kv_heads_value,
     std::size_t head_size_value) {
-  KvCacheConfig config;
+  kv_cache_config_2 config;
   config.block_count = block_count_value;
   config.tokens_per_block = tokens_per_block_value;
   config.layers = layers_value;
@@ -31,52 +31,52 @@ KvCacheConfig KvCacheConfig::fp16_transformer(
   return config;
 }
 
-KvCacheConfig KvCacheConfig::fp16_310p(
+kv_cache_config_2 kv_cache_config_2::fp16_310p(
     std::size_t block_count_value, std::size_t tokens_per_block_value,
     std::size_t layers_value, std::size_t kv_heads_value,
     std::size_t head_size_value) {
-  KvCacheConfig config =
+  kv_cache_config_2 config =
       fp16_transformer(block_count_value, tokens_per_block_value, layers_value,
                        kv_heads_value, head_size_value);
   config.format = KvStorageFormat::fractal_nz;
   return config;
 }
 
-Status AclDeviceAllocator::allocate(void** address, std::size_t bytes) {
-  if (!address || bytes == 0) return Status::failure("invalid device allocation request");
+status AclDeviceAllocator::allocate(void** address, std::size_t bytes) {
+  if (!address || bytes == 0) return status::failure("invalid device allocation request");
   if (malloc_device(address, bytes) != kSuccess) {
-    return Status::failure(std::string("aclrtMalloc: ") + recent_error());
+    return status::failure(std::string("aclrtMalloc: ") + recent_error());
   }
-  return Status::success();
+  return status::success();
 }
 
 void AclDeviceAllocator::release(void* address) {
   if (address) free_device(address);
 }
 
-PagedKvCache::PagedKvCache(KvCacheConfig config, DeviceAllocator* allocator)
+PagedKvCache::PagedKvCache(kv_cache_config_2 config, DeviceAllocator* allocator)
     : config_(config), allocator_(allocator ? allocator : &default_allocator_) {}
 
 PagedKvCache::~PagedKvCache() {
   if (storage_) allocator_->release(storage_);
 }
 
-Status PagedKvCache::validate_config() const {
+status PagedKvCache::validate_config() const {
   if (config_.block_count == 0 || config_.block_bytes == 0 ||
       config_.tokens_per_block == 0) {
-    return Status::failure("KV cache dimensions must be positive");
+    return status::failure("KV cache dimensions must be positive");
   }
   if (config_.block_count > std::numeric_limits<uint32_t>::max()) {
-    return Status::failure("KV cache block count exceeds uint32 block-table capacity");
+    return status::failure("KV cache block count exceeds uint32 block-table capacity");
   }
   if (config_.block_bytes > std::numeric_limits<std::size_t>::max() /
                                 config_.block_count) {
-    return Status::failure("KV cache allocation size overflows size_t");
+    return status::failure("KV cache allocation size overflows size_t");
   }
   if (config_.has_tensor_layout()) {
     if (config_.layers == 0 || config_.kv_heads == 0 ||
         config_.head_size == 0 || config_.element_bytes == 0) {
-      return Status::failure("KV tensor layout must define every dimension");
+      return status::failure("KV tensor layout must define every dimension");
     }
     const std::size_t values[] = {
         config_.tokens_per_block, config_.layers, config_.kv_heads,
@@ -84,23 +84,23 @@ Status PagedKvCache::validate_config() const {
     std::size_t expected = 2;
     for (const std::size_t value : values) {
       if (value > std::numeric_limits<std::size_t>::max() / expected) {
-        return Status::failure("KV tensor layout size overflows size_t");
+        return status::failure("KV tensor layout size overflows size_t");
       }
       expected *= value;
     }
     if (expected != config_.block_bytes) {
-      return Status::failure("KV block bytes do not match tensor layout");
+      return status::failure("KV block bytes do not match tensor layout");
     }
   }
-  return Status::success();
+  return status::success();
 }
 
-Status PagedKvCache::initialize() {
+status PagedKvCache::initialize() {
   std::lock_guard<std::mutex> lock(mutex_);
-  if (storage_) return Status::success();
-  const Status valid = validate_config();
+  if (storage_) return status::success();
+  const status valid = validate_config();
   if (!valid.ok) return valid;
-  const Status allocated =
+  const status allocated =
       allocator_->allocate(&storage_, config_.block_count * config_.block_bytes);
   if (!allocated.ok) return allocated;
   free_blocks_.reserve(config_.block_count);
@@ -109,7 +109,7 @@ Status PagedKvCache::initialize() {
   for (std::size_t index = config_.block_count; index > 0; --index) {
     free_blocks_.push_back(static_cast<uint32_t>(index - 1));
   }
-  return Status::success();
+  return status::success();
 }
 
 std::size_t PagedKvCache::blocks_for(std::size_t tokens) const {
@@ -117,54 +117,54 @@ std::size_t PagedKvCache::blocks_for(std::size_t tokens) const {
   return 1 + ((tokens - 1) / config_.tokens_per_block);
 }
 
-Status PagedKvCache::reserve(const std::string& request_id,
+status PagedKvCache::reserve(const std::string& request_id,
                              std::size_t total_tokens) {
-  if (request_id.empty()) return Status::failure("KV cache request id must not be empty");
+  if (request_id.empty()) return status::failure("KV cache request id must not be empty");
   std::lock_guard<std::mutex> lock(mutex_);
   return reserve_locked(request_id, total_tokens);
 }
 
-Status PagedKvCache::reserve_locked(const std::string& request_id,
+status PagedKvCache::reserve_locked(const std::string& request_id,
                                     std::size_t total_tokens) {
-  if (!storage_) return Status::failure("KV cache is not initialized");
+  if (!storage_) return status::failure("KV cache is not initialized");
 
-  RequestAllocation& allocation = requests_[request_id];
+  request_allocation& allocation = requests_[request_id];
   if (total_tokens < allocation.tokens) {
-    return Status::failure("KV cache cannot shrink an active request");
+    return status::failure("KV cache cannot shrink an active request");
   }
   const std::size_t required = blocks_for(total_tokens);
   if (required < allocation.blocks.size()) {
-    return Status::failure("KV cache block accounting is inconsistent");
+    return status::failure("KV cache block accounting is inconsistent");
   }
   const std::size_t additional = required - allocation.blocks.size();
   if (additional > free_blocks_.size()) {
     if (allocation.blocks.empty() && allocation.tokens == 0) requests_.erase(request_id);
-    return Status::failure("KV cache is out of blocks");
+    return status::failure("KV cache is out of blocks");
   }
   for (std::size_t index = 0; index < additional; ++index) {
     const uint32_t block = free_blocks_.back();
     free_blocks_.pop_back();
     if (block_refcounts_[block] != 0) {
-      return Status::failure("KV cache free-list reference count is corrupt");
+      return status::failure("KV cache free-list reference count is corrupt");
     }
     block_refcounts_[block] = 1;
     allocation.blocks.push_back(block);
   }
   allocation.tokens = total_tokens;
-  return Status::success();
+  return status::success();
 }
 
-Status PagedKvCache::resize(const std::string& request_id,
+status PagedKvCache::resize(const std::string& request_id,
                             std::size_t total_tokens) {
-  if (request_id.empty()) return Status::failure("KV cache request id must not be empty");
+  if (request_id.empty()) return status::failure("KV cache request id must not be empty");
   std::lock_guard<std::mutex> lock(mutex_);
-  if (!storage_) return Status::failure("KV cache is not initialized");
+  if (!storage_) return status::failure("KV cache is not initialized");
   const auto it = requests_.find(request_id);
   if (it == requests_.end()) {
-    return total_tokens == 0 ? Status::success()
-                             : Status::failure("KV cache request does not exist");
+    return total_tokens == 0 ? status::success()
+                             : status::failure("KV cache request does not exist");
   }
-  RequestAllocation& allocation = it->second;
+  request_allocation& allocation = it->second;
   const std::size_t required = blocks_for(total_tokens);
   while (allocation.blocks.size() > required) {
     release_block_locked(allocation.blocks.back());
@@ -172,21 +172,21 @@ Status PagedKvCache::resize(const std::string& request_id,
   }
   allocation.tokens = total_tokens;
   if (total_tokens == 0) requests_.erase(it);
-  return Status::success();
+  return status::success();
 }
 
-Status PagedKvCache::append(const std::string& request_id,
+status PagedKvCache::append(const std::string& request_id,
                             std::size_t token_count_to_append) {
-  if (request_id.empty()) return Status::failure("KV cache request id must not be empty");
+  if (request_id.empty()) return status::failure("KV cache request id must not be empty");
   if (token_count_to_append == 0) {
-    return Status::failure("KV cache append token count must be positive");
+    return status::failure("KV cache append token count must be positive");
   }
   std::lock_guard<std::mutex> lock(mutex_);
   const auto it = requests_.find(request_id);
   const std::size_t current = it == requests_.end() ? 0 : it->second.tokens;
   if (token_count_to_append >
       std::numeric_limits<std::size_t>::max() - current) {
-    return Status::failure("KV cache token count overflows size_t");
+    return status::failure("KV cache token count overflows size_t");
   }
   return reserve_locked(request_id, current + token_count_to_append);
 }
@@ -206,70 +206,70 @@ void PagedKvCache::release_block_locked(uint32_t block) {
   if (block_refcounts_[block] == 0) free_blocks_.push_back(block);
 }
 
-Status PagedKvCache::retain_prefix(
+status PagedKvCache::retain_prefix(
     const std::string& request_id, std::size_t prefix_tokens,
     std::vector<uint32_t>* retained_blocks) {
   if (!retained_blocks) {
-    return Status::failure("retained KV block output is null");
+    return status::failure("retained KV block output is null");
   }
   std::lock_guard<std::mutex> lock(mutex_);
   const auto it = requests_.find(request_id);
   if (!storage_ || it == requests_.end()) {
-    return Status::failure("KV cache request does not exist");
+    return status::failure("KV cache request does not exist");
   }
   if (prefix_tokens == 0 ||
       prefix_tokens % config_.tokens_per_block != 0 ||
       prefix_tokens > it->second.tokens) {
-    return Status::failure(
+    return status::failure(
         "retained KV prefix must contain complete allocated blocks");
   }
   const std::size_t count = prefix_tokens / config_.tokens_per_block;
   if (count > it->second.blocks.size()) {
-    return Status::failure("retained KV prefix block table is too short");
+    return status::failure("retained KV prefix block table is too short");
   }
   for (std::size_t index = 0; index < count; ++index) {
     const uint32_t block = it->second.blocks[index];
     if (block >= block_refcounts_.size() ||
         block_refcounts_[block] == 0 ||
         block_refcounts_[block] == std::numeric_limits<uint32_t>::max()) {
-      return Status::failure("KV block reference count cannot be retained");
+      return status::failure("KV block reference count cannot be retained");
     }
   }
   retained_blocks->assign(it->second.blocks.begin(),
                           it->second.blocks.begin() + count);
   for (const uint32_t block : *retained_blocks) ++block_refcounts_[block];
-  return Status::success();
+  return status::success();
 }
 
-Status PagedKvCache::attach_retained_prefix(
+status PagedKvCache::attach_retained_prefix(
     const std::string& request_id,
     const std::vector<uint32_t>& retained_blocks,
     std::size_t prefix_tokens) {
   if (request_id.empty() || retained_blocks.empty() || prefix_tokens == 0) {
-    return Status::failure("retained KV prefix attachment is invalid");
+    return status::failure("retained KV prefix attachment is invalid");
   }
   std::lock_guard<std::mutex> lock(mutex_);
-  if (!storage_) return Status::failure("KV cache is not initialized");
+  if (!storage_) return status::failure("KV cache is not initialized");
   if (requests_.count(request_id)) {
-    return Status::failure("KV cache request already has an allocation");
+    return status::failure("KV cache request already has an allocation");
   }
   if (prefix_tokens % config_.tokens_per_block != 0 ||
       retained_blocks.size() != prefix_tokens / config_.tokens_per_block) {
-    return Status::failure("retained KV prefix shape is inconsistent");
+    return status::failure("retained KV prefix shape is inconsistent");
   }
   for (const uint32_t block : retained_blocks) {
     if (block >= block_refcounts_.size() ||
         block_refcounts_[block] == 0 ||
         block_refcounts_[block] == std::numeric_limits<uint32_t>::max()) {
-      return Status::failure("retained KV prefix references an invalid block");
+      return status::failure("retained KV prefix references an invalid block");
     }
   }
-  RequestAllocation allocation;
+  request_allocation allocation;
   allocation.blocks = retained_blocks;
   allocation.tokens = prefix_tokens;
   for (const uint32_t block : retained_blocks) ++block_refcounts_[block];
   requests_.emplace(request_id, std::move(allocation));
-  return Status::success();
+  return status::success();
 }
 
 void PagedKvCache::release_retained_blocks(
@@ -360,9 +360,9 @@ void* PagedKvCache::value_slot_address(std::size_t layer, uint32_t block,
   return slot_address(true, layer, block, token_offset);
 }
 
-KvCacheStats PagedKvCache::stats() const {
+kv_cache_stats PagedKvCache::stats() const {
   std::lock_guard<std::mutex> lock(mutex_);
-  KvCacheStats result;
+  kv_cache_stats result;
   result.total_blocks = config_.block_count;
   result.free_blocks = free_blocks_.size();
   result.used_blocks = result.total_blocks - result.free_blocks;

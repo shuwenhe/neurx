@@ -79,7 +79,7 @@ func describe_safetensors_format() {
     println("         |")
     println("         +-- Maps tensor names to (dtype, shape, offsets)")
     println("    |")
-    println("    +--[Binary Tensor Data (variable length)]")
+    println("    +--[Binary tensor_2 Data (variable length)]")
     println("         |")
     println("         +-- F32  (4 bytes per element)")
     println("         +-- BF16 (2 bytes per element)")

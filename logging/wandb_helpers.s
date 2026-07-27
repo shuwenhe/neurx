@@ -24,7 +24,7 @@ func advance_rng(uint64 state) uint64 {
 
 func log_wandb_config(wandb_run run) {
     if !run.active { return }
-    println("WandB Config:")
+    println("WandB config:")
     for key in run.config {
         println("  " + key + ": " + run.config[key])
     }

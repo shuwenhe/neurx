@@ -9,7 +9,7 @@
 
 namespace neurx::inference {
 
-bool supports_atb_device_sampling(const SamplingConfig& config,
+bool supports_atb_device_sampling(const sampling_config_2& config,
                                   std::size_t vocabulary) {
   return vocabulary > 0 &&
          vocabulary <=
@@ -24,21 +24,21 @@ bool supports_atb_device_sampling(const SamplingConfig& config,
          config.seed <= std::numeric_limits<uint32_t>::max();
 }
 
-AdapterStatus sample_logits(const float* logits, std::size_t vocabulary,
-                            const SamplingConfig& config,
+adapter_status sample_logits(const float* logits, std::size_t vocabulary,
+                            const sampling_config_2& config,
                             const std::vector<int32_t>& token_history,
                             int32_t* token) {
   if (!logits || !token || vocabulary == 0 ||
       vocabulary > static_cast<std::size_t>(
                        std::numeric_limits<int32_t>::max())) {
-    return AdapterStatus::failure("sampler received invalid logits");
+    return adapter_status::failure("sampler received invalid logits");
   }
   if (!std::isfinite(config.temperature) || config.temperature < 0.0F ||
       config.top_k < 0 || !std::isfinite(config.top_p) ||
       config.top_p <= 0.0F || config.top_p > 1.0F ||
       !std::isfinite(config.repetition_penalty) ||
       config.repetition_penalty <= 0.0F) {
-    return AdapterStatus::failure("sampling parameters are invalid");
+    return adapter_status::failure("sampling parameters are invalid");
   }
 
   std::vector<float> scores(logits, logits + vocabulary);
@@ -67,7 +67,7 @@ AdapterStatus sample_logits(const float* logits, std::size_t vocabulary,
       if (finite_score(index) > finite_score(best)) best = index;
     }
     *token = static_cast<int32_t>(best);
-    return AdapterStatus::success();
+    return adapter_status::success();
   }
 
   std::vector<std::size_t> candidates(vocabulary);
@@ -83,7 +83,7 @@ AdapterStatus sample_logits(const float* logits, std::size_t vocabulary,
     candidates.resize(static_cast<std::size_t>(config.top_k));
   }
   if (candidates.empty() || !std::isfinite(finite_score(candidates.front()))) {
-    return AdapterStatus::failure("sampler received no finite logits");
+    return adapter_status::failure("sampler received no finite logits");
   }
 
   const float maximum = finite_score(candidates.front());
@@ -98,7 +98,7 @@ AdapterStatus sample_logits(const float* logits, std::size_t vocabulary,
     total += weight;
   }
   if (!(total > 0.0) || !std::isfinite(total)) {
-    return AdapterStatus::failure("sampler probability normalization failed");
+    return adapter_status::failure("sampler probability normalization failed");
   }
 
   if (config.top_p < 1.0F) {
@@ -117,7 +117,7 @@ AdapterStatus sample_logits(const float* logits, std::size_t vocabulary,
   std::discrete_distribution<std::size_t> distribution(weights.begin(),
                                                         weights.end());
   *token = static_cast<int32_t>(candidates[distribution(generator)]);
-  return AdapterStatus::success();
+  return adapter_status::success();
 }
 
 }

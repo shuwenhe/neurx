@@ -6,7 +6,7 @@ func main() int {
     string pretrain_source = runtime_env_get("NEURX_PRETRAIN_SOURCE", project_root + "/pretrain/llm/model_large_pretrain.s")
     string output_dir = runtime_env_get("NEURX_PRETRAIN_OUTPUT_DIR", project_root + "/checkpoint/NeurX-1.3")
     string s_compiler = runtime_env_get("S_COMPILER", runtime_env_get("COMPILER_BIN", "s"))
-    println("NeurX Large Model Pretrain Entry (S Lang)")
+    println("NeurX Large model Pretrain entry (S Lang)")
     println("")
     println("Project root : " + project_root)
     println("Source file  : " + pretrain_source)

@@ -149,7 +149,7 @@ func monitor_cluster_processes(
         }
         i = i + 1
     }
-    print("[MONITOR] Status: " + itoa(alive_count) + " alive, " + itoa(dead_count) + " dead")
+    print("[MONITOR] status: " + itoa(alive_count) + " alive, " + itoa(dead_count) + " dead")
     handles
 }
 

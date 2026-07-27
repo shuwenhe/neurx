@@ -48,7 +48,7 @@ void test_schedule_parsing() {
 }
 
 void test_warmup_and_cosine_decay() {
-    neurx_training::LrConfig config;
+    neurx_training::lr_config config;
     config.peak_lr = 1.0;
     config.min_lr = 0.1;
     config.warmup_steps = 10;
@@ -70,7 +70,7 @@ void test_warmup_and_cosine_decay() {
 }
 
 void test_linear_and_constant_decay() {
-    neurx_training::LrConfig config;
+    neurx_training::lr_config config;
     config.peak_lr = 2.0;
     config.min_lr = 0.0;
     config.total_steps = 10;
@@ -86,7 +86,7 @@ void test_linear_and_constant_decay() {
 }
 
 void test_gradient_policy() {
-    neurx_training::GradientPolicy policy;
+    neurx_training::gradient_policy policy;
     policy.max_norm = 1.0;
     policy.epsilon = 1e-6;
 

@@ -112,7 +112,7 @@ func main() {
     println("  - NEURX_PRETRAIN_RESUME: " + resume_flag)
     println("  - NEURX_PRETRAIN_RESUME_FROM: " + checkpoint_state_file)
     if str_len(latest_weights_path) > 0 {
-        println("  - Model weights will be loaded from checkpoint")
+        println("  - model weights will be loaded from checkpoint")
     }
     println("[PRETRAIN-GPU] Resume state will be automatically saved every NEURX_PRETRAIN_SAVE_INTERVAL steps.")
 }

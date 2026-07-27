@@ -34,7 +34,7 @@ func toolchain_command([]string args) string {
 }
 
 func toolchain_status() int {
-    println("NeurX S-Only Toolchain Status")
+    println("NeurX S-Only Toolchain status")
     println("")
     print_flag("scripts/legacy/data_clean.s", runtime_file_exists("scripts/legacy/data_clean.s"))
     print_flag("scripts/legacy/data_shard.s", runtime_file_exists("scripts/legacy/data_shard.s"))

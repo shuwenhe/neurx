@@ -38,7 +38,7 @@ type reward_model_config struct {
 type reward_model_trainer struct {
     config              reward_model_config
     model               reward_model
-    optimizer           Optimizer
+    optimizer           optimizer_2
     train_dataset       preference_dataset
     val_dataset         preference_dataset
     test_dataset        preference_dataset
@@ -74,7 +74,7 @@ type bradley_terry_loss struct {
 }
 
 func (trainer *reward_model_trainer) load_preference_data(data_path string) {
-    fmt.Printf("[Reward Model] Loading preference data from %s\n", data_path)
+    fmt.Printf("[Reward model] Loading preference data from %s\n", data_path)
     for i := 0; i < 1000; i++ {
         example := preference_data{
             prompt: fmt.Sprintf("Prompt %d: What is %d + %d?", i, i%100, (i+1)%100),
@@ -176,7 +176,7 @@ func (trainer *reward_model_trainer) train_step(batch []preference_data) float64
 }
 
 func (trainer *reward_model_trainer) evaluate(dataset preference_dataset) training_metric {
-    fmt.Printf("[Reward Model] Evaluating on %d examples\n", len(dataset.examples))
+    fmt.Printf("[Reward model] Evaluating on %d examples\n", len(dataset.examples))
     total_loss := 0.0
     correct := 0
     logits := []float64{}
@@ -269,7 +269,7 @@ func NewRewardModelTrainer(config reward_model_config) *reward_model_trainer {
             trained_steps: 0,
             best_val_accuracy: 0.0,
         },
-        optimizer: Optimizer{
+        optimizer: optimizer_2{
             name: "adamw",
             learning_rate: config.learning_rate,
             beta1: 0.9,
@@ -293,7 +293,7 @@ func NewRewardModelTrainer(config reward_model_config) *reward_model_trainer {
 
 func (trainer *reward_model_trainer) train() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
-    fmt.Println("║  Reward Model Training for Preference Learning        ║")
+    fmt.Println("║  Reward model Training for Preference Learning        ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
     trainer.load_preference_data("data/preferences")
     num_batches := trainer.train_dataset.train_size / trainer.config.batch_size
@@ -310,7 +310,7 @@ func (trainer *reward_model_trainer) train() {
             loss := trainer.train_step(batch_data)
             total_loss += loss
             if (batch + 1) % 10 == 0 {
-                fmt.Printf("  Batch %d/%d - Loss: %.6f\n", batch+1, num_batches, loss)
+                fmt.Printf("  batch_2 %d/%d - Loss: %.6f\n", batch+1, num_batches, loss)
             }
         }
         val_metric := trainer.evaluate(trainer.val_dataset)
@@ -326,12 +326,12 @@ func (trainer *reward_model_trainer) train() {
 }
 
 func (trainer *reward_model_trainer) save_checkpoint() {
-    fmt.Printf("[Reward Model] Saving checkpoint (Accuracy: %.4f)\n", trainer.model.best_val_accuracy)
+    fmt.Printf("[Reward model] Saving checkpoint (Accuracy: %.4f)\n", trainer.model.best_val_accuracy)
 }
 
 func (trainer *reward_model_trainer) print_summary() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
-    fmt.Println("║  Reward Model Training Summary                        ║")
+    fmt.Println("║  Reward model Training Summary                        ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
     fmt.Printf("Best Validation Accuracy: %.4f\n", trainer.model.best_val_accuracy)
     if len(trainer.training_history) > 0 {

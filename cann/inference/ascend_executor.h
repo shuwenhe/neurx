@@ -9,24 +9,24 @@
 
 namespace neurx::inference {
 
-struct AscendExecutorConfig {
+struct ascend_executor_config {
   std::string operator_library;
   std::string checkpoint;
-  cann::ModelLoadOptions model;
-  cann::KvCacheConfig kv_cache;
+  cann::model_load_options model;
+  cann::kv_cache_config_2 kv_cache;
 };
 
 class AscendExecutor final : public BackendAdapter {
  public:
-  explicit AscendExecutor(AscendExecutorConfig config);
+  explicit AscendExecutor(ascend_executor_config config);
   ~AscendExecutor() override = default;
 
   Backend kind() const override { return Backend::ascend; }
   const char* name() const override { return "ascend-cann-executor"; }
-  AdapterStatus initialize(int device_id) override;
+  adapter_status initialize(int device_id) override;
   bool ready() const override { return ready_; }
-  AdapterStatus execute(const DeviceBatch& batch) override;
-  AdapterStatus synchronize() override { return adapter_.synchronize(); }
+  adapter_status execute(const device_batch& batch) override;
+  adapter_status synchronize() override { return adapter_.synchronize(); }
 
   bool release_request(const std::string& request_id);
   const cann::Nxtrfmv2Model& model() const { return model_; }
@@ -36,7 +36,7 @@ class AscendExecutor final : public BackendAdapter {
   cann::Context context() const { return adapter_.native_session().context(); }
 
  private:
-  AscendExecutorConfig config_;
+  ascend_executor_config config_;
   AscendAdapter adapter_;
 
   cann::OperatorLibrary operators_;

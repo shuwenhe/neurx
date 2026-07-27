@@ -10,7 +10,7 @@ func main() int {
         root = "."
     }
     if !runtime_run_command("test -f " + runtime_shell_escape(config)).ok {
-        println("Config not found: " + config)
+        println("config not found: " + config)
         return 1
     }
     string max_steps = yaml_value(config, "max_steps")
@@ -44,7 +44,7 @@ func main() int {
     string intermediate_dim = default_if_empty(yaml_value(config, "intermediate_dim"), "512")
     string vocab_size = default_if_empty(yaml_value(config, "vocab_size"), "4096")
     println("LLM pretrain workflow (S)")
-    println("Config: " + config)
+    println("config: " + config)
     println("Steps : " + max_steps)
     string s_bin = s_bin_override
     if s_bin == "" {

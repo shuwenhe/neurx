@@ -103,7 +103,7 @@ func test_end_to_end_forward() bool {
 
 func main() {
     println("========================================")
-    println("Transformer Model End-to-End Tests")
+    println("transformer_2 model End-to-End Tests")
     println("========================================")
     if test_ffn_layer() {
         println("✓ FFN layer hidden -> 4xhidden -> hidden")
@@ -111,9 +111,9 @@ func main() {
         println("✗ FFN layer hidden -> 4xhidden -> hidden")
     }
     if test_transformer_block_with_rope() {
-        println("✓ Transformer block with RoPE")
+        println("✓ transformer_2 block with RoPE")
     } else {
-        println("✗ Transformer block with RoPE")
+        println("✗ transformer_2 block with RoPE")
     }
     if test_transformer_with_learned_pe() {
         println("✓ Learned position embedding forward path")

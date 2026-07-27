@@ -13,7 +13,7 @@ enum class ModelPrecision { fp16, fp32, int8_weight_only };
 
 enum class WeightStorage { fp16, fp32, int8_per_channel };
 
-struct ModelMetadata {
+struct model_metadata {
   uint64_t step = 0;
   uint64_t tokenizer_hash = 0;
   uint32_t tokenizer_kind = 0;
@@ -26,12 +26,12 @@ struct ModelMetadata {
   uint64_t parameter_tensors = 0;
 };
 
-struct ModelLoadOptions {
+struct model_load_options {
   ModelPrecision precision = ModelPrecision::fp16;
   uint64_t expected_tokenizer_hash = 0;
 };
 
-struct DeviceWeight {
+struct device_weight {
   std::string name;
   uint64_t elements = 0;
   uint64_t rows = 0;
@@ -56,31 +56,31 @@ enum class LayerWeightKind : std::size_t {
   down_projection = 8,
 };
 
-Status inspect_nxtrfmv2(const std::string& path, ModelMetadata* metadata);
+status inspect_nxtrfmv2(const std::string& path, model_metadata* metadata);
 uint16_t float_to_fp16_bits(float value);
 
-Status quantize_int8_per_channel(const float* input, std::size_t rows,
+status quantize_int8_per_channel(const float* input, std::size_t rows,
                                  std::size_t columns, int8_t* output,
                                  uint16_t* scales);
 
 class Nxtrfmv2Model {
  public:
-  Status load(const std::string& path, DeviceSession& session,
-              const ModelLoadOptions& options = {});
+  status load(const std::string& path, DeviceSession& session,
+              const model_load_options& options = {});
   void reset();
 
   bool loaded() const { return loaded_; }
   ModelPrecision precision() const { return precision_; }
-  const ModelMetadata& metadata() const { return metadata_; }
-  const std::vector<DeviceWeight>& weights() const { return weights_; }
-  const DeviceWeight* token_embedding() const;
-  const DeviceWeight* layer_weight(std::size_t layer,
+  const model_metadata& metadata() const { return metadata_; }
+  const std::vector<device_weight>& weights() const { return weights_; }
+  const device_weight* token_embedding() const;
+  const device_weight* layer_weight(std::size_t layer,
                                    LayerWeightKind kind) const;
-  const DeviceWeight* lm_head() const;
+  const device_weight* lm_head() const;
 
  private:
-  ModelMetadata metadata_;
-  std::vector<DeviceWeight> weights_;
+  model_metadata metadata_;
+  std::vector<device_weight> weights_;
   ModelPrecision precision_ = ModelPrecision::fp16;
   bool loaded_ = false;
 };

@@ -225,7 +225,7 @@ func (server *apiserver) process_request(req apirequest) apiresponse {
 
 func (queue *request_queue) enqueue(req apirequest) bool {
     if len(queue.pending_requests) >= queue.queue_size {
-        fmt.Printf("[Queue] Request queue full\n")
+        fmt.Printf("[Queue] request queue full\n")
         return false
     }
     queue.pending_requests = append(queue.pending_requests, req)
@@ -249,7 +249,7 @@ func (queue *request_queue) process_queue(server *apiserver) {
         queue.processing_requests = append(queue.processing_requests, req)
         response := server.process_request(req)
         queue.completed_requests = append(queue.completed_requests, req)
-        fmt.Printf("[Queue] Request %s processed (status: %d, time: %.2fms)\n",
+        fmt.Printf("[Queue] request %s processed (status: %d, time: %.2fms)\n",
             req.request_id, response.status_code, response.processing_time_ms)
         queue.processing_requests = queue.processing_requests[1:]
     }
@@ -258,7 +258,7 @@ func (queue *request_queue) process_queue(server *apiserver) {
 func (limiter *rate_limiter) allow_request() bool {
     if limiter.current_concurrent >= limiter.max_concurrent {
         limiter.rejected_requests++
-        fmt.Printf("[rate_limiter] Request rejected (concurrent: %d/%d)\n",
+        fmt.Printf("[rate_limiter] request rejected (concurrent: %d/%d)\n",
             limiter.current_concurrent, limiter.max_concurrent)
         return false
     }
@@ -284,7 +284,7 @@ func (server *apiserver) start() {
     server.register_models()
     server.register_routes()
     fmt.Println("┌────────────────────────────────────────┐")
-    fmt.Println("│  API Server Status                     │")
+    fmt.Println("│  API Server status                     │")
     fmt.Println("└────────────────────────────────────────┘\n")
     fmt.Printf("✓ Server initialized\n")
     fmt.Printf("✓ Listening on %s:%d\n", server.host, server.port)

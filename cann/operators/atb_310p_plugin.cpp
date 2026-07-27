@@ -24,9 +24,9 @@
 namespace neurx::cann {
 namespace {
 
-atb::Tensor device_tensor(void* data, aclDataType dtype, aclFormat format,
+atb::tensor_2 device_tensor(void* data, aclDataType dtype, aclFormat format,
                           std::initializer_list<int64_t> dimensions) {
-  atb::Tensor result;
+  atb::tensor_2 result;
   result.desc.dtype = dtype;
   result.desc.format = format;
   result.desc.shape.dimNum = dimensions.size();
@@ -45,16 +45,16 @@ atb::Tensor device_tensor(void* data, aclDataType dtype, aclFormat format,
   return result;
 }
 
-atb::Tensor host_i32(std::vector<int32_t>& values) {
-  atb::Tensor result =
+atb::tensor_2 host_i32(std::vector<int32_t>& values) {
+  atb::tensor_2 result =
       device_tensor(nullptr, ACL_INT32, ACL_FORMAT_ND,
                     {static_cast<int64_t>(values.size())});
   result.hostData = values.data();
   return result;
 }
 
-Status atb_error(const char* operation, atb::Status code) {
-  return Status::failure(std::string(operation) + " ATB status=" +
+status atb_error(const char* operation, atb::status code) {
+  return status::failure(std::string(operation) + " ATB status=" +
                          std::to_string(code));
 }
 
@@ -99,9 +99,9 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     if (context_) atb::DestroyContext(context_);
   }
 
-  Status initialize(const ModelMetadata& model, const KvCacheConfig& cache) {
-    if (ready_) return Status::success();
-    atb::Status code = atb::CreateContext(&context_);
+  status initialize(const model_metadata& model, const kv_cache_config_2& cache) {
+    if (ready_) return status::success();
+    atb::status code = atb::CreateContext(&context_);
     if (code != atb::NO_ERROR) return atb_error("CreateContext", code);
 
     atb::infer::GatherParam gather;
@@ -155,11 +155,11 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     model_ = model;
     cache_ = cache;
     ready_ = true;
-    return Status::success();
+    return status::success();
   }
 
-  Status embedding(const void* ids, const DeviceWeight& table,
-                   const TensorView& output, Stream stream) override {
+  status embedding(const void* ids, const device_weight& table,
+                   const tensor_view& output, Stream stream) override {
     set_stream(stream);
     atb::VariantPack pack;
     pack.inTensors = {
@@ -171,8 +171,8 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     return run(gather_, pack, "Gather");
   }
 
-  Status rms_norm(const TensorView& input, const DeviceWeight& scale,
-                  const TensorView& output, Stream stream) override {
+  status rms_norm(const tensor_view& input, const device_weight& scale,
+                  const tensor_view& output, Stream stream) override {
     set_stream(stream);
     atb::VariantPack pack;
     pack.inTensors = {
@@ -183,14 +183,14 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     return run(norm_, pack, "RmsNorm");
   }
 
-  Status linear(const TensorView& input, const DeviceWeight& weight,
-                const TensorView& output, Stream stream) override {
+  status linear(const tensor_view& input, const device_weight& weight,
+                const tensor_view& output, Stream stream) override {
     set_stream(stream);
     if (weight.quantized()) {
       return quantized_linear(input, weight, output, stream);
     }
     if (weight.type != WeightStorage::fp16) {
-      return Status::failure("ATB Linear received an unsupported weight type");
+      return status::failure("ATB Linear received an unsupported weight type");
     }
     atb::VariantPack pack;
     pack.inTensors = {
@@ -202,10 +202,10 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     return run(linear_, pack, "Linear");
   }
 
-  Status rope(const TensorView& query, const TensorView& key,
-              const TransformerBatchPlan& plan, Stream stream) override {
+  status rope(const tensor_view& query, const tensor_view& key,
+              const transformer_batch_plan& plan, Stream stream) override {
     set_stream(stream);
-    Status status = prepare_rope(plan);
+    status status = prepare_rope(plan);
     if (!status.ok) return status;
     atb::VariantPack pack;
     pack.inTensors = {
@@ -222,12 +222,12 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     return run(rope_, pack, "RoPE");
   }
 
-  Status attention_qkv_rope(
-      const TensorView& input, const DeviceWeight& norm_scale,
-      const DeviceWeight& query_weight, const DeviceWeight& key_weight,
-      const DeviceWeight& value_weight, const TensorView& normalized,
-      const TensorView& query, const TensorView& key,
-      const TensorView& value, const TransformerBatchPlan& plan,
+  status attention_qkv_rope(
+      const tensor_view& input, const device_weight& norm_scale,
+      const device_weight& query_weight, const device_weight& key_weight,
+      const device_weight& value_weight, const tensor_view& normalized,
+      const tensor_view& query, const tensor_view& key,
+      const tensor_view& value, const transformer_batch_plan& plan,
       Stream stream) override {
     set_stream(stream);
     if (query_weight.type != WeightStorage::fp16 ||
@@ -237,9 +237,9 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
           input, norm_scale, query_weight, key_weight, value_weight,
           normalized, query, key, value, plan, stream);
     }
-    Status status = prepare_rope(plan);
+    status status = prepare_rope(plan);
     if (!status.ok) return status;
-    GraphEntry* graph = graph_for(
+    graph_entry* graph = graph_for(
         {GraphKind::attention_qkv_rope, input.rows, input.columns});
     if (!graph) return last_error_;
     atb::VariantPack pack;
@@ -261,8 +261,8 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     return run_graph(*graph, pack, "AttentionQkvRopeGraph");
   }
 
-  Status store_kv(const TensorView& key, const TensorView& value,
-                  std::size_t layer, const TransformerBatchPlan& plan,
+  status store_kv(const tensor_view& key, const tensor_view& value,
+                  std::size_t layer, const transformer_batch_plan& plan,
                   PagedKvCache& cache, Stream stream) override {
     set_stream(stream);
     slot_host_.clear();
@@ -270,10 +270,10 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
       slot_host_.insert(slot_host_.end(), request.write_slots.begin(),
                         request.write_slots.end());
     }
-    Status status = upload_i32(slot_, slot_host_);
+    status status = upload_i32(slot_, slot_host_);
     if (!status.ok) return status;
-    atb::Tensor key_cache = cache_tensor(cache.key_layer_address(layer));
-    atb::Tensor value_cache = cache_tensor(cache.value_layer_address(layer));
+    atb::tensor_2 key_cache = cache_tensor(cache.key_layer_address(layer));
+    atb::tensor_2 value_cache = cache_tensor(cache.value_layer_address(layer));
     atb::VariantPack pack;
     pack.inTensors = {
         fp16_3d(key, plan), fp16_3d(value, plan), key_cache, value_cache,
@@ -283,13 +283,13 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     return run(reshape_cache_, pack, "ReshapeAndCache");
   }
 
-  Status attention(const TensorView& query, const TensorView&,
-                   const TensorView&, std::size_t layer,
-                   const TransformerBatchPlan& plan, PagedKvCache& cache,
-                   const TensorView& output, Stream stream) override {
+  status attention(const tensor_view& query, const tensor_view&,
+                   const tensor_view&, std::size_t layer,
+                   const transformer_batch_plan& plan, PagedKvCache& cache,
+                   const tensor_view& output, Stream stream) override {
     set_stream(stream);
-    PagedAttentionMetadata metadata;
-    Status status = build_paged_attention_metadata(plan, &metadata);
+    paged_attention_metadata metadata;
+    status status = build_paged_attention_metadata(plan, &metadata);
     if (!status.ok) return status;
     block_host_ = std::move(metadata.block_tables);
     sequence_lengths_ = std::move(metadata.context_lengths);
@@ -308,8 +308,8 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     return run(paged_attention_, pack, "PagedAttention");
   }
 
-  Status add(const TensorView& left, const TensorView& right,
-             const TensorView& output, Stream stream) override {
+  status add(const tensor_view& left, const tensor_view& right,
+             const tensor_view& output, Stream stream) override {
     set_stream(stream);
     atb::VariantPack pack;
     pack.inTensors = {fp16(left), fp16(right)};
@@ -317,12 +317,12 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     return run(add_, pack, "Add");
   }
 
-  Status add_rms_norm(const TensorView& left, const TensorView& right,
-                      const DeviceWeight& scale,
-                      const TensorView& residual,
-                      const TensorView& normalized, Stream stream) override {
+  status add_rms_norm(const tensor_view& left, const tensor_view& right,
+                      const device_weight& scale,
+                      const tensor_view& residual,
+                      const tensor_view& normalized, Stream stream) override {
     set_stream(stream);
-    GraphEntry* graph = graph_for(
+    graph_entry* graph = graph_for(
         {GraphKind::add_rms_norm, left.rows, left.columns});
     if (!graph) return last_error_;
     atb::VariantPack pack;
@@ -334,10 +334,10 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     return run_graph(*graph, pack, "AddRmsNormGraph");
   }
 
-  Status swiglu(const TensorView& gate, const TensorView& up,
-                const TensorView& output, Stream stream) override {
+  status swiglu(const tensor_view& gate, const tensor_view& up,
+                const tensor_view& output, Stream stream) override {
     set_stream(stream);
-    GraphEntry* graph =
+    graph_entry* graph =
         graph_for({GraphKind::swiglu, gate.rows, gate.columns});
     if (!graph) return last_error_;
     atb::VariantPack pack;
@@ -346,9 +346,9 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     return run_graph(*graph, pack, "SwiGLUGraph");
   }
 
-  Status gather_last(const TensorView& hidden,
-                     const TransformerBatchPlan& plan,
-                     const TensorView& output, Stream stream) override {
+  status gather_last(const tensor_view& hidden,
+                     const transformer_batch_plan& plan,
+                     const tensor_view& output, Stream stream) override {
     const std::size_t row_bytes = hidden.columns * sizeof(uint16_t);
     std::size_t row = 0;
     for (std::size_t request = 0; request < plan.requests.size(); ++request) {
@@ -361,22 +361,22 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
                           request * row_bytes;
       if (memcpy_async(destination, row_bytes, source, row_bytes,
                        MemcpyKind::device_to_device, stream) != kSuccess) {
-        return Status::failure(std::string("gather last token: ") +
+        return status::failure(std::string("gather last token: ") +
                                recent_error());
       }
     }
-    return Status::success();
+    return status::success();
   }
 
-  Status sample_logits(const inference::DeviceBatch& batch,
+  status sample_logits(const inference::device_batch& batch,
                        std::size_t vocabulary) {
     if (!batch.device_sampling || !batch.sampled_token_ids ||
         batch.batch_size == 0 || batch.batch_size > 512) {
-      return Status::failure("ATB device sampling metadata is invalid");
+      return status::failure("ATB device sampling metadata is invalid");
     }
-    const auto* requested = static_cast<const inference::SamplingConfig*>(
+    const auto* requested = static_cast<const inference::sampling_config_2*>(
         batch.sampling_params);
-    std::vector<inference::SamplingConfig> defaults;
+    std::vector<inference::sampling_config_2> defaults;
     if (!requested) {
       defaults.resize(batch.batch_size);
       requested = defaults.data();
@@ -391,9 +391,9 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
         atb::infer::TopkToppSamplingParam::BATCH_TOPK_MULTINOMIAL_SAMPLING;
     sampling_param.randSeeds.reserve(batch.batch_size);
     for (std::size_t row = 0; row < batch.batch_size; ++row) {
-      const inference::SamplingConfig& config = requested[row];
+      const inference::sampling_config_2& config = requested[row];
       if (!inference::supports_atb_device_sampling(config, vocabulary)) {
-        return Status::failure(
+        return status::failure(
             "sampling parameters require the CPU fallback");
       }
       const int32_t topk =
@@ -407,7 +407,7 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
                                                         : config.top_p));
       sampling_param.randSeeds.push_back(static_cast<uint32_t>(config.seed));
     }
-    Status status = upload_i32(sampling_topk_, topk_host);
+    status status = upload_i32(sampling_topk_, topk_host);
     if (!status.ok) return status;
     const std::size_t topp_bytes = topp_host.size() * sizeof(uint16_t);
     status = ensure(sampling_topp_, topp_bytes);
@@ -415,7 +415,7 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     if (memcpy_async(sampling_topp_.data(), sampling_topp_.size(),
                      topp_host.data(), topp_bytes, MemcpyKind::host_to_device,
                      batch.stream) != kSuccess) {
-      return Status::failure(std::string("sampling top-p upload: ") +
+      return status::failure(std::string("sampling top-p upload: ") +
                              recent_error());
     }
     const std::size_t probability_bytes =
@@ -438,7 +438,7 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     status = run(softmax_, softmax_pack, "SamplingSoftmax");
     if (!status.ok) return status;
 
-    const atb::Status update =
+    const atb::status update =
         atb::UpdateOperationParam(sampling_, sampling_param);
     if (update != atb::NO_ERROR) {
       return atb_error("TopkToppSampling update", update);
@@ -460,17 +460,17 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     status = run(sampling_, sampling_pack, "TopkToppSampling");
     if (!status.ok) return status;
     return synchronize_stream(batch.stream) == kSuccess
-               ? Status::success()
-               : Status::failure(std::string("device sampling synchronize: ") +
+               ? status::success()
+               : status::failure(std::string("device sampling synchronize: ") +
                                  recent_error());
   }
 
  private:
-  Status quantized_linear(const TensorView& input, const DeviceWeight& weight,
-                          const TensorView& output, Stream stream) {
+  status quantized_linear(const tensor_view& input, const device_weight& weight,
+                          const tensor_view& output, Stream stream) {
     if (!weight.storage.data() || !weight.scales.data() ||
         weight.rows != input.columns || weight.columns != output.columns) {
-      return Status::failure("ACLNN INT8 Linear weight shape is invalid");
+      return status::failure("ACLNN INT8 Linear weight shape is invalid");
     }
     AclTensorHandle x(
         input.data, ACL_FLOAT16,
@@ -486,7 +486,7 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
         {static_cast<int64_t>(output.rows),
          static_cast<int64_t>(output.columns)});
     if (!x.get() || !scale.get() || !y.get()) {
-      return Status::failure("aclCreateTensor failed for INT8 Linear");
+      return status::failure("aclCreateTensor failed for INT8 Linear");
     }
 
     uint64_t workspace_bytes = 0;
@@ -496,44 +496,44 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
             x.get(), w, scale.get(), nullptr, nullptr, nullptr, nullptr,
             0, y.get(), &workspace_bytes, &executor);
     if (prepared != ACLNN_SUCCESS) {
-      return Status::failure(
+      return status::failure(
           "aclnnWeightQuantBatchMatmulV2GetWorkspaceSize status=" +
           std::to_string(prepared));
     }
     if (workspace_bytes > quant_workspace_.size()) {
-      Status status = ensure(quant_workspace_, workspace_bytes);
+      status status = ensure(quant_workspace_, workspace_bytes);
       if (!status.ok) return status;
     }
     const aclnnStatus launched = aclnnWeightQuantBatchMatmulV2(
         quant_workspace_.data(), workspace_bytes, executor, stream);
     return launched == ACLNN_SUCCESS
-               ? Status::success()
-               : Status::failure("aclnnWeightQuantBatchMatmulV2 status=" +
+               ? status::success()
+               : status::failure("aclnnWeightQuantBatchMatmulV2 status=" +
                                  std::to_string(launched));
   }
 
-  struct QuantWeightEntry {
+  struct quant_weight_entry {
     const void* source = nullptr;
     DeviceBuffer formatted;
     aclTensor* tensor = nullptr;
 
-    ~QuantWeightEntry() {
+    ~quant_weight_entry() {
       if (tensor) aclDestroyTensor(tensor);
     }
   };
 
-  aclTensor* transformed_weight(const DeviceWeight& weight, Stream stream) {
+  aclTensor* transformed_weight(const device_weight& weight, Stream stream) {
     for (const auto& entry : quant_weights_) {
       if (entry->source == weight.storage.data()) return entry->tensor;
     }
-    auto entry = std::make_unique<QuantWeightEntry>();
+    auto entry = std::make_unique<quant_weight_entry>();
     entry->source = weight.storage.data();
     const int64_t dimensions[] = {
         static_cast<int64_t>(weight.columns),
         static_cast<int64_t>(weight.rows)};
     const aclIntArray* shape = aclCreateIntArray(dimensions, 2);
     if (!shape) {
-      last_error_ = Status::failure("aclCreateIntArray failed for INT8 weight");
+      last_error_ = status::failure("aclCreateIntArray failed for INT8 weight");
       return nullptr;
     }
     uint64_t formatted_bytes = 0;
@@ -541,12 +541,12 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
         aclnnCalculateMatmulWeightSizeV2(shape, ACL_INT8, &formatted_bytes);
     aclDestroyIntArray(shape);
     if (sized != ACLNN_SUCCESS || formatted_bytes < weight.storage.size()) {
-      last_error_ = Status::failure(
+      last_error_ = status::failure(
           "aclnnCalculateMatmulWeightSizeV2 status=" +
           std::to_string(sized));
       return nullptr;
     }
-    Status status = entry->formatted.allocate(formatted_bytes);
+    status status = entry->formatted.allocate(formatted_bytes);
     if (!status.ok) {
       last_error_ = status;
       return nullptr;
@@ -554,7 +554,7 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     if (memcpy_async(entry->formatted.data(), entry->formatted.size(),
                      weight.storage.data(), weight.storage.size(),
                      MemcpyKind::device_to_device, stream) != kSuccess) {
-      last_error_ = Status::failure(
+      last_error_ = status::failure(
           std::string("INT8 transformed-weight copy: ") + recent_error());
       return nullptr;
     }
@@ -564,7 +564,7 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
         entry->formatted.data());
     if (!entry->tensor) {
       last_error_ =
-          Status::failure("aclCreateTensor failed for transformed INT8 weight");
+          status::failure("aclCreateTensor failed for transformed INT8 weight");
       return nullptr;
     }
     uint64_t workspace_bytes = 0;
@@ -572,7 +572,7 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     const aclnnStatus prepared = aclnnTransMatmulWeightGetWorkspaceSize(
         entry->tensor, &workspace_bytes, &executor);
     if (prepared != ACLNN_SUCCESS) {
-      last_error_ = Status::failure(
+      last_error_ = status::failure(
           "aclnnTransMatmulWeightGetWorkspaceSize status=" +
           std::to_string(prepared));
       return nullptr;
@@ -585,7 +585,7 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     const aclnnStatus transformed = aclnnTransMatmulWeight(
         quant_transform_workspace_.data(), workspace_bytes, executor, stream);
     if (transformed != ACLNN_SUCCESS) {
-      last_error_ = Status::failure("aclnnTransMatmulWeight status=" +
+      last_error_ = status::failure("aclnnTransMatmulWeight status=" +
                                     std::to_string(transformed));
       return nullptr;
     }
@@ -596,37 +596,37 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
 
   enum class GraphKind { swiglu, add_rms_norm, attention_qkv_rope };
 
-  struct GraphKey {
+  struct graph_key {
     GraphKind kind;
     std::size_t rows;
     std::size_t columns;
 
-    bool operator==(const GraphKey& other) const {
+    bool operator==(const graph_key& other) const {
       return kind == other.kind && rows == other.rows &&
              columns == other.columns;
     }
   };
 
-  struct GraphEntry {
-    GraphKey key;
+  struct graph_entry {
+    graph_key key;
     atb::Operation* graph = nullptr;
     std::vector<atb::Operation*> nodes;
     DeviceBuffer workspace;
   };
 
-  template <typename Param>
-  Status create(const Param& param, atb::Operation** output,
+  template <typename param>
+  status create(const param& param, atb::Operation** output,
                 const char* name) {
-    const atb::Status code = atb::CreateOperation(param, output);
+    const atb::status code = atb::CreateOperation(param, output);
     if (code != atb::NO_ERROR) {
       last_error_ = atb_error(name, code);
       return last_error_;
     }
     operations_.push_back(*output);
-    return Status::success();
+    return status::success();
   }
 
-  void destroy_graph(GraphEntry& entry) {
+  void destroy_graph(graph_entry& entry) {
     if (entry.graph) atb::DestroyOperation(entry.graph);
     entry.graph = nullptr;
     for (atb::Operation* operation : entry.nodes) {
@@ -636,12 +636,12 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
   }
 
   void clear_graph_cache() {
-    for (GraphEntry& entry : graph_cache_) destroy_graph(entry);
+    for (graph_entry& entry : graph_cache_) destroy_graph(entry);
     graph_cache_.clear();
   }
 
-  Status create_graph(const GraphKey& key, GraphEntry* entry) {
-    if (!entry) return Status::failure("ATB graph cache entry is null");
+  status create_graph(const graph_key& key, graph_entry* entry) {
+    if (!entry) return status::failure("ATB graph cache entry is null");
     entry->key = key;
     atb::GraphParam graph;
     graph.name =
@@ -659,7 +659,7 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
       swish.activationType = atb::infer::ACTIVATION_SWISH;
       swish.scale = 1.0F;
       atb::Operation* swish_operation = nullptr;
-      atb::Status code = atb::CreateOperation(swish, &swish_operation);
+      atb::status code = atb::CreateOperation(swish, &swish_operation);
       if (code != atb::NO_ERROR) return atb_error("Graph Swish", code);
       entry->nodes.push_back(swish_operation);
       atb::infer::ElewiseParam multiply;
@@ -685,7 +685,7 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
       atb::infer::ElewiseParam add;
       add.elewiseType = atb::infer::ElewiseParam::ELEWISE_ADD;
       atb::Operation* add_operation = nullptr;
-      atb::Status code = atb::CreateOperation(add, &add_operation);
+      atb::status code = atb::CreateOperation(add, &add_operation);
       if (code != atb::NO_ERROR) return atb_error("Graph Add", code);
       entry->nodes.push_back(add_operation);
       atb::infer::RmsNormParam norm;
@@ -714,7 +714,7 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
       norm.layerType = atb::infer::RmsNormParam::RMS_NORM_NORM;
       norm.normParam.epsilon = 1.0e-5F;
       atb::Operation* norm_operation = nullptr;
-      atb::Status code = atb::CreateOperation(norm, &norm_operation);
+      atb::status code = atb::CreateOperation(norm, &norm_operation);
       if (code != atb::NO_ERROR) return atb_error("Graph QKV RmsNorm", code);
       entry->nodes.push_back(norm_operation);
       graph.nodes[0].operation = norm_operation;
@@ -754,15 +754,15 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
       graph.nodes[4].inTensorIds = {12, 13, 5, 6, 7};
       graph.nodes[4].outTensorIds = {9, 10};
     }
-    const atb::Status code = atb::CreateOperation(graph, &entry->graph);
+    const atb::status code = atb::CreateOperation(graph, &entry->graph);
     if (code != atb::NO_ERROR) {
       destroy_graph(*entry);
       return atb_error("Create GraphOperation", code);
     }
-    return Status::success();
+    return status::success();
   }
 
-  GraphEntry* graph_for(const GraphKey& key) {
+  graph_entry* graph_for(const graph_key& key) {
     for (auto entry = graph_cache_.begin(); entry != graph_cache_.end();
          ++entry) {
       if (entry->key == key) {
@@ -770,8 +770,8 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
         return &graph_cache_.front();
       }
     }
-    GraphEntry entry;
-    Status status = create_graph(key, &entry);
+    graph_entry entry;
+    status status = create_graph(key, &entry);
     if (!status.ok) {
       last_error_ = status;
       return nullptr;
@@ -780,7 +780,7 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     while (graph_cache_.size() > kMaxGraphCacheEntries) {
       if (stream_ && synchronize_stream(stream_) != kSuccess) {
         last_error_ =
-            Status::failure("ATB graph eviction synchronization failed");
+            status::failure("ATB graph eviction synchronization failed");
         destroy_graph(graph_cache_.front());
         graph_cache_.pop_front();
         return nullptr;
@@ -791,20 +791,20 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     return &graph_cache_.front();
   }
 
-  Status run_graph(GraphEntry& entry, atb::VariantPack& pack,
+  status run_graph(graph_entry& entry, atb::VariantPack& pack,
                    const char* name) {
     uint64_t workspace_bytes = 0;
-    atb::Status code =
+    atb::status code =
         entry.graph->Setup(pack, workspace_bytes, context_);
     if (code != atb::NO_ERROR) return atb_error(name, code);
     if (workspace_bytes > entry.workspace.size()) {
-      Status status = ensure(entry.workspace, workspace_bytes);
+      status status = ensure(entry.workspace, workspace_bytes);
       if (!status.ok) return status;
     }
     code = entry.graph->Execute(
         pack, static_cast<uint8_t*>(entry.workspace.data()), workspace_bytes,
         context_);
-    return code == atb::NO_ERROR ? Status::success()
+    return code == atb::NO_ERROR ? status::success()
                                  : atb_error(name, code);
   }
 
@@ -813,28 +813,28 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
     context_->SetExecuteStream(stream);
   }
 
-  atb::Tensor fp16(const TensorView& view) const {
+  atb::tensor_2 fp16(const tensor_view& view) const {
     return device_tensor(view.data, ACL_FLOAT16, ACL_FORMAT_ND,
                          {static_cast<int64_t>(view.rows),
                           static_cast<int64_t>(view.columns)});
   }
 
-  atb::Tensor fp16_weight(const DeviceWeight& weight) const {
+  atb::tensor_2 fp16_weight(const device_weight& weight) const {
     return device_tensor(
         weight.storage.data(), ACL_FLOAT16, ACL_FORMAT_ND,
         {static_cast<int64_t>(weight.rows),
          static_cast<int64_t>(weight.columns)});
   }
 
-  atb::Tensor fp16_3d(const TensorView& view,
-                      const TransformerBatchPlan& plan) const {
+  atb::tensor_2 fp16_3d(const tensor_view& view,
+                      const transformer_batch_plan& plan) const {
     return device_tensor(view.data, ACL_FLOAT16, ACL_FORMAT_ND,
                          {static_cast<int64_t>(view.rows),
                           static_cast<int64_t>(plan.head_count),
                           static_cast<int64_t>(plan.head_size)});
   }
 
-  atb::Tensor cache_tensor(void* address) const {
+  atb::tensor_2 cache_tensor(void* address) const {
     return device_tensor(
         address, ACL_FLOAT16, ACL_FORMAT_FRACTAL_NZ,
         {static_cast<int64_t>(cache_.block_count),
@@ -842,27 +842,27 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
          static_cast<int64_t>(cache_.tokens_per_block), 16});
   }
 
-  Status ensure(DeviceBuffer& buffer, std::size_t bytes) {
-    if (buffer.size() >= bytes) return Status::success();
+  status ensure(DeviceBuffer& buffer, std::size_t bytes) {
+    if (buffer.size() >= bytes) return status::success();
     if (buffer.data() && synchronize_stream(stream_) != kSuccess) {
-      return Status::failure("ATB buffer growth synchronization failed");
+      return status::failure("ATB buffer growth synchronization failed");
     }
     return buffer.allocate(bytes);
   }
 
-  Status upload_i32(DeviceBuffer& buffer,
+  status upload_i32(DeviceBuffer& buffer,
                     const std::vector<int32_t>& values) {
     const std::size_t bytes = values.size() * sizeof(int32_t);
-    Status status = ensure(buffer, bytes);
+    status status = ensure(buffer, bytes);
     if (!status.ok) return status;
     return memcpy_async(buffer.data(), buffer.size(), values.data(), bytes,
                         MemcpyKind::host_to_device, stream_) == kSuccess
-               ? Status::success()
-               : Status::failure(std::string("ATB metadata upload: ") +
+               ? status::success()
+               : status::failure(std::string("ATB metadata upload: ") +
                                  recent_error());
   }
 
-  Status prepare_rope(const TransformerBatchPlan& plan) {
+  status prepare_rope(const transformer_batch_plan& plan) {
     std::vector<uint16_t> cos_host;
     std::vector<uint16_t> sin_host;
     q_sequence_lengths_.clear();
@@ -884,7 +884,7 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
       }
     }
     const std::size_t bytes = cos_host.size() * sizeof(uint16_t);
-    Status status = ensure(cos_, bytes);
+    status status = ensure(cos_, bytes);
     if (!status.ok) return status;
     status = ensure(sin_, bytes);
     if (!status.ok) return status;
@@ -892,32 +892,32 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
                      MemcpyKind::host_to_device, stream_) != kSuccess ||
         memcpy_async(sin_.data(), sin_.size(), sin_host.data(), bytes,
                      MemcpyKind::host_to_device, stream_) != kSuccess) {
-      return Status::failure(std::string("RoPE table upload: ") +
+      return status::failure(std::string("RoPE table upload: ") +
                              recent_error());
     }
-    return Status::success();
+    return status::success();
   }
 
-  Status run(atb::Operation* operation, atb::VariantPack& pack,
+  status run(atb::Operation* operation, atb::VariantPack& pack,
              const char* name) {
     uint64_t workspace_bytes = 0;
-    atb::Status code = operation->Setup(pack, workspace_bytes, context_);
+    atb::status code = operation->Setup(pack, workspace_bytes, context_);
     if (code != atb::NO_ERROR) return atb_error(name, code);
     if (workspace_bytes > workspace_.size()) {
-      Status status = ensure(workspace_, workspace_bytes);
+      status status = ensure(workspace_, workspace_bytes);
       if (!status.ok) return status;
     }
     code = operation->Execute(
         pack, static_cast<uint8_t*>(workspace_.data()), workspace_bytes,
         context_);
-    return code == atb::NO_ERROR ? Status::success()
+    return code == atb::NO_ERROR ? status::success()
                                  : atb_error(name, code);
   }
 
   bool ready_ = false;
-  Status last_error_;
-  ModelMetadata model_;
-  KvCacheConfig cache_;
+  status last_error_;
+  model_metadata model_;
+  kv_cache_config_2 cache_;
   Stream stream_ = nullptr;
   atb::Context* context_ = nullptr;
   std::vector<atb::Operation*> operations_;
@@ -933,43 +933,43 @@ class Atb310PBackend final : public TransformerPrimitiveBackend {
   std::vector<int32_t> slot_host_, block_host_, sequence_lengths_;
   std::vector<int32_t> q_sequence_lengths_;
   static constexpr std::size_t kMaxGraphCacheEntries = 32;
-  std::list<GraphEntry> graph_cache_;
-  std::list<std::unique_ptr<QuantWeightEntry>> quant_weights_;
+  std::list<graph_entry> graph_cache_;
+  std::list<std::unique_ptr<quant_weight_entry>> quant_weights_;
 };
 
 class Plugin {
  public:
-  inference::AdapterStatus execute(const inference::DeviceBatch& batch) {
+  inference::adapter_status execute(const inference::device_batch& batch) {
     std::lock_guard<std::mutex> lock(mutex_);
     const auto* model = static_cast<const Nxtrfmv2Model*>(batch.model);
     auto* cache = static_cast<PagedKvCache*>(batch.kv_cache);
     if (!model || !cache) {
-      return inference::AdapterStatus::failure(
+      return inference::adapter_status::failure(
           "operator plugin requires model and KV cache handles");
     }
-    Status status = backend_.initialize(model->metadata(), cache->config());
-    if (!status.ok) return inference::AdapterStatus::failure(status.message);
-    TransformerBatchPlan plan;
+    status status = backend_.initialize(model->metadata(), cache->config());
+    if (!status.ok) return inference::adapter_status::failure(status.message);
+    transformer_batch_plan plan;
     status = build_transformer_batch_plan(batch, *model, *cache, &plan);
-    if (!status.ok) return inference::AdapterStatus::failure(status.message);
+    if (!status.ok) return inference::adapter_status::failure(status.message);
     if (activation_.size() < plan.scratch_bytes) {
       if (activation_.data() &&
           synchronize_stream(batch.stream) != kSuccess) {
-        return inference::AdapterStatus::failure(
+        return inference::adapter_status::failure(
             "activation workspace growth synchronization failed");
       }
       status = activation_.allocate(plan.scratch_bytes);
-      if (!status.ok) return inference::AdapterStatus::failure(status.message);
+      if (!status.ok) return inference::adapter_status::failure(status.message);
     }
-    inference::DeviceBatch launch = batch;
+    inference::device_batch launch = batch;
     launch.workspace = activation_.data();
     launch.workspace_bytes = activation_.size();
     status = execute_transformer(launch, *model, *cache, backend_);
     if (status.ok && batch.device_sampling) {
       status = backend_.sample_logits(batch, model->metadata().vocabulary);
     }
-    return status.ok ? inference::AdapterStatus::success()
-                     : inference::AdapterStatus::failure(status.message);
+    return status.ok ? inference::adapter_status::success()
+                     : inference::adapter_status::failure(status.message);
   }
 
  private:
@@ -989,24 +989,24 @@ Plugin& plugin() {
 extern "C" uint32_t neurx_cann_operator_abi_version() { return 2; }
 
 namespace {
-NeurxCannOperatorStatus abi_status(
-    const neurx::inference::AdapterStatus& status) {
+neurx_cann_operator_status abi_status(
+    const neurx::inference::adapter_status& status) {
   static thread_local std::string message;
   message = status.message;
   return {status.ok ? 0 : 1, status.ok ? nullptr : message.c_str()};
 }
 }
 
-extern "C" NeurxCannOperatorStatus neurx_cann_prefill(
-    const neurx::inference::DeviceBatch& batch) {
+extern "C" neurx_cann_operator_status neurx_cann_prefill(
+    const neurx::inference::device_batch& batch) {
   if (batch.schedule.phase != neurx::inference::Phase::prefill) {
     return {1, "prefill launcher received a decode batch"};
   }
   return abi_status(neurx::cann::plugin().execute(batch));
 }
 
-extern "C" NeurxCannOperatorStatus neurx_cann_decode(
-    const neurx::inference::DeviceBatch& batch) {
+extern "C" neurx_cann_operator_status neurx_cann_decode(
+    const neurx::inference::device_batch& batch) {
   if (batch.schedule.phase != neurx::inference::Phase::decode) {
     return {1, "decode launcher received a prefill batch"};
   }

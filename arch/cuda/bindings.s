@@ -632,7 +632,7 @@ static PyMethodDef TensorCudaMethods[] = {
 static struct PyModuleDef tensor_cuda_module = {
     PyModuleDef_HEAD_INIT,
     "_tensor_cuda",
-    "Tensor CUDA ops",
+    "tensor_2 CUDA ops",
     -1,
     TensorCudaMethods,
 };

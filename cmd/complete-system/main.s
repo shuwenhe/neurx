@@ -71,7 +71,7 @@ func runTraining(args []string) {
         fmt.Printf("Unknown scale: %s\n", scale)
         return
     }
-    fmt.Printf("  Model Parameters: %d\n", llm.NewGPT(modelConfig).NumParams())
+    fmt.Printf("  model Parameters: %d\n", llm.NewGPT(modelConfig).NumParams())
     trainingConfig := training.training_config{
         ModelScale:        scale,
         NumEpochs:         10,
@@ -122,8 +122,8 @@ func runInference(args []string) {
         fmt.Printf("❌ Failed to load model: %v\n", err)
         return
     }
-    fmt.Printf("✅ Model loaded successfully\n")
-    fmt.Printf("📊 Model parameters: %d\n", model.NumParams())
+    fmt.Printf("✅ model loaded successfully\n")
+    fmt.Printf("📊 model parameters: %d\n", model.NumParams())
     fmt.Println("\n" + "=" * 60)
     fmt.Println("🚀 Starting Inference Server...")
     fmt.Println("=" * 60 + "\n")
@@ -274,9 +274,9 @@ COMMANDS:
 FEATURES:
   ✓ Complete transformer architecture
   ✓ Multi-head attention with causal masking
-  ✓ AdamW optimizer with learning rate scheduling
-  ✓ Distributed training (DDP, Tensor Parallel, Pipeline Parallel)
-  ✓ Model checkpointing and resuming
+  ✓ adam_w optimizer with learning rate scheduling
+  ✓ Distributed training (DDP, tensor_2 Parallel, Pipeline Parallel)
+  ✓ model checkpointing and resuming
   ✓ Real-time monitoring and logging
   ✓ Production-ready inference server
   ✓ 647+ S language files (no Python/C++)

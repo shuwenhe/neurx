@@ -5,7 +5,7 @@ func main() int {
     string config = runtime_env_get("NEURX_ROBOTICS_OBSERVE_CONFIG", "workflows/robotics/train/config/sample.yaml")
     string steps_override = runtime_env_get("NEURX_ROBOTICS_OBSERVE_STEPS", "")
     if !runtime_run_command("test -f " + runtime_shell_escape(config)).ok {
-        println("Config not found: " + config)
+        println("config not found: " + config)
         return 1
     }
     string obs_dim = default_if_empty(yaml_value(config, "obs_dim"), "8")

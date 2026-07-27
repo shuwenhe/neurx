@@ -269,15 +269,15 @@ std::string top_logits_json(const std::vector<float>& logits,
   return output.str();
 }
 
-struct RequestRelease {
+struct request_release {
   neurx::inference::AscendWorker* worker;
   std::string id;
-  ~RequestRelease() {
+  ~request_release() {
     if (worker) worker->release_request(id);
   }
 };
 
-struct BatchRequestRelease {
+struct batch_request_release {
   neurx::inference::AscendWorker* worker;
   std::vector<std::string> ids;
   void release(std::size_t row) {
@@ -286,7 +286,7 @@ struct BatchRequestRelease {
       ids[row].clear();
     }
   }
-  ~BatchRequestRelease() {
+  ~batch_request_release() {
     if (!worker) return;
     for (const std::string& id : ids) {
       if (!id.empty()) worker->release_request(id);
@@ -294,15 +294,15 @@ struct BatchRequestRelease {
   }
 };
 
-neurx::inference::AdapterStatus generate(
+neurx::inference::adapter_status generate(
     neurx::inference::AscendWorker& worker, const std::string& request_id,
     const std::vector<int32_t>& prompt, int max_new_tokens,
-    const neurx::inference::SamplingConfig& sampling,
+    const neurx::inference::sampling_config_2& sampling,
     const std::vector<int32_t>& stop_tokens,
     std::vector<int32_t>* generated) {
   using namespace neurx::inference;
   if (prompt.empty() || max_new_tokens <= 0) {
-    return AdapterStatus::failure(
+    return adapter_status::failure(
         "input_ids must be non-empty and max_new_tokens must be positive");
   }
   const std::size_t maximum_sequence =
@@ -310,19 +310,19 @@ neurx::inference::AdapterStatus generate(
   if (prompt.size() > maximum_sequence ||
       static_cast<std::size_t>(max_new_tokens - 1) >
           maximum_sequence - prompt.size()) {
-    return AdapterStatus::failure(
+    return adapter_status::failure(
         "prompt and generated tokens exceed the model sequence limit");
   }
-  RequestRelease release{&worker, request_id};
+  request_release release{&worker, request_id};
   std::vector<int32_t> history = prompt;
-  Batch batch;
+  batch_2 batch;
   batch.phase = Phase::prefill;
   batch.key = {Backend::ascend, "fp16"};
   batch.items = {{request_id, static_cast<int>(prompt.size())}};
   batch.total_tokens = static_cast<int>(prompt.size());
-  WorkerBatchResult result;
-  SamplingConfig step_sampling = sampling;
-  AdapterStatus status =
+  worker_batch_result result;
+  sampling_config_2 step_sampling = sampling;
+  adapter_status status =
       worker.execute(batch, prompt, {step_sampling}, {history}, &result);
   if (!status.ok) return status;
 
@@ -345,27 +345,27 @@ neurx::inference::AdapterStatus generate(
     if (!status.ok) return status;
     token = result.next_tokens.front();
   }
-  return AdapterStatus::success();
+  return adapter_status::success();
 }
 
-neurx::inference::AdapterStatus generate_batch(
+neurx::inference::adapter_status generate_batch(
     neurx::inference::AscendWorker& worker, const std::string& batch_id,
     const std::vector<std::vector<int32_t>>& prompts, int max_new_tokens,
-    const neurx::inference::SamplingConfig& sampling,
+    const neurx::inference::sampling_config_2& sampling,
     const std::vector<int32_t>& stop_tokens,
     std::vector<std::vector<int32_t>>* generated) {
   using namespace neurx::inference;
   if (prompts.empty() || max_new_tokens <= 0 || !generated) {
-    return AdapterStatus::failure("batch generation arguments are invalid");
+    return adapter_status::failure("batch generation arguments are invalid");
   }
   const std::size_t maximum_sequence =
       worker.executor().model().metadata().max_sequence;
-  BatchRequestRelease release{&worker, {}};
-  Batch batch;
+  batch_request_release release{&worker, {}};
+  batch_2 batch;
   batch.phase = Phase::prefill;
   batch.key = {Backend::ascend, "fp16"};
   std::vector<int32_t> input_tokens;
-  std::vector<SamplingConfig> sampling_rows;
+  std::vector<sampling_config_2> sampling_rows;
   std::vector<std::vector<int32_t>> histories = prompts;
   release.ids.reserve(prompts.size());
   batch.items.reserve(prompts.size());
@@ -374,7 +374,7 @@ neurx::inference::AdapterStatus generate_batch(
     if (prompts[row].empty() || prompts[row].size() > maximum_sequence ||
         static_cast<std::size_t>(max_new_tokens - 1) >
             maximum_sequence - prompts[row].size()) {
-      return AdapterStatus::failure(
+      return adapter_status::failure(
           "a batch prompt exceeds the model sequence limit");
     }
     const std::string id = batch_id + "-" + std::to_string(row);
@@ -383,13 +383,13 @@ neurx::inference::AdapterStatus generate_batch(
     batch.total_tokens += static_cast<int>(prompts[row].size());
     input_tokens.insert(input_tokens.end(), prompts[row].begin(),
                         prompts[row].end());
-    SamplingConfig row_sampling = sampling;
+    sampling_config_2 row_sampling = sampling;
     row_sampling.seed += row;
     sampling_rows.push_back(row_sampling);
   }
 
-  WorkerBatchResult result;
-  AdapterStatus status =
+  worker_batch_result result;
+  adapter_status status =
       worker.execute(batch, input_tokens, sampling_rows, histories, &result);
   if (!status.ok) return status;
   generated->assign(prompts.size(), {});
@@ -410,12 +410,12 @@ neurx::inference::AdapterStatus generate_batch(
   }
 
   for (int step = 1; !active.empty() && step < max_new_tokens; ++step) {
-    Batch decode;
+    batch_2 decode;
     decode.phase = Phase::decode;
     decode.key = {Backend::ascend, "fp16"};
     decode.total_tokens = static_cast<int>(active.size());
     std::vector<int32_t> decode_tokens;
-    std::vector<SamplingConfig> decode_sampling;
+    std::vector<sampling_config_2> decode_sampling;
     std::vector<std::vector<int32_t>> decode_histories;
     decode.items.reserve(active.size());
     decode_tokens.reserve(active.size());
@@ -424,7 +424,7 @@ neurx::inference::AdapterStatus generate_batch(
     for (const std::size_t row : active) {
       decode.items.push_back({release.ids[row], 1});
       decode_tokens.push_back((*generated)[row].back());
-      SamplingConfig row_sampling = sampling;
+      sampling_config_2 row_sampling = sampling;
       row_sampling.seed += static_cast<uint64_t>(step) * prompts.size() + row;
       decode_sampling.push_back(row_sampling);
       decode_histories.push_back(histories[row]);
@@ -450,7 +450,7 @@ neurx::inference::AdapterStatus generate_batch(
     }
     active.swap(next_active);
   }
-  return AdapterStatus::success();
+  return adapter_status::success();
 }
 
 }
@@ -463,8 +463,8 @@ int main() {
     return 2;
   }
 
-  neurx::cann::ModelMetadata metadata;
-  neurx::cann::Status inspected =
+  neurx::cann::model_metadata metadata;
+  neurx::cann::status inspected =
       neurx::cann::inspect_nxtrfmv2(checkpoint, &metadata);
   if (!inspected.ok) {
     std::cerr << inspected.message << '\n';
@@ -494,7 +494,7 @@ int main() {
     return 2;
   }
 
-  neurx::inference::AscendExecutorConfig config;
+  neurx::inference::ascend_executor_config config;
   config.operator_library = operators;
   config.checkpoint = checkpoint;
   if (precision == "fp16") {
@@ -506,16 +506,16 @@ int main() {
     std::cerr << "NEURX_ASCEND_PRECISION must be fp16 or int8\n";
     return 2;
   }
-  config.kv_cache = neurx::cann::KvCacheConfig::fp16_310p(
+  config.kv_cache = neurx::cann::kv_cache_config_2::fp16_310p(
       static_cast<std::size_t>(blocks), static_cast<std::size_t>(block_tokens),
       metadata.layers, metadata.attention_heads,
       metadata.hidden_size / metadata.attention_heads);
-  neurx::cann::PrefixCacheConfig prefix_config;
+  neurx::cann::prefix_cache_config prefix_config;
   prefix_config.max_entries = static_cast<std::size_t>(prefix_entries);
   prefix_config.max_retained_blocks =
       static_cast<std::size_t>(prefix_blocks);
   neurx::inference::AscendWorker worker(std::move(config), prefix_config);
-  neurx::inference::AdapterStatus initialized =
+  neurx::inference::adapter_status initialized =
       worker.initialize(static_cast<int>(device));
   if (!initialized.ok) {
     std::cerr << initialized.message << '\n';
@@ -542,7 +542,7 @@ int main() {
     if (client < 0) continue;
     std::string method, path, body;
     if (!read_request(client, &method, &path, &body)) {
-      respond(client, 400, "Bad Request", "{\"error\":\"invalid request\"}");
+      respond(client, 400, "Bad request", "{\"error\":\"invalid request\"}");
       neurx_net_close(client);
       continue;
     }
@@ -555,7 +555,7 @@ int main() {
               healthy ? "{\"status\":\"ok\"}"
                       : "{\"status\":\"draining\"}");
     } else if (method == "GET" && path == "/metrics") {
-      const neurx::cann::PrefixCacheStats prefix =
+      const neurx::cann::prefix_cache_stats prefix =
           worker.prefix_cache_stats();
       std::ostringstream metrics;
       metrics << "neurx_ascend_requests_total " << requests << '\n'
@@ -585,20 +585,20 @@ int main() {
           !json_number(body, "top_k", 32, &requested_top_k) ||
           prompt.empty() || requested_top_k < 1 || requested_top_k > 128) {
         ++failures;
-        respond(client, 400, "Bad Request",
+        respond(client, 400, "Bad request",
                 "{\"error\":\"invalid benchmark request\"}");
       } else {
         const std::string id = "benchmark-" + std::to_string(requests);
-        RequestRelease release{&worker, id};
-        neurx::inference::Batch batch;
+        request_release release{&worker, id};
+        neurx::inference::batch_2 batch;
         batch.phase = neurx::inference::Phase::prefill;
         batch.key = {neurx::inference::Backend::ascend, precision};
         batch.items = {{id, static_cast<int>(prompt.size())}};
         batch.total_tokens = static_cast<int>(prompt.size());
-        neurx::inference::SamplingConfig sampling;
+        neurx::inference::sampling_config_2 sampling;
 
         sampling.repetition_penalty = 1.000001F;
-        neurx::inference::WorkerBatchResult result;
+        neurx::inference::worker_batch_result result;
         const auto status =
             worker.execute(batch, prompt, {sampling}, {prompt}, &result);
         if (!status.ok) {
@@ -631,7 +631,7 @@ int main() {
       if (body.find("\"stop_token_ids\"") != std::string::npos &&
           !json_integer_array(body, "stop_token_ids", &stop_tokens)) {
         ++failures;
-        respond(client, 400, "Bad Request",
+        respond(client, 400, "Bad request",
                 "{\"error\":\"invalid stop_token_ids\"}");
       } else if (!valid || prompts.size() >
                                static_cast<std::size_t>(http_max_batch) ||
@@ -639,10 +639,10 @@ int main() {
                  top_k < 0 || top_k > std::numeric_limits<int>::max() ||
                  seed < 0) {
         ++failures;
-        respond(client, 400, "Bad Request",
+        respond(client, 400, "Bad request",
                 "{\"error\":\"invalid batch generation parameters\"}");
       } else {
-        neurx::inference::SamplingConfig sampling;
+        neurx::inference::sampling_config_2 sampling;
         sampling.temperature = static_cast<float>(temperature);
         sampling.top_k = static_cast<int>(top_k);
         sampling.top_p = static_cast<float>(top_p);
@@ -680,16 +680,16 @@ int main() {
       if (body.find("\"stop_token_ids\"") != std::string::npos &&
           !json_integer_array(body, "stop_token_ids", &stop_tokens)) {
         ++failures;
-        respond(client, 400, "Bad Request",
+        respond(client, 400, "Bad request",
                 "{\"error\":\"invalid stop_token_ids\"}");
       } else if (!valid || max_new < 1 || max_new > 65536 ||
                  top_k < 0 || top_k > std::numeric_limits<int>::max() ||
                  seed < 0) {
         ++failures;
-        respond(client, 400, "Bad Request",
+        respond(client, 400, "Bad request",
                 "{\"error\":\"invalid generation parameters\"}");
       } else {
-        neurx::inference::SamplingConfig sampling;
+        neurx::inference::sampling_config_2 sampling;
         sampling.temperature = static_cast<float>(temperature);
         sampling.top_k = static_cast<int>(top_k);
         sampling.top_p = static_cast<float>(top_p);

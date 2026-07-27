@@ -69,9 +69,9 @@ func reasoning_trace_sample_target(reasoning_trace_sample_state sample) string {
     string target = "### Action\n" + sample.action
     target = target + "\n\n### Observation\n" + sample.observation
     if sample.ok {
-        target = target + "\n\n### Status\nok"
+        target = target + "\n\n### status\nok"
     } else {
-        target = target + "\n\n### Status\nfailed"
+        target = target + "\n\n### status\nfailed"
     }
     target
 }

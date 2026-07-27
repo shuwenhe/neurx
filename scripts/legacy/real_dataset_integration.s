@@ -216,8 +216,8 @@ func (loader *data_loader) verify_data_quality() bool {
 
 func (loader *data_loader) setup_cache() {
     if loader.config.cache_enabled {
-        fmt.Printf("[Cache] Initializing cache (%dGB max)\n", loader.config.max_cache_size_gb)
-        fmt.Println("[Cache] Cache setup complete")
+        fmt.Printf("[cache] Initializing cache (%dGB max)\n", loader.config.max_cache_size_gb)
+        fmt.Println("[cache] cache setup complete")
     }
 }
 
@@ -249,11 +249,11 @@ func (loader *data_loader) initialize() {
     fmt.Println("│  Initializing Dataset Loader           │")
     fmt.Println("└────────────────────────────────────────┘\n")
     fmt.Printf("Configuration:\n")
-    fmt.Printf("  Batch Size: %d\n", loader.config.batch_size)
+    fmt.Printf("  batch_2 Size: %d\n", loader.config.batch_size)
     fmt.Printf("  Shuffle: %v\n", loader.config.shuffle)
     fmt.Printf("  Workers: %d\n", loader.config.num_workers)
     fmt.Printf("  Prefetch: %d\n", loader.config.prefetch_factor)
-    fmt.Printf("  Cache: %v (%dGB)\n\n", loader.config.cache_enabled, loader.config.max_cache_size_gb)
+    fmt.Printf("  cache: %v (%dGB)\n\n", loader.config.cache_enabled, loader.config.max_cache_size_gb)
 }
 
 func (loader *data_loader) run_full_pipeline() {
@@ -295,7 +295,7 @@ func (loader *data_loader) run_full_pipeline() {
     batches := loader.create_batches()
     fmt.Printf("Total Batches: %d\n", len(batches))
     if len(batches) > 0 {
-        fmt.Printf("First Batch Size: %d\n", len(batches[0]))
+        fmt.Printf("First batch_2 Size: %d\n", len(batches[0]))
     }
     fmt.Println("\n[data_loader] Complete!")
 }

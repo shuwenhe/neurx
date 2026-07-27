@@ -241,7 +241,7 @@ func test_nccl_barrier() test_result {
 }
 
 func run_model_tests() test_suite {
-    suite := test_suite{name: "Model Architecture", results: make([]test_result, 0)}
+    suite := test_suite{name: "model Architecture", results: make([]test_result, 0)}
     suite.results = append(suite.results, test_transformer_forward_pass())
     suite.results = append(suite.results, test_transformer_backward_pass())
     suite.results = append(suite.results, test_attention_computation())
@@ -267,7 +267,7 @@ func test_transformer_forward_pass() test_result {
     passed := logits != nil
     cleanup_cuda_context(ctx)
     test_result{
-        name: "Transformer Forward Pass",
+        name: "transformer_2 Forward Pass",
         passed: passed,
         error_message: if passed { "" } else { "Forward pass failed" },
         duration_ms: (get_timestamp() - start) * 1000,
@@ -277,7 +277,7 @@ func test_transformer_forward_pass() test_result {
 func test_transformer_backward_pass() test_result {
     start := get_timestamp()
     test_result{
-        name: "Transformer Backward Pass",
+        name: "transformer_2 Backward Pass",
         passed: true,
         error_message: "",
         duration_ms: (get_timestamp() - start) * 1000,
@@ -295,7 +295,7 @@ func test_attention_computation() test_result {
 }
 
 func run_optimizer_tests() test_suite {
-    suite := test_suite{name: "Optimizer", results: make([]test_result, 0)}
+    suite := test_suite{name: "optimizer_2", results: make([]test_result, 0)}
     suite.results = append(suite.results, test_adamw_optimizer())
     suite.results = append(suite.results, test_learning_rate_schedule())
     print_test_suite_results(&suite)
@@ -313,9 +313,9 @@ func test_adamw_optimizer() test_result {
     }
     passed := optimizer.learning_rate > 0
     test_result{
-        name: "AdamW Optimizer",
+        name: "adam_w optimizer_2",
         passed: passed,
-        error_message: if passed { "" } else { "Optimizer creation failed" },
+        error_message: if passed { "" } else { "optimizer_2 creation failed" },
         duration_ms: (get_timestamp() - start) * 1000,
     }
 }

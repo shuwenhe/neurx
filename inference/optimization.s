@@ -349,7 +349,7 @@ func main() {
     req1.temperature = 0.7
     req1.top_p = 0.9
     enqueue_inference_request(scheduler, req1)
-    println("Request queued. Total pending: " + int_to_string(scheduler.pending_count))
+    println("request queued. Total pending: " + int_to_string(scheduler.pending_count))
     int batch_size = schedule_next_batch(scheduler)
     println("Scheduled batch size: " + int_to_string(batch_size))
     println("\nRunning optimized inference...")

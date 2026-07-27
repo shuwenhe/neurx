@@ -8,23 +8,23 @@
 #include <vector>
 
 int main() {
-  using neurx::inference::SamplingConfig;
+  using neurx::inference::sampling_config_2;
 
   const float logits[] = {1.0F, 3.0F, 2.0F, -1.0F};
   int32_t token = -1;
-  SamplingConfig greedy;
+  sampling_config_2 greedy;
   greedy.temperature = 0.0F;
   assert(neurx::inference::sample_logits(logits, 4, greedy, {}, &token).ok);
   assert(token == 1);
 
-  SamplingConfig top_k;
+  sampling_config_2 top_k;
   top_k.top_k = 1;
   top_k.seed = 7;
   assert(neurx::inference::sample_logits(logits, 4, top_k, {}, &token).ok);
   assert(token == 1);
   assert(neurx::inference::supports_atb_device_sampling(top_k, 4));
 
-  SamplingConfig penalty;
+  sampling_config_2 penalty;
   penalty.temperature = 0.0F;
   penalty.repetition_penalty = 4.0F;
   assert(neurx::inference::sample_logits(
@@ -33,15 +33,15 @@ int main() {
   assert(token == 2);
   assert(!neurx::inference::supports_atb_device_sampling(penalty, 4));
 
-  SamplingConfig temperature;
+  sampling_config_2 temperature;
   temperature.temperature = 0.7F;
   assert(!neurx::inference::supports_atb_device_sampling(temperature, 4));
 
-  SamplingConfig greedy_device;
+  sampling_config_2 greedy_device;
   greedy_device.temperature = 0.0F;
   assert(neurx::inference::supports_atb_device_sampling(greedy_device, 4));
 
-  SamplingConfig invalid;
+  sampling_config_2 invalid;
   invalid.top_p = 0.0F;
   assert(!neurx::inference::sample_logits(logits, 4, invalid, {}, &token).ok);
 

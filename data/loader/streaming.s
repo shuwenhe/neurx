@@ -294,7 +294,7 @@ func dataloader_statistics(streaming_dataloader loader) string {
     stats = stats + "  Total Batches: " + string(loader.total_batches) + "\n"
     stats = stats + "  Processed Batches: " + string(loader.processed_batches) + "\n"
     stats = stats + "  Prefetch Queue Size: " + string(loader.queue_size) + "\n"
-    stats = stats + "  Batch Size: " + string(loader.config.batch_size) + "\n"
+    stats = stats + "  batch_2 Size: " + string(loader.config.batch_size) + "\n"
     stats = stats + "  Sequence Length: " + string(loader.config.seq_len) + "\n"
     stats = stats + "  Buffer Size: " + string(loader.config.buffer_size) + "\n"
     stats = stats + "  Shuffle: " + string(loader.config.shuffle) + "\n"

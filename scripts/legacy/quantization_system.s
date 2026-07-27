@@ -173,7 +173,7 @@ func (framework *quantization_framework) analyze_compression() {
     int4_size := int64(framework.original_model.num_layers *
                       framework.original_model.hidden_size *
                       framework.original_model.hidden_size / 2)
-    fmt.Printf("Original Model Size: %.2f GB\n", float64(original_size)/1e9)
+    fmt.Printf("Original model Size: %.2f GB\n", float64(original_size)/1e9)
     fmt.Printf("INT8 Quantized: %.2f GB (%.1f%% of original)\n",
         float64(int8_size)/1e9, float64(int8_size)*100/float64(original_size))
     fmt.Printf("INT4 Quantized: %.2f GB (%.1f%% of original)\n",
@@ -193,11 +193,11 @@ func (framework *quantization_framework) evaluate_quantization_impact(original_p
     fmt.Printf("Quantized PPL (INT8): %.2f\n", quantized_ppl)
     fmt.Printf("Accuracy Loss: %.2f%%\n", accuracy_loss)
     if accuracy_loss < 1.0 {
-        fmt.Println("Status: ✅ Excellent - Minimal accuracy loss")
+        fmt.Println("status: ✅ Excellent - Minimal accuracy loss")
     } else if accuracy_loss < 5.0 {
-        fmt.Println("Status: 🟡 Good - Acceptable accuracy loss")
+        fmt.Println("status: 🟡 Good - Acceptable accuracy loss")
     } else {
-        fmt.Println("Status: 🔴 Poor - Significant accuracy loss")
+        fmt.Println("status: 🔴 Poor - Significant accuracy loss")
     }
 }
 
@@ -230,7 +230,7 @@ func NewQuantizationFramework(config quantization_config, model PolicyModel) *qu
 
 func (framework *quantization_framework) quantize_model(calibration_data [][]float64) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
-    fmt.Println("║  Model Quantization (INT8/INT4 Compression)           ║")
+    fmt.Println("║  model Quantization (INT8/INT4 Compression)           ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
     framework.calibrate(calibration_data)
     framework.analyze_compression()

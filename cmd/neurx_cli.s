@@ -5,7 +5,7 @@ import (
     "strconv"
     "../scripts"
 )
-struct Command {
+struct command {
     name        string
     description string
     usage       string
@@ -112,7 +112,7 @@ func cmd_help(args []string) error {
 }
 
 func cmd_status(args []string) error {
-    logger := scripts.new_logger("Status")
+    logger := scripts.new_logger("status")
     if scripts.dir_exists(".build") {
         logger.success("Build artifacts found")
     } else {
@@ -130,7 +130,7 @@ func cmd_status(args []string) error {
     }
     return nil
 }
-var commands = []Command{
+var commands = []command{
     {
         name:        "train",
         description: "Start foundation model training",
@@ -217,7 +217,7 @@ var commands = []Command{
     },
 }
 
-func find_command(name string) *Command {
+func find_command(name string) *command {
     for i := 0; i < len(commands); i++ {
         if commands[i].name == name {
             return &commands[i]
@@ -271,7 +271,7 @@ ENVIRONMENT VARIABLES:
   NEURX_ROOT        Root directory of NeurX project
   S_COMPILER        Path to S language compiler
   NEURX_GPUS        Number of GPUs to use
-  NEURX_BATCH_SIZE  Batch size for training
+  NEURX_BATCH_SIZE  batch_2 size for training
   NEURX_LOG_DIR     Directory for logs
 EXAMPLES:
   # Quick test on single GPU
@@ -292,7 +292,7 @@ func show_detailed_help(cmd string) {
         fmt.Printf("Unknown command: %s\n", cmd)
         return
     }
-    fmt.Printf("Command: %s\n", command.name)
+    fmt.Printf("command: %s\n", command.name)
     fmt.Printf("Description: %s\n", command.description)
     fmt.Printf("Usage: %s\n", command.usage)
 }
@@ -320,7 +320,7 @@ func main() {
         cmdArgs = args[1:]
     }
     if err := cmd.handler(cmdArgs); err != nil {
-        logger.error("Command failed: %v", err)
+        logger.error("command failed: %v", err)
         os.Exit(1)
     }
 }

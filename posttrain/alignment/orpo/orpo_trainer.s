@@ -230,7 +230,7 @@ func start_orpo_training(
 ) orpo_state {
     orpo_state state = create_orpo_state(cfg)
     print("[ORPO Training] Starting...")
-    print("  Config: seq_len=" + int_to_string_ex(cfg.seq_len) +
+    print("  config: seq_len=" + int_to_string_ex(cfg.seq_len) +
           " hidden=" + int_to_string_ex(cfg.hidden_size))
     print("  Parameters: beta=" + float_to_string_ex(cfg.beta) +
           " gamma=" + float_to_string_ex(cfg.gamma))
@@ -270,7 +270,7 @@ func start_orpo_training(
                 0.00000001
             )
             if mod_int_ex(batch_idx + 1, 10) == 0 {
-                print("  Batch " + int_to_string_ex(batch_idx + 1) +
+                print("  batch_2 " + int_to_string_ex(batch_idx + 1) +
                       ": Loss = " + float_to_string_ex(state.avg_loss))
             }
             batch_idx = batch_idx + 1

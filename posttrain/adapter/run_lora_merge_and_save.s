@@ -184,7 +184,7 @@ func verify_output(string output_dir) int {
 func main() int {
     println("")
     println("╔" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╗")
-    println("║  LoRA merge and Model saving - S LanguageImplementation")
+    println("║  LoRA merge and model saving - S LanguageImplementation")
     println("║  Merge LoRA adapter into base model")
     println("╚" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╝")
     println("")

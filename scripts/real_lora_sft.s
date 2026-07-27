@@ -95,7 +95,7 @@ func write_adapter_safetensors(string model_path, string output_dir, int rank, f
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/neurx")
     string helper = project_root + "/scripts/write_lora_adapter_safetensors.py"
     println("[NeurX PostTrain] Invoking Python Reference Trainer")
-    println("[LoRA Config] rank=" + int_to_str(rank) + ", alpha=" + float_to_str(alpha, 1))
+    println("[LoRA config] rank=" + int_to_str(rank) + ", alpha=" + float_to_str(alpha, 1))
     let _ = runtime_run_command_output(
         "python3 " + shell_escape(helper) + " " +
         shell_escape(model_path) + " " +

@@ -1,5 +1,5 @@
 package neurx.lib.loss
-use neurx.lib.tensor.{Vector, Matrix, create_vector, create_matrix, vector_scale, vector_subtract, matrix_scale}
+use neurx.lib.tensor.{vector, matrix, create_vector, create_matrix, vector_scale, vector_subtract, matrix_scale}
 struct mse_loss {
     string name
 }
@@ -25,7 +25,7 @@ func create_mse_loss() mse_loss {
     loss
 }
 
-func mse_loss_forward(Vector pred, Vector target) float {
+func mse_loss_forward(vector pred, vector target) float {
     if pred.size != target.size {
         return 0.0
     }
@@ -39,11 +39,11 @@ func mse_loss_forward(Vector pred, Vector target) float {
     sum / (pred.size as float)
 }
 
-func mse_loss_backward(Vector pred, Vector target) Vector {
+func mse_loss_backward(vector pred, vector target) vector {
     if pred.size != target.size {
         return create_vector(pred.size)
     }
-    Vector grad = create_vector(pred.size)
+    vector grad = create_vector(pred.size)
     float scale = 2.0 / (pred.size as float)
     int i = 0
     while i < pred.size {
@@ -60,7 +60,7 @@ func create_cross_entropy_loss() cross_entropy_loss {
     loss
 }
 
-func cross_entropy_loss_forward(Vector pred, Vector target) float {
+func cross_entropy_loss_forward(vector pred, vector target) float {
     if pred.size != target.size {
         return 0.0
     }
@@ -96,11 +96,11 @@ func cross_entropy_loss_forward(Vector pred, Vector target) float {
     loss / (pred.size as float)
 }
 
-func cross_entropy_loss_backward(Vector pred, Vector target) Vector {
+func cross_entropy_loss_backward(vector pred, vector target) vector {
     if pred.size != target.size {
         return create_vector(pred.size)
     }
-    Vector grad = create_vector(pred.size)
+    vector grad = create_vector(pred.size)
     float scale = 1.0 / (pred.size as float)
     int i = 0
     while i < pred.size {
@@ -117,7 +117,7 @@ func create_bce_loss() bceloss {
     loss
 }
 
-func bce_loss_forward(Vector pred, Vector target) float {
+func bce_loss_forward(vector pred, vector target) float {
     if pred.size != target.size {
         return 0.0
     }
@@ -178,7 +178,7 @@ func create_smooth_l1_loss() smooth_l1_loss {
     loss
 }
 
-func smooth_l1_loss_forward(Vector pred, Vector target) float {
+func smooth_l1_loss_forward(vector pred, vector target) float {
     if pred.size != target.size {
         return 0.0
     }
@@ -206,7 +206,7 @@ struct sgd_optimizer {
     float learning_rate
     float momentum
     float weight_decay
-    Vector velocity
+    vector velocity
 }
 
 struct adam_optimizer {
@@ -215,8 +215,8 @@ struct adam_optimizer {
     float beta2
     float epsilon
     int step_count
-    Vector m
-    Vector v
+    vector m
+    vector v
 }
 
 func create_sgd_optimizer(float lr, float momentum, float weight_decay) sgd_optimizer {
@@ -227,14 +227,14 @@ func create_sgd_optimizer(float lr, float momentum, float weight_decay) sgd_opti
     opt
 }
 
-func sgd_step(sgd_optimizer opt, Vector params, Vector grads) Vector {
+func sgd_step(sgd_optimizer opt, vector params, vector grads) vector {
     if params.size != grads.size {
         return params
     }
     if opt.velocity.size == 0 {
         opt.velocity = create_vector(params.size)
     }
-    Vector updated = create_vector(params.size)
+    vector updated = create_vector(params.size)
     int i = 0
     while i < params.size {
         float grad = grads.data[i] + opt.weight_decay * params.data[i]
@@ -255,7 +255,7 @@ func create_adam_optimizer(float lr) adam_optimizer {
     opt
 }
 
-func adam_step(adam_optimizer opt, Vector params, Vector grads) Vector {
+func adam_step(adam_optimizer opt, vector params, vector grads) vector {
     if params.size != grads.size {
         return params
     }
@@ -264,7 +264,7 @@ func adam_step(adam_optimizer opt, Vector params, Vector grads) Vector {
         opt.v = create_vector(params.size)
     }
     opt.step_count = opt.step_count + 1
-    Vector updated = create_vector(params.size)
+    vector updated = create_vector(params.size)
     int i = 0
     while i < params.size {
         opt.m.data[i] = opt.beta1 * opt.m.data[i] + (1.0 - opt.beta1) * grads.data[i]
@@ -288,7 +288,7 @@ struct rmsprop_optimizer {
     float learning_rate
     float alpha
     float epsilon
-    Vector mean_square
+    vector mean_square
 }
 
 func create_rmsprop_optimizer(float lr) rmsprop_optimizer {
@@ -299,14 +299,14 @@ func create_rmsprop_optimizer(float lr) rmsprop_optimizer {
     opt
 }
 
-func rmsprop_step(rmsprop_optimizer opt, Vector params, Vector grads) Vector {
+func rmsprop_step(rmsprop_optimizer opt, vector params, vector grads) vector {
     if params.size != grads.size {
         return params
     }
     if opt.mean_square.size == 0 {
         opt.mean_square = create_vector(params.size)
     }
-    Vector updated = create_vector(params.size)
+    vector updated = create_vector(params.size)
     int i = 0
     while i < params.size {
         float grad_sq = grads.data[i] * grads.data[i]

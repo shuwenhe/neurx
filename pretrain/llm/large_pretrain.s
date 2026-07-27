@@ -1463,7 +1463,7 @@ func gpt_large_pretrain_core_summary(gpt_large_pretrain_state state) string {
     out = out + gpt_large_pretrain_framework_title() + "\n"
     out = out + "----------------------------------\n"
     out = out + "Data: " + int_to_str(bool_to_int(gpt_large_pretrain_data_ready(state)), 0) + " | "
-    out = out + "Model: " + int_to_str(bool_to_int(gpt_large_pretrain_model_ready(state)), 0) + " | "
+    out = out + "model: " + int_to_str(bool_to_int(gpt_large_pretrain_model_ready(state)), 0) + " | "
     out = out + "Backward: " + int_to_str(bool_to_int(gpt_large_pretrain_backward_ready(state)), 0) + " | "
     out = out + "Distributed: " + int_to_str(bool_to_int(gpt_large_pretrain_distributed_ready(state)), 0) + " | "
     out = out + "Stability: " + int_to_str(bool_to_int(gpt_large_pretrain_stability_ready(state)), 0) + "\n"
@@ -2599,7 +2599,7 @@ func gpt_large_pretrain_launch() int {
     }
     println("Core readiness:")
     println("  - Data: " + int_to_str(bool_to_int(gpt_large_pretrain_data_ready(state)), 0))
-    println("  - Model: " + int_to_str(bool_to_int(gpt_large_pretrain_model_ready(state)), 0))
+    println("  - model: " + int_to_str(bool_to_int(gpt_large_pretrain_model_ready(state)), 0))
     println("  - Backward: " + int_to_str(bool_to_int(gpt_large_pretrain_backward_ready(state)), 0))
     println("  - Distributed: " + int_to_str(bool_to_int(gpt_large_pretrain_distributed_ready(state)), 0))
     println("  - Stability: " + int_to_str(bool_to_int(gpt_large_pretrain_stability_ready(state)), 0))

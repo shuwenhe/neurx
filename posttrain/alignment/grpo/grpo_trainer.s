@@ -386,8 +386,8 @@ func print_grpo_training_header() {
 }
 
 func print_grpo_config(grpo_train_config cfg) {
-    print("[GRPO Config]")
-    print("  Batch Size: " + string(cfg.batch_size))
+    print("[GRPO config]")
+    print("  batch_2 Size: " + string(cfg.batch_size))
     print("  Group Size: " + string(cfg.group_size))
     print("  Learning Rate: " + string_float(cfg.learning_rate))
     print("  Clip Epsilon: " + string_float(cfg.clip_epsilon))

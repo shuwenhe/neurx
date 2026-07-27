@@ -75,7 +75,7 @@ func create_neurx_200b_config_200b() neurx_config {
     neurx_config {
         version: NEURX_5_2,
         name: "NEURX-5.2-200B",
-        description: "General Language Model v5.2 with 200B parameters",
+        description: "General Language model v5.2 with 200B parameters",
         vocab_size: 200000,
         hidden_size: 12288,
         num_layers: 96,

@@ -41,7 +41,7 @@ inline const char* lr_schedule_name(LrSchedule schedule) {
     return "unknown";
 }
 
-struct LrConfig {
+struct lr_config {
     double peak_lr = 2e-4;
     double min_lr = 2e-5;
     std::uint64_t warmup_steps = 0;
@@ -49,7 +49,7 @@ struct LrConfig {
     LrSchedule schedule = LrSchedule::Cosine;
 };
 
-inline double learning_rate(const LrConfig& config,
+inline double learning_rate(const lr_config& config,
                             std::uint64_t optimizer_step) {
     if (!(config.peak_lr >= 0.0) || !(config.min_lr >= 0.0) ||
         config.min_lr > config.peak_lr || config.total_steps == 0) {
@@ -85,21 +85,21 @@ inline double learning_rate(const LrConfig& config,
            (config.peak_lr - config.min_lr) * multiplier;
 }
 
-struct GradientPolicy {
+struct gradient_policy {
     double max_norm = 1.0;
     double epsilon = 1e-6;
 };
 
-struct GradientDecision {
+struct gradient_decision {
     bool finite = false;
     bool clipped = false;
     double norm = 0.0;
     double scale = 0.0;
 };
 
-inline GradientDecision gradient_decision(double squared_norm,
-                                          const GradientPolicy& policy) {
-    GradientDecision result;
+inline gradient_decision gradient_decision(double squared_norm,
+                                          const gradient_policy& policy) {
+    gradient_decision result;
     if (!std::isfinite(squared_norm) || squared_norm < 0.0 ||
         !std::isfinite(policy.max_norm) || policy.max_norm < 0.0) {
         return result;

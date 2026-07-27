@@ -24,7 +24,7 @@ func create_value_config() value_config {
 
 func example_basic_value_training() {
     print("╔════════════════════════════════════════════════════════════╗")
-    print("║  Example 1: Basic Value Model Training                    ║")
+    print("║  Example 1: Basic Value model Training                    ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
     value_config cfg = create_value_config()
@@ -153,7 +153,7 @@ func example_distributed_value_training() {
     print("[Distributed Setup]")
     print("  Total GPUs: " + int_to_string_ex(num_gpus))
     print("  Global batch size: " + int_to_string_ex(global_batch_size))
-    print("  Batch per GPU: " + int_to_string_ex(batch_per_gpu))
+    print("  batch_2 per GPU: " + int_to_string_ex(batch_per_gpu))
     print("")
     print("[Gradient Synchronization]")
     print("  Each GPU computes gradients on its batch")
@@ -177,7 +177,7 @@ func example_distributed_value_training() {
 
 func example_value_ppo_integration() {
     print("╔════════════════════════════════════════════════════════════╗")
-    print("║  Example 4: Value Model Integration with PPO              ║")
+    print("║  Example 4: Value model Integration with PPO              ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
     print("[PPO Training Pipeline]")
@@ -210,7 +210,7 @@ func example_value_ppo_integration() {
 
 func example_value_performance_monitoring() {
     print("╔════════════════════════════════════════════════════════════╗")
-    print("║  Example 5: Value Model Performance Monitoring            ║")
+    print("║  Example 5: Value model Performance Monitoring            ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
     print("[Key Metrics]")
@@ -258,12 +258,12 @@ func example_full_alignment_pipeline() {
     print("  Output: SFT checkpoint")
     print("  Duration: 1 week on 64 A100s")
     print("")
-    print("[Stage 2: Reward Model Training]")
+    print("[Stage 2: Reward model Training]")
     print("  Input: SFT model + human preferences")
     print("  Output: Learned reward function")
     print("  Duration: 3-5 days on 8 A100s")
     print("")
-    print("[Stage 3: Value Model Training]")
+    print("[Stage 3: Value model Training]")
     print("  Input: SFT model + trajectory data")
     print("  Output: Value estimates V(s)")
     print("  Duration: 1-2 days on 8 A100s")
@@ -272,7 +272,7 @@ func example_full_alignment_pipeline() {
     print("  Components:")
     print("    • Policy (optimized)")
     print("    • Value Network (from Stage 3)")
-    print("    • Reward Model (from Stage 2)")
+    print("    • Reward model (from Stage 2)")
     print("  Output: Aligned final model")
     print("  Duration: 2 weeks on 64 A100s")
     print("")
@@ -286,7 +286,7 @@ func example_full_alignment_pipeline() {
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
-    print("  NEURX Value Model Trainer Examples                        ")
+    print("  NEURX Value model Trainer Examples                        ")
     print("═════════════════════════════════════════════════════════════")
     print("")
     example_basic_value_training()

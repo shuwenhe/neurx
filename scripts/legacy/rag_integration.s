@@ -70,11 +70,11 @@ func (rag *ragintegration) initialize(config retrieval_system_config) {
     rag.metrics_history = make([]ragmetrics, 0)
     rag.cache = make(map[string][]retrieval_result)
     fmt.Printf("Configuration:\n")
-    fmt.Printf("  embedding Model: %s\n", config.embedding_model)
-    fmt.Printf("  Vector DB: %s\n", config.vector_db_type)
+    fmt.Printf("  embedding model: %s\n", config.embedding_model)
+    fmt.Printf("  vector DB: %s\n", config.vector_db_type)
     fmt.Printf("  Top-K: %d\n", config.top_k)
     fmt.Printf("  Similarity Threshold: %.2f\n", config.similarity_threshold)
-    fmt.Printf("  Cache Enabled: %v\n\n", config.cache_enabled)
+    fmt.Printf("  cache Enabled: %v\n\n", config.cache_enabled)
 }
 
 func (rag *ragintegration) load_knowledge_base(
@@ -105,7 +105,7 @@ func (rag *ragintegration) load_knowledge_base(
 func (rag *ragintegration) generate_embeddings() {
     fmt.Printf("\n[Embeddings] Generating embeddings\n")
     fmt.Printf("  Documents: %d\n", len(rag.vector_db.documents))
-    fmt.Printf("  Model: %s\n", rag.config.embedding_model)
+    fmt.Printf("  model: %s\n", rag.config.embedding_model)
     fmt.Printf("  Dimension: 768\n")
     for doc_id := range rag.vector_db.documents {
         embedding_id := fmt.Sprintf("emb_%s", doc_id)
@@ -151,7 +151,7 @@ func (rag *ragintegration) retrieve_relevant_documents(
     query_embedding []float64) []retrieval_result {
     if rag.config.cache_enabled {
         if cached, exists := rag.cache[query]; exists {
-            fmt.Printf("  Cache hit for query\n")
+            fmt.Printf("  cache hit for query\n")
             return cached
         }
     }
@@ -263,7 +263,7 @@ func (rag *ragintegration) get_rag_statistics() {
         fmt.Printf("Avg Retrieval Time: %.1f ms\n", avg_time)
         fmt.Printf("Total Documents Retrieved: %d\n", total_retrieved)
         fmt.Printf("Knowledge Base Size: %d\n", rag.knowledge_base_size)
-        fmt.Printf("Cache Entries: %d\n", len(rag.cache))
+        fmt.Printf("cache Entries: %d\n", len(rag.cache))
     }
 }
 
@@ -286,7 +286,7 @@ func (rag *ragintegration) run_complete_rag_cycle() {
     rag.initialize(config)
     rag.load_knowledge_base(1000, 150)
     fmt.Println("\n┌────────────────────────────────────────┐")
-    fmt.Println("│  Building Vector Index                 │")
+    fmt.Println("│  Building vector Index                 │")
     fmt.Println("└────────────────────────────────────────┘")
     rag.generate_embeddings()
     fmt.Println("\n┌────────────────────────────────────────┐")

@@ -164,7 +164,7 @@ func generate_response(string user_input, inference_context ctx) string {
         return "English text!English text, RequiredEnglish text.English textAllowedEnglish text?"
     }
     if contains_string(user_input, "English text") || contains_string(user_input, "what") {
-        return "English text?English text.English textAllowedEnglish text NeurX, Transformer, trainingEnglish textinferenceEnglish text."
+        return "English text?English text.English textAllowedEnglish text NeurX, transformer_2, trainingEnglish textinferenceEnglish text."
     }
     if contains_string(user_input, "English text") || contains_string(user_input, "how") {
         return "English text.English text, English textAllowedEnglish text."
@@ -182,17 +182,17 @@ func main() int {
     println("")
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     let checkpoint_dir = runtime_env_get("NEURX_CHECKPOINT_DIR", project_root + "/checkpoint/NeurX-1.3")
-    println("Phase 1: Loading Model...")
+    println("Phase 1: Loading model...")
     inference_context ctx = initialize_inference_context(checkpoint_dir)
     if ctx.model_loaded {
         println("  ✓ checkpoint loaded: " + ctx.checkpoint_path)
-        println("  ✓ Model initialized")
+        println("  ✓ model initialized")
     } else {
         println("  ✗ Warning: checkpoint not found, using fallback mode")
     }
     println("")
-    println("Phase 2: Model Configuration...")
-    println("  Architecture: Decoder-only Transformer")
+    println("Phase 2: model Configuration...")
+    println("  Architecture: Decoder-only transformer_2")
     println("  Hidden Size:  " + int_to_string(ctx.config.hidden_size))
     println("  Attention Heads: " + int_to_string(ctx.config.num_heads))
     println("  FFN Size:     " + int_to_string(ctx.config.ffn_size))
@@ -200,10 +200,10 @@ func main() int {
     println("  Vocab Size:   " + int_to_string(ctx.config.vocab_size))
     println("  Context:      " + int_to_string(ctx.config.context_length) + " tokens")
     println("")
-    println("Phase 3: Training Status...")
+    println("Phase 3: Training status...")
     println("  Current Step: 100+")
     println("  Current Loss: ~10.5")
-    println("  Status:       Ready for inference")
+    println("  status:       Ready for inference")
     println("")
     println("╔════════════════════════════════════════════════════╗")
     println("║        Starting Interactive Chat Session         ║")

@@ -109,7 +109,7 @@ func verify_safetensors(safetensors_file file) bool {
 func get_tensor_metadata(safetensors_file file, string tensor_name) tensor_metadata {
     tensor_metadata empty_meta
     if tensor_name not in file.tensor_name_to_index {
-        println("❌ Tensor not found: " + tensor_name)
+        println("❌ tensor_2 not found: " + tensor_name)
         return empty_meta
     }
     int index = file.tensor_name_to_index[tensor_name]

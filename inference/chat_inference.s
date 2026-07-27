@@ -220,7 +220,7 @@ func main() {
     io.println("")
     var config: chat_config = create_chat_config()
     var model: simple_transformer = init_model(config)
-    io.println("🤖 Model Initialized")
+    io.println("🤖 model Initialized")
     io.println("   Vocab size: " + strings.from_i32(config.vocab_size))
     io.println("   Hidden dim: " + strings.from_i32(config.hidden_dim))
     io.println("   Layers: " + strings.from_i32(config.num_layers))

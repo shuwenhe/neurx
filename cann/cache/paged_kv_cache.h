@@ -13,7 +13,7 @@ namespace neurx::cann {
 
 enum class KvStorageFormat { contiguous_nd, fractal_nz };
 
-struct KvCacheConfig {
+struct kv_cache_config_2 {
   std::size_t block_count = 0;
   std::size_t block_bytes = 0;
   std::size_t tokens_per_block = 0;
@@ -23,12 +23,12 @@ struct KvCacheConfig {
   std::size_t element_bytes = 0;
   KvStorageFormat format = KvStorageFormat::contiguous_nd;
 
-  static KvCacheConfig fp16_transformer(std::size_t block_count,
+  static kv_cache_config_2 fp16_transformer(std::size_t block_count,
                                         std::size_t tokens_per_block,
                                         std::size_t layers,
                                         std::size_t kv_heads,
                                         std::size_t head_size);
-  static KvCacheConfig fp16_310p(std::size_t block_count,
+  static kv_cache_config_2 fp16_310p(std::size_t block_count,
                                  std::size_t tokens_per_block,
                                  std::size_t layers,
                                  std::size_t kv_heads,
@@ -38,7 +38,7 @@ struct KvCacheConfig {
   }
 };
 
-struct KvCacheStats {
+struct kv_cache_stats {
   std::size_t total_blocks = 0;
   std::size_t used_blocks = 0;
   std::size_t free_blocks = 0;
@@ -49,32 +49,32 @@ struct KvCacheStats {
 class DeviceAllocator {
  public:
   virtual ~DeviceAllocator() = default;
-  virtual Status allocate(void** address, std::size_t bytes) = 0;
+  virtual status allocate(void** address, std::size_t bytes) = 0;
   virtual void release(void* address) = 0;
 };
 
 class AclDeviceAllocator final : public DeviceAllocator {
  public:
-  Status allocate(void** address, std::size_t bytes) override;
+  status allocate(void** address, std::size_t bytes) override;
   void release(void* address) override;
 };
 
 class PagedKvCache {
  public:
-  explicit PagedKvCache(KvCacheConfig config, DeviceAllocator* allocator = nullptr);
+  explicit PagedKvCache(kv_cache_config_2 config, DeviceAllocator* allocator = nullptr);
   ~PagedKvCache();
   PagedKvCache(const PagedKvCache&) = delete;
   PagedKvCache& operator=(const PagedKvCache&) = delete;
 
-  Status initialize();
-  Status reserve(const std::string& request_id, std::size_t total_tokens);
-  Status resize(const std::string& request_id, std::size_t total_tokens);
-  Status append(const std::string& request_id, std::size_t token_count);
+  status initialize();
+  status reserve(const std::string& request_id, std::size_t total_tokens);
+  status resize(const std::string& request_id, std::size_t total_tokens);
+  status append(const std::string& request_id, std::size_t token_count);
   bool release(const std::string& request_id);
-  Status retain_prefix(const std::string& request_id,
+  status retain_prefix(const std::string& request_id,
                        std::size_t prefix_tokens,
                        std::vector<uint32_t>* retained_blocks);
-  Status attach_retained_prefix(const std::string& request_id,
+  status attach_retained_prefix(const std::string& request_id,
                                 const std::vector<uint32_t>& retained_blocks,
                                 std::size_t prefix_tokens);
   void release_retained_blocks(const std::vector<uint32_t>& retained_blocks);
@@ -90,31 +90,31 @@ class PagedKvCache {
                            std::size_t token_offset) const;
   std::size_t layer_tensor_bytes() const;
   std::size_t block_tensor_bytes() const;
-  KvCacheStats stats() const;
-  const KvCacheConfig& config() const { return config_; }
+  kv_cache_stats stats() const;
+  const kv_cache_config_2& config() const { return config_; }
 
  private:
-  struct RequestAllocation {
+  struct request_allocation {
     std::vector<uint32_t> blocks;
     std::size_t tokens = 0;
   };
 
-  Status validate_config() const;
+  status validate_config() const;
   std::size_t blocks_for(std::size_t tokens) const;
-  Status reserve_locked(const std::string& request_id, std::size_t total_tokens);
+  status reserve_locked(const std::string& request_id, std::size_t total_tokens);
   void release_block_locked(uint32_t block);
   void* layer_address(bool value, std::size_t layer) const;
   void* slot_address(bool value, std::size_t layer, uint32_t block,
                      std::size_t token_offset) const;
 
-  KvCacheConfig config_;
+  kv_cache_config_2 config_;
   AclDeviceAllocator default_allocator_;
   DeviceAllocator* allocator_ = nullptr;
   void* storage_ = nullptr;
   mutable std::mutex mutex_;
   std::vector<uint32_t> free_blocks_;
   std::vector<uint32_t> block_refcounts_;
-  std::map<std::string, RequestAllocation> requests_;
+  std::map<std::string, request_allocation> requests_;
 };
 
 }

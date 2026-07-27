@@ -4,7 +4,7 @@ use std.io.println
 func main() int {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     println("=======================================================================")
-    println("NeurX Deep Learning Framework - S Training Entry")
+    println("NeurX Deep Learning Framework - S Training entry")
     println("=======================================================================")
     println("")
     println("Project root: " + project_root)

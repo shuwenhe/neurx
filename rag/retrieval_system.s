@@ -79,7 +79,7 @@ interface VectorDBInterface {
     get_status()
 }
 
-struct search_resultItem {
+struct search_result_item {
     chunk_id: string
     score: float
     metadata: document_metadata
@@ -124,11 +124,11 @@ class InMemoryVectorDB implements VectorDBInterface {
         this.last_updated = current_timestamp()
     }
     search(query_embedding: tensor, top_k: int) {
-        results: list<search_resultItem> = []
+        results: list<search_result_item> = []
         for chunk_id, doc_emb in this.embeddings {
             let score = compute_similarity(query_embedding, doc_emb, this.config.metric)
             if score >= this.config.similarity_threshold {
-                results.append(search_resultItem{
+                results.append(search_result_item{
                     chunk_id=chunk_id,
                     score=score,
                     metadata=this.documents[chunk_id].metadata
@@ -274,7 +274,7 @@ class FAISSVectorDB implements VectorDBInterface {
         k_actual = min(top_k * 2, this.index.ntotal)
         if k_actual == 0 { return [] }
         distances, indices = this.index.search(query_embedding, k_actual)
-        results: list<search_resultItem> = []
+        results: list<search_result_item> = []
         for i in range(distances.shape[1]) {
             int_id = indices[0][i]
             if int_id < 0 || int_id not in this.id_to_chunk { continue }
@@ -283,7 +283,7 @@ class FAISSVectorDB implements VectorDBInterface {
                 score = 1.0 / (1.0 + score)
             }
             if score >= this.config.similarity_threshold {
-                results.append(search_resultItem{
+                results.append(search_result_item{
                     chunk_id=this.id_to_chunk[int_id].id,
                     score=float(score),
                     metadata=this.id_to_chunk[int_id].metadata
@@ -749,7 +749,7 @@ class HybridFusionEngine {
         this.keyword_weight = keyword_w
         this.normalization_method = method
     }
-    fuse(vector_results: list<search_resultItem>,
+    fuse(vector_results: list<search_result_item>,
          bm25_results: list<bm25_result>,
          top_k: int) {
         match this.normalization_method {
@@ -767,7 +767,7 @@ class HybridFusionEngine {
             }
         }
     }
-    _reciprocal_rank_fusion(vector_results: list<search_resultItem>,
+    _reciprocal_rank_fusion(vector_results: list<search_result_item>,
                             bm25_results: list<bm25_result>,
                             top_k: int,
                             k_constant: int = 60) {
@@ -785,7 +785,7 @@ class HybridFusionEngine {
         }
         return results
     }
-    _weighted_average_fusion(vector_results: list<search_resultItem>,
+    _weighted_average_fusion(vector_results: list<search_result_item>,
                              bm25_results: list<bm25_result>,
                              top_k: int) {
         vec_scores: map<string, float> = {}
@@ -822,7 +822,7 @@ class HybridFusionEngine {
         }
         return results
     }
-    _normalized_score_fusion(vector_results: list<search_resultItem>,
+    _normalized_score_fusion(vector_results: list<search_result_item>,
                              bm25_results: list<bm25_result>,
                              top_k: int) {
         return this._weighted_average_fusion(vector_results, bm25_results, top_k)
@@ -1059,14 +1059,14 @@ function test_retrieval_system() {
             metadata=document_metadata{source_id="doc2", title="Deep Learning Overview", document_type="text"}
         },
         {
-            content="NEURX(General Language Model)English textAIEnglish textlanguagemodelEnglish text.NEURX-4supportEnglish text, English text, toolEnglish text.MULTIMODAL-VISIONEnglish text.",
-            metadata=document_metadata{source_id="doc3", title="NEURX Model Series", document_type="text"}
+            content="NEURX(General Language model)English textAIEnglish textlanguagemodelEnglish text.NEURX-4supportEnglish text, English text, toolEnglish text.MULTIMODAL-VISIONEnglish text.",
+            metadata=document_metadata{source_id="doc3", title="NEURX model Series", document_type="text"}
         }
     ]
     report = rag.ingest(sample_docs, compute_embeddings=false)
     assert report.documents_ingested == 3, f"Ingestion count mismatch: {report.documents_ingested}"
     assert report.chunks_created >= 3, f"Chunks created too few: {report.chunks_created}"
-    print("  ✓ Test 2: Vector Similarity Search")
+    print("  ✓ Test 2: vector Similarity Search")
     chunks = list(rag.documents_store.values())
     for chunk in chunks {
         chunk.embedding = randn(cfg.vector_dim)

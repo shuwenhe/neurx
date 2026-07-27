@@ -5,7 +5,7 @@ use std.exec
 use std.time
 use std.path
 func checkNvidiaSmi() int {
-    cmd := exec.Command("nvidia-smi", "-L")
+    cmd := exec.command("nvidia-smi", "-L")
     output, err := cmd.Output()
     if err != nil {
         io.Println("   ❌ nvidia-smi not found")
@@ -13,7 +13,7 @@ func checkNvidiaSmi() int {
     }
     count := strings.Count(string(output), "GPU")
     io.Println("   ✓ nvidia-smi found: " + string(count) + " GPU(s)")
-    cmd = exec.Command("nvidia-smi", "--query-gpu=name", "--format=csv,noheader")
+    cmd = exec.command("nvidia-smi", "--query-gpu=name", "--format=csv,noheader")
     output, _ = cmd.Output()
     lines := strings.Split(string(output), "\n")
     if len(lines) > 0 && lines[0] != "" {
@@ -44,7 +44,7 @@ func checkRequiredFiles(files []string) {
 }
 
 func testCudaBinary(bin string) {
-    cmd := exec.Command("timeout", "30s", bin)
+    cmd := exec.command("timeout", "30s", bin)
     cmd.Env = append(os.Environ(),
         "NEURX_PRETRAIN_STEPS=1",
         "NEURX_PRETRAIN_MICRO_BATCH=1",

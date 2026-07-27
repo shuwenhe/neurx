@@ -11,10 +11,10 @@ class AscendAdapter final : public BackendAdapter {
   ~AscendAdapter() override;
   Backend kind() const override { return Backend::ascend; }
   const char* name() const override { return "ascend-cann"; }
-  AdapterStatus initialize(int device_id) override;
+  adapter_status initialize(int device_id) override;
   bool ready() const override { return session_.ready(); }
-  AdapterStatus execute(const DeviceBatch& batch) override;
-  AdapterStatus synchronize() override;
+  adapter_status execute(const device_batch& batch) override;
+  adapter_status synchronize() override;
   void bind_launchers(KernelLauncher prefill, KernelLauncher decode);
   cann::DeviceSession& native_session() { return session_; }
   const cann::DeviceSession& native_session() const { return session_; }

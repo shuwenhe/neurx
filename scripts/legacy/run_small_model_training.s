@@ -5,7 +5,7 @@ func main() int {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     let source_file = runtime_env_get("NEURX_SMALL_MODEL_SOURCE", project_root + "/train/train_llm.s")
     let checkpoint_dir = runtime_env_get("NEURX_SMALL_MODEL_CHECKPOINT_DIR", project_root + "/artifacts/checkpoints/llm_s_pretrain")
-    println("NeurX Small Model Training (S Lang)")
+    println("NeurX Small model Training (S Lang)")
     println("")
     println("Project root : " + project_root)
     println("Source file  : " + check_path(source_file))

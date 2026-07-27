@@ -6,31 +6,31 @@
 
 namespace neurx::inference {
 
-AscendExecutor::AscendExecutor(AscendExecutorConfig config)
+AscendExecutor::AscendExecutor(ascend_executor_config config)
     : config_(std::move(config)), kv_cache_(config_.kv_cache) {}
 
-AdapterStatus AscendExecutor::initialize(int device_id) {
-  if (ready_) return AdapterStatus::success();
+adapter_status AscendExecutor::initialize(int device_id) {
+  if (ready_) return adapter_status::success();
   auto status = operators_.load(config_.operator_library);
-  if (!status.ok) return AdapterStatus::failure(status.message);
+  if (!status.ok) return adapter_status::failure(status.message);
   adapter_.bind_launchers(operators_.prefill_launcher(),
                           operators_.decode_launcher());
   auto adapter_status = adapter_.initialize(device_id);
   if (!adapter_status.ok) return adapter_status;
   status = model_.load(config_.checkpoint, adapter_.native_session(), config_.model);
-  if (!status.ok) return AdapterStatus::failure(status.message);
+  if (!status.ok) return adapter_status::failure(status.message);
   status = cann::validate_310p_model(model_.metadata(), config_.kv_cache);
-  if (!status.ok) return AdapterStatus::failure(status.message);
+  if (!status.ok) return adapter_status::failure(status.message);
   status = kv_cache_.initialize();
-  if (!status.ok) return AdapterStatus::failure(status.message);
+  if (!status.ok) return adapter_status::failure(status.message);
   ready_ = true;
-  return AdapterStatus::success();
+  return adapter_status::success();
 }
 
-AdapterStatus AscendExecutor::execute(const DeviceBatch& batch) {
-  if (!ready_) return AdapterStatus::failure("Ascend executor is not initialized");
+adapter_status AscendExecutor::execute(const device_batch& batch) {
+  if (!ready_) return adapter_status::failure("Ascend executor is not initialized");
   if (batch.schedule.items.empty()) {
-    return AdapterStatus::failure("Ascend executor received an empty device batch");
+    return adapter_status::failure("Ascend executor received an empty device batch");
   }
 
   std::map<std::string, std::size_t> previous_tokens;
@@ -45,11 +45,11 @@ AdapterStatus AscendExecutor::execute(const DeviceBatch& batch) {
       for (const auto& rollback : previous_tokens) {
         kv_cache_.resize(rollback.first, rollback.second);
       }
-      return AdapterStatus::failure(item.request_id + ": " + status.message);
+      return adapter_status::failure(item.request_id + ": " + status.message);
     }
   }
 
-  DeviceBatch launch = batch;
+  device_batch launch = batch;
   launch.model = &model_;
   launch.kv_cache = &kv_cache_;
   launch.batch_size = launch.schedule.items.size();

@@ -1,25 +1,25 @@
 package neurx.model
 import fmt
 import math
-struct Tensor {
+struct tensor_2 {
     shape: []int
     data: []float
     requires_grad: bool
 }
 
-func tensor_new(shape: []int) Tensor {
+func tensor_new(shape: []int) tensor_2 {
     size := 1
     for i := 0; i < len(shape); i += 1 {
         size *= shape[i]
     }
-    Tensor{
+    tensor_2{
         shape: shape,
         data: make([]float, size),
         requires_grad: true,
     }
 }
 
-func tensor_shape_string(t: Tensor) string {
+func tensor_shape_string(t: tensor_2) string {
     result := "["
     for i := 0; i < len(t.shape); i += 1 {
         if i > 0 {
@@ -38,24 +38,24 @@ struct mini_transformer {
     num_layers: int
     seq_len: int
     num_heads: int
-    token_embed: Tensor
-    pos_embed: Tensor
+    token_embed: tensor_2
+    pos_embed: tensor_2
     layers: []transformer_layer
-    output_proj: Tensor
+    output_proj: tensor_2
     param_count: int
 }
 
 struct transformer_layer {
-    q_proj: Tensor
-    k_proj: Tensor
-    v_proj: Tensor
-    out_proj: Tensor
-    fc1: Tensor
-    fc2: Tensor
-    norm1_gamma: Tensor
-    norm1_beta: Tensor
-    norm2_gamma: Tensor
-    norm2_beta: Tensor
+    q_proj: tensor_2
+    k_proj: tensor_2
+    v_proj: tensor_2
+    out_proj: tensor_2
+    fc1: tensor_2
+    fc2: tensor_2
+    norm1_gamma: tensor_2
+    norm1_beta: tensor_2
+    norm2_gamma: tensor_2
+    norm2_beta: tensor_2
 }
 
 func create_mini_transformer(
@@ -148,8 +148,8 @@ func forward(
     input_ids: []int,
     batch_size: int,
     seq_length: int
-) Tensor {
-    embeddings := Tensor{
+) tensor_2 {
+    embeddings := tensor_2{
         shape: []int{batch_size, seq_length, model.embed_dim},
         data: make([]float, batch_size * seq_length * model.embed_dim),
         requires_grad: true,
@@ -177,7 +177,7 @@ func forward(
         x = apply_attention(x, layer, batch_size, seq_length, model.embed_dim, model.num_heads)
         x = apply_ffn(x, layer, batch_size, seq_length, model.embed_dim)
     }
-    logits := Tensor{
+    logits := tensor_2{
         shape: []int{batch_size, seq_length, model.vocab_size},
         data: make([]float, batch_size * seq_length * model.vocab_size),
         requires_grad: true,
@@ -200,15 +200,15 @@ func forward(
 }
 
 func apply_attention(
-    x: Tensor,
+    x: tensor_2,
     layer: transformer_layer,
     batch_size: int,
     seq_length: int,
     embed_dim: int,
     num_heads: int
-) Tensor {
+) tensor_2 {
     head_dim := embed_dim / num_heads
-    output := Tensor{
+    output := tensor_2{
         shape: x.shape,
         data: make([]float, len(x.data)),
         requires_grad: true,
@@ -231,14 +231,14 @@ func apply_attention(
 }
 
 func apply_ffn(
-    x: Tensor,
+    x: tensor_2,
     layer: transformer_layer,
     batch_size: int,
     seq_length: int,
     embed_dim: int
-) Tensor {
+) tensor_2 {
     hidden_dim := 4 * embed_dim
-    hidden := Tensor{
+    hidden := tensor_2{
         shape: []int{batch_size, seq_length, hidden_dim},
         data: make([]float, batch_size * seq_length * hidden_dim),
         requires_grad: true,
@@ -258,7 +258,7 @@ func apply_ffn(
             }
         }
     }
-    output := Tensor{
+    output := tensor_2{
         shape: x.shape,
         data: make([]float, len(x.data)),
         requires_grad: true,
@@ -286,7 +286,7 @@ func gelu(x: float) float {
 }
 
 func compute_cross_entropy_loss(
-    logits: Tensor,
+    logits: tensor_2,
     targets: []int,
     batch_size: int,
     seq_length: int,
@@ -325,14 +325,14 @@ func compute_cross_entropy_loss(
 
 func compute_gradients(
     model: mini_transformer,
-    logits: Tensor,
+    logits: tensor_2,
     targets: []int,
     batch_size: int,
     seq_length: int
-) map[string]Tensor {
-    gradients := make(map[string]Tensor)
+) map[string]tensor_2 {
+    gradients := make(map[string]tensor_2)
     vocab_size := model.vocab_size
-    logit_grads := Tensor{
+    logit_grads := tensor_2{
         shape: logits.shape,
         data: make([]float, len(logits.data)),
         requires_grad: true,
@@ -424,14 +424,14 @@ func compute_gradients(
 }
 
 struct adam_w_state {
-    m_states: map[string]Tensor
-    v_states: map[string]Tensor
+    m_states: map[string]tensor_2
+    v_states: map[string]tensor_2
     t: int
 }
 
 func adamw_update(
     model: &mini_transformer,
-    gradients: map[string]Tensor,
+    gradients: map[string]tensor_2,
     state: &adam_w_state,
     learning_rate: float,
     beta1: float,
@@ -539,10 +539,10 @@ func adamw_update(
 }
 
 func update_parameter(
-    param: &Tensor,
-    grad: Tensor,
-    m: &Tensor,
-    v: &Tensor,
+    param: &tensor_2,
+    grad: tensor_2,
+    m: &tensor_2,
+    v: &tensor_2,
     t: int,
     lr: float,
     beta1: float,

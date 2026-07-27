@@ -208,7 +208,7 @@ func print_final_stats(launcher_config config, int exit_code) {
         print("[ERROR] Exit code: " + itoa(exit_code))
     }
     print("==================================================")
-    print("[INFO] Model saved to: " + config.model_path)
+    print("[INFO] model saved to: " + config.model_path)
     print("[INFO] Logs saved to: " + config.log_dir)
     print("[INFO] Check logs for details: " + config.log_file)
     print("==================================================")

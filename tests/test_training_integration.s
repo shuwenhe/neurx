@@ -10,7 +10,7 @@ func test_training_config() {
 }
 
 func test_batch_preparation() {
-    println("Test 2: Batch preparation")
+    println("Test 2: batch_2 preparation")
     [][]int data = [][]int{cap: 5}
     var i = 0
     while i < 5 {
@@ -24,7 +24,7 @@ func test_batch_preparation() {
         i = i + 1
     }
     if len(data) == 5 {
-        println("  ✓ Batch prepared correctly")
+        println("  ✓ batch_2 prepared correctly")
     }
 }
 

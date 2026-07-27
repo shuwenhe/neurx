@@ -7,7 +7,7 @@ func main() {
     modelPath := "/home/shuwen/shuwen/posttrain/model.safetensors"
     stat, err := os.Stat(modelPath)
     if err != nil || stat.IsDir() {
-        io.Println("❌ Model not found")
+        io.Println("❌ model not found")
         os.Exit(1)
     }
     io.Println("╔════════════════════════════════════════════════════════╗")
@@ -15,9 +15,9 @@ func main() {
     io.Println("║  Pure S Language Implementation + stdin support       ║")
     io.Println("╚════════════════════════════════════════════════════════╝")
     io.Println("")
-    io.Println("📦 Model: base-model-posttrain/model.safetensors")
+    io.Println("📦 model: base-model-posttrain/model.safetensors")
     io.Println("🔤 Tokenizer: BPE (151,936 vocab)")
-    io.Println("🧠 Model: 24 layers, 896 hidden, 14 heads")
+    io.Println("🧠 model: 24 layers, 896 hidden, 14 heads")
     io.Println("")
     io.Println("═══════════════════════════════════════════════════════")
     io.Println("")
@@ -36,7 +36,7 @@ func main() {
         io.Println("")
         io.Println("🧠 Processing...")
         io.Println("  [1] BPE Tokenization")
-        io.Println("  [2] Transformer Inference (24 layers)")
+        io.Println("  [2] transformer_2 Inference (24 layers)")
         io.Println("  [3] Token Generation")
         io.Println("  [4] Text Decoding")
         io.Println("")

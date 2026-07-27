@@ -852,7 +852,7 @@ func get_monitoring_dashboard_layout() string {
 ║  │ (real-time│ ║  │ TFLOPS    │ ║  │ GPU Util   ██████████ 95%│  ║
 ║  │  moving   │ ║  │ samples/s │ ║  │ Grad Norm  ████░░░░░ 42  │  ║
 ║  │  avg)     │ ║  │ steps/min │ ║  │ LR: 3e-4 → 2.9e-4      │  ║
-║  └──────────┘ ║  └───────────┘ ║  │ Status: ✅ Healthy       │  ║
+║  └──────────┘ ║  └───────────┘ ║  │ status: ✅ Healthy       │  ║
 ╠═══════════════╩═══════════════╩═══════════════════════════════╣
 ║                    RECENT ALERTS                             ║
 ║  [✓] Step 12345: Loss within normal range (2.345)            ║

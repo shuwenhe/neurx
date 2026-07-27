@@ -34,7 +34,7 @@ func main() int {
         output_dir + " " +
         alpha_str + " " +
         rank_str
-    println("Command: " + command)
+    println("command: " + command)
     println("")
     0
 }

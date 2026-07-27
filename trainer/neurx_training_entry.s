@@ -79,7 +79,7 @@ func start_neurx_training(
     training_config tcfg
 ) {
     print("╔══════════════════════════════════════════════════╗")
-    print("║     NEURX-5.2 Large Language Model Training       ║")
+    print("║     NEURX-5.2 Large Language model Training       ║")
     print("╚══════════════════════════════════════════════════╝")
     print("")
     print("[1/7] Initializing distributed environment...")

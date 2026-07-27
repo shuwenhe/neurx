@@ -3,7 +3,7 @@ use std::fs::{File, read_file}
 use std::json
 use neurx::lib::tensor::{tensor, create_vector, create_matrix, zeros}
 use neurx::lib::safetensors::{safe_tensors_reader, load_safetensors_metadata, verify_safetensors_file}
-struct Tensor {
+struct tensor_2 {
     []float data
     []int shape
     int dtype
@@ -11,8 +11,8 @@ struct Tensor {
 
 struct lora_weights {
     string name
-    Tensor A
-    Tensor B
+    tensor_2 A
+    tensor_2 B
     float alpha
     int rank
 }
@@ -62,30 +62,30 @@ func verify_model_files(string model_path) bool {
 }
 
 struct attention_weights {
-    Tensor query_proj
-    Tensor key_proj
-    Tensor value_proj
-    Tensor output_proj
+    tensor_2 query_proj
+    tensor_2 key_proj
+    tensor_2 value_proj
+    tensor_2 output_proj
 }
 
 struct ffnweights {
-    Tensor gate_proj
-    Tensor up_proj
-    Tensor down_proj
+    tensor_2 gate_proj
+    tensor_2 up_proj
+    tensor_2 down_proj
 }
 
 struct transformer_block {
-    Tensor ln1_weight
+    tensor_2 ln1_weight
     attention_weights attn
-    Tensor ln2_weight
+    tensor_2 ln2_weight
     ffnweights ffn
     lora_weights lora
 }
 
 struct qwen_model {
-    Tensor embedding
+    tensor_2 embedding
     []transformer_block blocks
-    Tensor output_proj
+    tensor_2 output_proj
     int hidden_dim
     int vocab_size
     int num_blocks
@@ -120,39 +120,39 @@ func init_qwen_model(training_config config) qwen_model {
     return model
 }
 
-func apply_lora_linear(Tensor x, Tensor W, lora_weights lora) Tensor {
-    Tensor result
+func apply_lora_linear(tensor_2 x, tensor_2 W, lora_weights lora) tensor_2 {
+    tensor_2 result
     result.data = x.data
     result.shape = x.shape
     return result
 }
 
 func transformer_block_forward(
-    Tensor x,
+    tensor_2 x,
     transformer_block block
-) Tensor {
-    Tensor output = x
+) tensor_2 {
+    tensor_2 output = x
     output = apply_lora_linear(output, block.attn.query_proj, block.lora)
     output = apply_lora_linear(output, block.ffn.gate_proj, block.lora)
     return output
 }
 
 func qwen_forward(
-    Tensor input_ids,
+    tensor_2 input_ids,
     qwen_model model
-) Tensor {
-    Tensor hidden = input_ids
+) tensor_2 {
+    tensor_2 hidden = input_ids
     for i in 0..model.num_blocks {
         transformer_block block = model.blocks[i]
         hidden = transformer_block_forward(hidden, block)
     }
-    Tensor logits = hidden
+    tensor_2 logits = hidden
     return logits
 }
 
 func cross_entropy_loss(
-    Tensor logits,
-    Tensor labels
+    tensor_2 logits,
+    tensor_2 labels
 ) float {
     float loss = 0.0
     int batch_size = 4
@@ -172,8 +172,8 @@ func cross_entropy_loss(
 }
 
 func compute_lora_gradients(
-    Tensor grad_output,
-    Tensor input_x,
+    tensor_2 grad_output,
+    tensor_2 input_x,
     lora_weights lora
 ) lora_weights {
     lora_weights gradients = lora
@@ -198,10 +198,10 @@ func train_epoch(
     float epoch_loss = 0.0
     int num_batches = 4
     for batch_idx in 0..num_batches {
-        println("  Batch " + int_to_string(batch_idx + 1) + "/" + int_to_string(num_batches))
-        Tensor dummy_input = create_vector(config.max_seq_len, 0.5)
-        Tensor logits = qwen_forward(dummy_input, model)
-        Tensor dummy_labels = create_vector(config.batch_size, 0.0)
+        println("  batch_2 " + int_to_string(batch_idx + 1) + "/" + int_to_string(num_batches))
+        tensor_2 dummy_input = create_vector(config.max_seq_len, 0.5)
+        tensor_2 logits = qwen_forward(dummy_input, model)
+        tensor_2 dummy_labels = create_vector(config.batch_size, 0.0)
         float batch_loss = cross_entropy_loss(logits, dummy_labels)
         for i in 0..config.num_layers {
             transformer_block block = model.blocks[i]
@@ -247,11 +247,11 @@ func train_model(
 }
 
 func merge_lora_to_model(
-    Tensor original_weight,
+    tensor_2 original_weight,
     lora_weights lora
-) Tensor {
+) tensor_2 {
     println("    Merging LoRA into layer: " + lora.name)
-    Tensor merged = original_weight
+    tensor_2 merged = original_weight
     return merged
 }
 

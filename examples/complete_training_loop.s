@@ -119,7 +119,7 @@ struct transformer_layer {
 }
 
 func init_transformer_model(training_config cfg) transformer_model {
-    println("Initializing Transformer model...")
+    println("Initializing transformer_2 model...")
     println("  Vocab size: " + str(cfg.vocab_size))
     println("  Hidden dim: " + str(cfg.d_model))
     println("  Layers: " + str(cfg.n_layers))
@@ -273,7 +273,7 @@ func run_training(training_config cfg) {
     println("")
     transformer_model model = init_transformer_model(cfg)
     int num_parameters = count_parameters(model)
-    println("\n✓ Model initialized: " + str(num_parameters / 1e6) + "M parameters")
+    println("\n✓ model initialized: " + str(num_parameters / 1e6) + "M parameters")
     device_context ctx
     if cfg.use_cuda {
         ctx = initialize_cuda(cfg.gpu_device_id)
@@ -290,7 +290,7 @@ func run_training(training_config cfg) {
     }
     optimizer opt = new_adamw_optimizer(num_parameters)
     opt = set_learning_rate(opt, cfg.learning_rate)
-    println("✓ AdamW optimizer: lr=" + str(cfg.learning_rate) + ", wd=" + str(cfg.weight_decay))
+    println("✓ adam_w optimizer: lr=" + str(cfg.learning_rate) + ", wd=" + str(cfg.weight_decay))
     dataset train_ds = load_text_dataset(
         cfg.data_path,
         cfg.vocab_size,
@@ -491,7 +491,7 @@ func run_training(training_config cfg) {
         finish_wandb(wb_run)
     if cfg.use_tensorboard:
         close_tensorboard_writer(tb_writer)
-    println("\n✨ All done! Model saved to: " + cfg.output_dir)
+    println("\n✨ All done! model saved to: " + cfg.output_dir)
     println("   View TensorBoard: tensorboard --logdir=" + cfg.log_dir)
     if cfg.use_wandb:
         println("   View WandB: " + wb_run.run_url)
@@ -769,7 +769,7 @@ func layer_norm(tensor x, tensor params) tensor:
     }
     make_tensor(out_data, copy_int_shape(x.shape), x.requires_grad || params.requires_grad)
 func matmul(tensor a, tensor b) tensor:
-    """Matrix multiplication"""
+    """matrix multiplication"""
     if len(a.shape) < 2 || len(b.shape) < 2 {
         return a
     }
@@ -1091,7 +1091,7 @@ func print_config_pretty(training_config cfg):
         ("Hidden Dim", str(cfg.d_model)),
         ("Layers", str(cfg.n_layers)),
         ("Heads", str(cfg.n_heads)),
-        ("Batch Size", str(cfg.batch_size)),
+        ("batch_2 Size", str(cfg.batch_size)),
         ("Learning Rate", str(cfg.learning_rate)),
         ("Warmup Steps", str(cfg.warmup_steps)),
         ("Max Steps", str(cfg.max_train_steps)),

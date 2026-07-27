@@ -1,7 +1,7 @@
 
 package neurx.inference.tokenizer_loader
 
-struct TokenizerState {
+struct tokenizer_state_2 {
     string model_path
     string model_name
     int vocab_size
@@ -9,15 +9,15 @@ struct TokenizerState {
     string error_message
 }
 
-struct TokenizationResult {
+struct tokenization_result_2 {
     []int token_ids
     int token_count
     bool success
     string error
 }
 
-func new_tokenizer_state() TokenizerState {
-    TokenizerState state
+func new_tokenizer_state() tokenizer_state_2 {
+    tokenizer_state_2 state
     state.model_path = ""
     state.model_name = ""
     state.vocab_size = 0
@@ -26,7 +26,7 @@ func new_tokenizer_state() TokenizerState {
     state
 }
 
-func load_tokenizer(string model_path) TokenizerState {
+func load_tokenizer(string model_path) tokenizer_state_2 {
     state := new_tokenizer_state()
     state.model_path = model_path
     state.model_name = extract_model_name(model_path)
@@ -36,7 +36,7 @@ func load_tokenizer(string model_path) TokenizerState {
     state
 }
 
-func tokenize(TokenizerState state, string text) TokenizationResult {
+func tokenize(tokenizer_state_2 state, string text) tokenization_result_2 {
     result := new_tokenization_result()
     
     if !state.is_loaded {
@@ -53,7 +53,7 @@ func tokenize(TokenizerState state, string text) TokenizationResult {
     result
 }
 
-func tokenize_deterministic(TokenizerState state, string text, int runs) TokenizationResult {
+func tokenize_deterministic(tokenizer_state_2 state, string text, int runs) tokenization_result_2 {
     result := new_tokenization_result()
     
     if !state.is_loaded {
@@ -103,8 +103,8 @@ func tokenize_deterministic(TokenizerState state, string text, int runs) Tokeniz
 
 
 
-func new_tokenization_result() TokenizationResult {
-    result: TokenizationResult
+func new_tokenization_result() tokenization_result_2 {
+    result: tokenization_result_2
     result.success = false
     result.error = ""
     result

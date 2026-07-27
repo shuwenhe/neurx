@@ -95,7 +95,7 @@ func (manager *cluster_manager) validate_cluster_setup() bool {
         fmt.Printf("  ├─ GPU: %d x %s\n", node.gpu_count, node.gpu_type)
         fmt.Printf("  ├─ CPU: %d cores\n", node.cpu_cores)
         fmt.Printf("  ├─ Memory: %dGB\n", node.memory_gb)
-        fmt.Printf("  └─ Status: %s\n", node.status)
+        fmt.Printf("  └─ status: %s\n", node.status)
         if node.status == "healthy" {
             healthy++
         }

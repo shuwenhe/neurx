@@ -26,7 +26,7 @@ func main() int {
     println("Data file    : " + check_path(data_path))
     println("Output dir   : " + output_dir)
     println("Epochs       : " + int_to_str(epochs))
-    println("Batch size   : " + int_to_str(batch_size))
+    println("batch_2 size   : " + int_to_str(batch_size))
     println("Learning rate: " + fmt_float(learning_rate, 6))
     println("")
     runtime_command_result mkdir_result = runtime_make_dirs(output_dir)

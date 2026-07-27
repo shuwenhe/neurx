@@ -16,7 +16,7 @@ use neurx.distributed.nccl_id_manager.{
 use neurx.runtime.io.{runtime_env_get}
 func main() {
     print("="*60)
-    print("NeurX Multi-Node Distributed Pretraining Entry")
+    print("NeurX Multi-Node Distributed Pretraining entry")
     print("="*60)
     multi_node_config config = init_multi_node_config()
     int local_rank = parse_int(runtime_env_get("LOCAL_RANK", "0"), 0)

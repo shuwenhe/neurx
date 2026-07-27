@@ -16,7 +16,7 @@ func main() int {
     int avg_doc_tokens = 128
     println("Training Configuration:")
     println("  Max Steps: " + int_to_str(max_steps))
-    println("  Batch Size: " + int_to_str(batch_size))
+    println("  batch_2 Size: " + int_to_str(batch_size))
     println("  Learning Rate: " + fmt_float(base_lr, 6))
     println("  Warmup Steps: " + int_to_str(warmup_steps))
     println("")
@@ -59,7 +59,7 @@ func main() int {
     println("Throughput Metrics:")
     println("  Tokens/Step: " + int_to_str(tokens_per_step))
     println("  Total Tokens Processed: ~" + int_to_str(total_tokens / 1000) + "K")
-    println("  Batch Size: " + int_to_str(batch_size) + " docs/step")
+    println("  batch_2 Size: " + int_to_str(batch_size) + " docs/step")
     println("")
     println("========================================")
     println("Training Complete")

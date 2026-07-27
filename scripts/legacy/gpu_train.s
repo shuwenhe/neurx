@@ -51,7 +51,7 @@ func main() {
     float lr = parse_float(runtime_env_get("NEURX_PRETRAIN_LR", "0.001"), 0.001)
     println("[GPU] Configuration:")
     println("  GPUs: " + int_to_str(num_gpus))
-    println("  Batch Size: " + int_to_str(batch_size))
+    println("  batch_2 Size: " + int_to_str(batch_size))
     println("  Sequence Length: " + int_to_str(seq_len))
     println("  Hidden Dimension: " + int_to_str(hidden_dim))
     println("  Learning Rate: " + float_to_str(lr))
@@ -171,7 +171,7 @@ func process_shard_gpu(
         gpu_buffer batch_target = allocate_gpu_buffer(ctx.batch_size * ctx.seq_len, 4)
         gpu_buffer batch_output = allocate_gpu_buffer(ctx.batch_size * ctx.seq_len, 4)
         gpu_buffer batch_grads = allocate_gpu_buffer(ctx.batch_size * ctx.seq_len, 4)
-        println("  [Forward] Batch " + int_to_str(batch_idx))
+        println("  [Forward] batch_2 " + int_to_str(batch_idx))
         int status = cublasSgemm(
             ctx.cublas_handle,
             0, 0,
@@ -196,7 +196,7 @@ func process_shard_gpu(
             batch_target.device_ptr,
             batch_output.element_count
         )
-        println("  [Backward] Batch " + int_to_str(batch_idx))
+        println("  [Backward] batch_2 " + int_to_str(batch_idx))
         cuda_relu_backward(
             batch_grads.device_ptr,
             batch_output.device_ptr,

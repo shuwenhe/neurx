@@ -24,7 +24,7 @@ struct system_status {
 
 func check_system_status() {
     print("\n" + "="*70)
-    print("🔍 Checking NEURX-5.2 Training System Status")
+    print("🔍 Checking NEURX-5.2 Training System status")
     print("="*70 + "\n")
     system_status status {
         model_loaded: false,
@@ -115,7 +115,7 @@ func check_system_status() {
         ContinuousBatchScheduler sched = init_scheduler(max_batch_size=16)
         status.modules.inference_optimization = true
         status.inference_engine_ready = true
-        print("   ✅ Inference optimization ready (KV Cache + PagedAttn + Continuous Batch)")
+        print("   ✅ Inference optimization ready (KV cache + PagedAttn + Continuous batch_2)")
     except Exception as e:
         append(status.errors, f"Inference error: {e}")
         print(f"   ❌ {e}")
@@ -128,7 +128,7 @@ func check_system_status() {
         status.modules.inference_optimization
     ])
     print("\n" + "-"*70)
-    print(f"📊 System Status: {ready_count}/6 modules ready")
+    print(f"📊 System status: {ready_count}/6 modules ready")
     if len(status.warnings) > 0:
         print(f"\n⚠️  Warnings ({len(status.warnings)}):")
         for w in status.warnings:
@@ -236,7 +236,7 @@ func start_neurx_inference_server(int port = 8080, string model_path = "./checkp
     Features:
     - REST API endpoint
     - Continuous batching
-    - KV Cache management
+    - KV cache management
     - PagedAttention (optional)
     """
     print("\n" + "="*60)
@@ -254,7 +254,7 @@ func start_neurx_inference_server(int port = 8080, string model_path = "./checkp
     print(f"🚀 Server starting on port {port}...")
     print(f"\nEndpoints:")
     print(f"   POST /generate     - Single generation")
-    print(f"   POST /batch_generate - Batch generation")
+    print(f"   POST /batch_generate - batch_2 generation")
     print(f"   GET  /status       - Server status")
     print(f"   GET  /health       - Health check\n")
 func run_all_tests():

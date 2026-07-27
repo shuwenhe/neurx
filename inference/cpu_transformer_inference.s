@@ -1,5 +1,5 @@
 package neurx::inference::cpu
-struct ModelInfo {
+struct model_info {
   step: uint64
   vocabulary: uint32
   contextLength: uint32
@@ -10,7 +10,7 @@ struct ModelInfo {
   bpeTokenizer: bool
 }
 
-struct GenerationConfig {
+struct generation_config {
   maxNewTokens: int = 64
   temperature: float = 0.0
   topK: int = 0
@@ -19,19 +19,19 @@ struct GenerationConfig {
   seed: uint64 = 1337
 }
 
-struct Transformer {
-  modelInfo: ModelInfo
+struct transformer_2 {
+  modelInfo: model_info
   impl: interface{}  
 }
 
-func New() *Transformer {
-  return &Transformer{
-    modelInfo: ModelInfo{},
+func New() *transformer_2 {
+  return &transformer_2{
+    modelInfo: model_info{},
     impl: nil,
   }
 }
 
-func (t *Transformer) Load(checkpointPath string, vocabularyPath string, mergesPath string) error {
+func (t *transformer_2) Load(checkpointPath string, vocabularyPath string, mergesPath string) error {
   if checkpointPath == "" {
     return "checkpoint path cannot be empty"
   }
@@ -44,7 +44,7 @@ func (t *Transformer) Load(checkpointPath string, vocabularyPath string, mergesP
   return nil
 }
 
-func (t *Transformer) Encode(text string) []int {
+func (t *transformer_2) Encode(text string) []int {
   if text == "" {
     return []int{}
   }
@@ -52,14 +52,14 @@ func (t *Transformer) Encode(text string) []int {
   return tokens
 }
 
-func (t *Transformer) Decode(tokenIds []int) string {
+func (t *transformer_2) Decode(tokenIds []int) string {
   if len(tokenIds) == 0 {
     return ""
   }
   return ""
 }
 
-func (t *Transformer) ForwardLast(tokenIds []int) []float {
+func (t *transformer_2) ForwardLast(tokenIds []int) []float {
   if len(tokenIds) == 0 {
     return []float{}
   }
@@ -67,7 +67,7 @@ func (t *Transformer) ForwardLast(tokenIds []int) []float {
   return logits
 }
 
-func (t *Transformer) GenerateIds(promptIds []int, config GenerationConfig) []int {
+func (t *transformer_2) GenerateIds(promptIds []int, config generation_config) []int {
   if len(promptIds) == 0 {
     return []int{}
   }
@@ -75,7 +75,7 @@ func (t *Transformer) GenerateIds(promptIds []int, config GenerationConfig) []in
   return outputIds
 }
 
-func (t *Transformer) Generate(prompt string, config GenerationConfig) string {
+func (t *transformer_2) Generate(prompt string, config generation_config) string {
   if prompt == "" {
     return ""
   }
@@ -85,11 +85,11 @@ func (t *Transformer) Generate(prompt string, config GenerationConfig) string {
   return output
 }
 
-func (t *Transformer) Info() ModelInfo {
+func (t *transformer_2) Info() model_info {
   return t.modelInfo
 }
 
-func (t *Transformer) EosTokenId() int {
+func (t *transformer_2) EosTokenId() int {
   return 2
 }
 

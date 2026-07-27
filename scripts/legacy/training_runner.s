@@ -275,7 +275,7 @@ func cosine(x float64) float64 {
 
 func runTraining() error {
 	logInfo("Starting training loop...")
-	logInfo(fmt.Sprintf("Model: %s, Params: %d, Total Steps: %d",
+	logInfo(fmt.Sprintf("model: %s, Params: %d, Total Steps: %d",
 		gConfig.ModelName, gConfig.ParamCount, gConfig.TotalSteps))
 	for step := int64(0); step < int64(gConfig.TotalSteps); step++ {
 		err := trainingStep(step)
@@ -350,7 +350,7 @@ func logMetric(m *training_metrics) {
 }
 
 func printUsage() {
-	fmt.Println("NeurX Training Runner - Usage:")
+	fmt.Println("NeurX Training runner - Usage:")
 	fmt.Println("")
 	fmt.Println("Commands:")
 	fmt.Println("  run              Run training with default config")
@@ -363,7 +363,7 @@ func printUsage() {
 	fmt.Println("")
 	fmt.Println("Environment Variables:")
 	fmt.Println("  NEURX_HOME              NeurX project root")
-	fmt.Println("  NEURX_BATCH_SIZE        Batch size (default: 16)")
+	fmt.Println("  NEURX_BATCH_SIZE        batch_2 size (default: 16)")
 	fmt.Println("  NEURX_SEQ_LEN           Sequence length (default: 512)")
 	fmt.Println("  NEURX_TOTAL_STEPS       Total training steps (default: 1000)")
 	fmt.Println("  NEURX_NUM_GPUS          Number of GPUs (default: 8)")
@@ -434,7 +434,7 @@ func main() {
 			logError(err.Error())
 			os.Exit(1)
 		}
-		logInfo("Config loaded successfully")
+		logInfo("config loaded successfully")
 	case "config-save":
 		if len(os.Args) < 3 {
 			logError("Missing output path")
@@ -445,7 +445,7 @@ func main() {
 			logError(err.Error())
 			os.Exit(1)
 		}
-		logInfo("Config saved successfully")
+		logInfo("config saved successfully")
 	case "help":
 		printUsage()
 	default:

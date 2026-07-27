@@ -74,9 +74,9 @@ func main() {
     println("========================================")
     println("NeurX LoRA SFT Evaluation (S)")
     println("========================================")
-    println("Model  : " + model_file)
+    println("model  : " + model_file)
     println("Data   : " + data_file)
-    println("Runner : " + runner)
+    println("runner : " + runner)
     println("Max new tokens: " + max_tokens_text)
     println("")
     if !runtime_file_exists(model_file) {

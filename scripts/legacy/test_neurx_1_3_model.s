@@ -6,7 +6,7 @@ func main() int {
     string checkpoint_dir = runtime_env_get("NEURX_CHECKPOINT_DIR", project_root + "/checkpoint/NeurX-1.3")
     string output_dir = runtime_env_get("NEURX_OUTPUT_DIR", project_root + "/artifacts/inference_output/NeurX-1.3")
     println("╔════════════════════════════════════════════════════╗")
-    println("║   NeurX-1.3 Model Test (S Language Implementation) ║")
+    println("║   NeurX-1.3 model Test (S Language Implementation) ║")
     println("╚════════════════════════════════════════════════════╝")
     println("")
     println("Configuration:")
@@ -21,17 +21,17 @@ func main() int {
     }
     println("  ✓ checkpoint directory exists")
     if !runtime_file_exists(checkpoint_dir + "/transformer_v2.ckpt") {
-        println("  ✗ Model checkpoint file not found")
+        println("  ✗ model checkpoint file not found")
         return 1
     }
-    println("  ✓ Model checkpoint (transformer_v2.ckpt) found")
+    println("  ✓ model checkpoint (transformer_v2.ckpt) found")
     if !runtime_file_exists(checkpoint_dir + "/NeurX-1.3.neurx") {
-        println("  ✗ Model metadata file not found")
+        println("  ✗ model metadata file not found")
         return 1
     }
-    println("  ✓ Model metadata (NeurX-1.3.neurx) found")
+    println("  ✓ model metadata (NeurX-1.3.neurx) found")
     println("")
-    println("Phase 2: Loading Model Metadata...")
+    println("Phase 2: Loading model Metadata...")
     int result = read_model_metadata(checkpoint_dir)
     if result != 0 {
         println("  ✗ Failed to read model metadata")
@@ -51,9 +51,9 @@ func main() int {
     println("║                 Test Summary                       ║")
     println("╚════════════════════════════════════════════════════╝")
     println("")
-    println("✓ Model checkpoint validated")
-    println("✓ Model metadata loaded")
-    println("✓ Model structure verified")
+    println("✓ model checkpoint validated")
+    println("✓ model metadata loaded")
+    println("✓ model structure verified")
     println("")
     println("checkpoint Statistics:")
     print_checkpoint_size(checkpoint_dir)
@@ -73,7 +73,7 @@ func read_model_metadata(string checkpoint_dir) int {
     string cmd = "head -20 \"" + metadata_file + "\""
     println("  Reading metadata from: " + metadata_file)
     runtime_run_command(cmd)
-    println("  ✓ Model metadata loaded successfully")
+    println("  ✓ model metadata loaded successfully")
     return 0
 }
 

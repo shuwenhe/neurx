@@ -6,7 +6,7 @@ func main() int {
     string generations_override = runtime_env_get("NEURX_SKILLS_GENERATIONS", "")
     string s_bin_override = runtime_env_get("S_BIN", runtime_env_get("S_COMPILER", ""))
     if !runtime_run_command("test -f " + runtime_shell_escape(config)).ok {
-        println("Config not found: " + config)
+        println("config not found: " + config)
         return 1
     }
     string max_generations = default_if_empty(yaml_value(config, "max_generations"), "20")

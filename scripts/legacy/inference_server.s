@@ -161,7 +161,7 @@ func initializeModel() error {
 		return fmt.Errorf("model not found: %s", gConfig.ModelPath)
 	}
 	modelSizeMB := stat.Size() / (1024 * 1024)
-	logInfo(fmt.Sprintf("Model loaded: %s (size: %d MB)",
+	logInfo(fmt.Sprintf("model loaded: %s (size: %d MB)",
 		filepath.Base(gConfig.ModelPath), modelSizeMB))
 	if gConfig.EnableQuantized {
 		logInfo(fmt.Sprintf("Quantization enabled: %s", gConfig.QuantizationType))
@@ -269,8 +269,8 @@ func logError(msg string) {
 func startServer() error {
 	logInfo("Starting inference server...")
 	logInfo(fmt.Sprintf("Server: %s:%d", gConfig.Host, gConfig.Port))
-	logInfo(fmt.Sprintf("Model: %s", gConfig.ModelPath))
-	logInfo(fmt.Sprintf("Config: batch_size=%d, seq_len=%d, workers=%d",
+	logInfo(fmt.Sprintf("model: %s", gConfig.ModelPath))
+	logInfo(fmt.Sprintf("config: batch_size=%d, seq_len=%d, workers=%d",
 		gConfig.MaxBatchSize, gConfig.MaxSequenceLen, gConfig.WorkerThreads))
 	logInfo("Server started successfully!")
 	logInfo("Endpoints:")
@@ -289,11 +289,11 @@ func runInteractiveMode() {
 		`{"prompt":"How does neural networks work?","max_tokens":150}`,
 	}
 	for i, reqStr := range requests {
-		fmt.Printf("\n[Request %d]\n", i+1)
+		fmt.Printf("\n[request %d]\n", i+1)
 		fmt.Printf("Input: %s\n", reqStr)
 		resp, err := handleInferenceRequest([]byte(reqStr))
 		if err != nil {
-			logError("Request failed: " + err.Error())
+			logError("request failed: " + err.Error())
 		} else {
 			fmt.Printf("Response:\n%s\n", string(resp))
 		}
@@ -316,7 +316,7 @@ func printUsage() {
 	fmt.Println("Environment Variables:")
 	fmt.Println("  NEURX_INFERENCE_HOST      Server host (default: 0.0.0.0)")
 	fmt.Println("  NEURX_INFERENCE_PORT      Server port (default: 8080)")
-	fmt.Println("  NEURX_INFERENCE_MODEL     Model path")
+	fmt.Println("  NEURX_INFERENCE_MODEL     model path")
 	fmt.Println("  NEURX_INFERENCE_MAX_BATCH Max batch size (default: 32)")
 	fmt.Println("  NEURX_INFERENCE_QUANTIZED Enable quantization (0/1)")
 	fmt.Println("  NEURX_INFERENCE_CACHE     Enable caching (0/1)")
@@ -377,7 +377,7 @@ func main() {
 	}
 	err = initializeModel()
 	if err != nil {
-		logError("Model initialization failed: " + err.Error())
+		logError("model initialization failed: " + err.Error())
 		os.Exit(1)
 	}
 	switch command {
@@ -405,7 +405,7 @@ func main() {
 			logError(err.Error())
 			os.Exit(1)
 		}
-		logInfo("Config loaded successfully")
+		logInfo("config loaded successfully")
 		printConfig()
 	case "help":
 		printUsage()

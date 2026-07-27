@@ -15,15 +15,15 @@ class OperatorLibrary {
   OperatorLibrary(const OperatorLibrary&) = delete;
   OperatorLibrary& operator=(const OperatorLibrary&) = delete;
 
-  Status load(const std::string& path);
+  status load(const std::string& path);
   void unload();
   bool loaded() const { return handle_ != nullptr; }
   inference::KernelLauncher prefill_launcher() const;
   inference::KernelLauncher decode_launcher() const;
 
  private:
-  using RawLauncher = NeurxCannOperatorStatus (*)(
-      const inference::DeviceBatch&);
+  using RawLauncher = neurx_cann_operator_status (*)(
+      const inference::device_batch&);
   void* handle_ = nullptr;
   RawLauncher prefill_ = nullptr;
   RawLauncher decode_ = nullptr;

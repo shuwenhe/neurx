@@ -38,82 +38,82 @@ float fp16_to_float(uint16_t value) {
 
 }
 
-AscendWorker::AscendWorker(AscendExecutorConfig config,
-                           cann::PrefixCacheConfig prefix_cache_config)
+AscendWorker::AscendWorker(ascend_executor_config config,
+                           cann::prefix_cache_config prefix_cache_config)
     : executor_(std::move(config)),
       prefix_cache_(&executor_.mutable_kv_cache(), prefix_cache_config) {}
 
-AdapterStatus AscendWorker::initialize(int device_id) {
+adapter_status AscendWorker::initialize(int device_id) {
   return executor_.initialize(device_id);
 }
 
-AdapterStatus AscendWorker::ensure_capacity(cann::DeviceBuffer& buffer,
+adapter_status AscendWorker::ensure_capacity(cann::DeviceBuffer& buffer,
                                             std::size_t bytes,
                                             const char* name) {
-  if (buffer.size() >= bytes) return AdapterStatus::success();
-  const AdapterStatus synchronized = executor_.synchronize();
+  if (buffer.size() >= bytes) return adapter_status::success();
+  const adapter_status synchronized = executor_.synchronize();
   if (!synchronized.ok) return synchronized;
-  const cann::Status status = buffer.allocate(bytes);
+  const cann::status status = buffer.allocate(bytes);
   return status.ok
-             ? AdapterStatus::success()
-             : AdapterStatus::failure(std::string(name) + ": " +
+             ? adapter_status::success()
+             : adapter_status::failure(std::string(name) + ": " +
                                       status.message);
 }
 
-AdapterStatus AscendWorker::ensure_capacity(cann::HostBuffer& buffer,
+adapter_status AscendWorker::ensure_capacity(cann::HostBuffer& buffer,
                                             std::size_t bytes,
                                             const char* name) {
-  if (buffer.size() >= bytes) return AdapterStatus::success();
-  const AdapterStatus synchronized = executor_.synchronize();
+  if (buffer.size() >= bytes) return adapter_status::success();
+  const adapter_status synchronized = executor_.synchronize();
   if (!synchronized.ok) return synchronized;
-  const cann::Status status = buffer.allocate(bytes);
+  const cann::status status = buffer.allocate(bytes);
   return status.ok
-             ? AdapterStatus::success()
-             : AdapterStatus::failure(std::string(name) + ": " +
+             ? adapter_status::success()
+             : adapter_status::failure(std::string(name) + ": " +
                                       status.message);
 }
 
-AdapterStatus AscendWorker::execute(
-    const Batch& batch, const std::vector<int32_t>& token_ids,
-    const std::vector<SamplingConfig>& sampling,
+adapter_status AscendWorker::execute(
+    const batch_2& batch, const std::vector<int32_t>& token_ids,
+    const std::vector<sampling_config_2>& sampling,
     const std::vector<std::vector<int32_t>>& token_histories,
-    WorkerBatchResult* result) {
-  if (!ready()) return AdapterStatus::failure("Ascend worker is not initialized");
-  if (!result) return AdapterStatus::failure("Ascend worker result is null");
+    worker_batch_result* result) {
+  if (!ready()) return adapter_status::failure("Ascend worker is not initialized");
+  if (!result) return adapter_status::failure("Ascend worker result is null");
   if (batch.items.empty() || batch.total_tokens <= 0 ||
       token_ids.size() != static_cast<std::size_t>(batch.total_tokens)) {
-    return AdapterStatus::failure("Ascend worker batch token count is invalid");
+    return adapter_status::failure("Ascend worker batch token count is invalid");
   }
   const std::size_t batch_size = batch.items.size();
   if ((!sampling.empty() && sampling.size() != batch_size) ||
       (!token_histories.empty() && token_histories.size() != batch_size)) {
-    return AdapterStatus::failure(
+    return adapter_status::failure(
         "Ascend worker sampling metadata does not match batch size");
   }
   const std::size_t vocabulary = executor_.model().metadata().vocabulary;
   if (vocabulary == 0 ||
       batch_size > std::numeric_limits<std::size_t>::max() / vocabulary) {
-    return AdapterStatus::failure("Ascend worker logits shape overflows size_t");
+    return adapter_status::failure("Ascend worker logits shape overflows size_t");
   }
   for (const int32_t token : token_ids) {
     if (token < 0 || static_cast<std::size_t>(token) >= vocabulary) {
-      return AdapterStatus::failure(
+      return adapter_status::failure(
           "Ascend worker token id is outside the model vocabulary");
     }
   }
 
-  Batch execution_batch = batch;
+  batch_2 execution_batch = batch;
   std::vector<int32_t> execution_tokens;
   execution_tokens.reserve(token_ids.size());
   std::vector<std::vector<int32_t>> prefill_prompts(batch_size);
   std::size_t token_offset = 0;
   execution_batch.total_tokens = 0;
   for (std::size_t row = 0; row < batch_size; ++row) {
-    const WorkItem& item = batch.items[row];
+    const work_item& item = batch.items[row];
     if (item.token_count <= 0 ||
         static_cast<std::size_t>(item.token_count) >
             token_ids.size() - token_offset) {
-      return AdapterStatus::failure(
+      return adapter_status::failure(
           "Ascend worker work-item token range is invalid");
     }
     const std::size_t count = static_cast<std::size_t>(item.token_count);
@@ -124,11 +124,11 @@ AdapterStatus AscendWorker::execute(
         executor_.kv_cache().token_count(item.request_id) == 0) {
       prefill_prompts[row].assign(begin, end);
       if (count > 1) {
-        cann::PrefixCacheHit hit;
-        const cann::Status prefix_status = prefix_cache_.attach_longest(
+        cann::prefix_cache_hit hit;
+        const cann::status prefix_status = prefix_cache_.attach_longest(
             item.request_id, prefill_prompts[row], count - 1, &hit);
         if (!prefix_status.ok) {
-          return AdapterStatus::failure(item.request_id + ": " +
+          return adapter_status::failure(item.request_id + ": " +
                                         prefix_status.message);
         }
         prefix_tokens = hit.token_count;
@@ -141,13 +141,13 @@ AdapterStatus AscendWorker::execute(
     token_offset += count;
   }
   if (token_offset != token_ids.size() || execution_tokens.empty()) {
-    return AdapterStatus::failure(
+    return adapter_status::failure(
         "Ascend worker effective Prefill batch is invalid");
   }
   std::size_t additional_blocks = 0;
   const std::size_t tokens_per_block =
       executor_.kv_cache().config().tokens_per_block;
-  for (const WorkItem& item : execution_batch.items) {
+  for (const work_item& item : execution_batch.items) {
     const std::size_t current =
         executor_.kv_cache().token_count(item.request_id);
     const std::size_t required_tokens =
@@ -167,15 +167,15 @@ AdapterStatus AscendWorker::execute(
   const std::size_t logit_count = batch_size * vocabulary;
   if (logit_count >
       std::numeric_limits<std::size_t>::max() / sizeof(uint16_t)) {
-    return AdapterStatus::failure("Ascend worker logits allocation overflows size_t");
+    return adapter_status::failure("Ascend worker logits allocation overflows size_t");
   }
   const std::size_t token_bytes = execution_tokens.size() * sizeof(int32_t);
   const std::size_t logit_bytes = logit_count * sizeof(uint16_t);
   const std::size_t sampled_token_bytes = batch_size * sizeof(int32_t);
   bool use_device_sampling = batch_size <= 512;
-  const SamplingConfig default_sampling;
+  const sampling_config_2 default_sampling;
   for (std::size_t row = 0; row < batch_size; ++row) {
-    const SamplingConfig& config =
+    const sampling_config_2& config =
         sampling.empty() ? default_sampling : sampling[row];
     if (!supports_atb_device_sampling(config, vocabulary)) {
       use_device_sampling = false;
@@ -184,10 +184,10 @@ AdapterStatus AscendWorker::execute(
   }
 
   if (cann::set_current_context(executor_.context()) != cann::kSuccess) {
-    return AdapterStatus::failure(std::string("aclrtSetCurrentContext: ") +
+    return adapter_status::failure(std::string("aclrtSetCurrentContext: ") +
                                   cann::recent_error());
   }
-  AdapterStatus status =
+  adapter_status status =
       ensure_capacity(device_tokens_, token_bytes, "device token buffer");
   if (!status.ok) return status;
   status = ensure_capacity(device_logits_, logit_bytes, "device logits buffer");
@@ -213,11 +213,11 @@ AdapterStatus AscendWorker::execute(
                          host_tokens_.data(), token_bytes,
                          cann::MemcpyKind::host_to_device,
                          executor_.stream()) != cann::kSuccess) {
-    return AdapterStatus::failure(std::string("token H2D copy: ") +
+    return adapter_status::failure(std::string("token H2D copy: ") +
                                   cann::recent_error());
   }
 
-  DeviceBatch launch;
+  device_batch launch;
   launch.schedule = execution_batch;
   launch.token_ids = device_tokens_.data();
   launch.logits = device_logits_.data();
@@ -247,7 +247,7 @@ AdapterStatus AscendWorker::execute(
                          copy_bytes, cann::MemcpyKind::device_to_host,
                          executor_.stream()) != cann::kSuccess) {
     for (const auto& item : batch.items) executor_.release_request(item.request_id);
-    return AdapterStatus::failure(std::string("sampling output D2H copy: ") +
+    return adapter_status::failure(std::string("sampling output D2H copy: ") +
                                   cann::recent_error());
   }
   status = executor_.synchronize();
@@ -274,12 +274,12 @@ AdapterStatus AscendWorker::execute(
     for (std::size_t row = 0; row < batch_size; ++row) {
       const int32_t token = result->next_tokens[row];
       if (token < 0 || static_cast<std::size_t>(token) >= vocabulary) {
-        return AdapterStatus::failure(
+        return adapter_status::failure(
             batch.items[row].request_id +
             ": ATB sampler returned an invalid token id");
       }
     }
-    return AdapterStatus::success();
+    return adapter_status::success();
   }
 
   result->logits.resize(logit_count);
@@ -289,7 +289,7 @@ AdapterStatus AscendWorker::execute(
   }
   const std::vector<int32_t> empty_history;
   for (std::size_t row = 0; row < batch_size; ++row) {
-    const SamplingConfig& config =
+    const sampling_config_2& config =
         sampling.empty() ? default_sampling : sampling[row];
     const std::vector<int32_t>& history =
         token_histories.empty() ? empty_history : token_histories[row];
@@ -297,11 +297,11 @@ AdapterStatus AscendWorker::execute(
                            vocabulary, config, history,
                            &result->next_tokens[row]);
     if (!status.ok) {
-      return AdapterStatus::failure(batch.items[row].request_id + ": " +
+      return adapter_status::failure(batch.items[row].request_id + ": " +
                                     status.message);
     }
   }
-  return AdapterStatus::success();
+  return adapter_status::success();
 }
 
 }

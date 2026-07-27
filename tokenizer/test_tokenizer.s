@@ -131,7 +131,7 @@ func test_token_id_lookup() {
 }
 
 func test_cache_stats() {
-    println("Test 10: Cache statistics")
+    println("Test 10: cache statistics")
     []string vocab = []string{cap: 5}
     vocab.push("<pad>")
     vocab.push("<eos>")
@@ -147,7 +147,7 @@ func test_cache_stats() {
 }
 
 func test_batch_operations() {
-    println("Test 11: Batch encode/decode")
+    println("Test 11: batch_2 encode/decode")
     []string vocab = []string{cap: 10}
     vocab.push("<pad>")
     vocab.push("<eos>")
@@ -167,7 +167,7 @@ func test_batch_operations() {
     let batch = encode_batch(tokenizer, texts, 10)
     let decoded = decode_batch(tokenizer, batch)
     if batch.batch_size == 2 && len(decoded) == 2 {
-        println("  ✓ Batch operations work")
+        println("  ✓ batch_2 operations work")
     }
 }
 

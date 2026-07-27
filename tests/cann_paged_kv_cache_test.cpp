@@ -13,20 +13,20 @@ namespace {
 
 class HostAllocator final : public neurx::cann::DeviceAllocator {
  public:
-  neurx::cann::Status allocate(void** address, std::size_t bytes) override {
+  neurx::cann::status allocate(void** address, std::size_t bytes) override {
     if (!address || bytes == 0) {
-      return neurx::cann::Status::failure("invalid test allocation");
+      return neurx::cann::status::failure("invalid test allocation");
     }
     *address = ::operator new(bytes, std::nothrow);
-    return *address ? neurx::cann::Status::success()
-                    : neurx::cann::Status::failure("test allocation failed");
+    return *address ? neurx::cann::status::success()
+                    : neurx::cann::status::failure("test allocation failed");
   }
 
   void release(void* address) override { ::operator delete(address); }
 };
 
 #pragma pack(push, 1)
-struct TestHeaderV2 {
+struct test_header_v2 {
   char magic[8];
   uint32_t version, header_bytes;
   uint64_t step, optimizer_step, micro_step, shard, line, docs, tokens;
@@ -36,7 +36,7 @@ struct TestHeaderV2 {
 };
 #pragma pack(pop)
 
-static_assert(sizeof(TestHeaderV2) == 140, "test checkpoint header ABI changed");
+static_assert(sizeof(test_header_v2) == 140, "test checkpoint header ABI changed");
 
 }
 
@@ -69,7 +69,7 @@ int main() {
   assert(stats.active_requests == 1 && stats.allocated_tokens == 8);
 
   const auto tensor_config =
-      neurx::cann::KvCacheConfig::fp16_transformer(2, 16, 2, 2, 4);
+      neurx::cann::kv_cache_config_2::fp16_transformer(2, 16, 2, 2, 4);
   neurx::cann::PagedKvCache tensor_cache(tensor_config, &allocator);
   assert(tensor_cache.initialize().ok);
   auto* key0 = static_cast<unsigned char*>(tensor_cache.key_layer_address(0));
@@ -84,19 +84,19 @@ int main() {
              key0 ==
          816);
 
-  neurx::cann::ModelMetadata compatible_model;
+  neurx::cann::model_metadata compatible_model;
   compatible_model.vocabulary = 128;
   compatible_model.hidden_size = 256;
   compatible_model.attention_heads = 2;
   compatible_model.ffn_size = 512;
   compatible_model.layers = 2;
   const auto compatible_config =
-      neurx::cann::KvCacheConfig::fp16_310p(2, 16, 2, 2, 128);
+      neurx::cann::kv_cache_config_2::fp16_310p(2, 16, 2, 2, 128);
   assert(neurx::cann::validate_310p_model(compatible_model, compatible_config).ok);
   compatible_model.hidden_size = 260;
   assert(!neurx::cann::validate_310p_model(compatible_model, compatible_config).ok);
 
-  neurx::cann::TransformerBatchPlan prefill_plan;
+  neurx::cann::transformer_batch_plan prefill_plan;
   prefill_plan.phase = neurx::inference::Phase::prefill;
   prefill_plan.batch_size = 2;
   prefill_plan.token_count = 3;
@@ -105,7 +105,7 @@ int main() {
       {"a", 5, {0, 1}, {3, 4}},
       {"b", 1, {2}, {32}},
   };
-  neurx::cann::PagedAttentionMetadata attention_metadata;
+  neurx::cann::paged_attention_metadata attention_metadata;
   assert(neurx::cann::build_paged_attention_metadata(
              prefill_plan, &attention_metadata)
              .ok);
@@ -142,7 +142,7 @@ int main() {
               .ok);
 
   const char* checkpoint = "/tmp/neurx_nxtrfmv2_loader_test.ckpt";
-  TestHeaderV2 header{};
+  test_header_v2 header{};
   std::memcpy(header.magic, "NXTRFMV2", 8);
   header.version = 2;
   header.header_bytes = sizeof(header);
@@ -160,7 +160,7 @@ int main() {
     output.write(reinterpret_cast<const char*>(&header), sizeof(header));
     assert(output.good());
   }
-  neurx::cann::ModelMetadata metadata;
+  neurx::cann::model_metadata metadata;
   assert(neurx::cann::inspect_nxtrfmv2(checkpoint, &metadata).ok);
   assert(metadata.step == 42 && metadata.vocabulary == 128);
   assert(metadata.hidden_size == 32 && metadata.layers == 2);

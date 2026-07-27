@@ -486,8 +486,8 @@ func test_tokenizer() {
     dict[str, any] batch_result = batch_encode(tok, batch_texts, max_length=some(64), padding=True)
     assert(shape(batch_result["input_ids"]) == (4, 64))
     assert(shape(batch_result["attention_mask"]) == (4, 64))
-    print(f"   Batch shape: {shape(batch_result['input_ids'])}")
-    print("✅ Batch encoding works!")
+    print(f"   batch_2 shape: {shape(batch_result['input_ids'])}")
+    print("✅ batch_2 encoding works!")
     print("\n[Test 5] Testing chat prompt construction...")
     message[] messages = [
         message{role: "user", content: "English text!"},

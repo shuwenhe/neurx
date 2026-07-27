@@ -380,7 +380,7 @@ func run_training_loop(
     ff_dim := 64
     num_heads := 2
     println("📊 Configuration:")
-    printf("  Batch size: %d\n", batch_size)
+    printf("  batch_2 size: %d\n", batch_size)
     printf("  Sequence length: %d\n", seq_len)
     printf("  Vocabulary size: %d\n", vocab_size)
     printf("  Hidden dimension: %d\n", hidden_dim)
@@ -391,7 +391,7 @@ func run_training_loop(
     println("")
     println("🏗️  Creating model...")
     model := create_mini_transformer(vocab_size, hidden_dim, ff_dim, num_heads)
-    println("✅ Model created")
+    println("✅ model created")
     printf("   embedding: %s\n", tensor_shape_string(model.embedding_weight.shape))
     printf("   Q/K/V proj: %s\n", tensor_shape_string(model.q_proj.shape))
     printf("   FC layers: %s → %s\n", tensor_shape_string(model.fc1.shape), tensor_shape_string(model.fc2.shape))
@@ -506,7 +506,7 @@ func main() {
     println("╔══════════════════════════════════════════════════════════════════════╗")
     println("║  NeurX Industrial-Grade Training - End-to-End Verification        ║")
     println("║  Language: S                                                         ║")
-    println("║  Status: Production Ready                                            ║")
+    println("║  status: Production Ready                                            ║")
     println("╚══════════════════════════════════════════════════════════════════════╝")
     println("")
     num_epochs := 2

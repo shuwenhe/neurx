@@ -383,7 +383,7 @@ func start_value_training(
 ) value_state {
     value_state state = new_value_state(cfg)
     print("╔════════════════════════════════════════════════════════════╗")
-    print("║  Value Model Training                                      ║")
+    print("║  Value model Training                                      ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
     int epoch = 0

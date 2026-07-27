@@ -1,16 +1,16 @@
 package neurx.lib.nn
-use neurx.lib.tensor.{Vector, Matrix, create_vector, create_matrix, random_matrix, vector_scale, matrix_scale, matrix_multiply, matrix_vector_multiply, matrix_add, vector_add, outer_product}
+use neurx.lib.tensor.{vector, matrix, create_vector, create_matrix, random_matrix, vector_scale, matrix_scale, matrix_multiply, matrix_vector_multiply, matrix_add, vector_add, outer_product}
 struct linear_layer {
-    Matrix weight
-    Vector bias
+    matrix weight
+    vector bias
     int in_features
     int out_features
     float learning_rate
 }
 
 struct lora_adapter {
-    Matrix lora_a
-    Matrix lora_b
+    matrix lora_a
+    matrix lora_b
     float alpha
     int rank
     int in_features
@@ -19,22 +19,22 @@ struct lora_adapter {
 }
 
 struct lora_linear_layer {
-    Matrix base_weight
-    Vector base_bias
+    matrix base_weight
+    vector base_bias
     lora_adapter adapter
     int in_features
     int out_features
 }
 
 struct embedding_layer {
-    Matrix embeddings
+    matrix embeddings
     int vocab_size
     int embedding_dim
 }
 
 struct layer_norm {
-    Vector gamma
-    Vector beta
+    vector gamma
+    vector beta
     float epsilon
     int hidden_size
 }
@@ -59,8 +59,8 @@ func create_linear_layer(int in_features, int out_features, float lr, int seed) 
     layer
 }
 
-func linear_forward(linear_layer layer, Vector x) Vector {
-    Vector y = matrix_vector_multiply(layer.weight, x)
+func linear_forward(linear_layer layer, vector x) vector {
+    vector y = matrix_vector_multiply(layer.weight, x)
     y = vector_add(y, layer.bias)
     y
 }
@@ -78,11 +78,11 @@ func create_lora_adapter(int in_features, int out_features, int rank, float alph
     adapter
 }
 
-func lora_forward(lora_linear_layer layer, Vector x) Vector {
-    Vector output = matrix_vector_multiply(layer.base_weight, x)
+func lora_forward(lora_linear_layer layer, vector x) vector {
+    vector output = matrix_vector_multiply(layer.base_weight, x)
     output = vector_add(output, layer.base_bias)
-    Vector ax = matrix_vector_multiply(layer.adapter.lora_a, x)
-    Vector b_ax = matrix_vector_multiply(layer.adapter.lora_b, ax)
+    vector ax = matrix_vector_multiply(layer.adapter.lora_a, x)
+    vector b_ax = matrix_vector_multiply(layer.adapter.lora_b, ax)
     float scale = layer.adapter.alpha / (layer.adapter.rank as float)
     b_ax = vector_scale(b_ax, scale)
     output = vector_add(output, b_ax)
@@ -110,8 +110,8 @@ func create_embedding_layer(int vocab_size, int embedding_dim, int seed) embeddi
     layer
 }
 
-func embedding_lookup(embedding_layer layer, int token_id) Vector {
-    Vector result = create_vector(layer.embedding_dim)
+func embedding_lookup(embedding_layer layer, int token_id) vector {
+    vector result = create_vector(layer.embedding_dim)
     if token_id < 0 || token_id >= layer.vocab_size {
         return result
     }
@@ -137,7 +137,7 @@ func create_layer_norm(int hidden_size) layer_norm {
     ln
 }
 
-func layer_norm_forward(layer_norm ln, Vector x) Vector {
+func layer_norm_forward(layer_norm ln, vector x) vector {
     float mean = 0.0
     int i = 0
     while i < ln.hidden_size {
@@ -161,13 +161,13 @@ func layer_norm_forward(layer_norm ln, Vector x) Vector {
         j = j + 1
     }
     std_dev = sqrt_result
-    Vector normalized = create_vector(ln.hidden_size)
+    vector normalized = create_vector(ln.hidden_size)
     i = 0
     while i < ln.hidden_size {
         normalized.data[i] = (x.data[i] - mean) / (std_dev + ln.epsilon)
         i = i + 1
     }
-    Vector output = create_vector(ln.hidden_size)
+    vector output = create_vector(ln.hidden_size)
     i = 0
     while i < ln.hidden_size {
         output.data[i] = ln.gamma.data[i] * normalized.data[i] + ln.beta.data[i]
@@ -176,8 +176,8 @@ func layer_norm_forward(layer_norm ln, Vector x) Vector {
     output
 }
 
-func dropout(Vector x, float dropout_rate, int seed) Vector {
-    Vector result = create_vector(x.size)
+func dropout(vector x, float dropout_rate, int seed) vector {
+    vector result = create_vector(x.size)
     int state = seed
     int i = 0
     while i < x.size {
@@ -197,8 +197,8 @@ func dropout(Vector x, float dropout_rate, int seed) Vector {
 }
 
 struct batch_norm_stats {
-    Vector running_mean
-    Vector running_var
+    vector running_mean
+    vector running_var
     float momentum
     int feature_size
 }

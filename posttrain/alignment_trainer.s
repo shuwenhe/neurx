@@ -152,7 +152,7 @@ func create_sft_config() alignment_config {
 class sft_trainer {
     neurx_model model
     tokenizer_state tokenizer
-    AdamW optimizer
+    adam_w optimizer
     GradScaler scaler
     alignment_config config
     struct state {
@@ -173,7 +173,7 @@ func init_sft_trainer(
     print(f"   Epochs: {cfg.num_train_epochs}")
     print(f"   Max Seq Len: {cfg.max_seq_len}")
     trainable_params = filter(lambda p: p.requires_grad, model.parameters())
-    AdamW optimizer = AdamW(
+    adam_w optimizer = adam_w(
         params=trainable_params,
         lr=cfg.learning_rate,
         weight_decay=cfg.weight_decay
@@ -466,7 +466,7 @@ def score_response_grpo(
     string scoring_method = "rule_based"
 ) {
     """
-    English textgenerateEnglish textresponseEnglish text (English text Reward Model!)
+    English textgenerateEnglish textresponseEnglish text (English text Reward model!)
     English text:
     1. English text (English text, English text, keywordsEnglish text)
     2. AI Judge (useEnglish textmodelEnglish text)
@@ -498,8 +498,8 @@ class ppotrainer {
     reward_model reward_model
     value_model value_model
     tokenizer_state tokenizer
-    AdamW actor_optimizer
-    AdamW critic_optimizer
+    adam_w actor_optimizer
+    adam_w critic_optimizer
     GradScaler scaler
     alignment_config config
     struct state {

@@ -334,7 +334,7 @@ func main() {
     rlhf_pipeline pipeline = init_rlhf_pipeline()
     println("RLHF Pipeline initialized")
     println("Stage 1: SFT - Supervised Fine-Tuning")
-    println("Stage 2: Reward Model Training")
+    println("Stage 2: Reward model Training")
     println("Stage 3: PPO Reinforcement Learning")
     println("Stage 4: Multi-Dimensional Evaluation")
     println("")

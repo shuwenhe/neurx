@@ -51,7 +51,7 @@ type ppotrainer struct {
     policy_model        PolicyModel
     value_model         value_model
     reward_model        reward_model
-    optimizer           Optimizer
+    optimizer           optimizer_2
     trajectories        []trajectory
     step_count          int
     episode_count       int
@@ -373,7 +373,7 @@ func NewPPOTrainer(config ppoconfig) *ppotrainer {
             model_name: "reward_model",
             trained_steps: 0,
         },
-        optimizer: Optimizer{
+        optimizer: optimizer_2{
             name: "adamw",
             learning_rate: config.learning_rate,
             beta1: 0.9,

@@ -9,10 +9,10 @@ namespace {
 
 class HostAllocator final : public neurx::cann::DeviceAllocator {
  public:
-  neurx::cann::Status allocate(void** address, std::size_t bytes) override {
+  neurx::cann::status allocate(void** address, std::size_t bytes) override {
     *address = ::operator new(bytes, std::nothrow);
-    return *address ? neurx::cann::Status::success()
-                    : neurx::cann::Status::failure("allocation failed");
+    return *address ? neurx::cann::status::success()
+                    : neurx::cann::status::failure("allocation failed");
   }
   void release(void* address) override { ::operator delete(address); }
 };
@@ -23,7 +23,7 @@ int main() {
   HostAllocator allocator;
   neurx::cann::PagedKvCache kv({8, 64, 4}, &allocator);
   assert(kv.initialize().ok);
-  neurx::cann::PrefixCacheConfig config;
+  neurx::cann::prefix_cache_config config;
   config.max_entries = 2;
   config.max_retained_blocks = 6;
   neurx::cann::PrefixCache prefixes(&kv, config);
@@ -39,7 +39,7 @@ int main() {
 
   assert(kv.release("source"));
   assert(kv.stats().used_blocks == 3);
-  neurx::cann::PrefixCacheHit hit;
+  neurx::cann::prefix_cache_hit hit;
   assert(prefixes.attach_longest("target", prompt, prompt.size() - 1, &hit).ok);
   assert(hit.matched && hit.token_count == 8);
   assert(kv.token_count("target") == 8);

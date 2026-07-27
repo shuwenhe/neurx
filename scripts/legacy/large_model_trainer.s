@@ -275,9 +275,9 @@ func (lmt *large_model_trainer) print_config() {
         return
     }
     fmt.Printf("\n╔════════════════════════════════════════════════════════════╗\n")
-    fmt.Printf("║  %s Large Model Training Configuration  ║\n", lmt.config.model_name)
+    fmt.Printf("║  %s Large model Training Configuration  ║\n", lmt.config.model_name)
     fmt.Printf("╚════════════════════════════════════════════════════════════╝\n\n")
-    fmt.Printf("Model Architecture:\n")
+    fmt.Printf("model Architecture:\n")
     fmt.Printf("  Parameters:        %.2fB\n", float(lmt.config.num_params) / 1e9)
     fmt.Printf("  Hidden Dimension:  %d\n", lmt.config.hidden_dim)
     fmt.Printf("  Layers:            %d\n", lmt.config.num_layers)
@@ -297,22 +297,22 @@ func (lmt *large_model_trainer) print_config() {
     fmt.Printf("\nPrecision & Parallelism:\n")
     fmt.Printf("  Mixed Precision:         %v (FP16 compute, FP32 weights)\n",
         lmt.config.use_mixed_precision)
-    fmt.Printf("  Tensor Parallelism:      %d-way\n",
+    fmt.Printf("  tensor_2 Parallelism:      %d-way\n",
         lmt.config.tensor_parallel_size)
     fmt.Printf("  Pipeline Parallelism:    %d stages\n",
         lmt.config.pipeline_parallel_stages)
     fmt.Printf("  ZeRO Optimization:       Stage %d\n",
         lmt.config.zero_stage)
     fmt.Printf("\nEstimated Memory (per GPU, batch_size=8):\n")
-    fmt.Printf("  Model Weights:      %.2f GB\n", lmt.memory_est.model_weights_gb)
+    fmt.Printf("  model Weights:      %.2f GB\n", lmt.memory_est.model_weights_gb)
     fmt.Printf("  Gradients:          %.2f GB\n", lmt.memory_est.gradients_gb)
-    fmt.Printf("  Optimizer States:   %.2f GB\n", lmt.memory_est.optimizer_states_gb)
+    fmt.Printf("  optimizer_2 States:   %.2f GB\n", lmt.memory_est.optimizer_states_gb)
     fmt.Printf("  Activations:        %.2f GB\n", lmt.memory_est.activation_gb)
     fmt.Printf("  Total (with margin): %.2f GB ✓\n", lmt.memory_est.total_gb)
     fmt.Printf("\nDistributed Setup:\n")
     fmt.Printf("  World Size:  %d GPUs\n", lmt.world_size)
-    fmt.Printf("  Global Batch: %d (per GPU batch * world_size)\n", 8 * lmt.world_size)
-    fmt.Printf("  Effective Batch: %d (with gradient accumulation)\n",
+    fmt.Printf("  Global batch_2: %d (per GPU batch * world_size)\n", 8 * lmt.world_size)
+    fmt.Printf("  Effective batch_2: %d (with gradient accumulation)\n",
         8 * lmt.config.gradient_accumulation_steps * lmt.world_size)
     fmt.Printf("\n")
 }

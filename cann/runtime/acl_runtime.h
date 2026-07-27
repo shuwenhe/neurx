@@ -8,12 +8,12 @@
 
 namespace neurx::cann {
 
-struct Status {
+struct status {
   bool ok = false;
   std::string message;
 
-  static Status success() { return {true, {}}; }
-  static Status failure(std::string message) { return {false, std::move(message)}; }
+  static status success() { return {true, {}}; }
+  static status failure(std::string message) { return {false, std::move(message)}; }
 };
 
 class DeviceSession {
@@ -23,14 +23,14 @@ class DeviceSession {
   DeviceSession(const DeviceSession&) = delete;
   DeviceSession& operator=(const DeviceSession&) = delete;
 
-  Status initialize(int device_id);
+  status initialize(int device_id);
   void shutdown();
 
   bool ready() const { return ready_; }
   int device_id() const { return device_id_; }
   Context context() const { return context_; }
   Stream stream() const { return stream_; }
-  Status synchronize() const;
+  status synchronize() const;
 
  private:
   int device_id_ = -1;
@@ -49,7 +49,7 @@ class DeviceBuffer {
   DeviceBuffer(DeviceBuffer&& other) noexcept;
   DeviceBuffer& operator=(DeviceBuffer&& other) noexcept;
 
-  Status allocate(std::size_t bytes);
+  status allocate(std::size_t bytes);
   void reset();
   void* data() const { return data_; }
   std::size_t size() const { return size_; }
@@ -66,7 +66,7 @@ class HostBuffer {
   HostBuffer(const HostBuffer&) = delete;
   HostBuffer& operator=(const HostBuffer&) = delete;
 
-  Status allocate(std::size_t bytes);
+  status allocate(std::size_t bytes);
   void reset();
   void* data() const { return data_; }
   std::size_t size() const { return size_; }

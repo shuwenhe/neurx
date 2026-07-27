@@ -282,7 +282,7 @@ func gpu_forward_pass_example(int batch_size, int seq_len, int hidden_dim, int v
     embedding_ptr := gpu_malloc(&alloc, embedding_size)
     hidden_ptr := gpu_malloc(&alloc, hidden_size)
     output_ptr := gpu_malloc(&alloc, output_size)
-    fmt.printfln("💾 GPU Memory Status:")
+    fmt.printfln("💾 GPU Memory status:")
     gpu_memory_info(alloc)
     fmt.printfln("")
     fmt.printfln("⚙️  Computing operations...\n")

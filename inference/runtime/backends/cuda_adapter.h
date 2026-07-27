@@ -10,10 +10,10 @@ class CudaAdapter final : public BackendAdapter {
   ~CudaAdapter() override;
   Backend kind() const override { return Backend::cuda; }
   const char* name() const override { return "nvidia-cuda"; }
-  AdapterStatus initialize(int device_id) override;
+  adapter_status initialize(int device_id) override;
   bool ready() const override { return ready_; }
-  AdapterStatus execute(const DeviceBatch& batch) override;
-  AdapterStatus synchronize() override;
+  adapter_status execute(const device_batch& batch) override;
+  adapter_status synchronize() override;
 
  private:
   KernelLauncher prefill_ = nullptr;

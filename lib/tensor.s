@@ -1,24 +1,24 @@
 package neurx.lib.tensor
-struct Vector {
+struct vector {
     []float data
     int size
 }
 
-struct Matrix {
+struct matrix {
     []float data
     int rows
     int cols
 }
 
-struct Tensor {
+struct tensor_2 {
     []float data
     int dim1
     int dim2
     int dim3
 }
 
-func create_vector(int size) Vector {
-    Vector v
+func create_vector(int size) vector {
+    vector v
     v.size = size
     []float data
     int i = 0
@@ -30,15 +30,15 @@ func create_vector(int size) Vector {
     v
 }
 
-func vector_from_array([]float values) Vector {
-    Vector v
+func vector_from_array([]float values) vector {
+    vector v
     v.size = len(values)
     v.data = values
     v
 }
 
-func create_matrix(int rows, int cols) Matrix {
-    Matrix m
+func create_matrix(int rows, int cols) matrix {
+    matrix m
     m.rows = rows
     m.cols = cols
     []float data
@@ -51,8 +51,8 @@ func create_matrix(int rows, int cols) Matrix {
     m
 }
 
-func identity_matrix(int size) Matrix {
-    Matrix m = create_matrix(size, size)
+func identity_matrix(int size) matrix {
+    matrix m = create_matrix(size, size)
     int i = 0
     while i < size {
         int j = 0
@@ -69,8 +69,8 @@ func identity_matrix(int size) Matrix {
     m
 }
 
-func random_matrix(int rows, int cols, int seed) Matrix {
-    Matrix m = create_matrix(rows, cols)
+func random_matrix(int rows, int cols, int seed) matrix {
+    matrix m = create_matrix(rows, cols)
     int state = seed
     int i = 0
     while i < rows * cols {
@@ -86,35 +86,35 @@ func random_matrix(int rows, int cols, int seed) Matrix {
     m
 }
 
-func matrix_get(Matrix m, int row, int col) float {
+func matrix_get(matrix m, int row, int col) float {
     if row < 0 || row >= m.rows || col < 0 || col >= m.cols {
         return 0.0
     }
     m.data[row * m.cols + col]
 }
 
-func matrix_set(Matrix m, int row, int col, float value) Matrix {
+func matrix_set(matrix m, int row, int col, float value) matrix {
     if row >= 0 && row < m.rows && col >= 0 && col < m.cols {
         m.data[row * m.cols + col] = value
     }
     m
 }
 
-func vector_get(Vector v, int idx) float {
+func vector_get(vector v, int idx) float {
     if idx < 0 || idx >= v.size {
         return 0.0
     }
     v.data[idx]
 }
 
-func vector_set(Vector v, int idx, float value) Vector {
+func vector_set(vector v, int idx, float value) vector {
     if idx >= 0 && idx < v.size {
         v.data[idx] = value
     }
     v
 }
 
-func dot_product(Vector a, Vector b) float {
+func dot_product(vector a, vector b) float {
     if a.size != b.size {
         return 0.0
     }
@@ -127,11 +127,11 @@ func dot_product(Vector a, Vector b) float {
     result
 }
 
-func vector_add(Vector a, Vector b) Vector {
+func vector_add(vector a, vector b) vector {
     if a.size != b.size {
         return a
     }
-    Vector result = create_vector(a.size)
+    vector result = create_vector(a.size)
     int i = 0
     while i < a.size {
         result.data[i] = a.data[i] + b.data[i]
@@ -140,11 +140,11 @@ func vector_add(Vector a, Vector b) Vector {
     result
 }
 
-func vector_subtract(Vector a, Vector b) Vector {
+func vector_subtract(vector a, vector b) vector {
     if a.size != b.size {
         return a
     }
-    Vector result = create_vector(a.size)
+    vector result = create_vector(a.size)
     int i = 0
     while i < a.size {
         result.data[i] = a.data[i] - b.data[i]
@@ -153,8 +153,8 @@ func vector_subtract(Vector a, Vector b) Vector {
     result
 }
 
-func vector_scale(Vector v, float scalar) Vector {
-    Vector result = create_vector(v.size)
+func vector_scale(vector v, float scalar) vector {
+    vector result = create_vector(v.size)
     int i = 0
     while i < v.size {
         result.data[i] = v.data[i] * scalar
@@ -163,11 +163,11 @@ func vector_scale(Vector v, float scalar) Vector {
     result
 }
 
-func matrix_add(Matrix a, Matrix b) Matrix {
+func matrix_add(matrix a, matrix b) matrix {
     if a.rows != b.rows || a.cols != b.cols {
         return a
     }
-    Matrix result = create_matrix(a.rows, a.cols)
+    matrix result = create_matrix(a.rows, a.cols)
     int i = 0
     while i < a.rows * a.cols {
         result.data[i] = a.data[i] + b.data[i]
@@ -176,11 +176,11 @@ func matrix_add(Matrix a, Matrix b) Matrix {
     result
 }
 
-func matrix_subtract(Matrix a, Matrix b) Matrix {
+func matrix_subtract(matrix a, matrix b) matrix {
     if a.rows != b.rows || a.cols != b.cols {
         return a
     }
-    Matrix result = create_matrix(a.rows, a.cols)
+    matrix result = create_matrix(a.rows, a.cols)
     int i = 0
     while i < a.rows * a.cols {
         result.data[i] = a.data[i] - b.data[i]
@@ -189,8 +189,8 @@ func matrix_subtract(Matrix a, Matrix b) Matrix {
     result
 }
 
-func matrix_scale(Matrix m, float scalar) Matrix {
-    Matrix result = create_matrix(m.rows, m.cols)
+func matrix_scale(matrix m, float scalar) matrix {
+    matrix result = create_matrix(m.rows, m.cols)
     int i = 0
     while i < m.rows * m.cols {
         result.data[i] = m.data[i] * scalar
@@ -199,11 +199,11 @@ func matrix_scale(Matrix m, float scalar) Matrix {
     result
 }
 
-func matrix_multiply(Matrix a, Matrix b) Matrix {
+func matrix_multiply(matrix a, matrix b) matrix {
     if a.cols != b.rows {
         return create_matrix(a.rows, b.cols)
     }
-    Matrix result = create_matrix(a.rows, b.cols)
+    matrix result = create_matrix(a.rows, b.cols)
     int i = 0
     while i < a.rows {
         int j = 0
@@ -222,11 +222,11 @@ func matrix_multiply(Matrix a, Matrix b) Matrix {
     result
 }
 
-func matrix_vector_multiply(Matrix a, Vector v) Vector {
+func matrix_vector_multiply(matrix a, vector v) vector {
     if a.cols != v.size {
         return create_vector(a.rows)
     }
-    Vector result = create_vector(a.rows)
+    vector result = create_vector(a.rows)
     int i = 0
     while i < a.rows {
         float sum = 0.0
@@ -241,8 +241,8 @@ func matrix_vector_multiply(Matrix a, Vector v) Vector {
     result
 }
 
-func matrix_transpose(Matrix m) Matrix {
-    Matrix result = create_matrix(m.cols, m.rows)
+func matrix_transpose(matrix m) matrix {
+    matrix result = create_matrix(m.cols, m.rows)
     int i = 0
     while i < m.rows {
         int j = 0
@@ -262,8 +262,8 @@ func relu(float x) float {
     0.0
 }
 
-func vector_relu(Vector v) Vector {
-    Vector result = create_vector(v.size)
+func vector_relu(vector v) vector {
+    vector result = create_vector(v.size)
     int i = 0
     while i < v.size {
         result.data[i] = relu(v.data[i])
@@ -314,7 +314,7 @@ func sigmoid(float x) float {
     }
 }
 
-func vector_softmax(Vector v) Vector {
+func vector_softmax(vector v) vector {
     float max_val = v.data[0]
     int i = 1
     while i < v.size {
@@ -343,7 +343,7 @@ func vector_softmax(Vector v) Vector {
         sum = sum + exp_val
         i = i + 1
     }
-    Vector result = create_vector(v.size)
+    vector result = create_vector(v.size)
     i = 0
     while i < v.size {
         if sum > 0.0 {
@@ -356,7 +356,7 @@ func vector_softmax(Vector v) Vector {
     result
 }
 
-func vector_norm(Vector v) float {
+func vector_norm(vector v) float {
     float sum = 0.0
     int i = 0
     while i < v.size {
@@ -376,7 +376,7 @@ func vector_norm(Vector v) float {
     result
 }
 
-func vector_normalize(Vector v) Vector {
+func vector_normalize(vector v) vector {
     float norm = vector_norm(v)
     if norm == 0.0 {
         return v
@@ -384,8 +384,8 @@ func vector_normalize(Vector v) Vector {
     return vector_scale(v, 1.0 / norm)
 }
 
-func outer_product(Vector a, Vector b) Matrix {
-    Matrix result = create_matrix(a.size, b.size)
+func outer_product(vector a, vector b) matrix {
+    matrix result = create_matrix(a.size, b.size)
     int i = 0
     while i < a.size {
         int j = 0
@@ -398,11 +398,11 @@ func outer_product(Vector a, Vector b) Matrix {
     result
 }
 
-func matrix_hadamard(Matrix a, Matrix b) Matrix {
+func matrix_hadamard(matrix a, matrix b) matrix {
     if a.rows != b.rows || a.cols != b.cols {
         return a
     }
-    Matrix result = create_matrix(a.rows, a.cols)
+    matrix result = create_matrix(a.rows, a.cols)
     int i = 0
     while i < a.rows * a.cols {
         result.data[i] = a.data[i] * b.data[i]
@@ -411,7 +411,7 @@ func matrix_hadamard(Matrix a, Matrix b) Matrix {
     result
 }
 
-func matrix_frobenius_norm(Matrix m) float {
+func matrix_frobenius_norm(matrix m) float {
     float sum = 0.0
     int i = 0
     while i < m.rows * m.cols {
@@ -431,8 +431,8 @@ func matrix_frobenius_norm(Matrix m) float {
     result
 }
 
-func matrix_row_mean(Matrix m) Vector {
-    Vector result = create_vector(m.rows)
+func matrix_row_mean(matrix m) vector {
+    vector result = create_vector(m.rows)
     int i = 0
     while i < m.rows {
         float sum = 0.0

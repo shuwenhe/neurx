@@ -438,7 +438,7 @@ func print_rope_config_summary(rope_scaling_config cfg) string {
     } else {
         method_name = "YaRN (Recommended)"
     }
-    "RoPE Scaling Config:\n" +
+    "RoPE Scaling config:\n" +
     "  Method: " + method_name + "\n" +
     "  Original Length: " + string(cfg.original_max_seq_len) + "\n" +
     "  Target Length: " + string(cfg.target_max_seq_len) + "\n" +

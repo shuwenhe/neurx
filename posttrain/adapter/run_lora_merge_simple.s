@@ -3,7 +3,7 @@ use std.io.println
 func main() int {
     println("")
     println("╔" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╗")
-    println("║  LoRA merge and Model saving")
+    println("║  LoRA merge and model saving")
     println("║  Merge LoRA adapter into base model")
     println("╚" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╝")
     println("")

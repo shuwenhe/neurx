@@ -6,15 +6,15 @@
 
 extern "C" {
 
-struct NeurxCannOperatorStatus {
+struct neurx_cann_operator_status {
   int32_t code;
   const char* message;
 };
 
 uint32_t neurx_cann_operator_abi_version();
-NeurxCannOperatorStatus neurx_cann_prefill(
-    const neurx::inference::DeviceBatch& batch);
-NeurxCannOperatorStatus neurx_cann_decode(
-    const neurx::inference::DeviceBatch& batch);
+neurx_cann_operator_status neurx_cann_prefill(
+    const neurx::inference::device_batch& batch);
+neurx_cann_operator_status neurx_cann_decode(
+    const neurx::inference::device_batch& batch);
 
 }

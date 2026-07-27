@@ -315,18 +315,18 @@ func read_user_input() string {
 func main() {
     string model_path = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain/model.safetensors")
     if !runtime_file_exists(model_path) {
-        print("ERROR: Model not found at " + model_path + "\n")
+        print("ERROR: model not found at " + model_path + "\n")
         return
     }
     print("\n╔═══════════════════════════════════════════════════════╗\n")
-    print("║  NeurX Real Model Inference with Chinese Support    ║\n")
+    print("║  NeurX Real model Inference with Chinese Support    ║\n")
     print("║  真实模型推理引擎 (中文支持)                         ║\n")
     print("╚═══════════════════════════════════════════════════════╝\n\n")
     []int size_bytes = __host_read_binary_file_range(model_path, 0, 8)
     int metadata_size = u64_le(size_bytes, 0)
     []int header_bytes = __host_read_binary_file_range(model_path, 0, 8 + metadata_size)
     []int metadata_bytes = slice_bytes(header_bytes, 8, metadata_size)
-    print("✓ Model loaded: " + model_path + "\n")
+    print("✓ model loaded: " + model_path + "\n")
     print("✓ Metadata parsed: " + int_to_string(metadata_size) + " bytes\n")
     print("✓ Language support: English & Chinese 🇬🇧 🇨🇳\n\n")
     []int embed_idx = parse_tensor_index(metadata_bytes, "model.embed_tokens.weight")

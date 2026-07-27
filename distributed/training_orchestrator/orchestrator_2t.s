@@ -16,7 +16,7 @@ package neurx.distributed.training_orchestrator
 |  Each DP replica uses FSDP to shard parameters internally   |
 |  Mixed precision: BF16 storage, FP32 master weights         |
 |  Loss scaling: Dynamic (if FP16)                             |
-|  Optimizer: AdamW (decoupled weight decay)                   |
+|  optimizer_2: adam_w (decoupled weight decay)                   |
 |                                                             |
 |  Total GPUs = TP × PP × DP                                   |
 |  Example: 16 × 16 × 2 = 512 GPUs for 2T model              |

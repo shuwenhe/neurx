@@ -8,7 +8,7 @@ func main() int {
     string build_dir = runtime_env_get("NEURX_SMART_INFERENCE_BUILD_DIR", project_root + "/build")
     string ir_file = build_dir + "/smart_inference.ir"
     string bin_file = build_dir + "/smart_inference.bin"
-    println("NeurX Smart Inference Build Entry (S Lang)")
+    println("NeurX Smart Inference Build entry (S Lang)")
     println("")
     println("Project root : " + project_root)
     println("S compiler   : " + s_compiler)

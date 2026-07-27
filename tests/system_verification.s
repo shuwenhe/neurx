@@ -41,7 +41,7 @@ func check_all_components() component_status[] {
         "trainer/scaled_training_system.s",
         850
     )
-    scaled.description = "6-layer Transformer, 256-dim, 100M params"
+    scaled.description = "6-layer transformer_2, 256-dim, 100M params"
     components = append(components, scaled)
     let data = verify_component(
         "Real Data Loader",
@@ -105,7 +105,7 @@ func print_component_status(component: component_status) {
     }
     println("  " + status_icon + " " + component.name)
     println("      File: " + component.file_path + " (" + strings.from_i32(component.lines) + " lines)")
-    println("      Status: " + component.status)
+    println("      status: " + component.status)
     println("      " + component.description)
     println("")
 }
@@ -223,7 +223,7 @@ func print_final_report() {
     println("")
     println("🎯 Implementation Complete:")
     println("  ✅ 7 core S language modules (3,550+ lines)")
-    println("  ✅ 100M parameter Transformer model")
+    println("  ✅ 100M parameter transformer_2 model")
     println("  ✅ Multi-GPU distributed training (95% efficiency)")
     println("  ✅ Real-world dataset support (300B tokens)")
     println("  ✅ GPU acceleration (CUDA backend)")

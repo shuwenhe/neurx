@@ -9,16 +9,16 @@
 
 namespace neurx::inference {
 
-struct AdapterStatus {
+struct adapter_status {
   bool ok = false;
   std::string message;
 
-  static AdapterStatus success() { return {true, {}}; }
-  static AdapterStatus failure(std::string message) { return {false, std::move(message)}; }
+  static adapter_status success() { return {true, {}}; }
+  static adapter_status failure(std::string message) { return {false, std::move(message)}; }
 };
 
-struct DeviceBatch {
-  Batch schedule;
+struct device_batch {
+  batch_2 schedule;
   const void* token_ids = nullptr;
   const void* kv_block_table = nullptr;
   void* logits = nullptr;
@@ -38,17 +38,17 @@ struct DeviceBatch {
   bool device_sampling = false;
 };
 
-using KernelLauncher = std::function<AdapterStatus(const DeviceBatch&)>;
+using KernelLauncher = std::function<adapter_status(const device_batch&)>;
 
 class BackendAdapter {
  public:
   virtual ~BackendAdapter() = default;
   virtual Backend kind() const = 0;
   virtual const char* name() const = 0;
-  virtual AdapterStatus initialize(int device_id) = 0;
+  virtual adapter_status initialize(int device_id) = 0;
   virtual bool ready() const = 0;
-  virtual AdapterStatus execute(const DeviceBatch& batch) = 0;
-  virtual AdapterStatus synchronize() = 0;
+  virtual adapter_status execute(const device_batch& batch) = 0;
+  virtual adapter_status synchronize() = 0;
 };
 
 }

@@ -336,8 +336,8 @@ func print_dpo_training_header() {
 }
 
 func print_dpo_config(dpo_train_config cfg) {
-    print("[DPO Config]")
-    print("  Batch Size: " + string(cfg.batch_size))
+    print("[DPO config]")
+    print("  batch_2 Size: " + string(cfg.batch_size))
     print("  Learning Rate: " + string_float(cfg.learning_rate))
     print("  DPO Beta: " + string_float(cfg.dpo_beta))
     print("  Label Smoothing: " + string_float(cfg.label_smoothing))

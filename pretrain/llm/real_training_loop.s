@@ -156,7 +156,7 @@ func run_training_loop(
     println("========================================")
     println("manifest: " + manifest_path)
     println("Steps: " + int_to_str(num_steps, 0))
-    println("Batch size: " + int_to_str(batch_size, 0))
+    println("batch_2 size: " + int_to_str(batch_size, 0))
     println("Seq len: " + int_to_str(seq_len, 0))
     println("Vocab size: " + int_to_str(vocab_size, 0))
     println("Hidden dim: " + int_to_str(hidden_dim, 0))

@@ -139,7 +139,7 @@ func tool_schema_workspace_defaults() tool_schema_registry {
     s_ls = tool_schema_add_param(s_ls, new_tool_param("path", PARAM_TYPE_PATH, "Directory path to list.", true, ""))
     reg = tool_schema_registry_register(reg, s_ls)
     tool_schema s_shell = new_tool_schema("s", "Run a command in the workspace.")
-    s_shell = tool_schema_add_param(s_shell, new_tool_param("command", PARAM_TYPE_COMMAND, "Command to execute.", true, ""))
+    s_shell = tool_schema_add_param(s_shell, new_tool_param("command", PARAM_TYPE_COMMAND, "command to execute.", true, ""))
     reg = tool_schema_registry_register(reg, s_shell)
     tool_schema s_del = new_tool_schema("delete", "Delete a file or empty directory.")
     s_del = tool_schema_add_param(s_del, new_tool_param("path", PARAM_TYPE_PATH, "Workspace-relative path to delete.", true, ""))

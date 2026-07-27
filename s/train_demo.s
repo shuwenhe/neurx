@@ -169,11 +169,11 @@ func check_should_save(int step, int save_every) bool {
 func run_training(training_config tconfig) training_context {
     println("")
     println("========================================")
-    println("NeurX GPT Model Training")
+    println("NeurX GPT model Training")
     println("Language: S (.s)")
     println("With Full checkpoint Support")
     println("========================================")
-    println("Config: batch=", tconfig.batch_size,
+    println("config: batch=", tconfig.batch_size,
             " seq_len=", tconfig.seq_len,
             " steps=", tconfig.max_steps,
             " lr=", tconfig.learning_rate)
@@ -181,7 +181,7 @@ func run_training(training_config tconfig) training_context {
     println("----------------------------------------")
     model_config mconfig = new_model_config()
     training_state state = new_training_state()
-    println("Model initialized: ", mconfig.param_count, " parameters")
+    println("model initialized: ", mconfig.param_count, " parameters")
     println("")
     int i = 0
     while i < tconfig.max_steps {
@@ -229,7 +229,7 @@ func main() int {
     println("Best Loss:     ", result.best_loss)
     println("Best Step:     ", result.best_step)
     println("Total Params:  ", total_params)
-    println("Status:        ", result.trained)
+    println("status:        ", result.trained)
     println("")
     println("Files saved:")
     println("  artifacts/checkpoints/final_model.neurx")

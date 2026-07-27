@@ -205,14 +205,14 @@ func (lmdt *large_model_distributed_trainer) print_config() {
         return
     }
     fmt.Printf("\n╔════════════════════════════════════════════════════════════╗\n")
-    fmt.Printf("║     Large Model Distributed Training - Ready to Start     ║\n")
+    fmt.Printf("║     Large model Distributed Training - Ready to Start     ║\n")
     fmt.Printf("╚════════════════════════════════════════════════════════════╝\n\n")
     fmt.Printf("Distributed Setup:\n")
     fmt.Printf("  Backend:          %s\n", lmdt.config.backend)
     fmt.Printf("  World Size:       %d GPUs\n", lmdt.config.world_size)
     fmt.Printf("  Rank:             %d\n", lmdt.config.rank)
     fmt.Printf("  Master Address:   %s:%s\n", lmdt.config.master_addr, lmdt.config.master_port)
-    fmt.Printf("\nLarge Model Optimizations:\n")
+    fmt.Printf("\nLarge model Optimizations:\n")
     fmt.Printf("  Gradient Accumulation Steps:  %d (effective batch %dx)\n",
         lmdt.config.gradient_accumulation_steps,
         lmdt.config.gradient_accumulation_steps)
@@ -227,12 +227,12 @@ func (lmdt *large_model_distributed_trainer) print_config() {
     memory_savings := 50.0 + lmdt.activation_ckpt.memory_savings_percent
     fmt.Printf("  Total Optimizations:          ~%.0f%% memory savings\n", memory_savings)
     fmt.Printf("\nModel Configuration:\n")
-    fmt.Printf("  Model:            7B Parameters\n")
+    fmt.Printf("  model:            7B Parameters\n")
     fmt.Printf("  Hidden Dim:       4096\n")
     fmt.Printf("  Layers:           32\n")
     fmt.Printf("  Attention Heads:  32\n")
     fmt.Printf("  Max Sequence:     32,768 tokens\n")
-    fmt.Printf("\n✅ System Ready for 7B Model Training\n\n")
+    fmt.Printf("\n✅ System Ready for 7B model Training\n\n")
 }
 
 func (lmdt *large_model_distributed_trainer) get_status(): map[string]interface{} {
@@ -285,5 +285,5 @@ func main() {
     }
     status := trainer.get_status()
     status_json, _ := json.MarshalIndent(status, "", "  ")
-    fmt.Printf("Final Status:\n%s\n", string(status_json))
+    fmt.Printf("Final status:\n%s\n", string(status_json))
 }

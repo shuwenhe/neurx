@@ -4,13 +4,13 @@ package neurx.tests.tokenizer_test
 use std.io.println
 use neurx.inference.tokenizer_loader
 
-struct TestResult {
+struct test_result_2 {
     test_name: string
     passed: bool
     message: string
 }
 
-[]TestResult test_results = make([]TestResult, 0)
+[]test_result_2 test_results = make([]test_result_2, 0)
 
 func run_all_tests() int {
     println("=== W1.1 Tokenizer Unit Tests ===")
@@ -33,7 +33,7 @@ func run_all_tests() int {
     
     int i = 0
     while i < len(test_results) {
-        TestResult tr = test_results[i]
+        test_result_2 tr = test_results[i]
         string status = "PASS"
         if !tr.passed {
             status = "FAIL"
@@ -64,7 +64,7 @@ func run_all_tests() int {
 func test_tokenizer_loader_init() {
     string test_name = "Tokenizer: Initialization"
     
-    TokenizerState state = new_tokenizer_state()
+    tokenizer_state_2 state = new_tokenizer_state()
     
     bool passed = true
     string message = ""
@@ -83,11 +83,11 @@ func test_tokenizer_loader_init() {
 }
 
 func test_model_loading() {
-    string test_name = "Tokenizer: Load HF Model"
+    string test_name = "Tokenizer: Load HF model"
     
     string model_path = "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
     
-    TokenizerState state = load_tokenizer(model_path)
+    tokenizer_state_2 state = load_tokenizer(model_path)
     
     bool passed = true
     string message = ""
@@ -109,15 +109,15 @@ func test_basic_tokenization() {
     string test_name = "Tokenizer: Basic Tokenization"
     
     string model_path = "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
-    TokenizerState state = load_tokenizer(model_path)
+    tokenizer_state_2 state = load_tokenizer(model_path)
     
     if !state.is_loaded {
-        record_test_result(test_name, false, "Model not loaded, skipping test")
+        record_test_result(test_name, false, "model not loaded, skipping test")
         return
     }
     
     string test_text = "What is the treatment for chronic urinary tract infection?"
-    TokenizationResult result = tokenize(state, test_text)
+    tokenization_result_2 result = tokenize(state, test_text)
     
     bool passed = true
     string message = ""
@@ -140,15 +140,15 @@ func test_determinism() {
     string test_name = "Tokenizer: Determinism (10 runs)"
     
     string model_path = "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
-    TokenizerState state = load_tokenizer(model_path)
+    tokenizer_state_2 state = load_tokenizer(model_path)
     
     if !state.is_loaded {
-        record_test_result(test_name, false, "Model not loaded, skipping test")
+        record_test_result(test_name, false, "model not loaded, skipping test")
         return
     }
     
     string test_text = "What is the treatment for chronic urinary tract infection?"
-    TokenizationResult result = tokenize_deterministic(state, test_text, 10)
+    tokenization_result_2 result = tokenize_deterministic(state, test_text, 10)
     
     bool passed = result.success
     string message = ""
@@ -166,7 +166,7 @@ func test_vocab_size() {
     string test_name = "Tokenizer: Vocabulary Size"
     
     string model_path = "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
-    TokenizerState state = load_tokenizer(model_path)
+    tokenizer_state_2 state = load_tokenizer(model_path)
     
     bool passed = true
     string message = ""
@@ -183,7 +183,7 @@ func test_vocab_size() {
 
 
 func record_test_result(string test_name, bool passed, string message) {
-    TestResult result = TestResult {
+    test_result_2 result = test_result_2 {
         test_name: test_name,
         passed: passed,
         message: message,

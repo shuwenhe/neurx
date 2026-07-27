@@ -274,7 +274,7 @@ class FunctionCallingEngine {
         total_start = current_time_millis()
         if this.config.verbose_logging:
             print(f"\n{'='*60}")
-            print(f"🔧 Function Calling Engine - Processing Request")
+            print(f"🔧 Function Calling Engine - Processing request")
             print(f"User: {user_message[:100]}...")
             print(f"Mode: {this.config.execution_mode}")
             print(f"Available Tools: {available_tools?.length ?? this.registry.get_statistics().total_tools}\n")
@@ -784,7 +784,7 @@ async function test_function_calling() {
         assert "function" in def_dict, "Each should have 'function'"
         assert "name" in def_dict["function"], "Each function should have 'name'"
         assert "parameters" in def_dict["function"], "Each function should have 'parameters'"
-    print("  ✓ Test 5: End-to-End Request Processing")
+    print("  ✓ Test 5: End-to-End request Processing")
     response = await fc_engine.process_user_request("Search for the latest news about AI breakthroughs")
     assert response.tool_calls.length > 0 or response.final_text_response != null, \
            "Should have either tool calls or text response"

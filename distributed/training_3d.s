@@ -727,7 +727,7 @@ func print_full_config_summary(model_parallel_config mcfg, training_config tcfg)
     "╔══════════════════════════════════════════════════════════╗\n" +
     "║           NEURX-5.2 3D Parallel Training Configuration       ║\n" +
     "╠══════════════════════════════════════════════════════════╣\n" +
-    "║ Model: " + mcfg.name + "\n" +
+    "║ model: " + mcfg.name + "\n" +
     "║ Parameters: ~" + string(estimate_params(mcfg)) + "B\n" +
     "║ Architecture:\n" +
     "║   Hidden Dim: " + string(mcfg.hidden_dim) + "\n" +
@@ -738,14 +738,14 @@ func print_full_config_summary(model_parallel_config mcfg, training_config tcfg)
     "║   Max Seq Len: " + string(mcfg.max_seq_len) + " (" + string(mcfg.max_seq_len/1024) + "K)\n" +
     "║\n" +
     "║ 3D Parallelism:\n" +
-    "║   Tensor Parallel (TP): " + string(dims.tp_degree) + "\n" +
+    "║   tensor_2 Parallel (TP): " + string(dims.tp_degree) + "\n" +
     "║   Pipeline Parallel (PP): " + string(dims.pp_degree) + "\n" +
     "║   Data Parallel (DP/FSDP): " + string(dims.dp_degree) + "\n" +
     "║   Total GPUs: " + string(dims.total_gpus) + "\n" +
     "║\n" +
     "║ Training:\n" +
-    "║   Global Batch Size: " + string(tcfg.global_batch_size) + "\n" +
-    "║   Micro Batch Size: " + string(tcfg.micro_batch_size) + "\n" +
+    "║   Global batch_2 Size: " + string(tcfg.global_batch_size) + "\n" +
+    "║   Micro batch_2 Size: " + string(tcfg.micro_batch_size) + "\n" +
     "║   Learning Rate: " + string(tcfg.learning_rate) + "\n" +
     "║   Total Steps: " + string(tcfg.total_training_steps) + "\n" +
     "║   Precision: BF16" + "\n" +

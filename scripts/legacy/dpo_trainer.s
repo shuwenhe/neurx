@@ -66,7 +66,7 @@ func (trainer *dpotrainer) initialize(config dpoconfig) {
     fmt.Printf("  Learning Rate: %.2e\n", config.learning_rate)
     fmt.Printf("  Beta (KL weight): %.4f\n", config.beta)
     fmt.Printf("  Temperature: %.2f\n", config.temperature)
-    fmt.Printf("  Batch Size: %d\n", config.batch_size)
+    fmt.Printf("  batch_2 Size: %d\n", config.batch_size)
     fmt.Printf("  Loss Type: %s\n\n", config.loss_type)
 }
 
@@ -184,7 +184,7 @@ func (trainer *dpotrainer) compare_with_rlhf() {
         {"Aspect", "RLHF", "DPO"},
         {"Training Stability", "Medium", "High"},
         {"Convergence Speed", "Slow (5-7 days)", "Fast (2-3 days)"},
-        {"Reward Model", "Required", "Not needed"},
+        {"Reward model", "Required", "Not needed"},
         {"Implementation", "Complex", "Simple"},
         {"Hallucination Rate", "Higher", "Lower"},
         {"Preference Alignment", "Indirect", "Direct"},
@@ -249,7 +249,7 @@ func (trainer *dpotrainer) run_complete_dpo_cycle() {
     trainer.initialize(config)
     trainer.load_preference_data(5000, 0.96)
     fmt.Println("\n┌────────────────────────────────────────┐")
-    fmt.Println("│  Simulating Model Logits               │")
+    fmt.Println("│  Simulating model Logits               │")
     fmt.Println("└────────────────────────────────────────┘")
     for _, pair := range trainer.dataset.preference_pairs {
         trainer.model_logits[pair.chosen_response] = pair.chosen_reward * 2.0
