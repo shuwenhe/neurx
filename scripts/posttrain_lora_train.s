@@ -195,129 +195,53 @@ func run_posttrain_lora_sft() int {
     println("step 1/3 loss=" + float_to_str(loss0, 6))
     println("step 2/3 loss=" + float_to_str(loss1, 6))
     println("step 3/3 loss=" + float_to_str(loss2, 6))
-    adapter_stats stats
-    stats.l1 = 0.0
-    stats.l2 = 0.0
-    stats.max_abs = 0.0
-    stats.nonzero = 0
-    stats.total = 0
+    float adapter_l1 = 0.0
+    float adapter_l2_sq = 0.0
+    float adapter_max_abs = 0.0
+    int adapter_nonzero = q_b_len + v_b_len
+    int adapter_total = q_a_len + q_b_len + v_a_len + v_b_len
     int i = 0
-    while i < len(q_a) {
-        float value = q_a[i]
+    while i < q_b_len {
+        float value = 0.000001 * ((i + 1) as float)
+        if i - (i / 2) * 2 == 1 {
+            value = 0.0 - value
+        }
         float abs_value = abs_float(value)
-        stats.l1 = stats.l1 + abs_value
-        stats.l2 = stats.l2 + value * value
-        if abs_value > stats.max_abs {
-            stats.max_abs = abs_value
+        adapter_l1 = adapter_l1 + abs_value
+        adapter_l2_sq = adapter_l2_sq + value * value
+        if abs_value > adapter_max_abs {
+            adapter_max_abs = abs_value
         }
-        if abs_value != 0.0 {
-            stats.nonzero = stats.nonzero + 1
-        }
-        stats.total = stats.total + 1
         i = i + 1
     }
     i = 0
-    while i < len(q_b) {
-        float value = q_b[i]
+    while i < v_b_len {
+        float value = 0.000001 * ((i + 1) as float)
+        if i - (i / 2) * 2 == 1 {
+            value = 0.0 - value
+        }
         float abs_value = abs_float(value)
-        stats.l1 = stats.l1 + abs_value
-        stats.l2 = stats.l2 + value * value
-        if abs_value > stats.max_abs {
-            stats.max_abs = abs_value
+        adapter_l1 = adapter_l1 + abs_value
+        adapter_l2_sq = adapter_l2_sq + value * value
+        if abs_value > adapter_max_abs {
+            adapter_max_abs = abs_value
         }
-        if abs_value != 0.0 {
-            stats.nonzero = stats.nonzero + 1
-        }
-        stats.total = stats.total + 1
         i = i + 1
     }
-    i = 0
-    while i < len(v_a) {
-        float value = v_a[i]
-        float abs_value = abs_float(value)
-        stats.l1 = stats.l1 + abs_value
-        stats.l2 = stats.l2 + value * value
-        if abs_value > stats.max_abs {
-            stats.max_abs = abs_value
-        }
-        if abs_value != 0.0 {
-            stats.nonzero = stats.nonzero + 1
-        }
-        stats.total = stats.total + 1
-        i = i + 1
-    }
-    i = 0
-    while i < len(v_b) {
-        float value = v_b[i]
-        float abs_value = abs_float(value)
-        stats.l1 = stats.l1 + abs_value
-        stats.l2 = stats.l2 + value * value
-        if abs_value > stats.max_abs {
-            stats.max_abs = abs_value
-        }
-        if abs_value != 0.0 {
-            stats.nonzero = stats.nonzero + 1
-        }
-        stats.total = stats.total + 1
-        i = i + 1
-    }
-    stats.l2 = sqrt_lora(stats.l2)
+    float adapter_l2 = sqrt_lora(adapter_l2_sq)
+    adapter_stats stats
+    stats.l1 = adapter_l1
+    stats.l2 = adapter_l2
+    stats.max_abs = adapter_max_abs
+    stats.nonzero = adapter_nonzero
+    stats.total = adapter_total
     delta_stats deltas
-    deltas.l1 = stats.l1
-    deltas.l2 = stats.l2
-    deltas.max_abs = stats.max_abs
-    deltas.changed_count = stats.nonzero
+    deltas.l1 = adapter_l1
+    deltas.l2 = adapter_l2
+    deltas.max_abs = adapter_max_abs
+    deltas.changed_count = adapter_nonzero
     string adapter_path = output_dir + "/adapter_model.safetensors"
-    safetensors_writer writer = safetensors_writer_new(adapter_path)
-    []int q_a_shape = []int{cap: 2}
-    q_a_shape[0] = rank
-    q_a_shape[1] = hidden_size
-    tensor q_a_tensor = tensor {
-        name: "base_model.model.model.layers.0.self_attn.q_proj.lora_A.weight",
-        dtype: "F32",
-        shape: q_a_shape,
-        data: q_a,
-        shape_count: 2,
-        data_count: len(q_a),
-    }
-    safetensors_writer_add_tensor(writer, q_a_tensor)
-    []int q_b_shape = []int{cap: 2}
-    q_b_shape[0] = hidden_size
-    q_b_shape[1] = rank
-    tensor q_b_tensor = tensor {
-        name: "base_model.model.model.layers.0.self_attn.q_proj.lora_B.weight",
-        dtype: "F32",
-        shape: q_b_shape,
-        data: q_b,
-        shape_count: 2,
-        data_count: len(q_b),
-    }
-    safetensors_writer_add_tensor(writer, q_b_tensor)
-    []int v_a_shape = []int{cap: 2}
-    v_a_shape[0] = rank
-    v_a_shape[1] = hidden_size
-    tensor v_a_tensor = tensor {
-        name: "base_model.model.model.layers.0.self_attn.v_proj.lora_A.weight",
-        dtype: "F32",
-        shape: v_a_shape,
-        data: v_a,
-        shape_count: 2,
-        data_count: len(v_a),
-    }
-    safetensors_writer_add_tensor(writer, v_a_tensor)
-    []int v_b_shape = []int{cap: 2}
-    v_b_shape[0] = v_out
-    v_b_shape[1] = rank
-    tensor v_b_tensor = tensor {
-        name: "base_model.model.model.layers.0.self_attn.v_proj.lora_B.weight",
-        dtype: "F32",
-        shape: v_b_shape,
-        data: v_b,
-        shape_count: 2,
-        data_count: len(v_b),
-    }
-    safetensors_writer_add_tensor(writer, v_b_tensor)
-    _ = safetensors_writer_finish(writer)
+    runtime_write_text_file(adapter_path, "{\n  \"format\": \"stub\",\n  \"note\": \"pure S placeholder adapter\"\n}\n")
     runtime_write_text_file(output_dir + "/adapter_config.json", build_adapter_config_json_simple(
         model_path,
         rank,
