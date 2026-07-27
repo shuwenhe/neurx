@@ -47,7 +47,10 @@ func strip_comments(string text) string {
     bool escape = false
     while i < n {
         int c = text[i]
-        int nc = i+1 < n ? text[i+1] : -1
+        int nc = -1
+        if i + 1 < n {
+            nc = text[i+1]
+        }
         if in_line {
             if c == 10 {
                 in_line = false
@@ -120,6 +123,6 @@ func main() int {
         }
         i = i + 1
     }
-    println("Done. Modified " + string_char(48 + (modified / 10)) + string_char(48 + (modified % 10)) + " files.")
+    println("Done. Modified files.")
     0
 }

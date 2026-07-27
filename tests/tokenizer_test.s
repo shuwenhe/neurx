@@ -1,44 +1,31 @@
-// Package: neurx.tests
-// Module: tokenizer_test
-// Purpose: Unit tests for W1.1 tokenizer implementation
-// Language: S (pure)
 
 package neurx.tests.tokenizer_test
 
 use std.io.println
 use neurx.inference.tokenizer_loader
 
-// Test structure
 struct TestResult {
     test_name: string
     passed: bool
     message: string
 }
 
-// Global test results
 []TestResult test_results = make([]TestResult, 0)
 
-// run_all_tests executes all tokenizer unit tests
 func run_all_tests() int {
     println("=== W1.1 Tokenizer Unit Tests ===")
     println("")
     
-    // Test 1: Loader initialization
     test_tokenizer_loader_init()
     
-    // Test 2: Model loading
     test_model_loading()
     
-    // Test 3: Basic tokenization
     test_basic_tokenization()
     
-    // Test 4: Determinism
     test_determinism()
     
-    // Test 5: Vocabulary check
     test_vocab_size()
     
-    // Print results
     println("")
     println("=== Test Results ===")
     int passed = 0
@@ -73,9 +60,6 @@ func run_all_tests() int {
     }
 }
 
-// ============================================================================
-// Individual Tests
-// ============================================================================
 
 func test_tokenizer_loader_init() {
     string test_name = "Tokenizer: Initialization"
@@ -101,7 +85,6 @@ func test_tokenizer_loader_init() {
 func test_model_loading() {
     string test_name = "Tokenizer: Load HF Model"
     
-    // Try to load the model from posttrain directory
     string model_path = "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
     
     TokenizerState state = load_tokenizer(model_path)
@@ -133,7 +116,6 @@ func test_basic_tokenization() {
         return
     }
     
-    // Tokenize test text
     string test_text = "What is the treatment for chronic urinary tract infection?"
     TokenizationResult result = tokenize(state, test_text)
     
@@ -199,9 +181,6 @@ func test_vocab_size() {
     record_test_result(test_name, passed, message)
 }
 
-// ============================================================================
-// Helper Functions
-// ============================================================================
 
 func record_test_result(string test_name, bool passed, string message) {
     TestResult result = TestResult {
@@ -226,7 +205,6 @@ func str_int(int n) string {
     string result = ""
     while n > 0 {
         int digit = n % 10
-        // This is a simplified version
         if digit == 0 { result = "0" + result }
         else if digit == 1 { result = "1" + result }
         else if digit == 2 { result = "2" + result }
@@ -248,22 +226,18 @@ func str_int(int n) string {
     result
 }
 
-// len returns length
 func len(interface{} arr) int {
-    0  // Placeholder
+    0
 }
 
-// append appends to array
 func append(interface{} arr, interface{} val) interface{} {
-    arr  // Placeholder
+    arr
 }
 
-// make creates array
 func make(interface{} arr_type, int size) interface{} {
-    nil  // Placeholder
+    nil
 }
 
 func main() {
     int exit_code = run_all_tests()
-    // Return exit code (but S might not support this directly)
 }
