@@ -1,17 +1,13 @@
 package main
-
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_output, runtime_shell_escape, trim}
 use std.io.println
-
 func main() int {
     string config = runtime_env_get("NEURX_ROBOTICS_OBSERVE_CONFIG", "workflows/robotics/train/config/sample.yaml")
     string steps_override = runtime_env_get("NEURX_ROBOTICS_OBSERVE_STEPS", "")
-
     if !runtime_run_command("test -f " + runtime_shell_escape(config)).ok {
         println("Config not found: " + config)
         return 1
     }
-
     string obs_dim = default_if_empty(yaml_value(config, "obs_dim"), "8")
     string latent_dim = default_if_empty(yaml_value(config, "latent_dim"), "16")
     string act_dim = default_if_empty(yaml_value(config, "act_dim"), "4")
@@ -24,18 +20,15 @@ func main() int {
     if steps_override != "" {
         max_steps = steps_override
     }
-
     string root = runtime_run_command_output("git rev-parse --show-toplevel 2>/dev/null || pwd")
     if root == "" {
         root = "."
     }
-
     string s_compiler = runtime_run_command_output("command -v s 2>/dev/null || true")
     if s_compiler == "" {
         println("missing runnable s executable")
         return 1
     }
-
     string tmp_s = "/tmp/neurx_robotics_workflow_observe_tmp.s"
     string tmp_ir = "/tmp/neurx_robotics_workflow_observe_tmp.ir"
     string tmp_src = ""
@@ -63,22 +56,18 @@ func main() int {
     if !runtime_run_command(runtime_shell_escape(s_compiler) + " " + runtime_shell_escape(tmp_s) + " " + runtime_shell_escape(tmp_ir)).ok {
         return 1
     }
-
     println("Compiled robotics observation entrypoint with obs=" + obs_dim + ", latent=" + latent_dim + ", act=" + act_dim + ", steps=" + max_steps + ", samples=" + sample_count + ", eval_every=" + eval_every + ", save_every=" + save_every + ", lr=" + learning_rate + ", task=" + task_name)
     println("Note: current S CLI invocation validates compilation of the observation runner; it does not execute main() in this environment.")
     0
 }
-
 func usage() {
     println("Usage: observe_with_config.s")
     println("Configure via NEURX_ROBOTICS_OBSERVE_CONFIG and NEURX_ROBOTICS_OBSERVE_STEPS.")
 }
-
 func yaml_value(string file, string key) string {
     string cmd = "awk -F\":\" '/^" + key + "[[:space:]]*:/ {gsub(/ /, \"\", $2); print $2; exit}' " + runtime_shell_escape(file)
     trim(runtime_run_command_output(cmd))
 }
-
 func default_if_empty(string value, string fallback) string {
     if value == "" {
         return fallback

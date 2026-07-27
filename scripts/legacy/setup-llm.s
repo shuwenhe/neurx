@@ -1,15 +1,11 @@
 package main
-
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_shell_escape}
 use std.io.println
-
 func main() int {
     string api_key = runtime_env_get("NEURX_API_KEY", "")
-
     println("🚀 NeurX + LLM quickEnglish text")
     println("==============================")
     println("")
-
     println("✓ English text1step: English text")
     if !runtime_run_command("command -v cmake >/dev/null 2>&1").ok {
         println("❌ RequiredEnglish text cmake")
@@ -17,17 +13,14 @@ func main() int {
     }
     println("✓ cmake English text")
     println("")
-
     if api_key == "" {
         println("✓ English text2step: English textAPIEnglish text")
         println("English text NEURX_API_KEY English textrunEnglish text.")
         return 1
     }
-
     println("✓ English text2step: English textAPIEnglish text")
     println("✓ APIEnglish text")
     println("")
-
     println("✓ English text3step: compileneurx")
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     string build_cmd = "cd " + runtime_shell_escape(project_root + "/..") + " && mkdir -p build && cd build && cmake .. && make -j8"
@@ -36,7 +29,6 @@ func main() int {
     }
     println("✓ compileEnglish text")
     println("")
-
     println("✓ English text4step: English text")
     println("")
     println("NeurX + LLM English textuse!")
@@ -71,6 +63,5 @@ func main() int {
     println("- English text: ./README.md")
     println("")
     println("✅ English text!")
-
     0
 }

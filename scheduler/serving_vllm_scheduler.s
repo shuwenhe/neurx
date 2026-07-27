@@ -1,7 +1,5 @@
 package neurx.scheduler.serving_vllm_scheduler
-
 use neurx.serving.vllm.request_queue
-
 struct vllm_scheduler_state {
     string strategy
     int tick
@@ -11,7 +9,6 @@ struct vllm_scheduler_state {
     string last_selected_request
     int last_selected_remaining
 }
-
 struct vllm_schedule_result {
     vllm_scheduler_state scheduler
     vllm_request_queue_state queue
@@ -20,14 +17,12 @@ struct vllm_schedule_result {
     int remaining_tokens
     bool selected
 }
-
 func vllm_normalize_strategy(string strategy) string {
     if strategy == "srpt" {
         return "srpt"
     }
     "fcfs"
 }
-
 func new_vllm_scheduler_state(string strategy) vllm_scheduler_state {
     vllm_scheduler_state {
         strategy: vllm_normalize_strategy(strategy),
@@ -39,7 +34,6 @@ func new_vllm_scheduler_state(string strategy) vllm_scheduler_state {
         last_selected_remaining: 0,
     }
 }
-
 func vllm_scheduler_next(vllm_scheduler_state state, vllm_request_queue_state queue) vllm_schedule_result {
     int queue_depth = vllm_queue_size(queue)
     if queue_depth <= 0 {
@@ -60,17 +54,14 @@ func vllm_scheduler_next(vllm_scheduler_state state, vllm_request_queue_state qu
             selected: false,
         }
     }
-
     vllm_queue_pop_result popped = vllm_queue_pop_front(queue)
     if state.strategy == "srpt" {
         popped = vllm_queue_pop_shortest(queue)
     }
-
     int preemptions = state.preemptions
     if state.strategy == "srpt" && state.running_requests > 0 {
         preemptions = preemptions + 1
     }
-
     vllm_schedule_result {
         scheduler: vllm_scheduler_state {
             strategy: state.strategy,
@@ -88,7 +79,6 @@ func vllm_scheduler_next(vllm_scheduler_state state, vllm_request_queue_state qu
         selected: popped.ok,
     }
 }
-
 func vllm_scheduler_on_finish(vllm_scheduler_state state) vllm_scheduler_state {
     int next_running = state.running_requests
     if next_running > 0 {
@@ -104,11 +94,9 @@ func vllm_scheduler_on_finish(vllm_scheduler_state state) vllm_scheduler_state {
         last_selected_remaining: state.last_selected_remaining,
     }
 }
-
 func vllm_scheduler_state_dict(vllm_scheduler_state state) vllm_scheduler_state {
     state
 }
-
 func vllm_scheduler_load_state_dict(vllm_scheduler_state state, vllm_scheduler_state other) vllm_scheduler_state {
     other
 }

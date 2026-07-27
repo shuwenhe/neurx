@@ -1,22 +1,16 @@
 package main
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_run_command_output, trim}
-// Local logger to avoid import collisions
 func manifest_log(string s) int {
     _ = runtime_run_command_output("printf '%s\\n' " + shell_escape(s))
     0
 }
-
 extern "intrinsic" func __host_write_text_file(string path, string content) int
-
 func runtime_write_text_file(string path, string content) () {
     _ = __host_write_text_file(path, content)
 }
-
 func string_char(int c) string {
     string(c)
 }
-
 func main() int {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     let shard_dir = runtime_env_get("NEURX_PRETRAIN_SHARD_DIR", project_root + "/dataset/pretrain/shard")
@@ -30,24 +24,20 @@ func main() int {
     let total_documents_file = work_dir + "/total_documents.txt"
     let total_size_bytes_file = work_dir + "/total_size_bytes.txt"
     let average_docs_file = work_dir + "/average_docs.txt"
-
     manifest_log("NeurX Pretrain manifest Builder (S Lang)")
     manifest_log("")
     manifest_log("Project root : " + project_root)
     manifest_log("Shard dir    : " + shard_dir)
     manifest_log("manifest     : " + manifest_file)
     manifest_log("")
-
     if !runtime_file_exists(shard_dir) {
                 manifest_log("❌ shard directory not found: " + shard_dir)
         return 1
     }
-
     if force_rebuild != "1" && runtime_file_exists(manifest_file) {
         manifest_log("[pretrain-manifest] using existing manifest: " + manifest_file)
         return 0
     }
-
     _ = runtime_run_command_output("mkdir -p " + shell_escape(work_dir) + "; printf ok")
     _ = runtime_run_command_output("mkdir -p " + shell_escape(path_dirname(manifest_file)) + "; printf ok")
     runtime_write_text_file(shard_list_file, "")
@@ -57,18 +47,15 @@ func main() int {
     runtime_write_text_file(total_documents_file, "0\n")
     runtime_write_text_file(total_size_bytes_file, "0\n")
     runtime_write_text_file(average_docs_file, "0\n")
-
     if trim(runtime_run_command_output("find " + shell_escape(shard_dir) + " -maxdepth 1 -type f -name 'shard_*.jsonl' -print | sort > " + shell_escape(shard_list_file) + "; printf ok")) != "ok" {
         manifest_log("❌ failed to enumerate shards in: " + shard_dir)
         return 1
     }
-
     let shard_output = trim(runtime_read_text_file(shard_list_file))
     if shard_output == "" {
         manifest_log("❌ no shard files found in: " + shard_dir)
         return 1
     }
-
     int total_documents = 0
     int total_size_bytes = 0
     let json_header = "{\n"
@@ -77,7 +64,6 @@ func main() int {
     json_header = json_header + "  \"source_dir\": " + json_escape(shard_dir) + ",\n"
     json_header = json_header + "  \"shards\": [\n"
     runtime_write_text_file(manifest_file, json_header)
-
     int shard_count = 0
     int i = 0
     let current_path = ""
@@ -121,7 +107,6 @@ func main() int {
         }
         i = i + 1
     }
-
     let shard_count_text = trim(runtime_read_text_file(shard_count_file))
     let total_documents_text = trim(runtime_read_text_file(total_documents_file))
     let total_size_bytes_text = trim(runtime_read_text_file(total_size_bytes_file))
@@ -141,7 +126,6 @@ func main() int {
     if average_docs_text == "" {
         average_docs_text = "0"
     }
-
     let json_footer = "\n  ],\n"
     json_footer = json_footer + "  \"total_shards\": " + shard_count_text + ",\n"
     json_footer = json_footer + "  \"total_documents\": " + total_documents_text + ",\n"
@@ -155,7 +139,6 @@ func main() int {
     manifest_log("[pretrain-manifest] bytes      : " + total_size_bytes_text)
     0
 }
-
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
@@ -170,7 +153,6 @@ func shell_escape(string s) string {
     }
     out + "'"
 }
-
 func json_escape(string s) string {
     string out = "\""
     int i = 0
@@ -188,7 +170,6 @@ func json_escape(string s) string {
     out = out + "\""
     out
 }
-
 func parse_int(string s, int fallback) int {
     string text = trim(s)
     if text == "" {
@@ -211,7 +192,6 @@ func parse_int(string s, int fallback) int {
     }
     sign * value
 }
-
 func int_to_string(int value) string {
     if value == 0 {
         return "0"
@@ -232,7 +212,6 @@ func int_to_string(int value) string {
     }
     out
 }
-
 func path_basename(string path) string {
     int last = -1
     int i = 0
@@ -256,7 +235,6 @@ func path_basename(string path) string {
     }
     out
 }
-
 func path_dirname(string path) string {
     int last = -1
     int i = 0

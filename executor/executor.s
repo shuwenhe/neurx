@@ -1,5 +1,4 @@
 package neurx.executor.executor
-
 use neurx.agent.tool_registry
 use neurx.agent.memory
 use neurx.agent.action_schema
@@ -10,7 +9,6 @@ use neurx.inference
 use neurx.executor.model_tool_select
 use neurx.safety.safety
 use neurx.runtime.io.{runtime_env_get, runtime_read_text_file, runtime_file_exists}
-
 struct agent_execute_result {
     agent_tool_registry_state tools
     agent_memory_state memory
@@ -21,7 +19,6 @@ struct agent_execute_result {
     int tool_retries
     bool ok
 }
-
 func agent_text_contains(string text, string pattern) bool {
     string haystack = lower(trim(text))
     string needle = lower(trim(pattern))
@@ -33,7 +30,6 @@ func agent_text_contains(string text, string pattern) bool {
     if hay_len < nee_len {
         return false
     }
-
     int i = 0
     while i <= hay_len - nee_len {
         int j = 0
@@ -52,7 +48,6 @@ func agent_text_contains(string text, string pattern) bool {
     }
     false
 }
-
 func agent_execute_observation(string kind, string status, string details) string {
     string obs = kind + ":status=" + status
     if trim(details) != "" {
@@ -60,7 +55,6 @@ func agent_execute_observation(string kind, string status, string details) strin
     }
     obs
 }
-
 func agent_execute_clip(string text, int max_chars) string {
     if max_chars <= 0 || len(text) <= max_chars {
         return text
@@ -73,7 +67,6 @@ func agent_execute_clip(string text, int max_chars) string {
     }
     out + "...[truncated]"
 }
-
 func agent_execute_observation_value(string observation, string key) string {
     string raw = trim(observation)
     string needle = key + "="
@@ -106,7 +99,6 @@ func agent_execute_observation_value(string observation, string key) string {
     }
     ""
 }
-
 func agent_execute_failure_summary(string kind, string observation) string {
     string summary = kind + ":status=failed"
     string reason = agent_execute_observation_value(observation, "reason")
@@ -132,7 +124,6 @@ func agent_execute_failure_summary(string kind, string observation) string {
     }
     summary
 }
-
 func agent_execute_memory_preferred_command(agent_memory_state memory, string key) string {
     agent_memory_lookup_result preferred = agent_memory_lookup_long(memory, key)
     if preferred.found && trim(preferred.value) != "" {
@@ -140,7 +131,6 @@ func agent_execute_memory_preferred_command(agent_memory_state memory, string ke
     }
     ""
 }
-
 func agent_route_for_goal(string goal, string input) string {
     string text = lower(trim(goal + " " + input))
     if agent_text_contains(text, "delete_path") || agent_text_contains(text, "delete") || agent_text_contains(text, "remove") || agent_text_contains(text, "rm ") || agent_text_contains(text, "trash") {
@@ -211,7 +201,6 @@ func agent_route_for_goal(string goal, string input) string {
     }
     "general"
 }
-
 func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memory, string goal, string task, string input, string model_path) agent_execute_result {
     string action = "noop"
     string observation = "tool_unavailable"
@@ -239,7 +228,6 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
     next_memory = agent_memory_write_short(next_memory, "goal", goal)
     next_memory = agent_memory_write_short(next_memory, "route", route)
     next_memory = agent_memory_write_long(next_memory, "last_action_schema", agent_action_summary(parsed_action))
-
     if task == "analyze" {
         action = "analyze"
         next_memory = agent_memory_delete(next_memory, "inferred_route")
@@ -435,7 +423,6 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
                 observation = "write:status=failed;reason=path_missing"
                 ok = false
             } else {
-
                 agent_workspace_result write_result = agent_workspace_write_file(write_path, write_content)
                 observation = write_result.observation
                 ok = write_result.ok
@@ -513,7 +500,6 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
             string code_content = parsed_action.content
             string multi_files = ""
             if code_content == "" {
-
                 if code_path != "" {
                     agent_memory_lookup_result ar = agent_memory_lookup_long(next_memory, "retrieved")
                     if !ar.found || ar.value == "" {
@@ -992,7 +978,6 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
         observation = "done"
         ok = true
     }
-
     agent_execute_result {
         tools: tools,
         memory: next_memory,
@@ -1004,11 +989,9 @@ func agent_execute_step(agent_tool_registry_state tools, agent_memory_state memo
         ok: ok,
     }
 }
-
 func agent_execute_result_state_dict(agent_execute_result result) agent_execute_result {
     result
 }
-
 func agent_execute_result_load_state_dict(agent_execute_result result, agent_execute_result other) agent_execute_result {
     other
 }

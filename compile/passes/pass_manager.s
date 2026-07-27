@@ -1,15 +1,12 @@
 package neurx.compile.pass_manager
-
 use neurx.strings
 use neurx.runtime.compile
-
 struct pass_plan_state {
     []string passes
     bool has_shape_infer
     bool has_fusion
     bool has_lowering
 }
-
 func default_passes(string mode, bool dynamic, bool fullgraph) []string {
     []string passes = []
     passes.push("normalize")
@@ -28,7 +25,6 @@ func default_passes(string mode, bool dynamic, bool fullgraph) []string {
     passes.push("lower_graph")
     passes
 }
-
 func new_pass_plan_state(string mode, bool dynamic, bool fullgraph) pass_plan_state {
     []string passes = default_passes(mode, dynamic, fullgraph)
     pass_plan_state {
@@ -38,16 +34,13 @@ func new_pass_plan_state(string mode, bool dynamic, bool fullgraph) pass_plan_st
         has_lowering: true,
     }
 }
-
 func pass_count(pass_plan_state plan) int {
     int count = len(plan.passes)
     count
 }
-
 func get_pass(pass_plan_state plan, int index) string {
     plan.passes[index]
 }
-
 func apply_pass_plan(compile_state state, pass_plan_state plan) compile_state {
     compile_state next = state
     int i = 0
@@ -69,7 +62,6 @@ func apply_pass_plan(compile_state state, pass_plan_state plan) compile_state {
     }
     next
 }
-
 func pass_plan_load_state_dict(pass_plan_state plan, pass_plan_state other) pass_plan_state {
     other
 }

@@ -1,10 +1,7 @@
 package main
-
 use neurx.serving.security.request_governance.{governance_state, governance_decision, new_governance_state, governance_register_tenant, governance_authorize, governance_disable_tenant}
 use neurx.serving.lifecycle.request_lifecycle.{lifecycle_state, new_lifecycle_state, lifecycle_register, lifecycle_fail_attempt, lifecycle_tick, lifecycle_cancel, lifecycle_complete, lifecycle_begin_shutdown, lifecycle_shutdown_complete}
-
 func fail(string message) int { println("governance-lifecycle FAIL " + message); 1 }
-
 func main() int {
     string fingerprint = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
     governance_state governance = new_governance_state()
@@ -20,7 +17,6 @@ func main() int {
     governance = governance_disable_tenant(decision.state, "tenant-a")
     decision = governance_authorize(governance, fingerprint, "generate", 1, 4)
     if decision.http_status != 401 { return fail("disable") }
-
     lifecycle_state lifecycle = new_lifecycle_state()
     lifecycle = lifecycle_register(lifecycle, "req-1", 0, 1000, 2)
     lifecycle = lifecycle_fail_attempt(lifecycle, "req-1", 100, true)

@@ -1,29 +1,22 @@
 package neurx.inference.sampling
-
 struct sampling_config {
-
     string strategy
-
     float temperature
     int top_k
     float top_p
-
     int num_beams
     float length_penalty
     bool early_stopping
-
     float repetition_penalty
     int no_repeat_ngram_size
     float min_length_penalty
     int min_length
     int max_length
-
     float epsilon_cutoff
     float eta_cutoff
     bool do_sample
     uint64 seed
 }
-
 struct generation_state {
     []int input_ids
     [][]float scores
@@ -31,16 +24,13 @@ struct generation_state {
     []int generated_ids
     int current_step
     bool is_finished
-
     []beam_state beams
 }
-
 struct beam_state {
     []int token_ids
     float score
     bool is_finished
 }
-
 func default_sampling_config() sampling_config {
     sampling_config {
         strategy: "top_p",
@@ -61,7 +51,6 @@ func default_sampling_config() sampling_config {
         seed: 42,
     }
 }
-
 func greedy_config() sampling_config {
     sampling_config {
         strategy: "greedy",
@@ -73,7 +62,6 @@ func greedy_config() sampling_config {
         max_length: 512,
     }
 }
-
 func creative_config() sampling_config {
     sampling_config {
         strategy: "top_p",

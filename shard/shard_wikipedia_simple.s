@@ -1,13 +1,8 @@
-
-
 package neurx.shard.shard_wikipedia
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}
-
 func string_char(int c) string {
     string(c)
 }
-
 func trim(string s) string {
     var begin = 0
     while begin < len(s) {
@@ -18,7 +13,6 @@ func trim(string s) string {
             break
         }
     }
-
     var end = len(s)
     while end > begin {
         var ch = string_char(s[end - 1])
@@ -28,7 +22,6 @@ func trim(string s) string {
             break
         }
     }
-
     var out = ""
     var i = begin
     while i < end {
@@ -37,7 +30,6 @@ func trim(string s) string {
     }
     out
 }
-
 func shell_escape(string s) string {
     var out = "'"
     var i = 0
@@ -53,47 +45,37 @@ func shell_escape(string s) string {
     out = out + "'"
     out
 }
-
 func get_neurx_home() string {
     runtime_env_get("NEURX_HOME", ".")
 }
-
 func get_input_file() string {
     var neurx_home = get_neurx_home()
     var dataset_root = neurx_home + "/dataset/pretrain"
     runtime_env_get("ENWIKI_BZ2_FILE", dataset_root + "/raw/enwiki-latest-pages-articles.xml.bz2")
 }
-
 func get_output_dir() string {
     var neurx_home = get_neurx_home()
     var dataset_root = neurx_home + "/dataset/pretrain"
     runtime_env_get("ENWIKI_SHARD_DIR", dataset_root + "/shard")
 }
-
 func get_manifest_file() string {
     var neurx_home = get_neurx_home()
     var dataset_root = neurx_home + "/dataset/pretrain"
     runtime_env_get("ENWIKI_MANIFEST_FILE", dataset_root + "/manifest.json")
 }
-
 func get_docs_per_shard() string {
     runtime_env_get("DOCS_PER_SHARD", "5000")
 }
-
 func emit_progress(string message) {
-
     runtime_run_command_output("printf '%s\\n' " + shell_escape(message) + " >&2")
 }
-
 func get_max_pages() string {
     runtime_env_get("MAX_PAGES", "0")
 }
-
 func main() int {
     println("")
     println("[*] NeurX Wikipedia Shard Processing")
     println("")
-
     var input_file = get_input_file()
     var output_dir = get_output_dir()
     var manifest_file = get_manifest_file()
@@ -104,7 +86,6 @@ func main() int {
     var force_rebuild = runtime_env_get("NEURX_SHARD_FORCE_REBUILD", "0")
     var completion_file = output_dir + "/.wikipedia_shard_complete"
     var state_file = output_dir + "/.wikipedia_shard_state"
-
     println("Configuration:")
     println("  Input file    : " + input_file)
     println("  Output dir    : " + output_dir)
@@ -114,17 +95,14 @@ func main() int {
     println("  Resume        : " + resume)
     println("  Force rebuild : " + force_rebuild)
     println("")
-
     if !runtime_file_exists(input_file) {
         println("Error: input file not found: " + input_file)
         return 1
     }
-
     var mkdir_out = runtime_run_command_output("mkdir -p " + shell_escape(output_dir))
     if len(trim(mkdir_out)) > 0 {
         println(mkdir_out)
     }
-
     if force_rebuild == "1" || resume != "1" {
           var cleanup_cmd = "rm -f " + shell_escape(output_dir) + "/shard_*.jsonl " +
               shell_escape(output_dir + "/.wikipedia_dump.xml") + " " + shell_escape(manifest_file) + " " +
@@ -134,9 +112,7 @@ func main() int {
               println(cleanup_out)
           }
     }
-
     var created_at = trim(runtime_run_command_output("date -u +%Y-%m-%dT%H:%M:%SZ"))
-
     var awk_program = ""
     awk_program = awk_program + "function json_escape(s,   t) { "
     awk_program = awk_program + "t = s; "
@@ -208,7 +184,6 @@ func main() int {
     awk_program = awk_program + "print \"}\" >> manifest_tmp; "
     awk_program = awk_program + "emit_line(\"[shard] generated \" doc_count \" documents into \" total_shards \" shards\") "
     awk_program = awk_program + "} "
-
     var process_cmd = ""
     process_cmd = process_cmd + "set -e; "
     process_cmd = process_cmd + "rm -f " + shell_escape(completion_file) + " " + shell_escape(completion_file + ".tmp") + " " + shell_escape(manifest_file + ".tmp") + "; "
@@ -250,18 +225,15 @@ func main() int {
     process_cmd = process_cmd + shell_escape(awk_program)
     process_cmd = process_cmd + "; mv " + shell_escape(manifest_file + ".tmp") + " " + shell_escape(manifest_file)
     process_cmd = process_cmd + "; printf 'ok\\n' > " + shell_escape(completion_file + ".tmp") + "; mv " + shell_escape(completion_file + ".tmp") + " " + shell_escape(completion_file)
-
     println("[shard] launching Wikipedia shard pipeline")
     runtime_run_command_output(process_cmd)
     if !runtime_file_exists(manifest_file) || !runtime_file_exists(completion_file) {
         println("Error: shard generation command failed")
         return 1
     }
-
     println("")
     println("[+] Wikipedia sharding complete")
     println("[+] manifest : " + manifest_file)
     println("")
-
     0
 }

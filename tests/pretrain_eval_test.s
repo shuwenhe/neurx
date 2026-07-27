@@ -1,5 +1,4 @@
 package main
-
 func test_close(float actual, float expected, float tolerance) bool {
     float delta = actual - expected
     if delta < 0.0 {
@@ -7,7 +6,6 @@ func test_close(float actual, float expected, float tolerance) bool {
     }
     delta <= tolerance
 }
-
 func main() int {
     if !test_close(pretrain_eval_perplexity_from_loss(0.0), 1.0, 0.000001) {
         println("[pretrain-eval] FAIL: exp(0)")
@@ -21,7 +19,6 @@ func main() int {
         println("[pretrain-eval] FAIL: exp(1)")
         return 3
     }
-
     pretrain_eval_state state = new_pretrain_eval_state()
     state = pretrain_eval_update_from_loss(state, 10, 1.0)
     if !pretrain_eval_has_result(state) || !pretrain_eval_is_best(state) {
@@ -32,7 +29,6 @@ func main() int {
         println("[pretrain-eval] FAIL: state perplexity")
         return 5
     }
-
     println("[pretrain-eval] perplexity exp(mean_nll): PASS")
     0
 }

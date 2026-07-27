@@ -1,8 +1,6 @@
 package main
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use std.io.println
-
 func main() int {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     let checkpoint_dir = runtime_env_get("NEURX_CHECKPOINT_DIR", project_root + "/checkpoint/NeurX-1.3")
@@ -24,7 +22,6 @@ func main() int {
     }
     0
 }
-
 func check_path(string path) string {
     if runtime_file_exists(path) {
         return "ready (" + path + ")"

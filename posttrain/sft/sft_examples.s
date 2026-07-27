@@ -1,10 +1,8 @@
 package neurx.posttrain.sft.examples
-
 use neurx.posttrain.sft.sft_trainer
 use neurx.model.llm.neurx
 use neurx.tokenizer.neurx
 use std.io.println
-
 func create_sft_example_config() sft_train_config {
     sft_train_config {
         method: "sft",
@@ -38,11 +36,9 @@ func create_sft_example_config() sft_train_config {
         output_dir: "./outputs/sft/",
     }
 }
-
 func create_sft_example_dataset() sft_dataset {
     create_sft_dataset("./data/sft/instruction_data.jsonl")
 }
-
 func create_sft_example_trainer(
     neurx_model model,
     tokenizer_state tokenizer,
@@ -53,7 +49,6 @@ func create_sft_example_trainer(
 ) sft_trainer_state {
     neurx.posttrain.sft.sft_trainer.create_sft_trainer(model, tokenizer, config, dataset, global_rank, world_size)
 }
-
 func example_basic_sft_training() {
     neurx_model model = load_pretrained_sft_model("neurx_200b")
     tokenizer_state tokenizer = load_tokenizer_sft()
@@ -63,16 +58,13 @@ func example_basic_sft_training() {
     sft_train_result result = start_sft_training(trainer)
     println("SFT completed: " + fmt_float(result.final_loss, 4))
 }
-
 func main() {
     println("NEURX SFT examples")
     example_basic_sft_training()
 }
-
 func load_pretrained_sft_model(string model_name) neurx_model {
     neurx_model{}
 }
-
 func load_tokenizer_sft() tokenizer_state {
     tokenizer_state{}
 }

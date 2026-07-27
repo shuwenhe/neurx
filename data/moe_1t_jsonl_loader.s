@@ -1,9 +1,7 @@
 package neurx.data.jsonl_loader
-
 use neurx.strings
 use neurx.runtime.io.{io_println, runtime_file_exists, runtime_read_text_file}
 use neurx.tokenizer.model_bpe.{bpe_tokenizer, token_config, new_tokenizer_config, new_bpe_tokenizer, encode, pad_sequence}
-
 struct jsonl_document {
     string text
     string source
@@ -11,13 +9,11 @@ struct jsonl_document {
     []string metadata_keys
     []string metadata_values
 }
-
 func read_jsonl_file(string filepath) []jsonl_document {
     []jsonl_document docs = []jsonl_document{cap: 0}
     if !runtime_file_exists(filepath) {
         return docs
     }
-
     string content = runtime_read_text_file(filepath)
     []string lines = split_lines(content)
     int i = 0
@@ -33,10 +29,8 @@ func read_jsonl_file(string filepath) []jsonl_document {
         }
         i = i + 1
     }
-
     docs
 }
-
 func parse_json_document(string json_line) jsonl_document {
     jsonl_document doc = jsonl_document {
         text: "",
@@ -53,7 +47,6 @@ func parse_json_document(string json_line) jsonl_document {
     }
     doc
 }
-
 struct jsonl_data_config {
     string data_dir
     int num_shards
@@ -65,31 +58,25 @@ struct jsonl_data_config {
     int max_seq_length
     int shuffle_buffer_size
 }
-
 struct jsonl_batch {
     []int token_ids
     []int attention_mask
     []long document_ids
     []string metadata
 }
-
 struct jsonl_data_loader {
     jsonl_data_config config
     bpe_tokenizer tokenizer
-
     int current_shard_idx
     int current_doc_idx
     []jsonl_document current_shard_docs
-
     []int token_buffer
     int buffer_start_idx
     int buffer_end_idx
-
     long total_tokens_processed
     int num_batches_generated
     int documents_per_shard
 }
-
 func jsonl_data_loader_new(
     string data_dir,
     int batch_size,
@@ -97,7 +84,6 @@ func jsonl_data_loader_new(
     int dp_rank,
     int dp_size
 ) jsonl_data_loader {
-
     jsonl_data_config cfg = jsonl_data_config {
         data_dir: data_dir,
         num_shards: 8192,
@@ -109,9 +95,7 @@ func jsonl_data_loader_new(
         max_seq_length: 32768,
         shuffle_buffer_size: 10000,
     }
-
     bpe_tokenizer tok = new_bpe_tokenizer(build_default_vocab(), new_tokenizer_config())
-
     jsonl_data_loader loader = jsonl_data_loader {
         config: cfg,
         tokenizer: tok,
@@ -125,58 +109,45 @@ func jsonl_data_loader_new(
         num_batches_generated: 0,
         documents_per_shard: 0,
     }
-
     loader
 }
-
 func get_shard_indices_for_rank(
     int dp_rank,
     int dp_size,
     int num_shards
 ) []int {
-
     []int shard_indices = []int{cap: 0}
-
     int shard = dp_rank
     while shard < num_shards {
         shard_indices = append_int(shard_indices, shard)
         shard = shard + dp_size
     }
-
     shard_indices
 }
-
 func pack_tokens_into_batch(
     jsonl_data_loader loader,
     []int token_sequence,
     int batch_size,
     int seq_len
 ) jsonl_batch {
-
     []int batch_token_ids = []int{cap: batch_size * seq_len}
     []int batch_attention_mask = []int{cap: batch_size * seq_len}
-
     int i = 0
     while i < batch_size {
         []int tokens = []int{cap: seq_len}
         []int mask = []int{cap: seq_len}
-
         int j = 0
         while j < seq_len {
             int token_idx = i * seq_len + j
-
             if token_idx < len(token_sequence) {
                 tokens[j] = token_sequence[token_idx]
                 mask[j] = 1
             } else {
-
                 tokens[j] = loader.tokenizer.pad_token_id
                 mask[j] = 0
             }
-
             j = j + 1
         }
-
         int base = i * seq_len
         int k = 0
         while k < seq_len {
@@ -184,55 +155,40 @@ func pack_tokens_into_batch(
             batch_attention_mask[base + k] = mask[k]
             k = k + 1
         }
-
         i = i + 1
     }
-
     jsonl_batch batch = jsonl_batch {
         token_ids: batch_token_ids,
         attention_mask: batch_attention_mask,
         document_ids: []long{cap: 0},
         metadata: []string{cap: 0},
     }
-
     batch
 }
-
 func get_next_batch(
     jsonl_data_loader loader
 ) jsonl_batch {
-
     if loader.current_doc_idx >= len(loader.current_shard_docs) {
         load_next_shard(loader)
     }
-
     []int accumulated_tokens = []int{cap: 0}
-
     while len(accumulated_tokens) < (loader.config.batch_size * loader.config.seq_len) {
-
         if loader.current_doc_idx >= len(loader.current_shard_docs) {
             load_next_shard(loader)
-
             if len(loader.current_shard_docs) == 0 {
                 break
             }
         }
-
         jsonl_document doc = loader.current_shard_docs[loader.current_doc_idx]
-
         []int tokens = encode(loader.tokenizer, doc.text)
-
         []int doc_tokens = []int{cap: 0}
         doc_tokens = append_int(doc_tokens, loader.tokenizer.bos_token_id)
-
         int i = 0
         while i < len(tokens) {
             doc_tokens = append_int(doc_tokens, tokens[i])
             i = i + 1
         }
-
         doc_tokens = append_int(doc_tokens, loader.tokenizer.eos_token_id)
-
         i = 0
         while i < len(doc_tokens) {
             if len(accumulated_tokens) < loader.config.batch_size * loader.config.seq_len {
@@ -240,57 +196,41 @@ func get_next_batch(
             }
             i = i + 1
         }
-
         loader.current_doc_idx = loader.current_doc_idx + 1
         loader.total_tokens_processed = loader.total_tokens_processed + long(len(doc_tokens))
     }
-
     jsonl_batch batch = pack_tokens_into_batch(
         loader, accumulated_tokens,
         loader.config.batch_size,
         loader.config.seq_len
     )
-
     loader.num_batches_generated = loader.num_batches_generated + 1
-
     batch
 }
-
 func load_next_shard(jsonl_data_loader loader) {
-
     []int shard_indices = get_shard_indices_for_rank(
         loader.config.dp_rank,
         loader.config.dp_size,
         loader.config.num_shards
     )
-
     if loader.current_shard_idx >= len(shard_indices) {
-
         loader.current_shard_docs = []jsonl_document{cap: 0}
         return
     }
-
     int shard_id = shard_indices[loader.current_shard_idx]
-
     string filepath = loader.config.data_dir + "/shard_" + int_to_string(shard_id) + ".jsonl"
-
     []jsonl_document docs = read_jsonl_file(filepath)
-
     loader.current_shard_docs = docs
     loader.current_doc_idx = 0
     loader.current_shard_idx = loader.current_shard_idx + 1
 }
-
 func get_loader_stats(jsonl_data_loader loader) string {
-
     string stats = "JSONL Loader Stats:\n"
     stats = stats + "  Total tokens processed: " + long_to_string(loader.total_tokens_processed) + "\n"
     stats = stats + "  Batches generated: " + int_to_string(loader.num_batches_generated) + "\n"
     stats = stats + "  Current shard: " + int_to_string(loader.current_shard_idx) + "\n"
-
     stats
 }
-
 func append_int([]int arr, int val) []int {
     []int out = []int{cap: len(arr) + 1}
     int i = 0
@@ -301,7 +241,6 @@ func append_int([]int arr, int val) []int {
     out.push(val)
     out
 }
-
 func append_string([]string arr, string val) []string {
     []string out = []string{cap: len(arr) + 1}
     int i = 0
@@ -312,7 +251,6 @@ func append_string([]string arr, string val) []string {
     out.push(val)
     out
 }
-
 func int_to_string(int x) string {
     if x == 0 {
         return "0"
@@ -334,12 +272,10 @@ func int_to_string(int x) string {
     }
     out
 }
-
 func long_to_string(long x) string {
     int value = int(x)
     int_to_string(value)
 }
-
 func split_lines(string text) []string {
     []string lines = []string{cap: 0}
     string current = ""
@@ -361,7 +297,6 @@ func split_lines(string text) []string {
     }
     lines
 }
-
 func trim_string(string text) string {
     int left = 0
     int right = len(text) - 1
@@ -384,7 +319,6 @@ func trim_string(string text) string {
     }
     neurx.strings.substring(text, left, right + 1)
 }
-
 func extract_json_string_field(string json_line, string field_name) string {
     string needle = "\"" + field_name + "\""
     int pos = find_substring(json_line, needle)
@@ -448,7 +382,6 @@ func extract_json_string_field(string json_line, string field_name) string {
     }
     out
 }
-
 func find_substring(string text, string pattern) int {
     if len(pattern) == 0 {
         return 0
@@ -469,7 +402,6 @@ func find_substring(string text, string pattern) int {
     }
     -1
 }
-
 func build_default_vocab() []string {
     []string vocab = []string{cap: 0}
     vocab.push("<pad>")

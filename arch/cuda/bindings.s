@@ -1,11 +1,9 @@
 package neurx.backends.cuda.bindings
-
 struct device_array {
     []float data
     int size
     bool on_device
 }
-
 func copy_float_values([]float values) []float {
     []float out = []float{cap: len(values)}
     int i = 0
@@ -15,7 +13,6 @@ func copy_float_values([]float values) []float {
     }
     out
 }
-
 func to_device([]float host) device_array {
     device_array {
         data: copy_float_values(host),
@@ -23,11 +20,9 @@ func to_device([]float host) device_array {
         on_device: true,
     }
 }
-
 func to_host(device_array arr) []float {
     copy_float_values(arr.data)
 }
-
 func add_device(device_array left, device_array right) device_array {
     int n = left.size
     if right.size < n {
@@ -45,7 +40,6 @@ func add_device(device_array left, device_array right) device_array {
         on_device: left.on_device || right.on_device,
     }
 }
-
 func mul_device(device_array left, device_array right) device_array {
     int n = left.size
     if right.size < n {
@@ -63,7 +57,6 @@ func mul_device(device_array left, device_array right) device_array {
         on_device: left.on_device || right.on_device,
     }
 }
-
 func add_bias_device(device_array values, device_array bias, int rows, int cols) device_array {
     int n = rows * cols
     if values.size < n {
@@ -86,7 +79,6 @@ func add_bias_device(device_array values, device_array bias, int rows, int cols)
         on_device: values.on_device || bias.on_device,
     }
 }
-
 static PyObject* tensor_cuda_add_bias_3d_device(PyObject* , PyObject* args) {
     PyObject* a_capsule = nullptr;
     PyObject* b_capsule = nullptr;
@@ -98,7 +90,6 @@ static PyObject* tensor_cuda_add_bias_3d_device(PyObject* , PyObject* args) {
     if (std::string(dtype_str) != "float32") {
         return _raise(PyExc_TypeError, "add_bias_3d_device: only float32 supported");
     }
-
     auto* a = _get_device_array(a_capsule);
     auto* b = _get_device_array(b_capsule);
     if (!a || !b) {
@@ -107,7 +98,6 @@ static PyObject* tensor_cuda_add_bias_3d_device(PyObject* , PyObject* args) {
     if ((size_t)bsz * (size_t)t * (size_t)c != a->size || (size_t)c != b->size) {
         return _raise(PyExc_ValueError, "add_bias_3d_device: size mismatch");
     }
-
     void* d_out = nullptr;
     try {
         _cuda_check(cudaMalloc(&d_out, (size_t)bsz * (size_t)t * (size_t)c * sizeof(float)), "cudaMalloc");
@@ -118,11 +108,9 @@ static PyObject* tensor_cuda_add_bias_3d_device(PyObject* , PyObject* args) {
         if (d_out) cudaFree(d_out);
         return _raise(PyExc_RuntimeError, e.what());
     }
-
     auto* out = new DeviceArray{d_out, (size_t)bsz * (size_t)t * (size_t)c};
     return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-
 static PyObject* tensor_cuda_matmul_device(PyObject* , PyObject* args) {
     PyObject* a_capsule = nullptr;
     PyObject* b_capsule = nullptr;
@@ -134,7 +122,6 @@ static PyObject* tensor_cuda_matmul_device(PyObject* , PyObject* args) {
     if (std::string(dtype_str) != "float32") {
         return _raise(PyExc_TypeError, "matmul_device: only float32 supported");
     }
-
     auto* a = _get_device_array(a_capsule);
     auto* b = _get_device_array(b_capsule);
     if (!a || !b) {
@@ -143,7 +130,6 @@ static PyObject* tensor_cuda_matmul_device(PyObject* , PyObject* args) {
     if ((size_t)m * (size_t)k != a->size || (size_t)k * (size_t)n != b->size) {
         return _raise(PyExc_ValueError, "matmul_device: size mismatch");
     }
-
     void* d_out = nullptr;
     try {
         _cuda_check(cudaMalloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
@@ -154,11 +140,9 @@ static PyObject* tensor_cuda_matmul_device(PyObject* , PyObject* args) {
         if (d_out) cudaFree(d_out);
         return _raise(PyExc_RuntimeError, e.what());
     }
-
     auto* out = new DeviceArray{d_out, (size_t)m * (size_t)n};
     return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-
 static PyObject* tensor_cuda_layernorm_device(PyObject* , PyObject* args) {
     PyObject* a_capsule = nullptr;
     PyObject* g_capsule = nullptr;
@@ -172,7 +156,6 @@ static PyObject* tensor_cuda_layernorm_device(PyObject* , PyObject* args) {
     if (std::string(dtype_str) != "float32") {
         return _raise(PyExc_TypeError, "layernorm_device: only float32 supported");
     }
-
     auto* a = _get_device_array(a_capsule);
     auto* g = _get_device_array(g_capsule);
     auto* b = _get_device_array(b_capsule);
@@ -182,7 +165,6 @@ static PyObject* tensor_cuda_layernorm_device(PyObject* , PyObject* args) {
     if ((size_t)m * (size_t)n != a->size || (size_t)n != g->size || (size_t)n != b->size) {
         return _raise(PyExc_ValueError, "layernorm_device: size mismatch");
     }
-
     void* d_out = nullptr;
     try {
         _cuda_check(cudaMalloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
@@ -193,11 +175,9 @@ static PyObject* tensor_cuda_layernorm_device(PyObject* , PyObject* args) {
         if (d_out) cudaFree(d_out);
         return _raise(PyExc_RuntimeError, e.what());
     }
-
     auto* out = new DeviceArray{d_out, (size_t)m * (size_t)n};
     return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-
 static PyObject* tensor_cuda_softmax_device(PyObject* , PyObject* args) {
     PyObject* a_capsule = nullptr;
     int m = 0, n = 0;
@@ -215,7 +195,6 @@ static PyObject* tensor_cuda_softmax_device(PyObject* , PyObject* args) {
     if ((size_t)m * (size_t)n != a->size) {
         return _raise(PyExc_ValueError, "softmax_device: size mismatch");
     }
-
     void* d_out = nullptr;
     try {
         _cuda_check(cudaMalloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
@@ -226,11 +205,9 @@ static PyObject* tensor_cuda_softmax_device(PyObject* , PyObject* args) {
         if (d_out) cudaFree(d_out);
         return _raise(PyExc_RuntimeError, e.what());
     }
-
     auto* out = new DeviceArray{d_out, (size_t)m * (size_t)n};
     return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-
 static PyObject* tensor_cuda_reduce_sum_device(PyObject* , PyObject* args) {
     PyObject* a_capsule = nullptr;
     Py_ssize_t size = 0;
@@ -248,7 +225,6 @@ static PyObject* tensor_cuda_reduce_sum_device(PyObject* , PyObject* args) {
     if ((size_t)size != a->size) {
         return _raise(PyExc_ValueError, "reduce_sum_device: size mismatch");
     }
-
     void* d_out = nullptr;
     try {
         _cuda_check(cudaMalloc(&d_out, sizeof(float)), "cudaMalloc");
@@ -259,11 +235,9 @@ static PyObject* tensor_cuda_reduce_sum_device(PyObject* , PyObject* args) {
         if (d_out) cudaFree(d_out);
         return _raise(PyExc_RuntimeError, e.what());
     }
-
     auto* out = new DeviceArray{d_out, 1};
     return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-
 static PyObject* tensor_cuda_reduce_mean_device(PyObject* , PyObject* args) {
     PyObject* a_capsule = nullptr;
     Py_ssize_t size = 0;
@@ -281,7 +255,6 @@ static PyObject* tensor_cuda_reduce_mean_device(PyObject* , PyObject* args) {
     if ((size_t)size != a->size) {
         return _raise(PyExc_ValueError, "reduce_mean_device: size mismatch");
     }
-
     void* d_out = nullptr;
     try {
         _cuda_check(cudaMalloc(&d_out, sizeof(float)), "cudaMalloc");
@@ -292,11 +265,9 @@ static PyObject* tensor_cuda_reduce_mean_device(PyObject* , PyObject* args) {
         if (d_out) cudaFree(d_out);
         return _raise(PyExc_RuntimeError, e.what());
     }
-
     auto* out = new DeviceArray{d_out, 1};
     return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-
 static PyObject* tensor_cuda_reduce_max_device(PyObject* , PyObject* args) {
     PyObject* a_capsule = nullptr;
     Py_ssize_t size = 0;
@@ -314,7 +285,6 @@ static PyObject* tensor_cuda_reduce_max_device(PyObject* , PyObject* args) {
     if ((size_t)size != a->size) {
         return _raise(PyExc_ValueError, "reduce_max_device: size mismatch");
     }
-
     void* d_out = nullptr;
     try {
         _cuda_check(cudaMalloc(&d_out, sizeof(float)), "cudaMalloc");
@@ -325,11 +295,9 @@ static PyObject* tensor_cuda_reduce_max_device(PyObject* , PyObject* args) {
         if (d_out) cudaFree(d_out);
         return _raise(PyExc_RuntimeError, e.what());
     }
-
     auto* out = new DeviceArray{d_out, 1};
     return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-
 static PyObject* tensor_cuda_reduce_min_device(PyObject* , PyObject* args) {
     PyObject* a_capsule = nullptr;
     Py_ssize_t size = 0;
@@ -347,7 +315,6 @@ static PyObject* tensor_cuda_reduce_min_device(PyObject* , PyObject* args) {
     if ((size_t)size != a->size) {
         return _raise(PyExc_ValueError, "reduce_min_device: size mismatch");
     }
-
     void* d_out = nullptr;
     try {
         _cuda_check(cudaMalloc(&d_out, sizeof(float)), "cudaMalloc");
@@ -358,11 +325,9 @@ static PyObject* tensor_cuda_reduce_min_device(PyObject* , PyObject* args) {
         if (d_out) cudaFree(d_out);
         return _raise(PyExc_RuntimeError, e.what());
     }
-
     auto* out = new DeviceArray{d_out, 1};
     return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-
 static PyObject* tensor_cuda_reduce_sum_lastdim_device(PyObject* , PyObject* args) {
     PyObject* a_capsule = nullptr;
     int m = 0, n = 0;
@@ -380,7 +345,6 @@ static PyObject* tensor_cuda_reduce_sum_lastdim_device(PyObject* , PyObject* arg
     if ((size_t)m * (size_t)n != a->size) {
         return _raise(PyExc_ValueError, "reduce_sum_lastdim_device: size mismatch");
     }
-
     void* d_out = nullptr;
     try {
         _cuda_check(cudaMalloc(&d_out, (size_t)m * sizeof(float)), "cudaMalloc");
@@ -391,11 +355,9 @@ static PyObject* tensor_cuda_reduce_sum_lastdim_device(PyObject* , PyObject* arg
         if (d_out) cudaFree(d_out);
         return _raise(PyExc_RuntimeError, e.what());
     }
-
     auto* out = new DeviceArray{d_out, (size_t)m};
     return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-
 static PyObject* tensor_cuda_reduce_mean_lastdim_device(PyObject* , PyObject* args) {
     PyObject* a_capsule = nullptr;
     int m = 0, n = 0;
@@ -413,7 +375,6 @@ static PyObject* tensor_cuda_reduce_mean_lastdim_device(PyObject* , PyObject* ar
     if ((size_t)m * (size_t)n != a->size) {
         return _raise(PyExc_ValueError, "reduce_mean_lastdim_device: size mismatch");
     }
-
     void* d_out = nullptr;
     try {
         _cuda_check(cudaMalloc(&d_out, (size_t)m * sizeof(float)), "cudaMalloc");
@@ -424,11 +385,9 @@ static PyObject* tensor_cuda_reduce_mean_lastdim_device(PyObject* , PyObject* ar
         if (d_out) cudaFree(d_out);
         return _raise(PyExc_RuntimeError, e.what());
     }
-
     auto* out = new DeviceArray{d_out, (size_t)m};
     return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-
 static PyObject* tensor_cuda_reduce_max_lastdim_device(PyObject* , PyObject* args) {
     PyObject* a_capsule = nullptr;
     int m = 0, n = 0;
@@ -446,7 +405,6 @@ static PyObject* tensor_cuda_reduce_max_lastdim_device(PyObject* , PyObject* arg
     if ((size_t)m * (size_t)n != a->size) {
         return _raise(PyExc_ValueError, "reduce_max_lastdim_device: size mismatch");
     }
-
     void* d_out = nullptr;
     try {
         _cuda_check(cudaMalloc(&d_out, (size_t)m * sizeof(float)), "cudaMalloc");
@@ -457,11 +415,9 @@ static PyObject* tensor_cuda_reduce_max_lastdim_device(PyObject* , PyObject* arg
         if (d_out) cudaFree(d_out);
         return _raise(PyExc_RuntimeError, e.what());
     }
-
     auto* out = new DeviceArray{d_out, (size_t)m};
     return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-
 static PyObject* tensor_cuda_reduce_min_lastdim_device(PyObject* , PyObject* args) {
     PyObject* a_capsule = nullptr;
     int m = 0, n = 0;
@@ -479,7 +435,6 @@ static PyObject* tensor_cuda_reduce_min_lastdim_device(PyObject* , PyObject* arg
     if ((size_t)m * (size_t)n != a->size) {
         return _raise(PyExc_ValueError, "reduce_min_lastdim_device: size mismatch");
     }
-
     void* d_out = nullptr;
     try {
         _cuda_check(cudaMalloc(&d_out, (size_t)m * sizeof(float)), "cudaMalloc");
@@ -490,11 +445,9 @@ static PyObject* tensor_cuda_reduce_min_lastdim_device(PyObject* , PyObject* arg
         if (d_out) cudaFree(d_out);
         return _raise(PyExc_RuntimeError, e.what());
     }
-
     auto* out = new DeviceArray{d_out, (size_t)m};
     return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-
 static PyObject* tensor_cuda_argmax_lastdim(PyObject* , PyObject* args) {
     PyObject* a_capsule = nullptr;
     int m = 0, n = 0;
@@ -512,7 +465,6 @@ static PyObject* tensor_cuda_argmax_lastdim(PyObject* , PyObject* args) {
     if ((size_t)m * (size_t)n != a->size) {
         return _raise(PyExc_ValueError, "argmax_lastdim: size mismatch");
     }
-
     long long* d_out = nullptr;
     try {
         _cuda_check(cudaMalloc(&d_out, (size_t)m * sizeof(long long)), "cudaMalloc");
@@ -523,11 +475,9 @@ static PyObject* tensor_cuda_argmax_lastdim(PyObject* , PyObject* args) {
         if (d_out) cudaFree(d_out);
         return _raise(PyExc_RuntimeError, e.what());
     }
-
     auto* out = new DeviceArray{d_out, (size_t)m};
     return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-
 static PyObject* tensor_cuda_argmin_lastdim(PyObject* , PyObject* args) {
     PyObject* a_capsule = nullptr;
     int m = 0, n = 0;
@@ -545,7 +495,6 @@ static PyObject* tensor_cuda_argmin_lastdim(PyObject* , PyObject* args) {
     if ((size_t)m * (size_t)n != a->size) {
         return _raise(PyExc_ValueError, "argmin_lastdim: size mismatch");
     }
-
     long long* d_out = nullptr;
     try {
         _cuda_check(cudaMalloc(&d_out, (size_t)m * sizeof(long long)), "cudaMalloc");
@@ -556,11 +505,9 @@ static PyObject* tensor_cuda_argmin_lastdim(PyObject* , PyObject* args) {
         if (d_out) cudaFree(d_out);
         return _raise(PyExc_RuntimeError, e.what());
     }
-
     auto* out = new DeviceArray{d_out, (size_t)m};
     return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-
 static PyObject* tensor_cuda_transpose_2d(PyObject* , PyObject* args) {
     PyObject* a_capsule = nullptr;
     int m = 0, n = 0;
@@ -591,7 +538,6 @@ static PyObject* tensor_cuda_transpose_2d(PyObject* , PyObject* args) {
     auto* out = new DeviceArray{d_out, (size_t)m * (size_t)n};
     return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-
 static PyObject* tensor_cuda_permute_3d_0_2_1(PyObject* , PyObject* args) {
     PyObject* a_capsule = nullptr;
     int b = 0, t = 0, c = 0;
@@ -622,7 +568,6 @@ static PyObject* tensor_cuda_permute_3d_0_2_1(PyObject* , PyObject* args) {
     auto* out = new DeviceArray{d_out, (size_t)b * (size_t)t * (size_t)c};
     return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-
 static PyObject* tensor_cuda_permute_3d_1_2_0(PyObject* , PyObject* args) {
     PyObject* a_capsule = nullptr;
     int b = 0, t = 0, c = 0;
@@ -653,7 +598,6 @@ static PyObject* tensor_cuda_permute_3d_1_2_0(PyObject* , PyObject* args) {
     auto* out = new DeviceArray{d_out, (size_t)b * (size_t)t * (size_t)c};
     return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-
 static PyMethodDef TensorCudaMethods[] = {
     {"to_device", tensor_cuda_to_device, METH_VARARGS, "Copy numpy array to device"},
     {"to_host", tensor_cuda_to_host, METH_VARARGS, "Copy device array to numpy"},
@@ -679,7 +623,6 @@ static PyMethodDef TensorCudaMethods[] = {
     {"permute_3d_1_2_0", tensor_cuda_permute_3d_1_2_0, METH_VARARGS, "CUDA permute 3d (1,2,0)"},
     {nullptr, nullptr, 0, nullptr}
 };
-
 static struct PyModuleDef tensor_cuda_module = {
     PyModuleDef_HEAD_INIT,
     "_tensor_cuda",
@@ -687,7 +630,6 @@ static struct PyModuleDef tensor_cuda_module = {
     -1,
     TensorCudaMethods,
 };
-
 PyMODINIT_FUNC PyInit__tensor_cuda(void) {
     import_array();
     return PyModule_Create(&tensor_cuda_module);

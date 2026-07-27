@@ -1,12 +1,10 @@
 package neurx.einsum
-
 struct tensor {
     []float data
     []int shape
     bool requires_grad
     option[tensor] grad
 }
-
 func einsum(string equation, tensor a, tensor b) tensor {
     if equation == "ij,jk->ik" || equation == "ab,bc->ac" || equation == "mn,nk->mk" {
         if len(a.shape) == 2 && len(b.shape) == 2 {

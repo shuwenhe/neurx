@@ -1,49 +1,38 @@
-
-
 func classify_type(text: string) string {
     if contains(to_lower(text), "English text") ||
        contains(to_lower(text), "code") ||
        contains(to_lower(text), "def ") {
         return "code_example"
     }
-
     if contains(to_lower(text), "English text") ||
        contains(to_lower(text), "qa_pair") {
         return "qa_pair"
     }
-
     if contains(to_lower(text), "English text") ||
        contains(to_lower(text), "best") {
         return "best_practices"
     }
-
     if contains(to_lower(text), "English text") ||
        contains(to_lower(text), "architecture") {
         return "architectural_pattern"
     }
-
     return "technical_explanation"
 }
-
 func classify_domain(text: string) string {
     if contains(to_lower(text), "model") ||
        contains(to_lower(text), "model") {
         return "ml"
     }
-
     if contains(to_lower(text), "English text") ||
        contains(to_lower(text), "backend") {
         return "backend"
     }
-
     if contains(to_lower(text), "English text") ||
        contains(to_lower(text), "frontend") {
         return "frontend"
     }
-
     return "nlp"
 }
-
 func infer_complexity(length: int) string {
     if length < 200 {
         return "basic"
@@ -56,15 +45,12 @@ func infer_complexity(length: int) string {
     }
     return "expert"
 }
-
 func infer_language(text: string) string {
-
     if contains(text, "English text") || contains(text, "English text") || contains(text, "English text") {
         return "zh"
     }
     return "en"
 }
-
 func infer_quality(length: int) float {
     base_score = 0.75
     if length > 300 {
@@ -75,7 +61,6 @@ func infer_quality(length: int) float {
     }
     return base_score
 }
-
 func estimate_tokens(text: string) int {
     length = len(text)
     tokens = length / 3
@@ -84,7 +69,6 @@ func estimate_tokens(text: string) int {
     }
     return tokens
 }
-
 func main() {
     println("🔄 English texttrainingdataEnglish text...")
     println("")

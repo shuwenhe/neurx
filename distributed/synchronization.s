@@ -1,5 +1,4 @@
 package neurx.distributed.synchronization
-
 struct rank_state {
     int rank_id
     int world_size
@@ -8,7 +7,6 @@ struct rank_state {
     bool is_alive
     int last_heartbeat_timestamp_ms
 }
-
 struct sync_config {
     string backend
     int timeout_ms
@@ -16,7 +14,6 @@ struct sync_config {
     bool enable_deadlock_detection
     int max_retries
 }
-
 struct synchronization_state {
     []rank_state ranks
     sync_config config
@@ -25,10 +22,8 @@ struct synchronization_state {
     int failed_operations
     int deadlock_detections
 }
-
 func new_synchronization_state(int world_size, string backend) synchronization_state {
     []rank_state ranks = []rank_state{cap: world_size}
-
     int i = 0
     while i < world_size {
         ranks[i] = rank_state {
@@ -41,7 +36,6 @@ func new_synchronization_state(int world_size, string backend) synchronization_s
         }
         i = i + 1
     }
-
     synchronization_state {
         ranks: ranks,
         config: sync_config {
@@ -57,47 +51,32 @@ func new_synchronization_state(int world_size, string backend) synchronization_s
         deadlock_detections: 0,
     }
 }
-
 func allreduce_with_timeout(synchronization_state state, string tensor_name, int timeout_ms) bool {
-
     true
 }
-
 func detect_deadlock(synchronization_state state) bool {
     int current_time_ms = 0
-
     int i = 0
     while i < len(state.ranks) {
         rank_state rank = state.ranks[i]
         int time_since_heartbeat = current_time_ms - rank.last_heartbeat_timestamp_ms
-
         if time_since_heartbeat > state.config.timeout_ms {
             state.deadlock_detections = state.deadlock_detections + 1
             return true
         }
-
         i = i + 1
     }
-
     false
 }
-
 func barrier_sync(synchronization_state state) synchronization_state {
-
     state
 }
-
 func send_heartbeat(synchronization_state state, int rank_id) synchronization_state {
-
     state
 }
-
 func check_rank_health(synchronization_state state) int {
-
     state.world_size
 }
-
 func recover_from_rank_failure(synchronization_state state, int failed_rank_id) synchronization_state {
-
     state
 }

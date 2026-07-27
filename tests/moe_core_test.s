@@ -1,7 +1,5 @@
 package main
-
 use neurx.moe.core.{moe_core_self_test}
-
 func main() int {
     int status = moe_core_self_test()
     if status != 0 {
@@ -14,7 +12,6 @@ func main() int {
     println("[moe-core-s] load accounting: PASS")
     0
 }
-
 func test_int_to_string(int value) string {
     if value == 0 {
         return "0"
@@ -28,7 +25,6 @@ func test_int_to_string(int value) string {
     }
     out
 }
-
 func test_string_char(int code) string {
     string(code)
 }

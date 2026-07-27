@@ -1,17 +1,13 @@
 package main
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use std.io.println
-
 func main() int {
     string ascend_home = runtime_env_get("ASCEND_HOME_PATH", "/usr/local/Ascend/ascend-toolkit/latest")
-
     if !runtime_file_exists(ascend_home) {
         println("Ascend toolkit not found: " + ascend_home)
         println("Set ASCEND_HOME_PATH before using cann/env.s")
         return 1
     }
-
     println("export ASCEND_HOME_PATH=\"" + ascend_home + "\"")
     println("export PATH=\"" + ascend_home + "/bin:${PATH}\"")
     println("export PATH=\"" + ascend_home + "/compiler/ccec_compiler/bin:${PATH}\"")

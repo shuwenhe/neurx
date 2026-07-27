@@ -1,24 +1,19 @@
 package neurx.model.llm.train_gpt_large
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file}
 use neurx.pretrain.llm.gpt_large_pretrain
 use neurx.util.math.{exp_approx}
-
 func trim(string s) string {
     int i = 0
     while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
         i = i + 1
     }
-
     int j = len(s) - 1
     while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
         j = j - 1
     }
-
     if j < i {
         return ""
     }
-
     string out = ""
     int k = i
     while k <= j {
@@ -27,11 +22,9 @@ func trim(string s) string {
     }
     out
 }
-
 func string_char(int c) string {
     string(c)
 }
-
 func starts_with(string s, string prefix) bool {
     if len(prefix) > len(s) {
         return false
@@ -45,7 +38,6 @@ func starts_with(string s, string prefix) bool {
     }
     true
 }
-
 func substr(string s, int from, int to) string {
     string out = ""
     int i = from
@@ -55,14 +47,12 @@ func substr(string s, int from, int to) string {
     }
     out
 }
-
 func bool_to_str(bool v) string {
     if v {
         return "true"
     }
     "false"
 }
-
 func int_to_str(int n, int fallback) string {
     int value = n
     if value == 0 {
@@ -82,7 +72,6 @@ func int_to_str(int n, int fallback) string {
     }
     s
 }
-
 func str_to_int(string s, int fallback) int {
     if len(s) == 0 {
         return fallback
@@ -104,7 +93,6 @@ func str_to_int(string s, int fallback) int {
     }
     sign * value
 }
-
 func str_to_float(string s) float {
     if len(s) == 0 {
         return 0.0
@@ -136,7 +124,6 @@ func str_to_float(string s) float {
     }
     value
 }
-
 func float_to_int(float x) int {
     int n = 0
     float y = x
@@ -152,11 +139,9 @@ func float_to_int(float x) int {
     }
     n
 }
-
 func to_float(int n) float {
     n * 1.0
 }
-
 func fmt_float(float val, int decimals) string {
     float value = val
     if value == 0.0 {
@@ -183,7 +168,6 @@ func fmt_float(float val, int decimals) string {
     }
     s
 }
-
 func pad_float(float val, int w, int d) string {
     string s = fmt_float(val, d)
     while len(s) < w {
@@ -191,7 +175,6 @@ func pad_float(float val, int w, int d) string {
     }
     s
 }
-
 func split_lines(string s) []string {
     int capacity = 1
     int j = 0
@@ -201,7 +184,6 @@ func split_lines(string s) []string {
         }
         j = j + 1
     }
-
     []string out = []string{cap: capacity}
     string line = ""
     int idx = 0
@@ -224,7 +206,6 @@ func split_lines(string s) []string {
     }
     out
 }
-
 func line_value([]string lines, string key, string fallback) string {
     int i = 0
     while i < len(lines) {
@@ -235,15 +216,12 @@ func line_value([]string lines, string key, string fallback) string {
     }
     fallback
 }
-
 func line_value_int([]string lines, string key, int fallback) int {
     str_to_int(line_value(lines, key, int_to_str(fallback, 0)), fallback)
 }
-
 func line_value_float([]string lines, string key, float fallback) float {
     str_to_float(line_value(lines, key, fmt_float(fallback, 6)))
 }
-
 func join_documents([]string docs) string {
     string out = ""
     int i = 0
@@ -259,7 +237,6 @@ func join_documents([]string docs) string {
     }
     out
 }
-
 func clamp_int(int value, int min_value, int max_value) int {
     int out = value
     if out < min_value {
@@ -270,7 +247,6 @@ func clamp_int(int value, int min_value, int max_value) int {
     }
     out
 }
-
 func cos_approx(float x) float {
     float x2 = x * x
     float term = 1.0
@@ -283,7 +259,6 @@ func cos_approx(float x) float {
     }
     result
 }
-
 struct gpt_large_training_config {
     int batch_size
     int seq_len
@@ -297,7 +272,6 @@ struct gpt_large_training_config {
     int save_interval
     string output_dir
 }
-
 struct gpt_large_state {
     string name
     string family
@@ -327,7 +301,6 @@ struct gpt_large_state {
     float best_validation_loss
     bool trained
 }
-
 func default_documents() []string {
     []string docs = []string{cap: 3}
     docs[0] = "neurx trains a decoder-only transformer for language modeling."
@@ -335,7 +308,6 @@ func default_documents() []string {
     docs[2] = "checkpointing and validation need to stay visible and resumable."
     docs
 }
-
 func default_training_config() gpt_large_training_config {
     gpt_large_training_config {
         batch_size: clamp_int(str_to_int(trim(runtime_env_get("NEURX_LLM_BATCH_SIZE", "8")), 8), 1, 1024),
@@ -351,7 +323,6 @@ func default_training_config() gpt_large_training_config {
         output_dir: trim(runtime_env_get("NEURX_LLM_OUTPUT_DIR", "artifacts/checkpoints/model_llm_gpt_large")),
     }
 }
-
 func default_model_state() gpt_large_state {
     int vocab_size = clamp_int(str_to_int(trim(runtime_env_get("NEURX_LLM_VOCAB_SIZE", "50257")), 50257), 256, 262144)
     int hidden_size = clamp_int(str_to_int(trim(runtime_env_get("NEURX_LLM_HIDDEN_SIZE", "4096")), 4096), 256, 32768)
@@ -359,7 +330,6 @@ func default_model_state() gpt_large_state {
     int num_layers = clamp_int(str_to_int(trim(runtime_env_get("NEURX_LLM_NUM_LAYERS", "32")), 32), 1, 128)
     int intermediate_size = clamp_int(str_to_int(trim(runtime_env_get("NEURX_LLM_INTERMEDIATE_SIZE", "11008")), 11008), hidden_size, 131072)
     int max_seq_len = clamp_int(str_to_int(trim(runtime_env_get("NEURX_LLM_MAX_SEQ_LEN", "2048")), 2048), 16, 262144)
-
     int token_embed = vocab_size * hidden_size
     int pos_embed = max_seq_len * hidden_size
     int per_layer = 4 * hidden_size * hidden_size + 2 * hidden_size * intermediate_size + 8 * hidden_size
@@ -373,7 +343,6 @@ func default_model_state() gpt_large_state {
     if param_count_m < 1 {
         param_count_m = 1
     }
-
     gpt_large_state {
         name: trim(runtime_env_get("NEURX_MODEL_NAME", "gpt_large")),
         family: trim(runtime_env_get("NEURX_MODEL_FAMILY", "llm")),
@@ -404,7 +373,6 @@ func default_model_state() gpt_large_state {
         trained: false,
     }
 }
-
 func gpt_large_is_transformer_valid(gpt_large_state state) bool {
     if state.hidden_size <= 0 || state.num_heads <= 0 || state.num_layers <= 0 {
         return false
@@ -417,11 +385,9 @@ func gpt_large_is_transformer_valid(gpt_large_state state) bool {
     }
     true
 }
-
 func gpt_large_summary(gpt_large_state state) string {
     state.name + "[" + state.architecture + "," + int_to_str(state.parameter_count_m, 0) + "M,layers=" + int_to_str(state.num_layers, 0) + ",heads=" + int_to_str(state.num_heads, 0) + ",ctx=" + int_to_str(state.max_seq_len, 0) + "]"
 }
-
 func gpt_large_effective_lr(gpt_large_state state, gpt_large_training_config cfg, int step) float {
     float lr = cfg.learning_rate
     if cfg.warmup_steps > 0 && step < cfg.warmup_steps {
@@ -448,7 +414,6 @@ func gpt_large_effective_lr(gpt_large_state state, gpt_large_training_config cfg
     }
     lr
 }
-
 func gpt_large_train_loss(gpt_large_state state, gpt_large_training_config cfg, int step) float {
     float scale = to_float(state.hidden_size * state.num_layers) / 1048576.0
     if scale < 1.0 {
@@ -461,19 +426,15 @@ func gpt_large_train_loss(gpt_large_state state, gpt_large_training_config cfg, 
     float regularizer = 0.03 + cfg.weight_decay * 0.05 + state.dropout * 0.1
     decay + regularizer
 }
-
 func gpt_large_validation_loss(float train_loss) float {
     train_loss + 0.07
 }
-
 func gpt_large_perplexity_from_loss(float loss) float {
     exp_approx(loss)
 }
-
 func gpt_large_training_corpus_text() string {
     join_documents(default_documents())
 }
-
 func gpt_large_load_checkpoint_if_available(gpt_large_state fallback, gpt_large_training_config cfg) gpt_large_state {
     string manifest_path = cfg.output_dir + "/latest_checkpoint.txt"
     if !runtime_file_exists(manifest_path) {
@@ -483,7 +444,6 @@ func gpt_large_load_checkpoint_if_available(gpt_large_state fallback, gpt_large_
     if checkpoint_path == "" || !runtime_file_exists(checkpoint_path) {
         return fallback
     }
-
     []string lines = split_lines(runtime_read_text_file(checkpoint_path))
     gpt_large_state {
         name: line_value(lines, "name=", fallback.name),
@@ -515,7 +475,6 @@ func gpt_large_load_checkpoint_if_available(gpt_large_state fallback, gpt_large_
         trained: line_value(lines, "trained=", bool_to_str(fallback.trained)) == "true",
     }
 }
-
 func gpt_large_checkpoint_text(gpt_large_state state, gpt_large_training_config cfg, string kind) string {
     string out = "checkpoint_v1\n"
     out = out + "kind=" + kind + "\n"
@@ -554,11 +513,9 @@ func gpt_large_checkpoint_text(gpt_large_state state, gpt_large_training_config 
     out = out + "trained=" + bool_to_str(state.trained) + "\n"
     out
 }
-
 func gpt_large_checkpoint_record(gpt_large_state state, gpt_large_training_config cfg, string checkpoint_name) string {
     gpt_large_checkpoint_text(state, cfg, checkpoint_name)
 }
-
 func gpt_large_training_step(gpt_large_state state, gpt_large_training_config cfg, int step) gpt_large_state {
     float lr = gpt_large_effective_lr(state, cfg, step)
     float train_loss = gpt_large_train_loss(state, cfg, step)
@@ -572,7 +529,6 @@ func gpt_large_training_step(gpt_large_state state, gpt_large_training_config cf
     if val_loss < best_val {
         best_val = val_loss
     }
-
     gpt_large_state {
         name: state.name,
         family: state.family,
@@ -603,7 +559,6 @@ func gpt_large_training_step(gpt_large_state state, gpt_large_training_config cf
         trained: step + 1 >= cfg.max_steps,
     }
 }
-
 func gpt_large_training_run(gpt_large_state state, gpt_large_training_config cfg) gpt_large_state {
     gpt_large_state current = state
     int step = state.training_steps
@@ -619,7 +574,6 @@ func gpt_large_training_run(gpt_large_state state, gpt_large_training_config cfg
     }
     current
 }
-
 func gpt_large_training_summary(gpt_large_state state, gpt_large_training_config cfg) string {
     string out = "Model: " + gpt_large_summary(state) + "\n"
     out = out + "Steps: " + int_to_str(state.training_steps, 0) + "\n"
@@ -631,13 +585,11 @@ func gpt_large_training_summary(gpt_large_state state, gpt_large_training_config
     out = out + "checkpoint Root: " + cfg.output_dir + "\n"
     out
 }
-
 func gpt_large_run_industrial_backend() int {
     if !neurx.tensor.core.core_backend_smoke() {
         println("tensor core backend smoke test failed")
         return 1
     }
-
     gpt_large_pretrain.gpt_large_pretrain_state state = gpt_large_pretrain.gpt_large_pretrain_run_from_env()
     println("=======================================================================")
     println("NeurX Industrial GPT-Large Pretraining")
@@ -649,13 +601,11 @@ func gpt_large_run_industrial_backend() int {
     println("LR: " + fmt_float(state.cfg.lr, 8))
     println("Warmup: " + int_to_str(state.cfg.warmup_steps, 0))
     println("=======================================================================")
-
     if !gpt_large_pretrain.gpt_large_pretrain_system_ready(state) {
         println("industrial pretraining system is not fully ready")
         println("Refusing to fall back to report-only or simulation mode")
         return 1
     }
-
     gpt_large_pretrain.gpt_large_pretrain_state final_state = gpt_large_pretrain.gpt_large_pretrain_execute(state)
     println("Training finished.")
     println("Final loss: " + fmt_float(final_state.training.last_loss, 6))
@@ -664,25 +614,20 @@ func gpt_large_run_industrial_backend() int {
     println("Summary written to: " + final_state.output_dir + "/pretrain_summary.txt")
     0
 }
-
 func main() int {
     string backend_mode = trim(runtime_env_get("NEURX_LLM_BACKEND", "industrial"))
     if backend_mode != "legacy" {
         return gpt_large_run_industrial_backend()
     }
-
     gpt_large_training_config cfg = default_training_config()
     gpt_large_state state = default_model_state()
-
     if !gpt_large_is_transformer_valid(state) {
         println("invalid transformer config")
         return 1
     }
-
     if runtime_env_get("NEURX_LLM_RESUME", "1") == "1" {
         state = gpt_large_load_checkpoint_if_available(state, cfg)
     }
-
     println("=======================================================================")
     println("NeurX Transformer LLM Training")
     println("=======================================================================")
@@ -697,10 +642,8 @@ func main() int {
     println("Output Dir: " + cfg.output_dir)
     println("Resume: " + runtime_env_get("NEURX_LLM_RESUME", "1"))
     println("=======================================================================")
-
     state = gpt_large_training_run(state, cfg)
     state.trained = true
-
     println("CHECKPOINT_BEGIN final_model")
     println(gpt_large_checkpoint_record(state, cfg, "final_model"))
     println("CHECKPOINT_END final_model")
@@ -741,7 +684,6 @@ func main() int {
         }, cfg, "best_model"))
         println("CHECKPOINT_END best_model")
     }
-
     println("=======================================================================")
     println("Training Complete")
     println("=======================================================================")

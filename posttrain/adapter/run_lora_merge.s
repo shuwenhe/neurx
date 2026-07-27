@@ -1,8 +1,6 @@
 package main
-
 use neurx.runtime.io.{runtime_env_get}
 use std.io.println
-
 func main() int {
     string project_root = runtime_env_get("NEURX_ROOT", "/Users/shuwen/shuwen/train/neurx")
     string merger_bin = runtime_env_get("NEURX_LORA_MERGER_BIN", project_root + "/artifacts/build/lora_merge/lora_safetensors_merge")
@@ -11,7 +9,6 @@ func main() int {
     string output_dir = runtime_env_get("NEURX_MERGED_MODEL_DIR", project_root + "/../posttrain")
     string alpha = runtime_env_get("NEURX_LORA_ALPHA", "16")
     string rank = runtime_env_get("NEURX_LORA_RANK", "8")
-
     println("========================================")
     println("NeurX S LoRA safetensors merge")
     println("========================================")
@@ -34,6 +31,5 @@ func main() int {
         rank
     println(command)
     println("")
-
     0
 }

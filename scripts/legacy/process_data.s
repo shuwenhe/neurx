@@ -1,7 +1,5 @@
 package main
-
 func main() int {
-
     println("")
     println("==================================================")
     println("  NeurX Data Processing Status")
@@ -11,6 +9,5 @@ func main() int {
     println("Total shards: 128")
     println("Total documents: 71451")
     println("")
-
     0
 }

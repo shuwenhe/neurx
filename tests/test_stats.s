@@ -1,7 +1,5 @@
 package main
-
 use neurx.stats
-
 func assert_true(bool value, string name) {
     if value {
         println("PASS " + name)
@@ -9,7 +7,6 @@ func assert_true(bool value, string name) {
         println("FAIL " + name)
     }
 }
-
 func assert_close(float actual, float expected, string name) {
     float diff = actual - expected
     if diff < 0.0 {
@@ -17,7 +14,6 @@ func assert_close(float actual, float expected, string name) {
     }
     assert_true(diff < 0.0001, name)
 }
-
 func test_sort_topk_cumsum() {
     tensor a = tensor {
         data: [3.0, 1.0, 4.0, 2.0],
@@ -25,13 +21,11 @@ func test_sort_topk_cumsum() {
         requires_grad: false,
         grad: none,
     }
-
     tensor sorted = neurx.stats.sort(a, 0)
     tensor top2 = neurx.stats.topk(a, 2)
     tensor csum = neurx.stats.cumsum(a, 0)
     tensor cprod = neurx.stats.cumprod(a, 0)
     tensor prod = neurx.stats.prod(a, 0)
-
     assert_close(sorted.data[0], 1.0, "sort 0")
     assert_close(sorted.data[1], 2.0, "sort 1")
     assert_close(sorted.data[2], 3.0, "sort 2")
@@ -48,7 +42,6 @@ func test_sort_topk_cumsum() {
     assert_close(cprod.data[3], 24.0, "cumprod 3")
     assert_close(prod.data[0], 24.0, "prod all")
 }
-
 func test_dim_reductions() {
     tensor b = tensor {
         data: [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
@@ -56,12 +49,10 @@ func test_dim_reductions() {
         requires_grad: false,
         grad: none,
     }
-
     tensor csum_dim1 = neurx.stats.cumsum(b, 1)
     tensor cprod_dim1 = neurx.stats.cumprod(b, 1)
     tensor prod_dim1 = neurx.stats.prod_dim(b, 1)
     tensor prod_dim0 = neurx.stats.prod(b, 0)
-
     assert_close(csum_dim1.data[0], 1.0, "cumsum dim1 0")
     assert_close(csum_dim1.data[1], 3.0, "cumsum dim1 1")
     assert_close(csum_dim1.data[2], 6.0, "cumsum dim1 2")
@@ -80,7 +71,6 @@ func test_dim_reductions() {
     assert_close(prod_dim0.data[1], 10.0, "prod dim0 col1")
     assert_close(prod_dim0.data[2], 18.0, "prod dim0 col2")
 }
-
 func test_sort_argsort_topk_dim() {
     tensor a = tensor {
         data: [4.0, 1.0, 6.0, 3.0, 5.0, 2.0],
@@ -88,39 +78,33 @@ func test_sort_argsort_topk_dim() {
         requires_grad: false,
         grad: none,
     }
-
     tensor sorted_rows = neurx.stats.sort(a, 1)
     tensor sorted_cols = neurx.stats.sort(a, 0)
     tensor argsorted_rows = neurx.stats.argsort(a, 1)
     tensor top2_rows = neurx.stats.topk_dim(a, 2, 1)
     tensor top2_cols = neurx.stats.topk_dim(a, 2, 0)
-
     assert_close(sorted_rows.data[0], 1.0, "sort row0 0")
     assert_close(sorted_rows.data[1], 4.0, "sort row0 1")
     assert_close(sorted_rows.data[2], 6.0, "sort row0 2")
     assert_close(sorted_rows.data[3], 2.0, "sort row1 0")
     assert_close(sorted_rows.data[4], 3.0, "sort row1 1")
     assert_close(sorted_rows.data[5], 5.0, "sort row1 2")
-
     assert_close(sorted_cols.data[0], 3.0, "sort col0 0")
     assert_close(sorted_cols.data[1], 1.0, "sort col0 1")
     assert_close(sorted_cols.data[2], 2.0, "sort col0 2")
     assert_close(sorted_cols.data[3], 4.0, "sort col1 0")
     assert_close(sorted_cols.data[4], 5.0, "sort col1 1")
     assert_close(sorted_cols.data[5], 6.0, "sort col1 2")
-
     assert_close(argsorted_rows.data[0], 1.0, "argsort row0 0")
     assert_close(argsorted_rows.data[1], 0.0, "argsort row0 1")
     assert_close(argsorted_rows.data[2], 2.0, "argsort row0 2")
     assert_close(argsorted_rows.data[3], 2.0, "argsort row1 0")
     assert_close(argsorted_rows.data[4], 0.0, "argsort row1 1")
     assert_close(argsorted_rows.data[5], 1.0, "argsort row1 2")
-
     assert_close(top2_rows.data[0], 6.0, "topk dim row0 0")
     assert_close(top2_rows.data[1], 4.0, "topk dim row0 1")
     assert_close(top2_rows.data[2], 5.0, "topk dim row1 0")
     assert_close(top2_rows.data[3], 3.0, "topk dim row1 1")
-
     assert_close(top2_cols.data[0], 4.0, "topk dim col0 0")
     assert_close(top2_cols.data[1], 1.0, "topk dim col0 1")
     assert_close(top2_cols.data[2], 6.0, "topk dim col1 0")
@@ -128,7 +112,6 @@ func test_sort_argsort_topk_dim() {
     assert_close(top2_cols.data[4], 5.0, "topk dim col2 0")
     assert_close(top2_cols.data[5], 2.0, "topk dim col2 1")
 }
-
 func test_scalar_stats() {
     tensor a = tensor {
         data: [2.0, 4.0, 4.0, 8.0, 1.0],
@@ -136,12 +119,10 @@ func test_scalar_stats() {
         requires_grad: false,
         grad: none,
     }
-
     tensor unique_vals = neurx.stats.unique(a)
     tensor median_val = neurx.stats.median(a)
     tensor mode_val = neurx.stats.mode(a)
     tensor quantile_val = neurx.stats.quantile(a, 0.5)
-
     assert_close(unique_vals.data[0], 2.0, "unique 0")
     assert_close(unique_vals.data[1], 4.0, "unique 1")
     assert_close(unique_vals.data[2], 8.0, "unique 2")
@@ -149,7 +130,6 @@ func test_scalar_stats() {
     assert_close(median_val.data[0], 4.0, "median")
     assert_close(mode_val.data[0], 4.0, "mode")
     assert_close(quantile_val.data[0], 4.0, "quantile")
-
     tensor sum_val = neurx.stats.sum(a)
     tensor mean_val = neurx.stats.mean(a)
     tensor max_val = neurx.stats.max(a)
@@ -163,7 +143,6 @@ func test_scalar_stats() {
     assert_close(argmax_val.data[0], 3.0, "argmax")
     assert_close(argmin_val.data[0], 4.0, "argmin")
 }
-
 func test_dim_stats() {
     tensor a = tensor {
         data: [5.0, 1.0, 1.0, 9.0, 2.0, 2.0, 7.0, 8.0],
@@ -171,7 +150,6 @@ func test_dim_stats() {
         requires_grad: false,
         grad: none,
     }
-
     tensor median_rows = neurx.stats.median_dim(a, 1)
     tensor mode_rows = neurx.stats.mode_dim(a, 1)
     tensor quantile_rows = neurx.stats.quantile_dim(a, 0.75, 1)
@@ -181,7 +159,6 @@ func test_dim_stats() {
     tensor min_rows = neurx.stats.min_dim(a, 1)
     tensor argmax_rows = neurx.stats.argmax_dim(a, 1)
     tensor argmin_rows = neurx.stats.argmin_dim(a, 1)
-
     assert_close(median_rows.data[0], 3.0, "median dim row0")
     assert_close(median_rows.data[1], 4.5, "median dim row1")
     assert_close(mode_rows.data[0], 1.0, "mode dim row0")
@@ -200,7 +177,6 @@ func test_dim_stats() {
     assert_close(argmax_rows.data[1], 3.0, "argmax dim row1")
     assert_close(argmin_rows.data[0], 1.0, "argmin dim row0")
     assert_close(argmin_rows.data[1], 0.0, "argmin dim row1")
-
     tensor uniq_rows = neurx.stats.unique_dim(a, 1)
     assert_close(uniq_rows.data[0], 5.0, "unique dim row0 0")
     assert_close(uniq_rows.data[1], 1.0, "unique dim row0 1")
@@ -210,7 +186,6 @@ func test_dim_stats() {
     assert_close(uniq_rows.data[5], 7.0, "unique dim row1 1")
     assert_close(uniq_rows.data[6], 8.0, "unique dim row1 2")
     assert_close(uniq_rows.data[7], 0.0, "unique dim row1 3")
-
     tensor b = tensor {
         data: [1.0, 2.0, 2.0, 3.0, 1.0, 5.0, 2.0, 4.0],
         shape: [2, 4],
@@ -226,7 +201,6 @@ func test_dim_stats() {
     assert_close(uniq_cols.data[5], 5.0, "unique dim col1 1")
     assert_close(uniq_cols.data[6], 0.0, "unique dim col1 2")
     assert_close(uniq_cols.data[7], 4.0, "unique dim col1 3")
-
     tensor c = tensor {
         data: [1.0, 3.0, 5.0, 7.0, 2.0, 4.0, 6.0, 8.0],
         shape: [2, 4],
@@ -248,14 +222,12 @@ func test_dim_stats() {
     assert_close(quantile_cols.data[1], 3.0, "quantile dim col1")
     assert_close(quantile_cols.data[2], 5.0, "quantile dim col2")
     assert_close(quantile_cols.data[3], 7.0, "quantile dim col3")
-
     tensor sum_cols = neurx.stats.sum_dim(c, 0)
     assert_close(sum_cols.data[0], 3.0, "sum dim col0")
     assert_close(sum_cols.data[1], 7.0, "sum dim col1")
     assert_close(sum_cols.data[2], 11.0, "sum dim col2")
     assert_close(sum_cols.data[3], 15.0, "sum dim col3")
 }
-
 func main() {
     println("NeurX stats tests")
     test_sort_topk_cumsum()

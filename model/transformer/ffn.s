@@ -1,5 +1,4 @@
 package neurx.model.transformer.ffn
-
 struct ffn_config {
     int hidden_dim
     int intermediate_dim
@@ -8,7 +7,6 @@ struct ffn_config {
     bool use_bias
     string ffn_type
 }
-
 struct standard_ffn_state {
     int hidden_dim
     int intermediate_dim
@@ -17,7 +15,6 @@ struct standard_ffn_state {
     []float up_bias
     []float down_bias
 }
-
 struct glu_ffn_state {
     int hidden_dim
     int intermediate_dim
@@ -28,19 +25,16 @@ struct glu_ffn_state {
     []float value_bias
     []float down_bias
 }
-
 struct feed_forward_network {
     ffn_config config
     standard_ffn_state standard_ffn
     glu_ffn_state glu_ffn
     string active_type
 }
-
 struct ffn_layer {
     ffn_config config
     feed_forward_network network
 }
-
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
@@ -50,7 +44,6 @@ func allocate_vector(int size, float init_val) []float {
     }
     v
 }
-
 func copy_vector([]float src) []float {
     []float out = allocate_vector(len(src), 0.0)
     int i = 0
@@ -60,7 +53,6 @@ func copy_vector([]float src) []float {
     }
     out
 }
-
 func exp_approx(float x) float {
     if x > 20.0 {
         return 485165195.0
@@ -78,7 +70,6 @@ func exp_approx(float x) float {
     }
     result
 }
-
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -91,30 +82,24 @@ func sqrt_approx(float x) float {
     }
     y
 }
-
 func sigmoid(float x) float {
     1.0 / (1.0 + exp_approx(-x))
 }
-
 func swish(float x) float {
     x * sigmoid(x)
 }
-
 func gelu(float x) float {
-
     float x3 = x * x * x
     float inner = x + 0.044715 * x3
     float cdf = 0.5 * (1.0 + inner * 0.7978845608)
     x * cdf
 }
-
 func relu(float x) float {
     if x > 0.0 {
         return x
     }
     0.0
 }
-
 func new_ffn_config(int hidden_dim, int intermediate_dim, string activation_type, string ffn_type) ffn_config {
     ffn_config {
         hidden_dim: hidden_dim,
@@ -125,7 +110,6 @@ func new_ffn_config(int hidden_dim, int intermediate_dim, string activation_type
         ffn_type: ffn_type,
     }
 }
-
 func new_ffn_layer(int hidden_dim, string activation_type) ffn_layer {
     ffn_config cfg = new_ffn_config(hidden_dim, hidden_dim * 4, activation_type, "standard")
     if activation_type == "swiglu" {
@@ -139,7 +123,6 @@ func new_ffn_layer(int hidden_dim, string activation_type) ffn_layer {
         network: new_standard_ffn(cfg),
     }
 }
-
 func build_ramp(int size, float scale) []float {
     []float values = allocate_vector(size, 0.0)
     int i = 0
@@ -149,7 +132,6 @@ func build_ramp(int size, float scale) []float {
     }
     values
 }
-
 func new_standard_ffn(ffn_config cfg) feed_forward_network {
     int up_size = cfg.hidden_dim * cfg.intermediate_dim
     int down_size = cfg.intermediate_dim * cfg.hidden_dim
@@ -166,7 +148,6 @@ func new_standard_ffn(ffn_config cfg) feed_forward_network {
         active_type: "standard",
     }
 }
-
 func new_glu_ffn(ffn_config cfg) feed_forward_network {
     int gate_size = cfg.hidden_dim * cfg.intermediate_dim
     int down_size = cfg.intermediate_dim * cfg.hidden_dim
@@ -185,7 +166,6 @@ func new_glu_ffn(ffn_config cfg) feed_forward_network {
         active_type: "glu",
     }
 }
-
 func matmul_flat([]float a, []float b, int m, int k, int n) []float {
     []float result = allocate_vector(m * n, 0.0)
     int i = 0
@@ -205,7 +185,6 @@ func matmul_flat([]float a, []float b, int m, int k, int n) []float {
     }
     result
 }
-
 func apply_activation(
     []float hidden,
     string activation_type
@@ -226,7 +205,6 @@ func apply_activation(
     }
     out
 }
-
 func forward_standard_ffn(
     feed_forward_network ffn,
     []float hidden_states,
@@ -249,7 +227,6 @@ func forward_standard_ffn(
     }
     down
 }
-
 func forward_ffn_layer(
     ffn_layer layer,
     []float hidden_states,
@@ -260,7 +237,6 @@ func forward_ffn_layer(
     }
     return forward_standard_ffn(layer.network, hidden_states, tokens)
 }
-
 func forward_glu_ffn(
     feed_forward_network ffn,
     []float hidden_states,
@@ -285,7 +261,6 @@ func forward_glu_ffn(
     }
     down
 }
-
 func forward_swiglu_ffn(
     feed_forward_network ffn,
     []float hidden_states,
@@ -310,7 +285,6 @@ func forward_swiglu_ffn(
     }
     down
 }
-
 func apply_dropout(
     []float hidden,
     float dropout_rate,
@@ -333,7 +307,6 @@ func apply_dropout(
     }
     out
 }
-
 func compute_router_probs(
     []float router_logits,
     int seq_len,
@@ -372,7 +345,6 @@ func compute_router_probs(
     }
     probs
 }
-
 func compute_load_balancing_loss(
     []float router_probs,
     int seq_len,
@@ -391,7 +363,6 @@ func compute_load_balancing_loss(
     }
     total / (len(router_probs) * 1.0)
 }
-
 func get_ffn_complexity(
     feed_forward_network ffn,
     int batch_size,

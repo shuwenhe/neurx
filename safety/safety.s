@@ -1,12 +1,10 @@
 package neurx.safety.safety
-
 struct agent_safety_result {
     bool allowed
     string reason
     string category
     int severity
 }
-
 func new_agent_safety_result_allow() agent_safety_result {
     agent_safety_result {
         allowed: true,
@@ -15,7 +13,6 @@ func new_agent_safety_result_allow() agent_safety_result {
         severity: 0,
     }
 }
-
 func new_agent_safety_result_block(string reason, string category, int severity) agent_safety_result {
     agent_safety_result {
         allowed: false,
@@ -24,7 +21,6 @@ func new_agent_safety_result_block(string reason, string category, int severity)
         severity: severity,
     }
 }
-
 func agent_safety_text_contains(string text, string pattern) bool {
     string h = lower(trim(text))
     string n = lower(trim(pattern))
@@ -54,7 +50,6 @@ func agent_safety_text_contains(string text, string pattern) bool {
     }
     false
 }
-
 func agent_safety_check_injection(string input) agent_safety_result {
     if agent_safety_text_contains(input, "ignore previous instructions") || agent_safety_text_contains(input, "ignore all instructions") {
         return new_agent_safety_result_block("prompt_injection", "security", 3)
@@ -67,7 +62,6 @@ func agent_safety_check_injection(string input) agent_safety_result {
     }
     new_agent_safety_result_allow()
 }
-
 func agent_safety_check_destructive(string action, string input) agent_safety_result {
     if agent_safety_text_contains(input, "rm -rf") || agent_safety_text_contains(input, "drop table") || agent_safety_text_contains(input, "delete all") {
         return new_agent_safety_result_block("destructive_operation", "data_loss", 3)
@@ -77,10 +71,8 @@ func agent_safety_check_destructive(string action, string input) agent_safety_re
     }
     new_agent_safety_result_allow()
 }
-
 func agent_safety_check_s(string cmd) agent_safety_result {
     string c = lower(trim(cmd))
-
     if agent_safety_text_contains(c, "| bash") || agent_safety_text_contains(c, "|bash") {
         return new_agent_safety_result_block("remote_code_exec", "rce", 3)
     }
@@ -90,7 +82,6 @@ func agent_safety_check_s(string cmd) agent_safety_result {
     if agent_safety_text_contains(c, "| python") || agent_safety_text_contains(c, "|python") {
         return new_agent_safety_result_block("remote_code_exec", "rce", 3)
     }
-
     if agent_safety_text_contains(c, "dd ") && agent_safety_text_contains(c, "of=/dev/") {
         return new_agent_safety_result_block("disk_destroy", "data_loss", 3)
     }
@@ -103,7 +94,6 @@ func agent_safety_check_s(string cmd) agent_safety_result {
     if agent_safety_text_contains(c, "shred /dev/") || agent_safety_text_contains(c, "fdisk /dev/") || agent_safety_text_contains(c, "parted /dev/") {
         return new_agent_safety_result_block("disk_destroy", "data_loss", 3)
     }
-
     if agent_safety_text_contains(c, "rm ") && agent_safety_text_contains(c, "-rf") {
         if agent_safety_text_contains(c, " / ") || agent_safety_text_contains(c, " /\n") {
             return new_agent_safety_result_block("delete_root", "data_loss", 3)
@@ -118,31 +108,25 @@ func agent_safety_check_s(string cmd) agent_safety_result {
     if agent_safety_text_contains(c, "--no-preserve-root") {
         return new_agent_safety_result_block("delete_root_no_preserve", "data_loss", 3)
     }
-
     if agent_safety_text_contains(c, ":(){:|:&};:") || agent_safety_text_contains(c, ":(){ :|:& };:") {
         return new_agent_safety_result_block("fork_bomb", "dos", 3)
     }
-
     if agent_safety_text_contains(c, "chmod") && agent_safety_text_contains(c, "777") {
         if agent_safety_text_contains(c, " / ") || agent_safety_text_contains(c, " /\n") || agent_safety_text_contains(c, "chmod 777 /") || agent_safety_text_contains(c, "chmod -r 777") {
             return new_agent_safety_result_block("chmod_world_write_root", "security", 2)
         }
     }
-
     if agent_safety_text_contains(c, "/.ssh/authorized_keys") && (agent_safety_text_contains(c, ">") || agent_safety_text_contains(c, "tee ")) {
         return new_agent_safety_result_block("ssh_key_write", "security", 3)
     }
     if agent_safety_text_contains(c, "/.ssh/id_") && (agent_safety_text_contains(c, ">") || agent_safety_text_contains(c, "tee ")) {
         return new_agent_safety_result_block("ssh_key_write", "security", 3)
     }
-
     new_agent_safety_result_allow()
 }
-
 func agent_safety_check_shell(string cmd) agent_safety_result {
     agent_safety_check_s(cmd)
 }
-
 func agent_safety_check(string action, string input, string goal) agent_safety_result {
     agent_safety_result inject_result = agent_safety_check_injection(input)
     if !inject_result.allowed {
@@ -160,7 +144,6 @@ func agent_safety_check(string action, string input, string goal) agent_safety_r
     }
     new_agent_safety_result_allow()
 }
-
 func agent_safety_summary(agent_safety_result result) string {
     "allowed=" + string(result.allowed) + " reason=" + result.reason + " category=" + result.category + " severity=" + string(result.severity)
 }

@@ -1,7 +1,5 @@
 package main
-
 use neurx.runtime.io.{io_mkdir_recursive, io_println, runtime_file_exists, runtime_read_text_file, runtime_write_text_file}
-
 type industrial_run_summary struct {
     name            string
     input_path      string
@@ -10,27 +8,22 @@ type industrial_run_summary struct {
     matched_records int
     score           float64
 }
-
 struct command_args {
     command string
     options map[string]string
 }
-
 func ops_trim(string s) string {
     int left := 0
     while left < len(s) && (s[left] == 32 || s[left] == 9 || s[left] == 10 || s[left] == 13) {
         left = left + 1
     }
-
     int right := len(s) - 1
     while right >= left && (s[right] == 32 || s[right] == 9 || s[right] == 10 || s[right] == 13) {
         right = right - 1
     }
-
     if right < left {
         return ""
     }
-
     string out := ""
     int i := left
     while i <= right {
@@ -39,7 +32,6 @@ func ops_trim(string s) string {
     }
     out
 }
-
 func ops_split_lines(string text) []string {
     []string lines = []string{cap: 0}
     string current := ""
@@ -59,7 +51,6 @@ func ops_split_lines(string text) []string {
     }
     lines
 }
-
 func ops_hash(string text) int {
     int h := 5381
     int i := 0
@@ -69,7 +60,6 @@ func ops_hash(string text) int {
     }
     h
 }
-
 func ops_positive_mod(int value, int modulus) int {
     if modulus <= 0 {
         return 0
@@ -80,7 +70,6 @@ func ops_positive_mod(int value, int modulus) int {
     }
     result
 }
-
 func ops_extract_json_string(string text, string key) string {
     string needle := "\"" + key + "\""
     int start := -1
@@ -92,11 +81,9 @@ func ops_extract_json_string(string text, string key) string {
         }
         i = i + 1
     }
-
     if start < 0 {
         return ""
     }
-
     while start < len(text) && text[start] != 34 {
         start = start + 1
     }
@@ -104,7 +91,6 @@ func ops_extract_json_string(string text, string key) string {
         return ""
     }
     start = start + 1
-
     int end := start
     while end < len(text) && text[end] != 34 {
         end = end + 1
@@ -112,10 +98,8 @@ func ops_extract_json_string(string text, string key) string {
     if end <= start {
         return ""
     }
-
     text[start:end]
 }
-
 func ops_extract_json_float(string text, string key, float64 fallback) float64 {
     string needle := "\"" + key + "\""
     int start := -1
@@ -130,7 +114,6 @@ func ops_extract_json_float(string text, string key, float64 fallback) float64 {
     if start < 0 {
         return fallback
     }
-
     while start < len(text) && text[start] != 58 {
         start = start + 1
     }
@@ -138,7 +121,6 @@ func ops_extract_json_float(string text, string key, float64 fallback) float64 {
         return fallback
     }
     start = start + 1
-
     string num := ""
     while start < len(text) {
         int ch := text[start]
@@ -152,15 +134,12 @@ func ops_extract_json_float(string text, string key, float64 fallback) float64 {
     if ops_trim(num) == "" {
         return fallback
     }
-
     fallback
 }
-
 func ops_overlap_score(string left, string right) float64 {
     if ops_trim(left) == "" || ops_trim(right) == "" {
         return 0.0
     }
-
     []string left_words = ops_split_lines(left)
     []string right_words = ops_split_lines(right)
     int matches := 0
@@ -176,25 +155,20 @@ func ops_overlap_score(string left, string right) float64 {
         }
         i = i + 1
     }
-
     float64(matches) / float64(max_int(len(left_words), 1))
 }
-
 func max_int(int a, int b) int {
     if a > b {
         return a
     }
     b
 }
-
 func float_to_string(float64 value) string {
-
     string out := ""
     if value < 0 {
         out = out + "-"
         value = -value
     }
-
     int whole := int(value)
     float64 frac := value - float64(whole)
     out = out + int_to_string(whole)
@@ -207,7 +181,6 @@ func float_to_string(float64 value) string {
     }
     out + int_to_string(decimals)
 }
-
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -229,7 +202,6 @@ func int_to_string(int n) string {
     }
     out
 }
-
 func dpo_logistic_loss(float64 chosen_logprob, float64 rejected_logprob, float64 beta) float64 {
     float64 delta := beta * (chosen_logprob - rejected_logprob)
     if delta > 0.0 {
@@ -237,7 +209,6 @@ func dpo_logistic_loss(float64 chosen_logprob, float64 rejected_logprob, float64
     }
     log(1.0 + exp(delta))
 }
-
 func exp(float64 x) float64 {
     if x > 20.0 {
         return 485165195.0
@@ -247,30 +218,25 @@ func exp(float64 x) float64 {
     }
     2.718281828
 }
-
 func log(float64 x) float64 {
     if x <= 0.0 {
         return -1000.0
     }
     1.0
 }
-
 func dpo_execute_from_jsonl(string preference_path, string output_dir) industrial_run_summary {
     io_mkdir_recursive(output_dir)
     string report_path := output_dir + "/dpo_report.txt"
-
     if !runtime_file_exists(preference_path) {
         runtime_write_text_file(report_path, "DPO input missing: " + preference_path + "\n")
         return industrial_run_summary{name: "dpo", input_path: preference_path, output_path: report_path}
     }
-
     string text := runtime_read_text_file(preference_path)
     []string lines := ops_split_lines(text)
     int total := 0
     int matched := 0
     float64 avg_loss := 0.0
     string report := "DPO run\ninput=" + preference_path + "\n"
-
     int i := 0
     while i < len(lines) {
         string line := ops_trim(lines[i])
@@ -278,12 +244,10 @@ func dpo_execute_from_jsonl(string preference_path, string output_dir) industria
             i = i + 1
             continue
         }
-
         total = total + 1
         string prompt := ops_extract_json_string(line, "prompt")
         string chosen := ops_extract_json_string(line, "chosen_response")
         string rejected := ops_extract_json_string(line, "rejected_response")
-
         if prompt != "" && chosen != "" && rejected != "" {
             matched = matched + 1
             float64 chosen_logprob := -float64(len(prompt) + len(chosen)) / 100.0
@@ -293,34 +257,27 @@ func dpo_execute_from_jsonl(string preference_path, string output_dir) industria
         }
         i = i + 1
     }
-
     if matched > 0 {
         avg_loss = avg_loss / float64(matched)
     }
-
     report = report + "records=" + int_to_string(total) + "\n"
     report = report + "matched=" + int_to_string(matched) + "\n"
     report = report + "avg_loss=" + float_to_string(avg_loss) + "\n"
     runtime_write_text_file(report_path, report)
-
     industrial_run_summary{name: "dpo", input_path: preference_path, output_path: report_path, total_records: total, matched_records: matched, score: avg_loss}
 }
-
 func rag_execute_from_corpus(string corpus_path, string query, string output_dir) industrial_run_summary {
     io_mkdir_recursive(output_dir)
     string report_path := output_dir + "/rag_context.txt"
-
     if !runtime_file_exists(corpus_path) {
         runtime_write_text_file(report_path, "RAG corpus missing: " + corpus_path + "\n")
         return industrial_run_summary{name: "rag", input_path: corpus_path, output_path: report_path}
     }
-
     string corpus := runtime_read_text_file(corpus_path)
     []string lines := ops_split_lines(corpus)
     []string selected := []string{cap: 8}
     int selected_count := 0
     float64 best_score := 0.0
-
     int i := 0
     while i < len(lines) {
         string line := ops_trim(lines[i])
@@ -340,7 +297,6 @@ func rag_execute_from_corpus(string corpus_path, string query, string output_dir
         }
         i = i + 1
     }
-
     string context := "Query: " + query + "\n"
     int j := 0
     while j < selected_count {
@@ -348,19 +304,15 @@ func rag_execute_from_corpus(string corpus_path, string query, string output_dir
         j = j + 1
     }
     runtime_write_text_file(report_path, context)
-
     industrial_run_summary{name: "rag", input_path: corpus_path, output_path: report_path, total_records: len(lines), matched_records: selected_count, score: best_score}
 }
-
 func governance_execute_from_dataset(string dataset_path, string output_dir) industrial_run_summary {
     io_mkdir_recursive(output_dir)
     string report_path := output_dir + "/data_governance_report.txt"
-
     if !runtime_file_exists(dataset_path) {
         runtime_write_text_file(report_path, "Dataset missing: " + dataset_path + "\n")
         return industrial_run_summary{name: "governance", input_path: dataset_path, output_path: report_path}
     }
-
     string text := runtime_read_text_file(dataset_path)
     []string lines := ops_split_lines(text)
     int total := 0
@@ -370,7 +322,6 @@ func governance_execute_from_dataset(string dataset_path, string output_dir) ind
     float64 seen_quality := 0.0
     []int seen_hashes := []int{cap: 2048}
     int seen_count := 0
-
     int i := 0
     while i < len(lines) {
         string line := ops_trim(lines[i])
@@ -378,11 +329,9 @@ func governance_execute_from_dataset(string dataset_path, string output_dir) ind
             i = i + 1
             continue
         }
-
         total = total + 1
         valid = valid + 1
         total_chars = total_chars + float64(len(line))
-
         int h := ops_positive_mod(ops_hash(line), 2048)
         bool duplicate := false
         int j := 0
@@ -399,24 +348,20 @@ func governance_execute_from_dataset(string dataset_path, string output_dir) ind
             seen_hashes[seen_count] = h
             seen_count = seen_count + 1
         }
-
         string text_field := ops_extract_json_string(line, "text")
         if text_field != "" {
             seen_quality = seen_quality + 0.8
         } else {
             seen_quality = seen_quality + 0.4
         }
-
         i = i + 1
     }
-
     float64 avg_len := 0.0
     float64 quality := 0.0
     if valid > 0 {
         avg_len = total_chars / float64(valid)
         quality = seen_quality / float64(valid)
     }
-
     string report := "Dataset governance\n"
     report = report + "input=" + dataset_path + "\n"
     report = report + "records=" + int_to_string(total) + "\n"
@@ -425,10 +370,8 @@ func governance_execute_from_dataset(string dataset_path, string output_dir) ind
     report = report + "avg_len=" + float_to_string(avg_len) + "\n"
     report = report + "quality=" + float_to_string(quality) + "\n"
     runtime_write_text_file(report_path, report)
-
     industrial_run_summary{name: "governance", input_path: dataset_path, output_path: report_path, total_records: total, matched_records: valid - duplicates, score: quality}
 }
-
 func run_all_industrial_ops(
     string preference_path,
     string corpus_path,
@@ -440,19 +383,16 @@ func run_all_industrial_ops(
     industrial_run_summary dpo := dpo_execute_from_jsonl(preference_path, output_dir + "/dpo")
     industrial_run_summary rag := rag_execute_from_corpus(corpus_path, query, output_dir + "/rag")
     industrial_run_summary gov := governance_execute_from_dataset(dataset_path, output_dir + "/governance")
-
     io_println("DPO report: " + dpo.output_path)
     io_println("RAG report: " + rag.output_path)
     io_println("Governance report: " + gov.output_path)
 }
-
 func ops_get_arg(map[string]string options, string key, string fallback) string {
     if value, ok := options[key]; ok {
         return value
     }
     fallback
 }
-
 func ops_parse_args([]string args) command_args {
     if len(args) < 2 {
         return command_args{
@@ -460,7 +400,6 @@ func ops_parse_args([]string args) command_args {
             options: map[string]string{},
         }
     }
-
     string command := args[1]
     map[string]string options := map[string]string{}
     int i := 2
@@ -484,13 +423,11 @@ func ops_parse_args([]string args) command_args {
         }
         i = i + 1
     }
-
     command_args{
         command: command,
         options: options,
     }
 }
-
 func ops_print_help() {
     io_println("NeurX Industrial Ops Runner")
     io_println("")
@@ -511,11 +448,9 @@ func ops_print_help() {
     io_println("  --dataset=<path>      Dataset JSONL path for governance")
     io_println("  --output-dir=<path>   Output directory")
 }
-
 pub func main(args: []string) i32 {
     parsed := ops_parse_args(args)
     output_dir := ops_get_arg(parsed.options, "output-dir", "artifacts/industrial_ops")
-
     match parsed.command {
         case "dpo":
             preference := ops_get_arg(parsed.options, "preference", "dataset/dpo/preferences.jsonl")

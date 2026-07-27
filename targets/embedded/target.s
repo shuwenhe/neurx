@@ -1,5 +1,3 @@
-
-
 struct embedded_target_config {
     string  mcu_family
     int     ram_kb
@@ -9,7 +7,6 @@ struct embedded_target_config {
     int     max_power_mw
     string  precision
 }
-
 func default_embedded_target() embedded_target_config {
     return embedded_target_config{
         mcu_family:         "stm32",

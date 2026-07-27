@@ -1,34 +1,28 @@
 package neurx.agent.parallel_tool
-
 use neurx.agent.tool_registry
 use neurx.agent.memory
 use neurx.tool.workspace_tools
-
 struct parallel_tool_call {
     string id
     string tool_name
     string input
 }
-
 struct parallel_tool_result {
     string id
     string tool_name
     bool   ok
     string observation
 }
-
 struct parallel_tool_batch {
     []parallel_tool_call calls
     int count
 }
-
 struct parallel_tool_batch_result {
     []parallel_tool_result results
     int count
     int ok_count
     int fail_count
 }
-
 func new_parallel_tool_call(string id, string tool_name, string input) parallel_tool_call {
     parallel_tool_call {
         id:        id,
@@ -36,14 +30,12 @@ func new_parallel_tool_call(string id, string tool_name, string input) parallel_
         input:     input,
     }
 }
-
 func new_parallel_tool_batch() parallel_tool_batch {
     parallel_tool_batch {
         calls: []parallel_tool_call{cap: 8},
         count: 0,
     }
 }
-
 func parallel_tool_batch_add(parallel_tool_batch batch, string tool_name, string input) parallel_tool_batch {
     int n = batch.count
     []parallel_tool_call next = []parallel_tool_call{cap: n + 1}
@@ -59,7 +51,6 @@ func parallel_tool_batch_add(parallel_tool_batch batch, string tool_name, string
         count: n + 1,
     }
 }
-
 func new_parallel_tool_batch_result() parallel_tool_batch_result {
     parallel_tool_batch_result {
         results:    []parallel_tool_result{cap: 8},
@@ -68,7 +59,6 @@ func new_parallel_tool_batch_result() parallel_tool_batch_result {
         fail_count: 0,
     }
 }
-
 func parallel_tool_dispatch_one(parallel_tool_call call, agent_tool_registry_state tools) parallel_tool_result {
     bool enabled = agent_tool_registry_has_enabled(tools, call.tool_name)
     if !enabled {
@@ -79,10 +69,8 @@ func parallel_tool_dispatch_one(parallel_tool_call call, agent_tool_registry_sta
             observation: "tool_disabled:" + call.tool_name,
         }
     }
-
     string obs = ""
     bool ok = true
-
     if call.tool_name == "read" {
         agent_workspace_result r = agent_workspace_read(call.input)
         obs = r.observation
@@ -111,7 +99,6 @@ func parallel_tool_dispatch_one(parallel_tool_call call, agent_tool_registry_sta
         obs = "unknown_tool:" + call.tool_name
         ok = false
     }
-
     parallel_tool_result {
         id:          call.id,
         tool_name:   call.tool_name,
@@ -119,7 +106,6 @@ func parallel_tool_dispatch_one(parallel_tool_call call, agent_tool_registry_sta
         observation: obs,
     }
 }
-
 func parallel_tool_dispatch(parallel_tool_batch batch, agent_tool_registry_state tools) parallel_tool_batch_result {
     int n = batch.count
     []parallel_tool_result results = []parallel_tool_result{cap: n}
@@ -143,7 +129,6 @@ func parallel_tool_dispatch(parallel_tool_batch batch, agent_tool_registry_state
         fail_count: fail_count,
     }
 }
-
 func parallel_tool_merge_observations(parallel_tool_batch_result batch_result) string {
     string merged = ""
     int i = 0
@@ -163,7 +148,6 @@ func parallel_tool_merge_observations(parallel_tool_batch_result batch_result) s
     }
     merged
 }
-
 func parallel_tool_store_results(parallel_tool_batch_result batch_result, agent_memory_state memory) agent_memory_state {
     agent_memory_state m = memory
     int i = 0
@@ -174,7 +158,6 @@ func parallel_tool_store_results(parallel_tool_batch_result batch_result, agent_
     }
     m
 }
-
 func parallel_tool_batch_summary(parallel_tool_batch_result batch_result) string {
     "parallel_tools count=" + string(batch_result.count) +
     " ok=" + string(batch_result.ok_count) +

@@ -1,5 +1,4 @@
 package neurx.backends.compute_backend
-
 struct device_info {
     string backend
     int device_id
@@ -10,16 +9,13 @@ struct device_info {
     int memory_gb
     float peak_tflops
 }
-
 struct compute_context {
     device_info device
     bool gpu_available
     string active_dtype
     int stream_id
 }
-
 func detect_device() compute_context {
-
     compute_context {
         device: device_info {
             backend: "cpu",
@@ -36,7 +32,6 @@ func detect_device() compute_context {
         stream_id: 0,
     }
 }
-
 func new_compute_context(string backend, int device_id, string dtype) compute_context {
     bool is_gpu = backend == "cuda" || backend == "cann" || backend == "mps"
     string active_dtype = dtype
@@ -59,7 +54,6 @@ func new_compute_context(string backend, int device_id, string dtype) compute_co
         stream_id: 0,
     }
 }
-
 func backend_supports_dtype(device_info device, string dtype) bool {
     if dtype == "bf16" {
         return device.supports_bf16
@@ -75,7 +69,6 @@ func backend_supports_dtype(device_info device, string dtype) bool {
     }
     false
 }
-
 func resolve_compute_context(string preferred_backend, string preferred_dtype) compute_context {
     compute_context ctx = detect_device()
     if preferred_backend != "" {
@@ -91,19 +84,16 @@ func resolve_compute_context(string preferred_backend, string preferred_dtype) c
     }
     ctx
 }
-
 func cb_abs(float x) float {
     if x < 0.0 { return -x }
     x
 }
-
 func quantize_mantissa(float value, int mantissa_bits) float {
     if value == 0.0 {
         return 0.0
     }
     bool neg = value < 0.0
     float mag = cb_abs(value)
-
     int exp = 0
     while mag >= 2.0 {
         mag = mag * 0.5
@@ -113,26 +103,21 @@ func quantize_mantissa(float value, int mantissa_bits) float {
         mag = mag * 2.0
         exp = exp - 1
     }
-
     float frac = mag - 1.0
-
     float levels = cb_pow2(mantissa_bits)
     float scaled = frac * levels
     int rounded = cb_round(scaled)
-
     if rounded >= cb_round(levels) {
         rounded = 0
         exp = exp + 1
     }
     float q_frac = (rounded * 1.0) / levels
     float q_mag = (1.0 + q_frac) * cb_pow2_signed(exp)
-
     if neg {
         return -q_mag
     }
     q_mag
 }
-
 func cb_pow2(int bits) float {
     float r = 1.0
     int i = 0
@@ -142,7 +127,6 @@ func cb_pow2(int bits) float {
     }
     r
 }
-
 func cb_pow2_signed(int exp) float {
     float r = 1.0
     int e = exp
@@ -153,7 +137,6 @@ func cb_pow2_signed(int exp) float {
     }
     r
 }
-
 func cb_round(float x) int {
     bool neg = x < 0.0
     float v = x
@@ -164,19 +147,15 @@ func cb_round(float x) int {
     if neg { return -n }
     n
 }
-
 func to_bf16(float value) float {
     quantize_mantissa(value, 7)
 }
-
 func to_fp16(float value) float {
     quantize_mantissa(value, 10)
 }
-
 func to_fp8_e4m3(float value) float {
     quantize_mantissa(value, 3)
 }
-
 func array_to_bf16([]float arr) []float {
     int n = len(arr)
     []float out = []float{cap: n}
@@ -187,7 +166,6 @@ func array_to_bf16([]float arr) []float {
     }
     out
 }
-
 func array_to_fp16([]float arr) []float {
     int n = len(arr)
     []float out = []float{cap: n}
@@ -198,36 +176,28 @@ func array_to_fp16([]float arr) []float {
     }
     out
 }
-
 func backend_matmul(
     compute_context ctx,
     []float a, []float b,
     int m, int k, int n
 ) []float {
     if ctx.gpu_available {
-        // prefer native CANN implementation when available
         if ctx.device.backend == "cann" {
             []float out = []float{cap: m * n}
-            // initialize out buffer
             int idx = 0
             while idx < m * n { out[idx] = 0.0; idx = idx + 1 }
             __neurx_cann_matmul(a, b, out, m, k, n)
             return out
         }
-        // fall back to CPU implementation if no native backend bound
         return cpu_matmul(a, b, m, k, n)
     }
     cpu_matmul(a, b, m, k, n)
 }
-
-// Bridge to the native C implementation provided by the CANN runtime library.
 extern "intrinsic" func __neurx_cann_matmul([]float a, []float b, []float out, int m, int k, int n) ()
-
 func cpu_matmul([]float a, []float b, int m, int k, int n) []float {
     []float result = []float{cap: m * n}
     int idx = 0
     while idx < m * n { result[idx] = 0.0; idx = idx + 1 }
-
     int i = 0
     while i < m {
         int j = 0
@@ -245,19 +215,15 @@ func cpu_matmul([]float a, []float b, int m, int k, int n) []float {
     }
     result
 }
-
 func backend_matmul_bf16(
     compute_context ctx,
     []float a, []float b,
     int m, int k, int n
 ) []float {
-
     []float a_bf = array_to_bf16(a)
     []float b_bf = array_to_bf16(b)
-
     return backend_matmul(ctx, a_bf, b_bf, m, k, n)
 }
-
 func backend_matmul_dispatch(
     compute_context ctx,
     []float a, []float b,
@@ -273,14 +239,12 @@ func backend_matmul_dispatch(
     }
     return backend_matmul(ctx, a, b, m, k, n)
 }
-
 struct comm_context {
     int world_size
     int rank
     int comm_id
     string backend
 }
-
 func new_comm_context(int world_size, int rank) comm_context {
     comm_context {
         world_size: world_size,
@@ -289,19 +253,15 @@ func new_comm_context(int world_size, int rank) comm_context {
         backend: "local",
     }
 }
-
 func backend_all_reduce(
     comm_context comm,
     []float buffer
 ) []float {
     if comm.backend == "nccl" && comm.world_size > 1 {
-
         return buffer
     }
-
     buffer
 }
-
 func backend_all_reduce_pair([]float a, []float b) []float {
     int n = len(a)
     []float out = []float{cap: n}
@@ -314,15 +274,12 @@ func backend_all_reduce_pair([]float a, []float b) []float {
     }
     out
 }
-
 func backend_broadcast(comm_context comm, []float buffer, int root) []float {
     if comm.backend == "nccl" && comm.world_size > 1 {
-
         return buffer
     }
     buffer
 }
-
 struct amp_state {
     float loss_scale
     float scale_growth
@@ -332,7 +289,6 @@ struct amp_state {
     bool last_overflow
     string compute_dtype
 }
-
 func new_amp_state(string dtype) amp_state {
     float init_scale = 65536.0
     if dtype == "bf16" {
@@ -348,11 +304,9 @@ func new_amp_state(string dtype) amp_state {
         compute_dtype: dtype,
     }
 }
-
 func amp_scale_loss(amp_state amp, float loss) float {
     loss * amp.loss_scale
 }
-
 func amp_unscale_grad(amp_state amp, []float grad) []float {
     float inv = 1.0 / amp.loss_scale
     int n = len(grad)
@@ -364,7 +318,6 @@ func amp_unscale_grad(amp_state amp, []float grad) []float {
     }
     out
 }
-
 func amp_check_overflow([]float grad) bool {
     int i = 0
     while i < len(grad) {
@@ -372,7 +325,6 @@ func amp_check_overflow([]float grad) bool {
         if g > 1e30 || g < -1e30 {
             return true
         }
-
         if g != g {
             return true
         }
@@ -380,7 +332,6 @@ func amp_check_overflow([]float grad) bool {
     }
     false
 }
-
 func amp_update_scale(amp_state amp, bool overflow) amp_state {
     if overflow {
         amp.loss_scale = amp.loss_scale * amp.scale_backoff
@@ -399,7 +350,6 @@ func amp_update_scale(amp_state amp, bool overflow) amp_state {
     }
     amp
 }
-
 struct memory_estimate {
     int params_bytes
     int gradients_bytes
@@ -408,21 +358,16 @@ struct memory_estimate {
     int total_bytes
     int total_gb
 }
-
 func estimate_training_memory(int params, string dtype, int batch_tokens, int hidden, int layers) memory_estimate {
     int param_byte = 4
     if dtype == "bf16" || dtype == "fp16" {
         param_byte = 2
     }
-
     int params_b = params * param_byte
     int master_b = params * 4
     int grad_b = params * param_byte
-
     int opt_b = params * 8
-
     int act_b = batch_tokens * hidden * layers * 2
-
     int total = params_b + master_b + grad_b + opt_b + act_b
     memory_estimate {
         params_bytes: params_b + master_b,
@@ -433,7 +378,6 @@ func estimate_training_memory(int params, string dtype, int batch_tokens, int hi
         total_gb: total / (1024 * 1024 * 1024),
     }
 }
-
 func bf16_max_relative_error([]float arr) float {
     float max_err = 0.0
     int i = 0

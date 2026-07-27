@@ -1,19 +1,14 @@
 package main
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}
 use std.io.println
-
 func main() int {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
-
     println("==========================================")
     println("NeurX Training Pipeline - S Verification")
     println("==========================================")
     println("")
-
     let pass_count = 0
     let total_count = 0
-
     total_count = total_count + 1
     if check_file(project_root + "/training/training_pipeline.s", "trainingEnglish textmainEnglish text") {
         pass_count = pass_count + 1
@@ -38,19 +33,16 @@ func main() int {
     if check_file(project_root + "/TRAINING_PIPELINE_COMPLETE_SUMMARY.md", "English text") {
         pass_count = pass_count + 1
     }
-
     println("")
     if pass_count == total_count {
         println("English text: English text")
         println("English textstate: English text")
         return 0
     }
-
     println("English text: English text")
     println("English textstate: English text")
     1
 }
-
 func check_file(string path, string label) bool {
     if runtime_file_exists(path) {
         println("✅ " + label + " : ready (" + path + ")")
@@ -60,7 +52,6 @@ func check_file(string path, string label) bool {
         }
         return true
     }
-
     println("❌ " + label + " : missing (" + path + ")")
     false
 }

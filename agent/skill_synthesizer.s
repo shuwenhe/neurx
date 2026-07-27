@@ -1,12 +1,9 @@
 package neurx.agent.skill_synthesizer
-
 use neurx.agent.skill_schema
 use neurx.agent.skill_feedback
-
 func agent_skill_version_from_step(int step) string {
     "v" + string(step)
 }
-
 func agent_skill_signal_action(string signal) string {
     string raw = trim(signal)
     if raw == "" {
@@ -24,7 +21,6 @@ func agent_skill_signal_action(string signal) string {
     }
     lower(trim(out))
 }
-
 func agent_skill_append_unique([]string items, string value) []string {
     string v = trim(value)
     if v == "" {
@@ -47,7 +43,6 @@ func agent_skill_append_unique([]string items, string value) []string {
     out[size] = v
     out
 }
-
 func agent_skill_required_tools(agent_skill_feedback_state feedback, string action) []string {
     []string tools = []string{}
     tools = agent_skill_append_unique(tools, action)
@@ -70,7 +65,6 @@ func agent_skill_required_tools(agent_skill_feedback_state feedback, string acti
     }
     tools
 }
-
 func agent_skill_steps_for_feedback(agent_skill_feedback_state feedback, string action) []string {
     []string steps = []string{}
     if feedback.task == "code" || action == "write" || action == "write_file" || action == "apply_patch" || action == "patch" || action == "code" {
@@ -153,7 +147,6 @@ func agent_skill_steps_for_feedback(agent_skill_feedback_state feedback, string 
     steps = agent_skill_append_unique(steps, "execute")
     steps
 }
-
 func agent_skill_name_from_feedback(agent_skill_feedback_state feedback) string {
     string base = trim(feedback.skill_name)
     if base == "" {
@@ -161,7 +154,6 @@ func agent_skill_name_from_feedback(agent_skill_feedback_state feedback) string 
     }
     base + "_" + feedback.task
 }
-
 func agent_skill_synthesize(agent_skill_feedback_state feedback) agent_skill_record {
     string name = agent_skill_name_from_feedback(feedback)
     string version = agent_skill_version_from_step(feedback.step)
@@ -170,30 +162,23 @@ func agent_skill_synthesize(agent_skill_feedback_state feedback) agent_skill_rec
         status = "promoted"
     }
     string action = agent_skill_signal_action(feedback.signal)
-
     []string triggers = []string{}
     triggers = agent_skill_append_unique(triggers, feedback.task)
     triggers = agent_skill_append_unique(triggers, action)
     triggers = agent_skill_append_unique(triggers, feedback.signal)
-
     []string required_tools = agent_skill_required_tools(feedback, action)
-
     []string preconditions = []string{cap: 1}
     preconditions[0] = "trace_available"
-
     []string steps = agent_skill_steps_for_feedback(feedback, action)
-
     []string success_signals = []string{cap: 1}
     if feedback.task == "finalize" {
         success_signals[0] = "status=done"
     } else {
         success_signals[0] = "status=ok"
     }
-
     []string failure_signals = []string{cap: 2}
     failure_signals[0] = "status=blocked"
     failure_signals[1] = "status=failed"
-
     agent_skill_spec spec = agent_skill_spec {
         name: name,
         version: version,
@@ -206,21 +191,17 @@ func agent_skill_synthesize(agent_skill_feedback_state feedback) agent_skill_rec
         success_signals: success_signals,
         failure_signals: failure_signals,
     }
-
     agent_skill_metrics metrics = new_agent_skill_metrics()
     if feedback.success {
         metrics.success_rate = 1.0
         metrics.stability = 1.0
         metrics.avg_steps = 1.0
     }
-
     new_agent_skill_record(spec, metrics, feedback.step)
 }
-
 func agent_skill_synthesizer_state_dict(agent_skill_record record) agent_skill_record {
     agent_skill_record_state_dict(record)
 }
-
 func agent_skill_synthesizer_load_state_dict(agent_skill_record record, agent_skill_record other) agent_skill_record {
     agent_skill_record_load_state_dict(record, other)
 }

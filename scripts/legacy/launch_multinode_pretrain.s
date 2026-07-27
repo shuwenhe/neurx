@@ -1,10 +1,8 @@
 package main
-
 use std.exec
 use std.os
 use std.path
 use std.strings
-
 struct MultiNodeConfig {
     root string
     hostfile string
@@ -15,22 +13,18 @@ struct MultiNodeConfig {
     resumeEnabled bool
     hosts []string
 }
-
 func parseHostFile(hostfile string) []string {
     content, _ := os.ReadFile(hostfile)
     lines := strings.Split(string(content), "\n")
     hosts := []string{}
-    
     for _, line := range lines {
         trimmed := strings.TrimSpace(line)
         if trimmed != "" && !strings.HasPrefix(trimmed, "#") {
             hosts = append(hosts, trimmed)
         }
     }
-    
     return hosts
 }
-
 func getGpuCount(host string) int {
     cmd := exec.Command("ssh", host, "nvidia-smi -L | wc -l")
     output, _ := cmd.Output()
@@ -38,7 +32,6 @@ func getGpuCount(host string) int {
     strings.TrimSpace(string(output))
     return count
 }
-
 func launchOnHost(host string, rank int, config MultiNodeConfig) {
     env := os.Environ()
     env = append(env,
@@ -52,7 +45,6 @@ func launchOnHost(host string, rank int, config MultiNodeConfig) {
         "MASTER_PORT=" + config.masterPort,
         "CUDA_VISIBLE_DEVICES=0",
     )
-    
     cmd := exec.Command(config.root + "/artifacts/build/cuda_train/neurx_cuda_train_bridge")
     cmd.Env = env
     cmd.Dir = config.root
@@ -60,18 +52,15 @@ func launchOnHost(host string, rank int, config MultiNodeConfig) {
     cmd.Stderr = os.Stderr
     cmd.Run()
 }
-
 func main() {
     root := os.Getenv("NEURX_ROOT")
     if root == "" {
         root = "."
     }
-    
     hostfile := os.Getenv("NEURX_HOSTFILE")
     if hostfile == "" {
         hostfile = root + "/configs/pretrain.hosts"
     }
-    
     config := MultiNodeConfig{
         root: root,
         hostfile: hostfile,
@@ -80,30 +69,22 @@ func main() {
         sharedId: os.Getenv("NEURX_SHARED_NCCL_ID_FILE"),
         output: os.Getenv("NEURX_PRETRAIN_OUTPUT_DIR"),
     }
-    
     if config.masterPort == "" {
         config.masterPort = "29500"
     }
-    
     if config.sharedId == "" {
         config.sharedId = root + "/artifacts/nccl/unique_id"
     }
-    
     if config.output == "" {
         config.output = root + "/checkpoint/NeurX-1.3"
     }
-    
     config.hosts = parseHostFile(config.hostfile)
-    
     if config.masterAddr == "" && len(config.hosts) > 0 {
         config.masterAddr = strings.Fields(config.hosts[0])[0]
     }
-    
     os.MkdirAll(path.Dir(config.output), 0755)
     os.MkdirAll(path.Dir(config.sharedId), 0755)
-    
     io.Println("[multinode] nodes=" + string(len(config.hosts)) + " master=" + config.masterAddr + ":" + config.masterPort)
-    
     for i, host := range config.hosts {
         launchOnHost(host, i, config)
     }

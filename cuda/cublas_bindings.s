@@ -1,19 +1,13 @@
-
-
 package neurx.cuda_bindings
-
 use std.io.println
-
 extern func cuda_malloc(int size) int64
 extern func cuda_free(int64 ptr) int
 extern func cuda_memcpy_h2d(int64 dst, int src_ptr, int size) int
 extern func cuda_memcpy_d2h(int dst_ptr, int64 src, int size) int
 extern func cuda_device_synchronize() int
-
 extern func cublasCreate() int64
 extern func cublasDestroy(int64 handle) int
 extern func cublasSetStream(int64 handle, int64 stream) int
-
 extern func cublasSgemm(
     int64 handle,
     int transa,
@@ -30,7 +24,6 @@ extern func cublasSgemm(
     int64 C,
     int ldc
 ) int
-
 extern func cublasSgemv(
     int64 handle,
     int trans,
@@ -45,7 +38,6 @@ extern func cublasSgemv(
     int64 y,
     int incy
 ) int
-
 extern func cublasSdot(
     int64 handle,
     int n,
@@ -55,7 +47,6 @@ extern func cublasSdot(
     int incy,
     float* result
 ) int
-
 extern func cublasStrmm(
     int64 handle,
     int side,
@@ -70,7 +61,6 @@ extern func cublasStrmm(
     int64 B,
     int ldb
 ) int
-
 struct gpu_tensor {
     int64 device_ptr
     int size
@@ -78,12 +68,10 @@ struct gpu_tensor {
     int cols
     bool is_allocated
 }
-
 struct cuda_context {
     int64 cublas_handle
     bool initialized
 }
-
 func gpu_matrix_multiply(
     cuda_context ctx,
     gpu_tensor A,
@@ -94,12 +82,10 @@ func gpu_matrix_multiply(
         println("[ERROR] CUDA context not initialized")
         return -1
     }
-
     if A.cols != B.rows {
         println("[ERROR] Matrix dimension mismatch: A.cols=" + int_to_str(A.cols) + " != B.rows=" + int_to_str(B.rows))
         return -1
     }
-
     int status = cublasSgemm(
         ctx.cublas_handle,
         0,
@@ -116,17 +102,13 @@ func gpu_matrix_multiply(
         C.device_ptr,
         C.cols
     )
-
     if status != 0 {
         println("[ERROR] cublasSgemm failed with status " + int_to_str(status))
         return status
     }
-
     cuda_device_synchronize()
-
     status
 }
-
 func gpu_matrix_multiply_backward_A(
     cuda_context ctx,
     gpu_tensor grad_C,
@@ -136,7 +118,6 @@ func gpu_matrix_multiply_backward_A(
     if !ctx.initialized {
         return -1
     }
-
     int status = cublasSgemm(
         ctx.cublas_handle,
         0,
@@ -153,11 +134,9 @@ func gpu_matrix_multiply_backward_A(
         grad_A.device_ptr,
         grad_A.cols
     )
-
     cuda_device_synchronize()
     status
 }
-
 func gpu_matrix_multiply_backward_B(
     cuda_context ctx,
     gpu_tensor A,
@@ -167,7 +146,6 @@ func gpu_matrix_multiply_backward_B(
     if !ctx.initialized {
         return -1
     }
-
     int status = cublasSgemm(
         ctx.cublas_handle,
         1,
@@ -184,45 +162,34 @@ func gpu_matrix_multiply_backward_B(
         grad_B.device_ptr,
         grad_B.cols
     )
-
     cuda_device_synchronize()
     status
 }
-
 func init_cuda_context() cuda_context {
     println("[CUDA] Initializing cuBLAS context...")
-
     int64 handle = cublasCreate()
-
     cuda_context{
         cublas_handle: handle,
         initialized: handle != 0,
     }
 }
-
 func destroy_cuda_context(cuda_context* ctx) int {
     if !ctx.initialized {
         return 0
     }
-
     println("[CUDA] Destroying cuBLAS context...")
     int status = cublasDestroy(ctx.cublas_handle)
     ctx.initialized = false
     status
 }
-
 func allocate_gpu_tensor(int rows, int cols) gpu_tensor {
     int size = rows * cols
     int bytes = size * 4
-
     println("[CUDA] Allocating GPU memory: " + int_to_str(rows) + "x" + int_to_str(cols) + " (" + int_to_str(bytes) + " bytes)")
-
     int64 ptr = cuda_malloc(bytes)
-
     if ptr == 0 {
         println("[ERROR] CUDA malloc failed")
     }
-
     gpu_tensor{
         device_ptr: ptr,
         size: size,
@@ -231,7 +198,6 @@ func allocate_gpu_tensor(int rows, int cols) gpu_tensor {
         is_allocated: ptr != 0,
     }
 }
-
 func free_gpu_tensor(gpu_tensor* tensor) int {
     if tensor.is_allocated && tensor.device_ptr != 0 {
         println("[CUDA] Freeing GPU memory: " + int_to_str(tensor.size) + " elements")
@@ -240,7 +206,6 @@ func free_gpu_tensor(gpu_tensor* tensor) int {
     }
     0
 }
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -260,7 +225,6 @@ func int_to_str(int n) string {
     if neg { out = "-" + out }
     out
 }
-
 func string_char(int c) string {
     string(c)
 }

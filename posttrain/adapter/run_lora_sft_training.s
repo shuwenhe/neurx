@@ -1,7 +1,5 @@
 package main
-
 use std.io.println
-
 func digit_to_str(int digit) string {
     if digit == 0 {
         return "0"
@@ -32,7 +30,6 @@ func digit_to_str(int digit) string {
     }
     "9"
 }
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -54,7 +51,6 @@ func int_to_str(int n) string {
     }
     out
 }
-
 func fmt_float(float value, int decimals) string {
     float current = value
     bool neg = current < 0.0
@@ -84,16 +80,13 @@ func fmt_float(float value, int decimals) string {
     }
     out
 }
-
 func resolve_non_empty(string primary, string fallback) string {
     if len(primary) > 0 {
         return primary
     }
     fallback
 }
-
 func main() int {
-
     string project_root = "/home/shuwen/shuwen/train/neurx"
     string model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
     string data_path = "/home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl"
@@ -105,10 +98,8 @@ func main() int {
     float alpha = 16.0
     float learning_rate = 0.0005
     bool use_qlora = false
-
     string model_config = model_path + "/config.json"
     string tokenizer_json = model_path + "/tokenizer.json"
-
     println("========================================")
     println("NeurX LoRA Supervised Fine-Tuning")
     println("========================================")
@@ -132,7 +123,6 @@ func main() int {
     println("For production training, integration with PyTorch/HuggingFace is recommended")
     println("Loaded samples: 4 (simulation)")
     println("")
-
     float base_weight = 1.0
     float adapter_a = 0.0
     float adapter_b = 0.0
@@ -141,7 +131,6 @@ func main() int {
     int step = 0
     int examples_seen = 0
     int tokens_seen = 0
-
     float adapter_scale = alpha / (rank as float)
     int epoch = 0
     while epoch < epochs {
@@ -149,7 +138,6 @@ func main() int {
         println("Epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs))
         float epoch_loss = 0.0
         int epoch_examples = 0
-
         int sample = 0
         while sample < 4 {
             float x = 0.02 * ((sample + 1) as float)
@@ -166,14 +154,12 @@ func main() int {
                 x = 0.05 * ((sample + 1) as float)
                 y = 0.025 * ((sample + 1) as float)
             }
-
             float pred = base_weight * x + adapter_scale * adapter_a * adapter_b * x
             float diff = pred - y
             float grad_base = 2.0 * diff * x
             float grad_a = 2.0 * diff * x * adapter_b * adapter_scale
             float grad_b = 2.0 * diff * x * adapter_a * adapter_scale
             float diff_sum = diff * diff
-
             base_weight = base_weight - learning_rate * grad_base
             adapter_a = adapter_a - learning_rate * grad_a
             adapter_b = adapter_b - learning_rate * grad_b
@@ -190,7 +176,6 @@ func main() int {
             epoch_examples = epoch_examples + 1
             sample = sample + 1
         }
-
         float avg_loss = 0.0
         if epoch_examples > 0 {
             avg_loss = epoch_loss / (epoch_examples as float)
@@ -199,17 +184,13 @@ func main() int {
         println("  step       : " + int_to_str(step))
         println("  examples   : " + int_to_str(examples_seen))
         println("  best loss  : " + fmt_float(best_loss, 4))
-
         epoch = epoch + 1
     }
-
     println("")
     println("LoRA SFT training simulation complete")
     println("checkpoint dir: " + output_dir)
     println("Best loss     : " + fmt_float(best_loss, 4))
     println("")
-
     println("✓ LoRA SFT training completed")
-
     0
 }

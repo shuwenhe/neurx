@@ -1,9 +1,7 @@
 package neurx.model.transformer.transformer
-
 use neurx.attention.{attention_config, multi_head_attention, new_attention_config, new_multi_head_attention, forward_attention, forward_attention_with_rope, forward_gqa, forward_mqa, forward_flash_attention}
 use neurx.model.transformer.ffn.{ffn_config, feed_forward_network, new_ffn_config, new_standard_ffn, new_glu_ffn, forward_standard_ffn, forward_glu_ffn, forward_swiglu_ffn}
 use neurx.model.transformer.norm.{layer_norm_config, layer_norm, rms_norm, new_layer_norm, new_rms_norm, layer_normalize, rms_normalize, position_embedding_config, new_absolute_position_embedding, learned_position_embedding, new_learned_position_embedding, get_position_embedding, get_learned_position_embedding, rope_embedding, new_rope_embedding, apply_rope, alibi_embedding, new_alibi_embedding, apply_alibi_bias}
-
 struct transformer_layer_config {
     int hidden_dim
     int num_attention_heads
@@ -18,7 +16,6 @@ struct transformer_layer_config {
     bool pre_norm
     bool tie_embeddings
 }
-
 struct transformer_layer {
     transformer_layer_config config
     attention_config attn_config
@@ -31,7 +28,6 @@ struct transformer_layer {
     rms_norm rn2
     bool use_rmsnorm
 }
-
 struct transformer_config {
     int vocab_size
     int hidden_dim
@@ -49,7 +45,6 @@ struct transformer_config {
     bool pre_norm
     bool tie_embeddings
 }
-
 struct transformer_model {
     transformer_config config
     []transformer_layer layers
@@ -58,17 +53,14 @@ struct transformer_model {
     []float token_embedding
     []float lm_head_weight
 }
-
 struct transformer_output {
     []float logits
     []float hidden_states
 }
-
 struct transformer_block {
     transformer_layer layer
     string position_encoding_type
 }
-
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
@@ -78,7 +70,6 @@ func allocate_vector(int size, float init_val) []float {
     }
     v
 }
-
 func copy_vector([]float src) []float {
     []float out = allocate_vector(len(src), 0.0)
     int i = 0
@@ -88,7 +79,6 @@ func copy_vector([]float src) []float {
     }
     out
 }
-
 func add_vectors([]float a, []float b) []float {
     []float out = copy_vector(a)
     int i = 0
@@ -98,7 +88,6 @@ func add_vectors([]float a, []float b) []float {
     }
     out
 }
-
 func matmul_flat([]float a, []float b, int m, int k, int n) []float {
     []float result = allocate_vector(m * n, 0.0)
     int i = 0
@@ -118,7 +107,6 @@ func matmul_flat([]float a, []float b, int m, int k, int n) []float {
     }
     result
 }
-
 func fill_ramp(int size, float scale) []float {
     []float values = allocate_vector(size, 0.0)
     int i = 0
@@ -128,7 +116,6 @@ func fill_ramp(int size, float scale) []float {
     }
     values
 }
-
 func new_transformer_layer_config() transformer_layer_config {
     transformer_layer_config {
         hidden_dim: 4096,
@@ -145,7 +132,6 @@ func new_transformer_layer_config() transformer_layer_config {
         tie_embeddings: true,
     }
 }
-
 func new_transformer_config() transformer_config {
     transformer_config {
         vocab_size: 50257,
@@ -165,13 +151,11 @@ func new_transformer_config() transformer_config {
         tie_embeddings: true,
     }
 }
-
 func new_transformer_layer(transformer_layer_config cfg) transformer_layer {
     attention_config attn_cfg = new_attention_config(cfg.hidden_dim, cfg.num_attention_heads, cfg.num_key_value_heads, cfg.position_embedding_type)
     attn_cfg.attention_dropout_rate = cfg.attention_dropout
     attn_cfg.use_cache = cfg.use_cache
     attn_cfg.use_flash_attention = cfg.position_embedding_type == "flash"
-
     ffn_config ffn_cfg = new_ffn_config(cfg.hidden_dim, cfg.intermediate_dim, cfg.activation_type, "standard")
     feed_forward_network ffn_module = new_standard_ffn(ffn_cfg)
     if cfg.activation_type == "swiglu" || cfg.activation_type == "geglu" {
@@ -183,7 +167,6 @@ func new_transformer_layer(transformer_layer_config cfg) transformer_layer {
         use_bias: true,
         norm_type: cfg.norm_type,
     }
-
     transformer_layer {
         config: cfg,
         attn_config: attn_cfg,
@@ -197,7 +180,6 @@ func new_transformer_layer(transformer_layer_config cfg) transformer_layer {
         use_rmsnorm: cfg.norm_type == "rmsnorm",
     }
 }
-
 func new_transformer_model(transformer_config cfg) transformer_model {
     []transformer_layer layers = []transformer_layer{cap: cfg.num_layers}
     int i = 0
@@ -218,7 +200,6 @@ func new_transformer_model(transformer_config cfg) transformer_model {
         layers[i] = new_transformer_layer(layer_cfg)
         i = i + 1
     }
-
     int embed_size = cfg.vocab_size * cfg.hidden_dim
     transformer_model {
         config: cfg,
@@ -229,32 +210,27 @@ func new_transformer_model(transformer_config cfg) transformer_model {
         lm_head_weight: fill_ramp(embed_size, 0.02),
     }
 }
-
 func new_transformer_block(transformer_layer_config cfg) transformer_block {
     transformer_block {
         layer: new_transformer_layer(cfg),
         position_encoding_type: cfg.position_embedding_type,
     }
 }
-
 func residual_add([]float a, []float b) []float {
     return add_vectors(a, b)
 }
-
 func apply_transformer_norm(transformer_layer layer, []float hidden_states, int batch_size, int seq_len) []float {
     if layer.use_rmsnorm {
         return rms_normalize(layer.rn1, hidden_states, batch_size, seq_len)
     }
     return layer_normalize(layer.ln1, hidden_states, batch_size, seq_len)
 }
-
 func apply_transformer_norm2(transformer_layer layer, []float hidden_states, int batch_size, int seq_len) []float {
     if layer.use_rmsnorm {
         return rms_normalize(layer.rn2, hidden_states, batch_size, seq_len)
     }
     return layer_normalize(layer.ln2, hidden_states, batch_size, seq_len)
 }
-
 func transformer_layer_at([]transformer_layer layers, int index) transformer_layer {
     transformer_layer value = layers[0]
     int i = 0
@@ -266,7 +242,6 @@ func transformer_layer_at([]transformer_layer layers, int index) transformer_lay
     }
     value
 }
-
 func forward_transformer_layer(
     transformer_layer layer,
     []float hidden_states,
@@ -278,7 +253,6 @@ func forward_transformer_layer(
     if layer.config.pre_norm {
         attn_input = apply_transformer_norm(layer, x, batch_size, seq_len)
     }
-
     []float attn_output
     if layer.config.position_embedding_type == "rope" {
         position_embedding_config rope_cfg = position_embedding_config {
@@ -297,12 +271,10 @@ func forward_transformer_layer(
     if !layer.config.pre_norm {
         after_attn = apply_transformer_norm(layer, after_attn, batch_size, seq_len)
     }
-
     []float ffn_input = after_attn
     if layer.config.pre_norm {
         ffn_input = apply_transformer_norm2(layer, after_attn, batch_size, seq_len)
     }
-
     []float ffn_output
     if layer.config.activation_type == "gelu" {
         ffn_output = forward_standard_ffn(layer.ffn, ffn_input, batch_size * seq_len)
@@ -311,14 +283,12 @@ func forward_transformer_layer(
     } else {
         ffn_output = forward_standard_ffn(layer.ffn, ffn_input, batch_size * seq_len)
     }
-
     []float out = residual_add(after_attn, ffn_output)
     if !layer.config.pre_norm {
         out = apply_transformer_norm2(layer, out, batch_size, seq_len)
     }
     out
 }
-
 func forward_transformer_block(
     transformer_block block,
     []float hidden_states,
@@ -327,7 +297,6 @@ func forward_transformer_block(
 ) []float {
     forward_transformer_layer(block.layer, hidden_states, batch_size, seq_len)
 }
-
 func forward_transformer(
     transformer_model model,
     []float hidden_states,
@@ -336,7 +305,6 @@ func forward_transformer(
 ) transformer_output {
     int hidden_dim = model.config.hidden_dim
     []float x = copy_vector(hidden_states)
-
     if model.config.position_embedding_type == "absolute" {
         position_embedding_config pos_cfg = position_embedding_config {
             hidden_dim: hidden_dim,
@@ -358,20 +326,17 @@ func forward_transformer(
         learned_position_embedding pos_embed = new_learned_position_embedding(pos_cfg)
         x = add_vectors(x, get_learned_position_embedding(pos_embed, seq_len))
     }
-
     int layer_idx = 0
     while layer_idx < model.num_layers {
         x = forward_transformer_layer(transformer_layer_at(model.layers, layer_idx), x, batch_size, seq_len)
         layer_idx = layer_idx + 1
     }
-
     []float logits = matmul_flat(x, model.lm_head_weight, batch_size * seq_len, hidden_dim, model.vocab_size)
     transformer_output {
         logits: logits,
         hidden_states: x,
     }
 }
-
 func compute_lm_loss(
     []float logits,
     []int target_ids,
@@ -418,7 +383,6 @@ func compute_lm_loss(
     }
     loss / (total * 1.0)
 }
-
 func get_model_complexity(
     transformer_model model,
     int batch_size,

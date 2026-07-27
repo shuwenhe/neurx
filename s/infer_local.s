@@ -1,12 +1,9 @@
 package main
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}
-
 struct tensor {
     []float data
     int size
 }
-
 struct checkpoint_header {
     int step
     float loss
@@ -15,18 +12,15 @@ struct checkpoint_header {
     int weight_cols
     int bias_size
 }
-
 func mod(int a, int b) int {
     if b == 0 {
         return 0
     }
     a - (a / b) * b
 }
-
 func float(int x) float {
     0.0 + x
 }
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -45,7 +39,6 @@ func int_to_str(int n) string {
     }
     s
 }
-
 func fmt_float(float val, int decimals) string {
     bool neg = val < 0.0
     if neg {
@@ -74,7 +67,6 @@ func fmt_float(float val, int decimals) string {
     }
     s
 }
-
 func substring(string s, int start, int end) string {
     string out = ""
     int i = start
@@ -84,7 +76,6 @@ func substring(string s, int start, int end) string {
     }
     out
 }
-
 func trim(string s) string {
     int begin = 0
     while begin < len(s) {
@@ -95,7 +86,6 @@ func trim(string s) string {
             break
         }
     }
-
     int finish = len(s)
     while finish > begin {
         string ch = string(s[finish - 1])
@@ -107,7 +97,6 @@ func trim(string s) string {
     }
     substring(s, begin, finish)
 }
-
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
@@ -122,7 +111,6 @@ func shell_escape(string s) string {
     }
     out + "'"
 }
-
 func digit_value(string ch) int {
     if ch == "0" {
         return 0
@@ -156,7 +144,6 @@ func digit_value(string ch) int {
     }
     -1
 }
-
 func parse_int_str(string s) int {
     string text = trim(s)
     if text == "" {
@@ -179,7 +166,6 @@ func parse_int_str(string s) int {
     }
     sign * value
 }
-
 func parse_float_str(string s) float {
     string text = trim(s)
     if text == "" {
@@ -220,7 +206,6 @@ func parse_float_str(string s) float {
     }
     out
 }
-
 func parse_pair_left(string text) int {
     string trimmed = trim(text)
     int comma = -1
@@ -237,7 +222,6 @@ func parse_pair_left(string text) int {
     }
     parse_int_str(substring(trimmed, 0, comma))
 }
-
 func parse_pair_right(string text) int {
     string trimmed = trim(text)
     int comma = -1
@@ -254,7 +238,6 @@ func parse_pair_right(string text) int {
     }
     parse_int_str(substring(trimmed, comma + 1, len(trimmed)))
 }
-
 func parse_csv_floats_fixed(string text, int expected_count) tensor {
     []float data = []float{cap: expected_count}
     string current = ""
@@ -277,23 +260,19 @@ func parse_csv_floats_fixed(string text, int expected_count) tensor {
     }
     tensor { data: data, size: out_i }
 }
-
 func read_line_command(string checkpoint_path, string line_no) string {
     trim(runtime_run_command_output("sed -n '" + line_no + "p' " + shell_escape(checkpoint_path)))
 }
-
 func load_checkpoint_header_from_file(string checkpoint_path) checkpoint_header {
     string step_line = read_line_command(checkpoint_path, "2")
     string loss_line = read_line_command(checkpoint_path, "3")
     string count_line = read_line_command(checkpoint_path, "4")
     string weight_shape_line = read_line_command(checkpoint_path, "6")
     string bias_shape_line = read_line_command(checkpoint_path, "9")
-
     string weight_shape = substring(weight_shape_line, 13, len(weight_shape_line))
     int weight_rows = parse_pair_left(weight_shape)
     int weight_cols = parse_pair_right(weight_shape)
     int bias_size = parse_int_str(substring(bias_shape_line, 13, len(bias_shape_line)))
-
     checkpoint_header {
         step: parse_int_str(substring(step_line, 5, len(step_line))),
         loss: parse_float_str(substring(loss_line, 5, len(loss_line))),
@@ -303,12 +282,10 @@ func load_checkpoint_header_from_file(string checkpoint_path) checkpoint_header 
         bias_size: bias_size,
     }
 }
-
 func load_bias_from_file(string checkpoint_path, int bias_size) tensor {
     string line = read_line_command(checkpoint_path, "10")
     parse_csv_floats_fixed(substring(line, 12, len(line)), bias_size)
 }
-
 func load_weight_row_from_file(string checkpoint_path, int row_id, int vocab_size) tensor {
     int start_index = row_id * vocab_size + 1
     int end_index = start_index + vocab_size - 1
@@ -316,7 +293,6 @@ func load_weight_row_from_file(string checkpoint_path, int row_id, int vocab_siz
     string command = "awk -F= '/^param0.data=/{print $2}' " + shell_escape(checkpoint_path) + " | cut -d',' -f" + field_range
     parse_csv_floats_fixed(trim(runtime_run_command_output(command)), vocab_size)
 }
-
 func ascii_code(string text, int idx) int {
     string ch = string(text[idx])
     if ch == " " {
@@ -402,7 +378,6 @@ func ascii_code(string text, int idx) int {
     }
     32
 }
-
 func argmax_next_token(tensor weight_row, tensor bias, int vocab_size) int {
     float best_logit = weight_row.data[0] + bias.data[0]
     int best_id = 0
@@ -417,14 +392,12 @@ func argmax_next_token(tensor weight_row, tensor bias, int vocab_size) int {
     }
     best_id
 }
-
 func generate_text_from_checkpoint(string checkpoint_path, int vocab_size, tensor bias, string seed, int max_new_chars) string {
     string output = seed
     int current_id = 32
     if len(seed) > 0 {
         current_id = mod(ascii_code(seed, len(seed) - 1), vocab_size)
     }
-
     int n = 0
     while n < max_new_chars {
         tensor weight_row = load_weight_row_from_file(checkpoint_path, current_id, vocab_size)
@@ -438,18 +411,14 @@ func generate_text_from_checkpoint(string checkpoint_path, int vocab_size, tenso
     }
     output
 }
-
 func main() {
     string checkpoint_path = runtime_env_get("NEURX_INFER_CHECKPOINT_PATH", "artifacts/checkpoints/llm_s_pretrain/final_model.neurx")
     string validate_only = runtime_env_get("NEURX_INFER_VALIDATE_ONLY", "")
-
     if !runtime_file_exists(checkpoint_path) {
         println("checkpoint file not found: " + checkpoint_path)
         return
     }
-
     checkpoint_header header = load_checkpoint_header_from_file(checkpoint_path)
-
     if validate_only == "1" {
         println("================================================")
         println("NeurX checkpoint validation")
@@ -463,19 +432,16 @@ func main() {
         println("================================================")
         return
     }
-
     tensor bias = load_bias_from_file(checkpoint_path, header.bias_size)
     if bias.size < header.bias_size {
         println("Could not load bias vector from checkpoint: " + checkpoint_path)
         return
     }
-
     string seed = runtime_env_get("NEURX_INFER_SEED", "neurx ")
     int max_new_chars = parse_int_str(runtime_env_get("NEURX_INFER_MAX_NEW_CHARS", "120"))
     if max_new_chars <= 0 {
         max_new_chars = 120
     }
-
     println("================================================")
     println("NeurX checkpoint inference")
     println("================================================")

@@ -1,31 +1,24 @@
 package main
-
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_output, runtime_shell_escape}
 use std.io.println
-
 func main() int {
     string train_bin = runtime_env_get("NEURX_TRAIN_BIN", "/tmp/neurx_train")
-
     string script_dir = runtime_env_get("NEURX_ROOT", ".")
     string checkpoint_dir = script_dir + "/artifacts/checkpoints"
     _ = runtime_run_command("mkdir -p " + runtime_shell_escape(checkpoint_dir))
-
     println("========================================")
     println("NeurX Training Pipeline")
     println("S Compiler: " + script_dir + "/.local/bin/s")
     println("Output Dir: " + checkpoint_dir)
     println("========================================")
     println("")
-
     if !runtime_run_command("test -f " + runtime_shell_escape(train_bin)).ok {
         println("[ERROR] Training binary not found: " + train_bin)
         return 1
     }
-
     _ = runtime_run_command("chmod +x " + runtime_shell_escape(train_bin))
     string train_output = runtime_run_command_output(runtime_shell_escape(train_bin) + " 2>&1 || true")
     println(train_output)
-
     string step = extract_field(train_output, "Total Steps:")
     string loss = extract_field(train_output, "Final Loss:")
     string best_loss = extract_field(train_output, "Best Loss:")
@@ -38,7 +31,6 @@ func main() int {
     if best_loss == "" {
         best_loss = "1.10"
     }
-
     println("")
     println("--- Generating checkpoint Files ---")
     string materializer = runtime_env_get("NEURX_MATERIALIZE_BIN", script_dir + "/artifacts/build/materialize_llm_checkpoint")
@@ -61,7 +53,6 @@ func main() int {
             return 1
         }
     }
-
     string final_path = checkpoint_dir + "/final_model.neurx"
     string best_path = checkpoint_dir + "/best_model.neurx"
     string latest_path = checkpoint_dir + "/latest_checkpoint.txt"
@@ -71,12 +62,10 @@ func main() int {
     if !runtime_run_command(cmd).ok {
         return 1
     }
-
     println("")
     println("--- checkpoint Files Generated ---")
     _ = runtime_run_command("ls -la " + runtime_shell_escape(checkpoint_dir) + "/*.neurx 2>/dev/null || true")
     _ = runtime_run_command("ls -la " + runtime_shell_escape(checkpoint_dir + "/latest_checkpoint.txt") + " 2>/dev/null || true")
-
     println("")
     println("========================================")
     println("Training Pipeline Complete!")
@@ -88,7 +77,6 @@ func main() int {
     println("  - latest_checkpoint.txt")
     0
 }
-
 func extract_field(string text, string marker) string {
     []string lines = split_lines(text)
     int i = 0
@@ -101,7 +89,6 @@ func extract_field(string text, string marker) string {
     }
     ""
 }
-
 func split_lines(string text) []string {
     []string lines = []string{cap: 0}
     string current = ""
@@ -125,7 +112,6 @@ func split_lines(string text) []string {
     }
     lines
 }
-
 func starts_with(string text, string prefix) bool {
     len(prefix) <= len(text) && slice(text, 0, len(prefix)) == prefix
 }

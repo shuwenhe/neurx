@@ -1,11 +1,9 @@
 package main
-
 use std.io
 use std.os
 use std.path
 use std.time
 use std.exec
-
 struct TestConfig {
     scriptDir string
     projectRoot string
@@ -15,26 +13,22 @@ struct TestConfig {
     stepsPhase2 int
     maxSteps int
 }
-
 func logTest(config TestConfig, message string) error {
     timestamp = time.Now().Format(time.RFC3339)
     line = "[TEST] " + message
     io.Println(line)
     return io.AppendFile(config.testLog, line + "\n")
 }
-
 func logInfo(config TestConfig, message string) error {
     line = "[INFO] " + message
     io.Println(line)
     return io.AppendFile(config.testLog, line + "\n")
 }
-
 func logError(config TestConfig, message string) error {
     line = "[ERROR] " + message
     io.Println(line)
     return io.AppendFile(config.testLog, line + "\n")
 }
-
 func logSection(config TestConfig, title string) error {
     io.Println("")
     line = "==== " + title + " ===="
@@ -42,13 +36,11 @@ func logSection(config TestConfig, title string) error {
     io.Println("")
     return io.AppendFile(config.testLog, "\n" + line + "\n\n")
 }
-
 func readStateFile(filePath string) map[string]string {
     content, err = os.ReadFile(filePath)
     if err != nil {
         return make(map[string]string)
     }
-    
     state = make(map[string]string)
     lines = strings.Split(string(content), "\n")
     for _, line := range lines {
@@ -59,11 +51,9 @@ func readStateFile(filePath string) map[string]string {
     }
     return state
 }
-
 func main() {
     scriptDir = os.Args[0]
     projectRoot = scriptDir + "/../../.."
-    
     config := TestConfig{
         scriptDir: scriptDir,
         projectRoot: projectRoot,
@@ -73,7 +63,6 @@ func main() {
         stepsPhase2: 20,
     }
     config.maxSteps = config.stepsPhase1 + config.stepsPhase2
-    
     io.Println("================================================")
     io.Println("GPU Checkpoint Resume End-to-End Test")
     io.Println("================================================")
@@ -81,17 +70,13 @@ func main() {
     io.Println("Checkpoint Dir: " + config.checkpointDir)
     io.Println("Test Log: " + config.testLog)
     io.Println("")
-    
     os.MkdirAll(config.checkpointDir, 0755)
     os.MkdirAll(path.Dir(config.testLog), 0755)
-    
     logSection(config, "Phase 1: Fresh Training (" + string(config.stepsPhase1) + " steps)")
-    
     logTest(config, "Clearing old checkpoint...")
     os.Remove(config.checkpointDir + "/training_state.txt")
     os.Remove(config.checkpointDir + "/checkpoint.state")
     os.RemoveAll(config.checkpointDir + "/*.weights.f32")
-    
     logTest(config, "Starting fresh training...")
     env := map[string]string{
         "NEURX_PRETRAIN_OUTPUT_DIR": config.checkpointDir,
@@ -99,7 +84,6 @@ func main() {
         "NEURX_PRETRAIN_SAVE_INTERVAL": "3",
         "NEURX_PRETRAIN_RESUME": "0",
     }
-    
     cmd := exec.Command("make", "pretrain-gpu-fresh")
     cmd.Dir = config.projectRoot
     cmd.Env = env
@@ -108,23 +92,16 @@ func main() {
         logError(config, "Training failed: " + err.Error())
         os.Exit(1)
     }
-    
     io.Println(string(output))
-    
     time.Sleep(2 * time.Second)
-    
     phase1State := readStateFile(config.checkpointDir + "/training_state.txt")
     phase1Step := phase1State["step"]
     phase1Loss := phase1State["loss"]
-    
     logTest(config, "Phase 1 Results: step=" + phase1Step + ", loss=" + phase1Loss)
-    
     logSection(config, "Phase 2: Resume Training (" + string(config.stepsPhase2) + " more steps)")
-    
     logTest(config, "Starting resumed training from step " + phase1Step + "...")
     env["NEURX_PRETRAIN_STEPS"] = string(config.maxSteps)
     env["NEURX_PRETRAIN_RESUME"] = "1"
-    
     cmd = exec.Command("make", "pretrain-gpu")
     cmd.Dir = config.projectRoot
     cmd.Env = env
@@ -133,19 +110,13 @@ func main() {
         logError(config, "Resume training failed: " + err.Error())
         os.Exit(1)
     }
-    
     io.Println(string(output))
-    
     time.Sleep(2 * time.Second)
-    
     phase2State := readStateFile(config.checkpointDir + "/training_state.txt")
     phase2Step := phase2State["step"]
     phase2Loss := phase2State["loss"]
-    
     logTest(config, "Phase 2 Results: step=" + phase2Step + ", loss=" + phase2Loss)
-    
     logSection(config, "Validation & Verification")
-    
     io.Println("================================================")
     io.Println("End-to-End Test Results")
     io.Println("================================================")
@@ -159,6 +130,5 @@ func main() {
     io.Println("")
     io.Println("Test Log: " + config.testLog)
     io.Println("")
-    
     io.Println("✅ ALL TESTS PASSED")
 }

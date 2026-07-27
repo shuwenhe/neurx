@@ -1,9 +1,7 @@
 package neurx.agent.skill_feedback
-
 use neurx.agent.observation
 use neurx.agent.trace
 use neurx.agent.memory
-
 struct agent_skill_feedback_state {
     string skill_name
     string task
@@ -12,7 +10,6 @@ struct agent_skill_feedback_state {
     int step
     bool success
 }
-
 func new_agent_skill_feedback_state() agent_skill_feedback_state {
     agent_skill_feedback_state {
         skill_name: "",
@@ -23,7 +20,6 @@ func new_agent_skill_feedback_state() agent_skill_feedback_state {
         success: false,
     }
 }
-
 func agent_skill_feedback_from_trace(agent_trace_state trace_state, agent_memory_state memory_state) agent_skill_feedback_state {
     string task = agent_trace_last_task(trace_state)
     string action = agent_trace_last_action(trace_state)
@@ -35,7 +31,6 @@ func agent_skill_feedback_from_trace(agent_trace_state trace_state, agent_memory
     if route_result.found {
         route = route_result.value
     }
-
     string signal = action
     if observation != "" {
         if parsed.status != "" {
@@ -45,7 +40,6 @@ func agent_skill_feedback_from_trace(agent_trace_state trace_state, agent_memory
             signal = signal + ";kind=" + parsed.kind
         }
     }
-
     agent_skill_feedback_state {
         skill_name: route,
         task: task,
@@ -55,11 +49,9 @@ func agent_skill_feedback_from_trace(agent_trace_state trace_state, agent_memory
         success: success,
     }
 }
-
 func agent_skill_feedback_state_dict(agent_skill_feedback_state state) agent_skill_feedback_state {
     state
 }
-
 func agent_skill_feedback_load_state_dict(agent_skill_feedback_state state, agent_skill_feedback_state other) agent_skill_feedback_state {
     other
 }

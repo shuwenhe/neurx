@@ -1,8 +1,6 @@
 package neurx.tokenizer.model_bpe
-
 use neurx.strings
 use neurx.runtime.io.{io_println}
-
 struct token_config {
     int vocab_size
     int min_frequency
@@ -10,12 +8,10 @@ struct token_config {
     bool add_bos_token
     bool add_space_prefix
 }
-
 struct bpe_vocab {
     []string tokens
     int vocab_size
 }
-
 struct bpe_tokenizer {
     bpe_vocab vocab
     token_config config
@@ -29,18 +25,15 @@ struct bpe_tokenizer {
     int cache_hits
     int cache_misses
 }
-
 struct bpe_batch_result {
     []int token_ids
     int batch_size
     int seq_length
 }
-
 struct bpe_cache_stats {
     int cache_hits
     int cache_misses
 }
-
 func new_tokenizer_config() token_config {
     token_config {
         vocab_size: 16000,
@@ -50,17 +43,14 @@ func new_tokenizer_config() token_config {
         add_space_prefix: true,
     }
 }
-
 func new_bpe_tokenizer([]string vocab_list, token_config cfg) bpe_tokenizer {
     bpe_vocab vocab
     vocab.tokens = copy_strings(vocab_list)
     vocab.vocab_size = len(vocab_list)
-
     int pad_id = find_token_id(vocab_list, "<pad>")
     int eos_id = find_token_id(vocab_list, "<eos>")
     int bos_id = find_token_id(vocab_list, "<bos>")
     int unk_id = find_token_id(vocab_list, "<unk>")
-
     if pad_id < 0 {
         pad_id = 0
     }
@@ -73,7 +63,6 @@ func new_bpe_tokenizer([]string vocab_list, token_config cfg) bpe_tokenizer {
     if unk_id < 0 {
         unk_id = 3
     }
-
     bpe_tokenizer {
         vocab: vocab,
         config: cfg,
@@ -88,7 +77,6 @@ func new_bpe_tokenizer([]string vocab_list, token_config cfg) bpe_tokenizer {
         cache_misses: 0,
     }
 }
-
 func find_token_id([]string vocab_list, string token_str) int {
     int i = 0
     while i < len(vocab_list) {
@@ -99,28 +87,22 @@ func find_token_id([]string vocab_list, string token_str) int {
     }
     -1
 }
-
 func encode(bpe_tokenizer tokenizer, string text) []int {
     tokenizer.cache_misses = tokenizer.cache_misses + 1
-
     string normalized = text
     if tokenizer.config.add_space_prefix && len(text) > 0 {
         normalized = " " + text
     }
-
     []int token_ids = text_to_char_ids(normalized, tokenizer)
     token_ids = apply_bpe_merges(token_ids, tokenizer.merge_lefts, tokenizer.merge_rights, tokenizer.num_merges)
-
     if tokenizer.config.add_bos_token {
         token_ids = prepend_int(token_ids, tokenizer.bos_token_id)
     }
     if tokenizer.config.add_eos_token {
         token_ids = append_int(token_ids, tokenizer.eos_token_id)
     }
-
     token_ids
 }
-
 func text_to_char_ids(string text, bpe_tokenizer tokenizer) []int {
     int n = len(text)
     []int ids = []int{cap: n}
@@ -136,7 +118,6 @@ func text_to_char_ids(string text, bpe_tokenizer tokenizer) []int {
     }
     ids
 }
-
 func apply_bpe_merges([]int tokens, []int merge_lefts, []int merge_rights, int num_merges) []int {
     []int current_tokens = copy_ints(tokens)
     int merge_idx = 0
@@ -148,7 +129,6 @@ func apply_bpe_merges([]int tokens, []int merge_lefts, []int merge_rights, int n
     }
     current_tokens
 }
-
 func merge_token_pair([]int tokens, int left, int right, int merge_id) []int {
     []int result = []int{cap: len(tokens)}
     int i = 0
@@ -163,7 +143,6 @@ func merge_token_pair([]int tokens, int left, int right, int merge_id) []int {
     }
     result
 }
-
 func decode(bpe_tokenizer tokenizer, []int token_ids) string {
     []string out_tokens = []string{cap: len(token_ids)}
     int i = 0
@@ -179,7 +158,6 @@ func decode(bpe_tokenizer tokenizer, []int token_ids) string {
     }
     join_tokens(out_tokens, tokenizer.config.add_space_prefix)
 }
-
 func join_tokens([]string tokens, bool remove_space_prefix) string {
     string result = ""
     int i = 0
@@ -191,16 +169,13 @@ func join_tokens([]string tokens, bool remove_space_prefix) string {
         result = neurx.strings.concat2(result, token)
         i = i + 1
     }
-
     if remove_space_prefix && len(result) > 0 {
         if neurx.strings.substring(result, 0, 1) == " " {
             result = neurx.strings.substring(result, 1, len(result))
         }
     }
-
     result
 }
-
 func is_special_token(string token) bool {
     if neurx.strings.strings_eq(token, "<pad>") { return true }
     if neurx.strings.strings_eq(token, "<eos>") { return true }
@@ -208,7 +183,6 @@ func is_special_token(string token) bool {
     if neurx.strings.strings_eq(token, "<unk>") { return true }
     false
 }
-
 func should_add_space_before(string token) bool {
     if len(token) == 0 {
         return false
@@ -224,7 +198,6 @@ func should_add_space_before(string token) bool {
     }
     true
 }
-
 func encode_batch(bpe_tokenizer tokenizer, []string texts, int max_length) bpe_batch_result {
     []int flat_tokens = []int{cap: len(texts) * max_length}
     int i = 0
@@ -244,7 +217,6 @@ func encode_batch(bpe_tokenizer tokenizer, []string texts, int max_length) bpe_b
         seq_length: max_length,
     }
 }
-
 func decode_batch(bpe_tokenizer tokenizer, bpe_batch_result batch) []string {
     []string texts = []string{cap: batch.batch_size}
     int i = 0
@@ -262,7 +234,6 @@ func decode_batch(bpe_tokenizer tokenizer, bpe_batch_result batch) []string {
     }
     texts
 }
-
 func pad_sequence([]int tokens, int target_len, int pad_id) []int {
     if len(tokens) >= target_len {
         []int truncated = []int{cap: target_len}
@@ -273,7 +244,6 @@ func pad_sequence([]int tokens, int target_len, int pad_id) []int {
         }
         return truncated
     }
-
     []int padded = []int{cap: target_len}
     int j = 0
     while j < len(tokens) {
@@ -286,29 +256,24 @@ func pad_sequence([]int tokens, int target_len, int pad_id) []int {
     }
     padded
 }
-
 func get_vocab_size(bpe_tokenizer tokenizer) int {
     tokenizer.vocab.vocab_size
 }
-
 func id_to_token(bpe_tokenizer tokenizer, int token_id) string {
     if token_id >= 0 && token_id < tokenizer.vocab.vocab_size {
         return token_at(tokenizer.vocab.tokens, token_id)
     }
     "<unk>"
 }
-
 func token_to_id(bpe_tokenizer tokenizer, string token_str) int {
     find_token_id(tokenizer.vocab.tokens, token_str)
 }
-
 func get_cache_stats(bpe_tokenizer tokenizer) bpe_cache_stats {
     bpe_cache_stats {
         cache_hits: tokenizer.cache_hits,
         cache_misses: tokenizer.cache_misses,
     }
 }
-
 func print_statistics(bpe_tokenizer tokenizer) string {
     string stats = "tokenizer Statistics:\n"
     stats = stats + "  vocab_size=" + int_to_string(tokenizer.vocab.vocab_size) + "\n"
@@ -317,7 +282,6 @@ func print_statistics(bpe_tokenizer tokenizer) string {
     io_println(stats)
     stats
 }
-
 func copy_strings([]string values) []string {
     []string out = []string{cap: len(values)}
     int i = 0
@@ -327,7 +291,6 @@ func copy_strings([]string values) []string {
     }
     out
 }
-
 func copy_ints([]int values) []int {
     []int out = []int{cap: len(values)}
     int i = 0
@@ -337,7 +300,6 @@ func copy_ints([]int values) []int {
     }
     out
 }
-
 func token_at([]string tokens, int idx) string {
     if idx < 0 || idx >= len(tokens) {
         return "<unk>"
@@ -345,7 +307,6 @@ func token_at([]string tokens, int idx) string {
     string token = tokens[idx]
     token
 }
-
 func prepend_int([]int tokens, int token_id) []int {
     []int result = []int{cap: len(tokens) + 1}
     result.push(token_id)
@@ -356,7 +317,6 @@ func prepend_int([]int tokens, int token_id) []int {
     }
     result
 }
-
 func append_int([]int tokens, int token_id) []int {
     []int result = []int{cap: len(tokens) + 1}
     int i = 0
@@ -367,7 +327,6 @@ func append_int([]int tokens, int token_id) []int {
     result.push(token_id)
     result
 }
-
 func int_to_string(int x) string {
     if x == 0 {
         return "0"

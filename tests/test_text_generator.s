@@ -1,7 +1,5 @@
 package main
-
 use neurx.inference
-
 func assert_true(bool value, string name) {
     if value {
         println("PASS " + name)
@@ -9,7 +7,6 @@ func assert_true(bool value, string name) {
         println("FAIL " + name)
     }
 }
-
 func dummy_forward([]int token_ids) []float {
     int n = 8
     []float logits = []float{cap: n}
@@ -26,7 +23,6 @@ func dummy_forward([]int token_ids) []float {
     }
     logits
 }
-
 func contrastive_forward([]int token_ids) []float {
     int n = 6
     []float logits = []float{cap: n}
@@ -44,7 +40,6 @@ func contrastive_forward([]int token_ids) []float {
     }
     logits
 }
-
 func ngram_forward([]int token_ids) []float {
     int n = 6
     []float logits = []float{cap: n}
@@ -65,14 +60,12 @@ func ngram_forward([]int token_ids) []float {
     }
     logits
 }
-
 func test_generate_greedy_full_text() {
     neurx.inference.generator_config cfg = neurx.inference.default_generator_config()
     cfg.sampling = neurx.inference.sampling_strategies.greedy_config()
     cfg.max_new_tokens = 3
     cfg.return_full_text = true
     cfg.return_scores = true
-
     neurx.inference.generation_result result = neurx.inference.generate([5, 6], cfg)
     assert_true(len(result.sequences) == 1, "greedy sequence count")
     assert_true(len(result.sequences[0]) >= 3, "greedy full text length")
@@ -84,13 +77,11 @@ func test_generate_greedy_full_text() {
     assert_true(len(result.top_logprobs[0]) >= 1, "greedy top logprob steps")
     assert_true(len(result.top_logprobs[0][0]) >= 1, "greedy top logprob candidates")
 }
-
 func test_generate_new_tokens_only() {
     neurx.inference.generator_config cfg = neurx.inference.default_generator_config()
     cfg.sampling = neurx.inference.sampling_strategies.new_sampling_config()
     cfg.max_new_tokens = 2
     cfg.return_full_text = false
-
     neurx.inference.generation_result result = neurx.inference.generate([3, 4], cfg)
     assert_true(len(result.sequences) == 1, "new token sequence count")
     assert_true(len(result.sequences[0]) <= 3, "new token only length")
@@ -98,7 +89,6 @@ func test_generate_new_tokens_only() {
         assert_true(result.sequences[0][0] != 3, "new token omits prompt")
     }
 }
-
 func test_generate_beam_search() {
     neurx.inference.generator_config cfg = neurx.inference.default_generator_config()
     cfg.sampling = neurx.inference.sampling_strategies.new_sampling_config()
@@ -107,18 +97,15 @@ func test_generate_beam_search() {
     cfg.sampling.do_sample = false
     cfg.max_new_tokens = 3
     cfg.return_full_text = true
-
     neurx.inference.generation_result result = neurx.inference.generate([1], cfg)
     assert_true(len(result.sequences) == 1, "beam sequence count")
     assert_true(len(result.sequences[0]) >= 2, "beam produced tokens")
 }
-
 func test_generate_with_forward() {
     neurx.inference.generator_config cfg = neurx.inference.default_generator_config()
     cfg.sampling = neurx.inference.sampling_strategies.greedy_config()
     cfg.max_new_tokens = 3
     cfg.return_full_text = true
-
     neurx.inference.generation_result result = neurx.inference.generate_with_forward([1], dummy_forward, cfg)
     assert_true(len(result.sequences) == 1, "forward sequence count")
     assert_true(len(result.sequences[0]) >= 2, "forward generated tokens")
@@ -128,7 +115,6 @@ func test_generate_with_forward() {
     assert_true(len(result.top_logprobs[0]) >= 1, "forward top logprob steps")
     assert_true(result.top_logprobs[0][0][0].token_id >= 0, "forward top logprob token id")
 }
-
 func test_generate_overload_with_forward() {
     neurx.inference.generator_config cfg = neurx.inference.default_generator_config()
     cfg.sampling = neurx.inference.sampling_strategies.greedy_config()
@@ -139,7 +125,6 @@ func test_generate_overload_with_forward() {
     assert_true(len(result.token_logprobs) == 1, "forward overload logprob sequence count")
     assert_true(len(result.top_logprobs[0]) >= 1, "forward overload top logprob steps")
 }
-
 func test_generate_contrastive_with_forward() {
     neurx.inference.generator_config cfg = neurx.inference.default_generator_config()
     cfg.sampling = neurx.inference.sampling_strategies.new_sampling_config()
@@ -151,7 +136,6 @@ func test_generate_contrastive_with_forward() {
     cfg.sampling.typical_p = 1.0
     cfg.max_new_tokens = 2
     cfg.return_full_text = false
-
     neurx.inference.generation_result result = neurx.inference.generate_with_forward([5], contrastive_forward, cfg)
     assert_true(len(result.sequences) == 1, "contrastive forward sequence count")
     assert_true(len(result.sequences[0]) == 2, "contrastive forward token count")
@@ -160,7 +144,6 @@ func test_generate_contrastive_with_forward() {
     assert_true(len(result.token_logprobs[0]) == 2, "contrastive logprob steps")
     assert_true(len(result.top_logprobs[0][0]) >= 1, "contrastive top logprob candidates")
 }
-
 func test_generate_no_repeat_ngram_with_forward() {
     neurx.inference.generator_config cfg = neurx.inference.default_generator_config()
     cfg.sampling = neurx.inference.sampling_strategies.new_sampling_config()
@@ -171,7 +154,6 @@ func test_generate_no_repeat_ngram_with_forward() {
     cfg.max_new_tokens = 4
     cfg.return_full_text = false
     cfg.force_eos = false
-
     neurx.inference.generation_result result = neurx.inference.generate_with_forward([], ngram_forward, cfg)
     assert_true(len(result.sequences) == 1, "ngram forward sequence count")
     assert_true(len(result.sequences[0]) == 4, "ngram forward token count")
@@ -182,7 +164,6 @@ func test_generate_no_repeat_ngram_with_forward() {
     assert_true(len(result.token_logprobs[0]) == 4, "ngram logprob steps")
     assert_true(len(result.top_logprobs[0][0]) >= 1, "ngram top logprob candidates")
 }
-
 func main() {
     println("NeurX text generator tests")
     test_generate_greedy_full_text()

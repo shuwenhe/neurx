@@ -1,13 +1,9 @@
 package main
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_run_command_output}
-
 extern "intrinsic" func __host_write_text_file(string path, string content) int
-
 func runtime_write_text_file(string path, string content) () {
     _ = __host_write_text_file(path, content)
 }
-
 struct train_cache {
     []float x
     []float q
@@ -18,7 +14,6 @@ struct train_cache {
     []float probabilities
     float loss
 }
-
 struct adamw_state {
     []float params
     []float first_moment
@@ -28,7 +23,6 @@ struct adamw_state {
     float beta2_power
     float last_loss
 }
-
 func zeros(int n) []float {
     []float out = []float{cap: n}
     int i = 0
@@ -38,7 +32,6 @@ func zeros(int n) []float {
     }
     out
 }
-
 func initial_parameters(int vocab_size, int hidden_size) []float {
     int embedding_count = vocab_size * hidden_size
     int matrix_count = hidden_size * hidden_size
@@ -53,27 +46,21 @@ func initial_parameters(int vocab_size, int hidden_size) []float {
     }
     out
 }
-
 func embedding_offset() int {
     0
 }
-
 func q_offset(int vocab_size, int hidden_size) int {
     vocab_size * hidden_size
 }
-
 func k_offset(int vocab_size, int hidden_size) int {
     q_offset(vocab_size, hidden_size) + hidden_size * hidden_size
 }
-
 func v_offset(int vocab_size, int hidden_size) int {
     k_offset(vocab_size, hidden_size) + hidden_size * hidden_size
 }
-
 func lm_head_offset(int vocab_size, int hidden_size) int {
     v_offset(vocab_size, hidden_size) + hidden_size * hidden_size
 }
-
 func exp_approx(float x) float {
     float value = x
     if value > 12.0 {
@@ -95,7 +82,6 @@ func exp_approx(float x) float {
     }
     result
 }
-
 func log_approx(float x) float {
     if x <= 0.0 {
         return -100.0
@@ -124,7 +110,6 @@ func log_approx(float x) float {
     }
     2.0 * series + (exponent as float) * 0.6931471805599453
 }
-
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -140,7 +125,6 @@ func sqrt_approx(float x) float {
     }
     result
 }
-
 func forward(
     []float params,
     []int inputs,
@@ -156,7 +140,6 @@ func forward(
     []float attention = zeros(seq_len * seq_len)
     []float context = zeros(seq_len * hidden_size)
     []float probabilities = zeros(seq_len * vocab_size)
-
     int t = 0
     while t < seq_len {
         int h = 0
@@ -166,7 +149,6 @@ func forward(
         }
         t = t + 1
     }
-
     t = 0
     while t < seq_len {
         int o = 0
@@ -189,7 +171,6 @@ func forward(
         }
         t = t + 1
     }
-
     float scale = 1.0 / sqrt_approx(hidden_size as float)
     t = 0
     while t < seq_len {
@@ -229,7 +210,6 @@ func forward(
         }
         t = t + 1
     }
-
     float loss = 0.0
     t = 0
     while t < seq_len {
@@ -264,7 +244,6 @@ func forward(
         loss = loss - log_approx(probabilities[t * vocab_size + targets[t]] + 0.00000001)
         t = t + 1
     }
-
     train_cache {
         x: x,
         q: q,
@@ -276,7 +255,6 @@ func forward(
         loss: loss / (seq_len as float),
     }
 }
-
 func backward(
     []float params,
     train_cache cache,
@@ -292,7 +270,6 @@ func backward(
     []float d_k = zeros(seq_len * hidden_size)
     []float d_v = zeros(seq_len * hidden_size)
     []float d_x = zeros(seq_len * hidden_size)
-
     int t = 0
     while t < seq_len {
         int token = 0
@@ -313,7 +290,6 @@ func backward(
         }
         t = t + 1
     }
-
     float scale = 1.0 / sqrt_approx(hidden_size as float)
     t = 0
     while t < seq_len {
@@ -351,7 +327,6 @@ func backward(
         }
         t = t + 1
     }
-
     t = 0
     while t < seq_len {
         int i = 0
@@ -379,7 +354,6 @@ func backward(
     }
     grads
 }
-
 func adamw_update(adamw_state state, []float grads, float loss, float learning_rate, float weight_decay) adamw_state {
     float beta1 = 0.9
     float beta2 = 0.999
@@ -408,7 +382,6 @@ func adamw_update(adamw_state state, []float grads, float loss, float learning_r
         last_loss: loss,
     }
 }
-
 func gradient_relative_error(
     []float params,
     []float analytic,
@@ -437,7 +410,6 @@ func gradient_relative_error(
     }
     worst
 }
-
 func save_checkpoint(string path, adamw_state state, float loss) {
     string text = "version=1\n"
     text = text + "step=" + int_to_string(state.step) + "\n"
@@ -449,7 +421,6 @@ func save_checkpoint(string path, adamw_state state, float loss) {
     text = text + "second_moment=" + floats_to_string(state.second_moment) + "\n"
     runtime_write_text_file(path, text)
 }
-
 func load_checkpoint(string path, []float fallback_params) adamw_state {
     if !runtime_file_exists(path) {
         return adamw_state {
@@ -488,7 +459,6 @@ func load_checkpoint(string path, []float fallback_params) adamw_state {
         last_loss: parse_float(value_for_key(text, "loss")),
     }
 }
-
 func main() int {
     int vocab_size = 4
     int hidden_size = 2
@@ -501,7 +471,6 @@ func main() int {
     string checkpoint_path = output_dir + "/checkpoint.sckpt"
     bool resume = parse_int(runtime_env_get("NEURX_TINY_RESUME", "1"), 1) > 0
     _ = runtime_run_command_output("mkdir -p " + shell_escape(output_dir))
-
     []float initial = initial_parameters(vocab_size, hidden_size)
     adamw_state state = load_checkpoint(checkpoint_path, initial)
     if !resume {
@@ -515,7 +484,6 @@ func main() int {
             last_loss: 0.0,
         }
     }
-
     train_cache initial_cache = forward(state.params, inputs, targets, vocab_size, hidden_size)
     []float initial_grads = backward(state.params, initial_cache, inputs, targets, vocab_size, hidden_size)
     float gradient_error = gradient_relative_error(state.params, initial_grads, inputs, targets, vocab_size, hidden_size)
@@ -524,7 +492,6 @@ func main() int {
         println("[tiny-s] ERROR: analytical backward failed numerical reference")
         return 2
     }
-
     float start_loss = initial_cache.loss
     while state.step < max_steps {
         train_cache cache = forward(state.params, inputs, targets, vocab_size, hidden_size)
@@ -545,7 +512,6 @@ func main() int {
     }
     0
 }
-
 func copy_floats([]float values) []float {
     []float out = zeros(len(values))
     int i = 0
@@ -555,14 +521,12 @@ func copy_floats([]float values) []float {
     }
     out
 }
-
 func abs_float(float value) float {
     if value < 0.0 {
         return 0.0 - value
     }
     value
 }
-
 func floats_to_string([]float values) string {
     string out = ""
     int i = 0
@@ -575,7 +539,6 @@ func floats_to_string([]float values) string {
     }
     out
 }
-
 func parse_float_list(string text, int expected) []float {
     []float out = zeros(expected)
     int count = 0
@@ -597,7 +560,6 @@ func parse_float_list(string text, int expected) []float {
     }
     out
 }
-
 func value_for_key(string text, string key) string {
     string prefix = key + "="
     int line_start = 0
@@ -614,7 +576,6 @@ func value_for_key(string text, string key) string {
     }
     ""
 }
-
 func starts_with(string text, string prefix) bool {
     if len(text) < len(prefix) {
         return false
@@ -628,7 +589,6 @@ func starts_with(string text, string prefix) bool {
     }
     true
 }
-
 func substring(string text, int start, int end) string {
     string out = ""
     int i = start
@@ -638,7 +598,6 @@ func substring(string text, int start, int end) string {
     }
     out
 }
-
 func parse_int(string text, int fallback) int {
     if len(text) == 0 {
         return fallback
@@ -659,7 +618,6 @@ func parse_int(string text, int fallback) int {
     }
     value * sign
 }
-
 func parse_float(string text) float {
     if len(text) == 0 {
         return 0.0
@@ -691,7 +649,6 @@ func parse_float(string text) float {
     }
     value
 }
-
 func int_to_string(int value) string {
     if value == 0 {
         return "0"
@@ -712,7 +669,6 @@ func int_to_string(int value) string {
     }
     out
 }
-
 func float_to_string(float value, int decimals) string {
     float current = value
     string out = ""
@@ -739,11 +695,9 @@ func float_to_string(float value, int decimals) string {
     }
     out
 }
-
 func string_char(int code) string {
     string(code)
 }
-
 func shell_escape(string text) string {
     string out = "'"
     int i = 0

@@ -1,7 +1,5 @@
 package neurx.platform.diagnostics
-
 use neurx.platform.config.{runtime_config_parse_result, get_runtime_config}
-
 struct runtime_info_state {
     string tensor_version
     string runtime_name
@@ -18,13 +16,11 @@ struct runtime_info_state {
     string env_fallback_to_cpu
     string env_log_level
 }
-
 struct check_result {
     string name
     bool passed
     string detail
 }
-
 func runtime_info() runtime_info_state {
     runtime_config_parse_result cfg_out = get_runtime_config()
     runtime_info_state {
@@ -44,7 +40,6 @@ func runtime_info() runtime_info_state {
         env_log_level: env_get("TENSOR_LOG_LEVEL", ""),
     }
 }
-
 func new_check_result(string name, bool passed, string detail) check_result {
     check_result {
         name: name,
@@ -52,32 +47,26 @@ func new_check_result(string name, bool passed, string detail) check_result {
         detail: detail,
     }
 }
-
 func doctor(bool require_cuda, bool require_mps) []check_result {
     runtime_info_state info = runtime_info()
     []check_result out = []check_result{}
-
     out.push(new_check_result("runtime", true, info.runtime_name))
     out.push(new_check_result("config.default_device", true, info.default_device))
     out.push(new_check_result("cuda.extension", info.cuda_available, "available=" + string(info.cuda_available)))
     out.push(new_check_result("mps.runtime", info.mps_available, "available=" + string(info.mps_available)))
     out.push(new_check_result("npu.runtime", info.npu_available, "available=" + string(info.npu_available)))
-
     if require_cuda && !info.cuda_available {
         out.push(new_check_result("require_cuda", false, "CUDA is required but unavailable"))
     } else {
         out.push(new_check_result("require_cuda", true, "require_cuda=" + string(require_cuda)))
     }
-
     if require_mps && !info.mps_available {
         out.push(new_check_result("require_mps", false, "MPS is required but unavailable"))
     } else {
         out.push(new_check_result("require_mps", true, "require_mps=" + string(require_mps)))
     }
-
     out
 }
-
 func format_doctor_report([]check_result results) string {
     string out = "neurx doctor report"
     int i = 0

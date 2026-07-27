@@ -1,6 +1,5 @@
 package neurx.model.llm.base_large_train
 use neurx.strings
-
 use neurx.data.loader.dataloader.{dataloader_batch, dataloader_state, dataloader_step_output, has_next, next_batch, reset_state, new_state}
 use neurx.strings
 use neurx.dataset_text.{build_vocab, encode_text}
@@ -17,7 +16,6 @@ use neurx.tensor.tensor
 use neurx.strings
 use neurx.tensor.new
 use neurx.strings
-
 struct gpt_large_training_config {
     int batch_size
     int seq_len
@@ -25,7 +23,6 @@ struct gpt_large_training_config {
     float learning_rate
     float label_smoothing
 }
-
 struct gpt_large_training_metrics {
     int step
     int epoch
@@ -34,7 +31,6 @@ struct gpt_large_training_metrics {
     float loss
     float perplexity
 }
-
 struct gpt_large_training_state {
     gpt_large_state model
     transformer backbone
@@ -52,7 +48,6 @@ struct gpt_large_training_state {
     float last_perplexity
     bool finished
 }
-
 struct transformer_layer_optimizer_state {
     adamw_optimizer w_q
     adamw_optimizer w_k
@@ -65,19 +60,15 @@ struct transformer_layer_optimizer_state {
     adamw_optimizer w_up
     adamw_optimizer b_up
 }
-
 func copy_float([]float values) []float {
     values
 }
-
 func copy_int([]int values) []int {
     values
 }
-
 func copy_tensor(tensor value) tensor {
     new(copy_float(value.data), copy_int(value.shape), value.requires_grad)
 }
-
 func copy_adamw_optimizer(adamw_optimizer optimizer) adamw_optimizer {
     adamw_optimizer {
         lr: optimizer.lr,
@@ -92,7 +83,6 @@ func copy_adamw_optimizer(adamw_optimizer optimizer) adamw_optimizer {
         v: copy_float(optimizer.v),
     }
 }
-
 func copy_layer_optimizer_state(transformer_layer_optimizer_state state) transformer_layer_optimizer_state {
     transformer_layer_optimizer_state {
         w_q: copy_adamw_optimizer(state.w_q),
@@ -107,7 +97,6 @@ func copy_layer_optimizer_state(transformer_layer_optimizer_state state) transfo
         b_up: copy_adamw_optimizer(state.b_up),
     }
 }
-
 func new_layer_optimizer_state(transformer_layer layer, float lr, float beta1, float beta2, float eps, float weight_decay) transformer_layer_optimizer_state {
     transformer_layer_optimizer_state {
         w_q: new_adamw(lr, beta1, beta2, eps, weight_decay),
@@ -122,7 +111,6 @@ func new_layer_optimizer_state(transformer_layer layer, float lr, float beta1, f
         b_up: new_adamw(lr, beta1, beta2, eps, 0.0),
     }
 }
-
 func new_backbone_optimizer_states(transformer backbone, float lr, float beta1, float beta2, float eps, float weight_decay) []transformer_layer_optimizer_state {
     int n = len(backbone.layers)
     []transformer_layer_optimizer_state out = []transformer_layer_optimizer_state{cap: n}
@@ -133,7 +121,6 @@ func new_backbone_optimizer_states(transformer backbone, float lr, float beta1, 
     }
     out
 }
-
 func layer_optimizer_state_at([]transformer_layer_optimizer_state states, int index) transformer_layer_optimizer_state {
     int i = 0
     transformer_layer_optimizer_state out = states[0]
@@ -146,7 +133,6 @@ func layer_optimizer_state_at([]transformer_layer_optimizer_state states, int in
     }
     out
 }
-
 func layer_optimizer_state_set([]transformer_layer_optimizer_state states, int index, transformer_layer_optimizer_state value) []transformer_layer_optimizer_state {
     int i = 0
     while i < len(states) {
@@ -158,7 +144,6 @@ func layer_optimizer_state_set([]transformer_layer_optimizer_state states, int i
     }
     states
 }
-
 func copy_backbone_optimizer_states([]transformer_layer_optimizer_state states) []transformer_layer_optimizer_state {
     []transformer_layer_optimizer_state out = []transformer_layer_optimizer_state{cap: len(states)}
     int i = 0
@@ -168,7 +153,6 @@ func copy_backbone_optimizer_states([]transformer_layer_optimizer_state states) 
     }
     out
 }
-
 func transformer_layer_at([]transformer_layer layers, int index) transformer_layer {
     int i = 0
     transformer_layer out = layers[0]
@@ -181,7 +165,6 @@ func transformer_layer_at([]transformer_layer layers, int index) transformer_lay
     }
     out
 }
-
 func transformer_layer_set([]transformer_layer layers, int index, transformer_layer value) []transformer_layer {
     int i = 0
     while i < len(layers) {
@@ -193,7 +176,6 @@ func transformer_layer_set([]transformer_layer layers, int index, transformer_la
     }
     layers
 }
-
 func tensor_numel([]int shape) int {
     int n = 1
     int i = 0
@@ -203,7 +185,6 @@ func tensor_numel([]int shape) int {
     }
     n
 }
-
 func tensor_from_ints([]int values, []int shape) tensor {
     int n = len(values)
     []float data = []float{cap: n}
@@ -214,11 +195,9 @@ func tensor_from_ints([]int values, []int shape) tensor {
     }
     new(data, copy_int(shape), false)
 }
-
 func tensor_from_float_value(float value) tensor {
     new([value], [1], false)
 }
-
 func zero_tensor([]int shape) tensor {
     int n = tensor_numel(shape)
     []float data = []float{cap: n}
@@ -229,7 +208,6 @@ func zero_tensor([]int shape) tensor {
     }
     new(data, copy_int(shape), true)
 }
-
 func ramp_tensor([]int shape, float scale) tensor {
     int n = tensor_numel(shape)
     []float data = []float{cap: n}
@@ -243,7 +221,6 @@ func ramp_tensor([]int shape, float scale) tensor {
     }
     new(data, copy_int(shape), true)
 }
-
 func join_documents([]string documents) string {
     string out = ""
     int i = 0
@@ -259,7 +236,6 @@ func join_documents([]string documents) string {
     }
     out
 }
-
 func exp_approx(float x) float {
     if x > 20.0 {
         return 485165195.0
@@ -277,7 +253,6 @@ func exp_approx(float x) float {
     }
     result
 }
-
 func normalize_token_id(int token_id, int vocab_size) int {
     int normalized = token_id
     if vocab_size <= 0 {
@@ -291,7 +266,6 @@ func normalize_token_id(int token_id, int vocab_size) int {
     }
     normalized
 }
-
 func one_hot_tensor(tensor ids, int vocab_size) tensor {
     int n = len(ids.data)
     []float data = []float{cap: n * vocab_size}
@@ -306,7 +280,6 @@ func one_hot_tensor(tensor ids, int vocab_size) tensor {
     }
     new(data, [n, vocab_size], false)
 }
-
 func scale_tensor(tensor value, float scale) tensor {
     int n = len(value.data)
     []float data = []float{cap: n}
@@ -317,13 +290,11 @@ func scale_tensor(tensor value, float scale) tensor {
     }
     new(data, copy_int(value.shape), value.requires_grad)
 }
-
 struct gpt_large_backward_result {
     transformer updated_backbone
     tensor grad_input
     []transformer_layer_optimizer_state backbone_optimizers
 }
-
 func transformer_backward(
     transformer backbone,
     tensor input_hidden,
@@ -331,24 +302,18 @@ func transformer_backward(
     []transformer_layer_optimizer_state layer_optimizers
 ) gpt_large_backward_result {
     int num_layers = len(backbone.layers)
-
     []tensor layer_inputs = []tensor{cap: num_layers + 1}
     []tensor layer_outputs = []tensor{cap: num_layers}
-
     layer_inputs[0] = input_hidden
-
     tensor current = input_hidden
     int li = 0
     while li < num_layers {
         transformer_layer layer = transformer_layer_at(backbone.layers, li)
-
         layer_inputs[li + 1] = current
-
         current = transformer_layer_forward(layer, current, backbone.config)
         layer_outputs[li] = current
         li = li + 1
     }
-
     tensor grad_current = grad_output
     []transformer_layer_optimizer_state current_optimizers = layer_optimizers
     int bi = num_layers - 1
@@ -356,36 +321,30 @@ func transformer_backward(
         transformer_layer layer = transformer_layer_at(backbone.layers, bi)
         transformer_layer_optimizer_state layer_optimizer = layer_optimizer_state_at(current_optimizers, bi)
         tensor x_input = layer_inputs[bi + 1]
-
         transformer_block_backward_result bw = transformer_block_backward(
             layer, x_input, grad_current, layer_optimizer
         )
         backbone.layers = transformer_layer_set(backbone.layers, bi, bw.updated_layer)
         current_optimizers = layer_optimizer_state_set(current_optimizers, bi, bw.optimizer_state)
-
         grad_current = bw.grad_input
         bi = bi - 1
     }
-
     gpt_large_backward_result {
         updated_backbone: backbone,
         grad_input: grad_current,
         backbone_optimizers: current_optimizers,
     }
 }
-
 struct backward_result {
     tensor grad_input
     transformer_layer updated_layer
     transformer_layer_optimizer_state optimizer_state
 }
-
 struct transformer_block_backward_result {
     tensor grad_input
     transformer_layer updated_layer
     transformer_layer_optimizer_state optimizer_state
 }
-
 func approximate_attention_forward(transformer_layer layer, tensor x) tensor {
     tensor q = matmul(x, layer.w_q)
     tensor k = matmul(x, layer.w_k)
@@ -395,7 +354,6 @@ func approximate_attention_forward(transformer_layer layer, tensor x) tensor {
     tensor attn_context = matmul(attn_probs, v)
     matmul(attn_context, layer.w_o)
 }
-
 func transformer_block_backward(
     transformer_layer layer,
     tensor x,
@@ -409,90 +367,68 @@ func transformer_block_backward(
         optimizer_state: bw.optimizer_state,
     }
 }
-
 func backward_single_layer(
     transformer_layer layer,
     tensor x,
     tensor grad_out,
     transformer_layer_optimizer_state opt
 ) backward_result {
-
     tensor grad_x2_residual = grad_out
     transformer_layer updated_layer = layer
     transformer_layer_optimizer_state updated_opt = opt
     tensor attn_forward_approx = approximate_attention_forward(layer, x)
     tensor ffn_input = add(x, attn_forward_approx)
-
     ffn_backward_result ffn_bw = backward_swiglu_ffn(
         layer, ffn_input, grad_out, opt
     )
-
     grad_x2_residual = add(grad_x2_residual, ffn_bw.grad_to_x2)
     updated_layer = ffn_bw.updated_layer
     updated_opt = ffn_bw.optimizer_state
-
     tensor grad_x_identity = grad_x2_residual
-
     attn_backward_result attn_bw = backward_attention(
         updated_layer, x, grad_x2_residual, updated_opt
     )
     updated_layer = attn_bw.updated_layer
     updated_opt = attn_bw.optimizer_state
-
     tensor grad_x_total = add(grad_x_identity, attn_bw.grad_to_x)
-
     backward_result { grad_input: grad_x_total, updated_layer: updated_layer, optimizer_state: updated_opt }
 }
-
 struct ffn_backward_result {
     tensor grad_to_x2
     transformer_layer updated_layer
     transformer_layer_optimizer_state optimizer_state
 }
-
 func backward_swiglu_ffn(
     transformer_layer layer,
     tensor x2,
     tensor grad_ffn_out,
     transformer_layer_optimizer_state opt
 ) ffn_backward_result {
-
     int has_swiglu = len(layer.w_up.data) > 0 && len(layer.w_ff1.data) == len(layer.w_up.data)
-
     if has_swiglu {
-
         tensor gated_t = transpose(mul(sigmoid(matmul(x2, layer.w_ff1)), matmul(x2, layer.w_up)), 0, 1)
         tensor grad_w_ff2 = matmul(gated_t, grad_ffn_out)
         tensor grad_b_ff2 = sum_first_dim(grad_ffn_out, false)
-
         tensor d_gated = matmul(grad_ffn_out, transpose(layer.w_ff2, 0, 1))
-
         tensor gate_hidden = add(matmul(x2, layer.w_ff1), layer.b_ff1)
         tensor up_hidden = add(matmul(x2, layer.w_up), layer.b_up)
         tensor gate_act = silu(gate_hidden)
-
         tensor d_gate_act = mul(d_gated, up_hidden)
-
         tensor d_up_hidden = mul(d_gated, gate_act)
-
         tensor sig_gate = sigmoid(gate_hidden)
         tensor one_minus_sig = sub(tensor_ones_like(sig_gate), sig_gate)
         tensor z_times_oms = mul(gate_hidden, one_minus_sig)
         tensor one_plus_zom = add(tensor_ones_like(z_times_oms), z_times_oms)
         tensor dsilu_dz = mul(sig_gate, one_plus_zom)
-
         tensor d_gate_hidden = mul(d_gate_act, dsilu_dz)
-
         tensor x2_t = transpose(x2, 0, 1)
         tensor grad_w_gate = matmul(x2_t, d_gate_hidden)
         tensor grad_w_up = matmul(x2_t, d_up_hidden)
         tensor grad_b_gate = sum_first_dim(d_gate_hidden, false)
         tensor grad_b_up = sum_first_dim(d_up_hidden, false)
-
         tensor grad_from_gate = matmul(d_gate_hidden, transpose(layer.w_ff1, 0, 1))
         tensor grad_from_up = matmul(d_up_hidden, transpose(layer.w_up, 0, 1))
         tensor grad_to_x2 = add(grad_from_gate, grad_from_up)
-
         adamw_step_output step_ff2 = adamw_step_state(opt.w_ff2, layer.w_ff2, grad_w_ff2)
         opt.w_ff2 = step_ff2.optimizer
         layer.w_ff2 = step_ff2.params
@@ -511,21 +447,17 @@ func backward_swiglu_ffn(
         adamw_step_output step_b_up = adamw_step_state(opt.b_up, layer.b_up, grad_b_up)
         opt.b_up = step_b_up.optimizer
         layer.b_up = step_b_up.params
-
         ffn_backward_result { grad_to_x2: grad_to_x2, updated_layer: layer, optimizer_state: opt }
     } else {
-
         tensor grad_w_ff2 = matmul(transpose(x2, 0, 1), grad_ffn_out)
         tensor grad_b_ff2 = sum_first_dim(grad_ffn_out, false)
         tensor d_ff1_act = matmul(grad_ffn_out, transpose(layer.w_ff2, 0, 1))
-
         tensor ff1_hidden = add(matmul(x2, layer.w_ff1), layer.b_ff1)
         tensor relu_mask = relu_backward_mask(ff1_hidden)
         tensor d_ff1 = mul(d_ff1_act, relu_mask)
         tensor grad_w_ff1 = matmul(transpose(x2, 0, 1), d_ff1)
         tensor grad_b_ff1 = sum_first_dim(d_ff1, false)
         tensor grad_to_x2 = matmul(d_ff1, transpose(layer.w_ff1, 0, 1))
-
         adamw_step_output step_ff2 = adamw_step_state(opt.w_ff2, layer.w_ff2, grad_w_ff2)
         opt.w_ff2 = step_ff2.optimizer
         layer.w_ff2 = step_ff2.params
@@ -538,11 +470,9 @@ func backward_swiglu_ffn(
         adamw_step_output step_b_ff1 = adamw_step_state(opt.b_ff1, layer.b_ff1, grad_b_ff1)
         opt.b_ff1 = step_b_ff1.optimizer
         layer.b_ff1 = step_b_ff1.params
-
         ffn_backward_result { grad_to_x2: grad_to_x2, updated_layer: layer, optimizer_state: opt }
     }
 }
-
 func relu_backward_mask(tensor input) tensor {
     int n = len(input.data)
     []float data = []float{cap: n}
@@ -557,7 +487,6 @@ func relu_backward_mask(tensor input) tensor {
     }
     new(data, copy_int(input.shape), false)
 }
-
 func tensor_ones_like(tensor input) tensor {
     int n = len(input.data)
     []float data = []float{cap: n}
@@ -568,52 +497,42 @@ func tensor_ones_like(tensor input) tensor {
     }
     new(data, copy_int(input.shape), false)
 }
-
 struct attn_backward_result {
     tensor grad_to_x
     transformer_layer updated_layer
     transformer_layer_optimizer_state optimizer_state
 }
-
 func backward_attention(
     transformer_layer layer,
     tensor x,
     tensor grad_attn_out,
     transformer_layer_optimizer_state opt
 ) attn_backward_result {
-
     tensor q = matmul(x, layer.w_q)
     tensor k = matmul(x, layer.w_k)
     tensor v = matmul(x, layer.w_v)
-
     tensor attn_approx = matmul(softmax_last_dim(matmul(q, transpose(k, 0, 1))), v)
     tensor attn_t = transpose(attn_approx, 0, 1)
     tensor grad_w_o = matmul(attn_t, grad_attn_out)
     tensor grad_b_o = sum_first_dim(grad_attn_out, false)
-
     tensor d_attn = matmul(grad_attn_out, transpose(layer.w_o, 0, 1))
-
     tensor attn_weights = softmax_last_dim(matmul(q, transpose(k, 0, 1)))
     tensor attn_weights_t = transpose(attn_weights, 0, 1)
     tensor d_v = matmul(attn_weights_t, d_attn)
     tensor grad_w_v = matmul(transpose(x, 0, 1), d_v)
     tensor grad_b_v = sum_first_dim(d_v, false)
-
     int head_dim = layer.w_q.shape[1]
     float scale = 1.0 / sqrt_approx(head_dim * 1.0)
     tensor d_q = mul(matmul(matmul(d_attn, transpose(v, 0, 1)), k), scale)
     tensor d_k = mul(matmul(matmul(transpose(q, 0, 1), d_attn), transpose(v, 0, 1)), scale)
-
     tensor grad_w_q = matmul(transpose(x, 0, 1), d_q)
     tensor grad_w_k = matmul(transpose(x, 0, 1), d_k)
     tensor grad_b_q = sum_first_dim(d_q, false)
     tensor grad_b_k = sum_first_dim(d_k, false)
-
     tensor grad_from_q = matmul(d_q, transpose(layer.w_q, 0, 1))
     tensor grad_from_k = matmul(d_k, transpose(layer.w_k, 0, 1))
     tensor grad_from_v = matmul(d_v, transpose(layer.w_v, 0, 1))
     tensor grad_to_x = add(add(grad_from_q, grad_from_k), grad_from_v)
-
     adamw_step_output step_w_o = adamw_step_state(opt.w_o, layer.w_o, grad_w_o)
     opt.w_o = step_w_o.optimizer
     layer.w_o = step_w_o.params
@@ -626,10 +545,8 @@ func backward_attention(
     adamw_step_output step_w_v = adamw_step_state(opt.w_v, layer.w_v, grad_w_v)
     opt.w_v = step_w_v.optimizer
     layer.w_v = step_w_v.params
-
     attn_backward_result { grad_to_x: grad_to_x, updated_layer: layer, optimizer_state: opt }
 }
-
 func embedding_apply_grad(tensor embedding, tensor token_ids, tensor grad_hidden, float lr) tensor {
     tensor next = copy_tensor(embedding)
     if len(next.shape) < 2 {
@@ -654,7 +571,6 @@ func embedding_apply_grad(tensor embedding, tensor token_ids, tensor grad_hidden
     }
     next
 }
-
 func gpt_large_training_corpus([]string documents) string {
     string corpus = join_documents(documents)
     if trim(corpus) != "" {
@@ -662,12 +578,10 @@ func gpt_large_training_corpus([]string documents) string {
     }
     "neurx trains a decoder only transformer for language modeling.\nneurx uses s to build the full training pipeline.\n"
 }
-
 func gpt_large_training_tokens_from_text(string text) []int {
     []string vocab = build_vocab(text)
     encode_text(text, vocab)
 }
-
 func new_gpt_large_training_config(int batch_size, int seq_len, int max_steps, float learning_rate) gpt_large_training_config {
     gpt_large_training_config {
         batch_size: batch_size,
@@ -677,7 +591,6 @@ func new_gpt_large_training_config(int batch_size, int seq_len, int max_steps, f
         label_smoothing: 0.0,
     }
 }
-
 func new_gpt_large_training_metrics() gpt_large_training_metrics {
     gpt_large_training_metrics {
         step: 0,
@@ -688,7 +601,6 @@ func new_gpt_large_training_metrics() gpt_large_training_metrics {
         perplexity: 0.0,
     }
 }
-
 func gpt_large_training_state_dict(gpt_large_training_state state) gpt_large_training_state {
     []transformer_layer_optimizer_state layer_optimizers = copy_backbone_optimizer_states(state.backbone_optimizers)
     gpt_large_training_state {
@@ -716,7 +628,6 @@ func gpt_large_training_state_dict(gpt_large_training_state state) gpt_large_tra
         finished: state.finished,
     }
 }
-
 func gpt_large_training_load_state_dict(gpt_large_training_state state, gpt_large_training_state other) gpt_large_training_state {
     []transformer_layer_optimizer_state layer_optimizers = copy_backbone_optimizer_states(other.backbone_optimizers)
     gpt_large_training_state {
@@ -744,13 +655,11 @@ func gpt_large_training_load_state_dict(gpt_large_training_state state, gpt_larg
         finished: other.finished,
     }
 }
-
 func new_gpt_large_training_state([]string documents, gpt_large_training_config config) gpt_large_training_state {
     string corpus = gpt_large_training_corpus(documents)
     []int token_ids = gpt_large_training_tokens_from_text(corpus)
     return new_gpt_large_training_state_from_token_ids(token_ids, config)
 }
-
 func new_gpt_large_training_state_from_token_ids([]int token_ids, gpt_large_training_config config) gpt_large_training_state {
     gpt_large_state model = new_gpt_large_state()
     transformer_config backbone_config = transformer_config {
@@ -785,52 +694,41 @@ func new_gpt_large_training_state_from_token_ids([]int token_ids, gpt_large_trai
         finished: false,
     }
 }
-
 func gpt_large_training_should_continue(gpt_large_training_state state) bool {
     if state.finished {
         return false
     }
     state.step < state.config.max_steps
 }
-
 func gpt_large_training_forward(gpt_large_training_state state, tensor input_ids) tensor {
     tensor hidden = embedding_lookup(state.token_embedding, input_ids, 0)
     tensor backbone_out = transformer_forward(state.backbone, hidden)
     lm_head_logits(backbone_out, state.lm_head_weight, state.lm_head_bias)
 }
-
 func gpt_large_training_loss(gpt_large_training_state state, tensor logits, tensor target_ids) tensor {
     cross_entropy(logits, target_ids, -1, "mean", state.config.label_smoothing, -1)
 }
-
 func gpt_large_training_update(gpt_large_training_state state, tensor input_ids, tensor hidden, tensor logits, tensor target_ids, float loss_value, int valid_tokens) gpt_large_training_state {
-
     tensor probabilities = softmax_last_dim(logits)
     tensor targets = one_hot_tensor(target_ids, state.model.vocab_size)
-
     tensor grad_logits = sub(probabilities, targets)
     float scale = 1.0
     if valid_tokens > 0 {
         scale = 1.0 / (valid_tokens as float)
     }
     grad_logits = scale_tensor(grad_logits, scale)
-
     tensor hidden_t = transpose(hidden, 0, 1)
     tensor grad_head_weight = matmul(hidden_t, grad_logits)
     tensor grad_head_bias = sum_first_dim(grad_logits, false)
     tensor grad_hidden = matmul(grad_logits, transpose(state.lm_head_weight, 0, 1))
-
     adamw_step_output head_weight_step = adamw_step_state(state.optimizer, state.lm_head_weight, grad_head_weight)
     adamw_step_output head_bias_step = adamw_step_state(head_weight_step.optimizer, state.lm_head_bias, grad_head_bias)
     tensor next_head_weight = head_weight_step.params
     tensor next_head_bias = head_bias_step.params
-
     gpt_large_backward_result bw = transformer_backward(
         state.backbone, hidden, grad_hidden, state.backbone_optimizers
     )
-
     tensor next_embedding = embedding_apply_grad(state.token_embedding, input_ids, bw.grad_input, state.optimizer.lr)
-
     float perplexity = exp_approx(loss_value)
     float validation_loss = loss_value + 0.08
     float validation_perplexity = exp_approx(validation_loss)
@@ -846,7 +744,6 @@ func gpt_large_training_update(gpt_large_training_state state, tensor input_ids,
         loader = reset_state(loader)
         next_epoch = next_epoch + 1
     }
-
     gpt_large_training_state {
         model: gpt_large_state {
             name: state.model.name,
@@ -901,17 +798,14 @@ func gpt_large_training_update(gpt_large_training_state state, tensor input_ids,
         finished: next_step >= state.config.max_steps,
     }
 }
-
 func gpt_large_training_step(gpt_large_training_state state) gpt_large_training_state {
     if !gpt_large_training_should_continue(state) {
         return state
     }
-
     dataloader_state loader = state.loader
     if !has_next(loader) {
         loader = reset_state(loader)
     }
-
     dataloader_step_output batch_output = next_batch(loader)
     int shape_input = len(batch_output.batch.input_ids)
     tensor input_ids = tensor_from_ints(batch_output.batch.input_ids, [shape_input])
@@ -950,7 +844,6 @@ func gpt_large_training_step(gpt_large_training_state state) gpt_large_training_
         batch_output.batch.valid_tokens
     )
 }
-
 func gpt_large_training_run(gpt_large_training_state state, int steps) gpt_large_training_state {
     int loops = steps
     if loops < 0 {
@@ -967,11 +860,9 @@ func gpt_large_training_run(gpt_large_training_state state, int steps) gpt_large
     }
     current
 }
-
 func gpt_large_training_metrics_state_dict(gpt_large_training_metrics state) gpt_large_training_metrics {
     state
 }
-
 func gpt_large_training_metrics_load_state_dict(gpt_large_training_metrics state, gpt_large_training_metrics other) gpt_large_training_metrics {
     other
 }

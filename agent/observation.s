@@ -1,5 +1,4 @@
 package neurx.agent.observation
-
 struct agent_observation_state {
     string raw
     string kind
@@ -10,7 +9,6 @@ struct agent_observation_state {
     bool no_progress
     bool ok
 }
-
 func new_agent_observation_state() agent_observation_state {
     agent_observation_state {
         raw: "",
@@ -23,7 +21,6 @@ func new_agent_observation_state() agent_observation_state {
         ok: false,
     }
 }
-
 func agent_observation_contains(string text, string pattern) bool {
     string haystack = lower(trim(text))
     string needle = lower(trim(pattern))
@@ -53,7 +50,6 @@ func agent_observation_contains(string text, string pattern) bool {
     }
     false
 }
-
 func agent_observation_kind(string observation) string {
     string raw = trim(observation)
     if raw == "" {
@@ -71,16 +67,13 @@ func agent_observation_kind(string observation) string {
     }
     lower(trim(kind))
 }
-
 func agent_observation_parse(string observation) agent_observation_state {
     string raw = trim(observation)
     if raw == "" {
         return new_agent_observation_state()
     }
-
     string lower_raw = lower(raw)
     string kind = agent_observation_kind(raw)
-
     if lower_raw == "done" {
         return agent_observation_state {
             raw: raw,
@@ -93,7 +86,6 @@ func agent_observation_parse(string observation) agent_observation_state {
             ok: true,
         }
     }
-
     if lower_raw == "tool_unavailable" || lower_raw == "infer:rejected" || lower_raw == "local_model_config_missing: disabled" || agent_observation_contains(lower_raw, "status=blocked") {
         return agent_observation_state {
             raw: raw,
@@ -106,7 +98,6 @@ func agent_observation_parse(string observation) agent_observation_state {
             ok: false,
         }
     }
-
     if agent_observation_contains(lower_raw, ":failed") || agent_observation_contains(lower_raw, "tool_error:") || agent_observation_contains(lower_raw, "status=failed") || agent_observation_contains(lower_raw, "error=") {
         return agent_observation_state {
             raw: raw,
@@ -119,7 +110,6 @@ func agent_observation_parse(string observation) agent_observation_state {
             ok: false,
         }
     }
-
     if agent_observation_contains(lower_raw, "hits=0") || agent_observation_contains(lower_raw, "status=no_progress") || lower_raw == "noop" || lower_raw == "no_result" {
         return agent_observation_state {
             raw: raw,
@@ -132,7 +122,6 @@ func agent_observation_parse(string observation) agent_observation_state {
             ok: false,
         }
     }
-
     if agent_observation_contains(lower_raw, ":ok") || agent_observation_contains(lower_raw, "status=ok") || agent_observation_contains(lower_raw, "analysis:") || agent_observation_contains(lower_raw, "plan:") || agent_observation_contains(lower_raw, "verify:") || agent_observation_contains(lower_raw, "search:") || agent_observation_contains(lower_raw, "repo_map:") {
         return agent_observation_state {
             raw: raw,
@@ -145,7 +134,6 @@ func agent_observation_parse(string observation) agent_observation_state {
             ok: true,
         }
     }
-
     agent_observation_state {
         raw: raw,
         kind: kind,
@@ -157,23 +145,18 @@ func agent_observation_parse(string observation) agent_observation_state {
         ok: true,
     }
 }
-
 func agent_observation_requires_replan(string observation) bool {
     agent_observation_parse(observation).blocked
 }
-
 func agent_observation_is_failed(string observation) bool {
     agent_observation_parse(observation).failed
 }
-
 func agent_observation_is_terminal(string observation) bool {
     agent_observation_parse(observation).terminal
 }
-
 func agent_observation_is_progress(string observation) bool {
     agent_observation_parse(observation).ok
 }
-
 func agent_observation_is_no_progress(string observation) bool {
     agent_observation_parse(observation).no_progress
 }

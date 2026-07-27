@@ -110,7 +110,7 @@ NEURX_SHARD_FORCE_REBUILD ?= 0
 POSTTRAIN_MODEL_PATH ?= /home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct
 POSTTRAIN_DATA_FILE ?= /home/shuwen/shuwen/dataset/medical/train.json
 POSTTRAIN_OUTPUT_DIR ?= /home/shuwen/shuwen/posttrain
-POSTTRAIN_S_COMPILER ?= $(firstword $(wildcard $(CURDIR_UNIX)/../s/bin/s_seed $(CURDIR_UNIX)/tools/s_wrapper.sh) $(S_COMPILER))
+POSTTRAIN_S_COMPILER ?= $(firstword $(wildcard /home/shuwen/mining/bin/s /home/shuwen/train/s/.local/bin/s /home/shuwen/train2/s/.local/bin/s /home/shuwen/shuwen/train/s/.local/bin/s $(CURDIR_UNIX)/../s/bin/s_seed $(CURDIR_UNIX)/tools/s_wrapper.sh) $(S_COMPILER))
 LORA_MERGE_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/lora_merge
 LORA_MERGE_BIN := $(LORA_MERGE_BUILD_DIR)/lora_safetensors_merge$(BIN_EXT)
 LORA_MERGE_IR := $(LORA_MERGE_BUILD_DIR)/run_lora_merge.ir
@@ -326,11 +326,16 @@ test-checkpoint-resume: check-bash
 	@bash $(CURDIR_UNIX)/tests/checkpoint_resume_e2e.sh
 
 build-posttrain-sft-s:
-	@mkdir -p artifacts/build/posttrain_sft
-	@echo "Preparing LoRA/SFT post-training..."
-	@echo "✓ Ready to start post-training"
+	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_sft'
+	@cd '$(CURDIR_UNIX)' && \
+		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/real_lora_sft.ir'; \
+		"$(POSTTRAIN_S_COMPILER)" ir 'scripts/real_lora_sft.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/real_lora_sft.ir' 2>&1 || true; \
+		if [ ! -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/real_lora_sft.ir' ]; then \
+			"$(POSTTRAIN_S_COMPILER)" 'scripts/real_lora_sft.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/real_lora_sft.ir' 2>&1 || exit 1; \
+		fi && \
+		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/real_lora_sft.ir'
 
-posttrain: check-bash build-lora-merge build-posttrain-sft-s
+posttrain: check-bash build-s-ir-runner build-lora-merge build-posttrain-sft-s
 	@echo "Starting real Qwen LoRA/SFT post-training..."
 	@mkdir -p '$(POSTTRAIN_ADAPTER_DIR)' '$(POSTTRAIN_OUTPUT_DIR)' '$(LOG_DIR)'
 	@cd '$(CURDIR_UNIX)' && \
@@ -338,7 +343,8 @@ posttrain: check-bash build-lora-merge build-posttrain-sft-s
 		NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)' \
 		NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)' \
 		NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_ADAPTER_DIR)' \
-		python3 scripts/real_lora_sft.py 2>&1 | tee -a '$(LOG_DIR)/posttrain_real_$(shell date +%Y%m%d_%H%M%S).log'
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_sft/real_lora_sft.ir' \
+		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_real_$(shell date +%Y%m%d_%H%M%S).log'
 	@echo "[✓] LoRA training completed"
 	@echo "Adapter saved to: $(POSTTRAIN_ADAPTER_DIR)"
 	@if [ -f '$(LORA_MERGE_BIN)' ]; then \

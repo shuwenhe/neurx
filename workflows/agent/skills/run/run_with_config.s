@@ -1,18 +1,14 @@
 package main
-
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_output, runtime_shell_escape, trim}
 use std.io.println
-
 func main() int {
     string config = runtime_env_get("NEURX_SKILLS_CONFIG", "workflows/agent/skills/config/sample.yaml")
     string generations_override = runtime_env_get("NEURX_SKILLS_GENERATIONS", "")
     string s_bin_override = runtime_env_get("S_BIN", runtime_env_get("S_COMPILER", ""))
-
     if !runtime_run_command("test -f " + runtime_shell_escape(config)).ok {
         println("Config not found: " + config)
         return 1
     }
-
     string max_generations = default_if_empty(yaml_value(config, "max_generations"), "20")
     string promotion_threshold = default_if_empty(yaml_value(config, "promotion_threshold"), "85.0")
     string retire_threshold = default_if_empty(yaml_value(config, "retire_threshold"), "20.0")
@@ -22,7 +18,6 @@ func main() int {
     if generations_override != "" {
         max_generations = generations_override
     }
-
     string s_bin = s_bin_override
     if s_bin == "" {
         s_bin = runtime_run_command_output("command -v s 2>/dev/null || true")
@@ -31,7 +26,6 @@ func main() int {
         println("missing runnable s executable")
         return 1
     }
-
     string tmp_s = "/tmp/neurx_agent_skills_run_tmp.s"
     string tmp_ir = "/tmp/neurx_agent_skills_run_tmp.ir"
     string tmp_src = ""
@@ -44,21 +38,17 @@ func main() int {
     if !runtime_run_command(runtime_shell_escape(s_bin) + " " + runtime_shell_escape(tmp_s) + " " + runtime_shell_escape(tmp_ir)).ok {
         return 1
     }
-
     println("Ran agent skills workflow with generations=" + max_generations + ", promote=" + promotion_threshold + ", retire=" + retire_threshold + ", min_success=" + min_success_rate + ", max_avg_steps=" + max_avg_steps + ", output=" + output_dir + ", s_bin=" + s_bin)
     0
 }
-
 func usage() {
     println("Usage: run_with_config.s")
     println("Configure via NEURX_SKILLS_CONFIG, NEURX_SKILLS_GENERATIONS and S_BIN.")
 }
-
 func yaml_value(string file, string key) string {
     string cmd = "awk -F\":\" '/^" + key + "[[:space:]]*:/ {gsub(/ /, \"\", $2); print $2; exit}' " + runtime_shell_escape(file)
     trim(runtime_run_command_output(cmd))
 }
-
 func default_if_empty(string value, string fallback) string {
     if value == "" {
         return fallback

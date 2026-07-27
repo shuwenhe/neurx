@@ -1,5 +1,4 @@
 package neurx.inference.serve.continuous_batch
-
 struct continuous_batch_state {
     int capacity
     int active_requests
@@ -9,7 +8,6 @@ struct continuous_batch_state {
     int prefill_tokens
     int decode_tokens
 }
-
 func new_continuous_batch_state(int capacity) continuous_batch_state {
     int effective_capacity = capacity
     if effective_capacity <= 0 {
@@ -25,7 +23,6 @@ func new_continuous_batch_state(int capacity) continuous_batch_state {
         decode_tokens: 0,
     }
 }
-
 func continuous_batch_enqueue_request(continuous_batch_state state, int prefill_tokens) continuous_batch_state {
     int next_active = state.active_requests
     int next_queued = state.queued_requests
@@ -48,7 +45,6 @@ func continuous_batch_enqueue_request(continuous_batch_state state, int prefill_
         decode_tokens: state.decode_tokens,
     }
 }
-
 func continuous_batch_record_decode_step(continuous_batch_state state, int tokens) continuous_batch_state {
     int add_tokens = tokens
     if add_tokens < 0 {
@@ -64,7 +60,6 @@ func continuous_batch_record_decode_step(continuous_batch_state state, int token
         decode_tokens: state.decode_tokens + add_tokens,
     }
 }
-
 func continuous_batch_finish_request(continuous_batch_state state) continuous_batch_state {
     int next_active = state.active_requests
     if next_active > 0 {
@@ -77,7 +72,6 @@ func continuous_batch_finish_request(continuous_batch_state state) continuous_ba
             next_active = next_active + 1
         }
     }
-
     continuous_batch_state {
         capacity: state.capacity,
         active_requests: next_active,
@@ -88,11 +82,9 @@ func continuous_batch_finish_request(continuous_batch_state state) continuous_ba
         decode_tokens: state.decode_tokens,
     }
 }
-
 func continuous_batch_state_dict(continuous_batch_state state) continuous_batch_state {
     state
 }
-
 func continuous_batch_load_state_dict(continuous_batch_state state, continuous_batch_state other) continuous_batch_state {
     other
 }

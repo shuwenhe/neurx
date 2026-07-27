@@ -1,48 +1,36 @@
 use neurx.agent
 use neurx.runtime.io.{runtime_write_text_file, runtime_file_exists}
-
 string out_prefix   = "artifacts/checkpoints/agent/memory"
 string mem_path     = out_prefix + "/memory.txt"
 string report_path  = out_prefix + "/report.txt"
 string trace_path   = out_prefix + "/trace.txt"
-
 []string phase1_inputs = []string{cap: 4}
 phase1_inputs[0] = "search and index neurx agent architecture overview"
 phase1_inputs[1] = "retrieve tensor operations documentation and store key facts"
 phase1_inputs[2] = "analyze model checkpoint structure and record format details"
 phase1_inputs[3] = "summarize the distributed training configuration defaults"
-
 agent_runtime_state phase1 = new_default_agent("memory_build_phase")
 phase1 = run_agent_batch(phase1, phase1_inputs, 8)
-
 int keys_after_phase1 = len(agent_memory_keys(phase1))
 agent_persist_memory(phase1, mem_path)
-
 string phase1_trace = agent_trace_last_n_summary(phase1, 8)
-
 agent_runtime_state phase2 = agent_warm_start(
     "memory_retrieval_phase",
     mem_path,
     "",
     ""
 )
-
 int keys_before_phase2 = len(agent_memory_keys(phase2))
-
 []string phase2_inputs = []string{cap: 3}
 phase2_inputs[0] = "what is the neurx agent architecture overview that was stored"
 phase2_inputs[1] = "recall the tensor operations documentation key facts"
 phase2_inputs[2] = "retrieve the distributed training configuration defaults"
-
 phase2 = run_agent_batch(phase2, phase2_inputs, 8)
-
 int keys_after_phase2 = len(agent_memory_keys(phase2))
-
 []string expected_keys = []string{cap: 3}
 expected_keys[0] = "agent_architecture"
 expected_keys[1] = "tensor_ops"
 expected_keys[2] = "distributed_config"
-
 int hit_count = 0
 string key_report = ""
 int ki = 0
@@ -56,15 +44,12 @@ while ki < len(expected_keys) {
     key_report = key_report + "  key=" + expected_keys[ki] + " " + hit_str + "\n"
     ki = ki + 1
 }
-
 string stall_str = "false"
 if agent_is_stalled(phase2) {
     stall_str = "true"
 }
-
 string phase2_trace = agent_trace_last_n_summary(phase2, 8)
 runtime_write_text_file(trace_path, "=== phase1 ===\n" + phase1_trace + "\n\n=== phase2 ===\n" + phase2_trace)
-
 string report = "=== memory pipeline report ===\n\n"
 report = report + "=== phase1 summary ===\n" + agent_summary(phase1) + "\n\n"
 report = report + "=== phase2 summary ===\n" + agent_summary(phase2) + "\n\n"
@@ -76,5 +61,4 @@ report = report + "=== key retrieval eval ===\n"
 report = report + "  hit_count=" + string(hit_count) + "/" + string(len(expected_keys)) + "\n"
 report = report + key_report
 report = report + "\n=== stall_check ===\nis_stalled=" + stall_str + "\n"
-
 runtime_write_text_file(report_path, report)

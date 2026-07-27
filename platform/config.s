@@ -1,7 +1,5 @@
 package neurx.platform.config
-
 use neurx.platform.errors.{platform_error_state, new_configuration_error, clear_error, platform_error_active}
-
 struct runtime_config {
     string default_device
     bool fallback_to_cpu
@@ -11,20 +9,17 @@ struct runtime_config {
     int seed
     bool has_seed
 }
-
 struct bool_parse_result {
     bool value
     bool ok
     platform_error_state error
 }
-
 struct int_parse_result {
     int value
     bool has_value
     bool ok
     platform_error_state error
 }
-
 func make_bool_parse_result(bool value, bool ok, platform_error_state error) bool_parse_result {
     bool_parse_result {
         value: value,
@@ -32,7 +27,6 @@ func make_bool_parse_result(bool value, bool ok, platform_error_state error) boo
         error: error,
     }
 }
-
 func make_int_parse_result(int value, bool has_value, bool ok, platform_error_state error) int_parse_result {
     int_parse_result {
         value: value,
@@ -41,7 +35,6 @@ func make_int_parse_result(int value, bool has_value, bool ok, platform_error_st
         error: error,
     }
 }
-
 func make_runtime_config_parse_result(runtime_config cfg, bool ok, platform_error_state error) runtime_config_parse_result {
     runtime_config_parse_result {
         config: cfg,
@@ -49,7 +42,6 @@ func make_runtime_config_parse_result(runtime_config cfg, bool ok, platform_erro
         error: error,
     }
 }
-
 func new_runtime_config() runtime_config {
     runtime_config {
         default_device: "cpu",
@@ -61,11 +53,9 @@ func new_runtime_config() runtime_config {
         has_seed: false,
     }
 }
-
 func normalize_for_parse(string value) string {
     lower(trim(value))
 }
-
 func normalize_device(string value) string {
     string out = normalize_for_parse(value)
     if out == "" {
@@ -73,7 +63,6 @@ func normalize_device(string value) string {
     }
     out
 }
-
 func normalize_log_level(string value) string {
     string out = upper(trim(value))
     if out == "" {
@@ -81,17 +70,14 @@ func normalize_log_level(string value) string {
     }
     out
 }
-
 func is_valid_device(string value) bool {
     string out = normalize_device(value)
     out == "cpu" || out == "cuda" || out == "mps" || out == "npu"
 }
-
 func is_valid_log_level(string value) bool {
     string out = normalize_log_level(value)
     out == "CRITICAL" || out == "ERROR" || out == "WARNING" || out == "INFO" || out == "DEBUG"
 }
-
 func parse_bool_with_default(string name, string value, bool default_value) bool_parse_result {
     string v = normalize_for_parse(value)
     if v == "" {
@@ -105,11 +91,9 @@ func parse_bool_with_default(string name, string value, bool default_value) bool
     }
     make_bool_parse_result(default_value, false, new_configuration_error(name + " expects bool-like value, got: " + value))
 }
-
 func is_digit_char(string ch) bool {
     ch >= "0" && ch <= "9"
 }
-
 func config_substring(string s, int from, int to) string {
     string result = ""
     int i = from
@@ -119,7 +103,6 @@ func config_substring(string s, int from, int to) string {
     }
     result
 }
-
 func is_valid_int_literal(string value) bool {
     string v = trim(value)
     if len(v) == 0 {
@@ -143,7 +126,6 @@ func is_valid_int_literal(string value) bool {
     }
     true
 }
-
 func parse_optional_int(string name, string value) int_parse_result {
     string v = trim(value)
     if v == "" {
@@ -154,17 +136,14 @@ func parse_optional_int(string name, string value) int_parse_result {
     }
     make_int_parse_result(int(v), true, true, clear_error())
 }
-
 func config_error(string message) runtime_config_parse_result {
     make_runtime_config_parse_result(new_runtime_config(), false, new_configuration_error(message))
 }
-
 struct runtime_config_parse_result {
     runtime_config config
     bool ok
     platform_error_state error
 }
-
 func validate_runtime_config(runtime_config cfg) platform_error_state {
     if !is_valid_device(cfg.default_device) {
         return new_configuration_error("TENSOR_DEVICE must be one of {cpu,cuda,mps,npu}")
@@ -177,7 +156,6 @@ func validate_runtime_config(runtime_config cfg) platform_error_state {
     }
     clear_error()
 }
-
 func runtime_config_from_values(
     string device,
     string fallback_to_cpu,
@@ -187,43 +165,35 @@ func runtime_config_from_values(
     string seed,
 ) runtime_config_parse_result {
     runtime_config cfg = new_runtime_config()
-
     cfg.default_device = normalize_device(device)
     cfg.log_level = normalize_log_level(log_level)
-
     bool_parse_result fallback_out = parse_bool_with_default("TENSOR_FALLBACK_TO_CPU", fallback_to_cpu, true)
     if !fallback_out.ok {
         return make_runtime_config_parse_result(cfg, false, fallback_out.error)
     }
     cfg.fallback_to_cpu = fallback_out.value
-
     bool_parse_result strict_out = parse_bool_with_default("TENSOR_STRICT_CHECKS", strict_checks, false)
     if !strict_out.ok {
         return make_runtime_config_parse_result(cfg, false, strict_out.error)
     }
     cfg.strict_checks = strict_out.value
-
     bool_parse_result deterministic_out = parse_bool_with_default("TENSOR_DETERMINISTIC", deterministic, false)
     if !deterministic_out.ok {
         return make_runtime_config_parse_result(cfg, false, deterministic_out.error)
     }
     cfg.deterministic = deterministic_out.value
-
     int_parse_result seed_out = parse_optional_int("TENSOR_SEED", seed)
     if !seed_out.ok {
         return make_runtime_config_parse_result(cfg, false, seed_out.error)
     }
     cfg.has_seed = seed_out.has_value
     cfg.seed = seed_out.value
-
     platform_error_state validation = validate_runtime_config(cfg)
     if platform_error_active(validation) {
         return make_runtime_config_parse_result(cfg, false, validation)
     }
-
     make_runtime_config_parse_result(cfg, true, clear_error())
 }
-
 func get_runtime_config() runtime_config_parse_result {
     runtime_config_from_values(
         env_get("TENSOR_DEVICE", "cpu"),
@@ -234,7 +204,6 @@ func get_runtime_config() runtime_config_parse_result {
         env_get("TENSOR_SEED", "")
     )
 }
-
 func runtime_config_state_dict(runtime_config cfg) runtime_config {
     runtime_config {
         default_device: cfg.default_device,
@@ -246,7 +215,6 @@ func runtime_config_state_dict(runtime_config cfg) runtime_config {
         has_seed: cfg.has_seed,
     }
 }
-
 func runtime_config_load_state_dict(runtime_config cfg, runtime_config other) runtime_config {
     runtime_config {
         default_device: other.default_device,

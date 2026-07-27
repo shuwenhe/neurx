@@ -1,10 +1,6 @@
-
-
 package neurx.shard.shard_wikipedia
-
 use std.os.command
 use neurx.runtime.io.runtime_env_get
-
 struct wikipedia_config {
     string input_bz2_file
     string output_dir
@@ -12,24 +8,20 @@ struct wikipedia_config {
     int docs_per_shard
     int max_pages
 }
-
 string g_input_bz2_file = ""
 string g_output_dir = ""
 string g_manifest_file = ""
 int g_docs_per_shard = 5000
 int g_max_pages = 0
-
 struct shard_metadata {
     string shard_id
     string file_path
     int num_documents
     int size_bytes
 }
-
 func string_char(int c) string {
     string(c)
 }
-
 func trim(string s) string {
     int begin = 0
     while begin < len(s) {
@@ -40,7 +32,6 @@ func trim(string s) string {
             break
         }
     }
-
     int end = len(s)
     while end > begin {
         string ch = string_char(s[end - 1])
@@ -50,7 +41,6 @@ func trim(string s) string {
             break
         }
     }
-
     string out = ""
     int i = begin
     while i < end {
@@ -59,13 +49,11 @@ func trim(string s) string {
     }
     out
 }
-
 func parse_int(string s, int fallback) int {
     string text = trim(s)
     if len(text) == 0 {
         return fallback
     }
-
     int sign = 1
     int i = 0
     if string_char(text[0]) == "-" {
@@ -74,7 +62,6 @@ func parse_int(string s, int fallback) int {
     } else if string_char(text[0]) == "+" {
         i = 1
     }
-
     int value = 0
     while i < len(text) {
         int digit = text[i] - 48
@@ -84,34 +71,27 @@ func parse_int(string s, int fallback) int {
         value = value * 10 + digit
         i = i + 1
     }
-
     sign * value
 }
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
     }
-
     bool negative = n < 0
     if negative {
         n = 0 - n
     }
-
     string out = ""
     while n > 0 {
         int digit = n - (n / 10) * 10
         out = string_char(digit + 48) + out
         n = n / 10
     }
-
     if negative {
         out = "-" + out
     }
-
     out
 }
-
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
@@ -127,7 +107,6 @@ func shell_escape(string s) string {
     out = out + "'"
     out
 }
-
 func basename(string path) string {
     int last = -1
     int i = 0
@@ -151,7 +130,6 @@ func basename(string path) string {
     }
     out
 }
-
 func parent_dir(string path) string {
     int last = -1
     int i = 0
@@ -172,32 +150,26 @@ func parent_dir(string path) string {
     }
     out
 }
-
 func file_exists(string path) bool {
     let (_, code) = command("test -f " + shell_escape(path))
     code == 0
 }
-
 func dir_exists(string path) bool {
     let (_, code) = command("test -d " + shell_escape(path))
     code == 0
 }
-
 func make_dir(string path) bool {
     let (_, code) = command("mkdir -p " + shell_escape(path))
     code == 0
 }
-
 func write_text_file(string path, string content) bool {
     let (_, code) = command("printf %s " + shell_escape(content) + " > " + shell_escape(path))
     code == 0
 }
-
 func read_command_output(string cmd) string {
     let (out, _) = command(cmd)
     trim(out)
 }
-
 func shard_name(int index) string {
     string s = int_to_str(index)
     while len(s) < 5 {
@@ -205,7 +177,6 @@ func shard_name(int index) string {
     }
     "shard_" + s + ".jsonl"
 }
-
 func json_escape(string s) string {
     string out = "\""
     int i = 0
@@ -229,7 +200,6 @@ func json_escape(string s) string {
     out = out + "\""
     out
 }
-
 func generate_manifest_json(int total_pages, int total_shards, []shard_metadata shards) string {
     string json = "{\n"
     json = json + "  \"dataset_name\": \"neurx-wikipedia\",\n"
@@ -241,7 +211,6 @@ func generate_manifest_json(int total_pages, int total_shards, []shard_metadata 
     json = json + "  \"total_pages\": " + int_to_str(total_pages) + ",\n"
     json = json + "  \"total_shards\": " + int_to_str(total_shards) + ",\n"
     json = json + "  \"shards\": [\n"
-
     int i = 0
     while i < len(shards) {
         json = json + "    {\n"
@@ -256,12 +225,10 @@ func generate_manifest_json(int total_pages, int total_shards, []shard_metadata 
         json = json + "\n"
         i = i + 1
     }
-
     json = json + "  ]\n"
     json = json + "}\n"
     json
 }
-
 func process_wikipedia() int {
     println("")
     println("╔══════════════════════════════════════════════════════════╗")
@@ -274,12 +241,10 @@ func process_wikipedia() int {
     println("Docs/shard : " + int_to_str(g_docs_per_shard))
     println("Max pages  : " + int_to_str(g_max_pages))
     println("")
-
     if !file_exists(g_input_bz2_file) {
         println("[-] Input file not found: " + g_input_bz2_file)
         return 1
     }
-
     if !make_dir(g_output_dir) {
         println("[-] Failed to create output directory: " + g_output_dir)
         return 1
@@ -288,11 +253,8 @@ func process_wikipedia() int {
         println("[-] Failed to create manifest directory")
         return 1
     }
-
     string temp_xml = g_output_dir + "/.wikipedia_dump.xml"
-
     let _ = command("sh -c " + shell_escape("rm -f " + g_output_dir + "/shard_*.jsonl " + temp_xml))
-
     println("[*] Decompressing Wikipedia dump...")
     let (_, decompress_code) = command(
         "bzip2 -dc " + shell_escape(g_input_bz2_file) + " > " + shell_escape(temp_xml)
@@ -301,13 +263,11 @@ func process_wikipedia() int {
         println("[-] Failed to decompress input file")
         return 1
     }
-
     string count_cmd = "grep -c '<page>' " + shell_escape(temp_xml) + " 2>/dev/null || printf 0"
     int total_pages = parse_int(read_command_output(count_cmd), 0)
     if g_max_pages > 0 && total_pages > g_max_pages {
         total_pages = g_max_pages
     }
-
     int total_shards = 0
     if g_docs_per_shard > 0 {
         total_shards = (total_pages + g_docs_per_shard - 1) / g_docs_per_shard
@@ -315,11 +275,9 @@ func process_wikipedia() int {
     if total_shards < 1 {
         total_shards = 1
     }
-
     println("[*] Pages to shard: " + int_to_str(total_pages))
     println("[*] Planned shards : " + int_to_str(total_shards))
     println("")
-
     string perl_script = ""
     perl_script = perl_script + "use strict; use warnings; use JSON::PP qw(encode_json);\n"
     perl_script = perl_script + "my ($input, $out_dir, $docs_per_shard, $max_pages) = @ARGV;\n"
@@ -366,38 +324,31 @@ func process_wikipedia() int {
     perl_script = perl_script + "print {$mf} \"  ]\\n\";\n"
     perl_script = perl_script + "print {$mf} \"}\\n\";\n"
     perl_script = perl_script + "close $mf;\n"
-
     string perl_cmd = "perl -e " + shell_escape(perl_script) + " " +
         shell_escape(temp_xml) + " " +
         shell_escape(g_output_dir) + " " +
         shell_escape(int_to_str(g_docs_per_shard)) + " " +
         shell_escape(int_to_str(g_max_pages))
-
     println("[*] Writing JSONL shards and manifest...")
     let (_, shard_code) = command(perl_cmd)
     if shard_code != 0 {
         println("[-] Failed to create shards")
         return 1
     }
-
     println("")
     println("[+] Wikipedia sharding complete")
     println("[+] Shards   : " + int_to_str(total_shards))
     println("[+] Pages    : " + int_to_str(total_pages))
     println("[+] manifest : " + g_manifest_file)
-
     return 0
 }
-
 func main() int {
     string neurx_home = runtime_env_get("NEURX_HOME", ".")
     string dataset_root = neurx_home + "/dataset/pretrain"
-
     g_input_bz2_file = runtime_env_get("ENWIKI_BZ2_FILE", dataset_root + "/raw/enwiki-latest-pages-articles.xml.bz2")
     g_output_dir = runtime_env_get("ENWIKI_SHARD_DIR", dataset_root + "/shard")
     g_manifest_file = runtime_env_get("ENWIKI_MANIFEST_FILE", dataset_root + "/manifest.json")
     g_docs_per_shard = parse_int(runtime_env_get("DOCS_PER_SHARD", "5000"), 5000)
     g_max_pages = parse_int(runtime_env_get("MAX_PAGES", "0"), 0)
-
     process_wikipedia()
 }

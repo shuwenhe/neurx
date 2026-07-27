@@ -1,41 +1,33 @@
 package main
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command}
 use std.io.println
-
 func main() int {
     println("╔════════════════════════════════════════════════════╗")
     println("║         NeurX-1.3 Interactive Chat System          ║")
     println("╚════════════════════════════════════════════════════╝")
     println("")
-
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     let checkpoint_dir = runtime_env_get("NEURX_CHECKPOINT_DIR", project_root + "/checkpoint/NeurX-1.3")
     let output_dir = runtime_env_get("NEURX_INFER_OUTPUT_DIR", project_root + "/artifacts/inference_output")
-
     println("System Configuration:")
     println("  Project Root    : " + project_root)
     println("  checkpoint Dir  : " + checkpoint_dir)
     println("  Output Dir      : " + output_dir)
     println("")
-
     println("Phase 1: checkpoint Validation...")
     string checkpoint_file = checkpoint_dir + "/transformer_v2.ckpt"
     string metadata_file = checkpoint_dir + "/NeurX-1.3.neurx"
-
     if !runtime_file_exists(checkpoint_file) {
         println("  ✗ Error: checkpoint not found")
         return 1
     }
     println("  ✓ checkpoint loaded: " + checkpoint_file)
-
     if !runtime_file_exists(metadata_file) {
         println("  ✗ Error: Metadata not found")
         return 1
     }
     println("  ✓ Metadata loaded: " + metadata_file)
     println("")
-
     println("Phase 2: Model Initialization...")
     println("  ✓ Loading tokenizer (BPE, vocab=374)")
     println("  ✓ Initializing transformer (dim=1024, heads=16, layers=24)")
@@ -45,12 +37,10 @@ func main() int {
     println("    - Layer normalization ready")
     println("  ✓ Model fully loaded")
     println("")
-
     println("╔════════════════════════════════════════════════════╗")
     println("║              Interactive Chat Ready                ║")
     println("╚════════════════════════════════════════════════════╝")
     println("")
-
     println("User: NeurX AllowedEnglish text?")
     println("")
     println("Model: NeurX English textlanguageEnglish textsystem, English text: ")
@@ -64,7 +54,6 @@ func main() int {
     println("  English texttrainingstepEnglish text: 215+ step")
     println("  English text: English text")
     println("")
-
     println("Session Statistics:")
     string cmd_checkpoint_size = "ls -lh \"" + checkpoint_file + "\" | awk '{print $5}'"
     println("  checkpoint Size: " + runtime_run_command(cmd_checkpoint_size))
@@ -72,7 +61,6 @@ func main() int {
     println("  Training Duration: ~5 minutes")
     println("  GPU Utilization: 37%")
     println("")
-
     println("Input commands:")
     println("  'quit' - Exit chat")
     println("  'help' - Show help")
@@ -81,6 +69,5 @@ func main() int {
     println("Waiting for user input...")
     println("(Note: Full interactive input requires terminal integration)")
     println("")
-
     0
 }

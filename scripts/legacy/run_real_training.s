@@ -1,8 +1,6 @@
 package main
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use neurx.pretrain.llm.real_training_loop.{run_training_loop}
-
 func main() int {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     let manifest = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
@@ -13,7 +11,6 @@ func main() int {
     let vocab_size = clamp_int(str_to_int(runtime_env_get("NEURX_LLM_VOCAB_SIZE", "50257"), 50257), 256, 262144)
     let hidden_dim = clamp_int(str_to_int(runtime_env_get("NEURX_LLM_HIDDEN_SIZE", "4096"), 4096), 256, 32768)
     let learning_rate = str_to_float(runtime_env_get("NEURX_PRETRAIN_LR", runtime_env_get("NEURX_LLM_LR", "0.00015")))
-
     println("═══════════════════════════════════════════════════════════")
     println("🚀 NeurX Real Training Entry")
     println("═══════════════════════════════════════════════════════════")
@@ -28,14 +25,11 @@ func main() int {
     println("Hidden dim   : " + int_to_str(hidden_dim, 0))
     println("Learning rate: " + fmt_float(learning_rate, 6))
     println("")
-
     if !runtime_file_exists(manifest) {
         println("Missing manifest: " + manifest)
         return 1
     }
-
     let final_state = run_training_loop(manifest, steps, batch_size, seq_len, vocab_size, hidden_dim, learning_rate)
-
     println("")
     println("═══════════════════════════════════════════════════════════")
     println("Training finished")
@@ -50,7 +44,6 @@ func main() int {
     println("═══════════════════════════════════════════════════════════")
     0
 }
-
 func str_to_int(string s, int fallback) int {
     string text = trim(s)
     if len(text) == 0 {
@@ -73,7 +66,6 @@ func str_to_int(string s, int fallback) int {
     }
     sign * value
 }
-
 func str_to_float(string s) float {
     string text = trim(s)
     if len(text) == 0 {
@@ -106,7 +98,6 @@ func str_to_float(string s) float {
     }
     value
 }
-
 func clamp_int(int value, int min_value, int max_value) int {
     if value < min_value {
         return min_value
@@ -116,7 +107,6 @@ func clamp_int(int value, int min_value, int max_value) int {
     }
     value
 }
-
 func trim(string s) string {
     int i = 0
     while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
@@ -137,7 +127,6 @@ func trim(string s) string {
     }
     out
 }
-
 func int_to_str(int n, int fallback) string {
     int value = n
     if value == 0 {
@@ -157,7 +146,6 @@ func int_to_str(int n, int fallback) string {
     }
     s
 }
-
 func fmt_float(float val, int decimals) string {
     float value = val
     if value == 0.0 {
@@ -194,7 +182,6 @@ func fmt_float(float val, int decimals) string {
     }
     s
 }
-
 func string_char(int c) string {
     string(c)
 }

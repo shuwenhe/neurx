@@ -1,12 +1,10 @@
 package neurx.model.transformer.norm
-
 struct layer_norm_config {
     int hidden_dim
     float epsilon
     bool use_bias
     string norm_type
 }
-
 struct layer_norm {
     int hidden_dim
     float epsilon
@@ -14,13 +12,11 @@ struct layer_norm {
     []float beta
     bool use_bias
 }
-
 struct rms_norm {
     int hidden_dim
     float epsilon
     []float gamma
 }
-
 struct position_embedding_config {
     int hidden_dim
     int max_seq_len
@@ -28,13 +24,11 @@ struct position_embedding_config {
     float rope_base
     bool use_flash_attention
 }
-
 struct learned_position_embedding {
     int hidden_dim
     int max_seq_len
     []float weight
 }
-
 struct rope_embedding {
     int hidden_dim
     float rope_base
@@ -43,21 +37,17 @@ struct rope_embedding {
     []float cached_sin
     int max_seq_len
 }
-
 struct alibi_embedding {
     int num_heads
     []float head_slopes
 }
-
 struct rope_apply_result {
     []float query
     []float key
 }
-
 struct alibi_apply_result {
     []float scores
 }
-
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
@@ -67,7 +57,6 @@ func allocate_vector(int size, float init_val) []float {
     }
     v
 }
-
 func copy_vector([]float src) []float {
     []float out = allocate_vector(len(src), 0.0)
     int i = 0
@@ -77,7 +66,6 @@ func copy_vector([]float src) []float {
     }
     out
 }
-
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -90,7 +78,6 @@ func sqrt_approx(float x) float {
     }
     y
 }
-
 func exp_approx(float x) float {
     if x > 20.0 {
         return 485165195.0
@@ -108,7 +95,6 @@ func exp_approx(float x) float {
     }
     result
 }
-
 func cos_approx(float x) float {
     float pi = 3.141592653589793
     float two_pi = 6.283185307179586
@@ -130,7 +116,6 @@ func cos_approx(float x) float {
     }
     result
 }
-
 func sin_approx(float x) float {
     float pi = 3.141592653589793
     float two_pi = 6.283185307179586
@@ -152,7 +137,6 @@ func sin_approx(float x) float {
     }
     result
 }
-
 func new_layer_norm(layer_norm_config cfg) layer_norm {
     layer_norm {
         hidden_dim: cfg.hidden_dim,
@@ -162,7 +146,6 @@ func new_layer_norm(layer_norm_config cfg) layer_norm {
         use_bias: cfg.use_bias,
     }
 }
-
 func new_rms_norm(layer_norm_config cfg) rms_norm {
     rms_norm {
         hidden_dim: cfg.hidden_dim,
@@ -170,7 +153,6 @@ func new_rms_norm(layer_norm_config cfg) rms_norm {
         gamma: allocate_vector(cfg.hidden_dim, 1.0),
     }
 }
-
 func layer_normalize(
     layer_norm ln,
     []float input,
@@ -191,7 +173,6 @@ func layer_normalize(
                 d = d + 1
             }
             mean = mean / (hidden_dim * 1.0)
-
             float variance = 0.0
             d = 0
             while d < hidden_dim {
@@ -201,7 +182,6 @@ func layer_normalize(
             }
             variance = variance / (hidden_dim * 1.0)
             float denom = sqrt_approx(variance + ln.epsilon)
-
             d = 0
             while d < hidden_dim {
                 float normalized = (input[base + d] - mean) / denom
@@ -212,14 +192,12 @@ func layer_normalize(
                 output[base + d] = scaled
                 d = d + 1
             }
-
             s = s + 1
         }
         b = b + 1
     }
     output
 }
-
 func rms_normalize(
     rms_norm rn,
     []float input,
@@ -253,7 +231,6 @@ func rms_normalize(
     }
     output
 }
-
 func new_absolute_position_embedding(position_embedding_config cfg) []float {
     int total = cfg.max_seq_len * cfg.hidden_dim
     []float embedding = allocate_vector(total, 0.0)
@@ -276,7 +253,6 @@ func new_absolute_position_embedding(position_embedding_config cfg) []float {
     }
     embedding
 }
-
 func new_learned_position_embedding(position_embedding_config cfg) learned_position_embedding {
     int total = cfg.max_seq_len * cfg.hidden_dim
     []float weight = allocate_vector(total, 0.0)
@@ -296,7 +272,6 @@ func new_learned_position_embedding(position_embedding_config cfg) learned_posit
         weight: weight,
     }
 }
-
 func get_position_embedding(
     []float embedding,
     int hidden_dim,
@@ -311,7 +286,6 @@ func get_position_embedding(
     }
     out
 }
-
 func get_learned_position_embedding(
     learned_position_embedding embedding,
     int seq_len
@@ -325,7 +299,6 @@ func get_learned_position_embedding(
     }
     out
 }
-
 func new_rope_embedding(position_embedding_config cfg) rope_embedding {
     int half_dim = cfg.hidden_dim / 2
     []float frequencies = allocate_vector(half_dim, 0.0)
@@ -345,7 +318,6 @@ func new_rope_embedding(position_embedding_config cfg) rope_embedding {
         max_seq_len: cfg.max_seq_len,
     }
 }
-
 func apply_rope(
     rope_embedding rope,
     []float query,
@@ -395,7 +367,6 @@ func apply_rope(
         key: rotated_key,
     }
 }
-
 func new_alibi_embedding(position_embedding_config cfg, int num_heads) alibi_embedding {
     []float slopes = allocate_vector(num_heads, 0.0)
     int h = 0
@@ -408,7 +379,6 @@ func new_alibi_embedding(position_embedding_config cfg, int num_heads) alibi_emb
         head_slopes: slopes,
     }
 }
-
 func apply_alibi_bias(
     alibi_embedding alibi,
     []float attention_scores,
@@ -443,7 +413,6 @@ func apply_alibi_bias(
         scores: out,
     }
 }
-
 func get_embedding_stats(position_embedding_config cfg) map[string]double {
     map[string]double{}
 }

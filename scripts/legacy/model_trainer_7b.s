@@ -1,11 +1,9 @@
 package main
-
 import (
     "fmt"
     "os"
     "strconv"
 )
-
 type large_model_config struct {
     model_name: string
     num_params: int
@@ -21,7 +19,6 @@ type large_model_config struct {
     use_mixed_precision: bool
     zero_stage: int
 }
-
 type memory_estimate struct {
     model_weights_gb: float
     gradients_gb: float
@@ -29,7 +26,6 @@ type memory_estimate struct {
     activation_gb: float
     total_gb: float
 }
-
 func create_7b_config(): large_model_config {
     config := large_model_config{
         model_name: "neurx-7b",
@@ -48,7 +44,6 @@ func create_7b_config(): large_model_config {
     }
     return config
 }
-
 func create_13b_config(): large_model_config {
     config := large_model_config{
         model_name: "neurx-13b",
@@ -67,7 +62,6 @@ func create_13b_config(): large_model_config {
     }
     return config
 }
-
 func create_70b_config(): large_model_config {
     config := large_model_config{
         model_name: "neurx-70b",
@@ -86,28 +80,21 @@ func create_70b_config(): large_model_config {
     }
     return config
 }
-
 func estimate_memory(config: large_model_config, batch_size: int): memory_estimate {
     num_params_f := float(config.num_params)
     weights_gb := num_params_f * 4.0 / (1024.0 * 1024.0 * 1024.0)
-
     gradients_gb := weights_gb
-
     optimizer_states_gb := weights_gb * 2.0
     if config.zero_stage >= 2 {
         optimizer_states_gb = weights_gb * 2.0 / 4.0
     }
-
     bytes_per_token := float(config.hidden_dim) * 4.0
     seq_len_f := float(config.max_seq_len)
     batch_gb := float(batch_size) * seq_len_f * bytes_per_token / (1024.0 * 1024.0 * 1024.0)
-
     if config.activation_checkpointing {
         batch_gb = batch_gb * 0.4
     }
-
     total_gb := (weights_gb + gradients_gb + optimizer_states_gb + batch_gb) * 1.2
-
     estimate := memory_estimate{
         model_weights_gb: weights_gb,
         gradients_gb: gradients_gb,
@@ -115,10 +102,8 @@ func estimate_memory(config: large_model_config, batch_size: int): memory_estima
         activation_gb: batch_gb,
         total_gb: total_gb,
     }
-
     return estimate
 }
-
 func print_config(config: large_model_config, memory: memory_estimate) {
     fmt.Printf("\n")
     fmt.Printf("Model: %s\n", config.model_name)
@@ -145,32 +130,25 @@ func print_config(config: large_model_config, memory: memory_estimate) {
     fmt.Printf("  Total (with 20 percent margin): %.2f GB\n", memory.total_gb)
     fmt.Printf("\n")
 }
-
 func main() {
     model_size := os.Getenv("MODEL_SIZE")
     if model_size == "" {
         model_size = "7b"
     }
-
     world_size := 1
     rank := 0
-
     if ws := os.Getenv("WORLD_SIZE"); ws != "" {
         if w, err := strconv.Atoi(ws); err == nil {
             world_size = w
         }
     }
-
     if r := os.Getenv("RANK"); r != "" {
         if rr, err := strconv.Atoi(r); err == nil {
             rank = rr
         }
     }
-
     is_master := (rank == 0)
-
     var config large_model_config
-
     if model_size == "7b" {
         config = create_7b_config()
     } else if model_size == "13b" {
@@ -183,21 +161,17 @@ func main() {
         }
         return
     }
-
     memory := estimate_memory(config, 8)
-
     if is_master {
         fmt.Printf("\n")
         fmt.Printf("7B Model Trainer Initialization\n")
         fmt.Printf("==============================\n")
         print_config(config, memory)
-
         if memory.total_gb > 80.0 {
             fmt.Printf("Warning: Memory exceeds H100 capacity\n")
         } else {
             fmt.Printf("Status: Memory fits in H100 (80 GB)\n")
         }
-
         fmt.Printf("\nDistributed Setup:\n")
         fmt.Printf("  World Size: %d GPUs\n", world_size)
         fmt.Printf("  Current Rank: %d\n", rank)

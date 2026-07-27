@@ -1,5 +1,3 @@
-
-
 struct auto_target_config {
     string  soc_family
     bool    functional_safety
@@ -9,7 +7,6 @@ struct auto_target_config {
     []string sensors
     bool    v2x_enabled
 }
-
 func default_auto_target() auto_target_config {
     return auto_target_config{
         soc_family:       "orin",

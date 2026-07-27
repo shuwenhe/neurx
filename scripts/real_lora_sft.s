@@ -1,7 +1,5 @@
 module real_lora_sft
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_run_command_output, runtime_write_text_file, trim}
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -23,7 +21,6 @@ func int_to_str(int n) string {
     }
     out
 }
-
 func float_to_str(float value, int decimals) string {
     float current = value
     bool neg = current < 0.0
@@ -53,7 +50,6 @@ func float_to_str(float value, int decimals) string {
     }
     out
 }
-
 func shell_escape(string value) string {
     string out = "'"
     int i = 0
@@ -68,15 +64,12 @@ func shell_escape(string value) string {
     }
     out + "'"
 }
-
 func first_non_empty_line(string path) string {
     trim(runtime_run_command_output("grep -m 1 -v '^[[:space:]]*$' " + shell_escape(path)))
 }
-
 func string_char(int c) string {
     string(c)
 }
-
 func has_prefix(string s, string prefix) bool {
     if len(s) < len(prefix) {
         return false
@@ -90,7 +83,6 @@ func has_prefix(string s, string prefix) bool {
     }
     return true
 }
-
 func parse_int(string s, int fallback) int {
     string text = trim(s)
     if len(text) == 0 {
@@ -114,16 +106,13 @@ func parse_int(string s, int fallback) int {
     }
     sign * value
 }
-
 func get_json_string(string json_text, string key) string {
     string cmd = "printf %s " + shell_escape(json_text) + " | sed -n 's/.*\"" + key + "\"[[:space:]]*:[[:space:]]*\"\\([^\"]*\\)\".*/\\1/p' | head -1"
     trim(runtime_run_command_output(cmd))
 }
-
 func get_json_int(string json_text, string key, int fallback) int {
     parse_int(get_json_string(json_text, key), fallback)
 }
-
 func main() {
     string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
     string data_file = runtime_env_get("NEURX_POSTTRAIN_DATA_FILE", "/home/shuwen/shuwen/dataset/medical/train.json")
@@ -134,7 +123,6 @@ func main() {
     float learning_rate = 0.0005
     int max_steps = parse_int(runtime_env_get("NEURX_POSTTRAIN_MAX_STEPS", "4"), 4)
     int grad_accum = parse_int(runtime_env_get("NEURX_POSTTRAIN_GRAD_ACCUM", "1"), 1)
-
     if !runtime_file_exists(model_path) && !runtime_file_exists(model_path + "/config.json") {
         println("error: model path not found: " + model_path)
         return
@@ -143,15 +131,12 @@ func main() {
         println("error: data file not found: " + data_file)
         return
     }
-
     let _ = runtime_run_command_output("mkdir -p " + shell_escape(output_dir))
-
     println("Loading tokenizer: " + model_path)
     println("Loading Qwen model on S runtime (simulated training)")
     println("Injected LoRA into 2 modules: [q_proj, v_proj]")
     println("Trainable parameters: " + int_to_str(rank * 1024) + " / " + int_to_str(rank * 1024 * 100) + " (simulated)")
     println("Dataset: " + data_file + "; max_steps=" + int_to_str(max_steps) + "; grad_accum=" + int_to_str(grad_accum))
-
     string first_json = first_non_empty_line(data_file)
     string prompt = get_json_string(first_json, "question")
     string answer_a = get_json_string(first_json, "opa")
@@ -164,7 +149,6 @@ func main() {
     else if correct_index == 2 { expected = answer_b }
     else if correct_index == 3 { expected = answer_c }
     else if correct_index == 4 { expected = answer_d }
-
     int step = 0
     float loss = 1.0
     float best_loss = 9999.0
@@ -180,7 +164,6 @@ func main() {
         println("step " + int_to_str(step + 1) + "/" + int_to_str(epochs) + " loss=" + float_to_str(loss, 6))
         step = step + 1
     }
-
     string adapter_config = "{\n" +
         "  \"base_model_name_or_path\": \"" + model_path + "\",\n" +
         "  \"bias\": \"none\",\n" +
@@ -210,10 +193,8 @@ func main() {
         "  \"expected\": \"" + expected + "\",\n" +
         "  \"best_loss\": " + float_to_str(best_loss, 6) + "\n" +
         "}\n"
-
     runtime_write_text_file(output_dir + "/adapter_config.json", adapter_config)
     runtime_write_text_file(output_dir + "/training_state.json", training_state)
     runtime_write_text_file(output_dir + "/adapter_model.safetensors", adapter_weights)
-
     println("Saved real LoRA adapter to " + output_dir)
 }

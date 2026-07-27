@@ -1,14 +1,10 @@
-
-
 package data_quality
-
 import (
     "std/io"
     "std/json"
     "std/strings"
     "std/math"
 )
-
 struct quality_metrics {
     total_lines: i64
     valid_docs: i64
@@ -24,13 +20,11 @@ struct quality_metrics {
     quality_distribution: map<string, i64>
     issues: []string
 }
-
 struct quality_assessor {
     sample_size: i64
     metrics: quality_metrics
     seen_hashes: set<string>
 }
-
 func NewQualityAssessor(sample_size: i64) quality_assessor {
     return quality_assessor{
         sample_size: sample_size,
@@ -48,21 +42,17 @@ func NewQualityAssessor(sample_size: i64) quality_assessor {
         seen_hashes: make(set<string>),
     }
 }
-
 func (qa: *quality_assessor) calculateQualityScore(text: string) f64 {
     if len(text) == 0 {
         return 0.0
     }
-
     score := 0.0
-
     doc_len := f64(len(text))
     if doc_len >= 100.0 && doc_len <= 100000.0 {
         score += 0.2
     } else if doc_len > 100.0 && doc_len < 100000.0 {
         score += 0.2 * math.Min(1.0, doc_len / 10000.0)
     }
-
     space_count := f64(strings.Count(text, " "))
     space_ratio := space_count / doc_len
     if space_ratio >= 0.15 && space_ratio <= 0.35 {
@@ -70,7 +60,6 @@ func (qa: *quality_assessor) calculateQualityScore(text: string) f64 {
     } else if space_ratio > 0.0 {
         score += 0.2 * math.Min(1.0, space_ratio * 2.0)
     }
-
     unique_chars := countUniqueChars(text)
     diversity := f64(unique_chars) / doc_len
     if diversity > 0.3 {
@@ -78,7 +67,6 @@ func (qa: *quality_assessor) calculateQualityScore(text: string) f64 {
     } else if diversity > 0.1 {
         score += 0.2 * (diversity / 0.3)
     }
-
     url_count := strings.Count(text, "http")
     url_density := f64(url_count) / (doc_len / 50.0)
     if url_density < 0.1 {
@@ -86,14 +74,11 @@ func (qa: *quality_assessor) calculateQualityScore(text: string) f64 {
     } else if url_density < 0.5 {
         score += 0.2 * (1.0 - url_density / 0.5)
     }
-
     if hasNaturalLanguageFeatures(text) {
         score += 0.2
     }
-
     return score
 }
-
 func countUniqueChars(text: string) i64 {
     seen := make(set<rune>)
     for c in text {
@@ -101,23 +86,17 @@ func countUniqueChars(text: string) i64 {
     }
     return i64(len(seen))
 }
-
 func hasNaturalLanguageFeatures(text: string) bool {
-
     words := strings.Split(text, " ")
     long_word_count := 0
-
     for word in words {
         if len(word) >= 20 {
             long_word_count += 1
         }
     }
-
     return long_word_count > 0 && long_word_count > len(words) / 100
 }
-
 func detectLanguage(text: string) string {
-
     if strings.Contains(text, "é") || strings.Contains(text, "à") {
         return "fr"
     }
@@ -138,28 +117,21 @@ func detectLanguage(text: string) string {
     }
     return "en"
 }
-
 func (qa: *quality_assessor) AssessFile(filepath: string) quality_metrics {
     println("📊 evaluationfile: " + filepath)
-
     file := io.Open(filepath, "r")
     defer file.Close()
-
     reader := io.NewBufferedReader(file)
     line_no := 0
-
     for {
         line := reader.ReadLine()
         if line == "" {
             break
         }
-
         if line_no >= qa.sample_size {
             break
         }
-
         qa.metrics.total_lines += 1
-
         doc, err := json.Unmarshal(line)
         if err != nil {
             qa.metrics.invalid_docs += 1
@@ -168,7 +140,6 @@ func (qa: *quality_assessor) AssessFile(filepath: string) quality_metrics {
             line_no += 1
             continue
         }
-
         text, ok := doc["text"].(string)
         if !ok || len(text) == 0 {
             qa.metrics.invalid_docs += 1
@@ -177,7 +148,6 @@ func (qa: *quality_assessor) AssessFile(filepath: string) quality_metrics {
             line_no += 1
             continue
         }
-
         hash := strings.Hash(text)
         if hash in qa.seen_hashes {
             qa.metrics.issues = append(qa.metrics.issues,
@@ -186,15 +156,11 @@ func (qa: *quality_assessor) AssessFile(filepath: string) quality_metrics {
             qa.seen_hashes[hash] = true
         }
         qa.metrics.dedup_hash_count = i64(len(qa.seen_hashes))
-
         qa.metrics.total_chars += i64(len(text))
-
         tokens := i64(len(text)) / 4
         qa.metrics.total_tokens += tokens
-
         quality := qa.calculateQualityScore(text)
         qa.metrics.quality_score += quality
-
         if len(text) < 100 {
             qa.metrics.length_distribution["too_short"] += 1
         } else if len(text) > 100000 {
@@ -206,7 +172,6 @@ func (qa: *quality_assessor) AssessFile(filepath: string) quality_metrics {
         } else {
             qa.metrics.length_distribution["10k-100k"] += 1
         }
-
         quality_bucket := "low"
         if quality > 0.8 {
             quality_bucket = "high"
@@ -214,69 +179,57 @@ func (qa: *quality_assessor) AssessFile(filepath: string) quality_metrics {
             quality_bucket = "medium"
         }
         qa.metrics.quality_distribution[quality_bucket] += 1
-
         lang := detectLanguage(text)
         qa.metrics.language_detected[lang] += 1
-
         qa.metrics.valid_docs += 1
         line_no += 1
     }
-
     if qa.metrics.valid_docs > 0 {
         qa.metrics.avg_doc_length = f64(qa.metrics.total_chars) / f64(qa.metrics.valid_docs)
         qa.metrics.quality_score = qa.metrics.quality_score / f64(qa.metrics.valid_docs)
     }
     qa.metrics.avg_line_length = f64(qa.metrics.total_chars) / f64(qa.metrics.total_lines)
-
     return qa.metrics
 }
-
 func (metrics: quality_metrics) PrintReport() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║         📊 NeurX dataEnglish textevaluationEnglish text                      ║")
     println("╚════════════════════════════════════════════════════════╝")
     println("")
-
     println("📈 English textstatistics:")
     println("  English text:       " + string(metrics.total_lines))
     println("  English text:     " + string(metrics.valid_docs))
     println("  English text:     " + string(metrics.invalid_docs))
     println("  English text:       " + formatPercent(f64(metrics.valid_docs) / f64(metrics.total_lines)))
     println("")
-
     println("💾 dataEnglish text:")
     println("  English text:     " + formatSize(metrics.total_chars))
     println("  English text Tokens:    " + formatTokens(metrics.total_tokens))
     println("  English text:   " + string(i64(metrics.avg_doc_length)) + " English text")
     println("")
-
     println("✨ English text:")
     println("  English text: " + formatScore(metrics.quality_score))
     println("  deduplicationEnglish text:   " + string(metrics.dedup_hash_count))
     println("  deduplicationEnglish text:       " + formatPercent(f64(metrics.dedup_hash_count) / f64(metrics.valid_docs)))
     println("")
-
     println("📏 English text:")
     for key, count in metrics.length_distribution {
         percentage := f64(count) / f64(metrics.valid_docs) * 100.0
         println("  " + key + ":        " + string(count) + " (" + formatPercent(percentage/100.0) + ")")
     }
     println("")
-
     println("⭐ English text:")
     for key, count in metrics.quality_distribution {
         percentage := f64(count) / f64(metrics.valid_docs) * 100.0
         println("  " + key + ":        " + string(count) + " (" + formatPercent(percentage/100.0) + ")")
     }
     println("")
-
     println("🌍 languageEnglish text:")
     for lang, count in metrics.language_detected {
         percentage := f64(count) / f64(metrics.valid_docs) * 100.0
         println("  " + lang + ":           " + string(count) + " (" + formatPercent(percentage/100.0) + ")")
     }
     println("")
-
     if len(metrics.issues) > 0 {
         println("⚠️  English text:")
         issue_count := 0
@@ -289,11 +242,9 @@ func (metrics: quality_metrics) PrintReport() {
             issue_count += 1
         }
     }
-
     println("")
     println("═══════════════════════════════════════════════════════════")
 }
-
 func formatSize(size: i64) string {
     if size < 1024 {
         return string(size) + " B"
@@ -306,7 +257,6 @@ func formatSize(size: i64) string {
     }
     return formatFloat(f64(size) / (1024.0 * 1024.0 * 1024.0), 1) + " GB"
 }
-
 func formatTokens(tokens: i64) string {
     if tokens < 1000 {
         return string(tokens)
@@ -319,52 +269,40 @@ func formatTokens(tokens: i64) string {
     }
     return formatFloat(f64(tokens) / 1000000000.0, 1) + "B"
 }
-
 func formatScore(score: f64) string {
     return formatFloat(score, 2) + " / 1.0"
 }
-
 func formatPercent(percent: f64) string {
     return formatFloat(percent * 100.0, 1) + "%"
 }
-
 func formatFloat(num: f64, decimals: i32) string {
-
     multiplier := pow(10.0, f64(decimals))
     rounded := math.Floor(num * multiplier) / multiplier
     return string(rounded)
 }
-
 func pow(base: f64, exp: f64) f64 {
-
     result := 1.0
     for i := 0; i < i32(exp); i += 1 {
         result *= base
     }
     return result
 }
-
 func main() {
     if len(os.Args) < 2 {
         println("English text: quality_assessor <file> [sample_size]")
         println("example: quality_assessor data.jsonl 1000")
         return
     }
-
     filepath := os.Args[1]
     sample_size := i64(1000)
-
     if len(os.Args) > 2 {
         sample_size = i64(string_to_int(os.Args[2]))
     }
-
     assessor := NewQualityAssessor(sample_size)
     metrics := assessor.AssessFile(filepath)
     metrics.PrintReport()
 }
-
 func string_to_int(s: string) i64 {
-
     result := i64(0)
     for c in s {
         if c >= '0' && c <= '9' {

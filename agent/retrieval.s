@@ -1,14 +1,11 @@
 package neurx.agent.retrieval
-
 use neurx.agent.memory
-
 struct agent_retrieval_result {
     []string keys
     []string values
     []int scores
     int count
 }
-
 func new_agent_retrieval_result() agent_retrieval_result {
     agent_retrieval_result {
         keys: [],
@@ -17,7 +14,6 @@ func new_agent_retrieval_result() agent_retrieval_result {
         count: 0,
     }
 }
-
 func agent_retrieval_text_contains(string haystack, string needle) bool {
     int hl = len(haystack)
     int nl = len(needle)
@@ -45,7 +41,6 @@ func agent_retrieval_text_contains(string haystack, string needle) bool {
     }
     false
 }
-
 func agent_retrieval_score(string query, string text) int {
     string q = lower(trim(query))
     string t = lower(trim(text))
@@ -60,7 +55,6 @@ func agent_retrieval_score(string query, string text) int {
     }
     0
 }
-
 func agent_retrieval_search(agent_memory_state memory, string query, int top_k) agent_retrieval_result {
     []string long_keys = agent_memory_long_keys(memory)
     int n = len(long_keys)
@@ -97,7 +91,6 @@ func agent_retrieval_search(agent_memory_state memory, string query, int top_k) 
         count: found,
     }
 }
-
 func agent_retrieval_search_short(agent_memory_state memory, string query, int top_k) agent_retrieval_result {
     []string short_keys = agent_memory_short_keys(memory)
     int n = len(short_keys)
@@ -134,21 +127,18 @@ func agent_retrieval_search_short(agent_memory_state memory, string query, int t
         count: found,
     }
 }
-
 func agent_retrieval_top_key(agent_retrieval_result result) string {
     if result.count <= 0 {
         return ""
     }
     result.keys[0]
 }
-
 func agent_retrieval_top_value(agent_retrieval_result result) string {
     if result.count <= 0 {
         return ""
     }
     result.values[0]
 }
-
 func agent_retrieval_export(agent_retrieval_result result) string {
     string out = "retrieval;count=" + string(result.count) + "\n"
     int i = 0
@@ -158,7 +148,6 @@ func agent_retrieval_export(agent_retrieval_result result) string {
     }
     out
 }
-
 func agent_retrieval_summary(agent_retrieval_result result) string {
     "retrieval;hits=" + string(result.count) + ";top=" + agent_retrieval_top_key(result)
 }

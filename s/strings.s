@@ -1,5 +1,4 @@
 package neurx.strings
-
 func copy_strings([]string values) []string {
     []string out = []string{cap: len(values)}
     int i = 0
@@ -9,7 +8,6 @@ func copy_strings([]string values) []string {
     }
     out
 }
-
 func strings_eq(string a, string b) bool {
     if len(a) != len(b) {
         return false
@@ -24,16 +22,13 @@ func strings_eq(string a, string b) bool {
     }
     eq
 }
-
 func string_at([]string arr, int idx) string {
     if idx < 0 || idx >= len(arr) {
         return ""
     }
-
     string val = arr[idx]
     val
 }
-
 func substring(string s, int start, int end) string {
     if start < 0 {
         start = 0
@@ -53,7 +48,6 @@ func substring(string s, int start, int end) string {
     }
     out
 }
-
 func concat2(string a, string b) string {
     int n1 = len(a)
     int n2 = len(b)
@@ -71,23 +65,17 @@ func concat2(string a, string b) string {
     }
     out
 }
-
 func concat3(string a, string b, string c) string {
     concat2(concat2(a, b), c)
 }
-
 func concat4(string a, string b, string c, string d) string {
     concat2(concat3(a, b, c), d)
 }
-
 func concat5(string a, string b, string c, string d, string e) string {
     concat2(concat4(a, b, c, d), e)
 }
-
 func concat6(string a, string b, string c, string d, string e, string f) string {
     concat2(concat5(a, b, c, d, e), f)
 }
-
 func string_set_workaround() {
-
 }

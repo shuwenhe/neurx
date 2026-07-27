@@ -1,8 +1,6 @@
 package main
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_write_text_file}
 use std.io.println
-
 struct sft_state {
     float weight
     float bias
@@ -13,7 +11,6 @@ struct sft_state {
     float total_loss
     float best_eval_loss
 }
-
 func main() int {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     string data_path = runtime_env_get("NEURX_SFT_DATA_FILE", project_root + "/data/sft/instruction_data.jsonl")
@@ -21,7 +18,6 @@ func main() int {
     int epochs = parse_int(runtime_env_get("NEURX_SFT_EPOCHS", "3"), 3)
     int batch_size = parse_int(runtime_env_get("NEURX_SFT_BATCH_SIZE", "4"), 4)
     float learning_rate = parse_float(runtime_env_get("NEURX_SFT_LR", "0.001"))
-
     println("========================================")
     println("NeurX Supervised Fine-Tuning (S Lang)")
     println("========================================")
@@ -32,20 +28,16 @@ func main() int {
     println("Batch size   : " + int_to_str(batch_size))
     println("Learning rate: " + fmt_float(learning_rate, 6))
     println("")
-
     runtime_command_result mkdir_result = runtime_make_dirs(output_dir)
     if !mkdir_result.ok {
         println("Failed to create output dir: " + output_dir)
         return 1
     }
-
     []string samples = load_sft_samples(data_path)
     if len(samples) == 0 {
         samples = builtin_sft_samples()
     }
-
     println("Loaded samples: " + int_to_str(len(samples)))
-
     sft_state state = sft_state {
         weight: 0.01,
         bias: 0.0,
@@ -56,22 +48,18 @@ func main() int {
         total_loss: 0.0,
         best_eval_loss: 999999.0,
     }
-
     int epoch = 0
     while epoch < epochs {
         println("")
         println("Epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs))
-
         int sample_index = 0
         float epoch_loss = 0.0
         int epoch_examples = 0
-
         while sample_index < len(samples) {
             int batch_end = sample_index + batch_size
             if batch_end > len(samples) {
                 batch_end = len(samples)
             }
-
             int item = sample_index
             while item < batch_end {
                 string formatted = samples[item]
@@ -104,10 +92,8 @@ func main() int {
                 epoch_examples = epoch_examples + 1
                 item = item + 1
             }
-
             sample_index = batch_end
         }
-
         float eval_loss = 0.0
         int eval_valid = 0
         int eval_i = 0
@@ -141,19 +127,16 @@ func main() int {
         if eval_loss < state.best_eval_loss {
             state.best_eval_loss = eval_loss
         }
-
         float avg_train_loss = 0.0
         if epoch_examples > 0 {
             avg_train_loss = epoch_loss / (epoch_examples as float)
         }
-
         println("  train loss : " + fmt_float(avg_train_loss, 4))
         println("  eval loss  : " + fmt_float(eval_loss, 4))
         println("  weight     : " + fmt_float(state.weight, 6))
         println("  bias       : " + fmt_float(state.bias, 6))
         println("  examples   : " + int_to_str(state.examples_seen))
         println("  tokens     : " + int_to_str(state.tokens_seen))
-
         string checkpoint_path = output_dir + "/sft_checkpoint_epoch_" + int_to_str(epoch + 1) + ".txt"
         runtime_write_text_file(
             checkpoint_path,
@@ -171,10 +154,8 @@ func main() int {
             "last_loss=" + fmt_float(state.last_loss, 6) + "\n" +
             "best_eval_loss=" + fmt_float(state.best_eval_loss, 6) + "\n"
         )
-
         epoch = epoch + 1
     }
-
     string latest_checkpoint = output_dir + "/sft_latest.txt"
     runtime_write_text_file(
         latest_checkpoint,
@@ -198,14 +179,12 @@ func main() int {
         "examples_seen=" + int_to_str(state.examples_seen) + "\n" +
         "tokens_seen=" + int_to_str(state.tokens_seen) + "\n"
     )
-
     println("")
     println("SFT training complete")
     println("Latest checkpoint: " + latest_checkpoint)
     println("Best eval loss    : " + fmt_float(state.best_eval_loss, 4))
     0
 }
-
 func builtin_sft_samples() []string {
     []string samples = []string{cap: 4}
     samples[0] = format_sft_text("Explain gradient descent", "", "Gradient descent updates parameters by following the negative loss gradient.")
@@ -214,17 +193,14 @@ func builtin_sft_samples() []string {
     samples[3] = format_sft_text("Answer politely", "Can you help me?", "Yes, I can help you with that.")
     samples
 }
-
 func load_sft_samples(string data_path) []string {
     if !runtime_file_exists(data_path) {
         []string empty = []string{cap: 0}
         return empty
     }
-
     println("SFT data file detected; using built-in sample set in this minimal S implementation.")
     builtin_sft_samples()
 }
-
 func format_sft_text(string instruction, string input_text, string output_text) string {
     string out = "### Instruction:\n" + instruction
     if str_len(input_text) > 0 {
@@ -233,28 +209,23 @@ func format_sft_text(string instruction, string input_text, string output_text) 
     out = out + "\n\n### Response:\n" + output_text
     out
 }
-
 func trim(string s) string {
     int start = 0
     while start < str_len(s) && is_space(s[start]) {
         start = start + 1
     }
-
     int end = str_len(s) - 1
     while end >= start && is_space(s[end]) {
         end = end - 1
     }
-
     if end < start {
         return ""
     }
     substring(s, start, end + 1)
 }
-
 func is_space(int c) bool {
     c == 32 || c == 9 || c == 10 || c == 13
 }
-
 func substring(string s, int start, int end) string {
     if start < 0 {
         start = 0
@@ -265,7 +236,6 @@ func substring(string s, int start, int end) string {
     if end <= start {
         return ""
     }
-
     string out = ""
     int i = start
     while i < end {
@@ -274,7 +244,6 @@ func substring(string s, int start, int end) string {
     }
     out
 }
-
 func str_len(string s) int {
     int n = 0
     while n < len(s) {
@@ -282,19 +251,16 @@ func str_len(string s) int {
     }
     n
 }
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
     }
-
     int value = n
     bool neg = false
     if value < 0 {
         neg = true
         value = 0 - value
     }
-
     string out = ""
     while value > 0 {
         int digit = value
@@ -311,25 +277,21 @@ func int_to_str(int n) string {
     }
     out
 }
-
 func fmt_float(float value, int decimals) string {
     bool neg = value < 0.0
     if neg {
         value = 0.0 - value
     }
-
     int whole = 0
     while value >= 1.0 {
         value = value - 1.0
         whole = whole + 1
     }
-
     string out = ""
     if neg {
         out = "-"
     }
     out = out + int_to_str(whole) + "."
-
     int i = 0
     while i < decimals {
         value = value * 10.0
@@ -343,20 +305,17 @@ func fmt_float(float value, int decimals) string {
     }
     out
 }
-
 func parse_int(string s, int fallback) int {
     string text = trim(s)
     if str_len(text) == 0 {
         return fallback
     }
-
     int sign = 1
     int i = 0
     if text[0] == 45 {
         sign = -1
         i = 1
     }
-
     int value = 0
     while i < str_len(text) {
         int digit = text[i] - 48
@@ -368,26 +327,22 @@ func parse_int(string s, int fallback) int {
     }
     sign * value
 }
-
 func parse_float(string s) float {
     string text = trim(s)
     if str_len(text) == 0 {
         return 0.0
     }
-
     bool neg = false
     int i = 0
     if text[0] == 45 {
         neg = true
         i = 1
     }
-
     float whole = 0.0
     while i < str_len(text) && text[i] >= 48 && text[i] <= 57 {
         whole = whole * 10.0 + ((text[i] - 48) as float)
         i = i + 1
     }
-
     float frac = 0.0
     float scale = 1.0
     if i < str_len(text) && text[i] == 46 {
@@ -398,14 +353,12 @@ func parse_float(string s) float {
             i = i + 1
         }
     }
-
     float value = whole + frac / scale
     if neg {
         value = 0.0 - value
     }
     value
 }
-
 func check_path(string path) string {
     if runtime_file_exists(path) {
         return "ready (" + path + ")"

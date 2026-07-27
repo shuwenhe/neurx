@@ -1,7 +1,5 @@
 package main
-
 use std.io.println
-
 func main() int {
     println("")
     println("╔" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╗")
@@ -9,22 +7,18 @@ func main() int {
     println("║  Merge LoRA adapter into base model")
     println("╚" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╝")
     println("")
-
     println("📖 Loading base model...")
     println("  Path: /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct")
     println("  ✓ Loading complete")
     println("")
-
     println("📖 Loading LoRA adapter...")
     println("  Path: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft")
     println("  ✓ Loading complete")
     println("")
-
     println("🔗 Merging weights...")
     println("  Formula: W_final = W_base + (α/r) × B × A")
     println("  ✓ mergecomplete")
     println("")
-
     println("💾 savefinalmodel...")
     println("  location: /home/shuwen/shuwen/posttrain/")
     println("  ✓ model.safetensors havesave (~1.5GB)")
@@ -32,17 +26,14 @@ func main() int {
     println("  ✓ tokenizer.json havesave")
     println("  ✓ generation_config.json havesave")
     println("")
-
     println("✅ Verifying output...")
     println("  ✓ allfileComplete")
     println("  ✓ formatverifythrough")
     println("")
-
     println("=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=")
     println("✨ afterTrainingcomplete!")
     println("=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=")
     println("")
-
     println("🎯 finaloutput:")
     println("  📁 /home/shuwen/shuwen/posttrain/")
     println("     ├── model.safetensors (mergeafter of Completemodel ~1.5GB)")
@@ -52,12 +43,10 @@ func main() int {
     println("     ├── generation_config.json")
     println("     └── README.md")
     println("")
-
     println("🚀 现 in 可以:")
     println("  • Usagemodelenterlineinference")
     println("  • enter一stepFine-tuning")
     println("  • deployment to 生产环境")
     println("")
-
     0
 }

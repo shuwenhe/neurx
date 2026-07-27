@@ -1,5 +1,4 @@
 package neurx.moe.llm
-
 use neurx.model.llm.gpt.{
     model_config, language_model, transformer_layer, model_output,
     new_language_model, new_transformer_layer, transformer_layer_at,
@@ -14,14 +13,12 @@ use neurx.moe.transformer.{
     moe_mixtral_config, moe_large_config, moe_fine_grained_config
 }
 use neurx.model.transformer.norm.{rms_norm, rms_normalize, layer_norm_config, new_rms_norm}
-
 struct gpt_moe_config {
     model_config base
     moe_config moe
     int moe_frequency
     float moe_aux_loss_weight
 }
-
 func gpt_moe_mixtral(model_config base) gpt_moe_config {
     gpt_moe_config {
         base: base,
@@ -30,7 +27,6 @@ func gpt_moe_mixtral(model_config base) gpt_moe_config {
         moe_aux_loss_weight: 0.01,
     }
 }
-
 func gpt_moe_gpt4_style(model_config base) gpt_moe_config {
     gpt_moe_config {
         base: base,
@@ -39,7 +35,6 @@ func gpt_moe_gpt4_style(model_config base) gpt_moe_config {
         moe_aux_loss_weight: 0.01,
     }
 }
-
 func gpt_moe_neurx_v3(model_config base) gpt_moe_config {
     gpt_moe_config {
         base: base,
@@ -48,14 +43,12 @@ func gpt_moe_neurx_v3(model_config base) gpt_moe_config {
         moe_aux_loss_weight: 0.003,
     }
 }
-
 struct gpt_moe_block {
     transformer_layer dense_block
     moe_layer moe_ffn
     bool is_moe
     int layer_idx
 }
-
 struct gpt_moe_model {
     gpt_moe_config config
     []float wte
@@ -70,7 +63,6 @@ struct gpt_moe_model {
     int block_size
     int num_moe_layers
 }
-
 struct gpt_moe_output {
     []float logits
     []float last_hidden
@@ -78,28 +70,21 @@ struct gpt_moe_output {
     float aux_loss
     float total_loss
 }
-
 func new_gpt_moe_model(gpt_moe_config cfg) gpt_moe_model {
-
     language_model base = new_language_model(cfg.base)
-
     int nl = cfg.base.n_layer
     int H = cfg.base.n_embd
     int moe_freq = cfg.moe_frequency
     if moe_freq < 1 { moe_freq = 1 }
-
     []gpt_moe_block blocks = []gpt_moe_block{cap: nl}
     int num_moe = 0
     int l = 0
     while l < nl {
         bool is_moe = (l - (l / moe_freq) * moe_freq == 0)
-
         transformer_layer_config_local lc = default_moe_layer_config(cfg.base)
         lc.hidden_dim = H
         transformer_layer dense = transformer_layer_at(base.layers, l)
-
         moe_layer moe_ffn = new_moe_layer(cfg.moe)
-
         blocks[l] = gpt_moe_block {
             dense_block: dense,
             moe_ffn: moe_ffn,
@@ -109,7 +94,6 @@ func new_gpt_moe_model(gpt_moe_config cfg) gpt_moe_model {
         if is_moe { num_moe = num_moe + 1 }
         l = l + 1
     }
-
     gpt_moe_model {
         config: cfg,
         wte: base.wte,
@@ -125,15 +109,12 @@ func new_gpt_moe_model(gpt_moe_config cfg) gpt_moe_model {
         num_moe_layers: num_moe,
     }
 }
-
 struct transformer_layer_config_local {
     int hidden_dim
 }
-
 func default_moe_layer_config(model_config base) transformer_layer_config_local {
     transformer_layer_config_local { hidden_dim: base.n_embd }
 }
-
 func gpt_moe_block_at([]gpt_moe_block blocks, int idx) gpt_moe_block {
     gpt_moe_block val = blocks[0]
     int i = 0
@@ -143,12 +124,10 @@ func gpt_moe_block_at([]gpt_moe_block blocks, int idx) gpt_moe_block {
     }
     val
 }
-
 struct gpt_moe_block_forward_ret {
     []float output
     float aux_loss
 }
-
 func gpt_moe_block_forward(
     gpt_moe_block block,
     []float x,
@@ -162,13 +141,10 @@ func gpt_moe_block_forward(
     int nkv = block.dense_block.n_kv_head
     int hd = block.dense_block.head_dim
     int kv_D = nkv * hd
-
     []float normed1 = rms_normalize(block.dense_block.norm1, x, batch_size, seq_len)
-
     []float q = gpt_matmul(normed1, block.dense_block.attn.query_weight, total, H, H)
     []float k = gpt_matmul_kv(normed1, block.dense_block.attn.key_weight,   total, H, kv_D, H)
     []float v = gpt_matmul_kv(normed1, block.dense_block.attn.value_weight, total, H, kv_D, H)
-
     int pair_dim = hd / 2
     []float qr = gpt_copy(q)
     []float kr = gpt_copy(k)
@@ -211,7 +187,6 @@ func gpt_moe_block_forward(
         }
         b = b + 1
     }
-
     []float attn_out = gpt_alloc(total * H, 0.0)
     b = 0
     while b < batch_size {
@@ -229,12 +204,9 @@ func gpt_moe_block_forward(
         while i < seq_len * H { attn_out[b*seq_len*H + i] = sdpa[i]; i = i+1 }
         b = b + 1
     }
-
     []float attn_proj = gpt_matmul(attn_out, block.dense_block.attn.output_weight, total, H, H)
     []float h_attn = gpt_add(x, attn_proj)
-
     []float normed2 = rms_normalize(block.dense_block.norm2, h_attn, batch_size, seq_len)
-
     []float ffn_out
     float aux_loss = 0.0
     if block.is_moe {
@@ -242,13 +214,10 @@ func gpt_moe_block_forward(
         ffn_out = mo.hidden
         aux_loss = mo.aux_loss
     } else {
-
         ffn_out = gpt_dense_ffn_forward(block.dense_block, normed2, total)
     }
-
     gpt_moe_block_forward_ret { output: gpt_add(h_attn, ffn_out), aux_loss: aux_loss }
 }
-
 func gpt_dense_ffn_forward(transformer_layer layer, []float normed2, int total) []float {
     int H = layer.hidden_dim
     int ffn_D = len(layer.ffn.glu_ffn.gate_weight) / H
@@ -274,7 +243,6 @@ func gpt_dense_ffn_forward(transformer_layer layer, []float normed2, int total) 
     }
     down
 }
-
 func gpt_moe_forward(
     gpt_moe_model model,
     []int token_ids,
@@ -284,9 +252,7 @@ func gpt_moe_forward(
     int H = model.n_embd
     int V = model.vocab_size
     int total = batch_size * seq_len
-
     []float hidden = embed_tokens(model.wte, model.wpe, token_ids, batch_size, seq_len, H)
-
     float total_aux = 0.0
     int l = 0
     while l < model.n_layer {
@@ -298,21 +264,17 @@ func gpt_moe_forward(
         total_aux = total_aux + aux
         l = l + 1
     }
-
     []float normed = rms_normalize(model.final_norm, hidden, batch_size, seq_len)
-
     []float logits
     if model.config.base.tie_embeddings {
         logits = gpt_matmul_t(normed, model.lm_head, total, H, V)
     } else {
         logits = gpt_matmul(normed, model.lm_head, total, H, V)
     }
-
     float avg_aux = 0.0
     if model.num_moe_layers > 0 {
         avg_aux = total_aux / (model.num_moe_layers * 1.0)
     }
-
     gpt_moe_output {
         logits: logits,
         last_hidden: normed,
@@ -321,22 +283,16 @@ func gpt_moe_forward(
         total_loss: -1.0,
     }
 }
-
 func gpt_moe_param_count(gpt_moe_config cfg) int {
     int base = gpt_param_count(cfg.base)
     int nl = cfg.base.n_layer
     int H = cfg.base.n_embd
     int moe_freq = cfg.moe_frequency
     if moe_freq < 1 { moe_freq = 1 }
-
     int moe_count = nl / moe_freq
-
     int dense_ffn = 3 * H * cfg.base.ffn_dim
-
     int per_expert = 3 * H * cfg.moe.expert_dim
     int moe_layer_params = per_expert * cfg.moe.num_experts + H * cfg.moe.num_experts
-
     int delta = moe_count * (moe_layer_params - dense_ffn)
-
     base + delta
 }

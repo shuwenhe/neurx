@@ -1,8 +1,6 @@
 package neurx.pretrain.loop
-
 use neurx.pretrain.config
 use neurx.pretrain.data
-
 struct pretrain_loop_state {
     pretrain_config cfg
     pretrain_data_state data
@@ -16,7 +14,6 @@ struct pretrain_loop_state {
     bool should_save
     bool finished
 }
-
 func new_pretrain_loop_state(pretrain_config cfg, pretrain_data_state data) pretrain_loop_state {
     pretrain_loop_state {
         cfg: cfg,
@@ -32,14 +29,12 @@ func new_pretrain_loop_state(pretrain_config cfg, pretrain_data_state data) pret
         finished: false,
     }
 }
-
 func pretrain_step(pretrain_loop_state state, float loss, float grad_norm, int new_tokens) pretrain_loop_state {
     int next_global_step = state.global_step + 1
     bool should_log = (next_global_step / state.cfg.log_interval) * state.cfg.log_interval == next_global_step
     bool should_eval = (next_global_step / state.cfg.eval_interval) * state.cfg.eval_interval == next_global_step
     bool should_save = (next_global_step / state.cfg.save_interval) * state.cfg.save_interval == next_global_step
     bool finished = next_global_step >= state.cfg.max_steps
-
     pretrain_loop_state {
         cfg: state.cfg,
         data: advance_tokens(state.data, new_tokens),
@@ -54,7 +49,6 @@ func pretrain_step(pretrain_loop_state state, float loss, float grad_norm, int n
         finished: finished,
     }
 }
-
 func pretrain_reset_micro_step(pretrain_loop_state state) pretrain_loop_state {
     pretrain_loop_state {
         cfg: state.cfg,
@@ -70,11 +64,9 @@ func pretrain_reset_micro_step(pretrain_loop_state state) pretrain_loop_state {
         finished: state.finished,
     }
 }
-
 func pretrain_loop_state_dict(pretrain_loop_state state) pretrain_loop_state {
     state
 }
-
 func pretrain_loop_load_state_dict(pretrain_loop_state state, pretrain_loop_state other) pretrain_loop_state {
     other
 }

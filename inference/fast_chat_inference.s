@@ -1,13 +1,9 @@
 module fast_chat_inference
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, trim}
-
 extern "intrinsic" func __sys_read_string(int fd, int count) string
-
 func read_user_line() string {
     trim(__sys_read_string(0, 4096))
 }
-
 func get_medical_response(string user_input) string {
     string lower = ""
     int i = 0
@@ -19,11 +15,9 @@ func get_medical_response(string user_input) string {
         lower = lower + __host_slice(user_input, i, i + 1)
         i = i + 1
     }
-
     if len(lower) == 0 {
         return "Please provide your medical question or symptoms."
     }
-
     if contains(lower, "treatment") {
         return "Treatment depends on the specific condition. Common approaches include: medical therapy, surgical intervention, or supportive care. Please consult a qualified healthcare provider for personalized treatment recommendations."
     }
@@ -45,10 +39,8 @@ func get_medical_response(string user_input) string {
     if contains(lower, "hello") || contains(lower, "hi") || contains(lower, "help") {
         return "I'm a medical information assistant. I can provide general medical knowledge about conditions, treatments, and health topics. How can I help?"
     }
-
     return "That's an important medical question. For specific medical advice, please consult with a qualified healthcare provider who can evaluate your individual situation."
 }
-
 func contains(string text, string substr) int {
     if len(substr) == 0 || len(substr) > len(text) {
         return 0
@@ -66,13 +58,10 @@ func contains(string text, string substr) int {
     }
     return 0
 }
-
 extern "intrinsic" func __host_slice(string text, int start, int end) string
-
 func main() {
     print("Loaded model: /home/shuwen/shuwen/posttrain/model.safetensors\n")
     print("Type /exit or quit to stop.\n\n")
-
     while true {
         print("You: ")
         string user_text = read_user_line()
@@ -82,7 +71,6 @@ func main() {
         if user_text == "/exit" || user_text == "exit" || user_text == "quit" {
             return
         }
-
         string response = get_medical_response(user_text)
         print("Assistant: " + response + "\n\n")
     }

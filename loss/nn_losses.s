@@ -1,7 +1,5 @@
 package neurx.loss.nn_losses
-
 use neurx.tensor.tensor
-
 func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
@@ -12,7 +10,6 @@ func copy_int([]int data) []int {
     }
     out
 }
-
 func exp_approx(float x) float {
     if x > 20.0 {
         return 485165195.0
@@ -30,18 +27,15 @@ func exp_approx(float x) float {
     }
     result
 }
-
 func mse_loss(tensor input, tensor target) tensor {
     tensor diff = neurx.tensor.sub(input, target)
     tensor sq = neurx.tensor.mul(diff, diff)
     return neurx.tensor.mean(sq)
 }
-
 func l1_loss(tensor input, tensor target) tensor {
     tensor diff = neurx.tensor.sub(input, target)
     return neurx.tensor.mean(neurx.tensor.abs(diff))
 }
-
 func cross_entropy_loss(tensor logits, tensor target) tensor {
     tensor log_probs = neurx.tensor.log_softmax(logits, -1)
     int n = len(target.data)
@@ -65,7 +59,6 @@ func cross_entropy_loss(tensor logits, tensor target) tensor {
     loss = loss / n
     return neurx.tensor.scalar_tensor(loss)
 }
-
 func bce_with_logits_loss(tensor logits, tensor target) tensor {
     tensor probs = neurx.tensor.sigmoid(logits)
     tensor one = neurx.tensor.ones_like(probs)
@@ -75,7 +68,6 @@ func bce_with_logits_loss(tensor logits, tensor target) tensor {
     tensor total = neurx.tensor.negative(neurx.tensor.add(loss_pos, loss_neg))
     return neurx.tensor.mean(total)
 }
-
 func nll_loss(tensor log_probs, tensor target) tensor {
     int n = len(target.data)
     if n <= 0 {
@@ -97,7 +89,6 @@ func nll_loss(tensor log_probs, tensor target) tensor {
     }
     return neurx.tensor.scalar_tensor(loss / n)
 }
-
 func smooth_l1_loss(tensor input, tensor target, float beta) tensor {
     tensor diff = neurx.tensor.sub(input, target)
     tensor abs_diff = neurx.tensor.abs(diff)
@@ -115,11 +106,9 @@ func smooth_l1_loss(tensor input, tensor target, float beta) tensor {
     }
     return neurx.tensor.new(out, copy_int(abs_diff.shape), diff.requires_grad)
 }
-
 func huber_loss(tensor input, tensor target, float delta) tensor {
     return smooth_l1_loss(input, target, delta)
 }
-
 func binary_cross_entropy(tensor input, tensor target) tensor {
     tensor one = neurx.tensor.ones_like(input)
     tensor safe_input = neurx.tensor.clamp(input, 1e-6, 1.0 - 1e-6)
@@ -128,7 +117,6 @@ func binary_cross_entropy(tensor input, tensor target) tensor {
     tensor total = neurx.tensor.negative(neurx.tensor.add(loss_pos, loss_neg))
     return neurx.tensor.mean(total)
 }
-
 func kl_div_loss(tensor input_log_probs, tensor target, bool log_target) tensor {
     int n = len(input_log_probs.data)
     if len(target.data) < n {
@@ -157,7 +145,6 @@ func kl_div_loss(tensor input_log_probs, tensor target, bool log_target) tensor 
     }
     return neurx.tensor.scalar_tensor(loss / n)
 }
-
 func margin_ranking_loss(tensor input1, tensor input2, tensor target, float margin) tensor {
     int n = len(input1.data)
     if len(input2.data) < n {
@@ -180,7 +167,6 @@ func margin_ranking_loss(tensor input1, tensor input2, tensor target, float marg
     }
     return neurx.tensor.scalar_tensor(loss / n)
 }
-
 func triplet_margin_loss(tensor anchor, tensor positive, tensor negative, float margin, int p, float eps) tensor {
     tensor pos_dist = pairwise_distance(anchor, positive, p, eps)
     tensor neg_dist = pairwise_distance(anchor, negative, p, eps)
@@ -190,7 +176,6 @@ func triplet_margin_loss(tensor anchor, tensor positive, tensor negative, float 
     }
     return neurx.tensor.scalar_tensor(v)
 }
-
 func cosine_embedding_loss(tensor input1, tensor input2, tensor target, float margin) tensor {
     tensor cos = cosine_similarity(input1, input2, len(input1.shape) - 1, 1e-8)
     int n = len(cos.data)
@@ -215,7 +200,6 @@ func cosine_embedding_loss(tensor input1, tensor input2, tensor target, float ma
     }
     return neurx.tensor.scalar_tensor(loss / n)
 }
-
 func cosine_similarity(tensor x, tensor y, int dim, float eps) tensor {
     tensor xy = neurx.tensor.mul(x, y)
     tensor x2 = neurx.tensor.mul(x, x)
@@ -226,7 +210,6 @@ func cosine_similarity(tensor x, tensor y, int dim, float eps) tensor {
     tensor den = neurx.tensor.add(neurx.tensor.mul(den_x, den_y), neurx.tensor.scalar_tensor(eps))
     return neurx.tensor.div(num, den)
 }
-
 func pairwise_distance(tensor x, tensor y, int p, float eps) tensor {
     tensor diff = neurx.tensor.abs(neurx.tensor.sub(x, y))
     if p <= 1 {

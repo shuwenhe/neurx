@@ -1,8 +1,6 @@
 package main
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_write_text_file}
 use std.io.println
-
 func parent_path(string path) string {
     int slash = -1
     int i = 0
@@ -19,7 +17,6 @@ func parent_path(string path) string {
     }
     out
 }
-
 func main() int {
     string path = runtime_env_get("NEURX_CREATE_FILE_PATH", "")
     string content = runtime_env_get("NEURX_CREATE_FILE_TEXT", "")

@@ -1,7 +1,5 @@
 package main
-
 use std.io.println
-
 func main() int {
     println("🔧 NeurX toolsystem - neurxcompleteimplementation")
     println("==========================================")
@@ -92,6 +90,5 @@ func main() int {
     println("- English textmanagement: ./src/tools/ToolPermissionManager.h")
     println("")
     println("✅ systemEnglish text!")
-
     0
 }

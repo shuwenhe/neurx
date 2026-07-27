@@ -1,8 +1,5 @@
-
 package main
-
 use std.io.println
-
 func main() int {
     println("NeurX S CLI Quick Reference")
     println("")

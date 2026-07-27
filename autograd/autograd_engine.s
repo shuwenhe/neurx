@@ -1,7 +1,5 @@
 package neurx.autograd
-
 use neurx.tensor.tensor
-
 enum node_type {
     INPUT,
     ADD,
@@ -41,13 +39,11 @@ enum node_type {
     MASKED_FILL,
     NORM,
 }
-
 struct edge {
     int source_node_id
     int target_node_id
     tensor tensor_data
 }
-
 struct node {
     int id
     node_type op_type
@@ -56,15 +52,12 @@ struct node {
     []int children_ids
     []int parent_ids
     bool requires_grad
-
     map[string]tensor ctx
 }
-
 struct backward_result {
     []tensor input_grads
     bool success
 }
-
 struct computation_graph {
     []node nodes
     []edge edges
@@ -72,7 +65,6 @@ struct computation_graph {
     bool is_recording
     []int topo_order
 }
-
 func new_graph() computation_graph {
     computation_graph {
         nodes: [],
@@ -82,17 +74,14 @@ func new_graph() computation_graph {
         topo_order: [],
     }
 }
-
 func start_recording(computation_graph g) computation_graph {
     g.is_recording = true
     g
 }
-
 func stop_recording(computation_graph g) computation_graph {
     g.is_recording = false
     g
 }
-
 func add_node(
     computation_graph g,
     node_type op_type,
@@ -101,7 +90,6 @@ func add_node(
     bool requires_grad
 ) (computation_graph, int) {
     int node_id = g.next_node_id
-
     node n {
         id: node_id,
         op_type: op_type,
@@ -112,22 +100,17 @@ func add_node(
         requires_grad: requires_grad || output.requires_grad,
         ctx: {},
     }
-
     g.nodes.push(n)
     g.next_node_id = g.next_node_id + 1
-
     (g, node_id)
 }
-
 func add_edge(computation_graph g, int src_id, int dst_id, tensor t) computation_graph {
     edge e {
         source_node_id: src_id,
         target_node_id: dst_id,
         tensor_data: t,
     }
-
     g.edges.push(e)
-
     for i in 0..len(g.nodes) {
         if g.nodes[i].id == src_id {
             g.nodes[i].children_ids.push(dst_id)
@@ -136,10 +119,8 @@ func add_edge(computation_graph g, int src_id, int dst_id, tensor t) computation
             g.nodes[i].parent_ids.push(src_id)
         }
     }
-
     g
 }
-
 func save_context(computation_graph g, int node_id, string key, tensor value) computation_graph {
     for i in 0..len(g.nodes) {
         if g.nodes[i].id == node_id {
@@ -149,7 +130,6 @@ func save_context(computation_graph g, int node_id, string key, tensor value) co
     }
     g
 }
-
 func get_context(computation_graph g, int node_id, string key) tensor {
     for i in 0..len(g.nodes) {
         if g.nodes[i].id == node_id {
@@ -160,35 +140,28 @@ func get_context(computation_graph g, int node_id, string key) tensor {
     }
     neurx.tensor.zeros_like(tensor {data: [], shape: []})
 }
-
 func compute_topological_order(computation_graph g) computation_graph {
     int n = len(g.nodes)
     if n == 0 {
         return g
     }
-
     []int in_degree = []int{cap: n}
     for i in 0..n {
         in_degree[i] = len(g.nodes[i].parent_ids)
     }
-
     []int queue = []
     for i in 0..n {
         if in_degree[i] == 0 {
             queue.push(i)
         }
     }
-
     []int order = []
     int count = 0
-
     while len(queue) > 0 {
         int u = queue.pop_front()
         order.push(u)
         count = count + 1
-
         for child_id in g.nodes[u].children_ids {
-
             int child_idx = -1
             for j in 0..n {
                 if g.nodes[j].id == child_id {
@@ -196,7 +169,6 @@ func compute_topological_order(computation_graph g) computation_graph {
                     break
                 }
             }
-
             if child_idx >= 0 {
                 in_degree[child_idx] = in_degree[child_idx] - 1
                 if in_degree[child_idx] == 0 {
@@ -205,70 +177,53 @@ func compute_topological_order(computation_graph g) computation_graph {
             }
         }
     }
-
     if count != n {
         println("Warning: Cycle detected in computation graph!")
-
         order = []
         for i in n-1 .. 0 {
             order.push(i)
         }
     }
-
     []int reversed = []
     for i in len(order)-1 .. 0 {
         reversed.push(order[i])
     }
-
     g.topo_order = reversed
     g
 }
-
 func backward(computation_graph g, tensor loss_tensor, []float grad_output) computation_graph {
     if !loss_tensor.requires_grad {
         println("Warning: backward() called on tensor that doesn't require grad")
         return g
     }
-
     g = compute_topological_order(g)
-
     if len(g.topo_order) > 0 {
         int loss_node_idx = g.topo_order[0]
-
         if len(grad_output) == len(g.nodes[loss_node_idx].output.data) {
             g.nodes[loss_node_idx].output.grad = grad_output
         } else {
-
             int n_out = len(g.nodes[loss_node_idx].output.data)
             g.nodes[loss_node_idx].output.grad = ones_like_internal(g.nodes[loss_node_idx].output.data)
         }
     }
-
     for idx in g.topo_order {
         node current = g.nodes[idx]
-
         if !current.requires_grad || len(current.output.grad) == 0 {
             continue
         }
-
         tensor grad_output_tensor {
             data: current.output.grad,
             grad: [],
             shape: current.output.shape,
             requires_grad: false,
         }
-
         backward_result result = dispatch_backward(current, grad_output_tensor)
-
         if result.success  len(result.input_grads) > 0 {
-
             for grad_idx in 0..len(result.input_grads) {
                 if grad_idx < len(current.inputs)  len(current.parent_ids) > grad_idx {
                     int parent_node_id = current.parent_ids[grad_idx]
-
                     for p_idx in 0..len(g.nodes) {
                         if g.nodes[p_idx].id == parent_node_id {
-
                             accumulate_to_node_output(g.nodes[p_idx], result.input_grads[grad_idx])
                             break
                         }
@@ -277,21 +232,17 @@ func backward(computation_graph g, tensor loss_tensor, []float grad_output) comp
             }
         }
     }
-
     g
 }
-
 func accumulate_to_node_output(node *n, tensor grad) {
     if len(n.output.grad) == 0 {
         n.output.grad = copy_tensor(grad.data)
     } else {
-
         for i in 0..min(len(n.output.grad), len(grad.data)) {
             n.output.grad[i] = n.output.grad[i] + grad.data[i]
         }
     }
 }
-
 func copy_tensor([]float data) []float {
     []float out = []float{cap: len(data)}
     for i in 0..len(data) {
@@ -299,11 +250,9 @@ func copy_tensor([]float data) []float {
     }
     out
 }
-
 func min(int a, int b) int {
     if a < b { a } else { b }
 }
-
 func dispatch_backward(node n, tensor grad_output) backward_result {
     switch n.op_type {
         case node_type.MATMUL:

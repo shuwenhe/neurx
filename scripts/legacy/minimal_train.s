@@ -1,8 +1,6 @@
 package main
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_run_command_output, runtime_write_text_file}
 use std.io.println
-
 func main() {
     println("[TRAINER] Initializing minimal_train.s...")
     string startup_marker_file = runtime_env_get("NEURX_STARTUP_MARKER_FILE", "")
@@ -11,7 +9,6 @@ func main() {
         runtime_write_text_file(startup_marker_file, "started\n")
     }
     write_progress(progress_file, "trainer-main-entered")
-
     string project_root = runtime_env_get("NEURX_ROOT", ".")
     string model_name = runtime_env_get("NEURX_PRETRAIN_MODEL_NAME", "NeurX-1.3")
     string manifest_path = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
@@ -36,7 +33,6 @@ func main() {
     int save_interval = parse_int(runtime_env_get("NEURX_PRETRAIN_SAVE_INTERVAL", "100"), 100)
     int shard_docs_target = parse_int(runtime_env_get("NEURX_PRETRAIN_SHARD_DOCS_PER_FILE", "5000"), 5000)
     int shard_index_mode = parse_int(runtime_env_get("NEURX_PRETRAIN_SHARD_INDEX_MODE", "1"), 1)
-
     println("[TRAINER] Checking manifest exists...")
     write_progress(progress_file, "checking-manifest path=" + manifest_path)
     if !runtime_file_exists(manifest_path) {
@@ -46,7 +42,6 @@ func main() {
     }
     println("[TRAINER] manifest found!")
     write_progress(progress_file, "manifest-ok path=" + manifest_path)
-
     println("[TRAINER] Loading shard list...")
     write_progress(progress_file, "loading-shard-list file=" + shard_list_file)
     int shard_count = parse_int(runtime_env_get("NEURX_PRETRAIN_SHARD_COUNT", "0"), 0)
@@ -66,7 +61,6 @@ func main() {
         shard_count = count_non_empty_lines(shard_list_text)
         println("[TRAINER] Counted shards: " + int_to_str(shard_count))
     }
-
     if shard_count == 0 {
         println("[ERROR] No shards found!")
         write_progress(progress_file, "error no-shards-found")
@@ -74,7 +68,6 @@ func main() {
     }
     println("[TRAINER] Starting training with " + int_to_str(shard_count) + " shards")
     write_progress(progress_file, "queue-ready shards=" + int_to_str(shard_count))
-
     int window = batch_size * seq_len
     if window < 1 {
         window = 1
@@ -85,7 +78,6 @@ func main() {
     if step_window < window {
         window = step_window
     }
-
     float weight = 0.0100
     float bias = 0.0000
     float m_weight = 0.0
@@ -101,7 +93,6 @@ func main() {
     float grad_bias = 0.0
     float last_loss = 0.0
     float last_lr = learning_rate
-
     int shard_index = 0
     int last_shard_no = 0
     string last_shard = ""
@@ -113,14 +104,12 @@ func main() {
         string shard_name_start = extract_filename(shard_path)
         println("[shard] loading " + shard_slice + " " + shard_name_start)
         write_progress(progress_file, "loading shard=" + shard_slice + " file=" + shard_name_start + " step=" + int_to_str(step))
-
         if !runtime_file_exists(shard_path) {
             println("[ERROR] Shard file not found: " + shard_path)
             write_progress(progress_file, "error shard-not-found shard=" + shard_slice + " path=" + shard_path)
             shard_index = shard_index + 1
             continue
         }
-
         println("[" + shard_slice + "] " + shard_name_start)
         int shard_docs = 0
         int shard_tokens = 0
@@ -128,7 +117,6 @@ func main() {
         int next_line = 1
         int chunk_count = 0
         bool shard_done = false
-
         while !shard_done && step < max_steps && docs_seen < max_docs {
             chunk_count = chunk_count + 1
             int last_line = next_line + line_chunk_size - 1
@@ -138,15 +126,12 @@ func main() {
             } else {
                 chunk_cmd = "sed -n '" + int_to_str(next_line) + "," + int_to_str(last_line) + "p' " + shell_escape(shard_path)
             }
-
             println("[shard] reading " + shard_slice + " " + shard_name_start + " current_line=" + int_to_str(next_line) + " last_line=" + int_to_str(last_line) + " chunk=" + int_to_str(chunk_count))
             write_progress(progress_file, "reading shard=" + shard_slice + " file=" + shard_name_start + " current_line=" + int_to_str(next_line) + " last_line=" + int_to_str(last_line) + " chunk=" + int_to_str(chunk_count) + " step=" + int_to_str(step))
-
             string chunk_text = runtime_run_command_output(chunk_cmd)
             int chunk_len = str_len(chunk_text)
             println("[shard] read-complete " + shard_slice + " " + shard_name_start + " current_line=" + int_to_str(next_line) + " last_line=" + int_to_str(last_line) + " chunk=" + int_to_str(chunk_count) + " bytes=" + int_to_str(chunk_len))
             write_progress(progress_file, "read-complete shard=" + shard_slice + " file=" + shard_name_start + " current_line=" + int_to_str(next_line) + " last_line=" + int_to_str(last_line) + " chunk=" + int_to_str(chunk_count) + " bytes=" + int_to_str(chunk_len) + " step=" + int_to_str(step))
-
             if str_len(trim(chunk_text)) == 0 {
                 shard_done = true
             } else {
@@ -172,14 +157,12 @@ func main() {
                 write_progress(progress_file, "progress shard=" + shard_slice + " file=" + shard_name_start + " processed_lines=" + int_to_str(shard_docs) + " next_line=" + int_to_str(next_line) + " step=" + int_to_str(step))
             }
         }
-
         string shard_name_complete = extract_filename(shard_path)
         string shard_done_line = shard_complete_line(last_shard_no, shard_count, shard_name_complete, shard_docs, shard_tokens, step - shard_start_step, step, docs_seen, tokens_seen, last_loss)
         println(shard_done_line)
         write_progress(progress_file, shard_done_line)
         shard_index = shard_index + 1
     }
-
     if pair_count > 0 && step < max_steps {
         float lr = next_lr(step, learning_rate, warmup_steps)
         float grad_w = grad_weight / pair_count as float
@@ -199,12 +182,10 @@ func main() {
             write_progress(progress_file, final_progress_line)
         }
     }
-
     string final_model_path = output_dir + "/final_model.neurx"
     string best_model_path = output_dir + "/best_model.neurx"
     string latest_checkpoint_file = output_dir + "/latest_checkpoint.txt"
     string resume_state_file = output_dir + "/resume_state.json"
-
     runtime_run_command_output("mkdir -p " + shell_escape(output_dir) + "; printf ok")
     string checkpoint_json = "{\"model_name\":\"" + model_name + "\",\"output_dir\":\"" + output_dir + "\",\"model_path\":\"" + final_model_path + "\",\"step\":" + int_to_str(step) + ",\"docs_seen\":" + int_to_str(docs_seen) + ",\"tokens_seen\":" + int_to_str(tokens_seen) + ",\"loss\":" + fmt_float(last_loss, 6) + ",\"last_slice\":" + int_to_str(last_shard_no) + ",\"last_shard\":\"" + last_shard + "\"}"
     runtime_write_text_file(resume_state_file, checkpoint_json + "\n")
@@ -219,14 +200,11 @@ func main() {
     println("[pretrain] checkpoint: " + final_model_path)
     write_progress(progress_file, "complete step=" + int_to_str(step) + " docs=" + int_to_str(docs_seen) + " tokens=" + int_to_str(tokens_seen) + " checkpoint=" + final_model_path)
 }
-
 func write_progress(string path, string text) {
     if str_len(path) > 0 {
-
         runtime_run_command_output("echo '" + text + "' >> " + shell_escape(path) + "; printf ok")
     }
 }
-
 func should_log_step(int step, int log_interval) bool {
     int interval = log_interval
     if interval < 1 {
@@ -234,7 +212,6 @@ func should_log_step(int step, int log_interval) bool {
     }
     step == 1 || step == interval || step - (step / interval) * interval == 0
 }
-
 func training_progress_line(int step, int max_steps, int docs_seen, int tokens_seen, float loss, float lr, string shard_name) string {
     "[train] step=" + int_to_str(step) + "/" + int_to_str(max_steps) +
         " loss=" + fmt_float(loss, 6) +
@@ -243,7 +220,6 @@ func training_progress_line(int step, int max_steps, int docs_seen, int tokens_s
         " tokens=" + int_to_str(tokens_seen) +
         " shard=" + shard_name
 }
-
 func shard_complete_line(int shard_no, int shard_count, string shard_name, int shard_docs, int shard_tokens, int shard_steps, int total_steps, int total_docs, int total_tokens, float loss) string {
     "[shard] done " + int_to_str(shard_no) + "/" + int_to_str(shard_count) +
         " shard=" + shard_name +
@@ -255,7 +231,6 @@ func shard_complete_line(int shard_no, int shard_count, string shard_name, int s
         " total_tokens=" + int_to_str(total_tokens) +
         " loss=" + fmt_float(loss, 6)
 }
-
 func shard_progress_bar(int done, int total, int width) string {
     int bar_total = total
     int bar_width = width
@@ -293,7 +268,6 @@ func shard_progress_bar(int done, int total, int width) string {
     out = out + "]"
     out
 }
-
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
@@ -309,7 +283,6 @@ func shell_escape(string s) string {
     out = out + "'"
     out
 }
-
 func count_non_empty_lines(string text) int {
     int count = 0
     int i = 0
@@ -331,7 +304,6 @@ func count_non_empty_lines(string text) int {
     }
     count
 }
-
 func has_non_space(string text) bool {
     int i = 0
     int n = str_len(text)
@@ -343,7 +315,6 @@ func has_non_space(string text) bool {
     }
     false
 }
-
 func shard_path_at(string shard_list, int index) string {
     int current = 0
     int start = 0
@@ -365,7 +336,6 @@ func shard_path_at(string shard_list, int index) string {
     }
     ""
 }
-
 func shard_path_for_index(string shard_list, string shard_list_file, string shard_dir, int index, int index_mode) string {
     if index_mode > 0 {
         return shard_dir + "/shard_" + zero_pad_int(index, 5) + ".jsonl"
@@ -375,7 +345,6 @@ func shard_path_for_index(string shard_list, string shard_list_file, string shar
     }
     trim(runtime_run_command_output("sed -n '" + int_to_str(index + 1) + "p' " + shell_escape(shard_list_file)))
 }
-
 func zero_pad_int(int value, int width) string {
     string digits = int_to_str(value)
     string out = ""
@@ -387,7 +356,6 @@ func zero_pad_int(int value, int width) string {
     }
     out + digits
 }
-
 func extract_filename(string path) string {
     int last_slash = -1
     int i = 0
@@ -402,7 +370,6 @@ func extract_filename(string path) string {
     }
     path
 }
-
 func hash_token(string word, int vocab_size) int {
     int h = 5381
     int i = 0
@@ -412,14 +379,12 @@ func hash_token(string word, int vocab_size) int {
     }
     mod_int(h, vocab_size)
 }
-
 func token_as_float(int token, int vocab_size) float {
     if vocab_size <= 0 {
         return 0.0
     }
     (token as float) / (vocab_size as float)
 }
-
 func extract_json_string_field_prefix(string json_line, string field, int scan_limit) string {
     int json_len = str_len(json_line)
     if scan_limit > 0 && scan_limit < json_len {
@@ -472,7 +437,6 @@ func extract_json_string_field_prefix(string json_line, string field, int scan_l
     }
     out
 }
-
 func find_string_prefix(string s, string pattern, int start, int limit) int {
     int i = start
     while i + str_len(pattern) <= limit {
@@ -492,7 +456,6 @@ func find_string_prefix(string s, string pattern, int start, int limit) int {
     }
     -1
 }
-
 func trim(string s) string {
     int i = 0
     while i < str_len(s) && is_space(s[i]) {
@@ -507,7 +470,6 @@ func trim(string s) string {
     }
     substring(s, i, j + 1)
 }
-
 func substring(string s, int start, int end) string {
     int s_start = start
     int s_end = end
@@ -528,11 +490,9 @@ func substring(string s, int start, int end) string {
     }
     out
 }
-
 func is_space(int c) bool {
     c == 32 || c == 9 || c == 10 || c == 13
 }
-
 func mod_int(int a, int b) int {
     if b <= 0 {
         return 0
@@ -546,11 +506,9 @@ func mod_int(int a, int b) int {
     }
     value
 }
-
 func byte_token(int c, int vocab_size) int {
     mod_int(c + 1, vocab_size)
 }
-
 func parse_int(string s, int fallback) int {
     string text = trim(s)
     if str_len(text) == 0 {
@@ -573,7 +531,6 @@ func parse_int(string s, int fallback) int {
     }
     sign * value
 }
-
 func parse_float(string s) float {
     string text = trim(s)
     if str_len(text) == 0 {
@@ -606,14 +563,12 @@ func parse_float(string s) float {
     }
     value
 }
-
 func next_lr(int step, float base_lr, int warmup_steps) float {
     if warmup_steps > 0 && step < warmup_steps {
         return base_lr * ((step + 1) as float) / (warmup_steps as float)
     }
     base_lr
 }
-
 func fmt_float(float value, int decimals) string {
     float val = value
     bool neg = val < 0.0
@@ -643,7 +598,6 @@ func fmt_float(float value, int decimals) string {
     }
     out
 }
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -669,7 +623,6 @@ func int_to_str(int n) string {
     }
     out
 }
-
 func progress_bar(int done, int total, int width) string {
     int w = width
     int t = total
@@ -706,13 +659,11 @@ func progress_bar(int done, int total, int width) string {
     out = out + "]"
     out
 }
-
 func shard_progress_line(int shard_no, int shard_count, string shard_path, int shard_docs, int shard_docs_target) string {
     string label = "Shard " + int_to_str(shard_no) + "/" + int_to_str(shard_count)
     string bar = shard_progress_bar(shard_docs, shard_docs_target, 36)
     label + " " + bar + " docs=" + int_to_str(shard_docs) + "/" + int_to_str(shard_docs_target) + " path=" + shard_path
 }
-
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -725,7 +676,6 @@ func sqrt_approx(float x) float {
     }
     guess
 }
-
 func str_len(string s) int {
     int n = 0
     while s[n] != 0 {
@@ -733,7 +683,6 @@ func str_len(string s) int {
     }
     n
 }
-
 func string_char(int c) string {
     string(c)
 }

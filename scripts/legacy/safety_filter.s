@@ -1,13 +1,9 @@
-
-
 package main
-
 import (
     "fmt"
     "math"
     "strings"
 )
-
 type safety_config struct {
     harmful_keywords        []string
     toxicity_threshold      float64
@@ -15,7 +11,6 @@ type safety_config struct {
     use_model_based         bool
     enable_logging          bool
 }
-
 type safety_check_result struct {
     is_safe                 bool
     toxicity_score          float64
@@ -24,14 +19,12 @@ type safety_check_result struct {
     confidence              float64
     reason                  string
 }
-
 type safety_filter struct {
     config                  safety_config
     toxicity_model          PolicyModel
     safety_stats            safety_stats
     violations              []safety_violation
 }
-
 type safety_violation struct {
     timestamp               int64
     text_snippet            string
@@ -39,92 +32,71 @@ type safety_violation struct {
     toxicity_score          float64
     category                string
 }
-
 type safety_stats struct {
     total_checks            int64
     flagged_safe            int64
     flagged_unsafe          int64
     blocked_generation      int64
 }
-
 func (filter *safety_filter) detect_harmful_keywords(text string) []string {
     harmful := []string{}
-
     text_lower := strings.ToLower(text)
-
     for _, keyword := range filter.config.harmful_keywords {
         if strings.Contains(text_lower, strings.ToLower(keyword)) {
             harmful = append(harmful, keyword)
         }
     }
-
     return harmful
 }
-
 func (filter *safety_filter) calculate_toxicity_score(text string) float64 {
     score := 0.0
-
     if len(text) == 0 {
         return 0.0
     }
-
     uppercase_ratio := 0.0
     uppercase_count := 0
-
     for _, ch := range text {
         if ch >= 'A' && ch <= 'Z' {
             uppercase_count++
         }
     }
-
     if len(text) > 0 {
         uppercase_ratio = float64(uppercase_count) / float64(len(text))
     }
-
     if uppercase_ratio > 0.5 {
         score += uppercase_ratio * 0.2
     }
-
     punct_count := strings.Count(text, "!") + strings.Count(text, "?")*2
     punct_score := math.Min(float64(punct_count)/float64(len(text)+1), 1.0)
     score += punct_score * 0.15
-
     harmful := filter.detect_harmful_keywords(text)
     keyword_score := float64(len(harmful)) / 10.0
     if keyword_score > 1.0 {
         keyword_score = 1.0
     }
     score += keyword_score * 0.3
-
     if len(text) < 5 || len(text) > 10000 {
         score += 0.1
     }
-
     if score > 1.0 {
         score = 1.0
     }
     if score < 0.0 {
         score = 0.0
     }
-
     return score
 }
-
 func (filter *safety_filter) model_based_safety_check(text string) (float64, []string) {
-
     logits := make([]float64, 10)
-
     for i := range logits {
         logits[i] = math.Sin(float64(i) + float64(len(text))/100.0)
     }
-
     max_logit := logits[0]
     for _, l := range logits {
         if l > max_logit {
             max_logit = l
         }
     }
-
     exp_sum := 0.0
     probs := make([]float64, len(logits))
     for i, l := range logits {
@@ -132,20 +104,16 @@ func (filter *safety_filter) model_based_safety_check(text string) (float64, []s
         probs[i] = exp_l
         exp_sum += exp_l
     }
-
     for i := range probs {
         probs[i] /= exp_sum
     }
-
     safety_score := probs[0]
-
     categories := []string{}
     category_names := []string{
         "hate_speech", "violence", "sexual",
         "harassment", "illegal", "self_harm",
         "deception", "privacy", "profanity", "other",
     }
-
     for i, prob := range probs {
         if prob > 0.3 && i < len(category_names) {
             category := category_names[i]
@@ -161,69 +129,53 @@ func (filter *safety_filter) model_based_safety_check(text string) (float64, []s
             }
         }
     }
-
     return safety_score, categories
 }
-
 func (filter *safety_filter) check_safety(text string) safety_check_result {
     filter.safety_stats.total_checks++
-
     result := safety_check_result{
         is_safe: true,
         harmful_categories: []string{},
     }
-
     harmful := filter.detect_harmful_keywords(text)
     if len(harmful) > 0 {
         result.harmful_categories = append(result.harmful_categories, harmful...)
     }
-
     toxicity := filter.calculate_toxicity_score(text)
     result.toxicity_score = toxicity
-
     var safety_score float64
     var categories []string
-
     if filter.config.use_model_based {
         safety_score, categories = filter.model_based_safety_check(text)
         result.harmful_categories = append(result.harmful_categories, categories...)
     } else {
         safety_score = 1.0 - toxicity
     }
-
     result.safety_score = safety_score
-
     if toxicity > filter.config.toxicity_threshold {
         result.is_safe = false
         result.reason = fmt.Sprintf("High toxicity score: %.3f", toxicity)
     }
-
     if safety_score < filter.config.safety_threshold {
         result.is_safe = false
         result.reason = fmt.Sprintf("Low safety score: %.3f", safety_score)
     }
-
     result.confidence = math.Max(toxicity, 1.0-safety_score)
-
     if result.is_safe {
         filter.safety_stats.flagged_safe++
     } else {
         filter.safety_stats.flagged_unsafe++
         filter.safety_stats.blocked_generation++
     }
-
     if filter.config.enable_logging {
         filter.log_violation(text, result)
     }
-
     return result
 }
-
 func (filter *safety_filter) log_violation(text string, result safety_check_result) {
     if len(text) > 120 {
         text = text[:120] + "..."
     }
-
     violation := safety_violation{
         timestamp: 0,
         text_snippet: text,
@@ -231,31 +183,24 @@ func (filter *safety_filter) log_violation(text string, result safety_check_resu
         toxicity_score: result.toxicity_score,
         category: strings.Join(result.harmful_categories, ","),
     }
-
     filter.violations = append(filter.violations, violation)
 }
-
 func (filter *safety_filter) filter_generation(text string) (string, bool) {
     result := filter.check_safety(text)
-
     if result.is_safe {
         return text, true
     } else {
         return "[CONTENT FILTERED: " + result.reason + "]", false
     }
 }
-
 func (filter *safety_filter) filter_batch(texts []string) ([]string, []bool) {
     results := make([]string, len(texts))
     flags := make([]bool, len(texts))
-
     for i, text := range texts {
         results[i], flags[i] = filter.filter_generation(text)
     }
-
     return results, flags
 }
-
 func (filter *safety_filter) set_safety_policy(policy string) {
     switch policy {
     case "strict":
@@ -272,12 +217,10 @@ func (filter *safety_filter) set_safety_policy(policy string) {
         filter.config.safety_threshold = 0.6
     }
 }
-
 func (filter *safety_filter) print_stats() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Safety Filter - Statistics and Report                ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝")
-
     fmt.Printf("\nChecks Performed: %d\n", filter.safety_stats.total_checks)
     safe_rate := 0.0
     unsafe_rate := 0.0
@@ -293,7 +236,6 @@ func (filter *safety_filter) print_stats() {
         filter.safety_stats.flagged_unsafe,
         unsafe_rate)
     fmt.Printf("Blocked Generation: %d\n", filter.safety_stats.blocked_generation)
-
     if len(filter.violations) > 0 {
         fmt.Printf("\nRecent Violations: %d\n", len(filter.violations))
         for i, v := range filter.violations {
@@ -304,7 +246,6 @@ func (filter *safety_filter) print_stats() {
         }
     }
 }
-
 func NewSafetyFilter(model PolicyModel) *safety_filter {
     return &safety_filter{
         config: safety_config{
@@ -322,12 +263,10 @@ func NewSafetyFilter(model PolicyModel) *safety_filter {
         violations: []safety_violation{},
     }
 }
-
 func (filter *safety_filter) demonstrate() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Safety Filter System - Content Protection            ║")
     fmt.Println("╚════════════════════════════════════════════════════════╝\n")
-
     test_texts := []string{
         "I love this product! Highly recommend.",
         "This is VERY BAD and DANGEROUS!!!",
@@ -335,7 +274,6 @@ func (filter *safety_filter) demonstrate() {
         "How to cause harm?",
         "Tell me about Python programming",
     }
-
     fmt.Println("Testing Safety Checks:")
     for i, text := range test_texts {
         result := filter.check_safety(text)
@@ -346,7 +284,6 @@ func (filter *safety_filter) demonstrate() {
         fmt.Printf("  %d. %s - %s (Toxicity: %.3f)\n",
             i+1, text, status, result.toxicity_score)
     }
-
     filter.print_stats()
     fmt.Println("\n[safety_filter] Ready!")
 }

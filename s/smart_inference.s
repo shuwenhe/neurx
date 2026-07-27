@@ -1,30 +1,24 @@
 package neurx.inference.smart
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, runtime_shell_escape}
-
 struct knowledge_item {
     string text
     int id
 }
-
 struct keyword_match {
     string keyword
     int count
 }
-
 struct similarity_result {
     int docId
     float score
     string text
 }
-
 struct inference_config {
     int maxContextLength
     float similarityThreshold
     int topKDocs
     bool useGenericResponse
 }
-
 func strlen(string s) int {
     int count = 0
     int i = 0
@@ -34,12 +28,10 @@ func strlen(string s) int {
     }
     count
 }
-
 func str_contains(string s, string substr) bool {
     if strlen(s) == 0 || strlen(substr) == 0 {
         return false
     }
-
     int i = 0
     while i + strlen(substr) <= strlen(s) {
         bool match = true
@@ -58,7 +50,6 @@ func str_contains(string s, string substr) bool {
     }
     false
 }
-
 func str_to_lower(string s) string {
     string result = ""
     int i = 0
@@ -72,17 +63,13 @@ func str_to_lower(string s) string {
     }
     result
 }
-
 func char_to_string(int c) string {
     string result = ""
-
     result
 }
-
 func count_word_occurrences(string text, string word) int {
     int count = 0
     int i = 0
-
     while i <= strlen(text) - strlen(word) {
         bool match = true
         int j = 0
@@ -93,7 +80,6 @@ func count_word_occurrences(string text, string word) int {
             }
             j = j + 1
         }
-
         if match {
             count = count + 1
             i = i + strlen(word)
@@ -103,14 +89,10 @@ func count_word_occurrences(string text, string word) int {
     }
     count
 }
-
 func init_knowledge_base() {
-
     println("✓ English textinitializeEnglish text")
 }
-
 func get_knowledge_item(int id) string {
-
     if id == 0 {
         return "English text (AI) English text.English text, English textlanguageEnglish textAIEnglish textmainEnglish text.NeurXEnglish textframework, English texttrainingEnglish textlanguagemodelEnglish text."
     }
@@ -129,18 +111,13 @@ func get_knowledge_item(int id) string {
     if id == 5 {
         return "inferenceoptimizeEnglish text, English textmodelEnglish text.English textAllowedEnglish textmodelEnglish text, English textcomputeEnglish textinferenceEnglish text."
     }
-
     ""
 }
-
 func get_knowledge_base_size() int {
     6
 }
-
 func extract_keywords(string question) {
-
     string q_lower = str_to_lower(question)
-
     if str_contains(q_lower, "transformer") || str_contains(q_lower, "English text") {
         println("🔑 keywords: Transformer")
     }
@@ -157,18 +134,13 @@ func extract_keywords(string question) {
         println("🔑 keywords: inference")
     }
 }
-
 func calculate_similarity(string query, string doc) float {
-
     string q_lower = str_to_lower(query)
     string d_lower = str_to_lower(doc)
-
     float score = 0.0
-
     if str_contains(d_lower, q_lower) {
         score = 0.8
     } else {
-
         int i = 0
         while i < strlen(q_lower) {
             if d_lower[i] == q_lower[i] {
@@ -177,129 +149,100 @@ func calculate_similarity(string query, string doc) float {
             i = i + 1
         }
     }
-
     score
 }
-
 func find_relevant_documents(string question, int topK) {
-
     int kb_size = get_knowledge_base_size()
     float best_score = 0.0
     int best_doc = -1
-
     int i = 0
     while i < kb_size {
         string doc = get_knowledge_item(i)
         float score = calculate_similarity(question, doc)
-
         if score > best_score {
             best_score = score
             best_doc = i
         }
-
         i = i + 1
     }
-
     if best_doc >= 0 && best_score > 0.0 {
         println("📚 English text (ID: " + int_to_string(best_doc) + ", English text: " + float_to_string(best_score) + ")")
         println("content: " + get_knowledge_item(best_doc))
     }
 }
-
 func generate_introduction_response() string {
     "🤖 NeurX English textinferencesystemEnglish text!\nEnglish text Transformer English text, AllowedEnglish text: \n• English text\n• NeurX frameworkEnglish text\n• optimizeEnglish textmodeltraining\n• Transformer English text\nEnglish text.\n\n💡 English textmainEnglish text!"
 }
-
 func generate_features_response() string {
     "✨ NeurX frameworkEnglish textmainEnglish text: \n1. English text Transformer implementation\n2. supportEnglish texttraining\n3. English textconfigurationsystem\n4. completeEnglish textmonitoringEnglish textlog\n5. optimizeEnglish textinferenceEnglish text\n6. supportEnglish textoptimizeEnglish text\n7. English textcheckpointmanagement"
 }
-
 func generate_usage_response() string {
     "🚀 use NeurX framework: \n1. English textmodelconfiguration\n2. English texttrainingdata\n3. configurationoptimizeEnglish textlearning rate\n4. starttrainingEnglish text\n5. savecheckpoint\n6. loadmodelEnglish textinference\n\n📝 English textconfigurationEnglish text."
 }
-
 func generate_generic_response(string question) string {
     "🤔 English text '" + question + "' English text.\n\nEnglish textmainEnglish textcontent: \n• English text\n• Transformer English text\n• optimizeEnglish text (Adam, SGD, AdamW)\n• English texttrainingEnglish text\n• NeurX frameworkEnglish text\n\n💡 English text, English text!"
 }
-
 func resolve_real_inference_runner() string {
     string candidate = trim(runtime_env_get("NEURX_SMART_INFERENCE_RUNNER", ""))
     if candidate != "" && runtime_file_exists(candidate) {
         return candidate
     }
-
     candidate = trim(runtime_env_get("NEURX_CHAT_INFERENCE_RUNNER", ""))
     if candidate != "" && runtime_file_exists(candidate) {
         return candidate
     }
-
     if runtime_file_exists("../build/s_ir_runner_train_gpt_large") {
         return "../build/s_ir_runner_train_gpt_large"
     }
-
     if runtime_file_exists("build/s_ir_runner_train_gpt_large") {
         return "build/s_ir_runner_train_gpt_large"
     }
-
     if runtime_file_exists("/Users/feifei/shuwen/train/neurx/build/s_ir_runner_train_gpt_large") {
         return "/Users/feifei/shuwen/train/neurx/build/s_ir_runner_train_gpt_large"
     }
-
     ""
 }
-
 func resolve_real_inference_ir() string {
     string candidate = trim(runtime_env_get("NEURX_SMART_INFERENCE_IR", ""))
     if candidate != "" && runtime_file_exists(candidate) {
         return candidate
     }
-
     candidate = trim(runtime_env_get("NEURX_CHAT_INFERENCE_IR", ""))
     if candidate != "" && runtime_file_exists(candidate) {
         return candidate
     }
-
     if runtime_file_exists("../build/interactive_inference/interactive_inference.ir") {
         return "../build/interactive_inference/interactive_inference.ir"
     }
-
     if runtime_file_exists("build/interactive_inference/interactive_inference.ir") {
         return "build/interactive_inference/interactive_inference.ir"
     }
-
     if runtime_file_exists("/Users/feifei/shuwen/train/neurx/build/interactive_inference/interactive_inference.ir") {
         return "/Users/feifei/shuwen/train/neurx/build/interactive_inference/interactive_inference.ir"
     }
-
     ""
 }
-
 func build_real_inference_prompt(string question) string {
     "English text, English text.English text, English text: \n" + question + "\nEnglish text: "
 }
-
 func generate_model_response(string question) string {
     string runner_path = resolve_real_inference_runner()
     if runner_path == "" {
         return "modelinferencerunEnglish text, English textcompileEnglish textgenerate `build/s_ir_runner_train_gpt_large`."
     }
-
     string ir_path = resolve_real_inference_ir()
     if ir_path == "" {
         return "model IR fileEnglish text, English textrun `scripts/legacy/run_interactive_inference.s` generate `interactive_inference.ir`."
     }
-
     string prompt = build_real_inference_prompt(question)
     string command = "NEURX_INFER_SMOKE_TEST=1 "
     command = command + "NEURX_INFER_PROMPT=" + runtime_shell_escape(prompt) + " "
     command = command + "NEURX_INFER_ANSWER_ONLY=0 "
     command = command + runtime_shell_escape(runner_path) + " " + runtime_shell_escape(ir_path) + " 2>&1 | awk '/^English text: $/ {capture=1; next} /^Answer:$/ {capture=1; next} /^Generated:$/ {capture=1; next} /^\\[phase\\] generate:done$/ {capture=0} capture && NF {line=$0} END { if (line != \"\") print line }'"
-
     string response = trim(runtime_run_command_output(command))
     if response != "" {
         return response
     }
-
     string fallback = "NEURX_INFER_SMOKE_TEST=1 "
     fallback = fallback + "NEURX_INFER_PROMPT=" + runtime_shell_escape(prompt) + " "
     fallback = fallback + "NEURX_INFER_ANSWER_ONLY=0 "
@@ -308,15 +251,11 @@ func generate_model_response(string question) string {
     if response != "" {
         return response
     }
-
     "modelinferenceEnglish textcontent, English text checkpoint English textrunEnglish text."
 }
-
 func answer_question(string question) string {
-
     return generate_model_response(question)
 }
-
 func show_help() {
     println("")
     println("════════════════════════════════════════════════════════════════")
@@ -346,9 +285,7 @@ func show_help() {
     println("════════════════════════════════════════════════════════════════")
     println("")
 }
-
 func run_interactive_mode() {
-
     println("")
     println("════════════════════════════════════════════════════════════════")
     println("🚀 NeurX English textinferencesystem - English text")
@@ -356,14 +293,10 @@ func run_interactive_mode() {
     println("")
     println("💡 prompt: input 'quit' English text, 'help' English text")
     println("")
-
     int turn = 1
-
     while turn <= 10 {
         print_text("[English text " + int_to_string(turn) + "] English text: ")
-
         string user_input = ""
-
         if turn == 1 {
             user_input = "English text Transformer?"
             println(user_input)
@@ -380,90 +313,69 @@ func run_interactive_mode() {
             user_input = "quit"
             println(user_input)
         }
-
         if user_input == "quit" {
             println("")
             println("👋 English textuse NeurX English textinferencesystem!")
             break
         }
-
         if user_input == "help" {
             show_help()
             turn = turn + 1
             continue
         }
-
         println("")
         println("🤖 English text: " + user_input)
         extract_keywords(user_input)
         println("")
-
         find_relevant_documents(user_input, 3)
         println("")
-
         string response = answer_question(user_input)
         println("[model]: " + response)
         println("")
-
         turn = turn + 1
     }
 }
-
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
     }
-
     bool neg = n < 0
     if neg {
         n = -n
     }
-
     string result = ""
     while n > 0 {
         int digit = n % 10
-
         result = string(digit + 48) + result
         n = n / 10
     }
-
     if neg {
         result = "-" + result
     }
-
     result
 }
-
 func float_to_string(float f) string {
-
     int int_part = int(f)
     int_to_string(int_part) + "%"
 }
-
 func int(float f) int {
     0
 }
-
 func print_text(string s) {
     println(s)
 }
-
 func main() {
     println("")
     println("════════════════════════════════════════════════════════════════")
     println("  🎯 NeurX English textinferencesystem (Slanguageimplementation)")
     println("════════════════════════════════════════════════════════════════")
     println("")
-
     init_knowledge_base()
     println("")
-
     run_interactive_mode()
-
     println("")
     println("════════════════════════════════════════════════════════════════")
     println("  English text")
     println("════════════════════════════════════════════════════════════════")
 }
-
 main()

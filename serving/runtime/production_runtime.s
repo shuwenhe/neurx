@@ -1,5 +1,4 @@
 package neurx.serving.runtime.production_runtime
-
 struct production_queue {
     []string request_ids
     []string backends
@@ -8,7 +7,6 @@ struct production_queue {
     []int max_new_tokens
     []int generated_tokens
 }
-
 func new_production_queue() production_queue {
     production_queue {
         request_ids: [],
@@ -19,11 +17,9 @@ func new_production_queue() production_queue {
         generated_tokens: [],
     }
 }
-
 func production_queue_size(production_queue queue) int {
     len(queue.request_ids)
 }
-
 func production_queue_contains(production_queue queue, string request_id) bool {
     int i = 0
     while i < production_queue_size(queue) {
@@ -32,20 +28,17 @@ func production_queue_contains(production_queue queue, string request_id) bool {
     }
     false
 }
-
 func production_normalize_backend(string backend) string {
     if backend == "cuda" { return "cuda" }
     if backend == "ascend" { return "ascend" }
     "cpu"
 }
-
 func production_normalize_dtype(string backend, string dtype) string {
     if dtype == "fp8" && backend == "cuda" { return "fp8" }
     if dtype == "bf16" && backend != "cpu" { return "bf16" }
     if dtype == "fp16" && backend == "cuda" { return "fp16" }
     "fp32"
 }
-
 func production_queue_push(production_queue queue, string request_id, string backend, string dtype, int prompt_remaining, int max_new_tokens, int generated_tokens) production_queue {
     int old_size = production_queue_size(queue)
     []string ids = []string{cap: old_size + 1}
@@ -84,7 +77,6 @@ func production_queue_push(production_queue queue, string request_id, string bac
         generated_tokens: generated,
     }
 }
-
 struct production_runtime_config {
     int max_active_requests
     int max_queue_tokens
@@ -93,7 +85,6 @@ struct production_runtime_config {
     int max_prefill_requests
     int max_decode_batch_size
 }
-
 func new_production_runtime_config(int max_active_requests, int max_queue_tokens, int max_kv_tokens, int max_prefill_batch_tokens, int max_prefill_requests, int max_decode_batch_size) production_runtime_config {
     if max_active_requests <= 0 { max_active_requests = 1 }
     if max_queue_tokens <= 0 { max_queue_tokens = 1 }
@@ -110,7 +101,6 @@ func new_production_runtime_config(int max_active_requests, int max_queue_tokens
         max_decode_batch_size: max_decode_batch_size,
     }
 }
-
 struct production_runtime_state {
     production_runtime_config config
     production_queue prefill_queue
@@ -129,7 +119,6 @@ struct production_runtime_state {
     int prefix_cache_misses
     int kv_handoffs
 }
-
 func new_production_runtime_state(production_runtime_config config) production_runtime_state {
     production_runtime_state {
         config: config,
@@ -150,7 +139,6 @@ func new_production_runtime_state(production_runtime_config config) production_r
         kv_handoffs: 0,
     }
 }
-
 func production_string_contains([]string values, string value) bool {
     int i = 0
     while i < len(values) {
@@ -159,7 +147,6 @@ func production_string_contains([]string values, string value) bool {
     }
     false
 }
-
 func production_string_push([]string values, string value) []string {
     []string result = []string{cap: len(values) + 1}
     int i = 0
@@ -170,7 +157,6 @@ func production_string_push([]string values, string value) []string {
     result[len(values)] = value
     result
 }
-
 func production_remove_in_flight([]string values, []string completed) []string {
     int keep = 0
     int i = 0
@@ -190,11 +176,9 @@ func production_remove_in_flight([]string values, []string completed) []string {
     }
     result
 }
-
 func production_active_requests(production_runtime_state state) int {
     production_queue_size(state.prefill_queue) + production_queue_size(state.decode_queue) + state.in_flight_requests
 }
-
 func production_submit(production_runtime_state state, string request_id, string backend, string dtype, int prompt_tokens, int cached_prefix_tokens, int max_new_tokens) production_runtime_state {
     int prompt = prompt_tokens
     if prompt < 0 { prompt = 0 }
@@ -220,13 +204,11 @@ func production_submit(production_runtime_state state, string request_id, string
         state.prefix_cache_hits = state.prefix_cache_hits + 1
         state.kv_handoffs = state.kv_handoffs + 1
     }
-
     state.queued_tokens = state.queued_tokens + future_tokens
     state.kv_tokens = state.kv_tokens + cached
     state.admitted_requests = state.admitted_requests + 1
     state
 }
-
 struct production_batch {
     string phase
     string backend
@@ -239,12 +221,10 @@ struct production_batch {
     int total_tokens
     bool ok
 }
-
 struct production_schedule_result {
     production_runtime_state state
     production_batch batch
 }
-
 func empty_production_batch() production_batch {
     production_batch {
         phase: "none",
@@ -259,7 +239,6 @@ func empty_production_batch() production_batch {
         ok: false,
     }
 }
-
 func production_queue_without_selected(production_queue queue, []bool selected) production_queue {
     int i = 0
     production_queue result = new_production_queue()
@@ -271,7 +250,6 @@ func production_queue_without_selected(production_queue queue, []bool selected) 
     }
     result
 }
-
 func production_schedule_decode(production_runtime_state state) production_schedule_result {
     production_queue queue = state.decode_queue
     int size = production_queue_size(queue)
@@ -332,7 +310,6 @@ func production_schedule_decode(production_runtime_state state) production_sched
         },
     }
 }
-
 func production_schedule_prefill(production_runtime_state state) production_schedule_result {
     production_queue queue = state.prefill_queue
     int size = production_queue_size(queue)
@@ -400,15 +377,12 @@ func production_schedule_prefill(production_runtime_state state) production_sche
         },
     }
 }
-
 func production_schedule(production_runtime_state state) production_schedule_result {
-
     if production_queue_size(state.decode_queue) > 0 {
         return production_schedule_decode(state)
     }
     production_schedule_prefill(state)
 }
-
 func production_complete_prefill(production_runtime_state state, production_batch batch, bool succeeded) production_runtime_state {
     int batch_tokens = 0
     int k = 0
@@ -444,7 +418,6 @@ func production_complete_prefill(production_runtime_state state, production_batc
     if !commit { state.failed_batches = state.failed_batches + 1 }
     state
 }
-
 func production_complete_decode(production_runtime_state state, production_batch batch, []bool eos, bool succeeded) production_runtime_state {
     bool commit = succeeded && state.kv_tokens + len(batch.request_ids) <= state.config.max_kv_tokens
     int i = 0
@@ -467,7 +440,6 @@ func production_complete_decode(production_runtime_state state, production_batch
                 if state.queued_tokens < 0 { state.queued_tokens = 0 }
             }
             state.completed_requests = state.completed_requests + 1
-
         } else {
             state.decode_queue = production_queue_push(state.decode_queue, batch.request_ids[i], batch.backend, batch.dtype, 0, batch.max_new_tokens[i], generated)
         }
@@ -479,7 +451,6 @@ func production_complete_decode(production_runtime_state state, production_batch
     if !commit { state.failed_batches = state.failed_batches + 1 }
     state
 }
-
 func production_release_kv(production_runtime_state state, int tokens) production_runtime_state {
     int release = tokens
     if release < 0 { release = 0 }
