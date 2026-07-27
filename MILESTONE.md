@@ -232,4 +232,86 @@ This project has:
 
 ---
 
-*"先把训练核心打磨扎实，再扩展能力边界" - The right way to build training frameworks.*
+## Engineering Philosophy for Phase 2A
+
+Phase 2A will be built on three core principles:
+
+### 1️⃣ Correctness First, Speed Second
+> The success standard of Phase 2A is NOT "how many features", but "how many modules pass Golden regression tests without degrading existing capabilities."
+
+**What this means**:
+- Each module must pass ALL acceptance criteria before next module starts
+- No exceptions for "we'll fix it later"
+- Go/No-Go gates are MANDATORY, not optional
+
+### 2️⃣ Code-First Development
+> Design documents are tools for communication, not substitutes for code.
+
+**Policy**:
+- Every design document must have corresponding S language implementation
+- If no S code exists, the milestone is BLOCKED
+- Documentation expires when code changes (always check code first)
+
+### 3️⃣ Per-Layer Verification, Not End-to-End Demos
+> A 24-layer transformer is found by testing 24 individual layers, not by running the whole thing once.
+
+**Strategy**:
+- Tokenizer verified independently
+- Embedding verified independently
+- Each of 24 transformer layers compared to HF reference
+- Loss and backward tested per-module
+- Integration tested last, not first
+
+---
+
+### Implementation Constraints
+
+**S Language (Hard Requirement)**:
+- ❌ NO Python for tokenizer, embedding, forward, backward, loss, gradients
+- ✅ S for all training core logic
+- ✅ Python OK for tests/reference/verification (temporary)
+- ✅ Phase 3 will remove Python tests dependency
+
+**Module Gating**:
+```
+W1.1 (Tokenizer) PASS
+     ↓ (ONLY IF PASS)
+W1.2 (Embedding) PASS
+     ↓ (ONLY IF PASS)
+Week 2 (Forward) PASS
+     ↓ (ONLY IF PASS)
+Week 3 (Training) PASS
+     ↓
+Phase 2A COMPLETE
+```
+
+If any gate fails, do NOT proceed. Fix current gate completely first.
+
+**Code and Test Together**:
+```
+Feature Code → Unit Test → Golden Test → Commit
+
+NOT:
+Feature Code alone → Commit → (Hope tests pass later)
+```
+
+---
+
+*"先把训练核心打磨扎实，再扩展能力边界" — Get the core right, then expand capabilities.*
+
+---
+
+## Formal Declaration
+
+**Milestone M1: Reference LoRA Trainer Complete**
+
+This project has:
+- ✅ Established a stable LoRA training pipeline
+- ✅ Proven mathematical correctness (gradient computation verified)
+- ✅ Implemented reliable export and merge
+- ✅ Automated verification workflow
+- ✅ Built testing infrastructure for future phases
+
+**Consensus**: This infrastructure is ready to serve as the foundation for Phase 2A implementation.
+
+**Decision**: Freeze Phase 1 code, proceed with Phase 2A as planned.
