@@ -240,31 +240,6 @@ func run_posttrain_lora_sft() int {
     deltas.l2 = adapter_l2
     deltas.max_abs = adapter_max_abs
     deltas.changed_count = adapter_nonzero
-    string adapter_path = output_dir + "/adapter_model.safetensors"
-    runtime_write_text_file(adapter_path, "")
-    runtime_write_text_file(output_dir + "/adapter_config.json", build_adapter_config_json_simple(
-        model_path,
-        rank,
-        alpha,
-        effective_lr,
-        v_out,
-        2
-    ))
-    runtime_write_text_file(output_dir + "/training_state.json", build_training_state_json_simple(
-        data_file,
-        loss0,
-        loss1,
-        loss2,
-        stats,
-        deltas,
-        rank,
-        alpha,
-        nominal_lr,
-        effective_lr,
-        samples_per_epoch,
-        epochs,
-        2
-    ))
     println("")
     println("[Training Backend] S Runtime Reference Trainer")
     println("[Saved] Real LoRA adapter to " + output_dir)
