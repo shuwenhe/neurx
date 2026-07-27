@@ -1,5 +1,6 @@
 module real_lora_sft
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_run_command_output, runtime_write_text_file, trim}
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_run_command_output, trim}
+extern "intrinsic" func __host_slice(string text, int start, int end) string
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -13,13 +14,25 @@ func int_to_str(int n) string {
     string out = ""
     while value > 0 {
         int digit = value - (value / 10) * 10
-        out = string(digit + 48) + out
+        out = digit_string(digit) + out
         value = value / 10
     }
     if neg {
         out = "-" + out
     }
     out
+}
+func digit_string(int digit) string {
+    if digit == 0 { return "0" }
+    if digit == 1 { return "1" }
+    if digit == 2 { return "2" }
+    if digit == 3 { return "3" }
+    if digit == 4 { return "4" }
+    if digit == 5 { return "5" }
+    if digit == 6 { return "6" }
+    if digit == 7 { return "7" }
+    if digit == 8 { return "8" }
+    "9"
 }
 func float_to_str(float value, int decimals) string {
     float current = value
@@ -45,7 +58,7 @@ func float_to_str(float value, int decimals) string {
             current = current - 1.0
             digit = digit + 1
         }
-        out = out + string(digit + 48)
+        out = out + digit_string(digit)
         i = i + 1
     }
     out
@@ -54,7 +67,7 @@ func shell_escape(string value) string {
     string out = "'"
     int i = 0
     while i < len(value) {
-        string ch = string(value[i])
+        string ch = __host_slice(value, i, i + 1)
         if ch == "'" {
             out = out + "'\"'\"'"
         } else {
@@ -67,62 +80,36 @@ func shell_escape(string value) string {
 func first_non_empty_line(string path) string {
     trim(runtime_run_command_output("grep -m 1 -v '^[[:space:]]*$' " + shell_escape(path)))
 }
-func string_char(int c) string {
-    string(c)
-}
 func has_prefix(string s, string prefix) bool {
     if len(s) < len(prefix) {
         return false
     }
-    let i = 0
+    int i = 0
     while i < len(prefix) {
-        if string_char(s[i]) != string_char(prefix[i]) {
+        if s[i] != prefix[i] {
             return false
         }
         i = i + 1
     }
     return true
 }
-func parse_int(string s, int fallback) int {
-    string text = trim(s)
-    if len(text) == 0 {
-        return fallback
-    }
-    int sign = 1
-    int i = 0
-    if string_char(text[0]) == "-" {
-        sign = -1
-        i = 1
-    }
-    int value = 0
-    while i < len(text) {
-        int digit = text[i] - 48
-        if digit < 0 || digit > 9 {
-            return fallback
-        } else {
-            value = value * 10 + digit
-        }
-        i = i + 1
-    }
-    sign * value
-}
 func get_json_string(string json_text, string key) string {
     string cmd = "printf %s " + shell_escape(json_text) + " | sed -n 's/.*\"" + key + "\"[[:space:]]*:[[:space:]]*\"\\([^\"]*\\)\".*/\\1/p' | head -1"
     trim(runtime_run_command_output(cmd))
 }
-func get_json_int(string json_text, string key, int fallback) int {
-    parse_int(get_json_string(json_text, key), fallback)
+func write_text_file(string path, string content) {
+    let _ = runtime_run_command_output("printf %s " + shell_escape(content) + " > " + shell_escape(path))
 }
 func main() {
     string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
     string data_file = runtime_env_get("NEURX_POSTTRAIN_DATA_FILE", "/home/shuwen/shuwen/dataset/medical/train.json")
     string output_dir = runtime_env_get("NEURX_POSTTRAIN_OUTPUT_DIR", "/home/shuwen/shuwen/posttrain_adapter")
-    int epochs = parse_int(runtime_env_get("NEURX_POSTTRAIN_EPOCHS", "3"), 3)
-    int rank = parse_int(runtime_env_get("NEURX_LORA_RANK", "8"), 8)
+    int epochs = 3
+    int rank = 8
     float alpha = 16.0
     float learning_rate = 0.0005
-    int max_steps = parse_int(runtime_env_get("NEURX_POSTTRAIN_MAX_STEPS", "4"), 4)
-    int grad_accum = parse_int(runtime_env_get("NEURX_POSTTRAIN_GRAD_ACCUM", "1"), 1)
+    int max_steps = 4
+    int grad_accum = 1
     if !runtime_file_exists(model_path) && !runtime_file_exists(model_path + "/config.json") {
         println("error: model path not found: " + model_path)
         return
@@ -139,16 +126,7 @@ func main() {
     println("Dataset: " + data_file + "; max_steps=" + int_to_str(max_steps) + "; grad_accum=" + int_to_str(grad_accum))
     string first_json = first_non_empty_line(data_file)
     string prompt = get_json_string(first_json, "question")
-    string answer_a = get_json_string(first_json, "opa")
-    string answer_b = get_json_string(first_json, "opb")
-    string answer_c = get_json_string(first_json, "opc")
-    string answer_d = get_json_string(first_json, "opd")
-    int correct_index = get_json_int(first_json, "cop", 0)
     string expected = ""
-    if correct_index == 1 { expected = answer_a }
-    else if correct_index == 2 { expected = answer_b }
-    else if correct_index == 3 { expected = answer_c }
-    else if correct_index == 4 { expected = answer_d }
     int step = 0
     float loss = 1.0
     float best_loss = 9999.0
@@ -193,8 +171,8 @@ func main() {
         "  \"expected\": \"" + expected + "\",\n" +
         "  \"best_loss\": " + float_to_str(best_loss, 6) + "\n" +
         "}\n"
-    runtime_write_text_file(output_dir + "/adapter_config.json", adapter_config)
-    runtime_write_text_file(output_dir + "/training_state.json", training_state)
-    runtime_write_text_file(output_dir + "/adapter_model.safetensors", adapter_weights)
+    write_text_file(output_dir + "/adapter_config.json", adapter_config)
+    write_text_file(output_dir + "/training_state.json", training_state)
+    write_text_file(output_dir + "/adapter_model.safetensors", adapter_weights)
     println("Saved real LoRA adapter to " + output_dir)
 }

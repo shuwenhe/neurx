@@ -110,7 +110,7 @@ NEURX_SHARD_FORCE_REBUILD ?= 0
 POSTTRAIN_MODEL_PATH ?= /home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct
 POSTTRAIN_DATA_FILE ?= /home/shuwen/shuwen/dataset/medical/train.json
 POSTTRAIN_OUTPUT_DIR ?= /home/shuwen/shuwen/posttrain
-POSTTRAIN_S_COMPILER ?= $(firstword $(wildcard /home/shuwen/mining/bin/s /home/shuwen/train/s/.local/bin/s /home/shuwen/train2/s/.local/bin/s /home/shuwen/shuwen/train/s/.local/bin/s $(CURDIR_UNIX)/../s/bin/s_seed $(CURDIR_UNIX)/tools/s_wrapper.sh) $(S_COMPILER))
+POSTTRAIN_S_COMPILER ?= $(S_SEED_COMPILER)
 LORA_MERGE_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/lora_merge
 LORA_MERGE_BIN := $(LORA_MERGE_BUILD_DIR)/lora_safetensors_merge$(BIN_EXT)
 LORA_MERGE_IR := $(LORA_MERGE_BUILD_DIR)/run_lora_merge.ir
@@ -329,10 +329,7 @@ build-posttrain-sft-s:
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_sft'
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/real_lora_sft.ir'; \
-		"$(POSTTRAIN_S_COMPILER)" ir 'scripts/real_lora_sft.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/real_lora_sft.ir' 2>&1 || true; \
-		if [ ! -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/real_lora_sft.ir' ]; then \
-			"$(POSTTRAIN_S_COMPILER)" 'scripts/real_lora_sft.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/real_lora_sft.ir' 2>&1 || exit 1; \
-		fi && \
+		"$(POSTTRAIN_S_COMPILER)" 'scripts/real_lora_sft.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/real_lora_sft.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/real_lora_sft.ir'
 
 posttrain: check-bash build-s-ir-runner build-lora-merge build-posttrain-sft-s
