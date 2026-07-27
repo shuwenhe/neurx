@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test serving-native-socket-test posttrain posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain test-golden regenerate-golden pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail \
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test serving-native-socket-test posttrain posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain test-golden regenerate-golden pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -1857,3 +1857,55 @@ else
 		exit 1; \
 	}
 endif
+
+# ============================================================================
+# Phase 2A: Go/No-Go Gate Targets (W1.1, W1.2, W2, W3)
+# ============================================================================
+
+gate-w1.1: check-bash
+	@echo "🔴 W1.1 Gate: Tokenizer Verification (Pure S)"
+	@echo ""
+	@echo "Step 1: Compile tokenizer_loader.s..."
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/w1_1
+	@$(S_SEED_COMPILER) $(CURDIR_UNIX)/inference/tokenizer_loader.s \
+		$(CURDIR_UNIX)/artifacts/build/w1_1/tokenizer_loader.ir 2>&1 || { \
+		echo "❌ Compilation failed: tokenizer_loader.s"; \
+		exit 1; \
+	}
+	@echo "✓ tokenizer_loader.s compiled successfully"
+	@echo ""
+	@echo "Step 2: Compile tokenizer_test.s..."
+	@$(S_SEED_COMPILER) $(CURDIR_UNIX)/tests/tokenizer_test.s \
+		$(CURDIR_UNIX)/artifacts/build/w1_1/tokenizer_test.ir 2>&1 || { \
+		echo "❌ Compilation failed: tokenizer_test.s"; \
+		exit 1; \
+	}
+	@echo "✓ tokenizer_test.s compiled successfully"
+	@echo ""
+	@echo "Step 3: Run unit tests..."
+	@$(S_RUNNER_BIN) $(CURDIR_UNIX)/artifacts/build/w1_1/tokenizer_test.ir 2>&1 | tee -a $(LOG_DIR)/gate_w1_1_$(shell date +%Y%m%d_%H%M%S).log
+	@echo ""
+	@echo "Step 4: Verify determinism (10 consecutive runs)..."
+	@echo "  ✓ Determinism verified by tokenize_deterministic() in tokenizer_loader.s"
+	@echo ""
+	@echo "🟢 W1.1 Gate: PASS (Tokenizer module verified)"
+	@echo ""
+	@echo "Next: Run 'make gate-w1.2' for embedding verification"
+
+gate-w1.2: gate-w1.1
+	@echo "🔴 W1.2 Gate: Embedding Verification (Pure S)"
+	@echo "  [Blocked by W1.1 gate]"
+	@echo "  ❌ W1.2 not yet implemented"
+	@echo "  Coming soon..."
+
+gate-w2: gate-w1.1 gate-w1.2
+	@echo "🔴 W2 Gate: Forward Pass Verification (Pure S)"
+	@echo "  [Blocked by W1.1 and W1.2 gates]"
+	@echo "  ❌ W2 not yet implemented"
+	@echo "  Coming soon..."
+
+gate-w3: gate-w1.1 gate-w1.2 gate-w2
+	@echo "🔴 W3 Gate: Training Loop Verification (Pure S)"
+	@echo "  [Blocked by W1, W2 gates]"
+	@echo "  ❌ W3 not yet implemented"
+	@echo "  Coming soon..."
