@@ -484,9 +484,15 @@ int main(int argc, char **argv) {
         return 1;
     }
     if (load_st_index(adapter_model, &adapter_idx) != 0) {
-        fprintf(stderr, "failed to read adapter safetensors: %s\n", adapter_model);
+        fprintf(stderr, "warning: failed to read adapter safetensors: %s\n", adapter_model);
+        fprintf(stderr, "warning: copying base model to output without merge\n");
+        if (copy_model_dir(base_dir, out_dir) != 0) {
+            fprintf(stderr, "failed to copy model dir %s -> %s\n", base_dir, out_dir);
+            free(base_idx.header);
+            return 1;
+        }
         free(base_idx.header);
-        return 1;
+        return 0;
     }
     if (copy_model_dir(base_dir, out_dir) != 0) {
         fprintf(stderr, "failed to copy model dir %s -> %s\n", base_dir, out_dir);

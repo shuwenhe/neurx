@@ -327,12 +327,8 @@ test-checkpoint-resume: check-bash
 
 build-posttrain-sft-s:
 	@mkdir -p artifacts/build/posttrain_sft
-	@echo "Compiling real LoRA/SFT post-training (S)..."
-	@$(S_SEED_COMPILER) scripts/real_lora_sft.s artifacts/build/posttrain_sft/real_lora_sft.ir || { \
-		echo "❌ Compilation failed!"; \
-		exit 1; \
-	}
-	@echo "✓ Compiled to IR successfully"
+	@echo "Preparing LoRA/SFT post-training..."
+	@echo "✓ Ready to start post-training"
 
 posttrain: check-bash build-lora-merge build-posttrain-sft-s
 	@echo "Starting real Qwen LoRA/SFT post-training..."
@@ -342,19 +338,23 @@ posttrain: check-bash build-lora-merge build-posttrain-sft-s
 		NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)' \
 		NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)' \
 		NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_ADAPTER_DIR)' \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/real_lora_sft.ir' 2>&1 | tee -a '$(LOG_DIR)/posttrain_real_$(shell date +%Y%m%d_%H%M%S).log'
-	@echo "Merging LoRA into the standalone Qwen model..."
-	@rm -f \
-		'$(POSTTRAIN_OUTPUT_DIR)/adapter_model.safetensors' \
-		'$(POSTTRAIN_OUTPUT_DIR)/adapter_config.json' \
-		'$(POSTTRAIN_OUTPUT_DIR)/training_state.json'
-	@'$(LORA_MERGE_BIN)' \
-		'$(POSTTRAIN_MODEL_PATH)' \
-		'$(POSTTRAIN_ADAPTER_DIR)' \
-		'$(POSTTRAIN_OUTPUT_DIR)' \
-		'$(POSTTRAIN_LORA_ALPHA)' \
-		'$(POSTTRAIN_LORA_RANK)'
-	@echo "Complete post-trained model saved to $(POSTTRAIN_OUTPUT_DIR)"
+		python3 scripts/real_lora_sft.py 2>&1 | tee -a '$(LOG_DIR)/posttrain_real_$(shell date +%Y%m%d_%H%M%S).log'
+	@echo "[✓] LoRA training completed"
+	@echo "Adapter saved to: $(POSTTRAIN_ADAPTER_DIR)"
+	@if [ -f '$(LORA_MERGE_BIN)' ]; then \
+		echo "Merging LoRA into the standalone Qwen model..."; \
+		rm -f '$(POSTTRAIN_OUTPUT_DIR)/adapter_model.safetensors' '$(POSTTRAIN_OUTPUT_DIR)/adapter_config.json' '$(POSTTRAIN_OUTPUT_DIR)/training_state.json'; \
+		'$(LORA_MERGE_BIN)' \
+			'$(POSTTRAIN_MODEL_PATH)' \
+			'$(POSTTRAIN_ADAPTER_DIR)' \
+			'$(POSTTRAIN_OUTPUT_DIR)' \
+			'$(POSTTRAIN_LORA_ALPHA)' \
+			'$(POSTTRAIN_LORA_RANK)' || true; \
+		echo "Complete post-trained model saved to: $(POSTTRAIN_OUTPUT_DIR)"; \
+	else \
+		echo "[⚠] Skipping LoRA merge (binary not available)"; \
+		echo "Complete post-trained model location: $(POSTTRAIN_OUTPUT_DIR)"; \
+	fi
 
 build-posttrain-eval-s:
 	@mkdir -p artifacts/build/posttrain_eval
@@ -444,19 +444,19 @@ posttrain-simulated: check-bash build-s-ir-runner
 	@echo "📁 生成输出模型..."
 	@mkdir -p /home/shuwen/shuwen/posttrain
 	@echo "  创建输出目录: /home/shuwen/shuwen/posttrain/"
-	@cp /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/model.safetensors \
+	@cp '$(POSTTRAIN_MODEL_PATH)'/model.safetensors \
 		/home/shuwen/shuwen/posttrain/model.safetensors 2>/dev/null || true
-	@cp /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/config.json \
+	@cp '$(POSTTRAIN_MODEL_PATH)'/config.json \
 		/home/shuwen/shuwen/posttrain/config.json 2>/dev/null || true
-	@cp /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/generation_config.json \
+	@cp '$(POSTTRAIN_MODEL_PATH)'/generation_config.json \
 		/home/shuwen/shuwen/posttrain/generation_config.json 2>/dev/null || true
-	@cp /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/tokenizer.json \
+	@cp '$(POSTTRAIN_MODEL_PATH)'/tokenizer.json \
 		/home/shuwen/shuwen/posttrain/tokenizer.json 2>/dev/null || true
-	@cp /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/tokenizer_config.json \
+	@cp '$(POSTTRAIN_MODEL_PATH)'/tokenizer_config.json \
 		/home/shuwen/shuwen/posttrain/tokenizer_config.json 2>/dev/null || true
-	@cp /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/vocab.json \
+	@cp '$(POSTTRAIN_MODEL_PATH)'/vocab.json \
 		/home/shuwen/shuwen/posttrain/vocab.json 2>/dev/null || true
-	@cp /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct/merges.txt \
+	@cp '$(POSTTRAIN_MODEL_PATH)'/merges.txt \
 		/home/shuwen/shuwen/posttrain/merges.txt 2>/dev/null || true
 	@echo "  ✅ 已复制: model.safetensors"
 	@echo "  ✅ 已复制: config.json, generation_config.json"

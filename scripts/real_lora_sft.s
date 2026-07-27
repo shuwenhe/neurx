@@ -73,6 +73,24 @@ func first_non_empty_line(string path) string {
     trim(runtime_run_command_output("grep -m 1 -v '^[[:space:]]*$' " + shell_escape(path)))
 }
 
+func string_char(int c) string {
+    string(c)
+}
+
+func has_prefix(string s, string prefix) bool {
+    if len(s) < len(prefix) {
+        return false
+    }
+    let i = 0
+    while i < len(prefix) {
+        if string_char(s[i]) != string_char(prefix[i]) {
+            return false
+        }
+        i = i + 1
+    }
+    return true
+}
+
 func parse_int(string s, int fallback) int {
     string text = trim(s)
     if len(text) == 0 {
@@ -80,7 +98,7 @@ func parse_int(string s, int fallback) int {
     }
     int sign = 1
     int i = 0
-    if text[0] == 45 {
+    if string_char(text[0]) == "-" {
         sign = -1
         i = 1
     }
@@ -89,8 +107,9 @@ func parse_int(string s, int fallback) int {
         int digit = text[i] - 48
         if digit < 0 || digit > 9 {
             return fallback
+        } else {
+            value = value * 10 + digit
         }
-        value = value * 10 + digit
         i = i + 1
     }
     sign * value
@@ -106,7 +125,7 @@ func get_json_int(string json_text, string key, int fallback) int {
 }
 
 func main() {
-    string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct")
+    string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
     string data_file = runtime_env_get("NEURX_POSTTRAIN_DATA_FILE", "/home/shuwen/shuwen/dataset/medical/train.json")
     string output_dir = runtime_env_get("NEURX_POSTTRAIN_OUTPUT_DIR", "/home/shuwen/shuwen/posttrain_adapter")
     int epochs = parse_int(runtime_env_get("NEURX_POSTTRAIN_EPOCHS", "3"), 3)
@@ -125,7 +144,7 @@ func main() {
         return
     }
 
-    runtime_make_dirs(output_dir)
+    let _ = runtime_run_command_output("mkdir -p " + shell_escape(output_dir))
 
     println("Loading tokenizer: " + model_path)
     println("Loading Qwen model on S runtime (simulated training)")
