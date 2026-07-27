@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test serving-native-socket-test posttrain posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail \
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test serving-native-socket-test posttrain posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain test-golden regenerate-golden pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -118,6 +118,9 @@ POSTTRAIN_ADAPTER_DIR ?= /home/shuwen/shuwen/posttrain_adapter
 POSTTRAIN_MERGED_MODEL_DIR ?= $(POSTTRAIN_OUTPUT_DIR)
 POSTTRAIN_LORA_ALPHA ?= 16
 POSTTRAIN_LORA_RANK ?= 8
+POSTTRAIN_GOLDEN_DIR ?= /home/shuwen/shuwen/posttrain/golden
+POSTTRAIN_GOLDEN_SCRIPT ?= $(CURDIR_UNIX)/scripts/posttrain_golden.py
+POSTTRAIN_GOLDEN_DATASET_LIMIT ?= 12
 
 
 help:
@@ -374,6 +377,24 @@ verify-posttrain:
 	@python3 scripts/verify_posttrain_tensors.py
 	@echo ""
 	@echo "Verification complete!"
+
+test-golden:
+	@echo "Verifying Phase 2 Module 0 golden snapshot..."
+	@python3 '$(POSTTRAIN_GOLDEN_SCRIPT)' verify \
+		--golden-dir '$(POSTTRAIN_GOLDEN_DIR)' \
+		--model-dir '$(POSTTRAIN_MODEL_PATH)' \
+		--dataset-file '$(POSTTRAIN_DATA_FILE)' \
+		--dataset-limit '$(POSTTRAIN_GOLDEN_DATASET_LIMIT)'
+	@echo "Golden snapshot verification complete!"
+
+regenerate-golden:
+	@echo "Regenerating Phase 2 Module 0 golden snapshot..."
+	@python3 '$(POSTTRAIN_GOLDEN_SCRIPT)' generate \
+		--golden-dir '$(POSTTRAIN_GOLDEN_DIR)' \
+		--model-dir '$(POSTTRAIN_MODEL_PATH)' \
+		--dataset-file '$(POSTTRAIN_DATA_FILE)' \
+		--dataset-limit '$(POSTTRAIN_GOLDEN_DATASET_LIMIT)'
+	@$(MAKE) test-golden
 
 build-posttrain-eval-s:
 	@mkdir -p artifacts/build/posttrain_eval

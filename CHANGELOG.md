@@ -88,6 +88,182 @@ Phase 1 officially concluded. Infrastructure stable and ready to serve as founda
 Token → Embedding → Transformer → Logits → CrossEntropy → LoRA Update → Merge → Verify
 ```
 
+### Engineering Philosophy (Locked)
+
+**Three Core Principles**:
+1. **Correctness First** - Success metric is "modules passing Golden regression", not "features shipped"
+2. **Code-First Development** - Each module delivers: Code + Unit Test + Golden Verification + Design Doc (synchronized)
+3. **Per-Layer Verification** - Test each layer independently, not end-to-end
+
+**One-Sentence Principle**:
+> Each new training capability must pass through an automated Go/No-Go Gate that preserves the Golden Baseline, before the next capability layer can begin.
+
+### Automated Go/No-Go Gates (NEW)
+
+**For each milestone**, automated Make targets enforce quality:
+```bash
+make gate-w1.1    # Tokenizer: compiles + tests + golden + determinism + regression
+make gate-w1.2    # Embedding: all above
+make gate-w2      # Forward: all above
+make gate-w3      # Training: all above
+```
+
+**Gate Behavior**:
+- ✅ PASS → Next milestone unlocked
+- ❌ FAIL → Current milestone must be fixed
+- Prerequisites enforced (can't skip prior gates)
+- Deterministic (same code = same result)
+- Regression-detecting (all prior work verified)
+
+### Code-First: Four Artifacts Per Module
+
+Each module must deliver:
+1. **Runnable Code** (S language for training core)
+2. **Unit Tests** (companion test file)
+3. **Golden Regression Verification** (automated comparison)
+4. **Design Documentation** (synchronized with code)
+
+### Module Structure (Stable)
+
+```
+tests/
+├── reference/       ← Verification logic
+├── golden/          ← Reference data
+├── tokenizer/       ← Tokenizer unit tests (future)
+├── embedding/       ← Embedding unit tests (future)
+└── transformer/     ← Forward pass tests (future)
+```
+
+No new top-level test directories created beyond `reference/` and `golden/`.
+
+### Tokenizer (W1.1) Specific Requirements
+
+**Beyond matching token IDs**, tokenizer must be:
+- **Deterministic**: 10 consecutive runs produce byte-identical output
+- **Repeatable**: No caching or side effects affecting results
+- **Predictable**: Same input always → same output
+
+Verification:
+```bash
+encode(prompt)  # 1st run
+encode(prompt)  # 2nd run
+encode(prompt)  # 3rd run
+# All 10 must be byte-identical
+```
+
+### Module 0: Golden Test Infrastructure (COMPLETE)
+
+- Directory: `tests/reference/` + `tests/golden/`
+- Purpose: Authority comparison + verification logic
+- Status: Ready for Phase 2A modules
+
+### Module 1 (W1.1): Tokenizer (READY TO START)
+
+- **Gate**: `make gate-w1.1`
+- **Code**: `neurx/inference/tokenizer_loader.s` (S language)
+- **Test**: `neurx/tests/tokenizer_test.s` (S unit tests)
+- **Verify**: `python3 tests/reference/week1_verify.py::test_tokenization`
+- **Golden**: `tests/golden/tokenizer.json` (100% match required)
+- **Duration**: 2-3 days
+- **Status**: 🚀 Ready to implement
+
+### Module 2 (W1.2): Embedding (BLOCKED until W1.1 passes)
+
+- **Gate**: `make gate-w1.2`
+- **Prerequisites**: W1.1 gate must pass
+- **Entry condition**: W1.1 gate shows 🟢 PASS
+- **Status**: Waiting for W1.1
+
+### Module 3 (W2): Forward Pass (BLOCKED until W1.2 passes)
+
+- **Gate**: `make gate-w2`
+- **Status**: Waiting for W1.1 + W1.2
+
+### Module 4 (W3): Training Loop (BLOCKED until W2 passes)
+
+- **Gate**: `make gate-w3`
+- **Status**: Waiting for W1.1 + W1.2 + W2
+
+---
+
+## [Phase 1] - 2026-07-27 ✅ COMPLETE
+
+### Milestone M1: Reference LoRA Trainer Complete
+
+Phase 1 officially concluded. Infrastructure frozen and stable.
+
+#### Foundation Components (FROZEN)
+
+- **LoRA Injection**: Merge all 48 tensors correctly
+- **Reference Trainer**: Python implementation with gradient tracking (lora_B: 0→0.565)
+- **Export Pipeline**: Safetensors binary format (1.1MB, deterministic)
+- **Merge Integration**: Produces 943MB merged model
+- **Automated Verification**: `make verify-posttrain` regression testing
+
+#### Quality Metrics Established
+
+| Metric | Value | Status |
+|--------|-------|--------|
+| Gradient computation | lora_B: 0→0.565 (40.5% changed) | ✅ Proven |
+| Export determinism | Byte-identical output | ✅ Verified |
+| Merge correctness | All 48 tensors | ✅ Complete |
+| Verification automation | make verify-posttrain works | ✅ Working |
+
+#### Architecture Decisions
+
+- LoRA configuration frozen: rank=8, alpha=16.0
+- Training backend frozen: Python (Phase 1), S (Phase 3)
+- Export format frozen: Safetensors
+- Verification frozen: Deterministic checks
+
+---
+
+## Key Design Decisions
+
+| Decision | Rationale | Status |
+|----------|-----------|--------|
+| LoRA only (Phase 1-2) | Focus on training core | Locked |
+| Python trainer (Phase 1) | Faster iteration | Pragmatic, Phase 3 replaces |
+| Safetensors format | Model interoperability | Locked |
+| Per-layer testing | Fast regression detection | Core practice |
+| Golden data from HF | Authority reference | Established |
+| Single-objective phases | Reduces complexity | Policy |
+| Frozen Phase 1 | Stability for Phase 2 | Enforced |
+| Automated gates | CI/CD enforcement | NEW |
+| Code-First principle | Documentation ≤ Code | NEW |
+
+---
+
+## Repository State
+
+**Latest Commit**: (Phase 2A engineering philosophy + gates automation)
+
+**All files committed**:
+- MILESTONE.md (updated with Code-First + Tokenizer Determinism)
+- GATES.md (new: automated gate documentation)
+- PHASE2A_IMPLEMENTATION_PLAN.md (stable, no more changes)
+- CHANGELOG.md (this file)
+
+**Ready to implement**: W1.1 Tokenizer in S language
+
+---
+
+*"Correctness sustained through automation, not hope." - Phase 2A Engineering Principle*
+
+**Single Goal**: Complete Transformer SFT Kernel
+
+**No Expansion**:
+- ❌ New training algorithms
+- ❌ Distributed training
+- ❌ Inference optimization
+- ❌ Additional adapters (DoRA, QLoRA)
+- ❌ Alternative optimizers
+
+**Yes Implementation**:
+```
+Token → Embedding → Transformer → Logits → CrossEntropy → LoRA Update → Merge → Verify
+```
+
 ### Module 0: Test Infrastructure
 
 - **Reference Test Framework**: Established
