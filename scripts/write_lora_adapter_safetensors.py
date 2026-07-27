@@ -112,6 +112,9 @@ class LoRAModule:
         rng = random.Random(seed)
         self.A = [(rng.random() - 0.5) * 0.02 for _ in range(rank * in_dim)]
         self.B = [0.0 for _ in range(out_dim * rank)]
+        # Save initial weights for delta computation
+        self.A_initial = list(self.A)
+        self.B_initial = list(self.B)
 
     def forward(self, x):
         z = [0.0] * self.rank
@@ -241,6 +244,45 @@ def compute_statistics(modules):
     }
 
 
+def compute_weight_delta(modules):
+    """Compute weight changes from initialization to current state"""
+    l1_delta = 0.0
+    l2_delta = 0.0
+    max_delta = 0.0
+    changed_count = 0
+    total = 0
+    
+    for module in modules:
+        # Compare A weights
+        for i, (curr, init) in enumerate(zip(module.A, module.A_initial)):
+            total += 1
+            delta = abs(curr - init)
+            l1_delta += delta
+            l2_delta += delta * delta
+            if delta > max_delta:
+                max_delta = delta
+            if delta > 1e-10:  # Threshold for "changed"
+                changed_count += 1
+        
+        # Compare B weights
+        for i, (curr, init) in enumerate(zip(module.B, module.B_initial)):
+            total += 1
+            delta = abs(curr - init)
+            l1_delta += delta
+            l2_delta += delta * delta
+            if delta > max_delta:
+                max_delta = delta
+            if delta > 1e-10:  # Threshold for "changed"
+                changed_count += 1
+    
+    return {
+        "l1": l1_delta,
+        "l2": math.sqrt(l2_delta),
+        "max_abs": max_delta,
+        "changed_count": changed_count,
+    }
+
+
 def build_adapter_tensor_map(modules):
     tensor_map = {}
     for module in modules:
@@ -330,6 +372,8 @@ def train_adapter(model_dir, output_dir, data_file, epochs, max_steps, rank, alp
     write_safetensors(os.path.join(output_dir, "adapter_model.safetensors"), tensor_map)
 
     stats = compute_statistics(modules)
+    delta_stats = compute_weight_delta(modules)
+    
     adapter_config = {
         "base_model_name_or_path": model_dir,
         "bias": "none",
@@ -346,6 +390,7 @@ def train_adapter(model_dir, output_dir, data_file, epochs, max_steps, rank, alp
         "v_proj_out_dim": v_out,
         "optimizer": "sgd",
         "effective_learning_rate": effective_lr,
+        "training_backend": "Python Reference Trainer",
     }
     training_state = {
         "completed_steps": epochs * len(examples),
@@ -354,7 +399,8 @@ def train_adapter(model_dir, output_dir, data_file, epochs, max_steps, rank, alp
         "learning_rate": nominal_lr,
         "effective_learning_rate": effective_lr,
         "lr_scale": lr_scale,
-        "device": "s-runtime",
+        "device": "cpu-python",
+        "training_backend": "Python Reference Trainer",
         "elapsed_seconds": 0,
         "data_file": data_file,
         "final_loss": loss_history[-1],
@@ -365,6 +411,10 @@ def train_adapter(model_dir, output_dir, data_file, epochs, max_steps, rank, alp
         "adapter_max_abs": stats["max_abs"],
         "nonzero_weights": stats["nonzero"],
         "total_weights": stats["total"],
+        "weight_delta_l2": delta_stats["l2"],
+        "weight_delta_l1": delta_stats["l1"],
+        "weight_delta_max_abs": delta_stats["max_abs"],
+        "weight_changed_count": delta_stats["changed_count"],
         "modules": len(modules),
         "nominal_rank": rank,
         "alpha": alpha,
@@ -373,9 +423,27 @@ def train_adapter(model_dir, output_dir, data_file, epochs, max_steps, rank, alp
     write_json(os.path.join(output_dir, "adapter_config.json"), adapter_config)
     write_json(os.path.join(output_dir, "training_state.json"), training_state)
 
-    print(f"Saved real LoRA adapter to {output_dir}")
-    print(f"Adapter L1 norm: {stats['l1']:.6f}")
-    print(f"Adapter max abs: {stats['max_abs']:.6f}")
+    # Comprehensive logging
+    print(f"\n[Training Backend] Python Reference Trainer")
+    print(f"[Saved] Real LoRA adapter to {output_dir}")
+    print(f"\n[Adapter Weight Statistics]")
+    print(f"  L1 norm:           {stats['l1']:.6f}")
+    print(f"  L2 norm:           {stats['l2']:.6f}")
+    print(f"  Max absolute:      {stats['max_abs']:.6e}")
+    nonzero_pct = 100.0 * stats['nonzero'] / stats['total']
+    print(f"  Non-zero weights:  {stats['nonzero']}/{stats['total']} ({nonzero_pct:.1f}%)")
+    print(f"\n[Weight Delta (Init → Final)]")
+    print(f"  L1 delta:          {delta_stats['l1']:.6f}")
+    print(f"  L2 delta:          {delta_stats['l2']:.6f}")
+    print(f"  Max delta:         {delta_stats['max_abs']:.6e}")
+    changed_pct = 100.0 * delta_stats['changed_count'] / stats['total']
+    print(f"  Changed elements:  {delta_stats['changed_count']}/{stats['total']} ({changed_pct:.1f}%)")
+    print(f"\n[Loss Convergence]")
+    print(f"  Initial loss:      {loss_history[0]:.6f}")
+    print(f"  Final loss:        {loss_history[-1]:.6f}")
+    print(f"  Best loss:         {best_loss:.6f}")
+    improvement = (loss_history[0] - best_loss) / loss_history[0] * 100
+    print(f"  Improvement:       {improvement:.2f}%")
     return training_state
 
 

@@ -94,6 +94,8 @@ func shell_escape(string value) string {
 func write_adapter_safetensors(string model_path, string output_dir, int rank, float alpha) {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/neurx")
     string helper = project_root + "/scripts/write_lora_adapter_safetensors.py"
+    println("[NeurX PostTrain] Invoking Python Reference Trainer")
+    println("[LoRA Config] rank=" + int_to_str(rank) + ", alpha=" + float_to_str(alpha, 1))
     let _ = runtime_run_command_output(
         "python3 " + shell_escape(helper) + " " +
         shell_escape(model_path) + " " +
@@ -110,6 +112,12 @@ func main() {
     int rank = 8
     float alpha = 16.0
 
+    println("====================================================")
+    println("[PostTrain] LoRA Supervised Fine-Tuning")
+    println("====================================================")
+    println("[Backend] Python Reference Trainer (Phase 1)")
+    println("")
+
     if !runtime_file_exists(model_path) && !runtime_file_exists(model_path + "/config.json") {
         println("error: model path not found: " + model_path)
         return
@@ -125,4 +133,7 @@ func main() {
         println("error: adapter_model.safetensors was not written: " + output_dir)
         return
     }
+
+    println("")
+    println("[PostTrain Complete] Adapter ready at: " + output_dir)
 }
