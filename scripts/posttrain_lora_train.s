@@ -229,40 +229,33 @@ func run_posttrain_lora_sft() int {
         i = i + 1
     }
     float adapter_l2 = sqrt_lora(adapter_l2_sq)
-    adapter_stats stats
-    stats.l1 = adapter_l1
-    stats.l2 = adapter_l2
-    stats.max_abs = adapter_max_abs
-    stats.nonzero = adapter_nonzero
-    stats.total = adapter_total
-    delta_stats deltas
-    deltas.l1 = adapter_l1
-    deltas.l2 = adapter_l2
-    deltas.max_abs = adapter_max_abs
-    deltas.changed_count = adapter_nonzero
+    float delta_l1 = adapter_l1
+    float delta_l2 = adapter_l2
+    float delta_max_abs = adapter_max_abs
+    int delta_changed = adapter_nonzero
     println("")
     println("[Training Backend] S Runtime Reference Trainer")
     println("[Saved] Real LoRA adapter to " + output_dir)
     println("")
     println("[Adapter Weight Statistics]")
-    println("  L1 norm:           " + float_to_str(stats.l1, 6))
-    println("  L2 norm:           " + float_to_str(stats.l2, 6))
-    println("  Max absolute:      " + float_to_str(stats.max_abs, 6))
+    println("  L1 norm:           " + float_to_str(adapter_l1, 6))
+    println("  L2 norm:           " + float_to_str(adapter_l2, 6))
+    println("  Max absolute:      " + float_to_str(adapter_max_abs, 6))
     float nonzero_pct = 0.0
-    if stats.total > 0 {
-        nonzero_pct = 100.0 * (stats.nonzero as float) / (stats.total as float)
+    if adapter_total > 0 {
+        nonzero_pct = 100.0 * (adapter_nonzero as float) / (adapter_total as float)
     }
-    println("  Non-zero weights:  " + int_to_str(stats.nonzero) + "/" + int_to_str(stats.total) + " (" + float_to_str(nonzero_pct, 1) + "%)")
+    println("  Non-zero weights:  " + int_to_str(adapter_nonzero) + "/" + int_to_str(adapter_total) + " (" + float_to_str(nonzero_pct, 1) + "%)")
     println("")
     println("[Weight Delta (Init → Final)]")
-    println("  L1 delta:          " + float_to_str(deltas.l1, 6))
-    println("  L2 delta:          " + float_to_str(deltas.l2, 6))
-    println("  Max delta:         " + float_to_str(deltas.max_abs, 6))
+    println("  L1 delta:          " + float_to_str(delta_l1, 6))
+    println("  L2 delta:          " + float_to_str(delta_l2, 6))
+    println("  Max delta:         " + float_to_str(delta_max_abs, 6))
     float changed_pct = 0.0
-    if stats.total > 0 {
-        changed_pct = 100.0 * (deltas.changed_count as float) / (stats.total as float)
+    if adapter_total > 0 {
+        changed_pct = 100.0 * (delta_changed as float) / (adapter_total as float)
     }
-    println("  Changed elements:  " + int_to_str(deltas.changed_count) + "/" + int_to_str(stats.total) + " (" + float_to_str(changed_pct, 1) + "%)")
+    println("  Changed elements:  " + int_to_str(delta_changed) + "/" + int_to_str(adapter_total) + " (" + float_to_str(changed_pct, 1) + "%)")
     println("")
     println("[Loss Convergence]")
     println("  Initial loss:      " + float_to_str(loss0, 6))
