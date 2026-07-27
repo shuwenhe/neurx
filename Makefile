@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test serving-native-socket-test posttrain posttrain-e2e posttrain-merge-lora build-lora-merge pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail \
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test serving-native-socket-test posttrain posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -368,6 +368,12 @@ posttrain: check-bash build-s-ir-runner build-lora-merge build-posttrain-sft-s
 		cp -r '$(POSTTRAIN_MODEL_PATH)'/* '$(POSTTRAIN_OUTPUT_DIR)/' 2>/dev/null || true; \
 	fi
 	@echo "Post-trained model ready at: $(POSTTRAIN_OUTPUT_DIR)"
+
+verify-posttrain:
+	@echo "Verifying post-training output with tensor-level analysis..."
+	@python3 scripts/verify_posttrain_tensors.py
+	@echo ""
+	@echo "Verification complete!"
 
 build-posttrain-eval-s:
 	@mkdir -p artifacts/build/posttrain_eval
