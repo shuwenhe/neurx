@@ -10,6 +10,12 @@ DEFAULT_BASE_DIR = "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
 DEFAULT_ADAPTER_DIR = "/home/shuwen/shuwen/posttrain_adapter"
 DEFAULT_OUTPUT_DIR = "/home/shuwen/shuwen/posttrain"
 SAMPLE_TENSOR = "model.layers.0.self_attn.q_proj.weight"
+MIN_ADAPTER_L1 = 1e-6
+MIN_LOSS_DROP = 1e-6
+MAX_LOSS_STEP_INCREASE = 1e-7
+MIN_SAMPLE_MAX_DELTA = 1e-6
+MIN_WEIGHT_DELTA_L2 = 1e-6
+MIN_CHANGED_ELEMENTS = 1
 
 
 def getenv(name, fallback):
@@ -132,6 +138,41 @@ def load_training_state(path):
         return json.load(f)
 
 
+def verify_loss_history(loss_history):
+    if not loss_history or not isinstance(loss_history, list):
+        print("error: training_state does not contain loss_history", file=sys.stderr)
+        return None
+    if len(loss_history) < 2:
+        print("error: loss_history must contain at least two points", file=sys.stderr)
+        return None
+    start = float(loss_history[0])
+    final = float(loss_history[-1])
+    if not math.isfinite(start) or not math.isfinite(final):
+        print("error: loss_history contains non-finite values", file=sys.stderr)
+        return None
+    if start - final < MIN_LOSS_DROP:
+        print(
+            f"error: loss did not decrease enough: start={start:.6f} final={final:.6f} "
+            f"drop={start - final:.6e}",
+            file=sys.stderr,
+        )
+        return None
+    prev = start
+    for idx, value in enumerate(loss_history[1:], start=1):
+        current = float(value)
+        if not math.isfinite(current):
+            print(f"error: loss_history contains non-finite value at step {idx}", file=sys.stderr)
+            return None
+        if current - prev > MAX_LOSS_STEP_INCREASE:
+            print(
+                f"error: loss increased at step {idx}: prev={prev:.6f} current={current:.6f}",
+                file=sys.stderr,
+            )
+            return None
+        prev = current
+    return start, final
+
+
 def main(argv):
     base_dir = argv[1] if len(argv) > 1 else getenv("NEURX_POSTTRAIN_MODEL_PATH", DEFAULT_BASE_DIR)
     adapter_dir = argv[2] if len(argv) > 2 else getenv("NEURX_POSTTRAIN_OUTPUT_DIR", DEFAULT_ADAPTER_DIR)
@@ -146,7 +187,7 @@ def main(argv):
         return 1
 
     adapter_l1 = tensor_l1(adapter_file)
-    if adapter_l1 <= 1e-6:
+    if adapter_l1 <= MIN_ADAPTER_L1:
         print(f"error: adapter L1 norm too small: {adapter_l1:.6e}", file=sys.stderr)
         return 1
 
@@ -154,12 +195,22 @@ def main(argv):
     if os.path.exists(training_state_file):
         state = load_training_state(training_state_file)
         loss_history = state.get("loss_history", [])
-        if loss_history and isinstance(loss_history, list):
-            print(
-                f"training loss: start={loss_history[0]:.6f} final={loss_history[-1]:.6f}"
-            )
-        if state.get("adapter_l1_norm", 0.0) <= 1e-6:
+        loss_pair = verify_loss_history(loss_history)
+        if loss_pair is None:
+            return 1
+        start_loss, final_loss = loss_pair
+        print(f"training loss: start={start_loss:.6f} final={final_loss:.6f}")
+        print(f"training loss drop: {start_loss - final_loss:.6e}")
+
+        adapter_state_l1 = float(state.get("adapter_l1_norm", 0.0))
+        if adapter_state_l1 <= MIN_ADAPTER_L1:
             print("error: training_state reports zero adapter norm", file=sys.stderr)
+            return 1
+        if float(state.get("weight_delta_l2", 0.0)) <= MIN_WEIGHT_DELTA_L2:
+            print("error: training_state reports tiny weight delta l2", file=sys.stderr)
+            return 1
+        if int(state.get("weight_changed_count", 0)) < MIN_CHANGED_ELEMENTS:
+            print("error: training_state reports no changed weights", file=sys.stderr)
             return 1
 
     print(f"adapter L1 norm: {adapter_l1:.6f}")
@@ -179,7 +230,7 @@ def main(argv):
                 max_delta = value
         print(f"sample tensor delta: {delta:.6e}")
         print(f"sample tensor max abs delta: {max_delta:.6e}")
-        if max_delta <= 1e-6:
+        if max_delta <= MIN_SAMPLE_MAX_DELTA:
             print("error: merged tensor delta too small", file=sys.stderr)
             return 1
 
