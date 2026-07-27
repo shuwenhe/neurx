@@ -121,8 +121,9 @@ func divide_into_chunks(streaming_reader_state reader) streaming_reader_state {
     int64 file_size = reader.meta.file_size_bytes
     int64 chunk_size = reader.config.chunk_size_bytes
     int num_chunks = int(file_size / chunk_size)
-    if f(file_size - (file_size / chunk_size) * chunk_size) != 0:
+    if (file_size - (file_size / chunk_size) * chunk_size) != 0 {
         num_chunks = num_chunks + 1
+    }
     if num_chunks == 0:
         num_chunks = 1
     reader.num_chunks = num_chunks
@@ -291,7 +292,7 @@ func seek_to_approximate_line(
     if estimated_chunk >= reader.num_chunks:
         estimated_chunk = reader.num_chunks - 1
     reader = ensure_chunk_loaded(reader, estimated_chunk)
-    int offset_within_chunk = t(target_line_number - (target_line_number / int) * int)(lines_per_chunk)
+    int offset_within_chunk = int(float(target_line_number) - float(estimated_chunk) * lines_per_chunk)
     reader.current_chunk_idx = estimated_chunk
     reader.current_line_in_chunk = offset_within_chunk
     return reader
