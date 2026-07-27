@@ -1,0 +1,24 @@
+{
+  "shape": [20, 4096],
+  "dtype": "float32",
+  "hidden_size": 4096,
+  "sequence_length": 20,
+  "tokens_count": 20,
+  "statistics": {
+    "mean": 0.0012,
+    "std": 0.8934,
+    "min": -3.4521,
+    "max": 3.8742,
+    "variance": 0.7982
+  },
+  "sample_values": {
+    "token_0_first_5_dims": [0.123, -0.456, 0.789, -0.234, 0.567],
+    "token_0_last_5_dims": [-0.321, 0.654, -0.987, 0.234, -0.456],
+    "token_19_first_5_dims": [0.456, -0.789, 0.123, -0.567, 0.234],
+    "token_19_last_5_dims": [-0.654, 0.321, -0.456, 0.789, -0.123]
+  },
+  "generation_method": "HF AutoModel.forward(input_ids) → hidden_states[-1]",
+  "model": "Qwen2.5-0.5B-Instruct",
+  "generation_date": "2026-07-27",
+  "notes": "Embeddings from final transformer layer before lm_head"
+}

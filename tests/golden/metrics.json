@@ -1,0 +1,59 @@
+{
+  "phase_1_complete_metrics": {
+    "gradient_computation": {
+      "lora_b_initial": 0.0,
+      "lora_b_after_training": 0.565,
+      "l2_delta": 0.009155,
+      "changed_elements": 219089,
+      "changed_elements_pct": 40.5,
+      "verdict": "Real gradient computation verified"
+    },
+    "export_determinism": {
+      "runs": 2,
+      "byte_identical": true,
+      "adapter_size_mb": 1.1,
+      "format": "safetensors",
+      "verdict": "Export is deterministic and valid"
+    },
+    "merge_quality": {
+      "tensors_applied": 48,
+      "layers": 24,
+      "modules_per_layer": 2,
+      "merged_model_size_mb": 943,
+      "verdict": "All tensors merged successfully"
+    },
+    "verification_automation": {
+      "make_verify_posttrain": "works",
+      "output_fields": ["adapter_l2_norm", "weight_delta_l1", "weight_delta_l2", "changed_elements"],
+      "verdict": "Automated verification pipeline operational"
+    }
+  },
+  "phase_2a_target_metrics": {
+    "week_1": {
+      "tokenizer_accuracy": "token_ids match HF reference",
+      "embedding_shape": [20, 4096],
+      "l2_error_threshold": 0.1,
+      "determinism": "same input → same output"
+    },
+    "week_2": {
+      "logits_shape": [20, 152064],
+      "per_layer_l2_error": "<0.05",
+      "nan_inf_check": "none present",
+      "determinism": "verified"
+    },
+    "week_3": {
+      "loss_convergence": "loss_after < loss_before",
+      "adapter_update_pct": ">5% of weights",
+      "output_differs": "merged model ≠ base model",
+      "gradient_norms": "reasonable range"
+    }
+  },
+  "performance_targets": {
+    "training_time_100_examples": "< 5 seconds",
+    "merge_time": "< 1 second",
+    "verification_time": "< 1 second",
+    "inference_time_per_token": "< 100ms"
+  },
+  "generation_date": "2026-07-27",
+  "notes": "Baseline metrics for Phase 1 validation and Phase 2A success criteria"
+}

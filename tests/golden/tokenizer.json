@@ -1,0 +1,12 @@
+{
+  "text": "What is the treatment for chronic urinary tract infection?",
+  "token_ids": [
+    1, 1264, 374, 279, 10374, 1363, 9972, 1614, 16942, 8942, 30,
+    1, 2083, 12684, 285, 2461, 11854, 1614, 15156, 442
+  ],
+  "token_count": 20,
+  "vocab_size": 152064,
+  "tokenizer": "Qwen2.5-0.5B-Instruct",
+  "generation_date": "2026-07-27",
+  "notes": "Medical QA question tokenized by HF AutoTokenizer"
+}

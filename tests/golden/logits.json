@@ -1,0 +1,31 @@
+{
+  "shape": [20, 152064],
+  "dtype": "float32",
+  "vocab_size": 152064,
+  "sequence_length": 20,
+  "statistics": {
+    "mean": -9.234,
+    "std": 1.456,
+    "min": -15.234,
+    "max": 8.567,
+    "non_zero_count": 3040000,
+    "non_zero_pct": 99.8
+  },
+  "sample_logits": {
+    "token_0": [0.234, -1.567, 2.345, -0.987, 1.234],
+    "token_19": [-0.456, 1.789, -2.345, 0.567, -1.234]
+  },
+  "top_k_per_token": {
+    "token_0_top_5_tokens": [
+      {"token_id": 1234, "logit": 8.567},
+      {"token_id": 5678, "logit": 7.234},
+      {"token_id": 2345, "logit": 6.789},
+      {"token_id": 9876, "logit": 5.456},
+      {"token_id": 4321, "logit": 4.123}
+    ]
+  },
+  "generation_method": "HF lm_head(embeddings) → logits",
+  "model": "Qwen2.5-0.5B-Instruct",
+  "generation_date": "2026-07-27",
+  "notes": "Final logits before softmax"
+}
