@@ -8,24 +8,24 @@ package neurx.inference.tokenizer_loader
 
 // TokenizerState represents the state of a loaded tokenizer
 struct TokenizerState {
-    model_path string          // Path to HF model directory
-    model_name string          // Model name
-    vocab_size int             // Vocabulary size (e.g., 152064 for Qwen2.5)
-    is_loaded bool             // Whether tokenizer is successfully loaded
-    error_message string       // Error message if loading failed
+    string model_path          // Path to HF model directory
+    string model_name          // Model name
+    int vocab_size             // Vocabulary size (e.g., 152064 for Qwen2.5)
+    bool is_loaded             // Whether tokenizer is successfully loaded
+    string error_message       // Error message if loading failed
 }
 
 // TokenizationResult represents the result of tokenizing text
 struct TokenizationResult {
-    token_ids []int            // Array of token IDs
-    token_count int            // Number of tokens
-    success bool               // Whether tokenization succeeded
-    error string               // Error message if failed
+    []int token_ids            // Array of token IDs
+    int token_count            // Number of tokens
+    bool success               // Whether tokenization succeeded
+    string error               // Error message if failed
 }
 
 // Initialize empty tokenizer state
 func new_tokenizer_state() TokenizerState {
-    state: TokenizerState
+    TokenizerState state
     state.model_path = ""
     state.model_name = ""
     state.vocab_size = 0
@@ -35,7 +35,7 @@ func new_tokenizer_state() TokenizerState {
 }
 
 // Load tokenizer from HF model path (pure S implementation)
-func load_tokenizer(model_path string) TokenizerState {
+func load_tokenizer(string model_path) TokenizerState {
     state := new_tokenizer_state()
     state.model_path = model_path
     state.model_name = extract_model_name(model_path)
@@ -47,7 +47,7 @@ func load_tokenizer(model_path string) TokenizerState {
 
 // Tokenize text (simple space-based tokenization for W1.1 gate)
 // W1.1 GATE: Verify against tests/golden/tokenizer.json
-func tokenize(state TokenizerState, text string) TokenizationResult {
+func tokenize(TokenizerState state, string text) TokenizationResult {
     result := new_tokenization_result()
     
     if !state.is_loaded {
@@ -67,7 +67,7 @@ func tokenize(state TokenizerState, text string) TokenizationResult {
 }
 
 // Tokenize with determinism check (10 consecutive runs must produce identical tokens)
-func tokenize_deterministic(state TokenizerState, text string, runs int) TokenizationResult {
+func tokenize_deterministic(TokenizerState state, string text, int runs) TokenizationResult {
     result := new_tokenization_result()
     
     if !state.is_loaded {
@@ -133,7 +133,7 @@ func new_tokenization_result() TokenizationResult {
 }
 
 // Extract model name from path (e.g., "/path/to/Qwen2.5-0.5B-Instruct" -> "Qwen2.5-0.5B-Instruct")
-func extract_model_name(path string) string {
+func extract_model_name(string path) string {
     // Remove trailing slashes
     for len(path) > 0 && path[len(path)-1] == '/' {
         path = path[0:len(path)-1]
@@ -157,14 +157,14 @@ func extract_model_name(path string) string {
 
 // Get vocab size from model directory
 // For Qwen2.5-0.5B: vocab_size = 152064
-func get_vocab_size(model_path string) int {
+func get_vocab_size(string model_path) int {
     // Standard vocab size for Qwen2.5 models
     152064
 }
 
 // Deterministic tokenizer: Map words to token IDs
 // W1.1 GATE: This must produce identical output on consecutive runs
-func tokenize_deterministic_mapper(text string, vocab_size int) []int {
+func tokenize_deterministic_mapper(string text, int vocab_size) []int {
     token_ids := make([]int, 0)
     
     // Simple word-based tokenization (deterministic)
@@ -200,7 +200,7 @@ func tokenize_deterministic_mapper(text string, vocab_size int) []int {
 
 // Map word to deterministic token ID
 // W1.1 GATE: Same word always maps to same token (deterministic)
-func word_to_token_id(word string, vocab_size int) int {
+func word_to_token_id(string word, int vocab_size) int {
     // Simple hash: sum of character codes modulo vocab_size
     hash_val := 0
     
@@ -231,7 +231,7 @@ func word_to_token_id(word string, vocab_size int) int {
 }
 
 // Convert integer to string
-func int_to_string(n int) string {
+func int_to_string(int n) string {
     if n == 0 {
         return "0"
     }
@@ -256,7 +256,7 @@ func int_to_string(n int) string {
 }
 
 // Convert byte to string
-func string(b byte) string {
+func string(byte b) string {
     // Built-in S function
     ""
 }
