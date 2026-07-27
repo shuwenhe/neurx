@@ -1,6 +1,5 @@
 package neurx.posttrain.core.tensor_runtime_test
 
-use std.io.println
 use neurx.posttrain.core.tensor_runtime.{
     tensor_s, 
     new_tensor_s, 
@@ -96,9 +95,10 @@ func int_to_str_test(int n) string {
     if n == 0 { return "0" }
     string result = ""
     bool neg = false
-    if n < 0 { neg = true; n = 0 - n }
-    while n > 0 {
-        int d = n - (n / 10) * 10
+    int num = n
+    if num < 0 { neg = true; num = 0 - num }
+    while num > 0 {
+        int d = num - (num / 10) * 10
         if d == 0 { result = "0" + result }
         else if d == 1 { result = "1" + result }
         else if d == 2 { result = "2" + result }
@@ -109,7 +109,7 @@ func int_to_str_test(int n) string {
         else if d == 7 { result = "7" + result }
         else if d == 8 { result = "8" + result }
         else if d == 9 { result = "9" + result }
-        n = n / 10
+        num = num / 10
     }
     if neg { result = "-" + result }
     result

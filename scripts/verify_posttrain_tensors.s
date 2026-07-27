@@ -41,39 +41,71 @@ func main() {
     }
     string header = bytes_to_string(file_bytes, 8, header_size)
     println("[1] Reading adapter tensors...")
-    []string tensor_names = []string{
-        "base_model.model.model.layers.0.self_attn.q_proj.lora_A.weight",
-        "base_model.model.model.layers.0.self_attn.q_proj.lora_B.weight",
-        "base_model.model.model.layers.0.self_attn.v_proj.lora_A.weight",
-        "base_model.model.model.layers.0.self_attn.v_proj.lora_B.weight",
-    }
     int found = 0
-    int idx = 0
-    while idx < len(tensor_names) {
-        tensor_sample sample = read_tensor_sample(file_bytes, header, tensor_names[idx])
-        if len(sample.values) == 0 {
-            println("❌ FAIL: missing tensor: " + tensor_names[idx])
-            return
-        }
-        tensor_stats stats = compute_stats(sample.values)
-        println("")
-        println("📊 " + sample.name)
-        println("   Dtype: " + sample.dtype)
-        println("   Mean:  " + float_to_str(stats.mean, 6) + ", Std: " + float_to_str(stats.std, 6))
-        println("   Min:   " + float_to_str(stats.min, 6) + ", Max: " + float_to_str(stats.max, 6))
-        println("   L2:    " + float_to_str(stats.norm, 6))
-        println("   Non-zero: " + int_to_str(stats.nonzero) + "/" + int_to_str(stats.count))
-        if sample.name == "base_model.model.model.layers.0.self_attn.q_proj.lora_B.weight" ||
-           sample.name == "base_model.model.model.layers.0.self_attn.v_proj.lora_B.weight" {
-            if stats.nonzero > 0 {
-                found = found + 1
-            }
-        }
-        idx = idx + 1
+    tensor_sample sample_q_a = read_tensor_sample(file_bytes, header, "base_model.model.model.layers.0.self_attn.q_proj.lora_A.weight")
+    if len(sample_q_a.values) == 0 {
+        println("❌ FAIL: missing tensor: " + sample_q_a.name)
+        return
+    }
+    tensor_stats stats_q_a = compute_stats(sample_q_a.values)
+    println("")
+    println("📊 " + sample_q_a.name)
+    println("   Dtype: " + sample_q_a.dtype)
+    println("   Mean:  " + float_to_str(stats_q_a.mean, 6) + ", Std: " + float_to_str(stats_q_a.std, 6))
+    println("   Min:   " + float_to_str(stats_q_a.min, 6) + ", Max: " + float_to_str(stats_q_a.max, 6))
+    println("   L2:    " + float_to_str(stats_q_a.norm, 6))
+    println("   Non-zero: " + int_to_str(stats_q_a.nonzero) + "/" + int_to_str(stats_q_a.count))
+
+    tensor_sample sample_q_b = read_tensor_sample(file_bytes, header, "base_model.model.model.layers.0.self_attn.q_proj.lora_B.weight")
+    if len(sample_q_b.values) == 0 {
+        println("❌ FAIL: missing tensor: " + sample_q_b.name)
+        return
+    }
+    tensor_stats stats_q_b = compute_stats(sample_q_b.values)
+    println("")
+    println("📊 " + sample_q_b.name)
+    println("   Dtype: " + sample_q_b.dtype)
+    println("   Mean:  " + float_to_str(stats_q_b.mean, 6) + ", Std: " + float_to_str(stats_q_b.std, 6))
+    println("   Min:   " + float_to_str(stats_q_b.min, 6) + ", Max: " + float_to_str(stats_q_b.max, 6))
+    println("   L2:    " + float_to_str(stats_q_b.norm, 6))
+    println("   Non-zero: " + int_to_str(stats_q_b.nonzero) + "/" + int_to_str(stats_q_b.count))
+    if stats_q_b.nonzero > 0 {
+        found = found + 1
+    }
+
+    tensor_sample sample_v_a = read_tensor_sample(file_bytes, header, "base_model.model.model.layers.0.self_attn.v_proj.lora_A.weight")
+    if len(sample_v_a.values) == 0 {
+        println("❌ FAIL: missing tensor: " + sample_v_a.name)
+        return
+    }
+    tensor_stats stats_v_a = compute_stats(sample_v_a.values)
+    println("")
+    println("📊 " + sample_v_a.name)
+    println("   Dtype: " + sample_v_a.dtype)
+    println("   Mean:  " + float_to_str(stats_v_a.mean, 6) + ", Std: " + float_to_str(stats_v_a.std, 6))
+    println("   Min:   " + float_to_str(stats_v_a.min, 6) + ", Max: " + float_to_str(stats_v_a.max, 6))
+    println("   L2:    " + float_to_str(stats_v_a.norm, 6))
+    println("   Non-zero: " + int_to_str(stats_v_a.nonzero) + "/" + int_to_str(stats_v_a.count))
+
+    tensor_sample sample_v_b = read_tensor_sample(file_bytes, header, "base_model.model.model.layers.0.self_attn.v_proj.lora_B.weight")
+    if len(sample_v_b.values) == 0 {
+        println("❌ FAIL: missing tensor: " + sample_v_b.name)
+        return
+    }
+    tensor_stats stats_v_b = compute_stats(sample_v_b.values)
+    println("")
+    println("📊 " + sample_v_b.name)
+    println("   Dtype: " + sample_v_b.dtype)
+    println("   Mean:  " + float_to_str(stats_v_b.mean, 6) + ", Std: " + float_to_str(stats_v_b.std, 6))
+    println("   Min:   " + float_to_str(stats_v_b.min, 6) + ", Max: " + float_to_str(stats_v_b.max, 6))
+    println("   L2:    " + float_to_str(stats_v_b.norm, 6))
+    println("   Non-zero: " + int_to_str(stats_v_b.nonzero) + "/" + int_to_str(stats_v_b.count))
+    if stats_v_b.nonzero > 0 {
+        found = found + 1
     }
     println("")
     println("[3] Gradient Descent Verification (CRITICAL)")
-    println("-" * 60)
+    println("------------------------------------------------------------")
     println("S trainer initializes lora_B to all 0.0")
     println("If current values ≠ 0, gradient descent definitely happened!")
     println("")
@@ -88,7 +120,7 @@ func main() {
     println("============================================================")
     println("VERIFICATION SUMMARY")
     println("============================================================")
-    println("✅ LoRA tensors inspected: " + int_to_str(len(tensor_names)))
+    println("✅ LoRA tensors inspected: 4")
     println("✅ Non-zero B tensors: " + int_to_str(found))
     println("")
     println("CONCLUSION: Training is REAL ✅✅✅")
@@ -99,7 +131,13 @@ func main() {
 func read_tensor_sample([]int file_bytes, string header, string tensor_name) tensor_sample {
     int name_pos = find_substring(header, "\"" + tensor_name + "\":{")
     if name_pos < 0 {
-        return tensor_sample { name: tensor_name, dtype: "", values: []float{}, data_start: 0, data_end: 0 }
+        tensor_sample missing
+        missing.name = tensor_name
+        missing.dtype = ""
+        missing.values = []float{}
+        missing.data_start = 0
+        missing.data_end = 0
+        return missing
     }
     int dtype_pos = find_substring_from(header, "\"dtype\":\"", name_pos)
     int dtype_start = dtype_pos + len("\"dtype\":\"")
@@ -184,7 +222,15 @@ func pow2_int(int exponent) float {
 
 func compute_stats([]float values) tensor_stats {
     if len(values) == 0 {
-        return tensor_stats { mean: 0.0, std: 0.0, min: 0.0, max: 0.0, norm: 0.0, count: 0, nonzero: 0 }
+        tensor_stats empty
+        empty.mean = 0.0
+        empty.std = 0.0
+        empty.min = 0.0
+        empty.max = 0.0
+        empty.norm = 0.0
+        empty.count = 0
+        empty.nonzero = 0
+        return empty
     }
     float sum = 0.0
     float sq = 0.0
@@ -216,15 +262,15 @@ func compute_stats([]float values) tensor_stats {
         i = i + 1
     }
     variance = variance / (len(values) as float)
-    tensor_stats {
-        mean: mean,
-        std: sqrt_approx(variance),
-        min: min_v,
-        max: max_v,
-        norm: sqrt_approx(sq),
-        count: len(values),
-        nonzero: nonzero,
-    }
+    tensor_stats stats
+    stats.mean = mean
+    stats.std = sqrt_approx(variance)
+    stats.min = min_v
+    stats.max = max_v
+    stats.norm = sqrt_approx(sq)
+    stats.count = len(values)
+    stats.nonzero = nonzero
+    return stats
 }
 
 func sqrt_approx(float x) float {

@@ -5,6 +5,8 @@ struct tensor {
     string dtype
     []int shape
     []float data
+    int shape_count
+    int data_count
 }
 
 struct tensor_buffer {

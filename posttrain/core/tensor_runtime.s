@@ -1,7 +1,5 @@
 package neurx.posttrain.core.tensor_runtime
 
-use std.io.println
-
 struct tensor_s {
     []float data
     []int shape

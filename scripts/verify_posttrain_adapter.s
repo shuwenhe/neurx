@@ -75,9 +75,9 @@ func main() {
     println("adapter L1 norm: " + float_to_str(adapter_l1, 6))
     if runtime_file_exists(merged_file) {
         string base_model_file = base_dir
-        if runtime_file_exists(base_dir + "/model.safetensors") {
-            base_model_file = base_dir + "/model.safetensors"
-        }
+    if runtime_file_exists(base_dir + "/model.safetensors") {
+        base_model_file = base_dir + "/model.safetensors"
+    }
         string diff_text = trim(runtime_run_command_output("cmp -bl " + shell_escape(base_model_file) + " " + shell_escape(merged_file) + " 2>/dev/null | wc -l"))
         if diff_text == "" {
             diff_text = "0"
@@ -106,7 +106,7 @@ func extract_json_number_field(string json_text, string field_name, string fallb
     bool started = false
     while pos < len(json_text) {
         int ch = json_text[pos]
-        if (ch >= 48 && ch <= 57) || ch == 45 || ch == 43 || ch == 46 || ch == 101 || ch == 69 {
+        if is_number_token_char(ch) {
             token = token + string_char(ch)
             started = true
         } else if started {
@@ -144,7 +144,7 @@ func extract_json_array_values(string json_text, string field_name) []float {
             }
             break
         }
-        if (ch >= 48 && ch <= 57) || ch == 45 || ch == 43 || ch == 46 || ch == 101 || ch == 69 {
+        if is_number_token_char(ch) {
             token = token + string_char(ch)
         } else {
             if token != "" {
@@ -231,6 +231,10 @@ func parse_float(string s, float fallback) float {
         }
     }
     result * (sign as float)
+}
+
+func is_number_token_char(int ch) bool {
+    ch >= 48 && ch <= 57 || ch == 45 || ch == 43 || ch == 46 || ch == 101 || ch == 69
 }
 
 func find_substring(string text, string pattern) int {

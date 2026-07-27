@@ -334,17 +334,17 @@ test-checkpoint-resume: check-bash
 build-posttrain-sft-s:
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_sft'
 	@cd '$(CURDIR_UNIX)' && \
-		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/real_lora_sft.ir'; \
-		"$(POSTTRAIN_S_COMPILER)" 'scripts/real_lora_sft.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/real_lora_sft.ir' 2>&1 && \
-		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/real_lora_sft.ir'
+		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir'; \
+		"$(POSTTRAIN_S_COMPILER)" 'scripts/posttrain_lora_train.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' 2>&1 && \
+		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir'
 
 build-posttrain-verify-adapter-s: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_adapter'
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_adapter/verify_posttrain_adapter.ir'; \
-		"$(S_COMPILER)" ir 'scripts/verify_posttrain_adapter.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_adapter/verify_posttrain_adapter.ir' 2>&1 || true; \
+		"$(POSTTRAIN_S_COMPILER)" ir 'scripts/verify_posttrain_adapter.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_adapter/verify_posttrain_adapter.ir' 2>&1 || true; \
 		if [ ! -f '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_adapter/verify_posttrain_adapter.ir' ]; then \
-			"$(S_COMPILER)" 'scripts/verify_posttrain_adapter.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_adapter/verify_posttrain_adapter.ir' 2>&1 || exit 1; \
+			"$(POSTTRAIN_S_COMPILER)" 'scripts/verify_posttrain_adapter.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_adapter/verify_posttrain_adapter.ir' 2>&1 || exit 1; \
 		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_adapter/verify_posttrain_adapter.ir'
 
@@ -352,9 +352,9 @@ build-posttrain-verify-tensors-s: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_tensors'
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_tensors/verify_posttrain_tensors.ir'; \
-		"$(S_COMPILER)" ir 'scripts/verify_posttrain_tensors.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_tensors/verify_posttrain_tensors.ir' 2>&1 || true; \
+		"$(POSTTRAIN_S_COMPILER)" ir 'scripts/verify_posttrain_tensors.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_tensors/verify_posttrain_tensors.ir' 2>&1 || true; \
 		if [ ! -f '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_tensors/verify_posttrain_tensors.ir' ]; then \
-			"$(S_COMPILER)" 'scripts/verify_posttrain_tensors.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_tensors/verify_posttrain_tensors.ir' 2>&1 || exit 1; \
+			"$(POSTTRAIN_S_COMPILER)" 'scripts/verify_posttrain_tensors.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_tensors/verify_posttrain_tensors.ir' 2>&1 || exit 1; \
 		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_tensors/verify_posttrain_tensors.ir'
 
@@ -362,9 +362,9 @@ build-posttrain-golden-s: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_golden'
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir'; \
-		"$(S_COMPILER)" ir 'scripts/posttrain_golden.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir' 2>&1 || true; \
+		"$(POSTTRAIN_S_COMPILER)" ir 'scripts/posttrain_golden.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir' 2>&1 || true; \
 		if [ ! -f '$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir' ]; then \
-			"$(S_COMPILER)" 'scripts/posttrain_golden.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir' 2>&1 || exit 1; \
+			"$(POSTTRAIN_S_COMPILER)" 'scripts/posttrain_golden.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir' 2>&1 || exit 1; \
 		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir'
 
@@ -376,7 +376,7 @@ posttrain: check-bash build-s-ir-runner build-lora-merge build-posttrain-sft-s
 		NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)' \
 		NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)' \
 		NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_ADAPTER_DIR)' \
-		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_sft/real_lora_sft.ir' \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' \
 		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_real_$(shell date +%Y%m%d_%H%M%S).log'
 	@echo "[✓] LoRA training completed"
 	@echo "Adapter saved to: $(POSTTRAIN_ADAPTER_DIR)"
@@ -994,17 +994,25 @@ build-pretrain-manifest-s: check-bash
 	@echo "Building pretrain manifest entry..."
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest'
 	@mkdir -p '$(LOG_DIR)'
+	@mkdir -p '$(PRETRAIN_DATA_ROOT)'
+	@cd '$(CURDIR_UNIX)' && \
+		if [ -d '$(PRETRAIN_SHARD_DIR)' ]; then \
+			find '$(PRETRAIN_SHARD_DIR)' -maxdepth 1 -type f -name 'shard_*.jsonl' -print | sort > '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/shard_list.txt'; \
+		else \
+			: > '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/shard_list.txt'; \
+		fi
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir'; \
-		"$(S_COMPILER)" ir 'scripts/build_pretrain_manifest.s' -o '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' 2>&1 || true; \
+		"$(S_SEED_COMPILER)" ir 'scripts/build_pretrain_manifest.s' -o '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' 2>&1 || true; \
 		if [ ! -f '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' ]; then \
-			"$(S_COMPILER)" 'scripts/build_pretrain_manifest.s' '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' 2>&1 || exit 1; \
+			"$(S_SEED_COMPILER)" 'scripts/build_pretrain_manifest.s' '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' 2>&1 || exit 1; \
 		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir'
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		NEURX_PRETRAIN_SHARD_DIR="$${NEURX_PRETRAIN_SHARD_DIR:-$(PRETRAIN_SHARD_DIR)}" \
 		NEURX_PRETRAIN_MANIFEST="$${NEURX_PRETRAIN_MANIFEST:-$(PRETRAIN_MANIFEST)}" \
+		NEURX_PRETRAIN_SHARD_LIST_FILE='$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/shard_list.txt' \
 		NEURX_PRETRAIN_REBUILD_MANIFEST="$${NEURX_PRETRAIN_REBUILD_MANIFEST:-$(NEURX_SHARD_FORCE_REBUILD)}" \
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' \
 		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/build_pretrain_manifest_$(shell date +%Y%m%d_%H%M%S).log'

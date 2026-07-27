@@ -97,23 +97,37 @@ func generate_golden(string golden_dir, string model_dir, string data_file, int 
 }
 
 func verify_golden(string golden_dir) {
-    []string files = []string{
-        golden_dir + "/dataset.json",
-        golden_dir + "/prompts.json",
-        golden_dir + "/tokenizer.json",
-        golden_dir + "/baseline_metrics.json",
-        golden_dir + "/baseline_outputs.json",
-        golden_dir + "/expected_shapes.json",
-        golden_dir + "/metadata.json",
-        golden_dir + "/README.md",
+    if !runtime_file_exists(golden_dir + "/dataset.json") {
+        println("error: missing golden file: " + golden_dir + "/dataset.json")
+        return
     }
-    int i = 0
-    while i < len(files) {
-        if !runtime_file_exists(files[i]) {
-            println("error: missing golden file: " + files[i])
-            return
-        }
-        i = i + 1
+    if !runtime_file_exists(golden_dir + "/prompts.json") {
+        println("error: missing golden file: " + golden_dir + "/prompts.json")
+        return
+    }
+    if !runtime_file_exists(golden_dir + "/tokenizer.json") {
+        println("error: missing golden file: " + golden_dir + "/tokenizer.json")
+        return
+    }
+    if !runtime_file_exists(golden_dir + "/baseline_metrics.json") {
+        println("error: missing golden file: " + golden_dir + "/baseline_metrics.json")
+        return
+    }
+    if !runtime_file_exists(golden_dir + "/baseline_outputs.json") {
+        println("error: missing golden file: " + golden_dir + "/baseline_outputs.json")
+        return
+    }
+    if !runtime_file_exists(golden_dir + "/expected_shapes.json") {
+        println("error: missing golden file: " + golden_dir + "/expected_shapes.json")
+        return
+    }
+    if !runtime_file_exists(golden_dir + "/metadata.json") {
+        println("error: missing golden file: " + golden_dir + "/metadata.json")
+        return
+    }
+    if !runtime_file_exists(golden_dir + "/README.md") {
+        println("error: missing golden file: " + golden_dir + "/README.md")
+        return
     }
     string metadata = runtime_read_text_file(golden_dir + "/metadata.json")
     if metadata == "" || find_substring(metadata, "\"golden_schema_version\": 1") < 0 {
@@ -223,7 +237,7 @@ func extract_json_int_field(string json_text, string field_name, int fallback) i
     bool started = false
     while pos < len(json_text) {
         int ch = json_text[pos]
-        if (ch >= 48 && ch <= 57) || ch == 45 {
+        if ch == 45 || ch >= 48 && ch <= 57 {
             token = token + string_char(ch)
             started = true
         } else if started {
@@ -340,77 +354,6 @@ func json_escape(string s) string {
     }
     out = out + "\""
     out
-}
-
-func extract_json_string_field(string json_text, string field_name) string {
-    string needle = "\"" + field_name + "\""
-    int pos = find_substring(json_text, needle)
-    if pos < 0 {
-        return ""
-    }
-    pos = pos + len(needle)
-    while pos < len(json_text) && (json_text[pos] == 32 || json_text[pos] == 9 || json_text[pos] == 10 || json_text[pos] == 13 || json_text[pos] == 58) {
-        pos = pos + 1
-    }
-    if pos >= len(json_text) || json_text[pos] != 34 {
-        return ""
-    }
-    pos = pos + 1
-    string out = ""
-    while pos < len(json_text) {
-        int ch = json_text[pos]
-        if ch == 34 {
-            break
-        }
-        if ch == 92 && pos + 1 < len(json_text) {
-            int next = json_text[pos + 1]
-            if next == 34 {
-                out = out + "\""
-            } else if next == 92 {
-                out = out + "\\"
-            } else if next == 110 {
-                out = out + "\n"
-            } else if next == 116 {
-                out = out + "\t"
-            } else {
-                out = out + string_char(ch)
-                pos = pos + 1
-            }
-            pos = pos + 2
-            continue
-        }
-        out = out + string_char(ch)
-        pos = pos + 1
-    }
-    out
-}
-
-func extract_json_int_field(string json_text, string field_name, int fallback) int {
-    string needle = "\"" + field_name + "\""
-    int pos = find_substring(json_text, needle)
-    if pos < 0 {
-        return fallback
-    }
-    pos = pos + len(needle)
-    while pos < len(json_text) && (json_text[pos] == 32 || json_text[pos] == 9 || json_text[pos] == 10 || json_text[pos] == 13 || json_text[pos] == 58) {
-        pos = pos + 1
-    }
-    string token = ""
-    bool started = false
-    while pos < len(json_text) {
-        int ch = json_text[pos]
-        if (ch >= 48 && ch <= 57) || ch == 45 {
-            token = token + string_char(ch)
-            started = true
-        } else if started {
-            break
-        }
-        pos = pos + 1
-    }
-    if token == "" {
-        return fallback
-    }
-    parse_int(token, fallback)
 }
 
 func find_substring_from(string text, string pattern, int start) int {
