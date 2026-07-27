@@ -238,9 +238,6 @@ func int_to_str(int n) string {
     result
 }
 
-// ============================================================================
-// ENHANCED OPERATIONS (W1 IMPLEMENTATION PHASE 2)
-// ============================================================================
 
 func tensor_copy_s(tensor_s t) tensor_s {
     []float new_data = make([]float, len(t.data))

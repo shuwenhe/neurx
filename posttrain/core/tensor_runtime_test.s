@@ -13,9 +13,6 @@ use neurx.posttrain.core.tensor_runtime.{
     tensor_to_string_s
 }
 
-// ============================================================================
-// TEST FRAMEWORK
-// ============================================================================
 
 struct test_result_s {
     string test_name
@@ -118,9 +115,6 @@ func int_to_str_test(int n) string {
     result
 }
 
-// ============================================================================
-// CREATION TESTS (10 tests)
-// ============================================================================
 
 func test_new_tensor_1d_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 5)
@@ -269,9 +263,6 @@ func test_tensor_large_1d_s(test_suite_s suite) test_suite_s {
                       if passed { "" } else { "large 1D tensor failed" })
 }
 
-// ============================================================================
-// STRIDES TESTS (15 tests)
-// ============================================================================
 
 func test_compute_strides_1d_s(test_suite_s suite) test_suite_s {
     []int shape = make([]int, 1)
@@ -419,8 +410,6 @@ func test_flat_index_3d_s(test_suite_s suite) test_suite_s {
     
     int flat = tensor_get_flat_index_s(t, idx)
     
-    // For shape [2, 3, 4], strides are [12, 4, 1]
-    // Index [1, 2, 3] = 1*12 + 2*4 + 3*1 = 12 + 8 + 3 = 23
     bool passed = assert_equal_int_s(flat, 23)
     
     add_test_result_s(suite, "test_flat_index_3d_s", passed,
@@ -434,7 +423,6 @@ func test_strides_row_major_s(test_suite_s suite) test_suite_s {
     
     []int strides = compute_strides_s(shape)
     
-    // Row-major: strides should be [5, 1]
     bool passed = assert_equal_int_s(strides[0], 5) &&
                   assert_equal_int_s(strides[1], 1)
     
@@ -450,17 +438,13 @@ func test_strides_consistency_s(test_suite_s suite) test_suite_s {
     
     []int strides = compute_strides_s(shape)
     
-    // strides[i] should equal product of all dimensions after i
-    bool dim0_ok = assert_equal_int_s(strides[0], 12)  // 3 * 4
-    bool dim1_ok = assert_equal_int_s(strides[1], 4)   // 4
+    bool dim0_ok = assert_equal_int_s(strides[0], 12)
+    bool dim1_ok = assert_equal_int_s(strides[1], 4)
     
     add_test_result_s(suite, "test_strides_consistency_s", dim0_ok && dim1_ok,
                       if dim0_ok && dim1_ok { "" } else { "strides consistency failed" })
 }
 
-// ============================================================================
-// RESHAPE TESTS (12 tests)
-// ============================================================================
 
 func test_reshape_1d_to_2d_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 6)
@@ -582,11 +566,10 @@ func test_reshape_invalid_total_s(test_suite_s suite) test_suite_s {
     tensor_s t1 = new_tensor_s(data, shape)
     
     []int bad_shape = make([]int, 1)
-    bad_shape[0] = 5  // Mismatch: 5 != 6
+    bad_shape[0] = 5
     
     tensor_s t2 = tensor_reshape_s(t1, bad_shape)
     
-    // Should return original tensor on error
     bool passed = assert_equal_int_s(t2.shape[0], 6)
     
     add_test_result_s(suite, "test_reshape_invalid_total_s", passed,
@@ -672,9 +655,6 @@ func test_reshape_complex_s(test_suite_s suite) test_suite_s {
                       if passed { "" } else { "complex reshape failed" })
 }
 
-// ============================================================================
-// TRANSPOSE TESTS (8 tests)
-// ============================================================================
 
 func test_transpose_2d_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 6)
@@ -799,9 +779,6 @@ func test_transpose_preserves_data_s(test_suite_s suite) test_suite_s {
                       if passed { "" } else { "transpose should keep data" })
 }
 
-// ============================================================================
-// SLICE TESTS (12 tests)
-// ============================================================================
 
 func test_slice_basic_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 10)
@@ -923,7 +900,6 @@ func test_slice_invalid_negative_start_s(test_suite_s suite) test_suite_s {
     tensor_s t1 = new_tensor_s(data, shape)
     tensor_s t2 = tensor_slice_s(t1, -1, 5)
     
-    // Should return original tensor on error
     bool passed = assert_equal_int_s(t2.total_elements, 10)
     
     add_test_result_s(suite, "test_slice_invalid_negative_start_s", passed,
@@ -944,7 +920,6 @@ func test_slice_invalid_out_of_bounds_s(test_suite_s suite) test_suite_s {
     tensor_s t1 = new_tensor_s(data, shape)
     tensor_s t2 = tensor_slice_s(t1, 0, 15)
     
-    // Should return original tensor on error
     bool passed = assert_equal_int_s(t2.total_elements, 10)
     
     add_test_result_s(suite, "test_slice_invalid_out_of_bounds_s", passed,
@@ -965,16 +940,12 @@ func test_slice_invalid_inverted_s(test_suite_s suite) test_suite_s {
     tensor_s t1 = new_tensor_s(data, shape)
     tensor_s t2 = tensor_slice_s(t1, 5, 3)
     
-    // Should return original tensor on error
     bool passed = assert_equal_int_s(t2.total_elements, 10)
     
     add_test_result_s(suite, "test_slice_invalid_inverted_s", passed,
                       if passed { "" } else { "slice should reject inverted range" })
 }
 
-// ============================================================================
-// CONCATENATION TESTS (10 tests)
-// ============================================================================
 
 func test_cat_1d_basic_s(test_suite_s suite) test_suite_s {
     []float data1 = make([]float, 3)
@@ -1094,9 +1065,6 @@ func test_cat_preserves_dtype_s(test_suite_s suite) test_suite_s {
                       if passed { "" } else { "cat should preserve dtype" })
 }
 
-// ============================================================================
-// METADATA TESTS (6 tests)
-// ============================================================================
 
 func test_to_string_1d_s(test_suite_s suite) test_suite_s {
     []float data = make([]float, 5)
@@ -1151,14 +1119,10 @@ func test_rank_calculation_s(test_suite_s suite) test_suite_s {
                       if passed { "" } else { "rank calculation failed" })
 }
 
-// ============================================================================
-// MAIN TEST RUNNER
-// ============================================================================
 
 func run_all_tests_s() {
     test_suite_s suite = new_test_suite_s()
     
-    // Creation Tests (10)
     suite = test_new_tensor_1d_s(suite)
     suite = test_new_tensor_2d_s(suite)
     suite = test_new_tensor_3d_s(suite)
@@ -1168,7 +1132,6 @@ func run_all_tests_s() {
     suite = test_tensor_device_default_s(suite)
     suite = test_tensor_large_1d_s(suite)
     
-    // Strides Tests (15)
     suite = test_compute_strides_1d_s(suite)
     suite = test_compute_strides_2d_s(suite)
     suite = test_compute_strides_3d_s(suite)
@@ -1180,7 +1143,6 @@ func run_all_tests_s() {
     suite = test_strides_row_major_s(suite)
     suite = test_strides_consistency_s(suite)
     
-    // Reshape Tests (12)
     suite = test_reshape_1d_to_2d_s(suite)
     suite = test_reshape_2d_to_1d_s(suite)
     suite = test_reshape_2d_to_3d_s(suite)
@@ -1190,7 +1152,6 @@ func run_all_tests_s() {
     suite = test_reshape_to_single_element_s(suite)
     suite = test_reshape_complex_s(suite)
     
-    // Transpose Tests (8)
     suite = test_transpose_2d_s(suite)
     suite = test_transpose_square_s(suite)
     suite = test_transpose_1xn_s(suite)
@@ -1198,7 +1159,6 @@ func run_all_tests_s() {
     suite = test_transpose_preserves_total_s(suite)
     suite = test_transpose_preserves_data_s(suite)
     
-    // Slice Tests (12)
     suite = test_slice_basic_s(suite)
     suite = test_slice_from_start_s(suite)
     suite = test_slice_to_end_s(suite)
@@ -1208,14 +1168,12 @@ func run_all_tests_s() {
     suite = test_slice_invalid_out_of_bounds_s(suite)
     suite = test_slice_invalid_inverted_s(suite)
     
-    // Concatenation Tests (10)
     suite = test_cat_1d_basic_s(suite)
     suite = test_cat_dtype_mismatch_s(suite)
     suite = test_cat_2d_dim0_s(suite)
     suite = test_cat_2d_dim1_s(suite)
     suite = test_cat_preserves_dtype_s(suite)
     
-    // Metadata Tests (6)
     suite = test_to_string_1d_s(suite)
     suite = test_to_string_2d_s(suite)
     suite = test_rank_calculation_s(suite)

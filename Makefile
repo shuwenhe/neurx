@@ -119,7 +119,10 @@ POSTTRAIN_MERGED_MODEL_DIR ?= $(POSTTRAIN_OUTPUT_DIR)
 POSTTRAIN_LORA_ALPHA ?= 16
 POSTTRAIN_LORA_RANK ?= 8
 POSTTRAIN_GOLDEN_DIR ?= /home/shuwen/shuwen/posttrain/golden
-POSTTRAIN_GOLDEN_SCRIPT ?= $(CURDIR_UNIX)/scripts/posttrain_golden.py
+POSTTRAIN_GOLDEN_SOURCE ?= $(CURDIR_UNIX)/scripts/posttrain_golden.s
+POSTTRAIN_VERIFY_TENSORS_SOURCE ?= $(CURDIR_UNIX)/scripts/verify_posttrain_tensors.s
+POSTTRAIN_VERIFY_ADAPTER_SOURCE ?= $(CURDIR_UNIX)/scripts/verify_posttrain_adapter.s
+POSTTRAIN_PRETRAIN_MANIFEST_SOURCE ?= $(CURDIR_UNIX)/scripts/build_pretrain_manifest.s
 POSTTRAIN_GOLDEN_DATASET_LIMIT ?= 12
 
 
@@ -335,6 +338,36 @@ build-posttrain-sft-s:
 		"$(POSTTRAIN_S_COMPILER)" 'scripts/real_lora_sft.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/real_lora_sft.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/real_lora_sft.ir'
 
+build-posttrain-verify-adapter-s: check-bash
+	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_adapter'
+	@cd '$(CURDIR_UNIX)' && \
+		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_adapter/verify_posttrain_adapter.ir'; \
+		"$(S_COMPILER)" ir 'scripts/verify_posttrain_adapter.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_adapter/verify_posttrain_adapter.ir' 2>&1 || true; \
+		if [ ! -f '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_adapter/verify_posttrain_adapter.ir' ]; then \
+			"$(S_COMPILER)" 'scripts/verify_posttrain_adapter.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_adapter/verify_posttrain_adapter.ir' 2>&1 || exit 1; \
+		fi && \
+		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_adapter/verify_posttrain_adapter.ir'
+
+build-posttrain-verify-tensors-s: check-bash
+	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_tensors'
+	@cd '$(CURDIR_UNIX)' && \
+		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_tensors/verify_posttrain_tensors.ir'; \
+		"$(S_COMPILER)" ir 'scripts/verify_posttrain_tensors.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_tensors/verify_posttrain_tensors.ir' 2>&1 || true; \
+		if [ ! -f '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_tensors/verify_posttrain_tensors.ir' ]; then \
+			"$(S_COMPILER)" 'scripts/verify_posttrain_tensors.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_tensors/verify_posttrain_tensors.ir' 2>&1 || exit 1; \
+		fi && \
+		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_tensors/verify_posttrain_tensors.ir'
+
+build-posttrain-golden-s: check-bash
+	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_golden'
+	@cd '$(CURDIR_UNIX)' && \
+		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir'; \
+		"$(S_COMPILER)" ir 'scripts/posttrain_golden.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir' 2>&1 || true; \
+		if [ ! -f '$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir' ]; then \
+			"$(S_COMPILER)" 'scripts/posttrain_golden.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir' 2>&1 || exit 1; \
+		fi && \
+		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir'
+
 posttrain: check-bash build-s-ir-runner build-lora-merge build-posttrain-sft-s
 	@echo "Starting real Qwen LoRA/SFT post-training..."
 	@mkdir -p '$(POSTTRAIN_ADAPTER_DIR)' '$(POSTTRAIN_OUTPUT_DIR)' '$(LOG_DIR)'
@@ -357,15 +390,17 @@ posttrain: check-bash build-s-ir-runner build-lora-merge build-posttrain-sft-s
 					'$(POSTTRAIN_OUTPUT_DIR)' \
 					'$(POSTTRAIN_LORA_ALPHA)' \
 					'$(POSTTRAIN_LORA_RANK)' 2>&1; \
-				python3 '$(CURDIR_UNIX)/scripts/verify_posttrain_adapter.py' \
-					'$(POSTTRAIN_MODEL_PATH)' \
-					'$(POSTTRAIN_ADAPTER_DIR)' \
-					'$(POSTTRAIN_OUTPUT_DIR)' || exit 1; \
+				$(MAKE) build-posttrain-verify-adapter-s >/dev/null; \
+				NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)' \
+				NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_ADAPTER_DIR)' \
+				NEURX_MERGED_MODEL_DIR='$(POSTTRAIN_OUTPUT_DIR)' \
+				S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_verify_adapter/verify_posttrain_adapter.ir' \
+				'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_verify_adapter_$(shell date +%Y%m%d_%H%M%S).log' || exit 1; \
 			else \
 				echo "[⚠] Merge tool not available - copying base model"; \
 				cp -r '$(POSTTRAIN_MODEL_PATH)'/* '$(POSTTRAIN_OUTPUT_DIR)/' 2>/dev/null || true; \
 			fi \
-		else \
+	else \
 		echo "[ℹ] S runtime simulated training detected - copying base model..."; \
 		mkdir -p '$(POSTTRAIN_OUTPUT_DIR)'; \
 		cp -r '$(POSTTRAIN_MODEL_PATH)'/* '$(POSTTRAIN_OUTPUT_DIR)/' 2>/dev/null || true; \
@@ -373,27 +408,45 @@ posttrain: check-bash build-s-ir-runner build-lora-merge build-posttrain-sft-s
 	@echo "Post-trained model ready at: $(POSTTRAIN_OUTPUT_DIR)"
 
 verify-posttrain:
+	@mkdir -p '$(LOG_DIR)'
+	@$(MAKE) build-posttrain-verify-tensors-s
 	@echo "Verifying post-training output with tensor-level analysis..."
-	@python3 scripts/verify_posttrain_tensors.py
+	@cd '$(CURDIR_UNIX)' && \
+		set -o pipefail; \
+		NEURX_POSTTRAIN_ADAPTER_FILE='$(POSTTRAIN_ADAPTER_DIR)/adapter_model.safetensors' \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_verify_tensors/verify_posttrain_tensors.ir' \
+		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_verify_tensors_$(shell date +%Y%m%d_%H%M%S).log'
 	@echo ""
 	@echo "Verification complete!"
 
 test-golden:
+	@mkdir -p '$(LOG_DIR)'
+	@$(MAKE) build-posttrain-golden-s
 	@echo "Verifying Phase 2 Module 0 golden snapshot..."
-	@python3 '$(POSTTRAIN_GOLDEN_SCRIPT)' verify \
-		--golden-dir '$(POSTTRAIN_GOLDEN_DIR)' \
-		--model-dir '$(POSTTRAIN_MODEL_PATH)' \
-		--dataset-file '$(POSTTRAIN_DATA_FILE)' \
-		--dataset-limit '$(POSTTRAIN_GOLDEN_DATASET_LIMIT)'
+	@cd '$(CURDIR_UNIX)' && \
+		set -o pipefail; \
+		NEURX_POSTTRAIN_GOLDEN_MODE=verify \
+		NEURX_POSTTRAIN_GOLDEN_DIR='$(POSTTRAIN_GOLDEN_DIR)' \
+		NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)' \
+		NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)' \
+		NEURX_POSTTRAIN_GOLDEN_DATASET_LIMIT='$(POSTTRAIN_GOLDEN_DATASET_LIMIT)' \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir' \
+		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_golden_verify_$(shell date +%Y%m%d_%H%M%S).log'
 	@echo "Golden snapshot verification complete!"
 
 regenerate-golden:
+	@mkdir -p '$(LOG_DIR)'
+	@$(MAKE) build-posttrain-golden-s
 	@echo "Regenerating Phase 2 Module 0 golden snapshot..."
-	@python3 '$(POSTTRAIN_GOLDEN_SCRIPT)' generate \
-		--golden-dir '$(POSTTRAIN_GOLDEN_DIR)' \
-		--model-dir '$(POSTTRAIN_MODEL_PATH)' \
-		--dataset-file '$(POSTTRAIN_DATA_FILE)' \
-		--dataset-limit '$(POSTTRAIN_GOLDEN_DATASET_LIMIT)'
+	@cd '$(CURDIR_UNIX)' && \
+		set -o pipefail; \
+		NEURX_POSTTRAIN_GOLDEN_MODE=generate \
+		NEURX_POSTTRAIN_GOLDEN_DIR='$(POSTTRAIN_GOLDEN_DIR)' \
+		NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)' \
+		NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)' \
+		NEURX_POSTTRAIN_GOLDEN_DATASET_LIMIT='$(POSTTRAIN_GOLDEN_DATASET_LIMIT)' \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir' \
+		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_golden_generate_$(shell date +%Y%m%d_%H%M%S).log'
 	@$(MAKE) test-golden
 
 build-posttrain-eval-s:
@@ -939,10 +992,22 @@ run-large-pretrain-s: check-bash
 
 build-pretrain-manifest-s: check-bash
 	@echo "Building pretrain manifest entry..."
-	@mkdir -p $(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest
+	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest'
+	@mkdir -p '$(LOG_DIR)'
 	@cd '$(CURDIR_UNIX)' && \
-		python3 scripts/build_pretrain_manifest.py && \
-		test -f '$(PRETRAIN_MANIFEST)'
+		rm -f '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir'; \
+		"$(S_COMPILER)" ir 'scripts/build_pretrain_manifest.s' -o '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' 2>&1 || true; \
+		if [ ! -f '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' ]; then \
+			"$(S_COMPILER)" 'scripts/build_pretrain_manifest.s' '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' 2>&1 || exit 1; \
+		fi && \
+		test -f '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir'
+	@cd '$(CURDIR_UNIX)' && \
+		NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_PRETRAIN_SHARD_DIR="$${NEURX_PRETRAIN_SHARD_DIR:-$(PRETRAIN_SHARD_DIR)}" \
+		NEURX_PRETRAIN_MANIFEST="$${NEURX_PRETRAIN_MANIFEST:-$(PRETRAIN_MANIFEST)}" \
+		NEURX_PRETRAIN_REBUILD_MANIFEST="$${NEURX_PRETRAIN_REBUILD_MANIFEST:-$(NEURX_SHARD_FORCE_REBUILD)}" \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' \
+		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/build_pretrain_manifest_$(shell date +%Y%m%d_%H%M%S).log'
 
 run-train-compiled-s: check-bash
 	@echo "Building compiled train status entry..."
