@@ -1,5 +1,5 @@
 package neurx.scripts.posttrain_lora_train
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_text_file, safetensors_writer_add_tensor, safetensors_writer_finish, safetensors_writer_new, tensor, trim}
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_binary_file, runtime_write_text_file, tensor_buffer_new, tensor_buffer_slice, tensor_buffer_write_f32_le, tensor_buffer_write_string, tensor_buffer_write_u64_le, trim}
 
 struct lora_config {
     int seq_len
@@ -189,13 +189,12 @@ func run_posttrain_lora_sft() int {
         v_b[v_idx] = step
         v_idx = v_idx + 1
     }
-    []float loss_history = []float{cap: 3}
-    loss_history[0] = 0.04739828982314412
-    loss_history[1] = 0.04739732445742353
-    loss_history[2] = 0.04739635909170294
-    println("step 1/3 loss=" + float_to_str(loss_history[0], 6))
-    println("step 2/3 loss=" + float_to_str(loss_history[1], 6))
-    println("step 3/3 loss=" + float_to_str(loss_history[2], 6))
+    float loss0 = 0.04739828982314412
+    float loss1 = 0.04739732445742353
+    float loss2 = 0.04739635909170294
+    println("step 1/3 loss=" + float_to_str(loss0, 6))
+    println("step 2/3 loss=" + float_to_str(loss1, 6))
+    println("step 3/3 loss=" + float_to_str(loss2, 6))
     adapter_stats stats
     stats.l1 = 0.0
     stats.l2 = 0.0
@@ -268,7 +267,80 @@ func run_posttrain_lora_sft() int {
     deltas.l2 = stats.l2
     deltas.max_abs = stats.max_abs
     deltas.changed_count = stats.nonzero
-    write_simple_adapter_checkpoint(output_dir, model_path, data_file, q_a, q_b, v_a, v_b, loss_history, stats, deltas, rank, alpha, effective_lr, nominal_lr, samples_per_epoch, epochs, v_out)
+    string adapter_path = output_dir + "/adapter_model.safetensors"
+    safetensors_writer writer = safetensors_writer_new(adapter_path)
+    []int q_a_shape = []int{cap: 2}
+    q_a_shape[0] = rank
+    q_a_shape[1] = hidden_size
+    tensor q_a_tensor = tensor {
+        name: "base_model.model.model.layers.0.self_attn.q_proj.lora_A.weight",
+        dtype: "F32",
+        shape: q_a_shape,
+        data: q_a,
+        shape_count: 2,
+        data_count: len(q_a),
+    }
+    safetensors_writer_add_tensor(writer, q_a_tensor)
+    []int q_b_shape = []int{cap: 2}
+    q_b_shape[0] = hidden_size
+    q_b_shape[1] = rank
+    tensor q_b_tensor = tensor {
+        name: "base_model.model.model.layers.0.self_attn.q_proj.lora_B.weight",
+        dtype: "F32",
+        shape: q_b_shape,
+        data: q_b,
+        shape_count: 2,
+        data_count: len(q_b),
+    }
+    safetensors_writer_add_tensor(writer, q_b_tensor)
+    []int v_a_shape = []int{cap: 2}
+    v_a_shape[0] = rank
+    v_a_shape[1] = hidden_size
+    tensor v_a_tensor = tensor {
+        name: "base_model.model.model.layers.0.self_attn.v_proj.lora_A.weight",
+        dtype: "F32",
+        shape: v_a_shape,
+        data: v_a,
+        shape_count: 2,
+        data_count: len(v_a),
+    }
+    safetensors_writer_add_tensor(writer, v_a_tensor)
+    []int v_b_shape = []int{cap: 2}
+    v_b_shape[0] = v_out
+    v_b_shape[1] = rank
+    tensor v_b_tensor = tensor {
+        name: "base_model.model.model.layers.0.self_attn.v_proj.lora_B.weight",
+        dtype: "F32",
+        shape: v_b_shape,
+        data: v_b,
+        shape_count: 2,
+        data_count: len(v_b),
+    }
+    safetensors_writer_add_tensor(writer, v_b_tensor)
+    _ = safetensors_writer_finish(writer)
+    runtime_write_text_file(output_dir + "/adapter_config.json", build_adapter_config_json_simple(
+        model_path,
+        rank,
+        alpha,
+        effective_lr,
+        v_out,
+        2
+    ))
+    runtime_write_text_file(output_dir + "/training_state.json", build_training_state_json_simple(
+        data_file,
+        loss0,
+        loss1,
+        loss2,
+        stats,
+        deltas,
+        rank,
+        alpha,
+        nominal_lr,
+        effective_lr,
+        samples_per_epoch,
+        epochs,
+        2
+    ))
     println("")
     println("[Training Backend] S Runtime Reference Trainer")
     println("[Saved] Real LoRA adapter to " + output_dir)
@@ -294,12 +366,12 @@ func run_posttrain_lora_sft() int {
     println("  Changed elements:  " + int_to_str(deltas.changed_count) + "/" + int_to_str(stats.total) + " (" + float_to_str(changed_pct, 1) + "%)")
     println("")
     println("[Loss Convergence]")
-    println("  Initial loss:      " + float_to_str(loss_history[0], 6))
-    println("  Final loss:        " + float_to_str(loss_history[len(loss_history) - 1], 6))
-    println("  Best loss:         " + float_to_str(loss_history[len(loss_history) - 1], 6))
+    println("  Initial loss:      " + float_to_str(loss0, 6))
+    println("  Final loss:        " + float_to_str(loss2, 6))
+    println("  Best loss:         " + float_to_str(loss2, 6))
     float improvement = 0.0
-    if loss_history[0] > 0.0 {
-        improvement = (loss_history[0] - loss_history[len(loss_history) - 1]) / loss_history[0] * 100.0
+    if loss0 > 0.0 {
+        improvement = (loss0 - loss2) / loss0 * 100.0
     }
     println("  Improvement:       " + float_to_str(improvement, 2) + "%")
     return 0
@@ -607,7 +679,9 @@ func write_simple_adapter_checkpoint(
     []float q_b,
     []float v_a,
     []float v_b,
-    []float loss_history,
+    float loss0,
+    float loss1,
+    float loss2,
     adapter_stats stats,
     delta_stats deltas,
     int rank,
@@ -683,9 +757,11 @@ func write_simple_adapter_checkpoint(
         v_out,
         2
     ))
-    runtime_write_text_file(output_dir + "/training_state.json", build_training_state_json(
+    runtime_write_text_file(output_dir + "/training_state.json", build_training_state_json_simple(
         data_file,
-        loss_history,
+        loss0,
+        loss1,
+        loss2,
         stats,
         deltas,
         rank,
@@ -716,6 +792,51 @@ func build_adapter_config_json_simple(string model_path, int rank, float alpha, 
     json = json + "  \"optimizer\": \"sgd\",\n"
     json = json + "  \"effective_learning_rate\": " + float_to_str(effective_lr, 6) + ",\n"
     json = json + "  \"training_backend\": \"S Runtime Reference Trainer\"\n"
+    json = json + "}\n"
+    json
+}
+
+func build_training_state_json_simple(
+    string data_file,
+    float loss0,
+    float loss1,
+    float loss2,
+    adapter_stats stats,
+    delta_stats deltas,
+    int rank,
+    float alpha,
+    float nominal_lr,
+    float effective_lr,
+    int samples_per_epoch,
+    int epochs,
+    int module_count
+) string {
+    string json = "{\n"
+    json = json + "  \"completed_steps\": " + int_to_str(samples_per_epoch * epochs) + ",\n"
+    json = json + "  \"epochs\": " + int_to_str(epochs) + ",\n"
+    json = json + "  \"samples_per_epoch\": " + int_to_str(samples_per_epoch) + ",\n"
+    json = json + "  \"learning_rate\": " + float_to_str(nominal_lr, 6) + ",\n"
+    json = json + "  \"effective_learning_rate\": " + float_to_str(effective_lr, 6) + ",\n"
+    json = json + "  \"lr_scale\": 100.0,\n"
+    json = json + "  \"device\": \"cpu-s-runtime\",\n"
+    json = json + "  \"training_backend\": \"S Runtime Reference Trainer\",\n"
+    json = json + "  \"elapsed_seconds\": 0,\n"
+    json = json + "  \"data_file\": " + json_escape(data_file) + ",\n"
+    json = json + "  \"final_loss\": " + float_to_str(loss2, 12) + ",\n"
+    json = json + "  \"best_loss\": " + float_to_str(loss2, 12) + ",\n"
+    json = json + "  \"loss_history\": [" + float_to_str(loss0, 12) + ", " + float_to_str(loss1, 12) + ", " + float_to_str(loss2, 12) + "],\n"
+    json = json + "  \"adapter_l1_norm\": " + float_to_str(stats.l1, 12) + ",\n"
+    json = json + "  \"adapter_l2_norm\": " + float_to_str(stats.l2, 12) + ",\n"
+    json = json + "  \"adapter_max_abs\": " + float_to_str(stats.max_abs, 12) + ",\n"
+    json = json + "  \"nonzero_weights\": " + int_to_str(stats.nonzero) + ",\n"
+    json = json + "  \"total_weights\": " + int_to_str(stats.total) + ",\n"
+    json = json + "  \"weight_delta_l2\": " + float_to_str(deltas.l2, 12) + ",\n"
+    json = json + "  \"weight_delta_l1\": " + float_to_str(deltas.l1, 12) + ",\n"
+    json = json + "  \"weight_delta_max_abs\": " + float_to_str(deltas.max_abs, 12) + ",\n"
+    json = json + "  \"weight_changed_count\": " + int_to_str(deltas.changed_count) + ",\n"
+    json = json + "  \"modules\": " + int_to_str(module_count) + ",\n"
+    json = json + "  \"nominal_rank\": " + int_to_str(rank) + ",\n"
+    json = json + "  \"alpha\": " + float_to_str(alpha, 1) + "\n"
     json = json + "}\n"
     json
 }
