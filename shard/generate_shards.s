@@ -3,6 +3,7 @@ use std.os.{command, getenv}
 func string_char(int c) string {
     string(c)
 }
+
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
@@ -18,6 +19,7 @@ func shell_escape(string s) string {
     out = out + "'"
     out
 }
+
 func main() int {
     string neurx_root = getenv("NEURX_HOME", ".")
     let (_, code) = command("make -C " + shell_escape(neurx_root) + " shard")

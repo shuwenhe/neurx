@@ -16,10 +16,12 @@ func generate_uuid() string {
     }
     uuid
 }
+
 func advance_rng(uint64 state) uint64 {
     state = state * 6364136223846793005 + 1442695040888963407
     state
 }
+
 func log_wandb_config(wandb_run run) {
     if !run.active { return }
     println("WandB Config:")
@@ -27,10 +29,12 @@ func log_wandb_config(wandb_run run) {
         println("  " + key + ": " + run.config[key])
     }
 }
+
 func flush_wandb(wandb_run *run) {
     if !run.active { return }
     run.steps_logged = run.steps_logged + 1
 }
+
 func merge_maps(
     map[string]string a,
     map[string]string b

@@ -6,6 +6,7 @@ struct Tensor {
     data: []float
     requires_grad: bool
 }
+
 func tensor_new(shape: []int) Tensor {
     size := 1
     for i := 0; i < len(shape); i += 1 {
@@ -17,6 +18,7 @@ func tensor_new(shape: []int) Tensor {
         requires_grad: true,
     }
 }
+
 func tensor_shape_string(t: Tensor) string {
     result := "["
     for i := 0; i < len(t.shape); i += 1 {
@@ -28,6 +30,7 @@ func tensor_shape_string(t: Tensor) string {
     result += "]"
     result
 }
+
 struct mini_transformer {
     vocab_size: int
     embed_dim: int
@@ -41,6 +44,7 @@ struct mini_transformer {
     output_proj: Tensor
     param_count: int
 }
+
 struct transformer_layer {
     q_proj: Tensor
     k_proj: Tensor
@@ -53,6 +57,7 @@ struct transformer_layer {
     norm2_gamma: Tensor
     norm2_beta: Tensor
 }
+
 func create_mini_transformer(
     vocab_size: int,
     embed_dim: int,
@@ -137,6 +142,7 @@ func create_mini_transformer(
         param_count: param_count,
     }
 }
+
 func forward(
     model: mini_transformer,
     input_ids: []int,
@@ -192,6 +198,7 @@ func forward(
     }
     logits
 }
+
 func apply_attention(
     x: Tensor,
     layer: transformer_layer,
@@ -222,6 +229,7 @@ func apply_attention(
     }
     output
 }
+
 func apply_ffn(
     x: Tensor,
     layer: transformer_layer,
@@ -272,9 +280,11 @@ func apply_ffn(
     }
     output
 }
+
 func gelu(x: float) float {
     return x * 0.5 * (1.0 + math.Tanh(math.Sqrt(2.0/math.Pi) * (x + 0.044715 * x * x * x)))
 }
+
 func compute_cross_entropy_loss(
     logits: Tensor,
     targets: []int,
@@ -312,6 +322,7 @@ func compute_cross_entropy_loss(
     }
     0.0
 }
+
 func compute_gradients(
     model: mini_transformer,
     logits: Tensor,
@@ -411,11 +422,13 @@ func compute_gradients(
     }
     gradients
 }
+
 struct adam_w_state {
     m_states: map[string]Tensor
     v_states: map[string]Tensor
     t: int
 }
+
 func adamw_update(
     model: &mini_transformer,
     gradients: map[string]Tensor,
@@ -524,6 +537,7 @@ func adamw_update(
         }
     }
 }
+
 func update_parameter(
     param: &Tensor,
     grad: Tensor,

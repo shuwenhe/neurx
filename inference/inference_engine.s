@@ -112,6 +112,7 @@ struct memory_block {
     bool is_free
     int ref_count
 }
+
 struct sequence_metadata {
     int seq_id
     []int block_table
@@ -313,6 +314,7 @@ enum request_status {
     COMPLETED
     CANCELLED
 }
+
 struct inference_request {
     int request_id
     string prompt_text
@@ -752,12 +754,14 @@ enum quantization_type {
     GPTQ
     AWQ
 }
+
 struct quantization_config {
     quantization_type qtype
     int group_size
     bool symmetric
     float scale_dtype
 }
+
 func create_default_quant_config():
     return quantization_config{
         qtype: NONE,

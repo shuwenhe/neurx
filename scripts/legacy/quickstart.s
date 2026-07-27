@@ -14,6 +14,7 @@ func main() int {
     println("This S entrypoint centralizes the quickstart status layer.")
     0
 }
+
 func check_path(string path) string {
     if runtime_file_exists(path) {
         return "ready (" + path + ")"

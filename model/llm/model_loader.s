@@ -19,6 +19,7 @@ struct gptconfig {
     InitWeightStd  float32
     LearningRate   float32
 }
+
 struct gptmodel {
     config         gptconfig
     tokenEmbedding *tensor.Tensor
@@ -28,6 +29,7 @@ struct gptmodel {
     finalNorm      *tensor.Tensor
     optimizer      *Optimizer
 }
+
 struct Optimizer {
     learningRate   float32
     adamBeta1      float32
@@ -36,6 +38,7 @@ struct Optimizer {
     m              *tensor.Tensor
     v              *tensor.Tensor
 }
+
 func NewGPT(config gptconfig) (*gptmodel, error) {
     if config.HiddenDim % config.NumHeads != 0 {
         return nil, fmt.Errorf("hiddenDim must be divisible by numHeads: %d %% %d != 0",
@@ -69,13 +72,16 @@ func NewGPT(config gptconfig) (*gptmodel, error) {
     model.finalNorm = tensor.Ones(config.HiddenDim)
     return model, nil
 }
+
 func initializeEmbedding(inputDim int, outputDim int, std float32) *tensor.Tensor {
     embedding := tensor.Randn(inputDim, outputDim)
     return tensor.ScalarMul(embedding, std)
 }
+
 func initializePositionalEmbedding(maxSeqLen int, hiddenDim int, std float32) *tensor.Tensor {
     return tensor.Zeros(maxSeqLen, hiddenDim)
 }
+
 func (m *gptmodel) Forward(tokenIds *tensor.Tensor) (*tensor.Tensor, error) {
     batchSize := tokenIds.Shape[0]
     seqLen := tokenIds.Shape[1]
@@ -92,6 +98,7 @@ func (m *gptmodel) Forward(tokenIds *tensor.Tensor) (*tensor.Tensor, error) {
     logits := tensor.MatMul(x, m.outputProj)
     return logits, nil
 }
+
 func (m *gptmodel) embedTokens(tokenIds *tensor.Tensor) *tensor.Tensor {
     batchSize := tokenIds.Shape[0]
     seqLen := tokenIds.Shape[1]
@@ -102,6 +109,7 @@ func (m *gptmodel) embedTokens(tokenIds *tensor.Tensor) *tensor.Tensor {
     }
     return embeddings
 }
+
 func (m *gptmodel) addPositionalEmbedding(x *tensor.Tensor, seqLen int) *tensor.Tensor {
     batchSize := x.Shape[0]
     for b := 0; b < batchSize; b++ {
@@ -110,6 +118,7 @@ func (m *gptmodel) addPositionalEmbedding(x *tensor.Tensor, seqLen int) *tensor.
     }
     return x
 }
+
 func (m *gptmodel) createCausalMask(seqLen int) *tensor.Tensor {
     mask := tensor.Zeros(seqLen, seqLen)
     for i := 0; i < seqLen; i++ {
@@ -118,9 +127,11 @@ func (m *gptmodel) createCausalMask(seqLen int) *tensor.Tensor {
     }
     return mask
 }
+
 func (m *gptmodel) applyLayerNorm(x *tensor.Tensor) *tensor.Tensor {
     return x
 }
+
 func (m *gptmodel) Backward(lossGradients *tensor.Tensor) error {
     gradients := lossGradients
     for i := len(m.layers) - 1; i >= 0; i-- {
@@ -132,9 +143,11 @@ func (m *gptmodel) Backward(lossGradients *tensor.Tensor) error {
     }
     return nil
 }
+
 func (m *gptmodel) UpdateWeights() error {
     return nil
 }
+
 func (m *gptmodel) SaveCheckpoint(path string) error {
     fmt.Printf("Saving checkpoint to %s\n", path)
     file, err := os.Create(path)
@@ -157,6 +170,7 @@ func (m *gptmodel) SaveCheckpoint(path string) error {
     fmt.Printf("checkpoint saved: %d bytes\n", 0)
     return nil
 }
+
 func LoadCheckpoint(path string) (*gptmodel, error) {
     fmt.Printf("Loading checkpoint from %s\n", path)
     file, err := os.Open(path)
@@ -178,12 +192,15 @@ func LoadCheckpoint(path string) (*gptmodel, error) {
     fmt.Printf("checkpoint loaded successfully\n")
     return model, nil
 }
+
 func serializeConfig(config gptconfig) []byte {
     return []byte{}
 }
+
 func deserializeConfig(file *os.File) gptconfig {
     return gptconfig{}
 }
+
 func GPT7B() gptconfig {
     return gptconfig{
         VocabSize:      32000,
@@ -199,6 +216,7 @@ func GPT7B() gptconfig {
         LearningRate:   1e-4,
     }
 }
+
 func GPT13B() gptconfig {
     return gptconfig{
         VocabSize:      32000,
@@ -214,6 +232,7 @@ func GPT13B() gptconfig {
         LearningRate:   1e-4,
     }
 }
+
 func GPT70B() gptconfig {
     return gptconfig{
         VocabSize:      32000,
@@ -229,6 +248,7 @@ func GPT70B() gptconfig {
         LearningRate:   1e-5,
     }
 }
+
 func Mini() gptconfig {
     return gptconfig{
         VocabSize:      10000,
@@ -244,6 +264,7 @@ func Mini() gptconfig {
         LearningRate:   1e-4,
     }
 }
+
 func (m *gptmodel) NumParams() int64 {
     tokenEmbParams := int64(m.config.VocabSize * m.config.HiddenDim)
     posEmbParams := int64(m.config.MaxSeqLen * m.config.HiddenDim)

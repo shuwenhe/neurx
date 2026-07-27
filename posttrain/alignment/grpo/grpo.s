@@ -16,6 +16,7 @@ struct grpo_config {
     float advantage_eps
     string reward_type
 }
+
 func default_grpo_config() grpo_config {
     grpo_config {
         group_size: 8,
@@ -34,6 +35,7 @@ func default_grpo_config() grpo_config {
         reward_type: "math",
     }
 }
+
 func neurx_r1_grpo_config() grpo_config {
     grpo_config {
         group_size: 8,
@@ -52,6 +54,7 @@ func neurx_r1_grpo_config() grpo_config {
         reward_type: "math",
     }
 }
+
 struct grpo_group {
     string question
     string reference_answer
@@ -62,6 +65,7 @@ struct grpo_group {
     []float  log_probs_policy
     []float  log_probs_ref
 }
+
 func check_format_reward(string output) float {
     bool has_think  = string_contains(output, "<think>") && string_contains(output, "</think>")
     bool has_answer = string_contains(output, "<answer>") && string_contains(output, "</answer>")
@@ -73,6 +77,7 @@ func check_format_reward(string output) float {
     }
     0.0
 }
+
 func check_accuracy_reward(string output, string reference) float {
     string extracted = extract_answer_tag(output)
     if string_equals(extracted, reference) {
@@ -88,6 +93,7 @@ func check_accuracy_reward(string output, string reference) float {
     }
     0.0
 }
+
 func compute_length_penalty(int token_len, int max_len, float penalty_per_100) float {
     int threshold = max_len / 2
     if token_len <= threshold {
@@ -96,6 +102,7 @@ func compute_length_penalty(int token_len, int max_len, float penalty_per_100) f
     float excess = float_grpo(token_len - threshold)
     0.0 - (excess / 100.0) * penalty_per_100
 }
+
 func compute_reward(string output, string reference, int token_len, grpo_config cfg) float {
     float r = 0.0
     if cfg.use_format_reward {
@@ -107,6 +114,7 @@ func compute_reward(string output, string reference, int token_len, grpo_config 
     }
     r
 }
+
 func compute_group_advantages([]float rewards, float eps) []float {
     int G = len(rewards)
     float mean = 0.0
@@ -134,6 +142,7 @@ func compute_group_advantages([]float rewards, float eps) []float {
     }
     adv
 }
+
 func grpo_token_loss(float log_prob_policy, float log_prob_ref, float advantage, float clip_eps, float kl_coef) float {
     float log_ratio = log_prob_policy - log_prob_ref
     float ratio = exp_grpo(log_ratio)
@@ -143,6 +152,7 @@ func grpo_token_loss(float log_prob_policy, float log_prob_ref, float advantage,
     float kl = ratio - log_ratio - 1.0
     policy_loss + kl_coef * kl
 }
+
 struct grpo_step_result {
     float total_loss
     float policy_loss
@@ -154,6 +164,7 @@ struct grpo_step_result {
     []float advantages
     int accepted_outputs
 }
+
 func grpo_step(grpo_group group, grpo_config cfg) grpo_step_result {
     int G = len(group.outputs)
     []float rewards = []
@@ -226,6 +237,7 @@ func grpo_step(grpo_group group, grpo_config cfg) grpo_step_result {
         accepted_outputs: accepted,
     }
 }
+
 struct grpo_trainer_state {
     grpo_config cfg
     int global_step
@@ -237,6 +249,7 @@ struct grpo_trainer_state {
     float ema_clip_frac
     float ema_decay
 }
+
 func new_grpo_trainer(grpo_config cfg) grpo_trainer_state {
     grpo_trainer_state {
         cfg: cfg,
@@ -250,10 +263,12 @@ func new_grpo_trainer(grpo_config cfg) grpo_trainer_state {
         ema_decay: 0.98,
     }
 }
+
 struct grpo_train_step_result {
     grpo_trainer_state state
     grpo_step_result step_result
 }
+
 func grpo_train_step(grpo_trainer_state trainer, grpo_group group) grpo_train_step_result {
     grpo_step_result result = grpo_step(group, trainer.cfg)
     float d = trainer.ema_decay
@@ -267,6 +282,7 @@ func grpo_train_step(grpo_trainer_state trainer, grpo_group group) grpo_train_st
     updated.ema_clip_frac = d * trainer.ema_clip_frac + (1.0 - d) * result.clip_fraction
     grpo_train_step_result { state: updated, step_result: result }
 }
+
 struct grpo_curriculum_state {
     float recent_accuracy
     int adaptive_group_size
@@ -274,6 +290,7 @@ struct grpo_curriculum_state {
     int steps_since_update
     int update_interval
 }
+
 func new_grpo_curriculum(grpo_config base_cfg) grpo_curriculum_state {
     grpo_curriculum_state {
         recent_accuracy: 0.5,
@@ -283,6 +300,7 @@ func new_grpo_curriculum(grpo_config base_cfg) grpo_curriculum_state {
         update_interval: 100,
     }
 }
+
 func grpo_curriculum_update(grpo_curriculum_state cur, float step_accuracy, grpo_config base_cfg) grpo_curriculum_state {
     float d = 0.95
     float acc = d * cur.recent_accuracy + (1.0 - d) * step_accuracy
@@ -301,6 +319,7 @@ func grpo_curriculum_update(grpo_curriculum_state cur, float step_accuracy, grpo
     }
     updated
 }
+
 func float_grpo(int n) float {
     float v = 0.0
     int i = 0
@@ -310,6 +329,7 @@ func float_grpo(int n) float {
     }
     v
 }
+
 func sqrt_grpo(float x) float {
     if x <= 0.0 { return 0.0 }
     float g = x * 0.5 + 0.5
@@ -318,6 +338,7 @@ func sqrt_grpo(float x) float {
     g = 0.5 * (g + x / g)
     g
 }
+
 func exp_grpo(float x) float {
     if x > 20.0  { return 485165195.4 }
     if x < -20.0 { return 0.0 }
@@ -327,24 +348,30 @@ func exp_grpo(float x) float {
     float x5 = x4 * x
     1.0 + x + x2/2.0 + x3/6.0 + x4/24.0 + x5/120.0
 }
+
 func clip_grpo(float val, float lo, float hi) float {
     if val < lo { return lo }
     if val > hi { return hi }
     val
 }
+
 func min_float(float a, float b) float {
     if a < b { return a }
     b
 }
+
 func string_contains(string s, string sub) bool {
     false
 }
+
 func string_equals(string a, string b) bool {
     false
 }
+
 func string_trim(string s) string {
     s
 }
+
 func extract_answer_tag(string output) string {
     output
 }

@@ -3,17 +3,20 @@ struct Vector {
     []float data
     int size
 }
+
 struct Matrix {
     []float data
     int rows
     int cols
 }
+
 struct Tensor {
     []float data
     int dim1
     int dim2
     int dim3
 }
+
 func create_vector(int size) Vector {
     Vector v
     v.size = size
@@ -26,12 +29,14 @@ func create_vector(int size) Vector {
     v.data = data
     v
 }
+
 func vector_from_array([]float values) Vector {
     Vector v
     v.size = len(values)
     v.data = values
     v
 }
+
 func create_matrix(int rows, int cols) Matrix {
     Matrix m
     m.rows = rows
@@ -45,6 +50,7 @@ func create_matrix(int rows, int cols) Matrix {
     m.data = data
     m
 }
+
 func identity_matrix(int size) Matrix {
     Matrix m = create_matrix(size, size)
     int i = 0
@@ -62,6 +68,7 @@ func identity_matrix(int size) Matrix {
     }
     m
 }
+
 func random_matrix(int rows, int cols, int seed) Matrix {
     Matrix m = create_matrix(rows, cols)
     int state = seed
@@ -78,30 +85,35 @@ func random_matrix(int rows, int cols, int seed) Matrix {
     }
     m
 }
+
 func matrix_get(Matrix m, int row, int col) float {
     if row < 0 || row >= m.rows || col < 0 || col >= m.cols {
         return 0.0
     }
     m.data[row * m.cols + col]
 }
+
 func matrix_set(Matrix m, int row, int col, float value) Matrix {
     if row >= 0 && row < m.rows && col >= 0 && col < m.cols {
         m.data[row * m.cols + col] = value
     }
     m
 }
+
 func vector_get(Vector v, int idx) float {
     if idx < 0 || idx >= v.size {
         return 0.0
     }
     v.data[idx]
 }
+
 func vector_set(Vector v, int idx, float value) Vector {
     if idx >= 0 && idx < v.size {
         v.data[idx] = value
     }
     v
 }
+
 func dot_product(Vector a, Vector b) float {
     if a.size != b.size {
         return 0.0
@@ -114,6 +126,7 @@ func dot_product(Vector a, Vector b) float {
     }
     result
 }
+
 func vector_add(Vector a, Vector b) Vector {
     if a.size != b.size {
         return a
@@ -126,6 +139,7 @@ func vector_add(Vector a, Vector b) Vector {
     }
     result
 }
+
 func vector_subtract(Vector a, Vector b) Vector {
     if a.size != b.size {
         return a
@@ -138,6 +152,7 @@ func vector_subtract(Vector a, Vector b) Vector {
     }
     result
 }
+
 func vector_scale(Vector v, float scalar) Vector {
     Vector result = create_vector(v.size)
     int i = 0
@@ -147,6 +162,7 @@ func vector_scale(Vector v, float scalar) Vector {
     }
     result
 }
+
 func matrix_add(Matrix a, Matrix b) Matrix {
     if a.rows != b.rows || a.cols != b.cols {
         return a
@@ -159,6 +175,7 @@ func matrix_add(Matrix a, Matrix b) Matrix {
     }
     result
 }
+
 func matrix_subtract(Matrix a, Matrix b) Matrix {
     if a.rows != b.rows || a.cols != b.cols {
         return a
@@ -171,6 +188,7 @@ func matrix_subtract(Matrix a, Matrix b) Matrix {
     }
     result
 }
+
 func matrix_scale(Matrix m, float scalar) Matrix {
     Matrix result = create_matrix(m.rows, m.cols)
     int i = 0
@@ -180,6 +198,7 @@ func matrix_scale(Matrix m, float scalar) Matrix {
     }
     result
 }
+
 func matrix_multiply(Matrix a, Matrix b) Matrix {
     if a.cols != b.rows {
         return create_matrix(a.rows, b.cols)
@@ -202,6 +221,7 @@ func matrix_multiply(Matrix a, Matrix b) Matrix {
     }
     result
 }
+
 func matrix_vector_multiply(Matrix a, Vector v) Vector {
     if a.cols != v.size {
         return create_vector(a.rows)
@@ -220,6 +240,7 @@ func matrix_vector_multiply(Matrix a, Vector v) Vector {
     }
     result
 }
+
 func matrix_transpose(Matrix m) Matrix {
     Matrix result = create_matrix(m.cols, m.rows)
     int i = 0
@@ -233,12 +254,14 @@ func matrix_transpose(Matrix m) Matrix {
     }
     result
 }
+
 func relu(float x) float {
     if x > 0.0 {
         return x
     }
     0.0
 }
+
 func vector_relu(Vector v) Vector {
     Vector result = create_vector(v.size)
     int i = 0
@@ -248,6 +271,7 @@ func vector_relu(Vector v) Vector {
     }
     result
 }
+
 func tanh_activation(float x) float {
     float exp_2x = 1.0
     float x2 = x * 2.0
@@ -265,6 +289,7 @@ func tanh_activation(float x) float {
     }
     numerator / denominator
 }
+
 func sigmoid(float x) float {
     if x > 0.0 {
         float exp_neg_x = 1.0
@@ -288,6 +313,7 @@ func sigmoid(float x) float {
         return exp_x / (1.0 + exp_x)
     }
 }
+
 func vector_softmax(Vector v) Vector {
     float max_val = v.data[0]
     int i = 1
@@ -329,6 +355,7 @@ func vector_softmax(Vector v) Vector {
     }
     result
 }
+
 func vector_norm(Vector v) float {
     float sum = 0.0
     int i = 0
@@ -348,6 +375,7 @@ func vector_norm(Vector v) float {
     }
     result
 }
+
 func vector_normalize(Vector v) Vector {
     float norm = vector_norm(v)
     if norm == 0.0 {
@@ -355,6 +383,7 @@ func vector_normalize(Vector v) Vector {
     }
     return vector_scale(v, 1.0 / norm)
 }
+
 func outer_product(Vector a, Vector b) Matrix {
     Matrix result = create_matrix(a.size, b.size)
     int i = 0
@@ -368,6 +397,7 @@ func outer_product(Vector a, Vector b) Matrix {
     }
     result
 }
+
 func matrix_hadamard(Matrix a, Matrix b) Matrix {
     if a.rows != b.rows || a.cols != b.cols {
         return a
@@ -380,6 +410,7 @@ func matrix_hadamard(Matrix a, Matrix b) Matrix {
     }
     result
 }
+
 func matrix_frobenius_norm(Matrix m) float {
     float sum = 0.0
     int i = 0
@@ -399,6 +430,7 @@ func matrix_frobenius_norm(Matrix m) float {
     }
     result
 }
+
 func matrix_row_mean(Matrix m) Vector {
     Vector result = create_vector(m.rows)
     int i = 0

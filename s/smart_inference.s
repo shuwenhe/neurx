@@ -4,21 +4,25 @@ struct knowledge_item {
     string text
     int id
 }
+
 struct keyword_match {
     string keyword
     int count
 }
+
 struct similarity_result {
     int docId
     float score
     string text
 }
+
 struct inference_config {
     int maxContextLength
     float similarityThreshold
     int topKDocs
     bool useGenericResponse
 }
+
 func strlen(string s) int {
     int count = 0
     int i = 0
@@ -28,6 +32,7 @@ func strlen(string s) int {
     }
     count
 }
+
 func str_contains(string s, string substr) bool {
     if strlen(s) == 0 || strlen(substr) == 0 {
         return false
@@ -50,6 +55,7 @@ func str_contains(string s, string substr) bool {
     }
     false
 }
+
 func str_to_lower(string s) string {
     string result = ""
     int i = 0
@@ -63,10 +69,12 @@ func str_to_lower(string s) string {
     }
     result
 }
+
 func char_to_string(int c) string {
     string result = ""
     result
 }
+
 func count_word_occurrences(string text, string word) int {
     int count = 0
     int i = 0
@@ -89,9 +97,11 @@ func count_word_occurrences(string text, string word) int {
     }
     count
 }
+
 func init_knowledge_base() {
     println("✓ English textinitializeEnglish text")
 }
+
 func get_knowledge_item(int id) string {
     if id == 0 {
         return "English text (AI) English text.English text, English textlanguageEnglish textAIEnglish textmainEnglish text.NeurXEnglish textframework, English texttrainingEnglish textlanguagemodelEnglish text."
@@ -113,9 +123,11 @@ func get_knowledge_item(int id) string {
     }
     ""
 }
+
 func get_knowledge_base_size() int {
     6
 }
+
 func extract_keywords(string question) {
     string q_lower = str_to_lower(question)
     if str_contains(q_lower, "transformer") || str_contains(q_lower, "English text") {
@@ -134,6 +146,7 @@ func extract_keywords(string question) {
         println("🔑 keywords: inference")
     }
 }
+
 func calculate_similarity(string query, string doc) float {
     string q_lower = str_to_lower(query)
     string d_lower = str_to_lower(doc)
@@ -151,6 +164,7 @@ func calculate_similarity(string query, string doc) float {
     }
     score
 }
+
 func find_relevant_documents(string question, int topK) {
     int kb_size = get_knowledge_base_size()
     float best_score = 0.0
@@ -170,18 +184,23 @@ func find_relevant_documents(string question, int topK) {
         println("content: " + get_knowledge_item(best_doc))
     }
 }
+
 func generate_introduction_response() string {
     "🤖 NeurX English textinferencesystemEnglish text!\nEnglish text Transformer English text, AllowedEnglish text: \n• English text\n• NeurX frameworkEnglish text\n• optimizeEnglish textmodeltraining\n• Transformer English text\nEnglish text.\n\n💡 English textmainEnglish text!"
 }
+
 func generate_features_response() string {
     "✨ NeurX frameworkEnglish textmainEnglish text: \n1. English text Transformer implementation\n2. supportEnglish texttraining\n3. English textconfigurationsystem\n4. completeEnglish textmonitoringEnglish textlog\n5. optimizeEnglish textinferenceEnglish text\n6. supportEnglish textoptimizeEnglish text\n7. English textcheckpointmanagement"
 }
+
 func generate_usage_response() string {
     "🚀 use NeurX framework: \n1. English textmodelconfiguration\n2. English texttrainingdata\n3. configurationoptimizeEnglish textlearning rate\n4. starttrainingEnglish text\n5. savecheckpoint\n6. loadmodelEnglish textinference\n\n📝 English textconfigurationEnglish text."
 }
+
 func generate_generic_response(string question) string {
     "🤔 English text '" + question + "' English text.\n\nEnglish textmainEnglish textcontent: \n• English text\n• Transformer English text\n• optimizeEnglish text (Adam, SGD, AdamW)\n• English texttrainingEnglish text\n• NeurX frameworkEnglish text\n\n💡 English text, English text!"
 }
+
 func resolve_real_inference_runner() string {
     string candidate = trim(runtime_env_get("NEURX_SMART_INFERENCE_RUNNER", ""))
     if candidate != "" && runtime_file_exists(candidate) {
@@ -202,6 +221,7 @@ func resolve_real_inference_runner() string {
     }
     ""
 }
+
 func resolve_real_inference_ir() string {
     string candidate = trim(runtime_env_get("NEURX_SMART_INFERENCE_IR", ""))
     if candidate != "" && runtime_file_exists(candidate) {
@@ -222,9 +242,11 @@ func resolve_real_inference_ir() string {
     }
     ""
 }
+
 func build_real_inference_prompt(string question) string {
     "English text, English text.English text, English text: \n" + question + "\nEnglish text: "
 }
+
 func generate_model_response(string question) string {
     string runner_path = resolve_real_inference_runner()
     if runner_path == "" {
@@ -253,9 +275,11 @@ func generate_model_response(string question) string {
     }
     "modelinferenceEnglish textcontent, English text checkpoint English textrunEnglish text."
 }
+
 func answer_question(string question) string {
     return generate_model_response(question)
 }
+
 func show_help() {
     println("")
     println("════════════════════════════════════════════════════════════════")
@@ -285,6 +309,7 @@ func show_help() {
     println("════════════════════════════════════════════════════════════════")
     println("")
 }
+
 func run_interactive_mode() {
     println("")
     println("════════════════════════════════════════════════════════════════")
@@ -335,6 +360,7 @@ func run_interactive_mode() {
         turn = turn + 1
     }
 }
+
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -354,16 +380,20 @@ func int_to_string(int n) string {
     }
     result
 }
+
 func float_to_string(float f) string {
     int int_part = int(f)
     int_to_string(int_part) + "%"
 }
+
 func int(float f) int {
     0
 }
+
 func print_text(string s) {
     println(s)
 }
+
 func main() {
     println("")
     println("════════════════════════════════════════════════════════════════")

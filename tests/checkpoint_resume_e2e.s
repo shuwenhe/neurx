@@ -13,22 +13,26 @@ struct TestConfig {
     stepsPhase2 int
     maxSteps int
 }
+
 func logTest(config TestConfig, message string) error {
     timestamp = time.Now().Format(time.RFC3339)
     line = "[TEST] " + message
     io.Println(line)
     return io.AppendFile(config.testLog, line + "\n")
 }
+
 func logInfo(config TestConfig, message string) error {
     line = "[INFO] " + message
     io.Println(line)
     return io.AppendFile(config.testLog, line + "\n")
 }
+
 func logError(config TestConfig, message string) error {
     line = "[ERROR] " + message
     io.Println(line)
     return io.AppendFile(config.testLog, line + "\n")
 }
+
 func logSection(config TestConfig, title string) error {
     io.Println("")
     line = "==== " + title + " ===="
@@ -36,6 +40,7 @@ func logSection(config TestConfig, title string) error {
     io.Println("")
     return io.AppendFile(config.testLog, "\n" + line + "\n\n")
 }
+
 func readStateFile(filePath string) map[string]string {
     content, err = os.ReadFile(filePath)
     if err != nil {
@@ -51,6 +56,7 @@ func readStateFile(filePath string) map[string]string {
     }
     return state
 }
+
 func main() {
     scriptDir = os.Args[0]
     projectRoot = scriptDir + "/../../.."

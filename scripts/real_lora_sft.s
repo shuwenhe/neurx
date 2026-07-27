@@ -22,6 +22,7 @@ func int_to_str(int n) string {
     }
     out
 }
+
 func digit_string(int digit) string {
     if digit == 0 { return "0" }
     if digit == 1 { return "1" }
@@ -34,6 +35,7 @@ func digit_string(int digit) string {
     if digit == 8 { return "8" }
     "9"
 }
+
 func float_to_str(float value, int decimals) string {
     float current = value
     bool neg = current < 0.0
@@ -63,6 +65,7 @@ func float_to_str(float value, int decimals) string {
     }
     out
 }
+
 func shell_escape(string value) string {
     string out = "'"
     int i = 0
@@ -77,9 +80,11 @@ func shell_escape(string value) string {
     }
     out + "'"
 }
+
 func first_non_empty_line(string path) string {
     trim(runtime_run_command_output("grep -m 1 -v '^[[:space:]]*$' " + shell_escape(path)))
 }
+
 func has_prefix(string s, string prefix) bool {
     if len(s) < len(prefix) {
         return false
@@ -93,13 +98,16 @@ func has_prefix(string s, string prefix) bool {
     }
     return true
 }
+
 func get_json_string(string json_text, string key) string {
     string cmd = "printf %s " + shell_escape(json_text) + " | sed -n 's/.*\"" + key + "\"[[:space:]]*:[[:space:]]*\"\\([^\"]*\\)\".*/\\1/p' | head -1"
     trim(runtime_run_command_output(cmd))
 }
+
 func write_text_file(string path, string content) {
     let _ = runtime_run_command_output("printf %s " + shell_escape(content) + " > " + shell_escape(path))
 }
+
 func main() {
     string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
     string data_file = runtime_env_get("NEURX_POSTTRAIN_DATA_FILE", "/home/shuwen/shuwen/dataset/medical/train.json")

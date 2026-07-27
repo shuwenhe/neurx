@@ -4,6 +4,7 @@ func fail(string message) int {
     println("production-serving FAIL " + message)
     1
 }
+
 func main() int {
     production_runtime_config config = new_production_runtime_config(8, 128, 128, 8, 1, 4)
     production_runtime_state state = new_production_runtime_state(config)

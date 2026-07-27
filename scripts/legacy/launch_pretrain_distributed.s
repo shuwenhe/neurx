@@ -16,12 +16,14 @@ struct launcher_config {
     string log_file
     bool verbose
 }
+
 struct gpu_info {
     int device_id
     string name
     int memory_mb
     bool available
 }
+
 func parse_args() launcher_config {
     string num_gpus_str = runtime_env_get("NUM_GPUS", "1")
     int num_gpus = parse_int(num_gpus_str)
@@ -49,6 +51,7 @@ func parse_args() launcher_config {
         verbose: true,
     }
 }
+
 func query_gpu_info() []gpu_info {
     []gpu_info gpus = []gpu_info{cap: 16}
     gpu_info gpu0 = gpu_info {
@@ -60,6 +63,7 @@ func query_gpu_info() []gpu_info {
     gpus[0] = gpu0
     gpus
 }
+
 func check_gpu_availability(int num_gpus) (bool, int) {
     []gpu_info gpus = query_gpu_info()
     int available_count = 0
@@ -73,6 +77,7 @@ func check_gpu_availability(int num_gpus) (bool, int) {
     bool sufficient = available_count >= num_gpus
     (sufficient, available_count)
 }
+
 func setup_directories(launcher_config config) bool {
     if !create_directory(config.log_dir) {
         print("[ERROR] Failed to create log directory: " + config.log_dir)
@@ -88,6 +93,7 @@ func setup_directories(launcher_config config) bool {
     }
     true
 }
+
 func print_config(launcher_config config) {
     print("==================================================")
     print("NeurX Distributed Pretraining")
@@ -105,12 +111,14 @@ func print_config(launcher_config config) {
     print("[CONFIG] LOG_FILE: " + config.log_file)
     print("==================================================")
 }
+
 struct process_handle {
     int rank
     int pid
     string log_file
     bool running
 }
+
 func launch_rank_process(
     launcher_config config,
     int rank,
@@ -139,6 +147,7 @@ func launch_rank_process(
         running: pid > 0,
     }
 }
+
 func launch_all_processes(
     launcher_config config,
     int world_size,
@@ -155,6 +164,7 @@ func launch_all_processes(
     }
     handles
 }
+
 func wait_all_processes(
     []process_handle handles,
 ) int {
@@ -176,6 +186,7 @@ func wait_all_processes(
     }
     overall_exit_code
 }
+
 func aggregate_logs(launcher_config config, []process_handle handles) {
     print("[INFO] Aggregating logs from all ranks...")
     int rank = 0
@@ -187,6 +198,7 @@ func aggregate_logs(launcher_config config, []process_handle handles) {
         rank = rank + 1
     }
 }
+
 func print_final_stats(launcher_config config, int exit_code) {
     print("==================================================")
     if exit_code == 0 {
@@ -201,6 +213,7 @@ func print_final_stats(launcher_config config, int exit_code) {
     print("[INFO] Check logs for details: " + config.log_file)
     print("==================================================")
 }
+
 func main() {
     launcher_config config = parse_args()
     string timestamp = get_timestamp()
@@ -226,6 +239,7 @@ func main() {
     print_final_stats(config, exit_code)
     exit(exit_code)
 }
+
 func parse_int(string s) int {
     int result = 0
     int i = 0
@@ -238,6 +252,7 @@ func parse_int(string s) int {
     }
     result
 }
+
 func itoa(int n) string {
     if n == 0 {
         return "0"
@@ -255,8 +270,10 @@ func itoa(int n) string {
     }
     s
 }
+
 func get_timestamp() string {
     "20260714_161200"
 }
+
 func exit(int code) {
 }

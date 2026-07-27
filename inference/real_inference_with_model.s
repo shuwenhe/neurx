@@ -12,6 +12,7 @@ func pow_int(int base, int exp) int {
     }
     result
 }
+
 func u64_le([]int bytes, int offset) int {
     if len(bytes) < offset + 8 {
         return 0
@@ -25,6 +26,7 @@ func u64_le([]int bytes, int offset) int {
     }
     return value
 }
+
 func find_substring_bytes([]int bytes, string needle, int start_pos) int {
     int start = start_pos
     if start < 0 {
@@ -46,6 +48,7 @@ func find_substring_bytes([]int bytes, string needle, int start_pos) int {
     }
     -1
 }
+
 func skip_to_digit_bytes([]int bytes, int pos) int {
     int cursor = pos
     while cursor < len(bytes) {
@@ -57,6 +60,7 @@ func skip_to_digit_bytes([]int bytes, int pos) int {
     }
     -1
 }
+
 func parse_int_at_bytes([]int bytes, int pos) int {
     int value = 0
     int cursor = pos
@@ -70,6 +74,7 @@ func parse_int_at_bytes([]int bytes, int pos) int {
     }
     return value
 }
+
 func tensor_index_record(int offset, int size, int found) []int {
     []int record
     record = []int{cap: 3}
@@ -78,6 +83,7 @@ func tensor_index_record(int offset, int size, int found) []int {
     record[2] = found
     return record
 }
+
 func parse_tensor_index([]int metadata, string tensor_name) []int {
     []int result
     result = tensor_index_record(0, 0, 0)
@@ -108,6 +114,7 @@ func parse_tensor_index([]int metadata, string tensor_name) []int {
     result[2] = 1
     return result
 }
+
 func int_to_string(int value) string {
     if value == 0 {
         return "0"
@@ -127,6 +134,7 @@ func int_to_string(int value) string {
     }
     return out + tmp
 }
+
 func slice_bytes([]int bytes, int start, int length) []int {
     []int out
     int size = length
@@ -141,9 +149,11 @@ func slice_bytes([]int bytes, int start, int length) []int {
     }
     return out
 }
+
 func layer_tensor_name(int layer, string suffix) string {
     "model.layers." + int_to_string(layer) + "." + suffix
 }
+
 func tensor_signature([]int tensor_bytes, int salt) int {
     int total = 0
     int stride = 1 + (salt - (salt / 7) * 7)
@@ -165,6 +175,7 @@ func tensor_signature([]int tensor_bytes, int salt) int {
     }
     return x
 }
+
 func utf8_decode([]int bytes) string {
     string result = ""
     int i = 0
@@ -177,6 +188,7 @@ func utf8_decode([]int bytes) string {
     }
     return result
 }
+
 func tokenize_chinese(string text) []int {
     []int tokens
     tokens = []int{cap: 128}
@@ -226,6 +238,7 @@ func tokenize_chinese(string text) []int {
     }
     return out
 }
+
 func model_forward_pass([]int tokens, string model_path, []int metadata, []int embed_idx, []int norm_idx, []int head_idx) int {
     int logit_seed = 0
     int i = 0
@@ -258,6 +271,7 @@ func model_forward_pass([]int tokens, string model_path, []int metadata, []int e
     }
     return logit_seed
 }
+
 func generate_next_tokens(int seed, int count) []int {
     []int result
     result = []int{cap: count}
@@ -270,6 +284,7 @@ func generate_next_tokens(int seed, int count) []int {
     }
     return result
 }
+
 func token_to_chinese(int token) string {
     if token >= 20000 && token < 20100 {
         int offset = token - 20000
@@ -292,9 +307,11 @@ func token_to_chinese(int token) string {
     }
     return "."
 }
+
 func read_user_input() string {
     trim(__sys_read_string(0, 4096))
 }
+
 func main() {
     string model_path = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain/model.safetensors")
     if !runtime_file_exists(model_path) {

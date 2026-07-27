@@ -14,6 +14,7 @@ enum TrainingScale {
     XL,
     OneT,
 }
+
 struct training_config {
     scale         TrainingScale
     numGpus       int
@@ -27,6 +28,7 @@ struct training_config {
     modelPath     string
     timestamp     string
 }
+
 func get_scale_config(scale TrainingScale) struct {
     params    int
     gpus      int
@@ -92,12 +94,14 @@ func get_scale_config(scale TrainingScale) struct {
         }
     }
 }
+
 struct train_orchestrator {
     logger Logger
     config training_config
     sCompiler string
     neurxRoot string
 }
+
 func new_train_orchestrator(scale TrainingScale, numGpus int) (*train_orchestrator, error) {
     logger := new_logger("train_orchestrator")
     neurxRoot := get_env("NEURX_ROOT", "")
@@ -131,6 +135,7 @@ func new_train_orchestrator(scale TrainingScale, numGpus int) (*train_orchestrat
         neurxRoot: neurxRoot,
     }, nil
 }
+
 func (t *train_orchestrator) setup() error {
     t.logger.log("Setting up training environment...")
     for _, dir := range []string{t.config.logDir, t.config.checkpointDir, t.config.outputDir} {
@@ -141,6 +146,7 @@ func (t *train_orchestrator) setup() error {
     t.log_config()
     return nil
 }
+
 func (t *train_orchestrator) check_environment() error {
     t.logger.log("Checking environment...")
     numGpus, backend := t.detectGPUs()
@@ -155,6 +161,7 @@ func (t *train_orchestrator) check_environment() error {
     }
     return nil
 }
+
 func (t *train_orchestrator) Compile() error {
     t.logger.log("Compiling NeurX training module...")
     sourceFile := filepath.Join(t.config.outputDir, "neurx_training.s")
@@ -181,6 +188,7 @@ func (t *train_orchestrator) Compile() error {
     t.logger.success("Binary generated: %s", binFile)
     return nil
 }
+
 func (t *train_orchestrator) Run() error {
     t.logger.log("Starting training...")
     binFile := filepath.Join(t.config.outputDir, "neurx_train")
@@ -201,6 +209,7 @@ func (t *train_orchestrator) Run() error {
     t.logger.success("Training completed")
     return nil
 }
+
 func (t *train_orchestrator) Monitor() error {
     t.logger.log("Starting training monitor...")
     logFile := filepath.Join(t.config.logDir, "train.log")
@@ -219,6 +228,7 @@ func (t *train_orchestrator) Monitor() error {
     }
     return nil
 }
+
 func (t *train_orchestrator) detectGPUs() (int, string) {
     if command_exists("nvidia-smi") {
         result := exec_command("nvidia-smi", "--query-gpu=name", "--format=csv,noheader")
@@ -235,6 +245,7 @@ func (t *train_orchestrator) detectGPUs() (int, string) {
     }
     return 1, "CPU"
 }
+
 func (t *train_orchestrator) log_config() error {
     config := fmt.Sprintf(`╔══════════════════════════════════════════════════╗
 ║   NeurX Foundation Model Training               ║
@@ -250,6 +261,7 @@ func (t *train_orchestrator) log_config() error {
     logFile := filepath.Join(t.config.logDir, "config.txt")
     return write_file(logFile, config)
 }
+
 func (t *train_orchestrator) generateTrainingSource(outputPath string) error {
     scaleConfig := get_scale_config(t.config.scale)
     source := fmt.Sprintf(`
@@ -274,6 +286,7 @@ func main() {
 `, scaleString(t.config.scale), scaleConfig.params, scaleConfig.gpus, scaleConfig.batch, scaleConfig.lr, scaleConfig.seqLen, scaleConfig.layers)
     return write_file(outputPath, source)
 }
+
 func scaleString(scale TrainingScale) string {
     switch scale {
     case TrainingScale.Mini:
@@ -290,6 +303,7 @@ func scaleString(scale TrainingScale) string {
         return "unknown"
     }
 }
+
 func run_foundation_model_training(scale string, numGpus int) error {
     var scaleEnum TrainingScale
     switch to_lower(scale) {
@@ -329,15 +343,19 @@ func run_foundation_model_training(scale string, numGpus int) error {
     }
     return nil
 }
+
 func start_quick_training() error {
     return run_foundation_model_training("mini", 1)
 }
+
 func launch_70b_training(numGpus int) error {
     return run_foundation_model_training("xl", numGpus)
 }
+
 func launch_7b_training(numGpus int) error {
     return run_foundation_model_training("large", numGpus)
 }
+
 func launch_1t_training(numGpus int) error {
     orchestrator, err := new_train_orchestrator(TrainingScale.OneT, numGpus)
     if err != nil {

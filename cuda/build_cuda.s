@@ -5,6 +5,7 @@ use neurx.runtime.io.{
     runtime_file_exists,
     runtime_run_command_output,
 }
+
 func main() {
     println("[CUDA Manager] NeurX GPU Build System")
     println("")
@@ -26,28 +27,34 @@ func main() {
         build_all()
     }
 }
+
 func build_all() {
     println("[BUILD] Complete CUDA System")
     build_kernels()
     build_runtime()
     build_verify()
 }
+
 func build_kernels() {
     println("[BUILD] CUDA Kernels")
     execute_s_script("cuda/build_kernels_simple.s")
 }
+
 func build_runtime() {
     println("[BUILD] CUDA Runtime")
     execute_s_script("cuda/build_cuda_runtime.s")
 }
+
 func build_verify() {
     println("[BUILD] Environment Verification")
     execute_s_script("cuda/verify_environment.s")
 }
+
 func clean_all() {
     println("[CLEAN] CUDA Build Artifacts")
     execute_s_script("cuda/clean_build.s")
 }
+
 func verify_environment() {
     println("[VERIFY] CUDA Environment")
     string nvcc_out = runtime_run_command_output("which nvcc 2>/dev/null || echo 'not_found'")
@@ -79,6 +86,7 @@ func verify_environment() {
     }
     println("[SUCCESS] CUDA environment verified")
 }
+
 func execute_s_script(string script_path) {
     string s_compiler = runtime_env_get("S_COMPILER", "/home/shuwen/.local/bin/s")
     if !runtime_file_exists(s_compiler) {
@@ -97,6 +105,7 @@ func execute_s_script(string script_path) {
         println(output)
     }
 }
+
 func get_cuda_home() string {
     string cuda_home = trim(runtime_env_get("CUDA_HOME", ""))
     if str_len(cuda_home) > 0 {
@@ -107,6 +116,7 @@ func get_cuda_home() string {
     }
     "/usr"
 }
+
 func contains_string(string haystack, string needle) bool {
     int h_len = str_len(haystack)
     int n_len = str_len(needle)
@@ -130,6 +140,7 @@ func contains_string(string haystack, string needle) bool {
     }
     false
 }
+
 func eq_string(string a, string b) bool {
     int a_len = str_len(a)
     int b_len = str_len(b)
@@ -145,6 +156,7 @@ func eq_string(string a, string b) bool {
     }
     true
 }
+
 func str_len(string s) int {
     int n = 0
     while n < 10000000 && s[n] != 0 {
@@ -152,6 +164,7 @@ func str_len(string s) int {
     }
     n
 }
+
 func trim(string s) string {
     int len = str_len(s)
     int i = 0
@@ -167,6 +180,7 @@ func trim(string s) string {
     }
     substring(s, i, j + 1)
 }
+
 func substring(string s, int start, int end) string {
     string out = ""
     int i = start
@@ -177,6 +191,7 @@ func substring(string s, int start, int end) string {
     }
     out
 }
+
 func chr(int code) string {
     string(code)
 }

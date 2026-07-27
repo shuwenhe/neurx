@@ -20,6 +20,7 @@ func trim(string s) string {
     }
     out
 }
+
 func starts_with(string s, string p) bool {
     if len(p) > len(s) { return false }
     int i = 0
@@ -31,6 +32,7 @@ func starts_with(string s, string p) bool {
     }
     true
 }
+
 func substr(string s, int from, int to) string {
     string out = ""
     int i = from
@@ -40,6 +42,7 @@ func substr(string s, int from, int to) string {
     }
     out
 }
+
 func int_to_str(int n, int fallback) string {
     if n == 0 {
         return "0"
@@ -58,6 +61,7 @@ func int_to_str(int n, int fallback) string {
     }
     s
 }
+
 func fmt_float(float val, int decimals) string {
     if val == 0.0 {
         return "0.0"
@@ -83,6 +87,7 @@ func fmt_float(float val, int decimals) string {
     }
     s
 }
+
 func pad_float(float val, int w, int d) string {
     string s = fmt_float(val, d)
     while len(s) < w {
@@ -90,6 +95,7 @@ func pad_float(float val, int w, int d) string {
     }
     s
 }
+
 func split_lines(string s) []string {
     int capacity = 1
     int j = 0
@@ -121,6 +127,7 @@ func split_lines(string s) []string {
     }
     out
 }
+
 func parse_csv_floats(string s) []float {
     int capacity = 1
     int j = 0
@@ -151,6 +158,7 @@ func parse_csv_floats(string s) []float {
     }
     out
 }
+
 func parse_csv_ints(string s) []int {
     int capacity = 1
     int j = 0
@@ -181,6 +189,7 @@ func parse_csv_ints(string s) []int {
     }
     out
 }
+
 func str_to_int(string s, int fallback) int {
     if len(s) == 0 { return fallback }
     int sign = 1
@@ -195,6 +204,7 @@ func str_to_int(string s, int fallback) int {
     }
     sign * value
 }
+
 func str_to_float(string s) float {
     if len(s) == 0 { return 0.0 }
     bool neg = false
@@ -219,6 +229,7 @@ func str_to_float(string s) float {
     if neg { val = -val }
     val
 }
+
 func float_to_int(float x) int {
     int n = 0
     float y = x
@@ -234,6 +245,7 @@ func float_to_int(float x) int {
     }
     n
 }
+
 func shell_escape(string value) string {
     string out = "'"
     int i = 0
@@ -248,10 +260,12 @@ func shell_escape(string value) string {
     }
     out + "'"
 }
+
 func read_line(string path, int line_no) string {
     string cmd = "sed -n '" + int_to_str(line_no, 0) + "p' " + shell_escape(path)
     trim(runtime_run_command_output(cmd))
 }
+
 func resolve_checkpoint_path(string input_path) string {
     string checkpoint_path = input_path
     if runtime_file_exists(input_path + "/latest_checkpoint.txt") {
@@ -262,12 +276,14 @@ func resolve_checkpoint_path(string input_path) string {
     }
     checkpoint_path
 }
+
 func extract_weight_row_csv(string checkpoint_path, int row_id, int vocab_size) string {
     int start = row_id * vocab_size + 1
     int end = start + vocab_size - 1
     string cmd = "awk -F= '/^param0.data=/{print $2}' " + shell_escape(checkpoint_path) + " | cut -d',' -f" + int_to_str(start, 0) + "-" + int_to_str(end, 0)
     trim(runtime_run_command_output(cmd))
 }
+
 func csv_first_int(string s) int {
     string cur = ""
     int i = 0
@@ -280,6 +296,7 @@ func csv_first_int(string s) int {
     }
     str_to_int(trim(cur), 0)
 }
+
 func csv_second_int(string s) int {
     string cur = ""
     int i = 0
@@ -301,6 +318,7 @@ func csv_second_int(string s) int {
     }
     str_to_int(trim(cur), 0)
 }
+
 func argmax_next_row([]float weights_row, []float bias, int vocab_size) int {
     int best_id = 0
     float best_logit = weights_row[0] + bias[0]
@@ -315,6 +333,7 @@ func argmax_next_row([]float weights_row, []float bias, int vocab_size) int {
     }
     best_id
 }
+
 func main() int {
     string checkpoint_arg = trim(runtime_env_get("NEURX_INFER_CHECKPOINT", "artifacts/checkpoints/llm_s_pretrain"))
     string seed = runtime_env_get("NEURX_INFER_SEED", "neurx ")

@@ -10,6 +10,7 @@ type performance_monitor_config struct {
     alert_thresholds        map[string]float64
     enable_adaptive          bool
 }
+
 type performance_metrics struct {
     timestamp               int64
     throughput              float64
@@ -21,6 +22,7 @@ type performance_metrics struct {
     perplexity              float64
     cache_hit_rate          float64
 }
+
 type system_health_status struct {
     overall_status          string
     cpu_status              string
@@ -29,6 +31,7 @@ type system_health_status struct {
     network_status          string
     alerts                  []string
 }
+
 type performance_monitor struct {
     config                  performance_monitor_config
     metrics_history         []performance_metrics
@@ -36,6 +39,7 @@ type performance_monitor struct {
     alerts                  []alert
     recommendations         []string
 }
+
 type alert struct {
     timestamp               int64
     level                   string
@@ -44,6 +48,7 @@ type alert struct {
     threshold               float64
     message                 string
 }
+
 func (monitor *performance_monitor) collect_metrics() performance_metrics {
     sample_idx := float64(len(monitor.metrics_history))
     perplexity := 100.0 / (float64(len(monitor.metrics_history)/100) + 1.0)
@@ -67,6 +72,7 @@ func (monitor *performance_monitor) collect_metrics() performance_metrics {
     }
     return metrics
 }
+
 func (monitor *performance_monitor) assess_health() system_health_status {
     status := system_health_status{
         overall_status: "healthy",
@@ -111,6 +117,7 @@ func (monitor *performance_monitor) assess_health() system_health_status {
     monitor.health_history = append(monitor.health_history, status)
     return status
 }
+
 func (monitor *performance_monitor) check_alerts() []alert {
     alerts := []alert{}
     if len(monitor.metrics_history) == 0 {
@@ -176,6 +183,7 @@ func (monitor *performance_monitor) check_alerts() []alert {
     monitor.alerts = append(monitor.alerts, alerts...)
     return alerts
 }
+
 func (monitor *performance_monitor) generate_recommendations() {
     monitor.recommendations = []string{}
     if len(monitor.metrics_history) < 2 {
@@ -211,6 +219,7 @@ func (monitor *performance_monitor) generate_recommendations() {
         }
     }
 }
+
 func (monitor *performance_monitor) print_dashboard() {
     if len(monitor.metrics_history) == 0 {
         fmt.Println("No metrics collected yet")
@@ -246,6 +255,7 @@ func (monitor *performance_monitor) print_dashboard() {
         }
     }
 }
+
 func (monitor *performance_monitor) snapshot_summary() string {
     if len(monitor.metrics_history) == 0 {
         return "no metrics collected"
@@ -264,6 +274,7 @@ func (monitor *performance_monitor) snapshot_summary() string {
         len(health.alerts),
     )
 }
+
 func NewPerformanceMonitor() *performance_monitor {
     return &performance_monitor{
         config: performance_monitor_config{
@@ -283,6 +294,7 @@ func NewPerformanceMonitor() *performance_monitor {
         recommendations: []string{},
     }
 }
+
 func (monitor *performance_monitor) monitor_training(duration_steps int) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Performance Monitoring System                        ║")

@@ -108,11 +108,13 @@ func main() {
     print("  - Final step: " + itoa(step))
     print("  - Rank: " + itoa(rank.global_rank))
 }
+
 func simulate_training_step(int step) float {
     float base_loss = 10.0
     float loss = base_loss * (1.0 / float(step + 1))
     loss
 }
+
 func parse_int(string s, int fallback) int {
     int result = 0
     int i = 0
@@ -128,6 +130,7 @@ func parse_int(string s, int fallback) int {
     }
     result
 }
+
 func itoa(int n) string {
     if n == 0 {
         return "0"
@@ -145,6 +148,7 @@ func itoa(int n) string {
     }
     s
 }
+
 func ftoa(float f) string {
     int int_part = int(f)
     int frac_part = int((f - float(int_part)) * 1000000)

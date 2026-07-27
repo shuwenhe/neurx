@@ -9,6 +9,7 @@ struct wandb_run {
     int metrics_logged
     int steps_logged
 }
+
 func init_wandb(
     logger_config cfg,
     map[string]string additional_config
@@ -31,6 +32,7 @@ func init_wandb(
     println("WandB initialized. View at: " + r.run_url)
     r
 }
+
 func wandb_log_metric(
     wandb_run *run,
     string name,

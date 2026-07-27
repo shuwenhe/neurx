@@ -6,18 +6,21 @@ struct tensor_metadata {
     int64 data_offset
     int64 data_length
 }
+
 struct safetensors_file {
     string file_path
     int64 file_size
     []tensor_metadata tensors
     map[string]int tensor_name_to_index
 }
+
 func skip_whitespace(string json, int pos) int {
     while pos < json.length && (json[pos] == ' ' || json[pos] == '\n' || json[pos] == '\t' || json[pos] == '\r') {
         pos = pos + 1
     }
     return pos
 }
+
 func extract_string_value(string json, int start_pos) (string, int) {
     int i = start_pos
     string result = ""
@@ -32,6 +35,7 @@ func extract_string_value(string json, int start_pos) (string, int) {
     i = i + 1
     return result, i
 }
+
 func extract_number_value(string json, int start_pos) (int64, int) {
     int i = start_pos
     string num_str = ""
@@ -52,6 +56,7 @@ func extract_number_value(string json, int start_pos) (int64, int) {
     }
     return result * sign, i
 }
+
 func extract_array_values(string json, int start_pos) ([]int, int) {
     []int result = []
     int i = start_pos
@@ -82,12 +87,14 @@ func extract_array_values(string json, int start_pos) ([]int, int) {
     i = i + 1
     return result, i
 }
+
 func load_safetensors_header(string file_path) safetensors_file {
     safetensors_file result
     result.file_path = file_path
     println("Loading SafeTensors header from: " + file_path)
     return result
 }
+
 func verify_safetensors(safetensors_file file) bool {
     println("Verifying SafeTensors file: " + file.file_path)
     if file.tensors.length == 0 {
@@ -98,6 +105,7 @@ func verify_safetensors(safetensors_file file) bool {
     println("  Total tensors: " + int_to_string(file.tensors.length))
     return true
 }
+
 func get_tensor_metadata(safetensors_file file, string tensor_name) tensor_metadata {
     tensor_metadata empty_meta
     if tensor_name not in file.tensor_name_to_index {
@@ -107,6 +115,7 @@ func get_tensor_metadata(safetensors_file file, string tensor_name) tensor_metad
     int index = file.tensor_name_to_index[tensor_name]
     return file.tensors[index]
 }
+
 func print_tensor_info(safetensors_file file) {
     println("=== SafeTensors Tensors ===")
     int count = 0
@@ -120,6 +129,7 @@ func print_tensor_info(safetensors_file file) {
         count = count + 1
     }
 }
+
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -141,6 +151,7 @@ func int_to_string(int n) string {
     }
     return result
 }
+
 func int_to_hex(int n) string {
     string hex_chars = "0123456789ABCDEF"
     string result = "0x"

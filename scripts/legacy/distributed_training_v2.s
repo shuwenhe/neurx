@@ -23,6 +23,7 @@ type distributed_config_v2 struct {
     enable_flash_attention: bool
     mixed_precision_dtype: string
 }
+
 func create_7b_distributed_config(): distributed_config_v2 {
     return distributed_config_v2{
         backend: "nccl",
@@ -43,40 +44,48 @@ func create_7b_distributed_config(): distributed_config_v2 {
         mixed_precision_dtype: "fp16",
     }
 }
+
 type grad_accum_manager struct {
     accum_steps: int
     current_step: int
     accumulated_grads: map[string]float
     is_sync_step: bool
 }
+
 func (gm *grad_accum_manager) init(accum_steps: int) {
     gm.accum_steps = accum_steps
     gm.current_step = 0
     gm.accumulated_grads = make(map[string]float)
     gm.is_sync_step = false
 }
+
 func (gm *grad_accum_manager) step(grad_norm: float) {
     gm.current_step++
     gm.accumulated_grads["grad_norm"] = grad_norm
     gm.is_sync_step = (gm.current_step % gm.accum_steps) == 0
 }
+
 func (gm *grad_accum_manager) should_sync(): bool {
     return gm.is_sync_step
 }
+
 func (gm *grad_accum_manager) get_effective_batch_multiplier(): int {
     return gm.accum_steps
 }
+
 func (gm *grad_accum_manager) reset() {
     gm.current_step = 0
     gm.is_sync_step = false
     gm.accumulated_grads = make(map[string]float)
 }
+
 type activation_ckpt_manager struct {
     checkpoint_strategy: string
     layer_checkpoint_map: map[int]bool
     total_layers: int
     memory_savings_percent: float
 }
+
 func (acm *activation_ckpt_manager) init(total_layers: int, strategy: string) {
     acm.total_layers = total_layers
     acm.checkpoint_strategy = strategy
@@ -96,12 +105,14 @@ func (acm *activation_ckpt_manager) init(total_layers: int, strategy: string) {
         acm.memory_savings_percent = 0.0
     }
 }
+
 func (acm *activation_ckpt_manager) should_checkpoint(layer_id: int): bool {
     if val, exists := acm.layer_checkpoint_map[layer_id]; exists {
         return val
     }
     return false
 }
+
 type mixed_precision_manager struct {
     dtype: string
     compute_dtype: string
@@ -109,6 +120,7 @@ type mixed_precision_manager struct {
     loss_scaling: float
     loss_scaling_enabled: bool
 }
+
 func (mpm *mixed_precision_manager) init(dtype: string) {
     mpm.dtype = dtype
     mpm.loss_scaling_enabled = (dtype != "fp32")
@@ -128,12 +140,14 @@ func (mpm *mixed_precision_manager) init(dtype: string) {
         mpm.loss_scaling_enabled = false
     }
 }
+
 func (mpm *mixed_precision_manager) get_memory_savings(): float {
     if mpm.dtype == "fp32" {
         return 0.0
     }
     return 50.0
 }
+
 type large_model_distributed_trainer struct {
     config: distributed_config_v2
     grad_accum: grad_accum_manager
@@ -144,6 +158,7 @@ type large_model_distributed_trainer struct {
     is_master: bool
     estimated_memory_gb: float
 }
+
 func (lmdt *large_model_distributed_trainer) init(world_size: int, rank: int) error {
     lmdt.config = create_7b_distributed_config()
     lmdt.config.world_size = world_size
@@ -160,6 +175,7 @@ func (lmdt *large_model_distributed_trainer) init(world_size: int, rank: int) er
     lmdt.estimate_memory()
     return nil
 }
+
 func (lmdt *large_model_distributed_trainer) estimate_memory() {
     model_weights_gb := 7.0 * 4.0 / 1024.0
     gradients_gb := model_weights_gb
@@ -174,6 +190,7 @@ func (lmdt *large_model_distributed_trainer) estimate_memory() {
     total_gb := (model_weights_gb + gradients_gb + optimizer_states_gb + activations_gb) * 1.2
     lmdt.estimated_memory_gb = total_gb
 }
+
 func (lmdt *large_model_distributed_trainer) step(loss: float) {
     lmdt.global_step++
     lmdt.grad_accum.step(loss)
@@ -182,6 +199,7 @@ func (lmdt *large_model_distributed_trainer) step(loss: float) {
         lmdt.grad_accum.reset()
     }
 }
+
 func (lmdt *large_model_distributed_trainer) print_config() {
     if !lmdt.is_master {
         return
@@ -216,6 +234,7 @@ func (lmdt *large_model_distributed_trainer) print_config() {
     fmt.Printf("  Max Sequence:     32,768 tokens\n")
     fmt.Printf("\n✅ System Ready for 7B Model Training\n\n")
 }
+
 func (lmdt *large_model_distributed_trainer) get_status(): map[string]interface{} {
     return map[string]interface{}{
         "global_step": lmdt.global_step,
@@ -228,6 +247,7 @@ func (lmdt *large_model_distributed_trainer) get_status(): map[string]interface{
         "rank": lmdt.config.rank,
     }
 }
+
 func main() {
     world_size := 1
     rank := 0

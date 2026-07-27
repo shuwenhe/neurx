@@ -38,6 +38,7 @@ func main() {
         showHelp()
     }
 }
+
 func runTraining(args []string) {
     fmt.Println("🚀 Starting NeurX Training Pipeline (Pure S Implementation)")
     fmt.Println("=" * 60)
@@ -106,6 +107,7 @@ func runTraining(args []string) {
     elapsed := time.Since(startTime)
     fmt.Printf("\n✅ Training completed in %v\n", elapsed)
 }
+
 func runInference(args []string) {
     fmt.Println("🔮 Starting NeurX Inference (Pure S Implementation)")
     fmt.Println("=" * 60)
@@ -129,6 +131,7 @@ func runInference(args []string) {
         fmt.Printf("❌ Inference failed: %v\n", err)
     }
 }
+
 func runDistributed(args []string) {
     fmt.Println("🌐 Starting NeurX Distributed Training (Pure S Implementation)")
     fmt.Println("=" * 60)
@@ -152,6 +155,7 @@ func runDistributed(args []string) {
         fmt.Printf("❌ Distributed training failed: %v\n", err)
     }
 }
+
 func runBenchmark(args []string) {
     fmt.Println("⏱️  Running NeurX Benchmark (Pure S Implementation)")
     fmt.Println("=" * 60)
@@ -181,10 +185,12 @@ func runBenchmark(args []string) {
         }
     }
 }
+
 func runBenchmarkStep(scale string, numGPUs int) float32 {
     baseThroughput := float32(100)
     return baseThroughput * float32(numGPUs)
 }
+
 func runBuild(args []string) {
     fmt.Println("🔨 Building NeurX (Pure S Implementation)")
     fmt.Println("=" * 60)
@@ -201,6 +207,7 @@ func runBuild(args []string) {
         fmt.Printf("Unknown build option: %s\n", args[0])
     }
 }
+
 func buildAllComponents() {
     components := []string{
         "model/transformer/transformer_block.s",
@@ -214,6 +221,7 @@ func buildAllComponents() {
     }
     fmt.Println("\n✅ Build completed successfully")
 }
+
 func buildCoreComponents() {
     components := []string{
         "model/transformer/transformer_block.s",
@@ -224,11 +232,13 @@ func buildCoreComponents() {
     }
     fmt.Println("\n✅ Quick build completed")
 }
+
 func cleanBuild() {
     fmt.Println("  Removing old builds...")
     fmt.Println("  Rebuilding components...")
     buildAllComponents()
 }
+
 func showHelp() {
     fmt.Println(`
 ╔════════════════════════════════════════════════════════════╗
@@ -293,6 +303,7 @@ DOCUMENTATION:
 For more information, visit: https:
 `)
 }
+
 func operator*(s string, n int) string {
     result := ""
     for i := 0; i < n; i++ {
@@ -300,6 +311,7 @@ func operator*(s string, n int) string {
     }
     return result
 }
+
 func init() {
     fmt.Println("NeurX - Complete S Language Implementation")
     fmt.Println("Loading core modules...")

@@ -65,6 +65,7 @@ struct training_orchestrator_config {
     bool enable_elastic_training
     int max_retries_per_step
 }
+
 struct gpu_topology_entry {
     int global_rank
     int tp_rank
@@ -73,6 +74,7 @@ struct gpu_topology_entry {
     int node_id
     int local_gpu_id
 }
+
 struct orchestrator_state {
     training_orchestrator_config config
     []gpu_topology_entry topology_map
@@ -99,6 +101,7 @@ struct orchestrator_state {
     double current_throughput_tokens_sec
     double current_tflops
 }
+
 func orch_mod(int v, int d) int {
     if d <= 0 { return 0 }
     int r = v
@@ -106,6 +109,7 @@ func orch_mod(int v, int d) int {
     while r < 0 { r = r + d }
     return r
 }
+
 func config_2t_256gpus() training_orchestrator_config {
     training_orchestrator_config c
     c.vocab_size = 128000
@@ -152,6 +156,7 @@ func config_2t_256gpus() training_orchestrator_config {
     c.max_retries_per_step = 3
     return c
 }
+
 func config_2t_512gpus() training_orchestrator_config {
     training_orchestrator_config c = config_2t_256gpus()
     c.world_size = 512
@@ -163,6 +168,7 @@ func config_2t_512gpus() training_orchestrator_config {
     c.save_every_n_steps = 500
     return c
 }
+
 func config_2t_debug_8gpus() training_orchestrator_config {
     training_orchestrator_config c = config_2t_256gpus()
     c.world_size = 8
@@ -183,6 +189,7 @@ func config_2t_debug_8gpus() training_orchestrator_config {
     c.log_interval = 1
     return c
 }
+
 func init_orchestrator(training_orchestrator_config cfg, int global_rank) orchestrator_state {
     orchestrator_state state
     state.config = cfg
@@ -212,6 +219,7 @@ func init_orchestrator(training_orchestrator_config cfg, int global_rank) orches
     state.mp_state = init_mixed_precision(state)
     return state
 }
+
 func build_topology(int world_size, int tp, int pp, int dp) []gpu_topology_entry {
     []gpu_topology_entry map = []gpu_topology_entry{cap: world_size}
     int gpus_per_node = 8
@@ -233,21 +241,27 @@ func build_topology(int world_size, int tp, int pp, int dp) []gpu_topology_entry
     }
     return map
 }
+
 func init_process_groups(orchestrator_state state) object {
     return {}
 }
+
 func init_tp_system(orchestrator_state state) object {
     return {}
 }
+
 func init_pp_system(orchestrator_state state) object {
     return {}
 }
+
 func init_fsdp_system(orchestrator_state state) object {
     return {}
 }
+
 func init_mixed_precision(orchestrator_state state) object {
     return {}
 }
+
 func run_training_loop(ref orchestrator_state state) {
     training_orchestrator_config cfg = state.config
     int total_steps = cfg.total_training_steps
@@ -287,6 +301,7 @@ func run_training_loop(ref orchestrator_state state) {
     save_distributed_checkpoint(state, total_steps)
     print_training_summary(state)
 }
+
 func compute_learning_rate(orchestrator_state state, int step) double {
     training_orchestrator_config cfg = state.config
     if step < cfg.warmup_steps {
@@ -307,6 +322,7 @@ func compute_learning_rate(orchestrator_state state, int step) double {
     }
     return cfg.learning_rate
 }
+
 func cos_double(double x) double {
     double result = 1.0
     double term = 1.0
@@ -319,6 +335,7 @@ func cos_double(double x) double {
     }
     return result
 }
+
 func log_training_status(
     orchestrator_state state,
     int step,
@@ -328,6 +345,7 @@ func log_training_status(
     double elapsed_s = (0.0 - state.training_start_time_ms) / 1000.0
     double eta_hours = (elapsed_s / double(step + 1)) * double(state.config.total_training_steps - step - 1) / 3600.0
 }
+
 func pad_int(int value, int width) string {
     string s = str(value)
     while len(s) < width {
@@ -335,25 +353,31 @@ func pad_int(int value, int width) string {
     }
     return s
 }
+
 func format_float(double value, int decimals) string {
     return str(int(value * pow_dbl_o(10.0, decimals)))
 }
+
 func format_scientific(double value) string {
     return str(value)
 }
+
 func format_int(int value) string {
     return str(value)
 }
+
 func save_distributed_checkpoint(orchestrator_state state, int step) {
     string ckpt_dir = state.config.checkpoint_dir + "/step_" + str(step)
     if state.config.async_checkpoint {
     } else {
     }
 }
+
 func print_training_summary(orchestrator_state state) {
     double total_time_h = (0.0 - state.training_start_time_ms) / (1000.0 * 3600.0)
     double avg_loss = state.accumulated_loss / double(state.current_step)
 }
+
 struct memory_estimate_result {
     double params_per_gpu_gb
     double grads_per_gpu_gb
@@ -363,6 +387,7 @@ struct memory_estimate_result {
     bool fits_in_memory
     string recommendation
 }
+
 func estimate_memory_usage(training_orchestrator_config cfg) memory_estimate_result {
     memory_estimate_result result
     long_params = (
@@ -408,6 +433,7 @@ func estimate_memory_usage(training_orchestrator_config cfg) memory_estimate_res
     }
     return result
 }
+
 func pow_dbl_o(double base, double exp) double {
     double result = 1.0
     int e = 0

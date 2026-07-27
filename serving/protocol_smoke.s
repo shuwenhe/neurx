@@ -4,6 +4,7 @@ func fail(string message) int {
     println("serving-protocol FAIL " + message)
     1
 }
+
 func main() int {
     if serving_route_kind("POST", "/v1/chat/completions") != "openai-chat" { return fail("openai-route") }
     if serving_route_kind("POST", "/generate_stream") != "tgi-stream" { return fail("tgi-route") }

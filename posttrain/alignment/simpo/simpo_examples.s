@@ -19,6 +19,7 @@ func create_simpo_config() simpo_config {
         save_interval: 10,
     }
 }
+
 func example_basic_simpo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 1: Basic SimPO Training                          ║")
@@ -62,6 +63,7 @@ func example_basic_simpo_training() {
     simpo_state state = start_simpo_training(cfg, batches)
     print("")
 }
+
 func example_algorithm_comparison() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 2: Algorithm Comparison                          ║")
@@ -95,6 +97,7 @@ func example_algorithm_comparison() {
     print("  ORPO: Slower (more constraints)")
     print("")
 }
+
 func example_margin_based_learning() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 3: Margin-Based Learning                         ║")
@@ -123,6 +126,7 @@ func example_margin_based_learning() {
     print("  Low margin → High loss (needs improvement)")
     print("")
 }
+
 func example_training_dynamics() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 4: Training Dynamics                             ║")
@@ -144,6 +148,7 @@ func example_training_dynamics() {
     print("  • Convergence in ~2-3 epochs")
     print("")
 }
+
 func example_hyperparameter_sensitivity() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 5: Hyperparameter Sensitivity                    ║")
@@ -170,6 +175,7 @@ func example_hyperparameter_sensitivity() {
     print("  1e-3 | Fast      | Risky     | May diverge")
     print("")
 }
+
 func example_complete_pipeline() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 6: Complete Alignment Pipeline with SimPO         ║")
@@ -212,6 +218,7 @@ func example_complete_pipeline() {
     print("  • Evaluation: 1 day")
     print("")
 }
+
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -228,18 +235,23 @@ func main() {
     print("     All SimPO examples completed!                          ")
     print("═════════════════════════════════════════════════════════════")
 }
+
 func int_to_string_ex(int i) string {
     string(i)
 }
+
 func float_to_string_ex(float f) string {
     string(int(f * 10000.0) / 10000.0)
 }
+
 func append_int_ex([]int arr, int val) []int {
     arr
 }
+
 func append_pair_ex([]simpo_preference_pair arr, simpo_preference_pair p) []simpo_preference_pair {
     arr
 }
+
 func append_batch_ex([]simpo_batch arr, simpo_batch b) []simpo_batch {
     arr
 }

@@ -26,6 +26,7 @@ func main() int {
     println("Use make train / make run-s-pretrain-s for the compiled training backend.")
     0
 }
+
 func print_flag(string name, bool ok) {
     if ok {
         println("  - " + name + ": ready")

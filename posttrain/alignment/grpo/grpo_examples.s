@@ -37,6 +37,7 @@ func create_grpo_example_config() grpo_train_config {
         output_dir: "./outputs/grpo/",
     }
 }
+
 func create_grpo_example_dataset() grpo_dataset {
     grpo_dataset {
         prompts: []string{},
@@ -47,6 +48,7 @@ func create_grpo_example_dataset() grpo_dataset {
         quality_score: 0.95,
     }
 }
+
 func example_basic_grpo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║        Example 1: Basic GRPO Training for Math             ║")
@@ -78,6 +80,7 @@ func example_basic_grpo_training() {
     print("  Avg Reward: " + string_float(result.avg_reward))
     print("  checkpoint: " + result.checkpoint_path)
 }
+
 func example_grpo_group_size_comparison() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║     Example 2: GRPO with Different Group Sizes             ║")
@@ -115,6 +118,7 @@ func example_grpo_group_size_comparison() {
     print("  - Smaller G → More frequent gradient updates")
     print("  - G=8 often provides good trade-off")
 }
+
 func example_distributed_grpo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║       Example 3: Distributed GRPO on 64 GPUs              ║")
@@ -146,6 +150,7 @@ func example_distributed_grpo_training() {
         print("✓ Distributed training completed!")
     }
 }
+
 func example_alignment_methods_comparison() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 4: GRPO vs PPO vs DPO Comparison                 ║")
@@ -175,6 +180,7 @@ func example_alignment_methods_comparison() {
     print("  → Prefer over DPO: Multiple outputs per prompt needed")
     print("  → Prefer DPO: General instruction following")
 }
+
 func example_grpo_long_context() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║   Example 5: GRPO with Long Context (32K tokens)          ║")
@@ -194,6 +200,7 @@ func example_grpo_long_context() {
     print("  ✓ Better context utilization")
     print("  ✓ Suitable for code generation")
 }
+
 func example_custom_reward_functions() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║   Example 6: Custom Reward Functions for Domain Tasks      ║")
@@ -217,6 +224,7 @@ func example_custom_reward_functions() {
     print("   - Accuracy reward: Fact-checked against ground truth")
     print("")
 }
+
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -229,12 +237,15 @@ func main() {
     print("     All examples completed!                                 ")
     print("═════════════════════════════════════════════════════════════")
 }
+
 func load_pretrained_grpo_model(string model_name) neurx_model {
     neurx_model{}
 }
+
 func load_tokenizer_grpo() tokenizer_state {
     tokenizer_state{}
 }
+
 func create_grpo_trainer(
     neurx_model model,
     neurx_model ref_model,
@@ -273,6 +284,7 @@ func create_grpo_trainer(
         eval_loader: dataloader{},
     }
 }
+
 func string_float(float f) string {
     int int_part = int(f)
     int frac_part = int((f - float_of_int(int_part)) * 10000.0)

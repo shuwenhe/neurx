@@ -11,6 +11,7 @@ func workflow_skill_feedback(string skill_name, string task, string signal, stri
         success: success,
     }
 }
+
 func run_agent_skills_workflow_state(int max_generations, float promotion_threshold, float retire_threshold, float min_success_rate, int max_avg_steps) skill_evolution_state {
     skill_evolution_config config = new_skill_evolution_config(max_generations, promotion_threshold, retire_threshold, min_success_rate, max_avg_steps)
     skill_evolution_state state = new_skill_evolution_state(config)
@@ -22,6 +23,7 @@ func run_agent_skills_workflow_state(int max_generations, float promotion_thresh
     state = skill_evolution_step(state, workflow_skill_feedback("code", "infer", "infer:tool_unavailable", "task=infer action=infer observation=tool_unavailable", 3, false))
     state
 }
+
 func run_agent_skills_workflow(int max_generations, float promotion_threshold, float retire_threshold, float min_success_rate, int max_avg_steps, string output_dir) int {
     skill_evolution_state state = run_agent_skills_workflow_state(max_generations, promotion_threshold, retire_threshold, min_success_rate, max_avg_steps)
     string report_path = output_dir + "/candidate_report.txt"

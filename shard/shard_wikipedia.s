@@ -19,9 +19,11 @@ struct shard_metadata {
     int num_documents
     int size_bytes
 }
+
 func string_char(int c) string {
     string(c)
 }
+
 func trim(string s) string {
     int begin = 0
     while begin < len(s) {
@@ -49,6 +51,7 @@ func trim(string s) string {
     }
     out
 }
+
 func parse_int(string s, int fallback) int {
     string text = trim(s)
     if len(text) == 0 {
@@ -73,6 +76,7 @@ func parse_int(string s, int fallback) int {
     }
     sign * value
 }
+
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -92,6 +96,7 @@ func int_to_str(int n) string {
     }
     out
 }
+
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
@@ -107,6 +112,7 @@ func shell_escape(string s) string {
     out = out + "'"
     out
 }
+
 func basename(string path) string {
     int last = -1
     int i = 0
@@ -130,6 +136,7 @@ func basename(string path) string {
     }
     out
 }
+
 func parent_dir(string path) string {
     int last = -1
     int i = 0
@@ -150,26 +157,32 @@ func parent_dir(string path) string {
     }
     out
 }
+
 func file_exists(string path) bool {
     let (_, code) = command("test -f " + shell_escape(path))
     code == 0
 }
+
 func dir_exists(string path) bool {
     let (_, code) = command("test -d " + shell_escape(path))
     code == 0
 }
+
 func make_dir(string path) bool {
     let (_, code) = command("mkdir -p " + shell_escape(path))
     code == 0
 }
+
 func write_text_file(string path, string content) bool {
     let (_, code) = command("printf %s " + shell_escape(content) + " > " + shell_escape(path))
     code == 0
 }
+
 func read_command_output(string cmd) string {
     let (out, _) = command(cmd)
     trim(out)
 }
+
 func shard_name(int index) string {
     string s = int_to_str(index)
     while len(s) < 5 {
@@ -177,6 +190,7 @@ func shard_name(int index) string {
     }
     "shard_" + s + ".jsonl"
 }
+
 func json_escape(string s) string {
     string out = "\""
     int i = 0
@@ -200,6 +214,7 @@ func json_escape(string s) string {
     out = out + "\""
     out
 }
+
 func generate_manifest_json(int total_pages, int total_shards, []shard_metadata shards) string {
     string json = "{\n"
     json = json + "  \"dataset_name\": \"neurx-wikipedia\",\n"
@@ -229,6 +244,7 @@ func generate_manifest_json(int total_pages, int total_shards, []shard_metadata 
     json = json + "}\n"
     json
 }
+
 func process_wikipedia() int {
     println("")
     println("╔══════════════════════════════════════════════════════════╗")
@@ -342,6 +358,7 @@ func process_wikipedia() int {
     println("[+] manifest : " + g_manifest_file)
     return 0
 }
+
 func main() int {
     string neurx_home = runtime_env_get("NEURX_HOME", ".")
     string dataset_root = neurx_home + "/dataset/pretrain"

@@ -14,6 +14,7 @@ func findSCompiler() string {
     }
     return ""
 }
+
 func main() {
     realS := findSCompiler()
     if realS == "" {

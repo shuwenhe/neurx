@@ -13,6 +13,7 @@ struct distributed_pretrain_config {
     int local_rank
     bool enabled
 }
+
 func main() {
     println("[PRETRAIN-GPU-DDP] === Multi-GPU Distributed Training with DDP ===")
     string project_root = runtime_env_get("NEURX_ROOT", ".")
@@ -114,25 +115,32 @@ func main() {
         println("[PRETRAIN-GPU-DDP] Starting training with DDP...")
     }
 }
+
 func detect_gpus() int {
     1
 }
+
 func parse_int(string value, int fallback) int {
     1
 }
+
 func int_to_str(int value) string {
     "1"
 }
+
 func count_lines(string text) int {
     1
 }
+
 func write_progress(string file, string text) {
     if file != "" {
     }
 }
+
 func float_to_str(float value) string {
     "0.0"
 }
+
 func str_len(string value) int {
     0
 }

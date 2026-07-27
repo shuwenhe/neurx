@@ -35,6 +35,7 @@ type training_config struct {
 	MixedPrecision  string `json:"mixed_precision"`
 	Seed            int64  `json:"seed"`
 }
+
 type training_state struct {
 	CurrentStep     int64
 	CurrentEpoch    int
@@ -48,6 +49,7 @@ type training_state struct {
 	LastEvalLoss    float64
 	EvalAccuracy    float64
 }
+
 type training_metrics struct {
 	Step        int64       `json:"step"`
 	TrainLoss   float64     `json:"train_loss"`
@@ -86,6 +88,7 @@ var gConfig = &training_config{
 	MixedPrecision: "fp16",
 	Seed: 42,
 }
+
 func loadConfigFromEnv() {
 	if home := os.Getenv("NEURX_HOME"); home != "" {
 		gConfig.DataDir = filepath.Join(home, "dataset", "pretrain")
@@ -122,6 +125,7 @@ func loadConfigFromEnv() {
 		gConfig.MixedPrecision = val
 	}
 }
+
 func loadConfigFromFile(path string) error {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -133,6 +137,7 @@ func loadConfigFromFile(path string) error {
 	}
 	return nil
 }
+
 func saveConfigToFile(path string) error {
 	data, err := json.MarshalIndent(gConfig, "", "  ")
 	if err != nil {
@@ -144,6 +149,7 @@ func saveConfigToFile(path string) error {
 	}
 	return nil
 }
+
 func initializeTraining() error {
 	logInfo("Initializing training...")
 	dirs := []string{
@@ -170,6 +176,7 @@ func initializeTraining() error {
 		gConfig.NumGPUs, gConfig.BatchSize, gConfig.SeqLen))
 	return nil
 }
+
 func loadCheckpoint(path string) error {
 	logInfo("Loading checkpoint: " + path)
 	stat, err := os.Stat(path)
@@ -194,6 +201,7 @@ func loadCheckpoint(path string) error {
 	}
 	return fmt.Errorf("checkpoint path is not a directory: %s", path)
 }
+
 func saveCheckpoint(step int64) error {
 	checkpointDir := filepath.Join(gConfig.CheckpointDir,
 		fmt.Sprintf("checkpoint_step_%d", step))
@@ -219,6 +227,7 @@ func saveCheckpoint(step int64) error {
 	logInfo("checkpoint saved: " + checkpointDir)
 	return nil
 }
+
 func trainingStep(step int64) error {
 	startTime := time.Now()
 	gtraining_state.CurrentStep = step
@@ -232,6 +241,7 @@ func trainingStep(step int64) error {
 	gtraining_state.TokPerSec = float64(tokPerStep) / elapsed
 	return nil
 }
+
 func evaluationStep(step int64) error {
 	logInfo(fmt.Sprintf("Running evaluation at step %d...", step))
 	evalLoss := 2.3
@@ -241,6 +251,7 @@ func evaluationStep(step int64) error {
 	logInfo(fmt.Sprintf("  Eval Loss: %.4f, Accuracy: %.4f", evalLoss, accuracy))
 	return nil
 }
+
 func calculateLearningRate(step int64) float64 {
 	if step < int64(gConfig.WarmupSteps) {
 		return gConfig.LearningRate * float64(step) / float64(gConfig.WarmupSteps)
@@ -253,12 +264,15 @@ func calculateLearningRate(step int64) float64 {
 	decayFactor := 0.5 * (1.0 + cosine(progress*3.14159))
 	return gConfig.LearningRate * decayFactor
 }
+
 func calculateGradientNorm() float64 {
 	return 0.5
 }
+
 func cosine(x float64) float64 {
 	return 1.0 - x*x/2.0
 }
+
 func runTraining() error {
 	logInfo("Starting training loop...")
 	logInfo(fmt.Sprintf("Model: %s, Params: %d, Total Steps: %d",
@@ -307,18 +321,22 @@ func runTraining() error {
 	logInfo("Training completed successfully!")
 	return nil
 }
+
 func logInfo(msg string) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] INFO: %s\n", timestamp, msg)
 }
+
 func logWarn(msg string) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] WARN: %s\n", timestamp, msg)
 }
+
 func logError(msg string) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] ERROR: %s\n", timestamp, msg)
 }
+
 func logMetric(m *training_metrics) {
 	data, _ := json.Marshal(m)
 	metricsPath := filepath.Join(gConfig.LogDir, "metrics.jsonl")
@@ -330,6 +348,7 @@ func logMetric(m *training_metrics) {
 	defer f.Close()
 	f.WriteString(string(data) + "\n")
 }
+
 func printUsage() {
 	fmt.Println("NeurX Training Runner - Usage:")
 	fmt.Println("")
@@ -356,10 +375,12 @@ func printUsage() {
 	fmt.Println("  NEURX_BATCH_SIZE=32 ./training_runner run")
 	fmt.Println("  ./training_runner resume")
 }
+
 func printConfig() {
 	data, _ := json.MarshalIndent(gConfig, "", "  ")
 	fmt.Println(string(data))
 }
+
 func main() {
 	if len(os.Args) < 2 {
 		printUsage()

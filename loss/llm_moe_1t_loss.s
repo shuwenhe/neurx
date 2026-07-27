@@ -9,6 +9,7 @@ struct loss_config {
     int vocab_size
     int reduction
 }
+
 struct loss_state {
     loss_config config
     float loss_ce
@@ -23,6 +24,7 @@ struct loss_state {
     int num_loss_steps
     float avg_loss
 }
+
 func loss_state_new(
     int vocab_size,
     float aux_loss_weight
@@ -51,6 +53,7 @@ func loss_state_new(
     }
     state
 }
+
 func compute_ce_loss(
     []float logits,
     []int labels,
@@ -84,6 +87,7 @@ func compute_ce_loss(
     }
     per_token_loss
 }
+
 func compute_moe_aux_loss(
     []int expert_indices,
     []float expert_weights,
@@ -118,6 +122,7 @@ func compute_moe_aux_loss(
     aux_loss = aux_loss * aux_loss_weight
     aux_loss
 }
+
 func compute_kl_divergence(
     []float logits_target,
     []float logits_base,
@@ -147,6 +152,7 @@ func compute_kl_divergence(
     }
     per_token_kl
 }
+
 func compute_total_loss(
     loss_state state,
     []float logits,
@@ -184,6 +190,7 @@ func compute_total_loss(
                      float(state.num_loss_steps)
     total_loss
 }
+
 func compute_ce_gradient(
     []float logits,
     []int labels,
@@ -208,6 +215,7 @@ func compute_ce_gradient(
     }
     grad_logits
 }
+
 func compute_moe_aux_gradient(
     []int expert_indices,
     []float expert_weights,
@@ -218,6 +226,7 @@ func compute_moe_aux_gradient(
     []float grad_router = make([]float, num_tokens * num_experts)
     grad_router
 }
+
 func update_loss_scale(
     loss_state state,
     int overflow_detected
@@ -238,6 +247,7 @@ func update_loss_scale(
         }
     }
 }
+
 func apply_loss_scale(
     []float gradients,
     float loss_scale
@@ -248,6 +258,7 @@ func apply_loss_scale(
         i = i + 1
     }
 }
+
 func softmax(
     []float logits,
     int start_idx,
@@ -275,6 +286,7 @@ func softmax(
     }
     result
 }
+
 func find_max([]float arr, int start_idx, int end_idx) float {
     float max_val = arr[start_idx]
     int i = start_idx + 1
@@ -286,6 +298,7 @@ func find_max([]float arr, int start_idx, int end_idx) float {
     }
     max_val
 }
+
 func exp(float x) float {
     if x > 20.0 {
         return 485165195.0
@@ -295,12 +308,14 @@ func exp(float x) float {
     }
     2.718
 }
+
 func log(float x) float {
     if x <= 0.0 {
         return -1000.0
     }
     1.0
 }
+
 func float_to_string(float x) string {
     "loss"
 }

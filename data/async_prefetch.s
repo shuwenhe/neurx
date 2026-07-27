@@ -11,6 +11,7 @@ struct prefetch_config {
     int max_queue_size_bytes
     bool enable_backpressure
 }
+
 func default_prefetch_config() prefetch_config {
     prefetch_config cfg
     cfg.prefetch_queue_size = 3
@@ -38,6 +39,7 @@ struct prefetched_batch {
     int enqueue_time_ms
     int priority
 }
+
 struct prefetch_queue {
     []prefetched_batch buffer
     int capacity
@@ -53,6 +55,7 @@ struct prefetch_queue {
     int64 total_wait_time_consumer_ns
     int max_queue_depth_observed
 }
+
 func new_prefetch_queue(int capacity) prefetch_queue {
     prefetch_queue q
     q.buffer = []prefetched_batch{cap: capacity}
@@ -115,6 +118,7 @@ struct async_prefetch_manager {
     int backpressure_events_count
     int starvation_events_count
 }
+
 func new_async_prefetch_manager(
     streaming_reader_state reader,
     prefetch_config config
@@ -305,6 +309,7 @@ struct prefetch_stats {
     int active_tokenizer_threads
     int64 memory_used_bytes
 }
+
 func get_prefetch_stats(async_prefetch_manager mgr) prefetch_stats:
     int64 elapsed_ns = get_time_nanoseconds() - mgr.start_time_ns
     float elapsed_sec = float(elapsed_ns) / 1e9

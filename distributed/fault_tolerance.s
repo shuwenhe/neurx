@@ -7,12 +7,14 @@ struct checkpoint_state {
     []int rank_versions
     bool is_complete
 }
+
 struct recovery_config {
     int checkpoint_interval_steps
     int max_recovery_time_ms
     bool enable_elastic_training
     int straggler_threshold_percentile
 }
+
 struct fault_tolerance_state {
     []checkpoint_state checkpoints
     recovery_config config
@@ -20,6 +22,7 @@ struct fault_tolerance_state {
     int recovery_attempts
     int stragglers_detected
 }
+
 func new_fault_tolerance_state(int checkpoint_interval) fault_tolerance_state {
     fault_tolerance_state {
         checkpoints: []checkpoint_state{cap: 1000},
@@ -34,6 +37,7 @@ func new_fault_tolerance_state(int checkpoint_interval) fault_tolerance_state {
         stragglers_detected: 0,
     }
 }
+
 func save_distributed_checkpoint(fault_tolerance_state state, int step, string checkpoint_dir) checkpoint_state {
     checkpoint_state ckpt = checkpoint_state {
         step_number: step,
@@ -45,28 +49,36 @@ func save_distributed_checkpoint(fault_tolerance_state state, int step, string c
     }
     ckpt
 }
+
 func restore_from_checkpoint(fault_tolerance_state state) fault_tolerance_state {
     state.recovery_attempts = state.recovery_attempts + 1
     state
 }
+
 func detect_stragglers([]int iteration_times_ms) []int {
     []int{cap: 10}
 }
+
 func rebalance_work_for_stragglers([]int straggler_ranks, int world_size) []int {
     []int{cap: world_size}
 }
+
 func add_rank_elastic(fault_tolerance_state state, int new_rank_id) fault_tolerance_state {
     state
 }
+
 func remove_rank_elastic(fault_tolerance_state state, int removed_rank_id) fault_tolerance_state {
     state
 }
+
 func save_checkpoint_async(fault_tolerance_state state, int step, string checkpoint_dir) int {
     0
 }
+
 func check_async_checkpoint_status(int task_id) bool {
     false
 }
+
 struct heartbeat_entry {
     int rank
     int node_id
@@ -75,6 +87,7 @@ struct heartbeat_entry {
     float current_loss
     bool is_healthy
 }
+
 struct multi_node_recovery_plan {
     int failed_rank
     int recovery_step
@@ -83,6 +96,7 @@ struct multi_node_recovery_plan {
     int max_retries
     bool in_progress
 }
+
 struct fault_tolerance_multi_node {
     int world_size
     int num_nodes
@@ -92,6 +106,7 @@ struct fault_tolerance_multi_node {
     int max_recovery_retries
     string checkpoint_dir
 }
+
 func init_multi_node_fault_tolerance(
     int world_size,
     int num_nodes,
@@ -107,6 +122,7 @@ func init_multi_node_fault_tolerance(
         checkpoint_dir: checkpoint_dir,
     }
 }
+
 func record_rank_heartbeat(
     fault_tolerance_multi_node& ft_mn,
     int rank,
@@ -124,6 +140,7 @@ func record_rank_heartbeat(
     }
     ft_mn.heartbeats[rank] = hb
 }
+
 func detect_failed_ranks_multi_node(
     fault_tolerance_multi_node& ft_mn,
     int current_time_sec,
@@ -142,6 +159,7 @@ func detect_failed_ranks_multi_node(
     }
     failed
 }
+
 func plan_multi_node_recovery(
     fault_tolerance_multi_node& ft_mn,
     []int failed_ranks,
@@ -173,6 +191,7 @@ func plan_multi_node_recovery(
     }
     true
 }
+
 func execute_multi_node_recovery(
     fault_tolerance_multi_node& ft_mn,
     int rank,
@@ -184,12 +203,14 @@ func execute_multi_node_recovery(
     plan.retry_attempt = plan.retry_attempt + 1
     true
 }
+
 func sync_checkpoints_across_nodes(
     fault_tolerance_multi_node& ft_mn,
     int rank,
 ) bool {
     true
 }
+
 func find_last_good_checkpoint_multi_node(
     string checkpoint_dir,
     int current_step,
@@ -201,6 +222,7 @@ func find_last_good_checkpoint_multi_node(
     }
     last_step
 }
+
 func itoa_ext(int n) string {
     if n == 0 {
         return "0"

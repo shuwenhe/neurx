@@ -39,6 +39,7 @@ struct gptconfig {
     bool mixed_precision
     string device
 }
+
 func default_model_config() gptconfig {
     gptconfig {
         vocab_size: 256,
@@ -59,6 +60,7 @@ func default_model_config() gptconfig {
         device: "cpu",
     }
 }
+
 func model_config_string(gptconfig cfg) string {
     string s = ""
     s = s + "GPT Configuration:\n"
@@ -79,6 +81,7 @@ func model_config_string(gptconfig cfg) string {
     s = s + "  Device:       " + cfg.device + "\n"
     s
 }
+
 struct gptmodel {
     gptconfig config
     embedding token_embed
@@ -88,6 +91,7 @@ struct gptmodel {
     Linear output_head
     []AutoGradTensor all_parameters
 }
+
 func new_language_modelGPTConfig config) gptmodel {
     gptmodel model
     model.config = config
@@ -110,6 +114,7 @@ func new_language_modelGPTConfig config) gptmodel {
     model.all_parameters = collect_gpt_parameters(model)
     model
 }
+
 func collect_gpt_parameters(gptmodel model) []AutoGradTensor {
     []AutoGradTensor params = []AutoGradTensor{}
     int i = 0
@@ -143,6 +148,7 @@ func collect_gpt_parameters(gptmodel model) []AutoGradTensor {
     }
     params
 }
+
 func forward(gptmodel self, []int token_ids) AutoGradTensor {
     int batch_size = self.config.batch_size
     int seq_len = self.config.seq_len
@@ -165,6 +171,7 @@ func forward(gptmodel self, []int token_ids) AutoGradTensor {
     AutoGradTensor logits = forward(self.output_head, x)
     logits
 }
+
 func count_params(gptmodel self) int {
     int total = 0
     int i = 0
@@ -174,6 +181,7 @@ func count_params(gptmodel self) int {
     }
     return total
 }
+
 func print_model_summary(gptmodel self) void {
     println("============================================================")
     println("GPT Model Summary")
@@ -200,6 +208,7 @@ func print_model_summary(gptmodel self) void {
     println("TOTAL:", total, "parameters")
     println("============================================================")
 }
+
 struct training_metrics {
     int step
     float loss
@@ -209,6 +218,7 @@ struct training_metrics {
     float throughput
     float epoch_time_ms
 }
+
 struct training_state {
     int global_step
     int current_epoch
@@ -218,6 +228,7 @@ struct training_state {
     []training_metrics metrics_history
     bool trained
 }
+
 func new_training_state() training_state {
     training_state {
         global_step: 0,
@@ -229,6 +240,7 @@ func new_training_state() training_state {
         trained: false,
     }
 }
+
 struct data_loader {
     []int tokens
     int total_tokens
@@ -236,6 +248,7 @@ struct data_loader {
     int batch_size
     int seq_len
 }
+
 func new_data_loader([]int tokens, int batch_size, int seq_len) data_loader {
     data_loader {
         tokens: tokens,
@@ -245,6 +258,7 @@ func new_data_loader([]int tokens, int batch_size, int seq_len) data_loader {
         seq_len: seq_len,
     }
 }
+
 func generate_synthetic_data(int n_tokens, int vocab_size) []int {
     []int data = new int[n_tokens]
     []int pattern = [1, 23, 45, 67, 89, 12, 34, 56]
@@ -262,16 +276,20 @@ func generate_synthetic_data(int n_tokens, int vocab_size) []int {
     }
     data
 }
+
 struct Batch {
     []int input_ids
     []int target_ids
 }
+
 func next_batch(data_loader loader) int {
     return 0
 }
+
 func compute_cross_entropy_loss(AutoGradTensor logits, []int targets) AutoGradTensor {
     cross_entropy_loss(logits, targets)
 }
+
 struct checkpoint_info {
     string path
     int step
@@ -280,6 +298,7 @@ struct checkpoint_info {
     int param_count
     []float model_weights_hash
 }
+
 func format_checkpoint_v2(int step, float loss, float best_loss, int best_step,
                            int param_count, gptconfig config,
                            []float loss_window) string {
@@ -314,9 +333,11 @@ func format_checkpoint_v2(int step, float loss, float best_loss, int best_step,
     content = content + "# End of checkpoint\n"
     content
 }
+
 func get_timestamp() string {
     "20260623_150000"
 }
+
 func save_checkpoint_v2(string output_dir, int step, float loss, float best_loss,
                           int best_step, gptmodel model, gptconfig config,
                           []float loss_window) string {
@@ -332,6 +353,7 @@ func save_checkpoint_v2(string output_dir, int step, float loss, float best_loss
     }
     "[ERROR] Failed to save checkpoint"
 }
+
 struct training_result {
     training_state state
     int total_params
@@ -340,6 +362,7 @@ struct training_result {
     int total_time_ms
     []string saved_checkpoints
 }
+
 func run_training(gptconfig config) training_result {
     println("")
     println("╔══════════════════════════════════════════════════╗")
@@ -495,6 +518,7 @@ func check_should_save(int step, int every_n) bool {
     if every_n <= 0 { return true }
     return mod(step, every_n) == 0 && step > 0
 }
+
 func save_manifest(string manifest_path, []string checkpoints) void:
     content = "# NeurX checkpoint manifest\n"
     content += "# Generated: " + get_timestamp() + "\n\n"

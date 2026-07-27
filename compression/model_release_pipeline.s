@@ -9,12 +9,14 @@ struct compression_release_config {
     model_export_config export_config
     model_deployment_config deployment_config
 }
+
 struct compression_release_artifact {
     string release_dir
     model_export_artifact export_artifact
     model_deployment_artifact deployment_artifact
     string summary_path
 }
+
 func default_compression_release_config() compression_release_config {
     compression_release_config {
         release_dir: "artifacts/release",
@@ -24,6 +26,7 @@ func default_compression_release_config() compression_release_config {
         deployment_config: model_deployment_config {},
     }
 }
+
 func prepare_compression_release(compression_release_config config) compression_release_artifact {
     string root = trim(config.release_dir)
     if root == "" {
@@ -49,6 +52,7 @@ func prepare_compression_release(compression_release_config config) compression_
         summary_path: summary_path,
     }
 }
+
 func compression_release_summary_text(
     string release_dir,
     model_export_config export_cfg,
@@ -69,6 +73,7 @@ func compression_release_summary_text(
     out = out + "deployment_summary_path=" + deployment_artifact.summary_path + "\n"
     out
 }
+
 func bool_text(bool value) string {
     if value {
         return "true"

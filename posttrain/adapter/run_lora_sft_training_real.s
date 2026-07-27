@@ -10,6 +10,7 @@ struct training_example {
     string input
     string output
 }
+
 struct training_state {
     int total_examples
     int current_epoch
@@ -20,6 +21,7 @@ struct training_state {
     int examples_seen
     int tokens_seen
 }
+
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -41,6 +43,7 @@ func int_to_str(int n) string {
     }
     out
 }
+
 func digit_to_char(int d) string {
     if d == 0 { return "0" }
     if d == 1 { return "1" }
@@ -53,6 +56,7 @@ func digit_to_char(int d) string {
     if d == 8 { return "8" }
     "9"
 }
+
 func format_float(float value, int decimals) string {
     float current = value
     bool neg = current < 0.0
@@ -82,6 +86,7 @@ func format_float(float value, int decimals) string {
     }
     out
 }
+
 func parse_jsonl_example(string line) training_example {
     training_example ex
     ex.instruction = ""
@@ -95,10 +100,12 @@ func parse_jsonl_example(string line) training_example {
     ex.output = trim_json_string(output_val)
     ex
 }
+
 func trim_json_string(string s) string {
     string trimmed = trim_string(s)
     trimmed
 }
+
 func simple_hash(string text) int {
     int hash = 5381
     int i = 0
@@ -112,6 +119,7 @@ func simple_hash(string text) int {
     int remainder = hash - (hash / 10000) * 10000
     remainder
 }
+
 func create_training_state(int total_examples) training_state {
     training_state state
     state.total_examples = total_examples
@@ -124,6 +132,7 @@ func create_training_state(int total_examples) training_state {
     state.tokens_seen = 0
     state
 }
+
 func main() int {
     string project_root = "/home/shuwen/shuwen/train/neurx"
     string data_path = "/home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl"

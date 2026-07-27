@@ -4,6 +4,7 @@ struct platform_error_state {
     string message
     bool active
 }
+
 func new_tensor_error(string message) platform_error_state {
     platform_error_state {
         kind: "TensorError",
@@ -11,6 +12,7 @@ func new_tensor_error(string message) platform_error_state {
         active: true,
     }
 }
+
 func new_configuration_error(string message) platform_error_state {
     platform_error_state {
         kind: "ConfigurationError",
@@ -18,6 +20,7 @@ func new_configuration_error(string message) platform_error_state {
         active: true,
     }
 }
+
 func new_backend_not_available_error(string message) platform_error_state {
     platform_error_state {
         kind: "BackendNotAvailableError",
@@ -25,6 +28,7 @@ func new_backend_not_available_error(string message) platform_error_state {
         active: true,
     }
 }
+
 func new_runtime_validation_error(string message) platform_error_state {
     platform_error_state {
         kind: "RuntimeValidationError",
@@ -32,6 +36,7 @@ func new_runtime_validation_error(string message) platform_error_state {
         active: true,
     }
 }
+
 func clear_error() platform_error_state {
     platform_error_state {
         kind: "",
@@ -39,15 +44,19 @@ func clear_error() platform_error_state {
         active: false,
     }
 }
+
 func platform_error_kind(platform_error_state state) string {
     state.kind
 }
+
 func platform_error_message(platform_error_state state) string {
     state.message
 }
+
 func platform_error_active(platform_error_state state) bool {
     state.active
 }
+
 func platform_error_state_dict(platform_error_state state) platform_error_state {
     platform_error_state {
         kind: state.kind,
@@ -55,6 +64,7 @@ func platform_error_state_dict(platform_error_state state) platform_error_state 
         active: state.active,
     }
 }
+
 func platform_error_load_state_dict(platform_error_state state, platform_error_state other) platform_error_state {
     platform_error_state {
         kind: other.kind,

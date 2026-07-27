@@ -13,6 +13,7 @@ struct transformer_block {
     numHeads        int
     dropout         float32
 }
+
 struct multi_head_attention {
     queryProj    *tensor.Tensor
     keyProj      *tensor.Tensor
@@ -22,6 +23,7 @@ struct multi_head_attention {
     headDim      int
     scale        float32
 }
+
 struct feed_forward_network {
     proj1        *tensor.Tensor
     proj2        *tensor.Tensor
@@ -29,12 +31,14 @@ struct feed_forward_network {
     innerDim     int
     hiddenDim    int
 }
+
 struct layer_norm {
     weight       *tensor.Tensor
     bias         *tensor.Tensor
     eps          float32
     hiddenDim    int
 }
+
 func NewTransformerBlock(config transformer_config) *transformer_block {
     hiddenDim := config.HiddenDim
     numHeads := config.NumHeads
@@ -74,6 +78,7 @@ func NewTransformerBlock(config transformer_config) *transformer_block {
         dropout:   config.Dropout,
     }
 }
+
 func (tb *transformer_block) Forward(x *tensor.Tensor, causalMask *tensor.Tensor) *tensor.Tensor {
     xNorm := tb.norm1.Forward(x)
     attnOut := tb.selfAttention(xNorm, causalMask)
@@ -83,6 +88,7 @@ func (tb *transformer_block) Forward(x *tensor.Tensor, causalMask *tensor.Tensor
     x = tensor.Add(x, ffnOut)
     return x
 }
+
 func (tb *transformer_block) selfAttention(x *tensor.Tensor, causalMask *tensor.Tensor) *tensor.Tensor {
     batchSize := x.Shape[0]
     seqLen := x.Shape[1]
@@ -104,6 +110,7 @@ func (tb *transformer_block) selfAttention(x *tensor.Tensor, causalMask *tensor.
     output = tensor.MatMul(output, tb.attention.outProj)
     return output
 }
+
 func (tb *transformer_block) feedForward(x *tensor.Tensor) *tensor.Tensor {
     proj := tensor.MatMul(x, tb.ffn.proj1)
     gate := tensor.MatMul(x, tb.ffn.gateProj)
@@ -112,6 +119,7 @@ func (tb *transformer_block) feedForward(x *tensor.Tensor) *tensor.Tensor {
     output := tensor.MatMul(combined, tb.ffn.proj2)
     return output
 }
+
 func (tb *transformer_block) Backward(gradOutput *tensor.Tensor) (*tensor.Tensor, error) {
     gradAfterFFN := tensor.Add(gradOutput, gradOutput)
     gradNorm2 := tb.norm2.Backward(gradAfterFFN)
@@ -122,12 +130,15 @@ func (tb *transformer_block) Backward(gradOutput *tensor.Tensor) (*tensor.Tensor
     gradInput := tensor.Add(gradAttnInput, gradAfterFFN)
     return gradInput, nil
 }
+
 func (tb *transformer_block) attentionBackward(gradOutput *tensor.Tensor) *tensor.Tensor {
     return gradOutput
 }
+
 func (tb *transformer_block) ffnBackward(gradOutput *tensor.Tensor) *tensor.Tensor {
     return gradOutput
 }
+
 func (ln *layer_norm) Forward(x *tensor.Tensor) *tensor.Tensor {
     mean := computeMean(x, -1)
     variance := computeVariance(x, -1)
@@ -137,36 +148,46 @@ func (ln *layer_norm) Forward(x *tensor.Tensor) *tensor.Tensor {
     output = tensor.Add(output, ln.bias)
     return output
 }
+
 func (ln *layer_norm) Backward(gradOutput *tensor.Tensor) *tensor.Tensor {
     return gradOutput
 }
+
 func reshapeForHeads(x *tensor.Tensor, numHeads int) *tensor.Tensor {
     return x
 }
+
 func reshapeFromHeads(x *tensor.Tensor, numHeads int) *tensor.Tensor {
     return x
 }
+
 func applyMask(scores *tensor.Tensor, mask *tensor.Tensor) *tensor.Tensor {
     return scores
 }
+
 func softmax(x *tensor.Tensor, dim int) *tensor.Tensor {
     return activation.Softmax(x, dim)
 }
+
 func dropout(x *tensor.Tensor, dropoutRate float32) *tensor.Tensor {
     if dropoutRate == 0 {
         return x
     }
     return x
 }
+
 func computeMean(x *tensor.Tensor, dim int) *tensor.Tensor {
     return x
 }
+
 func computeVariance(x *tensor.Tensor, dim int) *tensor.Tensor {
     return x
 }
+
 func sqrt(x float32) float32 {
     return 1.0 / float32(x)
 }
+
 struct transformer_config {
     HiddenDim      int
     NumHeads       int
@@ -176,6 +197,7 @@ struct transformer_config {
     BiasType       string
     ActivationType string
 }
+
 func DefaultTransformerConfig() transformer_config {
     return transformer_config{
         HiddenDim:      4096,

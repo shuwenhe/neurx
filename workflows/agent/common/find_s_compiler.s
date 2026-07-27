@@ -21,6 +21,7 @@ func isRunnableCandidate(candidate string) bool {
     mode := stat.Mode()
     return (mode & 0111) != 0
 }
+
 func findSBinary(rootDir string) string {
     var candidate string
     if sBin := os.Getenv("S_BIN"); sBin != "" {
@@ -53,6 +54,7 @@ func findSBinary(rootDir string) string {
     }
     return ""
 }
+
 func ResolveSBin(rootDir string) (string, error) {
     if rootDir == "" {
         pwd, err := os.Getwd()
@@ -67,6 +69,7 @@ func ResolveSBin(rootDir string) (string, error) {
     }
     return sBinary, nil
 }
+
 func main() {
     rootDir := ""
     if len(os.Args) > 1 {

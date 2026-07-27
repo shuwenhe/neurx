@@ -25,6 +25,7 @@ struct code_interpreter_config {
     enable_dataframe_display: bool = true
     image_format: string = "png"
 }
+
 struct execution_result {
     success: bool
     output: string
@@ -39,6 +40,7 @@ struct execution_result {
     memory_used_mb: float
     line_count: int
 }
+
 struct file_info {
     path: string
     size_bytes: int
@@ -46,6 +48,7 @@ struct file_info {
     preview: string?
     is_image: bool
 }
+
 struct image_data {
     data: bytes
     format: string
@@ -53,6 +56,7 @@ struct image_data {
     height: int
     alt_text: string?
 }
+
 struct code_block {
     language: string
     code: string
@@ -231,6 +235,7 @@ class SandboxEnvironment {
         this.state.files_created.clear()
     }
 }
+
 struct security_check_result {
     allowed: bool
     reason: string
@@ -275,12 +280,14 @@ class SessionState {
         return successes / this.execution_history.length
     }
 }
+
 struct execution_record {
     code: string
     language: string
     result: execution_result
     timestamp: float
 }
+
 struct session_summary {
     session_id: string
     duration_seconds: float
@@ -415,6 +422,7 @@ class PythonRuntime {
         return null
     }
 }
+
 struct error_info {
     error_type: string
     message: string
@@ -596,6 +604,7 @@ class SQLRuntime {
         this.connection?.close()
     }
 }
+
 struct sql_query_result {
     columns: list<string>
     rows: list<list<any>>
@@ -668,6 +677,7 @@ class ResultFormatter {
         return "```\n" + content + "\n```"
     }
 }
+
 struct formatted_output {
     raw: execution_result
     formatted_text: string

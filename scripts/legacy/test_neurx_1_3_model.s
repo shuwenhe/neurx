@@ -67,6 +67,7 @@ func main() int {
     println("")
     0
 }
+
 func read_model_metadata(string checkpoint_dir) int {
     string metadata_file = checkpoint_dir + "/NeurX-1.3.neurx"
     string cmd = "head -20 \"" + metadata_file + "\""
@@ -75,6 +76,7 @@ func read_model_metadata(string checkpoint_dir) int {
     println("  ✓ Model metadata loaded successfully")
     return 0
 }
+
 func print_checkpoint_size(string checkpoint_dir) int {
     string cmd = "du -sh \"" + checkpoint_dir + "\" | awk '{print $1}'"
     runtime_run_command(cmd)

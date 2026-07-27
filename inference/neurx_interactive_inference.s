@@ -5,6 +5,7 @@ extern "intrinsic" func __sys_read_string(int fd, int count) string
 func read_user_line() string {
     trim(__sys_read_string(0, 4096))
 }
+
 func resolve_model_file(string configured_path) string {
     string path = trim(configured_path)
     if len(path) == 0 {
@@ -18,6 +19,7 @@ func resolve_model_file(string configured_path) string {
     }
     path
 }
+
 func main() {
     string root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/neurx")
     string model_file = resolve_model_file(runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain"))

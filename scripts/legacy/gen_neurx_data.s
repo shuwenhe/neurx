@@ -28,6 +28,7 @@ func generate_python_data(): training_data {
         quality_score: 0.95,
     }
 }
+
 func generate_llm_training_data(): training_data {
     text := "# English textlanguagemodeltrainingEnglish text..."
     return training_data{
@@ -36,6 +37,7 @@ func generate_llm_training_data(): training_data {
         quality_score: 0.95,
     }
 }
+
 func generate_qa_data(): training_data {
     text := "# English text: English textusePythonimplementationquickrankingEnglish text?"
     return training_data{
@@ -44,6 +46,7 @@ func generate_qa_data(): training_data {
         quality_score: 0.90,
     }
 }
+
 func main() {
     println("🚀 generateNeurXEnglish textLLMtrainingdata...")
     println("")

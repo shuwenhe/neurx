@@ -13,6 +13,7 @@ struct MultiNodeConfig {
     resumeEnabled bool
     hosts []string
 }
+
 func parseHostFile(hostfile string) []string {
     content, _ := os.ReadFile(hostfile)
     lines := strings.Split(string(content), "\n")
@@ -25,6 +26,7 @@ func parseHostFile(hostfile string) []string {
     }
     return hosts
 }
+
 func getGpuCount(host string) int {
     cmd := exec.Command("ssh", host, "nvidia-smi -L | wc -l")
     output, _ := cmd.Output()
@@ -32,6 +34,7 @@ func getGpuCount(host string) int {
     strings.TrimSpace(string(output))
     return count
 }
+
 func launchOnHost(host string, rank int, config MultiNodeConfig) {
     env := os.Environ()
     env = append(env,
@@ -52,6 +55,7 @@ func launchOnHost(host string, rank int, config MultiNodeConfig) {
     cmd.Stderr = os.Stderr
     cmd.Run()
 }
+
 func main() {
     root := os.Getenv("NEURX_ROOT")
     if root == "" {

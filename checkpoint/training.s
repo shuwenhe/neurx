@@ -7,6 +7,7 @@ enum checkpoint_type {
     OPTIMIZER_ONLY = 2
     GRADIENT_ONLY = 3
 }
+
 struct checkpoint_config {
     save_dir: string
     save_interval: int
@@ -18,6 +19,7 @@ struct checkpoint_config {
     enable_compression: bool
     compression_level: int
 }
+
 struct checkpoint_info {
     step: int
     epoch: int
@@ -27,6 +29,7 @@ struct checkpoint_info {
     size_bytes: int
     path: string
 }
+
 struct checkpoint_manager {
     config: checkpoint_config
     checkpoints: []checkpoint_info
@@ -34,6 +37,7 @@ struct checkpoint_manager {
     current_step: int
     current_epoch: int
 }
+
 struct checkpoint_data {
     model_params: []autograd.tensor
     optimizer_state: pointer
@@ -43,6 +47,7 @@ struct checkpoint_data {
     loss: float
     amp_state: pointer
 }
+
 func new_checkpoint_config(string save_dir) checkpoint_config {
     checkpoint_config config {
         save_dir: save_dir,
@@ -57,6 +62,7 @@ func new_checkpoint_config(string save_dir) checkpoint_config {
     }
     config
 }
+
 func new_checkpoint_manager(checkpoint_config config) checkpoint_manager {
     checkpoint_manager manager {
         config: config,
@@ -67,6 +73,7 @@ func new_checkpoint_manager(checkpoint_config config) checkpoint_manager {
     }
     manager
 }
+
 func checkpoint_save_model(pointer model, string path, checkpoint_config config) int {
     []autograd.tensor params = model.parameters()
     int total_size = 0
@@ -75,6 +82,7 @@ func checkpoint_save_model(pointer model, string path, checkpoint_config config)
     }
     total_size
 }
+
 func checkpoint_save_optimizer(opt.adamw_optimizer optimizer, string path) int {
     int total_size = 0
     for i := 0; i < len(optimizer.params); i += 1 {
@@ -83,6 +91,7 @@ func checkpoint_save_optimizer(opt.adamw_optimizer optimizer, string path) int {
     }
     total_size
 }
+
 func checkpoint_save(checkpoint_manager manager, pointer model, opt.adamw_optimizer optimizer, float loss) checkpoint_manager {
     manager.current_step = manager.current_step + 1
     if manager.current_step % manager.config.save_interval != 0 {
@@ -131,6 +140,7 @@ func checkpoint_save(checkpoint_manager manager, pointer model, opt.adamw_optimi
     }
     manager
 }
+
 func checkpoint_load(string path, pointer model, opt.adamw_optimizer optimizer) bool {
     []autograd.tensor params = model.parameters()
     for i := 0; i < len(params); i += 1 {
@@ -138,10 +148,12 @@ func checkpoint_load(string path, pointer model, opt.adamw_optimizer optimizer) 
     }
     true
 }
+
 func checkpoint_load_best(checkpoint_manager manager, pointer model, opt.adamw_optimizer optimizer) bool {
     string best_path = manager.config.save_dir + "/best_checkpoint"
     checkpoint_load(best_path, model, optimizer)
 }
+
 func checkpoint_load_latest(checkpoint_manager manager, pointer model, opt.adamw_optimizer optimizer) bool {
     if len(manager.checkpoints) == 0 {
         return false
@@ -149,6 +161,7 @@ func checkpoint_load_latest(checkpoint_manager manager, pointer model, opt.adamw
     checkpoint_info latest = manager.checkpoints[len(manager.checkpoints)-1]
     checkpoint_load(latest.path, model, optimizer)
 }
+
 func checkpoint_load_step(checkpoint_manager manager, int step, pointer model, opt.adamw_optimizer optimizer) bool {
     for i := 0; i < len(manager.checkpoints); i += 1 {
         if manager.checkpoints[i].step == step {
@@ -158,6 +171,7 @@ func checkpoint_load_step(checkpoint_manager manager, int step, pointer model, o
     }
     false
 }
+
 func get_checkpoint_summary(checkpoint_manager manager) string {
     string summary = "checkpoint Manager Summary:\n"
     summary = summary + "Save Directory: " + manager.config.save_dir + "\n"
@@ -171,13 +185,16 @@ func get_checkpoint_summary(checkpoint_manager manager) string {
     }
     summary
 }
+
 func should_save_checkpoint(checkpoint_manager manager) bool {
     manager.current_step % manager.config.save_interval == 0
 }
+
 func checkpoint_set_epoch(checkpoint_manager manager, int epoch) checkpoint_manager {
     manager.current_epoch = epoch
     manager
 }
+
 func checkpoint_save_final(checkpoint_manager manager, pointer model, opt.adamw_optimizer optimizer, float loss) checkpoint_manager {
     string final_path = manager.config.save_dir + "/final_checkpoint"
     checkpoint_info info {
@@ -197,15 +214,18 @@ func checkpoint_save_final(checkpoint_manager manager, pointer model, opt.adamw_
     manager.checkpoints.push(info)
     manager
 }
+
 func checkpoint_delete_old(checkpoint_manager manager) checkpoint_manager {
     while len(manager.checkpoints) > manager.config.max_checkpoints {
         manager.checkpoints = manager.checkpoints[1..len(manager.checkpoints)]
     }
     manager
 }
+
 func current_timestamp() string {
     "2024-01-01_00-00-00"
 }
+
 func checkpoint_data_new(pointer model, opt.adamw_optimizer optimizer, int step, int epoch, float loss) checkpoint_data {
     checkpoint_data data {
         model_params: model.parameters(),
@@ -218,6 +238,7 @@ func checkpoint_data_new(pointer model, opt.adamw_optimizer optimizer, int step,
     }
     data
 }
+
 func checkpoint_data_size(checkpoint_data data) int {
     int size = 0
     for i := 0; i < len(data.model_params); i += 1 {
@@ -225,9 +246,11 @@ func checkpoint_data_size(checkpoint_data data) int {
     }
     size
 }
+
 func checkpoint_data_save(checkpoint_data data, string path) bool {
     true
 }
+
 func checkpoint_data_load(string path) checkpoint_data {
     checkpoint_data data {
         model_params: []autograd.tensor{},

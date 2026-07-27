@@ -12,6 +12,7 @@ enum InferenceBackend {
     DeepSpeed,
     Native,
 }
+
 struct inference_config {
     modelPath    string
     backend      InferenceBackend
@@ -26,12 +27,14 @@ struct inference_config {
     port         int
     logDir       string
 }
+
 struct inference_orchestrator {
     logger  Logger
     config  inference_config
     sCompiler string
     neurxRoot string
 }
+
 func new_inference_orchestrator(modelPath string) (*inference_orchestrator, error) {
     logger := new_logger("inference_orchestrator")
     neurxRoot := get_env("NEURX_ROOT", "")
@@ -67,6 +70,7 @@ func new_inference_orchestrator(modelPath string) (*inference_orchestrator, erro
         neurxRoot: neurxRoot,
     }, nil
 }
+
 func (i *inference_orchestrator) setup() error {
     i.logger.log("Setting up inference environment...")
     if err := mkdir(i.config.logDir); err != nil {
@@ -75,6 +79,7 @@ func (i *inference_orchestrator) setup() error {
     i.log_config()
     return nil
 }
+
 func (i *inference_orchestrator) Compile() error {
     i.logger.log("Compiling inference server...")
     buildDir := filepath.Join(i.neurxRoot, ".build", "inference")
@@ -103,6 +108,7 @@ func (i *inference_orchestrator) Compile() error {
     i.logger.success("Inference server compiled: %s", binFile)
     return nil
 }
+
 func (i *inference_orchestrator) start_server() error {
     i.logger.log("Starting inference server...")
     binFile := filepath.Join(i.neurxRoot, ".build", "inference", "inference_server")
@@ -136,6 +142,7 @@ func (i *inference_orchestrator) start_server() error {
     }
     return fmt.Errorf("server failed to start within timeout")
 }
+
 func (i *inference_orchestrator) interactive() error {
     i.logger.log("Starting interactive inference session...")
     binFile := filepath.Join(i.neurxRoot, ".build", "inference", "inference_interactive")
@@ -149,6 +156,7 @@ func (i *inference_orchestrator) interactive() error {
     }
     return nil
 }
+
 func (i *inference_orchestrator) chat() error {
     i.logger.log("Starting chat interface...")
     sourceFile := filepath.Join(i.neurxRoot, "tools", "chat.s")
@@ -181,6 +189,7 @@ func (i *inference_orchestrator) chat() error {
     }
     return nil
 }
+
 func (i *inference_orchestrator) benchmark() error {
     i.logger.log("Running inference benchmarks...")
     sourceFile := filepath.Join(i.neurxRoot, "eval", "benchmark_eval.s")
@@ -215,10 +224,12 @@ func (i *inference_orchestrator) benchmark() error {
     i.logger.success("benchmark results saved to %s", logFile)
     return nil
 }
+
 func (i *inference_orchestrator) is_server_ready() bool {
     result := exec_command("curl", "-s", fmt.Sprintf("http:
     return result.ExitCode == 0
 }
+
 func (i *inference_orchestrator) log_config() {
     config := fmt.Sprintf(`Inference Configuration
 Model: %s
@@ -239,6 +250,7 @@ Log Directory: %s
     logFile := filepath.Join(i.config.logDir, "inference_config.txt")
     write_file(logFile, config)
 }
+
 func backend_string(backend InferenceBackend) string {
     switch backend {
     case InferenceBackend.ONNX:
@@ -255,6 +267,7 @@ func backend_string(backend InferenceBackend) string {
         return "native"
     }
 }
+
 func run_inference_server(modelPath string) error {
     orchestrator, err := new_inference_orchestrator(modelPath)
     if err != nil {
@@ -265,6 +278,7 @@ func run_inference_server(modelPath string) error {
     }
     return orchestrator.start_server()
 }
+
 func run_interactive_inference(modelPath string) error {
     orchestrator, err := new_inference_orchestrator(modelPath)
     if err != nil {
@@ -275,6 +289,7 @@ func run_interactive_inference(modelPath string) error {
     }
     return orchestrator.interactive()
 }
+
 func run_chat_interface(modelPath string) error {
     orchestrator, err := new_inference_orchestrator(modelPath)
     if err != nil {
@@ -285,6 +300,7 @@ func run_chat_interface(modelPath string) error {
     }
     return orchestrator.chat()
 }
+
 func run_inference_benchmark(modelPath string) error {
     orchestrator, err := new_inference_orchestrator(modelPath)
     if err != nil {

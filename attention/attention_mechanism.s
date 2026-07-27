@@ -31,6 +31,7 @@ class NeurxAttention {
         float memory_usage_mb
     } stats
 }
+
 func init(attention_config cfg) NeurxAttention {
     int kv_dim = cfg.head_dim * cfg.num_key_value_heads
     print("🔧 Initializing NEURX Attention:")
@@ -55,6 +56,7 @@ func init(attention_config cfg) NeurxAttention {
         }
     }
 }
+
 func forward(
     self: NeurxAttention,
     hidden_states: tensor,
@@ -298,6 +300,7 @@ struct rope_cache {
     tensor sin_vals
     int cached_max_seq
 }
+
 func compute_rope_embeddings(
     []int position_ids,
     int head_dim,

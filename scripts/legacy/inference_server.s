@@ -27,6 +27,7 @@ type inference_server_config struct {
 	LogLevel        string `json:"log_level"`
 	WorkerThreads   int    `json:"worker_threads"`
 }
+
 type inference_request struct {
 	Prompt          string   `json:"prompt"`
 	MaxTokens       int      `json:"max_tokens"`
@@ -39,6 +40,7 @@ type inference_request struct {
 	StopSequences   []string `json:"stop_sequences"`
 	ReturnLogprobs  bool     `json:"return_logprobs"`
 }
+
 type inference_response struct {
 	RequestID    string    `json:"request_id"`
 	Generated    string    `json:"generated"`
@@ -50,6 +52,7 @@ type inference_response struct {
 	Logprobs     []float64 `json:"logprobs,omitempty"`
 	Timestamp    string    `json:"timestamp"`
 }
+
 type server_metrics struct {
 	TotalRequests      int64   `json:"total_requests"`
 	SuccessfulRequests int64   `json:"successful_requests"`
@@ -118,6 +121,7 @@ func loadConfigFromEnv() {
 		gConfig.EnableCache = true
 	}
 }
+
 func validateConfig() error {
 	if gConfig.ModelPath == "" {
 		return fmt.Errorf("model path is not set")
@@ -137,6 +141,7 @@ func validateConfig() error {
 	}
 	return nil
 }
+
 func loadConfigFromFile(path string) error {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -148,6 +153,7 @@ func loadConfigFromFile(path string) error {
 	}
 	return nil
 }
+
 func initializeModel() error {
 	logInfo("Initializing model...")
 	stat, err := os.Stat(gConfig.ModelPath)
@@ -162,6 +168,7 @@ func initializeModel() error {
 	}
 	return nil
 }
+
 func processInferenceRequest(req *inference_request) (*inference_response, error) {
 	startTime := time.Now()
 	if req.Prompt == "" {
@@ -201,6 +208,7 @@ func processInferenceRequest(req *inference_request) (*inference_response, error
 	}
 	return response, nil
 }
+
 func handleInferenceRequest(jsonData []byte) ([]byte, error) {
 	var req inference_request
 	err := json.Unmarshal(jsonData, &req)
@@ -218,6 +226,7 @@ func handleInferenceRequest(jsonData []byte) ([]byte, error) {
 	}
 	return respData, nil
 }
+
 func handleMetricsRequest() ([]byte, error) {
 	gMetrics.UptimeSeconds = int64(time.Since(gServerStartTime).Seconds())
 	data, err := json.MarshalIndent(gMetrics, "", "  ")
@@ -226,6 +235,7 @@ func handleMetricsRequest() ([]byte, error) {
 	}
 	return data, nil
 }
+
 func handleHealthCheck() ([]byte, error) {
 	health := map[string]interface{}{
 		"status": "healthy",
@@ -240,18 +250,22 @@ func handleHealthCheck() ([]byte, error) {
 	}
 	return data, nil
 }
+
 func logInfo(msg string) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] INFO: %s\n", timestamp, msg)
 }
+
 func logWarn(msg string) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] WARN: %s\n", timestamp, msg)
 }
+
 func logError(msg string) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] ERROR: %s\n", timestamp, msg)
 }
+
 func startServer() error {
 	logInfo("Starting inference server...")
 	logInfo(fmt.Sprintf("Server: %s:%d", gConfig.Host, gConfig.Port))
@@ -265,6 +279,7 @@ func startServer() error {
 	logInfo(fmt.Sprintf("  GET  http:
 	return nil
 }
+
 func runInteractiveMode() {
 	logInfo("Entering interactive mode (simulation)...")
 	logInfo("Type 'quit' to exit")
@@ -286,6 +301,7 @@ func runInteractiveMode() {
 	}
 	logInfo("Interactive mode completed")
 }
+
 func printUsage() {
 	fmt.Println("NeurX Inference Server - Usage:")
 	fmt.Println("")
@@ -311,10 +327,12 @@ func printUsage() {
 	fmt.Println("  ./inference_server interactive")
 	fmt.Println("  ./inference_server benchmark")
 }
+
 func printConfig() {
 	data, _ := json.MarshalIndent(gConfig, "", "  ")
 	fmt.Println(string(data))
 }
+
 func runBenchmark() {
 	logInfo("Running inference benchmark...")
 	testRequests := []inference_request{
@@ -344,6 +362,7 @@ func runBenchmark() {
 	fmt.Printf("  Avg latency: %.3f s\n", gMetrics.AvgLatency)
 	fmt.Printf("  Max latency: %.3f s\n", gMetrics.MaxLatency)
 }
+
 func main() {
 	if len(os.Args) < 2 {
 		printUsage()

@@ -10,6 +10,7 @@ func copy_int([]int data) []int {
     }
     return out
 }
+
 func shape_prod([]int shape) int {
     int n = 1
     int i = 0
@@ -19,6 +20,7 @@ func shape_prod([]int shape) int {
     }
     return n
 }
+
 func normalize_dim_local(int dim, int ndim) int {
     int axis = dim
     if axis < 0 {
@@ -26,6 +28,7 @@ func normalize_dim_local(int dim, int ndim) int {
     }
     return axis
 }
+
 func make_scalar_from_like(float value, tensor like) tensor {
     []int shape = []int{cap: 1}
     shape[0] = 1
@@ -35,12 +38,14 @@ func make_scalar_from_like(float value, tensor like) tensor {
     }
     return out
 }
+
 func reduce_identity(int mode) float {
     if mode == 4 {
         return 1.0
     }
     return 0.0
 }
+
 func reduce_init_value(tensor a, int mode) float {
     if len(a.storage) == 0 {
         return reduce_identity(mode)
@@ -50,6 +55,7 @@ func reduce_init_value(tensor a, int mode) float {
     }
     return reduce_identity(mode)
 }
+
 func reduce_step(float acc, float value, int mode) float {
     if mode == 0 || mode == 1 {
         return acc + value
@@ -68,6 +74,7 @@ func reduce_step(float acc, float value, int mode) float {
     }
     return acc * value
 }
+
 func reduce_all(tensor a, int mode) tensor {
     float acc = reduce_init_value(a, mode)
     int i = 0
@@ -84,36 +91,47 @@ func reduce_all(tensor a, int mode) tensor {
     }
     return make_scalar_from_like(acc, a)
 }
+
 func reduce_sum(tensor a) tensor {
     return reduce_all(a, 0)
 }
+
 func sum(tensor a) tensor {
     return reduce_sum(a)
 }
+
 func reduce_mean(tensor a) tensor {
     return reduce_all(a, 1)
 }
+
 func mean(tensor a) tensor {
     return reduce_mean(a)
 }
+
 func reduce_max(tensor a) tensor {
     return reduce_all(a, 2)
 }
+
 func max(tensor a) tensor {
     return reduce_max(a)
 }
+
 func reduce_min(tensor a) tensor {
     return reduce_all(a, 3)
 }
+
 func min(tensor a) tensor {
     return reduce_min(a)
 }
+
 func reduce_prod(tensor a) tensor {
     return reduce_all(a, 4)
 }
+
 func prod(tensor a) tensor {
     return reduce_prod(a)
 }
+
 func reduce_arg_all(tensor a, int mode) tensor {
     int n = len(a.storage)
     float best = 0.0
@@ -141,18 +159,23 @@ func reduce_arg_all(tensor a, int mode) tensor {
     }
     return make_scalar_from_like(best_idx, a)
 }
+
 func reduce_argmax(tensor a) tensor {
     return reduce_arg_all(a, 0)
 }
+
 func argmax(tensor a) tensor {
     return reduce_argmax(a)
 }
+
 func reduce_argmin(tensor a) tensor {
     return reduce_arg_all(a, 1)
 }
+
 func argmin(tensor a) tensor {
     return reduce_argmin(a)
 }
+
 func reduce_output_shape([]int shape, int dim, bool keepdim) []int {
     int ndim = len(shape)
     int axis = normalize_dim_local(dim, ndim)
@@ -180,6 +203,7 @@ func reduce_output_shape([]int shape, int dim, bool keepdim) []int {
     }
     return out
 }
+
 func reduce_dim_all(tensor a, int dim, bool keepdim, int mode) tensor {
     int ndim = len(a.desc.shape)
     if ndim == 0 {
@@ -232,36 +256,47 @@ func reduce_dim_all(tensor a, int dim, bool keepdim, int mode) tensor {
     }
     return out
 }
+
 func reduce_sum_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_dim_all(a, dim, keepdim, 0)
 }
+
 func sum_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_sum_dim(a, dim, keepdim)
 }
+
 func reduce_mean_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_dim_all(a, dim, keepdim, 1)
 }
+
 func mean_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_mean_dim(a, dim, keepdim)
 }
+
 func reduce_max_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_dim_all(a, dim, keepdim, 2)
 }
+
 func max_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_max_dim(a, dim, keepdim)
 }
+
 func reduce_min_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_dim_all(a, dim, keepdim, 3)
 }
+
 func min_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_min_dim(a, dim, keepdim)
 }
+
 func reduce_prod_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_dim_all(a, dim, keepdim, 4)
 }
+
 func prod_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_prod_dim(a, dim, keepdim)
 }
+
 func reduce_arg_dim_all(tensor a, int dim, bool keepdim, int mode) tensor {
     int ndim = len(a.desc.shape)
     if ndim == 0 {
@@ -319,15 +354,19 @@ func reduce_arg_dim_all(tensor a, int dim, bool keepdim, int mode) tensor {
     }
     return out
 }
+
 func reduce_argmax_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_arg_dim_all(a, dim, keepdim, 0)
 }
+
 func argmax_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_argmax_dim(a, dim, keepdim)
 }
+
 func reduce_argmin_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_arg_dim_all(a, dim, keepdim, 1)
 }
+
 func argmin_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_argmin_dim(a, dim, keepdim)
 }

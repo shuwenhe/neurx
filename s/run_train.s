@@ -77,6 +77,7 @@ func main() int {
     println("  - latest_checkpoint.txt")
     0
 }
+
 func extract_field(string text, string marker) string {
     []string lines = split_lines(text)
     int i = 0
@@ -89,6 +90,7 @@ func extract_field(string text, string marker) string {
     }
     ""
 }
+
 func split_lines(string text) []string {
     []string lines = []string{cap: 0}
     string current = ""
@@ -112,6 +114,7 @@ func split_lines(string text) []string {
     }
     lines
 }
+
 func starts_with(string text, string prefix) bool {
     len(prefix) <= len(text) && slice(text, 0, len(prefix)) == prefix
 }

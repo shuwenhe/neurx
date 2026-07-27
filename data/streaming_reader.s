@@ -11,6 +11,7 @@ struct stream_reader_config {
     bool enable_direct_io
     int io_thread_count
 }
+
 func default_tb_stream_reader_config() stream_reader_config {
     stream_reader_config cfg
     cfg.chunk_size_bytes = 256 * 1024 * 1024
@@ -24,6 +25,7 @@ func default_tb_stream_reader_config() stream_reader_config {
     cfg.io_thread_count = 4
     return cfg
 }
+
 struct file_metadata {
     string filepath
     int64 file_size_bytes
@@ -35,6 +37,7 @@ struct file_metadata {
     string checksum_md5
     float quality_score
 }
+
 struct data_chunk {
     int chunk_id
     int64 start_byte_offset
@@ -46,6 +49,7 @@ struct data_chunk {
     int access_count
     int last_access_time
 }
+
 struct streaming_reader_state {
     file_metadata meta
     stream_reader_config config
@@ -63,6 +67,7 @@ struct streaming_reader_state {
     bool error_state
     string last_error_message
 }
+
 func init_streaming_reader(
     string filepath,
     stream_reader_config config
@@ -152,6 +157,7 @@ struct line_read_result {
     bool end_of_file
     streaming_reader_state updated_reader
 }
+
 func read_next_line(streaming_reader_state reader) line_read_result {
     if !reader.is_initialized or reader.error_state:
         return line_read_result{
@@ -250,6 +256,7 @@ struct batch_read_result {
     bool end_of_file
     streaming_reader_state updated_reader
 }
+
 func read_batch_of_lines(
     streaming_reader_state reader,
     int batch_size
@@ -308,6 +315,7 @@ struct reader_progress {
     int current_chunk_id
     float mb_per_second
 }
+
 func get_progress(streaming_reader_state reader) reader_progress {
     float percent = 0.0
     if reader.meta.file_size_bytes > 0:

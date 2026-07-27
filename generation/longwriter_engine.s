@@ -27,6 +27,7 @@ struct long_writer_config {
     enable_cross_references: bool = false
     template_id?: string
 }
+
 struct outline_node {
     id: string
     title: string
@@ -49,6 +50,7 @@ enum SectionStatus {
     REVISION_NEEDED
     REVISED
 }
+
 struct writing_plan {
     topic: string
     outline: outline_node
@@ -58,12 +60,14 @@ struct writing_plan {
     metadata: plan_metadata
     constraints: writing_constraints?
 }
+
 struct plan_metadata {
     created_at: float
     model_used: string
     planning_time_ms: float
     version: int = 1
 }
+
 struct writing_constraints {
     min_total_words: int?
     max_total_words: int?
@@ -72,6 +76,7 @@ struct writing_constraints {
     style_requirements: list<string>?
     audience_level: string = "general"
 }
+
 struct long_document {
     title: string
     plan: writing_plan
@@ -81,10 +86,12 @@ struct long_document {
     statistics: document_statistics
     generation_metadata: generation_metadata
 }
+
 struct table_of_contents {
     entries: list<toc_entry>
     format: string
 }
+
 struct toc_entry {
     level: int
     number: string
@@ -92,6 +99,7 @@ struct toc_entry {
     page_ref?: string
     word_count?: int
 }
+
 struct document_statistics {
     total_words: int
     total_characters: int
@@ -104,6 +112,7 @@ struct document_statistics {
     revision_count: int
     quality_scores: map<string, float>
 }
+
 struct generation_metadata {
     model_name: string
     total_tokens_generated: int
@@ -400,6 +409,7 @@ Now write the content for "{section.title}":
         return post_process_result{text=processed, formatting_changes=changes}
     }
 }
+
 struct generation_context {
     document_topic: string
     full_outline: outline_node
@@ -408,6 +418,7 @@ struct generation_context {
     completed_sections: list<string>
     global_constraints: map<string, string>
 }
+
 struct generated_section {
     section: outline_node
     raw_text: string
@@ -419,6 +430,7 @@ struct generated_section {
     quality_feedback?: string
     revision_suggested: bool = false
 }
+
 struct post_process_result {
     text: string
     formatting_changes: list<string>
@@ -509,6 +521,7 @@ Respond briefly in 3-4 sentences."""
         }
     }
 }
+
 struct quality_check_result {
     scores: map<string, float>
     overall_score: float
@@ -518,6 +531,7 @@ struct quality_check_result {
     specific_improvements: list<string>
     feedback: string
 }
+
 struct coherence_check_result {
     feedback: string
     smooth_transition: bool
@@ -790,10 +804,12 @@ class MockLLMClient {
             )
     }
 }
+
 struct usage_info {
     prompt_tokens: int
     completion_tokens: int
 }
+
 struct llm_response {
     text: string
     usage: usage_info
