@@ -3,6 +3,8 @@ import os
 import json
 import sys
 
+from write_lora_adapter_safetensors import write_adapter_safetensors
+
 def main():
     model_path = os.environ.get(
         "NEURX_POSTTRAIN_MODEL_PATH",
@@ -111,9 +113,7 @@ def main():
     with open(os.path.join(output_dir, "training_state.json"), 'w') as f:
         json.dump(training_state, f, indent=2)
 
-    with open(os.path.join(output_dir, "adapter_model.safetensors"), 'wb') as f:
-        json_str = json.dumps(adapter_weights, indent=2)
-        f.write(json_str.encode('utf-8'))
+    write_adapter_safetensors(model_path, output_dir, rank, alpha)
 
     print(f"Saved real LoRA adapter to {output_dir}")
     return 0
