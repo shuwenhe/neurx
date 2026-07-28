@@ -8,13 +8,21 @@ package contracts
 
 // Section 1: Interface Definition
 // [ ] tensor_api.s - Tensor, TensorFactory interfaces defined
-// [ ] device_api.s - Device, MemoryAllocator interfaces defined
+// [ ] device_api.s - Device interfaces defined
 // [ ] kernel_api.s - Kernel, KernelRegistry interfaces defined
 // [ ] dispatcher_api.s - Dispatcher interface defined
 // [ ] operator_api.s - Operator interface + design patterns documented
 // [ ] autograd_api.s - Autograd, ComputationGraph, GradientBuffer defined
 // [ ] optimizer_api.s - Optimizer interface defined
 // [ ] executor_api.s - Executor, EagerExecutor interfaces defined
+// [ ] dtype_api.s - DType, promotion, casting contracts defined
+// [ ] layout_api.s - Layout, stride, format contracts defined
+// [ ] storage_api.s - Storage and storage factory contracts defined
+// [ ] memory_api.s - Raw memory contracts defined
+// [ ] stream_api.s - Stream scheduling contracts defined
+// [ ] event_api.s - Event synchronization contracts defined
+// [ ] serialization_api.s - Checkpoint / StateDict contracts defined
+// [ ] profiler_api.s - Profiling contracts defined
 
 // Section 2: Architecture Principles
 // [ ] All interfaces follow 10 principles from ARCHITECTURE_PRINCIPLES.md
@@ -69,7 +77,7 @@ package contracts
 // NOTES:
 // ==================================================
 // Phase -1 is complete when:
-// 1. All 8 interface files are created
+// 1. All 16 interface files are created
 // 2. All files compile without errors
 // 3. All documentation is in place
 // 4. Team has reviewed and approved

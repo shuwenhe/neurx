@@ -1,92 +1,129 @@
-// NeurX Tensor API Interface
-// Phase -1: Architecture Contracts
-// Purpose: Define the core Tensor interface that all operations depend on
+// Tensor API - Public Handle to Tensor Implementation
+//
+// Tensor is a lightweight PUBLIC HANDLE to TensorImpl.
+// Users interact with Tensor (not TensorImpl).
+// All actual data and computation lives in TensorImpl.
+//
+// Architecture:
+// Tensor (Handle) → TensorImpl (Implementation) → Storage → Allocator
+//
+// Benefits of this separation:
+// - Zero-copy operations (view, reshape, transpose share Storage)
+// - Easy gradient tracking (metadata in TensorImpl)
+// - Version counter (detect in-place modifications)
+// - Separate from implementation changes
 
-package contracts
+import "tensor_impl_api"
+import "storage_api"
+import "device_api"
+import "dtype_api"
 
-// DataType enum
-type DataType interface {
-    name() string
+struct Tensor {
+    impl: TensorImpl  // Reference to internal implementation
 }
 
-type Float32 struct {}
-type Float64 struct {}
-type Int32 struct {}
-type Int64 struct {}
-
-func (Float32) name() string { return "float32" }
-func (Float64) name() string { return "float64" }
-func (Int32) name() string { return "int32" }
-func (Int64) name() string { return "int64" }
-
-// Device interface (forward declaration, fully defined in device_api.s)
-type Device interface {
-    name() string
-    allocate(size: int) -> []byte
-    deallocate(buffer: []byte)
+interface ITensor {
+    // === Metadata Access ===
+    shape() -> []i64
+    dtype() -> DType
+    device() -> Device
+    metadata() -> TensorMetadata
+    storage() -> Storage
+    
+    numel() -> i64          // Total elements
+    ndim() -> i64           // Number of dimensions
+    nbytes() -> i64         // Total bytes
+    
+    // === Stride and Layout ===
+    stride() -> []i64
+    offset() -> i64
+    is_contiguous() -> bool
+    contiguous() -> Tensor
+    
+    // === Shape Operations (Zero-Copy via Stride) ===
+    reshape(new_shape: []i64) -> Tensor
+    view(new_shape: []i64) -> Tensor
+    squeeze(dim: i64) -> Tensor
+    unsqueeze(dim: i64) -> Tensor
+    transpose(dim0: i64, dim1: i64) -> Tensor
+    permute(dims: []i64) -> Tensor
+    
+    // === Data Access ===
+    data_ptr() -> i64        // Raw pointer (for kernel use only)
+    
+    // === Gradient Tracking ===
+    requires_grad() -> bool
+    set_requires_grad(requires: bool) -> void
+    is_leaf() -> bool
+    
+    grad() -> Tensor
+    set_grad(grad: Tensor) -> void
+    
+    backward() -> void
+    backward_with_gradient(gradient: Tensor) -> void
+    
+    // === Version Counter (for in-place detection) ===
+    version() -> i64
+    bump_version() -> void
 }
 
-// Tensor Interface - Core data structure for all computations
-interface Tensor {
-    // Properties
-    func shape() -> []int
-    func dtype() -> DataType
-    func device() -> Device
-    func numel() -> int              // Total number of elements
-    func requires_grad() -> bool
+interface ITensorFactory {
+    // === Creation ===
+    zeros(shape: []i64, dtype: DType, device: Device) -> Tensor
+    ones(shape: []i64, dtype: DType, device: Device) -> Tensor
+    full(shape: []i64, fill_value: f64, dtype: DType, device: Device) -> Tensor
     
-    // Shape operations (zero-copy via stride)
-    func reshape(shape: []int) -> Tensor      // Change shape, may change stride
-    func transpose(axes: []int) -> Tensor     // Permute dimensions
-    func view(shape: []int) -> Tensor         // Unsafe reshape, requires contiguous
-    func squeeze(dim: int) -> Tensor          // Remove dimension of size 1
-    func unsqueeze(dim: int) -> Tensor        // Add dimension of size 1
+    // === Random ===
+    randn(shape: []i64, dtype: DType, device: Device) -> Tensor
+    rand(shape: []i64, dtype: DType, device: Device) -> Tensor
+    randint(shape: []i64, low: i64, high: i64, device: Device) -> Tensor
     
-    // Data access
-    func get(indices: []int) -> float         // Get single element
-    func set(indices: []int, value: float)    // Set single element
-    func contiguous() -> Tensor               // Ensure C-contiguous layout
+    // === Range ===
+    arange(start: f64, end: f64, step: f64, dtype: DType, device: Device) -> Tensor
+    linspace(start: f64, end: f64, steps: i64, dtype: DType, device: Device) -> Tensor
     
-    // Gradient tracking
-    func backward()                           // Compute gradients
-    func grad() -> Tensor                     // Get gradient
-    func zero_grad()                          // Clear gradient
+    // === Identity ===
+    eye(n: i64, m: i64, dtype: DType, device: Device) -> Tensor
     
-    // Metadata
-    func is_contiguous() -> bool
-    func stride() -> []int                    // Memory stride for each dimension
-    func storage_offset() -> int              // Offset in underlying storage
-    
-    // Memory
-    func nbytes() -> int                      // Total bytes used
-    func data_ptr() -> int                    // Pointer to underlying data (for advanced use)
+    // === From Data ===
+    from_array(data: []f64, shape: []i64, dtype: DType, device: Device) -> Tensor
 }
 
-// TensorFactory Interface - Create tensors
-interface TensorFactory {
-    func zeros(shape: []int, dtype: DataType, device: Device) -> Tensor
-    func ones(shape: []int, dtype: DataType, device: Device) -> Tensor
-    func randn(shape: []int, dtype: DataType, device: Device) -> Tensor     // Normal distribution
-    func rand(shape: []int, dtype: DataType, device: Device) -> Tensor      // Uniform [0, 1)
-    func arange(start: float, end: float, step: float, dtype: DataType, device: Device) -> Tensor
-    func eye(n: int, m: int, dtype: DataType, device: Device) -> Tensor     // Identity matrix
+interface ITensorCloning {
+    // Clone (deep copy)
+    clone(tensor: Tensor) -> Tensor
+    
+    // Clone with different dtype
+    clone_with_dtype(tensor: Tensor, dtype: DType) -> Tensor
+    
+    // Clone with different device
+    clone_with_device(tensor: Tensor, device: Device) -> Tensor
 }
 
-// Operation - Tracks computation for autograd
-struct Operation {
-    name: string
-    inputs: []Tensor
-    backward_fn: func(grad_output: Tensor) -> []Tensor
+interface ITensorComparison {
+    // Compare tensors
+    equal(t1: Tensor, t2: Tensor) -> bool
+    
+    // Allclose (with tolerance)
+    allclose(t1: Tensor, t2: Tensor, rtol: f64, atol: f64) -> bool
+    
+    // Element-wise comparison
+    less(t1: Tensor, t2: Tensor) -> Tensor
+    greater(t1: Tensor, t2: Tensor) -> Tensor
+    equal_element(t1: Tensor, t2: Tensor) -> Tensor
 }
 
-// Constants for Phase -1 testing
-const (
-    PHASE_1_TARGET_SHAPES = 100  // Number of shape operations to test
-)
-
-// Phase -1 Verification
-// Once implemented, verify:
-// [ ] All shape operations preserve data (no unintended copies)
-// [ ] Gradient tracking is enabled when requires_grad=true
-// [ ] Device is correctly propagated
-// [ ] stride calculation is correct for all operations
+interface ITensorDebug {
+    // Print tensor info
+    print_shape(tensor: Tensor) -> void
+    print_info(tensor: Tensor) -> void
+    
+    // Print values (small tensors only)
+    print_values(tensor: Tensor) -> void
+    
+    // Get string representation
+    to_string(tensor: Tensor) -> string
+    
+    // Validate tensor integrity
+    is_valid(tensor: Tensor) -> bool
+}

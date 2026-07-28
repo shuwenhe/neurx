@@ -1,114 +1,149 @@
-// NeurX Executor API Interface
-// Phase -1: Architecture Contracts
-// Purpose: Different execution modes (Eager, Compiled, JIT)
-
-package contracts
-
-// ExecutionMode enum
-type ExecMode interface {
-    name() string
-}
-
-type EagerMode struct {}
-type CompiledMode struct {}
-type JITMode struct {}
-type AOTMode struct {}
-
-func (EagerMode) name() string { return "eager" }
-func (CompiledMode) name() string { return "compiled" }
-func (JITMode) name() string { return "jit" }
-func (AOTMode) name() string { return "aot" }
-
-// Executor Interface - Execute operations
-interface Executor {
-    // Execution mode
-    func set_mode(mode: ExecMode)
-    func get_mode() -> ExecMode
-    
-    // Execute single operation
-    func execute_op(op_name: string, inputs: []Tensor) -> Tensor
-    
-    // Execute computation graph
-    func execute_graph(graph: ComputationGraph) -> Tensor
-    
-    // Profiling
-    func enable_profiling(enable: bool)
-    func get_profile() -> ExecutionProfile
-}
-
-// ExecutionProfile - Performance metrics
-struct ExecutionProfile {
-    total_time: float           // milliseconds
-    kernel_times: map[string]float
-    memory_peak: int            // bytes
-    memory_allocated: int
-    memory_freed: int
-    kernel_calls: int
-}
-
-// EagerExecutor - Execute immediately
-interface EagerExecutor extends Executor {
-    // No additional methods, just execute immediately
-}
-
-// CompiledExecutor - Compile then execute
-interface CompiledExecutor extends Executor {
-    func compile(graph: ComputationGraph) -> CompiledGraph
-    func optimize(graph: CompiledGraph) -> CompiledGraph
-}
-
-// CompiledGraph - Result of compilation
-struct CompiledGraph {
-    fused_ops: []FusedOperation
-    memory_plan: MemoryPlan
-    execution_order: []int
-}
-
-// FusedOperation - Multiple ops fused into single kernel
-struct FusedOperation {
-    ops: []string          // e.g., ["layernorm", "add"]
-    inputs: []Tensor
-    kernel: Kernel
-}
-
-// MemoryPlan - Pre-computed memory usage
-struct MemoryPlan {
-    peak_memory: int
-    allocation_schedule: []MemoryEvent
-    reuse_map: map[string][]int  // which tensors can reuse memory
-}
-
-// MemoryEvent - Memory allocation/deallocation at runtime
-struct MemoryEvent {
-    step: int
-    tensor_id: string
-    size: int
-    action: string  // "alloc" or "free"
-}
-
-// Phase -1 Design:
-// For Phase 1-8: Only EagerExecutor (execute immediately)
-// CompiledExecutor: Phase 11+ (compiler optimization)
+// Executor API - Operation execution strategies
 //
-// EagerExecutor pattern:
-// ```s
-// func (e EagerExecutor) execute_op(op_name: string, inputs: []Tensor) -> Tensor {
-//     dispatcher := e.dispatcher
-//     kernel := dispatcher.select_kernel(op_name, inputs[0].device())
-//     output := kernel.execute(inputs)
-//     
-//     if e.profiling_enabled {
-//         e.profile.kernel_calls += 1
-//         e.profile.kernel_times[op_name] += kernel_time
-//     }
-//     
-//     return output
-// }
-// ```
+// Different execution modes for different scenarios:
+// - Eager: immediate execution (training)
+// - Compiled: pre-compiled (inference)
+// - JIT: compile on-the-fly
+// - AOT: ahead-of-time compilation
+//
+// Executor hooks into Profiler for measurement
 
-// Phase -1 Verification
-// Once implemented, verify:
-// [ ] Eager executor works
-// [ ] Operations execute in correct order
-// [ ] Profiling collects timing data
-// [ ] Profile shows performance bottlenecks
+import "execution_plan_api"
+import "profiler_api"
+
+enum ExecutionMode {
+    Eager      // Execute immediately
+    Compiled   // Pre-compiled execution
+    JIT        // Compile on first run, cache
+    AOT        // Ahead-of-time compiled
+}
+
+struct ExecutionProfile {
+    total_time_us: i64
+    kernel_profiles: map[string]KernelProfile
+    memory_peak: i64
+    memory_allocated: i64
+    memory_freed: i64
+    kernel_call_count: i64
+}
+
+interface IExecutor {
+    // === Mode Management ===
+    set_mode(mode: ExecutionMode) -> void
+    get_mode() -> ExecutionMode
+    
+    // === Single Operation Execution ===
+    execute_op(op_name: string, inputs: []Tensor) -> Tensor
+    
+    // === Graph Execution ===
+    execute_graph(graph: ComputationGraph) -> Tensor
+    
+    // === Profiling ===
+    enable_profiling(enable: bool) -> void
+    get_profile() -> ExecutionProfile
+    reset_profile() -> void
+}
+
+interface IEagerExecutor {
+    // Eager execution: execute immediately
+    // Used for training with dynamic graphs
+    
+    // Execute and record profiling
+    execute_with_profiling(op_name: string, inputs: []Tensor) -> Tensor
+    
+    // Memory efficient (minimal buffering)
+    execute_low_memory(op_name: string, inputs: []Tensor) -> Tensor
+}
+
+interface ICompiledExecutor {
+    // Pre-compiled execution: compile then run
+    // Used for inference
+    
+    // Compile graph to execution plan
+    compile(graph: ComputationGraph) -> ExecutionPlan
+    
+    // Optimize execution plan
+    optimize(plan: ExecutionPlan) -> ExecutionPlan
+    
+    // Execute compiled plan
+    execute_plan(plan: ExecutionPlan) -> Tensor
+    
+    // Cache compiled plans
+    cache_plan(key: string, plan: ExecutionPlan) -> void
+    lookup_cached_plan(key: string) -> ExecutionPlan
+}
+
+interface IJITExecutor {
+    // JIT execution: compile once, reuse
+    
+    // Get or compile
+    get_or_compile(key: string, graph: ComputationGraph) -> ExecutionPlan
+    
+    // Clear JIT cache
+    clear_cache() -> void
+    
+    // JIT statistics
+    get_cache_size() -> i64
+    get_cache_hits() -> i64
+    get_cache_misses() -> i64
+}
+
+interface IAOTExecutor {
+    // Ahead-of-time execution: pre-compiled binaries
+    
+    // Load pre-compiled plan
+    load_plan(path: string) -> ExecutionPlan
+    
+    // Save compiled plan
+    save_plan(path: string, plan: ExecutionPlan) -> void
+}
+
+interface IExecutorMemoryManagement {
+    // Pre-allocate memory based on execution plan
+    allocate_for_plan(plan: ExecutionPlan) -> i64  // base address
+    
+    // Deallocate plan memory
+    deallocate_plan(base_addr: i64) -> void
+    
+    // Memory reuse tracking
+    get_memory_reuse_map(plan: ExecutionPlan) -> map[string][]string
+}
+
+interface IExecutorStreamManagement {
+    // Execute on specific stream (for async)
+    execute_on_stream(op_name: string, inputs: []Tensor, stream: Stream) -> Tensor
+    
+    // Execute plan on stream
+    execute_plan_on_stream(plan: ExecutionPlan, stream: Stream) -> Tensor
+    
+    // Synchronization
+    wait_all_streams() -> void
+}
+
+interface IExecutorPerformance {
+    // Estimate execution time
+    estimate_time(graph: ComputationGraph) -> i64  // microseconds
+    
+    // Estimate memory
+    estimate_memory(graph: ComputationGraph) -> i64
+    
+    // Get bottleneck kernel
+    get_bottleneck_kernel(profile: ExecutionProfile) -> string
+}
+
+// === EXECUTION FLOW ===
+// Training (Eager Mode):
+// 1. Forward pass (Eager)
+//    Operator → Dispatcher → Kernel → Device
+// 2. Backward pass (Eager)
+//    Gradient flows backward through graph
+// 3. Optimizer step
+//    Update parameters
+//
+// Inference (Compiled Mode):
+// 1. Compile once
+//    Graph → ExecutionPlan (with fusion, memory plan)
+// 2. Execute repeatedly
+//    ExecutionPlan → Fused Kernels → Device
+// 3. No backward tracking
+//    No computation graph overhead

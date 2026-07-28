@@ -1,106 +1,190 @@
-// NeurX Optimizer API Interface
-// Phase -1: Architecture Contracts
-// Purpose: Parameter update algorithms (SGD, AdamW, etc.)
-
-package contracts
-
-// OptimizerType enum
-type OptimType interface {
-    name() string
-}
-
-type SGD struct {}
-type Adam struct {}
-type AdamW struct {}
-type LAMB struct {}
-
-func (SGD) name() string { return "sgd" }
-func (Adam) name() string { return "adam" }
-func (AdamW) name() string { return "adamw" }
-func (LAMB) name() string { return "lamb" }
-
-// OptimizerState - Maintains optimizer state (momentum, etc.)
-struct OptimizerState {
-    step: int
-    momentum: map[string]Tensor    // For SGD
-    m: map[string]Tensor           // First moment for Adam
-    v: map[string]Tensor           // Second moment for Adam
-    exp_avg_sq: map[string]Tensor
-}
-
-// Optimizer Interface - Parameter update rules
-interface Optimizer {
-    // Configuration
-    func get_learning_rate() -> float
-    func set_learning_rate(lr: float)
-    func get_weight_decay() -> float
-    func set_weight_decay(wd: float)
-    
-    // Optimization step
-    func zero_grad()
-    func step()                                    // Update parameters given gradients
-    func step_with_closure(closure: func() -> Tensor)  // For line search
-    
-    // State management
-    func state_dict() -> map[string]Tensor       // For checkpoint
-    func load_state_dict(state: map[string]Tensor)
-    
-    // Parameter registration
-    func add_param_group(params: []Tensor, lr: float, weight_decay: float)
-    
-    // Gradient accumulation
-    func accumulate_gradients(grads: map[string]Tensor)
-}
-
-// LRScheduler Interface - Learning rate scheduling
-interface LRScheduler {
-    func step(epoch: int)
-    func get_last_lr() -> float
-    func get_lr(epoch: int) -> float
-}
-
-// Phase -1 Implementation Pattern for AdamW:
+// Optimizer API - Parameter update algorithms
 //
+// Supports: SGD, Adam, AdamW, LAMB, etc.
+// Direct state_dict support for checkpoint/resume
+//
+// Optimizer → State → Checkpoint
+
+import "serialization_api"
+
+enum OptimizerType {
+    SGD
+    Adam
+    AdamW
+    LAMB
+    RMSprop
+    Adagrad
+}
+
+struct OptimizerState {
+    step: i64
+    learning_rate: f64
+    weight_decay: f64
+    momentum: map[string]Tensor    // For SGD momentum
+    m: map[string]Tensor           // First moment (Adam/AdamW)
+    v: map[string]Tensor           // Second moment (Adam/AdamW)
+}
+
+interface IOptimizer {
+    // === Configuration ===
+    get_learning_rate() -> f64
+    set_learning_rate(lr: f64) -> void
+    
+    get_weight_decay() -> f64
+    set_weight_decay(wd: f64) -> void
+    
+    // === Gradient Management ===
+    zero_grad() -> void
+    add_grad(param_name: string, grad: Tensor) -> void
+    
+    // === Optimization Step ===
+    step() -> void
+    step_with_closure(closure: func() -> f64) -> void  // For line search
+    
+    // === State Management (Checkpoint/Resume) ===
+    state_dict() -> map[string]Tensor
+    load_state_dict(state: map[string]Tensor) -> void
+    
+    // === Parameter Groups ===
+    add_param_group(param_names: []string, lr: f64, weight_decay: f64) -> void
+    get_param_groups() -> []map[string]f64
+}
+
+interface ISGDOptimizer {
+    // SGD-specific
+    get_momentum() -> f64
+    set_momentum(momentum: f64) -> void
+    
+    get_nesterov() -> bool
+    set_nesterov(nesterov: bool) -> void
+}
+
+interface IAdamOptimizer {
+    // Adam-specific
+    get_betas() -> [2]f64  // [beta1, beta2]
+    set_betas(beta1: f64, beta2: f64) -> void
+    
+    get_epsilon() -> f64
+    set_epsilon(eps: f64) -> void
+}
+
+interface IAdamWOptimizer {
+    // AdamW = Adam + decoupled weight decay
+    // (standard L2 regularization, not Adam's weight decay)
+    
+    get_weight_decay() -> f64
+    set_weight_decay(wd: f64) -> void
+}
+
+interface ILAMBOptimizer {
+    // LAMB = Layer-wise Adaptive Moments Optimizer for Batch training
+    // Enables large batch training
+    
+    get_betas() -> [2]f64
+    set_betas(beta1: f64, beta2: f64) -> void
+}
+
+interface ILRScheduler {
+    // Learning rate scheduling
+    
+    step(epoch: i64) -> void
+    step_batch(batch_idx: i64) -> void
+    
+    get_last_lr() -> f64
+    get_lr(epoch: i64) -> f64
+    
+    // Get current learning rate
+    get_current_lr() -> f64
+}
+
+interface ILRSchedulerTypes {
+    // Common schedulers
+    
+    // StepLR: decrease lr by factor every N epochs
+    step_lr(optimizer: IOptimizer, step_size: i64, gamma: f64) -> ILRScheduler
+    
+    // ExponentialLR: lr = lr0 * gamma^epoch
+    exponential_lr(optimizer: IOptimizer, gamma: f64) -> ILRScheduler
+    
+    // CosineAnnealingLR: cosine annealing
+    cosine_annealing_lr(optimizer: IOptimizer, T_max: i64, eta_min: f64) -> ILRScheduler
+    
+    // WarmupLR: warmup then decay
+    warmup_lr(optimizer: IOptimizer, warmup_epochs: i64, base_lr: f64) -> ILRScheduler
+}
+
+interface IOptimizerCheckpoint {
+    // Checkpoint support (for resume)
+    
+    // Save optimizer state
+    save_checkpoint(path: string, optimizer: IOptimizer) -> void
+    
+    // Load optimizer state
+    load_checkpoint(path: string, optimizer: IOptimizer) -> void
+    
+    // Verify checkpoint validity (before resume)
+    verify_checkpoint(path: string) -> bool
+}
+
+interface IOptimizerMonitoring {
+    // Monitor optimization progress
+    
+    // Get gradient statistics
+    get_grad_norm() -> f64
+    get_param_norm() -> f64
+    
+    // Get effective learning rate
+    get_effective_lr() -> f64
+    
+    // Log optimizer state
+    log_state() -> string
+}
+
+// === MANDATORY STATE_DICT FORMAT ===
+//
+// state_dict() must return:
+// {
+//     "step": step_count,
+//     "learning_rate": current_lr,
+//     "param_0_m": momentum_tensor,    // if SGD
+//     "param_0_v": velocity_tensor,    // if SGD
+//     "param_1_m": ...
+//     ...
+//     "state": {...}  // optimizer-specific state
+// }
+//
+// load_state_dict(dict) must restore EXACTLY:
+// - step counter
+// - learning rate
+// - all momentum/velocity tensors
+// - optimizer-specific state
+//
+// Constraint: Resume must pass Loss continuity test
+// (Loss curve must not jump after checkpoint/resume)
+
+// === IMPLEMENTATION PATTERN (Phase 1) ===
+//
+// AdamW:
 // ```s
-// func (opt AdamW) step() {
+// func (opt *AdamW) step() {
 //     opt.state.step += 1
-//     lr := opt.learning_rate
-//     beta1 := 0.9
-//     beta2 := 0.999
-//     eps := 1e-8
-//     weight_decay := opt.weight_decay
 //     
-//     for param_id in opt.params {
-//         param := opt.params[param_id]
+//     for param_name, param := range opt.params {
 //         grad := param.grad()
+//         if grad == nil { continue }
 //         
-//         if grad == nil {
-//             continue
-//         }
+//         // Get or create state
+//         state := opt.state[param_name]
+//         state.m = beta1 * state.m + (1-beta1) * grad
+//         state.v = beta2 * state.v + (1-beta2) * (grad*grad)
 //         
-//         // AdamW update
-//         state := opt.state[param_id]
-//         state.m = beta1 * state.m + (1 - beta1) * grad
-//         state.v = beta2 * state.v + (1 - beta2) * (grad ** 2)
+//         // Bias correction
+//         m_hat := state.m / (1 - pow(beta1, opt.state.step))
+//         v_hat := state.v / (1 - pow(beta2, opt.state.step))
 //         
-//         m_hat := state.m / (1 - (beta1 ** opt.state.step))
-//         v_hat := state.v / (1 - (beta2 ** opt.state.step))
-//         
-//         param -= lr * (m_hat / (sqrt(v_hat) + eps) + weight_decay * param)
+//         // Update (decoupled weight decay)
+//         param -= lr * m_hat / (sqrt(v_hat) + eps)
+//         param -= lr * weight_decay * param
 //     }
 // }
 // ```
-
-// Constraint from ARCHITECTURE_PRINCIPLES:
-// Rule 7: Checkpoint & Resume
-//   "恢复后 Loss 不连续 = 严重 Bug"
-//   "Optimizer 状态必须完全保存"
-//   "Resume 必须通过一致性验证"
-
-// Phase -1 Verification
-// Once implemented, verify:
-// [ ] SGD optimizer works
-// [ ] AdamW optimizer works
-// [ ] Loss decreases over training steps
-// [ ] Optimizer state can be saved/loaded
-// [ ] After resume, loss curve is continuous

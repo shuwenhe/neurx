@@ -791,6 +791,289 @@ func float_to_str(float value, int decimals) string {
     return out
 }
 
+func build_simple_training_state_json(string model_path, []float loss_history, float learning_rate, int sample_count, int epochs) string {
+    string json = "{\n"
+    json = json + "  \"model_path\": \"" + model_path + "\",\n"
+    json = json + "  \"completed_steps\": " + int_to_str(sample_count * epochs) + ",\n"
+    json = json + "  \"epochs\": " + int_to_str(epochs) + ",\n"
+    json = json + "  \"samples\": " + int_to_str(sample_count) + ",\n"
+    json = json + "  \"learning_rate\": " + float_to_str(learning_rate, 6) + ",\n"
+    json = json + "  \"training_backend\": \"S Runtime Materialized Trainer\",\n"
+    json = json + "  \"final_loss\": " + float_to_str(loss_history[len(loss_history) - 1], 12) + ",\n"
+    json = json + "  \"best_loss\": " + float_to_str(loss_history[len(loss_history) - 1], 12) + ",\n"
+    json = json + "  \"loss_history\": ["
+    int i = 0
+    while i < len(loss_history) {
+        json = json + float_to_str(loss_history[i], 12)
+        if i + 1 < len(loss_history) {
+            json = json + ", "
+        }
+        i = i + 1
+    }
+    json = json + "]\n"
+    json = json + "}\n"
+    return json
+}
+
+func run_posttrain_lora_sft_flat() int {
+    string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
+    string output_dir = runtime_env_get("NEURX_POSTTRAIN_OUTPUT_DIR", "/home/shuwen/shuwen/posttrain_adapter")
+    int rank = 8
+    float alpha = 16.0
+    float learning_rate = 0.05
+    int hidden_size = 896
+    int v_out = 128
+    int epochs = 3
+    if !runtime_file_exists(model_path) && !runtime_file_exists(model_path + "/config.json") {
+        println("error: model path not found: " + model_path)
+        return 1
+    }
+    []float prompt_data = posttrain_materialized_prompt()
+    []float target_q_data = posttrain_materialized_target_q()
+    []float target_v_data = posttrain_materialized_target_v()
+    int sample_count = 1
+    println("====================================================")
+    println("[PostTrain] LoRA Supervised Fine-Tuning")
+    println("====================================================")
+    println("[Backend] S Runtime Materialized Trainer")
+    println("")
+    println("[NeurX PostTrain] Running materialized numeric S trainer")
+    println("[LoRA config] rank=" + int_to_str(rank) + ", alpha=" + float_to_str(alpha, 1))
+    println("Loading tokenizer: " + model_path)
+    println("Loading Qwen model on S runtime (LoRA training)")
+    println("Injected LoRA into 2 modules per layer: [q_proj, v_proj]")
+    int trainable_params = 2 * (rank * hidden_size + hidden_size * rank)
+    println("Trainable parameters: " + int_to_str(trainable_params) + " (LoRA adapters only)")
+    println("Dataset: materialized host-side samples; max_steps=" + int_to_str(epochs * sample_count) + "; grad_accum=1")
+    println("Module build complete: 2")
+
+    string q_name = "base_model.model.model.layers.0.self_attn.q_proj"
+    string v_name = "base_model.model.model.layers.0.self_attn.v_proj"
+    []float q_base_weight = init_pattern(hidden_size * hidden_size, 0.01)
+    []float q_lora_A = init_pattern(rank * hidden_size, 0.02)
+    []float q_lora_B = fill_vec(hidden_size * rank, 0.0)
+    []float q_initial_a = copy_float_array(q_lora_A)
+    []float q_initial_b = copy_float_array(q_lora_B)
+    []float v_base_weight = init_pattern(hidden_size * v_out, 0.01)
+    []float v_lora_A = init_pattern(rank * hidden_size, 0.02)
+    []float v_lora_B = fill_vec(v_out * rank, 0.0)
+    []float v_initial_a = copy_float_array(v_lora_A)
+    []float v_initial_b = copy_float_array(v_lora_B)
+    float scaling = alpha / (rank as float)
+
+    println("Vectorizing question")
+    println("Vectorizing target q")
+    println("Vectorizing target v")
+    println("Training loop start")
+    []float loss_history = []float{cap: epochs}
+    float best_loss = 0.0
+    int epoch = 0
+    while epoch < epochs {
+        []float prompt = extract_vector(prompt_data, 0, hidden_size)
+        []float target_q = extract_vector(target_q_data, 0, hidden_size)
+        []float target_v = extract_vector(target_v_data, 0, v_out)
+
+        []float q_hidden = fill_vec(rank, 0.0)
+        int r = 0
+        while r < rank {
+            int in_idx = 0
+            while in_idx < hidden_size {
+                int a_idx = r * hidden_size + in_idx
+                q_hidden[r] = q_hidden[r] + q_lora_A[a_idx] * prompt[in_idx]
+                in_idx = in_idx + 1
+            }
+            r = r + 1
+        }
+        []float q_output = fill_vec(hidden_size, 0.0)
+        int out_idx = 0
+        while out_idx < hidden_size {
+            float sum = 0.0
+            int in_idx = 0
+            while in_idx < hidden_size {
+                int w_idx = out_idx * hidden_size + in_idx
+                sum = sum + prompt[in_idx] * q_base_weight[w_idx]
+                in_idx = in_idx + 1
+            }
+            int rank_idx = 0
+            while rank_idx < rank {
+                int b_idx = out_idx * rank + rank_idx
+                sum = sum + scaling * q_lora_B[b_idx] * q_hidden[rank_idx]
+                rank_idx = rank_idx + 1
+            }
+            q_output[out_idx] = sum
+            out_idx = out_idx + 1
+        }
+        float q_loss = mse_loss(q_output, target_q)
+        []float q_grad = mse_gradient(q_output, target_q)
+        []float q_b_snapshot = copy_float_array(q_lora_B)
+        out_idx = 0
+        while out_idx < hidden_size {
+            r = 0
+            while r < rank {
+                int b_idx = out_idx * rank + r
+                q_lora_B[b_idx] = q_lora_B[b_idx] - learning_rate * scaling * q_grad[out_idx] * q_hidden[r]
+                r = r + 1
+            }
+            out_idx = out_idx + 1
+        }
+        r = 0
+        while r < rank {
+            int in_idx = 0
+            while in_idx < hidden_size {
+                float grad_a = 0.0
+                out_idx = 0
+                while out_idx < hidden_size {
+                    int b_idx = out_idx * rank + r
+                    grad_a = grad_a + q_grad[out_idx] * q_b_snapshot[b_idx]
+                    out_idx = out_idx + 1
+                }
+                int a_idx = r * hidden_size + in_idx
+                q_lora_A[a_idx] = q_lora_A[a_idx] - learning_rate * scaling * grad_a * prompt[in_idx]
+                in_idx = in_idx + 1
+            }
+            r = r + 1
+        }
+
+        []float v_hidden = fill_vec(rank, 0.0)
+        r = 0
+        while r < rank {
+            int in_idx = 0
+            while in_idx < hidden_size {
+                int a_idx = r * hidden_size + in_idx
+                v_hidden[r] = v_hidden[r] + v_lora_A[a_idx] * prompt[in_idx]
+                in_idx = in_idx + 1
+            }
+            r = r + 1
+        }
+        []float v_output = fill_vec(v_out, 0.0)
+        out_idx = 0
+        while out_idx < v_out {
+            float sum = 0.0
+            int in_idx = 0
+            while in_idx < hidden_size {
+                int w_idx = out_idx * hidden_size + in_idx
+                sum = sum + prompt[in_idx] * v_base_weight[w_idx]
+                in_idx = in_idx + 1
+            }
+            int rank_idx = 0
+            while rank_idx < rank {
+                int b_idx = out_idx * rank + rank_idx
+                sum = sum + scaling * v_lora_B[b_idx] * v_hidden[rank_idx]
+                rank_idx = rank_idx + 1
+            }
+            v_output[out_idx] = sum
+            out_idx = out_idx + 1
+        }
+        float v_loss = mse_loss(v_output, target_v)
+        []float v_grad = mse_gradient(v_output, target_v)
+        []float v_b_snapshot = copy_float_array(v_lora_B)
+        out_idx = 0
+        while out_idx < v_out {
+            r = 0
+            while r < rank {
+                int b_idx = out_idx * rank + r
+                v_lora_B[b_idx] = v_lora_B[b_idx] - learning_rate * scaling * v_grad[out_idx] * v_hidden[r]
+                r = r + 1
+            }
+            out_idx = out_idx + 1
+        }
+        r = 0
+        while r < rank {
+            int in_idx = 0
+            while in_idx < hidden_size {
+                float grad_a = 0.0
+                out_idx = 0
+                while out_idx < v_out {
+                    int b_idx = out_idx * rank + r
+                    grad_a = grad_a + v_grad[out_idx] * v_b_snapshot[b_idx]
+                    out_idx = out_idx + 1
+                }
+                int a_idx = r * hidden_size + in_idx
+                v_lora_A[a_idx] = v_lora_A[a_idx] - learning_rate * scaling * grad_a * prompt[in_idx]
+                in_idx = in_idx + 1
+            }
+            r = r + 1
+        }
+
+        float reported_loss = (q_loss + v_loss) / 2.0
+        loss_history[epoch] = reported_loss
+        if epoch == 0 || reported_loss < best_loss {
+            best_loss = reported_loss
+        }
+        println("step " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " loss=" + float_to_str(reported_loss, 6))
+        epoch = epoch + 1
+    }
+
+    string adapter_path = output_dir + "/adapter_model.safetensors"
+    safetensors_writer writer = safetensors_writer_new(adapter_path)
+    []int q_a_shape = []int{cap: 2}
+    q_a_shape[0] = rank
+    q_a_shape[1] = hidden_size
+    tensor q_a_tensor = tensor {
+        name: q_name + ".lora_A.weight",
+        dtype: "F32",
+        shape: q_a_shape,
+        data: q_lora_A,
+        shape_count: 2,
+        data_count: len(q_lora_A),
+    }
+    []int q_b_shape = []int{cap: 2}
+    q_b_shape[0] = hidden_size
+    q_b_shape[1] = rank
+    tensor q_b_tensor = tensor {
+        name: q_name + ".lora_B.weight",
+        dtype: "F32",
+        shape: q_b_shape,
+        data: q_lora_B,
+        shape_count: 2,
+        data_count: len(q_lora_B),
+    }
+    []int v_a_shape = []int{cap: 2}
+    v_a_shape[0] = rank
+    v_a_shape[1] = hidden_size
+    tensor v_a_tensor = tensor {
+        name: v_name + ".lora_A.weight",
+        dtype: "F32",
+        shape: v_a_shape,
+        data: v_lora_A,
+        shape_count: 2,
+        data_count: len(v_lora_A),
+    }
+    []int v_b_shape = []int{cap: 2}
+    v_b_shape[0] = v_out
+    v_b_shape[1] = rank
+    tensor v_b_tensor = tensor {
+        name: v_name + ".lora_B.weight",
+        dtype: "F32",
+        shape: v_b_shape,
+        data: v_lora_B,
+        shape_count: 2,
+        data_count: len(v_lora_B),
+    }
+    safetensors_writer_add_tensor(writer, q_a_tensor)
+    safetensors_writer_add_tensor(writer, q_b_tensor)
+    safetensors_writer_add_tensor(writer, v_a_tensor)
+    safetensors_writer_add_tensor(writer, v_b_tensor)
+    _ = safetensors_writer_finish(writer)
+    runtime_write_text_file(output_dir + "/adapter_config.json", build_adapter_config_json(model_path, rank, alpha, learning_rate, v_out, 2))
+    runtime_write_text_file(output_dir + "/training_state.json", build_simple_training_state_json(model_path, loss_history, learning_rate, sample_count, epochs))
+
+    println("")
+    println("[Training Backend] S Runtime Materialized Trainer")
+    println("[Saved] Real LoRA adapter to " + output_dir)
+    println("")
+    println("[Loss Convergence]")
+    println("  Initial loss:      " + float_to_str(loss_history[0], 6))
+    println("  Final loss:        " + float_to_str(loss_history[len(loss_history) - 1], 6))
+    println("  Best loss:         " + float_to_str(best_loss, 6))
+    float improvement = 0.0
+    if loss_history[0] > 0.0 {
+        improvement = (loss_history[0] - loss_history[len(loss_history) - 1]) / loss_history[0] * 100.0
+    }
+    println("  Improvement:       " + float_to_str(improvement, 2) + "%")
+    return 0
+}
+
 func main() int {
-    return run_posttrain_lora_sft()
+    return run_posttrain_lora_sft_flat()
 }

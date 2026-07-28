@@ -1,97 +1,148 @@
-// NeurX Device API Interface
-// Phase -1: Architecture Contracts
-// Purpose: Define device abstraction for CPU, CUDA, CANN, Metal
+// Device API - Hardware abstraction (Resources only)
+//
+// Device manages:
+// - Memory allocation/deallocation
+// - Device properties and capabilities
+// - Synchronization (device-level)
+// - Basic info queries
+//
+// Device does NOT manage:
+// - Stream creation (use StreamManager instead)
+// - Event recording (use StreamManager instead)
+// - Async operations (use Stream + Event instead)
+//
+// This keeps Device simple and focused on resource management.
 
-package contracts
-
-// Device Type Enum
-type DeviceType interface {
-    name() string
+enum DeviceType {
+    CPU
+    CUDA     // with device_id
+    CANN     // with device_id
+    Metal
+    Custom
 }
 
-type CPU struct {}
-type CUDA struct { device_id: int }
-type CANN struct { device_id: int }
-type Metal struct {}
-
-func (CPU) name() string { return "cpu" }
-func (c CUDA) name() string { return "cuda:" + string(c.device_id) }
-func (c CANN) name() string { return "cann:" + string(c.device_id) }
-func (Metal) name() string { return "metal" }
-
-// Device Interface - Unified hardware abstraction
-interface Device {
-    // Device identification
-    func device_type() -> DeviceType
-    func is_available() -> bool
-    func supports_bfloat16() -> bool
-    func supports_fp16() -> bool
-    
-    // Memory management
-    func allocate(bytes: int) -> int          // Returns device pointer (int for simplicity)
-    func deallocate(ptr: int)                 // Free device memory
-    func memset(ptr: int, value: int, bytes: int)
-    func memcpy_h2d(host_ptr: []byte, device_ptr: int, bytes: int)  // Host to Device
-    func memcpy_d2h(device_ptr: int, host_ptr: []byte, bytes: int)  // Device to Host
-    func memcpy_d2d(src_ptr: int, dst_ptr: int, bytes: int)         // Device to Device
-    
-    // Device properties
-    func max_threads_per_block() -> int
-    func total_memory() -> int
-    func free_memory() -> int
-    func compute_capability() -> string       // e.g., "8.0" for RTX 3090
-    
-    // Synchronization
-    func synchronize()                        // Block until all operations complete
-    func record_event() -> int                // Record a CUDA-like event
-    func wait_event(event_id: int)           // Wait for event
-    
-    // Capability checking
-    func supports_operation(op_name: string) -> bool
+struct CPUDevice {
+    id: i64
 }
 
-// DeviceProperties - Configuration for device
-struct DeviceProperties {
-    device_type: DeviceType
+struct CUDADevice {
+    id: i64
     compute_capability: string
-    max_threads_per_block: int
-    shared_memory_per_block: int
-    num_blocks: int
 }
 
-// AllocationStrategy
-type AllocationStrategy interface {
-    name() string
+struct CANNDevice {
+    id: i64
+    compute_capability: string
 }
 
-type SimpleAlloc struct {}           // malloc on demand
-type PoolAlloc struct {
-    pool_size: int
-    block_size: int
+struct MetalDevice {
+    id: i64
 }
 
-func (SimpleAlloc) name() string { return "simple" }
-func (PoolAlloc) name() string { return "pool" }
-
-// MemoryAllocator Interface
-interface MemoryAllocator {
-    func init(device: Device, strategy: AllocationStrategy)
-    func allocate(bytes: int) -> int
-    func deallocate(ptr: int)
-    func clear_cache()
-    func get_memory_stats() -> map[string]int
+struct Device {
+    device_type: DeviceType
+    id: i64
 }
 
-// Phase -1 Verification
-// Constraints from ARCHITECTURE_PRINCIPLES:
-// Rule 9: New Device Isolation
-//   - New device only modifies runtime/device/* and runtime/kernel/*
-//   - Does NOT modify Operator code
-//   - Registers with Dispatcher, and existing Operators work automatically
+interface IDevice {
+    // === Identity ===
+    device_type() -> DeviceType
+    device_id() -> i64
+    name() -> string
+    
+    // === Capabilities ===
+    is_available() -> bool
+    supports_fp16() -> bool
+    supports_bfloat16() -> bool
+    supports_fp64() -> bool
+    supports_int8() -> bool
+    
+    // === Compute ===
+    max_threads_per_block() -> i64
+    warp_size() -> i64
+    compute_capability() -> string
+    
+    // === Memory ===
+    total_memory() -> i64
+    allocated_memory() -> i64
+    free_memory() -> i64
+}
 
-// Once implemented, verify:
-// [ ] Memory allocation works on target device
-// [ ] Synchronization blocks correctly
-// [ ] Can query device properties
-// [ ] Memory can be copied between host and device
-// [ ] Multiple devices can be managed independently
+interface IDeviceMemory {
+    // Allocate on device
+    allocate(size: i64) -> MemoryPtr
+    
+    // Deallocate from device
+    deallocate(ptr: MemoryPtr) -> void
+    
+    // Set memory value
+    memset(ptr: MemoryPtr, value: i32, size: i64) -> void
+    
+    // Copy host to device
+    memcpy_h2d(dst: MemoryPtr, src: i64, size: i64) -> void
+    
+    // Copy device to host
+    memcpy_d2h(dst: i64, src: MemoryPtr, size: i64) -> void
+    
+    // Copy device to device
+    memcpy_d2d(dst: MemoryPtr, src: MemoryPtr, size: i64) -> void
+}
+
+interface IDeviceSynchronization {
+    // Block until all device work completes
+    synchronize() -> void
+    
+    // Check if device is idle
+    is_idle() -> bool
+    
+    // Block on stream (actual sync via Stream, not Device)
+    // This is only for device-level synchronization
+}
+
+interface IDeviceProperties {
+    // Get detailed device properties
+    get_properties() -> map[string]string
+    
+    // Get architecture name
+    get_arch_name() -> string
+    
+    // Get driver version
+    get_driver_version() -> string
+    
+    // Get runtime version
+    get_runtime_version() -> string
+}
+
+interface IDeviceFactory {
+    // Create device by type
+    create_device(device_type: DeviceType, device_id: i64) -> Device
+    
+    // Get device by ID
+    get_device(device_type: DeviceType, device_id: i64) -> Device
+    
+    // List available devices
+    list_devices(device_type: DeviceType) -> []Device
+    
+    // Get device count
+    get_device_count(device_type: DeviceType) -> i64
+}
+
+interface IDeviceRegistry {
+    // Register device type
+    register_device(device_type: DeviceType, factory_ptr: i64) -> void
+    
+    // Get device factory
+    get_factory(device_type: DeviceType) -> i64
+}
+
+interface IDeviceContext {
+    // Set current device (thread-local)
+    set_current_device(device: Device) -> void
+    
+    // Get current device
+    get_current_device() -> Device
+    
+    // Push/pop device context (RAII)
+    push_device(device: Device) -> void
+    pop_device() -> void
+}
