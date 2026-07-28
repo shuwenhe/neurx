@@ -1,5 +1,6 @@
 package neurx.serving.vllm.prefix_cache
 use neurx.serving.cache.prefix_cache
+
 struct vllm_prefix_cache_state {
     prefix_cache_state cache
     int key_space

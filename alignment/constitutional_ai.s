@@ -85,10 +85,15 @@ struct cai_batch {
 }
 
 func cai_token_prompt_start() int { 50001 }
+
 func cai_token_response_start() int { 50002 }
+
 func cai_token_critique_start() int { 50003 }
+
 func cai_token_revision_start() int { 50004 }
+
 func cai_token_principle_base() int { 50100 }
+
 func cai_concat([]int a, []int b) []int {
     int n = len(a) + len(b)
     []int out = []int{cap: n}

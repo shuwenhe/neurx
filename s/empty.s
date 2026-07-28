@@ -1,4 +1,5 @@
 package neurx.empty
+
 struct example {
     int value
 }

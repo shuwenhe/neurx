@@ -1,4 +1,5 @@
 package neurx.serving.cache.kv_cache
+
 struct kv_cache_state {
     int layer_count
     int max_seq_len

@@ -1,4 +1,5 @@
 package neurx.linalg
+
 struct tensor {
     []float data
     []int shape

@@ -9,6 +9,7 @@ int IOREQ_PENDING    = 0
 int IOREQ_SUBMITTED  = 1
 int IOREQ_COMPLETE   = 2
 int IOREQ_ERROR      = 3
+
 struct io_request {
     int    req_id
     int    op

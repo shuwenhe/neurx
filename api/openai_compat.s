@@ -1,4 +1,5 @@
 package neurx.api.llm_compat
+
 struct chat_message {
     string role
     string content

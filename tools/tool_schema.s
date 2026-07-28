@@ -5,6 +5,7 @@ string PARAM_TYPE_BOOL    = "bool"
 string PARAM_TYPE_FLOAT   = "float"
 string PARAM_TYPE_PATH    = "path"
 string PARAM_TYPE_COMMAND = "command"
+
 struct tool_param_schema {
     string name
     string param_type

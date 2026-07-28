@@ -1,5 +1,6 @@
 package neurx.tokenizer.data_pipeline
 use neurx.strings
+
 struct tokenizer_config {
     string tokenizer_type
     int vocab_size
@@ -466,6 +467,7 @@ func update_running_average(bpe_tokenizer_state state, int new_value) void {
         state.avg_tokens_per_string =
             (state.avg_tokens_per_string * float(n - 1) + float(new_value)) / float(n)
     }
+
 func get_gpt2_pre_tokenize_pattern() string {
     return """'s|'t|'re|'ve|'m|'ll|'d| ?\\p{L}+| ?\\p{N}+| ?[^\\s\\p{L}\\p{N}]+|\\s+(?!\\S)|\\s+"""
 }

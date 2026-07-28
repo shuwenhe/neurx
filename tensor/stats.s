@@ -1,4 +1,5 @@
 package neurx.stats
+
 struct tensor {
     []float data
     []int shape

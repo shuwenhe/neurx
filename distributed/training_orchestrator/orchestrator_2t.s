@@ -21,6 +21,7 @@ package neurx.distributed.training_orchestrator
 |  Total GPUs = TP × PP × DP                                   |
 |  Example: 16 × 16 × 2 = 512 GPUs for 2T model              |
 +-------------------------------------------------------------+
+
 struct training_orchestrator_config {
     int vocab_size
     int hidden_dim

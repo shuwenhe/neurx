@@ -1,4 +1,5 @@
 package neurx.data
+
 struct sampler_config {
     int total_samples
     int batch_size

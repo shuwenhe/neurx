@@ -301,7 +301,6 @@ func run_posttrain_lora_sft() int {
         }
         modules[module_idx] = q_module
         module_idx = module_idx + 1
-
         named_lora_module v_module
         v_module.name = v_name
         lora_linear v_layer
@@ -586,7 +585,6 @@ func write_simple_adapter_checkpoint(
 ) {
     string adapter_path = output_dir + "/adapter_model.safetensors"
     safetensors_writer writer = safetensors_writer_new(adapter_path)
-
     []int q_a_shape = []int{cap: 2}
     q_a_shape[0] = rank
     q_a_shape[1] = 896
@@ -599,7 +597,6 @@ func write_simple_adapter_checkpoint(
         data_count: len(q_a),
     }
     safetensors_writer_add_tensor(writer, q_a_tensor)
-
     []int q_b_shape = []int{cap: 2}
     q_b_shape[0] = 896
     q_b_shape[1] = rank
@@ -612,7 +609,6 @@ func write_simple_adapter_checkpoint(
         data_count: len(q_b),
     }
     safetensors_writer_add_tensor(writer, q_b_tensor)
-
     []int v_a_shape = []int{cap: 2}
     v_a_shape[0] = rank
     v_a_shape[1] = 896
@@ -625,7 +621,6 @@ func write_simple_adapter_checkpoint(
         data_count: len(v_a),
     }
     safetensors_writer_add_tensor(writer, v_a_tensor)
-
     []int v_b_shape = []int{cap: 2}
     v_b_shape[0] = v_out
     v_b_shape[1] = rank
@@ -638,9 +633,7 @@ func write_simple_adapter_checkpoint(
         data_count: len(v_b),
     }
     safetensors_writer_add_tensor(writer, v_b_tensor)
-
     _ = safetensors_writer_finish(writer)
-
     runtime_write_text_file(output_dir + "/adapter_config.json", build_adapter_config_json_simple(
         model_path,
         rank,

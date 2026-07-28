@@ -2,6 +2,7 @@ package neurx.attention.mechanism
 import neurx.arch.cuda.bindings.*
 import neurx.tensor.*
 import neurx.nn.*
+
 struct attention_config {
     int hidden_size
     int num_attention_heads
@@ -163,6 +164,7 @@ func forward(
     timer.stop("attention_forward")
     _update_stats(self, batch_size, seq_len, cfg, timer)
     return (attn_output, present_kv, attn_weights)
+
 func _standard_attention_forward(
     tensor query_states,
     tensor key_states,
@@ -181,6 +183,7 @@ func _standard_attention_forward(
     tensor context = matmul(attn_probs, value_states)
     option[tensor] weights = return_attn_weights ? some(attn_probs) : none
     return (context, weights)
+
 func _flash_attention_forward(
     tensor query_states,
     tensor key_states,
@@ -295,6 +298,7 @@ class MaskBuilder {
             return base_mask
         tensor padding_2d = (1.0 - padding_mask.unsqueeze(1).unsqueeze(2)) * -10000.0
         return base_mask + padding_2d
+
 struct rope_cache {
     tensor cos_vals
     tensor sin_vals
@@ -332,6 +336,7 @@ func compute_rope_embeddings(
     cos_vals = cos_vals.unsqueeze(0).unsqueeze(2)
     sin_vals = sin_vals.unsqueeze(0).unsqueeze(2)
     return (cos_vals, sin_vals)
+
 func apply_rotary_emb(
     tensor x,
     tensor cos_vals,
@@ -350,6 +355,7 @@ func apply_rotary_emb(
     tensor result = stack([rotated_even, rotated_odd], dim=-1)
     result = result.reshape(shape(x)[:-1])
     return result
+
 func apply_rope_scaling(
     tensor freqs,
     int scaling_type,
@@ -377,6 +383,7 @@ func apply_rope_scaling(
             return freqs * scale
         case _:
             return freqs
+
 func _update_stats(
     ref NeurxAttention self,
     int batch_size,
@@ -395,6 +402,7 @@ func _update_stats(
     if !cfg.use_flash_attention:
         mem_per_sample += seq_len * seq_len * cfg.num_attention_heads
     self.stats.memory_usage_mb = float(mem_per_sample * batch_size) / (1024 * 1024)
+
 func test_attention() {
     print("\n" + "="*60)
     print("Testing NEURX Attention Mechanism")

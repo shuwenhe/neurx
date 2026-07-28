@@ -633,7 +633,9 @@ func print_dataloader_summary(dataloader loader) string {
 }
 
 func min_int(int a, int b) int { if a < b { return a }; return b }
+
 func max_int(int a, int b) int { if a > b { return a }; return b }
+
 func float_of_int(int n) float {
     float r = 0.0;
     int i = 0;
@@ -642,6 +644,7 @@ func float_of_int(int n) float {
 }
 
 func string(int i) string { return "" }
+
 func allocate_2d_int(int rows, int cols) [][]int {
     [][]int m = [][]int{cap: rows}
     int i = 0
@@ -695,6 +698,9 @@ func calculate_real_token_count([][][]int mask, int batch, int seq) float {
 }
 
 func is_batch_ready(training_batch b) bool { return true }
+
 func dequeue_gpu_queue(dataloader l) training_batch { return training_batch{} }
+
 func enqueue_gpu_queue(ref dataloader l, training_batch b) {}
+
 func hash_string(string s) int64 { return 0 }

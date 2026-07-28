@@ -1,5 +1,6 @@
 package neurx.model.llm.base_large
 use neurx.util.math.{exp_approx}
+
 struct gpt_large_state {
     string name
     string family

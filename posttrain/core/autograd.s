@@ -1,5 +1,4 @@
 package neurx.posttrain.core.autograd
-
 use std.io.println
 
 struct computation_node_s {
@@ -51,7 +50,6 @@ func new_computation_node_s(string op, tensor_s out, []tensor_s ins) computation
 func record_operation_s(gradient_tape_s tape, string op_name, tensor_s output, []tensor_s inputs) gradient_tape_s {
     computation_node_s node = new_computation_node_s(op_name, output, inputs)
     node.node_id = tape.op_count
-    
     gradient_tape_s {
         operations: append(tape.operations, node),
         op_count: tape.op_count + 1,
@@ -69,37 +67,28 @@ func disable_grad_s() {
 
 func backward_matmul_s(tensor_s grad_output, tensor_s input_a, tensor_s input_b) []tensor_s {
     []tensor_s grads
-    
     tensor_s grad_a = make_zeros_like_s(input_a)
     tensor_s grad_b = make_zeros_like_s(input_b)
-    
     grads = append(grads, grad_a)
     grads = append(grads, grad_b)
-    
     grads
 }
 
 func backward_add_s(tensor_s grad_output, tensor_s input_a, tensor_s input_b) []tensor_s {
     []tensor_s grads
-    
     tensor_s grad_a = copy_tensor_s(grad_output)
     tensor_s grad_b = copy_tensor_s(grad_output)
-    
     grads = append(grads, grad_a)
     grads = append(grads, grad_b)
-    
     grads
 }
 
 func backward_mul_s(tensor_s grad_output, tensor_s input_a, tensor_s input_b) []tensor_s {
     []tensor_s grads
-    
     tensor_s grad_a = mul_tensors_s(grad_output, input_b)
     tensor_s grad_b = mul_tensors_s(grad_output, input_a)
-    
     grads = append(grads, grad_a)
     grads = append(grads, grad_b)
-    
     grads
 }
 
@@ -115,7 +104,6 @@ func backward_layer_norm_s(tensor_s grad_output, tensor_s input, float epsilon) 
 
 func backward_relu_s(tensor_s grad_output, tensor_s input) tensor_s {
     []float grad_data = make([]float, 0)
-    
     int i = 0
     while i < len(input.data) {
         if input.data[i] > 0.0 {
@@ -125,7 +113,6 @@ func backward_relu_s(tensor_s grad_output, tensor_s input) tensor_s {
         }
         i = i + 1
     }
-    
     tensor_s {
         data: grad_data,
         shape: grad_output.shape,
@@ -139,13 +126,10 @@ func backward_relu_s(tensor_s grad_output, tensor_s input) tensor_s {
 
 func backward_linear_s(tensor_s grad_output, tensor_s input, tensor_s weight) []tensor_s {
     []tensor_s grads
-    
     tensor_s grad_input = matmul_s(grad_output, transpose_s(weight))
     tensor_s grad_weight = matmul_s(transpose_s(input), grad_output)
-    
     grads = append(grads, grad_input)
     grads = append(grads, grad_weight)
-    
     grads
 }
 
@@ -163,7 +147,6 @@ func make_zeros_like_s(tensor_s t) tensor_s {
         zeros = append(zeros, 0.0)
         i = i + 1
     }
-    
     tensor_s {
         data: zeros,
         shape: t.shape,
@@ -182,7 +165,6 @@ func copy_tensor_s(tensor_s t) tensor_s {
         copied = append(copied, t.data[i])
         i = i + 1
     }
-    
     tensor_s {
         data: copied,
         shape: t.shape,
@@ -201,7 +183,6 @@ func mul_tensors_s(tensor_s a, tensor_s b) tensor_s {
         result = append(result, a.data[i] * b.data[i])
         i = i + 1
     }
-    
     tensor_s {
         data: result,
         shape: a.shape,

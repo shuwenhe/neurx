@@ -1,4 +1,5 @@
 module longwriter_engine
+
 struct long_writer_config {
     max_total_tokens: int = 32000
     max_section_tokens: int = 4096

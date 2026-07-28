@@ -1,4 +1,5 @@
 package neurx.cuda
+
 struct cuda_device {
     int id
     string name

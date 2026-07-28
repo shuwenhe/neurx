@@ -27,7 +27,6 @@ type inference_server_config struct {
 	LogLevel        string `json:"log_level"`
 	WorkerThreads   int    `json:"worker_threads"`
 }
-
 type inference_request struct {
 	Prompt          string   `json:"prompt"`
 	MaxTokens       int      `json:"max_tokens"`
@@ -40,7 +39,6 @@ type inference_request struct {
 	StopSequences   []string `json:"stop_sequences"`
 	ReturnLogprobs  bool     `json:"return_logprobs"`
 }
-
 type inference_response struct {
 	RequestID    string    `json:"request_id"`
 	Generated    string    `json:"generated"`
@@ -52,7 +50,6 @@ type inference_response struct {
 	Logprobs     []float64 `json:"logprobs,omitempty"`
 	Timestamp    string    `json:"timestamp"`
 }
-
 type server_metrics struct {
 	TotalRequests      int64   `json:"total_requests"`
 	SuccessfulRequests int64   `json:"successful_requests"`
@@ -94,6 +91,7 @@ var gMetrics = &server_metrics{
 	UptimeSeconds: 0,
 }
 var gServerStartTime = time.Now()
+
 func loadConfigFromEnv() {
 	if home := os.Getenv("NEURX_HOME"); home != "" {
 		gConfig.ModelPath = filepath.Join(home, "artifacts", "models", "1t.bin")

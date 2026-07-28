@@ -1,5 +1,6 @@
 package neurx.checkpoint.pretrain
 use neurx.runtime.io.{runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file}
+
 struct pretrain_checkpoint_state {
     string run_name
     string root

@@ -1,6 +1,7 @@
 package neurx.posttrain.alignment.orpo_trainer
 use neurx.distributed.collective
 use neurx.amp.scaler
+
 struct orpo_config {
     int seq_len
     int hidden_size

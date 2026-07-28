@@ -1,4 +1,5 @@
 module main
+
 struct tensor_2 {
     []float data
     []int shape

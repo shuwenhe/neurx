@@ -1,4 +1,5 @@
 package neurx.model.diffusion.minimal_diffuser
+
 struct minimal_diffuser_state {
     string name
     string family

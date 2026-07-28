@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_output, runtime_shell_escape, trim}
 use std.io.println
+
 func main() int {
     string root = dataset_root()
     bool force = runtime_env_get("NEURX_GITHUB_DATASETS_FORCE", "0") == "1"

@@ -1,5 +1,6 @@
 package neurx.inference.smart
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, runtime_shell_escape}
+
 struct knowledge_item {
     string text
     int id

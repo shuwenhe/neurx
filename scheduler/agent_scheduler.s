@@ -1,4 +1,5 @@
 package neurx.scheduler.agent_scheduler
+
 struct agent_scheduler_state {
     []string tasks
     []int priorities

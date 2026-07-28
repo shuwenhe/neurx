@@ -1,6 +1,7 @@
 package neurx.diffusion.sampler.ddpm
 use neurx.diffusion.noise
 use neurx.ops
+
 struct ddpm_sampler_state {
     int current_t
     int total_steps

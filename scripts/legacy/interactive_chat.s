@@ -3,6 +3,7 @@ use std.io
 use std.os
 use std.strings
 use std.bufio
+
 func main() {
     modelPath := "/home/shuwen/shuwen/posttrain/model.safetensors"
     stat, err := os.Stat(modelPath)

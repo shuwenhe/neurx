@@ -1,4 +1,5 @@
 package neurx.inference.eval
+
 struct infer_eval_state {
     int samples
     float avg_latency_ms

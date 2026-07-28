@@ -1,4 +1,5 @@
 package neurx.backends.compute_backend
+
 struct device_info {
     string backend
     int device_id
@@ -210,6 +211,7 @@ func backend_matmul(
     cpu_matmul(a, b, m, k, n)
 }
 extern "intrinsic" func __neurx_cann_matmul([]float a, []float b, []float out, int m, int k, int n) ()
+
 func cpu_matmul([]float a, []float b, int m, int k, int n) []float {
     []float result = []float{cap: m * n}
     int idx = 0

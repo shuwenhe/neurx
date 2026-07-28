@@ -1,6 +1,7 @@
 package neurx.optimizer.optim_mvp
 use neurx.tensor.tensor
 use neurx.tensor.new
+
 struct sgd_optimizer {
     float lr
 }

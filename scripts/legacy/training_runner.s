@@ -35,7 +35,6 @@ type training_config struct {
 	MixedPrecision  string `json:"mixed_precision"`
 	Seed            int64  `json:"seed"`
 }
-
 type training_state struct {
 	CurrentStep     int64
 	CurrentEpoch    int
@@ -49,7 +48,6 @@ type training_state struct {
 	LastEvalLoss    float64
 	EvalAccuracy    float64
 }
-
 type training_metrics struct {
 	Step        int64       `json:"step"`
 	TrainLoss   float64     `json:"train_loss"`

@@ -24,6 +24,7 @@ use neurx.session.session
 use neurx.agent.workspace_tools
 use neurx.runtime.io.{runtime_env_get, runtime_write_text_file, runtime_read_text_file, runtime_file_exists}
 use neurx.agent.call_trace
+
 struct agent_runtime_state {
     agent_plan_state plan
     agent_memory_state memory

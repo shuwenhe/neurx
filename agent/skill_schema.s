@@ -1,5 +1,6 @@
 package neurx.agent.skill_schema
 use neurx.strings
+
 struct agent_skill_spec {
     string name
     string version

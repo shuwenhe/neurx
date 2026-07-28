@@ -2,6 +2,7 @@ package neurx.workflows.robotics
 use neurx.workflows.robotics.sim.{robotics_sim_state, robotics_sim_state_dict, robotics_sim_load_state_dict, robotics_sim_enable_domain_randomization, new_robotics_sim_state}
 use neurx.workflows.robotics.real.{robotics_real_state, robotics_real_state_dict, robotics_real_load_state_dict, robotics_real_connect, robotics_real_trigger_emergency_stop, new_robotics_real_state}
 use neurx.workflows.robotics.deploy.{robotics_deploy_state, robotics_deploy_state_dict, robotics_deploy_load_state_dict, robotics_deploy_start, robotics_deploy_trigger_emergency_stop, new_robotics_deploy_state}
+
 struct robotics_workflow_pipeline_state {
     robotics_workflow_state workflow
     robotics_sim_state sim

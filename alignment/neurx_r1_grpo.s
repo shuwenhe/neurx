@@ -1,4 +1,5 @@
 package neurx.alignment.neurx_r1_grpo
+
 struct grpo_config {
     int group_size
     int num_prompts_per_batch

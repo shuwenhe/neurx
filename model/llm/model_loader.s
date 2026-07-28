@@ -6,6 +6,7 @@ import (
     "../../core/tensor"
     "../transformer"
 )
+
 struct gptconfig {
     VocabSize      int
     MaxSeqLen      int
@@ -81,7 +82,6 @@ func initializeEmbedding(inputDim int, outputDim int, std float32) *tensor.tenso
 func initializePositionalEmbedding(maxSeqLen int, hiddenDim int, std float32) *tensor.tensor_2 {
     return tensor.Zeros(maxSeqLen, hiddenDim)
 }
-
 func (m *gptmodel) Forward(tokenIds *tensor.tensor_2) (*tensor.tensor_2, error) {
     batchSize := tokenIds.Shape[0]
     seqLen := tokenIds.Shape[1]
@@ -98,7 +98,6 @@ func (m *gptmodel) Forward(tokenIds *tensor.tensor_2) (*tensor.tensor_2, error) 
     logits := tensor.MatMul(x, m.outputProj)
     return logits, nil
 }
-
 func (m *gptmodel) embedTokens(tokenIds *tensor.tensor_2) *tensor.tensor_2 {
     batchSize := tokenIds.Shape[0]
     seqLen := tokenIds.Shape[1]
@@ -109,7 +108,6 @@ func (m *gptmodel) embedTokens(tokenIds *tensor.tensor_2) *tensor.tensor_2 {
     }
     return embeddings
 }
-
 func (m *gptmodel) addPositionalEmbedding(x *tensor.tensor_2, seqLen int) *tensor.tensor_2 {
     batchSize := x.Shape[0]
     for b := 0; b < batchSize; b++ {
@@ -118,7 +116,6 @@ func (m *gptmodel) addPositionalEmbedding(x *tensor.tensor_2, seqLen int) *tenso
     }
     return x
 }
-
 func (m *gptmodel) createCausalMask(seqLen int) *tensor.tensor_2 {
     mask := tensor.Zeros(seqLen, seqLen)
     for i := 0; i < seqLen; i++ {
@@ -127,11 +124,9 @@ func (m *gptmodel) createCausalMask(seqLen int) *tensor.tensor_2 {
     }
     return mask
 }
-
 func (m *gptmodel) applyLayerNorm(x *tensor.tensor_2) *tensor.tensor_2 {
     return x
 }
-
 func (m *gptmodel) Backward(lossGradients *tensor.tensor_2) error {
     gradients := lossGradients
     for i := len(m.layers) - 1; i >= 0; i-- {
@@ -143,11 +138,9 @@ func (m *gptmodel) Backward(lossGradients *tensor.tensor_2) error {
     }
     return nil
 }
-
 func (m *gptmodel) UpdateWeights() error {
     return nil
 }
-
 func (m *gptmodel) SaveCheckpoint(path string) error {
     fmt.Printf("Saving checkpoint to %s\n", path)
     file, err := os.Create(path)
@@ -264,7 +257,6 @@ func Mini() gptconfig {
         LearningRate:   1e-4,
     }
 }
-
 func (m *gptmodel) NumParams() int64 {
     tokenEmbParams := int64(m.config.VocabSize * m.config.HiddenDim)
     posEmbParams := int64(m.config.MaxSeqLen * m.config.HiddenDim)

@@ -1,4 +1,5 @@
 package neurx.pretrain.config
+
 struct pretrain_config {
     int global_batch_size
     int micro_batch_size

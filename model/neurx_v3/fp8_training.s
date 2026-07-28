@@ -1,4 +1,5 @@
 package neurx.model.neurx.fp8_training
+
 struct fp8_config {
     string forward_dtype
     string backward_dtype
@@ -47,9 +48,13 @@ struct fp8_quant_stats {
 }
 
 func e4m3_max() float { 448.0 }
+
 func e4m3_min_normal() float { 0.015625 }
+
 func e5m2_max() float { 57344.0 }
+
 func e5m2_min_normal() float { 0.00006103515625 }
+
 func float_to_e4m3(float x) int {
     if x == 0.0 { return 0 }
     if x < 0.0 { return float_to_e4m3(-x) | 0x80 }

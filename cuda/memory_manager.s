@@ -1,4 +1,5 @@
 package neurx.cuda
+
 func cuda_malloc(int size_bytes, string label) (uint64, error) {
     if size_bytes <= 0 {
         return (0, error{message: "Invalid allocation size"})

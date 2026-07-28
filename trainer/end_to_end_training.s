@@ -1,6 +1,7 @@
 package neurx.trainer.end_to_end_training
 use std.io
 use std.math
+
 struct data_bundle {
     input_ids: [][]int
     labels: [][]int
@@ -493,6 +494,7 @@ func is_nan(float64 x) bool {
     x != x
 }
 var random_seed: int = 42
+
 func seed_rng(int s) {
     random_seed = s
 }

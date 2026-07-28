@@ -1,4 +1,5 @@
 module function_calling
+
 struct function_calling_config {
     execution_mode: string = "auto"
     max_tool_calls_per_turn: int = 5
@@ -126,6 +127,7 @@ struct content_block {
     id?: string
     name?: string
     input?: map<string, any>
+
 struct user_message {
     role: string = "user"
     content: string | list<content_block>

@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use std.io.println
+
 func main() int {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     let inference_source = runtime_env_get("NEURX_INFERENCE_SOURCE", project_root + "/inference/production_inference.s")

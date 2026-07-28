@@ -1,4 +1,5 @@
 package neurx.testing.test_distributed_rlhf
+
 struct test_result {
     string name
     int passed

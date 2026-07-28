@@ -16,6 +16,7 @@ use neurx.logging.progress_display
 use neurx.inference.text_generator
 use neurx.cuda.device_manager
 use neurx.distributed.nccl_backend
+
 struct training_config {
     int vocab_size
     int d_model
@@ -495,6 +496,7 @@ func run_training(training_config cfg) {
     println("   View TensorBoard: tensorboard --logdir=" + cfg.log_dir)
     if cfg.use_wandb:
         println("   View WandB: " + wb_run.run_url)
+
 func run_validation(
     transformer_model model,
     dataloader val_loader,
@@ -561,6 +563,7 @@ func generate_validation_samples(
             println("  Generated: " + generated_text[:100] + "...")
             println()
     println("  ✓ Text generation validated successfully")
+
 func count_parameters(transformer_model model) int:
     int count = 0
     count += numel(model.token_embedding)
@@ -572,6 +575,7 @@ func count_parameters(transformer_model model) int:
     count += numel(model.lm_head)
     count += numel(model.final_norm)
     return count
+
 func move_model_to_gpu(transformer_model model, device_context ctx) transformer_model:
     model.token_embedding = to_gpu(model.token_embedding, ctx)
     model.position_embedding = to_gpu(model.position_embedding, ctx)
@@ -588,6 +592,7 @@ func move_model_to_gpu(transformer_model model, device_context ctx) transformer_
         layer.ln_1 = to_gpu(layer.ln_1, ctx)
         layer.ln_2 = to_gpu(layer.ln_2, ctx)
     return model
+
 func clip_gradients([]tensor grads, float max_norm) []tensor:
     """Gradient clipping to prevent exploding gradients"""
     float total_norm = 0.0
@@ -599,12 +604,14 @@ func clip_gradients([]tensor grads, float max_norm) []tensor:
         for i in range(len(grads)):
             grads[i] = grads[i] * clip_coef
     return grads
+
 func simple_tokenize(string text) []int:
     """Mock tokenization: convert characters to ASCII codes"""
     []int tokens = [1]
     for char in text:
         tokens.push(int(char) % 50257)
     return tokens
+
 func simple_decode([]int token_ids) string:
     """Mock decode: convert token IDs to characters"""
     string result = ""
@@ -614,6 +621,7 @@ func simple_decode([]int token_ids) string:
         else:
             result = result + "▢"
     return result
+
 func print_final_summary(training_state state, training_config cfg):
     println("\n" + "=" * 60)
     println("TRAINING SUMMARY")
@@ -629,6 +637,7 @@ func print_final_summary(training_state state, training_config cfg):
         println("GPU Mode:        ✓ Active (GPU " + str(cfg.gpu_device_id) + ")")
     if cfg.distributed_training:
         println("Distributed:     ✓ " + str(cfg.world_size) + " GPUs")
+
 func main():
     """Main entry point for training"""
     training_config cfg = default_training_config()
@@ -642,6 +651,7 @@ func main():
     run_training(cfg)
 if is_main_module():
     main()
+
 func make_tensor([]float data, []int shape, bool requires_grad) tensor:
     tensor {
         data: data,
@@ -649,6 +659,7 @@ func make_tensor([]float data, []int shape, bool requires_grad) tensor:
         requires_grad: requires_grad,
         grad: none,
     }
+
 func copy_int_shape([]int shape) []int:
     []int out = []int{cap: len(shape)}
     int i = 0
@@ -657,6 +668,7 @@ func copy_int_shape([]int shape) []int:
         i = i + 1
     }
     out
+
 func embedding_lookup(tensor emb, []int ids) tensor:
     """Look up embeddings for given token IDs"""
     if len(emb.shape) < 2 {
@@ -682,6 +694,7 @@ func embedding_lookup(tensor emb, []int ids) tensor:
         row = row + 1
     }
     make_tensor(out_data, []int{len(ids), emb_dim}, emb.requires_grad)
+
 func add_tensors(tensor a, tensor b) tensor:
     """Element-wise addition"""
     if len(a.data) == len(b.data) {
@@ -705,6 +718,7 @@ func add_tensors(tensor a, tensor b) tensor:
         return make_tensor(out_data, copy_int_shape(a.shape), a.requires_grad || b.requires_grad)
     }
     a
+
 func apply_dropout(tensor x, float p) tensor:
     """Apply dropout during training"""
     if p <= 0.0 {
@@ -725,6 +739,7 @@ func apply_dropout(tensor x, float p) tensor:
         i = i + 1
     }
     make_tensor(out_data, copy_int_shape(x.shape), x.requires_grad)
+
 func layer_norm(tensor x, tensor params) tensor:
     """Layer normalization"""
     if len(x.shape) == 0 {
@@ -768,6 +783,7 @@ func layer_norm(tensor x, tensor params) tensor:
         row = row + 1
     }
     make_tensor(out_data, copy_int_shape(x.shape), x.requires_grad || params.requires_grad)
+
 func matmul(tensor a, tensor b) tensor:
     """matrix multiplication"""
     if len(a.shape) < 2 || len(b.shape) < 2 {
@@ -804,6 +820,7 @@ func matmul(tensor a, tensor b) tensor:
     }
     out_shape[i] = out_cols
     make_tensor(out_data, out_shape, a.requires_grad || b.requires_grad)
+
 func multi_head_attention(tensor q, tensor k, tensor v, int n_heads, []int mask) tensor:
     """Multi-head self-attention mechanism"""
     if len(q.shape) < 3 {
@@ -871,6 +888,7 @@ func multi_head_attention(tensor q, tensor k, tensor v, int n_heads, []int mask)
         b = b + 1
     }
     make_tensor(out_data, copy_int_shape(q.shape), q.requires_grad || k.requires_grad || v.requires_grad)
+
 func swiglu(tensor gate, tensor up) tensor:
     """SwiGLU activation: gate * SiLU(up)"""
     []float out_data = []float{cap: len(gate.data)}
@@ -882,6 +900,7 @@ func swiglu(tensor gate, tensor up) tensor:
         i = i + 1
     }
     make_tensor(out_data, copy_int_shape(gate.shape), gate.requires_grad || up.requires_grad)
+
 func cross_entropy_loss(tensor logits, tensor labels, []int mask) tensor:
     """Cross-entropy loss for next-token prediction"""
     if len(logits.shape) < 2 {
@@ -932,6 +951,7 @@ func cross_entropy_loss(tensor logits, tensor labels, []int mask) tensor:
         count = 1
     }
     make_tensor([loss / count], [1], logits.requires_grad)
+
 func slice_tensor(tensor t, []int start, []int end) tensor:
     """Slice tensor along dimensions"""
     if len(t.shape) == 1 {
@@ -981,6 +1001,7 @@ func slice_tensor(tensor t, []int start, []int end) tensor:
         return make_tensor(out_data, [out_b, out_t, out_v], t.requires_grad)
     }
     t
+
 func create_labels_from_tokens([]int tokens, int offset) tensor:
     """Create label tensor shifted by offset positions"""
     []float label_data = []float{cap: len(tokens)}
@@ -994,6 +1015,7 @@ func create_labels_from_tokens([]int tokens, int offset) tensor:
         i = i + 1
     }
     make_tensor(label_data, [len(tokens)], false)
+
 func create_position_indices(int length) tensor:
     """Create position index tensor [0, 1, 2, ..., length-1]"""
     []float pos_data = []float{cap: length}
@@ -1003,6 +1025,7 @@ func create_position_indices(int length) tensor:
         i = i + 1
     }
     make_tensor(pos_data, [length], false)
+
 func create_attention_mask(int length) []int:
     """Create causal attention mask (lower triangular)"""
     []int mask = []
@@ -1012,11 +1035,13 @@ func create_attention_mask(int length) []int:
         }
     }
     return mask
+
 func backward(computation_graph graph, tensor loss) []tensor:
     """Run backward pass through computation graph"""
     []tensor grads = []tensor{cap: 1}
     grads[0] = loss
     grads
+
 func compute_global_gradient_norm([]tensor grads) float:
     """Compute L2 norm of all gradients concatenated"""
     float norm_sq = 0.0
@@ -1028,9 +1053,11 @@ func compute_global_gradient_norm([]tensor grads) float:
         }
     }
     sqrt(norm_sq)
+
 func extract_scalar_value(tensor t) float:
     """Extract single float value from scalar tensor"""
     t.data[0]
+
 func extract_last_token_logits(tensor logits) []float:
     """Get logits for last token position"""
     if len(logits.shape) < 3 {
@@ -1046,6 +1073,7 @@ func extract_last_token_logits(tensor logits) []float:
         i = i + 1
     }
     out
+
 func flatten_gradients([]tensor grads) []float:
     """Convert list of gradient tensors to flat array"""
     []float flat = []
@@ -1057,23 +1085,28 @@ func flatten_gradients([]tensor grads) []float:
         }
     }
     flat
+
 func get_flat_gradients([]tensor grads) []float:
     """Get flattened gradients"""
     flatten_gradients(grads)
+
 func compute_throughput(int batch_size, int seq_len, float time_ms) float:
     """Compute tokens per second"""
     float tokens = float(batch_size * seq_len)
     float seconds = time_ms / 1000.0
     tokens / seconds
+
 func format_duration(float seconds) string:
     """Format duration in human-readable form"""
     int mins = int(seconds / 60)
     int secs = int(seconds % 60)
     str(mins) + "m " + str(secs) + "s"
+
 func create_directory_if_not_exists(string path):
     """Create directory tree if it doesn't exist"""
     import os
     os.makedirs(path, exist_ok=True)
+
 func load_config_from_json(string path) training_config:
     """Load training config from JSON file"""
     import json
@@ -1084,6 +1117,7 @@ func load_config_from_json(string path) training_config:
         if hasattr(cfg, key):
             setattr(cfg, key, value)
     return cfg
+
 func print_config_pretty(training_config cfg):
     """Print configuration in formatted table"""
     configs = [
@@ -1110,6 +1144,7 @@ func print_config_pretty(training_config cfg):
     for name, value in configs {
         printf("  %-20s %s\n", name, value)
     }
+
 func log_model_summary(logger lg, transformer_model model, training_config cfg):
     """Log model architecture summary"""
     log_scalar(&lg, "config/vocab_size", float(cfg.vocab_size), 0, {})
@@ -1119,36 +1154,44 @@ func log_model_summary(logger lg, transformer_model model, training_config cfg):
     log_scalar(&lg, "config/parameters", float(count_parameters(model)), 0, {})
     log_scalar(&lg, "config/batch_size", float(cfg.batch_size), 0, {})
     log_scalar(&lg, "config/learning_rate", cfg.learning_rate, 0, {})
+
 func save_best_model(transformer_model model, optimizer opt, int step,
                      string dir, float val_loss):
     """Save best model checkpoint based on validation performance"""
     string filename = dir + "/best_model.pt"
     checkpoint_data ckpt = create_checkpoint(model, opt, step, -1, {}, val_loss)
     save_model_checkpoint(ckpt, filename)
+
 func save_final_model(transformer_model model, optimizer opt, int step, string dir):
     """Save final trained model"""
     string filename = dir + "/final_model.pt"
     checkpoint_data ckpt = create_checkpoint(model, opt, step, -1, {}, 0.0)
     save_model_checkpoint(ckpt, filename)
+
 func eval_mode(transformer_model model) transformer_model:
     """Switch model to evaluation mode (disables dropout, etc.)"""
     model.config.dropout = 0.0
     return model
+
 func train_mode(transformer_model model) transformer_model:
     """Switch model back to training mode"""
     return model
+
 func has_command_arg(string arg) bool:
     """Check if argument was provided on command line"""
     import sys
     arg in sys.argv
+
 func get_command_arg(string arg) string:
     """Get value for command line argument"""
     import sys
     idx = sys.argv.index(arg)
     sys.argv[idx + 1]
+
 func to_gpu(tensor t, device_context ctx) tensor:
     """Transfer tensor to GPU memory"""
     t
+
 func distribute_model(transformer_model model, nccl_communicator comm) transformer_model:
     """Distribute model across GPUs for data parallelism"""
     model

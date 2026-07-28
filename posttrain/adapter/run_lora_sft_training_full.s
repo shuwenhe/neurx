@@ -1,5 +1,6 @@
 package main
 use std.io.println
+
 struct training_config {
     string base_model_path
     string train_data_path

@@ -1,4 +1,5 @@
 package neurx.optimizer.adamw
+
 struct adamw_config {
     float learning_rate
     float beta1

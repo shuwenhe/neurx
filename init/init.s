@@ -1,4 +1,5 @@
 package neurx.init.init
+
 struct init_boot_result {
     bool ok
     string phase

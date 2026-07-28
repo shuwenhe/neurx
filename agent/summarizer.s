@@ -1,4 +1,5 @@
 package neurx.agent.summarizer
+
 struct agent_summary_result {
     string text
     int original_len

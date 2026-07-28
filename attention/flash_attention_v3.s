@@ -1,4 +1,5 @@
 package neurx.attention.flash_v3
+
 struct flash_attention_v3_config {
     int block_size_q
     int block_size_k

@@ -2,6 +2,7 @@ package neurx.runtime.control
 use neurx.strings
 use neurx.tensor.tensor
 use neurx.strings
+
 struct control_state {
     string name
     bool cond_enabled

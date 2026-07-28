@@ -1,4 +1,5 @@
 package neurx.platform.errors
+
 struct platform_error_state {
     string kind
     string message

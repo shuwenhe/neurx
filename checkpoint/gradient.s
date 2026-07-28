@@ -1,5 +1,6 @@
 package neurx.checkpoint.gradient
 import "neurx.autograd"
+
 struct checkpoint_config {
     enabled: bool
     checkpoints_per_layer: int

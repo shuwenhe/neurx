@@ -1,4 +1,5 @@
 package neurx.workflows.robotics.deploy
+
 struct robotics_deploy_state {
     string target_name
     bool running

@@ -1,4 +1,5 @@
 package neurx.data.pipeline.deduplication
+
 struct min_hash_signature {
     int* hash_values
     int num_hashes

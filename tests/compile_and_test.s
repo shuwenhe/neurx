@@ -5,6 +5,7 @@ use std.path
 use std.env
 use std.time
 use std.process
+
 struct compilation_result {
     filename: string
     status: string

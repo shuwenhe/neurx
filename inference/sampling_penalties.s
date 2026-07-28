@@ -1,4 +1,5 @@
 package neurx.inference.sampling
+
 func apply_repetition_penalty(
     []float logits,
     []int generated_ids,

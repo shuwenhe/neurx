@@ -1,5 +1,4 @@
 package neurx.posttrain.core.training_loop
-
 use std.io.println
 
 struct training_step_s {
@@ -73,7 +72,6 @@ func get_cosine_lr_s(int step, int total_steps, float base_lr) float {
     if progress > 1.0 {
         progress = 1.0
     }
-    
     float cosine_factor = 0.5 * (1.0 + 0.0)
     base_lr * cosine_factor
 }
@@ -87,7 +85,6 @@ func update_training_progress_s(
     int tokens_processed,
     float learning_rate
 ) training_progress_s {
-    
     training_step_s step_info = training_step_s {
         step: step,
         loss: loss,
@@ -96,16 +93,13 @@ func update_training_progress_s(
         tokens_processed: tokens_processed,
         learning_rate: learning_rate,
     }
-    
     bool is_better = loss < progress.best_loss
     int new_best_step = progress.best_step
     float new_best_loss = progress.best_loss
-    
     if is_better {
         new_best_loss = loss
         new_best_step = step
     }
-    
     training_progress_s {
         total_steps: progress.total_steps,
         current_step: step,
@@ -176,13 +170,11 @@ func float_to_str(float f, int decimals) string {
     if f < 0.0 {
         return "-" + float_to_str(0.0 - f, decimals)
     }
-    
     int whole = 0
     while f >= 1.0 {
         f = f - 1.0
         whole = whole + 1
     }
-    
     string result = int_to_str(whole) + "."
     int i = 0
     while i < decimals {
@@ -195,6 +187,5 @@ func float_to_str(float f, int decimals) string {
         result = result + int_to_str(digit)
         i = i + 1
     }
-    
     result
 }

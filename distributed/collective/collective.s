@@ -17,6 +17,7 @@ int DTYPE_BFLOAT16 = 2
 int DTYPE_INT64    = 3
 int DTYPE_INT32    = 4
 int DTYPE_BOOL     = 5
+
 struct process_group {
     int pg_id
     []int ranks
@@ -697,6 +698,7 @@ struct nccl_unique_id {
     byte[NCCL_UNIQUE_ID_BYTES] id
 }
 int NCCL_UNIQUE_ID_BYTES = 128
+
 func get_nccl_unique_id(process_group pg) nccl_unique_id {
     nccl_unique_id uid
     return uid

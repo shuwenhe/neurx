@@ -1,4 +1,5 @@
 package neurx.distributed.tensor_parallel_v2
+
 struct tp_v2_config {
     int tp_degree
     int tp_rank

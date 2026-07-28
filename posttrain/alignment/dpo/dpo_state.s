@@ -1,4 +1,5 @@
 package neurx.posttrain.dpo.dpo_state
+
 struct dpo_state {
     float beta
     float label_smoothing

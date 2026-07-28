@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_output, runtime_shell_escape}
 use std.io.println
+
 func main() int {
     string branch = runtime_env_get("NEURX_WATCH_BRANCH", "main")
     string interval = runtime_env_get("NEURX_WATCH_INTERVAL", "2")

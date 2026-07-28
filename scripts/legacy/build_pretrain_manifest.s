@@ -1,10 +1,12 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_run_command_output, trim}
+
 func manifest_log(string s) int {
     _ = runtime_run_command_output("printf '%s\\n' " + shell_escape(s))
     0
 }
 extern "intrinsic" func __host_write_text_file(string path, string content) int
+
 func runtime_write_text_file(string path, string content) () {
     _ = __host_write_text_file(path, content)
 }

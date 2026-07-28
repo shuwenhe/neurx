@@ -2,6 +2,7 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_env_set, create_directory, file_exists}
 use neurx.runtime.process.{exec_process, exec_process_async, wait_process}
 use neurx.strings.{trim, string_concat, starts_with}
+
 struct launcher_config {
     int num_gpus
     string master_addr

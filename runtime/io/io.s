@@ -5,6 +5,7 @@ use std.fs.write_text_file as fs_write_text_file
 use std.process.run_process
 use std.process.run_process_output
 use std.vec.vec
+
 struct json_value {
 }
 
@@ -57,8 +58,8 @@ func runtime_read_text_file(string path) string {
     }
     ""
 }
-
 extern "intrinsic" func __host_read_binary_file(string path) []int
+
 func runtime_read_binary_file(string path) []int {
     __host_read_binary_file(path)
 }
@@ -172,9 +173,7 @@ func runtime_run_command_output(string command) string {
     }
     ""
 }
-
 extern func runtime_run_command_exit_code(string command) int
-
 extern func runtime_execute_file(string target_path, string entry_function) int
 
 func runtime_json_parse(string text) json_value {
@@ -287,35 +286,28 @@ func float_to_bits_internal(float f) int {
     if f == 0.0 {
         return 0
     }
-    
     bool sign = f < 0.0
     float abs_f = f
     if sign {
         abs_f = 0.0 - f
     }
-    
     int exp = 127
     float mantissa_f = abs_f
-    
     while mantissa_f >= 2.0 {
         mantissa_f = mantissa_f / 2.0
         exp = exp + 1
     }
-    
     while mantissa_f < 1.0 && exp > 0 {
         mantissa_f = mantissa_f * 2.0
         exp = exp - 1
     }
-    
     int mantissa = int((mantissa_f - 1.0) * 8388608.0)
-    
     int bits = 0
     if sign {
         bits = bits + 2147483648
     }
     bits = bits + exp * 8388608
     bits = bits + mantissa
-    
     bits
 }
 
@@ -345,11 +337,9 @@ func safetensors_writer_add_tensor(safetensors_writer w, tensor t) () {
         data_size = data_size * t.shape[i]
         i = i + 1
     }
-    
     if t.dtype == "F32" {
         data_size = data_size * 4
     }
-    
     w.tensors[w.tensor_count] = t
     w.tensor_count = w.tensor_count + 1
     w.total_data_size = w.total_data_size + data_size
@@ -357,20 +347,16 @@ func safetensors_writer_add_tensor(safetensors_writer w, tensor t) () {
 
 func safetensors_writer_build_header(safetensors_writer w) string {
     string header = "{"
-    
     int offset = 0
     int idx = 0
     while idx < w.tensor_count {
         if idx > 0 {
             header = header + ","
         }
-        
         tensor t = w.tensors[idx]
         header = header + "\"" + t.name + "\":{"
-        
         header = header + "\"dtype\":\"" + t.dtype + "\""
         header = header + ",\"shape\":["
-        
         int shape_idx = 0
         while shape_idx < t.shape_count {
             if shape_idx > 0 {
@@ -380,7 +366,6 @@ func safetensors_writer_build_header(safetensors_writer w) string {
             shape_idx = shape_idx + 1
         }
         header = header + "]"
-        
         int tensor_size = 1
         int si = 0
         while si < t.shape_count {
@@ -390,14 +375,11 @@ func safetensors_writer_build_header(safetensors_writer w) string {
         if t.dtype == "F32" {
             tensor_size = tensor_size * 4
         }
-        
         header = header + ",\"data_offsets\":[" + int_to_str_json_internal(offset) + "," + int_to_str_json_internal(offset + tensor_size) + "]"
         header = header + "}"
-        
         offset = offset + tensor_size
         idx = idx + 1
     }
-    
     header = header + "}"
     header
 }
@@ -406,13 +388,11 @@ func int_to_str_json_internal(int n) string {
     if n == 0 {
         return "0"
     }
-    
     bool neg = n < 0
     int val = n
     if neg {
         val = 0 - val
     }
-    
     string digits = ""
     while val > 0 {
         int digit = val - (val / 10) * 10
@@ -430,7 +410,6 @@ func int_to_str_json_internal(int n) string {
         digits = ch + digits
         val = val / 10
     }
-    
     if neg {
         digits = "-" + digits
     }
@@ -440,23 +419,18 @@ func int_to_str_json_internal(int n) string {
 func safetensors_writer_finish(safetensors_writer w) bool {
     string header = safetensors_writer_build_header(w)
     int header_size = len(header)
-    
     tensor_buffer buf = tensor_buffer_new(8 + header_size + w.total_data_size + 1024)
-    
     tensor_buffer_write_u64_le(buf, header_size)
     tensor_buffer_write_string(buf, header)
-    
     int tidx = 0
     while tidx < w.tensor_count {
         tensor t = w.tensors[tidx]
-        
         int data_len = 1
         int sidx = 0
         while sidx < t.shape_count {
             data_len = data_len * t.shape[sidx]
             sidx = sidx + 1
         }
-        
         int didx = 0
         while didx < data_len {
             if didx < t.data_count {
@@ -466,16 +440,14 @@ func safetensors_writer_finish(safetensors_writer w) bool {
             }
             didx = didx + 1
         }
-        
         tidx = tidx + 1
     }
-    
     []byte file_data = tensor_buffer_slice(buf)
     runtime_write_binary_file(w.filepath, file_data)
     true
 }
-
 extern "intrinsic" func __host_write_binary_file(string path, []byte data) ()
+
 func runtime_write_binary_file(string path, []byte data) () {
     __host_write_binary_file(path, data)
 }

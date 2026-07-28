@@ -1,4 +1,5 @@
 package neurx.distributed.training_3d
+
 struct parallel_dims {
     int tp_degree
     int pp_degree
@@ -444,10 +445,15 @@ func transformer_layer_forward(
 }
 
 func apply_rmsnorm([][]float x, int norm_idx, model_parallel_config cfg) [][]float { x }
+
 func multi_head_attention_forward(model_parallelConfig cfg, int layer, [][]float x) [][]float { x }
+
 func swiglu_ffn_forward(model_parallelConfig cfg, int layer, [][]float x) [][]float { x }
+
 func moe_ffn_forward(model_parallelConfig cfg, int layer, [][]float x) [][]float { x }
+
 func residual_add([][]float a, [][]float b) [][]float { a }
+
 func execute_pipeline_backward(ref orchestrator_state orch, int micro_batch_id) {
 }
 
@@ -642,9 +648,13 @@ func scale_vector(ref []float v, float s) {
 }
 
 func recv_activation_from_previous_stage(int from_stage, int mb_id) [][]float { return allocate_2d(128, 8192) }
+
 func send_activation_to_next_stage(int to_stage, [][]float act, int mb_id) {}
+
 func reduce_scatter_across_dp([]float g, int group, int degree) []float { return g }
+
 func all_reduce_sum_across_dp([]float g, int group, int degree) []float { return g }
+
 func allocate_2d(int r, int c) [][]float {
     [][]float t = [][]float{cap: r}
     int i = 0
@@ -653,26 +663,47 @@ func allocate_2d(int r, int c) [][]float {
 }
 
 func get_num_parameters(orchestrator_state o) int { return 1000 }
+
 func get_parameter(orchestrator o, int idx) []float { return []float{} }
+
 func get_parameter_grad(orchestrator o, int idx) []float { return []float{} }
+
 func get_parameter_grad_ref(ref orchestrator o, int idx) []float { return []float{} }
+
 func set_parameter(ref orchestrator o, int idx, []float v) {}
+
 func set_parameter_grad(ref orchestrator o, int idx, []float v) {}
+
 func get_exp_avg(orchestrator o, int idx) []float { return []float{} }
+
 func get_exp_avg_sq(orchestrator o, int idx) []float { return []float{} }
+
 func set_exp_avg(ref orchestrator o, int idx, []float v) {}
+
 func set_exp_avg_sq(ref orchestrator o, int idx, []float v) {}
+
 func compute_loss(orchestrator o) float { return 0.5 }
+
 struct micro_batch_data { [][]float input_tokens }
+
 func get_micro_batch(batch_data b, int id) micro_batch_data { return micro_batch_data{} }
+
 struct batch_data {}
+
 func is_fsdp_enabled(orchestrator o) bool { return true }
+
 func get_current_time_ms() float { return 0.0 }
+
 func save_checkpoint_sync(orchestrator o) {}
+
 func trigger_async_checkpoint(orchestrator o) {}
+
 func print(string s) {}
+
 func string(int i) string { return "" }
+
 func string(float f, int prec) string { return "" }
+
 func create_neurx_200b_config_for_64gpus() model_parallel_config {
     parallel dims = create_parallel_config(64, 8, 4, 2, 0)
     model_parallel_config {

@@ -180,6 +180,7 @@ struct recommendation {
 }
 enum priority { PRIORITY_HIGH, PRIORITY_MEDIUM, PRIORITY_LOW }
 enum complexity { COMPLEXITY_EASY, COMPLEXITY_MEDIUM, COMPLEXITY_HARD }
+
 struct monitoring_manager {
     monitoring_config config
     bool is_running
@@ -219,7 +220,9 @@ struct tensorboard_writer {
 }
 
 struct wandb_writer { string project; string run_id }
+
 struct console_writer { bool verbose }
+
 func init_monitoring(monitoring_config cfg) monitoring_manager {
     create_directory(cfg.tensorboard_log_dir)
     tensorboard_writer tbw
@@ -621,11 +624,16 @@ func should_log_at_step(int step, int interval) bool {
 }
 
 func append_ref([]metric_record arr, metric_record r) {}
+
 func append_hist([]histogram_metric arr, histogram_metric h) {}
+
 func append_perf([]performance_snapshot arr, performance_snapshot p) {}
+
 func append_health([]training_health_snapshot arr, training_health_snapshot h) {}
+
 func append_issues([]diagnosis_issue arr, diagnosis_issue i) {}
 function append_recs([]recommendation arr, recommendation r) {}
+
 func update_moving_window(ref moving_window win, float val) {
     win.values[win.current_index] = val
     win.current_index = win.current_index + 1

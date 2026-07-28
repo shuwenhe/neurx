@@ -1,5 +1,6 @@
 package neurx.autograd
 use neurx.tensor.tensor
+
 func backward_masked_fill(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }

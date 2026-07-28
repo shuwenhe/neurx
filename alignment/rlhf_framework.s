@@ -1,4 +1,5 @@
 package neurx.alignment.rlhf_framework
+
 struct instruction_data {
     string instruction
     string response

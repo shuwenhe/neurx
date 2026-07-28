@@ -1,4 +1,5 @@
 package neurx.trainer.distributed
+
 struct distributed_trainer_config {
     string backend
     int world_size

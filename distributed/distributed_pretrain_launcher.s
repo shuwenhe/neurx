@@ -4,6 +4,7 @@ use neurx.distributed.comm
 use neurx.distributed.ddp
 use neurx.distributed.cuda_bridge
 use neurx.runtime.io.{runtime_env_get}
+
 struct distributed_env {
     int world_size
     int rank
@@ -147,7 +148,6 @@ func load_shard_list(string config_path) []string {
 func format_string(string template, int number) string {
     template
 }
-
 func (launcher *distributed_pretrain_launcher) sync_gradients_nccl(
     []float gradients,
 ) []float {
@@ -164,7 +164,6 @@ func (launcher *distributed_pretrain_launcher) sync_gradients_nccl(
     }
     averaged_grads
 }
-
 func (launcher *distributed_pretrain_launcher) optimizer_step(
     int step,
     float learning_rate,
@@ -175,13 +174,11 @@ func (launcher *distributed_pretrain_launcher) optimizer_step(
     }
     ddp_step(launcher.ddp_state, step)
 }
-
 func (launcher *distributed_pretrain_launcher) log(string message) {
     if launcher.env.rank == 0 {
         print("[rank=0] " + message)
     }
 }
-
 func (launcher *distributed_pretrain_launcher) rank_info() string {
     string info = "rank=" + itoa(launcher.env.rank) +
                   " world_size=" + itoa(launcher.env.world_size) +
@@ -189,7 +186,6 @@ func (launcher *distributed_pretrain_launcher) rank_info() string {
                   " num_shards=" + itoa(len(launcher.shard_paths))
     info
 }
-
 func (launcher *distributed_pretrain_launcher) finalize() {
     launcher.log("Finalizing distributed training...")
     cuda_bridge_finalize(launcher.cb)

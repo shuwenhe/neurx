@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command, runtime_run_command_output, runtime_shell_escape}
 use std.io.println
+
 func main() int {
     string root_dir = ""
     string s_bin_override = runtime_env_get("S_BIN", runtime_env_get("S_COMPILER", ""))

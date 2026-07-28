@@ -1,5 +1,4 @@
 package neurx.posttrain.core.numerical_validation
-
 use std.io.println
 
 struct golden_test_case_s {
@@ -45,7 +44,6 @@ func add_golden_test_s(
     tensor_s expected,
     float tol
 ) regression_test_suite_s {
-    
     golden_test_case_s test = golden_test_case_s {
         test_name: test_name,
         operation: op,
@@ -55,7 +53,6 @@ func add_golden_test_s(
         tolerance: tol,
         passed: false,
     }
-    
     regression_test_suite_s {
         test_cases: append(suite.test_cases, test),
         total_tests: suite.total_tests + 1,
@@ -68,16 +65,12 @@ func run_golden_tests_s(regression_test_suite_s suite) regression_test_suite_s {
     println("═══════════════════════════════════════════")
     println("Running Golden Regression Tests")
     println("═══════════════════════════════════════════")
-    
     int passed = 0
     int failed = 0
-    
     int i = 0
     while i < len(suite.test_cases) {
         golden_test_case_s test = suite.test_cases[i]
-        
         bool result = run_single_test_s(test)
-        
         if result {
             println("✓ PASS: " + test.test_name)
             passed = passed + 1
@@ -85,14 +78,11 @@ func run_golden_tests_s(regression_test_suite_s suite) regression_test_suite_s {
             println("✗ FAIL: " + test.test_name)
             failed = failed + 1
         }
-        
         i = i + 1
     }
-    
     println("═══════════════════════════════════════════")
     println("Results: " + int_to_str(passed) + "/" + int_to_str(suite.total_tests))
     println("═══════════════════════════════════════════")
-    
     regression_test_suite_s {
         test_cases: suite.test_cases,
         total_tests: suite.total_tests,
@@ -103,9 +93,7 @@ func run_golden_tests_s(regression_test_suite_s suite) regression_test_suite_s {
 
 func run_single_test_s(golden_test_case_s test) bool {
     tensor_s actual = execute_operation_s(test.operation, test.input_a, test.input_b)
-    
     bool match = compare_tensors_s(actual, test.expected_output, test.tolerance)
-    
     match
 }
 
@@ -122,7 +110,6 @@ func execute_operation_s(string op, tensor_s a, tensor_s b) tensor_s {
     if op == "softmax" {
         return softmax_forward_s(a)
     }
-    
     a
 }
 
@@ -130,19 +117,15 @@ func compare_tensors_s(tensor_s t1, tensor_s t2, float tolerance) bool {
     if t1.total_elements != t2.total_elements {
         return false
     }
-    
     int i = 0
     while i < len(t1.data) {
         float diff = t1.data[i] - t2.data[i]
         if diff < 0.0 { diff = 0.0 - diff }
-        
         if diff > tolerance {
             return false
         }
-        
         i = i + 1
     }
-    
     true
 }
 
@@ -151,27 +134,20 @@ func numerical_gradient_check_s(
     tensor_s input,
     float epsilon
 ) numerical_gradient_s {
-    
     tensor_s analytical = compute_analytical_gradient_s(op, input)
     tensor_s numerical = compute_numerical_gradient_s(op, input, epsilon)
-    
     float max_diff = 0.0
     float rel_error = 0.0
-    
     int i = 0
     while i < len(analytical.data) {
         float diff = analytical.data[i] - numerical.data[i]
         if diff < 0.0 { diff = 0.0 - diff }
-        
         if diff > max_diff {
             max_diff = diff
         }
-        
         i = i + 1
     }
-    
     bool passed = max_diff < epsilon
-    
     numerical_gradient_s {
         analytical: analytical,
         numerical: numerical,
@@ -188,24 +164,18 @@ func compute_analytical_gradient_s(string op, tensor_s input) tensor_s {
 
 func compute_numerical_gradient_s(string op, tensor_s input, float epsilon) tensor_s {
     []float grad = make([]float, 0)
-    
     int i = 0
     while i < len(input.data) {
         tensor_s input_plus = copy_tensor_s(input)
         input_plus.data[i] = input_plus.data[i] + epsilon
-        
         tensor_s input_minus = copy_tensor_s(input)
         input_minus.data[i] = input_minus.data[i] - epsilon
-        
         tensor_s out_plus = execute_operation_s(op, input_plus, make_zeros_like_s(input))
         tensor_s out_minus = execute_operation_s(op, input_minus, make_zeros_like_s(input))
-        
         float numerical_grad = (out_plus.data[0] - out_minus.data[0]) / (2.0 * epsilon)
         grad = append(grad, numerical_grad)
-        
         i = i + 1
     }
-    
     tensor_s {
         data: grad,
         shape: input.shape,
@@ -228,7 +198,6 @@ func add_forward_s(tensor_s a, tensor_s b) tensor_s {
         result = append(result, a.data[i] + b.data[i])
         i = i + 1
     }
-    
     tensor_s {
         data: result,
         shape: a.shape,
@@ -247,7 +216,6 @@ func mul_forward_s(tensor_s a, tensor_s b) tensor_s {
         result = append(result, a.data[i] * b.data[i])
         i = i + 1
     }
-    
     tensor_s {
         data: result,
         shape: a.shape,
@@ -270,7 +238,6 @@ func make_zeros_like_s(tensor_s t) tensor_s {
         zeros = append(zeros, 0.0)
         i = i + 1
     }
-    
     tensor_s {
         data: zeros,
         shape: t.shape,
@@ -289,7 +256,6 @@ func copy_tensor_s(tensor_s t) tensor_s {
         copied = append(copied, t.data[i])
         i = i + 1
     }
-    
     tensor_s {
         data: copied,
         shape: t.shape,

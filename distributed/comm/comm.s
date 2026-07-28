@@ -1,4 +1,5 @@
 package neurx.distributed.comm
+
 struct process_group_state {
     string backend
     int rank

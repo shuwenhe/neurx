@@ -1,5 +1,4 @@
 package neurx.posttrain.core.data_loader
-
 use std.io.println
 
 struct training_example_s {
@@ -46,7 +45,6 @@ func tokenize_example_s(training_example_s ex, []int vocab_map) tokenized_exampl
     []int input_ids
     []int attention_mask
     []int labels
-    
     tokenized_example_s {
         input_ids: input_ids,
         attention_mask: attention_mask,
@@ -60,7 +58,6 @@ func create_batch_s([]tokenized_example_s examples, int batch_size, int max_seq_
     [][]int input_ids_batch
     [][]int attention_mask_batch
     [][]int labels_batch
-    
     data_batch_s {
         input_ids_batch: input_ids_batch,
         attention_mask_batch: attention_mask_batch,
@@ -73,7 +70,6 @@ func create_batch_s([]tokenized_example_s examples, int batch_size, int max_seq_
 
 func pad_sequence_s([]int seq, int target_len, int pad_token) []int {
     []int result
-    
     int i = 0
     while i < len(seq) {
         if i < target_len {
@@ -81,10 +77,8 @@ func pad_sequence_s([]int seq, int target_len, int pad_token) []int {
         }
         i = i + 1
     }
-    
     while len(result) < target_len {
         result = append(result, pad_token)
     }
-    
     result
 }

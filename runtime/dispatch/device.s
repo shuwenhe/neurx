@@ -2,6 +2,7 @@ int DEV_CPU  = 0
 int DEV_GPU  = 1
 int DEV_NPU  = 2
 int DEV_FPGA = 3
+
 struct device_info {
     int    dev_id
     int    dev_type

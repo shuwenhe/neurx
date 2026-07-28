@@ -1,5 +1,6 @@
 package neurx.tools.infer
 use neurx.runtime.io.{runtime_env_get, runtime_read_text_file, runtime_file_exists, runtime_run_command_output}
+
 func trim(string s) string {
     int i = 0
     while i < len(s) && (string(s[i]) == " " || string(s[i]) == "\t" || string(s[i]) == "\r" || string(s[i]) == "\n") {

@@ -5,6 +5,7 @@ import (
   "strings"
   "path/filepath"
 )
+
 func RemoveComments(content string) string {
   lines := strings.Split(content, "\n")
   result := []string{}

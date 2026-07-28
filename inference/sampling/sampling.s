@@ -1,4 +1,5 @@
 package neurx.inference.sampling
+
 struct sampling_state {
     float temperature
     int top_k

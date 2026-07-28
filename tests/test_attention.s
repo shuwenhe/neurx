@@ -1,4 +1,5 @@
 package main
+
 struct tensor {
     []float data
     int rows

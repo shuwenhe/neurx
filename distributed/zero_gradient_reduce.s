@@ -2,6 +2,7 @@ package neurx.distributed.zero_gradient_reduce
 use neurx.strings
 use neurx.runtime.io.{io_println}
 use neurx.distributed.collective.{collective_state, allreduce_async, reduce_scatter_async}
+
 struct zero_stage3_config {
     int rank
     int world_size

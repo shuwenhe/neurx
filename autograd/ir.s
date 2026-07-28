@@ -1,4 +1,5 @@
 use neurx.autograd.tracer
+
 func trace_to_ir(tracer_state state, string name) ir_graph {
     ir_from_tracer(state, name)
 }
@@ -30,6 +31,7 @@ use neurx.autograd.function
 use neurx.autograd.eqn
 use neurx.autograd.tracer
 use neurx.strings
+
 struct ir_eqn {
     string primitive
     []string params
@@ -337,9 +339,9 @@ func transform_chain_to_jaxpr(transform_chain chain, string name) ir_graph {
         linearized: chain.linearized,
     }
 }
-
 type ir_pass = ir_graph
 var ir_pass_registry = map[string]ir_pass{}
+
 func register_ir_pass(string name, ir_pass pass) void {
     ir_pass_registry[name] = pass
 }

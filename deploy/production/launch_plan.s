@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_shell_escape}
 use std.io.println
+
 func main() int {
     string startup_env = runtime_env_get("NEURX_CLUSTER_ENV", "./training_startup.env")
     string project_root = runtime_env_get("NEURX_ROOT", "/Users/shuwen/shuwen/train/neurx")

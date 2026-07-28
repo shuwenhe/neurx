@@ -1,4 +1,5 @@
 package neurx.model.audio.minimal_speech
+
 struct minimal_speech_state {
     string name
     string family

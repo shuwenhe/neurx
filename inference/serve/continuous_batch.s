@@ -1,4 +1,5 @@
 package neurx.inference.serve.continuous_batch
+
 struct continuous_batch_state {
     int capacity
     int active_requests

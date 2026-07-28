@@ -1,5 +1,6 @@
 package neurx.compile.passes.fusion
 use neurx.compile.ir.{ir_graph, ir_node, ir_op}
+
 struct fusion_config {
     bool enable_kernel_fusion
     bool enable_layout_fusion

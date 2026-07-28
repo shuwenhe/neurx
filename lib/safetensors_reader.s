@@ -1,4 +1,5 @@
 module safetensors_reader
+
 struct tensor_metadata {
     string name
     []int shape

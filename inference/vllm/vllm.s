@@ -4,6 +4,7 @@ use neurx.scheduler.inference_vllm_scheduler
 use neurx.inference.vllm.metrics
 use neurx.inference.vllm.prefix_cache
 use neurx.attention.inference_paged
+
 struct vllm_runtime_state {
     vllm_request_queue_state queue
     vllm_scheduler_state scheduler

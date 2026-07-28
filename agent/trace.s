@@ -1,5 +1,6 @@
 package neurx.agent.trace
 use neurx.agent.observation
+
 struct agent_trace_state {
     []int steps
     []string tasks

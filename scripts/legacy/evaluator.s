@@ -14,13 +14,11 @@ type evaluation_metrics struct {
     speed: float
     timestamp: string
 }
-
 type evaluator struct {
     batch_size: int
     accumulation_steps: int
     history: []evaluation_metrics
 }
-
 func (e *evaluator) init(batch_size: int, accumulation_steps: int) {
     e.batch_size = batch_size
     e.accumulation_steps = accumulation_steps
@@ -55,7 +53,6 @@ func calculate_cross_entropy(logits: []float, labels: []int): float {
     }
     return 0.0
 }
-
 func (e *evaluator) evaluate(
     step: int,
     train_loss: float,
@@ -87,7 +84,6 @@ func (e *evaluator) evaluate(
     e.history = append(e.history, metrics)
     return metrics
 }
-
 func (e *evaluator) best_perplexity(): float {
     if len(e.history) == 0 {
         return math.MaxFloat
@@ -100,7 +96,6 @@ func (e *evaluator) best_perplexity(): float {
     }
     return best
 }
-
 func (e *evaluator) convergence_info(): map[string]interface{} {
     if len(e.history) < 2 {
         return map[string]interface{}{
@@ -131,7 +126,6 @@ func (e *evaluator) convergence_info(): map[string]interface{} {
         "metrics_count": len(e.history),
     }
 }
-
 func (e *evaluator) generate_report(): string {
     report := "=== NeurX Training Evaluation Report ===\n\n"
     if len(e.history) == 0 {
@@ -166,7 +160,6 @@ func (e *evaluator) generate_report(): string {
     }
     return report
 }
-
 func (e *evaluator) export_json(): string {
     data := map[string]interface{}{
         "total_evaluations": len(e.history),

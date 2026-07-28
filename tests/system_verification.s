@@ -3,6 +3,7 @@ use std.io
 use std.strings
 use std.path
 use std.env
+
 struct component_status {
     name: string
     file_path: string

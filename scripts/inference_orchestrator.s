@@ -70,7 +70,6 @@ func new_inference_orchestrator(modelPath string) (*inference_orchestrator, erro
         neurxRoot: neurxRoot,
     }, nil
 }
-
 func (i *inference_orchestrator) setup() error {
     i.logger.log("Setting up inference environment...")
     if err := mkdir(i.config.logDir); err != nil {
@@ -79,7 +78,6 @@ func (i *inference_orchestrator) setup() error {
     i.log_config()
     return nil
 }
-
 func (i *inference_orchestrator) Compile() error {
     i.logger.log("Compiling inference server...")
     buildDir := filepath.Join(i.neurxRoot, ".build", "inference")
@@ -108,7 +106,6 @@ func (i *inference_orchestrator) Compile() error {
     i.logger.success("Inference server compiled: %s", binFile)
     return nil
 }
-
 func (i *inference_orchestrator) start_server() error {
     i.logger.log("Starting inference server...")
     binFile := filepath.Join(i.neurxRoot, ".build", "inference", "inference_server")
@@ -142,7 +139,6 @@ func (i *inference_orchestrator) start_server() error {
     }
     return fmt.Errorf("server failed to start within timeout")
 }
-
 func (i *inference_orchestrator) interactive() error {
     i.logger.log("Starting interactive inference session...")
     binFile := filepath.Join(i.neurxRoot, ".build", "inference", "inference_interactive")
@@ -156,7 +152,6 @@ func (i *inference_orchestrator) interactive() error {
     }
     return nil
 }
-
 func (i *inference_orchestrator) chat() error {
     i.logger.log("Starting chat interface...")
     sourceFile := filepath.Join(i.neurxRoot, "tools", "chat.s")
@@ -189,7 +184,6 @@ func (i *inference_orchestrator) chat() error {
     }
     return nil
 }
-
 func (i *inference_orchestrator) benchmark() error {
     i.logger.log("Running inference benchmarks...")
     sourceFile := filepath.Join(i.neurxRoot, "eval", "benchmark_eval.s")
@@ -224,12 +218,10 @@ func (i *inference_orchestrator) benchmark() error {
     i.logger.success("benchmark results saved to %s", logFile)
     return nil
 }
-
 func (i *inference_orchestrator) is_server_ready() bool {
     result := exec_command("curl", "-s", fmt.Sprintf("http:
     return result.ExitCode == 0
 }
-
 func (i *inference_orchestrator) log_config() {
     config := fmt.Sprintf(`Inference Configuration
 model: %s

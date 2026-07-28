@@ -1,4 +1,5 @@
 package neurx.inference.sampling
+
 func greedy_decode(
     [][]float all_logits,
     sampling_config config,

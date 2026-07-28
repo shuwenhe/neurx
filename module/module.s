@@ -1,6 +1,7 @@
 package neurx.module
 use neurx.tensor.tensor
 use neurx.nn
+
 func module_new(string name) nn.module {
     neurx.nn.new_module(name)
 }

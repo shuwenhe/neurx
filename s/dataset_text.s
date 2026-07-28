@@ -1,5 +1,6 @@
 package neurx.dataset_text
 use neurx.strings
+
 struct text_corpus_state {
     string path
     string raw_text

@@ -2,6 +2,7 @@ package neurx.model.transformer.transformer
 use neurx.attention.{attention_config, multi_head_attention, new_attention_config, new_multi_head_attention, forward_attention, forward_attention_with_rope, forward_gqa, forward_mqa, forward_flash_attention}
 use neurx.model.transformer.ffn.{ffn_config, feed_forward_network, new_ffn_config, new_standard_ffn, new_glu_ffn, forward_standard_ffn, forward_glu_ffn, forward_swiglu_ffn}
 use neurx.model.transformer.norm.{layer_norm_config, layer_norm, rms_norm, new_layer_norm, new_rms_norm, layer_normalize, rms_normalize, position_embedding_config, new_absolute_position_embedding, learned_position_embedding, new_learned_position_embedding, get_position_embedding, get_learned_position_embedding, rope_embedding, new_rope_embedding, apply_rope, alibi_embedding, new_alibi_embedding, apply_alibi_bias}
+
 struct transformer_layer_config {
     int hidden_dim
     int num_attention_heads

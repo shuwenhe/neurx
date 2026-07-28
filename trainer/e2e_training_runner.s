@@ -7,6 +7,7 @@ import fmt
 import math
 import time
 import io
+
 struct training_config {
     vocab_size: int
     embedding_dim: int

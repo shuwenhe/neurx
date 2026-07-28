@@ -1,5 +1,6 @@
 package neurx.lib.loss
 use neurx.lib.tensor.{vector, matrix, create_vector, create_matrix, vector_scale, vector_subtract, matrix_scale}
+
 struct mse_loss {
     string name
 }

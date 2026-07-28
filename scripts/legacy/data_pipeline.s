@@ -18,7 +18,6 @@ type clean_config struct {
     ManifestFile   string
     CheckpointFile string
 }
-
 type shard_config struct {
     InputFile      string
     ShardDir       string
@@ -26,14 +25,12 @@ type shard_config struct {
     MaxShards      int
     LinesPerShard  int
 }
-
 type shard_metadata struct {
     ShardID       string `json:"shard_id"`
     FilePath      string `json:"file_path"`
     NumDocuments  int64  `json:"num_documents"`
     SizeBytes     int64  `json:"size_bytes"`
 }
-
 type manifest struct {
     DatasetName         string           `json:"dataset_name"`
     Version             string           `json:"version"`
@@ -194,7 +191,6 @@ func cleanData(config CleanConfig) error {
     }
     return writeManifest(config, stats.TotalWritten)
 }
-
 type clean_stats struct {
     TotalProcessed int64
     TotalWritten   int64

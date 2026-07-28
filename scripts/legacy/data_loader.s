@@ -6,7 +6,6 @@ type data_loader_config struct {
     max_samples_per_shard: i64
     max_shards: i64
 }
-
 type sample struct {
     text: string
     index: i64

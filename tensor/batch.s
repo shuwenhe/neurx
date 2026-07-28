@@ -4,6 +4,7 @@ use neurx.autograd.function
 use neurx.strings
 use neurx.tensor.tensor
 use neurx.strings
+
 struct batch_state {
     string name
     bool active

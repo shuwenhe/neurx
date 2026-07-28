@@ -1,4 +1,5 @@
 package neurx.alignment.supervised_finetuning
+
 struct sft_example {
     string instruction
     string input_context

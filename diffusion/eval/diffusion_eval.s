@@ -1,4 +1,5 @@
 package neurx.diffusion.eval
+
 struct diffusion_eval_state {
     int samples
     float fid_like

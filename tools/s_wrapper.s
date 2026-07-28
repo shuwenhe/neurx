@@ -2,6 +2,7 @@ package main
 use std.exec
 use std.os
 use std.path
+
 func findSCompiler() string {
     realS := "/usr/local/bin/s"
     _, err := os.Stat(realS)

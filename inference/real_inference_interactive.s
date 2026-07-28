@@ -2,6 +2,7 @@ module real_inference_interactive
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, trim}
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __host_write_text_file(string path, string content) int
+
 func read_user_line() string {
     trim(__sys_read_string(0, 4096))
 }
@@ -75,6 +76,7 @@ func contains(string text, string substr) int {
     return 0
 }
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
 func main() {
     string model_path = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain/model.safetensors")
     print("╔════════════════════════════════════════════════════════╗\n")

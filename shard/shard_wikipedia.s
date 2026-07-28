@@ -1,6 +1,7 @@
 package neurx.shard.shard_wikipedia
 use std.os.command
 use neurx.runtime.io.runtime_env_get
+
 struct wikipedia_config {
     string input_bz2_file
     string output_dir
@@ -13,6 +14,7 @@ string g_output_dir = ""
 string g_manifest_file = ""
 int g_docs_per_shard = 5000
 int g_max_pages = 0
+
 struct shard_metadata {
     string shard_id
     string file_path

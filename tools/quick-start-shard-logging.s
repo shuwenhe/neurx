@@ -1,5 +1,6 @@
 package main
 use std.io.println
+
 func main() int {
     println("NeurX Shard Processing - Real-time Logging Quick Start")
     println("")

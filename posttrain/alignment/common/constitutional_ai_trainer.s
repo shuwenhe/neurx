@@ -1,4 +1,5 @@
 package neurx.posttrain.alignment.constitutional_ai_trainer
+
 struct constitutional_principle {
     string id
     string description

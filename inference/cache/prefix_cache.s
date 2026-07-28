@@ -1,4 +1,5 @@
 package neurx.inference.cache.prefix_cache
+
 struct prefix_cache_state {
     int max_entries
     int max_tokens

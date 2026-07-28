@@ -2,6 +2,7 @@ package neurx.distributed.multi_node_launcher
 use neurx.runtime.io.{runtime_env_get}
 use neurx.strings.{string_concat}
 use neurx.distributed.nccl_id_manager.{nccl_unique_id, load_nccl_id_from_shared_storage}
+
 struct multi_node_config {
     int num_nodes
     int node_rank

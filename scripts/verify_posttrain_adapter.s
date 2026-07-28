@@ -1,6 +1,5 @@
 module verify_posttrain_adapter
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_binary_file, runtime_read_text_file, runtime_run_command_output, trim}
-
 float MIN_ADAPTER_L1 = 1e-6
 float MIN_LOSS_DROP = 1e-6
 float MAX_LOSS_STEP_INCREASE = 1e-7

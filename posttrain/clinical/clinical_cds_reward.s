@@ -1,5 +1,6 @@
 package neurx.posttrain.clinical
 use neurx.posttrain.reward.{reward_model, reward_train_result}
+
 struct medical_fact {
     string entity
     string relation

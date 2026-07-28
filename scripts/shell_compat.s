@@ -7,6 +7,7 @@ import (
     "strings"
     "time"
 )
+
 func mkdir(path string) error {
     err := os.MkdirAll(path, 0755)
     if err != nil {
@@ -240,7 +241,6 @@ struct logger_2 {
 func new_logger(prefix string) logger_2 {
     return logger_2{prefix: prefix, timestamp: true}
 }
-
 func (l logger_2) log(msg string, args ...interface{}) {
     output := fmt.Sprintf("[INFO] %s: %s\n", l.prefix, fmt.Sprintf(msg, args...))
     if l.timestamp {
@@ -248,7 +248,6 @@ func (l logger_2) log(msg string, args ...interface{}) {
     }
     fmt.Print(output)
 }
-
 func (l logger_2) error(msg string, args ...interface{}) {
     output := fmt.Sprintf("[ERROR] %s: %s\n", l.prefix, fmt.Sprintf(msg, args...))
     if l.timestamp {
@@ -256,7 +255,6 @@ func (l logger_2) error(msg string, args ...interface{}) {
     }
     fmt.Fprint(os.Stderr, output)
 }
-
 func (l logger_2) warn(msg string, args ...interface{}) {
     output := fmt.Sprintf("[WARN] %s: %s\n", l.prefix, fmt.Sprintf(msg, args...))
     if l.timestamp {
@@ -264,7 +262,6 @@ func (l logger_2) warn(msg string, args ...interface{}) {
     }
     fmt.Print(output)
 }
-
 func (l logger_2) success(msg string, args ...interface{}) {
     output := fmt.Sprintf("[✓] %s: %s\n", l.prefix, fmt.Sprintf(msg, args...))
     if l.timestamp {

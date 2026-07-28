@@ -2,6 +2,7 @@ package neurx.agent.extended_thinking
 use neurx.executor.executor.{agent_execute_step, agent_text_contains}
 use neurx.agent.tool_registry
 use neurx.agent.memory
+
 struct extended_thought {
     int    index
     string thought

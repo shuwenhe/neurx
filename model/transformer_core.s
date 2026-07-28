@@ -1,4 +1,5 @@
 package neurx.model.gpt_transformer
+
 struct gptconfig {
     int hidden_size
     int num_layers

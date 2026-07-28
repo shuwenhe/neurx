@@ -304,6 +304,7 @@ func prepare_clm_batch(
         "labels": labels,
         "task_type": CLM,
     }
+
 func prepare_mlm_batch(
     tokenizer: tokenizer_state,
     batch_texts: []string,
@@ -346,6 +347,7 @@ func prepare_mlm_batch(
         "mask_positions": should_mask,
         "task_type": MLM,
     }
+
 func prepare_prefix_lm_batch(
     tokenizer: tokenizer_state,
     batch_prefixes: []string,
@@ -391,6 +393,7 @@ func prepare_prefix_lm_batch(
         "eop_positions": eop_positions,
         "task_type": PREFIX_LM,
     }
+
 func train_step(
     ref pretrain_state state,
     neurx_model model,
@@ -491,6 +494,7 @@ func train_step(
     state.estimated_total_hours = remaining_steps * state.seconds_per_step / 3600
     state.estimated_end_time = now() + timedelta(hours=state.estimated_total_hours)
     return loss_value
+
 func evaluate(
     state: pretrain_state,
     neurx_model model,
@@ -540,6 +544,7 @@ func evaluate(
     print(f"   Loss: {avg_loss:.4f}")
     print(f"   Perplexity: {perplexity:.2f}")
     return metrics
+
 func run_pretraining(
     model_config_path: option<string> = none,
     resume_from_checkpoint: option[string] = none
@@ -663,6 +668,7 @@ func run_pretraining(
             step=state.current_step,
             is_final=True
         )
+
 func log_training_progress(
     state: pretrain_state,
     float loss: float) {
@@ -712,6 +718,7 @@ func log_evaluation_results(
     print(f"   Best Val Loss:       {state.loss_history.best_val_loss:.4f}")
     print(f"   Tokens Seen:         {state.total_tokens_seen:,}")
     print(f"{'='*50}\n")
+
 func update_training_phase(ref pretrain_state state) {
     """
     English texttrainingphase
@@ -725,6 +732,7 @@ func update_training_phase(ref pretrain_state state) {
         state.phase = LONG_CONTEXT_PHASE
     else:
         state.phase = FINE_TUNING_PHASE
+
 func print_final_summary(pretrain_state state) {
     """
     English texttrainingsummary
@@ -745,6 +753,7 @@ func print_final_summary(pretrain_state state) {
     if len(state.loss_history.prefix_lm_losses) > 0:
         print(f"   PrefixLM Avg Loss:  {mean(state.loss_history.prefix_lm_losses):.4f}")
     print(f"{'-'*50}")
+
 func format_duration(timedelta td) {
     int total_seconds = int(td.total_seconds())
     int days = total_seconds
@@ -759,6 +768,7 @@ func format_duration(timedelta td) {
         return f"{minutes}m {seconds}s"
     else:
         return f"{seconds}s"
+
 func get_gpu_memory_usage() {
     """
     English textGPUEnglish textuseEnglish text(English text: MB)

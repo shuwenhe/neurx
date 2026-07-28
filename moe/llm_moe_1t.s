@@ -2,6 +2,7 @@ package neurx.moe.llm_1t
 use neurx.model.llm.gpt.{model_config, gpt_param_count}
 use neurx.moe.llm.{gpt_moe_config, gpt_moe_param_count}
 use neurx.moe.transformer.{moe_config, moe_stats, moe_compute_stats, new_moe_config}
+
 struct moe_1t_scale_profile {
     string model_name
     int target_total_params

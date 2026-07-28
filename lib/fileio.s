@@ -2,6 +2,7 @@ package neurx.lib.fileio
 const int FILE_READ = 0
 const int FILE_WRITE = 1
 const int FILE_APPEND = 2
+
 struct file_handle {
     string path
     int mode

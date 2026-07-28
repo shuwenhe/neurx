@@ -96,34 +96,27 @@ func float_to_bits(float f) int {
     if f == 0.0 {
         return 0
     }
-    
     bool sign = f < 0.0
     float abs_f = f
     if sign {
         abs_f = 0.0 - f
     }
-    
     int exp = 127
     float mantissa_f = abs_f
-    
     while mantissa_f >= 2.0 {
         mantissa_f = mantissa_f / 2.0
         exp = exp + 1
     }
-    
     while mantissa_f < 1.0 && exp > 0 {
         mantissa_f = mantissa_f * 2.0
         exp = exp - 1
     }
-    
     int mantissa = int((mantissa_f - 1.0) * 8388608.0)
-    
     int bits = 0
     if sign {
         bits = bits + 2147483648
     }
     bits = bits + exp * 8388608
     bits = bits + mantissa
-    
     bits
 }

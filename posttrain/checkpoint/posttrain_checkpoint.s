@@ -1,4 +1,5 @@
 package neurx.posttrain.checkpoint
+
 struct posttrain_checkpoint_state {
     string run_name
     string root

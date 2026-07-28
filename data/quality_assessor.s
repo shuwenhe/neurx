@@ -5,6 +5,7 @@ import (
     "std/strings"
     "std/math"
 )
+
 struct quality_metrics {
     total_lines: i64
     valid_docs: i64
@@ -44,7 +45,6 @@ func NewQualityAssessor(sample_size: i64) quality_assessor {
         seen_hashes: make(set<string>),
     }
 }
-
 func (qa: *quality_assessor) calculateQualityScore(text: string) f64 {
     if len(text) == 0 {
         return 0.0
@@ -123,7 +123,6 @@ func detectLanguage(text: string) string {
     }
     return "en"
 }
-
 func (qa: *quality_assessor) AssessFile(filepath: string) quality_metrics {
     println("📊 evaluationfile: " + filepath)
     file := io.Open(filepath, "r")
@@ -198,7 +197,6 @@ func (qa: *quality_assessor) AssessFile(filepath: string) quality_metrics {
     qa.metrics.avg_line_length = f64(qa.metrics.total_chars) / f64(qa.metrics.total_lines)
     return qa.metrics
 }
-
 func (metrics: quality_metrics) PrintReport() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║         📊 NeurX dataEnglish textevaluationEnglish text                      ║")

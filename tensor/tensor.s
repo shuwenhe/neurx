@@ -2,6 +2,7 @@ package neurx.tensor
 use neurx.backends.compute_backend
 use neurx.autograd.ir
 use neurx.autograd.tracer
+
 struct tensor {
     []float data
     []int shape

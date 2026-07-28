@@ -1,6 +1,7 @@
 package neurx.distributed_training
 use std.io
 use std.math
+
 struct process_group {
     rank: int
     world_size: int

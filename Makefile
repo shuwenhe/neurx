@@ -124,6 +124,7 @@ POSTTRAIN_VERIFY_TENSORS_SOURCE ?= $(CURDIR_UNIX)/scripts/verify_posttrain_tenso
 POSTTRAIN_VERIFY_ADAPTER_SOURCE ?= $(CURDIR_UNIX)/scripts/verify_posttrain_adapter.s
 POSTTRAIN_PRETRAIN_MANIFEST_SOURCE ?= $(CURDIR_UNIX)/scripts/build_pretrain_manifest.s
 POSTTRAIN_GOLDEN_DATASET_LIMIT ?= 12
+POSTTRAIN_MATERIALIZED_SAMPLES ?= 4
 
 
 help:
@@ -334,8 +335,15 @@ test-checkpoint-resume: check-bash
 build-posttrain-sft-s:
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_sft'
 	@cd '$(CURDIR_UNIX)' && \
-		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir'; \
-		"$(POSTTRAIN_S_COMPILER)" 'scripts/posttrain_lora_train.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' 2>&1 && \
+		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.bundle.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_materialized_data.s'; \
+		node 'scripts/materialize_posttrain_data.mjs' \
+			--input '$(POSTTRAIN_DATA_FILE)' \
+			--output '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_materialized_data.s' \
+			--samples '$(POSTTRAIN_MATERIALIZED_SAMPLES)' \
+			--hidden 896 \
+			--vout 128 && \
+		{ printf 'package main\n'; sed -n '2p' 'posttrain/trainer/posttrain_real_numeric.s'; printf '\n'; tail -n +2 '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_materialized_data.s'; printf '\n'; tail -n +3 'posttrain/trainer/posttrain_real_numeric.s'; } > '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.bundle.s'; \
+		"$(POSTTRAIN_S_COMPILER)" '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.bundle.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir'
 
 build-posttrain-verify-adapter-s: check-bash

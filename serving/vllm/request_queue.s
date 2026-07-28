@@ -1,4 +1,5 @@
 package neurx.serving.vllm.request_queue
+
 struct vllm_request_queue_state {
     []string request_ids
     []int prefill_tokens

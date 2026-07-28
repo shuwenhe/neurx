@@ -1,4 +1,5 @@
 package neurx.workflows.robotics.real
+
 struct robotics_real_state {
     string robot_name
     bool connected

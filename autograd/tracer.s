@@ -2,6 +2,7 @@ package neurx.autograd.tracer
 use neurx.autograd.function
 use neurx.autograd.eqn
 use neurx.strings
+
 struct tracer_state {
     string name
     bool active

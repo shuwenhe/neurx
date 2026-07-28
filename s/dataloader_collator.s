@@ -1,4 +1,5 @@
 package neurx.data
+
 struct collator_config {
     int max_length
     int pad_token_id

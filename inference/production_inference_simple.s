@@ -1,4 +1,5 @@
 package neurx.inference.simple
+
 func runtime_env_get(string name, string default_value) string {
     default_value
 }

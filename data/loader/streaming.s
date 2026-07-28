@@ -1,4 +1,5 @@
 package neurx.data.loader.streaming
+
 struct streaming_config {
     string data_dir
     string file_pattern

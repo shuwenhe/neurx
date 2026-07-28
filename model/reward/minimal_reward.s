@@ -1,4 +1,5 @@
 package neurx.model.reward.minimal_reward
+
 struct minimal_reward_state {
     string name
     string family

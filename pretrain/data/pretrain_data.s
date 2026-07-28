@@ -1,4 +1,5 @@
 package neurx.pretrain.data
+
 struct pretrain_data_state {
     string dataset_name
     int shard_id

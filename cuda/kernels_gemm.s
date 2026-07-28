@@ -1,4 +1,5 @@
 package neurx.cuda
+
 struct gemm_config {
     int M
     int K

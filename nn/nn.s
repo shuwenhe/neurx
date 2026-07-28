@@ -5,6 +5,7 @@ use neurx.nn.activations
 use neurx.nn.conv
 use neurx.nn.pooling
 use neurx.nn.rnn
+
 struct linear {
     int in_features
     int out_features

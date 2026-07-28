@@ -502,7 +502,9 @@ func pad_with_zeros(int value, int width) string {
 }
 
 func get_current_time_ms() float64 { return 0.0 }
+
 func get_unique_id() int { return 0 }
+
 func is_queue_full(checkpoint_manager mgr) bool {
     return (mgr.queue_rear + 1) % len(mgr.task_queue) == mgr.queue_front
 }
@@ -526,6 +528,7 @@ func dequeue_task(checkpoint_manager mgr) checkpoint_task {
 }
 
 func start_background_writer_if_needed(ref checkpoint_manager mgr) {}
+
 func update_save_stats_success(ref checkpoint_manager mgr, float64 time_ms, int size_mb) {
     mgr.stats.total_saves_completed = mgr.stats.total_saves_completed + 1
     mgr.stats.total_saves_attempted = mgr.stats.total_saves_attempted + 1
@@ -540,32 +543,55 @@ func update_save_stats_failure(ref checkpoint_manager mgr) {
 }
 
 func write_tensor_to_file(tensor_shard t, string path, compression_type c) bool { return true }
+
 func write_string_to_file(string path, string content) bool { return true }
+
 func serialize_metadata_to_json(training_metadata m) string { return "{}" }
+
 func empty_checkpoint() model_checkpoint {
     return model_checkpoint{}
 }
 
 func is_valid_checkpoint(model_checkpoint c) bool { return true }
+
 func restore_parameters_to_model([]tensor_shard shards) {}
+
 func restore_optimizer_state(optimizer_state opt) {}
+
 func restore_rng_states([]uint64 cuda, []uint64 cpu) {}
+
 func restore_data_iterator(data_iterator_state iter) {}
+
 func find_best_checkpoint(string base_dir) string { return "" }
+
 func list_all_checkpoints(string base_dir) []string { return []string{} }
+
 func sort_checkpoints_by_step_desc(ref []string paths) {}
+
 func extract_step_from_path(string path) int { return 0 }
+
 func delete_directory_recursive(string path) {}
+
 func file_exists(string path) bool { return false }
+
 func directory_exists(string path) bool { return false }
+
 func cleanup_directory(string path) {}
+
 func atomic_rename(string from, string to) bool { return true }
+
 func log_info(string msg) {}
+
 func sanitize_filename(string name) string { return name }
+
 func string_timestamp(float64 ts) string { return "" }
+
 func is_numeric(string s) bool { return false }
+
 func parse_int(string s) int { return 0 }
+
 func float_of_int(int n) float { return 0.0 }
+
 func quick_resume_training(string checkpoint_path) bool {
     checkpoint_config cfg = default_checkpoint_config_for_large_model()
     checkpoint_manager mgr = init_checkpoint_manager(cfg)

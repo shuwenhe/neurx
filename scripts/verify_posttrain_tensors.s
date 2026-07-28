@@ -55,7 +55,6 @@ func main() {
     println("   Min:   " + float_to_str(stats_q_a.min, 6) + ", Max: " + float_to_str(stats_q_a.max, 6))
     println("   L2:    " + float_to_str(stats_q_a.norm, 6))
     println("   Non-zero: " + int_to_str(stats_q_a.nonzero) + "/" + int_to_str(stats_q_a.count))
-
     tensor_sample sample_q_b = read_tensor_sample(file_bytes, header, "base_model.model.model.layers.0.self_attn.q_proj.lora_B.weight")
     if len(sample_q_b.values) == 0 {
         println("❌ FAIL: missing tensor: " + sample_q_b.name)
@@ -72,7 +71,6 @@ func main() {
     if stats_q_b.nonzero > 0 {
         found = found + 1
     }
-
     tensor_sample sample_v_a = read_tensor_sample(file_bytes, header, "base_model.model.model.layers.0.self_attn.v_proj.lora_A.weight")
     if len(sample_v_a.values) == 0 {
         println("❌ FAIL: missing tensor: " + sample_v_a.name)
@@ -86,7 +84,6 @@ func main() {
     println("   Min:   " + float_to_str(stats_v_a.min, 6) + ", Max: " + float_to_str(stats_v_a.max, 6))
     println("   L2:    " + float_to_str(stats_v_a.norm, 6))
     println("   Non-zero: " + int_to_str(stats_v_a.nonzero) + "/" + int_to_str(stats_v_a.count))
-
     tensor_sample sample_v_b = read_tensor_sample(file_bytes, header, "base_model.model.model.layers.0.self_attn.v_proj.lora_B.weight")
     if len(sample_v_b.values) == 0 {
         println("❌ FAIL: missing tensor: " + sample_v_b.name)

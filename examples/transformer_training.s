@@ -1,4 +1,5 @@
 package neurx.examples.transformer_training
+
 func example_transformer_config() {
 }
 

@@ -1,6 +1,7 @@
 package neurx.loss
 use neurx.tensor.tensor
 use neurx.tensor.new
+
 struct loss {
     string name
 }

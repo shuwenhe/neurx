@@ -2,6 +2,7 @@ package neurx.inference.neurx
 import neurx.model.llm.neurx.*
 import neurx.attention.*
 import neurx.tokenizer.neurx.*
+
 struct kv_cache_entry {
     tensor key_cache
     tensor value_cache
@@ -15,6 +16,7 @@ class KVCacheManager {
     []tensor layer_key_caches
     []tensor layer_value_caches
     []int cache_lengths
+
 func init(
     int num_layers,
     int num_kv_heads,
@@ -42,6 +44,7 @@ func init(
         layer_value_caches: [],
         cache_lengths: [0] * max_batch_size,
     }
+
 func update(
     self: KVCacheManager,
     int layer_idx,
@@ -70,6 +73,7 @@ func update(
         self.layer_key_caches[layer_idx],
         self.layer_value_caches[layer_idx]
     )
+
 func get_cached_kv(
     self: KVCacheManager,
     int layer_idx
@@ -82,11 +86,13 @@ func get_cached_kv(
         ))
     else:
         return none
+
 func reset(self: KVCacheManager):
     """English text cache"""
     self.layer_key_caches.clear()
     self.layer_value_caches.clear()
     self.cache_lengths = [0] * len(self.cache_lengths)
+
 func get_memory_usage(self: KVCacheManager):
     """English textuseEnglish text"""
     int64 total_k_memory = 0
@@ -105,6 +111,7 @@ func get_memory_usage(self: KVCacheManager):
         "current_max_seq_len": current_max_len,
         "num_active_entries": len(self.layer_key_caches),
     }
+
 struct memory_block {
     int block_id
     tensor key_data
@@ -137,6 +144,7 @@ class PagedAttentionManager {
         float memory_utilization
         int64 peak_memory_bytes
     } stats
+
 func init_paged_attention(
     int num_kv_heads,
     int head_dim,
@@ -181,6 +189,7 @@ func init_paged_attention(
             peak_memory_bytes: 0,
         },
     }
+
 func allocate_sequence(
     self: PagedAttentionManager,
     int seq_id,
@@ -216,6 +225,7 @@ func allocate_sequence(
     self.stats.memory_utilization = \
         1.0 - float(self.stats.free_blocks) / float(self.num_blocks)
     return meta
+
 func extend_sequence(
     self: PagedAttentionManager,
     int seq_id,
@@ -254,6 +264,7 @@ func extend_sequence(
         ] = new_values[:, :, tokens_written : tokens_written + tokens_to_write]
         tokens_written += tokens_to_write
     meta.current_length += new_tokens
+
 func free_sequence(self: PagedAttentionManager, int seq_id):
     """
     English text blocks
@@ -268,6 +279,7 @@ func free_sequence(self: PagedAttentionManager, int seq_id):
             self.stats.free_blocks += 1
     del self.active_sequences[seq_id]
     self.stats.total_allocated_blocks -= len(meta.block_table)
+
 func gather_kv_for_attention(
     self: PgedAttentionManager,
     int seq_id,
@@ -301,6 +313,7 @@ func gather_kv_for_attention(
             self.physical_blocks[physical_block_id].value_data[start_in_block : start_in_block + copy_len]
         dst_pos += copy_len
     return (full_keys, full_values)
+
 func _find_free_block(self: PagedAttentionManager):
     """English text block"""
     for block in self.physical_blocks:
@@ -349,6 +362,7 @@ class ContinuousBatchScheduler {
         float avg_throughput_tps
         int peak_concurrent_requests
     } stats
+
 func init_scheduler(
     int max_batch_size: int = 32,
     int max_queue_size: int = 256,
@@ -373,6 +387,7 @@ func init_scheduler(
             peak_concurrent_requests: 0,
         },
     }
+
 func add_request(
     self: ContinuousBatchScheduler,
     string prompt,
@@ -411,6 +426,7 @@ func add_request(
     }
     self.waiting_queue.push(req)
     return req.request_id
+
 func schedule_batch(self: ContinuousBatchScheduler):
     """
     English textrequest
@@ -438,6 +454,7 @@ func schedule_batch(self: ContinuousBatchScheduler):
         len(batch)
     )
     return batch
+
 func mark_completed(
     self: ContinuousBatchScheduler,
     int request_id,
@@ -471,6 +488,7 @@ func mark_completed(
         float(self.stats.total_tokens_generated) /
         max((now() - self.scheduler_start).total_seconds(), 0.001)
     )
+
 func get_status_report(self: ContinuousBatchScheduler):
     """generatestateEnglish text"""
     report = f"""
@@ -514,6 +532,7 @@ class inference_engine {
         float avg_latency_per_token_ms
         float peak_gpu_memory_gb
     } perf_stats
+
 func init_engine(
     neurx_model model,
     tokenizer_state tokenizer,
@@ -558,6 +577,7 @@ func init_engine(
             peak_gpu_memory_gb: 0.0,
         },
     }
+
 func generate(
     self: inference_engine,
     string prompt,
@@ -667,6 +687,7 @@ func generate(
     print(f"      Latency/token: {latency_per_token:.2f}ms")
     generated_text = truncate_at_special_tokens(generated_text)
     return generated_text
+
 func sample_next_token(
     tensor logits,
     float temperature,
@@ -704,6 +725,7 @@ func sample_next_token(
         probs = probs / probs.sum()
     int next_token_id = multinomial(probs, num_samples=1).item()
     return next_token_id
+
 func generate_batch(
     self: inference_engine,
     []string prompts,
@@ -769,6 +791,7 @@ func create_default_quant_config():
         symmetric: true,
         scale_dtype: "fp32",
     }
+
 func apply_quantization(
     neurx_model model,
     quantization_config config
@@ -803,6 +826,7 @@ func apply_quantization(
     print(f"   Original: ~{original_params / 1e6:.0f}M params")
     print(f"   Compressed: ~{compressed_params / 1e6:.0f}M params (effective)")
     return model
+
 func test_inference_system() {
     print("\n" + "="*70)
     print("Testing NEURX Inference Optimization System")
@@ -876,8 +900,10 @@ func test_inference_system() {
     print("\n" + "="*70)
     print("All inference optimization tests passed! ✨")
     print("="*70 + "\n")
+
 func ceil_div(int a, int b):
     return (a + b - 1)
+
 func get_tensor_memory(tensor t):
     """English textuse (English text)"""
     int elements = 1
@@ -885,6 +911,7 @@ func get_tensor_memory(tensor t):
         elements *= dim
     int element_size = 4
     return int64(elements) * element_size
+
 func truncate_at_special_tokens(string text):
     """English text token English text"""
     []string stop_sequences = ["", "\n\n", "<|end_of_turn|>"]

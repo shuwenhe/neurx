@@ -1,4 +1,5 @@
 package neurx.logging
+
 struct training_metrics {
     float current_loss
     []float recent_losses

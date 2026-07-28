@@ -1,4 +1,5 @@
 package neurx.inference.sampling
+
 func select_top_k_beams([]beam_state candidates, int k) []beam_state {
     if len(candidates) <= k {
         return candidates

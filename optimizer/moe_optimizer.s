@@ -1,4 +1,5 @@
 module moe_optimization
+
 struct moe_config {
     hidden_size: int = 4096
     intermediate_size: int = 14336

@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command_output, runtime_file_exists, trim}
 use std.io.println
+
 func main() int {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     let log_dir = project_root + "/artifacts/logs"

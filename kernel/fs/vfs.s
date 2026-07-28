@@ -5,6 +5,7 @@ int INODE_KV_PAGE   = 3
 int INODE_TOOL      = 4
 int INODE_MEMORY    = 5
 int INODE_VECTOR    = 6
+
 struct inode {
     int    ino
     string path

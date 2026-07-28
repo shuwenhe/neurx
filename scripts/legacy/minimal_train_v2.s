@@ -1,4 +1,5 @@
 package main
+
 func main() int {
     int max_steps = 10000
     int log_interval = 10

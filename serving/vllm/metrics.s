@@ -1,4 +1,5 @@
 package neurx.serving.vllm.metrics
+
 struct vllm_metrics_state {
     int admitted
     int rejected

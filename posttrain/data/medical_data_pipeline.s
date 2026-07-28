@@ -1,4 +1,5 @@
 package neurx.posttrain.data.medical
+
 struct mysql_config {
     string host
     int port

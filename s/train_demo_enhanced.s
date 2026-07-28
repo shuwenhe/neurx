@@ -21,6 +21,7 @@ use std.ai.nn.modules.{Linear, embedding, layer_norm, multi_head_attention,
                          new_mha, new_feed_forward, new_transformer_block,
                          new_dropout, new_relu, new_gelu, new_silu, new_sigmoid, new_softmax,
                          new_sequential, count_parameters, print_module_summary}
+
 struct gptconfig {
     int vocab_size
     int embed_dim
@@ -494,6 +495,7 @@ func run_training(gptconfig config) training_result {
         total_time_ms: total_time,
         saved_checkpoints: checkpoints_saved,
     }
+
 func format_step_line(int step, float loss, float best_loss,
                        float grad_norm, float lr, int time_ms) string {
     string line = ""
@@ -514,6 +516,7 @@ func format_step_line(int step, float loss, float best_loss,
     line = line + lr_str + " | "
     line = line + string(time_ms) + " ms"
     line
+
 func check_should_save(int step, int every_n) bool {
     if every_n <= 0 { return true }
     return mod(step, every_n) == 0 && step > 0
@@ -526,12 +529,15 @@ func save_manifest(string manifest_path, []string checkpoints) void:
     for ckpt in checkpoints:
         content += ckpt + "\n"
     write_text_file(manifest_path, content)
+
 func get_time_ms() int:
     return 0
+
 func write_text_file(string path, string content) Result[void, Error]:
     pass
 def rename_file(string old_path, string new_path) void:
     pass
+
 func main() int:
     gptconfig config = default_model_config()
     println("NeurX GPT Training - AI Native Edition")

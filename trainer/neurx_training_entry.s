@@ -5,6 +5,7 @@ use neurx.distributed.training_3d.*
 use neurx.checkpoint.distributed.*
 use neurx.data.loader.dataloader.*
 use neurx.monitoring.training_observability.*
+
 func create_neurx_200b_model_config() model_parallel_config {
     parallel dims = create_parallel_config(64, 8, 4, 2, 0)
     model_parallel_config {
@@ -199,15 +200,20 @@ func start_neurx_training(
 }
 
 func initialize_model_weights(orchestrator_state orch) {}
+
 func get_current_gradient_norm(orchestrator_state o) float { return 0.0 }
 model_checkpoint build_checkpoint_from_orchestrator(orchestrator_state o) {
     return model_checkpoint{}
 }
 
 func export_model_for_inference(orchestrator_state o, string path) {}
+
 func evaluate_model_async(dataloader d, orchestrator_state o) {}
+
 func cleanup_dataloader(dataloader d) {}
+
 func generate_complete_training_report(orchestrator_state o, monitoring_manager m, checkpoint_manager c, dataloader d) {}
+
 func should_log_at_step(int step, int interval) bool { return step % interval == 0 }
 performance_snapshot collect_performance_snapshot(orchestrator_state orch) {
     return performance_snapshot{}

@@ -19,7 +19,6 @@ type large_model_config struct {
     use_mixed_precision: bool
     zero_stage: int
 }
-
 type memory_estimate struct {
     model_weights_gb: float
     gradients_gb: float

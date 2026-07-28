@@ -1,4 +1,5 @@
 package neurx.attention.mla
+
 struct mla_config {
     int hidden_dim
     int num_q_heads

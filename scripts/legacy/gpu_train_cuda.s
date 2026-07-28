@@ -30,7 +30,6 @@ type gpu_training_config = struct {
     gradient_accumulation_steps: int
     weight_decay: float
 }
-
 type gpu_model = struct {
     embedding_size: int
     hidden_size: int
@@ -43,7 +42,6 @@ type gpu_model = struct {
     m_gpu: int64
     v_gpu: int64
 }
-
 type training_state = struct {
     step: int
     total_loss: float
