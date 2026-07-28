@@ -1,738 +1,783 @@
-# NeurX Runtime 为中心的实现路线图 (工程架构版本)
+# NeurX 世界级训练框架 - 11 阶段工程路线图 (2026-07-28)
 
-**核心原则**: Runtime 优先 > 模型设计 | 可验证优先 > 功能完整 | 接口化优先 > 直接集成
+**核心哲学**: 构建经得起时间考验的系统，而非快速迭代的功能列表
 
-**关键洞察**: 
-- 真正决定框架寿命的是 **Runtime + Operator + Autograd + IR**
-- KDA、MLA、MoonEP 都只是在 Runtime 上的应用
-- PyTorch、JAX、MindSpore、TensorFlow 的本质都是 Runtime
+**指导原则**:
+- Runtime 优先 > 模型优先
+- 工程稳定性 > 功能新颖性
+- 完整闭环 > 孤立功能
+- 自动化验证 > 手动测试
+- 模块边界清晰 > 功能积压
 
 ---
 
-## 项目结构（最终）
+## 项目最终结构（深层次分解）
 
 ```
 neurx/
-├── runtime/                # ⭐⭐⭐⭐⭐ 核心（所有计算都这里）
-│   ├── tensor/            # Tensor 定义 + 内存管理
-│   ├── operator/          # MatMul, Softmax, LayerNorm, etc.
-│   ├── autograd/          # Backward + Gradient computation
-│   ├── optimizer/         # AdamW, SGD, etc.
-│   └── checkpoint/        # Save/Load 训练状态
+├── runtime/                          # ⭐⭐⭐⭐⭐ 核心基础设施
+│   ├── core/                         # 最底层
+│   │   ├── tensor.s                  # Tensor 定义 (metadata: shape, stride, data_ptr)
+│   │   ├── storage.s                 # 原始数据存储
+│   │   ├── allocator.s               # 内存分配器（支持 pool 分配）
+│   │   ├── device.s                  # Device 抽象 (CPU/GPU/TPU)
+│   │   └── stream.s                  # 异步执行流（预留）
+│   │
+│   ├── graph/                        # 计算图层
+│   │   ├── autograd.s                # 自动求导核心（拓扑排序 + 反向传播）
+│   │   ├── graph.s                   # 动态计算图 (for debugging)
+│   │   ├── node.s                    # 计算节点
+│   │   └── scheduler.s               # 执行调度（预留）
+│   │
+│   ├── operator/                     # 算子库
+│   │   ├── linear.s                  # MatMul, Bias, etc.
+│   │   ├── attention.s               # Scaled Dot-Product Attention 基础
+│   │   ├── norm.s                    # LayerNorm, RMSNorm
+│   │   ├── activation.s              # ReLU, SwiGLU, Tanh, etc.
+│   │   ├── loss.s                    # CrossEntropy, MSE, etc.
+│   │   ├── rope.s                    # RoPE（属于算子库，不是 model）
+│   │   └── broadcast.s               # 广播、view、reshape 等内存操作
+│   │
+│   ├── executor/                     # 执行引擎
+│   │   ├── eager.s                   # Eager execution (Phase 1-6)
+│   │   └── compiled.s                # Compiled execution (Phase 8+ 后续)
+│   │
+│   └── distributed/                  # 分布式（Phase 8）
+│       ├── process_group.s           # 进程通信
+│       ├── communicator.s            # AllReduce, AllGather 等
+│       ├── tensor_parallel.s         # 张量并行
+│       ├── pipeline_parallel.s       # 流水线并行
+│       └── zero.s                    # ZeRO 优化（后期）
 │
-├── model/
-│   ├── core/              # Embedding, RoPE
-│   ├── attention/         # Interface + Standard/MLA/KDA impl
-│   ├── ffn/               # Interface + Dense/MoE/LatentMoE impl
-│   └── transformer.s      # Orchestration
+├── model/                            # ⭐⭐⭐ 应用层（简单编排）
+│   ├── components/                   # 组件库（组装用）
+│   │   ├── embedding.s               # Token/Position Embedding
+│   │   └── rotary_position.s         # RoPE 集成
+│   │
+│   ├── transformer_block.s           # Transformer Block（组装）
+│   ├── transformer.s                 # 标准 Transformer（24层）
+│   ├── qwen.s                        # Qwen2.5 具体实现
+│   ├── llama.s                       # Llama（后期移植）
+│   └── kimi.s                        # Kimi-K3（后期集成）
 │
-├── serialization/
-│   ├── safetensors/       # SafeTensors Reader
-│   ├── tokenizer/         # HF-compatible tokenizer loader
-│   └── hf_compat/         # HuggingFace compatibility layer
+├── interface/                        # ⭐⭐⭐ 可插拔接口层
+│   ├── attention/
+│   │   ├── interface.s               # Attention 接口
+│   │   ├── standard.s                # 标准 Attention
+│   │   ├── mla.s                     # Multi-Head Latent Attention
+│   │   └── kda.s                     # Kimi Delta Attention
+│   │
+│   ├── ffn/
+│   │   ├── interface.s               # FFN 接口
+│   │   ├── dense.s                   # 标准 MLP
+│   │   ├── moe.s                     # 标准 MoE
+│   │   └── latent_moe.s              # LatentMoE
+│   │
+│   └── optimizer/
+│       ├── interface.s               # Optimizer 接口
+│       ├── adamw.s                   # AdamW
+│       ├── sgd.s                     # SGD（后期）
+│       └── lamb.s                    # LAMB（后期）
 │
-├── reference/             # ⭐⭐⭐ 与 HF 对齐验证工具
-│   ├── export_*.py        # 导出 HF 层的中间结果
-│   ├── compare_*.s        # 与 S 实现对比
-│   └── tests/             # 自动化对齐测试
+├── serialization/                    # 序列化
+│   ├── safetensors/
+│   │   └── loader.s                  # SafeTensors 读取
+│   │
+│   ├── checkpoint/
+│   │   ├── saver.s                   # Checkpoint 保存
+│   │   ├── loader.s                  # Checkpoint 加载
+│   │   └── resume.s                  # Resume 逻辑（关键）
+│   │
+│   └── tokenizer/
+│       └── hf_tokenizer.s            # HF 兼容 tokenizer loader
+│
+├── reference/                        # ⭐⭐⭐ 验证与参考实现
+│   ├── export/
+│   │   ├── export_tensor.py          # 导出 HF 张量
+│   │   ├── export_forward.py         # 导出 Forward 结果
+│   │   ├── export_gradient.py        # 导出 Backward 结果
+│   │   ├── export_optimizer.py       # 导出 Optimizer 更新
+│   │   └── export_checkpoint.py      # 导出 Checkpoint 数据
+│   │
+│   ├── compare/
+│   │   ├── compare_forward.s         # Forward 对齐
+│   │   ├── compare_backward.s        # Backward 对齐
+│   │   ├── compare_optimizer.s       # Optimizer 对齐
+│   │   ├── compare_checkpoint.s      # Checkpoint 对齐
+│   │   └── compare_resume.s          # Resume 一致性对齐（关键）
+│   │
+│   └── tests/
+│       ├── test_tensor.s             # Tensor 操作
+│       ├── test_operators.s          # 算子正确性
+│       ├── test_autograd.s           # 梯度计算
+│       ├── test_block.s              # Block 完整性
+│       ├── test_checkpoint_resume.s  # Resume 一致性（关键）
+│       └── golden_test.s             # Golden test（已知输出）
+│
+├── ci/                               # CI/自动化测试
+│   ├── Makefile.test                 # 测试目标
+│   ├── benchmark.s                   # 性能基准
+│   ├── profiler.s                    # 性能分析
+│   └── golden_dataset.s              # 黄金数据集
 │
 ├── posttrain/
-│   ├── trainer/           # 训练主循环
-│   └── evaluation/        # Loss 曲线等指标
+│   ├── trainer/
+│   │   └── train_loop.s              # 训练主循环
+│   │
+│   ├── evaluation/
+│   │   └── metrics.s                 # Loss、精度等指标
+│   │
+│   └── dataloaders/
+│       └── jsonl_loader.s            # JSONL 数据加载
 │
-└── config.yaml            # 模型配置
+└── config.yaml                       # 所有配置（模型、训练、Runtime）
 ```
 
 ---
 
-## 为什么优先构建 Runtime？
+## 完整训练闭环（所有阶段围绕这个推进）
 
 ```
-当前问题:
-    SafeTensors → 读数据
-    Embedding → 1 步
-    Attention → 1 步
-    Loss → 1 步
-    Backward → 1 步
-    ❌ 每个地方要重新写梯度、优化器、内存管理
-
-正确方式:
-    Tensor Runtime
-         ↓
-    自动求导 (Autograd)
-         ↓
-    所有 Operator 都支持前反向传播
-         ↓
-    模型只负责「流程」，计算全交给 Runtime
-         ↓
-    以后：Embedding/Attention/MoE/KDA 都自动支持梯度
+JSONL 文件
+    ↓
+Tokenizer (HF-compatible)
+    ├─ Text → Token IDs
+    └─ Token IDs ← Text
+    ↓
+DataLoader
+    ├─ Batch tokenization
+    └─ Batch shape (batch_size, seq_len)
+    ↓
+Embedding
+    ├─ Token ID → Embedding
+    └─ Add RoPE
+    ↓
+Forward Pass (Transformer 24 layers)
+    ├─ Attention (pluggable: Standard/MLA/KDA)
+    ├─ FFN (pluggable: Dense/MoE/LatentMoE)
+    └─ Output logits (batch, seq_len, vocab_size)
+    ↓
+Loss Computation (CrossEntropy)
+    ├─ Logits vs. Labels
+    └─ Loss scalar
+    ↓
+Backward Pass
+    ├─ dL/dLogits
+    ├─ dL/dAttention
+    ├─ dL/dFFN
+    ├─ dL/dEmbedding
+    └─ Gradient accumulation
+    ↓
+Optimizer Step (AdamW)
+    ├─ Momentum update
+    ├─ Velocity update
+    ├─ Parameter update
+    └─ Learning rate schedule
+    ↓
+Checkpoint Save
+    ├─ Model weights
+    ├─ Optimizer state (m, v)
+    ├─ Training state (step, epoch, loss)
+    └─ Config snapshot
+    ↓
+Resume Training (关键验证点)
+    ├─ Load all state
+    ├─ Continue training N steps
+    ├─ Verify loss curve continuity
+    └─ Checkpoint loss == Resume loss
+    ↓
+Inference
+    ├─ Load trained weights
+    ├─ Forward pass (no grad)
+    └─ Generate outputs
 ```
 
 ---
 
-## 阶段 1 ⭐⭐⭐⭐⭐: NeurX Runtime 基础
+## 11 个阶段路线图（每个阶段对应一个能力里程碑）
 
-**目标**: 能正确计算一个 Transformer Block 的前向和反向，数值与 HuggingFace 完全对齐
+### Phase 0 ⭐⭐⭐⭐⭐: CI、测试、基准框架 (2-3 天)
+
+**为什么这么早？**: 没有良好的测试体系，后续所有工作都是盲目的。
+
+**关键组件**:
+- [ ] 自动化单元测试框架
+- [ ] Golden test dataset (已知输入→已知输出)
+- [ ] 性能基准测试
+- [ ] Continuous integration pipeline
 
 **验收标准**:
 ```
-✓ Tensor 能存储、管理、操作
-✓ MatMul 与 PyTorch 数值一致 (误差 < 1e-4)
-✓ Softmax 与 PyTorch 数值一致
-✓ LayerNorm 与 PyTorch 数值一致
-✓ Backward 梯度与 PyTorch 一致 (误差 < 1e-3)
-✓ AdamW 参数更新与 PyTorch 一致
+✓ make test 能运行所有单元测试
+✓ make benchmark 能生成性能报告
+✓ make golden 能验证已知输入输出一致性
+✓ 单个模块改动 < 5% 性能下降
 ```
 
-### 1.1 Tensor 数据结构 (2-3 天)
+**文件**:
+- `ci/Makefile.test` - 测试编排
+- `reference/tests/test_base.s` - 基础测试
+- `ci/benchmark.s` - 性能基准
+- `ci/golden_test.s` - 黄金测试
+- `ci/golden_dataset.s` - 黄金数据
 
-**文件**: `runtime/tensor/tensor.s`
+---
+
+### Phase 1 ⭐⭐⭐⭐⭐: Tensor Runtime (3-4 天)
+
+**目标**: Tensor 能正确存储、管理、追踪，支持梯度计算
+
+**关键设计**:
 
 ```s
 struct Tensor {
-    data: []float           // 扁平化的数据
-    shape: []int            // [batch, seq_len, hidden]
-    stride: []int           // 行优先或列优先
-    grad: Tensor            // 梯度张量
-    requires_grad: bool     // 是否需要计算梯度
-    op: Operation           // 产生这个张量的操作
+    // 数据
+    data: []byte              // 原始数据指针
+    
+    // 元数据
+    shape: []int              // [batch, seq, hidden]
+    stride: []int             // 行优先/列优先（支持 reshape 不 copy）
+    offset: int               // 数据起始位置
+    
+    // 梯度追踪
+    grad: Tensor              // 梯度张量
+    requires_grad: bool
+    
+    // 计算图追踪
+    op: Operation             // 产生这个张量的操作
+    parent_tensors: []Tensor  // 输入张量
+    
+    // 设备
+    device: Device            // CPU/GPU/TPU（预留）
 }
-
-func Tensor.reshape(shape: []int) → Tensor
-func Tensor.transpose(axes: []int) → Tensor
-func Tensor.view(shape: []int) → Tensor
-func Tensor.contiguous() → Tensor
 ```
 
-**关键**:
-- 支持 stride（不copy数据就能 reshape）
-- 支持自动求导信息
-- 支持内存高效的操作
-
-**验证**:
-- [x] 能创建张量
-- [x] 能 reshape/transpose
-- [x] 梯度存储正确
-
----
-
-### 1.2 基础 Operator: MatMul (1-2 天)
-
-**文件**: `runtime/operator/matmul.s`
-
+**关键操作** (支持 stride，不 copy 数据):
 ```s
-func matmul(A: Tensor, B: Tensor) → Result {
-    // A: (M, K)
-    // B: (K, N)
-    // Result: (M, N)
-    
-    result = Tensor.zeros([M, N])
-    for i in range(M)
-        for j in range(N)
-            for k in range(K)
-                result[i, j] += A[i, k] * B[k, j]
-    
-    // 记录这个操作用于反向传播
-    result.op = MatMulOp(A, B)
-    return result
-}
+func reshape(shape: []int) → Tensor
+func transpose(axes: []int) → Tensor  
+func view(shape: []int) → Tensor
+func slice(start: []int, end: []int) → Tensor
+func contiguous() → Tensor  // 整理内存
+func broadcast(shape: []int) → Tensor
 ```
 
 **验证**:
-```python
-# reference/export_matmul.py
-import torch
-A = torch.randn(128, 896)
-B = torch.randn(896, 896)
-result_hf = torch.matmul(A, B)
-# 导出 result_hf
+```
+✓ reshape 不增加内存使用
+✓ transpose 正确追踪 stride
+✓ view 与 reshape 对齐
+✓ broadcast 支持自动扩展
+✓ contiguous 能正确整理内存
 ```
 
-```s
-# reference/compare_matmul.s
-let A = load_from_file("A.bin")
-let B = load_from_file("B.bin")
-let result_s = matmul(A, B)
-let result_hf = load_from_file("result_hf.bin")
-assert allclose(result_s, result_hf, atol=1e-4)
-```
-
-**关键**:
-- 支持 batched matmul
-- 支持不同形状的广播
-- 数值与 PyTorch 一致
+**文件**:
+- `runtime/core/tensor.s` - Tensor 定义
+- `runtime/core/storage.s` - 数据存储
+- `runtime/core/allocator.s` - 内存管理
+- `runtime/core/device.s` - Device 抽象
+- `reference/tests/test_tensor.s` - Tensor 单元测试
 
 ---
 
-### 1.3 基础 Operator: Softmax, LayerNorm (1-2 天)
+### Phase 2 ⭐⭐⭐⭐⭐: Operator Library (4-5 天)
 
-**文件**: `runtime/operator/softmax.s`, `runtime/operator/norm.s`
+**目标**: 基础算子与 HF 数值完全一致
 
-```s
-func softmax(x: Tensor, dim: int) → Tensor {
-    // 数值稳定: x_max = max(x)
-    x_shifted = x - x_max
-    exp_x = exp(x_shifted)
-    sum_exp = sum(exp_x)
-    return exp_x / sum_exp
-}
+**关键算子**:
 
-func layer_norm(x: Tensor, weight: Tensor, bias: Tensor, eps: float) → Tensor {
-    // x: (batch, seq, hidden)
-    mean = mean(x, axis=-1)
-    var = var(x, axis=-1)
-    x_norm = (x - mean) / sqrt(var + eps)
-    return x_norm * weight + bias
-}
+```
+Linear (MatMul + Bias)
+  ✓ Forward 数值对齐
+  ✓ Backward 梯度对齐
+  
+Softmax
+  ✓ Forward 数值稳定
+  ✓ Backward 梯度正确
+  
+LayerNorm / RMSNorm
+  ✓ Forward 对齐 HF (误差 < 1e-5)
+  ✓ Backward 对齐 HF (误差 < 1e-3)
+  
+Activation (ReLU, SwiGLU, Gelu, etc.)
+  ✓ Forward 对齐
+  ✓ Backward 对齐
+  
+Loss (CrossEntropy)
+  ✓ 数值稳定（防止 inf/nan）
+  ✓ 支持 ignore_index
+  
+RoPE (Rotary Position Encoding)
+  ✓ Forward 对齐
+  ✓ Backward 对齐
 ```
 
-**验证**: 与 PyTorch 对齐（误差 < 1e-5）
+**验收标准**:
+```
+✓ 每个算子与 HF 对齐 (误差 < 1e-4)
+✓ 每个算子支持 backward
+✓ make test-operators 全部通过
+```
+
+**文件**:
+- `runtime/operator/*.s` - 所有算子实现
+- `reference/export/export_tensor.py` - 导出 HF 中间值
+- `reference/compare/compare_forward.s` - Forward 对比
 
 ---
 
-### 1.4 Autograd: Backward Graph & Chain Rule (2-3 天)
+### Phase 3 ⭐⭐⭐⭐⭐: Autograd Engine (2-3 天)
 
-**文件**: `runtime/autograd/backward.s`
+**目标**: 自动求导系统完全工作
+
+**核心逻辑**:
 
 ```s
 interface Operation {
     func backward(grad_output: Tensor) → []Tensor {
-        // 接收上层的梯度
-        // 返回对输入的梯度
+        // 接收上层梯度，返回对输入的梯度
     }
 }
 
-struct MatMulOp: Operation {
-    A: Tensor
-    B: Tensor
-    
-    func backward(grad_output: Tensor) → []Tensor {
-        grad_A = matmul(grad_output, B.T)
-        grad_B = matmul(A.T, grad_output)
-        return [grad_A, grad_B]
-    }
-}
-
-struct SoftmaxOp: Operation {
-    x: Tensor
-    output: Tensor
-    
-    func backward(grad_output: Tensor) → []Tensor {
-        // d(softmax)/dx = softmax(x) * (grad - (grad * softmax).sum())
-        grad_x = output * (grad_output - (grad_output * output).sum())
-        return [grad_x]
-    }
-}
-
-// 自动求导
 func backward(loss: Tensor) {
-    loss.grad = Tensor.ones(loss.shape)
-    
-    queue = [loss]
-    visited = {}
-    
-    while queue is not empty {
-        tensor = queue.pop()
-        
-        if tensor.op is None
-            continue
-        
-        grads = tensor.op.backward(tensor.grad)
-        
-        for i, input_tensor in tensor.op.inputs {
-            input_tensor.grad += grads[i]
-            if input_tensor not in visited {
-                queue.push(input_tensor)
-                visited.add(input_tensor)
-            }
-        }
-    }
+    // 1. 初始化 loss.grad = ones(loss.shape)
+    // 2. 拓扑排序（从 loss 回溯到叶子节点）
+    // 3. 对每个节点调用其 operation.backward()
+    // 4. 梯度自动累积
+    // 5. 返回所有叶子节点的梯度
 }
 ```
 
-**关键**:
-- 自动梯度累积
-- 防止重复计算（visited 集合）
-- 支持复杂计算图
-
-**验证**:
-```s
-# reference/compare_backward.s
-let x = Tensor.randn([32, 896], requires_grad=true)
-let y = matmul(x, W) + b
-let loss = y.sum()
-loss.backward()
-# 与 PyTorch 梯度对比
+**验收标准**:
 ```
+✓ 梯度计算与 PyTorch 完全一致 (误差 < 1e-3)
+✓ 支持梯度累积
+✓ 支持复杂计算图
+✓ make test-autograd 全部通过
+```
+
+**文件**:
+- `runtime/graph/autograd.s` - 自动求导核心
+- `runtime/graph/node.s` - 计算节点
+- `reference/export/export_gradient.py` - 导出 PyTorch 梯度
+- `reference/compare/compare_backward.s` - Backward 对比
 
 ---
 
-### 1.5 基础 Operator: 完整集合 (1-2 天)
+### Phase 4 ⭐⭐⭐⭐⭐: Optimizer + Checkpoint (2-3 天)
 
-**文件**: `runtime/operator/ops.s`
+**目标**: 能保存和加载训练状态，Resume 一致性验证通过
 
-```
-✓ MatMul
-✓ Add/Sub/Mul/Div
-✓ Softmax
-✓ ReLU / SwiGLU / Tanh
-✓ LayerNorm / RMSNorm
-✓ Transpose
-✓ Reshape
-✓ Embedding Lookup
-✓ Attention (Q @ K @ V)
-✓ CrossEntropy Loss
-```
-
-每一个都支持梯度计算。
-
----
-
-### 1.6 AdamW Optimizer (1-2 天)
-
-**文件**: `runtime/optimizer/adamw.s`
-
+**Optimizer**:
 ```s
 struct AdamW {
-    lr: float                   // 学习率
-    betas: (float, float)       // (beta1, beta2)
-    eps: float                  // 数值稳定性
+    lr: float
+    betas: (float, float)
+    eps: float
     weight_decay: float
     
-    m: []{float}                // 一阶矩
-    v: []{float}                // 二阶矩
+    m: []Tensor    // 一阶矩
+    v: []Tensor    // 二阶矩
 }
 
-func AdamW.step(params: []{Tensor}) {
-    for i, param in params {
-        if param.grad is None
-            continue
-        
-        g = param.grad
-        m[i] = beta1 * m[i] + (1 - beta1) * g
-        v[i] = beta2 * v[i] + (1 - beta2) * g^2
-        
-        m_hat = m[i] / (1 - beta1^t)
-        v_hat = v[i] / (1 - beta2^t)
-        
-        param -= lr * (m_hat / (sqrt(v_hat) + eps) + weight_decay * param)
-    }
+func step(params: []Tensor) {
+    // 标准 AdamW 更新
 }
 ```
 
-**验证**: 与 PyTorch AdamW 完全一致
-
----
-
-### 1.7 Checkpoint & Save/Load (1-2 天)
-
-**文件**: `runtime/checkpoint/checkpoint.s`
-
+**Checkpoint**:
 ```s
-struct TrainingCheckpoint {
+struct Checkpoint {
     step: int
     epoch: int
     
-    parameters: []Tensor
-    optimizer_states: {
+    // 模型
+    model_params: []Tensor
+    
+    // 优化器
+    optimizer_state: {
         m: []Tensor
         v: []Tensor
-        t: int
+        beta1_t: float
+        beta2_t: float
     }
     
+    // 训练状态
     loss: float
     metrics: {}
 }
 
-func save_checkpoint(path: string, checkpoint: TrainingCheckpoint) {
-    // 二进制格式
-    // 能快速加载
-}
-
-func load_checkpoint(path: string) → TrainingCheckpoint {
-    // 恢复所有状态
-}
+func save_checkpoint(path: string, checkpoint: Checkpoint)
+func load_checkpoint(path: string) → Checkpoint
 ```
 
-**验证**: 恢复后能继续训练，loss 曲线连续
-
----
-
-### 1.8 完整验证: 单个 Transformer Block (2 天)
-
-**文件**: `reference/tests/test_block_alignment.s`
-
-```s
-// 从 HuggingFace 导出一个 Transformer Block 的全部中间值
-// 在 S 中重现，逐层对比
-
-func test_embedding_alignment() {
-    // input: token ids
-    // HF output: embeddings
-    // S output: embeddings
-    assert allclose(hf_emb, s_emb, atol=1e-5)
-}
-
-func test_attention_alignment() {
-    // input: (batch, seq, hidden)
-    // HF output: attention output
-    // S output: attention output
-    assert allclose(hf_attn, s_attn, atol=1e-4)
-}
-
-func test_mlp_alignment() {
-    // input: (batch, seq, hidden)
-    // HF output: mlp output
-    // S output: mlp output
-    assert allclose(hf_mlp, s_mlp, atol=1e-4)
-}
-
-func test_backward_alignment() {
-    // 计算梯度，与 PyTorch 对比
-    hf_grads = hf_block.backward(loss)
-    s_grads = s_block.backward(loss)
-    
-    for name, grad in s_grads {
-        assert allclose(hf_grads[name], grad, atol=1e-3)
-    }
-}
+**Resume 一致性验证** (关键！):
 ```
-
----
-
-## 阶段 2 ⭐⭐⭐⭐: 单层 Transformer Block 完全对齐
-
-**目标**: 一个完整的 Transformer Block 与 HuggingFace 完全一致
+1. 训练 100 步 → 保存 Checkpoint
+2. 从 Checkpoint 恢复 → 继续训练 100 步
+3. 对比: Loss 曲线是否连续？
+   ✓ loss[99] ≈ loss_resume[0]
+   ✓ loss[100:200] ≈ loss_resume[1:100]
+```
 
 **验收标准**:
 ```
-✓ Forward pass 对齐 (误差 < 1e-4)
-✓ Backward pass 对齐 (误差 < 1e-3)
-✓ 参数更新后 loss 继续下降
+✓ Checkpoint 包含所有必需的状态
+✓ Resume 后 loss 曲线连续
+✓ 参数完全一致
+✓ Optimizer 状态完全一致
+✓ make test-checkpoint-resume 通过
 ```
 
-### 2.1 抽象化 Attention (1 天)
-
-**文件**: `model/attention/attention_interface.s`
-
-```s
-interface Attention {
-    func forward(Q: Tensor, K: Tensor, V: Tensor, mask: Tensor) → Tensor
-    func backward(grad_output: Tensor) → (grad_Q, grad_K, grad_V)
-}
-
-struct StandardAttention: Attention {
-    num_heads: int
-    hidden_size: int
-    
-    func forward(...) → Tensor {
-        scores = Q @ K.T / sqrt(head_dim)
-        if mask is not None
-            scores = scores + mask
-        
-        attn_weights = softmax(scores, axis=-1)
-        output = attn_weights @ V
-        return output
-    }
-}
-
-struct MLAAttention: Attention {
-    // 后期实现
-}
-
-struct KDAAttention: Attention {
-    // 后期实现
-}
-```
-
-**关键**: Transformer Block 只调用 Attention Interface，不关心具体实现
+**文件**:
+- `runtime/optimizer/adamw.s` - AdamW
+- `runtime/checkpoint/saver.s` - 保存
+- `runtime/checkpoint/loader.s` - 加载
+- `runtime/checkpoint/resume.s` - Resume 逻辑
+- `reference/compare/compare_checkpoint.s` - Checkpoint 对比
+- `reference/compare/compare_resume.s` - Resume 一致性对比（关键）
 
 ---
 
-### 2.2 抽象化 FFN (1 天)
+### Phase 5 ⭐⭐⭐⭐: Transformer Block (2-3 天)
 
-**文件**: `model/ffn/ffn_interface.s`
+**目标**: 单个 Block 与 HF 完全对齐，Forward/Backward/Optimizer 都一致
 
-```s
-interface FFN {
-    func forward(x: Tensor) → Tensor
-    func backward(grad_output: Tensor) → grad_x
-}
-
-struct DenseFNN: FFN {
-    gate_proj: Linear
-    up_proj: Linear
-    down_proj: Linear
-    
-    func forward(x: Tensor) → Tensor {
-        gate = swiglu(gate_proj(x))
-        up = up_proj(x)
-        return down_proj(gate * up)
-    }
-}
-
-struct MoEFFN: FFN {
-    // 后期实现
-}
-
-struct LatentMoEFFN: FFN {
-    // 后期实现
-}
-```
-
----
-
-### 2.3 Transformer Block (1 day)
-
-**文件**: `model/transformer_block.s`
+**Block 结构**:
 
 ```s
 struct TransformerBlock {
-    attention: Attention       // 可以是 Standard/MLA/KDA
-    ffn: FFN                   // 可以是 Dense/MoE/LatentMoE
+    attention: AttentionInterface     // 接口（标准化）
+    ffn: FFNInterface               // 接口（标准化）
     norm1: LayerNorm
     norm2: LayerNorm
     
     func forward(x: Tensor) → Tensor {
-        // Pre-norm
-        attn_out = attention.forward(norm1(x), ...)
-        x = x + attn_out
+        attn_out = attention.forward(norm1(x), x, x)
+        x = x + attn_out              // Residual
         
         ffn_out = ffn.forward(norm2(x))
-        x = x + ffn_out
+        x = x + ffn_out               // Residual
         
         return x
     }
 }
 ```
 
-**关键**: Block 完全不知道 Attention/FFN 的具体实现，只调用接口
+**标准实现** (Phase 5 内):
+```s
+struct StandardAttention: AttentionInterface {
+    // Scaled Dot-Product Attention
+}
 
----
-
-### 2.4 完整验证框架 (2 days)
-
-**文件**: `reference/tests/test_block_full_cycle.s`
-
-- [x] Forward 对齐
-- [x] Backward 对齐
-- [x] 优化器更新对齐
-- [x] 训练 5 步，loss 下降
-
----
-
-## 阶段 3 ⭐⭐⭐⭐: 完整 Qwen Forward Pass
-
-**目标**: 24 层 Transformer + 输出 logits，与 HuggingFace 完全一致
+struct DenseFFN: FFNInterface {
+    // Standard MLP: gate_proj → SwiGLU → up_proj → down_proj
+}
+```
 
 **验收标准**:
 ```
-✓ 完整 Forward 对齐 (误差 < 1e-4)
-✓ 可以计算 loss
-✓ Backward 对齐 (误差 < 1e-3)
+✓ Forward 与 HF 对齐 (误差 < 1e-4)
+✓ Backward 与 HF 对齐 (误差 < 1e-3)
+✓ 训练 10 步，loss 下降
+✓ Checkpoint/Resume 一致性验证通过
+✓ make test-block 全部通过
 ```
 
-### 3.1 SafeTensors 加载 (1-2 天)
-
-**文件**: `serialization/safetensors/loader.s`
-
-读取 Qwen2.5 model.safetensors，提取所有 24 层权重
-
-### 3.2 HF-兼容 Tokenizer 加载 (1-2 天)
-
-**文件**: `serialization/tokenizer/hf_tokenizer.s`
-
-直接读 tokenizer.json，完全兼容 HuggingFace
+**文件**:
+- `model/transformer_block.s` - Block 定义
+- `interface/attention/interface.s` - Attention 接口
+- `interface/attention/standard.s` - 标准实现
+- `interface/ffn/interface.s` - FFN 接口
+- `interface/ffn/dense.s` - 标准实现
+- `reference/compare/compare_block.s` - Block 对比
 
 ---
 
-### 3.3 完整训练循环 (1-2 天)
+### Phase 6 ⭐⭐⭐⭐⭐: Qwen 训练闭环 (3-4 天)
 
-**文件**: `posttrain/trainer/train_loop.s`
+**目标**: 完整的训练闭环（JSONL → Forward → Loss → Backward → Optimizer → Checkpoint → Resume → Inference）
 
+**关键流程**:
+
+```
+Load JSONL Dataset
+    ↓
+Tokenize (HF-compatible)
+    ↓
+Create Batches
+    ↓
+Forward 24 Blocks
+    ├─ Embedding + RoPE
+    ├─ Block[0] to Block[23]
+    └─ Output projection to logits
+    ↓
+Compute Loss (CrossEntropy)
+    ↓
+Backward (自动梯度)
+    ↓
+Optimizer.step() (AdamW)
+    ↓
+Save Checkpoint
+    ↓
+Resume from Checkpoint (验证一致性)
+    ↓
+Inference (生成输出)
+```
+
+**验收标准**:
+```
+✓ 完整训练循环运行无误
+✓ Loss 真的在下降（不是常数）
+✓ LoRA 权重真的在变化
+✓ Checkpoint 保存成功
+✓ Resume 后 loss 曲线连续
+✓ Inference 能生成合理输出
+✓ make posttrain 全部成功
+```
+
+**文件**:
+- `model/qwen.s` - Qwen2.5 具体实现
+- `serialization/safetensors/loader.s` - 权重加载
+- `serialization/tokenizer/hf_tokenizer.s` - Tokenizer 加载
+- `posttrain/dataloaders/jsonl_loader.s` - 数据加载
+- `posttrain/trainer/train_loop.s` - 训练主循环
+- `posttrain/evaluation/metrics.s` - 指标计算
+
+---
+
+### Phase 7 ⭐⭐⭐⭐: LoRA / PEFT (1-2 天)
+
+**目标**: 用 LoRA 适配器训练 Qwen，参数高效
+
+**关键**:
 ```s
-func train_epoch(model, data_loader, optimizer) {
-    for batch in data_loader {
-        input_ids = batch.input_ids
-        labels = batch.labels
-        
-        // Forward
-        logits = model.forward(input_ids)
-        loss = cross_entropy(logits, labels)
-        
-        // Backward
-        loss.backward()
-        
-        // Optimize
-        optimizer.step()
-        optimizer.zero_grad()
-        
-        print(f"loss={loss.item()}")
+// LoRA 线性层
+struct LoRALinear {
+    weight: Tensor          // 原始权重 (fixed)
+    lora_a: Tensor          // 秩为 8
+    lora_b: Tensor          // 秩为 8
+    scaling: float
+    
+    func forward(x: Tensor) → Tensor {
+        // 标准计算 + LoRA 计算
+        return linear(x, weight) + scaling * linear(linear(x, lora_a), lora_b)
     }
 }
 ```
 
-**验收**:
-- [x] Loss 真的下降（不是常数）
-- [x] LoRA 权重真的在变化
-- [x] 保存 checkpoint 可恢复
-
----
-
-## 阶段 4 ⭐⭐⭐⭐: LoRA 训练
-
-**目标**: 能用 LoRA 训练 Qwen，loss 收敛，推理正确
-
-**验收**:
+**验收标准**:
 ```
-✓ LoRA 训练 10 步，loss 下降
-✓ 权重合并后能推理
-✓ 生成医学回答
+✓ LoRA 训练参数减少 99%+
+✓ Loss 收敛不变
+✓ Checkpoint 正确保存 LoRA 权重
+✓ 推理性能不下降
 ```
 
 ---
 
-## 阶段 5 ⭐⭐⭐⭐: FFN 切换（Dense → MoE）
+### Phase 8 ⭐⭐⭐⭐⭐: Distributed Runtime (5-7 天)
 
-**目标**: 通过配置切换 `ffn=dense` 或 `ffn=moe`，模型无需改动
+**目标**: 多卡训练稳定，通信正确
 
-**验收**:
+**关键组件**:
 ```
-✓ MoE 能训练
-✓ Load balance 指标 (ideally > 0.9)
-✓ 收敛速度与 Dense FFN 相当
+Process Group
+    ↓
+AllReduce (梯度同步)
+    ↓
+Tensor Parallel (模型并行)
+    ↓
+Pipeline Parallel (流水线并行)
+    ↓
+ZeRO（可选，后期优化）
 ```
 
-**实现步骤**:
-1. `model/ffn/moe_ffn.s` - 标准 Top2 MoE
-2. 更新 config 支持 `ffn_type: dense|moe`
-3. Transformer 从 config 选择实现
+**验收标准**:
+```
+✓ 单卡与多卡 loss 一致
+✓ AllReduce 正确同步梯度
+✓ 多卡训练不发散
+```
 
 ---
 
-## 阶段 6 ⭐⭐⭐: Attention 切换（Standard → KDA）
+### Phase 9 ⭐⭐⭐: Attention 插件化 (3-5 天)
 
-**目标**: KDA Attention 替换 Standard Attention，训练收敛
+**目标**: 通过接口实现 Standard/MLA/KDA，支持无缝切换
 
-**验收**:
+**接口定义**:
+```s
+interface AttentionInterface {
+    func forward(Q, K, V, mask) → Output
+    func backward(grad_output) → (grad_Q, grad_K, grad_V)
+}
 ```
-✓ KDA Forward 数值正确
-✓ KDA Backward 梯度正确
-✓ 训练不发散，loss 下降
+
+**实现**:
+```s
+impl StandardAttention: AttentionInterface { ... }
+impl MLAAttention: AttentionInterface { ... }
+impl KDAAttention: AttentionInterface { ... }
 ```
 
-**实现步骤**:
-1. `model/attention/kda_attention.s` - KDA 数学实现
-2. 实现 Attention 接口
-3. 通过 config 选择 `attention_type: standard|kda`
+**配置切换**:
+```yaml
+model:
+  attention_type: standard  # 或 mla, kda
+```
 
-**分阶段做 KDA**:
-- Phase 6.1: Delta Rule + Forget Gate（CPU，无优化）
-- Phase 6.2: Log-space 稳定性
-- Phase 6.3: Chunk Parallel（性能）
-- Phase 6.4: GPU Kernel（后期）
+**验收标准**:
+```
+✓ 三种 Attention 都能训练
+✓ 三种 Attention 都能收敛
+✓ 切换 Attention 类型，模型无需修改
+```
 
 ---
 
-## 阶段 7 ⭐⭐⭐: Distributed Training
+### Phase 10 ⭐⭐⭐: MoE / LatentMoE (3-5 天)
 
-**目标**: 多卡训练稳定
+**目标**: FFN 插件化，支持 Dense/MoE/LatentMoE
 
-**关键**: 
-- Gradient AllReduce
-- Model parallelism
-- Pipeline parallelism
+**接口**:
+```s
+interface FFNInterface {
+    func forward(x) → Output
+    func backward(grad) → grad_x
+}
+```
+
+**实现**:
+```s
+impl DenseFFN: FFNInterface { ... }
+impl MoEFFN: FFNInterface { ... }
+impl LatentMoEFFN: FFNInterface { ... }
+```
+
+**配置**:
+```yaml
+model:
+  ffn_type: dense  # 或 moe, latent_moe
+  num_experts: 8
+```
+
+**验收标准**:
+```
+✓ MoE 能训练，loss 收敛
+✓ Load balance > 0.9
+✓ Expert assignment 均衡
+✓ LatentMoE 性能对标 MoE
+```
 
 ---
 
-## 阶段 8 ⭐⭐: RL + Agent 长上下文能力
+### Phase 11 ⭐⭐⭐: RLHF、GRPO、Agent (5-7 天)
 
-**目标**: Agent 能在 NeurX 上推理
+**目标**: 高级训练能力
+
+**关键**:
+- RLHF (Reinforcement Learning from Human Feedback)
+- GRPO (Group Relative Policy Optimization)
+- Agent 长上下文推理
+
+---
+
+## 关键验证点总结
+
+| 检查项 | 何时 | 为什么重要 |
+|--------|------|----------|
+| Tensor 内存管理 | Phase 1 | 所有后续操作都依赖这个 |
+| Operator 数值一致 | Phase 2 | 一旦对齐，后续梯度自动正确 |
+| Autograd 梯度正确 | Phase 3 | 优化器依赖这个 |
+| Resume 一致性 | Phase 4 | 很多框架都失败在这里 |
+| Block Forward/Backward | Phase 5 | 24 层只是复制 |
+| 完整训练闭环 | Phase 6 | 证明整个系统能工作 |
+| Attention 切换 | Phase 9 | 验证接口设计是否正确 |
+| FFN 切换 | Phase 10 | 验证接口设计是否正确 |
 
 ---
 
 ## 为什么这个顺序更稳健？
 
-| 旧路线 | 新路线 | 区别 |
-|--------|--------|------|
-| SafeTensors → Embedding → Attention | **Runtime → Single Block → Full Model** | 从基础设施开始 |
-| 每个模块自己管理梯度 | **统一 Autograd** | 避免重复代码 |
-| KDA 紧跟 Attention | **KDA 在标准 Attention 之后** | 先验证基础 |
-| 无对齐验证 | **自动化对齐测试框架** | 快速定位问题 |
+**旧思路的问题**:
+- ❌ 先实现功能，后补测试
+- ❌ Phase 1 就想完成训练（太贪心）
+- ❌ Attention/FFN 紧耦合，不能切换
+- ❌ Resume 一致性问题隐藏到后期才暴露
+- ❌ 没有自动化验证（Gold Test）
 
----
-
-## 关键文件 Checklist
-
-### Runtime (Phase 1)
-- [ ] `runtime/tensor/tensor.s`
-- [ ] `runtime/operator/matmul.s`
-- [ ] `runtime/operator/softmax.s`
-- [ ] `runtime/operator/norm.s`
-- [ ] `runtime/autograd/backward.s`
-- [ ] `runtime/optimizer/adamw.s`
-- [ ] `runtime/checkpoint/checkpoint.s`
-
-### Reference (Phase 1)
-- [ ] `reference/export_matmul.py`
-- [ ] `reference/compare_matmul.s`
-- [ ] `reference/tests/test_*.s`
-
-### Model (Phase 2-3)
-- [ ] `model/attention/attention_interface.s`
-- [ ] `model/attention/standard_attention.s`
-- [ ] `model/ffn/ffn_interface.s`
-- [ ] `model/ffn/dense_ffn.s`
-- [ ] `model/transformer_block.s`
-- [ ] `model/transformer.s` (24-layer)
-
-### Serialization (Phase 3)
-- [ ] `serialization/safetensors/loader.s`
-- [ ] `serialization/tokenizer/hf_tokenizer.s`
-
-### Training (Phase 3-4)
-- [ ] `posttrain/trainer/train_loop.s`
-- [ ] `posttrain/evaluation/metrics.s`
+**新思路的优点**:
+- ✅ Phase 0 建立测试体系（先保证质量）
+- ✅ Phase 1-4 专注 Runtime 基础（一个月内完成）
+- ✅ Phase 5-6 验证完整训练闭环
+- ✅ Phase 9-10 验证接口设计正确性
+- ✅ Phase 8 分布式作为可选优化，而非依赖
 
 ---
 
 ## 时间估算
 
-| 阶段 | 任务 | 时间 |
-|------|------|------|
-| 1 | Runtime + Autograd | 10-14 天 |
-| 2 | 单层 Block 对齐 | 3-4 天 |
-| 3 | 完整 Forward + 训练循环 | 3-4 天 |
-| 4 | LoRA 训练 | 2-3 天 |
-| 5 | MoE 切换 | 3-4 天 |
-| 6 | KDA 切换 | 5-7 天 |
-| 7 | Distributed | 5-7 天 |
-| 8 | RL + Agent | 3-5 天 |
-| **总计** | | **4-5 周** |
+| 阶段 | 任务 | 时间 | 累计 |
+|------|------|------|------|
+| 0 | CI/Test/Benchmark | 2-3 天 | 2-3 天 |
+| 1 | Tensor Runtime | 3-4 天 | 5-7 天 |
+| 2 | Operator Library | 4-5 天 | 9-12 天 |
+| 3 | Autograd | 2-3 天 | 11-15 天 |
+| 4 | Optimizer + Checkpoint | 2-3 天 | 13-18 天 |
+| 5 | Transformer Block | 2-3 天 | 15-21 天 |
+| 6 | Qwen 闭环 | 3-4 天 | 18-25 天 |
+| 7 | LoRA | 1-2 天 | 19-27 天 |
+| 8 | Distributed | 5-7 天 | 24-34 天 |
+| 9 | Attention 插件 | 3-5 天 | 27-39 天 |
+| 10 | MoE 插件 | 3-5 天 | 30-44 天 |
+| 11 | RLHF/GRPO/Agent | 5-7 天 | 35-51 天 |
+| **总计** | | | **5-7 周** |
 
 ---
 
-## 最重要的三个验证点
-
-1. **Phase 1 验证**: 单个 MatMul 与 PyTorch 完全一致 → 整个 Runtime 就能信任
-2. **Phase 2 验证**: Transformer Block Forward/Backward 与 HF 完全一致 → 24 层就是复制
-3. **Phase 3 验证**: Loss 真的下降，权重真的变化 → 以后所有功能都能加
-
----
-
-## 立即开始
+## 立即开始（Phase 0 + Phase 1）
 
 ```bash
-# 创建目录结构
-mkdir -p runtime/{tensor,operator,autograd,optimizer,checkpoint}
-mkdir -p reference/{export,tests}
-mkdir -p model/{attention,ffn}
-mkdir -p serialization/{safetensors,tokenizer}
+# 创建完整目录结构
+mkdir -p runtime/{core,graph,operator,executor,distributed}
+mkdir -p interface/{attention,ffn}
+mkdir -p model/components
+mkdir -p serialization/{safetensors,checkpoint,tokenizer}
+mkdir -p reference/{export,compare,tests}
+mkdir -p ci
 
-# 开始 Phase 1.1
-touch runtime/tensor/tensor.s
+# Phase 0: 建立测试框架
+touch ci/Makefile.test
+touch ci/benchmark.s
+touch reference/tests/test_base.s
+
+# Phase 1.1: Tensor 定义
+touch runtime/core/tensor.s
+touch runtime/core/storage.s
 ```
 
-**第一个关键决定**: Tensor 数据结构 + 梯度追踪能力
+**关键决策**: Tensor 数据结构 + Memory Layout 支持（stride, broadcast, view）
 
-这决定了整个 Runtime 的设计。一旦做对，后面的 Operator/Autograd 都会自然而然地正确。
+这个设计决定了整个 Runtime 的性能和灵活性。一旦做对，后续 20+ 阶段都能放心推进。
+
+---
+
+## 核心哲学总结
+
+> **世界级框架 = 扎实的 Runtime + 清晰的接口 + 完善的测试 + 详细的文档**
+
+不是：
+- 最多的功能
+- 最快的性能
+- 最新的论文实现
+
+而是：
+- 经得起时间考验的系统设计
+- 每个模块都能独立验证
+- 新模块能无缝集成
+- 团队能长期维护
+
+NeurX 的目标不是赶上 PyTorch，而是成为**一个可信任的、可维护的、可扩展的 ML Runtime**。
+
+这需要时间，但一旦完成，价值是无限的。
