@@ -1,7 +1,8 @@
 package neurx.posttrain.trainer.posttrain_real_numeric
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_write_text_file, safetensors_writer_new, safetensors_writer_add_tensor, safetensors_writer_finish, tensor}
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_text_file, safetensors_writer_new, safetensors_writer_add_tensor, safetensors_writer_finish, tensor}
 
-struct lora_linear {
+struct named_lora_module {
+    string name
     []float base_weight
     int out_dim
     int in_dim
@@ -9,11 +10,6 @@ struct lora_linear {
     []float lora_B
     int rank
     float scaling
-}
-
-struct named_lora_module {
-    string name
-    lora_linear layer
     []float initial_a
     []float initial_b
 }
@@ -47,8 +43,13 @@ func run_posttrain_lora_sft() int {
         println("error: model path not found: " + model_path)
         return 1
     }
-    posttrain_dataset dataset = posttrain_materialized_dataset()
-    int sample_count = dataset.sample_count
+    println("Loading materialized prompt data")
+    []float prompt_data = posttrain_materialized_prompt()
+    println("Loading materialized target q data")
+    []float target_q_data = posttrain_materialized_target_q()
+    println("Loading materialized target v data")
+    []float target_v_data = posttrain_materialized_target_v()
+    int sample_count = 1
     if sample_count < 1 {
         println("error: no materialized samples available")
         return 1
@@ -95,16 +96,16 @@ func run_posttrain_lora_sft() int {
         int epoch_items = 0
         int sample_idx = 0
         while sample_idx < sample_count {
-            int prompt_offset = sample_idx * dataset.prompt_dim
-            int target_v_offset = sample_idx * dataset.target_v_dim
-            []float prompt = extract_vector(dataset.prompt, prompt_offset, dataset.prompt_dim)
-            []float target_q = extract_vector(dataset.target_q, prompt_offset, dataset.prompt_dim)
-            []float target_v = extract_vector(dataset.target_v, target_v_offset, dataset.target_v_dim)
+            int prompt_offset = sample_idx * hidden_size
+            int target_v_offset = sample_idx * v_out
+            []float prompt = extract_vector(prompt_data, prompt_offset, hidden_size)
+            []float target_q = extract_vector(target_q_data, prompt_offset, hidden_size)
+            []float target_v = extract_vector(target_v_data, target_v_offset, v_out)
             int m = 0
             while m < len(modules) {
                 named_lora_module module = modules[m]
                 []float target = target_q
-                if module.layer.out_dim == v_out {
+                if module.out_dim == v_out {
                     target = target_v
                 }
                 float sample_loss = mse_loss(runtime_forward_named_module(module, prompt), target)
@@ -168,51 +169,49 @@ func run_posttrain_lora_sft() int {
 func init_lora_module(string name, int in_dim, int out_dim, int rank, float alpha, float a_scale, float w_scale) named_lora_module {
     named_lora_module module
     module.name = name
-    lora_linear layer
-    layer.base_weight = init_pattern(in_dim * out_dim, w_scale)
-    layer.out_dim = out_dim
-    layer.in_dim = in_dim
-    layer.lora_A = init_pattern(rank * in_dim, a_scale)
-    layer.lora_B = fill_vec(out_dim * rank, 0.0)
-    layer.rank = rank
-    layer.scaling = alpha / (rank as float)
-    module.layer = layer
-    module.initial_a = copy_float_array(layer.lora_A)
-    module.initial_b = copy_float_array(layer.lora_B)
+    module.base_weight = init_pattern(in_dim * out_dim, w_scale)
+    module.out_dim = out_dim
+    module.in_dim = in_dim
+    module.lora_A = init_pattern(rank * in_dim, a_scale)
+    module.lora_B = fill_vec(out_dim * rank, 0.0)
+    module.rank = rank
+    module.scaling = alpha / (rank as float)
+    module.initial_a = copy_float_array(module.lora_A)
+    module.initial_b = copy_float_array(module.lora_B)
     return module
 }
 
 func runtime_forward_named_module(named_lora_module module, []float input_vec) []float {
-    []float output = fill_vec(module.layer.out_dim, 0.0)
-    []float hidden = fill_vec(module.layer.rank, 0.0)
+    []float output = fill_vec(module.out_dim, 0.0)
+    []float hidden = fill_vec(module.rank, 0.0)
     int r = 0
-    while r < module.layer.rank {
+    while r < module.rank {
         int in_idx = 0
-        while in_idx < module.layer.in_dim && in_idx < len(input_vec) {
-            int a_idx = r * module.layer.in_dim + in_idx
-            if a_idx < len(module.layer.lora_A) {
-                hidden[r] = hidden[r] + module.layer.lora_A[a_idx] * input_vec[in_idx]
+        while in_idx < module.in_dim && in_idx < len(input_vec) {
+            int a_idx = r * module.in_dim + in_idx
+            if a_idx < len(module.lora_A) {
+                hidden[r] = hidden[r] + module.lora_A[a_idx] * input_vec[in_idx]
             }
             in_idx = in_idx + 1
         }
         r = r + 1
     }
     int out_idx = 0
-    while out_idx < module.layer.out_dim {
+    while out_idx < module.out_dim {
         float sum = 0.0
         int in_idx = 0
-        while in_idx < module.layer.in_dim && in_idx < len(input_vec) {
-            int w_idx = out_idx * module.layer.in_dim + in_idx
-            if w_idx < len(module.layer.base_weight) {
-                sum = sum + input_vec[in_idx] * module.layer.base_weight[w_idx]
+        while in_idx < module.in_dim && in_idx < len(input_vec) {
+            int w_idx = out_idx * module.in_dim + in_idx
+            if w_idx < len(module.base_weight) {
+                sum = sum + input_vec[in_idx] * module.base_weight[w_idx]
             }
             in_idx = in_idx + 1
         }
         int rank_idx = 0
-        while rank_idx < module.layer.rank {
-            int b_idx = out_idx * module.layer.rank + rank_idx
-            if b_idx < len(module.layer.lora_B) {
-                sum = sum + module.layer.scaling * module.layer.lora_B[b_idx] * hidden[rank_idx]
+        while rank_idx < module.rank {
+            int b_idx = out_idx * module.rank + rank_idx
+            if b_idx < len(module.lora_B) {
+                sum = sum + module.scaling * module.lora_B[b_idx] * hidden[rank_idx]
             }
             rank_idx = rank_idx + 1
         }
@@ -223,14 +222,14 @@ func runtime_forward_named_module(named_lora_module module, []float input_vec) [
 }
 
 func train_named_module(named_lora_module module, []float input_vec, []float target_vec, float lr) named_lora_module {
-    []float hidden = fill_vec(module.layer.rank, 0.0)
+    []float hidden = fill_vec(module.rank, 0.0)
     int r = 0
-    while r < module.layer.rank {
+    while r < module.rank {
         int in_idx = 0
-        while in_idx < module.layer.in_dim && in_idx < len(input_vec) {
-            int a_idx = r * module.layer.in_dim + in_idx
-            if a_idx < len(module.layer.lora_A) {
-                hidden[r] = hidden[r] + module.layer.lora_A[a_idx] * input_vec[in_idx]
+        while in_idx < module.in_dim && in_idx < len(input_vec) {
+            int a_idx = r * module.in_dim + in_idx
+            if a_idx < len(module.lora_A) {
+                hidden[r] = hidden[r] + module.lora_A[a_idx] * input_vec[in_idx]
             }
             in_idx = in_idx + 1
         }
@@ -238,37 +237,37 @@ func train_named_module(named_lora_module module, []float input_vec, []float tar
     }
     []float output = runtime_forward_named_module(module, input_vec)
     []float grad_out = mse_gradient(output, target_vec)
-    []float b_snapshot = copy_float_array(module.layer.lora_B)
-    float step_scale = lr * module.layer.scaling
+    []float b_snapshot = copy_float_array(module.lora_B)
+    float step_scale = lr * module.scaling
     int out_idx = 0
-    while out_idx < module.layer.out_dim {
+    while out_idx < module.out_dim {
         r = 0
-        while r < module.layer.rank {
-            int b_idx = out_idx * module.layer.rank + r
-            if b_idx < len(module.layer.lora_B) {
+        while r < module.rank {
+            int b_idx = out_idx * module.rank + r
+            if b_idx < len(module.lora_B) {
                 float grad_b = grad_out[out_idx] * hidden[r]
-                module.layer.lora_B[b_idx] = module.layer.lora_B[b_idx] - step_scale * grad_b
+                module.lora_B[b_idx] = module.lora_B[b_idx] - step_scale * grad_b
             }
             r = r + 1
         }
         out_idx = out_idx + 1
     }
     r = 0
-    while r < module.layer.rank {
+    while r < module.rank {
         int in_idx = 0
-        while in_idx < module.layer.in_dim && in_idx < len(input_vec) {
+        while in_idx < module.in_dim && in_idx < len(input_vec) {
             float grad_a = 0.0
             out_idx = 0
-            while out_idx < module.layer.out_dim {
-                int b_idx = out_idx * module.layer.rank + r
+            while out_idx < module.out_dim {
+                int b_idx = out_idx * module.rank + r
                 if b_idx < len(b_snapshot) {
                     grad_a = grad_a + grad_out[out_idx] * b_snapshot[b_idx]
                 }
                 out_idx = out_idx + 1
             }
-            int a_idx = r * module.layer.in_dim + in_idx
-            if a_idx < len(module.layer.lora_A) {
-                module.layer.lora_A[a_idx] = module.layer.lora_A[a_idx] - step_scale * grad_a * input_vec[in_idx]
+            int a_idx = r * module.in_dim + in_idx
+            if a_idx < len(module.lora_A) {
+                module.lora_A[a_idx] = module.lora_A[a_idx] - step_scale * grad_a * input_vec[in_idx]
             }
             in_idx = in_idx + 1
         }
@@ -287,9 +286,9 @@ func compute_stats([]named_lora_module modules) adapter_stats {
     while module_idx < len(modules) {
         named_lora_module module = modules[module_idx]
         int i = 0
-        int a_len = module.layer.rank * module.layer.in_dim
+        int a_len = module.rank * module.in_dim
         while i < a_len {
-            float value = module.layer.lora_A[i]
+            float value = module.lora_A[i]
             float abs_value = abs_float(value)
             l1 = l1 + abs_value
             l2 = l2 + value * value
@@ -303,9 +302,9 @@ func compute_stats([]named_lora_module modules) adapter_stats {
             i = i + 1
         }
         i = 0
-        int b_len = module.layer.out_dim * module.layer.rank
+        int b_len = module.out_dim * module.rank
         while i < b_len {
-            float value = module.layer.lora_B[i]
+            float value = module.lora_B[i]
             float abs_value = abs_float(value)
             l1 = l1 + abs_value
             l2 = l2 + value * value
@@ -338,9 +337,9 @@ func compute_delta_stats([]named_lora_module modules) delta_stats {
     while module_idx < len(modules) {
         named_lora_module module = modules[module_idx]
         int i = 0
-        int a_len = module.layer.rank * module.layer.in_dim
+        int a_len = module.rank * module.in_dim
         while i < a_len {
-            float delta = module.layer.lora_A[i] - module.initial_a[i]
+            float delta = module.lora_A[i] - module.initial_a[i]
             float abs_delta = abs_float(delta)
             l1 = l1 + abs_delta
             l2 = l2 + delta * delta
@@ -353,9 +352,9 @@ func compute_delta_stats([]named_lora_module modules) delta_stats {
             i = i + 1
         }
         i = 0
-        int b_len = module.layer.out_dim * module.layer.rank
+        int b_len = module.out_dim * module.rank
         while i < b_len {
-            float delta = module.layer.lora_B[i] - module.initial_b[i]
+            float delta = module.lora_B[i] - module.initial_b[i]
             float abs_delta = abs_float(delta)
             l1 = l1 + abs_delta
             l2 = l2 + delta * delta
@@ -396,23 +395,23 @@ func write_adapter_checkpoint(
     int module_idx = 0
     while module_idx < len(modules) {
         named_lora_module module = modules[module_idx]
-        int a_len = module.layer.rank * module.layer.in_dim
-        int b_len = module.layer.out_dim * module.layer.rank
+        int a_len = module.rank * module.in_dim
+        int b_len = module.out_dim * module.rank
         []float a_data = []float{cap: a_len}
         int i = 0
         while i < a_len {
-            a_data[i] = module.layer.lora_A[i]
+            a_data[i] = module.lora_A[i]
             i = i + 1
         }
         []float b_data = []float{cap: b_len}
         i = 0
         while i < b_len {
-            b_data[i] = module.layer.lora_B[i]
+            b_data[i] = module.lora_B[i]
             i = i + 1
         }
         []int a_shape = []int{cap: 2}
-        a_shape[0] = module.layer.rank
-        a_shape[1] = module.layer.in_dim
+        a_shape[0] = module.rank
+        a_shape[1] = module.in_dim
         tensor a_tensor = tensor {
             name: module.name + ".lora_A.weight",
             dtype: "F32",
@@ -422,8 +421,8 @@ func write_adapter_checkpoint(
             data_count: a_len,
         }
         []int b_shape = []int{cap: 2}
-        b_shape[0] = module.layer.out_dim
-        b_shape[1] = module.layer.rank
+        b_shape[0] = module.out_dim
+        b_shape[1] = module.rank
         tensor b_tensor = tensor {
             name: module.name + ".lora_B.weight",
             dtype: "F32",
@@ -514,12 +513,132 @@ func extract_vector([]float source, int start, int n) []float {
     int i = 0
     while i < n {
         int src_idx = start + i
-        if src_idx < len(source) {
-            v[i] = source[src_idx]
-        }
+        v[i] = source[src_idx]
         i = i + 1
     }
     return v
+}
+
+func decode_float_text_file(string path) []float {
+    string text = runtime_read_text_file(path)
+    return parse_float_list_fixed(text)
+}
+
+func parse_float_list_fixed(string text) []float {
+    int count = 0
+    bool in_token = false
+    int i = 0
+    while i < len(text) {
+        int ch = text[i]
+        if is_number_token_char(ch) {
+            if !in_token {
+                in_token = true
+                count = count + 1
+            }
+        } else {
+            in_token = false
+        }
+        i = i + 1
+    }
+    []float values = []float{cap: count}
+    string token = ""
+    int out_idx = 0
+    i = 0
+    while i < len(text) {
+        int ch = text[i]
+        if is_number_token_char(ch) {
+            token = token + string(ch)
+        } else if len(token) > 0 {
+            values[out_idx] = parse_float(token, 0.0)
+            out_idx = out_idx + 1
+            token = ""
+        }
+        i = i + 1
+    }
+    if len(token) > 0 {
+        values[out_idx] = parse_float(token, 0.0)
+    }
+    return values
+}
+
+func parse_float(string text, float fallback) float {
+    string s = text
+    if len(s) == 0 {
+        return fallback
+    }
+    int sign = 1
+    int i = 0
+    if s[0] == 45 {
+        sign = -1
+        i = 1
+    } else if s[0] == 43 {
+        i = 1
+    }
+    float value = 0.0
+    while i < len(s) {
+        int ch = s[i]
+        if ch == 46 {
+            i = i + 1
+            break
+        }
+        if ch < 48 || ch > 57 {
+            return fallback
+        }
+        value = value * 10.0 + (ch - 48) as float
+        i = i + 1
+    }
+    float frac = 0.1
+    while i < len(s) {
+        int ch = s[i]
+        if ch == 101 || ch == 69 {
+            break
+        }
+        if ch < 48 || ch > 57 {
+            break
+        }
+        value = value + (ch - 48) as float * frac
+        frac = frac * 0.1
+        i = i + 1
+    }
+    int exp = 0
+    int exp_sign = 1
+    if i < len(s) && (s[i] == 101 || s[i] == 69) {
+        i = i + 1
+        if i < len(s) && s[i] == 45 {
+            exp_sign = -1
+            i = i + 1
+        } else if i < len(s) && s[i] == 43 {
+            i = i + 1
+        }
+        while i < len(s) {
+            int ch = s[i]
+            if ch < 48 || ch > 57 {
+                break
+            }
+            exp = exp * 10 + (ch - 48)
+            i = i + 1
+        }
+    }
+    float result = value
+    int scaled_exp = exp * exp_sign
+    if scaled_exp > 0 {
+        int j = 0
+        while j < scaled_exp {
+            result = result * 10.0
+            j = j + 1
+        }
+    } else if scaled_exp < 0 {
+        int j = 0
+        while j < 0 - scaled_exp {
+            result = result / 10.0
+            j = j + 1
+        }
+    }
+    return result * (sign as float)
+}
+
+func is_number_token_char(int ch) bool {
+    return ch >= 48 && ch <= 57 || ch == 45 || ch == 43 || ch == 46 || ch == 101 || ch == 69
 }
 
 func init_pattern(int n, float scale) []float {

@@ -90,23 +90,25 @@ function emitVec(name, values) {
   return lines.join('\n');
 }
 
-function emitSampleBlock(sample, idx, hidden, vout) {
-  const prompt = textVector(buildPrompt(sample), hidden);
-  const targetQ = textVector(buildTarget(sample), hidden);
-  const targetV = textVector(buildTarget(sample), vout);
+function emitFlatArrayFunction(funcName, samples, dim, valueSelector, valueDim) {
   const lines = [];
-  const promptOffset = idx * hidden;
-  const targetVOffset = idx * vout;
-  for (let i = 0; i < prompt.length; i += 1) {
-    lines.push(`    prompt[${promptOffset + i}] = ${prompt[i].toFixed(12)}`);
+  lines.push(`func ${funcName}() []float {`);
+  lines.push(`    []float values = []float{cap: ${samples.length * valueDim}}`);
+  for (let idx = 0; idx < samples.length; idx += 1) {
+    const vector = valueSelector(samples[idx], dim);
+    const offset = idx * valueDim;
+    for (let i = 0; i < vector.length; i += 1) {
+      lines.push(`    values[${offset + i}] = ${vector[i].toFixed(12)}`);
+    }
   }
-  for (let i = 0; i < targetQ.length; i += 1) {
-    lines.push(`    target_q[${promptOffset + i}] = ${targetQ[i].toFixed(12)}`);
-  }
-  for (let i = 0; i < targetV.length; i += 1) {
-    lines.push(`    target_v[${targetVOffset + i}] = ${targetV[i].toFixed(12)}`);
-  }
+  lines.push('    return values');
+  lines.push('}');
   return lines.join('\n');
+}
+
+function writeFloatTextFile(filePath, values) {
+  const lines = values.map((value) => value.toFixed(12));
+  fs.writeFileSync(filePath, `${lines.join('\n')}\n`);
 }
 
 function main() {
@@ -137,32 +139,11 @@ function main() {
   const out = [];
   out.push('package neurx.posttrain.materialized');
   out.push('');
-  out.push('struct posttrain_dataset {');
-  out.push('    []float prompt');
-  out.push('    []float target_q');
-  out.push('    []float target_v');
-  out.push('    int sample_count');
-  out.push('    int prompt_dim');
-  out.push('    int target_v_dim');
-  out.push('}');
+  out.push(emitFlatArrayFunction('posttrain_materialized_prompt', samples, args.hidden, (sample, dim) => textVector(buildPrompt(sample), dim), args.hidden));
   out.push('');
-  out.push('func posttrain_materialized_dataset() posttrain_dataset {');
-  out.push(`    []float prompt = []float{cap: ${samples.length * args.hidden}}`);
-  out.push(`    []float target_q = []float{cap: ${samples.length * args.hidden}}`);
-  out.push(`    []float target_v = []float{cap: ${samples.length * args.vout}}`);
-  for (let i = 0; i < samples.length; i += 1) {
-    out.push(emitSampleBlock(samples[i], i, args.hidden, args.vout));
-    out.push('');
-  }
-  out.push('    posttrain_dataset dataset');
-  out.push('    dataset.prompt = prompt');
-  out.push('    dataset.target_q = target_q');
-  out.push('    dataset.target_v = target_v');
-  out.push(`    dataset.sample_count = ${samples.length}`);
-  out.push(`    dataset.prompt_dim = ${args.hidden}`);
-  out.push(`    dataset.target_v_dim = ${args.vout}`);
-  out.push('    return dataset');
-  out.push('}');
+  out.push(emitFlatArrayFunction('posttrain_materialized_target_q', samples, args.hidden, (sample, dim) => textVector(buildTarget(sample), dim), args.hidden));
+  out.push('');
+  out.push(emitFlatArrayFunction('posttrain_materialized_target_v', samples, args.vout, (sample, dim) => textVector(buildTarget(sample), dim), args.vout));
   fs.writeFileSync(args.output, out.join('\n') + '\n');
 }
 
