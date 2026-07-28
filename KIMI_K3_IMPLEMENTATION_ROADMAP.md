@@ -1,783 +1,754 @@
-# NeurX 世界级训练框架 - 11 阶段工程路线图 (2026-07-28)
+# NeurX 世界级 ML Runtime - 最终路线图 (2026-07-28 Final Version)
 
-**核心哲学**: 构建经得起时间考验的系统，而非快速迭代的功能列表
+**目标**: 构建对标 PyTorch、JAX、MindSpore 的自主训练框架
+
+**核心理念**: Interface First（接口优先） + Hardware Abstraction（硬件抽象） + Device-Agnostic Operators（硬件无关算子）
 
 **指导原则**:
-- Runtime 优先 > 模型优先
-- 工程稳定性 > 功能新颖性
-- 完整闭环 > 孤立功能
-- 自动化验证 > 手动测试
-- 模块边界清晰 > 功能积压
+- 接口设计 > 实现细节
+- 硬件抽象 > 硬件适配
+- 性能可观测 > 性能黑盒
+- 完整测试 > 功能堆积
+- 清晰架构 > 快速功能
 
 ---
 
-## 项目最终结构（深层次分解）
+## 项目最终架构（世界级框架标准）
 
 ```
 neurx/
-├── runtime/                          # ⭐⭐⭐⭐⭐ 核心基础设施
-│   ├── core/                         # 最底层
-│   │   ├── tensor.s                  # Tensor 定义 (metadata: shape, stride, data_ptr)
-│   │   ├── storage.s                 # 原始数据存储
-│   │   ├── allocator.s               # 内存分配器（支持 pool 分配）
-│   │   ├── device.s                  # Device 抽象 (CPU/GPU/TPU)
-│   │   └── stream.s                  # 异步执行流（预留）
+├── contracts/                        # ⭐⭐⭐⭐⭐ Phase -1: 架构契约（接口定义）
+│   ├── tensor_api.s                  # Tensor 接口定义
+│   ├── device_api.s                  # Device 接口定义
+│   ├── memory_api.s                  # Memory 接口定义
+│   ├── kernel_api.s                  # Kernel 接口定义
+│   ├── operator_api.s                # Operator 接口定义
+│   ├── dispatcher_api.s              # Dispatcher 接口定义
+│   ├── autograd_api.s                # Autograd 接口定义
+│   ├── optimizer_api.s               # Optimizer 接口定义
+│   └── executor_api.s                # Executor 接口定义
+│
+├── runtime/                          # ⭐⭐⭐⭐⭐ Runtime 核心
 │   │
-│   ├── graph/                        # 计算图层
-│   │   ├── autograd.s                # 自动求导核心（拓扑排序 + 反向传播）
-│   │   ├── graph.s                   # 动态计算图 (for debugging)
+│   ├── core/                         # Layer 1: 最底层 Tensor
+│   │   ├── tensor.s                  # Tensor 数据结构
+│   │   ├── storage.s                 # 数据存储（内存指针）
+│   │   └── dtypes.s                  # 数据类型（float32, int32, etc.）
+│   │
+│   ├── device/                       # Layer 2: 设备抽象（最关键）
+│   │   ├── device.s                  # Device 基类
+│   │   ├── cpu/
+│   │   │   ├── cpu_device.s
+│   │   │   └── cpu_allocator.s
+│   │   ├── cuda/
+│   │   │   ├── cuda_device.s
+│   │   │   ├── cuda_allocator.s
+│   │   │   ├── cuda_stream.s
+│   │   │   └── cuda_properties.s
+│   │   ├── cann/
+│   │   │   ├── cann_device.s
+│   │   │   └── cann_allocator.s
+│   │   └── metal/
+│   │       └── metal_device.s
+│   │
+│   ├── memory/                       # Layer 3: 内存管理
+│   │   ├── allocator.s               # 内存分配器接口
+│   │   ├── pool_allocator.s          # 内存池分配
+│   │   ├── cache.s                   # KV Cache 管理
+│   │   └── fragmentation.s           # 碎片管理
+│   │
+│   ├── kernel/                       # Layer 4: 硬件内核（Device-specific）
+│   │   ├── cpu/
+│   │   │   ├── cpu_matmul.s
+│   │   │   ├── cpu_softmax.s
+│   │   │   ├── cpu_layernorm.s
+│   │   │   └── cpu_*.s
+│   │   ├── cuda/
+│   │   │   ├── cuda_matmul.s
+│   │   │   ├── cuda_softmax.s
+│   │   │   ├── cuda_layernorm.s
+│   │   │   └── cuda_*.s              # 可选：调用 CUDA kernels
+│   │   ├── cann/
+│   │   │   └── cann_*.s
+│   │   └── metal/
+│   │       └── metal_*.s
+│   │
+│   ├── operator/                     # Layer 5: 高层算子（Device-agnostic）
+│   │   ├── linear.s                  # MatMul + Bias（调 Dispatcher）
+│   │   ├── attention.s               # Attention 算子（调 Dispatcher）
+│   │   ├── norm.s                    # LayerNorm（调 Dispatcher）
+│   │   ├── activation.s              # ReLU, SwiGLU（调 Dispatcher）
+│   │   ├── loss.s                    # CrossEntropy（调 Dispatcher）
+│   │   ├── rope.s                    # RoPE（调 Dispatcher）
+│   │   └── broadcast.s               # Reshape, Transpose, View（调 Dispatcher）
+│   │
+│   ├── dispatcher/                   # Layer 6: 调度器（最核心）
+│   │   ├── dispatcher.s              # 根据 Device 选择 Kernel
+│   │   └── registry.s                # Kernel 注册表
+│   │
+│   ├── compiler/                     # Layer 7: 编译优化
+│   │   ├── graph_optimizer.s         # 图优化（常数折叠、死代码删除）
+│   │   ├── fusion.s                  # 算子融合（多个 Op → 1 Kernel）
+│   │   ├── memory_planner.s          # 内存规划
+│   │   ├── layout_optimizer.s        # 数据布局优化
+│   │   └── compiler.s                # 编译主逻辑
+│   │
+│   ├── executor/                     # Layer 8: 执行引擎
+│   │   ├── eager.s                   # Eager 执行
+│   │   ├── compiled.s                # 编译执行
+│   │   ├── aot.s                     # AOT (Ahead-Of-Time)
+│   │   └── jit.s                     # JIT (Just-In-Time)
+│   │
+│   ├── graph/                        # Layer 9: 计算图与自动求导
 │   │   ├── node.s                    # 计算节点
-│   │   └── scheduler.s               # 执行调度（预留）
+│   │   ├── graph.s                   # 计算图
+│   │   ├── autograd.s                # 自动求导（Chain Rule）
+│   │   └── scheduler.s               # 执行调度
 │   │
-│   ├── operator/                     # 算子库
-│   │   ├── linear.s                  # MatMul, Bias, etc.
-│   │   ├── attention.s               # Scaled Dot-Product Attention 基础
-│   │   ├── norm.s                    # LayerNorm, RMSNorm
-│   │   ├── activation.s              # ReLU, SwiGLU, Tanh, etc.
-│   │   ├── loss.s                    # CrossEntropy, MSE, etc.
-│   │   ├── rope.s                    # RoPE（属于算子库，不是 model）
-│   │   └── broadcast.s               # 广播、view、reshape 等内存操作
+│   ├── optimizer/                    # Layer 10: 优化器
+│   │   ├── adamw.s
+│   │   ├── sgd.s
+│   │   ├── lamb.s
+│   │   └── shampoo.s
 │   │
-│   ├── executor/                     # 执行引擎
-│   │   ├── eager.s                   # Eager execution (Phase 1-6)
-│   │   └── compiled.s                # Compiled execution (Phase 8+ 后续)
+│   ├── checkpoint/                   # 检查点与恢复
+│   │   ├── saver.s
+│   │   ├── loader.s
+│   │   └── resume.s                  # Resume 一致性验证
 │   │
-│   └── distributed/                  # 分布式（Phase 8）
-│       ├── process_group.s           # 进程通信
-│       ├── communicator.s            # AllReduce, AllGather 等
-│       ├── tensor_parallel.s         # 张量并行
-│       ├── pipeline_parallel.s       # 流水线并行
-│       └── zero.s                    # ZeRO 优化（后期）
+│   ├── distributed/                  # 分布式运行时（Phase 9）
+│   │   ├── process_group.s
+│   │   ├── communicator.s
+│   │   ├── tensor_parallel.s
+│   │   ├── pipeline_parallel.s
+│   │   └── zero.s
+│   │
+│   └── profiler/                     # ⭐⭐⭐⭐⭐ 性能分析（从 Phase 0 开始）
+│       ├── profiler.s                # 性能分析主程序
+│       ├── kernel_timer.s            # Kernel 耗时
+│       ├── memory_tracker.s          # 内存使用
+│       ├── bandwidth.s               # 带宽统计
+│       ├── flops.s                   # FLOPS 计算
+│       └── throughput.s              # Tokens/s
 │
-├── model/                            # ⭐⭐⭐ 应用层（简单编排）
-│   ├── components/                   # 组件库（组装用）
-│   │   ├── embedding.s               # Token/Position Embedding
-│   │   └── rotary_position.s         # RoPE 集成
-│   │
-│   ├── transformer_block.s           # Transformer Block（组装）
-│   ├── transformer.s                 # 标准 Transformer（24层）
-│   ├── qwen.s                        # Qwen2.5 具体实现
-│   ├── llama.s                       # Llama（后期移植）
-│   └── kimi.s                        # Kimi-K3（后期集成）
-│
-├── interface/                        # ⭐⭐⭐ 可插拔接口层
+├── interface/                        # 可插拔接口（应用层）
 │   ├── attention/
-│   │   ├── interface.s               # Attention 接口
-│   │   ├── standard.s                # 标准 Attention
-│   │   ├── mla.s                     # Multi-Head Latent Attention
-│   │   └── kda.s                     # Kimi Delta Attention
-│   │
+│   │   ├── interface.s
+│   │   ├── standard.s
+│   │   ├── mla.s
+│   │   └── kda.s
 │   ├── ffn/
-│   │   ├── interface.s               # FFN 接口
-│   │   ├── dense.s                   # 标准 MLP
-│   │   ├── moe.s                     # 标准 MoE
-│   │   └── latent_moe.s              # LatentMoE
-│   │
+│   │   ├── interface.s
+│   │   ├── dense.s
+│   │   ├── moe.s
+│   │   └── latent_moe.s
 │   └── optimizer/
-│       ├── interface.s               # Optimizer 接口
-│       ├── adamw.s                   # AdamW
-│       ├── sgd.s                     # SGD（后期）
-│       └── lamb.s                    # LAMB（后期）
+│       ├── interface.s
+│       └── *.s
 │
-├── serialization/                    # 序列化
-│   ├── safetensors/
-│   │   └── loader.s                  # SafeTensors 读取
-│   │
-│   ├── checkpoint/
-│   │   ├── saver.s                   # Checkpoint 保存
-│   │   ├── loader.s                  # Checkpoint 加载
-│   │   └── resume.s                  # Resume 逻辑（关键）
-│   │
-│   └── tokenizer/
-│       └── hf_tokenizer.s            # HF 兼容 tokenizer loader
+├── model/                            # 模型应用层（简单编排）
+│   ├── transformer_block.s
+│   ├── transformer.s
+│   ├── qwen.s
+│   ├── llama.s
+│   └── kimi.s
 │
-├── reference/                        # ⭐⭐⭐ 验证与参考实现
+├── test/                             # 测试体系（从 Phase 0 开始）
+│   ├── functional/
+│   │   ├── test_tensor.s
+│   │   ├── test_operators.s
+│   │   └── test_autograd.s
+│   ├── numerical/
+│   │   ├── test_forward_alignment.s     # vs HF
+│   │   ├── test_backward_alignment.s    # vs HF
+│   │   └── test_numerical_stability.s
+│   ├── stress/
+│   │   ├── test_oom.s
+│   │   ├── test_resume.s
+│   │   ├── test_random_shape.s
+│   │   ├── test_large_batch.s
+│   │   └── test_multi_gpu.s
+│   └── golden/
+│       ├── golden_test.s
+│       └── golden_dataset.s
+│
+├── reference/                        # 参考实现与验证
 │   ├── export/
-│   │   ├── export_tensor.py          # 导出 HF 张量
-│   │   ├── export_forward.py         # 导出 Forward 结果
-│   │   ├── export_gradient.py        # 导出 Backward 结果
-│   │   ├── export_optimizer.py       # 导出 Optimizer 更新
-│   │   └── export_checkpoint.py      # 导出 Checkpoint 数据
-│   │
-│   ├── compare/
-│   │   ├── compare_forward.s         # Forward 对齐
-│   │   ├── compare_backward.s        # Backward 对齐
-│   │   ├── compare_optimizer.s       # Optimizer 对齐
-│   │   ├── compare_checkpoint.s      # Checkpoint 对齐
-│   │   └── compare_resume.s          # Resume 一致性对齐（关键）
-│   │
-│   └── tests/
-│       ├── test_tensor.s             # Tensor 操作
-│       ├── test_operators.s          # 算子正确性
-│       ├── test_autograd.s           # 梯度计算
-│       ├── test_block.s              # Block 完整性
-│       ├── test_checkpoint_resume.s  # Resume 一致性（关键）
-│       └── golden_test.s             # Golden test（已知输出）
+│   │   ├── export_tensor.py
+│   │   ├── export_forward.py
+│   │   ├── export_gradient.py
+│   │   ├── export_optimizer.py
+│   │   └── export_checkpoint.py
+│   └── compare/
+│       ├── compare_forward.s
+│       ├── compare_backward.s
+│       ├── compare_optimizer.s
+│       └── compare_resume.s
 │
-├── ci/                               # CI/自动化测试
-│   ├── Makefile.test                 # 测试目标
-│   ├── benchmark.s                   # 性能基准
-│   ├── profiler.s                    # 性能分析
-│   └── golden_dataset.s              # 黄金数据集
+├── ci/                               # CI 流程
+│   ├── Makefile.test
+│   ├── benchmark.s
+│   └── profiler.s
 │
-├── posttrain/
-│   ├── trainer/
-│   │   └── train_loop.s              # 训练主循环
-│   │
-│   ├── evaluation/
-│   │   └── metrics.s                 # Loss、精度等指标
-│   │
-│   └── dataloaders/
-│       └── jsonl_loader.s            # JSONL 数据加载
-│
-└── config.yaml                       # 所有配置（模型、训练、Runtime）
+└── config.yaml                       # 配置文件
 ```
 
 ---
 
-## 完整训练闭环（所有阶段围绕这个推进）
+## 核心架构层次（最重要）
 
 ```
-JSONL 文件
+Model Layer
+    ↓ 调用
+Interface Layer (Attention / FFN)
+    ↓ 调用
+Operator Layer (hardware-agnostic)
+    ↓ 调用
+Dispatcher (选择 Kernel)
+    ↓ 调用
+Kernel Layer (CPU/CUDA/CANN)
+    ↓ 操作
+Device & Memory Layer
+    ↓ 底层
+Tensor Core
+
+关键设计:
+  ✓ Model 完全不知道硬件
+  ✓ Operator 完全不知道硬件
+  ✓ Dispatcher 做决策（CPU 选 CPU Kernel，CUDA 选 CUDA Kernel）
+  ✓ 新增硬件只需: Device + Kernel + 注册到 Dispatcher
+  ✓ 新增 Operator 只需: Device-agnostic 实现 + Dispatcher 调度
+```
+
+---
+
+## 完整训练闭环（所有阶段围绕这个）
+
+```
+JSONL Dataset
     ↓
-Tokenizer (HF-compatible)
-    ├─ Text → Token IDs
-    └─ Token IDs ← Text
+HF-compatible Tokenizer
+    ↓ 
+DataLoader (batching)
     ↓
-DataLoader
-    ├─ Batch tokenization
-    └─ Batch shape (batch_size, seq_len)
+Tensor (Device: CPU/CUDA)
     ↓
-Embedding
-    ├─ Token ID → Embedding
-    └─ Add RoPE
+Forward Pass (Transformer)
+    ├─ Operator (device-agnostic)
+    ├─ Dispatcher (choose kernel)
+    └─ Kernel (CPU/CUDA implementation)
     ↓
-Forward Pass (Transformer 24 layers)
-    ├─ Attention (pluggable: Standard/MLA/KDA)
-    ├─ FFN (pluggable: Dense/MoE/LatentMoE)
-    └─ Output logits (batch, seq_len, vocab_size)
+Loss Computation
     ↓
-Loss Computation (CrossEntropy)
-    ├─ Logits vs. Labels
-    └─ Loss scalar
-    ↓
-Backward Pass
-    ├─ dL/dLogits
-    ├─ dL/dAttention
-    ├─ dL/dFFN
-    ├─ dL/dEmbedding
-    └─ Gradient accumulation
+Backward Pass (Autograd)
+    ├─ Chain Rule
+    ├─ Gradient accumulation
+    └─ Device dispatch
     ↓
 Optimizer Step (AdamW)
-    ├─ Momentum update
-    ├─ Velocity update
-    ├─ Parameter update
-    └─ Learning rate schedule
     ↓
 Checkpoint Save
-    ├─ Model weights
-    ├─ Optimizer state (m, v)
-    ├─ Training state (step, epoch, loss)
-    └─ Config snapshot
+    ├─ Model state
+    ├─ Optimizer state
+    ├─ Training state
+    └─ Device state
     ↓
-Resume Training (关键验证点)
+Resume Training (一致性验证)
     ├─ Load all state
-    ├─ Continue training N steps
-    ├─ Verify loss curve continuity
-    └─ Checkpoint loss == Resume loss
+    ├─ Verify loss continuity
+    └─ Continue training
     ↓
 Inference
-    ├─ Load trained weights
-    ├─ Forward pass (no grad)
-    └─ Generate outputs
 ```
 
 ---
 
-## 11 个阶段路线图（每个阶段对应一个能力里程碑）
+## 12 个阶段的新路线（Phase -1 开始）
 
-### Phase 0 ⭐⭐⭐⭐⭐: CI、测试、基准框架 (2-3 天)
+### Phase -1 ⭐⭐⭐⭐⭐: 架构契约（Interface First） (3-5 天)
 
-**为什么这么早？**: 没有良好的测试体系，后续所有工作都是盲目的。
+**为什么这么早？** PyTorch、JAX、MindSpore 都是这样做的。先定义接口，再写代码，避免未来推倒重来。
 
 **关键组件**:
-- [ ] 自动化单元测试框架
-- [ ] Golden test dataset (已知输入→已知输出)
-- [ ] 性能基准测试
-- [ ] Continuous integration pipeline
+
+```s
+// contracts/tensor_api.s
+interface Tensor {
+    shape: []int
+    stride: []int
+    dtype: DataType
+    device: Device
+    requires_grad: bool
+    
+    func reshape(shape: []int) → Tensor
+    func transpose(axes: []int) → Tensor
+    // ...
+}
+
+// contracts/device_api.s
+interface Device {
+    name: string
+    type: string  // "cpu", "cuda", "cann", "metal"
+    
+    func allocate(size: int) → Buffer
+    func deallocate(buffer: Buffer)
+    func synchronize()
+    // ...
+}
+
+// contracts/kernel_api.s
+interface Kernel {
+    func execute(inputs: []Tensor) → []Tensor
+}
+
+// contracts/dispatcher_api.s
+interface Dispatcher {
+    func select_kernel(op_name: string, device: Device) → Kernel
+}
+
+// contracts/operator_api.s
+interface Operator {
+    // 调 Dispatcher 执行
+    func forward(inputs: []Tensor) → Tensor
+}
+
+// contracts/autograd_api.s
+interface Operation {
+    func backward(grad: Tensor) → []Tensor
+}
+
+// ... 其他接口
+```
 
 **验收标准**:
 ```
-✓ make test 能运行所有单元测试
-✓ make benchmark 能生成性能报告
-✓ make golden 能验证已知输入输出一致性
-✓ 单个模块改动 < 5% 性能下降
+✓ 所有关键接口已定义
+✓ 接口之间的依赖关系清晰
+✓ 能对标 PyTorch/JAX 的接口设计
 ```
 
-**文件**:
-- `ci/Makefile.test` - 测试编排
-- `reference/tests/test_base.s` - 基础测试
-- `ci/benchmark.s` - 性能基准
-- `ci/golden_test.s` - 黄金测试
-- `ci/golden_dataset.s` - 黄金数据
+**好处**:
+- 团队对未来架构有清晰共识
+- 新成员能快速理解框架设计
+- 避免后期推倒重来
 
 ---
 
-### Phase 1 ⭐⭐⭐⭐⭐: Tensor Runtime (3-4 天)
+### Phase 0 ⭐⭐⭐⭐⭐: CI、测试、基准、性能分析 (3-4 天)
 
-**目标**: Tensor 能正确存储、管理、追踪，支持梯度计算
+**关键组件**:
 
-**关键设计**:
-
+1. **Functional Test** (结果一致)
 ```s
-struct Tensor {
-    // 数据
-    data: []byte              // 原始数据指针
-    
-    // 元数据
-    shape: []int              // [batch, seq, hidden]
-    stride: []int             // 行优先/列优先（支持 reshape 不 copy）
-    offset: int               // 数据起始位置
-    
-    // 梯度追踪
-    grad: Tensor              // 梯度张量
-    requires_grad: bool
-    
-    // 计算图追踪
-    op: Operation             // 产生这个张量的操作
-    parent_tensors: []Tensor  // 输入张量
-    
-    // 设备
-    device: Device            // CPU/GPU/TPU（预留）
-}
+test/functional/test_tensor.s
+test/functional/test_operators.s
 ```
 
-**关键操作** (支持 stride，不 copy 数据):
+2. **Numerical Test** (数值精度)
 ```s
-func reshape(shape: []int) → Tensor
-func transpose(axes: []int) → Tensor  
-func view(shape: []int) → Tensor
-func slice(start: []int, end: []int) → Tensor
-func contiguous() → Tensor  // 整理内存
-func broadcast(shape: []int) → Tensor
+test/numerical/test_forward_alignment.s    # vs HF (误差 < 1e-4)
+test/numerical/test_backward_alignment.s   # vs HF (误差 < 1e-3)
+test/numerical/test_numerical_stability.s
 ```
 
-**验证**:
-```
-✓ reshape 不增加内存使用
-✓ transpose 正确追踪 stride
-✓ view 与 reshape 对齐
-✓ broadcast 支持自动扩展
-✓ contiguous 能正确整理内存
+3. **Stress Test** (极限条件)
+```s
+test/stress/test_oom.s              # 内存溢出恢复
+test/stress/test_resume.s           # 10000 步后恢复一致
+test/stress/test_random_shape.s     # 随机 shape
+test/stress/test_large_batch.s      # 大 batch
+test/stress/test_multi_gpu.s        # 多卡一致性
 ```
 
-**文件**:
-- `runtime/core/tensor.s` - Tensor 定义
-- `runtime/core/storage.s` - 数据存储
-- `runtime/core/allocator.s` - 内存管理
-- `runtime/core/device.s` - Device 抽象
-- `reference/tests/test_tensor.s` - Tensor 单元测试
+4. **Profiler** (性能分析)
+```s
+runtime/profiler/kernel_timer.s     # 每个 Kernel 耗时
+runtime/profiler/memory_tracker.s   # 内存使用曲线
+runtime/profiler/throughput.s       # Tokens/s
+```
+
+**验收标准**:
+```
+✓ make test 运行所有测试
+✓ make benchmark 生成报告
+✓ make profile 生成性能分析
+✓ Regression detection 工作
+```
 
 ---
 
-### Phase 2 ⭐⭐⭐⭐⭐: Operator Library (4-5 天)
+### Phase 1 ⭐⭐⭐⭐⭐: Tensor + Memory + Device (4-5 天)
 
-**目标**: 基础算子与 HF 数值完全一致
+**目标**: Tensor 能正确操作，支持多种 Device
 
-**关键算子**:
+**关键实现**:
 
+1. **Tensor 核心**
+```s
+runtime/core/tensor.s
+  ├─ shape, stride, dtype, device
+  ├─ reshape (stride 变，不 copy)
+  ├─ transpose (stride 重排)
+  └─ view / slice / contiguous
+```
+
+2. **Device 抽象** (最关键)
+```s
+runtime/device/device.s
+  ├─ CPU Device (基础实现)
+  ├─ CUDA Device (GPU 支持)
+  ├─ CANN Device (昇腾支持)
+  └─ Metal Device (Apple 支持)
+```
+
+3. **Memory 管理**
+```s
+runtime/memory/allocator.s
+  ├─ Pool allocator (预分配)
+  ├─ Cache management
+  └─ Fragmentation handling
+```
+
+**验收标准**:
+```
+✓ Tensor 支持 reshape/transpose 不 copy 数据
+✓ Device 抽象能支持 CPU/CUDA
+✓ Memory allocation 正确
+✓ make test-tensor 全部通过
+```
+
+---
+
+### Phase 2 ⭐⭐⭐⭐⭐: Kernel + Dispatcher (4-5 天)
+
+**目标**: Kernel 与 Operator 分离，Dispatcher 智能调度
+
+**关键实现**:
+
+1. **Kernel 层** (Device-specific)
+```s
+runtime/kernel/cpu/
+  ├─ cpu_matmul.s
+  ├─ cpu_softmax.s
+  ├─ cpu_layernorm.s
+  └─ ... (CPU 实现)
+
+runtime/kernel/cuda/
+  ├─ cuda_matmul.s
+  └─ ... (CUDA 实现或 kernel wrapper)
+```
+
+2. **Dispatcher** (最核心)
+```s
+runtime/dispatcher/dispatcher.s
+  // MatMul(A, B) 调用
+  // ↓
+  // if device == CPU_DEVICE
+  //     kernel = registry.get("matmul", CPU_DEVICE)
+  // else if device == CUDA_DEVICE
+  //     kernel = registry.get("matmul", CUDA_DEVICE)
+  // ↓
+  // kernel.execute(A, B)
+```
+
+**验收标准**:
+```
+✓ CPU Kernel 正确
+✓ CUDA Kernel 正确（或 wrapper）
+✓ Dispatcher 能正确选择
+✓ 同一 Op 在不同 Device 结果一致
+```
+
+---
+
+### Phase 3 ⭐⭐⭐⭐⭐: Operator Library (4-5 天)
+
+**目标**: 所有算子与 HF 数值对齐，且通过 Dispatcher
+
+**关键算子** (都调 Dispatcher):
 ```
 Linear (MatMul + Bias)
-  ✓ Forward 数值对齐
-  ✓ Backward 梯度对齐
-  
 Softmax
-  ✓ Forward 数值稳定
-  ✓ Backward 梯度正确
-  
 LayerNorm / RMSNorm
-  ✓ Forward 对齐 HF (误差 < 1e-5)
-  ✓ Backward 对齐 HF (误差 < 1e-3)
-  
-Activation (ReLU, SwiGLU, Gelu, etc.)
-  ✓ Forward 对齐
-  ✓ Backward 对齐
-  
+Activation (ReLU, SwiGLU, etc.)
 Loss (CrossEntropy)
-  ✓ 数值稳定（防止 inf/nan）
-  ✓ 支持 ignore_index
-  
-RoPE (Rotary Position Encoding)
-  ✓ Forward 对齐
-  ✓ Backward 对齐
+RoPE
+Broadcast / Reshape / Transpose
+```
+
+**实现模式**:
+```s
+// runtime/operator/linear.s
+func linear(x: Tensor, weight: Tensor, bias: Tensor) → Tensor {
+    // 1. 选择 Kernel
+    kernel = dispatcher.select_kernel("matmul", x.device)
+    
+    // 2. 执行
+    output = kernel.execute(x, weight)
+    output = output + bias
+    
+    // 3. 追踪梯度
+    output.op = LinearOp(x, weight, bias)
+    
+    return output
+}
 ```
 
 **验收标准**:
 ```
 ✓ 每个算子与 HF 对齐 (误差 < 1e-4)
 ✓ 每个算子支持 backward
+✓ CPU 和 CUDA 结果一致
 ✓ make test-operators 全部通过
 ```
 
-**文件**:
-- `runtime/operator/*.s` - 所有算子实现
-- `reference/export/export_tensor.py` - 导出 HF 中间值
-- `reference/compare/compare_forward.s` - Forward 对比
-
 ---
 
-### Phase 3 ⭐⭐⭐⭐⭐: Autograd Engine (2-3 天)
+### Phase 4 ⭐⭐⭐⭐⭐: Autograd Engine (2-3 天)
 
-**目标**: 自动求导系统完全工作
+**目标**: 自动求导完整工作
 
-**核心逻辑**:
-
+**关键实现**:
 ```s
-interface Operation {
-    func backward(grad_output: Tensor) → []Tensor {
-        // 接收上层梯度，返回对输入的梯度
-    }
-}
-
-func backward(loss: Tensor) {
-    // 1. 初始化 loss.grad = ones(loss.shape)
-    // 2. 拓扑排序（从 loss 回溯到叶子节点）
-    // 3. 对每个节点调用其 operation.backward()
-    // 4. 梯度自动累积
-    // 5. 返回所有叶子节点的梯度
-}
+runtime/graph/autograd.s
+  ├─ Chain Rule
+  ├─ Gradient accumulation
+  ├─ Topological sort
+  └─ Device dispatch (梯度也要 dispatch)
 ```
 
 **验收标准**:
 ```
-✓ 梯度计算与 PyTorch 完全一致 (误差 < 1e-3)
-✓ 支持梯度累积
+✓ 梯度计算与 PyTorch 一致 (误差 < 1e-3)
 ✓ 支持复杂计算图
+✓ 梯度也通过 Dispatcher 执行
 ✓ make test-autograd 全部通过
 ```
 
-**文件**:
-- `runtime/graph/autograd.s` - 自动求导核心
-- `runtime/graph/node.s` - 计算节点
-- `reference/export/export_gradient.py` - 导出 PyTorch 梯度
-- `reference/compare/compare_backward.s` - Backward 对比
-
 ---
 
-### Phase 4 ⭐⭐⭐⭐⭐: Optimizer + Checkpoint (2-3 天)
+### Phase 5 ⭐⭐⭐⭐⭐: Optimizer + Checkpoint + Resume (2-3 天)
 
-**目标**: 能保存和加载训练状态，Resume 一致性验证通过
+**目标**: 能保存/加载训练状态，Resume 一致性验证通过
 
-**Optimizer**:
-```s
-struct AdamW {
-    lr: float
-    betas: (float, float)
-    eps: float
-    weight_decay: float
-    
-    m: []Tensor    // 一阶矩
-    v: []Tensor    // 二阶矩
-}
-
-func step(params: []Tensor) {
-    // 标准 AdamW 更新
-}
+**关键验证** (最重要):
 ```
-
-**Checkpoint**:
-```s
-struct Checkpoint {
-    step: int
-    epoch: int
-    
-    // 模型
-    model_params: []Tensor
-    
-    // 优化器
-    optimizer_state: {
-        m: []Tensor
-        v: []Tensor
-        beta1_t: float
-        beta2_t: float
-    }
-    
-    // 训练状态
-    loss: float
-    metrics: {}
-}
-
-func save_checkpoint(path: string, checkpoint: Checkpoint)
-func load_checkpoint(path: string) → Checkpoint
-```
-
-**Resume 一致性验证** (关键！):
-```
-1. 训练 100 步 → 保存 Checkpoint
-2. 从 Checkpoint 恢复 → 继续训练 100 步
-3. 对比: Loss 曲线是否连续？
-   ✓ loss[99] ≈ loss_resume[0]
-   ✓ loss[100:200] ≈ loss_resume[1:100]
+Step 100: loss = 0.047398
+  ↓ save checkpoint
+  ↓
+Load checkpoint
+  ↓
+Step 101: loss should = 0.047397
+Step 102: loss should = 0.047396
+  ↓
+test/stress/test_resume.s: Loss 曲线是否连续？
 ```
 
 **验收标准**:
 ```
-✓ Checkpoint 包含所有必需的状态
+✓ Checkpoint 包含完整状态
 ✓ Resume 后 loss 曲线连续
-✓ 参数完全一致
-✓ Optimizer 状态完全一致
+✓ 参数、Optimizer 状态完全一致
+✓ 多次 Resume 结果相同
 ✓ make test-checkpoint-resume 通过
 ```
 
-**文件**:
-- `runtime/optimizer/adamw.s` - AdamW
-- `runtime/checkpoint/saver.s` - 保存
-- `runtime/checkpoint/loader.s` - 加载
-- `runtime/checkpoint/resume.s` - Resume 逻辑
-- `reference/compare/compare_checkpoint.s` - Checkpoint 对比
-- `reference/compare/compare_resume.s` - Resume 一致性对比（关键）
-
 ---
 
-### Phase 5 ⭐⭐⭐⭐: Transformer Block (2-3 天)
+### Phase 6 ⭐⭐⭐⭐: Compiler (2-3 天)
 
-**目标**: 单个 Block 与 HF 完全对齐，Forward/Backward/Optimizer 都一致
-
-**Block 结构**:
-
-```s
-struct TransformerBlock {
-    attention: AttentionInterface     // 接口（标准化）
-    ffn: FFNInterface               // 接口（标准化）
-    norm1: LayerNorm
-    norm2: LayerNorm
-    
-    func forward(x: Tensor) → Tensor {
-        attn_out = attention.forward(norm1(x), x, x)
-        x = x + attn_out              // Residual
-        
-        ffn_out = ffn.forward(norm2(x))
-        x = x + ffn_out               // Residual
-        
-        return x
-    }
-}
-```
-
-**标准实现** (Phase 5 内):
-```s
-struct StandardAttention: AttentionInterface {
-    // Scaled Dot-Product Attention
-}
-
-struct DenseFFN: FFNInterface {
-    // Standard MLP: gate_proj → SwiGLU → up_proj → down_proj
-}
-```
-
-**验收标准**:
-```
-✓ Forward 与 HF 对齐 (误差 < 1e-4)
-✓ Backward 与 HF 对齐 (误差 < 1e-3)
-✓ 训练 10 步，loss 下降
-✓ Checkpoint/Resume 一致性验证通过
-✓ make test-block 全部通过
-```
-
-**文件**:
-- `model/transformer_block.s` - Block 定义
-- `interface/attention/interface.s` - Attention 接口
-- `interface/attention/standard.s` - 标准实现
-- `interface/ffn/interface.s` - FFN 接口
-- `interface/ffn/dense.s` - 标准实现
-- `reference/compare/compare_block.s` - Block 对比
-
----
-
-### Phase 6 ⭐⭐⭐⭐⭐: Qwen 训练闭环 (3-4 天)
-
-**目标**: 完整的训练闭环（JSONL → Forward → Loss → Backward → Optimizer → Checkpoint → Resume → Inference）
-
-**关键流程**:
-
-```
-Load JSONL Dataset
-    ↓
-Tokenize (HF-compatible)
-    ↓
-Create Batches
-    ↓
-Forward 24 Blocks
-    ├─ Embedding + RoPE
-    ├─ Block[0] to Block[23]
-    └─ Output projection to logits
-    ↓
-Compute Loss (CrossEntropy)
-    ↓
-Backward (自动梯度)
-    ↓
-Optimizer.step() (AdamW)
-    ↓
-Save Checkpoint
-    ↓
-Resume from Checkpoint (验证一致性)
-    ↓
-Inference (生成输出)
-```
-
-**验收标准**:
-```
-✓ 完整训练循环运行无误
-✓ Loss 真的在下降（不是常数）
-✓ LoRA 权重真的在变化
-✓ Checkpoint 保存成功
-✓ Resume 后 loss 曲线连续
-✓ Inference 能生成合理输出
-✓ make posttrain 全部成功
-```
-
-**文件**:
-- `model/qwen.s` - Qwen2.5 具体实现
-- `serialization/safetensors/loader.s` - 权重加载
-- `serialization/tokenizer/hf_tokenizer.s` - Tokenizer 加载
-- `posttrain/dataloaders/jsonl_loader.s` - 数据加载
-- `posttrain/trainer/train_loop.s` - 训练主循环
-- `posttrain/evaluation/metrics.s` - 指标计算
-
----
-
-### Phase 7 ⭐⭐⭐⭐: LoRA / PEFT (1-2 天)
-
-**目标**: 用 LoRA 适配器训练 Qwen，参数高效
-
-**关键**:
-```s
-// LoRA 线性层
-struct LoRALinear {
-    weight: Tensor          // 原始权重 (fixed)
-    lora_a: Tensor          // 秩为 8
-    lora_b: Tensor          // 秩为 8
-    scaling: float
-    
-    func forward(x: Tensor) → Tensor {
-        // 标准计算 + LoRA 计算
-        return linear(x, weight) + scaling * linear(linear(x, lora_a), lora_b)
-    }
-}
-```
-
-**验收标准**:
-```
-✓ LoRA 训练参数减少 99%+
-✓ Loss 收敛不变
-✓ Checkpoint 正确保存 LoRA 权重
-✓ 推理性能不下降
-```
-
----
-
-### Phase 8 ⭐⭐⭐⭐⭐: Distributed Runtime (5-7 天)
-
-**目标**: 多卡训练稳定，通信正确
+**目标**: 图优化与算子融合
 
 **关键组件**:
+```s
+runtime/compiler/graph_optimizer.s
+  ├─ Constant folding (常数折叠)
+  ├─ Dead code elimination (死代码删除)
+  └─ Layout optimization (布局优化)
+
+runtime/compiler/fusion.s
+  ├─ LayerNorm + Add fusion
+  ├─ Attention + Softmax fusion
+  └─ MLP fusion
 ```
-Process Group
-    ↓
-AllReduce (梯度同步)
-    ↓
-Tensor Parallel (模型并行)
-    ↓
-Pipeline Parallel (流水线并行)
-    ↓
-ZeRO（可选，后期优化）
-```
+
+**好处**:
+- 减少 Kernel 调用次数
+- 提升性能 20-30%
 
 **验收标准**:
 ```
-✓ 单卡与多卡 loss 一致
-✓ AllReduce 正确同步梯度
-✓ 多卡训练不发散
+✓ 融合后结果一致 (数值精度)
+✓ 性能提升 > 10%
+✓ make benchmark 显示改进
 ```
 
 ---
 
-### Phase 9 ⭐⭐⭐: Attention 插件化 (3-5 天)
+### Phase 7 ⭐⭐⭐⭐: Transformer Block 验证 (2-3 天)
 
-**目标**: 通过接口实现 Standard/MLA/KDA，支持无缝切换
+**目标**: 单个 Block 与 HF 完全对齐
 
-**接口定义**:
-```s
-interface AttentionInterface {
-    func forward(Q, K, V, mask) → Output
-    func backward(grad_output) → (grad_Q, grad_K, grad_V)
-}
+**验证**:
 ```
-
-**实现**:
-```s
-impl StandardAttention: AttentionInterface { ... }
-impl MLAAttention: AttentionInterface { ... }
-impl KDAAttention: AttentionInterface { ... }
-```
-
-**配置切换**:
-```yaml
-model:
-  attention_type: standard  # 或 mla, kda
-```
-
-**验收标准**:
-```
-✓ 三种 Attention 都能训练
-✓ 三种 Attention 都能收敛
-✓ 切换 Attention 类型，模型无需修改
+Forward ✓ (误差 < 1e-4)
+Backward ✓ (误差 < 1e-3)
+Optimizer Update ✓
+Resume ✓
 ```
 
 ---
 
-### Phase 10 ⭐⭐⭐: MoE / LatentMoE (3-5 天)
+### Phase 8 ⭐⭐⭐⭐⭐: Qwen 完整训练闭环 (3-4 天)
 
-**目标**: FFN 插件化，支持 Dense/MoE/LatentMoE
+**目标**: 能完整训练 24 层 Qwen
 
-**接口**:
-```s
-interface FFNInterface {
-    func forward(x) → Output
-    func backward(grad) → grad_x
-}
+**验证**:
 ```
-
-**实现**:
-```s
-impl DenseFFN: FFNInterface { ... }
-impl MoEFFN: FFNInterface { ... }
-impl LatentMoEFFN: FFNInterface { ... }
-```
-
-**配置**:
-```yaml
-model:
-  ffn_type: dense  # 或 moe, latent_moe
-  num_experts: 8
-```
-
-**验收标准**:
-```
-✓ MoE 能训练，loss 收敛
-✓ Load balance > 0.9
-✓ Expert assignment 均衡
-✓ LatentMoE 性能对标 MoE
+JSONL → Forward → Loss → Backward → Optimizer → Checkpoint → Resume → Inference
 ```
 
 ---
 
-### Phase 11 ⭐⭐⭐: RLHF、GRPO、Agent (5-7 天)
+### Phase 9 ⭐⭐⭐⭐: LoRA / PEFT (1-2 天)
 
-**目标**: 高级训练能力
+---
+
+### Phase 10 ⭐⭐⭐⭐⭐: Distributed Runtime (5-7 天)
+
+**目标**: 多卡训练
 
 **关键**:
-- RLHF (Reinforcement Learning from Human Feedback)
-- GRPO (Group Relative Policy Optimization)
-- Agent 长上下文推理
+```
+AllReduce (梯度同步)
+Tensor Parallel
+Pipeline Parallel
+ZeRO 优化
+```
 
 ---
 
-## 关键验证点总结
+### Phase 11 ⭐⭐⭐: 插件系统 (3-5 天)
 
-| 检查项 | 何时 | 为什么重要 |
-|--------|------|----------|
-| Tensor 内存管理 | Phase 1 | 所有后续操作都依赖这个 |
-| Operator 数值一致 | Phase 2 | 一旦对齐，后续梯度自动正确 |
-| Autograd 梯度正确 | Phase 3 | 优化器依赖这个 |
-| Resume 一致性 | Phase 4 | 很多框架都失败在这里 |
-| Block Forward/Backward | Phase 5 | 24 层只是复制 |
-| 完整训练闭环 | Phase 6 | 证明整个系统能工作 |
-| Attention 切换 | Phase 9 | 验证接口设计是否正确 |
-| FFN 切换 | Phase 10 | 验证接口设计是否正确 |
+**目标**: Attention / FFN 可切换
+
+```
+interface/attention/
+  ├─ Standard
+  ├─ MLA
+  └─ KDA
+
+interface/ffn/
+  ├─ Dense
+  ├─ MoE
+  └─ LatentMoE
+```
 
 ---
 
-## 为什么这个顺序更稳健？
+### Phase 12 ⭐⭐: RLHF / Agent (5-7 天)
 
-**旧思路的问题**:
-- ❌ 先实现功能，后补测试
-- ❌ Phase 1 就想完成训练（太贪心）
-- ❌ Attention/FFN 紧耦合，不能切换
-- ❌ Resume 一致性问题隐藏到后期才暴露
-- ❌ 没有自动化验证（Gold Test）
+---
 
-**新思路的优点**:
-- ✅ Phase 0 建立测试体系（先保证质量）
-- ✅ Phase 1-4 专注 Runtime 基础（一个月内完成）
-- ✅ Phase 5-6 验证完整训练闭环
-- ✅ Phase 9-10 验证接口设计正确性
-- ✅ Phase 8 分布式作为可选优化，而非依赖
+## 关键创新：硬件抽象层
+
+**PyTorch**:
+```python
+# 用户无需知道硬件
+x = x + y
+# PyTorch 自动 dispatch 到 CPU/CUDA kernel
+```
+
+**NeurX 设计**:
+```s
+// runtime/operator/linear.s
+kernel = dispatcher.select_kernel("matmul", device)
+// 自动选择 CPU 或 CUDA kernel
+```
+
+**新硬件添加**:
+1. 实现 Device (allocate, synchronize, etc.)
+2. 实现 Kernel (cpu_matmul.s 或 cuda_matmul.s)
+3. 注册到 Dispatcher
+4. ✅ 所有 Operator 自动支持新硬件
+
+**结果**: 代码复用最大化，维护成本最小化
 
 ---
 
 ## 时间估算
 
-| 阶段 | 任务 | 时间 | 累计 |
-|------|------|------|------|
-| 0 | CI/Test/Benchmark | 2-3 天 | 2-3 天 |
-| 1 | Tensor Runtime | 3-4 天 | 5-7 天 |
-| 2 | Operator Library | 4-5 天 | 9-12 天 |
-| 3 | Autograd | 2-3 天 | 11-15 天 |
-| 4 | Optimizer + Checkpoint | 2-3 天 | 13-18 天 |
-| 5 | Transformer Block | 2-3 天 | 15-21 天 |
-| 6 | Qwen 闭环 | 3-4 天 | 18-25 天 |
-| 7 | LoRA | 1-2 天 | 19-27 天 |
-| 8 | Distributed | 5-7 天 | 24-34 天 |
-| 9 | Attention 插件 | 3-5 天 | 27-39 天 |
-| 10 | MoE 插件 | 3-5 天 | 30-44 天 |
-| 11 | RLHF/GRPO/Agent | 5-7 天 | 35-51 天 |
-| **总计** | | | **5-7 周** |
+| Phase | 任务 | 时间 |
+|-------|------|------|
+| -1 | Architecture Contracts | 3-5 天 |
+| 0 | CI/Test/Benchmark/Profiler | 3-4 天 |
+| 1 | Tensor + Memory + Device | 4-5 天 |
+| 2 | Kernel + Dispatcher | 4-5 天 |
+| 3 | Operator Library | 4-5 天 |
+| 4 | Autograd | 2-3 天 |
+| 5 | Optimizer + Checkpoint | 2-3 天 |
+| 6 | Compiler | 2-3 天 |
+| 7 | Transformer Block | 2-3 天 |
+| 8 | Qwen Training | 3-4 天 |
+| 9 | LoRA | 1-2 天 |
+| 10 | Distributed | 5-7 天 |
+| 11 | Plugins | 3-5 天 |
+| 12 | RLHF/Agent | 5-7 天 |
+| **总计** | | **45-60 天 (6-8 周)** |
 
 ---
 
-## 立即开始（Phase 0 + Phase 1）
+## 为什么这个架构能对标 PyTorch？
+
+| 特性 | NeurX | PyTorch |
+|------|-------|---------|
+| Device 抽象 | ✓ (Phase 1) | ✓ |
+| Kernel 与 Operator 分离 | ✓ (Phase 2) | ✓ |
+| Dispatcher 智能调度 | ✓ (Phase 2) | ✓ |
+| Compiler & Fusion | ✓ (Phase 6) | ✓ (TorchScript) |
+| Profiler | ✓ (Phase 0) | ✓ |
+| Autograd | ✓ (Phase 4) | ✓ |
+| Distributed | ✓ (Phase 10) | ✓ |
+| 代码清晰度 | ✓ (纯 S 语言) | ~ (C++/Python) |
+| 维护成本 | ✓ (低) | ~ (高) |
+
+---
+
+## 立即开始
 
 ```bash
-# 创建完整目录结构
-mkdir -p runtime/{core,graph,operator,executor,distributed}
-mkdir -p interface/{attention,ffn}
-mkdir -p model/components
-mkdir -p serialization/{safetensors,checkpoint,tokenizer}
-mkdir -p reference/{export,compare,tests}
-mkdir -p ci
+# Step 1: 创建目录
+mkdir -p runtime/{core,device,memory,kernel,operator,dispatcher,compiler,executor,graph,optimizer,checkpoint,distributed,profiler}
+mkdir -p runtime/kernel/{cpu,cuda,cann,metal}
+mkdir -p runtime/device/{cpu,cuda,cann,metal}
+mkdir -p contracts test/{functional,numerical,stress,golden} interface/{attention,ffn} ci
 
-# Phase 0: 建立测试框架
+# Step 2: Phase -1
+touch contracts/tensor_api.s
+touch contracts/device_api.s
+touch contracts/kernel_api.s
+touch contracts/dispatcher_api.s
+touch contracts/operator_api.s
+touch contracts/autograd_api.s
+touch contracts/optimizer_api.s
+
+# Step 3: Phase 0
 touch ci/Makefile.test
-touch ci/benchmark.s
-touch reference/tests/test_base.s
-
-# Phase 1.1: Tensor 定义
-touch runtime/core/tensor.s
-touch runtime/core/storage.s
+touch test/functional/test_base.s
+touch runtime/profiler/profiler.s
 ```
 
-**关键决策**: Tensor 数据结构 + Memory Layout 支持（stride, broadcast, view）
-
-这个设计决定了整个 Runtime 的性能和灵活性。一旦做对，后续 20+ 阶段都能放心推进。
+**决策**: 先花 3-5 天设计接口（Phase -1），再写代码。这样避免未来 6 个月后发现设计错误，推倒重来。
 
 ---
 
-## 核心哲学总结
+## 核心哲学
 
-> **世界级框架 = 扎实的 Runtime + 清晰的接口 + 完善的测试 + 详细的文档**
+> **接口优先，不是功能优先。硬件无关，不是硬件绑定。性能可观测，不是黑盒。**
 
-不是：
-- 最多的功能
-- 最快的性能
-- 最新的论文实现
+这是世界级框架与快速原型之间最大的区别。
 
-而是：
-- 经得起时间考验的系统设计
-- 每个模块都能独立验证
-- 新模块能无缝集成
-- 团队能长期维护
+快速原型: 功能快速 → 代码复杂 → 难以维护 → 最后推倒重来
+世界级框架: 接口清晰 → 架构稳健 → 易于扩展 → 长期演进
 
-NeurX 的目标不是赶上 PyTorch，而是成为**一个可信任的、可维护的、可扩展的 ML Runtime**。
-
-这需要时间，但一旦完成，价值是无限的。
+NeurX 选择后者。
