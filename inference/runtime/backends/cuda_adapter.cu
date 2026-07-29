@@ -11,30 +11,30 @@ CudaAdapter::~CudaAdapter() {
   if (stream_) cudaStreamDestroy(static_cast<cudaStream_t>(stream_));
 }
 
-AdapterStatus CudaAdapter::initialize(int device_id) {
-  if (cudaSetDevice(device_id) != cudaSuccess) return AdapterStatus::failure("cudaSetDevice failed");
+adapter_status CudaAdapter::initialize(int device_id) {
+  if (cudaSetDevice(device_id) != cudaSuccess) return adapter_status::failure("cudaSetDevice failed");
   cudaStream_t stream = nullptr;
   if (cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking) != cudaSuccess)
-    return AdapterStatus::failure("CUDA non-blocking stream creation failed");
+    return adapter_status::failure("CUDA non-blocking stream creation failed");
   stream_ = stream;
   ready_ = true;
-  return AdapterStatus::success();
+  return adapter_status::success();
 }
 
-AdapterStatus CudaAdapter::execute(const DeviceBatch& batch) {
-  if (!ready_) return AdapterStatus::failure("CUDA adapter is not initialized");
-  DeviceBatch launch = batch;
+adapter_status CudaAdapter::execute(const device_batch& batch) {
+  if (!ready_) return adapter_status::failure("CUDA adapter is not initialized");
+  device_batch launch = batch;
   if (!launch.stream) launch.stream = stream_;
   KernelLauncher launcher = launch.schedule.phase == Phase::prefill ? prefill_ : decode_;
-  if (!launcher) return AdapterStatus::failure("CUDA kernel launcher is not bound");
+  if (!launcher) return adapter_status::failure("CUDA kernel launcher is not bound");
   return launcher(launch);
 }
 
-AdapterStatus CudaAdapter::synchronize() {
-  if (!ready_) return AdapterStatus::failure("CUDA adapter is not initialized");
+adapter_status CudaAdapter::synchronize() {
+  if (!ready_) return adapter_status::failure("CUDA adapter is not initialized");
   return cudaStreamSynchronize(static_cast<cudaStream_t>(stream_)) == cudaSuccess
-             ? AdapterStatus::success()
-             : AdapterStatus::failure("CUDA stream synchronization failed");
+             ? adapter_status::success()
+             : adapter_status::failure("CUDA stream synchronization failed");
 }
 
 }

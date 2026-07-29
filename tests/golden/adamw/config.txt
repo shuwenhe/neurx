@@ -1,0 +1,7 @@
+lr=0.001
+beta1=0.9
+beta2=0.999
+eps=1e-08
+weight_decay=0.01
+grad=0.1 (constant)
+implementation=numpy

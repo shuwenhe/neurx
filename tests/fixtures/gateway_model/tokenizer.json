@@ -1,0 +1,1 @@
+{"model":{"type":"BPE","vocab":{"<unk>":0,"H":1,"i":2,"Hi":3},"merges":["H i"],"unk_token":"<unk>"},"added_tokens":[]}

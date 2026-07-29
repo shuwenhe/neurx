@@ -1,0 +1,3 @@
+vocab_size=10
+hidden_dim=8
+seed=42

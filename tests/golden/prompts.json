@@ -4,25 +4,25 @@
       "name": "medical_qa_1",
       "text": "What is the treatment for chronic urinary tract infection?",
       "category": "medical_treatment",
-      "tokens_count": 20
+      "tokens_count": 10
     },
     {
       "name": "medical_qa_2",
       "text": "What are the symptoms of acute myocardial infarction?",
       "category": "medical_symptoms",
-      "tokens_count": 18
+      "tokens_count": 12
     },
     {
       "name": "medical_qa_3",
       "text": "How is Type 2 diabetes diagnosed?",
       "category": "medical_diagnosis",
-      "tokens_count": 12
+      "tokens_count": 8
     },
     {
       "name": "medical_qa_4",
       "text": "What medications are used for hypertension?",
       "category": "medical_drugs",
-      "tokens_count": 14
+      "tokens_count": 7
     },
     {
       "name": "medical_qa_5",

@@ -99,7 +99,7 @@ struct gradient_decision {
 
 inline gradient_decision gradient_decision(double squared_norm,
                                           const gradient_policy& policy) {
-    gradient_decision result;
+    struct gradient_decision result;
     if (!std::isfinite(squared_norm) || squared_norm < 0.0 ||
         !std::isfinite(policy.max_norm) || policy.max_norm < 0.0) {
         return result;

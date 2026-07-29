@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway posttrain posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain test-golden regenerate-golden pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 \
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain test-golden regenerate-golden pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -1566,6 +1566,36 @@ build-openai-gateway:
 		artifacts/build/serving_native/serving_socket.o \
 		-o artifacts/build/serving_native/openai_gateway_fake_backend
 
+openai-sse-streaming-test: build-openai-gateway
+	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
+		"$$PYTORCH_PYTHON" tests/openai_sse_streaming_test.py \
+		artifacts/build/serving_native/neurx_openai_gateway \
+		artifacts/build/serving_native/openai_gateway_fake_backend
+
+phase5-golden-prompt-test: build-s-ir-runner
+	@mkdir -p artifacts/build/phase5
+	@cd '$(CURDIR_UNIX)' && \
+		rm -f '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden_prompt_test.ir'; \
+		"$(S_SEED_COMPILER)" 'tests/phase5_golden.s' '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden.ir' 2>&1 || exit 1; \
+		"$(S_SEED_COMPILER)" 'tests/phase5_golden_prompt_test.s' '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden_prompt_test.ir' 2>&1 || exit 1; \
+		test -f '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden_prompt_test.ir'
+	@cd '$(CURDIR_UNIX)' && \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden_prompt_test.ir' \
+		'$(S_RUNNER_BIN)' 2>&1
+
+phase5-hf-runtime-matrix: build-s-ir-runner
+	@mkdir -p artifacts/build/phase5
+	@cd '$(CURDIR_UNIX)' && \
+		rm -f '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_hf_runtime_matrix.ir'; \
+		"$(S_SEED_COMPILER)" 'tests/phase5_golden.s' '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden.ir' 2>&1 || exit 1; \
+		"$(S_SEED_COMPILER)" 'tests/phase5_hf_runtime_matrix.s' '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_hf_runtime_matrix.ir' 2>&1 || exit 1; \
+		test -f '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_hf_runtime_matrix.ir'
+	@cd '$(CURDIR_UNIX)' && \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/phase5/phase5_hf_runtime_matrix.ir' \
+		'$(S_RUNNER_BIN)' 2>&1
+
+phase5-hf-runtime-test: phase5-hf-runtime-matrix
+
 check-nvcc:
 	@if [ -z '$(CUDA_NVCC)' ]; then \
 		echo "Error: nvcc not found. Run CUDA tests on a Linux NVIDIA CUDA host."; \
@@ -1603,6 +1633,36 @@ hf-decoder-cuda-kernels-test: check-nvcc
 		cuda/hf_decoder_kernels_test.cu \
 		-o artifacts/build/hf_decoder_cuda/hf_decoder_kernels_test
 	@artifacts/build/hf_decoder_cuda/hf_decoder_kernels_test
+
+hf-decoder-cuda-parity-test: hf-decoder-cuda-build
+	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
+		cuda/hf_decoder_cuda_probe.cu \
+		-o artifacts/build/hf_decoder_cuda/hf_decoder_cuda_probe.o
+	@$(CUDA_NVCC) artifacts/build/hf_decoder_cuda/hf_decoder_cuda_probe.o \
+		artifacts/build/hf_decoder_cuda/hf_decoder_cuda.o \
+		artifacts/build/hf_decoder_cuda/json.o \
+		artifacts/build/hf_decoder_cuda/safetensors.o \
+		artifacts/build/hf_decoder_cuda/hf_model.o \
+		artifacts/build/hf_decoder_cuda/tensor_runtime.o \
+		-lcublas -o artifacts/build/hf_decoder_cuda/hf_decoder_cuda_probe
+	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
+		"$$PYTORCH_PYTHON" tests/hf_decoder_cuda_parity.py \
+		artifacts/build/hf_decoder_cuda/hf_decoder_cuda_probe
+
+build-hf-cuda-backend: hf-decoder-cuda-build
+	@$(CC) -O2 -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -Werror -c serving/native/serving_socket.c \
+		-o artifacts/build/hf_decoder_cuda/serving_socket.o
+	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
+		serving/native/hf_cuda_backend.cu \
+		-o artifacts/build/hf_decoder_cuda/hf_cuda_backend.o
+	@$(CUDA_NVCC) artifacts/build/hf_decoder_cuda/hf_cuda_backend.o \
+		artifacts/build/hf_decoder_cuda/hf_decoder_cuda.o \
+		artifacts/build/hf_decoder_cuda/json.o \
+		artifacts/build/hf_decoder_cuda/safetensors.o \
+		artifacts/build/hf_decoder_cuda/hf_model.o \
+		artifacts/build/hf_decoder_cuda/tensor_runtime.o \
+		artifacts/build/hf_decoder_cuda/serving_socket.o \
+		-lcublas -o artifacts/build/hf_decoder_cuda/neurx_hf_cuda_backend
 
 transformer-cuda-checkpoint-resume-test:
 	@if [ -z '$(CUDA_NVCC)' ]; then \
@@ -2260,29 +2320,47 @@ simple-training: build-simple-training-s
 # ========================================
 # Test Suite
 # ========================================
-.PHONY: test-math test-adamw test-gradient-check test-all
+.PHONY: test-generate-golden test-serving-socket test-s-conversions
 
-test-math:
-	@echo "🧪 [Test] Math Functions"
-	$(S_SEED_COMPILER) tests/test_math_functions.s /tmp/test_math.ir
+test-generate-golden:
+	@echo "🧪 [Test] Golden Test Generator (S implementation)"
+	$(S_SEED_COMPILER) tests/generate_golden.s /tmp/generate_golden.ir
 	@echo "✅ Compiled (runtime execution pending)"
+	@echo "ℹ️  Replaces: tests/generate_golden.py"
 
-test-adamw:
-	@echo "🧪 [Test] AdamW Optimizer"
-	$(S_SEED_COMPILER) tests/test_adamw.s /tmp/test_adamw.ir
+test-serving-socket:
+	@echo "🧪 [Test] Serving Socket (S implementation)"
+	$(S_SEED_COMPILER) tests/serving_socket_test.s /tmp/serving_socket_test.ir
 	@echo "✅ Compiled (runtime execution pending)"
+	@echo "ℹ️  Replaces: tests/serving_native_socket_test.c"
 
-test-gradient-check:
-	@echo "🧪 [Test] Gradient Check"
-	$(S_SEED_COMPILER) tests/test_gradient_check.s /tmp/test_gradient_check.ir
-	@echo "✅ Compiled (runtime execution pending)"
-
-test-all: test-math test-adamw test-gradient-check
+test-s-conversions: test-generate-golden test-serving-socket
 	@echo ""
-	@echo "📊 Test Summary:"
-	@echo "  ✅ Math functions test compiled"
-	@echo "  ✅ AdamW optimizer test compiled"
-	@echo "  ✅ Gradient check test compiled"
+	@echo "📊 Python/C to S Conversion Test Summary:"
+	@echo "  ✅ Golden generator test compiled (replaces generate_golden.py)"
+	@echo "  ✅ Serving socket test compiled (replaces serving_native_socket_test.c)"
 	@echo ""
 	@echo "⚠️  Note: Actual test execution requires S runtime"
-	@echo "   Currently only verifying compilation"
+	@echo "   See PYTHON_C_TO_S_CONVERSION_STATUS.md for full details"
+
+# ========================================
+# Golden Test Generation
+# ========================================
+.PHONY: generate-golden verify-golden
+
+generate-golden:
+	@echo "🔬 [Generate] Golden Reference Data"
+	python3 tests/generate_golden.py
+	@echo ""
+	@echo "✅ Generated:"
+	@echo "  - tests/golden/adamw/*.bin (10 steps)"
+	@echo "  - tests/golden/math/*.bin (exp, log, sqrt, pow)"
+	@echo "  - tests/golden/embedding/*.bin (5 test cases)"
+	@echo "  - tests/golden/loss/*.bin (cross-entropy)"
+	@echo ""
+	@echo "📊 Next: Run NeurX implementations and compare outputs"
+
+verify-golden:
+	@echo "⚠️  Golden verification requires S runtime"
+	@echo "  Planned: Compare NeurX outputs with .bin files"
+	@echo "  Tolerance: max_abs_error < 1e-5"

@@ -128,9 +128,9 @@ class DisaggregatedScheduler {
     if (id.empty() || requests_.count(id) || prompt_tokens < 0 || max_new_tokens <= 0) {
       throw std::invalid_argument("invalid or duplicate inference request");
     }
-    request request{std::move(id), std::move(key), prompt_tokens, prompt_tokens, max_new_tokens};
-    const std::string request_id = request.id;
-    requests_.emplace(request_id, std::move(request));
+    struct request submitted{std::move(id), std::move(key), prompt_tokens, prompt_tokens, max_new_tokens};
+    const std::string request_id = submitted.id;
+    requests_.emplace(request_id, std::move(submitted));
 
     if (prompt_tokens == 0) {
       requests_.at(request_id).state = RequestState::queued_decode;
@@ -148,39 +148,49 @@ class DisaggregatedScheduler {
   }
 
   void complete_prefill(const std::string& id, int processed_tokens) {
-    request& request = mutable_request(id, RequestState::prefilling);
-    if (processed_tokens <= 0 || processed_tokens > request.remaining_prompt_tokens) {
+    struct request& current = mutable_request(id, RequestState::prefilling);
+    if (processed_tokens <= 0 || processed_tokens > current.remaining_prompt_tokens) {
       throw std::invalid_argument("invalid prefill completion token count");
     }
-    request.remaining_prompt_tokens -= processed_tokens;
+    current.remaining_prompt_tokens -= processed_tokens;
     metrics_.prefetched_tokens += static_cast<uint64_t>(processed_tokens);
-    if (request.remaining_prompt_tokens == 0) {
-      request.state = RequestState::queued_decode;
+    if (current.remaining_prompt_tokens == 0) {
+      current.state = RequestState::queued_decode;
       decode_queue_.push_back(id);
       ++metrics_.kv_handoffs;
     } else {
-      request.state = RequestState::queued_prefill;
+      current.state = RequestState::queued_prefill;
       prefill_queue_.push_back(id);
     }
   }
 
   void complete_decode(const std::string& id, bool eos = false) {
-    request& request = mutable_request(id, RequestState::decoding);
-    ++request.generated_tokens;
+    struct request& current = mutable_request(id, RequestState::decoding);
+    ++current.generated_tokens;
     ++metrics_.decode_steps;
     ++metrics_.generated_tokens;
-    if (eos || request.generated_tokens >= request.max_new_tokens) {
-      request.state = RequestState::finished;
+    if (eos || current.generated_tokens >= current.max_new_tokens) {
+      current.state = RequestState::finished;
     } else {
-      request.state = RequestState::queued_decode;
+      current.state = RequestState::queued_decode;
       decode_queue_.push_back(id);
     }
   }
 
-  const request& request(const std::string& id) const {
+  const struct request& get_request(const std::string& id) const {
     const auto it = requests_.find(id);
     if (it == requests_.end()) throw std::out_of_range("unknown inference request");
     return it->second;
+  }
+  void cancel(const std::string& id) {
+    const auto existing = requests_.find(id);
+    if (existing == requests_.end()) return;
+    const auto remove_id = [&id](std::vector<std::string>& queue) {
+      queue.erase(std::remove(queue.begin(), queue.end(), id), queue.end());
+    };
+    remove_id(prefill_queue_);
+    remove_id(decode_queue_);
+    requests_.erase(existing);
   }
   const runtime_metrics& metrics() const { return metrics_; }
 
@@ -203,11 +213,11 @@ class DisaggregatedScheduler {
     while (!queue.empty() && static_cast<int>(batch.items.size()) < item_limit) {
       const std::string id = queue.front();
       queue.erase(queue.begin());
-      request& request = requests_.at(id);
-      if (!(request.key == batch.key)) { deferred.push_back(id); continue; }
-      const int tokens = phase == Phase::decode ? 1 : std::min(request.remaining_prompt_tokens, token_limit - batch.total_tokens);
+      struct request& current = requests_.at(id);
+      if (!(current.key == batch.key)) { deferred.push_back(id); continue; }
+      const int tokens = phase == Phase::decode ? 1 : std::min(current.remaining_prompt_tokens, token_limit - batch.total_tokens);
       if (tokens <= 0) { deferred.push_back(id); continue; }
-      request.state = phase == Phase::decode ? RequestState::decoding : RequestState::prefilling;
+      current.state = phase == Phase::decode ? RequestState::decoding : RequestState::prefilling;
       batch.items.push_back({id, tokens});
       batch.total_tokens += tokens;
       if (phase == Phase::prefill) ++metrics_.prefills_started;
@@ -217,15 +227,15 @@ class DisaggregatedScheduler {
     return batch;
   }
 
-  request& mutable_request(const std::string& id, RequestState expected) {
-    request& request = const_cast<request&>(this->request(id));
-    if (request.state != expected) throw std::logic_error("inference request completed in wrong phase");
-    return request;
+  struct request& mutable_request(const std::string& id, RequestState expected) {
+    struct request& current = const_cast<struct request&>(this->get_request(id));
+    if (current.state != expected) throw std::logic_error("inference request completed in wrong phase");
+    return current;
   }
 
   runtime_config_2 config_;
   runtime_metrics metrics_;
-  std::map<std::string, request> requests_;
+  std::map<std::string, struct request> requests_;
   std::vector<std::string> prefill_queue_;
   std::vector<std::string> decode_queue_;
 };

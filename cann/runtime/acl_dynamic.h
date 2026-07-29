@@ -126,6 +126,12 @@ inline Error memcpy_async(void* destination, std::size_t destination_bytes,
                  static_cast<int>(kind), stream)
             : -1;
 }
+inline Error memset_async(void* destination, std::size_t destination_bytes,
+                          uint32_t value, std::size_t count, Stream stream) {
+  using Fn = Error (*)(void*, std::size_t, uint32_t, std::size_t, Stream);
+  auto fn = acl_symbol<Fn>("aclrtMemsetAsync");
+  return fn ? fn(destination, destination_bytes, value, count, stream) : -1;
+}
 inline Error create_event(Event* event) {
   using Fn = Error (*)(Event*);
   auto fn = acl_symbol<Fn>("aclrtCreateEvent");

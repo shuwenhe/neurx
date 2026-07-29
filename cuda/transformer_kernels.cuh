@@ -44,6 +44,12 @@ __global__ void rope(float* x,int t,int d,int heads,bool inverse) {
     float cs=cosf(angle),sn=sinf(angle);if(inverse)sn=-sn;int z=p*d+h*hd+j;float a=x[z],b=x[z+1];x[z]=a*cs-b*sn;x[z+1]=a*sn+b*cs;
 }
 
+__global__ void rope_position(float* x,int d,int heads,int position) {
+    int q=blockIdx.x*blockDim.x+threadIdx.x,hd=d/heads,pairs=hd/2,total=heads*pairs;if(q>=total)return;
+    int pair=q%pairs,h=q/pairs,j=pair*2;float angle=position/powf(10000.0f,float(j)/hd);
+    float cs=cosf(angle),sn=sinf(angle);int z=h*hd+j;float a=x[z],b=x[z+1];x[z]=a*cs-b*sn;x[z+1]=a*sn+b*cs;
+}
+
 __global__ void swiglu_fwd(const float* gate,const float* up,float* y,int n) {
     int i=blockIdx.x*blockDim.x+threadIdx.x;if(i>=n)return;float s=1/(1+expf(-gate[i]));y[i]=gate[i]*s*up[i];
 }
@@ -63,6 +69,15 @@ __global__ void attention_fwd(const float* q,const float* k,const float* v,float
     for(int j=0;j<=i;j++){float s=0;for(int p=0;p<hd;p++)s+=q[i*d+h*hd+p]*k[j*d+h*hd+p];s*=scale;att[(h*t+i)*t+j]=s;mx=fmaxf(mx,s);}float sum=0;
     for(int j=0;j<=i;j++)sum+=expf(att[(h*t+i)*t+j]-mx);for(int j=0;j<=i;j++)att[(h*t+i)*t+j]=expf(att[(h*t+i)*t+j]-mx)/sum;
     for(int p=0;p<hd;p++){float s=0;for(int j=0;j<=i;j++)s+=att[(h*t+i)*t+j]*v[j*d+h*hd+p];ctx[i*d+h*hd+p]=s;}
+}
+
+__global__ void attention_decode(const float* q,const float* k_cache,const float* v_cache,
+                                 float* att,float* ctx,int position,int max_seq,int d,int heads) {
+    int h=blockIdx.x*blockDim.x+threadIdx.x;if(h>=heads)return;int hd=d/heads;float scale=rsqrtf(float(hd)),mx=-INFINITY;
+    for(int j=0;j<=position;j++){float s=0;for(int p=0;p<hd;p++)s+=q[h*hd+p]*k_cache[j*d+h*hd+p];s*=scale;att[h*max_seq+j]=s;mx=fmaxf(mx,s);}
+    float sum=0;for(int j=0;j<=position;j++)sum+=expf(att[h*max_seq+j]-mx);
+    for(int j=0;j<=position;j++)att[h*max_seq+j]=expf(att[h*max_seq+j]-mx)/sum;
+    for(int p=0;p<hd;p++){float s=0;for(int j=0;j<=position;j++)s+=att[h*max_seq+j]*v_cache[j*d+h*hd+p];ctx[h*hd+p]=s;}
 }
 __global__ void attention_bwd(const float* q,const float* k,const float* v,const float* att,const float* dctx,float* dq,float* dk,float* dv,int t,int d,int heads) {
     int z=blockIdx.x*blockDim.x+threadIdx.x;if(z>=heads*t)return;int h=z/t,i=z%t,hd=d/heads;float scale=rsqrtf(float(hd));

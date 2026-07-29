@@ -9,6 +9,8 @@ struct InferenceCache {
   int *ids;
   float *embedding, *x, *n1, *inv1, *q, *k, *v, *att, *ctx;
   float *proj, *res, *n2, *inv2, *gate, *up, *sw, *down, *h, *logits;
+  std::vector<float *> key_cache, value_cache;
+  int cache_length = 0;
 
   explicit InferenceCache(const Model &m) {
     int64_t td = int64_t(m.seq) * m.dim;
@@ -21,6 +23,10 @@ struct InferenceCache {
     n2 = managed_f(td); inv2 = managed_f(m.seq); gate = managed_f(tf);
     up = managed_f(tf); sw = managed_f(tf); down = managed_f(td);
     h = managed_f(td); logits = managed_f(int64_t(m.seq) * m.vocab);
+    for (int layer = 0; layer < m.nlayers; ++layer) {
+      key_cache.push_back(managed_f(td));
+      value_cache.push_back(managed_f(td));
+    }
   }
 
   ~InferenceCache() {
@@ -29,6 +35,8 @@ struct InferenceCache {
     for (void *p : allocations) {
       if (p) cudaFree(p);
     }
+    for (float *p : key_cache) if (p) cudaFree(p);
+    for (float *p : value_cache) if (p) cudaFree(p);
   }
 };
 
@@ -38,7 +46,7 @@ static bool read_checkpoint_header(const std::string &path, HeaderV2 &h) {
     std::fprintf(stderr, "Cannot read checkpoint: %s\n", path.c_str());
     return false;
   }
-  if (std::memcmp(h.magic, "NXTRFMV2", 8) || h.version != 2 ||
+  if (std::memcmp(h.magic, "NXTRFMV2", 8) || (h.version != 2 && h.version != 3) ||
       h.header_bytes != sizeof(h)) {
     std::fprintf(stderr, "Unsupported checkpoint format (expected NXTRFMV2)\n");
     return false;
@@ -79,7 +87,7 @@ static bool load_inference_weights(Model &model, const Tokenizer &tok,
   return true;
 }
 
-static bool forward(Model &m, InferenceCache &c, const std::vector<int> &ids) {
+static bool forward_prefill(Model &m, InferenceCache &c, const std::vector<int> &ids) {
   int t = int(ids.size()), d = m.dim, f = m.ffn, td = t * d, tf = t * f;
   for (int i = 0; i < t; ++i) c.ids[i] = ids[i];
   embedding_fwd<<<blocks(td), 256>>>(c.ids, m.emb.v, c.embedding, t, d);
@@ -94,6 +102,8 @@ static bool forward(Model &m, InferenceCache &c, const std::vector<int> &ids) {
     int rope_items = t * m.heads * (d / m.heads / 2);
     rope<<<blocks(rope_items), 256>>>(c.q, t, d, m.heads, false);
     rope<<<blocks(rope_items), 256>>>(c.k, t, d, m.heads, false);
+    CUDA_CHECK(cudaMemcpy(c.key_cache[li], c.k, td * sizeof(float), cudaMemcpyDeviceToDevice));
+    CUDA_CHECK(cudaMemcpy(c.value_cache[li], c.v, td * sizeof(float), cudaMemcpyDeviceToDevice));
     attention_fwd<<<m.heads * t, 1>>>(c.q, c.k, c.v, c.att, c.ctx, t, d, m.heads);
     if (!gemm(c.ctx, l.wo.v, c.proj, t, d, d)) return false;
     add<<<blocks(td), 256>>>(c.x, c.proj, c.res, td);
@@ -107,6 +117,49 @@ static bool forward(Model &m, InferenceCache &c, const std::vector<int> &ids) {
   }
   if (!gemm(input, m.out.v, c.logits, t, d, m.vocab)) return false;
   CUDA_CHECK(cudaDeviceSynchronize());
+  c.cache_length = t;
+  return true;
+}
+
+static bool forward_decode(Model &m, InferenceCache &c, int token, int position) {
+  if (position != c.cache_length || position < 0 || position >= m.seq) {
+    std::fprintf(stderr, "KV cache position mismatch: position=%d cache_length=%d\n",
+                 position, c.cache_length);
+    return false;
+  }
+  const int d = m.dim, f = m.ffn;
+  c.ids[0] = token;
+  embedding_fwd<<<blocks(d), 256>>>(c.ids, m.emb.v, c.embedding, 1, d);
+  float *input = c.embedding;
+  for (int li = 0; li < m.nlayers; ++li) {
+    Layer &l = *m.layers[li];
+    CUDA_CHECK(cudaMemcpy(c.x, input, d * sizeof(float), cudaMemcpyDeviceToDevice));
+    rms_fwd<<<1, 1>>>(c.x, l.nq.v, c.n1, c.inv1, 1, d);
+    if (!gemm(c.n1, l.wq.v, c.q, 1, d, d) ||
+        !gemm(c.n1, l.wk.v, c.k, 1, d, d) ||
+        !gemm(c.n1, l.wv.v, c.v, 1, d, d)) return false;
+    const int rope_items = m.heads * (d / m.heads / 2);
+    rope_position<<<blocks(rope_items), 256>>>(c.q, d, m.heads, position);
+    rope_position<<<blocks(rope_items), 256>>>(c.k, d, m.heads, position);
+    CUDA_CHECK(cudaMemcpy(c.key_cache[li] + int64_t(position) * d, c.k,
+                          d * sizeof(float), cudaMemcpyDeviceToDevice));
+    CUDA_CHECK(cudaMemcpy(c.value_cache[li] + int64_t(position) * d, c.v,
+                          d * sizeof(float), cudaMemcpyDeviceToDevice));
+    attention_decode<<<blocks(m.heads), 256>>>(c.q, c.key_cache[li], c.value_cache[li],
+                                               c.att, c.ctx, position, m.seq, d, m.heads);
+    if (!gemm(c.ctx, l.wo.v, c.proj, 1, d, d)) return false;
+    add<<<blocks(d), 256>>>(c.x, c.proj, c.res, d);
+    rms_fwd<<<1, 1>>>(c.res, l.nf.v, c.n2, c.inv2, 1, d);
+    if (!gemm(c.n2, l.wg.v, c.gate, 1, d, f) ||
+        !gemm(c.n2, l.wu.v, c.up, 1, d, f)) return false;
+    swiglu_fwd<<<blocks(f), 256>>>(c.gate, c.up, c.sw, f);
+    if (!gemm(c.sw, l.wd.v, c.down, 1, f, d)) return false;
+    add<<<blocks(d), 256>>>(c.res, c.down, c.h, d);
+    input = c.h;
+  }
+  if (!gemm(input, m.out.v, c.logits, 1, d, m.vocab)) return false;
+  CUDA_CHECK(cudaDeviceSynchronize());
+  c.cache_length = position + 1;
   return true;
 }
 
@@ -170,12 +223,17 @@ int main() {
     if (ids.empty()) ids.push_back(tok.unk);
     if (ids.size() >= header.seq) ids.erase(ids.begin(), ids.end() - (header.seq - 1));
     std::printf("NeurX: ");
+    if (!forward_prefill(model, cache, ids)) return 6;
+    int logits_position = int(ids.size()) - 1;
     for (int n = 0; n < max_new_tokens && ids.size() < header.seq; ++n) {
-      if (!forward(model, cache, ids)) return 6;
-      int token = greedy_token(model, cache, int(ids.size()) - 1);
+      int token = greedy_token(model, cache, logits_position);
       if (token == tok.eos) break;
       if (token >= 0 && token < int(decoder.size())) std::printf("%s", decoder[token].c_str());
       ids.push_back(token);
+      if (n + 1 < max_new_tokens && ids.size() < header.seq) {
+        if (!forward_decode(model, cache, token, int(ids.size()) - 1)) return 6;
+        logits_position = 0;
+      }
     }
     std::printf("\n\n");
   }
