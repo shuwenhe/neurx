@@ -432,6 +432,23 @@ test-posttrain: check-bash
 	@echo ""
 	@echo "[✓] Phase 2A verification complete!"
 
+test-numerical: check-bash
+	@echo "======================================================"
+	@echo "[NeurX] Self-Contained Numerical Tests (Pure S)"
+	@echo "======================================================"
+	@echo ""
+	@echo "Philosophy: No PyTorch, No Python - Pure NeurX"
+	@echo ""
+	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/test_embedding'
+	@echo "Compiling embedding tests..."
+	@cd '$(CURDIR_UNIX)' && \
+		"$(POSTTRAIN_S_COMPILER)" 'scripts/test_embedding_standalone.s' '$(CURDIR_UNIX)/artifacts/build/test_embedding/test_standalone.ir' 2>&1 || exit 1
+	@echo "Running tests..."
+	@cd '$(CURDIR_UNIX)' && \
+		export NEURX_MODEL_PATH='/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct'; \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/test_embedding/test_standalone.ir' \
+		'$(S_RUNNER_BIN)' 2>&1
+
 verify-posttrain:
 	@mkdir -p '$(LOG_DIR)'
 	@$(MAKE) build-posttrain-verify-tensors-s
