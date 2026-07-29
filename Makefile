@@ -363,10 +363,7 @@ build-posttrain-sft-s: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_sft'
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir'; \
-		"$(POSTTRAIN_S_COMPILER)" ir 'posttrain/training/phase2a_trainer.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' 2>&1 || true; \
-		if [ ! -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' ]; then \
-			"$(POSTTRAIN_S_COMPILER)" 'posttrain/training/phase2a_trainer.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' 2>&1 || exit 1; \
-		fi && \
+		"$(POSTTRAIN_S_COMPILER)" 'posttrain/training/phase2a_simple.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' 2>&1 || exit 1; \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir'
 
 build-posttrain-verify-adapter-s: check-bash
