@@ -412,6 +412,26 @@ posttrain: check-bash build-s-ir-runner build-posttrain-sft-s
 	@echo "[✓] Phase 2A training completed!"
 	@echo "Output: $(POSTTRAIN_OUTPUT_DIR)"
 
+test-posttrain: check-bash
+	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_test'
+	@mkdir -p '$(LOG_DIR)'
+	@echo "======================================================"
+	@echo "[Phase 2A] Automated Verification Suite"
+	@echo "======================================================"
+	@cd '$(CURDIR_UNIX)' && \
+		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_test/verify_phase2a.ir'; \
+		"$(POSTTRAIN_S_COMPILER)" 'posttrain/testing/verify_phase2a.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_test/verify_phase2a.ir' 2>&1 || exit 1; \
+		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_test/verify_phase2a.ir' || exit 1
+	@cd '$(CURDIR_UNIX)' && \
+		set -o pipefail; \
+		export NEURX_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)'; \
+		export NEURX_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)'; \
+		export NEURX_DATA_PATH='$(POSTTRAIN_DATA_FILE)'; \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_test/verify_phase2a.ir' \
+		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/verify_phase2a_$(shell date +%Y%m%d_%H%M%S).log'
+	@echo ""
+	@echo "[✓] Phase 2A verification complete!"
+
 verify-posttrain:
 	@mkdir -p '$(LOG_DIR)'
 	@$(MAKE) build-posttrain-verify-tensors-s
