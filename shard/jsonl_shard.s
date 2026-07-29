@@ -3,7 +3,12 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}
 
 func pick_input_file(string root) string {
-    string candidate = runtime_env_get("INPUT_FILE", "")
+    string candidate = runtime_env_get("SHARD_INPUT_FILE", "")
+    if candidate != "" && runtime_file_exists(candidate) {
+        return candidate
+    }
+
+    candidate = runtime_env_get("INPUT_FILE", "")
     if candidate != "" && runtime_file_exists(candidate) {
         return candidate
     }
@@ -46,6 +51,9 @@ func build_script(string input_file, string shard_dir, string manifest_file, str
     script = script + "shard_list=\"\"\n"
     script = script + "for shard_file in \"" + shard_dir + "\"/shard_*; do\n"
     script = script + "  [ -f \"$shard_file\" ] || continue\n"
+    script = script + "  case \"$shard_file\" in\n"
+    script = script + "    *.log|*.jsonl) continue ;;\n"
+    script = script + "  esac\n"
     script = script + "  mv \"$shard_file\" \"$shard_file.jsonl\"\n"
     script = script + "  shard_list=\"$shard_list $shard_file.jsonl\"\n"
     script = script + "  i=$((i + 1))\n"

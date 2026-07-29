@@ -857,46 +857,54 @@ shard: check-bash
 		exit 1; \
 	fi
 	@cd '$(CURDIR_UNIX)' && \
-		INPUT_FILE='$(CURDIR_UNIX)/data/large_model/train.jsonl'; \
-		if [ ! -f "$$INPUT_FILE" ]; then \
-			for candidate in \
-				'$(CURDIR_UNIX)/data/training_data_claude.jsonl' \
-				'$(CURDIR_UNIX)/data/training_data_industrial_complete.jsonl' \
-				'$(CURDIR_UNIX)/data/training_data_splits/val.jsonl' \
-				'$(CURDIR_UNIX)/data/training_data_splits/test.jsonl'; do \
-				if [ -f "$$candidate" ]; then \
-					INPUT_FILE="$$candidate"; \
-					break; \
-				fi; \
-			done; \
+		SHARD_INPUT_FILE="$${SHARD_INPUT_FILE:-$${INPUT_FILE:-$${ENWIKI_BZ2_FILE:-}}}"; \
+		if [ -z "$$SHARD_INPUT_FILE" ]; then \
+			SHARD_INPUT_FILE='$(CURDIR_UNIX)/data/large_model/train.jsonl'; \
+			if [ ! -f "$$SHARD_INPUT_FILE" ]; then \
+				for candidate in \
+					'$(CURDIR_UNIX)/data/training_data_claude.jsonl' \
+					'$(CURDIR_UNIX)/data/training_data_industrial_complete.jsonl' \
+					'$(CURDIR_UNIX)/data/training_data_splits/val.jsonl' \
+					'$(CURDIR_UNIX)/data/training_data_splits/test.jsonl'; do \
+					if [ -f "$$candidate" ]; then \
+						SHARD_INPUT_FILE="$$candidate"; \
+						break; \
+					fi; \
+				done; \
+			fi; \
 		fi; \
-		if [ ! -f "$$INPUT_FILE" ]; then \
-			echo "Error: no JSONL shard input found."; \
+		if [ ! -f "$$SHARD_INPUT_FILE" ]; then \
+			echo "Error: shard input not found: $$SHARD_INPUT_FILE"; \
 			exit 1; \
 		fi; \
-		SHARD_SOURCE='shard/jsonl_shard.s'; \
-		export S_COMPILER='$(S_SEED_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)'; \
-		if "$$S_COMPILER" --help 2>&1 | grep -q "<input.s> <output.ir>"; then \
-			"$$S_COMPILER" "$$SHARD_SOURCE" '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 || exit 1; \
+		if printf '%s' "$$SHARD_INPUT_FILE" | grep -Eq '\.bz2$$'; then \
+			echo "Running Wikipedia shard processor on $(PLATFORM)..."; \
+			$(MAKE) shard-enwiki ENWIKI_BZ2_FILE="$$SHARD_INPUT_FILE" ENWIKI_SHARD_DIR='$(PRETRAIN_SHARD_DIR)' ENWIKI_MANIFEST_FILE='$(PRETRAIN_MANIFEST)' DOCS_PER_SHARD='$(PRETRAIN_SHARD_DOCS_PER_FILE)'; \
 		else \
-			"$$S_COMPILER" ir "$$SHARD_SOURCE" -o '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 || exit 1; \
-		fi && \
-		test -f '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir'
-	@$(MAKE) build-s-ir-runner
-	@echo "Running JSONL shard processor on $(PLATFORM)..."
-	@SHARD_LOG="$(PRETRAIN_SHARD_DIR)/shard_$(PLATFORM)_$(shell date +%Y%m%d_%H%M%S).log"; \
-	echo "Shard processing log: $$SHARD_LOG"; \
-	set -o pipefail; \
-	cd '$(CURDIR_UNIX)' && \
-		NEURX_HOME='$(CURDIR_UNIX)' \
-		INPUT_FILE="$$INPUT_FILE" \
-		SHARD_DIR='$(PRETRAIN_SHARD_DIR)' \
-		MANIFEST_FILE='$(PRETRAIN_MANIFEST)' \
-		DOCS_PER_SHARD='$(PRETRAIN_SHARD_DOCS_PER_FILE)' \
-		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' \
-		S_IR_RUNNER_ENTRY='main' \
-		'$(S_RUNNER_BIN)' 2>&1 | tee -a "$$SHARD_LOG" && \
-	echo "✓ Shard processing completed!" || (echo "✗ Shard processing failed. Check log: $$SHARD_LOG"; exit 1)
+			SHARD_SOURCE='shard/jsonl_shard.s'; \
+			export S_COMPILER='$(S_SEED_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)'; \
+			if "$$S_COMPILER" --help 2>&1 | grep -q "<input.s> <output.ir>"; then \
+				"$$S_COMPILER" "$$SHARD_SOURCE" '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 || exit 1; \
+			else \
+				"$$S_COMPILER" ir "$$SHARD_SOURCE" -o '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 || exit 1; \
+			fi && \
+			test -f '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' && \
+			$(MAKE) build-s-ir-runner && \
+			echo "Running JSONL shard processor on $(PLATFORM)..."; \
+			SHARD_LOG="$(PRETRAIN_SHARD_DIR)/shard_$(PLATFORM)_$(shell date +%Y%m%d_%H%M%S).log"; \
+			echo "Shard processing log: $$SHARD_LOG"; \
+			set -o pipefail; \
+			cd '$(CURDIR_UNIX)' && \
+				NEURX_HOME='$(CURDIR_UNIX)' \
+				INPUT_FILE="$$SHARD_INPUT_FILE" \
+				SHARD_DIR='$(PRETRAIN_SHARD_DIR)' \
+				MANIFEST_FILE='$(PRETRAIN_MANIFEST)' \
+				DOCS_PER_SHARD='$(PRETRAIN_SHARD_DOCS_PER_FILE)' \
+				S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' \
+				S_IR_RUNNER_ENTRY='main' \
+				'$(S_RUNNER_BIN)' 2>&1 | tee -a "$$SHARD_LOG" && \
+			echo "✓ Shard processing completed!" || (echo "✗ Shard processing failed. Check log: $$SHARD_LOG"; exit 1); \
+		fi
 
 split: check-bash
 	@echo "Splitting training data into train/val/test"
@@ -1287,6 +1295,7 @@ shard-s:
 shard-enwiki: check-bash
 	@echo "$(BLUE)📦 Sharding Wikipedia dataset...$(NC)"
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/shard
+	@mkdir -p $(PRETRAIN_SHARD_DIR)
 	@mkdir -p $(LOG_DIR)
 	@if ! command -v "$(S_COMPILER)" >/dev/null 2>&1; then \
 		echo "Error: S compiler not found at $(S_COMPILER)"; \
@@ -1294,16 +1303,27 @@ shard-enwiki: check-bash
 		exit 1; \
 	fi
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)' \
-		$(S_COMPILER) ir 'shard/shard_enwiki.s' -o '$(CURDIR_UNIX)/artifacts/build/shard/shard_enwiki.ir' 2>&1 && \
-		test -f '$(CURDIR_UNIX)/artifacts/build/shard/shard_enwiki.ir'
+		export S_COMPILER='$(S_SEED_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)'; \
+		if "$$S_COMPILER" --help 2>&1 | grep -q "<input.s> <output.ir>"; then \
+			"$$S_COMPILER" 'shard/shard.s' '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 || exit 1; \
+		else \
+			"$$S_COMPILER" ir 'shard/shard.s' -o '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 || exit 1; \
+		fi && \
+		test -f '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir'
 	@$(MAKE) build-s-ir-runner
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_HOME='$(CURDIR_UNIX)' \
-		ENWIKI_BZ2_FILE='$(PRETRAIN_RAW_DIR)/enwiki-latest-pages-articles.xml.bz2' \
-		ENWIKI_SHARD_DIR='$(PRETRAIN_SHARD_DIR)' \
-		ENWIKI_MANIFEST_FILE='$(PRETRAIN_MANIFEST)' \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/shard/shard_enwiki.ir' 2>&1 | tee -a $(LOG_DIR)/shard_enwiki_$(shell date +%Y%m%d_%H%M%S).log
+		NEURX_SHARD_CMD='wikipedia' \
+		S_COMPILER='$(S_SEED_COMPILER)' \
+		S_COMPILER_EMIT_CWD='$(S_COMPILER_EMIT_CWD)' \
+		S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
+		ENWIKI_BZ2_FILE="$${ENWIKI_BZ2_FILE:-$(PRETRAIN_RAW_DIR)/enwiki-latest-pages-articles.xml.bz2}" \
+		ENWIKI_SHARD_DIR="$${ENWIKI_SHARD_DIR:-$(PRETRAIN_SHARD_DIR)}" \
+		ENWIKI_MANIFEST_FILE="$${ENWIKI_MANIFEST_FILE:-$(PRETRAIN_MANIFEST)}" \
+		DOCS_PER_SHARD="$${DOCS_PER_SHARD:-$(PRETRAIN_SHARD_DOCS_PER_FILE)}" \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' \
+		S_IR_RUNNER_ENTRY='main' \
+		'$(S_RUNNER_BIN)' 2>&1 | tee -a $(LOG_DIR)/shard_enwiki_$(shell date +%Y%m%d_%H%M%S).log
 	@echo "$(GREEN)✓ Wikipedia sharding complete$(NC)"
 
 data-pipeline-s: build-data-scripts

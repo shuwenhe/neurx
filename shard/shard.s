@@ -6,26 +6,26 @@ func string_char(int c) string {
 }
 
 func trim(string s) string {
-    var begin = 0
+    int begin = 0
     while begin < len(s) {
-        var ch = string_char(s[begin])
+        string ch = string_char(s[begin])
         if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
             begin = begin + 1
         } else {
             break
         }
     }
-    var end = len(s)
+    int end = len(s)
     while end > begin {
-        var ch = string_char(s[end - 1])
+        string ch = string_char(s[end - 1])
         if ch == " " || ch == "\t" || ch == "\n" || ch == "\r" {
             end = end - 1
         } else {
             break
         }
     }
-    var out = ""
-    var i = begin
+    string out = ""
+    int i = begin
     while i < end {
         out = out + string_char(s[i])
         i = i + 1
@@ -59,10 +59,10 @@ func parse_int(string s, int fallback) int {
 }
 
 func shell_escape(string s) string {
-    var out = "'"
-    var i = 0
+    string out = "'"
+    int i = 0
     while i < len(s) {
-        var ch = string_char(s[i])
+        string ch = string_char(s[i])
         if ch == "'" {
             out = out + "'\"'\"'"
         } else {
