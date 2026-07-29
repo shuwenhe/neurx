@@ -131,6 +131,7 @@ func cmd_status(args []string) error {
     }
     return nil
 }
+
 var commands = []command{
     {
         name:        "train",
