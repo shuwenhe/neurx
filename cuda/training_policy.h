@@ -49,6 +49,8 @@ struct lr_config {
     LrSchedule schedule = LrSchedule::Cosine;
 };
 
+using LrConfig = lr_config;
+
 inline double learning_rate(const lr_config& config,
                             std::uint64_t optimizer_step) {
     if (!(config.peak_lr >= 0.0) || !(config.min_lr >= 0.0) ||
@@ -90,12 +92,16 @@ struct gradient_policy {
     double epsilon = 1e-6;
 };
 
+using GradientPolicy = gradient_policy;
+
 struct gradient_decision {
     bool finite = false;
     bool clipped = false;
     double norm = 0.0;
     double scale = 0.0;
 };
+
+using GradientDecision = gradient_decision;
 
 inline gradient_decision gradient_decision(double squared_norm,
                                           const gradient_policy& policy) {

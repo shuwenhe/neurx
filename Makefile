@@ -857,39 +857,44 @@ shard: check-bash
 		exit 1; \
 	fi
 	@cd '$(CURDIR_UNIX)' && \
-		export S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)'; \
+		INPUT_FILE='$(CURDIR_UNIX)/data/large_model/train.jsonl'; \
+		if [ ! -f "$$INPUT_FILE" ]; then \
+			for candidate in \
+				'$(CURDIR_UNIX)/data/training_data_claude.jsonl' \
+				'$(CURDIR_UNIX)/data/training_data_industrial_complete.jsonl' \
+				'$(CURDIR_UNIX)/data/training_data_splits/val.jsonl' \
+				'$(CURDIR_UNIX)/data/training_data_splits/test.jsonl'; do \
+				if [ -f "$$candidate" ]; then \
+					INPUT_FILE="$$candidate"; \
+					break; \
+				fi; \
+			done; \
+		fi; \
+		if [ ! -f "$$INPUT_FILE" ]; then \
+			echo "Error: no JSONL shard input found."; \
+			exit 1; \
+		fi; \
+		SHARD_SOURCE='shard/jsonl_shard.s'; \
+		export S_COMPILER='$(S_SEED_COMPILER)' S_SOURCE_ROOT='$(CURDIR_UNIX)'; \
 		if "$$S_COMPILER" --help 2>&1 | grep -q "<input.s> <output.ir>"; then \
-			"$$S_COMPILER" 'shard/shard.s' '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 || exit 1; \
+			"$$S_COMPILER" "$$SHARD_SOURCE" '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 || exit 1; \
 		else \
-			"$$S_COMPILER" ir 'shard/shard.s' -o '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 || exit 1; \
+			"$$S_COMPILER" ir "$$SHARD_SOURCE" -o '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' 2>&1 || exit 1; \
 		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/shard/shard.ir'
 	@$(MAKE) build-s-ir-runner
-	@echo "Running Wikipedia shard processor on $(PLATFORM)..."
+	@echo "Running JSONL shard processor on $(PLATFORM)..."
 	@SHARD_LOG="$(PRETRAIN_SHARD_DIR)/shard_$(PLATFORM)_$(shell date +%Y%m%d_%H%M%S).log"; \
-	SHARD_PROGRESS_LOG="$(PRETRAIN_SHARD_DIR)/shard_$(PLATFORM)_$(shell date +%Y%m%d_%H%M%S).progress.log"; \
 	echo "Shard processing log: $$SHARD_LOG"; \
-	echo "Shard progress log: $$SHARD_PROGRESS_LOG"; \
-	: > "$$SHARD_PROGRESS_LOG"; \
-	tail -n 0 -F "$$SHARD_PROGRESS_LOG" & \
-	TAIL_PID=$$!; \
-	trap 'kill $$TAIL_PID >/dev/null 2>&1 || true' EXIT; \
 	set -o pipefail; \
 	cd '$(CURDIR_UNIX)' && \
 		NEURX_HOME='$(CURDIR_UNIX)' \
-		S_COMPILER='$(S_SEED_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)'; \
-		S_COMPILER_EMIT_CWD='$(S_COMPILER_EMIT_CWD)' \
-		S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		NEURX_SHARD_CMD='$(NEURX_SHARD_CMD)' \
-		NEURX_SHARD_RESUME='$(NEURX_SHARD_RESUME)' \
-		NEURX_SHARD_FORCE_REBUILD='$(NEURX_SHARD_FORCE_REBUILD)' \
-		ENWIKI_BZ2_FILE='$(PRETRAIN_RAW_DIR)/enwiki-latest-pages-articles.xml.bz2' \
-		ENWIKI_SHARD_DIR='$(PRETRAIN_SHARD_DIR)' \
-		ENWIKI_MANIFEST_FILE='$(PRETRAIN_MANIFEST)' \
+		INPUT_FILE="$$INPUT_FILE" \
+		SHARD_DIR='$(PRETRAIN_SHARD_DIR)' \
+		MANIFEST_FILE='$(PRETRAIN_MANIFEST)' \
 		DOCS_PER_SHARD='$(PRETRAIN_SHARD_DOCS_PER_FILE)' \
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/shard/shard.ir' \
 		S_IR_RUNNER_ENTRY='main' \
-		NEURX_SHARD_PROGRESS_LOG="$$SHARD_PROGRESS_LOG" \
 		'$(S_RUNNER_BIN)' 2>&1 | tee -a "$$SHARD_LOG" && \
 	echo "✓ Shard processing completed!" || (echo "✗ Shard processing failed. Check log: $$SHARD_LOG"; exit 1)
 
@@ -1175,17 +1180,16 @@ run-with-logs-s: check-bash
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/run_with_logs/run_with_logs.ir' 2>&1 | tee -a $(LOG_DIR)/run_with_logs_$(shell date +%Y%m%d_%H%M%S).log
 
 verify-framework-s: check-bash
-	@echo "Building framework verification entry..."
-	@mkdir -p $(CURDIR_UNIX)/artifacts/build/verify_framework
+	@echo "Building framework stack verification entry..."
+	@mkdir -p $(CURDIR_UNIX)/artifacts/build/framework_stack
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
-		S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' \
-		$(S_COMPILER) ir 'scripts/legacy/verify_framework.s' -o '$(CURDIR_UNIX)/artifacts/build/verify_framework/verify_framework.ir' 2>&1 && \
-		test -f '$(CURDIR_UNIX)/artifacts/build/verify_framework/verify_framework.ir'
-	@echo "Running framework verification entry..."
+		"$(S_SEED_COMPILER)" 'tests/framework_stack.s' '$(CURDIR_UNIX)/artifacts/build/framework_stack/framework_stack.ir' 2>&1 && \
+		test -f '$(CURDIR_UNIX)/artifacts/build/framework_stack/framework_stack.ir'
+	@echo "Running framework stack verification entry..."
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/verify_framework/verify_framework.ir' 2>&1 | tee -a $(LOG_DIR)/verify_framework_$(shell date +%Y%m%d_%H%M%S).log
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/framework_stack/framework_stack.ir' 2>&1 | tee -a $(LOG_DIR)/verify_framework_$(shell date +%Y%m%d_%H%M%S).log
 
 verify-inference-pipeline-s: check-bash
 	@echo "Building inference pipeline verification entry..."
@@ -1921,6 +1925,25 @@ run-gpu-pretrain-s: check-bash
 			find '$(PRETRAIN_SHARD_DIR)' -maxdepth 1 -type f -name 'shard_*.jsonl' -print | sort > '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt'; \
 		else \
 			find '$(PRETRAIN_SHARD_DIR)' -maxdepth 1 -type f -name 'shard_*.jsonl' -print | sort | sed -n '1,$(PRETRAIN_SHARD_LIMIT)p' > '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt'; \
+		fi; \
+		if [ ! -s '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt' ]; then \
+			: > '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt'; \
+			for candidate in \
+				'$(CURDIR_UNIX)/data/training_data_claude.jsonl' \
+				'$(CURDIR_UNIX)/data/training_data_industrial_complete.jsonl' \
+				'$(CURDIR_UNIX)/data/large_model/train.jsonl' \
+				'$(CURDIR_UNIX)/data/large_model/val.jsonl' \
+				'$(CURDIR_UNIX)/data/training_data_splits/train.jsonl' \
+				'$(CURDIR_UNIX)/data/training_data_splits/val.jsonl' \
+				'$(CURDIR_UNIX)/data/training_data_splits/test.jsonl'; do \
+				if [ -f "$$candidate" ]; then \
+					printf '%s\n' "$$candidate" >> '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt'; \
+				fi; \
+			done; \
+		fi; \
+		if [ ! -s '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt' ]; then \
+			echo "[pretrain-gpu] no shard files found under $(PRETRAIN_SHARD_DIR) or fallback JSONL paths"; \
+			exit 1; \
 		fi
 	@if [ ! -x "$(S_RUNNER_BIN)" ]; then \
 		$(MAKE) build-s-ir-runner; \
@@ -1929,8 +1952,13 @@ run-gpu-pretrain-s: check-bash
 	@echo "Running S GPU pretrain launcher..."
 	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
 		SHARD_COUNT="$$(wc -l < '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt')"; \
-		FIRST_SHARD="$$(sed -n '1p' '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt')"; \
-		LAST_SHARD="$$(sed -n "$${SHARD_COUNT}p" '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt')"; \
+		if [ "$$SHARD_COUNT" -gt 0 ]; then \
+			FIRST_SHARD="$$(head -n 1 '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt')"; \
+			LAST_SHARD="$$(tail -n 1 '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt')"; \
+		else \
+			FIRST_SHARD=""; \
+			LAST_SHARD=""; \
+		fi; \
 		GPU_COUNT="$$(nvidia-smi -L 2>/dev/null | grep -c '^GPU ' || true)"; \
 		REQUESTED_WORLD="$${NEURX_NUM_GPUS:-$$GPU_COUNT}"; \
 		GIT_SHA="$$(git rev-parse HEAD 2>/dev/null || printf unknown)"; \
@@ -1952,6 +1980,14 @@ run-gpu-pretrain-s: check-bash
 		else \
 			echo "[pretrain-gpu] no transformer-v2 checkpoint, starting fresh"; \
 			RESUME_FLAG=0; \
+		fi; \
+		if [ -f "$${NEURX_TOKENIZER_VOCAB:-$(CURDIR_UNIX)/data/corpus/vocab.json}" ] && [ -f "$${NEURX_TOKENIZER_MERGES:-$(CURDIR_UNIX)/data/corpus/merges.txt}" ]; then \
+			TOKENIZER_VOCAB_PATH="$${NEURX_TOKENIZER_VOCAB:-$(CURDIR_UNIX)/data/corpus/vocab.json}"; \
+			TOKENIZER_MERGES_PATH="$${NEURX_TOKENIZER_MERGES:-$(CURDIR_UNIX)/data/corpus/merges.txt}"; \
+		else \
+			TOKENIZER_VOCAB_PATH=""; \
+			TOKENIZER_MERGES_PATH=""; \
+			echo "[pretrain-gpu] tokenizer vocab/merges missing, falling back to byte-level tokenizer"; \
 		fi; \
 		echo "[pretrain-gpu] skipping S validation, launching native CUDA/cuBLAS trainer..."; \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
@@ -1980,8 +2016,8 @@ run-gpu-pretrain-s: check-bash
 		NEURX_PRETRAIN_RESUME="$$RESUME_FLAG" \
 		NEURX_PRETRAIN_RESUME_FROM="$$RESUME_CHECKPOINT_FILE" \
 		NEURX_VALIDATE_CHECKPOINT="$${NEURX_VALIDATE_CHECKPOINT:-0}" \
-		NEURX_TOKENIZER_VOCAB="$${NEURX_TOKENIZER_VOCAB:-$(CURDIR_UNIX)/data/corpus/vocab.json}" \
-		NEURX_TOKENIZER_MERGES="$${NEURX_TOKENIZER_MERGES:-$(CURDIR_UNIX)/data/corpus/merges.txt}" \
+		NEURX_TOKENIZER_VOCAB="$$TOKENIZER_VOCAB_PATH" \
+		NEURX_TOKENIZER_MERGES="$$TOKENIZER_MERGES_PATH" \
 		NEURX_TRANSFORMER_DIM="$${NEURX_TRANSFORMER_DIM:-1024}" \
 		NEURX_TRANSFORMER_HEADS="$${NEURX_TRANSFORMER_HEADS:-16}" \
 		NEURX_TRANSFORMER_FFN="$${NEURX_TRANSFORMER_FFN:-4096}" \
