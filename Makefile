@@ -359,11 +359,14 @@ posttrain-phase2a: check-bash build-s-ir-runner build-posttrain-phase2a-s
 	@echo "[✓] Phase 2A training completed!"
 	@echo "Output: $(POSTTRAIN_OUTPUT_DIR)"
 
-build-posttrain-sft-s:
+build-posttrain-sft-s: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_sft'
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir'; \
-		"$(POSTTRAIN_S_COMPILER)" 'posttrain/trainer/posttrain_mini_scalar.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' 2>&1 && \
+		"$(POSTTRAIN_S_COMPILER)" ir 'posttrain/training/phase2a_trainer.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' 2>&1 || true; \
+		if [ ! -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' ]; then \
+			"$(POSTTRAIN_S_COMPILER)" 'posttrain/training/phase2a_trainer.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' 2>&1 || exit 1; \
+		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir'
 
 build-posttrain-verify-adapter-s: check-bash
@@ -396,44 +399,21 @@ build-posttrain-golden-s: check-bash
 		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir'
 
-posttrain: check-bash build-s-ir-runner build-lora-merge build-posttrain-sft-s
-	@echo "Starting real Qwen LoRA/SFT post-training..."
-	@mkdir -p '$(POSTTRAIN_ADAPTER_DIR)' '$(POSTTRAIN_OUTPUT_DIR)' '$(LOG_DIR)'
+posttrain: check-bash build-s-ir-runner build-posttrain-sft-s
+	@echo "======================================================"
+	@echo "[Phase 2A] Complete SFT Training with LoRA"
+	@echo "======================================================"
+	@mkdir -p '$(POSTTRAIN_OUTPUT_DIR)' '$(LOG_DIR)'
 	@cd '$(CURDIR_UNIX)' && \
 		set -o pipefail; \
-		NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)' \
-		NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)' \
-		NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_ADAPTER_DIR)' \
+		export NEURX_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)'; \
+		export NEURX_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)'; \
+		export NEURX_DATA_PATH='$(POSTTRAIN_DATA_FILE)'; \
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' \
-		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_real_$(shell date +%Y%m%d_%H%M%S).log'
-	@echo "[✓] LoRA training completed"
-	@echo "Adapter saved to: $(POSTTRAIN_ADAPTER_DIR)"
-		@if head -c 8 '$(POSTTRAIN_ADAPTER_DIR)/adapter_model.safetensors' 2>/dev/null | od -An -tx1 | grep -q '[0-9a-f]'; then \
-			if [ -f '$(LORA_MERGE_BIN)' ]; then \
-				echo "Merging LoRA into the model..."; \
-				rm -f '$(POSTTRAIN_OUTPUT_DIR)/adapter_model.safetensors' '$(POSTTRAIN_OUTPUT_DIR)/adapter_config.json' '$(POSTTRAIN_OUTPUT_DIR)/training_state.json'; \
-				'$(LORA_MERGE_BIN)' \
-					'$(POSTTRAIN_MODEL_PATH)' \
-					'$(POSTTRAIN_ADAPTER_DIR)' \
-					'$(POSTTRAIN_OUTPUT_DIR)' \
-					'$(POSTTRAIN_LORA_ALPHA)' \
-					'$(POSTTRAIN_LORA_RANK)' 2>&1; \
-				$(MAKE) build-posttrain-verify-adapter-s >/dev/null; \
-				NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)' \
-				NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_ADAPTER_DIR)' \
-				NEURX_MERGED_MODEL_DIR='$(POSTTRAIN_OUTPUT_DIR)' \
-				S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_verify_adapter/verify_posttrain_adapter.ir' \
-				'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_verify_adapter_$(shell date +%Y%m%d_%H%M%S).log' || exit 1; \
-			else \
-				echo "[⚠] Merge tool not available - copying base model"; \
-				cp -r '$(POSTTRAIN_MODEL_PATH)'/* '$(POSTTRAIN_OUTPUT_DIR)/' 2>/dev/null || true; \
-			fi \
-	else \
-		echo "[ℹ] S runtime simulated training detected - copying base model..."; \
-		mkdir -p '$(POSTTRAIN_OUTPUT_DIR)'; \
-		cp -r '$(POSTTRAIN_MODEL_PATH)'/* '$(POSTTRAIN_OUTPUT_DIR)/' 2>/dev/null || true; \
-	fi
-	@echo "Post-trained model ready at: $(POSTTRAIN_OUTPUT_DIR)"
+		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_phase2a_$(shell date +%Y%m%d_%H%M%S).log'
+	@echo ""
+	@echo "[✓] Phase 2A training completed!"
+	@echo "Output: $(POSTTRAIN_OUTPUT_DIR)"
 
 verify-posttrain:
 	@mkdir -p '$(LOG_DIR)'
