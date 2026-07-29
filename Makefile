@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test serving-native-socket-test posttrain posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain test-golden regenerate-golden pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 \
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test serving-native-socket-test posttrain posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain test-golden regenerate-golden pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -331,6 +331,33 @@ test-checkpoint-resume: check-bash
 	@echo "Running End-to-End Checkpoint Resume Test..."
 	@mkdir -p $(CURDIR_UNIX)/tests
 	@bash $(CURDIR_UNIX)/tests/checkpoint_resume_e2e.sh
+
+build-posttrain-phase2a-s: check-bash
+	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a'
+	@cd '$(CURDIR_UNIX)' && \
+		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir'; \
+		"$(POSTTRAIN_S_COMPILER)" ir 'posttrain/training/phase2a_trainer.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir' 2>&1 || true; \
+		if [ ! -f '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir' ]; then \
+			"$(POSTTRAIN_S_COMPILER)" 'posttrain/training/phase2a_trainer.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir' 2>&1 || exit 1; \
+		fi && \
+		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir'
+	@echo "✓ Phase 2A compiled to S IR successfully"
+
+posttrain-phase2a: check-bash build-s-ir-runner build-posttrain-phase2a-s
+	@echo "======================================================"
+	@echo "[Phase 2A] Complete SFT Training with LoRA"
+	@echo "======================================================"
+	@mkdir -p '$(LOG_DIR)' '$(POSTTRAIN_OUTPUT_DIR)'
+	@cd '$(CURDIR_UNIX)' && \
+		set -o pipefail; \
+		export NEURX_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)'; \
+		export NEURX_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)'; \
+		export NEURX_DATA_PATH='$(POSTTRAIN_DATA_FILE)'; \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir' \
+		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_phase2a_$(shell date +%Y%m%d_%H%M%S).log'
+	@echo ""
+	@echo "[✓] Phase 2A training completed!"
+	@echo "Output: $(POSTTRAIN_OUTPUT_DIR)"
 
 build-posttrain-sft-s:
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_sft'
