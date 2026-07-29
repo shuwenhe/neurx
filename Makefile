@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway posttrain posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain test-golden regenerate-golden pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 \
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway posttrain posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain test-golden regenerate-golden pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -1464,8 +1464,54 @@ model-runtime-native-test:
 		runtime/model/json.cpp runtime/model/safetensors.cpp \
 		runtime/model/hf_model.cpp runtime/model/bpe_tokenizer.cpp \
 		runtime/native/tensor_runtime.cpp \
+		-licui18n -licuuc -licudata \
 		-o artifacts/build/model_runtime_native/model_runtime_native_test
 	@artifacts/build/model_runtime_native/model_runtime_native_test
+
+tokenizer-hf-parity-test:
+	@mkdir -p artifacts/build/model_runtime_native
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
+		tests/tokenizer_parity_probe.cpp runtime/model/json.cpp \
+		runtime/model/bpe_tokenizer.cpp -licui18n -licuuc -licudata \
+		-o artifacts/build/model_runtime_native/tokenizer_parity_probe
+	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
+		HF_MODEL_DIR="$${HF_MODEL_DIR:-/home/shuwen/model/Qwen2.5-0.5B-Instruct}"; \
+		"$$PYTORCH_PYTHON" tests/tokenizer_hf_parity.py \
+		artifacts/build/model_runtime_native/tokenizer_parity_probe "$$HF_MODEL_DIR"
+
+hf-checkpoint-level1-test:
+	@mkdir -p artifacts/build/model_runtime_native
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
+		tests/hf_checkpoint_level1_probe.cpp runtime/model/json.cpp \
+		runtime/model/safetensors.cpp runtime/model/hf_model.cpp \
+		runtime/native/tensor_runtime.cpp \
+		-o artifacts/build/model_runtime_native/hf_checkpoint_level1_probe
+	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
+		HF_MODEL_DIR="$${HF_MODEL_DIR:-/home/shuwen/model/Qwen2.5-0.5B-Instruct}"; \
+		"$$PYTORCH_PYTHON" tests/hf_checkpoint_level1_parity.py \
+		artifacts/build/model_runtime_native/hf_checkpoint_level1_probe "$$HF_MODEL_DIR"
+
+hf-decoder-cpu-parity-test:
+	@mkdir -p artifacts/build/model_runtime_native
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
+		tests/hf_decoder_cpu_probe.cpp runtime/model/json.cpp \
+		runtime/model/safetensors.cpp runtime/model/hf_model.cpp \
+		runtime/model/decoder_cpu.cpp runtime/native/tensor_runtime.cpp \
+		-o artifacts/build/model_runtime_native/hf_decoder_cpu_probe
+	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
+		"$$PYTORCH_PYTHON" tests/hf_decoder_cpu_parity.py \
+		artifacts/build/model_runtime_native/hf_decoder_cpu_probe
+
+hf-kv-generation-parity-test:
+	@mkdir -p artifacts/build/model_runtime_native
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
+		tests/hf_kv_generation_probe.cpp runtime/model/json.cpp \
+		runtime/model/safetensors.cpp runtime/model/hf_model.cpp \
+		runtime/model/decoder_cpu.cpp runtime/native/tensor_runtime.cpp \
+		-o artifacts/build/model_runtime_native/hf_kv_generation_probe
+	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
+		"$$PYTORCH_PYTHON" tests/hf_kv_generation_parity.py \
+		artifacts/build/model_runtime_native/hf_kv_generation_probe
 
 kv-cache-reference-test:
 	@mkdir -p artifacts/build/kv_cache
@@ -1513,6 +1559,7 @@ build-openai-gateway:
 		serving/native/openai_gateway.cpp \
 		runtime/model/json.cpp runtime/model/bpe_tokenizer.cpp \
 		artifacts/build/serving_native/serving_socket.o \
+		-licui18n -licuuc -licudata \
 		-o artifacts/build/serving_native/neurx_openai_gateway
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		tests/openai_gateway_fake_backend.cpp \
@@ -1536,6 +1583,26 @@ transformer-cuda-integration-test: check-nvcc
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
 		cuda/transformer_integration_test.cu -lcublas -o artifacts/build/transformer_cuda/transformer_integration_test
 	@artifacts/build/transformer_cuda/transformer_integration_test
+
+hf-decoder-cuda-build: check-nvcc
+	@mkdir -p artifacts/build/hf_decoder_cuda
+	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
+		cuda/hf_decoder_cuda.cu -o artifacts/build/hf_decoder_cuda/hf_decoder_cuda.o
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c runtime/model/json.cpp \
+		-o artifacts/build/hf_decoder_cuda/json.o
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c runtime/model/safetensors.cpp \
+		-o artifacts/build/hf_decoder_cuda/safetensors.o
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c runtime/model/hf_model.cpp \
+		-o artifacts/build/hf_decoder_cuda/hf_model.o
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c runtime/native/tensor_runtime.cpp \
+		-o artifacts/build/hf_decoder_cuda/tensor_runtime.o
+
+hf-decoder-cuda-kernels-test: check-nvcc
+	@mkdir -p artifacts/build/hf_decoder_cuda
+	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
+		cuda/hf_decoder_kernels_test.cu \
+		-o artifacts/build/hf_decoder_cuda/hf_decoder_kernels_test
+	@artifacts/build/hf_decoder_cuda/hf_decoder_kernels_test
 
 transformer-cuda-checkpoint-resume-test:
 	@if [ -z '$(CUDA_NVCC)' ]; then \
@@ -2189,3 +2256,33 @@ simple-training: build-simple-training-s
 	@echo "   ..."
 	@echo ""
 	@echo "✅ Milestone 1 Complete: Code compiles successfully"
+
+# ========================================
+# Test Suite
+# ========================================
+.PHONY: test-math test-adamw test-gradient-check test-all
+
+test-math:
+	@echo "🧪 [Test] Math Functions"
+	$(S_SEED_COMPILER) tests/test_math_functions.s /tmp/test_math.ir
+	@echo "✅ Compiled (runtime execution pending)"
+
+test-adamw:
+	@echo "🧪 [Test] AdamW Optimizer"
+	$(S_SEED_COMPILER) tests/test_adamw.s /tmp/test_adamw.ir
+	@echo "✅ Compiled (runtime execution pending)"
+
+test-gradient-check:
+	@echo "🧪 [Test] Gradient Check"
+	$(S_SEED_COMPILER) tests/test_gradient_check.s /tmp/test_gradient_check.ir
+	@echo "✅ Compiled (runtime execution pending)"
+
+test-all: test-math test-adamw test-gradient-check
+	@echo ""
+	@echo "📊 Test Summary:"
+	@echo "  ✅ Math functions test compiled"
+	@echo "  ✅ AdamW optimizer test compiled"
+	@echo "  ✅ Gradient check test compiled"
+	@echo ""
+	@echo "⚠️  Note: Actual test execution requires S runtime"
+	@echo "   Currently only verifying compilation"
