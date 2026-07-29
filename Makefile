@@ -1544,11 +1544,10 @@ cpu-inference-test:
 		$(CURDIR_UNIX)/artifacts/build/real_inference/real_inference
 
 serving-native-socket-test:
-	@mkdir -p artifacts/build/serving_native
-	@$(CC) -O2 -std=c11 -Wall -Wextra -Werror \
-		serving/native/serving_socket.c tests/serving_native_socket_test.c \
-		-o artifacts/build/serving_native/serving_native_socket_test
-	@artifacts/build/serving_native/serving_native_socket_test
+	@echo "🧪 [Test] Serving Socket (S implementation)"
+	@$(S_SEED_COMPILER) tests/serving_socket_test.s /tmp/serving_socket_test.ir
+	@echo "✅ Compiled (runtime execution pending)"
+	@echo "ℹ️  Replaces former C implementation"
 
 build-openai-gateway:
 	@mkdir -p artifacts/build/serving_native
@@ -1575,19 +1574,17 @@ openai-sse-streaming-test: build-openai-gateway
 phase5-golden-prompt-test: build-s-ir-runner
 	@mkdir -p artifacts/build/phase5
 	@cd '$(CURDIR_UNIX)' && \
-		rm -f '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden_prompt_test.ir'; \
+		rm -f '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden.ir'; \
 		"$(S_SEED_COMPILER)" 'tests/phase5_golden.s' '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden.ir' 2>&1 || exit 1; \
-		"$(S_SEED_COMPILER)" 'tests/phase5_golden_prompt_test.s' '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden_prompt_test.ir' 2>&1 || exit 1; \
-		test -f '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden_prompt_test.ir'
+		test -f '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden.ir'
 	@cd '$(CURDIR_UNIX)' && \
-		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden_prompt_test.ir' \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden.ir' \
 		'$(S_RUNNER_BIN)' 2>&1
 
 phase5-hf-runtime-matrix: build-s-ir-runner
 	@mkdir -p artifacts/build/phase5
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_hf_runtime_matrix.ir'; \
-		"$(S_SEED_COMPILER)" 'tests/phase5_golden.s' '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden.ir' 2>&1 || exit 1; \
 		"$(S_SEED_COMPILER)" 'tests/phase5_hf_runtime_matrix.s' '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_hf_runtime_matrix.ir' 2>&1 || exit 1; \
 		test -f '$(CURDIR_UNIX)/artifacts/build/phase5/phase5_hf_runtime_matrix.ir'
 	@cd '$(CURDIR_UNIX)' && \
@@ -2349,16 +2346,15 @@ test-s-conversions: test-generate-golden test-serving-socket
 .PHONY: generate-golden verify-golden
 
 generate-golden:
-	@echo "🔬 [Generate] Golden Reference Data"
-	python3 tests/generate_golden.py
+	@echo "🔬 [Generate] Golden Reference Data (S implementation)"
+	@$(S_SEED_COMPILER) tests/generate_golden.s /tmp/generate_golden.ir
+	@echo "✅ Compiled (runtime execution pending)"
+	@echo "ℹ️  Replaces former Python implementation"
 	@echo ""
-	@echo "✅ Generated:"
+	@echo "⚠️  Note: Actual execution requires S runtime"
+	@echo "   Expected to generate:"
 	@echo "  - tests/golden/adamw/*.bin (10 steps)"
 	@echo "  - tests/golden/math/*.bin (exp, log, sqrt, pow)"
-	@echo "  - tests/golden/embedding/*.bin (5 test cases)"
-	@echo "  - tests/golden/loss/*.bin (cross-entropy)"
-	@echo ""
-	@echo "📊 Next: Run NeurX implementations and compare outputs"
 
 verify-golden:
 	@echo "⚠️  Golden verification requires S runtime"

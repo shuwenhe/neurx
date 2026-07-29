@@ -1,6 +1,7 @@
 package main
 
-use neurx.runtime.io.{runtime_read_text_file, runtime_file_exists}
+use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file}
+use neurx.strings.{string_index_of, string_length, string_split, string_trim, substring}
 use std.io.println
 
 struct phase5_prompt_entry {
@@ -15,168 +16,70 @@ struct phase5_prompt_catalog {
     string default_prompt
 }
 
-func phase5_trim(string text) string {
-    int start = 0
-    int end = phase5_length(text)
-    while start < end && phase5_is_space(text[start]) {
-        start = start + 1
-    }
-    while end > start && phase5_is_space(text[end - 1]) {
-        end = end - 1
-    }
-    phase5_substring(text, start, end)
-}
-
-func phase5_length(string text) int {
-    int i = 0
-    while i < 1000000 {
-        if i >= len(text) {
-            break
-        }
-        i = i + 1
-    }
-    i
-}
-
-func phase5_is_space(int ch) bool {
-    ch == 32 || ch == 9 || ch == 10 || ch == 13
-}
-
-func phase5_substring(string text, int start, int end) string {
-    string out = ""
-    int i = start
-    int n = phase5_length(text)
-    while i < end && i < n {
-        out = out + string(text[i])
-        i = i + 1
-    }
-    out
-}
-
-func phase5_index_of(string text, string needle) int {
-    int text_len = phase5_length(text)
-    int needle_len = phase5_length(needle)
-    if needle_len == 0 {
-        return 0
-    }
-    if needle_len > text_len {
-        return -1
-    }
-    int i = 0
-    while i <= text_len - needle_len {
-        int j = 0
-        bool match = true
-        while j < needle_len {
-            if text[i + j] != needle[j] {
-                match = false
-                break
-            }
-            j = j + 1
-        }
-        if match {
-            return i
-        }
-        i = i + 1
-    }
-    -1
-}
-
-func phase5_split_lines(string text) []string {
-    []string lines = []string{cap: 16}
-    string current = ""
-    int i = 0
-    int n = phase5_length(text)
-    while i < n {
-        int ch = text[i]
-        if ch == 10 {
-            lines.push(current)
-            current = ""
-        } else if ch != 13 {
-            current = current + string(ch)
-        }
-        i = i + 1
-    }
-    if phase5_length(current) > 0 {
-        lines.push(current)
-    }
-    lines
+func phase5_digit_value(string digit) int {
+    if digit == "0" { return 0 }
+    if digit == "1" { return 1 }
+    if digit == "2" { return 2 }
+    if digit == "3" { return 3 }
+    if digit == "4" { return 4 }
+    if digit == "5" { return 5 }
+    if digit == "6" { return 6 }
+    if digit == "7" { return 7 }
+    if digit == "8" { return 8 }
+    if digit == "9" { return 9 }
+    0
 }
 
 func phase5_extract_json_string(string line, string key) string {
-    int key_pos = phase5_index_of(line, key)
+    int key_pos = string_index_of(line, key)
     if key_pos < 0 {
         return ""
     }
-    int colon_pos = phase5_index_of(phase5_substring(line, key_pos, phase5_length(line)), ":")
+    string rest = string_trim(substring(line, key_pos + string_length(key), string_length(line)))
+    int colon_pos = string_index_of(rest, ":")
     if colon_pos < 0 {
         return ""
     }
-    int cursor = key_pos + colon_pos + 1
-    while cursor < phase5_length(line) && phase5_is_space(line[cursor]) {
-        cursor = cursor + 1
-    }
-    if cursor >= phase5_length(line) || line[cursor] != 34 {
+    rest = string_trim(substring(rest, colon_pos + 1, string_length(rest)))
+    if string_length(rest) < 2 || substring(rest, 0, 1) != "\"" {
         return ""
     }
-    cursor = cursor + 1
-    string out = ""
-    while cursor < phase5_length(line) {
-        int ch = line[cursor]
-        if ch == 34 {
-            break
-        }
-        if ch == 92 && cursor + 1 < phase5_length(line) {
-            int next = line[cursor + 1]
-            if next == 34 || next == 92 {
-                out = out + string(next)
-                cursor = cursor + 2
-                continue
-            }
-            if next == 110 {
-                out = out + "\n"
-                cursor = cursor + 2
-                continue
-            }
-            if next == 116 {
-                out = out + "\t"
-                cursor = cursor + 2
-                continue
-            }
-        }
-        out = out + string(ch)
-        cursor = cursor + 1
+    string body = substring(rest, 1, string_length(rest))
+    int end_quote = string_index_of(body, "\"")
+    if end_quote < 0 {
+        return ""
     }
-    out
+    substring(body, 0, end_quote)
 }
 
 func phase5_extract_json_int(string line, string key) int {
-    int key_pos = phase5_index_of(line, key)
+    int key_pos = string_index_of(line, key)
     if key_pos < 0 {
         return -1
     }
-    int colon_pos = phase5_index_of(phase5_substring(line, key_pos, phase5_length(line)), ":")
+    string rest = string_trim(substring(line, key_pos + string_length(key), string_length(line)))
+    int colon_pos = string_index_of(rest, ":")
     if colon_pos < 0 {
         return -1
     }
-    int cursor = key_pos + colon_pos + 1
-    while cursor < phase5_length(line) && phase5_is_space(line[cursor]) {
-        cursor = cursor + 1
-    }
+    rest = string_trim(substring(rest, colon_pos + 1, string_length(rest)))
     int sign = 1
-    if cursor < phase5_length(line) && line[cursor] == 45 {
+    if string_length(rest) > 0 && substring(rest, 0, 1) == "-" {
         sign = -1
-        cursor = cursor + 1
+        rest = substring(rest, 1, string_length(rest))
     }
+    int i = 0
     int value = 0
     bool found = false
-    while cursor < phase5_length(line) {
-        int ch = line[cursor]
-        if ch < 48 || ch > 57 {
+    while i < string_length(rest) {
+        string digit = substring(rest, i, i + 1)
+        if digit != "0" && digit != "1" && digit != "2" && digit != "3" && digit != "4" &&
+           digit != "5" && digit != "6" && digit != "7" && digit != "8" && digit != "9" {
             break
         }
-        value = value * 10 + (ch - 48)
+        value = value * 10 + phase5_digit_value(digit)
         found = true
-        cursor = cursor + 1
+        i = i + 1
     }
     if !found {
         return -1
@@ -192,16 +95,16 @@ func phase5_load_prompt_catalog(string path) phase5_prompt_catalog {
         println("phase5-golden-prompt FAIL missing_file=" + path)
         return catalog
     }
-    []string lines = phase5_split_lines(runtime_read_text_file(path))
+    []string lines = string_split(runtime_read_text_file(path), "\n")
     phase5_prompt_entry current
     bool in_entry = false
     int i = 0
     while i < len(lines) {
-        string line = phase5_trim(lines[i])
-        if phase5_index_of(line, "\"default_prompt\"") >= 0 {
+        string line = string_trim(lines[i])
+        if string_index_of(line, "\"default_prompt\"") >= 0 {
             catalog.default_prompt = phase5_extract_json_string(line, "\"default_prompt\"")
         }
-        if phase5_index_of(line, "\"name\"") >= 0 {
+        if string_index_of(line, "\"name\"") >= 0 {
             current = phase5_prompt_entry {
                 name: phase5_extract_json_string(line, "\"name\""),
                 text: "",
@@ -209,11 +112,11 @@ func phase5_load_prompt_catalog(string path) phase5_prompt_catalog {
                 tokens_count: -1,
             }
             in_entry = true
-        } else if in_entry && phase5_index_of(line, "\"text\"") >= 0 {
+        } else if in_entry && string_index_of(line, "\"text\"") >= 0 {
             current.text = phase5_extract_json_string(line, "\"text\"")
-        } else if in_entry && phase5_index_of(line, "\"category\"") >= 0 {
+        } else if in_entry && string_index_of(line, "\"category\"") >= 0 {
             current.category = phase5_extract_json_string(line, "\"category\"")
-        } else if in_entry && phase5_index_of(line, "\"tokens_count\"") >= 0 {
+        } else if in_entry && string_index_of(line, "\"tokens_count\"") >= 0 {
             current.tokens_count = phase5_extract_json_int(line, "\"tokens_count\"")
             catalog.prompts.push(current)
             in_entry = false
@@ -238,12 +141,12 @@ func phase5_find_prompt(phase5_prompt_catalog catalog, string text) phase5_promp
 func main() int {
     string prompt_path = "tests/golden/prompts.json"
     phase5_prompt_catalog catalog = phase5_load_prompt_catalog(prompt_path)
-    if phase5_length(catalog.default_prompt) == 0 {
+    if string_length(catalog.default_prompt) == 0 {
         println("phase5-golden-prompt FAIL missing_default_prompt")
         return 1
     }
     phase5_prompt_entry default_entry = phase5_find_prompt(catalog, catalog.default_prompt)
-    if phase5_length(default_entry.name) == 0 {
+    if string_length(default_entry.name) == 0 {
         println("phase5-golden-prompt FAIL default_prompt_not_listed")
         return 1
     }
@@ -254,7 +157,7 @@ func main() int {
     int i = 0
     while i < len(catalog.prompts) {
         phase5_prompt_entry entry = catalog.prompts[i]
-        if phase5_length(entry.name) == 0 || phase5_length(entry.text) == 0 || phase5_length(entry.category) == 0 {
+        if string_length(entry.name) == 0 || string_length(entry.text) == 0 || string_length(entry.category) == 0 {
             println("phase5-golden-prompt FAIL invalid_entry=" + string(i))
             return 1
         }
