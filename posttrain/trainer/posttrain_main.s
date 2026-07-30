@@ -390,7 +390,7 @@ func run_posttrain_lora_sft() int {
                 int rank_val = rank
                 int in_dim = hidden_size
                 float rank_float = rank as float
-                float scaling_val = alpha / rank_float
+                float scaling_val = 2.0
                 []float target = target_q
                 int is_odd = module_cursor - ((module_cursor / 2) * 2)
                 if is_odd == 1 {
