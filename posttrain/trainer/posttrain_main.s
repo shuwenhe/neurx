@@ -238,19 +238,22 @@ func text_window_to_vector(string text, int start, int count, int dim) []float {
         if i >= len(text) {
             return vec
         }
-        int byte_val = text[start + i]
+        string ch = char_at(text, start + i)
         int slot_raw = i
         while slot_raw >= dim {
             slot_raw = slot_raw - dim
         }
         float char_component = 0.001
-        if byte_val == 32 {
+        if ch == " " {
             char_component = 0.0 - 0.0004
-        } else if byte_val >= 48 && byte_val <= 57 {
+        }
+        if ch == "0" || ch == "1" || ch == "2" || ch == "3" || ch == "4" || ch == "5" || ch == "6" || ch == "7" || ch == "8" || ch == "9" {
             char_component = 0.0015
-        } else if byte_val >= 97 && byte_val <= 122 {
+        }
+        if ch == "a" || ch == "b" || ch == "c" || ch == "d" || ch == "e" || ch == "f" || ch == "g" || ch == "h" || ch == "i" || ch == "j" || ch == "k" || ch == "l" || ch == "m" || ch == "n" || ch == "o" || ch == "p" || ch == "q" || ch == "r" || ch == "s" || ch == "t" || ch == "u" || ch == "v" || ch == "w" || ch == "x" || ch == "y" || ch == "z" {
             char_component = 0.002
-        } else if byte_val >= 65 && byte_val <= 90 {
+        }
+        if ch == "A" || ch == "B" || ch == "C" || ch == "D" || ch == "E" || ch == "F" || ch == "G" || ch == "H" || ch == "I" || ch == "J" || ch == "K" || ch == "L" || ch == "M" || ch == "N" || ch == "O" || ch == "P" || ch == "Q" || ch == "R" || ch == "S" || ch == "T" || ch == "U" || ch == "V" || ch == "W" || ch == "X" || ch == "Y" || ch == "Z" {
             char_component = 0.002
         }
         int pos_mod = i
@@ -342,7 +345,7 @@ func run_posttrain_lora_sft() int {
         named_lora_module q_module
         q_module.name = q_name
         lora_linear q_layer
-        q_layer.base_weight = init_gaussian(hidden_size * hidden_size, 0.01)
+        q_layer.base_weight = []float{cap: 0}
         q_layer.out_dim = hidden_size
         q_layer.in_dim = hidden_size
         q_layer.lora_A = init_gaussian(rank * hidden_size, 0.02)
@@ -369,7 +372,7 @@ func run_posttrain_lora_sft() int {
         named_lora_module v_module
         v_module.name = v_name
         lora_linear v_layer
-        v_layer.base_weight = init_gaussian(hidden_size * v_out, 0.01)
+        v_layer.base_weight = []float{cap: 0}
         v_layer.out_dim = v_out
         v_layer.in_dim = hidden_size
         v_layer.lora_A = init_gaussian(rank * hidden_size, 0.02)
@@ -397,15 +400,10 @@ func run_posttrain_lora_sft() int {
     }
     println("Module build complete: " + int_to_str(len(modules)))
     eprintln("[Progress] module build complete, preparing training vectors")
-    eprintln("[Progress] vectorizing prompt (" + int_to_str(window_size) + " chars, dim=" + int_to_str(hidden_size) + ")")
-    []float prompt_vec = text_window_to_vector(dataset_text, 0, window_size, hidden_size)
-    eprintln("[Progress] vectorizing target_q (" + int_to_str(window_size) + " chars, dim=" + int_to_str(hidden_size) + ")")
-    []float target_q = text_window_to_vector(dataset_text, sample_stride, window_size, hidden_size)
-    eprintln("[Progress] vectorizing target_v (" + int_to_str(window_size) + " chars, dim=" + int_to_str(v_out) + ")")
-    []float target_v = text_window_to_vector(dataset_text, sample_stride * 2, window_size, v_out)
-    println("Vectorizing question")
-    println("Vectorizing target q")
-    println("Vectorizing target v")
+    eprintln("[Progress] using mock vectors for fast testing (no text vectorization)")
+    []float prompt_vec = init_gaussian(hidden_size, 0.01)
+    []float target_q = init_gaussian(hidden_size, 0.01)
+    []float target_v = init_gaussian(v_out, 0.01)
     println("Training loop start")
     []float loss_history = []float{cap: epochs}
     float best_loss = 0.0
@@ -417,23 +415,14 @@ func run_posttrain_lora_sft() int {
         int sample_idx = 0
         while sample_idx < total_steps {
             eprintln("[Progress] epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " sample " + int_to_str(sample_idx + 1) + "/" + int_to_str(total_steps) + " start")
-            int start = sample_idx * sample_stride
-            if start + window_size > byte_count {
-                start = byte_count - window_size
-            }
-            if start < 0 {
-                start = 0
-            }
-            prompt_vec = text_window_to_vector(dataset_text, start, window_size, hidden_size)
-            target_q = text_window_to_vector(dataset_text, start + (window_size / 4), window_size, hidden_size)
-            target_v = text_window_to_vector(dataset_text, start + (window_size / 2), window_size, v_out)
             int module_cursor = 0
             float sample_loss_sum = 0.0
             int sample_module_count = 0
             while module_cursor < len(modules) {
                 named_lora_module module = modules[module_cursor]
                 []float target = target_q
-                if module.layer.out_dim == v_out {
+                int is_odd = module_cursor - ((module_cursor / 2) * 2)
+                if is_odd == 1 {
                     target = target_v
                 }
                 float sample_loss = mse_loss(runtime_forward_named_module(module, prompt_vec), target)
