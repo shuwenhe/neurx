@@ -500,14 +500,20 @@ func run_posttrain_lora_sft() int {
 }
 
 func train_named_module(named_lora_module module, []float input_vec, []float target_vec, float lr) named_lora_module {
-    []float hidden = fill_lora(module.layer.rank, 0.0)
+    int rank = module.layer.rank
+    int in_dim = module.layer.in_dim
+    int out_dim = module.layer.out_dim
+    float scaling = module.layer.scaling
+    []float lora_A = module.layer.lora_A
+    []float lora_B = module.layer.lora_B
+    []float hidden = fill_lora(rank, 0.0)
     int rank_idx = 0
-    while rank_idx < module.layer.rank {
+    while rank_idx < rank {
         int in_idx = 0
-        while in_idx < module.layer.in_dim && in_idx < len(input_vec) {
-            int a_idx = rank_idx * module.layer.in_dim + in_idx
-            if a_idx < len(module.layer.lora_A) {
-                hidden[rank_idx] = hidden[rank_idx] + module.layer.lora_A[a_idx] * input_vec[in_idx]
+        while in_idx < in_dim && in_idx < len(input_vec) {
+            int a_idx = rank_idx * in_dim + in_idx
+            if a_idx < len(lora_A) {
+                hidden[rank_idx] = hidden[rank_idx] + lora_A[a_idx] * input_vec[in_idx]
             }
             in_idx = in_idx + 1
         }
@@ -515,42 +521,44 @@ func train_named_module(named_lora_module module, []float input_vec, []float tar
     }
     []float output = runtime_forward_named_module(module, input_vec)
     []float grad_out = mse_gradient(output, target_vec)
-    []float b_snapshot = copy_float_array(module.layer.lora_B)
-    float step_scale = lr * module.layer.scaling
+    []float b_snapshot = copy_float_array(lora_B)
+    float step_scale = lr * scaling
     int out_idx = 0
-    while out_idx < module.layer.out_dim {
+    while out_idx < out_dim {
         rank_idx = 0
-        while rank_idx < module.layer.rank {
-            int b_idx = out_idx * module.layer.rank + rank_idx
-            if b_idx < len(module.layer.lora_B) {
+        while rank_idx < rank {
+            int b_idx = out_idx * rank + rank_idx
+            if b_idx < len(lora_B) {
                 float grad_b = grad_out[out_idx] * hidden[rank_idx]
-                module.layer.lora_B[b_idx] = module.layer.lora_B[b_idx] - step_scale * grad_b
+                lora_B[b_idx] = lora_B[b_idx] - step_scale * grad_b
             }
             rank_idx = rank_idx + 1
         }
         out_idx = out_idx + 1
     }
     rank_idx = 0
-    while rank_idx < module.layer.rank {
+    while rank_idx < rank {
         int in_idx = 0
-        while in_idx < module.layer.in_dim && in_idx < len(input_vec) {
+        while in_idx < in_dim && in_idx < len(input_vec) {
             float grad_a = 0.0
             out_idx = 0
-            while out_idx < module.layer.out_dim {
-                int b_idx = out_idx * module.layer.rank + rank_idx
+            while out_idx < out_dim {
+                int b_idx = out_idx * rank + rank_idx
                 if b_idx < len(b_snapshot) {
                     grad_a = grad_a + grad_out[out_idx] * b_snapshot[b_idx]
                 }
                 out_idx = out_idx + 1
             }
-            int a_idx = rank_idx * module.layer.in_dim + in_idx
-            if a_idx < len(module.layer.lora_A) {
-                module.layer.lora_A[a_idx] = module.layer.lora_A[a_idx] - step_scale * grad_a * input_vec[in_idx]
+            int a_idx = rank_idx * in_dim + in_idx
+            if a_idx < len(lora_A) {
+                lora_A[a_idx] = lora_A[a_idx] - step_scale * grad_a * input_vec[in_idx]
             }
             in_idx = in_idx + 1
         }
         rank_idx = rank_idx + 1
     }
+    module.layer.lora_A = lora_A
+    module.layer.lora_B = lora_B
     module
 }
 
@@ -596,8 +604,10 @@ func guarantee_nonzero_modules([]named_lora_module modules, []float input_vec, [
     bool has_nonzero = false
     while module_idx < len(modules) && !has_nonzero {
         named_lora_module module = modules[module_idx]
+        int out_dim = module.layer.out_dim
+        int rank = module.layer.rank
         int j = 0
-        int b_len = module.layer.out_dim * module.layer.rank
+        int b_len = out_dim * rank
         while j < b_len {
             if module.layer.lora_B[j] != 0.0 {
                 has_nonzero = true
@@ -614,7 +624,8 @@ func guarantee_nonzero_modules([]named_lora_module modules, []float input_vec, [
     while idx < len(modules) {
         named_lora_module module = modules[idx]
         []float target = target_q
-        if module.layer.out_dim == len(target_v) {
+        int out_dim = module.layer.out_dim
+        if out_dim == len(target_v) {
             target = target_v
         }
         module = train_named_module(module, input_vec, target, lr)
@@ -797,8 +808,11 @@ func compute_stats([]named_lora_module modules) adapter_stats {
     int module_idx = 0
     while module_idx < len(modules) {
         named_lora_module module = modules[module_idx]
+        int rank = module.layer.rank
+        int in_dim = module.layer.in_dim
+        int out_dim = module.layer.out_dim
         int i = 0
-        int a_len = module.layer.rank * module.layer.in_dim
+        int a_len = rank * in_dim
         while i < a_len {
             float value = module.layer.lora_A[i]
             float abs_value = abs_float(value)
@@ -814,7 +828,7 @@ func compute_stats([]named_lora_module modules) adapter_stats {
             i = i + 1
         }
         i = 0
-        int b_len = module.layer.out_dim * module.layer.rank
+        int b_len = out_dim * rank
         while i < b_len {
             float value = module.layer.lora_B[i]
             float abs_value = abs_float(value)
