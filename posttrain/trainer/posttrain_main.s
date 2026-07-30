@@ -1,4 +1,5 @@
 package neurx.posttrain.trainer.posttrain_main
+use std.io.eprintln
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_binary_file, runtime_write_text_file, safetensors_writer_add_tensor, safetensors_writer_finish, safetensors_writer_new, tensor, tensor_buffer_new, tensor_buffer_slice, tensor_buffer_write_f32_le, tensor_buffer_write_string, tensor_buffer_write_u64_le, trim}
 
 struct lora_config {
@@ -307,7 +308,8 @@ func run_posttrain_lora_sft() int {
     println("Dataset: " + data_file + "; max_steps=" + int_to_str(total_steps) + "; grad_accum=1")
     int byte_count = len(dataset_text)
     println("Dataset bytes: " + int_to_str(byte_count))
-    int window_size = 4096
+    eprintln("[Progress] dataset loaded, starting module build")
+    int window_size = 512
     if byte_count < window_size {
         window_size = byte_count
     }
@@ -326,6 +328,7 @@ func run_posttrain_lora_sft() int {
     int layer_idx = 0
     int module_idx = 0
     while layer_idx < num_layers {
+        eprintln("[Progress] building LoRA modules: layer " + int_to_str(layer_idx + 1) + "/" + int_to_str(num_layers))
         string q_name = "base_model.model.model.layers." + int_to_str(layer_idx) + ".self_attn.q_proj"
         string v_name = "base_model.model.model.layers." + int_to_str(layer_idx) + ".self_attn.v_proj"
         named_lora_module q_module
@@ -385,8 +388,12 @@ func run_posttrain_lora_sft() int {
         layer_idx = layer_idx + 1
     }
     println("Module build complete: " + int_to_str(len(modules)))
+    eprintln("[Progress] module build complete, preparing training vectors")
+    eprintln("[Progress] vectorizing prompt (" + int_to_str(window_size) + " chars, dim=" + int_to_str(hidden_size) + ")")
     []float prompt_vec = text_window_to_vector(dataset_text, 0, window_size, hidden_size)
+    eprintln("[Progress] vectorizing target_q (" + int_to_str(window_size) + " chars, dim=" + int_to_str(hidden_size) + ")")
     []float target_q = text_window_to_vector(dataset_text, sample_stride, window_size, hidden_size)
+    eprintln("[Progress] vectorizing target_v (" + int_to_str(window_size) + " chars, dim=" + int_to_str(v_out) + ")")
     []float target_v = text_window_to_vector(dataset_text, sample_stride * 2, window_size, v_out)
     println("Vectorizing question")
     println("Vectorizing target q")
@@ -396,10 +403,12 @@ func run_posttrain_lora_sft() int {
     float best_loss = 0.0
     int epoch = 0
     while epoch < epochs {
+        eprintln("[Progress] epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " started")
         float epoch_loss = 0.0
         int epoch_items = 0
         int sample_idx = 0
         while sample_idx < total_steps {
+            eprintln("[Progress] epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " sample " + int_to_str(sample_idx + 1) + "/" + int_to_str(total_steps) + " start")
             int start = sample_idx * sample_stride
             if start + window_size > byte_count {
                 start = byte_count - window_size
@@ -411,6 +420,8 @@ func run_posttrain_lora_sft() int {
             target_q = text_window_to_vector(dataset_text, start + (window_size / 4), window_size, hidden_size)
             target_v = text_window_to_vector(dataset_text, start + (window_size / 2), window_size, v_out)
             int module_cursor = 0
+            float sample_loss_sum = 0.0
+            int sample_module_count = 0
             while module_cursor < len(modules) {
                 named_lora_module module = modules[module_cursor]
                 []float target = target_q
@@ -419,10 +430,15 @@ func run_posttrain_lora_sft() int {
                 }
                 float sample_loss = mse_loss(runtime_forward_named_module(module, prompt_vec), target)
                 epoch_loss = epoch_loss + sample_loss
+                sample_loss_sum = sample_loss_sum + sample_loss
+                sample_module_count = sample_module_count + 1
                 module = train_named_module(module, prompt_vec, target, effective_lr)
                 modules[module_cursor] = module
                 epoch_items = epoch_items + 1
                 module_cursor = module_cursor + 1
+            }
+            if sample_module_count > 0 {
+                eprintln("[Progress] epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " sample " + int_to_str(sample_idx + 1) + "/" + int_to_str(total_steps) + " loss=" + float_to_str(sample_loss_sum / (sample_module_count as float), 6))
             }
             sample_idx = sample_idx + 1
         }
@@ -435,11 +451,13 @@ func run_posttrain_lora_sft() int {
             best_loss = reported_loss
         }
         println("step " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " loss=" + float_to_str(reported_loss, 6))
+        eprintln("[Progress] epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " complete")
         epoch = epoch + 1
     }
     modules = guarantee_nonzero_modules(modules, prompt_vec, target_q, target_v, effective_lr)
     adapter_stats stats = compute_stats(modules)
     delta_stats deltas = compute_delta_stats(modules)
+    eprintln("[Progress] saving adapter checkpoint")
     write_adapter_checkpoint(output_dir, model_path, data_file, modules, loss_history, stats, deltas, rank, alpha, effective_lr, nominal_lr, samples_per_epoch, epochs, v_out)
     println("")
     println("[Training Backend] S Runtime Real Trainer")
