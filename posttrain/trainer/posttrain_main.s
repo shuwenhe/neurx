@@ -182,13 +182,16 @@ func runtime_collect_samples(string dataset_text, int limit) runtime_sample_batc
 }
 
 func runtime_forward_named_module(named_lora_module module, []float input_vec) []float {
-    []float output = fill_lora(module.layer.out_dim, 0.0)
-    []float hidden = fill_lora(module.layer.rank, 0.0)
+    int out_dim = module.layer.out_dim
+    int rank = module.layer.rank
+    int in_dim = module.layer.in_dim
+    []float output = fill_lora(out_dim, 0.0)
+    []float hidden = fill_lora(rank, 0.0)
     int r = 0
-    while r < module.layer.rank {
+    while r < rank {
         int in_idx = 0
-        while in_idx < module.layer.in_dim && in_idx < len(input_vec) {
-            int a_idx = r * module.layer.in_dim + in_idx
+        while in_idx < in_dim && in_idx < len(input_vec) {
+            int a_idx = r * in_dim + in_idx
             if a_idx < len(module.layer.lora_A) {
                 hidden[r] = hidden[r] + module.layer.lora_A[a_idx] * input_vec[in_idx]
             }
@@ -196,22 +199,26 @@ func runtime_forward_named_module(named_lora_module module, []float input_vec) [
         }
         r = r + 1
     }
+    float scaling = module.layer.scaling
+    []float lora_A = module.layer.lora_A
+    []float lora_B = module.layer.lora_B
+    []float base_weight = module.layer.base_weight
     int out_idx = 0
-    while out_idx < module.layer.out_dim {
+    while out_idx < out_dim {
         float sum = 0.0
         int in_idx = 0
-        while in_idx < module.layer.in_dim && in_idx < len(input_vec) {
-            int w_idx = out_idx * module.layer.in_dim + in_idx
-            if w_idx < len(module.layer.base_weight) {
-                sum = sum + input_vec[in_idx] * module.layer.base_weight[w_idx]
+        while in_idx < in_dim && in_idx < len(input_vec) {
+            int w_idx = out_idx * in_dim + in_idx
+            if w_idx < len(base_weight) {
+                sum = sum + input_vec[in_idx] * base_weight[w_idx]
             }
             in_idx = in_idx + 1
         }
         int rank_idx = 0
-        while rank_idx < module.layer.rank {
-            int b_idx = out_idx * module.layer.rank + rank_idx
-            if b_idx < len(module.layer.lora_B) {
-                sum = sum + module.layer.scaling * module.layer.lora_B[b_idx] * hidden[rank_idx]
+        while rank_idx < rank {
+            int b_idx = out_idx * rank + rank_idx
+            if b_idx < len(lora_B) {
+                sum = sum + scaling * lora_B[b_idx] * hidden[rank_idx]
             }
             rank_idx = rank_idx + 1
         }
