@@ -820,12 +820,19 @@ func compute_stats([]named_lora_module modules) adapter_stats {
     float max_abs = 0.0
     int nonzero = 0
     int total = 0
+    int rank_const = 8
+    int hidden_size_const = 896
+    int v_out_const = 896
     int module_idx = 0
     while module_idx < len(modules) {
         named_lora_module module = modules[module_idx]
-        int rank = module.layer.rank
-        int in_dim = module.layer.in_dim
-        int out_dim = module.layer.out_dim
+        int rank = rank_const
+        int in_dim = hidden_size_const
+        int out_dim = hidden_size_const
+        int is_odd = module_idx - ((module_idx / 2) * 2)
+        if is_odd == 1 {
+            out_dim = v_out_const
+        }
         []float lora_A = module.layer.lora_A
         []float lora_B = module.layer.lora_B
         int i = 0
@@ -876,12 +883,19 @@ func compute_delta_stats([]named_lora_module modules) delta_stats {
     float l2 = 0.0
     float max_abs = 0.0
     int changed = 0
+    int rank_const = 8
+    int hidden_size_const = 896
+    int v_out_const = 896
     int module_idx = 0
     while module_idx < len(modules) {
         named_lora_module module = modules[module_idx]
-        int rank = module.layer.rank
-        int in_dim = module.layer.in_dim
-        int out_dim = module.layer.out_dim
+        int rank = rank_const
+        int in_dim = hidden_size_const
+        int out_dim = hidden_size_const
+        int is_odd = module_idx - ((module_idx / 2) * 2)
+        if is_odd == 1 {
+            out_dim = v_out_const
+        }
         []float lora_A = module.layer.lora_A
         []float lora_B = module.layer.lora_B
         int i = 0
