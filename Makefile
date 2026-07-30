@@ -2519,3 +2519,23 @@ posttrain-simple: check-bash build-s-ir-runner
 	@echo ""
 	@echo "[✓] Simple REAL training completed!"
 	@echo "Output: $(POSTTRAIN_OUTPUT_DIR)"
+
+# LoRA Training with Tensor + CrossEntropy - Full demonstration
+posttrain-lora-tensor: check-bash build-s-ir-runner
+	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_lora_tensor'
+	@echo "======================================================"
+	@echo "[Phase 2A] LoRA + Tensor + CrossEntropy Training"
+	@echo "======================================================"
+	@cd '$(CURDIR_UNIX)' && \
+		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_lora_tensor/lora_tensor.ir'; \
+		"$(POSTTRAIN_S_COMPILER)" 'posttrain/training/lora_tensor_real.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_lora_tensor/lora_tensor.ir' 2>&1 || exit 1; \
+		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_lora_tensor/lora_tensor.ir'
+	@mkdir -p '$(POSTTRAIN_OUTPUT_DIR)' '$(LOG_DIR)'
+	@cd '$(CURDIR_UNIX)' && \
+		set -o pipefail; \
+		export NEURX_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)'; \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_lora_tensor/lora_tensor.ir' \
+		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_lora_tensor_$(shell date +%Y%m%d_%H%M%S).log'
+	@echo ""
+	@echo "[✓] LoRA Tensor training completed!"
+	@echo "Output: $(POSTTRAIN_OUTPUT_DIR)"
