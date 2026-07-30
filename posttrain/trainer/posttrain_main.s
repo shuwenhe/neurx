@@ -426,15 +426,25 @@ func run_posttrain_lora_sft() int {
             float sample_loss_sum = 0.0
             int sample_module_count = 0
             while module_cursor < len(modules) {
+                eprintln("[Debug] Processing module " + int_to_str(module_cursor))
+                named_lora_module module = modules[module_cursor]
+                eprintln("[Debug] Module loaded")
                 []float target = target_q
                 int is_odd = module_cursor - ((module_cursor / 2) * 2)
                 if is_odd == 1 {
                     target = target_v
                 }
-                float sample_loss = 0.1
+                eprintln("[Debug] Target selected")
+                []float output = runtime_forward_named_module(module, prompt_vec)
+                eprintln("[Debug] Forward complete")
+                float sample_loss = mse_loss(output, target)
+                eprintln("[Debug] Loss computed")
                 epoch_loss = epoch_loss + sample_loss
                 sample_loss_sum = sample_loss_sum + sample_loss
                 sample_module_count = sample_module_count + 1
+                module = train_named_module(module, prompt_vec, target, effective_lr)
+                eprintln("[Debug] Backward complete")
+                modules[module_cursor] = module
                 epoch_items = epoch_items + 1
                 module_cursor = module_cursor + 1
             }
@@ -494,6 +504,7 @@ func run_posttrain_lora_sft() int {
     println("  Improvement:       " + float_to_str(improvement, 2) + "%")
     0
 }
+
 func train_named_module(named_lora_module module, []float input_vec, []float target_vec, float lr) named_lora_module {
     int rank = module.layer.rank
     int in_dim = module.layer.in_dim
