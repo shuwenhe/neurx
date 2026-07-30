@@ -64,7 +64,7 @@ func test_tokenizer_loader_init() {
 
 func test_model_loading() {
     string test_name = "Tokenizer: Load HF model"
-    string model_path = "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
+    string model_path = "../model/Qwen2.5-0.5B-Instruct"
     tokenizer_state_2 state = load_tokenizer(model_path)
     bool passed = true
     string message = ""
@@ -81,7 +81,7 @@ func test_model_loading() {
 
 func test_basic_tokenization() {
     string test_name = "Tokenizer: Basic Tokenization"
-    string model_path = "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
+    string model_path = "../model/Qwen2.5-0.5B-Instruct"
     tokenizer_state_2 state = load_tokenizer(model_path)
     if !state.is_loaded {
         record_test_result(test_name, false, "model not loaded, skipping test")
@@ -106,7 +106,7 @@ func test_basic_tokenization() {
 
 func test_determinism() {
     string test_name = "Tokenizer: Determinism (10 runs)"
-    string model_path = "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
+    string model_path = "../model/Qwen2.5-0.5B-Instruct"
     tokenizer_state_2 state = load_tokenizer(model_path)
     if !state.is_loaded {
         record_test_result(test_name, false, "model not loaded, skipping test")
@@ -126,7 +126,7 @@ func test_determinism() {
 
 func test_vocab_size() {
     string test_name = "Tokenizer: Vocabulary Size"
-    string model_path = "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
+    string model_path = "../model/Qwen2.5-0.5B-Instruct"
     tokenizer_state_2 state = load_tokenizer(model_path)
     bool passed = true
     string message = ""

@@ -103,9 +103,9 @@ func create_training_config_from_env() training_config {
     config.learning_rate = 0.0005
     config.warmup_steps = 100
     config.total_steps = 1000
-    config.output_dir = runtime_env_get("NEURX_OUTPUT_DIR", "/home/shuwen/shuwen/posttrain")
-    config.model_path = runtime_env_get("NEURX_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
-    config.data_path = runtime_env_get("NEURX_DATA_PATH", "/home/shuwen/shuwen/dataset/medical/train.json")
+    config.output_dir = runtime_env_get("NEURX_OUTPUT_DIR", "../posttrain")
+    config.model_path = runtime_env_get("NEURX_MODEL_PATH", "../model/Qwen2.5-0.5B-Instruct")
+    config.data_path = runtime_env_get("NEURX_DATA_PATH", "../dataset/medical/train.json")
     return config
 }
 
@@ -226,7 +226,7 @@ func main() {
     println("[Phase 2A] Complete SFT Training with LoRA")
     println("====================================================")
     println("[Loading] Qwen2.5-0.5B-Instruct...")
-    println("Model Path: /home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
+    println("Model Path: ../model/Qwen2.5-0.5B-Instruct")
     println("")
     println("[Model Architecture]")
     println("  Layers: 24")

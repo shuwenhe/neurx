@@ -601,9 +601,9 @@ func create_training_config_json(training_config config) string {
 
 func create_training_config() training_config {
     training_config config
-    config.model_path = runtime_env_get("NEURX_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
-    config.data_path = runtime_env_get("NEURX_DATA_PATH", "/home/shuwen/shuwen/dataset/medical/train.json")
-    config.output_dir = runtime_env_get("NEURX_OUTPUT_DIR", "/home/shuwen/shuwen/posttrain")
+    config.model_path = runtime_env_get("NEURX_MODEL_PATH", "../model/Qwen2.5-0.5B-Instruct")
+    config.data_path = runtime_env_get("NEURX_DATA_PATH", "../dataset/medical/train.json")
+    config.output_dir = runtime_env_get("NEURX_OUTPUT_DIR", "../posttrain")
     config.num_epochs = 3
     config.batch_size = 4
     config.num_layers = 24

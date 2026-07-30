@@ -3,9 +3,9 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, r
 
 func main() {
     string mode = runtime_env_get("NEURX_POSTTRAIN_GOLDEN_MODE", "verify")
-    string golden_dir = runtime_env_get("NEURX_POSTTRAIN_GOLDEN_DIR", "/home/shuwen/shuwen/posttrain/golden")
-    string model_dir = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
-    string data_file = runtime_env_get("NEURX_POSTTRAIN_DATA_FILE", "/home/shuwen/shuwen/dataset/medical/train.json")
+    string golden_dir = runtime_env_get("NEURX_POSTTRAIN_GOLDEN_DIR", "../posttrain/golden")
+    string model_dir = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "../model/Qwen2.5-0.5B-Instruct")
+    string data_file = runtime_env_get("NEURX_POSTTRAIN_DATA_FILE", "../dataset/medical/train.json")
     int dataset_limit = parse_int(runtime_env_get("NEURX_POSTTRAIN_GOLDEN_DATASET_LIMIT", "12"), 12)
     if mode == "generate" {
         generate_golden(golden_dir, model_dir, data_file, dataset_limit)

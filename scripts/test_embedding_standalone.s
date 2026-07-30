@@ -132,7 +132,7 @@ func test_batch_embedding() bool {
 func test_model_loading() bool {
     println("[TEST 4] Model File Availability")
 
-    string model_path = runtime_env_get("NEURX_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
+    string model_path = runtime_env_get("NEURX_MODEL_PATH", "../model/Qwen2.5-0.5B-Instruct")
     println("  Model path: " + model_path)
 
     if runtime_file_exists(model_path) {

@@ -7,7 +7,7 @@ float MIN_WEIGHT_DELTA_L2 = 1e-6
 int MIN_CHANGED_ELEMENTS = 1
 
 func main() {
-    string base_dir = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
+    string base_dir = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "../model/Qwen2.5-0.5B-Instruct")
     string adapter_dir = runtime_env_get("NEURX_POSTTRAIN_OUTPUT_DIR", "/home/shuwen/shuwen/posttrain_adapter")
     string output_dir = runtime_env_get("NEURX_MERGED_MODEL_DIR", "/home/shuwen/shuwen/posttrain")
     string adapter_file = adapter_dir + "/adapter_model.safetensors"

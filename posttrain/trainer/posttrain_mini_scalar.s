@@ -79,8 +79,8 @@ func float_to_str(float value, int decimals) string {
 }
 
 func run_mini_scalar_posttrain() int {
-    string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
-    string output_dir = runtime_env_get("NEURX_POSTTRAIN_OUTPUT_DIR", "/home/shuwen/shuwen/posttrain_adapter")
+    string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "../model/Qwen2.5-0.5B-Instruct")
+    string output_dir = runtime_env_get("NEURX_POSTTRAIN_OUTPUT_DIR", "../posttrain_adapter")
     if !runtime_file_exists(model_path) && !runtime_file_exists(model_path + "/config.json") {
         println("error: model path not found: " + model_path)
         return 1
