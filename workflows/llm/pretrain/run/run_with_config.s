@@ -2,7 +2,7 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_output, runtime_shell_escape}
 use std.io.println
 
-func main() int {
+func main() {
     string config = runtime_env_get("NEURX_PRETRAIN_CONFIG", "workflows/llm/pretrain/config/sample.yaml")
     string steps_override = runtime_env_get("NEURX_PRETRAIN_STEPS_OVERRIDE", "")
     string s_bin_override = runtime_env_get("S_BIN", runtime_env_get("S_COMPILER", ""))
@@ -60,7 +60,7 @@ func main() int {
     string tmp_src = ""
     tmp_src = tmp_src + "package neurx.workflows.llm.pretrain.run_tmp\n\n"
     tmp_src = tmp_src + "use neurx.workflows.llm.pretrain.run.pipeline_runner.{run_pretrain_with_distributed_config}\n\n"
-    tmp_src = tmp_src + "func main() int {\n"
+    tmp_src = tmp_src + "func main() {\n"
     tmp_src = tmp_src + "  run_pretrain_with_distributed_config(" + micro_batch + ", " + seq_len + ", " + lr + ", " + max_steps + ", " + warmup_steps + ", " + min_lr + ", " + weight_decay + ", " + log_interval + ", " + eval_interval + ", " + save_interval + ", " + runtime_shell_escape(dataset_manifest) + ", " + runtime_shell_escape(checkpoint_root) + ", " + tp_degree + ", " + pp_degree + ", " + dp_degree + ", " + sp_degree + ", " + zero_stage + ", " + hidden_dim + ", " + num_layers + ", " + num_attn_heads + ", " + num_kv_heads + ", " + intermediate_dim + ", " + vocab_size + ")\n"
     tmp_src = tmp_src + "  0\n}\n"
     _ = runtime_run_command("printf %s " + runtime_shell_escape(tmp_src) + " > " + runtime_shell_escape(tmp_s))

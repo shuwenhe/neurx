@@ -16,7 +16,7 @@ struct enwiki_shard_config {
     bool cleanup_temp
 }
 
-func main() int {
+func main() {
     println("")
     println("╔══════════════════════════════════════════════════════════╗")
     println("║     NeurX Wikipedia Shard Processing (S Language)        ║")

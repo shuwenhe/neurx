@@ -262,7 +262,7 @@ func sft_to_jsonl(sft_record rec) string {
     json
 }
 
-func main() int {
+func main() {
     println("╔═══════════════════════════════════════════════════════════════╗")
     println("║ MedMCQA → SFT Dataset Converter (S Language Implementation)  ║")
     println("╚═══════════════════════════════════════════════════════════════╝")

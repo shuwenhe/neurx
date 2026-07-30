@@ -83,7 +83,7 @@ func get_max_pages() string {
     runtime_env_get("MAX_PAGES", "0")
 }
 
-func main() int {
+func main() {
     println("")
     println("[*] NeurX Wikipedia Shard Processing")
     println("")

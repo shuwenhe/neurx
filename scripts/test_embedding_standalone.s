@@ -153,7 +153,7 @@ func test_model_loading() bool {
     return false
 }
 
-func main() int {
+func main() {
     println("============================================================")
     println("NeurX Embedding Tests (Pure S, No PyTorch)")
     println("============================================================")

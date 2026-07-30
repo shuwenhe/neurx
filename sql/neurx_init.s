@@ -13,7 +13,7 @@ func schema_sql(string password) string {
     "ALTER TABLE `user` MODIFY COLUMN `phone` VARCHAR(32) NOT NULL;\n"
 }
 
-func main() int {
+func main() {
     string password = runtime_env_get("NEURX_DB_PASSWORD", "")
     if password == "" {
         println("NEURX_DB_PASSWORD must be set")

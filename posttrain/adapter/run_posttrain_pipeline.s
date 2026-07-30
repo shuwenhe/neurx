@@ -67,7 +67,7 @@ func float_to_str(float value, int decimals) string {
     out
 }
 
-func main() int {
+func main() {
     println("")
     println("╔════════════════════════════════════════════════════════════════╗")
     println("║   NeurX Post-Training Configuration                             ║")

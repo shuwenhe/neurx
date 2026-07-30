@@ -1,7 +1,7 @@
 package main
 use std.io.println
 
-func main() int {
+func main() {
     println("")
     println("╔" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╗")
     println("║  LoRA merge and model saving")

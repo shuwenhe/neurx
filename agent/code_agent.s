@@ -440,7 +440,7 @@ func code_agent_print_answer(agent_runtime_state state) {
     println("[code_agent] last_observation: ", state.last_observation)
 }
 
-func main() int {
+func main() {
     string task = trim(runtime_env_get("NEURX_CODE_AGENT_TASK", ""))
     if task == "" {
         task = code_agent_read_stdin()

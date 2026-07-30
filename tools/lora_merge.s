@@ -201,7 +201,7 @@ func fmt_float(float value, int decimals) string {
     out
 }
 
-func main() int {
+func main() {
     merge_config cfg = merge_config {
         base_dir: "/path/to/base/model",
         adapter_dir: "/path/to/adapter",

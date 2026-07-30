@@ -2,7 +2,7 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command, runtime_shell_escape}
 use std.io.println
 
-func main() int {
+func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     string mode = runtime_env_get("NEURX_INFER_MODE", "batch")
     string checkpoint_dir = runtime_env_get("NEURX_CHECKPOINT_DIR", project_root + "/artifacts/checkpoints/llm_training")

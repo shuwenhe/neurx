@@ -234,7 +234,7 @@ func run_clean() int {
     0
 }
 
-func main() int {
+func main() {
     var cmd = env_get("NEURX_SHARD_CMD", "help")
     if cmd == "wikipedia" || cmd == "shard" {
         return run_wikipedia()

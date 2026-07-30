@@ -2,7 +2,7 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_output, runtime_shell_escape, trim}
 use std.io.println
 
-func main() int {
+func main() {
     string config = runtime_env_get("NEURX_ROBOTICS_CONFIG", "workflows/robotics/train/config/sample.yaml")
     string steps_override = runtime_env_get("NEURX_ROBOTICS_STEPS", "")
     if !runtime_run_command("test -f " + runtime_shell_escape(config)).ok {
@@ -31,7 +31,7 @@ func main() int {
     string tmp_src = ""
     tmp_src = tmp_src + "package neurx.workflows.robotics.train.run_tmp\n\n"
     tmp_src = tmp_src + "use neurx.workflows.robotics.train.pipeline_runner.{run_robotics_training_with_schedule}\n\n"
-    tmp_src = tmp_src + "func main() int {\n"
+    tmp_src = tmp_src + "func main() {\n"
     tmp_src = tmp_src + "    run_robotics_training_with_schedule(" + obs_dim + ", " + latent_dim + ", " + act_dim + ", " + max_steps + ", " + sample_count + ", " + eval_every + ", " + save_every + ", " + learning_rate + ", " + runtime_shell_escape(task_name) + ")\n"
     tmp_src = tmp_src + "    0\n}\n"
     _ = runtime_run_command("printf %s " + runtime_shell_escape(tmp_src) + " > " + runtime_shell_escape(tmp_s))

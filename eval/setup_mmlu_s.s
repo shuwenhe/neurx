@@ -327,7 +327,7 @@ func string_trim(string s) string {
     return s[start:end]
 }
 
-func main() int {
+func main() {
     string project_root = io_get_env("NEURX_ROOT", ".")
     string data_root = io_get_env("NEURX_MMLU_DATA_ROOT", project_root + "/data/mmlu")
     io_println("=========================================")

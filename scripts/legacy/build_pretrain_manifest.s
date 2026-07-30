@@ -15,7 +15,7 @@ func string_char(int c) string {
     string(c)
 }
 
-func main() int {
+func main() {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     let shard_dir = runtime_env_get("NEURX_PRETRAIN_SHARD_DIR", project_root + "/dataset/pretrain/shard")
     let manifest_file = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")

@@ -45,7 +45,7 @@ func verify_data_loader() bool {
     return true
 }
 
-func main() int {
+func main() {
     println("====================================================")
     println("[Phase 2A] Module Verification")
     println("====================================================")

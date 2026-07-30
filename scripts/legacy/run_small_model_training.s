@@ -2,7 +2,7 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use std.io.println
 
-func main() int {
+func main() {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     let source_file = runtime_env_get("NEURX_SMALL_MODEL_SOURCE", project_root + "/train/train_llm.s")
     let checkpoint_dir = runtime_env_get("NEURX_SMALL_MODEL_CHECKPOINT_DIR", project_root + "/artifacts/checkpoints/llm_s_pretrain")

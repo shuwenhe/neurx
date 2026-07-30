@@ -91,7 +91,7 @@ func resolve_non_empty(string primary, string fallback) string {
     fallback
 }
 
-func main() int {
+func main() {
     string project_root = "/home/shuwen/shuwen/train/neurx"
     string model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
     string data_path = "/home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl"

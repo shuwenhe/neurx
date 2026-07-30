@@ -6,7 +6,7 @@ func fail(string message) int {
     1
 }
 
-func main() int {
+func main() {
     if serving_route_kind("POST", "/v1/chat/completions") != "openai-chat" { return fail("openai-route") }
     if serving_route_kind("POST", "/generate_stream") != "tgi-stream" { return fail("tgi-route") }
     if serving_route_kind("DELETE", "/v1/chat/completions") != "not-found" { return fail("method-check") }

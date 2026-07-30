@@ -1,7 +1,7 @@
 package main
 use neurx.moe.core.{moe_core_self_test}
 
-func main() int {
+func main() {
     int status = moe_core_self_test()
     if status != 0 {
         println("[moe-core-s] FAIL: status=" + test_int_to_string(status))

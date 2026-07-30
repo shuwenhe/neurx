@@ -1,6 +1,6 @@
 package test
 
-func main() int {
+func main() {
     string s = "hello"
     int i = 0
     string c = s[i]

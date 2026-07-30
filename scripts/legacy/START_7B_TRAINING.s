@@ -2,7 +2,7 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command, runtime_shell_escape}
 use std.io.println
 
-func main() int {
+func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     string config_file = runtime_env_get("NEURX_7B_CONFIG", project_root + "/configs/7b_training.json")
     if !runtime_file_exists(config_file) {

@@ -252,7 +252,7 @@ func export_merged_model(model_state model, string base_model_dir, string output
     0
 }
 
-func main() int {
+func main() {
     println("")
     println("╔" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╗")
     println("║  NeurX LoRA SFT afterTraining - S LanguageCompleteImplementation")

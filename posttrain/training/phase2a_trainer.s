@@ -776,7 +776,7 @@ func run_real_training(training_config config) training_state {
     return state
 }
 
-func main() int {
+func main() {
 
     training_config config
     config.model_path = runtime_env_get("NEURX_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")

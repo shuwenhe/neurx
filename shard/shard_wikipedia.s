@@ -295,7 +295,7 @@ func process_wikipedia(string input_bz2_file, string output_dir, string manifest
     return 0
 }
 
-func main() int {
+func main() {
     string neurx_home = runtime_env_get("NEURX_HOME", ".")
     string dataset_root = neurx_home + "/dataset/pretrain"
     string input_bz2_file = runtime_env_get("ENWIKI_BZ2_FILE", dataset_root + "/raw/enwiki-latest-pages-articles.xml.bz2")

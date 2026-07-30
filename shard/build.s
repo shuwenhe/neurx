@@ -50,7 +50,7 @@ func compile_one(string compiler, string script_dir, string build_dir, string sh
     false
 }
 
-func main() int {
+func main() {
     string script_dir = getenv("SHARD_SCRIPT_DIR", ".")
     string build_dir = getenv("SHARD_BUILD_DIR", "../artifacts/build/shard")
     string compiler = getenv("S_COMPILER", "/home/shuwen/s/bin/s")

@@ -479,7 +479,7 @@ func load_checkpoint(string path, []float fallback_params) adamw_state {
     }
 }
 
-func main() int {
+func main() {
     int vocab_size = 4
     int hidden_size = 2
     []int inputs = [0, 1, 2]

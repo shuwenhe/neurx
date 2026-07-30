@@ -2,7 +2,7 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_output, runtime_shell_escape, trim}
 use std.io.println
 
-func main() int {
+func main() {
     string config = runtime_env_get("NEURX_ROBOTICS_OBSERVE_CONFIG", "workflows/robotics/train/config/sample.yaml")
     string steps_override = runtime_env_get("NEURX_ROBOTICS_OBSERVE_STEPS", "")
     if !runtime_run_command("test -f " + runtime_shell_escape(config)).ok {
@@ -36,7 +36,7 @@ func main() int {
     tmp_src = tmp_src + "package neurx.workflows.robotics.train.observe_tmp\n\n"
     tmp_src = tmp_src + "use neurx.workflows.robotics.train.pipeline_runner.{run_robotics_training_schedule_state, robotics_workflow_training_state, robotics_workflow_eval_count, robotics_workflow_save_count, robotics_workflow_last_eval_step, robotics_workflow_last_save_step, robotics_workflow_eval_interval, robotics_workflow_save_interval}\n"
     tmp_src = tmp_src + "use neurx.model.robotics.train.{robotics_trajectory_train_state}\n\n"
-    tmp_src = tmp_src + "func main() int {\n"
+    tmp_src = tmp_src + "func main() {\n"
     tmp_src = tmp_src + "    let workflow = run_robotics_training_schedule_state(" + obs_dim + ", " + latent_dim + ", " + act_dim + ", " + max_steps + ", " + sample_count + ", " + eval_every + ", " + save_every + ", " + learning_rate + ", " + runtime_shell_escape(task_name) + ")\n"
     tmp_src = tmp_src + "    let training = robotics_workflow_training_state(workflow)\n"
     tmp_src = tmp_src + "    println(\"task_name: \" + " + runtime_shell_escape(task_name) + ")\n"

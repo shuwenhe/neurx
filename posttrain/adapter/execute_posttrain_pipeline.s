@@ -219,7 +219,7 @@ func step_verify_output() int {
     0
 }
 
-func main() int {
+func main() {
     println("")
     println_separator()
     println("  🎓 NeurX CompleteafterTrainingExecuteprocess")

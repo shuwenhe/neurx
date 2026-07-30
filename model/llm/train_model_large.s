@@ -653,7 +653,7 @@ func gpt_large_run_industrial_backend() int {
     0
 }
 
-func main() int {
+func main() {
     string backend_mode = trim(runtime_env_get("NEURX_LLM_BACKEND", "industrial"))
     if backend_mode != "legacy" {
         return gpt_large_run_industrial_backend()

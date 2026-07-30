@@ -2,7 +2,7 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_shell_escape}
 use std.io.println
 
-func main() int {
+func main() {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     println("=======================================================================")
     println("NeurX Deep Learning Framework - S Inference entry")

@@ -176,7 +176,7 @@ func generate_response(string user_input, inference_context ctx) string {
     "English text!English textAllowedEnglish text.English texttraining, English text: NeurXframework, Transformermodel, trainingEnglish text, English textgenerateEnglish textinferenceEnglish text.English textexplanationEnglish text, English text."
 }
 
-func main() int {
+func main() {
     println("╔════════════════════════════════════════════════════╗")
     println("║   NeurX-1.3 Inference & Chat System (S Lang)      ║")
     println("╚════════════════════════════════════════════════════╝")

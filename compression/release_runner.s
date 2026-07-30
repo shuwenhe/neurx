@@ -3,7 +3,7 @@ use neurx.compression.release.{compression_release_config, prepare_compression_r
 use neurx.exporter.{default_model_export_config}
 use neurx.deployment.chain.{default_model_deployment_config}
 
-func main() int {
+func main() {
     compression_release_config config = compression_release_config {
         release_dir: "artifacts/release",
         quantization_manifest_path: "artifacts/quantized_model/quantized_model.manifest",

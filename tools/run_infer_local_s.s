@@ -2,7 +2,7 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_run_command, runtime_shell_escape}
 use std.io.println
 
-func main() int {
+func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     string s_root = runtime_env_get("S_ROOT", project_root + "/../s")
     string s_compiler = runtime_env_get("S_COMPILER", s_root + "/.local/bin/s")

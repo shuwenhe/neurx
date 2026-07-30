@@ -1,7 +1,7 @@
 package main
 use std.io.println
 
-func main() int {
+func main() {
     println("NeurX Shard Processing - Real-time Logging Quick Start")
     println("")
     println("This guide has been migrated to S.")

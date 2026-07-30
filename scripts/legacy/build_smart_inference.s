@@ -2,7 +2,7 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_run_command, runtime_shell_escape}
 use std.io.println
 
-func main() int {
+func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     string s_compiler = runtime_env_get("S_COMPILER", runtime_env_get("COMPILER_BIN", "/Users/feifei/shuwen/train/s/.local/bin/s"))
     string source_file = runtime_env_get("NEURX_SMART_INFERENCE_SOURCE", project_root + "/s/smart_inference.s")

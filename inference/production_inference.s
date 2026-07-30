@@ -56,7 +56,7 @@ func int_to_str(int val, int radix) string {
     result
 }
 
-func main() int {
+func main() {
     string model_name = trim(runtime_env_get("NEURX_INFER_MODEL_NAME", "llm_s"))
     string device_type = trim(runtime_env_get("NEURX_INFER_DEVICE", "cpu"))
     string checkpoint_arg = trim(runtime_env_get("NEURX_INFER_CHECKPOINT", "/home/shuwen/shuwen/train/neurx/artifacts/checkpoints/llm_s_pretrain"))

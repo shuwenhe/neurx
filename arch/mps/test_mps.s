@@ -95,7 +95,7 @@ func logging_smoke() int {
     status
 }
 
-func main() int {
+func main() {
     int status = 0
     status = status + linear_smoke()
     status = status + optimizer_smoke()

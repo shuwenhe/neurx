@@ -91,7 +91,7 @@ func test_loop_iteration() {
     }
 }
 
-func main() int {
+func main() {
     println("===================================")
     println("S Compiler Nested Struct Test")
     println("===================================")

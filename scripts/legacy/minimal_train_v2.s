@@ -1,6 +1,6 @@
 package main
 
-func main() int {
+func main() {
     int max_steps = 10000
     int log_interval = 10
     float base_lr = 0.0002

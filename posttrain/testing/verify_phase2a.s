@@ -66,7 +66,7 @@ func float_to_str(float value, int decimals) string {
     return result
 }
 
-func main() int {
+func main() {
     println("====================================================")
     println("[Phase 2A] Automated Verification Suite")
     println("====================================================")

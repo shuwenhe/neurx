@@ -63,7 +63,7 @@ func float_to_str(float value, int decimals) string {
     return out
 }
 
-func main() int {
+func main() {
     string output_dir = runtime_env_get("NEURX_OUTPUT_DIR", "/home/shuwen/shuwen/posttrain")
 
     println("====================================================")

@@ -19,7 +19,7 @@ func parent_path(string path) string {
     out
 }
 
-func main() int {
+func main() {
     string path = runtime_env_get("NEURX_CREATE_FILE_PATH", "")
     string content = runtime_env_get("NEURX_CREATE_FILE_TEXT", "")
     bool overwrite = runtime_env_get("NEURX_CREATE_FILE_OVERWRITE", "0") == "1"

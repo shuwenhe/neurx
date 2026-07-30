@@ -2,7 +2,7 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_shell_escape, runtime_run_command_output}
 use std.io.println
 
-func main() int {
+func main() {
     string hosts = runtime_env_get("WORKER_HOSTS", "")
     if hosts == "" {
         println("Usage: set WORKER_HOSTS='root@host1 root@host2' and run this script")

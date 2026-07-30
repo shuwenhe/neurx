@@ -1,6 +1,6 @@
 package main
 
-func main() int {
+func main() {
     println("========================================")
     println("NeurX Real Data Training")
     println("========================================")

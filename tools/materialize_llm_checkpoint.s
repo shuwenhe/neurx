@@ -101,7 +101,7 @@ func checkpoint_text(int step, float loss, int vocab_size, string weights, strin
     "param1.data=" + bias + "\n"
 }
 
-func main() int {
+func main() {
     int vocab_size = 256
     int steps = 80
     string weights = serialize_weights(vocab_size)

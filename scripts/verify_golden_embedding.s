@@ -148,7 +148,7 @@ func verify_embedding_test(string test_name, string golden_dir, string output_di
     return result
 }
 
-func main() int {
+func main() {
     println("============================================================")
     println("Stage 1: Embedding Verification (NeurX S Implementation)")
     println("============================================================")

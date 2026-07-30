@@ -4,7 +4,7 @@ use neurx.serving.lifecycle.request_lifecycle.{lifecycle_state, new_lifecycle_st
 
 func fail(string message) int { println("governance-lifecycle FAIL " + message); 1 }
 
-func main() int {
+func main() {
     string fingerprint = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
     governance_state governance = new_governance_state()
     governance = governance_register_tenant(governance, "tenant-a", fingerprint, "inference", 2, 10, 0)

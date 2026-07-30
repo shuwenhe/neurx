@@ -1,6 +1,6 @@
 package neurx.agent.hello
 
-func main() int {
+func main() {
     print("hello,world")
     0
 }

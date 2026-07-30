@@ -134,7 +134,7 @@ func create_training_state(int total_examples) training_state {
     state
 }
 
-func main() int {
+func main() {
     string project_root = "/home/shuwen/shuwen/train/neurx"
     string data_path = "/home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl"
     string output_dir = "/home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft"

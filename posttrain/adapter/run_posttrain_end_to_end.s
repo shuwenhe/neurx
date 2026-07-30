@@ -178,7 +178,7 @@ func step4_summary() int {
     0
 }
 
-func main() int {
+func main() {
     println("")
     println("╔" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╗")
     println("║  NeurX CompleteafterTrainingpipeline")

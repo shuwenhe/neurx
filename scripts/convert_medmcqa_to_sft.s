@@ -142,7 +142,7 @@ func sft_to_json_line(sft_example ex) string {
     line
 }
 
-func main() int {
+func main() {
     println("")
     println("╔════════════════════════════════════════════════════════════════╗")
     println("║ MedMCQA → SFT Converter (S Language)                          ║")

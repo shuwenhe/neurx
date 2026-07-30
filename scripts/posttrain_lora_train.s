@@ -1288,6 +1288,6 @@ func json_escape(string s) string {
     out
 }
 
-func main() int {
+func main() {
     return run_posttrain_lora_sft()
 }

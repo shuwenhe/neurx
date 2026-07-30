@@ -2664,7 +2664,7 @@ func gpt_large_pretrain_launch() int {
     return 0
 }
 
-func main() int {
+func main() {
     return gpt_large_pretrain_launch()
 }
 

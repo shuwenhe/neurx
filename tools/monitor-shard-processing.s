@@ -2,7 +2,7 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_shell_escape}
 use std.io.println
 
-func main() int {
+func main() {
     string log_fifo = runtime_env_get("NEURX_SHARD_LOG_FIFO", ".neurx-shard-log")
     _ = runtime_run_command("rm -f " + runtime_shell_escape(log_fifo))
     if !runtime_run_command("mkfifo " + runtime_shell_escape(log_fifo)).ok {

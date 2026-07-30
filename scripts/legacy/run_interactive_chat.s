@@ -2,7 +2,7 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command}
 use std.io.println
 
-func main() int {
+func main() {
     println("╔════════════════════════════════════════════════════╗")
     println("║         NeurX-1.3 Interactive Chat System          ║")
     println("╚════════════════════════════════════════════════════╝")

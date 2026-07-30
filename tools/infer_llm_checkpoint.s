@@ -335,7 +335,7 @@ func argmax_next_row([]float weights_row, []float bias, int vocab_size) int {
     best_id
 }
 
-func main() int {
+func main() {
     string checkpoint_arg = trim(runtime_env_get("NEURX_INFER_CHECKPOINT", "artifacts/checkpoints/llm_s_pretrain"))
     string seed = runtime_env_get("NEURX_INFER_SEED", "neurx ")
     int max_new = str_to_int(runtime_env_get("NEURX_INFER_MAX_NEW_CHARS", "120"), 120)

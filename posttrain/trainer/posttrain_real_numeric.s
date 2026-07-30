@@ -1074,6 +1074,6 @@ func run_posttrain_lora_sft_flat() int {
     return 0
 }
 
-func main() int {
+func main() {
     return run_posttrain_lora_sft_flat()
 }

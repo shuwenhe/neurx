@@ -23,7 +23,7 @@ func trim(string s) string {
     out
 }
 
-func main() int {
+func main() {
     println("╔════════════════════════════════════════════════════╗")
     println("║      NeurX-1.3 Full model Inference Pipeline      ║")
     println("╚════════════════════════════════════════════════════╝")

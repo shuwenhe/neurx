@@ -268,7 +268,7 @@ func float_to_string(float f) string {
     s
 }
 
-func main() int {
+func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     merge_config cfg
     cfg.base_model_dir = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH",

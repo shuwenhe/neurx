@@ -510,7 +510,7 @@ func assert_true(bool condition, string message) int {
     0
 }
 
-func main() int {
+func main() {
     hybrid_moe_config cfg = tiny_hybrid_moe_config()
     hybrid_moe_model model = new_hybrid_moe_model(cfg)
     int tokens = 4

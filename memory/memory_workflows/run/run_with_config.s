@@ -2,7 +2,7 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_output, runtime_shell_escape, trim}
 use std.io.println
 
-func main() int {
+func main() {
     string config = runtime_env_get("NEURX_MEMORY_CONFIG", "workflows/agent/memory/config/sample.yaml")
     string steps_override = runtime_env_get("NEURX_MEMORY_STEPS", "")
     string s_bin_override = runtime_env_get("S_BIN", runtime_env_get("S_COMPILER", ""))
@@ -30,7 +30,7 @@ func main() int {
     string tmp_src = ""
     tmp_src = tmp_src + "package neurx.workflows.agent.memory.run_tmp\n\n"
     tmp_src = tmp_src + "use neurx.workflows.agent.memory.pipeline_runner.{run_agent_memory_workflow}\n\n"
-    tmp_src = tmp_src + "func main() int {\n"
+    tmp_src = tmp_src + "func main() {\n"
     tmp_src = tmp_src + "    run_agent_memory_workflow(" + max_steps + ", " + runtime_shell_escape(output_dir) + ", " + runtime_shell_escape(dataset_manifest) + ")\n"
     tmp_src = tmp_src + "    0\n}\n"
     _ = runtime_run_command("printf %s " + runtime_shell_escape(tmp_src) + " > " + runtime_shell_escape(tmp_s))

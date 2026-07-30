@@ -221,7 +221,7 @@ func run_phase2a_training(training_config config) training_state {
     return state
 }
 
-func main() int {
+func main() {
     println("====================================================")
     println("[Phase 2A] Complete SFT Training with LoRA")
     println("====================================================")

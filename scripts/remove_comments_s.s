@@ -98,7 +98,7 @@ func strip_comments(string text) string {
     out
 }
 
-func main() int {
+func main() {
     string root_find = "."
     string find_cmd = "find " + root_find + " -type f -name '*.s' -not -path '*/.git/*' -not -path './artifacts/*'"
     string list_text = runtime_run_command_output(find_cmd)

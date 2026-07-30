@@ -6,7 +6,7 @@ func fail(string message) int {
     1
 }
 
-func main() int {
+func main() {
     production_runtime_config config = new_production_runtime_config(8, 128, 128, 8, 1, 4)
     production_runtime_state state = new_production_runtime_state(config)
     state = production_submit(state, "cuda-long", "cuda", "bf16", 12, 0, 3)

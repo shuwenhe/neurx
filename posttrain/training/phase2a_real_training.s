@@ -771,7 +771,7 @@ func run_real_training(training_config config) training_state {
     return state
 }
 
-func main() int {
+func main() {
     training_config config = create_training_config()
     training_state final_state = run_real_training(config)
     return 0

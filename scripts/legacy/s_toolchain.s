@@ -3,7 +3,7 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use std.env.args as host_args
 use std.io.println
 
-func main() int {
+func main() {
     let args = host_args()
     let cmd = toolchain_command(args)
     if cmd == "status" {

@@ -104,7 +104,7 @@ func shell_escape(string s) string {
     out
 }
 
-func main() int {
+func main() {
     string shard_dir = getenv("SHARD_DIR", getenv("ENWIKI_SHARD_DIR", "."))
     int max_samples_per_shard = parse_int(getenv("MAX_SAMPLES_PER_SHARD", "500"), 500)
     int max_shards = parse_int(getenv("MAX_SHARDS", "10"), 10)

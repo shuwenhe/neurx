@@ -4,7 +4,7 @@ struct counter_state {
     int value
 }
 
-func main() int {
+func main() {
     counter_state state = counter_state {
         value: 7,
     }

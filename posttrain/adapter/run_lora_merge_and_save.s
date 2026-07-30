@@ -182,7 +182,7 @@ func verify_output(string output_dir) int {
     0
 }
 
-func main() int {
+func main() {
     println("")
     println("╔" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╗")
     println("║  LoRA merge and model saving - S LanguageImplementation")

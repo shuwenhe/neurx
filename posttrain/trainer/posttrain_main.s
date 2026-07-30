@@ -40,6 +40,14 @@ struct lora_linear {
 struct named_lora_module {
     string name
     lora_linear layer
+    
+    int out_dim
+    int in_dim
+    int rank
+    float scaling
+    []float lora_A
+    []float lora_B
+    
     []float initial_a
     []float initial_b
 }
@@ -316,6 +324,14 @@ func run_posttrain_lora_sft() int {
         q_layer.dropout_rate = dropout
         q_layer.last_input = []float{cap: 0}
         q_module.layer = q_layer
+        
+        q_module.out_dim = hidden_size
+        q_module.in_dim = hidden_size
+        q_module.rank = rank
+        q_module.scaling = q_layer.scaling
+        q_module.lora_A = q_layer.lora_A
+        q_module.lora_B = q_layer.lora_B
+        
         q_module.initial_a = []float{cap: rank * hidden_size}
         int q_a_idx = 0
         while q_a_idx < rank * hidden_size {
@@ -344,6 +360,14 @@ func run_posttrain_lora_sft() int {
         v_layer.dropout_rate = dropout
         v_layer.last_input = []float{cap: 0}
         v_module.layer = v_layer
+        
+        v_module.out_dim = v_out
+        v_module.in_dim = hidden_size
+        v_module.rank = rank
+        v_module.scaling = v_layer.scaling
+        v_module.lora_A = v_layer.lora_A
+        v_module.lora_B = v_layer.lora_B
+        
         v_module.initial_a = []float{cap: rank * hidden_size}
         int v_a_idx = 0
         while v_a_idx < rank * hidden_size {
@@ -382,30 +406,101 @@ func run_posttrain_lora_sft() int {
             int sample_module_count = 0
             while module_cursor < len(modules) {
                 eprintln("[Debug] Processing module " + int_to_str(module_cursor))
-                eprintln("[Debug] Extracting module fields manually")
-                int out_dim = hidden_size
-                if module_cursor - ((module_cursor / 2) * 2) == 1 {
-                    out_dim = v_out
-                }
-                int rank_val = rank
-                int in_dim = hidden_size
-                float rank_float = rank as float
-                float scaling_val = 2.0
+                
+                named_lora_module module = modules[module_cursor]
+                int out_dim = module.out_dim
+                int in_dim = module.in_dim
+                int rank_val = module.rank
+                float scaling_val = module.scaling
+                []float lora_A = module.lora_A
+                []float lora_B = module.lora_B
+                
                 []float target = target_q
                 int is_odd = module_cursor - ((module_cursor / 2) * 2)
                 if is_odd == 1 {
                     target = target_v
                 }
-                eprintln("[Debug] Target selected, dims: out=" + int_to_str(out_dim) + " in=" + int_to_str(in_dim) + " rank=" + int_to_str(rank_val))
+                
                 []float output = fill_lora(out_dim, 0.0)
                 []float hidden = fill_lora(rank_val, 0.0)
-                eprintln("[Debug] Allocated tensors")
-                int sample_loss_int = module_cursor + 1
-                float sample_loss = (sample_loss_int as float) * 0.01
-                eprintln("[Debug] Loss computed: " + float_to_str(sample_loss, 6))
+                
+                int r = 0
+                while r < rank_val {
+                    int in_idx = 0
+                    while in_idx < in_dim && in_idx < len(prompt_vec) {
+                        int a_idx = r * in_dim + in_idx
+                        if a_idx < len(lora_A) {
+                            hidden[r] = hidden[r] + lora_A[a_idx] * prompt_vec[in_idx]
+                        }
+                        in_idx = in_idx + 1
+                    }
+                    r = r + 1
+                }
+                
+                int out_idx = 0
+                while out_idx < out_dim {
+                    float sum = 0.0
+                    int rank_idx = 0
+                    while rank_idx < rank_val {
+                        int b_idx = out_idx * rank_val + rank_idx
+                        if b_idx < len(lora_B) {
+                            sum = sum + scaling_val * lora_B[b_idx] * hidden[rank_idx]
+                        }
+                        rank_idx = rank_idx + 1
+                    }
+                    output[out_idx] = sum
+                    out_idx = out_idx + 1
+                }
+                
+                float sample_loss = mse_loss(output, target)
                 epoch_loss = epoch_loss + sample_loss
                 sample_loss_sum = sample_loss_sum + sample_loss
                 sample_module_count = sample_module_count + 1
+                
+                []float grad_out = mse_gradient(output, target)
+                []float b_snapshot = copy_float_array(lora_B)
+                float step_scale = effective_lr * scaling_val
+                
+                out_idx = 0
+                while out_idx < out_dim {
+                    int rank_idx = 0
+                    while rank_idx < rank_val {
+                        int b_idx = out_idx * rank_val + rank_idx
+                        if b_idx < len(lora_B) {
+                            float grad_b = grad_out[out_idx] * hidden[rank_idx]
+                            lora_B[b_idx] = lora_B[b_idx] - step_scale * grad_b
+                        }
+                        rank_idx = rank_idx + 1
+                    }
+                    out_idx = out_idx + 1
+                }
+                
+                int rank_idx = 0
+                while rank_idx < rank_val {
+                    int in_idx = 0
+                    while in_idx < in_dim && in_idx < len(prompt_vec) {
+                        float grad_a = 0.0
+                        out_idx = 0
+                        while out_idx < out_dim {
+                            int b_idx = out_idx * rank_val + rank_idx
+                            if b_idx < len(b_snapshot) {
+                                grad_a = grad_a + grad_out[out_idx] * b_snapshot[b_idx]
+                            }
+                            out_idx = out_idx + 1
+                        }
+                        int a_idx = rank_idx * in_dim + in_idx
+                        if a_idx < len(lora_A) {
+                            lora_A[a_idx] = lora_A[a_idx] - step_scale * grad_a * prompt_vec[in_idx]
+                        }
+                        in_idx = in_idx + 1
+                    }
+                    rank_idx = rank_idx + 1
+                }
+                
+                module.lora_A = lora_A
+                module.lora_B = lora_B
+                modules[module_cursor] = module
+                
                 epoch_items = epoch_items + 1
                 module_cursor = module_cursor + 1
             }
@@ -426,12 +521,47 @@ func run_posttrain_lora_sft() int {
         eprintln("[Progress] epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " complete")
         epoch = epoch + 1
     }
-    eprintln("[Progress] training complete (statistics temporarily disabled due to S compiler limitations)")
+    
+    adapter_stats stats = compute_stats(modules)
+    delta_stats deltas = compute_delta_stats(modules)
+    eprintln("[Progress] saving adapter checkpoint")
+    write_adapter_checkpoint(output_dir, model_path, data_file, modules, loss_history, stats, deltas, rank, alpha, effective_lr, nominal_lr, samples_per_epoch, epochs, v_out)
+    
     println("")
-    println("[Training Backend] S Runtime Framework Trainer (Mock Mode)")
-    println("[Status] Training loop completed successfully")
-    println("[Note] Real Forward/Backward/Optimizer blocked by S nested struct access limitation")
+    println("[Training Backend] S Runtime Real Trainer (Cache Fields Workaround)")
+    println("[Saved] Real LoRA adapter to " + output_dir)
     println("")
+    println("[Adapter Weight Statistics]")
+    println("  L1 norm:           " + float_to_str(stats.l1, 6))
+    println("  L2 norm:           " + float_to_str(stats.l2, 6))
+    println("  Max absolute:      " + float_to_str(stats.max_abs, 6))
+    float nonzero_pct = 0.0
+    if stats.total > 0 {
+        nonzero_pct = 100.0 * (stats.nonzero as float) / (stats.total as float)
+    }
+    println("  Non-zero weights:  " + int_to_str(stats.nonzero) + "/" + int_to_str(stats.total) + " (" + float_to_str(nonzero_pct, 1) + "%)")
+    println("")
+    println("[Weight Delta (Init → Final)]")
+    println("  L1 delta:          " + float_to_str(deltas.l1, 6))
+    println("  L2 delta:          " + float_to_str(deltas.l2, 6))
+    println("  Max delta:         " + float_to_str(deltas.max_abs, 6))
+    float changed_pct = 0.0
+    if stats.total > 0 {
+        changed_pct = 100.0 * (deltas.changed_count as float) / (stats.total as float)
+    }
+    println("  Changed elements:  " + int_to_str(deltas.changed_count) + "/" + int_to_str(stats.total) + " (" + float_to_str(changed_pct, 1) + "%)")
+    println("")
+    println("[Loss Convergence]")
+    println("  Initial loss:      " + float_to_str(loss_history[0], 6))
+    println("  Final loss:        " + float_to_str(loss_history[len(loss_history) - 1], 6))
+    println("  Best loss:         " + float_to_str(best_loss, 6))
+    float improvement = 0.0
+    if loss_history[0] > 0.0 {
+        improvement = (loss_history[0] - loss_history[len(loss_history) - 1]) / loss_history[0] * 100.0
+    }
+    println("  Improvement:       " + float_to_str(improvement, 2) + "%")
+    println("")
+    println("[Note] Using cache fields workaround for S compiler nested struct limitation")
     0
 }
 
@@ -655,8 +785,8 @@ func compute_stats([]named_lora_module modules) adapter_stats {
         if is_odd == 1 {
             out_dim = v_out_const
         }
-        []float lora_A = module.layer.lora_A
-        []float lora_B = module.layer.lora_B
+        []float lora_A = module.lora_A
+        []float lora_B = module.lora_B
         int i = 0
         int a_len = rank * in_dim
         while i < a_len {
@@ -718,8 +848,8 @@ func compute_delta_stats([]named_lora_module modules) delta_stats {
         if is_odd == 1 {
             out_dim = v_out_const
         }
-        []float lora_A = module.layer.lora_A
-        []float lora_B = module.layer.lora_B
+        []float lora_A = module.lora_A
+        []float lora_B = module.lora_B
         int i = 0
         int a_len = rank * in_dim
         while i < a_len {
@@ -781,11 +911,11 @@ func write_adapter_checkpoint(
     int module_idx = 0
     while module_idx < len(modules) {
         named_lora_module module = modules[module_idx]
-        int rank = module.layer.rank
-        int in_dim = module.layer.in_dim
-        int out_dim = module.layer.out_dim
-        []float lora_A = module.layer.lora_A
-        []float lora_B = module.layer.lora_B
+        int rank = module.rank
+        int in_dim = module.in_dim
+        int out_dim = module.out_dim
+        []float lora_A = module.lora_A
+        []float lora_B = module.lora_B
         int a_len = rank * in_dim
         int b_len = out_dim * rank
         []float a_data = []float{cap: a_len}
@@ -1294,6 +1424,6 @@ func json_escape(string s) string {
     out
 }
 
-func main() int {
+func main() {
     return run_posttrain_lora_sft()
 }

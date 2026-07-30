@@ -96,7 +96,7 @@ func list_supported_adapter_types() {
     println("")
 }
 
-func main() int {
+func main() {
     print_header()
     string root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     string base_model_dir = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", root + "/../model/base-model-7B")

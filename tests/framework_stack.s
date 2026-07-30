@@ -20,7 +20,7 @@ func print_path(string root, string rel) bool {
     ready
 }
 
-func main() int {
+func main() {
     string root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/neurx")
 
     println("========================================")

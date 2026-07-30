@@ -90,7 +90,7 @@ func build_script(string input_file, string shard_dir, string manifest_file, str
     script
 }
 
-func main() int {
+func main() {
     string root = runtime_env_get("NEURX_HOME", runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/neurx"))
     string shard_dir = runtime_env_get("SHARD_DIR", root + "/dataset/pretrain/shard")
     string manifest_file = runtime_env_get("MANIFEST_FILE", root + "/dataset/pretrain/manifest.json")

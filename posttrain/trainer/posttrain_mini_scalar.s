@@ -138,6 +138,6 @@ func run_mini_scalar_posttrain() int {
     return 0
 }
 
-func main() int {
+func main() {
     return run_mini_scalar_posttrain()
 }

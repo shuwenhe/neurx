@@ -11,7 +11,7 @@ func phase5_summary_command(string path) string {
     cmd
 }
 
-func main() int {
+func main() {
     string prompt_path = "tests/golden/prompts.json"
     if !runtime_file_exists(prompt_path) {
         println("phase5-hf-runtime FAIL missing_file=" + prompt_path)

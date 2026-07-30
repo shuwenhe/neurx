@@ -2,7 +2,7 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_shell_escape}
 use std.io.println
 
-func main() int {
+func main() {
     let root = runtime_env_get("NEURX_ROOT", ".")
     println("NeurX S entry: QUICKREF_ML_IMPLEMENTATION")
     let command = "make -C " + runtime_shell_escape(root) + " -f Makefile -f configs/Makefile.large_models toolchain-s"

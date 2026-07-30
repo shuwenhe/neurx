@@ -13,7 +13,7 @@ struct sft_state {
     float best_eval_loss
 }
 
-func main() int {
+func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     string data_path = runtime_env_get("NEURX_SFT_DATA_FILE", project_root + "/data/sft/instruction_data.jsonl")
     string output_dir = runtime_env_get("NEURX_SFT_OUTPUT_DIR", project_root + "/artifacts/checkpoints/sft")

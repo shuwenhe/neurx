@@ -1,7 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_shell_escape}
 
-func main() int {
+func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     string infer_dir = project_root + "/infer"
     string serving_dir = project_root + "/serving"

@@ -1,6 +1,6 @@
 package neurx.pretrain.llm.entry
 use neurx.pretrain.llm.gpt_large_pretrain.gpt_large_pretrain_launch as gpt_large_pretrain_launch
 
-func main() int {
+func main() {
     return gpt_large_pretrain_launch()
 }
