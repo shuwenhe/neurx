@@ -235,25 +235,33 @@ func text_window_to_vector(string text, int start, int count, int dim) []float {
     }
     int i = 0
     while i < limit {
-        string ch = char_at(text, start + i)
-        int slot = i - (i / dim) * dim
-        float char_component = 0.0009
-        if ch == " " {
+        if i >= len(text) {
+            return vec
+        }
+        int byte_val = text[start + i]
+        int slot_raw = i
+        while slot_raw >= dim {
+            slot_raw = slot_raw - dim
+        }
+        float char_component = 0.001
+        if byte_val == 32 {
             char_component = 0.0 - 0.0004
-        } else if ch == "\n" || ch == "\t" {
-            char_component = 0.0 - 0.0007
-        } else if ch == "." || ch == "," || ch == ":" || ch == ";" {
-            char_component = 0.0003
-        } else if ch == "0" || ch == "1" || ch == "2" || ch == "3" || ch == "4" || ch == "5" || ch == "6" || ch == "7" || ch == "8" || ch == "9" {
+        } else if byte_val >= 48 && byte_val <= 57 {
             char_component = 0.0015
-        } else if ch == "a" || ch == "e" || ch == "i" || ch == "o" || ch == "u" || ch == "A" || ch == "E" || ch == "I" || ch == "O" || ch == "U" {
+        } else if byte_val >= 97 && byte_val <= 122 {
+            char_component = 0.002
+        } else if byte_val >= 65 && byte_val <= 90 {
             char_component = 0.002
         }
-        float position_component = (((i - (i / 11) * 11) as float) - 5.0) * 0.0002
-        vec[slot] = vec[slot] + char_component + position_component
+        int pos_mod = i
+        while pos_mod >= 11 {
+            pos_mod = pos_mod - 11
+        }
+        float position_component = (pos_mod as float - 5.0) * 0.0002
+        vec[slot_raw] = vec[slot_raw] + char_component + position_component
         i = i + 1
     }
-    float normalization = 1.0 / ((limit + 1) as float)
+    float normalization = 1.0 / (limit as float + 1.0)
     i = 0
     while i < len(vec) {
         vec[i] = vec[i] * normalization
@@ -309,7 +317,7 @@ func run_posttrain_lora_sft() int {
     int byte_count = len(dataset_text)
     println("Dataset bytes: " + int_to_str(byte_count))
     eprintln("[Progress] dataset loaded, starting module build")
-    int window_size = 512
+    int window_size = 128
     if byte_count < window_size {
         window_size = byte_count
     }
