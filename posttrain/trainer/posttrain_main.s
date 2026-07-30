@@ -147,46 +147,6 @@ func runtime_split_lines(string text) []string {
     lines
 }
 
-func runtime_collect_samples(string dataset_text, int limit) runtime_sample_batch {
-    int actual_limit = limit
-    if actual_limit < 1 {
-        actual_limit = 1
-    }
-    runtime_sample_batch batch
-    batch.items = []runtime_training_sample{cap: actual_limit}
-    batch.count = 0
-    []string lines = runtime_split_lines(dataset_text)
-    int sample_count = 0
-    int i = 0
-    while i < len(lines) && sample_count < actual_limit {
-        string trimmed = trim(lines[i])
-        if trimmed != "" {
-            runtime_training_sample sample
-            sample.question = extract_json_string_field(trimmed, "question")
-            sample.explanation = extract_json_string_field(trimmed, "exp")
-            sample.subject = extract_json_string_field(trimmed, "subject_name")
-            sample.topic = extract_json_string_field(trimmed, "topic_name")
-            sample.option_a = extract_json_string_field(trimmed, "opa")
-            sample.option_b = extract_json_string_field(trimmed, "opb")
-            sample.option_c = extract_json_string_field(trimmed, "opc")
-            sample.option_d = extract_json_string_field(trimmed, "opd")
-            sample.choice = extract_json_int_field(trimmed, "cop", 1)
-            sample.prompt = runtime_build_prompt(sample)
-            sample.target = runtime_choice_text(sample)
-            if sample.target == "" {
-                sample.target = sample.explanation
-            }
-            if sample.question != "" {
-                batch.items[sample_count] = sample
-                sample_count = sample_count + 1
-            }
-        }
-        i = i + 1
-    }
-    batch.count = sample_count
-    batch
-}
-
 func text_window_to_vector(string text, int start, int count, int dim) []float {
     []float vec = fill_lora(dim, 0.0)
     if dim < 1 || count < 1 || start >= len(text) {
@@ -308,11 +268,33 @@ func run_posttrain_lora_sft() int {
         eprintln("[Progress] building LoRA modules: layer " + int_to_str(layer_idx + 1) + "/" + int_to_str(num_layers))
         string q_name = "base_model.model.model.layers." + int_to_str(layer_idx) + ".self_attn.q_proj"
         string v_name = "base_model.model.model.layers." + int_to_str(layer_idx) + ".self_attn.v_proj"
-        named_lora_module q_module
-        q_module.name = q_name
-        lora_linear q_layer
-        q_layer.base_weight = []float{cap: 0}
-        q_layer.out_dim = hidden_size
+        
+        lora_linear q_layer = lora_linear{
+            base_weight: []float{cap: 0},
+            out_dim: hidden_size,
+            in_dim: hidden_size,
+            lora_A: init_gaussian(rank * hidden_size, 0.02),
+            lora_B: fill_lora(hidden_size * rank, 0.0),
+            rank: rank,
+            scaling: alpha / (rank as float),
+            dropout_rate: dropout,
+            last_input: []float{cap: 0}
+        }
+        
+        named_lora_module q_module = named_lora_module{
+            name: q_name,
+            layer: q_layer,
+            out_dim: hidden_size,
+            in_dim: hidden_size,
+            rank: rank,
+            scaling: alpha / (rank as float),
+            lora_A: init_gaussian(rank * hidden_size, 0.02),
+            lora_B: fill_lora(hidden_size * rank, 0.0),
+            initial_a: copy_float_array(q_layer.lora_A),
+            initial_b: copy_float_array(q_layer.lora_B)
+        }
+        
+        modules[module_idx] = q_module
         q_layer.in_dim = hidden_size
         q_layer.lora_A = init_gaussian(rank * hidden_size, 0.02)
         q_layer.lora_B = fill_lora(hidden_size * rank, 0.0)
@@ -344,9 +326,9 @@ func run_posttrain_lora_sft() int {
         }
         modules[module_idx] = q_module
         module_idx = module_idx + 1
-        named_lora_module v_module
+        named_lora_module v_module = named_lora_module{}
         v_module.name = v_name
-        lora_linear v_layer
+        lora_linear v_layer = lora_linear{}
         v_layer.base_weight = []float{cap: 0}
         v_layer.out_dim = v_out
         v_layer.in_dim = hidden_size
