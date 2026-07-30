@@ -4,7 +4,7 @@ struct Data {
     int value
 }
 
-func main() {
+func main() int {
     println("=== Test: Explicit struct field operations ===")
     Data obj
     println("Before: Setting obj.value = 42")
