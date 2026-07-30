@@ -36,28 +36,22 @@ func generate_slurm_script(config: deployment_config, output_path: string) bool 
 #SBATCH --time=72:00:00
 #SBATCH --output=logs/slurm-%j.out
 #SBATCH --error=logs/slurm-%j.err
-# Load modules
 module load cuda/11.8
 module load nccl/2.16.2
 module load gcc/11.2.0
-# Set environment variables
 export CUDA_VISIBLE_DEVICES=0,1,2,3
 export NCCL_DEBUG=INFO
 export NCCL_IB_DISABLE=1
 export OMP_NUM_THREADS=8
-# Get node list
 nodes=$(scontrol show hostname $SLURM_NODELIST | paste -d, -s)
 master_node=$(scontrol show hostname $SLURM_NODELIST | head -n1)
 master_port=12355
-# Export distributed training variables
 export MASTER_ADDR=$master_node
 export MASTER_PORT=$master_port
 export RANK=$SLURM_PROCID
 export WORLD_SIZE=$SLURM_NTASKS
 export LOCAL_RANK=$SLURM_LOCALID
-# Create log directory
 mkdir -p logs
-# Log configuration
 echo "=========================================="
 echo "NeurX Training on SLURM Cluster"
 echo "=========================================="
@@ -68,7 +62,6 @@ echo "GPUs per node: ` + strings.from_i32(gpus_per_node) + `"
 echo "Total tasks: $WORLD_SIZE"
 echo "batch_2 size: ` + strings.from_i32(batch_size) + `"
 echo "=========================================="
-# Run training
 srun neurx run scaled_training_system \
     --epochs=` + strings.from_i32(config.num_epochs) + ` \
     --batch_size=` + strings.from_i32(config.batch_size_per_gpu) + ` \

@@ -74,18 +74,18 @@ func float_to_str(float value, int decimals) string {
 func test_embedding_shape() bool {
     println("[TEST 1] Embedding Shape Verification")
     println("  Testing: vocab_size=151936, hidden_size=896")
-    
+
     int vocab_size = 151936
     int hidden_size = 896
-    
+
     int expected_params = vocab_size * hidden_size
     println("  Expected parameters: " + int_to_str(expected_params))
-    
+
     if expected_params > 0 {
         println("  ✓ Shape calculation correct")
         return true
     }
-    
+
     println("  ✗ Shape calculation failed")
     return false
 }
@@ -93,15 +93,15 @@ func test_embedding_shape() bool {
 func test_embedding_lookup() bool {
     println("[TEST 2] Embedding Lookup Simulation")
     println("  Testing: Single token lookup")
-    
+
     int token_id = 1234
     int hidden_size = 896
-    
+
     println("  Token ID: " + int_to_str(token_id))
     println("  Expected output shape: (" + int_to_str(hidden_size) + ",)")
-    
+
     println("  Simulated output: [0.0, 0.1, 0.2, ..., 0.9]")
-    
+
     println("  ✓ Lookup simulation successful")
     return true
 }
@@ -109,35 +109,35 @@ func test_embedding_lookup() bool {
 func test_batch_embedding() bool {
     println("[TEST 3] Batch Embedding Simulation")
     println("  Testing: Batch of 2 sequences, 3 tokens each")
-    
+
     int batch_size = 2
     int seq_len = 3
     int hidden_size = 896
-    
+
     println("  Input shape: (" + int_to_str(batch_size) + ", " + int_to_str(seq_len) + ")")
     println("  Expected output shape: (" + int_to_str(batch_size) + ", " + int_to_str(seq_len) + ", " + int_to_str(hidden_size) + ")")
-    
+
     int total_embeddings = batch_size * seq_len
     println("  Total embeddings to compute: " + int_to_str(total_embeddings))
-    
+
     if total_embeddings == 6 {
         println("  ✓ Batch size calculation correct")
         return true
     }
-    
+
     println("  ✗ Batch size calculation failed")
     return false
 }
 
 func test_model_loading() bool {
     println("[TEST 4] Model File Availability")
-    
+
     string model_path = runtime_env_get("NEURX_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
     println("  Model path: " + model_path)
-    
+
     if runtime_file_exists(model_path) {
         println("  ✓ Model directory exists")
-        
+
         string safetensors_path = model_path + "/model.safetensors"
         if runtime_file_exists(safetensors_path) {
             println("  ✓ model.safetensors found")
@@ -148,7 +148,7 @@ func test_model_loading() bool {
             return false
         }
     }
-    
+
     println("  ✗ Model directory not found")
     return false
 }
@@ -161,38 +161,38 @@ func main() int {
     println("Philosophy: Self-contained verification using NeurX only")
     println("No external dependencies (PyTorch, NumPy, etc.)")
     println("")
-    
+
     int passed = 0
     int failed = 0
-    
+
     if test_embedding_shape() {
         passed = passed + 1
     } else {
         failed = failed + 1
     }
     println("")
-    
+
     if test_embedding_lookup() {
         passed = passed + 1
     } else {
         failed = failed + 1
     }
     println("")
-    
+
     if test_batch_embedding() {
         passed = passed + 1
     } else {
         failed = failed + 1
     }
     println("")
-    
+
     if test_model_loading() {
         passed = passed + 1
     } else {
         failed = failed + 1
     }
     println("")
-    
+
     println("============================================================")
     println("Summary")
     println("============================================================")
@@ -200,7 +200,7 @@ func main() int {
     println("✓ Passed: " + int_to_str(passed))
     println("✗ Failed: " + int_to_str(failed))
     println("")
-    
+
     if failed == 0 {
         println("🎉 All infrastructure tests passed!")
         println("")

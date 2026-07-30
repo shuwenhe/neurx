@@ -35,4 +35,4 @@ class SafeTensorFile {
   std::map<std::string, std::string> metadata_;
 };
 
-}  // namespace neurx::runtime::model
+}

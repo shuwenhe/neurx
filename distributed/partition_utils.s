@@ -14,10 +14,10 @@ func create_partition_info(int total_params, int num_partitions, int partition_i
     info.total_params = total_params
     info.num_partitions = num_partitions
     info.partition_id = partition_id
-    
+
     info.partition_size = total_params / num_partitions
     int remainder = total_params - (info.partition_size * num_partitions)
-    
+
     if partition_id < remainder {
         info.partition_size = info.partition_size + 1
         info.start_idx = partition_id * info.partition_size
@@ -25,15 +25,15 @@ func create_partition_info(int total_params, int num_partitions, int partition_i
         int offset = remainder * (info.partition_size + 1)
         info.start_idx = offset + (partition_id - remainder) * info.partition_size
     }
-    
+
     info.end_idx = info.start_idx + info.partition_size
-    
+
     return info
 }
 
 func get_local_partition([]float global_data, PartitionInfo info) []float {
     []float local_data = []
-    
+
     int i = info.start_idx
     while i < info.end_idx {
         if i < len(global_data) {
@@ -41,19 +41,19 @@ func get_local_partition([]float global_data, PartitionInfo info) []float {
         }
         i = i + 1
     }
-    
+
     return local_data
 }
 
 func scatter_partition([]float local_data, PartitionInfo info, int total_size) []float {
     []float global_data = []
-    
+
     int i = 0
     while i < total_size {
         global_data = append(global_data, 0.0)
         i = i + 1
     }
-    
+
     i = 0
     int idx = info.start_idx
     while i < len(local_data) && idx < info.end_idx {
@@ -63,7 +63,7 @@ func scatter_partition([]float local_data, PartitionInfo info, int total_size) [
         i = i + 1
         idx = idx + 1
     }
-    
+
     return global_data
 }
 
@@ -90,13 +90,13 @@ func int_to_string(int n) string {
     if n < 0 {
         return "-" + int_to_string(0 - n)
     }
-    
+
     string result = ""
     int remaining = n
     while remaining >= 10 {
         int digit = remaining - ((remaining / 10) * 10)
         remaining = remaining / 10
-        
+
         if digit == 0 { result = "0" + result }
         if digit == 1 { result = "1" + result }
         if digit == 2 { result = "2" + result }
@@ -108,7 +108,7 @@ func int_to_string(int n) string {
         if digit == 8 { result = "8" + result }
         if digit == 9 { result = "9" + result }
     }
-    
+
     if remaining == 0 { result = "0" + result }
     if remaining == 1 { result = "1" + result }
     if remaining == 2 { result = "2" + result }
@@ -119,6 +119,6 @@ func int_to_string(int n) string {
     if remaining == 7 { result = "7" + result }
     if remaining == 8 { result = "8" + result }
     if remaining == 9 { result = "9" + result }
-    
+
     return result
 }

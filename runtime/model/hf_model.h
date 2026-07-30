@@ -61,4 +61,4 @@ class HfWeightStore {
   std::map<std::string, Location> locations_;
 };
 
-}  // namespace neurx::runtime::model
+}

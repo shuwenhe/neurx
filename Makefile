@@ -336,9 +336,9 @@ build-posttrain-phase2a-s: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a'
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir'; \
-		"$(POSTTRAIN_S_COMPILER)" ir 'posttrain/training/phase2a_trainer.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir' 2>&1 || true; \
+		"$(POSTTRAIN_S_COMPILER)" ir 'posttrain/trainer/posttrain_main.s' -o '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir' 2>&1 || true; \
 		if [ ! -f '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir' ]; then \
-			"$(POSTTRAIN_S_COMPILER)" 'posttrain/training/phase2a_trainer.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir' 2>&1 || exit 1; \
+			"$(POSTTRAIN_S_COMPILER)" 'posttrain/trainer/posttrain_main.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir' 2>&1 || exit 1; \
 		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir'
 	@echo "✓ Phase 2A compiled to S IR successfully"
@@ -353,6 +353,9 @@ posttrain-phase2a: check-bash build-s-ir-runner build-posttrain-phase2a-s
 		export NEURX_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)'; \
 		export NEURX_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)'; \
 		export NEURX_DATA_PATH='$(POSTTRAIN_DATA_FILE)'; \
+		export NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)'; \
+		export NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)'; \
+		export NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)'; \
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir' \
 		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_phase2a_$(shell date +%Y%m%d_%H%M%S).log'
 	@echo ""
@@ -363,7 +366,7 @@ build-posttrain-sft-s: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_sft'
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir'; \
-		"$(POSTTRAIN_S_COMPILER)" 'posttrain/training/phase2a_simple.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' 2>&1 || exit 1; \
+		"$(POSTTRAIN_S_COMPILER)" 'posttrain/trainer/posttrain_main.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' 2>&1 || exit 1; \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir'
 
 build-posttrain-verify-adapter-s: check-bash
@@ -406,6 +409,9 @@ posttrain: check-bash build-s-ir-runner build-posttrain-sft-s
 		export NEURX_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)'; \
 		export NEURX_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)'; \
 		export NEURX_DATA_PATH='$(POSTTRAIN_DATA_FILE)'; \
+		export NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)'; \
+		export NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)'; \
+		export NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)'; \
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' \
 		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_phase2a_$(shell date +%Y%m%d_%H%M%S).log'
 	@echo ""
@@ -2271,9 +2277,9 @@ else
 	}
 endif
 
-# ============================================================================
-# Phase 2A: Go/No-Go Gate Targets (W1.1, W1.2, W2, W3)
-# ============================================================================
+
+
+
 
 gate-w1.1: check-bash
 	@echo "🔴 W1.1 Gate: Tokenizer Verification (Pure S)"
@@ -2338,9 +2344,9 @@ gate-w3: gate-w1.1 gate-w1.2 gate-w2
 	@echo "  Coming soon..."
 	@exit 1
 
-# ========================================
-# Milestone 1: Simple Training System
-# ========================================
+
+
+
 .PHONY: build-simple-training-s simple-training
 
 build-simple-training-s:
@@ -2367,9 +2373,9 @@ simple-training: build-simple-training-s
 	@echo ""
 	@echo "✅ Milestone 1 Complete: Code compiles successfully"
 
-# ========================================
-# Test Suite
-# ========================================
+
+
+
 .PHONY: test-generate-golden test-serving-socket test-s-conversions
 
 test-generate-golden:
@@ -2393,9 +2399,9 @@ test-s-conversions: test-generate-golden test-serving-socket
 	@echo "⚠️  Note: Actual test execution requires S runtime"
 	@echo "   See PYTHON_C_TO_S_CONVERSION_STATUS.md for full details"
 
-# ========================================
-# Golden Test Generation
-# ========================================
+
+
+
 .PHONY: generate-golden verify-golden
 
 generate-golden:
@@ -2412,9 +2418,9 @@ generate-golden:
 verify-golden:
 	@echo "⚠️  Golden verification requires S runtime"
 
-# ========================================
-# DeepSpeed ZeRO Distributed Training
-# ========================================
+
+
+
 .PHONY: build-deepspeed-zero test-zero-optimizer build-zero-components
 
 build-zero-components:
@@ -2471,3 +2477,45 @@ build-deepspeed-zero: build-zero-components test-zero-optimizer
 	@echo "  4. Implement ZeRO-2 (gradient partitioning)"
 	@echo "  Planned: Compare NeurX outputs with .bin files"
 	@echo "  Tolerance: max_abs_error < 1e-5"
+
+
+posttrain-real: check-bash build-s-ir-runner
+	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_real'
+	@echo "======================================================"
+	@echo "[Phase 2A] REAL SFT Training with LoRA (Pure S)"
+	@echo "======================================================"
+	@cd '$(CURDIR_UNIX)' && \
+		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_real/phase2a_real.ir'; \
+		"$(POSTTRAIN_S_COMPILER)" 'posttrain/training/phase2a_trainer.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_real/phase2a_real.ir' 2>&1 || exit 1; \
+		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_real/phase2a_real.ir'
+	@mkdir -p '$(POSTTRAIN_OUTPUT_DIR)' '$(LOG_DIR)'
+	@cd '$(CURDIR_UNIX)' && \
+		set -o pipefail; \
+		export NEURX_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)'; \
+		export NEURX_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)'; \
+		export NEURX_DATA_PATH='$(POSTTRAIN_DATA_FILE)'; \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_real/phase2a_real.ir' \
+		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_real_$(shell date +%Y%m%d_%H%M%S).log'
+	@echo ""
+	@echo "[✓] REAL Phase 2A training completed with gradient updates!"
+	@echo "Output: $(POSTTRAIN_OUTPUT_DIR)"
+
+
+posttrain-simple: check-bash build-s-ir-runner
+	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_simple'
+	@echo "======================================================"
+	@echo "[Phase 2A] Simple REAL Training (Pure S)"
+	@echo "======================================================"
+	@cd '$(CURDIR_UNIX)' && \
+		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_simple/simple_real.ir'; \
+		"$(POSTTRAIN_S_COMPILER)" 'posttrain/training/ultra_simple_real.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_simple/simple_real.ir' 2>&1 || exit 1; \
+		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_simple/simple_real.ir'
+	@mkdir -p '$(POSTTRAIN_OUTPUT_DIR)' '$(LOG_DIR)'
+	@cd '$(CURDIR_UNIX)' && \
+		set -o pipefail; \
+		export NEURX_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)'; \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_simple/simple_real.ir' \
+		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_simple_$(shell date +%Y%m%d_%H%M%S).log'
+	@echo ""
+	@echo "[✓] Simple REAL training completed!"
+	@echo "Output: $(POSTTRAIN_OUTPUT_DIR)"

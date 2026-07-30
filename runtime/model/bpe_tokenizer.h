@@ -36,4 +36,4 @@ class BpeTokenizer {
   int32_t unknown_id_ = -1;
 };
 
-}  // namespace neurx::runtime::model
+}

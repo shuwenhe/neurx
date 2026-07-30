@@ -71,30 +71,30 @@ func main() int {
     println("[Phase 2A] Automated Verification Suite")
     println("====================================================")
     println("")
-    
+
     println("[TEST 1] Verify File Paths")
     println("---")
     string model_path = runtime_env_get("NEURX_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
     string data_path = runtime_env_get("NEURX_DATA_PATH", "/home/shuwen/shuwen/dataset/medical/train.json")
     string output_dir = runtime_env_get("NEURX_OUTPUT_DIR", "/home/shuwen/shuwen/posttrain")
-    
+
     if runtime_file_exists(model_path) {
         println("✓ Model path exists: " + model_path)
     } else {
         println("✗ Model path NOT found: " + model_path)
         return 1
     }
-    
+
     if runtime_file_exists(data_path) {
         println("✓ Data path exists: " + data_path)
     } else {
         println("✗ Data path NOT found: " + data_path)
         return 1
     }
-    
+
     println("✓ Output directory configured: " + output_dir)
     println("")
-    
+
     println("[TEST 2] Verify Training Configuration")
     println("---")
     int num_layers = 24
@@ -102,7 +102,7 @@ func main() int {
     int vocab_size = 151936
     int lora_rank = 8
     float lora_alpha = 16.0
-    
+
     int total_lora_params = lora_rank * hidden_size * 7 * num_layers
     println("Model Configuration:")
     println("  Layers: " + int_to_str(num_layers))
@@ -114,7 +114,7 @@ func main() int {
     println("  Alpha: " + float_to_str(lora_alpha, 1))
     println("  Target Modules: 7 (q,k,v,o,gate,up,down)")
     println("  Total LoRA Parameters: " + int_to_str(total_lora_params))
-    
+
     if total_lora_params > 0 {
         println("✓ LoRA parameter calculation verified")
     } else {
@@ -122,14 +122,14 @@ func main() int {
         return 1
     }
     println("")
-    
+
     println("[TEST 3] Verify Data Loading")
     println("---")
     println("Dataset: MedMCQA (Medical Multiple-Choice QA)")
     println("Format: JSON with questions, options, answers")
     println("Max Sequence Length: 512 tokens")
     println("Batch Size: 32")
-    
+
     if runtime_file_exists(data_path) {
         println("✓ Dataset file accessible")
     } else {
@@ -137,7 +137,7 @@ func main() int {
         return 1
     }
     println("")
-    
+
     println("[TEST 4] Verify Training Hyperparameters")
     println("---")
     float learning_rate = 0.0005
@@ -145,13 +145,13 @@ func main() int {
     int total_steps = 1000
     int batch_size = 32
     int num_epochs = 3
-    
+
     println("Learning Rate: " + float_to_str(learning_rate, 6))
     println("Warmup Steps: " + int_to_str(warmup_steps))
     println("Total Steps: " + int_to_str(total_steps))
     println("Batch Size: " + int_to_str(batch_size))
     println("Epochs: " + int_to_str(num_epochs))
-    
+
     if learning_rate > 0.0 && warmup_steps > 0 && total_steps > 0 {
         println("✓ Hyperparameters validated")
     } else {
@@ -159,7 +159,7 @@ func main() int {
         return 1
     }
     println("")
-    
+
     println("[TEST 5] Verify Phase 2A Components")
     println("---")
     println("Phase 2A requires:")
@@ -169,13 +169,13 @@ func main() int {
     println("  • AdamW Optimizer (with scheduling)")
     println("  • Data Loader (MedMCQA)")
     println("")
-    
+
     bool transformer_impl = true
     bool lora_impl = true
     bool loss_impl = true
     bool optimizer_impl = true
     bool data_impl = true
-    
+
     if transformer_impl {
         println("✓ Transformer module signature verified")
     }
@@ -192,7 +192,7 @@ func main() int {
         println("✓ Data loader module verified")
     }
     println("")
-    
+
     println("====================================================")
     println("[SUMMARY]")
     println("====================================================")
@@ -213,6 +213,6 @@ func main() int {
     println("  • Generate real adapter_model.safetensors")
     println("  • Verify numerical accuracy")
     println("")
-    
+
     return 0
 }

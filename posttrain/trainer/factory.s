@@ -16,19 +16,19 @@ func factory_get_trainer_type(trainer_factory factory) trainer_type {
 }
 
 func factory_is_reference(trainer_factory factory) bool {
-    return factory.selected_type == 0  
+    return factory.selected_type == 0
 }
 
 func factory_is_runtime(trainer_factory factory) bool {
-    return factory.selected_type == 1  
+    return factory.selected_type == 1
 }
 
 func select_trainer_for_config(trainer_config config) trainer_type {
     string forced_backend = trim(runtime_env_get("NEURX_POSTTRAIN_BACKEND", "runtime"))
     if forced_backend == "reference" || forced_backend == "sim" || forced_backend == "simulation" {
-        return 0  
+        return 0
     }
-    return 1  
+    return 1
 }
 
 func validate_trainer_config(trainer_config config) int {
@@ -60,7 +60,7 @@ func validate_trainer_config(trainer_config config) int {
         println("error: total_steps must be positive")
         return 7
     }
-    return 0  
+    return 0
 }
 
 func create_config(

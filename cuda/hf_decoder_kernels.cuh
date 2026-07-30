@@ -111,4 +111,4 @@ __global__ void swiglu_in_place(float* gate, const float* up, int count) {
   if (index < count) gate[index] = gate[index] / (1.0F + expf(-gate[index])) * up[index];
 }
 
-}  // namespace neurx::cuda::kernels
+}

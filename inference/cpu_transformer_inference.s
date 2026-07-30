@@ -22,7 +22,7 @@ struct generation_config {
 
 struct transformer_2 {
   modelInfo: model_info
-  impl: interface{}  
+  impl: interface{}
 }
 
 func New() *transformer_2 {

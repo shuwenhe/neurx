@@ -976,10 +976,10 @@ func run_runtime_training(trainer_config config) int {
 }
 
 func get_trainer_type_name(trainer_type ttype) string {
-    if ttype == 0 {  
+    if ttype == 0 {
         return "Reference Trainer (Simulation)"
     }
-    if ttype == 1 {  
+    if ttype == 1 {
         return "Runtime Trainer (Real)"
     }
     return "Unknown"

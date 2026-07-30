@@ -53,7 +53,7 @@ func reference_compute_adapter_stats(reference_trainer trainer) reference_traine
     float adapter_l2_sq = 0.0
     float adapter_max_abs = 0.0
     int adapter_nonzero = trainer.state.q_b_len + trainer.state.v_b_len
-    int adapter_total = trainer.state.q_a_len + trainer.state.q_b_len + 
+    int adapter_total = trainer.state.q_a_len + trainer.state.q_b_len +
                         trainer.state.v_a_len + trainer.state.v_b_len
     int i = 0
     while i < trainer.state.q_b_len {

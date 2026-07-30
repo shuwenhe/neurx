@@ -95,7 +95,7 @@ void run_linear(cublasHandle_t handle, const float* input, int rows, const Linea
   }
 }
 
-}  // namespace
+}
 
 struct HfCudaKvCache::State {
   std::size_t length = 0;
@@ -338,4 +338,4 @@ int32_t HfDecoderCuda::greedy(const std::vector<float>& logits) {
   return static_cast<int32_t>(std::max_element(logits.begin(), logits.end()) - logits.begin());
 }
 
-}  // namespace neurx::cuda
+}

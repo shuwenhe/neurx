@@ -411,7 +411,7 @@ func infer_remote_descriptor_backend(string model_path) string {
 }
 
 func infer_remote_response_text(string response_path) string {
-    string parser = "jq -r '.choices[0].message.content 
+    string parser = "jq -r '.choices[0].message.content
     trim(runtime_run_command_output(parser))
 }
 

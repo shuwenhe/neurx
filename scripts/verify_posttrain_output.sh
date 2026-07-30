@@ -1,6 +1,6 @@
-#!/bin/bash
-# Verify NeurX PostTrain Output Integrity
-# Checks that adapter and merged model contain real weights, not placeholders
+
+
+
 
 echo "=== NeurX PostTrain Verification ==="
 echo ""
@@ -19,7 +19,7 @@ if [ ! -f "$MODEL_FILE" ]; then
     exit 1
 fi
 
-# Check adapter file type
+
 echo "[1] Checking adapter file format..."
 file_type=$(file "$ADAPTER_FILE" | grep -o "data\|JSON")
 adapter_size=$(stat -c%s "$ADAPTER_FILE" 2>/dev/null || stat -f%z "$ADAPTER_FILE")
@@ -38,7 +38,7 @@ else
     exit 1
 fi
 
-# Check safetensors format (8-byte header + JSON)
+
 echo ""
 echo "[2] Checking safetensors format..."
 header=$(xxd -p -l 8 "$ADAPTER_FILE")
@@ -49,7 +49,7 @@ else
     exit 1
 fi
 
-# Verify model was merged (compare with base)
+
 echo ""
 echo "[3] Verifying model weights were merged..."
 base_size=$(stat -c%s "$BASE_MODEL" 2>/dev/null || stat -f%z "$BASE_MODEL")
@@ -61,7 +61,7 @@ else
     echo "⚠️  WARN: Model sizes differ (base=$base_size, merged=$model_size)"
 fi
 
-# Check if content actually differs
+
 diff_count=$(cmp -bl "$BASE_MODEL" "$MODEL_FILE" 2>/dev/null | wc -l)
 if [ "$diff_count" -gt 0 ]; then
     echo "✅ PASS: Merged model differs from base model ($diff_count bytes changed)"

@@ -2,10 +2,10 @@ import "device_api"
 import "dtype_api"
 import "layout_api"
 
-// Storage API - Backing storage for Tensor/TensorImpl
-//
-// Storage owns the raw memory handle and layout metadata.
-// TensorImpl tracks autograd and versioning on top of Storage.
+
+
+
+
 
 struct Storage {
     id: i64

@@ -1,7 +1,7 @@
-// NeurX Runtime Contracts - 完整接口规范
-//
-// 这 16 个 Contract 定义了世界级训练框架的核心架构。
-// 对标：PyTorch + JAX + Megatron-Core
+# NeurX Runtime Contracts
+
+这 16 个 Contract 定义了世界级训练框架的核心架构。
+对标：PyTorch + JAX + Megatron-Core
 
 ## 📋 16 个核心 Contract
 

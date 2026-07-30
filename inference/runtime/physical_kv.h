@@ -100,4 +100,4 @@ class PhysicalKvPool {
   mutable std::mutex mutex_;
 };
 
-}  // namespace neurx::inference
+}

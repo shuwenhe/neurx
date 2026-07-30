@@ -276,13 +276,9 @@ ENVIRONMENT VARIABLES:
   NEURX_BATCH_SIZE  batch_2 size for training
   NEURX_LOG_DIR     Directory for logs
 EXAMPLES:
-  # Quick test on single GPU
   $ neurx quick-start
-  # Full 70B training on 512 GPUs
   $ neurx launch-70b 512
-  # Build everything from scratch
   $ neurx build-clean
-  # Start inference server
   $ neurx inference ./model.bin
 For more information, visit: https:
 `)

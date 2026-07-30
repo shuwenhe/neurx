@@ -127,7 +127,7 @@ func should_save_step_s(training_progress_s progress, training_config_s config) 
 }
 
 func log_training_step_s(training_step_s step) {
-    println("Step " + int_to_str(step.step) + 
+    println("Step " + int_to_str(step.step) +
             ": loss=" + float_to_str(step.loss, 4) +
             " grad_norm=" + float_to_str(step.grad_norm, 4) +
             " lr=" + float_to_str(step.learning_rate, 6))

@@ -324,10 +324,10 @@ func show_usage_examples():
 ║                                                              ║
 ║  📘 PRETRAINING (English texttraining)                                     ║
 ║                                                              ║
-║  
+║
 ║  start_neurx_training(mode="pretrain")                        ║
 ║                                                              ║
-║  
+║
 ║  start_neurx_training(                                        ║
 ║      mode="pretrain",                                         ║
 ║      config_path="./configs/my_neurx_config.json",                ║
@@ -337,7 +337,7 @@ func show_usage_examples():
 ║  ══════════════════════════════════════════════════════════  ║
 ║  📚 SUPERVISED FINE-TUNING (English text)                         ║
 ║                                                              ║
-║  
+║
 ║  start_neurx_training(mode="sft",                             ║
 ║      config_path="./configs/sft_config.json"                    ║
 ║  )                                                           ║
@@ -345,21 +345,21 @@ func show_usage_examples():
 ║  ══════════════════════════════════════════════════════════  ║
 ║  🎯 ALIGNMENT TRAINING (alignmenttraining)                              ║
 ║                                                              ║
-║  
+║
 ║  start_neurx_training(mode="align",                            ║
 ║      config_path="./configs/dpo_config.json"                    ║
 ║  )                                                           ║
 ║                                                              ║
-║  
-║  
+║
+║
 ║                                                              ║
-║  
-║  
+║
+║
 ║                                                              ║
 ║  ══════════════════════════════════════════════════════════  ║
 ║  🌐 INFERENCE SERVER (inferenceEnglish text)                                 ║
 ║                                                              ║
-║  
+║
 ║  start_neurx_inference_server(                                 ║
 ║      port=8080,                                              ║
 ║      model_path="./checkpoints/neurx_final/"                    ║
@@ -368,16 +368,16 @@ func show_usage_examples():
 ║  ══════════════════════════════════════════════════════════  ║
 ║  🧪 TESTING (testEnglish text)                                          ║
 ║                                                              ║
-║  
+║
 ║  run_all_tests()                                              ║
 ║                                                              ║
-║  
+║
 ║  check_system_status()                                         ║
 ║                                                              ║
 ║  ══════════════════════════════════════════════════════════  ║
 ║  🔧 ADVANCED USAGE (advancedEnglish text)                                    ║
 ║                                                              ║
-║  
+║
 ║  neurx_config my_cfg = create_custom_neurx_config(                  ║
 ║      vocab_size=151552,                                       ║
 ║      hidden_size=5120,                                        ║
@@ -388,10 +388,10 @@ func show_usage_examples():
 ║      enable_moe=false                                         ║
 ║  )                                                           ║
 ║                                                              ║
-║  
+║
 ║  neurx_config vision_cfg = create_vision_9b_config()              ║
 ║                                                              ║
-║  
+║
 ║  neurx_config moe_cfg = create_moe_200b_config_200b()             ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝

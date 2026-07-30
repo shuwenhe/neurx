@@ -1,4 +1,4 @@
-package neurx.posttrain.training.phase2a_trainer
+package neurx.posttrain.training.phase2a_real
 
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_write_binary_file, runtime_read_binary_file, runtime_read_json_file}
 
@@ -125,9 +125,7 @@ func random_seed(int seed) int {
 func random_float(int seed) float {
     int value = random_seed(seed)
     if value < 0 { value = 0 - value }
-
-    int remainder = value - (value / 10000) * 10000
-    float normalized = float(remainder) / 10000.0
+    float normalized = float(value % 10000) / 10000.0
     return normalized
 }
 
@@ -327,18 +325,13 @@ func log_approx(float x) float {
 
 
 
-struct gradient_pair {
-    []float grad_A
-    []float grad_B
-}
-
 func compute_lora_gradients(
     []float hidden_input,
     []float grad_output,
     lora_weights lora,
     int batch_size,
     int seq_len
-) gradient_pair {
+) ([]float, []float) {
 
 
 
@@ -368,10 +361,7 @@ func compute_lora_gradients(
         i = i + 1
     }
 
-    gradient_pair result
-    result.grad_A = grad_A
-    result.grad_B = grad_B
-    return result
+    return (grad_A, grad_B)
 }
 
 
@@ -406,11 +396,6 @@ func init_optimizer(int size_A, int size_B) optimizer_state {
     return opt
 }
 
-struct optimizer_result {
-    lora_weights lora
-    optimizer_state optimizer
-}
-
 func optimizer_step(
     lora_weights lora,
     []float grad_A,
@@ -418,7 +403,7 @@ func optimizer_step(
     optimizer_state opt,
     float lr,
     int step
-) optimizer_result {
+) (lora_weights, optimizer_state) {
 
     float beta1_t = pow_approx(opt.beta1, float(step))
     float beta2_t = pow_approx(opt.beta2, float(step))
@@ -449,10 +434,7 @@ func optimizer_step(
         i = i + 1
     }
 
-    optimizer_result result
-    result.lora = lora
-    result.optimizer = opt
-    return result
+    return (lora, opt)
 }
 
 func pow_approx(float base, float exp) float {
@@ -505,6 +487,7 @@ func serialize_lora_to_safetensors([]lora_weights loras, training_config config)
 
 
 
+
     int total_params = 0
     int layer_idx = 0
     while layer_idx < len(loras) {
@@ -513,13 +496,34 @@ func serialize_lora_to_safetensors([]lora_weights loras, training_config config)
     }
 
 
-    int data_size = total_params * 4
-    []byte buffer = []byte{cap: 8 + data_size}
+    string header = "{\"__metadata__\":{\"format\":\"pt\"},"
+    layer_idx = 0
+    while layer_idx < len(loras) {
+        string prefix = "base_model.model.model.layers." + int_to_str(layer_idx) + ".self_attn."
+        header = header + "\"" + prefix + "q_proj.lora_A.weight\":{\"dtype\":\"F32\",\"shape\":[" + int_to_str(config.lora_rank) + "," + int_to_str(config.hidden_size) + "],\"data_offsets\":[0,0]},"
+        header = header + "\"" + prefix + "q_proj.lora_B.weight\":{\"dtype\":\"F32\",\"shape\":[" + int_to_str(config.hidden_size) + "," + int_to_str(config.lora_rank) + "],\"data_offsets\":[0,0]},"
+        layer_idx = layer_idx + 1
+    }
+    header = header + "}"
+
+    []byte header_bytes = string_to_bytes(header)
+    int header_size = len(header_bytes)
+
+
+    []byte buffer = []byte{cap: 8 + header_size + total_params * 4}
 
 
     int i = 0
     while i < 8 {
-        buffer = append(buffer, byte(0))
+        int byte_val = (header_size >> (i * 8)) & 0xFF
+        buffer = append(buffer, byte(byte_val))
+        i = i + 1
+    }
+
+
+    i = 0
+    while i < len(header_bytes) {
+        buffer = append(buffer, header_bytes[i])
         i = i + 1
     }
 
@@ -557,25 +561,19 @@ func serialize_lora_to_safetensors([]lora_weights loras, training_config config)
 func float32_to_bytes(float value) []byte {
 
 
-    int int_bits = int(value * 1000000.0)
+    int bits = 0
+    if value > 0.0 {
+        bits = int(value * 1000000.0)
+    } else {
+        bits = int(value * 1000000.0)
+        bits = bits | 0x80000000
+    }
 
     []byte bytes = []byte{cap: 4}
-
-    int divisor = 256 * 256 * 256
-    int byte3 = int_bits / divisor
-    int_bits = int_bits - byte3 * divisor
-    divisor = divisor / 256
-    int byte2 = int_bits / divisor
-    int_bits = int_bits - byte2 * divisor
-    divisor = divisor / 256
-    int byte1 = int_bits / divisor
-    int_bits = int_bits - byte1 * divisor
-    int byte0 = int_bits
-
-    bytes = append(bytes, byte(byte0))
-    bytes = append(bytes, byte(byte1))
-    bytes = append(bytes, byte(byte2))
-    bytes = append(bytes, byte(byte3))
+    bytes = append(bytes, byte(bits & 0xFF))
+    bytes = append(bytes, byte((bits >> 8) & 0xFF))
+    bytes = append(bytes, byte((bits >> 16) & 0xFF))
+    bytes = append(bytes, byte((bits >> 24) & 0xFF))
     return bytes
 }
 
@@ -708,8 +706,7 @@ func run_real_training(training_config config) training_state {
             []int labels = []int{cap: tokens}
             i = 0
             while i < tokens {
-                int label = i - (i / config.vocab_size) * config.vocab_size
-                labels = append(labels, label)
+                labels = append(labels, i % config.vocab_size)
                 int j = 0
                 while j < config.vocab_size {
                     seed = random_seed(seed + i * 1000 + j)
@@ -732,12 +729,10 @@ func run_real_training(training_config config) training_state {
                 i = i + 1
             }
 
-            gradient_pair grads = compute_lora_gradients(hidden, grad_output, state.layer_loras[0], batch_size, seq_len)
+            ([]float grad_A, []float grad_B) = compute_lora_gradients(hidden, grad_output, state.layer_loras[0], batch_size, seq_len)
 
 
-            optimizer_result opt_result = optimizer_step(state.layer_loras[0], grads.grad_A, grads.grad_B, state.optimizer, config.learning_rate, state.current_step)
-            state.layer_loras[0] = opt_result.lora
-            state.optimizer = opt_result.optimizer
+            (state.layer_loras[0], state.optimizer) = optimizer_step(state.layer_loras[0], grad_A, grad_B, state.optimizer, config.learning_rate, state.current_step)
 
 
             if state.current_loss < state.best_loss {
@@ -777,22 +772,7 @@ func run_real_training(training_config config) training_state {
 }
 
 func main() int {
-
-    training_config config
-    config.model_path = runtime_env_get("NEURX_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
-    config.data_path = runtime_env_get("NEURX_DATA_PATH", "/home/shuwen/shuwen/dataset/medical/train.json")
-    config.output_dir = runtime_env_get("NEURX_OUTPUT_DIR", "/home/shuwen/shuwen/posttrain")
-    config.num_epochs = 3
-    config.batch_size = 4
-    config.num_layers = 24
-    config.hidden_size = 896
-    config.vocab_size = 151936
-    config.lora_rank = 8
-    config.lora_alpha = 16.0
-    config.learning_rate = 0.0005
-    config.warmup_steps = 100
-    config.total_steps = 300
-
+    training_config config = create_training_config()
     training_state final_state = run_real_training(config)
     return 0
 }

@@ -26,7 +26,7 @@ std::vector<float> host_copy(float* values, std::size_t count) {
   return result;
 }
 
-}  // namespace
+}
 
 int main() {
   int devices = 0;

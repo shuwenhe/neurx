@@ -76,8 +76,8 @@ interface trainer {
     func initialize(trainer_config config) trainer_state
 }
 enum trainer_type {
-    REFERENCE  
-    RUNTIME    
+    REFERENCE
+    RUNTIME
 }
 
 func create_trainer(trainer_type ttype) int {

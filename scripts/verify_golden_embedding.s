@@ -78,13 +78,13 @@ func float_to_str(float value, int decimals) string {
 
 func float_to_scientific(float value) string {
     if value == 0.0 { return "0.00e+00" }
-    
+
     float abs_val = abs_float(value)
     bool negative = value < 0.0
-    
+
     int exponent = 0
     float mantissa = abs_val
-    
+
     if abs_val >= 10.0 {
         while mantissa >= 10.0 {
             mantissa = mantissa / 10.0
@@ -96,13 +96,13 @@ func float_to_scientific(float value) string {
             exponent = exponent - 1
         }
     }
-    
+
     string sign = ""
     if negative { sign = "-" }
-    
+
     string exp_sign = ""
     if exponent >= 0 { exp_sign = "+" }
-    
+
     return sign + float_to_str(mantissa, 2) + "e" + exp_sign + int_to_str(exponent)
 }
 
@@ -123,27 +123,27 @@ func verify_embedding_test(string test_name, string golden_dir, string output_di
     result.mean_abs_error = 0.0
     result.max_rel_error = 0.0
     result.total_elements = 0
-    
+
     println("[Test] " + test_name)
-    
+
     string golden_path = golden_dir + "/" + test_name + "/output.npy"
     string neurx_path = output_dir + "/" + test_name + "/output.npy"
-    
+
     if !runtime_file_exists(golden_path) {
         println("  ✗ Golden output not found: " + golden_path)
         return result
     }
-    
+
     if !runtime_file_exists(neurx_path) {
         println("  ✗ NeurX output not found: " + neurx_path)
         println("  Status: SKIPPED (not implemented)")
         return result
     }
-    
+
     println("  ✓ Both outputs found")
     println("  Note: Actual numerical comparison needs safetensors reader implementation")
     println("  Status: INFRASTRUCTURE_READY")
-    
+
     result.passed = true
     return result
 }
@@ -153,36 +153,36 @@ func main() int {
     println("Stage 1: Embedding Verification (NeurX S Implementation)")
     println("============================================================")
     println("")
-    
+
     string golden_dir = runtime_env_get("NEURX_GOLDEN_DIR", "tests/golden/embedding")
     string output_dir = runtime_env_get("NEURX_OUTPUT_DIR", "tests/output/embedding")
-    
+
     println("Configuration:")
     println("  Golden Directory: " + golden_dir)
     println("  Output Directory: " + output_dir)
     println("")
-    
+
     if !runtime_file_exists(golden_dir) {
         println("✗ Golden directory not found: " + golden_dir)
         println("  Please run golden data generation first.")
         return 1
     }
-    
+
     println("Test Case Discovery:")
     println("  Searching in: " + golden_dir)
-    
+
     []string test_cases = []string{}
     test_cases = append(test_cases, "single_token")
     test_cases = append(test_cases, "short_sequence")
     test_cases = append(test_cases, "batch_sequences")
-    
+
     println("  Found " + int_to_str(len(test_cases)) + " predefined test cases")
     println("")
-    
+
     int passed = 0
     int failed = 0
     int skipped = 0
-    
+
     int i = 0
     while i < len(test_cases) {
         embedding_test_result result = verify_embedding_test(
@@ -190,7 +190,7 @@ func main() int {
             golden_dir,
             output_dir
         )
-        
+
         if result.passed {
             passed = passed + 1
         } else {
@@ -200,11 +200,11 @@ func main() int {
                 skipped = skipped + 1
             }
         }
-        
+
         println("")
         i = i + 1
     }
-    
+
     println("============================================================")
     println("Summary")
     println("============================================================")
@@ -213,7 +213,7 @@ func main() int {
     println("✗ Failed: " + int_to_str(failed))
     println("⊘ Skipped: " + int_to_str(skipped))
     println("")
-    
+
     if failed == 0 && skipped == 0 {
         println("🎉 All tests passed!")
         println("")

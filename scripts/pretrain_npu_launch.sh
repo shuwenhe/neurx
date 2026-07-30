@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+
 set -euo pipefail
 
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -153,7 +153,7 @@ if [[ "$requested_world_size" -gt 1 && "${#worker_hosts[@]}" -lt 1 ]]; then
   exit 1
 fi
 
-configured_world_size=$((1 + ${#worker_hosts[@]}))
+configured_world_size=$((1 + ${
 if [[ "$requested_world_size" -ne "$configured_world_size" ]]; then
   echo "[pretrain-npu] note: configured workers imply WORLD_SIZE=$configured_world_size; using requested WORLD_SIZE=$requested_world_size"
 fi

@@ -21,4 +21,4 @@ QuantizedWeight quantize_weight_symmetric(const float* weights, std::size_t rows
 std::vector<float> weight_only_matmul(const float* input, std::size_t batch,
                                       std::size_t inner, const QuantizedWeight& weight);
 
-}  // namespace neurx::runtime::native
+}

@@ -696,26 +696,21 @@ class DataAnalysisHelper {
         code = f"""
 import pandas as pd
 import numpy as np
-# Load dataset
 df = pd.read_csv("{csv_path}")
 print("=" * 60)
 print("DATASET OVERVIEW")
 print("=" * 60)
-# Basic info
 print(f"\\nShape: {{df.shape}}")
 print(f"\\nColumns: {{list(df.columns)}}")
 print(f"\\nDtypes:\\n{{df.dtypes}}")
-# Statistical summary
 print("\\n" + "=" * 60)
 print("STATISTICAL SUMMARY")
 print("=" * 60)
 print(df.describe())
-# First few rows
 print("\\n" + "=" * 60)
 print(f"FIRST {{max_rows}} ROWS")
 print("=" * 60)
 print(df.head({max_rows}).to_string(index=False))
-# Missing values
 print("\\n" + "=" * 60)
 print("MISSING VALUES")
 print("=" * 60)
@@ -724,7 +719,6 @@ if missing.sum() > 0:
     print(missing[missing > 0])
 else:
     print("No missing values")
-# Memory usage
 print("\\n" + "=" * 60)
 print("MEMORY USAGE")
 print("=" * 60)
@@ -792,7 +786,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 df = pd.read_csv("{csv_path}")
-# Select numeric columns only
 numeric_df = df.select_dtypes(include=[np.number])
 plt.figure(figsize=(12, 10))
 corr = numeric_df.corr()
@@ -823,7 +816,6 @@ from scipy import stats
 df = pd.read_csv("{csv_path}")
 test_type = "{test_type}".lower()
 if test_type == "t-test":
-    # Independent t-test
     group1 = df[df["{col2}"] == df["{col2}"].unique()[0]]["{col1}"]
     group2 = df[df["{col2}"] == df["{col2}"].unique()[1]]["{col1}"]
     t_stat, p_val = stats.ttest_ind(group1, group2)

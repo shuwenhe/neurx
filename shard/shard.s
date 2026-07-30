@@ -160,7 +160,7 @@ func run_wikipedia() int {
         }
     }
     runtime_run_command_output("rm -f " + shell_escape(completion_file))
-    var run_command = 
+    var run_command =
         "NEURX_HOME=" + shell_escape(root) +
         " S_COMPILER=" + shell_escape(compiler) +
         " S_COMPILER_EMIT_CWD=" + shell_escape(env_get("S_COMPILER_EMIT_CWD", root + "/../s")) +
@@ -211,7 +211,7 @@ func run_list() int {
         println("Shard directory not found: " + shard_dir)
         return 1
     }
-    var list_cmd = "sh -c " + 
+    var list_cmd = "sh -c " +
         shell_escape("printf '%-30s %10s %15s\n' 'Shard File' 'Lines' 'Size (MB)'; printf '%-30s %10s %15s\n' '--------------------' '----------' '---------------'; total_size=0; total_lines=0; for shard_file in " + shell_escape(shard_dir) + "/shard_*.jsonl; do [ -f \"$shard_file\" ] || continue; filename=$(basename \"$shard_file\"); line_count=$(wc -l < \"$shard_file\"); file_size=$((($(stat -c%s \"$shard_file\" 2>/dev/null || stat -f%z \"$shard_file\") / 1024 / 1024))); printf '%-30s %10d %15d\n' \"$filename\" \"$line_count\" \"$file_size\"; total_size=$((total_size + file_size)); total_lines=$((total_lines + line_count)); done; printf '%-30s %10d %15d\n' 'TOTAL' \"$total_lines\" \"$total_size\"")
     var list_output = runtime_run_command_output(list_cmd)
     if len(trim(list_output)) > 0 {

@@ -1,7 +1,7 @@
 package neurx.posttrain.core.tensor_runtime_test
 use neurx.posttrain.core.tensor_runtime.{
-    tensor_s, 
-    new_tensor_s, 
+    tensor_s,
+    new_tensor_s,
     compute_strides_s,
     tensor_get_flat_index_s,
     tensor_reshape_s,
@@ -121,7 +121,7 @@ func test_new_tensor_1d_s(test_suite_s suite) test_suite_s {
     bool passed = assert_equal_int_s(t.total_elements, 5) &&
                   assert_equal_int_s(t.rank, 1) &&
                   assert_equal_int_s(len(t.shape), 1)
-    add_test_result_s(suite, "test_new_tensor_1d_s", passed, 
+    add_test_result_s(suite, "test_new_tensor_1d_s", passed,
                       if passed { "" } else { "1D tensor creation failed" })
 }
 

@@ -50,7 +50,7 @@ int cuda_synchronize(int device_id, void*) {
   return cudaDeviceSynchronize() == cudaSuccess ? 0 : -1;
 }
 
-}  // namespace
+}
 
 extern "C" int nx_register_cuda_memory_backend(void) {
   nx_memory_ops ops{};

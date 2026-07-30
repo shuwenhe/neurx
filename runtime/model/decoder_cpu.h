@@ -72,4 +72,4 @@ class DecoderCpuModel {
                               DecoderKvCache* cache) const;
 };
 
-}  // namespace neurx::runtime::model
+}

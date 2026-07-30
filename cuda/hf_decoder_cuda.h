@@ -47,4 +47,4 @@ class HfDecoderCuda {
   std::unique_ptr<Impl> impl_;
 };
 
-}  // namespace neurx::cuda
+}

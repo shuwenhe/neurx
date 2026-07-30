@@ -103,7 +103,7 @@ bool contains(const std::vector<int32_t>& values, int32_t value) {
   return false;
 }
 
-}  // namespace
+}
 
 int main() {
   try {

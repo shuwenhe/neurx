@@ -15,7 +15,7 @@ func generate_medical_response(string input) string {
     if contains(lower_input, "治疗") || contains(lower_input, "treatment") {
         return "治疗方案取决于具体病情。常见方法包括：药物治疗、手术治疗或支持性护理。请咨询医疗专业人士获得个性化建议。"
     }
-    if contains(lower_input, "症状") || contains(lower_input, "症") || contains(lower_input, "症状") || 
+    if contains(lower_input, "症状") || contains(lower_input, "症") || contains(lower_input, "症状") ||
        contains(lower_input, "疼痛") || contains(lower_input, "腿痛") || contains(lower_input, "pain") ||
        contains(lower_input, "fever") || contains(lower_input, "发烧") {
         return "症状可能由多种原因引起。建议您咨询医生进行专业诊断和评估。"

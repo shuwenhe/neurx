@@ -129,12 +129,16 @@ func runtime_parse_medmcqa_sample(string line) runtime_training_sample {
     sample
 }
 
+func char_at(string text, int idx) string {
+    return string(text[idx])
+}
+
 func runtime_split_lines(string text) []string {
     []string lines = []string{cap: 0}
     string current = ""
     int i = 0
     while i < len(text) {
-        string ch = substring(text, i, i + 1)
+        string ch = char_at(text, i)
         if ch == "\n" || ch == "\r" {
             if trim(current) != "" {
                 lines.push(trim(current))
@@ -230,7 +234,7 @@ func text_window_to_vector(string text, int start, int count, int dim) []float {
     }
     int i = 0
     while i < limit {
-        string ch = substring(text, start + i, start + i + 1)
+        string ch = char_at(text, start + i)
         int slot = i - (i / dim) * dim
         float char_component = 0.0009
         if ch == " " {
@@ -1024,7 +1028,7 @@ func text_to_vector(string text, int dim) []float {
     }
     int i = 0
     while i < len(text) {
-        string ch = substring(text, i, i + 1)
+        string ch = char_at(text, i)
         int slot = i - (i / dim) * dim
         float char_component = 0.0009
         if ch == " " {
@@ -1133,7 +1137,7 @@ func extract_json_string_field(string json_text, string field_name) string {
     }
     int i = pos + len(needle)
     while i < len(json_text) {
-        string ch = substring(json_text, i, i + 1)
+        string ch = char_at(json_text, i)
         if ch == ":" {
             i = i + 1
             break
@@ -1141,7 +1145,7 @@ func extract_json_string_field(string json_text, string field_name) string {
         i = i + 1
     }
     while i < len(json_text) {
-        string ch = substring(json_text, i, i + 1)
+        string ch = char_at(json_text, i)
         if ch != " " && ch != "\t" {
             break
         }
@@ -1150,18 +1154,18 @@ func extract_json_string_field(string json_text, string field_name) string {
     if i >= len(json_text) {
         return ""
     }
-    if substring(json_text, i, i + 1) != "\"" {
+    if char_at(json_text, i) != "\"" {
         return ""
     }
     i = i + 1
     string out = ""
     while i < len(json_text) {
-        string ch = substring(json_text, i, i + 1)
+        string ch = char_at(json_text, i)
         if ch == "\"" {
             return out
         }
         if ch == "\\" && i + 1 < len(json_text) {
-            string next_ch = substring(json_text, i + 1, i + 2)
+            string next_ch = char_at(json_text, i + 1)
             if next_ch == "\"" {
                 out = concat2(out, "\"")
                 i = i + 2
@@ -1197,7 +1201,7 @@ func extract_json_int_field(string json_text, string field_name, int fallback) i
     }
     int i = pos + len(needle)
     while i < len(json_text) {
-        string ch = substring(json_text, i, i + 1)
+        string ch = char_at(json_text, i)
         if ch != " " && ch != "\t" && ch != "\n" && ch != "\r" && ch != ":" {
             break
         }
@@ -1206,7 +1210,7 @@ func extract_json_int_field(string json_text, string field_name, int fallback) i
     string token = ""
     bool started = false
     while i < len(json_text) {
-        string ch = substring(json_text, i, i + 1)
+        string ch = char_at(json_text, i)
         if ch == "-" || ch == "0" || ch == "1" || ch == "2" || ch == "3" || ch == "4" || ch == "5" || ch == "6" || ch == "7" || ch == "8" || ch == "9" {
             token = concat2(token, ch)
             started = true
@@ -1229,7 +1233,7 @@ func find_substring(string text, string pattern) int {
     while i + len(pattern) <= len(text) {
         int j = 0
         while j < len(pattern) {
-            if substring(text, i + j, i + j + 1) != substring(pattern, j, j + 1) {
+            if char_at(text, i + j) != char_at(pattern, j) {
                 break
             }
             j = j + 1
@@ -1249,13 +1253,13 @@ func parse_int(string s, int fallback) int {
     }
     int sign = 1
     int i = 0
-    if substring(text, 0, 1) == "-" {
+    if char_at(text, 0) == "-" {
         sign = -1
         i = 1
     }
     int value = 0
     while i < len(text) {
-        string ch = substring(text, i, i + 1)
+        string ch = char_at(text, i)
         int digit = -1
         if ch == "0" {
             digit = 0

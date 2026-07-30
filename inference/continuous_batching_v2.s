@@ -42,7 +42,7 @@ struct scheduler_state {
 func new_scheduler_state(
     scheduler_policy policy,
     int total_kv_blocks) scheduler_state {
-    
+
     scheduler_state {
         pending_queue: []inference_request{cap: 1024},
         running_batch: []running_request{cap: policy.max_batch_size},
@@ -57,16 +57,16 @@ func new_scheduler_state(
 func scheduler_enqueue_request(
     scheduler_state state,
     inference_request req) scheduler_state {
-    
+
     req.arrival_time_ms = state.current_time_ms
     state.pending_queue.push(req)
-    
+
     return state
 }
 
 func scheduler_schedule_batch(
     scheduler_state state) scheduler_state {
-    
+
     if state.policy.algorithm == "fcfs" {
         return scheduler_fcfs(state)
     } else if state.policy.algorithm == "sjf" {
@@ -74,19 +74,19 @@ func scheduler_schedule_batch(
     } else if state.policy.algorithm == "priority" {
         return scheduler_priority(state)
     }
-    
+
     return state
 }
 
 func scheduler_fcfs(scheduler_state state) scheduler_state {
     int req_idx = 0
-    while req_idx < len(state.pending_queue) && 
+    while req_idx < len(state.pending_queue) &&
           len(state.running_batch) < state.policy.max_batch_size {
-        
+
         inference_request req = state.pending_queue[req_idx]
-        
+
         int required_blocks = estimate_kv_blocks(req)
-        
+
         if state.used_kv_blocks + required_blocks <= state.total_kv_blocks {
             running_request run_req = running_request {
                 req: req,
@@ -95,107 +95,107 @@ func scheduler_fcfs(scheduler_state state) scheduler_state {
                 current_position: len(req.prompt_tokens),
                 start_time_ms: state.current_time_ms,
             }
-            
+
             state.running_batch.push(run_req)
             state.used_kv_blocks = state.used_kv_blocks + required_blocks
-            
+
             state.pending_queue = remove_at_index(state.pending_queue, req_idx)
         } else {
             req_idx = req_idx + 1
         }
     }
-    
+
     return state
 }
 
 func scheduler_sjf(scheduler_state state) scheduler_state {
     state.pending_queue = sort_by_estimated_time(state.pending_queue)
-    
+
     return scheduler_fcfs(state)
 }
 
 func scheduler_priority(scheduler_state state) scheduler_state {
     state.pending_queue = sort_by_priority(state.pending_queue)
-    
+
     return scheduler_fcfs(state)
 }
 
 func scheduler_preempt_requests(
     scheduler_state state,
     int required_blocks) scheduler_state {
-    
+
     if !state.policy.enable_preemption {
         return state
     }
-    
+
     int freed_blocks = 0
     int victim_idx = len(state.running_batch) - 1
-    
+
     while victim_idx >= 0 && freed_blocks < required_blocks {
         running_request victim = state.running_batch[victim_idx]
-        
+
         if is_preemptible(victim, state.policy.preemption_threshold) {
             freed_blocks = freed_blocks + victim.kv_cache_blocks_used
             state.used_kv_blocks = state.used_kv_blocks - victim.kv_cache_blocks_used
-            
+
             victim.req.generated_tokens = len(victim.generated_token_ids)
             state.preempted_queue.push(victim.req)
-            
+
             state.running_batch = remove_running_at_index(state.running_batch, victim_idx)
         }
-        
+
         victim_idx = victim_idx - 1
     }
-    
+
     return state
 }
 
 func is_preemptible(
     running_request req,
     float threshold) bool {
-    
+
     int total_tokens = len(req.req.prompt_tokens) + req.req.max_new_tokens
     int progress = len(req.req.prompt_tokens) + len(req.generated_token_ids)
-    
+
     float completion_ratio = float(progress) / float(total_tokens)
-    
+
     return completion_ratio < threshold
 }
 
 func scheduler_finish_request(
     scheduler_state state,
     int request_id) scheduler_state {
-    
+
     int req_idx = 0
     while req_idx < len(state.running_batch) {
         if state.running_batch[req_idx].req.request_id == request_id {
             int freed_blocks = state.running_batch[req_idx].kv_cache_blocks_used
             state.used_kv_blocks = state.used_kv_blocks - freed_blocks
-            
+
             state.running_batch = remove_running_at_index(state.running_batch, req_idx)
             break
         }
         req_idx = req_idx + 1
     }
-    
+
     return state
 }
 
 func scheduler_step(scheduler_state state) scheduler_state {
     state.current_time_ms = state.current_time_ms + 1
-    
+
     int req_idx = 0
     while req_idx < len(state.running_batch) {
         state.running_batch[req_idx].generated_token_ids.push(0)
-        
-        if len(state.running_batch[req_idx].generated_token_ids) >= 
+
+        if len(state.running_batch[req_idx].generated_token_ids) >=
            state.running_batch[req_idx].req.max_new_tokens {
             state.running_batch[req_idx].req.is_finished = true
         }
-        
+
         req_idx = req_idx + 1
     }
-    
+
     return state
 }
 
@@ -272,10 +272,10 @@ func remove_running_at_index([]running_request arr, int idx) []running_request {
 }
 
 func scheduler_get_stats(scheduler_state state) scheduler_stats {
-    int total_requests = len(state.pending_queue) + 
-                        len(state.running_batch) + 
+    int total_requests = len(state.pending_queue) +
+                        len(state.running_batch) +
                         len(state.preempted_queue)
-    
+
     int avg_wait_time = 0
     if len(state.pending_queue) > 0 {
         int total_wait = 0
@@ -286,9 +286,9 @@ func scheduler_get_stats(scheduler_state state) scheduler_stats {
         }
         avg_wait_time = total_wait / len(state.pending_queue)
     }
-    
+
     float kv_utilization = float(state.used_kv_blocks) / float(state.total_kv_blocks)
-    
+
     scheduler_stats {
         pending_count: len(state.pending_queue),
         running_count: len(state.running_batch),
