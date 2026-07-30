@@ -119,38 +119,21 @@ func runtime_build_prompt(runtime_training_sample sample) string {
     prompt
 }
 
-func runtime_parse_medmcqa_sample(string line) runtime_training_sample {
-    runtime_training_sample sample
-    sample.question = extract_json_string_field(line, "question")
-    sample.explanation = extract_json_string_field(line, "exp")
-    sample.subject = extract_json_string_field(line, "subject_name")
-    sample.topic = extract_json_string_field(line, "topic_name")
-    sample.option_a = extract_json_string_field(line, "opa")
-    sample.option_b = extract_json_string_field(line, "opb")
-    sample.option_c = extract_json_string_field(line, "opc")
-    sample.option_d = extract_json_string_field(line, "opd")
-    sample.choice = extract_json_int_field(line, "cop", 1)
-    sample.prompt = runtime_build_prompt(sample)
-    sample.target = runtime_choice_text(sample)
-    if sample.target == "" {
-        sample.target = sample.explanation
-    }
-    sample
-}
+
 
 func char_at(string text, int idx) string {
     return string(text[idx])
 }
 
 func runtime_split_lines(string text) []string {
-    []string lines = []string{cap: 0}
+    []string lines = []
     string current = ""
     int i = 0
     while i < len(text) {
         string ch = char_at(text, i)
         if ch == "\n" || ch == "\r" {
             if trim(current) != "" {
-                lines.push(trim(current))
+                lines = append(lines, trim(current))
             }
             current = ""
         } else {
@@ -159,25 +142,40 @@ func runtime_split_lines(string text) []string {
         i = i + 1
     }
     if trim(current) != "" {
-        lines.push(trim(current))
+        lines = append(lines, trim(current))
     }
     lines
 }
 
 func runtime_collect_samples(string dataset_text, int limit) runtime_sample_batch {
-    if limit < 1 {
-        limit = 1
+    int actual_limit = limit
+    if actual_limit < 1 {
+        actual_limit = 1
     }
     runtime_sample_batch batch
-    batch.items = []runtime_training_sample{cap: limit}
+    batch.items = []runtime_training_sample{cap: actual_limit}
     batch.count = 0
     []string lines = runtime_split_lines(dataset_text)
     int sample_count = 0
     int i = 0
-    while i < len(lines) && sample_count < limit {
+    while i < len(lines) && sample_count < actual_limit {
         string trimmed = trim(lines[i])
         if trimmed != "" {
-            runtime_training_sample sample = runtime_parse_medmcqa_sample(trimmed)
+            runtime_training_sample sample
+            sample.question = extract_json_string_field(trimmed, "question")
+            sample.explanation = extract_json_string_field(trimmed, "exp")
+            sample.subject = extract_json_string_field(trimmed, "subject_name")
+            sample.topic = extract_json_string_field(trimmed, "topic_name")
+            sample.option_a = extract_json_string_field(trimmed, "opa")
+            sample.option_b = extract_json_string_field(trimmed, "opb")
+            sample.option_c = extract_json_string_field(trimmed, "opc")
+            sample.option_d = extract_json_string_field(trimmed, "opd")
+            sample.choice = extract_json_int_field(trimmed, "cop", 1)
+            sample.prompt = runtime_build_prompt(sample)
+            sample.target = runtime_choice_text(sample)
+            if sample.target == "" {
+                sample.target = sample.explanation
+            }
             if sample.question != "" {
                 batch.items[sample_count] = sample
                 sample_count = sample_count + 1
