@@ -295,71 +295,33 @@ func run_posttrain_lora_sft() int {
         }
         
         modules[module_idx] = q_module
-        q_layer.in_dim = hidden_size
-        q_layer.lora_A = init_gaussian(rank * hidden_size, 0.02)
-        q_layer.lora_B = fill_lora(hidden_size * rank, 0.0)
-        q_layer.rank = rank
-        float rank_float_q = rank as float
-        q_layer.scaling = alpha / rank_float_q
-        q_layer.dropout_rate = dropout
-        q_layer.last_input = []float{cap: 0}
-        q_module.layer = q_layer
-        
-        q_module.out_dim = hidden_size
-        q_module.in_dim = hidden_size
-        q_module.rank = rank
-        q_module.scaling = q_layer.scaling
-        q_module.lora_A = q_layer.lora_A
-        q_module.lora_B = q_layer.lora_B
-        
-        q_module.initial_a = []float{cap: rank * hidden_size}
-        int q_a_idx = 0
-        while q_a_idx < rank * hidden_size {
-            q_module.initial_a[q_a_idx] = q_layer.lora_A[q_a_idx]
-            q_a_idx = q_a_idx + 1
-        }
-        q_module.initial_b = []float{cap: hidden_size * rank}
-        int q_b_idx = 0
-        while q_b_idx < hidden_size * rank {
-            q_module.initial_b[q_b_idx] = q_layer.lora_B[q_b_idx]
-            q_b_idx = q_b_idx + 1
-        }
-        modules[module_idx] = q_module
         module_idx = module_idx + 1
-        named_lora_module v_module = named_lora_module{}
-        v_module.name = v_name
-        lora_linear v_layer = lora_linear{}
-        v_layer.base_weight = []float{cap: 0}
-        v_layer.out_dim = v_out
-        v_layer.in_dim = hidden_size
-        v_layer.lora_A = init_gaussian(rank * hidden_size, 0.02)
-        v_layer.lora_B = fill_lora(v_out * rank, 0.0)
-        v_layer.rank = rank
-        float rank_float_v = rank as float
-        v_layer.scaling = alpha / rank_float_v
-        v_layer.dropout_rate = dropout
-        v_layer.last_input = []float{cap: 0}
-        v_module.layer = v_layer
         
-        v_module.out_dim = v_out
-        v_module.in_dim = hidden_size
-        v_module.rank = rank
-        v_module.scaling = v_layer.scaling
-        v_module.lora_A = v_layer.lora_A
-        v_module.lora_B = v_layer.lora_B
+        lora_linear v_layer = lora_linear{
+            base_weight: []float{cap: 0},
+            out_dim: v_out,
+            in_dim: hidden_size,
+            lora_A: init_gaussian(rank * hidden_size, 0.02),
+            lora_B: fill_lora(v_out * rank, 0.0),
+            rank: rank,
+            scaling: alpha / (rank as float),
+            dropout_rate: dropout,
+            last_input: []float{cap: 0}
+        }
         
-        v_module.initial_a = []float{cap: rank * hidden_size}
-        int v_a_idx = 0
-        while v_a_idx < rank * hidden_size {
-            v_module.initial_a[v_a_idx] = v_layer.lora_A[v_a_idx]
-            v_a_idx = v_a_idx + 1
+        named_lora_module v_module = named_lora_module{
+            name: v_name,
+            layer: v_layer,
+            out_dim: v_out,
+            in_dim: hidden_size,
+            rank: rank,
+            scaling: v_layer.scaling,
+            lora_A: v_layer.lora_A,
+            lora_B: v_layer.lora_B,
+            initial_a: copy_float_array(v_layer.lora_A),
+            initial_b: copy_float_array(v_layer.lora_B)
         }
-        v_module.initial_b = []float{cap: v_out * rank}
-        int v_b_idx = 0
-        while v_b_idx < v_out * rank {
-            v_module.initial_b[v_b_idx] = v_layer.lora_B[v_b_idx]
-            v_b_idx = v_b_idx + 1
-        }
+        
         modules[module_idx] = v_module
         module_idx = module_idx + 1
         layer_idx = layer_idx + 1
