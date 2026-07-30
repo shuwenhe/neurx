@@ -358,7 +358,8 @@ func run_posttrain_lora_sft() int {
         q_layer.lora_A = init_gaussian(rank * hidden_size, 0.02)
         q_layer.lora_B = fill_lora(hidden_size * rank, 0.0)
         q_layer.rank = rank
-        q_layer.scaling = alpha / (rank as float)
+        float rank_float_q = rank as float
+        q_layer.scaling = alpha / rank_float_q
         q_layer.dropout_rate = dropout
         q_layer.last_input = []float{cap: 0}
         q_module.layer = q_layer
@@ -385,7 +386,8 @@ func run_posttrain_lora_sft() int {
         v_layer.lora_A = init_gaussian(rank * hidden_size, 0.02)
         v_layer.lora_B = fill_lora(v_out * rank, 0.0)
         v_layer.rank = rank
-        v_layer.scaling = alpha / (rank as float)
+        float rank_float_v = rank as float
+        v_layer.scaling = alpha / rank_float_v
         v_layer.dropout_rate = dropout
         v_layer.last_input = []float{cap: 0}
         v_module.layer = v_layer
