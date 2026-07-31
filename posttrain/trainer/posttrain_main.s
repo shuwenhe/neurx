@@ -47,7 +47,7 @@ struct named_lora_module {
     float scaling
     []float lora_A
     []float lora_B
-    
+
     []float initial_a
     []float initial_b
 }
@@ -268,7 +268,7 @@ func run_posttrain_lora_sft() int {
         eprintln("[Progress] building LoRA modules: layer " + int_to_str(layer_idx + 1) + "/" + int_to_str(num_layers))
         string q_name = "base_model.model.model.layers." + int_to_str(layer_idx) + ".self_attn.q_proj"
         string v_name = "base_model.model.model.layers." + int_to_str(layer_idx) + ".self_attn.v_proj"
-        
+
         lora_linear q_layer = lora_linear{
             base_weight: []float{cap: 0},
             out_dim: hidden_size,
@@ -280,7 +280,7 @@ func run_posttrain_lora_sft() int {
             dropout_rate: dropout,
             last_input: []float{cap: 0}
         }
-        
+
         named_lora_module q_module = named_lora_module{
             name: q_name,
             layer: q_layer,
@@ -293,10 +293,10 @@ func run_posttrain_lora_sft() int {
             initial_a: copy_float_array(q_layer.lora_A),
             initial_b: copy_float_array(q_layer.lora_B)
         }
-        
+
         modules[module_idx] = q_module
         module_idx = module_idx + 1
-        
+
         lora_linear v_layer = lora_linear{
             base_weight: []float{cap: 0},
             out_dim: v_out,
@@ -308,7 +308,7 @@ func run_posttrain_lora_sft() int {
             dropout_rate: dropout,
             last_input: []float{cap: 0}
         }
-        
+
         named_lora_module v_module = named_lora_module{
             name: v_name,
             layer: v_layer,
@@ -321,7 +321,7 @@ func run_posttrain_lora_sft() int {
             initial_a: copy_float_array(v_layer.lora_A),
             initial_b: copy_float_array(v_layer.lora_B)
         }
-        
+
         modules[module_idx] = v_module
         module_idx = module_idx + 1
         layer_idx = layer_idx + 1
@@ -349,7 +349,7 @@ func run_posttrain_lora_sft() int {
             int sample_module_count = 0
             while module_cursor < len(modules) {
                 eprintln("[Debug] Processing module " + int_to_str(module_cursor))
-                
+
                 named_lora_module module = modules[module_cursor]
                 int out_dim = module.out_dim
                 int in_dim = module.in_dim
@@ -357,16 +357,16 @@ func run_posttrain_lora_sft() int {
                 float scaling_val = module.scaling
                 []float lora_A = module.lora_A
                 []float lora_B = module.lora_B
-                
+
                 []float target = target_q
                 int is_odd = module_cursor - ((module_cursor / 2) * 2)
                 if is_odd == 1 {
                     target = target_v
                 }
-                
+
                 []float output = fill_lora(out_dim, 0.0)
                 []float hidden = fill_lora(rank_val, 0.0)
-                
+
                 int r = 0
                 while r < rank_val {
                     int in_idx = 0
@@ -379,7 +379,7 @@ func run_posttrain_lora_sft() int {
                     }
                     r = r + 1
                 }
-                
+
                 int out_idx = 0
                 while out_idx < out_dim {
                     float sum = 0.0
@@ -394,16 +394,16 @@ func run_posttrain_lora_sft() int {
                     output[out_idx] = sum
                     out_idx = out_idx + 1
                 }
-                
+
                 float sample_loss = mse_loss(output, target)
                 epoch_loss = epoch_loss + sample_loss
                 sample_loss_sum = sample_loss_sum + sample_loss
                 sample_module_count = sample_module_count + 1
-                
+
                 []float grad_out = mse_gradient(output, target)
                 []float b_snapshot = copy_float_array(lora_B)
                 float step_scale = effective_lr * scaling_val
-                
+
                 out_idx = 0
                 while out_idx < out_dim {
                     int rank_idx = 0
@@ -417,7 +417,7 @@ func run_posttrain_lora_sft() int {
                     }
                     out_idx = out_idx + 1
                 }
-                
+
                 int rank_idx = 0
                 while rank_idx < rank_val {
                     if rank_idx == 0 {
@@ -446,11 +446,11 @@ func run_posttrain_lora_sft() int {
                     }
                     rank_idx = rank_idx + 1
                 }
-                
+
                 module.lora_A = lora_A
                 module.lora_B = lora_B
                 modules[module_cursor] = module
-                
+
                 epoch_items = epoch_items + 1
                 module_cursor = module_cursor + 1
             }
@@ -471,7 +471,7 @@ func run_posttrain_lora_sft() int {
         eprintln("[Progress] epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " complete")
         epoch = epoch + 1
     }
-    
+
     eprintln("[Progress] training complete, skipping stats due to S compiler struct field bug")
     println("")
     println("[Training Backend] S Runtime Real Trainer (Field Assignment Bug Workaround)")

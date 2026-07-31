@@ -2520,7 +2520,6 @@ posttrain-simple: check-bash build-s-ir-runner
 	@echo "[✓] Simple REAL training completed!"
 	@echo "Output: $(POSTTRAIN_OUTPUT_DIR)"
 
-# LoRA Training with Tensor + CrossEntropy - Full demonstration
 posttrain-lora-tensor: check-bash build-s-ir-runner
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_lora_tensor'
 	@echo "======================================================"
