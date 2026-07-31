@@ -1,5 +1,4 @@
 package neurx.data.pipeline.preprocessing
-
 struct text_quality_metrics {
     float entropy
     float language_confidence
@@ -33,7 +32,6 @@ struct batch_mixer {
     string strategy
     float temperature
 }
-
 func new_preprocessing_config() preprocessing_config {
     preprocessing_config {
         normalize_unicode: true,

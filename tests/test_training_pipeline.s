@@ -6,7 +6,6 @@ import (
     "neurx/model"
     "neurx/nn"
 )
-
 func test_forward_pass_basic() bool {
     var model_state: model.transformer_state
     model_state.hidden_dim = 768

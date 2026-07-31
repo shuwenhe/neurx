@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use std.io.println
-
 func main() {
     let shards_dir = runtime_env_get("SHARDS_DIR", "/home/shuwen/shuwen/train/neurx/dataset/pretrain/shard")
     let out_path = runtime_env_get("OUT", "/app/train/neurx/dataset/report.json")

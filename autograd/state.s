@@ -1,6 +1,5 @@
 package neurx.autograd.engine
 use neurx.tensor.tensor
-
 struct grad_record {
     int id
     []int shape
@@ -13,7 +12,6 @@ struct autograd_state {
     bool grad_accumulation
     []grad_record records
 }
-
 func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}

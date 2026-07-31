@@ -2,7 +2,6 @@ package neurx.agent.parallel_tool
 use neurx.agent.tool_registry
 use neurx.agent.memory
 use neurx.tool.workspace_tools
-
 struct parallel_tool_call {
     string id
     string tool_name
@@ -27,7 +26,6 @@ struct parallel_tool_batch_result {
     int ok_count
     int fail_count
 }
-
 func new_parallel_tool_call(string id, string tool_name, string input) parallel_tool_call {
     parallel_tool_call {
         id:        id,

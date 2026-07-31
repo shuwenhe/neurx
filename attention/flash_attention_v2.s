@@ -2,7 +2,6 @@ package neurx.attention.flash_v2
 use neurx.attention.core.{
     attention_config, multi_head_attention_module
 }
-
 struct flash_attn_config {
     int block_q
     int block_kv
@@ -13,7 +12,6 @@ struct flash_attn_config {
     float softmax_scale
     string dtype
 }
-
 func new_flash_attn_config(int head_dim, int num_q_heads, int num_kv_heads, bool causal) flash_attn_config {
     float scale = 1.0 / sqrt_approx(float_of_int(head_dim))
     flash_attn_config {

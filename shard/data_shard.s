@@ -24,7 +24,6 @@ use neurx.script.data_utils.{
     dir_list_files,
 }
 use neurx.strings.{string_split, string_join}
-
 struct shard_config {
     string input_file
     string shard_dir
@@ -50,7 +49,6 @@ struct shard_manifest {
     i64 average_docs_per_shard
     []shard_metadata shards
 }
-
 func new_shard_config_from_env() shard_config {
     let neurx_home = get_env("NEURX_HOME", ".")
     let dataset_root = get_env("DATASET_ROOT", path_join([]string{neurx_home, "dataset", "pretrain"}))

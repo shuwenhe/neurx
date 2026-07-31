@@ -9,7 +9,6 @@ enum checkpoint_format {
     FORMAT_SAFE_TENSORS,
     FORMAT_HF_DS,
 }
-
 struct checkpoint_config {
     string base_directory
     int save_interval
@@ -32,7 +31,6 @@ struct checkpoint_config {
     int io_threads
     int chunk_size_mb
 }
-
 func default_checkpoint_config_for_large_model() checkpoint_config {
     checkpoint_config {
         base_directory: "./checkpoints",

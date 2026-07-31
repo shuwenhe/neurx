@@ -1,5 +1,4 @@
 package neurx.tokenizer.vocab_builder
-
 struct token_pair {
     string left
     string right
@@ -21,7 +20,6 @@ struct builder_progress {
     float progress_percent
     string status
 }
-
 func count_all_pairs(string* texts, int text_count) map[string]int {
     map[string]int pair_frequencies
     int i = 0

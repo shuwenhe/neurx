@@ -2,7 +2,6 @@ package neurx.runtime.compile
 use neurx.strings
 use neurx.runtime.stage
 use neurx.strings
-
 struct compile_state {
     string name
     string backend
@@ -27,7 +26,6 @@ struct compile_state {
     []string cache_keys
     []string tags
 }
-
 func join_strings([]string values) string {
     string out = ""
     int i = 0

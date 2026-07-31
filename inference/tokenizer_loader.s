@@ -1,5 +1,4 @@
 package neurx.inference.tokenizer_loader
-
 struct tokenizer_state_2 {
     string model_path
     string model_name
@@ -14,7 +13,6 @@ struct tokenization_result_2 {
     bool success
     string error
 }
-
 func new_tokenizer_state() tokenizer_state_2 {
     tokenizer_state_2 state
     state.model_path = ""

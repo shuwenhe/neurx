@@ -5,7 +5,6 @@ use neurx.compile.pass_manager
 use neurx.compile.lowering
 use neurx.compile.executor
 use neurx.compile.cache
-
 struct compile_pipeline_state {
     compile_state state
     ir_graph_state graph
@@ -15,7 +14,6 @@ struct compile_pipeline_state {
     compile_cache_state cache
     string cache_key
 }
-
 func new_compile_pipeline_state(string module_name, string backend, string mode, bool dynamic, bool fullgraph, bool debug) compile_pipeline_state {
     compile_state base = new_compile_state(module_name, backend, mode)
     base = compile_set_dynamic(base, dynamic)

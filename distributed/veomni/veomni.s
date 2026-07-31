@@ -7,7 +7,6 @@ enum parallel_mode {
     PIPELINE_PARALLEL = 3
     HYBRID = 4
 }
-
 struct veomni_config {
     parallel_mode mode
     int world_size
@@ -68,7 +67,6 @@ struct communication_stats {
     float pipeline_recv_time
     int total_communicated_bytes
 }
-
 func new_veomni_config() veomni_config {
     veomni_config {
         mode: HYBRID,

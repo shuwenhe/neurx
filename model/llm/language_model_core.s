@@ -11,7 +11,6 @@ enum neurx_version {
     NEURX_4_LONG
     NEURX_5_2
 }
-
 struct neurx_config {
     neurx_version version
     string name
@@ -70,7 +69,6 @@ struct neurx_state {
         int total_flops
     } stats
 }
-
 func create_neurx_200b_config_200b() neurx_config {
     neurx_config {
         version: NEURX_5_2,

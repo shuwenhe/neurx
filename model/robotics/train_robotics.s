@@ -1,7 +1,6 @@
 package neurx.model.robotics.train_robotics
 use neurx.data.loader.dataloader.{dataloader_state, dataloader_step_output, has_next, next_batch, reset_state, new_state}
 use neurx.pretrain.config.{pretrain_config, new_pretrain_config, with_max_steps, with_lr}
-
 struct robotics_training_config {
     int batch_size
     int seq_len
@@ -33,7 +32,6 @@ struct robotics_training_state {
     float last_loss
     bool finished
 }
-
 func new_robotics_training_config(int batch_size, int seq_len, int max_steps, float learning_rate, string task_name) robotics_training_config {
     robotics_training_config {
         batch_size: batch_size,

@@ -1,6 +1,5 @@
 package neurx.posttrain.checkpoint.adapter_saver
 use neurx.runtime.io.{runtime_make_dirs, runtime_write_binary_file, runtime_file_exists, runtime_write_text_file, trim}
-
 struct safetensors_header {
     string version
     int num_tensors
@@ -14,7 +13,6 @@ struct safetensors_tensor_info {
     int offset
     int size
 }
-
 func create_safetensors_header() safetensors_header {
     safetensors_header header
     header.version = "0.0.1"

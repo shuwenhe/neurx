@@ -1,6 +1,5 @@
 package neurx.lib.loss
 use neurx.lib.tensor.{vector, matrix, create_vector, create_matrix, vector_scale, vector_subtract, matrix_scale}
-
 struct mse_loss {
     string name
 }
@@ -19,7 +18,6 @@ struct smooth_l1_loss {
     float delta
     string name
 }
-
 func create_mse_loss() mse_loss {
     mse_loss loss
     loss.name = "MSE"

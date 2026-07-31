@@ -1,5 +1,4 @@
 package neurx.model.neurx.fp8_training
-
 struct fp8_config {
     string forward_dtype
     string backward_dtype
@@ -10,7 +9,6 @@ struct fp8_config {
     bool compress_gradients
     bool compress_moe_tokens
 }
-
 func new_fp8_config() fp8_config {
     []string no_quant = []string{cap: 4}
     no_quant[0] = "embedding"

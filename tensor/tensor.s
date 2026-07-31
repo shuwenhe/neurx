@@ -2,14 +2,12 @@ package neurx.tensor
 use neurx.backends.compute_backend
 use neurx.autograd.ir
 use neurx.autograd.tracer
-
 struct tensor {
     []float data
     []int shape
     bool requires_grad
     option[tensor] grad
 }
-
 func ndim(tensor a) int {
     return len(a.shape)
 }

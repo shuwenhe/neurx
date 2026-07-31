@@ -1,7 +1,6 @@
 int CPUFREQ_POWERSAVE    = 0
 int CPUFREQ_ONDEMAND     = 1
 int CPUFREQ_PERFORMANCE  = 2
-
 struct cpu_info {
     int    cpu_id
     int    numa_node
@@ -26,7 +25,6 @@ struct cpu_state {
     []worker   workers
     int        next_worker_id
 }
-
 func new_cpu_state() cpu_state {
     return cpu_state{
         cpus:           [],

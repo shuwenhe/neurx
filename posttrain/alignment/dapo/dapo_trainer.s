@@ -1,12 +1,10 @@
 package neurx.posttrain.alignment.dapo.trainer
-
 use neurx.posttrain.alignment.dapo.{
     dapo_config, dapo_state, dapo_rollout_result,
     dapo_step, dapo_select_top_k_trajectories, new_dapo_config
 }
 use neurx.nn.{module, optimizer}
 use neurx.tensor.{tensor}
-
 struct dapo_trainer {
     module policy
     module value_model
@@ -27,7 +25,6 @@ struct dapo_train_result {
     float kl_divergence
     int num_correct
 }
-
 func new_dapo_trainer(
     module policy,
     module value_model,
@@ -71,7 +68,6 @@ func dapo_trainer_train_step(
     dapo_trainer trainer,
     dapo_rollout_result rollouts
 ) (dapo_trainer, dapo_train_result) {
-    // Select top-k trajectories for self-improvement
     dapo_rollout_result selected_rollouts = rollouts
     if trainer.config.use_self_improvement {
         selected_rollouts = dapo_select_top_k_trajectories(
@@ -79,36 +75,25 @@ func dapo_trainer_train_step(
             trainer.config.top_k_trajectories
         )
     }
-    
-    // Perform multiple epochs of optimization
     int epoch = 0
     dapo_state final_state = dapo_state{}
-    
     while epoch < trainer.config.num_epochs {
-        // Compute DAPO update
         dapo_state state = dapo_step(
             trainer.policy,
             trainer.value_model,
             selected_rollouts,
             trainer.config
         )
-        
         state.iteration = trainer.global_step
-        
-        // Backward pass and optimization
         tensor total_loss_tensor = tensor{
             data: [state.total_loss],
             shape: [1],
             dtype: "float32",
         }
-        
-        // Update policy
         trainer.policy_optimizer.zero_grad()
         total_loss_tensor.backward()
         trainer.policy_optimizer.clip_grad_norm(trainer.config.max_grad_norm)
         trainer.policy_optimizer.step()
-        
-        // Update value model
         trainer.value_optimizer.zero_grad()
         tensor value_loss_tensor = tensor{
             data: [state.value_loss],
@@ -118,15 +103,11 @@ func dapo_trainer_train_step(
         value_loss_tensor.backward()
         trainer.value_optimizer.clip_grad_norm(trainer.config.max_grad_norm)
         trainer.value_optimizer.step()
-        
         final_state = state
         trainer.global_step = trainer.global_step + 1
         epoch = epoch + 1
     }
-    
-    // Store in history
     trainer.history[trainer.global_step % 1000] = final_state
-    
     dapo_train_result result = dapo_train_result {
         state: final_state,
         avg_reward: selected_rollouts.avg_reward,
@@ -136,7 +117,6 @@ func dapo_trainer_train_step(
         kl_divergence: final_state.kl_divergence,
         num_correct: selected_rollouts.num_correct,
     }
-    
     (trainer, result)
 }
 
@@ -145,11 +125,8 @@ func dapo_trainer_train(
     int num_iterations
 ) (dapo_trainer, []dapo_train_result) {
     []dapo_train_result results = []dapo_train_result{cap: num_iterations}
-    
     int iteration = 0
     while iteration < num_iterations {
-        // Generate rollouts (to be implemented with environment)
-        // For now, this is a placeholder
         dapo_rollout_result rollouts = dapo_rollout_result {
             states: []tensor{},
             actions: []tensor{},
@@ -161,15 +138,12 @@ func dapo_trainer_train(
             max_reward: 0.0,
             num_correct: 0,
         }
-        
         (trainer, dapo_train_result result) = dapo_trainer_train_step(
             trainer,
             rollouts
         )
-        
         results[iteration] = result
         iteration = iteration + 1
     }
-    
     (trainer, results)
 }

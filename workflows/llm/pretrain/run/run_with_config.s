@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_output, runtime_shell_escape}
 use std.io.println
-
 func main() {
     string config = runtime_env_get("NEURX_PRETRAIN_CONFIG", "workflows/llm/pretrain/config/sample.yaml")
     string steps_override = runtime_env_get("NEURX_PRETRAIN_STEPS_OVERRIDE", "")

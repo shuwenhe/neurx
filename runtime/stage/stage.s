@@ -4,7 +4,6 @@ use neurx.runtime.control
 use neurx.strings
 use neurx.autograd.function
 use neurx.strings
-
 struct stage_state {
     string name
     string backend
@@ -23,7 +22,6 @@ struct stage_state {
     []string control_branches
     []string control_params
 }
-
 func join_strings([]string values) string {
     string out = ""
     int i = 0

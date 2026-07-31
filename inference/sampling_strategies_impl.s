@@ -1,5 +1,4 @@
 package neurx.inference.sampling
-
 struct sampling_config {
     string strategy
     float temperature
@@ -34,7 +33,6 @@ struct beam_state {
     float score
     bool is_finished
 }
-
 func default_sampling_config() sampling_config {
     sampling_config {
         strategy: "top_p",

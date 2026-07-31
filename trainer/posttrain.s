@@ -1,10 +1,8 @@
 package neurx.trainer.posttrain
 use neurx.posttrain.loop.{posttrain_loop_state, posttrain_step, posttrain_loop_state_dict, posttrain_loop_load_state_dict}
-
 struct posttrain_trainer_ref {
     posttrain_loop_state loop
 }
-
 func new_posttrain_trainer_ref(posttrain_loop_state loop) posttrain_trainer_ref {
     posttrain_trainer_ref {
         loop: loop,

@@ -1,4 +1,3 @@
-
 obs_dim: 8
 latent_dim: 16
 act_dim: 4

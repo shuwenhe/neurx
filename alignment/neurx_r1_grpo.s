@@ -1,5 +1,4 @@
 package neurx.alignment.neurx_r1_grpo
-
 struct grpo_config {
     int group_size
     int num_prompts_per_batch
@@ -11,7 +10,6 @@ struct grpo_config {
     float temperature
     float top_p
 }
-
 func new_grpo_config() grpo_config {
     grpo_config {
         group_size: 4,

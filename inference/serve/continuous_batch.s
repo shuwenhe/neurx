@@ -1,5 +1,4 @@
 package neurx.inference.serve.continuous_batch
-
 struct continuous_batch_state {
     int capacity
     int active_requests
@@ -9,7 +8,6 @@ struct continuous_batch_state {
     int prefill_tokens
     int decode_tokens
 }
-
 func new_continuous_batch_state(int capacity) continuous_batch_state {
     int effective_capacity = capacity
     if effective_capacity <= 0 {

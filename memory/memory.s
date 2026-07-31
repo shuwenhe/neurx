@@ -1,6 +1,5 @@
 package neurx.agent.memory
 use neurx.runtime.io.{runtime_write_text_file, runtime_read_text_file, runtime_file_exists}
-
 struct agent_memory_state {
     []string short_keys
     []string short_values
@@ -17,7 +16,6 @@ struct agent_memory_lookup_result {
     string value
     bool found
 }
-
 func agent_memory_lookup_found(agent_memory_state s, string v) agent_memory_lookup_result {
     agent_memory_lookup_result {
         state: s,

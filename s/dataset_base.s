@@ -1,5 +1,4 @@
 package neurx.data
-
 struct sample {
     []int token_ids
     string text
@@ -32,7 +31,6 @@ struct dataset {
     []sample samples
     bool is_loaded
 }
-
 func new_dataset(dataset_config cfg) dataset {
     dataset {
         config: cfg,

@@ -1,5 +1,4 @@
 package neurx.cuda
-
 struct cuda_device {
     int id
     string name
@@ -32,7 +31,6 @@ struct memory_allocation {
     string label
     bool is_pinned
 }
-
 func get_device_count() int {
     query_gpu_count()
 }

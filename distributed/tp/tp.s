@@ -1,5 +1,4 @@
 package neurx.distributed.tp
-
 struct tp_state {
     int world_size
     int rank
@@ -13,7 +12,6 @@ struct tp_shard_spec {
     int shard_size
     int padded_size
 }
-
 func normalize_world_size(int world_size) int {
     if world_size > 0 {
         return world_size

@@ -2,7 +2,6 @@ package neurx.optimizer.optimizer
 use neurx.tensor.tensor
 use neurx.optimizer.optim
 use neurx.scheduler.training_scheduler
-
 struct optimizer_param_group {
     []tensor params
     float lr
@@ -25,7 +24,6 @@ struct optimizer {
     lr_scheduler scheduler
     bool has_scheduler
 }
-
 func copy_tensors([]tensor values) []tensor {
     []tensor out = []tensor{cap: len(values)}
     int i = 0

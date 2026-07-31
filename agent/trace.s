@@ -1,6 +1,5 @@
 package neurx.agent.trace
 use neurx.agent.observation
-
 struct agent_trace_state {
     []int steps
     []string tasks
@@ -14,7 +13,6 @@ struct agent_trace_state {
     []bool ok_flags
     int count
 }
-
 func new_agent_trace_state() agent_trace_state {
     agent_trace_state {
         steps: [],

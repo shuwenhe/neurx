@@ -1,5 +1,4 @@
 package main
-
 func main() {
     println("======================================================================")
     println("S languageEnglish text (%) English texttest")

@@ -14,7 +14,6 @@ enum metric_type {
     TABLE,
     SCALAR_LIST,
 }
-
 struct log_entry {
     float timestamp
     log_level level

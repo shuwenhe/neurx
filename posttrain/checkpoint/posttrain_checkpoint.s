@@ -1,5 +1,4 @@
 package neurx.posttrain.checkpoint
-
 struct posttrain_checkpoint_state {
     string run_name
     string root
@@ -9,7 +8,6 @@ struct posttrain_checkpoint_state {
     float best_score
     int save_count
 }
-
 func new_posttrain_checkpoint_state(string run_name, string root) posttrain_checkpoint_state {
     posttrain_checkpoint_state {
         run_name: run_name,

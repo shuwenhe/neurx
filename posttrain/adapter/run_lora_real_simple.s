@@ -1,5 +1,4 @@
 module main
-
 struct tensor_2 {
     []float data
     []int shape
@@ -30,7 +29,6 @@ struct training_state {
     float total_loss
     float best_loss
 }
-
 func int_to_string(int n) string {
     if n == 0 {
         return "0"

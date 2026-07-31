@@ -1,7 +1,6 @@
 package neurx.data.loader.distributed
 use neurx.runtime.io.{runtime_run_command_output}
 use neurx.data.dataset.dataset.{dataset}
-
 struct data_shard {
     string shard_id
     int shard_index
@@ -30,7 +29,6 @@ struct distributed_dataloader {
     int samples_seen
     int tokens_seen
 }
-
 func new_training_data_shard(string dataset_path) data_shard {
     []string paths = []string{cap: 1}
     paths.push(dataset_path)

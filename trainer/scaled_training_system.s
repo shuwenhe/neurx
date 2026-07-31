@@ -2,7 +2,6 @@ package neurx.trainer.scaled_training_system
 use std.io
 use std.math
 use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file}
-
 struct data_bundle {
     input_ids: [][]int
     labels: [][]int
@@ -12,7 +11,6 @@ struct data_bundle {
     num_tokens: int
     source: string
 }
-
 func create_synthetic_data_bundle(int batch_size, int seq_len, int vocab_size) data_bundle {
     input_ids := make([][]int, batch_size)
     labels := make([][]int, batch_size)

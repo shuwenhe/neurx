@@ -1,7 +1,6 @@
 package neurx.monitoring.moe_1t_metrics
 use neurx.strings
 use neurx.runtime.io.{io_println, runtime_make_dirs, runtime_write_text_file, runtime_run_command_output}
-
 struct training_metrics {
     float loss
     float loss_ce
@@ -69,7 +68,6 @@ struct metrics_collector {
     int save_frequency
     string metrics_output_dir
 }
-
 func metrics_collector_new(
     int global_rank,
     int world_size,

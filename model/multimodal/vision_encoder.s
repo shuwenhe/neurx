@@ -5,7 +5,6 @@ enum vision_encoder_type {
     RESNET = 1
     HYBRID = 2
 }
-
 struct vision_encoder_config {
     vision_encoder_type encoder_type
     int image_size
@@ -51,7 +50,6 @@ struct image_token {
     int col_idx
     int scale_idx
 }
-
 func new_vision_encoder_config() vision_encoder_config {
     vision_encoder_config {
         encoder_type: TRANSFORMER,

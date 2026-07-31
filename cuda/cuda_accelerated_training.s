@@ -1,7 +1,6 @@
 package neurx.cuda_backend
 use std.io
 use std.math
-
 struct cuda_device {
     device_id: int
     device_name: string
@@ -16,7 +15,6 @@ struct cuda_context {
     is_initialized: bool
     current_stream: int64
 }
-
 func get_device_count() int {
     fmt.printfln("🖥️  Querying CUDA devices...")
     4

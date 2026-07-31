@@ -1,5 +1,4 @@
 package neurx.autograd.minimal
-
 struct grad_node {
     int id
     []float data
@@ -15,7 +14,6 @@ struct grad_node {
 struct grad_graph {
     []grad_node nodes
 }
-
 func copy_float([]float data) []float {
     []float out = []float{cap: len(data)}
     int i = 0

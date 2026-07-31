@@ -3,7 +3,6 @@ use std::fs::{File, read_file}
 use std::json
 use neurx::lib::tensor::{tensor, create_vector, create_matrix, zeros}
 use neurx::lib::safetensors::{safe_tensors_reader, load_safetensors_metadata, verify_safetensors_file}
-
 struct tensor_2 {
     []float data
     []int shape
@@ -38,7 +37,6 @@ struct training_state {
     float best_loss
     []float loss_history
 }
-
 func load_model_config(string model_path) training_config {
     training_config config
     config.model_path = model_path

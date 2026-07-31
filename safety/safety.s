@@ -1,12 +1,10 @@
 package neurx.safety.safety
-
 struct agent_safety_result {
     bool allowed
     string reason
     string category
     int severity
 }
-
 func new_agent_safety_result_allow() agent_safety_result {
     agent_safety_result {
         allowed: true,

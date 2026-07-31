@@ -1,6 +1,5 @@
 package neurx.compile.cache.cache_manager
 use neurx.compile.ir.{ir_graph, ir_node}
-
 struct cache_entry {
     string cache_key
     ir_graph optimized_graph
@@ -25,7 +24,6 @@ struct cache_manager {
     int max_cache_size_bytes
     string cache_directory
 }
-
 func new_cache_manager(string cache_dir, int max_size_mb) cache_manager {
     cache_manager {
         entries: []cache_entry{cap: 10000},

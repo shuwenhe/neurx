@@ -1,6 +1,5 @@
 package neurx.autograd
 use neurx.tensor.tensor
-
 struct grad_fn {
 }
 
@@ -14,7 +13,6 @@ struct grad_record {
 struct autograd_state {
     []grad_record records
 }
-
 func new_state() autograd_state {
     autograd_state {
         records: [],

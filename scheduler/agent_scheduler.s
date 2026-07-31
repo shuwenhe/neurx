@@ -1,12 +1,10 @@
 package neurx.scheduler.agent_scheduler
-
 struct agent_scheduler_state {
     []string tasks
     []int priorities
     []string statuses
     int count
 }
-
 func new_agent_scheduler_state() agent_scheduler_state {
     agent_scheduler_state {
         tasks: [],

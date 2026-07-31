@@ -1,6 +1,5 @@
 package neurx.autograd
 use neurx.tensor.tensor
-
 func backward_sum(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -181,7 +180,6 @@ func backward_pow(node n, tensor grad_output) backward_result {
     tensor grad_b { data: grad_b_data, grad: [], shape: exponent.shape, requires_grad: true }
     backward_result { input_grads: [grad_a, grad_b], success: true }
 }
-
 func pow_approx(float base, float exp) float {
     if base == 0.0 {
         if exp > 0.0 { return 0.0 } else { return 1e10 }
@@ -204,7 +202,6 @@ func pow_approx(float base, float exp) float {
     }
     result
 }
-
 func log_approx(float x) float {
     if x <= 0.0 {
         return -1e10

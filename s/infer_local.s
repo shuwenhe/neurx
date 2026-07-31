@@ -1,6 +1,5 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}
-
 struct tensor {
     []float data
     int size
@@ -14,7 +13,6 @@ struct checkpoint_header {
     int weight_cols
     int bias_size
 }
-
 func mod(int a, int b) int {
     if b == 0 {
         return 0

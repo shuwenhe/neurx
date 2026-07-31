@@ -1,5 +1,4 @@
 package neurx.scheduler.lr_scheduler
-
 struct lr_schedule_config {
     float base_lr
     float min_lr
@@ -13,7 +12,6 @@ struct lr_scheduler {
     int current_step
     float current_lr
 }
-
 func new_lr_scheduler(lr_schedule_config cfg) lr_scheduler {
     lr_scheduler {
         config: cfg,

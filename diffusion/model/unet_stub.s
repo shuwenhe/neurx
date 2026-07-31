@@ -1,13 +1,11 @@
 package neurx.diffusion.model
 use neurx.ops
-
 struct denoiser_state {
     string name
     int channels
     int hidden_dim
     bool conditioned
 }
-
 func new_denoiser_state(string name, int channels, int hidden_dim, bool conditioned) denoiser_state {
     denoiser_state {
         name: name,

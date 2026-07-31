@@ -1,13 +1,11 @@
 package neurx.agent.retrieval
 use neurx.agent.memory
-
 struct agent_retrieval_result {
     []string keys
     []string values
     []int scores
     int count
 }
-
 func new_agent_retrieval_result() agent_retrieval_result {
     agent_retrieval_result {
         keys: [],

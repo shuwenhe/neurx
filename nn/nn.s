@@ -5,7 +5,6 @@ use neurx.nn.activations
 use neurx.nn.conv
 use neurx.nn.pooling
 use neurx.nn.rnn
-
 struct linear {
     int in_features
     int out_features
@@ -14,7 +13,6 @@ struct linear {
     bool has_bias
     bool training
 }
-
 func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}

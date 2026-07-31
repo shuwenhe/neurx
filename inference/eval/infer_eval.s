@@ -1,5 +1,4 @@
 package neurx.inference.eval
-
 struct infer_eval_state {
     int samples
     float avg_latency_ms
@@ -7,7 +6,6 @@ struct infer_eval_state {
     float exact_match
     bool has_result
 }
-
 func new_infer_eval_state() infer_eval_state {
     infer_eval_state {
         samples: 0,

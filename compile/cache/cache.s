@@ -1,13 +1,11 @@
 package neurx.compile.cache
 use neurx.strings
-
 struct compile_cache_state {
     []string keys
     []string entries
     int hit_count
     int miss_count
 }
-
 func new_compile_cache_state() compile_cache_state {
     compile_cache_state {
         keys: [],

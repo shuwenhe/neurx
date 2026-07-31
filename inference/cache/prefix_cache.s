@@ -1,5 +1,4 @@
 package neurx.inference.cache.prefix_cache
-
 struct prefix_cache_state {
     int max_entries
     int max_tokens
@@ -13,7 +12,6 @@ struct prefix_cache_state {
     int misses
     int evictions
 }
-
 func new_prefix_cache_state(int max_entries, int max_tokens) prefix_cache_state {
     int normalized_entries = max_entries
     if normalized_entries <= 0 {

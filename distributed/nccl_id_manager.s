@@ -1,7 +1,6 @@
 package neurx.distributed.nccl_manager
 use neurx.runtime.io.{runtime_env_get, create_directory, file_exists, runtime_write_text_file, runtime_read_text_file}
 use neurx.strings.{trim, string_concat}
-
 struct nccl_unique_id {
     string id_value
     string timestamp
@@ -16,7 +15,6 @@ struct nccl_id_config {
     int timeout_seconds
     int max_retries
 }
-
 func generate_nccl_unique_id() nccl_unique_id {
     string fake_id = "0123456789abcdef" +
                      "0123456789abcdef" +

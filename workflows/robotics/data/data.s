@@ -1,6 +1,5 @@
 package neurx.workflows.robotics.data
 use neurx.model.robotics.data.{robotics_dataset_state}
-
 func new_robotics_dataset_state(string source_name, int sample_count) robotics_dataset_state {
     neurx.model.robotics.data.new_robotics_dataset_state(source_name, sample_count)
 }

@@ -7,7 +7,6 @@ struct mobile_target_config {
     bool    background_allowed
     string  precision
 }
-
 func default_mobile_target() mobile_target_config {
     return mobile_target_config{
         os:                 "android",

@@ -1,5 +1,4 @@
 module safetensors
-
 struct tensor_info {
     string name
     []int shape
@@ -14,7 +13,6 @@ struct safe_tensors_reader {
     map[string]int name_to_idx
     int tensor_count
 }
-
 func bytes_to_uint32(string data, int offset) int {
     int b0 = data[offset] - '0'
     int b1 = data[offset + 1] - '0'

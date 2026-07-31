@@ -1,6 +1,5 @@
 package neurx.distributed.pp
 use neurx.strings
-
 struct pipeline_parallel_state {
     string name
     string strategy
@@ -18,7 +17,6 @@ struct pipeline_parallel_state {
     []int stage_ranks
     []string schedule
 }
-
 func copy_ints([]int values) []int {
     []int out = []int{cap: len(values)}
     int i = 0

@@ -1,13 +1,11 @@
 package neurx.model
 import fmt
 import math
-
 struct tensor_2 {
     shape: []int
     data: []float
     requires_grad: bool
 }
-
 func tensor_new(shape: []int) tensor_2 {
     size := 1
     for i := 0; i < len(shape); i += 1 {

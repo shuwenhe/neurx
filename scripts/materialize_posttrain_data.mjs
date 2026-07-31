@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import fs from 'fs';
 import path from 'path';
-
 function parseArgs(argv) {
   const args = {
     input: '',
@@ -26,7 +25,6 @@ function parseArgs(argv) {
   }
   return args;
 }
-
 function textVector(text, dim) {
   const vec = new Array(dim).fill(0);
   for (let i = 0; i < text.length; i += 1) {
@@ -53,7 +51,6 @@ function textVector(text, dim) {
   }
   return vec;
 }
-
 function optionForChoice(sample) {
   const choice = Number(sample.cop || 1);
   if (choice === 1) return sample.opa || sample.exp || sample.question || '';
@@ -62,7 +59,6 @@ function optionForChoice(sample) {
   if (choice === 4) return sample.opd || sample.exp || sample.question || '';
   return sample.exp || sample.question || '';
 }
-
 function buildPrompt(sample) {
   const parts = [];
   if (sample.question) parts.push(sample.question);
@@ -76,11 +72,9 @@ function buildPrompt(sample) {
   }
   return parts.join('\n');
 }
-
 function buildTarget(sample) {
   return `${optionForChoice(sample)}\n${sample.exp || ''}`;
 }
-
 function emitVec(name, values) {
   const lines = [];
   lines.push(`    []float ${name} = []float{cap: ${values.length}}`);
@@ -89,7 +83,6 @@ function emitVec(name, values) {
   }
   return lines.join('\n');
 }
-
 function emitFlatArrayFunction(funcName, samples, dim, valueSelector, valueDim) {
   const lines = [];
   lines.push(`func ${funcName}() []float {`);
@@ -105,12 +98,10 @@ function emitFlatArrayFunction(funcName, samples, dim, valueSelector, valueDim) 
   lines.push('}');
   return lines.join('\n');
 }
-
 function writeFloatTextFile(filePath, values) {
   const lines = values.map((value) => value.toFixed(12));
   fs.writeFileSync(filePath, `${lines.join('\n')}\n`);
 }
-
 function main() {
   const args = parseArgs(process.argv);
   if (!args.input || !args.output) {
@@ -146,5 +137,4 @@ function main() {
   out.push(emitFlatArrayFunction('posttrain_materialized_target_v', samples, args.vout, (sample, dim) => textVector(buildTarget(sample), dim), args.vout));
   fs.writeFileSync(args.output, out.join('\n') + '\n');
 }
-
 main();

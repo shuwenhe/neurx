@@ -4,7 +4,6 @@ use neurx.distributed.ddp.{ddp_state, new_ddp_state, ddp_attach_process_group, d
 use neurx.runtime.io.{runtime_env_get}
 use neurx.tensor.tensor
 use neurx.tensor.new
-
 struct pretrain_ddp_state {
     ddp_state ddp
     process_group_state process_group
@@ -17,7 +16,6 @@ struct pretrain_ddp_sync_result {
     tensor second
     tensor third
 }
-
 func copy_float([]float values) []float {
     []float out = []float{cap: len(values)}
     int i = 0

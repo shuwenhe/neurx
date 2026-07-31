@@ -1,7 +1,6 @@
 package neurx.trainer.end_to_end_training
 use std.io
 use std.math
-
 struct data_bundle {
     input_ids: [][]int
     labels: [][]int
@@ -9,7 +8,6 @@ struct data_bundle {
     seq_len: int
     num_tokens: int
 }
-
 func create_dummy_data_bundle(int batch_size, int seq_len, int vocab_size) data_bundle {
     input_ids := make([][]int, batch_size)
     labels := make([][]int, batch_size)

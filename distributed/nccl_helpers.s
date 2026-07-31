@@ -1,5 +1,4 @@
 package neurx.distributed
-
 func get_dtype_size(string dtype) int {
     switch dtype {
         case "fp32":

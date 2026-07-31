@@ -1,6 +1,5 @@
 package neurx.trainer.industrial_1t_training
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_run_command_output, runtime_write_text_file}
-
 struct industrial_batch {
     tokens: []int
     labels: []int
@@ -133,7 +132,6 @@ struct industrial_checkpoint_load_result {
     data_shard_index: int
     data_line_index: int
 }
-
 func industrial_chr(int code) string {
     if code == 48 { return "0" }
     if code == 49 { return "1" }

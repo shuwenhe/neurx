@@ -1,5 +1,4 @@
 package neurx.backends.compute_backend
-
 struct device_info {
     string backend
     int device_id
@@ -17,7 +16,6 @@ struct compute_context {
     string active_dtype
     int stream_id
 }
-
 func detect_device() compute_context {
     compute_context {
         device: device_info {

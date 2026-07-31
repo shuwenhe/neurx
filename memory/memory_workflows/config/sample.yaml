@@ -1,4 +1,3 @@
-
 max_steps: 100
 memory_size: 4096
 dataset_manifest: "data/agent/memory/mini_manifest.json"

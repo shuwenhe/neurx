@@ -1,5 +1,4 @@
 package neurx.model.transformer.position_encoding
-
 struct position_encoding_config {
     int hidden_dim
     int max_seq_len
@@ -25,7 +24,6 @@ struct rope_position_encoding {
     float rope_base
     []float frequencies
 }
-
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0

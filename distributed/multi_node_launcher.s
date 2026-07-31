@@ -2,7 +2,6 @@ package neurx.distributed.multi_node_launcher
 use neurx.runtime.io.{runtime_env_get}
 use neurx.strings.{string_concat}
 use neurx.distributed.nccl_id_manager.{nccl_unique_id, load_nccl_id_from_shared_storage}
-
 struct multi_node_config {
     int num_nodes
     int node_rank
@@ -20,7 +19,6 @@ struct rank_info {
     int node_rank
     string node_name
 }
-
 func init_multi_node_config() multi_node_config {
     int num_nodes = parse_int(
         runtime_env_get("NEURX_NUM_NODES", "1"), 1)

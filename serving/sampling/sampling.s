@@ -1,12 +1,10 @@
 package neurx.serving.sampling
-
 struct sampling_state {
     float temperature
     int top_k
     float top_p
     float repetition_penalty
 }
-
 func new_sampling_state() sampling_state {
     sampling_state {
         temperature: 1.0,

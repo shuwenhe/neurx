@@ -1,11 +1,9 @@
 package neurx.workflows.robotics.train
 use neurx.model.robotics.train.{robotics_training_state, robotics_training_config}
 use neurx.model.robotics.train.{robotics_trajectory_train_config, robotics_trajectory_train_state}
-
 struct robotics_train_state {
     robotics_training_state state
 }
-
 func new_robotics_train_state(string strategy, int steps) robotics_train_state {
     robotics_train_state {
         state: neurx.model.robotics.train.robotics_train_state(

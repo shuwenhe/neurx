@@ -1,6 +1,5 @@
 package neurx.posttrain.alignment.examples
 use neurx.posttrain.alignment.constitutional_ai_trainer.*
-
 func create_cai_config() cai_config {
     cai_config {
         max_response_tokens: 512,

@@ -9,7 +9,6 @@ int IOREQ_PENDING    = 0
 int IOREQ_SUBMITTED  = 1
 int IOREQ_COMPLETE   = 2
 int IOREQ_ERROR      = 3
-
 struct io_request {
     int    req_id
     int    op
@@ -41,7 +40,6 @@ struct storage_state {
     bool     writeback_enabled
     int      writeback_dirty_mb
 }
-
 func new_storage_state(depth int, total_mb int) storage_state {
     io_ring r = io_ring{
         submission_queue: [],

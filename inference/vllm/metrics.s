@@ -1,5 +1,4 @@
 package neurx.inference.vllm.metrics
-
 struct vllm_metrics_state {
     int admitted
     int rejected
@@ -11,7 +10,6 @@ struct vllm_metrics_state {
     int cache_hits
     int cache_misses
 }
-
 func new_vllm_metrics_state() vllm_metrics_state {
     vllm_metrics_state {
         admitted: 0,

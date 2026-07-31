@@ -1,5 +1,4 @@
 package neurx.logging
-
 func current_time_seconds() float {
     float(lg.current_step * 0.1)
 }

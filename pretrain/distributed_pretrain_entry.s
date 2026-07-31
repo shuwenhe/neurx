@@ -8,7 +8,6 @@ use neurx.distributed.cuda_bridge.{
     cuda_bridge_log_status,
 }
 use neurx.runtime.io.{runtime_env_get}
-
 struct training_config {
     string model_path
     string dataset_path
@@ -31,7 +30,6 @@ struct training_metrics {
     int shard_idx
     int line_idx
 }
-
 func main() {
     training_config config = parse_config()
     distributed_pretrain_launcher launcher = new_distributed_pretrain_launcher(

@@ -1,5 +1,4 @@
 module web_search_crawler
-
 struct web_search_config {
     search_engines: list<string> = ["google", "bing"]
     max_results_per_engine: int = 10
@@ -648,9 +647,7 @@ Based on the following search results for the query "{query}", provide:
 Search Results:
 {context}
 Respond in this format:
-## Summary
 [your summary here]
-## Key Findings
 - [finding 1]
 - [finding 2]
 - [finding 3]
@@ -724,7 +721,6 @@ Also provide a comma-separated ranking of the most relevant result indices (0-ba
         return final_output
     }
 }
-
 struct search_options {
     crawl_results: bool = true
     generate_summary: bool = true

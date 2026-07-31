@@ -5,7 +5,6 @@ use neurx.compile.passes.elimination.{elimination_config, new_elimination_config
 use neurx.compile.passes.memory.{memory_config, new_memory_config, apply_memory_passes}
 use neurx.compile.executor.execution_engine.{executor_config, new_executor_config, execute_graph}
 use neurx.compile.cache.cache_manager.{cache_manager, new_cache_manager, cache_lookup, cache_store}
-
 struct optimization_pipeline {
     fusion_config fusion_cfg
     elimination_config elim_cfg
@@ -26,7 +25,6 @@ struct optimization_stats {
     int compilation_time_ms
     float estimated_speedup
 }
-
 func new_optimization_pipeline() optimization_pipeline {
     optimization_pipeline {
         fusion_cfg: new_fusion_config(),

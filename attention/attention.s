@@ -1,7 +1,6 @@
 package neurx.attention
 use neurx.model.transformer.norm.{rope_embedding, rope_apply_result, apply_rope}
 use neurx.attention.flash_compute
-
 struct attention_config {
     int hidden_dim
     int num_heads
@@ -33,7 +32,6 @@ struct project_qkv_result {
     []float key
     []float value
 }
-
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0

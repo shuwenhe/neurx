@@ -1,5 +1,4 @@
 package neurx.alignment.rlhf_complete
-
 struct sft_config {
     int num_epochs
     int batch_size
@@ -24,7 +23,6 @@ struct sft_trainer {
     float* loss_history
     int step_counter
 }
-
 func sft_training_step(
     float* model_logits,
     int* target_tokens,

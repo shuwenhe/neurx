@@ -41,7 +41,6 @@ type manifest struct {
     AverageDocsPerShard int64            `json:"average_docs_per_shard"`
     Shards              []shard_metadata  `json:"shards"`
 }
-
 func main() {
     if len(os.Args) < 2 {
         printHelp()

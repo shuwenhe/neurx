@@ -1,5 +1,4 @@
 package neurx.moe.transformer
-
 struct moe_config {
     int num_experts
     int num_experts_per_token
@@ -45,7 +44,6 @@ struct moe_route_result {
     []int expert_indices
     []float router_probs
 }
-
 func new_moe_config(int hidden_dim, int expert_dim, int num_experts) moe_config {
     moe_config {
         num_experts: num_experts,

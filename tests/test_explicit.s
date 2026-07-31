@@ -1,12 +1,10 @@
 package main
-
-struct Data {
+struct data {
     int value
 }
-
 func main() int {
     println("=== Test: Explicit struct field operations ===")
-    Data obj = Data {
+    data obj = data {
         value: 0
     }
     println("Initial value: 0")

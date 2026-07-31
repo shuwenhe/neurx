@@ -1,13 +1,7 @@
 package neurx.posttrain.alignment.dapo
-
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
 use neurx.posttrain.rl.{rollout, reward_manager}
-
-// DAPO: Directed Aligned Policy Optimization
-// Based on https://dapo-sia.github.io/
-// Achieves SOTA performance on AIME 2024 (50 points on Qwen2.5-32B)
-
 struct dapo_config {
     float learning_rate
     int batch_size
@@ -54,7 +48,6 @@ struct dapo_rollout_result {
     float max_reward
     int num_correct
 }
-
 func new_dapo_config() dapo_config {
     dapo_config {
         learning_rate: 1e-5,
@@ -87,24 +80,19 @@ func dapo_compute_advantages(
     int T = rewards.len
     []tensor advantages = []tensor{cap: T}
     []tensor returns = []tensor{cap: T}
-    
     tensor gae = tensor_ops.zeros_like(values[T - 1])
     int t = T - 1
-    
     while t >= 0 {
         tensor reward = rewards[t]
         tensor value = values[t]
         bool done = dones[t]
-        
         tensor next_value = tensor_ops.zeros_like(value)
         if t < T - 1 {
             next_value = values[t + 1]
         }
-        
         if done {
             next_value = tensor_ops.zeros_like(value)
         }
-        
         tensor delta = tensor_ops.add(
             reward,
             tensor_ops.sub(
@@ -112,22 +100,17 @@ func dapo_compute_advantages(
                 value
             )
         )
-        
         gae = tensor_ops.add(
             delta,
             tensor_ops.mul_scalar(gae, gamma * gae_lambda)
         )
-        
         if done {
             gae = tensor_ops.zeros_like(gae)
         }
-        
         advantages[t] = gae
         returns[t] = tensor_ops.add(gae, value)
-        
         t = t - 1
     }
-    
     (advantages, returns)
 }
 
@@ -135,23 +118,16 @@ func dapo_select_top_k_trajectories(
     dapo_rollout_result rollouts,
     int k
 ) dapo_rollout_result {
-    // Select top-k trajectories based on reward
-    // This is a key component of DAPO for self-improvement
-    
     int n = rollouts.states.len
     if k >= n {
         return rollouts
     }
-    
-    // Sort by rewards and select top-k
     []int indices = []int{cap: n}
     int i = 0
     while i < n {
         indices[i] = i
         i = i + 1
     }
-    
-    // Simple selection sort for top-k (can be optimized)
     i = 0
     while i < k {
         int max_idx = i
@@ -164,23 +140,17 @@ func dapo_select_top_k_trajectories(
             }
             j = j + 1
         }
-        
-        // Swap
         int temp = indices[i]
         indices[i] = indices[max_idx]
         indices[max_idx] = temp
-        
         i = i + 1
     }
-    
-    // Build result with top-k
     []tensor top_states = []tensor{cap: k}
     []tensor top_actions = []tensor{cap: k}
     []tensor top_rewards = []tensor{cap: k}
     []tensor top_log_probs = []tensor{cap: k}
     []tensor top_values = []tensor{cap: k}
     []bool top_dones = []bool{cap: k}
-    
     i = 0
     while i < k {
         int idx = indices[i]
@@ -192,7 +162,6 @@ func dapo_select_top_k_trajectories(
         top_dones[i] = rollouts.dones[idx]
         i = i + 1
     }
-    
     dapo_rollout_result {
         states: top_states,
         actions: top_actions,
@@ -215,32 +184,25 @@ func dapo_compute_policy_loss(
     tensor ratio = tensor_ops.exp(
         tensor_ops.sub(log_probs, old_log_probs)
     )
-    
     tensor clipped_ratio = tensor_ops.clip(
         ratio,
         1.0 - clip_range,
         1.0 + clip_range
     )
-    
     tensor adv_exp = tensor_ops.unsqueeze(advantages, -1)
-    
     tensor surrogate1 = tensor_ops.mul(ratio, adv_exp)
     tensor surrogate2 = tensor_ops.mul(clipped_ratio, adv_exp)
-    
     tensor policy_loss = tensor_ops.neg(
         tensor_ops.mean(
             tensor_ops.min(surrogate1, surrogate2)
         )
     )
-    
-    // Compute KL divergence for monitoring
     float kl_div = tensor_ops.sum_scalar(
         tensor_ops.mul(
             old_log_probs,
             tensor_ops.sub(old_log_probs, log_probs)
         )
     ) / old_log_probs.shape[0]
-    
     (policy_loss, kl_div)
 }
 
@@ -257,20 +219,16 @@ func dapo_compute_value_loss(
             tensor_ops.sub_scalar(old_values, clip_range),
             tensor_ops.add_scalar(old_values, clip_range)
         )
-        
         tensor loss1 = tensor_ops.pow(
             tensor_ops.sub(values, returns),
             2.0
         )
-        
         tensor loss2 = tensor_ops.pow(
             tensor_ops.sub(values_clipped, returns),
             2.0
         )
-        
         return tensor_ops.mean(tensor_ops.max(loss1, loss2))
     }
-    
     return tensor_ops.mean(
         tensor_ops.pow(tensor_ops.sub(values, returns), 2.0)
     )
@@ -282,7 +240,6 @@ func dapo_step(
     dapo_rollout_result rollouts,
     dapo_config cfg
 ) dapo_state {
-    // Compute advantages and returns
     ([]tensor advantages, []tensor returns) = dapo_compute_advantages(
         rollouts.rewards,
         rollouts.values,
@@ -290,13 +247,10 @@ func dapo_step(
         cfg.gamma,
         cfg.gae_lambda
     )
-    
-    // Normalize advantages
     if cfg.use_advantage_normalization {
         tensor all_adv = tensor_ops.concat(advantages, 0)
         float mean_adv = tensor_ops.mean_scalar(all_adv)
         float std_adv = tensor_ops.std_scalar(all_adv)
-        
         int i = 0
         while i < advantages.len {
             advantages[i] = tensor_ops.div_scalar(
@@ -306,32 +260,22 @@ func dapo_step(
             i = i + 1
         }
     }
-    
-    // Concatenate all tensors
     tensor states = tensor_ops.concat(rollouts.states, 0)
     tensor actions = tensor_ops.concat(rollouts.actions, 0)
     tensor old_log_probs = tensor_ops.concat(rollouts.log_probs, 0)
     tensor old_values = tensor_ops.concat(rollouts.values, 0)
     tensor adv_tensor = tensor_ops.concat(advantages, 0)
     tensor ret_tensor = tensor_ops.concat(returns, 0)
-    
-    // Forward pass
     tensor policy_logits = policy.forward(states)
     tensor new_log_probs = tensor_ops.log_softmax(policy_logits, -1)
-    
-    // Gather log probs for taken actions
     new_log_probs = tensor_ops.gather(new_log_probs, actions, -1)
-    
     tensor new_values = value_model.forward(states)
-    
-    // Compute losses
     (tensor policy_loss, float kl_div) = dapo_compute_policy_loss(
         new_log_probs,
         old_log_probs,
         adv_tensor,
         cfg.clip_range
     )
-    
     tensor value_loss = dapo_compute_value_loss(
         new_values,
         ret_tensor,
@@ -339,8 +283,6 @@ func dapo_step(
         cfg.use_value_clipping,
         cfg.clip_range
     )
-    
-    // Compute entropy
     tensor probs = tensor_ops.softmax(policy_logits, -1)
     tensor log_probs_all = tensor_ops.log_softmax(policy_logits, -1)
     tensor entropy = tensor_ops.neg(
@@ -350,8 +292,6 @@ func dapo_step(
         )
     )
     tensor entropy_mean = tensor_ops.mean(entropy)
-    
-    // Total loss
     tensor total_loss = tensor_ops.add(
         policy_loss,
         tensor_ops.add(
@@ -359,7 +299,6 @@ func dapo_step(
             tensor_ops.mul_scalar(entropy_mean, -cfg.entropy_coef)
         )
     )
-    
     dapo_state {
         policy_logits: policy_logits,
         value_estimates: new_values,

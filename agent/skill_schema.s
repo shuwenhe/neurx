@@ -1,6 +1,5 @@
 package neurx.agent.skill_schema
 use neurx.strings
-
 struct agent_skill_spec {
     string name
     string version
@@ -35,7 +34,6 @@ struct agent_skill_record {
     bool retired
     float score
 }
-
 func new_agent_skill_spec(string name, string version, string intent, string status) agent_skill_spec {
     agent_skill_spec {
         name: name,

@@ -1,6 +1,5 @@
 package neurx.posttrain.grpo
 use neurx.posttrain.config
-
 struct grpo_config {
     int group_size
     float clip_eps
@@ -17,7 +16,6 @@ struct grpo_config {
     float advantage_eps
     string reward_type
 }
-
 func default_grpo_config() grpo_config {
     grpo_config {
         group_size: 8,

@@ -33,7 +33,6 @@ structure gradient_overflow_info {
     overflow_value: float
     num_overflowing_params: int
 }
-
 func new_mixed_precision_state(config: loss_scale_config): mixed_precision_state {
     var state: mixed_precision_state
     state.compute_precision = BF16

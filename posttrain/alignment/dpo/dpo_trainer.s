@@ -9,7 +9,6 @@ use neurx.distributed.training_3d.*
 use neurx.checkpoint.distributed.*
 use neurx.data.loader.dataloader.*
 use neurx.monitoring.training_observability.*
-
 struct dpo_preference_pair {
     []int prompt_tokens
     []int chosen_response_tokens
@@ -96,7 +95,6 @@ struct dpo_train_result {
     string checkpoint_path
     string eval_report_path
 }
-
 func load_dpo_dataset(
     string data_path,
     float train_test_ratio

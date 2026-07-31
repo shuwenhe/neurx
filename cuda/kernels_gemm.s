@@ -1,5 +1,4 @@
 package neurx.cuda
-
 struct gemm_config {
     int M
     int K
@@ -12,7 +11,6 @@ struct gemm_config {
     bool use_tensor_cores
     int tile_size
 }
-
 func default_gemm_config(int M, int K, int N) gemm_config {
     gemm_config {
         M: M, K: K, N: N,

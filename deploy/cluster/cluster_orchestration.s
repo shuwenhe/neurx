@@ -1,6 +1,5 @@
 package neurx.deployment.cluster_orchestration
 use neurx.runtime.io.{runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file}
-
 struct cluster_node_spec {
     int node_id
     string node_name
@@ -42,7 +41,6 @@ struct cluster_orchestration_state {
     string last_summary
     string last_manifest_path
 }
-
 func new_cluster_node_spec(int node_id, string node_name, string ip_address, int gpu_count, string gpu_type, int cpu_cores, int memory_gb, string status, float utilization) cluster_node_spec {
     cluster_node_spec {
         node_id: node_id,

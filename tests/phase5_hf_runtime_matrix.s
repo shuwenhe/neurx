@@ -1,8 +1,6 @@
 package main
-
 use neurx.runtime.io.{runtime_file_exists, runtime_run_command_output}
 use std.io.println
-
 func phase5_summary_command(string path) string {
     string cmd = "set -e; default=$(sed -n 's/.*\"default_prompt\": \"\\([^\"]*\\)\".*/\\1/p' '" + path + "' | head -1)"
     cmd = cmd + " && count=$(grep -c '\"name\"' '" + path + "')"
@@ -17,7 +15,6 @@ func main() {
         println("phase5-hf-runtime FAIL missing_file=" + prompt_path)
         return 1
     }
-
     string prompt_check = runtime_run_command_output("make phase5-golden-prompt-test")
     if prompt_check == "" {
         println("phase5-hf-runtime FAIL golden_prompt_test")
@@ -28,7 +25,6 @@ func main() {
         println("phase5-hf-runtime FAIL prompt_summary")
         return 1
     }
-
     println("phase5-hf-runtime matrix")
     println(prompt_summary + " source=" + prompt_path)
     println("component             CPU      CUDA     CANN    evidence")

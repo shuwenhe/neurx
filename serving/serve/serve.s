@@ -1,5 +1,4 @@
 package neurx.serving.serve
-
 func mod(int a, int b) int {
     if b == 0 {
         return 0
@@ -25,7 +24,6 @@ func int_to_str(int n) string {
     }
     return s
 }
-
 struct admission_control_state {
     int max_active_requests
     int max_prefill_tokens

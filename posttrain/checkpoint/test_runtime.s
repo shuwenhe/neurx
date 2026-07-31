@@ -1,5 +1,4 @@
 package main
-
 func str_len(string s) int {
     return __host_str_len(s)
 }
@@ -53,7 +52,6 @@ func test_str_len() {
     println("====================================")
     println("[Test] str_len()")
     println("====================================")
-
     string s1 = "checkpoint_step_000100"
     int len1 = str_len(s1)
     println("Input: 'checkpoint_step_000100'")
@@ -66,7 +64,6 @@ func test_str_len() {
         println("✗ FAIL")
     }
     println("")
-
     string s2 = ""
     int len2 = str_len(s2)
     print("Empty string length: ")
@@ -84,7 +81,6 @@ func test_str_find() {
     println("====================================")
     println("[Test] str_find()")
     println("====================================")
-
     string haystack = "checkpoint_step_000100"
     string needle = "step"
     int pos = str_find(haystack, needle)
@@ -99,7 +95,6 @@ func test_str_find() {
         println("✗ FAIL")
     }
     println("")
-
     string needle2 = "xyz"
     int pos2 = str_find(haystack, needle2)
     println("Needle: 'xyz'")
@@ -118,9 +113,7 @@ func test_str_char_at() {
     println("====================================")
     println("[Test] str_char_at()")
     println("====================================")
-
     string s = "checkpoint"
-
     string c0 = str_char_at(s, 0)
     println("String: 'checkpoint'")
     print("char_at(0): '")
@@ -133,7 +126,6 @@ func test_str_char_at() {
         println("✗ FAIL")
     }
     println("")
-
     string c5 = str_char_at(s, 5)
     print("char_at(5): '")
     print(c5)
@@ -151,9 +143,7 @@ func test_str_substring() {
     println("====================================")
     println("[Test] str_substring()")
     println("====================================")
-
     string s = "checkpoint_step_000100"
-
     string sub = str_substring(s, 11)
     println("String: 'checkpoint_step_000100'")
     print("substring(11): '")
@@ -172,10 +162,8 @@ func test_file_io() {
     println("====================================")
     println("[Test] File I/O")
     println("====================================")
-
     string test_file = "/tmp/neurx_test_runtime.txt"
     string test_content = "hello world"
-
     println("Writing to: " + test_file)
     println("Content: '" + test_content + "'")
     bool write_ok = write_file(test_file, test_content)
@@ -186,7 +174,6 @@ func test_file_io() {
         println("✗ FAIL")
     }
     println("")
-
     println("Reading from: " + test_file)
     string read_content = read_file(test_file)
     print("read_file() result: '")
@@ -199,7 +186,6 @@ func test_file_io() {
         println("✗ FAIL")
     }
     println("")
-
     println("Checking file existence...")
     bool exists = file_exists(test_file)
     print("file_exists() result: ")
@@ -209,7 +195,6 @@ func test_file_io() {
         println("✗ FAIL (file should exist)")
     }
     println("")
-
     println("Checking file size...")
     int size = file_size(test_file)
     print("file_size() result: ")
@@ -228,13 +213,11 @@ func test_atomic_rename() {
     println("[Test] Atomic Replace (CRITICAL)")
     println("====================================")
     println("")
-
     println("Test 1: Normal Replace (tmp → final)")
     println("--------------------------------------")
     string tmp1 = "/tmp/neurx_atomic_test1.tmp"
     string final1 = "/tmp/neurx_atomic_test1.json"
     string content1 = "{\"step\": 100}"
-
     write_file(tmp1, content1)
     bool ok1 = atomic_replace(tmp1, final1)
     print("  atomic_replace() result: ")
@@ -243,7 +226,6 @@ func test_atomic_rename() {
     } else {
         println("✗ FAIL")
     }
-
     bool final1_exists = file_exists(final1)
     bool tmp1_gone = !file_exists(tmp1)
     print("  Final exists: ")
@@ -258,7 +240,6 @@ func test_atomic_rename() {
     } else {
         println("✗ FAIL")
     }
-
     string read1 = read_file(final1)
     print("  Content match: ")
     if read1 == content1 {
@@ -267,14 +248,12 @@ func test_atomic_rename() {
         println("✗ FAIL")
     }
     println("")
-
     println("Test 2: Overwrite Existing File")
     println("--------------------------------------")
     string tmp2 = "/tmp/neurx_atomic_test2.tmp"
     string final2 = "/tmp/neurx_atomic_test2.json"
     string old_content = "{\"step\": 50}"
     string new_content = "{\"step\": 100}"
-
     write_file(final2, old_content)
     write_file(tmp2, new_content)
     bool ok2 = atomic_replace(tmp2, final2)
@@ -284,7 +263,6 @@ func test_atomic_rename() {
     } else {
         println("✗ FAIL")
     }
-
     string read2 = read_file(final2)
     print("  Content updated: ")
     if read2 == new_content {
@@ -293,12 +271,10 @@ func test_atomic_rename() {
         println("✗ FAIL")
     }
     println("")
-
     println("Test 3: Fail Path (tmp doesn't exist)")
     println("--------------------------------------")
     string tmp3 = "/tmp/neurx_nonexistent.tmp"
     string final3 = "/tmp/neurx_atomic_test3.json"
-
     bool ok3 = atomic_replace(tmp3, final3)
     print("  atomic_replace() result: ")
     if !ok3 {
@@ -307,13 +283,11 @@ func test_atomic_rename() {
         println("✗ FAIL (should return false)")
     }
     println("")
-
     println("Test 4: Directory fsync (Checkpoint Safety)")
     println("--------------------------------------")
     string tmp4 = "/tmp/trainer_state.json.tmp"
     string final4 = "/tmp/trainer_state.json"
     string checkpoint_data = "{\"step\": 1000, \"loss\": 2.31}"
-
     write_file(tmp4, checkpoint_data)
     bool ok4 = atomic_replace(tmp4, final4)
     print("  atomic_replace() with dir fsync: ")
@@ -322,7 +296,6 @@ func test_atomic_rename() {
     } else {
         println("✗ FAIL")
     }
-
     string read4 = read_file(final4)
     print("  Checkpoint persisted: ")
     if read4 == checkpoint_data {
@@ -331,7 +304,6 @@ func test_atomic_rename() {
         println("✗ FAIL")
     }
     println("")
-
     println("🎯 Atomic Replace guarantees:")
     println("  1. File data flushed before rename")
     println("  2. Rename is atomic (all or nothing)")
@@ -346,15 +318,12 @@ func main() {
     println("NeurX Runtime Unit Tests")
     println("========================================")
     println("")
-
     test_str_len()
     test_str_find()
     test_str_char_at()
     test_str_substring()
-
     test_file_io()
     test_atomic_rename()
-
     println("========================================")
     println("Runtime Unit Tests Complete")
     println("========================================")
@@ -373,12 +342,10 @@ func int_to_str(int n) string {
     int value = n
     bool negative = false
     string out = ""
-
     if value < 0 {
         negative = true
         value = 0 - value
     }
-
     while value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }

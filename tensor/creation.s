@@ -1,12 +1,10 @@
 package neurx.creation
-
 struct tensor {
     []float data
     []int shape
     bool requires_grad
     option[tensor] grad
 }
-
 func numel([]int shape) int {
     int n = 1
     for i in 0..len(shape) {

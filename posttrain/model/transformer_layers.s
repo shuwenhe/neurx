@@ -1,6 +1,5 @@
 package neurx.posttrain.model.transformer_layers
 use neurx.posttrain.model.model_loader.{fill_model_tensor}
-
 struct embedding_layer {
     []float weight
     int vocab_size
@@ -58,7 +57,6 @@ struct transformer_block {
     mlp_layer mlp
     int hidden_size
 }
-
 func create_embedding(int vocab_size, int hidden_size) embedding_layer {
     embedding_layer emb
     emb.vocab_size = vocab_size

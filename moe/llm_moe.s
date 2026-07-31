@@ -13,14 +13,12 @@ use neurx.moe.transformer.{
     moe_mixtral_config, moe_large_config, moe_fine_grained_config
 }
 use neurx.model.transformer.norm.{rms_norm, rms_normalize, layer_norm_config, new_rms_norm}
-
 struct gpt_moe_config {
     model_config base
     moe_config moe
     int moe_frequency
     float moe_aux_loss_weight
 }
-
 func gpt_moe_mixtral(model_config base) gpt_moe_config {
     gpt_moe_config {
         base: base,

@@ -3,7 +3,6 @@ int SCHED_RT     = 0
 int SCHED_NORMAL = 1
 int SCHED_BATCH  = 2
 int SCHED_IDLE   = 3
-
 struct task_struct {
     int     pid
     string  name
@@ -26,7 +25,6 @@ struct run_queue {
     int            current_pid
     int            clock_ms
 }
-
 func new_run_queue() run_queue {
     return run_queue{
         rt_queue:     [],

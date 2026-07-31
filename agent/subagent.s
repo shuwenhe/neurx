@@ -1,5 +1,4 @@
 package neurx.agent.subagent
-
 struct agent_subagent_task {
     string id
     string goal
@@ -15,7 +14,6 @@ struct agent_subagent_registry_state {
     int completed
     int failed
 }
-
 func new_agent_subagent_task(string id, string goal, string input, int max_steps) agent_subagent_task {
     agent_subagent_task {
         id: id,

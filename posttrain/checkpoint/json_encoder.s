@@ -1,6 +1,4 @@
-
 package neurx.posttrain.checkpoint.json_encoder
-
 func trainer_state_to_json(
     int version,
     int step,
@@ -13,7 +11,6 @@ func trainer_state_to_json(
     int last_checkpoint_step
 ) string {
     string json = "{\n"
-
     json = json + "  \"version\": " + int_to_str(version) + ",\n"
     json = json + "  \"step\": " + int_to_str(step) + ",\n"
     json = json + "  \"epoch\": " + int_to_str(epoch) + ",\n"
@@ -23,9 +20,7 @@ func trainer_state_to_json(
     json = json + "  \"last_loss\": " + float_to_str(last_loss) + ",\n"
     json = json + "  \"wall_time\": " + float_to_str(wall_time) + ",\n"
     json = json + "  \"last_checkpoint_step\": " + int_to_str(last_checkpoint_step) + "\n"
-
     json = json + "}"
-
     return json
 }
 
@@ -38,16 +33,13 @@ func scheduler_state_to_json(
     string schedule_type
 ) string {
     string json = "{\n"
-
     json = json + "  \"version\": " + int_to_str(version) + ",\n"
     json = json + "  \"step\": " + int_to_str(step) + ",\n"
     json = json + "  \"warmup_steps\": " + int_to_str(warmup_steps) + ",\n"
     json = json + "  \"max_lr\": " + float_to_str(max_lr) + ",\n"
     json = json + "  \"min_lr\": " + float_to_str(min_lr) + ",\n"
     json = json + "  \"schedule_type\": \"" + schedule_type + "\"\n"
-
     json = json + "}"
-
     return json
 }
 
@@ -59,15 +51,12 @@ func optimizer_state_to_json(
     int params_per_layer
 ) string {
     string json = "{\n"
-
     json = json + "  \"version\": " + int_to_str(version) + ",\n"
     json = json + "  \"optimizer_type\": \"" + optimizer_type + "\",\n"
     json = json + "  \"step\": " + int_to_str(step) + ",\n"
     json = json + "  \"num_layers\": " + int_to_str(num_layers) + ",\n"
     json = json + "  \"params_per_layer\": " + int_to_str(params_per_layer) + "\n"
-
     json = json + "}"
-
     return json
 }
 
@@ -81,7 +70,6 @@ func training_config_to_json(
     float lora_alpha
 ) string {
     string json = "{\n"
-
     json = json + "  \"model_name\": \"" + model_name + "\",\n"
     json = json + "  \"dataset\": \"" + dataset + "\",\n"
     json = json + "  \"batch_size\": " + int_to_str(batch_size) + ",\n"
@@ -89,9 +77,7 @@ func training_config_to_json(
     json = json + "  \"num_epochs\": " + int_to_str(num_epochs) + ",\n"
     json = json + "  \"lora_rank\": " + int_to_str(lora_rank) + ",\n"
     json = json + "  \"lora_alpha\": " + float_to_str(lora_alpha) + "\n"
-
     json = json + "}"
-
     return json
 }
 
@@ -100,12 +86,10 @@ func int_to_str(int n) string {
     int value = n
     bool negative = false
     string out = ""
-
     if value < 0 {
         negative = true
         value = 0 - value
     }
-
     while value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
@@ -127,18 +111,14 @@ func int_to_str(int n) string {
 func float_to_str(float value) string {
     float current = value
     bool negative = current < 0.0
-
     if negative { current = 0.0 - current }
-
     int whole = 0
     while current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
-
     string result = int_to_str(whole)
     result = result + "."
-
     int i = 0
     while i < 8 {
         current = current * 10.0
@@ -150,7 +130,6 @@ func float_to_str(float value) string {
         result = result + int_to_str(digit)
         i = i + 1
     }
-
     if negative { result = "-" + result }
     return result
 }

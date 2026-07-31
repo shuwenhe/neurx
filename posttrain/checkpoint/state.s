@@ -1,11 +1,5 @@
-
-
-
 package neurx.posttrain.checkpoint.state
-
-
-
-struct TrainerState {
+struct trainer_state {
     int step
     int epoch
     int global_tokens
@@ -15,14 +9,9 @@ struct TrainerState {
     float wall_time
     int last_checkpoint_step
 }
-
-
 func init_trainer_state(int dummy) {
-
-
     println("[TrainerState] Initialized with defaults")
 }
-
 
 func print_trainer_state_fields(
     int step,
@@ -57,18 +46,15 @@ func print_trainer_state_fields(
     println("====================================")
 }
 
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
     bool negative = false
     string out = ""
-
     if value < 0 {
         negative = true
         value = 0 - value
     }
-
     while value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
@@ -87,22 +73,17 @@ func int_to_str(int n) string {
     return out
 }
 
-
 func float_to_str(float value) string {
     float current = value
     bool negative = current < 0.0
-
     if negative { current = 0.0 - current }
-
     int whole = 0
     while current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
-
     string result = int_to_str(whole)
     result = result + "."
-
     int i = 0
     while i < 4 {
         current = current * 10.0
@@ -114,7 +95,6 @@ func float_to_str(float value) string {
         result = result + int_to_str(digit)
         i = i + 1
     }
-
     if negative { result = "-" + result }
     return result
 }

@@ -1,5 +1,4 @@
 package neurx.model.transformer.transformer
-
 struct model_preset {
     string name
     string family
@@ -13,7 +12,6 @@ struct foundation_model {
     transformer_config runtime_config
     transformer_model backbone
 }
-
 func intermediate_dim_4x(int hidden_dim) int {
     hidden_dim * 4
 }

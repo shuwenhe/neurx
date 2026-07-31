@@ -4,7 +4,6 @@ use std.math
 use std.time
 use std.strings
 println := io.println
-
 struct compile_config {
     source_file: string
     output_binary: string
@@ -19,7 +18,6 @@ struct ir_module {
     instructions: []string
     data_section: []string
 }
-
 func compile_neurx_code(config: compile_config) (bool, ir_module) {
     println("\n╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 1: COMPILE & IR GENERATION                     ║")

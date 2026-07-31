@@ -9,7 +9,6 @@ import neurx.nn.nn
 import neurx.tensor.tensor
 import neurx.loss.losses
 import neurx.optimizer.optim
-
 func main() {
     int world_size = get_world_size_from_env()
     int global_rank = get_global_rank_from_env()
@@ -116,7 +115,6 @@ func initialize_model_weights(orchestrator_state orch) {
 
 func initialize_optimizer(orchestrator_state orch) {
 }
-
 struct data_loader {
     string data_path
     int seq_len

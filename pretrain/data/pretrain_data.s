@@ -1,5 +1,4 @@
 package neurx.pretrain.data
-
 struct pretrain_data_state {
     string dataset_name
     int shard_id
@@ -9,7 +8,6 @@ struct pretrain_data_state {
     int epoch
     bool exhausted
 }
-
 func new_pretrain_data_state(string dataset_name, int shard_id, int num_shards) pretrain_data_state {
     pretrain_data_state {
         dataset_name: dataset_name,

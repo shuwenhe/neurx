@@ -1,5 +1,4 @@
 package neurx.lib.tensor
-
 struct vector {
     []float data
     int size
@@ -17,7 +16,6 @@ struct tensor_2 {
     int dim2
     int dim3
 }
-
 func create_vector(int size) vector {
     vector v
     v.size = size

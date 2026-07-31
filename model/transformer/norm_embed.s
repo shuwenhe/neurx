@@ -1,5 +1,4 @@
 package neurx.model.transformer.norm
-
 struct layer_norm_config {
     int hidden_dim
     float epsilon
@@ -57,7 +56,6 @@ struct rope_apply_result {
 struct alibi_apply_result {
     []float scores
 }
-
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0

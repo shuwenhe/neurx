@@ -13,7 +13,6 @@ import (
     "../../cmd"
     "../../scripts"
 )
-
 func main() {
     args := os.Args[1:]
     if len(args) == 0 {
@@ -267,11 +266,11 @@ COMMANDS:
     neurx benchmark
       Run comprehensive benchmarks
   Building:
-    neurx build all         # Build all components
-    neurx build quick       # Quick build (core only)
-    neurx build clean       # Clean rebuild
+    neurx build all
+    neurx build quick
+    neurx build clean
   Help:
-    neurx help              # Show this message
+    neurx help
 FEATURES:
   ✓ Complete transformer architecture
   ✓ Multi-head attention with causal masking

@@ -4,7 +4,6 @@ use neurx.optimizer.optim_mvp.{sgd_optimizer, adam_optimizer, rmsprop_optimizer,
 use neurx.tensor.tensor
 use neurx.transformer.{transformer_config, transformer_init, transformer_forward}
 use neurx.checkpoint.{checkpoint, new_checkpoint, checkpoint_state_dict, checkpoint_load_state_dict, save_checkpoint, load_checkpoint}
-
 func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
@@ -26,7 +25,6 @@ func copy_int([]int data) []int {
     }
     out
 }
-
 struct trainer_config {
     int epochs
     int batch_size

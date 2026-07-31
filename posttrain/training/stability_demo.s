@@ -1,18 +1,14 @@
 package neurx.posttrain.training.stability_demo
-
 use neurx.posttrain.training.stability.{has_nan, has_inf}
-
 func demo_nan_detection() {
     println("=== NaN/Inf Detection Demo ===")
     println("")
-
     float normal = 1.5
     println("[Test 1] Normal value: 1.5")
     if !has_nan(normal) && !has_inf(normal) {
         println("  ✓ Healthy gradient")
     }
     println("")
-
     float zero = 0.0
     float nan_value = zero / zero
     println("[Test 2] NaN value (0.0/0.0)")
@@ -20,14 +16,12 @@ func demo_nan_detection() {
         println("  ✗ NaN detected! Training should stop.")
     }
     println("")
-
     float large = 1e40
     println("[Test 3] Inf value (1e40)")
     if has_inf(large) {
         println("  ✗ Inf detected! Training should stop.")
     }
     println("")
-
     println("✓ NaN/Inf detection working correctly!")
 }
 
@@ -35,9 +29,7 @@ func demo_gradient_clipping() {
     println("")
     println("=== Gradient Clipping Demo ===")
     println("")
-
     []float grads = []float{1.0, 2.0, 3.0, 4.0, 5.0}
-
     float norm_sq = 0.0
     int i = 0
     while i < len(grads) {
@@ -45,32 +37,26 @@ func demo_gradient_clipping() {
         i = i + 1
     }
     float norm = sqrt(norm_sq)
-
     print("Original gradient norm: ")
     println(float_to_str_2(norm))
-
     float max_norm = 3.0
     if norm > max_norm {
         float scale = max_norm / norm
         print("Clipping with scale: ")
         println(float_to_str_4(scale))
-
         i = 0
         while i < len(grads) {
             grads[i] = grads[i] * scale
             i = i + 1
         }
-
         println("✓ Gradients clipped successfully!")
     }
-
     println("")
 }
 
 func main() {
     demo_nan_detection()
     demo_gradient_clipping()
-
     println("")
     println("====================================")
     println("Next Steps:")
@@ -92,15 +78,12 @@ func float_to_str_n(float value, int decimals) string {
     float current = value
     bool negative = current < 0.0
     if negative { current = 0.0 - current }
-
     int whole = 0
     while current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
-
     string result = int_to_str(whole)
-
     if decimals > 0 {
         result = result + "."
         int i = 0
@@ -115,7 +98,6 @@ func float_to_str_n(float value, int decimals) string {
             i = i + 1
         }
     }
-
     if negative { result = "-" + result }
     return result
 }

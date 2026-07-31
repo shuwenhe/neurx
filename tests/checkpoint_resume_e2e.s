@@ -4,7 +4,6 @@ use std.os
 use std.path
 use std.time
 use std.exec
-
 struct test_config {
     scriptDir string
     projectRoot string
@@ -14,7 +13,6 @@ struct test_config {
     stepsPhase2 int
     maxSteps int
 }
-
 func logTest(config test_config, message string) error {
     timestamp = time.Now().Format(time.RFC3339)
     line = "[TEST] " + message

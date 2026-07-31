@@ -1,5 +1,4 @@
 package neurx.tokenizer.manager
-
 struct tokenizer_stats {
     int total_tokens_encoded
     int total_sequences_processed
@@ -31,7 +30,6 @@ struct tokenizer_manager {
     bool truncate_to_max_length
     int max_sequence_length
 }
-
 func new_tokenizer_manager(int vocab_size) tokenizer_manager {
     tokenizer_manager {
         vocab_size: vocab_size,

@@ -3,7 +3,6 @@ use neurx.model.llm.gpt.{
     model_config, language_model,
     gpt_generate_greedy, gpt_generate_topk
 }
-
 struct constitutional_principle {
     string id
     string critique_request
@@ -15,7 +14,6 @@ struct constitution {
     []constitutional_principle principles
     int num_principles
 }
-
 func default_constitution() constitution {
     []constitutional_principle ps = []constitutional_principle{cap: 8}
     ps[0] = constitutional_principle {

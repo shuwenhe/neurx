@@ -1,7 +1,6 @@
 package neurx.inference.inference_server
 use neurx.inference.kv_cache_manager.{paged_kv_cache, new_paged_kv_cache}
 use neurx.inference.sampling_strategies.{sampling_config, new_sampling_config}
-
 struct inference_request {
     string request_id
     string prompt
@@ -44,7 +43,6 @@ struct server_stats {
     float avg_tokens_per_second
     float gpu_utilization_percent
 }
-
 func new_batch_scheduler(int max_batch_size, int max_total_tokens) batch_scheduler {
     batch_scheduler {
         pending_requests: []inference_request{cap: 1000},

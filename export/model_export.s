@@ -1,6 +1,5 @@
 package neurx.exporter
 use neurx.runtime.io.{runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file}
-
 struct model_export_config {
     string model_name
     string source_model_dir
@@ -24,7 +23,6 @@ struct model_export_artifact {
     string bundle_summary_path
     string deployment_hint_path
 }
-
 func default_model_export_config() model_export_config {
     model_export_config {
         model_name: "neurx-model",

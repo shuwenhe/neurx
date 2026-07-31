@@ -1,11 +1,8 @@
-
 package main
-
 func test_trainer_state_roundtrip() {
     println("====================================")
     println("[Round Trip Test] TrainerState")
     println("====================================")
-
     int version = 1
     int step = 100
     int epoch = 2
@@ -15,7 +12,6 @@ func test_trainer_state_roundtrip() {
     float last_loss = 1.45
     float wall_time = 3600.0
     int last_checkpoint_step = 90
-
     println("Original Values:")
     println("  step: 100")
     println("  epoch: 2")
@@ -26,7 +22,6 @@ func test_trainer_state_roundtrip() {
     println("  wall_time: 3600.0")
     println("  last_checkpoint_step: 90")
     println("")
-
     println("Serializing to JSON...")
     string json = trainer_state_to_json(
         version,
@@ -39,18 +34,15 @@ func test_trainer_state_roundtrip() {
         wall_time,
         last_checkpoint_step
     )
-
     println("Generated JSON:")
     println(json)
     println("")
-
     println("Deserializing from JSON...")
     int restored_step = json_get_int(json, "step")
     int restored_epoch = json_get_int(json, "epoch")
     int restored_tokens = json_get_int(json, "global_tokens")
     float restored_best_loss = json_get_float(json, "best_loss")
     float restored_last_loss = json_get_float(json, "last_loss")
-
     println("Restored Values:")
     print("  step: ")
     println(int_to_str(restored_step))
@@ -59,26 +51,22 @@ func test_trainer_state_roundtrip() {
     print("  global_tokens: ")
     println(int_to_str(restored_tokens))
     println("")
-
     println("Verification:")
     if restored_step == step {
         println("  ✓ step matches")
     } else {
         println("  ✗ step MISMATCH")
     }
-
     if restored_epoch == epoch {
         println("  ✓ epoch matches")
     } else {
         println("  ✗ epoch MISMATCH")
     }
-
     if restored_tokens == global_tokens {
         println("  ✓ global_tokens matches")
     } else {
         println("  ✗ global_tokens MISMATCH")
     }
-
     println("====================================")
 }
 
@@ -87,14 +75,12 @@ func test_scheduler_state_roundtrip() {
     println("====================================")
     println("[Round Trip Test] SchedulerState")
     println("====================================")
-
     int version = 1
     int step = 50
     int warmup_steps = 100
     float max_lr = 0.0001
     float min_lr = 0.00001
     string schedule_type = "cosine"
-
     println("Original Values:")
     println("  step: 50")
     println("  warmup_steps: 100")
@@ -102,7 +88,6 @@ func test_scheduler_state_roundtrip() {
     println("  min_lr: 0.00001")
     println("  schedule_type: cosine")
     println("")
-
     println("Serializing to JSON...")
     string json = scheduler_state_to_json(
         version,
@@ -112,16 +97,13 @@ func test_scheduler_state_roundtrip() {
         min_lr,
         schedule_type
     )
-
     println("Generated JSON:")
     println(json)
     println("")
-
     println("Deserializing from JSON...")
     int restored_step = json_get_int(json, "step")
     int restored_warmup = json_get_int(json, "warmup_steps")
     string restored_type = json_get_string(json, "schedule_type")
-
     println("Restored Values:")
     print("  step: ")
     println(int_to_str(restored_step))
@@ -130,20 +112,17 @@ func test_scheduler_state_roundtrip() {
     print("  schedule_type: ")
     println(restored_type)
     println("")
-
     println("Verification:")
     if restored_step == step {
         println("  ✓ step matches")
     } else {
         println("  ✗ step MISMATCH")
     }
-
     if restored_warmup == warmup_steps {
         println("  ✓ warmup_steps matches")
     } else {
         println("  ✗ warmup_steps MISMATCH")
     }
-
     println("====================================")
 }
 
@@ -152,20 +131,17 @@ func test_optimizer_metadata_roundtrip() {
     println("====================================")
     println("[Round Trip Test] OptimizerState Metadata")
     println("====================================")
-
     int version = 1
     string optimizer_type = "AdamW"
     int step = 100
     int num_layers = 24
     int params_per_layer = 1024
-
     println("Original Values:")
     println("  optimizer_type: AdamW")
     println("  step: 100")
     println("  num_layers: 24")
     println("  params_per_layer: 1024")
     println("")
-
     println("Serializing to JSON...")
     string json = optimizer_state_to_json(
         version,
@@ -174,16 +150,13 @@ func test_optimizer_metadata_roundtrip() {
         num_layers,
         params_per_layer
     )
-
     println("Generated JSON:")
     println(json)
     println("")
-
     println("Deserializing from JSON...")
     string restored_type = json_get_string(json, "optimizer_type")
     int restored_step = json_get_int(json, "step")
     int restored_layers = json_get_int(json, "num_layers")
-
     println("Restored Values:")
     print("  optimizer_type: ")
     println(restored_type)
@@ -192,20 +165,17 @@ func test_optimizer_metadata_roundtrip() {
     print("  num_layers: ")
     println(int_to_str(restored_layers))
     println("")
-
     println("Verification:")
     if restored_step == step {
         println("  ✓ step matches")
     } else {
         println("  ✗ step MISMATCH")
     }
-
     if restored_layers == num_layers {
         println("  ✓ num_layers matches")
     } else {
         println("  ✗ num_layers MISMATCH")
     }
-
     println("====================================")
 }
 
@@ -215,11 +185,9 @@ func main() {
     println("JSON Serialization Round Trip Tests")
     println("========================================")
     println("")
-
     test_trainer_state_roundtrip()
     test_scheduler_state_roundtrip()
     test_optimizer_metadata_roundtrip()
-
     println("")
     println("========================================")
     println("All Round Trip Tests Complete")
@@ -255,12 +223,10 @@ func int_to_str(int n) string {
     int value = n
     bool negative = false
     string out = ""
-
     if value < 0 {
         negative = true
         value = 0 - value
     }
-
     while value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }

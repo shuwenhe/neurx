@@ -1,5 +1,4 @@
 package neurx.model.core.demo_or_classifier
-
 struct demo_or_classifier_state {
     string name
     string family
@@ -13,7 +12,6 @@ struct demo_or_classifier_state {
     float train_accuracy
     bool trained
 }
-
 func new_demo_or_classifier_state() demo_or_classifier_state {
     []float weight = []float{cap: 2}
     weight[0] = 2.0

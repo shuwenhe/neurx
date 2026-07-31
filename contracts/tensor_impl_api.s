@@ -2,86 +2,66 @@ import "storage_api"
 import "dtype_api"
 import "layout_api"
 import "device_api"
-
-struct VersionCounter {
+struct version_counter {
     version: i64
 }
 
-struct AutogradMeta {
+struct autograd_meta {
     requires_grad: bool
     is_leaf: bool
-    grad_fn: func(grad_output: Tensor) -> []Tensor
-    saved_tensors: []Tensor
+    grad_fn: func(grad_output: tensor) -> []tensor
+    saved_tensors: []tensor
 }
 
-struct TensorMetadata {
+struct tensor_metadata {
     shape: []i64
     stride: []i64
     offset: i64
     dtype: DType
     layout: Layout
-    device: Device
-    version_counter: VersionCounter
+    device: device
+    version_counter: version_counter
 }
 
-struct TensorImpl {
-
+struct tensor_impl {
     id: i64
-
-    storage: Storage
-    metadata: TensorMetadata
-
-    autograd_meta: AutogradMeta
-
+    storage: storage
+    metadata: tensor_metadata
+    autograd_meta: autograd_meta
     ref_count: i64
 }
-
 interface ITensorImpl {
-
     shape() -> []i64
     stride() -> []i64
     dtype() -> DType
     layout() -> Layout
-    device() -> Device
+    device() -> device
     offset() -> i64
-
-    storage() -> Storage
+    storage() -> storage
     data_ptr() -> i64
-
     version() -> i64
     bump_version() -> void
-
     requires_grad() -> bool
     set_requires_grad(requires: bool) -> void
     is_leaf() -> bool
     set_is_leaf(leaf: bool) -> void
-    grad_fn() -> func(Tensor) -> []Tensor
-    set_grad_fn(fn: func(Tensor) -> []Tensor) -> void
-    save_tensor(t: Tensor) -> void
-    saved_tensors() -> []Tensor
+    grad_fn() -> func(tensor) -> []tensor
+    set_grad_fn(fn: func(tensor) -> []tensor) -> void
+    save_tensor(t: tensor) -> void
+    saved_tensors() -> []tensor
     clear_saved_tensors() -> void
-
     incref() -> void
     decref() -> void
     ref_count() -> i64
 }
-
 interface ITensorImplFactory {
-
-    create(storage: Storage, metadata: TensorMetadata) -> TensorImpl
-
-    create_leaf(storage: Storage, metadata: TensorMetadata) -> TensorImpl
-
-    clone(impl: TensorImpl) -> TensorImpl
-
-    view(impl: TensorImpl, new_shape: []i64, new_stride: []i64) -> TensorImpl
-
-    reshape(impl: TensorImpl, new_shape: []i64) -> TensorImpl
+    create(storage: storage, metadata: tensor_metadata) -> tensor_impl
+    create_leaf(storage: storage, metadata: tensor_metadata) -> tensor_impl
+    clone(impl: tensor_impl) -> tensor_impl
+    view(impl: tensor_impl, new_shape: []i64, new_stride: []i64) -> tensor_impl
+    reshape(impl: tensor_impl, new_shape: []i64) -> tensor_impl
 }
-
 interface ITensorImplLifecycle {
-
-    finalize(impl: TensorImpl) -> void
-
-    debug_info(impl: TensorImpl) -> string
+    finalize(impl: tensor_impl) -> void
+    debug_info(impl: tensor_impl) -> string
 }

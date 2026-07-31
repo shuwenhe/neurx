@@ -4,7 +4,6 @@ int SHARDING_GRAD_SHARD = 1
 int SHARDING_NO_SHARD = 2
 int BACKEND_NCCL_FSDP = 0
 int BACKEND_CUSTOM = 1
-
 struct fsdp_config {
     int sharding_policy
     int dp_degree
@@ -58,7 +57,6 @@ struct fsdp_unit_state {
     double time_in_allgather_ms
     double time_in_reducescatter_ms
 }
-
 func mod_fsdn(int val, int div) int {
     if div <= 0 { return 0 }
     int r = val

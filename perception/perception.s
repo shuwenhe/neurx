@@ -1,5 +1,4 @@
 package neurx.perception.perception
-
 struct agent_perception_result {
     string kind
     string content
@@ -9,7 +8,6 @@ struct agent_perception_result {
     []string values
     int field_count
 }
-
 func new_agent_perception_result(string kind, string content, string source) agent_perception_result {
     agent_perception_result {
         kind: kind,

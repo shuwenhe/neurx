@@ -4,7 +4,6 @@ enum rope_scaling_type {
     ROPE_SCALING_NTK
     ROPE_SCALING_YARN
 }
-
 struct rope_scaling_config {
     rope_scaling_type method
     int original_max_seq_len
@@ -18,7 +17,6 @@ struct rope_scaling_config {
     float yarn_mscale
     bool ntk_use_log_space
 }
-
 func default_rope_scaling_4k_to_32k(int head_dim) rope_scaling_config {
     rope_scaling_config {
         method: ROPE_SCALING_YARN,

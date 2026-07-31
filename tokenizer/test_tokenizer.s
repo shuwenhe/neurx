@@ -1,5 +1,4 @@
 package main
-
 func test_tokenizer_config() {
     println("Test 1: tokenizer configuration")
     let cfg = new_tokenizer_config()

@@ -1,5 +1,4 @@
 package neurx.logging
-
 func encode_scalar_summary(
     string tag,
     float value,

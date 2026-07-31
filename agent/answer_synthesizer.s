@@ -2,7 +2,6 @@ package neurx.agent.answer_synthesizer
 use neurx.agent.trace
 use neurx.agent.memory
 use neurx.agent.observation
-
 struct agent_answer_state {
     string goal
     string answer
@@ -11,7 +10,6 @@ struct agent_answer_state {
     bool ready
     int synthesized_at_step
 }
-
 func new_agent_answer_state(string goal) agent_answer_state {
     agent_answer_state {
         goal: goal,

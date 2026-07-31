@@ -2,14 +2,12 @@ package neurx.script.data_utils
 use std.io
 use std.os
 use std.strings
-
 struct json_value {
     string type
     string str_val
     []json_value array_val
     map[string]json_value obj_val
 }
-
 func json_encode_string(s: string) string {
     let mut result = "\""
     for i = 0; i < len(s); i = i + 1 {

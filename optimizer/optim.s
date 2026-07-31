@@ -1,7 +1,6 @@
 package neurx.optimizer.optim
 use neurx.tensor.tensor
 use neurx.tensor.new
-
 struct sgd_optimizer {
     float lr
 }
@@ -49,7 +48,6 @@ struct rmsprop_optimizer {
     float eps
     []float avg
 }
-
 func ensure_size([]float values, int n) []float {
     []float out = []float{cap: n}
     int i = 0

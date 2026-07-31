@@ -1,7 +1,6 @@
 package neurx.posttrain.trainer.posttrain_main
 use std.io.eprintln
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_binary_file, runtime_write_text_file, safetensors_writer_add_tensor, safetensors_writer_finish, safetensors_writer_new, tensor, tensor_buffer_new, tensor_buffer_slice, tensor_buffer_write_f32_le, tensor_buffer_write_string, tensor_buffer_write_u64_le, trim}
-
 struct lora_config {
     int seq_len
     int hidden_size
@@ -40,14 +39,12 @@ struct lora_linear {
 struct named_lora_module {
     string name
     lora_linear layer
-
     int out_dim
     int in_dim
     int rank
     float scaling
     []float lora_A
     []float lora_B
-
     []float initial_a
     []float initial_b
 }
@@ -85,7 +82,6 @@ struct runtime_sample_batch {
     []runtime_training_sample items
     int count
 }
-
 func runtime_choice_text(runtime_training_sample sample) string {
     if sample.choice == 1 {
         return sample.option_a
@@ -266,7 +262,6 @@ func run_posttrain_lora_sft() int {
         eprintln("[Progress] building LoRA modules: layer " + int_to_str(layer_idx + 1) + "/" + int_to_str(num_layers))
         string q_name = "base_model.model.model.layers." + int_to_str(layer_idx) + ".self_attn.q_proj"
         string v_name = "base_model.model.model.layers." + int_to_str(layer_idx) + ".self_attn.v_proj"
-
         lora_linear q_layer = lora_linear{
             base_weight: []float{cap: 0},
             out_dim: hidden_size,
@@ -278,7 +273,6 @@ func run_posttrain_lora_sft() int {
             dropout_rate: dropout,
             last_input: []float{cap: 0}
         }
-
         named_lora_module q_module = named_lora_module{
             name: q_name,
             layer: q_layer,
@@ -291,10 +285,8 @@ func run_posttrain_lora_sft() int {
             initial_a: copy_float_array(q_layer.lora_A),
             initial_b: copy_float_array(q_layer.lora_B)
         }
-
         modules[module_idx] = q_module
         module_idx = module_idx + 1
-
         lora_linear v_layer = lora_linear{
             base_weight: []float{cap: 0},
             out_dim: v_out,
@@ -306,7 +298,6 @@ func run_posttrain_lora_sft() int {
             dropout_rate: dropout,
             last_input: []float{cap: 0}
         }
-
         named_lora_module v_module = named_lora_module{
             name: v_name,
             layer: v_layer,
@@ -319,16 +310,13 @@ func run_posttrain_lora_sft() int {
             initial_a: copy_float_array(v_layer.lora_A),
             initial_b: copy_float_array(v_layer.lora_B)
         }
-
         modules[module_idx] = v_module
         module_idx = module_idx + 1
         layer_idx = layer_idx + 1
     }
     println("Module build complete: " + int_to_str(len(modules)))
     eprintln("[Progress] module build complete, preparing training vectors")
-
     eprintln("=== [Stage 1] JSON → Token IDs ===")
-
     int max_seq_len = 128
     []int input_ids = []int{cap: max_seq_len}
     int token_count = 0
@@ -337,7 +325,6 @@ func run_posttrain_lora_sft() int {
     if dataset_len > 500 {
         dataset_len = 500
     }
-
     while text_idx < dataset_len && token_count < max_seq_len {
         int char_code = dataset_text[text_idx]
         if char_code > 32 && char_code < 127 {
@@ -346,7 +333,6 @@ func run_posttrain_lora_sft() int {
         }
         text_idx = text_idx + 1
     }
-
     eprintln("[Stage 1] ✓ Tokenization complete")
     eprintln("[Stage 1]   Total tokens: " + int_to_str(token_count))
     if token_count > 0 {
@@ -359,12 +345,10 @@ func run_posttrain_lora_sft() int {
         eprintln("[Stage 1]   First 5 token IDs: " + first_5)
     }
     eprintln("")
-
     eprintln("[Progress] using mock vectors for fast testing (no text vectorization)")
     []float prompt_vec = init_gaussian(hidden_size, 0.01)
     []float target_q = init_gaussian(hidden_size, 100.0)
     []float target_v = init_gaussian(v_out, 100.0)
-
     println("Training loop start")
     []float loss_history = []float{cap: epochs}
     float best_loss = 0.0
@@ -381,7 +365,6 @@ func run_posttrain_lora_sft() int {
             int sample_module_count = 0
             while module_cursor < len(modules) {
                 eprintln("[Debug] Processing module " + int_to_str(module_cursor))
-
                 named_lora_module module = modules[module_cursor]
                 int out_dim = module.out_dim
                 int in_dim = module.in_dim
@@ -389,16 +372,13 @@ func run_posttrain_lora_sft() int {
                 float scaling_val = module.scaling
                 []float lora_A = module.lora_A
                 []float lora_B = module.lora_B
-
                 []float target = target_q
                 int is_odd = module_cursor - ((module_cursor / 2) * 2)
                 if is_odd == 1 {
                     target = target_v
                 }
-
                 []float output = fill_lora(out_dim, 0.0)
                 []float hidden = fill_lora(rank_val, 0.0)
-
                 int r = 0
                 while r < rank_val {
                     int in_idx = 0
@@ -411,7 +391,6 @@ func run_posttrain_lora_sft() int {
                     }
                     r = r + 1
                 }
-
                 int out_idx = 0
                 while out_idx < out_dim {
                     float sum = 0.0
@@ -426,22 +405,18 @@ func run_posttrain_lora_sft() int {
                     output[out_idx] = sum
                     out_idx = out_idx + 1
                 }
-
                 float sample_loss = mse_loss(output, target)
                 epoch_loss = epoch_loss + sample_loss
                 sample_loss_sum = sample_loss_sum + sample_loss
                 sample_module_count = sample_module_count + 1
-
                 []float grad_out = mse_gradient(output, target)
                 []float b_snapshot = copy_float_array(lora_B)
                 float step_scale = effective_lr * scaling_val
-
                 if module_cursor == 0 {
                     eprintln("[Verify 1] Gradient check:")
                     eprintln("  grad_out[0] = " + float_to_str(grad_out[0], 8))
                     eprintln("  step_scale = " + float_to_str(step_scale, 8))
                 }
-
                 out_idx = 0
                 while out_idx < out_dim {
                     int rank_idx = 0
@@ -455,7 +430,6 @@ func run_posttrain_lora_sft() int {
                     }
                     out_idx = out_idx + 1
                 }
-
                 int rank_idx = 0
                 while rank_idx < rank_val {
                     if rank_idx == 0 {
@@ -478,7 +452,6 @@ func run_posttrain_lora_sft() int {
                         }
                         int a_idx = rank_idx * in_dim + in_idx
                         if a_idx < len(lora_A) {
-
                             float old_val = lora_A[a_idx]
                             lora_A[a_idx] = lora_A[a_idx] - step_scale * grad_a * prompt_vec[in_idx]
                             float new_val = lora_A[a_idx]
@@ -494,22 +467,18 @@ func run_posttrain_lora_sft() int {
                     }
                     rank_idx = rank_idx + 1
                 }
-
                 if module_cursor == 0 {
                     eprintln("[Verify 3] Struct assignment:")
                     eprintln("  lora_A[0] (local) = " + float_to_str(lora_A[0], 8))
                     eprintln("  module.lora_A[0] (before) = " + float_to_str(module.lora_A[0], 8))
                 }
-
                 module.lora_A = lora_A
                 module.lora_B = lora_B
                 modules[module_cursor] = module
-
                 if module_cursor == 0 {
                     eprintln("  module.lora_A[0] (after) = " + float_to_str(module.lora_A[0], 8))
                     eprintln("  modules[0].lora_A[0] (after) = " + float_to_str(modules[0].lora_A[0], 8))
                 }
-
                 epoch_items = epoch_items + 1
                 module_cursor = module_cursor + 1
             }
@@ -527,17 +496,14 @@ func run_posttrain_lora_sft() int {
             best_loss = reported_loss
         }
         println("step " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " loss=" + float_to_str(reported_loss, 6))
-
         if len(modules) > 0 {
             eprintln("[Verify 4] Final state check:")
             eprintln("  modules[0].lora_A[0] = " + float_to_str(modules[0].lora_A[0], 8))
             eprintln("  modules[0].lora_B[0] = " + float_to_str(modules[0].lora_B[0], 8))
         }
-
         eprintln("[Progress] epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " complete")
         epoch = epoch + 1
     }
-
     eprintln("[Progress] training complete, skipping stats due to S compiler struct field bug")
     println("")
     println("[Training Backend] S Runtime Real Trainer (Field Assignment Bug Workaround)")

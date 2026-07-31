@@ -6,7 +6,6 @@ const int JSON_NUMBER = 2
 const int JSON_STRING = 3
 const int JSON_ARRAY = 4
 const int JSON_OBJECT = 5
-
 struct json_value {
     int value_type
     string str_value
@@ -19,7 +18,6 @@ struct json_object {
     []string values
     int count
 }
-
 func parse_json_string(string json_str) string {
     string str = trim_string(json_str)
     if len(str) < 2 {

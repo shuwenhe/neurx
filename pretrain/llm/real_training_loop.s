@@ -10,7 +10,6 @@ use neurx.data.dataset.corpus_loader.{corpus_state, corpus_batch_result, new_cor
 use neurx.tensor.tensor
 use neurx.tensor.new
 use neurx.strings
-
 struct real_training_state {
     tensor weights_q
     tensor weights_k
@@ -26,7 +25,6 @@ struct real_training_state {
     float total_loss
     int tokens_seen
 }
-
 func shape1(int n) []int {
     []int s = []int{cap: 1}
     s[0] = n

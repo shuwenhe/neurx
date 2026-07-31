@@ -1,6 +1,5 @@
 package main
 use std.os.{command, getenv}
-
 func string_char(int c) string {
     string(c)
 }

@@ -13,7 +13,6 @@ enum packing_strategy {
     PACKING_BINNING,
     PACKING_SMART_PACKING,
 }
-
 struct dataloader_config {
     []string data_paths
     data_format format
@@ -42,7 +41,6 @@ struct dataloader_config {
     bool enable_profiling
     int stats_report_interval
 }
-
 func default_dataloader_config() dataloader_config {
     dataloader_config {
         data_paths: ["./data/pretrain*.jsonl"],

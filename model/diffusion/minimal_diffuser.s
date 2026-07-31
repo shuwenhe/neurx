@@ -1,5 +1,4 @@
 package neurx.model.diffusion.minimal_diffuser
-
 struct minimal_diffuser_state {
     string name
     string family
@@ -10,7 +9,6 @@ struct minimal_diffuser_state {
     float sample_quality
     bool trained
 }
-
 func new_minimal_diffuser_state() minimal_diffuser_state {
     minimal_diffuser_state {
         name: "minimal_diffuser",

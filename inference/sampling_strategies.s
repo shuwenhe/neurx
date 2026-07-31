@@ -1,5 +1,4 @@
 package neurx.inference.sampling_strategies
-
 struct sampling_config {
     string strategy
     float temperature
@@ -35,7 +34,6 @@ struct generation_state {
     bool is_finished
     []beam_state beams
 }
-
 func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}

@@ -91,7 +91,6 @@ var gMetrics = &server_metrics{
 	UptimeSeconds: 0,
 }
 var gServerStartTime = time.Now()
-
 func loadConfigFromEnv() {
 	if home := os.Getenv("NEURX_HOME"); home != "" {
 		gConfig.ModelPath = filepath.Join(home, "artifacts", "models", "1t.bin")

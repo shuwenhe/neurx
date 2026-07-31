@@ -3,7 +3,6 @@ import (
     "neurx/model"
     "neurx/nn"
 )
-
 struct matmul_config {
     batch_size: int
     use_blocked: bool
@@ -22,7 +21,6 @@ struct vectorization_stats {
     memory_bandwidth: float
     compute_efficiency: float
 }
-
 func batch_matmul(A: [][]float, B: [][]float, batch_size: int, M: int, K: int, N: int) batch_matmul_result {
     var result: batch_matmul_result
     var output: [][]float = [][]float(batch_size * M * N)

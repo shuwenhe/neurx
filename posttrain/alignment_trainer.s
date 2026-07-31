@@ -2,7 +2,6 @@ package neurx.posttrain.alignment
 import neurx.model.llm.neurx.*
 import neurx.tokenizer.neurx.*
 import neurx.amp.scaler.*
-
 struct alignment_config {
     string method
     string model_name
@@ -30,7 +29,6 @@ struct alignment_config {
     string reward_model_path
     string output_dir
 }
-
 func create_dpo_config() alignment_config {
     return alignment_config {
         method: "dpo",
@@ -163,7 +161,6 @@ class sft_trainer {
         float best_eval_score
         datetime start_time
     } state
-
 func init_sft_trainer(
     neurx_model model,
     tokenizer_state tokenizer,
@@ -195,11 +192,10 @@ func init_sft_trainer(
             start_time: now()
         }
     }
-
 func train_sft_epoch(self: sft_trainer, data_loader dataloader) {
     """
     trainingEnglish text epoch English text SFT
-    Data format:
+    data format:
     {"instruction": "...", "input": "...", "output": "..."}
     English text chat format:
     [{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}]
@@ -250,7 +246,6 @@ func train_sft_epoch(self: sft_trainer, data_loader dataloader) {
         if self.state.current_step % 50 == 0:
             log_sft_progress(self.state, loss.item())
     return total_loss / max(num_batches, 1)
-
 func prepare_sft_batch(
     tokenizer_state tokenizer,
     []string instructions,
@@ -300,7 +295,6 @@ class dpotrainer {
         float avg_reward_margin
         float best_win_rate
     } state
-
 func compute_dpo_loss(
     self: dpotrainer,
     chosen_logits: tensor,
@@ -371,7 +365,6 @@ class GRPOTrainer {
         float avg_group_reward
         float diversity_score
     } state
-
 func train_grpo_step(
     self: GRPOTrainer,
     batch_prompts: []string,
@@ -514,7 +507,6 @@ class ppotrainer {
         float entropy_bonus
         float mean_reward
     } state
-
 func train_ppo_iteration(
     self: ppotrainer,
     batch_prompts: []string
@@ -623,7 +615,6 @@ func train_ppo_iteration(
     self.state.entropy_bonus = iteration_metrics["entropy"]
     self.state.mean_reward = iteration_metrics["mean_reward"]
     return iteration_metrics
-
 func log_sft_progress(state: sft_trainer.state, float loss) {
     elapsed = now() - state.start_time
     print(
@@ -632,7 +623,6 @@ func log_sft_progress(state: sft_trainer.state, float loss) {
         f"Avg Loss: {state.running_loss:>7.4f} | "
         f"Elapsed: {elapsed}"
     )
-
 func log_alignment_progress(
     string method,
     int step,
@@ -659,7 +649,6 @@ func log_alignment_progress(
                 f"KL Penalty: {metrics['kl_penalty']:.4f} | "
                 f"Entropy: {metrics['entropy']:.4f}"
             )
-
 func test_alignment_systems() {
     print("\n" + "="*70)
     print("Testing NEURX Alignment Training Systems")
@@ -728,13 +717,10 @@ func test_alignment_systems() {
     print("\n" + "="*70)
     print("All alignment system tests passed! ✨")
     print("="*70 + "\n")
-
 func contains_code_block(string text):
     return "```" in text || "`" in text
-
 func has_proper_formatting(string text):
     return ("\n" in text) and (len(text.split()) > 3)
-
 func compute_repetition_ratio(string text):
     words = text.split()
     if len(words) < 4:
@@ -742,7 +728,6 @@ func compute_repetition_ratio(string text):
     bigrams = [(words[i], words[i+1]) for i in range(len(words)-1)]
     unique_bigrams = set(bigrams)
     return 1.0 - len(unique_bigrams) / max(len(bigrams), 1)
-
 func compute_group_diversity(tensor[][] responses, int n: int):
     set all_ngrams
     for group_responses in responses:
@@ -752,7 +737,6 @@ func compute_group_diversity(tensor[][] responses, int n: int):
                 ngram = tuple(words[i:i+n])
                 all_ngrams.add(ngram)
     return float(len(all_ngrams)) / max(responses.size * responses[0].size, 1)
-
 func compute_gae_advantages(
     tensor rewards,
     tensor values,
@@ -776,7 +760,6 @@ func compute_gae_advantages(
         advantages[t] = delta + gamma * lambda_ * last_advantage
         last_advantage = advantages[t]
     return advantages
-
 func compute_kl_divergence(
     neurx_model policy,
     neurx_model reference,

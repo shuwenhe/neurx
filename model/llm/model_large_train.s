@@ -16,7 +16,6 @@ use neurx.tensor.tensor
 use neurx.strings
 use neurx.tensor.new
 use neurx.strings
-
 struct gpt_large_training_config {
     int batch_size
     int seq_len
@@ -64,7 +63,6 @@ struct transformer_layer_optimizer_state {
     adamw_optimizer w_up
     adamw_optimizer b_up
 }
-
 func copy_float([]float values) []float {
     values
 }

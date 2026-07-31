@@ -2,7 +2,6 @@ package neurx.lib.fileio
 const int FILE_READ = 0
 const int FILE_WRITE = 1
 const int FILE_APPEND = 2
-
 struct file_handle {
     string path
     int mode
@@ -17,7 +16,6 @@ struct line_reader {
     int current_line
     int total_lines
 }
-
 func open_file(string path, int mode) file_handle {
     file_handle handle
     handle.path = path

@@ -1,7 +1,6 @@
 package neurx.model.llm.long_context_32k
 use neurx.strings
 use neurx.runtime.io.{io_println}
-
 struct rope_config {
     int dim
     int max_seq_len
@@ -32,7 +31,6 @@ struct rope_qk_result {
     []float rotated_q
     []float rotated_k
 }
-
 func rope_config_new(
     int dim,
     int max_seq_len

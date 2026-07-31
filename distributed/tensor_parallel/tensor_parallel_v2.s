@@ -1,5 +1,4 @@
 package neurx.distributed.tensor_parallel_v2
-
 struct tp_v2_config {
     int tp_degree
     int tp_rank
@@ -30,7 +29,6 @@ struct tp_v2_state {
     double time_mlp_ms
     double time_comm_ms
 }
-
 func tp_mod(int val, int div) int {
     if div <= 0 { return 0 }
     int r = val

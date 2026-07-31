@@ -1,6 +1,5 @@
 package neurx.posttrain.core.loss_computation
 use std.io.println
-
 struct loss_state_s {
     float current_loss
     int batch_size
@@ -15,7 +14,6 @@ struct loss_result_s {
     float total_loss
     [][]float grad_logits
 }
-
 func new_loss_state_s(int num_classes) loss_state_s {
     loss_state_s {
         current_loss: 0.0,

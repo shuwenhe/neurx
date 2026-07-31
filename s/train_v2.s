@@ -4,7 +4,6 @@ use std.math_dl as M
 use std.autograd as AG
 use std.nn as NN
 use std.training_io as IO
-
 struct train_config {
     int vocab_size
     int embed_dim
@@ -21,7 +20,6 @@ struct train_config {
     int max_steps
     int save_every
 }
-
 func default_config() train_config {
     train_config {
         vocab_size: 256, embed_dim: 128, num_heads: 4,

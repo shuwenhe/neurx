@@ -1,5 +1,4 @@
 package neurx.model.robotics.perception
-
 struct robotics_perception_state {
     string perception_name
     int obs_dim
@@ -9,7 +8,6 @@ struct robotics_perception_state {
     bool normalized
     bool trained
 }
-
 func robotics_perception_copy_float([]float values) []float {
     int n = len(values)
     []float out = []float{cap: n}

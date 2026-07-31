@@ -1,7 +1,6 @@
 package neurx.tokenizer.model_bpe
 use neurx.strings
 use neurx.runtime.io.{io_println}
-
 struct token_config {
     int vocab_size
     int min_frequency
@@ -39,7 +38,6 @@ struct bpe_cache_stats {
     int cache_hits
     int cache_misses
 }
-
 func new_tokenizer_config() token_config {
     token_config {
         vocab_size: 16000,

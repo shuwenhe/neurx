@@ -50,7 +50,6 @@ structure recovery_state {
     recovery_end_time: float
     recovery_duration: float
 }
-
 func new_checkpoint_manager(
     base_path: string,
     save_interval: int,

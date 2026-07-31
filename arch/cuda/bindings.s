@@ -1,11 +1,9 @@
 package neurx.backends.cuda.bindings
-
 struct device_array {
     []float data
     int size
     bool on_device
 }
-
 func copy_float_values([]float values) []float {
     []float out = []float{cap: len(values)}
     int i = 0

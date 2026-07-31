@@ -1,5 +1,4 @@
 package neurx.agent.observation
-
 struct agent_observation_state {
     string raw
     string kind
@@ -10,7 +9,6 @@ struct agent_observation_state {
     bool no_progress
     bool ok
 }
-
 func new_agent_observation_state() agent_observation_state {
     agent_observation_state {
         raw: "",

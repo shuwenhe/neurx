@@ -1,6 +1,5 @@
 package neurx.checkpoint.gradient
 import "neurx.autograd"
-
 struct checkpoint_config {
     enabled: bool
     checkpoints_per_layer: int
@@ -20,7 +19,6 @@ struct checkpoint_layer {
     outputs: [][]autograd.tensor
     needs_recompute: bool
 }
-
 func new_checkpoint_config(bool enabled) checkpoint_config {
     checkpoint_config config {
         enabled: enabled,
@@ -127,6 +125,7 @@ func apply_checkpointing_to_transformer(pointer transformer, checkpoint_config c
 func gradient_checkpointing_step(
     pointer model,
     []autograd.tensor inputs,
+
     func loss_fn,
     checkpoint_config config,
 ) float {

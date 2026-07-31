@@ -1,6 +1,5 @@
 package main
 use neurx.serving.runtime.production_runtime.{production_runtime_config, production_runtime_state, production_schedule_result, new_production_runtime_config, new_production_runtime_state, production_submit, production_schedule, production_complete_prefill, production_complete_decode, production_queue_size}
-
 func fail(string message) int {
     println("production-serving FAIL " + message)
     1

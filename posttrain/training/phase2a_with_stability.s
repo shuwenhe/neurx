@@ -1,8 +1,6 @@
 package main
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs}
 use neurx.posttrain.training.stability.{clip_all_gradients, check_grads_healthy}
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -88,7 +86,6 @@ func main() {
     println("  Dataset: MedMCQA Medical Multiple-Choice QA")
     println("  Data Path: ../dataset/medical/train.json")
     println("")
-
     float loss_value = 10.0
     int epoch = 0
     int total_steps = 0
@@ -97,7 +94,6 @@ func main() {
     int total_gradient_clips = 0
     float best_loss = 999999.0
     int best_step = 0
-
     while epoch < 3 {
         println("")
         println("====================================================")
@@ -105,25 +101,20 @@ func main() {
         println("====================================================")
         int step_in_epoch = 0
         int steps_per_epoch = 100
-
         while step_in_epoch < steps_per_epoch {
             total_steps = total_steps + 1
             step_in_epoch = step_in_epoch + 1
-
             loss_value = loss_value - 0.08
             if loss_value < 0.5 { loss_value = 0.5 }
             total_tokens = total_tokens + 512
-
             []float layer1_grad
             []float layer2_grad
             [][]float simulated_grads
-
             int grad_idx
             grad_idx = 0
             while grad_idx < 10 {
                 float grad_val
                 grad_val = 0.5 + ((total_steps + grad_idx) as float) * 0.01
-
                 if total_steps == (total_steps / 50) * 50 {
                     grad_val = grad_val * 3.0
                 }
@@ -131,10 +122,8 @@ func main() {
                 layer2_grad = append(layer2_grad, grad_val * 0.8)
                 grad_idx = grad_idx + 1
             }
-
             simulated_grads = append(simulated_grads, layer1_grad)
             simulated_grads = append(simulated_grads, layer2_grad)
-
             bool grads_healthy
             grads_healthy = check_grads_healthy(simulated_grads)
             if !grads_healthy {
@@ -143,18 +132,15 @@ func main() {
                 println("[ABORT] Training stopped for safety. Checkpoint saved.")
                 return
             }
-
             float grad_norm
             grad_norm = clip_all_gradients(simulated_grads, 1.0)
             if grad_norm > 1.0 {
                 total_gradient_clips = total_gradient_clips + 1
             }
-
             if loss_value < best_loss {
                 best_loss = loss_value
                 best_step = total_steps
             }
-
             if step_in_epoch == 10 || step_in_epoch == 20 || step_in_epoch == 50 || step_in_epoch == 100 {
                 print("[Step " + int_to_str(total_steps) + "] Loss: " + float_to_str(loss_value, 4))
                 print(" | Grad Norm: " + float_to_str(grad_norm, 4))
@@ -166,7 +152,6 @@ func main() {
         }
         epoch = epoch + 1
     }
-
     println("")
     println("====================================================")
     println("[Training Complete - Phase 2A Summary]")

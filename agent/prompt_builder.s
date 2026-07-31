@@ -2,7 +2,6 @@ package neurx.agent.prompt_builder
 use neurx.agent.memory
 use neurx.agent.tool_registry
 use neurx.reasoning.reasoning
-
 struct agent_prompt_builder_state {
     string system_role
     string goal
@@ -13,7 +12,6 @@ struct agent_prompt_builder_state {
     string last_observation
     string extra
 }
-
 func new_agent_prompt_builder(string goal, string task) agent_prompt_builder_state {
     agent_prompt_builder_state {
         system_role: "You are a precise AI agent. Think step by step, use available tools, and complete the task.",

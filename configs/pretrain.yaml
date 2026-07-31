@@ -1,7 +1,6 @@
 master_addr: 112.29.145.3
 master_port: 29500
 npu_pretrain_config: cann/configs/ascend_910b_train.json
-
 workers:
   - host: root@112.29.145.15
     visible_devices: 0

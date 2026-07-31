@@ -1,5 +1,4 @@
 package neurx.distributed
-
 struct pipeline_parallel_config {
     int pp_degree
     int pp_rank
@@ -25,7 +24,6 @@ struct pipeline_parallel_state {
     [][]double activation_cache
     int microbatch_count
 }
-
 func pp_mod_nonneg(int value, int divisor) int {
     if divisor <= 0 {
         return 0

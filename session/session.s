@@ -1,5 +1,4 @@
 package neurx.session.session
-
 struct agent_session_turn {
     int index
     string role
@@ -13,7 +12,6 @@ struct agent_session_state {
     string system_prompt
     bool active
 }
-
 func new_agent_session_turn(int index, string role, string content) agent_session_turn {
     agent_session_turn {
         index: index,

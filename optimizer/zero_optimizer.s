@@ -1,5 +1,4 @@
 package neurx.optimizer.zero_optimizer
-
 struct zero_optimizer_config {
     int zero_stage
     int dp_degree
@@ -28,7 +27,6 @@ struct zero_stage_2_state {
 struct zero_stage_3_state {
     zero_stage_2_state stage_2
 }
-
 func zero_mod_nonneg(int value, int divisor) int {
     if divisor <= 0 {
         return 0

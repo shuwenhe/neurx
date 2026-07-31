@@ -1,5 +1,4 @@
 package neurx.serving.vllm.request_queue
-
 struct vllm_request_queue_state {
     []string request_ids
     []int prefill_tokens
@@ -13,7 +12,6 @@ struct vllm_queue_pop_result {
     int remaining_tokens
     bool ok
 }
-
 func new_vllm_request_queue_state() vllm_request_queue_state {
     vllm_request_queue_state {
         request_ids: [],

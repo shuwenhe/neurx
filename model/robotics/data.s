@@ -1,11 +1,9 @@
 package neurx.model.robotics.data
-
 struct robotics_dataset_state {
     string source_name
     int sample_count
     bool normalized
 }
-
 func new_robotics_dataset_state(string source_name, int sample_count) robotics_dataset_state {
     robotics_dataset_state {
         source_name: source_name,

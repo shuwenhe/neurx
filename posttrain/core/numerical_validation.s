@@ -1,6 +1,5 @@
 package neurx.posttrain.core.numerical_validation
 use std.io.println
-
 struct golden_test_case_s {
     string test_name
     string operation
@@ -25,7 +24,6 @@ struct regression_test_suite_s {
     int passed_tests
     int failed_tests
 }
-
 func new_regression_test_suite_s() regression_test_suite_s {
     regression_test_suite_s {
         test_cases: make([]golden_test_case_s, 0),

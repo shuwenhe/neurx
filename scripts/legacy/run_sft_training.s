@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_write_text_file}
 use std.io.println
-
 struct sft_state {
     float weight
     float bias
@@ -12,7 +11,6 @@ struct sft_state {
     float total_loss
     float best_eval_loss
 }
-
 func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     string data_path = runtime_env_get("NEURX_SFT_DATA_FILE", project_root + "/data/sft/instruction_data.jsonl")

@@ -1,5 +1,4 @@
 module multimodal_vision
-
 struct vision_config {
     image_size: int = 336
     patch_size: int = 14
@@ -227,10 +226,10 @@ struct layer_output {
     attention_weights: tensor?
 }
 class ViTAttention {
-    query: Linear
-    key: Linear
-    value: Linear
-    output_proj: Linear
+    query: linear
+    key: linear
+    value: linear
+    output_proj: linear
     num_heads: int
     head_dim: int
     scale: float
@@ -238,10 +237,10 @@ class ViTAttention {
         this.num_heads = num_heads
         this.head_dim = hidden_size / num_heads
         this.scale = this.head_dim ** (-0.5)
-        this.query = new Linear(in_features=hidden_size, out_features=hidden_size, bias=true)
-        this.key = new Linear(in_features=hidden_size, out_features=hidden_size, bias=true)
-        this.value = new Linear(in_features=hidden_size, out_features=hidden_size, bias=true)
-        this.output_proj = new Linear(in_features=hidden_size, out_features=hidden_size, bias=true)
+        this.query = new linear(in_features=hidden_size, out_features=hidden_size, bias=true)
+        this.key = new linear(in_features=hidden_size, out_features=hidden_size, bias=true)
+        this.value = new linear(in_features=hidden_size, out_features=hidden_size, bias=true)
+        this.output_proj = new linear(in_features=hidden_size, out_features=hidden_size, bias=true)
     }
     forward(hidden_states: tensor, attention_mask: tensor?) {
         batch_size, seq_len, _ = hidden_states.shape
@@ -272,10 +271,10 @@ struct attention_output {
     attention_weights: tensor?
 }
 class Intermediate {
-    dense: Linear
+    dense: linear
     activation: GELU
     init(hidden_size: int, intermediate_size: int) {
-        this.dense = new Linear(in_features=hidden_size, out_features=intermediate_size, bias=true)
+        this.dense = new linear(in_features=hidden_size, out_features=intermediate_size, bias=true)
         this.activation = new GELU(approximate='none')
     }
     forward(hidden_states: tensor) {
@@ -284,10 +283,10 @@ class Intermediate {
     }
 }
 class Output {
-    dense: Linear
+    dense: linear
     dropout: Dropout
     init(intermediate_size: int, hidden_size: int) {
-        this.dense = new Linear(in_features=intermediate_size, out_features=hidden_size, bias=true)
+        this.dense = new linear(in_features=intermediate_size, out_features=hidden_size, bias=true)
         this.dropout = new Dropout(p=0.0)
     }
     forward(hidden_states: tensor, residual: tensor) {
@@ -362,9 +361,9 @@ class VisualAdapter {
         this.output_dim = output_dim
         this.hidden_dim = hidden_dim
         this.layers = Sequential([
-            Linear(input_dim, hidden_dim),
+            linear(input_dim, hidden_dim),
             GELU(),
-            Linear(hidden_dim, output_dim)
+            linear(hidden_dim, output_dim)
         ])
         this.layer_norm = new layer_norm(output_dim, eps=1e-6)
     }
@@ -377,8 +376,8 @@ class VisualAdapter {
 class CLIPContrastiveModel {
     vision_encoder: ViTEncoder
     text_encoder: CLIPTextEncoder
-    vision_projection: Linear
-    text_projection: Linear
+    vision_projection: linear
+    text_projection: linear
     logit_scale: Parameter
     temperature: float = 0.07
     init(vision_config: vision_config) {
@@ -390,12 +389,12 @@ class CLIPContrastiveModel {
             transformer_heads=vision_config.num_attention_heads,
             transformer_layers=12
         )
-        this.vision_projection = new Linear(
+        this.vision_projection = new linear(
             in_features=vision_config.hidden_size,
             out_features=vision_config.projection_dim,
             bias=false
         )
-        this.text_projection = new Linear(
+        this.text_projection = new linear(
             in_features=vision_config.clip_embed_dim,
             out_features=vision_config.projection_dim,
             bias=false
@@ -444,7 +443,7 @@ class CLIPTextEncoder {
     positional_embedding: Parameter
     transformer_blocks: list<CLIPTransformerBlock>
     final_layer_norm: layer_norm
-    text_projection: Linear
+    text_projection: linear
     vocab_size: int
     embed_dim: int
     max_position_embeddings: int = 77
@@ -464,7 +463,7 @@ class CLIPTextEncoder {
             ))
         }
         this.final_layer_norm = new layer_norm(embed_dim)
-        this.text_projection = new Linear(in_features=embed_dim, out_features=embed_dim, bias=False)
+        this.text_projection = new linear(in_features=embed_dim, out_features=embed_dim, bias=False)
     }
     forward(text: string) {
         let tokens = this._tokenize(text)
@@ -494,12 +493,12 @@ class CLIPTextEncoder {
 }
 class CLIPTransformerBlock {
     self_attn: multi_head_attention
-    mlp: MLP
+    mlp: mlp
     layer_norm1: layer_norm
     layer_norm2: layer_norm
     init(embed_dim: int, num_heads: int, intermediate_size: int) {
         this.self_attn = new multi_head_attention(embed_dim=embed_dim, num_heads=num_heads)
-        this.mlp = MLP(embed_dim=embed_dim, intermediate_size=intermediate_size)
+        this.mlp = mlp(embed_dim=embed_dim, intermediate_size=intermediate_size)
         this.layer_norm1 = new layer_norm(embed_dim, eps=1e-6)
         this.layer_norm2 = new layer_norm(embed_dim, eps=1e-6)
     }
@@ -612,12 +611,12 @@ class TemporalEncoder {
 }
 class TemporalTransformerBlock {
     self_attn: multi_head_attention
-    mlp: MLP
+    mlp: mlp
     norm1: layer_norm
     norm2: layer_norm
     init(embed_dim: int, num_heads: int, intermediate_size: int) {
         this.self_attn = new multi_head_attention(embed_dim=embed_dim, num_heads=num_heads)
-        this.mlp = MLP(embed_dim=embed_dim, intermediate_size=intermediate_size)
+        this.mlp = mlp(embed_dim=embed_dim, intermediate_size=intermediate_size)
         this.norm1 = new layer_norm(embed_dim)
         this.norm2 = new layer_norm(embed_dim)
     }
@@ -691,10 +690,10 @@ struct multimodal_embedding_result {
     metadata: vision_metadata?
 }
 class CrossImageAttention {
-    query: Linear
-    key: Linear
-    value: Linear
-    output_proj: Linear
+    query: linear
+    key: linear
+    value: linear
+    output_proj: linear
     num_heads: int
     head_dim: int
     scale: float
@@ -702,10 +701,10 @@ class CrossImageAttention {
         this.num_heads = num_heads
         this.head_dim = embed_dim / num_heads
         this.scale = this.head_dim ** (-0.5)
-        this.query = new Linear(embed_dim, embed_dim)
-        this.key = new Linear(embed_dim, embed_dim)
-        this.value = new Linear(embed_dim, embed_dim)
-        this.output_proj = new Linear(embed_dim, embed_dim)
+        this.query = new linear(embed_dim, embed_dim)
+        this.key = new linear(embed_dim, embed_dim)
+        this.value = new linear(embed_dim, embed_dim)
+        this.output_proj = new linear(embed_dim, embed_dim)
     }
     forward(image_features_list: list<tensor>) {
         let concatenated = concatenate(image_features_list, dim=1)

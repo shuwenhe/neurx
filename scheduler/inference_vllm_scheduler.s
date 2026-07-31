@@ -1,6 +1,5 @@
 package neurx.scheduler.inference_vllm_scheduler
 use neurx.inference.vllm.request_queue
-
 struct vllm_scheduler_state {
     string strategy
     int tick
@@ -19,7 +18,6 @@ struct vllm_schedule_result {
     int remaining_tokens
     bool selected
 }
-
 func vllm_normalize_strategy(string strategy) string {
     if strategy == "srpt" {
         return "srpt"

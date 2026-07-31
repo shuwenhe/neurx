@@ -1,7 +1,6 @@
 package neurx.posttrain.model.transformer_model
 use neurx.posttrain.model.model_loader.{model_weights, layer_weights, fill_model_tensor}
 use neurx.posttrain.model.transformer_layers.{embedding_layer, create_embedding, embedding_forward, transformer_block, create_transformer_block, transformer_block_forward, rms_norm, create_rms_norm, rms_norm_forward, linear_layer, create_linear, linear_forward}
-
 struct transformer_model {
     embedding_layer embedding
     []transformer_block layers
@@ -19,7 +18,6 @@ struct forward_pass_result {
     []float logits
     []float loss_per_token
 }
-
 func create_transformer_model(int num_layers, int hidden_size, int vocab_size, int intermediate_size, int num_heads) transformer_model {
     transformer_model model
     model.num_layers = num_layers

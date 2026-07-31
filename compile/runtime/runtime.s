@@ -1,11 +1,9 @@
 package neurx.compile.runtime
-
 struct runtime_status_state {
     bool runtime_available
     bool ops_runtime_enabled
     int ir_file_count
 }
-
 func runtime_available() bool {
     true
 }

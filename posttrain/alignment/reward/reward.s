@@ -1,5 +1,4 @@
 package neurx.posttrain.reward
-
 struct reward_state {
     string reward_model
     float last_reward
@@ -7,7 +6,6 @@ struct reward_state {
     float margin
     bool has_result
 }
-
 func new_reward_state(string reward_model) reward_state {
     reward_state {
         reward_model: reward_model,

@@ -1,5 +1,4 @@
 package neurx.inference.serve.admission_control
-
 struct admission_control_state {
     int max_active_requests
     int max_prefill_tokens
@@ -11,7 +10,6 @@ struct admission_control_state {
     int last_remaining_tokens
     int last_priority_score
 }
-
 func normalize_policy(string policy) string {
     if policy == "srpt" {
         return "srpt"

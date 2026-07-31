@@ -1,7 +1,6 @@
 package neurx.diffusion.noise
 use neurx.diffusion.config
 use neurx.ops
-
 struct noise_schedule_state {
     diffusion_config cfg
     int step
@@ -9,7 +8,6 @@ struct noise_schedule_state {
     float alpha_t
     float alpha_bar_t
 }
-
 func linear_beta(float beta_start, float beta_end, int t, int timesteps) float {
     if timesteps <= 1 {
         return beta_end

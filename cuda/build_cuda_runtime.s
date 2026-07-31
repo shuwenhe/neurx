@@ -7,7 +7,6 @@ use neurx.runtime.io.{
     runtime_run_command_output,
     runtime_write_text_file,
 }
-
 func main() {
     println("[CUDA Runtime] Building CUDA Runtime Library")
     println("")

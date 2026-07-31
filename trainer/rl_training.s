@@ -11,7 +11,6 @@ enum rl_stage {
     TRAINING = 1
     EVALUATING = 2
 }
-
 struct rl_config {
     rl_algorithm algorithm
     int batch_size
@@ -76,7 +75,6 @@ struct rl_metrics {
     float kl_divergence
     float clip_fraction
 }
-
 func new_rl_config() rl_config {
     rl_config {
         algorithm: PPO,

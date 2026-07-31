@@ -1,12 +1,10 @@
 package neurx.diffusion.eval
-
 struct diffusion_eval_state {
     int samples
     float fid_like
     float is_like
     bool has_result
 }
-
 func new_diffusion_eval_state() diffusion_eval_state {
     diffusion_eval_state {
         samples: 0,

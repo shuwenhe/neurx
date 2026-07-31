@@ -1,5 +1,4 @@
 package neurx.agent.action_schema
-
 struct agent_action_state {
     string tool
     string path
@@ -12,7 +11,6 @@ struct agent_action_state {
     bool replace_all
     bool structured
 }
-
 func new_agent_action_state() agent_action_state {
     agent_action_state {
         tool: "",

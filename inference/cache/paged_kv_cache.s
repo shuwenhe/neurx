@@ -1,5 +1,4 @@
 package neurx.inference.cache.paged_kv_cache
-
 struct paged_kv_cache_state {
     int layer_count
     int block_size
@@ -9,7 +8,6 @@ struct paged_kv_cache_state {
     int evictions
     bool enabled
 }
-
 func new_paged_kv_cache_state(int layer_count, int block_size, int max_blocks) paged_kv_cache_state {
     int effective_block_size = block_size
     if effective_block_size <= 0 {

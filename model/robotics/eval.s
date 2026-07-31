@@ -1,11 +1,9 @@
 package neurx.model.robotics.eval
-
 struct robotics_eval_state {
     string metric_name
     float score
     int episodes
 }
-
 func new_robotics_eval_state(string metric_name) robotics_eval_state {
     robotics_eval_state {
         metric_name: metric_name,

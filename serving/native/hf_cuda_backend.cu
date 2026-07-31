@@ -1,7 +1,6 @@
 #include "../../cuda/hf_decoder_cuda.h"
 #include "../../runtime/model/json.h"
 #include "serving_socket.h"
-
 #include <cerrno>
 #include <csignal>
 #include <cstdlib>
@@ -10,18 +9,14 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-
 namespace {
-
 using neurx::runtime::model::Json;
 volatile std::sig_atomic_t running = 1;
 void stop(int) { running = 0; }
-
 std::string environment(const char* name, const char* fallback) {
   const char* value = std::getenv(name);
   return value && *value ? value : fallback;
 }
-
 int environment_int(const char* name, int fallback) {
   const std::string value = environment(name, "");
   if (value.empty()) return fallback;
@@ -32,7 +27,6 @@ int environment_int(const char* name, int fallback) {
              ? static_cast<int>(parsed)
              : fallback;
 }
-
 bool write_all(int fd, const std::string& value) {
   std::size_t offset = 0;
   while (offset < value.size()) {
@@ -44,7 +38,6 @@ bool write_all(int fd, const std::string& value) {
   }
   return true;
 }
-
 bool read_request(int fd, std::string* method, std::string* path, std::string* body) {
   std::string request;
   std::size_t expected = std::numeric_limits<std::size_t>::max();
@@ -76,13 +69,11 @@ bool read_request(int fd, std::string* method, std::string* path, std::string* b
   *body = request.substr(separator + 4, expected - separator - 4);
   return true;
 }
-
 void respond(int fd, int code, const char* status, const std::string& body) {
   write_all(fd, "HTTP/1.1 " + std::to_string(code) + " " + status +
                     "\r\nContent-Type: application/json\r\nContent-Length: " +
                     std::to_string(body.size()) + "\r\nConnection: close\r\n\r\n" + body);
 }
-
 std::vector<int32_t> eos_tokens(const std::string& directory) {
   const std::filesystem::path path = std::filesystem::path(directory) / "generation_config.json";
   if (!std::filesystem::exists(path)) return {};
@@ -97,14 +88,11 @@ std::vector<int32_t> eos_tokens(const std::string& directory) {
   }
   return result;
 }
-
 bool contains(const std::vector<int32_t>& values, int32_t value) {
   for (int32_t candidate : values) if (candidate == value) return true;
   return false;
 }
-
 }
-
 int main() {
   try {
     const std::string directory = environment("NEURX_MODEL_DIR", "");

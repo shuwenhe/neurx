@@ -1,6 +1,5 @@
 package neurx.eval.mmlu_data
 use std.io.println
-
 struct mmlu_task {
     string name
     string category
@@ -18,7 +17,6 @@ struct mmlu_question {
     string correct_answer
     int qid
 }
-
 func mmlu_task_list() []mmlu_task {
     []mmlu_task tasks = []mmlu_task{}
     tasks = append(tasks, mmlu_task{name: "abstract_algebra", category: "STEM", num_questions: 100, is_included: true})

@@ -1,11 +1,6 @@
 package neurx.posttrain.alignment.remax
-
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
-
-// ReMax: Relax and Maximize
-// Efficient RL algorithm that relaxes PPO constraints for better exploration
-
 struct remax_config {
     float learning_rate
     int batch_size
@@ -16,8 +11,8 @@ struct remax_config {
     int max_grad_norm
     float gamma
     float gae_lambda
-    float alpha  // ReMax relaxation parameter
-    float beta   // ReMax maximization parameter
+    float alpha
+    float beta
     bool use_advantage_normalization
 }
 
@@ -34,7 +29,6 @@ struct remax_state {
     float total_loss
     float relaxation_loss
 }
-
 func new_remax_config() remax_config {
     remax_config {
         learning_rate: 3e-6,
@@ -59,38 +53,27 @@ func remax_compute_policy_loss(
     float alpha,
     float beta
 ) (tensor, float) {
-    // ReMax objective: relax PPO clipping with smooth approximation
     tensor log_ratio = tensor_ops.sub(log_probs, old_log_probs)
     tensor ratio = tensor_ops.exp(log_ratio)
-    
-    // Relaxed objective
     tensor adv_exp = tensor_ops.unsqueeze(advantages, -1)
-    
-    // Smooth maximization with temperature
     tensor weighted_ratio = tensor_ops.pow(ratio, beta)
     tensor surrogate = tensor_ops.mul(weighted_ratio, adv_exp)
-    
-    // Add relaxation term
     tensor relaxation = tensor_ops.mul_scalar(
         tensor_ops.pow(log_ratio, 2.0),
         alpha
     )
-    
     tensor policy_loss = tensor_ops.neg(
         tensor_ops.sub(
             tensor_ops.mean(surrogate),
             tensor_ops.mean(relaxation)
         )
     )
-    
-    // Compute KL divergence
     float kl_div = tensor_ops.mean_scalar(
         tensor_ops.sub(
             tensor_ops.mul(ratio, log_ratio),
             tensor_ops.sub(ratio, tensor_ops.ones_like(ratio))
         )
     )
-    
     (policy_loss, kl_div)
 }
 
@@ -105,19 +88,15 @@ func remax_step(
     []bool dones,
     remax_config cfg
 ) remax_state {
-    // Compute advantages using GAE
     int T = rewards.len
     []tensor advantages = []tensor{cap: T}
     []tensor returns = []tensor{cap: T}
-    
     tensor gae = tensor_ops.zeros_like(old_values[T - 1])
     int t = T - 1
-    
     while t >= 0 {
         tensor reward = rewards[t]
         tensor value = old_values[t]
         bool done = dones[t]
-        
         tensor next_value = tensor_ops.zeros_like(value)
         if t < T - 1 {
             next_value = old_values[t + 1]
@@ -125,7 +104,6 @@ func remax_step(
         if done {
             next_value = tensor_ops.zeros_like(value)
         }
-        
         tensor delta = tensor_ops.add(
             reward,
             tensor_ops.sub(
@@ -133,27 +111,21 @@ func remax_step(
                 value
             )
         )
-        
         gae = tensor_ops.add(
             delta,
             tensor_ops.mul_scalar(gae, cfg.gamma * cfg.gae_lambda)
         )
-        
         if done {
             gae = tensor_ops.zeros_like(gae)
         }
-        
         advantages[t] = gae
         returns[t] = tensor_ops.add(gae, value)
         t = t - 1
     }
-    
-    // Normalize advantages
     if cfg.use_advantage_normalization {
         tensor all_adv = tensor_ops.concat(advantages, 0)
         float mean_adv = tensor_ops.mean_scalar(all_adv)
         float std_adv = tensor_ops.std_scalar(all_adv)
-        
         int i = 0
         while i < advantages.len {
             advantages[i] = tensor_ops.div_scalar(
@@ -163,22 +135,15 @@ func remax_step(
             i = i + 1
         }
     }
-    
-    // Concatenate tensors
     tensor states_cat = tensor_ops.concat(states, 0)
     tensor actions_cat = tensor_ops.concat(actions, 0)
     tensor old_log_probs_cat = tensor_ops.concat(old_log_probs, 0)
     tensor adv_tensor = tensor_ops.concat(advantages, 0)
     tensor ret_tensor = tensor_ops.concat(returns, 0)
-    
-    // Forward pass
     tensor policy_logits = policy.forward(states_cat)
     tensor new_log_probs = tensor_ops.log_softmax(policy_logits, -1)
     new_log_probs = tensor_ops.gather(new_log_probs, actions_cat, -1)
-    
     tensor new_values = value_model.forward(states_cat)
-    
-    // Compute ReMax policy loss
     (tensor policy_loss, float kl_div) = remax_compute_policy_loss(
         new_log_probs,
         old_log_probs_cat,
@@ -186,13 +151,9 @@ func remax_step(
         cfg.alpha,
         cfg.beta
     )
-    
-    // Compute value loss
     tensor value_loss = tensor_ops.mean(
         tensor_ops.pow(tensor_ops.sub(new_values, ret_tensor), 2.0)
     )
-    
-    // Compute entropy
     tensor probs = tensor_ops.softmax(policy_logits, -1)
     tensor log_probs_all = tensor_ops.log_softmax(policy_logits, -1)
     tensor entropy = tensor_ops.neg(
@@ -202,8 +163,6 @@ func remax_step(
         )
     )
     tensor entropy_mean = tensor_ops.mean(entropy)
-    
-    // Total loss
     tensor total_loss = tensor_ops.add(
         policy_loss,
         tensor_ops.add(
@@ -211,7 +170,6 @@ func remax_step(
             tensor_ops.mul_scalar(entropy_mean, -cfg.entropy_coef)
         )
     )
-    
     remax_state {
         policy_logits: policy_logits,
         value_estimates: new_values,

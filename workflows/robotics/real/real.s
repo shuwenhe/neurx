@@ -1,11 +1,9 @@
 package neurx.workflows.robotics.real
-
 struct robotics_real_state {
     string robot_name
     bool connected
     bool emergency_stop
 }
-
 func new_robotics_real_state(string robot_name) robotics_real_state {
     robotics_real_state {
         robot_name: robot_name,

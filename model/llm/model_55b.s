@@ -8,7 +8,6 @@ use neurx.moe.llm.{
 use neurx.moe.transformer.{
     moe_stats, moe_compute_stats, new_moe_config
 }
-
 struct gpt_5_5_model_spec {
     string model_name
     model_config dense_base
@@ -49,7 +48,6 @@ struct gpt_5_5_model {
     gpt_5_5_model_spec spec
     gpt_5_5_parallel_plan parallel
 }
-
 func gpt_5_5_dense_base() model_config {
     model_config {
         name: "gpt-5.5-style",

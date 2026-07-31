@@ -1,5 +1,4 @@
 package neurx.tokenizer
-
 struct bpe_tokenizer {
     map[string]int vocab
     map[int]string id_to_token
@@ -27,7 +26,6 @@ struct pair[string, string] {
     string first
     string second
 }
-
 func new_bpe_tokenizer() bpe_tokenizer {
     bpe_tokenizer tokenizer {
         vocab: map[string]int{},

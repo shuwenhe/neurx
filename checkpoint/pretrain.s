@@ -1,6 +1,5 @@
 package neurx.checkpoint.pretrain
 use neurx.runtime.io.{runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file}
-
 struct pretrain_checkpoint_state {
     string run_name
     string root
@@ -25,7 +24,6 @@ struct pretrain_checkpoint_bundle_state {
     string tokenizer_manifest_path
     bool resumable
 }
-
 func new_pretrain_checkpoint_state(string run_name, string root) pretrain_checkpoint_state {
     int next_save_step = 1000
     pretrain_checkpoint_state {

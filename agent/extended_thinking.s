@@ -2,7 +2,6 @@ package neurx.agent.extended_thinking
 use neurx.executor.executor.{agent_execute_step, agent_text_contains}
 use neurx.agent.tool_registry
 use neurx.agent.memory
-
 struct extended_thought {
     int    index
     string thought
@@ -23,7 +22,6 @@ struct extended_thinking_state {
     bool           finished
     bool           budget_exceeded
 }
-
 func new_extended_thinking_state(string goal, int budget_steps) extended_thinking_state {
     extended_thinking_state {
         goal:               goal,

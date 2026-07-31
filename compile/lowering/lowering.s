@@ -1,13 +1,11 @@
 package neurx.compile.lowering
 use neurx.runtime.compile
-
 struct lowering_plan_state {
     string backend
     string target
     bool lowered
     bool compiled
 }
-
 func new_lowering_plan_state(string backend) lowering_plan_state {
     string target = "cpu_ref"
     if backend == "aot" {

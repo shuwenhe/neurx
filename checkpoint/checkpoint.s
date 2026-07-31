@@ -1,6 +1,5 @@
 package neurx.checkpoint
 use neurx.tensor.tensor
-
 struct checkpoint {
     int step
     float loss
@@ -14,7 +13,6 @@ struct checkpoint_ref {
     string kind
     bool resumable
 }
-
 func new_checkpoint(int step, float loss, []tensor params) checkpoint {
     checkpoint {
         step: step,

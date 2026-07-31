@@ -1,5 +1,4 @@
 package neurx.serving.runtime.production_runtime
-
 struct production_queue {
     []string request_ids
     []string backends
@@ -8,7 +7,6 @@ struct production_queue {
     []int max_new_tokens
     []int generated_tokens
 }
-
 func new_production_queue() production_queue {
     production_queue {
         request_ids: [],

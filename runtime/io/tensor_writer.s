@@ -1,5 +1,4 @@
 package neurx.runtime.io
-
 struct tensor {
     string name
     string dtype
@@ -13,7 +12,6 @@ struct tensor_buffer {
     []byte buffer
     int pos
 }
-
 func tensor_buffer_new(int capacity) tensor_buffer {
     tensor_buffer {
         buffer: []byte{cap: capacity},

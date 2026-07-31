@@ -1,10 +1,8 @@
 package neurx.autograd.context
-
 struct grad_mode_state {
     bool grad_enabled
     bool grad_accumulation
 }
-
 func new_state() grad_mode_state {
     grad_mode_state {
         grad_enabled: true,

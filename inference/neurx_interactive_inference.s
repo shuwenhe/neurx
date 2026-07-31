@@ -2,7 +2,6 @@ module neurx_interactive_inference
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, trim}
 extern "intrinsic" func __host_write_text_file(string path, string content) int
 extern "intrinsic" func __sys_read_string(int fd, int count) string
-
 func read_user_line() string {
     trim(__sys_read_string(0, 4096))
 }

@@ -1,11 +1,9 @@
 package neurx.platform.errors
-
 struct platform_error_state {
     string kind
     string message
     bool active
 }
-
 func new_tensor_error(string message) platform_error_state {
     platform_error_state {
         kind: "TensorError",

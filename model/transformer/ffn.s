@@ -1,5 +1,4 @@
 package neurx.model.transformer.ffn
-
 struct ffn_config {
     int hidden_dim
     int intermediate_dim
@@ -40,7 +39,6 @@ struct ffn_layer {
     ffn_config config
     feed_forward_network network
 }
-
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0

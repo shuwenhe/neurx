@@ -1,6 +1,5 @@
 package neurx.eval.six_dimension
 use neurx.eval.benchmark_eval
-
 struct medical_question {
     string id
     string question
@@ -37,7 +36,6 @@ struct grounding_analysis {
     float hallucination_ratio
     int grounding_score
 }
-
 func evaluate_grounding(
     string response,
     string reference_answer,

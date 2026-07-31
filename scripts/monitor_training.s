@@ -5,7 +5,6 @@ use std.path
 use std.exec
 use std.strings
 use std.regexp
-
 func findLatestLog(dir string) string {
     stat, err := os.Stat(dir)
     if err != nil || !stat.IsDir() {

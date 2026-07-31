@@ -1,5 +1,4 @@
 package neurx.attention.core
-
 struct attention_config {
     int hidden_dim
     int num_attention_heads
@@ -32,7 +31,6 @@ struct project_qkv_result {
     []float key
     []float value
 }
-
 func new_multi_head_attention(attention_config cfg) multi_head_attention_module {
     int head_dim = cfg.hidden_dim / cfg.num_attention_heads
     int kv_head_dim = cfg.hidden_dim / cfg.num_kv_heads

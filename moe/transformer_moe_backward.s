@@ -4,7 +4,6 @@ use neurx.moe.transformer.{
     moe_route, moe_expert_forward, moe_capacity
 }
 use neurx.model.llm.gpt.{gpt_alloc, gpt_matmul, gpt_swish, gpt_sigmoid}
-
 struct moe_expert_grads {
     []float d_gate_weight
     []float d_value_weight
@@ -17,7 +16,6 @@ struct moe_layer_grads {
     []float d_hidden
     float d_aux_loss_scale
 }
-
 func moe_swish_grad(float x) float {
     float s = gpt_sigmoid(x)
     s + x * s * (1.0 - s)

@@ -1,5 +1,4 @@
 package neurx.optimizer.adamw
-
 struct adamw_config {
     float learning_rate
     float beta1
@@ -22,7 +21,6 @@ struct adamw_optimizer {
     int global_step
     float current_lr
 }
-
 func new_adamw(adamw_config cfg) adamw_optimizer {
     adamw_optimizer {
         config: cfg,

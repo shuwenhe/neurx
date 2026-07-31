@@ -2,7 +2,6 @@ package main
 import fmt
 import os
 import neurx.model
-
 struct train_config {
     vocab_size: int
     embed_dim: int
@@ -15,7 +14,6 @@ struct train_config {
     num_epochs: int
     log_interval: int
 }
-
 func get_default_config() train_config {
     config := train_config{
         vocab_size: 256,

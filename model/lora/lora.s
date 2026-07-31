@@ -1,5 +1,4 @@
 package neurx.model.lora
-
 struct lora_config {
     int rank
     float alpha
@@ -10,7 +9,6 @@ struct lora_config {
     string qlora_dtype
     float lora_lr
 }
-
 func default_lora_config() lora_config {
     lora_config {
         rank: 16,

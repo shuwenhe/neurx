@@ -1,5 +1,4 @@
 package neurx.model.audio.minimal_speech
-
 struct minimal_speech_state {
     string name
     string family
@@ -10,7 +9,6 @@ struct minimal_speech_state {
     float train_accuracy
     bool trained
 }
-
 func new_minimal_speech_state() minimal_speech_state {
     minimal_speech_state {
         name: "minimal_speech",

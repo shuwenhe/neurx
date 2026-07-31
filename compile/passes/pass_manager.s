@@ -1,14 +1,12 @@
 package neurx.compile.pass_manager
 use neurx.strings
 use neurx.runtime.compile
-
 struct pass_plan_state {
     []string passes
     bool has_shape_infer
     bool has_fusion
     bool has_lowering
 }
-
 func default_passes(string mode, bool dynamic, bool fullgraph) []string {
     []string passes = []
     passes.push("normalize")

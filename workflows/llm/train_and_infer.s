@@ -3,7 +3,6 @@ use std.io
 use std.math
 use std.time
 use std.strings
-
 struct model_config {
     vocab_size: i32
     hidden_dim: i32
@@ -36,7 +35,6 @@ struct inference_result {
     num_tokens: i32
     latency_ms: f64
 }
-
 func println(s: string) {
     io.println(s)
 }

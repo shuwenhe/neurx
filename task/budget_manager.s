@@ -1,5 +1,4 @@
 package neurx.agent.budget_manager
-
 struct agent_budget_state {
     int max_tokens
     int used_tokens
@@ -9,7 +8,6 @@ struct agent_budget_state {
     int step_count
     int max_steps
 }
-
 func new_agent_budget_state(int max_tokens, int max_cost, int cost_per_token, int max_steps) agent_budget_state {
     agent_budget_state {
         max_tokens: max_tokens,

@@ -1,11 +1,9 @@
 package neurx.agent.summarizer
-
 struct agent_summary_result {
     string text
     int original_len
     bool clipped
 }
-
 func agent_summary_result_make(string text, int orig_len, bool clipped) agent_summary_result {
     agent_summary_result {
         text: text,

@@ -2,7 +2,6 @@ package neurx.compression.release
 use neurx.runtime.io.{runtime_make_dirs, runtime_write_text_file}
 use neurx.exporter.{model_export_config, model_export_artifact, prepare_model_export_bundle}
 use neurx.deployment.chain.{model_deployment_config, model_deployment_artifact, prepare_model_deployment_bundle}
-
 struct compression_release_config {
     string release_dir
     string quantization_manifest_path
@@ -17,7 +16,6 @@ struct compression_release_artifact {
     model_deployment_artifact deployment_artifact
     string summary_path
 }
-
 func default_compression_release_config() compression_release_config {
     compression_release_config {
         release_dir: "artifacts/release",

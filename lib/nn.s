@@ -1,6 +1,5 @@
 package neurx.lib.nn
 use neurx.lib.tensor.{vector, matrix, create_vector, create_matrix, random_matrix, vector_scale, matrix_scale, matrix_multiply, matrix_vector_multiply, matrix_add, vector_add, outer_product}
-
 struct linear_layer {
     matrix weight
     vector bias
@@ -39,7 +38,6 @@ struct layer_norm {
     float epsilon
     int hidden_size
 }
-
 func create_linear_layer(int in_features, int out_features, float lr, int seed) linear_layer {
     linear_layer layer
     layer.in_features = in_features

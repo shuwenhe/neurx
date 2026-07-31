@@ -1,6 +1,5 @@
 package neurx.optimizer.optimizer_adamw
 use neurx.tensor.{tensor, zeros, ones, fill, new}
-
 struct adam_state {
     float learning_rate
     float beta1
@@ -22,7 +21,6 @@ struct optimizer_config {
     int warmup_steps
     string lr_schedule
 }
-
 func init_adam_state(
     []tensor parameters,
     optimizer_config config

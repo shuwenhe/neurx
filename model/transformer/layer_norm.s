@@ -1,5 +1,4 @@
 package neurx.model.transformer.layer_norm
-
 struct layer_norm_config {
     int hidden_dim
     float epsilon
@@ -30,7 +29,6 @@ struct rms_norm_output {
     []float normalized
     []float variance
 }
-
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0

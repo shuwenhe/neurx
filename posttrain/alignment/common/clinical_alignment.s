@@ -2,7 +2,6 @@ package neurx.posttrain.alignment.clinical
 use neurx.posttrain.config
 use neurx.posttrain.data
 use neurx.eval.six_dimension
-
 struct test_set_info {
     string dataset_name
     []string test_question_ids
@@ -16,7 +15,6 @@ struct contamination_check_result {
     []string contaminated_ids
     float contamination_ratio
 }
-
 func create_test_set_info() test_set_info {
     test_set_info info = test_set_info{
         dataset_name: "medmcqa+hle",

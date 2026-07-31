@@ -2,7 +2,6 @@ package neurx.distributed.moe_all_to_all
 use neurx.strings
 use neurx.runtime.io.{io_println}
 use neurx.distributed.collective.{collective_state, alltoall_async}
-
 struct routing_decision {
     []int expert_indices
     []float expert_weights
@@ -30,7 +29,6 @@ struct moe_routing_state {
     long tokens_received_per_expert
     float aux_loss
 }
-
 func compute_router_logits(
     []float hidden_states,
     []float router_weight,

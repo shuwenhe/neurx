@@ -1,5 +1,4 @@
 package neurx.distributed.performance_monitor
-
 struct rank_metrics {
     int rank_id
     int compute_time_ms
@@ -26,7 +25,6 @@ struct performance_monitor {
     int communication_bottleneck_count
     float average_communication_time_ms
 }
-
 func new_performance_monitor(int world_size) performance_monitor {
     performance_monitor {
         metrics: []rank_metrics{cap: world_size},

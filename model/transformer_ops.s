@@ -1,6 +1,5 @@
 package neurx.model.transformer_ops
 use std.io.eprintln
-
 func embedding_lookup(
     []int token_ids,
     []float embed_weight,
@@ -10,14 +9,11 @@ func embedding_lookup(
     int vocab_size
 ) []float {
     []float output = []float{cap: batch_size * seq_len * hidden_size}
-
     int idx = 0
     while idx < batch_size * seq_len {
         int token_id = token_ids[idx]
-
         if token_id < 0 { token_id = 0 }
         if token_id >= vocab_size { token_id = vocab_size - 1 }
-
         int h = 0
         while h < hidden_size {
             int embed_offset = token_id * hidden_size + h
@@ -27,7 +23,6 @@ func embedding_lookup(
         }
         idx = idx + 1
     }
-
     output
 }
 
@@ -40,13 +35,11 @@ func rms_norm(
     float eps
 ) []float {
     []float output = []float{cap: batch_size * seq_len * hidden_size}
-
     int b = 0
     while b < batch_size {
         int s = 0
         while s < seq_len {
             int offset = (b * seq_len + s) * hidden_size
-
             float sum_sq = 0.0
             int h = 0
             while h < hidden_size {
@@ -54,26 +47,21 @@ func rms_norm(
                 sum_sq = sum_sq + val * val
                 h = h + 1
             }
-
             float rms = sqrt_approx(sum_sq / (hidden_size as float) + eps)
-
             h = 0
             while h < hidden_size {
                 output[offset + h] = (x[offset + h] / rms) * weight[h]
                 h = h + 1
             }
-
             s = s + 1
         }
         b = b + 1
     }
-
     output
 }
 
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
-
     float guess = x / 2.0
     int i = 0
     while i < 5 {
@@ -91,7 +79,6 @@ func matmul(
     int N
 ) []float {
     []float C = []float{cap: M * N}
-
     int m = 0
     while m < M {
         int n = 0
@@ -107,7 +94,6 @@ func matmul(
         }
         m = m + 1
     }
-
     C
 }
 
@@ -117,13 +103,10 @@ func softmax(
     int last_dim
 ) []float {
     []float output = []float{cap: total_size}
-
     int num_softmax = total_size / last_dim
-
     int i = 0
     while i < num_softmax {
         int offset = i * last_dim
-
         float max_val = x[offset]
         int j = 1
         while j < last_dim {
@@ -132,7 +115,6 @@ func softmax(
             }
             j = j + 1
         }
-
         float sum = 0.0
         j = 0
         while j < last_dim {
@@ -141,23 +123,19 @@ func softmax(
             sum = sum + exp_val
             j = j + 1
         }
-
         j = 0
         while j < last_dim {
             output[offset + j] = output[offset + j] / sum
             j = j + 1
         }
-
         i = i + 1
     }
-
     output
 }
 
 func exp_approx(float x) float {
     if x > 20.0 { return 485165195.0 }
     if x < -20.0 { return 0.0 }
-
     float result = 1.0
     float term = 1.0
     int i = 1
@@ -183,7 +161,6 @@ func silu([]float x) []float {
 func add_arrays([]float a, []float b) []float {
     int size = len(a)
     if len(b) < size { size = len(b) }
-
     []float output = []float{cap: size}
     int i = 0
     while i < size {
@@ -196,7 +173,6 @@ func add_arrays([]float a, []float b) []float {
 func mul_arrays([]float a, []float b) []float {
     int size = len(a)
     if len(b) < size { size = len(b) }
-
     []float output = []float{cap: size}
     int i = 0
     while i < size {
@@ -217,16 +193,12 @@ func simplified_attention(
     int hidden_size,
     int num_heads
 ) []float {
-
     int total_tokens = batch_size * seq_len
     []float q = matmul(hidden_states, q_weight, total_tokens, hidden_size, hidden_size)
     []float k = matmul(hidden_states, k_weight, total_tokens, hidden_size, hidden_size)
     []float v = matmul(hidden_states, v_weight, total_tokens, hidden_size, hidden_size)
-
     int head_dim = hidden_size / num_heads
-
     float scale = 1.0 / sqrt_approx(head_dim as float)
-
     []float attn_scores = []float{cap: total_tokens * total_tokens}
     int i = 0
     while i < total_tokens {
@@ -243,9 +215,7 @@ func simplified_attention(
         }
         i = i + 1
     }
-
     []float attn_weights = softmax(attn_scores, total_tokens * total_tokens, total_tokens)
-
     []float context = []float{cap: total_tokens * hidden_size}
     i = 0
     while i < total_tokens {
@@ -262,7 +232,6 @@ func simplified_attention(
         }
         i = i + 1
     }
-
     []float output = matmul(context, o_weight, total_tokens, hidden_size, hidden_size)
     output
 }
@@ -278,13 +247,10 @@ func swiglu_mlp(
     int intermediate_size
 ) []float {
     int total_tokens = batch_size * seq_len
-
     []float gate = matmul(hidden_states, gate_weight, total_tokens, hidden_size, intermediate_size)
     []float up = matmul(hidden_states, up_weight, total_tokens, hidden_size, intermediate_size)
-
     []float silu_up = silu(up)
     []float activated = mul_arrays(gate, silu_up)
-
     []float output = matmul(activated, down_weight, total_tokens, intermediate_size, hidden_size)
     output
 }
@@ -306,19 +272,13 @@ func transformer_layer(
     int num_heads,
     int intermediate_size
 ) []float {
-
     []float normed = rms_norm(hidden_states, input_ln_weight, batch_size, seq_len, hidden_size, 0.000001)
-
     []float attn_output = simplified_attention(normed, q_weight, k_weight, v_weight, o_weight,
                                                batch_size, seq_len, hidden_size, num_heads)
-
     []float after_attn = add_arrays(hidden_states, attn_output)
-
     normed = rms_norm(after_attn, post_ln_weight, batch_size, seq_len, hidden_size, 0.000001)
-
     []float mlp_output = swiglu_mlp(normed, gate_weight, up_weight, down_weight,
                                     batch_size, seq_len, hidden_size, intermediate_size)
-
     []float output = add_arrays(after_attn, mlp_output)
     output
 }

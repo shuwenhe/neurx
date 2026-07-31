@@ -1,5 +1,4 @@
 package neurx.data.pipeline.deduplication
-
 struct min_hash_signature {
     int* hash_values
     int num_hashes
@@ -28,7 +27,6 @@ struct document_similarity {
     float similarity_score
     bool is_duplicate
 }
-
 func init_bloom_filter(int expected_documents, float false_positive_rate) bloom_filter {
     bloom_filter bf
     float ln2_squared = 0.4804530139

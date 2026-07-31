@@ -1,5 +1,4 @@
 package neurx.tools.safetensors
-
 struct tensor_metadata {
     string name
     string dtype
@@ -15,7 +14,6 @@ struct safetensors_archive {
     int header_size
     int data_offset
 }
-
 func dtype_element_size(string dtype) int {
     if dtype == "F32" || dtype == "I32" || dtype == "U32" {
         return 4

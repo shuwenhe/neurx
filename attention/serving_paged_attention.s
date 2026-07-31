@@ -1,12 +1,10 @@
 package neurx.attention.serving_paged
 use neurx.serving.cache.paged_kv_cache
-
 struct vllm_paged_attention_state {
     paged_kv_cache_state kv
     int page_size
     int decode_steps
 }
-
 func new_vllm_paged_attention_state(int layer_count, int page_size, int max_pages) vllm_paged_attention_state {
     int normalized_page = page_size
     if normalized_page <= 0 {

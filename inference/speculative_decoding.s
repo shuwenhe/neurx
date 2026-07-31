@@ -6,7 +6,6 @@ enum speculative_mode {
     ADAPTIVE = 2
     BATCH_VERIFICATION = 3
 }
-
 struct speculative_config {
     speculative_mode mode
     int draft_model_size
@@ -76,7 +75,6 @@ struct speculative_result {
     float accept_rate
     int total_steps
 }
-
 func new_speculative_config() speculative_config {
     speculative_config {
         mode: ADAPTIVE,

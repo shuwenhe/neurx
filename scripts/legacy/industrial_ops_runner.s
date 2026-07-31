@@ -8,12 +8,10 @@ type industrial_run_summary struct {
     matched_records int
     score           float64
 }
-
 struct command_args {
     command string
     options map[string]string
 }
-
 func ops_trim(string s) string {
     int left := 0
     while left < len(s) && (s[left] == 32 || s[left] == 9 || s[left] == 10 || s[left] == 13) {

@@ -1,6 +1,5 @@
 package neurx.tools.lora_merge
 use std.io.println
-
 struct safetensors_header {
     string name
     string dtype
@@ -14,7 +13,6 @@ struct safetensors_index {
     []safetensors_header tensors
     map[string]safetensors_header tensor_map
 }
-
 func path_join(string dir, string filename) string {
     if len(dir) == 0 {
         return filename

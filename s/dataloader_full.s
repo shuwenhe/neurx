@@ -1,5 +1,4 @@
 package neurx.data
-
 struct dataloader_config {
     int batch_size
     bool shuffle
@@ -24,7 +23,6 @@ struct dataloader {
     int batches_served
     []batch prefetch_buffer
 }
-
 func new_dataloader(
     dataset ds,
     dataloader_config cfg

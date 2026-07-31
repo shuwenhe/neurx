@@ -7,7 +7,6 @@ use neurx.model.robotics.train.{
     robotics_robot_train_run,
     robotics_robot_train_step,
 }
-
 func run_robotics_training_with_params(int obs_dim, int latent_dim, int act_dim, int max_steps, int sample_count, float learning_rate, int eval_every, int save_every, string task_name) int {
     robotics_trajectory_train_config cfg = robotics_robot_train_config(obs_dim, latent_dim, act_dim, max_steps, sample_count, learning_rate, task_name)
     robotics_trajectory_train_state state = robotics_robot_train_state(cfg)
@@ -26,7 +25,6 @@ func run_robotics_training_with_params(int obs_dim, int latent_dim, int act_dim,
     }
     0
 }
-
 struct robotics_workflow_tick_state {
     robotics_trajectory_train_state training
     int eval_every

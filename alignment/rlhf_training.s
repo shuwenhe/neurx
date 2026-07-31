@@ -1,5 +1,4 @@
 package neurx.alignment.rlhf_training
-
 struct human_preference {
     string prompt
     string chosen_response
@@ -33,7 +32,6 @@ struct rlhf_trainer {
     float average_reward
     float policy_gradient
 }
-
 func new_ppo_config() ppo_config {
     ppo_config {
         learning_rate: 0.00001,

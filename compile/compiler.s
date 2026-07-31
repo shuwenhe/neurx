@@ -1,7 +1,6 @@
 package neurx.compile.compiler
 use neurx.platform.errors.{platform_error_state, new_configuration_error, clear_error, platform_error_active}
 use neurx.compile.pipeline
-
 struct compile_options {
     string backend
     string mode
@@ -28,7 +27,6 @@ struct compile_result {
     bool ok
     platform_error_state error
 }
-
 func new_compile_options() compile_options {
     compile_options {
         backend: "eager",

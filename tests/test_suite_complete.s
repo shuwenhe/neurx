@@ -7,7 +7,6 @@ use neurx.model.transformer
 use neurx.amp.scaler
 use neurx.optimizer.adamw
 use neurx.tokenizer.data_pipeline
-
 struct test_result {
     string name
     bool passed
@@ -21,7 +20,6 @@ struct test_suite {
     int num_passed
     int num_failed
 }
-
 func run_all_tests() {
     println("=" * 70)
     println("🧪 NeurX Industrial-Grade Test Suite")

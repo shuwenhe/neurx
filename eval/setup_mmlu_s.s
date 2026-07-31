@@ -9,7 +9,6 @@ use neurx.runtime.io.{
     runtime_run_command,
     runtime_run_command_output,
 }
-
 func all_mmlu_stem_tasks() []string {
     []string{
         "abstract_algebra",
@@ -85,7 +84,6 @@ func all_mmlu_other_tasks() []string {
         "security_studies",
     }
 }
-
 struct mmlu_download_stats {
     int total_tasks
     int successful_count

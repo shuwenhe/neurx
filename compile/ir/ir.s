@@ -1,6 +1,5 @@
 package neurx.compile.ir
 use neurx.strings
-
 struct ir_node_state {
     string name
     string op
@@ -16,7 +15,6 @@ struct ir_graph_state {
     []string outputs
     bool valid
 }
-
 func copy_nodes([]ir_node_state values) []ir_node_state {
     []ir_node_state out = []ir_node_state{cap: len(values)}
     int i = 0

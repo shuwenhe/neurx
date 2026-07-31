@@ -1,7 +1,6 @@
 package neurx.deployment.chain
 use neurx.runtime.io.{runtime_make_dirs, runtime_write_text_file}
 use neurx.strings
-
 struct model_deployment_config {
     string cluster_name
     string image_name
@@ -34,7 +33,6 @@ struct model_deployment_artifact {
     string launch_plan_path
     string summary_path
 }
-
 func default_model_deployment_config() model_deployment_config {
     model_deployment_config {
         cluster_name: "neurx-prod",

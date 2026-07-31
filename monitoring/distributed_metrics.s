@@ -73,7 +73,6 @@ structure anomaly_detector {
     prev_throughput: float
     anomaly_count: int
 }
-
 func new_metrics_aggregator(window_size: int): metrics_aggregator {
     var agg: metrics_aggregator
     agg.window_size = window_size

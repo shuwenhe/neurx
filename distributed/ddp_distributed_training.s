@@ -1,7 +1,6 @@
 package neurx.distributed_training
 use std.io
 use std.math
-
 struct process_group {
     rank: int
     world_size: int
@@ -17,7 +16,6 @@ struct rank_info {
     hostname: string
     ip_address: string
 }
-
 func init_process_group(int rank, int world_size, string backend) process_group {
     fmt.printfln("🌐 Initializing Process Group")
     fmt.printfln("   Rank: %d/%d", rank, world_size)

@@ -1,5 +1,4 @@
 package neurx.data.loader.streaming
-
 struct streaming_config {
     string data_dir
     string file_pattern
@@ -45,7 +44,6 @@ struct streaming_dataloader {
     int total_batches
     int processed_batches
 }
-
 func new_streaming_config(string data_dir) streaming_config {
     streaming_config {
         data_dir: data_dir,

@@ -1,6 +1,5 @@
 package neurx.reasoning.data
 use neurx.agent.runtime
-
 struct reasoning_trace_sample_state {
     int step
     string goal
@@ -24,7 +23,6 @@ struct reasoning_trace_step_output {
     reasoning_trace_sample_state sample
     bool ok
 }
-
 func get_reasoning_trace_sample(reasoning_trace_dataset_state state, int index) reasoning_trace_sample_state {
     state.samples[index]
 }

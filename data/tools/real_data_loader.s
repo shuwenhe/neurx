@@ -2,7 +2,6 @@ package neurx.data.tools.real_data_loader
 use std.io
 use std.strings
 use std.math
-
 struct tokenizer {
     vocab_size: int
     vocab: []string
@@ -12,7 +11,6 @@ struct tokenizer {
     unk_token_id: int
     pad_token_id: int
 }
-
 func create_tokenizer(int vocab_size) tokenizer {
     vocab := make([]string, vocab_size)
     token_to_id := make(map[string]int)

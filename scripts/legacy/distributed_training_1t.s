@@ -28,7 +28,6 @@ type checkpoint_manager struct {
     keep_last_n: int
     saved_checkpoints: int
 }
-
 func initialize_distributed_1t(world_size: int, rank: int,
                               local_rank: int): distributed_trainer1_t {
     trainer := distributed_trainer1_t{
@@ -47,12 +46,14 @@ type tensor_parallel_operator struct {
     tp_size: int
     tp_group_members: [string]
 }
+
 func (op *tensor_parallel_operator) split_linear_weight(weight_shape: [2]int): [2]int {
     out_features := weight_shape[0]
     in_features := weight_shape[1]
     split_out := out_features / op.tp_size
     return [2]int{split_out, in_features}
 }
+
 func (op *tensor_parallel_operator) all_reduce_loss(local_loss: float): float {
     global_loss := local_loss * float(op.tp_size)
     return global_loss / float(op.tp_size)
@@ -68,6 +69,7 @@ type pipeline_scheduler struct {
     micro_batch_size: int
     pipeline_stages: []*pipeline_stage
 }
+
 func (ps *pipeline_scheduler) create_pipeline_stages(num_stages: int,
                                                    total_layers: int): {
     layers_per_stage := total_layers / num_stages
@@ -97,6 +99,7 @@ func create_zero_optimizer_1t(): zero_optimizer {
     }
     return zero
 }
+
 func (z *zero_optimizer) estimate_memory_reduction(original_bytes: int64): int64 {
     if z.stage == 3 {
         return original_bytes / 4
@@ -111,6 +114,7 @@ type gradient_manager struct {
     accumulated_loss: float
     ready_to_update: bool
 }
+
 func (gm *gradient_manager) accumulate_gradient(loss: float): bool {
     gm.accumulated_loss += loss
     gm.accumulated_step += 1
@@ -120,12 +124,14 @@ func (gm *gradient_manager) accumulate_gradient(loss: float): bool {
     }
     return false
 }
+
 func (gm *gradient_manager) get_accumulated_loss(): float {
     if gm.accumulated_step > 0 {
         return gm.accumulated_loss / float(gm.accumulated_step)
     }
     return 0.0
 }
+
 func (gm *gradient_manager) reset() {
     gm.accumulated_loss = 0.0
     gm.accumulated_step = 0
@@ -135,9 +141,11 @@ type activation_checkpointer struct {
     checkpoint_segments: int
     enabled: bool
 }
+
 func (ac *activation_checkpointer) compute_memory_savings(): float {
     return 0.70
 }
+
 func (ac *activation_checkpointer) configure_for_1t_model() {
     ac.checkpoint_segments = 96 / 10
     ac.enabled = true
@@ -190,20 +198,24 @@ func create_training_loop_1t(rank: int, world_size: int): training_loop1_t {
     }
     return loop
 }
+
 func (loop *training_loop1_t) forward_pass(batch_tokens: int64): float {
     loss := 0.0
     time.Sleep(3 * time.Second)
     return loss
 }
+
 func (loop *training_loop1_t) backward_pass() {
     fmt.Printf("[Step %d] Computing gradients with ZeRO-3\n", loop.state.step)
 }
+
 func (loop *training_loop1_t) optimizer_step() {
     loop.state.step += 1
     progress := float(loop.state.step) / 500000.0
     cosine_factor := (1.0 + math.Cos(3.14159 * progress)) / 2.0
     loop.state.learning_rate = 1e-4 * cosine_factor
 }
+
 func (loop *training_loop1_t) save_checkpoint() {
     loop.checkpoint_mgr.saved_checkpoints += 1
     fmt.Printf("[checkpoint %d] Saved at step %d\n",
@@ -214,9 +226,11 @@ type communication_optimizer struct {
     use_gradient_compression: bool
     overlap_communication: bool
 }
+
 func (co *communication_optimizer) all_reduce_grads_async(grad_size: int64): {
     fmt.Printf("  [COMM] All-reduce gradients (%d MB) asynchronously\n", grad_size / (1024 * 1024))
 }
+
 func (co *communication_optimizer) broadcast_weights_async(weight_size: int64): {
     fmt.Printf("  [COMM] Broadcast weights (%d MB) asynchronously\n", weight_size / (1024 * 1024))
 }
@@ -227,17 +241,20 @@ type performance_monitor struct {
     interconnect_utilization: float
     memory_usage_percent: float
 }
+
 func (pm *performance_monitor) compute_throughput(batch_size: int, seq_len: int,
                                                elapsed_seconds: float): float {
     tokens_per_batch := batch_size * seq_len
     throughput := float(tokens_per_batch) / elapsed_seconds
     return throughput
 }
+
 func (pm *performance_monitor) compute_flops(params: int64, batch_size: int,
                                           seq_len: int): int64 {
     flops := 2 * params * int64(batch_size) * int64(seq_len)
     return flops
 }
+
 func (pm *performance_monitor) log_performance(state: training_state) {
     fmt.Printf("\n[Step %d] Performance Metrics:\n", state.step)
     fmt.Printf("  Tokens/sec: %.0f\n", state.tokens_per_second)

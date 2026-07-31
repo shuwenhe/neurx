@@ -3,7 +3,6 @@ use neurx.model.llm.gpt.{
     model_config, language_model, model_output,
     gpt_forward, gpt_generate_greedy
 }
-
 func be_exp(float x) float {
     if x > 20.0 { return 485165195.4 }
     if x < -20.0 { return 0.0 }
@@ -36,7 +35,6 @@ func be_log(float x) float {
     }
     s + adj
 }
-
 struct logprob_result {
     float total_logprob
     int num_tokens

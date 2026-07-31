@@ -2,7 +2,6 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_env_set, create_directory, file_exists}
 use neurx.runtime.process.{exec_process, exec_process_async, wait_process}
 use neurx.strings.{trim, string_concat, starts_with}
-
 struct launcher_config {
     int num_gpus
     string master_addr
@@ -24,7 +23,6 @@ struct gpu_info {
     int memory_mb
     bool available
 }
-
 func parse_args() launcher_config {
     string num_gpus_str = runtime_env_get("NUM_GPUS", "1")
     int num_gpus = parse_int(num_gpus_str)

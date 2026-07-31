@@ -1,5 +1,4 @@
 package neurx.model.multimodal.minimal_fusion
-
 struct minimal_fusion_state {
     string name
     string family
@@ -10,7 +9,6 @@ struct minimal_fusion_state {
     float train_accuracy
     bool trained
 }
-
 func new_minimal_fusion_state() minimal_fusion_state {
     minimal_fusion_state {
         name: "minimal_fusion",

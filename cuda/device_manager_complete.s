@@ -1,5 +1,4 @@
 package neurx.cuda
-
 struct cuda_device {
     int id
     string name
@@ -25,7 +24,6 @@ struct cuda_context {
     map[string]uint64 allocations
     map[string]int allocation_sizes
 }
-
 func get_device_count() int {
     result := cuda_runtime_call("cudaGetDeviceCount", [], 0)
     return result.int_value

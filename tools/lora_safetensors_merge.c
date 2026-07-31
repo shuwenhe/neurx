@@ -8,11 +8,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-
 #ifndef _FILE_OFFSET_BITS
 #define _FILE_OFFSET_BITS 64
 #endif
-
 typedef struct {
     char name[512];
     char dtype[16];
@@ -21,51 +19,42 @@ typedef struct {
     uint64_t begin;
     uint64_t end;
 } tensor_info;
-
 typedef struct {
     char *header;
     uint64_t header_len;
     uint64_t data_base;
 } st_index;
-
 static uint64_t read_u64_le(const unsigned char *p) {
     uint64_t v = 0;
     for (int i = 7; i >= 0; i--) v = (v << 8) | p[i];
     return v;
 }
-
 static uint16_t read_u16_le(const unsigned char *p) {
     return (uint16_t)p[0] | ((uint16_t)p[1] << 8);
 }
-
 static void write_u16_le(unsigned char *p, uint16_t v) {
     p[0] = (unsigned char)(v & 255);
     p[1] = (unsigned char)(v >> 8);
 }
-
 static float u32_to_f32(uint32_t bits) {
     float out;
     memcpy(&out, &bits, sizeof(out));
     return out;
 }
-
 static uint32_t f32_to_u32(float value) {
     uint32_t out;
     memcpy(&out, &value, sizeof(out));
     return out;
 }
-
 static float bf16_to_f32(uint16_t v) {
     return u32_to_f32((uint32_t)v << 16);
 }
-
 static uint16_t f32_to_bf16(float value) {
     uint32_t bits = f32_to_u32(value);
     uint32_t lsb = (bits >> 16) & 1;
     bits += 0x7fff + lsb;
     return (uint16_t)(bits >> 16);
 }
-
 static float f16_to_f32(uint16_t h) {
     uint32_t sign = (uint32_t)(h & 0x8000) << 16;
     uint32_t exp = (h >> 10) & 0x1f;
@@ -84,7 +73,6 @@ static float f16_to_f32(uint16_t h) {
     exp = exp + (127 - 15);
     return u32_to_f32(sign | (exp << 23) | (mant << 13));
 }
-
 static uint16_t f32_to_f16(float value) {
     uint32_t x = f32_to_u32(value);
     uint32_t sign = (x >> 16) & 0x8000;
@@ -94,14 +82,12 @@ static uint16_t f32_to_f16(float value) {
     if (exp >= 31) return (uint16_t)(sign | 0x7c00);
     return (uint16_t)(sign | ((uint32_t)exp << 10) | ((mant + 0x1000) >> 13));
 }
-
 static int dtype_size(const char *dtype) {
     if (strcmp(dtype, "F32") == 0) return 4;
     if (strcmp(dtype, "BF16") == 0) return 2;
     if (strcmp(dtype, "F16") == 0) return 2;
     return 0;
 }
-
 static int mkdir_p(const char *path) {
     char tmp[1024];
     size_t len = strlen(path);
@@ -117,7 +103,6 @@ static int mkdir_p(const char *path) {
     if (mkdir(tmp, 0755) != 0 && errno != EEXIST) return -1;
     return 0;
 }
-
 static int copy_file(const char *src, const char *dst) {
     FILE *in = fopen(src, "rb");
     FILE *out = NULL;
@@ -143,11 +128,9 @@ static int copy_file(const char *src, const char *dst) {
     fclose(in);
     return 0;
 }
-
 static void path_join(char *out, size_t cap, const char *a, const char *b) {
     snprintf(out, cap, "%s/%s", a, b);
 }
-
 static int copy_model_dir(const char *src_dir, const char *dst_dir) {
     DIR *dir = opendir(src_dir);
     struct dirent *ent;
@@ -171,7 +154,6 @@ static int copy_model_dir(const char *src_dir, const char *dst_dir) {
     closedir(dir);
     return 0;
 }
-
 static int load_st_index(const char *path, st_index *idx) {
     FILE *fp = fopen(path, "rb");
     unsigned char len_buf[8];
@@ -196,7 +178,6 @@ static int load_st_index(const char *path, st_index *idx) {
     fclose(fp);
     return 0;
 }
-
 static char *find_quoted_name(const char *header, const char *name) {
     size_t n = strlen(name);
     const char *p = header;
@@ -206,7 +187,6 @@ static char *find_quoted_name(const char *header, const char *name) {
     }
     return NULL;
 }
-
 static int object_span(char *name_quote, char **obj_begin, char **obj_end) {
     char *p = strchr(name_quote, ':');
     int depth = 0;
@@ -236,7 +216,6 @@ static int object_span(char *name_quote, char **obj_begin, char **obj_end) {
     }
     return -1;
 }
-
 static int extract_dtype(char *begin, char *end, char out[16]) {
     char *p = strstr(begin, "\"dtype\"");
     if (!p || p >= end) return -1;
@@ -251,7 +230,6 @@ static int extract_dtype(char *begin, char *end, char out[16]) {
     out[q - p] = 0;
     return 0;
 }
-
 static int parse_int_list(char *p, char *end, long *out, int maxn, int *count) {
     int n = 0;
     while (p < end && *p != '[') p++;
@@ -266,13 +244,11 @@ static int parse_int_list(char *p, char *end, long *out, int maxn, int *count) {
     *count = n;
     return 0;
 }
-
 static int extract_shape(char *begin, char *end, long *shape, int *rank) {
     char *p = strstr(begin, "\"shape\"");
     if (!p || p >= end) return -1;
     return parse_int_list(p, end, shape, 8, rank);
 }
-
 static int extract_offsets(char *begin, char *end, uint64_t *a, uint64_t *b) {
     long vals[2];
     int n = 0;
@@ -283,7 +259,6 @@ static int extract_offsets(char *begin, char *end, uint64_t *a, uint64_t *b) {
     *b = (uint64_t)vals[1];
     return 0;
 }
-
 static int st_find_tensor(st_index *idx, const char *name, tensor_info *out) {
     char *q = find_quoted_name(idx->header, name);
     char *begin = NULL;
@@ -296,13 +271,11 @@ static int st_find_tensor(st_index *idx, const char *name, tensor_info *out) {
     if (extract_offsets(begin, end, &out->begin, &out->end) != 0) return -1;
     return 0;
 }
-
 static long numel(const tensor_info *t) {
     long n = 1;
     for (int i = 0; i < t->rank; i++) n *= t->shape[i];
     return n;
 }
-
 static float *read_tensor_as_f32(const char *path, const st_index *idx, const tensor_info *t) {
     int ds = dtype_size(t->dtype);
     long n = numel(t);
@@ -339,7 +312,6 @@ fail:
     free(out);
     return NULL;
 }
-
 static int write_tensor_from_f32(FILE *fp, const st_index *idx, const tensor_info *t, const float *data) {
     int ds = dtype_size(t->dtype);
     long n = numel(t);
@@ -372,7 +344,6 @@ static int write_tensor_from_f32(FILE *fp, const st_index *idx, const tensor_inf
     free(raw);
     return 0;
 }
-
 static void peft_to_base_name(const char *a_name, char *base, size_t cap) {
     const char *p = a_name;
     const char *prefix = "base_model.model.";
@@ -383,13 +354,11 @@ static void peft_to_base_name(const char *a_name, char *base, size_t cap) {
     if (suffix) strcpy(suffix, ".weight");
     if (strncmp(base, "model.model.", 12) == 0) memmove(base, base + 6, strlen(base + 6) + 1);
 }
-
 static void a_to_b_name(const char *a_name, char *b_name, size_t cap) {
     snprintf(b_name, cap, "%s", a_name);
     char *p = strstr(b_name, ".lora_A.weight");
     if (p) memcpy(p, ".lora_B.weight", 14);
 }
-
 static int merge_one(const char *adapter_path, st_index *adapter_idx, const char *out_model_path,
                      st_index *base_idx, const char *a_name, double alpha, double rank_override) {
     char b_name[512], base_name[512];
@@ -441,7 +410,6 @@ done:
     free(w);
     return rc;
 }
-
 static int enumerate_and_merge(const char *adapter_path, st_index *adapter_idx, const char *out_model_path,
                                st_index *base_idx, double alpha, double rank_override) {
     char *p = adapter_idx->header;
@@ -462,7 +430,6 @@ static int enumerate_and_merge(const char *adapter_path, st_index *adapter_idx, 
     }
     return merged;
 }
-
 int main(int argc, char **argv) {
     if (argc < 4) {
         fprintf(stderr, "usage: %s <base_model_dir> <adapter_dir> <out_dir> [alpha] [rank]\n", argv[0]);

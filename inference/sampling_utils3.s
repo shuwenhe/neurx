@@ -1,5 +1,4 @@
 package neurx.inference.sampling
-
 func normalize([]float arr) []float {
     float sum = 0.0
     for v in arr { sum = sum + v }

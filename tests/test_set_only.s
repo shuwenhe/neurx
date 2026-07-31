@@ -1,12 +1,10 @@
 package main
-
-struct Data {
+struct data {
     int value
 }
-
 func main() {
     println("=== Test: Can we SET fields? ===")
-    Data obj
+    data obj
     obj.value = 42
     println("Set obj.value = 42")
     println("Test complete")

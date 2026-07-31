@@ -17,7 +17,6 @@ use neurx.tensor.tensor
 use neurx.tensor.new
 use neurx.tensor.transpose
 use neurx.transformer.{transformer, transformer_config, transformer_init, transformer_forward, transformer_state_dict, transformer_load_state_dict}
-
 struct two_t_training_batch {
     tensor input_ids
     tensor target_ids
@@ -80,7 +79,6 @@ struct two_t_runtime_state {
     int train_tokens_seen
     int valid_tokens_seen
 }
-
 func copy_float([]float values) []float {
     int n = len(values)
     []float out = []float{cap: n}

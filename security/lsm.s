@@ -8,7 +8,6 @@ int CAP_ADMIN        = 255
 int LSM_ALLOW = 0
 int LSM_DENY  = 1
 int LSM_AUDIT = 2
-
 struct security_context {
     int    agent_pid
     string agent_name
@@ -24,7 +23,6 @@ struct lsm_state {
     bool               enforcing
     []string           audit_log
 }
-
 func new_lsm_state(enforcing bool) lsm_state {
     return lsm_state{
         contexts:  [],

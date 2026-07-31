@@ -1,5 +1,4 @@
 package neurx.distributed.data_parallel
-
 struct data_parallel_config {
     int world_size
     int rank
@@ -34,7 +33,6 @@ struct distributed_training_metrics {
     int gradient_overflows
     float average_bucket_size
 }
-
 func init_data_parallel(
     int world_size,
     int rank,

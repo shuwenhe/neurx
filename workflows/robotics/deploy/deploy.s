@@ -1,11 +1,9 @@
 package neurx.workflows.robotics.deploy
-
 struct robotics_deploy_state {
     string target_name
     bool running
     bool emergency_stop
 }
-
 func new_robotics_deploy_state(string target_name) robotics_deploy_state {
     robotics_deploy_state {
         target_name: target_name,

@@ -2,7 +2,6 @@ package neurx.registry.skill_registry
 use neurx.agent.observation
 use neurx.agent.skill_schema
 use neurx.runtime.io.{runtime_write_text_file}
-
 struct agent_skill_registry_state {
     []agent_skill_record records
     int active_index
@@ -10,7 +9,6 @@ struct agent_skill_registry_state {
     int promote_count
     int retire_count
 }
-
 func new_agent_skill_registry_state() agent_skill_registry_state {
     agent_skill_registry_state {
         records: [],

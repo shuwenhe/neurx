@@ -1,7 +1,6 @@
 package neurx.pretrain.llm.real_main_training
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, runtime_write_text_file}
 use neurx.pretrain.llm.real_training_loop.{run_training_loop}
-
 struct real_training_config {
     string manifest_path
     string data_dir
@@ -13,7 +12,6 @@ struct real_training_config {
     int max_steps
     float learning_rate
 }
-
 func default_training_config() real_training_config {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     let data_root = runtime_env_get("NEURX_PRETRAIN_DATA_DIR", project_root + "/dataset/pretrain")

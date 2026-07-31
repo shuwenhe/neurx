@@ -2,7 +2,6 @@ package neurx.scripts.convert_medmcqa
 use std.io.println
 use neurx.runtime.io.{runtime_env_get, runtime_read_text_file, runtime_write_text_file,
                        runtime_file_exists, runtime_make_dirs, runtime_run_command_output}
-
 struct question_data {
     string qid
     string question
@@ -17,7 +16,6 @@ struct sft_record {
     string input
     string output
 }
-
 func parse_jsonl_question(string line) question_data {
     question_data q = question_data{
         qid: "",

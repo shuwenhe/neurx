@@ -1,13 +1,8 @@
 #pragma once
-
 #include <cuda_runtime.h>
-
 #include <cmath>
-
 namespace neurx::cuda::kernels {
-
 inline int blocks(int count) { return (count + 255) / 256; }
-
 __global__ void embedding(const int32_t* ids, const float* weight, float* output,
                           int tokens, int hidden) {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -15,7 +10,6 @@ __global__ void embedding(const int32_t* ids, const float* weight, float* output
     output[index] = weight[static_cast<long long>(ids[index / hidden]) * hidden + index % hidden];
   }
 }
-
 __global__ void rms_norm(const float* input, const float* weight, float* output,
                          int rows, int hidden, float epsilon) {
   const int row = blockIdx.x * blockDim.x + threadIdx.x;
@@ -31,17 +25,14 @@ __global__ void rms_norm(const float* input, const float* weight, float* output,
     output[index] = input[index] * inverse * weight[column];
   }
 }
-
 __global__ void add_in_place(float* target, const float* value, int count) {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   if (index < count) target[index] += value[index];
 }
-
 __global__ void add_bias(float* values, const float* bias, int rows, int columns) {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   if (index < rows * columns) values[index] += bias[index % columns];
 }
-
 __global__ void rope_half(float* values, int tokens, int heads, int head_dimension,
                           int position_offset, float theta) {
   const int half = head_dimension / 2;
@@ -60,7 +51,6 @@ __global__ void rope_half(float* values, int tokens, int heads, int head_dimensi
   row[frequency] = first * cosine - second * sine;
   row[frequency + half] = second * cosine + first * sine;
 }
-
 __global__ void attention_gqa(const float* query, const float* key_cache,
                               const float* value_cache, float* output,
                               int tokens, int past_tokens, int query_heads,
@@ -105,10 +95,8 @@ __global__ void attention_gqa(const float* query, const float* key_cache,
     output[(static_cast<long long>(token) * query_heads + query_head) * head_dimension + feature] = result;
   }
 }
-
 __global__ void swiglu_in_place(float* gate, const float* up, int count) {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   if (index < count) gate[index] = gate[index] / (1.0F + expf(-gate[index])) * up[index];
 }
-
 }

@@ -1,7 +1,5 @@
 package main
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
-
 func resolve_path(string root, string rel) string {
     if root == "" {
         return rel
@@ -22,12 +20,10 @@ func print_path(string root, string rel) bool {
 
 func main() {
     string root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/neurx")
-
     println("========================================")
     println("NeurX framework stack verification (S)")
     println("========================================")
     println("root: " + root)
-
     println("")
     println("PyTorch-like runtime")
     println("  Tensor, autograd, dispatcher, and CUDA abstraction are represented in NeurX.")
@@ -42,7 +38,6 @@ func main() {
     }
     println("  status: " + pytorch_status + " (" + int_to_string(pytorch_ready) + "/4)")
     println("  next: Gap to close next: unify dispatcher registration with native device memory and CUDA backend entrypoints.")
-
     println("")
     println("Megatron-LM-like stack")
     println("  Transformer core and parallel-training layout are present in NeurX.")
@@ -58,7 +53,6 @@ func main() {
     }
     println("  status: " + megatron_status + " (" + int_to_string(megatron_ready) + "/5)")
     println("  next: Gap to close next: turn TP/PP/MoE wiring into a single training orchestration path.")
-
     println("")
     println("DeepSpeed-like stack")
     println("  ZeRO, checkpointing, and FSDP scaffolding are present in NeurX.")
@@ -74,7 +68,6 @@ func main() {
     }
     println("  status: " + deepspeed_status + " (" + int_to_string(deepspeed_ready) + "/5)")
     println("  next: Gap to close next: add real offload, ZeRO-2/3, and distributed backend integration.")
-
     println("")
     println("vLLM-like serving stack")
     println("  Paged KV, prefix cache, continuous batching, and serving runtime are present in NeurX.")
@@ -90,7 +83,6 @@ func main() {
     }
     println("  status: " + vllm_status + " (" + int_to_string(vllm_ready) + "/5)")
     println("  next: Gap to close next: make the scheduler, KV manager, and OpenAI SSE flow one streaming service.")
-
     println("")
     println("TVM-like compiler stack")
     println("  Compile, lowering, fusion, and executor layers are present in NeurX.")
@@ -106,7 +98,6 @@ func main() {
     }
     println("  status: " + tvm_status + " (" + int_to_string(tvm_ready) + "/5)")
     println("  next: Gap to close next: add autotuning, backend-specialized codegen, and stronger IR cost modeling.")
-
     println("")
     println("ONNX Runtime-like stack")
     println("  Model loading and runtime data structures are present in NeurX.")
@@ -122,7 +113,6 @@ func main() {
     }
     println("  status: " + onnx_status + " (" + int_to_string(onnx_ready) + "/5)")
     println("  next: Gap to close next: add ONNX import, graph optimization, and portable backend lowering.")
-
     int ready_groups = 0
     if pytorch_ready == 4 { ready_groups = ready_groups + 1 }
     if megatron_ready == 5 { ready_groups = ready_groups + 1 }
@@ -130,7 +120,6 @@ func main() {
     if vllm_ready == 5 { ready_groups = ready_groups + 1 }
     if tvm_ready == 5 { ready_groups = ready_groups + 1 }
     if onnx_ready == 5 { ready_groups = ready_groups + 1 }
-
     println("")
     println("summary: " + int_to_string(ready_groups) + "/6 buckets complete")
     println("status: PASS")
@@ -162,13 +151,11 @@ func int_to_string(int n) string {
     if n < 0 {
         return "-" + int_to_string(0 - n)
     }
-
     string result = ""
     int remaining = n
     while remaining >= 10 {
         int digit = remaining - ((remaining / 10) * 10)
         remaining = remaining / 10
-
         if digit == 0 { result = "0" + result }
         if digit == 1 { result = "1" + result }
         if digit == 2 { result = "2" + result }
@@ -180,7 +167,6 @@ func int_to_string(int n) string {
         if digit == 8 { result = "8" + result }
         if digit == 9 { result = "9" + result }
     }
-
     if remaining == 0 { result = "0" + result }
     if remaining == 1 { result = "1" + result }
     if remaining == 2 { result = "2" + result }
@@ -191,6 +177,5 @@ func int_to_string(int n) string {
     if remaining == 7 { result = "7" + result }
     if remaining == 8 { result = "8" + result }
     if remaining == 9 { result = "9" + result }
-
     result
 }

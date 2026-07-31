@@ -1,5 +1,4 @@
 package neurx.posttrain.rlhf.ppo_trainer
-
 struct ppo_step {
     int step_id
     []float tokens
@@ -83,7 +82,6 @@ struct ppo_training_result {
     float ratio_mean
     float advantage_mean
 }
-
 func collect_trajectory(
     string prompt,
     ppo_config config

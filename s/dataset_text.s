@@ -1,6 +1,5 @@
 package neurx.dataset_text
 use neurx.strings
-
 struct text_corpus_state {
     string path
     string raw_text
@@ -11,7 +10,6 @@ struct text_corpus_state {
     int char_count
     int token_count
 }
-
 func copy_ints([]int values) []int {
     []int out = []int{cap: len(values)}
     int i = 0

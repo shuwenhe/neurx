@@ -1,11 +1,6 @@
 package neurx.posttrain.inference.vllm
-
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
-
-// vLLM integration for fast inference during RL training
-// Implements PagedAttention and continuous batching
-
 struct vllm_config {
     int max_num_batched_tokens
     int max_num_seqs
@@ -40,7 +35,7 @@ struct vllm_block {
 }
 
 struct vllm_block_table {
-    [][]int seq_block_tables  // seq_id -> block_ids
+    [][]int seq_block_tables
     []vllm_block blocks
     int num_free_gpu_blocks
     int num_free_cpu_blocks
@@ -60,7 +55,6 @@ struct vllm_engine {
     []vllm_sequence sequences
     int next_seq_id
 }
-
 func new_vllm_config() vllm_config {
     vllm_config {
         max_num_batched_tokens: 2048,
@@ -78,9 +72,7 @@ func new_vllm_config() vllm_config {
 }
 
 func vllm_allocate_block(vllm_block_table table, bool is_gpu) int {
-    // Allocate a new block from free pool
     if is_gpu && table.num_free_gpu_blocks > 0 {
-        // Find free GPU block
         int i = 0
         while i < table.blocks.len {
             if table.blocks[i].is_gpu && table.blocks[i].ref_count == 0 {
@@ -91,7 +83,6 @@ func vllm_allocate_block(vllm_block_table table, bool is_gpu) int {
             i = i + 1
         }
     } else if !is_gpu && table.num_free_cpu_blocks > 0 {
-        // Find free CPU block
         int i = 0
         while i < table.blocks.len {
             if !table.blocks[i].is_gpu && table.blocks[i].ref_count == 0 {
@@ -102,14 +93,12 @@ func vllm_allocate_block(vllm_block_table table, bool is_gpu) int {
             i = i + 1
         }
     }
-    
-    return -1  // No free blocks
+    return -1
 }
 
 func vllm_free_block(vllm_block_table table, int block_id) {
     if block_id >= 0 && block_id < table.blocks.len {
         table.blocks[block_id].ref_count = table.blocks[block_id].ref_count - 1
-        
         if table.blocks[block_id].ref_count == 0 {
             if table.blocks[block_id].is_gpu {
                 table.num_free_gpu_blocks = table.num_free_gpu_blocks + 1
@@ -123,46 +112,32 @@ func vllm_free_block(vllm_block_table table, int block_id) {
 func vllm_schedule_sequences(
     vllm_engine engine
 ) vllm_scheduler_output {
-    // Continuous batching scheduler
-    // Select sequences to process based on available resources
-    
     []int scheduled = []int{cap: engine.config.max_num_seqs}
     []int num_tokens = []int{cap: engine.config.max_num_seqs}
     int total_tokens = 0
     bool is_prompt = false
-    
     int i = 0
     while i < engine.sequences.len {
         vllm_sequence seq = engine.sequences[i]
-        
         if seq.finished {
             i = i + 1
             continue
         }
-        
-        // Check if this is prompt phase or generation phase
         bool seq_is_prompt = seq.output_len == 0
-        
-        // Calculate tokens needed
-        int tokens_needed = 1  // Default: 1 token for generation
+        int tokens_needed = 1
         if seq_is_prompt {
             tokens_needed = seq.prompt_len
         }
-        
-        // Check if we can fit this sequence
         if total_tokens + tokens_needed <= engine.config.max_num_batched_tokens {
             scheduled[scheduled.len] = seq.seq_id
             num_tokens[num_tokens.len] = tokens_needed
             total_tokens = total_tokens + tokens_needed
-            
             if seq_is_prompt {
                 is_prompt = true
             }
         }
-        
         i = i + 1
     }
-    
     vllm_scheduler_output {
         scheduled_seq_ids: scheduled,
         num_tokens_per_seq: num_tokens,
@@ -179,66 +154,43 @@ func vllm_paged_attention(
     []int context_lens,
     int block_size
 ) tensor {
-    // PagedAttention kernel
-    // Efficient attention using block-based KV cache
-    
     int batch_size = query.shape[0]
     int num_heads = query.shape[1]
     int head_dim = query.shape[2]
-    
-    // Output tensor
     tensor output = tensor_ops.zeros([batch_size, num_heads, head_dim])
-    
     int b = 0
     while b < batch_size {
         []int blocks = block_tables[b]
         int context_len = context_lens[b]
-        
-        // Compute attention over blocks
         int num_blocks = (context_len + block_size - 1) / block_size
-        
         []tensor attn_scores = []tensor{cap: num_blocks}
         int block_idx = 0
-        
         while block_idx < num_blocks {
             int block_id = blocks[block_idx]
-            
-            // Get K, V from cache for this block
             tensor k_block = tensor_ops.index_select(
                 key_cache,
                 0,
                 block_id
             )
-            
             tensor v_block = tensor_ops.index_select(
                 value_cache,
                 0,
                 block_id
             )
-            
-            // Compute attention score for this block
             tensor q_b = tensor_ops.index_select(query, 0, b)
             tensor score = tensor_ops.matmul(
                 q_b,
                 tensor_ops.transpose(k_block, -2, -1)
             )
-            
-            // Scale
             float scale = 1.0 / (head_dim * 1.0)
             score = tensor_ops.mul_scalar(score, scale)
-            
             attn_scores[block_idx] = score
             block_idx = block_idx + 1
         }
-        
-        // Concatenate scores and apply softmax
         tensor all_scores = tensor_ops.concat(attn_scores, -1)
         tensor attn_weights = tensor_ops.softmax(all_scores, -1)
-        
-        // Apply attention weights to values
         tensor attn_output = tensor_ops.zeros([num_heads, head_dim])
         block_idx = 0
-        
         while block_idx < num_blocks {
             int block_id = blocks[block_idx]
             tensor v_block = tensor_ops.index_select(
@@ -246,8 +198,6 @@ func vllm_paged_attention(
                 0,
                 block_id
             )
-            
-            // Extract weights for this block
             int start = block_idx * block_size
             int end = start + block_size
             tensor weights_block = tensor_ops.slice(
@@ -256,19 +206,13 @@ func vllm_paged_attention(
                 start,
                 end
             )
-            
             tensor contrib = tensor_ops.matmul(weights_block, v_block)
             attn_output = tensor_ops.add(attn_output, contrib)
-            
             block_idx = block_idx + 1
         }
-        
-        // Store output
         output = tensor_ops.index_copy(output, 0, b, attn_output)
-        
         b = b + 1
     }
-    
     output
 }
 
@@ -279,9 +223,6 @@ func vllm_generate(
     float temperature,
     float top_p
 ) [][]int {
-    // Generate completions for multiple prompts using vLLM
-    
-    // Create sequences
     int i = 0
     while i < prompts.len {
         vllm_sequence seq = vllm_sequence {
@@ -295,34 +236,16 @@ func vllm_generate(
             top_k: 0,
             finished: false,
         }
-        
         engine.sequences[engine.sequences.len] = seq
         engine.next_seq_id = engine.next_seq_id + 1
-        
         i = i + 1
     }
-    
-    // Generation loop
     bool all_finished = false
     while !all_finished {
-        // Schedule sequences
         vllm_scheduler_output sched = vllm_schedule_sequences(engine)
-        
         if sched.scheduled_seq_ids.len == 0 {
             break
         }
-        
-        // Prepare batch
-        // (Implementation would include building input tensors,
-        //  managing KV cache, etc.)
-        
-        // Run model inference
-        // tensor logits = vllm_forward_batch(engine, sched)
-        
-        // Sample next tokens
-        // Update sequences
-        
-        // Check if all sequences are finished
         all_finished = true
         int j = 0
         while j < engine.sequences.len {
@@ -333,22 +256,17 @@ func vllm_generate(
             j = j + 1
         }
     }
-    
-    // Collect outputs
     [][]int outputs = [][]int{cap: prompts.len}
     i = 0
     while i < engine.sequences.len {
         outputs[i] = engine.sequences[i].token_ids
         i = i + 1
     }
-    
     outputs
 }
 
 func new_vllm_engine(module model, vllm_config config) vllm_engine {
-    // Initialize block table
     []vllm_block blocks = []vllm_block{cap: config.num_gpu_blocks + config.num_cpu_blocks}
-    
     int i = 0
     while i < config.num_gpu_blocks {
         blocks[i] = vllm_block {
@@ -359,7 +277,6 @@ func new_vllm_engine(module model, vllm_config config) vllm_engine {
         }
         i = i + 1
     }
-    
     while i < config.num_gpu_blocks + config.num_cpu_blocks {
         blocks[i] = vllm_block {
             block_id: i,
@@ -369,14 +286,12 @@ func new_vllm_engine(module model, vllm_config config) vllm_engine {
         }
         i = i + 1
     }
-    
     vllm_block_table table = vllm_block_table {
         seq_block_tables: [][]int{},
         blocks: blocks,
         num_free_gpu_blocks: config.num_gpu_blocks,
         num_free_cpu_blocks: config.num_cpu_blocks,
     }
-    
     vllm_engine {
         model: model,
         config: config,

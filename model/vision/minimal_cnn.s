@@ -1,5 +1,4 @@
 package neurx.model.vision.minimal_cnn
-
 struct minimal_cnn_state {
     string name
     string family
@@ -13,7 +12,6 @@ struct minimal_cnn_state {
     float train_accuracy
     bool trained
 }
-
 func new_minimal_cnn_state() minimal_cnn_state {
     []float weight = []float{cap: 3}
     weight[0] = 0.5

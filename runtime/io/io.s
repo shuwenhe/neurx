@@ -5,7 +5,6 @@ use std.fs.write_text_file as fs_write_text_file
 use std.process.run_process
 use std.process.run_process_output
 use std.vec.vec
-
 struct json_value {
 }
 
@@ -14,7 +13,6 @@ struct runtime_command_result {
     int exit_code
     string error
 }
-
 func trim(string s) string {
     int i = 0
     while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {

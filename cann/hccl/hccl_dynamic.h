@@ -1,11 +1,8 @@
 #pragma once
-
 #include <cstddef>
 #include <cstdint>
 #include <dlfcn.h>
-
 namespace neurx::hccl {
-
 using Result = int;
 using Comm = void*;
 using Stream = void*;
@@ -14,7 +11,6 @@ constexpr int kFloat32 = 0;
 constexpr int kFloat16 = 1;
 constexpr int kBfloat16 = 9;
 constexpr int kSum = 0;
-
 inline void* library() {
   static void* handle = [] {
     void* loaded = dlopen("libhccl.so", RTLD_NOW | RTLD_LOCAL);
@@ -23,12 +19,10 @@ inline void* library() {
   }();
   return handle;
 }
-
 template <typename Function>
 inline Function symbol(const char* name) {
   return library() ? reinterpret_cast<Function>(dlsym(library(), name)) : nullptr;
 }
-
 inline bool available() { return library() != nullptr; }
 inline Result all_reduce(const void* send, void* receive, uint64_t count,
                          int dtype, int operation, Comm comm, Stream stream) {
@@ -53,5 +47,4 @@ inline Result destroy(Comm comm) {
   auto fn = symbol<Fn>("HcclCommDestroy");
   return fn ? fn(comm) : -1;
 }
-
 }

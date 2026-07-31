@@ -1,30 +1,24 @@
 #pragma once
-
 #include <cstddef>
 #include <cstdint>
 #include <dlfcn.h>
-
 namespace neurx::cann {
-
 using Error = int;
 using Context = void*;
 using Stream = void*;
 using Event = void*;
 constexpr Error kSuccess = 0;
-
 enum class MemcpyKind : int {
   host_to_host = 0,
   host_to_device = 1,
   device_to_host = 2,
   device_to_device = 3,
 };
-
 enum class MallocPolicy : int {
   huge_first = 0,
   huge_only = 1,
   normal_only = 2,
 };
-
 inline void* acl_library() {
   static void* library = [] {
     void* handle = dlopen("libascendcl.so", RTLD_NOW | RTLD_LOCAL);
@@ -33,13 +27,11 @@ inline void* acl_library() {
   }();
   return library;
 }
-
 template <typename Function>
 inline Function acl_symbol(const char* name) {
   void* library = acl_library();
   return library ? reinterpret_cast<Function>(dlsym(library, name)) : nullptr;
 }
-
 inline bool available() { return acl_library() != nullptr; }
 inline Error init() {
   using Fn = Error (*)(const char*);
@@ -158,5 +150,4 @@ inline const char* recent_error() {
   const char* message = fn ? fn() : nullptr;
   return message ? message : "CANN ACL call failed";
 }
-
 }

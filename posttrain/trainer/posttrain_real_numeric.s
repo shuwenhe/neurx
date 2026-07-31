@@ -1,6 +1,5 @@
 package neurx.posttrain.trainer.posttrain_real_numeric
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_text_file, safetensors_writer_new, safetensors_writer_add_tensor, safetensors_writer_finish, tensor}
-
 struct named_lora_module {
     string name
     []float base_weight
@@ -28,7 +27,6 @@ struct delta_stats {
     float max_abs
     int changed_count
 }
-
 func run_posttrain_lora_sft() int {
     string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "../model/Qwen2.5-0.5B-Instruct")
     string output_dir = runtime_env_get("NEURX_POSTTRAIN_OUTPUT_DIR", "../posttrain_adapter")
@@ -68,7 +66,6 @@ func run_posttrain_lora_sft() int {
     println("Trainable parameters: " + int_to_str(trainable_params) + " (LoRA adapters only)")
     println("Dataset: materialized host-side samples; max_steps=" + int_to_str(epochs * sample_count) + "; grad_accum=1")
     println("Module build complete: 2")
-
     []named_lora_module modules = []named_lora_module{cap: num_layers * 2}
     int layer_idx = 0
     int module_idx = 0
@@ -83,7 +80,6 @@ func run_posttrain_lora_sft() int {
         module_idx = module_idx + 1
         layer_idx = layer_idx + 1
     }
-
     println("Vectorizing question")
     println("Vectorizing target q")
     println("Vectorizing target v")
@@ -125,11 +121,9 @@ func run_posttrain_lora_sft() int {
         println("step " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " loss=" + float_to_str(reported_loss, 6))
         epoch = epoch + 1
     }
-
     adapter_stats stats = compute_stats(modules)
     delta_stats deltas = compute_delta_stats(modules)
     write_adapter_checkpoint(output_dir, model_path, modules, loss_history, stats, deltas, rank, alpha, learning_rate, sample_count, epochs, v_out)
-
     println("")
     println("[Training Backend] S Runtime Materialized Trainer")
     println("[Saved] Real LoRA adapter to " + output_dir)
@@ -846,7 +840,6 @@ func run_posttrain_lora_sft_flat() int {
     println("Trainable parameters: " + int_to_str(trainable_params) + " (LoRA adapters only)")
     println("Dataset: materialized host-side samples; max_steps=" + int_to_str(epochs * sample_count) + "; grad_accum=1")
     println("Module build complete: 2")
-
     string q_name = "base_model.model.model.layers.0.self_attn.q_proj"
     string v_name = "base_model.model.model.layers.0.self_attn.v_proj"
     []float q_base_weight = init_pattern(hidden_size * hidden_size, 0.01)
@@ -860,7 +853,6 @@ func run_posttrain_lora_sft_flat() int {
     []float v_initial_a = copy_float_array(v_lora_A)
     []float v_initial_b = copy_float_array(v_lora_B)
     float scaling = alpha / (rank as float)
-
     println("Vectorizing question")
     println("Vectorizing target q")
     println("Vectorizing target v")
@@ -872,7 +864,6 @@ func run_posttrain_lora_sft_flat() int {
         []float prompt = extract_vector(prompt_data, 0, hidden_size)
         []float target_q = extract_vector(target_q_data, 0, hidden_size)
         []float target_v = extract_vector(target_v_data, 0, v_out)
-
         []float q_hidden = fill_vec(rank, 0.0)
         int r = 0
         while r < rank {
@@ -933,7 +924,6 @@ func run_posttrain_lora_sft_flat() int {
             }
             r = r + 1
         }
-
         []float v_hidden = fill_vec(rank, 0.0)
         r = 0
         while r < rank {
@@ -994,7 +984,6 @@ func run_posttrain_lora_sft_flat() int {
             }
             r = r + 1
         }
-
         float reported_loss = (q_loss + v_loss) / 2.0
         loss_history[epoch] = reported_loss
         if epoch == 0 || reported_loss < best_loss {
@@ -1003,7 +992,6 @@ func run_posttrain_lora_sft_flat() int {
         println("step " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " loss=" + float_to_str(reported_loss, 6))
         epoch = epoch + 1
     }
-
     string adapter_path = output_dir + "/adapter_model.safetensors"
     safetensors_writer writer = safetensors_writer_new(adapter_path)
     []int q_a_shape = []int{cap: 2}
@@ -1057,7 +1045,6 @@ func run_posttrain_lora_sft_flat() int {
     _ = safetensors_writer_finish(writer)
     runtime_write_text_file(output_dir + "/adapter_config.json", build_adapter_config_json(model_path, rank, alpha, learning_rate, v_out, 2))
     runtime_write_text_file(output_dir + "/training_state.json", build_simple_training_state_json(model_path, loss_history, learning_rate, sample_count, epochs))
-
     println("")
     println("[Training Backend] S Runtime Materialized Trainer")
     println("[Saved] Real LoRA adapter to " + output_dir)

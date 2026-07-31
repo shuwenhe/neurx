@@ -1,6 +1,5 @@
 package neurx.posttrain.optimizer.adamw
 use neurx.posttrain.model.model_loader.{fill_model_tensor}
-
 struct adamw_optimizer {
     []float param_groups
     [][]float param_states_m
@@ -40,7 +39,6 @@ struct learning_rate_schedule {
     string scheduler_type
     int current_step
 }
-
 func create_optimizer_config(float lr, float wd) optimizer_config {
     optimizer_config config
     config.learning_rate = lr

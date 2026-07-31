@@ -1,7 +1,6 @@
 package neurx.autograd.function
 use neurx.autograd.eqn
 use neurx.strings
-
 struct function_record {
     string name
     bool forward_enabled
@@ -32,7 +31,6 @@ struct backward_rule {
     tensor grad_b
     bool ready
 }
-
 func copy_eqns([]jaxpr_eqn values) []jaxpr_eqn {
     neurx.autograd.eqn.copy_eqns(values)
 }

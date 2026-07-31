@@ -1,5 +1,4 @@
 package neurx.attention.flash_compute
-
 struct flash_attention_config {
     int block_size_q
     int block_size_kv
@@ -30,7 +29,6 @@ struct flash_attention_state {
     vector row_sum
     flash_attention_config config
 }
-
 func new_flash_attention_config() flash_attention_config {
     return flash_attention_config {
         block_size_q: 128,

@@ -1,5 +1,4 @@
 package neurx.attention.flash_v3
-
 struct flash_attention_v3_config {
     int block_size_q
     int block_size_k
@@ -35,7 +34,6 @@ struct attention_stats {
     float mean_attention_weight
     float attention_entropy
 }
-
 func compute_block_attention(
     float* query_block,
     float* key_block,

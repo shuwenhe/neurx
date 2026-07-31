@@ -3,7 +3,6 @@ use neurx.eval.mmlu_data
 use neurx.eval.benchmark_eval
 use neurx.model.llm.gpt
 use std.io.println
-
 struct mmlu_fewshot_prompt {
     []mmlu_data.mmlu_question examples
     mmlu_data.mmlu_question test_q
@@ -16,7 +15,6 @@ struct mmlu_eval_config {
     string data_root
     string model_type
 }
-
 func default_mmlu_eval_config() mmlu_eval_config {
     mmlu_eval_config {
         num_shots: 5,

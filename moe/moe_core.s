@@ -1,5 +1,4 @@
 package neurx.moe.core
-
 struct moe_config {
     int hidden_dim
     int latent_dim
@@ -26,7 +25,6 @@ struct moe_result {
     []float expert_weights
     []float expert_load
 }
-
 func new_moe_config(
     int hidden_dim,
     int latent_dim,

@@ -2,7 +2,6 @@ package neurx.runtime.control
 use neurx.strings
 use neurx.tensor.tensor
 use neurx.strings
-
 struct control_state {
     string name
     bool cond_enabled
@@ -12,7 +11,6 @@ struct control_state {
     []string branches
     []string params
 }
-
 func join_strings([]string values) string {
     string out = ""
     int i = 0

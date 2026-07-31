@@ -2,7 +2,6 @@ package neurx.distributed.pipeline_parallel_v2
 int SCHEDULE_GPIPE = 0
 int SCHEDULE_1F1B = 1
 int SCHEDULE_INTERLEAVED_1F1B = 2
-
 struct pipeline_config {
     int pp_degree
     int pp_rank
@@ -49,7 +48,6 @@ struct pipeline_state {
     double peak_memory_bytes
     [][][][]double layer_weights
 }
-
 func pp_mod(int val, int div) int {
     if div <= 0 { return 0 }
     int r = val
@@ -109,8 +107,11 @@ func init_pipeline(pipeline_config cfg) pipeline_state {
 func execute_1f1b_step(
     ref pipeline_state state,
     [][]double initial_input,
+
     func forward_fn,
+
     func backward_fn,
+
     func loss_fn) double {
     pipeline_config cfg = state.config
     int rank = cfg.pp_rank

@@ -1,13 +1,11 @@
 package neurx.diffusion.train
 use neurx.diffusion.config
-
 struct diffusion_train_state {
     diffusion_config cfg
     int step
     float loss
     bool finished
 }
-
 func new_diffusion_train_state(diffusion_config cfg) diffusion_train_state {
     diffusion_train_state {
         cfg: cfg,

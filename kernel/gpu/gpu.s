@@ -9,7 +9,6 @@ int JOB_PENDING   = 0
 int JOB_RUNNING   = 1
 int JOB_DONE      = 2
 int JOB_ERROR     = 3
-
 struct gpu_device {
     int    gpu_id
     int    gpu_type
@@ -60,7 +59,6 @@ struct gpu_state {
     int           next_job_id
     int           next_fence_id
 }
-
 func new_gpu_state() gpu_state {
     return gpu_state{
         devices:         [],

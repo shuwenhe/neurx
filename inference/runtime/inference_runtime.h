@@ -1,5 +1,4 @@
 #pragma once
-
 #include <algorithm>
 #include <cstdint>
 #include <map>
@@ -7,13 +6,10 @@
 #include <string>
 #include <utility>
 #include <vector>
-
 namespace neurx::inference {
-
 enum class Backend { cuda, ascend, cpu };
 enum class Phase { prefill, decode };
 enum class RequestState { queued_prefill, prefilling, queued_decode, decoding, finished };
-
 inline const char* backend_name(Backend backend) {
   switch (backend) {
     case Backend::cuda: return "cuda";
@@ -22,7 +18,6 @@ inline const char* backend_name(Backend backend) {
   }
   return "unknown";
 }
-
 struct backend_capabilities {
   Backend backend;
   bool fp16;
@@ -34,7 +29,6 @@ struct backend_capabilities {
   const char* collective;
   const char* kv_transfer;
 };
-
 inline backend_capabilities capabilities(Backend backend) {
   switch (backend) {
     case Backend::cuda:
@@ -46,7 +40,6 @@ inline backend_capabilities capabilities(Backend backend) {
   }
   throw std::logic_error("unreachable backend");
 }
-
 struct execution_plan {
   Backend backend;
   std::string dtype;
@@ -56,7 +49,6 @@ struct execution_plan {
   bool fuse_rmsnorm_qkv;
   bool fuse_logits_sampling;
 };
-
 inline execution_plan make_execution_plan(Backend backend, bool fp8_requested) {
   const auto caps = capabilities(backend);
   return {backend,
@@ -69,14 +61,11 @@ inline execution_plan make_execution_plan(Backend backend, bool fp8_requested) {
           backend != Backend::cpu,
           backend != Backend::cpu};
 }
-
 struct batch_key {
   Backend backend = Backend::cpu;
   std::string dtype = "fp32";
-
   bool operator==(const batch_key& other) const { return backend == other.backend && dtype == other.dtype; }
 };
-
 struct request {
   std::string id;
   batch_key key;
@@ -86,27 +75,22 @@ struct request {
   int generated_tokens = 0;
   RequestState state = RequestState::queued_prefill;
 };
-
 struct work_item {
   std::string request_id;
   int token_count = 0;
 };
-
 struct batch_2 {
   Phase phase = Phase::prefill;
   batch_key key;
   std::vector<work_item> items;
   int total_tokens = 0;
 };
-
 struct runtime_config_2 {
   int max_prefill_batch_tokens = 4096;
   int max_prefill_requests = 16;
   int max_decode_batch_size = 64;
-
   bool prioritize_decode = true;
 };
-
 struct runtime_metrics {
   uint64_t prefills_started = 0;
   uint64_t decode_steps = 0;
@@ -114,7 +98,6 @@ struct runtime_metrics {
   uint64_t generated_tokens = 0;
   uint64_t kv_handoffs = 0;
 };
-
 class DisaggregatedScheduler {
  public:
   explicit DisaggregatedScheduler(runtime_config_2 config) : config_(config) {
@@ -123,7 +106,6 @@ class DisaggregatedScheduler {
       throw std::invalid_argument("inference scheduler limits must be positive");
     }
   }
-
   void submit(std::string id, batch_key key, int prompt_tokens, int max_new_tokens) {
     if (id.empty() || requests_.count(id) || prompt_tokens < 0 || max_new_tokens <= 0) {
       throw std::invalid_argument("invalid or duplicate inference request");
@@ -131,7 +113,6 @@ class DisaggregatedScheduler {
     struct request submitted{std::move(id), std::move(key), prompt_tokens, prompt_tokens, max_new_tokens};
     const std::string request_id = submitted.id;
     requests_.emplace(request_id, std::move(submitted));
-
     if (prompt_tokens == 0) {
       requests_.at(request_id).state = RequestState::queued_decode;
       decode_queue_.push_back(request_id);
@@ -139,14 +120,12 @@ class DisaggregatedScheduler {
       prefill_queue_.push_back(request_id);
     }
   }
-
   batch_2 schedule() {
     if (config_.prioritize_decode && !decode_queue_.empty()) return take_decode_batch();
     if (!prefill_queue_.empty()) return take_prefill_batch();
     if (!decode_queue_.empty()) return take_decode_batch();
     return {};
   }
-
   void complete_prefill(const std::string& id, int processed_tokens) {
     struct request& current = mutable_request(id, RequestState::prefilling);
     if (processed_tokens <= 0 || processed_tokens > current.remaining_prompt_tokens) {
@@ -163,7 +142,6 @@ class DisaggregatedScheduler {
       prefill_queue_.push_back(id);
     }
   }
-
   void complete_decode(const std::string& id, bool eos = false) {
     struct request& current = mutable_request(id, RequestState::decoding);
     ++current.generated_tokens;
@@ -176,7 +154,6 @@ class DisaggregatedScheduler {
       decode_queue_.push_back(id);
     }
   }
-
   const struct request& get_request(const std::string& id) const {
     const auto it = requests_.find(id);
     if (it == requests_.end()) throw std::out_of_range("unknown inference request");
@@ -193,17 +170,14 @@ class DisaggregatedScheduler {
     requests_.erase(existing);
   }
   const runtime_metrics& metrics() const { return metrics_; }
-
  private:
   batch_2 take_decode_batch() {
     return take_homogeneous_batch(decode_queue_, Phase::decode, config_.max_decode_batch_size, 0);
   }
-
   batch_2 take_prefill_batch() {
     return take_homogeneous_batch(prefill_queue_, Phase::prefill, config_.max_prefill_requests,
                                   config_.max_prefill_batch_tokens);
   }
-
   batch_2 take_homogeneous_batch(std::vector<std::string>& queue, Phase phase, int item_limit, int token_limit) {
     batch_2 batch;
     batch.phase = phase;
@@ -226,18 +200,15 @@ class DisaggregatedScheduler {
     queue.insert(queue.begin(), deferred.begin(), deferred.end());
     return batch;
   }
-
   struct request& mutable_request(const std::string& id, RequestState expected) {
     struct request& current = const_cast<struct request&>(this->get_request(id));
     if (current.state != expected) throw std::logic_error("inference request completed in wrong phase");
     return current;
   }
-
   runtime_config_2 config_;
   runtime_metrics metrics_;
   std::map<std::string, struct request> requests_;
   std::vector<std::string> prefill_queue_;
   std::vector<std::string> decode_queue_;
 };
-
 }

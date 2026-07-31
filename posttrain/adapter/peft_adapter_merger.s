@@ -1,6 +1,5 @@
 package neurx.posttrain.adapter.peft_adapter_merger
 use std.io.println
-
 struct peft_adapter_merge_config {
     string base_model_path
     string adapter_path
@@ -16,7 +15,6 @@ struct merge_result {
     int total_params_merged
     string output_path
 }
-
 func parse_adapter_config(string config_json) peft_adapter_merge_config {
     int rank_start = find_json_number(config_json, "\"r\"")
     float alpha_start = find_json_float(config_json, "\"lora_alpha\"")

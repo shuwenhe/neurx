@@ -1,5 +1,4 @@
 package neurx.tensor.shape
-
 func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}

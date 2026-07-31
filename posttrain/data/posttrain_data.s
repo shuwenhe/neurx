@@ -1,5 +1,4 @@
 package neurx.posttrain.data
-
 struct posttrain_data_state {
     string dataset_name
     string sample_mode
@@ -10,7 +9,6 @@ struct posttrain_data_state {
     int epoch
     bool exhausted
 }
-
 func new_posttrain_data_state(string dataset_name, string sample_mode) posttrain_data_state {
     posttrain_data_state {
         dataset_name: dataset_name,

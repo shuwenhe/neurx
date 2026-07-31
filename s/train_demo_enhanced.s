@@ -14,14 +14,13 @@ use std.tensor.{tensor_2, tensor, zeros, ones, randn, xavier_uniform, kaiming_no
 use std.ai.autograd.{AutoGradTensor, create_autograd_tensor, parameter, backward,
                       new_sgd_optimizer, new_adam_optimizer, sgd_step, adam_step,
                       zero_grad, clip_grad_norm_, clip_grad_value_}
-use std.ai.nn.modules.{Linear, embedding, layer_norm, multi_head_attention,
+use std.ai.nn.modules.{linear, embedding, layer_norm, multi_head_attention,
                          FeedForward, transformer_block, Dropout,
                          ReLU, GELU, SiLU, Sigmoid, Softmax,
                          Sequential, new_linear, new_embedding, new_layer_norm,
                          new_mha, new_feed_forward, new_transformer_block,
                          new_dropout, new_relu, new_gelu, new_silu, new_sigmoid, new_softmax,
                          new_sequential, count_parameters, print_module_summary}
-
 struct gptconfig {
     int vocab_size
     int embed_dim
@@ -40,7 +39,6 @@ struct gptconfig {
     bool mixed_precision
     string device
 }
-
 func default_model_config() gptconfig {
     gptconfig {
         vocab_size: 256,
@@ -89,7 +87,7 @@ struct gptmodel {
     embedding pos_embed
     []transformer_block blocks
     layer_norm final_norm
-    Linear output_head
+    linear output_head
     []AutoGradTensor all_parameters
 }
 
@@ -495,7 +493,6 @@ func run_training(gptconfig config) training_result {
         total_time_ms: total_time,
         saved_checkpoints: checkpoints_saved,
     }
-
 func format_step_line(int step, float loss, float best_loss,
                        float grad_norm, float lr, int time_ms) string {
     string line = ""
@@ -516,12 +513,10 @@ func format_step_line(int step, float loss, float best_loss,
     line = line + lr_str + " | "
     line = line + string(time_ms) + " ms"
     line
-
 func check_should_save(int step, int every_n) bool {
     if every_n <= 0 { return true }
     return mod(step, every_n) == 0 && step > 0
 }
-
 func save_manifest(string manifest_path, []string checkpoints) void:
     content = "# NeurX checkpoint manifest\n"
     content += "# Generated: " + get_timestamp() + "\n\n"
@@ -529,15 +524,12 @@ func save_manifest(string manifest_path, []string checkpoints) void:
     for ckpt in checkpoints:
         content += ckpt + "\n"
     write_text_file(manifest_path, content)
-
 func get_time_ms() int:
     return 0
-
 func write_text_file(string path, string content) Result[void, Error]:
     pass
 def rename_file(string old_path, string new_path) void:
     pass
-
 func main() int:
     gptconfig config = default_model_config()
     println("NeurX GPT Training - AI Native Edition")

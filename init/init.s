@@ -1,11 +1,9 @@
 package neurx.init.init
-
 struct init_boot_result {
     bool ok
     string phase
     string summary
 }
-
 func neurx_boot_phase_kernel() string {
     "kernel"
 }

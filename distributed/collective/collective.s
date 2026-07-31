@@ -17,7 +17,6 @@ int DTYPE_BFLOAT16 = 2
 int DTYPE_INT64    = 3
 int DTYPE_INT32    = 4
 int DTYPE_BOOL     = 5
-
 struct process_group {
     int pg_id
     []int ranks
@@ -65,7 +64,6 @@ struct comm_metrics {
     int num_reducescatters
     float bandwidth_efficiency
 }
-
 func new_process_group(int pg_id, []int ranks, int my_rank, int backend) process_group {
     process_group pg
     pg.pg_id = pg_id

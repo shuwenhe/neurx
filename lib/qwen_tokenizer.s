@@ -1,5 +1,4 @@
 module qwen_tokenizer
-
 struct tokenizer_config {
     string vocab_path
     string merges_path
@@ -7,7 +6,6 @@ struct tokenizer_config {
     map[string]int token_to_id
     map[int]string id_to_token
 }
-
 func init_tokenizer(string vocab_path, string merges_path) tokenizer_config {
     tokenizer_config config
     config.vocab_path = vocab_path

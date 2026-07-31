@@ -1,7 +1,6 @@
 package neurx.scheduler.lr_scheduler_moe_1t
 use neurx.strings
 use neurx.runtime.io.{io_println}
-
 struct lr_schedule_config {
     string schedule_type
     float base_lr
@@ -25,7 +24,6 @@ struct lr_scheduler_state {
     float max_lr
     float min_lr_achieved
 }
-
 func lr_scheduler_new(
     float base_lr,
     int warmup_steps,

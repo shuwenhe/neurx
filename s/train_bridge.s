@@ -1,7 +1,6 @@
 package neurx.train.bridge
 use std.fs.write_text_file as write_file
 use std.fs.read_to_string as read_file
-
 func checkpoint_save(string path, string content) bool {
     var result = write_file(path, content)
     result.is_ok()

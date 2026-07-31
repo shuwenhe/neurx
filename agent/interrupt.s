@@ -1,5 +1,4 @@
 package neurx.agent.interrupt
-
 struct agent_interrupt_state {
     bool pending
     string reason
@@ -8,7 +7,6 @@ struct agent_interrupt_state {
     bool resolved
     int interrupt_count
 }
-
 func new_agent_interrupt_state() agent_interrupt_state {
     agent_interrupt_state {
         pending: false,

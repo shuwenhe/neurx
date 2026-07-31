@@ -1,5 +1,4 @@
 package neurx.distributed.training_3d
-
 struct parallel_dims {
     int tp_degree
     int pp_degree
@@ -129,7 +128,6 @@ struct schedule_instruction {
     int stage_id
     int dependency_id
 }
-
 func create_parallel_config(
     int total_gpus,
     int tp, int pp, int dp,

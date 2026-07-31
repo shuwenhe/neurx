@@ -1,5 +1,4 @@
 package neurx.posttrain.eval
-
 struct posttrain_eval_state {
     int last_eval_step
     float reward_score
@@ -7,7 +6,6 @@ struct posttrain_eval_state {
     float safety_score
     bool has_result
 }
-
 func new_posttrain_eval_state() posttrain_eval_state {
     posttrain_eval_state {
         last_eval_step: -1,

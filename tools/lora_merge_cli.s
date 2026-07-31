@@ -1,7 +1,6 @@
 package neurx.tools.lora_merge_cli
 use neurx.runtime.io.{runtime_env_get}
 use std.io.println
-
 func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     string merger_bin = runtime_env_get("NEURX_LORA_MERGER_BIN",

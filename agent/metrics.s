@@ -1,5 +1,4 @@
 package neurx.agent.metrics
-
 struct agent_metrics_state {
     int total_steps
     int ok_steps
@@ -11,7 +10,6 @@ struct agent_metrics_state {
     int tool_fail_count
     int interrupt_count
 }
-
 func new_agent_metrics_state() agent_metrics_state {
     agent_metrics_state {
         total_steps: 0,

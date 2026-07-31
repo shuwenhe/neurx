@@ -1,7 +1,6 @@
 package neurx.distillation
 use neurx.runtime.io.{runtime_make_dirs, runtime_write_text_file}
 use neurx.strings
-
 struct distillation_config {
     float temperature
     float student_weight
@@ -31,7 +30,6 @@ struct distillation_state {
     distillation_metrics last_metrics
     string latest_bundle_path
 }
-
 func default_distillation_config() distillation_config {
     distillation_config {
         temperature: 4.0,

@@ -1,7 +1,6 @@
 package neurx.checkpoint.activation
 use neurx.tensor.tensor
 use neurx.autograd
-
 func save_checkpoint(
     checkpoint_manager mgr,
     int layer_id,

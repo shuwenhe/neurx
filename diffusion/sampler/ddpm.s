@@ -1,14 +1,12 @@
 package neurx.diffusion.sampler.ddpm
 use neurx.diffusion.noise
 use neurx.ops
-
 struct ddpm_sampler_state {
     int current_t
     int total_steps
     bool finished
     noise_schedule_state noise
 }
-
 func new_ddpm_sampler_state(noise_schedule_state noise) ddpm_sampler_state {
     int total = noise.cfg.timesteps
     ddpm_sampler_state {

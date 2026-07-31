@@ -1,6 +1,5 @@
 package neurx.data.dynamic_batching
 use neurx.strings
-
 struct packing_config:
     int max_seq_len
     int target_batch_size
@@ -17,7 +16,6 @@ struct packing_config:
     bool apply_position_ids
     bool async_packing
     int prefetch_queue_size
-
 func default_2t_packing_config() packing_config:
     packing_config cfg
     cfg.max_seq_len = 2048

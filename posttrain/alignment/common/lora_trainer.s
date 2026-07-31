@@ -1,5 +1,4 @@
 package neurx.posttrain.alignment.lora_trainer
-
 struct lora_config {
     int seq_len
     int hidden_size
@@ -22,7 +21,6 @@ struct lora_config {
     bool use_qlora
     string qlora_dtype
 }
-
 func default_lora_config() lora_config {
     lora_config {
         seq_len: 128,

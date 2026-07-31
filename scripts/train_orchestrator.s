@@ -14,7 +14,6 @@ enum TrainingScale {
     XL,
     OneT,
 }
-
 struct training_config {
     scale         TrainingScale
     numGpus       int
@@ -28,7 +27,6 @@ struct training_config {
     modelPath     string
     timestamp     string
 }
-
 func get_scale_config(scale TrainingScale) struct {
     params    int
     gpus      int
@@ -135,6 +133,7 @@ func new_train_orchestrator(scale TrainingScale, numGpus int) (*train_orchestrat
         neurxRoot: neurxRoot,
     }, nil
 }
+
 func (t *train_orchestrator) setup() error {
     t.logger.log("Setting up training environment...")
     for _, dir := range []string{t.config.logDir, t.config.checkpointDir, t.config.outputDir} {
@@ -145,6 +144,7 @@ func (t *train_orchestrator) setup() error {
     t.log_config()
     return nil
 }
+
 func (t *train_orchestrator) check_environment() error {
     t.logger.log("Checking environment...")
     numGpus, backend := t.detectGPUs()
@@ -159,6 +159,7 @@ func (t *train_orchestrator) check_environment() error {
     }
     return nil
 }
+
 func (t *train_orchestrator) Compile() error {
     t.logger.log("Compiling NeurX training module...")
     sourceFile := filepath.Join(t.config.outputDir, "neurx_training.s")
@@ -185,6 +186,7 @@ func (t *train_orchestrator) Compile() error {
     t.logger.success("Binary generated: %s", binFile)
     return nil
 }
+
 func (t *train_orchestrator) Run() error {
     t.logger.log("Starting training...")
     binFile := filepath.Join(t.config.outputDir, "neurx_train")
@@ -205,6 +207,7 @@ func (t *train_orchestrator) Run() error {
     t.logger.success("Training completed")
     return nil
 }
+
 func (t *train_orchestrator) Monitor() error {
     t.logger.log("Starting training monitor...")
     logFile := filepath.Join(t.config.logDir, "train.log")
@@ -223,6 +226,7 @@ func (t *train_orchestrator) Monitor() error {
     }
     return nil
 }
+
 func (t *train_orchestrator) detectGPUs() (int, string) {
     if command_exists("nvidia-smi") {
         result := exec_command("nvidia-smi", "--query-gpu=name", "--format=csv,noheader")
@@ -239,6 +243,7 @@ func (t *train_orchestrator) detectGPUs() (int, string) {
     }
     return 1, "CPU"
 }
+
 func (t *train_orchestrator) log_config() error {
     config := fmt.Sprintf(`╔══════════════════════════════════════════════════╗
 ║   NeurX Foundation model Training               ║
@@ -254,12 +259,12 @@ func (t *train_orchestrator) log_config() error {
     logFile := filepath.Join(t.config.logDir, "config.txt")
     return write_file(logFile, config)
 }
+
 func (t *train_orchestrator) generateTrainingSource(outputPath string) error {
     scaleConfig := get_scale_config(t.config.scale)
     source := fmt.Sprintf(`
 package main
 import "fmt"
-
 func main() {
     params := %d
     gpus := %d

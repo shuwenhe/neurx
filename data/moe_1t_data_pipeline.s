@@ -2,7 +2,6 @@ package neurx.data.moe_1t_data_pipeline
 use neurx.strings
 use neurx.runtime.io.{io_println, io_file_exists, io_read_lines, io_mkdir_recursive}
 use neurx.tokenizer.bpe_trainer.{bpe_tokenizer_state}
-
 struct data_shard_meta {
     string shard_id
     string file_path
@@ -27,7 +26,6 @@ struct data_shard_directory {
     int tokens_consumed
     int shards_completed
 }
-
 func moe_1t_load_shard_directory(string manifest_path) data_shard_directory {
     data_shard_directory dir = data_shard_directory {
         root_path: manifest_path,

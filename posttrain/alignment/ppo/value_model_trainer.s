@@ -1,5 +1,4 @@
 package neurx.posttrain.rlhf.value_model_trainer
-
 struct value_network {
     [][]float hidden_weights
     []float hidden_bias
@@ -90,7 +89,6 @@ struct value_metrics {
     float mean_target
     int step
 }
-
 func create_value_network(value_config cfg) value_network {
     int hidden_size = cfg.hidden_size
     int seq_len = cfg.seq_len

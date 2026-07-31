@@ -1,5 +1,4 @@
 package neurx.scheduler.schedulers
-
 func sched_cos_approx(float x) float {
     float x2 = x * x
     float x4 = x2 * x2
@@ -18,7 +17,6 @@ func sched_clamp(float v, float lo, float hi) float {
     }
     v
 }
-
 struct cosine_scheduler_state {
     float base_lr
     float min_lr

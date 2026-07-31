@@ -1,11 +1,9 @@
 package main
-
-struct Data {
+struct data {
     int value
 }
-
 func main() {
-    Data obj
+    data obj
     obj.value = 42
     0
 }

@@ -1,6 +1,5 @@
 package neurx.agent.workspace_tools
 use neurx.runtime.io.{runtime_env_get, runtime_read_text_file, runtime_write_text_file, runtime_file_exists, runtime_dir_exists, runtime_make_dirs, runtime_delete_path, runtime_run_command, runtime_run_command_output, runtime_shell_escape}
-
 struct agent_workspace_result {
     bool ok
     string observation
@@ -19,7 +18,6 @@ struct agent_workspace_patch_result {
     string resolved_path
     int replacements
 }
-
 func agent_workspace_root() string {
     string root = trim(runtime_env_get("NEURX_AGENT_WORKSPACE_ROOT", "."))
     if root == "" {

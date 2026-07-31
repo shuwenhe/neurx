@@ -10,7 +10,6 @@ use neurx.posttrain.core.tensor_runtime.{
     tensor_cat_s,
     tensor_to_string_s
 }
-
 struct test_result_s {
     string test_name
     bool passed
@@ -23,7 +22,6 @@ struct test_suite_s {
     int passed_tests
     int failed_tests
 }
-
 func new_test_suite_s() test_suite_s {
     test_suite_s {
         results: make([]test_result_s, 0),

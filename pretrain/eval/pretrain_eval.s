@@ -1,5 +1,4 @@
 package neurx.pretrain.eval
-
 struct pretrain_eval_state {
     int last_eval_step
     float val_loss
@@ -10,7 +9,6 @@ struct pretrain_eval_state {
     bool has_result
     bool is_best
 }
-
 func new_pretrain_eval_state() pretrain_eval_state {
     pretrain_eval_state {
         last_eval_step: -1,

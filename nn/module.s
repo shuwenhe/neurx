@@ -2,7 +2,6 @@ package neurx.nn
 use neurx.tensor.tensor
 use neurx.nn.conv
 use neurx.nn.rnn
-
 struct parameter {
     tensor value
     string name
@@ -326,7 +325,6 @@ struct module_dict {
     []string keys
     []module values
 }
-
 func copy_parameter(parameter p) parameter {
     parameter {
         value: neurx.tensor.clone(p.value),

@@ -1,13 +1,11 @@
 package neurx.compile.executor
 use neurx.runtime.compile
-
 struct executor_plan_state {
     string backend
     bool can_execute
     bool async_enabled
     int launch_count
 }
-
 func new_executor_plan_state(string backend) executor_plan_state {
     executor_plan_state {
         backend: backend,

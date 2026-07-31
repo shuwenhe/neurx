@@ -1,6 +1,5 @@
 package neurx.posttrain.reward.examples
 use neurx.posttrain.reward.factual_consistency_reward.*
-
 func create_factual_config() factual_config {
     factual_config {
         max_facts_per_doc: 20,

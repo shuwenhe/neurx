@@ -1,7 +1,6 @@
 int HOST_MEM   = 0
 int DEVICE_MEM = 1
 int SHARED_MEM = 2
-
 struct mem_region {
     int    region_id
     int    domain
@@ -23,7 +22,6 @@ struct mem_state {
     []mem_region regions
     int          next_region_id
 }
-
 func new_mem_state() mem_state {
     return mem_state{
         regions:       [],

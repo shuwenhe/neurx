@@ -2,7 +2,6 @@ package neurx.autograd.tracer
 use neurx.autograd.function
 use neurx.autograd.eqn
 use neurx.strings
-
 struct tracer_state {
     string name
     bool active
@@ -15,7 +14,6 @@ struct tracer_state {
     []ir_eqn eqns
     []string tags
 }
-
 func get_op(tracer_state state, int index) string {
     state.ops[index]
 }

@@ -7,7 +7,6 @@
 	run-full-inference-s compile-all-components-s integration-s complete-training-cycle-s verify-transformer-implementation-s cluster-launch-s setup-production-deployment-s \
 	run-end-to-end-verification-s run-integration-tests-s minimal-diagnostic-s diagnose-file-creation-s diagnose-tool-registration-s diagnose-autoscroll-s \
 	build-pretrain-manifest-s build-cuda-train-bridge build-cuda-chat-bridge run-gpu-pretrain-s cuda-tools-s cuda-verify-s cuda-build-s cuda-build-runtime-s cuda-build-runtime-alt-s cuda-build-kernels-s cuda-build-kernels-simple-s run-interactive-chat-repl-s transformer-cuda-checkpoint-resume-test build-real-inference-s build-hf-posttrain-chat-s hf-posttrain-chat
-
 ifeq ($(OS),Windows_NT)
 PLATFORM := windows
 WINDOWS_GIT_BASH := C:/Progra~1/Git/bin/bash.exe
@@ -31,16 +30,12 @@ endif
 SHELL := /bin/bash
 BASH ?= bash
 endif
-
 .DEFAULT_GOAL := help
-
-
 BLUE := \033[0;34m
 GREEN := \033[0;32m
 YELLOW := \033[1;33m
 RED := \033[0;31m
 NC := \033[0m
-
 CURDIR_UNIX := $(subst \,/,$(CURDIR))
 UNAME_S := $(shell uname -s 2>/dev/null)
 PLATFORM := $(if $(filter Darwin,$(UNAME_S)),macos,$(if $(filter Linux,$(UNAME_S)),linux,linux))
@@ -125,21 +120,14 @@ POSTTRAIN_VERIFY_ADAPTER_SOURCE ?= $(CURDIR_UNIX)/scripts/verify_posttrain_adapt
 POSTTRAIN_PRETRAIN_MANIFEST_SOURCE ?= $(CURDIR_UNIX)/scripts/build_pretrain_manifest.s
 POSTTRAIN_GOLDEN_DATASET_LIMIT ?= 12
 POSTTRAIN_MATERIALIZED_SAMPLES ?= 1
-
-
 help:
 	@echo "  make shard"
-
 	@echo "  make pretrain-npu"
 	@echo "  make pretrain-gpu"
 	@echo "  make posttrain"
 	@echo "  make infer"
 	@echo "  make chat"
-
-
-
 train:
-
 pretrain-s-p0: check-bash build-s-ir-runner
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/tiny_s_pretrain'
 	@cd '$(CURDIR_UNIX)' && \
@@ -147,7 +135,6 @@ pretrain-s-p0: check-bash build-s-ir-runner
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_TINY_OUTPUT_DIR="$${NEURX_TINY_OUTPUT_DIR:-$(CURDIR_UNIX)/artifacts/checkpoints/tiny_s_transformer}" \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/tiny_s_pretrain/tiny_transformer_pretrain.ir'
-
 pretrain-eval-test: check-bash build-s-ir-runner
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/pretrain_eval_s'
 	@cd '$(CURDIR_UNIX)' && \
@@ -160,7 +147,6 @@ pretrain-eval-test: check-bash build-s-ir-runner
 			'artifacts/build/pretrain_eval_s/pretrain_eval_test.ir'
 	@cd '$(CURDIR_UNIX)' && \
 		'$(S_RUNNER_BIN)' 'artifacts/build/pretrain_eval_s/pretrain_eval_test.ir'
-
 hybrid-moe-s: check-bash build-s-ir-runner
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/hybrid_moe_s'
 	@cd '$(CURDIR_UNIX)' && \
@@ -174,7 +160,6 @@ hybrid-moe-s: check-bash build-s-ir-runner
 			'artifacts/build/hybrid_moe_s/hybrid_moe.ir'
 	@cd '$(CURDIR_UNIX)' && \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/hybrid_moe_s/hybrid_moe.ir'
-
 infer: check-bash build-real-inference-s
 	@mkdir -p $(LOG_DIR)
 	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
@@ -182,10 +167,6 @@ infer: check-bash build-real-inference-s
 		NEURX_CHAT_MODEL_PATH="$${NEURX_CHAT_MODEL_PATH:-$(POSTTRAIN_OUTPUT_DIR)}" \
 		'$(CURDIR_UNIX)/artifacts/build/real_inference/real_inference' \
 		2>&1 | tee -a $(LOG_DIR)/infer_$(shell date +%Y%m%d_%H%M%S).log
-
-
-
-
 pretrain-npu: check-bash
 	@NEURX_NPU_WORLD_SIZE="$${NEURX_NPU_WORLD_SIZE:-$${WORLD_SIZE:-2}}" \
 	NEURX_NPU_MASTER_ADDR="$${NEURX_NPU_MASTER_ADDR:-$(NPU_PRETRAIN_MASTER_ADDR)}" \
@@ -193,7 +174,6 @@ pretrain-npu: check-bash
 	NEURX_NPU_WORKER_HOST="$${NEURX_NPU_WORKER_HOST:-$(NPU_PRETRAIN_WORKER_HOST)}" \
 	NEURX_NPU_WORKER_VISIBLE_DEVICES="$${NEURX_NPU_WORKER_VISIBLE_DEVICES:-$(NPU_PRETRAIN_WORKER_VISIBLE_DEVICES)}" \
 	bash $(CURDIR_UNIX)/scripts/pretrain_npu_launch.sh
-
 pretrain-gpu-single-node: check-bash
 	@mkdir -p $(PRETRAIN_LOG_DIR)
 	@set -o pipefail; cd '$(CURDIR_UNIX)' && \
@@ -222,7 +202,6 @@ pretrain-gpu-single-node: check-bash
 		NEURX_GRADIENT_ACCUMULATION_STEPS="$${NEURX_GRADIENT_ACCUMULATION_STEPS:-8}" \
 		PRETRAIN_SHARD_LIMIT='$(PRETRAIN_SHARD_LIMIT)' \
 		$(MAKE) run-gpu-pretrain-s 2>&1 | tee -a '$(PRETRAIN_LOG_DIR)/pretrain_gpu_$(shell date +%Y%m%d_%H%M%S).log'
-
 pretrain-gpu-distributed: check-bash
 	@mkdir -p $(PRETRAIN_LOG_DIR)
 	@echo "=== NeurX Multi-GPU Distributed Pretraining ==="
@@ -260,7 +239,6 @@ pretrain-gpu-distributed: check-bash
 		WORLD_SIZE="$${NEURX_NUM_GPUS:-$$GPU_COUNT}" \
 		PRETRAIN_SHARD_LIMIT='$(PRETRAIN_SHARD_LIMIT)' \
 		$(MAKE) run-gpu-pretrain-s 2>&1 | tee -a '$(PRETRAIN_LOG_DIR)/pretrain_gpu_distributed_$(shell date +%Y%m%d_%H%M%S).log'
-
 pretrain-gpu-legacy: check-bash
 	@mkdir -p $(PRETRAIN_LOG_DIR)
 	@echo "=== NeurX Multi-GPU Distributed Pretraining (Default) ==="
@@ -298,19 +276,15 @@ pretrain-gpu-legacy: check-bash
 		WORLD_SIZE="$${NEURX_NUM_GPUS:-$$GPU_COUNT}" \
 		PRETRAIN_SHARD_LIMIT='$(PRETRAIN_SHARD_LIMIT)' \
 		$(MAKE) run-gpu-pretrain-s 2>&1 | tee -a '$(PRETRAIN_LOG_DIR)/pretrain_gpu_$(shell date +%Y%m%d_%H%M%S).log'
-
 pretrain-gpu-resume: pretrain-gpu
 	@echo "Resume mode enabled by default"
-
 pretrain-gpu-multinode: check-bash build-cuda-train-bridge
 	@NEURX_HOSTFILE="$${NEURX_HOSTFILE:-$(CURDIR_UNIX)/configs/pretrain.hosts}" \
 	NEURX_SHARED_NCCL_ID_FILE="$${NEURX_SHARED_NCCL_ID_FILE:-$(CURDIR_UNIX)/artifacts/nccl/unique_id}" \
 	MASTER_PORT="$${MASTER_PORT:-29500}" \
 	s run $(CURDIR_UNIX)/scripts/legacy/launch_multinode_pretrain.s
-
 pretrain-gpu: pretrain-gpu-single-node
 	@echo "Default GPU pretraining target uses the single-node foreground launcher"
-
 pretrain-gpu-fresh: check-bash
 	@mkdir -p $(PRETRAIN_LOG_DIR)
 	@echo "Starting fresh training (ignoring any existing checkpoint)..."
@@ -323,15 +297,12 @@ pretrain-gpu-fresh: check-bash
 		NEURX_PRETRAIN_STEPS='$(PRETRAIN_STEPS)' \
 		NEURX_PRETRAIN_RESUME="no" \
 		$(MAKE) run-gpu-pretrain-s 2>&1 | tee -a '$(PRETRAIN_LOG_DIR)/pretrain_gpu_fresh_$(shell date +%Y%m%d_%H%M%S).log'
-
 test-pretrain-model: check-bash
 	@NEURX_VALIDATE_CHECKPOINT=1 $(MAKE) run-gpu-pretrain-s
-
 test-checkpoint-resume: check-bash
 	@echo "Running End-to-End Checkpoint Resume Test..."
 	@mkdir -p $(CURDIR_UNIX)/tests
 	@bash $(CURDIR_UNIX)/tests/checkpoint_resume_e2e.sh
-
 build-posttrain-phase2a-s: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a'
 	@cd '$(CURDIR_UNIX)' && \
@@ -342,7 +313,6 @@ build-posttrain-phase2a-s: check-bash
 		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_phase2a/phase2a_trainer.ir'
 	@echo "✓ Phase 2A compiled to S IR successfully"
-
 posttrain-phase2a: check-bash build-s-ir-runner build-posttrain-phase2a-s
 	@echo "======================================================"
 	@echo "[Phase 2A] Complete SFT Training with LoRA"
@@ -361,14 +331,12 @@ posttrain-phase2a: check-bash build-s-ir-runner build-posttrain-phase2a-s
 	@echo ""
 	@echo "[✓] Phase 2A training completed!"
 	@echo "Output: $(POSTTRAIN_OUTPUT_DIR)"
-
 build-posttrain-sft-s: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_sft'
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir'; \
 		"$(POSTTRAIN_S_COMPILER)" 'posttrain/trainer/posttrain_main.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' 2>&1 || exit 1; \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir'
-
 build-posttrain-verify-adapter-s: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_adapter'
 	@cd '$(CURDIR_UNIX)' && \
@@ -378,7 +346,6 @@ build-posttrain-verify-adapter-s: check-bash
 			"$(POSTTRAIN_S_COMPILER)" 'scripts/verify_posttrain_adapter.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_adapter/verify_posttrain_adapter.ir' 2>&1 || exit 1; \
 		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_adapter/verify_posttrain_adapter.ir'
-
 build-posttrain-verify-tensors-s: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_tensors'
 	@cd '$(CURDIR_UNIX)' && \
@@ -388,7 +355,6 @@ build-posttrain-verify-tensors-s: check-bash
 			"$(POSTTRAIN_S_COMPILER)" 'scripts/verify_posttrain_tensors.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_tensors/verify_posttrain_tensors.ir' 2>&1 || exit 1; \
 		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_tensors/verify_posttrain_tensors.ir'
-
 build-posttrain-golden-s: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_golden'
 	@cd '$(CURDIR_UNIX)' && \
@@ -398,7 +364,6 @@ build-posttrain-golden-s: check-bash
 			"$(POSTTRAIN_S_COMPILER)" 'scripts/posttrain_golden.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir' 2>&1 || exit 1; \
 		fi && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir'
-
 posttrain: check-bash build-s-ir-runner build-posttrain-sft-s
 	@echo "======================================================"
 	@echo "[Phase 2A] Complete SFT Training with LoRA"
@@ -417,7 +382,6 @@ posttrain: check-bash build-s-ir-runner build-posttrain-sft-s
 	@echo ""
 	@echo "[✓] Phase 2A training completed!"
 	@echo "Output: $(POSTTRAIN_OUTPUT_DIR)"
-
 test-posttrain: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_test'
 	@mkdir -p '$(LOG_DIR)'
@@ -437,7 +401,6 @@ test-posttrain: check-bash
 		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/verify_phase2a_$(shell date +%Y%m%d_%H%M%S).log'
 	@echo ""
 	@echo "[✓] Phase 2A verification complete!"
-
 test-numerical: check-bash
 	@echo "======================================================"
 	@echo "[NeurX] Self-Contained Numerical Tests (Pure S)"
@@ -454,7 +417,6 @@ test-numerical: check-bash
 		export NEURX_MODEL_PATH='/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct'; \
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/test_embedding/test_standalone.ir' \
 		'$(S_RUNNER_BIN)' 2>&1
-
 verify-posttrain:
 	@mkdir -p '$(LOG_DIR)'
 	@$(MAKE) build-posttrain-verify-tensors-s
@@ -466,7 +428,6 @@ verify-posttrain:
 		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_verify_tensors_$(shell date +%Y%m%d_%H%M%S).log'
 	@echo ""
 	@echo "Verification complete!"
-
 runtime-test:
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 	@echo "$(BLUE)Phase 2B: S Runtime Unit Tests$(NC)"
@@ -489,7 +450,6 @@ runtime-test:
 	@echo "  - Commit 1: srt_str_len, srt_str_char_at, srt_str_find"
 	@echo "  - Commit 2: srt_write_file, srt_read_file, srt_file_exists"
 	@echo "  - Commit 3: srt_atomic_replace"
-
 test-golden:
 	@mkdir -p '$(LOG_DIR)'
 	@$(MAKE) build-posttrain-golden-s
@@ -504,7 +464,6 @@ test-golden:
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir' \
 		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_golden_verify_$(shell date +%Y%m%d_%H%M%S).log'
 	@echo "Golden snapshot verification complete!"
-
 regenerate-golden:
 	@mkdir -p '$(LOG_DIR)'
 	@$(MAKE) build-posttrain-golden-s
@@ -519,7 +478,6 @@ regenerate-golden:
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir' \
 		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_golden_generate_$(shell date +%Y%m%d_%H%M%S).log'
 	@$(MAKE) test-golden
-
 build-posttrain-eval-s:
 	@mkdir -p artifacts/build/posttrain_eval
 	@echo "Compiling LoRA post-train evaluation (S)..."
@@ -528,7 +486,6 @@ build-posttrain-eval-s:
 		exit 1; \
 	}
 	@echo "✓ Compiled to IR successfully"
-
 posttrain-eval: build-posttrain-eval-s build-real-inference-s
 	@echo "Evaluating the trained LoRA adapter with S runtime..."
 	@cd '$(CURDIR_UNIX)' && \
@@ -537,7 +494,6 @@ posttrain-eval: build-posttrain-eval-s build-real-inference-s
 		NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)' \
 		NEURX_POSTTRAIN_EVAL_RUNNER='$(CURDIR_UNIX)/artifacts/build/real_inference/real_inference' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/posttrain_eval/eval_lora_sft.ir'
-
 posttrain-merge: check-bash build-lora-merge
 	@echo "Merging the LoRA adapter into a standalone model..."
 	@'$(LORA_MERGE_BIN)' \
@@ -547,7 +503,6 @@ posttrain-merge: check-bash build-lora-merge
 		'$(POSTTRAIN_LORA_ALPHA)' \
 		'$(POSTTRAIN_LORA_RANK)'
 	@echo "Standalone model saved to $(POSTTRAIN_MERGED_MODEL_DIR)"
-
 posttrain-simulated: check-bash build-s-ir-runner
 	@echo "Building NeurX posttrain entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/posttrain
@@ -631,13 +586,11 @@ posttrain-simulated: check-bash build-s-ir-runner
 	@echo "📁 最终模型位置: /home/shuwen/shuwen/posttrain/"
 	@ls -lh /home/shuwen/shuwen/posttrain/ 2>/dev/null || echo "  目录已创建"
 	@echo ""
-
 build-lora-merge: check-bash
 	@mkdir -p '$(LORA_MERGE_BUILD_DIR)'
 	@$(CC) -std=c11 -O2 -Wall -Wextra \
 		-o '$(LORA_MERGE_BIN)' \
 		'$(CURDIR_UNIX)/tools/lora_safetensors_merge.c'
-
 posttrain-merge-lora: check-bash build-s-ir-runner build-lora-merge
 	@mkdir -p '$(LORA_MERGE_BUILD_DIR)' $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
@@ -657,7 +610,6 @@ posttrain-merge-lora: check-bash build-s-ir-runner build-lora-merge
 		export NEURX_LORA_ALPHA='$(POSTTRAIN_LORA_ALPHA)'; \
 		export NEURX_LORA_RANK='$(POSTTRAIN_LORA_RANK)'; \
 		S_IR_RUNNER_INPUT='$(LORA_MERGE_IR)' '$(S_RUNNER_BIN)' 2>&1 | tee -a $(LOG_DIR)/posttrain_merge_lora_$(shell date +%Y%m%d_%H%M%S).log
-
 posttrain-e2e: check-bash build-s-ir-runner
 	@echo "🚀 Building NeurX End-to-End Post-Training Pipeline (S Language)..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/posttrain_e2e $(LOG_DIR)
@@ -677,34 +629,26 @@ posttrain-e2e: check-bash build-s-ir-runner
 	@echo ""
 	@echo "✨ Post-training pipeline complete!"
 	@echo "   Final model: /home/shuwen/shuwen/posttrain/"
-
 pretrain-watch: check-bash
 	@echo "Running NeurX large-model pre-training with live log monitoring"
 	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && $(MAKE) build-pretrain-manifest-s && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 $(MAKE) run-large-pretrain-s 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
-
 chat:
 	@$(MAKE) chat-with-model
-
-
-
 chat-with-model: build-s-ir-runner build-real-inference-with-model-s
 	@echo "🚀 Running NeurX Real Model Inference..."
 	@echo "✓ Using true model weights for inference"; \
 	mkdir -p artifacts/logs; \
 	$(CURDIR_UNIX)/artifacts/build/real_inference_with_model/real_inference_with_model 2>&1
-
 chat-real-model: build-s-ir-runner build-real-inference-interactive-s
 	@echo "🚀 Running NeurX Real Model Inference (Interactive)..."
 	@echo "✓ Model loaded with Chinese support"; \
 	mkdir -p artifacts/logs; \
 	$(CURDIR_UNIX)/artifacts/build/real_inference_interactive/real_inference_interactive 2>&1
-
 chat-fast-inference: build-s-ir-runner build-fast-chat-inference-s
 	@echo "🚀 Running NeurX Fast Chat Inference (Pure S)..."
 	@echo "✓ Running fast medical knowledge inference"; \
 	mkdir -p artifacts/logs; \
 	$(CURDIR_UNIX)/artifacts/build/fast_chat_inference/fast_chat_inference 2>&1
-
 chat-real-inference: build-s-ir-runner build-real-inference-s build-neurx-interactive-inference-s
 	@echo "🚀 Running NeurX Real Inference Engine (Pure S)..."
 	@if [ -f "/home/shuwen/shuwen/posttrain/model.safetensors" ]; then \
@@ -715,7 +659,6 @@ chat-real-inference: build-s-ir-runner build-real-inference-s build-neurx-intera
 	else \
 		echo "❌ Model not found"; \
 	fi
-
 build-neurx-interactive-inference-s:
 	@mkdir -p artifacts/build/neurx_interactive_inference
 	@echo "Compiling NeurX Interactive Inference (S)..."
@@ -725,7 +668,6 @@ build-neurx-interactive-inference-s:
 		$(S_SEED_COMPILER) inference/neurx_interactive_inference.s artifacts/build/neurx_interactive_inference/neurx_interactive_inference.ir 2>&1 || exit 1; \
 	fi
 	@test -f artifacts/build/neurx_interactive_inference/neurx_interactive_inference.ir
-
 real-inference: build-real-inference-s
 	@echo "🚀 Running NeurX Real Inference Engine (Pure S)..."
 	@if [ -f "/home/shuwen/shuwen/posttrain/model.safetensors" ]; then \
@@ -736,7 +678,6 @@ real-inference: build-real-inference-s
 	else \
 		echo "❌ Model not found"; \
 	fi
-
 build-posttrain-chat-s:
 	@mkdir -p artifacts/build/posttrain_chat
 	@echo "Compiling PostTrain Chat (S)..."
@@ -749,7 +690,6 @@ build-posttrain-chat-s:
 	@printf '#!/bin/bash\n%s/artifacts/build/s_runner/s_ir_runner %s/artifacts/build/posttrain_chat/posttrain_chat.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifacts/build/posttrain_chat/posttrain_chat
 	@chmod +x artifacts/build/posttrain_chat/posttrain_chat
 	@echo "✓ PostTrain Chat ready"
-
 build-real-inference-s:
 	@mkdir -p artifacts/build/real_inference
 	@echo "Compiling Real Interactive Inference (S)..."
@@ -762,7 +702,6 @@ build-real-inference-s:
 	@printf '#!/bin/bash\n%s/artifacts/build/s_runner/s_ir_runner %s/artifacts/build/real_inference/real_inference.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifacts/build/real_inference/real_inference
 	@chmod +x artifacts/build/real_inference/real_inference
 	@echo "✓ Real Interactive Inference ready"
-
 build-fast-chat-inference-s:
 	@mkdir -p artifacts/build/fast_chat_inference
 	@echo "Compiling Fast Chat Inference (S)..."
@@ -775,7 +714,6 @@ build-fast-chat-inference-s:
 	@printf '#!/bin/bash\n%s/artifacts/build/s_runner/s_ir_runner %s/artifacts/build/fast_chat_inference/fast_chat_inference.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifacts/build/fast_chat_inference/fast_chat_inference
 	@chmod +x artifacts/build/fast_chat_inference/fast_chat_inference
 	@echo "✓ Fast Chat Inference ready"
-
 build-real-inference-interactive-s:
 	@mkdir -p artifacts/build/real_inference_interactive
 	@echo "Compiling Real Inference Interactive (S)..."
@@ -788,7 +726,6 @@ build-real-inference-interactive-s:
 	@printf '#!/bin/bash\n%s/artifacts/build/s_runner/s_ir_runner %s/artifacts/build/real_inference_interactive/real_inference_interactive.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifacts/build/real_inference_interactive/real_inference_interactive
 	@chmod +x artifacts/build/real_inference_interactive/real_inference_interactive
 	@echo "✓ Real Inference Interactive ready"
-
 build-real-inference-with-model-s:
 	@mkdir -p artifacts/build/real_inference_with_model
 	@echo "Compiling Real Inference with Model Weights (S)..."
@@ -801,17 +738,14 @@ build-real-inference-with-model-s:
 	@printf '#!/bin/bash\n%s/artifacts/build/s_runner/s_ir_runner %s/artifacts/build/real_inference_with_model/real_inference_with_model.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifacts/build/real_inference_with_model/real_inference_with_model
 	@chmod +x artifacts/build/real_inference_with_model/real_inference_with_model
 	@echo "✓ Real Inference with Model ready"
-
 build-hf-posttrain-chat-s: build-real-inference-s build-s-ir-runner
 	@mkdir -p artifacts/build/hf_posttrain_chat
 	@echo "Compiling Hugging Face PostTrain-compatible chat frontend (S)..."
 	@cd '$(CURDIR_UNIX)' && \
 		$(S_SEED_COMPILER) 'scripts/hf_posttrain_chat.s' '$(CURDIR_UNIX)/artifacts/build/hf_posttrain_chat/hf_posttrain_chat.ir'
 	@test -f '$(CURDIR_UNIX)/artifacts/build/hf_posttrain_chat/hf_posttrain_chat.ir'
-
 hf-posttrain-chat: build-hf-posttrain-chat-s
 	@'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/hf_posttrain_chat/hf_posttrain_chat.ir'
-
 build-production-training-s: check-bash
 	@echo "[Building] Production Training System..."
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/production_training'
@@ -820,7 +754,6 @@ build-production-training-s: check-bash
 		$(S_SEED_COMPILER) 'trainer/production_training_system.s' '$(CURDIR_UNIX)/artifacts/build/production_training/production_training_system.ir' 2>&1 || exit 1
 	@test -f '$(CURDIR_UNIX)/artifacts/build/production_training/production_training_system.ir'
 	@echo "✓ Production Training System compiled successfully"
-
 build-production-example-s: check-bash build-production-training-s
 	@echo "[Building] Production Training Examples..."
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/production_training'
@@ -829,7 +762,6 @@ build-production-example-s: check-bash build-production-training-s
 		$(S_SEED_COMPILER) 'examples/production_training_example.s' '$(CURDIR_UNIX)/artifacts/build/production_training/production_training_example.ir' 2>&1 || exit 1
 	@test -f '$(CURDIR_UNIX)/artifacts/build/production_training/production_training_example.ir'
 	@echo "✓ Production Training Examples compiled successfully"
-
 production-training: build-production-example-s
 	@echo "======================================================"
 	@echo "[Production Training] Single GPU Example"
@@ -839,7 +771,6 @@ production-training: build-production-example-s
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/production_training/production_training_example.ir'
 	@echo ""
 	@echo "[✓] Production Training completed!"
-
 production-ddp: build-production-example-s
 	@echo "======================================================"
 	@echo "[Production Training] DDP Multi-GPU Example"
@@ -850,7 +781,6 @@ production-ddp: build-production-example-s
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/production_training/production_training_example.ir'
 	@echo ""
 	@echo "[✓] DDP Training completed!"
-
 production-zero1: build-production-example-s
 	@echo "======================================================"
 	@echo "[Production Training] ZeRO Stage 1 Example"
@@ -861,7 +791,6 @@ production-zero1: build-production-example-s
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/production_training/production_training_example.ir'
 	@echo ""
 	@echo "[✓] ZeRO-1 Training completed!"
-
 production-zero2: build-production-example-s
 	@echo "======================================================"
 	@echo "[Production Training] ZeRO Stage 2 Example"
@@ -872,10 +801,7 @@ production-zero2: build-production-example-s
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/production_training/production_training_example.ir'
 	@echo ""
 	@echo "[✓] ZeRO-2 Training completed!"
-
 run-production-training: production-training
-
-
 shard: check-bash
 	@echo "Building NeurX shard entry ($(PLATFORM))..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/shard
@@ -934,11 +860,9 @@ shard: check-bash
 				'$(S_RUNNER_BIN)' 2>&1 | tee -a "$$SHARD_LOG" && \
 			echo "✓ Shard processing completed!" || (echo "✗ Shard processing failed. Check log: $$SHARD_LOG"; exit 1); \
 		fi
-
 split: check-bash
 	@echo "Splitting training data into train/val/test"
 	@cd '$(CURDIR_UNIX)' && $(MAKE) split-data-s 2>&1
-
 split-data-s: check-bash
 	@echo "Building dataset split entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/split_data
@@ -957,7 +881,6 @@ split-data-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_SPLIT_DATASET_ROOT='$(PRETRAIN_DATA_ROOT)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/split_data/split_data.ir' 2>&1 | tee -a $(LOG_DIR)/split_data_$(shell date +%Y%m%d_%H%M%S).log
-
 run-training-pipeline-s: check-bash
 	@echo "Building S training pipeline entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/training_pipeline
@@ -976,7 +899,6 @@ run-training-pipeline-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/training_pipeline/run_training_pipeline.ir' 2>&1 | tee -a $(LOG_DIR)/training_pipeline_$(shell date +%Y%m%d_%H%M%S).log
-
 quick-start-s: check-bash
 	@echo "Building S quick start entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/quick_start
@@ -989,7 +911,6 @@ quick-start-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/quick_start/quick_start.ir' 2>&1 | tee -a $(LOG_DIR)/quick_start_$(shell date +%Y%m%d_%H%M%S).log
-
 run-interactive-inference-s: check-bash
 	@echo "Building S interactive chat system..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/interactive_inference
@@ -1005,7 +926,6 @@ run-interactive-inference-s: check-bash
 		NEURX_CHECKPOINT_DIR='$(PRETRAIN_OUTPUT_DIR)' \
 		NEURX_INFER_OUTPUT_DIR='$(CURDIR_UNIX)/artifacts/inference_output' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/interactive_inference/run_interactive_chat.ir' 2>&1 | tee -a $(LOG_DIR)/chat_$(shell date +%Y%m%d_%H%M%S).log
-
 run-interactive-chat-repl-s: check-bash
 	@$(MAKE) build-cuda-chat-bridge
 	@mkdir -p $(LOG_DIR)
@@ -1015,7 +935,6 @@ run-interactive-chat-repl-s: check-bash
 		NEURX_TOKENIZER_VOCAB='$(CURDIR_UNIX)/data/corpus/vocab.json' \
 		NEURX_TOKENIZER_MERGES='$(CURDIR_UNIX)/data/corpus/merges.txt' \
 		'$(CUDA_CHAT_BRIDGE_BIN)' 2>&1 | tee -a $(LOG_DIR)/chat_repl_$(shell date +%Y%m%d_%H%M%S).log
-
 run-small-model-training-s: check-bash
 	@echo "Building S small model training entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/small_model_training
@@ -1028,7 +947,6 @@ run-small-model-training-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/small_model_training/run_small_model_training.ir' 2>&1 | tee -a $(LOG_DIR)/run_small_model_training_$(shell date +%Y%m%d_%H%M%S).log
-
 verify-setup-s: check-bash
 	@echo "Building setup verification entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/verify_setup
@@ -1041,7 +959,6 @@ verify-setup-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/verify_setup/verify_setup.ir' 2>&1 | tee -a $(LOG_DIR)/verify_setup_$(shell date +%Y%m%d_%H%M%S).log
-
 quick-test-s: check-bash
 	@echo "Building quick test entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/quick_test
@@ -1054,7 +971,6 @@ quick-test-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/quick_tests/quick_test.ir' 2>&1 | tee -a $(LOG_DIR)/quick_test_$(shell date +%Y%m%d_%H%M%S).log
-
 quickstart-s: check-bash
 	@echo "Building quickstart entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/quickstart
@@ -1067,7 +983,6 @@ quickstart-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/quickstart/quickstart.ir' 2>&1 | tee -a $(LOG_DIR)/quickstart_$(shell date +%Y%m%d_%H%M%S).log
-
 verify-training-pipeline-s: check-bash
 	@echo "Building training pipeline verification entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/verify_training_pipeline
@@ -1080,7 +995,6 @@ verify-training-pipeline-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/verify_training_pipeline/verify_training_pipeline.ir' 2>&1 | tee -a $(LOG_DIR)/verify_training_pipeline_$(shell date +%Y%m%d_%H%M%S).log
-
 monitor-training-s: check-bash
 	@echo "Building training monitor entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/monitor_training
@@ -1093,7 +1007,6 @@ monitor-training-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/monitor_training/monitor_training.ir' 2>&1 | tee -a $(LOG_DIR)/monitor_training_$(shell date +%Y%m%d_%H%M%S).log
-
 build-linux-s: check-bash
 	@echo "Building Linux build status entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/build_linux
@@ -1106,7 +1019,6 @@ build-linux-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/build_linux/build_linux.ir' 2>&1 | tee -a $(LOG_DIR)/build_linux_$(shell date +%Y%m%d_%H%M%S).log
-
 build-macos-s: check-bash
 	@echo "Building macOS build status entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/build_macos
@@ -1119,7 +1031,6 @@ build-macos-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/build_macos/build_macos.ir' 2>&1 | tee -a $(LOG_DIR)/build_macos_$(shell date +%Y%m%d_%H%M%S).log
-
 run-large-pretrain-s: check-bash
 	@echo "Building large pretrain status entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/run_large_pretrain
@@ -1136,7 +1047,6 @@ run-large-pretrain-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_large_pretrain.ir' 2>&1 | tee -a $(LOG_DIR)/run_large_pretrain_$(shell date +%Y%m%d_%H%M%S).log
-
 build-pretrain-manifest-s: check-bash
 	@echo "Building pretrain manifest entry..."
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest'
@@ -1163,7 +1073,6 @@ build-pretrain-manifest-s: check-bash
 		NEURX_PRETRAIN_REBUILD_MANIFEST="$${NEURX_PRETRAIN_REBUILD_MANIFEST:-$(NEURX_SHARD_FORCE_REBUILD)}" \
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/build_pretrain_manifest/build_pretrain_manifest.ir' \
 		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/build_pretrain_manifest_$(shell date +%Y%m%d_%H%M%S).log'
-
 run-train-compiled-s: check-bash
 	@echo "Building compiled train status entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/run_train_compiled
@@ -1176,7 +1085,6 @@ run-train-compiled-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/run_train_compiled/run_train_compiled.ir' 2>&1 | tee -a $(LOG_DIR)/run_train_compiled_$(shell date +%Y%m%d_%H%M%S).log
-
 run-train-large-model-s: check-bash
 	@echo "Building large model train status entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/run_train_large_model
@@ -1189,7 +1097,6 @@ run-train-large-model-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/run_train_large_model/run_train_large_model.ir' 2>&1 | tee -a $(LOG_DIR)/run_train_large_model_$(shell date +%Y%m%d_%H%M%S).log
-
 run-train-model-ir-s: check-bash
 	@echo "Building IR train status entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/run_train_model_ir
@@ -1202,7 +1109,6 @@ run-train-model-ir-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/run_train_model_ir/run_train_model_ir.ir' 2>&1 | tee -a $(LOG_DIR)/run_train_model_ir_$(shell date +%Y%m%d_%H%M%S).log
-
 run-with-logs-s: check-bash
 	@echo "Building logs wrapper status entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/run_with_logs
@@ -1215,7 +1121,6 @@ run-with-logs-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/run_with_logs/run_with_logs.ir' 2>&1 | tee -a $(LOG_DIR)/run_with_logs_$(shell date +%Y%m%d_%H%M%S).log
-
 verify-framework-s: check-bash
 	@echo "Building framework stack verification entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/framework_stack
@@ -1227,7 +1132,6 @@ verify-framework-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/framework_stack/framework_stack.ir' 2>&1 | tee -a $(LOG_DIR)/verify_framework_$(shell date +%Y%m%d_%H%M%S).log
-
 verify-inference-pipeline-s: check-bash
 	@echo "Building inference pipeline verification entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/verify_inference_pipeline
@@ -1240,7 +1144,6 @@ verify-inference-pipeline-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/verify_inference_pipeline/verify_inference_pipeline.ir' 2>&1 | tee -a $(LOG_DIR)/verify_inference_pipeline_$(shell date +%Y%m%d_%H%M%S).log
-
 test-build-s: check-bash
 	@echo "Building build test entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/test_build
@@ -1253,7 +1156,6 @@ test-build-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/test_build/test_build.ir' 2>&1 | tee -a $(LOG_DIR)/test_build_$(shell date +%Y%m%d_%H%M%S).log
-
 test-smart-inference-s: check-bash
 	@echo "Building smart inference test entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/test_smart_inference
@@ -1266,12 +1168,6 @@ test-smart-inference-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/test_smart_inference/test_smart_inference.ir' 2>&1 | tee -a $(LOG_DIR)/test_smart_inference_$(shell date +%Y%m%d_%H%M%S).log
-
-
-
-
-
-
 DATA_SCRIPTS_DIR := $(CURDIR_UNIX)/artifacts/build/data_scripts
 DATA_SCRIPTS_IR := $(DATA_SCRIPTS_DIR)/data_scripts.ir
 DATA_SCRIPTS_BIN := $(DATA_SCRIPTS_DIR)/data_scripts.bin
@@ -1286,7 +1182,6 @@ INDUSTRIAL_CORPUS ?= data/corpus/train_corpus.txt
 INDUSTRIAL_QUERY ?= NeurX industrial RAG
 INDUSTRIAL_DATASET ?= data/training_data_industrial_complete.jsonl
 TOOLCHAIN_CMD ?= status
-
 build-data-scripts: check-bash
 	@echo "Building NeurX S-only Data Pipeline..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/data_pipeline
@@ -1294,7 +1189,6 @@ build-data-scripts: check-bash
 	@echo "  This is a complete S-language implementation ready for compilation"
 	@echo "  To compile: $(S_COMPILER) scripts/legacy/data_pipeline.s -o artifacts/build/data_pipeline/data_pipeline"
 	@echo "✓ S implementation available at scripts/legacy/data_pipeline.s"
-
 clean-s:
 	@echo "Building NeurX data cleaning entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/data_scripts
@@ -1307,7 +1201,6 @@ clean-s:
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_HOME='$(CURDIR_UNIX)' NEURX_SCRIPTS_CMD=clean \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/data_scripts/scripts.ir' 2>&1 | tee -a $(LOG_DIR)/clean_$(shell date +%Y%m%d_%H%M%S).log
-
 shard-s:
 	@echo "Building NeurX data sharding entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/data_scripts
@@ -1320,7 +1213,6 @@ shard-s:
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_HOME='$(CURDIR_UNIX)' NEURX_SCRIPTS_CMD=shard \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/data_scripts/scripts.ir' 2>&1 | tee -a $(LOG_DIR)/shard_$(shell date +%Y%m%d_%H%M%S).log
-
 shard-enwiki: check-bash
 	@echo "$(BLUE)📦 Sharding Wikipedia dataset...$(NC)"
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/shard
@@ -1351,13 +1243,11 @@ shard-enwiki: check-bash
 		S_IR_RUNNER_ENTRY='main' \
 		'$(S_RUNNER_BIN)' 2>&1 | tee -a $(LOG_DIR)/shard_enwiki_$(shell date +%Y%m%d_%H%M%S).log
 	@echo "$(GREEN)✓ Wikipedia sharding complete$(NC)"
-
 data-pipeline-s: build-data-scripts
 	@echo "Running NeurX full data pipeline (clean + shard, S version)..."
 	@mkdir -p $(LOG_DIR)
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_HOME='$(CURDIR_UNIX)' $(DATA_SCRIPTS_BIN) clean-and-shard 2>&1 | tee -a $(LOG_DIR)/pipeline_$(shell date +%Y%m%d_%H%M%S).log
-
 verify-dataset-s: check-bash
 	@echo "Building S dataset verifier..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/dataset_verify
@@ -1372,7 +1262,6 @@ verify-dataset-s: check-bash
 		$(S_COMPILER) ir 'data/tools/verify_dataset.s' -o '$(CURDIR_UNIX)/artifacts/build/dataset_verify/dataset_verify.ir' 2>&1 && \
 		test -f '$(CURDIR_UNIX)/artifacts/build/dataset_verify/dataset_verify.ir'
 	@echo "✓ Dataset verification entry compiled to S IR"
-
 build-industrial-ops: check-bash
 	@echo "Building industrial ops runner..."
 	@mkdir -p $(INDUSTRIAL_OPS_DIR)
@@ -1392,7 +1281,6 @@ build-industrial-ops: check-bash
 	fi
 	@chmod +x $(INDUSTRIAL_OPS_BIN)
 	@echo "✓ Build complete: $(INDUSTRIAL_OPS_BIN)"
-
 industrial-ops: build-industrial-ops
 	@echo "Running industrial ops runner..."
 	@mkdir -p $(LOG_DIR)
@@ -1403,7 +1291,6 @@ industrial-ops: build-industrial-ops
 		--query='$(INDUSTRIAL_QUERY)' \
 		--dataset='$(INDUSTRIAL_DATASET)' \
 		--output-dir='$(CURDIR_UNIX)/artifacts/industrial_ops' 2>&1 | tee -a $(LOG_DIR)/industrial_ops_$(shell date +%Y%m%d_%H%M%S).log
-
 build-s-ir-runner: check-bash
 	@echo "Building generic S IR runner..."
 	@mkdir -p $(S_RUNNER_BUILD_DIR)
@@ -1422,7 +1309,6 @@ build-s-ir-runner: check-bash
 		2>&1 && \
 		chmod +x '$(S_RUNNER_BIN)' && \
 		test -f '$(S_RUNNER_BIN)'
-
 build-cuda-train-bridge: check-bash
 	@echo "Building native CUDA/cuBLAS train bridge..."
 	@if [ '$(PLATFORM)' != 'linux' ]; then \
@@ -1441,7 +1327,6 @@ build-cuda-train-bridge: check-bash
 		-o '$(CUDA_TRAIN_BRIDGE_BIN)'
 	@chmod +x '$(CUDA_TRAIN_BRIDGE_BIN)'
 	@test -x '$(CUDA_TRAIN_BRIDGE_BIN)'
-
 build-cuda-chat-bridge: check-bash
 	@echo "Building native NXTRFMV2 CUDA chat bridge..."
 	@if [ '$(PLATFORM)' != 'linux' ]; then \
@@ -1457,12 +1342,10 @@ build-cuda-chat-bridge: check-bash
 		'$(CUDA_CHAT_BRIDGE_SRC)' -lcublas -o '$(CUDA_CHAT_BRIDGE_BIN)'
 	@chmod +x '$(CUDA_CHAT_BRIDGE_BIN)'
 	@test -x '$(CUDA_CHAT_BRIDGE_BIN)'
-
 build-cuda-bigram-bridge: check-bash
 	@mkdir -p '$(CUDA_TRAIN_BRIDGE_BUILD_DIR)'
 	@'$(CUDA_NVCC)' -O3 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
 		'$(CUDA_BIGRAM_BRIDGE_SRC)' -lcublas -o '$(CUDA_TRAIN_BRIDGE_BUILD_DIR)/neurx_cuda_bigram_bridge'
-
 pretrain-bigram-gpu: build-cuda-bigram-bridge build-pretrain-manifest-s
 	@NEURX_PRETRAIN_SHARD_LIST_FILE='$(CURDIR_UNIX)/artifacts/build/run_large_pretrain/shard_list.txt' \
 		NEURX_PRETRAIN_OUTPUT_DIR="$${NEURX_PRETRAIN_OUTPUT_DIR:-$(CURDIR_UNIX)/checkpoint/NeurX-Bigram-Smoke}" \
@@ -1470,34 +1353,29 @@ pretrain-bigram-gpu: build-cuda-bigram-bridge build-pretrain-manifest-s
 		NEURX_CUDA_VOCAB_SIZE="$${NEURX_CUDA_VOCAB_SIZE:-4096}" \
 		NEURX_CUDA_BATCH_PAIRS="$${NEURX_CUDA_BATCH_PAIRS:-256}" \
 		'$(CUDA_TRAIN_BRIDGE_BUILD_DIR)/neurx_cuda_bigram_bridge'
-
 transformer-reference-test:
 	@mkdir -p artifacts/build/transformer_reference
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		tests/transformer_reference.cpp -o artifacts/build/transformer_reference/transformer_reference
 	@artifacts/build/transformer_reference/transformer_reference
-
 adam-optimizer-test:
 	@mkdir -p artifacts/build/adam_optimizer
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		tests/adam_optimizer_regression_test.cpp \
 		-o artifacts/build/adam_optimizer/adam_optimizer_regression_test
 	@artifacts/build/adam_optimizer/adam_optimizer_regression_test
-
 training-policy-test:
 	@mkdir -p artifacts/build/training_policy
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		tests/training_policy_test.cpp \
 		-o artifacts/build/training_policy/training_policy_test
 	@artifacts/build/training_policy/training_policy_test
-
 tensor-runtime-native-test:
 	@mkdir -p artifacts/build/tensor_runtime_native
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		tests/tensor_runtime_native_test.cpp runtime/native/tensor_runtime.cpp \
 		-o artifacts/build/tensor_runtime_native/tensor_runtime_native_test
 	@artifacts/build/tensor_runtime_native/tensor_runtime_native_test
-
 tensor-runtime-native-backends-build: check-nvcc
 	@mkdir -p artifacts/build/tensor_runtime_native
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c \
@@ -1506,7 +1384,6 @@ tensor-runtime-native-backends-build: check-nvcc
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
 		runtime/native/cuda_memory_backend.cu \
 		-o artifacts/build/tensor_runtime_native/cuda_memory_backend.o
-
 model-runtime-native-test:
 	@mkdir -p artifacts/build/model_runtime_native
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
@@ -1517,7 +1394,6 @@ model-runtime-native-test:
 		-licui18n -licuuc -licudata \
 		-o artifacts/build/model_runtime_native/model_runtime_native_test
 	@artifacts/build/model_runtime_native/model_runtime_native_test
-
 tokenizer-hf-parity-test:
 	@mkdir -p artifacts/build/model_runtime_native
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
@@ -1528,7 +1404,6 @@ tokenizer-hf-parity-test:
 		HF_MODEL_DIR="$${HF_MODEL_DIR:-/home/shuwen/model/Qwen2.5-0.5B-Instruct}"; \
 		"$$PYTORCH_PYTHON" tests/tokenizer_hf_parity.py \
 		artifacts/build/model_runtime_native/tokenizer_parity_probe "$$HF_MODEL_DIR"
-
 hf-checkpoint-level1-test:
 	@mkdir -p artifacts/build/model_runtime_native
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
@@ -1540,7 +1415,6 @@ hf-checkpoint-level1-test:
 		HF_MODEL_DIR="$${HF_MODEL_DIR:-/home/shuwen/model/Qwen2.5-0.5B-Instruct}"; \
 		"$$PYTORCH_PYTHON" tests/hf_checkpoint_level1_parity.py \
 		artifacts/build/model_runtime_native/hf_checkpoint_level1_probe "$$HF_MODEL_DIR"
-
 hf-decoder-cpu-parity-test:
 	@mkdir -p artifacts/build/model_runtime_native
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
@@ -1551,7 +1425,6 @@ hf-decoder-cpu-parity-test:
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
 		"$$PYTORCH_PYTHON" tests/hf_decoder_cpu_parity.py \
 		artifacts/build/model_runtime_native/hf_decoder_cpu_probe
-
 hf-kv-generation-parity-test:
 	@mkdir -p artifacts/build/model_runtime_native
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
@@ -1562,14 +1435,12 @@ hf-kv-generation-parity-test:
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
 		"$$PYTORCH_PYTHON" tests/hf_kv_generation_parity.py \
 		artifacts/build/model_runtime_native/hf_kv_generation_probe
-
 kv-cache-reference-test:
 	@mkdir -p artifacts/build/kv_cache
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		tests/kv_cache_reference_test.cpp \
 		-o artifacts/build/kv_cache/kv_cache_reference_test
 	@artifacts/build/kv_cache/kv_cache_reference_test
-
 numeric-alignment-test:
 	@mkdir -p artifacts/build/numeric_alignment
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
@@ -1579,7 +1450,6 @@ numeric-alignment-test:
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
 		"$$PYTORCH_PYTHON" tests/numeric_alignment_pytorch.py \
 		artifacts/build/numeric_alignment/numeric_alignment_probe
-
 inference-runtime-test:
 	@mkdir -p artifacts/build/inference_runtime
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
@@ -1587,18 +1457,15 @@ inference-runtime-test:
 		cann/runtime/acl_runtime.cpp \
 		-ldl -o artifacts/build/inference_runtime/inference_runtime_test
 	@artifacts/build/inference_runtime/inference_runtime_test
-
 cpu-inference-test:
 	@$(MAKE) build-real-inference-s
 	@NEURX_CHAT_MODEL_PATH="$${NEURX_CHAT_MODEL_PATH:-$(POSTTRAIN_OUTPUT_DIR)}" \
 		$(CURDIR_UNIX)/artifacts/build/real_inference/real_inference
-
 serving-native-socket-test:
 	@echo "🧪 [Test] Serving Socket (S implementation)"
 	@$(S_SEED_COMPILER) tests/serving_socket_test.s /tmp/serving_socket_test.ir
 	@echo "✅ Compiled (runtime execution pending)"
 	@echo "ℹ️  Replaces former C implementation"
-
 build-openai-gateway:
 	@mkdir -p artifacts/build/serving_native
 	@$(CC) -O2 -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -Werror -c \
@@ -1614,13 +1481,11 @@ build-openai-gateway:
 		tests/openai_gateway_fake_backend.cpp \
 		artifacts/build/serving_native/serving_socket.o \
 		-o artifacts/build/serving_native/openai_gateway_fake_backend
-
 openai-sse-streaming-test: build-openai-gateway
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
 		"$$PYTORCH_PYTHON" tests/openai_sse_streaming_test.py \
 		artifacts/build/serving_native/neurx_openai_gateway \
 		artifacts/build/serving_native/openai_gateway_fake_backend
-
 phase5-golden-prompt-test: build-s-ir-runner
 	@mkdir -p artifacts/build/phase5
 	@cd '$(CURDIR_UNIX)' && \
@@ -1630,7 +1495,6 @@ phase5-golden-prompt-test: build-s-ir-runner
 	@cd '$(CURDIR_UNIX)' && \
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/phase5/phase5_golden.ir' \
 		'$(S_RUNNER_BIN)' 2>&1
-
 phase5-hf-runtime-matrix: build-s-ir-runner
 	@mkdir -p artifacts/build/phase5
 	@cd '$(CURDIR_UNIX)' && \
@@ -1640,27 +1504,22 @@ phase5-hf-runtime-matrix: build-s-ir-runner
 	@cd '$(CURDIR_UNIX)' && \
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/phase5/phase5_hf_runtime_matrix.ir' \
 		'$(S_RUNNER_BIN)' 2>&1
-
 phase5-hf-runtime-test: phase5-hf-runtime-matrix
-
 check-nvcc:
 	@if [ -z '$(CUDA_NVCC)' ]; then \
 		echo "Error: nvcc not found. Run CUDA tests on a Linux NVIDIA CUDA host."; \
 		exit 1; \
 	fi
-
 transformer-cuda-kernels-test: check-nvcc
 	@mkdir -p artifacts/build/transformer_cuda
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 cuda/transformer_kernels_test.cu \
 		-o artifacts/build/transformer_cuda/transformer_kernels_test
 	@artifacts/build/transformer_cuda/transformer_kernels_test
-
 transformer-cuda-integration-test: check-nvcc
 	@mkdir -p artifacts/build/transformer_cuda
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
 		cuda/transformer_integration_test.cu -lcublas -o artifacts/build/transformer_cuda/transformer_integration_test
 	@artifacts/build/transformer_cuda/transformer_integration_test
-
 hf-decoder-cuda-build: check-nvcc
 	@mkdir -p artifacts/build/hf_decoder_cuda
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
@@ -1673,14 +1532,12 @@ hf-decoder-cuda-build: check-nvcc
 		-o artifacts/build/hf_decoder_cuda/hf_model.o
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c runtime/native/tensor_runtime.cpp \
 		-o artifacts/build/hf_decoder_cuda/tensor_runtime.o
-
 hf-decoder-cuda-kernels-test: check-nvcc
 	@mkdir -p artifacts/build/hf_decoder_cuda
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
 		cuda/hf_decoder_kernels_test.cu \
 		-o artifacts/build/hf_decoder_cuda/hf_decoder_kernels_test
 	@artifacts/build/hf_decoder_cuda/hf_decoder_kernels_test
-
 hf-decoder-cuda-parity-test: hf-decoder-cuda-build
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
 		cuda/hf_decoder_cuda_probe.cu \
@@ -1695,7 +1552,6 @@ hf-decoder-cuda-parity-test: hf-decoder-cuda-build
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
 		"$$PYTORCH_PYTHON" tests/hf_decoder_cuda_parity.py \
 		artifacts/build/hf_decoder_cuda/hf_decoder_cuda_probe
-
 build-hf-cuda-backend: hf-decoder-cuda-build
 	@$(CC) -O2 -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -Werror -c serving/native/serving_socket.c \
 		-o artifacts/build/hf_decoder_cuda/serving_socket.o
@@ -1710,7 +1566,6 @@ build-hf-cuda-backend: hf-decoder-cuda-build
 		artifacts/build/hf_decoder_cuda/tensor_runtime.o \
 		artifacts/build/hf_decoder_cuda/serving_socket.o \
 		-lcublas -o artifacts/build/hf_decoder_cuda/neurx_hf_cuda_backend
-
 transformer-cuda-checkpoint-resume-test:
 	@if [ -z '$(CUDA_NVCC)' ]; then \
 		echo "Error: nvcc not found. Run this CUDA checkpoint test on a Linux NVIDIA CUDA host."; \
@@ -1720,7 +1575,6 @@ transformer-cuda-checkpoint-resume-test:
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 \
 		cuda/transformer_checkpoint_resume_test.cu -lcublas -o artifacts/build/transformer_cuda/transformer_checkpoint_resume_test
 	@artifacts/build/transformer_cuda/transformer_checkpoint_resume_test
-
 cuda-tools-s: check-bash
 	@echo "Building S CUDA tools entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/cuda_tools
@@ -1740,25 +1594,18 @@ cuda-tools-s: check-bash
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		NEURX_CUDA_TOOL="$${NEURX_CUDA_TOOL:-verify}" \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/cuda_tools/cuda_tools.ir' 2>&1 | tee -a $(LOG_DIR)/cuda_tools_$(shell date +%Y%m%d_%H%M%S).log
-
 cuda-verify-s:
 	@NEURX_CUDA_TOOL=verify $(MAKE) cuda-tools-s
-
 cuda-build-s:
 	@NEURX_CUDA_TOOL=build $(MAKE) cuda-tools-s
-
 cuda-build-runtime-s:
 	@NEURX_CUDA_TOOL=build-runtime $(MAKE) cuda-tools-s
-
 cuda-build-runtime-alt-s:
 	@NEURX_CUDA_TOOL=build-runtime-alt $(MAKE) cuda-tools-s
-
 cuda-build-kernels-s:
 	@NEURX_CUDA_TOOL=build-kernels $(MAKE) cuda-tools-s
-
 cuda-build-kernels-simple-s:
 	@NEURX_CUDA_TOOL=build-kernels-simple $(MAKE) cuda-tools-s
-
 toolchain-s: check-bash
 	@echo "Building S-only toolchain coordinator..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/toolchain
@@ -1780,7 +1627,6 @@ toolchain-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		TOOLCHAIN_CMD='$(TOOLCHAIN_CMD)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/toolchain/toolchain.ir' 2>&1 | tee -a $(LOG_DIR)/toolchain_$(shell date +%Y%m%d_%H%M%S).log
-
 analyze-dataset-s: check-bash
 	@echo "Building dataset analyze wrapper..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/dataset_analyze
@@ -1802,7 +1648,6 @@ analyze-dataset-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		SHARDS_DIR='$(VERIFY_DATASET_DIR)' MANIFEST='$(CURDIR_UNIX)/dataset/pretrain/manifest.json' OUT='$(CURDIR_UNIX)/dataset/report.json' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/dataset_analyze/run_analyze.ir' 2>&1 | tee -a $(LOG_DIR)/dataset_analyze_$(shell date +%Y%m%d_%H%M%S).log
-
 run-training-s: check-bash
 	@echo "Building S training orchestrator..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/train_orchestrator
@@ -1824,7 +1669,6 @@ run-training-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/train_orchestrator/run_llm_training.ir' 2>&1 | tee -a $(LOG_DIR)/run_training_$(shell date +%Y%m%d_%H%M%S).log
-
 train-and-infer-s: check-bash
 	@echo "Building S train+infer orchestrator..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/train_and_infer
@@ -1842,7 +1686,6 @@ train-and-infer-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		MODE='$(MODE)' NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/train_and_infer/run_train_and_infer.ir' 2>&1 | tee -a $(LOG_DIR)/train_and_infer_$(shell date +%Y%m%d_%H%M%S).log
-
 run-inference-s: check-bash
 	@echo "Building S full model inference pipeline..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/inference_orchestrator
@@ -1862,7 +1705,6 @@ run-inference-s: check-bash
 		NEURX_CHECKPOINT_DIR='$(PRETRAIN_OUTPUT_DIR)' \
 		NEURX_INFER_PROMPT='$(NEURX_INFER_PROMPT)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/inference_orchestrator/run_full_model_inference.ir' 2>&1 | tee -a $(LOG_DIR)/run_inference_$(shell date +%Y%m%d_%H%M%S).log
-
 run-full-inference-s: check-bash
 	@echo "Building S full inference orchestrator..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/full_inference
@@ -1883,7 +1725,6 @@ run-full-inference-s: check-bash
 		NEURX_CHECKPOINT_DIR="$${NEURX_CHECKPOINT_DIR:-$(CURDIR_UNIX)/artifacts/checkpoints/llm_training}" \
 		NEURX_OUTPUT_DIR="$${NEURX_OUTPUT_DIR:-$(CURDIR_UNIX)/artifacts/inference_output}" \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/full_inference/run_full_inference.ir' 2>&1 | tee -a $(LOG_DIR)/run_full_inference_$(shell date +%Y%m%d_%H%M%S).log
-
 run-s-pretrain-s: check-bash
 	@echo "Building S real pretrain runner..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/pretrain_orchestrator
@@ -1961,7 +1802,6 @@ run-s-pretrain-s: check-bash
 		RUN_STATUS=$${PIPESTATUS[0]}; \
 		kill "$$HEARTBEAT_PID" >/dev/null 2>&1 || true; \
 		exit "$$RUN_STATUS"
-
 run-gpu-pretrain-s: check-bash
 	@echo "Preparing native GPU pretrain launcher..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/run_large_pretrain
@@ -2096,7 +1936,6 @@ run-gpu-pretrain-s: check-bash
 			 if [ $$status -eq 0 ]; then echo "[training] All ranks completed successfully!"; fi; \
 			 exit $$status' \
 		2>&1 | tee -a $(LOG_DIR)/run_gpu_pretrain_$(shell date +%Y%m%d_%H%M%S).log
-
 test-neurx-1-3: check-bash
 	@echo "Building NeurX-1.3 Model Test (S Language)..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/test
@@ -2112,7 +1951,6 @@ test-neurx-1-3: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		$(S_RUNNER_BIN) '$(CURDIR_UNIX)/artifacts/build/tests/neurx_1_3_test.ir' 2>&1 | tee -a $(LOG_DIR)/test_neurx_1_3_$(shell date +%Y%m%d_%H%M%S).log
-
 compile-all-components-s: check-bash
 	@echo "Building full compilation/test status entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/compile_all_components
@@ -2125,7 +1963,6 @@ compile-all-components-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/compile_all_components/compile_all_components.ir' 2>&1 | tee -a $(LOG_DIR)/compile_all_components_$(shell date +%Y%m%d_%H%M%S).log
-
 integration-s: check-bash
 	@echo "Building training integration status entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/integration
@@ -2138,7 +1975,6 @@ integration-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/integration/integration.ir' 2>&1 | tee -a $(LOG_DIR)/integration_$(shell date +%Y%m%d_%H%M%S).log
-
 complete-training-cycle-s: check-bash
 	@echo "Building complete training cycle status entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/complete_training_cycle
@@ -2151,7 +1987,6 @@ complete-training-cycle-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/complete_training_cycle/complete_training_cycle.ir' 2>&1 | tee -a $(LOG_DIR)/complete_training_cycle_$(shell date +%Y%m%d_%H%M%S).log
-
 verify-transformer-implementation-s: check-bash
 	@echo "Building transformer verification entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/verify_transformer_implementation
@@ -2164,7 +1999,6 @@ verify-transformer-implementation-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/verify_transformer_implementation/verify_transformer_implementation.ir' 2>&1 | tee -a $(LOG_DIR)/verify_transformer_implementation_$(shell date +%Y%m%d_%H%M%S).log
-
 cluster-launch-s: check-bash
 	@echo "Building cluster launch status entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/cluster_launch
@@ -2177,7 +2011,6 @@ cluster-launch-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/cluster_launch/cluster_launch.ir' 2>&1 | tee -a $(LOG_DIR)/cluster_launch_$(shell date +%Y%m%d_%H%M%S).log
-
 setup-production-deployment-s: check-bash
 	@echo "Building production deployment status entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/setup_production_deployment
@@ -2190,7 +2023,6 @@ setup-production-deployment-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/setup_deploy/production/setup_production_deployment.ir' 2>&1 | tee -a $(LOG_DIR)/setup_production_deployment_$(shell date +%Y%m%d_%H%M%S).log
-
 run-end-to-end-verification-s: check-bash
 	@echo "Building end-to-end verification status entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/run_end_to_end_verification
@@ -2203,7 +2035,6 @@ run-end-to-end-verification-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/run_end_to_end_verification/run_end_to_end_verification.ir' 2>&1 | tee -a $(LOG_DIR)/run_end_to_end_verification_$(shell date +%Y%m%d_%H%M%S).log
-
 run-integration-tests-s: check-bash
 	@echo "Building integration tests status entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/run_integration_tests
@@ -2216,7 +2047,6 @@ run-integration-tests-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/run_integration_tests/run_integration_tests.ir' 2>&1 | tee -a $(LOG_DIR)/run_integration_tests_$(shell date +%Y%m%d_%H%M%S).log
-
 minimal-diagnostic-s: check-bash
 	@echo "Building minimal diagnostic status entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/minimal_diagnostic
@@ -2229,7 +2059,6 @@ minimal-diagnostic-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/minimal_diagnostic/minimal_diagnostic.ir' 2>&1 | tee -a $(LOG_DIR)/minimal_diagnostic_$(shell date +%Y%m%d_%H%M%S).log
-
 diagnose-file-creation-s: check-bash
 	@echo "Building file creation diagnostic status entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/diagnose_file_creation
@@ -2242,7 +2071,6 @@ diagnose-file-creation-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/diagnose_file_creation/diagnose_file_creation.ir' 2>&1 | tee -a $(LOG_DIR)/diagnose_file_creation_$(shell date +%Y%m%d_%H%M%S).log
-
 diagnose-tool-registration-s: check-bash
 	@echo "Building tool registration diagnostic status entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/diagnose_tool_registration
@@ -2255,7 +2083,6 @@ diagnose-tool-registration-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/diagnose_tool_registration/diagnose_tool_registration.ir' 2>&1 | tee -a $(LOG_DIR)/diagnose_tool_registration_$(shell date +%Y%m%d_%H%M%S).log
-
 diagnose-autoscroll-s: check-bash
 	@echo "Building autoscroll diagnostic status entry..."
 	@mkdir -p $(CURDIR_UNIX)/artifacts/build/diagnose_autoscroll
@@ -2268,22 +2095,15 @@ diagnose-autoscroll-s: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		NEURX_ROOT='$(CURDIR_UNIX)' \
 		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/diagnose_autoscroll/diagnose_autoscroll.ir' 2>&1 | tee -a $(LOG_DIR)/diagnose_autoscroll_$(shell date +%Y%m%d_%H%M%S).log
-
-
-
 logs:
 	@mkdir -p $(LOG_DIR)
 	@echo "Available logs in $(LOG_DIR):"
 	@ls -1t $(LOG_DIR) | sed -n '1,200p' || true
-
 logs-tail:
 	@mkdir -p $(LOG_DIR)
 	@FILE=$$(ls -1t $(LOG_DIR)/*$(NAME)* 2>/dev/null | head -1); \
 	if [ -z "$$FILE" ]; then echo "No log files found in $(LOG_DIR)"; exit 1; fi; \
 	echo "Tailing $$FILE"; tail -n 200 -f "$$FILE"
-
-
-
 check-bash:
 ifeq ($(PLATFORM),windows)
 	@where "$(BASH)" >NUL 2>&1 || if not exist "$(BASH)" ( \
@@ -2299,11 +2119,6 @@ else
 		exit 1; \
 	}
 endif
-
-
-
-
-
 gate-w1.1: check-bash
 	@echo "🔴 W1.1 Gate: Tokenizer Verification (Pure S)"
 	@echo ""
@@ -2345,39 +2160,30 @@ gate-w1.1: check-bash
 	@echo "   Tokenizer module verified (pure S, deterministic)"
 	@echo ""
 	@echo "Next: Run 'make gate-w1.2' for embedding verification"
-
 gate-w1.2: gate-w1.1
 	@echo "🔴 W1.2 Gate: Embedding Verification (Pure S)"
 	@echo "  [Blocked by W1.1 gate]"
 	@echo "  ❌ W1.2 not yet implemented"
 	@echo "  Coming soon..."
 	@exit 1
-
 gate-w2: gate-w1.1 gate-w1.2
 	@echo "🔴 W2 Gate: Forward Pass Verification (Pure S)"
 	@echo "  [Blocked by W1.1 and W1.2 gates]"
 	@echo "  ❌ W2 not yet implemented"
 	@echo "  Coming soon..."
 	@exit 1
-
 gate-w3: gate-w1.1 gate-w1.2 gate-w2
 	@echo "🔴 W3 Gate: Training Loop Verification (Pure S)"
 	@echo "  [Blocked by W1, W2 gates]"
 	@echo "  ❌ W3 not yet implemented"
 	@echo "  Coming soon..."
 	@exit 1
-
-
-
-
 .PHONY: build-simple-training-s simple-training
-
 build-simple-training-s:
 	@echo "🔨 [Compile] Simple Training System"
 	$(S_SEED_COMPILER) trainer/simple_training_system.s /tmp/simple_training.ir
 	$(S_SEED_COMPILER) examples/simple_training_main.s /tmp/simple_training_main.ir
 	@echo "✅ Compilation successful"
-
 simple-training: build-simple-training-s
 	@echo ""
 	@echo "🚀 [Run] Simple Training System"
@@ -2395,24 +2201,17 @@ simple-training: build-simple-training-s
 	@echo "   ..."
 	@echo ""
 	@echo "✅ Milestone 1 Complete: Code compiles successfully"
-
-
-
-
 .PHONY: test-generate-golden test-serving-socket test-s-conversions
-
 test-generate-golden:
 	@echo "🧪 [Test] Golden Test Generator (S implementation)"
 	$(S_SEED_COMPILER) tests/generate_golden.s /tmp/generate_golden.ir
 	@echo "✅ Compiled (runtime execution pending)"
 	@echo "ℹ️  Replaces: tests/generate_golden.py"
-
 test-serving-socket:
 	@echo "🧪 [Test] Serving Socket (S implementation)"
 	$(S_SEED_COMPILER) tests/serving_socket_test.s /tmp/serving_socket_test.ir
 	@echo "✅ Compiled (runtime execution pending)"
 	@echo "ℹ️  Replaces: tests/serving_native_socket_test.c"
-
 test-s-conversions: test-generate-golden test-serving-socket
 	@echo ""
 	@echo "📊 Python/C to S Conversion Test Summary:"
@@ -2421,12 +2220,7 @@ test-s-conversions: test-generate-golden test-serving-socket
 	@echo ""
 	@echo "⚠️  Note: Actual test execution requires S runtime"
 	@echo "   See PYTHON_C_TO_S_CONVERSION_STATUS.md for full details"
-
-
-
-
 .PHONY: generate-golden verify-golden
-
 generate-golden:
 	@echo "🔬 [Generate] Golden Reference Data (S implementation)"
 	@$(S_SEED_COMPILER) tests/generate_golden.s /tmp/generate_golden.ir
@@ -2437,15 +2231,9 @@ generate-golden:
 	@echo "   Expected to generate:"
 	@echo "  - tests/golden/adamw/*.bin (10 steps)"
 	@echo "  - tests/golden/math/*.bin (exp, log, sqrt, pow)"
-
 verify-golden:
 	@echo "⚠️  Golden verification requires S runtime"
-
-
-
-
 .PHONY: build-deepspeed-zero test-zero-optimizer build-zero-components
-
 build-zero-components:
 	@echo "🔨 [Build] DeepSpeed ZeRO Components"
 	@echo ""
@@ -2462,7 +2250,6 @@ build-zero-components:
 	@echo "   ✅ zero_optimizer.s compiled"
 	@echo ""
 	@echo "✅ All ZeRO components compiled successfully"
-
 test-zero-optimizer:
 	@echo "🧪 [Test] DeepSpeed ZeRO-1 Optimizer"
 	@$(S_SEED_COMPILER) tests/test_zero_optimizer.s /tmp/test_zero_optimizer.ir
@@ -2474,7 +2261,6 @@ test-zero-optimizer:
 	@echo "  - Memory savings analysis"
 	@echo ""
 	@echo "⚠️  Actual execution requires S runtime"
-
 build-deepspeed-zero: build-zero-components test-zero-optimizer
 	@echo ""
 	@echo "============================================================"
@@ -2500,8 +2286,6 @@ build-deepspeed-zero: build-zero-components test-zero-optimizer
 	@echo "  4. Implement ZeRO-2 (gradient partitioning)"
 	@echo "  Planned: Compare NeurX outputs with .bin files"
 	@echo "  Tolerance: max_abs_error < 1e-5"
-
-
 posttrain-simple: check-bash build-s-ir-runner
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_simple'
 	@echo "======================================================"
@@ -2520,7 +2304,6 @@ posttrain-simple: check-bash build-s-ir-runner
 	@echo ""
 	@echo "[✓] Simple REAL training completed!"
 	@echo "Output: $(POSTTRAIN_OUTPUT_DIR)"
-
 posttrain-lora-tensor: check-bash build-s-ir-runner
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_lora_tensor'
 	@echo "======================================================"
@@ -2539,11 +2322,6 @@ posttrain-lora-tensor: check-bash build-s-ir-runner
 	@echo ""
 	@echo "[✓] LoRA Tensor training completed!"
 	@echo "Output: $(POSTTRAIN_OUTPUT_DIR)"
-
-
-
-
-
 posttrain-real: check-bash build-s-ir-runner build-posttrain-real-s
 	@echo ""
 	@echo "============================================================"
@@ -2553,7 +2331,6 @@ posttrain-real: check-bash build-s-ir-runner build-posttrain-real-s
 	@cd '$(S_COMPILER_EMIT_CWD)' && '$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/posttrain_real/posttrain_real_ir.json' || exit 1
 	@echo ""
 	@echo "[✓] Real training pipeline complete!"
-
 build-posttrain-real-s: check-bash
 	@echo "[Build] Compiling real training pipeline..."
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_real'

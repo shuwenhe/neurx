@@ -1,5 +1,4 @@
 module safetensors_io
-
 struct tensor_meta {
     string name
     []int shape
@@ -13,7 +12,6 @@ struct safe_tensors_file {
     []tensor_meta tensors
     int tensor_count
 }
-
 func read_uint64_le(string data, int offset) int64 {
     if offset + 8 > len(data) {
         return 0

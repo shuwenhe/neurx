@@ -1,6 +1,5 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
-
 func abs_float(float x) float {
     if x < 0.0 {
         return 0.0 - x
@@ -85,13 +84,11 @@ func run_mini_scalar_posttrain() int {
         println("error: model path not found: " + model_path)
         return 1
     }
-
     float x = 2.0
     float y = 5.0
     float w = 0.1
     float lr = 0.2
     float initial_w = w
-
     println("====================================================")
     println("[PostTrain] Mini Scalar Trainer")
     println("====================================================")
@@ -100,7 +97,6 @@ func run_mini_scalar_posttrain() int {
     println("[Mini] Forward -> Loss -> Backward -> SGD")
     println("x=" + float_to_str(x, 1) + ", y=" + float_to_str(y, 1) + ", lr=" + float_to_str(lr, 1))
     println("initial w=" + float_to_str(w, 6))
-
     float loss0 = 0.0
     float loss1 = 0.0
     float loss2 = 0.0
@@ -121,12 +117,10 @@ func run_mini_scalar_posttrain() int {
         println("step " + int_to_str(step + 1) + "/3 pred=" + float_to_str(pred, 6) + " loss=" + float_to_str(loss, 6) + " w=" + float_to_str(w, 6))
         step = step + 1
     }
-
     float improvement = 0.0
     if loss0 > 0.0 {
         improvement = (loss0 - loss2) / loss0 * 100.0
     }
-
     println("")
     println("[Loss Convergence]")
     println("  Initial loss:      " + float_to_str(loss0, 6))

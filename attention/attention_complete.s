@@ -1,7 +1,6 @@
 package neurx.attention.complete
 use neurx.tensor.{tensor, new, zeros, ones, fill, reshape}
 use neurx.ml.math_ops.{softmax, softmax_backward, scale_tensor, add_tensors, matmul_2d, transpose_2d}
-
 struct attention_cache {
     tensor Q
     tensor K
@@ -37,7 +36,6 @@ struct multihead_attention_state {
     tensor grad_b_V
     tensor grad_b_O
 }
-
 func xavier_init_attention(int in_dim, int out_dim) tensor {
     float limit = sqrt(6.0 / float_from_int(in_dim + out_dim))
     int total = in_dim * out_dim

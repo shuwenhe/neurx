@@ -1,6 +1,5 @@
 package main
 use neurx.inference
-
 func assert_true(bool value, string name) {
     if value {
         println("PASS " + name)

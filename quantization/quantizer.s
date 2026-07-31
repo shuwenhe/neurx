@@ -10,7 +10,6 @@ enum quantization_type {
     INT4_FULL,
     FP8_E4M3,
 }
-
 struct quantization_stats {
     quantization_type quantization_method
     float min_value
@@ -56,7 +55,6 @@ struct quantization_state {
     int num_params_original
     int num_params_quantized
 }
-
 func new_quantization_config(qtype quantization_type) quantization_config {
     quantization_config config
     config.quantization_type = qtype

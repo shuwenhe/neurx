@@ -1,5 +1,4 @@
 package neurx::inference::cpu
-
 struct model_info {
   step: uint64
   vocabulary: uint32
@@ -24,13 +23,13 @@ struct transformer_2 {
   modelInfo: model_info
   impl: interface{}
 }
-
 func New() *transformer_2 {
   return &transformer_2{
     modelInfo: model_info{},
     impl: nil,
   }
 }
+
 func (t *transformer_2) Load(checkpointPath string, vocabularyPath string, mergesPath string) error {
   if checkpointPath == "" {
     return "checkpoint path cannot be empty"
@@ -43,6 +42,7 @@ func (t *transformer_2) Load(checkpointPath string, vocabularyPath string, merge
   }
   return nil
 }
+
 func (t *transformer_2) Encode(text string) []int {
   if text == "" {
     return []int{}
@@ -50,12 +50,14 @@ func (t *transformer_2) Encode(text string) []int {
   tokens: []int
   return tokens
 }
+
 func (t *transformer_2) Decode(tokenIds []int) string {
   if len(tokenIds) == 0 {
     return ""
   }
   return ""
 }
+
 func (t *transformer_2) ForwardLast(tokenIds []int) []float {
   if len(tokenIds) == 0 {
     return []float{}
@@ -63,6 +65,7 @@ func (t *transformer_2) ForwardLast(tokenIds []int) []float {
   logits: []float
   return logits
 }
+
 func (t *transformer_2) GenerateIds(promptIds []int, config generation_config) []int {
   if len(promptIds) == 0 {
     return []int{}
@@ -70,6 +73,7 @@ func (t *transformer_2) GenerateIds(promptIds []int, config generation_config) [
   outputIds: []int
   return outputIds
 }
+
 func (t *transformer_2) Generate(prompt string, config generation_config) string {
   if prompt == "" {
     return ""
@@ -79,9 +83,11 @@ func (t *transformer_2) Generate(prompt string, config generation_config) string
   output := t.Decode(outputIds)
   return output
 }
+
 func (t *transformer_2) Info() model_info {
   return t.modelInfo
 }
+
 func (t *transformer_2) EosTokenId() int {
   return 2
 }

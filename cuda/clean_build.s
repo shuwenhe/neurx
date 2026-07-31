@@ -1,7 +1,6 @@
 package main
 use std.io.println
 use neurx.runtime.io.runtime_run_command_output
-
 func main() {
     println("[CLEAN] Removing CUDA build artifacts...")
     println("")

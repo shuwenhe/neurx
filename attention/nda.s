@@ -1,5 +1,4 @@
 package neurx.attention.nda
-
 struct nda_config {
     int hidden_dim
     int state_dim
@@ -29,7 +28,6 @@ struct nda_result {
     []float alpha
     []float beta
 }
-
 func new_nda_config(int hidden, int state, int latent, int kernel) nda_config {
     nda_config {
         hidden_dim: hidden,

@@ -1,6 +1,5 @@
 package neurx.posttrain.core.embedding_layer
 use std.io.println
-
 struct embedding_state_s {
     int vocab_size
     int hidden_dim
@@ -21,7 +20,6 @@ struct embedding_output_s {
     int seq_len
     int hidden_dim
 }
-
 func new_embedding_state_s(int vocab_size, int hidden_dim) embedding_state_s {
     embedding_state_s {
         vocab_size: vocab_size,

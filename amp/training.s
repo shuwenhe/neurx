@@ -5,7 +5,6 @@ enum amp_dtype {
     FP16 = 1
     BF16 = 2
 }
-
 struct amp_config {
     dtype: amp_dtype
     enable_grad_scaling: bool
@@ -45,7 +44,6 @@ struct grad_scaler_state {
     int growth_interval
     bool found_inf
 }
-
 func new_autocast_state(bool enabled, int dtype) autocast_state {
     autocast_state {
         enabled: enabled,

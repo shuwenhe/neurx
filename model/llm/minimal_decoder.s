@@ -1,5 +1,4 @@
 package neurx.model.llm.minimal_decoder
-
 struct minimal_decoder_state {
     string name
     string family
@@ -12,7 +11,6 @@ struct minimal_decoder_state {
     float train_perplexity
     bool trained
 }
-
 func new_minimal_decoder_state() minimal_decoder_state {
     minimal_decoder_state {
         name: "minimal_decoder",

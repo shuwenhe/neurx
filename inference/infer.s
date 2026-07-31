@@ -13,7 +13,6 @@ use neurx.runtime.io.{runtime_env_get, runtime_write_text_file, runtime_run_comm
 use neurx.ops
 use neurx.tensor.tensor
 use neurx.checkpoint
-
 struct infer_pipeline_state {
     infer_request_state request
     infer_response_state response
@@ -26,7 +25,6 @@ struct infer_pipeline_state {
     infer_eval_state eval
     checkpoint model_weights
 }
-
 func new_infer_pipeline_state(string request_id, string model, int input_tokens, int max_new_tokens, int layer_count, int max_seq_len) infer_pipeline_state {
     kv_cache_state cache = new_kv_cache_state(layer_count, max_seq_len)
     int block_size = 16

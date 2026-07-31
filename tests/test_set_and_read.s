@@ -1,11 +1,9 @@
 package main
-
-struct Data {
+struct data {
     int value
 }
-
 func main() {
-    Data obj
+    data obj
     obj.value = 42
     int val = obj.value
     println("Value: " + int_to_str(val))

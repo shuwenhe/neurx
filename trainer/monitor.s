@@ -7,7 +7,6 @@ enum log_level {
     ERROR = 3
     CRITICAL = 4
 }
-
 struct log_entry {
     timestamp: string
     level: log_level
@@ -53,7 +52,6 @@ struct training_monitor {
     start_time: float
     step_times: []float
 }
-
 func new_monitor_config() monitor_config {
     monitor_config config {
         log_level: log_level.INFO,

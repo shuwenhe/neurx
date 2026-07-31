@@ -4,7 +4,6 @@ use neurx.autograd.function
 use neurx.strings
 use neurx.tensor.tensor
 use neurx.strings
-
 struct batch_state {
     string name
     bool active
@@ -13,7 +12,6 @@ struct batch_state {
     []string primitives
     []string params
 }
-
 func join_strings([]string values) string {
     string out = ""
     int i = 0

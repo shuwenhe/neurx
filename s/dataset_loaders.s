@@ -1,9 +1,7 @@
 package neurx.data
-
 struct error {
     string message
 }
-
 func load_text_dataset(dataset ds) (dataset, error) {
     if len(ds.config.path) == 0 {
         return ds, error{message: "No path specified for text dataset"}

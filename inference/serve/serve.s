@@ -1,5 +1,4 @@
 package neurx.inference.serve
-
 struct infer_request_state {
     string request_id
     string model
@@ -13,7 +12,6 @@ struct infer_response_state {
     bool finished
     int status
 }
-
 func new_infer_request_state(string request_id, string model, int input_tokens, int max_new_tokens) infer_request_state {
     infer_request_state {
         request_id: request_id,

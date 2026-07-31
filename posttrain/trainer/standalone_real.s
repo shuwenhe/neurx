@@ -1,6 +1,5 @@
 package neurx.posttrain.trainer.standalone_real
 ·························································································use std.io.eprintln
-
 struct training_config {
     int hidden_size
     int num_layers
@@ -11,7 +10,6 @@ struct training_config {
     int num_epochs
     int steps_per_epoch
 }
-
 func default_config() training_config {
     training_config{
         hidden_size: 32,
@@ -142,13 +140,10 @@ func simple_transformer_layer(
     int batch_seq,
     int hidden
 ) []float {
-
     []float normed = rms_norm(hidden_states, ln_weight, batch_seq, hidden)
     []float q = matmul(normed, q_proj, batch_seq, hidden, hidden)
     []float v = matmul(normed, v_proj, batch_seq, hidden, hidden)
-
     []float attn_out = matmul(v, o_proj, batch_seq, hidden, hidden)
-
     []float output = add_arrays(hidden_states, attn_out)
     output
 }
@@ -160,9 +155,7 @@ func cross_entropy_loss([]float logits, []int labels, int batch_seq, int vocab) 
         int label = labels[i]
         if label < 0 { label = 0 }
         if label >= vocab { label = vocab - 1 }
-
         int logits_offset = i * vocab
-
         float max_logit = logits[logits_offset]
         int j = 1
         while j < vocab {
@@ -171,20 +164,16 @@ func cross_entropy_loss([]float logits, []int labels, int batch_seq, int vocab) 
             }
             j = j + 1
         }
-
         float sum_exp = 0.0
         j = 0
         while j < vocab {
             sum_exp = sum_exp + exp_approx(logits[logits_offset + j] - max_logit)
             j = j + 1
         }
-
         float log_prob = logits[logits_offset + label] - max_logit - log_approx(sum_exp)
         total_loss = total_loss - log_prob
-
         i = i + 1
     }
-
     total_loss / (batch_seq as float)
 }
 
@@ -209,20 +198,16 @@ func main() int {
     eprintln("[Real Training Pipeline] Standalone Version")
     eprintln("============================================================")
     eprintln("")
-
     training_config config = default_config()
-
     eprintln("[Config] Hidden: " + int_to_str(config.hidden_size))
     eprintln("[Config] Layers: " + int_to_str(config.num_layers))
     eprintln("[Config] Vocab: " + int_to_str(config.vocab_size))
     eprintln("[Config] Batch: " + int_to_str(config.batch_size))
     eprintln("[Config] Seq Len: " + int_to_str(config.seq_len))
     eprintln("")
-
     int hidden = config.hidden_size
     int vocab = config.vocab_size
     int batch_seq = config.batch_size * config.seq_len
-
     eprintln("[Step 1/4] Initializing model weights...")
     []float embed_weight = init_weights(vocab * hidden, 0.02)
     []float ln_weight = init_weights(hidden, 1.0)
@@ -231,7 +216,6 @@ func main() int {
     []float o_proj = init_weights(hidden * hidden, 0.02)
     eprintln("[Step 1/4] Weights initialized")
     eprintln("")
-
     eprintln("[Step 2/4] Creating training data...")
     []int input_ids = []int{cap: batch_seq}
     []int labels = []int{cap: batch_seq}
@@ -243,42 +227,33 @@ func main() int {
     }
     eprintln("[Step 2/4] Data ready")
     eprintln("")
-
     eprintln("[Step 3/4] Training...")
     int epoch = 0
     while epoch < config.num_epochs {
         eprintln("  Epoch " + int_to_str(epoch + 1) + "/" + int_to_str(config.num_epochs))
-
         int step = 0
         while step < config.steps_per_epoch {
-
             []float hidden_states = embedding(input_ids, embed_weight, batch_seq, hidden, vocab)
             hidden_states = simple_transformer_layer(hidden_states, ln_weight, q_proj, v_proj, o_proj, batch_seq, hidden)
             []float logits = matmul(hidden_states, embed_weight, batch_seq, hidden, vocab)
-
             float loss = cross_entropy_loss(logits, labels, batch_seq, vocab)
             float ppl = exp_approx(loss)
-
             eprintln("    Step " + int_to_str(step + 1) + ": loss=" + float_to_str(loss, 4) + ", ppl=" + float_to_str(ppl, 2))
-
             step = step + 1
         }
         epoch = epoch + 1
     }
     eprintln("[Step 3/4] Training complete")
     eprintln("")
-
     eprintln("[Step 4/4] Summary")
     eprintln("  Status: ✓ Forward pass working")
     eprintln("  Status: ✓ CrossEntropy loss computed")
     eprintln("  Status: ✓ Perplexity computed")
     eprintln("  Status: ⏳ Backward pass (TODO)")
     eprintln("")
-
     eprintln("============================================================")
     eprintln("[Success] Real training pipeline validated!")
     eprintln("============================================================")
-
     0
 }
 

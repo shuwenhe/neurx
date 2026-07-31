@@ -1,5 +1,4 @@
 package neurx.distributed.fault_tolerance
-
 struct checkpoint_state {
     int step_number
     int timestamp_ms
@@ -23,7 +22,6 @@ struct fault_tolerance_state {
     int recovery_attempts
     int stragglers_detected
 }
-
 func new_fault_tolerance_state(int checkpoint_interval) fault_tolerance_state {
     fault_tolerance_state {
         checkpoints: []checkpoint_state{cap: 1000},

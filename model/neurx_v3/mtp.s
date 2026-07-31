@@ -1,5 +1,4 @@
 package neurx.model.neurx.mtp
-
 struct mtp_config {
     int hidden_dim
     int vocab_size
@@ -10,7 +9,6 @@ struct mtp_config {
     float rope_theta
     bool causal
 }
-
 func new_mtp_config() mtp_config {
     mtp_config {
         hidden_dim: 5120,

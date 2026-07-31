@@ -7,7 +7,6 @@ import fmt
 import math
 import time
 import io
-
 struct training_config {
     vocab_size: int
     embedding_dim: int
@@ -48,7 +47,6 @@ struct transformer_layer {
     fc2: bundle.tensor_2
     fc_norm: bundle.tensor_2
 }
-
 func generate_synthetic_data(
     batch_size: int,
     seq_length: int,

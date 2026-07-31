@@ -1,5 +1,4 @@
 package neurx.amp.scaler
-
 struct mixed_precision_config {
     string precision_type
     float loss_scale
@@ -32,7 +31,6 @@ struct dynamic_quantization {
     float* activation_min
     float* activation_max
 }
-
 func is_nan_or_inf(float value) bool {
     if value != value {
         return true

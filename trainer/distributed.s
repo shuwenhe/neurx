@@ -1,5 +1,4 @@
 package neurx.trainer.distributed
-
 struct distributed_trainer_config {
     string backend
     int world_size
@@ -14,7 +13,6 @@ struct distributed_trainer_state {
     int global_step
     bool initialized
 }
-
 func new_distributed_trainer_config(int world_size, int rank) distributed_trainer_config {
     distributed_trainer_config {
         backend: "nccl",

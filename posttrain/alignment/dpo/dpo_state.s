@@ -1,5 +1,4 @@
 package neurx.posttrain.dpo.dpo_state
-
 struct dpo_state {
     float beta
     float label_smoothing
@@ -7,7 +6,6 @@ struct dpo_state {
     float last_loss
     bool ready
 }
-
 func clamp_float(float value, float low, float high) float {
     if value < low {
         return low

@@ -14,7 +14,6 @@ use neurx.model.transformer.norm.{
     rope_embedding, new_rope_embedding, apply_rope, rope_apply_result,
     position_embedding_config
 }
-
 struct model_config {
     string name
     int vocab_size
@@ -62,7 +61,6 @@ struct model_output {
     []float last_hidden
     float loss
 }
-
 func model_small() model_config {
     model_config {
         name: "model-small",

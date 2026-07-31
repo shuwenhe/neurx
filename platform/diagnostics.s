@@ -1,6 +1,5 @@
 package neurx.platform.diagnostics
 use neurx.platform.config.{runtime_config_parse_result, get_runtime_config}
-
 struct runtime_info_state {
     string tensor_version
     string runtime_name
@@ -23,7 +22,6 @@ struct check_result {
     bool passed
     string detail
 }
-
 func runtime_info() runtime_info_state {
     runtime_config_parse_result cfg_out = get_runtime_config()
     runtime_info_state {

@@ -1,5 +1,4 @@
 package neurx.trainer
-
 struct trainer_config {
     string name
     string mode
@@ -15,7 +14,6 @@ struct trainer_state {
     float loss
     bool finished
 }
-
 func new_trainer_config(string name, string mode, int max_steps) trainer_config {
     trainer_config {
         name: name,

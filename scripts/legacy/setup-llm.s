@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_shell_escape}
 use std.io.println
-
 func main() {
     string api_key = runtime_env_get("NEURX_API_KEY", "")
     println("🚀 NeurX + LLM quickEnglish text")

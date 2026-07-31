@@ -1,6 +1,5 @@
 package neurx.distributed.pipelining
 use neurx.strings
-
 struct pipeline_stage {
     string name
     int stage_index
@@ -33,7 +32,6 @@ struct pipeline_schedule_state {
     bool flush_done
     bool active
 }
-
 func copy_stage(pipeline_stage stage) pipeline_stage {
     pipeline_stage {
         name: stage.name,

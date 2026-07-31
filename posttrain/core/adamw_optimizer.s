@@ -1,6 +1,5 @@
 package neurx.posttrain.core.adamw_optimizer
 use std.io.println
-
 struct adamw_state_s {
     float learning_rate
     float beta1
@@ -17,7 +16,6 @@ struct param_update_s {
     float norm
     float ratio
 }
-
 func new_adamw_state_s(float lr) adamw_state_s {
     adamw_state_s {
         learning_rate: lr,

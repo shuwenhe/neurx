@@ -1,10 +1,8 @@
 package neurx.tokenizer.bpe_trainer
 use neurx.strings
-
 func string_char(int c) string {
     string(c)
 }
-
 struct bpe_split_state {
     []string train_documents
     []string valid_documents

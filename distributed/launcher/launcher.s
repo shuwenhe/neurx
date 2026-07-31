@@ -1,5 +1,4 @@
 package neurx.distributed.launcher
-
 struct distributed_config {
     int world_size
     int rank
@@ -8,7 +7,6 @@ struct distributed_config {
     int master_port
     string backend
 }
-
 func clamp_positive(int value, int fallback) int {
     if value > 0 {
         return value

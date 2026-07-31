@@ -1,6 +1,5 @@
 package neurx.posttrain.core.lora_module
 use std.io.println
-
 struct lora_module_s {
     int input_dim
     int output_dim
@@ -24,7 +23,6 @@ struct lora_layer_spec_s {
     int rank
     float alpha
 }
-
 func new_lora_module_s(int input_dim, int output_dim, int rank, float alpha) lora_module_s {
     [][]float lora_a = make([][]float, 0)
     [][]float lora_b = make([][]float, 0)

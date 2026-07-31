@@ -1,6 +1,5 @@
 package neurx.posttrain.rlhf.ppo
 use neurx.posttrain.config
-
 struct ppo_state {
     float clip_range
     float kl_coef
@@ -20,7 +19,6 @@ struct ppo_step_result {
     float clipped_ratio
     float advantage
 }
-
 func abs_float(float x) float {
     if x < 0.0 {
         return 0.0 - x

@@ -1,5 +1,4 @@
 package neurx.observability.serving_observability
-
 struct serving_observability_state {
     int requests_total
     int requests_active
@@ -22,7 +21,6 @@ struct serving_observability_state {
     bool error_rate_alert
     bool kv_capacity_alert
 }
-
 func new_serving_observability_state(int kv_blocks_capacity) serving_observability_state {
     serving_observability_state {
         requests_total: 0, requests_active: 0, requests_rejected: 0, requests_failed: 0,

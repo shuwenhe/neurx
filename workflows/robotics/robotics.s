@@ -1,11 +1,9 @@
 package neurx.workflows.robotics
-
 struct robotics_workflow_state {
     string name
     string mode
     bool ready
 }
-
 func new_robotics_workflow_state(string name, string mode) robotics_workflow_state {
     robotics_workflow_state {
         name: name,

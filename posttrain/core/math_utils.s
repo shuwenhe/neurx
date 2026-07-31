@@ -1,6 +1,5 @@
 package neurx.posttrain.core.math_utils
 use std.io.println
-
 func exp_taylor_s(float x) float {
     float result = 1.0
     float term = 1.0

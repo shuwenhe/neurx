@@ -5,7 +5,6 @@ use neurx.tensor.tensor
 use neurx.autograd.tensor
 use neurx.autograd.engine
 use neurx.autograd.function
-
 struct grad_record {
     int id
     []int shape
@@ -33,7 +32,6 @@ struct linearize_state {
     bool reverse_mode
     []dual_record records
 }
-
 func copy_float([]float data) []float {
     neurx.autograd.engine.copy_float(data)
 }

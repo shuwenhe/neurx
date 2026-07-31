@@ -1,12 +1,10 @@
 package neurx.testing.test_distributed_rlhf
-
 struct test_result {
     string name
     int passed
     int failed
     []string messages
 }
-
 func new_test_result(string name) test_result {
     test_result result
     result.name = name

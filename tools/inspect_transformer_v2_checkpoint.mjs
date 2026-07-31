@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import fs from "node:fs";
-
 function load(path) {
   const b = fs.readFileSync(path);
   if (b.subarray(0, 8).toString() !== "NXTRFMV2") throw new Error(`${path}: bad magic`);
@@ -33,7 +32,6 @@ function load(path) {
   if (o !== b.length) throw new Error(`${path}: trailing or missing bytes (${o}/${b.length})`);
   return { path, meta, params };
 }
-
 const files = process.argv.slice(2);
 if (!files.length || files.length > 2) throw new Error("usage: inspect_transformer_v2_checkpoint.mjs CHECKPOINT [CHECKPOINT]");
 if (files.some(path => fs.statSync(path).size > 2_000_000_000)) {

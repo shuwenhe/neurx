@@ -1,5 +1,4 @@
 package neurx.tensor.core
-
 struct tensor_desc {
     []int shape
     []int strides
@@ -18,7 +17,6 @@ struct tensor {
     []float grad
     bool has_grad
 }
-
 func tensor_numel(tensor t) int {
     return t.desc.numel
 }

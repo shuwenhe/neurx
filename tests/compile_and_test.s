@@ -5,7 +5,6 @@ use std.path
 use std.env
 use std.time
 use std.process
-
 struct compilation_result {
     filename: string
     status: string
@@ -32,7 +31,6 @@ struct build_report {
     compilation_results: compilation_result[]
     test_results: test_result[]
 }
-
 func print_header(title: string) {
     println("╔" + strings.repeat("═", 62) + "╗")
     let padded = title + strings.repeat(" ", 60 - len(title))

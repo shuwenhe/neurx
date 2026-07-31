@@ -1,5 +1,4 @@
 module document_parser
-
 struct document_parser_config {
     enabled_formats: list<string> = ["pdf", "html", "markdown", "docx", "pptx", "xlsx", "txt", "csv"]
     pdf_extract_images: bool = true
@@ -592,7 +591,6 @@ class HTMLParser {
         }
     }
 }
-
 struct conversion_result {
     content: string
     sections: list<document_section>
@@ -601,7 +599,6 @@ struct conversion_result {
     links: list<extracted_link>
     code_blocks: list<code_block>
 }
-
 struct table_conversion_result {
     table: extracted_table
     markdown: string
@@ -989,13 +986,10 @@ function test_document_parser() {
     parser = new DocumentParser()
     print("  ✓ Test 1: Markdown Parsing")
     sample_md = """
-# Introduction to AI
 This is an overview of artificial intelligence.
-## Key Concepts
 - Machine Learning
 - Deep Learning
 - NLP
-### Machine Learning Algorithms
 ```python
 def train_model(data):
     model.fit(data)
@@ -1006,7 +1000,6 @@ def train_model(data):
 | Random Forest | Ensemble | 89% |
 | Neural Network | Deep Learning | 94% |
 | SVM | Kernel | 87% |
-## Conclusion
 AI is transforming industries.
 """
     md_result = parser.parse_string(sample_md, "markdown")

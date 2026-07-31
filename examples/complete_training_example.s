@@ -5,7 +5,6 @@ import (
     "neurx/training/gradient_accumulation"
     "neurx/model"
 )
-
 func create_training_config() training_pipeline.training_config {
     var config: training_pipeline.training_config
     config.batch_size = 32

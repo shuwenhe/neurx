@@ -23,7 +23,6 @@ use neurx.optimizer.optim.{adamw_optimizer}
 use neurx.ops
 use neurx.tensor.new
 use neurx.tensor.tensor
-
 func get_file_size(string path) int {
     if !runtime_file_exists(path) {
         return 0
@@ -82,7 +81,6 @@ func read_text_file_with_estimated_progress(string path, int update_interval_ms)
     println("[io] [========================================] 100% | complete, loaded " + loaded_str)
     return text
 }
-
 struct gpt_large_pretrain_state {
     pretrain_config cfg
     string dataset_manifest

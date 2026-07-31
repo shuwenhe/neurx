@@ -3,7 +3,6 @@ use std.io
 use std.strings
 use std.math
 use std.time
-
 struct model_config {
     name: string
     vocab_size: i32
@@ -34,7 +33,6 @@ struct performance_report {
     peak_throughput: f64
     scaling_efficiency: f64
 }
-
 func get_scaled_model() model_config {
     return model_config {
         name: "Scaled transformer_2",

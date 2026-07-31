@@ -1,6 +1,5 @@
 package main
 use neurx.moe.core.{moe_core_self_test}
-
 func main() {
     int status = moe_core_self_test()
     if status != 0 {

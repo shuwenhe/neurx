@@ -1,5 +1,4 @@
 package neurx.model.integration
-
 struct training_batch {
     [][]int token_ids
     [][]int input_ids
@@ -40,7 +39,6 @@ struct model_trainer {
     [string:double loss_history
     [string:double eval_metrics
 }
-
 func create_training_batch(
     []string texts,
     int batch_size,

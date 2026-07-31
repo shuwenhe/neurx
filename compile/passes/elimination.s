@@ -1,12 +1,10 @@
 package neurx.compile.passes.elimination
 use neurx.compile.ir.{ir_graph, ir_node, ir_op}
-
 struct elimination_config {
     bool enable_dce
     bool enable_redundancy_elimination
     bool enable_constant_folding
 }
-
 func new_elimination_config() elimination_config {
     elimination_config {
         enable_dce: true,

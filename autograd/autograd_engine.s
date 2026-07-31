@@ -39,7 +39,6 @@ enum node_type {
     MASKED_FILL,
     NORM,
 }
-
 struct edge {
     int source_node_id
     int target_node_id
@@ -69,7 +68,6 @@ struct computation_graph {
     bool is_recording
     []int topo_order
 }
-
 func new_graph() computation_graph {
     computation_graph {
         nodes: [],

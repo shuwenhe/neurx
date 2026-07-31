@@ -1,5 +1,4 @@
 package neurx.inference.optimization
-
 struct flash_attention_config {
     int block_size
     bool use_flash_attention
@@ -68,7 +67,6 @@ struct optimization_metrics {
     float cache_hit_ratio
     int batch_size_avg
 }
-
 func init_flash_attention(flash_attention_config config) void {
 }
 

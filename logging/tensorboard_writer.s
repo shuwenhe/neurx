@@ -1,5 +1,4 @@
 package neurx.logging
-
 struct tensorboard_writer {
     bool initialized
     string log_dir
@@ -7,7 +6,6 @@ struct tensorboard_writer {
     int events_written
     file_handle output_file
 }
-
 func create_tensorboard_writer(string log_dir) tensorboard_writer {
     ensure_directory_exists(log_dir)
     string filename = "events.out.tfevents." + get_timestamp_string() + "." + get_hostname()

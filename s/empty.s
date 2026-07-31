@@ -1,9 +1,7 @@
 package neurx.empty
-
 struct example {
     int value
 }
-
 func add_one(int value) int {
     value + 1
 }

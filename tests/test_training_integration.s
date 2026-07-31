@@ -1,5 +1,4 @@
 package main
-
 func test_training_config() {
     println("Test 1: Training configuration")
     let batch_size = 32

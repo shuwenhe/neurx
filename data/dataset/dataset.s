@@ -1,5 +1,4 @@
 package neurx.data.dataset.dataset
-
 struct dataset_state {
     []float items
 }
@@ -21,7 +20,6 @@ struct concat_dataset_state {
     []dataset_state datasets
     []int cumulative_sizes
 }
-
 func copy_float([]float values) []float {
     int n = len(values)
     []float out = []float{cap: n}

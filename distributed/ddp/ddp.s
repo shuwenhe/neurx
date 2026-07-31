@@ -1,7 +1,6 @@
 package neurx.distributed.ddp
 use neurx.strings
 use neurx.distributed.comm
-
 struct ddp_state {
     string name
     string backend
@@ -18,7 +17,6 @@ struct ddp_state {
     bool gradient_synchronized
     float last_sync_scale
 }
-
 func copy_ints([]int values) []int {
     []int out = []int{cap: len(values)}
     int i = 0

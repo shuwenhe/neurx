@@ -1,16 +1,12 @@
 package neurx.posttrain.trainer.main_real
 use std.io.eprintln
-
 use neurx.posttrain.trainer.real_training.{run_real_training}
-
 func main() int {
     eprintln("[NeurX PostTrain] Starting Real Training Pipeline")
     eprintln("[Version] Phase 1: Proof of Concept")
     eprintln("[Components] Real Transformer + Real Loss + Real Tokenizer")
     eprintln("")
-
     int result = run_real_training()
-
     if result == 0 {
         eprintln("")
         eprintln("[Success] Training completed successfully")
@@ -18,14 +14,12 @@ func main() int {
         eprintln("")
         eprintln("[Error] Training failed with code: " + int_to_str(result))
     }
-
     result
 }
 
 func int_to_str(int x) string {
     if x == 0 { return "0" }
     if x < 0 { return "-" + int_to_str(0 - x) }
-
     string result = ""
     int num = x
     while num > 0 {

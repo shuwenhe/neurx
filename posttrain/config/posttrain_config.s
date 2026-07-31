@@ -1,5 +1,4 @@
 package neurx.posttrain.config
-
 struct posttrain_config {
     string stage
     int global_batch_size
@@ -16,7 +15,6 @@ struct posttrain_config {
     string scheduler
     string backend
 }
-
 func new_posttrain_config() posttrain_config {
     posttrain_config {
         stage: "sft",

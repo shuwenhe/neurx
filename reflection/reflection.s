@@ -2,7 +2,6 @@ package neurx.reflection
 use neurx.agent.trace
 use neurx.agent.memory
 use neurx.agent.observation
-
 struct agent_reflection_state {
     string critique
     string suggestion
@@ -12,7 +11,6 @@ struct agent_reflection_state {
     string last_action
     string last_observation
 }
-
 func new_agent_reflection_state() agent_reflection_state {
     agent_reflection_state {
         critique: "",

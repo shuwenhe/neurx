@@ -3,7 +3,6 @@ use neurx.posttrain.sft.sft_trainer
 use neurx.model.llm.neurx
 use neurx.tokenizer.neurx
 use std.io.println
-
 func create_sft_example_config() sft_train_config {
     sft_train_config {
         method: "sft",

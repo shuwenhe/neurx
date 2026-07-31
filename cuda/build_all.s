@@ -7,7 +7,6 @@ use neurx.runtime.io.{
     runtime_write_text_file,
     runtime_run_command_output,
 }
-
 struct build_config {
     string cuda_home
     string cuda_lib
@@ -21,7 +20,6 @@ struct build_result {
     string output
     int exit_code
 }
-
 func main() {
     println("[CUDA Build] NeurX CUDA System Builder (S Language)")
     println("")

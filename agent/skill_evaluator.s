@@ -1,13 +1,11 @@
 package neurx.agent.skill_evaluator
 use neurx.agent.skill_schema
-
 struct agent_skill_eval_result {
     float score
     bool should_promote
     bool should_retire
     string reason
 }
-
 func new_agent_skill_eval_result() agent_skill_eval_result {
     agent_skill_eval_result {
         score: 0.0,

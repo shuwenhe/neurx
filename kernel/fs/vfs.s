@@ -5,7 +5,6 @@ int INODE_KV_PAGE   = 3
 int INODE_TOOL      = 4
 int INODE_MEMORY    = 5
 int INODE_VECTOR    = 6
-
 struct inode {
     int    ino
     string path
@@ -30,7 +29,6 @@ struct vfs_state {
     int      next_ino
     int      next_dino
 }
-
 func new_vfs() vfs_state {
     return vfs_state{
         inodes:    [],

@@ -1,43 +1,34 @@
 package main
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}
-
 func pick_input_file(string root) string {
     string candidate = runtime_env_get("SHARD_INPUT_FILE", "")
     if candidate != "" && runtime_file_exists(candidate) {
         return candidate
     }
-
     candidate = runtime_env_get("INPUT_FILE", "")
     if candidate != "" && runtime_file_exists(candidate) {
         return candidate
     }
-
     candidate = root + "/data/large_model/train.jsonl"
     if runtime_file_exists(candidate) {
         return candidate
     }
-
     candidate = root + "/data/training_data_claude.jsonl"
     if runtime_file_exists(candidate) {
         return candidate
     }
-
     candidate = root + "/data/training_data_industrial_complete.jsonl"
     if runtime_file_exists(candidate) {
         return candidate
     }
-
     candidate = root + "/data/training_data_splits/val.jsonl"
     if runtime_file_exists(candidate) {
         return candidate
     }
-
     candidate = root + "/data/training_data_splits/test.jsonl"
     if runtime_file_exists(candidate) {
         return candidate
     }
-
     ""
 }
 
@@ -100,11 +91,9 @@ func main() {
         println("jsonl-shard FAIL missing_input")
         return 1
     }
-
     println("jsonl-shard input=" + input_file)
     println("jsonl-shard shard_dir=" + shard_dir)
     println("jsonl-shard manifest=" + manifest_file)
-
     string script = build_script(input_file, shard_dir, manifest_file, docs_per_shard)
     string command = "cat > /tmp/neurx_jsonl_shard.sh <<'EOF'\n"
     command = command + script + "\nEOF\n"

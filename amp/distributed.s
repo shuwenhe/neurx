@@ -4,7 +4,6 @@ int PRECISION_BF16 = 1
 int PRECISION_FP16 = 2
 int PRECISION_FP8_E4M3 = 3
 int PRECISION_FP8_E5M2 = 4
-
 struct dtype_info {
     int id
     string name
@@ -13,7 +12,6 @@ struct dtype_info {
     double min_positive
     double epsilon
 }
-
 func get_dtype_info(int dtype_id) dtype_info {
     dtype_info info
     if dtype_id == PRECISION_FP32 {

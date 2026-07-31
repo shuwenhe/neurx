@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, runtime_shell_escape, trim}
 use std.io.println
-
 func main() {
     string root_dir = runtime_env_get("NEURX_FIND_S_ROOT", "")
     string resolved = resolve_s_bin(root_dir)

@@ -1,6 +1,5 @@
 package neurx.autograd
 use neurx.tensor.tensor
-
 func backward_matmul(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 2 {
         return backward_result { input_grads: [], success: false }

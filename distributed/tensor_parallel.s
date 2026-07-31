@@ -1,5 +1,4 @@
 package neurx.distributed
-
 struct tensor_parallel_config {
     int tp_degree
     int tp_rank
@@ -15,7 +14,6 @@ struct tensor_parallel_state {
     [][]double local_weights
     [][]double local_grads
 }
-
 func tp_mod_nonneg(int value, int divisor) int {
     if divisor <= 0 {
         return 0

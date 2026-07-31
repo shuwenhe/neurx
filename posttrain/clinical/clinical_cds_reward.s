@@ -1,6 +1,5 @@
 package neurx.posttrain.clinical
 use neurx.posttrain.reward.{reward_model, reward_train_result}
-
 struct medical_fact {
     string entity
     string relation
@@ -17,7 +16,6 @@ struct fact_verification_result {
     float fact_accuracy
     float grounding_score
 }
-
 func extract_medical_facts(string response) []medical_fact {
     []medical_fact facts = []
     []string dosage_patterns = [

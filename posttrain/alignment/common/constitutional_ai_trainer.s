@@ -1,5 +1,4 @@
 package neurx.posttrain.alignment.constitutional_ai_trainer
-
 struct constitutional_principle {
     string id
     string description
@@ -82,7 +81,6 @@ struct cai_state {
     float quality_threshold_rate
     float avg_tokens_per_pair
 }
-
 func create_default_constitution() constitution {
     []constitutional_principle principles = make_principle_array(8)
     principles[0] = constitutional_principle {

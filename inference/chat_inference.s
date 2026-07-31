@@ -3,7 +3,6 @@ use std.io
 use std.math
 use std.time
 use std.strings
-
 struct chat_config {
     vocab_size: i32
     hidden_dim: i32
@@ -34,7 +33,6 @@ struct simple_transformer {
     head_dim: i32
     total_params: i64
 }
-
 func create_chat_config() chat_config {
     var config: chat_config
     config.vocab_size = 32000

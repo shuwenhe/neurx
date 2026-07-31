@@ -1,7 +1,6 @@
 package neurx.pretrain.loop
 use neurx.pretrain.config
 use neurx.pretrain.data
-
 struct pretrain_loop_state {
     pretrain_config cfg
     pretrain_data_state data
@@ -15,7 +14,6 @@ struct pretrain_loop_state {
     bool should_save
     bool finished
 }
-
 func new_pretrain_loop_state(pretrain_config cfg, pretrain_data_state data) pretrain_loop_state {
     pretrain_loop_state {
         cfg: cfg,

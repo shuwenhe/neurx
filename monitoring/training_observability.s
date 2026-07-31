@@ -13,7 +13,6 @@ enum alert_channel {
     ALERT_CONSOLE,
     ALERT_LOGGER,
 }
-
 struct monitoring_config {
     string experiment_name
     string run_id
@@ -40,7 +39,6 @@ struct monitoring_config {
     bool enable_auto_diagnosis
     bool save_full_history
 }
-
 func default_monitoring_config() monitoring_config {
     monitoring_config {
         experiment_name: "NEURX-5.2-Pretrain",

@@ -8,7 +8,6 @@ enum reasoning_strategy {
     REFLECTION = 4
     MULTI_PART = 5
 }
-
 struct cot_config {
     reasoning_strategy strategy
     int max_steps
@@ -80,7 +79,6 @@ struct reasoning_result {
     int num_samples
     bool is_consistent
 }
-
 func new_cot_config() cot_config {
     cot_config {
         strategy: STEP_BY_STEP,

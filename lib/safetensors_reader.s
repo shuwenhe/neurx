@@ -1,5 +1,4 @@
 module safetensors_reader
-
 struct tensor_metadata {
     string name
     []int shape
@@ -14,7 +13,6 @@ struct safetensors_file {
     []tensor_metadata tensors
     map[string]int tensor_name_to_index
 }
-
 func skip_whitespace(string json, int pos) int {
     while pos < json.length && (json[pos] == ' ' || json[pos] == '\n' || json[pos] == '\t' || json[pos] == '\r') {
         pos = pos + 1

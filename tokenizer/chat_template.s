@@ -1,5 +1,4 @@
 package neurx.tokenizer.chat_template
-
 struct chat_message {
     string role
     string content
@@ -11,7 +10,6 @@ struct chat_conversation {
     bool add_generation_prompt
     string system_prompt
 }
-
 func new_conversation([]chat_message msgs, bool gen_prompt) chat_conversation {
     chat_conversation {
         messages: msgs,

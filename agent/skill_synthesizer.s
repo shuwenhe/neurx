@@ -1,7 +1,6 @@
 package neurx.agent.skill_synthesizer
 use neurx.agent.skill_schema
 use neurx.agent.skill_feedback
-
 func agent_skill_version_from_step(int step) string {
     "v" + string(step)
 }

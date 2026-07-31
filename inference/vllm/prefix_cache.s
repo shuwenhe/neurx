@@ -1,6 +1,5 @@
 package neurx.inference.vllm.prefix_cache
 use neurx.inference.cache.prefix_cache
-
 struct vllm_prefix_cache_state {
     prefix_cache_state cache
     int key_space
@@ -10,7 +9,6 @@ struct vllm_prefix_lookup_result {
     vllm_prefix_cache_state state
     bool hit
 }
-
 func new_vllm_prefix_cache_state(int max_entries, int max_tokens, int key_space) vllm_prefix_cache_state {
     int normalized_key_space = key_space
     if normalized_key_space <= 0 {

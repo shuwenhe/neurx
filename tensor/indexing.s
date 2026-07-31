@@ -1,12 +1,10 @@
 package neurx.indexing
-
 struct tensor {
     []float data
     []int shape
     bool requires_grad
     option[tensor] grad
 }
-
 func clone(tensor a) tensor {
     tensor {
         data: a.data,

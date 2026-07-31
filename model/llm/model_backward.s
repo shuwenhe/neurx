@@ -11,7 +11,6 @@ use neurx.model.llm.gpt.{
 }
 use neurx.model.transformer.norm.{rms_norm, rms_normalize}
 use neurx.model.transformer.ffn.{forward_swiglu_ffn, forward_standard_ffn}
-
 struct gpt_sdpa_cache {
     []float q
     []float k
@@ -107,7 +106,6 @@ struct transformer_layer_adamw {
     []float m_ffn_val_w    []float v_ffn_val_w
     []float m_ffn_down_w   []float v_ffn_down_w
 }
-
 func bk_alloc(int n) []float {
     []float v = []float{cap: n}
     int i = 0

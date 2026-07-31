@@ -5,7 +5,6 @@ enum trae_moe_status {
     FORWARD = 1
     BACKWARD = 2
 }
-
 struct trae_moe_config {
     int num_experts
     int expert_dim
@@ -54,7 +53,6 @@ struct trae_forward_result {
     float entropy
     []float expert_activations
 }
-
 func new_trae_moe_config() trae_moe_config {
     trae_moe_config {
         num_experts: 128,

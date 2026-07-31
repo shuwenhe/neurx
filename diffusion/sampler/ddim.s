@@ -1,7 +1,6 @@
 package neurx.diffusion.sampler.ddim
 use neurx.diffusion.noise
 use neurx.ops
-
 struct ddim_sampler_state {
     int current_t
     int stride
@@ -9,7 +8,6 @@ struct ddim_sampler_state {
     bool finished
     noise_schedule_state noise
 }
-
 func new_ddim_sampler_state(noise_schedule_state noise, int stride) ddim_sampler_state {
     int step_stride = stride
     if step_stride <= 0 {

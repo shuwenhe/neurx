@@ -1,6 +1,5 @@
 package neurx.model.llm.base_large
 use neurx.util.math.{exp_approx}
-
 struct gpt_large_state {
     string name
     string family
@@ -42,7 +41,6 @@ struct gpt_large_train_config {
     float target_loss
     float min_lr
 }
-
 func new_gpt_large_state() gpt_large_state {
     gpt_large_state {
         name: "gpt_large",

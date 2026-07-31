@@ -1,6 +1,5 @@
 package neurx.autograd.complete
 use neurx.tensor.{tensor, zeros, ones, fill, new}
-
 struct gradient_node {
     int id
     tensor value
@@ -14,7 +13,6 @@ struct gradient_tape {
     int node_counter
     bool recording
 }
-
 func create_tape() gradient_tape {
     gradient_tape {
         nodes: []gradient_node{cap: 1000},

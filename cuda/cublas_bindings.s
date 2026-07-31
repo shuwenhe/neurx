@@ -61,7 +61,6 @@ extern func cublasStrmm(
     int64 B,
     int ldb
 ) int
-
 struct gpu_tensor {
     int64 device_ptr
     int size
@@ -74,7 +73,6 @@ struct cuda_context {
     int64 cublas_handle
     bool initialized
 }
-
 func gpu_matrix_multiply(
     cuda_context ctx,
     gpu_tensor A,

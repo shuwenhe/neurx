@@ -8,7 +8,6 @@ use neurx.autograd.tensor
 use neurx.strings
 use neurx.tensor.tensor
 use neurx.strings
-
 struct backward_state {
     string name
     bool ready
@@ -21,7 +20,6 @@ struct backward_state {
     []string tags
     []float upstream
 }
-
 func copy_float([]float values) []float {
     []float out = []float{cap: len(values)}
     int i = 0

@@ -3,7 +3,6 @@ use neurx.tensor.tensor
 use neurx.tensor.new
 use neurx.ops
 use neurx.strings
-
 func relu(tensor x) tensor {
     int n = len(x.data)
     []float out = []float{cap: n}
@@ -149,7 +148,6 @@ func sum_first_dim(tensor x, bool keepdim) tensor {
     shape[0] = cols
     new(out, shape, true)
 }
-
 struct adamw_state {
     tensor params
     tensor grad

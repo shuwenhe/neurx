@@ -1,6 +1,5 @@
 package neurx.compile.executor.execution_engine
 use neurx.compile.ir.{ir_graph, ir_node}
-
 struct kernel_launch {
     string kernel_name
     int block_size
@@ -22,7 +21,6 @@ struct executor_config {
     bool enable_stream_async
     bool enable_graph_capture
 }
-
 func new_executor_config() executor_config {
     executor_config {
         max_streams: 32,

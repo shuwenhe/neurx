@@ -1,5 +1,4 @@
 package neurx.pretrain.config.frontier_training_plan
-
 struct frontier_model_target {
     string name
     string architecture
@@ -78,7 +77,6 @@ struct frontier_audit {
     float readiness_score
     bool can_launch_frontier_run
 }
-
 func default_gpt55_class_target() frontier_model_target {
     frontier_model_target {
         name: "neurx-gpt-frontier",

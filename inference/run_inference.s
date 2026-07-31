@@ -1,5 +1,4 @@
 package main
-
 struct model_config {
     int vocab_size
     int hidden_dim
@@ -23,7 +22,6 @@ struct inference_result {
     int num_tokens
     float inference_time
 }
-
 func exp_approx(float x) float {
     float result = 1.0
     float term = 1.0

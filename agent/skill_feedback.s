@@ -2,7 +2,6 @@ package neurx.agent.skill_feedback
 use neurx.agent.observation
 use neurx.agent.trace
 use neurx.agent.memory
-
 struct agent_skill_feedback_state {
     string skill_name
     string task
@@ -11,7 +10,6 @@ struct agent_skill_feedback_state {
     int step
     bool success
 }
-
 func new_agent_skill_feedback_state() agent_skill_feedback_state {
     agent_skill_feedback_state {
         skill_name: "",

@@ -1,6 +1,5 @@
 package main
 use std.io.println
-
 struct training_config {
     string base_model_path
     string train_data_path
@@ -35,7 +34,6 @@ struct training_metrics {
     int current_epoch
     int current_step
 }
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n

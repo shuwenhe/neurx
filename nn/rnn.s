@@ -1,6 +1,5 @@
 package neurx.nn.rnn
 use neurx.tensor.tensor
-
 func exp_approx(float x) float {
     if x > 20.0 {
         return 485165195.0
@@ -115,7 +114,6 @@ func zeros(int n) []float {
     }
     out
 }
-
 struct rnn_cell_state {
     int input_size
     int hidden_size

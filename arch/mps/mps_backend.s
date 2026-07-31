@@ -2,7 +2,6 @@ package neurx.mps
 import "Foundation"
 import "Metal"
 import "MetalPerformanceShaders"
-
 struct mps_device {
     id: int
     name: string
@@ -27,7 +26,6 @@ struct mps_kernel {
     name: string
     shader: pointer
 }
-
 func mps_available() bool {
     let devices = MTLCopyAllDevices()
     devices.count > 0

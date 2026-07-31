@@ -1,5 +1,4 @@
 package neurx.moe.fine_grained
-
 struct neurx_moe_config {
     int hidden_dim
     int ffn_dim
@@ -10,7 +9,6 @@ struct neurx_moe_config {
     float expert_capacity_factor
     float bias_update_speed
 }
-
 func new_neurx_moe_config() neurx_moe_config {
     neurx_moe_config {
         hidden_dim: 5120,

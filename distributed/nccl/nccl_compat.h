@@ -1,20 +1,16 @@
 #pragma once
-
 #include <cuda_runtime.h>
 #include <dlfcn.h>
 #include <cstddef>
-
 using ncclResult_t = int;
 using ncclComm_t = void*;
 using ncclDataType_t = int;
 using ncclRedOp_t = int;
 struct ncclUniqueId { char internal[128]; };
-
 static constexpr ncclResult_t ncclSuccess = 0;
 static constexpr ncclDataType_t ncclFloat = 7;
 static constexpr ncclDataType_t ncclDouble = 8;
 static constexpr ncclRedOp_t ncclSum = 0;
-
 inline void* neurx_nccl_symbol(const char* name) {
   static void* handle = nullptr;
   if (!handle) {
@@ -23,7 +19,6 @@ inline void* neurx_nccl_symbol(const char* name) {
   }
   return handle ? dlsym(handle, name) : nullptr;
 }
-
 inline const char* ncclGetErrorString(ncclResult_t) { return "NCCL runtime unavailable or call failed"; }
 inline ncclResult_t ncclGetUniqueId(ncclUniqueId* id) {
   using Fn = ncclResult_t (*)(ncclUniqueId*);

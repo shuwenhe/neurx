@@ -1,17 +1,13 @@
 #include "hf_decoder_cuda.h"
-
 #include <cuda_runtime.h>
-
 #include <cstdio>
 #include <exception>
 #include <vector>
-
 void print_logits(const char* name, const std::vector<float>& logits) {
   std::printf("%s %zu", name, logits.size());
   for (float value : logits) std::printf(" %.9g", value);
   std::printf("\n");
 }
-
 int main(int argc, char** argv) {
   if (argc < 4) return 2;
   int devices = 0;

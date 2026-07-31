@@ -1,5 +1,4 @@
 package neurx.data.batch_optimization
-
 struct batch_config {
     int batch_size
     int seq_len
@@ -21,7 +20,6 @@ struct optimized_batch {
     int sequences_in_batch
     float avg_loss_weight
 }
-
 func new_batch_config() batch_config {
     batch_config {
         batch_size: 32,

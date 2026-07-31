@@ -3,7 +3,6 @@
 #include <filesystem>
 #include <fstream>
 #include <sstream>
-
 static int ei(const char*n,int d){const char*s=getenv(n);return s&&*s?atoi(s):d;}static float ef(const char*n,float d){const char*s=getenv(n);return s&&*s?strtof(s,nullptr):d;}static std::string es(const char*n,std::string d){const char*s=getenv(n);return s&&*s?s:d;}
 struct Header{char magic[8];int version,step,cursor,vocab,seq,dim,heads,ffn;};
 static bool save(GM&m,const std::string&dir,int st,int cursor){cudaDeviceSynchronize();std::filesystem::create_directories(dir);std::string tmp=dir+"/transformer.ckpt.tmp",dst=dir+"/transformer.ckpt";std::ofstream o(tmp,std::ios::binary|std::ios::trunc);Header h{{'N','X','T','R','F','M','R','1'},1,st,cursor,m.c.vocab,m.c.seq,m.c.dim,m.c.heads,m.c.ffn};o.write((char*)&h,sizeof(h));for(GP*p:m.ps()){o.write((char*)p->v,p->n*4);o.write((char*)p->m,p->n*4);o.write((char*)p->s,p->n*4);}o.close();if(!o)return false;std::filesystem::rename(tmp,dst);std::ofstream meta(dir+"/final_model.neurx");meta<<"{\n  \"architecture\": \"decoder_only_transformer\",\n  \"tokenizer\": \"byte_level\",\n  \"step\": "<<st<<",\n  \"vocab_size\": "<<m.c.vocab<<",\n  \"context_length\": "<<m.c.seq<<",\n  \"hidden_size\": "<<m.c.dim<<",\n  \"num_heads\": "<<m.c.heads<<",\n  \"ffn_size\": "<<m.c.ffn<<",\n  \"checkpoint\": \""<<dst<<"\"\n}\n";printf("[transformer] checkpoint-saved step=%d path=%s\n",st,dst.c_str());return true;}

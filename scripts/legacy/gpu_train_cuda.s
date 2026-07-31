@@ -48,7 +48,6 @@ type training_state = struct {
     samples_seen: int
     batches_completed: int
 }
-
 func main() {
     int max_steps = parse_int(runtime_env_get("NEURX_PRETRAIN_STEPS"), 1000000000)
     int batch_size = parse_int(runtime_env_get("NEURX_PRETRAIN_BATCH_SIZE"), 32)

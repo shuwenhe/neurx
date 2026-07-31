@@ -1,6 +1,5 @@
 package neurx.posttrain.loss.cross_entropy
 use neurx.posttrain.model.model_loader.{fill_model_tensor}
-
 struct loss_batch_result {
     float total_loss
     float avg_loss
@@ -9,7 +8,6 @@ struct loss_batch_result {
     int num_samples
     int num_tokens
 }
-
 func softmax([]float logits) []float {
     []float softmax_probs = fill_model_tensor(len(logits), 0.0)
     float max_logit = logits[0]

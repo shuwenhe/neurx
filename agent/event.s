@@ -1,12 +1,10 @@
 package neurx.agent.event
-
 struct agent_event_state {
     []string kinds
     []string payloads
     []int steps
     int count
 }
-
 func new_agent_event_state() agent_event_state {
     agent_event_state {
         kinds: [],

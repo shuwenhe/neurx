@@ -1,6 +1,5 @@
 package neurx.posttrain.model.model_loader
 use neurx.runtime.io.{runtime_file_exists, runtime_read_binary_file}
-
 struct model_weights {
     string name
     []float embedding_weight
@@ -28,7 +27,6 @@ struct layer_weights {
     int num_heads
     int intermediate_size
 }
-
 func load_safetensors_metadata(string path) []string {
     if !runtime_file_exists(path) {
         println("Error: safetensors file not found: " + path)

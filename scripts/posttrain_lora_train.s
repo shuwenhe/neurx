@@ -1,6 +1,5 @@
 package neurx.scripts.posttrain_lora_train
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_binary_file, runtime_write_text_file, tensor_buffer_new, tensor_buffer_slice, tensor_buffer_write_f32_le, tensor_buffer_write_string, tensor_buffer_write_u64_le, trim}
-
 struct lora_config {
     int seq_len
     int hidden_size
@@ -57,7 +56,6 @@ struct delta_stats {
     float max_abs
     int changed_count
 }
-
 func run_posttrain_lora_sft() int {
     string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "../model/Qwen2.5-0.5B-Instruct")
     string data_file = runtime_env_get("NEURX_POSTTRAIN_DATA_FILE", "/home/shuwen/shuwen/dataset/medical/train.json")

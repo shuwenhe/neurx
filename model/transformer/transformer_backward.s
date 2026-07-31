@@ -4,7 +4,6 @@ use neurx.model.transformer.layer_norm.{
     layer_norm_backward,
     rms_norm_backward
 }
-
 struct backward_pass_output {
     []float grad_input_ids
     []float grad_hidden_states
@@ -22,7 +21,6 @@ struct gradient_accumulator {
     []float grad_w_down
     []float grad_bias_terms
 }
-
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0

@@ -1,5 +1,4 @@
 package neurx.posttrain.trainer
-
 struct trainer_config {
     string model_path
     string data_file
@@ -79,7 +78,6 @@ enum trainer_type {
     REFERENCE
     RUNTIME
 }
-
 func create_trainer(trainer_type ttype) int {
     return 0
 }

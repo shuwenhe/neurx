@@ -1,11 +1,9 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_run_command_output}
 extern "intrinsic" func __host_write_text_file(string path, string content) int
-
 func runtime_write_text_file(string path, string content) () {
     _ = __host_write_text_file(path, content)
 }
-
 struct train_cache {
     []float x
     []float q

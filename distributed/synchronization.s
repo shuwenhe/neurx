@@ -1,5 +1,4 @@
 package neurx.distributed.synchronization
-
 struct rank_state {
     int rank_id
     int world_size
@@ -25,7 +24,6 @@ struct synchronization_state {
     int failed_operations
     int deadlock_detections
 }
-
 func new_synchronization_state(int world_size, string backend) synchronization_state {
     []rank_state ranks = []rank_state{cap: world_size}
     int i = 0

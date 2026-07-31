@@ -1,6 +1,5 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_text_file, trim}
-
 func manifest_log(string s) int {
     println(s)
     0

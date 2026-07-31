@@ -1,11 +1,9 @@
 package neurx.workflows.robotics.sim
-
 struct robotics_sim_state {
     string env_name
     int episodes
     bool domain_randomization
 }
-
 func new_robotics_sim_state(string env_name, int episodes, bool domain_randomization) robotics_sim_state {
     robotics_sim_state {
         env_name: env_name,

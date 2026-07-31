@@ -1,5 +1,4 @@
 package neurx.posttrain.training.metrics
-
 func record_loss(float loss) float {
     return compute_perplexity(loss)
 }
@@ -18,10 +17,8 @@ func record_learning_rate(float lr) float {
 
 func argmax([]float logits) int {
     if len(logits) == 0 { return 0 }
-
     int max_idx = 0
     float max_val = logits[0]
-
     int i = 1
     while i < len(logits) {
         if logits[i] > max_val {
@@ -30,7 +27,6 @@ func argmax([]float logits) int {
         }
         i = i + 1
     }
-
     return max_idx
 }
 
@@ -46,17 +42,14 @@ func compute_perplexity(float loss) float {
 func exp_approx(float x) float {
     if x > 10.0 { return 22026.0 }
     if x < 0.0 - 10.0 { return 0.0 }
-
     float result = 1.0
     float term = 1.0
     int n = 1
-
     while n <= 10 {
         term = term * x / (n as float)
         result = result + term
         n = n + 1
     }
-
     return result
 }
 
@@ -140,16 +133,13 @@ func print_metrics_header() {
 
 func int_to_str(int n) string {
     if n == 0 { return "0" }
-
     int value = n
     bool negative = false
     string out = ""
-
     if value < 0 {
         negative = true
         value = 0 - value
     }
-
     while value > 0 {
         int digit = value - (value / 10) * 10
         if digit == 0 { out = "0" + out }
@@ -183,17 +173,13 @@ func float_to_str_6(float value) string {
 func float_to_str_n(float value, int decimals) string {
     float current = value
     bool negative = current < 0.0
-
     if negative { current = 0.0 - current }
-
     int whole = 0
     while current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
-
     string result = int_to_str(whole)
-
     if decimals > 0 {
         result = result + "."
         int i = 0
@@ -208,7 +194,6 @@ func float_to_str_n(float value, int decimals) string {
             i = i + 1
         }
     }
-
     if negative { result = "-" + result }
     return result
 }

@@ -1,19 +1,14 @@
 #pragma once
-
 #include "transformer_plan.h"
-
 namespace neurx::cann {
-
 struct tensor_view {
   void* data = nullptr;
   std::size_t rows = 0;
   std::size_t columns = 0;
 };
-
 class TransformerPrimitiveBackend {
  public:
   virtual ~TransformerPrimitiveBackend() = default;
-
   virtual status embedding(const void* token_ids, const device_weight& table,
                            const tensor_view& output, Stream stream) = 0;
   virtual status rms_norm(const tensor_view& input, const device_weight& scale,
@@ -63,9 +58,7 @@ class TransformerPrimitiveBackend {
                              const transformer_batch_plan& plan,
                              const tensor_view& output, Stream stream) = 0;
 };
-
 status execute_transformer(const inference::device_batch& batch,
                            const Nxtrfmv2Model& model, PagedKvCache& cache,
                            TransformerPrimitiveBackend& backend);
-
 }

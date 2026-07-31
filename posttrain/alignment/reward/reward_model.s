@@ -3,7 +3,6 @@ use neurx.model.llm.gpt.{
     model_config, language_model, model_output,
     new_language_model, gpt_forward
 }
-
 struct reward_model {
     language_model backbone
     []float head
@@ -31,7 +30,6 @@ struct reward_train_result {
 struct reward_batch_scores {
     []float rewards
 }
-
 func rm_alloc(int n, float v) []float {
     []float arr = []float{cap: n}
     int i = 0

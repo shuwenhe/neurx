@@ -1,5 +1,4 @@
 package neurx.data
-
 struct sampler_config {
     int total_samples
     int batch_size
@@ -16,7 +15,6 @@ struct sampler {
     int current_position
     int epoch
 }
-
 func new_sampler(sampler_config cfg) sampler {
     []int indices = []int{cap: cfg.total_samples}
     for i in 0..cfg.total_samples {

@@ -1,6 +1,5 @@
 package neurx.inference.smart
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, runtime_shell_escape}
-
 struct knowledge_item {
     string text
     int id
@@ -23,7 +22,6 @@ struct inference_config {
     int topKDocs
     bool useGenericResponse
 }
-
 func strlen(string s) int {
     int count = 0
     int i = 0

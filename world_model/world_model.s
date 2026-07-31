@@ -18,7 +18,6 @@ struct world_model_state {
     int                    max_history
     bool                   initialized
 }
-
 func new_world_model() world_model_state {
     world_state init = world_state{
         snapshot_id:      "init",

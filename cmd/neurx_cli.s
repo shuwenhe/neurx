@@ -5,14 +5,12 @@ import (
     "strconv"
     "../scripts"
 )
-
 struct command {
     name        string
     description string
     usage       string
     handler     func([]string) error
 }
-
 func cmd_train(args []string) error {
     if len(args) == 0 {
         fmt.Println("Usage: neurx train <scale> [num_gpus]")
@@ -131,7 +129,6 @@ func cmd_status(args []string) error {
     }
     return nil
 }
-
 var commands = []command{
     {
         name:        "train",

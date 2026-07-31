@@ -2,7 +2,6 @@ package neurx.attention.ring
 use neurx.attention.flash_v2.{
     flash_attn_config, flash_attn_forward_head, flash_attn_backward
 }
-
 struct ring_attn_config {
     int sp_degree
     int sp_rank
@@ -19,7 +18,6 @@ struct ring_attn_config {
     int comm_overlap_depth
     bool gradient_checkpointing
 }
-
 func default_ring_attn_config(
     int seq_len,
     int num_heads,

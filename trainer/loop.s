@@ -11,7 +11,6 @@ enum training_mode {
     VALIDATE = 1
     TEST = 2
 }
-
 struct training_config {
     epochs: int
     batch_size: int
@@ -67,7 +66,6 @@ struct training_loop {
     zero_state: zero.zero_state
     checkpoint_config: gradient.checkpoint_config
 }
-
 func new_training_config() training_config {
     training_config config {
         epochs: 10,

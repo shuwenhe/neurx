@@ -2,7 +2,6 @@ package neurx.model.llm.train_gpt_large
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file}
 use neurx.pretrain.llm.gpt_large_pretrain
 use neurx.util.math.{exp_approx}
-
 func trim(string s) string {
     int i = 0
     while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
@@ -278,7 +277,6 @@ func cos_approx(float x) float {
     }
     result
 }
-
 struct gpt_large_training_config {
     int batch_size
     int seq_len

@@ -1,5 +1,4 @@
 package neurx.api.llm_compat
-
 struct chat_message {
     string role
     string content
@@ -84,7 +83,6 @@ struct api_config {
     bool enable_batching
     int batch_size
 }
-
 func validate_chat_completion_request(chat_completion_request req) api_error {
     api_error err
     if strlen(req.model) == 0 {

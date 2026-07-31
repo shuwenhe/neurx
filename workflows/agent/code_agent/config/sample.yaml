@@ -1,4 +1,3 @@
-
 goal: "implement a Codex-style code agent in NeurX"
 input: "Inspect the repository, update the agent runtime for coding tasks, and verify the result."
 max_steps: 16

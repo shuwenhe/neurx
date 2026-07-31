@@ -9,7 +9,6 @@ use neurx.inference
 use neurx.executor.model_tool_select
 use neurx.safety.safety
 use neurx.runtime.io.{runtime_env_get, runtime_read_text_file, runtime_file_exists}
-
 struct agent_execute_result {
     agent_tool_registry_state tools
     agent_memory_state memory
@@ -20,7 +19,6 @@ struct agent_execute_result {
     int tool_retries
     bool ok
 }
-
 func agent_text_contains(string text, string pattern) bool {
     string haystack = lower(trim(text))
     string needle = lower(trim(pattern))

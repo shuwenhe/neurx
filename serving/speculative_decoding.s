@@ -1,5 +1,4 @@
 package neurx.serving.speculative_decoding
-
 struct spec_decode_config {
     int gamma
     float acceptance_threshold
@@ -12,7 +11,6 @@ struct spec_decode_config {
     int medusa_heads
     int self_skip_layers
 }
-
 func default_spec_decode_config(int vocab_size) spec_decode_config {
     spec_decode_config {
         gamma: 5,

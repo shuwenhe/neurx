@@ -1,6 +1,5 @@
 package neurx.data.pipeline.quality_filter
 use neurx.strings
-
 struct quality_filter_config:
     float min_quality_score
     int min_length_chars
@@ -23,7 +22,6 @@ struct quality_filter_config:
     float min_language_confidence
     bool async_processing
     int batch_size_for_scoring
-
 func default_2t_quality_filter_config() quality_filter_config:
     quality_filter_config cfg
     cfg.min_quality_score = 0.3

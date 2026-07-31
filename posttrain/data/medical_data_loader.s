@@ -1,6 +1,5 @@
 package neurx.posttrain.data.medical_data_loader
 use neurx.posttrain.model.model_loader.{fill_model_tensor}
-
 struct medical_sample {
     string question
     string answer
@@ -23,7 +22,6 @@ struct tokenized_sample {
     []int target_ids
     int seq_len
 }
-
 func parse_medical_sample_json(string json_line) medical_sample {
     medical_sample sample
     sample.question = ""

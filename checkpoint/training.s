@@ -7,7 +7,6 @@ enum checkpoint_type {
     OPTIMIZER_ONLY = 2
     GRADIENT_ONLY = 3
 }
-
 struct checkpoint_config {
     save_dir: string
     save_interval: int
@@ -47,7 +46,6 @@ struct checkpoint_data {
     loss: float
     amp_state: pointer
 }
-
 func new_checkpoint_config(string save_dir) checkpoint_config {
     checkpoint_config config {
         save_dir: save_dir,

@@ -5,7 +5,6 @@ string PARAM_TYPE_BOOL    = "bool"
 string PARAM_TYPE_FLOAT   = "float"
 string PARAM_TYPE_PATH    = "path"
 string PARAM_TYPE_COMMAND = "command"
-
 struct tool_param_schema {
     string name
     string param_type
@@ -31,7 +30,6 @@ struct tool_schema_validate_result {
     string error
     string tool_name
 }
-
 func new_tool_param(string name, string param_type, string description, bool required, string default_value) tool_param_schema {
     tool_param_schema {
         name:          name,

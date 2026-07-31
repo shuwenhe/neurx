@@ -1,5 +1,4 @@
 package neurx.pretrain.config
-
 struct pretrain_config {
     int global_batch_size
     int micro_batch_size
@@ -18,7 +17,6 @@ struct pretrain_config {
     string scheduler
     string backend
 }
-
 func new_pretrain_config() pretrain_config {
     pretrain_config {
         global_batch_size: 256,

@@ -1,11 +1,6 @@
 package neurx.posttrain.alignment.reinforce_pp
-
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
-
-// REINFORCE++: Enhanced REINFORCE with variance reduction
-// Improved version of REINFORCE with multiple variance reduction techniques
-
 struct reinforce_pp_config {
     float learning_rate
     int batch_size
@@ -14,7 +9,7 @@ struct reinforce_pp_config {
     float entropy_coef
     int max_grad_norm
     float gamma
-    float baseline_momentum  // EMA for baseline
+    float baseline_momentum
     bool use_reward_whitening
     bool use_advantage_normalization
     float clip_range_reward
@@ -33,7 +28,6 @@ struct reinforce_pp_state {
     float avg_reward
     float ema_baseline
 }
-
 func new_reinforce_pp_config() reinforce_pp_config {
     reinforce_pp_config {
         learning_rate: 1e-5,
@@ -56,40 +50,27 @@ func reinforce_pp_compute_baseline(
     float ema_baseline,
     float momentum
 ) (tensor, float) {
-    // Compute baseline using multiple strategies:
-    // 1. Within-group mean (like RLOO)
-    // 2. EMA of historical rewards
-    
     int n = rewards.len
     []tensor group_means = []tensor{cap: n}
-    
     int i = 0
     while i < n {
         int group_idx = i / num_samples_per_prompt
         int group_start = group_idx * num_samples_per_prompt
         int group_end = group_start + num_samples_per_prompt
-        
-        // Compute group mean
         tensor sum = tensor_ops.zeros_like(rewards[i])
         int count = 0
-        
         int j = group_start
         while j < group_end {
             sum = tensor_ops.add(sum, rewards[j])
             count = count + 1
             j = j + 1
         }
-        
         group_means[i] = tensor_ops.div_scalar(sum, count * 1.0)
         i = i + 1
     }
-    
     tensor baseline = tensor_ops.concat(group_means, 0)
-    
-    // Update EMA baseline
     float current_mean = tensor_ops.mean_scalar(baseline)
     float new_ema = momentum * ema_baseline + (1.0 - momentum) * current_mean
-    
     (baseline, new_ema)
 }
 
@@ -103,7 +84,6 @@ func reinforce_pp_step(
     float ema_baseline,
     reinforce_pp_config cfg
 ) reinforce_pp_state {
-    // Reward clipping
     int i = 0
     while i < rewards.len {
         rewards[i] = tensor_ops.clip_scalar(
@@ -113,19 +93,13 @@ func reinforce_pp_step(
         )
         i = i + 1
     }
-    
-    // Compute baseline
     (tensor baseline, float new_ema) = reinforce_pp_compute_baseline(
         rewards,
         cfg.num_samples_per_prompt,
         ema_baseline,
         cfg.baseline_momentum
     )
-    
-    // Concatenate rewards
     tensor rewards_cat = tensor_ops.concat(rewards, 0)
-    
-    // Reward whitening
     if cfg.use_reward_whitening {
         float mean_r = tensor_ops.mean_scalar(rewards_cat)
         float std_r = tensor_ops.std_scalar(rewards_cat)
@@ -134,11 +108,7 @@ func reinforce_pp_step(
             std_r + 1e-8
         )
     }
-    
-    // Compute advantages
     tensor advantages = tensor_ops.sub(rewards_cat, baseline)
-    
-    // Advantage normalization
     if cfg.use_advantage_normalization {
         float mean_adv = tensor_ops.mean_scalar(advantages)
         float std_adv = tensor_ops.std_scalar(advantages)
@@ -147,28 +117,19 @@ func reinforce_pp_step(
             std_adv + 1e-8
         )
     }
-    
-    // Concatenate tensors
     tensor states_cat = tensor_ops.concat(states, 0)
     tensor actions_cat = tensor_ops.concat(actions, 0)
     tensor old_log_probs_cat = tensor_ops.concat(old_log_probs, 0)
-    
-    // Forward pass
     tensor policy_logits = policy.forward(states_cat)
     tensor new_log_probs = tensor_ops.log_softmax(policy_logits, -1)
     new_log_probs = tensor_ops.gather(new_log_probs, actions_cat, -1)
-    
-    // Policy loss: E[log π(a|s) * A(s,a)]
     tensor adv_exp = tensor_ops.unsqueeze(advantages, -1)
     tensor policy_grad = tensor_ops.mul(new_log_probs, adv_exp)
-    
-    // KL penalty
     tensor kl_term = tensor_ops.mul(
         old_log_probs_cat,
         tensor_ops.sub(old_log_probs_cat, new_log_probs)
     )
     float kl_div = tensor_ops.mean_scalar(kl_term)
-    
     tensor policy_loss = tensor_ops.neg(
         tensor_ops.sub(
             tensor_ops.mean(policy_grad),
@@ -178,8 +139,6 @@ func reinforce_pp_step(
             )
         )
     )
-    
-    // Entropy bonus
     tensor probs = tensor_ops.softmax(policy_logits, -1)
     tensor log_probs_all = tensor_ops.log_softmax(policy_logits, -1)
     tensor entropy = tensor_ops.neg(
@@ -189,15 +148,11 @@ func reinforce_pp_step(
         )
     )
     tensor entropy_mean = tensor_ops.mean(entropy)
-    
-    // Total loss
     tensor total_loss = tensor_ops.sub(
         policy_loss,
         tensor_ops.mul_scalar(entropy_mean, cfg.entropy_coef)
     )
-    
     float avg_reward = tensor_ops.mean_scalar(rewards_cat)
-    
     reinforce_pp_state {
         policy_logits: policy_logits,
         log_probs: new_log_probs,

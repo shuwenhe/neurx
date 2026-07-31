@@ -3,7 +3,6 @@ int PROC_RUNNING = 1
 int PROC_WAITING = 2
 int PROC_ZOMBIE  = 3
 int PROC_REAPED  = 4
-
 struct proc_descriptor {
     int    pid
     int    ppid
@@ -22,7 +21,6 @@ struct proc_table {
     []proc_descriptor procs
     int               next_pid
 }
-
 func new_proc_table() proc_table {
     return proc_table{procs: [], next_pid: 1}
 }

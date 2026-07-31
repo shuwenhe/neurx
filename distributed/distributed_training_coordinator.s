@@ -1,5 +1,4 @@
 package neurx.distributed
-
 struct distributed_training_config {
     int world_size
     int global_rank
@@ -30,7 +29,6 @@ struct distributed_training_state {
     double accumulated_loss
     int samples_since_sync
 }
-
 func dtc_mod_nonneg(int value, int divisor) int {
     if divisor <= 0 {
         return 0

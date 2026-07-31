@@ -3,7 +3,6 @@ use std.exec
 use std.os
 use std.path
 use std.strings
-
 struct multi_node_config_2 {
     root string
     hostfile string
@@ -14,7 +13,6 @@ struct multi_node_config_2 {
     resumeEnabled bool
     hosts []string
 }
-
 func parseHostFile(hostfile string) []string {
     content, _ := os.ReadFile(hostfile)
     lines := strings.Split(string(content), "\n")

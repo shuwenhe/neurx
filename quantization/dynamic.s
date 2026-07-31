@@ -1,5 +1,4 @@
 package neurx.quantization.dynamic
-
 struct quantization_config {
     string quantization_type
     bool symmetric
@@ -58,7 +57,6 @@ struct quantization_metrics {
     float memory_reduction_ratio
     float calibration_time_ms
 }
-
 func compute_quantization_stats(float* tensor, int size) quantization_stats {
     quantization_stats stats
     if size == 0 {

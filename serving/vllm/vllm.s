@@ -4,7 +4,6 @@ use neurx.scheduler.serving_vllm_scheduler
 use neurx.serving.vllm.metrics
 use neurx.serving.vllm.prefix_cache
 use neurx.attention.serving_paged
-
 struct vllm_runtime_state {
     vllm_request_queue_state queue
     vllm_scheduler_state scheduler
@@ -20,7 +19,6 @@ struct vllm_runtime_step_result {
     int remaining_tokens
     bool selected
 }
-
 func new_vllm_runtime_state(int layer_count, int page_size, int max_pages, int max_prefix_entries, int max_prefix_tokens, string strategy) vllm_runtime_state {
     vllm_runtime_state {
         queue: new_vllm_request_queue_state(),

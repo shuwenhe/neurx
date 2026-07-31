@@ -1,6 +1,5 @@
 package neurx.platform.logging
 use neurx.platform.config.{runtime_config_parse_result, get_runtime_config}
-
 struct logger_state {
     string name
     string level
@@ -9,7 +8,6 @@ struct logger_state {
     string date_format
     int child_count
 }
-
 func configure_logging(string level) logger_state {
     runtime_config_parse_result cfg_out = get_runtime_config()
     string target_level = level

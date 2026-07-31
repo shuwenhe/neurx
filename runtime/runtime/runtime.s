@@ -1,12 +1,10 @@
 package neurx.runtime
-
 struct runtime_state {
     bool available
     bool ops_backend_enabled
     string artifact_root
     []string ir_files
 }
-
 func new_runtime_state(bool available, bool ops_backend_enabled, string artifact_root, []string ir_files) runtime_state {
     runtime_state {
         available: available,

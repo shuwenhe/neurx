@@ -1,5 +1,4 @@
 module moe_optimization
-
 struct moe_config {
     hidden_size: int = 4096
     intermediate_size: int = 14336
@@ -49,8 +48,8 @@ struct dispatch_pattern {
 
 struct moe_expert {
     id: int
-    up_proj: Linear
-    down_proj: Linear
+    up_proj: linear
+    down_proj: linear
     gate: Activation?
     specialization_score: float = 0.0
     importance_weight: float = 1.0
@@ -58,13 +57,13 @@ struct moe_expert {
 }
 
 struct moe_router {
-    gate_layer: Linear
+    gate_layer: linear
     bias: Parameter?
     noise: Normal?
     router_type: string
     top_k: int
     init(hidden_dim: int, num_experts: int, config: moe_config) {
-        this.gate_layer = new Linear(in_features=hidden_dim, out_features=num_experts, bias=true)
+        this.gate_layer = new linear(in_features=hidden_dim, out_features=num_experts, bias=true)
         this.router_type = config.router_type
         this.top_k = config.num_selected_experts
         if config.jitter_noise > 0 && config.training:
@@ -106,8 +105,8 @@ class MoEFFNLayer {
         for i in range(config.num_experts):
             let expert = moe_expert{
                 id=i,
-                up_proj=new Linear(config.hidden_size, config.intermediate_size),
-                down_proj=new Linear(config.intermediate_size, config.hidden_size),
+                up_proj=new linear(config.hidden_size, config.intermediate_size),
+                down_proj=new linear(config.intermediate_size, config.hidden_size),
                 gate=new SiLU(),
                 is_active=true
             }
@@ -117,8 +116,8 @@ class MoEFFNLayer {
             for i in range(config.num_shared_experts) {
                 let shared_exp = moe_expert{
                     id=config.num_experts + i,
-                    up_proj=new Linear(config.hidden_size, config.intermediate_size),
-                    down_proj=new Linear(config.intermediate_size, config.hidden_size),
+                    up_proj=new linear(config.hidden_size, config.intermediate_size),
+                    down_proj=new linear(config.intermediate_size, config.hidden_size),
                     gate=new SiLU(),
                     is_active=true
                 }
@@ -411,7 +410,6 @@ class ExpertSpecializer {
         return cv < 0.1
     }
 }
-
 struct expert_analysis_report {
     num_total_experts: int
     num_active_experts: int
@@ -420,7 +418,6 @@ struct expert_analysis_report {
     importance_range: tuple<float, float>
     redundancy_detected: bool
 }
-
 struct individual_expert_report {
     expert_id: int
     is_active: bool
@@ -514,20 +511,17 @@ class ExpertManager {
         }
     }
 }
-
 struct pruning_report {
     experts_pruned: int
     pruned_expert_ids: list<int>
     threshold_used: float
     remaining_active: int
 }
-
 struct merging_report {
     merges_performed: int
     operations: list<merge_operation>
     estimated_memory_savings_pct: float
 }
-
 struct merge_operation {
     layer_index: int
     expert_a_id: int
@@ -535,7 +529,6 @@ struct merge_operation {
     similarity: float
     action: string
 }
-
 struct moe_efficiency_report {
     total_experts_per_layer: int
     total_moe_layers: int

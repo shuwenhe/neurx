@@ -1,141 +1,105 @@
-struct GraphNode {
+struct graph_node {
     id: i64
     operation_name: string
-    forward_inputs: []Tensor
-    forward_output: Tensor
-    backward_fn: func(grad: Tensor) -> []Tensor
+    forward_inputs: []tensor
+    forward_output: tensor
+    backward_fn: func(grad: tensor) -> []tensor
 }
 
-struct GraphEdge {
+struct graph_edge {
     from_node_id: i64
     to_node_id: i64
     tensor_index: i64
-    prev_func: func(grad: Tensor) -> Tensor
+    prev_func: func(grad: tensor) -> tensor
 }
 
-struct ComputationGraph {
-    nodes: map[i64]GraphNode
-    edges: []GraphEdge
-    leaf_tensors: []Tensor
-    output_tensor: Tensor
+struct computation_graph {
+    nodes: map[i64]graph_node
+    edges: []graph_edge
+    leaf_tensors: []tensor
+    output_tensor: tensor
 }
 
-struct GraphTask {
+struct graph_task {
     id: i64
     node_id: i64
-    grad_tensor: Tensor
+    grad_tensor: tensor
     dependencies_remaining: i64
 }
 
-struct ReadyQueue {
-    tasks: []GraphTask
+struct ready_queue {
+    tasks: []graph_task
 }
 
-struct AutogradEngine {
-    graph: ComputationGraph
-    ready_queue: ReadyQueue
-    node_results: map[i64][]Tensor
+struct autograd_engine {
+    graph: computation_graph
+    ready_queue: ready_queue
+    node_results: map[i64][]tensor
 }
-
 interface IGraphBuilder {
-
-    build_graph(output: Tensor) -> ComputationGraph
-
-    get_graph(tensor: Tensor) -> ComputationGraph
-
-    clear_graph(tensor: Tensor) -> void
+    build_graph(output: tensor) -> computation_graph
+    get_graph(tensor: tensor) -> computation_graph
+    clear_graph(tensor: tensor) -> void
 }
-
 interface IGraphNode {
-
     node_id() -> i64
     operation_name() -> string
-
-    forward_inputs() -> []Tensor
-    forward_output() -> Tensor
-
-    set_backward_fn(fn: func(Tensor) -> []Tensor) -> void
-    backward_fn() -> func(Tensor) -> []Tensor
+    forward_inputs() -> []tensor
+    forward_output() -> tensor
+    set_backward_fn(fn: func(tensor) -> []tensor) -> void
+    backward_fn() -> func(tensor) -> []tensor
 }
-
 interface IGraphEdge {
-
     from_node() -> i64
     to_node() -> i64
     tensor_index() -> i64
 }
-
 interface IGraphTask {
-
     task_id() -> i64
     node_id() -> i64
-    gradient() -> Tensor
-
+    gradient() -> tensor
     dependencies_remaining() -> i64
     decrement_dependencies() -> void
 }
-
 interface IReadyQueue {
-
-    push_task(task: GraphTask) -> void
-    pop_task() -> GraphTask
+    push_task(task: graph_task) -> void
+    pop_task() -> graph_task
     is_empty() -> bool
     size() -> i64
 }
-
 interface IAutogradEngine {
-
-    build_from_tensor(output: Tensor) -> void
-
-    backward(output: Tensor, grad: Tensor) -> void
-
-    get_gradient(tensor: Tensor) -> Tensor
-    get_all_gradients() -> map[string]Tensor
+    build_from_tensor(output: tensor) -> void
+    backward(output: tensor, grad: tensor) -> void
+    get_gradient(tensor: tensor) -> tensor
+    get_all_gradients() -> map[string]tensor
 }
-
 interface IAutograd {
-
-    backward(loss: Tensor) -> void
-    backward_with_gradient(loss: Tensor, gradient: Tensor) -> void
-
-    get_gradient(tensor: Tensor) -> Tensor
+    backward(loss: tensor) -> void
+    backward_with_gradient(loss: tensor, gradient: tensor) -> void
+    get_gradient(tensor: tensor) -> tensor
     requires_grad() -> bool
-
-    check_gradient(fn: func(Tensor) -> Tensor, x: Tensor, eps: f64) -> f64
-
+    check_gradient(fn: func(tensor) -> tensor, x: tensor, eps: f64) -> f64
     enable_grad() -> void
     disable_grad() -> void
     is_grad_enabled() -> bool
-
-    get_computation_graph(tensor: Tensor) -> ComputationGraph
+    get_computation_graph(tensor: tensor) -> computation_graph
 }
-
 interface IGradientAccumulator {
-
-    add_gradient(tensor: Tensor, grad: Tensor) -> void
-
-    get_gradient(tensor: Tensor) -> Tensor
-
+    add_gradient(tensor: tensor, grad: tensor) -> void
+    get_gradient(tensor: tensor) -> tensor
     zero_gradients() -> void
-
     synchronize() -> void
 }
-
 interface IGradientValidator {
-
     check_operator(
-        forward_fn: func([]Tensor) -> Tensor,
-        backward_fn: func(Tensor) -> []Tensor,
-        inputs: []Tensor,
+        forward_fn: func([]tensor) -> tensor,
+        backward_fn: func(tensor) -> []tensor,
+        inputs: []tensor,
         eps: f64
     ) -> f64
-
-    check_backward_graph(output: Tensor, eps: f64) -> f64
+    check_backward_graph(output: tensor, eps: f64) -> f64
 }
-
 interface IAutogradCheckpoint {
-
-    checkpoint(tensor: Tensor) -> void
-
-    recompute_forward(node_id: i64) -> Tensor
+    checkpoint(tensor: tensor) -> void
+    recompute_forward(node_id: i64) -> tensor
 }

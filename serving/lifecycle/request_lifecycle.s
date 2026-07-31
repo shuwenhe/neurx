@@ -1,5 +1,4 @@
 package neurx.serving.lifecycle.request_lifecycle
-
 struct lifecycle_state {
     []string request_ids
     []string statuses
@@ -16,7 +15,6 @@ struct lifecycle_state {
     int retries
     int failed
 }
-
 func new_lifecycle_state() lifecycle_state {
     lifecycle_state {
         request_ids: [], statuses: [], deadlines_ms: [], attempts: [], max_retries: [], next_retry_ms: [],

@@ -1,6 +1,5 @@
 package neurx.tokenizer.data_pipeline
 use neurx.strings
-
 struct tokenizer_config {
     string tokenizer_type
     int vocab_size
@@ -29,7 +28,6 @@ struct tokenizer_config {
     bool return_attention_mask
     bool return_token_type_ids
 }
-
 func default_llm_tokenizer_config() tokenizer_config {
     tokenizer_config cfg
     cfg.tokenizer_type = "bpe"
@@ -235,7 +233,6 @@ func bpe_encode_word(bpe_tokenizer_state state, string word) []int {
     }
     return token_ids
 }
-
 func decode(bpe_tokenizer_state state, []int token_ids) string {
     []string tokens = []string{cap: len(token_ids)}
     int i = 0
@@ -257,7 +254,6 @@ func decode(bpe_tokenizer_state state, []int token_ids) string {
     result = postprocess_decoded(result)
     return result
 }
-
 struct batch_encoding_result {
     [][]int input_ids
     [][]int attention_masks
@@ -265,7 +261,6 @@ struct batch_encoding_result {
     int max_seq_len_in_batch
     float total_time_ms
 }
-
 func encode_batch(
     bpe_tokenizer_state state,
     []string texts,
@@ -318,7 +313,6 @@ func encode_batch(
     result.total_time_ms = float(end_time - start_time)
     return result
 }
-
 struct streaming_encode_state {
     bpe_tokenizer_state tokenizer
     streaming_reader_state reader
@@ -329,7 +323,6 @@ struct streaming_encode_state {
     int target_queue_size
     bool end_of_stream
 }
-
 func init_streaming_encode(
     bpe_tokenizer_state tokenizer,
     streaming_reader_state reader,
@@ -346,14 +339,12 @@ func init_streaming_encode(
     sstate.end_of_stream = false
     return sstate
 }
-
 struct streaming_batch_result {
     []int token_ids
     int count
     bool end_of_stream
     streaming_encode_state updated_state
 }
-
 func streaming_next_batch(streaming_encode_state sstate) streaming_batch_result {
     while sstate.tokens_in_queue < sstate.target_queue_size && !sstate.end_of_stream {
         if sstate.buffer_position >= len(sstate.current_buffer) {
@@ -399,13 +390,11 @@ func streaming_next_batch(streaming_encode_state sstate) streaming_batch_result 
     result.updated_state = sstate
     return result
 }
-
 struct bpe_merge {
     string token1
     string token2
     int priority
 }
-
 func preprocess_text(string text, tokenizer_config cfg) string {
     if cfg.normalize_unicode {
         text = unicode_normalize(text)
@@ -421,7 +410,6 @@ func preprocess_text(string text, tokenizer_config cfg) string {
     }
     return text
 }
-
 func pre_tokenize(string text, string pattern) []string {
     []string words = []string{cap: 10}
     int start = 0
@@ -438,7 +426,6 @@ func pre_tokenize(string text, string pattern) []string {
     }
     return words
 }
-
 func truncate_tokens([]int tokens, tokenizer_config cfg) []int {
     int max_len = cfg.max_sequence_length
     if len(tokens) <= max_len {
@@ -456,54 +443,42 @@ func truncate_tokens([]int tokens, tokenizer_config cfg) []int {
     }
     return result
 }
-
 func postprocess_decoded(string text) string {
     return text
 }
-
 func update_running_average(bpe_tokenizer_state state, int new_value) void {
     int n = state.total_strings_encoded
     if n > 0 {
         state.avg_tokens_per_string =
             (state.avg_tokens_per_string * float(n - 1) + float(new_value)) / float(n)
     }
-
 func get_gpt2_pre_tokenize_pattern() string {
     return """'s|'t|'re|'ve|'m|'ll|'d| ?\\p{L}+| ?\\p{N}+| ?[^\\s\\p{L}\\p{N}]+|\\s+(?!\\S)|\\s+"""
 }
-
 func read_text_file(string path) string {
     return ""
 }
-
 func parse_vocab_json(string json_content) map[string]int {
     return map[string]int{}
 }
-
 func split_lines(string text) []string {
     return []string{cap: 0}
 }
-
 func split_whitespace(string text) []string {
     return []string{cap: 0}
 }
-
 func get_current_time_ms() int {
     return 0
 }
-
 func substring(string s, int start, int end) string {
     return ""
 }
-
 func trim(string s) string {
     return s
 }
-
 func to_lowercase(string s) string {
     return s
 }
-
 func unicode_normalize(string s) string {
     return s
 }

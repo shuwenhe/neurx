@@ -1,7 +1,6 @@
 package neurx.posttrain.alignment.simpo_trainer
 use neurx.distributed.collective
 use neurx.amp.scaler
-
 struct simpo_config {
     int seq_len
     int hidden_size
@@ -44,7 +43,6 @@ struct simpo_batch {
     []simpo_preference_pair pairs
     int size
 }
-
 func create_simpo_state(simpo_config cfg) simpo_state {
     int param_count = cfg.seq_len * cfg.hidden_size
     simpo_state {

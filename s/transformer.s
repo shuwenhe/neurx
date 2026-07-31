@@ -1,7 +1,6 @@
 package neurx.transformer
 use neurx.tensor.tensor
 use neurx.tensor.new
-
 func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
@@ -47,7 +46,6 @@ func copy_layers([]transformer_layer layers) []transformer_layer {
     }
     out
 }
-
 struct transformer_config {
     int num_layers
     int num_heads

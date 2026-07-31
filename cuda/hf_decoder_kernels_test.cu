@@ -1,17 +1,12 @@
 #include "hf_decoder_kernels.cuh"
-
 #include <cuda_runtime.h>
-
 #include <cmath>
 #include <cstdio>
 #include <vector>
-
 namespace {
-
 bool close(float actual, float expected, float tolerance = 2.0e-5F) {
   return std::fabs(actual - expected) <= tolerance;
 }
-
 template <typename T>
 T* device_copy(const std::vector<T>& values) {
   T* result = nullptr;
@@ -19,15 +14,12 @@ T* device_copy(const std::vector<T>& values) {
   cudaMemcpy(result, values.data(), values.size() * sizeof(T), cudaMemcpyHostToDevice);
   return result;
 }
-
 std::vector<float> host_copy(float* values, std::size_t count) {
   std::vector<float> result(count);
   cudaMemcpy(result.data(), values, count * sizeof(float), cudaMemcpyDeviceToHost);
   return result;
 }
-
 }
-
 int main() {
   int devices = 0;
   if (cudaGetDeviceCount(&devices) != cudaSuccess || devices == 0) {
@@ -36,7 +28,6 @@ int main() {
   }
   using namespace neurx::cuda::kernels;
   bool ok = true;
-
   float* rms_input = device_copy<float>({1.0F, 2.0F, -1.0F, -2.0F});
   float* rms_weight = device_copy<float>({0.5F, 1.5F, 2.0F, 0.25F});
   float* rms_output = nullptr;
@@ -47,7 +38,6 @@ int main() {
   const float rms_expected[] = {0.5F * inverse, 3.0F * inverse,
                                 -2.0F * inverse, -0.5F * inverse};
   for (int i = 0; i < 4; ++i) ok = ok && close(rms[i], rms_expected[i]);
-
   float* rope_values = device_copy<float>({1.0F, 2.0F, 3.0F, 4.0F});
   rope_half<<<1, 2>>>(rope_values, 1, 1, 4, 1, 10000.0F);
   const auto rope = host_copy(rope_values, 4);
@@ -55,7 +45,6 @@ int main() {
   ok = ok && close(rope[2], 3.0F * std::cos(1.0F) + std::sin(1.0F));
   ok = ok && close(rope[1], 2.0F * std::cos(0.01F) - 4.0F * std::sin(0.01F));
   ok = ok && close(rope[3], 4.0F * std::cos(0.01F) + 2.0F * std::sin(0.01F));
-
   float* query = device_copy<float>({1.0F, 0.0F, 0.0F, 1.0F,
                                       1.0F, 1.0F, 1.0F, -1.0F});
   float* key = device_copy<float>({1.0F, 0.0F, 0.0F, 1.0F});

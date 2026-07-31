@@ -1,6 +1,5 @@
 module posttrain_validation_verify_tensors
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_binary_file, trim}
-
 struct tensor_stats {
     float mean
     float std
@@ -18,7 +17,6 @@ struct tensor_sample {
     int data_start
     int data_end
 }
-
 func main() {
     println("============================================================")
     println("NeurX PostTrain Tensor-Level Verification")

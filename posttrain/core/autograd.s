@@ -1,6 +1,5 @@
 package neurx.posttrain.core.autograd
 use std.io.println
-
 struct computation_node_s {
     string op_name
     tensor_s output
@@ -28,7 +27,6 @@ struct autograd_state_s {
     bool grad_enabled
     int tape_depth
 }
-
 func new_gradient_tape_s() gradient_tape_s {
     gradient_tape_s {
         operations: make([]computation_node_s, 0),

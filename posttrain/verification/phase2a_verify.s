@@ -1,5 +1,4 @@
 package neurx.posttrain.verification.phase2a_verify
-
 func verify_model_loader() bool {
     println("[✓] Model loader module structure verified")
     return true
@@ -52,9 +51,7 @@ func main() {
     println("")
     println("Verifying all Phase 2A modules...")
     println("")
-
     bool all_ok = true
-
     all_ok = verify_model_loader() && all_ok
     all_ok = verify_transformer_layers() && all_ok
     all_ok = verify_transformer_model() && all_ok
@@ -64,7 +61,6 @@ func main() {
     all_ok = verify_phase2a_trainer() && all_ok
     all_ok = verify_adapter_saver() && all_ok
     all_ok = verify_data_loader() && all_ok
-
     println("")
     if all_ok {
         println("[✅] All Phase 2A modules verified successfully!")

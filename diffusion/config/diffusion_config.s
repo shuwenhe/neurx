@@ -1,5 +1,4 @@
 package neurx.diffusion.config
-
 struct diffusion_config {
     int timesteps
     float beta_start
@@ -8,7 +7,6 @@ struct diffusion_config {
     string prediction_type
     bool v_prediction
 }
-
 func new_diffusion_config() diffusion_config {
     diffusion_config {
         timesteps: 1000,

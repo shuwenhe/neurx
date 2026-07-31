@@ -3,7 +3,6 @@ use neurx.strings
 use neurx.runtime.io.{io_println, io_mkdir_recursive}
 use neurx.moe.llm_1t.{moe_1t_framework}
 use neurx.distributed.collective.{collective_state}
-
 struct sft_data_example {
     string instruction
     string input_context
@@ -52,7 +51,6 @@ struct dpo_training_state {
     []float loss_history
     []float margin_history
 }
-
 func dpo_compute_loss(
     float chosen_logprob,
     float rejected_logprob,

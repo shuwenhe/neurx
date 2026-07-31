@@ -1,5 +1,4 @@
 package neurx.model.robotics.policy
-
 struct robotics_policy_state {
     string policy_name
     int input_dim
@@ -9,7 +8,6 @@ struct robotics_policy_state {
     float train_loss
     bool trained
 }
-
 func robotics_policy_copy_float([]float values) []float {
     int n = len(values)
     []float out = []float{cap: n}

@@ -1,7 +1,6 @@
 package neurx.posttrain.adapter.peft_saver
 use std.io.println
 use std.io.file
-
 struct peft_adapter_config {
     int r
     float lora_alpha
@@ -19,7 +18,6 @@ struct peft_adapter_config {
     string modules_to_save
     string peft_version
 }
-
 func default_peft_config(string model_name, int rank, float alpha) peft_adapter_config {
     peft_adapter_config {
         r: rank,

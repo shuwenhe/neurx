@@ -1,7 +1,5 @@
 package neurx.posttrain.training.stability
-
 func clip_all_gradients([][]float all_grads, float max_norm) float {
-
     float total = 0.0
     int layer = 0
     while layer < len(all_grads) {
@@ -14,7 +12,6 @@ func clip_all_gradients([][]float all_grads, float max_norm) float {
         layer = layer + 1
     }
     float global_norm = sqrt(total)
-
     if global_norm > max_norm {
         float scale = max_norm / global_norm
         layer = 0
@@ -27,7 +24,6 @@ func clip_all_gradients([][]float all_grads, float max_norm) float {
             layer = layer + 1
         }
     }
-
     return global_norm
 }
 
@@ -65,12 +61,10 @@ func check_grads_healthy([][]float all_grads) bool {
 func compute_accuracy([][][]float logits, [][]int targets) float {
     int correct = 0
     int total = 0
-
     int b = 0
     while b < len(logits) {
         int t = 0
         while t < len(logits[b]) {
-
             int pred = 0
             float max_val = logits[b][t][0]
             int v = 1
@@ -81,7 +75,6 @@ func compute_accuracy([][][]float logits, [][]int targets) float {
                 }
                 v = v + 1
             }
-
             if pred == targets[b][t] {
                 correct = correct + 1
             }
@@ -90,7 +83,6 @@ func compute_accuracy([][][]float logits, [][]int targets) float {
         }
         b = b + 1
     }
-
     if total == 0 { return 0.0 }
     return ((correct as float)) / ((total as float))
 }

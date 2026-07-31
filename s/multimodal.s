@@ -1,7 +1,6 @@
 package neurx.multimodal
 use neurx.tensor.tensor
 use neurx.tensor.new
-
 func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
@@ -27,7 +26,6 @@ func copy_int([]int data) []int {
 func copy_tensor(tensor value) tensor {
     new(copy_float(value.data), copy_int(value.shape), value.requires_grad)
 }
-
 struct multimodal_batch {
     int batch_size
     int seq_len

@@ -1,5 +1,4 @@
 module longwriter_engine
-
 struct long_writer_config {
     max_total_tokens: int = 32000
     max_section_tokens: int = 4096
@@ -214,7 +213,6 @@ TASK: Create a comprehensive, well-structured writing outline for the following 
 **Topic**: {topic}
 {f'**Requirements/Special Instructions**: {requirements}' if requirements != None else ''}
 {domain_instruction}{constraint_instruction}{existing_context}
-## Output Format Requirements
 {detail_instructions}
 Respond with a valid JSON object representing the outline tree structure. Use this schema:
 {{
@@ -361,22 +359,18 @@ Citation Guidelines (when referencing facts, data, or sources):
 - If uncertain about a fact, indicate it as approximate or use cautious language
 """
         return f"""You are an expert writer creating a specific section of a longer document.
-## Your task
 Write section **{section.id}: {section.title}**
-## Context
 **Overall document Topic**: {context.document_topic}
 **Current Position**: This is section {get_section_position(context.full_outline, section.id)} of {context.total_sections} total sections.
 **Parent Section**: {parent_context}
 {"**Previous Section Summary**:\n" + prev_context if prev_context != None else ""}
 {"**Upcoming Next**: " + next_hint if next_hint != None else ""}
-## Section Requirements
 {f'Description:\n{section.description}\n' if section.description != None else ''}{f'Key Points to Cover:\n- ' + '\n- '.join(section.must_include!) + '\n' if section.must_include != None && section.must_include!.length > 0 else ''}
 {f'Relevant Keywords/Topics: ' + ', '.join(section.keywords!) if section.keywords != None && section.keywords!.length > 0 else ''}
 {style_instruction}
 {length_instruction}
 {constraints}
 {citation_instruction}
-## Important Instructions
 1. Write ONLY the content for this section. Do NOT include the section title as a heading (it will be added automatically).
 2. Maintain consistency with previous sections in terminology, tone, and style.
 3. Ensure smooth transitions - the last paragraph should naturally lead into what comes next.
@@ -410,7 +404,6 @@ Now write the content for "{section.title}":
         return post_process_result{text=processed, formatting_changes=changes}
     }
 }
-
 struct generation_context {
     document_topic: string
     full_outline: outline_node
@@ -419,7 +412,6 @@ struct generation_context {
     completed_sections: list<string>
     global_constraints: map<string, string>
 }
-
 struct generated_section {
     section: outline_node
     raw_text: string
@@ -431,7 +423,6 @@ struct generated_section {
     quality_feedback?: string
     revision_suggested: bool = false
 }
-
 struct post_process_result {
     text: string
     formatting_changes: list<string>
@@ -445,11 +436,9 @@ class QualityChecker {
     }
     async check(generated: generated_section, context: generation_context) {
         prompt = f"""You are a strict editor evaluating the quality of a written document section.
-## Section to Evaluate
 **Title**: {generated.section.title} (Level {generated.section.level})
 **Content**:
-{generated.processed_text[:3000]}  # Truncate for evaluation context window
-## Evaluation Criteria (score 0.0 - 1.0 for each):
+{generated.processed_text[:3000]}
 1. **Completeness** (weight 25%):
    - Does it cover all expected topics for this section?
    - Is there sufficient detail and depth?
@@ -473,7 +462,6 @@ class QualityChecker {
 6. **Length Appropriateness** (weighted 10%):
    - Is the length suitable for the section's importance?
    - Neither too short (superficial) nor too long (verbose)?
-## Response Format (JSON):
 {{
   "scores": {{
     "completeness": <float 0-1>,
@@ -522,7 +510,6 @@ Respond briefly in 3-4 sentences."""
         }
     }
 }
-
 struct quality_check_result {
     scores: map<string, float>
     overall_score: float
@@ -532,7 +519,6 @@ struct quality_check_result {
     specific_improvements: list<string>
     feedback: string
 }
-
 struct coherence_check_result {
     feedback: string
     smooth_transition: bool
@@ -805,12 +791,10 @@ class MockLLMClient {
             )
     }
 }
-
 struct usage_info {
     prompt_tokens: int
     completion_tokens: int
 }
-
 struct llm_response {
     text: string
     usage: usage_info

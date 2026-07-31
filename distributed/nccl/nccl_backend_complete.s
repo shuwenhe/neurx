@@ -1,5 +1,4 @@
 package neurx.distributed
-
 struct nccl_config {
     int world_size
     int rank
@@ -22,7 +21,6 @@ struct nccl_communicator {
     int num_collective_ops
     []float64 op_times
 }
-
 func init_nccl(nccl_config cfg) (nccl_communicator, error) {
     if cfg.rank < 0 || cfg.rank >= cfg.world_size {
         return nccl_communicator{}, error{message: "Invalid rank"}

@@ -2,7 +2,6 @@ package neurx.posttrain.dpo.examples
 use neurx.posttrain.dpo.dpo_trainer.*
 use neurx.model.llm.neurx.*
 use neurx.tokenizer.neurx.*
-
 func create_dpo_example_config() dpo_train_config {
     dpo_train_config {
         method: "dpo",

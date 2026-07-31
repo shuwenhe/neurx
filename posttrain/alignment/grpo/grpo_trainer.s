@@ -6,7 +6,6 @@ use neurx.distributed.training_3d.*
 use neurx.checkpoint.distributed.*
 use neurx.data.loader.dataloader.*
 use neurx.monitoring.training_observability.*
-
 struct generation_output {
     string text
     []int token_ids
@@ -109,7 +108,6 @@ struct grpo_train_result {
     float training_time_seconds
     string checkpoint_path
 }
-
 func compute_format_reward(string response) float {
     if str_contains(response, "<think>") && str_contains(response, "</think>") {
         return 0.5

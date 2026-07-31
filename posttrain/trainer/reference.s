@@ -1,6 +1,5 @@
 package neurx.posttrain.trainer
 use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file}
-
 struct reference_trainer {
     trainer_config config
     trainer_state state
@@ -8,7 +7,6 @@ struct reference_trainer {
     weight_delta_stats delta_stats_data
     loss_stats loss_stats_data
 }
-
 func reference_init_lora_matrices(int rank, int hidden_size, int v_out) reference_trainer {
     reference_trainer trainer
     int q_a_len = rank * hidden_size

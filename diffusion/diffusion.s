@@ -6,7 +6,6 @@ use neurx.diffusion.sampler.ddpm
 use neurx.diffusion.sampler.ddim
 use neurx.diffusion.train
 use neurx.diffusion.eval
-
 struct diffusion_pipeline_state {
     diffusion_config cfg
     noise_schedule_state noise
@@ -16,7 +15,6 @@ struct diffusion_pipeline_state {
     diffusion_train_state train
     diffusion_eval_state eval
 }
-
 func new_diffusion_pipeline_state() diffusion_pipeline_state {
     diffusion_config cfg = new_diffusion_config()
     noise_schedule_state noise = new_noise_schedule_state(cfg)

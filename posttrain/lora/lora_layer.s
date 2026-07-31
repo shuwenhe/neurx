@@ -1,6 +1,5 @@
 package neurx.posttrain.lora.lora_layer
 use neurx.posttrain.model.model_loader.{fill_model_tensor}
-
 struct lora_linear {
     []float base_weight
     []float lora_a
@@ -34,7 +33,6 @@ struct lora_config {
     float dropout_rate
     []string target_modules
 }
-
 func create_lora_linear(int in_dim, int out_dim, int rank, float alpha, float dropout_rate) lora_linear {
     lora_linear layer
     layer.in_dim = in_dim

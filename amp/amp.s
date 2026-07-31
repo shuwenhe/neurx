@@ -1,12 +1,10 @@
 package neurx.amp
-
 struct amp_runtime_config {
     string dtype
     bool enabled
     bool enable_grad_scaling
     float initial_scale
 }
-
 func new_amp_runtime_config(string dtype, bool enabled) amp_runtime_config {
     amp_runtime_config {
         dtype: dtype,

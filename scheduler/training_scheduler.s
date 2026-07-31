@@ -1,6 +1,5 @@
 package neurx.scheduler.training_scheduler
 use neurx.scheduler.schedulers
-
 struct lr_scheduler {
     float lr
     float base_lr
@@ -10,7 +9,6 @@ struct lr_scheduler {
     int   last_epoch
     string kind
 }
-
 func new_lr_scheduler(float lr) lr_scheduler {
     lr_scheduler {
         lr:           lr,

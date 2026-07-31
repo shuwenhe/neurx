@@ -1,5 +1,4 @@
 package neurx.attention.mla
-
 struct mla_config {
     int hidden_dim
     int num_q_heads
@@ -11,7 +10,6 @@ struct mla_config {
     float softmax_scale
     bool causal
 }
-
 func new_mla_config(int hidden_dim, int num_heads, int kv_lora_rank, int q_lora_rank) mla_config {
     int head_dim = hidden_dim / num_heads
     int rope_dim = 64

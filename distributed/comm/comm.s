@@ -1,5 +1,4 @@
 package neurx.distributed.comm
-
 struct process_group_state {
     string backend
     int rank
@@ -10,7 +9,6 @@ struct process_group_state {
     int send_count
     int recv_count
 }
-
 func copy_float([]float values) []float {
     []float out = []float{cap: len(values)}
     int i = 0

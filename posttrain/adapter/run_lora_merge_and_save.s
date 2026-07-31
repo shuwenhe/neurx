@@ -1,6 +1,5 @@
 package main
 use std.io.println
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -66,7 +65,6 @@ func float_to_str(float value, int decimals) string {
     }
     out
 }
-
 struct merge_config {
     string base_model_path
     string adapter_checkpoint_dir

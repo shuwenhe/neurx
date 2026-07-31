@@ -1,11 +1,6 @@
 package neurx.posttrain.alignment.prime
-
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
-
-// PRIME: PRocess-supervised reward Model with Intermediate rEwards
-// Provides dense intermediate rewards for multi-step reasoning
-
 struct prime_config {
     float learning_rate
     int batch_size
@@ -23,7 +18,7 @@ struct prime_config {
 struct prime_state {
     tensor policy_logits
     tensor value_estimates
-    tensor step_rewards  // Intermediate rewards per step
+    tensor step_rewards
     tensor cumulative_rewards
     tensor advantages
     float kl_divergence
@@ -35,10 +30,9 @@ struct prime_state {
 
 struct process_reward_model {
     module backbone
-    []module step_heads  // One head per reasoning step
+    []module step_heads
     int num_steps
 }
-
 func new_prime_config() prime_config {
     prime_config {
         learning_rate: 1e-5,
@@ -60,25 +54,15 @@ func prime_compute_process_rewards(
     []tensor states,
     []tensor actions
 ) []tensor {
-    // Compute intermediate rewards for each reasoning step
-    
     []tensor step_rewards = []tensor{cap: states.len}
-    
     int i = 0
     while i < states.len {
-        // Determine which step this is
         int step_idx = i % rm.num_steps
-        
-        // Get embeddings from backbone
         tensor embeddings = rm.backbone.forward(states[i])
-        
-        // Apply step-specific head
         tensor reward = rm.step_heads[step_idx].forward(embeddings)
-        
         step_rewards[i] = reward
         i = i + 1
     }
-    
     step_rewards
 }
 
@@ -87,26 +71,18 @@ func prime_compute_cumulative_rewards(
     float gamma,
     float intermediate_weight
 ) []tensor {
-    // Combine intermediate rewards into cumulative rewards
-    
     int n = step_rewards.len
     []tensor cumulative = []tensor{cap: n}
-    
-    // Backward pass to compute discounted cumulative rewards
     tensor running_reward = tensor_ops.zeros_like(step_rewards[n - 1])
-    
     int i = n - 1
     while i >= 0 {
-        // Add current step reward
         running_reward = tensor_ops.add(
             tensor_ops.mul_scalar(step_rewards[i], intermediate_weight),
             tensor_ops.mul_scalar(running_reward, gamma)
         )
-        
         cumulative[i] = running_reward
         i = i - 1
     }
-    
     cumulative
 }
 
@@ -121,9 +97,7 @@ func prime_step(
     []bool dones,
     prime_config cfg
 ) prime_state {
-    // Compute process-supervised rewards
     []tensor step_rewards = []tensor{}
-    
     if cfg.use_process_supervision {
         step_rewards = prime_compute_process_rewards(
             reward_model,
@@ -131,33 +105,25 @@ func prime_step(
             actions
         )
     } else {
-        // Use final reward only
         int i = 0
         while i < states.len {
             step_rewards[i] = tensor_ops.zeros([1])
             i = i + 1
         }
     }
-    
-    // Compute cumulative rewards with discounting
     []tensor cumulative_rewards = prime_compute_cumulative_rewards(
         step_rewards,
         cfg.gamma,
         cfg.intermediate_reward_weight
     )
-    
-    // Compute advantages using GAE
     []tensor advantages = []tensor{cap: states.len}
     []tensor returns = []tensor{cap: states.len}
-    
     tensor gae = tensor_ops.zeros_like(old_values[states.len - 1])
     int t = states.len - 1
-    
     while t >= 0 {
         tensor reward = cumulative_rewards[t]
         tensor value = old_values[t]
         bool done = dones[t]
-        
         tensor next_value = tensor_ops.zeros_like(value)
         if t < states.len - 1 {
             next_value = old_values[t + 1]
@@ -165,7 +131,6 @@ func prime_step(
         if done {
             next_value = tensor_ops.zeros_like(value)
         }
-        
         tensor delta = tensor_ops.add(
             reward,
             tensor_ops.sub(
@@ -173,22 +138,17 @@ func prime_step(
                 value
             )
         )
-        
         gae = tensor_ops.add(
             delta,
             tensor_ops.mul_scalar(gae, cfg.gamma * 0.95)
         )
-        
         if done {
             gae = tensor_ops.zeros_like(gae)
         }
-        
         advantages[t] = gae
         returns[t] = tensor_ops.add(gae, value)
         t = t - 1
     }
-    
-    // Concatenate tensors
     tensor states_cat = tensor_ops.concat(states, 0)
     tensor actions_cat = tensor_ops.concat(actions, 0)
     tensor old_log_probs_cat = tensor_ops.concat(old_log_probs, 0)
@@ -196,46 +156,33 @@ func prime_step(
     tensor ret_tensor = tensor_ops.concat(returns, 0)
     tensor step_rewards_cat = tensor_ops.concat(step_rewards, 0)
     tensor cumulative_cat = tensor_ops.concat(cumulative_rewards, 0)
-    
-    // Normalize advantages
     float mean_adv = tensor_ops.mean_scalar(adv_tensor)
     float std_adv = tensor_ops.std_scalar(adv_tensor)
     adv_tensor = tensor_ops.div_scalar(
         tensor_ops.sub_scalar(adv_tensor, mean_adv),
         std_adv + 1e-8
     )
-    
-    // Forward pass
     tensor policy_logits = policy.forward(states_cat)
     tensor new_log_probs = tensor_ops.log_softmax(policy_logits, -1)
     new_log_probs = tensor_ops.gather(new_log_probs, actions_cat, -1)
-    
     tensor new_values = value_model.forward(states_cat)
-    
-    // PPO-style policy loss
     tensor ratio = tensor_ops.exp(
         tensor_ops.sub(new_log_probs, old_log_probs_cat)
     )
-    
     tensor adv_exp = tensor_ops.unsqueeze(adv_tensor, -1)
     tensor surrogate1 = tensor_ops.mul(ratio, adv_exp)
     tensor surrogate2 = tensor_ops.mul(
         tensor_ops.clip(ratio, 1.0 - 0.2, 1.0 + 0.2),
         adv_exp
     )
-    
     tensor policy_loss = tensor_ops.neg(
         tensor_ops.mean(
             tensor_ops.min(surrogate1, surrogate2)
         )
     )
-    
-    // Value loss
     tensor value_loss = tensor_ops.mean(
         tensor_ops.pow(tensor_ops.sub(new_values, ret_tensor), 2.0)
     )
-    
-    // Entropy
     tensor probs = tensor_ops.softmax(policy_logits, -1)
     tensor log_probs_all = tensor_ops.log_softmax(policy_logits, -1)
     tensor entropy = tensor_ops.neg(
@@ -245,16 +192,12 @@ func prime_step(
         )
     )
     tensor entropy_mean = tensor_ops.mean(entropy)
-    
-    // KL divergence
     float kl_div = tensor_ops.mean_scalar(
         tensor_ops.mul(
             old_log_probs_cat,
             tensor_ops.sub(old_log_probs_cat, new_log_probs)
         )
     )
-    
-    // Total loss
     tensor total_loss = tensor_ops.add(
         policy_loss,
         tensor_ops.add(
@@ -262,7 +205,6 @@ func prime_step(
             tensor_ops.mul_scalar(entropy_mean, -cfg.entropy_coef)
         )
     )
-    
     prime_state {
         policy_logits: policy_logits,
         value_estimates: new_values,

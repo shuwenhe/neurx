@@ -3,7 +3,6 @@ use neurx.runtime.io.{runtime_env_get, runtime_run_command_exit_code}
 use neurx.eval.mmlu_data
 use neurx.eval.mmlu_evaluator
 use std.io.println
-
 func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/Users/shuwen/shuwen/train/neurx")
     string model_path = runtime_env_get("NEURX_MODEL_PATH", project_root + "/../model/base-model-7B")

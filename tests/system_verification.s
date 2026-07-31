@@ -3,7 +3,6 @@ use std.io
 use std.strings
 use std.path
 use std.env
-
 struct component_status {
     name: string
     file_path: string
@@ -21,7 +20,6 @@ struct system_health_check {
     components: component_status[]
     recommendations: []string
 }
-
 func verify_component(name: string, file_path: string, expected_lines: i32) component_status {
     let exists = true
     let component = component_status {

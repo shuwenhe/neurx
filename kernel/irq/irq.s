@@ -1,7 +1,6 @@
 int IRQ_HARDIRQ = 0
 int IRQ_SOFTIRQ = 1
 int IRQ_TASKLET = 2
-
 struct irq_descriptor {
     int    irq_num
     string name
@@ -18,7 +17,6 @@ struct irq_state {
     []int            pending_tasklet
     bool             irqs_disabled
 }
-
 func new_irq_state() irq_state {
     return irq_state{
         descriptors:     [],

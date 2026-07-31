@@ -21,7 +21,6 @@ use neurx.model.transformer.position_encoding.{
     apply_rope_position,
     add_position_encoding_to_hidden
 }
-
 struct transformer_forward_config {
     int vocab_size
     int hidden_dim
@@ -81,7 +80,6 @@ struct forward_pass_cache {
     [][]float ffn_outputs
     [][]float layer_norms
 }
-
 func write_slice([]float dst, int dst_offset, []float src) {
     int i = 0
     while i < len(src) {

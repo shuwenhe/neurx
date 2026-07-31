@@ -1,11 +1,9 @@
 package main
-
 struct tensor {
     []float data
     int rows
     int cols
 }
-
 func test_basic_attention_forward() {
     let seq_len = 3
     let hidden_dim = 8

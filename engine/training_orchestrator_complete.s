@@ -5,7 +5,6 @@ use neurx.distributed.nccl_backend
 use neurx.cuda.device_manager
 use neurx.optimizer.adamw
 use neurx.data.tokenizer
-
 struct training_config {
     string model_name
     int vocab_size
@@ -52,7 +51,6 @@ struct training_state {
     string last_checkpoint_path
     int steps_since_checkpoint
 }
-
 func create_training_orchestrator(training_config cfg) (training_state, error) {
     state := training_state{
         current_step: 0,

@@ -1,5 +1,4 @@
 package neurx.model.gpt_transformer
-
 struct gptconfig {
     int hidden_size
     int num_layers
@@ -43,7 +42,6 @@ struct layer_scale {
     float* scale
     int hidden_size
 }
-
 func init_rotary_embedding(int dim, int max_seq_len) rotary_embedding {
     rotary_embedding rope
     rope.dim = dim

@@ -1,27 +1,20 @@
 #include "hf_decoder_cuda.h"
-
 #include "hf_decoder_kernels.cuh"
-
 #include <cublas_v2.h>
 #include <cuda_runtime.h>
-
 #include <algorithm>
 #include <stdexcept>
 #include <utility>
-
 namespace neurx::cuda {
 namespace {
-
 void check_cuda(cudaError_t status, const char* operation) {
   if (status != cudaSuccess) {
     throw std::runtime_error(std::string(operation) + ": " + cudaGetErrorString(status));
   }
 }
-
 void check_cublas(cublasStatus_t status, const char* operation) {
   if (status != CUBLAS_STATUS_SUCCESS) throw std::runtime_error(std::string(operation) + " failed");
 }
-
 class DeviceBuffer {
  public:
   DeviceBuffer() = default;
@@ -50,12 +43,10 @@ class DeviceBuffer {
   void* data() { return data_; }
   const void* data() const { return data_; }
   std::size_t bytes() const { return bytes_; }
-
  private:
   void* data_ = nullptr;
   std::size_t bytes_ = 0;
 };
-
 DeviceBuffer load_weight(const runtime::model::HfWeightStore& store, const std::string& name) {
   const runtime::native::Tensor tensor = store.load(name).to(runtime::native::DType::float32);
   std::vector<float> host(static_cast<std::size_t>(tensor.numel()));
@@ -65,21 +56,18 @@ DeviceBuffer load_weight(const runtime::model::HfWeightStore& store, const std::
              "copy HF weight to CUDA");
   return result;
 }
-
 struct Linear {
   int input = 0;
   int output = 0;
   DeviceBuffer weight;
   DeviceBuffer bias;
 };
-
 struct Layer {
   DeviceBuffer input_norm;
   Linear q, k, v, o;
   DeviceBuffer post_norm;
   Linear gate, up, down;
 };
-
 void run_linear(cublasHandle_t handle, const float* input, int rows, const Linear& linear,
                 float* output) {
   const float alpha = 1.0F;
@@ -94,16 +82,13 @@ void run_linear(cublasHandle_t handle, const float* input, int rows, const Linea
         output, static_cast<const float*>(linear.bias.data()), rows, linear.output);
   }
 }
-
 }
-
 struct HfCudaKvCache::State {
   std::size_t length = 0;
   std::size_t capacity = 0;
   std::vector<DeviceBuffer> keys;
   std::vector<DeviceBuffer> values;
 };
-
 HfCudaKvCache::HfCudaKvCache() : state_(new State) {}
 HfCudaKvCache::~HfCudaKvCache() = default;
 HfCudaKvCache::HfCudaKvCache(HfCudaKvCache&&) noexcept = default;
@@ -112,7 +97,6 @@ std::size_t HfCudaKvCache::length() const { return state_->length; }
 void HfCudaKvCache::clear() {
   state_->length = 0;
 }
-
 struct HfDecoderCuda::Impl {
   runtime::model::HfConfig config;
   int device = 0;
@@ -121,7 +105,6 @@ struct HfDecoderCuda::Impl {
   std::vector<Layer> layers;
   DeviceBuffer final_norm;
   DeviceBuffer lm_head;
-
   Impl(const std::string& directory, int device_id)
       : config(runtime::model::HfConfig::from_file(directory + "/config.json")),
         device(device_id) {
@@ -161,18 +144,15 @@ struct HfDecoderCuda::Impl {
     lm_head = config.tie_word_embeddings ? load_weight(store, "model.embed_tokens.weight")
                                            : load_weight(store, "lm_head.weight");
   }
-
   ~Impl() {
     if (handle) cublasDestroy(handle);
   }
-
   Linear output_linear() const {
     Linear linear;
     linear.input = static_cast<int>(config.hidden_size);
     linear.output = static_cast<int>(config.vocab_size);
     return linear;
   }
-
   void ensure_cache(HfCudaKvCache::State* cache, std::size_t required) {
     const std::size_t layers_count = layers.size();
     const std::size_t kv_width = static_cast<std::size_t>(
@@ -201,7 +181,6 @@ struct HfDecoderCuda::Impl {
     }
     cache->capacity = capacity;
   }
-
   std::vector<float> forward(const std::vector<int32_t>& ids, HfCudaKvCache::State* cache) {
     if (ids.empty()) throw std::invalid_argument("CUDA decoder requires at least one token");
     if (cache == nullptr) throw std::invalid_argument("CUDA decoder KV cache is null");
@@ -313,29 +292,24 @@ struct HfDecoderCuda::Impl {
     return host;
   }
 };
-
 HfDecoderCuda::HfDecoderCuda(const std::string& directory, int device)
     : impl_(new Impl(directory, device)) {}
 HfDecoderCuda::~HfDecoderCuda() = default;
 HfDecoderCuda::HfDecoderCuda(HfDecoderCuda&&) noexcept = default;
 HfDecoderCuda& HfDecoderCuda::operator=(HfDecoderCuda&&) noexcept = default;
 const runtime::model::HfConfig& HfDecoderCuda::config() const { return impl_->config; }
-
 std::vector<float> HfDecoderCuda::prefill(const std::vector<int32_t>& ids,
                                           HfCudaKvCache* cache) {
   if (cache == nullptr) throw std::invalid_argument("CUDA decoder KV cache is null");
   cache->clear();
   return impl_->forward(ids, cache->state_.get());
 }
-
 std::vector<float> HfDecoderCuda::decode(int32_t token, HfCudaKvCache* cache) {
   if (cache == nullptr) throw std::invalid_argument("CUDA decoder KV cache is null");
   return impl_->forward({token}, cache->state_.get());
 }
-
 int32_t HfDecoderCuda::greedy(const std::vector<float>& logits) {
   if (logits.empty()) throw std::invalid_argument("cannot sample empty CUDA logits");
   return static_cast<int32_t>(std::max_element(logits.begin(), logits.end()) - logits.begin());
 }
-
 }

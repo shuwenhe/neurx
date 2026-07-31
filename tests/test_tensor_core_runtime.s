@@ -1,5 +1,4 @@
 package main
-
 struct tensor_desc {
     []int shape
     []int strides
@@ -10,7 +9,6 @@ struct tensor {
     []float storage
     tensor_desc desc
 }
-
 func shape_numel([]int shape) int {
     int n = 1
     int i = 0

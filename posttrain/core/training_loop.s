@@ -1,6 +1,5 @@
 package neurx.posttrain.core.training_loop
 use std.io.println
-
 struct training_step_s {
     int step
     float loss
@@ -32,7 +31,6 @@ struct training_progress_s {
     float total_time_seconds
     bool finished
 }
-
 func new_training_config_s() training_config_s {
     training_config_s {
         num_epochs: 3,

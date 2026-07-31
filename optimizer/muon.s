@@ -1,5 +1,4 @@
 package neurx.optimizer.muon
-
 struct muon_config {
     float learning_rate
     float beta
@@ -22,7 +21,6 @@ struct muon_optimizer {
     int global_step
     float current_lr
 }
-
 func new_muon(muon_config cfg) muon_optimizer {
     muon_optimizer {
         config: cfg,

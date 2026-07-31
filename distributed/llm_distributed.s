@@ -5,7 +5,6 @@ use neurx.model.llm.gpt_backward.{
     gpt_adamw_step, gpt_forward_cached, gpt_backward, gpt_train_step,
     gpt_train_step_result, scale_all_grads
 }
-
 struct dist_config {
     int world_size
     int rank
@@ -17,7 +16,6 @@ struct dist_config {
     int bucket_size_mb
     bool overlap_comm
 }
-
 func new_dist_config(int world_size, int rank, int dp_size) dist_config {
     dist_config {
         world_size: world_size,

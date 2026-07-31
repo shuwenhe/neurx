@@ -4,7 +4,6 @@ import (
     "../../../core/tensor"
     "../../../nn/activation"
 )
-
 struct transformer_block {
     attention       *multi_head_attention
     ffn             *feed_forward_network
@@ -39,7 +38,6 @@ struct layer_norm {
     eps          float32
     hiddenDim    int
 }
-
 func NewTransformerBlock(config transformer_config) *transformer_block {
     hiddenDim := config.HiddenDim
     numHeads := config.NumHeads
@@ -79,6 +77,7 @@ func NewTransformerBlock(config transformer_config) *transformer_block {
         dropout:   config.Dropout,
     }
 }
+
 func (tb *transformer_block) Forward(x *tensor.tensor_2, causalMask *tensor.tensor_2) *tensor.tensor_2 {
     xNorm := tb.norm1.Forward(x)
     attnOut := tb.selfAttention(xNorm, causalMask)
@@ -88,6 +87,7 @@ func (tb *transformer_block) Forward(x *tensor.tensor_2, causalMask *tensor.tens
     x = tensor.Add(x, ffnOut)
     return x
 }
+
 func (tb *transformer_block) selfAttention(x *tensor.tensor_2, causalMask *tensor.tensor_2) *tensor.tensor_2 {
     batchSize := x.Shape[0]
     seqLen := x.Shape[1]
@@ -109,6 +109,7 @@ func (tb *transformer_block) selfAttention(x *tensor.tensor_2, causalMask *tenso
     output = tensor.MatMul(output, tb.attention.outProj)
     return output
 }
+
 func (tb *transformer_block) feedForward(x *tensor.tensor_2) *tensor.tensor_2 {
     proj := tensor.MatMul(x, tb.ffn.proj1)
     gate := tensor.MatMul(x, tb.ffn.gateProj)
@@ -117,6 +118,7 @@ func (tb *transformer_block) feedForward(x *tensor.tensor_2) *tensor.tensor_2 {
     output := tensor.MatMul(combined, tb.ffn.proj2)
     return output
 }
+
 func (tb *transformer_block) Backward(gradOutput *tensor.tensor_2) (*tensor.tensor_2, error) {
     gradAfterFFN := tensor.Add(gradOutput, gradOutput)
     gradNorm2 := tb.norm2.Backward(gradAfterFFN)
@@ -127,12 +129,15 @@ func (tb *transformer_block) Backward(gradOutput *tensor.tensor_2) (*tensor.tens
     gradInput := tensor.Add(gradAttnInput, gradAfterFFN)
     return gradInput, nil
 }
+
 func (tb *transformer_block) attentionBackward(gradOutput *tensor.tensor_2) *tensor.tensor_2 {
     return gradOutput
 }
+
 func (tb *transformer_block) ffnBackward(gradOutput *tensor.tensor_2) *tensor.tensor_2 {
     return gradOutput
 }
+
 func (ln *layer_norm) Forward(x *tensor.tensor_2) *tensor.tensor_2 {
     mean := computeMean(x, -1)
     variance := computeVariance(x, -1)
@@ -142,6 +147,7 @@ func (ln *layer_norm) Forward(x *tensor.tensor_2) *tensor.tensor_2 {
     output = tensor.Add(output, ln.bias)
     return output
 }
+
 func (ln *layer_norm) Backward(gradOutput *tensor.tensor_2) *tensor.tensor_2 {
     return gradOutput
 }

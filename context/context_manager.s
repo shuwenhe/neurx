@@ -1,7 +1,6 @@
 package neurx.context.context_manager
 use neurx.inference
 use neurx.tool.workspace_tools.{agent_workspace_clip}
-
 struct agent_context_state {
     int token_count
     int max_tokens
@@ -11,7 +10,6 @@ struct agent_context_state {
     []int segment_tokens
     bool compressed
 }
-
 func new_agent_context_state(int max_tokens) agent_context_state {
     int threshold = max_tokens * 3 / 4
     agent_context_state {

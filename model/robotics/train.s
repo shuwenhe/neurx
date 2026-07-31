@@ -1,7 +1,6 @@
 package neurx.model.robotics.train
 use neurx.model.robotics.train_robotics.{robotics_training_config, robotics_training_loop_state, robotics_training_metrics, robotics_training_state, new_robotics_training_config, new_robotics_training_metrics, new_robotics_training_state, robotics_training_state_dict, robotics_training_load_state_dict, robotics_training_step, robotics_training_run, robotics_training_complete}
 use neurx.model.robotics.trajectory_train.{robotics_trajectory_train_config, robotics_trajectory_train_state, robotics_trajectory_train_metrics, new_robotics_trajectory_train_config, new_robotics_trajectory_train_state, robotics_trajectory_train_state_dict, robotics_trajectory_train_load_state_dict, robotics_trajectory_train_step, robotics_trajectory_train_run, robotics_trajectory_train_complete}
-
 func robotics_train_config(int batch_size, int seq_len, int max_steps, float learning_rate, string task_name) robotics_training_config {
     new_robotics_training_config(batch_size, seq_len, max_steps, learning_rate, task_name)
 }

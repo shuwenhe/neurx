@@ -1,5 +1,4 @@
 module transformer_engine
-
 struct transformer_config {
     int vocab_size
     int hidden_size
@@ -21,7 +20,6 @@ struct attention_output {
     []float hidden_state
     []float attention_weights
 }
-
 func init_transformer(string model_path) transformer_state {
     transformer_state state
     state.config.vocab_size = 151936

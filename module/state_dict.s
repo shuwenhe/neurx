@@ -1,7 +1,6 @@
 package neurx.module.state_dict
 use neurx.tensor.tensor
 use neurx.nn
-
 struct named_tensor {
     string name
     tensor value
@@ -15,7 +14,6 @@ struct module_state {
     int buffer_count
     int child_count
 }
-
 func module_state_dict(nn.module m) module_state {
     module_state {
         root: neurx.nn.module_state_dict(m),

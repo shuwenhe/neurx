@@ -1,5 +1,4 @@
 package neurx.agent.eval
-
 struct agent_eval_state {
     []string tasks
     []string actuals
@@ -9,7 +8,6 @@ struct agent_eval_state {
     int passed
     int failed
 }
-
 func new_agent_eval_state() agent_eval_state {
     agent_eval_state {
         tasks: [],

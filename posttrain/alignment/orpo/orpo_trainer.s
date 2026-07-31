@@ -1,7 +1,6 @@
 package neurx.posttrain.alignment.orpo_trainer
 use neurx.distributed.collective
 use neurx.amp.scaler
-
 struct orpo_config {
     int seq_len
     int hidden_size
@@ -74,7 +73,6 @@ struct orpo_trajectory {
     float total_log_odds
     float total_kl
 }
-
 func create_orpo_state(orpo_config cfg) orpo_state {
     int param_count = cfg.seq_len * cfg.hidden_size
     orpo_state {

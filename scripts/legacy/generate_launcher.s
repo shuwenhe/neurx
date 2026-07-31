@@ -2,7 +2,6 @@ package neurx.script
 use std.fs
 use std.os
 use std.strings
-
 struct training_config {
     string root_dir
     string hostfile
@@ -27,7 +26,6 @@ struct training_config {
     string tokenizer_merges
     string shard_list_file
 }
-
 func load_config_from_env() training_config {
     training_config cfg
     string root = os::getenv("NEURX_ROOT")

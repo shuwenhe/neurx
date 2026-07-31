@@ -1,5 +1,4 @@
 package neurx.agent.tool_registry
-
 struct agent_tool_registry_state {
     []string tool_names
     []bool enabled
@@ -7,7 +6,6 @@ struct agent_tool_registry_state {
     []int retries
     []string capabilities
 }
-
 func new_agent_tool_registry_state() agent_tool_registry_state {
     agent_tool_registry_state {
         tool_names: [],

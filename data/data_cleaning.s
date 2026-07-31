@@ -4,7 +4,6 @@ use neurx.runtime.io.{
     io_println, io_file_exists, io_read_lines, io_mkdir_recursive,
     io_write_file, io_list_files, io_file_size
 }
-
 struct cleaning_config {
     string raw_dir
     string cleaned_dir
@@ -24,7 +23,6 @@ struct cleaning_stats {
     int long_documents
     long total_tokens_estimate
 }
-
 func new_cleaning_config() cleaning_config {
     cleaning_config {
         raw_dir: "dataset/pretrain/raw",

@@ -1,6 +1,5 @@
 package neurx.compile.passes.memory
 use neurx.compile.ir.{ir_graph, ir_node}
-
 struct memory_stats {
     int peak_memory_bytes
     int total_allocations
@@ -13,7 +12,6 @@ struct memory_config {
     bool enable_in_place_ops
     int max_memory_budget_mb
 }
-
 func new_memory_config() memory_config {
     memory_config {
         enable_memory_reuse: true,

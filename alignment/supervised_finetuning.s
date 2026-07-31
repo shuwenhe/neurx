@@ -1,5 +1,4 @@
 package neurx.alignment.supervised_finetuning
-
 struct sft_example {
     string instruction
     string input_context
@@ -32,7 +31,6 @@ struct sft_trainer {
     float total_loss
     float best_eval_loss
 }
-
 func new_sft_config() sft_config {
     sft_config {
         batch_size: 32,

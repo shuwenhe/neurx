@@ -1,5 +1,4 @@
 package neurx.posttrain.data.medical
-
 struct mysql_config {
     string host
     int port
@@ -18,7 +17,6 @@ struct medical_article {
     string plain_content
     []string keywords
 }
-
 func clean_medical_content(string raw_content) string {
     string cleaned = raw_content
     cleaned = remove_pattern(cleaned, "Authors:.*\\n")

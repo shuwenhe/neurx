@@ -19,7 +19,6 @@ struct ipc_state {
     int          next_qid
     int          next_msg_id
 }
-
 func new_ipc_state() ipc_state {
     return ipc_state{queues: [], next_qid: 1, next_msg_id: 1}
 }

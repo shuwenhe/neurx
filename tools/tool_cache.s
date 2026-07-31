@@ -1,5 +1,4 @@
 package neurx.tool.tool_cache
-
 struct tool_cache_entry {
     string key
     string value
@@ -21,7 +20,6 @@ struct tool_cache_result {
     bool   hit
     string value
 }
-
 func new_tool_cache(int capacity) tool_cache_state {
     int cap_val = capacity
     if cap_val < 1 {

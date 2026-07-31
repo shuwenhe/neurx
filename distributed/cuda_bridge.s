@@ -1,5 +1,4 @@
 package neurx.distributed.cuda_bridge
-
 struct cuda_device {
     int device_id
     int local_rank
@@ -17,7 +16,6 @@ struct cuda_bridge {
     bool initialized
     int nccl_comm_id
 }
-
 func new_cuda_bridge(
     rank int,
     local_rank int,

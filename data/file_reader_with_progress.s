@@ -1,6 +1,5 @@
 package neurx.data.file_reader_with_progress
 use neurx.runtime.io.{runtime_read_text_file, runtime_file_exists}
-
 func trim(string s) string {
     int i = 0
     int len_s = len(s)

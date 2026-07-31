@@ -2,7 +2,6 @@ package neurx.distributed.zero
 use neurx.strings
 use neurx.distributed.comm
 use neurx.strings
-
 struct zero_state {
     string name
     string backend
@@ -19,7 +18,6 @@ struct zero_state {
     int gathered_bucket_count
     float last_sync_scale
 }
-
 func copy_ints([]int values) []int {
     []int out = []int{cap: len(values)}
     int i = 0

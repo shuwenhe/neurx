@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_run_command_output, runtime_write_text_file}
 use std.io.println
-
 func main() {
     println("[TRAINER] Initializing minimal_train.s...")
     string startup_marker_file = runtime_env_get("NEURX_STARTUP_MARKER_FILE", "")

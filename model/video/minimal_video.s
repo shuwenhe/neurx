@@ -1,5 +1,4 @@
 package neurx.model.video.minimal_video
-
 struct minimal_video_state {
     string name
     string family
@@ -10,7 +9,6 @@ struct minimal_video_state {
     float train_accuracy
     bool trained
 }
-
 func new_minimal_video_state() minimal_video_state {
     minimal_video_state {
         name: "minimal_video",

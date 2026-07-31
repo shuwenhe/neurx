@@ -1,5 +1,4 @@
 module function_calling
-
 struct function_calling_config {
     execution_mode: string = "auto"
     max_tool_calls_per_turn: int = 5
@@ -127,19 +126,16 @@ struct content_block {
     id?: string
     name?: string
     input?: map<string, any>
-
 struct user_message {
     role: string = "user"
     content: string | list<content_block>
     tool_results?: list<tool_call_result_block>
 }
-
 struct tool_call_result_block {
     tool_call_id: string
     content: any
     is_error: bool = false
 }
-
 struct execution_summary {
     total_tool_calls_initiated: int
     total_tool_calls_completed: int
@@ -240,7 +236,6 @@ class ToolRegistry {
         }
     }
 }
-
 struct registry_statistics {
     total_tools: int
     categories: map<string, int>
@@ -252,7 +247,6 @@ interface ToolExecutor {
     get_name()
     validate_arguments(args: map<string, any>, schema: parameter_schema)
 }
-
 struct validation_report {
     is_valid: bool
     missing_params: list<string>
@@ -547,7 +541,6 @@ class FunctionCallingEngine {
         }
     }
 }
-
 struct conversation_summary {
     total_messages: int
     user_messages: int
@@ -840,7 +833,6 @@ class MockLLMClientForFC {
         }
     }
 }
-
 struct llm_raw_response {
     finished_reason?: string
     choices: list<map<string, any>>

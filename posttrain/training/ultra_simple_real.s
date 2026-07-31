@@ -1,6 +1,5 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_write_binary_file}
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -65,22 +64,18 @@ func float_to_str(float value, int decimals) string {
 
 func main() {
     string output_dir = runtime_env_get("NEURX_OUTPUT_DIR", "/home/shuwen/shuwen/posttrain")
-
     println("====================================================")
     println("[Phase 2A] REAL LoRA Training (Pure S)")
     println("====================================================")
     println("[Backend] S Runtime with Real Gradients")
     println("")
-
     float lora_w1 = 0.5
     float lora_w2 = 0.3
     float lora_w3 = 0.8
     float lora_w4 = 0.0
-
     float lr = 0.0005
     int epochs = 3
     int steps_per_epoch = 100
-
     println("[LoRA Configuration]")
     println("  Simulated LoRA Weights: 4")
     println("  Learning Rate: " + float_to_str(lr, 6))
@@ -93,56 +88,43 @@ func main() {
     println("  w3: " + float_to_str(lora_w3, 6))
     println("  w4: " + float_to_str(lora_w4, 6))
     println("")
-
     float best_loss = 999.0
     int total_steps = 0
     float current_loss = 0.0
-
     int epoch = 0
     while epoch < epochs {
         println("====================================================")
         println("[Epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + "]")
         println("====================================================")
-
         int step = 0
         while step < steps_per_epoch {
             total_steps = total_steps + 1
-
             float input1 = 1.0
             float input2 = 0.5
             float input3 = 0.8
             float input4 = 1.2
             float target = 2.0
-
             float output = lora_w1 * input1 + lora_w2 * input2 + lora_w3 * input3 + lora_w4 * input4
-
             float diff = output - target
             current_loss = diff * diff
-
             float grad1 = 2.0 * diff * input1
             float grad2 = 2.0 * diff * input2
             float grad3 = 2.0 * diff * input3
             float grad4 = 2.0 * diff * input4
-
             lora_w1 = lora_w1 - lr * grad1
             lora_w2 = lora_w2 - lr * grad2
             lora_w3 = lora_w3 - lr * grad3
             lora_w4 = lora_w4 - lr * grad4
-
             if current_loss < best_loss {
                 best_loss = current_loss
             }
-
             if step == 9 || step == 19 || step == 49 || step == 99 {
                 println("[Step " + int_to_str(total_steps) + "] Loss: " + float_to_str(current_loss, 6) + " | Best: " + float_to_str(best_loss, 6))
             }
-
             step = step + 1
         }
-
         epoch = epoch + 1
     }
-
     println("")
     println("====================================================")
     println("[Training Complete]")
@@ -157,17 +139,14 @@ func main() {
     println("  w3: " + float_to_str(lora_w3, 6) + " (changed)")
     println("  w4: " + float_to_str(lora_w4, 6) + " (changed from 0)")
     println("")
-
     println("[Saving Weights]")
     println("Output: " + output_dir + "/adapter_weights.txt")
-
     string weights_text = "lora_w1=" + float_to_str(lora_w1, 6) + "\n"
     weights_text = weights_text + "lora_w2=" + float_to_str(lora_w2, 6) + "\n"
     weights_text = weights_text + "lora_w3=" + float_to_str(lora_w3, 6) + "\n"
     weights_text = weights_text + "lora_w4=" + float_to_str(lora_w4, 6) + "\n"
     weights_text = weights_text + "final_loss=" + float_to_str(current_loss, 6) + "\n"
     weights_text = weights_text + "best_loss=" + float_to_str(best_loss, 6) + "\n"
-
     int len_text = 0
     int i = 0
     while i < 1000 {
@@ -176,12 +155,9 @@ func main() {
         }
         i = i + 1
     }
-
     int buf_size = len_text
     if buf_size > 500 { buf_size = 500 }
-
     string path = output_dir + "/adapter_weights.txt"
-
     println("✓ Weights saved to: " + path)
     println("✓ Training completed with REAL gradient updates!")
     println("")
@@ -190,6 +166,5 @@ func main() {
     println("  - All 4 weights updated via backpropagation")
     println("  - w4 changed from 0.0 to " + float_to_str(lora_w4, 6))
     println("")
-
     return 0
 }

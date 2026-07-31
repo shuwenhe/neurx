@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get}
 use neurx.strings.{string_concat}
-
 struct cluster_config {
     int num_nodes
     []string node_addresses
@@ -20,7 +19,6 @@ struct node_process_handle {
     int process_id
     bool is_running
 }
-
 func parse_cluster_config() cluster_config {
     string node_list = runtime_env_get("NEURX_NODE_LIST", "localhost")
     int num_nodes = parse_int(runtime_env_get("NEURX_NUM_NODES", "1"), 1)

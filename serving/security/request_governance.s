@@ -1,5 +1,4 @@
 package neurx.serving.security.request_governance
-
 struct governance_state {
     []string tenant_ids
     []string key_fingerprints
@@ -14,7 +13,6 @@ struct governance_state {
     int denied
     int quota_rejected
 }
-
 func new_governance_state() governance_state {
     governance_state {
         tenant_ids: [], key_fingerprints: [], roles: [],

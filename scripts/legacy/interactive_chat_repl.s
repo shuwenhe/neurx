@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_run_command_output}
 use std.io.println
-
 struct model_config {
     int vocab_size
     int hidden_size
@@ -16,7 +15,6 @@ struct inference_context {
     string checkpoint_path
     bool model_loaded
 }
-
 func trim(string s) string {
     int i = 0
     while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {

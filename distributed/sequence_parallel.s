@@ -1,5 +1,4 @@
 package neurx.distributed
-
 struct sequence_parallel_config {
     int sp_degree
     int sp_rank
@@ -15,7 +14,6 @@ struct sequence_parallel_state {
     int batch_size
     int hidden_dim
 }
-
 func sp_mod_nonneg(int value, int divisor) int {
     if divisor <= 0 {
         return 0

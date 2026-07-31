@@ -5,7 +5,6 @@ import neurx.pretrain.pipeline.*
 import neurx.attention.*
 import neurx.posttrain.alignment.*
 import neurx.inference.engine.*
-
 struct system_status {
     bool model_loaded
     bool tokenizer_ready
@@ -22,7 +21,6 @@ struct system_status {
     []string warnings
     []string errors
 }
-
 func check_system_status() {
     print("\n" + "="*70)
     print("🔍 Checking NEURX-5.2 Training System status")
@@ -142,7 +140,6 @@ func check_system_status() {
         print("\n✨ All systems operational! Ready for NEURX-5.2 training/inference.")
     print("="*70 + "\n")
     return status
-
 func start_neurx_training(
     string mode = "full",
     string config_path = "",
@@ -181,7 +178,6 @@ func start_neurx_training(
             print("\n🎉 Full pipeline complete!")
         case _:
             print(f"Unknown mode: {mode}. Use 'pretrain', 'sft', 'align', or 'full'.")
-
 func _start_pretraining(string config_path, option<string> resume_from):
     """startEnglish texttraining"""
     print("\n" + "="*60)
@@ -196,7 +192,6 @@ func _start_pretraining(string config_path, option<string> resume_from):
         model_config_path=config_path if config_path != "" else none,
         resume_from_checkpoint=resume_from
     )
-
 func _start_sft(string config_path, option<string> resume_from):
     """startEnglish text"""
     print("\n" + "="*60)
@@ -215,7 +210,6 @@ func _start_sft(string config_path, option<string> resume_from):
         if (epoch+1) % eval_interval == 0:
             evaluate_sft(trainer, dataloaders["eval"])
         save_checkpoint(model, f"{sft_cfg.output_dir}/epoch_{epoch+1}/")
-
 func _start_alignment(string config_path, option<string> resume_from):
     """startalignmenttraining"""
     print("\n" + "="*60)
@@ -235,7 +229,6 @@ func _start_alignment(string config_path, option<string> resume_from):
     print(f"   Method: {align_method.upper()}")
     print(f"   Data: {align_cfg.train_data_path}")
     run_alignment_training(align_cfg)
-
 func start_neurx_inference_server(int port = 8080, string model_path = "./checkpoints/neurx_final/"):
     """
     start NEURX-5.2 inferenceEnglish text
@@ -263,7 +256,6 @@ func start_neurx_inference_server(int port = 8080, string model_path = "./checkp
     print(f"   POST /batch_generate - batch_2 generation")
     print(f"   GET  /status       - Server status")
     print(f"   GET  /health       - Health check\n")
-
 func run_all_tests():
     """runEnglish texttest"""
     print("\n" + "#"*70)
@@ -312,7 +304,6 @@ func run_all_tests():
     else:
         print("#  ⚠️  SOME TESTS FAILED - Please check logs above  ")
     print("#"*70 + "\n")
-
 func show_usage_examples():
     """
     English textuseexample
@@ -397,7 +388,6 @@ func show_usage_examples():
 ╚══════════════════════════════════════════════════════════════╝
 """
     print(examples)
-
 func main():
     """mainEnglish text"""
     print("""

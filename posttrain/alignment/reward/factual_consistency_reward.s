@@ -1,5 +1,4 @@
 package neurx.posttrain.reward.factual_consistency_reward
-
 struct fact {
     string subject
     string predicate
@@ -56,7 +55,6 @@ struct factual_config {
     float coverage_weight
     float citation_weight
 }
-
 func extract_facts(string text, factual_config config) factual_content {
     factual_content content
     content.facts = []fact{}

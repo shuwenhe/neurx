@@ -4,7 +4,6 @@ use neurx.moe.fine_grained
 use neurx.model.neurx.mtp
 use neurx.model.neurx.fp8_training
 use neurx.alignment.neurx_r1_grpo
-
 struct neurx_v3_config {
     int hidden_dim
     int num_layers
@@ -23,7 +22,6 @@ struct neurx_v3_config {
     int max_seq_len
     int batch_size
 }
-
 func new_neurx_v3_config() neurx_v3_config {
     neurx_v3_config {
         hidden_dim: 5120,

@@ -1,6 +1,5 @@
 package neurx.reasoning.reasoning
 use neurx.agent.observation
-
 struct agent_reasoning_step {
     int index
     string thought
@@ -13,7 +12,6 @@ struct agent_reasoning_state {
     string scratchpad
     bool chain_complete
 }
-
 func new_agent_reasoning_step(int index, string thought, string conclusion) agent_reasoning_step {
     agent_reasoning_step {
         index: index,

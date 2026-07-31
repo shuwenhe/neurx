@@ -2,7 +2,6 @@ package neurx.posttrain.sft.sft_trainer
 use neurx.model.llm.neurx
 use neurx.tokenizer.neurx
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file}
-
 struct sft_example {
     string instruction
     string input_context
@@ -108,7 +107,6 @@ struct sft_step_result {
     float perplexity
     float token_accuracy
 }
-
 func create_sft_example_config() sft_train_config {
     sft_train_config {
         method: "sft",

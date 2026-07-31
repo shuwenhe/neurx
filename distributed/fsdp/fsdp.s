@@ -5,7 +5,6 @@ enum fsdp_sharding_strategy {
     SHARD_GRAD_OP = 1
     NO_SHARD = 2
 }
-
 struct fsdp_config {
     fsdp_sharding_strategy sharding_strategy
     bool mixed_precision
@@ -52,7 +51,6 @@ struct fsdp_module {
     int total_params
     int local_params
 }
-
 func new_fsdp_config() fsdp_config {
     fsdp_config {
         sharding_strategy: fsdp_sharding_strategy.FULL_SHARD,

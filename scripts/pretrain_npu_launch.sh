@@ -1,11 +1,7 @@
-
 set -euo pipefail
-
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$root_dir"
-
 config_file="${NEURX_NPU_CLUSTER_CONFIG:-$root_dir/configs/pretrain.yaml}"
-
 yaml_value() {
   local file="$1"
   local key="$2"
@@ -19,7 +15,6 @@ yaml_value() {
     }
   ' "$file"
 }
-
 yaml_list_entries() {
   local file="$1"
   local section="$2"
@@ -33,7 +28,6 @@ yaml_list_entries() {
     }
   ' "$file"
 }
-
 yaml_list_value() {
   local item="$1"
   local key="$2"
@@ -47,17 +41,14 @@ yaml_list_value() {
     }
   ' <<<"$item"
 }
-
 log_step() {
   echo "[pretrain-npu] $1"
 }
-
 if [[ "${PLATFORM:-linux}" != "linux" ]]; then
   echo "error: Ascend CANN pretraining is supported on Linux hosts only."
   echo "       Current platform: ${PLATFORM:-unknown}"
   exit 1
 fi
-
 log_step "step 1/8: locating Ascend toolkit"
 ascend_home="${ASCEND_HOME_PATH:-/usr/local/Ascend/ascend-toolkit/latest}"
 if [[ ! -d "$ascend_home" ]]; then
@@ -65,7 +56,6 @@ if [[ ! -d "$ascend_home" ]]; then
   echo "       Set ASCEND_HOME_PATH, then run: make pretrain-npu"
   exit 1
 fi
-
 log_step "step 2/8: locating Ascend runtime libraries"
 acl_lib=""
 for candidate in "$ascend_home/lib64/libascendcl.so" "$ascend_home/runtime/lib64/libascendcl.so"; do
@@ -79,7 +69,6 @@ if [[ -z "$acl_lib" ]]; then
   echo "       Install the CANN runtime package or correct ASCEND_HOME_PATH."
   exit 1
 fi
-
 log_step "step 3/8: checking NPU availability"
 npu_smi_bin="${NPU_SMI:-$(command -v npu-smi 2>/dev/null || true)}"
 if [[ -z "$npu_smi_bin" && -x /usr/local/Ascend/driver/tools/npu-smi ]]; then
@@ -90,7 +79,6 @@ if [[ -z "$npu_smi_bin" ]] || ! "$npu_smi_bin" info >/dev/null 2>&1; then
   echo "       Check the Ascend driver and device permissions."
   exit 1
 fi
-
 log_step "step 4/8: loading cluster config"
 visible_devices="${ASCEND_RT_VISIBLE_DEVICES:-${NEURX_NPU_VISIBLE_DEVICES:-0}}"
 if [[ -f "$config_file" ]]; then
@@ -101,7 +89,6 @@ if [[ ! "$visible_devices" =~ ^[0-9]+(,[0-9]+)*$ ]]; then
   echo "       Received: $visible_devices"
   exit 1
 fi
-
 device_count="$(printf '%s' "$visible_devices" | awk -F, '{print NF}')"
 requested_world_size="${NEURX_NPU_WORLD_SIZE:-${WORLD_SIZE:-$device_count}}"
 worker_host="${NEURX_NPU_WORKER_HOST:-$(yaml_value "$config_file" worker_host)}"
@@ -112,7 +99,6 @@ master_addr="${NEURX_NPU_MASTER_ADDR:-$(yaml_value "$config_file" master_addr)}"
 master_addr="${master_addr:-112.29.145.3}"
 master_port="${NEURX_NPU_MASTER_PORT:-$(yaml_value "$config_file" master_port)}"
 master_port="${master_port:-29500}"
-
 worker_hosts=()
 worker_visibles=()
 if [[ -f "$config_file" ]]; then
@@ -125,12 +111,10 @@ if [[ -f "$config_file" ]]; then
     worker_visibles+=("${vis:-0}")
   done < <(yaml_list_entries "$config_file" workers)
 fi
-
 if [[ "${#worker_hosts[@]}" -eq 0 ]]; then
   worker_hosts=("$worker_host")
   worker_visibles=("$worker_visible")
 fi
-
 if [[ -f "$config_file" ]]; then
   yaml_world_size="$(yaml_value "$config_file" world_size)"
   if [[ -n "$yaml_world_size" ]]; then
@@ -139,32 +123,27 @@ if [[ -f "$config_file" ]]; then
     requested_world_size="$((1 + ${#worker_hosts[@]}))"
   fi
 fi
-
 log_step "step 5/8: validating world size and HCCL runtime"
 if [[ ! "$requested_world_size" =~ ^[0-9]+$ ]] || [[ "$requested_world_size" -lt 1 ]]; then
   echo "error: WORLD_SIZE must be a positive integer."
   echo "       Received: $requested_world_size"
   exit 1
 fi
-
 log_step "step 6/8: preparing pretrain manifest and runtime environment"
 if [[ "$requested_world_size" -gt 1 && "${#worker_hosts[@]}" -lt 1 ]]; then
   echo "error: world size > 1 but no workers were configured."
   exit 1
 fi
-
 configured_world_size=$((1 + ${
 if [[ "$requested_world_size" -ne "$configured_world_size" ]]; then
   echo "[pretrain-npu] note: configured workers imply WORLD_SIZE=$configured_world_size; using requested WORLD_SIZE=$requested_world_size"
 fi
-
 config="${NEURX_NPU_PRETRAIN_CONFIG:-$(yaml_value "$config_file" npu_pretrain_config)}"
 config="${config:-cann/configs/ascend_910b_train.json}"
 if [[ ! -f "$config" ]]; then
   echo "error: NPU pretrain config not found: $config"
   exit 1
 fi
-
 if [[ "$requested_world_size" -gt 1 ]]; then
   hccl_lib=""
   for candidate in \
@@ -186,25 +165,20 @@ if [[ "$requested_world_size" -gt 1 ]]; then
     exit 1
   fi
 fi
-
 mkdir -p "${NEURX_PRETRAIN_OUTPUT_DIR:-$root_dir/checkpoint/NeurX-1.3}/logs"
-
 echo "=== NeurX Ascend NPU Pretraining ==="
 echo "[pretrain-npu] toolkit: $ascend_home"
 echo "[pretrain-npu] runtime: $acl_lib"
 echo "[pretrain-npu] visible devices: $visible_devices ($device_count)"
 echo "[pretrain-npu] requested world size: $requested_world_size"
 echo "[pretrain-npu] config: $config"
-
 export ASCEND_HOME_PATH="$ascend_home"
 export PATH="$ascend_home/bin:$ascend_home/compiler/ccec_compiler/bin:$PATH"
 export LD_LIBRARY_PATH="$ascend_home/lib64:$ascend_home/runtime/lib64:$ascend_home/compiler/lib64:${LD_LIBRARY_PATH:-}"
 export ASCEND_OPP_PATH="${ASCEND_OPP_PATH:-$ascend_home/opp}"
 export ASCEND_AICPU_PATH="${ASCEND_AICPU_PATH:-$ascend_home}"
-
 log_step "step 7/8: building pretrain manifest"
 make build-pretrain-manifest-s
-
 common_env=(
   "NEURX_ROOT=$root_dir"
   "NEURX_COMPUTE_BACKEND=cann"
@@ -226,7 +200,6 @@ common_env=(
   "NEURX_PRETRAIN_LR=${NEURX_PRETRAIN_LR:-0.0002}"
   "NEURX_PRETRAIN_SAVE_INTERVAL=${NEURX_PRETRAIN_SAVE_INTERVAL:-10000}"
 )
-
 if [[ "$requested_world_size" -gt 1 ]]; then
   log_step "step 8/8: checking workers and synchronizing code"
   for idx in "${!worker_hosts[@]}"; do
@@ -264,7 +237,6 @@ if [[ "$requested_world_size" -gt 1 ]]; then
     ssh -o StrictHostKeyChecking=no "$host" "bash -lc $(printf '%q' "$remote_cmd")" &
   done
 fi
-
 log_step "starting master locally (rank=0)"
 log_step "building s_ir_runner locally"
 make build-s-ir-runner

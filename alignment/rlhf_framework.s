@@ -1,5 +1,4 @@
 package neurx.alignment.rlhf_framework
-
 struct instruction_data {
     string instruction
     string response
@@ -68,7 +67,6 @@ struct alignment_metrics {
     float consistency_score
     float overall_alignment_score
 }
-
 func init_sft_state() sft_train_state {
     sft_train_state state
     state.epoch = 0

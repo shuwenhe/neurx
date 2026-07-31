@@ -1,5 +1,4 @@
 package neurx.posttrain.core.tensor_runtime
-
 struct tensor_s {
     []float data
     []int shape
@@ -19,7 +18,6 @@ struct tensor_metadata_s {
     string device
     int offset
 }
-
 func new_tensor_s([]float data_ptr, []int shape_list) tensor_s {
     int total = 1
     int i = 0

@@ -1,6 +1,5 @@
 package neurx.inference
 use neurx.inference.sampling_strategies
-
 struct generator_config {
     sampling_config sampling
     int eos_token_id
@@ -13,7 +12,6 @@ struct generator_config {
     int num_return_sequences
     int top_logprobs_count
 }
-
 func default_generator_config() generator_config {
     generator_config {
         sampling: neurx.inference.sampling_strategies.new_sampling_config(),
@@ -333,6 +331,7 @@ func generate_one_sequence(
 
 func generate_one_sequence_with_forward(
     []int prompt_ids,
+
     func forward_fn,
     generator_config cfg,
     uint64 rng
@@ -469,6 +468,7 @@ func generate(
 
 func generate_with_forward(
     []int prompt_ids,
+
     func forward_fn,
     generator_config cfg
 ) generation_result {
@@ -516,6 +516,7 @@ func generate_with_forward(
 
 func generate(
     []int prompt_ids,
+
     func forward_fn,
     generator_config cfg
 ) generation_result {

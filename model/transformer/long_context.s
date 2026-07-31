@@ -6,7 +6,6 @@ enum context_type {
     FULL_ATTENTION = 2
     MIXED = 3
 }
-
 struct long_context_config {
     int max_context_length
     int sliding_window_size
@@ -65,7 +64,6 @@ struct long_context_state {
     []segment_info segments
     int current_segment_idx
 }
-
 func new_long_context_config() long_context_config {
     long_context_config {
         max_context_length: 262144,

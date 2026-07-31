@@ -1,10 +1,8 @@
 package neurx.trainer.pretrain
 use neurx.pretrain.loop.{pretrain_loop_state, pretrain_step, pretrain_reset_micro_step, pretrain_loop_state_dict, pretrain_loop_load_state_dict}
-
 struct pretrain_trainer_ref {
     pretrain_loop_state loop
 }
-
 func new_pretrain_trainer_ref(pretrain_loop_state loop) pretrain_trainer_ref {
     pretrain_trainer_ref {
         loop: loop,

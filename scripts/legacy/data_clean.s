@@ -20,7 +20,6 @@ use neurx.script.data_utils.{
     hash_key,
 }
 use neurx.strings.{string_split, string_join, string_contains, string_trim}
-
 struct clean_config {
     string raw_dir
     string cleaned_dir
@@ -43,7 +42,6 @@ struct dataset_splits {
     string val_file
     string test_file
 }
-
 func new_clean_config_from_env() clean_config {
     let neurx_home = get_env("NEURX_HOME", ".")
     clean_config{

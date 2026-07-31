@@ -1,6 +1,5 @@
 package neurx.nn.conv
 use neurx.tensor.tensor
-
 func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
@@ -50,7 +49,6 @@ func shape4(int a, int b, int c, int d) []int {
 func out_size(int in_size, int kernel, int stride, int padding, int dilation) int {
     (in_size + 2 * padding - dilation * (kernel - 1) - 1) / stride + 1
 }
-
 struct conv1d_state {
     int in_channels
     int out_channels

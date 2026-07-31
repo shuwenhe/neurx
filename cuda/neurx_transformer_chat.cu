@@ -2,16 +2,13 @@
 #define NEURX_TRANSFORMER_NO_MAIN
 #include "neurx_transformer_train_v2.cu"
 #include <iostream>
-
 namespace {
-
 struct InferenceCache {
   int *ids;
   float *embedding, *x, *n1, *inv1, *q, *k, *v, *att, *ctx;
   float *proj, *res, *n2, *inv2, *gate, *up, *sw, *down, *h, *logits;
   std::vector<float *> key_cache, value_cache;
   int cache_length = 0;
-
   explicit InferenceCache(const Model &m) {
     int64_t td = int64_t(m.seq) * m.dim;
     int64_t tf = int64_t(m.seq) * m.ffn;
@@ -28,7 +25,6 @@ struct InferenceCache {
       value_cache.push_back(managed_f(td));
     }
   }
-
   ~InferenceCache() {
     void *allocations[] = {ids, embedding, x, n1, inv1, q, k, v, att, ctx,
                            proj, res, n2, inv2, gate, up, sw, down, h, logits};
@@ -39,7 +35,6 @@ struct InferenceCache {
     for (float *p : value_cache) if (p) cudaFree(p);
   }
 };
-
 static bool read_checkpoint_header(const std::string &path, HeaderV2 &h) {
   std::ifstream in(path, std::ios::binary);
   if (!in || !read_exact(in, &h, sizeof(h))) {
@@ -53,7 +48,6 @@ static bool read_checkpoint_header(const std::string &path, HeaderV2 &h) {
   }
   return true;
 }
-
 static bool load_inference_weights(Model &model, const Tokenizer &tok,
                                    const std::string &path,
                                    const HeaderV2 &expected) {
@@ -86,7 +80,6 @@ static bool load_inference_weights(Model &model, const Tokenizer &tok,
   }
   return true;
 }
-
 static bool forward_prefill(Model &m, InferenceCache &c, const std::vector<int> &ids) {
   int t = int(ids.size()), d = m.dim, f = m.ffn, td = t * d, tf = t * f;
   for (int i = 0; i < t; ++i) c.ids[i] = ids[i];
@@ -120,7 +113,6 @@ static bool forward_prefill(Model &m, InferenceCache &c, const std::vector<int> 
   c.cache_length = t;
   return true;
 }
-
 static bool forward_decode(Model &m, InferenceCache &c, int token, int position) {
   if (position != c.cache_length || position < 0 || position >= m.seq) {
     std::fprintf(stderr, "KV cache position mismatch: position=%d cache_length=%d\n",
@@ -162,14 +154,12 @@ static bool forward_decode(Model &m, InferenceCache &c, int token, int position)
   c.cache_length = position + 1;
   return true;
 }
-
 static int greedy_token(const Model &m, const InferenceCache &c, int position) {
   const float *row = c.logits + int64_t(position) * m.vocab;
   int best = 0;
   for (int i = 1; i < m.vocab; ++i) if (row[i] > row[best]) best = i;
   return best;
 }
-
 static std::vector<std::string> decoder_for(const Tokenizer &tok) {
   std::vector<std::string> decoder(tok.size());
   for (const auto &entry : tok.vocab) {
@@ -178,9 +168,7 @@ static std::vector<std::string> decoder_for(const Tokenizer &tok) {
   }
   return decoder;
 }
-
 }
-
 int main() {
   std::setvbuf(stdout, nullptr, _IOLBF, 0);
   int device_count = 0;
@@ -189,7 +177,6 @@ int main() {
     std::fprintf(stderr, "CUDA device unavailable: %s\n", cudaGetErrorString(status));
     return 2;
   }
-
   std::string checkpoint = env_str("NEURX_CHECKPOINT", "checkpoint/NeurX-1.3/transformer_v2.ckpt");
   HeaderV2 header{};
   if (!read_checkpoint_header(checkpoint, header)) return 3;
@@ -200,7 +187,6 @@ int main() {
     std::fprintf(stderr, "Tokenizer vocabulary size mismatch: %d != %u\n", tok.size(), header.vocab);
     return 4;
   }
-
   std::printf("Loading %.2f GiB NXTRFMV2 checkpoint weights...\n",
               std::filesystem::file_size(checkpoint) / double(1ULL << 30));
   Model model(header.vocab, header.seq, header.dim, header.heads,
@@ -209,7 +195,6 @@ int main() {
   InferenceCache cache(model);
   auto decoder = decoder_for(tok);
   int max_new_tokens = std::max(1, env_int("NEURX_CHAT_MAX_TOKENS", 64));
-
   std::printf("NeurX real CUDA inference ready (step=%llu, layers=%u, context=%u).\n",
               static_cast<unsigned long long>(header.step), header.layers, header.seq);
   std::printf("Commands: quit, exit, bye, or English text\n\n");

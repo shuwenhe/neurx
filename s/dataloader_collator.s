@@ -1,5 +1,4 @@
 package neurx.data
-
 struct collator_config {
     int max_length
     int pad_token_id
@@ -20,7 +19,6 @@ struct batch {
     []int original_lengths
     map[string]any extra
 }
-
 func default_collator_config() collator_config {
     collator_config {
         max_length: 512,

@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_text_file, runtime_run_command_output}
 use std.io.println
-
 struct training_state {
     int current_step
     int completed_docs
@@ -9,7 +8,6 @@ struct training_state {
     float loss
     string checkpoint_time
 }
-
 func main() {
     println("[PRETRAIN-GPU] === NVIDIA CUDA Runtime/cuBLAS Pretraining (S launcher) ===")
     string project_root = runtime_env_get("NEURX_ROOT", ".")

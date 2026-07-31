@@ -1,6 +1,5 @@
 module posttrain_chat_interactive
 use neurx.runtime.io.{runtime_file_exists, runtime_env_get}
-
 func tokenize(string input) []int {
     []int tokens = make([]int, 0)
     tokens = append(tokens, 151643)

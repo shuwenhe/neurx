@@ -49,7 +49,6 @@ type training_optimization1_t struct {
     eval_steps: int
     max_grad_norm: float
 }
-
 func create_1t_config(): model_config1_t {
     config := model_config1_t{
         model_name: "neurx-1t",
@@ -186,6 +185,7 @@ func create_training_pipeline_1t(): training_pipeline1_t {
     }
     return pipeline
 }
+
 func (p *training_pipeline1_t) print_summary() {
     fmt.Println("\n" + "="*80)
     fmt.Println("🚀 NEURX 1T PARAMETER MODEL - TRAINING CONFIGURATION")
@@ -238,6 +238,7 @@ func (p *training_pipeline1_t) print_summary() {
     fmt.Printf("  Sequence Parallelism: %v\n", p.dist_config.sequence_parallel)
     fmt.Println("\n" + "="*80)
 }
+
 func (p *training_pipeline1_t) initialize_distributed_environment() {
     fmt.Println("\n[INIT] Initializing distributed training environment...")
     fmt.Printf("  Setting up %d GPU processes\n", p.dist_config.total_gpus)
@@ -246,6 +247,7 @@ func (p *training_pipeline1_t) initialize_distributed_environment() {
     fmt.Printf("  Data Parallelism: %d\n", p.dist_config.data_parallel_size)
     fmt.Println("  status: ✓ Distributed environment ready")
 }
+
 func (p *training_pipeline1_t) initialize_model() {
     fmt.Println("\n[MODEL] Initializing 1T parameter model...")
     fmt.Printf("  Parameters: %.2fT\n", float(p.config.num_params)/1e12)
@@ -253,6 +255,7 @@ func (p *training_pipeline1_t) initialize_model() {
               p.config.num_layers, p.config.hidden_dim, p.config.num_heads)
     fmt.Println("  status: ✓ model initialized with tensor parallelism")
 }
+
 func (p *training_pipeline1_t) setup_optimization() {
     fmt.Println("\n[OPTIM] Setting up optimizer and scheduler...")
     fmt.Printf("  optimizer_2: adam_w with weight decay %.2e\n", 0.01)
@@ -261,6 +264,7 @@ func (p *training_pipeline1_t) setup_optimization() {
     fmt.Printf("  LR Scheduler: Cosine annealing\n")
     fmt.Println("  status: ✓ optimizer_2 and scheduler ready")
 }
+
 func (p *training_pipeline1_t) run_training() {
     fmt.Println("\n[TRAIN] Starting 1T model training...")
     fmt.Printf("  Total Steps: %d\n", p.train_config.total_steps)

@@ -1,5 +1,4 @@
 package neurx.attention.gradient
-
 struct attention_forward_cache {
     []float hidden_states
     []float concatenated
@@ -39,7 +38,6 @@ struct attention_gradients {
     []float d_wo
     []float d_hidden_states
 }
-
 func softmax_backward(
     []float input_grad,
     []float softmax_output,

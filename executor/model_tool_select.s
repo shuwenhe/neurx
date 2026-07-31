@@ -3,7 +3,6 @@ use neurx.inference
 use neurx.agent.memory
 use neurx.agent.tool_registry
 use neurx.agent.action_schema
-
 func agent_model_clip(string text, int max_chars) string {
     if len(text) <= max_chars {
         return text

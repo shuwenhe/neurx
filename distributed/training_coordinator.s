@@ -2,7 +2,6 @@ package neurx.distributed.training_coordinator
 use neurx.distributed.synchronization.{synchronization_state, new_synchronization_state}
 use neurx.distributed.fault_tolerance.{fault_tolerance_state, new_fault_tolerance_state, save_distributed_checkpoint, restore_from_checkpoint}
 use neurx.distributed.performance_monitor.{performance_monitor, new_performance_monitor, update_rank_metrics}
-
 struct parallel_strategy {
     string name
     int data_parallel_size
@@ -22,7 +21,6 @@ struct distributed_training_state {
     int current_step
     bool training_active
 }
-
 func new_distributed_training_state(int rank_id, int world_size, parallel_strategy strategy) distributed_training_state {
     distributed_training_state {
         strategy: strategy,

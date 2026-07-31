@@ -1,7 +1,6 @@
 package neurx.train.demo
 use std.fs.write_text_file as fs_write
 use std.fs.read_to_string as fs_read
-
 struct training_config {
     int batch_size
     int seq_len
@@ -10,7 +9,6 @@ struct training_config {
     string model_name
     int save_every_n_steps
 }
-
 func new_training_config(int batch_size, int seq_len, int max_steps, float learning_rate) training_config {
     training_config {
         batch_size: batch_size,

@@ -27,25 +27,19 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-
 using namespace neurx_cuda_transformer;
-
 namespace {
-
 #define CUDA_CHECK(x) do { cudaError_t e=(x); if(e!=cudaSuccess){ \
   std::fprintf(stderr,"CUDA error %s:%d: %s\n",__FILE__,__LINE__,cudaGetErrorString(e)); return false; } } while(0)
 #define CUBLAS_CHECK(x) do { cublasStatus_t e=(x); if(e!=CUBLAS_STATUS_SUCCESS){ \
   std::fprintf(stderr,"cuBLAS error %s:%d: %d\n",__FILE__,__LINE__,int(e)); return false; } } while(0)
-
 static int env_int(const char *n,int d){const char*s=std::getenv(n);return s&&*s?std::atoi(s):d;}
 static float env_float(const char*n,float d){const char*s=std::getenv(n);return s&&*s?std::strtof(s,nullptr):d;}
 static std::string env_str(const char*n,const std::string&d){const char*s=std::getenv(n);return s&&*s?s:d;}
 static uint64_t fnv1a(const std::string&s){uint64_t h=1469598103934665603ULL;for(unsigned char c:s){h^=c;h*=1099511628211ULL;}return h;}
 static bool exists(const std::string&p){return std::filesystem::exists(p);}
-
 static bool nccl_ok(ncclResult_t e,const char*expr){if(e==ncclSuccess)return true;std::fprintf(stderr,"NCCL error %s: %s\n",expr,ncclGetErrorString(e));return false;}
 #define NCCL_CHECK(x) do{if(!nccl_ok((x),#x))return false;}while(0)
-
 struct Param {
   float *v=nullptr,*g=nullptr,*m=nullptr,*s=nullptr; int64_t n=0;
   bool apply_weight_decay=true;
@@ -60,14 +54,11 @@ struct Param {
   Param(const Param&)=delete; Param&operator=(const Param&)=delete;
   ~Param(){if(v)cudaFree(v);if(g)cudaFree(g);if(m)cudaFree(m);if(s)cudaFree(s);}
 };
-
 struct Layer {
   int d,f; Param nq,nk,wq,wk,wv,wo,nf,wg,wu,wd;
   Layer(int dim,int ffn):d(dim),f(ffn),nq(d,false),nk(d,false),wq(d*d),wk(d*d),wv(d*d),wo(d*d),nf(d,false),wg(d*f),wu(d*f),wd(f*d){}
-
   std::vector<Param*> params(){return{&nq,&wq,&wk,&wv,&wo,&nf,&wg,&wu,&wd};}
 };
-
 struct Model {
   int vocab,seq,dim,heads,ffn,nlayers; Param emb,out; std::vector<std::unique_ptr<Layer>> layers;
   uint32_t seed;
@@ -80,7 +71,6 @@ struct Model {
   std::vector<Param*> params(){std::vector<Param*>p{&emb};for(auto&l:layers){auto q=l->params();p.insert(p.end(),q.begin(),q.end());}p.push_back(&out);return p;}
   void init(){std::mt19937 rng(seed);std::normal_distribution<float>nd(0,.02f);for(Param*p:params())for(int64_t i=0;i<p->n;i++)p->v[i]=nd(rng);for(auto&l:layers)for(int i=0;i<dim;i++){l->nq.v[i]=1;l->nk.v[i]=1;l->nf.v[i]=1;}}
 };
-
 struct LayerCache {
   float *x,*n1,*iq,*ik,*q,*k,*v,*att,*ctx,*proj,*res,*n2,*iff,*gate,*up,*sw,*down,*h;
   float *dout,*dres,*dsw,*dg,*du,*dn2,*tmp,*dctx,*dq,*dk,*dv,*dn1,*dx;
@@ -96,7 +86,6 @@ static LayerCache make_layer_cache(int t,int d,int f,int heads){LayerCache a{};i
 struct TrainCache {int*ids,*targets;float*embedding,*logits,*loss,*dl,*dh;std::vector<LayerCache>lc;
   TrainCache(Model&m){int64_t td=int64_t(m.seq)*m.dim,tv=int64_t(m.seq)*m.vocab;ids=managed_i(m.seq);targets=managed_i(m.seq);embedding=managed_f(td);logits=managed_f(tv);loss=managed_f(1);dl=managed_f(tv);dh=managed_f(td);for(int i=0;i<m.nlayers;i++)lc.push_back(make_layer_cache(m.seq,m.dim,m.ffn,m.heads));}
 };
-
 static cublasHandle_t blas=nullptr;
 static bool gemm(float*a,float*b,float*c,int m,int k,int n){if(!blas)CUBLAS_CHECK(cublasCreate(&blas));const float one=1,zero=0;CUBLAS_CHECK(cublasSgemm(blas,CUBLAS_OP_N,CUBLAS_OP_N,n,m,k,&one,b,n,a,k,&zero,c,n));return true;}
 static bool backward_linear(float*x,Param&w,float*dy,float*dx,int m,int k,int n){if(!blas)CUBLAS_CHECK(cublasCreate(&blas));const float one=1,zero=0;
@@ -116,7 +105,6 @@ static bool init_distributed(DistributedContext&d){
   NCCL_CHECK(ncclCommInitRank(&d.comm,d.world,id,d.rank));return true;
 }
 static bool sync_gradients(Model&m,DistributedContext&d){if(d.world==1)return true;for(Param*p:m.params())NCCL_CHECK(ncclAllReduce(p->g,p->g,p->n,ncclFloat,ncclSum,d.comm,d.stream));CUDA_CHECK(cudaStreamSynchronize(d.stream));for(Param*p:m.params())scale_values<<<blocks(p->n),256,0,d.stream>>>(p->g,p->n,1.0f/float(d.world));CUDA_CHECK(cudaStreamSynchronize(d.stream));return true;}
-
 static bool squared_l2_norm(const std::vector<Param*>&params,
                             float* Param::*member,double&result){
   if(!blas)CUBLAS_CHECK(cublasCreate(&blas));
@@ -132,7 +120,6 @@ static bool squared_l2_norm(const std::vector<Param*>&params,
   }
   return true;
 }
-
 static bool optimizer_state_is_finite(Model&m){
   auto params=m.params();
   double value_norm=0.0,first_norm=0.0,second_norm=0.0;
@@ -142,7 +129,6 @@ static bool optimizer_state_is_finite(Model&m){
   return std::isfinite(value_norm)&&std::isfinite(first_norm)&&std::isfinite(second_norm);
 }
 __global__ void rms_dg_accum(const float*x,const float*inv,const float*dy,float*dg,int rows,int d){int j=blockIdx.x*blockDim.x+threadIdx.x;if(j>=d)return;float s=0;for(int r=0;r<rows;r++)s+=dy[r*d+j]*x[r*d+j]*inv[r];dg[j]+=s;}
-
 static bool forward_backward(Model&m,TrainCache&a){int t=m.seq,d=m.dim,f=m.ffn,v=m.vocab,td=t*d,tf=t*f;
   embedding_fwd<<<blocks(td),256>>>(a.ids,m.emb.v,a.embedding,t,d);float*input=a.embedding;
   for(int li=0;li<m.nlayers;li++){Layer&l=*m.layers[li];LayerCache&c=a.lc[li];CUDA_CHECK(cudaMemcpy(c.x,input,td*4,cudaMemcpyDeviceToDevice));
@@ -165,14 +151,11 @@ static bool forward_backward(Model&m,TrainCache&a){int t=m.seq,d=m.dim,f=m.ffn,v
   }
   embedding_bwd<<<blocks(td),256>>>(a.ids,upstream,m.emb.g,t,d);CUDA_CHECK(cudaDeviceSynchronize());return true;
 }
-
 static bool optimizer_step(Model&m,int step,float lr,float grad_scale,float weight_decay){for(Param*p:m.params()){scale_values<<<blocks(p->n),256>>>(p->g,p->n,grad_scale);const float decay=p->apply_weight_decay?weight_decay:0.0f;adamw<<<blocks(p->n),256>>>(p->v,p->g,p->m,p->s,p->n,step,lr,decay);}CUDA_CHECK(cudaDeviceSynchronize());return true;}
-
 static std::string json_unescape(const std::string&s){std::string o;for(size_t i=0;i<s.size();i++){char c=s[i];if(c!='\\'||i+1>=s.size()){o+=c;continue;}char e=s[++i];if(e=='n')o+='\n';else if(e=='r')o+='\r';else if(e=='t')o+='\t';else if(e=='b')o+='\b';else if(e=='f')o+='\f';else if(e=='"'||e=='\\'||e=='/')o+=e;else if(e=='u'&&i+4<s.size()){unsigned cp=0;for(int j=0;j<4;j++){char h=s[++i];cp=cp*16+(h>='0'&&h<='9'?h-'0':std::tolower(h)-'a'+10);}if(cp<128)o+=char(cp);else if(cp<2048){o+=char(0xc0|(cp>>6));o+=char(0x80|(cp&63));}else{o+=char(0xe0|(cp>>12));o+=char(0x80|((cp>>6)&63));o+=char(0x80|(cp&63));}}}return o;}
 static bool parse_json_string(const std::string&s,size_t&p,std::string&out){while(p<s.size()&&std::isspace((unsigned char)s[p]))p++;if(p>=s.size()||s[p]!='"')return false;p++;std::string raw;bool esc=false;for(;p<s.size();p++){char c=s[p];if(!esc&&c=='"'){p++;out=json_unescape(raw);return true;}raw+=c;if(!esc&&c=='\\')esc=true;else esc=false;}return false;}
 static std::string extract_json_string_field(const std::string&line,const std::string&field){size_t p=0;while(p<line.size()){std::string key;if(!parse_json_string(line,p,key)){p++;continue;}while(p<line.size()&&std::isspace((unsigned char)line[p]))p++;if(p>=line.size()||line[p++]!=':')continue;if(key==field){std::string value;if(parse_json_string(line,p,value))return value;return{};}std::string ignored;if(!parse_json_string(line,p,ignored)){while(p<line.size()&&line[p]!=',')p++;}}return{};}
 static std::string extract_text(const std::string&line){std::string value=extract_json_string_field(line,"text");if(value.empty())value=extract_json_string_field(line,"content");if(value.empty())value=extract_json_string_field(line,"xml");return value;}
-
 struct Tokenizer {
   std::string kind="byte_level",vocab_path,merges_path;std::unordered_map<std::string,int>vocab;std::map<std::pair<std::string,std::string>,int>rank;int unk=0,eos=-1;uint64_t fingerprint=0;
   bool load(const std::string&vp,const std::string&mp){vocab_path=vp;merges_path=mp;if(vp.empty()){kind="byte_level";return true;}kind="bpe";std::ifstream in(vp);if(!in){std::fprintf(stderr,"cannot open BPE vocab: %s\n",vp.c_str());return false;}std::stringstream ss;ss<<in.rdbuf();std::string j=ss.str();size_t p=0;while(p<j.size()){std::string token;if(!parse_json_string(j,p,token)){p++;continue;}while(p<j.size()&&std::isspace((unsigned char)j[p]))p++;if(p>=j.size()||j[p++]!=':')continue;while(p<j.size()&&std::isspace((unsigned char)j[p]))p++;char*end=nullptr;long id=std::strtol(j.c_str()+p,&end,10);if(end!=j.c_str()+p){vocab[token]=int(id);p=size_t(end-j.c_str());}}
@@ -196,7 +179,6 @@ struct Tokenizer {
     if(eos>=0)ids.push_back(eos);return ids;
   }
 };
-
 struct Cursor {int shard=0;uint64_t line=0,docs=0;std::vector<int>pending;};
 struct JsonlStream {std::vector<std::string>shards;Tokenizer*tok;Cursor cur;std::ifstream in;
   bool load_list(const std::string&p){std::ifstream f(p);std::string s;while(std::getline(f,s))if(!s.empty())shards.push_back(s);return!shards.empty();}
@@ -204,7 +186,6 @@ struct JsonlStream {std::vector<std::string>shards;Tokenizer*tok;Cursor cur;std:
   bool next_doc(){int exhausted=0;for(;;){if(!in.is_open()&&!open_cursor())return false;std::string line;if(std::getline(in,line)){cur.line++;std::string text=extract_text(line);if(text.empty())continue;std::vector<int>encoded=tok->encode(text);cur.docs++;if(!encoded.empty()){neurx_training::append_document_tokens(cur.pending,encoded);return true;}}else{in.close();cur.shard++;cur.line=0;exhausted++;if(exhausted>=int(shards.size())){std::fprintf(stderr,"no non-empty JSONL text fields found in one complete shard pass\n");return false;}if(cur.shard>=int(shards.size()))cur.shard=0;}}}
   bool sequence(std::vector<int>&ids){const size_t sequence_length=ids.empty()?0:ids.size()-1;while(cur.pending.size()<sequence_length+1)if(!next_doc())return false;return neurx_training::take_training_window(cur.pending,sequence_length,ids);}
 };
-
 static bool validation_loss(Model&m,TrainCache&cache,JsonlStream&reader,
                             DistributedContext&dist,int batches,double&mean_loss){
   reader.in.close();reader.cur=Cursor{};
@@ -228,17 +209,14 @@ static bool validation_loss(Model&m,TrainCache&cache,JsonlStream&reader,
   if(synchronized!=cudaSuccess){std::fprintf(stderr,"CUDA validation synchronization failed: %s\n",cudaGetErrorString(synchronized));cudaFree(metrics);return false;}
   mean_loss=metrics[0]/metrics[1];cudaFree(metrics);return std::isfinite(mean_loss);
 }
-
 static std::string read_text_file(const std::string&path){
   std::ifstream in(path,std::ios::binary);
   if(!in)return{};
   std::ostringstream out;out<<in.rdbuf();return out.str();
 }
-
 static std::string hex64(uint64_t value){
   std::ostringstream out;out<<std::hex<<std::setfill('0')<<std::setw(16)<<value;return out.str();
 }
-
 static std::string json_escape(const std::string&value){
   std::ostringstream out;
   for(unsigned char c:value){
@@ -251,7 +229,6 @@ static std::string json_escape(const std::string&value){
   }
   return out.str();
 }
-
 struct RunConfig {
   int vocab=0,seq=0,dim=0,heads=0,ffn=0,layers=0,micro_batch=0,grad_accum=0,eval_batches=0;
   int rank=0,world_size=1;
@@ -261,7 +238,6 @@ struct RunConfig {
   std::string schedule,tokenizer_kind,tokenizer_hash,shard_list_path,shard_list_hash;
   std::string validation_source,validation_hash,git_sha;
 };
-
 static std::string run_config_canonical(const RunConfig&c){
   std::ostringstream out;
   out<<"vocab="<<c.vocab<<"\nseq="<<c.seq<<"\ndim="<<c.dim<<"\nheads="<<c.heads
@@ -278,7 +254,6 @@ static std::string run_config_canonical(const RunConfig&c){
      <<"\ngit_sha="<<c.git_sha<<"\n";
   return out.str();
 }
-
 static bool write_run_manifest(const std::string&directory,const RunConfig&c,
                                bool allow_mismatch){
   std::filesystem::create_directories(directory);
@@ -295,7 +270,6 @@ static bool write_run_manifest(const std::string&directory,const RunConfig&c,
       return false;
     }
   }
-
   const auto now=std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   std::ostringstream json;
   json<<"{\n"
@@ -323,7 +297,6 @@ static bool write_run_manifest(const std::string&directory,const RunConfig&c,
       <<"\", \"validation_source\": \""<<json_escape(c.validation_source)
       <<"\", \"validation_hash\": \""<<json_escape(c.validation_hash)<<"\"}\n"
       <<"}\n";
-
   const std::string tmp=path+".tmp";
   std::ofstream out(tmp,std::ios::binary|std::ios::trunc);
   out<<json.str();out.close();
@@ -337,14 +310,12 @@ static bool write_run_manifest(const std::string&directory,const RunConfig&c,
   if(ec){std::fprintf(stderr,"cannot install run manifest: %s\n",ec.message().c_str());return false;}
   return true;
 }
-
 static double load_best_validation_loss(const std::string&directory){
   std::ifstream in(directory+"/best_validation_loss.txt");
   double value=std::numeric_limits<double>::infinity();
   if(in>>value&&std::isfinite(value))return value;
   return std::numeric_limits<double>::infinity();
 }
-
 static bool save_best_validation_loss(const std::string&directory,double value){
   const std::string path=directory+"/best_validation_loss.txt",tmp=path+".tmp";
   std::ofstream out(tmp,std::ios::trunc);out<<std::setprecision(17)<<value<<"\n";out.close();
@@ -353,7 +324,6 @@ static bool save_best_validation_loss(const std::string&directory,double value){
   if(ec){std::filesystem::remove(path,ec);ec.clear();std::filesystem::rename(tmp,path,ec);}
   return !ec;
 }
-
 #pragma pack(push,1)
 struct HeaderV1{char magic[8];int32_t version,step,cursor,vocab,seq,dim,heads,ffn;};
 struct HeaderV2{char magic[8];uint32_t version,header_bytes;uint64_t step,optimizer_step,micro_step,shard,line,docs,tokens;uint32_t vocab,seq,dim,heads,ffn,layers,micro_batch,grad_accum,tokenizer_kind,vocab_path_bytes,merges_path_bytes;uint64_t tokenizer_hash,pending_count,param_count;};
@@ -368,14 +338,10 @@ static bool file_checksum(const std::string&path,uint64_t bytes,uint64_t&checksu
 }
 static bool save_v2(Model&m,Tokenizer&t,JsonlStream&r,const std::string&dir,uint64_t step,uint64_t opt,uint64_t micro,int mb,int ga,uint64_t tokens){cudaDeviceSynchronize();std::filesystem::create_directories(dir);std::string tmp=dir+"/transformer_v2.ckpt.tmp",dst=dir+"/transformer_v2.ckpt";std::ofstream o(tmp,std::ios::binary|std::ios::trunc);auto ps=m.params();HeaderV2 h{};std::memcpy(h.magic,"NXTRFMV2",8);h.version=3;h.header_bytes=sizeof(h);h.step=step;h.optimizer_step=opt;h.micro_step=micro;h.shard=r.cur.shard;h.line=r.cur.line;h.docs=r.cur.docs;h.tokens=tokens;h.vocab=m.vocab;h.seq=m.seq;h.dim=m.dim;h.heads=m.heads;h.ffn=m.ffn;h.layers=m.nlayers;h.micro_batch=mb;h.grad_accum=ga;h.tokenizer_kind=t.kind=="bpe"?1:0;h.vocab_path_bytes=t.vocab_path.size();h.merges_path_bytes=t.merges_path.size();h.tokenizer_hash=t.fingerprint;h.pending_count=r.cur.pending.size();h.param_count=ps.size();write_blob(o,&h,sizeof(h));write_blob(o,t.vocab_path.data(),h.vocab_path_bytes);write_blob(o,t.merges_path.data(),h.merges_path_bytes);if(h.pending_count)write_blob(o,r.cur.pending.data(),h.pending_count*4);for(Param*p:ps){uint64_t n=p->n;write_blob(o,&n,8);write_blob(o,p->v,n*4);write_blob(o,p->g,n*4);write_blob(o,p->m,n*4);write_blob(o,p->s,n*4);}o.close();if(!o)return false;std::error_code size_error;uint64_t payload_bytes=std::filesystem::file_size(tmp,size_error),checksum=0;if(size_error||!file_checksum(tmp,payload_bytes,checksum))return false;CheckpointFooterV3 footer{};std::memcpy(footer.magic,"NXHASH01",8);footer.payload_bytes=payload_bytes;footer.checksum=checksum;std::ofstream append(tmp,std::ios::binary|std::ios::app);if(!write_blob(append,&footer,sizeof(footer))){return false;}append.close();std::filesystem::rename(tmp,dst);
   std::string model_name=env_str("NEURX_PRETRAIN_MODEL_NAME","NeurX-1.3");std::string model_path=dir+"/"+model_name+".neurx";std::ofstream meta(model_path);meta<<"{\n  \"model_name\": \""<<model_name<<"\",\n  \"format\": \"NXTRFMV2\",\n  \"architecture\": \"decoder_only_transformer\",\n  \"tokenizer\": \""<<t.kind<<"\",\n  \"tokenizer_hash\": \""<<std::hex<<t.fingerprint<<std::dec<<"\",\n  \"step\": "<<step<<",\n  \"optimizer_step\": "<<opt<<",\n  \"vocab_size\": "<<m.vocab<<",\n  \"context_length\": "<<m.seq<<",\n  \"hidden_size\": "<<m.dim<<",\n  \"num_heads\": "<<m.heads<<",\n  \"ffn_size\": "<<m.ffn<<",\n  \"num_layers\": "<<m.nlayers<<",\n  \"micro_batch_size\": "<<mb<<",\n  \"gradient_accumulation_steps\": "<<ga<<",\n  \"checkpoint\": \""<<dst<<"\"\n}\n";std::ofstream latest(dir+"/latest_checkpoint.txt");latest<<dst<<"\n";return true;}
-
 static bool read_exact(std::ifstream&i,void*p,size_t n){i.read((char*)p,n);return bool(i);}
 static bool load_v2(Model&m,Tokenizer&t,JsonlStream&r,const std::string&path,uint64_t&step,uint64_t&opt,uint64_t&micro,uint64_t&tokens,int mb,int ga){std::ifstream in(path,std::ios::binary);if(!in)return false;HeaderV2 h{};if(!read_exact(in,&h,sizeof(h))||std::memcmp(h.magic,"NXTRFMV2",8)||(h.version!=2&&h.version!=3)||h.header_bytes!=sizeof(h))return false;if(h.vocab!=uint32_t(m.vocab)||h.seq!=uint32_t(m.seq)||h.dim!=uint32_t(m.dim)||h.heads!=uint32_t(m.heads)||h.ffn!=uint32_t(m.ffn)||h.layers!=uint32_t(m.nlayers)||h.micro_batch!=uint32_t(mb)||h.grad_accum!=uint32_t(ga)){std::fprintf(stderr,"NXTRFMV2 configuration mismatch\n");return false;}if(h.tokenizer_kind!=(t.kind=="bpe")||(h.tokenizer_kind&&h.tokenizer_hash!=t.fingerprint)){std::fprintf(stderr,"NXTRFMV2 tokenizer mismatch\n");return false;}constexpr uint64_t max_path_bytes=1ULL<<20,max_pending_tokens=1ULL<<28;if(h.vocab_path_bytes>max_path_bytes||h.merges_path_bytes>max_path_bytes||h.pending_count>max_pending_tokens)return false;std::string saved_vocab(h.vocab_path_bytes,'\0'),saved_merges(h.merges_path_bytes,'\0');if((h.vocab_path_bytes&&!read_exact(in,saved_vocab.data(),h.vocab_path_bytes))||(h.merges_path_bytes&&!read_exact(in,saved_merges.data(),h.merges_path_bytes)))return false;r.cur.shard=h.shard;r.cur.line=h.line;r.cur.docs=h.docs;r.cur.pending.resize(h.pending_count);if(h.pending_count&&!read_exact(in,r.cur.pending.data(),h.pending_count*4))return false;auto ps=m.params();if(h.param_count!=ps.size())return false;for(Param*p:ps){uint64_t n=0;if(!read_exact(in,&n,8)||n!=uint64_t(p->n)||!read_exact(in,p->v,n*4)||!read_exact(in,p->g,n*4)||!read_exact(in,p->m,n*4)||!read_exact(in,p->s,n*4))return false;}step=h.step;opt=h.optimizer_step;micro=h.micro_step;tokens=h.tokens;if(h.version==2)return in.peek()==std::ifstream::traits_type::eof();CheckpointFooterV3 footer{};if(!read_exact(in,&footer,sizeof(footer))||std::memcmp(footer.magic,"NXHASH01",8)||in.peek()!=std::ifstream::traits_type::eof())return false;in.close();std::error_code ec;uint64_t total_bytes=std::filesystem::file_size(path,ec);uint64_t checksum=0;if(ec||footer.payload_bytes+sizeof(footer)!=total_bytes||!file_checksum(path,footer.payload_bytes,checksum)||checksum!=footer.checksum){std::fprintf(stderr,"NXTRFMV2 checkpoint checksum mismatch: %s\n",path.c_str());return false;}return true;}
-
 static bool load_v1(Model&m,Tokenizer&t,const std::string&path,uint64_t&step){std::ifstream in(path,std::ios::binary);HeaderV1 h{};if(!in||!read_exact(in,&h,sizeof(h))||std::memcmp(h.magic,"NXTRFMR1",8))return false;if(t.kind!="byte_level"||m.vocab!=256||h.vocab!=m.vocab||h.seq!=m.seq||h.dim!=m.dim||h.heads!=m.heads||h.ffn!=m.ffn){std::fprintf(stderr,"NXTRFMR1 can only migrate with matching byte-level model dimensions\n");return false;}std::vector<Param*>old{&m.emb,&m.layers[0]->nq,&m.layers[0]->nk,&m.layers[0]->wq,&m.layers[0]->wk,&m.layers[0]->wv,&m.layers[0]->wo,&m.layers[0]->nf,&m.layers[0]->wg,&m.layers[0]->wu,&m.layers[0]->wd,&m.out};for(Param*p:old)if(!read_exact(in,p->v,p->n*4)||!read_exact(in,p->m,p->n*4)||!read_exact(in,p->s,p->n*4))return false;step=h.step;std::printf("[checkpoint] migrated NXTRFMR1 layer0; extra layers retain deterministic initialization\n");return true;}
-
 }
-
 #ifndef NEURX_TRANSFORMER_NO_MAIN
 int main(){
   DistributedContext dist;if(!init_distributed(dist)){std::fprintf(stderr,"distributed CUDA/NCCL initialization failed\n");return 2;}

@@ -1,5 +1,4 @@
 package neurx.strings
-
 func copy_strings([]string values) []string {
     []string out = []string{cap: len(values)}
     int i = 0

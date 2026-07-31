@@ -1,12 +1,10 @@
 package neurx.runtime.io
-
 struct safetensors_writer {
     string filepath
     []tensor tensors
     int tensor_count
     int total_data_size
 }
-
 func safetensors_writer_new(string filepath) safetensors_writer {
     safetensors_writer {
         filepath: filepath,

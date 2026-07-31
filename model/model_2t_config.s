@@ -1,5 +1,4 @@
 package neurx.model
-
 struct model_2t_config {
     int vocab_size
     int hidden_dim
@@ -19,7 +18,6 @@ struct model_2t_config {
     bool pre_norm
     bool use_bias
 }
-
 func new_2t_model_config() model_2t_config {
     model_2t_config cfg
     cfg.vocab_size = 100000

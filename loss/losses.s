@@ -1,11 +1,9 @@
 package neurx.loss
 use neurx.tensor.tensor
 use neurx.tensor.new
-
 struct loss {
     string name
 }
-
 func shape1(int n) []int {
     []int shape = []int{cap: 1}
     shape[0] = n

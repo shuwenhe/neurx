@@ -1,54 +1,20 @@
-
-
-
-
 model:
-
   base_model_path: /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct
-
-
   model_name: Qwen2.5-0.5B-Instruct
-
-
   model_type: qwen
-
-
 data:
-
   train_data_path: /home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl
-
-
   val_data_path: /home/shuwen/shuwen/train/dataset/medmcqa/val.jsonl
-
-
   data_format: sft
-
-
   dataset_type: medmcqa
-
-
 output:
-
   adapter_output_dir: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft
-
-
   merged_model_output_dir: /home/shuwen/shuwen/train/model/base-model-posttrain
-
-
   log_dir: /home/shuwen/shuwen/train/neurx/artifacts/logs
-
-
 lora:
-
   rank: 8
-
-
   alpha: 16
-
-
   dropout: 0.05
-
-
   target_modules:
     - q_proj
     - v_proj
@@ -57,86 +23,33 @@ lora:
     - gate_proj
     - up_proj
     - down_proj
-
-
 training:
-
   training_method: sft
-
-
   num_epochs: 3
-
-
   batch_size: 32
-
-
   gradient_accumulation_steps: 1
-
-
   learning_rate: 0.0005
-
-
   lr_scheduler: cosine
-
-
   warmup_steps: 100
-
-
   max_steps: -1
-
-
   weight_decay: 0.01
-
-
   optimizer: adamw_8bit
-
-
   max_grad_norm: 1.0
-
-
 merge:
-
   merge_lora_after_training: true
-
-
   merge_method: linear
-
-
   merge_ratio: 1.0
-
-
 system:
-
   gpu_devices: "0"
-
-
   use_distributed: false
-
-
   seed: 42
-
-
   fp16: false
   bf16: false
-
-
 validation:
-
   validation_steps: 100
-
-
   validation_set_size: 0.1
-
-
   save_steps: 100
-
-
 project:
-
   project_name: medical-lora-sft
-
-
   run_name: qwen2.5-0.5b-medmcqa-lora
-
-
   project_root: /home/shuwen/shuwen/train/neurx

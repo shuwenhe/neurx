@@ -3,7 +3,6 @@ use std.io
 use std.strings
 use std.path
 use std.env
-
 struct deployment_config {
     cluster_name: string
     num_nodes: i32
@@ -22,20 +21,12 @@ struct gpu_config {
     total_memory: i64
     available_memory: i64
 }
-
 func generate_slurm_script(config: deployment_config, output_path: string) bool {
     let num_nodes = config.num_nodes
     let gpus_per_node = config.gpus_per_node
     let total_tasks = num_nodes * gpus_per_node
     let batch_size = config.batch_size_per_gpu * total_tasks
-    let slurm_script = `#!/bin/bash
-#SBATCH --nodes=` + strings.from_i32(num_nodes) + `
-#SBATCH --ntasks-per-node=` + strings.from_i32(gpus_per_node) + `
-#SBATCH --gpus-per-node=` + strings.from_i32(gpus_per_node) + `
-#SBATCH --job-name=neurx-training
-#SBATCH --time=72:00:00
-#SBATCH --output=logs/slurm-%j.out
-#SBATCH --error=logs/slurm-%j.err
+    let slurm_script = `
 module load cuda/11.8
 module load nccl/2.16.2
 module load gcc/11.2.0

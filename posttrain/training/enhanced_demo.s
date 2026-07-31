@@ -1,7 +1,5 @@
 package neurx.posttrain.training.enhanced_demo
-
 use neurx.posttrain.training.stability.{clip_all_gradients, check_grads_healthy, compute_accuracy}
-
 func training_loop_with_stability() {
     println("=== Enhanced Training Loop Demo ===")
     println("")
@@ -10,51 +8,39 @@ func training_loop_with_stability() {
     println("2. NaN/Inf detection (automatic training abort)")
     println("3. Token accuracy tracking")
     println("")
-
     int num_steps = 10
     int step = 0
-
     while step < num_steps {
         println("[Step " + int_to_str(step + 1) + "/" + int_to_str(num_steps) + "]")
-
         float loss = 2.5 - ((step as float)) * 0.2
-
         []float layer1_grads = make_float_array(3)
         layer1_grads[0] = 0.1
         layer1_grads[1] = 0.2
         layer1_grads[2] = 0.3
-
         []float layer2_grads = make_float_array(3)
         layer2_grads[0] = 0.4
         layer2_grads[1] = 0.5
         layer2_grads[2] = 0.6
-
         [][]float all_gradients = make_2d_array(2)
         all_gradients[0] = layer1_grads
         all_gradients[1] = layer2_grads
-
         bool grads_healthy = check_grads_healthy(all_gradients)
         if !grads_healthy {
             println("[ABORT] Training stopped due to NaN/Inf in gradients!")
             println("Checkpoint saved. Please investigate the issue.")
             return
         }
-
         float grad_norm = clip_all_gradients(all_gradients, 1.0)
-
         print("  Loss: ")
         print(float_to_str_2(loss))
         print(" | Grad Norm: ")
         print(float_to_str_4(grad_norm))
-
         if grad_norm > 1.0 {
             print(" [CLIPPED]")
         }
         println("")
-
         step = step + 1
     }
-
     println("")
     println("✓ Training completed successfully!")
     println("✓ All gradient checks passed!")
@@ -123,15 +109,12 @@ func float_to_str_n(float value, int decimals) string {
     float current = value
     bool negative = current < 0.0
     if negative { current = 0.0 - current }
-
     int whole = 0
     while current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
-
     string result = int_to_str(whole)
-
     if decimals > 0 {
         result = result + "."
         int i = 0
@@ -146,7 +129,6 @@ func float_to_str_n(float value, int decimals) string {
             i = i + 1
         }
     }
-
     if negative { result = "-" + result }
     return result
 }

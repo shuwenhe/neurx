@@ -1,6 +1,5 @@
 package neurx.posttrain.core.data_loader
 use std.io.println
-
 struct training_example_s {
     string instruction
     string input
@@ -25,7 +24,6 @@ struct data_batch_s {
     int max_seq_len
     int total_tokens
 }
-
 func parse_json_line(string line) training_example_s {
     training_example_s {
         instruction: "",
