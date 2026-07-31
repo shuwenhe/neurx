@@ -1,8 +1,8 @@
-// 梯度工具 - 从 verl 借鉴的全局梯度裁剪和 NaN 检测
+
 package neurx.posttrain.training.gradient_utils
 
-// 全局梯度裁剪 (跨所有参数层)
-// 对应 verl: verl/utils/torch_functional.py::clip_grad_norm_
+
+
 struct GlobalGradientStats {
     float total_norm
     float clip_coefficient
@@ -10,79 +10,79 @@ struct GlobalGradientStats {
     int total_params
 }
 
-// 计算所有层梯度的全局 L2 范数
+
 func compute_global_grad_norm([][]float all_layer_grads) float {
     float total_norm_squared = 0.0
-    
-    // 遍历所有层
+
+
     int layer_idx = 0
     while layer_idx < len(all_layer_grads) {
         []float layer_grad = all_layer_grads[layer_idx]
-        
-        // 累积该层梯度的平方和
+
+
         int i = 0
         while i < len(layer_grad) {
             float g = layer_grad[i]
             total_norm_squared = total_norm_squared + g * g
             i = i + 1
         }
-        
+
         layer_idx = layer_idx + 1
     }
-    
+
     return sqrt(total_norm_squared)
 }
 
-// 全局梯度裁剪 (修改输入的梯度数组)
-// 返回裁剪统计信息
+
+
 func clip_gradients_global([][]float all_layer_grads, float max_norm) GlobalGradientStats {
-    // 1. 计算全局梯度范数
+
     float global_norm = compute_global_grad_norm(all_layer_grads)
-    
-    // 2. 计算裁剪系数
+
+
     float clip_coef = max_norm / (global_norm + 1e-6)
-    
+
     bool was_clipped = false
-    
-    // 3. 如果范数超过阈值，裁剪所有层的梯度
+
+
     if clip_coef < 1.0 {
         was_clipped = true
-        
+
         int layer_idx = 0
         while layer_idx < len(all_layer_grads) {
             []float layer_grad = all_layer_grads[layer_idx]
-            
+
             int i = 0
             while i < len(layer_grad) {
                 layer_grad[i] = layer_grad[i] * clip_coef
                 i = i + 1
             }
-            
+
             layer_idx = layer_idx + 1
         }
     }
-    
-    // 4. 统计总参数数量
+
+
     int total_params = 0
     int idx = 0
     while idx < len(all_layer_grads) {
         total_params = total_params + len(all_layer_grads[idx])
         idx = idx + 1
     }
-    
-    // 5. 返回统计信息
+
+
     GlobalGradientStats stats
     stats.total_norm = global_norm
     stats.clip_coefficient = clip_coef
     stats.clipped = was_clipped
     stats.total_params = total_params
-    
+
     return stats
 }
 
 
-// ========== NaN/Inf 检测 ==========
-// 对应 verl: verl/trainer/ppo/ray_trainer.py 中的 NaN 检测
+
+
 
 struct NaNInfStats {
     bool has_nan
@@ -94,22 +94,22 @@ struct NaNInfStats {
     string first_inf_layer
 }
 
-// 检查单个浮点数是否为 NaN
+
 func is_nan(float x) bool {
-    // NaN 的特性：NaN != NaN
+
     return x != x
 }
 
-// 检查单个浮点数是否为 Inf
+
 func is_inf(float x) bool {
-    // 简化判断：超过浮点数最大值
+
     float max_float = 3.4e38
     if x > max_float { return true }
     if x < (0.0 - max_float) { return true }
     return false
 }
 
-// 检查所有层的梯度是否包含 NaN 或 Inf
+
 func check_gradients_nan_inf([][]float all_layer_grads, []string layer_names) NaNInfStats {
     NaNInfStats stats
     stats.has_nan = false
@@ -119,7 +119,7 @@ func check_gradients_nan_inf([][]float all_layer_grads, []string layer_names) Na
     stats.total_checked = 0
     stats.first_nan_layer = ""
     stats.first_inf_layer = ""
-    
+
     int layer_idx = 0
     while layer_idx < len(all_layer_grads) {
         []float layer_grad = all_layer_grads[layer_idx]
@@ -127,13 +127,13 @@ func check_gradients_nan_inf([][]float all_layer_grads, []string layer_names) Na
         if layer_idx < len(layer_names) {
             layer_name = layer_names[layer_idx]
         }
-        
+
         int i = 0
         while i < len(layer_grad) {
             float g = layer_grad[i]
             stats.total_checked = stats.total_checked + 1
-            
-            // 检查 NaN
+
+
             if is_nan(g) {
                 stats.nan_count = stats.nan_count + 1
                 if !stats.has_nan {
@@ -141,8 +141,8 @@ func check_gradients_nan_inf([][]float all_layer_grads, []string layer_names) Na
                     stats.first_nan_layer = layer_name
                 }
             }
-            
-            // 检查 Inf
+
+
             if is_inf(g) {
                 stats.inf_count = stats.inf_count + 1
                 if !stats.has_inf {
@@ -150,25 +150,25 @@ func check_gradients_nan_inf([][]float all_layer_grads, []string layer_names) Na
                     stats.first_inf_layer = layer_name
                 }
             }
-            
+
             i = i + 1
         }
-        
+
         layer_idx = layer_idx + 1
     }
-    
+
     return stats
 }
 
-// 检查参数是否包含 NaN 或 Inf
+
 func check_parameters_nan_inf([][]float all_layer_params, []string layer_names) NaNInfStats {
-    // 复用梯度检查逻辑
+
     return check_gradients_nan_inf(all_layer_params, layer_names)
 }
 
 
-// ========== 梯度统计 ==========
-// 对应 verl: verl/trainer/ppo/metric_utils.py 中的梯度统计
+
+
 
 struct GradientStatistics {
     float mean
@@ -180,43 +180,43 @@ struct GradientStatistics {
     float sparsity
 }
 
-// 计算单层梯度的统计信息
+
 func compute_gradient_statistics([]float gradients) GradientStatistics {
     GradientStatistics stats
-    
+
     int n = len(gradients)
     if n == 0 {
         return stats
     }
-    
-    // 1. 计算均值、最小值、最大值
+
+
     float sum = 0.0
     float min_val = gradients[0]
     float max_val = gradients[0]
     int zero_cnt = 0
-    
+
     int i = 0
     while i < n {
         float g = gradients[i]
         sum = sum + g
-        
+
         if g < min_val { min_val = g }
         if g > max_val { max_val = g }
-        
-        // 检查零梯度 (绝对值小于 1e-8)
+
+
         if g > -1e-8 && g < 1e-8 {
             zero_cnt = zero_cnt + 1
         }
-        
+
         i = i + 1
     }
-    
+
     float mean = sum / ((n as float))
-    
-    // 2. 计算标准差和 L2 范数
+
+
     float var_sum = 0.0
     float l2_sum = 0.0
-    
+
     i = 0
     while i < n {
         float g = gradients[i]
@@ -225,15 +225,15 @@ func compute_gradient_statistics([]float gradients) GradientStatistics {
         l2_sum = l2_sum + g * g
         i = i + 1
     }
-    
+
     float variance = var_sum / ((n as float))
     float std_dev = sqrt(variance)
     float l2_norm = sqrt(l2_sum)
-    
-    // 3. 计算稀疏度
+
+
     float sparsity = ((zero_cnt as float)) / ((n as float))
-    
-    // 4. 填充统计结构
+
+
     stats.mean = mean
     stats.std = std_dev
     stats.min = min_val
@@ -241,14 +241,14 @@ func compute_gradient_statistics([]float gradients) GradientStatistics {
     stats.l2_norm = l2_norm
     stats.zero_count = zero_cnt
     stats.sparsity = sparsity
-    
+
     return stats
 }
 
 
-// ========== 辅助函数 ==========
 
-// 打印全局梯度裁剪统计
+
+
 func print_gradient_clip_stats(GlobalGradientStats stats) {
     println("[Gradient Clip]")
     print("  Total Norm: ")
@@ -265,30 +265,30 @@ func print_gradient_clip_stats(GlobalGradientStats stats) {
     println(int_to_str(stats.total_params))
 }
 
-// 打印 NaN/Inf 检测结果
+
 func print_nan_inf_stats(NaNInfStats stats) {
     if stats.has_nan || stats.has_inf {
         println("[ERROR] Detected NaN/Inf in gradients!")
-        
+
         if stats.has_nan {
             print("  NaN Count: ")
             println(int_to_str(stats.nan_count))
             print("  First NaN Layer: ")
             println(stats.first_nan_layer)
         }
-        
+
         if stats.has_inf {
             print("  Inf Count: ")
             println(int_to_str(stats.inf_count))
             print("  First Inf Layer: ")
             println(stats.first_inf_layer)
         }
-        
+
         println("  Training should be stopped or checkpointed!")
     }
 }
 
-// 打印梯度统计
+
 func print_gradient_stats(GradientStatistics stats, string layer_name) {
     print("[Gradient Stats] ")
     println(layer_name)
@@ -303,7 +303,7 @@ func print_gradient_stats(GradientStatistics stats, string layer_name) {
 }
 
 
-// ========== 格式化辅助函数 ==========
+
 
 func int_to_str(int n) string {
     if n == 0 { return "0" }
@@ -336,15 +336,15 @@ func float_to_str_4(float value) string {
     float current = value
     bool negative = current < 0.0
     if negative { current = 0.0 - current }
-    
+
     int whole = 0
     while current >= 1.0 {
         current = current - 1.0
         whole = whole + 1
     }
-    
+
     string result = int_to_str(whole) + "."
-    
+
     int i = 0
     while i < 4 {
         current = current * 10.0
@@ -356,7 +356,7 @@ func float_to_str_4(float value) string {
         result = result + int_to_str(digit)
         i = i + 1
     }
-    
+
     if negative { result = "-" + result }
     return result
 }

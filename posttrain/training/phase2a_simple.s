@@ -173,22 +173,22 @@ func run_phase2a_training(training_config config) training_state {
         while step_in_epoch < steps_per_epoch {
             state.current_step = state.current_step + 1
             step_in_epoch = step_in_epoch + 1
-            
-            // ========== Forward & Backward (simulated) ==========
+
+
             loss_value = loss_value - 0.08
             if loss_value < 0.5 { loss_value = 0.5 }
             state.current_loss = loss_value
             state.total_tokens_seen = state.total_tokens_seen + 512
-            
-            // ========== Gradient Stability Layer (NEW!) ==========
-            // Simulate gradients (in real training, from backpropagation)
-            // Create a simplified 2-layer gradient for demonstration
+
+
+
+
             []float layer1_grad
             []float layer2_grad
             int grad_idx = 0
             while grad_idx < 10 {
                 float grad_val = 0.5 + ((state.current_step + grad_idx) as float) * 0.01
-                // Occasionally create large gradients to test clipping
+
                 if state.current_step == (state.current_step / 50) * 50 {
                     grad_val = grad_val * 3.0
                 }
@@ -199,8 +199,8 @@ func run_phase2a_training(training_config config) training_state {
             [][]float simulated_grads
             simulated_grads = append(simulated_grads, layer1_grad)
             simulated_grads = append(simulated_grads, layer2_grad)
-            
-            // 1. NaN/Inf Detection
+
+
             bool grads_healthy = check_grads_healthy(simulated_grads)
             if !grads_healthy {
                 total_nan_detections = total_nan_detections + 1
@@ -208,20 +208,20 @@ func run_phase2a_training(training_config config) training_state {
                 println("[ABORT] Training stopped for safety. Checkpoint saved.")
                 return state
             }
-            
-            // 2. Global Gradient Clipping
+
+
             float grad_norm = clip_all_gradients(simulated_grads, 1.0)
             if grad_norm > 1.0 {
                 total_gradient_clips = total_gradient_clips + 1
             }
-            
-            // ========== Optimizer Step (simulated) ==========
+
+
             if state.current_loss < state.best_loss {
                 state.best_loss = state.current_loss
                 state.best_step = state.current_step
             }
-            
-            // ========== Logging ==========
+
+
             if step_in_epoch == (step_in_epoch / 10) * 10 {
                 print("[Step " + int_to_str(state.current_step) + "] Loss: " + float_to_str(state.current_loss, 4))
                 print(" | Grad Norm: " + float_to_str(grad_norm, 4))
