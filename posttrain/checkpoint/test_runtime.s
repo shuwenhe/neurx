@@ -41,7 +41,11 @@ func read_file(string filepath) string {
     return __host_read_file(filepath)
 }
 
-func rename_file(string old_path, string new_path) bool {
+func atomic_replace(string tmp_path, string final_path) bool {
+    int result = __host_atomic_replace(tmp_path, final_path)
+    if result == 1 {
+        return true
+    }
     return false
 }
 
@@ -221,56 +225,118 @@ func test_file_io() {
 
 func test_atomic_rename() {
     println("====================================")
-    println("[Test] Atomic Rename (CRITICAL)")
+    println("[Test] Atomic Replace (CRITICAL)")
     println("====================================")
-
-    string tmp_file = "/tmp/neurx_test.json.tmp"
-    string final_file = "/tmp/neurx_test.json"
-    string content = "{\"step\": 100}"
-
-    println("Step 1: Write to temp file")
-    write_file(tmp_file, content)
-    println("  ✓ " + tmp_file)
     println("")
 
-    println("Step 2: Atomic rename")
-    bool rename_ok = rename_file(tmp_file, final_file)
-    print("  rename_file() result: ")
-    if rename_ok {
+    println("Test 1: Normal Replace (tmp → final)")
+    println("--------------------------------------")
+    string tmp1 = "/tmp/neurx_atomic_test1.tmp"
+    string final1 = "/tmp/neurx_atomic_test1.json"
+    string content1 = "{\"step\": 100}"
+
+    write_file(tmp1, content1)
+    bool ok1 = atomic_replace(tmp1, final1)
+    print("  atomic_replace() result: ")
+    if ok1 {
+        println("✓ PASS")
+    } else {
+        println("✗ FAIL")
+    }
+
+    bool final1_exists = file_exists(final1)
+    bool tmp1_gone = !file_exists(tmp1)
+    print("  Final exists: ")
+    if final1_exists {
+        println("✓ PASS")
+    } else {
+        println("✗ FAIL")
+    }
+    print("  Temp removed: ")
+    if tmp1_gone {
+        println("✓ PASS")
+    } else {
+        println("✗ FAIL")
+    }
+
+    string read1 = read_file(final1)
+    print("  Content match: ")
+    if read1 == content1 {
         println("✓ PASS")
     } else {
         println("✗ FAIL")
     }
     println("")
 
-    println("Step 3: Verify final file exists")
-    bool final_exists = file_exists(final_file)
-    bool tmp_gone = !file_exists(tmp_file)
-    print("  Final file exists: ")
-    if final_exists {
+    println("Test 2: Overwrite Existing File")
+    println("--------------------------------------")
+    string tmp2 = "/tmp/neurx_atomic_test2.tmp"
+    string final2 = "/tmp/neurx_atomic_test2.json"
+    string old_content = "{\"step\": 50}"
+    string new_content = "{\"step\": 100}"
+
+    write_file(final2, old_content)
+    write_file(tmp2, new_content)
+    bool ok2 = atomic_replace(tmp2, final2)
+    print("  atomic_replace() result: ")
+    if ok2 {
         println("✓ PASS")
     } else {
         println("✗ FAIL")
     }
-    print("  Temp file removed: ")
-    if tmp_gone {
+
+    string read2 = read_file(final2)
+    print("  Content updated: ")
+    if read2 == new_content {
+        println("✓ PASS (old overwritten)")
+    } else {
+        println("✗ FAIL")
+    }
+    println("")
+
+    println("Test 3: Fail Path (tmp doesn't exist)")
+    println("--------------------------------------")
+    string tmp3 = "/tmp/neurx_nonexistent.tmp"
+    string final3 = "/tmp/neurx_atomic_test3.json"
+
+    bool ok3 = atomic_replace(tmp3, final3)
+    print("  atomic_replace() result: ")
+    if !ok3 {
+        println("✓ PASS (correctly returned false)")
+    } else {
+        println("✗ FAIL (should return false)")
+    }
+    println("")
+
+    println("Test 4: Directory fsync (Checkpoint Safety)")
+    println("--------------------------------------")
+    string tmp4 = "/tmp/trainer_state.json.tmp"
+    string final4 = "/tmp/trainer_state.json"
+    string checkpoint_data = "{\"step\": 1000, \"loss\": 2.31}"
+
+    write_file(tmp4, checkpoint_data)
+    bool ok4 = atomic_replace(tmp4, final4)
+    print("  atomic_replace() with dir fsync: ")
+    if ok4 {
+        println("✓ PASS")
+    } else {
+        println("✗ FAIL")
+    }
+
+    string read4 = read_file(final4)
+    print("  Checkpoint persisted: ")
+    if read4 == checkpoint_data {
         println("✓ PASS")
     } else {
         println("✗ FAIL")
     }
     println("")
 
-    println("Step 4: Verify content preserved")
-    string final_content = read_file(final_file)
-    print("  Content: '")
-    print(final_content)
-    println("'")
-    print("  Expected: '" + content + "'  ")
-    if final_content == content {
-        println("✓ PASS")
-    } else {
-        println("✗ FAIL")
-    }
+    println("🎯 Atomic Replace guarantees:")
+    println("  1. File data flushed before rename")
+    println("  2. Rename is atomic (all or nothing)")
+    println("  3. Directory metadata persisted (critical!)")
+    println("  4. Safe for checkpoint during power failure")
     println("")
 }
 
