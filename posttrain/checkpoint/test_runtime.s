@@ -1,5 +1,41 @@
-
 package main
+
+func str_len(string s) int {
+    return __host_str_len(s)
+}
+
+func str_find(string haystack, string needle) int {
+    return __host_str_find(haystack, needle)
+}
+
+func str_char_at(string s, int pos) string {
+    return __host_str_char_at(s, pos)
+}
+
+func str_substring(string s, int start) string {
+    println("[PLACEHOLDER] str_substring() - needs runtime.c implementation")
+    return s
+}
+
+func write_file(string filepath, string content) bool {
+    println("[PLACEHOLDER] write_file() - needs runtime.c implementation")
+    return false
+}
+
+func read_file(string filepath) string {
+    println("[PLACEHOLDER] read_file() - needs runtime.c implementation")
+    return ""
+}
+
+func file_exists(string filepath) bool {
+    println("[PLACEHOLDER] file_exists() - needs runtime.c implementation")
+    return false
+}
+
+func rename_file(string old_path, string new_path) bool {
+    println("[PLACEHOLDER] rename_file() - needs runtime.c implementation")
+    return false
+}
 
 func test_str_len() {
     println("====================================")
@@ -177,7 +213,7 @@ func test_atomic_rename() {
     println("  ✓ " + tmp_file)
     println("")
 
-    println("Step 2: Atomic rename (防止 checkpoint 损坏)")
+    println("Step 2: Atomic rename")
     bool rename_ok = rename_file(tmp_file, final_file)
     print("  rename_file() result: ")
     if rename_ok {
@@ -273,44 +309,4 @@ func int_to_str(int n) string {
     }
     if negative { out = "-" + out }
     return out
-}
-
-func str_len(string s) int {
-    println("[PLACEHOLDER] str_len() - needs runtime.c implementation")
-    return 0
-}
-
-func str_find(string haystack, string needle) int {
-    println("[PLACEHOLDER] str_find() - needs runtime.c implementation")
-    return 0 - 1
-}
-
-func str_char_at(string s, int pos) string {
-    println("[PLACEHOLDER] str_char_at() - needs runtime.c implementation")
-    return ""
-}
-
-func str_substring(string s, int start) string {
-    println("[PLACEHOLDER] str_substring() - needs runtime.c implementation")
-    return s
-}
-
-func write_file(string filepath, string content) bool {
-    println("[PLACEHOLDER] write_file() - needs runtime.c implementation")
-    return false
-}
-
-func read_file(string filepath) string {
-    println("[PLACEHOLDER] read_file() - needs runtime.c implementation")
-    return ""
-}
-
-func file_exists(string filepath) bool {
-    println("[PLACEHOLDER] file_exists() - needs runtime.c implementation")
-    return false
-}
-
-func rename_file(string old_path, string new_path) bool {
-    println("[PLACEHOLDER] rename_file() - needs runtime.c implementation")
-    return false
 }
