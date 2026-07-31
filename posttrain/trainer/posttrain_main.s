@@ -274,7 +274,7 @@ func run_posttrain_lora_sft() int {
             out_dim: hidden_size,
             in_dim: hidden_size,
             lora_A: init_gaussian(rank * hidden_size, 0.02),
-            lora_B: fill_lora(hidden_size * rank, 0.0),
+            lora_B: init_gaussian(hidden_size * rank, 0.01),  // 🔧 修复：初始化为小随机值，不再是 0
             rank: rank,
             scaling: alpha / (rank as float),
             dropout_rate: dropout,
@@ -289,7 +289,7 @@ func run_posttrain_lora_sft() int {
             rank: rank,
             scaling: alpha / (rank as float),
             lora_A: init_gaussian(rank * hidden_size, 0.02),
-            lora_B: fill_lora(hidden_size * rank, 0.0),
+            lora_B: init_gaussian(hidden_size * rank, 0.01),  // 🔧 修复：初始化为小随机值
             initial_a: copy_float_array(q_layer.lora_A),
             initial_b: copy_float_array(q_layer.lora_B)
         }
@@ -302,7 +302,7 @@ func run_posttrain_lora_sft() int {
             out_dim: v_out,
             in_dim: hidden_size,
             lora_A: init_gaussian(rank * hidden_size, 0.02),
-            lora_B: fill_lora(v_out * rank, 0.0),
+            lora_B: init_gaussian(v_out * rank, 0.01),  // 🔧 修复：初始化为小随机值
             rank: rank,
             scaling: alpha / (rank as float),
             dropout_rate: dropout,
@@ -330,8 +330,8 @@ func run_posttrain_lora_sft() int {
     eprintln("[Progress] module build complete, preparing training vectors")
     eprintln("[Progress] using mock vectors for fast testing (no text vectorization)")
     []float prompt_vec = init_gaussian(hidden_size, 0.01)
-    []float target_q = init_gaussian(hidden_size, 0.01)
-    []float target_v = init_gaussian(v_out, 0.01)
+    []float target_q = init_gaussian(hidden_size, 100.0)  // 🔧 增大 target 从 0.01 → 100.0
+    []float target_v = init_gaussian(v_out, 100.0)        // 🔧 增大 target 从 0.01 → 100.0
 
     println("Training loop start")
     []float loss_history = []float{cap: epochs}
@@ -404,6 +404,13 @@ func run_posttrain_lora_sft() int {
                 []float b_snapshot = copy_float_array(lora_B)
                 float step_scale = effective_lr * scaling_val
 
+                // 🔍 验证1：梯度是否存在
+                if module_cursor == 0 {
+                    eprintln("[Verify 1] Gradient check:")
+                    eprintln("  grad_out[0] = " + float_to_str(grad_out[0], 8))
+                    eprintln("  step_scale = " + float_to_str(step_scale, 8))
+                }
+
                 out_idx = 0
                 while out_idx < out_dim {
                     int rank_idx = 0
@@ -440,16 +447,38 @@ func run_posttrain_lora_sft() int {
                         }
                         int a_idx = rank_idx * in_dim + in_idx
                         if a_idx < len(lora_A) {
+                            // 🔍 验证2：局部变量更新前后
+                            float old_val = lora_A[a_idx]
                             lora_A[a_idx] = lora_A[a_idx] - step_scale * grad_a * prompt_vec[in_idx]
+                            float new_val = lora_A[a_idx]
+                            if module_cursor == 0 && rank_idx == 0 && in_idx == 0 {
+                                eprintln("[Verify 2] Local array update:")
+                                eprintln("  lora_A[0] before = " + float_to_str(old_val, 8))
+                                eprintln("  lora_A[0] after = " + float_to_str(new_val, 8))
+                                eprintln("  grad_a = " + float_to_str(grad_a, 8))
+                                eprintln("  delta = " + float_to_str(old_val - new_val, 8))
+                            }
                         }
                         in_idx = in_idx + 1
                     }
                     rank_idx = rank_idx + 1
                 }
 
+                // 🔍 验证3：结构体赋值前后对比
+                if module_cursor == 0 {
+                    eprintln("[Verify 3] Struct assignment:")
+                    eprintln("  lora_A[0] (local) = " + float_to_str(lora_A[0], 8))
+                    eprintln("  module.lora_A[0] (before) = " + float_to_str(module.lora_A[0], 8))
+                }
+
                 module.lora_A = lora_A
                 module.lora_B = lora_B
                 modules[module_cursor] = module
+
+                if module_cursor == 0 {
+                    eprintln("  module.lora_A[0] (after) = " + float_to_str(module.lora_A[0], 8))
+                    eprintln("  modules[0].lora_A[0] (after) = " + float_to_str(modules[0].lora_A[0], 8))
+                }
 
                 epoch_items = epoch_items + 1
                 module_cursor = module_cursor + 1
@@ -468,6 +497,14 @@ func run_posttrain_lora_sft() int {
             best_loss = reported_loss
         }
         println("step " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " loss=" + float_to_str(reported_loss, 6))
+
+        // 🔍 验证4：训练结束后最终状态
+        if len(modules) > 0 {
+            eprintln("[Verify 4] Final state check:")
+            eprintln("  modules[0].lora_A[0] = " + float_to_str(modules[0].lora_A[0], 8))
+            eprintln("  modules[0].lora_B[0] = " + float_to_str(modules[0].lora_B[0], 8))
+        }
+
         eprintln("[Progress] epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " complete")
         epoch = epoch + 1
     }

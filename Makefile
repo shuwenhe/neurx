@@ -2538,3 +2538,25 @@ posttrain-lora-tensor: check-bash build-s-ir-runner
 	@echo ""
 	@echo "[✓] LoRA Tensor training completed!"
 	@echo "Output: $(POSTTRAIN_OUTPUT_DIR)"
+
+# ============================================================
+# Real Training Pipeline (Full Transformer + CrossEntropy)
+# ============================================================
+
+posttrain-real: check-bash build-s-ir-runner build-posttrain-real-s
+	@echo ""
+	@echo "============================================================"
+	@echo "[Real Training] Full Transformer Forward + CrossEntropy"
+	@echo "============================================================"
+	@echo ""
+	@cd '$(S_COMPILER_EMIT_CWD)' && '$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/posttrain_real/posttrain_real_ir.json' || exit 1
+	@echo ""
+	@echo "[✓] Real training pipeline complete!"
+
+build-posttrain-real-s: check-bash
+	@echo "[Build] Compiling real training pipeline..."
+	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_real'
+	@cd '$(S_COMPILER_EMIT_CWD)' && '$(S_COMPILER)' \
+		'$(CURDIR_UNIX)/posttrain/trainer/standalone_real.s' \
+		'$(CURDIR_UNIX)/artifacts/build/posttrain_real/posttrain_real_ir.json' || exit 1
+	@echo "[✓] Real training IR generated"
