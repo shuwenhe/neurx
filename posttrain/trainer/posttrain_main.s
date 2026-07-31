@@ -40,7 +40,7 @@ struct lora_linear {
 struct named_lora_module {
     string name
     lora_linear layer
-    
+
     int out_dim
     int in_dim
     int rank
@@ -206,11 +206,11 @@ func run_posttrain_lora_sft() int {
     int rank = 8
     float alpha = 16.0
     float dropout = 0.05
-    int hidden_size = 896
-    int num_layers = 24
-    int v_out = 128
-    int epochs = 3
-    int samples_per_epoch = 4
+    int hidden_size = 128
+    int num_layers = 2
+    int v_out = 32
+    int epochs = 1
+    int samples_per_epoch = 1
     float nominal_lr = 0.0005
     float effective_lr = 0.05
     if !runtime_file_exists(model_path) && !runtime_file_exists(model_path + "/config.json") {
@@ -332,6 +332,7 @@ func run_posttrain_lora_sft() int {
     []float prompt_vec = init_gaussian(hidden_size, 0.01)
     []float target_q = init_gaussian(hidden_size, 0.01)
     []float target_v = init_gaussian(v_out, 0.01)
+
     println("Training loop start")
     []float loss_history = []float{cap: epochs}
     float best_loss = 0.0
@@ -419,8 +420,15 @@ func run_posttrain_lora_sft() int {
                 
                 int rank_idx = 0
                 while rank_idx < rank_val {
+                    if rank_idx == 0 {
+                        eprintln("[Debug] Module " + int_to_str(module_cursor) + " backward pass started (" + int_to_str(rank_val * in_dim * out_dim) + " iterations)")
+                    }
                     int in_idx = 0
                     while in_idx < in_dim && in_idx < len(prompt_vec) {
+                        int progress_check = in_idx - ((in_idx / 32) * 32)
+                        if progress_check == 0 && rank_idx == 0 {
+                            eprintln("[Progress] Module " + int_to_str(module_cursor) + " gradient: " + int_to_str(in_idx) + "/" + int_to_str(in_dim))
+                        }
                         float grad_a = 0.0
                         out_idx = 0
                         while out_idx < out_dim {
@@ -464,10 +472,10 @@ func run_posttrain_lora_sft() int {
         epoch = epoch + 1
     }
     
-    adapter_stats stats = compute_stats(modules)
-    delta_stats deltas = compute_delta_stats(modules)
+    adapter_stats stats = compute_stats_from_layer(modules)
+    delta_stats deltas = compute_delta_stats_from_layer(modules)
     eprintln("[Progress] saving adapter checkpoint")
-    write_adapter_checkpoint(output_dir, model_path, data_file, modules, loss_history, stats, deltas, rank, alpha, effective_lr, nominal_lr, samples_per_epoch, epochs, v_out)
+    write_adapter_checkpoint_from_layer(output_dir, model_path, data_file, modules, loss_history, stats, deltas, rank, alpha, effective_lr, nominal_lr, samples_per_epoch, epochs, v_out)
     
     println("")
     println("[Training Backend] S Runtime Real Trainer (Cache Fields Workaround)")
@@ -708,7 +716,7 @@ func build_training_state_json_simple(
     json
 }
 
-func compute_stats([]named_lora_module modules) adapter_stats {
+func compute_stats_from_layer([]named_lora_module modules) adapter_stats {
     float l1 = 0.0
     float l2 = 0.0
     float max_abs = 0.0
@@ -772,7 +780,7 @@ func compute_stats([]named_lora_module modules) adapter_stats {
     }
 }
 
-func compute_delta_stats([]named_lora_module modules) delta_stats {
+func compute_delta_stats_from_layer([]named_lora_module modules) delta_stats {
     float l1 = 0.0
     float l2 = 0.0
     float max_abs = 0.0
@@ -832,7 +840,7 @@ func compute_delta_stats([]named_lora_module modules) delta_stats {
     }
 }
 
-func write_adapter_checkpoint(
+func write_adapter_checkpoint_from_layer(
     string output_dir,
     string model_path,
     string data_file,
