@@ -20,7 +20,7 @@ func test_direct_access() {
     obj.data.weights[0] = 1.0
     obj.data.weights[1] = 2.0
     obj.data.weights[2] = 3.0
-    
+
     println("[Test 1] Direct field access:")
     println("  obj.data.value = " + int_to_str(obj.data.value))
     println("  obj.data.score = " + float_to_str(obj.data.score, 2))
@@ -29,17 +29,17 @@ func test_direct_access() {
 
 func test_array_element_access() {
     []OuterData arr = []OuterData{cap: 2}
-    
+
     arr[0].name = "first"
     arr[0].data.value = 10
     arr[0].data.score = 1.5
     arr[0].data.weights = []float{cap: 2}
     arr[0].data.weights[0] = 0.5
-    
+
     arr[1].name = "second"
     arr[1].data.value = 20
     arr[1].data.score = 2.5
-    
+
     println("")
     println("[Test 2] Array element field access:")
     println("  arr[0].data.value = " + int_to_str(arr[0].data.value))
@@ -51,14 +51,14 @@ func test_local_extraction() {
     arr[0].name = "extract"
     arr[0].data.value = 99
     arr[0].data.score = 9.9
-    
+
     println("")
     println("[Test 3] Local variable extraction:")
-    
+
     OuterData elem = arr[0]
     int val = elem.data.value
     println("  Extracted value = " + int_to_str(val))
-    
+
     InnerData inner = elem.data
     int val2 = inner.value
     println("  Double extraction = " + int_to_str(val2))
@@ -79,7 +79,7 @@ func test_loop_iteration() {
         arr[i].data.value = i * 10
         i = i + 1
     }
-    
+
     println("")
     println("[Test 5] Loop iteration with nested access:")
     i = 0
@@ -95,18 +95,18 @@ func main() {
     println("===================================")
     println("S Compiler Nested Struct Test")
     println("===================================")
-    
+
     test_direct_access()
     test_array_element_access()
     test_local_extraction()
-    
+
     OuterData sample
     sample.name = "sample"
     sample.data.value = 777
     test_function_param(sample)
-    
+
     test_loop_iteration()
-    
+
     println("")
     println("[Result] All tests completed!")
     0

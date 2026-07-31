@@ -1,18 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 struct FusionInfo {
     kernel_ids: []i64
     fused_kernel_name: string
@@ -40,18 +25,13 @@ struct MemoryAllocationPlan {
 struct ExecutionPlan {
     id: i64
 
-
     kernel_launches: []KernelLaunchInfo
-
 
     memory_plan: []MemoryAllocationPlan
 
-
     fusion_groups: []FusionInfo
 
-
     total_memory: i64
-
 
     estimated_time_us: i64
 }
@@ -60,18 +40,13 @@ interface IExecutionPlan {
 
     plan_id() -> i64
 
-
     kernel_launches() -> []KernelLaunchInfo
-
 
     memory_plan() -> []MemoryAllocationPlan
 
-
     fusion_groups() -> []FusionInfo
 
-
     total_memory() -> i64
-
 
     estimated_time() -> i64
 }
@@ -80,12 +55,9 @@ interface IExecutionPlanner {
 
     build_plan(graph: ComputationGraph) -> ExecutionPlan
 
-
     optimize_plan(plan: ExecutionPlan) -> ExecutionPlan
 
-
     estimate_memory(plan: ExecutionPlan) -> i64
-
 
     estimate_time(plan: ExecutionPlan) -> i64
 }
@@ -94,9 +66,7 @@ interface IFusionOptimizer {
 
     find_fusion_groups(plan: ExecutionPlan) -> []FusionInfo
 
-
     apply_fusion(plan: ExecutionPlan, fusion: FusionInfo) -> ExecutionPlan
-
 
     can_fuse(k1: KernelLaunchInfo, k2: KernelLaunchInfo) -> bool
 }
@@ -105,9 +75,7 @@ interface IMemoryPlanner {
 
     allocate_plan_memory(plan: ExecutionPlan) -> i64
 
-
     get_allocation(tensor_id: i64) -> MemoryAllocationPlan
-
 
     deallocate_plan_memory(base_addr: i64) -> void
 }
@@ -116,12 +84,9 @@ interface ICUDAGraphBuilder {
 
     build_cuda_graph(plan: ExecutionPlan) -> i64
 
-
     launch_cuda_graph(graph_handle: i64, stream: Stream) -> void
 
-
     destroy_cuda_graph(graph_handle: i64) -> void
-
 
     can_reuse_graph(plan: ExecutionPlan) -> bool
 }
@@ -129,7 +94,6 @@ interface ICUDAGraphBuilder {
 interface IDynamicShapeHandler {
 
     update_plan_for_shapes(plan: ExecutionPlan, shapes: [][]i64) -> ExecutionPlan
-
 
     is_compatible(plan: ExecutionPlan, shapes: [][]i64) -> bool
 }

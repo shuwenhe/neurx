@@ -1,16 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
 import "storage_api"
 import "dtype_api"
 import "layout_api"
@@ -41,13 +28,10 @@ struct TensorImpl {
 
     id: i64
 
-
     storage: Storage
     metadata: TensorMetadata
 
-
     autograd_meta: AutogradMeta
-
 
     ref_count: i64
 }
@@ -61,14 +45,11 @@ interface ITensorImpl {
     device() -> Device
     offset() -> i64
 
-
     storage() -> Storage
     data_ptr() -> i64
 
-
     version() -> i64
     bump_version() -> void
-
 
     requires_grad() -> bool
     set_requires_grad(requires: bool) -> void
@@ -80,7 +61,6 @@ interface ITensorImpl {
     saved_tensors() -> []Tensor
     clear_saved_tensors() -> void
 
-
     incref() -> void
     decref() -> void
     ref_count() -> i64
@@ -90,15 +70,11 @@ interface ITensorImplFactory {
 
     create(storage: Storage, metadata: TensorMetadata) -> TensorImpl
 
-
     create_leaf(storage: Storage, metadata: TensorMetadata) -> TensorImpl
-
 
     clone(impl: TensorImpl) -> TensorImpl
 
-
     view(impl: TensorImpl, new_shape: []i64, new_stride: []i64) -> TensorImpl
-
 
     reshape(impl: TensorImpl, new_shape: []i64) -> TensorImpl
 }
@@ -106,7 +82,6 @@ interface ITensorImplFactory {
 interface ITensorImplLifecycle {
 
     finalize(impl: TensorImpl) -> void
-
 
     debug_info(impl: TensorImpl) -> string
 }

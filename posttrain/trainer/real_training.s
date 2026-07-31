@@ -11,20 +11,17 @@ struct training_config {
     string data_path
     string output_dir
 
-
     int hidden_size
     int num_layers
     int num_heads
     int intermediate_size
     int vocab_size
 
-
     int batch_size
     int seq_len
     int num_epochs
     int steps_per_epoch
     float learning_rate
-
 
     int lora_rank
     float lora_alpha
@@ -36,7 +33,6 @@ func default_training_config() training_config {
         model_path: "../model/Qwen2.5-0.5B-Instruct",
         data_path: "../dataset/medical/train.json",
         output_dir: "../posttrain",
-
 
         hidden_size: 64,
         num_layers: 2,
@@ -63,7 +59,6 @@ func run_real_training() int {
 
     training_config config = default_training_config()
 
-
     eprintln("[Config] Model: " + config.model_path)
     eprintln("[Config] Hidden Size: " + int_to_str(config.hidden_size))
     eprintln("[Config] Num Layers: " + int_to_str(config.num_layers))
@@ -72,7 +67,6 @@ func run_real_training() int {
     eprintln("[Config] Seq Len: " + int_to_str(config.seq_len))
     eprintln("[Config] Epochs: " + int_to_str(config.num_epochs))
     eprintln("")
-
 
     eprintln("[Step 1/5] Loading model weights (mock)")
     model_weights weights = load_model_weights_mock(
@@ -83,12 +77,10 @@ func run_real_training() int {
     eprintln("[Step 1/5] Weights loaded successfully")
     eprintln("")
 
-
     eprintln("[Step 2/5] Creating tokenizer")
     simple_tokenizer tokenizer = create_simple_tokenizer()
     eprintln("[Step 2/5] Tokenizer ready (vocab_size=" + int_to_str(tokenizer.vocab_size) + ")")
     eprintln("")
-
 
     eprintln("[Step 3/5] Preparing training data")
     string sample_text = "What are the symptoms of diabetes? The symptoms include increased thirst."
@@ -100,7 +92,6 @@ func run_real_training() int {
     eprintln("  Labels: [" + int_to_str(labels[0]) + ", " + int_to_str(labels[1]) + ", ...]")
     eprintln("")
 
-
     eprintln("[Step 4/5] Starting training loop")
     int epoch = 0
     while epoch < config.num_epochs {
@@ -109,7 +100,6 @@ func run_real_training() int {
         int step = 0
         while step < config.steps_per_epoch {
             eprintln("  [Step " + int_to_str(step + 1) + "/" + int_to_str(config.steps_per_epoch) + "]")
-
 
             eprintln("    Forward pass...")
             []float logits = model_forward(
@@ -123,7 +113,6 @@ func run_real_training() int {
                 config.intermediate_size,
                 config.vocab_size
             )
-
 
             eprintln("    Computing loss...")
             float loss = cross_entropy_loss(
@@ -139,7 +128,6 @@ func run_real_training() int {
 
             eprintln("    Loss: " + float_to_str(loss, 6) + ", Perplexity: " + float_to_str(ppl, 2))
 
-
             eprintln("    Computing gradients...")
             []float grad_logits = cross_entropy_gradient(
                 logits,
@@ -152,8 +140,6 @@ func run_real_training() int {
 
             eprintln("    Gradient stats: mean=" + float_to_str(mean(grad_logits), 8))
 
-
-
             eprintln("    [TODO] Backward pass + parameter update")
 
             step = step + 1
@@ -162,7 +148,6 @@ func run_real_training() int {
         epoch = epoch + 1
     }
     eprintln("")
-
 
     eprintln("[Step 5/5] Saving checkpoint")
     eprintln("[Step 5/5] [TODO] Implement checkpoint saving")

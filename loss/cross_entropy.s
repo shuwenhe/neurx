@@ -1,10 +1,6 @@
 package neurx.loss.cross_entropy
 use std.io.eprintln
 
-
-
-
-
 func cross_entropy_loss(
     []float logits,
     []int labels,
@@ -20,19 +16,15 @@ func cross_entropy_loss(
     while i < batch_size * seq_len {
         int label = labels[i]
 
-
         if label == ignore_index {
             i = i + 1
             continue
         }
 
-
         if label < 0 { label = 0 }
         if label >= vocab_size { label = vocab_size - 1 }
 
-
         int logits_offset = i * vocab_size
-
 
         float max_logit = logits[logits_offset]
         int j = 1
@@ -42,7 +34,6 @@ func cross_entropy_loss(
             }
             j = j + 1
         }
-
 
         float sum_exp = 0.0
         j = 0
@@ -54,9 +45,7 @@ func cross_entropy_loss(
 
         float log_sum_exp = log_approx(sum_exp)
 
-
         float log_prob = logits[logits_offset + label] - max_logit - log_sum_exp
-
 
         total_loss = total_loss - log_prob
         valid_count = valid_count + 1
@@ -87,8 +76,6 @@ func log_approx(float x) float {
     if x <= 0.0 { return -10.0 }
     if x == 1.0 { return 0.0 }
 
-
-
     float y = (x - 1.0) / (x + 1.0)
     float y2 = y * y
     float result = y
@@ -103,7 +90,6 @@ func log_approx(float x) float {
 
     result * 2.0
 }
-
 
 func cross_entropy_gradient(
     []float logits,
@@ -131,10 +117,8 @@ func cross_entropy_gradient(
             continue
         }
 
-
         if label < 0 { label = 0 }
         if label >= vocab_size { label = vocab_size - 1 }
-
 
         float max_logit = logits[logits_offset]
         int j = 1
@@ -153,7 +137,6 @@ func cross_entropy_gradient(
             j = j + 1
         }
 
-
         j = 0
         while j < vocab_size {
             float prob = exp_approx(logits[logits_offset + j] - max_logit) / sum_exp
@@ -170,7 +153,6 @@ func cross_entropy_gradient(
 
     grad
 }
-
 
 func perplexity_from_loss(float loss) float {
     exp_approx(loss)

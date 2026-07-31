@@ -1,4 +1,3 @@
-
 package neurx.posttrain.training.stability_demo
 
 use neurx.posttrain.training.stability.{has_nan, has_inf}
@@ -7,14 +6,12 @@ func demo_nan_detection() {
     println("=== NaN/Inf Detection Demo ===")
     println("")
 
-
     float normal = 1.5
     println("[Test 1] Normal value: 1.5")
     if !has_nan(normal) && !has_inf(normal) {
         println("  ✓ Healthy gradient")
     }
     println("")
-
 
     float zero = 0.0
     float nan_value = zero / zero
@@ -23,7 +20,6 @@ func demo_nan_detection() {
         println("  ✗ NaN detected! Training should stop.")
     }
     println("")
-
 
     float large = 1e40
     println("[Test 3] Inf value (1e40)")
@@ -40,9 +36,7 @@ func demo_gradient_clipping() {
     println("=== Gradient Clipping Demo ===")
     println("")
 
-
     []float grads = []float{1.0, 2.0, 3.0, 4.0, 5.0}
-
 
     float norm_sq = 0.0
     int i = 0
@@ -54,7 +48,6 @@ func demo_gradient_clipping() {
 
     print("Original gradient norm: ")
     println(float_to_str_2(norm))
-
 
     float max_norm = 3.0
     if norm > max_norm {

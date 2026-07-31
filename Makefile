@@ -2479,28 +2479,6 @@ build-deepspeed-zero: build-zero-components test-zero-optimizer
 	@echo "  Tolerance: max_abs_error < 1e-5"
 
 
-posttrain-real: check-bash build-s-ir-runner
-	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_real'
-	@echo "======================================================"
-	@echo "[Phase 2A] REAL SFT Training with LoRA (Pure S)"
-	@echo "======================================================"
-	@cd '$(CURDIR_UNIX)' && \
-		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_real/phase2a_real.ir'; \
-		"$(POSTTRAIN_S_COMPILER)" 'posttrain/training/phase2a_trainer.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_real/phase2a_real.ir' 2>&1 || exit 1; \
-		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_real/phase2a_real.ir'
-	@mkdir -p '$(POSTTRAIN_OUTPUT_DIR)' '$(LOG_DIR)'
-	@cd '$(CURDIR_UNIX)' && \
-		set -o pipefail; \
-		export NEURX_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)'; \
-		export NEURX_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)'; \
-		export NEURX_DATA_PATH='$(POSTTRAIN_DATA_FILE)'; \
-		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_real/phase2a_real.ir' \
-		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_real_$(shell date +%Y%m%d_%H%M%S).log'
-	@echo ""
-	@echo "[✓] REAL Phase 2A training completed with gradient updates!"
-	@echo "Output: $(POSTTRAIN_OUTPUT_DIR)"
-
-
 posttrain-simple: check-bash build-s-ir-runner
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_simple'
 	@echo "======================================================"

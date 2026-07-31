@@ -1,8 +1,6 @@
-
 package neurx.posttrain.training.enhanced_demo
 
 use neurx.posttrain.training.stability.{clip_all_gradients, check_grads_healthy, compute_accuracy}
-
 
 func training_loop_with_stability() {
     println("=== Enhanced Training Loop Demo ===")
@@ -13,20 +11,13 @@ func training_loop_with_stability() {
     println("3. Token accuracy tracking")
     println("")
 
-
     int num_steps = 10
     int step = 0
 
     while step < num_steps {
         println("[Step " + int_to_str(step + 1) + "/" + int_to_str(num_steps) + "]")
 
-
-
         float loss = 2.5 - ((step as float)) * 0.2
-
-
-
-
 
         []float layer1_grads = make_float_array(3)
         layer1_grads[0] = 0.1
@@ -42,14 +33,12 @@ func training_loop_with_stability() {
         all_gradients[0] = layer1_grads
         all_gradients[1] = layer2_grads
 
-
         bool grads_healthy = check_grads_healthy(all_gradients)
         if !grads_healthy {
             println("[ABORT] Training stopped due to NaN/Inf in gradients!")
             println("Checkpoint saved. Please investigate the issue.")
             return
         }
-
 
         float grad_norm = clip_all_gradients(all_gradients, 1.0)
 
@@ -63,9 +52,6 @@ func training_loop_with_stability() {
         }
         println("")
 
-
-
-
         step = step + 1
     }
 
@@ -77,8 +63,6 @@ func training_loop_with_stability() {
 func main() {
     training_loop_with_stability()
 }
-
-
 
 func make_float_array(int size) []float {
     []float arr = []float{}

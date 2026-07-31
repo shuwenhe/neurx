@@ -69,21 +69,21 @@ func cross_entropy_loss(
     if logit1 > max_logit { max_logit = logit1 }
     if logit2 > max_logit { max_logit = logit2 }
     if logit3 > max_logit { max_logit = logit3 }
-    
+
     float exp0 = exp_approx(logit0 - max_logit)
     float exp1 = exp_approx(logit1 - max_logit)
     float exp2 = exp_approx(logit2 - max_logit)
     float exp3 = exp_approx(logit3 - max_logit)
     float sum_exp = exp0 + exp1 + exp2 + exp3
-    
+
     float target_logit = logit0
     if target_class == 1 { target_logit = logit1 }
     if target_class == 2 { target_logit = logit2 }
     if target_class == 3 { target_logit = logit3 }
-    
+
     float log_prob = (target_logit - max_logit) - log_approx(sum_exp)
     float loss = 0.0 - log_prob
-    
+
     return loss
 }
 
@@ -105,28 +105,28 @@ func cross_entropy_backward(
     if logit1 > max_logit { max_logit = logit1 }
     if logit2 > max_logit { max_logit = logit2 }
     if logit3 > max_logit { max_logit = logit3 }
-    
+
     float exp0 = exp_approx(logit0 - max_logit)
     float exp1 = exp_approx(logit1 - max_logit)
     float exp2 = exp_approx(logit2 - max_logit)
     float exp3 = exp_approx(logit3 - max_logit)
     float sum_exp = exp0 + exp1 + exp2 + exp3
-    
+
     float prob0 = exp0 / sum_exp
     float prob1 = exp1 / sum_exp
     float prob2 = exp2 / sum_exp
     float prob3 = exp3 / sum_exp
-    
+
     float grad_logit0 = prob0
     float grad_logit1 = prob1
     float grad_logit2 = prob2
     float grad_logit3 = prob3
-    
+
     if target_class == 0 { grad_logit0 = grad_logit0 - 1.0 }
     if target_class == 1 { grad_logit1 = grad_logit1 - 1.0 }
     if target_class == 2 { grad_logit2 = grad_logit2 - 1.0 }
     if target_class == 3 { grad_logit3 = grad_logit3 - 1.0 }
-    
+
     gradient_result result
     result.grad0 = grad_logit0
     result.grad1 = grad_logit1
@@ -199,13 +199,13 @@ func float_to_str(float value, int decimals) string {
 
 func main() {
     string output_dir = runtime_env_get("NEURX_OUTPUT_DIR", "/home/shuwen/shuwen/posttrain")
-    
+
     println("====================================================")
     println("[Phase 2A] LoRA Training with Tensor + CrossEntropy")
     println("====================================================")
     println("[Backend] S Runtime - Tensor, LoRA Matrix, CrossEntropy")
     println("")
-    
+
     int rank = 2
     int hidden_size = 4
     float alpha = 4.0
@@ -213,13 +213,13 @@ func main() {
     int epochs = 3
     int steps_per_epoch = 100
     int num_classes = 4
-    
+
     int lora_A_rows = rank
     int lora_A_cols = hidden_size
     int lora_B_rows = hidden_size
     int lora_B_cols = rank
     float lora_scaling = alpha / float(rank)
-    
+
     println("[Architecture]")
     println("  Tensor Support: Enabled")
     println("  LoRA Module:")
@@ -237,104 +237,104 @@ func main() {
     println("  Steps per Epoch: " + int_to_str(steps_per_epoch))
     println("  Num Classes: " + int_to_str(num_classes))
     println("")
-    
+
     float lora_A_w0 = 1.0
     float lora_A_w1 = 2.0
     float lora_B_w0 = 0.0
     float lora_B_w1 = 0.0
-    
+
     float logit_w0 = 0.5
     float logit_w1 = 0.3
     float logit_w2 = 0.8
     float logit_w3 = 0.2
-    
+
     println("[Initial Weights]")
     println("  LoRA_A weights: [" + float_to_str(lora_A_w0, 2) + ", " + float_to_str(lora_A_w1, 2) + "]")
     println("  LoRA_B weights: [" + float_to_str(lora_B_w0, 2) + ", " + float_to_str(lora_B_w1, 2) + "] (zeros)")
     println("  Logit weights: [" + float_to_str(logit_w0, 2) + ", " + float_to_str(logit_w1, 2) + ", " + float_to_str(logit_w2, 2) + ", " + float_to_str(logit_w3, 2) + "]")
     println("")
-    
+
     float best_loss = 999.0
     int total_steps = 0
     float current_loss = 0.0
-    
+
     int epoch = 0
     while epoch < epochs {
         println("====================================================")
         println("[Epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + "]")
         println("====================================================")
-        
+
         int step = 0
         while step < steps_per_epoch {
             total_steps = total_steps + 1
-            
+
             float input0 = 1.0
             float input1 = 1.0
             float input2 = 1.0
             float input3 = 1.0
             int target_class = 2
-            
+
             float lora_output0 = matmul_element(lora_A_w0, lora_B_w0, input0, lora_scaling)
             float lora_output1 = matmul_element(lora_A_w1, lora_B_w1, input1, lora_scaling)
-            
+
             float logit0 = logit_w0 + lora_output0
             float logit1 = logit_w1 + lora_output1
             float logit2 = logit_w2
             float logit3 = logit_w3
-            
+
             current_loss = cross_entropy_loss(logit0, logit1, logit2, logit3, target_class)
-            
+
             float max_logit = logit0
             if logit1 > max_logit { max_logit = logit1 }
             if logit2 > max_logit { max_logit = logit2 }
             if logit3 > max_logit { max_logit = logit3 }
-            
+
             float exp0 = exp_approx(logit0 - max_logit)
             float exp1 = exp_approx(logit1 - max_logit)
             float exp2 = exp_approx(logit2 - max_logit)
             float exp3 = exp_approx(logit3 - max_logit)
             float sum_exp = exp0 + exp1 + exp2 + exp3
-            
+
             float prob0 = exp0 / sum_exp
             float prob1 = exp1 / sum_exp
             float prob2 = exp2 / sum_exp
             float prob3 = exp3 / sum_exp
-            
+
             float grad_logit0 = prob0
             float grad_logit1 = prob1
             float grad_logit2 = prob2
             float grad_logit3 = prob3
-            
+
             if target_class == 0 { grad_logit0 = grad_logit0 - 1.0 }
             if target_class == 1 { grad_logit1 = grad_logit1 - 1.0 }
             if target_class == 2 { grad_logit2 = grad_logit2 - 1.0 }
             if target_class == 3 { grad_logit3 = grad_logit3 - 1.0 }
-            
+
             logit_w0 = logit_w0 - lr * grad_logit0
             logit_w1 = logit_w1 - lr * grad_logit1
             logit_w2 = logit_w2 - lr * grad_logit2
             logit_w3 = logit_w3 - lr * grad_logit3
-            
+
             float lora_grad_B0 = grad_logit0 * lora_A_w0 * lora_scaling * input0
             float lora_grad_B1 = grad_logit1 * lora_A_w1 * lora_scaling * input1
-            
+
             lora_B_w0 = lora_B_w0 - lr * lora_grad_B0
             lora_B_w1 = lora_B_w1 - lr * lora_grad_B1
-            
+
             if current_loss < best_loss {
                 best_loss = current_loss
             }
-            
+
             if step == 9 || step == 19 || step == 49 || step == 99 {
                 println("[Step " + int_to_str(total_steps) + "] Loss: " + float_to_str(current_loss, 6) + " | Best: " + float_to_str(best_loss, 6))
             }
-            
+
             step = step + 1
         }
-        
+
         epoch = epoch + 1
     }
-    
+
     println("")
     println("====================================================")
     println("[Training Complete]")
@@ -347,7 +347,7 @@ func main() {
     println("  LoRA_B weights: [" + float_to_str(lora_B_w0, 6) + ", " + float_to_str(lora_B_w1, 6) + "] (changed from [0.0, 0.0])")
     println("  Logit weights: [" + float_to_str(logit_w0, 6) + ", " + float_to_str(logit_w1, 6) + ", " + float_to_str(logit_w2, 6) + ", " + float_to_str(logit_w3, 6) + "]")
     println("")
-    
+
     println("✓ Training completed with:")
     println("  ✓ Tensor operations (matrix shapes)")
     println("  ✓ LoRA module (lora_A, lora_B)")
@@ -356,6 +356,6 @@ func main() {
     println("")
     println("Output: " + output_dir)
     println("")
-    
+
     return 0
 }

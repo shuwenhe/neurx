@@ -2,7 +2,6 @@ package neurx.posttrain.training.simple_real
 
 use neurx.runtime.io.{runtime_env_get, runtime_write_binary_file}
 
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -78,8 +77,6 @@ func main() {
     float lora_alpha = 16.0
     float learning_rate = 0.0005
 
-
-
     println("====================================================")
     println("[Phase 2A] REAL SFT Training with LoRA")
     println("====================================================")
@@ -95,14 +92,12 @@ func main() {
     println("  Batch Size: " + int_to_str(batch_size))
     println("")
 
-
     int lora_a_size = lora_rank * hidden_size
     int lora_b_size = hidden_size * lora_rank
 
     println("[Initializing LoRA Weights]")
     []float lora_A = []float{cap: lora_a_size}
     []float lora_B = []float{cap: lora_b_size}
-
 
     int seed = 42
     int i = 0
@@ -115,7 +110,6 @@ func main() {
         i = i + 1
     }
 
-
     i = 0
     while i < lora_b_size {
         lora_B = append(lora_B, 0.0)
@@ -124,7 +118,6 @@ func main() {
 
     println("✓ Initialized LoRA weights (lora_A: " + int_to_str(lora_a_size) + ", lora_B: " + int_to_str(lora_b_size) + ")")
     println("")
-
 
     int total_steps = 0
     float current_loss = 10.0
@@ -141,8 +134,6 @@ func main() {
         while step < steps_per_epoch {
             total_steps = total_steps + 1
 
-
-
             seed = seed + total_steps * 999
             if seed < 0 { seed = 0 - seed }
             int loss_remainder = seed - (seed / 1000) * 1000
@@ -150,16 +141,12 @@ func main() {
             current_loss = current_loss - loss_delta
             if current_loss < 0.3 { current_loss = 0.3 + loss_delta * 0.1 }
 
-
-
             int update_idx = total_steps - (total_steps / lora_b_size) * lora_b_size
             lora_B[update_idx] = lora_B[update_idx] + learning_rate * (current_loss - 0.5) * 0.1
-
 
             if current_loss < best_loss {
                 best_loss = current_loss
             }
-
 
             if step == 9 || step == 19 || step == 49 || step == 99 {
                 println("[Step " + int_to_str(total_steps) + "] Loss: " + float_to_str(current_loss, 4) + " | Best: " + float_to_str(best_loss, 4))
@@ -180,20 +167,17 @@ func main() {
     println("Best Loss: " + float_to_str(best_loss, 4))
     println("")
 
-
     println("[Saving LoRA Weights]")
     println("Output Directory: " + output_dir)
 
     string lora_path = output_dir + "/adapter_model.bin"
     []byte buffer = []byte{cap: (lora_a_size + lora_b_size) * 4 + 16}
 
-
     i = 0
     while i < 16 {
         buffer = append(buffer, byte(0))
         i = i + 1
     }
-
 
     i = 0
     while i < lora_a_size {
@@ -217,7 +201,6 @@ func main() {
 
     runtime_write_binary_file(lora_path, buffer)
     println("✓ Saved LoRA weights (" + int_to_str(len(buffer)) + " bytes)")
-
 
     string config_json = "{\"lora_rank\":" + int_to_str(lora_rank) + ",\"lora_alpha\":" + float_to_str(lora_alpha, 1) + ",\"learning_rate\":" + float_to_str(learning_rate, 6) + "}"
     []byte config_bytes = []byte{cap: len(config_json)}

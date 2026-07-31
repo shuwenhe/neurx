@@ -174,14 +174,10 @@ func run_phase2a_training(training_config config) training_state {
             state.current_step = state.current_step + 1
             step_in_epoch = step_in_epoch + 1
 
-
             loss_value = loss_value - 0.08
             if loss_value < 0.5 { loss_value = 0.5 }
             state.current_loss = loss_value
             state.total_tokens_seen = state.total_tokens_seen + 512
-
-
-
 
             []float layer1_grad
             []float layer2_grad
@@ -200,7 +196,6 @@ func run_phase2a_training(training_config config) training_state {
             simulated_grads = append(simulated_grads, layer1_grad)
             simulated_grads = append(simulated_grads, layer2_grad)
 
-
             bool grads_healthy = check_grads_healthy(simulated_grads)
             if !grads_healthy {
                 total_nan_detections = total_nan_detections + 1
@@ -209,18 +204,15 @@ func run_phase2a_training(training_config config) training_state {
                 return state
             }
 
-
             float grad_norm = clip_all_gradients(simulated_grads, 1.0)
             if grad_norm > 1.0 {
                 total_gradient_clips = total_gradient_clips + 1
             }
 
-
             if state.current_loss < state.best_loss {
                 state.best_loss = state.current_loss
                 state.best_step = state.current_step
             }
-
 
             if step_in_epoch == (step_in_epoch / 10) * 10 {
                 print("[Step " + int_to_str(state.current_step) + "] Loss: " + float_to_str(state.current_loss, 4))

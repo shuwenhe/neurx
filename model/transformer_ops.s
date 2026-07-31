@@ -1,7 +1,6 @@
 package neurx.model.transformer_ops
 use std.io.eprintln
 
-
 func embedding_lookup(
     []int token_ids,
     []float embed_weight,
@@ -16,10 +15,8 @@ func embedding_lookup(
     while idx < batch_size * seq_len {
         int token_id = token_ids[idx]
 
-
         if token_id < 0 { token_id = 0 }
         if token_id >= vocab_size { token_id = vocab_size - 1 }
-
 
         int h = 0
         while h < hidden_size {
@@ -33,7 +30,6 @@ func embedding_lookup(
 
     output
 }
-
 
 func rms_norm(
     []float x,
@@ -51,7 +47,6 @@ func rms_norm(
         while s < seq_len {
             int offset = (b * seq_len + s) * hidden_size
 
-
             float sum_sq = 0.0
             int h = 0
             while h < hidden_size {
@@ -61,7 +56,6 @@ func rms_norm(
             }
 
             float rms = sqrt_approx(sum_sq / (hidden_size as float) + eps)
-
 
             h = 0
             while h < hidden_size {
@@ -80,7 +74,6 @@ func rms_norm(
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
 
-
     float guess = x / 2.0
     int i = 0
     while i < 5 {
@@ -89,7 +82,6 @@ func sqrt_approx(float x) float {
     }
     guess
 }
-
 
 func matmul(
     []float A,
@@ -119,7 +111,6 @@ func matmul(
     C
 }
 
-
 func softmax(
     []float x,
     int total_size,
@@ -133,7 +124,6 @@ func softmax(
     while i < num_softmax {
         int offset = i * last_dim
 
-
         float max_val = x[offset]
         int j = 1
         while j < last_dim {
@@ -143,7 +133,6 @@ func softmax(
             j = j + 1
         }
 
-
         float sum = 0.0
         j = 0
         while j < last_dim {
@@ -152,7 +141,6 @@ func softmax(
             sum = sum + exp_val
             j = j + 1
         }
-
 
         j = 0
         while j < last_dim {
@@ -181,7 +169,6 @@ func exp_approx(float x) float {
     result
 }
 
-
 func silu([]float x) []float {
     []float output = []float{cap: len(x)}
     int i = 0
@@ -192,7 +179,6 @@ func silu([]float x) []float {
     }
     output
 }
-
 
 func add_arrays([]float a, []float b) []float {
     int size = len(a)
@@ -220,7 +206,6 @@ func mul_arrays([]float a, []float b) []float {
     output
 }
 
-
 func simplified_attention(
     []float hidden_states,
     []float q_weight,
@@ -238,9 +223,7 @@ func simplified_attention(
     []float k = matmul(hidden_states, k_weight, total_tokens, hidden_size, hidden_size)
     []float v = matmul(hidden_states, v_weight, total_tokens, hidden_size, hidden_size)
 
-
     int head_dim = hidden_size / num_heads
-
 
     float scale = 1.0 / sqrt_approx(head_dim as float)
 
@@ -261,9 +244,7 @@ func simplified_attention(
         i = i + 1
     }
 
-
     []float attn_weights = softmax(attn_scores, total_tokens * total_tokens, total_tokens)
-
 
     []float context = []float{cap: total_tokens * hidden_size}
     i = 0
@@ -282,11 +263,9 @@ func simplified_attention(
         i = i + 1
     }
 
-
     []float output = matmul(context, o_weight, total_tokens, hidden_size, hidden_size)
     output
 }
-
 
 func swiglu_mlp(
     []float hidden_states,
@@ -300,19 +279,15 @@ func swiglu_mlp(
 ) []float {
     int total_tokens = batch_size * seq_len
 
-
     []float gate = matmul(hidden_states, gate_weight, total_tokens, hidden_size, intermediate_size)
     []float up = matmul(hidden_states, up_weight, total_tokens, hidden_size, intermediate_size)
-
 
     []float silu_up = silu(up)
     []float activated = mul_arrays(gate, silu_up)
 
-
     []float output = matmul(activated, down_weight, total_tokens, intermediate_size, hidden_size)
     output
 }
-
 
 func transformer_layer(
     []float hidden_states,
@@ -334,20 +309,15 @@ func transformer_layer(
 
     []float normed = rms_norm(hidden_states, input_ln_weight, batch_size, seq_len, hidden_size, 0.000001)
 
-
     []float attn_output = simplified_attention(normed, q_weight, k_weight, v_weight, o_weight,
                                                batch_size, seq_len, hidden_size, num_heads)
 
-
     []float after_attn = add_arrays(hidden_states, attn_output)
-
 
     normed = rms_norm(after_attn, post_ln_weight, batch_size, seq_len, hidden_size, 0.000001)
 
-
     []float mlp_output = swiglu_mlp(normed, gate_weight, up_weight, down_weight,
                                     batch_size, seq_len, hidden_size, intermediate_size)
-
 
     []float output = add_arrays(after_attn, mlp_output)
     output

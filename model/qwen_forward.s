@@ -5,8 +5,6 @@ use neurx.model.transformer_ops.{
 }
 use std.io.eprintln
 
-
-
 func model_forward(
     []int input_ids,
     model_weights weights,
@@ -23,13 +21,11 @@ func model_forward(
              " Seq=" + int_to_str(seq_len) +
              " Hidden=" + int_to_str(hidden_size))
 
-
     eprintln("[Model Forward] Step 1/4: Embedding lookup")
     []float hidden_states = embedding_lookup(
         input_ids, weights.embed_tokens,
         batch_size, seq_len, hidden_size, vocab_size
     )
-
 
     eprintln("[Model Forward] Step 2/4: Processing " + int_to_str(num_layers) + " transformer layers")
     int layer_idx = 0
@@ -61,7 +57,6 @@ func model_forward(
         layer_idx = layer_idx + 1
     }
 
-
     eprintln("[Model Forward] Step 3/4: Final layer normalization")
     hidden_states = rms_norm(
         hidden_states,
@@ -71,7 +66,6 @@ func model_forward(
         hidden_size,
         0.000001
     )
-
 
     eprintln("[Model Forward] Step 4/4: LM head projection")
     int total_tokens = batch_size * seq_len
@@ -87,7 +81,6 @@ func model_forward(
     logits
 }
 
-
 func model_forward_with_lora(
     []int input_ids,
     model_weights weights,
@@ -100,7 +93,6 @@ func model_forward_with_lora(
     int intermediate_size,
     int vocab_size
 ) []float {
-
 
     model_forward(
         input_ids, weights,

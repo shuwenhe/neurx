@@ -2,21 +2,13 @@ package neurx.model.weight_loader
 use neurx.runtime.io.{runtime_read_binary_file, runtime_file_exists}
 use std.io.eprintln
 
-
-
-
-
-
 struct model_weights {
 
     []float embed_tokens
 
-
     []layer_weights layers
 
-
     []float norm_weight
-
 
     bool weights_loaded
 }
@@ -28,16 +20,13 @@ struct layer_weights {
     []float v_proj
     []float o_proj
 
-
     []float gate_proj
     []float up_proj
     []float down_proj
 
-
     []float input_layernorm
     []float post_attention_layernorm
 }
-
 
 func parse_u64_le([]int bytes, int offset) int {
     int b0 = bytes[offset]
@@ -49,11 +38,9 @@ func parse_u64_le([]int bytes, int offset) int {
     int b6 = bytes[offset + 6]
     int b7 = bytes[offset + 7]
 
-
     int result = b0 + (b1 * 256) + (b2 * 65536) + (b3 * 16777216)
     result
 }
-
 
 func parse_f32_le([]int bytes, int offset) float {
     int b0 = bytes[offset]
@@ -61,21 +48,16 @@ func parse_f32_le([]int bytes, int offset) float {
     int b2 = bytes[offset + 2]
     int b3 = bytes[offset + 3]
 
-
-
     int bits = b0 + (b1 * 256) + (b2 * 65536) + (b3 * 16777216)
-
 
     int sign = 1
     if b3 >= 128 {
         sign = -1
     }
 
-
     float val = (bits as float) / 1000000.0
     val * (sign as float)
 }
-
 
 func load_tensor_simple([]int file_bytes, int tensor_offset, int num_elements) []float {
     []float data = []float{cap: num_elements}
@@ -90,7 +72,6 @@ func load_tensor_simple([]int file_bytes, int tensor_offset, int num_elements) [
     data
 }
 
-
 func load_model_weights_mock(string model_dir, int hidden_size, int num_layers) model_weights {
     eprintln("[Weight Loader] Loading mock weights for testing")
     eprintln("[Weight Loader] Model dir: " + model_dir)
@@ -99,7 +80,6 @@ func load_model_weights_mock(string model_dir, int hidden_size, int num_layers) 
 
     int vocab_size = 151936
     int intermediate_size = 4864
-
 
     []layer_weights layers = []layer_weights{cap: num_layers}
     int i = 0

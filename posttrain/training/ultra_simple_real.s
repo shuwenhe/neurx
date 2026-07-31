@@ -72,10 +72,6 @@ func main() {
     println("[Backend] S Runtime with Real Gradients")
     println("")
 
-
-
-
-
     float lora_w1 = 0.5
     float lora_w2 = 0.3
     float lora_w3 = 0.8
@@ -112,37 +108,30 @@ func main() {
         while step < steps_per_epoch {
             total_steps = total_steps + 1
 
-
             float input1 = 1.0
             float input2 = 0.5
             float input3 = 0.8
             float input4 = 1.2
             float target = 2.0
 
-
             float output = lora_w1 * input1 + lora_w2 * input2 + lora_w3 * input3 + lora_w4 * input4
-
 
             float diff = output - target
             current_loss = diff * diff
-
 
             float grad1 = 2.0 * diff * input1
             float grad2 = 2.0 * diff * input2
             float grad3 = 2.0 * diff * input3
             float grad4 = 2.0 * diff * input4
 
-
             lora_w1 = lora_w1 - lr * grad1
             lora_w2 = lora_w2 - lr * grad2
             lora_w3 = lora_w3 - lr * grad3
             lora_w4 = lora_w4 - lr * grad4
 
-
             if current_loss < best_loss {
                 best_loss = current_loss
             }
-
 
             if step == 9 || step == 19 || step == 49 || step == 99 {
                 println("[Step " + int_to_str(total_steps) + "] Loss: " + float_to_str(current_loss, 6) + " | Best: " + float_to_str(best_loss, 6))
@@ -169,7 +158,6 @@ func main() {
     println("  w4: " + float_to_str(lora_w4, 6) + " (changed from 0)")
     println("")
 
-
     println("[Saving Weights]")
     println("Output: " + output_dir + "/adapter_weights.txt")
 
@@ -180,7 +168,6 @@ func main() {
     weights_text = weights_text + "final_loss=" + float_to_str(current_loss, 6) + "\n"
     weights_text = weights_text + "best_loss=" + float_to_str(best_loss, 6) + "\n"
 
-
     int len_text = 0
     int i = 0
     while i < 1000 {
@@ -190,12 +177,10 @@ func main() {
         i = i + 1
     }
 
-
     int buf_size = len_text
     if buf_size > 500 { buf_size = 500 }
 
     string path = output_dir + "/adapter_weights.txt"
-
 
     println("✓ Weights saved to: " + path)
     println("✓ Training completed with REAL gradient updates!")

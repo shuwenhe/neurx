@@ -119,8 +119,6 @@ func runtime_build_prompt(runtime_training_sample sample) string {
     prompt
 }
 
-
-
 func char_at(string text, int idx) string {
     return string(text[idx])
 }
@@ -438,7 +436,6 @@ func run_posttrain_lora_sft() int {
                 []float b_snapshot = copy_float_array(lora_B)
                 float step_scale = effective_lr * scaling_val
 
-
                 if module_cursor == 0 {
                     eprintln("[Verify 1] Gradient check:")
                     eprintln("  grad_out[0] = " + float_to_str(grad_out[0], 8))
@@ -498,7 +495,6 @@ func run_posttrain_lora_sft() int {
                     rank_idx = rank_idx + 1
                 }
 
-
                 if module_cursor == 0 {
                     eprintln("[Verify 3] Struct assignment:")
                     eprintln("  lora_A[0] (local) = " + float_to_str(lora_A[0], 8))
@@ -531,7 +527,6 @@ func run_posttrain_lora_sft() int {
             best_loss = reported_loss
         }
         println("step " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " loss=" + float_to_str(reported_loss, 6))
-
 
         if len(modules) > 0 {
             eprintln("[Verify 4] Final state check:")

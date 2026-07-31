@@ -110,12 +110,9 @@ func main() {
             total_steps = total_steps + 1
             step_in_epoch = step_in_epoch + 1
 
-
             loss_value = loss_value - 0.08
             if loss_value < 0.5 { loss_value = 0.5 }
             total_tokens = total_tokens + 512
-
-
 
             []float layer1_grad
             []float layer2_grad
@@ -138,7 +135,6 @@ func main() {
             simulated_grads = append(simulated_grads, layer1_grad)
             simulated_grads = append(simulated_grads, layer2_grad)
 
-
             bool grads_healthy
             grads_healthy = check_grads_healthy(simulated_grads)
             if !grads_healthy {
@@ -148,19 +144,16 @@ func main() {
                 return
             }
 
-
             float grad_norm
             grad_norm = clip_all_gradients(simulated_grads, 1.0)
             if grad_norm > 1.0 {
                 total_gradient_clips = total_gradient_clips + 1
             }
 
-
             if loss_value < best_loss {
                 best_loss = loss_value
                 best_step = total_steps
             }
-
 
             if step_in_epoch == 10 || step_in_epoch == 20 || step_in_epoch == 50 || step_in_epoch == 100 {
                 print("[Step " + int_to_str(total_steps) + "] Loss: " + float_to_str(loss_value, 4))
