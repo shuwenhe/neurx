@@ -2539,9 +2539,9 @@ posttrain-lora-tensor: check-bash build-s-ir-runner
 	@echo "[✓] LoRA Tensor training completed!"
 	@echo "Output: $(POSTTRAIN_OUTPUT_DIR)"
 
-# ============================================================
-# Real Training Pipeline (Full Transformer + CrossEntropy)
-# ============================================================
+
+
+
 
 posttrain-real: check-bash build-s-ir-runner build-posttrain-real-s
 	@echo ""

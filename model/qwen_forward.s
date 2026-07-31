@@ -5,10 +5,10 @@ use neurx.model.transformer_ops.{
 }
 use std.io.eprintln
 
-// Complete forward pass for Qwen model
-// Input: token IDs → Output: logits
+
+
 func model_forward(
-    []int input_ids,        // [batch_size * seq_len]
+    []int input_ids,
     model_weights weights,
     int batch_size,
     int seq_len,
@@ -19,27 +19,27 @@ func model_forward(
     int vocab_size
 ) []float {
     eprintln("[Model Forward] Starting forward pass")
-    eprintln("[Model Forward] Batch=" + int_to_str(batch_size) + 
+    eprintln("[Model Forward] Batch=" + int_to_str(batch_size) +
              " Seq=" + int_to_str(seq_len) +
              " Hidden=" + int_to_str(hidden_size))
-    
-    // Step 1: Embedding lookup
+
+
     eprintln("[Model Forward] Step 1/4: Embedding lookup")
     []float hidden_states = embedding_lookup(
         input_ids, weights.embed_tokens,
         batch_size, seq_len, hidden_size, vocab_size
     )
-    
-    // Step 2: Transformer layers
+
+
     eprintln("[Model Forward] Step 2/4: Processing " + int_to_str(num_layers) + " transformer layers")
     int layer_idx = 0
     while layer_idx < num_layers {
         if layer_idx == 0 or layer_idx == num_layers - 1 {
             eprintln("[Model Forward]   Layer " + int_to_str(layer_idx + 1) + "/" + int_to_str(num_layers))
         }
-        
+
         layer_weights layer = weights.layers[layer_idx]
-        
+
         hidden_states = transformer_layer(
             hidden_states,
             layer.input_layernorm,
@@ -57,11 +57,11 @@ func model_forward(
             num_heads,
             intermediate_size
         )
-        
+
         layer_idx = layer_idx + 1
     }
-    
-    // Step 3: Final layer norm
+
+
     eprintln("[Model Forward] Step 3/4: Final layer normalization")
     hidden_states = rms_norm(
         hidden_states,
@@ -71,23 +71,23 @@ func model_forward(
         hidden_size,
         0.000001
     )
-    
-    // Step 4: LM head (project to vocab size)
+
+
     eprintln("[Model Forward] Step 4/4: LM head projection")
     int total_tokens = batch_size * seq_len
     []float logits = matmul(
         hidden_states,
-        weights.embed_tokens,  // Tied weights
+        weights.embed_tokens,
         total_tokens,
         hidden_size,
         vocab_size
     )
-    
+
     eprintln("[Model Forward] Forward pass complete")
     logits
 }
 
-// Apply LoRA to model forward
+
 func model_forward_with_lora(
     []int input_ids,
     model_weights weights,
@@ -100,8 +100,8 @@ func model_forward_with_lora(
     int intermediate_size,
     int vocab_size
 ) []float {
-    // For Phase 1: simplified - just run base model
-    // TODO: integrate LoRA in Phase 2
+
+
     model_forward(
         input_ids, weights,
         batch_size, seq_len, hidden_size,
@@ -120,7 +120,7 @@ struct lora_adapter {
 func int_to_str(int x) string {
     if x == 0 { return "0" }
     if x < 0 { return "-" + int_to_str(0 - x) }
-    
+
     string result = ""
     int num = x
     while num > 0 {

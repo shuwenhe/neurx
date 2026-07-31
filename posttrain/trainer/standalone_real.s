@@ -1,10 +1,10 @@
 package neurx.posttrain.trainer.standalone_real
-use std.io.eprintln
+·························································································use std.io.eprintln
 
-// ==================== Training Config ====================
+
 struct training_config {
     int hidden_size
-    int num_layers  
+    int num_layers
     int num_heads
     int vocab_size
     int batch_size
@@ -15,10 +15,10 @@ struct training_config {
 
 func default_config() training_config {
     training_config{
-        hidden_size: 32,      // Small for testing
-        num_layers: 1,         // Just 1 layer
+        hidden_size: 32,
+        num_layers: 1,
         num_heads: 4,
-        vocab_size: 256,       // Small vocab
+        vocab_size: 256,
         batch_size: 1,
         seq_len: 8,
         num_epochs: 1,
@@ -26,7 +26,7 @@ func default_config() training_config {
     }
 }
 
-// ==================== Simple Math Functions ====================
+
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float guess = x / 2.0
@@ -52,7 +52,7 @@ func exp_approx(float x) float {
     result
 }
 
-// ==================== Mock Weight Initialization ====================
+
 func init_weights(int size, float std) []float {
     []float arr = []float{cap: size}
     int i = 0
@@ -65,7 +65,7 @@ func init_weights(int size, float std) []float {
     arr
 }
 
-// ==================== Matrix Multiply ====================
+
 func matmul([]float A, []float B, int M, int K, int N) []float {
     []float C = []float{cap: M * N}
     int m = 0
@@ -86,7 +86,7 @@ func matmul([]float A, []float B, int M, int K, int N) []float {
     C
 }
 
-// ==================== RMS Norm ====================
+
 func rms_norm([]float x, []float weight, int batch_seq, int hidden) []float {
     []float output = []float{cap: batch_seq * hidden}
     int i = 0
@@ -110,7 +110,7 @@ func rms_norm([]float x, []float weight, int batch_seq, int hidden) []float {
     output
 }
 
-// ==================== Embedding Lookup ====================
+
 func embedding([]int token_ids, []float embed_weight, int batch_seq, int hidden, int vocab) []float {
     []float output = []float{cap: batch_seq * hidden}
     int i = 0
@@ -128,7 +128,7 @@ func embedding([]int token_ids, []float embed_weight, int batch_seq, int hidden,
     output
 }
 
-// ==================== Add Arrays ====================
+
 func add_arrays([]float a, []float b) []float {
     int size = len(a)
     []float output = []float{cap: size}
@@ -140,7 +140,7 @@ func add_arrays([]float a, []float b) []float {
     output
 }
 
-// ==================== Simplified Transformer Layer ====================
+
 func simple_transformer_layer(
     []float hidden_states,
     []float ln_weight,
@@ -150,20 +150,20 @@ func simple_transformer_layer(
     int batch_seq,
     int hidden
 ) []float {
-    // Just do linear projection for Phase 1
+
     []float normed = rms_norm(hidden_states, ln_weight, batch_seq, hidden)
     []float q = matmul(normed, q_proj, batch_seq, hidden, hidden)
     []float v = matmul(normed, v_proj, batch_seq, hidden, hidden)
-    
-    // Simplified "attention": just use values
+
+
     []float attn_out = matmul(v, o_proj, batch_seq, hidden, hidden)
-    
-    // Residual
+
+
     []float output = add_arrays(hidden_states, attn_out)
     output
 }
 
-// ==================== CrossEntropy Loss (Simplified) ====================
+
 func cross_entropy_loss([]float logits, []int labels, int batch_seq, int vocab) float {
     float total_loss = 0.0
     int i = 0
@@ -171,10 +171,10 @@ func cross_entropy_loss([]float logits, []int labels, int batch_seq, int vocab) 
         int label = labels[i]
         if label < 0 { label = 0 }
         if label >= vocab { label = vocab - 1 }
-        
+
         int logits_offset = i * vocab
-        
-        // Find max for numerical stability
+
+
         float max_logit = logits[logits_offset]
         int j = 1
         while j < vocab {
@@ -183,22 +183,22 @@ func cross_entropy_loss([]float logits, []int labels, int batch_seq, int vocab) 
             }
             j = j + 1
         }
-        
-        // Compute sum exp
+
+
         float sum_exp = 0.0
         j = 0
         while j < vocab {
             sum_exp = sum_exp + exp_approx(logits[logits_offset + j] - max_logit)
             j = j + 1
         }
-        
-        // NLL loss
+
+
         float log_prob = logits[logits_offset + label] - max_logit - log_approx(sum_exp)
         total_loss = total_loss - log_prob
-        
+
         i = i + 1
     }
-    
+
     total_loss / (batch_seq as float)
 }
 
@@ -218,27 +218,27 @@ func log_approx(float x) float {
     result * 2.0
 }
 
-// ==================== Main Training Function ====================
+
 func main() int {
     eprintln("============================================================")
     eprintln("[Real Training Pipeline] Standalone Version")
     eprintln("============================================================")
     eprintln("")
-    
+
     training_config config = default_config()
-    
+
     eprintln("[Config] Hidden: " + int_to_str(config.hidden_size))
     eprintln("[Config] Layers: " + int_to_str(config.num_layers))
     eprintln("[Config] Vocab: " + int_to_str(config.vocab_size))
     eprintln("[Config] Batch: " + int_to_str(config.batch_size))
     eprintln("[Config] Seq Len: " + int_to_str(config.seq_len))
     eprintln("")
-    
+
     int hidden = config.hidden_size
     int vocab = config.vocab_size
     int batch_seq = config.batch_size * config.seq_len
-    
-    // Initialize model weights
+
+
     eprintln("[Step 1/4] Initializing model weights...")
     []float embed_weight = init_weights(vocab * hidden, 0.02)
     []float ln_weight = init_weights(hidden, 1.0)
@@ -247,8 +247,8 @@ func main() int {
     []float o_proj = init_weights(hidden * hidden, 0.02)
     eprintln("[Step 1/4] Weights initialized")
     eprintln("")
-    
-    // Create dummy input
+
+
     eprintln("[Step 2/4] Creating training data...")
     []int input_ids = []int{cap: batch_seq}
     []int labels = []int{cap: batch_seq}
@@ -260,48 +260,48 @@ func main() int {
     }
     eprintln("[Step 2/4] Data ready")
     eprintln("")
-    
-    // Training loop
+
+
     eprintln("[Step 3/4] Training...")
     int epoch = 0
     while epoch < config.num_epochs {
         eprintln("  Epoch " + int_to_str(epoch + 1) + "/" + int_to_str(config.num_epochs))
-        
+
         int step = 0
         while step < config.steps_per_epoch {
-            // Forward pass
+
             []float hidden_states = embedding(input_ids, embed_weight, batch_seq, hidden, vocab)
             hidden_states = simple_transformer_layer(hidden_states, ln_weight, q_proj, v_proj, o_proj, batch_seq, hidden)
             []float logits = matmul(hidden_states, embed_weight, batch_seq, hidden, vocab)
-            
-            // Compute loss
+
+
             float loss = cross_entropy_loss(logits, labels, batch_seq, vocab)
             float ppl = exp_approx(loss)
-            
+
             eprintln("    Step " + int_to_str(step + 1) + ": loss=" + float_to_str(loss, 4) + ", ppl=" + float_to_str(ppl, 2))
-            
+
             step = step + 1
         }
         epoch = epoch + 1
     }
     eprintln("[Step 3/4] Training complete")
     eprintln("")
-    
+
     eprintln("[Step 4/4] Summary")
     eprintln("  Status: ✓ Forward pass working")
     eprintln("  Status: ✓ CrossEntropy loss computed")
     eprintln("  Status: ✓ Perplexity computed")
     eprintln("  Status: ⏳ Backward pass (TODO)")
     eprintln("")
-    
+
     eprintln("============================================================")
     eprintln("[Success] Real training pipeline validated!")
     eprintln("============================================================")
-    
+
     0
 }
 
-// ==================== Utility Functions ====================
+
 func int_to_str(int x) string {
     if x == 0 { return "0" }
     if x < 0 { return "-" + int_to_str(0 - x) }
