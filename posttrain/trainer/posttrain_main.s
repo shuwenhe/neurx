@@ -328,6 +328,40 @@ func run_posttrain_lora_sft() int {
     }
     println("Module build complete: " + int_to_str(len(modules)))
     eprintln("[Progress] module build complete, preparing training vectors")
+
+    eprintln("=== [Stage 1] JSON → Token IDs ===")
+
+    int max_seq_len = 128
+    []int input_ids = []int{cap: max_seq_len}
+    int token_count = 0
+    int text_idx = 0
+    int dataset_len = len(dataset_text)
+    if dataset_len > 500 {
+        dataset_len = 500
+    }
+
+    while text_idx < dataset_len && token_count < max_seq_len {
+        int char_code = dataset_text[text_idx]
+        if char_code > 32 && char_code < 127 {
+            input_ids[token_count] = char_code
+            token_count = token_count + 1
+        }
+        text_idx = text_idx + 1
+    }
+
+    eprintln("[Stage 1] ✓ Tokenization complete")
+    eprintln("[Stage 1]   Total tokens: " + int_to_str(token_count))
+    if token_count > 0 {
+        string first_5 = "[" + int_to_str(input_ids[0])
+        if token_count > 1 { first_5 = first_5 + ", " + int_to_str(input_ids[1]) }
+        if token_count > 2 { first_5 = first_5 + ", " + int_to_str(input_ids[2]) }
+        if token_count > 3 { first_5 = first_5 + ", " + int_to_str(input_ids[3]) }
+        if token_count > 4 { first_5 = first_5 + ", " + int_to_str(input_ids[4]) }
+        first_5 = first_5 + "]"
+        eprintln("[Stage 1]   First 5 token IDs: " + first_5)
+    }
+    eprintln("")
+
     eprintln("[Progress] using mock vectors for fast testing (no text vectorization)")
     []float prompt_vec = init_gaussian(hidden_size, 0.01)
     []float target_q = init_gaussian(hidden_size, 100.0)
