@@ -4,10 +4,10 @@ package neurx.posttrain.training.gradient_utils
 // 全局梯度裁剪 (跨所有参数层)
 // 对应 verl: verl/utils/torch_functional.py::clip_grad_norm_
 struct GlobalGradientStats {
-    float total_norm        // 全局梯度范数
-    float clip_coefficient  // 裁剪系数
-    bool clipped            // 是否被裁剪
-    int total_params        // 总参数数量
+    float total_norm
+    float clip_coefficient
+    bool clipped
+    int total_params
 }
 
 // 计算所有层梯度的全局 L2 范数
@@ -71,7 +71,7 @@ func clip_gradients_global([][]float all_layer_grads, float max_norm) GlobalGrad
     }
     
     // 5. 返回统计信息
-    GlobalGradientStats stats = GlobalGradientStats{}
+    GlobalGradientStats stats
     stats.total_norm = global_norm
     stats.clip_coefficient = clip_coef
     stats.clipped = was_clipped
@@ -85,13 +85,13 @@ func clip_gradients_global([][]float all_layer_grads, float max_norm) GlobalGrad
 // 对应 verl: verl/trainer/ppo/ray_trainer.py 中的 NaN 检测
 
 struct NaNInfStats {
-    bool has_nan            // 是否包含 NaN
-    bool has_inf            // 是否包含 Inf
-    int nan_count           // NaN 数量
-    int inf_count           // Inf 数量
-    int total_checked       // 检查的总数
-    string first_nan_layer  // 第一个 NaN 所在层
-    string first_inf_layer  // 第一个 Inf 所在层
+    bool has_nan
+    bool has_inf
+    int nan_count
+    int inf_count
+    int total_checked
+    string first_nan_layer
+    string first_inf_layer
 }
 
 // 检查单个浮点数是否为 NaN
@@ -111,7 +111,7 @@ func is_inf(float x) bool {
 
 // 检查所有层的梯度是否包含 NaN 或 Inf
 func check_gradients_nan_inf([][]float all_layer_grads, []string layer_names) NaNInfStats {
-    NaNInfStats stats = NaNInfStats{}
+    NaNInfStats stats
     stats.has_nan = false
     stats.has_inf = false
     stats.nan_count = 0
@@ -171,18 +171,18 @@ func check_parameters_nan_inf([][]float all_layer_params, []string layer_names) 
 // 对应 verl: verl/trainer/ppo/metric_utils.py 中的梯度统计
 
 struct GradientStatistics {
-    float mean              // 平均值
-    float std               // 标准差
-    float min               // 最小值
-    float max               // 最大值
-    float l2_norm           // L2 范数
-    int zero_count          // 零梯度数量
-    float sparsity          // 稀疏度
+    float mean
+    float std
+    float min
+    float max
+    float l2_norm
+    int zero_count
+    float sparsity
 }
 
 // 计算单层梯度的统计信息
 func compute_gradient_statistics([]float gradients) GradientStatistics {
-    GradientStatistics stats = GradientStatistics{}
+    GradientStatistics stats
     
     int n = len(gradients)
     if n == 0 {
