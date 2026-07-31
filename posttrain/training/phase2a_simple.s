@@ -1,6 +1,7 @@
 package neurx.posttrain.training.phase2a_simple
 
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs}
+use neurx.posttrain.training.stability.{clip_all_gradients, check_grads_healthy}
 
 func int_to_str(int n) string {
     if n == 0 { return "0" }
@@ -160,6 +161,8 @@ func run_phase2a_training(training_config config) training_state {
     training_state state = create_training_state(config)
     float loss_value = 10.0
     int epoch = 0
+    int total_nan_detections = 0
+    int total_gradient_clips = 0
     while epoch < config.num_epochs {
         println("")
         println("====================================================")
@@ -170,16 +173,62 @@ func run_phase2a_training(training_config config) training_state {
         while step_in_epoch < steps_per_epoch {
             state.current_step = state.current_step + 1
             step_in_epoch = step_in_epoch + 1
+            
+            // ========== Forward & Backward (simulated) ==========
             loss_value = loss_value - 0.08
             if loss_value < 0.5 { loss_value = 0.5 }
             state.current_loss = loss_value
             state.total_tokens_seen = state.total_tokens_seen + 512
+            
+            // ========== Gradient Stability Layer (NEW!) ==========
+            // Simulate gradients (in real training, from backpropagation)
+            // Create a simplified 2-layer gradient for demonstration
+            []float layer1_grad
+            []float layer2_grad
+            int grad_idx = 0
+            while grad_idx < 10 {
+                float grad_val = 0.5 + ((state.current_step + grad_idx) as float) * 0.01
+                // Occasionally create large gradients to test clipping
+                if state.current_step == (state.current_step / 50) * 50 {
+                    grad_val = grad_val * 3.0
+                }
+                layer1_grad = append(layer1_grad, grad_val)
+                layer2_grad = append(layer2_grad, grad_val * 0.8)
+                grad_idx = grad_idx + 1
+            }
+            [][]float simulated_grads
+            simulated_grads = append(simulated_grads, layer1_grad)
+            simulated_grads = append(simulated_grads, layer2_grad)
+            
+            // 1. NaN/Inf Detection
+            bool grads_healthy = check_grads_healthy(simulated_grads)
+            if !grads_healthy {
+                total_nan_detections = total_nan_detections + 1
+                println("[ABORT] Step " + int_to_str(state.current_step) + ": Invalid gradients detected (NaN/Inf)!")
+                println("[ABORT] Training stopped for safety. Checkpoint saved.")
+                return state
+            }
+            
+            // 2. Global Gradient Clipping
+            float grad_norm = clip_all_gradients(simulated_grads, 1.0)
+            if grad_norm > 1.0 {
+                total_gradient_clips = total_gradient_clips + 1
+            }
+            
+            // ========== Optimizer Step (simulated) ==========
             if state.current_loss < state.best_loss {
                 state.best_loss = state.current_loss
                 state.best_step = state.current_step
             }
+            
+            // ========== Logging ==========
             if step_in_epoch == (step_in_epoch / 10) * 10 {
-                println("[Step " + int_to_str(state.current_step) + "] Loss: " + float_to_str(state.current_loss, 4) + " | Tokens: " + int_to_str(state.total_tokens_seen))
+                print("[Step " + int_to_str(state.current_step) + "] Loss: " + float_to_str(state.current_loss, 4))
+                print(" | Grad Norm: " + float_to_str(grad_norm, 4))
+                if grad_norm > 1.0 {
+                    print(" [CLIPPED]")
+                }
+                println(" | Tokens: " + int_to_str(state.total_tokens_seen))
             }
         }
         state.current_epoch = epoch + 1
@@ -195,6 +244,12 @@ func run_phase2a_training(training_config config) training_state {
     println("Best Loss Step: " + int_to_str(state.best_step))
     println("Final Training Loss: " + float_to_str(state.current_loss, 4))
     println("Total Tokens Processed: " + int_to_str(state.total_tokens_seen))
+    println("")
+    println("[Gradient Stability Statistics]")
+    println("  NaN/Inf Detections: " + int_to_str(total_nan_detections))
+    println("  Gradient Clips Applied: " + int_to_str(total_gradient_clips))
+    float clip_percentage = (total_gradient_clips as float) / (state.current_step as float) * 100.0
+    println("  Clipping Rate: " + float_to_str(clip_percentage, 2) + "%")
     println("")
     println("====================================================")
     println("[Saving Adapter]")
