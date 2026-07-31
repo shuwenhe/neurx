@@ -117,12 +117,15 @@ func main() {
             
             // ========== Gradient Stability Layer (NEW!) ==========
             // Simulate gradients (2 layers for demo)
-            int grad_idx
-            grad_idx = 0
             []float layer1_grad
             []float layer2_grad
+            [][]float simulated_grads
+            
+            int grad_idx
+            grad_idx = 0
             while grad_idx < 10 {
-                float grad_val = 0.5 + ((total_steps + grad_idx) as float) * 0.01
+                float grad_val
+                grad_val = 0.5 + ((total_steps + grad_idx) as float) * 0.01
                 // Occasionally create large gradients to test clipping
                 if total_steps == (total_steps / 50) * 50 {
                     grad_val = grad_val * 3.0
@@ -132,12 +135,12 @@ func main() {
                 grad_idx = grad_idx + 1
             }
             
-            [][]float simulated_grads
             simulated_grads = append(simulated_grads, layer1_grad)
             simulated_grads = append(simulated_grads, layer2_grad)
             
             // 1. NaN/Inf Detection
-            bool grads_healthy = check_grads_healthy(simulated_grads)
+            bool grads_healthy
+            grads_healthy = check_grads_healthy(simulated_grads)
             if !grads_healthy {
                 total_nan_detections = total_nan_detections + 1
                 println("[ABORT] Step " + int_to_str(total_steps) + ": Invalid gradients detected (NaN/Inf)!")
@@ -146,7 +149,8 @@ func main() {
             }
             
             // 2. Global Gradient Clipping
-            float grad_norm = clip_all_gradients(simulated_grads, 1.0)
+            float grad_norm
+            grad_norm = clip_all_gradients(simulated_grads, 1.0)
             if grad_norm > 1.0 {
                 total_gradient_clips = total_gradient_clips + 1
             }
