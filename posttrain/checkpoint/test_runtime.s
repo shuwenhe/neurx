@@ -17,23 +17,31 @@ func str_substring(string s, int start) string {
     return s
 }
 
+func file_size(string path) int {
+    return __host_file_size(path)
+}
+
+func file_exists(string filepath) bool {
+    int result = __host_file_exists(filepath)
+    if result == 1 {
+        return true
+    }
+    return false
+}
+
 func write_file(string filepath, string content) bool {
-    println("[PLACEHOLDER] write_file() - needs runtime.c implementation")
+    int result = __host_write_file(filepath, content)
+    if result == 1 {
+        return true
+    }
     return false
 }
 
 func read_file(string filepath) string {
-    println("[PLACEHOLDER] read_file() - needs runtime.c implementation")
-    return ""
-}
-
-func file_exists(string filepath) bool {
-    println("[PLACEHOLDER] file_exists() - needs runtime.c implementation")
-    return false
+    return __host_read_file(filepath)
 }
 
 func rename_file(string old_path, string new_path) bool {
-    println("[PLACEHOLDER] rename_file() - needs runtime.c implementation")
     return false
 }
 
@@ -195,6 +203,18 @@ func test_file_io() {
         println("✓ PASS (file exists)")
     } else {
         println("✗ FAIL (file should exist)")
+    }
+    println("")
+
+    println("Checking file size...")
+    int size = file_size(test_file)
+    print("file_size() result: ")
+    println(int_to_str(size))
+    print("Expected: 11 (length of 'hello world')  ")
+    if size == 11 {
+        println("✓ PASS")
+    } else {
+        println("✗ FAIL")
     }
     println("")
 }
