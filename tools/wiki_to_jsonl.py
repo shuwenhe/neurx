@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
-"""
-Wikipedia XML to JSONL converter
-Workaround for S compiler array indexing bug
-"""
 import sys
 import json
 import bz2
 import xml.etree.ElementTree as ET
 from pathlib import Path
+
 def extract_pages(xml_path, max_pages=0):
-    """Extract Wikipedia pages from XML.bz2 file"""
     print(f"[*] Opening {xml_path}...")
     with bz2.open(xml_path, 'rt', encoding='utf-8') as f:
         count = 0
@@ -32,6 +28,7 @@ def extract_pages(xml_path, max_pages=0):
                             break
                 elem.clear()
     print(f"[*] Total extracted: {count} pages")
+
 def main():
     if len(sys.argv) < 3:
         print("Usage: wiki_to_jsonl.py <input.xml.bz2> <output.jsonl> [max_pages]")
@@ -45,5 +42,6 @@ def main():
             json.dump(page, out, ensure_ascii=False)
             out.write('\\n')
     print(f"[✓] Saved to {output_file}")
+
 if __name__ == '__main__':
     main()
