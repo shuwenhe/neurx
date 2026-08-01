@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 namespace neurx::runtime::model {
-enum class ModelArchitecture { llama, qwen2 };
+enum class ModelArchitecture { llama, base_model };
 struct HfConfig {
   ModelArchitecture architecture = ModelArchitecture::llama;
   std::string model_type;

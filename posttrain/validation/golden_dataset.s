@@ -3,7 +3,7 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, r
 func main() {
     string mode = runtime_env_get("NEURX_POSTTRAIN_GOLDEN_MODE", "verify")
     string golden_dir = runtime_env_get("NEURX_POSTTRAIN_GOLDEN_DIR", "../posttrain/golden")
-    string model_dir = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "../model/Qwen2.5-0.5B-Instruct")
+    string model_dir = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "../model/base-model")
     string data_file = runtime_env_get("NEURX_POSTTRAIN_DATA_FILE", "../dataset/medical/train.json")
     int dataset_limit = parse_int(runtime_env_get("NEURX_POSTTRAIN_GOLDEN_DATASET_LIMIT", "12"), 12)
     if mode == "generate" {
@@ -78,7 +78,7 @@ func generate_golden(string golden_dir, string model_dir, string data_file, int 
     metadata = metadata + "    \"dtype\": \"float16\"\n"
     metadata = metadata + "  },\n"
     metadata = metadata + "  \"reference\": {\n"
-    metadata = metadata + "    \"reference_model\": \"Qwen2.5-0.5B-Instruct\",\n"
+    metadata = metadata + "    \"reference_model\": \"base-model\",\n"
     metadata = metadata + "    \"reference_backend\": \"S Runtime\",\n"
     metadata = metadata + "    \"seed\": 42,\n"
     metadata = metadata + "    \"version\": \"golden-v1\"\n"
@@ -133,7 +133,7 @@ func verify_golden(string golden_dir) {
         println("error: golden metadata missing schema version")
         return
     }
-    if find_substring(metadata, "\"reference_model\": \"Qwen2.5-0.5B-Instruct\"") < 0 {
+    if find_substring(metadata, "\"reference_model\": \"base-model\"") < 0 {
         println("error: golden metadata missing reference model")
         return
     }

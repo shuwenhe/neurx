@@ -1,7 +1,7 @@
 model:
-  base_model_path: /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct
-  model_name: Qwen2.5-0.5B-Instruct
-  model_type: qwen
+  base_model_path: /home/shuwen/shuwen/train/model/base-model
+  model_name: base-model
+  model_type: base_model
 data:
   train_data_path: /home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl
   val_data_path: /home/shuwen/shuwen/train/dataset/medmcqa/val.jsonl
@@ -51,5 +51,5 @@ validation:
   save_steps: 100
 project:
   project_name: medical-lora-sft
-  run_name: qwen2.5-0.5b-medmcqa-lora
+  run_name: base-model-medmcqa-lora
   project_root: /home/shuwen/shuwen/train/neurx

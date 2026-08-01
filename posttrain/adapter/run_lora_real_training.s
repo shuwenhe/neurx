@@ -81,7 +81,7 @@ struct transformer_block {
     lora_weights lora
 }
 
-struct qwen_model {
+struct base_model {
     tensor_2 embedding
     []transformer_block blocks
     tensor_2 output_proj
@@ -90,8 +90,8 @@ struct qwen_model {
     int num_blocks
 }
 
-func init_qwen_model(training_config config) qwen_model {
-    qwen_model model
+func init_base_model(training_config config) base_model {
+    base_model model
     model.hidden_dim = 896
     model.vocab_size = 151936
     model.num_blocks = config.num_layers
@@ -136,9 +136,9 @@ func transformer_block_forward(
     return output
 }
 
-func qwen_forward(
+func base_model_forward(
     tensor_2 input_ids,
-    qwen_model model
+    base_model model
 ) tensor_2 {
     tensor_2 hidden = input_ids
     for i in 0..model.num_blocks {
@@ -189,7 +189,7 @@ func optimizer_step(
 }
 
 func train_epoch(
-    mut qwen_model model,
+    mut base_model model,
     training_config config,
     mut training_state state
 ) float {
@@ -199,7 +199,7 @@ func train_epoch(
     for batch_idx in 0..num_batches {
         println("  batch_2 " + int_to_string(batch_idx + 1) + "/" + int_to_string(num_batches))
         tensor_2 dummy_input = create_vector(config.max_seq_len, 0.5)
-        tensor_2 logits = qwen_forward(dummy_input, model)
+        tensor_2 logits = base_model_forward(dummy_input, model)
         tensor_2 dummy_labels = create_vector(config.batch_size, 0.0)
         float batch_loss = cross_entropy_loss(logits, dummy_labels)
         for i in 0..config.num_layers {
@@ -221,7 +221,7 @@ func train_epoch(
 }
 
 func train_model(
-    mut qwen_model model,
+    mut base_model model,
     training_config config
 ) training_state {
     training_state state
@@ -255,7 +255,7 @@ func merge_lora_to_model(
 }
 
 func save_merged_model(
-    qwen_model model,
+    base_model model,
     training_config config,
     string output_path
 ) {
@@ -343,15 +343,15 @@ func main() {
     println("🎯 NeurX 完整 LoRA SFT 训练实现")
     println("目标: 真实权重修改、前向传播、损失计算、反向传播")
     println("="*60)
-    string model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
+    string model_path = "/home/shuwen/shuwen/train/model/base-model"
     training_config config = load_model_config(model_path)
     if verify_model_files(model_path) == false {
         print_error("❌ 模型文件验证失败")
         return
     }
     println("\n📦 初始化模型...")
-    qwen_model model = init_qwen_model(config)
-    println("  ✓ Qwen2.5-0.5B 模型已加载")
+    base_model model = init_base_model(config)
+    println("  ✓ BaseModel.5-0.5B 模型已加载")
     println("  隐藏维度: 896")
     println("  词汇表大小: 151936")
     println("  Block 数量: " + int_to_string(config.num_layers))

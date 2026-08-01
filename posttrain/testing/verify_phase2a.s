@@ -71,7 +71,7 @@ func main() {
     println("")
     println("[TEST 1] Verify File Paths")
     println("---")
-    string model_path = runtime_env_get("NEURX_MODEL_PATH", "../model/Qwen2.5-0.5B-Instruct")
+    string model_path = runtime_env_get("NEURX_MODEL_PATH", "../model/base-model")
     string data_path = runtime_env_get("NEURX_DATA_PATH", "../dataset/medical/train.json")
     string output_dir = runtime_env_get("NEURX_OUTPUT_DIR", "../posttrain")
     if runtime_file_exists(model_path) {

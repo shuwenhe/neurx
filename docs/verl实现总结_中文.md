@@ -35,7 +35,7 @@
 - 多种序列分组方法（长度、相似度、随机）
 - MoE负载均衡损失
 - 用于语义分组的K-means聚类
-- 针对大规模MoE模型优化（DeepSeek-V3, Qwen3-235B）
+- 针对大规模MoE模型优化（DeepSeek-V3, large-scale MoE model）
 
 **主要组件:**
 - `GSPOTrainer` - 主训练类

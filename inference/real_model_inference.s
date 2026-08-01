@@ -50,7 +50,7 @@ func main() {
     print("Test 3: Inference Performance\n")
     print("═══════════════════════════════════════════════════════\n\n")
     print("model Statistics:\n")
-    print("  • Architecture: Qwen2.5-0.5B-Instruct with LoRA\n")
+    print("  • Architecture: base-model with LoRA\n")
     print("  • Total parameters: 512M\n")
     print("  • Attention heads: 14\n")
     print("  • Head dimension: 64\n")

@@ -55,7 +55,7 @@ func main() {
     println("\n" + "============================================================")
     println("Complete LoRA SFT Training with File Generation")
     println("============================================================\n")
-    string base_model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
+    string base_model_path = "/home/shuwen/shuwen/train/model/base-model"
     string output_dir = "/home/shuwen/shuwen/posttrain"
     int num_epochs = 3
     int batch_size = 32
@@ -115,7 +115,7 @@ func main() {
     println("  status: ALL FILES CREATED ✓")
     println("")
     println("📊 model Verification:")
-    println("  model Type: Qwen2.5-0.5B-Instruct (LoRA-adapted)")
+    println("  model Type: base-model (LoRA-adapted)")
     println("  Parameter Count: 383,859,712")
     println("  LoRA Layers: 12 (attention + FFN)")
     println("  Weights Modified: YES ✓")

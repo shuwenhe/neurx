@@ -89,7 +89,7 @@ func load_and_merge() merged_model {
     int lora_rank = 8
     float lora_alpha = 16.0
     println("📖 Loading base model...")
-    println("  Path: /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct")
+    println("  Path: /home/shuwen/shuwen/train/model/base-model")
     println("  File: model.safetensors")
     println("  Size: ~1.5 GB")
     println("")
@@ -142,7 +142,7 @@ func save_merged_model(merged_model model, string output_dir) int {
     println("  📄 Writing config.json")
     println("     {")
     println("       \"model_name\": \"base-model-posttrain\",")
-    println("       \"architecture\": \"qwen\",")
+    println("       \"architecture\": \"base_model\",")
     println("       \"hidden_size\": 768,")
     println("       \"num_hidden_layers\": 32,")
     println("       \"num_attention_heads\": 12,")
@@ -188,7 +188,7 @@ func main() {
     println("╚" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╝")
     println("")
     merge_config cfg
-    cfg.base_model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
+    cfg.base_model_path = "/home/shuwen/shuwen/train/model/base-model"
     cfg.adapter_checkpoint_dir = "/home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft"
     cfg.output_model_dir = "/home/shuwen/shuwen/posttrain"
     cfg.lora_rank = 8
@@ -196,7 +196,7 @@ func main() {
     cfg.input_dim = 768
     cfg.output_dim = 768
     println("⚙️  configurationInformation:")
-    println("  basemodel: /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct")
+    println("  basemodel: /home/shuwen/shuwen/train/model/base-model")
     println("  LoRA Checkpoint: /home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft")
     println("  Output directory: /home/shuwen/shuwen/posttrain")
     println("  LoRA Rank: 8")

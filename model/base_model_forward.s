@@ -1,4 +1,4 @@
-package neurx.model.qwen_forward
+package neurx.model.base_model_forward
 use neurx.model.weight_loader.{model_weights, layer_weights}
 use neurx.model.transformer_ops.{
     embedding_lookup, rms_norm, transformer_layer, matmul, add_arrays

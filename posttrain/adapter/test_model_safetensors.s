@@ -74,7 +74,7 @@ func main() {
     println("")
     println("🔍 Test 5: model Configuration")
     println("  config.json:")
-    println("    - model_type: qwen2")
+    println("    - model_type: base_model")
     println("    - hidden_size: 896")
     println("    - num_hidden_layers: 24")
     println("    - num_attention_heads: 14")

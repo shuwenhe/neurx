@@ -92,7 +92,7 @@ func resolve_non_empty(string primary, string fallback) string {
 
 func main() {
     string project_root = "/home/shuwen/shuwen/train/neurx"
-    string model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
+    string model_path = "/home/shuwen/shuwen/train/model/base-model"
     string data_path = "/home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl"
     string output_dir = "/home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft"
     string format_type = "sft"
@@ -107,7 +107,7 @@ func main() {
     println("========================================")
     println("NeurX LoRA Supervised Fine-Tuning")
     println("========================================")
-    println("Base model   : Qwen2.5-0.5B-Instruct")
+    println("Base model   : base-model")
     println("Project root : " + project_root)
     println("Data file    : " + data_path)
     println("Output dir   : " + output_dir)

@@ -102,7 +102,7 @@ PRETRAIN_RUNNER_BIN := $(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_lar
 NEURX_SHARD_CMD ?= wikipedia
 NEURX_SHARD_RESUME ?= 1
 NEURX_SHARD_FORCE_REBUILD ?= 0
-POSTTRAIN_MODEL_PATH ?= $(CURDIR_UNIX)/../model/Qwen2.5-0.5B-Instruct
+POSTTRAIN_MODEL_PATH ?= $(CURDIR_UNIX)/../model/base-model
 POSTTRAIN_DATA_FILE ?= $(CURDIR_UNIX)/../dataset/medical/train.json
 POSTTRAIN_OUTPUT_DIR ?= $(CURDIR_UNIX)/../posttrain
 POSTTRAIN_S_COMPILER ?= $(S_SEED_COMPILER)
@@ -414,7 +414,7 @@ test-numerical: check-bash
 		"$(POSTTRAIN_S_COMPILER)" 'scripts/test_embedding_standalone.s' '$(CURDIR_UNIX)/artifacts/build/test_embedding/test_standalone.ir' 2>&1 || exit 1
 	@echo "Running tests..."
 	@cd '$(CURDIR_UNIX)' && \
-		export NEURX_MODEL_PATH='/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct'; \
+		export NEURX_MODEL_PATH='/home/shuwen/shuwen/model/base-model'; \
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/test_embedding/test_standalone.ir' \
 		'$(S_RUNNER_BIN)' 2>&1
 verify-posttrain:
@@ -1401,7 +1401,7 @@ tokenizer-hf-parity-test:
 		runtime/model/bpe_tokenizer.cpp -licui18n -licuuc -licudata \
 		-o artifacts/build/model_runtime_native/tokenizer_parity_probe
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
-		HF_MODEL_DIR="$${HF_MODEL_DIR:-/home/shuwen/model/Qwen2.5-0.5B-Instruct}"; \
+		HF_MODEL_DIR="$${HF_MODEL_DIR:-/home/shuwen/model/base-model}"; \
 		"$$PYTORCH_PYTHON" tests/tokenizer_hf_parity.py \
 		artifacts/build/model_runtime_native/tokenizer_parity_probe "$$HF_MODEL_DIR"
 hf-checkpoint-level1-test:
@@ -1412,7 +1412,7 @@ hf-checkpoint-level1-test:
 		runtime/native/tensor_runtime.cpp \
 		-o artifacts/build/model_runtime_native/hf_checkpoint_level1_probe
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
-		HF_MODEL_DIR="$${HF_MODEL_DIR:-/home/shuwen/model/Qwen2.5-0.5B-Instruct}"; \
+		HF_MODEL_DIR="$${HF_MODEL_DIR:-/home/shuwen/model/base-model}"; \
 		"$$PYTORCH_PYTHON" tests/hf_checkpoint_level1_parity.py \
 		artifacts/build/model_runtime_native/hf_checkpoint_level1_probe "$$HF_MODEL_DIR"
 hf-decoder-cpu-parity-test:

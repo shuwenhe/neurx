@@ -102,7 +102,7 @@ func float_to_str(float value, int decimals) string {
 
 func load_config() training_config {
     training_config cfg
-    cfg.base_model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
+    cfg.base_model_path = "/home/shuwen/shuwen/train/model/base-model"
     cfg.train_data_path = "/home/shuwen/shuwen/train/dataset/medmcqa/train.jsonl"
     cfg.val_data_path = "/home/shuwen/shuwen/train/dataset/medmcqa/val.jsonl"
     cfg.output_dir = "/home/shuwen/shuwen/train/neurx/artifacts/checkpoints/lora_sft"

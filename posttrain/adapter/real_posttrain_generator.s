@@ -27,10 +27,10 @@ func main() {
     println("\n" + "============================================================")
     println("Real LoRA Post-Training model Generator")
     println("============================================================\n")
-    string base_model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
+    string base_model_path = "/home/shuwen/shuwen/train/model/base-model"
     string output_model_path = "/home/shuwen/shuwen/posttrain"
     println("🚀 Phase 1: Initialize")
-    println("  Base model: Qwen2.5-0.5B-Instruct")
+    println("  Base model: base-model")
     println("  Location: " + base_model_path)
     println("")
     println("🚀 Phase 2: Load LoRA Adapters")
@@ -120,7 +120,7 @@ func main() {
     println("  status: ✓ All tests passed")
     println("")
     println("✨ Post-Training Complete!")
-    println("  model: Qwen2.5-0.5B-Instruct (LoRA fine-tuned)")
+    println("  model: base-model (LoRA fine-tuned)")
     println("  Path: " + output_model_path)
     println("  status: READY FOR DEPLOYMENT")
     println("  Quality: PRODUCTION-READY (validated)")

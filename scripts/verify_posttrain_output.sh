@@ -2,7 +2,7 @@ echo "=== NeurX PostTrain Verification ==="
 echo ""
 ADAPTER_FILE="../../posttrain_adapter/adapter_model.safetensors"
 MODEL_FILE="../../posttrain/model.safetensors"
-BASE_MODEL="../../model/Qwen2.5-0.5B-Instruct/model.safetensors"
+BASE_MODEL="../../model/base-model/model.safetensors"
 if [ ! -f "$ADAPTER_FILE" ]; then
     echo "❌ FAIL: Adapter file not found: $ADAPTER_FILE"
     exit 1

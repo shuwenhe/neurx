@@ -53,7 +53,7 @@ func run_reference_training(trainer_config config) int {
     println("[NeurX PostTrain] Invoking S Runtime Reference Trainer")
     println("[LoRA config] rank=" + int_to_str(config.rank) + ", alpha=" + float_to_str(config.alpha, 1))
     println("Loading tokenizer: " + config.model_path)
-    println("Loading Qwen model on S runtime (LoRA training)")
+    println("Loading base model on S runtime (LoRA training)")
     println("Injected LoRA into 2 modules per layer: [q_proj, v_proj]")
     int v_out = 128
     int trainable_params = config.num_layers * (2 * config.rank * config.hidden_size + config.rank * (config.hidden_size + v_out))
@@ -826,7 +826,7 @@ func run_runtime_training(trainer_config config) int {
     println("[NeurX PostTrain] Invoking S Runtime Real Trainer")
     println("[LoRA config] rank=" + int_to_str(config.rank) + ", alpha=" + float_to_str(config.alpha, 1))
     println("Loading tokenizer: " + config.model_path)
-    println("Loading Qwen model on S runtime (real LoRA training backend)")
+    println("Loading base model on S runtime (real LoRA training backend)")
     println("Injected LoRA into 2 modules per layer: [q_proj, v_proj]")
     int trainable_params = config.num_layers * 4 * config.rank * config.hidden_size
     println("Trainable parameters: " + int_to_str(trainable_params) + " (LoRA adapters only)")

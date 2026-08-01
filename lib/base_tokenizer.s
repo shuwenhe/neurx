@@ -1,4 +1,4 @@
-module qwen_tokenizer
+module base_tokenizer
 struct tokenizer_config {
     string vocab_path
     string merges_path

@@ -1,7 +1,7 @@
 package neurx.posttrain.trainer.real_training
 use std.io.eprintln
 use neurx.model.weight_loader.{load_model_weights_mock, model_weights}
-use neurx.model.qwen_forward.{model_forward}
+use neurx.model.base_model_forward.{model_forward}
 use neurx.tokenizer.simple_tokenizer.{create_simple_tokenizer, tokenize, create_labels, simple_tokenizer}
 use neurx.loss.cross_entropy.{cross_entropy_loss, cross_entropy_gradient, perplexity_from_loss}
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
@@ -25,7 +25,7 @@ struct training_config {
 }
 func default_training_config() training_config {
     training_config{
-        model_path: "../model/Qwen2.5-0.5B-Instruct",
+        model_path: "../model/base-model",
         data_path: "../dataset/medical/train.json",
         output_dir: "../posttrain",
         hidden_size: 64,

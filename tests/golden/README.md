@@ -190,7 +190,7 @@ python3 << 'EOF'
 from transformers import AutoTokenizer, AutoModel
 import json
 
-model_path = "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
+model_path = "/home/shuwen/shuwen/model/base-model"
 tokenizer = AutoTokenizer.from_pretrained(model_path)
 model = AutoModel.from_pretrained(model_path)
 

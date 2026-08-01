@@ -18,7 +18,7 @@ func main() {
     io.Println("║   NeurX PostTrain model - Interactive Chat                ║")
     io.Println("║   Real transformer_2 Inference Engine (Pure S)              ║")
     io.Println("║                                                            ║")
-    io.Println("║   model: Qwen2.5-0.5B-Instruct + LoRA                     ║")
+    io.Println("║   model: base-model + LoRA                     ║")
     io.Println("║   • 24-layer transformer_2                                  ║")
     io.Println("║   • 896 hidden dimension                                  ║")
     io.Println("║   • 14 attention heads                                    ║")

@@ -194,7 +194,7 @@ func text_window_to_vector(string text, int start, int count, int dim) []float {
 }
 
 func run_posttrain_lora_sft() int {
-    string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "../model/Qwen2.5-0.5B-Instruct")
+    string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "../model/base-model")
     string data_file = runtime_env_get("NEURX_POSTTRAIN_DATA_FILE", "/home/shuwen/shuwen/dataset/medical/train.json")
     string output_dir = runtime_env_get("NEURX_POSTTRAIN_OUTPUT_DIR", "/home/shuwen/shuwen/posttrain_adapter")
     int rank = 8
@@ -228,7 +228,7 @@ func run_posttrain_lora_sft() int {
     println("[NeurX PostTrain] Running data-driven S Runtime trainer")
     println("[LoRA config] rank=" + int_to_str(rank) + ", alpha=" + float_to_str(alpha, 1))
     println("Loading tokenizer: " + model_path)
-    println("Loading Qwen model on S runtime (LoRA training)")
+    println("Loading base model on S runtime (LoRA training)")
     println("Injected LoRA into 2 modules per layer: [q_proj, v_proj]")
     int trainable_params = num_layers * (2 * rank * hidden_size + rank * (hidden_size + v_out))
     println("Trainable parameters: " + int_to_str(trainable_params) + " (LoRA adapters only)")

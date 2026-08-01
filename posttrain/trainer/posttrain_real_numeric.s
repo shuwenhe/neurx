@@ -28,7 +28,7 @@ struct delta_stats {
     int changed_count
 }
 func run_posttrain_lora_sft() int {
-    string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "../model/Qwen2.5-0.5B-Instruct")
+    string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "../model/base-model")
     string output_dir = runtime_env_get("NEURX_POSTTRAIN_OUTPUT_DIR", "../posttrain_adapter")
     int rank = 8
     float alpha = 16.0
@@ -60,7 +60,7 @@ func run_posttrain_lora_sft() int {
     println("[NeurX PostTrain] Running materialized numeric S trainer")
     println("[LoRA config] rank=" + int_to_str(rank) + ", alpha=" + float_to_str(alpha, 1))
     println("Loading tokenizer: " + model_path)
-    println("Loading Qwen model on S runtime (LoRA training)")
+    println("Loading base model on S runtime (LoRA training)")
     println("Injected LoRA into 2 modules per layer: [q_proj, v_proj]")
     int trainable_params = num_layers * (2 * rank * hidden_size + rank * (hidden_size + v_out))
     println("Trainable parameters: " + int_to_str(trainable_params) + " (LoRA adapters only)")
@@ -810,7 +810,7 @@ func build_simple_training_state_json(string model_path, []float loss_history, f
 }
 
 func run_posttrain_lora_sft_flat() int {
-    string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "../model/Qwen2.5-0.5B-Instruct")
+    string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "../model/base-model")
     string output_dir = runtime_env_get("NEURX_POSTTRAIN_OUTPUT_DIR", "../posttrain_adapter")
     int rank = 8
     float alpha = 16.0
@@ -834,7 +834,7 @@ func run_posttrain_lora_sft_flat() int {
     println("[NeurX PostTrain] Running materialized numeric S trainer")
     println("[LoRA config] rank=" + int_to_str(rank) + ", alpha=" + float_to_str(alpha, 1))
     println("Loading tokenizer: " + model_path)
-    println("Loading Qwen model on S runtime (LoRA training)")
+    println("Loading base model on S runtime (LoRA training)")
     println("Injected LoRA into 2 modules per layer: [q_proj, v_proj]")
     int trainable_params = 2 * (rank * hidden_size + hidden_size * rank)
     println("Trainable parameters: " + int_to_str(trainable_params) + " (LoRA adapters only)")

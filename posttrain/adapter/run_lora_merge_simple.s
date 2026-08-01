@@ -8,7 +8,7 @@ func main() {
     println("╚" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╝")
     println("")
     println("📖 Loading base model...")
-    println("  Path: /home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct")
+    println("  Path: /home/shuwen/shuwen/train/model/base-model")
     println("  ✓ Loading complete")
     println("")
     println("📖 Loading LoRA adapter...")

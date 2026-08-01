@@ -215,7 +215,7 @@ func main() {
     println("\n" + repeat_string("=", 60))
     println("Real LoRA SFT Training Implementation")
     println(repeat_string("=", 60))
-    string model_path = "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct"
+    string model_path = "/home/shuwen/shuwen/train/model/base-model"
     training_config config = load_model_config(model_path)
     println("\nModel Configuration:")
     println("  Path: " + config.model_path)
