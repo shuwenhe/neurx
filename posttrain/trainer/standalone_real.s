@@ -193,7 +193,7 @@ func log_approx(float x) float {
     result * 2.0
 }
 
-func main() int {
+func main() {
     eprintln("============================================================")
     eprintln("[Real Training Pipeline] Standalone Version")
     eprintln("============================================================")

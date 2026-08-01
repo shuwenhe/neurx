@@ -1,6 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command_output, runtime_shell_escape, trim}
-func main() int {
+func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/app/shuwen/neurx")
     string log_dir = project_root + "/artifacts/logs"
     string latest_log = latest_phase2a_log(log_dir)
@@ -11,7 +11,6 @@ func main() int {
     if latest_log == "" {
         println("ERROR: no training log found")
         println("Expected pattern: " + log_dir + "/posttrain_phase2a_*.log")
-        return 1
     }
     println("Log file: " + latest_log)
     println("File size: " + file_size_human(latest_log))

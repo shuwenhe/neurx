@@ -207,7 +207,7 @@ struct training_context {
     int model_param_count
 }
 
-func main() int {
+func main() {
     training_config tconfig = new_training_config(8, 32, 50, 0.001)
     training_context ctx = run_training(tconfig)
     training_state result = ctx.final_state

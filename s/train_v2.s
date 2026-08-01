@@ -44,7 +44,7 @@ func config_string(train_config cfg) string {
     s
 }
 
-func main() int {
+func main() {
     println("")
     println("========================================")
     println("  NeurX GPT - S Language AI-Native Training")
@@ -163,9 +163,7 @@ func main() int {
     println("Checkpoints saved to: " + output_dir + "/")
     println("")
     if state.current_loss < 2.0 {
-        return 0
     } else {
-        return 1
     }
 }
 

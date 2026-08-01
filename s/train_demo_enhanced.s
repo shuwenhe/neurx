@@ -282,7 +282,6 @@ struct batch_2 {
 }
 
 func next_batch(data_loader loader) int {
-    return 0
 }
 
 func compute_cross_entropy_loss(AutoGradTensor logits, []int targets) AutoGradTensor {
@@ -525,12 +524,11 @@ func save_manifest(string manifest_path, []string checkpoints) void:
         content += ckpt + "\n"
     write_text_file(manifest_path, content)
 func get_time_ms() int:
-    return 0
 func write_text_file(string path, string content) Result[void, Error]:
     pass
 def rename_file(string old_path, string new_path) void:
     pass
-func main() int:
+func main():
     gptconfig config = default_model_config()
     println("NeurX GPT Training - AI Native Edition")
     println("======================================")
@@ -538,9 +536,7 @@ func main() int:
     training_result result = run_training(config)
     if result.state.trained and result.best_loss < 3.0:
         println("\n✓ Training completed successfully!")
-        return 0
     else:
         println("\n⚠ Training completed but may need tuning.")
-        return 1
 if __name__ == "__main__":
     exit(main())

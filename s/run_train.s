@@ -1,7 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_output, runtime_shell_escape}
 use std.io.println
-func main() int {
+func main() {
     string train_bin = runtime_env_get("NEURX_TRAIN_BIN", "/tmp/neurx_train")
     string script_dir = runtime_env_get("NEURX_ROOT", ".")
     string checkpoint_dir = script_dir + "/artifacts/checkpoints"
@@ -14,7 +14,6 @@ func main() int {
     println("")
     if !runtime_run_command("test -f " + runtime_shell_escape(train_bin)).ok {
         println("[ERROR] Training binary not found: " + train_bin)
-        return 1
     }
     _ = runtime_run_command("chmod +x " + runtime_shell_escape(train_bin))
     string train_output = runtime_run_command_output(runtime_shell_escape(train_bin) + " 2>&1 || true")
@@ -50,7 +49,6 @@ func main() int {
         compile_cmd = compile_cmd + " " + runtime_shell_escape(materializer)
         if !runtime_run_command(compile_cmd).ok {
             println("[ERROR] Failed to build S checkpoint materializer")
-            return 1
         }
     }
     string final_path = checkpoint_dir + "/final_model.neurx"
@@ -60,7 +58,6 @@ func main() int {
     cmd = cmd + " && cp " + runtime_shell_escape(final_path) + " " + runtime_shell_escape(best_path)
     cmd = cmd + " && printf '%s\\n' " + runtime_shell_escape(best_path) + " > " + runtime_shell_escape(latest_path)
     if !runtime_run_command(cmd).ok {
-        return 1
     }
     println("")
     println("--- checkpoint Files Generated ---")
