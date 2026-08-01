@@ -190,6 +190,8 @@ data/pretrain_dataset/manifest.json
 data/training_data_splits/
 data/*.jsonl
 data/**/*.jsonl
+posttrain/data/tokenized_medical_data.json
+posttrain/data/real_medical_tokenized.json
 
 dataset/pretrain/cleaned/*.jsonl
 dataset/pretrain/cleaned/pretrain_data_cleaned.jsonl
