@@ -216,7 +216,14 @@ func run_posttrain_lora_sft() int {
         println("error: data file not found: " + data_file)
         return 1
     }
+    int max_file_bytes = 10 * 1024 * 1024
     string dataset_text = runtime_read_text_file(data_file)
+    int actual_bytes = len(dataset_text)
+    if actual_bytes > max_file_bytes {
+        eprintln("[Warning] Data file is " + int_to_str(actual_bytes) + " bytes (> " + int_to_str(max_file_bytes) + ")")
+        eprintln("[Warning] This is a demo, processing only first chunk")
+        eprintln("[Warning] For production, use stream-based data loading")
+    }
     if len(dataset_text) == 0 {
         println("error: dataset is empty: " + data_file)
         return 1
@@ -411,7 +418,7 @@ func run_posttrain_lora_sft() int {
     
     while resp_idx < len(tokenized_text) && found_resp_start_val == 0 {
         int ch = tokenized_text[resp_idx]
-        if ch == 114 && resp_idx + 17 < len(tokenized_text) {
+        if ch == 114 && resp_idx + 18 < len(tokenized_text) {
             if tokenized_text[resp_idx + 1] == 101 &&
                tokenized_text[resp_idx + 2] == 115 &&
                tokenized_text[resp_idx + 3] == 112 &&
@@ -421,8 +428,15 @@ func run_posttrain_lora_sft() int {
                tokenized_text[resp_idx + 7] == 101 &&
                tokenized_text[resp_idx + 8] == 95 &&
                tokenized_text[resp_idx + 9] == 115 &&
-               tokenized_text[resp_idx + 10] == 116 {
-                resp_idx = resp_idx + 20
+               tokenized_text[resp_idx + 10] == 116 &&
+               tokenized_text[resp_idx + 11] == 97 &&
+               tokenized_text[resp_idx + 12] == 114 &&
+               tokenized_text[resp_idx + 13] == 116 &&
+               tokenized_text[resp_idx + 14] == 95 &&
+               tokenized_text[resp_idx + 15] == 105 &&
+               tokenized_text[resp_idx + 16] == 100 &&
+               tokenized_text[resp_idx + 17] == 120 {
+                resp_idx = resp_idx + 18
                 while resp_idx < len(tokenized_text) && tokenized_text[resp_idx] != 58 {
                     resp_idx = resp_idx + 1
                 }
@@ -430,7 +444,7 @@ func run_posttrain_lora_sft() int {
                 while resp_idx < len(tokenized_text) && tokenized_text[resp_idx] < 48 {
                     resp_idx = resp_idx + 1
                 }
-                if tokenized_text[resp_idx] >= 48 && tokenized_text[resp_idx] <= 57 {
+                if resp_idx < len(tokenized_text) && tokenized_text[resp_idx] >= 48 && tokenized_text[resp_idx] <= 57 {
                     int start_val = 0
                     while resp_idx < len(tokenized_text) && tokenized_text[resp_idx] >= 48 && tokenized_text[resp_idx] <= 57 {
                         start_val = start_val * 10 + (tokenized_text[resp_idx] - 48)
@@ -544,6 +558,23 @@ func run_posttrain_lora_sft() int {
         i = i + 1
     }
     eprintln("[Step 2B]   Labels: " + int_to_str(prompt_mask) + " masked (-100), " + int_to_str(response_compute) + " response tokens")
+    if !(sample1_response_start > 0 && sample1_response_start < sample1_total_tokens) {
+        eprintln("[ERROR] Invalid response_start_idx: " + int_to_str(sample1_response_start) + ". Must satisfy 0 < response_start < total_tokens.")
+        return 1
+    }
+
+    int masked_count_check = 0
+    int lbl_check_idx = 0
+    while lbl_check_idx < sample1_total_tokens {
+        if sample1_labels[lbl_check_idx] == -100 {
+            masked_count_check = masked_count_check + 1
+        }
+        lbl_check_idx = lbl_check_idx + 1
+    }
+    if masked_count_check != prompt_mask {
+        eprintln("[ERROR] Masked labels count (" + int_to_str(masked_count_check) + ") does not equal expected prompt length (" + int_to_str(prompt_mask) + ").")
+        return 1
+    }
     eprintln("[Step 2B] ✓ Real medical data loaded and verified")
     eprintln("")
     eprintln("========== [Summary] Data & Tokenizer Validation Complete ==========")
@@ -657,6 +688,11 @@ func run_posttrain_lora_sft() int {
             lm_loss_count = lm_loss_count + 1
         }
         shift_idx = shift_idx + 1
+    }
+
+    if lm_loss_count != token_count - sample1_response_start {
+        eprintln("[ERROR] Valid loss positions (" + int_to_str(lm_loss_count) + ") does not equal expected response length (" + int_to_str(token_count - sample1_response_start) + ").")
+        return 1
     }
     
     eprintln("[Step 4] Shifted labels configuration:")
