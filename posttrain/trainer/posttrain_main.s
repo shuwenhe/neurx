@@ -1377,8 +1377,16 @@ func save_lora_weights_json(
         weights_json = weights_json + "],\n"
         
         // Statistics
-        weights_json = weights_json + "      \"lora_a_norm\": " + float_to_str(curr.initial_a[0] if len(curr.initial_a) > 0 else 0.0, 6) + ",\n"
-        weights_json = weights_json + "      \"lora_b_norm\": " + float_to_str(curr.initial_b[0] if len(curr.initial_b) > 0 else 0.0, 6) + "\n"
+        float norm_a = 0.0
+        if len(curr.initial_a) > 0 {
+            norm_a = curr.initial_a[0]
+        }
+        float norm_b = 0.0
+        if len(curr.initial_b) > 0 {
+            norm_b = curr.initial_b[0]
+        }
+        weights_json = weights_json + "      \"lora_a_norm\": " + float_to_str(norm_a, 6) + ",\n"
+        weights_json = weights_json + "      \"lora_b_norm\": " + float_to_str(norm_b, 6) + "\n"
         weights_json = weights_json + "    }"
         
         if m_idx < len(modules) - 1 {
