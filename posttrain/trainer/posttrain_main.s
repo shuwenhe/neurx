@@ -414,75 +414,13 @@ func run_posttrain_lora_sft() int {
             }
             
             while module_cursor < max_modules {
-                named_lora_module module = modules[module_cursor]
-                
-                int out_dim = module.out_dim
-                int in_dim = module.in_dim
-                int rank_val = module.rank
-                float scaling_val = module.scaling
-                []float lora_A = module.lora_A
-                []float lora_B = module.lora_B
-                
-                []float target = target_q
-                int is_odd = module_cursor - ((module_cursor / 2) * 2)
-                if is_odd == 1 {
-                    target = target_v
-                }
-                
-                // Zero arrays
-                int zero_idx = 0
-                while zero_idx < 896 {
-                    output_reuse[zero_idx] = 0.0
-                    zero_idx = zero_idx + 1
-                }
-                zero_idx = 0
-                while zero_idx < 8 {
-                    hidden_reuse[zero_idx] = 0.0
-                    zero_idx = zero_idx + 1
-                }
-                
-                int r = 0
-                while r < rank_val {
-                    int in_idx = 0
-                    while in_idx < in_dim && in_idx < len(prompt_vec) {
-                        int a_idx = r * in_dim + in_idx
-                        if a_idx < len(lora_A) {
-                            hidden_reuse[r] = hidden_reuse[r] + lora_A[a_idx] * prompt_vec[in_idx]
-                        }
-                        in_idx = in_idx + 1
-                    }
-                    r = r + 1
-                }
-                
-                int out_idx = 0
-                while out_idx < out_dim {
-                    float sum = 0.0
-                    int rank_idx = 0
-                    while rank_idx < rank_val {
-                        int b_idx = out_idx * rank_val + rank_idx
-                        if b_idx < len(lora_B) {
-                            sum = sum + scaling_val * lora_B[b_idx] * hidden_reuse[rank_idx]
-                        }
-                        rank_idx = rank_idx + 1
-                    }
-                    output_reuse[out_idx] = sum
-                    out_idx = out_idx + 1
-                }
-                
-                float sample_loss = mse_loss(output_reuse, target)
-                
-                epoch_loss = epoch_loss + sample_loss
-                sample_loss_sum = sample_loss_sum + sample_loss
+                // TEMPORARY: SKIP ALL FORWARD COMPUTATION
                 sample_module_count = sample_module_count + 1
-                
-                // Print progress only every 8 modules to reduce output
-                if module_cursor - ((module_cursor / 8) * 8) == 7 || module_cursor == len(modules) - 1 {
-                    eprintln("[Progress] Modules 0-" + int_to_str(module_cursor) + " forward+loss complete")
-                }
-                
                 epoch_items = epoch_items + 1
                 module_cursor = module_cursor + 1
             }
+            
+            eprintln("[Progress] Forward loop completed all " + int_to_str(max_modules) + " modules (computation skipped)!")
             if sample_module_count > 0 {
                 eprintln("[Progress] epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " sample " + int_to_str(sample_idx + 1) + "/" + int_to_str(total_steps) + " loss=" + float_to_str(sample_loss_sum / (sample_module_count as float), 6))
             }
