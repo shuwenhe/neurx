@@ -741,7 +741,6 @@ func run_posttrain_lora_sft() int {
     []float loss_history = []float{cap: epochs}
     float best_loss = 0.0
     
-    // Initialize target vectors for backward pass
     []float prompt_vec = fill_lora(hidden_size, 0.1)
     []float target_q = fill_lora(hidden_size, 0.0)
     []float target_v = fill_lora(v_out, 0.0)
@@ -936,10 +935,8 @@ func run_posttrain_lora_sft() int {
     }
     eprintln("[Progress] training complete")
     
-    // ============ Save trained adapter weights ============
     eprintln("[Progress] Saving LoRA adapter weights...")
     
-    // Save configuration files
     int save_result = save_adapter_weights(
         output_dir,
         modules,
@@ -952,7 +949,6 @@ func run_posttrain_lora_sft() int {
         v_out
     )
     
-    // Save weight matrices
     int weights_save_result = save_lora_weights_json(
         output_dir,
         modules,
@@ -1333,7 +1329,6 @@ func save_lora_weights_json(
         return 1
     }
     
-    // Create adapter_model.json with all LoRA weights
     string weights_json = "{\n"
     weights_json = weights_json + "  \"modules\": [\n"
     
@@ -1346,7 +1341,6 @@ func save_lora_weights_json(
         weights_json = weights_json + "      \"rank\": " + int_to_str(rank) + ",\n"
         weights_json = weights_json + "      \"lora_a_len\": " + int_to_str(len(curr.lora_A)) + ",\n"
         
-        // Truncate lora_A for readability (save first 10 values)
         weights_json = weights_json + "      \"lora_a_sample\": ["
         int a_sample_count = 0
         if len(curr.lora_A) > 10 {
@@ -1366,7 +1360,6 @@ func save_lora_weights_json(
         
         weights_json = weights_json + "      \"lora_b_len\": " + int_to_str(len(curr.lora_B)) + ",\n"
         
-        // Truncate lora_B for readability (save first 10 values)
         weights_json = weights_json + "      \"lora_b_sample\": ["
         int b_sample_count = 0
         if len(curr.lora_B) > 10 {
@@ -1384,7 +1377,6 @@ func save_lora_weights_json(
         }
         weights_json = weights_json + "],\n"
         
-        // Statistics
         float norm_a = 0.0
         if len(curr.initial_a) > 0 {
             norm_a = curr.initial_a[0]
