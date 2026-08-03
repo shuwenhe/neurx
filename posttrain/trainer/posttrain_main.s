@@ -195,8 +195,8 @@ func text_window_to_vector(string text, int start, int count, int dim) []float {
 }
 
 func run_posttrain_lora_sft() int {
-    string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/app/shuwen/model/Qwen2.5-0.5B-Instruct")
-    string data_file = runtime_env_get("NEURX_POSTTRAIN_DATA_FILE", "/app/shuwen/dataset/medical/train.json")
+    string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/home/shuwen/shuwen/train/model/Qwen2.5-0.5B-Instruct")
+    string data_file = runtime_env_get("NEURX_POSTTRAIN_DATA_FILE", "/home/shuwen/shuwen/dataset/medical/train.json")
     string output_dir = runtime_env_get("NEURX_POSTTRAIN_OUTPUT_DIR", "/tmp/posttrain_adapter")
     int rank = 8
     float alpha = 16.0
