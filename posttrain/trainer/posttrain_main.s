@@ -853,6 +853,7 @@ func run_posttrain_lora_sft() int {
                     }
                     rank_idx = rank_idx + 1
                 }
+                eprintln("[Progress] Module " + int_to_str(module_cursor) + " backward complete (all " + int_to_str(rank_val) + " ranks)")
                 if module_cursor == 0 {
                     eprintln("[Verify 3] Struct assignment:")
                     eprintln("  lora_A[0] (local) = " + float_to_str(lora_A[0], 8))
