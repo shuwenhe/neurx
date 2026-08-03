@@ -348,7 +348,7 @@ func run_posttrain_lora_sft() int {
     
     eprintln("========== [Phase 5A Step 2B] Real Medical Tokenizer Integration ==========")
     eprintln("[Step 2B] Loading real Qwen tokenized medical data...")
-    string tokenized_data_path = "/app/shuwen/neurx/posttrain/data/real_medical_tokenized.json"
+    string tokenized_data_path = "/home/shuwen/shuwen/neurx/posttrain/data/real_medical_tokenized.json"
     string tokenized_text = runtime_read_text_file(tokenized_data_path)
     int tokenized_size = len(tokenized_text)
     eprintln("[Step 2B] Tokenized data loaded: " + int_to_str(tokenized_size) + " bytes")
@@ -1248,7 +1248,7 @@ func save_adapter_weights(
     }
     
     string config_json = "{\n"
-    config_json = config_json + "  \"base_model_name_or_path\": \"/app/shuwen/model/Qwen2.5-0.5B-Instruct\",\n"
+    config_json = config_json + "  \"base_model_name_or_path\": \"/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct\",\n"
     config_json = config_json + "  \"bias\": \"none\",\n"
     config_json = config_json + "  \"fan_in_fan_out\": false,\n"
     config_json = config_json + "  \"inference_mode\": true,\n"
@@ -1278,7 +1278,7 @@ func save_adapter_weights(
     state_json = state_json + "  \"device\": \"cpu-s-runtime\",\n"
     state_json = state_json + "  \"training_backend\": \"S Runtime Real Trainer\",\n"
     state_json = state_json + "  \"elapsed_seconds\": 0,\n"
-    state_json = state_json + "  \"data_file\": \"/app/shuwen/dataset/medical/train.json\",\n"
+    state_json = state_json + "  \"data_file\": \"/home/shuwen/shuwen/dataset/medical/train.json\",\n"
     state_json = state_json + "  \"final_loss\": 29.414998,\n"
     state_json = state_json + "  \"best_loss\": 29.414998,\n"
     state_json = state_json + "  \"loss_history\": [29.414998],\n"
