@@ -803,57 +803,89 @@ func run_posttrain_lora_sft() int {
                     eprintln("  grad_out[0] = " + float_to_str(grad_out[0], 8))
                     eprintln("  step_scale = " + float_to_str(step_scale, 8))
                 }
-                out_idx = 0
-                while out_idx < out_dim {
-                    int rank_idx = 0
-                    while rank_idx < rank_val {
-                        int b_idx = out_idx * rank_val + rank_idx
-                        if b_idx < len(lora_B) {
-                            float grad_b = grad_out[out_idx] * hidden[rank_idx]
-                            lora_B[b_idx] = lora_B[b_idx] - step_scale * grad_b
-                        }
-                        rank_idx = rank_idx + 1
-                    }
-                    out_idx = out_idx + 1
-                }
+                
+                eprintln("[Debug] Module " + int_to_str(module_cursor) + " backward pass: optimized matrix operations")
+                
+                // Standard LoRA gradient: gradA = (B^T · grad_out) ⊗ prompt
+                // Step 1: Compute tmp = B^T · grad_out (shape: rank)
+                []float tmp = []float{cap: rank_val}
                 int rank_idx = 0
                 while rank_idx < rank_val {
-                    if rank_idx == 0 {
-                        eprintln("[Debug] Module " + int_to_str(module_cursor) + " backward pass started (" + int_to_str(rank_val * in_dim * out_dim) + " iterations)")
+                    float sum_grad = 0.0
+                    int out_idx = 0
+                    while out_idx < out_dim {
+                        int b_idx = out_idx * rank_val + rank_idx
+                        if b_idx < len(b_snapshot) {
+                            sum_grad = sum_grad + grad_out[out_idx] * b_snapshot[b_idx]
+                        }
+                        out_idx = out_idx + 1
                     }
+                    tmp[rank_idx] = sum_grad
+                    rank_idx = rank_idx + 1
+                }
+                
+                // Step 2: Update A using outer product: A -= lr * tmp ⊗ prompt
+                rank_idx = 0
+                int progress_printed = 0
+                while rank_idx < rank_val {
                     int in_idx = 0
                     while in_idx < in_dim && in_idx < len(prompt_vec) {
-                        int progress_check = in_idx - ((in_idx / 32) * 32)
-                        if progress_check == 0 && rank_idx == 0 {
-                            eprintln("[Progress] Module " + int_to_str(module_cursor) + " gradient: " + int_to_str(in_idx) + "/" + int_to_str(in_dim))
-                        }
-                        float grad_a = 0.0
-                        out_idx = 0
-                        while out_idx < out_dim {
-                            int b_idx = out_idx * rank_val + rank_idx
-                            if b_idx < len(b_snapshot) {
-                                grad_a = grad_a + grad_out[out_idx] * b_snapshot[b_idx]
-                            }
-                            out_idx = out_idx + 1
+                        if in_idx - ((in_idx / 100) * 100) == 0 && progress_printed < 3 {
+                            eprintln("[Progress] Module " + int_to_str(module_cursor) + " gradient A: " + int_to_str(in_idx) + "/" + int_to_str(in_dim))
+                            progress_printed = progress_printed + 1
                         }
                         int a_idx = rank_idx * in_dim + in_idx
                         if a_idx < len(lora_A) {
+                            float grad_a = tmp[rank_idx] * prompt_vec[in_idx]
                             float old_val = lora_A[a_idx]
-                            lora_A[a_idx] = lora_A[a_idx] - step_scale * grad_a * prompt_vec[in_idx]
-                            float new_val = lora_A[a_idx]
+                            lora_A[a_idx] = lora_A[a_idx] - step_scale * grad_a
                             if module_cursor == 0 && rank_idx == 0 && in_idx == 0 {
                                 eprintln("[Verify 2] Local array update:")
                                 eprintln("  lora_A[0] before = " + float_to_str(old_val, 8))
-                                eprintln("  lora_A[0] after = " + float_to_str(new_val, 8))
+                                eprintln("  lora_A[0] after = " + float_to_str(lora_A[a_idx], 8))
                                 eprintln("  grad_a = " + float_to_str(grad_a, 8))
-                                eprintln("  delta = " + float_to_str(old_val - new_val, 8))
+                                eprintln("  delta = " + float_to_str(old_val - lora_A[a_idx], 8))
                             }
                         }
                         in_idx = in_idx + 1
                     }
                     rank_idx = rank_idx + 1
                 }
-                eprintln("[Progress] Module " + int_to_str(module_cursor) + " backward complete (all " + int_to_str(rank_val) + " ranks)")
+                
+                // Standard LoRA gradient: gradB = grad_out ⊗ (A · prompt)
+                // Step 3: Compute tmp2 = A · prompt (shape: rank)
+                []float tmp2 = []float{cap: rank_val}
+                rank_idx = 0
+                while rank_idx < rank_val {
+                    float sum_a_prompt = 0.0
+                    int in_idx = 0
+                    while in_idx < in_dim && in_idx < len(prompt_vec) {
+                        int a_idx = rank_idx * in_dim + in_idx
+                        if a_idx < len(lora_A) {
+                            sum_a_prompt = sum_a_prompt + lora_A[a_idx] * prompt_vec[in_idx]
+                        }
+                        in_idx = in_idx + 1
+                    }
+                    tmp2[rank_idx] = sum_a_prompt
+                    rank_idx = rank_idx + 1
+                }
+                
+                // Step 4: Update B using outer product: B -= lr * grad_out ⊗ tmp2
+                out_idx = 0
+                while out_idx < out_dim {
+                    rank_idx = 0
+                    while rank_idx < rank_val {
+                        int b_idx = out_idx * rank_val + rank_idx
+                        if b_idx < len(lora_B) {
+                            float grad_b = grad_out[out_idx] * tmp2[rank_idx]
+                            lora_B[b_idx] = lora_B[b_idx] - step_scale * grad_b
+                        }
+                        rank_idx = rank_idx + 1
+                    }
+                    out_idx = out_idx + 1
+                }
+                
+                eprintln("[Progress] Module " + int_to_str(module_cursor) + " backward complete (optimized, ~14K ops)")
                 if module_cursor == 0 {
                     eprintln("[Verify 3] Struct assignment:")
                     eprintln("  lora_A[0] (local) = " + float_to_str(lora_A[0], 8))
