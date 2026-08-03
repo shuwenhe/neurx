@@ -402,21 +402,35 @@ func run_posttrain_lora_sft() int {
             float sample_loss_sum = 0.0
             int sample_module_count = 0
             while module_cursor < len(modules) {
-                eprintln("[Debug] Processing module " + int_to_str(module_cursor))
+                eprintln("[DEBUG1] Processing module " + int_to_str(module_cursor))
+                if module_cursor >= len(modules) {
+                    eprintln("[DEBUG1-ERROR] module_cursor out of bounds!")
+                    module_cursor = module_cursor + 1
+                    continue
+                }
+                
                 named_lora_module module = modules[module_cursor]
+                eprintln("[DEBUG2] Got module, dims=" + int_to_str(module.out_dim))
+                
                 int out_dim = module.out_dim
                 int in_dim = module.in_dim
                 int rank_val = module.rank
                 float scaling_val = module.scaling
                 []float lora_A = module.lora_A
                 []float lora_B = module.lora_B
+                eprintln("[DEBUG3] lora_A len=" + int_to_str(len(lora_A)) + " lora_B len=" + int_to_str(len(lora_B)))
+                
                 []float target = target_q
                 int is_odd = module_cursor - ((module_cursor / 2) * 2)
                 if is_odd == 1 {
                     target = target_v
                 }
+                eprintln("[DEBUG4] target set, size=" + int_to_str(len(target)))
+                
                 []float output = fill_lora(out_dim, 0.0)
                 []float hidden = fill_lora(rank_val, 0.0)
+                eprintln("[DEBUG5] arrays allocated")
+                
                 int r = 0
                 while r < rank_val {
                     int in_idx = 0
@@ -429,6 +443,8 @@ func run_posttrain_lora_sft() int {
                     }
                     r = r + 1
                 }
+                eprintln("[DEBUG6] forward hidden done")
+                
                 int out_idx = 0
                 while out_idx < out_dim {
                     float sum = 0.0
@@ -443,7 +459,11 @@ func run_posttrain_lora_sft() int {
                     output[out_idx] = sum
                     out_idx = out_idx + 1
                 }
+                eprintln("[DEBUG7] forward output done")
+                
                 float sample_loss = mse_loss(output, target)
+                eprintln("[DEBUG8] loss computed: " + float_to_str(sample_loss, 6))
+                
                 epoch_loss = epoch_loss + sample_loss
                 sample_loss_sum = sample_loss_sum + sample_loss
                 sample_module_count = sample_module_count + 1
