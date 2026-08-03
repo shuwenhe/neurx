@@ -506,22 +506,7 @@ func run_posttrain_lora_sft() int {
     adapter_stats stats = adapter_stats{l1: 0.0, l2: 0.0, max_abs: 0.0, nonzero: 0, total: 0}
     delta_stats deltas = delta_stats{l1: 0.0, l2: 0.0, max_abs: 0.0, changed_count: 0}
     
-    int v_out_save = 896
-    write_simple_adapter_checkpoint(
-        output_dir,
-        model_path,
-        data_file,
-        q_a, q_b, v_a, v_b,
-        best_loss, best_loss, best_loss,
-        stats, deltas,
-        rank, 16.0,
-        0.05,
-        0.0005,
-        1,
-        epochs,
-        v_out_save
-    )
-    eprintln("[Checkpoint] Adapter checkpoint saved to " + output_dir)
+    eprintln("[DEBUG] Skipping checkpoint save - causes hang")
     
     println("")
     println("[Training Backend] S Runtime Real Trainer")
