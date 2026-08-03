@@ -201,9 +201,9 @@ func run_posttrain_lora_sft() int {
     int rank = 8
     float alpha = 16.0
     float dropout = 0.05
-    int hidden_size = 128
-    int num_layers = 2
-    int v_out = 32
+    int hidden_size = 896
+    int num_layers = 24
+    int v_out = 896
     int epochs = 1
     int samples_per_epoch = 1
     float nominal_lr = 0.0005
