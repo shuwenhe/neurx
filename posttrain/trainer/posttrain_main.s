@@ -430,7 +430,7 @@ func run_posttrain_lora_sft() int {
     
     sample1_total_tokens = ids_idx
     
-    int resp_idx = 0
+    int resp_idx = 0    
     int found_resp_start_key = 0
     int found_resp_start_val = 0
     
@@ -745,6 +745,7 @@ func run_posttrain_lora_sft() int {
     []float prompt_vec = fill_lora(hidden_size, 0.1)
     []float target_q = fill_lora(hidden_size, 0.0)
     []float target_v = fill_lora(v_out, 0.0)
+    
     int epoch = 0
     while epoch < epochs {
         eprintln("[Progress] epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " started")
