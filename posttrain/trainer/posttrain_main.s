@@ -491,7 +491,7 @@ func run_posttrain_lora_sft() int {
             if ch >= 48 && ch <= 57 {
                 is_digit = 1
             }
-            if ch == 45 && lbl_parse_idx + 1 < len(tokenized_text) && tokenized_text[lbl_parse_idx + 1] == 49 {
+            if ch == 45 && lbl_parse_idx + 1 < len(tokenized_text) && tokenized_text[lbl_parse_idx + 1] >= 48 && tokenized_text[lbl_parse_idx + 1] <= 57 {
                 is_neg = 1
                 is_digit = 1
             }
@@ -571,6 +571,19 @@ func run_posttrain_lora_sft() int {
         }
         lbl_check_idx = lbl_check_idx + 1
     }
+    
+    eprintln("[Step 2B] DEBUG: Labels array first 60 positions:")
+    int debug_idx = 0
+    while debug_idx < 60 && debug_idx < sample1_total_tokens {
+        int label_val = sample1_labels[debug_idx]
+        string marker = ""
+        if debug_idx == sample1_response_start { marker = " <-- response_start" }
+        string label_str = ""
+        if label_val == -100 { label_str = "-100" } else { label_str = int_to_str(label_val) }
+        eprintln("  [" + int_to_str(debug_idx) + "] label=" + label_str + marker)
+        debug_idx = debug_idx + 1
+    }
+    
     if masked_count_check != prompt_mask {
         eprintln("[ERROR] Masked labels count (" + int_to_str(masked_count_check) + ") does not equal expected prompt length (" + int_to_str(prompt_mask) + ").")
         return 1
