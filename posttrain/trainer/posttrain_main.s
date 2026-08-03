@@ -447,31 +447,7 @@ func run_posttrain_lora_sft() int {
                 epoch_loss = epoch_loss + sample_loss
                 sample_loss_sum = sample_loss_sum + sample_loss
                 sample_module_count = sample_module_count + 1
-                
-                eprintln("[Debug] Module " + int_to_str(module_cursor) + " backward: starting...")
-                []float grad_out = mse_gradient(output, target)
-                []float a_snapshot = copy_float_array(lora_A)
-                []float b_snapshot = copy_float_array(lora_B)
-                []float old_a_snapshot = copy_float_array(a_snapshot)
-                []float old_b_snapshot = copy_float_array(b_snapshot)
-                
-                int max_iters = 20000
-                int iter_count = 0
-                int rank_idx = 0
-                while rank_idx < rank_val && iter_count < max_iters {
-                    int out_idx = 0
-                    while out_idx < out_dim && iter_count < max_iters {
-                        int b_idx = out_idx * rank_val + rank_idx
-                        if b_idx < len(old_b_snapshot) {
-                            float val = grad_out[out_idx] * old_b_snapshot[b_idx]
-                        }
-                        out_idx = out_idx + 1
-                        iter_count = iter_count + 1
-                    }
-                    rank_idx = rank_idx + 1
-                }
-                
-                eprintln("[Progress] Module " + int_to_str(module_cursor) + " backward complete (limited to " + int_to_str(iter_count) + " iters)")
+                eprintln("[Progress] Module " + int_to_str(module_cursor) + " forward+loss complete")
                 epoch_items = epoch_items + 1
                 module_cursor = module_cursor + 1
             }
