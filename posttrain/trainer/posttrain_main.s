@@ -674,6 +674,10 @@ func run_posttrain_lora_sft() int {
     eprintln("[Step 3] Forward pass through simplified layer...")
     eprintln("[Step 3] ✓ Aggregated hidden states (fast path)")
     eprintln("[Step 3] ✓ Ready for training loop")
+    
+    []float prompt_vec = fill_lora(hidden_size, 0.1)
+    []float target_q = fill_lora(hidden_size, 0.0)
+    []float target_v = fill_lora(v_out, 0.0)
     eprintln("")
     
     eprintln("========== [Phase 5A Step 4] Shifted-Label Cross-Entropy Loss ==========")
