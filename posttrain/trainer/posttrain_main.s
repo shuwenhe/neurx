@@ -1,6 +1,16 @@
 package neurx.posttrain.trainer.posttrain_main
 use std.io.eprintln
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_binary_file, runtime_write_text_file, safetensors_writer_add_tensor, safetensors_writer_finish, safetensors_writer_new, tensor, tensor_buffer_new, tensor_buffer_slice, tensor_buffer_write_f32_le, tensor_buffer_write_string, tensor_buffer_write_u64_le, trim}
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_binary_file, runtime_run_command, runtime_shell_escape, safetensors_writer_add_tensor, safetensors_writer_finish, safetensors_writer_new, tensor, tensor_buffer_new, tensor_buffer_slice, tensor_buffer_write_f32_le, tensor_buffer_write_string, tensor_buffer_write_u64_le, trim}
+
+func write_file_via_shell(string path, string content) int {
+    string cmd = "cat > " + runtime_shell_escape(path) + " << 'EOF'\n" + content + "\nEOF"
+    var result = runtime_run_command(cmd)
+    if result.ok {
+        0
+    } else {
+        1
+    }
+}
 
 struct lora_config {
     int seq_len
@@ -1090,7 +1100,7 @@ func write_simple_adapter_checkpoint(
     }
     safetensors_writer_add_tensor(writer, v_b_tensor)
     _ = safetensors_writer_finish(writer)
-    runtime_write_text_file(output_dir + "/adapter_config.json", build_adapter_config_json_simple(
+    write_file_via_shell(output_dir + "/adapter_config.json", build_adapter_config_json_simple(
         model_path,
         rank,
         alpha,
@@ -1098,7 +1108,7 @@ func write_simple_adapter_checkpoint(
         v_out,
         2
     ))
-    runtime_write_text_file(output_dir + "/training_state.json", build_training_state_json_simple(
+    write_file_via_shell(output_dir + "/training_state.json", build_training_state_json_simple(
         data_file,
         loss0,
         loss1,
@@ -1400,7 +1410,7 @@ func save_lora_weights_json(
     weights_json = weights_json + "  ]\n"
     weights_json = weights_json + "}\n"
     
-    runtime_write_text_file(output_dir + "/adapter_model.json", weights_json)
+    write_file_via_shell(output_dir + "/adapter_model.json", weights_json)
     eprintln("[✓] LoRA weights saved to " + output_dir + "/adapter_model.json")
     0
 }
@@ -1439,7 +1449,7 @@ func save_adapter_weights(
     config_json = config_json + "  \"training_backend\": \"S Runtime Real Trainer\"\n"
     config_json = config_json + "}\n"
     
-    runtime_write_text_file(output_dir + "/adapter_config.json", config_json)
+    write_file_via_shell(output_dir + "/adapter_config.json", config_json)
     
     string state_json = "{\n"
     state_json = state_json + "  \"completed_steps\": " + int_to_str(samples_per_epoch * epochs) + ",\n"
@@ -1469,7 +1479,7 @@ func save_adapter_weights(
     state_json = state_json + "  \"alpha\": " + float_to_str(alpha, 1) + "\n"
     state_json = state_json + "}\n"
     
-    runtime_write_text_file(output_dir + "/training_state.json", state_json)
+    write_file_via_shell(output_dir + "/training_state.json", state_json)
     0
 }
 
