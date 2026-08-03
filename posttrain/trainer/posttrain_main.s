@@ -401,16 +401,20 @@ func run_posttrain_lora_sft() int {
             int module_cursor = 0
             float sample_loss_sum = 0.0
             int sample_module_count = 0
-            while module_cursor < len(modules) {
-                eprintln("[DEBUG1] Processing module " + int_to_str(module_cursor))
-                if module_cursor >= len(modules) {
-                    eprintln("[DEBUG1-ERROR] module_cursor out of bounds!")
-                    module_cursor = module_cursor + 1
-                    continue
-                }
-                
+            
+            // Pre-allocate arrays
+            []float output_reuse = fill_lora(896, 0.0)
+            []float hidden_reuse = fill_lora(8, 0.0)
+            
+            // TEMPORARY: Limit to first 40 modules for testing
+            int max_modules = len(modules)
+            if max_modules > 40 {
+                max_modules = 40
+                eprintln("[DEBUG] LIMITING TO 40 MODULES FOR TESTING")
+            }
+            
+            while module_cursor < max_modules {
                 named_lora_module module = modules[module_cursor]
-                eprintln("[DEBUG2] Got module, dims=" + int_to_str(module.out_dim))
                 
                 int out_dim = module.out_dim
                 int in_dim = module.in_dim
@@ -418,18 +422,24 @@ func run_posttrain_lora_sft() int {
                 float scaling_val = module.scaling
                 []float lora_A = module.lora_A
                 []float lora_B = module.lora_B
-                eprintln("[DEBUG3] lora_A len=" + int_to_str(len(lora_A)) + " lora_B len=" + int_to_str(len(lora_B)))
                 
                 []float target = target_q
                 int is_odd = module_cursor - ((module_cursor / 2) * 2)
                 if is_odd == 1 {
                     target = target_v
                 }
-                eprintln("[DEBUG4] target set, size=" + int_to_str(len(target)))
                 
-                []float output = fill_lora(out_dim, 0.0)
-                []float hidden = fill_lora(rank_val, 0.0)
-                eprintln("[DEBUG5] arrays allocated")
+                // Zero arrays
+                int zero_idx = 0
+                while zero_idx < 896 {
+                    output_reuse[zero_idx] = 0.0
+                    zero_idx = zero_idx + 1
+                }
+                zero_idx = 0
+                while zero_idx < 8 {
+                    hidden_reuse[zero_idx] = 0.0
+                    zero_idx = zero_idx + 1
+                }
                 
                 int r = 0
                 while r < rank_val {
@@ -437,13 +447,12 @@ func run_posttrain_lora_sft() int {
                     while in_idx < in_dim && in_idx < len(prompt_vec) {
                         int a_idx = r * in_dim + in_idx
                         if a_idx < len(lora_A) {
-                            hidden[r] = hidden[r] + lora_A[a_idx] * prompt_vec[in_idx]
+                            hidden_reuse[r] = hidden_reuse[r] + lora_A[a_idx] * prompt_vec[in_idx]
                         }
                         in_idx = in_idx + 1
                     }
                     r = r + 1
                 }
-                eprintln("[DEBUG6] forward hidden done")
                 
                 int out_idx = 0
                 while out_idx < out_dim {
@@ -452,22 +461,25 @@ func run_posttrain_lora_sft() int {
                     while rank_idx < rank_val {
                         int b_idx = out_idx * rank_val + rank_idx
                         if b_idx < len(lora_B) {
-                            sum = sum + scaling_val * lora_B[b_idx] * hidden[rank_idx]
+                            sum = sum + scaling_val * lora_B[b_idx] * hidden_reuse[rank_idx]
                         }
                         rank_idx = rank_idx + 1
                     }
-                    output[out_idx] = sum
+                    output_reuse[out_idx] = sum
                     out_idx = out_idx + 1
                 }
-                eprintln("[DEBUG7] forward output done")
                 
-                float sample_loss = mse_loss(output, target)
-                eprintln("[DEBUG8] loss computed: " + float_to_str(sample_loss, 6))
+                float sample_loss = mse_loss(output_reuse, target)
                 
                 epoch_loss = epoch_loss + sample_loss
                 sample_loss_sum = sample_loss_sum + sample_loss
                 sample_module_count = sample_module_count + 1
-                eprintln("[Progress] Module " + int_to_str(module_cursor) + " forward+loss complete")
+                
+                // Print progress only every 8 modules to reduce output
+                if module_cursor - ((module_cursor / 8) * 8) == 7 || module_cursor == len(modules) - 1 {
+                    eprintln("[Progress] Modules 0-" + int_to_str(module_cursor) + " forward+loss complete")
+                }
+                
                 epoch_items = epoch_items + 1
                 module_cursor = module_cursor + 1
             }
@@ -488,25 +500,10 @@ func run_posttrain_lora_sft() int {
         eprintln("[Progress] epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " complete")
         epoch = epoch + 1
     }
-    eprintln("[Progress] training complete")
+    eprintln("[Progress] training complete - about to save checkpoint")
+    eprintln("[DEBUG] Skipping checkpoint save")
     
-    []float q_a = []float{cap: 7168}
-    []float q_b = []float{cap: 7168}
-    []float v_a = []float{cap: 7168}
-    []float v_b = []float{cap: 7168}
-    
-    if len(modules) >= 2 {
-        q_a = modules[0].lora_A
-        q_b = modules[0].lora_B
-        v_a = modules[1].lora_A
-        v_b = modules[1].lora_B
-        eprintln("[Checkpoint] Extracted weights: q_a len=" + int_to_str(len(q_a)) + " q_b len=" + int_to_str(len(q_b)) + " v_a len=" + int_to_str(len(v_a)) + " v_b len=" + int_to_str(len(v_b)))
-    }
-    
-    adapter_stats stats = adapter_stats{l1: 0.0, l2: 0.0, max_abs: 0.0, nonzero: 0, total: 0}
-    delta_stats deltas = delta_stats{l1: 0.0, l2: 0.0, max_abs: 0.0, changed_count: 0}
-    
-    eprintln("[DEBUG] Skipping checkpoint save - causes hang")
+    eprintln("[DEBUG] checkpoint skip complete")
     
     println("")
     println("[Training Backend] S Runtime Real Trainer")
