@@ -401,7 +401,7 @@ func run_posttrain_lora_sft() int {
             int module_cursor = 0
             float sample_loss_sum = 0.0
             int sample_module_count = 0
-            while module_cursor < len(modules) && module_cursor < 4 {
+            while module_cursor < len(modules) {
                 eprintln("[Debug] Processing module " + int_to_str(module_cursor))
                 named_lora_module module = modules[module_cursor]
                 int out_dim = module.out_dim
@@ -455,7 +455,7 @@ func run_posttrain_lora_sft() int {
                 []float old_a_snapshot = copy_float_array(a_snapshot)
                 []float old_b_snapshot = copy_float_array(b_snapshot)
                 
-                int max_iters = 100
+                int max_iters = 20000
                 int iter_count = 0
                 int rank_idx = 0
                 while rank_idx < rank_val && iter_count < max_iters {
