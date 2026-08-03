@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain posttrain-install-deps posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain runtime-test test-golden regenerate-golden pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 \
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain runtime-test test-golden regenerate-golden pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -115,6 +115,11 @@ POSTTRAIN_LEARNING_RATE ?= 0.0002
 POSTTRAIN_TARGET_MODULES ?= q_proj,k_proj,v_proj,o_proj
 POSTTRAIN_DEVICE ?= auto
 POSTTRAIN_MERGE_MODEL ?= 1
+POSTTRAIN_EVAL_DATA ?= /home/shuwen/shuwen/dataset/medical/test.json
+POSTTRAIN_EVAL_OUTPUT ?= $(POSTTRAIN_OUTPUT_DIR)/evaluation
+POSTTRAIN_EVAL_MAX_SAMPLES ?= 256
+POSTTRAIN_EVAL_MAX_LENGTH ?= 256
+POSTTRAIN_EVAL_BATCH_SIZE ?= 4
 POSTTRAIN_S_COMPILER ?= $(S_SEED_COMPILER)
 LORA_MERGE_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/lora_merge
 LORA_MERGE_BIN := $(LORA_MERGE_BUILD_DIR)/lora_safetensors_merge$(BIN_EXT)
@@ -402,6 +407,19 @@ posttrain: check-bash
 	@echo "[✓] SFT training and model merge completed"
 	@echo "Model: $(POSTTRAIN_OUTPUT_DIR)"
 	@echo "Adapter: $(POSTTRAIN_OUTPUT_DIR)/adapter"
+posttrain-eval-medical: check-bash
+	@mkdir -p '$(POSTTRAIN_EVAL_OUTPUT)' '$(LOG_DIR)'
+	@cd '$(CURDIR_UNIX)' && \
+		set -o pipefail; \
+		export NEURX_POSTTRAIN_EVAL_DATA='$(POSTTRAIN_EVAL_DATA)'; \
+		export NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)'; \
+		export NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)'; \
+		export NEURX_POSTTRAIN_EVAL_OUTPUT='$(POSTTRAIN_EVAL_OUTPUT)'; \
+		export NEURX_POSTTRAIN_EVAL_MAX_SAMPLES='$(POSTTRAIN_EVAL_MAX_SAMPLES)'; \
+		export NEURX_POSTTRAIN_EVAL_MAX_LENGTH='$(POSTTRAIN_EVAL_MAX_LENGTH)'; \
+		export NEURX_POSTTRAIN_EVAL_BATCH_SIZE='$(POSTTRAIN_EVAL_BATCH_SIZE)'; \
+		export NEURX_POSTTRAIN_DEVICE='$(POSTTRAIN_DEVICE)'; \
+		'$(POSTTRAIN_PYTHON)' 'posttrain/evaluate_medical_mcq.py' 2>&1 | tee -a '$(LOG_DIR)/posttrain_eval_medical_$(shell date +%Y%m%d_%H%M%S).log'
 test-posttrain: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_test'
 	@mkdir -p '$(LOG_DIR)'
