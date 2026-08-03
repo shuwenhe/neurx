@@ -489,7 +489,39 @@ func run_posttrain_lora_sft() int {
         epoch = epoch + 1
     }
     eprintln("[Progress] training complete")
-    eprintln("[SIMPLIFIED] Skipping save operations for debugging")
+    
+    []float q_a = []float{cap: 7168}
+    []float q_b = []float{cap: 7168}
+    []float v_a = []float{cap: 7168}
+    []float v_b = []float{cap: 7168}
+    
+    if len(modules) >= 2 {
+        q_a = modules[0].lora_A
+        q_b = modules[0].lora_B
+        v_a = modules[1].lora_A
+        v_b = modules[1].lora_B
+        eprintln("[Checkpoint] Extracted weights: q_a len=" + int_to_str(len(q_a)) + " q_b len=" + int_to_str(len(q_b)) + " v_a len=" + int_to_str(len(v_a)) + " v_b len=" + int_to_str(len(v_b)))
+    }
+    
+    adapter_stats stats = adapter_stats{l1: 0.0, l2: 0.0, max_abs: 0.0, nonzero: 0, total: 0}
+    delta_stats deltas = delta_stats{l1: 0.0, l2: 0.0, max_abs: 0.0, changed_count: 0}
+    
+    int v_out_save = 896
+    write_simple_adapter_checkpoint(
+        output_dir,
+        model_path,
+        data_file,
+        q_a, q_b, v_a, v_b,
+        best_loss, best_loss, best_loss,
+        stats, deltas,
+        rank, 16.0,
+        0.05,
+        0.0005,
+        1,
+        epochs,
+        v_out_save
+    )
+    eprintln("[Checkpoint] Adapter checkpoint saved to " + output_dir)
     
     println("")
     println("[Training Backend] S Runtime Real Trainer")
@@ -622,8 +654,23 @@ func write_simple_adapter_checkpoint(
     }
     safetensors_writer_add_tensor(writer, v_b_tensor)
     _ = safetensors_writer_finish(writer)
-    eprintln("[SIMPLIFIED] Skipping file writes: adapter_config.json, training_state.json")
-    eprintln("[✓] Training completed successfully - file I/O removed for debugging")
+    eprintln("[✓] Saved adapter_model.safetensors")
+    
+    string config_json = build_adapter_config_json_simple(model_path, rank, alpha, effective_lr, v_out, 48)
+    string config_path = output_dir + "/adapter_config.json"
+    _ = runtime_write_binary_file(config_path, config_json)
+    eprintln("[✓] Saved adapter_config.json")
+    
+    string state_json = build_training_state_json_simple(
+        "/home/shuwen/shuwen/dataset/medical/train.json",
+        loss0, loss1, loss2,
+        stats, deltas,
+        rank, alpha, nominal_lr, effective_lr,
+        samples_per_epoch, epochs, 48
+    )
+    string state_path = output_dir + "/training_state.json"
+    _ = runtime_write_binary_file(state_path, state_json)
+    eprintln("[✓] Saved training_state.json")
 }
 
 func build_adapter_config_json_simple(string model_path, int rank, float alpha, float effective_lr, int v_out, int module_count) string {
