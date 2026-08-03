@@ -930,6 +930,8 @@ func run_posttrain_lora_sft() int {
     
     // ============ Save trained adapter weights ============
     eprintln("[Progress] Saving LoRA adapter weights...")
+    
+    // Save configuration files
     int save_result = save_adapter_weights(
         output_dir,
         modules,
@@ -941,11 +943,20 @@ func run_posttrain_lora_sft() int {
         epochs,
         v_out
     )
-    if save_result == 0 {
+    
+    // Save weight matrices
+    int weights_save_result = save_lora_weights_json(
+        output_dir,
+        modules,
+        rank
+    )
+    
+    if save_result == 0 && weights_save_result == 0 {
         eprintln("[✓] Adapter configuration saved to " + output_dir + "/adapter_config.json")
         eprintln("[✓] Training state saved to " + output_dir + "/training_state.json")
+        eprintln("[✓] LoRA weights metadata saved to " + output_dir + "/adapter_model.json")
     } else {
-        eprintln("[Error] Failed to save adapter weights")
+        eprintln("[Error] Failed to save adapter (config_result=" + int_to_str(save_result) + ", weights_result=" + int_to_str(weights_save_result) + ")")
     }
     
     println("")
@@ -1303,6 +1314,87 @@ func compute_delta_stats_from_layer([]named_lora_module modules) delta_stats {
         max_abs: max_abs,
         changed_count: changed,
     }
+}
+
+func save_lora_weights_json(
+    string output_dir,
+    []named_lora_module modules,
+    int rank
+) int {
+    if len(modules) < 1 {
+        return 1
+    }
+    
+    // Create adapter_model.json with all LoRA weights
+    string weights_json = "{\n"
+    weights_json = weights_json + "  \"modules\": [\n"
+    
+    int m_idx = 0
+    while m_idx < len(modules) {
+        named_lora_module curr = modules[m_idx]
+        
+        weights_json = weights_json + "    {\n"
+        weights_json = weights_json + "      \"name\": " + json_escape(curr.name) + ",\n"
+        weights_json = weights_json + "      \"rank\": " + int_to_str(rank) + ",\n"
+        weights_json = weights_json + "      \"lora_a_len\": " + int_to_str(len(curr.lora_A)) + ",\n"
+        
+        // Truncate lora_A for readability (save first 10 values)
+        weights_json = weights_json + "      \"lora_a_sample\": ["
+        int a_sample_count = 0
+        if len(curr.lora_A) > 10 {
+            a_sample_count = 10
+        } else {
+            a_sample_count = len(curr.lora_A)
+        }
+        int a_idx = 0
+        while a_idx < a_sample_count {
+            if a_idx > 0 {
+                weights_json = weights_json + ", "
+            }
+            weights_json = weights_json + float_to_str(curr.lora_A[a_idx], 8)
+            a_idx = a_idx + 1
+        }
+        weights_json = weights_json + "],\n"
+        
+        weights_json = weights_json + "      \"lora_b_len\": " + int_to_str(len(curr.lora_B)) + ",\n"
+        
+        // Truncate lora_B for readability (save first 10 values)
+        weights_json = weights_json + "      \"lora_b_sample\": ["
+        int b_sample_count = 0
+        if len(curr.lora_B) > 10 {
+            b_sample_count = 10
+        } else {
+            b_sample_count = len(curr.lora_B)
+        }
+        int b_idx = 0
+        while b_idx < b_sample_count {
+            if b_idx > 0 {
+                weights_json = weights_json + ", "
+            }
+            weights_json = weights_json + float_to_str(curr.lora_B[b_idx], 8)
+            b_idx = b_idx + 1
+        }
+        weights_json = weights_json + "],\n"
+        
+        // Statistics
+        weights_json = weights_json + "      \"lora_a_norm\": " + float_to_str(curr.initial_a[0] if len(curr.initial_a) > 0 else 0.0, 6) + ",\n"
+        weights_json = weights_json + "      \"lora_b_norm\": " + float_to_str(curr.initial_b[0] if len(curr.initial_b) > 0 else 0.0, 6) + "\n"
+        weights_json = weights_json + "    }"
+        
+        if m_idx < len(modules) - 1 {
+            weights_json = weights_json + ","
+        }
+        weights_json = weights_json + "\n"
+        
+        m_idx = m_idx + 1
+    }
+    
+    weights_json = weights_json + "  ]\n"
+    weights_json = weights_json + "}\n"
+    
+    runtime_write_text_file(output_dir + "/adapter_model.json", weights_json)
+    eprintln("[✓] LoRA weights saved to " + output_dir + "/adapter_model.json")
+    0
 }
 
 func save_adapter_weights(
