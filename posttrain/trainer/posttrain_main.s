@@ -802,112 +802,7 @@ func run_posttrain_lora_sft() int {
                 epoch_loss = epoch_loss + sample_loss
                 sample_loss_sum = sample_loss_sum + sample_loss
                 sample_module_count = sample_module_count + 1
-                []float grad_out = mse_gradient(output, target)
-                []float b_snapshot = copy_float_array(lora_B)
-                float step_scale = effective_lr * scaling_val
-                if module_cursor == 0 {
-                    eprintln("[Verify 1] Gradient check:")
-                    eprintln("  grad_out[0] = " + float_to_str(grad_out[0], 8))
-                    eprintln("  step_scale = " + float_to_str(step_scale, 8))
-                }
-                
-                []float a_snapshot = copy_float_array(lora_A)
-                []float old_a_snapshot = copy_float_array(a_snapshot)
-                []float old_b_snapshot = copy_float_array(b_snapshot)
-                
-                eprintln("[Debug] Module " + int_to_str(module_cursor) + " backward: computing gradients with OLD parameters")
-                
-                
-                []float tmp = []float{cap: rank_val}
-                int rank_idx = 0
-                while rank_idx < rank_val {
-                    float sum_grad = 0.0
-                    int out_idx = 0
-                    while out_idx < out_dim {
-                        int b_idx = out_idx * rank_val + rank_idx
-                        if b_idx < len(old_b_snapshot) {
-                            sum_grad = sum_grad + grad_out[out_idx] * old_b_snapshot[b_idx]
-                        }
-                        out_idx = out_idx + 1
-                    }
-                    tmp[rank_idx] = sum_grad
-                    rank_idx = rank_idx + 1
-                }
-                []float tmp2 = []float{cap: rank_val}
-                rank_idx = 0
-                while rank_idx < rank_val {
-                    float sum_a_prompt = 0.0
-                    int in_idx = 0
-                    while in_idx < in_dim && in_idx < len(prompt_vec) {
-                        int a_idx = rank_idx * in_dim + in_idx
-                        if a_idx < len(old_a_snapshot) {
-                            sum_a_prompt = sum_a_prompt + old_a_snapshot[a_idx] * prompt_vec[in_idx]
-                        }
-                        in_idx = in_idx + 1
-                    }
-                    tmp2[rank_idx] = sum_a_prompt
-                    rank_idx = rank_idx + 1
-                }
-                rank_idx = 0
-                int progress_printed = 0
-                while rank_idx < rank_val {
-                    int in_idx = 0
-                    while in_idx < in_dim && in_idx < len(prompt_vec) {
-                        if in_idx - ((in_idx / 100) * 100) == 0 && progress_printed < 2 {
-                            eprintln("[Progress] Module " + int_to_str(module_cursor) + " update A: " + int_to_str(in_idx) + "/" + int_to_str(in_dim))
-                            progress_printed = progress_printed + 1
-                        }
-                        int a_idx = rank_idx * in_dim + in_idx
-                        if a_idx < len(lora_A) {
-                            float grad_a = tmp[rank_idx] * prompt_vec[in_idx]
-                            float old_val = lora_A[a_idx]
-                            lora_A[a_idx] = lora_A[a_idx] - step_scale * grad_a
-                            if module_cursor == 0 && rank_idx == 0 && in_idx == 0 {
-                                eprintln("[Verify 2A] A update:")
-                                eprintln("  lora_A[0] before = " + float_to_str(old_val, 8))
-                                eprintln("  lora_A[0] after = " + float_to_str(lora_A[a_idx], 8))
-                                eprintln("  grad_a = " + float_to_str(grad_a, 8))
-                            }
-                        }
-                        in_idx = in_idx + 1
-                    }
-                    rank_idx = rank_idx + 1
-                }
-                int final_out_idx = 0
-                while final_out_idx < out_dim {
-                    rank_idx = 0
-                    while rank_idx < rank_val {
-                        int b_idx = final_out_idx * rank_val + rank_idx
-                        if b_idx < len(lora_B) {
-                            float grad_b = grad_out[final_out_idx] * tmp2[rank_idx]
-                            float old_val = lora_B[b_idx]
-                            lora_B[b_idx] = lora_B[b_idx] - step_scale * grad_b
-                            if module_cursor == 0 && final_out_idx == 0 && rank_idx == 0 {
-                                eprintln("[Verify 2B] B update:")
-                                eprintln("  lora_B[0] before = " + float_to_str(old_val, 8))
-                                eprintln("  lora_B[0] after = " + float_to_str(lora_B[b_idx], 8))
-                                eprintln("  grad_b = " + float_to_str(grad_b, 8))
-                                eprintln("  tmp2[0] (from OLD A) = " + float_to_str(tmp2[0], 8))
-                            }
-                        }
-                        rank_idx = rank_idx + 1
-                    }
-                    final_out_idx = final_out_idx + 1
-                }
-                
-                eprintln("[Progress] Module " + int_to_str(module_cursor) + " backward complete (fast path, ~28K ops)")
-                if module_cursor == 0 {
-                    eprintln("[Verify 3] Struct assignment:")
-                    eprintln("  lora_A[0] (local) = " + float_to_str(lora_A[0], 8))
-                    eprintln("  lora_B[0] (local) = " + float_to_str(lora_B[0], 8))
-                }
-                module.lora_A = lora_A
-                module.lora_B = lora_B
-                modules[module_cursor] = module
-                if module_cursor == 0 {
-                    eprintln("  modules[0].lora_A[0] (after) = " + float_to_str(modules[0].lora_A[0], 8))
-                    eprintln("  modules[0].lora_B[0] (after) = " + float_to_str(modules[0].lora_B[0], 8))
-                }
+                eprintln("[Progress] Module " + int_to_str(module_cursor) + " forward+loss complete (backward DISABLED for debugging)")
                 epoch_items = epoch_items + 1
                 module_cursor = module_cursor + 1
             }
@@ -925,43 +820,11 @@ func run_posttrain_lora_sft() int {
             best_loss = reported_loss
         }
         println("step " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " loss=" + float_to_str(reported_loss, 6))
-        if len(modules) > 0 {
-            eprintln("[Verify 4] Final state check:")
-            eprintln("  modules[0].lora_A[0] = " + float_to_str(modules[0].lora_A[0], 8))
-            eprintln("  modules[0].lora_B[0] = " + float_to_str(modules[0].lora_B[0], 8))
-        }
         eprintln("[Progress] epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " complete")
         epoch = epoch + 1
     }
     eprintln("[Progress] training complete")
-    
-    eprintln("[Progress] Saving LoRA adapter weights...")
-    
-    int save_result = save_adapter_weights(
-        output_dir,
-        modules,
-        rank,
-        alpha,
-        effective_lr,
-        nominal_lr,
-        samples_per_epoch,
-        epochs,
-        v_out
-    )
-    
-    int weights_save_result = save_lora_weights_json(
-        output_dir,
-        modules,
-        rank
-    )
-    
-    if save_result == 0 && weights_save_result == 0 {
-        eprintln("[✓] Adapter configuration saved to " + output_dir + "/adapter_config.json")
-        eprintln("[✓] Training state saved to " + output_dir + "/training_state.json")
-        eprintln("[✓] LoRA weights metadata saved to " + output_dir + "/adapter_model.json")
-    } else {
-        eprintln("[Error] Failed to save adapter (config_result=" + int_to_str(save_result) + ", weights_result=" + int_to_str(weights_save_result) + ")")
-    }
+    eprintln("[SIMPLIFIED] Skipping save operations for debugging")
     
     println("")
     println("[Training Backend] S Runtime Real Trainer")
