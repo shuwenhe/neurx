@@ -2,12 +2,20 @@ package neurx.posttrain.trainer.posttrain_main
 use std.io.eprintln
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_binary_file, runtime_run_command, runtime_shell_escape, safetensors_writer_add_tensor, safetensors_writer_finish, safetensors_writer_new, tensor, tensor_buffer_new, tensor_buffer_slice, tensor_buffer_write_f32_le, tensor_buffer_write_string, tensor_buffer_write_u64_le, trim}
 
-func write_file_via_shell(string path, string content) int {
-    string cmd = "cat > " + runtime_shell_escape(path) + " << 'EOF'\n" + content + "\nEOF"
-    var result = runtime_run_command(cmd)
-    if result.ok {
+func write_file_simple(string path, string content) int {
+    eprintln("[DEBUG] Writing file to: " + path)
+    eprintln("[DEBUG] Content length: " + int_to_str(len(content)))
+    var result = runtime_run_command("mkdir -p " + runtime_shell_escape(runtime_env_get("NEURX_POSTTRAIN_OUTPUT_DIR", "/home/shuwen/shuwen/posttrain")))
+    if !result.ok {
+        eprintln("[ERROR] Failed to create output directory")
+        return 1
+    }
+    var result2 = runtime_run_command("cat > " + runtime_shell_escape(path) + " << 'EOFMARKER'\n" + content + "\nEOFMARKER")
+    if result2.ok {
+        eprintln("[✓] File written: " + path)
         0
     } else {
+        eprintln("[ERROR] Failed to write file: " + path)
         1
     }
 }
@@ -674,10 +682,6 @@ func run_posttrain_lora_sft() int {
     eprintln("[Step 3] Forward pass through simplified layer...")
     eprintln("[Step 3] ✓ Aggregated hidden states (fast path)")
     eprintln("[Step 3] ✓ Ready for training loop")
-    
-    []float prompt_vec = fill_lora(hidden_size, 0.1)
-    []float target_q = fill_lora(hidden_size, 0.0)
-    []float target_v = fill_lora(v_out, 0.0)
     eprintln("")
     
     eprintln("========== [Phase 5A Step 4] Shifted-Label Cross-Entropy Loss ==========")
@@ -736,6 +740,11 @@ func run_posttrain_lora_sft() int {
     println("Training loop start")
     []float loss_history = []float{cap: epochs}
     float best_loss = 0.0
+    
+    // Initialize target vectors for backward pass
+    []float prompt_vec = fill_lora(hidden_size, 0.1)
+    []float target_q = fill_lora(hidden_size, 0.0)
+    []float target_v = fill_lora(v_out, 0.0)
     int epoch = 0
     while epoch < epochs {
         eprintln("[Progress] epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " started")
@@ -1088,7 +1097,7 @@ func write_simple_adapter_checkpoint(
     }
     safetensors_writer_add_tensor(writer, v_b_tensor)
     _ = safetensors_writer_finish(writer)
-    write_file_via_shell(output_dir + "/adapter_config.json", build_adapter_config_json_simple(
+    write_file_simple(output_dir + "/adapter_config.json", build_adapter_config_json_simple(
         model_path,
         rank,
         alpha,
@@ -1096,7 +1105,7 @@ func write_simple_adapter_checkpoint(
         v_out,
         2
     ))
-    write_file_via_shell(output_dir + "/training_state.json", build_training_state_json_simple(
+    write_file_simple(output_dir + "/training_state.json", build_training_state_json_simple(
         data_file,
         loss0,
         loss1,
@@ -1398,7 +1407,7 @@ func save_lora_weights_json(
     weights_json = weights_json + "  ]\n"
     weights_json = weights_json + "}\n"
     
-    write_file_via_shell(output_dir + "/adapter_model.json", weights_json)
+    write_file_simple(output_dir + "/adapter_model.json", weights_json)
     eprintln("[✓] LoRA weights saved to " + output_dir + "/adapter_model.json")
     0
 }
