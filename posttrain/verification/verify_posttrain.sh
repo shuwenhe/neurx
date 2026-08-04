@@ -37,7 +37,7 @@ echo ""
 echo "[Test 3] Weight Changes"
 if [[ -f "$BASE_MODEL_PATH/model.safetensors" && -f "$ADAPTER_PATH/adapter_model.safetensors" ]]; then
     ADAPTER_SIZE=$(stat -f%z "$ADAPTER_PATH/adapter_model.safetensors" 2>/dev/null || stat -c%s "$ADAPTER_PATH/adapter_model.safetensors" 2>/dev/null)
-    
+
     if [[ $ADAPTER_SIZE -gt 20971520 && $ADAPTER_SIZE -lt 209715200 ]]; then
         echo "  Status: ✓ PASSED"
         echo "  Details: LoRA weights (~$(( ADAPTER_SIZE / 1048576 )) MB) properly stored"
