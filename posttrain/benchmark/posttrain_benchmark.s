@@ -3,14 +3,14 @@ package neurx.posttrain.benchmark
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_text_file, runtime_make_dirs}
 use std.io.{println, eprintln}
 
-struct BenchmarkTimer {
+struct benchmark_timer {
     string name
     int64 start_ns
     int64 end_ns
     int iteration
 }
 
-struct BenchmarkMetrics {
+struct benchmark_metrics {
     string phase
     int64 total_time_ms
     float tokens_per_sec
@@ -20,13 +20,13 @@ struct BenchmarkMetrics {
     float gpu_utilization_percent
 }
 
-struct BenchmarkReport {
+struct benchmark_report {
     string timestamp
     string device
     int num_steps
     int batch_size
     int seq_length
-    []BenchmarkMetrics phases
+    []benchmark_metrics phases
     int64 total_time_ms
     float avg_tokens_per_sec
     string notes
@@ -36,20 +36,20 @@ func get_current_time_ns() int64 {
     0
 }
 
-func timer_start(string name, int iteration) BenchmarkTimer {
-    var timer BenchmarkTimer
+func timer_start(string name, int iteration) benchmark_timer {
+    var timer benchmark_timer
     timer.name = name
     timer.start_ns = get_current_time_ns()
     timer.iteration = iteration
     timer
 }
 
-func timer_end(BenchmarkTimer timer) BenchmarkTimer {
+func timer_end(benchmark_timer timer) benchmark_timer {
     timer.end_ns = get_current_time_ns()
     timer
 }
 
-func timer_elapsed_ms(BenchmarkTimer timer) int64 {
+func timer_elapsed_ms(benchmark_timer timer) int64 {
     (timer.end_ns - timer.start_ns) / 1000000
 }
 
@@ -117,7 +117,7 @@ func len_bytes(string s) int {
     0
 }
 
-func benchmark_data_loading() BenchmarkMetrics {
+func benchmark_data_loading() benchmark_metrics {
     var data_file = runtime_env_get("NEURX_POSTTRAIN_DATA_FILE", "/home/shuwen/shuwen/dataset/medical/train.json")
     
     var timer = timer_start("data_loading", 0)
@@ -139,7 +139,7 @@ func benchmark_data_loading() BenchmarkMetrics {
     result
 }
 
-func benchmark_model_loading() BenchmarkMetrics {
+func benchmark_model_loading() benchmark_metrics {
     var model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
     
     var timer = timer_start("model_loading", 0)
@@ -147,7 +147,7 @@ func benchmark_model_loading() BenchmarkMetrics {
     var exists = runtime_file_exists(model_file)
     timer = timer_end(timer)
     
-    var result BenchmarkMetrics
+    var result benchmark_metrics
     result.phase = "model_loading"
     result.total_time_ms = timer_elapsed_ms(timer)
     result.tokens_per_sec = 0.0
@@ -158,7 +158,7 @@ func benchmark_model_loading() BenchmarkMetrics {
     result
 }
 
-func benchmark_forward_pass(int num_steps, int batch_size, int seq_length) BenchmarkMetrics {
+func benchmark_forward_pass(int num_steps, int batch_size, int seq_length) benchmark_metrics {
     var total_time = int64(0)
     var i = 0
     
@@ -173,7 +173,7 @@ func benchmark_forward_pass(int num_steps, int batch_size, int seq_length) Bench
     var tokens_per_batch = batch_size * seq_length
     var tokens_per_sec = float(tokens_per_batch * 1000) / float(avg_time)
     
-    var result BenchmarkMetrics
+    var result benchmark_metrics
     result.phase = "forward_pass"
     result.total_time_ms = total_time
     result.tokens_per_sec = tokens_per_sec
@@ -184,7 +184,7 @@ func benchmark_forward_pass(int num_steps, int batch_size, int seq_length) Bench
     result
 }
 
-func benchmark_backward_pass(int num_steps, int batch_size, int seq_length) BenchmarkMetrics {
+func benchmark_backward_pass(int num_steps, int batch_size, int seq_length) benchmark_metrics {
     var total_time = int64(0)
     var i = 0
     
@@ -199,7 +199,7 @@ func benchmark_backward_pass(int num_steps, int batch_size, int seq_length) Benc
     var tokens_per_batch = batch_size * seq_length
     var tokens_per_sec = float(tokens_per_batch * 1000) / float(avg_time)
     
-    var result BenchmarkMetrics
+    var result benchmark_metrics
     result.phase = "backward_pass"
     result.total_time_ms = total_time
     result.tokens_per_sec = tokens_per_sec
@@ -210,7 +210,7 @@ func benchmark_backward_pass(int num_steps, int batch_size, int seq_length) Benc
     result
 }
 
-func benchmark_optimizer_step(int num_steps, int batch_size) BenchmarkMetrics {
+func benchmark_optimizer_step(int num_steps, int batch_size) benchmark_metrics {
     var total_time = int64(0)
     var i = 0
     
@@ -223,7 +223,7 @@ func benchmark_optimizer_step(int num_steps, int batch_size) BenchmarkMetrics {
     
     var avg_time = total_time / int64(num_steps)
     
-    var result BenchmarkMetrics
+    var result benchmark_metrics
     result.phase = "optimizer_step"
     result.total_time_ms = total_time
     result.tokens_per_sec = 0.0
@@ -234,7 +234,7 @@ func benchmark_optimizer_step(int num_steps, int batch_size) BenchmarkMetrics {
     result
 }
 
-func format_benchmark_report(BenchmarkReport report) string {
+func format_benchmark_report(benchmark_report report) string {
     var result = ""
     result = result + "# PostTrain Performance Benchmark Report\n"
     result = result + "\n"
