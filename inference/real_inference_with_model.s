@@ -134,7 +134,7 @@ func int_to_string(int value) string {
 }
 
 func slice_bytes([]int bytes, int start, int length) []int {
-    []int out
+    []int out = []int{cap: 0}
     int size = length
     if size < 0 {
         size = 0
