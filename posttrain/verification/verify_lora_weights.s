@@ -7,7 +7,7 @@ use neurx.runtime.io.{
     runtime_file_read_all,
     runtime_env_get
 }
-struct WeightStats {
+struct weight_stats {
     f64 mean
     f64 std_dev
     f64 min_val

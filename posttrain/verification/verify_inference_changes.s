@@ -4,40 +4,40 @@ package neurx.posttrain.verification.inference_changes
 use neurx.runtime.io.{
     runtime_env_get
 }
-struct TestQuery {
+struct test_query {
     string question
     string expected_topic
 }
-struct ResponseMetrics {
+struct response_metrics {
     string base_response
     string finetuned_response
     bool has_difference
     string response_quality
 }
-func create_test_queries() []TestQuery {
-    []TestQuery queries = make([]TestQuery, 5)
+func create_test_queries() []test_query {
+    []test_query queries = make([]test_query, 5)
     
-    queries[0] = TestQuery{
+    queries[0] = test_query{
         question: "What are the symptoms of diabetes?",
         expected_topic: "diabetes symptoms"
     }
     
-    queries[1] = TestQuery{
+    queries[1] = test_query{
         question: "How is hypertension treated?",
         expected_topic: "hypertension treatment"
     }
     
-    queries[2] = TestQuery{
+    queries[2] = test_query{
         question: "Describe the stages of cancer",
         expected_topic: "cancer stages"
     }
     
-    queries[3] = TestQuery{
+    queries[3] = test_query{
         question: "What causes migraine headaches?",
         expected_topic: "migraine causes"
     }
     
-    queries[4] = TestQuery{
+    queries[4] = test_query{
         question: "List common side effects of antibiotics",
         expected_topic: "antibiotic side effects"
     }
@@ -127,13 +127,13 @@ func verify_inference_changes() string {
     output = output + "  Inference Output Verification\n"
     output = output + "════════════════════════════════════════════\n\n"
     
-    []TestQuery queries = create_test_queries()
+    []test_query queries = create_test_queries()
     i32 queries_len = len(queries)
     
     i32 improved_count = 0
     
     for i := 0; i < queries_len; i = i + 1 {
-        TestQuery query = queries[i]
+        test_query query = queries[i]
         
         output = output + "[Test " + string(i + 1) + "/" + string(queries_len) + "]\n"
         output = output + "Question: " + query.question + "\n"

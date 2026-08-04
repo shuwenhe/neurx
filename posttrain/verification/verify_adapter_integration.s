@@ -7,7 +7,7 @@ use neurx.runtime.io.{
     runtime_file_read_all,
     runtime_exec
 }
-struct AdapterConfig {
+struct adapter_config {
     string peft_type
     i32 r_rank
     f64 lora_alpha
@@ -15,11 +15,11 @@ struct AdapterConfig {
     []string target_modules
     bool modules_to_save
 }
-func parse_adapter_config() AdapterConfig {
+func parse_adapter_config() adapter_config {
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH", "/home/shuwen/shuwen/posttrain/adapter")
     string config_file = adapter_path + "/adapter_config.json"
     
-    AdapterConfig config = AdapterConfig{
+    adapter_config config = adapter_config{
         peft_type: "unknown",
         r_rank: 0,
         lora_alpha: 0.0,
@@ -47,7 +47,7 @@ func parse_adapter_config() AdapterConfig {
     
     return config
 }
-func verify_target_modules(config AdapterConfig) string {
+func verify_target_modules(config adapter_config) string {
     string result = "[Target Modules Verification]\n"
     result = result + "=============================\n"
     
@@ -75,7 +75,7 @@ func verify_target_modules(config AdapterConfig) string {
     result = result + "\n"
     return result
 }
-func verify_adapter_parameters(config AdapterConfig) string {
+func verify_adapter_parameters(config adapter_config) string {
     string result = "[Adapter Parameter Analysis]\n"
     result = result + "============================\n"
     
@@ -181,7 +181,7 @@ func verify_adapter_integration() string {
     output = output + "  LoRA Adapter Integration Verification\n"
     output = output + "════════════════════════════════════════════\n\n"
     
-    AdapterConfig config = parse_adapter_config()
+    adapter_config config = parse_adapter_config()
     
     output = output + verify_target_modules(config)
     output = output + verify_adapter_parameters(config)

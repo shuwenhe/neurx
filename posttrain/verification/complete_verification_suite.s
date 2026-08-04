@@ -8,7 +8,7 @@ use neurx.runtime.io.{
     runtime_file_read_all,
     runtime_exec
 }
-struct VerificationResult {
+struct verification_result {
     string phase_name
     bool adapter_files_ok
     bool adapter_config_ok

@@ -11,7 +11,7 @@ use neurx.runtime.io.{
     runtime_time_elapsed
 }
 
-struct TestResult {
+struct test_result {
     string name
     string category
     string status      // "passed", "failed", "skipped"
@@ -20,8 +20,8 @@ struct TestResult {
     []string details
 }
 
-struct TestResults {
-    []TestResult results
+struct test_results {
+    []test_result results
     string start_time
     string end_time
     int passed
@@ -126,7 +126,7 @@ func print_result(string category, string name, string status, string message) v
     }
 }
 
-func test_base_model_files() TestResult {
+func test_base_model_files() test_result {
     print_header("[Test 1] Base Model Files Validation")
     
     string base_path = runtime_env_get("NEURX_BASE_MODEL_PATH")
@@ -136,7 +136,7 @@ func test_base_model_files() TestResult {
     
     bool exists = runtime_file_exists(base_path)
     
-    TestResult result
+    test_result result
     result.name = "base_model_files"
     result.category = "loading"
     result.message = ""
@@ -164,7 +164,7 @@ func test_base_model_files() TestResult {
     }
 }
 
-func test_adapter_config() TestResult {
+func test_adapter_config() test_result {
     print_header("[Test 2] Adapter Configuration Verification")
     
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH")
@@ -174,7 +174,7 @@ func test_adapter_config() TestResult {
     
     bool exists = runtime_file_exists(adapter_path)
     
-    TestResult result
+    test_result result
     result.name = "adapter_config"
     result.category = "loading"
     result.message = ""
@@ -202,7 +202,7 @@ func test_adapter_config() TestResult {
     }
 }
 
-func test_adapter_model_files() TestResult {
+func test_adapter_model_files() test_result {
     print_header("[Test 3] Adapter Model Files")
     
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH")
@@ -212,7 +212,7 @@ func test_adapter_model_files() TestResult {
     
     bool exists = runtime_file_exists(adapter_path)
     
-    TestResult result
+    test_result result
     result.name = "adapter_files"
     result.category = "loading"
     result.message = ""
@@ -243,7 +243,7 @@ func test_adapter_model_files() TestResult {
     }
 }
 
-func test_merged_model_files() TestResult {
+func test_merged_model_files() test_result {
     print_header("[Test 4] Merged Model Files")
     
     string merged_path = runtime_env_get("NEURX_MERGED_MODEL_PATH")
@@ -253,7 +253,7 @@ func test_merged_model_files() TestResult {
     
     bool exists = runtime_file_exists(merged_path)
     
-    TestResult result
+    test_result result
     result.name = "merged_model"
     result.category = "loading"
     result.message = ""
@@ -284,7 +284,7 @@ func test_merged_model_files() TestResult {
     }
 }
 
-func test_data_files() TestResult {
+func test_data_files() test_result {
     print_header("[Test 5] Medical MCQ Data Files")
     
     string data_path = runtime_env_get("NEURX_DATA_PATH")
@@ -294,7 +294,7 @@ func test_data_files() TestResult {
     
     bool exists = runtime_file_exists(data_path)
     
-    TestResult result
+    test_result result
     result.name = "data_files"
     result.category = "data"
     result.message = ""
@@ -316,7 +316,7 @@ func test_data_files() TestResult {
     return result
 }
 
-func test_output_directory() TestResult {
+func test_output_directory() test_result {
     print_header("[Test 6] Output Directory Structure")
     
     string output_dir = runtime_env_get("NEURX_TEST_OUTPUT_DIR")
@@ -324,7 +324,7 @@ func test_output_directory() TestResult {
         output_dir = "/home/shuwen/shuwen/neurx/artifacts/posttrain_test"
     }
     
-    TestResult result
+    test_result result
     result.name = "directory_structure"
     result.category = "setup"
     result.message = ""
@@ -340,7 +340,7 @@ func test_output_directory() TestResult {
     return result
 }
 
-func test_model_summary() TestResult {
+func test_model_summary() test_result {
     print_header("[Test 7] Model Summary Report")
     
     string base_path = runtime_env_get("NEURX_BASE_MODEL_PATH")
@@ -358,7 +358,7 @@ func test_model_summary() TestResult {
         merged_path = "/home/shuwen/shuwen/posttrain/base-model-posttrain"
     }
     
-    TestResult result
+    test_result result
     result.name = "model_summary"
     result.category = "summary"
     result.message = ""
@@ -420,13 +420,13 @@ func main() void {
     println("║" + repeat_char(" ", 15) + "PostTrain Model Test Suite (S Language)" + repeat_char(" ", 3) + "║")
     println("╚" + repeat_char("═", 58) + "╝")
     
-    TestResult result1 = test_base_model_files()
-    TestResult result2 = test_adapter_config()
-    TestResult result3 = test_adapter_model_files()
-    TestResult result4 = test_merged_model_files()
-    TestResult result5 = test_data_files()
-    TestResult result6 = test_output_directory()
-    TestResult result7 = test_model_summary()
+    test_result result1 = test_base_model_files()
+    test_result result2 = test_adapter_config()
+    test_result result3 = test_adapter_model_files()
+    test_result result4 = test_merged_model_files()
+    test_result result5 = test_data_files()
+    test_result result6 = test_output_directory()
+    test_result result7 = test_model_summary()
     
     int passed = 0
     int failed = 0

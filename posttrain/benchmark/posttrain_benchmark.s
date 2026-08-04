@@ -308,13 +308,13 @@ func main() void {
     
     var avg_throughput = (forward_metric.tokens_per_sec + backward_metric.tokens_per_sec) / 2.0
     
-    var report BenchmarkReport
+    var report benchmark_report
     report.timestamp = "2026-08-04"
     report.device = device
     report.num_steps = num_steps
     report.batch_size = batch_size
     report.seq_length = seq_length
-    report.phases = []BenchmarkMetrics{data_metric, model_metric, forward_metric, backward_metric, optimizer_metric}
+    report.phases = []benchmark_metrics{data_metric, model_metric, forward_metric, backward_metric, optimizer_metric}
     report.total_time_ms = total_time
     report.avg_tokens_per_sec = avg_throughput
     report.notes = "Benchmark completed successfully"
