@@ -1,4 +1,4 @@
-module real_model_inference
+package real_model_inference
 use neurx.runtime.io.{runtime_file_exists}
 func main() {
     string MODEL_PATH = "/home/shuwen/shuwen/posttrain/model.safetensors"

@@ -1,4 +1,4 @@
-module real_inference_optimized
+package real_inference_optimized
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file}
 extern "intrinsic" func __host_read_binary_file(string path) []int
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int

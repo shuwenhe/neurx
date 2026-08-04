@@ -1,4 +1,4 @@
-module real_inference_interactive
+package real_inference_interactive
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, trim}
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __host_write_text_file(string path, string content) int

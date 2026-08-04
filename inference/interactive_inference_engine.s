@@ -1,4 +1,4 @@
-module interactive_inference_engine
+package interactive_inference_engine
 use neurx.runtime.io.{runtime_file_exists}
 func get_token_embedding(int token_id) []float32 {
     []float32 embedding = make([]float32, 896)
