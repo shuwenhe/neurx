@@ -14,7 +14,7 @@ use neurx.runtime.io.{
 struct test_result {
     string name
     string category
-    string status      // "passed", "failed", "skipped"
+    string status
     float duration
     string message
     []string details
