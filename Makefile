@@ -591,7 +591,6 @@ verify-posttrain:
 	@echo ""
 	@echo "Verification complete!"
 
-# New PostTrain Verification Suite Targets
 verify-lora-weights:
 	@echo "════════════════════════════════════════════════"
 	@echo "  LoRA Weights Verification"

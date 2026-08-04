@@ -1,28 +1,19 @@
-// Verify Inference Changes
-// ===========================
-// Compare inference outputs before and after fine-tuning
 
 package neurx.posttrain.verification.inference_changes
 
 use neurx.runtime.io.{
     runtime_env_get
 }
-
-// Test query structure
 struct TestQuery {
     string question
     string expected_topic
 }
-
-// Response metrics
 struct ResponseMetrics {
     string base_response
     string finetuned_response
     bool has_difference
     string response_quality
 }
-
-// Generate test medical queries
 func create_test_queries() []TestQuery {
     []TestQuery queries = make([]TestQuery, 5)
     
@@ -53,8 +44,6 @@ func create_test_queries() []TestQuery {
     
     return queries
 }
-
-// Simulate inference with base model (quick lookup)
 func simulate_base_model_response(question string) string {
     string base_responses = ""
     
@@ -74,8 +63,6 @@ func simulate_base_model_response(question string) string {
     
     return base_responses
 }
-
-// Simulate inference with fine-tuned model
 func simulate_finetuned_model_response(question string) string {
     string finetuned_responses = ""
     
@@ -95,8 +82,6 @@ func simulate_finetuned_model_response(question string) string {
     
     return finetuned_responses
 }
-
-// Helper function to check if string contains substring
 func contains(str string, substr string) bool {
     i32 str_len = len(str)
     i32 substr_len = len(substr)
@@ -119,8 +104,6 @@ func contains(str string, substr string) bool {
     }
     return false
 }
-
-// Analyze response quality improvement
 func analyze_response_quality(base_resp string, finetuned_resp string) string {
     i32 base_len = len(base_resp)
     i32 finetuned_len = len(finetuned_resp)
@@ -138,8 +121,6 @@ func analyze_response_quality(base_resp string, finetuned_resp string) string {
     
     return quality + " (" + string(length_improvement) + "% change)"
 }
-
-// Main verification
 func verify_inference_changes() string {
     string output = ""
     output = output + "\n════════════════════════════════════════════\n"
@@ -200,8 +181,6 @@ func verify_inference_changes() string {
     
     return output
 }
-
-// Entry point
 func main() {
     string result = verify_inference_changes()
     println(result)

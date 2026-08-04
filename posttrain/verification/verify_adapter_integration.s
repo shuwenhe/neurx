@@ -1,6 +1,3 @@
-// Verify Adapter Integration
-// ============================
-// Test if LoRA adapter is correctly integrated with base model
 
 package neurx.posttrain.verification.adapter_integration
 
@@ -10,8 +7,6 @@ use neurx.runtime.io.{
     runtime_file_read_all,
     runtime_exec
 }
-
-// Structure for adapter configuration
 struct AdapterConfig {
     string peft_type
     i32 r_rank
@@ -20,8 +15,6 @@ struct AdapterConfig {
     []string target_modules
     bool modules_to_save
 }
-
-// Parse LoRA configuration parameters
 func parse_adapter_config() AdapterConfig {
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH", "/home/shuwen/shuwen/posttrain/adapter")
     string config_file = adapter_path + "/adapter_config.json"
@@ -40,28 +33,20 @@ func parse_adapter_config() AdapterConfig {
     }
     
     string content = runtime_file_read_all(config_file)
-    
-    // Parse JSON manually
     if contains(content, "\"peft_type\"") {
         if contains(content, "lora") {
             config.peft_type = "lora"
         }
     }
-    
-    // Extract rank
     if contains(content, "\"r\":") {
-        config.r_rank = 8 // Default LoRA rank
+        config.r_rank = 8
     }
-    
-    // Extract lora_alpha
     if contains(content, "\"lora_alpha\":") {
-        config.lora_alpha = 16.0 // Default lora_alpha
+        config.lora_alpha = 16.0
     }
     
     return config
 }
-
-// Verify target modules are included
 func verify_target_modules(config AdapterConfig) string {
     string result = "[Target Modules Verification]\n"
     result = result + "=============================\n"
@@ -90,20 +75,13 @@ func verify_target_modules(config AdapterConfig) string {
     result = result + "\n"
     return result
 }
-
-// Verify adapter parameter count
 func verify_adapter_parameters(config AdapterConfig) string {
     string result = "[Adapter Parameter Analysis]\n"
     result = result + "============================\n"
     
     i32 rank = config.r_rank
     f64 alpha = config.lora_alpha
-    
-    // Calculate parameter count
-    // For attention modules: in_features=2048, out_features=2048, rank=8
-    i32 attention_params = 2048 * rank * 2 * 7 * 24 // 2 = (A, B), 7 modules, 24 layers
-    
-    // For MLP modules: typically larger
+    i32 attention_params = 2048 * rank * 2 * 7 * 24
     i32 total_params = attention_params
     
     result = result + "Configuration:\n"
@@ -122,8 +100,6 @@ func verify_adapter_parameters(config AdapterConfig) string {
     result = result + "\n"
     return result
 }
-
-// Verify safetensors format compatibility
 func verify_safetensors_format() string {
     string result = "[Safetensors Format Verification]\n"
     result = result + "================================\n"
@@ -146,8 +122,6 @@ func verify_safetensors_format() string {
     
     return result
 }
-
-// Verify integration workflow
 func verify_integration_workflow() string {
     string result = "[Integration Workflow]\n"
     result = result + "====================\n"
@@ -179,8 +153,6 @@ func verify_integration_workflow() string {
     
     return result
 }
-
-// Helper function to check if string contains substring
 func contains(str string, substr string) bool {
     i32 str_len = len(str)
     i32 substr_len = len(substr)
@@ -203,8 +175,6 @@ func contains(str string, substr string) bool {
     }
     return false
 }
-
-// Main verification
 func verify_adapter_integration() string {
     string output = ""
     output = output + "\n════════════════════════════════════════════\n"
@@ -225,8 +195,6 @@ func verify_adapter_integration() string {
     
     return output
 }
-
-// Entry point
 func main() {
     string result = verify_adapter_integration()
     println(result)

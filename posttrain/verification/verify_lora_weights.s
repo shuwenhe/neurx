@@ -1,6 +1,3 @@
-// Verify LoRA Weights Integration
-// ================================
-// Test if LoRA weights were correctly saved and loaded into the model
 
 package neurx.posttrain.verification.lora_weights
 
@@ -10,8 +7,6 @@ use neurx.runtime.io.{
     runtime_file_read_all,
     runtime_env_get
 }
-
-// Structure to store weight statistics
 struct WeightStats {
     f64 mean
     f64 std_dev
@@ -20,29 +15,20 @@ struct WeightStats {
     i32 total_elements
     i32 non_zero_elements
 }
-
-// Verify LoRA adapter files exist
 func verify_adapter_files() string {
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH", "/home/shuwen/shuwen/posttrain/adapter")
     
     string result = "[LoRA Adapter Verification]\n"
     result = result + "==============================\n"
     result = result + "Path: " + adapter_path + "\n\n"
-    
-    // Check adapter_model.safetensors
     string model_file = adapter_path + "/adapter_model.safetensors"
     if runtime_file_exists(model_file) {
         i64 size = runtime_file_size(model_file)
-        string size_mb = ""
-        if size > 1048576 {
-            size_mb = " (" + string(f64(size) / 1048576.0) + " MB)"
-        }
-        result = result + "✓ adapter_model.safetensors" + size_mb + "\n"
+        f64 size_mb = f64(size) / f64(1048576)
+        result = result + "✓ adapter_model.safetensors (" + string(size_mb) + " MB)\n"
     } else {
         result = result + "✗ adapter_model.safetensors NOT FOUND\n"
     }
-    
-    // Check adapter_config.json
     string config_file = adapter_path + "/adapter_config.json"
     if runtime_file_exists(config_file) {
         result = result + "✓ adapter_config.json\n"
@@ -53,8 +39,6 @@ func verify_adapter_files() string {
     result = result + "\n"
     return result
 }
-
-// Read and display adapter configuration
 func verify_adapter_config() string {
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH", "/home/shuwen/shuwen/posttrain/adapter")
     string config_file = adapter_path + "/adapter_config.json"
@@ -72,8 +56,6 @@ func verify_adapter_config() string {
         result = result + "✗ Failed to read config\n"
         return result
     }
-    
-    // Extract key parameters from JSON
     result = result + "Configuration Content:\n"
     result = result + "----------------------\n"
     result = result + config_content + "\n"
@@ -81,24 +63,18 @@ func verify_adapter_config() string {
     
     return result
 }
-
-// Estimate weight changes by checking file sizes
 func verify_weight_changes() string {
     string base_model_path = runtime_env_get("NEURX_BASE_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH", "/home/shuwen/shuwen/posttrain/adapter")
     
     string result = "[Weight Analysis]\n"
     result = result + "=================\n"
-    
-    // Base model size
     string base_model_file = base_model_path + "/model.safetensors"
     if runtime_file_exists(base_model_file) {
         i64 base_size = runtime_file_size(base_model_file)
         f64 base_mb = f64(base_size) / 1048576.0
         result = result + "Base Model Size: " + string(base_mb) + " MB\n"
     }
-    
-    // Adapter model size
     string adapter_model_file = adapter_path + "/adapter_model.safetensors"
     if runtime_file_exists(adapter_model_file) {
         i64 adapter_size = runtime_file_size(adapter_model_file)
@@ -113,8 +89,6 @@ func verify_weight_changes() string {
     result = result + "\n"
     return result
 }
-
-// Main verification function
 func verify_lora_integration() string {
     string output = ""
     output = output + "\n════════════════════════════════════════════\n"
@@ -131,8 +105,6 @@ func verify_lora_integration() string {
     
     return output
 }
-
-// Entry point
 func main() {
     string result = verify_lora_integration()
     println(result)
