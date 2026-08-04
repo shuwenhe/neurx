@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain posttrain-cpu posttrain-gpu posttrain-npu posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain runtime-test test-golden regenerate-golden pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 \
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain posttrain-cpu posttrain-gpu posttrain-npu posttrain-test posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain runtime-test test-golden regenerate-golden pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -143,6 +143,7 @@ help:
 	@echo "  make posttrain-cpu"
 	@echo "  make posttrain-gpu"
 	@echo "  make posttrain-npu"
+	@echo "  make posttrain-test"
 	@echo "  make infer"
 	@echo "  make chat"
 train:
@@ -507,6 +508,29 @@ posttrain-npu: check-bash
 	@echo "[✓] NPU training completed"
 	@echo "Model: $(POSTTRAIN_OUTPUT_DIR)"
 	@echo "Adapter: $(POSTTRAIN_OUTPUT_DIR)/adapter"
+posttrain-test: check-bash
+	@echo "======================================================"
+	@echo "[PostTrain] Model Testing Suite (Pure S Language)"
+	@echo "======================================================"
+	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_test'
+	@mkdir -p '$(LOG_DIR)'
+	@cd '$(CURDIR_UNIX)' && \
+		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_test/test_model.ir'; \
+		"$(POSTTRAIN_S_COMPILER)" 'posttrain/testing/test_posttrain_model.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_test/test_model.ir' 2>&1 || exit 1; \
+		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_test/test_model.ir' || exit 1
+	@cd '$(CURDIR_UNIX)' && \
+		set -o pipefail; \
+		export NEURX_BASE_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)'; \
+		export NEURX_ADAPTER_PATH='$(POSTTRAIN_OUTPUT_DIR)/adapter'; \
+		export NEURX_MERGED_MODEL_PATH='$(POSTTRAIN_OUTPUT_DIR)/base-model-posttrain'; \
+		export NEURX_DATA_PATH='$(POSTTRAIN_DATA_FILE)'; \
+		export NEURX_TEST_OUTPUT_DIR='$(CURDIR_UNIX)/artifacts/posttrain_test'; \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_test/test_model.ir' \
+		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_test_$(shell date +%Y%m%d_%H%M%S).log'
+	@echo ""
+	@echo "[✓] PostTrain model testing completed"
+	@echo "Results: $(CURDIR_UNIX)/artifacts/posttrain_test/test_results.json"
+	@echo "Logs: $(LOG_DIR)/posttrain_test_*.log"
 posttrain-eval-medical: check-bash
 	@mkdir -p '$(POSTTRAIN_EVAL_OUTPUT)' '$(LOG_DIR)'
 	@cd '$(CURDIR_UNIX)' && \
