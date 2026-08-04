@@ -188,8 +188,7 @@ func utf8_decode([]int bytes) string {
 }
 
 func tokenize_chinese(string text) []int {
-    []int tokens
-    tokens = []int{cap: 128}
+    []int tokens = []int{cap: 128}
     int token_count = 0
     tokens[token_count] = 151643
     token_count = token_count + 1
@@ -227,8 +226,7 @@ func tokenize_chinese(string text) []int {
         tokens[token_count] = 151645
         token_count = token_count + 1
     }
-    []int out
-    out = []int{cap: token_count}
+    []int out = []int{cap: token_count}
     i = 0
     while i < token_count {
         out[i] = tokens[i]
@@ -271,8 +269,7 @@ func model_forward_pass([]int tokens, string model_path, []int metadata, []int e
 }
 
 func generate_next_tokens(int seed, int count) []int {
-    []int result
-    result = []int{cap: count}
+    []int result = []int{cap: count}
     int i = 0
     while i < count {
         int logit = seed + i * 7919
