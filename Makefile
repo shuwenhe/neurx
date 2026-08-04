@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain posttrain-cpu posttrain-gpu posttrain-npu posttrain-test posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain runtime-test test-golden regenerate-golden pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 \
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain posttrain-cpu posttrain-gpu posttrain-npu posttrain-test posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain verify-lora-weights verify-inference verify-adapter-integration verify-posttrain-complete runtime-test test-golden regenerate-golden pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -590,6 +590,54 @@ verify-posttrain:
 		'$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_verify_tensors_$(shell date +%Y%m%d_%H%M%S).log'
 	@echo ""
 	@echo "Verification complete!"
+
+# New PostTrain Verification Suite Targets
+verify-lora-weights:
+	@echo "════════════════════════════════════════════════"
+	@echo "  LoRA Weights Verification"
+	@echo "════════════════════════════════════════════════"
+	@cd '$(CURDIR_UNIX)' && \
+		NEURX_BASE_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)' \
+		NEURX_ADAPTER_PATH='$(POSTTRAIN_ADAPTER_DIR)' \
+		$(S_COMPILER) posttrain/verification/verify_lora_weights.s
+
+verify-inference:
+	@echo "════════════════════════════════════════════════"
+	@echo "  Inference Changes Verification"
+	@echo "════════════════════════════════════════════════"
+	@cd '$(CURDIR_UNIX)' && \
+		NEURX_BASE_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)' \
+		NEURX_ADAPTER_PATH='$(POSTTRAIN_ADAPTER_DIR)' \
+		$(S_COMPILER) posttrain/verification/verify_inference_changes.s
+
+verify-adapter-integration:
+	@echo "════════════════════════════════════════════════"
+	@echo "  Adapter Integration Verification"
+	@echo "════════════════════════════════════════════════"
+	@cd '$(CURDIR_UNIX)' && \
+		NEURX_BASE_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)' \
+		NEURX_ADAPTER_PATH='$(POSTTRAIN_ADAPTER_DIR)' \
+		$(S_COMPILER) posttrain/verification/verify_adapter_integration.s
+
+verify-posttrain-complete:
+	@echo "════════════════════════════════════════════════"
+	@echo "  Complete PostTrain Verification Suite"
+	@echo "════════════════════════════════════════════════"
+	@$(MAKE) verify-lora-weights
+	@echo ""
+	@$(MAKE) verify-inference
+	@echo ""
+	@$(MAKE) verify-adapter-integration
+	@echo ""
+	@cd '$(CURDIR_UNIX)' && \
+		NEURX_BASE_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)' \
+		NEURX_ADAPTER_PATH='$(POSTTRAIN_ADAPTER_DIR)' \
+		$(S_COMPILER) posttrain/verification/complete_verification_suite.s
+	@echo ""
+	@echo "════════════════════════════════════════════════"
+	@echo "  All Verification Tests Complete!"
+	@echo "════════════════════════════════════════════════"
+
 runtime-test:
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 	@echo "$(BLUE)Phase 2B: S Runtime Unit Tests$(NC)"
