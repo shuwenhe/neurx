@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain runtime-test test-golden regenerate-golden pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 \
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain posttrain-cpu posttrain-gpu posttrain-npu posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain runtime-test test-golden regenerate-golden pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -140,6 +140,9 @@ help:
 	@echo "  make pretrain-npu"
 	@echo "  make pretrain-gpu"
 	@echo "  make posttrain"
+	@echo "  make posttrain-cpu"
+	@echo "  make posttrain-gpu"
+	@echo "  make posttrain-npu"
 	@echo "  make infer"
 	@echo "  make chat"
 train:
@@ -383,7 +386,7 @@ posttrain-install-deps:
 	@'$(POSTTRAIN_PYTHON)' -m pip install -r '$(CURDIR_UNIX)/posttrain/requirements.txt'
 posttrain: check-bash
 	@echo "======================================================"
-	@echo "[PostTrain] Real LoRA SFT Training"
+	@echo "[PostTrain] Real LoRA SFT Training (auto device)"
 	@echo "======================================================"
 	@mkdir -p '$(POSTTRAIN_OUTPUT_DIR)' '$(LOG_DIR)'
 	@cd '$(CURDIR_UNIX)' && \
@@ -405,6 +408,103 @@ posttrain: check-bash
 		'$(POSTTRAIN_PYTHON)' 'posttrain/trainer/train_sft.py' 2>&1 | tee -a '$(LOG_DIR)/posttrain_sft_$(shell date +%Y%m%d_%H%M%S).log'
 	@echo ""
 	@echo "[✓] SFT training and model merge completed"
+	@echo "Model: $(POSTTRAIN_OUTPUT_DIR)"
+	@echo "Adapter: $(POSTTRAIN_OUTPUT_DIR)/adapter"
+posttrain-cpu: check-bash
+	@echo "======================================================"
+	@echo "[PostTrain] Real LoRA SFT Training (CPU only)"
+	@echo "======================================================"
+	@echo "Device: CPU (no GPU/NPU acceleration)"
+	@mkdir -p '$(POSTTRAIN_OUTPUT_DIR)' '$(LOG_DIR)'
+	@cd '$(CURDIR_UNIX)' && \
+		set -o pipefail; \
+		export NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)'; \
+		export NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)'; \
+		export NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)'; \
+		export NEURX_POSTTRAIN_EPOCHS='$(POSTTRAIN_EPOCHS)'; \
+		export NEURX_POSTTRAIN_BATCH_SIZE='$(POSTTRAIN_BATCH_SIZE)'; \
+		export NEURX_POSTTRAIN_GRAD_ACCUM='$(POSTTRAIN_GRAD_ACCUM)'; \
+		export NEURX_POSTTRAIN_MAX_LENGTH='$(POSTTRAIN_MAX_LENGTH)'; \
+		export NEURX_POSTTRAIN_MAX_SAMPLES='$(POSTTRAIN_MAX_SAMPLES)'; \
+		export NEURX_POSTTRAIN_LR='$(POSTTRAIN_LEARNING_RATE)'; \
+		export NEURX_POSTTRAIN_TARGET_MODULES='$(POSTTRAIN_TARGET_MODULES)'; \
+		export NEURX_POSTTRAIN_LORA_RANK='$(POSTTRAIN_LORA_RANK)'; \
+		export NEURX_POSTTRAIN_LORA_ALPHA='$(POSTTRAIN_LORA_ALPHA)'; \
+		export NEURX_POSTTRAIN_DEVICE='cpu'; \
+		export NEURX_POSTTRAIN_MERGE_MODEL='$(POSTTRAIN_MERGE_MODEL)'; \
+		'$(POSTTRAIN_PYTHON)' 'posttrain/trainer/train_sft.py' 2>&1 | tee -a '$(LOG_DIR)/posttrain_sft_cpu_$(shell date +%Y%m%d_%H%M%S).log'
+	@echo ""
+	@echo "[✓] CPU training completed"
+	@echo "Model: $(POSTTRAIN_OUTPUT_DIR)"
+	@echo "Adapter: $(POSTTRAIN_OUTPUT_DIR)/adapter"
+posttrain-gpu: check-bash
+	@echo "======================================================"
+	@echo "[PostTrain] Real LoRA SFT Training (NVIDIA GPU)"
+	@echo "======================================================"
+	@if [ -z "$$(command -v nvidia-smi 2>/dev/null)" ]; then \
+		echo "Error: NVIDIA GPU not detected. Install NVIDIA CUDA Toolkit."; \
+		exit 1; \
+	fi
+	@GPU_COUNT="$$(nvidia-smi -L 2>/dev/null | grep -c '^GPU ' || echo 0)"; \
+	echo "Available GPUs: $$GPU_COUNT"; \
+	if [ "$$GPU_COUNT" -eq 0 ]; then \
+		echo "Warning: No NVIDIA GPU found. Fallback to auto device selection."; \
+	fi
+	@mkdir -p '$(POSTTRAIN_OUTPUT_DIR)' '$(LOG_DIR)'
+	@cd '$(CURDIR_UNIX)' && \
+		set -o pipefail; \
+		export NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)'; \
+		export NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)'; \
+		export NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)'; \
+		export NEURX_POSTTRAIN_EPOCHS='$(POSTTRAIN_EPOCHS)'; \
+		export NEURX_POSTTRAIN_BATCH_SIZE='$(POSTTRAIN_BATCH_SIZE)'; \
+		export NEURX_POSTTRAIN_GRAD_ACCUM='$(POSTTRAIN_GRAD_ACCUM)'; \
+		export NEURX_POSTTRAIN_MAX_LENGTH='$(POSTTRAIN_MAX_LENGTH)'; \
+		export NEURX_POSTTRAIN_MAX_SAMPLES='$(POSTTRAIN_MAX_SAMPLES)'; \
+		export NEURX_POSTTRAIN_LR='$(POSTTRAIN_LEARNING_RATE)'; \
+		export NEURX_POSTTRAIN_TARGET_MODULES='$(POSTTRAIN_TARGET_MODULES)'; \
+		export NEURX_POSTTRAIN_LORA_RANK='$(POSTTRAIN_LORA_RANK)'; \
+		export NEURX_POSTTRAIN_LORA_ALPHA='$(POSTTRAIN_LORA_ALPHA)'; \
+		export NEURX_POSTTRAIN_DEVICE='cuda'; \
+		export NEURX_POSTTRAIN_MERGE_MODEL='$(POSTTRAIN_MERGE_MODEL)'; \
+		'$(POSTTRAIN_PYTHON)' 'posttrain/trainer/train_sft.py' 2>&1 | tee -a '$(LOG_DIR)/posttrain_sft_gpu_$(shell date +%Y%m%d_%H%M%S).log'
+	@echo ""
+	@echo "[✓] GPU training completed"
+	@echo "Model: $(POSTTRAIN_OUTPUT_DIR)"
+	@echo "Adapter: $(POSTTRAIN_OUTPUT_DIR)/adapter"
+posttrain-npu: check-bash
+	@echo "======================================================"
+	@echo "[PostTrain] Real LoRA SFT Training (Ascend NPU)"
+	@echo "======================================================"
+	@if [ -z "$$ASCEND_HOME" ] && [ ! -d "$(ASCEND_HOME_DEFAULT)" ]; then \
+		echo "Error: Ascend NPU environment not found."; \
+		echo "Set ASCEND_HOME or install Ascend Toolkit at $(ASCEND_HOME_DEFAULT)"; \
+		exit 1; \
+	fi
+	@ASCEND_PATH="$${ASCEND_HOME:-$(ASCEND_HOME_DEFAULT)}"; \
+	echo "Ascend Home: $$ASCEND_PATH"; \
+	echo "SOC Version: $(ASCEND_SOC_VERSION)"
+	@mkdir -p '$(POSTTRAIN_OUTPUT_DIR)' '$(LOG_DIR)'
+	@cd '$(CURDIR_UNIX)' && \
+		set -o pipefail; \
+		export ASCEND_HOME="$${ASCEND_HOME:-$(ASCEND_HOME_DEFAULT)}"; \
+		export NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)'; \
+		export NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)'; \
+		export NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)'; \
+		export NEURX_POSTTRAIN_EPOCHS='$(POSTTRAIN_EPOCHS)'; \
+		export NEURX_POSTTRAIN_BATCH_SIZE='$(POSTTRAIN_BATCH_SIZE)'; \
+		export NEURX_POSTTRAIN_GRAD_ACCUM='$(POSTTRAIN_GRAD_ACCUM)'; \
+		export NEURX_POSTTRAIN_MAX_LENGTH='$(POSTTRAIN_MAX_LENGTH)'; \
+		export NEURX_POSTTRAIN_MAX_SAMPLES='$(POSTTRAIN_MAX_SAMPLES)'; \
+		export NEURX_POSTTRAIN_LR='$(POSTTRAIN_LEARNING_RATE)'; \
+		export NEURX_POSTTRAIN_TARGET_MODULES='$(POSTTRAIN_TARGET_MODULES)'; \
+		export NEURX_POSTTRAIN_LORA_RANK='$(POSTTRAIN_LORA_RANK)'; \
+		export NEURX_POSTTRAIN_LORA_ALPHA='$(POSTTRAIN_LORA_ALPHA)'; \
+		export NEURX_POSTTRAIN_DEVICE='npu'; \
+		export NEURX_POSTTRAIN_MERGE_MODEL='$(POSTTRAIN_MERGE_MODEL)'; \
+		'$(POSTTRAIN_PYTHON)' 'posttrain/trainer/train_sft.py' 2>&1 | tee -a '$(LOG_DIR)/posttrain_sft_npu_$(shell date +%Y%m%d_%H%M%S).log'
+	@echo ""
+	@echo "[✓] NPU training completed"
 	@echo "Model: $(POSTTRAIN_OUTPUT_DIR)"
 	@echo "Adapter: $(POSTTRAIN_OUTPUT_DIR)/adapter"
 posttrain-eval-medical: check-bash
