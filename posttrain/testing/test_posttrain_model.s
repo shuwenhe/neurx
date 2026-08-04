@@ -15,11 +15,6 @@ use neurx.runtime.io.{
     runtime_time_elapsed
 }
 
-// Constants
-int ICON_PASS = 10003         // ✓
-int ICON_FAIL = 10007         // ✗
-int ICON_SKIP = 8856          // ⊘
-
 // TestResult structure
 struct TestResult {
     string name
@@ -119,10 +114,9 @@ func repeat_char(string ch, int count) string {
 
 // Print test header
 func print_header(string title) void {
-    string sep = repeat_char("=", 60)
-    println(sep)
+    println("============================================================")
     println(title)
-    println(sep)
+    println("============================================================")
 }
 
 // Print test result

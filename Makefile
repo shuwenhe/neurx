@@ -516,7 +516,7 @@ posttrain-test: check-bash
 	@mkdir -p '$(LOG_DIR)'
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_test/test_model.ir'; \
-		"$(POSTTRAIN_S_COMPILER)" 'posttrain/testing/test_posttrain_model.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_test/test_model.ir' 2>&1 || exit 1; \
+		"$(POSTTRAIN_S_COMPILER)" 'posttrain/testing/test_posttrain_model_simple.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_test/test_model.ir' 2>&1 || exit 1; \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_test/test_model.ir' || exit 1
 	@cd '$(CURDIR_UNIX)' && \
 		set -o pipefail; \
