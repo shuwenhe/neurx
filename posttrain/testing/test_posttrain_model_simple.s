@@ -1,6 +1,3 @@
-// PostTrain Model Testing Suite - Simple Version (Pure S Language)
-// ================================================================
-
 package neurx.posttrain.testing.test_model_simple
 
 use neurx.runtime.io.{
@@ -9,7 +6,6 @@ use neurx.runtime.io.{
     runtime_file_size
 }
 
-// Test: Base Model Files
 func test_base_model() string {
     string base_path = runtime_env_get("NEURX_BASE_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
     
@@ -28,7 +24,6 @@ func test_base_model() string {
     }
 }
 
-// Test: Adapter Files
 func test_adapter_files() string {
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH", "/home/shuwen/shuwen/posttrain/adapter")
     
@@ -47,7 +42,6 @@ func test_adapter_files() string {
     }
 }
 
-// Test: Adapter Model
 func test_adapter_model() string {
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH", "/home/shuwen/shuwen/posttrain/adapter")
     
@@ -66,7 +60,6 @@ func test_adapter_model() string {
     }
 }
 
-// Test: Merged Model
 func test_merged_model() string {
     string merged_path = runtime_env_get("NEURX_MERGED_MODEL_PATH", "/home/shuwen/shuwen/posttrain/base-model-posttrain")
     
@@ -85,7 +78,6 @@ func test_merged_model() string {
     }
 }
 
-// Test: Data Files
 func test_data_files() string {
     string data_path = runtime_env_get("NEURX_DATA_PATH", "/home/shuwen/shuwen/dataset/medical/test.json")
     
@@ -97,14 +89,12 @@ func test_data_files() string {
     return "✓ [loading] data_files: PASSED\n  → Medical test dataset found"
 }
 
-// Test: Output Directory
 func test_output_directory() string {
     string output_path = runtime_env_get("NEURX_TEST_OUTPUT_DIR", "/home/shuwen/shuwen/neurx/artifacts/posttrain_test")
     
     return "✓ [setup] output_directory: PASSED\n  → Output directory configured: " + output_path
 }
 
-// Test: Model Summary
 func test_model_summary() string {
     string result = "✓ [info] model_summary: PASSED"
     result = result + "\n  → Base Model: Qwen2.5-0.5B-Instruct"

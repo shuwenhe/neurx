@@ -1,7 +1,3 @@
-// PostTrain Model Testing Suite (Pure S Language)
-// ================================================
-// Comprehensive tests for post-trained models with LoRA adapters.
-
 package neurx.posttrain.testing.test_model
 
 use neurx.runtime.io.{
@@ -15,7 +11,6 @@ use neurx.runtime.io.{
     runtime_time_elapsed
 }
 
-// TestResult structure
 struct TestResult {
     string name
     string category
@@ -25,7 +20,6 @@ struct TestResult {
     []string details
 }
 
-// TestResults collection
 struct TestResults {
     []TestResult results
     string start_time
@@ -35,7 +29,6 @@ struct TestResults {
     int skipped
 }
 
-// Convert int to string
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -63,7 +56,6 @@ func int_to_str(int n) string {
     return out
 }
 
-// Convert float to string
 func float_to_str(float value, int decimals) string {
     float current = value
     bool negative = current < 0.0
@@ -101,7 +93,6 @@ func float_to_str(float value, int decimals) string {
     return result
 }
 
-// Repeat character
 func repeat_char(string ch, int count) string {
     string result = ""
     int i = 0
@@ -112,14 +103,12 @@ func repeat_char(string ch, int count) string {
     return result
 }
 
-// Print test header
 func print_header(string title) void {
     println("============================================================")
     println(title)
     println("============================================================")
 }
 
-// Print test result
 func print_result(string category, string name, string status, string message) void {
     string symbol = "?"
     if status == "passed" { symbol = "✓" }
@@ -137,7 +126,6 @@ func print_result(string category, string name, string status, string message) v
     }
 }
 
-// Test 1: Base Model Files Validation
 func test_base_model_files() TestResult {
     print_header("[Test 1] Base Model Files Validation")
     
@@ -160,7 +148,6 @@ func test_base_model_files() TestResult {
         return result
     }
     
-    // Check for model.safetensors
     string model_file = base_path + "/model.safetensors"
     bool model_exists = runtime_file_exists(model_file)
     
@@ -177,7 +164,6 @@ func test_base_model_files() TestResult {
     }
 }
 
-// Test 2: Adapter Configuration
 func test_adapter_config() TestResult {
     print_header("[Test 2] Adapter Configuration Verification")
     
@@ -200,7 +186,6 @@ func test_adapter_config() TestResult {
         return result
     }
     
-    // Check for adapter_config.json
     string config_file = adapter_path + "/adapter_config.json"
     bool config_exists = runtime_file_exists(config_file)
     
@@ -217,7 +202,6 @@ func test_adapter_config() TestResult {
     }
 }
 
-// Test 3: Adapter Model Files
 func test_adapter_model_files() TestResult {
     print_header("[Test 3] Adapter Model Files")
     
@@ -259,7 +243,6 @@ func test_adapter_model_files() TestResult {
     }
 }
 
-// Test 4: Merged Model Files
 func test_merged_model_files() TestResult {
     print_header("[Test 4] Merged Model Files")
     
@@ -301,7 +284,6 @@ func test_merged_model_files() TestResult {
     }
 }
 
-// Test 5: Data Files
 func test_data_files() TestResult {
     print_header("[Test 5] Medical MCQ Data Files")
     
@@ -334,7 +316,6 @@ func test_data_files() TestResult {
     return result
 }
 
-// Test 6: Output Directory
 func test_output_directory() TestResult {
     print_header("[Test 6] Output Directory Structure")
     
@@ -348,7 +329,6 @@ func test_output_directory() TestResult {
     result.category = "setup"
     result.message = ""
     
-    // Create output directories
     runtime_make_dirs(output_dir)
     runtime_make_dirs(output_dir + "/checkpoints")
     runtime_make_dirs(output_dir + "/logs")
@@ -360,7 +340,6 @@ func test_output_directory() TestResult {
     return result
 }
 
-// Test 7: Model Summary Report
 func test_model_summary() TestResult {
     print_header("[Test 7] Model Summary Report")
     
@@ -390,7 +369,6 @@ func test_model_summary() TestResult {
     summary = summary + "  Adapter: " + adapter_path + "\n"
     summary = summary + "  Merged:  " + merged_path + "\n"
     
-    // Check file sizes
     float base_size = runtime_file_size(base_path + "/model.safetensors")
     float adapter_size = runtime_file_size(adapter_path + "/adapter_model.safetensors")
     float merged_size = runtime_file_size(merged_path + "/model.safetensors")
@@ -416,7 +394,6 @@ func test_model_summary() TestResult {
     return result
 }
 
-// Print final summary
 func print_final_summary(int passed, int failed, int skipped) void {
     println("\n" + repeat_char("=", 60))
     println("TEST SUMMARY")
@@ -437,14 +414,12 @@ func print_final_summary(int passed, int failed, int skipped) void {
     println(repeat_char("=", 60) + "\n")
 }
 
-// Main entry point
 func main() void {
     println("\n")
     println("╔" + repeat_char("═", 58) + "╗")
     println("║" + repeat_char(" ", 15) + "PostTrain Model Test Suite (S Language)" + repeat_char(" ", 3) + "║")
     println("╚" + repeat_char("═", 58) + "╝")
     
-    // Run all tests
     TestResult result1 = test_base_model_files()
     TestResult result2 = test_adapter_config()
     TestResult result3 = test_adapter_model_files()
@@ -453,7 +428,6 @@ func main() void {
     TestResult result6 = test_output_directory()
     TestResult result7 = test_model_summary()
     
-    // Count results
     int passed = 0
     int failed = 0
     int skipped = 0
@@ -486,7 +460,6 @@ func main() void {
     else if result7.status == "failed" { failed = failed + 1 }
     else { skipped = skipped + 1 }
     
-    // Print summary
     print_final_summary(passed, failed, skipped)
     
     println("✓ PostTrain model testing completed")

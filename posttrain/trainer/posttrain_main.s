@@ -6,10 +6,8 @@ func write_file_simple(string path, string content) int {
     eprintln("[DEBUG] Writing file to: " + path)
     eprintln("[DEBUG] Content length: " + int_to_str(len(content)))
     
-    // Create output directory
     runtime_make_dirs("/home/shuwen/shuwen/posttrain")
     
-    // Write the file
     runtime_write_text_file(path, content)
     eprintln("[✓] File written: " + path)
     0
@@ -487,7 +485,6 @@ func run_posttrain_lora_sft() int {
     }
     eprintln("[Progress] training complete - saving checkpoint")
     
-    // Simply save JSON config and state files
     string config_json = build_adapter_config_json_simple(
         model_path, rank, 16.0, 0.05, 896, 48
     )
