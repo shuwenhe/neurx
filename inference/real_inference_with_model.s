@@ -76,8 +76,7 @@ func parse_int_at_bytes([]int bytes, int pos) int {
 }
 
 func tensor_index_record(int offset, int size, int found) []int {
-    []int record
-    record = []int{cap: 3}
+    []int record = []int{cap: 3}
     record[0] = offset
     record[1] = size
     record[2] = found
@@ -85,8 +84,7 @@ func tensor_index_record(int offset, int size, int found) []int {
 }
 
 func parse_tensor_index([]int metadata, string tensor_name) []int {
-    []int result
-    result = tensor_index_record(0, 0, 0)
+    []int result = tensor_index_record(0, 0, 0)
     int name_pos = find_substring_bytes(metadata, "\"" + tensor_name + "\"", 0)
     if name_pos < 0 {
         return result
