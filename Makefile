@@ -904,7 +904,20 @@ pretrain-watch: check-bash
 	@echo "Running NeurX large-model pre-training with live log monitoring"
 	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && $(MAKE) build-pretrain-manifest-s && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 $(MAKE) run-large-pretrain-s 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
 chat:
-	@$(MAKE) chat-with-model
+	@echo "🚀 NeurX Real Transformer Inference Engine"
+	@echo ""
+	@echo "Choose mode:"
+	@echo "  1. Interactive Chat (实时对话) - bash chat_interactive.sh"
+	@echo "  2. Demo Mode (演示模式)       - make chat-demo"
+	@echo ""
+	@bash chat_interactive.sh
+
+chat-demo: build-s-ir-runner build-real-inference-with-model-s
+	@echo "🚀 Running NeurX Real Model Inference (Demo Mode)..."
+	@echo "✓ Using true model weights for inference"; \
+	mkdir -p artifacts/logs; \
+	$(CURDIR_UNIX)/artifacts/build/real_inference_with_model/real_inference_with_model 2>&1
+
 chat-with-model: build-s-ir-runner build-real-inference-with-model-s
 	@echo "🚀 Running NeurX Real Model Inference..."
 	@echo "✓ Using true model weights for inference"; \

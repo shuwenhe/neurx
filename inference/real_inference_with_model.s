@@ -52,7 +52,6 @@ func generate_response(string question) string {
 }
 
 func main() {
-func main() {
     print("\n╔════════════════════════════════════════════════════════════╗\n")
     print("║  NeurX Real Transformer Inference Engine                  ║\n")
     print("║  真实推理引擎 (S Language Implementation)                 ║\n")
