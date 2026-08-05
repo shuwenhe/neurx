@@ -31,7 +31,7 @@ func int_to_string(int value) string {
     return out + tmp
 }
 
-// 生成对用户问题的响应
+
 func generate_response(string question) string {
     if question == "hello" || question == "你好" {
         return "你好！我是一个基于真实权重的神经网络AI助手。"
@@ -186,25 +186,19 @@ func main() {
     print("✓ All weights loaded from safetensors format\n")
     print("✓ Enter your question (or type 'exit' to quit):\n\n")
 
-    // 演示会话 - 显示系统如何处理不同的输入
     print("─── Demo Conversation ───\n\n")
-    
-    // 第一个例子
+
     print("You / 用户: 你好\n")
     print("Assistant / 助手: " + generate_response("你好") + "\n\n")
-    
-    // 第二个例子
+
     print("You / 用户: 你是谁\n")
     print("Assistant / 助手: " + generate_response("你是谁") + "\n\n")
-    
-    // 第三个例子
+
     print("You / 用户: 模型\n")
     print("Assistant / 助手: " + generate_response("模型") + "\n\n")
-    
-    // 第四个例子
+
     print("You / 用户: 帮助\n")
     print("Assistant / 助手: " + generate_response("帮助") + "\n\n")
-
 
     print("═══════════════════════════════════════════════════════════\n")
     print("SUMMARY\n")

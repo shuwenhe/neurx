@@ -4,38 +4,6 @@ func string_char(int c) string {
     string(c)
 }
 
-func split_lines(string s) []string {
-    int capacity = 1
-    int j = 0
-    while j < len(s) {
-        if s[j] == 10 {
-            capacity = capacity + 1
-        }
-        j = j + 1
-    }
-    []string out = []string{cap: capacity}
-    string line = ""
-    int idx = 0
-    int i = 0
-    while i < len(s) {
-        if s[i] == 10 || s[i] == 13 {
-            if len(line) > 0 {
-                out[idx] = line
-                idx = idx + 1
-                line = ""
-            }
-            i = i + 1
-            continue
-        }
-        line = line + string_char(s[i])
-        i = i + 1
-    }
-    if len(line) > 0 {
-        out[idx] = line
-    }
-    out
-}
-
 func strip_comments(string text) string {
     string out = ""
     int i = 0
@@ -105,21 +73,24 @@ func main() {
         println("No .s files found")
         return 0
     }
-    []string files = split_lines(list_text)
     int i = 0
+    string path = ""
     int modified = 0
-    while i < len(files) {
-        string path = trim(files[i])
-        if path == "" {
-            i = i + 1
-            continue
-        }
-        string content = runtime_read_text_file(path)
-        string new = strip_comments(content)
-        if new != content {
-            runtime_write_text_file(path, new)
-            println("Stripped comments: " + path)
-            modified = modified + 1
+    while i <= len(list_text) {
+        if i == len(list_text) || list_text[i] == 10 || list_text[i] == 13 {
+            string current = trim(path)
+            if current != "" {
+                string content = runtime_read_text_file(current)
+                string new = strip_comments(content)
+                if new != content {
+                    runtime_write_text_file(current, new)
+                    println("Stripped comments: " + current)
+                    modified = modified + 1
+                }
+            }
+            path = ""
+        } else {
+            path = path + string_char(list_text[i])
         }
         i = i + 1
     }

@@ -3,9 +3,9 @@ use neurx.runtime.io.{runtime_env_get, runtime_file_exists, trim}
 
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 
-// ============================================================================
-// Utility Functions
-// ============================================================================
+
+
+
 
 func read_user_line() string {
     trim(__sys_read_string(0, 4096))
@@ -67,9 +67,9 @@ func generate_response(string input) string {
     return "I'm a medical AI assistant. How can I help?"
 }
 
-// ============================================================================
-// MAIN: Interactive Chat
-// ============================================================================
+
+
+
 
 func main() {
     string model_path = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain/model.safetensors")
@@ -110,7 +110,6 @@ func main() {
             return
         }
 
-        // STEP 1: Tokenization
         print("\n[Tokenization]\n")
         print("Input: \"" + user_input + "\"\n")
         print("Input Length: " + int_to_string(len(user_input)) + " chars\n")
@@ -118,7 +117,6 @@ func main() {
         print(int_to_string(len(user_input)) + " tokens..., 151645]\n")
         print("Num Tokens: " + int_to_string(len(user_input) + 2) + "\n\n")
 
-        // STEP 2: Forward Pass
         print("[Forward Pass - Real Transformer]\n")
         print("Architecture: Qwen2.5-0.5B-Instruct\n")
         print("Layers: 24 (with residual connections)\n")
@@ -128,7 +126,6 @@ func main() {
         print("Status: Computing embeddings + 24-layer transformer...\n")
         print("(Real implementation: token → embedding → 24×attention+FFN → logits)\n\n")
 
-        // STEP 3: Sampling & Generation
         print("[Sampling & Decoding]\n")
         print("Sampling Strategy: Greedy (argmax from logits)\n")
         print("Temperature: 1.0\n")
