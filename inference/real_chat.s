@@ -100,7 +100,6 @@ func main() {
         print("You: ")
         string user_input = read_user_line()
         
-        // Display the input immediately (echo)
         print(user_input + "\n")
 
         if len(user_input) == 0 {
