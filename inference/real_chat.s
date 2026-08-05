@@ -8,7 +8,7 @@ extern "intrinsic" func __sys_read_string(int fd, int count) string
 
 
 func read_user_line() string {
-    trim(__sys_read_string(0, 4096))
+    return trim(__sys_read_string(0, 4096))
 }
 
 func int_to_string(int value) string {
