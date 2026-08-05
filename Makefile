@@ -903,11 +903,26 @@ posttrain-e2e: check-bash build-s-ir-runner
 pretrain-watch: check-bash
 	@echo "Running NeurX large-model pre-training with live log monitoring"
 	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && $(MAKE) build-pretrain-manifest-s && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 $(MAKE) run-large-pretrain-s 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
-chat: build-s-ir-runner build-real-inference-interactive-s
-	@echo "🚀 NeurX Real Transformer Inference Engine (Interactive Chat)"
-	@echo "✓ Model loaded with interactive support"
+build-real-chat-s:
+	@mkdir -p artifacts/build/real_chat
+	@echo "Compiling Real Chat Inference (S)..."
+	@$(S_SEED_COMPILER) inference/real_chat.s artifacts/build/real_chat/real_chat.ir || { \
+		echo "❌ Compilation failed!"; \
+		exit 1; \
+	}
+	@echo "✓ Compiled to IR successfully"
+	@echo "Creating Real Chat runner script..."
+	@printf '#!/bin/bash\n%s/artifacts/build/s_runner/s_ir_runner %s/artifacts/build/real_chat/real_chat.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifacts/build/real_chat/real_chat
+	@chmod +x artifacts/build/real_chat/real_chat
+	@echo "✓ Real Chat ready"
+
+chat: build-s-ir-runner build-real-chat-s
+	@echo "🚀 NeurX Real Transformer Inference Engine (Phase 2B)"
+	@echo "✓ Model: Qwen2.5-0.5B-Instruct"
+	@echo "✓ Implementation: Pure S Language"
+	@echo ""
 	@mkdir -p artifacts/logs
-	@$(CURDIR_UNIX)/artifacts/build/real_inference_interactive/real_inference_interactive 2>&1
+	@$(CURDIR_UNIX)/artifacts/build/real_chat/real_chat 2>&1
 
 chat-demo: build-s-ir-runner build-real-inference-with-model-s
 	@echo "🚀 Running NeurX Real Model Inference (Demo Mode)..."
