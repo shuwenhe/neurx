@@ -1,5 +1,5 @@
 package main
-use neurx.runtime.io.{runtime_run_command_output, runtime_read_text_file, runtime_write_text_file}
+use neurx.runtime.io.{runtime_run_command_output, runtime_read_text_file, runtime_write_text_file, trim}
 func string_char(int c) string {
     string(c)
 }
