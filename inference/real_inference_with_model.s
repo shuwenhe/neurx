@@ -304,7 +304,17 @@ func token_to_chinese(int token) string {
 }
 
 func read_user_input() string {
-    trim(__sys_read_string(0, 4096))
+    string input = ""
+    int attempts = 0
+    int max_attempts = 3
+    while attempts < max_attempts {
+        input = __sys_read_string(0, 4096)
+        if len(input) > 0 || attempts > 0 {
+            break
+        }
+        attempts = attempts + 1
+    }
+    return trim(input)
 }
 
 func main() {
@@ -332,10 +342,12 @@ func main() {
     }
     print("Type /exit, exit, or quit to stop\n")
     print("输入 /exit、exit 或 quit 停止对话\n\n")
-    while true {
+    int loop_count = 0
+    while loop_count < 1000 {
         print("You / 您: ")
         string user_input = read_user_input()
         if len(user_input) == 0 {
+            print("\nNo input received. Exiting.\n")
             return
         }
         if user_input == "/exit" || user_input == "exit" || user_input == "quit" {
@@ -353,5 +365,7 @@ func main() {
             i = i + 1
         }
         print("Assistant / 助手: " + response + "\n\n")
+        loop_count = loop_count + 1
     }
+    print("Session limit reached. Exiting.\n")
 }
