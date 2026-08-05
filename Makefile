@@ -6,7 +6,7 @@
 	run-train-compiled-s run-train-large-model-s run-train-model-ir-s run-with-logs-s verify-framework-s verify-inference-pipeline-s test-build-s test-smart-inference-s \
 	run-full-inference-s compile-all-components-s integration-s complete-training-cycle-s verify-transformer-implementation-s cluster-launch-s setup-production-deployment-s \
 	run-end-to-end-verification-s run-integration-tests-s minimal-diagnostic-s diagnose-file-creation-s diagnose-tool-registration-s diagnose-autoscroll-s \
-	build-pretrain-manifest-s build-cuda-train-bridge build-cuda-chat-bridge run-gpu-pretrain-s cuda-tools-s cuda-verify-s cuda-build-s cuda-build-runtime-s cuda-build-runtime-alt-s cuda-build-kernels-s cuda-build-kernels-simple-s run-interactive-chat-repl-s transformer-cuda-checkpoint-resume-test build-real-inference-s build-hf-posttrain-chat-s hf-posttrain-chat
+	build-pretrain-manifest-s build-cuda-train-bridge build-cuda-chat-bridge run-gpu-pretrain-s cuda-tools-s cuda-verify-s cuda-build-s cuda-build-runtime-s cuda-build-runtime-alt-s cuda-build-kernels-s cuda-build-kernels-simple-s run-interactive-chat-repl-s transformer-cuda-checkpoint-resume-test build-real-inference-s build-real-model-chat-s build-hf-posttrain-chat-s hf-posttrain-chat
 ifeq ($(OS),Windows_NT)
 PLATFORM := windows
 WINDOWS_GIT_BASH := C:/Progra~1/Git/bin/bash.exe
@@ -129,7 +129,6 @@ POSTTRAIN_MERGED_MODEL_DIR ?= $(POSTTRAIN_OUTPUT_DIR)
 POSTTRAIN_LORA_ALPHA ?= 16
 POSTTRAIN_LORA_RANK ?= 8
 CHAT_MODEL_PATH ?= $(POSTTRAIN_OUTPUT_DIR)
-CHAT_PYTHON ?= $(POSTTRAIN_PYTHON)
 CHAT_MAX_NEW_TOKENS ?= 128
 POSTTRAIN_GOLDEN_DIR ?= /home/shuwen/shuwen/posttrain/golden
 POSTTRAIN_GOLDEN_SOURCE ?= $(CURDIR_UNIX)/scripts/posttrain_golden.s
@@ -919,15 +918,21 @@ build-real-chat-s:
 	@chmod +x artifacts/build/real_chat/real_chat
 	@echo "✓ Real Chat ready"
 
-chat: build-real-chat-s
+build-real-model-chat-s: build-s-ir-runner build-real-inference-s
+	@mkdir -p artifacts/build/real_model_chat
+	@$(S_SEED_COMPILER) scripts/real_model_chat.s artifacts/build/real_model_chat/real_model_chat.ir
+	@test -f artifacts/build/real_model_chat/real_model_chat.ir
+
+chat: build-real-model-chat-s
 	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' || { \
 		echo "Model weights not found: $(CHAT_MODEL_PATH)/model.safetensors"; \
 		exit 1; \
 	}
-	@NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
+	@NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
 		NEURX_CHAT_MAX_NEW_TOKENS='$(CHAT_MAX_NEW_TOKENS)' \
-		NEURX_TOKENIZER_PATH='$(TOKENIZER_PATH)' \
-		'$(CURDIR_UNIX)/artifacts/build/real_chat/real_chat'
+		NEURX_CHAT_INFERENCE_RUNNER='$(CURDIR_UNIX)/artifacts/build/real_inference/real_inference' \
+		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/real_model_chat/real_model_chat.ir'
 
 chat-demo: build-s-ir-runner build-real-inference-with-model-s
 	@echo "🚀 Running NeurX Real Model Inference (Demo Mode)..."

@@ -76,17 +76,15 @@ func parse_int_at_bytes([]int bytes, int pos) int {
 }
 
 func tensor_index_record(int offset, int size, int found) []int {
-    []int record
-    record = []int{cap: 3}
-    record[0] = offset
-    record[1] = size
-    record[2] = found
-    return record
+    []int values = []int{cap: 3}
+    values[0] = offset
+    values[1] = size
+    values[2] = found
+    return values
 }
 
 func parse_tensor_index([]int metadata, string tensor_name) []int {
-    []int result
-    result = tensor_index_record(0, 0, 0)
+    []int result = tensor_index_record(0, 0, 0)
     int name_pos = find_substring_bytes(metadata, "\"" + tensor_name + "\"", 0)
     if name_pos < 0 {
         return result
@@ -140,12 +138,11 @@ func int_to_string(int value) string {
 }
 
 func slice_bytes([]int bytes, int start, int length) []int {
-    []int out
     int size = length
     if size < 0 {
         size = 0
     }
-    out = []int{cap: size}
+    []int out = []int{cap: size}
     int i = 0
     while i < size && start + i < len(bytes) {
         out[i] = bytes[start + i]
@@ -433,8 +430,7 @@ func load_prompt_text() string {
 }
 
 func tokenize(string text) []int {
-    []int tokens
-    tokens = []int{cap: 32}
+    []int tokens = []int{cap: 32}
     int token_count = 0
     tokens[token_count] = 151643
     token_count = token_count + 1
@@ -459,8 +455,7 @@ func tokenize(string text) []int {
     }
     tokens[token_count] = 151645
     token_count = token_count + 1
-    []int out
-    out = []int{cap: token_count}
+    []int out = []int{cap: token_count}
     i = 0
     while i < token_count {
         out[i] = tokens[i]
@@ -629,12 +624,9 @@ func select_next_token(int seed, int vocab_size, float temperature, int top_k) i
     if k > 64 {
         k = 64
     }
-    []int candidates
-    candidates = []int{cap: 64}
-    []int tokens
-    tokens = []int{cap: 64}
-    []int weights
-    weights = []int{cap: 64}
+    []int candidates = []int{cap: 64}
+    []int tokens = []int{cap: 64}
+    []int weights = []int{cap: 64}
     int candidate_count = 0
     int slot = 0
     int max_logit = -2147483647
