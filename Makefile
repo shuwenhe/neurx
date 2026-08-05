@@ -128,6 +128,9 @@ POSTTRAIN_ADAPTER_DIR ?= $(POSTTRAIN_OUTPUT_DIR)/adapter
 POSTTRAIN_MERGED_MODEL_DIR ?= $(POSTTRAIN_OUTPUT_DIR)
 POSTTRAIN_LORA_ALPHA ?= 16
 POSTTRAIN_LORA_RANK ?= 8
+CHAT_MODEL_PATH ?= $(POSTTRAIN_OUTPUT_DIR)
+CHAT_PYTHON ?= $(POSTTRAIN_PYTHON)
+CHAT_MAX_NEW_TOKENS ?= 128
 POSTTRAIN_GOLDEN_DIR ?= /home/shuwen/shuwen/posttrain/golden
 POSTTRAIN_GOLDEN_SOURCE ?= $(CURDIR_UNIX)/scripts/posttrain_golden.s
 POSTTRAIN_VERIFY_TENSORS_SOURCE ?= $(CURDIR_UNIX)/scripts/verify_posttrain_tensors.s
@@ -916,13 +919,15 @@ build-real-chat-s:
 	@chmod +x artifacts/build/real_chat/real_chat
 	@echo "✓ Real Chat ready"
 
-chat: build-s-ir-runner build-real-chat-s
-	@echo "🚀 NeurX Real Transformer Inference Engine (Phase 2B)"
-	@echo "✓ Model: Qwen2.5-0.5B-Instruct"
-	@echo "✓ Implementation: Pure S Language"
-	@echo ""
-	@mkdir -p artifacts/logs
-	@$(CURDIR_UNIX)/artifacts/build/real_chat/real_chat 2>&1
+chat: build-real-chat-s
+	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' || { \
+		echo "Model weights not found: $(CHAT_MODEL_PATH)/model.safetensors"; \
+		exit 1; \
+	}
+	@NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
+		NEURX_CHAT_MAX_NEW_TOKENS='$(CHAT_MAX_NEW_TOKENS)' \
+		NEURX_TOKENIZER_PATH='$(TOKENIZER_PATH)' \
+		'$(CURDIR_UNIX)/artifacts/build/real_chat/real_chat'
 
 chat-demo: build-s-ir-runner build-real-inference-with-model-s
 	@echo "🚀 Running NeurX Real Model Inference (Demo Mode)..."
