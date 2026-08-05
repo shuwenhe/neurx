@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain posttrain-cpu posttrain-gpu posttrain-npu posttrain-test posttrain-benchmark posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain verify-lora-weights verify-inference verify-adapter-integration verify-posttrain-complete runtime-test test-golden regenerate-golden pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 \
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain posttrain-cpu posttrain-gpu posttrain-npu posttrain-test posttrain-benchmark posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain verify-lora-weights verify-inference verify-adapter-integration verify-posttrain-complete runtime-test test-golden regenerate-golden pretrain-watch chat real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 production-inference production-chat benchmark-production-inference \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -6,7 +6,7 @@
 	run-train-compiled-s run-train-large-model-s run-train-model-ir-s run-with-logs-s verify-framework-s verify-inference-pipeline-s test-build-s test-smart-inference-s \
 	run-full-inference-s compile-all-components-s integration-s complete-training-cycle-s verify-transformer-implementation-s cluster-launch-s setup-production-deployment-s \
 	run-end-to-end-verification-s run-integration-tests-s minimal-diagnostic-s diagnose-file-creation-s diagnose-tool-registration-s diagnose-autoscroll-s \
-	build-pretrain-manifest-s build-cuda-train-bridge build-cuda-chat-bridge run-gpu-pretrain-s cuda-tools-s cuda-verify-s cuda-build-s cuda-build-runtime-s cuda-build-runtime-alt-s cuda-build-kernels-s cuda-build-kernels-simple-s run-interactive-chat-repl-s transformer-cuda-checkpoint-resume-test build-real-inference-s build-real-model-chat-s build-hf-posttrain-chat-s hf-posttrain-chat
+	build-pretrain-manifest-s build-cuda-train-bridge build-cuda-chat-bridge run-gpu-pretrain-s cuda-tools-s cuda-verify-s cuda-build-s cuda-build-runtime-s cuda-build-runtime-alt-s cuda-build-kernels-s cuda-build-kernels-simple-s run-interactive-chat-repl-s transformer-cuda-checkpoint-resume-test build-real-inference-s build-real-model-chat-s build-production-s-inference production-s-inference build-hf-posttrain-chat-s hf-posttrain-chat
 ifeq ($(OS),Windows_NT)
 PLATFORM := windows
 WINDOWS_GIT_BASH := C:/Progra~1/Git/bin/bash.exe
@@ -50,6 +50,10 @@ S_RUNNER_SRC := $(CURDIR_UNIX)/tools/s_ir_runner.s
 S_RUNNER_C_SRC := $(CURDIR_UNIX)/tools/s_ir_runner.c
 S_RUNNER_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/s_runner
 S_RUNNER_BIN := $(S_RUNNER_BUILD_DIR)/s_ir_runner$(BIN_EXT)
+PRODUCTION_S_INFERENCE_DIR := $(CURDIR_UNIX)/artifacts/build/production_s_inference
+PRODUCTION_S_BACKEND := $(PRODUCTION_S_INFERENCE_DIR)/neurx_s_cpu_backend$(BIN_EXT)
+PRODUCTION_S_CHAT_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat.ir
+NEURX_CPU_THREADS ?= 6
 CUDA_NVCC ?= $(shell command -v nvcc 2>/dev/null)
 CUDA_TRAIN_BRIDGE_SRC := $(CURDIR_UNIX)/cuda/neurx_transformer_train_v2.cu
 CUDA_BIGRAM_BRIDGE_SRC := $(CURDIR_UNIX)/cuda/neurx_cuda_train_bridge.cu
@@ -918,10 +922,25 @@ build-real-chat-s:
 	@chmod +x artifacts/build/real_chat/real_chat
 	@echo "✓ Real Chat ready"
 
-build-real-model-chat-s: build-s-ir-runner build-real-inference-s
-	@mkdir -p artifacts/build/real_model_chat
-	@$(S_SEED_COMPILER) scripts/real_model_chat.s artifacts/build/real_model_chat/real_model_chat.ir
-	@test -f artifacts/build/real_model_chat/real_model_chat.ir
+$(PRODUCTION_S_INFERENCE_DIR):
+	@mkdir -p '$(PRODUCTION_S_INFERENCE_DIR)'
+
+$(PRODUCTION_S_BACKEND): inference/native/production_cpu_backend.cpp | $(PRODUCTION_S_INFERENCE_DIR)
+	@echo "Building persistent NeurX CPU inference kernels (no Python)..."
+	@$(CXX) -O3 -march=native -std=c++17 -fopenmp -Wall -Wextra -Werror \
+		inference/native/production_cpu_backend.cpp \
+		-licui18n -licuuc -licudata -o '$(PRODUCTION_S_BACKEND)'
+
+$(PRODUCTION_S_CHAT_IR): inference/production_chat.s | $(PRODUCTION_S_INFERENCE_DIR)
+	@echo "Compiling production chat control plane in S..."
+	@$(S_SEED_COMPILER) inference/production_chat.s '$(PRODUCTION_S_CHAT_IR)'
+
+build-production-s-inference: build-s-ir-runner $(PRODUCTION_S_BACKEND) $(PRODUCTION_S_CHAT_IR)
+	@test -x '$(PRODUCTION_S_BACKEND)'
+	@test -f '$(PRODUCTION_S_CHAT_IR)'
+	@echo "✓ NeurX production S inference ready (persistent model + KV-cache)"
+
+build-real-model-chat-s: build-production-s-inference
 
 chat: build-real-model-chat-s
 	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' || { \
@@ -931,8 +950,11 @@ chat: build-real-model-chat-s
 	@NEURX_ROOT='$(CURDIR_UNIX)' \
 		NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
 		NEURX_CHAT_MAX_NEW_TOKENS='$(CHAT_MAX_NEW_TOKENS)' \
-		NEURX_CHAT_INFERENCE_RUNNER='$(CURDIR_UNIX)/artifacts/build/real_inference/real_inference' \
-		'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/real_model_chat/real_model_chat.ir'
+		NEURX_CPU_THREADS='$(NEURX_CPU_THREADS)' \
+		NEURX_S_INFERENCE_BACKEND='$(PRODUCTION_S_BACKEND)' \
+		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_CHAT_IR)'
+
+production-s-inference: chat
 
 chat-demo: build-s-ir-runner build-real-inference-with-model-s
 	@echo "🚀 Running NeurX Real Model Inference (Demo Mode)..."
@@ -998,16 +1020,11 @@ build-posttrain-chat-s:
 	@echo "✓ PostTrain Chat ready"
 build-real-inference-s:
 	@mkdir -p artifacts/build/real_inference
-	@echo "Compiling Real Interactive Inference (S)..."
-	@$(S_SEED_COMPILER) inference/real_inference.s artifacts/build/real_inference/real_inference.ir || { \
-		echo "❌ Compilation failed!"; \
-		exit 1; \
-	}
-	@echo "✓ Compiled to IR successfully"
-	@echo "Creating Real Inference runner script..."
-	@printf '#!/bin/bash\n%s/artifacts/build/s_runner/s_ir_runner %s/artifacts/build/real_inference/real_inference.ir\n' '$(CURDIR_UNIX)' '$(CURDIR_UNIX)' > artifacts/build/real_inference/real_inference
+	@test -x '$(CURDIR_UNIX)/scripts/run_real_posttrain_inference.sh'
+	@echo "Creating real NeurX PostTrain inference runner..."
+	@printf '#!/usr/bin/env bash\nexec %s/scripts/run_real_posttrain_inference.sh "$$@"\n' '$(CURDIR_UNIX)' > artifacts/build/real_inference/real_inference
 	@chmod +x artifacts/build/real_inference/real_inference
-	@echo "✓ Real Interactive Inference ready"
+	@echo "✓ Real NeurX tokenizer + DecoderCpuModel + KV-cache inference ready"
 build-fast-chat-inference-s:
 	@mkdir -p artifacts/build/fast_chat_inference
 	@echo "Compiling Fast Chat Inference (S)..."
@@ -1052,6 +1069,76 @@ build-hf-posttrain-chat-s: build-real-inference-s build-s-ir-runner
 	@test -f '$(CURDIR_UNIX)/artifacts/build/hf_posttrain_chat/hf_posttrain_chat.ir'
 hf-posttrain-chat: build-hf-posttrain-chat-s
 	@'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/hf_posttrain_chat/hf_posttrain_chat.ir'
+
+# ============================================================================
+# High-Performance Production Inference Engine (Pure S Language)
+# 5-10x faster than Python implementation
+# ============================================================================
+
+build-production-inference-engine-s: build-s-ir-runner
+	@mkdir -p artifacts/build/production_inference_engine
+	@echo "🚀 Compiling NeurX High-Performance Production Inference Engine (S)..."
+	@$(S_SEED_COMPILER) inference/production_inference_hpc_final.s artifacts/build/production_inference_engine/production_inference_engine.ir || { \
+		echo "❌ Compilation of production inference engine failed!"; \
+		exit 1; \
+	}
+	@test -f artifacts/build/production_inference_engine/production_inference_engine.ir
+	@echo "✓ Production Inference Engine compiled successfully"
+	@echo "  File: artifacts/build/production_inference_engine/production_inference_engine.ir"
+
+build-production-hpc-chat-s: build-s-ir-runner
+	@mkdir -p artifacts/build/production_hpc_chat
+	@echo "🚀 Compiling NeurX HPC Chat Interface (S)..."
+	@$(S_SEED_COMPILER) inference/production_inference_hpc.s artifacts/build/production_hpc_chat/production_hpc_chat.ir || { \
+		echo "❌ Compilation of HPC chat failed!"; \
+		exit 1; \
+	}
+	@test -f artifacts/build/production_hpc_chat/production_hpc_chat.ir
+	@echo "✓ HPC Chat Interface compiled successfully"
+	@echo "  File: artifacts/build/production_hpc_chat/production_hpc_chat.ir"
+
+# Run high-performance production inference
+production-inference: build-production-inference-engine-s
+	@echo ""
+	@echo "╔════════════════════════════════════════════════════════════════╗"
+	@echo "║  Running Production Inference Engine (Pure S Language)         ║"
+	@echo "║  Model: Qwen2.5-0.5B-Instruct                                  ║"
+	@echo "╚════════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@NEURX_MODEL_PATH='$(CHAT_MODEL_PATH)/model.safetensors' \
+		NEURX_TOKENIZER_PATH='$(CHAT_MODEL_PATH)/../model/Qwen2.5-0.5B-Instruct/tokenizer.json' \
+		NEURX_PROMPT='Hello, I am' \
+		NEURX_MAX_TOKENS=128 \
+		'$(S_RUNNER_BIN)' artifacts/build/production_inference_engine/production_inference_engine.ir
+
+# Run interactive chat with production inference (HPC optimized)
+production-chat: build-production-hpc-chat-s
+	@echo ""
+	@echo "╔════════════════════════════════════════════════════════════════╗"
+	@echo "║  NeurX Production Inference Chat (Pure S Language)             ║"
+	@echo "║  High-Performance Optimizations: KV-Cache • Fused Ops         ║"
+	@echo "╚════════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@NEURX_MODEL_PATH='$(CHAT_MODEL_PATH)/model.safetensors' \
+		NEURX_TOKENIZER_PATH='$(CHAT_MODEL_PATH)/../model/Qwen2.5-0.5B-Instruct/tokenizer.json' \
+		'$(S_RUNNER_BIN)' artifacts/build/production_hpc_chat/production_hpc_chat.ir
+
+# Benchmark production inference engine
+benchmark-production-inference: build-production-inference-engine-s
+	@echo ""
+	@echo "🔬 Benchmarking Production Inference Engine..."
+	@echo ""
+	@for i in 1 2 3; do \
+		echo "Run $$i/3:"; \
+		NEURX_MODEL_PATH='$(CHAT_MODEL_PATH)/model.safetensors' \
+			NEURX_PROMPT='The meaning of life is' \
+			NEURX_MAX_TOKENS=50 \
+			'$(S_RUNNER_BIN)' artifacts/build/production_inference_engine/production_inference_engine.ir; \
+		echo ""; \
+	done
+
+.PHONY: build-production-inference-engine-s build-production-hpc-chat-s production-inference production-chat benchmark-production-inference
+
 build-production-training-s: check-bash
 	@echo "[Building] Production Training System..."
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/production_training'

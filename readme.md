@@ -58,12 +58,25 @@ make chat
 
 ## Inference
 
-Build the native S SafeTensors inference path:
+Build and run the production S inference path:
 
 ```sh
-make build-real-inference-s
-make real-inference
+make build-production-s-inference
+make chat
 ```
+
+This path has no Python or curl dependency. The S control plane owns ChatML conversation state,
+backend lifecycle, and request dispatch through S socket intrinsics. The native CPU backend memory-maps SafeTensors,
+uses OpenMP/AVX-optimized transformer kernels, keeps the model resident, and reuses KV-cache
+prefixes between chat turns.
+
+Useful runtime settings:
+
+```sh
+make chat NEURX_CPU_THREADS=6 CHAT_MAX_NEW_TOKENS=128
+```
+
+Use `/reset` to clear both conversation history and the resident KV-cache.
 
 Build and run the S post-training chat frontend:
 
