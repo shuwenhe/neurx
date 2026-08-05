@@ -925,20 +925,23 @@ build-real-chat-s:
 $(PRODUCTION_S_INFERENCE_DIR):
 	@mkdir -p '$(PRODUCTION_S_INFERENCE_DIR)'
 
-$(PRODUCTION_S_BACKEND): inference/native/production_cpu_backend.cpp | $(PRODUCTION_S_INFERENCE_DIR)
-	@echo "Building persistent NeurX CPU inference kernels (no Python)..."
-	@$(CXX) -O3 -march=native -std=c++17 -fopenmp -Wall -Wextra -Werror \
-		inference/native/production_cpu_backend.cpp \
-		-licui18n -licuuc -licudata -o '$(PRODUCTION_S_BACKEND)'
+$(PRODUCTION_S_BACKEND): inference/native/production_cpu_backend.s | $(PRODUCTION_S_INFERENCE_DIR)
+	@echo "🔧 Building NeurX CPU Backend (Pure S Language)..."
+	@$(S_SEED_COMPILER) inference/native/production_cpu_backend.s '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir' || { \
+		echo "❌ Backend compilation failed!"; \
+		exit 1; \
+	}
+	@echo "✓ CPU backend compiled: $(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir"
+	@touch '$(PRODUCTION_S_BACKEND)'
 
 $(PRODUCTION_S_CHAT_IR): inference/production_chat.s | $(PRODUCTION_S_INFERENCE_DIR)
 	@echo "Compiling production chat control plane in S..."
 	@$(S_SEED_COMPILER) inference/production_chat.s '$(PRODUCTION_S_CHAT_IR)'
 
 build-production-s-inference: build-s-ir-runner $(PRODUCTION_S_BACKEND) $(PRODUCTION_S_CHAT_IR)
-	@test -x '$(PRODUCTION_S_BACKEND)'
+	@test -f '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir'
 	@test -f '$(PRODUCTION_S_CHAT_IR)'
-	@echo "✓ NeurX production S inference ready (persistent model + KV-cache)"
+	@echo "✓ NeurX production S inference ready (pure S backend + KV-cache)"
 
 build-real-model-chat-s: build-production-s-inference
 
@@ -951,7 +954,7 @@ chat: build-real-model-chat-s
 		NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
 		NEURX_CHAT_MAX_NEW_TOKENS='$(CHAT_MAX_NEW_TOKENS)' \
 		NEURX_CPU_THREADS='$(NEURX_CPU_THREADS)' \
-		NEURX_S_INFERENCE_BACKEND='$(PRODUCTION_S_BACKEND)' \
+		NEURX_S_INFERENCE_BACKEND='$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir' \
 		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_CHAT_IR)'
 
 production-s-inference: chat

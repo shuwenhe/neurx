@@ -1,6 +1,6 @@
 package neurx.inference.high_performance_chat
 
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, trim, println, printf}
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists, trim, printf}
 
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 
@@ -80,13 +80,13 @@ func calculate_throughput(int tokens, int time_ms) float {
 // ============================================================================
 
 func main() {
-    println("")
-    println("╔════════════════════════════════════════════════════════════════╗")
-    println("║     🚀 NeurX High-Performance Production Inference Engine     ║")
-    println("║            Pure S Language • Optimized for CPU               ║")
-    println("║      5-10x Faster than Python • No External Dependencies      ║")
-    println("╚════════════════════════════════════════════════════════════════╝")
-    println("")
+    print("")
+    print("╔════════════════════════════════════════════════════════════════╗")
+    print("║     🚀 NeurX High-Performance Production Inference Engine     ║")
+    print("║            Pure S Language • Optimized for CPU               ║")
+    print("║      5-10x Faster than Python • No External Dependencies      ║")
+    print("╚════════════════════════════════════════════════════════════════╝")
+    print("")
     
     string model_path = runtime_env_get(
         "NEURX_MODEL_PATH",
@@ -97,49 +97,49 @@ func main() {
         "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct/tokenizer.json"
     )
     
-    println("📋 Model Configuration:")
-    println("   Model:              Qwen2.5-0.5B-Instruct")
-    println("   Implementation:     Pure S Language")
-    println("   Mode:               High-Performance CPU Inference")
-    println("")
-    println("🔧 Architecture Details:")
-    println("   Layers:             24")
-    println("   Hidden Dimension:   896")
-    println("   Attention Heads:    14")
-    println("   Head Dimension:     64")
-    println("   Feed-Forward Dim:   3,584")
-    println("   Vocabulary Size:    151,936")
-    println("")
-    println("⚡ Optimizations Enabled:")
-    println("   ✓ KV Cache (O(1) attention lookup)")
-    println("   ✓ Fused Operations (attention + projection)")
-    println("   ✓ Memory Pre-allocation")
-    println("   ✓ Streaming Token Generation")
-    println("   ✓ SIMD-Ready Math Operations")
-    println("   ✓ Greedy Sampling (fastest)")
-    println("")
+    print("📋 Model Configuration:")
+    print("   Model:              Qwen2.5-0.5B-Instruct")
+    print("   Implementation:     Pure S Language")
+    print("   Mode:               High-Performance CPU Inference")
+    print("")
+    print("🔧 Architecture Details:")
+    print("   Layers:             24")
+    print("   Hidden Dimension:   896")
+    print("   Attention Heads:    14")
+    print("   Head Dimension:     64")
+    print("   Feed-Forward Dim:   3,584")
+    print("   Vocabulary Size:    151,936")
+    print("")
+    print("⚡ Optimizations Enabled:")
+    print("   ✓ KV Cache (O(1) attention lookup)")
+    print("   ✓ Fused Operations (attention + projection)")
+    print("   ✓ Memory Pre-allocation")
+    print("   ✓ Streaming Token Generation")
+    print("   ✓ SIMD-Ready Math Operations")
+    print("   ✓ Greedy Sampling (fastest)")
+    print("")
     
     // Verify file availability
     bool model_exists = runtime_file_exists(model_path)
     bool tokenizer_exists = runtime_file_exists(tokenizer_path)
     
     if model_exists {
-        println("✓ Model weights:     " + model_path)
+        print("✓ Model weights:     " + model_path)
     } else {
-        println("⚠ Model not found:   " + model_path)
+        print("⚠ Model not found:   " + model_path)
     }
     
     if tokenizer_exists {
-        println("✓ Tokenizer:         " + tokenizer_path)
+        print("✓ Tokenizer:         " + tokenizer_path)
     } else {
-        println("⚠ Tokenizer not found: " + tokenizer_path)
+        print("⚠ Tokenizer not found: " + tokenizer_path)
     }
     
-    println("")
-    println("═════════════════════════════════════════════════════════════════")
-    println("📖 Commands: 'help' for info | 'stats' for metrics | 'exit' to quit")
-    println("═════════════════════════════════════════════════════════════════")
-    println("")
+    print("")
+    print("═════════════════════════════════════════════════════════════════")
+    print("📖 Commands: 'help' for info | 'stats' for metrics | 'exit' to quit")
+    print("═════════════════════════════════════════════════════════════════")
+    print("")
     
     // Session tracking
     int session_turns = 0
@@ -158,53 +158,53 @@ func main() {
         
         // Command processing
         if user_input == "exit" || user_input == "quit" {
-            println("")
-            println("═════════════════════════════════════════════════════════════════")
-            println("📊 Session Summary:")
-            println("   Conversation Turns:  " + int_to_string(session_turns))
-            println("   Prompt Tokens:       " + int_to_string(total_prompt_tokens))
-            println("   Generated Tokens:    " + int_to_string(total_generated_tokens))
-            println("   Total Tokens:        " + int_to_string(total_prompt_tokens + total_generated_tokens))
-            println("   Total Time:          " + int_to_string(total_time_ms) + " ms")
+            print("")
+            print("═════════════════════════════════════════════════════════════════")
+            print("📊 Session Summary:")
+            print("   Conversation Turns:  " + int_to_string(session_turns))
+            print("   Prompt Tokens:       " + int_to_string(total_prompt_tokens))
+            print("   Generated Tokens:    " + int_to_string(total_generated_tokens))
+            print("   Total Tokens:        " + int_to_string(total_prompt_tokens + total_generated_tokens))
+            print("   Total Time:          " + int_to_string(total_time_ms) + " ms")
             if total_generated_tokens > 0 {
                 float avg_tps = calculate_throughput(total_generated_tokens, total_time_ms)
-                println("   Avg Throughput:      " + float_to_string(avg_tps, 2) + " tokens/sec")
+                print("   Avg Throughput:      " + float_to_string(avg_tps, 2) + " tokens/sec")
             }
-            println("═════════════════════════════════════════════════════════════════")
-            println("")
-            println("👋 Goodbye! Thank you for using NeurX Inference Engine!")
-            println("")
+            print("═════════════════════════════════════════════════════════════════")
+            print("")
+            print("👋 Goodbye! Thank you for using NeurX Inference Engine!")
+            print("")
             return
         }
         
         if user_input == "help" {
-            println("")
-            println("📚 Help - Available Commands:")
-            println("   help              Display this help message")
-            println("   stats             Show session performance statistics")
-            println("   exit, quit        Exit the chat program")
-            println("")
-            println("💡 Tips:")
-            println("   • Type questions or statements to get AI responses")
-            println("   • Responses use real Transformer model weights")
-            println("   • Performance is optimized with KV cache")
-            println("   • Medical knowledge built-in (Qwen2.5-0.5B-Instruct)")
-            println("")
+            print("")
+            print("📚 Help - Available Commands:")
+            print("   help              Display this help message")
+            print("   stats             Show session performance statistics")
+            print("   exit, quit        Exit the chat program")
+            print("")
+            print("💡 Tips:")
+            print("   • Type questions or statements to get AI responses")
+            print("   • Responses use real Transformer model weights")
+            print("   • Performance is optimized with KV cache")
+            print("   • Medical knowledge built-in (Qwen2.5-0.5B-Instruct)")
+            print("")
             continue
         }
         
         if user_input == "stats" {
-            println("")
-            println("📊 Performance Statistics:")
-            println("   Turns:               " + int_to_string(session_turns))
-            println("   Prompt Tokens:       " + int_to_string(total_prompt_tokens))
-            println("   Generated Tokens:    " + int_to_string(total_generated_tokens))
-            println("   Total Time:          " + int_to_string(total_time_ms) + " ms")
+            print("")
+            print("📊 Performance Statistics:")
+            print("   Turns:               " + int_to_string(session_turns))
+            print("   Prompt Tokens:       " + int_to_string(total_prompt_tokens))
+            print("   Generated Tokens:    " + int_to_string(total_generated_tokens))
+            print("   Total Time:          " + int_to_string(total_time_ms) + " ms")
             if total_generated_tokens > 0 {
                 float avg_tps = calculate_throughput(total_generated_tokens, total_time_ms)
-                println("   Avg Throughput:      " + float_to_string(avg_tps, 2) + " tokens/sec")
+                print("   Avg Throughput:      " + float_to_string(avg_tps, 2) + " tokens/sec")
             }
-            println("")
+            print("")
             continue
         }
         
@@ -214,47 +214,47 @@ func main() {
         int prompt_token_count = len(user_input) / 4 + 2  // ~4 chars per token
         total_prompt_tokens = total_prompt_tokens + prompt_token_count
         
-        println("")
-        println("🔄 [Inference Pipeline Execution]")
-        println("")
+        print("")
+        print("🔄 [Inference Pipeline Execution]")
+        print("")
         
         // Step 1: Tokenization
-        println("  STEP 1: Tokenization (BPE)")
-        println("    ├─ Input text: " + int_to_string(len(user_input)) + " characters")
-        println("    ├─ BPE encoding...")
-        println("    └─ Tokens generated: " + int_to_string(prompt_token_count))
-        println("")
+        print("  STEP 1: Tokenization (BPE)")
+        print("    ├─ Input text: " + int_to_string(len(user_input)) + " characters")
+        print("    ├─ BPE encoding...")
+        print("    └─ Tokens generated: " + int_to_string(prompt_token_count))
+        print("")
         
         // Step 2: Embedding
-        println("  STEP 2: Embedding Lookup")
-        println("    ├─ Vocabulary: 151,936 tokens")
-        println("    ├─ Embedding dim: 896")
-        println("    └─ Status: ✓ Complete")
-        println("")
+        print("  STEP 2: Embedding Lookup")
+        print("    ├─ Vocabulary: 151,936 tokens")
+        print("    ├─ Embedding dim: 896")
+        print("    └─ Status: ✓ Complete")
+        print("")
         
         // Step 3: Transformer Forward
-        println("  STEP 3: Transformer Forward Pass (24 layers)")
-        println("    ├─ Layer 1-8:  ▓▓▓▓▓ Attention + FFN")
-        println("    ├─ Layer 9-16: ▓▓▓▓▓ Attention + FFN")
-        println("    ├─ Layer 17-24: ▓▓▓▓▓ Attention + FFN")
-        println("    └─ KV Cache: ✓ Optimized (O(1) lookup)")
-        println("")
+        print("  STEP 3: Transformer Forward Pass (24 layers)")
+        print("    ├─ Layer 1-8:  ▓▓▓▓▓ Attention + FFN")
+        print("    ├─ Layer 9-16: ▓▓▓▓▓ Attention + FFN")
+        print("    ├─ Layer 17-24: ▓▓▓▓▓ Attention + FFN")
+        print("    └─ KV Cache: ✓ Optimized (O(1) lookup)")
+        print("")
         
         // Step 4: LM Head
-        println("  STEP 4: Language Model Head Projection")
-        println("    ├─ Input: 896-dimensional hidden state")
-        println("    └─ Output: 151,936 logits")
-        println("")
+        print("  STEP 4: Language Model Head Projection")
+        print("    ├─ Input: 896-dimensional hidden state")
+        print("    └─ Output: 151,936 logits")
+        print("")
         
         // Step 5: Sampling
-        println("  STEP 5: Greedy Sampling (Argmax)")
-        println("    └─ Next token selected: ✓")
-        println("")
+        print("  STEP 5: Greedy Sampling (Argmax)")
+        print("    └─ Next token selected: ✓")
+        print("")
         
         // Step 6: Decoding
-        println("  STEP 6: Token Decoding")
-        println("    └─ Token → Text: ✓")
-        println("")
+        print("  STEP 6: Token Decoding")
+        print("    └─ Token → Text: ✓")
+        print("")
         
         // Simulate inference time (optimized)
         // Real implementation: ~1.8-2.5 ms per token on CPU
@@ -266,31 +266,31 @@ func main() {
         
         float throughput = calculate_throughput(tokens_generated, inference_time)
         
-        println("═════════════════════════════════════════════════════════════════")
-        println("⏱  Performance Metrics:")
-        println("    Prompt tokens:       " + int_to_string(prompt_token_count))
-        println("    Generated tokens:    " + int_to_string(tokens_generated))
-        println("    Elapsed time:        " + int_to_string(inference_time) + " ms")
-        println("    Throughput:          " + float_to_string(throughput, 2) + " tokens/sec")
-        println("═════════════════════════════════════════════════════════════════")
-        println("")
+        print("═════════════════════════════════════════════════════════════════")
+        print("⏱  Performance Metrics:")
+        print("    Prompt tokens:       " + int_to_string(prompt_token_count))
+        print("    Generated tokens:    " + int_to_string(tokens_generated))
+        print("    Elapsed time:        " + int_to_string(inference_time) + " ms")
+        print("    Throughput:          " + float_to_string(throughput, 2) + " tokens/sec")
+        print("═════════════════════════════════════════════════════════════════")
+        print("")
         
         // Generate medical response
-        println("🤖 Assistant:")
-        println("")
-        println("I am Qwen2.5-0.5B-Instruct, a specialized medical AI assistant developed")
-        println("for healthcare and medical knowledge tasks. I can assist you with:")
-        println("")
-        println("  • Medical information and health education")
-        println("  • Disease understanding and symptom interpretation")
-        println("  • Medication and treatment information")
-        println("  • Clinical decision support suggestions")
-        println("  • Health prevention and wellness guidance")
-        println("")
-        println("This response was generated using a pure S language implementation")
-        println("of a 24-layer Transformer model with optimized KV-cache inference.")
-        println("")
-        println("═════════════════════════════════════════════════════════════════")
-        println("")
+        print("🤖 Assistant:")
+        print("")
+        print("I am Qwen2.5-0.5B-Instruct, a specialized medical AI assistant developed")
+        print("for healthcare and medical knowledge tasks. I can assist you with:")
+        print("")
+        print("  • Medical information and health education")
+        print("  • Disease understanding and symptom interpretation")
+        print("  • Medication and treatment information")
+        print("  • Clinical decision support suggestions")
+        print("  • Health prevention and wellness guidance")
+        print("")
+        print("This response was generated using a pure S language implementation")
+        print("of a 24-layer Transformer model with optimized KV-cache inference.")
+        print("")
+        print("═════════════════════════════════════════════════════════════════")
+        print("")
     }
 }
