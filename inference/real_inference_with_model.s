@@ -304,17 +304,7 @@ func token_to_chinese(int token) string {
 }
 
 func read_user_input() string {
-    string input = ""
-    int attempts = 0
-    int max_attempts = 3
-    while attempts < max_attempts {
-        input = __sys_read_string(0, 4096)
-        if len(input) > 0 || attempts > 0 {
-            break
-        }
-        attempts = attempts + 1
-    }
-    return trim(input)
+    trim(__sys_read_string(0, 4096))
 }
 
 func main() {
@@ -342,30 +332,25 @@ func main() {
     }
     print("Type /exit, exit, or quit to stop\n")
     print("输入 /exit、exit 或 quit 停止对话\n\n")
-    int loop_count = 0
-    while loop_count < 1000 {
+    while true {
         print("You / 您: ")
         string user_input = read_user_input()
-        if len(user_input) == 0 {
-            print("\nNo input received. Exiting.\n")
-            return
-        }
         if user_input == "/exit" || user_input == "exit" || user_input == "quit" {
             print("Goodbye! 再见！\n")
             return
         }
-        []int tokens = tokenize_chinese(user_input)
-        int seed = model_forward_pass(tokens, model_path, metadata_bytes, embed_idx, norm_idx, head_idx)
-        []int output_tokens = generate_next_tokens(seed, 12)
-        string response = ""
-        int i = 0
-        while i < len(output_tokens) {
-            string word = token_to_chinese(output_tokens[i])
-            response = response + word
-            i = i + 1
+        if len(user_input) > 0 {
+            []int tokens = tokenize_chinese(user_input)
+            int seed = model_forward_pass(tokens, model_path, metadata_bytes, embed_idx, norm_idx, head_idx)
+            []int output_tokens = generate_next_tokens(seed, 12)
+            string response = ""
+            int i = 0
+            while i < len(output_tokens) {
+                string word = token_to_chinese(output_tokens[i])
+                response = response + word
+                i = i + 1
+            }
+            print("Assistant / 助手: " + response + "\n\n")
         }
-        print("Assistant / 助手: " + response + "\n\n")
-        loop_count = loop_count + 1
     }
-    print("Session limit reached. Exiting.\n")
 }
