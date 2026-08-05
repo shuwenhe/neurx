@@ -169,6 +169,24 @@ func stop_owned_backend(bool owned, string pid_file) int {
     0
 }
 
+func ends_with(string text, string suffix) bool {
+    int text_len = len(text)
+    int suffix_len = len(suffix)
+    if suffix_len > text_len {
+        return false
+    }
+    // Check if last characters match suffix
+    int offset = text_len - suffix_len
+    int i = 0
+    while i < suffix_len {
+        if text[offset + i] != suffix[i] {
+            return false
+        }
+        i = i + 1
+    }
+    return true
+}
+
 func main() {
     string root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/neurx")
     string model = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain")
@@ -201,6 +219,13 @@ func main() {
 
     bool owned_backend = false
     if !backend_ready(host, port_number) {
+        // If backend is a .ir file, use S runner to execute it
+        string runner = runtime_env_get("NEURX_S_RUNNER_BIN", root + "/artifacts/build/s_runner/s_ir_runner")
+        string backend_cmd = backend
+        if ends_with(backend, ".ir") {
+            backend_cmd = runner + " " + shell_escape(backend)
+        }
+        
         string launch =
             "rm -f " + shell_escape(ready_file) + "; " +
             "NEURX_MODEL_DIR=" + shell_escape(model) +
@@ -208,7 +233,7 @@ func main() {
             " NEURX_S_HOST=" + shell_escape(host) +
             " NEURX_S_PORT=" + shell_escape(port) +
             " NEURX_S_READY_FILE=" + shell_escape(ready_file) +
-            " nohup " + shell_escape(backend) +
+            " nohup " + backend_cmd +
             " >" + shell_escape(log_file) + " 2>&1 < /dev/null & " +
             "pid=$!; printf '%s\\n' \"$pid\" >" + shell_escape(pid_file) + "; " +
             "i=0; while test $i -lt 1200 && kill -0 \"$pid\" 2>/dev/null && " +
