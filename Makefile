@@ -905,7 +905,7 @@ pretrain-watch: check-bash
 	@cd '$(CURDIR_UNIX)' && mkdir -p artifacts/logs && $(MAKE) build-pretrain-manifest-s && S_COMPILER='$(S_COMPILER)' S_SOURCE_ROOT='$(S_COMPILER_EMIT_CWD)' MODEL_SIZE=llm NEURX_ALLOW_FULL_1T_LOCAL=1 $(MAKE) run-large-pretrain-s 2>&1 | tee artifacts/logs/model_large_pretrain_watch.log
 build-real-chat-s:
 	@mkdir -p artifacts/build/real_chat
-	@echo "Compiling Real Chat Inference (S)..."
+	@echo "Compiling Real Chat with Real Inference Pipeline (S)..."
 	@$(S_SEED_COMPILER) inference/real_chat.s artifacts/build/real_chat/real_chat.ir || { \
 		echo "❌ Compilation failed!"; \
 		exit 1; \

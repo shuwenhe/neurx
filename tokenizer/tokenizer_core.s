@@ -1,5 +1,6 @@
 package neurx.tokenizer.neurx
 import neurx.tensor.*
+
 struct special_tokens_config {
     int pad_token_id      = 0
     int bos_token_id      = 1
@@ -18,9 +19,11 @@ struct special_tokens_config {
     string sop_token      = ""
     string eop_token      = ""
 }
+
 func default_special_tokens() special_tokens_config {
     return special_tokens_config{}
 }
+
 enum encoding_type {
     UNIGRAM
     BPE
