@@ -1,7 +1,8 @@
 package step3_transformer
 
 use neurx.inference.safetensors_loader.{load_transformer_layer}
-use neurx.inference.cpu_backend.{fast_matmul_flat, fast_gelu, pow_f}
+use neurx.inference.cpu_backend.{fast_matmul_flat_opt, fast_gelu, pow_f, fast_softmax}
+use neurx.model.transformer.position_encoding.{new_rope_position_encoding, position_encoding_config, apply_rope_position}
 
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 
@@ -56,33 +57,6 @@ func rms_norm([][]float x) [][]float {
 
 func transformer_layer([][]float hidden_states) [][]float {
     return hidden_states
-}
-
-func apply_rope_flat([]float q, []float k, int seq_len, int num_heads, int head_dim, float theta) ( []float, []float ) {
-    int total_dim = num_heads * head_dim
-    int t = 0
-    while t < seq_len {
-        int h = 0
-        while h < num_heads {
-            int base = h * head_dim
-            int d = 0
-            while d < head_dim {
-                int idx = t * total_dim + base + d
-                float pos = float(t)
-                float theta_k = pos / pow_f(theta, float(d) / float(head_dim))
-                float cosv = 1.0
-                float sinv = theta_k
-                float qv = q[idx]
-                float kv = k[idx]
-                q[idx] = qv * cosv - kv * sinv
-                k[idx] = kv * cosv + qv * sinv
-                d = d + 1
-            }
-            h = h + 1
-        }
-        t = t + 1
-    }
-    (q, k)
 }
 
 func exp_approx(float x) float {
@@ -156,6 +130,37 @@ func transformer_forward([][]float embeddings) [][]float {
         [][]float Wup = weights[base + "mlp.up_proj.weight"]
         [][]float Wdown = weights[base + "mlp.down_proj.weight"]
 
+        func compute_matrix_stats(mat [][]float) (float, float) {
+            if mat == nil || len(mat) == 0 { return 0.0, 0.0 }
+            int R = len(mat)
+            int C = len(mat[0])
+            int tot = R * C
+            float sum = 0.0
+            int r = 0
+            while r < R {
+                int c = 0
+                while c < C {
+                    sum = sum + mat[r][c]
+                    c = c + 1
+                }
+                r = r + 1
+            }
+            float mean = sum / float(tot)
+            float sample = 0.0
+            int count = 0
+            r = 0
+            while r < R && count < 8 {
+                int c = 0
+                while c < C && count < 8 {
+                    sample = sample + mat[r][c]
+                    c = c + 1
+                    count = count + 1
+                }
+                r = r + 1
+            }
+            mean, sample
+        }
+
         func flatten_mat(mat [][]float) []float {
             if mat == nil || len(mat) == 0 { return []float{} }
             int R = len(mat)
@@ -173,6 +178,21 @@ func transformer_forward([][]float embeddings) [][]float {
             out
         }
 
+        float m_wq, s_wq = compute_matrix_stats(Wq)
+        float m_wk, s_wk = compute_matrix_stats(Wk)
+        float m_wv, s_wv = compute_matrix_stats(Wv)
+        float m_wo, s_wo = compute_matrix_stats(Wo)
+        float m_gate, s_gate = compute_matrix_stats(Wgate)
+        float m_up, s_up = compute_matrix_stats(Wup)
+        float m_down, s_down = compute_matrix_stats(Wdown)
+        print("[L" + int_to_string(layer) + "] Wq mean=" + int_to_string(int(m_wq * 1000000.0)) + " sample=" + int_to_string(int(s_wq * 1000000.0)) + "\n")
+        print("[L" + int_to_string(layer) + "] Wk mean=" + int_to_string(int(m_wk * 1000000.0)) + " sample=" + int_to_string(int(s_wk * 1000000.0)) + "\n")
+        print("[L" + int_to_string(layer) + "] Wv mean=" + int_to_string(int(m_wv * 1000000.0)) + " sample=" + int_to_string(int(s_wv * 1000000.0)) + "\n")
+        print("[L" + int_to_string(layer) + "] Wo mean=" + int_to_string(int(m_wo * 1000000.0)) + " sample=" + int_to_string(int(s_wo * 1000000.0)) + "\n")
+        print("[L" + int_to_string(layer) + "] Gate mean=" + int_to_string(int(m_gate * 1000000.0)) + " sample=" + int_to_string(int(s_gate * 1000000.0)) + "\n")
+        print("[L" + int_to_string(layer) + "] Up mean=" + int_to_string(int(m_up * 1000000.0)) + " sample=" + int_to_string(int(s_up * 1000000.0)) + "\n")
+        print("[L" + int_to_string(layer) + "] Down mean=" + int_to_string(int(m_down * 1000000.0)) + " sample=" + int_to_string(int(s_down * 1000000.0)) + "\n")
+
         []float fq = flatten_mat(Wq)
         []float fk = flatten_mat(Wk)
         []float fv = flatten_mat(Wv)
@@ -181,11 +201,20 @@ func transformer_forward([][]float embeddings) [][]float {
         []float fup = flatten_mat(Wup)
         []float fdown = flatten_mat(Wdown)
 
-        []float Q = fast_matmul_flat(A, fq, seq_len, hidden, hidden)
-        []float K = fast_matmul_flat(A, fk, seq_len, hidden, hidden)
-        []float V = fast_matmul_flat(A, fv, seq_len, hidden, hidden)
+        []float Q = fast_matmul_flat_opt(A, fq, seq_len, hidden, hidden)
+        []float K = fast_matmul_flat_opt(A, fk, seq_len, hidden, hidden)
+        []float V = fast_matmul_flat_opt(A, fv, seq_len, hidden, hidden)
 
-        (Q, K) = apply_rope_flat(Q, K, seq_len, 14, hidden / 14, 10000.0)
+        pos_enc_cfg := position_encoding_config{
+            hidden_dim: hidden,
+            max_seq_len: seq_len,
+            encoding_type: "rope",
+            rope_base: 10000.0,
+        }
+        rope_enc := new_rope_position_encoding(pos_enc_cfg)
+        [][]float rope_res = apply_rope_position(rope_enc, Q, K, seq_len, 0)
+        Q = rope_res[0]
+        K = rope_res[1]
 
         int num_heads = 14
         int head_dim = hidden / num_heads
@@ -211,7 +240,8 @@ func transformer_forward([][]float embeddings) [][]float {
                     scores[kj] = s
                     kj = kj + 1
                 }
-                []float probs = softmax_row(scores, seq_len)
+                []float probs = []float{cap: seq_len}
+                fast_softmax(scores, probs, seq_len)
                 int d2 = 0
                 while d2 < head_dim {
                     float acc = 0.0
@@ -229,7 +259,7 @@ func transformer_forward([][]float embeddings) [][]float {
             qi = qi + 1
         }
 
-        []float AttnProjected = fast_matmul_flat(Out, fo, seq_len, hidden, hidden)
+        []float AttnProjected = fast_matmul_flat_opt(Out, fo, seq_len, hidden, hidden)
 
         int idx = 0
         while idx < seq_len * hidden {
@@ -237,8 +267,8 @@ func transformer_forward([][]float embeddings) [][]float {
             idx = idx + 1
         }
 
-        []float Gate = fast_matmul_flat(A, fgate, seq_len, hidden, 4864)
-        []float Up = fast_matmul_flat(A, fup, seq_len, hidden, 4864)
+        []float Gate = fast_matmul_flat_opt(A, fgate, seq_len, hidden, 4864)
+        []float Up = fast_matmul_flat_opt(A, fup, seq_len, hidden, 4864)
         []float Gated = []float{cap: seq_len * 4864}
         int ii = 0
         while ii < seq_len {
@@ -250,7 +280,7 @@ func transformer_forward([][]float embeddings) [][]float {
             }
             ii = ii + 1
         }
-        []float FfnOut = fast_matmul_flat(Gated, fdown, seq_len, 4864, hidden)
+        []float FfnOut = fast_matmul_flat_opt(Gated, fdown, seq_len, 4864, hidden)
 
         int kk = 0
         while kk < seq_len * hidden {

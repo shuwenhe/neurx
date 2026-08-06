@@ -49,7 +49,7 @@ func main() {
     cfg := create_transformer_config()
     [][]float hidden = transformer_forward(embeddings)
     print("Transformer output shape: [" + int_to_string(len(hidden)) + ", " + int_to_string(cfg.hidden_size) + "]\n")
-    // --- Numeric verification: compute mean/std for this output
+
     func compute_mean_std([][]float mat) (float, float) {
         int rows = len(mat)
         if rows == 0 { return 0.0, 0.0 }
@@ -78,7 +78,7 @@ func main() {
             i = i + 1
         }
         float var = acc / float(N)
-        // sqrt via Newton iterations
+
         func sqrt_approx(float x) float {
             if x <= 0.0 { return 0.0 }
             float y = x
@@ -104,8 +104,6 @@ func main() {
     string output = decode_tokens(generated)
     print("Model output:\n" + output + "\n")
     print("Inference pipeline completed.\n")
-
-    // Single-token random test
     print("\n[VERIFY] Running single-token numeric test...\n")
     []int single = []int{2048}
     [][]float emb_single = embed_tokens(single)

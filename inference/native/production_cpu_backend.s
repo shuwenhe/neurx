@@ -84,6 +84,10 @@ func fast_matmul_flat([]float A, []float B, int M, int N, int P) []float {
     out
 }
 
+func fast_matmul_flat_opt([]float A, []float B, int M, int N, int P) []float {
+    return fast_matmul_flat(A, B, M, N, P)
+}
+
 func fast_softmax([]float logits, []float probs, int size) {
     float max_val = logits[0]
     int i = 1
