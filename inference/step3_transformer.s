@@ -100,6 +100,54 @@ func softmax_row([]float scores, int length) []float {
     out
 }
 
+func compute_matrix_stats(mat [][]float) (float, float) {
+    if mat == nil || len(mat) == 0 { return 0.0, 0.0 }
+    int R = len(mat)
+    int C = len(mat[0])
+    int tot = R * C
+    float sum = 0.0
+    int r = 0
+    while r < R {
+        int c = 0
+        while c < C {
+            sum = sum + mat[r][c]
+            c = c + 1
+        }
+        r = r + 1
+    }
+    float mean = sum / float(tot)
+    float sample = 0.0
+    int count = 0
+    r = 0
+    while r < R && count < 8 {
+        int c = 0
+        while c < C && count < 8 {
+            sample = sample + mat[r][c]
+            c = c + 1
+            count = count + 1
+        }
+        r = r + 1
+    }
+    mean, sample
+}
+
+func flatten_mat(mat [][]float) []float {
+    if mat == nil || len(mat) == 0 { return []float{} }
+    int R = len(mat)
+    int C = len(mat[0])
+    []float out = []float{cap: R * C}
+    int r = 0
+    while r < R {
+        int c = 0
+        while c < C {
+            out[r * C + c] = mat[r][c]
+            c = c + 1
+        }
+        r = r + 1
+    }
+    out
+}
+
 func transformer_forward([][]float embeddings) [][]float {
     int seq_len = len(embeddings)
     if seq_len == 0 { return embeddings }
@@ -129,54 +177,6 @@ func transformer_forward([][]float embeddings) [][]float {
         [][]float Wgate = weights[base + "mlp.gate_proj.weight"]
         [][]float Wup = weights[base + "mlp.up_proj.weight"]
         [][]float Wdown = weights[base + "mlp.down_proj.weight"]
-
-        func compute_matrix_stats(mat [][]float) (float, float) {
-            if mat == nil || len(mat) == 0 { return 0.0, 0.0 }
-            int R = len(mat)
-            int C = len(mat[0])
-            int tot = R * C
-            float sum = 0.0
-            int r = 0
-            while r < R {
-                int c = 0
-                while c < C {
-                    sum = sum + mat[r][c]
-                    c = c + 1
-                }
-                r = r + 1
-            }
-            float mean = sum / float(tot)
-            float sample = 0.0
-            int count = 0
-            r = 0
-            while r < R && count < 8 {
-                int c = 0
-                while c < C && count < 8 {
-                    sample = sample + mat[r][c]
-                    c = c + 1
-                    count = count + 1
-                }
-                r = r + 1
-            }
-            mean, sample
-        }
-
-        func flatten_mat(mat [][]float) []float {
-            if mat == nil || len(mat) == 0 { return []float{} }
-            int R = len(mat)
-            int C = len(mat[0])
-            []float out = []float{cap: R * C}
-            int r = 0
-            while r < R {
-                int c = 0
-                while c < C {
-                    out[r * C + c] = mat[r][c]
-                    c = c + 1
-                }
-                r = r + 1
-            }
-            out
-        }
 
         float m_wq, s_wq = compute_matrix_stats(Wq)
         float m_wk, s_wk = compute_matrix_stats(Wk)
