@@ -313,3 +313,4 @@ func clamp_scalar(x: f32, min_val: f32, max_val: f32) -> f32 {
     }
     return x
 }
+

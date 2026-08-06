@@ -27,3 +27,4 @@ func log_collective_op(
             int_to_string(bytes) + " bytes across " +
             int_to_string(world_size) + " GPUs")
 }
+

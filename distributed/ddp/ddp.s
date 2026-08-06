@@ -296,3 +296,4 @@ func ddp_broadcast_params(ddp_state state, process_group_state pg, []float param
     }
     broadcast(pg, 0, params)
 }
+

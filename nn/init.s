@@ -232,3 +232,4 @@ func cos_approx(float x) float {
     float x10 = x8 * x2
     return 1.0 - (x2 / 2.0) + (x4 / 24.0) - (x6 / 720.0) + (x8 / 40320.0) - (x10 / 3628800.0)
 }
+

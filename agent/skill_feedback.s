@@ -60,3 +60,4 @@ func agent_skill_feedback_state_dict(agent_skill_feedback_state state) agent_ski
 func agent_skill_feedback_load_state_dict(agent_skill_feedback_state state, agent_skill_feedback_state other) agent_skill_feedback_state {
     other
 }
+

@@ -49,3 +49,4 @@ func vllm_prefix_cache_state_dict(vllm_prefix_cache_state state) vllm_prefix_cac
 func vllm_prefix_cache_load_state_dict(vllm_prefix_cache_state state, vllm_prefix_cache_state other) vllm_prefix_cache_state {
     other
 }
+

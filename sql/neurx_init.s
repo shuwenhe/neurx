@@ -34,3 +34,4 @@ func main() {
     println("NeurX MySQL schema initialized")
     0
 }
+

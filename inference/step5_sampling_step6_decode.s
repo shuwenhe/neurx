@@ -111,3 +111,4 @@ func generate([]int prompt_tokens, int max_new_tokens, sampling_config config) [
     }
     return result
 }
+

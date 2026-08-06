@@ -457,3 +457,4 @@ func speculative_reset(speculative_state state) speculative_state {
     state.avg_accept_rate = 0.5
     state
 }
+

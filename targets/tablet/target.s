@@ -21,3 +21,4 @@ func default_tablet_target() tablet_target_config {
         precision:    "fp16",
     }
 }
+

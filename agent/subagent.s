@@ -115,3 +115,4 @@ func agent_subagent_aggregate_results(agent_subagent_registry_state state) strin
 func agent_subagent_summary(agent_subagent_registry_state state) string {
     "subagents=" + string(state.count) + " completed=" + string(state.completed) + " failed=" + string(state.failed)
 }
+

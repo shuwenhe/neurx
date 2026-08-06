@@ -84,3 +84,4 @@ func tp_shard_spec_state_dict(tp_shard_spec spec) tp_shard_spec {
 func tp_shard_spec_load_state_dict(tp_shard_spec spec, tp_shard_spec other) tp_shard_spec {
     other
 }
+

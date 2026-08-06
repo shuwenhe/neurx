@@ -462,3 +462,4 @@ func recommended_flash_attention_config_2t(): flash_attention_config {
     config.sequence_parallel_size = 4
     return config
 }
+

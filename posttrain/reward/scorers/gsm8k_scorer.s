@@ -131,3 +131,4 @@ func remove_commas_and_dollars(string s) string {
 func string_concat(string a, string b) string {
     return a + b
 }
+

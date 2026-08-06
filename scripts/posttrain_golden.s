@@ -378,3 +378,4 @@ func find_substring_from(string text, string pattern, int start) int {
     }
     -1
 }
+

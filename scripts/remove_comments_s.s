@@ -68,3 +68,4 @@ func strip_comments(string text) string {
 
 func main() {
     string root_find = "."
+

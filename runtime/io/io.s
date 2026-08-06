@@ -453,3 +453,4 @@ extern "intrinsic" func __host_write_binary_file(string path, []byte data) ()
 func runtime_write_binary_file(string path, []byte data) () {
     __host_write_binary_file(path, data)
 }
+

@@ -218,3 +218,4 @@ func new_from_ints([]int values, []int shape) tensor {
     }
     new(data, shape, true)
 }
+

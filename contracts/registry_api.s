@@ -73,3 +73,4 @@ interface i_registry_thread_safety {
     release_write_lock() -> void
     is_locked() -> bool
 }
+

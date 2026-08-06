@@ -89,3 +89,4 @@ func main() {
     print("Intrinsic: __host_read_binary_file(path) → []int\n")
     print("Goal: Read model.safetensors header and print metadata\n\n")
 }
+

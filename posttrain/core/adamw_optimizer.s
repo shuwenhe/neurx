@@ -156,3 +156,4 @@ func clip_grad_norm_s([][]float gradients, float max_norm) [][]float {
     }
     clipped
 }
+

@@ -242,3 +242,4 @@ func main() {
     println("NeurX Training Complete!")
     if result.trained && result.loss < result.best_loss + 1.0 { 0 } else { 1 }
 }
+

@@ -50,3 +50,4 @@ struct logger {
     tensorboard_writer tb_writer
     wandb_run wb_run
 }
+

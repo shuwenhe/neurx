@@ -335,3 +335,4 @@ func calculate_zero_memory_usage(
     stats.memory_reduction_factor = calculate_zero_memory_savings(total_params, dp_degree, zero_stage)
     return stats
 }
+

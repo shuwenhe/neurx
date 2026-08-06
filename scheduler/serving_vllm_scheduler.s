@@ -108,3 +108,4 @@ func vllm_scheduler_state_dict(vllm_scheduler_state state) vllm_scheduler_state 
 func vllm_scheduler_load_state_dict(vllm_scheduler_state state, vllm_scheduler_state other) vllm_scheduler_state {
     other
 }
+

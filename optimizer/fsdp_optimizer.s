@@ -424,3 +424,4 @@ func recommend_fsdp_for_2t(int num_gpus, int tp_degree, int pp_degree) fsdp_conf
     int effective_dp = num_gpus / (tp_degree * pp_degree)
     return default_fsdp_config_2t(effective_dp, 0)
 }
+

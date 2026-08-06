@@ -306,3 +306,4 @@ func (monitor *performance_monitor) monitor_training(duration_steps int) {
     }
     monitor.print_dashboard()
 }
+

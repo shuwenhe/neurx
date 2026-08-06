@@ -311,3 +311,4 @@ func run_inference_benchmark(modelPath string) error {
     }
     return orchestrator.benchmark()
 }
+

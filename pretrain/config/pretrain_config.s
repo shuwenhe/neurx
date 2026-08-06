@@ -89,3 +89,4 @@ func pretrain_config_state_dict(pretrain_config cfg) pretrain_config {
 func pretrain_config_load_state_dict(pretrain_config cfg, pretrain_config other) pretrain_config {
     other
 }
+

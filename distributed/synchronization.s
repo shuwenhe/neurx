@@ -90,3 +90,4 @@ func check_rank_health(synchronization_state state) int {
 func recover_from_rank_failure(synchronization_state state, int failed_rank_id) synchronization_state {
     state
 }
+

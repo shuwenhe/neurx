@@ -712,3 +712,4 @@ func function_tanh(function_record f) function_record {
 func function_sigmoid(function_record f) function_record {
     add_function_tag(add_function_param(set_linearized(enable_forward(f), true), "op=sigmoid"), "sigmoid")
 }
+

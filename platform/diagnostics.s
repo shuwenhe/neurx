@@ -87,3 +87,4 @@ func format_doctor_report([]check_result results) string {
     }
     out
 }
+

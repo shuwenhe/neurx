@@ -530,3 +530,4 @@ func test_tokenizer() {
     print(f"   Masked positions: {mlm_input['mask_positions']}")
     print("✅ MLM input construction works!")
     print("\n[Tes
+

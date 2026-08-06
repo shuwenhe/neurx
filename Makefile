@@ -951,22 +951,13 @@ chat: build-real-model-chat-s
 		exit 1; \
 	}
 	@mkdir -p /tmp
-	@rm -f /tmp/neurx_s_inference_*.* 
 	@NEURX_ROOT='$(CURDIR_UNIX)' \
-		NEURX_MODEL_DIR='$(CHAT_MODEL_PATH)' \
-		NEURX_CPU_THREADS='$(NEURX_CPU_THREADS)' \
-		NEURX_S_HOST='127.0.0.1' \
-		NEURX_S_PORT='18082' \
-		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir' > /tmp/neurx_s_inference_18082.log 2>&1 & \
-	BACKEND_PID=$$!; \
-	sleep 2; \
-	NEURX_ROOT='$(CURDIR_UNIX)' \
 		NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
 		NEURX_CHAT_MAX_NEW_TOKENS='$(CHAT_MAX_NEW_TOKENS)' \
 		NEURX_CPU_THREADS='$(NEURX_CPU_THREADS)' \
-		NEURX_S_INFERENCE_BACKEND='$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir' \
-		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_CHAT_IR)'; \
-	kill $$BACKEND_PID 2>/dev/null || true
+		NEURX_S_PORT='18083' \
+		NEURX_S_INFERENCE_BACKEND='$(PRODUCTION_S_BACKEND)' \
+		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_CHAT_IR)'
 
 production-s-inference: chat
 

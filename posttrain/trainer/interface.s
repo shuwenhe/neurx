@@ -71,8 +71,11 @@ struct trainer_report {
 }
 interface trainer {
     func step(trainer_config config, trainer_state state, []string batch_data) trainer_state
+
     func save_adapter(trainer_state state, string output_dir) int
+
     func get_stats(trainer_state state) trainer_report
+
     func initialize(trainer_config config) trainer_state
 }
 enum trainer_type {
@@ -83,3 +86,4 @@ enum trainer_type {
 func create_trainer(trainer_type ttype) int {
     return 0
 }
+

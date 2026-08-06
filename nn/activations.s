@@ -375,3 +375,4 @@ func log_approx(float x) float {
     }
     2.0 * result
 }
+

@@ -147,3 +147,4 @@ func get_lora_trainable_params_s(lora_module_s lora) int {
     int lora_b_params = lora.rank * lora.output_dim
     lora_a_params + lora_b_params
 }
+

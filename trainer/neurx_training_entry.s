@@ -310,3 +310,4 @@ func test_3d_parallel_module() {
     print("3D Parallel config valid: " + string(valid))
     print(print_full_config_summary(mcfg, create_64gpu_training_config()))
 }
+

@@ -223,3 +223,4 @@ func recommended_2t_ultra_setup_512_gpus() recommended_2t_training_setup {
 
 func print_2t_model_specification(model_2t_config cfg) {
 }
+

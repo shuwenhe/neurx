@@ -152,3 +152,4 @@ func fmt_float(float val, int decimals) string {
 func string_char(int c) string {
     string(c)
 }
+

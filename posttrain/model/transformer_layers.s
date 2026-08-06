@@ -264,3 +264,4 @@ func transformer_block_forward(transformer_block block, []float hidden_state) []
     }
     return final_output
 }
+

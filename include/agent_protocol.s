@@ -272,3 +272,4 @@ func agent_protocol_message_summary(agent_protocol_message msg) string {
     " in_tok=" + string(msg.input_tokens) +
     " out_tok=" + string(msg.output_tokens)
 }
+

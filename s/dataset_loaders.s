@@ -89,3 +89,4 @@ func read_lines(string path) []string {
         "Deep learning has many applications",
     }
 }
+

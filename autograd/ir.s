@@ -439,3 +439,4 @@ func distributed_training(ir_graph graph, int num_workers) ir_graph {
         linearized: graph.linearized,
     }
 }
+

@@ -54,3 +54,4 @@ func is_grad_accumulation_enabled(grad_mode_state state) bool {
 func get_gradient_accumulation(grad_mode_state state) bool {
     state.grad_accumulation
 }
+

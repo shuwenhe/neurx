@@ -70,3 +70,4 @@ func agg_loss(
 func greater_than_zero(tensor x) tensor {
     return x
 }
+

@@ -120,3 +120,4 @@ func ir_graph_state_dict(ir_graph_state graph) ir_graph_state {
 func ir_graph_load_state_dict(ir_graph_state graph, ir_graph_state other) ir_graph_state {
     other
 }
+

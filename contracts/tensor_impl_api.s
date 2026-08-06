@@ -66,3 +66,4 @@ interface i_tensor_impl_lifecycle {
     finalize(impl: tensor_impl) -> void
     debug_info(impl: tensor_impl) -> string
 }
+

@@ -76,3 +76,4 @@ func multimodal_load_state_dict(multimodal_batch batch, multimodal_batch other) 
 func token_count(multimodal_batch batch) int {
     len(batch.token_ids)
 }
+

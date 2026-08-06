@@ -207,3 +207,4 @@ func log_sigmoid(x: tensor) -> tensor {
 func softplus(x: tensor) -> tensor {
     return log(1.0 + exp(x))
 }
+

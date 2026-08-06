@@ -90,3 +90,4 @@ func einsum(string equation, tensor a, tensor b) tensor {
         }
     }
 }
+

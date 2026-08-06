@@ -23,3 +23,4 @@ func sample_from_softmax(
     int idx = sample_from_distribution(probs, rng_state)
     (idx, advance_rng(rng_state))
 }
+

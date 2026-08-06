@@ -39,3 +39,4 @@ func dpo_state_dict(dpo_state state) dpo_state {
 func dpo_load_state_dict(dpo_state state, dpo_state other) dpo_state {
     other
 }
+

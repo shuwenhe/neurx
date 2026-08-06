@@ -36,3 +36,4 @@ func flush_metrics(logger *lg) {
     }
     lg.metric_buffer = []
 }
+

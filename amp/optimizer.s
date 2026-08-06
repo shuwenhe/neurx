@@ -441,3 +441,4 @@ func print_mixed_precision_status(state: mixed_precision_state): void {
     println("  total_steps=" + int_to_string(state.total_steps))
     println("  overflow_steps=" + int_to_string(state.num_overflow_steps))
 }
+

@@ -104,3 +104,4 @@ func main() {
     io.Println("✓ To start full training, run: cd " + curdir + " && make pretrain-gpu")
     io.Println("")
 }
+

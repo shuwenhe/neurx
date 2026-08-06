@@ -71,3 +71,4 @@ func call_trace_maybe_write(agent_memory_state memory) string {
     string path = call_trace_default_log_path()
     call_trace_write_log(memory, path)
 }
+

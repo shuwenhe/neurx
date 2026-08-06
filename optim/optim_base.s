@@ -92,3 +92,4 @@ func optimizer_step(optimizer_base opt) optimizer_base {
 func optimizer_get_step_count(optimizer_base opt) int {
     return opt.step_count
 }
+

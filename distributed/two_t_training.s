@@ -165,3 +165,4 @@ func two_t_training_plan_summary(two_t_training_plan plan) string {
     out = out + ")"
     out
 }
+

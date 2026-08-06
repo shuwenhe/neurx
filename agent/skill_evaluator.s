@@ -50,3 +50,4 @@ func agent_skill_eval_result_state_dict(agent_skill_eval_result result) agent_sk
 func agent_skill_eval_result_load_state_dict(agent_skill_eval_result result, agent_skill_eval_result other) agent_skill_eval_result {
     other
 }
+

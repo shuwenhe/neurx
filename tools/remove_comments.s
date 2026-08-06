@@ -90,3 +90,4 @@ func main() {
   }
   println("Done! All comments removed.")
 }
+

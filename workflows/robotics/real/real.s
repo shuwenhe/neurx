@@ -37,3 +37,4 @@ func robotics_real_trigger_emergency_stop(robotics_real_state state) robotics_re
         emergency_stop: true,
     }
 }
+

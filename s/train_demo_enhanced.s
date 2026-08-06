@@ -526,6 +526,7 @@ func save_manifest(string manifest_path, []string checkpoints) void:
         content += ckpt + "\n"
     write_text_file(manifest_path, content)
 func get_time_ms() int:
+
 func write_text_file(string path, string content) result[void, error]:
     pass
 def rename_file(string old_path, string new_path) void:
@@ -542,3 +543,4 @@ func main():
         println("\n⚠ Training completed but may need tuning.")
 if __name__ == "__main__":
     exit(main())
+

@@ -306,3 +306,4 @@ func diffusion_ddpm_next_t(int current_t) int {
 func diffusion_ddim_next_t(int current_t, int stride) int {
     diffusion_ddim_next_t(current_t, stride)
 }
+

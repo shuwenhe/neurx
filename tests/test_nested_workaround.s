@@ -25,3 +25,4 @@ func main() {
     println("Step 5: Got value = " + int_to_str(val))
     0
 }
+

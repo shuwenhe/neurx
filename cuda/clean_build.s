@@ -16,3 +16,4 @@ func remove_dir(string path) {
     runtime_run_command_output("rm -rf " + path + " 2>&1")
     println("[OK] Removed: " + path)
 }
+

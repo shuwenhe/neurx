@@ -156,3 +156,4 @@ func replace_all(string s, string old_str, string new_str) string {
     }
     return result
 }
+

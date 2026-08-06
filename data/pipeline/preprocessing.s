@@ -110,3 +110,4 @@ func get_multilingual_batch(batch_mixer mixer, int batch_size) []int {
 func filter_documents([]string documents, preprocessing_config cfg) []string {
     []string{cap: len(documents)}
 }
+

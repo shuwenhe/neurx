@@ -316,3 +316,4 @@ func nda_forward(nda_weights weights, []float input, int tokens, []float initial
         beta: beta_values,
     }
 }
+

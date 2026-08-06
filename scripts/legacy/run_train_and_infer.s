@@ -29,3 +29,4 @@ func print_flag(string name, bool ok) {
         println("  - " + name + ": missing")
     }
 }
+

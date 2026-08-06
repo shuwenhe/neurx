@@ -6,3 +6,4 @@ func main() {
     println("For safety, this version only provides guidance instead of rewriting history automatically.")
     0
 }
+

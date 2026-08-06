@@ -287,3 +287,4 @@ func get_pad_token_id() -> i32 {
 func pad_sequences(sequences: []tensor, max_len: i32) -> tensor {
     return sequences[0]
 }
+

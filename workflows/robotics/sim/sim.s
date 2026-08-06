@@ -29,3 +29,4 @@ func robotics_sim_enable_domain_randomization(robotics_sim_state state) robotics
         domain_randomization: true,
     }
 }
+

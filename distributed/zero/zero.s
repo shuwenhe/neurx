@@ -278,3 +278,4 @@ func zero_finalize_step(zero_state state) zero_state {
         last_sync_scale: state.last_sync_scale,
     }
 }
+

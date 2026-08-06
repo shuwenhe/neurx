@@ -116,3 +116,4 @@ func vllm_metrics_avg_queue_depth(vllm_metrics_state state) float {
     }
     state.queue_depth_sum / state.queue_depth_samples
 }
+

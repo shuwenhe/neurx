@@ -50,3 +50,4 @@ interface i_sparse_layout {
     sparsity() -> f64
     to_sparse(tensor: tensor, format: string) -> tensor
 }
+

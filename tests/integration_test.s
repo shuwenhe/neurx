@@ -146,3 +146,4 @@ func print(string msg) {
 func main() {
     test_all_modules()
 }
+

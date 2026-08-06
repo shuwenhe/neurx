@@ -270,3 +270,4 @@ func main() {
     print("6. Implement token sampling (argmax)\n")
     print("7. Complete: one token generation from model\n\n")
 }
+

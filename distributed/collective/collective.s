@@ -730,3 +730,4 @@ func estimate_collective_memory(int tensor_elements, int world_size, int dtype) 
     float allreduce_mem = tensor_elements * elem_bytes * 2
     return allgather_mem
 }
+

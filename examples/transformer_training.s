@@ -32,3 +32,4 @@ func training_script_structure() {
 
 func minimal_example() {
 }
+

@@ -33,3 +33,4 @@ func tokenize(string text) []int {
 func decode([]int tokens) string {
     return simple_decode(tokens)
 }
+

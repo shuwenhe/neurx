@@ -66,3 +66,4 @@ func drain_hardirq(is irq_state) (irq_state, []int) {
     is.pending_hardirq = []
     return (is, fired)
 }
+

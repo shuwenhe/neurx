@@ -506,3 +506,4 @@ func pow_dbl(double base, double exp) double {
     if negative { result = 1.0 / result }
     return result
 }
+

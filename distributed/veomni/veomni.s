@@ -513,3 +513,4 @@ func veomni_reset(veomni_state state) veomni_state {
     state.gradients = math.allocate_float(0, 0.0)
     state
 }
+

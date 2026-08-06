@@ -31,3 +31,4 @@ func test_int_to_string(int value) string {
 func test_string_char(int code) string {
     string(code)
 }
+

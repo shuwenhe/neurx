@@ -141,3 +141,4 @@ func foundation_model_forward(
 func foundation_model_summary(foundation_model model) string {
     model.preset.name + ":" + model.preset.size_label + ":layers=" + string(model.config.num_layers) + ":hidden=" + string(model.config.hidden_dim) + ":runtime_hidden=" + string(model.runtime_config.hidden_dim)
 }
+

@@ -446,3 +446,4 @@ func print_rope_config_summary(rope_scaling_config cfg) string {
     "  Base: " + string(cfg.base) + "\n" +
     "  Dim: " + string(cfg.dim)
 }
+

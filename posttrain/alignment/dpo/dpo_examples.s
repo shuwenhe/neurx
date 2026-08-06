@@ -216,3 +216,4 @@ func string_float(float f) string {
     int frac_part = int((f - float_of_int(int_part)) * 10000.0)
     string(int_part) + "." + string(frac_part)
 }
+

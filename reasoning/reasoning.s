@@ -87,3 +87,4 @@ func agent_reasoning_last_conclusion(agent_reasoning_state state) string {
 func agent_reasoning_export(agent_reasoning_state state) string {
     state.scratchpad
 }
+

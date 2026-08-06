@@ -556,3 +556,4 @@ func print_char(string s, int n) string {
 infix "*" (left: string, right: int): string {
     print_char(left, right)
 }
+

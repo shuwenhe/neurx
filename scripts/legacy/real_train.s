@@ -158,3 +158,4 @@ func digit_to_char(int digit) string {
 func int(float f) int {
     0
 }
+

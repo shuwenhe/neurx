@@ -35,3 +35,4 @@ interface i_multi_stream_synchronization {
     wait_multiple_events(stream: stream, events: []event) -> void
     wait_any_event(stream: stream, events: []event) -> i64
 }
+

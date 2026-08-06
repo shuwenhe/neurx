@@ -166,3 +166,4 @@ func net_close(ns net_state, sock_id int) net_state {
     }
     return ns
 }
+

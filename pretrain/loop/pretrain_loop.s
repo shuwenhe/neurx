@@ -76,3 +76,4 @@ func pretrain_loop_state_dict(pretrain_loop_state state) pretrain_loop_state {
 func pretrain_loop_load_state_dict(pretrain_loop_state state, pretrain_loop_state other) pretrain_loop_state {
     other
 }
+

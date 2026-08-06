@@ -568,3 +568,4 @@ func cot_reset(cot_state state) cot_state {
     state.best_score = 0.0
     state
 }
+

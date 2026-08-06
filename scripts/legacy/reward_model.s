@@ -334,3 +334,4 @@ func (trainer *reward_model_trainer) print_summary() {
         fmt.Printf("Final AUC Score: %.4f\n", latest.auc_score)
     }
 }
+

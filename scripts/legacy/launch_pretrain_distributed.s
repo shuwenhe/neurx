@@ -278,3 +278,4 @@ func get_timestamp() string {
 
 func exit(int code) {
 }
+

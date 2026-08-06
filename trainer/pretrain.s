@@ -34,3 +34,4 @@ func pretrain_trainer_load_state_dict(pretrain_trainer_ref trainer, pretrain_tra
         loop: pretrain_loop_load_state_dict(trainer.loop, other.loop),
     }
 }
+

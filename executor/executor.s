@@ -1006,3 +1006,4 @@ func agent_execute_result_state_dict(agent_execute_result result) agent_execute_
 func agent_execute_result_load_state_dict(agent_execute_result result, agent_execute_result other) agent_execute_result {
     other
 }
+

@@ -25,3 +25,4 @@ func neurx_boot() init_boot_result {
         summary: "kernel_initialized services_started policy_loaded",
     }
 }
+

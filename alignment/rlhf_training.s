@@ -120,3 +120,4 @@ func rank_responses_by_preference(reward_model mdl, string prompt, []string resp
     []float scores = score_responses(mdl, prompt, responses)
     []int{cap: len(responses)}
 }
+

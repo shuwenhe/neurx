@@ -19,3 +19,4 @@ func default_auto_target() auto_target_config {
         v2x_enabled:      false,
     }
 }
+

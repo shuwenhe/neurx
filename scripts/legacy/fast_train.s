@@ -164,3 +164,4 @@ func str_len(string s) int {
     }
     -1
 }
+

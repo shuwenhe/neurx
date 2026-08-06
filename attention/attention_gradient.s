@@ -285,3 +285,4 @@ func allocate_vector(int size, float init_val) []float {
     }
     return v
 }
+

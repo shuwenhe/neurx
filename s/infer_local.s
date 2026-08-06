@@ -479,3 +479,4 @@ func main() {
     println(generate_text_from_checkpoint(checkpoint_path, header.weight_cols, bias, seed, max_new_chars))
     println("================================================")
 }
+

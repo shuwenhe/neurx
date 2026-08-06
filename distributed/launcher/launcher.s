@@ -105,3 +105,4 @@ func validate_distributed_config(distributed_config cfg) bool {
 func is_distributed(distributed_config cfg) bool {
     cfg.world_size > 1
 }
+

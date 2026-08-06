@@ -641,3 +641,4 @@ py_modinit_func py_init_tensor_cuda(void) {
     import_array();
     return py_module_create(&tensor_cuda_module);
 }
+

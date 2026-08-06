@@ -105,3 +105,4 @@ func apply_embedding_scale_s([][]float embeddings, float scale) [][]float {
     }
     scaled
 }
+

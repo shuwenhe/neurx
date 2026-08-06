@@ -44,3 +44,4 @@ func launch_gemm(
     log_kernel_launch("GEMM", cfg.M, cfg.K, cfg.N, flops, memory_bytes)
     nil
 }
+

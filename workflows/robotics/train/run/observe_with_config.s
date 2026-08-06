@@ -78,3 +78,4 @@ func default_if_empty(string value, string fallback) string {
     }
     value
 }
+

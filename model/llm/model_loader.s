@@ -277,3 +277,4 @@ func (m *gptmodel) num_params() int64 {
     total := token_emb_params + pos_emb_params + layer_params + output_params + final_norm_params
     return total
 }
+

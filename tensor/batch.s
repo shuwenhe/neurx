@@ -451,3 +451,4 @@ func vmap_reciprocal(tensor a) tensor {
 func vmap_where(tensor condition, tensor x, tensor y) tensor {
     vmap_ternary("where", condition, x, y)
 }
+

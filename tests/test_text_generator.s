@@ -186,3 +186,4 @@ func main() {
     test_generate_contrastive_with_forward()
     test_generate_no_repeat_ngram_with_forward()
 }
+

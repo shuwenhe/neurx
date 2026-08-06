@@ -2468,3 +2468,4 @@ func gru_cell_layer_train(gru_cell_layer layer) gru_cell_layer {
 func gru_cell_layer_eval(gru_cell_layer layer) gru_cell_layer {
     return gru_cell_layer_state_dict(layer)
 }
+

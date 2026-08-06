@@ -9,3 +9,4 @@ func main() {
     obj.value = 42
     obj.value
 }
+

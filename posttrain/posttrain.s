@@ -162,3 +162,4 @@ func posttrain_pipeline_state_dict(posttrain_pipeline_state state) posttrain_pip
 func posttrain_pipeline_load_state_dict(posttrain_pipeline_state state, posttrain_pipeline_state other) posttrain_pipeline_state {
     other
 }
+

@@ -60,3 +60,4 @@ interface id_type_format_conversion {
     saturate_on_cast(tensor: tensor, target_dtype: DType) -> tensor
     bitcast(tensor: tensor, target_dtype: DType) -> tensor
 }
+

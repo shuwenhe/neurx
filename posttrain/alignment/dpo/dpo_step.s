@@ -37,3 +37,4 @@ func dpo_step_result_state_dict(dpo_step_result result) dpo_step_result {
 func dpo_step_result_load_state_dict(dpo_step_result result, dpo_step_result other) dpo_step_result {
     other
 }
+

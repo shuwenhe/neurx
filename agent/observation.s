@@ -170,3 +170,4 @@ func agent_observation_is_progress(string observation) bool {
 func agent_observation_is_no_progress(string observation) bool {
     agent_observation_parse(observation).no_progress
 }
+

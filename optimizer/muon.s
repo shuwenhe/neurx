@@ -158,3 +158,4 @@ func muon_get_state(muon_optimizer opt) {
 
 func muon_load_state(muon_optimizer opt) {
 }
+

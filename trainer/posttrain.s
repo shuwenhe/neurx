@@ -28,3 +28,4 @@ func posttrain_trainer_load_state_dict(posttrain_trainer_ref trainer, posttrain_
         loop: posttrain_loop_load_state_dict(trainer.loop, other.loop),
     }
 }
+

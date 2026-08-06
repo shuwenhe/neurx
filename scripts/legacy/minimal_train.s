@@ -718,3 +718,4 @@ func str_len(string s) int {
 func string_char(int c) string {
     string(c)
 }
+

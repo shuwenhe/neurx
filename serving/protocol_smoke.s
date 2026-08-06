@@ -19,3 +19,4 @@ func main() {
     println("serving-protocol PASS openai=true tgi=true sse=true")
     0
 }
+

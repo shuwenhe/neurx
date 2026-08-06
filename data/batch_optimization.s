@@ -115,3 +115,4 @@ func adaptive_batch_size_schedule(int step, int max_steps,
                                    float gpu_utilization) int {
     initial_batch_size
 }
+

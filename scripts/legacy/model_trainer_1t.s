@@ -289,3 +289,4 @@ func main() {
     fmt.Println("command: s run scripts/legacy/model_trainer_1t.s")
     fmt.Println("\n✅ Ready for 1T model training on H100 cluster")
 }
+

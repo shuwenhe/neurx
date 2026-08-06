@@ -134,3 +134,4 @@ func compile_pipeline_state_dict(compile_pipeline_state pipeline) compile_pipeli
 func compile_pipeline_load_state_dict(compile_pipeline_state pipeline, compile_pipeline_state other) compile_pipeline_state {
     other
 }
+

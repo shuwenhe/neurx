@@ -371,3 +371,4 @@ func reduce_argmin_dim(tensor a, int dim, bool keepdim) tensor {
 func argmin_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_argmin_dim(a, dim, keepdim)
 }
+

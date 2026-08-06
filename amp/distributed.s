@@ -360,3 +360,4 @@ func estimate_mp_memory_usage(
     mb.savings_vs_fp32_pct = (1.0 - mb.total_per_gpu_gb / fp32_total) * 100.0
     return mb
 }
+

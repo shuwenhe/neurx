@@ -393,3 +393,4 @@ func example_load_state_dict(example ex, example other) example {
         shape: copy_int(other.shape),
     }
 }
+

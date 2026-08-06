@@ -95,3 +95,4 @@ func agent_answer_format(agent_answer_state state) string {
 func agent_answer_summary(agent_answer_state state) string {
     "ready=" + string(state.ready) + " confidence=" + state.confidence + " step=" + string(state.synthesized_at_step)
 }
+

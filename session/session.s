@@ -97,3 +97,4 @@ func agent_session_to_prompt(agent_session_state state) string {
 func agent_session_summary(agent_session_state state) string {
     "session=" + state.session_id + " turns=" + string(state.count) + " active=" + string(state.active)
 }
+

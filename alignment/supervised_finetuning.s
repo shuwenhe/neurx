@@ -118,3 +118,4 @@ func get_sft_learning_rate(sft_trainer trainer, int total_steps) float {
     float progress = float(trainer.steps_completed - warmup_steps) / float(total_steps - warmup_steps)
     trainer.config.learning_rate * 0.5 * (1.0 + 3.14159 * progress)
 }
+

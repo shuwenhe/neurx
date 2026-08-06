@@ -139,3 +139,4 @@ func str_substring(string s, int start) string {
 func str_to_int(string s) int {
     return 0
 }
+

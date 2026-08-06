@@ -239,3 +239,4 @@ func (mtl *multi_task_learner) run() {
     mtl.analyze_performance()
     fmt.Println("\n[MultiTask] Complete!")
 }
+

@@ -87,3 +87,4 @@ func index_of_space(string text) int {
     }
     -1
 }
+

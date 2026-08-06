@@ -95,3 +95,4 @@ func paged_kv_cache_state_dict(paged_kv_cache_state state) paged_kv_cache_state 
 func paged_kv_cache_load_state_dict(paged_kv_cache_state state, paged_kv_cache_state other) paged_kv_cache_state {
     other
 }
+

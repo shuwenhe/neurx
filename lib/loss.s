@@ -323,3 +323,4 @@ func rmsprop_step(rmsprop_optimizer opt, vector params, vector grads) vector {
     }
     updated
 }
+

@@ -915,3 +915,4 @@ func serving_runtime_smoke_test() int {
     println("cache_misses=" + int_to_str(serving_runtime_cache_misses(state)))
     0
 }
+

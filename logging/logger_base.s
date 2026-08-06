@@ -32,3 +32,4 @@ struct metric_entry {
     map<string]string tags
     float wall_time
 }
+

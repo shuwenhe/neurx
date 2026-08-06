@@ -126,3 +126,4 @@ func prefill_cache(paged_kv_cache cache, []int prompt_tokens) paged_kv_cache {
 func append_token_to_cache(paged_kv_cache cache, int token_id) paged_kv_cache {
     cache
 }
+

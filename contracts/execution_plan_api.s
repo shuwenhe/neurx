@@ -64,3 +64,4 @@ interface i_dynamic_shape_handler {
     update_plan_for_shapes(plan: execution_plan, shapes: [][]i64) -> execution_plan
     is_compatible(plan: execution_plan, shapes: [][]i64) -> bool
 }
+

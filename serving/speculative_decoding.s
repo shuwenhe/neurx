@@ -390,3 +390,4 @@ func argmax_spec([]float arr, int n) int {
     }
     best
 }
+

@@ -89,3 +89,4 @@ func concat6(string a, string b, string c, string d, string e, string f) string 
 
 func string_set_workaround() {
 }
+

@@ -329,3 +329,4 @@ func main() {
     multi_gpu := init_multi_gpu_context(4)
     gpu_forward_pass_example(32, 2048, 256, 32000)
 }
+

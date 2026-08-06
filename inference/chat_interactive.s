@@ -20,3 +20,4 @@ func main() {
         print("Assistant: Medical response to: " + input + "\n\n")
     }
 }
+

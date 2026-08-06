@@ -38,3 +38,4 @@ func nccl_reducescatter(
     log_collective_op("REDUCESCATTER", reduce_op, send_bytes, comm->config.world_size)
     nil
 }
+

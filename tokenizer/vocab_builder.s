@@ -269,3 +269,4 @@ func main() {
     save_merge_rules(vocab, "./merges.txt")
     println("BPE vocabulary building completed!")
 }
+

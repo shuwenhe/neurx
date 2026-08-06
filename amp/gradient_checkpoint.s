@@ -61,3 +61,4 @@ func clone_activation([]float act) []float {
     }
     return cloned
 }
+

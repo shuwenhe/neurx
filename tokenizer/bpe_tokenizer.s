@@ -448,3 +448,4 @@ func train_bpe(string corpus_path, int vocab_size, string output_dir) bpe_tokeni
     tokenizer.vocab_size = len(tokenizer.vocab)
     tokenizer
 }
+

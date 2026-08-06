@@ -203,3 +203,4 @@ func text_corpus_load_state_dict(text_corpus_state state, text_corpus_state othe
         token_count: other.token_count,
     }
 }
+

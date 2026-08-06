@@ -79,3 +79,4 @@ func top_k_sample(
         (sample_from_distribution(normalized, rng_state), advance_rng(rng_state))
     }
 }
+

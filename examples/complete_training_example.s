@@ -245,3 +245,4 @@ func print_info(msg: string, val: int) {
 func format_int(i: int) string {
     return "0"
 }
+

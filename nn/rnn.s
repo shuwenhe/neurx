@@ -381,3 +381,4 @@ func gru_forward(gru_cell_state cell, []float input, int seq_len, []float h0) gr
         hidden_size: hs,
     }
 }
+

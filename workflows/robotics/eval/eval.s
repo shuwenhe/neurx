@@ -16,3 +16,4 @@ func robotics_eval_load_state_dict(robotics_eval_state state, robotics_eval_stat
 func robotics_eval_update(robotics_eval_state state, float score, int episodes) robotics_eval_state {
     neurx.model.robotics.eval.robotics_eval_update(state, score, episodes)
 }
+

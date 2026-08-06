@@ -436,3 +436,4 @@ func vision_encoder_compute_spatial_positions(int width, int height, int patch_s
     }
     positions
 }
+

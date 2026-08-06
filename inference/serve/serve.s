@@ -56,3 +56,4 @@ func infer_response_state_dict(infer_response_state state) infer_response_state 
 func infer_response_load_state_dict(infer_response_state state, infer_response_state other) infer_response_state {
     other
 }
+

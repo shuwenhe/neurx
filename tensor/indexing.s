@@ -468,3 +468,4 @@ func gather(tensor a, []int indices) tensor {
         grad: none,
     }
 }
+

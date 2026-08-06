@@ -61,3 +61,4 @@ func main() {
     println("")
     println("✓ Weight generator ready for integration")
 }
+

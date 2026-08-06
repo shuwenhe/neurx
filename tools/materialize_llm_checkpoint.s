@@ -110,3 +110,4 @@ func main() {
     println(checkpoint_text(steps, loss, vocab_size, weights, bias))
     0
 }
+

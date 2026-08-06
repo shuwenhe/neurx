@@ -327,3 +327,4 @@ func (manager *checkpoint_manager) run_full_checkpoint_cycle() {
     storage.cleanup_old_checkpoints(5)
     fmt.Println("\n[checkpoint_manager] Complete!")
 }
+

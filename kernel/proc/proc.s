@@ -72,3 +72,4 @@ func proc_wait(pt proc_table, ppid int) (proc_table, proc_descriptor, bool) {
     }
     return (pt, proc_descriptor{}, false)
 }
+

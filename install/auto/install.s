@@ -9,3 +9,4 @@ func main() {
     println("This migration keeps the installer as an S entrypoint and avoids destructive actions by default.")
     0
 }
+

@@ -501,3 +501,4 @@ func infer_pipeline_last_observation(infer_pipeline_state state) string {
     }
     "infer:running"
 }
+

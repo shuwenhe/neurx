@@ -34,3 +34,4 @@ func main() {
     println("production-serving PASS admitted=" + string(state.admitted_requests) + " completed=" + string(state.completed_requests) + " prefill_tokens=" + string(state.prefill_tokens) + " decode_tokens=" + string(state.decode_tokens))
     0
 }
+

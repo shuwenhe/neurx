@@ -124,3 +124,4 @@ func (adapter *lora_adapter) compute_merged_weight(layer *lora_layer) [][]float6
     }
     return ab
 }
+

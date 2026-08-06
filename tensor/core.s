@@ -1014,3 +1014,4 @@ func matmul2d(tensor a, tensor b) tensor {
     }
     return out
 }
+

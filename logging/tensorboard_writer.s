@@ -33,3 +33,4 @@ func tb_write_scalar(
     write_event(writer.output_file, step, summary_data)
     writer.events_written = writer.events_written + 1
 }
+

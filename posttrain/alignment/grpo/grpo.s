@@ -376,3 +376,4 @@ func string_trim(string s) string {
 func extract_answer_tag(string output) string {
     output
 }
+

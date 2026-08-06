@@ -133,3 +133,4 @@ func cross_entropy_gradient(
 func perplexity_from_loss(float loss) float {
     exp_approx(loss)
 }
+

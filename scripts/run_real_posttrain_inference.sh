@@ -4,7 +4,7 @@ set -euo pipefail
 neurx_root="${NEURX_ROOT:-/home/shuwen/shuwen/neurx}"
 configured_model="${NEURX_CHAT_MODEL_PATH:-/home/shuwen/shuwen/posttrain}"
 python_bin="${NEURX_CHAT_PYTHON:-/home/shuwen/.venv/bin/python}"
-inference_script="${NEURX_POSTTRAIN_INFERENCE_SCRIPT:-/home/shuwen/shuwen/posttrain/neurx_inference.py}"
+inference_script="${NEURX_POSTTRAIN_INFERENCE_SCRIPT:-$neurx_root/inference/posttrain_inference.py}"
 max_new_tokens="${NEURX_CHAT_MAX_NEW_TOKENS:-128}"
 
 if [[ -f "$configured_model" ]]; then
@@ -23,5 +23,7 @@ args=(
 if [[ -n "${NEURX_CHAT_PROMPT_PATH:-}" && -f "${NEURX_CHAT_PROMPT_PATH}" ]]; then
     args+=(--history-file "$NEURX_CHAT_PROMPT_PATH")
 fi
+
+args+=("$@")
 
 exec "$python_bin" "${args[@]}"

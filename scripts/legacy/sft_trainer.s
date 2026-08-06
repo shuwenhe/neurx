@@ -336,3 +336,4 @@ func (trainer *sft_trainer) print_summary() {
         fmt.Printf("Final Perplexity: %.2f\n", latest.eval_perplexity)
     }
 }
+

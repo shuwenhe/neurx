@@ -947,3 +947,4 @@ func run_all_tests_s() {
     suite = test_rank_calculation_s(suite)
     print_test_results_s(suite)
 }
+

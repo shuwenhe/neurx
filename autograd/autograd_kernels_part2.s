@@ -164,3 +164,4 @@ func backward_silu(node n, tensor grad_output) backward_result {
     tensor result { data: grad_data, grad: [], shape: input.shape, requires_grad: true }
     backward_result { input_grads: [result], success: true }
 }
+

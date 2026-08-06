@@ -7,3 +7,4 @@ func main() {
     println("Bundle generation is now expected to be handled by S-native packaging or a dedicated build target.")
     0
 }
+

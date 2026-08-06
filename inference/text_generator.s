@@ -524,3 +524,4 @@ func generate(
 ) generation_result {
     generate_with_forward(prompt_ids, forward_fn, cfg)
 }
+

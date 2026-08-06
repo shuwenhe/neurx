@@ -341,3 +341,4 @@ func (m: *mutex) unlock() {}
 func decode_tokens(t: tensor) -> string { return "" }
 
 func encode_text(s: string) -> tensor { return tensor_zeros([1]) }
+

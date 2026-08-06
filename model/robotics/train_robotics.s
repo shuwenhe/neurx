@@ -179,3 +179,4 @@ func robotics_training_run(robotics_training_state state, int steps) robotics_tr
 func robotics_training_complete(robotics_training_state state) bool {
     state.finished
 }
+

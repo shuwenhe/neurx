@@ -71,3 +71,4 @@ func serving_route_kind(string method, string path) string {
     if method == "GET" && path == "/metrics" { return "metrics" }
     "not-found"
 }
+

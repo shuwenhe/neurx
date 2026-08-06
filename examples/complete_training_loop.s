@@ -1152,3 +1152,4 @@ func to_gpu(tensor t, device_context ctx) tensor:
 func distribute_model(transformer_model model, nccl_communicator comm) transformer_model:
     """Distribute model across GPUs for data parallelism"""
     model
+

@@ -35,3 +35,4 @@ func minimal_fusion_state_dict(minimal_fusion_state state) minimal_fusion_state 
 func minimal_fusion_load_state_dict(minimal_fusion_state state, minimal_fusion_state other) minimal_fusion_state {
     other
 }
+

@@ -449,3 +449,4 @@ func tensor_apply_s(tensor_s t, string op) tensor_s {
         device: t.device,
     }
 }
+

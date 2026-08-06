@@ -220,3 +220,4 @@ func random_dropout_mask(tensor t, float drop_rate) tensor {
     mask = tensor_ops.gt(mask, drop_rate)
     tensor_ops.to_float(mask)
 }
+

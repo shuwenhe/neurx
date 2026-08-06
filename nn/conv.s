@@ -448,3 +448,4 @@ func convtranspose2d_forward(convtranspose2d_state layer, tensor input) tensor {
     }
     neurx.tensor.new(out, shape4(batch, out_ch, out_h, out_w), input.requires_grad)
 }
+

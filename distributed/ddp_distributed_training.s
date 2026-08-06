@@ -312,3 +312,4 @@ func main() {
     run_distributed_training_example()
     analyze_scaling(4, 32, 256 * 32000)
 }
+

@@ -114,3 +114,4 @@ func range_func(int n) []int {
     []int r = []int{cap: n}
     r
 }
+

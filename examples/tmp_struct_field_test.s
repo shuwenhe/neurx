@@ -13,3 +13,4 @@ func main() {
     println(string(next.value))
     0
 }
+

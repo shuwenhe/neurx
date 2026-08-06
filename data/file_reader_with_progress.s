@@ -204,3 +204,4 @@ func display_file_reading_progress(string file_path) {
     string bar4 = create_progress_bar(100, 40)
     println("[init] " + bar4 + " 100% | complete")
 }
+

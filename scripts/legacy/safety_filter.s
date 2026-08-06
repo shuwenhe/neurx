@@ -298,3 +298,4 @@ func (filter *safety_filter) demonstrate() {
     filter.print_stats()
     fmt.Println("\n[safety_filter] Ready!")
 }
+

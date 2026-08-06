@@ -260,3 +260,4 @@ func recommended_distributed_config_512_gpus() distributed_training_config {
     config.gradient_accumulation_steps = 2
     return config
 }
+

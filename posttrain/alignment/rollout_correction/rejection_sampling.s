@@ -259,3 +259,4 @@ func clamp(x: Tensor, min_val: f32, max_val: f32) -> Tensor {
 func where(condition: Tensor, x: Tensor, y: Tensor) -> Tensor {
     return condition.to_float() * x + (1.0 - condition.to_float()) * y
 }
+

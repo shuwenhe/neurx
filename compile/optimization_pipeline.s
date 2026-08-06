@@ -88,3 +88,4 @@ func compile_and_optimize(optimization_pipeline pipeline, ir_graph input_graph) 
     ir_graph optimized = optimize_graph_progressive(pipeline, input_graph)
     optimized
 }
+

@@ -796,3 +796,4 @@ func estimate_params(model_parallel_config cfg) float {
     float total = embed + float_of_int(cfg.num_layers) * per_layer + float_of_int(cfg.hidden_dim)
     return total / 1e9
 }
+

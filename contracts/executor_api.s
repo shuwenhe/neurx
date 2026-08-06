@@ -61,3 +61,4 @@ interface i_executor_performance {
     estimate_memory(graph: computation_graph) -> i64
     get_bottleneck_kernel(profile: execution_profile) -> string
 }
+

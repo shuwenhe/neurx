@@ -599,3 +599,4 @@ func agent_workspace_patch_file(string path, string old_text, string new_text, b
 func agent_workspace_repo_map(int max_files) string {
     string root = agent_workspace_root()
     string cap_str = string(max_files)
+

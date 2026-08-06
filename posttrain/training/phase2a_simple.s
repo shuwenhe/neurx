@@ -340,3 +340,4 @@ func main() {
     println("Ready for inference with: model.generate(...)")
     return 0
 }
+

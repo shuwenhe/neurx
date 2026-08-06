@@ -414,3 +414,4 @@ func vector_norm(A: []float) float {
     }
     return result
 }
+

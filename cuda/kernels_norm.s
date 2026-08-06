@@ -23,3 +23,4 @@ func launch_layernorm(
                       cfg.batch_size * cfg.normalized_size * 6 * 2)
     nil
 }
+

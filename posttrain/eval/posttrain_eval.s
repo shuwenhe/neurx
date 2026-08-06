@@ -35,3 +35,4 @@ func posttrain_eval_state_dict(posttrain_eval_state state) posttrain_eval_state 
 func posttrain_eval_load_state_dict(posttrain_eval_state state, posttrain_eval_state other) posttrain_eval_state {
     other
 }
+

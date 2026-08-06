@@ -894,3 +894,4 @@ func truncate_at_special_tokens(string text):
 def call_ai_judge(string prompt, string response):
     """English text AI Judge modelEnglish text (English textmodel)"""
     return 0.5
+

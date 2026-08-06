@@ -95,3 +95,4 @@ func adamax_pow(float base, int exponent) float {
     }
     result
 }
+

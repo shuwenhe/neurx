@@ -306,3 +306,4 @@ func main() {
     fmt.Println("Next: Deploy on H100 cluster with 1024 GPUs")
     fmt.Println("="*80 + "\n")
 }
+

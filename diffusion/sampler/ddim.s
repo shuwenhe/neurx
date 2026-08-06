@@ -46,3 +46,4 @@ func ddim_sampler_state_dict(ddim_sampler_state state) ddim_sampler_state {
 func ddim_sampler_load_state_dict(ddim_sampler_state state, ddim_sampler_state other) ddim_sampler_state {
     other
 }
+

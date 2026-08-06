@@ -112,3 +112,4 @@ func backward(tensor t) tensor {
     }
     neurx.tensor.ones_like(t)
 }
+

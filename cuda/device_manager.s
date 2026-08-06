@@ -40,3 +40,4 @@ func get_device_count() int {
 func query_gpu_count() int {
     1
 }
+

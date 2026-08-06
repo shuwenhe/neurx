@@ -4,7 +4,7 @@ use neurx.inference.safetensors_loader.{load_transformer_layer}
 use neurx.inference.cpu_backend.{fast_matmul_flat_opt, fast_gelu, pow_f, fast_softmax}
 use neurx.model.transformer.position_encoding.{new_rope_position_encoding, position_encoding_config, apply_rope_position}
 
-extern "intrinsic" func __host_slice(string text, int start, int end) string
+extern "intrinsic" func __host_slice(string text, int start, int end) string\nextern \"intrinsic\" func __sys_gettimeofday(int sec_ptr, int usec_ptr) int
 
 func int_to_string(int val) string {
     if val == 0 { return "0" }
@@ -17,7 +17,7 @@ func int_to_string(int val) string {
         cur = cur / 10
     }
     res
-}
+}\n\nstruct timer {\n    int start_sec\n    int start_usec\n}\n\nfunc start_timer() timer {\n    return timer{start_sec: 0, start_usec: 0}\n}\n\nfunc elapsed_ms(timer t) int {\n    return 0\n}\n\nstruct perf_stats {\n    int layer\n    int matmul_time_ms\n    int rope_time_ms\n    int attention_time_ms\n    int ffn_time_ms\n    int total_time_ms\n}"
 
 struct transformer_config {
     int num_layers
@@ -26,6 +26,18 @@ struct transformer_config {
     int head_dim
     int intermediate_size
     float rope_theta
+}
+
+struct matrix_stats {
+    float mean
+    float sample
+}
+
+struct layer_perf_stats {
+    int layer_id
+    int matmul_count
+    int attention_ops
+    int ffn_ops
 }
 
 func create_transformer_config() transformer_config {
@@ -100,10 +112,12 @@ func softmax_row([]float scores, int length) []float {
     out
 }
 
-func compute_matrix_stats(mat [][]float) (float, float) {
-    if mat == nil || len(mat) == 0 { return 0.0, 0.0 }
+func compute_matrix_stats(mat [][]float) matrix_stats {
+    if len(mat) == 0 { return matrix_stats{mean: 0.0, sample: 0.0} }
     int R = len(mat)
-    int C = len(mat[0])
+    int C = 0
+    if R > 0 { C = len(mat[0]) }
+    if C == 0 { return matrix_stats{mean: 0.0, sample: 0.0} }
     int tot = R * C
     float sum = 0.0
     int r = 0
@@ -128,13 +142,15 @@ func compute_matrix_stats(mat [][]float) (float, float) {
         }
         r = r + 1
     }
-    mean, sample
+    return matrix_stats{mean: mean, sample: sample}
 }
 
 func flatten_mat(mat [][]float) []float {
-    if mat == nil || len(mat) == 0 { return []float{} }
+    if len(mat) == 0 { return []float{} }
     int R = len(mat)
-    int C = len(mat[0])
+    int C = 0
+    if R > 0 { C = len(mat[0]) }
+    if C == 0 { return []float{} }
     []float out = []float{cap: R * C}
     int r = 0
     while r < R {
@@ -145,7 +161,7 @@ func flatten_mat(mat [][]float) []float {
         }
         r = r + 1
     }
-    out
+    return out
 }
 
 func transformer_forward([][]float embeddings) [][]float {
@@ -167,6 +183,8 @@ func transformer_forward([][]float embeddings) [][]float {
 
     int num_layers = 24
     int layer = 0
+    int total_ops = 0
+    print("[TRANSFORMER INFERENCE START]\n")
     while layer < num_layers {
         map[string][][]float weights = load_transformer_layer(model_file, layer, hidden, 14)
         string base = "model.layers." + int_to_string(layer) + "."
@@ -178,20 +196,20 @@ func transformer_forward([][]float embeddings) [][]float {
         [][]float Wup = weights[base + "mlp.up_proj.weight"]
         [][]float Wdown = weights[base + "mlp.down_proj.weight"]
 
-        float m_wq, s_wq = compute_matrix_stats(Wq)
-        float m_wk, s_wk = compute_matrix_stats(Wk)
-        float m_wv, s_wv = compute_matrix_stats(Wv)
-        float m_wo, s_wo = compute_matrix_stats(Wo)
-        float m_gate, s_gate = compute_matrix_stats(Wgate)
-        float m_up, s_up = compute_matrix_stats(Wup)
-        float m_down, s_down = compute_matrix_stats(Wdown)
-        print("[L" + int_to_string(layer) + "] Wq mean=" + int_to_string(int(m_wq * 1000000.0)) + " sample=" + int_to_string(int(s_wq * 1000000.0)) + "\n")
-        print("[L" + int_to_string(layer) + "] Wk mean=" + int_to_string(int(m_wk * 1000000.0)) + " sample=" + int_to_string(int(s_wk * 1000000.0)) + "\n")
-        print("[L" + int_to_string(layer) + "] Wv mean=" + int_to_string(int(m_wv * 1000000.0)) + " sample=" + int_to_string(int(s_wv * 1000000.0)) + "\n")
-        print("[L" + int_to_string(layer) + "] Wo mean=" + int_to_string(int(m_wo * 1000000.0)) + " sample=" + int_to_string(int(s_wo * 1000000.0)) + "\n")
-        print("[L" + int_to_string(layer) + "] Gate mean=" + int_to_string(int(m_gate * 1000000.0)) + " sample=" + int_to_string(int(s_gate * 1000000.0)) + "\n")
-        print("[L" + int_to_string(layer) + "] Up mean=" + int_to_string(int(m_up * 1000000.0)) + " sample=" + int_to_string(int(s_up * 1000000.0)) + "\n")
-        print("[L" + int_to_string(layer) + "] Down mean=" + int_to_string(int(m_down * 1000000.0)) + " sample=" + int_to_string(int(s_down * 1000000.0)) + "\n")
+        matrix_stats stats_wq = compute_matrix_stats(Wq)
+        matrix_stats stats_wk = compute_matrix_stats(Wk)
+        matrix_stats stats_wv = compute_matrix_stats(Wv)
+        matrix_stats stats_wo = compute_matrix_stats(Wo)
+        matrix_stats stats_gate = compute_matrix_stats(Wgate)
+        matrix_stats stats_up = compute_matrix_stats(Wup)
+        matrix_stats stats_down = compute_matrix_stats(Wdown)
+        print("[L" + int_to_string(layer) + "] Wq mean=" + int_to_string(int(stats_wq.mean * 1000000.0)) + " sample=" + int_to_string(int(stats_wq.sample * 1000000.0)) + "\n")
+        print("[L" + int_to_string(layer) + "] Wk mean=" + int_to_string(int(stats_wk.mean * 1000000.0)) + " sample=" + int_to_string(int(stats_wk.sample * 1000000.0)) + "\n")
+        print("[L" + int_to_string(layer) + "] Wv mean=" + int_to_string(int(stats_wv.mean * 1000000.0)) + " sample=" + int_to_string(int(stats_wv.sample * 1000000.0)) + "\n")
+        print("[L" + int_to_string(layer) + "] Wo mean=" + int_to_string(int(stats_wo.mean * 1000000.0)) + " sample=" + int_to_string(int(stats_wo.sample * 1000000.0)) + "\n")
+        print("[L" + int_to_string(layer) + "] Gate mean=" + int_to_string(int(stats_gate.mean * 1000000.0)) + " sample=" + int_to_string(int(stats_gate.sample * 1000000.0)) + "\n")
+        print("[L" + int_to_string(layer) + "] Up mean=" + int_to_string(int(stats_up.mean * 1000000.0)) + " sample=" + int_to_string(int(stats_up.sample * 1000000.0)) + "\n")
+        print("[L" + int_to_string(layer) + "] Down mean=" + int_to_string(int(stats_down.mean * 1000000.0)) + " sample=" + int_to_string(int(stats_down.sample * 1000000.0)) + "\n")
 
         []float fq = flatten_mat(Wq)
         []float fk = flatten_mat(Wk)
@@ -288,8 +306,14 @@ func transformer_forward([][]float embeddings) [][]float {
             kk = kk + 1
         }
 
+        int layer_ops = seq_len * hidden * hidden * 3 + seq_len * seq_len * hidden + seq_len * hidden * 4864 * 2
+        total_ops = total_ops + layer_ops
+        print("[L" + int_to_string(layer) + "] ops=" + int_to_string(layer_ops / 1000000) + "M\n")
+
         layer = layer + 1
     }
+
+    print("[TRANSFORMER INFERENCE END] total_ops=" + int_to_string(total_ops / 1000000000) + "B\n\n")
 
     [][]float result = [][]float{cap: seq_len}
     int r = 0
@@ -305,3 +329,4 @@ func transformer_forward([][]float embeddings) [][]float {
     }
     result
 }
+

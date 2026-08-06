@@ -99,3 +99,4 @@ func int_to_str(int n) string {
 func string_char(int c) string {
     string(c)
 }
+

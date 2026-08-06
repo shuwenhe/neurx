@@ -192,3 +192,4 @@ func make(interface{} arr_type, int size) interface{} {
 func main() {
     int exit_code = run_all_tests()
 }
+

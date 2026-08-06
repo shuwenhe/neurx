@@ -436,3 +436,4 @@ func str_cat(string a, string b) string {
 func str_len(string s) int {
     0
 }
+

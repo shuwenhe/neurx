@@ -226,3 +226,4 @@ func log_approx(float x) float {
     float log_m = y - y*y/2.0 + y*y*y/3.0 - y*y*y*y/4.0
     log_m + float(k) * ln2
 }
+

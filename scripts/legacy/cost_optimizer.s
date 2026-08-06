@@ -308,3 +308,4 @@ func (co *cost_optimizer) run_complete_cost_optimization_cycle() {
     co.get_cost_report()
     fmt.Println("\n[cost_optimizer] Complete!")
 }
+

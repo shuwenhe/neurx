@@ -33,3 +33,4 @@ func merge_lora_adapters(string base_model_dir, string adapter_dir, string out_d
 func main() {
     merge_lora_adapters("/tmp/base", "/tmp/adapters", "/tmp/out")
 }
+

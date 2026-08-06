@@ -93,3 +93,4 @@ func generate_response(string prompt, int max_tokens) string {
     }
     return generated_text
 }
+

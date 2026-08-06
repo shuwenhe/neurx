@@ -512,3 +512,4 @@ func checkpoint_params(checkpoint state) []tensor {
 func checkpoint_param_count(checkpoint state) int {
     len(state.params)
 }
+

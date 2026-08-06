@@ -38,3 +38,4 @@ func find_best_beam([]beam_state finished) beam {
     }
     finished[best_idx]
 }
+

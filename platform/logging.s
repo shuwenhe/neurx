@@ -62,3 +62,4 @@ func logger_load_state_dict(logger_state state, logger_state other) logger_state
         child_count: other.child_count,
     }
 }
+

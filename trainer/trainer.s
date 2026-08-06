@@ -65,3 +65,4 @@ func trainer_state_dict(trainer_state state) trainer_state {
 func trainer_load_state_dict(trainer_state state, trainer_state other) trainer_state {
     other
 }
+

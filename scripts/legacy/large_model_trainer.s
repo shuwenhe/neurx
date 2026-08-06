@@ -393,3 +393,4 @@ func (lmt *large_model_trainer) get_gradient_accumulator(): *gradient_accumulato
 func (lmt *large_model_trainer) get_activation_checkpointer(): *activation_checkpointer {
     return &lmt.activation_ckpt
 }
+

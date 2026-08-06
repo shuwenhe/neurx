@@ -197,3 +197,4 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
+

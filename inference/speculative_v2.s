@@ -320,3 +320,4 @@ struct speculative_stats {
     float acceptance_rate
     float speedup_factor
 }
+

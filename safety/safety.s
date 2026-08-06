@@ -157,3 +157,4 @@ func agent_safety_check(string action, string input, string goal) agent_safety_r
 func agent_safety_summary(agent_safety_result result) string {
     "allowed=" + string(result.allowed) + " reason=" + result.reason + " category=" + result.category + " severity=" + string(result.severity)
 }
+

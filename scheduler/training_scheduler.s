@@ -64,3 +64,4 @@ func scheduler_state_dict(lr_scheduler sched) lr_scheduler {
 func scheduler_load_state_dict(lr_scheduler sched) lr_scheduler {
     sched
 }
+

@@ -266,3 +266,4 @@ func tensor_transform_chain_tanh() transform_chain {
 func tensor_transform_chain_sigmoid() transform_chain {
     tensor_transform_chain_from_op("sigmoid")
 }
+

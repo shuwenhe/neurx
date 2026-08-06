@@ -69,3 +69,4 @@ func robotics_robot_train_run(robotics_trajectory_train_state state, int steps) 
 func robotics_robot_train_complete(robotics_trajectory_train_state state) bool {
     robotics_trajectory_train_complete(state)
 }
+

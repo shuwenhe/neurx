@@ -176,3 +176,4 @@ func parallel_tool_batch_summary(parallel_tool_batch_result batch_result) string
     " ok=" + string(batch_result.ok_count) +
     " fail=" + string(batch_result.fail_count)
 }
+

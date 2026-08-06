@@ -81,3 +81,4 @@ func create_batch_from_samples([]medical_sample samples, int batch_size, int seq
     }
     return batches
 }
+

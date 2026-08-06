@@ -289,3 +289,4 @@ func (handler *long_context_handler) demonstrate() {
     handler.print_stats()
     fmt.Println("\n[LongContext] Ready!")
 }
+

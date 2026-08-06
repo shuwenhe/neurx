@@ -5,3 +5,4 @@ func main() i32 {
     println("Test")
     return 0
 }
+

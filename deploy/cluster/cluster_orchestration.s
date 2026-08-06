@@ -684,3 +684,4 @@ func main() {
     state = cluster_write_launch_plan(state, spec)
     runtime_write_text_file(state.deployment_dir + "/latest_cluster_summary.txt", state.last_summary)
 }
+

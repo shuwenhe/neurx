@@ -35,3 +35,4 @@ func infer_eval_state_dict(infer_eval_state state) infer_eval_state {
 func infer_eval_load_state_dict(infer_eval_state state, infer_eval_state other) infer_eval_state {
     other
 }
+

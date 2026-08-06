@@ -83,3 +83,4 @@ func main() {
     log_test(config, "Clearing old checkpoint...")
     os.Remove(config.checkpointDir + "/training_state.txt")
     os.Remove(config.checkpointDir + "/checkpoint.state")
+

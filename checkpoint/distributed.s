@@ -597,3 +597,4 @@ func quick_resume_training(string checkpoint_path) bool {
     checkpoint_manager mgr = init_checkpoint_manager(cfg)
     return restore_training_state(mgr, checkpoint_path)
 }
+

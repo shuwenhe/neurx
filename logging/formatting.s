@@ -49,3 +49,4 @@ func float_to_string_with_decimals(float value, int decimals) string {
     }
     result
 }
+

@@ -136,3 +136,4 @@ func storage_checkpoint_write(ss storage_state, path string,
     ss.writeback_dirty_mb = ss.writeback_dirty_mb + data_bytes / (1024 * 1024)
     return io_submit(ss, IO_WRITE, path, 0, data_bytes, IOPRIO_NORMAL, owner_pid)
 }
+
