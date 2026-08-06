@@ -1,5 +1,11 @@
 package neurx.inference.true_model_inference
 
+use neurx.inference.safetensors_real.{load_model_safetensors}
+use neurx.inference.tokenizer_loader.{load_tokenizer, tokenize}
+use step2_embedding.{embed_tokens}
+use step3_transformer.{create_transformer_config, transformer_forward}
+use step5_sampling_step6_decode.{create_sampling_config, generate, decode_tokens}
+
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 
 func int_to_string(int val) string {
@@ -15,94 +21,40 @@ func int_to_string(int val) string {
 }
 
 func main() {
-    print("\n╔═══════════════════════════════════════════════════════════╗\n")
-    print("║  🎯 PHASE 2B: REAL MODEL INFERENCE - ACTIVE NOW          ║\n")
-    print("║  ✓ Not rule-based anymore - TRUE Transformer inference   ║\n")
-    print("║  ✓ Using /posttrain/model.safetensors weights (1.9GB)    ║\n")
-    print("║  ✓ Pure neural network computation in S language         ║\n")
-    print("╚═══════════════════════════════════════════════════════════╝\n\n")
-
-    print("📊 MODEL DETAILS\n")
-    print("═══════════════════════════════════════════════════════════\n")
-    print("Name: Qwen2.5-0.5B-Instruct\n")
-    print("Weights: /home/shuwen/shuwen/posttrain/model.safetensors\n")
-    print("Size: 1.95 GB (BF16 precision)\n\n")
-
-    print("Architecture:\n")
-    print("  • Vocabulary size: 151,936 tokens\n")
-    print("  • Embedding dimension: 896\n")
-    print("  • Attention heads: 14\n")
-    print("  • Head dimension: 64\n")
-    print("  • FFN intermediate: 4,864\n")
-    print("  • Number of layers: 24\n\n")
-
-    print("🔄 INFERENCE PIPELINE\n")
-    print("═══════════════════════════════════════════════════════════\n\n")
-
-    string user_prompt = "糖尿病的治疗"
-    print("User input: \"" + user_prompt + "\"\n\n")
-
-    print("STEP 1: TOKENIZATION\n")
-    print("─────────────────────────────────────────────────────────\n")
-    print("Text → BPE tokens → Token IDs\n")
-    int token_id = 2048
-    print("Token ID: " + int_to_string(token_id) + "\n")
-    print("✓ Tokenization complete\n\n")
-
-    print("STEP 2: EMBEDDING LOOKUP\n")
-    print("─────────────────────────────────────────────────────────\n")
-    print("Load embedding[151936, 896]\n")
-    print("Token " + int_to_string(token_id) + " → [896] vector\n")
-    print("✓ Embedding retrieved from model.safetensors\n\n")
-
-    print("STEP 3: TRANSFORMER (24 layers)\n")
-    print("─────────────────────────────────────────────────────────\n")
-    print("Layer 0: RMSNorm → Attention(14×64) → Residual\n")
-    print("         RMSNorm → FFN(4864) → Residual\n")
-
-    int layer = 1
-    while layer < 24 {
-        if layer == 6 {
-            print("...\n")
-            layer = 22
-        }
-        if layer != 6 {
-            print("Layer " + int_to_string(layer) + ": (same ops)\n")
-        }
-        layer = layer + 1
+    string model_path = "/home/shuwen/shuwen/posttrain/model.safetensors"
+    print("Starting NeurX real inference pipeline...\n")
+    print("[1] Load safetensors header and validate model\n")
+    string load_status = load_model_safetensors(model_path)
+    print("safetensors: " + load_status + "\n\n")
+    print("[2] Load tokenizer\n")
+    tokenizer_state_2 := load_tokenizer("/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
+    if !tokenizer_state_2.is_loaded {
+        print("Tokenizer load failed: " + tokenizer_state_2.error_message + "\n")
+        return
     }
-
-    print("✓ All layers computed\n\n")
-
-    print("STEP 4: LM HEAD PROJECTION\n")
-    print("─────────────────────────────────────────────────────────\n")
-    print("[896] @ lm_head.weight[151936,896] → [151936] logits\n")
-    print("✓ Vocabulary logits ready\n\n")
-
-    print("STEP 5: SAMPLING\n")
-    print("─────────────────────────────────────────────────────────\n")
-    print("argmax(logits) → Token 4096\n")
-    print("✓ Token selected\n\n")
-
-    print("STEP 6: DECODING\n")
-    print("─────────────────────────────────────────────────────────\n")
-    print("Token 4096 → \"医学\"\n")
-    print("✓ Decoded\n\n")
-
-    print("═══════════════════════════════════════════════════════════\n")
-    print("📝 RESULT\n")
-    print("═══════════════════════════════════════════════════════════\n")
-    print("User: " + user_prompt + "\n")
-    print("Model: 医学\n\n")
-
-    print("✅ REAL NEURAL NETWORK INFERENCE WORKING!\n\n")
-
-    print("COMPARISON: OLD vs NEW\n")
-    print("═══════════════════════════════════════════════════════════\n")
-    print("OLD (Rule engine):\n")
-    print("  input → keyword match → category → template\n\n")
-    print("NEW (Real inference):\n")
-    print("  input → tokenize → embed → 24×transformer → lm_head → sample → decode\n\n")
-
-    print("🚀 NEXT: Phase 2C - Implement matmul and weight loading\n")
+    string user_prompt = "糖尿病的治疗"
+    print("User prompt: " + user_prompt + "\n")
+    print("[3] Tokenize input\n")
+    token_result := tokenize(tokenizer_state_2, user_prompt)
+    if !token_result.success {
+        print("Tokenization error: " + token_result.error + "\n")
+        return
+    }
+    []int prompt_tokens = token_result.token_ids
+    print("Tokenized: " + int_to_string(len(prompt_tokens)) + " tokens\n")
+    print("[4] Embedding lookup\n")
+    [][]float embeddings = embed_tokens(prompt_tokens)
+    print("Embeddings shape: [" + int_to_string(len(embeddings)) + ", 896] (per token)\n")
+    print("[5] Transformer forward\n")
+    cfg := create_transformer_config()
+    [][]float hidden = transformer_forward(embeddings)
+    print("Transformer output shape: [" + int_to_string(len(hidden)) + ", " + int_to_string(cfg.hidden_size) + "]\n")
+    print("[6] Sampling / generate continuation\n")
+    sampling_cfg := create_sampling_config()
+    []int generated = generate(prompt_tokens, 32, sampling_cfg)
+    print("Generated tokens: " + int_to_string(len(generated) - len(prompt_tokens)) + "\n")
+    print("[7] Decode tokens to string\n")
+    string output = decode_tokens(generated)
+    print("Model output:\n" + output + "\n")
+    print("Inference pipeline completed.\n")
 }
