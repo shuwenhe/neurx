@@ -2,7 +2,6 @@ package neurx.inference.medical_reasoning_engine
 
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 
-// 医学领域分类
 func CATEGORY_UNKNOWN() int { return 0 }
 func CATEGORY_TREATMENT() int { return 1 }
 func CATEGORY_SYMPTOM() int { return 2 }
@@ -14,9 +13,7 @@ func CATEGORY_HEALTH() int { return 7 }
 func CATEGORY_ANATOMY() int { return 8 }
 func CATEGORY_PATHOLOGY() int { return 9 }
 
-// Medical reasoning context stored in separate variables during inference
 
-// 字符串操作
 func to_lower(string text) string {
     string result = ""
     int i = 0
@@ -61,18 +58,15 @@ func contains_any_two(string text, string pattern1, string pattern2) bool {
     contains_substr(text, pattern2)
 }
 
-// 分类检测
 func detect_category(string text) int {
     string lower = to_lower(text)
 
-    // 治疗相关
     if contains_substr(lower, "treatment") || contains_substr(lower, "treat") || 
        contains_substr(lower, "therapy") || contains_substr(lower, "therapeutic") ||
        contains_substr(lower, "治疗") || contains_substr(lower, "疗法") {
         return CATEGORY_TREATMENT()
     }
 
-    // 症状相关
     if contains_substr(lower, "symptom") || contains_substr(lower, "pain") || 
        contains_substr(lower, "fever") || contains_substr(lower, "sign") ||
        contains_substr(lower, "症状") || contains_substr(lower, "疼痛") ||
@@ -80,49 +74,42 @@ func detect_category(string text) int {
         return CATEGORY_SYMPTOM()
     }
 
-    // 诊断相关
     if contains_substr(lower, "diagnos") || contains_substr(lower, "detect") || 
        contains_substr(lower, "identify") || contains_substr(lower, "test") ||
        contains_substr(lower, "诊断") || contains_substr(lower, "检查") {
         return CATEGORY_DIAGNOSIS()
     }
 
-    // 疾病相关
     if contains_substr(lower, "disease") || contains_substr(lower, "disorder") || 
        contains_substr(lower, "condition") || contains_substr(lower, "illness") ||
        contains_substr(lower, "疾病") || contains_substr(lower, "病") {
         return CATEGORY_DISEASE()
     }
 
-    // 药物相关
     if contains_substr(lower, "medicine") || contains_substr(lower, "drug") || 
        contains_substr(lower, "medication") || contains_substr(lower, "pharma") ||
        contains_substr(lower, "药") || contains_substr(lower, "药物") {
         return CATEGORY_DRUG()
     }
 
-    // 感染相关
     if contains_substr(lower, "infection") || contains_substr(lower, "infect") || 
        contains_substr(lower, "virus") || contains_substr(lower, "bacteria") ||
        contains_substr(lower, "感染") || contains_substr(lower, "病原") {
         return CATEGORY_INFECTION()
     }
 
-    // 健康相关
     if contains_substr(lower, "health") || contains_substr(lower, "wellness") || 
        contains_substr(lower, "preventive") || contains_substr(lower, "prevention") ||
        contains_substr(lower, "健康") || contains_substr(lower, "保健") {
         return CATEGORY_HEALTH()
     }
 
-    // 解剖相关
     if contains_substr(lower, "anatomy") || contains_substr(lower, "organ") || 
        contains_substr(lower, "tissue") || contains_substr(lower, "bone") ||
        contains_substr(lower, "解剖") || contains_substr(lower, "器官") {
         return CATEGORY_ANATOMY()
     }
 
-    // 病理相关
     if contains_substr(lower, "pathology") || contains_substr(lower, "patholog") || 
        contains_substr(lower, "lesion") || contains_substr(lower, "abnormal") ||
        contains_substr(lower, "病理") || contains_substr(lower, "病变") {
@@ -132,11 +119,9 @@ func detect_category(string text) int {
     CATEGORY_UNKNOWN()
 }
 
-// 核心推理引擎
 func generate_treatment_response(string text) string {
     string lower = to_lower(text)
     
-    // 特定疾病的治疗建议
     if contains_substr(lower, "diabetes") || contains_substr(lower, "diabetic") || contains_substr(lower, "糖尿病") {
         return "糖尿病的治疗通常包括：\n1. 血糖控制（胰岛素或口服药物）\n2. 饮食管理和运动\n3. 定期监测血糖和血压\n4. 预防并发症（眼睛、肾脏、神经）\n建议在内分泌专家指导下进行治疗。"
     }
@@ -153,7 +138,6 @@ func generate_treatment_response(string text) string {
         return "哮喘的治疗包括：\n1. 长期控制性用药（吸入糖皮质激素）\n2. 急性发作缓解（支气管扩张剂）\n3. 触发因素识别和回避\n4. 肺功能监测\n5. 患者教育和自我管理\n规则用药可以有效控制症状。"
     }
 
-    // 通用治疗回应
     return "治疗方案的制定需要考虑多个因素：\n1. 明确诊断：准确识别疾病\n2. 病情评估：严重程度、并发症、患者情况\n3. 治疗选择：\n   - 保守治疗：药物、物理治疗、生活方式改变\n   - 手术治疗：适应症明确时\n   - 综合治疗：多学科协作\n4. 预后评估：预期效果和风险\n5. 随访监测：调整治疗方案\n\n最终的治疗决策应由医生根据患者具体情况制定。"
 }
 
@@ -170,7 +154,6 @@ func generate_symptom_response(string text) string {
         return "咳嗽症状分析：\n\n常见原因：\n1. 上呼吸道感染：感冒、喉炎\n2. 下呼吸道感染：支气管炎、肺炎\n3. 慢性疾病：哮喘、COPD、肺纤维化\n4. 其他：胃食管反流、心脏病、药物副作用\n\n咳嗽类型：\n- 干咳：无痰，常见于病毒感染初期\n- 湿咳：有痰，提示感染或水肿\n- 阵咳：集中发作\n\n警示信号：\n- 咳血\n- 呼吸困难\n- 胸痛\n- 持续>3周的咳嗽\n- 伴有高热、寒战\n\n建议：咳嗽持续>1周或恶化应就医检查。"
     }
 
-    // 通用症状回应
     return "症状评估需要系统分析：\n\n重要信息：\n1. 症状特征：\n   - 发生时间和进展过程\n   - 症状性质和位置\n   - 严重程度和对生活的影响\n\n2. 伴随症状：全身症状、其他部位症状\n\n3. 加重或缓解因素：特定活动、饮食、位置变化\n\n4. 既往史：相关病史、手术、过敏\n\n5. 危险信号识别：\n   - 急性发作的严重症状\n   - 进行性恶化\n   - 生命危险症状\n\n专业评估包括：\n- 详细的病史采集\n- 体格检查\n- 必要的实验室和影像学检查\n\n建议：症状新发或加重时应及时就医评估。"
 }
 
@@ -193,7 +176,6 @@ func generate_disease_response(string text) string {
         return "肝脏疾病知识：\n\n常见肝脏疾病：\n1. 病毒性肝炎：\n   - 甲型肝炎：粪口途径传播\n   - 乙型肝炎：血液/体液传播，可慢性化\n   - 丙型肝炎：主要通过血液传播\n\n2. 脂肪肝：肝细胞脂肪堆积\n   - 非酒精性脂肪肝：代谢相关\n   - 酒精性脂肪肝：饮酒引起\n\n3. 肝硬化：肝脏结构和功能的终末改变\n   - 常见病因：乙肝、酒精滥用\n   - 并发症：门脉高压、腹水、食管静脉曲张\n\n4. 肝癌：原发性肝细胞癌\n   - 高危人群：肝硬化患者、乙肝患者\n\n症状提示：\n- 黄疸（皮肤黄染）\n- 腹痛和腹胀\n- 乏力和厌食\n- 尿色深、大便浅色\n\n预防措施：\n- 乙肝疫苗接种\n- 戒酒\n- 健康饮食\n- 定期肝功能检查"
     }
 
-    // 通用疾病回应
     return "疾病是人体在一定条件下因各种病因引起的生理功能和代谢异常，导致身体不适。\n\n疾病的基本要素：\n1. 病因：导致疾病的原因\n   - 传染性病因：病原微生物\n   - 非传染性病因：遗传、代谢、环境、生活方式\n\n2. 发病机制：疾病发展的过程\n   - 损伤程度\n   - 代偿机制\n   - 临床表现产生\n\n3. 临床表现：患者主观感受和客观体征\n   - 症状：患者感觉到的不适\n   - 体征：医生检查发现的异常\n\n4. 预后：疾病的发展结果和恢复情况\n\n疾病的预防：\n- 一级预防：预防疾病发生（健康教育、环境改善）\n- 二级预防：早期发现、早期治疗\n- 三级预防：防止并发症、康复治疗\n\n了解具体疾病需咨询医学专业人士。"
 }
 
@@ -211,7 +193,6 @@ func generate_health_response(string text) string {
     return "健康维护的综合指南：\n\n健康是身体、心理和社会适应的完整状态，而不仅仅是没有疾病。\n\n健康的四大支柱：\n\n1. 营养饮食：\n   - 均衡饮食：蛋白质、碳水化合物、脂肪的合理比例\n   - 微量营养素：维生素和矿物质的充分摄入\n   - 食物多样性：不同颜色和来源的食物\n   - 限制有害物质：减少盐、糖、饱和脂肪摄入\n   - 水合状态：每日充分饮水\n\n2. 规律运动：\n   - 有氧运动：每周至少150分钟中等强度运动\n   - 力量训练：每周2-3次肌肉锻炼\n   - 柔韧性训练：改善活动范围\n   - 运动益处：\n     * 维持健康体重\n     * 改善心血管功能\n     * 增强肌肉和骨骼\n     * 改善心理健康\n     * 降低疾病风险\n\n3. 充足睡眠：\n   - 推荐睡眠：成人7-9小时\n   - 睡眠质量：规律作息时间\n   - 睡眠环境：舒适、黑暗、安静\n   - 睡眠卫生：避免咖啡因和屏幕刺激\n   - 睡眠的益处：\n     * 免疫功能恢复\n     * 认知功能改善\n     * 情绪调节\n     * 体重管理\n\n4. 心理健康：\n   - 压力管理：识别和处理压力源\n   - 社交联系：维持健康的人际关系\n   - 心理平衡：乐观心态、应对能力\n   - 寻求帮助：需要时接受心理咨询\n\n预防性检查：\n- 定期体检：根据年龄和风险因素制定计划\n- 疾病筛查：癌症、心脏病、糖尿病等\n- 生活方式评估：吸烟、饮酒等\n- 免疫接种：按推荐时间表接种\n\n特殊人群的健康维护：\n- 儿童：生长发育监测、营养需求\n- 孕妇：产前检查、营养、运动注意事项\n- 老年人：跌倒预防、慢病管理、认知健康\n- 慢性病患者：病情控制、并发症预防\n\n健康生活方式的长期效益：\n- 提高生活质量\n- 延长健康寿命\n- 减少医疗成本\n- 改善工作和学习表现\n\n记住：健康是一种生活方式的选择，而不是目标。需要持续的努力和承诺。"
 }
 
-// 主推理函数
 func reason_medical_response(string prompt) string {
     if len(prompt) == 0 {
         return "请提供您的医学问题或症状。"
@@ -239,12 +220,10 @@ func reason_medical_response(string prompt) string {
         return "病理学是研究疾病的本质、原因和机制的学科。\n\n病理改变的层次：\n1. 分子水平：基因突变、蛋白质异常\n2. 细胞水平：细胞病变、凋亡、坏死\n3. 组织水平：炎症、纤维化、肿瘤\n4. 器官水平：功能障碍、结构破坏\n5. 整体水平：系统性表现\n\n基本病理过程：\n- 炎症反应：红肿热痛和全身反应\n- 修复和再生：组织愈合过程\n- 肿瘤发生：异常细胞增殖\n- 适应过程：代偿性改变\n\n深入了解病理变化需要病理检查和医学专业知识。"
     }
 
-    // 默认响应
     return "感谢您的问题。这是一个有趣的医学话题。基于医学原理，您似乎在询问关于生物学、生理学或临床医学的问题。\n\n为了给您更准确的回答，我需要：\n1. 更具体的症状或问题描述\n2. 相关的背景信息\n3. 您想了解的具体方面\n\n如果您能提供更多细节，我可以提供更有针对性的医学解释。同时，对于具体的诊疗建议，建议咨询专业医疗人员。"
 }
 
 func main() {
-    // 测试函数
     string test1 = "用c++写一个快速排序"
     string test2 = "糖尿病的治疗方法是什么"
     string test3 = "我头痛怎么办"

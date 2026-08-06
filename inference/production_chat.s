@@ -14,9 +14,6 @@ extern "intrinsic" func __sys_close(int fd) int
 
 extern "intrinsic" func __sys_set_deadline_ms(int fd, int read_timeout_ms, int write_timeout_ms) int
 
-// ============================================
-// Medical Reasoning Engine (Integrated)
-// ============================================
 
 func to_lower(string text) string {
     string result = ""
@@ -58,7 +55,6 @@ func contains_substr(string text, string substr) bool {
 func detect_category(string text) int {
     string lower = to_lower(text)
     
-    // Medical categories
     if contains_substr(lower, "treatment") || contains_substr(lower, "treat") || contains_substr(lower, "治疗") {
         return 1
     }
@@ -91,7 +87,6 @@ func reason_response(string prompt) string {
     int category = detect_category(prompt)
     string lower = to_lower(prompt)
 
-    // Treatment responses
     if category == 1 {
         if contains_substr(lower, "diabetes") || contains_substr(lower, "糖尿病") {
             return "糖尿病的治疗通常包括：1. 血糖控制（胰岛素或口服药物） 2. 饮食管理和运动 3. 定期监测血糖和血压 4. 预防并发症。建议在内分泌专家指导下进行治疗。"
@@ -99,7 +94,6 @@ func reason_response(string prompt) string {
         return "治疗方案的制定需要考虑多个因素：明确诊断、病情评估、治疗选择、预后评估和随访监测。最终的治疗决策应由医生根据患者具体情况制定。"
     }
 
-    // Symptom responses
     if category == 2 {
         if contains_substr(lower, "pain") || contains_substr(lower, "ache") || contains_substr(lower, "疼痛") {
             return "疼痛是一个复杂的症状，可能由多种原因引起：肌肉骨骼问题、神经压迫、炎症、内脏疾病等。请描述疼痛位置、性质和发作频率。建议就医进行全面评估。"
@@ -110,12 +104,10 @@ func reason_response(string prompt) string {
         return "症状评估需要系统分析：描述症状特征、伴随症状、加重或缓解因素。建议由医疗专业人员进行详细的病史采集、体格检查和必要的检查。"
     }
 
-    // Diagnosis responses
     if category == 3 {
         return "诊断是医学实践中最重要的步骤。通常包括：病史采集、体格检查、实验室检查（血液、尿液）、影像学检查（X线、超声、CT/MRI）、特殊检查（内镜、病理活检）等。准确诊断是有效治疗的基础。"
     }
 
-    // Disease responses
     if category == 4 {
         if contains_substr(lower, "diabetes") || contains_substr(lower, "糖尿病") {
             return "糖尿病是一种慢性代谢疾病。分类：1型（胰岛素依赖）、2型（主要由胰岛素抵抗引起）、妊娠期糖尿病。高危因素：家族史、肥胖、缺乏运动。症状：多饮、多尿、多食、体重下降等。"
@@ -129,22 +121,18 @@ func reason_response(string prompt) string {
         return "疾病是人体在一定条件下因各种病因引起的生理功能和代谢异常。需要了解：病因（传染/非传染）、发病机制、临床表现、预后。疾病预防包括一级预防（预防发生）、二级预防（早期诊疗）、三级预防（防止并发症）。"
     }
 
-    // Drug responses
     if category == 5 {
         return "药物治疗的重要原则：明确诊断后选择合适的药物，根据病情严重程度调整方案。常见类别：抗感染药、心血管药、神经系统药等。合理用药原则：准确的用法用量、完成疗程、了解不良反应、避免禁忌组合。需在医生或药师指导下使用。"
     }
 
-    // Infection responses
     if category == 6 {
         return "感染性疾病由病原体入侵机体引起。主要类型：细菌感染（需要抗生素）、病毒感染（通常自限性）、真菌感染（真菌药治疗）、寄生虫感染。临床表现：发热、寒战、脓肿等。预防：个人卫生、疫苗接种、食品卫生、安全医疗操作。"
     }
 
-    // Health responses
     if category == 7 {
         return "健康维护的四大支柱：1. 营养饮食：均衡、多样、限制有害物质 2. 规律运动：每周150分钟中等强度运动 3. 充足睡眠：7-9小时睡眠 4. 心理健康：管理压力、社交联系。预防性检查：定期体检、疾病筛查、免疫接种。健康是长期生活方式的选择。"
     }
 
-    // Default response for non-medical questions
     return "感谢您的提问。我是一个医学知识助手，专门回答医学和健康相关的问题。对于您提出的这个问题，建议咨询相关领域的专家。如果您有任何医学或健康问题，我很乐意帮助。"
 }
 
