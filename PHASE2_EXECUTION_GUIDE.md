@@ -1,8 +1,8 @@
 # 🚀 PHASE 2 EXECUTION GUIDE - From Rule Engine to Real Model Inference
 
-**Status**: 🎯 READY TO IMPLEMENT  
-**Target Duration**: 5-8 weeks  
-**Architecture**: Pure S language, no external dependencies  
+**Status**: 🎯 READY TO IMPLEMENT
+**Target Duration**: 5-8 weeks
+**Architecture**: Pure S language, no external dependencies
 **Commit**: 6fdc637f (Architecture framework complete)
 
 ---
@@ -35,8 +35,8 @@ Week 7-8: Testing, Optimization, Production Readiness
 
 ### STEP 1: Understand SafTensors Format
 
-**Duration**: 1-2 days  
-**File**: `safetensors_parser_phase2a.s` ✅ (Already created)  
+**Duration**: 1-2 days
+**File**: `safetensors_parser_phase2a.s` ✅ (Already created)
 **Status**: Planning document complete
 
 **What You Need to Know**:
@@ -66,29 +66,19 @@ JSON Metadata Example:
 
 ### STEP 2: Implement Binary I/O (Phase 2B)
 
-**Duration**: 2-3 days  
-**Files to Create**: 
+**Duration**: 2-3 days
+**Files to Create**:
 - `safetensors_loader_phase2b.s`
 
 **What to Implement**:
 ```s
-// Read binary file
 func read_binary_file(string path) []int {
-    // Use intrinsic: __host_read_binary_file(path) → []int
-    // This returns raw bytes from file
 }
 
-// Parse header
 func parse_header([]int bytes) int {
-    // Extract first 8 bytes
-    // Convert from little-endian to integer
-    // Return header length
 }
 
-// Extract JSON metadata
 func extract_json_metadata([]int bytes, int header_len) string {
-    // Read bytes [8:8+header_len]
-    // Return as string (JSON)
 }
 ```
 
@@ -105,24 +95,16 @@ Expected Output:
 
 ### STEP 3: Load Embedding Matrix (Phase 2C)
 
-**Duration**: 3-4 days  
-**Files to Create**: 
+**Duration**: 3-4 days
+**Files to Create**:
 - `embedding_loader.s`
 
 **What to Implement**:
 ```s
-// Load embedding from file
 func load_embedding_matrix(string model_path) [][]float {
-    // Step 1: Parse file header → get offset
-    // Step 2: Read bytes from file[offset:offset+size]
-    // Step 3: Convert BF16 bytes → float32 values
-    // Return: [151936, 896] matrix
 }
 
-// BF16 to float32 conversion
 func bf16_to_float32(int bf16_value) float {
-    // BF16 = 16-bit truncated float32
-    // Shift left 16 bits, add 16 zero bits, interpret as float32
     float value
     value
 }
@@ -132,15 +114,10 @@ func bf16_to_float32(int bf16_value) float {
 ```
 func main() {
     [][]float embedding = load_embedding_matrix(model_path)
-    
-    // Verify shape
-    assert(embedding.length == 151936)  // vocab size
-    assert(embedding[0].length == 896)  // hidden size
-    
-    // Verify values are reasonable floats
+    assert(embedding.length == 151936)
+    assert(embedding[0].length == 896)
     float first_val = embedding[0][0]
     assert(first_val > -10.0 && first_val < 10.0)
-    
     print("✓ Embedding loaded successfully")
 }
 ```
@@ -149,27 +126,16 @@ func main() {
 
 ### STEP 4: Tokenizer Implementation (Phase 2D)
 
-**Duration**: 3-4 days  
-**Files to Create**: 
+**Duration**: 3-4 days
+**Files to Create**:
 - `tokenizer_bpe.s`
 
 **What to Implement**:
 ```s
-// Tokenize input text
 func tokenize(string text) []int {
-    // Load BPE vocabulary from:
-    //   /home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct/tokenizer.json
-    // Apply BPE algorithm:
-    //   1. Split text into characters
-    //   2. Apply merge rules iteratively
-    //   3. Map merged tokens to token IDs
-    // Return: [token_id1, token_id2, ...]
 }
 
-// Simple version for testing:
 func simple_tokenize(string text) []int {
-    // For MVP: just return fixed token IDs
-    // Real implementation loads tokenizer.json
     []int result
     result
 }
@@ -178,7 +144,7 @@ func simple_tokenize(string text) []int {
 **Test Success Criteria**:
 ```
 Input: "糖尿病"
-Output: [token_id1, token_id2, token_id3]  // 3-5 tokens
+Output: [token_id1, token_id2, token_id3]
 
 Verify:
   - Each token_id in range [0, 151643]
@@ -190,59 +156,37 @@ Verify:
 
 ### STEP 5: Single Layer Forward Pass (Phase 2E)
 
-**Duration**: 4-5 days  
-**Files to Create**: 
+**Duration**: 4-5 days
+**Files to Create**:
 - `tensor_ops.s` (basic matrix operations)
 - `transformer_layer_real.s` (layer computation)
 
 **What to Implement** (Layer 1 only):
 
 ```s
-// Matrix multiplication (most critical)
 func matmul([][]float a, [][]float b) [][]float {
-    // Compute C = A @ B
-    // Handle shapes: [M, K] @ [K, N] → [M, N]
 }
 
-// Layer normalization
 func rms_norm([]float input, []float weight) []float {
-    // Compute: output = input / sqrt(mean(input^2)) * weight
 }
 
-// Multi-head attention (14 heads)
 func multihead_attention(
     []float hidden,
     [][]float w_q, [][]float w_k, [][]float w_v, [][]float w_o
 ) []float {
-    // Project to Q, K, V
-    // Split into 14 heads
-    // Compute scaled dot-product attention
-    // Merge heads and project output
 }
 
-// Feed-forward network
 func feedforward(
     []float hidden,
     [][]float w_gate, [][]float w_up, [][]float w_down
 ) []float {
-    // hidden_gated = GELU(hidden @ w_gate)
-    // hidden_up = hidden_gated * (hidden @ w_up)
-    // output = hidden_up @ w_down
 }
 
-// Full layer forward
 func transformer_layer_forward(
     []float hidden,
     int layer_id,
-    map[string][][]float weights  // Loaded layer weights
+    map[string][][]float weights
 ) []float {
-    // Step 1: Input normalization
-    // Step 2: Self-attention
-    // Step 3: Residual connection
-    // Step 4: Feed-forward normalization
-    // Step 5: Feed-forward network
-    // Step 6: Residual connection
-    // Return: [896] output
 }
 ```
 
@@ -262,27 +206,22 @@ Verify:
 
 ### STEP 6: Complete Pipeline (Phase 2F)
 
-**Duration**: 2-3 days  
-**Files to Create**: 
+**Duration**: 2-3 days
+**Files to Create**:
 - `model_inference_complete.s`
 
 **What to Implement**:
 ```s
 func generate_single_token(string prompt) string {
-    // Step 1: Tokenize input
     []int token_ids = tokenize(prompt)
-    
-    // Step 2: Load embedding
+
     int first_token = token_ids[0]
-    []float hidden = embedding[first_token]  // [896]
-    
-    // Step 3: Forward through Layer 1
+    []float hidden = embedding[first_token]
+
     hidden = transformer_layer_forward(hidden, 0, layer_weights[0])
-    
-    // Step 4: Check output shape
+
     assert(hidden.length == 896)
-    
-    // For now: just return proof that computation worked
+
     return "Single token generation successful"
 }
 ```
@@ -348,12 +287,10 @@ print(string) → void
 
 ### Data Type Definitions
 ```s
-// Matrix/tensor types
-[]float              // 1D vector
-[][]float            // 2D matrix
-int                  // Indices, sizes
+[]float
+[][]float
+int
 
-// No structs or complex types to avoid S language limitations
 ```
 
 ---
@@ -430,22 +367,18 @@ int                  // Indices, sizes
 ```bash
 cd /home/shuwen/shuwen/neurx
 
-# Compile individual module
 NEURX_ROOT=$(pwd) /home/shuwen/shuwen/s/bin/s_seed \
   inference/module_name.s \
   artifacts/build/production_s_inference/module_name.ir
 
-# Run compiled module
 /home/shuwen/shuwen/neurx/artifacts/build/s_runner/s_ir_runner \
   artifacts/build/production_s_inference/module_name.ir
 ```
 
 ### Testing
 ```bash
-# Run all tests
 make test-model-inference
 
-# Run specific test
 make test-embedding-load
 make test-layer-forward
 ```
@@ -519,7 +452,7 @@ Once you finish all phases and tests pass:
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: 2026-08-06  
-**Status**: 🚀 Ready to begin Phase 2B  
+**Document Version**: 1.0
+**Last Updated**: 2026-08-06
+**Status**: 🚀 Ready to begin Phase 2B
 **Next Review**: Upon completion of Phase 2B
