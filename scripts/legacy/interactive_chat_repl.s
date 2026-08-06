@@ -9,7 +9,6 @@ struct model_config {
     int num_layers
     int context_length
 }
-
 struct inference_context {
     model_config config
     string checkpoint_path
@@ -35,7 +34,6 @@ func trim(string s) string {
     }
     out
 }
-
 func contains_string(string haystack, string needle) bool {
     int h_len = len(haystack)
     int n_len = len(needle)
@@ -55,11 +53,9 @@ func contains_string(string haystack, string needle) bool {
     }
     false
 }
-
 func read_stdin_line() string {
     trim(runtime_run_command_output("head -1 /dev/stdin 2>/dev/null"))
 }
-
 func load_model_config(string checkpoint_dir) model_config {
     string metadata_path = checkpoint_dir + "/NeurX-1.3.neurx"
     string metadata = runtime_read_text_file(metadata_path)
@@ -72,7 +68,6 @@ func load_model_config(string checkpoint_dir) model_config {
     config.context_length = 256
     return config
 }
-
 func initialize_inference_context(string checkpoint_dir) inference_context {
     inference_context ctx
     ctx.config = load_model_config(checkpoint_dir)
@@ -80,7 +75,6 @@ func initialize_inference_context(string checkpoint_dir) inference_context {
     ctx.model_loaded = runtime_file_exists(ctx.checkpoint_path)
     return ctx
 }
-
 func tokenize_input(string text) int {
     int hash = 0
     int len_text = len(text)
@@ -91,16 +85,13 @@ func tokenize_input(string text) int {
     }
     modulo(hash, 374)
 }
-
 func modulo(int a, int b) int {
     a - (a / b) * b
 }
-
 func model_forward(inference_context ctx, int input_token) int {
     int next_token = modulo(input_token + 17, ctx.config.vocab_size)
     next_token
 }
-
 func decode_token(int token) string {
     if token >= 32 && token <= 126 {
         return string(token)
@@ -110,7 +101,6 @@ func decode_token(int token) string {
     }
     "."
 }
-
 func model_generate_response(inference_context ctx, string user_input) string {
     int input_token = tokenize_input(user_input)
     string model_response = ""
@@ -131,7 +121,6 @@ func model_generate_response(inference_context ctx, string user_input) string {
     }
     model_response
 }
-
 func generate_response(string user_input, inference_context ctx) string {
     if ctx.model_loaded {
     }
@@ -173,7 +162,6 @@ func generate_response(string user_input, inference_context ctx) string {
     }
     "English text!English textAllowedEnglish text.English texttraining, English text: NeurXframework, Transformermodel, trainingEnglish text, English textgenerateEnglish textinferenceEnglish text.English textexplanationEnglish text, English text."
 }
-
 func main() {
     println("╔════════════════════════════════════════════════════╗")
     println("║   NeurX-1.3 Inference & Chat System (S Lang)      ║")

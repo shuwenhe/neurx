@@ -17,7 +17,6 @@ struct dpo_preference_pair {
     string annotator_id
     string domain
 }
-
 struct dpo_dataset {
     []dpo_preference_pair pairs
     int size
@@ -28,7 +27,6 @@ struct dpo_dataset {
     float avg_response_len
     []float domain_distribution
 }
-
 struct dpo_train_config {
     string method
     int batch_size
@@ -57,7 +55,6 @@ struct dpo_train_config {
     bool pin_memory
     string output_dir
 }
-
 struct dpo_trainer_state {
     neurx_model model
     neurx_model reference_model
@@ -85,7 +82,6 @@ struct dpo_trainer_state {
     dataloader train_loader
     dataloader eval_loader
 }
-
 struct dpo_train_result {
     bool success
     int final_step
@@ -110,7 +106,6 @@ func load_dpo_dataset(
         domain_distribution: []float{},
     }
 }
-
 func validate_dpo_dataset(dpo_dataset dataset) bool {
     if dataset.size == 0 {
         return false
@@ -123,7 +118,6 @@ func validate_dpo_dataset(dpo_dataset dataset) bool {
     }
     true
 }
-
 func create_dpo_trainer(
     neurx_model model,
     neurx_model reference_model,
@@ -163,7 +157,6 @@ func create_dpo_trainer(
         eval_loader: dataloader{},
     }
 }
-
 func compute_learning_rate(
     dpo_trainer_state trainer,
     int current_step,
@@ -189,14 +182,12 @@ func compute_learning_rate(
         return cfg.learning_rate * (1.0 - progress)
     }
 }
-
 func cos_approx(float x) float {
     float x2 = x * x
     float x4 = x2 * x2
     float x6 = x4 * x2
     1.0 - (x2 / 2.0) + (x4 / 24.0) - (x6 / 720.0)
 }
-
 struct dpo_training_step_result {
     float loss
     float margin
@@ -204,7 +195,6 @@ struct dpo_training_step_result {
     float chosen_reward
     float rejected_reward
 }
-
 func dpo_training_step(
     ref dpo_trainer_state trainer,
     []dpo_preference_pair batch
@@ -257,7 +247,6 @@ func dpo_training_step(
         rejected_reward: avg_rejected,
     }
 }
-
 func start_dpo_training(
     ref dpo_trainer_state trainer
 ) dpo_train_result {
@@ -307,25 +296,21 @@ func start_dpo_training(
         eval_report_path: cfg.output_dir + "/eval_report.txt",
     }
 }
-
 func dpo_evaluate(dpo_trainer_state trainer) float {
     float avg_loss = 0.0
     avg_loss
 }
-
 func save_dpo_checkpoint(dpo_trainer_state trainer, int step) {
     string checkpoint_path = trainer.config.checkpoint_dir + "/step_" + string(step)
     if trainer.global_rank == 0 {
         print("[DPO] checkpoint saved: " + checkpoint_path)
     }
 }
-
 func load_dpo_checkpoint(string checkpoint_path) (dpo_trainer_state, int) {
     dpo_trainer_state trainer = dpo_trainer_state{}
     int step = 0
     (trainer, step)
 }
-
 func print_dpo_training_header() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║   Direct Preference Optimization (DPO) Training            ║")
@@ -333,7 +318,6 @@ func print_dpo_training_header() {
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
 }
-
 func print_dpo_config(dpo_train_config cfg) {
     print("[DPO config]")
     print("  batch_2 Size: " + string(cfg.batch_size))
@@ -344,7 +328,6 @@ func print_dpo_config(dpo_train_config cfg) {
     print("  Total Steps: " + string(cfg.total_training_steps))
     print("")
 }
-
 func print_dpo_dataset_stats(dpo_dataset dataset) {
     print("[Dataset]")
     print("  Total Pairs: " + string(dataset.size))
@@ -353,7 +336,6 @@ func print_dpo_dataset_stats(dpo_dataset dataset) {
     print("  Avg Response Length: " + string_float(dataset.avg_response_len) + " tokens")
     print("")
 }
-
 func print_dpo_training_progress(dpo_trainer_state trainer) {
     int step = trainer.current_step
     float loss = trainer.running_loss
@@ -366,7 +348,6 @@ func print_dpo_training_progress(dpo_trainer_state trainer) {
           " | Acc: " + string_float(acc * 100.0) + "%" +
           " | LR: " + string_float(lr))
 }
-
 func print_dpo_training_complete(dpo_trainer_state trainer) {
     print("")
     print("╔════════════════════════════════════════════════════════════╗")
@@ -379,7 +360,6 @@ func print_dpo_training_complete(dpo_trainer_state trainer) {
     print("  checkpoint Dir: " + trainer.config.checkpoint_dir)
     print("")
 }
-
 func string_float(float f) string {
     int int_part = int(f)
     int frac_part = int((f - float_of_int(int_part)) * 10000.0)

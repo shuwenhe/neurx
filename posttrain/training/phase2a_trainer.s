@@ -15,14 +15,12 @@ struct training_config {
     int warmup_steps
     int total_steps
 }
-
 struct lora_weights {
     []float lora_A
     []float lora_B
     int rank
     int hidden_size
 }
-
 struct optimizer_state {
     []float m_A
     []float v_A
@@ -32,7 +30,6 @@ struct optimizer_state {
     float beta2
     float epsilon
 }
-
 struct training_state {
     int current_step
     int current_epoch
@@ -68,7 +65,6 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
-
 func float_to_str(float value, int decimals) string {
     float current = value
     bool negative = current < 0.0
@@ -105,11 +101,9 @@ func float_to_str(float value, int decimals) string {
     if negative { result = "-" + result }
     return result
 }
-
 func random_seed(int seed) int {
     return seed * 1103515245 + 12345
 }
-
 func random_float(int seed) float {
     int value = random_seed(seed)
     if value < 0 { value = 0 - value }
@@ -117,7 +111,6 @@ func random_float(int seed) float {
     float normalized = float(remainder) / 10000.0
     return normalized
 }
-
 func init_lora_weights(int rank, int hidden_size, int layer_idx) lora_weights {
     lora_weights lora
     lora.rank = rank
@@ -143,7 +136,6 @@ func init_lora_weights(int rank, int hidden_size, int layer_idx) lora_weights {
     }
     return lora
 }
-
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float guess = x / 2.0
@@ -155,7 +147,6 @@ func sqrt_approx(float x) float {
     }
     return guess
 }
-
 func matmul([]float A, []float B, int m, int k, int n) []float {
     []float C = []float{cap: m * n}
     int i = 0
@@ -180,7 +171,6 @@ func matmul([]float A, []float B, int m, int k, int n) []float {
     }
     return C
 }
-
 func apply_lora([]float hidden, lora_weights lora, int batch_size, int seq_len) []float {
     int tokens = batch_size * seq_len
     int h = lora.hidden_size
@@ -196,11 +186,9 @@ func apply_lora([]float hidden, lora_weights lora, int batch_size, int seq_len) 
     }
     return result
 }
-
 func transformer_layer_forward([]float hidden, lora_weights lora, int batch_size, int seq_len) []float {
     return apply_lora(hidden, lora, batch_size, seq_len)
 }
-
 func compute_loss([]float logits, []int labels, int vocab_size, int num_tokens) float {
     float total_loss = 0.0
     int i = 0
@@ -228,7 +216,6 @@ func compute_loss([]float logits, []int labels, int vocab_size, int num_tokens) 
     }
     return total_loss / float(num_tokens)
 }
-
 func exp_approx(float x) float {
     if x > 10.0 { return 22026.0 }
     if x < -10.0 { return 0.0 }
@@ -242,7 +229,6 @@ func exp_approx(float x) float {
     }
     return result
 }
-
 func log_approx(float x) float {
     if x <= 0.0 { return -10.0 }
     if x == 1.0 { return 0.0 }
@@ -258,12 +244,10 @@ func log_approx(float x) float {
     }
     return 2.0 * result
 }
-
 struct gradient_pair {
     []float grad_A
     []float grad_B
 }
-
 func compute_lora_gradients(
     []float hidden_input,
     []float grad_output,
@@ -294,7 +278,6 @@ func compute_lora_gradients(
     result.grad_B = grad_B
     return result
 }
-
 func init_optimizer(int size_A, int size_B) optimizer_state {
     optimizer_state opt
     opt.beta1 = 0.9
@@ -318,12 +301,10 @@ func init_optimizer(int size_A, int size_B) optimizer_state {
     }
     return opt
 }
-
 struct optimizer_result {
     lora_weights lora
     optimizer_state optimizer
 }
-
 func optimizer_step(
     lora_weights lora,
     []float grad_A,
@@ -358,7 +339,6 @@ func optimizer_step(
     result.optimizer = opt
     return result
 }
-
 func pow_approx(float base, float exp) float {
     if exp == 0.0 { return 1.0 }
     if base == 0.0 { return 0.0 }
@@ -366,7 +346,6 @@ func pow_approx(float base, float exp) float {
     float result = exp_approx(exp * ln_base)
     return result
 }
-
 func save_lora_adapter([]lora_weights loras, training_config config) bool {
     println("\n[Saving Adapter]")
     println("Output Directory: " + config.output_dir)
@@ -383,7 +362,6 @@ func save_lora_adapter([]lora_weights loras, training_config config) bool {
     println("✓ Saved training_config.json")
     return true
 }
-
 func serialize_lora_to_safetensors([]lora_weights loras, training_config config) []byte {
     int total_params = 0
     int layer_idx = 0
@@ -424,7 +402,6 @@ func serialize_lora_to_safetensors([]lora_weights loras, training_config config)
     }
     return buffer
 }
-
 func float32_to_bytes(float value) []byte {
     int int_bits = int(value * 1000000.0)
     []byte bytes = []byte{cap: 4}
@@ -444,7 +421,6 @@ func float32_to_bytes(float value) []byte {
     bytes = append(bytes, byte(byte3))
     return bytes
 }
-
 func string_to_bytes(string s) []byte {
     []byte bytes = []byte{cap: len(s)}
     int i = 0
@@ -454,15 +430,12 @@ func string_to_bytes(string s) []byte {
     }
     return bytes
 }
-
 func create_adapter_config_json(training_config config) string {
     return "{\"alpha\":" + float_to_str(config.lora_alpha, 1) + ",\"r\":" + int_to_str(config.lora_rank) + ",\"target_modules\":[\"q_proj\",\"v_proj\"],\"peft_type\":\"LORA\",\"task_type\":\"CAUSAL_LM\"}"
 }
-
 func create_training_config_json(training_config config) string {
     return "{\"learning_rate\":" + float_to_str(config.learning_rate, 6) + ",\"num_epochs\":" + int_to_str(config.num_epochs) + ",\"batch_size\":" + int_to_str(config.batch_size) + "}"
 }
-
 func create_training_config() training_config {
     training_config config
     config.model_path = runtime_env_get("NEURX_MODEL_PATH", "../model/base-model")
@@ -480,7 +453,6 @@ func create_training_config() training_config {
     config.total_steps = 300
     return config
 }
-
 func run_real_training(training_config config) training_state {
     println("====================================================")
     println("[Phase 2A] REAL SFT Training with LoRA")
@@ -602,7 +574,6 @@ func run_real_training(training_config config) training_state {
     println("")
     return state
 }
-
 func main() {
     training_config config
     config.model_path = runtime_env_get("NEURX_MODEL_PATH", "../model/base-model")

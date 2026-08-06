@@ -6,13 +6,11 @@ struct embedding_state_s {
     int seq_len
     float scale
 }
-
 struct rope_encoding_state_s {
     int dim
     float base
     int seq_length
 }
-
 struct embedding_output_s {
     [][]float embeddings
     [][]float pos_encoded
@@ -28,7 +26,6 @@ func new_embedding_state_s(int vocab_size, int hidden_dim) embedding_state_s {
         scale: 1.0,
     }
 }
-
 func new_rope_encoding_state_s(int dim) rope_encoding_state_s {
     rope_encoding_state_s {
         dim: dim,
@@ -36,7 +33,6 @@ func new_rope_encoding_state_s(int dim) rope_encoding_state_s {
         seq_length: 0,
     }
 }
-
 func compute_rope_freqs(rope_encoding_state_s state, int position) []float {
     []float freqs
     int i = 0
@@ -48,7 +44,6 @@ func compute_rope_freqs(rope_encoding_state_s state, int position) []float {
     }
     freqs
 }
-
 func apply_rope_s([]float token_emb, int position, rope_encoding_state_s rope_state) []float {
     []float rotated
     []float freqs = compute_rope_freqs(rope_state, position)
@@ -73,7 +68,6 @@ func apply_rope_s([]float token_emb, int position, rope_encoding_state_s rope_st
     }
     rotated
 }
-
 func embedding_lookup_s([]int token_ids, [][]float embedding_matrix) [][]float {
     [][]float result
     int i = 0
@@ -86,7 +80,6 @@ func embedding_lookup_s([]int token_ids, [][]float embedding_matrix) [][]float {
     }
     result
 }
-
 func apply_embedding_scale_s([][]float embeddings, float scale) [][]float {
     [][]float scaled
     int i = 0

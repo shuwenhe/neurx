@@ -12,7 +12,6 @@ struct pretrain_optimizer_state {
     float last_lr
     float last_grad_norm
 }
-
 struct pretrain_optimizer_step_state {
     pretrain_optimizer_state optimizer
     tensor token_embedding
@@ -33,7 +32,6 @@ func new_pretrain_optimizer_state(float lr, float min_lr, int warmup_steps, int 
         last_grad_norm: 0.0,
     }
 }
-
 func pretrain_optimizer_global_norm3(tensor a, tensor b, tensor c) float {
     float total_sq = 0.0
     int i = 0
@@ -68,7 +66,6 @@ func pretrain_optimizer_global_norm3(tensor a, tensor b, tensor c) float {
     }
     guess
 }
-
 func pretrain_optimizer_scale_for_norm(float grad_norm, float max_grad_norm) float {
     if max_grad_norm <= 0.0 {
         return 1.0
@@ -78,7 +75,6 @@ func pretrain_optimizer_scale_for_norm(float grad_norm, float max_grad_norm) flo
     }
     max_grad_norm / grad_norm
 }
-
 func pretrain_optimizer_step(pretrain_optimizer_state state, tensor token_embedding, tensor token_embedding_grad, tensor lm_head_weight, tensor lm_head_weight_grad, tensor lm_head_bias, tensor lm_head_bias_grad) pretrain_optimizer_step_state {
     lr_scheduler next_scheduler = scheduler_step(state.scheduler, state.step + 1)
     float current_lr = scheduler_current_lr(next_scheduler)
@@ -124,7 +120,6 @@ func pretrain_optimizer_step(pretrain_optimizer_state state, tensor token_embedd
         lr: current_lr,
     }
 }
-
 func pretrain_optimizer_state_dict(pretrain_optimizer_state state) pretrain_optimizer_state {
     pretrain_optimizer_state {
         token_embedding_opt: state.token_embedding_opt,
@@ -137,7 +132,6 @@ func pretrain_optimizer_state_dict(pretrain_optimizer_state state) pretrain_opti
         last_grad_norm: state.last_grad_norm,
     }
 }
-
 func pretrain_optimizer_load_state_dict(pretrain_optimizer_state state, pretrain_optimizer_state other) pretrain_optimizer_state {
     pretrain_optimizer_state {
         token_embedding_opt: other.token_embedding_opt,

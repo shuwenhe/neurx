@@ -7,7 +7,6 @@ struct gradient_node {
     []int inputs
     tensor grad
 }
-
 struct gradient_tape {
     []gradient_node nodes
     int node_counter
@@ -20,7 +19,6 @@ func create_tape() gradient_tape {
         recording: true,
     }
 }
-
 func add_node(gradient_tape tape, tensor value, string op, []int inputs) (gradient_tape, int) {
     if !tape.recording {
         return (tape, -1)
@@ -37,7 +35,6 @@ func add_node(gradient_tape tape, tensor value, string op, []int inputs) (gradie
     tape.node_counter = tape.node_counter + 1
     (tape, node_id)
 }
-
 func ad_add(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tensor) {
     tensor result = zeros(a.shape)
     int i = 0
@@ -49,7 +46,6 @@ func ad_add(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tensor)
     (tape, node_id) = add_node(tape, result, "add", [get_node_id(a), get_node_id(b)])
     (tape, node_id, result)
 }
-
 func ad_mul(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tensor) {
     tensor result = zeros(a.shape)
     int i = 0
@@ -61,7 +57,6 @@ func ad_mul(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tensor)
     (tape, node_id) = add_node(tape, result, "mul", [get_node_id(a), get_node_id(b)])
     (tape, node_id, result)
 }
-
 func ad_matmul(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tensor) {
     int m = a.shape[0]
     int n = a.shape[1]
@@ -86,7 +81,6 @@ func ad_matmul(gradient_tape tape, tensor a, tensor b) (gradient_tape, int, tens
     (tape, node_id) = add_node(tape, result, "matmul", [get_node_id(a), get_node_id(b)])
     (tape, node_id, result)
 }
-
 func ad_transpose(gradient_tape tape, tensor a) (gradient_tape, int, tensor) {
     int m = a.shape[0]
     int n = a.shape[1]
@@ -104,7 +98,6 @@ func ad_transpose(gradient_tape tape, tensor a) (gradient_tape, int, tensor) {
     (tape, node_id) = add_node(tape, result, "transpose", [get_node_id(a)])
     (tape, node_id, result)
 }
-
 func ad_softmax(gradient_tape tape, tensor logits) (gradient_tape, int, tensor) {
     tensor exp_logits = zeros(logits.shape)
     float max_val = logits.data[0]
@@ -132,7 +125,6 @@ func ad_softmax(gradient_tape tape, tensor logits) (gradient_tape, int, tensor) 
     (tape, node_id) = add_node(tape, result, "softmax", [get_node_id(logits)])
     (tape, node_id, result)
 }
-
 func ad_relu(gradient_tape tape, tensor x) (gradient_tape, int, tensor) {
     tensor result = zeros(x.shape)
     int i = 0
@@ -148,7 +140,6 @@ func ad_relu(gradient_tape tape, tensor x) (gradient_tape, int, tensor) {
     (tape, node_id) = add_node(tape, result, "relu", [get_node_id(x)])
     (tape, node_id, result)
 }
-
 func ad_layer_norm(gradient_tape tape, tensor x, float eps) (gradient_tape, int, tensor) {
     float mean = 0.0
     int i = 0
@@ -175,7 +166,6 @@ func ad_layer_norm(gradient_tape tape, tensor x, float eps) (gradient_tape, int,
     (tape, node_id) = add_node(tape, result, "layer_norm", [get_node_id(x)])
     (tape, node_id, result)
 }
-
 func backward_add(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad_b) (tensor, tensor) {
     int i = 0
     while i < len(grad.data) {
@@ -185,7 +175,6 @@ func backward_add(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad_b)
     }
     (grad_a, grad_b)
 }
-
 func backward_mul(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad_b) (tensor, tensor) {
     int i = 0
     while i < len(grad.data) {
@@ -195,7 +184,6 @@ func backward_mul(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad_b)
     }
     (grad_a, grad_b)
 }
-
 func backward_matmul(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad_b) (tensor, tensor) {
     int m = a.shape[0]
     int n = a.shape[1]
@@ -232,7 +220,6 @@ func backward_matmul(tensor grad, tensor a, tensor b, tensor grad_a, tensor grad
     }
     (grad_a, grad_b)
 }
-
 func backward_softmax(tensor grad, tensor softmax_output, tensor grad_input) tensor {
     int i = 0
     while i < len(grad.data) {
@@ -248,7 +235,6 @@ func backward_softmax(tensor grad, tensor softmax_output, tensor grad_input) ten
     }
     grad_input
 }
-
 func backward_relu(tensor grad, tensor x, tensor grad_input) tensor {
     int i = 0
     while i < len(grad.data) {
@@ -259,7 +245,6 @@ func backward_relu(tensor grad, tensor x, tensor grad_input) tensor {
     }
     grad_input
 }
-
 func backward_tape(
     gradient_tape tape,
     tensor final_grad
@@ -308,15 +293,12 @@ func backward_tape(
     }
     gradients
 }
-
 func get_node_id(tensor t) int {
     0
 }
-
 func float_from_int(int x) float {
     0.0 + x
 }
-
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float y = x
@@ -327,7 +309,6 @@ func sqrt_approx(float x) float {
     }
     y
 }
-
 func exp_approx(float x) float {
     if x > 20.0 { return 485165195.0 }
     if x < -20.0 { return 0.0 }

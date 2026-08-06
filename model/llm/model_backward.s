@@ -21,7 +21,6 @@ struct gpt_sdpa_cache {
     int n_kv_head
     int head_dim
 }
-
 struct transformer_layer_cache {
     []float x_in
     []float normed1
@@ -41,7 +40,6 @@ struct transformer_layer_cache {
     int batch_size
     int seq_len
 }
-
 struct gpt_forward_cache {
     []float embedding
     []transformer_layer_cache layers
@@ -51,7 +49,6 @@ struct gpt_forward_cache {
     int seq_len
     int n_layer
 }
-
 struct transformer_layer_grads {
     []float d_norm1_gamma
     []float d_norm2_gamma
@@ -67,7 +64,6 @@ struct transformer_layer_grads {
     []float d_ffn_val_w
     []float d_ffn_down_w
 }
-
 struct gpt_param_grads {
     []float d_wte
     []float d_wpe
@@ -76,7 +72,6 @@ struct gpt_param_grads {
     []transformer_layer_grads layers
     int n_layer
 }
-
 struct gpt_adamw_state {
     []float m_wte
     []float v_wte
@@ -94,7 +89,6 @@ struct gpt_adamw_state {
     float eps
     float weight_decay
 }
-
 struct transformer_layer_adamw {
     []float m_norm1_gamma  []float v_norm1_gamma
     []float m_norm2_gamma  []float v_norm2_gamma
@@ -112,27 +106,23 @@ func bk_alloc(int n) []float {
     while i < n { v[i] = 0.0; i = i + 1 }
     v
 }
-
 func bk_copy([]float src) []float {
     []float out = bk_alloc(len(src))
     int i = 0
     while i < len(src) { out[i] = src[i]; i = i + 1 }
     out
 }
-
 func bk_add_inplace([]float a, []float b) []float {
     int i = 0
     while i < len(a) { a[i] = a[i] + b[i]; i = i + 1 }
     a
 }
-
 func bk_scale([]float v, float s) []float {
     []float out = bk_alloc(len(v))
     int i = 0
     while i < len(v) { out[i] = v[i] * s; i = i + 1 }
     out
 }
-
 func bk_matmul_da([]float d_c, []float b, int m, int k, int n) []float {
     []float d_a = bk_alloc(m * k)
     int i = 0
@@ -152,7 +142,6 @@ func bk_matmul_da([]float d_c, []float b, int m, int k, int n) []float {
     }
     d_a
 }
-
 func bk_matmul_db([]float a, []float d_c, int m, int k, int n) []float {
     []float d_b = bk_alloc(k * n)
     int l = 0
@@ -172,7 +161,6 @@ func bk_matmul_db([]float a, []float d_c, int m, int k, int n) []float {
     }
     d_b
 }
-
 func bk_matmul_t_da([]float d_c, []float b, int m, int k, int n) []float {
     []float d_a = bk_alloc(m * k)
     int i = 0
@@ -192,7 +180,6 @@ func bk_matmul_t_da([]float d_c, []float b, int m, int k, int n) []float {
     }
     d_a
 }
-
 func bk_matmul_t_db([]float a, []float d_c, int m, int k, int n) []float {
     []float d_b = bk_alloc(n * k)
     int j = 0
@@ -212,7 +199,6 @@ func bk_matmul_t_db([]float a, []float d_c, int m, int k, int n) []float {
     }
     d_b
 }
-
 func bk_matmul_kv_da([]float d_c, []float b, int m, int k, int n, int full_n) []float {
     []float d_a = bk_alloc(m * k)
     int i = 0
@@ -232,7 +218,6 @@ func bk_matmul_kv_da([]float d_c, []float b, int m, int k, int n, int full_n) []
     }
     d_a
 }
-
 func bk_matmul_kv_db([]float a, []float d_c, int m, int k, int n, int full_n) []float {
     []float d_b = bk_alloc(k * full_n)
     int l = 0
@@ -252,7 +237,6 @@ func bk_matmul_kv_db([]float a, []float d_c, int m, int k, int n, int full_n) []
     }
     d_b
 }
-
 func bk_softmax_row([]float d_weights, []float weights, int size) []float {
     float dot = 0.0
     int i = 0
@@ -265,12 +249,10 @@ func bk_softmax_row([]float d_weights, []float weights, int size) []float {
     }
     d_scores
 }
-
 func bk_swish_grad(float z) float {
     float s = gpt_sigmoid(z)
     s + z * s * (1.0 - s)
 }
-
 func transformer_layer_forward_cached(
     transformer_layer layer,
     []float x,
@@ -414,7 +396,6 @@ func transformer_layer_forward_cached(
     }
     (y, cache)
 }
-
 func bk_compute_attn_weights(
     []float q, []float k,
     int seq_len, int nh, int nkv, int hd
@@ -453,7 +434,6 @@ func bk_compute_attn_weights(
     }
     weights
 }
-
 func gpt_forward_cached(
     language_model model,
     []int token_ids,
@@ -494,7 +474,6 @@ func gpt_forward_cached(
     }
     (fc, logits)
 }
-
 func gpt_ce_backward(
     []float logits,
     []int targets,
@@ -539,7 +518,6 @@ func gpt_ce_backward(
     }
     d_logits
 }
-
 func bk_rmsn(
     rms_norm rn,
     []float d_out,
@@ -587,13 +565,11 @@ func bk_rmsn(
     }
     (d_input, d_gamma)
 }
-
 struct sdpa_bk_result {
     []float d_q
     []float d_k
     []float d_v
 }
-
 func bk_causal_sdpa(
     []float d_out,
     gpt_sdpa_cache cache
@@ -656,7 +632,6 @@ func bk_causal_sdpa(
     }
     sdpa_bk_result { d_q: d_q, d_k: d_k, d_v: d_v }
 }
-
 func bk_rope_q([]float d_q_rope, int batch_size, int seq_len, int nh, int hd, int D, []float freqs) []float {
     []float d_q = gpt_copy(d_q_rope)
     int pair_dim = hd / 2
@@ -687,7 +662,6 @@ func bk_rope_q([]float d_q_rope, int batch_size, int seq_len, int nh, int hd, in
     }
     d_q
 }
-
 func bk_rope_k([]float d_k_rope, int batch_size, int seq_len, int nkv, int hd, int kv_D, []float freqs) []float {
     []float d_k = gpt_copy(d_k_rope)
     int pair_dim = hd / 2
@@ -718,7 +692,6 @@ func bk_rope_k([]float d_k_rope, int batch_size, int seq_len, int nkv, int hd, i
     }
     d_k
 }
-
 func transformer_layer_backward(
     transformer_layer layer,
     transformer_layer_cache cache,
@@ -816,7 +789,6 @@ func transformer_layer_backward(
     }
     (d_input, grads)
 }
-
 func model_backward
     language_model model,
     gpt_forward_cache fc,
@@ -877,7 +849,6 @@ func model_backward
         n_layer: model.n_layer,
     }
 }
-
 func new_gpt_adamw_state(language_model model, float lr, float beta1, float beta2, float eps, float wd) gpt_adamw_state {
     int D = model.n_embd
     int V = model.vocab_size
@@ -912,7 +883,6 @@ func new_gpt_adamw_state(language_model model, float lr, float beta1, float beta
         lr: lr, beta1: beta1, beta2: beta2, eps: eps, weight_decay: wd,
     }
 }
-
 func adamw_update_vec([]float param, []float grad, []float m, []float v, int step, float lr, float b1, float b2, float eps, float wd) []float {
     float bc1 = 1.0 - bk_pow(b1, step)
     float bc2 = 1.0 - bk_pow(b2, step)
@@ -930,14 +900,12 @@ func adamw_update_vec([]float param, []float grad, []float m, []float v, int ste
     }
     p
 }
-
 func bk_pow(float base, int exp) float {
     float r = 1.0
     int e = exp
     while e > 0 { r = r * base; e = e - 1 }
     r
 }
-
 func gpt_adamw_step(
     language_model model,
     gpt_param_grads grads,
@@ -970,14 +938,12 @@ func gpt_adamw_step(
     }
     (model, o)
 }
-
 struct gpt_train_step_result {
     language_model model
     gpt_adamw_state opt
     float loss
     float grad_norm
 }
-
 func train_step
     language_model model,
     gpt_adamw_state opt,
@@ -1032,7 +998,6 @@ func train_step
         grad_norm: grad_norm,
     }
 }
-
 func gpt_compute_ce_loss([]float logits, []int targets, int total, int vocab) float {
     float loss = 0.0
     int count = 0
@@ -1055,14 +1020,12 @@ func gpt_compute_ce_loss([]float logits, []int targets, int total, int vocab) fl
     if count == 0 { return 0.0 }
     loss / (count * 1.0)
 }
-
 func bk_vec_norm_sq([]float v) float {
     float s = 0.0
     int i = 0
     while i < len(v) { s = s + v[i] * v[i]; i = i + 1 }
     s
 }
-
 func scale_all_grads(gpt_param_grads grads, float scale) gpt_param_grads {
     grads.d_wte = bk_scale(grads.d_wte, scale)
     grads.d_wpe = bk_scale(grads.d_wpe, scale)

@@ -55,7 +55,6 @@ func init(attention_config cfg) NeurxAttention {
         }
     }
 }
-
 func forward(
     self: NeurxAttention,
     hidden_states: tensor,

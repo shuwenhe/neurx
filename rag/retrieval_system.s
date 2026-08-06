@@ -24,7 +24,6 @@ struct retrieval_system_config {
     max_context_tokens: int = 4096
     citation_format: string = "[doc{index}]"
 }
-
 struct document_chunk {
     id: string
     content: string
@@ -33,7 +32,6 @@ struct document_chunk {
     chunk_index: int
     token_count: int
 }
-
 struct document_metadata {
     source_id: string
     source_path: string?
@@ -48,7 +46,6 @@ struct document_metadata {
     section?: string
     relevance_score?: float
 }
-
 struct search_result {
     chunks: list<document_chunk>
     scores: list<float>
@@ -56,7 +53,6 @@ struct search_result {
     expanded_query: string?
     retrieval_metadata: retrieval_metadata
 }
-
 struct retrieval_metadata {
     total_scanned: int
     total_returned: int
@@ -78,13 +74,11 @@ interface VectorDBInterface {
     clear()
     get_status()
 }
-
 struct search_result_item {
     chunk_id: string
     score: float
     metadata: document_metadata
 }
-
 struct dbstatus {
     total_documents: int
     index_type: string

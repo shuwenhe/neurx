@@ -15,7 +15,6 @@ func new_posttrain_eval_state() posttrain_eval_state {
         has_result: false,
     }
 }
-
 func update_posttrain_eval(posttrain_eval_state state, int step, float reward_score, float alignment_score, float safety_score) posttrain_eval_state {
     posttrain_eval_state {
         last_eval_step: step,
@@ -25,11 +24,9 @@ func update_posttrain_eval(posttrain_eval_state state, int step, float reward_sc
         has_result: true,
     }
 }
-
 func posttrain_eval_state_dict(posttrain_eval_state state) posttrain_eval_state {
     state
 }
-
 func posttrain_eval_load_state_dict(posttrain_eval_state state, posttrain_eval_state other) posttrain_eval_state {
     other
 }

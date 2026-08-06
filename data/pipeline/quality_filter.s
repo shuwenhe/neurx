@@ -46,14 +46,12 @@ func default_2t_quality_filter_config() quality_filter_config:
     cfg.async_processing = true
     cfg.batch_size_for_scoring = 1000
     return cfg
-
 struct bloom_filter:
     []byte bit_array
     int64 size_bits
     int64 num_items_inserted
     int num_hash_functions
     float expected_fpr
-
 func calculate_bloom_params(
     int64 expected_items,
     float desired_fpr
@@ -69,7 +67,6 @@ func calculate_bloom_params(
     if k > 20:
         k = 20
     return (m, k)
-
 func new_bloom_filter(int64 size_bits, int num_hashes) bloom_filter:
     int64 array_size = (size_bits + 7) / 8
     []byte bit_array = []byte{cap: array_size}
@@ -84,7 +81,6 @@ func new_bloom_filter(int64 size_bits, int num_hashes) bloom_filter:
     bf.num_hash_functions = num_hashes
     bf.expected_fpr = calculate_expected_fpr(size_bits, 0, num_hashes)
     return bf
-
 func bloom_insert(bloom_filter bf, string item) void:
     int h = 0
     while h < bf.num_hash_functions:
@@ -96,7 +92,6 @@ func bloom_insert(bloom_filter bf, string item) void:
             bf.bit_array[byte_idx] = bf.bit_array[byte_idx] | (1 << bit_idx)
         h = h + 1
     bf.num_items_inserted = bf.num_items_inserted + 1
-
 func bloom_contains(bloom_filter bf, string item) bool:
     int h = 0
     while h < bf.num_hash_functions:
@@ -111,7 +106,6 @@ func bloom_contains(bloom_filter bf, string item) bool:
             return false
         h = h + 1
     return true
-
 func calculate_expected_fpr(int64 size_bits, int64 n, int k) float:
     if size_bits == 0 or k == 0:
         return 1.0
@@ -119,7 +113,6 @@ func calculate_expected_fpr(int64 size_bits, int64 n, int k) float:
     float base = 1.0 - exp_approx(exponent)
     float fpr = pow_approx(base, float(k))
     return fpr
-
 struct quality_metrics:
     float overall_score
     float length_score
@@ -142,7 +135,6 @@ struct quality_metrics:
     bool contains_pii
     bool is_duplicate
     bool should_keep
-
 struct quality_scorer_state:
     quality_filter_config config
     bloom_filter dedup_filter
@@ -150,7 +142,6 @@ struct quality_scorer_state:
     int total_samples_kept
     int total_samples_rejected
     []string rejection_reasons
-
 func new_quality_scorer(quality_filter_config config) quality_scorer_state:
     quality_scorer_state scorer
     scorer.config = config
@@ -168,7 +159,6 @@ func new_quality_scorer(quality_filter_config config) quality_scorer_state:
             bits = int64(config.bloom_filter_size_mb) * 1024 * 1024 * 8
         scorer.dedup_filter = new_bloom_filter(bits, config.num_hash_functions)
     return scorer
-
 func score_sample(
     quality_scorer_state scorer,
     string text,
@@ -207,7 +197,6 @@ func score_sample(
         scorer.total_samples_rejected = scorer.total_samples_rejected + 1
         record_rejection_reason(scorer, metrics)
     return metrics
-
 func compute_length_score(int char_count, int token_count, quality_filter_config cfg) float:
     if char_count < cfg.min_length_chars:
         return float(char_count) / float(cfg.min_length_chars)
@@ -218,7 +207,6 @@ func compute_length_score(int char_count, int token_count, quality_filter_config
     if cfg.max_tokens > 0 and token_count > cfg.max_tokens:
         return 0.85
     return 1.0
-
 func compute_content_quality(string text, []int token_ids, quality_metrics metrics) float:
     if len(token_ids) == 0:
         return 0.0
@@ -237,7 +225,6 @@ func compute_content_quality(string text, []int token_ids, quality_metrics metri
     float diversity_component = metrics.unique_token_ratio
     float repetition_component = 1.0 - repetition_penalty
     return (diversity_component * 0.6 + repetition_component * 0.4)
-
 func compute_language_score(string detected_lang, float confidence, quality_filter_config cfg) float:
     if cfg.target_language == "auto":
         if confidence >= cfg.min_language_confidence:
@@ -251,7 +238,6 @@ func compute_language_score(string detected_lang, float confidence, quality_filt
             return confidence
         else:
             return 0.0
-
 func detect_toxicity(string text) (bool, float):
     toxic_words = ["fuck", "shit", "ass", "damn", "hate", "kill", "violence"]
     float score = 0.0
@@ -266,7 +252,6 @@ func detect_toxicity(string text) (bool, float):
     if score > 1.0:
         score = 1.0
     return (toxic_count > 2, score)
-
 func detect_pii(string text) bool:
     if contains_regex(text, r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"):
         return true
@@ -275,7 +260,6 @@ func detect_pii(string text) bool:
     if contains_regex(text, r"\d{3}-\d{2}-\d{4}"):
         return true
     return false
-
 func detect_code_content(string text) float:
     float code_score = 0.0
     int bracket_count = count_char(text, '{') + count_char(text, '}') +
@@ -297,7 +281,6 @@ func detect_code_content(string text) float:
     if code_score > 1.0:
         code_score = 1.0
     return code_score
-
 func compute_format_score(string text, float code_indicator) float:
     if code_indicator > 0.9:
         return 0.2
@@ -308,13 +291,11 @@ func compute_format_score(string text, float code_indicator) float:
         return 0.8
     else:
         return 0.5
-
 func normalize_for_dedup(string text, []int token_ids) string:
     string normalized = to_lower_case(trim(text))
     if len(normalized) > 500:
         normalized = substring(normalized, 0, 500)
     return normalized
-
 func compute_overall_score(quality_metrics m, quality_filter_config cfg) float:
     float score = 0.0
     float total_weight = 0.0
@@ -333,7 +314,6 @@ func compute_overall_score(quality_metrics m, quality_filter_config cfg) float:
     if total_weight > 0:
         score = score / total_weight
     return score
-
 func make_filter_decision(quality_metrics m, quality_filter_config cfg) bool:
     if m.overall_score < cfg.min_quality_score:
         return false
@@ -354,7 +334,6 @@ func make_filter_decision(quality_metrics m, quality_filter_config cfg) bool:
     if m.is_duplicate:
         return false
     return true
-
 struct filter_statistics:
     int total_samples_processed
     int samples_accepted
@@ -371,7 +350,6 @@ struct filter_statistics:
     float avg_quality_score_rejected
     float bloom_filter_fpr_actual
     int bloom_filter_items
-
 func get_filter_statistics(quality_scorer_state scorer) filter_statistics:
     filter_statistics stats
     stats.total_samples_processed = scorer.total_samples_seen
@@ -393,7 +371,6 @@ func get_filter_statistics(quality_scorer_state scorer) filter_statistics:
         scorer.dedup_filter.num_hash_functions
     )
     return stats
-
 func record_rejection_reason(quality_scorer_state scorer, quality_metrics m) void:
     string reason = ""
     if m.overall_score < scorer.config.min_quality_score:
@@ -412,7 +389,6 @@ func record_rejection_reason(quality_scorer_state scorer, quality_metrics m) voi
         reason = "other"
     if len(scorer.rejection_reasons) < 10000:
         scorer.rejection_reasons.push(reason)
-
 func measure_repetition(map<int, int> freq, int total) float:
     if total == 0:
         return 0.0
@@ -421,7 +397,6 @@ func measure_repetition(map<int, int> freq, int total) float:
         float p = float(count) / float(total)
         sum_squared = sum_squared + p * p
     return (sum_squared - 1.0/float(total)) / (1.0 - 1.0/float(total))
-
 func detect_language(string text) (string, float):
     if contains_range(text, 0x4E00, 0x9FFF):
         return ("zh", 0.9)
@@ -431,7 +406,6 @@ func detect_language(string text) (string, float):
         return ("ar", 0.8)
     else:
         return ("en", 0.7)
-
 func contains_range(string s, int start, int end) bool:
     int i = 0
     while i < len(s):
@@ -440,10 +414,8 @@ func contains_range(string s, int start, int end) bool:
             return true
         i = i + 1
     return false
-
 func get_codepoint(string s, int pos) int:
     return int(s[pos])
-
 func compute_hash_with_seed(string item, int seed) int64:
     int64 hash = int64(seed) * 2654435761
     int i = 0
@@ -454,19 +426,14 @@ func compute_hash_with_seed(string item, int seed) int64:
     if hash < 0:
         hash = -hash
     return hash
-
 func contains(string s, string sub) bool:
     return find_substring(s, sub) >= 0
-
 func find_substring(string s, string sub) int:
     return -1
-
 func to_lower_case(string s) string:
     return s
-
 func trim(string s) string:
     return s
-
 func count_char(string s, char c) int:
     int count = 0
     int i = 0
@@ -475,7 +442,6 @@ func count_char(string s, char c) int:
             count = count + 1
         i = i + 1
     return count
-
 func count_occurrences(string s, string sub) int:
     int count = 0
     int pos = 0
@@ -487,12 +453,9 @@ func count_occurrences(string s, string sub) int:
         else:
             break
     return count
-
 func contains_regex(string s, string pattern) bool:
     return false
-
 func max(int a, int b) int:
     if a > b: return a else: return b
-
 func substring(string s, int start, int end) string:
     return ""

@@ -1,8 +1,6 @@
 package neurx.optimizer.adafactor
-
 use neurx.tensor.tensor
 use neurx.tensor.new
-
 struct adafactor_optimizer {
     float lr
     float beta2_decay
@@ -17,7 +15,6 @@ struct adafactor_optimizer {
     int num_rows
     int num_cols
 }
-
 func new_adafactor(
     float lr,
     float beta2_decay,
@@ -41,7 +38,6 @@ func new_adafactor(
         num_cols: 0,
     }
 }
-
 func adafactor_step_2d(
     adafactor_optimizer optimizer,
     tensor params,
@@ -54,9 +50,7 @@ func adafactor_step_2d(
     optimizer.num_cols = num_cols
     optimizer.row_var = ensure_adafactor_state(optimizer.row_var, num_rows)
     optimizer.col_var = ensure_adafactor_state(optimizer.col_var, num_cols)
-
     float beta2_t = 1.0 - adafactor_pow(float(optimizer.step), 0.0 - optimizer.beta2_decay)
-
     []float row_sums = []float{cap: num_rows}
     []float col_sums = []float{cap: num_cols}
     int r = 0
@@ -69,7 +63,6 @@ func adafactor_step_2d(
         col_sums[c] = 0.0
         c = c + 1
     }
-
     int idx = 0
     while idx < num_rows * num_cols {
         int row = idx / num_cols
@@ -80,7 +73,6 @@ func adafactor_step_2d(
         col_sums[col] = col_sums[col] + grad_sq
         idx = idx + 1
     }
-
     r = 0
     while r < num_rows {
         float row_mean = row_sums[r] / float(num_cols)
@@ -93,14 +85,12 @@ func adafactor_step_2d(
         optimizer.col_var[c] = optimizer.col_var[c] * (1.0 - beta2_t) + col_mean * beta2_t
         c = c + 1
     }
-
     float total_row_var = 0.0
     r = 0
     while r < num_rows {
         total_row_var = total_row_var + optimizer.row_var[r]
         r = r + 1
     }
-
     int n = num_rows * num_cols
     []float update = []float{cap: n}
     idx = 0
@@ -111,10 +101,8 @@ func adafactor_step_2d(
         update[idx] = grads.data[idx] / (denom + optimizer.eps1)
         idx = idx + 1
     }
-
     float rms = adafactor_rms(update, n)
     float clip_denom = adafactor_max(1.0, rms / optimizer.clip_threshold)
-
     []float out = []float{cap: n}
     idx = 0
     while idx < n {
@@ -126,18 +114,15 @@ func adafactor_step_2d(
         out[idx] = new_param - optimizer.lr * scaled
         idx = idx + 1
     }
-
     adafactor_optimizer_step_output {
         optimizer: optimizer,
         params: new(out, params.shape, params.requires_grad),
     }
 }
-
 struct adafactor_optimizer_step_output {
     adafactor_optimizer optimizer
     tensor params
 }
-
 func ensure_adafactor_state([]float values, int n) []float {
     []float out = []float{cap: n}
     int i = 0
@@ -151,7 +136,6 @@ func ensure_adafactor_state([]float values, int n) []float {
     }
     out
 }
-
 func adafactor_rms([]float values, int n) float {
     if n == 0 {
         return 0.0
@@ -164,14 +148,12 @@ func adafactor_rms([]float values, int n) float {
     }
     return adafactor_sqrt(sum_sq / float(n))
 }
-
 func adafactor_max(float a, float b) float {
     if a > b {
         return a
     }
     return b
 }
-
 func adafactor_sqrt(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -187,14 +169,12 @@ func adafactor_sqrt(float x) float {
     }
     y
 }
-
 func adafactor_pow(float base, float exponent) float {
     if base <= 0.0 {
         return 0.0
     }
     return adafactor_exp(exponent * adafactor_ln(base))
 }
-
 func adafactor_exp(float x) float {
     float result = 1.0
     float term = 1.0
@@ -206,7 +186,6 @@ func adafactor_exp(float x) float {
     }
     result
 }
-
 func adafactor_ln(float x) float {
     if x <= 0.0 {
         return 0.0

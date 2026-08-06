@@ -15,7 +15,6 @@ struct SAPOConfig {
     use_value_loss: bool
     value_loss_coeff: f32
 }
-
 struct SAPOTrainer {
     config: SAPOConfig
     policy_model: *Model
@@ -25,7 +24,6 @@ struct SAPOTrainer {
     step_count: i64
     advantage_stats: AdvantageStats
 }
-
 struct AdvantageStats {
     mean: f32
     std: f32
@@ -58,7 +56,6 @@ func new_sapo_trainer(
         },
     }
 }
-
 func (trainer: *SAPOTrainer) smooth_clip(x: Tensor, lower: f32, upper: f32) -> Tensor {
     let tau = trainer.config.tau
     let lower_weight = sigmoid((x - lower) / tau)
@@ -68,7 +65,6 @@ func (trainer: *SAPOTrainer) smooth_clip(x: Tensor, lower: f32, upper: f32) -> T
                          upper * (1.0 - upper_weight)
     return smooth_clipped
 }
-
 func (trainer: *SAPOTrainer) compute_smooth_surrogate(
     ratio: Tensor,
     advantage: Tensor
@@ -85,7 +81,6 @@ func (trainer: *SAPOTrainer) compute_smooth_surrogate(
         return smooth_obj
     }
 }
-
 func (trainer: *SAPOTrainer) compute_gae(
     rewards: []Tensor,
     values: []Tensor,
@@ -115,7 +110,6 @@ func (trainer: *SAPOTrainer) compute_gae(
     }
     return advantages, returns
 }
-
 func (trainer: *SAPOTrainer) normalize_advantages(advantages: []Tensor) -> []Tensor {
     if !trainer.config.normalize_advantages {
         return advantages
@@ -143,7 +137,6 @@ func (trainer: *SAPOTrainer) normalize_advantages(advantages: []Tensor) -> []Ten
     }
     return normalized
 }
-
 func (trainer: *SAPOTrainer) train_step(
     prompts: []Tensor,
     responses: []Tensor,
@@ -225,7 +218,6 @@ func (trainer: *SAPOTrainer) train_step(
         total_kl / f32(num_updates)
     )
 }
-
 func (trainer: *SAPOTrainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let value_losses: []f32 = []
@@ -249,11 +241,9 @@ func (trainer: *SAPOTrainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     }
     return policy_losses, value_losses
 }
-
 func sigmoid(x: Tensor) -> Tensor {
     return 1.0 / (1.0 + exp(-x))
 }
-
 func compute_mean(values: []f32) -> f32 {
     if values.len() == 0 {
         return 0.0
@@ -264,7 +254,6 @@ func compute_mean(values: []f32) -> f32 {
     }
     return sum / f32(values.len())
 }
-
 func compute_std(values: []f32, mean: f32) -> f32 {
     if values.len() == 0 {
         return 1.0

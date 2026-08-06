@@ -18,7 +18,6 @@ struct OTBConfig {
     clip_epsilon: f32
     entropy_coeff: f32
 }
-
 struct OTBTrainer {
     config: OTBConfig
     policy_model: *Model
@@ -55,7 +54,6 @@ func new_otb_trainer(
         step_count: 0,
     }
 }
-
 func (trainer: *OTBTrainer) compute_token_baseline(
     tokens: Tensor,
     rewards: Tensor
@@ -112,7 +110,6 @@ func (trainer: *OTBTrainer) compute_token_baseline(
     }
     return baselines
 }
-
 func (trainer: *OTBTrainer) compute_advantages(
     tokens: Tensor,
     rewards: Tensor
@@ -133,7 +130,6 @@ func (trainer: *OTBTrainer) compute_advantages(
     }
     return advantages
 }
-
 func (trainer: *OTBTrainer) train_step(
     prompts: []Tensor,
     responses: []Tensor,
@@ -195,7 +191,6 @@ func (trainer: *OTBTrainer) train_step(
         total_entropy / f32(num_updates)
     )
 }
-
 func (trainer: *OTBTrainer) train(train_data: DataLoader) -> []f32 {
     let policy_losses: []f32 = []
     for batch in train_data {
@@ -225,7 +220,6 @@ func (trainer: *OTBTrainer) train(train_data: DataLoader) -> []f32 {
     }
     return policy_losses
 }
-
 func (trainer: *OTBTrainer) get_variance_reduction() -> f32 {
     if trainer.advantage_variance_before < 1e-8 {
         return 0.0
@@ -233,13 +227,11 @@ func (trainer: *OTBTrainer) get_variance_reduction() -> f32 {
     return (trainer.advantage_variance_before - trainer.advantage_variance_after) /
            trainer.advantage_variance_before
 }
-
 func compute_variance_tensor(x: Tensor) -> f32 {
     let mean = x.mean()
     let variance = (x - mean).pow(2).mean()
     return variance.item()
 }
-
 func compute_mean(values: []f32) -> f32 {
     if values.len() == 0 {
         return 0.0
@@ -250,7 +242,6 @@ func compute_mean(values: []f32) -> f32 {
     }
     return sum / f32(values.len())
 }
-
 func compute_variance(values: []f32, mean: f32) -> f32 {
     if values.len() == 0 {
         return 0.0

@@ -7,7 +7,6 @@ func assert_true(bool value, string name) {
         println("FAIL " + name)
     }
 }
-
 func assert_close(float actual, float expected, string name) {
     float diff = actual - expected
     if diff < 0.0 {
@@ -15,7 +14,6 @@ func assert_close(float actual, float expected, string name) {
     }
     assert_true(diff < 0.0001, name)
 }
-
 func test_temperature_and_penalty() {
     []float logits = [2.0, 4.0, 0.0]
     logits[2] = -2.0
@@ -27,7 +25,6 @@ func test_temperature_and_penalty() {
     assert_close(penalized[1], 4.0, "penalty 1")
     assert_close(penalized[2], -4.0, "penalty 2")
 }
-
 func test_presence_and_frequency() {
     []float logits = [5.0, 1.0, 0.0]
     []int past = [0, 0, 2]
@@ -41,7 +38,6 @@ func test_presence_and_frequency() {
     assert_close(adjusted[1], 1.0, "presence frequency 1")
     assert_close(adjusted[2], -1.5, "presence frequency 2")
 }
-
 func test_ngram_blocking() {
     []float logits = [5.0, 4.0, 3.0, 2.0]
     []int past = [0, 1, 0]
@@ -52,7 +48,6 @@ func test_ngram_blocking() {
     assert_close(adjusted[0], 5.0, "ngram keep 0")
     assert_true(adjusted[1] < -1000000000.0, "ngram mask 1")
 }
-
 func test_greedy_and_distribution() {
     []float logits = [1.0, 3.0, 2.0]
     int greedy = neurx.inference.sampling_strategies.greedy_sample(logits)
@@ -67,7 +62,6 @@ func test_greedy_and_distribution() {
     assert_true(sampled == 1, "greedy config sample")
     assert_true(dist_idx == 1, "distribution sample")
 }
-
 func test_topk_and_topp() {
     []float logits = [10.0, 1.0, 0.5, 0.0]
     logits[3] = -2.0
@@ -89,7 +83,6 @@ func test_topk_and_topp() {
     assert_true(next_token == 0, "sample next token with top-k")
     assert_true(alias_token == 0, "sample token alias")
 }
-
 func test_typical_sampling() {
     []float logits = [3.0, 2.0, 0.0, 0.0]
     logits[3] = -2.0
@@ -107,7 +100,6 @@ func test_typical_sampling() {
     assert_true(typical_logits[3] < -1000000000.0, "typical mask 3")
     assert_true(next_token == 0, "sample next token typical")
 }
-
 func test_contrastive_search() {
     []float logits = [4.0, 3.9, 1.0, 0.5]
     []int past = [0, 0, 2]
@@ -122,7 +114,6 @@ func test_contrastive_search() {
     int next_token = neurx.inference.sampling_strategies.sample_next_token_index(logits, past, cfg, 99)
     assert_true(next_token == 1, "contrastive picks less repetitive token")
 }
-
 func test_beam_search() {
     []float step0 = [1.0, 3.0, 2.0]
     []float step1 = [0.5, 4.0, 1.0]
@@ -138,7 +129,6 @@ func test_beam_search() {
     assert_true(beam[0] == 1, "beam token 0")
     assert_true(beam[1] == 1, "beam token 1")
 }
-
 func main() {
     println("NeurX sampling strategies tests")
     test_temperature_and_penalty()

@@ -62,7 +62,6 @@ func main() {
         os.Exit(1)
     }
 }
-
 func cmdClean() {
     fmt.Println("")
     fmt.Println("╔════════════════════════════════════════════╗")
@@ -86,7 +85,6 @@ func cmdClean() {
     fmt.Println("")
     fmt.Println("✓ Data cleaning completed successfully")
 }
-
 func cmdShard() {
     fmt.Println("")
     fmt.Println("╔════════════════════════════════════════════╗")
@@ -105,7 +103,6 @@ func cmdShard() {
     fmt.Println("")
     fmt.Println("✓ Data sharding completed successfully")
 }
-
 func cmdPipeline() {
     fmt.Println("")
     fmt.Println("╔════════════════════════════════════════════╗")
@@ -118,7 +115,6 @@ func cmdPipeline() {
     fmt.Println("Step 2/2: Generating shards...")
     cmdShard()
 }
-
 func getCleanConfig() CleanConfig {
     home := getEnv("NEURX_HOME", ".")
     return CleanConfig{
@@ -129,7 +125,6 @@ func getCleanConfig() CleanConfig {
         CheckpointFile: getEnv("CHECKPOINT_FILE", filepath.Join(home, "dataset", "pretrain", "cleaned", ".cleaning_checkpoint.json")),
     }
 }
-
 func getShardConfig() ShardConfig {
     home := getEnv("NEURX_HOME", ".")
     datasetRoot := getEnv("DATASET_ROOT", filepath.Join(home, "dataset", "pretrain"))
@@ -141,7 +136,6 @@ func getShardConfig() ShardConfig {
         LinesPerShard: getEnvInt("LINES_PER_SHARD", 100),
     }
 }
-
 func cleanData(config CleanConfig) error {
     files, err := findSourceFiles(config.RawDir)
     if err != nil {
@@ -196,7 +190,6 @@ type clean_stats struct {
     Duplicates     int64
     Errors         int64
 }
-
 func processFileContent(writer *bufio.Writer, content string, seen map[string]bool, stats *clean_stats) {
     lines := strings.Split(content, "\n")
     for _, line := range lines {
@@ -220,7 +213,6 @@ func processFileContent(writer *bufio.Writer, content string, seen map[string]bo
         stats.TotalWritten++
     }
 }
-
 func generateSplits(config CleanConfig) error {
     content, err := ioutil.ReadFile(config.OutputFile)
     if err != nil {
@@ -259,7 +251,6 @@ func generateSplits(config CleanConfig) error {
         float64(testSize)*100/float64(total))
     return nil
 }
-
 func generateShards(config ShardConfig) error {
     info, err := os.Stat(config.InputFile)
     if err != nil {
@@ -342,7 +333,6 @@ func generateShards(config ShardConfig) error {
     fmt.Println("")
     return writeShardManifest(config.ManifestFile, shards)
 }
-
 func writeShardFile(path string, content string) (int64, error) {
     err := ioutil.WriteFile(path, []byte(content), 0644)
     if err != nil {
@@ -354,7 +344,6 @@ func writeShardFile(path string, content string) (int64, error) {
     }
     return info.Size(), nil
 }
-
 func findSourceFiles(dir string) ([]string, error) {
     var files []string
     entries, err := ioutil.ReadDir(dir)
@@ -376,7 +365,6 @@ func findSourceFiles(dir string) ([]string, error) {
     sort.Strings(files)
     return files, nil
 }
-
 func extractText(line string) string {
     if !strings.Contains(line, "\"text\"") {
         return ""
@@ -397,20 +385,17 @@ func extractText(line string) string {
     }
     return rest[:endIdx]
 }
-
 func normalizeText(text string) string {
     text = strings.TrimSpace(text)
     text = strings.ToLower(text)
     parts := strings.Fields(text)
     return strings.Join(parts, " ")
 }
-
 func hashKey(text string) string {
     h := sha256.New()
     h.Write([]byte(text))
     return hex.EncodeToString(h.Sum(nil))
 }
-
 func createRecord(text string) string {
     tokens := len(text) / 4
     if tokens < 1 {
@@ -423,15 +408,12 @@ func createRecord(text string) string {
     data, _ := json.Marshal(record)
     return string(data)
 }
-
 func formatShardID(index int) string {
     return fmt.Sprintf("shard_%05d", index)
 }
-
 func formatShardFilename(dir string, index int) string {
     return filepath.Join(dir, formatShardID(index)+".jsonl")
 }
-
 func writeShardManifest(path string, shards []shard_metadata) error {
     var totalDocs int64
     var totalSize int64
@@ -459,7 +441,6 @@ func writeShardManifest(path string, shards []shard_metadata) error {
     }
     return ioutil.WriteFile(path, data, 0644)
 }
-
 func writeManifest(config CleanConfig, totalDocs int64) error {
     manifest := map[string]interface{}{
         "dataset_name": "neurx-pretrain-dataset",
@@ -478,7 +459,6 @@ func writeManifest(config CleanConfig, totalDocs int64) error {
     }
     return ioutil.WriteFile(config.ManifestFile, data, 0644)
 }
-
 func writeEmptyManifest(config CleanConfig) error {
     manifest := map[string]interface{}{
         "dataset_name": "neurx-pretrain-dataset",
@@ -489,18 +469,15 @@ func writeEmptyManifest(config CleanConfig) error {
     data, _ := json.MarshalIndent(manifest, "", "  ")
     return ioutil.WriteFile(config.ManifestFile, data, 0644)
 }
-
 func ensureDir(dir string) error {
     return os.MkdirAll(dir, 0755)
 }
-
 func getEnv(key, defaultVal string) string {
     if val := os.Getenv(key); val != "" {
         return val
     }
     return defaultVal
 }
-
 func getEnvInt(key string, defaultVal int) int {
     if val := os.Getenv(key); val != "" {
         var num int
@@ -509,7 +486,6 @@ func getEnvInt(key string, defaultVal int) int {
     }
     return defaultVal
 }
-
 func printHelp() {
     fmt.Println("")
     fmt.Println("╔════════════════════════════════════════════╗")

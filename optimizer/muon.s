@@ -6,7 +6,6 @@ struct muon_config {
     float weight_decay
     int   warmup_steps
 }
-
 struct muon_param_state {
     []float param
     []float momentum
@@ -14,7 +13,6 @@ struct muon_param_state {
     [][]float grad_cov
     int    step
 }
-
 struct muon_optimizer {
     muon_config config
     []muon_param_state param_states
@@ -29,7 +27,6 @@ func new_muon(muon_config cfg) muon_optimizer {
         current_lr: cfg.learning_rate,
     }
 }
-
 func muon_register_param(
     muon_optimizer opt,
     []float param,
@@ -44,7 +41,6 @@ func muon_register_param(
     opt.param_states.push(state)
     return opt
 }
-
 func muon_compute_lr(muon_optimizer opt) float {
     float warmup_steps = float(opt.config.warmup_steps)
     float global_step = float(opt.global_step)
@@ -54,13 +50,11 @@ func muon_compute_lr(muon_optimizer opt) float {
         return opt.config.learning_rate
     }
 }
-
 func muon_set_learning_rate(muon_optimizer opt, float new_lr) muon_optimizer {
     opt.config.learning_rate = new_lr
     opt.current_lr = muon_compute_lr(opt)
     return opt
 }
-
 func compute_vector_norm([]float v, int size) float {
     float sum_sq = 0.0
     var i = 0
@@ -71,7 +65,6 @@ func compute_vector_norm([]float v, int size) float {
     }
     return sqrt_approx(sum_sq)
 }
-
 func whiten_gradient(
     []float grad,
     [][]float grad_cov,
@@ -91,7 +84,6 @@ func whiten_gradient(
         i = i + 1
     }
 }
-
 func muon_update_param(
     muon_param_state state,
     []float gradients,
@@ -126,7 +118,6 @@ func muon_update_param(
     }
     return state
 }
-
 func muon_step(
     muon_optimizer opt,
     [][]float all_gradients,
@@ -150,9 +141,7 @@ func muon_step(
     }
     return opt
 }
-
 func muon_get_state(muon_optimizer opt) {
 }
-
 func muon_load_state(muon_optimizer opt) {
 }

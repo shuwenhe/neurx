@@ -7,7 +7,6 @@ struct distributed_trainer_config {
     int pipeline_parallel
     int data_parallel
 }
-
 struct distributed_trainer_state {
     distributed_trainer_config config
     int global_step
@@ -23,7 +22,6 @@ func new_distributed_trainer_config(int world_size, int rank) distributed_traine
         data_parallel: world_size,
     }
 }
-
 func new_distributed_trainer_state(distributed_trainer_config config) distributed_trainer_state {
     distributed_trainer_state {
         config: config,
@@ -31,7 +29,6 @@ func new_distributed_trainer_state(distributed_trainer_config config) distribute
         initialized: true,
     }
 }
-
 func distributed_trainer_step(distributed_trainer_state state) distributed_trainer_state {
     distributed_trainer_state {
         config: state.config,
@@ -39,11 +36,9 @@ func distributed_trainer_step(distributed_trainer_state state) distributed_train
         initialized: state.initialized,
     }
 }
-
 func distributed_trainer_state_dict(distributed_trainer_state state) distributed_trainer_state {
     state
 }
-
 func distributed_trainer_load_state_dict(distributed_trainer_state state, distributed_trainer_state other) distributed_trainer_state {
     other
 }

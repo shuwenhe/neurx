@@ -12,7 +12,6 @@ struct named_lora_module {
     []float initial_a
     []float initial_b
 }
-
 struct adapter_stats {
     float l1
     float l2
@@ -20,7 +19,6 @@ struct adapter_stats {
     int nonzero
     int total
 }
-
 struct delta_stats {
     float l1
     float l2
@@ -159,7 +157,6 @@ func run_posttrain_lora_sft() int {
     println("  Improvement:       " + float_to_str(improvement, 2) + "%")
     return 0
 }
-
 func init_lora_module(string name, int in_dim, int out_dim, int rank, float alpha, float a_scale, float w_scale) named_lora_module {
     named_lora_module module
     module.name = name
@@ -174,7 +171,6 @@ func init_lora_module(string name, int in_dim, int out_dim, int rank, float alph
     module.initial_b = copy_float_array(module.lora_B)
     return module
 }
-
 func runtime_forward_named_module(named_lora_module module, []float input_vec) []float {
     []float output = fill_vec(module.out_dim, 0.0)
     []float hidden = fill_vec(module.rank, 0.0)
@@ -214,7 +210,6 @@ func runtime_forward_named_module(named_lora_module module, []float input_vec) [
     }
     return output
 }
-
 func train_named_module(named_lora_module module, []float input_vec, []float target_vec, float lr) named_lora_module {
     []float hidden = fill_vec(module.rank, 0.0)
     int r = 0
@@ -269,7 +264,6 @@ func train_named_module(named_lora_module module, []float input_vec, []float tar
     }
     return module
 }
-
 func compute_stats([]named_lora_module modules) adapter_stats {
     float l1 = 0.0
     float l2 = 0.0
@@ -321,7 +315,6 @@ func compute_stats([]named_lora_module modules) adapter_stats {
     stats.total = total
     return stats
 }
-
 func compute_delta_stats([]named_lora_module modules) delta_stats {
     float l1 = 0.0
     float l2 = 0.0
@@ -369,7 +362,6 @@ func compute_delta_stats([]named_lora_module modules) delta_stats {
     stats.changed_count = changed
     return stats
 }
-
 func write_adapter_checkpoint(
     string output_dir,
     string model_path,
@@ -433,7 +425,6 @@ func write_adapter_checkpoint(
     runtime_write_text_file(output_dir + "/adapter_config.json", build_adapter_config_json(model_path, rank, alpha, learning_rate, v_out, len(modules)))
     runtime_write_text_file(output_dir + "/training_state.json", build_training_state_json(model_path, loss_history, stats, deltas, rank, alpha, learning_rate, sample_count, epochs, len(modules)))
 }
-
 func build_adapter_config_json(string model_path, int rank, float alpha, float learning_rate, int v_out, int module_count) string {
     string json = "{\n"
     json = json + "  \"base_model_name_or_path\": \"" + model_path + "\",\n"
@@ -455,7 +446,6 @@ func build_adapter_config_json(string model_path, int rank, float alpha, float l
     json = json + "}\n"
     return json
 }
-
 func build_training_state_json(string model_path, []float loss_history, adapter_stats stats, delta_stats deltas, int rank, float alpha, float learning_rate, int sample_count, int epochs, int module_count) string {
     string json = "{\n"
     json = json + "  \"model_path\": \"" + model_path + "\",\n"
@@ -491,7 +481,6 @@ func build_training_state_json(string model_path, []float loss_history, adapter_
     json = json + "}\n"
     return json
 }
-
 func fill_vec(int n, float value) []float {
     []float v = []float{cap: n}
     int i = 0
@@ -501,7 +490,6 @@ func fill_vec(int n, float value) []float {
     }
     return v
 }
-
 func extract_vector([]float source, int start, int n) []float {
     []float v = []float{cap: n}
     int i = 0
@@ -512,12 +500,10 @@ func extract_vector([]float source, int start, int n) []float {
     }
     return v
 }
-
 func decode_float_text_file(string path) []float {
     string text = runtime_read_text_file(path)
     return parse_float_list_fixed(text)
 }
-
 func parse_float_list_fixed(string text) []float {
     int count = 0
     bool in_token = false
@@ -554,7 +540,6 @@ func parse_float_list_fixed(string text) []float {
     }
     return values
 }
-
 func parse_float(string text, float fallback) float {
     string s = text
     if len(s) == 0 {
@@ -630,11 +615,9 @@ func parse_float(string text, float fallback) float {
     }
     return result * (sign as float)
 }
-
 func is_number_token_char(int ch) bool {
     return ch >= 48 && ch <= 57 || ch == 45 || ch == 43 || ch == 46 || ch == 101 || ch == 69
 }
-
 func init_pattern(int n, float scale) []float {
     []float v = []float{cap: n}
     int i = 0
@@ -648,11 +631,9 @@ func init_pattern(int n, float scale) []float {
     }
     return v
 }
-
 func runtime_forward_named_module_dummy(named_lora_module module, []float input_vec) []float {
     return runtime_forward_named_module(module, input_vec)
 }
-
 func mse_loss([]float predictions, []float targets) float {
     float loss = 0.0
     int limit = len(predictions)
@@ -670,7 +651,6 @@ func mse_loss([]float predictions, []float targets) float {
     }
     return loss
 }
-
 func mse_gradient([]float predictions, []float targets) []float {
     int limit = len(predictions)
     if len(targets) < limit {
@@ -684,14 +664,12 @@ func mse_gradient([]float predictions, []float targets) []float {
     }
     return grad
 }
-
 func abs_float(float value) float {
     if value < 0.0 {
         return 0.0 - value
     }
     return value
 }
-
 func copy_float_array([]float source) []float {
     []float result = []float{cap: len(source)}
     int i = 0
@@ -701,7 +679,6 @@ func copy_float_array([]float source) []float {
     }
     return result
 }
-
 func sqrt_lora(float x) float {
     if x < 0.0 {
         return 0.0
@@ -714,7 +691,6 @@ func sqrt_lora(float x) float {
     }
     return guess
 }
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -745,7 +721,6 @@ func int_to_str(int n) string {
     }
     return out
 }
-
 func float_to_str(float value, int decimals) string {
     float current = value
     bool neg = current < 0.0
@@ -784,7 +759,6 @@ func float_to_str(float value, int decimals) string {
     }
     return out
 }
-
 func build_simple_training_state_json(string model_path, []float loss_history, float learning_rate, int sample_count, int epochs) string {
     string json = "{\n"
     json = json + "  \"model_path\": \"" + model_path + "\",\n"
@@ -808,7 +782,6 @@ func build_simple_training_state_json(string model_path, []float loss_history, f
     json = json + "}\n"
     return json
 }
-
 func run_posttrain_lora_sft_flat() int {
     string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "../model/base-model")
     string output_dir = runtime_env_get("NEURX_POSTTRAIN_OUTPUT_DIR", "../posttrain_adapter")
@@ -1060,7 +1033,6 @@ func run_posttrain_lora_sft_flat() int {
     println("  Improvement:       " + float_to_str(improvement, 2) + "%")
     return 0
 }
-
 func main() {
     return run_posttrain_lora_sft_flat()
 }

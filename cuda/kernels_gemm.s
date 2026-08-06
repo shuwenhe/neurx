@@ -23,7 +23,6 @@ func default_gemm_config(int M, int K, int N) gemm_config {
         tile_size: 32,
     }
 }
-
 func launch_gemm(
     cuda_context ctx,
     uint64 ptr_a,

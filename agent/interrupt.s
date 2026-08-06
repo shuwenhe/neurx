@@ -17,7 +17,6 @@ func new_agent_interrupt_state() agent_interrupt_state {
         interrupt_count: 0,
     }
 }
-
 func agent_interrupt_request(agent_interrupt_state state, string kind, string reason) agent_interrupt_state {
     agent_interrupt_state {
         pending: true,
@@ -28,7 +27,6 @@ func agent_interrupt_request(agent_interrupt_state state, string kind, string re
         interrupt_count: state.interrupt_count + 1,
     }
 }
-
 func agent_interrupt_resolve(agent_interrupt_state state, string response) agent_interrupt_state {
     agent_interrupt_state {
         pending: false,
@@ -39,7 +37,6 @@ func agent_interrupt_resolve(agent_interrupt_state state, string response) agent
         interrupt_count: state.interrupt_count,
     }
 }
-
 func agent_interrupt_approved(agent_interrupt_state state) bool {
     if !state.resolved {
         return false
@@ -47,7 +44,6 @@ func agent_interrupt_approved(agent_interrupt_state state) bool {
     string r = lower(trim(state.response))
     r == "yes" || r == "y" || r == "ok" || r == "approve" || r == "confirmed"
 }
-
 func agent_interrupt_should_request(string action, string observation) bool {
     string a = lower(trim(action))
     string o = lower(trim(observation))
@@ -59,7 +55,6 @@ func agent_interrupt_should_request(string action, string observation) bool {
     }
     false
 }
-
 func agent_interrupt_summary(agent_interrupt_state state) string {
     "pending=" + string(state.pending) + " kind=" + state.kind + " count=" + string(state.interrupt_count) + " resolved=" + string(state.resolved)
 }

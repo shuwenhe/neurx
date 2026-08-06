@@ -11,7 +11,6 @@ func copy_float([]float data) []float {
     }
     out
 }
-
 func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
@@ -22,7 +21,6 @@ func copy_int([]int data) []int {
     }
     out
 }
-
 func copy_tensor(tensor value) tensor {
     new(copy_float(value.data), copy_int(value.shape), value.requires_grad)
 }
@@ -33,7 +31,6 @@ struct multimodal_batch {
     []float image_features
     []float audio_features
 }
-
 func new_batch(
     int batch_size,
     int seq_len,
@@ -49,7 +46,6 @@ func new_batch(
         audio_features: audio_features,
     }
 }
-
 func multimodal_state_dict(multimodal_batch batch) multimodal_batch {
     multimodal_batch {
         batch_size: batch.batch_size,
@@ -59,7 +55,6 @@ func multimodal_state_dict(multimodal_batch batch) multimodal_batch {
         audio_features: copy_float(batch.audio_features),
     }
 }
-
 func multimodal_load_state_dict(multimodal_batch batch, multimodal_batch other) multimodal_batch {
     del batch
     multimodal_batch {
@@ -70,7 +65,6 @@ func multimodal_load_state_dict(multimodal_batch batch, multimodal_batch other) 
         audio_features: copy_float(other.audio_features),
     }
 }
-
 func token_count(multimodal_batch batch) int {
     len(batch.token_ids)
 }

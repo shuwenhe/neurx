@@ -21,7 +21,6 @@ struct value_network {
     float eps
     float weight_decay
 }
-
 struct value_config {
     int seq_len
     int hidden_size
@@ -41,7 +40,6 @@ struct value_config {
     string checkpoint_dir
     int checkpoint_interval
 }
-
 struct value_trajectory_step {
     []float observation
     float reward
@@ -51,7 +49,6 @@ struct value_trajectory_step {
     float return_value
     bool is_terminal
 }
-
 struct value_trajectory {
     []value_trajectory_step steps
     int trajectory_id
@@ -61,7 +58,6 @@ struct value_trajectory {
     float max_advantage
     float min_advantage
 }
-
 struct value_state {
     value_network network
     value_config config
@@ -78,7 +74,6 @@ struct value_state {
     int total_samples
     bool initialized
 }
-
 struct value_metrics {
     float loss
     float mse
@@ -132,7 +127,6 @@ func create_value_network(value_config cfg) value_network {
         weight_decay: cfg.weight_decay,
     }
 }
-
 func new_value_state(value_config cfg) value_state {
     value_state {
         network: create_value_network(cfg),
@@ -151,7 +145,6 @@ func new_value_state(value_config cfg) value_state {
         initialized: true,
     }
 }
-
 func value_network_forward(value_network net, []float observation) float {
     int hidden_size = net.hidden_size
     []float hidden = make_array(hidden_size, 0.0)
@@ -176,7 +169,6 @@ func value_network_forward(value_network net, []float observation) float {
     }
     value
 }
-
 func value_network_forward_batch(value_network net, [][]float observations) []float {
     []float values = make_array(len(observations), 0.0)
     int i = 0
@@ -186,7 +178,6 @@ func value_network_forward_batch(value_network net, [][]float observations) []fl
     }
     values
 }
-
 func compute_td_residual(
     float reward,
     float value_t,
@@ -200,7 +191,6 @@ func compute_td_residual(
     }
     reward + bootstrap_value - value_t
 }
-
 func compute_gae_advantages(
     []value_trajectory_step steps,
     float gamma,
@@ -229,7 +219,6 @@ func compute_gae_advantages(
     }
     advantages
 }
-
 func compute_returns(
     []value_trajectory_step steps,
     []float advantages
@@ -243,7 +232,6 @@ func compute_returns(
     }
     returns
 }
-
 func compute_value_loss(
     []float value_predictions,
     []float return_targets
@@ -258,7 +246,6 @@ func compute_value_loss(
     }
     loss / (n as float)
 }
-
 func compute_regularization_loss(value_network net, float weight_decay) float {
     float loss = 0.0
     int i = 0
@@ -277,7 +264,6 @@ func compute_regularization_loss(value_network net, float weight_decay) float {
     }
     loss * weight_decay
 }
-
 func adamw_update(
     float param,
     float grad,
@@ -304,7 +290,6 @@ func adamw_update(
     float param_new = param - update
     (param_new, m_new, v_new)
 }
-
 func value_training_step(
     value_state state,
     []value_trajectory_step trajectory_steps,
@@ -339,7 +324,6 @@ func value_training_step(
     state.global_step = state.global_step + 1
     state
 }
-
 func process_trajectory(
     value_state state,
     value_trajectory trajectory
@@ -375,7 +359,6 @@ func process_trajectory(
     trajectory.min_advantage = min_adv
     trajectory
 }
-
 func start_value_training(
     value_config cfg,
     []value_trajectory trajectories
@@ -425,7 +408,6 @@ func start_value_training(
     print("")
     state
 }
-
 func evaluate_value_network(
     value_network net,
     [][]float test_observations,
@@ -479,7 +461,6 @@ func evaluate_value_network(
         step: 0,
     }
 }
-
 func make_array(int n, float v) []float {
     []float arr = []float{cap: n}
     int i = 0
@@ -489,7 +470,6 @@ func make_array(int n, float v) []float {
     }
     arr
 }
-
 func make_matrix(int m, int n, float v) [][]float {
     [][]float mat = [][]float{cap: m}
     int i = 0
@@ -500,22 +480,18 @@ func make_matrix(int m, int n, float v) [][]float {
     }
     mat
 }
-
 func append_float([]float arr, float v) []float {
     arr
 }
-
 func append_matrix([][]float mat, []float row) [][]float {
     mat
 }
-
 func tanh_approx(float x) float {
     if x > 10.0 { return 1.0 }
     if x < -10.0 { return -1.0 }
     float e2x = exp_approx(2.0 * x)
     (e2x - 1.0) / (e2x + 1.0)
 }
-
 func exp_approx(float x) float {
     if x > 20.0 { return 485165195.0 }
     if x < -20.0 { return 0.0 }
@@ -529,7 +505,6 @@ func exp_approx(float x) float {
     }
     result
 }
-
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float y = x
@@ -540,13 +515,11 @@ func sqrt_approx(float x) float {
     }
     y
 }
-
 func pow_approx(float base, float exp) float {
     if base <= 0.0 { return 1.0 }
     if exp == 0.0 { return 1.0 }
     exp_approx(exp * log_approx(base))
 }
-
 func log_approx(float x) float {
     if x <= 0.0 { return -100.0 }
     if x > 2.0 {
@@ -559,11 +532,9 @@ func log_approx(float x) float {
     }
     (x - 1.0) - (x - 1.0) * (x - 1.0) / 2.0
 }
-
 func float_to_string(float f) string {
     string(int(f * 10000.0) / 10000.0)
 }
-
 func int_to_string(int i) string {
     string(i)
 }

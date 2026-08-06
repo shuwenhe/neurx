@@ -42,7 +42,6 @@ func backward_softmax(node n, tensor grad_output) backward_result {
     tensor result { data: grad_data, grad: [], shape: shape, requires_grad: true }
     backward_result { input_grads: [result], success: true }
 }
-
 func backward_log_softmax(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -69,7 +68,6 @@ func backward_log_softmax(node n, tensor grad_output) backward_result {
     tensor result { data: grad_input, grad: [], shape: shape, requires_grad: true }
     backward_result { input_grads: [result], success: true }
 }
-
 func backward_relu(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -86,7 +84,6 @@ func backward_relu(node n, tensor grad_output) backward_result {
     tensor result { data: grad_data, grad: [], shape: input.shape, requires_grad: true }
     backward_result { input_grads: [result], success: true }
 }
-
 func backward_gelu(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -108,18 +105,15 @@ func backward_gelu(node n, tensor grad_output) backward_result {
     tensor result { data: grad_data, grad: [], shape: input.shape, requires_grad: true }
     backward_result { input_grads: [result], success: true }
 }
-
 func tanh_approx(float x) float {
     float sig = sigmoid_approx(2.0 * x)
     2.0 * sig - 1.0
 }
-
 func sigmoid_approx(float x) float {
     if x > 20.0 { return 1.0 }
     if x < -20.0 { return 0.0 }
     1.0 / (1.0 + exp_approx(-x))
 }
-
 func exp_approx(float x) float {
     if x > 700.0 { return 1e308 }
     if x < -700.0 { return 0.0 }
@@ -139,15 +133,12 @@ func exp_approx(float x) float {
     }
     result * power_of_2
 }
-
 func float_to_int(float x) int {
     int(x)
 }
-
 func float_to_array(float x) []float {
     []float{x}
 }
-
 func backward_silu(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }

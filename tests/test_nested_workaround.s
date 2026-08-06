@@ -2,7 +2,6 @@ package main
 struct inner {
     int value
 }
-
 struct outer {
     string name
     inner data

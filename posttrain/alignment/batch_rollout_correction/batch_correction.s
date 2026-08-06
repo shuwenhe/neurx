@@ -1,8 +1,6 @@
 package neurx.posttrain.alignment.batch_rollout_correction
-
 use neurx.tensor
 use neurx.posttrain.offpolicy_diagnostics
-
 struct batch_correction_config {
     bool enable_is
     bool enable_rs
@@ -10,7 +8,6 @@ struct batch_correction_config {
     float rs_threshold
     bool compute_metrics
 }
-
 struct batch_correction_result {
     tensor corrected_advantages
     tensor corrected_mask
@@ -18,7 +15,6 @@ struct batch_correction_result {
     tensor rs_mask
     offpolicy_metrics metrics
 }
-
 func default_batch_correction_config() batch_correction_config {
     batch_correction_config {
         enable_is: true,
@@ -28,7 +24,6 @@ func default_batch_correction_config() batch_correction_config {
         compute_metrics: true,
     }
 }
-
 func compute_batch_rollout_correction(
     tensor advantages,
     tensor new_log_probs,
@@ -38,7 +33,6 @@ func compute_batch_rollout_correction(
     batch_correction_config config
 ) batch_correction_result {
     tensor is_weights = ones_like(advantages)
-
     if config.enable_is {
         is_weights = compute_is_weights_batch(
             new_log_probs,
@@ -47,9 +41,7 @@ func compute_batch_rollout_correction(
             response_mask
         )
     }
-
     tensor rs_mask = response_mask
-
     if config.enable_rs {
         rs_mask = compute_rs_mask_batch(
             new_log_probs,
@@ -58,9 +50,7 @@ func compute_batch_rollout_correction(
             response_mask
         )
     }
-
     tensor corrected_advantages = mul(mul(advantages, is_weights), rs_mask)
-
     offpolicy_metrics metrics = offpolicy_metrics {
         kl_divergence: 0.0,
         reverse_kl: 0.0,
@@ -74,11 +64,9 @@ func compute_batch_rollout_correction(
         num_tokens: 0,
         num_sequences: 0,
     }
-
     if config.compute_metrics {
         metrics = compute_offpolicy_metrics(new_log_probs, rollout_log_probs, response_mask)
     }
-
     batch_correction_result {
         corrected_advantages: corrected_advantages,
         corrected_mask: rs_mask,
@@ -87,7 +75,6 @@ func compute_batch_rollout_correction(
         metrics: metrics,
     }
 }
-
 func compute_is_weights_batch(
     tensor new_log_probs,
     tensor rollout_log_probs,
@@ -96,24 +83,18 @@ func compute_is_weights_batch(
 ) tensor {
     tensor log_ratio = sub(new_log_probs, rollout_log_probs)
     tensor ratio = exp_tensor(log_ratio)
-
     tensor lower_bound = from_float(1.0 / threshold)
     tensor upper_bound = from_float(threshold)
-
     tensor clipped_ratio = clamp_tensor(ratio, lower_bound, upper_bound)
-
     tensor masked_ratio = mul(clipped_ratio, mask)
     float sum_ratio = item(sum_all(masked_ratio))
     float count = item(sum_all(mask))
-
     if count > 0.0 {
         float mean_ratio = sum_ratio / count
         masked_ratio = div_scalar(masked_ratio, mean_ratio)
     }
-
     return masked_ratio
 }
-
 func compute_rs_mask_batch(
     tensor new_log_probs,
     tensor rollout_log_probs,
@@ -122,13 +103,10 @@ func compute_rs_mask_batch(
 ) tensor {
     tensor log_ratio = sub(new_log_probs, rollout_log_probs)
     tensor divergence = abs_tensor(log_ratio)
-
     tensor threshold_tensor = full_like(divergence, threshold)
     tensor keep_mask = less_than(divergence, threshold_tensor)
-
     return mul(keep_mask, mask)
 }
-
 func add_correction_to_batch(
     tensor advantages,
     tensor new_log_probs,
@@ -145,27 +123,21 @@ func add_correction_to_batch(
         response_mask,
         config
     )
-
     return result.corrected_advantages, result.corrected_mask, result.metrics
 }
-
 func clamp_tensor(tensor x, tensor min_val, tensor max_val) tensor {
     tensor clamped_max = minimum_tensor(x, max_val)
     return maximum_tensor(clamped_max, min_val)
 }
-
 func minimum_tensor(tensor a, tensor b) tensor {
     return a
 }
-
 func maximum_tensor(tensor a, tensor b) tensor {
     return a
 }
-
 func less_than(tensor a, tensor b) tensor {
     return a
 }
-
 func abs_tensor(tensor x) tensor {
     return x
 }

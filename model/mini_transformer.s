@@ -17,7 +17,6 @@ func tensor_new(shape: []int) tensor_2 {
         requires_grad: true,
     }
 }
-
 func tensor_shape_string(t: tensor_2) string {
     result := "["
     for i := 0; i < len(t.shape); i += 1 {
@@ -29,7 +28,6 @@ func tensor_shape_string(t: tensor_2) string {
     result += "]"
     result
 }
-
 struct mini_transformer {
     vocab_size: int
     embed_dim: int
@@ -43,7 +41,6 @@ struct mini_transformer {
     output_proj: tensor_2
     param_count: int
 }
-
 struct transformer_layer {
     q_proj: tensor_2
     k_proj: tensor_2
@@ -56,7 +53,6 @@ struct transformer_layer {
     norm2_gamma: tensor_2
     norm2_beta: tensor_2
 }
-
 func create_mini_transformer(
     vocab_size: int,
     embed_dim: int,
@@ -141,7 +137,6 @@ func create_mini_transformer(
         param_count: param_count,
     }
 }
-
 func forward(
     model: mini_transformer,
     input_ids: []int,
@@ -197,7 +192,6 @@ func forward(
     }
     logits
 }
-
 func apply_attention(
     x: tensor_2,
     layer: transformer_layer,
@@ -228,7 +222,6 @@ func apply_attention(
     }
     output
 }
-
 func apply_ffn(
     x: tensor_2,
     layer: transformer_layer,
@@ -279,11 +272,9 @@ func apply_ffn(
     }
     output
 }
-
 func gelu(x: float) float {
     return x * 0.5 * (1.0 + math.Tanh(math.Sqrt(2.0/math.Pi) * (x + 0.044715 * x * x * x)))
 }
-
 func compute_cross_entropy_loss(
     logits: tensor_2,
     targets: []int,
@@ -321,7 +312,6 @@ func compute_cross_entropy_loss(
     }
     0.0
 }
-
 func compute_gradients(
     model: mini_transformer,
     logits: tensor_2,
@@ -421,13 +411,11 @@ func compute_gradients(
     }
     gradients
 }
-
 struct adam_w_state {
     m_states: map[string]tensor_2
     v_states: map[string]tensor_2
     t: int
 }
-
 func adamw_update(
     model: &mini_transformer,
     gradients: map[string]tensor_2,
@@ -536,7 +524,6 @@ func adamw_update(
         }
     }
 }
-
 func update_parameter(
     param: &tensor_2,
     grad: tensor_2,

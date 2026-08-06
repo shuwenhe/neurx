@@ -23,7 +23,6 @@ func configure_logging(string level) logger_state {
         child_count: 0,
     }
 }
-
 func get_logger(string name) logger_state {
     logger_state base = configure_logging("")
     if trim(name) == "" {
@@ -38,7 +37,6 @@ func get_logger(string name) logger_state {
         child_count: base.child_count + 1,
     }
 }
-
 func logger_state_dict(logger_state state) logger_state {
     logger_state {
         name: state.name,
@@ -49,7 +47,6 @@ func logger_state_dict(logger_state state) logger_state {
         child_count: state.child_count,
     }
 }
-
 func logger_load_state_dict(logger_state state, logger_state other) logger_state {
     logger_state {
         name: other.name,

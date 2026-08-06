@@ -15,7 +15,6 @@ func get_dtype_size(string dtype) int {
             4
     }
 }
-
 func log_collective_op(
     string op_name,
     string reduce_type,

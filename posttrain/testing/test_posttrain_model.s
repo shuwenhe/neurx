@@ -1,5 +1,4 @@
 package neurx.posttrain.testing.test_model
-
 use neurx.runtime.io.{
     runtime_env_get,
     runtime_file_exists,
@@ -10,7 +9,6 @@ use neurx.runtime.io.{
     runtime_time_now,
     runtime_time_elapsed
 }
-
 struct test_result {
     string name
     string category
@@ -19,7 +17,6 @@ struct test_result {
     string message
     []string details
 }
-
 struct test_results {
     []test_result results
     string start_time
@@ -28,7 +25,6 @@ struct test_results {
     int failed
     int skipped
 }
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -55,7 +51,6 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
-
 func float_to_str(float value, int decimals) string {
     float current = value
     bool negative = current < 0.0
@@ -92,7 +87,6 @@ func float_to_str(float value, int decimals) string {
     if negative { result = "-" + result }
     return result
 }
-
 func repeat_char(string ch, int count) string {
     string result = ""
     int i = 0
@@ -102,55 +96,44 @@ func repeat_char(string ch, int count) string {
     }
     return result
 }
-
 func print_header(string title) void {
     println("============================================================")
     println(title)
     println("============================================================")
 }
-
 func print_result(string category, string name, string status, string message) void {
     string symbol = "?"
     if status == "passed" { symbol = "✓" }
     else if status == "failed" { symbol = "✗" }
     else if status == "skipped" { symbol = "⊘" }
-    
     string status_upper = "UNKNOWN"
     if status == "passed" { status_upper = "PASSED" }
     else if status == "failed" { status_upper = "FAILED" }
     else if status == "skipped" { status_upper = "SKIPPED" }
-    
     println(symbol + " [" + category + "] " + name + ": " + status_upper)
     if message != "" {
         println("  → " + message)
     }
 }
-
 func test_base_model_files() test_result {
     print_header("[Test 1] Base Model Files Validation")
-    
     string base_path = runtime_env_get("NEURX_BASE_MODEL_PATH")
     if base_path == "" {
         base_path = "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
     }
-    
     bool exists = runtime_file_exists(base_path)
-    
     test_result result
     result.name = "base_model_files"
     result.category = "loading"
     result.message = ""
-    
     if !exists {
         result.status = "failed"
         result.message = "Base model directory not found: " + base_path
         print_result(result.category, result.name, result.status, result.message)
         return result
     }
-    
     string model_file = base_path + "/model.safetensors"
     bool model_exists = runtime_file_exists(model_file)
-    
     if model_exists {
         result.status = "passed"
         result.message = "Base model files validated"
@@ -163,32 +146,25 @@ func test_base_model_files() test_result {
         return result
     }
 }
-
 func test_adapter_config() test_result {
     print_header("[Test 2] Adapter Configuration Verification")
-    
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH")
     if adapter_path == "" {
         adapter_path = "/home/shuwen/shuwen/posttrain/adapter"
     }
-    
     bool exists = runtime_file_exists(adapter_path)
-    
     test_result result
     result.name = "adapter_config"
     result.category = "loading"
     result.message = ""
-    
     if !exists {
         result.status = "skipped"
         result.message = "Adapter path not found"
         print_result(result.category, result.name, result.status, result.message)
         return result
     }
-    
     string config_file = adapter_path + "/adapter_config.json"
     bool config_exists = runtime_file_exists(config_file)
-    
     if config_exists {
         result.status = "passed"
         result.message = "LoRA adapter configuration found"
@@ -201,32 +177,25 @@ func test_adapter_config() test_result {
         return result
     }
 }
-
 func test_adapter_model_files() test_result {
     print_header("[Test 3] Adapter Model Files")
-    
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH")
     if adapter_path == "" {
         adapter_path = "/home/shuwen/shuwen/posttrain/adapter"
     }
-    
     bool exists = runtime_file_exists(adapter_path)
-    
     test_result result
     result.name = "adapter_files"
     result.category = "loading"
     result.message = ""
-    
     if !exists {
         result.status = "skipped"
         result.message = "Adapter path not found"
         print_result(result.category, result.name, result.status, result.message)
         return result
     }
-    
     string model_file = adapter_path + "/adapter_model.safetensors"
     bool model_exists = runtime_file_exists(model_file)
-    
     if model_exists {
         float size_bytes = runtime_file_size(model_file)
         float size_mb = size_bytes / (1024.0 * 1024.0)
@@ -242,32 +211,25 @@ func test_adapter_model_files() test_result {
         return result
     }
 }
-
 func test_merged_model_files() test_result {
     print_header("[Test 4] Merged Model Files")
-    
     string merged_path = runtime_env_get("NEURX_MERGED_MODEL_PATH")
     if merged_path == "" {
         merged_path = "/home/shuwen/shuwen/posttrain/base-model-posttrain"
     }
-    
     bool exists = runtime_file_exists(merged_path)
-    
     test_result result
     result.name = "merged_model"
     result.category = "loading"
     result.message = ""
-    
     if !exists {
         result.status = "skipped"
         result.message = "Merged model path not found"
         print_result(result.category, result.name, result.status, result.message)
         return result
     }
-    
     string model_file = merged_path + "/model.safetensors"
     bool model_exists = runtime_file_exists(model_file)
-    
     if model_exists {
         float size_bytes = runtime_file_size(model_file)
         float size_mb = size_bytes / (1024.0 * 1024.0)
@@ -283,143 +245,113 @@ func test_merged_model_files() test_result {
         return result
     }
 }
-
 func test_data_files() test_result {
     print_header("[Test 5] Medical MCQ Data Files")
-    
     string data_path = runtime_env_get("NEURX_DATA_PATH")
     if data_path == "" {
         data_path = "/home/shuwen/shuwen/dataset/medical/test.json"
     }
-    
     bool exists = runtime_file_exists(data_path)
-    
     test_result result
     result.name = "data_files"
     result.category = "data"
     result.message = ""
-    
     if !exists {
         result.status = "skipped"
         result.message = "Data file not found: " + data_path
         print_result(result.category, result.name, result.status, result.message)
         return result
     }
-    
     float size_bytes = runtime_file_size(data_path)
     float size_mb = size_bytes / (1024.0 * 1024.0)
     string msg = "Medical MCQ data found (" + float_to_str(size_mb, 2) + " MB)"
-    
     result.status = "passed"
     result.message = msg
     print_result(result.category, result.name, result.status, result.message)
     return result
 }
-
 func test_output_directory() test_result {
     print_header("[Test 6] Output Directory Structure")
-    
     string output_dir = runtime_env_get("NEURX_TEST_OUTPUT_DIR")
     if output_dir == "" {
         output_dir = "/home/shuwen/shuwen/neurx/artifacts/posttrain_test"
     }
-    
     test_result result
     result.name = "directory_structure"
     result.category = "setup"
     result.message = ""
-    
     runtime_make_dirs(output_dir)
     runtime_make_dirs(output_dir + "/checkpoints")
     runtime_make_dirs(output_dir + "/logs")
     runtime_make_dirs(output_dir + "/results")
-    
     result.status = "passed"
     result.message = "Output directories created"
     print_result(result.category, result.name, result.status, result.message)
     return result
 }
-
 func test_model_summary() test_result {
     print_header("[Test 7] Model Summary Report")
-    
     string base_path = runtime_env_get("NEURX_BASE_MODEL_PATH")
     if base_path == "" {
         base_path = "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
     }
-    
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH")
     if adapter_path == "" {
         adapter_path = "/home/shuwen/shuwen/posttrain/adapter"
     }
-    
     string merged_path = runtime_env_get("NEURX_MERGED_MODEL_PATH")
     if merged_path == "" {
         merged_path = "/home/shuwen/shuwen/posttrain/base-model-posttrain"
     }
-    
     test_result result
     result.name = "model_summary"
     result.category = "summary"
     result.message = ""
-    
     string summary = "\n"
     summary = summary + "Model Paths:\n"
     summary = summary + "  Base:   " + base_path + "\n"
     summary = summary + "  Adapter: " + adapter_path + "\n"
     summary = summary + "  Merged:  " + merged_path + "\n"
-    
     float base_size = runtime_file_size(base_path + "/model.safetensors")
     float adapter_size = runtime_file_size(adapter_path + "/adapter_model.safetensors")
     float merged_size = runtime_file_size(merged_path + "/model.safetensors")
-    
     if base_size > 0.0 {
         summary = summary + "\nFile Sizes:\n"
         summary = summary + "  Base model:   " + float_to_str(base_size / (1024.0 * 1024.0), 2) + " MB\n"
     }
-    
     if adapter_size > 0.0 {
         summary = summary + "  LoRA adapter: " + float_to_str(adapter_size / (1024.0 * 1024.0), 2) + " MB\n"
     }
-    
     if merged_size > 0.0 {
         summary = summary + "  Merged model: " + float_to_str(merged_size / (1024.0 * 1024.0), 2) + " MB\n"
     }
-    
     println(summary)
-    
     result.status = "passed"
     result.message = "Model summary generated"
     print_result(result.category, result.name, result.status, result.message)
     return result
 }
-
 func print_final_summary(int passed, int failed, int skipped) void {
     println("\n" + repeat_char("=", 60))
     println("TEST SUMMARY")
     println(repeat_char("=", 60))
-    
     int total = passed + failed + skipped
     string msg = "\nTotal: " + int_to_str(total) + 
                  " | Passed: " + int_to_str(passed) + 
                  " | Failed: " + int_to_str(failed) + 
                  " | Skipped: " + int_to_str(skipped) + "\n"
     println(msg)
-    
     if total > 0 {
         float percentage = (float(passed) / float(total)) * 100.0
         println("Success Rate: " + float_to_str(percentage, 1) + "%")
     }
-    
     println(repeat_char("=", 60) + "\n")
 }
-
 func main() void {
     println("\n")
     println("╔" + repeat_char("═", 58) + "╗")
     println("║" + repeat_char(" ", 15) + "PostTrain Model Test Suite (S Language)" + repeat_char(" ", 3) + "║")
     println("╚" + repeat_char("═", 58) + "╝")
-    
     test_result result1 = test_base_model_files()
     test_result result2 = test_adapter_config()
     test_result result3 = test_adapter_model_files()
@@ -427,41 +359,30 @@ func main() void {
     test_result result5 = test_data_files()
     test_result result6 = test_output_directory()
     test_result result7 = test_model_summary()
-    
     int passed = 0
     int failed = 0
     int skipped = 0
-    
     if result1.status == "passed" { passed = passed + 1 }
     else if result1.status == "failed" { failed = failed + 1 }
     else { skipped = skipped + 1 }
-    
     if result2.status == "passed" { passed = passed + 1 }
     else if result2.status == "failed" { failed = failed + 1 }
     else { skipped = skipped + 1 }
-    
     if result3.status == "passed" { passed = passed + 1 }
     else if result3.status == "failed" { failed = failed + 1 }
     else { skipped = skipped + 1 }
-    
     if result4.status == "passed" { passed = passed + 1 }
     else if result4.status == "failed" { failed = failed + 1 }
     else { skipped = skipped + 1 }
-    
     if result5.status == "passed" { passed = passed + 1 }
     else if result5.status == "failed" { failed = failed + 1 }
     else { skipped = skipped + 1 }
-    
     if result6.status == "passed" { passed = passed + 1 }
     else if result6.status == "failed" { failed = failed + 1 }
     else { skipped = skipped + 1 }
-    
     if result7.status == "passed" { passed = passed + 1 }
     else if result7.status == "failed" { failed = failed + 1 }
     else { skipped = skipped + 1 }
-    
     print_final_summary(passed, failed, skipped)
-    
     println("✓ PostTrain model testing completed")
 }
-

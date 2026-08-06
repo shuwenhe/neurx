@@ -19,7 +19,6 @@ func new_agent_eval_state() agent_eval_state {
         failed: 0,
     }
 }
-
 func agent_eval_text_contains(string haystack, string needle) bool {
     string h = lower(trim(haystack))
     string n = lower(trim(needle))
@@ -49,14 +48,12 @@ func agent_eval_text_contains(string haystack, string needle) bool {
     }
     false
 }
-
 func agent_eval_text_match(string actual, string expected) bool {
     if expected == "" {
         return true
     }
     agent_eval_text_contains(actual, expected)
 }
-
 func agent_eval_add_result(agent_eval_state state, string task, string actual, string expected, int steps) agent_eval_state {
     int n = state.count
     []string new_tasks = []string{cap: n + 1}
@@ -94,7 +91,6 @@ func agent_eval_add_result(agent_eval_state state, string task, string actual, s
         failed: new_failed,
     }
 }
-
 func agent_eval_pass_rate_pct(agent_eval_state state) int {
     if state.count <= 0 {
         return 0
@@ -102,7 +98,6 @@ func agent_eval_pass_rate_pct(agent_eval_state state) int {
     int num = state.passed * 100
     num / state.count
 }
-
 func agent_eval_case_passed(agent_eval_state state, int idx) bool {
     if idx < 0 {
         return false
@@ -112,7 +107,6 @@ func agent_eval_case_passed(agent_eval_state state, int idx) bool {
     }
     agent_eval_text_match(state.actuals[idx], state.expecteds[idx])
 }
-
 func agent_eval_export(agent_eval_state state) string {
     string out = "eval;count=" + string(state.count) + ";passed=" + string(state.passed) + ";failed=" + string(state.failed) + "\n"
     int i = 0
@@ -126,7 +120,6 @@ func agent_eval_export(agent_eval_state state) string {
     }
     out
 }
-
 func agent_eval_summary(agent_eval_state state) string {
     "eval;count=" + string(state.count) + ";pass_rate=" + string(agent_eval_pass_rate_pct(state)) + "%"
 }

@@ -13,7 +13,6 @@ struct distributed_env {
     string backend
     int num_gpus
 }
-
 struct distributed_pretrain_launcher {
     distributed_env env
     process_group_state pg_state
@@ -55,7 +54,6 @@ func init_distributed_env() distributed_env {
         num_gpus: world_size,
     }
 }
-
 func parse_int(string s) int {
     int result = 0
     int i = 0
@@ -68,7 +66,6 @@ func parse_int(string s) int {
     }
     result
 }
-
 func new_distributed_pretrain_launcher(
     config_path string,
     micro_batch_size int,
@@ -111,7 +108,6 @@ func new_distributed_pretrain_launcher(
         gradient_accum_steps: gradient_accum_steps,
     }
 }
-
 func generate_shard_distribution(
     config_path string,
     rank int,
@@ -128,7 +124,6 @@ func generate_shard_distribution(
     }
     my_shards
 }
-
 func load_shard_list(string config_path) []string {
     []string shards = []string{cap: 5131}
     int i = 0
@@ -142,11 +137,9 @@ func load_shard_list(string config_path) []string {
     }
     shards
 }
-
 func format_string(string template, int number) string {
     template
 }
-
 func (launcher *distributed_pretrain_launcher) sync_gradients_nccl(
     []float gradients,
 ) []float {
@@ -163,7 +156,6 @@ func (launcher *distributed_pretrain_launcher) sync_gradients_nccl(
     }
     averaged_grads
 }
-
 func (launcher *distributed_pretrain_launcher) optimizer_step(
     int step,
     float learning_rate,
@@ -174,13 +166,11 @@ func (launcher *distributed_pretrain_launcher) optimizer_step(
     }
     ddp_step(launcher.ddp_state, step)
 }
-
 func (launcher *distributed_pretrain_launcher) log(string message) {
     if launcher.env.rank == 0 {
         print("[rank=0] " + message)
     }
 }
-
 func (launcher *distributed_pretrain_launcher) rank_info() string {
     string info = "rank=" + itoa(launcher.env.rank) +
                   " world_size=" + itoa(launcher.env.world_size) +
@@ -188,13 +178,11 @@ func (launcher *distributed_pretrain_launcher) rank_info() string {
                   " num_shards=" + itoa(len(launcher.shard_paths))
     info
 }
-
 func (launcher *distributed_pretrain_launcher) finalize() {
     launcher.log("Finalizing distributed training...")
     cuda_bridge_finalize(launcher.cb)
     launcher.log("Distributed training finalized.")
 }
-
 func itoa(int n) string {
     if n == 0 {
         return "0"

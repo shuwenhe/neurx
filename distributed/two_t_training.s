@@ -34,7 +34,6 @@ func two_t_mod_nonneg(int value, int divisor) int {
     }
     current
 }
-
 func recommended_two_t_plan(int world_size, int rank) two_t_training_plan {
     int tp = 16
     int pp = 8
@@ -67,11 +66,9 @@ func recommended_two_t_plan(int world_size, int rank) two_t_training_plan {
         epoch: 0,
     }
 }
-
 func new_two_t_training_plan(int world_size, int rank) two_t_training_plan {
     recommended_two_t_plan(world_size, rank)
 }
-
 func two_t_training_plan_state_dict(two_t_training_plan plan) two_t_training_plan {
     two_t_training_plan {
         world_size: plan.world_size,
@@ -94,7 +91,6 @@ func two_t_training_plan_state_dict(two_t_training_plan plan) two_t_training_pla
         epoch: plan.epoch,
     }
 }
-
 func two_t_training_plan_load_state_dict(two_t_training_plan plan, two_t_training_plan other) two_t_training_plan {
     two_t_training_plan {
         world_size: other.world_size,
@@ -117,7 +113,6 @@ func two_t_training_plan_load_state_dict(two_t_training_plan plan, two_t_trainin
         epoch: other.epoch,
     }
 }
-
 func two_t_training_plan_step(two_t_training_plan plan) two_t_training_plan {
     two_t_training_plan {
         world_size: plan.world_size,
@@ -140,11 +135,9 @@ func two_t_training_plan_step(two_t_training_plan plan) two_t_training_plan {
         epoch: plan.epoch,
     }
 }
-
 func two_t_training_plan_ddp_scale(two_t_training_plan plan) float {
     ddp_sync_scale(plan.ddp)
 }
-
 func two_t_training_plan_summary(two_t_training_plan plan) string {
     string out = "two_t_training_plan("
     out = out + "world_size=" + string(plan.world_size)

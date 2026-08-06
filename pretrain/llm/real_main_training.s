@@ -27,7 +27,6 @@ func default_training_config() real_training_config {
         learning_rate: str_to_float(runtime_env_get("NEURX_PRETRAIN_LR", runtime_env_get("NEURX_LLM_LR", "0.00015")))
     }
 }
-
 func build_fallback_manifest(real_training_config config) string {
     string shard_dir = config.data_dir + "/shard"
     string fallback_manifest = config.output_dir + "/shard_manifest.txt"
@@ -40,7 +39,6 @@ func build_fallback_manifest(real_training_config config) string {
     println("Using shard list manifest: " + fallback_manifest)
     fallback_manifest
 }
-
 func run_real_training_loop(real_training_config config) int {
     string manifest_path = config.manifest_path
     if !runtime_file_exists(manifest_path) {
@@ -55,7 +53,6 @@ func run_real_training_loop(real_training_config config) int {
     println("Tokens seen: " + int_to_str(state.tokens_seen, 0))
     0
 }
-
 func str_to_int(string s, int fallback) int {
     string text = trim(s)
     if len(text) == 0 {
@@ -78,7 +75,6 @@ func str_to_int(string s, int fallback) int {
     }
     sign * value
 }
-
 func str_to_float(string s) float {
     string text = trim(s)
     if len(text) == 0 {
@@ -111,7 +107,6 @@ func str_to_float(string s) float {
     }
     value
 }
-
 func clamp_int(int value, int min_value, int max_value) int {
     if value < min_value {
         return min_value
@@ -121,7 +116,6 @@ func clamp_int(int value, int min_value, int max_value) int {
     }
     value
 }
-
 func trim(string s) string {
     int i = 0
     while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
@@ -142,7 +136,6 @@ func trim(string s) string {
     }
     out
 }
-
 func int_to_str(int n, int fallback) string {
     int value = n
     if value == 0 {
@@ -162,7 +155,6 @@ func int_to_str(int n, int fallback) string {
     }
     s
 }
-
 func string_char(int c) string {
     string(c)
 }

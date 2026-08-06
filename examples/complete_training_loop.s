@@ -94,7 +94,6 @@ func default_training_config() training_config {
         rank: 0,
     }
 }
-
 struct transformer_model {
     tensor token_embedding
     tensor position_embedding
@@ -104,7 +103,6 @@ struct transformer_model {
     training_config config
     computation_graph graph
 }
-
 struct transformer_layer {
     tensor wq
     tensor wk
@@ -116,7 +114,6 @@ struct transformer_layer {
     tensor ln_1
     tensor ln_2
 }
-
 func init_transformer_model(training_config cfg) transformer_model {
     println("Initializing transformer_2 model...")
     println("  Vocab size: " + str(cfg.vocab_size))
@@ -144,7 +141,6 @@ func init_transformer_model(training_config cfg) transformer_model {
         graph: g,
     }
 }
-
 func init_transformer_layer(int d_model, int d_ff) transformer_layer {
     float scale = sqrt(2.0 / float(d_model))
     transformer_layer {
@@ -159,14 +155,12 @@ func init_transformer_layer(int d_model, int d_ff) transformer_layer {
         ln_2: ones_tensor([d_model]),
     }
 }
-
 struct forward_result {
     tensor logits
     tensor loss
     []tensor activations
     float forward_time_ms
 }
-
 func model_forward(
     transformer_model model,
     batch input_batch,
@@ -227,13 +221,11 @@ func model_forward(
         forward_time_ms: end_time - start_time,
     }
 }
-
 struct backward_result_info {
     []tensor parameter_gradients
     float backward_time_ms
     float grad_norm
 }
-
 func compute_gradients(
     transformer_model *model,
     forward_result fwd_res
@@ -251,7 +243,6 @@ func compute_gradients(
         grad_norm: grad_norm,
     }
 }
-
 struct training_state {
     int global_step
     int current_epoch
@@ -264,7 +255,6 @@ struct training_state {
     wandb_run wb_run
     tensorboard_writer tb_writer
 }
-
 func run_training(training_config cfg) {
     println("=" * 80)
     println("NEURX TRANSFORMER TRAINING LOOP")

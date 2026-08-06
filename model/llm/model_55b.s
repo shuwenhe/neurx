@@ -28,7 +28,6 @@ struct gpt_5_5_model_spec {
     string checkpoint_dir
     string output_dir
 }
-
 struct gpt_5_5_parallel_plan {
     int world_size
     int tensor_parallel_size
@@ -43,7 +42,6 @@ struct gpt_5_5_parallel_plan {
     bool flash_attention
     bool elastic_recovery
 }
-
 struct gpt_5_5_model {
     gpt_5_5_model_spec spec
     gpt_5_5_parallel_plan parallel
@@ -65,7 +63,6 @@ func gpt_5_5_dense_base() model_config {
         tie_embeddings: false,
     }
 }
-
 func gpt_5_5_sparse_model() gpt_moe_config {
     gpt_moe_config {
         base: gpt_5_5_dense_base(),
@@ -74,7 +71,6 @@ func gpt_5_5_sparse_model() gpt_moe_config {
         moe_aux_loss_weight: 0.0025,
     }
 }
-
 func gpt_5_5_parallel_default() gpt_5_5_parallel_plan {
     gpt_5_5_parallel_plan {
         world_size: 64,
@@ -91,7 +87,6 @@ func gpt_5_5_parallel_default() gpt_5_5_parallel_plan {
         elastic_recovery: true,
     }
 }
-
 func gpt_5_5_spec_default() gpt_5_5_model_spec {
     gpt_5_5_model_spec {
         model_name: "gpt-5.5-style-frontier",
@@ -114,22 +109,18 @@ func gpt_5_5_spec_default() gpt_5_5_model_spec {
         output_dir: "artifacts/gpt_5_5",
     }
 }
-
 func gpt_5_5_model_default() gpt_5_5_model {
     gpt_5_5_model {
         spec: gpt_5_5_spec_default(),
         parallel: gpt_5_5_parallel_default(),
     }
 }
-
 func gpt_5_5_total_params(gpt_5_5_model_spec spec) int {
     gpt_moe_param_count(spec.sparse_model)
 }
-
 func gpt_5_5_dense_params(gpt_5_5_model_spec spec) int {
     gpt_param_count(spec.dense_base)
 }
-
 func gpt_5_5_effective_active_params(gpt_5_5_model_spec spec) int {
     int total_params = gpt_5_5_total_params(spec)
     int dense_params = gpt_5_5_dense_params(spec)
@@ -156,7 +147,6 @@ func gpt_5_5_effective_active_params(gpt_5_5_model_spec spec) int {
     }
     active_params
 }
-
 func gpt_5_5_active_ratio(gpt_5_5_model_spec spec) float {
     int total_params = gpt_5_5_total_params(spec)
     int active_params = gpt_5_5_effective_active_params(spec)
@@ -165,7 +155,6 @@ func gpt_5_5_active_ratio(gpt_5_5_model_spec spec) float {
     }
     active_params * 1.0 / (total_params * 1.0)
 }
-
 func gpt_5_5_ready(gpt_5_5_model model) bool {
     if model.parallel.world_size <= 0 {
         return false
@@ -181,7 +170,6 @@ func gpt_5_5_ready(gpt_5_5_model model) bool {
     }
     true
 }
-
 func gpt_5_5_summary(gpt_5_5_model model) string {
     int total_params = gpt_5_5_total_params(model.spec)
     int dense_params = gpt_5_5_dense_params(model.spec)
@@ -212,14 +200,12 @@ func gpt_5_5_summary(gpt_5_5_model model) string {
     out = out + "ready=" + int_to_str_simple(bool_to_int(gpt_5_5_ready(model))) + "\n"
     out
 }
-
 func bool_to_int(bool v) int {
     if v {
         return 1
     }
     0
 }
-
 func int_from_float(float x) int {
     int n = 0
     float y = x
@@ -235,7 +221,6 @@ func int_from_float(float x) int {
     }
     n
 }
-
 func float_to_string(float x) string {
     int whole = int_from_float(x)
     float remainder = x - whole * 1.0

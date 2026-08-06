@@ -8,14 +8,12 @@ struct model_config {
     int ffn_dim
     int max_seq_len
 }
-
 struct training_metrics {
     int step
     float final_loss
     float best_loss
     float learning_rate
 }
-
 struct inference_result {
     string prompt
     string generated_text
@@ -33,7 +31,6 @@ func exp_approx(float x) float {
     }
     result
 }
-
 func log_approx(float x) float {
     if x <= 0.0 {
         -1000.0
@@ -44,7 +41,6 @@ func log_approx(float x) float {
         y - y * y / 2.0 + y * y * y / 3.0
     }
 }
-
 func max_float(float a, float b) float {
     if a > b {
         a
@@ -52,7 +48,6 @@ func max_float(float a, float b) float {
         b
     }
 }
-
 func init_model_config() model_config {
     model_config {
         vocab_size: 128000,
@@ -64,7 +59,6 @@ func init_model_config() model_config {
         max_seq_len: 4096,
     }
 }
-
 func init_training_metrics() training_metrics {
     training_metrics {
         step: 100,
@@ -73,7 +67,6 @@ func init_training_metrics() training_metrics {
         learning_rate: 0.0005,
     }
 }
-
 func compute_softmax_sample(int vocab_size, int step) int {
     float base_logit = float(step) * 0.1
     float sample_logit = base_logit + float(step % 17) * 0.5
@@ -83,7 +76,6 @@ func compute_softmax_sample(int vocab_size, int step) int {
     }
     token_id
 }
-
 func generate_tokens(int num_tokens, int vocab_size) int {
     int total = 0
     int i = 0
@@ -94,7 +86,6 @@ func generate_tokens(int num_tokens, int vocab_size) int {
     }
     total
 }
-
 func print_header() {
     println("")
     println("╔════════════════════════════════════════════════════════════════╗")
@@ -102,7 +93,6 @@ func print_header() {
     println("╚════════════════════════════════════════════════════════════════╝")
     println("")
 }
-
 func print_model_info(model_config config, training_metrics metrics) {
     println("📋 modelinformation:")
     print("  • English text:        ")
@@ -147,7 +137,6 @@ func print_model_info(model_config config, training_metrics metrics) {
     println("  • English text:      1")
     println("")
 }
-
 func print_inference_config() {
     println("══════════════════════════════════════════════════════════════")
     println("🎯 inferenceEnglish text")
@@ -161,7 +150,6 @@ func print_inference_config() {
     println("──────────────────────────────────────────────────────────────")
     println("")
 }
-
 func print_sample_results(int sample_num, int total_tokens) {
     print("[English text ")
     print(sample_num)
@@ -176,7 +164,6 @@ func print_sample_results(int sample_num, int total_tokens) {
     println(" English text)")
     println("")
 }
-
 func print_inference_stats(int num_samples, int max_tokens) {
     println("──────────────────────────────────────────────────────────────")
     println("")
@@ -196,7 +183,6 @@ func print_inference_stats(int num_samples, int max_tokens) {
     println("══════════════════════════════════════════════════════════════")
     println("")
 }
-
 func run_inference_demo() {
     model_config config = init_model_config()
     training_metrics metrics = init_training_metrics()
@@ -225,7 +211,6 @@ func run_inference_demo() {
     println("🎊 inferencesystemEnglish textstart!")
     println("")
 }
-
 func main() {
     run_inference_demo()
 }

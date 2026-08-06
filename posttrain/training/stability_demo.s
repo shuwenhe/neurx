@@ -24,7 +24,6 @@ func demo_nan_detection() {
     println("")
     println("✓ NaN/Inf detection working correctly!")
 }
-
 func demo_gradient_clipping() {
     println("")
     println("=== Gradient Clipping Demo ===")
@@ -53,7 +52,6 @@ func demo_gradient_clipping() {
     }
     println("")
 }
-
 func main() {
     demo_nan_detection()
     demo_gradient_clipping()
@@ -65,15 +63,12 @@ func main() {
     println("3. Monitor gradient norms in logs")
     println("====================================")
 }
-
 func float_to_str_2(float value) string {
     return float_to_str_n(value, 2)
 }
-
 func float_to_str_4(float value) string {
     return float_to_str_n(value, 4)
 }
-
 func float_to_str_n(float value, int decimals) string {
     float current = value
     bool negative = current < 0.0
@@ -101,7 +96,6 @@ func float_to_str_n(float value, int decimals) string {
     if negative { result = "-" + result }
     return result
 }
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n

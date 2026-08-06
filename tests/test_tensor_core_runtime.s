@@ -4,7 +4,6 @@ struct tensor_desc {
     []int strides
     int numel
 }
-
 struct tensor {
     []float storage
     tensor_desc desc
@@ -18,7 +17,6 @@ func shape_numel([]int shape) int {
     }
     return n
 }
-
 func contiguous_strides([]int shape) []int {
     int ndim = len(shape)
     []int strides = []int{cap: ndim}
@@ -31,7 +29,6 @@ func contiguous_strides([]int shape) []int {
     }
     return strides
 }
-
 func zeros_float(int n) []float {
     []float out = []float{cap: n}
     int i = 0
@@ -41,7 +38,6 @@ func zeros_float(int n) []float {
     }
     return out
 }
-
 func from_data([]float data, []int shape) tensor {
     int n = shape_numel(shape)
     []float storage = zeros_float(n)
@@ -59,7 +55,6 @@ func from_data([]float data, []int shape) tensor {
         },
     }
 }
-
 func add(tensor a, tensor b) tensor {
     tensor_desc ad = a.desc
     []float adata = a.storage
@@ -75,7 +70,6 @@ func add(tensor a, tensor b) tensor {
         desc: a.desc,
     }
 }
-
 func matmul2d(tensor a, tensor b) tensor {
     tensor_desc ad = a.desc
     tensor_desc bd = b.desc
@@ -114,7 +108,6 @@ func matmul2d(tensor a, tensor b) tensor {
         },
     }
 }
-
 func assert_close(float actual, float expected, string name) {
     float diff = actual - expected
     if diff < 0.0 {
@@ -126,7 +119,6 @@ func assert_close(float actual, float expected, string name) {
         println("FAIL " + name)
     }
 }
-
 func main() {
     println("NeurX tensor core runtime smoke")
     []float adata = []float{cap: 4}

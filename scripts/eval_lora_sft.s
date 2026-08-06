@@ -15,18 +15,15 @@ func shell_escape(string value) string {
     }
     out + "'"
 }
-
 func first_non_empty_line(string path) string {
     string cmd = "grep -m 1 -v '^[[:space:]]*$' " + shell_escape(path)
     trim(runtime_run_command_output(cmd))
 }
-
 func extract_json_string_field(string json_text, string field_name) string {
     string cmd = "printf %s " + shell_escape(json_text) +
         " | sed -n 's/.*\"" + field_name + "\"[[:space:]]*:[[:space:]]*\"\\([^\"]*\\)\".*/\\1/p' | head -1"
     trim(runtime_run_command_output(cmd))
 }
-
 func extract_json_int_field(string json_text, string field_name, int default_value) int {
     string text = extract_json_string_field(json_text, field_name)
     if len(text) == 0 {
@@ -49,7 +46,6 @@ func extract_json_int_field(string json_text, string field_name, int default_val
     }
     sign * value
 }
-
 func first_record_json(string data_file) string {
     string line = first_non_empty_line(data_file)
     if len(line) == 0 {
@@ -57,7 +53,6 @@ func first_record_json(string data_file) string {
     }
     line
 }
-
 func main() {
     string root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/neurx")
     string model_dir = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/home/shuwen/shuwen/posttrain")

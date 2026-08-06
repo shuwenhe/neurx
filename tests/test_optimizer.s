@@ -9,7 +9,6 @@ func test_adamw_init() {
         println("  ✓ config parameters valid")
     }
 }
-
 func test_warmup_lr() {
     println("Test 2: Learning rate warmup")
     let base_lr = 1e-4
@@ -27,7 +26,6 @@ func test_warmup_lr() {
         println("  ✓ LR at step 1000 (end warmup) is base_lr")
     }
 }
-
 func test_cosine_decay() {
     println("Test 3: Cosine annealing decay")
     let base_lr = 1e-4
@@ -50,7 +48,6 @@ func test_cosine_decay() {
         println("  ✓ LR at end equals min_lr")
     }
 }
-
 func test_momentum_accumulation() {
     println("Test 4: Momentum accumulation")
     let beta1 = 0.9
@@ -61,7 +58,6 @@ func test_momentum_accumulation() {
         println("  ✓ Momentum accumulates correctly")
     }
 }
-
 func test_variance_accumulation() {
     println("Test 5: Variance accumulation")
     let beta2 = 0.999
@@ -72,7 +68,6 @@ func test_variance_accumulation() {
         println("  ✓ Variance accumulates correctly")
     }
 }
-
 func test_bias_correction() {
     println("Test 6: Bias correction")
     let beta1 = 0.9
@@ -87,7 +82,6 @@ func test_bias_correction() {
         println("  ✓ Bias correction 2 correct")
     }
 }
-
 func test_weight_decay() {
     println("Test 7: Decoupled weight decay")
     let weight_decay = 0.01
@@ -99,7 +93,6 @@ func test_weight_decay() {
         println("  ✓ Weight decay applied correctly")
     }
 }
-
 func test_scheduler_step_advancement() {
     println("Test 8: Scheduler step advancement")
     let base_lr = 1e-4
@@ -113,7 +106,6 @@ func test_scheduler_step_advancement() {
         println("  ✓ Scheduler steps correctly")
     }
 }
-
 func test_schedule_types() {
     println("Test 9: Multiple schedule types")
     let base_lr = 1e-4
@@ -125,7 +117,6 @@ func test_schedule_types() {
         println("  ✓ All schedule types supported")
     }
 }
-
 func test_llm_config() {
     println("Test 10: LLM pretraining configuration")
     let base_lr = 1e-4
@@ -136,21 +127,18 @@ func test_llm_config() {
         println("  ✓ LLM config computed correctly")
     }
 }
-
 func abs_float(float x) float {
     if x < 0.0 {
         return -x
     }
     return x
 }
-
 func pow_approx(float x, float y) float {
     if y == 1.0 {
         return x
     }
     return x * x
 }
-
 func cos_approx(float x) float {
     if abs_float(x) < 0.01 {
         return 1.0
@@ -163,7 +151,6 @@ func cos_approx(float x) float {
     }
     return 1.0 - (x * x / 2.0)
 }
-
 func main() {
     println("============================================")
     println("adam_w optimizer_2 & LR Scheduler Tests")

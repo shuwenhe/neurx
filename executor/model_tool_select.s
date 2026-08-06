@@ -15,7 +15,6 @@ func agent_model_clip(string text, int max_chars) string {
     }
     out + "\n...[truncated]"
 }
-
 func agent_model_route_line_starts_with(string line, string prefix) bool {
     int ll = len(line)
     int pl = len(prefix)
@@ -31,7 +30,6 @@ func agent_model_route_line_starts_with(string line, string prefix) bool {
     }
     true
 }
-
 func agent_model_route_extract_value(string line, int key_len) string {
     int ll = len(line)
     int start = key_len
@@ -54,7 +52,6 @@ func agent_model_route_extract_value(string line, int key_len) string {
     }
     lower(trim(val))
 }
-
 func agent_model_route_scan_response(string response) string {
     int resp_len = len(response)
     string cur_line = ""
@@ -84,7 +81,6 @@ func agent_model_route_scan_response(string response) string {
     }
     ""
 }
-
 func agent_model_route_normalize(string raw) string {
     if raw == "write" || raw == "write_file" || raw == "create" || raw == "create_file" || raw == "new_file" {
         return "write"
@@ -163,7 +159,6 @@ func agent_model_route_normalize(string raw) string {
     }
     ""
 }
-
 func agent_model_route_build_prompt(string goal, string task, string input) string {
     string prompt = "You are a tool-routing agent. Select the single best route for the goal.\n"
     prompt = prompt + "Routes and meanings:\n"
@@ -191,7 +186,6 @@ func agent_model_route_build_prompt(string goal, string task, string input) stri
     prompt = prompt + "\nRespond with exactly one line:\nroute: <route_name>\n"
     prompt
 }
-
 func agent_model_route(string goal, string task, string input, string model_path) string {
     if model_path == "" {
         return ""
@@ -207,7 +201,6 @@ func agent_model_route(string goal, string task, string input, string model_path
     }
     agent_model_route_normalize(raw)
 }
-
 func agent_model_parse_field(string response, string key) string {
     int resp_len = len(response)
     string cur_line = ""
@@ -233,7 +226,6 @@ func agent_model_parse_field(string response, string key) string {
     }
     ""
 }
-
 func agent_model_str_find(string text, string pattern, int start) int {
     int tl = len(text)
     int pl = len(pattern)
@@ -261,7 +253,6 @@ func agent_model_str_find(string text, string pattern, int start) int {
     }
     -1
 }
-
 func agent_model_parse_block(string response, string begin_marker, string end_marker) string {
     int bm_pos = agent_model_str_find(response, begin_marker, 0)
     if bm_pos < 0 {
@@ -287,7 +278,6 @@ func agent_model_parse_block(string response, string begin_marker, string end_ma
     }
     out
 }
-
 func agent_model_tool_call_build_prompt(agent_tool_registry_state tools, agent_memory_state memory, string goal, string task, string input, string model_path) string {
     agent_memory_lookup_result retrieved_result = agent_memory_lookup_long(memory, "retrieved")
     agent_memory_lookup_result inferred_result = agent_memory_lookup_long(memory, "inferred_model")
@@ -332,11 +322,9 @@ func agent_model_tool_call_build_prompt(agent_tool_registry_state tools, agent_m
     prompt = prompt + "---END CONTENT---\n"
     prompt
 }
-
 func agent_model_tool_call_parse(string response) agent_action_state {
     agent_action_parse(response, "general")
 }
-
 func agent_model_tool_call(agent_tool_registry_state tools, agent_memory_state memory, string goal, string task, string input, string model_path) agent_action_state {
     if model_path == "" {
         return new_agent_action_state()
@@ -348,7 +336,6 @@ func agent_model_tool_call(agent_tool_registry_state tools, agent_memory_state m
     }
     agent_model_tool_call_parse(response)
 }
-
 func agent_model_plan_build_prompt(string goal, string route, string analysis, string input) string {
     string prompt = "You are a planning agent. Output an ordered task queue to accomplish the goal.\n\n"
     prompt = prompt + "GOAL: " + goal + "\n"
@@ -388,7 +375,6 @@ func agent_model_plan_build_prompt(string goal, string route, string analysis, s
     prompt = prompt + "  Check changes: plan_queue: [git_status, git_diff]\n"
     prompt
 }
-
 func agent_model_plan(agent_memory_state memory, string goal, string route, string input, string model_path) string {
     if model_path == "" {
         return ""
@@ -405,7 +391,6 @@ func agent_model_plan(agent_memory_state memory, string goal, string route, stri
     }
     agent_model_parse_field(response, "plan_queue")
 }
-
 func agent_model_code_error_context(agent_memory_state memory) string {
     string errors = ""
     agent_memory_lookup_result build_err = agent_memory_lookup_long(memory, "last_build")
@@ -433,7 +418,6 @@ func agent_model_code_error_context(agent_memory_state memory) string {
     }
     errors
 }
-
 func agent_model_code_build_prompt(agent_memory_state memory, string goal, string route, string input) string {
     string prompt = "You are an expert software engineer. Write a complete, correct implementation.\n\n"
     prompt = prompt + "GOAL: " + goal + "\n"
@@ -471,7 +455,6 @@ func agent_model_code_build_prompt(agent_memory_state memory, string goal, strin
     prompt = prompt + "Do not add any explanation before the first block or after the last block.\n"
     prompt
 }
-
 func agent_model_code_parse(string response) agent_action_state {
     string path = agent_model_parse_field(response, "path")
     string content = agent_model_parse_block(response, "---BEGIN---", "---END---")
@@ -495,7 +478,6 @@ func agent_model_code_parse(string response) agent_action_state {
         structured: structured,
     }
 }
-
 func agent_model_code_parse_all_files(string response) string {
     string out = ""
     int pos = 0
@@ -547,7 +529,6 @@ func agent_model_code_parse_all_files(string response) string {
     }
     out
 }
-
 func agent_model_code(agent_memory_state memory, string goal, string route, string input, string model_path) agent_action_state {
     if model_path == "" {
         return new_agent_action_state()
@@ -559,7 +540,6 @@ func agent_model_code(agent_memory_state memory, string goal, string route, stri
     }
     agent_model_code_parse(response)
 }
-
 func agent_model_verify_build_prompt(string goal, string route, string evidence) string {
     string prompt = "You are a verification agent. Determine whether the goal was achieved.\n\n"
     prompt = prompt + "GOAL: " + goal + "\n"
@@ -569,7 +549,6 @@ func agent_model_verify_build_prompt(string goal, string route, string evidence)
     prompt = prompt + "Then provide a one-sentence explanation.\n"
     prompt
 }
-
 func agent_model_verify(agent_memory_state memory, string goal, string route, string model_path) string {
     if model_path == "" {
         return ""

@@ -6,7 +6,6 @@ func abs_float(float x) float {
     }
     return x
 }
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -37,7 +36,6 @@ func int_to_str(int n) string {
     }
     return out
 }
-
 func float_to_str(float value, int decimals) string {
     float current = value
     bool negative = current < 0.0
@@ -76,7 +74,6 @@ func float_to_str(float value, int decimals) string {
     }
     return out
 }
-
 func run_mini_scalar_posttrain() int {
     string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "../model/base-model")
     string output_dir = runtime_env_get("NEURX_POSTTRAIN_OUTPUT_DIR", "../posttrain_adapter")
@@ -131,7 +128,6 @@ func run_mini_scalar_posttrain() int {
     println("[✓] Mini scalar training completed")
     return 0
 }
-
 func main() {
     return run_mini_scalar_posttrain()
 }

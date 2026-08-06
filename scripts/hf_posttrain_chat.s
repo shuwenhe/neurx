@@ -17,7 +17,6 @@ func shell_escape(string value) string {
     }
     out + "'"
 }
-
 func ends_with(string value, string suffix) bool {
     if len(suffix) > len(value) {
         return false
@@ -32,7 +31,6 @@ func ends_with(string value, string suffix) bool {
     }
     true
 }
-
 func resolve_model_file(string configured_path) string {
     string path = trim(configured_path)
     if ends_with(path, ".safetensors") && runtime_file_exists(path) {
@@ -44,7 +42,6 @@ func resolve_model_file(string configured_path) string {
     }
     path
 }
-
 func last_index_of(string text, string needle) int {
     if len(needle) == 0 || len(needle) > len(text) {
         return -1
@@ -62,7 +59,6 @@ func last_index_of(string text, string needle) int {
     }
     -1
 }
-
 func slice_from(string text, int start) string {
     int offset = start
     if offset < 0 {
@@ -70,7 +66,6 @@ func slice_from(string text, int start) string {
     }
     __host_slice(text, offset, len(text))
 }
-
 func extract_response(string output) string {
     string marker = "Assistant: "
     int index = last_index_of(output, marker)
@@ -79,11 +74,9 @@ func extract_response(string output) string {
     }
     trim(slice_from(output, index + len(marker)))
 }
-
 func read_user_line() string {
     trim(__sys_read_string(0, 4096))
 }
-
 func main() {
     string root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/neurx")
     string configured_model = runtime_env_get(

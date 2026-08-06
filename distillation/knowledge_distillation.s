@@ -13,7 +13,6 @@ struct distillation_config {
     string student_name
     string output_dir
 }
-
 struct distillation_metrics {
     float student_loss
     float distillation_loss
@@ -22,7 +21,6 @@ struct distillation_metrics {
     float teacher_accuracy
     float kl_divergence
 }
-
 struct distillation_state {
     distillation_config config
     int step
@@ -44,7 +42,6 @@ func default_distillation_config() distillation_config {
         output_dir: "artifacts/distillation",
     }
 }
-
 func new_distillation_state(distillation_config config) distillation_state {
     distillation_state {
         config: config,
@@ -54,7 +51,6 @@ func new_distillation_state(distillation_config config) distillation_state {
         latest_bundle_path: "",
     }
 }
-
 func distillation_softmax([]float logits, float temperature) []float {
     int n = len(logits)
     []float probs = []float{cap: n}
@@ -94,7 +90,6 @@ func distillation_softmax([]float logits, float temperature) []float {
     }
     probs
 }
-
 func distillation_kl_divergence([]float student_logits, []float teacher_logits, float temperature) float {
     []float student_probs = distillation_softmax(student_logits, temperature)
     []float teacher_probs = distillation_softmax(teacher_logits, temperature)
@@ -114,7 +109,6 @@ func distillation_kl_divergence([]float student_logits, []float teacher_logits, 
     }
     kl * temperature * temperature
 }
-
 func distillation_cross_entropy([]float logits, []int target_ids) float {
     if len(logits) == 0 || len(target_ids) == 0 {
         return 0.0
@@ -134,7 +128,6 @@ func distillation_cross_entropy([]float logits, []int target_ids) float {
     }
     loss / float(len(target_ids))
 }
-
 func distillation_train_step(
     []float student_logits,
     []float teacher_logits,
@@ -153,7 +146,6 @@ func distillation_train_step(
         kl_divergence: distill_loss,
     }
 }
-
 func distillation_update_state(distillation_state state, distillation_metrics metrics) distillation_state {
     distillation_state next = state
     next.step = state.step + 1
@@ -163,7 +155,6 @@ func distillation_update_state(distillation_state state, distillation_metrics me
     }
     next
 }
-
 func distillation_summary_text(distillation_state state) string {
     string out = ""
     out = out + "distillation.teacher=" + state.config.teacher_name + "\n"
@@ -180,7 +171,6 @@ func distillation_summary_text(distillation_state state) string {
     out = out + "distillation.last_distill_loss=" + strings.format("%.6f", state.last_metrics.distillation_loss) + "\n"
     out
 }
-
 func distillation_config_text(distillation_config config) string {
     string out = ""
     out = out + "temperature=" + strings.format("%.4f", config.temperature) + "\n"
@@ -195,7 +185,6 @@ func distillation_config_text(distillation_config config) string {
     out = out + "output_dir=" + config.output_dir + "\n"
     out
 }
-
 func distillation_generate_student_plan(distillation_config config) string {
     float layer_scale = 1.0 / config.compression_ratio
     string out = ""
@@ -205,7 +194,6 @@ func distillation_generate_student_plan(distillation_config config) string {
     out = out + "student.distillation_temperature=" + strings.format("%.4f", config.temperature) + "\n"
     out
 }
-
 func distillation_write_bundle(distillation_state state, string bundle_dir) distillation_state {
     string root = trim(bundle_dir)
     if root == "" {
@@ -219,7 +207,6 @@ func distillation_write_bundle(distillation_state state, string bundle_dir) dist
     next.latest_bundle_path = root
     next
 }
-
 func distillation_export_manifest_text(distillation_state state) string {
     string out = ""
     out = out + "bundle_dir=" + state.latest_bundle_path + "\n"
@@ -229,13 +216,11 @@ func distillation_export_manifest_text(distillation_state state) string {
     out = out + "best_loss=" + strings.format("%.6f", state.best_loss) + "\n"
     out
 }
-
 func distillation_persist(distillation_state state, string export_dir) distillation_state {
     distillation_state next = distillation_write_bundle(state, export_dir)
     runtime_write_text_file(next.latest_bundle_path + "/distillation.manifest", distillation_export_manifest_text(next))
     next
 }
-
 func exp_approx(float x) float {
     if x < -20.0 {
         return 0.0
@@ -253,7 +238,6 @@ func exp_approx(float x) float {
     }
     sum
 }
-
 func log_approx(float x) float {
     if x <= 0.0 {
         return -20.0

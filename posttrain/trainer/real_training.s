@@ -6,7 +6,6 @@ use neurx.tokenizer.simple_tokenizer.{create_simple_tokenizer, tokenize, create_
 use neurx.loss.cross_entropy.{cross_entropy_loss, cross_entropy_gradient, perplexity_from_loss}
 use neurx.posttrain.checkpoint.adapter_saver.{save_checkpoint, load_checkpoint}
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
-
 struct training_config {
     string model_path
     string data_path
@@ -25,7 +24,6 @@ struct training_config {
     float lora_alpha
     float lora_dropout
 }
-
 func default_training_config() training_config {
     training_config{
         model_path: "../model/Qwen2.5-0.5B-Instruct",
@@ -46,7 +44,6 @@ func default_training_config() training_config {
         lora_dropout: 0.05
     }
 }
-
 func run_real_training() int {
     eprintln("============================================================")
     eprintln("[Real Training Pipeline] Real Qwen2.5-0.5B Training")
@@ -62,12 +59,10 @@ func run_real_training() int {
     eprintln("[Config] LoRA Rank: " + int_to_str(config.lora_rank))
     eprintln("[Config] Output Dir: " + config.output_dir)
     eprintln("")
-    
     eprintln("[Step 1/6] Loading REAL Qwen2.5-0.5B model weights")
     model_weights weights = load_model_weights_real(config.model_path)
     eprintln("[Step 1/6] ✓ Real Qwen weights loaded successfully")
     eprintln("")
-    
     eprintln("[Step 2/6] Creating LoRA adapters")
     [][]float lora_a_matrices = [][]float{cap: 7}
     [][]float lora_b_matrices = [][]float{cap: 7}
@@ -79,7 +74,6 @@ func run_real_training() int {
     }
     eprintln("[Step 2/6] ✓ LoRA adapters created (rank=" + int_to_str(config.lora_rank) + ")")
     eprintln("")
-    
     eprintln("[Step 3/6] Creating tokenizer and preparing data")
     simple_tokenizer tokenizer = create_simple_tokenizer()
     string sample_text = "What are the symptoms of diabetes? The symptoms include increased thirst."
@@ -87,10 +81,8 @@ func run_real_training() int {
     []int labels = create_labels(input_ids, config.seq_len)
     eprintln("[Step 3/6] ✓ Tokenizer ready (vocab_size=" + int_to_str(tokenizer.vocab_size) + ")")
     eprintln("")
-    
     []float loss_history = []float{cap: config.num_epochs * config.steps_per_epoch}
     []float eval_loss_history = []float{cap: config.num_epochs * config.steps_per_epoch}
-    
     eprintln("[Step 4/6] Starting REAL training loop with LM loss")
     int epoch = 0
     int total_steps = 0
@@ -99,7 +91,6 @@ func run_real_training() int {
         int step = 0
         while step < config.steps_per_epoch {
             eprintln("  [Step " + int_to_str(step + 1) + "/" + int_to_str(config.steps_per_epoch) + "]")
-            
             eprintln("    Forward pass (real Qwen forward)...")
             []float logits = model_forward(
                 input_ids,
@@ -112,7 +103,6 @@ func run_real_training() int {
                 config.intermediate_size,
                 config.vocab_size
             )
-            
             eprintln("    Computing REAL LM loss...")
             float loss = cross_entropy_loss(
                 logits,
@@ -125,7 +115,6 @@ func run_real_training() int {
             loss_history[total_steps] = loss
             float ppl = perplexity_from_loss(loss)
             eprintln("    Loss: " + float_to_str(loss, 6) + ", Perplexity: " + float_to_str(ppl, 2))
-            
             eprintln("    Computing gradients for backprop...")
             []float grad_logits = cross_entropy_gradient(
                 logits,
@@ -136,16 +125,13 @@ func run_real_training() int {
                 -100
             )
             eprintln("    Gradient stats: mean=" + float_to_str(mean(grad_logits), 8))
-            
             eprintln("    [TODO] Applying LoRA adapter updates")
-            
             total_steps = total_steps + 1
             step = step + 1
         }
         epoch = epoch + 1
     }
     eprintln("")
-    
     eprintln("[Step 5/6] Saving adapter checkpoints")
     []string target_modules = []string{cap: 7}
     target_modules[0] = "q_proj"
@@ -155,7 +141,6 @@ func run_real_training() int {
     target_modules[4] = "gate_proj"
     target_modules[5] = "up_proj"
     target_modules[6] = "down_proj"
-    
     bool save_ok = save_checkpoint(
         config.output_dir,
         lora_a_matrices,
@@ -165,28 +150,24 @@ func run_real_training() int {
         total_steps,
         target_modules
     )
-    
     if save_ok {
         eprintln("[Step 5/6] ✓ Adapter checkpoint saved successfully")
     } else {
         eprintln("[Step 5/6] ✗ Failed to save adapter checkpoint")
     }
     eprintln("")
-    
     eprintln("[Step 6/6] Loading and verifying checkpoints")
     [][]float loaded_adapters = load_checkpoint(
         config.output_dir,
         config.lora_rank,
         config.hidden_size
     )
-    
     if len(loaded_adapters) > 0 {
         eprintln("[Step 6/6] ✓ Checkpoint loaded and verified")
     } else {
         eprintln("[Step 6/6] ✗ Failed to load checkpoint")
     }
     eprintln("")
-    
     eprintln("============================================================")
     eprintln("[Real Training Pipeline] Training Complete!")
     eprintln("============================================================")
@@ -202,10 +183,8 @@ func run_real_training() int {
     eprintln("[Total Steps] " + int_to_str(total_steps))
     eprintln("[Output Directory] " + config.output_dir)
     eprintln("")
-    
     0
 }
-
 func mean([]float arr) float {
     if len(arr) == 0 { return 0.0 }
     float sum = 0.0
@@ -216,7 +195,6 @@ func mean([]float arr) float {
     }
     sum / (len(arr) as float)
 }
-
 func int_to_str(int x) string {
     if x == 0 { return "0" }
     if x < 0 { return "-" + int_to_str(0 - x) }
@@ -238,7 +216,6 @@ func int_to_str(int x) string {
     }
     result
 }
-
 func float_to_str(float x, int precision) string {
     int integer_part = x as int
     float decimal_part = x - (integer_part as float)

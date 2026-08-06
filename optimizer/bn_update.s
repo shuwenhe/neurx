@@ -1,14 +1,11 @@
 package neurx.optimizer.bn_update
-
 use neurx.tensor.tensor
 use neurx.tensor.new
-
 struct batch_norm_stats {
     []float running_mean
     []float running_var
     []int num_batches
 }
-
 func new_batch_norm_stats(int num_features) batch_norm_stats {
     batch_norm_stats {
         running_mean: make_zeros(num_features),
@@ -16,7 +13,6 @@ func new_batch_norm_stats(int num_features) batch_norm_stats {
         num_batches: make([]int, 0),
     }
 }
-
 func reset_running_stats(batch_norm_stats stats) batch_norm_stats {
     int i = 0
     while i < len(stats.running_mean) {
@@ -27,7 +23,6 @@ func reset_running_stats(batch_norm_stats stats) batch_norm_stats {
     stats.num_batches = make([]int, 0)
     return stats
 }
-
 func update_batch_norm_from_batch(
     batch_norm_stats stats,
     tensor batch_data
@@ -37,10 +32,8 @@ func update_batch_norm_from_batch(
     if batch_size <= 0 {
         return stats
     }
-    
     []float batch_mean = make_zeros(num_features)
     []float batch_var = make_zeros(num_features)
-    
     int f = 0
     while f < num_features {
         float sum_f = 0.0
@@ -59,7 +52,6 @@ func update_batch_norm_from_batch(
         }
         f = f + 1
     }
-    
     f = 0
     while f < num_features {
         float sum_sq = 0.0
@@ -79,7 +71,6 @@ func update_batch_norm_from_batch(
         }
         f = f + 1
     }
-    
     float momentum = 0.1
     f = 0
     while f < num_features {
@@ -87,10 +78,8 @@ func update_batch_norm_from_batch(
         stats.running_var[f] = stats.running_var[f] * (1.0 - momentum) + batch_var[f] * momentum
         f = f + 1
     }
-    
     return stats
 }
-
 func apply_batch_norm(
     batch_norm_stats stats,
     tensor input_data,
@@ -98,9 +87,7 @@ func apply_batch_norm(
 ) tensor {
     int batch_size = len(input_data.data)
     int num_features = len(stats.running_mean)
-    
     []float out = make_zeros(batch_size)
-    
     int i = 0
     while i < batch_size {
         int f = 0
@@ -115,10 +102,8 @@ func apply_batch_norm(
         }
         i = i + 1
     }
-    
     return new(out, input_data.shape, input_data.requires_grad)
 }
-
 func make_zeros(int n) []float {
     []float arr = []float{cap: n}
     int i = 0
@@ -128,7 +113,6 @@ func make_zeros(int n) []float {
     }
     return arr
 }
-
 func make_ones(int n) []float {
     []float arr = []float{cap: n}
     int i = 0
@@ -138,7 +122,6 @@ func make_ones(int n) []float {
     }
     return arr
 }
-
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0

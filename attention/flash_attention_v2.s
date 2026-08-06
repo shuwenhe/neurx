@@ -25,13 +25,11 @@ func new_flash_attn_config(int head_dim, int num_q_heads, int num_kv_heads, bool
         dtype: "bf16",
     }
 }
-
 struct flash_block_acc {
     []float output
     []float row_max
     []float row_sum
 }
-
 func new_flash_block_acc(int block_q, int head_dim) flash_block_acc {
     flash_block_acc {
         output:   zeros(block_q * head_dim),
@@ -39,12 +37,10 @@ func new_flash_block_acc(int block_q, int head_dim) flash_block_acc {
         row_sum:  zeros(block_q),
     }
 }
-
 struct flash_attn_output {
     []float out
     []float lse
 }
-
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -57,7 +53,6 @@ func sqrt_approx(float x) float {
     float r4 = r3 + x / r3
     0.5 * r4
 }
-
 func float_of_int(int n) float {
     float result = 0.0
     int i = 0
@@ -67,7 +62,6 @@ func float_of_int(int n) float {
     }
     result
 }
-
 func zeros(int n) []float {
     []float out = []
     int i = 0
@@ -77,7 +71,6 @@ func zeros(int n) []float {
     }
     out
 }
-
 func fill(int n, float val) []float {
     []float out = []
     int i = 0
@@ -87,7 +80,6 @@ func fill(int n, float val) []float {
     }
     out
 }
-
 func exp_stable(float x) float {
     if x > 88.0 {
         return 2.41549527e38
@@ -102,12 +94,10 @@ func exp_stable(float x) float {
     float x6 = x5 * x
     1.0 + x + x2/2.0 + x3/6.0 + x4/24.0 + x5/120.0 + x6/720.0
 }
-
 func max_float(float a, float b) float {
     if a > b { return a }
     b
 }
-
 func flash_attn_forward_head(
     []float q, []float k, []float v,
     int seq_len, int kv_len, int head_dim,
@@ -230,13 +220,11 @@ func flash_attn_forward_head(
     }
     out
 }
-
 struct flash_attn_fwd_state {
     flash_attn_config config
     []float output
     []float lse
 }
-
 func flash_attn_forward(
     flash_attn_config cfg,
     []float q, []float k, []float v,
@@ -296,13 +284,11 @@ func flash_attn_forward(
         lse: lse,
     }
 }
-
 struct flash_attn_grad_result {
     []float dq
     []float dk
     []float dv
 }
-
 func flash_attn_backward(
     flash_attn_fwd_state fwd,
     []float q, []float k, []float v,
@@ -456,7 +442,6 @@ func flash_attn_backward(
     }
     flash_attn_grad_result { dq: dq, dk: dk, dv: dv }
 }
-
 struct flash_mha_state {
     flash_attn_config cfg
     []float wq
@@ -464,7 +449,6 @@ struct flash_mha_state {
     []float wv
     []float wo
 }
-
 func new_flash_mha(int hidden_dim, int num_q_heads, int num_kv_heads, bool causal) flash_mha_state {
     int head_dim = hidden_dim / num_q_heads
     int kv_dim   = head_dim * num_kv_heads
@@ -476,7 +460,6 @@ func new_flash_mha(int hidden_dim, int num_q_heads, int num_kv_heads, bool causa
         wo:  zeros(hidden_dim * hidden_dim),
     }
 }
-
 func flash_mha_forward(flash_mha_state mha, []float x, int seq_len) []float {
     int H_q  = mha.cfg.num_q_heads
     int H_kv = mha.cfg.num_kv_heads
@@ -493,7 +476,6 @@ func flash_mha_forward(flash_mha_state mha, []float x, int seq_len) []float {
     []float merged = merge_heads(fwd.output, seq_len, H_q, D)
     matmul_2d(merged, mha.wo, seq_len, hidden, hidden)
 }
-
 func matmul_2d([]float a, []float b, int M, int K, int N) []float {
     []float c = zeros(M * N)
     int i = 0
@@ -513,11 +495,9 @@ func matmul_2d([]float a, []float b, int M, int K, int N) []float {
     }
     c
 }
-
 func reshape_to_heads([]float x, int seq, int heads, int D) []float {
     x
 }
-
 func merge_heads([]float x, int seq, int heads, int D) []float {
     x
 }

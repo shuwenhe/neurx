@@ -21,7 +21,6 @@ func checkNvidiaSmi() int {
     }
     return count
 }
-
 func checkCudaBinary(bin string) bool {
     stat, err := os.Stat(bin)
     if err != nil || stat.IsDir() {
@@ -31,7 +30,6 @@ func checkCudaBinary(bin string) bool {
     io.Println("   ✓ Binary exists: " + bin)
     return true
 }
-
 func checkRequiredFiles(files []string) {
     for _, file := range files {
         stat, err := os.Stat(file)
@@ -42,7 +40,6 @@ func checkRequiredFiles(files []string) {
         }
     }
 }
-
 func testCudaBinary(bin string) {
     cmd := exec.command("timeout", "30s", bin)
     cmd.Env = append(os.Environ(),
@@ -70,7 +67,6 @@ func testCudaBinary(bin string) {
         io.Println("   (No output received)")
     }
 }
-
 func main() {
     curdir := "/home/shuwen/shuwen/train/neurx"
     cudaTrainBin := curdir + "/artifacts/build/cuda_train/neurx_cuda_train_bridge"

@@ -2,11 +2,9 @@ use neurx.autograd.tracer
 func trace_to_ir(tracer_state state, string name) ir_graph {
     ir_from_tracer(state, name)
 }
-
 func ir_to_trace(ir_graph graph) tracer_state {
     ir_to_tracer(graph)
 }
-
 func hybrid_trace_graph(tracer_state state, string name, bool to_graph) any {
     if to_graph {
         return trace_to_ir(state, name)
@@ -36,7 +34,6 @@ struct ir_eqn {
     []string inputs
     []string outputs
 }
-
 struct ir_graph {
     string name
     int eqn_count
@@ -48,35 +45,27 @@ struct ir_graph {
     bool ready
     bool linearized
 }
-
 func get_primitive(ir_graph graph, int index) string {
     graph.primitives[index]
 }
-
 func get_param(ir_graph graph, int index) string {
     graph.params[index]
 }
-
 func get_eqn(ir_graph graph, int index) ir_eqn {
     graph.eqns[index]
 }
-
 func get_eqn_input(ir_eqn eqn, int index) string {
     eqn.inputs[index]
 }
-
 func get_eqn_param(ir_eqn eqn, int index) string {
     eqn.params[index]
 }
-
 func get_chain_step(transform_chain chain, int index) string {
     chain.steps[index]
 }
-
 func get_chain_param(transform_chain chain, int index) string {
     chain.params[index]
 }
-
 func copy_eqn(ir_eqn eqn) ir_eqn {
     ir_eqn {
         primitive: eqn.primitive,
@@ -85,7 +74,6 @@ func copy_eqn(ir_eqn eqn) ir_eqn {
         outputs: copy_strings(eqn.outputs),
     }
 }
-
 func copy_eqns([]ir_eqn values) []ir_eqn {
     []ir_eqn out = []ir_eqn{cap: len(values)}
     int i = 0
@@ -95,7 +83,6 @@ func copy_eqns([]ir_eqn values) []ir_eqn {
     }
     out
 }
-
 func join_params([]string params) string {
     string out = ""
     int i = 0
@@ -108,7 +95,6 @@ func join_params([]string params) string {
     }
     out
 }
-
 func new_ir_graph(string name) ir_graph {
     ir_graph {
         name: name,
@@ -122,31 +108,24 @@ func new_ir_graph(string name) ir_graph {
         linearized: false,
     }
 }
-
 func ir_name(ir_graph graph) string {
     graph.name
 }
-
 func ir_eqn_count(ir_graph graph) int {
     graph.eqn_count
 }
-
 func ir_primitive_count(ir_graph graph) int {
     len(graph.primitives)
 }
-
 func ir_param_count(ir_graph graph) int {
     len(graph.params)
 }
-
 func ir_input_count(ir_graph graph) int {
     len(graph.inputs)
 }
-
 func ir_output_count(ir_graph graph) int {
     len(graph.outputs)
 }
-
 func ir_has_primitive(ir_graph graph, string primitive) bool {
     int i = 0
     while i < len(graph.primitives) {
@@ -157,15 +136,12 @@ func ir_has_primitive(ir_graph graph, string primitive) bool {
     }
     false
 }
-
 func ir_ready(ir_graph graph) bool {
     graph.ready
 }
-
 func ir_is_linearized(ir_graph graph) bool {
     graph.linearized
 }
-
 func ir_add_eqn_with_io(ir_graph graph, string primitive, []string params, []string inputs, []string outputs) ir_graph {
     []string primitives = copy_strings(graph.primitives)
     []string param_list = copy_strings(graph.params)
@@ -192,15 +168,12 @@ func ir_add_eqn_with_io(ir_graph graph, string primitive, []string params, []str
         linearized: graph.linearized,
     }
 }
-
 func ir_add_eqn_with_params(ir_graph graph, string primitive, []string params) ir_graph {
     ir_add_eqn_with_io(graph, primitive, params, [], [])
 }
-
 func ir_add_eqn(ir_graph graph, string primitive) ir_graph {
     ir_add_eqn_with_params(graph, primitive, [])
 }
-
 func ir_add_input(ir_graph graph, string input) ir_graph {
     []string inputs = copy_strings(graph.inputs)
     inputs.push(input)
@@ -216,7 +189,6 @@ func ir_add_input(ir_graph graph, string input) ir_graph {
         linearized: graph.linearized,
     }
 }
-
 func ir_add_output(ir_graph graph, string output) ir_graph {
     []string outputs = copy_strings(graph.outputs)
     outputs.push(output)
@@ -232,7 +204,6 @@ func ir_add_output(ir_graph graph, string output) ir_graph {
         linearized: graph.linearized,
     }
 }
-
 func ir_state_dict(ir_graph graph) ir_graph {
     ir_graph {
         name: graph.name,
@@ -246,11 +217,9 @@ func ir_state_dict(ir_graph graph) ir_graph {
         linearized: graph.linearized,
     }
 }
-
 func ir_load_state_dict(ir_graph graph, ir_graph other) ir_graph {
     other
 }
-
 func ir_from_tracer(tracer_state state, string name) ir_graph {
     ir_graph {
         name: name,
@@ -264,7 +233,6 @@ func ir_from_tracer(tracer_state state, string name) ir_graph {
         linearized: tracer.tracer_linearized(state),
     }
 }
-
 func ir_to_tracer(ir_graph graph) tracer_state {
     tracer_state {
         name: graph.name,
@@ -279,19 +247,15 @@ func ir_to_tracer(ir_graph graph) tracer_state {
         tags: [],
     }
 }
-
 func ir_capture(ir_graph graph, string primitive) ir_graph {
     ir_add_eqn(graph, primitive)
 }
-
 func ir_capture_with_params(ir_graph graph, string primitive, []string params) ir_graph {
     ir_add_eqn_with_params(graph, primitive, params)
 }
-
 func ir_capture_with_io(ir_graph graph, string primitive, []string params, []string inputs, []string outputs) ir_graph {
     ir_add_eqn_with_io(graph, primitive, params, inputs, outputs)
 }
-
 func ir_to_transform_chain(ir_graph graph) transform_chain {
     transform_chain {
         steps: copy_strings(graph.primitives),
@@ -303,7 +267,6 @@ func ir_to_transform_chain(ir_graph graph) transform_chain {
         linearized: graph.linearized,
     }
 }
-
 func transform_chain_to_jaxpr(transform_chain chain, string name) ir_graph {
     []ir_eqn eqns = copy_eqns(chain.eqns)
     if len(eqns) == 0 {
@@ -339,15 +302,12 @@ func transform_chain_to_jaxpr(transform_chain chain, string name) ir_graph {
 }
 type ir_pass = ir_graph
 var ir_pass_registry = map[string]ir_pass{}
-
 func register_ir_pass(string name, ir_pass pass) void {
     ir_pass_registry[name] = pass
 }
-
 func run_ir_pass(ir_graph graph, string pass_name) ir_graph {
     return graph
 }
-
 func optimize_ir(ir_graph graph) ir_graph {
     ir_graph out = graph
     for name, pass in ir_pass_registry {
@@ -355,7 +315,6 @@ func optimize_ir(ir_graph graph) ir_graph {
     }
     out
 }
-
 func simple_fuse_add(ir_graph graph) ir_graph {
     []ir_eqn optimized_eqns = []ir_eqn{}
     int i = 0
@@ -389,7 +348,6 @@ func simple_fuse_add(ir_graph graph) ir_graph {
         linearized: graph.linearized,
     }
 }
-
 func compile_jaxpr(ir_graph graph) string {
     if !graph.ready {
         return "Graph not ready for compilation"
@@ -403,7 +361,6 @@ func compile_jaxpr(ir_graph graph) string {
     }
     compiled_code
 }
-
 func synchronize_gradients([]ir_eqn eqns, int num_workers) []ir_eqn {
     int i = 0
     while i < len(eqns) {
@@ -421,7 +378,6 @@ func synchronize_gradients([]ir_eqn eqns, int num_workers) []ir_eqn {
     }
     eqns
 }
-
 func distributed_training(ir_graph graph, int num_workers) ir_graph {
     []ir_eqn eqns = copy_eqns(graph.eqns)
     eqns = synchronize_gradients(eqns, num_workers)

@@ -19,7 +19,6 @@ func create_tensorboard_writer(string log_dir) tensorboard_writer {
         output_file: f,
     }
 }
-
 func tb_write_scalar(
     tensorboard_writer *writer,
     string tag,

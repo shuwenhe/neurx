@@ -34,7 +34,6 @@ func save_checkpoint(
                                   (estimate_full_layer_memory(layer_id) - estimate_tensor_memory(input))
     (mgr, true)
 }
-
 func should_save_layer(checkpoint_manager mgr, int layer_id) bool {
     if len(mgr.config.checkpoint_layers) > 0 {
         for l in mgr.config.checkpoint_layers {
@@ -47,27 +46,22 @@ func should_save_layer(checkpoint_manager mgr, int layer_id) bool {
     }
     (layer_id % mgr.config.checkpoint_every) == 0
 }
-
 func estimate_tensor_memory(tensor t) int {
     len(t.data) * 4 * size_of_dimensions(t.shape)
 }
-
 func estimate_full_layer_memory(int layer_id) int {
     base_size = 1024 * 1024 * 4
     base_size * 5
 }
-
 func size_of_dimensions([]int shape) int {
     if len(shape) == 0 { return 1 }
     int size = 1
     for s in shape { size = size * s }
     size
 }
-
 func estimate_recompute_cost(int layer_id) int {
     1000000
 }
-
 func restore_activation(
     checkpoint_manager mgr,
     int layer_id,
@@ -84,7 +78,6 @@ func restore_activation(
     }
     ckpt.input_activation
 }
-
 func recompute_layer(
     layer_checkpoint ckpt,
     layer_forward_fn forward_fn

@@ -5,7 +5,6 @@ struct model_preset {
     string size_label
     int estimated_parameters_b
 }
-
 struct foundation_model {
     model_preset preset
     transformer_config config
@@ -15,7 +14,6 @@ struct foundation_model {
 func intermediate_dim_4x(int hidden_dim) int {
     hidden_dim * 4
 }
-
 func new_7b_transformer_config() transformer_config {
     transformer_config cfg = new_transformer_config()
     cfg.vocab_size = 32000
@@ -28,7 +26,6 @@ func new_7b_transformer_config() transformer_config {
     cfg.position_embedding_type = "rope"
     cfg
 }
-
 func new_13b_transformer_config() transformer_config {
     transformer_config cfg = new_transformer_config()
     cfg.vocab_size = 32000
@@ -41,7 +38,6 @@ func new_13b_transformer_config() transformer_config {
     cfg.position_embedding_type = "rope"
     cfg
 }
-
 func new_70b_transformer_config() transformer_config {
     transformer_config cfg = new_transformer_config()
     cfg.vocab_size = 32000
@@ -54,7 +50,6 @@ func new_70b_transformer_config() transformer_config {
     cfg.position_embedding_type = "rope"
     cfg
 }
-
 func preset_from_size(string size_label) model_preset {
     if size_label == "13B" {
         return model_preset {
@@ -79,7 +74,6 @@ func preset_from_size(string size_label) model_preset {
         estimated_parameters_b: 7,
     }
 }
-
 func config_from_size(string size_label, string position_embedding_type) transformer_config {
     transformer_config cfg = new_7b_transformer_config()
     if size_label == "13B" {
@@ -90,14 +84,12 @@ func config_from_size(string size_label, string position_embedding_type) transfo
     cfg.position_embedding_type = position_embedding_type
     cfg
 }
-
 func min_int(int a, int b) int {
     if a < b {
         return a
     }
     b
 }
-
 func compact_runtime_config(transformer_config cfg) transformer_config {
     transformer_config runtime = cfg
     runtime.hidden_dim = min_int(cfg.hidden_dim, 8)
@@ -115,7 +107,6 @@ func compact_runtime_config(transformer_config cfg) transformer_config {
     runtime.intermediate_dim = runtime.hidden_dim * 4
     runtime
 }
-
 func new_foundation_model(string size_label, string position_embedding_type) foundation_model {
     transformer_config cfg = config_from_size(size_label, position_embedding_type)
     transformer_config runtime_cfg = compact_runtime_config(cfg)
@@ -126,7 +117,6 @@ func new_foundation_model(string size_label, string position_embedding_type) fou
         backbone: new_transformer_model(runtime_cfg),
     }
 }
-
 func foundation_model_forward(
     foundation_model model,
     []float hidden_states,
@@ -135,7 +125,6 @@ func foundation_model_forward(
 ) transformer_output {
     forward_transformer(model.backbone, hidden_states, batch_size, seq_len)
 }
-
 func foundation_model_summary(foundation_model model) string {
     model.preset.name + ":" + model.preset.size_label + ":layers=" + string(model.config.num_layers) + ":hidden=" + string(model.config.hidden_dim) + ":runtime_hidden=" + string(model.runtime_config.hidden_dim)
 }

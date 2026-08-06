@@ -10,7 +10,6 @@ struct sft_data_example {
     float quality_score
     string domain
 }
-
 struct sft_config {
     string data_path
     int num_examples
@@ -24,7 +23,6 @@ struct sft_config {
     int eval_interval
     int save_interval
 }
-
 struct preference_pair {
     string prompt
     string chosen_response
@@ -35,7 +33,6 @@ struct preference_pair {
     string domain
     int timestamp
 }
-
 struct dpo_training_state {
     moe_1t_framework base_model
     int global_step
@@ -65,7 +62,6 @@ func dpo_compute_loss(
     }
     loss
 }
-
 func dpo_compute_implicit_reward(
     float chosen_logprob,
     float rejected_logprob,
@@ -74,7 +70,6 @@ func dpo_compute_implicit_reward(
     float reward = beta * (chosen_logprob - rejected_logprob)
     reward
 }
-
 func dpo_training_new(
     moe_1t_framework base_model,
     float beta
@@ -96,7 +91,6 @@ func dpo_training_new(
     }
     state
 }
-
 func dpo_training_step(
     dpo_training_state state,
     preference_pair pair
@@ -117,14 +111,12 @@ func dpo_training_step(
     state.global_step = state.global_step + 1
     loss
 }
-
 struct generative_reward_model {
     moe_1t_framework base_model
     string reward_head_path
     int hidden_dim
     float reward_scale
 }
-
 struct grpo_training_state {
     dpo_training_state dpo_state
     generative_reward_model reward_model
@@ -140,7 +132,6 @@ struct grpo_training_state {
     []float kl_divergence_history
     float average_return
 }
-
 func grpo_training_new(
     dpo_training_state dpo_state,
     float kl_penalty
@@ -168,7 +159,6 @@ func grpo_training_new(
     }
     state
 }
-
 func grpo_training_step(
     grpo_training_state state,
     string prompt,
@@ -191,14 +181,12 @@ func grpo_training_step(
     state.grpo_steps_completed = state.grpo_steps_completed + 1
     (policy_loss, value_loss, kl_divergence)
 }
-
 struct constitution_principle {
     string principle_id
     string description
     string evaluation_template
     float importance_weight
 }
-
 struct constitutional_ai_state {
     []constitution_principle principles
     moe_1t_framework base_model
@@ -207,7 +195,6 @@ struct constitutional_ai_state {
     []int principle_violation_counts
     float overall_alignment_score
 }
-
 func constitutional_ai_new() constitutional_ai_state {
     []constitution_principle principles = make([]constitution_principle, 7)
     principles[0] = constitution_principle {
@@ -268,7 +255,6 @@ func constitutional_ai_new() constitutional_ai_state {
     }
     state
 }
-
 func constitutional_ai_evaluate_response(
     constitutional_ai_state state,
     string prompt,
@@ -290,7 +276,6 @@ func constitutional_ai_evaluate_response(
     }
     alignment_score
 }
-
 struct complete_posttraining_pipeline {
     moe_1t_framework base_model
     sft_config sft_cfg
@@ -303,7 +288,6 @@ struct complete_posttraining_pipeline {
     float best_eval_score
     string checkpoint_dir
 }
-
 func complete_posttraining_new(
     moe_1t_framework base_model,
     string checkpoint_dir
@@ -339,26 +323,21 @@ func complete_posttraining_new(
     }
     pipeline
 }
-
 func compute_logprob_from_response(
     string response,
     string prompt
 ) float {
     0.5
 }
-
 func log(float x) float {
     0.0
 }
-
 func exp(float x) float {
     2.718
 }
-
 func sigmoid(float x) float {
     1.0 / (1.0 + exp(-x))
 }
-
 func clip(float x, float min_val, float max_val) float {
     if x < min_val {
         min_val
@@ -368,7 +347,6 @@ func clip(float x, float min_val, float max_val) float {
         x
     }
 }
-
 func minimum(float a, float b) float {
     if a < b {
         a

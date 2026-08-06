@@ -5,7 +5,6 @@ struct nda_config {
     int latent_dim
     int conv_kernel
 }
-
 struct nda_weights {
     nda_config config
     []float w_q
@@ -21,7 +20,6 @@ struct nda_weights {
     []float w_gate_up
     []float w_output
 }
-
 struct nda_result {
     []float output
     []float final_state
@@ -36,7 +34,6 @@ func new_nda_config(int hidden, int state, int latent, int kernel) nda_config {
         conv_kernel: kernel,
     }
 }
-
 func nda_zeros(int n) []float {
     []float out = []float{cap: n}
     int i = 0
@@ -46,7 +43,6 @@ func nda_zeros(int n) []float {
     }
     out
 }
-
 func nda_deterministic_weights(int n, int salt, float scale) []float {
     []float out = nda_zeros(n)
     int i = 0
@@ -58,7 +54,6 @@ func nda_deterministic_weights(int n, int salt, float scale) []float {
     }
     out
 }
-
 func nda_copy_floats([]float values) []float {
     []float out = nda_zeros(len(values))
     int i = 0
@@ -68,7 +63,6 @@ func nda_copy_floats([]float values) []float {
     }
     out
 }
-
 func nda_sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -84,7 +78,6 @@ func nda_sqrt_approx(float x) float {
     }
     result
 }
-
 func nda_exp_approx(float x) float {
     float value = x
     if value > 10.0 {
@@ -106,15 +99,12 @@ func nda_exp_approx(float x) float {
     }
     result
 }
-
 func nda_sigmoid(float x) float {
     1.0 / (1.0 + nda_exp_approx(0.0 - x))
 }
-
 func nda_swish(float x) float {
     x * nda_sigmoid(x)
 }
-
 func nda_rms_norm_tokens([]float input, int tokens, int hidden) []float {
     []float out = nda_zeros(tokens * hidden)
     int t = 0
@@ -136,7 +126,6 @@ func nda_rms_norm_tokens([]float input, int tokens, int hidden) []float {
     }
     out
 }
-
 func nda_l2_normalize_channels([]float input, int tokens, int width) []float {
     []float out = nda_zeros(tokens * width)
     int t = 0
@@ -158,7 +147,6 @@ func nda_l2_normalize_channels([]float input, int tokens, int width) []float {
     }
     out
 }
-
 func nda_linear([]float input, []float weight, int rows, int in_dim, int out_dim) []float {
     []float out = nda_zeros(rows * out_dim)
     int r = 0
@@ -178,7 +166,6 @@ func nda_linear([]float input, []float weight, int rows, int in_dim, int out_dim
     }
     out
 }
-
 func nda_short_conv([]float input, []float kernel, int tokens, int channels, int kernel_size) []float {
     []float out = nda_zeros(tokens * channels)
     int t = 0
@@ -201,7 +188,6 @@ func nda_short_conv([]float input, []float kernel, int tokens, int channels, int
     }
     out
 }
-
 func nda_activate_swish([]float input) []float {
     []float out = nda_zeros(len(input))
     int i = 0
@@ -211,7 +197,6 @@ func nda_activate_swish([]float input) []float {
     }
     out
 }
-
 func new_nda_weights(nda_config cfg) nda_weights {
     int h = cfg.hidden_dim
     int d = cfg.state_dim
@@ -233,7 +218,6 @@ func new_nda_weights(nda_config cfg) nda_weights {
         w_output: nda_deterministic_weights(d * h, 12, 0.01),
     }
 }
-
 func nda_forward(nda_weights weights, []float input, int tokens, []float initial_state) nda_result {
     nda_config cfg = weights.config
     int h = cfg.hidden_dim

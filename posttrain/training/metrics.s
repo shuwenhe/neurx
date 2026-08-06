@@ -2,19 +2,15 @@ package neurx.posttrain.training.metrics
 func record_loss(float loss) float {
     return compute_perplexity(loss)
 }
-
 func record_accuracy(int correct, int total) float {
     return compute_accuracy(correct, total)
 }
-
 func record_grad_norm(float grad_norm) float {
     return grad_norm
 }
-
 func record_learning_rate(float lr) float {
     return lr
 }
-
 func argmax([]float logits) int {
     if len(logits) == 0 { return 0 }
     int max_idx = 0
@@ -29,16 +25,13 @@ func argmax([]float logits) int {
     }
     return max_idx
 }
-
 func compute_accuracy(int correct, int total) float {
     if total == 0 { return 0.0 }
     return (correct as float) / (total as float) * 100.0
 }
-
 func compute_perplexity(float loss) float {
     return exp_approx(loss)
 }
-
 func exp_approx(float x) float {
     if x > 10.0 { return 22026.0 }
     if x < 0.0 - 10.0 { return 0.0 }
@@ -52,7 +45,6 @@ func exp_approx(float x) float {
     }
     return result
 }
-
 func print_metrics_inline(
     int step,
     float loss,
@@ -75,7 +67,6 @@ func print_metrics_inline(
     print(float_to_str_6(learning_rate))
     println("")
 }
-
 func print_metrics_detailed(
     int step,
     int epoch,
@@ -101,7 +92,6 @@ func print_metrics_detailed(
     println("  Correct Tokens: " + int_to_str(correct_tokens))
     println("====================================")
 }
-
 func print_training_summary(
     int total_steps,
     float final_loss,
@@ -121,7 +111,6 @@ func print_training_summary(
     println("Total Tokens Processed: " + int_to_str(total_tokens))
     println("====================================")
 }
-
 func print_metrics_header() {
     println("")
     println("====================================")
@@ -130,7 +119,6 @@ func print_metrics_header() {
     println("Format: [Step N] Loss | PPL | Acc% | Grad | LR")
     println("====================================")
 }
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -157,19 +145,15 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
-
 func float_to_str_2(float value) string {
     return float_to_str_n(value, 2)
 }
-
 func float_to_str_4(float value) string {
     return float_to_str_n(value, 4)
 }
-
 func float_to_str_6(float value) string {
     return float_to_str_n(value, 6)
 }
-
 func float_to_str_n(float value, int decimals) string {
     float current = value
     bool negative = current < 0.0

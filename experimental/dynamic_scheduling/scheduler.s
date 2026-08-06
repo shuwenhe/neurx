@@ -1,7 +1,5 @@
 package neurx.experimental.dynamic_scheduling
-
 use neurx.tensor
-
 struct dynamic_scheduler_config {
     int min_rollout_workers
     int max_rollout_workers
@@ -12,7 +10,6 @@ struct dynamic_scheduler_config {
     float scale_down_threshold
     int adjustment_interval_steps
 }
-
 struct dynamic_scheduler_state {
     dynamic_scheduler_config config
     int current_rollout_workers
@@ -21,14 +18,12 @@ struct dynamic_scheduler_state {
     []float buffer_utilization_history
     []float throughput_history
 }
-
 struct resource_allocation {
     int num_rollout_workers
     int num_training_workers
     float estimated_throughput
     string reason
 }
-
 func default_dynamic_scheduler_config() dynamic_scheduler_config {
     dynamic_scheduler_config {
         min_rollout_workers: 1,
@@ -41,7 +36,6 @@ func default_dynamic_scheduler_config() dynamic_scheduler_config {
         adjustment_interval_steps: 100,
     }
 }
-
 func init_dynamic_scheduler(dynamic_scheduler_config config) dynamic_scheduler_state {
     dynamic_scheduler_state {
         config: config,
@@ -52,7 +46,6 @@ func init_dynamic_scheduler(dynamic_scheduler_config config) dynamic_scheduler_s
         throughput_history: make([]float, 0),
     }
 }
-
 func compute_resource_allocation(
     dynamic_scheduler_state state,
     float current_buffer_utilization,
@@ -60,11 +53,9 @@ func compute_resource_allocation(
 ) resource_allocation {
     state.buffer_utilization_history = append(state.buffer_utilization_history, current_buffer_utilization)
     state.throughput_history = append(state.throughput_history, current_throughput)
-
     int new_rollout_workers = state.current_rollout_workers
     int new_training_workers = state.current_training_workers
     string reason = "no_change"
-
     if current_buffer_utilization > state.config.scale_up_threshold {
         if new_training_workers < state.config.max_training_workers {
             new_training_workers = new_training_workers + 1
@@ -82,13 +73,10 @@ func compute_resource_allocation(
             reason = "buffer_low_scale_down_training"
         }
     }
-
     state.current_rollout_workers = new_rollout_workers
     state.current_training_workers = new_training_workers
     state.total_steps = state.total_steps + 1
-
     float estimated_throughput = estimate_throughput(new_rollout_workers, new_training_workers)
-
     resource_allocation {
         num_rollout_workers: new_rollout_workers,
         num_training_workers: new_training_workers,
@@ -96,17 +84,14 @@ func compute_resource_allocation(
         reason: reason,
     }
 }
-
 func estimate_throughput(int rollout_workers, int training_workers) float {
     float rollout_rate = float(rollout_workers) * 100.0
     float training_rate = float(training_workers) * 50.0
-
     if rollout_rate < training_rate {
         return rollout_rate
     }
     return training_rate
 }
-
 func get_scheduler_stats(dynamic_scheduler_state state) scheduler_stats {
     float avg_buffer_util = 0.0
     if len(state.buffer_utilization_history) > 0 {
@@ -115,7 +100,6 @@ func get_scheduler_stats(dynamic_scheduler_state state) scheduler_stats {
         }
         avg_buffer_util = avg_buffer_util / float(len(state.buffer_utilization_history))
     }
-
     scheduler_stats {
         current_rollout_workers: state.current_rollout_workers,
         current_training_workers: state.current_training_workers,
@@ -123,7 +107,6 @@ func get_scheduler_stats(dynamic_scheduler_state state) scheduler_stats {
         avg_buffer_utilization: avg_buffer_util,
     }
 }
-
 struct scheduler_stats {
     int current_rollout_workers
     int current_training_workers

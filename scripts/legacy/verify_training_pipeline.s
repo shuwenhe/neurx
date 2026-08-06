@@ -43,7 +43,6 @@ func main() {
     println("English textstate: English text")
     1
 }
-
 func check_file(string path, string label) bool {
     if runtime_file_exists(path) {
         println("✅ " + label + " : ready (" + path + ")")

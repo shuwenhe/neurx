@@ -19,14 +19,12 @@ struct vision_config {
     image_resolution_adaptive: bool = true
     support_video: bool = true
 }
-
 struct image_input {
     pixel_values: tensor
     image_path: string?
     image_url: string?
     metadata: map<string, any>?
 }
-
 struct video_input {
     frames: list<tensor>
     video_path: string?
@@ -34,7 +32,6 @@ struct video_input {
     duration_seconds: float
     audio_track: tensor?
 }
-
 struct vision_output {
     image_features: tensor
     pooled_features: tensor
@@ -43,7 +40,6 @@ struct vision_output {
     multimodal_embedding: tensor?,
     metadata: vision_metadata
 }
-
 struct vision_metadata {
     num_patches_h: int
     num_patches_w: int
@@ -150,7 +146,6 @@ class ViTPatchEmbeddings {
         }
     }
 }
-
 struct embeddings_output {
     hidden_states: tensor
     attention_mask: tensor
@@ -189,7 +184,6 @@ class ViTEncoderBlocks {
         }
     }
 }
-
 struct encoder_output {
     last_hidden_state: tensor
     attentions: list<tensor>?
@@ -220,7 +214,6 @@ class ViTLayer {
         }
     }
 }
-
 struct layer_output {
     hidden_states: tensor
     attention_weights: tensor?
@@ -265,7 +258,6 @@ class ViTAttention {
         }
     }
 }
-
 struct attention_output {
     hidden_states: tensor
     attention_weights: tensor?
@@ -429,7 +421,6 @@ class CLIPContrastiveModel {
         return (loss_i2t + loss_t2i) / 2
     }
 }
-
 struct clipoutput {
     image_features: tensor
     text_features: tensor
@@ -547,7 +538,6 @@ class VideoProcessor {
         }
     }
 }
-
 struct video_vision_output {
     per_frame_features: tensor
     temporal_encoded: tensor
@@ -682,7 +672,6 @@ class MultiImageProcessor {
         }
     }
 }
-
 struct multimodal_embedding_result {
     per_image_features: list<tensor>
     fused_multimodal_embedding: tensor?
@@ -855,7 +844,6 @@ class MultimodalVisionModel {
         }
     }
 }
-
 struct vision_language_output {
     answer: string
     visual_tokens: tensor

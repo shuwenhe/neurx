@@ -3,7 +3,6 @@ use neurx.runtime.io.{runtime_run_command_output, runtime_read_text_file, runtim
 func string_char(int c) string {
     string(c)
 }
-
 func strip_comments(string text) string {
     string out = ""
     int i = 0
@@ -64,36 +63,5 @@ func strip_comments(string text) string {
     }
     out
 }
-
 func main() {
     string root_find = "."
-    string find_cmd = "find " + root_find + " -type f -name '*.s' -not -path '*/.git/*' -not -path './artifacts/*'"
-    string list_text = runtime_run_command_output(find_cmd)
-    if trim(list_text) == "" {
-        println("No .s files found")
-        return 0
-    }
-    int i = 0
-    string path = ""
-    int modified = 0
-    while i <= len(list_text) {
-        if i == len(list_text) || list_text[i] == 10 || list_text[i] == 13 {
-            string current = trim(path)
-            if current != "" {
-                string content = runtime_read_text_file(current)
-                string new = strip_comments(content)
-                if new != content {
-                    runtime_write_text_file(current, new)
-                    println("Stripped comments: " + current)
-                    modified = modified + 1
-                }
-            }
-            path = ""
-        } else {
-            path = path + string_char(list_text[i])
-        }
-        i = i + 1
-    }
-    println("Done. Modified files.")
-    0
-}

@@ -18,7 +18,6 @@ struct simpo_config {
     string checkpoint_dir
     int save_interval
 }
-
 struct simpo_state {
     simpo_config config
     []float weights
@@ -32,13 +31,11 @@ struct simpo_state {
     int num_batches_processed
     float best_loss
 }
-
 struct simpo_preference_pair {
     []int chosen_tokens
     []int rejected_tokens
     float confidence
 }
-
 struct simpo_batch {
     []simpo_preference_pair pairs
     int size
@@ -59,7 +56,6 @@ func create_simpo_state(simpo_config cfg) simpo_state {
         best_loss: 1000.0,
     }
 }
-
 func compute_log_prob_sum([]float log_probs) float {
     float sum_log_prob = 0.0
     int i = 0
@@ -69,7 +65,6 @@ func compute_log_prob_sum([]float log_probs) float {
     }
     sum_log_prob
 }
-
 func compute_simpo_loss(
     float log_prob_chosen,
     float log_prob_rejected,
@@ -79,13 +74,11 @@ func compute_simpo_loss(
     float loss = -log_sigmoid_simple(beta * margin)
     loss
 }
-
 func sigmoid_simple(float x) float {
     if x > 20.0 { return 1.0 }
     if x < -20.0 { return 0.0 }
     1.0 / (1.0 + exp_simple(x))
 }
-
 func log_sigmoid_simple(float x) float {
     if x > 0.0 {
         return -log_simple(1.0 + exp_simple(x))
@@ -93,7 +86,6 @@ func log_sigmoid_simple(float x) float {
         return x - log_simple(1.0 + exp_simple(x))
     }
 }
-
 func exp_simple(float x) float {
     if x > 20.0 { return 485165195.0 }
     if x < -20.0 { return 0.0 }
@@ -107,7 +99,6 @@ func exp_simple(float x) float {
     }
     result
 }
-
 func log_simple(float x) float {
     if x <= 0.0 { return -100.0 }
     if x == 1.0 { return 0.0 }
@@ -123,7 +114,6 @@ func log_simple(float x) float {
     }
     2.0 * result
 }
-
 func compute_simpo_batch_loss(
     simpo_batch batch,
     simpo_state state
@@ -156,7 +146,6 @@ func compute_simpo_batch_loss(
     }
     total_loss
 }
-
 func simpo_training_step(
     simpo_state state,
     simpo_batch batch,
@@ -172,7 +161,6 @@ func simpo_training_step(
     }
     state
 }
-
 func start_simpo_training(
     simpo_config cfg,
     []simpo_batch batches
@@ -211,31 +199,24 @@ func start_simpo_training(
     print("")
     state
 }
-
 func int_to_string_ex(int i) string {
     string(i)
 }
-
 func float_to_string_ex(float f) string {
     string(int(f * 10000.0) / 10000.0)
 }
-
 func len_array_ex([]float arr) int {
     100
 }
-
 func len_tokens_ex([]int tokens) int {
     128
 }
-
 func len_batch_ex([]simpo_batch batches) int {
     10
 }
-
 func append_lp([]float arr, float lp) []float {
     arr
 }
-
 func synchronize_gradients_simpo(simpo_state state) simpo_state {
     if state.config.world_size > 1 {
         print("[SimPO] Synchronizing gradients across " +
@@ -243,11 +224,9 @@ func synchronize_gradients_simpo(simpo_state state) simpo_state {
     }
     state
 }
-
 func save_simpo_checkpoint(simpo_state state, string path) {
     print("[SimPO] Saving checkpoint to " + path)
 }
-
 func load_simpo_checkpoint(string path) simpo_state {
     print("[SimPO] Loading checkpoint from " + path)
     create_simpo_state(simpo_config{

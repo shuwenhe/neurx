@@ -19,7 +19,6 @@ struct fsdp_config {
     float gradient_predivide_factor
     float gradient_accumulation_steps
 }
-
 struct fsdp_state {
     int rank
     int world_size
@@ -32,7 +31,6 @@ struct fsdp_state {
     nccl_backend.nccl_comm comm
     fsdp_config config
 }
-
 struct fsdp_param {
     []float local_data
     []float shard_data
@@ -42,7 +40,6 @@ struct fsdp_param {
     int shard_size
     bool is_sharded
 }
-
 struct fsdp_module {
     fsdp_state state
     []fsdp_param params
@@ -67,7 +64,6 @@ func new_fsdp_config() fsdp_config {
         gradient_accumulation_steps: 1.0,
     }
 }
-
 func new_fsdp_state(int rank, int world_size, nccl_backend.nccl_comm comm) fsdp_state {
     fsdp_state {
         rank: rank,
@@ -82,7 +78,6 @@ func new_fsdp_state(int rank, int world_size, nccl_backend.nccl_comm comm) fsdp_
         config: new_fsdp_config(),
     }
 }
-
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
@@ -92,7 +87,6 @@ func allocate_vector(int size, float init_val) []float {
     }
     v
 }
-
 func fsdp_init(pointer model, fsdp_state state) fsdp_module {
     []float all_params = model.parameters()
     int total_params = len(all_params)
@@ -118,7 +112,6 @@ func fsdp_init(pointer model, fsdp_state state) fsdp_module {
     }
     module
 }
-
 func fsdp_all_gather_params(fsdp_module module) fsdp_module {
     if module.state.config.sharding_strategy == fsdp_sharding_strategy.NO_SHARD {
         return module
@@ -143,7 +136,6 @@ func fsdp_all_gather_params(fsdp_module module) fsdp_module {
     }
     module
 }
-
 func fsdp_scatter_params(fsdp_module module) fsdp_module {
     if module.state.config.sharding_strategy == fsdp_sharding_strategy.NO_SHARD {
         return module
@@ -168,7 +160,6 @@ func fsdp_scatter_params(fsdp_module module) fsdp_module {
     )
     module
 }
-
 func fsdp_reduce_scatter_grads(fsdp_module module) fsdp_module {
     if module.state.config.sharding_strategy == fsdp_sharding_strategy.NO_SHARD {
         return module
@@ -200,7 +191,6 @@ func fsdp_reduce_scatter_grads(fsdp_module module) fsdp_module {
     }
     module
 }
-
 func fsdp_all_reduce_grads(fsdp_module module) fsdp_module {
     nccl_backend.nccl_all_reduce(
         module.flattened_grads,
@@ -216,14 +206,12 @@ func fsdp_all_reduce_grads(fsdp_module module) fsdp_module {
     }
     module
 }
-
 func fsdp_forward_pre_hook(fsdp_module module) fsdp_module {
     if module.state.config.sharding_strategy == fsdp_sharding_strategy.FULL_SHARD {
         module = fsdp_all_gather_params(module)
     }
     module
 }
-
 func fsdp_backward_post_hook(fsdp_module module) fsdp_module {
     if module.state.config.sharding_strategy == fsdp_sharding_strategy.FULL_SHARD {
         module = fsdp_reduce_scatter_grads(module)
@@ -232,21 +220,18 @@ func fsdp_backward_post_hook(fsdp_module module) fsdp_module {
     }
     module
 }
-
 func fsdp_optimizer_step_pre_hook(fsdp_module module) fsdp_module {
     if module.state.config.sharding_strategy == fsdp_sharding_strategy.FULL_SHARD {
         module = fsdp_all_gather_params(module)
     }
     module
 }
-
 func fsdp_optimizer_step_post_hook(fsdp_module module) fsdp_module {
     if module.state.config.sharding_strategy == fsdp_sharding_strategy.FULL_SHARD {
         module = fsdp_scatter_params(module)
     }
     module
 }
-
 func fsdp_flatten_params(fsdp_module module) fsdp_module {
     int offset = 0
     int i = 0
@@ -266,7 +251,6 @@ func fsdp_flatten_params(fsdp_module module) fsdp_module {
     }
     module
 }
-
 func fsdp_unflatten_params(fsdp_module module) fsdp_module {
     int offset = 0
     int i = 0
@@ -283,7 +267,6 @@ func fsdp_unflatten_params(fsdp_module module) fsdp_module {
     }
     module
 }
-
 func fsdp_save_checkpoint(fsdp_module module, string path) bool {
     if module.state.is_root {
         module = fsdp_all_gather_params(module)
@@ -296,7 +279,6 @@ func fsdp_save_checkpoint(fsdp_module module, string path) bool {
     nccl_backend.nccl_barrier(module.state.comm)
     true
 }
-
 func fsdp_load_checkpoint(fsdp_module module, string path) bool {
     if module.state.is_root {
         []float full_params = allocate_vector(module.total_params, 0.0)
@@ -322,28 +304,22 @@ func fsdp_load_checkpoint(fsdp_module module, string path) bool {
     module = fsdp_scatter_params(module)
     true
 }
-
 func write_float_to_file(string path, float value) {
 }
-
 func read_float_from_file(string path, int idx) float {
     0.0
 }
-
 func fsdp_compute_memory_savings(fsdp_module module) float {
     float total_memory = module.total_params * 4.0 / (1024 * 1024 * 1024)
     float local_memory = module.local_params * 4.0 / (1024 * 1024 * 1024)
     (1.0 - local_memory / total_memory) * 100.0
 }
-
 func fsdp_module_parameters(fsdp_module module) []float {
     module.flattened_params
 }
-
 func fsdp_module_gradients(fsdp_module module) []float {
     module.flattened_grads
 }
-
 func fsdp_zero_grad(fsdp_module module) fsdp_module {
     int i = 0
     while i < module.local_params {
@@ -363,14 +339,12 @@ func fsdp_zero_grad(fsdp_module module) fsdp_module {
     }
     module
 }
-
 func min(int a, int b) int {
     if a < b {
         return a
     }
     b
 }
-
 func fsdp_set_gradients(fsdp_module module, []float grads) fsdp_module {
     int i = 0
     while i < min(len(grads), module.local_params) {
@@ -379,11 +353,9 @@ func fsdp_set_gradients(fsdp_module module, []float grads) fsdp_module {
     }
     module
 }
-
 func fsdp_get_gradients(fsdp_module module) []float {
     copy_vector(module.flattened_grads)
 }
-
 func copy_vector([]float src) []float {
     int n = len(src)
     []float out = []float{cap: n}

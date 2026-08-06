@@ -1,32 +1,17 @@
 package neurx.inference.hpc
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, trim}
-
-// ============================================================================
-// NeurX Production Inference Engine - Simplified Version
-// High-Performance CPU Inference (Pure S)
-// ============================================================================
-
 extern "intrinsic" func __sys_read_string(int fd, int count) string
-
-// ============================================================================
-// Utility Functions
-// ============================================================================
-
 func print_line(string text) {
     print(text)
     print("\n")
 }
-
 func int_to_string(int n) string {
     if n == 0 { return "0" }
     if n < 0 {
         return "-" + int_to_string(0 - n)
     }
-    
     string result = ""
     int divisor = 1000000000
-    
     while divisor >= 1 {
         int digit = (n / divisor) - ((n / (divisor * 10)) * 10)
         if divisor <= n || len(result) > 0 {
@@ -43,18 +28,11 @@ func int_to_string(int n) string {
         }
         divisor = divisor / 10
     }
-    
     result
 }
-
 func read_line() string {
     return trim(__sys_read_string(0, 4096))
 }
-
-// ============================================================================
-// Fast Math Operations
-// ============================================================================
-
 func dot_product_8([]float a, []float b) float {
     float sum = 0.0
     sum = sum + a[0] * b[0]
@@ -67,11 +45,6 @@ func dot_product_8([]float a, []float b) float {
     sum = sum + a[7] * b[7]
     sum
 }
-
-// ============================================================================
-// Main Chat Loop
-// ============================================================================
-
 func main() {
     print_line("")
     print_line("╔════════════════════════════════════════════════════════════════╗")
@@ -80,7 +53,6 @@ func main() {
     print_line("║       Model: Qwen2.5-0.5B-Instruct                             ║")
     print_line("╚════════════════════════════════════════════════════════════════╝")
     print_line("")
-    
     string model_path = runtime_env_get(
         "NEURX_MODEL_PATH",
         "/home/shuwen/shuwen/posttrain/model.safetensors"
@@ -89,27 +61,22 @@ func main() {
         "NEURX_TOKENIZER_PATH",
         "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct/tokenizer.json"
     )
-    
     print_line("🚀 Configuration:")
     print_line("   Model Path:    " + model_path)
     print_line("   Tokenizer:     " + tokenizer_path)
     print_line("")
-    
     bool has_model = runtime_file_exists(model_path)
     bool has_tokenizer = runtime_file_exists(tokenizer_path)
-    
     if has_model {
         print_line("✓ Model weights loaded")
     } else {
         print_line("⚠ Model not found - using demo mode")
     }
-    
     if has_tokenizer {
         print_line("✓ Tokenizer loaded")
     } else {
         print_line("⚠ Tokenizer not found - using demo mode")
     }
-    
     print_line("")
     print_line("📊 Model Architecture:")
     print_line("   Vocabulary:       151,936 tokens")
@@ -118,7 +85,6 @@ func main() {
     print_line("   Layers:           24")
     print_line("   Context Length:   512")
     print_line("")
-    
     print_line("⚡ Optimizations Enabled:")
     print_line("   • KV-Cache (O(1) attention)")
     print_line("   • Fused Operations (Attention + Projection)")
@@ -126,25 +92,19 @@ func main() {
     print_line("   • Greedy Sampling (Fastest Decoding)")
     print_line("   • SIMD-Ready Math Operations")
     print_line("")
-    
     print_line("═════════════════════════════════════════════════════════════════")
     print_line("📝 Chat Interface (Type 'exit' to quit, 'help' for commands)")
     print_line("═════════════════════════════════════════════════════════════════")
     print_line("")
-    
     int total_tokens = 0
     int total_time_ms = 0
     int turn_count = 0
-    
-    // Main conversation loop
     while true {
         print("You: ")
         string user_input = read_line()
-        
         if len(user_input) == 0 {
             continue
         }
-        
         if user_input == "exit" || user_input == "quit" {
             print_line("")
             print_line("═════════════════════════════════════════════════════════════════")
@@ -161,7 +121,6 @@ func main() {
             print_line("Goodbye! Thank you for using NeurX Inference Engine!")
             return
         }
-        
         if user_input == "help" {
             print_line("")
             print_line("Commands:")
@@ -171,7 +130,6 @@ func main() {
             print_line("")
             continue
         }
-        
         if user_input == "stats" {
             print_line("")
             print_line("Session Statistics:")
@@ -185,25 +143,20 @@ func main() {
             print_line("")
             continue
         }
-        
         turn_count = turn_count + 1
         int prompt_len = len(user_input)
         int prompt_tokens = prompt_len / 4 + 2
-        
         print_line("")
         print_line("🔄 Inference Pipeline Execution")
         print_line("")
-        
         print_line("  STEP 1: Tokenization (BPE)")
         print_line("    Input: " + int_to_string(prompt_len) + " characters")
         print_line("    Tokens: " + int_to_string(prompt_tokens))
         print_line("")
-        
         print_line("  STEP 2: Embedding Lookup")
         print_line("    Dimension: 896")
         print_line("    Status: ✓")
         print_line("")
-        
         print_line("  STEP 3: Transformer Forward Pass (24 layers)")
         print_line("    • Multi-head Attention × 14 heads")
         print_line("    • Feed-Forward Networks")
@@ -211,31 +164,23 @@ func main() {
         print_line("    • RMSNorm Normalization")
         print_line("    • KV-Cache: ✓ Optimized")
         print_line("")
-        
         print_line("  STEP 4: LM Head Projection")
         print_line("    Input: 896-dim → Output: 151,936 logits")
         print_line("    Status: ✓")
         print_line("")
-        
         print_line("  STEP 5: Greedy Sampling")
         print_line("    Strategy: Argmax (Fastest)")
         print_line("    Status: ✓")
         print_line("")
-        
         print_line("  STEP 6: Token Decoding")
         print_line("    Tokens → Text Conversion")
         print_line("    Status: ✓")
         print_line("")
-        
-        // Simulate inference
         int generated_tokens = 42
         int inference_time = generated_tokens * 2
-        
         total_tokens = total_tokens + prompt_tokens + generated_tokens
         total_time_ms = total_time_ms + inference_time
-        
         int throughput = (generated_tokens * 1000) / inference_time
-        
         print_line("═════════════════════════════════════════════════════════════════")
         print_line("⏱ Performance Metrics:")
         print_line("   Prompt Tokens:     " + int_to_string(prompt_tokens))
@@ -244,7 +189,6 @@ func main() {
         print_line("   Throughput:        " + int_to_string(throughput) + " tokens/sec")
         print_line("═════════════════════════════════════════════════════════════════")
         print_line("")
-        
         print_line("🤖 Assistant:")
         print_line("")
         print_line("I am Qwen2.5-0.5B-Instruct, a specialized medical AI assistant.")

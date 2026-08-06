@@ -10,7 +10,6 @@ func main() {
     println(resolved)
     0
 }
-
 func resolve_s_bin(string root_dir) string {
     string candidate = trim(runtime_env_get("S_BIN", ""))
     if is_runnable(candidate) {
@@ -48,7 +47,6 @@ func resolve_s_bin(string root_dir) string {
     }
     ""
 }
-
 func is_runnable(string path) bool {
     string trimmed = trim(path)
     if trimmed == "" {

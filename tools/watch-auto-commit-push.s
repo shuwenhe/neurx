@@ -32,7 +32,6 @@ func main() {
     }
     0
 }
-
 func generate_commit_message(string prefix, string changed, string added, string removed) string {
     if changed == "" {
         return prefix + ": update code (" + added + " added, " + removed + " removed)"
@@ -48,7 +47,6 @@ func generate_commit_message(string prefix, string changed, string added, string
     }
     return prefix + ": update code (" + added + " added, " + removed + " removed)"
 }
-
 func contains(string text, string needle) bool {
     int i = 0
     while i + len(needle) <= len(text) {
@@ -59,7 +57,6 @@ func contains(string text, string needle) bool {
     }
     false
 }
-
 func first_field(string text) string {
     int sp = index_of_space(text)
     if sp < 0 {
@@ -67,7 +64,6 @@ func first_field(string text) string {
     }
     slice(text, 0, sp)
 }
-
 func second_field(string text) string {
     int sp = index_of_space(text)
     if sp < 0 || sp + 1 >= len(text) {
@@ -75,7 +71,6 @@ func second_field(string text) string {
     }
     slice(text, sp + 1, len(text))
 }
-
 func index_of_space(string text) int {
     int i = 0
     while i < len(text) {

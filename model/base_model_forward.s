@@ -71,7 +71,6 @@ func model_forward(
     eprintln("[Model Forward] Forward pass complete")
     logits
 }
-
 func model_forward_with_lora(
     []int input_ids,
     model_weights weights,
@@ -97,7 +96,6 @@ struct lora_adapter {
     int rank
     float scaling
 }
-
 func int_to_str(int x) string {
     if x == 0 { return "0" }
     if x < 0 { return "-" + int_to_str(0 - x) }

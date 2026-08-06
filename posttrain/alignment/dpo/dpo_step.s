@@ -27,11 +27,9 @@ func dpo_step(dpo_state state, float chosen_logp, float rejected_logp, float ref
         rejected_reward: rejected_reward,
     }
 }
-
 func dpo_step_result_state_dict(dpo_step_result result) dpo_step_result {
     result
 }
-
 func dpo_step_result_load_state_dict(dpo_step_result result, dpo_step_result other) dpo_step_result {
     other
 }

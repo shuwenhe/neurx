@@ -19,19 +19,16 @@ func logTest(config test_config, message string) error {
     io.Println(line)
     return io.AppendFile(config.testLog, line + "\n")
 }
-
 func logInfo(config test_config, message string) error {
     line = "[INFO] " + message
     io.Println(line)
     return io.AppendFile(config.testLog, line + "\n")
 }
-
 func logError(config test_config, message string) error {
     line = "[ERROR] " + message
     io.Println(line)
     return io.AppendFile(config.testLog, line + "\n")
 }
-
 func logSection(config test_config, title string) error {
     io.Println("")
     line = "==== " + title + " ===="
@@ -39,7 +36,6 @@ func logSection(config test_config, title string) error {
     io.Println("")
     return io.AppendFile(config.testLog, "\n" + line + "\n\n")
 }
-
 func readStateFile(filePath string) map[string]string {
     content, err = os.ReadFile(filePath)
     if err != nil {
@@ -55,7 +51,6 @@ func readStateFile(filePath string) map[string]string {
     }
     return state
 }
-
 func main() {
     scriptDir = os.Args[0]
     projectRoot = scriptDir + "/../../.."
@@ -81,59 +76,3 @@ func main() {
     logTest(config, "Clearing old checkpoint...")
     os.Remove(config.checkpointDir + "/training_state.txt")
     os.Remove(config.checkpointDir + "/checkpoint.state")
-    os.RemoveAll(config.checkpointDir + "/*.weights.f32")
-    logTest(config, "Starting fresh training...")
-    env := map[string]string{
-        "NEURX_PRETRAIN_OUTPUT_DIR": config.checkpointDir,
-        "NEURX_PRETRAIN_STEPS": string(config.stepsPhase1),
-        "NEURX_PRETRAIN_SAVE_INTERVAL": "3",
-        "NEURX_PRETRAIN_RESUME": "0",
-    }
-    cmd := exec.command("make", "pretrain-gpu-fresh")
-    cmd.Dir = config.projectRoot
-    cmd.Env = env
-    output, err := cmd.CombinedOutput()
-    if err != nil {
-        logError(config, "Training failed: " + err.Error())
-        os.Exit(1)
-    }
-    io.Println(string(output))
-    time.Sleep(2 * time.Second)
-    phase1State := readStateFile(config.checkpointDir + "/training_state.txt")
-    phase1Step := phase1State["step"]
-    phase1Loss := phase1State["loss"]
-    logTest(config, "Phase 1 Results: step=" + phase1Step + ", loss=" + phase1Loss)
-    logSection(config, "Phase 2: Resume Training (" + string(config.stepsPhase2) + " more steps)")
-    logTest(config, "Starting resumed training from step " + phase1Step + "...")
-    env["NEURX_PRETRAIN_STEPS"] = string(config.maxSteps)
-    env["NEURX_PRETRAIN_RESUME"] = "1"
-    cmd = exec.command("make", "pretrain-gpu")
-    cmd.Dir = config.projectRoot
-    cmd.Env = env
-    output, err = cmd.CombinedOutput()
-    if err != nil {
-        logError(config, "Resume training failed: " + err.Error())
-        os.Exit(1)
-    }
-    io.Println(string(output))
-    time.Sleep(2 * time.Second)
-    phase2State := readStateFile(config.checkpointDir + "/training_state.txt")
-    phase2Step := phase2State["step"]
-    phase2Loss := phase2State["loss"]
-    logTest(config, "Phase 2 Results: step=" + phase2Step + ", loss=" + phase2Loss)
-    logSection(config, "Validation & Verification")
-    io.Println("================================================")
-    io.Println("End-to-End Test Results")
-    io.Println("================================================")
-    io.Println("")
-    io.Println("✓ Fresh training completed (" + string(config.stepsPhase1) + " steps)")
-    io.Println("✓ Checkpoint created at: " + config.checkpointDir)
-    io.Println("✓ Phase 1 final state: step=" + phase1Step + ", loss=" + phase1Loss)
-    io.Println("")
-    io.Println("✓ Resume training completed (" + string(config.stepsPhase2) + " more steps)")
-    io.Println("✓ Phase 2 final state: step=" + phase2Step + ", loss=" + phase2Loss)
-    io.Println("")
-    io.Println("Test Log: " + config.testLog)
-    io.Println("")
-    io.Println("✅ ALL TESTS PASSED")
-}

@@ -23,7 +23,6 @@ func new_agent_metrics_state() agent_metrics_state {
         interrupt_count: 0,
     }
 }
-
 func agent_metrics_record_step(agent_metrics_state state, bool ok) agent_metrics_state {
     int new_ok = state.ok_steps
     int new_fail = state.fail_steps
@@ -45,7 +44,6 @@ func agent_metrics_record_step(agent_metrics_state state, bool ok) agent_metrics
         interrupt_count: state.interrupt_count,
     }
 }
-
 func agent_metrics_record_replan(agent_metrics_state state) agent_metrics_state {
     agent_metrics_state {
         total_steps: state.total_steps,
@@ -59,7 +57,6 @@ func agent_metrics_record_replan(agent_metrics_state state) agent_metrics_state 
         interrupt_count: state.interrupt_count,
     }
 }
-
 func agent_metrics_record_skill_hit(agent_metrics_state state) agent_metrics_state {
     agent_metrics_state {
         total_steps: state.total_steps,
@@ -73,7 +70,6 @@ func agent_metrics_record_skill_hit(agent_metrics_state state) agent_metrics_sta
         interrupt_count: state.interrupt_count,
     }
 }
-
 func agent_metrics_record_skill_miss(agent_metrics_state state) agent_metrics_state {
     agent_metrics_state {
         total_steps: state.total_steps,
@@ -87,7 +83,6 @@ func agent_metrics_record_skill_miss(agent_metrics_state state) agent_metrics_st
         interrupt_count: state.interrupt_count,
     }
 }
-
 func agent_metrics_record_safety_block(agent_metrics_state state) agent_metrics_state {
     agent_metrics_state {
         total_steps: state.total_steps,
@@ -101,7 +96,6 @@ func agent_metrics_record_safety_block(agent_metrics_state state) agent_metrics_
         interrupt_count: state.interrupt_count,
     }
 }
-
 func agent_metrics_record_tool_fail(agent_metrics_state state) agent_metrics_state {
     agent_metrics_state {
         total_steps: state.total_steps,
@@ -115,7 +109,6 @@ func agent_metrics_record_tool_fail(agent_metrics_state state) agent_metrics_sta
         interrupt_count: state.interrupt_count,
     }
 }
-
 func agent_metrics_record_interrupt(agent_metrics_state state) agent_metrics_state {
     agent_metrics_state {
         total_steps: state.total_steps,
@@ -129,7 +122,6 @@ func agent_metrics_record_interrupt(agent_metrics_state state) agent_metrics_sta
         interrupt_count: state.interrupt_count + 1,
     }
 }
-
 func agent_metrics_ok_rate_pct(agent_metrics_state state) int {
     if state.total_steps <= 0 {
         return 0
@@ -137,7 +129,6 @@ func agent_metrics_ok_rate_pct(agent_metrics_state state) int {
     int num = state.ok_steps * 100
     num / state.total_steps
 }
-
 func agent_metrics_skill_hit_rate_pct(agent_metrics_state state) int {
     int total = state.skill_hit_count + state.skill_miss_count
     if total <= 0 {
@@ -146,7 +137,6 @@ func agent_metrics_skill_hit_rate_pct(agent_metrics_state state) int {
     int num = state.skill_hit_count * 100
     num / total
 }
-
 func agent_metrics_export(agent_metrics_state state) string {
     "metrics;total=" + string(state.total_steps) +
     ";ok=" + string(state.ok_steps) +
@@ -158,7 +148,6 @@ func agent_metrics_export(agent_metrics_state state) string {
     ";tool_fail=" + string(state.tool_fail_count) +
     ";interrupt=" + string(state.interrupt_count)
 }
-
 func agent_metrics_summary(agent_metrics_state state) string {
     "steps=" + string(state.total_steps) +
     ";ok_rate=" + string(agent_metrics_ok_rate_pct(state)) + "%" +

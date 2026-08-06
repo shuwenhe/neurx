@@ -5,7 +5,6 @@ struct tool_cache_entry {
     int    hit_count
     bool   valid
 }
-
 struct tool_cache_state {
     []tool_cache_entry entries
     int capacity
@@ -15,7 +14,6 @@ struct tool_cache_state {
     int total_misses
     int total_evictions
 }
-
 struct tool_cache_result {
     bool   hit
     string value
@@ -46,15 +44,12 @@ func new_tool_cache(int capacity) tool_cache_state {
         total_evictions: 0,
     }
 }
-
 func new_tool_cache_default() tool_cache_state {
     new_tool_cache(64)
 }
-
 func tool_cache_make_key(string tool_name, string input) string {
     tool_name + "\x00" + input
 }
-
 func tool_cache_text_eq(string a, string b) bool {
     int la = len(a)
     int lb = len(b)
@@ -70,7 +65,6 @@ func tool_cache_text_eq(string a, string b) bool {
     }
     true
 }
-
 func tool_cache_get(tool_cache_state state, string tool_name, string input) tool_cache_result {
     string key = tool_cache_make_key(tool_name, input)
     int i = 0
@@ -82,7 +76,6 @@ func tool_cache_get(tool_cache_state state, string tool_name, string input) tool
     }
     tool_cache_result { hit: false, value: "" }
 }
-
 func tool_cache_record_hit(tool_cache_state state, string tool_name, string input) tool_cache_state {
     string key = tool_cache_make_key(tool_name, input)
     []tool_cache_entry next = []tool_cache_entry{cap: state.capacity}
@@ -109,7 +102,6 @@ func tool_cache_record_hit(tool_cache_state state, string tool_name, string inpu
         total_evictions: state.total_evictions,
     }
 }
-
 func tool_cache_record_miss(tool_cache_state state) tool_cache_state {
     tool_cache_state {
         entries:         state.entries,
@@ -121,7 +113,6 @@ func tool_cache_record_miss(tool_cache_state state) tool_cache_state {
         total_evictions: state.total_evictions,
     }
 }
-
 func tool_cache_put(tool_cache_state state, string tool_name, string input, string value) tool_cache_state {
     string key = tool_cache_make_key(tool_name, input)
     int found_idx = -1
@@ -196,7 +187,6 @@ func tool_cache_put(tool_cache_state state, string tool_name, string input, stri
         total_evictions: evictions,
     }
 }
-
 func tool_cache_invalidate_tool(tool_cache_state state, string tool_name) tool_cache_state {
     string prefix = tool_name + "\x00"
     int prefix_len = len(prefix)
@@ -241,7 +231,6 @@ func tool_cache_invalidate_tool(tool_cache_state state, string tool_name) tool_c
         total_evictions: state.total_evictions,
     }
 }
-
 func tool_cache_invalidate_path(tool_cache_state state, string path) tool_cache_state {
     tool_cache_state s = tool_cache_invalidate_tool(
         tool_cache_invalidate_tool(state, "read"),
@@ -249,11 +238,9 @@ func tool_cache_invalidate_path(tool_cache_state state, string path) tool_cache_
     )
     s
 }
-
 func tool_cache_clear(tool_cache_state state) tool_cache_state {
     new_tool_cache(state.capacity)
 }
-
 func tool_cache_hit_rate_pct(tool_cache_state state) int {
     int total = state.total_hits + state.total_misses
     if total == 0 {
@@ -261,7 +248,6 @@ func tool_cache_hit_rate_pct(tool_cache_state state) int {
     }
     (state.total_hits * 100) / total
 }
-
 func tool_cache_summary(tool_cache_state state) string {
     "tool_cache size=" + string(state.size) + "/" + string(state.capacity) +
     " hits=" + string(state.total_hits) +

@@ -26,13 +26,11 @@ func cmd_train(args []string) error {
     }
     return scripts.run_foundation_model_training(scale, numGpus)
 }
-
 func cmd_quick_start(args []string) error {
     logger := scripts.new_logger("CLI")
     logger.log("Starting quick training (mini scale, 1 GPU)...")
     return scripts.start_quick_training()
 }
-
 func cmd_launch_70b(args []string) error {
     numGpus := 512
     if len(args) > 0 {
@@ -42,7 +40,6 @@ func cmd_launch_70b(args []string) error {
     }
     return scripts.launch_70b_training(numGpus)
 }
-
 func cmd_launch_7b(args []string) error {
     numGpus := 64
     if len(args) > 0 {
@@ -52,7 +49,6 @@ func cmd_launch_7b(args []string) error {
     }
     return scripts.launch_7b_training(numGpus)
 }
-
 func cmd_launch_1t(args []string) error {
     numGpus := 1024
     if len(args) > 0 {
@@ -62,19 +58,15 @@ func cmd_launch_1t(args []string) error {
     }
     return scripts.launch_1t_training(numGpus)
 }
-
 func cmd_build(args []string) error {
     return scripts.build_everything()
 }
-
 func cmd_build_quick(args []string) error {
     return scripts.quick_build()
 }
-
 func cmd_build_clean(args []string) error {
     return scripts.clean_build()
 }
-
 func cmd_inference(args []string) error {
     if len(args) == 0 {
         fmt.Println("Usage: neurx inference <model_path>")
@@ -82,7 +74,6 @@ func cmd_inference(args []string) error {
     }
     return scripts.run_inference_server(args[0])
 }
-
 func cmd_chat(args []string) error {
     modelPath := "model.bin"
     if len(args) > 0 {
@@ -90,7 +81,6 @@ func cmd_chat(args []string) error {
     }
     return scripts.run_chat_interface(modelPath)
 }
-
 func cmd_benchmark(args []string) error {
     modelPath := "model.bin"
     if len(args) > 0 {
@@ -98,18 +88,15 @@ func cmd_benchmark(args []string) error {
     }
     return scripts.run_inference_benchmark(modelPath)
 }
-
 func cmd_version(args []string) error {
     fmt.Println("NeurX CLI v1.0.0")
     fmt.Println("S Language Implementation")
     return nil
 }
-
 func cmd_help(args []string) error {
     show_help()
     return nil
 }
-
 func cmd_status(args []string) error {
     logger := scripts.new_logger("status")
     if scripts.dir_exists(".build") {
@@ -215,7 +202,6 @@ var commands = []command{
         handler:     cmd_help,
     },
 }
-
 func find_command(name string) *command {
     for i := 0; i < len(commands); i++ {
         if commands[i].name == name {
@@ -224,7 +210,6 @@ func find_command(name string) *command {
     }
     return nil
 }
-
 func show_help() {
     fmt.Println(`╔════════════════════════════════════════════════════════════╗
 ║                   NeurX CLI - Main Interface                ║
@@ -280,7 +265,6 @@ EXAMPLES:
 For more information, visit: https:
 `)
 }
-
 func show_detailed_help(cmd string) {
     command := find_command(cmd)
     if command == nil {
@@ -291,7 +275,6 @@ func show_detailed_help(cmd string) {
     fmt.Printf("Description: %s\n", command.description)
     fmt.Printf("Usage: %s\n", command.usage)
 }
-
 func main() {
     logger := scripts.new_logger("CLI")
     args := os.Args[1:]

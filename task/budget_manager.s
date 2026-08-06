@@ -19,7 +19,6 @@ func new_agent_budget_state(int max_tokens, int max_cost, int cost_per_token, in
         max_steps: max_steps,
     }
 }
-
 func agent_budget_default() agent_budget_state {
     agent_budget_state {
         max_tokens: 65536,
@@ -31,7 +30,6 @@ func agent_budget_default() agent_budget_state {
         max_steps: 64,
     }
 }
-
 func agent_budget_estimate_tokens(string text) int {
     int n = len(text)
     if n <= 0 {
@@ -43,7 +41,6 @@ func agent_budget_estimate_tokens(string text) int {
     }
     t
 }
-
 func agent_budget_record_step(agent_budget_state state, string text) agent_budget_state {
     int tokens = agent_budget_estimate_tokens(text)
     int cost = tokens * state.cost_per_token
@@ -57,28 +54,24 @@ func agent_budget_record_step(agent_budget_state state, string text) agent_budge
         max_steps: state.max_steps,
     }
 }
-
 func agent_budget_token_exhausted(agent_budget_state state) bool {
     if state.max_tokens <= 0 {
         return false
     }
     state.used_tokens >= state.max_tokens
 }
-
 func agent_budget_cost_exhausted(agent_budget_state state) bool {
     if state.max_cost <= 0 {
         return false
     }
     state.used_cost >= state.max_cost
 }
-
 func agent_budget_step_exhausted(agent_budget_state state) bool {
     if state.max_steps <= 0 {
         return false
     }
     state.step_count >= state.max_steps
 }
-
 func agent_budget_exhausted(agent_budget_state state) bool {
     if agent_budget_token_exhausted(state) {
         return true
@@ -88,7 +81,6 @@ func agent_budget_exhausted(agent_budget_state state) bool {
     }
     agent_budget_step_exhausted(state)
 }
-
 func agent_budget_remaining_tokens(agent_budget_state state) int {
     int r = state.max_tokens - state.used_tokens
     if r < 0 {
@@ -96,7 +88,6 @@ func agent_budget_remaining_tokens(agent_budget_state state) int {
     }
     r
 }
-
 func agent_budget_remaining_steps(agent_budget_state state) int {
     int r = state.max_steps - state.step_count
     if r < 0 {
@@ -104,7 +95,6 @@ func agent_budget_remaining_steps(agent_budget_state state) int {
     }
     r
 }
-
 func agent_budget_export(agent_budget_state state) string {
     "budget;max_tokens=" + string(state.max_tokens) +
     ";used_tokens=" + string(state.used_tokens) +
@@ -113,7 +103,6 @@ func agent_budget_export(agent_budget_state state) string {
     ";step_count=" + string(state.step_count) +
     ";max_steps=" + string(state.max_steps)
 }
-
 func agent_budget_summary(agent_budget_state state) string {
     "tokens=" + string(state.used_tokens) + "/" + string(state.max_tokens) +
     ";steps=" + string(state.step_count) + "/" + string(state.max_steps) +

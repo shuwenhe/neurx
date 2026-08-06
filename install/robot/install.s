@@ -10,7 +10,6 @@ func main() {
     println("This S entrypoint replaces the old shell installer.")
     0
 }
-
 func bool_text(bool value) string {
     if value {
         return "true"

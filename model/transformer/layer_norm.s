@@ -4,7 +4,6 @@ struct layer_norm_config {
     float epsilon
     bool use_bias
 }
-
 struct layer_norm_state {
     int hidden_dim
     float epsilon
@@ -12,19 +11,16 @@ struct layer_norm_state {
     []float beta
     bool use_bias
 }
-
 struct rms_norm_state {
     int hidden_dim
     float epsilon
     []float gamma
 }
-
 struct layer_norm_output {
     []float normalized
     []float mean
     []float variance
 }
-
 struct rms_norm_output {
     []float normalized
     []float variance
@@ -38,7 +34,6 @@ func allocate_vector(int size, float init_val) []float {
     }
     v
 }
-
 func copy_vector([]float src) []float {
     []float out = allocate_vector(len(src), 0.0)
     int i = 0
@@ -48,7 +43,6 @@ func copy_vector([]float src) []float {
     }
     out
 }
-
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -61,7 +55,6 @@ func sqrt_approx(float x) float {
     }
     y
 }
-
 func new_layer_norm(layer_norm_config cfg) layer_norm_state {
     layer_norm_state {
         hidden_dim: cfg.hidden_dim,
@@ -71,7 +64,6 @@ func new_layer_norm(layer_norm_config cfg) layer_norm_state {
         use_bias: cfg.use_bias,
     }
 }
-
 func layer_normalize(
     layer_norm_state ln,
     []float input,
@@ -126,7 +118,6 @@ func layer_normalize(
         variance: var_out,
     }
 }
-
 func layer_norm_backward(
     layer_norm_state ln,
     []float grad_output,
@@ -184,7 +175,6 @@ func layer_norm_backward(
     result[2] = grad_beta
     result
 }
-
 func new_rms_norm(layer_norm_config cfg) rms_norm_state {
     rms_norm_state {
         hidden_dim: cfg.hidden_dim,
@@ -192,7 +182,6 @@ func new_rms_norm(layer_norm_config cfg) rms_norm_state {
         gamma: allocate_vector(cfg.hidden_dim, 1.0),
     }
 }
-
 func rms_normalize(
     rms_norm_state rn,
     []float input,
@@ -232,7 +221,6 @@ func rms_normalize(
         variance: var_out,
     }
 }
-
 func rms_norm_backward(
     rms_norm_state rn,
     []float grad_output,

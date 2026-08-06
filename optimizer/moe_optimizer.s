@@ -23,7 +23,6 @@ struct moe_config {
     apply_residual: bool = true
     expert_pruning_threshold: float = 0.001
 }
-
 struct moe_forward_output {
     output: tensor
     aux_loss: tensor?
@@ -34,7 +33,6 @@ struct moe_forward_output {
     dispatch_pattern: dispatch_pattern
     perexpert_output?: list<tensor>
 }
-
 struct dispatch_pattern {
     total_tokens: int
     tokens_per_expert: list<int>
@@ -45,7 +43,6 @@ struct dispatch_pattern {
     entropy: float
     dropped_tokens: int
 }
-
 struct moe_expert {
     id: int
     up_proj: linear
@@ -55,7 +52,6 @@ struct moe_expert {
     importance_weight: float = 1.0
     is_active: bool = true
 }
-
 struct moe_router {
     gate_layer: linear
     bias: Parameter?

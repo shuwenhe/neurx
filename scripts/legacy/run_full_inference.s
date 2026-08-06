@@ -30,7 +30,6 @@ func main() {
     }
     0
 }
-
 func print_flag(string name, bool ok) {
     if ok {
         println("  - " + name + ": ready")

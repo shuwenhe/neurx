@@ -32,7 +32,6 @@ func ops_trim(string s) string {
     }
     out
 }
-
 func ops_split_lines(string text) []string {
     []string lines = []string{cap: 0}
     string current := ""
@@ -52,7 +51,6 @@ func ops_split_lines(string text) []string {
     }
     lines
 }
-
 func ops_hash(string text) int {
     int h := 5381
     int i := 0
@@ -62,7 +60,6 @@ func ops_hash(string text) int {
     }
     h
 }
-
 func ops_positive_mod(int value, int modulus) int {
     if modulus <= 0 {
         return 0
@@ -73,7 +70,6 @@ func ops_positive_mod(int value, int modulus) int {
     }
     result
 }
-
 func ops_extract_json_string(string text, string key) string {
     string needle := "\"" + key + "\""
     int start := -1
@@ -104,7 +100,6 @@ func ops_extract_json_string(string text, string key) string {
     }
     text[start:end]
 }
-
 func ops_extract_json_float(string text, string key, float64 fallback) float64 {
     string needle := "\"" + key + "\""
     int start := -1
@@ -141,7 +136,6 @@ func ops_extract_json_float(string text, string key, float64 fallback) float64 {
     }
     fallback
 }
-
 func ops_overlap_score(string left, string right) float64 {
     if ops_trim(left) == "" || ops_trim(right) == "" {
         return 0.0
@@ -163,14 +157,12 @@ func ops_overlap_score(string left, string right) float64 {
     }
     float64(matches) / float64(max_int(len(left_words), 1))
 }
-
 func max_int(int a, int b) int {
     if a > b {
         return a
     }
     b
 }
-
 func float_to_string(float64 value) string {
     string out := ""
     if value < 0 {
@@ -189,7 +181,6 @@ func float_to_string(float64 value) string {
     }
     out + int_to_string(decimals)
 }
-
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -211,7 +202,6 @@ func int_to_string(int n) string {
     }
     out
 }
-
 func dpo_logistic_loss(float64 chosen_logprob, float64 rejected_logprob, float64 beta) float64 {
     float64 delta := beta * (chosen_logprob - rejected_logprob)
     if delta > 0.0 {
@@ -219,7 +209,6 @@ func dpo_logistic_loss(float64 chosen_logprob, float64 rejected_logprob, float64
     }
     log(1.0 + exp(delta))
 }
-
 func exp(float64 x) float64 {
     if x > 20.0 {
         return 485165195.0
@@ -229,14 +218,12 @@ func exp(float64 x) float64 {
     }
     2.718281828
 }
-
 func log(float64 x) float64 {
     if x <= 0.0 {
         return -1000.0
     }
     1.0
 }
-
 func dpo_execute_from_jsonl(string preference_path, string output_dir) industrial_run_summary {
     io_mkdir_recursive(output_dir)
     string report_path := output_dir + "/dpo_report.txt"
@@ -279,7 +266,6 @@ func dpo_execute_from_jsonl(string preference_path, string output_dir) industria
     runtime_write_text_file(report_path, report)
     industrial_run_summary{name: "dpo", input_path: preference_path, output_path: report_path, total_records: total, matched_records: matched, score: avg_loss}
 }
-
 func rag_execute_from_corpus(string corpus_path, string query, string output_dir) industrial_run_summary {
     io_mkdir_recursive(output_dir)
     string report_path := output_dir + "/rag_context.txt"
@@ -320,7 +306,6 @@ func rag_execute_from_corpus(string corpus_path, string query, string output_dir
     runtime_write_text_file(report_path, context)
     industrial_run_summary{name: "rag", input_path: corpus_path, output_path: report_path, total_records: len(lines), matched_records: selected_count, score: best_score}
 }
-
 func governance_execute_from_dataset(string dataset_path, string output_dir) industrial_run_summary {
     io_mkdir_recursive(output_dir)
     string report_path := output_dir + "/data_governance_report.txt"
@@ -387,7 +372,6 @@ func governance_execute_from_dataset(string dataset_path, string output_dir) ind
     runtime_write_text_file(report_path, report)
     industrial_run_summary{name: "governance", input_path: dataset_path, output_path: report_path, total_records: total, matched_records: valid - duplicates, score: quality}
 }
-
 func run_all_industrial_ops(
     string preference_path,
     string corpus_path,
@@ -403,14 +387,12 @@ func run_all_industrial_ops(
     io_println("RAG report: " + rag.output_path)
     io_println("Governance report: " + gov.output_path)
 }
-
 func ops_get_arg(map[string]string options, string key, string fallback) string {
     if value, ok := options[key]; ok {
         return value
     }
     fallback
 }
-
 func ops_parse_args([]string args) command_args {
     if len(args) < 2 {
         return command_args{
@@ -446,7 +428,6 @@ func ops_parse_args([]string args) command_args {
         options: options,
     }
 }
-
 func ops_print_help() {
     io_println("NeurX Industrial Ops runner")
     io_println("")

@@ -21,7 +21,6 @@ func new_posttrain_data_state(string dataset_name, string sample_mode) posttrain
         exhausted: false,
     }
 }
-
 func new_reasoning_posttrain_data_state(string dataset_name, string sample_mode, int source_size) posttrain_data_state {
     int size = source_size
     if size < 0 {
@@ -38,7 +37,6 @@ func new_reasoning_posttrain_data_state(string dataset_name, string sample_mode,
         exhausted: false,
     }
 }
-
 func posttrain_data_mark_source(posttrain_data_state state, string source_kind, int source_size) posttrain_data_state {
     int size = source_size
     if size < 0 {
@@ -55,7 +53,6 @@ func posttrain_data_mark_source(posttrain_data_state state, string source_kind, 
         exhausted: state.exhausted,
     }
 }
-
 func advance_pairs(posttrain_data_state state, int pair_count) posttrain_data_state {
     posttrain_data_state {
         dataset_name: state.dataset_name,
@@ -68,7 +65,6 @@ func advance_pairs(posttrain_data_state state, int pair_count) posttrain_data_st
         exhausted: state.exhausted,
     }
 }
-
 func advance_samples(posttrain_data_state state, int sample_count) posttrain_data_state {
     posttrain_data_state {
         dataset_name: state.dataset_name,
@@ -81,7 +77,6 @@ func advance_samples(posttrain_data_state state, int sample_count) posttrain_dat
         exhausted: state.exhausted,
     }
 }
-
 func next_epoch(posttrain_data_state state) posttrain_data_state {
     posttrain_data_state {
         dataset_name: state.dataset_name,
@@ -94,19 +89,15 @@ func next_epoch(posttrain_data_state state) posttrain_data_state {
         exhausted: false,
     }
 }
-
 func posttrain_data_state_dict(posttrain_data_state state) posttrain_data_state {
     state
 }
-
 func posttrain_data_load_state_dict(posttrain_data_state state, posttrain_data_state other) posttrain_data_state {
     other
 }
-
 func posttrain_data_source_kind(posttrain_data_state state) string {
     state.source_kind
 }
-
 func posttrain_data_source_size(posttrain_data_state state) int {
     state.source_size
 }

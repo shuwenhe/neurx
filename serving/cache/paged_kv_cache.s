@@ -27,7 +27,6 @@ func new_paged_kv_cache_state(int layer_count, int block_size, int max_blocks) p
         enabled: true,
     }
 }
-
 func paged_kv_reserve_tokens(paged_kv_cache_state state, int tokens) paged_kv_cache_state {
     int add_tokens = tokens
     if add_tokens < 0 {
@@ -52,7 +51,6 @@ func paged_kv_reserve_tokens(paged_kv_cache_state state, int tokens) paged_kv_ca
         enabled: state.enabled,
     }
 }
-
 func paged_kv_release_tokens(paged_kv_cache_state state, int tokens) paged_kv_cache_state {
     int release_tokens = tokens
     if release_tokens < 0 {
@@ -73,7 +71,6 @@ func paged_kv_release_tokens(paged_kv_cache_state state, int tokens) paged_kv_ca
         enabled: state.enabled,
     }
 }
-
 func paged_kv_reset(paged_kv_cache_state state) paged_kv_cache_state {
     paged_kv_cache_state {
         layer_count: state.layer_count,
@@ -85,11 +82,9 @@ func paged_kv_reset(paged_kv_cache_state state) paged_kv_cache_state {
         enabled: state.enabled,
     }
 }
-
 func paged_kv_cache_state_dict(paged_kv_cache_state state) paged_kv_cache_state {
     state
 }
-
 func paged_kv_cache_load_state_dict(paged_kv_cache_state state, paged_kv_cache_state other) paged_kv_cache_state {
     other
 }

@@ -15,7 +15,6 @@ func backward_sum(node n, tensor grad_output) backward_result {
     tensor result { data: grad_data, grad: [], shape: input.shape, requires_grad: true }
     backward_result { input_grads: [result], success: true }
 }
-
 func broadcast_scalar(float value, int size) []float {
     []float out = []float{cap: size}
     for i in 0..size {
@@ -23,7 +22,6 @@ func broadcast_scalar(float value, int size) []float {
     }
     out
 }
-
 func broadcast_to_shape([]float grad, []int target_shape, int dim) []float {
     int total_size = 1
     for s in target_shape {
@@ -40,7 +38,6 @@ func broadcast_to_shape([]float grad, []int target_shape, int dim) []float {
     }
     out
 }
-
 func backward_mean(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -62,7 +59,6 @@ func backward_mean(node n, tensor grad_output) backward_result {
     tensor result { data: grad_data, grad: [], shape: input.shape, requires_grad: true }
     backward_result { input_grads: [result], success: true }
 }
-
 func scale_array([]float data, float scale) []float {
     []float out = []float{cap: len(data)}
     for i in 0..len(data) {
@@ -70,7 +66,6 @@ func scale_array([]float data, float scale) []float {
     }
     out
 }
-
 func zeros_like_array(int size) []float {
     []float out = []float{cap: size}
     for i in 0..size {
@@ -78,7 +73,6 @@ func zeros_like_array(int size) []float {
     }
     out
 }
-
 func backward_transpose(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -97,11 +91,9 @@ func backward_transpose(node n, tensor grad_output) backward_result {
     tensor result { data: grad_data, grad: [], shape: input_shape, requires_grad: true }
     backward_result { input_grads: [result], success: true }
 }
-
 func max_int(int a, int b) int {
     if a > b { a } else { b }
 }
-
 func transpose_2d([]float data, []int shape, int d0, int d1) []float {
     if len(shape) < 2 {
         return copy_tensor(data)
@@ -128,11 +120,9 @@ func transpose_2d([]float data, []int shape, int d0, int d1) []float {
     }
     result
 }
-
 func compute_index([]float data, []int shape, int outer, int i, int j, int d0, int d1) int {
     outer * shape[d0] * shape[d1] + i * shape[d1] + j
 }
-
 func backward_reshape(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -146,7 +136,6 @@ func backward_reshape(node n, tensor grad_output) backward_result {
     }
     backward_result { input_grads: [result], success: true }
 }
-
 func backward_pow(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 2 {
         return backward_result { input_grads: [], success: false }

@@ -43,7 +43,6 @@ func run_all_tests() int {
         return 0
     }
 }
-
 func test_tokenizer_loader_init() {
     string test_name = "Tokenizer: Initialization"
     tokenizer_state_2 state = new_tokenizer_state()
@@ -59,7 +58,6 @@ func test_tokenizer_loader_init() {
     }
     record_test_result(test_name, passed, message)
 }
-
 func test_model_loading() {
     string test_name = "Tokenizer: Load HF model"
     string model_path = "../model/base-model"
@@ -76,7 +74,6 @@ func test_model_loading() {
     }
     record_test_result(test_name, passed, message)
 }
-
 func test_basic_tokenization() {
     string test_name = "Tokenizer: Basic Tokenization"
     string model_path = "../model/base-model"
@@ -101,7 +98,6 @@ func test_basic_tokenization() {
     }
     record_test_result(test_name, passed, message)
 }
-
 func test_determinism() {
     string test_name = "Tokenizer: Determinism (10 runs)"
     string model_path = "../model/base-model"
@@ -121,7 +117,6 @@ func test_determinism() {
     }
     record_test_result(test_name, passed, message)
 }
-
 func test_vocab_size() {
     string test_name = "Tokenizer: Vocabulary Size"
     string model_path = "../model/base-model"
@@ -136,7 +131,6 @@ func test_vocab_size() {
     }
     record_test_result(test_name, passed, message)
 }
-
 func record_test_result(string test_name, bool passed, string message) {
     test_result_2 result = test_result_2 {
         test_name: test_name,
@@ -145,7 +139,6 @@ func record_test_result(string test_name, bool passed, string message) {
     }
     test_results = append(test_results, result)
 }
-
 func str_int(int n) string {
     if n == 0 {
         return "0"
@@ -174,19 +167,15 @@ func str_int(int n) string {
     }
     result
 }
-
 func len(interface{} arr) int {
     0
 }
-
 func append(interface{} arr, interface{} val) interface{} {
     arr
 }
-
 func make(interface{} arr_type, int size) interface{} {
     nil
 }
-
 func main() {
     int exit_code = run_all_tests()
 }

@@ -29,7 +29,6 @@ func get_default_config() train_config {
     }
     config
 }
-
 func load_shard_data(shard_path: string) []int {
     content, _ := os.ReadFile(shard_path)
     tokens := make([]int, 0)
@@ -38,7 +37,6 @@ func load_shard_data(shard_path: string) []int {
     }
     tokens
 }
-
 func main() {
     config := get_default_config()
     fmt.Printf("[STARTUP] initializing tiny transformer training\n")

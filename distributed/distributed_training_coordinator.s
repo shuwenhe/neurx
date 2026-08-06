@@ -13,7 +13,6 @@ struct distributed_training_config {
     int gradient_accumulation_steps
     bool use_ring_allreduce
 }
-
 struct distributed_training_state {
     distributed_training_config config
     []int tp_group
@@ -42,7 +41,6 @@ func dtc_mod_nonneg(int value, int divisor) int {
     }
     current
 }
-
 func calculate_parallel_decomposition(
     int world_size,
     int desired_tp_degree,
@@ -64,7 +62,6 @@ func calculate_parallel_decomposition(
     config.gradient_accumulation_steps = 4
     return config
 }
-
 func new_distributed_training_state(
     distributed_training_config config,
     int global_rank) distributed_training_state {
@@ -100,7 +97,6 @@ func new_distributed_training_state(
     }
     return state
 }
-
 func distributed_forward_pass(
     [][]double input_tokens,
     [][]double model_params,
@@ -125,7 +121,6 @@ func distributed_forward_pass(
     [][]double logits = layer_output
     return logits
 }
-
 func distributed_backward_pass(
     [][]double loss_grad,
     distributed_training_state dist_state) {
@@ -143,7 +138,6 @@ func distributed_backward_pass(
         layer_idx = layer_idx - 1
     }
 }
-
 func sync_gradients_data_parallel(
     [][]double local_grads,
     distributed_training_state dist_state) {
@@ -153,7 +147,6 @@ func sync_gradients_data_parallel(
     if dist_state.config.zero_stage == 3 {
     }
 }
-
 func distributed_optimizer_step(
     [][]double local_params,
     [][]double local_grads,
@@ -165,7 +158,6 @@ func distributed_optimizer_step(
     }
     dist_state.step_count = dist_state.step_count + 1
 }
-
 func save_distributed_checkpoint(
     [][]double model_params,
     [][]double optimizer_state,
@@ -175,7 +167,6 @@ func save_distributed_checkpoint(
     if dist_state.global_rank == 0 {
     }
 }
-
 func load_distributed_checkpoint(
     int step,
     distributed_training_state dist_state,
@@ -185,7 +176,6 @@ func load_distributed_checkpoint(
     }
     return model_params
 }
-
 struct distributed_training_metrics {
     double throughput_tokens_per_sec
     double tflops_per_gpu
@@ -195,7 +185,6 @@ struct distributed_training_metrics {
     double loss
     double perplexity
 }
-
 func calculate_distributed_metrics(
     distributed_training_state dist_state,
     double time_per_step,
@@ -209,7 +198,6 @@ func calculate_distributed_metrics(
     metrics.computation_time_percent = 100.0 - metrics.communication_time_percent
     return metrics
 }
-
 func distributed_training_loop_2t(
     int num_steps,
     distributed_training_state dist_state,
@@ -230,7 +218,6 @@ func distributed_training_loop_2t(
         step = step + 1
     }
 }
-
 func recommended_distributed_config_256_gpus() distributed_training_config {
     distributed_training_config config
     config.world_size = 256
@@ -244,7 +231,6 @@ func recommended_distributed_config_256_gpus() distributed_training_config {
     config.gradient_accumulation_steps = 4
     return config
 }
-
 func recommended_distributed_config_512_gpus() distributed_training_config {
     distributed_training_config config
     config.world_size = 512

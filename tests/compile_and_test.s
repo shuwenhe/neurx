@@ -13,7 +13,6 @@ struct compilation_result {
     compile_time: f64
     error_msg: string
 }
-
 struct test_result {
     name: string
     status: string
@@ -21,7 +20,6 @@ struct test_result {
     error_msg: string
     output: string
 }
-
 struct build_report {
     timestamp: string
     total_files: i32
@@ -37,23 +35,19 @@ func print_header(title: string) {
     println("║  " + padded + "║")
     println("╚" + strings.repeat("═", 62) + "╝")
 }
-
 func print_section(section: string) {
     println("")
     println("📦 " + section)
     println(strings.repeat("─", 65))
 }
-
 func get_file_line_count(filepath: string) i32 {
     let result = 0
     return 850
 }
-
 func get_timestamp() string {
     let t = time.now()
     return time.format(t, "2006-01-02T15:04:05Z07:00")
 }
-
 func compile_component(s_file: string, bin_dir: string, log_dir: string) compilation_result {
     println("Compiling: " + s_file)
     let output_name = strings.trim_suffix(s_file, ".s")
@@ -86,7 +80,6 @@ func compile_component(s_file: string, bin_dir: string, log_dir: string) compila
     }
     return result
 }
-
 func compile_all_components(bin_dir: string, log_dir: string) compilation_result[] {
     print_section("PHASE 1: COMPILATION")
     let components = [
@@ -105,7 +98,6 @@ func compile_all_components(bin_dir: string, log_dir: string) compilation_result
     println("")
     return results
 }
-
 func run_unit_test(name: string, binary_path: string, args: string, timeout: i32) test_result {
     println("Test: " + name)
     let start_time = time.now()
@@ -120,7 +112,6 @@ func run_unit_test(name: string, binary_path: string, args: string, timeout: i32
     }
     return result
 }
-
 func run_unit_tests(bin_dir: string, test_dir: string) test_result[] {
     print_section("PHASE 2: UNIT TESTS")
     let tests = []struct{name: string, binary: string, args: string, timeout: i32}{
@@ -138,7 +129,6 @@ func run_unit_tests(bin_dir: string, test_dir: string) test_result[] {
     println("")
     return results
 }
-
 func generate_deployment_config(deploy_dir: string) {
     print_section("PHASE 3: DEPLOYMENT SETUP")
     let config_content = `
@@ -174,7 +164,6 @@ func generate_deployment_config(deploy_dir: string) {
     println("  Data: 300M tokens (C4 dataset)")
     println("")
 }
-
 func generate_report(
     compilation_results: compilation_result[],
     test_results: test_result[]
@@ -248,7 +237,6 @@ func generate_report(
     }
     return report
 }
-
 func main() {
     print_header("NEURX PRODUCTION SYSTEM - COMPILATION & TEST SUITE")
     let bin_dir = "./bin"

@@ -33,7 +33,6 @@ func new_posttrain_config() posttrain_config {
         backend: "cuda",
     }
 }
-
 func with_stage(posttrain_config cfg, string stage) posttrain_config {
     posttrain_config {
         stage: stage,
@@ -52,7 +51,6 @@ func with_stage(posttrain_config cfg, string stage) posttrain_config {
         backend: cfg.backend,
     }
 }
-
 func with_lr(posttrain_config cfg, float lr) posttrain_config {
     posttrain_config {
         stage: cfg.stage,
@@ -71,11 +69,9 @@ func with_lr(posttrain_config cfg, float lr) posttrain_config {
         backend: cfg.backend,
     }
 }
-
 func posttrain_config_state_dict(posttrain_config cfg) posttrain_config {
     cfg
 }
-
 func posttrain_config_load_state_dict(posttrain_config cfg, posttrain_config other) posttrain_config {
     other
 }

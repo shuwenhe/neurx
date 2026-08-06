@@ -17,7 +17,6 @@ func new_diffusion_config() diffusion_config {
         v_prediction: false,
     }
 }
-
 func with_timesteps(diffusion_config cfg, int timesteps) diffusion_config {
     diffusion_config {
         timesteps: timesteps,
@@ -28,7 +27,6 @@ func with_timesteps(diffusion_config cfg, int timesteps) diffusion_config {
         v_prediction: cfg.v_prediction,
     }
 }
-
 func with_schedule(diffusion_config cfg, string schedule) diffusion_config {
     diffusion_config {
         timesteps: cfg.timesteps,
@@ -39,11 +37,9 @@ func with_schedule(diffusion_config cfg, string schedule) diffusion_config {
         v_prediction: cfg.v_prediction,
     }
 }
-
 func diffusion_config_state_dict(diffusion_config cfg) diffusion_config {
     cfg
 }
-
 func diffusion_config_load_state_dict(diffusion_config cfg, diffusion_config other) diffusion_config {
     other
 }

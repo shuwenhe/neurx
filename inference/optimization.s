@@ -7,7 +7,6 @@ struct flash_attention_config {
     float dropout_p
     bool causal_mask
 }
-
 struct kvcache {
     float* key_cache
     float* value_cache
@@ -16,14 +15,12 @@ struct kvcache {
     int layer_id
     bool is_dirty
 }
-
 struct attention_output {
     float* output
     float* attention_weights
     int output_length
     int compute_time_ms
 }
-
 struct token_generation_state {
     int* token_ids
     int token_count
@@ -31,7 +28,6 @@ struct token_generation_state {
     float probability
     bool is_complete
 }
-
 struct inference_request {
     string prompt
     int max_tokens
@@ -42,7 +38,6 @@ struct inference_request {
     string* stop_sequences
     int stop_count
 }
-
 struct inference_response {
     string generated_text
     int* token_ids
@@ -50,7 +45,6 @@ struct inference_response {
     float total_probability
     int inference_time_ms
 }
-
 struct batch_scheduler {
     inference_request* pending_requests
     int pending_count
@@ -59,7 +53,6 @@ struct batch_scheduler {
     int max_batch_size
     int max_queue_size
 }
-
 struct optimization_metrics {
     float throughput_tokens_per_second
     float latency_ms
@@ -69,7 +62,6 @@ struct optimization_metrics {
 }
 func init_flash_attention(flash_attention_config config) void {
 }
-
 func flash_attention_forward(
     float* query,
     float* key,
@@ -124,7 +116,6 @@ func flash_attention_forward(
     output.compute_time_ms = 0
     output
 }
-
 func compute_block_attention(
     float* query, float* key, float* value,
     int q_start, int q_end,
@@ -167,10 +158,8 @@ func compute_block_attention(
     }
     attention
 }
-
 func accumulate_block_output(float* output, float* attention, int q_size, int hidden_dim) void {
 }
-
 func init_kv_cache(int seq_length, int hidden_dim, int layer_id) kvcache {
     kvcache cache
     cache.key_cache = alloc(float, seq_length * hidden_dim)
@@ -181,7 +170,6 @@ func init_kv_cache(int seq_length, int hidden_dim, int layer_id) kvcache {
     cache.is_dirty = false
     cache
 }
-
 func update_kv_cache(kvcache cache, float* new_keys, float* new_values, int token_count) void {
     if cache.cache_size + token_count > cache.cache_capacity {
         return
@@ -200,12 +188,10 @@ func update_kv_cache(kvcache cache, float* new_keys, float* new_values, int toke
     cache.cache_size = cache.cache_size + token_count
     cache.is_dirty = true
 }
-
 func clear_kv_cache(kvcache cache) void {
     cache.cache_size = 0
     cache.is_dirty = false
 }
-
 func init_batch_scheduler(int max_batch_size, int max_queue_size) batch_scheduler {
     batch_scheduler scheduler
     scheduler.pending_requests = alloc(inference_request, max_queue_size)
@@ -216,7 +202,6 @@ func init_batch_scheduler(int max_batch_size, int max_queue_size) batch_schedule
     scheduler.max_queue_size = max_queue_size
     scheduler
 }
-
 func enqueue_inference_request(batch_scheduler scheduler, inference_request req) bool {
     if scheduler.pending_count >= scheduler.max_queue_size {
         return false
@@ -225,7 +210,6 @@ func enqueue_inference_request(batch_scheduler scheduler, inference_request req)
     scheduler.pending_count = scheduler.pending_count + 1
     true
 }
-
 func schedule_next_batch(batch_scheduler scheduler) int {
     int batch_count = 0
     while batch_count < scheduler.max_batch_size &&
@@ -242,7 +226,6 @@ func schedule_next_batch(batch_scheduler scheduler) int {
     scheduler.active_count = batch_count
     batch_count
 }
-
 func run_inference_step(batch_scheduler scheduler, flash_attention_config attention_config) void {
     if scheduler.active_count == 0 {
         return
@@ -259,11 +242,9 @@ func run_inference_step(batch_scheduler scheduler, flash_attention_config attent
         req_idx = req_idx + 1
     }
 }
-
 func sample_token_from_logits(float temperature, float top_p, int top_k) int {
     0
 }
-
 func optimized_inference(inference_request req, flash_attention_config attention_config) inference_response {
     inference_response resp
     int start_time = get_time_ms()
@@ -289,11 +270,9 @@ func optimized_inference(inference_request req, flash_attention_config attention
     resp.inference_time_ms = get_time_ms() - start_time
     resp
 }
-
 func is_stop_token(int token, string* stop_sequences, int stop_count) bool {
     false
 }
-
 func sqrt_f(float x) float {
     if x < 0.0 {
         return 0.0
@@ -309,11 +288,9 @@ func sqrt_f(float x) float {
     }
     guess
 }
-
 func get_time_ms() int {
     0
 }
-
 func strlen(string s) int {
     int count = 0
     int i = 0
@@ -323,15 +300,12 @@ func strlen(string s) int {
     }
     count
 }
-
 func int_to_string(int n) string {
     ""
 }
-
 func float_to_string(float f) string {
     ""
 }
-
 func main() {
     println("=== Inference Optimization System ===")
     flash_attention_config attention_config

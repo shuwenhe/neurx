@@ -30,7 +30,6 @@ func new_demo_or_classifier_state() demo_or_classifier_state {
         trained: true,
     }
 }
-
 func demo_or_classifier_predict(demo_or_classifier_state state, []float input) int {
     float score = state.bias
     int i = 0
@@ -47,11 +46,9 @@ func demo_or_classifier_predict(demo_or_classifier_state state, []float input) i
     }
     0
 }
-
 func demo_or_classifier_state_dict(demo_or_classifier_state state) demo_or_classifier_state {
     state
 }
-
 func demo_or_classifier_load_state_dict(demo_or_classifier_state state, demo_or_classifier_state other) demo_or_classifier_state {
     other
 }

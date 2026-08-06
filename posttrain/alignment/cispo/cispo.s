@@ -18,7 +18,6 @@ struct CISPOConfig {
     value_clip_epsilon: f32
     kl_coeff: f32
 }
-
 struct CISPOTrainer {
     config: CISPOConfig
     policy_model: *Model
@@ -29,7 +28,6 @@ struct CISPOTrainer {
     step_count: i64
     is_weight_stats: ISWeightStats
 }
-
 struct ISWeightStats {
     mean: f32
     std: f32
@@ -65,7 +63,6 @@ func new_cispo_trainer(
         },
     }
 }
-
 func (trainer: *CISPOTrainer) compute_is_weights(
     new_log_probs: []Tensor,
     behavior_log_probs: []Tensor
@@ -84,7 +81,6 @@ func (trainer: *CISPOTrainer) compute_is_weights(
     trainer.update_is_weight_stats(is_weights)
     return is_weights
 }
-
 func (trainer: *CISPOTrainer) update_is_weight_stats(is_weights: []Tensor) {
     let values: []f32 = []
     let clipped_count = 0
@@ -117,7 +113,6 @@ func (trainer: *CISPOTrainer) update_is_weight_stats(is_weights: []Tensor) {
     }
     trainer.is_weight_stats.clipped_ratio = f32(clipped_count) / f32(total_count)
 }
-
 func (trainer: *CISPOTrainer) compute_cispo_objective(
     ratio: Tensor,
     advantage: Tensor,
@@ -144,7 +139,6 @@ func (trainer: *CISPOTrainer) compute_cispo_objective(
     }
     return weighted_obj
 }
-
 func (trainer: *CISPOTrainer) compute_gae(
     rewards: []Tensor,
     values: []Tensor,
@@ -174,7 +168,6 @@ func (trainer: *CISPOTrainer) compute_gae(
     }
     return advantages, returns
 }
-
 func (trainer: *CISPOTrainer) train_step(
     prompts: []Tensor,
     responses: []Tensor,
@@ -290,7 +283,6 @@ func (trainer: *CISPOTrainer) train_step(
         total_kl / f32(num_updates)
     )
 }
-
 func (trainer: *CISPOTrainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let value_losses: []f32 = []
@@ -317,7 +309,6 @@ func (trainer: *CISPOTrainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     }
     return policy_losses, value_losses
 }
-
 func compute_mean(values: []f32) -> f32 {
     if values.len() == 0 {
         return 0.0
@@ -328,7 +319,6 @@ func compute_mean(values: []f32) -> f32 {
     }
     return sum / f32(values.len())
 }
-
 func compute_std(values: []f32, mean: f32) -> f32 {
     if values.len() == 0 {
         return 1.0
@@ -339,7 +329,6 @@ func compute_std(values: []f32, mean: f32) -> f32 {
     }
     return sqrt(sum_sq / f32(values.len()))
 }
-
 func clamp(x: Tensor, min_val: f32, max_val: f32) -> Tensor {
     return maximum(minimum(x, max_val), min_val)
 }

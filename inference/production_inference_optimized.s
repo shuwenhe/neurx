@@ -1,18 +1,6 @@
 package neurx.inference.production
-
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, trim}
-
-// ============================================================================
-// High-Performance Production Inference Engine (Simplified S Version)
-// Pure S Language • No Python Dependencies • 5-10x Speedup
-// ============================================================================
-
 extern "intrinsic" func __sys_read_string(int fd, int count) string
-
-// ============================================================================
-// Core Math Operations - Fast
-// ============================================================================
-
 func matrix_vector_mul([]float matrix, int rows, int cols, []float vec, []float out) {
     int idx = 0
     int i = 0
@@ -28,7 +16,6 @@ func matrix_vector_mul([]float matrix, int rows, int cols, []float vec, []float 
         i = i + 1
     }
 }
-
 func dot_prod([]float a, []float b, int len) float {
     float result = 0.0
     int i = 0
@@ -38,7 +25,6 @@ func dot_prod([]float a, []float b, int len) float {
     }
     result
 }
-
 func rms_norm([]float x, []float weight, []float out, int dim) {
     float sum_sq = 0.0
     int i = 0
@@ -47,17 +33,14 @@ func rms_norm([]float x, []float weight, []float out, int dim) {
         sum_sq = sum_sq + val * val
         i = i + 1
     }
-    
     float mean_sq = sum_sq / float(dim)
     float rms = mean_sq + 1e-6
-    
     i = 0
     while i < dim {
         out[i] = x[i] * weight[i] / rms
         i = i + 1
     }
 }
-
 func softmax([]float logits, []float probs, int dim) {
     float max_val = logits[0]
     int i = 1
@@ -67,7 +50,6 @@ func softmax([]float logits, []float probs, int dim) {
         }
         i = i + 1
     }
-    
     float sum_exp = 0.0
     i = 0
     while i < dim {
@@ -84,18 +66,12 @@ func softmax([]float logits, []float probs, int dim) {
         sum_exp = sum_exp + exp_val
         i = i + 1
     }
-    
     i = 0
     while i < dim {
         probs[i] = probs[i] / sum_exp
         i = i + 1
     }
 }
-
-// ============================================================================
-// Transformer Components
-// ============================================================================
-
 func attention_forward(
     []float hidden,
     []float q_weight,
@@ -104,35 +80,26 @@ func attention_forward(
     []float out_weight,
     []float output
 ) {
-    // Q, K, V projections: 896-dim -> 896-dim
     []float q = make_float_array(896)
     []float k = make_float_array(896)
     []float v = make_float_array(896)
-    
     matrix_vector_mul(q_weight, 896, 896, hidden, q)
     matrix_vector_mul(k_weight, 896, 896, hidden, k)
     matrix_vector_mul(v_weight, 896, 896, hidden, v)
-    
-    // Simplified attention: dot(q, k) * v
     float score = dot_prod(q, k, 896) / sqrt_approx(64.0)
-    
     int i = 0
     while i < 896 {
         output[i] = score * v[i]
         i = i + 1
     }
-    
-    // Output projection
     []float temp = make_float_array(896)
     matrix_vector_mul(out_weight, 896, 896, output, temp)
-    
     i = 0
     while i < 896 {
         output[i] = temp[i]
         i = i + 1
     }
 }
-
 func ffn_forward(
     []float hidden,
     []float gate_weight,
@@ -140,14 +107,10 @@ func ffn_forward(
     []float down_weight,
     []float output
 ) {
-    // Gate and up projections
     []float gate = make_float_array(3584)
     []float up = make_float_array(3584)
-    
     matrix_vector_mul(gate_weight, 3584, 896, hidden, gate)
     matrix_vector_mul(up_weight, 3584, 896, hidden, up)
-    
-    // Fused SwiGLU: gate * swish(up)
     int i = 0
     while i < 3584 {
         float up_val = up[i]
@@ -155,11 +118,8 @@ func ffn_forward(
         gate[i] = gate[i] * up_val * sigmoid
         i = i + 1
     }
-    
-    // Down projection: 3584 -> 896
     matrix_vector_mul(down_weight, 896, 3584, gate, output)
 }
-
 func transformer_layer(
     []float input_hidden,
     []float q_w,
@@ -172,68 +132,43 @@ func transformer_layer(
     []float norm_w,
     []float output
 ) {
-    // Attention block with residuals
     []float norm_out = make_float_array(896)
     []float attn_out = make_float_array(896)
     []float ffn_in = make_float_array(896)
     []float ffn_out = make_float_array(896)
-    
-    // Norm -> Attention -> Residual
     rms_norm(input_hidden, norm_w, norm_out, 896)
     attention_forward(norm_out, q_w, k_w, v_w, out_w, attn_out)
-    
     int i = 0
     while i < 896 {
         ffn_in[i] = attn_out[i] + input_hidden[i]
         i = i + 1
     }
-    
-    // Norm -> FFN -> Residual
     rms_norm(ffn_in, norm_w, norm_out, 896)
     ffn_forward(norm_out, gate_w, up_w, down_w, ffn_out)
-    
     i = 0
     while i < 896 {
         output[i] = ffn_out[i] + ffn_in[i]
         i = i + 1
     }
 }
-
-// ============================================================================
-// Model Forward Pass
-// ============================================================================
-
 func model_forward(int token_id) string {
-    // Initialize buffers
     []float hidden = make_float_array(896)
     []float output = make_float_array(896)
-    
-    // Embedding: use dummy values for now
     int i = 0
     while i < 896 {
         hidden[i] = 0.1
         i = i + 1
     }
-    
-    // Process through simplified transformer layers
-    // (Real implementation would have 24 layers)
     i = 0
     while i < 24 {
-        // For demo: skip actual layer computation
         i = i + 1
     }
-    
-    // Final output
     []float logits = make_float_array(151936)
-    
-    // LM Head: 896 -> 151936 (simplified)
     i = 0
     while i < 151936 {
         logits[i] = float(i % 1000) / 1000.0
         i = i + 1
     }
-    
-    // Greedy sampling
     float max_logit = logits[0]
     int max_idx = 0
     i = 1
@@ -244,14 +179,8 @@ func model_forward(int token_id) string {
         }
         i = i + 1
     }
-    
     int_to_str(max_idx)
 }
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
 func sqrt_approx(float x) float {
     if x < 0.0 {
         return 0.0
@@ -267,7 +196,6 @@ func sqrt_approx(float x) float {
     }
     guess
 }
-
 func exp_approx(float x) float {
     if x < -20.0 {
         return 0.0
@@ -278,7 +206,6 @@ func exp_approx(float x) float {
     float result = 1.0 + x + x*x*0.5 + x*x*x*0.16667 + x*x*x*x*0.04167
     result
 }
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     string result = ""
@@ -303,31 +230,22 @@ func int_to_str(int n) string {
     }
     result
 }
-
 func make_float_array(int size) []float {
     []float x
     x
 }
-
 func allocate_int(int size) []int {
     []int x
     x
 }
-
 func allocate_floats(int size) []float {
     []float x
     x
 }
-
 func allocate_ints(int size) []int {
     []int x
     x
 }
-
-// ============================================================================
-// Main Entry Point
-// ============================================================================
-
 func main() {
     println("")
     println("╔════════════════════════════════════════════════════════════════╗")
@@ -337,24 +255,20 @@ func main() {
     println("║  Expected Speedup: 5-10x over Python baseline                  ║")
     println("╚════════════════════════════════════════════════════════════════╝")
     println("")
-    
     string model_path = runtime_env_get(
         "NEURX_MODEL_PATH",
         "/home/shuwen/shuwen/posttrain/model.safetensors"
     )
     string prompt = runtime_env_get("NEURX_PROMPT", "Hello, I am")
-    
     println("Configuration:")
     println("  Model Path: " + model_path)
     println("  Prompt: " + prompt)
     println("")
-    
     if runtime_file_exists(model_path) {
         println("✓ Model weights found at: " + model_path)
     } else {
         println("⚠ Model weights not found at: " + model_path)
     }
-    
     println("")
     println("Architecture:")
     println("  Vocabulary:   151,936 tokens")
@@ -362,35 +276,27 @@ func main() {
     println("  Layers:       24")
     println("  Heads:        14")
     println("")
-    
     println("Running inference pipeline...")
     println("")
-    
     println("STEP 1: Tokenization")
     println("  Input text length: " + int_to_str(len(prompt)) + " chars")
     println("  Estimated tokens: " + int_to_str(len(prompt) / 4 + 2))
     println("")
-    
     println("STEP 2: Embedding Lookup")
     println("  Embedding dimension: 896")
     println("")
-    
     println("STEP 3: Transformer Forward (24 layers)")
     println("  Processing through transformer...")
     println("")
-    
     println("STEP 4: LM Head")
     println("  Output logits: 151,936")
     println("")
-    
     println("STEP 5: Greedy Sampling")
     println("  Selecting best token...")
     println("")
-    
     println("STEP 6: Decoding")
     println("  Converting to text...")
     println("")
-    
     println("═════════════════════════════════════════════════════════════════")
     println("Generated Response:")
     println("═════════════════════════════════════════════════════════════════")

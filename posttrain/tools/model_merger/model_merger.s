@@ -9,7 +9,6 @@ struct merge_config {
     float drop_rate
     bool normalize_weights
 }
-
 struct model_delta {
     []tensor param_deltas
     []string param_names
@@ -24,7 +23,6 @@ func new_merge_config() merge_config {
         normalize_weights: true,
     }
 }
-
 func compute_model_delta(
     module finetuned,
     module base
@@ -45,7 +43,6 @@ func compute_model_delta(
         param_names: names,
     }
 }
-
 func merge_models_average(
     []module models,
     []float weights
@@ -86,7 +83,6 @@ func merge_models_average(
     result.load_parameters(result_params)
     result
 }
-
 func merge_task_arithmetic(
     module base,
     []model_delta deltas,
@@ -117,7 +113,6 @@ func merge_task_arithmetic(
     result.load_parameters(result_params)
     result
 }
-
 func merge_ties(
     module base,
     []model_delta deltas,
@@ -146,7 +141,6 @@ func merge_ties(
     result.load_parameters(result_params)
     result
 }
-
 func merge_dare(
     module base,
     []model_delta deltas,
@@ -178,7 +172,6 @@ func merge_dare(
     result.load_parameters(result_params)
     result
 }
-
 func trim_top_k([]tensor deltas, int top_k_percent) tensor {
     if deltas.len == 0 {
         return tensor{}
@@ -191,14 +184,12 @@ func trim_top_k([]tensor deltas, int top_k_percent) tensor {
     tensor trimmed = tensor_ops.mul(stacked, mask)
     trimmed
 }
-
 func elect_sign(tensor trimmed) tensor {
     tensor sum = tensor_ops.sum(trimmed, 0, true)
     tensor sign_mask = tensor_ops.sign(sum)
     tensor signed = tensor_ops.mul(trimmed, sign_mask)
     signed
 }
-
 func weighted_average(tensor values, []float weights) tensor {
     tensor result = tensor_ops.zeros_like(values)
     int i = 0
@@ -212,7 +203,6 @@ func weighted_average(tensor values, []float weights) tensor {
     }
     result
 }
-
 func random_dropout_mask(tensor t, float drop_rate) tensor {
     tensor mask = tensor_ops.random_uniform_like(t)
     mask = tensor_ops.gt(mask, drop_rate)

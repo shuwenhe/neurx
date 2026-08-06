@@ -32,7 +32,6 @@ func create_dpo_example_config() dpo_train_config {
         output_dir: "./outputs/dpo/",
     }
 }
-
 func create_dpo_example_dataset() dpo_dataset {
     dpo_dataset {
         pairs: []dpo_preference_pair{},
@@ -45,7 +44,6 @@ func create_dpo_example_dataset() dpo_dataset {
         domain_distribution: []float{0.4, 0.3, 0.2, 0.1},
     }
 }
-
 func example_basic_dpo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║          Example 1: Basic DPO Training                    ║")
@@ -76,7 +74,6 @@ func example_basic_dpo_training() {
     print("  Best Metric: " + string_float(result.best_metric))
     print("  checkpoint: " + result.checkpoint_path)
 }
-
 func example_distributed_dpo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║      Example 2: Distributed DPO on 64 GPUs                ║")
@@ -110,7 +107,6 @@ func example_distributed_dpo_training() {
         print("  checkpoint: " + result.checkpoint_path)
     }
 }
-
 func example_dpo_with_different_betas() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║     Example 3: DPO with Different Beta Values             ║")
@@ -146,7 +142,6 @@ func example_dpo_with_different_betas() {
     print("")
     print("✓ Comparison complete! Check outputs/dpo/ for details")
 }
-
 func example_dpo_resume_from_checkpoint() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║      Example 4: DPO Resume from checkpoint                ║")
@@ -162,7 +157,6 @@ func example_dpo_resume_from_checkpoint() {
     print("")
     print("✓ Resume completed!")
 }
-
 func example_dpo_vs_rlhf_comparison() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║           Example 5: DPO vs RLHF Comparison              ║")
@@ -188,7 +182,6 @@ func example_dpo_vs_rlhf_comparison() {
     print("  ✓ Better performance in practice")
     print("")
 }
-
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -201,15 +194,12 @@ func main() {
     print("     All examples completed!                                 ")
     print("═════════════════════════════════════════════════════════════")
 }
-
 func load_pretrained_model(string model_name) neurx_model {
     neurx_model{}
 }
-
 func load_tokenizer() tokenizer_state {
     tokenizer_state{}
 }
-
 func string_float(float f) string {
     int int_part = int(f)
     int frac_part = int((f - float_of_int(int_part)) * 10000.0)

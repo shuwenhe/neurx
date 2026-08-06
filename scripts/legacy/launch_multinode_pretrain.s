@@ -25,7 +25,6 @@ func parseHostFile(hostfile string) []string {
     }
     return hosts
 }
-
 func getGpuCount(host string) int {
     cmd := exec.command("ssh", host, "nvidia-smi -L | wc -l")
     output, _ := cmd.Output()
@@ -33,7 +32,6 @@ func getGpuCount(host string) int {
     strings.TrimSpace(string(output))
     return count
 }
-
 func launchOnHost(host string, rank int, config multi_node_config_2) {
     env := os.Environ()
     env = append(env,
@@ -54,7 +52,6 @@ func launchOnHost(host string, rank int, config multi_node_config_2) {
     cmd.Stderr = os.Stderr
     cmd.Run()
 }
-
 func main() {
     root := os.Getenv("NEURX_ROOT")
     if root == "" {

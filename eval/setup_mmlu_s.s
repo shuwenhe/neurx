@@ -32,7 +32,6 @@ func all_mmlu_stem_tasks() []string {
         "machine_learning",
     }
 }
-
 func all_mmlu_social_tasks() []string {
     []string{
         "econometrics",
@@ -49,7 +48,6 @@ func all_mmlu_social_tasks() []string {
         "world_religions",
     }
 }
-
 func all_mmlu_humanities_tasks() []string {
     []string{
         "formal_logic",
@@ -62,7 +60,6 @@ func all_mmlu_humanities_tasks() []string {
         "world_history",
     }
 }
-
 func all_mmlu_other_tasks() []string {
     []string{
         "business_ethics",
@@ -91,7 +88,6 @@ struct mmlu_download_stats {
     int total_test_rows
     int total_dev_rows
 }
-
 struct mmlu_csv_question {
     string question
     string choice_a
@@ -100,7 +96,6 @@ struct mmlu_csv_question {
     string choice_d
     string correct_answer
 }
-
 func setup_mmlu_data_s(string data_root) mmlu_download_stats {
     mmlu_download_stats stats
     stats.total_tasks = 57
@@ -134,7 +129,6 @@ func setup_mmlu_data_s(string data_root) mmlu_download_stats {
     }
     return stats
 }
-
 func download_all_mmlu_tasks(string data_root, mmlu_download_stats stats) mmlu_download_stats {
     []string all_tasks = []string{}
     []string stem_tasks = all_mmlu_stem_tasks()
@@ -189,13 +183,11 @@ func download_all_mmlu_tasks(string data_root, mmlu_download_stats stats) mmlu_d
     }
     return stats
 }
-
 func download_file_curl(string url, string output_path) bool {
     string cmd = "curl -sS -L --retry 3 --retry-delay 1 -o " + output_path + " \"" + url + "\" 2>/dev/null"
     int _result = runtime_run_command(cmd)
     return runtime_file_exists(output_path)
 }
-
 func get_task_category(string task) string {
     []string stem_tasks = all_mmlu_stem_tasks()
     int idx = 0
@@ -223,7 +215,6 @@ func get_task_category(string task) string {
     }
     return "Other"
 }
-
 func count_csv_rows(string csv_path) int {
     if !runtime_file_exists(csv_path) {
         return 0
@@ -245,7 +236,6 @@ func count_csv_rows(string csv_path) int {
     }
     return line_count
 }
-
 func verify_data_integrity(string data_root) {
     string test_cmd = "find " + data_root + "/test -name '*.csv' 2>/dev/null | wc -l"
     string dev_cmd = "find " + data_root + "/dev -name '*.csv' 2>/dev/null | wc -l"
@@ -261,7 +251,6 @@ func verify_data_integrity(string data_root) {
         io_println("  ! Warning: Some files may be missing")
     }
 }
-
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -279,7 +268,6 @@ func int_to_string(int n) string {
     }
     return sign + result
 }
-
 func string_to_int(string s, int fallback) int {
     if len(s) == 0 {
         return fallback
@@ -304,7 +292,6 @@ func string_to_int(string s, int fallback) int {
     }
     return sign * result
 }
-
 func string_trim(string s) string {
     int start = 0
     int end = len(s)
@@ -324,7 +311,6 @@ func string_trim(string s) string {
     }
     return s[start:end]
 }
-
 func main() {
     string project_root = io_get_env("NEURX_ROOT", ".")
     string data_root = io_get_env("NEURX_MMLU_DATA_ROOT", project_root + "/data/mmlu")

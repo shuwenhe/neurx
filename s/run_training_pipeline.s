@@ -35,7 +35,6 @@ func SetupTrainingConfig(trainBin string) (*training_config, error) {
     }
     return config, nil
 }
-
 func PrintHeader(config *training_config) {
     fmt.Println("========================================")
     fmt.Println("NeurX Training Pipeline")
@@ -44,7 +43,6 @@ func PrintHeader(config *training_config) {
     fmt.Println("========================================")
     fmt.Println("")
 }
-
 func RunTraining(config *training_config) (string, error) {
     if !core.FileExists(config.TrainBin) {
         return "", fmt.Errorf("[ERROR] Training binary not found: %s", config.TrainBin)
@@ -60,7 +58,6 @@ func RunTraining(config *training_config) (string, error) {
     fmt.Print(result)
     return result, nil
 }
-
 func ParseTrainingOutput(output string) map[string]string {
     result := make(map[string]string)
     if idx := strings.Index(output, "Total Steps:"); idx >= 0 {
@@ -92,7 +89,6 @@ func ParseTrainingOutput(output string) map[string]string {
     }
     return result
 }
-
 func GenerateCheckpoints(config *training_config, metrics map[string]string) error {
     fmt.Println("")
     fmt.Println("--- Generating checkpoint Files ---")
@@ -108,7 +104,6 @@ func GenerateCheckpoints(config *training_config, metrics map[string]string) err
     }
     return nil
 }
-
 func ListCheckpoints(config *training_config) {
     fmt.Println("")
     fmt.Println("--- checkpoint Files Generated ---")
@@ -122,7 +117,6 @@ func ListCheckpoints(config *training_config) {
         return nil
     })
 }
-
 func PrintFooter(config *training_config) {
     fmt.Println("")
     fmt.Println("========================================")
@@ -135,7 +129,6 @@ func PrintFooter(config *training_config) {
     fmt.Println("  - latest_checkpoint.txt")
     fmt.Println("")
 }
-
 func main() {
     trainBin := "/tmp/neurx_train"
     if len(os.Args) > 1 {

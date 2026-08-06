@@ -16,7 +16,6 @@ struct runtime_info_state {
     string env_fallback_to_cpu
     string env_log_level
 }
-
 struct check_result {
     string name
     bool passed
@@ -41,7 +40,6 @@ func runtime_info() runtime_info_state {
         env_log_level: env_get("TENSOR_LOG_LEVEL", ""),
     }
 }
-
 func new_check_result(string name, bool passed, string detail) check_result {
     check_result {
         name: name,
@@ -49,7 +47,6 @@ func new_check_result(string name, bool passed, string detail) check_result {
         detail: detail,
     }
 }
-
 func doctor(bool require_cuda, bool require_mps) []check_result {
     runtime_info_state info = runtime_info()
     []check_result out = []check_result{}
@@ -70,7 +67,6 @@ func doctor(bool require_cuda, bool require_mps) []check_result {
     }
     out
 }
-
 func format_doctor_report([]check_result results) string {
     string out = "neurx doctor report"
     int i = 0

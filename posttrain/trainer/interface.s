@@ -24,7 +24,6 @@ struct trainer_config {
     bool use_qlora
     string qlora_dtype
 }
-
 struct trainer_state {
     int step
     int epoch
@@ -39,7 +38,6 @@ struct trainer_state {
     int v_a_len
     int v_b_len
 }
-
 struct adapter_stats {
     float l1_norm
     float l2_norm
@@ -47,7 +45,6 @@ struct adapter_stats {
     int nonzero_weights
     int total_weights
 }
-
 struct weight_delta_stats {
     float l1_delta
     float l2_delta
@@ -55,14 +52,12 @@ struct weight_delta_stats {
     int changed_elements
     int total_elements
 }
-
 struct loss_stats {
     float initial_loss
     float final_loss
     float best_loss
     float improvement_percent
 }
-
 struct trainer_report {
     adapter_stats adapter
     weight_delta_stats delta

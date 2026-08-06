@@ -35,7 +35,6 @@ func softmax([]float logits) []float {
     }
     return softmax_probs
 }
-
 func cross_entropy_loss_single([]float logits, int target_id) float {
     if target_id < 0 || target_id >= len(logits) {
         return 0.0
@@ -47,7 +46,6 @@ func cross_entropy_loss_single([]float logits, int target_id) float {
     }
     return 0.0 - log(target_prob)
 }
-
 func cross_entropy_loss_batch([][]float logits_batch, []int target_ids) loss_batch_result {
     loss_batch_result result
     result.loss_per_sample = []float{}
@@ -67,7 +65,6 @@ func cross_entropy_loss_batch([][]float logits_batch, []int target_ids) loss_bat
     }
     return result
 }
-
 func cross_entropy_loss_with_ignore_index([][]float logits_batch, []int target_ids, int ignore_index) loss_batch_result {
     loss_batch_result result
     result.loss_per_token = []float{}
@@ -88,7 +85,6 @@ func cross_entropy_loss_with_ignore_index([][]float logits_batch, []int target_i
     }
     return result
 }
-
 func label_smoothing_cross_entropy([][]float logits_batch, []int target_ids, float smoothing) loss_batch_result {
     loss_batch_result result
     result.loss_per_token = []float{}
@@ -113,14 +109,12 @@ func label_smoothing_cross_entropy([][]float logits_batch, []int target_ids, flo
     }
     return result
 }
-
 func compute_perplexity(loss_batch_result loss_result) float {
     if loss_result.avg_loss < 0.0 {
         return 0.0
     }
     return exp(loss_result.avg_loss)
 }
-
 func compute_token_accuracy([][]float logits_batch, []int target_ids) float {
     if len(logits_batch) == 0 || len(target_ids) == 0 {
         return 0.0

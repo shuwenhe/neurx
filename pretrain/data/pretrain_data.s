@@ -19,7 +19,6 @@ func new_pretrain_data_state(string dataset_name, int shard_id, int num_shards) 
         exhausted: false,
     }
 }
-
 func advance_tokens(pretrain_data_state state, int token_count) pretrain_data_state {
     pretrain_data_state {
         dataset_name: state.dataset_name,
@@ -31,7 +30,6 @@ func advance_tokens(pretrain_data_state state, int token_count) pretrain_data_st
         exhausted: state.exhausted,
     }
 }
-
 func advance_samples(pretrain_data_state state, int sample_count) pretrain_data_state {
     pretrain_data_state {
         dataset_name: state.dataset_name,
@@ -43,7 +41,6 @@ func advance_samples(pretrain_data_state state, int sample_count) pretrain_data_
         exhausted: state.exhausted,
     }
 }
-
 func mark_exhausted(pretrain_data_state state, bool exhausted) pretrain_data_state {
     pretrain_data_state {
         dataset_name: state.dataset_name,
@@ -55,7 +52,6 @@ func mark_exhausted(pretrain_data_state state, bool exhausted) pretrain_data_sta
         exhausted: exhausted,
     }
 }
-
 func next_epoch(pretrain_data_state state) pretrain_data_state {
     pretrain_data_state {
         dataset_name: state.dataset_name,
@@ -67,11 +63,9 @@ func next_epoch(pretrain_data_state state) pretrain_data_state {
         exhausted: false,
     }
 }
-
 func pretrain_data_state_dict(pretrain_data_state state) pretrain_data_state {
     state
 }
-
 func pretrain_data_load_state_dict(pretrain_data_state state, pretrain_data_state other) pretrain_data_state {
     other
 }

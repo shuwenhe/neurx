@@ -71,7 +71,6 @@ func default_dataloader_config() dataloader_config {
         stats_report_interval: 1000,
     }
 }
-
 struct raw_sample {
     string text
     string source_file
@@ -79,7 +78,6 @@ struct raw_sample {
     int length_chars
     int estimated_tokens
 }
-
 struct tokenized_sample {
     []int token_ids
     int seq_len
@@ -89,7 +87,6 @@ struct tokenized_sample {
     float weight
     string metadata
 }
-
 struct training_batch {
     [][]int input_ids
     [][]int attention_mask
@@ -109,7 +106,6 @@ enum loader_status {
     LOADER_EXHAUSTED,
     LOADER_ERROR
 }
-
 struct dataloader {
     dataloader_config config
     loader_status status
@@ -131,7 +127,6 @@ struct dataloader {
     int total_samples_processed
     int total_batches_produced
 }
-
 struct sample_buffer {
     raw_sample[] samples
     int count
@@ -139,7 +134,6 @@ struct sample_buffer {
     bool is_full
     mutex lock
 }
-
 struct tokenized_buffer {
     tokenized_sample[] samples
     int count
@@ -147,19 +141,16 @@ struct tokenized_buffer {
     bool is_ready
     mutex lock
 }
-
 struct thread_pool {
     int num_threads
     []thread workers
     task_queue queue
     bool running
 }
-
 struct rng_state {
     uint64 state
     uint64 inc
 }
-
 struct distributed_sampler {
     int world_size
     int rank
@@ -169,7 +160,6 @@ struct distributed_sampler {
     uint64 seed
     []int shuffled_indices
 }
-
 struct smart_packer {
     packing_strategy strategy
     int target_length
@@ -177,7 +167,6 @@ struct smart_packer {
     []tokenized_sample current_batch_accumulator
     int accumulated_tokens
 }
-
 struct dataloader_stats {
     int total_files_scanned
     int64 total_bytes_read
@@ -194,7 +183,6 @@ struct dataloader_stats {
     float total_time_spent_tokenize_pct
     float total_time_waiting_pct
 }
-
 func init_dataloader(dataloader_config cfg) dataloader {
     []string files = scan_data_files(cfg.data_paths, cfg.format)
     if len(files) == 0 {
@@ -244,15 +232,12 @@ func init_dataloader(dataloader_config cfg) dataloader {
     loader.total_batches_produced = 0
     return loader
 }
-
 func scan_data_files([]string paths, data_format fmt) []string {
     return []string{}
 }
-
 func estimate_total_samples([]string files) int {
     return 100000000
 }
-
 func generate_shuffled_indices(int n, uint64 seed) []int {
     []int indices = []int{cap: n}
     int i = 0
@@ -273,7 +258,6 @@ func generate_shuffled_indices(int n, uint64 seed) []int {
     }
     return indices
 }
-
 func get_next_batch(ref dataloader loader) training_batch {
     if len(loader.gpu_queue) == 0 || !is_batch_ready(loader.gpu_queue[0]) {
         prepare_next_batches(loader)
@@ -283,7 +267,6 @@ func get_next_batch(ref dataloader loader) training_batch {
     loader.stats.total_batches_produced = loader.stats.total_batches_produced + 1
     return batch
 }
-
 func prepare_next_batches(ref dataloader loader) {
     int batches_to_prepare = loader.config.prefetch_factor - len(loader.gpu_queue)
     int b = 0
@@ -302,7 +285,6 @@ func prepare_next_batches(ref dataloader loader) {
         b = b + 1
     }
 }
-
 func fetch_samples_from_tokenized_buffer(dataloader loader, int count) []tokenized_sample {
     []tokenized_sample result = []tokenized_sample{cap: count}
     int available = min_int(count, loader.tokenized_buffer.count)
@@ -320,7 +302,6 @@ func fetch_samples_from_tokenized_buffer(dataloader loader, int count) []tokeniz
     loader.tokenized_buffer.count = remaining
     return result
 }
-
 func refill_tokenized_buffer(ref dataloader loader) {
     refill_raw_buffer(loader)
     int i = 0
@@ -337,7 +318,6 @@ func refill_tokenized_buffer(ref dataloader loader) {
     loader.raw_buffer.count = 0
     loader.raw_buffer.is_full = false
 }
-
 func refill_raw_buffer(ref dataloader loader) {
     if loader.raw_buffer.is_full { return }
     int to_load = loader.raw_buffer.capacity - loader.raw_buffer.count
@@ -363,7 +343,6 @@ func refill_raw_buffer(ref dataloader loader) {
         loader.raw_buffer.is_full = true
     }
 }
-
 func read_next_sample(dataloader loader) raw_sample {
     raw_sample sample
     sample.text = ""
@@ -373,7 +352,6 @@ func read_next_sample(dataloader loader) raw_sample {
     sample.estimated_tokens = 0
     return sample
 }
-
 func tokenize_single(raw_sample raw, dataloader_config cfg) tokenized_sample {
     []int token_ids = run_tokenizer(raw.text, cfg)
     if len(token_ids) > cfg.max_seq_len {
@@ -392,7 +370,6 @@ func tokenize_single(raw_sample raw, dataloader_config cfg) tokenized_sample {
     result.metadata = ""
     return result
 }
-
 func run_tokenizer(string text, dataloaderConfig cfg) []int {
     int estimated_len = len(text) / 4
     []int ids = []int{cap: estimated_len}
@@ -400,14 +377,12 @@ func run_tokenizer(string text, dataloaderConfig cfg) []int {
     while i < estimated_len { ids[i] = i % 128000; i = i + 1 }
     return ids
 }
-
 func truncate([]int ids, int max_len) []int {
     []int result = []int{cap: max_len}
     int i = 0
     while i < max_len && i < len(ids) { result[i] = ids[i]; i = i + 1 }
     return result
 }
-
 func add_special_tokens([]int ids) []int {
     int new_len = len(ids) + 2
     []int result = []int{cap: new_len}
@@ -417,21 +392,18 @@ func add_special_tokens([]int ids) []int {
     result[new_len-1] = 2
     return result
 }
-
 func create_attention_mask(int seq_len) []int {
     []int mask = []int{cap: seq_len}
     int i = 0
     while i < seq_len { mask[i] = 1; i = i + 1 }
     return mask
 }
-
 func create_position_ids(int seq_len) []int {
     []int pos = []int{cap: seq_len}
     int i = 0
     while i < seq_len { pos[i] = i; i = i + 1 }
     return pos
 }
-
 func build_training_batch(dataloader loader, []tokenized_sample samples) training_batch {
     if loader.config.packing == PACKING_SMART_PACKING {
         return build_packed_batch(loader, samples)
@@ -439,7 +411,6 @@ func build_training_batch(dataloader loader, []tokenized_sample samples) trainin
         return build_standard_batch(loader, samples)
     }
 }
-
 func build_standard_batch(dataloader loader, []tokenized_sample samples) training_batch {
     int batch_size = len(samples)
     int max_len_in_batch = 0
@@ -494,7 +465,6 @@ func build_standard_batch(dataloader loader, []tokenized_sample samples) trainin
     batch.total_prepare_time_ms = 0.0
     return batch
 }
-
 func build_packed_batch(dataloader loader, []tokenized_sample samples) training_batch {
     int target_len = loader.config.max_seq_len
     int batch_size = loader.config.batch_size
@@ -547,7 +517,6 @@ func build_packed_batch(dataloader loader, []tokenized_sample samples) training_
     batch.total_prepare_time_ms = 0.0
     return batch
 }
-
 func passes_quality_filter(tokenized_sample tok, dataloader_config cfg) bool {
     if tok.seq_len < cfg.min_seq_len {
         return false
@@ -563,7 +532,6 @@ func passes_quality_filter(tokenized_sample tok, dataloader_config cfg) bool {
     }
     return true
 }
-
 func calculate_token_repetition_ratio([]int tokens) float {
     if len(tokens) == 0 { return 0.0 }
     map(int, int) freq_map
@@ -580,7 +548,6 @@ func calculate_token_repetition_ratio([]int tokens) float {
     }
     return float_of_int(max_count) / float_of_int(len(tokens))
 }
-
 func get_local_samples_for_rank(distributed_sampler samp, int num_samples_needed) []int {
     []int local_indices = []int{cap: num_samples_needed}
     int fetched = 0
@@ -598,7 +565,6 @@ func get_local_samples_for_rank(distributed_sampler samp, int num_samples_needed
     }
     return local_indices
 }
-
 func reset_for_new_epoch(ref dataloader loader) {
     loader.current_epoch = loader.current_epoch + 1
     loader.current_file_index = 0
@@ -609,11 +575,9 @@ func reset_for_new_epoch(ref dataloader loader) {
         loader.config.seed + loader.current_epoch
     )
 }
-
 func get_dataloader_stats(dataloader loader) dataloader_stats {
     return loader.stats
 }
-
 func print_dataloader_summary(dataloader loader) string {
     dataloader_stats stats = loader.stats
     "data_loader Summary:\n" +
@@ -629,42 +593,33 @@ func print_dataloader_summary(dataloader loader) string {
     "  Current Epoch: " + string(loader.current_epoch) + "\n" +
     "  Samples This Epoch: " + string(loader.total_samples_processed)
 }
-
 func min_int(int a, int b) int { if a < b { return a }; return b }
-
 func max_int(int a, int b) int { if a > b { return a }; return b }
-
 func float_of_int(int n) float {
     float r = 0.0;
     int i = 0;
     while i < n { r = r + 1.0; i = i + 1 };
     return r
 }
-
 func string(int i) string { return "" }
-
 func allocate_2d_int(int rows, int cols) [][]int {
     [][]int m = [][]int{cap: rows}
     int i = 0
     while i < rows { m[i] = []int{cap: cols}; i = i + 1 }
     return m
 }
-
 func copy_tokens([]int dst, []int src, int offset, int count) {
     int i = 0
     while i < count { dst[offset+i] = src[i]; i = i + 1 }
 }
-
 func set_range([]int arr, int start, int count, int val) {
     int i = 0
     while i < count { arr[start+i] = val; i = i + 1 }
 }
-
 func set_consecutive([]int arr, int start, int count, int from_val) {
     int i = 0
     while i < count { arr[start+i] = from_val+i; i = i + 1 }
 }
-
 func build_labels([][][]int input_ids, int batch, int seq) []float {
     int total = batch * seq
     []float labels = []float{cap: total}
@@ -680,7 +635,6 @@ func build_labels([][][]int input_ids, int batch, int seq) []float {
     }
     return labels
 }
-
 func calculate_real_token_count([][][]int mask, int batch, int seq) float {
     float sum = 0.0
     int b = 0
@@ -694,11 +648,7 @@ func calculate_real_token_count([][][]int mask, int batch, int seq) float {
     }
     return sum
 }
-
 func is_batch_ready(training_batch b) bool { return true }
-
 func dequeue_gpu_queue(dataloader l) training_batch { return training_batch{} }
-
 func enqueue_gpu_queue(ref dataloader l, training_batch b) {}
-
 func hash_string(string s) int64 { return 0 }

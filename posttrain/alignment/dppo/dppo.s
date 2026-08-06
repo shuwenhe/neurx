@@ -18,7 +18,6 @@ struct DPPOConfig {
     value_loss_coeff: f32
     value_clip_epsilon: f32
 }
-
 struct DPPOTrainer {
     config: DPPOConfig
     policy_model: *Model
@@ -51,7 +50,6 @@ func new_dppo_trainer(
         step_count: 0,
     }
 }
-
 func (trainer: *DPPOTrainer) compute_binary_kl_constraint(
     new_probs: Tensor,
     old_probs: Tensor,
@@ -68,7 +66,6 @@ func (trainer: *DPPOTrainer) compute_binary_kl_constraint(
                            1.0 * kl_violation
     return constrained_ratio * advantage
 }
-
 func (trainer: *DPPOTrainer) compute_binary_tv_constraint(
     new_probs: Tensor,
     old_probs: Tensor,
@@ -81,7 +78,6 @@ func (trainer: *DPPOTrainer) compute_binary_tv_constraint(
                            1.0 * tv_violation
     return constrained_ratio * advantage
 }
-
 func (trainer: *DPPOTrainer) compute_constrained_objective(
     new_log_probs: Tensor,
     old_log_probs: Tensor,
@@ -116,7 +112,6 @@ func (trainer: *DPPOTrainer) compute_constrained_objective(
     }
     return constrained_obj
 }
-
 func (trainer: *DPPOTrainer) update_adaptive_epsilon(current_kl: f32) {
     if !trainer.config.use_adaptive_epsilon {
         return
@@ -137,7 +132,6 @@ func (trainer: *DPPOTrainer) update_adaptive_epsilon(current_kl: f32) {
         trainer.config.epsilon_max
     )
 }
-
 func (trainer: *DPPOTrainer) compute_gae(
     rewards: []Tensor,
     values: []Tensor,
@@ -167,7 +161,6 @@ func (trainer: *DPPOTrainer) compute_gae(
     }
     return advantages, returns
 }
-
 func (trainer: *DPPOTrainer) train_step(
     prompts: []Tensor,
     responses: []Tensor,
@@ -269,7 +262,6 @@ func (trainer: *DPPOTrainer) train_step(
         avg_kl
     )
 }
-
 func (trainer: *DPPOTrainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let value_losses: []f32 = []
@@ -291,7 +283,6 @@ func (trainer: *DPPOTrainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     }
     return policy_losses, value_losses
 }
-
 func compute_mean(values: []f32) -> f32 {
     if values.len() == 0 {
         return 0.0
@@ -302,7 +293,6 @@ func compute_mean(values: []f32) -> f32 {
     }
     return sum / f32(values.len())
 }
-
 func compute_std(values: []f32, mean: f32) -> f32 {
     if values.len() == 0 {
         return 1.0
@@ -313,7 +303,6 @@ func compute_std(values: []f32, mean: f32) -> f32 {
     }
     return sqrt(sum_sq / f32(values.len()))
 }
-
 func clamp(x: Tensor, min_val: f32, max_val: f32) -> Tensor {
     return maximum(minimum(x, max_val), min_val)
 }

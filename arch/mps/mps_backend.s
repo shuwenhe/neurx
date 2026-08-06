@@ -8,20 +8,17 @@ struct mps_device {
     max_memory: int
     shared_memory: bool
 }
-
 struct mps_tensor {
     data: []float
     shape: []int
     device: mps_device
     gpu_buffer: pointer
 }
-
 struct mps_context {
     devices: []mps_device
     current_device: int
     command_queue: pointer
 }
-
 struct mps_kernel {
     name: string
     shader: pointer
@@ -30,7 +27,6 @@ func mps_available() bool {
     let devices = MTLCopyAllDevices()
     devices.count > 0
 }
-
 func mps_get_devices() []mps_device {
     let metal_devices = MTLCopyAllDevices()
     []mps_device result = []mps_device{cap: metal_devices.count}
@@ -46,7 +42,6 @@ func mps_get_devices() []mps_device {
     }
     result
 }
-
 func mps_create_context([]mps_device devices) mps_context {
     mps_context ctx {
         devices: devices,
@@ -58,14 +53,12 @@ func mps_create_context([]mps_device devices) mps_context {
     }
     ctx
 }
-
 func mps_select_device(mps_context ctx, int device_id) mps_context {
     if device_id >= 0 && device_id < len(ctx.devices) {
         ctx.current_device = device_id
     }
     ctx
 }
-
 func mps_allocate_tensor([]int shape, mps_device device) mps_tensor {
     int size = 1
     for i := 0; i < len(shape); i += 1 {
@@ -79,7 +72,6 @@ func mps_allocate_tensor([]int shape, mps_device device) mps_tensor {
     }
     tensor
 }
-
 func mps_copy_to_device(mps_tensor tensor, []float data) mps_tensor {
     int n = len(data)
     if n > len(tensor.data) {
@@ -90,11 +82,9 @@ func mps_copy_to_device(mps_tensor tensor, []float data) mps_tensor {
     }
     tensor
 }
-
 func mps_copy_from_device(mps_tensor tensor) []float {
     copy_vector(tensor.data)
 }
-
 func mps_tensor_add(mps_tensor a, mps_tensor b) mps_tensor {
     if len(a.shape) != len(b.shape) {
         return a
@@ -106,7 +96,6 @@ func mps_tensor_add(mps_tensor a, mps_tensor b) mps_tensor {
     }
     result
 }
-
 func mps_tensor_mul(mps_tensor a, mps_tensor b) mps_tensor {
     if len(a.shape) != len(b.shape) {
         return a
@@ -118,7 +107,6 @@ func mps_tensor_mul(mps_tensor a, mps_tensor b) mps_tensor {
     }
     result
 }
-
 func mps_tensor_matmul(mps_tensor a, mps_tensor b) mps_tensor {
     if len(a.shape) != 2 || len(b.shape) != 2 {
         return a
@@ -138,7 +126,6 @@ func mps_tensor_matmul(mps_tensor a, mps_tensor b) mps_tensor {
     }
     result
 }
-
 func mps_tensor_relu(mps_tensor input) mps_tensor {
     int size = len(input.data)
     mps_tensor result = mps_allocate_tensor(input.shape, input.device)
@@ -151,7 +138,6 @@ func mps_tensor_relu(mps_tensor input) mps_tensor {
     }
     result
 }
-
 func mps_tensor_softmax(mps_tensor input) mps_tensor {
     int size = len(input.data)
     mps_tensor result = mps_allocate_tensor(input.shape, input.device)
@@ -172,7 +158,6 @@ func mps_tensor_softmax(mps_tensor input) mps_tensor {
     }
     result
 }
-
 func mps_tensor_sum(mps_tensor input) float {
     float sum = 0.0
     for i := 0; i < len(input.data); i += 1 {
@@ -180,14 +165,12 @@ func mps_tensor_sum(mps_tensor input) float {
     }
     sum
 }
-
 func mps_tensor_mean(mps_tensor input) float {
     if len(input.data) == 0 {
         return 0.0
     }
     mps_tensor_sum(input) / float(len(input.data))
 }
-
 func mps_tensor_scale(mps_tensor input, float scale) mps_tensor {
     int size = len(input.data)
     mps_tensor result = mps_allocate_tensor(input.shape, input.device)
@@ -196,7 +179,6 @@ func mps_tensor_scale(mps_tensor input, float scale) mps_tensor {
     }
     result
 }
-
 func mps_tensor_sub(mps_tensor a, mps_tensor b) mps_tensor {
     if len(a.shape) != len(b.shape) {
         return a
@@ -208,7 +190,6 @@ func mps_tensor_sub(mps_tensor a, mps_tensor b) mps_tensor {
     }
     result
 }
-
 func mps_tensor_div(mps_tensor a, mps_tensor b) mps_tensor {
     if len(a.shape) != len(b.shape) {
         return a
@@ -224,7 +205,6 @@ func mps_tensor_div(mps_tensor a, mps_tensor b) mps_tensor {
     }
     result
 }
-
 func mps_tensor_transpose(mps_tensor input, int dim0, int dim1) mps_tensor {
     if len(input.shape) < 2 {
         return input
@@ -244,7 +224,6 @@ func mps_tensor_transpose(mps_tensor input, int dim0, int dim1) mps_tensor {
     }
     result
 }
-
 func mps_tensor_reshape(mps_tensor input, []int new_shape) mps_tensor {
     int old_size = 1
     for i := 0; i < len(input.shape); i += 1 {
@@ -265,17 +244,13 @@ func mps_tensor_reshape(mps_tensor input, []int new_shape) mps_tensor {
     }
     result
 }
-
 func mps_free_tensor(mps_tensor tensor) {
 }
-
 func mps_sync() {
 }
-
 func mps_get_device_info(mps_device device) string {
     "Device " + string(device.id) + ": " + device.name + " (Max Mem: " + string(device.max_memory) + ")"
 }
-
 func copy_vector([]float src) []float {
     int n = len(src)
     []float out = []float{cap: n}
@@ -284,7 +259,6 @@ func copy_vector([]float src) []float {
     }
     out
 }
-
 func copy_int([]int src) []int {
     int n = len(src)
     []int out = []int{cap: n}
@@ -293,7 +267,6 @@ func copy_int([]int src) []int {
     }
     out
 }
-
 func exp(float x) float {
     if x > 20.0 {
         return 485165195.0

@@ -11,7 +11,6 @@ struct vllm_runtime_state {
     vllm_prefix_cache_state prefix_cache
     vllm_paged_attention_state paged_attention
 }
-
 struct vllm_runtime_step_result {
     vllm_runtime_state state
     string request_id
@@ -28,7 +27,6 @@ func new_vllm_runtime_state(int layer_count, int page_size, int max_pages, int m
         paged_attention: new_vllm_paged_attention_state(layer_count, page_size, max_pages),
     }
 }
-
 func vllm_runtime_enqueue_request(vllm_runtime_state state, string request_id, int prefill_tokens, int remaining_tokens, bool accepted) vllm_runtime_state {
     vllm_request_queue_state queue = state.queue
     vllm_prefix_cache_state prefix_state = state.prefix_cache
@@ -48,7 +46,6 @@ func vllm_runtime_enqueue_request(vllm_runtime_state state, string request_id, i
         paged_attention: state.paged_attention,
     }
 }
-
 func vllm_runtime_schedule_next(vllm_runtime_state state) vllm_runtime_step_result {
     vllm_schedule_result scheduled = vllm_scheduler_next(state.scheduler, state.queue)
     vllm_paged_attention_state paged = state.paged_attention
@@ -69,7 +66,6 @@ func vllm_runtime_schedule_next(vllm_runtime_state state) vllm_runtime_step_resu
         selected: scheduled.selected,
     }
 }
-
 func vllm_runtime_record_decode(vllm_runtime_state state, int decode_tokens) vllm_runtime_state {
     vllm_runtime_state {
         queue: state.queue,
@@ -79,7 +75,6 @@ func vllm_runtime_record_decode(vllm_runtime_state state, int decode_tokens) vll
         paged_attention: vllm_paged_attention_decode_step(state.paged_attention, decode_tokens),
     }
 }
-
 func vllm_runtime_finish_request(vllm_runtime_state state, int release_tokens) vllm_runtime_state {
     vllm_runtime_state {
         queue: state.queue,
@@ -89,15 +84,12 @@ func vllm_runtime_finish_request(vllm_runtime_state state, int release_tokens) v
         paged_attention: vllm_paged_attention_release(state.paged_attention, release_tokens),
     }
 }
-
 func vllm_runtime_queue_depth(vllm_runtime_state state) int {
     vllm_queue_size(state.queue)
 }
-
 func vllm_runtime_state_dict(vllm_runtime_state state) vllm_runtime_state {
     state
 }
-
 func vllm_runtime_load_state_dict(vllm_runtime_state state, vllm_runtime_state other) vllm_runtime_state {
     other
 }

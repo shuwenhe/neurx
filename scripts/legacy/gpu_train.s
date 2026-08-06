@@ -33,7 +33,6 @@ struct gpu_context {
     int hidden_dim
     float learning_rate
 }
-
 struct gpu_buffer {
     int64 device_ptr
     int size_bytes
@@ -94,7 +93,6 @@ func main() {
     println("  Total steps: " + int_to_str(total_steps))
     cleanup_gpu_context(ctx)
 }
-
 func init_gpu_context(int batch_size, int seq_len, int hidden_dim, float lr) gpu_context {
     println("[GPU] Initializing CUDA context...")
     int64 handle = cublasCreate()
@@ -119,14 +117,12 @@ func init_gpu_context(int batch_size, int seq_len, int hidden_dim, float lr) gpu
         learning_rate: lr,
     }
 }
-
 func cleanup_gpu_context(gpu_context ctx) {
     if ctx.initialized && ctx.cublas_handle != 0 {
         println("[GPU] Destroying CUDA context...")
         cublasDestroy(ctx.cublas_handle)
     }
 }
-
 func allocate_gpu_buffer(int element_count, int element_size) gpu_buffer {
     int total_bytes = element_count * element_size
     println("[GPU] Allocating " + int_to_str(total_bytes) + " bytes")
@@ -140,14 +136,12 @@ func allocate_gpu_buffer(int element_count, int element_size) gpu_buffer {
         element_count: element_count,
     }
 }
-
 func free_gpu_buffer(gpu_buffer buf) {
     if buf.device_ptr != 0 {
         cuda_free(buf.device_ptr)
         println("[GPU] Freed " + int_to_str(buf.size_bytes) + " bytes")
     }
 }
-
 func process_shard_gpu(
     gpu_context ctx,
     string shard_path,
@@ -223,7 +217,6 @@ func process_shard_gpu(
     println("  Processed: " + int_to_str(total_processed) + " lines in " + int_to_str(steps) + " steps")
     steps
 }
-
 func parse_int(string s, int default_val) int {
     int result = default_val
     int i = 0
@@ -244,7 +237,6 @@ func parse_int(string s, int default_val) int {
     if neg { result = 0 - result }
     result
 }
-
 func parse_float(string s, float default_val) float {
     float result = default_val
     int i = 0
@@ -261,7 +253,6 @@ func parse_float(string s, float default_val) float {
     }
     result
 }
-
 func str_len(string s) int {
     int n = 0
     while n < 1000000 && s[n] != 0 {
@@ -269,7 +260,6 @@ func str_len(string s) int {
     }
     n
 }
-
 func substring(string s, int start, int end) string {
     string out = ""
     int i = start
@@ -279,11 +269,9 @@ func substring(string s, int start, int end) string {
     }
     out
 }
-
 func string_char(int c) string {
     string(c)
 }
-
 func trim(string s) string {
     int i = 0
     int len = str_len(s)
@@ -299,7 +287,6 @@ func trim(string s) string {
     }
     substring(s, i, j + 1)
 }
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -319,7 +306,6 @@ func int_to_str(int n) string {
     if neg { out = "-" + out }
     out
 }
-
 func int64_to_str(int64 n) string {
     if n == 0 { return "0" }
     int64 value = n
@@ -339,13 +325,11 @@ func int64_to_str(int64 n) string {
     if neg { out = "-" + out }
     out
 }
-
 func float_to_str(float f) string {
     int int_part = int(f)
     int frac_part = int((f - float(int_part)) * 1000.0)
     int_to_str(int_part) + "." + int_to_str(frac_part)
 }
-
 func count_lines(string text) int {
     int count = 0
     int i = 0
@@ -361,7 +345,6 @@ func count_lines(string text) int {
     }
     count
 }
-
 func get_line(string text, int line_num) string {
     int current_line = 0
     int start = 0
@@ -382,7 +365,6 @@ func get_line(string text, int line_num) string {
     }
     ""
 }
-
 func basename(string path) string {
     int i = str_len(path) - 1
     while i >= 0 && path[i] != 47 && path[i] != 92 {

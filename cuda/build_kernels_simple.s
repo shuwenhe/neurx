@@ -46,17 +46,14 @@ func main() {
         println("[ERROR] libcuda_kernels.so not created")
     }
 }
-
 func get_cuda_version() string {
     string out = runtime_run_command_output("nvcc --version 2>/dev/null | grep 'release' | awk '{print $5}' | tr -d ',' || echo '12.0'")
     trim(out)
 }
-
 func get_gpu_arch() string {
     string out = runtime_run_command_output("nvidia-smi --query-gpu=compute_cap --format=csv,noheader 2>/dev/null | head -1 | tr -d '.' || echo '89'")
     trim(out)
 }
-
 func get_cuda_home() string {
     string cuda_home = trim(runtime_env_get("CUDA_HOME", ""))
     if str_len(cuda_home) > 0 && runtime_file_exists(cuda_home + "/include/cuda.h") {
@@ -73,7 +70,6 @@ func get_cuda_home() string {
     }
     "/usr"
 }
-
 func compile_to_ptx(string build_dir, string gpu_arch) bool {
     string cmd = "nvcc -ptx cuda/cuda_kernels.cu " +
         "-o " + build_dir + "/cuda_kernels.ptx " +
@@ -89,13 +85,11 @@ func compile_to_ptx(string build_dir, string gpu_arch) bool {
         return false
     }
 }
-
 func create_wrapper_c(string build_dir) {
     string wrapper = get_cuda_wrapper_c()
     runtime_write_text_file(build_dir + "/cuda_kernels_wrapper.c", wrapper)
     println("[OK] Wrapper created: " + build_dir + "/cuda_kernels_wrapper.c")
 }
-
 func compile_wrapper(string build_dir, string cuda_home, string cuda_lib) bool {
     string obj_file = build_dir + "/cuda_kernels_wrapper.o"
     string compile_cmd = "gcc -c -fPIC " +
@@ -128,17 +122,14 @@ func compile_wrapper(string build_dir, string cuda_home, string cuda_lib) bool {
     println("[OK] Linked: " + so_file)
     true
 }
-
 func create_env_metadata(string build_dir, string cuda_lib) {
     string env_text = "CUDA_KERNELS_LIB=" + build_dir + "/libcuda_kernels.so" + chr(10) +
         "CUDA_LIBRARY_PATH=" + cuda_lib + ":" + build_dir + chr(10)
     runtime_write_text_file(build_dir + "/env.txt", env_text)
 }
-
 func create_dir(string path) {
     runtime_make_dirs(path)
 }
-
 func str_len(string s) int {
     int n = 0
     while n < 10000000 && s[n] != 0 {
@@ -146,7 +137,6 @@ func str_len(string s) int {
     }
     n
 }
-
 func trim(string s) string {
     int len = str_len(s)
     int i = 0
@@ -162,7 +152,6 @@ func trim(string s) string {
     }
     substring(s, i, j + 1)
 }
-
 func substring(string s, int start, int end) string {
     string out = ""
     int i = start
@@ -173,11 +162,9 @@ func substring(string s, int start, int end) string {
     }
     out
 }
-
 func chr(int code) string {
     string(code)
 }
-
 func contains_string(string haystack, string needle) bool {
     int h_len = str_len(haystack)
     int n_len = str_len(needle)
@@ -201,7 +188,6 @@ func contains_string(string haystack, string needle) bool {
     }
     false
 }
-
 func get_word(string s, int word_index) string {
     int word_count = 0
     int i = 0
@@ -229,7 +215,6 @@ func get_word(string s, int word_index) string {
     }
     ""
 }
-
 func get_cuda_wrapper_c() string {
     string c_code =
 "\n" +

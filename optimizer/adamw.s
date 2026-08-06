@@ -7,14 +7,12 @@ struct adamw_config {
     float epsilon
     int   warmup_steps
 }
-
 struct adamw_param_state {
     []float momentum
     []float variance
     []float param
     int    step
 }
-
 struct adamw_optimizer {
     adamw_config config
     []adamw_param_state param_states
@@ -29,7 +27,6 @@ func new_adamw(adamw_config cfg) adamw_optimizer {
         current_lr: cfg.learning_rate,
     }
 }
-
 func adamw_register_param(
     adamw_optimizer opt,
     []float param,
@@ -43,7 +40,6 @@ func adamw_register_param(
     opt.param_states.push(state)
     return opt
 }
-
 func adamw_compute_lr(adamw_optimizer opt) float {
     float warmup_steps = float(opt.config.warmup_steps)
     float global_step = float(opt.global_step)
@@ -53,13 +49,11 @@ func adamw_compute_lr(adamw_optimizer opt) float {
         return opt.config.learning_rate
     }
 }
-
 func adamw_set_learning_rate(adamw_optimizer opt, float new_lr) adamw_optimizer {
     opt.config.learning_rate = new_lr
     opt.current_lr = adamw_compute_lr(opt)
     return opt
 }
-
 func adamw_update_param(
     adamw_param_state state,
     []float gradients,
@@ -91,7 +85,6 @@ func adamw_update_param(
     }
     return state
 }
-
 func adamw_step(
     adamw_optimizer opt,
     [][]float gradients,
@@ -117,25 +110,20 @@ func adamw_step(
     }
     return opt
 }
-
 func adamw_zero_grad(adamw_optimizer opt) adamw_optimizer {
     return opt
 }
-
 func adamw_get_learning_rate(adamw_optimizer opt) float {
     return opt.current_lr
 }
-
 func adamw_get_step(adamw_optimizer opt) int {
     return opt.global_step
 }
-
 struct adamw_state_dict {
     int global_step
     float current_lr
     []adamw_param_state param_states
 }
-
 func adamw_state_dict(adamw_optimizer opt) adamw_state_dict {
     adamw_state_dict {
         global_step: opt.global_step,
@@ -143,7 +131,6 @@ func adamw_state_dict(adamw_optimizer opt) adamw_state_dict {
         param_states: opt.param_states,
     }
 }
-
 func adamw_load_state_dict(
     adamw_optimizer opt,
     adamw_state_dict state_dict
@@ -153,7 +140,6 @@ func adamw_load_state_dict(
     opt.param_states = state_dict.param_states
     return opt
 }
-
 func allocate_float_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     var i = 0
@@ -163,7 +149,6 @@ func allocate_float_vector(int size, float init_val) []float {
     }
     return v
 }
-
 func pow_approx(float x, float y) float {
     if y == 1.0 {
         return x
@@ -174,7 +159,6 @@ func pow_approx(float x, float y) float {
     let ln_x = log_approx(x)
     return exp_approx(y * ln_x)
 }
-
 func log_approx(float x) float {
     if x <= 0.0 {
         return -100.0
@@ -187,7 +171,6 @@ func log_approx(float x) float {
     let result = 2.0 * (t + t2 * t / 3.0 + t2 * t2 * t / 5.0 + t2 * t2 * t2 * t / 7.0)
     return result
 }
-
 func exp_approx(float x) float {
     if x > 20.0 {
         return 2147483647.0
@@ -210,7 +193,6 @@ func exp_approx(float x) float {
     }
     return result
 }
-
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -228,7 +210,6 @@ func sqrt_approx(float x) float {
     }
     return result
 }
-
 func abs_approx(float x) float {
     if x < 0.0 {
         return -x

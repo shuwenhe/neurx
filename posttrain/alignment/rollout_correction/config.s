@@ -27,12 +27,10 @@ struct ISThreshold {
     upper: f32
     is_icepop: bool
 }
-
 struct RSThreshold {
     lower: f32
     upper: f32
 }
-
 struct RolloutCorrectionConfig {
     is_level: ISAggregationLevel
     is_threshold: ISThreshold
@@ -57,7 +55,6 @@ func new_rollout_correction_config() -> RolloutCorrectionConfig {
         loss_type: LossType.PPO_CLIP,
     }
 }
-
 func parse_threshold(threshold_str: string) -> (f32, f32) {
     if threshold_str.contains("_") {
         let parts = threshold_str.split("_")
@@ -73,7 +70,6 @@ func parse_threshold(threshold_str: string) -> (f32, f32) {
         return lower, upper
     }
 }
-
 func decoupled_token_is(threshold: f32) -> RolloutCorrectionConfig {
     return RolloutCorrectionConfig{
         is_level: ISAggregationLevel.TOKEN,
@@ -89,7 +85,6 @@ func decoupled_token_is(threshold: f32) -> RolloutCorrectionConfig {
         loss_type: LossType.PPO_CLIP,
     }
 }
-
 func decoupled_seq_is(threshold: f32) -> RolloutCorrectionConfig {
     return RolloutCorrectionConfig{
         is_level: ISAggregationLevel.SEQUENCE,
@@ -105,7 +100,6 @@ func decoupled_seq_is(threshold: f32) -> RolloutCorrectionConfig {
         loss_type: LossType.PPO_CLIP,
     }
 }
-
 func decoupled_token_icepop(threshold_lower: f32, threshold_upper: f32) -> RolloutCorrectionConfig {
     return RolloutCorrectionConfig{
         is_level: ISAggregationLevel.TOKEN,
@@ -121,7 +115,6 @@ func decoupled_token_icepop(threshold_lower: f32, threshold_upper: f32) -> Rollo
         loss_type: LossType.PPO_CLIP,
     }
 }
-
 func decoupled_seq_is_rs(is_threshold: f32, rs_lower: f32, rs_upper: f32) -> RolloutCorrectionConfig {
     return RolloutCorrectionConfig{
         is_level: ISAggregationLevel.SEQUENCE,
@@ -137,7 +130,6 @@ func decoupled_seq_is_rs(is_threshold: f32, rs_lower: f32, rs_upper: f32) -> Rol
         loss_type: LossType.PPO_CLIP,
     }
 }
-
 func decoupled_geo_rs(rs_lower: f32, rs_upper: f32) -> RolloutCorrectionConfig {
     return RolloutCorrectionConfig{
         is_level: ISAggregationLevel.NONE,
@@ -149,7 +141,6 @@ func decoupled_geo_rs(rs_lower: f32, rs_upper: f32) -> RolloutCorrectionConfig {
         loss_type: LossType.PPO_CLIP,
     }
 }
-
 func decoupled_k3_rs(rs_upper: f32) -> RolloutCorrectionConfig {
     return RolloutCorrectionConfig{
         is_level: ISAggregationLevel.NONE,
@@ -161,7 +152,6 @@ func decoupled_k3_rs(rs_upper: f32) -> RolloutCorrectionConfig {
         loss_type: LossType.PPO_CLIP,
     }
 }
-
 func decoupled_k3_rs_seq_tis(rs_upper: f32, is_threshold: f32) -> RolloutCorrectionConfig {
     return RolloutCorrectionConfig{
         is_level: ISAggregationLevel.SEQUENCE,
@@ -177,7 +167,6 @@ func decoupled_k3_rs_seq_tis(rs_upper: f32, is_threshold: f32) -> RolloutCorrect
         loss_type: LossType.PPO_CLIP,
     }
 }
-
 func bypass_ppo_clip() -> RolloutCorrectionConfig {
     return RolloutCorrectionConfig{
         is_level: ISAggregationLevel.NONE,
@@ -189,7 +178,6 @@ func bypass_ppo_clip() -> RolloutCorrectionConfig {
         loss_type: LossType.PPO_CLIP,
     }
 }
-
 func bypass_ppo_clip_geo_rs(rs_lower: f32, rs_upper: f32) -> RolloutCorrectionConfig {
     return RolloutCorrectionConfig{
         is_level: ISAggregationLevel.NONE,
@@ -201,7 +189,6 @@ func bypass_ppo_clip_geo_rs(rs_lower: f32, rs_upper: f32) -> RolloutCorrectionCo
         loss_type: LossType.PPO_CLIP,
     }
 }
-
 func bypass_ppo_clip_k3_rs(rs_upper: f32) -> RolloutCorrectionConfig {
     return RolloutCorrectionConfig{
         is_level: ISAggregationLevel.NONE,
@@ -213,7 +200,6 @@ func bypass_ppo_clip_k3_rs(rs_upper: f32) -> RolloutCorrectionConfig {
         loss_type: LossType.PPO_CLIP,
     }
 }
-
 func bypass_pg_is(is_threshold: f32) -> RolloutCorrectionConfig {
     return RolloutCorrectionConfig{
         is_level: ISAggregationLevel.SEQUENCE,
@@ -229,7 +215,6 @@ func bypass_pg_is(is_threshold: f32) -> RolloutCorrectionConfig {
         loss_type: LossType.REINFORCE,
     }
 }
-
 func bypass_pg_geo_rs(rs_lower: f32, rs_upper: f32) -> RolloutCorrectionConfig {
     return RolloutCorrectionConfig{
         is_level: ISAggregationLevel.NONE,
@@ -241,7 +226,6 @@ func bypass_pg_geo_rs(rs_lower: f32, rs_upper: f32) -> RolloutCorrectionConfig {
         loss_type: LossType.REINFORCE,
     }
 }
-
 func bypass_pg_geo_rs_seq_tis(
     rs_lower: f32,
     rs_upper: f32,
@@ -261,7 +245,6 @@ func bypass_pg_geo_rs_seq_tis(
         loss_type: LossType.REINFORCE,
     }
 }
-
 func bypass_pg_geo_rs_token_tis(
     rs_lower: f32,
     rs_upper: f32,
@@ -281,7 +264,6 @@ func bypass_pg_geo_rs_token_tis(
         loss_type: LossType.REINFORCE,
     }
 }
-
 func parse_f32(s: string) -> f32 {
     return 1.0
 }

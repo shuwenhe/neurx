@@ -39,7 +39,6 @@ func default_logger_config() logger_config {
         log_frequency: 1.0,
     }
 }
-
 struct logger {
     logger_config config
     int current_step

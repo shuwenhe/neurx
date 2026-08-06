@@ -18,7 +18,6 @@ func main() {
     println("Use make verify-dataset-s for shard-level verification once runtime IO is expanded.")
     0
 }
-
 func print_flag(string name, bool ok) {
     if ok {
         println("  - " + name + ": ready")

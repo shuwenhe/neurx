@@ -25,7 +25,6 @@ func main() {
     println("Backend compilation and checkpoint materialization remain delegated.")
     0
 }
-
 func resolve_source(string project_root) string {
     let candidate_a = project_root + "/train/train_llm_jsonl.s"
     if runtime_file_exists(candidate_a) {
@@ -45,7 +44,6 @@ func resolve_source(string project_root) string {
     }
     project_root + "/src/train_llm.s"
 }
-
 func print_flag(string name, bool ok) {
     if ok {
         println("  - " + name + ": ready")

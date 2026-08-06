@@ -31,7 +31,6 @@ func pick_input_file(string root) string {
     }
     ""
 }
-
 func build_script(string input_file, string shard_dir, string manifest_file, string docs_per_shard) string {
     string script = "#!/bin/sh\n"
     script = script + "set -e\n"
@@ -65,7 +64,7 @@ func build_script(string input_file, string shard_dir, string manifest_file, str
     script = script + "  printf '  \"shards\": [\\n'\n"
     script = script + "  idx=0\n"
     script = script + "  for shard_file in $shard_list; do\n"
-    script = script + "    shard_file=$(printf '%s' \"$shard_file\" | sed 's/^ *//')\n"
+    script = script + "    shard_file=$(printf '%s' \"$shard_file\" | sed 's/^ *
     script = script + "    [ -n \"$shard_file\" ] || continue\n"
     script = script + "    lines=$(wc -l < \"$shard_file\")\n"
     script = script + "    size=$(wc -c < \"$shard_file\")\n"
@@ -80,7 +79,6 @@ func build_script(string input_file, string shard_dir, string manifest_file, str
     script = script + ": > \"" + shard_dir + "/.jsonl_shard_complete\"\n"
     script
 }
-
 func main() {
     string root = runtime_env_get("NEURX_HOME", runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/neurx"))
     string shard_dir = runtime_env_get("SHARD_DIR", root + "/dataset/pretrain/shard")

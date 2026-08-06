@@ -15,7 +15,6 @@ struct dapo_trainer {
     int global_step
     []dapo_state history
 }
-
 struct dapo_train_result {
     dapo_state state
     float avg_reward
@@ -43,7 +42,6 @@ func new_dapo_trainer(
         history: []dapo_state{cap: 1000},
     }
 }
-
 func dapo_trainer_with_config(
     module policy,
     module value_model,
@@ -63,7 +61,6 @@ func dapo_trainer_with_config(
         history: []dapo_state{cap: 1000},
     }
 }
-
 func dapo_trainer_train_step(
     dapo_trainer trainer,
     dapo_rollout_result rollouts
@@ -119,7 +116,6 @@ func dapo_trainer_train_step(
     }
     (trainer, result)
 }
-
 func dapo_trainer_train(
     dapo_trainer trainer,
     int num_iterations

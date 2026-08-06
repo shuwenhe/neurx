@@ -31,7 +31,6 @@ func init_wandb(
     println("WandB initialized. View at: " + r.run_url)
     r
 }
-
 func wandb_log_metric(
     wandb_run *run,
     string name,

@@ -14,7 +14,6 @@ struct reinforce_pp_config {
     bool use_advantage_normalization
     float clip_range_reward
 }
-
 struct reinforce_pp_state {
     tensor policy_logits
     tensor log_probs
@@ -43,7 +42,6 @@ func new_reinforce_pp_config() reinforce_pp_config {
         clip_range_reward: 10.0,
     }
 }
-
 func reinforce_pp_compute_baseline(
     []tensor rewards,
     int num_samples_per_prompt,
@@ -73,7 +71,6 @@ func reinforce_pp_compute_baseline(
     float new_ema = momentum * ema_baseline + (1.0 - momentum) * current_mean
     (baseline, new_ema)
 }
-
 func reinforce_pp_step(
     module policy,
     module reference_policy,

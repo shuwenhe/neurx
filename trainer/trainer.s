@@ -7,7 +7,6 @@ struct trainer_config {
     int eval_interval
     int save_interval
 }
-
 struct trainer_state {
     trainer_config config
     int step
@@ -24,7 +23,6 @@ func new_trainer_config(string name, string mode, int max_steps) trainer_config 
         save_interval: 1000,
     }
 }
-
 func new_trainer_state(trainer_config config) trainer_state {
     trainer_state {
         config: config,
@@ -33,7 +31,6 @@ func new_trainer_state(trainer_config config) trainer_state {
         finished: false,
     }
 }
-
 func trainer_step(trainer_state state, float loss) trainer_state {
     int next_step = state.step + 1
     trainer_state {
@@ -43,23 +40,18 @@ func trainer_step(trainer_state state, float loss) trainer_state {
         finished: next_step >= state.config.max_steps,
     }
 }
-
 func trainer_should_log(trainer_state state) bool {
     state.step > 0 && (state.step / state.config.log_interval) * state.config.log_interval == state.step
 }
-
 func trainer_should_eval(trainer_state state) bool {
     state.step > 0 && (state.step / state.config.eval_interval) * state.config.eval_interval == state.step
 }
-
 func trainer_should_save(trainer_state state) bool {
     state.step > 0 && (state.step / state.config.save_interval) * state.config.save_interval == state.step
 }
-
 func trainer_state_dict(trainer_state state) trainer_state {
     state
 }
-
 func trainer_load_state_dict(trainer_state state, trainer_state other) trainer_state {
     other
 }

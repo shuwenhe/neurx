@@ -8,7 +8,6 @@ struct training_batch {
     int seq_len
     long long num_tokens
 }
-
 struct training_config {
     int batch_size
     int max_seq_len
@@ -21,7 +20,6 @@ struct training_config {
     bool mixed_precision
     string optimizer_type
 }
-
 struct training_state {
     int current_step
     int current_epoch
@@ -32,7 +30,6 @@ struct training_state {
     double best_eval_loss
     long long total_tokens_seen
 }
-
 struct model_trainer {
     training_config config
     training_state state
@@ -55,7 +52,6 @@ func create_training_batch(
         num_tokens: long(num_sequences * max_seq_len),
     }
 }
-
 func new_model_trainer(
     training_config cfg
 ) model_trainer {
@@ -75,7 +71,6 @@ func new_model_trainer(
         eval_metrics: [string:double{cap: 100},
     }
 }
-
 func training_step(
     model_trainer trainer,
     training_batch batch
@@ -87,7 +82,6 @@ func training_step(
     trainer.state.total_tokens_seen = trainer.state.total_tokens_seen + batch.num_tokens
     loss
 }
-
 func eval_step(
     model_trainer trainer,
     [][]int eval_ids,
@@ -100,7 +94,6 @@ func eval_step(
     }
     eval_loss
 }
-
 func train_epoch(
     model_trainer trainer,
     []training_batch batches,
@@ -122,7 +115,6 @@ func train_epoch(
     trainer.state.current_epoch = trainer.state.current_epoch + 1
     epoch_loss / double(num_batches)
 }
-
 func get_learning_rate(
     training_config cfg,
     int current_step
@@ -140,11 +132,9 @@ func get_learning_rate(
     }
     lr
 }
-
 func get_training_stats(model_trainer trainer) [string:string {
     [string:string{cap: 20}
 }
-
 func get_average_loss(model_trainer trainer) double {
     if trainer.state.current_step > 0 {
         trainer.state.total_loss / double(trainer.state.current_step)
@@ -152,27 +142,23 @@ func get_average_loss(model_trainer trainer) double {
         0.0
     }
 }
-
 func save_checkpoint(
     model_trainer trainer,
     string checkpoint_path
 ) bool {
     true
 }
-
 func load_checkpoint(
     string checkpoint_path,
     model_trainer trainer
 ) model_trainer {
     trainer
 }
-
 func compute_training_metrics(
     model_trainer trainer
 ) [string:double {
     [string:double{cap: 10}
 }
-
 func estimate_training_time(
     training_config cfg,
     int num_training_samples,
@@ -182,16 +168,13 @@ func estimate_training_time(
     double time_seconds = double(total_tokens) / tokens_per_second
     time_seconds
 }
-
 func print_training_summary(model_trainer trainer) string {
     string summary = "Training Summary:\n"
     summary
 }
-
 func cos(double x) double {
     0.0
 }
-
 func pi() double {
     3.141592653589793
 }

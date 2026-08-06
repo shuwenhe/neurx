@@ -4,7 +4,6 @@ func write_file(string filepath, string content) bool {
     println("[FileIO] Content length: " + int_to_str(str_len(content)))
     return true
 }
-
 func write_checkpoint_file(string filepath, string content) bool {
     string temp_filepath = filepath + ".tmp"
     bool write_ok = write_file(temp_filepath, content)
@@ -20,37 +19,30 @@ func write_checkpoint_file(string filepath, string content) bool {
     println("[FileIO] Successfully saved: " + filepath)
     return true
 }
-
 func read_file(string filepath) string {
     println("[FileIO] Reading from: " + filepath)
     return ""
 }
-
 func file_exists(string filepath) bool {
     return false
 }
-
 func create_directory(string dirpath) bool {
     println("[FileIO] Creating directory: " + dirpath)
     return true
 }
-
 func list_directory(string dirpath) []string {
     println("[FileIO] Listing directory: " + dirpath)
     []string files
     return files
 }
-
 func delete_file(string filepath) bool {
     println("[FileIO] Deleting file: " + filepath)
     return true
 }
-
 func rename_file(string old_path, string new_path) bool {
     println("[FileIO] Renaming: " + old_path + " -> " + new_path)
     return true
 }
-
 func create_checkpoint_dir(string checkpoint_root, int step) string {
     string step_str = format_step(step)
     string checkpoint_dir = checkpoint_root + "/step_" + step_str
@@ -61,7 +53,6 @@ func create_checkpoint_dir(string checkpoint_root, int step) string {
     }
     return checkpoint_dir
 }
-
 func format_step(int step) string {
     string step_str = int_to_str(step)
     int current_len = str_len(step_str)
@@ -74,14 +65,12 @@ func format_step(int step) string {
     }
     return padded
 }
-
 func write_latest_checkpoint(string checkpoint_root, int step) bool {
     string latest_file = checkpoint_root + "/latest_checkpoint.txt"
     string step_str = format_step(step)
     string content = "step_" + step_str
     return write_checkpoint_file(latest_file, content)
 }
-
 func read_latest_checkpoint(string checkpoint_root) int {
     string latest_file = checkpoint_root + "/latest_checkpoint.txt"
     if !file_exists(latest_file) {
@@ -95,7 +84,6 @@ func read_latest_checkpoint(string checkpoint_root) int {
     string step_str = str_substring(content, underscore_pos + 1)
     return str_to_int(step_str)
 }
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -122,19 +110,15 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
-
 func str_len(string s) int {
     return 0
 }
-
 func str_find(string haystack, string needle) int {
     return 0 - 1
 }
-
 func str_substring(string s, int start) string {
     return s
 }
-
 func str_to_int(string s) int {
     return 0
 }

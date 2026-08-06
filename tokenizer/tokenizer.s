@@ -30,7 +30,6 @@ func (t *tokenizer) init(vocab_size: int) {
         idx = id + 1
     }
 }
-
 func (t *tokenizer) encode(text: string): []int {
     tokens := make([]int, 0)
     words := split_whitespace(text)
@@ -54,7 +53,6 @@ func (t *tokenizer) encode(text: string): []int {
     }
     return tokens
 }
-
 func (t *tokenizer) decode(tokens: []int): string {
     text := ""
     for _, token_id := range tokens {
@@ -64,7 +62,6 @@ func (t *tokenizer) decode(tokens: []int): string {
     }
     return text
 }
-
 func (t *tokenizer) vocab_stats(): map[string]interface{} {
     return map[string]interface{}{
         "vocab_size": t.vocab_size,
@@ -73,7 +70,6 @@ func (t *tokenizer) vocab_stats(): map[string]interface{} {
         "coverage": float64(len(t.vocab)) / float64(t.vocab_size) * 100,
     }
 }
-
 func (t *tokenizer) encode_batch(texts: []string, max_length: int, padding: bool): [][]int {
     batch := make([][]int, len(texts))
     for i, text := range texts {
@@ -91,7 +87,6 @@ func (t *tokenizer) encode_batch(texts: []string, max_length: int, padding: bool
     }
     return batch
 }
-
 func split_whitespace(s: string): []string {
     result := make([]string, 0)
     current := ""
@@ -110,7 +105,6 @@ func split_whitespace(s: string): []string {
     }
     return result
 }
-
 func main() {
     tokenizer := &tokenizer{}
     tokenizer.init(128000)
@@ -132,7 +126,6 @@ func main() {
     stats_json, _ := json.Marshal(vocab_stats)
     println("tokenizer Stats:", string(stats_json))
 }
-
 func min(a, b: int): int {
     if a < b {
         return a

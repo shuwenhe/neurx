@@ -14,7 +14,6 @@ struct vllm_config {
     string dtype
     int tensor_parallel_size
 }
-
 struct vllm_sequence {
     int seq_id
     []int token_ids
@@ -26,28 +25,24 @@ struct vllm_sequence {
     int top_k
     bool finished
 }
-
 struct vllm_block {
     int block_id
     []int token_ids
     int ref_count
     bool is_gpu
 }
-
 struct vllm_block_table {
     [][]int seq_block_tables
     []vllm_block blocks
     int num_free_gpu_blocks
     int num_free_cpu_blocks
 }
-
 struct vllm_scheduler_output {
     []int scheduled_seq_ids
     []int num_tokens_per_seq
     int total_tokens
     bool is_prompt_phase
 }
-
 struct vllm_engine {
     module model
     vllm_config config
@@ -70,7 +65,6 @@ func new_vllm_config() vllm_config {
         tensor_parallel_size: 1,
     }
 }
-
 func vllm_allocate_block(vllm_block_table table, bool is_gpu) int {
     if is_gpu && table.num_free_gpu_blocks > 0 {
         int i = 0
@@ -95,7 +89,6 @@ func vllm_allocate_block(vllm_block_table table, bool is_gpu) int {
     }
     return -1
 }
-
 func vllm_free_block(vllm_block_table table, int block_id) {
     if block_id >= 0 && block_id < table.blocks.len {
         table.blocks[block_id].ref_count = table.blocks[block_id].ref_count - 1
@@ -108,7 +101,6 @@ func vllm_free_block(vllm_block_table table, int block_id) {
         }
     }
 }
-
 func vllm_schedule_sequences(
     vllm_engine engine
 ) vllm_scheduler_output {
@@ -145,7 +137,6 @@ func vllm_schedule_sequences(
         is_prompt_phase: is_prompt,
     }
 }
-
 func vllm_paged_attention(
     tensor query,
     tensor key_cache,
@@ -215,7 +206,6 @@ func vllm_paged_attention(
     }
     output
 }
-
 func vllm_generate(
     vllm_engine engine,
     [][]int prompts,
@@ -264,7 +254,6 @@ func vllm_generate(
     }
     outputs
 }
-
 func new_vllm_engine(module model, vllm_config config) vllm_engine {
     []vllm_block blocks = []vllm_block{cap: config.num_gpu_blocks + config.num_cpu_blocks}
     int i = 0

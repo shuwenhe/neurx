@@ -21,7 +21,6 @@ func new_pretrain_eval_state() pretrain_eval_state {
         is_best: false,
     }
 }
-
 func update_pretrain_eval(pretrain_eval_state state, int step, float val_loss, float ppl) pretrain_eval_state {
     float next_best_val_loss = state.best_val_loss
     float next_best_ppl = state.best_ppl
@@ -42,7 +41,6 @@ func update_pretrain_eval(pretrain_eval_state state, int step, float val_loss, f
         is_best: next_is_best,
     }
 }
-
 func pretrain_eval_perplexity_from_loss(float loss) float {
     if loss >= 20.0 {
         return 485165195.4097903
@@ -78,23 +76,18 @@ func pretrain_eval_perplexity_from_loss(float loss) float {
     }
     result
 }
-
 func pretrain_eval_update_from_loss(pretrain_eval_state state, int step, float val_loss) pretrain_eval_state {
     update_pretrain_eval(state, step, val_loss, pretrain_eval_perplexity_from_loss(val_loss))
 }
-
 func pretrain_eval_has_result(pretrain_eval_state state) bool {
     state.has_result
 }
-
 func pretrain_eval_is_best(pretrain_eval_state state) bool {
     state.is_best
 }
-
 func string_char(int c) string {
     string(c)
 }
-
 func int_to_str(int n) string {
     int value = n
     if value == 0 {
@@ -114,7 +107,6 @@ func int_to_str(int n) string {
     }
     s
 }
-
 func fmt_float(float val, int decimals) string {
     float value = val
     if value == 0.0 {
@@ -151,7 +143,6 @@ func fmt_float(float val, int decimals) string {
     }
     s
 }
-
 func pretrain_eval_summary(pretrain_eval_state state) string {
     string result = "eval(step="
     if state.has_result {
@@ -177,11 +168,9 @@ func pretrain_eval_summary(pretrain_eval_state state) string {
     }
     result + ")"
 }
-
 func pretrain_eval_state_dict(pretrain_eval_state state) pretrain_eval_state {
     state
 }
-
 func pretrain_eval_load_state_dict(pretrain_eval_state state, pretrain_eval_state other) pretrain_eval_state {
     other
 }

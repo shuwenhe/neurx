@@ -10,7 +10,6 @@ struct adamw_state_s {
     [][]float first_moment
     [][]float second_moment
 }
-
 struct param_update_s {
     [][]float updated_params
     float norm
@@ -28,7 +27,6 @@ func new_adamw_state_s(float lr) adamw_state_s {
         second_moment: make([][]float, 0),
     }
 }
-
 func initialize_optimizer_state_s([][]float params, adamw_state_s state) adamw_state_s {
     [][]float m = make([][]float, 0)
     [][]float v = make([][]float, 0)
@@ -57,7 +55,6 @@ func initialize_optimizer_state_s([][]float params, adamw_state_s state) adamw_s
         second_moment: v,
     }
 }
-
 func compute_bias_correction_s(float beta, int step) float {
     float beta_t = 1.0
     int i = 0
@@ -67,7 +64,6 @@ func compute_bias_correction_s(float beta, int step) float {
     }
     1.0 - beta_t
 }
-
 func adamw_step_s(
     [][]float params,
     [][]float gradients,
@@ -119,7 +115,6 @@ func adamw_step_s(
         ratio: 0.0,
     }
 }
-
 func clip_grad_norm_s([][]float gradients, float max_norm) [][]float {
     float grad_norm = 0.0
     int i = 0

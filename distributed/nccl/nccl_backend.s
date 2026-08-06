@@ -8,7 +8,6 @@ struct nccl_config {
     string blocking_mode
     float timeout_secs
 }
-
 struct nccl_communicator {
     bool initialized
     uint64 comm_handle

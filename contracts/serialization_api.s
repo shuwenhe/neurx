@@ -15,7 +15,6 @@ struct serialization_config {
     compression: bool
     compression_level: i64
 }
-
 struct state_dict {
     tensors: map[string]tensor
     hyperparams: map[string]string

@@ -19,9 +19,6 @@ func RemoveComments(content string) string {
         continue
       }
     }
-    for strings.Contains(line, "/*") {
-      idx := strings.Index(line, "/*")
-      if strings.Contains(line[idx:], "*/") {
         endIdx := strings.Index(line[idx:], "*/")
         line = line[:idx] + line[idx+endIdx+2:]
       } else {
@@ -40,7 +37,6 @@ func RemoveComments(content string) string {
   }
   return strings.Join(result, "\n")
 }
-
 func ProcessFile(filepath string) error {
   content, err := ioutil.ReadFile(filepath)
   if err != nil {
@@ -53,7 +49,6 @@ func ProcessFile(filepath string) error {
   }
   return nil
 }
-
 func GetFilesWithComments(rootDir string) []string {
   var files []string
   filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
@@ -74,7 +69,6 @@ func GetFilesWithComments(rootDir string) []string {
   })
   return files
 }
-
 func main() {
   rootDir := "."
   if len(os.Args) > 1 {

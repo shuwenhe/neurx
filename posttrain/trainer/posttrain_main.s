@@ -1,18 +1,14 @@
 package neurx.posttrain.trainer.posttrain_main
 use std.io.eprintln
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_text_file, runtime_make_dirs, trim}
-
 func write_file_simple(string path, string content) int {
     eprintln("[DEBUG] Writing file to: " + path)
     eprintln("[DEBUG] Content length: " + int_to_str(len(content)))
-    
     runtime_make_dirs("/home/shuwen/shuwen/posttrain")
-    
     runtime_write_text_file(path, content)
     eprintln("[✓] File written: " + path)
     0
 }
-
 struct lora_config {
     int seq_len
     int hidden_size
@@ -35,7 +31,6 @@ struct lora_config {
     bool use_qlora
     string qlora_dtype
 }
-
 struct lora_linear {
     []float base_weight
     int out_dim
@@ -47,7 +42,6 @@ struct lora_linear {
     float dropout_rate
     []float last_input
 }
-
 struct named_lora_module {
     string name
     lora_linear layer
@@ -60,7 +54,6 @@ struct named_lora_module {
     []float initial_a
     []float initial_b
 }
-
 struct adapter_stats {
     float l1
     float l2
@@ -68,14 +61,12 @@ struct adapter_stats {
     int nonzero
     int total
 }
-
 struct delta_stats {
     float l1
     float l2
     float max_abs
     int changed_count
 }
-
 struct runtime_training_sample {
     string question
     string explanation
@@ -89,7 +80,6 @@ struct runtime_training_sample {
     string prompt
     string target
 }
-
 struct runtime_sample_batch {
     []runtime_training_sample items
     int count
@@ -109,7 +99,6 @@ func runtime_choice_text(runtime_training_sample sample) string {
     }
     sample.explanation
 }
-
 func runtime_build_prompt(runtime_training_sample sample) string {
     string prompt = sample.question
     if sample.subject != "" {
@@ -126,11 +115,9 @@ func runtime_build_prompt(runtime_training_sample sample) string {
     }
     prompt
 }
-
 func char_at(string text, int idx) string {
     return string(text[idx])
 }
-
 func runtime_split_lines(string text) []string {
     []string lines = []
     string current = ""
@@ -152,7 +139,6 @@ func runtime_split_lines(string text) []string {
     }
     lines
 }
-
 func text_window_to_vector(string text, int start, int count, int dim) []float {
     []float vec = fill_lora(dim, 0.0)
     if dim < 1 || count < 1 || start >= len(text) {
@@ -204,7 +190,6 @@ func text_window_to_vector(string text, int start, int count, int dim) []float {
     }
     vec
 }
-
 func run_posttrain_lora_sft() int {
     string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
     string data_file = runtime_env_get("NEURX_POSTTRAIN_DATA_FILE", "/home/shuwen/shuwen/dataset/medical/train.json")
@@ -344,45 +329,37 @@ func run_posttrain_lora_sft() int {
     eprintln("========== [Phase 5A Step 4] Preparing Training ==========")
     eprintln("[Step 4] Skipping complex data parsing - using simple defaults")
     eprintln("")
-    
     int token_count = 94
     int sample1_response_start = 40
     int vocab_size = 151936
     int lm_loss_count = 54
     int prompt_end_idx = 40
     int response_loss_count = 54
-    
     []int shifted_labels = []int{cap: 94}
     int i = 0
     while i < 94 {
         shifted_labels[i] = 0
         i = i + 1
     }
-    
     eprintln("[Step 4] Shifted labels configuration:")
     eprintln("[Step 4]   Original sequence length: 94")
     eprintln("[Step 4]   Prediction targets (shifted): 93")
     eprintln("[Step 4]   Valid loss positions: 54")
-    
     eprintln("[Step 4] Loss mask (response only):")
     eprintln("[Step 4]   Prompt positions: 40 (masked)")
     eprintln("[Step 4]   Response positions: 54 (compute loss)")
     eprintln("[Step 4]   Mask ratio: 1.000")
-    
     eprintln("[Step 4] Logits shape: [94, 896]")
     eprintln("[Step 4] Loss function: cross_entropy(logits[0:-1], labels[1:])")
     eprintln("[Step 4]   With masking: only compute for response tokens (labels != -100)")
     eprintln("[Step 4] ✓ Step 4 prepared (SIMPLIFIED)")
     eprintln("")
-    
     println("Training loop start")
     []float loss_history = []float{cap: epochs}
     float best_loss = 0.0
-    
     []float prompt_vec = fill_lora(hidden_size, 0.1)
     []float target_q = fill_lora(hidden_size, 0.0)
     []float target_v = fill_lora(v_out, 0.0)
-    
     int epoch = 0
     while epoch < epochs {
         eprintln("[Progress] epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " started")
@@ -394,28 +371,22 @@ func run_posttrain_lora_sft() int {
             int module_cursor = 0
             float sample_loss_sum = 0.0
             int sample_module_count = 0
-            
             []float output_reuse = fill_lora(896, 0.0)
             []float hidden_reuse = fill_lora(8, 0.0)
-            
             int max_modules = len(modules)
-            
             while module_cursor < max_modules {
                 named_lora_module module = modules[module_cursor]
-                
                 int out_dim = module.out_dim
                 int in_dim = module.in_dim
                 int rank_val = module.rank
                 float scaling_val = module.scaling
                 []float lora_A = module.lora_A
                 []float lora_B = module.lora_B
-                
                 []float target = target_q
                 int is_odd = module_cursor - ((module_cursor / 2) * 2)
                 if is_odd == 1 {
                     target = target_v
                 }
-                
                 int zero_idx = 0
                 while zero_idx < 896 {
                     output_reuse[zero_idx] = 0.0
@@ -426,7 +397,6 @@ func run_posttrain_lora_sft() int {
                     hidden_reuse[zero_idx] = 0.0
                     zero_idx = zero_idx + 1
                 }
-                
                 int r = 0
                 while r < rank_val {
                     int in_idx = 0
@@ -439,7 +409,6 @@ func run_posttrain_lora_sft() int {
                     }
                     r = r + 1
                 }
-                
                 int out_idx = 0
                 while out_idx < out_dim {
                     float sum = 0.0
@@ -454,17 +423,13 @@ func run_posttrain_lora_sft() int {
                     output_reuse[out_idx] = sum
                     out_idx = out_idx + 1
                 }
-                
                 float sample_loss = mse_loss(output_reuse, target)
-                
                 epoch_loss = epoch_loss + sample_loss
                 sample_loss_sum = sample_loss_sum + sample_loss
                 sample_module_count = sample_module_count + 1
-                
                 epoch_items = epoch_items + 1
                 module_cursor = module_cursor + 1
             }
-            
             eprintln("[Progress] Forward loop completed all " + int_to_str(max_modules) + " modules!")
             if sample_module_count > 0 {
                 eprintln("[Progress] epoch " + int_to_str(epoch + 1) + "/" + int_to_str(epochs) + " sample " + int_to_str(sample_idx + 1) + "/" + int_to_str(total_steps) + " loss=" + float_to_str(sample_loss_sum / (sample_module_count as float), 6))
@@ -484,7 +449,6 @@ func run_posttrain_lora_sft() int {
         epoch = epoch + 1
     }
     eprintln("[Progress] training complete - saving checkpoint")
-    
     string config_json = build_adapter_config_json_simple(
         model_path, rank, 16.0, 0.05, 896, 48
     )
@@ -493,10 +457,8 @@ func run_posttrain_lora_sft() int {
         config_json
     )
     eprintln("[✓] Saved adapter_config.json")
-    
     adapter_stats stats = adapter_stats{l1: 0.0, l2: 0.0, max_abs: 0.0, nonzero: 0, total: 0}
     delta_stats deltas = delta_stats{l1: 0.0, l2: 0.0, max_abs: 0.0, changed_count: 0}
-    
     string state_json = build_training_state_json_simple(
         data_file, best_loss, best_loss, best_loss,
         stats, deltas,
@@ -508,7 +470,6 @@ func run_posttrain_lora_sft() int {
         state_json
     )
     eprintln("[✓] Saved training_state.json")
-    
     println("")
     println("[Training Backend] S Runtime Real Trainer")
     println("[Training] Completed successfully - 48 LoRA modules trained with real data")
@@ -530,7 +491,6 @@ func run_posttrain_lora_sft() int {
     println("")
     0
 }
-
 func fill_lora(int n, float val) []float {
     []float result = []float{cap: n}
     int i = 0
@@ -540,7 +500,6 @@ func fill_lora(int n, float val) []float {
     }
     result
 }
-
 func init_gaussian(int n, float std) []float {
     []float result = []float{cap: n}
     int i = 0
@@ -554,7 +513,6 @@ func init_gaussian(int n, float std) []float {
     }
     result
 }
-
 func sqrt_lora(float x) float {
     if x < 0.0 {
         return 0.0
@@ -567,7 +525,6 @@ func sqrt_lora(float x) float {
     }
     guess
 }
-
 func write_simple_adapter_checkpoint(
     string output_dir,
     string model_path,
@@ -641,12 +598,10 @@ func write_simple_adapter_checkpoint(
     safetensors_writer_add_tensor(writer, v_b_tensor)
     _ = safetensors_writer_finish(writer)
     eprintln("[✓] Saved adapter_model.safetensors")
-    
     string config_json = build_adapter_config_json_simple(model_path, rank, alpha, effective_lr, v_out, 48)
     string config_path = output_dir + "/adapter_config.json"
     _ = runtime_write_binary_file(config_path, config_json)
     eprintln("[✓] Saved adapter_config.json")
-    
     string state_json = build_training_state_json_simple(
         "/home/shuwen/shuwen/dataset/medical/train.json",
         loss0, loss1, loss2,
@@ -658,7 +613,6 @@ func write_simple_adapter_checkpoint(
     _ = runtime_write_binary_file(state_path, state_json)
     eprintln("[✓] Saved training_state.json")
 }
-
 func build_adapter_config_json_simple(string model_path, int rank, float alpha, float effective_lr, int v_out, int module_count) string {
     string json = "{\n"
     json = json + "  \"base_model_name_or_path\": " + json_escape(model_path) + ",\n"
@@ -680,7 +634,6 @@ func build_adapter_config_json_simple(string model_path, int rank, float alpha, 
     json = json + "}\n"
     json
 }
-
 func build_training_state_json_simple(
     string data_file,
     float loss0,
@@ -725,7 +678,6 @@ func build_training_state_json_simple(
     json = json + "}\n"
     json
 }
-
 func compute_stats_from_layer([]named_lora_module modules) adapter_stats {
     float l1 = 0.0
     float l2 = 0.0
@@ -793,7 +745,6 @@ func compute_stats_from_layer([]named_lora_module modules) adapter_stats {
         total: total,
     }
 }
-
 func compute_delta_stats_from_layer([]named_lora_module modules) delta_stats {
     float l1 = 0.0
     float l2 = 0.0
@@ -859,7 +810,6 @@ func compute_delta_stats_from_layer([]named_lora_module modules) delta_stats {
         changed_count: changed,
     }
 }
-
 func save_lora_weights_json(
     string output_dir,
     []named_lora_module modules,
@@ -868,19 +818,15 @@ func save_lora_weights_json(
     if len(modules) < 1 {
         return 1
     }
-    
     string weights_json = "{\n"
     weights_json = weights_json + "  \"modules\": [\n"
-    
     int m_idx = 0
     while m_idx < len(modules) {
         named_lora_module curr = modules[m_idx]
-        
         weights_json = weights_json + "    {\n"
         weights_json = weights_json + "      \"name\": " + json_escape(curr.name) + ",\n"
         weights_json = weights_json + "      \"rank\": " + int_to_str(rank) + ",\n"
         weights_json = weights_json + "      \"lora_a_len\": " + int_to_str(len(curr.lora_A)) + ",\n"
-        
         weights_json = weights_json + "      \"lora_a_sample\": ["
         int a_sample_count = 0
         if len(curr.lora_A) > 10 {
@@ -897,9 +843,7 @@ func save_lora_weights_json(
             a_idx = a_idx + 1
         }
         weights_json = weights_json + "],\n"
-        
         weights_json = weights_json + "      \"lora_b_len\": " + int_to_str(len(curr.lora_B)) + ",\n"
-        
         weights_json = weights_json + "      \"lora_b_sample\": ["
         int b_sample_count = 0
         if len(curr.lora_B) > 10 {
@@ -916,7 +860,6 @@ func save_lora_weights_json(
             b_idx = b_idx + 1
         }
         weights_json = weights_json + "],\n"
-        
         float norm_a = 0.0
         if len(curr.initial_a) > 0 {
             norm_a = curr.initial_a[0]
@@ -928,23 +871,18 @@ func save_lora_weights_json(
         weights_json = weights_json + "      \"lora_a_norm\": " + float_to_str(norm_a, 6) + ",\n"
         weights_json = weights_json + "      \"lora_b_norm\": " + float_to_str(norm_b, 6) + "\n"
         weights_json = weights_json + "    }"
-        
         if m_idx < len(modules) - 1 {
             weights_json = weights_json + ","
         }
         weights_json = weights_json + "\n"
-        
         m_idx = m_idx + 1
     }
-    
     weights_json = weights_json + "  ]\n"
     weights_json = weights_json + "}\n"
-    
     write_file_simple(output_dir + "/adapter_model.json", weights_json)
     eprintln("[✓] LoRA weights saved to " + output_dir + "/adapter_model.json")
     0
 }
-
 func save_adapter_weights(
     string output_dir,
     []named_lora_module modules,
@@ -959,7 +897,6 @@ func save_adapter_weights(
     if len(modules) < 1 {
         return 1
     }
-    
     string config_json = "{\n"
     config_json = config_json + "  \"base_model_name_or_path\": \"/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct\",\n"
     config_json = config_json + "  \"bias\": \"none\",\n"
@@ -978,9 +915,7 @@ func save_adapter_weights(
     config_json = config_json + "  \"effective_learning_rate\": " + float_to_str(effective_lr, 6) + ",\n"
     config_json = config_json + "  \"training_backend\": \"S Runtime Real Trainer\"\n"
     config_json = config_json + "}\n"
-    
     write_file_via_shell(output_dir + "/adapter_config.json", config_json)
-    
     string state_json = "{\n"
     state_json = state_json + "  \"completed_steps\": " + int_to_str(samples_per_epoch * epochs) + ",\n"
     state_json = state_json + "  \"epochs\": " + int_to_str(epochs) + ",\n"
@@ -1008,11 +943,9 @@ func save_adapter_weights(
     state_json = state_json + "  \"nominal_rank\": " + int_to_str(rank) + ",\n"
     state_json = state_json + "  \"alpha\": " + float_to_str(alpha, 1) + "\n"
     state_json = state_json + "}\n"
-    
     write_file_via_shell(output_dir + "/training_state.json", state_json)
     0
 }
-
 func save_adapter_weights_safetensors(
     string output_dir,
     []named_lora_module modules,
@@ -1026,15 +959,12 @@ func save_adapter_weights_safetensors(
 ) int {
     string adapter_path = output_dir + "/adapter_model.safetensors"
     safetensors_writer writer = safetensors_writer_new(adapter_path)
-    
     int m_idx = 0
     while m_idx < len(modules) && m_idx < 4 {
         named_lora_module curr_module = modules[m_idx]
-        
         []int a_shape = []int{cap: 2}
         a_shape[0] = rank
         a_shape[1] = 896
-        
         tensor a_tensor = tensor {
             name: curr_module.name + ".lora_A.weight",
             dtype: "F32",
@@ -1043,18 +973,14 @@ func save_adapter_weights_safetensors(
             shape_count: 2,
             data_count: len(curr_module.lora_A),
         }
-        
         safetensors_writer_add_tensor(writer, a_tensor)
-        
         int b_out_dim = 896
         if m_idx - (m_idx / 2) * 2 == 1 {
             b_out_dim = v_out
         }
-        
         []int b_shape = []int{cap: 2}
         b_shape[0] = b_out_dim
         b_shape[1] = rank
-        
         tensor b_tensor = tensor {
             name: curr_module.name + ".lora_B.weight",
             dtype: "F32",
@@ -1063,18 +989,12 @@ func save_adapter_weights_safetensors(
             shape_count: 2,
             data_count: len(curr_module.lora_B),
         }
-        
         safetensors_writer_add_tensor(writer, b_tensor)
-        
         m_idx = m_idx + 1
     }
-    
     _ = safetensors_writer_finish(writer)
     0
 }
-
-
-
 func build_adapter_config_json(string model_path, int rank, float alpha, float effective_lr, int v_out, []named_lora_module modules) string {
     string json = "{\n"
     json = json + "  \"base_model_name_or_path\": " + json_escape(model_path) + ",\n"
@@ -1096,7 +1016,6 @@ func build_adapter_config_json(string model_path, int rank, float alpha, float e
     json = json + "}\n"
     json
 }
-
 func build_training_state_json(
     string data_file,
     []float loss_history,
@@ -1150,7 +1069,6 @@ func build_training_state_json(
     json = json + "}\n"
     json
 }
-
 func text_to_vector(string text, int dim) []float {
     []float vec = fill_lora(dim, 0.0)
     if dim < 1 {
@@ -1184,7 +1102,6 @@ func text_to_vector(string text, int dim) []float {
     }
     vec
 }
-
 func mse_loss([]float predictions, []float targets) float {
     float loss = 0.0
     int i = 0
@@ -1202,7 +1119,6 @@ func mse_loss([]float predictions, []float targets) float {
     }
     loss
 }
-
 func mse_gradient([]float predictions, []float targets) []float {
     int limit = len(predictions)
     if len(targets) < limit {
@@ -1216,14 +1132,12 @@ func mse_gradient([]float predictions, []float targets) []float {
     }
     grad
 }
-
 func abs_float(float value) float {
     if value < 0.0 {
         return 0.0 - value
     }
     value
 }
-
 func copy_float_array([]float source) []float {
     []float result = []float{cap: len(source)}
     int i = 0
@@ -1233,7 +1147,6 @@ func copy_float_array([]float source) []float {
     }
     result
 }
-
 func first_non_empty_line(string path) string {
     string content = runtime_read_text_file(path)
     string current = ""
@@ -1258,7 +1171,6 @@ func first_non_empty_line(string path) string {
     }
     ""
 }
-
 func extract_json_string_field(string json_text, string field_name) string {
     string needle = "\"" + field_name + "\""
     int pos = find_substring(json_text, needle)
@@ -1322,7 +1234,6 @@ func extract_json_string_field(string json_text, string field_name) string {
     }
     out
 }
-
 func extract_json_int_field(string json_text, string field_name, int fallback) int {
     string needle = "\"" + field_name + "\""
     int pos = find_substring(json_text, needle)
@@ -1354,7 +1265,6 @@ func extract_json_int_field(string json_text, string field_name, int fallback) i
     }
     parse_int(token, fallback)
 }
-
 func find_substring(string text, string pattern) int {
     if len(pattern) == 0 {
         return 0
@@ -1375,7 +1285,6 @@ func find_substring(string text, string pattern) int {
     }
     -1
 }
-
 func parse_int(string s, int fallback) int {
     string text = trim(s)
     if text == "" {
@@ -1419,18 +1328,15 @@ func parse_int(string s, int fallback) int {
     }
     sign * value
 }
-
 func make_shape(int a, int b) []int {
     []int shape = []int{cap: 2}
     shape[0] = a
     shape[1] = b
     shape
 }
-
 func string_char(int c) string {
     string(c)
 }
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -1461,7 +1367,6 @@ func int_to_str(int n) string {
     }
     out
 }
-
 func float_to_str(float value, int decimals) string {
     float current = value
     bool neg = current < 0.0
@@ -1500,7 +1405,6 @@ func float_to_str(float value, int decimals) string {
     }
     out
 }
-
 func json_escape(string s) string {
     string out = "\""
     int i = 0
@@ -1524,7 +1428,6 @@ func json_escape(string s) string {
     out = out + "\""
     out
 }
-
 func main() {
     return run_posttrain_lora_sft()
 }

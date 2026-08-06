@@ -15,7 +15,6 @@ struct remax_config {
     float beta
     bool use_advantage_normalization
 }
-
 struct remax_state {
     tensor policy_logits
     tensor value_estimates
@@ -45,7 +44,6 @@ func new_remax_config() remax_config {
         use_advantage_normalization: true,
     }
 }
-
 func remax_compute_policy_loss(
     tensor log_probs,
     tensor old_log_probs,
@@ -76,7 +74,6 @@ func remax_compute_policy_loss(
     )
     (policy_loss, kl_div)
 }
-
 func remax_step(
     module policy,
     module value_model,

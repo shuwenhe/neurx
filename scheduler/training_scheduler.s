@@ -20,7 +20,6 @@ func new_lr_scheduler(float lr) lr_scheduler {
         kind:         "constant",
     }
 }
-
 func new_named_lr_scheduler(float base_lr, float min_lr, int warmup_steps, int max_steps, string kind) lr_scheduler {
     lr_scheduler {
         lr:           base_lr,
@@ -32,7 +31,6 @@ func new_named_lr_scheduler(float base_lr, float min_lr, int warmup_steps, int m
         kind:         kind,
     }
 }
-
 func scheduler_step(lr_scheduler sched, int epoch) lr_scheduler {
     float new_lr = sched.lr
     if sched.kind == "cosine" {
@@ -50,15 +48,12 @@ func scheduler_step(lr_scheduler sched, int epoch) lr_scheduler {
         kind:         sched.kind,
     }
 }
-
 func scheduler_current_lr(lr_scheduler sched) float {
     sched.lr
 }
-
 func scheduler_state_dict(lr_scheduler sched) lr_scheduler {
     sched
 }
-
 func scheduler_load_state_dict(lr_scheduler sched) lr_scheduler {
     sched
 }

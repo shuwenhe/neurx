@@ -16,7 +16,6 @@ struct GMPOConfig {
     reward_normalization: bool
     min_reward_value: f32
 }
-
 struct GMPOTrainer {
     config: GMPOConfig
     policy_model: *Model
@@ -26,7 +25,6 @@ struct GMPOTrainer {
     reward_statistics: []RewardStats
     step_count: i64
 }
-
 struct RewardStats {
     mean: f32
     std: f32
@@ -64,7 +62,6 @@ func new_gmpo_trainer(
         step_count: 0,
     }
 }
-
 func (trainer: *GMPOTrainer) compute_geometric_mean(rewards: []f32) -> f32 {
     if rewards.len() == 0 {
         return 0.0
@@ -81,7 +78,6 @@ func (trainer: *GMPOTrainer) compute_geometric_mean(rewards: []f32) -> f32 {
     let geometric_mean = exp(log_sum / f32(shifted_rewards.len()))
     return geometric_mean - trainer.config.epsilon
 }
-
 func compute_arithmetic_mean(rewards: []f32) -> f32 {
     if rewards.len() == 0 {
         return 0.0
@@ -92,7 +88,6 @@ func compute_arithmetic_mean(rewards: []f32) -> f32 {
     }
     return sum / f32(rewards.len())
 }
-
 func (trainer: *GMPOTrainer) update_reward_statistics(
     multi_rewards: [][]f32
 ) {
@@ -127,7 +122,6 @@ func (trainer: *GMPOTrainer) update_reward_statistics(
         }
     }
 }
-
 func (trainer: *GMPOTrainer) normalize_rewards(
     multi_rewards: [][]f32
 ) -> [][]f32 {
@@ -148,7 +142,6 @@ func (trainer: *GMPOTrainer) normalize_rewards(
     }
     return normalized
 }
-
 func (trainer: *GMPOTrainer) combine_rewards(multi_rewards: []f32) -> f32 {
     if trainer.config.use_geometric_mean {
         return trainer.compute_geometric_mean(multi_rewards)
@@ -156,7 +149,6 @@ func (trainer: *GMPOTrainer) combine_rewards(multi_rewards: []f32) -> f32 {
         return compute_arithmetic_mean(multi_rewards)
     }
 }
-
 func (trainer: *GMPOTrainer) compute_gae(
     rewards: []Tensor,
     values: []Tensor,
@@ -195,7 +187,6 @@ func (trainer: *GMPOTrainer) compute_gae(
     }
     return advantages, returns
 }
-
 func (trainer: *GMPOTrainer) train_step(
     prompts: []Tensor,
     responses: []Tensor,
@@ -292,7 +283,6 @@ func (trainer: *GMPOTrainer) train_step(
         total_kl / f32(num_updates)
     )
 }
-
 func (trainer: *GMPOTrainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let value_losses: []f32 = []
@@ -314,7 +304,6 @@ func (trainer: *GMPOTrainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     }
     return policy_losses, value_losses
 }
-
 func (trainer: *GMPOTrainer) print_reward_statistics() {
     println("Reward Statistics (Geometric Mean):")
     for i in 0..trainer.config.num_rewards {
@@ -325,7 +314,6 @@ func (trainer: *GMPOTrainer) print_reward_statistics() {
                f"max={stats.max:.4f}")
     }
 }
-
 func compute_mean(values: []f32) -> f32 {
     if values.len() == 0 {
         return 0.0
@@ -336,7 +324,6 @@ func compute_mean(values: []f32) -> f32 {
     }
     return sum / f32(values.len())
 }
-
 func compute_std(values: []f32, mean: f32) -> f32 {
     if values.len() == 0 {
         return 1.0

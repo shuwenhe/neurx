@@ -27,7 +27,6 @@ struct document_parser_config {
     enable_section_detection: bool = true
     enable_page_numbering: bool = true
 }
-
 struct parsed_document {
     content: string
     metadata: document_metadata
@@ -39,7 +38,6 @@ struct parsed_document {
     statistics: document_statistics
     raw_structure: any?
 }
-
 struct document_metadata {
     filename: string
     file_path: string
@@ -55,7 +53,6 @@ struct document_metadata {
     language: string?
     encoding: string?
 }
-
 struct document_section {
     id: string
     title: string
@@ -66,7 +63,6 @@ struct document_section {
     page_number?: int
     subsections: list<document_section>?
 }
-
 struct extracted_table {
     id: string
     headers: list<string>
@@ -80,7 +76,6 @@ struct extracted_table {
     confidence: float
     bbox?: tuple<float, float, float, float>?
 }
-
 struct extracted_image {
     id: string
     data: bytes
@@ -91,20 +86,17 @@ struct extracted_image {
     caption: string?
     position: tuple<int, int>?
 }
-
 struct extracted_link {
     url: string
     text: string
     link_type: string
 }
-
 struct code_block {
     language: string
     code: string
     start_line: int
     end_line: int
 }
-
 struct document_statistics {
     total_characters: int
     total_words: int

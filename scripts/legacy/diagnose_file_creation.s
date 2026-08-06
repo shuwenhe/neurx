@@ -14,7 +14,6 @@ func main() {
     println("This S entrypoint centralizes the file creation diagnostic status layer.")
     0
 }
-
 func check_path(string path) string {
     if runtime_file_exists(path) {
         return "ready (" + path + ")"

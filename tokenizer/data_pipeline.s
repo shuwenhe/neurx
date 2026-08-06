@@ -58,7 +58,6 @@ func default_llm_tokenizer_config() tokenizer_config {
     cfg.return_token_type_ids = false
     return cfg
 }
-
 struct bpe_tokenizer_state {
     tokenizer_config config
     []string id_to_token
@@ -73,7 +72,6 @@ struct bpe_tokenizer_state {
     int total_strings_encoded
     float avg_tokens_per_string
 }
-
 func init_bpe_tokenizer(tokenizer_config config) bpe_tokenizer_state {
     bpe_tokenizer_state state
     state.config = config
@@ -91,7 +89,6 @@ func init_bpe_tokenizer(tokenizer_config config) bpe_tokenizer_state {
     }
     return state
 }
-
 func load_vocabulary(bpe_tokenizer_state state, string vocab_path) bpe_tokenizer_state {
     string content = read_text_file(vocab_path)
     if len(content) == 0 {
@@ -103,7 +100,6 @@ func load_vocabulary(bpe_tokenizer_state state, string vocab_path) bpe_tokenizer
     state.token_to_id = vocab
     return state
 }
-
 func load_merges(bpe_tokenizer_state state, string merges_path) bpe_tokenizer_state {
     string content = read_text_file(merges_path)
     if len(content) == 0 {
@@ -133,7 +129,6 @@ func load_merges(bpe_tokenizer_state state, string merges_path) bpe_tokenizer_st
     }
     return state
 }
-
 func encode(bpe_tokenizer_state state, string text) []int {
     state.total_strings_encoded = state.total_strings_encoded + 1
     if state.config.enable_caching && state.encoding_cache.contains(text) {
@@ -165,7 +160,6 @@ func encode(bpe_tokenizer_state state, string text) []int {
     }
     return all_token_ids
 }
-
 func bpe_encode_word(bpe_tokenizer_state state, string word) []int {
     []string tokens = []string{cap: len(word)}
     int i = 0

@@ -15,7 +15,6 @@ func normalize([]float arr) []float {
     }
     normalized
 }
-
 func argsort_descending([]float arr) []int {
     int n = len(arr)
     if n == 0 { return [] }

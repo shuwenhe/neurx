@@ -51,7 +51,6 @@ func create_7b_config(): large_model_config {
         zero_stage: 1,
     }
 }
-
 func create_13b_config(): large_model_config {
     return large_model_config{
         model_name: "neurx-13b",
@@ -72,7 +71,6 @@ func create_13b_config(): large_model_config {
         zero_stage: 2,
     }
 }
-
 func create_70b_config(): large_model_config {
     return large_model_config{
         model_name: "neurx-70b",
@@ -93,7 +91,6 @@ func create_70b_config(): large_model_config {
         zero_stage: 3,
     }
 }
-
 func (config *large_model_config) estimate_memory(batch_size: int): memory_estimate {
     num_params := float(config.num_params)
     weights_bytes := num_params * 4.0
@@ -134,7 +131,6 @@ type gradient_accumulator struct {
     should_sync: bool
     step_counter: int
 }
-
 func (ga *gradient_accumulator) init(accumulation_steps: int) {
     ga.accumulation_steps = accumulation_steps
     ga.current_step = 0
@@ -142,7 +138,6 @@ func (ga *gradient_accumulator) init(accumulation_steps: int) {
     ga.should_sync = false
     ga.step_counter = 0
 }
-
 func (ga *gradient_accumulator) accumulate(grad_name: string, grad: []float) {
     if _, exists := ga.accumulated_grads[grad_name]; !exists {
         ga.accumulated_grads[grad_name] = make([]float, len(grad))
@@ -153,15 +148,12 @@ func (ga *gradient_accumulator) accumulate(grad_name: string, grad: []float) {
     ga.current_step++
     ga.step_counter++
 }
-
 func (ga *gradient_accumulator) should_sync_gradients(): bool {
     return ga.current_step >= ga.accumulation_steps
 }
-
 func (ga *gradient_accumulator) get_accumulated_grads(): map[string][]float {
     return ga.accumulated_grads
 }
-
 func (ga *gradient_accumulator) scale_accumulated_grads() {
     scale := 1.0 / float(ga.accumulation_steps)
     for grad_name, grad := range ga.accumulated_grads {
@@ -171,7 +163,6 @@ func (ga *gradient_accumulator) scale_accumulated_grads() {
         ga.accumulated_grads[grad_name] = grad
     }
 }
-
 func (ga *gradient_accumulator) reset() {
     for grad_name := range ga.accumulated_grads {
         for i := 0; i < len(ga.accumulated_grads[grad_name]); i++ {
@@ -184,7 +175,6 @@ type activation_checkpointer struct {
     checkpoint_segments: int
     checkpointed_layers: map[int]bool
 }
-
 func (ac *activation_checkpointer) init(num_layers: int) {
     ac.checkpoint_segments = 0
     ac.checkpointed_layers = make(map[int]bool)
@@ -192,22 +182,18 @@ func (ac *activation_checkpointer) init(num_layers: int) {
         ac.checkpointed_layers[i] = true
     }
 }
-
 func (ac *activation_checkpointer) checkpoint_layer(layer_id: int) {
     ac.checkpointed_layers[layer_id] = true
 }
-
 func (ac *activation_checkpointer) skip_checkpoint(layer_id: int) {
     ac.checkpointed_layers[layer_id] = false
 }
-
 func (ac *activation_checkpointer) is_checkpointed(layer_id: int): bool {
     if val, exists := ac.checkpointed_layers[layer_id]; exists {
         return val
     }
     return false
 }
-
 func (ac *activation_checkpointer) estimate_memory_savings(): float {
     checkpointed_count := 0
     for _, is_ckpt := range ac.checkpointed_layers {
@@ -233,7 +219,6 @@ type large_model_trainer struct {
     rank: int
     is_master: bool
 }
-
 func (lmt *large_model_trainer) init(config_name: string, world_size: int, rank: int) error {
     var config large_model_config
     if config_name == "7b" {
@@ -264,7 +249,6 @@ func (lmt *large_model_trainer) init(config_name: string, world_size: int, rank:
     }
     return nil
 }
-
 func (lmt *large_model_trainer) print_config() {
     if !lmt.is_master {
         return
@@ -311,7 +295,6 @@ func (lmt *large_model_trainer) print_config() {
         8 * lmt.config.gradient_accumulation_steps * lmt.world_size)
     fmt.Printf("\n")
 }
-
 func (lmt *large_model_trainer) check_resources(): bool {
     if lmt.memory_est.total_gb > 80.0 {
         fmt.Printf("⚠️  WARNING: Memory per GPU (%.2f GB) may exceed H100 (80 GB)\n", lmt.memory_est.total_gb)
@@ -326,7 +309,6 @@ func (lmt *large_model_trainer) check_resources(): bool {
     }
     return true
 }
-
 func (lmt *large_model_trainer) get_step_info(): map[string]interface{} {
     info := make(map[string]interface{})
     info["global_step"] = lmt.global_step
@@ -336,7 +318,6 @@ func (lmt *large_model_trainer) get_step_info(): map[string]interface{} {
     info["memory_per_gpu_gb"] = lmt.memory_est.total_gb
     return info
 }
-
 func main() {
     model_size := os.Getenv("MODEL_SIZE")
     if model_size == "" {
@@ -370,25 +351,20 @@ func main() {
     data, _ := json.MarshalIndent(step_info, "", "  ")
     fmt.Printf("%s\n", string(data))
 }
-
 func CreateTrainer(model_size: string, world_size: int, rank: int): (*large_model_trainer, error) {
     trainer := &large_model_trainer{}
     err := trainer.init(model_size, world_size, rank)
     return trainer, err
 }
-
 func (lmt *large_model_trainer) GetMemoryEstimate(): memory_estimate {
     return lmt.memory_est
 }
-
 func (lmt *large_model_trainer) GetConfig(): large_model_config {
     return lmt.config
 }
-
 func (lmt *large_model_trainer) GetGradientAccumulator(): *gradient_accumulator {
     return &lmt.grad_accumulator
 }
-
 func (lmt *large_model_trainer) GetActivationCheckpointer(): *activation_checkpointer {
     return &lmt.activation_ckpt
 }

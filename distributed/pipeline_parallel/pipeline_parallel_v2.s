@@ -14,14 +14,12 @@ struct pipeline_config {
     int checkpoint_strategy
     bool overlap_comm_compute
 }
-
 struct pipeline_stage {
     int stage_id
     int start_layer
     int end_layer
     int num_layers_local
 }
-
 struct microbatch_state {
     int microbatch_id
     bool forward_done
@@ -31,7 +29,6 @@ struct microbatch_state {
     [][]double input_gradient
     [][]double output_gradient
 }
-
 struct pipeline_state {
     pipeline_config config
     pipeline_stage stage_info
@@ -55,7 +52,6 @@ func pp_mod(int val, int div) int {
     while r < 0 { r = r + div }
     return r
 }
-
 func init_pipeline(pipeline_config cfg) pipeline_state {
     pipeline_state state
     state.config = cfg
@@ -103,15 +99,11 @@ func init_pipeline(pipeline_config cfg) pipeline_state {
     }
     return state
 }
-
 func execute_1f1b_step(
     ref pipeline_state state,
     [][]double initial_input,
-
     func forward_fn,
-
     func backward_fn,
-
     func loss_fn) double {
     pipeline_config cfg = state.config
     int rank = cfg.pp_rank
@@ -222,7 +214,6 @@ func execute_1f1b_step(
     }
     return 0.0
 }
-
 func run_forward_stage(pipeline_state state, [][]double input, int mb_id) [][]double {
     [][]double current = input
     if state.config.use_activation_checkpointing != 2 {
@@ -234,7 +225,6 @@ func run_forward_stage(pipeline_state state, [][]double input, int mb_id) [][]do
     }
     return current
 }
-
 func run_backward_stage(pipeline_state state, [][]double grad_output, int mb_id) [][]double {
     [][]double current_grad = grad_output
     int layer_idx = state.stage_info.num_layers_local - 1
@@ -243,30 +233,24 @@ func run_backward_stage(pipeline_state state, [][]double grad_output, int mb_id)
     }
     return current_grad
 }
-
 func p2p_send_to_next(pipeline_state state, [][]double activation, int mb_id) {
     state.time_comm_ms = state.time_comm_ms + 0.05
 }
-
 func p2p_recv_from_prev(pipeline_state state, int mb_id) [][]double {
     state.time_comm_ms = state.time_comm_ms + 0.05
     return [][]double{}
 }
-
 func p2p_send_grad_to_prev(pipeline_state state, [][]double gradient, int mb_id) {
     state.time_comm_ms = state.time_comm_ms + 0.05
 }
-
 func p2p_recv_grad_from_next(pipeline_state state, int mb_id) [][]double {
     state.time_comm_ms = state.time_comm_ms + 0.05
     return [][]double{}
 }
-
 func free_microbatch_activations(ref pipeline_state state, int mb_id) {
     state.mb_states[mb_id].input_activation = [][]double{}
     state.mb_states[mb_id].output_activation = [][]double{}
 }
-
 func copy_tensor([][]double src) [][]double {
     int rows = len(src)
     if rows == 0 { return [][]double{} }
@@ -284,7 +268,6 @@ func copy_tensor([][]double src) [][]double {
     }
     return dst
 }
-
 struct pipeline_metrics {
     double throughput_tokens_per_sec
     double utilization_percent
@@ -294,7 +277,6 @@ struct pipeline_metrics {
     int steps_completed
     double avg_step_time_ms
 }
-
 func analyze_pipeline_performance(pipeline_state state, double wall_clock_time_ms) pipeline_metrics {
     pipeline_metrics m
     m.steps_completed = 1
@@ -315,10 +297,8 @@ func analyze_pipeline_performance(pipeline_state state, double wall_clock_time_m
     m.throughput_tokens_per_sec = tokens_per_step / (wall_clock_time_ms / 1000.0)
     return m
 }
-
 func print_pipeline_stats(pipeline_state state, pipeline_metrics metrics) {
 }
-
 func recommended_pp_config_2t(int num_gpus_available) pipeline_config {
     int optimal_pp = 8
     if num_gpus_available >= 512 {
