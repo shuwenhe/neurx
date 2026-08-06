@@ -13,7 +13,6 @@ func CATEGORY_HEALTH() int { return 7 }
 func CATEGORY_ANATOMY() int { return 8 }
 func CATEGORY_PATHOLOGY() int { return 9 }
 
-
 func to_lower(string text) string {
     string result = ""
     int i = 0
@@ -121,7 +120,7 @@ func detect_category(string text) int {
 
 func generate_treatment_response(string text) string {
     string lower = to_lower(text)
-    
+
     if contains_substr(lower, "diabetes") || contains_substr(lower, "diabetic") || contains_substr(lower, "糖尿病") {
         return "糖尿病的治疗通常包括：\n1. 血糖控制（胰岛素或口服药物）\n2. 饮食管理和运动\n3. 定期监测血糖和血压\n4. 预防并发症（眼睛、肾脏、神经）\n建议在内分泌专家指导下进行治疗。"
     }
@@ -143,7 +142,7 @@ func generate_treatment_response(string text) string {
 
 func generate_symptom_response(string text) string {
     string lower = to_lower(text)
-    
+
     if contains_substr(lower, "pain") || contains_substr(lower, "ache") || contains_substr(lower, "疼痛") {
         return "疼痛是一个复杂的症状，可能由多种原因引起：\n\n常见原因：\n1. 肌肉骨骼问题：拉伤、扭伤、关节炎\n2. 神经压迫：坐骨神经痛、脊椎问题\n3. 炎症：感染、自免疾病\n4. 内脏疾病：心脏、消化系统、生殖系统问题\n5. 其他：肿瘤、代谢性疾病\n\n评估重点：\n- 疼痛位置、性质和放射情况\n- 发作频率和持续时间\n- 加重或缓解因素\n- 伴随症状\n\n建议：就医进行全面评估，必要时进行影像学检查。"
     }
@@ -159,13 +158,13 @@ func generate_symptom_response(string text) string {
 
 func generate_diagnosis_response(string text) string {
     string lower = to_lower(text)
-    
+
     return "诊断是医学实践中最重要的步骤：\n\n诊断过程通常包括：\n1. 病史采集（现病史、既往史、家族史、生活史）\n2. 体格检查（全面的临床检查）\n3. 实验室检查：\n   - 血液检查：血球计数、生化指标\n   - 尿液检查\n   - 特异性标志物检查\n4. 影像学检查：\n   - X线成像\n   - 超声检查\n   - CT/MRI检查\n   - 其他专项检查\n5. 特殊检查：\n   - 内镜检查\n   - 病理活检\n   - 功能学检查\n\n诊断思维：\n1. 根据症状和体征构建鉴别诊断清单\n2. 通过检查逐步排除或确认\n3. 综合分析所有信息做出最可能的诊断\n4. 必要时追加检查确诊\n\n重要提醒：\n- 准确诊断是有效治疗的基础\n- 不同疾病的诊断标准不同\n- 某些疾病需要专科医生诊断\n- 遵循循证医学原则\n\n建议：各类症状和体征应由有资质的医疗专业人员进行诊断。"
 }
 
 func generate_disease_response(string text) string {
     string lower = to_lower(text)
-    
+
     if contains_substr(lower, "heart") || contains_substr(lower, "cardiac") || contains_substr(lower, "心脏") {
         return "心脏病的医学知识：\n\n心脏病类型：\n1. 冠心病：冠状动脉粥样硬化\n   - 表现：心绞痛、心肌梗死\n   - 危险因素：吸烟、高血压、高脂血症、糖尿病\n\n2. 心律不齐：心脏电传导异常\n   - 常见类型：房颤、室速、心动过缓\n   - 症状：心悸、晕厥、乏力\n\n3. 心力衰竭：心脏泵血功能减退\n   - 分类：收缩期/舒张期、急性/慢性\n   - 症状：呼吸困难、浮肿、乏力\n\n4. 瓣膜病：心脏瓣膜结构或功能异常\n\n危险信号：\n- 突然胸痛\n- 严重呼吸困难\n- 晕厥\n- 快速无规律心跳\n\n预防：控制危险因素、规律锻炼、健康饮食、定期体检。"
     }
@@ -185,7 +184,7 @@ func generate_drug_response(string text) string {
 
 func generate_infection_response(string text) string {
     string lower = to_lower(text)
-    
+
     return "感染性疾病的医学知识：\n\n感染的基本概念：\n病原体成功入侵机体，克服防御机制，在组织内繁殖引起的病理过程。\n\n主要病原体类型：\n1. 细菌感染：\n   - 常见细菌：金黄色葡萄球菌、链球菌、大肠杆菌\n   - 感染部位：皮肤、呼吸道、泌尿道、血液\n   - 治疗：抗生素\n\n2. 病毒感染：\n   - 常见病毒：流感、COVID-19、疱疹病毒\n   - 症状：通常为自限性\n   - 治疗：主要是支持性治疗\n\n3. 真菌感染：\n   - 常见真菌：念珠菌、曲霉菌\n   - 易发人群：免疫低下者\n   - 治疗：抗真菌药\n\n4. 寄生虫感染：\n   - 常见寄生虫：蠕虫、原虫\n   - 治疗：相应的抗寄生虫药\n\n感染的进展阶段：\n1. 局部感染：局限于特定部位\n2. 全身感染/败血症：病原体进入血液，引起全身性炎症反应\n\n感染的临床表现：\n- 局部：红肿热痛\n- 全身：发热、寒战、头痛、肌肉酸痛\n\n预防感染：\n- 个人卫生：洗手、清洁伤口\n- 疫苗接种\n- 避免与感染者接触\n- 食品卫生和安全\n- 安全医疗操作\n\n抗感染原则：\n- 早期诊断和治疗\n- 选择合适的抗感染药物\n- 完成完整疗程\n- 监测治疗效果"
 }
 

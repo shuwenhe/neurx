@@ -83,20 +83,20 @@ func main() {
     print("\n")
     print("Type medical questions (or /exit to quit)\n")
     print("════════════════════════════════════════════════════════════════\n\n")
-    
+
     while true {
         print("You: ")
         string input = trim(__sys_read_string(0, 512))
-        
+
         if input == "/exit" || input == "exit" {
             print("\nGoodbye!\n")
             return
         }
-        
+
         if len(input) == 0 {
             continue
         }
-        
+
         string response = generate_response(input)
         print("Assistant: " + response + "\n\n")
     }

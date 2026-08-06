@@ -52,7 +52,7 @@ python3 tests/reference/week1_verify.py
 
 ### Step 2: Implement NeurX Tokenizer + Embedding
 ```python
-# In scripts/train_lora_with_embeddings.py
+
 from transformers import AutoTokenizer
 
 def tokenize_and_embed(text, model_path):
@@ -64,7 +64,7 @@ def tokenize_and_embed(text, model_path):
 
 ### Step 3: Compare Against Golden
 ```python
-# Your implementation
+
 from tests.reference import load_golden, compute_l2_distance
 
 golden = load_golden("embedding")
@@ -115,7 +115,7 @@ assert error < 0.1, f"Embedding mismatch: {error}"
     "mlp_output": [...],
     "layer_norm_output": [...]
   },
-  // ... 23 more layers
+
   "final_logits": [52, 152064]
 }
 ```
@@ -156,12 +156,12 @@ assert error < 0.1, f"Embedding mismatch: {error}"
 ## Running All Tests
 
 ```bash
-# Run all verification scripts
+
 python3 tests/reference/week1_verify.py
 python3 tests/reference/week2_verify.py
 python3 tests/reference/week3_verify.py
 
-# Or run together
+
 for week in 1 2 3; do
   python3 tests/reference/week${week}_verify.py
   if [ $? -ne 0 ]; then
@@ -250,9 +250,9 @@ print(f"Forward pass: {elapsed:.3f}s")
 
 ### Add ablation tests
 ```python
-# Test: Remove LoRA injection
+
 result_no_lora = forward_pass(tokens, lora=False)
-# Compare against result_with_lora
+
 ```
 
 ---

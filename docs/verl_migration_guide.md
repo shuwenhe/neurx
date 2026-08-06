@@ -162,7 +162,7 @@ distiller.train(train_loader)
 for batch in dataloader:
     prompts = batch["prompts"]
     responses = batch["responses"]
-    # Process batch
+
 ```
 
 **neurx:**
@@ -170,7 +170,7 @@ for batch in dataloader:
 for batch in dataloader {
     let prompts = batch.prompts
     let responses = batch.responses
-    // Process batch
+
 }
 ```
 
@@ -251,7 +251,7 @@ from verl.workers.rollout import vLLMRollout
 from verl.workers.checkpoint import MooncakeCheckpointEngine
 from verl.reward import BatchRewardManager
 
-# Setup
+
 config = PPOConfig(
     learning_rate=1e-5,
     clip_epsilon=0.2,
@@ -282,7 +282,7 @@ trainer = PPOTrainer(
     reward_manager=reward_manager,
 )
 
-# Train
+
 trainer.fit(train_dataloader)
 ```
 
@@ -293,7 +293,7 @@ import "posttrain/inference/vllm/vllm.s"
 import "checkpoint/mooncake_engine.s"
 import "posttrain/reward/reward_managers.s"
 
-// Setup
+
 let config = PPOConfig{
     learning_rate: 1e-5,
     clip_epsilon: 0.2,
@@ -326,7 +326,7 @@ let trainer = new_ppo_trainer(
     reward_manager
 )
 
-// Train
+
 trainer.train(train_dataloader)
 ```
 
@@ -344,14 +344,14 @@ trainer.train(train_dataloader)
 
 **verl (Python):**
 ```python
-# Lists are mutable by default
+
 data = []
 data.append(item)
 ```
 
 **neurx (s):**
 ```s
-// Need to explicitly make mutable
+
 let data: []Item = []
 data.push(item)  // Works because of let (mutable binding)
 ```

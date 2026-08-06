@@ -199,7 +199,7 @@
 
 ### 8.2 编译测试计划
 ```bash
-# 待执行的编译命令
+
 s compile posttrain/alignment/rollout_correction/config.s
 s compile posttrain/alignment/rollout_correction/importance_sampling.s
 s compile posttrain/alignment/rollout_correction/rejection_sampling.s
@@ -221,8 +221,8 @@ s compile posttrain/alignment/vectorized/vectorized_estimators.s
 
 测试方法:
 ```python
-# 使用verl生成golden输出
-# 对比neurx实现输出
+
+
 ```
 
 #### Rejection Sampling Golden Test

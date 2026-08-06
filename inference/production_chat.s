@@ -14,7 +14,6 @@ extern "intrinsic" func __sys_close(int fd) int
 
 extern "intrinsic" func __sys_set_deadline_ms(int fd, int read_timeout_ms, int write_timeout_ms) int
 
-
 func to_lower(string text) string {
     string result = ""
     int i = 0
@@ -54,7 +53,7 @@ func contains_substr(string text, string substr) bool {
 
 func detect_category(string text) int {
     string lower = to_lower(text)
-    
+
     if contains_substr(lower, "treatment") || contains_substr(lower, "treat") || contains_substr(lower, "治疗") {
         return 1
     }

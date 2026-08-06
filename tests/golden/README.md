@@ -13,10 +13,10 @@
 
 ```python
 def test_tokenization():
-    # Tokenization verification LOGIC
+
     hf_tokens = tokenizer.encode(TEST_TEXT)
     assert len(hf_tokens) > 0
-    # ... more verification
+
 ```
 
 ### `tests/golden/` ← You are here
@@ -119,7 +119,7 @@ golden = load_json("tests/golden/logits.json")
 your_logits = your_model(tokens)
 
 assert your_logits.shape == tuple(golden["shape"])
-# Check that top-5 tokens are reasonable
+
 top_k_you = topk(your_logits, k=5)
 top_k_hf = golden["top_k_per_token"]["token_0_top_5_tokens"]
 ```
@@ -143,7 +143,7 @@ top_k_hf = golden["top_k_per_token"]["token_0_top_5_tokens"]
 ```python
 golden = load_json("tests/golden/prompts.json")
 prompt = golden["default_prompt"]
-# Use same prompt across week1, week2, week3 tests
+
 ```
 
 ---
@@ -174,7 +174,7 @@ prompt = golden["default_prompt"]
 ```python
 golden = load_json("tests/golden/metrics.json")
 
-# For Phase 2A Week 1
+
 l2_threshold = golden["phase_2a_target_metrics"]["week_1"]["l2_error_threshold"]
 assert embedding_l2_error < l2_threshold
 ```
@@ -196,7 +196,7 @@ model = AutoModel.from_pretrained(model_path)
 
 prompt = "What is the treatment for chronic urinary tract infection?"
 
-# Tokenizer golden
+
 tokens = tokenizer.encode(prompt)
 with open("tests/golden/tokenizer.json", "w") as f:
     json.dump({
@@ -206,7 +206,7 @@ with open("tests/golden/tokenizer.json", "w") as f:
         "vocab_size": len(tokenizer)
     }, f, indent=2)
 
-# Embedding golden
+
 input_ids = np.array([tokens])
 outputs = model(input_ids=input_ids, output_hidden_states=True)
 embeddings = outputs.hidden_states[-1].detach().cpu().numpy()[0]
@@ -234,11 +234,11 @@ EOF
 If you update any HF reference, edit the .json files directly:
 
 ```bash
-# Edit tokenizer.json if tokenizer changes
-# Edit embedding.json if embedding layer changes
-# Edit logits.json if final layer changes
-# git add tests/golden/*.json
-# git commit -m "Update golden data"
+
+
+
+
+
 ```
 
 ---
@@ -250,22 +250,22 @@ If you update any HF reference, edit the .json files directly:
 from tests.reference import load_golden
 
 golden = load_golden("tokenizer")  # Reads tests/golden/tokenizer.json
-# Compare your implementation against golden
+
 ```
 
 ### `tests/reference/week2_verify.py`
 ```python
 golden = load_golden("embedding")
 golden = load_golden("logits")
-# Per-layer comparison
+
 ```
 
 ### `tests/reference/week3_verify.py`
 ```python
 golden = load_golden("metrics")
-# Check loss convergence against targets
-# Check adapter weight changes
-# Verify output differs from base
+
+
+
 ```
 
 ---
@@ -348,7 +348,7 @@ Golden tokens: [1, 2, 100, 4, 5]
     "mlp_output": {...},
     "layer_norm_output": {...}
   },
-  // ... layers 1-23
+
 }
 ```
 

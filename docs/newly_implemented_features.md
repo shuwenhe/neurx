@@ -215,10 +215,10 @@ rollout_correction/
 import "posttrain/alignment/rollout_correction/config.s"
 import "posttrain/alignment/rollout_correction/rollout_correction.s"
 
-// 创建配置（Sequence TIS）
+
 let config = decoupled_seq_is(threshold: 2.0)
 
-// 计算校正后的loss
+
 let corrected_loss, result = compute_policy_loss_decoupled_mode(
     new_log_probs,
     rollout_log_probs,
@@ -229,7 +229,7 @@ let corrected_loss, result = compute_policy_loss_decoupled_mode(
     clip_epsilon: 0.2
 )
 
-// 查看统计
+
 println(f"IS mean: {result.statistics['is_mean']}")
 println(f"Rejection rate: {result.statistics['rc_total_rejection_rate']}")
 ```
@@ -257,11 +257,11 @@ println(f"Pass@8: {passk:.2%}")
 ```s
 import "posttrain/alignment/vectorized/vectorized_estimators.s"
 
-// Stack sequences: [batch][num_samples] -> [batch, num_samples, seq_len]
+
 let stacked_rewards = stack_grouped_sequences(grouped_rewards)
 let stacked_mask = stack_grouped_sequences(grouped_masks)
 
-// Compute vectorized
+
 let loss, advantages = compute_rloo_loss_vectorized(
     log_probs,
     stacked_rewards,
