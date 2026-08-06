@@ -60,6 +60,30 @@ func fast_matmul([]float matrix, int rows, int cols, []float vec, []float out) {
     }
 }
 
+func fast_matmul_flat([]float A, []float B, int M, int N, int P) []float {
+    []float out = []float{cap: M * P}
+    int i = 0
+    while i < M * P {
+        out[i] = 0.0
+        i = i + 1
+    }
+    int m = 0
+    while m < M {
+        int n = 0
+        while n < N {
+            float a_val = A[m * N + n]
+            int p = 0
+            while p < P {
+                out[m * P + p] = out[m * P + p] + a_val * B[n * P + p]
+                p = p + 1
+            }
+            n = n + 1
+        }
+        m = m + 1
+    }
+    out
+}
+
 func fast_softmax([]float logits, []float probs, int size) {
     float max_val = logits[0]
     int i = 1

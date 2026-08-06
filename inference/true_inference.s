@@ -49,6 +49,53 @@ func main() {
     cfg := create_transformer_config()
     [][]float hidden = transformer_forward(embeddings)
     print("Transformer output shape: [" + int_to_string(len(hidden)) + ", " + int_to_string(cfg.hidden_size) + "]\n")
+    // --- Numeric verification: compute mean/std for this output
+    func compute_mean_std([][]float mat) (float, float) {
+        int rows = len(mat)
+        if rows == 0 { return 0.0, 0.0 }
+        int cols = len(mat[0])
+        float sum = 0.0
+        int i = 0
+        while i < rows {
+            int j = 0
+            while j < cols {
+                sum = sum + mat[i][j]
+                j = j + 1
+            }
+            i = i + 1
+        }
+        int N = rows * cols
+        float mean = sum / float(N)
+        float acc = 0.0
+        i = 0
+        while i < rows {
+            int j = 0
+            while j < cols {
+                float d = mat[i][j] - mean
+                acc = acc + d * d
+                j = j + 1
+            }
+            i = i + 1
+        }
+        float var = acc / float(N)
+        // sqrt via Newton iterations
+        func sqrt_approx(float x) float {
+            if x <= 0.0 { return 0.0 }
+            float y = x
+            int k = 0
+            while k < 10 {
+                y = 0.5 * (y + x / y)
+                k = k + 1
+            }
+            y
+        }
+        float std = sqrt_approx(var)
+        mean, std
+    }
+
+    float m, s
+    m, s = compute_mean_std(hidden)
+    print("[VERIFY] prompt -> transformer mean=" + int_to_string(int(m * 1000.0)) + " (x1e-3), std=" + int_to_string(int(s * 1000.0)) + " (x1e-3)\n")
     print("[6] Sampling / generate continuation\n")
     sampling_cfg := create_sampling_config()
     []int generated = generate(prompt_tokens, 32, sampling_cfg)
@@ -57,4 +104,13 @@ func main() {
     string output = decode_tokens(generated)
     print("Model output:\n" + output + "\n")
     print("Inference pipeline completed.\n")
+
+    // Single-token random test
+    print("\n[VERIFY] Running single-token numeric test...\n")
+    []int single = []int{2048}
+    [][]float emb_single = embed_tokens(single)
+    [][]float out_single = transformer_forward(emb_single)
+    float m2, s2
+    m2, s2 = compute_mean_std(out_single)
+    print("[VERIFY] single-token -> mean=" + int_to_string(int(m2 * 1000.0)) + " (x1e-3), std=" + int_to_string(int(s2 * 1000.0)) + " (x1e-3)\n")
 }

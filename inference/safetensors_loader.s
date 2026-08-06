@@ -98,9 +98,17 @@ func load_transformer_layer(string model_path, int layer_id, int hidden_size, in
     int header_len = bytes_to_int64_le(file_bytes, 0)
     string json = extract_json_from_bytes(file_bytes, 8, header_len)
     string prefix = "model.layers." + int_to_string(layer_id) + "."
-    string names[4] = ["self_attn.q_proj.weight", "self_attn.k_proj.weight", "self_attn.v_proj.weight", "self_attn.o_proj.weight"]
+    string names[7] = [
+        "self_attn.q_proj.weight",
+        "self_attn.k_proj.weight",
+        "self_attn.v_proj.weight",
+        "self_attn.o_proj.weight",
+        "mlp.gate_proj.weight",
+        "mlp.up_proj.weight",
+        "mlp.down_proj.weight",
+    ]
     int i = 0
-    while i < 4 {
+    while i < 7 {
         string full = prefix + names[i]
         int start = find_tensor_data_offset(json, full)
         if start < 0 {
