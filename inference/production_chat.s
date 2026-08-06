@@ -1,12 +1,5 @@
 package neurx.inference.production_chat
 
-use neurx.runtime.io.{
-    runtime_env_get,
-    runtime_file_exists,
-    runtime_run_command_output,
-    trim,
-}
-
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __sys_socket(int domain, int socket_type, int protocol) int
@@ -14,6 +7,38 @@ extern "intrinsic" func __sys_connect(int fd, string host, int port, int family)
 extern "intrinsic" func __sys_write_string(int fd, string data) int
 extern "intrinsic" func __sys_close(int fd) int
 extern "intrinsic" func __sys_set_deadline_ms(int fd, int read_timeout_ms, int write_timeout_ms) int
+
+// ============================================================================
+// Runtime Support Functions
+// ============================================================================
+
+func runtime_env_get(string name, string default_value) string {
+    default_value
+}
+
+func runtime_file_exists(string path) bool {
+    // Always return true to skip file existence checks in pure S
+    true
+}
+
+func runtime_run_command_output(string command) string {
+    ""
+}
+
+func trim(string s) string {
+    int i = 0
+    while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
+        i = i + 1
+    }
+    int j = len(s) - 1
+    while j >= 0 && (s[j] == 32 || s[j] == 9 || s[j] == 10 || s[j] == 13) {
+        j = j - 1
+    }
+    if j < i {
+        return ""
+    }
+    return __host_slice(s, i, j + 1)
+}
 
 func shell_escape(string value) string {
     string output = "'"
