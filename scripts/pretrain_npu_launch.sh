@@ -134,7 +134,7 @@ if [[ "$requested_world_size" -gt 1 && "${#worker_hosts[@]}" -lt 1 ]]; then
   echo "error: world size > 1 but no workers were configured."
   exit 1
 fi
-configured_world_size=$((1 + ${
+configured_world_size=$((1 + ${#worker_hosts[@]}))
 if [[ "$requested_world_size" -ne "$configured_world_size" ]]; then
   echo "[pretrain-npu] note: configured workers imply WORLD_SIZE=$configured_world_size; using requested WORLD_SIZE=$requested_world_size"
 fi
