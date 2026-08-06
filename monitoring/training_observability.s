@@ -790,23 +790,23 @@ func generate_final_report(monitoring_manager m) {
 func get_monitoring_dashboard_layout() string {
     return `
 ╔══════════════════════════════════════════════════════════════╗
-║              NEURX-5.2 Training Monitor Dashboard              ║
+║              NEURX-5.2 training monitor dashboard              ║
 ╠═══════════════╦═══════════════╦═══════════════════════════════╣
 ║   LOSS CURVE  ║   THROUGHPUT    ║      SYSTEM HEALTH            ║
 ║  ┌──────────┐ ║  ┌───────────┐ ║  ┌─────────────────────────┐  ║
-║  │ 📉 Loss   │ ║  │ tokens/s  │ ║  │ GPU Memory ████████░░ 87%│  ║
-║  │ (real-time│ ║  │ TFLOPS    │ ║  │ GPU Util   ██████████ 95%│  ║
+║  │ 📉 loss   │ ║  │ tokens/s  │ ║  │ GPU Memory ████████░░ 87%│  ║
+║  │ (real-time│ ║  │ TFLOPS    │ ║  │ GPU util   ██████████ 95%│  ║
 ║  │  moving   │ ║  │ samples/s │ ║  │ Grad Norm  ████░░░░░ 42  │  ║
 ║  │  avg)     │ ║  │ steps/min │ ║  │ LR: 3e-4 → 2.9e-4      │  ║
-║  └──────────┘ ║  └───────────┘ ║  │ status: ✅ Healthy       │  ║
+║  └──────────┘ ║  └───────────┘ ║  │ status: ✅ healthy       │  ║
 ╠═══════════════╩═══════════════╩═══════════════════════════════╣
 ║                    RECENT ALERTS                             ║
-║  [✓] Step 12345: Loss within normal range (2.345)            ║
-║  [!] Step 12344: GPU memory high warning (89%)              ║
+║  [✓] step 12345: Loss within normal range (2.345)            ║
+║  [!] step 12344: GPU memory high warning (89%)              ║
 ╠═════════════════════════════════════════════════════════════════╣
-║  Auto-Diagnosis: No critical issues found.                 ║
-║  Recommendation: Training is proceeding normally.            ║
-║  Expected completion: ~14 days at current throughput.       ║
+║  auto-diagnosis: No critical issues found.                 ║
+║  recommendation: Training is proceeding normally.            ║
+║  expected completion: ~14 days at current throughput.       ║
 ╚════════════════════════════════════════════════════════════════╝
 `
 }

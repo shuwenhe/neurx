@@ -16,8 +16,8 @@ struct mooncake_engine {
     config: mooncake_config
     prev_rank: i32
     next_rank: i32
-    send_streams: []CudaStream
-    recv_streams: []CudaStream
+    send_streams: []cuda_stream
+    recv_streams: []cuda_stream
     send_buffers: []tensor
     recv_buffers: []tensor
     bytes_transferred: i64
@@ -27,8 +27,8 @@ struct mooncake_engine {
 func new_mooncake_engine(config: mooncake_config) -> mooncake_engine {
     let prev_rank = (config.rank - 1 + config.world_size) % config.world_size
     let next_rank = (config.rank + 1) % config.world_size
-    let send_streams: []CudaStream = []
-    let recv_streams: []CudaStream = []
+    let send_streams: []cuda_stream = []
+    let recv_streams: []cuda_stream = []
     for i in 0..config.num_streams {
         send_streams.push(cuda_stream_create())
         recv_streams.push(cuda_stream_create())

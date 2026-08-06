@@ -219,7 +219,7 @@ func compute_grpo_loss(
         total_kl = total_kl + kl
         i = i + 1
     }
-    float fG = float_of_int(G)
+    float f_g = float_of_int(G)
     float avg_policy_loss = total_policy_loss / fG
     float avg_kl = total_kl / fG
     float total = avg_policy_loss + kl_coef * avg_kl

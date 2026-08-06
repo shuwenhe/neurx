@@ -4,8 +4,8 @@ use std.os
 use std.strings
 use std.bufio
 func main() {
-    modelPath := "/home/shuwen/shuwen/posttrain/model.safetensors"
-    stat, err := os.Stat(modelPath)
+    model_path := "/home/shuwen/shuwen/posttrain/model.safetensors"
+    stat, err := os.Stat(model_path)
     if err != nil || stat.IsDir() {
         io.Println("❌ model not found")
         os.Exit(1)
@@ -24,13 +24,13 @@ func main() {
     reader := bufio.NewReader(os.Stdin)
     for {
         io.Print("You: ")
-        userInput, _ := reader.ReadString('\n')
-        userInput = strings.TrimSpace(userInput)
-        if userInput == "exit" || userInput == "quit" {
+        user_input, _ := reader.ReadString('\n')
+        user_input = strings.TrimSpace(user_input)
+        if user_input == "exit" || user_input == "quit" {
             io.Println("Goodbye!")
             break
         }
-        if userInput == "" {
+        if user_input == "" {
             continue
         }
         io.Println("")

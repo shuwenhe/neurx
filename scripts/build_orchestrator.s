@@ -5,21 +5,21 @@ import (
     "path/filepath"
     "runtime"
 )
-enum BuildTarget {
+enum build_target {
     CPU,
     CUDA,
     HIP,
-    Metal,
-    OneAPI,
+    metal,
+    one_api,
     CANN,
 }
-enum BuildArch {
+enum build_arch {
     X86_64,
     ARM64,
 }
 struct build_config {
-    target        BuildTarget
-    arch          BuildArch
+    target        build_target
+    arch          build_arch
     optimization  bool
     debug         bool
     tests         bool
@@ -30,19 +30,19 @@ struct build_config {
 struct build_orchestrator {
     logger      logger_2
     config      build_config
-    neurxRoot   string
-    sRoot       string
-    buildDir    string
+    neurx_root   string
+    s_root       string
+    build_dir    string
 }
 func new_build_orchestrator() (*build_orchestrator, error) {
     logger := new_logger("build_orchestrator")
-    neurxRoot := get_env("NEURX_ROOT", "")
-    if neurxRoot == "" {
+    neurx_root := get_env("NEURX_ROOT", "")
+    if neurx_root == "" {
         pwd, _ := os.Getwd()
-        neurxRoot = pwd
+        neurx_root = pwd
     }
-    sRoot := filepath.Join(neurxRoot, "..", "s")
-    buildDir := filepath.Join(neurxRoot, ".build")
+    s_root := filepath.Join(neurx_root, "..", "s")
+    build_dir := filepath.Join(neurx_root, ".build")
     target := detect_build_target()
     arch := detect_build_arch()
     config := build_config{
@@ -58,9 +58,9 @@ func new_build_orchestrator() (*build_orchestrator, error) {
     return &build_orchestrator{
         logger:    logger,
         config:    config,
-        neurxRoot: neurxRoot,
-        sRoot:     sRoot,
-        buildDir:  buildDir,
+        neurx_root: neurxRoot,
+        s_root:     sRoot,
+        build_dir:  buildDir,
     }, nil
 }
 func (b *build_orchestrator) setup() error {
@@ -71,16 +71,16 @@ func (b *build_orchestrator) setup() error {
     b.log_config()
     return nil
 }
-func (b *build_orchestrator) Clean() error {
+func (b *build_orchestrator) clean() error {
     b.logger.log("Cleaning build artifacts...")
     if err := remove_dir(b.buildDir); err != nil {
         b.logger.warn("Failed to clean build directory: %v", err)
     }
     components := []string{"core", "training", "inference", "distributed"}
     for _, comp := range components {
-        compDir := filepath.Join(b.neurxRoot, comp)
-        if dir_exists(compDir) {
-            files, _ := find_build_artifacts(compDir)
+        comp_dir := filepath.Join(b.neurxRoot, comp)
+        if dir_exists(comp_dir) {
+            files, _ := find_build_artifacts(comp_dir)
             for _, file := range files {
                 remove_file(file)
             }
@@ -112,16 +112,16 @@ func (b *build_orchestrator) build_core() error {
         "tokenizer/model_bpe.s",
         "optimizer/adamw.s",
     }
-    sCompiler := b.get_s_compiler()
+    s_compiler := b.get_s_compiler()
     for _, comp := range components {
-        compPath := filepath.Join(b.neurxRoot, comp)
-        if !file_exists(compPath) {
-            b.logger.warn("Component not found: %s", compPath)
+        comp_path := filepath.Join(b.neurxRoot, comp)
+        if !file_exists(comp_path) {
+            b.logger.warn("Component not found: %s", comp_path)
             continue
         }
-        outFile := filepath.Join(b.buildDir, filepath.Base(comp) + ".ir")
+        out_file := filepath.Join(b.buildDir, filepath.Base(comp) + ".ir")
         b.logger.log("Building %s...", filepath.Base(comp))
-        result := exec_command(sCompiler, compPath, outFile)
+        result := exec_command(s_compiler, comp_path, out_file)
         if result.ExitCode != 0 {
             b.logger.error("Failed to build %s: %s", filepath.Base(comp), result.Stderr)
             return fmt.Errorf("build failed for %s", comp)
@@ -138,16 +138,16 @@ func (b *build_orchestrator) build_training() error {
         "training/validator.s",
         "distributed/training_coordinator.s",
     }
-    sCompiler := b.get_s_compiler()
+    s_compiler := b.get_s_compiler()
     for _, comp := range components {
-        compPath := filepath.Join(b.neurxRoot, comp)
-        if !file_exists(compPath) {
-            b.logger.warn("Component not found: %s", compPath)
+        comp_path := filepath.Join(b.neurxRoot, comp)
+        if !file_exists(comp_path) {
+            b.logger.warn("Component not found: %s", comp_path)
             continue
         }
-        outFile := filepath.Join(b.buildDir, filepath.Base(comp) + ".ir")
+        out_file := filepath.Join(b.buildDir, filepath.Base(comp) + ".ir")
         b.logger.log("Building %s...", filepath.Base(comp))
-        result := exec_command(sCompiler, compPath, outFile)
+        result := exec_command(s_compiler, comp_path, out_file)
         if result.ExitCode != 0 {
             b.logger.error("Failed to build %s: %s", filepath.Base(comp), result.Stderr)
             return fmt.Errorf("build failed for %s", comp)
@@ -163,16 +163,16 @@ func (b *build_orchestrator) build_inference() error {
         "infer/kv_cache_manager.s",
         "serving/speculative_decoding.s",
     }
-    sCompiler := b.get_s_compiler()
+    s_compiler := b.get_s_compiler()
     for _, comp := range components {
-        compPath := filepath.Join(b.neurxRoot, comp)
-        if !file_exists(compPath) {
-            b.logger.warn("Component not found: %s", compPath)
+        comp_path := filepath.Join(b.neurxRoot, comp)
+        if !file_exists(comp_path) {
+            b.logger.warn("Component not found: %s", comp_path)
             continue
         }
-        outFile := filepath.Join(b.buildDir, filepath.Base(comp) + ".ir")
+        out_file := filepath.Join(b.buildDir, filepath.Base(comp) + ".ir")
         b.logger.log("Building %s...", filepath.Base(comp))
-        result := exec_command(sCompiler, compPath, outFile)
+        result := exec_command(s_compiler, comp_path, out_file)
         if result.ExitCode != 0 {
             b.logger.error("Failed to build %s: %s", filepath.Base(comp), result.Stderr)
             return fmt.Errorf("build failed for %s", comp)
@@ -181,7 +181,7 @@ func (b *build_orchestrator) build_inference() error {
     }
     return nil
 }
-func (b *build_orchestrator) BuildAll() error {
+func (b *build_orchestrator) build_all() error {
     b.logger.log("Building all NeurX components...")
     if err := b.setup(); err != nil {
         return err
@@ -207,12 +207,12 @@ func (b *build_orchestrator) run_tests() error {
         return nil
     }
     b.logger.log("Running build tests...")
-    testDir := filepath.Join(b.neurxRoot, "tests")
-    if !dir_exists(testDir) {
+    test_dir := filepath.Join(b.neurxRoot, "tests")
+    if !dir_exists(test_dir) {
         b.logger.warn("Tests directory not found")
         return nil
     }
-    result := exec_in_dir(testDir, "make", "test")
+    result := exec_in_dir(test_dir, "make", "test")
     if result.ExitCode != 0 {
         b.logger.error("Tests failed: %s", result.Stderr)
         return fmt.Errorf("tests failed")
@@ -227,79 +227,79 @@ func (b *build_orchestrator) get_s_compiler() string {
     return filepath.Join(b.sRoot, ".local", "bin", "s")
 }
 func (b *build_orchestrator) log_config() {
-    config := fmt.Sprintf(`NeurX Build Configuration
-Target: %s
-Architecture: %s
-Optimization: %v
-Debug: %v
-Tests: %v
-Documentation: %v
-Parallel Jobs: %d
-Build Directory: %s
+    config := fmt.Sprintf(`neur_x build configuration
+target: %s
+architecture: %s
+optimization: %v
+debug: %v
+tests: %v
+documentation: %v
+parallel jobs: %d
+build directory: %s
 `, target_string(b.config.target), arch_string(b.config.arch), b.config.optimization, b.config.debug, b.config.tests, b.config.documentation, b.config.parallel, b.buildDir)
-    logFile := filepath.Join(b.buildDir, "build_config.txt")
-    write_file(logFile, config)
+    log_file := filepath.Join(b.buildDir, "build_config.txt")
+    write_file(log_file, config)
 }
-func target_string(t BuildTarget) string {
+func target_string(t build_target) string {
     switch t {
-    case BuildTarget.CPU:
+    case build_target.CPU:
         return "CPU"
-    case BuildTarget.CUDA:
+    case build_target.CUDA:
         return "CUDA"
-    case BuildTarget.HIP:
+    case build_target.HIP:
         return "HIP (AMD)"
-    case BuildTarget.Metal:
+    case build_target.Metal:
         return "Metal (Apple)"
-    case BuildTarget.OneAPI:
+    case build_target.OneAPI:
         return "OneAPI (Intel)"
-    case BuildTarget.CANN:
+    case build_target.CANN:
         return "CANN (Huawei)"
     default:
         return "Unknown"
     }
 }
-func arch_string(a BuildArch) string {
+func arch_string(a build_arch) string {
     switch a {
-    case BuildArch.X86_64:
+    case build_arch.X86_64:
         return "x86_64"
-    case BuildArch.ARM64:
+    case build_arch.ARM64:
         return "ARM64"
     default:
         return "Unknown"
     }
 }
-func detect_build_target() BuildTarget {
+func detect_build_target() build_target {
     if command_exists("nvidia-smi") {
-        return BuildTarget.CUDA
+        return build_target.CUDA
     }
     if command_exists("rocm-smi") {
-        return BuildTarget.HIP
+        return build_target.HIP
     }
     if runtime.GOOS == "darwin" {
-        return BuildTarget.Metal
+        return build_target.Metal
     }
     if command_exists("xpumanager") {
-        return BuildTarget.OneAPI
+        return build_target.OneAPI
     }
-    return BuildTarget.CPU
+    return build_target.CPU
 }
-func detect_build_arch() BuildArch {
+func detect_build_arch() build_arch {
     switch runtime.GOARCH {
     case "amd64":
-        return BuildArch.X86_64
+        return build_arch.X86_64
     case "arm64":
-        return BuildArch.ARM64
+        return build_arch.ARM64
     default:
-        return BuildArch.X86_64
+        return build_arch.X86_64
     }
 }
 func find_build_artifacts(dir string) ([]string, error) {
     var artifacts []string
     files, _ := list_dir(dir)
     for _, file := range files {
-        fullPath := filepath.Join(dir, file)
+        full_path := filepath.Join(dir, file)
         if strings.HasSuffix(file, ".o") || strings.HasSuffix(file, ".ir") || strings.HasSuffix(file, ".o.d") {
-            artifacts = append(artifacts, fullPath)
+            artifacts = append(artifacts, full_path)
         }
     }
     return artifacts, nil

@@ -1,25 +1,25 @@
 package neurx.distributed.training_orchestrator
 |                                                             |
-|  DP Replica 0 -+                                            |
-|  |- TP Group 0 -|                                           |
-|  |  |- PP Stage 0 (GPU 0): embedding + Layers 0-9         |
-|  |  |- PP Stage 1 (GPU 1): Layers 10-19                   |
+|  DP replica 0 -+                                            |
+|  |- TP group 0 -|                                           |
+|  |  |- PP stage 0 (GPU 0): embedding + layers 0-9         |
+|  |  |- PP stage 1 (GPU 1): Layers 10-19                   |
 |  |  |- ...                                                   |
-|  |  +- PP Stage P-1 (GPU P-1): Output Head                 |
+|  |  +- PP stage P-1 (GPU P-1): Output head                 |
 |  |                                                           |
-|  |- TP Group 1 -|  (DP Replica 1)                           |
-|  |  +- Same structure, different data                       |
+|  |- TP group 1 -|  (DP replica 1)                           |
+|  |  +- same structure, different data                       |
 |  |                                                           |
 |  ...                                                         |
-|  +- TP Group D-1 (DP Replica D-1)                            |
+|  +- TP group D-1 (DP replica D-1)                            |
 |                                                             |
-|  Each DP replica uses FSDP to shard parameters internally   |
-|  Mixed precision: BF16 storage, FP32 master weights         |
-|  Loss scaling: Dynamic (if FP16)                             |
+|  each DP replica uses FSDP to shard parameters internally   |
+|  mixed precision: BF16 storage, FP32 master weights         |
+|  loss scaling: Dynamic (if FP16)                             |
 |  optimizer_2: adam_w (decoupled weight decay)                   |
 |                                                             |
-|  Total GPUs = TP × PP × DP                                   |
-|  Example: 16 × 16 × 2 = 512 GPUs for 2T model              |
+|  total gp_us = TP × PP × DP                                   |
+|  example: 16 × 16 × 2 = 512 gp_us for 2T model              |
 +-------------------------------------------------------------+
 struct training_orchestrator_config {
     int vocab_size

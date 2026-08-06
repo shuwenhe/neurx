@@ -6,7 +6,7 @@ struct operator_context {
     device: device
     profiler: Profiler
 }
-interface IOperator {
+interface i_operator {
     forward(inputs: []tensor, ctx: operator_context) -> tensor
     backward(grad_output: tensor) -> []tensor
     operator_name() -> string
@@ -15,23 +15,23 @@ interface IOperator {
     supports_device(device: device) -> bool
     supports_dtype(dtype: DType) -> bool
 }
-interface IOperatorDeterminism {
+interface i_operator_determinism {
     is_deterministic() -> bool
     set_seed(seed: i64) -> void
 }
-interface IOperatorComposition {
-    compose(operators: []IOperator) -> IOperator
+interface i_operator_composition {
+    compose(operators: []i_operator) -> IOperator
 }
-interface IOperatorAutograd {
+interface i_operator_autograd {
     gradient_wrt_input(i: i64, grad_output: tensor, forward_inputs: []tensor) -> tensor
     check_gradient(forward_inputs: []tensor, eps: f64) -> f64
 }
-interface IOperatorPerformance {
+interface i_operator_performance {
     estimated_time_us(shapes: [][]i64) -> i64
     estimated_memory(shapes: [][]i64) -> i64
     profile(inputs: []tensor) -> map[string]f64
 }
-const ProhibitedInOperators = """
+const prohibited_in_operators = """
 ❌ malloc() / new() / allocate()        → pre-allocate tensors
 ❌ if device == CUDA                    → use Dispatcher
 ❌ CUDA API calls                       → use Kernel
@@ -42,7 +42,7 @@ const ProhibitedInOperators = """
 ❌ Global state access                  → thread-unsafe
 ❌ Kernel direct calls                  → use Dispatcher
 """
-const RequiredInOperators = """
+const required_in_operators = """
 ✅ Use Dispatcher.select_kernel()      → for kernel selection
 ✅ Pre-allocate output tensors         → caller decides memory
 ✅ Track computation graph             → for autograd

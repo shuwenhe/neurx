@@ -12,9 +12,9 @@ extern func cuda_free(int64 ptr) int
 extern func cuda_memcpy_h2d(int64 dst, int src_ptr, int size) int
 extern func cuda_memcpy_d2h(int dst_ptr, int64 src, int size) int
 extern func cuda_device_synchronize() int
-extern func cublasCreate() int64
-extern func cublasDestroy(int64 handle) int
-extern func cublasSgemm(
+extern func cublas_create() int64
+extern func cublas_destroy(int64 handle) int
+extern func cublas_sgemm(
     int64 handle, int transa, int transb,
     int m, int n, int k,
     float alpha, int64 A, int lda,
@@ -95,7 +95,7 @@ func main() {
 }
 func init_gpu_context(int batch_size, int seq_len, int hidden_dim, float lr) gpu_context {
     println("[GPU] Initializing CUDA context...")
-    int64 handle = cublasCreate()
+    int64 handle = cublas_create()
     if handle == 0 {
         println("[ERROR] Failed to create cuBLAS handle")
         return gpu_context{
@@ -120,7 +120,7 @@ func init_gpu_context(int batch_size, int seq_len, int hidden_dim, float lr) gpu
 func cleanup_gpu_context(gpu_context ctx) {
     if ctx.initialized && ctx.cublas_handle != 0 {
         println("[GPU] Destroying CUDA context...")
-        cublasDestroy(ctx.cublas_handle)
+        cublas_destroy(ctx.cublas_handle)
     }
 }
 func allocate_gpu_buffer(int element_count, int element_size) gpu_buffer {
@@ -165,7 +165,7 @@ func process_shard_gpu(
         gpu_buffer batch_output = allocate_gpu_buffer(ctx.batch_size * ctx.seq_len, 4)
         gpu_buffer batch_grads = allocate_gpu_buffer(ctx.batch_size * ctx.seq_len, 4)
         println("  [Forward] batch_2 " + int_to_str(batch_idx))
-        int status = cublasSgemm(
+        int status = cublas_sgemm(
             ctx.cublas_handle,
             0, 0,
             ctx.batch_size * ctx.seq_len, ctx.hidden_dim, ctx.hidden_dim,

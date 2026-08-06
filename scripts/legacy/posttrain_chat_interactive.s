@@ -5,11 +5,11 @@ use std.strings
 use std.bufio
 use std.collections
 func main() {
-    neurxDir := "/home/shuwen/shuwen/train/neurx"
-    modelPath := "/home/shuwen/shuwen/posttrain/model.safetensors"
-    stat, err := os.Stat(modelPath)
+    neurx_dir := "/home/shuwen/shuwen/train/neurx"
+    model_path := "/home/shuwen/shuwen/posttrain/model.safetensors"
+    stat, err := os.Stat(model_path)
     if err != nil || stat.IsDir() {
-        io.Println("❌ model not found: " + modelPath)
+        io.Println("❌ model not found: " + model_path)
         os.Exit(1)
     }
     io.Println("✓ model found: base-model-posttrain")
@@ -30,7 +30,7 @@ func main() {
     io.Println("║   • 'clear' to clear screen                               ║")
     io.Println("╚════════════════════════════════════════════════════════════╝")
     io.Println("")
-    medicalKnowledge := map[string]string{
+    medical_knowledge := map[string]string{
         "disease": "A disease is a pathological condition of a living organism causing dysfunction or distress.",
         "treatment": "Treatment involves medical interventions to cure or manage diseases.",
         "diagnosis": "Diagnosis is identifying a disease through examination and testing.",
@@ -46,25 +46,25 @@ func main() {
     reader := bufio.NewReader(os.Stdin)
     for {
         io.Print("You: ")
-        userInput, err := reader.ReadString('\n')
+        user_input, err := reader.ReadString('\n')
         if err != nil {
             break
         }
-        userInput = strings.TrimSpace(userInput)
-        if userInput == "exit" || userInput == "quit" {
+        user_input = strings.TrimSpace(user_input)
+        if user_input == "exit" || user_input == "quit" {
             io.Println("")
             io.Println("👋 Goodbye!")
             break
         }
-        if userInput == "clear" {
+        if user_input == "clear" {
             exec.command("clear").Run()
             continue
         }
-        if userInput == "" {
+        if user_input == "" {
             continue
         }
-        inputLower := strings.ToLower(userInput)
-        response := medicalKnowledge[inputLower]
+        input_lower := strings.ToLower(user_input)
+        response := medical_knowledge[input_lower]
         if response == "" {
             response = "I am a medical AI assistant. Please ask a specific medical question."
         }

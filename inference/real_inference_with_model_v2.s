@@ -1,10 +1,10 @@
 package real_inference_with_model
 use std.tensor.{
-    Tensor, TensorShape, zeros, ones, randn, matmul,
+    tensor, tensor_shape, zeros, ones, randn, matmul,
     softmax_tensor, transpose, reshape, get_flat, set_flat, item
 }
 use std.ai.nn.{
-    Linear, Embedding, TransformerBlock, LayerNorm
+    linear, embedding, transformer_block, layer_norm
 }
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, trim}
 extern "intrinsic" func __host_read_binary_file_range(string path, int start, int count) []int
@@ -29,7 +29,7 @@ func int_to_string(int value) string {
     }
     return out + tmp
 }
-struct TransformerConfig {
+struct transformer_config {
     int vocab_size
     int hidden_size
     int num_hidden_layers
@@ -38,31 +38,31 @@ struct TransformerConfig {
     float attention_dropout
     float hidden_dropout
 }
-struct SimpleTransformer {
-    Embedding embedding_layer
-    TransformerBlock[] layers
-    LayerNorm final_norm
-    Linear lm_head
-    TransformerConfig config
+struct simple_transformer {
+    embedding embedding_layer
+    transformer_block[] layers
+    layer_norm final_norm
+    linear lm_head
+    transformer_config config
 }
-func load_embedding_weights(string model_path, int vocab_size, int hidden_size) Tensor {
+func load_embedding_weights(string model_path, int vocab_size, int hidden_size) tensor {
     print("Loading embedding weights...")
     int[] shape = []int{cap: 2}
     shape[0] = vocab_size
     shape[1] = hidden_size
-    Tensor result = randn(shape, 0.0, 0.1)
+    tensor result = randn(shape, 0.0, 0.1)
     return result
 }
-func create_transformer_model(string model_path, TransformerConfig config) SimpleTransformer {
-    SimpleTransformer model
+func create_transformer_model(string model_path, transformer_config config) simple_transformer {
+    simple_transformer model
     model.config = config
     print("\n🔄 Initializing Transformer Model...\n")
     print("   vocab_size: " + int_to_string(config.vocab_size) + "\n")
     print("   hidden_size: " + int_to_string(config.hidden_size) + "\n")
     print("   num_layers: " + int_to_string(config.num_hidden_layers) + "\n\n")
-    Tensor embed_weights = load_embedding_weights(model_path, config.vocab_size, config.hidden_size)
+    tensor embed_weights = load_embedding_weights(model_path, config.vocab_size, config.hidden_size)
     model.embedding_layer = new_embedding(config.vocab_size, config.hidden_size, -1)
-    model.layers = []TransformerBlock{cap: config.num_hidden_layers}
+    model.layers = []transformer_block{cap: config.num_hidden_layers}
     int layer_idx = 0
     while layer_idx < config.num_hidden_layers {
         model.layers[layer_idx] = new_transformer_block(
@@ -82,7 +82,7 @@ func create_transformer_model(string model_path, TransformerConfig config) Simpl
     print("✓ Using real matrix computations (S standard library)\n\n")
     return model
 }
-func transformer_forward(SimpleTransformer model, int[] token_ids) int[] {
+func transformer_forward(simple_transformer model, int[] token_ids) int[] {
     print("Executing Transformer inference...\n")
     int[] output = []int{cap: 1}
     output[0] = 100
@@ -143,7 +143,7 @@ func main() {
     print("║  NeurX Real Transformer Inference Engine             ║\n")
     print("║  真实推理引擎 (S 标准库 + 矩阵计算)                 ║\n")
     print("╚═══════════════════════════════════════════════════════╝\n")
-    TransformerConfig config
+    transformer_config config
     config.vocab_size = 151936
     config.hidden_size = 896
     config.num_hidden_layers = 12
@@ -151,7 +151,7 @@ func main() {
     config.intermediate_size = 4896
     config.attention_dropout = 0.0
     config.hidden_dropout = 0.0
-    SimpleTransformer model = create_transformer_model(model_path, config)
+    simple_transformer model = create_transformer_model(model_path, config)
     print("✓ Model loaded: " + model_path + "\n")
     print("✓ Language support: English & Chinese 🇬🇧 🇨🇳\n\n")
     print("Type /exit to stop\n\n")

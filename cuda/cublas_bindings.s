@@ -5,10 +5,10 @@ extern func cuda_free(int64 ptr) int
 extern func cuda_memcpy_h2d(int64 dst, int src_ptr, int size) int
 extern func cuda_memcpy_d2h(int dst_ptr, int64 src, int size) int
 extern func cuda_device_synchronize() int
-extern func cublasCreate() int64
-extern func cublasDestroy(int64 handle) int
-extern func cublasSetStream(int64 handle, int64 stream) int
-extern func cublasSgemm(
+extern func cublas_create() int64
+extern func cublas_destroy(int64 handle) int
+extern func cublas_set_stream(int64 handle, int64 stream) int
+extern func cublas_sgemm(
     int64 handle,
     int transa,
     int transb,
@@ -24,7 +24,7 @@ extern func cublasSgemm(
     int64 C,
     int ldc
 ) int
-extern func cublasSgemv(
+extern func cublas_sgemv(
     int64 handle,
     int trans,
     int m,
@@ -38,7 +38,7 @@ extern func cublasSgemv(
     int64 y,
     int incy
 ) int
-extern func cublasSdot(
+extern func cublas_sdot(
     int64 handle,
     int n,
     int64 x,
@@ -47,7 +47,7 @@ extern func cublasSdot(
     int incy,
     float* result
 ) int
-extern func cublasStrmm(
+extern func cublas_strmm(
     int64 handle,
     int side,
     int uplo,
@@ -86,7 +86,7 @@ func gpu_matrix_multiply(
         println("[ERROR] matrix dimension mismatch: A.cols=" + int_to_str(A.cols) + " != B.rows=" + int_to_str(B.rows))
         return -1
     }
-    int status = cublasSgemm(
+    int status = cublas_sgemm(
         ctx.cublas_handle,
         0,
         0,
@@ -109,65 +109,65 @@ func gpu_matrix_multiply(
     cuda_device_synchronize()
     status
 }
-func gpu_matrix_multiply_backward_A(
+func gpu_matrix_multiply_backward_a(
     cuda_context ctx,
-    gpu_tensor grad_C,
+    gpu_tensor grad_c,
     gpu_tensor B,
-    gpu_tensor* grad_A
+    gpu_tensor* grad_a
 ) int {
     if !ctx.initialized {
         return -1
     }
-    int status = cublasSgemm(
+    int status = cublas_sgemm(
         ctx.cublas_handle,
         0,
         1,
-        grad_C.rows,
+        grad_c.rows,
         B.rows,
-        grad_C.cols,
+        grad_c.cols,
         1.0,
-        grad_C.device_ptr,
-        grad_C.cols,
+        grad_c.device_ptr,
+        grad_c.cols,
         B.device_ptr,
         B.cols,
         0.0,
-        grad_A.device_ptr,
-        grad_A.cols
+        grad_a.device_ptr,
+        grad_a.cols
     )
     cuda_device_synchronize()
     status
 }
-func gpu_matrix_multiply_backward_B(
+func gpu_matrix_multiply_backward_b(
     cuda_context ctx,
     gpu_tensor A,
-    gpu_tensor grad_C,
-    gpu_tensor* grad_B
+    gpu_tensor grad_c,
+    gpu_tensor* grad_b
 ) int {
     if !ctx.initialized {
         return -1
     }
-    int status = cublasSgemm(
+    int status = cublas_sgemm(
         ctx.cublas_handle,
         1,
         0,
         A.cols,
-        grad_C.cols,
+        grad_c.cols,
         A.rows,
         1.0,
         A.device_ptr,
         A.cols,
-        grad_C.device_ptr,
-        grad_C.cols,
+        grad_c.device_ptr,
+        grad_c.cols,
         0.0,
-        grad_B.device_ptr,
-        grad_B.cols
+        grad_b.device_ptr,
+        grad_b.cols
     )
     cuda_device_synchronize()
     status
 }
 func init_cuda_context() cuda_context {
     println("[CUDA] Initializing cuBLAS context...")
-    int64 handle = cublasCreate()
+    int64 handle = cublas_create()
     cuda_context{
         cublas_handle: handle,
         initialized: handle != 0,
@@ -178,7 +178,7 @@ func destroy_cuda_context(cuda_context* ctx) int {
         return 0
     }
     println("[CUDA] Destroying cuBLAS context...")
-    int status = cublasDestroy(ctx.cublas_handle)
+    int status = cublas_destroy(ctx.cublas_handle)
     ctx.initialized = false
     status
 }

@@ -111,7 +111,7 @@ func benchmark_data_loading() benchmark_metrics {
     var elapsed_ms = timer_elapsed_ms(timer)
     var file_size_mb = float(len_bytes(content)) / (1024.0 * 1024.0)
     var throughput = file_size_mb / (float(elapsed_ms) / 1000.0)
-    var result BenchmarkMetrics
+    var result benchmark_metrics
     result.phase = "data_loading"
     result.total_time_ms = elapsed_ms
     result.tokens_per_sec = throughput * 1000.0

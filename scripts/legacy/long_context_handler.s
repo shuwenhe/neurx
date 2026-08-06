@@ -247,7 +247,7 @@ func (handler *long_context_handler) print_stats() {
     fmt.Printf("  Extended (32K+): Long-form generation\n")
     fmt.Printf("  Estimated memory for max length: %.2f MB\n", handler.estimate_memory_mb(handler.config.max_seq_length))
 }
-func NewLongContextHandler(config long_context_config) *long_context_handler {
+func new_long_context_handler(config long_context_config) *long_context_handler {
     return &long_context_handler{
         config: config,
         positional_encoding: &ro_pepositional_encoding{

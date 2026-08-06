@@ -248,7 +248,7 @@ func (trainer *sft_trainer) compute_lcs(a []int, b []int) int {
     }
     return dp[len(a)][len(b)]
 }
-func NewSFTTrainer(config sft_config) *sft_trainer {
+func new_sft_trainer(config sft_config) *sft_trainer {
     return &sft_trainer{
         config: config,
         model: policy_model{

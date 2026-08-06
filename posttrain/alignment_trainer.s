@@ -149,7 +149,7 @@ class sft_trainer {
     neurx_model model
     tokenizer_state tokenizer
     adam_w optimizer
-    GradScaler scaler
+    grad_scaler scaler
     alignment_config config
     struct state {
         int current_step
@@ -174,7 +174,7 @@ func init_sft_trainer(
         lr=cfg.learning_rate,
         weight_decay=cfg.weight_decay
     )
-    GradScaler scaler = GradScaler(enabled=(cfg.precision != "fp32"))
+    grad_scaler scaler = grad_scaler(enabled=(cfg.precision != "fp32"))
     return sft_trainer{
         model: model,
         tokenizer: tokenizer,
@@ -331,7 +331,7 @@ func compute_dpo_loss(
             tensor diff = beta * delta_pi - (1.0 / (2.0 * beta))
             loss = (diff ** 2).mean()
         case _:
-            raise ValueError(f"Unknown DPO loss type: {loss_type}")
+            raise value_error(f"Unknown DPO loss type: {loss_type}")
     dict[str, float] metrics = {}
     metrics["chosen_reward"] = chosen_log_prob.mean().item()
     metrics["rejected_reward"] = rejected_log_prob.mean().item()
@@ -353,7 +353,7 @@ def compute_log_probs(
     masked_log_probs = (token_log_probs * mask).sum(dim=-1) / (mask.sum(dim=-1) + 1e-9)
     int total_tokens = int(mask.sum().item())
     return (masked_log_probs, total_tokens)
-class GRPOTrainer {
+class grpo_trainer {
     neurx_model model
     tokenizer_state tokenizer
     alignment_config config
@@ -487,7 +487,7 @@ def score_response_grpo(
             score = call_ai_judge(prompt, response)
             return score
         case _:
-            raise ValueError(f"Unknown scoring method: {scoring_method}")
+            raise value_error(f"Unknown scoring method: {scoring_method}")
 class ppotrainer {
     neurx_model policy_model
     neurx_model reference_model
@@ -496,7 +496,7 @@ class ppotrainer {
     tokenizer_state tokenizer
     adam_w actor_optimizer
     adam_w critic_optimizer
-    GradScaler scaler
+    grad_scaler scaler
     alignment_config config
     struct state {
         int current_iteration

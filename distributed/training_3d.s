@@ -425,9 +425,9 @@ func transformer_layer_forward(
     return hidden_states
 }
 func apply_rmsnorm([][]float x, int norm_idx, model_parallel_config cfg) [][]float { x }
-func multi_head_attention_forward(model_parallelConfig cfg, int layer, [][]float x) [][]float { x }
-func swiglu_ffn_forward(model_parallelConfig cfg, int layer, [][]float x) [][]float { x }
-func moe_ffn_forward(model_parallelConfig cfg, int layer, [][]float x) [][]float { x }
+func multi_head_attention_forward(model_parallel_config cfg, int layer, [][]float x) [][]float { x }
+func swiglu_ffn_forward(model_parallel_config cfg, int layer, [][]float x) [][]float { x }
+func moe_ffn_forward(model_parallel_config cfg, int layer, [][]float x) [][]float { x }
 func residual_add([][]float a, [][]float b) [][]float { a }
 func execute_pipeline_backward(ref orchestrator_state orch, int micro_batch_id) {
 }

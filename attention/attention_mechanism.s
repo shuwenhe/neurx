@@ -15,7 +15,7 @@ struct attention_config {
     int softmax_scale
     bool use_gradient_checkpointing
 }
-class NeurxAttention {
+class neurx_attention {
     attention_config config
     tensor q_proj_weight
     tensor k_proj_weight
@@ -31,14 +31,14 @@ class NeurxAttention {
         float memory_usage_mb
     } stats
 }
-func init(attention_config cfg) NeurxAttention {
+func init(attention_config cfg) neurx_attention {
     int kv_dim = cfg.head_dim * cfg.num_key_value_heads
     print("🔧 Initializing NEURX Attention:")
     print(f"   Heads: {cfg.num_attention_heads} (Q) / {cfg.num_key_value_heads} (KV)")
     print(f"   Head dim: {cfg.head_dim}")
     print(f"   Flash Attention: {'✅' if cfg.use_flash_attention else '❌'}")
     print(f"   GQA: {'✅' if cfg.use_gqa else '❌'}")
-    return NeurxAttention {
+    return neurx_attention {
         config: cfg,
         q_proj_weight: xavier_uniform(cfg.hidden_size, cfg.hidden_size),
         k_proj_weight: xavier_uniform(kv_dim, cfg.hidden_size),
@@ -200,40 +200,40 @@ func _flash_attention_forward(
     int S_Q = shape(query_states)[2]
     int S_KV = shape(key_states)[2]
     int D = shape(query_states)[3]
-    int Br = min(128, S_Q)
-    int Bc = min(256, S_KV)
+    int br = min(128, S_Q)
+    int bc = min(256, S_KV)
     tensor output = zeros(B, num_heads, S_Q, D)
     tensor l = zeros(B, num_heads, S_Q, 1)
     tensor m = ones(B, num_heads, S_Q, 1) * (-1e9)
-    for i_start in range(0, S_Q, Br):
-        int i_end = min(i_start + Br, S_Q)
-        tensor Qi = query_states[:, :, i_start:i_end, :]
-        tensor Oi = output[:, :, i_start:i_end, :]
+    for i_start in range(0, S_Q, br):
+        int i_end = min(i_start + br, S_Q)
+        tensor qi = query_states[:, :, i_start:i_end, :]
+        tensor oi = output[:, :, i_start:i_end, :]
         tensor li = l[:, :, i_start:i_end, :]
         tensor mi = m[:, :, i_start:i_end, :]
-        for j_start in range(0, S_KV, Bc):
-            int j_end = min(j_start + Bc, S_KV)
-            tensor Kj = key_states[:, :, j_start:j_end, :]
-            tensor Vj = value_states[:, :, j_start:j_end, :]
-            tensor Sij = matmul(Qi, Kj.transpose(-2, -1)) * scale
+        for j_start in range(0, S_KV, bc):
+            int j_end = min(j_start + bc, S_KV)
+            tensor kj = key_states[:, :, j_start:j_end, :]
+            tensor vj = value_states[:, :, j_start:j_end, :]
+            tensor sij = matmul(qi, kj.transpose(-2, -1)) * scale
             if causal_mask != none:
                 tensor mask_block = causal_mask[:, :, i_start:i_end, j_start:j_end]
-                Sij = Sij + mask_block
-            tensor mij_new = max(Sij, dim=-1, keepdim=True)
+                sij = sij + mask_block
+            tensor mij_new = max(sij, dim=-1, keepdim=True)
             mij_corrected = exp(mi - mij_new)
-            Pij = exp(Sij - mij_new)
-            lij_new = mij_corrected * li + sum(Pij, dim=-1, keepdim=True)
-            Oij = (mij_corrected.unsqueeze(-1) * Oi)
-            Oij = Oij + matmul(Pij, Vj)
-            Oij = Oij / (lij_new + 1e-9)
+            pij = exp(sij - mij_new)
+            lij_new = mij_corrected * li + sum(pij, dim=-1, keepdim=True)
+            oij = (mij_corrected.unsqueeze(-1) * oi)
+            oij = oij + matmul(pij, vj)
+            oij = oij / (lij_new + 1e-9)
             mi = mij_new
             li = lij_new
-            Oi = Oij
-        output[:, :, i_start:i_end, :] = Oi
+            oi = oij
+        output[:, :, i_start:i_end, :] = oi
         l[:, :, i_start:i_end, :] = li
         m[:, :, i_start:i_end, :] = mi
     return output
-class MaskBuilder {
+class mask_builder {
     static func build_prefix_lm_mask(
         int batch_size,
         int total_seq_len,
@@ -375,11 +375,11 @@ func apply_rope_scaling(
         case _:
             return freqs
 func _update_stats(
-    ref NeurxAttention self,
+    ref neurx_attention self,
     int batch_size,
     int seq_len,
     attention_config cfg,
-    Timer timer) {
+    timer timer) {
     int64 flops_per_head = int64(seq_len) * seq_len * cfg.head_dim * 2
     int64 total_flops = flops_per_head * cfg.num_attention_heads * batch_size
     if cfg.use_gqa:
@@ -410,12 +410,12 @@ func test_attention() {
         use_gradient_checkpointing: false,
     }
     print("\n[Test 1] Initializing NeurxAttention...")
-    NeurxAttention attn = init(cfg)
+    neurx_attention attn = init(cfg)
     assert(attn != None)
     print("✅ Initialization successful!")
     print("\n[Test 2] Testing causal attention forward pass...")
     tensor input = randn(2, 64, 4096)
-    tensor causal_mask = MaskBuilder.build_causal_mask(64)
+    tensor causal_mask = mask_builder.build_causal_mask(64)
     tuple[output, _, weights] = attn.forward(
         hidden_states=input,
         attention_mask=some(causal_mask),
@@ -428,7 +428,7 @@ func test_attention() {
     print(f"   Output shape: {shape(output)}")
     print("✅ Causal attention works!")
     print("\n[Test 3] Testing Prefix-LM attention...")
-    tensor prefix_mask = MaskBuilder.build_prefix_lm_mask(
+    tensor prefix_mask = mask_builder.build_prefix_lm_mask(
         batch_size=2,
         total_seq_len=64,
         prefix_lengths=[20, 30]

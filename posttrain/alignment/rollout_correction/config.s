@@ -1,10 +1,10 @@
 import "tensor/tensor.s"
-enum ISAggregationLevel {
+enum is_aggregation_level {
     NONE,
     TOKEN,
     SEQUENCE
 }
-enum RejectionMode {
+enum rejection_mode {
     NONE,
     TOKEN_K1,
     TOKEN_K2,
@@ -18,30 +18,30 @@ enum RejectionMode {
     SEQ_MAX_K2,
     SEQ_MAX_K3
 }
-enum LossType {
+enum loss_type {
     PPO_CLIP,
     REINFORCE
 }
-struct ISThreshold {
+struct is_threshold {
     lower: f32
     upper: f32
     is_icepop: bool
 }
-struct RSThreshold {
+struct rs_threshold {
     lower: f32
     upper: f32
 }
-struct RolloutCorrectionConfig {
+struct rollout_correction_config {
     is_level: ISAggregationLevel
     is_threshold: ISThreshold
     is_batch_normalize: bool
-    rs_modes: []RejectionMode
-    rs_thresholds: []RSThreshold
+    rs_modes: []rejection_mode
+    rs_thresholds: []rs_threshold
     bypass_mode: bool
     loss_type: LossType
 }
 func new_rollout_correction_config() -> RolloutCorrectionConfig {
-    return RolloutCorrectionConfig{
+    return rollout_correction_config{
         is_level: ISAggregationLevel.NONE,
         is_threshold: ISThreshold{
             lower: 0.0,
@@ -71,7 +71,7 @@ func parse_threshold(threshold_str: string) -> (f32, f32) {
     }
 }
 func decoupled_token_is(threshold: f32) -> RolloutCorrectionConfig {
-    return RolloutCorrectionConfig{
+    return rollout_correction_config{
         is_level: ISAggregationLevel.TOKEN,
         is_threshold: ISThreshold{
             lower: 0.0,
@@ -86,7 +86,7 @@ func decoupled_token_is(threshold: f32) -> RolloutCorrectionConfig {
     }
 }
 func decoupled_seq_is(threshold: f32) -> RolloutCorrectionConfig {
-    return RolloutCorrectionConfig{
+    return rollout_correction_config{
         is_level: ISAggregationLevel.SEQUENCE,
         is_threshold: ISThreshold{
             lower: 0.0,
@@ -101,7 +101,7 @@ func decoupled_seq_is(threshold: f32) -> RolloutCorrectionConfig {
     }
 }
 func decoupled_token_icepop(threshold_lower: f32, threshold_upper: f32) -> RolloutCorrectionConfig {
-    return RolloutCorrectionConfig{
+    return rollout_correction_config{
         is_level: ISAggregationLevel.TOKEN,
         is_threshold: ISThreshold{
             lower: threshold_lower,
@@ -116,7 +116,7 @@ func decoupled_token_icepop(threshold_lower: f32, threshold_upper: f32) -> Rollo
     }
 }
 func decoupled_seq_is_rs(is_threshold: f32, rs_lower: f32, rs_upper: f32) -> RolloutCorrectionConfig {
-    return RolloutCorrectionConfig{
+    return rollout_correction_config{
         is_level: ISAggregationLevel.SEQUENCE,
         is_threshold: ISThreshold{
             lower: 0.0,
@@ -124,36 +124,36 @@ func decoupled_seq_is_rs(is_threshold: f32, rs_lower: f32, rs_upper: f32) -> Rol
             is_icepop: false,
         },
         is_batch_normalize: false,
-        rs_modes: [RejectionMode.SEQ_SUM_K1],
-        rs_thresholds: [RSThreshold{lower: rs_lower, upper: rs_upper}],
+        rs_modes: [rejection_mode.SEQ_SUM_K1],
+        rs_thresholds: [rs_threshold{lower: rs_lower, upper: rs_upper}],
         bypass_mode: false,
         loss_type: LossType.PPO_CLIP,
     }
 }
 func decoupled_geo_rs(rs_lower: f32, rs_upper: f32) -> RolloutCorrectionConfig {
-    return RolloutCorrectionConfig{
+    return rollout_correction_config{
         is_level: ISAggregationLevel.NONE,
         is_threshold: ISThreshold{lower: 0.0, upper: 1e10, is_icepop: false},
         is_batch_normalize: false,
-        rs_modes: [RejectionMode.SEQ_MEAN_K1],
-        rs_thresholds: [RSThreshold{lower: rs_lower, upper: rs_upper}],
+        rs_modes: [rejection_mode.SEQ_MEAN_K1],
+        rs_thresholds: [rs_threshold{lower: rs_lower, upper: rs_upper}],
         bypass_mode: false,
         loss_type: LossType.PPO_CLIP,
     }
 }
 func decoupled_k3_rs(rs_upper: f32) -> RolloutCorrectionConfig {
-    return RolloutCorrectionConfig{
+    return rollout_correction_config{
         is_level: ISAggregationLevel.NONE,
         is_threshold: ISThreshold{lower: 0.0, upper: 1e10, is_icepop: false},
         is_batch_normalize: false,
-        rs_modes: [RejectionMode.SEQ_SUM_K3],
-        rs_thresholds: [RSThreshold{lower: 0.0, upper: rs_upper}],
+        rs_modes: [rejection_mode.SEQ_SUM_K3],
+        rs_thresholds: [rs_threshold{lower: 0.0, upper: rs_upper}],
         bypass_mode: false,
         loss_type: LossType.PPO_CLIP,
     }
 }
 func decoupled_k3_rs_seq_tis(rs_upper: f32, is_threshold: f32) -> RolloutCorrectionConfig {
-    return RolloutCorrectionConfig{
+    return rollout_correction_config{
         is_level: ISAggregationLevel.SEQUENCE,
         is_threshold: ISThreshold{
             lower: 0.0,
@@ -161,14 +161,14 @@ func decoupled_k3_rs_seq_tis(rs_upper: f32, is_threshold: f32) -> RolloutCorrect
             is_icepop: false,
         },
         is_batch_normalize: false,
-        rs_modes: [RejectionMode.SEQ_SUM_K3],
-        rs_thresholds: [RSThreshold{lower: 0.0, upper: rs_upper}],
+        rs_modes: [rejection_mode.SEQ_SUM_K3],
+        rs_thresholds: [rs_threshold{lower: 0.0, upper: rs_upper}],
         bypass_mode: false,
         loss_type: LossType.PPO_CLIP,
     }
 }
 func bypass_ppo_clip() -> RolloutCorrectionConfig {
-    return RolloutCorrectionConfig{
+    return rollout_correction_config{
         is_level: ISAggregationLevel.NONE,
         is_threshold: ISThreshold{lower: 0.0, upper: 1e10, is_icepop: false},
         is_batch_normalize: false,
@@ -179,29 +179,29 @@ func bypass_ppo_clip() -> RolloutCorrectionConfig {
     }
 }
 func bypass_ppo_clip_geo_rs(rs_lower: f32, rs_upper: f32) -> RolloutCorrectionConfig {
-    return RolloutCorrectionConfig{
+    return rollout_correction_config{
         is_level: ISAggregationLevel.NONE,
         is_threshold: ISThreshold{lower: 0.0, upper: 1e10, is_icepop: false},
         is_batch_normalize: false,
-        rs_modes: [RejectionMode.SEQ_MEAN_K1],
-        rs_thresholds: [RSThreshold{lower: rs_lower, upper: rs_upper}],
+        rs_modes: [rejection_mode.SEQ_MEAN_K1],
+        rs_thresholds: [rs_threshold{lower: rs_lower, upper: rs_upper}],
         bypass_mode: true,
         loss_type: LossType.PPO_CLIP,
     }
 }
 func bypass_ppo_clip_k3_rs(rs_upper: f32) -> RolloutCorrectionConfig {
-    return RolloutCorrectionConfig{
+    return rollout_correction_config{
         is_level: ISAggregationLevel.NONE,
         is_threshold: ISThreshold{lower: 0.0, upper: 1e10, is_icepop: false},
         is_batch_normalize: false,
-        rs_modes: [RejectionMode.SEQ_SUM_K3],
-        rs_thresholds: [RSThreshold{lower: 0.0, upper: rs_upper}],
+        rs_modes: [rejection_mode.SEQ_SUM_K3],
+        rs_thresholds: [rs_threshold{lower: 0.0, upper: rs_upper}],
         bypass_mode: true,
         loss_type: LossType.PPO_CLIP,
     }
 }
 func bypass_pg_is(is_threshold: f32) -> RolloutCorrectionConfig {
-    return RolloutCorrectionConfig{
+    return rollout_correction_config{
         is_level: ISAggregationLevel.SEQUENCE,
         is_threshold: ISThreshold{
             lower: 0.0,
@@ -216,12 +216,12 @@ func bypass_pg_is(is_threshold: f32) -> RolloutCorrectionConfig {
     }
 }
 func bypass_pg_geo_rs(rs_lower: f32, rs_upper: f32) -> RolloutCorrectionConfig {
-    return RolloutCorrectionConfig{
+    return rollout_correction_config{
         is_level: ISAggregationLevel.NONE,
         is_threshold: ISThreshold{lower: 0.0, upper: 1e10, is_icepop: false},
         is_batch_normalize: false,
-        rs_modes: [RejectionMode.SEQ_MEAN_K1],
-        rs_thresholds: [RSThreshold{lower: rs_lower, upper: rs_upper}],
+        rs_modes: [rejection_mode.SEQ_MEAN_K1],
+        rs_thresholds: [rs_threshold{lower: rs_lower, upper: rs_upper}],
         bypass_mode: true,
         loss_type: LossType.REINFORCE,
     }
@@ -231,7 +231,7 @@ func bypass_pg_geo_rs_seq_tis(
     rs_upper: f32,
     is_threshold: f32
 ) -> RolloutCorrectionConfig {
-    return RolloutCorrectionConfig{
+    return rollout_correction_config{
         is_level: ISAggregationLevel.SEQUENCE,
         is_threshold: ISThreshold{
             lower: 0.0,
@@ -239,8 +239,8 @@ func bypass_pg_geo_rs_seq_tis(
             is_icepop: false,
         },
         is_batch_normalize: false,
-        rs_modes: [RejectionMode.SEQ_MEAN_K1],
-        rs_thresholds: [RSThreshold{lower: rs_lower, upper: rs_upper}],
+        rs_modes: [rejection_mode.SEQ_MEAN_K1],
+        rs_thresholds: [rs_threshold{lower: rs_lower, upper: rs_upper}],
         bypass_mode: true,
         loss_type: LossType.REINFORCE,
     }
@@ -250,7 +250,7 @@ func bypass_pg_geo_rs_token_tis(
     rs_upper: f32,
     is_threshold: f32
 ) -> RolloutCorrectionConfig {
-    return RolloutCorrectionConfig{
+    return rollout_correction_config{
         is_level: ISAggregationLevel.TOKEN,
         is_threshold: ISThreshold{
             lower: 0.0,
@@ -258,8 +258,8 @@ func bypass_pg_geo_rs_token_tis(
             is_icepop: false,
         },
         is_batch_normalize: false,
-        rs_modes: [RejectionMode.SEQ_MEAN_K1],
-        rs_thresholds: [RSThreshold{lower: rs_lower, upper: rs_upper}],
+        rs_modes: [rejection_mode.SEQ_MEAN_K1],
+        rs_thresholds: [rs_threshold{lower: rs_lower, upper: rs_upper}],
         bypass_mode: true,
         loss_type: LossType.REINFORCE,
     }

@@ -3,8 +3,8 @@ kind: Deployment
 metadata: {name: neurx-inference-ascend, labels: {app: neurx-inference, backend: ascend}}
 spec:
   replicas: 8
-  strategy: {type: RollingUpdate, rollingUpdate: {maxUnavailable: 1, maxSurge: 0}}
-  selector: {matchLabels: {app: neurx-inference, backend: ascend}}
+  strategy: {type: RollingUpdate, rolling_update: {max_unavailable: 1, max_surge: 0}}
+  selector: {match_labels: {app: neurx-inference, backend: ascend}}
   template:
     metadata:
       labels: {app: neurx-inference, backend: ascend}
@@ -14,7 +14,7 @@ spec:
       containers:
         - name: neurx
           image: neurx/inference-ascend:latest
-          ports: [{name: http, containerPort: 8080}, {name: grpc, containerPort: 8081}]
+          ports: [{name: http, container_port: 8080}, {name: grpc, container_port: 8081}]
           env:
             - {name: NEURX_BACKEND, value: ascend}
             - {name: NEURX_ASCEND_DEVICE_ID, value: "0"}
@@ -23,28 +23,28 @@ spec:
             - {name: NEURX_CHECKPOINT, value: /models/transformer_v2.ckpt}
             - {name: NEURX_CANN_OPERATOR_LIBRARY, value: /app/neurx/lib/libneurx_cann_operators.so}
             - {name: NEURX_DRAIN_TIMEOUT_MS, value: "110000"}
-          readinessProbe: {httpGet: {path: /health/ready, port: http}, periodSeconds: 5}
-          livenessProbe: {httpGet: {path: /health/live, port: http}, periodSeconds: 10}
-          lifecycle: {preStop: {httpGet: {path: /admin/drain, port: http}}}
+          readiness_probe: {http_get: {path: /health/ready, port: http}, period_seconds: 5}
+          liveness_probe: {http_get: {path: /health/live, port: http}, period_seconds: 10}
+          lifecycle: {pre_stop: {http_get: {path: /admin/drain, port: http}}}
           resources:
-            requests: {cpu: "4", memory: 16Gi, huawei.com/Ascend310P: "1"}
-            limits: {cpu: "16", memory: 64Gi, huawei.com/Ascend310P: "1"}
-          volumeMounts:
-            - {name: model, mountPath: /models, readOnly: true}
+            requests: {cpu: "4", memory: 16gi, huawei.com/ascend_310_p: "1"}
+            limits: {cpu: "16", memory: 64gi, huawei.com/ascend_310_p: "1"}
+          volume_mounts:
+            - {name: model, mount_path: /models, read_only: true}
       volumes:
         - name: model
-          persistentVolumeClaim: {claimName: neurx-model}
+          persistent_volume_claim: {claim_name: neurx-model}
 ---
-apiVersion: v1
+api_version: v1
 kind: Service
 metadata: {name: neurx-inference-ascend}
 spec:
   selector: {app: neurx-inference, backend: ascend}
   ports:
-    - {name: http, port: 8080, targetPort: http}
-    - {name: grpc, port: 8081, targetPort: grpc}
+    - {name: http, port: 8080, target_port: http}
+    - {name: grpc, port: 8081, target_port: grpc}
 ---
-apiVersion: policy/v1
+api_version: policy/v1
 kind: PodDisruptionBudget
 metadata: {name: neurx-inference-ascend}
-spec: {minAvailable: 7, selector: {matchLabels: {app: neurx-inference, backend: ascend}}}
+spec: {min_available: 7, selector: {match_labels: {app: neurx-inference, backend: ascend}}}

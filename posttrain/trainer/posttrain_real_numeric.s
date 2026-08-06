@@ -5,8 +5,8 @@ struct named_lora_module {
     []float base_weight
     int out_dim
     int in_dim
-    []float lora_A
-    []float lora_B
+    []float lora_a
+    []float lora_b
     int rank
     float scaling
     []float initial_a
@@ -816,15 +816,15 @@ func run_posttrain_lora_sft_flat() int {
     string q_name = "base_model.model.model.layers.0.self_attn.q_proj"
     string v_name = "base_model.model.model.layers.0.self_attn.v_proj"
     []float q_base_weight = init_pattern(hidden_size * hidden_size, 0.01)
-    []float q_lora_A = init_pattern(rank * hidden_size, 0.02)
-    []float q_lora_B = fill_vec(hidden_size * rank, 0.0)
-    []float q_initial_a = copy_float_array(q_lora_A)
-    []float q_initial_b = copy_float_array(q_lora_B)
+    []float q_lora_a = init_pattern(rank * hidden_size, 0.02)
+    []float q_lora_b = fill_vec(hidden_size * rank, 0.0)
+    []float q_initial_a = copy_float_array(q_lora_a)
+    []float q_initial_b = copy_float_array(q_lora_b)
     []float v_base_weight = init_pattern(hidden_size * v_out, 0.01)
-    []float v_lora_A = init_pattern(rank * hidden_size, 0.02)
-    []float v_lora_B = fill_vec(v_out * rank, 0.0)
-    []float v_initial_a = copy_float_array(v_lora_A)
-    []float v_initial_b = copy_float_array(v_lora_B)
+    []float v_lora_a = init_pattern(rank * hidden_size, 0.02)
+    []float v_lora_b = fill_vec(v_out * rank, 0.0)
+    []float v_initial_a = copy_float_array(v_lora_a)
+    []float v_initial_b = copy_float_array(v_lora_b)
     float scaling = alpha / (rank as float)
     println("Vectorizing question")
     println("Vectorizing target q")
@@ -843,7 +843,7 @@ func run_posttrain_lora_sft_flat() int {
             int in_idx = 0
             while in_idx < hidden_size {
                 int a_idx = r * hidden_size + in_idx
-                q_hidden[r] = q_hidden[r] + q_lora_A[a_idx] * prompt[in_idx]
+                q_hidden[r] = q_hidden[r] + q_lora_a[a_idx] * prompt[in_idx]
                 in_idx = in_idx + 1
             }
             r = r + 1
@@ -861,7 +861,7 @@ func run_posttrain_lora_sft_flat() int {
             int rank_idx = 0
             while rank_idx < rank {
                 int b_idx = out_idx * rank + rank_idx
-                sum = sum + scaling * q_lora_B[b_idx] * q_hidden[rank_idx]
+                sum = sum + scaling * q_lora_b[b_idx] * q_hidden[rank_idx]
                 rank_idx = rank_idx + 1
             }
             q_output[out_idx] = sum
@@ -869,13 +869,13 @@ func run_posttrain_lora_sft_flat() int {
         }
         float q_loss = mse_loss(q_output, target_q)
         []float q_grad = mse_gradient(q_output, target_q)
-        []float q_b_snapshot = copy_float_array(q_lora_B)
+        []float q_b_snapshot = copy_float_array(q_lora_b)
         out_idx = 0
         while out_idx < hidden_size {
             r = 0
             while r < rank {
                 int b_idx = out_idx * rank + r
-                q_lora_B[b_idx] = q_lora_B[b_idx] - learning_rate * scaling * q_grad[out_idx] * q_hidden[r]
+                q_lora_b[b_idx] = q_lora_b[b_idx] - learning_rate * scaling * q_grad[out_idx] * q_hidden[r]
                 r = r + 1
             }
             out_idx = out_idx + 1
@@ -892,7 +892,7 @@ func run_posttrain_lora_sft_flat() int {
                     out_idx = out_idx + 1
                 }
                 int a_idx = r * hidden_size + in_idx
-                q_lora_A[a_idx] = q_lora_A[a_idx] - learning_rate * scaling * grad_a * prompt[in_idx]
+                q_lora_a[a_idx] = q_lora_a[a_idx] - learning_rate * scaling * grad_a * prompt[in_idx]
                 in_idx = in_idx + 1
             }
             r = r + 1
@@ -903,7 +903,7 @@ func run_posttrain_lora_sft_flat() int {
             int in_idx = 0
             while in_idx < hidden_size {
                 int a_idx = r * hidden_size + in_idx
-                v_hidden[r] = v_hidden[r] + v_lora_A[a_idx] * prompt[in_idx]
+                v_hidden[r] = v_hidden[r] + v_lora_a[a_idx] * prompt[in_idx]
                 in_idx = in_idx + 1
             }
             r = r + 1
@@ -921,7 +921,7 @@ func run_posttrain_lora_sft_flat() int {
             int rank_idx = 0
             while rank_idx < rank {
                 int b_idx = out_idx * rank + rank_idx
-                sum = sum + scaling * v_lora_B[b_idx] * v_hidden[rank_idx]
+                sum = sum + scaling * v_lora_b[b_idx] * v_hidden[rank_idx]
                 rank_idx = rank_idx + 1
             }
             v_output[out_idx] = sum
@@ -929,13 +929,13 @@ func run_posttrain_lora_sft_flat() int {
         }
         float v_loss = mse_loss(v_output, target_v)
         []float v_grad = mse_gradient(v_output, target_v)
-        []float v_b_snapshot = copy_float_array(v_lora_B)
+        []float v_b_snapshot = copy_float_array(v_lora_b)
         out_idx = 0
         while out_idx < v_out {
             r = 0
             while r < rank {
                 int b_idx = out_idx * rank + r
-                v_lora_B[b_idx] = v_lora_B[b_idx] - learning_rate * scaling * v_grad[out_idx] * v_hidden[r]
+                v_lora_b[b_idx] = v_lora_b[b_idx] - learning_rate * scaling * v_grad[out_idx] * v_hidden[r]
                 r = r + 1
             }
             out_idx = out_idx + 1
@@ -952,7 +952,7 @@ func run_posttrain_lora_sft_flat() int {
                     out_idx = out_idx + 1
                 }
                 int a_idx = r * hidden_size + in_idx
-                v_lora_A[a_idx] = v_lora_A[a_idx] - learning_rate * scaling * grad_a * prompt[in_idx]
+                v_lora_a[a_idx] = v_lora_a[a_idx] - learning_rate * scaling * grad_a * prompt[in_idx]
                 in_idx = in_idx + 1
             }
             r = r + 1
@@ -976,7 +976,7 @@ func run_posttrain_lora_sft_flat() int {
         shape: q_a_shape,
         data: q_lora_A,
         shape_count: 2,
-        data_count: len(q_lora_A),
+        data_count: len(q_lora_a),
     }
     []int q_b_shape = []int{cap: 2}
     q_b_shape[0] = hidden_size
@@ -987,7 +987,7 @@ func run_posttrain_lora_sft_flat() int {
         shape: q_b_shape,
         data: q_lora_B,
         shape_count: 2,
-        data_count: len(q_lora_B),
+        data_count: len(q_lora_b),
     }
     []int v_a_shape = []int{cap: 2}
     v_a_shape[0] = rank
@@ -998,7 +998,7 @@ func run_posttrain_lora_sft_flat() int {
         shape: v_a_shape,
         data: v_lora_A,
         shape_count: 2,
-        data_count: len(v_lora_A),
+        data_count: len(v_lora_a),
     }
     []int v_b_shape = []int{cap: 2}
     v_b_shape[0] = v_out
@@ -1009,7 +1009,7 @@ func run_posttrain_lora_sft_flat() int {
         shape: v_b_shape,
         data: v_lora_B,
         shape_count: 2,
-        data_count: len(v_lora_B),
+        data_count: len(v_lora_b),
     }
     safetensors_writer_add_tensor(writer, q_a_tensor)
     safetensors_writer_add_tensor(writer, q_b_tensor)

@@ -1,7 +1,7 @@
 import "tensor/tensor.s"
 import "optimizer/optimizer.s"
 import "posttrain/alignment/ppo/ppo.s"
-struct OPOConfig {
+struct opo_config {
     learning_rate: f32
     num_epochs: i32
     max_grad_norm: f32
@@ -20,28 +20,28 @@ struct OPOConfig {
     value_clip_epsilon: f32
     entropy_coeff: f32
 }
-struct OPOTrainer {
+struct opo_trainer {
     config: OPOConfig
-    policy_model: *Model
-    value_model: *Model
-    reference_model: *Model
-    optimizer: *Optimizer
+    policy_model: *model
+    value_model: *model
+    reference_model: *model
+    optimizer: *optimizer
     current_lr: f32
     kl_history: []f32
     step_count: i64
 }
 func new_opo_trainer(
     config: OPOConfig,
-    policy: *Model,
-    value: *Model,
-    reference: *Model
+    policy: *model,
+    value: *model,
+    reference: *model
 ) -> OPOTrainer {
     let params = policy.parameters()
     if config.use_value_loss {
         params = params + value.parameters()
     }
     let optimizer = adamw_optimizer(params, config.learning_rate)
-    return OPOTrainer{
+    return opo_trainer{
         config: config,
         policy_model: policy,
         value_model: value,
@@ -52,7 +52,7 @@ func new_opo_trainer(
         step_count: 0,
     }
 }
-func (trainer: *OPOTrainer) compute_advantage_weights(advantages: Tensor) -> Tensor {
+func (trainer: *opo_trainer) compute_advantage_weights(advantages: Tensor) -> Tensor {
     match trainer.config.advantage_weighting {
         "optimal" => {
             let weights = exp(advantages / trainer.config.temperature)
@@ -81,7 +81,7 @@ func (trainer: *OPOTrainer) compute_advantage_weights(advantages: Tensor) -> Ten
         }
     }
 }
-func (trainer: *OPOTrainer) compute_optimal_objective(
+func (trainer: *opo_trainer) compute_optimal_objective(
     new_log_probs: Tensor,
     ref_log_probs: Tensor,
     advantage: Tensor,
@@ -92,7 +92,7 @@ func (trainer: *OPOTrainer) compute_optimal_objective(
     let objective = log_ratio * weighted_advantage
     return objective
 }
-func (trainer: *OPOTrainer) adapt_learning_rate(kl: f32) {
+func (trainer: *opo_trainer) adapt_learning_rate(kl: f32) {
     if !trainer.config.use_adaptive_lr {
         return
     }
@@ -111,14 +111,14 @@ func (trainer: *OPOTrainer) adapt_learning_rate(kl: f32) {
     trainer.current_lr = clamp_scalar(trainer.current_lr, min_lr, max_lr)
     trainer.optimizer.set_learning_rate(trainer.current_lr)
 }
-func (trainer: *OPOTrainer) compute_gae(
-    rewards: []Tensor,
-    values: []Tensor,
-    dones: []Tensor
-) -> ([]Tensor, []Tensor) {
+func (trainer: *opo_trainer) compute_gae(
+    rewards: []tensor,
+    values: []tensor,
+    dones: []tensor
+) -> ([]tensor, []tensor) {
     let batch_size = rewards.len()
-    let advantages: []Tensor = []
-    let returns: []Tensor = []
+    let advantages: []tensor = []
+    let returns: []tensor = []
     for b in 0..batch_size {
         let seq_len = rewards[b].shape[0]
         let seq_advantages = tensor_zeros([seq_len])
@@ -140,17 +140,17 @@ func (trainer: *OPOTrainer) compute_gae(
     }
     return advantages, returns
 }
-func (trainer: *OPOTrainer) train_step(
-    prompts: []Tensor,
-    responses: []Tensor,
-    rewards: []Tensor
+func (trainer: *opo_trainer) train_step(
+    prompts: []tensor,
+    responses: []tensor,
+    rewards: []tensor
 ) -> (f32, f32, f32) {
     let batch_size = prompts.len()
-    let inputs: []Tensor = []
+    let inputs: []tensor = []
     for i in 0..batch_size {
         inputs.push(concat(prompts[i], responses[i]))
     }
-    let values: []Tensor = []
+    let values: []tensor = []
     if trainer.config.use_value_loss {
         for input in inputs {
             let value = trainer.value_model.forward(input)
@@ -161,7 +161,7 @@ func (trainer: *OPOTrainer) train_step(
             values.push(tensor_zeros([responses[i].shape[0]]))
         }
     }
-    let dones: []Tensor = []
+    let dones: []tensor = []
     for resp in responses {
         let seq_len = resp.shape[0]
         let done = tensor_zeros([seq_len])
@@ -177,12 +177,12 @@ func (trainer: *OPOTrainer) train_step(
     }
     let adv_mean = compute_mean(all_advantages)
     let adv_std = compute_std(all_advantages, adv_mean)
-    let normalized_advantages: []Tensor = []
+    let normalized_advantages: []tensor = []
     for adv in advantages {
         let norm_adv = (adv - adv_mean) / (adv_std + 1e-8)
         normalized_advantages.push(norm_adv)
     }
-    let ref_log_probs: []Tensor = []
+    let ref_log_probs: []tensor = []
     for input in inputs {
         let logits = trainer.reference_model.forward(input)
         let log_probs = log_softmax(logits, dim: -1)
@@ -245,7 +245,7 @@ func (trainer: *OPOTrainer) train_step(
         avg_kl
     )
 }
-func (trainer: *OPOTrainer) train(train_data: DataLoader) -> ([]f32, []f32) {
+func (trainer: *opo_trainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let value_losses: []f32 = []
     for batch in train_data {

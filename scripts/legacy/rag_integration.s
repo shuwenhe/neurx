@@ -251,7 +251,7 @@ func (rag *ragintegration) get_rag_statistics() {
         fmt.Printf("cache Entries: %d\n", len(rag.cache))
     }
 }
-func NewRAGIntegration() *ragintegration {
+func new_rag_integration() *ragintegration {
     return &ragintegration{
         vector_db:   vector_database{},
         metrics_history: make([]ragmetrics, 0),

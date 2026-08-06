@@ -419,7 +419,7 @@ func infer_run_remote(string model_path, string prompt) string {
     string payload = "{\"model\":\"" + infer_json_escape(model_name) + "\",\"messages\":[{\"role\":\"user\",\"content\":\"" + infer_json_escape(prompt) + "\"}],\"temperature\":0.0,\"top_p\":1.0,\"stream\":false}"
     runtime_write_text_file(payload_path, payload)
     string cmd = "curl -sS -X POST " + runtime_shell_escape(final_url) +
-        " -H 'Content-Type: application/json'"
+        " -H 'content-type: application/json'"
     if api_key != "" {
         cmd = cmd + " -H " + runtime_shell_escape("Authorization: Bearer " + api_key)
     }

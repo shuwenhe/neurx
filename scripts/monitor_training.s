@@ -5,7 +5,7 @@ use std.path
 use std.exec
 use std.strings
 use std.regexp
-func findLatestLog(dir string) string {
+func find_latest_log(dir string) string {
     stat, err := os.Stat(dir)
     if err != nil || !stat.IsDir() {
         return ""
@@ -14,49 +14,49 @@ func findLatestLog(dir string) string {
     if err != nil {
         return ""
     }
-    latestFile := ""
-    latestTime := int64(0)
+    latest_file := ""
+    latest_time := int64(0)
     for _, entry := range entries {
         if strings.HasPrefix(entry.Name(), "pretrain_gpu_") && strings.HasSuffix(entry.Name(), ".log") {
             info, _ := entry.Info()
             if info.ModTime().Unix() > latestTime {
-                latestTime = info.ModTime().Unix()
-                latestFile = path.Join(dir, entry.Name())
+                latest_time = info.ModTime().Unix()
+                latest_file = path.Join(dir, entry.Name())
             }
         }
     }
-    return latestFile
+    return latest_file
 }
 func main() {
-    neurxRoot := os.Getenv("NEURX_ROOT")
-    if neurxRoot == "" {
-        neurxRoot = "."
+    neurx_root := os.Getenv("NEURX_ROOT")
+    if neurx_root == "" {
+        neurx_root = "."
     }
-    logDir := os.Getenv("LOG_DIR")
-    if logDir == "" {
-        logDir = neurxRoot + "/checkpoint/NeurX-1.3/logs"
+    log_dir := os.Getenv("LOG_DIR")
+    if log_dir == "" {
+        log_dir = neurx_root + "/checkpoint/NeurX-1.3/logs"
     }
-    artifactLogDir := os.Getenv("ARTIFACT_LOG_DIR")
-    if artifactLogDir == "" {
-        artifactLogDir = neurxRoot + "/artifacts/logs"
+    artifact_log_dir := os.Getenv("ARTIFACT_LOG_DIR")
+    if artifact_log_dir == "" {
+        artifact_log_dir = neurx_root + "/artifacts/logs"
     }
-    logFile := findLatestLog(artifactLogDir)
-    if logFile == "" {
-        logFile = findLatestLog(logDir)
+    log_file := find_latest_log(artifact_log_dir)
+    if log_file == "" {
+        log_file = find_latest_log(log_dir)
     }
-    if logFile == "" {
+    if log_file == "" {
         io.Println("❌ No training log file found in:")
-        io.Println("   - " + artifactLogDir)
-        io.Println("   - " + logDir)
+        io.Println("   - " + artifact_log_dir)
+        io.Println("   - " + log_dir)
         io.Println("")
         io.Println("✓ Start training with: make pretrain-gpu")
         os.Exit(1)
     }
     io.Println("📊 Monitoring training progress...")
-    io.Println("📄 Log file: " + logFile)
+    io.Println("📄 Log file: " + log_file)
     io.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     io.Println("")
-    cmd := exec.command("tail", "-f", logFile)
+    cmd := exec.command("tail", "-f", log_file)
     cmd.Stdout = os.Stdout
     cmd.Stderr = os.Stderr
     cmd.Run()

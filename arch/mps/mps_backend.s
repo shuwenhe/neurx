@@ -24,11 +24,11 @@ struct mps_kernel {
     shader: pointer
 }
 func mps_available() bool {
-    let devices = MTLCopyAllDevices()
+    let devices = mtl_copy_all_devices()
     devices.count > 0
 }
 func mps_get_devices() []mps_device {
-    let metal_devices = MTLCopyAllDevices()
+    let metal_devices = mtl_copy_all_devices()
     []mps_device result = []mps_device{cap: metal_devices.count}
     for i in 0..<metal_devices.count {
         let device = metal_devices[i]

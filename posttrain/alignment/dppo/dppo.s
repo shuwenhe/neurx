@@ -1,7 +1,7 @@
 import "tensor/tensor.s"
 import "optimizer/optimizer.s"
 import "posttrain/alignment/ppo/ppo.s"
-struct DPPOConfig {
+struct dppo_config {
     learning_rate: f32
     num_epochs: i32
     max_grad_norm: f32
@@ -18,28 +18,28 @@ struct DPPOConfig {
     value_loss_coeff: f32
     value_clip_epsilon: f32
 }
-struct DPPOTrainer {
+struct dppo_trainer {
     config: DPPOConfig
-    policy_model: *Model
-    value_model: *Model
-    reference_model: *Model
-    optimizer: *Optimizer
+    policy_model: *model
+    value_model: *model
+    reference_model: *model
+    optimizer: *optimizer
     current_epsilon: f32
     kl_history: []f32
     step_count: i64
 }
 func new_dppo_trainer(
     config: DPPOConfig,
-    policy: *Model,
-    value: *Model,
-    reference: *Model
+    policy: *model,
+    value: *model,
+    reference: *model
 ) -> DPPOTrainer {
     let params = policy.parameters()
     if config.use_value_loss {
         params = params + value.parameters()
     }
     let optimizer = adamw_optimizer(params, config.learning_rate)
-    return DPPOTrainer{
+    return dppo_trainer{
         config: config,
         policy_model: policy,
         value_model: value,
@@ -50,7 +50,7 @@ func new_dppo_trainer(
         step_count: 0,
     }
 }
-func (trainer: *DPPOTrainer) compute_binary_kl_constraint(
+func (trainer: *dppo_trainer) compute_binary_kl_constraint(
     new_probs: Tensor,
     old_probs: Tensor,
     advantage: Tensor
@@ -66,7 +66,7 @@ func (trainer: *DPPOTrainer) compute_binary_kl_constraint(
                            1.0 * kl_violation
     return constrained_ratio * advantage
 }
-func (trainer: *DPPOTrainer) compute_binary_tv_constraint(
+func (trainer: *dppo_trainer) compute_binary_tv_constraint(
     new_probs: Tensor,
     old_probs: Tensor,
     advantage: Tensor
@@ -78,7 +78,7 @@ func (trainer: *DPPOTrainer) compute_binary_tv_constraint(
                            1.0 * tv_violation
     return constrained_ratio * advantage
 }
-func (trainer: *DPPOTrainer) compute_constrained_objective(
+func (trainer: *dppo_trainer) compute_constrained_objective(
     new_log_probs: Tensor,
     old_log_probs: Tensor,
     advantage: Tensor
@@ -112,7 +112,7 @@ func (trainer: *DPPOTrainer) compute_constrained_objective(
     }
     return constrained_obj
 }
-func (trainer: *DPPOTrainer) update_adaptive_epsilon(current_kl: f32) {
+func (trainer: *dppo_trainer) update_adaptive_epsilon(current_kl: f32) {
     if !trainer.config.use_adaptive_epsilon {
         return
     }
@@ -132,14 +132,14 @@ func (trainer: *DPPOTrainer) update_adaptive_epsilon(current_kl: f32) {
         trainer.config.epsilon_max
     )
 }
-func (trainer: *DPPOTrainer) compute_gae(
-    rewards: []Tensor,
-    values: []Tensor,
-    dones: []Tensor
-) -> ([]Tensor, []Tensor) {
+func (trainer: *dppo_trainer) compute_gae(
+    rewards: []tensor,
+    values: []tensor,
+    dones: []tensor
+) -> ([]tensor, []tensor) {
     let batch_size = rewards.len()
-    let advantages: []Tensor = []
-    let returns: []Tensor = []
+    let advantages: []tensor = []
+    let returns: []tensor = []
     for b in 0..batch_size {
         let seq_len = rewards[b].shape[0]
         let seq_advantages = tensor_zeros([seq_len])
@@ -161,17 +161,17 @@ func (trainer: *DPPOTrainer) compute_gae(
     }
     return advantages, returns
 }
-func (trainer: *DPPOTrainer) train_step(
-    prompts: []Tensor,
-    responses: []Tensor,
-    rewards: []Tensor
+func (trainer: *dppo_trainer) train_step(
+    prompts: []tensor,
+    responses: []tensor,
+    rewards: []tensor
 ) -> (f32, f32, f32) {
     let batch_size = prompts.len()
-    let inputs: []Tensor = []
+    let inputs: []tensor = []
     for i in 0..batch_size {
         inputs.push(concat(prompts[i], responses[i]))
     }
-    let values: []Tensor = []
+    let values: []tensor = []
     if trainer.config.use_value_loss {
         for input in inputs {
             let value = trainer.value_model.forward(input)
@@ -182,7 +182,7 @@ func (trainer: *DPPOTrainer) train_step(
             values.push(tensor_zeros([responses[i].shape[0]]))
         }
     }
-    let dones: []Tensor = []
+    let dones: []tensor = []
     for resp in responses {
         let seq_len = resp.shape[0]
         let done = tensor_zeros([seq_len])
@@ -198,12 +198,12 @@ func (trainer: *DPPOTrainer) train_step(
     }
     let adv_mean = compute_mean(all_advantages)
     let adv_std = compute_std(all_advantages, adv_mean)
-    let normalized_advantages: []Tensor = []
+    let normalized_advantages: []tensor = []
     for adv in advantages {
         let norm_adv = (adv - adv_mean) / (adv_std + 1e-8)
         normalized_advantages.push(norm_adv)
     }
-    let old_log_probs: []Tensor = []
+    let old_log_probs: []tensor = []
     for input in inputs {
         let logits = trainer.policy_model.forward(input)
         let log_probs = log_softmax(logits, dim: -1)
@@ -262,7 +262,7 @@ func (trainer: *DPPOTrainer) train_step(
         avg_kl
     )
 }
-func (trainer: *DPPOTrainer) train(train_data: DataLoader) -> ([]f32, []f32) {
+func (trainer: *dppo_trainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let value_losses: []f32 = []
     for batch in train_data {

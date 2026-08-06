@@ -49,23 +49,23 @@ struct lora_linear {
     []float base_weight
     int out_dim
     int in_dim
-    []float lora_A
-    []float lora_B
-    []float lora_A_grad
-    []float lora_B_grad
+    []float lora_a
+    []float lora_b
+    []float lora_a_grad
+    []float lora_b_grad
     int rank
     float scaling
     float dropout_rate
     []float last_input
-    []float last_Ax
+    []float last_ax
 }
 struct lora_state {
     []lora_linear layers
     int num_layers
-    [][]float mA
-    [][]float vA
-    [][]float mB
-    [][]float vB
+    [][]float m_a
+    [][]float v_a
+    [][]float m_b
+    [][]float v_b
     lora_config config
     int current_step
     float current_loss
@@ -137,15 +137,15 @@ func create_lora_linear(int in_dim, int out_dim, []float base_weight, lora_confi
         base_weight: base_weight,
         out_dim: out_dim,
         in_dim: in_dim,
-        lora_A: a,
-        lora_B: b,
-        lora_A_grad: fill_lora(r * in_dim, 0.0),
-        lora_B_grad: fill_lora(out_dim * r, 0.0),
+        lora_a: a,
+        lora_b: b,
+        lora_a_grad: fill_lora(r * in_dim, 0.0),
+        lora_b_grad: fill_lora(out_dim * r, 0.0),
         rank: r,
         scaling: scale,
         dropout_rate: cfg.dropout_rate,
         last_input: []float{},
-        last_Ax: []float{},
+        last_ax: []float{},
     }
 }
 func create_lora_state(lora_config cfg) lora_state {
@@ -159,25 +159,25 @@ func create_lora_state(lora_config cfg) lora_state {
         layers = append(layers, layer)
         layer_idx = layer_idx + 1
     }
-    [][]float mA = [][]float{}
-    [][]float vA = [][]float{}
-    [][]float mB = [][]float{}
-    [][]float vB = [][]float{}
+    [][]float m_a = [][]float{}
+    [][]float v_a = [][]float{}
+    [][]float m_b = [][]float{}
+    [][]float v_b = [][]float{}
     int i = 0
     while i < cfg.num_layers {
-        mA = append(mA, fill_lora(cfg.rank * cfg.hidden_size, 0.0))
-        vA = append(vA, fill_lora(cfg.rank * cfg.hidden_size, 0.0))
-        mB = append(mB, fill_lora(cfg.hidden_size * cfg.rank, 0.0))
-        vB = append(vB, fill_lora(cfg.hidden_size * cfg.rank, 0.0))
+        m_a = append(m_a, fill_lora(cfg.rank * cfg.hidden_size, 0.0))
+        v_a = append(v_a, fill_lora(cfg.rank * cfg.hidden_size, 0.0))
+        m_b = append(m_b, fill_lora(cfg.hidden_size * cfg.rank, 0.0))
+        v_b = append(v_b, fill_lora(cfg.hidden_size * cfg.rank, 0.0))
         i = i + 1
     }
     lora_state {
         layers: layers,
         num_layers: cfg.num_layers,
-        mA: mA,
-        vA: vA,
-        mB: mB,
-        vB: vB,
+        m_a: mA,
+        v_a: vA,
+        m_b: mB,
+        v_b: vB,
         config: cfg,
         current_step: 0,
         current_loss: 0.0,
@@ -207,7 +207,7 @@ func lora_forward(lora_linear layer, []float input) []float {
         }
         b = b + 1
     }
-    []float xA = fill_lora(batch_seq_len * layer.rank, 0.0)
+    []float x_a = fill_lora(batch_seq_len * layer.rank, 0.0)
     b = 0
     while b < batch_seq_len {
         int r = 0
@@ -222,7 +222,7 @@ func lora_forward(lora_linear layer, []float input) []float {
                 }
                 j = j + 1
             }
-            xA[b * layer.rank + r] = sum
+            x_a[b * layer.rank + r] = sum
             r = r + 1
         }
         b = b + 1
@@ -234,10 +234,10 @@ func lora_forward(lora_linear layer, []float input) []float {
             float sum = 0.0
             int r = 0
             while r < layer.rank {
-                int xA_idx = b * layer.rank + r
-                int B_idx = i * layer.rank + r
-                if xA_idx < len(xA) && B_idx < len(layer.lora_B) {
-                    sum = sum + xA[xA_idx] * layer.lora_B[B_idx]
+                int x_a_idx = b * layer.rank + r
+                int b_idx = i * layer.rank + r
+                if x_a_idx < len(x_a) && b_idx < len(layer.lora_B) {
+                    sum = sum + x_a[x_a_idx] * layer.lora_B[b_idx]
                 }
                 r = r + 1
             }
@@ -255,7 +255,7 @@ struct lora_backward_result {
 }
 func lora_backward(lora_linear layer, []float grad_output) lora_backward_result {
     int batch_seq_len = len(grad_output) / layer.out_dim
-    []float grad_B = fill_lora(layer.out_dim * layer.rank, 0.0)
+    []float grad_b = fill_lora(layer.out_dim * layer.rank, 0.0)
     int b = 0
     while b < batch_seq_len {
         int i = 0
@@ -267,20 +267,20 @@ func lora_backward(lora_linear layer, []float grad_output) lora_backward_result 
             }
             int r = 0
             while r < layer.rank {
-                int B_idx = i * layer.rank + r
-                int xA_idx = b * layer.rank + r
-                float xA_val = 0.0
-                if xA_idx < len(layer.last_Ax) {
-                    xA_val = layer.last_Ax[xA_idx]
+                int b_idx = i * layer.rank + r
+                int x_a_idx = b * layer.rank + r
+                float x_a_val = 0.0
+                if x_a_idx < len(layer.last_Ax) {
+                    x_a_val = layer.last_Ax[x_a_idx]
                 }
-                grad_B[B_idx] = grad_B[B_idx] + layer.scaling * grad_val * xA_val
+                grad_b[b_idx] = grad_b[b_idx] + layer.scaling * grad_val * x_a_val
                 r = r + 1
             }
             i = i + 1
         }
         b = b + 1
     }
-    []float grad_A = fill_lora(layer.rank * layer.in_dim, 0.0)
+    []float grad_a = fill_lora(layer.rank * layer.in_dim, 0.0)
     []float grad_lora = fill_lora(batch_seq_len * layer.rank, 0.0)
     b = 0
     while b < batch_seq_len {
@@ -290,16 +290,16 @@ func lora_backward(lora_linear layer, []float grad_output) lora_backward_result 
             int i = 0
             while i < layer.out_dim {
                 int grad_idx = b * layer.out_dim + i
-                int B_idx = i * layer.rank + r
+                int b_idx = i * layer.rank + r
                 float grad_val = 0.0
-                float B_val = 0.0
+                float b_val = 0.0
                 if grad_idx < len(grad_output) {
                     grad_val = grad_output[grad_idx]
                 }
-                if B_idx < len(layer.lora_B) {
-                    B_val = layer.lora_B[B_idx]
+                if b_idx < len(layer.lora_B) {
+                    b_val = layer.lora_B[b_idx]
                 }
-                sum = sum + grad_val * B_val
+                sum = sum + grad_val * b_val
                 i = i + 1
             }
             grad_lora[b * layer.rank + r] = layer.scaling * sum
@@ -327,15 +327,15 @@ func lora_backward(lora_linear layer, []float grad_output) lora_backward_result 
                 sum = sum + x_val * grad_val
                 j = j + 1
             }
-            grad_A[r * layer.in_dim] = grad_A[r * layer.in_dim] + sum
+            grad_a[r * layer.in_dim] = grad_a[r * layer.in_dim] + sum
             r = r + 1
         }
         b = b + 1
     }
     []float grad_input = fill_lora(batch_seq_len * layer.in_dim, 0.0)
     lora_linear updated = layer
-    updated.lora_A_grad = grad_A
-    updated.lora_B_grad = grad_B
+    updated.lora_A_grad = grad_a
+    updated.lora_B_grad = grad_b
     lora_backward_result {
         updated_layer: updated,
         grad_input: grad_input,

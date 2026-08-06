@@ -6,79 +6,79 @@ import (
     "strconv"
     "strings"
 )
-enum TrainingScale {
-    Mini,
-    Small,
-    Medium,
-    Large,
+enum training_scale {
+    mini,
+    small,
+    medium,
+    large,
     XL,
-    OneT,
+    one_t,
 }
 struct training_config {
-    scale         TrainingScale
-    numGpus       int
-    batchSize     int
-    learningRate  float32
+    scale         training_scale
+    num_gpus       int
+    batch_size     int
+    learning_rate  float32
     epochs        int
-    checkpointDir string
-    logDir        string
-    outputDir     string
-    dataPath      string
-    modelPath     string
+    checkpoint_dir string
+    log_dir        string
+    output_dir     string
+    data_path      string
+    model_path     string
     timestamp     string
 }
-func get_scale_config(scale TrainingScale) struct {
+func get_scale_config(scale training_scale) struct {
     params    int
     gpus      int
     batch     int
     lr        float32
-    seqLen    int
+    seq_len    int
     layers    int
 } {
     switch scale {
-    case TrainingScale.Mini:
+    case training_scale.Mini:
         return {
             params:  124_000_000,
             gpus:    1,
             batch:   32,
             lr:      1e-4,
-            seqLen:  512,
+            seq_len:  512,
             layers:  12,
         }
-    case TrainingScale.Small:
+    case training_scale.Small:
         return {
             params:  1_000_000_000,
             gpus:    8,
             batch:   256,
             lr:      5e-5,
-            seqLen:  2048,
+            seq_len:  2048,
             layers:  24,
         }
-    case TrainingScale.Medium:
+    case training_scale.Medium:
         return {
             params:  7_000_000_000,
             gpus:    32,
             batch:   512,
             lr:      3e-5,
-            seqLen:  4096,
+            seq_len:  4096,
             layers:  32,
         }
-    case TrainingScale.Large:
+    case training_scale.Large:
         return {
             params:  13_000_000_000,
             gpus:    64,
             batch:   1024,
             lr:      2e-5,
-            seqLen:  4096,
+            seq_len:  4096,
             layers:  40,
         }
-    case TrainingScale.XL:
+    case training_scale.XL:
         return {
             params:  70_000_000_000,
             gpus:    512,
             batch:   4096,
             lr:      1e-5,
-            seqLen:  8192,
+            seq_len:  8192,
             layers:  80,
         }
     default:
@@ -87,7 +87,7 @@ func get_scale_config(scale TrainingScale) struct {
             gpus:    1,
             batch:   32,
             lr:      1e-4,
-            seqLen:  512,
+            seq_len:  512,
             layers:  12,
         }
     }
@@ -95,40 +95,40 @@ func get_scale_config(scale TrainingScale) struct {
 struct train_orchestrator {
     logger logger_2
     config training_config
-    sCompiler string
-    neurxRoot string
+    s_compiler string
+    neurx_root string
 }
-func new_train_orchestrator(scale TrainingScale, numGpus int) (*train_orchestrator, error) {
+func new_train_orchestrator(scale training_scale, num_gpus int) (*train_orchestrator, error) {
     logger := new_logger("train_orchestrator")
-    neurxRoot := get_env("NEURX_ROOT", "")
-    if neurxRoot == "" {
+    neurx_root := get_env("NEURX_ROOT", "")
+    if neurx_root == "" {
         pwd, _ := os.Getwd()
-        neurxRoot = pwd
+        neurx_root = pwd
     }
-    sCompiler := get_env("S_COMPILER", "")
-    if sCompiler == "" {
+    s_compiler := get_env("S_COMPILER", "")
+    if s_compiler == "" {
         if command_exists("s") {
-            sCompiler = "s"
+            s_compiler = "s"
         } else {
-            sCompiler = filepath.Join(neurxRoot, "..", "s", ".local", "bin", "s")
+            s_compiler = filepath.Join(neurx_root, "..", "s", ".local", "bin", "s")
         }
     }
-    if !command_exists(sCompiler) && !file_exists(sCompiler) {
-        return nil, fmt.Errorf("S compiler not found at %s", sCompiler)
+    if !command_exists(s_compiler) && !file_exists(s_compiler) {
+        return nil, fmt.Errorf("S compiler not found at %s", s_compiler)
     }
     config := training_config{
         scale:         scale,
-        numGpus:       numGpus,
+        num_gpus:       numGpus,
         timestamp:     timestamp(),
     }
-    config.logDir = filepath.Join(neurxRoot, "logs", fmt.Sprintf("%s_%s", scaleString(scale), config.timestamp))
-    config.checkpointDir = filepath.Join(neurxRoot, "checkpoints", fmt.Sprintf("%s_%s", scaleString(scale), config.timestamp))
-    config.outputDir = filepath.Join(neurxRoot, "outputs", fmt.Sprintf("%s_%s", scaleString(scale), config.timestamp))
+    config.logDir = filepath.Join(neurx_root, "logs", fmt.Sprintf("%s_%s", scale_string(scale), config.timestamp))
+    config.checkpointDir = filepath.Join(neurx_root, "checkpoints", fmt.Sprintf("%s_%s", scale_string(scale), config.timestamp))
+    config.outputDir = filepath.Join(neurx_root, "outputs", fmt.Sprintf("%s_%s", scale_string(scale), config.timestamp))
     return &train_orchestrator{
         logger:    logger,
         config:    config,
-        sCompiler: sCompiler,
-        neurxRoot: neurxRoot,
+        s_compiler: sCompiler,
+        neurx_root: neurxRoot,
     }, nil
 }
 func (t *train_orchestrator) setup() error {
@@ -143,56 +143,56 @@ func (t *train_orchestrator) setup() error {
 }
 func (t *train_orchestrator) check_environment() error {
     t.logger.log("Checking environment...")
-    numGpus, backend := t.detectGPUs()
-    if numGpus < t.config.numGpus {
-        t.logger.warn("Requested %d GPUs but only %d available, using %d", t.config.numGpus, numGpus, numGpus)
-        t.config.numGpus = numGpus
+    num_gpus, backend := t.detectGPUs()
+    if num_gpus < t.config.numGpus {
+        t.logger.warn("Requested %d GPUs but only %d available, using %d", t.config.numGpus, num_gpus, num_gpus)
+        t.config.numGpus = num_gpus
     }
-    t.logger.success("Detected %d GPUs (%s)", numGpus, backend)
+    t.logger.success("Detected %d GPUs (%s)", num_gpus, backend)
     if t.config.dataPath != "" && !file_exists(t.config.dataPath) {
         t.logger.error("Data path not found: %s", t.config.dataPath)
         return fmt.Errorf("data not found")
     }
     return nil
 }
-func (t *train_orchestrator) Compile() error {
+func (t *train_orchestrator) compile() error {
     t.logger.log("Compiling NeurX training module...")
-    sourceFile := filepath.Join(t.config.outputDir, "neurx_training.s")
-    irFile := filepath.Join(t.config.outputDir, "neurx_training.ir")
-    binFile := filepath.Join(t.config.outputDir, "neurx_train")
-    if !file_exists(sourceFile) {
-        if err := t.generateTrainingSource(sourceFile); err != nil {
+    source_file := filepath.Join(t.config.outputDir, "neurx_training.s")
+    ir_file := filepath.Join(t.config.outputDir, "neurx_training.ir")
+    bin_file := filepath.Join(t.config.outputDir, "neurx_train")
+    if !file_exists(source_file) {
+        if err := t.generateTrainingSource(source_file); err != nil {
             return err
         }
     }
     t.logger.log("Compiling to IR...")
-    result := exec_command(t.sCompiler, sourceFile, irFile)
+    result := exec_command(t.sCompiler, source_file, ir_file)
     if result.ExitCode != 0 {
         t.logger.error("Compilation failed: %s", result.Stderr)
         return fmt.Errorf("compilation failed")
     }
-    t.logger.success("IR generated: %s", irFile)
+    t.logger.success("IR generated: %s", ir_file)
     t.logger.log("Generating binary...")
-    result = exec_command(t.sCompiler, "--emit-bin", irFile, binFile)
+    result = exec_command(t.sCompiler, "--emit-bin", ir_file, bin_file)
     if result.ExitCode != 0 {
         t.logger.error("Binary generation failed: %s", result.Stderr)
         return fmt.Errorf("binary generation failed")
     }
-    t.logger.success("Binary generated: %s", binFile)
+    t.logger.success("Binary generated: %s", bin_file)
     return nil
 }
-func (t *train_orchestrator) Run() error {
+func (t *train_orchestrator) run() error {
     t.logger.log("Starting training...")
-    binFile := filepath.Join(t.config.outputDir, "neurx_train")
-    if !file_exists(binFile) {
-        return fmt.Errorf("training binary not found at %s", binFile)
+    bin_file := filepath.Join(t.config.outputDir, "neurx_train")
+    if !file_exists(bin_file) {
+        return fmt.Errorf("training binary not found at %s", bin_file)
     }
     cmd := fmt.Sprintf("cd %s && ", t.neurxRoot)
     cmd += fmt.Sprintf("NEURX_GPUS=%d ", t.config.numGpus)
     cmd += fmt.Sprintf("NEURX_BATCH_SIZE=%d ", t.config.batchSize)
     cmd += fmt.Sprintf("NEURX_LOG_DIR=%s ", t.config.logDir)
     cmd += fmt.Sprintf("NEURX_CKPT_DIR=%s ", t.config.checkpointDir)
-    cmd += fmt.Sprintf("%s 2>&1 | tee -a %s", binFile, filepath.Join(t.config.logDir, "train.log"))
+    cmd += fmt.Sprintf("%s 2>&1 | tee -a %s", bin_file, filepath.Join(t.config.logDir, "train.log"))
     result := shell(cmd)
     if result.ExitCode != 0 {
         t.logger.error("Training failed: %s", result.Stderr)
@@ -201,25 +201,25 @@ func (t *train_orchestrator) Run() error {
     t.logger.success("Training completed")
     return nil
 }
-func (t *train_orchestrator) Monitor() error {
+func (t *train_orchestrator) monitor() error {
     t.logger.log("Starting training monitor...")
-    logFile := filepath.Join(t.config.logDir, "train.log")
+    log_file := filepath.Join(t.config.logDir, "train.log")
     for i := 0; i < 30; i++ {
-        if file_exists(logFile) {
+        if file_exists(log_file) {
             break
         }
         sleep_seconds(1)
     }
-    if !file_exists(logFile) {
+    if !file_exists(log_file) {
         return fmt.Errorf("training log not found")
     }
-    result := shell(fmt.Sprintf("tail -f %s", logFile))
+    result := shell(fmt.Sprintf("tail -f %s", log_file))
     if result.ExitCode != 0 {
         t.logger.error("Monitoring failed: %s", result.Stderr)
     }
     return nil
 }
-func (t *train_orchestrator) detectGPUs() (int, string) {
+func (t *train_orchestrator) detect_gp_us() (int, string) {
     if command_exists("nvidia-smi") {
         result := exec_command("nvidia-smi", "--query-gpu=name", "--format=csv,noheader")
         if result.ExitCode == 0 {
@@ -237,76 +237,76 @@ func (t *train_orchestrator) detectGPUs() (int, string) {
 }
 func (t *train_orchestrator) log_config() error {
     config := fmt.Sprintf(`╔══════════════════════════════════════════════════╗
-║   NeurX Foundation model Training               ║
-║   English text: English text NeurX English text                    ║
+║   neur_x foundation model training               ║
+║   english text: English text neur_x english text                    ║
 ╠══════════════════════════════════════════════════╣
-║ English text: %s
-║ GPU English text: %d
-║ timeEnglish text: %s
+║ english text: %s
+║ GPU english text: %d
+║ time_english text: %s
 ║ log: %s
 ║ checkpoint: %s
 ╚══════════════════════════════════════════════════╝
-`, scaleString(t.config.scale), t.config.numGpus, t.config.timestamp, t.config.logDir, t.config.checkpointDir)
-    logFile := filepath.Join(t.config.logDir, "config.txt")
-    return write_file(logFile, config)
+`, scale_string(t.config.scale), t.config.numGpus, t.config.timestamp, t.config.logDir, t.config.checkpointDir)
+    log_file := filepath.Join(t.config.logDir, "config.txt")
+    return write_file(log_file, config)
 }
-func (t *train_orchestrator) generateTrainingSource(outputPath string) error {
-    scaleConfig := get_scale_config(t.config.scale)
+func (t *train_orchestrator) generate_training_source(output_path string) error {
+    scale_config := get_scale_config(t.config.scale)
     source := fmt.Sprintf(`
 package main
 import "fmt"
 func main() {
     params := %d
     gpus := %d
-    batchSize := %d
-    learningRate := %.2e
-    seqLen := %d
+    batch_size := %d
+    learning_rate := %.2e
+    seq_len := %d
     layers := %d
     fmt.Printf("Training Configuration:\\n")
     fmt.Printf("  Parameters: %%d\\n", params)
     fmt.Printf("  GPUs: %%d\\n", gpus)
-    fmt.Printf("  batch_2 Size: %%d\\n", batchSize)
-    fmt.Printf("  Learning Rate: %%.2e\\n", learningRate)
-    fmt.Printf("  Sequence Length: %%d\\n", seqLen)
+    fmt.Printf("  batch_2 Size: %%d\\n", batch_size)
+    fmt.Printf("  Learning Rate: %%.2e\\n", learning_rate)
+    fmt.Printf("  Sequence Length: %%d\\n", seq_len)
     fmt.Printf("  Layers: %%d\\n", layers)
     fmt.Println("Training loop started...")
 }
-`, scaleString(t.config.scale), scaleConfig.params, scaleConfig.gpus, scaleConfig.batch, scaleConfig.lr, scaleConfig.seqLen, scaleConfig.layers)
-    return write_file(outputPath, source)
+`, scale_string(t.config.scale), scale_config.params, scale_config.gpus, scale_config.batch, scale_config.lr, scale_config.seqLen, scale_config.layers)
+    return write_file(output_path, source)
 }
-func scaleString(scale TrainingScale) string {
+func scale_string(scale training_scale) string {
     switch scale {
-    case TrainingScale.Mini:
+    case training_scale.Mini:
         return "mini"
-    case TrainingScale.Small:
+    case training_scale.Small:
         return "small"
-    case TrainingScale.Medium:
+    case training_scale.Medium:
         return "medium"
-    case TrainingScale.Large:
+    case training_scale.Large:
         return "large"
-    case TrainingScale.XL:
+    case training_scale.XL:
         return "xl"
     default:
         return "unknown"
     }
 }
-func run_foundation_model_training(scale string, numGpus int) error {
-    var scaleEnum TrainingScale
+func run_foundation_model_training(scale string, num_gpus int) error {
+    var scale_enum training_scale
     switch to_lower(scale) {
     case "mini":
-        scaleEnum = TrainingScale.Mini
+        scaleEnum = training_scale.Mini
     case "small":
-        scaleEnum = TrainingScale.Small
+        scaleEnum = training_scale.Small
     case "medium":
-        scaleEnum = TrainingScale.Medium
+        scaleEnum = training_scale.Medium
     case "large":
-        scaleEnum = TrainingScale.Large
+        scaleEnum = training_scale.Large
     case "xl":
-        scaleEnum = TrainingScale.XL
+        scaleEnum = training_scale.XL
     default:
-        scaleEnum = TrainingScale.Mini
+        scaleEnum = training_scale.Mini
     }
-    orchestrator, err := new_train_orchestrator(scaleEnum, numGpus)
+    orchestrator, err := new_train_orchestrator(scale_enum, num_gpus)
     if err != nil {
         return err
     }
@@ -332,14 +332,14 @@ func run_foundation_model_training(scale string, numGpus int) error {
 func start_quick_training() error {
     return run_foundation_model_training("mini", 1)
 }
-func launch_70b_training(numGpus int) error {
-    return run_foundation_model_training("xl", numGpus)
+func launch_70b_training(num_gpus int) error {
+    return run_foundation_model_training("xl", num_gpus)
 }
-func launch_7b_training(numGpus int) error {
-    return run_foundation_model_training("large", numGpus)
+func launch_7b_training(num_gpus int) error {
+    return run_foundation_model_training("large", num_gpus)
 }
-func launch_1t_training(numGpus int) error {
-    orchestrator, err := new_train_orchestrator(TrainingScale.OneT, numGpus)
+func launch_1t_training(num_gpus int) error {
+    orchestrator, err := new_train_orchestrator(training_scale.OneT, num_gpus)
     if err != nil {
         return err
     }

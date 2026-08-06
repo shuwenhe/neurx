@@ -79,526 +79,526 @@ func add_bias_device(device_array values, device_array bias, int rows, int cols)
         on_device: values.on_device || bias.on_device,
     }
 }
-static PyObject* tensor_cuda_add_bias_3d_device(PyObject* , PyObject* args) {
-    PyObject* a_capsule = nullptr;
-    PyObject* b_capsule = nullptr;
+static py_object* tensor_cuda_add_bias_3d_device(py_object* , py_object* args) {
+    py_object* a_capsule = nullptr;
+    py_object* b_capsule = nullptr;
     int bsz = 0, t = 0, c = 0;
     const char* dtype_str = nullptr;
-    if (!PyArg_ParseTuple(args, "OOiiis", &a_capsule, &b_capsule, &bsz, &t, &c, &dtype_str)) {
-        return _raise(PyExc_TypeError, "expected (capsule, capsule, b, t, c, dtype)");
+    if (!py_arg_parse_tuple(args, "OOiiis", &a_capsule, &b_capsule, &bsz, &t, &c, &dtype_str)) {
+        return _raise(py_exc_type_error, "expected (capsule, capsule, b, t, c, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
-        return _raise(PyExc_TypeError, "add_bias_3d_device: only float32 supported");
+        return _raise(py_exc_type_error, "add_bias_3d_device: only float32 supported");
     }
     auto* a = _get_device_array(a_capsule);
     auto* b = _get_device_array(b_capsule);
     if (!a || !b) {
-        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+        return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
     if ((size_t)bsz * (size_t)t * (size_t)c != a->size || (size_t)c != b->size) {
-        return _raise(PyExc_ValueError, "add_bias_3d_device: size mismatch");
+        return _raise(py_exc_value_error, "add_bias_3d_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cudaMalloc(&d_out, (size_t)bsz * (size_t)t * (size_t)c * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(&d_out, (size_t)bsz * (size_t)t * (size_t)c * sizeof(float)), "cudaMalloc");
         cuda_add_bias_3d_device_float((const float*)a->ptr, (const float*)b->ptr, (float*)d_out, bsz, t, c);
-        _cuda_check(cudaGetLastError(), "cuda_add_bias_3d_device");
-        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+        _cuda_check(cuda_get_last_error(), "cuda_add_bias_3d_device");
+        _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
-        if (d_out) cudaFree(d_out);
-        return _raise(PyExc_RuntimeError, e.what());
+        if (d_out) cuda_free(d_out);
+        return _raise(py_exc_runtime_error, e.what());
     }
-    auto* out = new DeviceArray{d_out, (size_t)bsz * (size_t)t * (size_t)c};
-    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
+    auto* out = new device_array{d_out, (size_t)bsz * (size_t)t * (size_t)c};
+    return py_capsule_new(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-static PyObject* tensor_cuda_matmul_device(PyObject* , PyObject* args) {
-    PyObject* a_capsule = nullptr;
-    PyObject* b_capsule = nullptr;
+static py_object* tensor_cuda_matmul_device(py_object* , py_object* args) {
+    py_object* a_capsule = nullptr;
+    py_object* b_capsule = nullptr;
     int m = 0, k = 0, n = 0;
     const char* dtype_str = nullptr;
-    if (!PyArg_ParseTuple(args, "OOiiis", &a_capsule, &b_capsule, &m, &k, &n, &dtype_str)) {
-        return _raise(PyExc_TypeError, "expected (capsule, capsule, m, k, n, dtype)");
+    if (!py_arg_parse_tuple(args, "OOiiis", &a_capsule, &b_capsule, &m, &k, &n, &dtype_str)) {
+        return _raise(py_exc_type_error, "expected (capsule, capsule, m, k, n, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
-        return _raise(PyExc_TypeError, "matmul_device: only float32 supported");
+        return _raise(py_exc_type_error, "matmul_device: only float32 supported");
     }
     auto* a = _get_device_array(a_capsule);
     auto* b = _get_device_array(b_capsule);
     if (!a || !b) {
-        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+        return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
     if ((size_t)m * (size_t)k != a->size || (size_t)k * (size_t)n != b->size) {
-        return _raise(PyExc_ValueError, "matmul_device: size mismatch");
+        return _raise(py_exc_value_error, "matmul_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cudaMalloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
         cuda_matmul_device_float((const float*)a->ptr, (const float*)b->ptr, (float*)d_out, m, k, n);
-        _cuda_check(cudaGetLastError(), "cuda_matmul_device");
-        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+        _cuda_check(cuda_get_last_error(), "cuda_matmul_device");
+        _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
-        if (d_out) cudaFree(d_out);
-        return _raise(PyExc_RuntimeError, e.what());
+        if (d_out) cuda_free(d_out);
+        return _raise(py_exc_runtime_error, e.what());
     }
-    auto* out = new DeviceArray{d_out, (size_t)m * (size_t)n};
-    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
+    auto* out = new device_array{d_out, (size_t)m * (size_t)n};
+    return py_capsule_new(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-static PyObject* tensor_cuda_layernorm_device(PyObject* , PyObject* args) {
-    PyObject* a_capsule = nullptr;
-    PyObject* g_capsule = nullptr;
-    PyObject* b_capsule = nullptr;
+static py_object* tensor_cuda_layernorm_device(py_object* , py_object* args) {
+    py_object* a_capsule = nullptr;
+    py_object* g_capsule = nullptr;
+    py_object* b_capsule = nullptr;
     int m = 0, n = 0;
     float eps = 0.00001f;
     const char* dtype_str = nullptr;
-    if (!PyArg_ParseTuple(args, "OOOiifs", &a_capsule, &g_capsule, &b_capsule, &m, &n, &eps, &dtype_str)) {
-        return _raise(PyExc_TypeError, "expected (capsule, gamma, beta, m, n, eps, dtype)");
+    if (!py_arg_parse_tuple(args, "OOOiifs", &a_capsule, &g_capsule, &b_capsule, &m, &n, &eps, &dtype_str)) {
+        return _raise(py_exc_type_error, "expected (capsule, gamma, beta, m, n, eps, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
-        return _raise(PyExc_TypeError, "layernorm_device: only float32 supported");
+        return _raise(py_exc_type_error, "layernorm_device: only float32 supported");
     }
     auto* a = _get_device_array(a_capsule);
     auto* g = _get_device_array(g_capsule);
     auto* b = _get_device_array(b_capsule);
     if (!a || !g || !b) {
-        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+        return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
     if ((size_t)m * (size_t)n != a->size || (size_t)n != g->size || (size_t)n != b->size) {
-        return _raise(PyExc_ValueError, "layernorm_device: size mismatch");
+        return _raise(py_exc_value_error, "layernorm_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cudaMalloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
         cuda_layernorm_device_float((const float*)a->ptr, (const float*)g->ptr, (const float*)b->ptr, (float*)d_out, m, n, eps);
-        _cuda_check(cudaGetLastError(), "cuda_layernorm_device");
-        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+        _cuda_check(cuda_get_last_error(), "cuda_layernorm_device");
+        _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
-        if (d_out) cudaFree(d_out);
-        return _raise(PyExc_RuntimeError, e.what());
+        if (d_out) cuda_free(d_out);
+        return _raise(py_exc_runtime_error, e.what());
     }
-    auto* out = new DeviceArray{d_out, (size_t)m * (size_t)n};
-    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
+    auto* out = new device_array{d_out, (size_t)m * (size_t)n};
+    return py_capsule_new(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-static PyObject* tensor_cuda_softmax_device(PyObject* , PyObject* args) {
-    PyObject* a_capsule = nullptr;
+static py_object* tensor_cuda_softmax_device(py_object* , py_object* args) {
+    py_object* a_capsule = nullptr;
     int m = 0, n = 0;
     const char* dtype_str = nullptr;
-    if (!PyArg_ParseTuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
-        return _raise(PyExc_TypeError, "expected (capsule, m, n, dtype)");
+    if (!py_arg_parse_tuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
+        return _raise(py_exc_type_error, "expected (capsule, m, n, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
-        return _raise(PyExc_TypeError, "softmax_device: only float32 supported");
+        return _raise(py_exc_type_error, "softmax_device: only float32 supported");
     }
     auto* a = _get_device_array(a_capsule);
     if (!a) {
-        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+        return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
     if ((size_t)m * (size_t)n != a->size) {
-        return _raise(PyExc_ValueError, "softmax_device: size mismatch");
+        return _raise(py_exc_value_error, "softmax_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cudaMalloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
         cuda_softmax_device_float((const float*)a->ptr, (float*)d_out, m, n);
-        _cuda_check(cudaGetLastError(), "cuda_softmax_device");
-        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+        _cuda_check(cuda_get_last_error(), "cuda_softmax_device");
+        _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
-        if (d_out) cudaFree(d_out);
-        return _raise(PyExc_RuntimeError, e.what());
+        if (d_out) cuda_free(d_out);
+        return _raise(py_exc_runtime_error, e.what());
     }
-    auto* out = new DeviceArray{d_out, (size_t)m * (size_t)n};
-    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
+    auto* out = new device_array{d_out, (size_t)m * (size_t)n};
+    return py_capsule_new(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-static PyObject* tensor_cuda_reduce_sum_device(PyObject* , PyObject* args) {
-    PyObject* a_capsule = nullptr;
-    Py_ssize_t size = 0;
+static py_object* tensor_cuda_reduce_sum_device(py_object* , py_object* args) {
+    py_object* a_capsule = nullptr;
+    py_ssize_t size = 0;
     const char* dtype_str = nullptr;
-    if (!PyArg_ParseTuple(args, "Ons", &a_capsule, &size, &dtype_str)) {
-        return _raise(PyExc_TypeError, "expected (capsule, size, dtype)");
+    if (!py_arg_parse_tuple(args, "Ons", &a_capsule, &size, &dtype_str)) {
+        return _raise(py_exc_type_error, "expected (capsule, size, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
-        return _raise(PyExc_TypeError, "reduce_sum_device: only float32 supported");
+        return _raise(py_exc_type_error, "reduce_sum_device: only float32 supported");
     }
     auto* a = _get_device_array(a_capsule);
     if (!a) {
-        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+        return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
     if ((size_t)size != a->size) {
-        return _raise(PyExc_ValueError, "reduce_sum_device: size mismatch");
+        return _raise(py_exc_value_error, "reduce_sum_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cudaMalloc(&d_out, sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(&d_out, sizeof(float)), "cudaMalloc");
         cuda_reduce_sum_device_float((const float*)a->ptr, (float*)d_out, (size_t)size);
-        _cuda_check(cudaGetLastError(), "cuda_reduce_sum_device");
-        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+        _cuda_check(cuda_get_last_error(), "cuda_reduce_sum_device");
+        _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
-        if (d_out) cudaFree(d_out);
-        return _raise(PyExc_RuntimeError, e.what());
+        if (d_out) cuda_free(d_out);
+        return _raise(py_exc_runtime_error, e.what());
     }
-    auto* out = new DeviceArray{d_out, 1};
-    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
+    auto* out = new device_array{d_out, 1};
+    return py_capsule_new(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-static PyObject* tensor_cuda_reduce_mean_device(PyObject* , PyObject* args) {
-    PyObject* a_capsule = nullptr;
-    Py_ssize_t size = 0;
+static py_object* tensor_cuda_reduce_mean_device(py_object* , py_object* args) {
+    py_object* a_capsule = nullptr;
+    py_ssize_t size = 0;
     const char* dtype_str = nullptr;
-    if (!PyArg_ParseTuple(args, "Ons", &a_capsule, &size, &dtype_str)) {
-        return _raise(PyExc_TypeError, "expected (capsule, size, dtype)");
+    if (!py_arg_parse_tuple(args, "Ons", &a_capsule, &size, &dtype_str)) {
+        return _raise(py_exc_type_error, "expected (capsule, size, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
-        return _raise(PyExc_TypeError, "reduce_mean_device: only float32 supported");
+        return _raise(py_exc_type_error, "reduce_mean_device: only float32 supported");
     }
     auto* a = _get_device_array(a_capsule);
     if (!a) {
-        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+        return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
     if ((size_t)size != a->size) {
-        return _raise(PyExc_ValueError, "reduce_mean_device: size mismatch");
+        return _raise(py_exc_value_error, "reduce_mean_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cudaMalloc(&d_out, sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(&d_out, sizeof(float)), "cudaMalloc");
         cuda_reduce_mean_device_float((const float*)a->ptr, (float*)d_out, (size_t)size);
-        _cuda_check(cudaGetLastError(), "cuda_reduce_mean_device");
-        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+        _cuda_check(cuda_get_last_error(), "cuda_reduce_mean_device");
+        _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
-        if (d_out) cudaFree(d_out);
-        return _raise(PyExc_RuntimeError, e.what());
+        if (d_out) cuda_free(d_out);
+        return _raise(py_exc_runtime_error, e.what());
     }
-    auto* out = new DeviceArray{d_out, 1};
-    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
+    auto* out = new device_array{d_out, 1};
+    return py_capsule_new(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-static PyObject* tensor_cuda_reduce_max_device(PyObject* , PyObject* args) {
-    PyObject* a_capsule = nullptr;
-    Py_ssize_t size = 0;
+static py_object* tensor_cuda_reduce_max_device(py_object* , py_object* args) {
+    py_object* a_capsule = nullptr;
+    py_ssize_t size = 0;
     const char* dtype_str = nullptr;
-    if (!PyArg_ParseTuple(args, "Ons", &a_capsule, &size, &dtype_str)) {
-        return _raise(PyExc_TypeError, "expected (capsule, size, dtype)");
+    if (!py_arg_parse_tuple(args, "Ons", &a_capsule, &size, &dtype_str)) {
+        return _raise(py_exc_type_error, "expected (capsule, size, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
-        return _raise(PyExc_TypeError, "reduce_max_device: only float32 supported");
+        return _raise(py_exc_type_error, "reduce_max_device: only float32 supported");
     }
     auto* a = _get_device_array(a_capsule);
     if (!a) {
-        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+        return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
     if ((size_t)size != a->size) {
-        return _raise(PyExc_ValueError, "reduce_max_device: size mismatch");
+        return _raise(py_exc_value_error, "reduce_max_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cudaMalloc(&d_out, sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(&d_out, sizeof(float)), "cudaMalloc");
         cuda_reduce_max_device_float((const float*)a->ptr, (float*)d_out, (size_t)size);
-        _cuda_check(cudaGetLastError(), "cuda_reduce_max_device");
-        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+        _cuda_check(cuda_get_last_error(), "cuda_reduce_max_device");
+        _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
-        if (d_out) cudaFree(d_out);
-        return _raise(PyExc_RuntimeError, e.what());
+        if (d_out) cuda_free(d_out);
+        return _raise(py_exc_runtime_error, e.what());
     }
-    auto* out = new DeviceArray{d_out, 1};
-    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
+    auto* out = new device_array{d_out, 1};
+    return py_capsule_new(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-static PyObject* tensor_cuda_reduce_min_device(PyObject* , PyObject* args) {
-    PyObject* a_capsule = nullptr;
-    Py_ssize_t size = 0;
+static py_object* tensor_cuda_reduce_min_device(py_object* , py_object* args) {
+    py_object* a_capsule = nullptr;
+    py_ssize_t size = 0;
     const char* dtype_str = nullptr;
-    if (!PyArg_ParseTuple(args, "Ons", &a_capsule, &size, &dtype_str)) {
-        return _raise(PyExc_TypeError, "expected (capsule, size, dtype)");
+    if (!py_arg_parse_tuple(args, "Ons", &a_capsule, &size, &dtype_str)) {
+        return _raise(py_exc_type_error, "expected (capsule, size, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
-        return _raise(PyExc_TypeError, "reduce_min_device: only float32 supported");
+        return _raise(py_exc_type_error, "reduce_min_device: only float32 supported");
     }
     auto* a = _get_device_array(a_capsule);
     if (!a) {
-        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+        return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
     if ((size_t)size != a->size) {
-        return _raise(PyExc_ValueError, "reduce_min_device: size mismatch");
+        return _raise(py_exc_value_error, "reduce_min_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cudaMalloc(&d_out, sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(&d_out, sizeof(float)), "cudaMalloc");
         cuda_reduce_min_device_float((const float*)a->ptr, (float*)d_out, (size_t)size);
-        _cuda_check(cudaGetLastError(), "cuda_reduce_min_device");
-        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+        _cuda_check(cuda_get_last_error(), "cuda_reduce_min_device");
+        _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
-        if (d_out) cudaFree(d_out);
-        return _raise(PyExc_RuntimeError, e.what());
+        if (d_out) cuda_free(d_out);
+        return _raise(py_exc_runtime_error, e.what());
     }
-    auto* out = new DeviceArray{d_out, 1};
-    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
+    auto* out = new device_array{d_out, 1};
+    return py_capsule_new(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-static PyObject* tensor_cuda_reduce_sum_lastdim_device(PyObject* , PyObject* args) {
-    PyObject* a_capsule = nullptr;
+static py_object* tensor_cuda_reduce_sum_lastdim_device(py_object* , py_object* args) {
+    py_object* a_capsule = nullptr;
     int m = 0, n = 0;
     const char* dtype_str = nullptr;
-    if (!PyArg_ParseTuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
-        return _raise(PyExc_TypeError, "expected (capsule, m, n, dtype)");
+    if (!py_arg_parse_tuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
+        return _raise(py_exc_type_error, "expected (capsule, m, n, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
-        return _raise(PyExc_TypeError, "reduce_sum_lastdim_device: only float32 supported");
+        return _raise(py_exc_type_error, "reduce_sum_lastdim_device: only float32 supported");
     }
     auto* a = _get_device_array(a_capsule);
     if (!a) {
-        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+        return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
     if ((size_t)m * (size_t)n != a->size) {
-        return _raise(PyExc_ValueError, "reduce_sum_lastdim_device: size mismatch");
+        return _raise(py_exc_value_error, "reduce_sum_lastdim_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cudaMalloc(&d_out, (size_t)m * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(&d_out, (size_t)m * sizeof(float)), "cudaMalloc");
         cuda_reduce_sum_lastdim_device_float((const float*)a->ptr, (float*)d_out, m, n);
-        _cuda_check(cudaGetLastError(), "cuda_reduce_sum_lastdim_device");
-        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+        _cuda_check(cuda_get_last_error(), "cuda_reduce_sum_lastdim_device");
+        _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
-        if (d_out) cudaFree(d_out);
-        return _raise(PyExc_RuntimeError, e.what());
+        if (d_out) cuda_free(d_out);
+        return _raise(py_exc_runtime_error, e.what());
     }
-    auto* out = new DeviceArray{d_out, (size_t)m};
-    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
+    auto* out = new device_array{d_out, (size_t)m};
+    return py_capsule_new(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-static PyObject* tensor_cuda_reduce_mean_lastdim_device(PyObject* , PyObject* args) {
-    PyObject* a_capsule = nullptr;
+static py_object* tensor_cuda_reduce_mean_lastdim_device(py_object* , py_object* args) {
+    py_object* a_capsule = nullptr;
     int m = 0, n = 0;
     const char* dtype_str = nullptr;
-    if (!PyArg_ParseTuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
-        return _raise(PyExc_TypeError, "expected (capsule, m, n, dtype)");
+    if (!py_arg_parse_tuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
+        return _raise(py_exc_type_error, "expected (capsule, m, n, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
-        return _raise(PyExc_TypeError, "reduce_mean_lastdim_device: only float32 supported");
+        return _raise(py_exc_type_error, "reduce_mean_lastdim_device: only float32 supported");
     }
     auto* a = _get_device_array(a_capsule);
     if (!a) {
-        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+        return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
     if ((size_t)m * (size_t)n != a->size) {
-        return _raise(PyExc_ValueError, "reduce_mean_lastdim_device: size mismatch");
+        return _raise(py_exc_value_error, "reduce_mean_lastdim_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cudaMalloc(&d_out, (size_t)m * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(&d_out, (size_t)m * sizeof(float)), "cudaMalloc");
         cuda_reduce_mean_lastdim_device_float((const float*)a->ptr, (float*)d_out, m, n);
-        _cuda_check(cudaGetLastError(), "cuda_reduce_mean_lastdim_device");
-        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+        _cuda_check(cuda_get_last_error(), "cuda_reduce_mean_lastdim_device");
+        _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
-        if (d_out) cudaFree(d_out);
-        return _raise(PyExc_RuntimeError, e.what());
+        if (d_out) cuda_free(d_out);
+        return _raise(py_exc_runtime_error, e.what());
     }
-    auto* out = new DeviceArray{d_out, (size_t)m};
-    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
+    auto* out = new device_array{d_out, (size_t)m};
+    return py_capsule_new(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-static PyObject* tensor_cuda_reduce_max_lastdim_device(PyObject* , PyObject* args) {
-    PyObject* a_capsule = nullptr;
+static py_object* tensor_cuda_reduce_max_lastdim_device(py_object* , py_object* args) {
+    py_object* a_capsule = nullptr;
     int m = 0, n = 0;
     const char* dtype_str = nullptr;
-    if (!PyArg_ParseTuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
-        return _raise(PyExc_TypeError, "expected (capsule, m, n, dtype)");
+    if (!py_arg_parse_tuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
+        return _raise(py_exc_type_error, "expected (capsule, m, n, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
-        return _raise(PyExc_TypeError, "reduce_max_lastdim_device: only float32 supported");
+        return _raise(py_exc_type_error, "reduce_max_lastdim_device: only float32 supported");
     }
     auto* a = _get_device_array(a_capsule);
     if (!a) {
-        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+        return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
     if ((size_t)m * (size_t)n != a->size) {
-        return _raise(PyExc_ValueError, "reduce_max_lastdim_device: size mismatch");
+        return _raise(py_exc_value_error, "reduce_max_lastdim_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cudaMalloc(&d_out, (size_t)m * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(&d_out, (size_t)m * sizeof(float)), "cudaMalloc");
         cuda_reduce_max_lastdim_device_float((const float*)a->ptr, (float*)d_out, m, n);
-        _cuda_check(cudaGetLastError(), "cuda_reduce_max_lastdim_device");
-        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+        _cuda_check(cuda_get_last_error(), "cuda_reduce_max_lastdim_device");
+        _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
-        if (d_out) cudaFree(d_out);
-        return _raise(PyExc_RuntimeError, e.what());
+        if (d_out) cuda_free(d_out);
+        return _raise(py_exc_runtime_error, e.what());
     }
-    auto* out = new DeviceArray{d_out, (size_t)m};
-    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
+    auto* out = new device_array{d_out, (size_t)m};
+    return py_capsule_new(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-static PyObject* tensor_cuda_reduce_min_lastdim_device(PyObject* , PyObject* args) {
-    PyObject* a_capsule = nullptr;
+static py_object* tensor_cuda_reduce_min_lastdim_device(py_object* , py_object* args) {
+    py_object* a_capsule = nullptr;
     int m = 0, n = 0;
     const char* dtype_str = nullptr;
-    if (!PyArg_ParseTuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
-        return _raise(PyExc_TypeError, "expected (capsule, m, n, dtype)");
+    if (!py_arg_parse_tuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
+        return _raise(py_exc_type_error, "expected (capsule, m, n, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
-        return _raise(PyExc_TypeError, "reduce_min_lastdim_device: only float32 supported");
+        return _raise(py_exc_type_error, "reduce_min_lastdim_device: only float32 supported");
     }
     auto* a = _get_device_array(a_capsule);
     if (!a) {
-        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+        return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
     if ((size_t)m * (size_t)n != a->size) {
-        return _raise(PyExc_ValueError, "reduce_min_lastdim_device: size mismatch");
+        return _raise(py_exc_value_error, "reduce_min_lastdim_device: size mismatch");
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cudaMalloc(&d_out, (size_t)m * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(&d_out, (size_t)m * sizeof(float)), "cudaMalloc");
         cuda_reduce_min_lastdim_device_float((const float*)a->ptr, (float*)d_out, m, n);
-        _cuda_check(cudaGetLastError(), "cuda_reduce_min_lastdim_device");
-        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+        _cuda_check(cuda_get_last_error(), "cuda_reduce_min_lastdim_device");
+        _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
-        if (d_out) cudaFree(d_out);
-        return _raise(PyExc_RuntimeError, e.what());
+        if (d_out) cuda_free(d_out);
+        return _raise(py_exc_runtime_error, e.what());
     }
-    auto* out = new DeviceArray{d_out, (size_t)m};
-    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
+    auto* out = new device_array{d_out, (size_t)m};
+    return py_capsule_new(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-static PyObject* tensor_cuda_argmax_lastdim(PyObject* , PyObject* args) {
-    PyObject* a_capsule = nullptr;
+static py_object* tensor_cuda_argmax_lastdim(py_object* , py_object* args) {
+    py_object* a_capsule = nullptr;
     int m = 0, n = 0;
     const char* dtype_str = nullptr;
-    if (!PyArg_ParseTuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
-        return _raise(PyExc_TypeError, "expected (capsule, m, n, dtype)");
+    if (!py_arg_parse_tuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
+        return _raise(py_exc_type_error, "expected (capsule, m, n, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
-        return _raise(PyExc_TypeError, "argmax_lastdim: only float32 supported");
+        return _raise(py_exc_type_error, "argmax_lastdim: only float32 supported");
     }
     auto* a = _get_device_array(a_capsule);
     if (!a) {
-        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+        return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
     if ((size_t)m * (size_t)n != a->size) {
-        return _raise(PyExc_ValueError, "argmax_lastdim: size mismatch");
+        return _raise(py_exc_value_error, "argmax_lastdim: size mismatch");
     }
     long long* d_out = nullptr;
     try {
-        _cuda_check(cudaMalloc(&d_out, (size_t)m * sizeof(long long)), "cudaMalloc");
+        _cuda_check(cuda_malloc(&d_out, (size_t)m * sizeof(long long)), "cudaMalloc");
         cuda_argmax_lastdim_device_int64((const float*)a->ptr, d_out, m, n);
-        _cuda_check(cudaGetLastError(), "cuda_argmax_lastdim");
-        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+        _cuda_check(cuda_get_last_error(), "cuda_argmax_lastdim");
+        _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
-        if (d_out) cudaFree(d_out);
-        return _raise(PyExc_RuntimeError, e.what());
+        if (d_out) cuda_free(d_out);
+        return _raise(py_exc_runtime_error, e.what());
     }
-    auto* out = new DeviceArray{d_out, (size_t)m};
-    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
+    auto* out = new device_array{d_out, (size_t)m};
+    return py_capsule_new(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-static PyObject* tensor_cuda_argmin_lastdim(PyObject* , PyObject* args) {
-    PyObject* a_capsule = nullptr;
+static py_object* tensor_cuda_argmin_lastdim(py_object* , py_object* args) {
+    py_object* a_capsule = nullptr;
     int m = 0, n = 0;
     const char* dtype_str = nullptr;
-    if (!PyArg_ParseTuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
-        return _raise(PyExc_TypeError, "expected (capsule, m, n, dtype)");
+    if (!py_arg_parse_tuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
+        return _raise(py_exc_type_error, "expected (capsule, m, n, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
-        return _raise(PyExc_TypeError, "argmin_lastdim: only float32 supported");
+        return _raise(py_exc_type_error, "argmin_lastdim: only float32 supported");
     }
     auto* a = _get_device_array(a_capsule);
     if (!a) {
-        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+        return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
     if ((size_t)m * (size_t)n != a->size) {
-        return _raise(PyExc_ValueError, "argmin_lastdim: size mismatch");
+        return _raise(py_exc_value_error, "argmin_lastdim: size mismatch");
     }
     long long* d_out = nullptr;
     try {
-        _cuda_check(cudaMalloc(&d_out, (size_t)m * sizeof(long long)), "cudaMalloc");
+        _cuda_check(cuda_malloc(&d_out, (size_t)m * sizeof(long long)), "cudaMalloc");
         cuda_argmin_lastdim_device_int64((const float*)a->ptr, d_out, m, n);
-        _cuda_check(cudaGetLastError(), "cuda_argmin_lastdim");
-        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+        _cuda_check(cuda_get_last_error(), "cuda_argmin_lastdim");
+        _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
-        if (d_out) cudaFree(d_out);
-        return _raise(PyExc_RuntimeError, e.what());
+        if (d_out) cuda_free(d_out);
+        return _raise(py_exc_runtime_error, e.what());
     }
-    auto* out = new DeviceArray{d_out, (size_t)m};
-    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
+    auto* out = new device_array{d_out, (size_t)m};
+    return py_capsule_new(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-static PyObject* tensor_cuda_transpose_2d(PyObject* , PyObject* args) {
-    PyObject* a_capsule = nullptr;
+static py_object* tensor_cuda_transpose_2d(py_object* , py_object* args) {
+    py_object* a_capsule = nullptr;
     int m = 0, n = 0;
     const char* dtype_str = nullptr;
-    if (!PyArg_ParseTuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
-        return _raise(PyExc_TypeError, "expected (capsule, m, n, dtype)");
+    if (!py_arg_parse_tuple(args, "Oiis", &a_capsule, &m, &n, &dtype_str)) {
+        return _raise(py_exc_type_error, "expected (capsule, m, n, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
-        return _raise(PyExc_TypeError, "transpose_2d: only float32 supported");
+        return _raise(py_exc_type_error, "transpose_2d: only float32 supported");
     }
     auto* a = _get_device_array(a_capsule);
     if (!a) {
-        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+        return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
     if ((size_t)m * (size_t)n != a->size) {
-        return _raise(PyExc_ValueError, "transpose_2d: size mismatch");
+        return _raise(py_exc_value_error, "transpose_2d: size mismatch");
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cudaMalloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(&d_out, (size_t)m * (size_t)n * sizeof(float)), "cudaMalloc");
         cuda_transpose_2d_device_float((const float*)a->ptr, (float*)d_out, m, n);
-        _cuda_check(cudaGetLastError(), "cuda_transpose_2d");
-        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+        _cuda_check(cuda_get_last_error(), "cuda_transpose_2d");
+        _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
-        if (d_out) cudaFree(d_out);
-        return _raise(PyExc_RuntimeError, e.what());
+        if (d_out) cuda_free(d_out);
+        return _raise(py_exc_runtime_error, e.what());
     }
-    auto* out = new DeviceArray{d_out, (size_t)m * (size_t)n};
-    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
+    auto* out = new device_array{d_out, (size_t)m * (size_t)n};
+    return py_capsule_new(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-static PyObject* tensor_cuda_permute_3d_0_2_1(PyObject* , PyObject* args) {
-    PyObject* a_capsule = nullptr;
+static py_object* tensor_cuda_permute_3d_0_2_1(py_object* , py_object* args) {
+    py_object* a_capsule = nullptr;
     int b = 0, t = 0, c = 0;
     const char* dtype_str = nullptr;
-    if (!PyArg_ParseTuple(args, "Oiiis", &a_capsule, &b, &t, &c, &dtype_str)) {
-        return _raise(PyExc_TypeError, "expected (capsule, b, t, c, dtype)");
+    if (!py_arg_parse_tuple(args, "Oiiis", &a_capsule, &b, &t, &c, &dtype_str)) {
+        return _raise(py_exc_type_error, "expected (capsule, b, t, c, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
-        return _raise(PyExc_TypeError, "permute_3d_0_2_1: only float32 supported");
+        return _raise(py_exc_type_error, "permute_3d_0_2_1: only float32 supported");
     }
     auto* a = _get_device_array(a_capsule);
     if (!a) {
-        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+        return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
     if ((size_t)b * (size_t)t * (size_t)c != a->size) {
-        return _raise(PyExc_ValueError, "permute_3d_0_2_1: size mismatch");
+        return _raise(py_exc_value_error, "permute_3d_0_2_1: size mismatch");
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cudaMalloc(&d_out, (size_t)b * (size_t)t * (size_t)c * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(&d_out, (size_t)b * (size_t)t * (size_t)c * sizeof(float)), "cudaMalloc");
         cuda_permute_3d_0_2_1_device_float((const float*)a->ptr, (float*)d_out, b, t, c);
-        _cuda_check(cudaGetLastError(), "cuda_permute_3d_0_2_1");
-        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+        _cuda_check(cuda_get_last_error(), "cuda_permute_3d_0_2_1");
+        _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
-        if (d_out) cudaFree(d_out);
-        return _raise(PyExc_RuntimeError, e.what());
+        if (d_out) cuda_free(d_out);
+        return _raise(py_exc_runtime_error, e.what());
     }
-    auto* out = new DeviceArray{d_out, (size_t)b * (size_t)t * (size_t)c};
-    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
+    auto* out = new device_array{d_out, (size_t)b * (size_t)t * (size_t)c};
+    return py_capsule_new(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-static PyObject* tensor_cuda_permute_3d_1_2_0(PyObject* , PyObject* args) {
-    PyObject* a_capsule = nullptr;
+static py_object* tensor_cuda_permute_3d_1_2_0(py_object* , py_object* args) {
+    py_object* a_capsule = nullptr;
     int b = 0, t = 0, c = 0;
     const char* dtype_str = nullptr;
-    if (!PyArg_ParseTuple(args, "Oiiis", &a_capsule, &b, &t, &c, &dtype_str)) {
-        return _raise(PyExc_TypeError, "expected (capsule, b, t, c, dtype)");
+    if (!py_arg_parse_tuple(args, "Oiiis", &a_capsule, &b, &t, &c, &dtype_str)) {
+        return _raise(py_exc_type_error, "expected (capsule, b, t, c, dtype)");
     }
     if (std::string(dtype_str) != "float32") {
-        return _raise(PyExc_TypeError, "permute_3d_1_2_0: only float32 supported");
+        return _raise(py_exc_type_error, "permute_3d_1_2_0: only float32 supported");
     }
     auto* a = _get_device_array(a_capsule);
     if (!a) {
-        return _raise(PyExc_RuntimeError, "invalid device array capsule");
+        return _raise(py_exc_runtime_error, "invalid device array capsule");
     }
     if ((size_t)b * (size_t)t * (size_t)c != a->size) {
-        return _raise(PyExc_ValueError, "permute_3d_1_2_0: size mismatch");
+        return _raise(py_exc_value_error, "permute_3d_1_2_0: size mismatch");
     }
     void* d_out = nullptr;
     try {
-        _cuda_check(cudaMalloc(&d_out, (size_t)b * (size_t)t * (size_t)c * sizeof(float)), "cudaMalloc");
+        _cuda_check(cuda_malloc(&d_out, (size_t)b * (size_t)t * (size_t)c * sizeof(float)), "cudaMalloc");
         cuda_permute_3d_1_2_0_device_float((const float*)a->ptr, (float*)d_out, b, t, c);
-        _cuda_check(cudaGetLastError(), "cuda_permute_3d_1_2_0");
-        _cuda_check(cudaDeviceSynchronize(), "cudaDeviceSynchronize");
+        _cuda_check(cuda_get_last_error(), "cuda_permute_3d_1_2_0");
+        _cuda_check(cuda_device_synchronize(), "cudaDeviceSynchronize");
     } catch (const std::exception& e) {
-        if (d_out) cudaFree(d_out);
-        return _raise(PyExc_RuntimeError, e.what());
+        if (d_out) cuda_free(d_out);
+        return _raise(py_exc_runtime_error, e.what());
     }
-    auto* out = new DeviceArray{d_out, (size_t)b * (size_t)t * (size_t)c};
-    return PyCapsule_New(out, "neurx.cuda.DeviceArray", _capsule_destructor);
+    auto* out = new device_array{d_out, (size_t)b * (size_t)t * (size_t)c};
+    return py_capsule_new(out, "neurx.cuda.DeviceArray", _capsule_destructor);
 }
-static PyMethodDef TensorCudaMethods[] = {
+static py_method_def tensor_cuda_methods[] = {
     {"to_device", tensor_cuda_to_device, METH_VARARGS, "Copy numpy array to device"},
     {"to_host", tensor_cuda_to_host, METH_VARARGS, "Copy device array to numpy"},
     {"add_device", tensor_cuda_add_device, METH_VARARGS, "CUDA elementwise add (device)"},
@@ -623,14 +623,14 @@ static PyMethodDef TensorCudaMethods[] = {
     {"permute_3d_1_2_0", tensor_cuda_permute_3d_1_2_0, METH_VARARGS, "CUDA permute 3d (1,2,0)"},
     {nullptr, nullptr, 0, nullptr}
 };
-static struct PyModuleDef tensor_cuda_module = {
-    PyModuleDef_HEAD_INIT,
+static struct py_module_def tensor_cuda_module = {
+    py_module_def_head_init,
     "_tensor_cuda",
     "tensor_2 CUDA ops",
     -1,
-    TensorCudaMethods,
+    tensor_cuda_methods,
 };
-PyMODINIT_FUNC PyInit__tensor_cuda(void) {
+py_modinit_func py_init_tensor_cuda(void) {
     import_array();
-    return PyModule_Create(&tensor_cuda_module);
+    return py_module_create(&tensor_cuda_module);
 }

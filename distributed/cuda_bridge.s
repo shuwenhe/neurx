@@ -154,7 +154,7 @@ func cuda_bridge_malloc_gradients(
     cuda_bridge cb,
     int num_gradients,
 ) int {
-    int gpu_mem_ptr = 0xDEADBEEF
+    int gpu_mem_ptr = 0x_deadbeef
     gpu_mem_ptr
 }
 func cuda_bridge_free_gradients(int gpu_mem_ptr) {

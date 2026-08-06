@@ -8,43 +8,43 @@ func head_dim() int { return 64 }
 func intermediate_size() int { return 3584 }
 func max_seq_len() int { return 2048 }
 func context_len() int { return 512 }
-struct Vec {
+struct vec {
     []float data
     int size
 }
-struct Matrix {
+struct matrix {
     []float data
     int rows
     int cols
 }
-struct AttentionCache {
+struct attention_cache {
     [][]float key_cache      
     [][]float value_cache    
     int cache_size          
 }
-struct ModelWeights {
-    []Matrix embed_tokens           
-    []Matrix norm_weights           
-    []Matrix q_proj_weight          
-    []Matrix k_proj_weight          
-    []Matrix v_proj_weight          
-    []Matrix out_proj_weight        
-    []Matrix gate_proj_weight       
-    []Matrix up_proj_weight         
-    []Matrix down_proj_weight       
-    Matrix lm_head_weight           
-    Matrix final_norm_weight        
+struct model_weights {
+    []matrix embed_tokens           
+    []matrix norm_weights           
+    []matrix q_proj_weight          
+    []matrix k_proj_weight          
+    []matrix v_proj_weight          
+    []matrix out_proj_weight        
+    []matrix gate_proj_weight       
+    []matrix up_proj_weight         
+    []matrix down_proj_weight       
+    matrix lm_head_weight           
+    matrix final_norm_weight        
 }
-struct InferenceState {
+struct inference_state {
     []float hidden_states           
     []float attention_output        
     []float ffn_output              
     []float logits                  
-    AttentionCache kv_cache
+    attention_cache kv_cache
     int generated_tokens
     int sequence_length
 }
-func matmul_vec_optimized(Matrix m, []float v, []float out) {
+func matmul_vec_optimized(matrix m, []float v, []float out) {
     int rows = m.rows
     int cols = m.cols
     int idx = 0
@@ -121,8 +121,8 @@ func exp(float x) float {
 }
 func multi_head_attention_cached(
     []float hidden_state,
-    ModelWeights weights,
-    AttentionCache cache,
+    model_weights weights,
+    attention_cache cache,
     int layer_idx,
     []float output,
     int seq_pos
@@ -185,7 +185,7 @@ func multi_head_attention_cached(
 }
 func feed_forward_network(
     []float hidden_state,
-    ModelWeights weights,
+    model_weights weights,
     int layer_idx,
     []float output
 ) {
@@ -204,8 +204,8 @@ func feed_forward_network(
 }
 func transformer_layer_forward(
     []float input_hidden,
-    ModelWeights weights,
-    AttentionCache cache,
+    model_weights weights,
+    attention_cache cache,
     int layer_idx,
     []float output,
     int seq_pos
@@ -231,8 +231,8 @@ func transformer_layer_forward(
 }
 func model_forward(
     int token_id,
-    ModelWeights weights,
-    InferenceState state
+    model_weights weights,
+    inference_state state
 ) int {
     int i = 0
     while i < HIDDEN_DIM {
@@ -298,15 +298,15 @@ func decode_token(int token_id) string {
 }
 func generate(
     string prompt,
-    ModelWeights weights,
+    model_weights weights,
     int max_new_tokens
 ) string {
-    InferenceState state
+    inference_state state
     state.hidden_states = allocate(HIDDEN_DIM)
     state.attention_output = allocate(HIDDEN_DIM)
     state.ffn_output = allocate(HIDDEN_DIM)
     state.logits = allocate(VOCAB_SIZE)
-    AttentionCache cache
+    attention_cache cache
     cache.key_cache = allocate(NUM_LAYERS)
     cache.value_cache = allocate(NUM_LAYERS)
     cache.cache_size = 0
@@ -353,7 +353,7 @@ func main() {
     println("✓ Prompt: " + prompt)
     println("✓ Max tokens: " + max_tokens_str)
     println("")
-    ModelWeights weights
+    model_weights weights
     println("⏱ Starting inference...")
     string output = generate(prompt, weights, 128)
     println("")

@@ -11,13 +11,13 @@ use std.tensor.{tensor_2, tensor, zeros, ones, randn, xavier_uniform, kaiming_no
                  gather, one_hot,
                  mse_loss, cross_entropy_loss, l1_loss, bce_with_logits_loss,
                  print_info, print_values, numel, shape}
-use std.ai.autograd.{AutoGradTensor, create_autograd_tensor, parameter, backward,
+use std.ai.autograd.{auto_grad_tensor, create_autograd_tensor, parameter, backward,
                       new_sgd_optimizer, new_adam_optimizer, sgd_step, adam_step,
                       zero_grad, clip_grad_norm_, clip_grad_value_}
 use std.ai.nn.modules.{linear, embedding, layer_norm, multi_head_attention,
-                         FeedForward, transformer_block, Dropout,
-                         ReLU, GELU, SiLU, Sigmoid, Softmax,
-                         Sequential, new_linear, new_embedding, new_layer_norm,
+                         feed_forward, transformer_block, dropout,
+                         re_lu, GELU, si_lu, sigmoid, softmax,
+                         sequential, new_linear, new_embedding, new_layer_norm,
                          new_mha, new_feed_forward, new_transformer_block,
                          new_dropout, new_relu, new_gelu, new_silu, new_sigmoid, new_softmax,
                          new_sequential, count_parameters, print_module_summary}
@@ -86,9 +86,9 @@ struct gptmodel {
     []transformer_block blocks
     layer_norm final_norm
     linear output_head
-    []AutoGradTensor all_parameters
+    []auto_grad_tensor all_parameters
 }
-func new_language_modelGPTConfig config) gptmodel {
+func new_language_model_gpt_config config) gptmodel {
     gptmodel model
     model.config = config
     model.token_embed = new_embedding(config.vocab_size, config.embed_dim, -1)
@@ -110,8 +110,8 @@ func new_language_modelGPTConfig config) gptmodel {
     model.all_parameters = collect_gpt_parameters(model)
     model
 }
-func collect_gpt_parameters(gptmodel model) []AutoGradTensor {
-    []AutoGradTensor params = []AutoGradTensor{}
+func collect_gpt_parameters(gptmodel model) []auto_grad_tensor {
+    []auto_grad_tensor params = []auto_grad_tensor{}
     int i = 0
     while i < len(model.token_embed.parameters) {
         append(params, model.token_embed.parameters[i])
@@ -143,26 +143,26 @@ func collect_gpt_parameters(gptmodel model) []AutoGradTensor {
     }
     params
 }
-func forward(gptmodel self, []int token_ids) AutoGradTensor {
+func forward(gptmodel self, []int token_ids) auto_grad_tensor {
     int batch_size = self.config.batch_size
     int seq_len = self.config.seq_len
     int d_model = self.config.embed_dim
-    AutoGradTensor token_emb = forward(self.token_embed, token_ids, batch_size, seq_len)
+    auto_grad_tensor token_emb = forward(self.token_embed, token_ids, batch_size, seq_len)
     []int pos_ids = new int[batch_size * seq_len]
     int idx = 0
     while idx < batch_size * seq_len {
         pos_ids[idx] = mod(idx, seq_len)
         idx = idx + 1
     }
-    AutoGradTensor pos_emb = forward(self.pos_embed, pos_ids, batch_size, seq_len)
-    AutoGradTensor x = add(token_emb, pos_emb)
+    auto_grad_tensor pos_emb = forward(self.pos_embed, pos_ids, batch_size, seq_len)
+    auto_grad_tensor x = add(token_emb, pos_emb)
     int i = 0
     while i < len(self.blocks) {
         x = forward(self.blocks[i], x)
         i = i + 1
     }
     x = forward(self.final_norm, x)
-    AutoGradTensor logits = forward(self.output_head, x)
+    auto_grad_tensor logits = forward(self.output_head, x)
     logits
 }
 func count_params(gptmodel self) int {
@@ -268,7 +268,7 @@ struct batch_2 {
 }
 func next_batch(data_loader loader) int {
 }
-func compute_cross_entropy_loss(AutoGradTensor logits, []int targets) AutoGradTensor {
+func compute_cross_entropy_loss(auto_grad_tensor logits, []int targets) auto_grad_tensor {
     cross_entropy_loss(logits, targets)
 }
 struct checkpoint_info {
@@ -396,8 +396,8 @@ func run_training(gptconfig config) training_result {
         next_batch(dataloader)
         []int input_ids = []int{}
         []int target_ids = []int{}
-        AutoGradTensor logits = forward(model, input_ids)
-        AutoGradTensor loss_tensor = compute_cross_entropy_loss(logits, target_ids)
+        auto_grad_tensor logits = forward(model, input_ids)
+        auto_grad_tensor loss_tensor = compute_cross_entropy_loss(logits, target_ids)
         float loss_val = item(loss_tensor.data)
         zero_grad(model.all_parameters)
         var grads = backward(loss_tensor)
@@ -502,7 +502,7 @@ func save_manifest(string manifest_path, []string checkpoints) void:
         content += ckpt + "\n"
     write_text_file(manifest_path, content)
 func get_time_ms() int:
-func write_text_file(string path, string content) Result[void, Error]:
+func write_text_file(string path, string content) result[void, error]:
     pass
 def rename_file(string old_path, string new_path) void:
     pass

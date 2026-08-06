@@ -1,133 +1,133 @@
-import importlib.util
+import importlib .util 
 
-import json
+import json 
 
-import tempfile
+import tempfile 
 
-import unittest
+import unittest 
 
-from pathlib import Path
-
-
-
-SCRIPT = Path(__file__).parents[1] / "posttrain" / "trainer" / "train_sft.py"
-
-SPEC = importlib.util.spec_from_file_location("train_sft", SCRIPT)
-
-MODULE = importlib.util.module_from_spec(SPEC)
-
-assert SPEC.loader is not None
-
-SPEC.loader.exec_module(MODULE)
+from pathlib import path 
 
 
 
-class FakeTokenizer:
+SCRIPT =path (__file__ ).parents [1 ]/"posttrain"/"trainer"/"train_sft.py"
 
-    chat_template = None
+SPEC =importlib .util .spec_from_file_location ("train_sft",SCRIPT )
 
-    eos_token_id = 99
+MODULE =importlib .util .module_from_spec (SPEC )
 
+assert SPEC .loader is not None 
 
-    def __call__(self, text, add_special_tokens):
-
-        prefix = [1] if add_special_tokens else []
-
-        return {"input_ids": prefix + [2 + index for index, _ in enumerate(text.split())]}
+SPEC .loader .exec_module (MODULE )
 
 
 
-class FakeChatTokenizer(FakeTokenizer):
+class fake_tokenizer :
 
-    chat_template = "template"
+    chat_template =None 
+
+    eos_token_id =99 
 
 
-    def apply_chat_template(self, messages, tokenize, add_generation_prompt):
+    def __call__ (self ,text ,add_special_tokens ):
 
-        ids = [10, 11]
+        prefix =[1 ]if add_special_tokens else []
 
-        for message in messages:
-
-            ids.extend([20 if message["role"] == "user" else 30, len(message["content"])])
-
-        if add_generation_prompt:
-
-            ids.append(30)
-
-        return {"input_ids": ids, "attention_mask": [1] * len(ids)}
+        return {"input_ids":prefix +[2 +index for index ,_ in enumerate (text .split ())]}
 
 
 
-class PosttrainDataTest(unittest.TestCase):
+class fake_chat_tokenizer (fake_tokenizer ):
 
-    def test_medical_record_masks_prompt(self):
+    chat_template ="template"
 
-        record = {
-            "question": "Which vitamin?",
-            "opa": "A",
-            "opb": "B12",
-            "opc": "C",
-            "opd": "D",
-            "cop": 2,
-            "exp": "Only animal products supply it.",
+
+    def apply_chat_template (self ,messages ,tokenize ,add_generation_prompt ):
+
+        ids =[10 ,11 ]
+
+        for message in messages :
+
+            ids .extend ([20 if message ["role"]=="user"else 30 ,len (message ["content"])])
+
+        if add_generation_prompt :
+
+            ids .append (30 )
+
+        return {"input_ids":ids ,"attention_mask":[1 ]*len (ids )}
+
+
+
+class posttrain_data_test (unittest .test_case ):
+
+    def test_medical_record_masks_prompt (self ):
+
+        record ={
+        "question":"Which vitamin?",
+        "opa":"A",
+        "opb":"B12",
+        "opc":"C",
+        "opd":"D",
+        "cop":2 ,
+        "exp":"Only animal products supply it.",
         }
 
-        example = MODULE.encode_record(FakeTokenizer(), record, 128)
+        example =MODULE .encode_record (fake_tokenizer (),record ,128 )
 
-        self.assertIsNotNone(example)
+        self .assert_is_not_none (example )
 
-        self.assertIn(99, example.labels)
+        self .assert_in (99 ,example .labels )
 
-        self.assertGreater(sum(label == MODULE.IGNORE_INDEX for label in example.labels), 0)
+        self .assert_greater (sum (label ==MODULE .IGNORE_INDEX for label in example .labels ),0 )
 
-        self.assertGreater(sum(label != MODULE.IGNORE_INDEX for label in example.labels), 1)
-
-
-    def test_pretokenized_record_preserves_response(self):
-
-        record = {"input_ids": list(range(10)), "labels": [-100] * 6 + list(range(6, 10))}
-
-        example = MODULE.encode_record(FakeTokenizer(), record, 6)
-
-        self.assertEqual(example.input_ids, [4, 5, 6, 7, 8, 9])
-
-        self.assertEqual(example.labels, [-100, -100, 6, 7, 8, 9])
+        self .assert_greater (sum (label !=MODULE .IGNORE_INDEX for label in example .labels ),1 )
 
 
-    def test_chat_template_batch_encoding_is_supported(self):
+    def test_pretokenized_record_preserves_response (self ):
 
-        record = {"instruction": "Question", "output": "Answer"}
+        record ={"input_ids":list (range (10 )),"labels":[-100 ]*6 +list (range (6 ,10 ))}
 
-        example = MODULE.encode_record(FakeChatTokenizer(), record, 128)
+        example =MODULE .encode_record (fake_tokenizer (),record ,6 )
 
-        self.assertIsNotNone(example)
+        self .assert_equal (example .input_ids ,[4 ,5 ,6 ,7 ,8 ,9 ])
 
-        self.assertGreater(sum(label == MODULE.IGNORE_INDEX for label in example.labels), 0)
-
-        self.assertGreater(sum(label != MODULE.IGNORE_INDEX for label in example.labels), 0)
+        self .assert_equal (example .labels ,[-100 ,-100 ,6 ,7 ,8 ,9 ])
 
 
-    def test_jsonl_and_json_array_are_streamed(self):
+    def test_chat_template_batch_encoding_is_supported (self ):
 
-        records = [{"input_ids": [1, 2], "labels": [-100, 2]}, {"input_ids": [3, 4], "labels": [-100, 4]}]
+        record ={"instruction":"Question","output":"Answer"}
 
-        with tempfile.TemporaryDirectory() as directory:
+        example =MODULE .encode_record (fake_chat_tokenizer (),record ,128 )
 
-            jsonl = Path(directory) / "data.jsonl"
+        self .assert_is_not_none (example )
 
-            jsonl.write_text("\n".join(json.dumps(item) for item in records), encoding="utf-8")
+        self .assert_greater (sum (label ==MODULE .IGNORE_INDEX for label in example .labels ),0 )
 
-            array = Path(directory) / "data.json"
-
-            array.write_text(json.dumps(records), encoding="utf-8")
-
-            self.assertEqual(list(MODULE.iter_json_records(jsonl)), records)
-
-            self.assertEqual(list(MODULE.iter_json_records(array)), records)
+        self .assert_greater (sum (label !=MODULE .IGNORE_INDEX for label in example .labels ),0 )
 
 
+    def test_jsonl_and_json_array_are_streamed (self ):
 
-if __name__ == "__main__":
+        records =[{"input_ids":[1 ,2 ],"labels":[-100 ,2 ]},{"input_ids":[3 ,4 ],"labels":[-100 ,4 ]}]
 
-    unittest.main()
+        with tempfile .temporary_directory ()as directory :
+
+            jsonl =path (directory )/"data.jsonl"
+
+            jsonl .write_text ("\n".join (json .dumps (item )for item in records ),encoding ="utf-8")
+
+            array =path (directory )/"data.json"
+
+            array .write_text (json .dumps (records ),encoding ="utf-8")
+
+            self .assert_equal (list (MODULE .iter_json_records (jsonl )),records )
+
+            self .assert_equal (list (MODULE .iter_json_records (array )),records )
+
+
+
+if __name__ =="__main__":
+
+    unittest .main ()
 

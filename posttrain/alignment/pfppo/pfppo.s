@@ -107,10 +107,10 @@ func (buffer: *replay_buffer) get_statistics() -> (f32, f32, f32) {
 }
 struct pfppo_trainer {
     config: pfppo_config
-    policy_model: *Model
-    value_model: *Model
-    reference_model: *Model
-    optimizer: *Optimizer
+    policy_model: *model
+    value_model: *model
+    reference_model: *model
+    optimizer: *optimizer
     replay_buffer: replay_buffer
     reuse_counts: map[i32]i32
     filtered_count: i32
@@ -118,9 +118,9 @@ struct pfppo_trainer {
 }
 func new_pfppo_trainer(
     config: pfppo_config,
-    policy: *Model,
-    value: *Model,
-    reference: *Model
+    policy: *model,
+    value: *model,
+    reference: *model
 ) -> pfppo_trainer {
     let optimizer = adamw_optimizer(
         policy.parameters() + value.parameters(),

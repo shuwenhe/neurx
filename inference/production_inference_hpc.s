@@ -41,7 +41,7 @@ func float_to_string(float value, int decimals) string {
     result = result + int_to_string(dec_val)
     result
 }
-struct PerformanceMetrics {
+struct performance_metrics {
     int prompt_tokens
     int generated_tokens
     int total_tokens

@@ -1,30 +1,30 @@
-enum DTypeCategory {
-    FloatingPoint
-    Integer
-    Complex
-    Boolean
+enum d_type_category {
+    floating_point
+    integer
+    complex
+    boolean
 }
-enum DType {
-    Float16
-    BFloat16
-    Float32
-    Float64
-    Int8
-    UInt8
-    Int16
-    UInt16
-    Int32
-    UInt32
-    Int64
-    UInt64
-    Bool
-    Complex64
-    Complex128
-    Float8E4M3FN
-    Float8E5M2
-    Custom
+enum d_type {
+    float_16
+    b_float_16
+    float_32
+    float_64
+    int_8
+    u_int_8
+    int_16
+    u_int_16
+    int_32
+    u_int_32
+    int_64
+    u_int_64
+    bool
+    complex_64
+    complex_128
+    float_8_e_4_m_3_fn
+    float_8_e_5_m_2
+    custom
 }
-interface IDType {
+interface id_type {
     name() -> string
     category() -> DTypeCategory
     size_bytes() -> i64
@@ -38,23 +38,23 @@ struct dtype_promotion_rule {
     to_dtype: DType
     cost: i64
 }
-interface IDTypePromotion {
+interface id_type_promotion {
     promote(dtype1: DType, dtype2: DType) -> DType
-    get_promotion_chain(from_dtype: DType, to_dtype: DType) -> []DType
+    get_promotion_chain(from_dtype: DType, to_dtype: DType) -> []d_type
     can_promote(from_dtype: DType, to_dtype: DType) -> bool
     promotion_cost(from_dtype: DType, to_dtype: DType) -> i64
 }
-interface IDTypeRegistry {
+interface id_type_registry {
     register_dtype(name: string, size: i64, category: DTypeCategory) -> DType
     register_promotion_rule(rule: dtype_promotion_rule) -> void
     get_all_promotion_rules() -> []dtype_promotion_rule
 }
-interface IDTypeCasting {
+interface id_type_casting {
     cast(input: tensor, target_dtype: DType) -> tensor
     is_safe_cast(from_dtype: DType, to_dtype: DType) -> bool
     cast_cost(from_dtype: DType, to_dtype: DType) -> i64
 }
-interface IDTypeFormatConversion {
+interface id_type_format_conversion {
     convert_dtype(tensor: tensor, target_dtype: DType) -> tensor
     saturate_on_cast(tensor: tensor, target_dtype: DType) -> tensor
     bitcast(tensor: tensor, target_dtype: DType) -> tensor

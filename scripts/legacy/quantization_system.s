@@ -30,7 +30,7 @@ type quantized_layer struct {
 }
 type quantization_framework struct {
     config              quantization_config
-    original_model      PolicyModel
+    original_model      policy_model
     quantized_layers    map[string]*quantized_layer
     calibration_data    [][]float64
     compression_ratio   float64
@@ -204,7 +204,7 @@ func (framework *quantization_framework) estimate_inference_speedup() {
     fmt.Printf("  INT8: %.1fx speedup\n", int8_speedup_gpu)
     fmt.Printf("  INT4: %.1fx speedup\n", int4_speedup_gpu)
 }
-func NewQuantizationFramework(config quantization_config, model PolicyModel) *quantization_framework {
+func new_quantization_framework(config quantization_config, model policy_model) *quantization_framework {
     return &quantization_framework{
         config: config,
         original_model: model,

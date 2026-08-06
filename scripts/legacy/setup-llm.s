@@ -40,7 +40,7 @@ func main() {
     println("")
     println("int main() {")
     println("
-    println("    auto analyzer = std::make_unique<LLMCodeAnalyzer>();")
+    println("    auto analyzer = std::make_unique<llm_code_analyzer>();")
     println("")
     println("
     println("    auto provider = new RemoteProvider();")

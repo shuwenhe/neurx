@@ -9,19 +9,19 @@ struct lora_module {
     int rank
     int hidden_size
     float scaling
-    int lora_A_rows
-    int lora_A_cols
-    int lora_B_rows
-    int lora_B_cols
+    int lora_a_rows
+    int lora_a_cols
+    int lora_b_rows
+    int lora_b_cols
 }
 func matmul_element(
-    float lora_A_val,
-    float lora_B_val,
+    float lora_a_val,
+    float lora_b_val,
     float input_val,
     float scaling
 ) float {
-    float lora_intermediate = input_val * lora_A_val * scaling
-    float lora_output = lora_intermediate * lora_B_val
+    float lora_intermediate = input_val * lora_a_val * scaling
+    float lora_output = lora_intermediate * lora_b_val
     return lora_output
 }
 func exp_approx(float x) float {
@@ -191,16 +191,16 @@ func main() {
     int epochs = 3
     int steps_per_epoch = 100
     int num_classes = 4
-    int lora_A_rows = rank
-    int lora_A_cols = hidden_size
-    int lora_B_rows = hidden_size
-    int lora_B_cols = rank
+    int lora_a_rows = rank
+    int lora_a_cols = hidden_size
+    int lora_b_rows = hidden_size
+    int lora_b_cols = rank
     float lora_scaling = alpha / float(rank)
     println("[Architecture]")
     println("  Tensor Support: Enabled")
     println("  LoRA Module:")
-    println("    - lora_A shape: [" + int_to_str(lora_A_rows) + ", " + int_to_str(lora_A_cols) + "]")
-    println("    - lora_B shape: [" + int_to_str(lora_B_rows) + ", " + int_to_str(lora_B_cols) + "]")
+    println("    - lora_A shape: [" + int_to_str(lora_a_rows) + ", " + int_to_str(lora_a_cols) + "]")
+    println("    - lora_B shape: [" + int_to_str(lora_b_rows) + ", " + int_to_str(lora_b_cols) + "]")
     println("    - Rank: " + int_to_str(rank))
     println("    - Hidden Size: " + int_to_str(hidden_size))
     println("    - Scaling (alpha/rank): " + float_to_str(lora_scaling, 2))
@@ -213,17 +213,17 @@ func main() {
     println("  Steps per Epoch: " + int_to_str(steps_per_epoch))
     println("  Num Classes: " + int_to_str(num_classes))
     println("")
-    float lora_A_w0 = 1.0
-    float lora_A_w1 = 2.0
-    float lora_B_w0 = 0.0
-    float lora_B_w1 = 0.0
+    float lora_a_w_0 = 1.0
+    float lora_a_w_1 = 2.0
+    float lora_b_w_0 = 0.0
+    float lora_b_w_1 = 0.0
     float logit_w0 = 0.5
     float logit_w1 = 0.3
     float logit_w2 = 0.8
     float logit_w3 = 0.2
     println("[Initial Weights]")
-    println("  LoRA_A weights: [" + float_to_str(lora_A_w0, 2) + ", " + float_to_str(lora_A_w1, 2) + "]")
-    println("  LoRA_B weights: [" + float_to_str(lora_B_w0, 2) + ", " + float_to_str(lora_B_w1, 2) + "] (zeros)")
+    println("  LoRA_A weights: [" + float_to_str(lora_a_w_0, 2) + ", " + float_to_str(lora_a_w_1, 2) + "]")
+    println("  LoRA_B weights: [" + float_to_str(lora_b_w_0, 2) + ", " + float_to_str(lora_b_w_1, 2) + "] (zeros)")
     println("  Logit weights: [" + float_to_str(logit_w0, 2) + ", " + float_to_str(logit_w1, 2) + ", " + float_to_str(logit_w2, 2) + ", " + float_to_str(logit_w3, 2) + "]")
     println("")
     float best_loss = 999.0
@@ -242,8 +242,8 @@ func main() {
             float input2 = 1.0
             float input3 = 1.0
             int target_class = 2
-            float lora_output0 = matmul_element(lora_A_w0, lora_B_w0, input0, lora_scaling)
-            float lora_output1 = matmul_element(lora_A_w1, lora_B_w1, input1, lora_scaling)
+            float lora_output0 = matmul_element(lora_a_w_0, lora_b_w_0, input0, lora_scaling)
+            float lora_output1 = matmul_element(lora_a_w_1, lora_b_w_1, input1, lora_scaling)
             float logit0 = logit_w0 + lora_output0
             float logit1 = logit_w1 + lora_output1
             float logit2 = logit_w2
@@ -274,10 +274,10 @@ func main() {
             logit_w1 = logit_w1 - lr * grad_logit1
             logit_w2 = logit_w2 - lr * grad_logit2
             logit_w3 = logit_w3 - lr * grad_logit3
-            float lora_grad_B0 = grad_logit0 * lora_A_w0 * lora_scaling * input0
-            float lora_grad_B1 = grad_logit1 * lora_A_w1 * lora_scaling * input1
-            lora_B_w0 = lora_B_w0 - lr * lora_grad_B0
-            lora_B_w1 = lora_B_w1 - lr * lora_grad_B1
+            float lora_grad_b_0 = grad_logit0 * lora_a_w_0 * lora_scaling * input0
+            float lora_grad_b_1 = grad_logit1 * lora_a_w_1 * lora_scaling * input1
+            lora_b_w_0 = lora_b_w_0 - lr * lora_grad_b_0
+            lora_b_w_1 = lora_b_w_1 - lr * lora_grad_b_1
             if current_loss < best_loss {
                 best_loss = current_loss
             }
@@ -297,7 +297,7 @@ func main() {
     println("Best Loss: " + float_to_str(best_loss, 6))
     println("")
     println("[Final Weights - UPDATED via Backpropagation]")
-    println("  LoRA_B weights: [" + float_to_str(lora_B_w0, 6) + ", " + float_to_str(lora_B_w1, 6) + "] (changed from [0.0, 0.0])")
+    println("  LoRA_B weights: [" + float_to_str(lora_b_w_0, 6) + ", " + float_to_str(lora_b_w_1, 6) + "] (changed from [0.0, 0.0])")
     println("  Logit weights: [" + float_to_str(logit_w0, 6) + ", " + float_to_str(logit_w1, 6) + ", " + float_to_str(logit_w2, 6) + ", " + float_to_str(logit_w3, 6) + "]")
     println("")
     println("✓ Training completed with:")

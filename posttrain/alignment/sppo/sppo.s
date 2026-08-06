@@ -14,9 +14,9 @@ struct sppo_config {
 }
 struct sppo_trainer {
     config: sppo_config
-    policy_model: *Model
-    reference_model: *Model
-    optimizer: *Optimizer
+    policy_model: *model
+    reference_model: *model
+    optimizer: *optimizer
     iteration: i32
     win_rates: []f32
     trajectory_buffer: []trajectory
@@ -28,7 +28,7 @@ struct trajectory {
     reward: f32
     win_rate: f32
 }
-func new_sppo_trainer(config: sppo_config, model: *Model, ref_model: *Model) -> sppo_trainer {
+func new_sppo_trainer(config: sppo_config, model: *model, ref_model: *model) -> sppo_trainer {
     let optimizer = adamw_optimizer(model.parameters(), config.learning_rate)
     return sppo_trainer{
         config: config,

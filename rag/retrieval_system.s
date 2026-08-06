@@ -63,7 +63,7 @@ struct retrieval_metadata {
     used_hybrid_search: bool
     used_query_expansion: bool
 }
-interface VectorDBInterface {
+interface vector_db_interface {
     init(config: retrieval_system_config)
     insert(chunks: list<document_chunk>)
     delete(chunk_ids: list<string>)
@@ -86,7 +86,7 @@ struct dbstatus {
     is_initialized: bool
     last_updated: float
 }
-class InMemoryVectorDB implements VectorDBInterface {
+class in_memory_vector_db implements vector_db_interface {
     config: retrieval_system_config
     embeddings: map<str, tensor>
     documents: map<str, document_chunk>
@@ -176,7 +176,7 @@ class InMemoryVectorDB implements VectorDBInterface {
         }
     }
 }
-class FAISSVectorDB implements VectorDBInterface {
+class faiss_vector_db implements vector_db_interface {
     config: retrieval_system_config
     index: any
     id_to_chunk: map<int, document_chunk>
@@ -320,7 +320,7 @@ class FAISSVectorDB implements VectorDBInterface {
         }
     }
 }
-class EmbeddingService {
+class embedding_service {
     model_name: string
     model: any
     tokenizer: any
@@ -329,7 +329,7 @@ class EmbeddingService {
     init(model_name: string, config: retrieval_system_config) {
         this.model_name = model_name
         this.config = config
-        this.cache = new LRUCache(capacity=10000)
+        this.cache = new lru_cache(capacity=10000)
         match model_name.split("/")[0].split("-")[0].to_lower() {
             "bge" => {
                 this.model, this.tokenizer = load_transformers_model(
@@ -419,15 +419,15 @@ class EmbeddingService {
         return result
     }
 }
-class LRUCache<K, V> {
+class lru_cache<K, V> {
     capacity: int
     cache: OrderedDict<K, V>
     init(capacity: int) {
         this.capacity = capacity
-        this.cache = new OrderedMap<K, V>()
+        this.cache = new ordered_map<K, V>()
     __getitem__(key: K) {
         if key not in this.cache {
-            raise KeyError(key)
+            raise key_error(key)
         value = this.cache[key]
         this.cache.move_to_end(key)
         return value
@@ -444,12 +444,12 @@ class LRUCache<K, V> {
         return this.cache.size()
     }
 }
-class DocumentProcessor {
+class document_processor {
     config: retrieval_system_config
     splitter: TextSplitter
     init(config: retrieval_system_config) {
         this.config = config
-        this.splitter = new RecursiveCharacterTextSplitter(
+        this.splitter = new recursive_character_text_splitter(
             chunk_size=config.max_chunk_length,
             chunk_overlap=config.max_chunk_length
         )
@@ -477,7 +477,7 @@ class DocumentProcessor {
         return all_chunks
     }
 }
-class RecursiveCharacterTextSplitter {
+class recursive_character_text_splitter {
     chunk_size: int
     chunk_overlap: int
     separators: list<string>
@@ -535,7 +535,7 @@ class RecursiveCharacterTextSplitter {
         return chunks
     }
 }
-class QueryExpander {
+class query_expander {
     llm_client: any
     enabled: bool
     init(llm_client: any, enabled: bool = true) {
@@ -603,7 +603,7 @@ struct query_expansion_result {
     original: string
     expanded: list<string>
 }
-class BM25Retriever {
+class b_m_25_retriever {
     corpus: list<string>
     doc_ids: list<string>
     df: map<string, int>
@@ -682,7 +682,7 @@ struct bm25_result {
     chunk_id: string
     score: float
 }
-class CrossEncoderReranker {
+class cross_encoder_reranker {
     model: any
     tokenizer: any
     model_name: string
@@ -730,7 +730,7 @@ struct reranked_result {
     chunk: document_chunk
     rerank_score: float
 }
-class HybridFusionEngine {
+class hybrid_fusion_engine {
     vector_weight: float
     keyword_weight: float
     normalization_method: string = "rrf"
@@ -823,7 +823,7 @@ struct fused_result {
     chunk_id: string
     fused_score: float
 }
-class RetrievalEngine {
+class retrieval_engine {
     config: retrieval_system_config
     vector_db: VectorDBInterface
     embedding_service: EmbeddingService
@@ -836,32 +836,32 @@ class RetrievalEngine {
     init(config: retrieval_system_config, llm_client?: any) {
         this.config = config
         this.documents_store = map<string, document_chunk>{}
-        this.document_processor = new DocumentProcessor(config=config)
-        this.embedding_service = new EmbeddingService(
+        this.document_processor = new document_processor(config=config)
+        this.embedding_service = new embedding_service(
             model_name=config.embedding_model_name,
             config=config
         )
         match config.vector_db_backend.to_lower() {
             "faiss" => {
-                this.vector_db = new FAISSVectorDB(config=config)
+                this.vector_db = new faiss_vector_db(config=config)
             }
             "chroma" | "milvus" | "pinecone" => {
                 throw error(f"{config.vector_db_backend} backend not yet implemented")
             }
             _ => {
-                this.vector_db = new InMemoryVectorDB(config=config)
+                this.vector_db = new in_memory_vector_db(config=config)
             }
         }
         if llm_client != null && config.enable_query_expansion {
-            this.query_expander = new QueryExpander(llm_client=llm_client!)
+            this.query_expander = new query_expander(llm_client=llm_client!)
         }
         if config.enable_hybrid_search {
-            this.bm25_retriever = new BM25Retriever()
+            this.bm25_retriever = new b_m_25_retriever()
         }
         if config.enable_cross_encoder_rerank {
-            this.reranker = new CrossEncoderReranker(config.reranker_model)
+            this.reranker = new cross_encoder_reranker(config.reranker_model)
         }
-        this.fusion_engine = new HybridFusionEngine(
+        this.fusion_engine = new hybrid_fusion_engine(
             vector_w=config.vector_weight,
             keyword_w=config.keyword_weight
         )
@@ -1030,7 +1030,7 @@ struct rag_statistics {
     query_expansion_enabled: bool
 }
 function create_retrieval_system(config?: retrieval_system_config, llm_client?: any) {
-    return new RetrievalEngine(config=config ?? new retrieval_system_config(), llm_client=llm_client)
+    return new retrieval_engine(config=config ?? new retrieval_system_config(), llm_client=llm_client)
 }
 function test_retrieval_system() {
     print("🧪 Testing NEURX RAG System...")
@@ -1077,9 +1077,9 @@ function test_retrieval_system() {
 }
 export {
     retrieval_system_config, document_chunk, document_metadata, search_result, retrieval_metadata,
-    VectorDBInterface, InMemoryVectorDB, FAISSVectorDB,
-    EmbeddingService, DocumentProcessor, QueryExpander,
-    BM25Retriever, CrossEncoderReranker, HybridFusionEngine,
-    RetrievalEngine, ingestion_report, rag_statistics,
+    vector_db_interface, in_memory_vector_db, faiss_vector_db,
+    embedding_service, document_processor, query_expander,
+    b_m_25_retriever, cross_encoder_reranker, hybrid_fusion_engine,
+    retrieval_engine, ingestion_report, rag_statistics,
     create_retrieval_system, test_rag_system
 }

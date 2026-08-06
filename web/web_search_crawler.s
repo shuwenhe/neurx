@@ -101,7 +101,7 @@ struct engine_search_result {
     error?: string
 }
 class GoogleSearchEngine implements SearchEngineInterface {
-    name = "Google"
+    name = "google"
     api_key: string?
     cx_id: string?
     init(api_key?: string, cx_id?: string) {
@@ -130,7 +130,7 @@ class GoogleSearchEngine implements SearchEngineInterface {
             "gl": config.region
         }
         if !config.time_range.empty():
-            params["dateRestrict"] = config.time_range
+            params["date_restrict"] = config.time_range
         response = http_get("https:
         data = json_decode(response.body)
         if "error" in data:
@@ -161,7 +161,7 @@ class GoogleSearchEngine implements SearchEngineInterface {
             for item in ddg_result.items:
                 item.source_engine = this.name
             return ddg_result
-        } catch Exception as e:
+        } catch exception as e:
             return engine_search_result{
                 items=[], total_estimated=0, query_time_ms=current_time_millis() - start_time,
                 has_more=false, error=f"Google search failed: {e.message}"
@@ -177,12 +177,12 @@ class GoogleSearchEngine implements SearchEngineInterface {
         response = http_get("https:
         data = json_decode(response.body)
         items: list<search_result_item> = []
-        if "Abstract" in data and not data["Abstract"].empty():
+        if "abstract" in data and not data["abstract"].empty():
             items.append(search_result_item{
-                url=data.get("AbstractURL", ""),
-                title=data.get("Heading", ""),
-                snippet=data["Abstract"],
-                source_engine="DuckDuckGo",
+                url=data.get("abstract_url", ""),
+                title=data.get("heading", ""),
+                snippet=data["abstract"],
+                source_engine="duck_duck_go",
                 rank_in_engine=1
             })
         return engine_search_result{
@@ -194,7 +194,7 @@ class GoogleSearchEngine implements SearchEngineInterface {
     }
 }
 class BingSearchEngine implements SearchEngineInterface {
-    name = "Bing"
+    name = "bing"
     api_key: string?
     init(api_key?: string) {
         this.api_key = api_key
@@ -211,7 +211,7 @@ class BingSearchEngine implements SearchEngineInterface {
     }
     _search_via_api(query: string, config: web_search_config, start_time: float) {
         headers = {
-            "Ocp-Apim-Subscription-Key": this.api_key!
+            "ocp-apim-subscription-key": this.api_key!
         }
         params = {
             "q": query,
@@ -222,9 +222,9 @@ class BingSearchEngine implements SearchEngineInterface {
         }
         if !config.time_range.empty():
             params["freshness"] = match config.time_range {
-                "d" => "Day"
-                "w" => "Week"
-                "m" => "Month"
+                "d" => "day"
+                "w" => "week"
+                "m" => "month"
                 _ => null
             }
         response = http_get(
@@ -260,7 +260,7 @@ class BingSearchEngine implements SearchEngineInterface {
         }
     }
 }
-class WebCrawler {
+class web_crawler {
     config: web_search_config
     session: HTTPSession
     cache: LRUCache<string, crawled_content>
@@ -268,14 +268,14 @@ class WebCrawler {
     html_cleaner: HTMLCleaner
     init(config: web_search_config) {
         this.config = config
-        this.session = new HTTPSession(
+        this.session = new http_session(
             timeout=config.crawl_timeout_seconds,
             user_agent=config.user_agent,
             allow_redirects=config.follow_redirects
         )
-        this.cache = new LRUCache(capacity=1000)
-        this.content_extractor = new MainContentExtractor(config=config)
-        this.html_cleaner = new HTMLCleaner(config=config)
+        this.cache = new lru_cache(capacity=1000)
+        this.content_extractor = new main_content_extractor(config=config)
+        this.html_cleaner = new html_cleaner(config=config)
     }
     async crawl(url: string) {
         if this.config.cache_enabled && url in this.cache {
@@ -304,20 +304,20 @@ class WebCrawler {
             if this.config.cache_enabled:
                 this.cache[url] = crawled
             return (crawled, null)
-        } except TimeoutException:
+        } except timeout_exception:
             return (null, "Timeout")
-        except SSLError:
+        except ssl_error:
             return (null, "SSL certificate error")
-        except DNSException:
+        except dns_exception:
             return (null, "DNS resolution failed")
-        except TooManyRedirects:
+        except too_many_redirects:
             return (null, "Too many redirects")
-        catch Exception as e:
+        catch exception as e:
             return (null, str(e))
     }
     batch_crawl(urls: list<string>, max_concurrent: int = 3) {
         results: dict<string, tuple<crawled_content?, string?>> = {}
-        semaphore = Semaphore(max_concurrent)
+        semaphore = semaphore(max_concurrent)
         async def crawl_single(url: string) {
             async with semaphore:
                 results[url] = await this.crawl(url)
@@ -330,7 +330,7 @@ class WebCrawler {
         return age_hours > this.config.cache_ttl_hours
     }
 }
-class MainContentExtractor {
+class main_content_extractor {
     config: web_search_config
     init(config: web_search_config) {
         this.config = config
@@ -484,7 +484,7 @@ class MainContentExtractor {
         sections: list<page_section>
     }
 }
-class HTMLCleaner {
+class html_cleaner {
     config: web_search_config
     init(config: web_search_config) {
         this.config = config
@@ -504,24 +504,24 @@ class HTMLCleaner {
         return text
     }
 }
-class WebSearchSystem {
+class web_search_system {
     config: web_search_config
-    engines: map<string, SearchEngineInterface>
+    engines: map<string, search_engine_interface>
     crawler: WebCrawler
     result_aggregator: ResultAggregator
     llm_client: any?
     init(config?: web_search_config, llm_client?: any) {
         this.config = config ?? new web_search_config()
-        this.engines = map<string, SearchEngineInterface>{}
+        this.engines = map<string, search_engine_interface>{}
         this.llm_client = llm_client
         if "google" in this.config.search_engines:
-            google = new GoogleSearchEngine(this.config.google_api_key, this.config.google_cx_id)
+            google = new google_search_engine(this.config.google_api_key, this.config.google_cx_id)
             this.engines["google"] = google
         if "bing" in this.config.search_engines:
-            bing = new BingSearchEngine(this.config.bing_api_key)
+            bing = new bing_search_engine(this.config.bing_api_key)
             this.engines["bing"] = bing
-        this.crawler = new WebCrawler(config=this.config)
-        this.result_aggregator = new ResultAggregator(config=config)
+        this.crawler = new web_crawler(config=this.config)
+        this.result_aggregator = new result_aggregator(config=config)
     }
     async search(query: string, options?: search_options) {
         opts = options ?? new search_options()
@@ -720,7 +720,7 @@ struct search_options {
     verbose: bool = true
     corrected_query?: string
 }
-class ResultAggregator {
+class result_aggregator {
     config: web_search_config
     init(config: web_search_config) {
         this.config = config
@@ -786,17 +786,17 @@ function create_web_search_system(config?: web_search_config, llm_client?: any) 
     return new WebSearchSystem(config=config, llm_client=llm_client)
 }
 async function test_web_search_system() {
-    print("🧪 Testing NEURX WEB Search System...")
+    print("🧪 testing NEURX WEB search system...")
     cfg = web_search_config(
         enable_crawling=false,
         max_results_per_engine=3,
         total_max_results=5
     )
     ws = create_web_search_system(cfg)
-    print("  ✓ Test 1: System Initialization & Engine Setup")
-    assert len(ws.engines) >= 1, "At least one search engine should be initialized"
-    assert ws.crawler != None, "Crawler should be initialized"
-    print("  ✓ Test 2: URL Normalization & Deduplication")
+    print("  ✓ test 1: System initialization & engine setup")
+    assert len(ws.engines) >= 1, "at least one search engine should be initialized"
+    assert ws.crawler != None, "crawler should be initialized"
+    print("  ✓ test 2: URL normalization & deduplication")
     agg = ws.result_aggregator
     test_items = [
         search_result_item{url="https:
@@ -805,15 +805,15 @@ async function test_web_search_system() {
         search_result_item{url="https:
     ]
     unique = agg.deduplicate(test_items)
-    assert len(unique) == 3, f"Dedup failed: expected 3, got {len(unique)}"
-    print("  ✓ Test 3: Result Scoring & Ranking")
+    assert len(unique) == 3, f"dedup failed: expected 3, got {len(unique)}"
+    print("  ✓ test 3: Result scoring & ranking")
     scored = agg.score_and_rank(unique, "test query example")
-    assert len(scored) == len(unique), "Scoring should preserve all items"
-    assert scored[0].relevance_score != None, "Relevance scores should be assigned"
+    assert len(scored) == len(unique), "scoring should preserve all items"
+    assert scored[0].relevance_score != None, "relevance scores should be assigned"
     for i in range(len(scored) - 1):
         assert scored[i].relevance_score! >= scored[i+1].relevance_score!, \
-               f"Results should be sorted by score: {scored[i].relevance_score} >= {scored[i+1].relevance_score}"
-    print("  ✓ Test 4: HTML Cleaning")
+               f"results should be sorted by score: {scored[i].relevance_score} >= {scored[i+1].relevance_score}"
+    print("  ✓ test 4: HTML cleaning")
     cleaner = new HTMLCleaner(cfg)
     dirty_html = "<div><script>alert('xss')</script><p>Hello   World</p></div>"
     cleaned = cleaner.clean(dirty_html)
@@ -825,6 +825,6 @@ async function test_web_search_system() {
 export {
     web_search_config, search_result_item, crawled_content, page_metadata, page_section,
     search_response, search_statistics,
-    WebSearchSystem, search_options,
+    web_search_system, search_options,
     create_web_search_system, test_web_search_system
 }

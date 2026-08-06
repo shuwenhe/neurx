@@ -2,7 +2,7 @@ import "tensor/tensor.s"
 import "optimizer/optimizer.s"
 import "posttrain/alignment/rollout_correction/config.s"
 import "posttrain/alignment/rollout_correction/importance_sampling.s"
-struct TIROptimalTokenBaselineConfig {
+struct tir_optimal_token_baseline_config {
     learning_rate: f32
     num_epochs: i32
     max_grad_norm: f32
@@ -18,13 +18,13 @@ struct TIROptimalTokenBaselineConfig {
     clip_epsilon: f32
     entropy_coeff: f32
 }
-struct TIROptimalTokenBaselineTrainer {
+struct tir_optimal_token_baseline_trainer {
     config: TIROptimalTokenBaselineConfig
-    policy_model: *Model
-    value_model: *Model
-    reference_model: *Model
-    optimizer: *Optimizer
-    value_optimizer: *Optimizer
+    policy_model: *model
+    value_model: *model
+    reference_model: *model
+    optimizer: *optimizer
+    value_optimizer: *optimizer
     token_baselines: map[i64]f32
     position_baselines: map[i64]f32
     variance_before: f32
@@ -33,7 +33,7 @@ struct TIROptimalTokenBaselineTrainer {
     is_weight_stats: ISWeightStats
     step_count: i64
 }
-struct ISWeightStats {
+struct is_weight_stats {
     mean: f32
     std: f32
     min: f32
@@ -42,16 +42,16 @@ struct ISWeightStats {
 }
 func new_tir_otb_trainer(
     config: TIROptimalTokenBaselineConfig,
-    policy: *Model,
-    value: *Model,
-    reference: *Model
+    policy: *model,
+    value: *model,
+    reference: *model
 ) -> TIROptimalTokenBaselineTrainer {
     let optimizer = adamw_optimizer(policy.parameters(), config.learning_rate)
-    let value_optimizer: *Optimizer = nil
+    let value_optimizer: *optimizer = nil
     if config.use_learned_baseline {
         value_optimizer = adamw_optimizer(value.parameters(), config.learning_rate * 0.1)
     }
-    return TIROptimalTokenBaselineTrainer{
+    return tir_optimal_token_baseline_trainer{
         config: config,
         policy_model: policy,
         value_model: value,
@@ -73,7 +73,7 @@ func new_tir_otb_trainer(
         step_count: 0,
     }
 }
-func (trainer: *TIROptimalTokenBaselineTrainer) compute_tir_token_baseline(
+func (trainer: *tir_optimal_token_baseline_trainer) compute_tir_token_baseline(
     tokens: Tensor,
     rewards: Tensor,
     is_weights: Tensor,
@@ -109,7 +109,7 @@ func (trainer: *TIROptimalTokenBaselineTrainer) compute_tir_token_baseline(
     }
     return baselines
 }
-func (trainer: *TIROptimalTokenBaselineTrainer) compute_tir_advantages(
+func (trainer: *tir_optimal_token_baseline_trainer) compute_tir_advantages(
     tokens: Tensor,
     rewards: Tensor,
     is_weights: Tensor,
@@ -138,16 +138,16 @@ func (trainer: *TIROptimalTokenBaselineTrainer) compute_tir_advantages(
     }
     return advantages
 }
-func (trainer: *TIROptimalTokenBaselineTrainer) train_step(
-    prompts: []Tensor,
-    responses: []Tensor,
-    rollout_log_probs: []Tensor,
-    rewards: []Tensor
+func (trainer: *tir_optimal_token_baseline_trainer) train_step(
+    prompts: []tensor,
+    responses: []tensor,
+    rollout_log_probs: []tensor,
+    rewards: []tensor
 ) -> (f32, f32, f32, f32) {
     let batch_size = prompts.len()
-    let inputs: []Tensor = []
-    let all_tokens: []Tensor = []
-    let positions: []Tensor = []
+    let inputs: []tensor = []
+    let all_tokens: []tensor = []
+    let positions: []tensor = []
     for i in 0..batch_size {
         let input = concat(prompts[i], responses[i])
         inputs.push(input)
@@ -156,7 +156,7 @@ func (trainer: *TIROptimalTokenBaselineTrainer) train_step(
         let pos = tensor_arange(seq_len)
         positions.push(pos)
     }
-    let ref_log_probs: []Tensor = []
+    let ref_log_probs: []tensor = []
     for input in inputs {
         let logits = trainer.reference_model.forward(input)
         let log_probs = log_softmax(logits, dim: -1)
@@ -231,7 +231,7 @@ func (trainer: *TIROptimalTokenBaselineTrainer) train_step(
         total_is_weight / f32(num_updates)
     )
 }
-func (trainer: *TIROptimalTokenBaselineTrainer) update_is_weight_stats(is_weights: Tensor) {
+func (trainer: *tir_optimal_token_baseline_trainer) update_is_weight_stats(is_weights: Tensor) {
     let values = is_weights.flatten()
     trainer.is_weight_stats.mean = values.mean().item()
     trainer.is_weight_stats.std = values.std().item()
@@ -241,7 +241,7 @@ func (trainer: *TIROptimalTokenBaselineTrainer) update_is_weight_stats(is_weight
                    (is_weights > trainer.config.is_threshold)).to_float()
     trainer.is_weight_stats.clip_fraction = clipped.mean().item()
 }
-func (trainer: *TIROptimalTokenBaselineTrainer) get_variance_reduction() -> f32 {
+func (trainer: *tir_optimal_token_baseline_trainer) get_variance_reduction() -> f32 {
     return trainer.variance_reduction_ratio
 }
 func compute_variance_tensor(x: Tensor) -> f32 {

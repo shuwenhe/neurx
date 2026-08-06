@@ -97,9 +97,9 @@ func find_files(dir string, pattern string) ([]string, error) {
 }
 struct exec_command_result {
     command string
-    Stdout  string
-    Stderr  string
-    ExitCode int
+    stdout  string
+    stderr  string
+    exit_code int
     error   error
 }
 func exec_command(cmd string, args ...string) exec_command_result {
@@ -109,19 +109,19 @@ func exec_command(cmd string, args ...string) exec_command_result {
     command.Stdout = &stdout
     command.Stderr = &stderr
     err := command.Run()
-    exitCode := 0
+    exit_code := 0
     if err != nil {
-        if exitErr, ok := err.(*exec.Exiterror); ok {
-            exitCode = exitErr.ExitCode()
+        if exit_err, ok := err.(*exec.Exiterror); ok {
+            exit_code = exit_err.ExitCode()
         } else {
-            exitCode = 1
+            exit_code = 1
         }
     }
     return exec_command_result{
         command:  cmd,
-        Stdout:   stdout.String(),
-        Stderr:   stderr.String(),
-        ExitCode: exitCode,
+        stdout:   stdout.String(),
+        stderr:   stderr.String(),
+        exit_code: exitCode,
         error:    err,
     }
 }
@@ -133,19 +133,19 @@ func exec_in_dir(dir string, cmd string, args ...string) exec_command_result {
     command.Stdout = &stdout
     command.Stderr = &stderr
     err := command.Run()
-    exitCode := 0
+    exit_code := 0
     if err != nil {
-        if exitErr, ok := err.(*exec.Exiterror); ok {
-            exitCode = exitErr.ExitCode()
+        if exit_err, ok := err.(*exec.Exiterror); ok {
+            exit_code = exit_err.ExitCode()
         } else {
-            exitCode = 1
+            exit_code = 1
         }
     }
     return exec_command_result{
         command:  cmd,
-        Stdout:   stdout.String(),
-        Stderr:   stderr.String(),
-        ExitCode: exitCode,
+        stdout:   stdout.String(),
+        stderr:   stderr.String(),
+        exit_code: exitCode,
         error:    err,
     }
 }
@@ -156,19 +156,19 @@ func shell(command string) exec_command_result {
     cmd.Stdout = &stdout
     cmd.Stderr = &stderr
     err := cmd.Run()
-    exitCode := 0
+    exit_code := 0
     if err != nil {
-        if exitErr, ok := err.(*exec.Exiterror); ok {
-            exitCode = exitErr.ExitCode()
+        if exit_err, ok := err.(*exec.Exiterror); ok {
+            exit_code = exit_err.ExitCode()
         } else {
-            exitCode = 1
+            exit_code = 1
         }
     }
     return exec_command_result{
         command:  command,
-        Stdout:   stdout.String(),
-        Stderr:   stderr.String(),
-        ExitCode: exitCode,
+        stdout:   stdout.String(),
+        stderr:   stderr.String(),
+        exit_code: exitCode,
         error:    err,
     }
 }
@@ -176,22 +176,22 @@ func command_exists(cmd string) bool {
     _, err := exec.LookPath(cmd)
     return err == nil
 }
-func get_env(key string, defaultValue string) string {
+func get_env(key string, default_value string) string {
     if value := os.Getenv(key); value != "" {
         return value
     }
-    return defaultValue
+    return default_value
 }
 func set_env(key string, value string) error {
     return os.Setenv(key, value)
 }
-func get_env_int(key string, defaultValue int) int {
+func get_env_int(key string, default_value int) int {
     if value := os.Getenv(key); value != "" {
-        if intVal, err := strconv.Atoi(value); err == nil {
-            return intVal
+        if int_val, err := strconv.Atoi(value); err == nil {
+            return int_val
         }
     }
-    return defaultValue
+    return default_value
 }
 func abs_path(path string) (string, error) {
     return filepath.Abs(path)

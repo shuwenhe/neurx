@@ -26,8 +26,8 @@ struct lora_linear {
     []float base_weight
     int out_dim
     int in_dim
-    []float lora_A
-    []float lora_B
+    []float lora_a
+    []float lora_b
     int rank
     float scaling
     float dropout_rate

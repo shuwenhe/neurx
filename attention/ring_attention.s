@@ -65,12 +65,12 @@ func init_ring_attn_state(ring_attn_config cfg) ring_attn_state {
     int L = cfg.local_seq_len
     int H = cfg.local_num_heads
     int D = cfg.head_dim
-    int Hkv = cfg.kv_heads
+    int hkv = cfg.kv_heads
     ring_attn_state {
         config: cfg,
         local_q: allocate_3d_tensor(H, L, D),
-        local_k: allocate_3d_tensor(Hkv, L, D),
-        local_v: allocate_3d_tensor(Hkv, L, D),
+        local_k: allocate_3d_tensor(hkv, L, D),
+        local_v: allocate_3d_tensor(hkv, L, D),
         remote_k_buffer: allocate_2d_tensor(L, D),
         remote_v_buffer: allocate_2d_tensor(L, D),
         attn_output: allocate_3d_tensor(H, L, D),
@@ -174,7 +174,7 @@ func ring_attention_forward(
     int rank = state.config.sp_rank
     int L = state.config.local_seq_len
     int H = state.config.local_num_heads
-    int Hkv = state.config.kv_heads
+    int hkv = state.config.kv_heads
     int D = state.config.head_dim
     state.local_q = q_input
     state.local_k = k_input
@@ -209,7 +209,7 @@ func ring_attention_forward(
         h = 0
         while h < H {
             int kv_h = h
-            if Hkv > 0 && Hkv < H {
+            if hkv > 0 && hkv < H {
                 kv_h = h / (H / Hkv)
             }
             [][]float q_h = q_input[h]
@@ -270,17 +270,17 @@ func ring_attn_update_step(
     bool causal = state.config.causal_mask
     int P = state.config.sp_degree
     int rank = state.config.sp_rank
-    int kv_L = len(kv_block)
-    if kv_L == 0 { kv_L = L }
+    int kv_l = len(kv_block)
+    if kv_l == 0 { kv_l = L }
     int global_offset = (source_rank - rank) * L
     if global_offset < 0 { global_offset = 0 }
     int qi = 0
     while qi < L {
         float old_max = state.row_max_accum[head_idx][qi][0]
         float old_sum = state.row_max_accum[head_idx][qi][0]
-        []float scores = fill(kv_L, 0.0)
+        []float scores = fill(kv_l, 0.0)
         int kj = 0
-        while kj < kv_L && kj < L {
+        while kj < kv_l && kj < L {
             float dot = 0.0
             int d = 0
             while d < D {
@@ -293,7 +293,7 @@ func ring_attn_update_step(
         if causal {
             int qi_global = rank * L + qi
             kj = 0
-            while kj < kv_L && kj < L {
+            while kj < kv_l && kj < L {
                 int kj_global = source_rank * L + kj
                 if kj_global > qi_global {
                     scores[kj] = -1e9
@@ -303,7 +303,7 @@ func ring_attn_update_step(
         }
         float new_max = old_max
         kj = 0
-        while kj < kv_L && kj < L {
+        while kj < kv_l && kj < L {
             if scores[kj] > new_max {
                 new_max = scores[kj]
             }
@@ -318,7 +318,7 @@ func ring_attn_update_step(
         }
         float row_lsum = 0.0
         kj = 0
-        while kj < kv_L && kj < L {
+        while kj < kv_l && kj < L {
             float p = exp_stable(scores[kj] - new_max)
             row_lsum = row_lsum + p
             d = 0
@@ -391,8 +391,8 @@ func sp_layernorm_forward(
     int H = sp_cfg.hidden_dim
     if !sp_cfg.use_ring_reduce {
         [][]float gathered = simulate_allgather(sp_cfg, local_hidden, L, H)
-        int total_L = len(gathered)
-        [][]float normalized = layernorm_full_sequence(gathered, total_L, H)
+        int total_l = len(gathered)
+        [][]float normalized = layernorm_full_sequence(gathered, total_l, H)
         [][]float local_result = extract_local_portion(normalized, sp_cfg.sp_rank, L, H)
         return local_result
     } else {
@@ -401,8 +401,8 @@ func sp_layernorm_forward(
 }
 func simulate_allgather(sequence_parallel_config sp_cfg, [][]float input, int L, int H) [][]float {
     int P = sp_cfg.sp_degree
-    int total_L = L * P
-    [][]float gathered = allocate_2d_tensor(total_L, H)
+    int total_l = L * P
+    [][]float gathered = allocate_2d_tensor(total_l, H)
     int rank = sp_cfg.sp_rank
     int r = 0
     while r < P {

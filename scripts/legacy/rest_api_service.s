@@ -65,10 +65,10 @@ func (server *apiserver) initialize() {
     fmt.Printf("  URL: http:
 }
 func (server *apiserver) register_models() {
-    server.models["neurx-346m"] = "NeurX-level 346M parameter model"
-    server.models["neurx-7b"] = "NeurX-level 7B parameter model"
-    server.models["neurx-70b"] = "NeurX-level 70B parameter model"
-    fmt.Printf("Registered Models:\n")
+    server.models["neurx-346m"] = "neur_x-level 346M parameter model"
+    server.models["neurx-7b"] = "neur_x-level 7B parameter model"
+    server.models["neurx-70b"] = "neur_x-level 70B parameter model"
+    fmt.Printf("registered models:\n")
     for name, desc := range server.models {
         fmt.Printf("  ✓ %s: %s\n", name, desc)
     }
@@ -325,7 +325,7 @@ func (server *apiserver) print_stats() {
     fmt.Printf("Models: %d\n", len(server.models))
     fmt.Printf("Max Connections: %d\n", server.max_connections)
 }
-func NewAPIServer(host string, port int) *apiserver {
+func new_api_server(host string, port int) *apiserver {
     return &apiserver{
         host:               host,
         port:               port,

@@ -112,7 +112,7 @@ func new_rng(int seed) rng_state {
     rng_state { seed: seed }
 }
 func rng_next(rng_state state) float {
-    state.seed = (state.seed * 1664525 + 1013904223)  0x7FFFFFFF
+    state.seed = (state.seed * 1664525 + 1013904223)  0x_7_fffffff
     float(state.seed) / 2147483648.0
 }
 func rng_randn(rng_state state) float {

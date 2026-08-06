@@ -31,12 +31,12 @@ struct autograd_engine {
     ready_queue: ready_queue
     node_results: map[i64][]tensor
 }
-interface IGraphBuilder {
+interface i_graph_builder {
     build_graph(output: tensor) -> computation_graph
     get_graph(tensor: tensor) -> computation_graph
     clear_graph(tensor: tensor) -> void
 }
-interface IGraphNode {
+interface i_graph_node {
     node_id() -> i64
     operation_name() -> string
     forward_inputs() -> []tensor
@@ -44,31 +44,31 @@ interface IGraphNode {
     set_backward_fn(fn: func(tensor) -> []tensor) -> void
     backward_fn() -> func(tensor) -> []tensor
 }
-interface IGraphEdge {
+interface i_graph_edge {
     from_node() -> i64
     to_node() -> i64
     tensor_index() -> i64
 }
-interface IGraphTask {
+interface i_graph_task {
     task_id() -> i64
     node_id() -> i64
     gradient() -> tensor
     dependencies_remaining() -> i64
     decrement_dependencies() -> void
 }
-interface IReadyQueue {
+interface i_ready_queue {
     push_task(task: graph_task) -> void
     pop_task() -> graph_task
     is_empty() -> bool
     size() -> i64
 }
-interface IAutogradEngine {
+interface i_autograd_engine {
     build_from_tensor(output: tensor) -> void
     backward(output: tensor, grad: tensor) -> void
     get_gradient(tensor: tensor) -> tensor
     get_all_gradients() -> map[string]tensor
 }
-interface IAutograd {
+interface i_autograd {
     backward(loss: tensor) -> void
     backward_with_gradient(loss: tensor, gradient: tensor) -> void
     get_gradient(tensor: tensor) -> tensor
@@ -79,13 +79,13 @@ interface IAutograd {
     is_grad_enabled() -> bool
     get_computation_graph(tensor: tensor) -> computation_graph
 }
-interface IGradientAccumulator {
+interface i_gradient_accumulator {
     add_gradient(tensor: tensor, grad: tensor) -> void
     get_gradient(tensor: tensor) -> tensor
     zero_gradients() -> void
     synchronize() -> void
 }
-interface IGradientValidator {
+interface i_gradient_validator {
     check_operator(
         forward_fn: func([]tensor) -> tensor,
         backward_fn: func(tensor) -> []tensor,
@@ -94,7 +94,7 @@ interface IGradientValidator {
     ) -> f64
     check_backward_graph(output: tensor, eps: f64) -> f64
 }
-interface IAutogradCheckpoint {
+interface i_autograd_checkpoint {
     checkpoint(tensor: tensor) -> void
     recompute_forward(node_id: i64) -> tensor
 }

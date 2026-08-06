@@ -120,7 +120,7 @@ func new_mla_weights(mla_config cfg) mla_weights {
     int d_h = cfg.head_dim
     int d_c = cfg.kv_lora_rank
     int d_cq = cfg.q_lora_rank
-    int d_R = cfg.rope_head_dim
+    int d_r = cfg.rope_head_dim
     mla_weights {
         config: cfg,
         w_dq:  fill_ramp(d * d_cq, 0.01),
@@ -130,8 +130,8 @@ func new_mla_weights(mla_config cfg) mla_weights {
         w_uk:  fill_ramp(d_c * n_h * d_h, 0.01),
         w_uv:  fill_ramp(d_c * n_h * d_h, 0.01),
         kv_norm: fill_ramp(d_c, 1.0),
-        w_qr:  fill_ramp(d * n_h * d_R, 0.01),
-        w_kr:  fill_ramp(d * n_h * d_R, 0.01),
+        w_qr:  fill_ramp(d * n_h * d_r, 0.01),
+        w_kr:  fill_ramp(d * n_h * d_r, 0.01),
         w_o:   fill_ramp(n_h * d_h * d, 0.01),
     }
 }
@@ -214,21 +214,21 @@ func mla_forward(mla_weights w, []float h, int seq_len, int start_pos) ([]float,
     int d_h = cfg.head_dim
     int d_c = cfg.kv_lora_rank
     int d_cq = cfg.q_lora_rank
-    int d_R = cfg.rope_head_dim
+    int d_r = cfg.rope_head_dim
     float scale = cfg.softmax_scale
     []float cq = matmul(h, w.w_dq, seq_len, d, d_cq)
     cq = rms_norm(cq, seq_len * d_cq, 1e-6)
     []float q_main = matmul(cq, w.w_uq, seq_len, d_cq, n_h * d_h)
-    []float q_rope = matmul(h, w.w_qr, seq_len, d, n_h * d_R)
-    q_rope = apply_rope(q_rope, seq_len, n_h * d_R, start_pos)
+    []float q_rope = matmul(h, w.w_qr, seq_len, d, n_h * d_r)
+    q_rope = apply_rope(q_rope, seq_len, n_h * d_r, start_pos)
     []float c_kv = matmul(h, w.w_dkv, seq_len, d, d_c)
     c_kv = rms_norm(c_kv, seq_len * d_c, 1e-6)
     []float k_main = matmul(c_kv, w.w_uk, seq_len, d_c, n_h * d_h)
     []float v = matmul(c_kv, w.w_uv, seq_len, d_c, n_h * d_h)
-    []float k_rope = matmul(h, w.w_kr, seq_len, d, n_h * d_R)
-    k_rope = apply_rope(k_rope, seq_len, n_h * d_R, start_pos)
-    int total_q_dim = n_h * (d_h + d_R)
-    int total_kv_dim = n_h * (d_h + d_R)
+    []float k_rope = matmul(h, w.w_kr, seq_len, d, n_h * d_r)
+    k_rope = apply_rope(k_rope, seq_len, n_h * d_r, start_pos)
+    int total_q_dim = n_h * (d_h + d_r)
+    int total_kv_dim = n_h * (d_h + d_r)
     []float q_full = []float{cap: seq_len * total_q_dim}
     []float k_full = []float{cap: seq_len * total_kv_dim}
     int s = 0
@@ -237,14 +237,14 @@ func mla_forward(mla_weights w, []float h, int seq_len, int start_pos) ([]float,
         while h_idx < n_h {
             int d_idx = 0
             while d_idx < d_h {
-                q_full[s * total_q_dim + h_idx * (d_h + d_R) + d_idx] =
+                q_full[s * total_q_dim + h_idx * (d_h + d_r) + d_idx] =
                     q_main[s * n_h * d_h + h_idx * d_h + d_idx]
                 d_idx = d_idx + 1
             }
             d_idx = 0
-            while d_idx < d_R {
-                q_full[s * total_q_dim + h_idx * (d_h + d_R) + d_h + d_idx] =
-                    q_rope[s * n_h * d_R + h_idx * d_R + d_idx]
+            while d_idx < d_r {
+                q_full[s * total_q_dim + h_idx * (d_h + d_r) + d_h + d_idx] =
+                    q_rope[s * n_h * d_r + h_idx * d_r + d_idx]
                 d_idx = d_idx + 1
             }
             h_idx = h_idx + 1
@@ -253,21 +253,21 @@ func mla_forward(mla_weights w, []float h, int seq_len, int start_pos) ([]float,
         while h_idx < n_h {
             int d_idx = 0
             while d_idx < d_h {
-                k_full[s * total_kv_dim + h_idx * (d_h + d_R) + d_idx] =
+                k_full[s * total_kv_dim + h_idx * (d_h + d_r) + d_idx] =
                     k_main[s * n_h * d_h + h_idx * d_h + d_idx]
                 d_idx = d_idx + 1
             }
             d_idx = 0
-            while d_idx < d_R {
-                k_full[s * total_kv_dim + h_idx * (d_h + d_R) + d_idx] =
-                    k_rope[s * n_h * d_R + h_idx * d_R + d_idx]
+            while d_idx < d_r {
+                k_full[s * total_kv_dim + h_idx * (d_h + d_r) + d_idx] =
+                    k_rope[s * n_h * d_r + h_idx * d_r + d_idx]
                 d_idx = d_idx + 1
             }
             h_idx = h_idx + 1
         }
         s = s + 1
     }
-    []float attn_out = mla_attention_core(q_full, k_full, v, seq_len, n_h, d_h, d_R, scale, cfg.causal)
+    []float attn_out = mla_attention_core(q_full, k_full, v, seq_len, n_h, d_h, d_r, scale, cfg.causal)
     []float output = matmul(attn_out, w.w_o, seq_len, n_h * d_h, d)
     mla_forward_state fwd_state = mla_forward_state {
         kv_latent: c_kv,
@@ -277,10 +277,10 @@ func mla_forward(mla_weights w, []float h, int seq_len, int start_pos) ([]float,
 }
 func mla_attention_core(
     []float q, []float k, []float v,
-    int seq_len, int n_h, int d_h, int d_R,
+    int seq_len, int n_h, int d_h, int d_r,
     float scale, bool causal
 ) []float {
-    int combined_dim = d_h + d_R
+    int combined_dim = d_h + d_r
     []float output = zeros(seq_len * n_h * d_h)
     int h = 0
     while h < n_h {
@@ -348,11 +348,11 @@ struct mla_kv_cache {
 }
 func new_mla_kv_cache(int batch_size, int max_seq_len, mla_config cfg) mla_kv_cache {
     int d_c = cfg.kv_lora_rank
-    int d_R = cfg.rope_head_dim
+    int d_r = cfg.rope_head_dim
     int n_h = cfg.num_kv_heads
     mla_kv_cache {
         kv_latent: zeros(batch_size * max_seq_len * d_c),
-        k_rope: zeros(batch_size * max_seq_len * n_h * d_R),
+        k_rope: zeros(batch_size * max_seq_len * n_h * d_r),
         current_len: 0,
     }
 }
@@ -365,49 +365,49 @@ func mla_forward_incremental(
     int d_h = cfg.head_dim
     int d_c = cfg.kv_lora_rank
     int d_cq = cfg.q_lora_rank
-    int d_R = cfg.rope_head_dim
+    int d_r = cfg.rope_head_dim
     float scale = cfg.softmax_scale
     []float cq = matmul(h, w.w_dq, 1, d, d_cq)
     cq = rms_norm(cq, d_cq, 1e-6)
     []float q_main = matmul(cq, w.w_uq, 1, d_cq, n_h * d_h)
-    []float q_rope = matmul(h, w.w_qr, 1, d, n_h * d_R)
-    q_rope = apply_rope(q_rope, 1, n_h * d_R, pos)
-    int total_q_dim = n_h * (d_h + d_R)
+    []float q_rope = matmul(h, w.w_qr, 1, d, n_h * d_r)
+    q_rope = apply_rope(q_rope, 1, n_h * d_r, pos)
+    int total_q_dim = n_h * (d_h + d_r)
     []float q_full = []float{cap: total_q_dim}
     int h_idx = 0
     while h_idx < n_h {
         int d_idx = 0
         while d_idx < d_h {
-            q_full[h_idx * (d_h + d_R) + d_idx] = q_main[h_idx * d_h + d_idx]
+            q_full[h_idx * (d_h + d_r) + d_idx] = q_main[h_idx * d_h + d_idx]
             d_idx = d_idx + 1
         }
         d_idx = 0
-        while d_idx < d_R {
-            q_full[h_idx * (d_h + d_R) + d_h + d_idx] = q_rope[h_idx * d_R + d_idx]
+        while d_idx < d_r {
+            q_full[h_idx * (d_h + d_r) + d_h + d_idx] = q_rope[h_idx * d_r + d_idx]
             d_idx = d_idx + 1
         }
         h_idx = h_idx + 1
     }
     []float c_kv = matmul(h, w.w_dkv, 1, d, d_c)
     c_kv = rms_norm(c_kv, d_c, 1e-6)
-    []float k_rope_new = matmul(h, w.w_kr, 1, d, n_h * d_R)
-    k_rope_new = apply_rope(k_rope_new, 1, n_h * d_R, pos)
+    []float k_rope_new = matmul(h, w.w_kr, 1, d, n_h * d_r)
+    k_rope_new = apply_rope(k_rope_new, 1, n_h * d_r, pos)
     int cache_offset = pos * d_c
     int d_idx = 0
     while d_idx < d_c {
         cache.kv_latent[cache_offset + d_idx] = c_kv[d_idx]
         d_idx = d_idx + 1
     }
-    int rope_offset = pos * n_h * d_R
+    int rope_offset = pos * n_h * d_r
     d_idx = 0
-    while d_idx < n_h * d_R {
+    while d_idx < n_h * d_r {
         cache.k_rope[rope_offset + d_idx] = k_rope_new[d_idx]
         d_idx = d_idx + 1
     }
     int cached_len = cache.current_len + 1
     []float k_main = matmul(cache.kv_latent, w.w_uk, cached_len, d_c, n_h * d_h)
     []float v_all = matmul(cache.kv_latent, w.w_uv, cached_len, d_c, n_h * d_h)
-    int total_kv_dim = n_h * (d_h + d_R)
+    int total_kv_dim = n_h * (d_h + d_r)
     []float k_full = []float{cap: cached_len * total_kv_dim}
     int s = 0
     while s < cached_len {
@@ -415,14 +415,14 @@ func mla_forward_incremental(
         while h_idx < n_h {
             d_idx = 0
             while d_idx < d_h {
-                k_full[s * total_kv_dim + h_idx * (d_h + d_R) + d_idx] =
+                k_full[s * total_kv_dim + h_idx * (d_h + d_r) + d_idx] =
                     k_main[s * n_h * d_h + h_idx * d_h + d_idx]
                 d_idx = d_idx + 1
             }
             d_idx = 0
-            while d_idx < d_R {
-                int k_rope_idx = s * n_h * d_R + h_idx * d_R + d_idx
-                k_full[s * total_kv_dim + h_idx * (d_h + d_R) + d_h + d_idx] =
+            while d_idx < d_r {
+                int k_rope_idx = s * n_h * d_r + h_idx * d_r + d_idx
+                k_full[s * total_kv_dim + h_idx * (d_h + d_r) + d_h + d_idx] =
                     cache.k_rope[k_rope_idx]
                 d_idx = d_idx + 1
             }
@@ -430,7 +430,7 @@ func mla_forward_incremental(
         }
         s = s + 1
     }
-    []float attn_out = mla_attention_single_query(q_full, k_full, v_all, cached_len, n_h, d_h, d_R, scale)
+    []float attn_out = mla_attention_single_query(q_full, k_full, v_all, cached_len, n_h, d_h, d_r, scale)
     []float output = matmul(attn_out, w.w_o, 1, n_h * d_h, d)
     mla_kv_cache new_cache = cache
     new_cache.current_len = cached_len
@@ -438,9 +438,9 @@ func mla_forward_incremental(
 }
 func mla_attention_single_query(
     []float q, []float k, []float v,
-    int kv_len, int n_h, int d_h, int d_R, float scale
+    int kv_len, int n_h, int d_h, int d_r, float scale
 ) []float {
-    int combined_dim = d_h + d_R
+    int combined_dim = d_h + d_r
     []float output = zeros(n_h * d_h)
     int h = 0
     while h < n_h {

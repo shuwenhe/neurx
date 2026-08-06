@@ -108,7 +108,7 @@ struct document_statistics {
     link_count: int
     estimated_reading_time_minutes: float
 }
-class DocumentParser {
+class document_parser {
     config: document_parser_config
     pdf_parser: PDFParser?
     html_parser: HTMLParser?
@@ -117,16 +117,16 @@ class DocumentParser {
     init(config?: document_parser_config) {
         this.config = config ?? new document_parser_config()
         if "pdf" in this.config.enabled_formats {
-            this.pdf_parser = new PDFParser(config=this.config)
+            this.pdf_parser = new pdf_parser(config=this.config)
         }
         if "html" in this.config.enabled_formats || "htm" in this.config.enabled_formats {
-            this.html_parser = new HTMLParser(config=this.config)
+            this.html_parser = new html_parser(config=this.config)
         }
         if "md" in this.config.enabled_formats || "markdown" in this.config.enabled_formats {
-            this.markdown_parser = new MarkdownParser(config=this.config)
+            this.markdown_parser = new markdown_parser(config=this.config)
         }
         if {"docx", "pptx", "xlsx"}.any(f => f in this.config.enabled_formats) {
-            this.office_parser = new OfficeDocumentParser(config=this.config)
+            this.office_parser = new office_document_parser(config=this.config)
         }
     }
     parse(file_path: string) {
@@ -158,7 +158,7 @@ class DocumentParser {
             try {
                 let doc = this.parse(path)
                 results.append(doc)
-            } catch Exception as e {
+            } catch exception as e {
                 print(f"Warning: Failed to parse {path}: {e.message}")
             }
         }
@@ -270,7 +270,7 @@ class DocumentParser {
         }
     }
 }
-class PDFParser {
+class pdf_parser {
     config: document_parser_config
     init(config: document_parser_config) {
         this.config = config
@@ -363,7 +363,7 @@ class PDFParser {
         return null
     }
 }
-class HTMLParser {
+class html_parser {
     config: document_parser_config
     init(config: document_parser_config) {
         this.config = config
@@ -595,7 +595,7 @@ struct table_conversion_result {
     table: extracted_table
     markdown: string
 }
-class MarkdownParser {
+class markdown_parser {
     config: document_parser_config
     init(config: document_parser_config) {
         this.config = config
@@ -746,7 +746,7 @@ class MarkdownParser {
         return parts
     }
 }
-class OfficeDocumentParser {
+class office_document_parser {
     config: document_parser_config
     init(config: document_parser_config) {
         this.config = config
@@ -971,11 +971,11 @@ def generate_short_uuid() {
     import uuid, shortuuid
     return shortuuid.uuid()[:8]
 function create_document_parser(config?: document_parser_config) {
-    return new DocumentParser(config=config)
+    return new document_parser(config=config)
 }
 function test_document_parser() {
     print("🧪 Testing NEURX document Parser...")
-    parser = new DocumentParser()
+    parser = new document_parser()
     print("  ✓ Test 1: Markdown Parsing")
     sample_md = """
 This is an overview of artificial intelligence.
@@ -1030,6 +1030,6 @@ AI is transforming industries.
 export {
     document_parser_config, parsed_document, document_metadata,
     document_section, extracted_table, extracted_image, code_block,
-    document_statistics, DocumentParser,
+    document_statistics, document_parser,
     create_document_parser, test_document_parser
 }

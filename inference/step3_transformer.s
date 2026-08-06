@@ -1,5 +1,5 @@
 package step3_transformer
-struct TransformerConfig {
+struct transformer_config {
     int num_layers
     int hidden_size
     int num_heads
@@ -7,8 +7,8 @@ struct TransformerConfig {
     int intermediate_size
     float rope_theta
 }
-func create_transformer_config() TransformerConfig {
-    return TransformerConfig{
+func create_transformer_config() transformer_config {
+    return transformer_config{
         num_layers: 24,
         hidden_size: 896,
         num_heads: 14,

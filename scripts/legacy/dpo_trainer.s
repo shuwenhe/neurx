@@ -213,7 +213,7 @@ func (trainer *dpotrainer) get_dpo_summary() {
     fmt.Printf("  Total Pairs: %d\n", trainer.dataset.size)
     fmt.Printf("  Quality Score: %.2f%%\n", trainer.dataset.quality_score*100)
 }
-func NewDPOTrainer() *dpotrainer {
+func new_dpo_trainer() *dpotrainer {
     return &dpotrainer{
         model_logits:    make(map[string]float64),
         reference_logits: make(map[string]float64),

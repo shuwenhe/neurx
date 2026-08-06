@@ -1,7 +1,7 @@
 import "tensor/tensor.s"
 import "optimizer/optimizer.s"
 import "posttrain/alignment/ppo/ppo.s"
-struct GMPOConfig {
+struct gmpo_config {
     clip_epsilon: f32
     value_clip_epsilon: f32
     learning_rate: f32
@@ -16,16 +16,16 @@ struct GMPOConfig {
     reward_normalization: bool
     min_reward_value: f32
 }
-struct GMPOTrainer {
+struct gmpo_trainer {
     config: GMPOConfig
-    policy_model: *Model
-    value_model: *Model
-    reference_model: *Model
-    optimizer: *Optimizer
-    reward_statistics: []RewardStats
+    policy_model: *model
+    value_model: *model
+    reference_model: *model
+    optimizer: *optimizer
+    reward_statistics: []reward_stats
     step_count: i64
 }
-struct RewardStats {
+struct reward_stats {
     mean: f32
     std: f32
     min: f32
@@ -34,17 +34,17 @@ struct RewardStats {
 }
 func new_gmpo_trainer(
     config: GMPOConfig,
-    policy: *Model,
-    value: *Model,
-    reference: *Model
+    policy: *model,
+    value: *model,
+    reference: *model
 ) -> GMPOTrainer {
     let optimizer = adamw_optimizer(
         policy.parameters() + value.parameters(),
         config.learning_rate
     )
-    let reward_statistics: []RewardStats = []
+    let reward_statistics: []reward_stats = []
     for i in 0..config.num_rewards {
-        reward_statistics.push(RewardStats{
+        reward_statistics.push(reward_stats{
             mean: 0.0,
             std: 1.0,
             min: f32.MAX,
@@ -52,7 +52,7 @@ func new_gmpo_trainer(
             history: [],
         })
     }
-    return GMPOTrainer{
+    return gmpo_trainer{
         config: config,
         policy_model: policy,
         value_model: value,
@@ -62,7 +62,7 @@ func new_gmpo_trainer(
         step_count: 0,
     }
 }
-func (trainer: *GMPOTrainer) compute_geometric_mean(rewards: []f32) -> f32 {
+func (trainer: *gmpo_trainer) compute_geometric_mean(rewards: []f32) -> f32 {
     if rewards.len() == 0 {
         return 0.0
     }
@@ -88,7 +88,7 @@ func compute_arithmetic_mean(rewards: []f32) -> f32 {
     }
     return sum / f32(rewards.len())
 }
-func (trainer: *GMPOTrainer) update_reward_statistics(
+func (trainer: *gmpo_trainer) update_reward_statistics(
     multi_rewards: [][]f32
 ) {
     for reward_idx in 0..trainer.config.num_rewards {
@@ -122,7 +122,7 @@ func (trainer: *GMPOTrainer) update_reward_statistics(
         }
     }
 }
-func (trainer: *GMPOTrainer) normalize_rewards(
+func (trainer: *gmpo_trainer) normalize_rewards(
     multi_rewards: [][]f32
 ) -> [][]f32 {
     if !trainer.config.reward_normalization {
@@ -142,21 +142,21 @@ func (trainer: *GMPOTrainer) normalize_rewards(
     }
     return normalized
 }
-func (trainer: *GMPOTrainer) combine_rewards(multi_rewards: []f32) -> f32 {
+func (trainer: *gmpo_trainer) combine_rewards(multi_rewards: []f32) -> f32 {
     if trainer.config.use_geometric_mean {
         return trainer.compute_geometric_mean(multi_rewards)
     } else {
         return compute_arithmetic_mean(multi_rewards)
     }
 }
-func (trainer: *GMPOTrainer) compute_gae(
-    rewards: []Tensor,
-    values: []Tensor,
-    dones: []Tensor
-) -> ([]Tensor, []Tensor) {
+func (trainer: *gmpo_trainer) compute_gae(
+    rewards: []tensor,
+    values: []tensor,
+    dones: []tensor
+) -> ([]tensor, []tensor) {
     let batch_size = rewards.len()
-    let advantages: []Tensor = []
-    let returns: []Tensor = []
+    let advantages: []tensor = []
+    let returns: []tensor = []
     for b in 0..batch_size {
         let seq_len = rewards[b].shape[0]
         let num_rewards = rewards[b].shape[1]
@@ -187,17 +187,17 @@ func (trainer: *GMPOTrainer) compute_gae(
     }
     return advantages, returns
 }
-func (trainer: *GMPOTrainer) train_step(
-    prompts: []Tensor,
-    responses: []Tensor,
+func (trainer: *gmpo_trainer) train_step(
+    prompts: []tensor,
+    responses: []tensor,
     multi_rewards: [][]f32
 ) -> (f32, f32, f32) {
     let batch_size = prompts.len()
     trainer.update_reward_statistics(multi_rewards)
     let normalized_rewards = trainer.normalize_rewards(multi_rewards)
-    let inputs: []Tensor = []
-    let reward_tensors: []Tensor = []
-    let done_tensors: []Tensor = []
+    let inputs: []tensor = []
+    let reward_tensors: []tensor = []
+    let done_tensors: []tensor = []
     for i in 0..batch_size {
         let input = concat(prompts[i], responses[i])
         inputs.push(input)
@@ -213,7 +213,7 @@ func (trainer: *GMPOTrainer) train_step(
         done_tensor[-1] = tensor_scalar(1.0)
         done_tensors.push(done_tensor)
     }
-    let value_outputs: []Tensor = []
+    let value_outputs: []tensor = []
     for input in inputs {
         let value = trainer.value_model.forward(input)
         value_outputs.push(value)
@@ -223,13 +223,13 @@ func (trainer: *GMPOTrainer) train_step(
         value_outputs,
         done_tensors
     )
-    let current_log_probs: []Tensor = []
+    let current_log_probs: []tensor = []
     for i in 0..batch_size {
         let logits = trainer.policy_model.forward(inputs[i])
         let log_probs = log_softmax(logits, dim: -1)
         current_log_probs.push(log_probs)
     }
-    let ref_log_probs: []Tensor = []
+    let ref_log_probs: []tensor = []
     for i in 0..batch_size {
         let logits = trainer.reference_model.forward(inputs[i])
         let log_probs = log_softmax(logits, dim: -1)
@@ -283,7 +283,7 @@ func (trainer: *GMPOTrainer) train_step(
         total_kl / f32(num_updates)
     )
 }
-func (trainer: *GMPOTrainer) train(train_data: DataLoader) -> ([]f32, []f32) {
+func (trainer: *gmpo_trainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let value_losses: []f32 = []
     for batch in train_data {
@@ -304,7 +304,7 @@ func (trainer: *GMPOTrainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     }
     return policy_losses, value_losses
 }
-func (trainer: *GMPOTrainer) print_reward_statistics() {
+func (trainer: *gmpo_trainer) print_reward_statistics() {
     println("Reward Statistics (Geometric Mean):")
     for i in 0..trainer.config.num_rewards {
         let stats = trainer.reward_statistics[i]

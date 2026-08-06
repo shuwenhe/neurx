@@ -29,11 +29,11 @@ func main() {
         println("  Install from: https:
         return
     }
-    println("[INFO] CUDA Environment Detected:")
-    println("  Home: " + config.cuda_home)
-    println("  Lib: " + config.cuda_lib)
-    println("  Version: " + config.cuda_version)
-    println("  GPU Arch: sm_" + config.gpu_arch)
+    println("[INFO] CUDA environment detected:")
+    println("  home: " + config.cuda_home)
+    println("  lib: " + config.cuda_lib)
+    println("  version: " + config.cuda_version)
+    println("  GPU arch: sm_" + config.gpu_arch)
     println("")
     switch target {
         case "all" {
@@ -54,12 +54,12 @@ func main() {
             clean_build_artifacts()
         }
         default {
-            println("[ERROR] Unknown target: " + target)
+            println("[ERROR] unknown target: " + target)
         }
     }
 }
 func build_cuda_runtime(build_config cfg) {
-    println("[BUILD] CUDA Runtime Library")
+    println("[BUILD] CUDA runtime library")
     println("")
     string build_dir = "./artifacts/build/cuda_runtime"
     create_directory(build_dir)

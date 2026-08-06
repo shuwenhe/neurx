@@ -7,36 +7,36 @@ import (
     "../transformer"
 )
 struct gptconfig {
-    VocabSize      int
-    MaxSeqLen      int
-    HiddenDim      int
-    NumLayers      int
-    NumHeads       int
-    InnerDim       int
-    Dropout        float32
-    ActivationType string
-    BiasType       string
-    InitWeightStd  float32
-    LearningRate   float32
+    vocab_size      int
+    max_seq_len      int
+    hidden_dim      int
+    num_layers      int
+    num_heads       int
+    inner_dim       int
+    dropout        float32
+    activation_type string
+    bias_type       string
+    init_weight_std  float32
+    learning_rate   float32
 }
 struct gptmodel {
     config         gptconfig
-    tokenEmbedding *tensor.tensor_2
-    posEmbedding   *tensor.tensor_2
+    token_embedding *tensor.tensor_2
+    pos_embedding   *tensor.tensor_2
     layers         []*transformer.transformer_block
-    outputProj     *tensor.tensor_2
-    finalNorm      *tensor.tensor_2
+    output_proj     *tensor.tensor_2
+    final_norm      *tensor.tensor_2
     optimizer      *optimizer_2
 }
 struct optimizer_2 {
-    learningRate   float32
-    adamBeta1      float32
-    adamBeta2      float32
-    adamEps        float32
+    learning_rate   float32
+    adam_beta_1      float32
+    adam_beta_2      float32
+    adam_eps        float32
     m              *tensor.tensor_2
     v              *tensor.tensor_2
 }
-func NewGPT(config gptconfig) (*gptmodel, error) {
+func new_gpt(config gptconfig) (*gptmodel, error) {
     if config.HiddenDim % config.NumHeads != 0 {
         return nil, fmt.Errorf("hiddenDim must be divisible by numHeads: %d %% %d != 0",
             config.HiddenDim, config.NumHeads)
@@ -45,84 +45,84 @@ func NewGPT(config gptconfig) (*gptmodel, error) {
         config: config,
         layers: make([]*transformer.transformer_block, config.NumLayers),
         optimizer: &optimizer_2{
-            learningRate: config.LearningRate,
-            adamBeta1:    0.9,
-            adamBeta2:    0.95,
-            adamEps:      1e-8,
+            learning_rate: config.LearningRate,
+            adam_beta_1:    0.9,
+            adam_beta_2:    0.95,
+            adam_eps:      1e-8,
         },
     }
-    model.tokenEmbedding = initializeEmbedding(config.VocabSize, config.HiddenDim, config.InitWeightStd)
-    model.posEmbedding = initializePositionalEmbedding(config.MaxSeqLen, config.HiddenDim, config.InitWeightStd)
+    model.tokenEmbedding = initialize_embedding(config.VocabSize, config.HiddenDim, config.InitWeightStd)
+    model.posEmbedding = initialize_positional_embedding(config.MaxSeqLen, config.HiddenDim, config.InitWeightStd)
     for i := 0; i < config.NumLayers; i++ {
-        transformerConfig := transformer.transformer_config{
-            HiddenDim:      config.HiddenDim,
-            NumHeads:       config.NumHeads,
-            InnerDim:       config.InnerDim,
-            Dropout:        config.Dropout,
-            MaxSeqLen:      config.MaxSeqLen,
-            BiasType:       config.BiasType,
-            ActivationType: config.ActivationType,
+        transformer_config := transformer.transformer_config{
+            hidden_dim:      config.HiddenDim,
+            num_heads:       config.NumHeads,
+            inner_dim:       config.InnerDim,
+            dropout:        config.Dropout,
+            max_seq_len:      config.MaxSeqLen,
+            bias_type:       config.BiasType,
+            activation_type: config.ActivationType,
         }
-        model.layers[i] = transformer.NewTransformerBlock(transformerConfig)
+        model.layers[i] = transformer.NewTransformerBlock(transformer_config)
     }
-    model.outputProj = initializeEmbedding(config.HiddenDim, config.VocabSize, config.InitWeightStd)
+    model.outputProj = initialize_embedding(config.HiddenDim, config.VocabSize, config.InitWeightStd)
     model.finalNorm = tensor.Ones(config.HiddenDim)
     return model, nil
 }
-func initializeEmbedding(inputDim int, outputDim int, std float32) *tensor.tensor_2 {
-    embedding := tensor.Randn(inputDim, outputDim)
+func initialize_embedding(input_dim int, output_dim int, std float32) *tensor.tensor_2 {
+    embedding := tensor.Randn(input_dim, output_dim)
     return tensor.ScalarMul(embedding, std)
 }
-func initializePositionalEmbedding(maxSeqLen int, hiddenDim int, std float32) *tensor.tensor_2 {
-    return tensor.Zeros(maxSeqLen, hiddenDim)
+func initialize_positional_embedding(max_seq_len int, hidden_dim int, std float32) *tensor.tensor_2 {
+    return tensor.Zeros(max_seq_len, hidden_dim)
 }
-func (m *gptmodel) Forward(tokenIds *tensor.tensor_2) (*tensor.tensor_2, error) {
-    batchSize := tokenIds.Shape[0]
-    seqLen := tokenIds.Shape[1]
-    if seqLen > m.config.MaxSeqLen {
-        return nil, fmt.Errorf("sequence length %d exceeds max %d", seqLen, m.config.MaxSeqLen)
+func (m *gptmodel) forward(token_ids *tensor.tensor_2) (*tensor.tensor_2, error) {
+    batch_size := token_ids.Shape[0]
+    seq_len := token_ids.Shape[1]
+    if seq_len > m.config.MaxSeqLen {
+        return nil, fmt.Errorf("sequence length %d exceeds max %d", seq_len, m.config.MaxSeqLen)
     }
-    x := m.embedTokens(tokenIds)
-    x = m.addPositionalEmbedding(x, seqLen)
-    causalMask := m.createCausalMask(seqLen)
+    x := m.embedTokens(token_ids)
+    x = m.addPositionalEmbedding(x, seq_len)
+    causal_mask := m.createCausalMask(seq_len)
     for i := 0; i < len(m.layers); i++ {
-        x = m.layers[i].Forward(x, causalMask)
+        x = m.layers[i].Forward(x, causal_mask)
     }
     x = m.applyLayerNorm(x)
     logits := tensor.MatMul(x, m.outputProj)
     return logits, nil
 }
-func (m *gptmodel) embedTokens(tokenIds *tensor.tensor_2) *tensor.tensor_2 {
-    batchSize := tokenIds.Shape[0]
-    seqLen := tokenIds.Shape[1]
-    embeddings := tensor.Zeros(batchSize, seqLen, m.config.HiddenDim)
-    for b := 0; b < batchSize; b++ {
-        for t := 0; t < seqLen; t++ {
+func (m *gptmodel) embed_tokens(token_ids *tensor.tensor_2) *tensor.tensor_2 {
+    batch_size := token_ids.Shape[0]
+    seq_len := token_ids.Shape[1]
+    embeddings := tensor.Zeros(batch_size, seq_len, m.config.HiddenDim)
+    for b := 0; b < batch_size; b++ {
+        for t := 0; t < seq_len; t++ {
         }
     }
     return embeddings
 }
-func (m *gptmodel) addPositionalEmbedding(x *tensor.tensor_2, seqLen int) *tensor.tensor_2 {
-    batchSize := x.Shape[0]
-    for b := 0; b < batchSize; b++ {
-        for t := 0; t < seqLen; t++ {
+func (m *gptmodel) add_positional_embedding(x *tensor.tensor_2, seq_len int) *tensor.tensor_2 {
+    batch_size := x.Shape[0]
+    for b := 0; b < batch_size; b++ {
+        for t := 0; t < seq_len; t++ {
         }
     }
     return x
 }
-func (m *gptmodel) createCausalMask(seqLen int) *tensor.tensor_2 {
-    mask := tensor.Zeros(seqLen, seqLen)
-    for i := 0; i < seqLen; i++ {
+func (m *gptmodel) create_causal_mask(seq_len int) *tensor.tensor_2 {
+    mask := tensor.Zeros(seq_len, seq_len)
+    for i := 0; i < seq_len; i++ {
         for j := 0; j <= i; j++ {
         }
     }
     return mask
 }
-func (m *gptmodel) applyLayerNorm(x *tensor.tensor_2) *tensor.tensor_2 {
+func (m *gptmodel) apply_layer_norm(x *tensor.tensor_2) *tensor.tensor_2 {
     return x
 }
-func (m *gptmodel) Backward(lossGradients *tensor.tensor_2) error {
-    gradients := lossGradients
+func (m *gptmodel) backward(loss_gradients *tensor.tensor_2) error {
+    gradients := loss_gradients
     for i := len(m.layers) - 1; i >= 0; i-- {
         var err error
         gradients, err = m.layers[i].Backward(gradients)
@@ -132,40 +132,40 @@ func (m *gptmodel) Backward(lossGradients *tensor.tensor_2) error {
     }
     return nil
 }
-func (m *gptmodel) UpdateWeights() error {
+func (m *gptmodel) update_weights() error {
     return nil
 }
-func (m *gptmodel) SaveCheckpoint(path string) error {
+func (m *gptmodel) save_checkpoint(path string) error {
     fmt.Printf("Saving checkpoint to %s\n", path)
     file, err := os.Create(path)
     if err != nil {
         return fmt.Errorf("failed to create checkpoint file: %w", err)
     }
     defer file.Close()
-    configBytes := serializeConfig(m.config)
-    file.Write(configBytes)
-    embeddingBytes := m.tokenEmbedding.Serialize()
-    file.Write(embeddingBytes)
-    posEmbeddingBytes := m.posEmbedding.Serialize()
-    file.Write(posEmbeddingBytes)
+    config_bytes := serialize_config(m.config)
+    file.Write(config_bytes)
+    embedding_bytes := m.tokenEmbedding.Serialize()
+    file.Write(embedding_bytes)
+    pos_embedding_bytes := m.posEmbedding.Serialize()
+    file.Write(pos_embedding_bytes)
     for i := 0; i < len(m.layers); i++ {
-        layerBytes := m.layers[i].Serialize()
-        file.Write(layerBytes)
+        layer_bytes := m.layers[i].Serialize()
+        file.Write(layer_bytes)
     }
-    outputProjBytes := m.outputProj.Serialize()
-    file.Write(outputProjBytes)
+    output_proj_bytes := m.outputProj.Serialize()
+    file.Write(output_proj_bytes)
     fmt.Printf("checkpoint saved: %d bytes\n", 0)
     return nil
 }
-func LoadCheckpoint(path string) (*gptmodel, error) {
+func load_checkpoint(path string) (*gptmodel, error) {
     fmt.Printf("Loading checkpoint from %s\n", path)
     file, err := os.Open(path)
     if err != nil {
         return nil, fmt.Errorf("failed to open checkpoint file: %w", err)
     }
     defer file.Close()
-    config := deserializeConfig(file)
-    model, err := NewGPT(config)
+    config := deserialize_config(file)
+    model, err := new_gpt(config)
     if err != nil {
         return nil, err
     }
@@ -178,80 +178,80 @@ func LoadCheckpoint(path string) (*gptmodel, error) {
     fmt.Printf("checkpoint loaded successfully\n")
     return model, nil
 }
-func serializeConfig(config gptconfig) []byte {
+func serialize_config(config gptconfig) []byte {
     return []byte{}
 }
-func deserializeConfig(file *os.File) gptconfig {
+func deserialize_config(file *os.File) gptconfig {
     return gptconfig{}
 }
 func GPT7B() gptconfig {
     return gptconfig{
-        VocabSize:      32000,
-        MaxSeqLen:      4096,
-        HiddenDim:      4096,
-        NumLayers:      32,
-        NumHeads:       32,
-        InnerDim:       11008,
-        Dropout:        0.1,
-        ActivationType: "swiglu",
-        BiasType:       "alibi",
-        InitWeightStd:  0.02,
-        LearningRate:   1e-4,
+        vocab_size:      32000,
+        max_seq_len:      4096,
+        hidden_dim:      4096,
+        num_layers:      32,
+        num_heads:       32,
+        inner_dim:       11008,
+        dropout:        0.1,
+        activation_type: "swiglu",
+        bias_type:       "alibi",
+        init_weight_std:  0.02,
+        learning_rate:   1e-4,
     }
 }
 func GPT13B() gptconfig {
     return gptconfig{
-        VocabSize:      32000,
-        MaxSeqLen:      4096,
-        HiddenDim:      5120,
-        NumLayers:      40,
-        NumHeads:       40,
-        InnerDim:       13824,
-        Dropout:        0.1,
-        ActivationType: "swiglu",
-        BiasType:       "alibi",
-        InitWeightStd:  0.02,
-        LearningRate:   1e-4,
+        vocab_size:      32000,
+        max_seq_len:      4096,
+        hidden_dim:      5120,
+        num_layers:      40,
+        num_heads:       40,
+        inner_dim:       13824,
+        dropout:        0.1,
+        activation_type: "swiglu",
+        bias_type:       "alibi",
+        init_weight_std:  0.02,
+        learning_rate:   1e-4,
     }
 }
 func GPT70B() gptconfig {
     return gptconfig{
-        VocabSize:      32000,
-        MaxSeqLen:      8192,
-        HiddenDim:      8192,
-        NumLayers:      80,
-        NumHeads:       64,
-        InnerDim:       22016,
-        Dropout:        0.0,
-        ActivationType: "swiglu",
-        BiasType:       "alibi",
-        InitWeightStd:  0.02,
-        LearningRate:   1e-5,
+        vocab_size:      32000,
+        max_seq_len:      8192,
+        hidden_dim:      8192,
+        num_layers:      80,
+        num_heads:       64,
+        inner_dim:       22016,
+        dropout:        0.0,
+        activation_type: "swiglu",
+        bias_type:       "alibi",
+        init_weight_std:  0.02,
+        learning_rate:   1e-5,
     }
 }
-func Mini() gptconfig {
+func mini() gptconfig {
     return gptconfig{
-        VocabSize:      10000,
-        MaxSeqLen:      512,
-        HiddenDim:      256,
-        NumLayers:      6,
-        NumHeads:       8,
-        InnerDim:       1024,
-        Dropout:        0.1,
-        ActivationType: "swiglu",
-        BiasType:       "alibi",
-        InitWeightStd:  0.02,
-        LearningRate:   1e-4,
+        vocab_size:      10000,
+        max_seq_len:      512,
+        hidden_dim:      256,
+        num_layers:      6,
+        num_heads:       8,
+        inner_dim:       1024,
+        dropout:        0.1,
+        activation_type: "swiglu",
+        bias_type:       "alibi",
+        init_weight_std:  0.02,
+        learning_rate:   1e-4,
     }
 }
-func (m *gptmodel) NumParams() int64 {
-    tokenEmbParams := int64(m.config.VocabSize * m.config.HiddenDim)
-    posEmbParams := int64(m.config.MaxSeqLen * m.config.HiddenDim)
-    layerParams := int64(m.config.NumLayers * (4*m.config.HiddenDim*m.config.HiddenDim +
+func (m *gptmodel) num_params() int64 {
+    token_emb_params := int64(m.config.VocabSize * m.config.HiddenDim)
+    pos_emb_params := int64(m.config.MaxSeqLen * m.config.HiddenDim)
+    layer_params := int64(m.config.NumLayers * (4*m.config.HiddenDim*m.config.HiddenDim +
                                                  3*m.config.HiddenDim*m.config.InnerDim +
                                                  2*m.config.HiddenDim))
-    outputParams := int64(m.config.HiddenDim * m.config.VocabSize)
-    finalNormParams := int64(m.config.HiddenDim)
-    total := tokenEmbParams + posEmbParams + layerParams + outputParams + finalNormParams
+    output_params := int64(m.config.HiddenDim * m.config.VocabSize)
+    final_norm_params := int64(m.config.HiddenDim)
+    total := token_emb_params + pos_emb_params + layer_params + output_params + final_norm_params
     return total
 }

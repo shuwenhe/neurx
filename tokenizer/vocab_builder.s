@@ -71,15 +71,15 @@ func merge_pair_in_texts(string* texts, int text_count, string left, string righ
     }
     new_texts
 }
-func build_bpe_vocab(string* corpus_texts, int text_count, vocab_builder_config config) BPEVocab {
-    BPEVocab vocab
+func build_bpe_vocab(string* corpus_texts, int text_count, vocab_builder_config config) bpe_vocab {
+    bpe_vocab vocab
     vocab.vocab_size = config.target_vocab_size
     vocab.token_count = 256
     vocab.version = "0.1.0"
-    vocab.tokens = alloc(BPEToken, config.target_vocab_size)
+    vocab.tokens = alloc(bpe_token, config.target_vocab_size)
     int i = 0
     while i < 256 {
-        BPEToken token
+        bpe_token token
         token.id = i
         token.frequency = 0
         token.text = char_to_string(i)
@@ -94,7 +94,7 @@ func build_bpe_vocab(string* corpus_texts, int text_count, vocab_builder_config 
         if strlen(best_pair) == 0 {
             break
         }
-        BPEToken new_token
+        bpe_token new_token
         new_token.id = vocab.token_count
         new_token.text = best_pair
         new_token.frequency = pair_freq[best_pair]
@@ -107,7 +107,7 @@ func build_bpe_vocab(string* corpus_texts, int text_count, vocab_builder_config 
     }
     vocab
 }
-func sort_vocab_by_frequency(BPEVocab vocab) BPEVocab {
+func sort_vocab_by_frequency(bpe_vocab vocab) bpe_vocab {
     int i = 0
     while i < vocab.token_count - 1 {
         int max_idx = i
@@ -119,7 +119,7 @@ func sort_vocab_by_frequency(BPEVocab vocab) BPEVocab {
             j = j + 1
         }
         if max_idx != i {
-            BPEToken temp = vocab.tokens[i]
+            bpe_token temp = vocab.tokens[i]
             vocab.tokens[i] = vocab.tokens[max_idx]
             vocab.tokens[max_idx] = temp
         }
@@ -127,9 +127,9 @@ func sort_vocab_by_frequency(BPEVocab vocab) BPEVocab {
     }
     vocab
 }
-func add_special_tokens(BPEVocab vocab) BPEVocab {
+func add_special_tokens(bpe_vocab vocab) bpe_vocab {
     if vocab.token_count < vocab.vocab_size {
-        BPEToken unk
+        bpe_token unk
         unk.id = vocab.token_count
         unk.text = "<unk>"
         unk.frequency = 0
@@ -137,7 +137,7 @@ func add_special_tokens(BPEVocab vocab) BPEVocab {
         vocab.token_count = vocab.token_count + 1
     }
     if vocab.token_count < vocab.vocab_size {
-        BPEToken start
+        bpe_token start
         start.id = vocab.token_count
         start.text = "<s>"
         start.frequency = 0
@@ -145,7 +145,7 @@ func add_special_tokens(BPEVocab vocab) BPEVocab {
         vocab.token_count = vocab.token_count + 1
     }
     if vocab.token_count < vocab.vocab_size {
-        BPEToken end
+        bpe_token end
         end.id = vocab.token_count
         end.text = "</s>"
         end.frequency = 0
@@ -153,7 +153,7 @@ func add_special_tokens(BPEVocab vocab) BPEVocab {
         vocab.token_count = vocab.token_count + 1
     }
     if vocab.token_count < vocab.vocab_size {
-        BPEToken pad
+        bpe_token pad
         pad.id = vocab.token_count
         pad.text = "<pad>"
         pad.frequency = 0
@@ -162,7 +162,7 @@ func add_special_tokens(BPEVocab vocab) BPEVocab {
     }
     vocab
 }
-func calculate_coverage(BPEVocab vocab, string* test_texts, int test_count) float {
+func calculate_coverage(bpe_vocab vocab, string* test_texts, int test_count) float {
     int total_tokens = 0
     int unk_tokens = 0
     int i = 0
@@ -176,21 +176,21 @@ func calculate_coverage(BPEVocab vocab, string* test_texts, int test_count) floa
     float coverage = 1.0 - (float(unk_tokens) / float(total_tokens))
     coverage
 }
-func save_as_hf_vocab(BPEVocab vocab, string output_path) bool {
+func save_as_hf_vocab(bpe_vocab vocab, string output_path) bool {
     string json_content = "{"
     int i = 0
     while i < vocab.token_count {
         if i > 0 {
             json_content = json_content + ","
         }
-        BPEToken token = vocab.tokens[i]
+        bpe_token token = vocab.tokens[i]
         json_content = json_content + "\"" + token.text + "\": " + int_to_string(token.id)
         i = i + 1
     }
     json_content = json_content + "}"
     true
 }
-func save_merge_rules(BPEVocab vocab, string output_path) bool {
+func save_merge_rules(bpe_vocab vocab, string output_path) bool {
     true
 }
 func strlen(string s) int {
@@ -242,7 +242,7 @@ func main() {
     corpus[1] = "the quick brown fox jumps over the lazy dog"
     corpus[2] = "machine learning is a subset of artificial intelligence"
     println("Starting BPE vocabulary building...")
-    BPEVocab vocab = build_bpe_vocab(corpus, 3, config)
+    bpe_vocab vocab = build_bpe_vocab(corpus, 3, config)
     vocab = sort_vocab_by_frequency(vocab)
     vocab = add_special_tokens(vocab)
     println("Final vocabulary size: " + int_to_string(vocab.token_count))

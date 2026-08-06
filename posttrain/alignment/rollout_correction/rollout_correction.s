@@ -3,9 +3,9 @@ import "optimizer/optimizer.s"
 import "posttrain/alignment/rollout_correction/config.s"
 import "posttrain/alignment/rollout_correction/importance_sampling.s"
 import "posttrain/alignment/rollout_correction/rejection_sampling.s"
-struct RolloutCorrectionResult {
+struct rollout_correction_result {
     is_weights: ISWeights
-    rs_results: []RSResult
+    rs_results: []rs_result
     corrected_mask: Tensor
     corrected_advantages: Tensor
     corrected_loss: Tensor
@@ -44,7 +44,7 @@ func apply_rollout_correction_to_advantages(
         corrected_mask
     )
     let statistics = collect_statistics(is_weights, rs_results, corrected_mask, response_mask)
-    return RolloutCorrectionResult{
+    return rollout_correction_result{
         is_weights: is_weights,
         rs_results: rs_results,
         corrected_mask: corrected_mask,
@@ -86,7 +86,7 @@ func apply_rollout_correction_to_loss(
         corrected_mask
     )
     let statistics = collect_statistics(is_weights, rs_results, corrected_mask, response_mask)
-    return RolloutCorrectionResult{
+    return rollout_correction_result{
         is_weights: is_weights,
         rs_results: rs_results,
         corrected_mask: corrected_mask,
@@ -102,16 +102,16 @@ func compute_policy_loss_bypass_mode(
     response_mask: Tensor,
     config: RolloutCorrectionConfig,
     clip_epsilon: f32
-) -> (Tensor, RolloutCorrectionResult) {
+) -> (tensor, rollout_correction_result) {
     let ratio = exp(new_log_probs - rollout_log_probs)
     let policy_loss: Tensor
     match config.loss_type {
-        LossType.PPO_CLIP => {
+        loss_type.PPO_CLIP => {
             let surr1 = ratio * advantages
             let surr2 = clamp(ratio, 1.0 - clip_epsilon, 1.0 + clip_epsilon) * advantages
             policy_loss = -minimum(surr1, surr2)
         },
-        LossType.REINFORCE => {
+        loss_type.REINFORCE => {
             policy_loss = -new_log_probs * advantages
         }
     }
@@ -134,7 +134,7 @@ func compute_policy_loss_decoupled_mode(
     response_mask: Tensor,
     config: RolloutCorrectionConfig,
     clip_epsilon: f32
-) -> (Tensor, RolloutCorrectionResult) {
+) -> (tensor, rollout_correction_result) {
     let ratio = exp(new_log_probs - old_log_probs)
     let surr1 = ratio * advantages
     let surr2 = clamp(ratio, 1.0 - clip_epsilon, 1.0 + clip_epsilon) * advantages
@@ -151,7 +151,7 @@ func compute_policy_loss_decoupled_mode(
 }
 func collect_statistics(
     is_weights: ISWeights,
-    rs_results: []RSResult,
+    rs_results: []rs_result,
     corrected_mask: Tensor,
     original_mask: Tensor
 ) -> map[string]f32 {
@@ -173,7 +173,7 @@ func collect_statistics(
     return stats
 }
 func is_rollout_correction_enabled(config: RolloutCorrectionConfig) -> bool {
-    return config.is_level != ISAggregationLevel.NONE || config.rs_modes.len() > 0
+    return config.is_level != is_aggregation_level.NONE || config.rs_modes.len() > 0
 }
 func clamp(x: Tensor, min_val: f32, max_val: f32) -> Tensor {
     return maximum(minimum(x, max_val), min_val)

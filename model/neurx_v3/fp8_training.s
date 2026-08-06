@@ -49,7 +49,7 @@ func e5m2_min_normal() float { 0.00006103515625 }
 func float_to_e4m3(float x) int {
     if x == 0.0 { return 0 }
     if x < 0.0 { return float_to_e4m3(-x) | 0x80 }
-    if x > 448.0 { return 0x7E }
+    if x > 448.0 { return 0x_7_e }
     if x < 0.001953125 { return 0 }
     int exp = 0
     float val = x
@@ -57,7 +57,7 @@ func float_to_e4m3(float x) int {
     while val < 1.0 && exp > -9 { val = val * 2.0; exp = exp - 1 }
     if exp < -9 { return 0 }
     int biased_exp = exp + 7
-    if biased_exp > 15 { return 0x7E }
+    if biased_exp > 15 { return 0x_7_e }
     if biased_exp < 0 { return 0 }
     float mantissa = val - 1.0
     int mant_bits = (mantissa * 8.0) as int
@@ -67,7 +67,7 @@ func float_to_e4m3(float x) int {
 func float_to_e5m2(float x) int {
     if x == 0.0 { return 0 }
     if x < 0.0 { return float_to_e5m2(-x) | 0x80 }
-    if x > 57344.0 { return 0x7B }
+    if x > 57344.0 { return 0x_7_b }
     if x < 0.0000076 { return 0 }
     int exp = 0
     float val = x
@@ -75,7 +75,7 @@ func float_to_e5m2(float x) int {
     while val < 1.0 && exp > -17 { val = val * 2.0; exp = exp - 1 }
     if exp < -17 { return 0 }
     int biased_exp = exp + 15
-    if biased_exp > 30 { return 0x7B }
+    if biased_exp > 30 { return 0x_7_b }
     if biased_exp < 0 { return 0 }
     float mantissa = val - 1.0
     int mant_bits = (mantissa * 4.0) as int
@@ -84,7 +84,7 @@ func float_to_e5m2(float x) int {
 }
 func e4m3_to_float(int fp8) float {
     int sign = (fp8 >> 7) & 1
-    int exp = (fp8 >> 3) & 0xF
+    int exp = (fp8 >> 3) & 0x_f
     int mant = fp8 & 0x7
     if exp == 0 {
         float val = mant as float / 8.0 * 0.015625
@@ -101,7 +101,7 @@ func e4m3_to_float(int fp8) float {
 }
 func e5m2_to_float(int fp8) float {
     int sign = (fp8 >> 7) & 1
-    int exp = (fp8 >> 2) & 0x1F
+    int exp = (fp8 >> 2) & 0x_1_f
     int mant = fp8 & 0x3
     if exp == 0 {
         float val = mant as float / 4.0 * 0.00006103515625

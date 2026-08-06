@@ -21,7 +21,7 @@ type safety_check_result struct {
 }
 type safety_filter struct {
     config                  safety_config
-    toxicity_model          PolicyModel
+    toxicity_model          policy_model
     safety_stats            safety_stats
     violations              []safety_violation
 }
@@ -246,7 +246,7 @@ func (filter *safety_filter) print_stats() {
         }
     }
 }
-func NewSafetyFilter(model PolicyModel) *safety_filter {
+func new_safety_filter(model policy_model) *safety_filter {
     return &safety_filter{
         config: safety_config{
             harmful_keywords: []string{

@@ -1,9 +1,9 @@
 package step1_tokenizer
-struct QwenTokenizer {
+struct qwen_tokenizer {
     int vocab_size
 }
-func create_qwen_tokenizer() QwenTokenizer {
-    return QwenTokenizer{
+func create_qwen_tokenizer() qwen_tokenizer {
+    return qwen_tokenizer{
         vocab_size: 151936
     }
 }

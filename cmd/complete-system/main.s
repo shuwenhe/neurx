@@ -16,7 +16,7 @@ import (
 func main() {
     args := os.Args[1:]
     if len(args) == 0 {
-        showHelp()
+        show_help()
         return
     }
     cmd := args[0]
@@ -35,10 +35,10 @@ func main() {
         showHelp()
     default:
         fmt.Printf("Unknown command: %s\n", cmd)
-        showHelp()
+        show_help()
     }
 }
-func runTraining(args []string) {
+func run_training(args []string) {
     fmt.Println("🚀 Starting NeurX Training Pipeline (Pure S Implementation)")
     fmt.Println("=" * 60)
     if len(args) == 0 {
@@ -47,14 +47,14 @@ func runTraining(args []string) {
         return
     }
     scale := args[0]
-    numGPUs := 1
+    num_gp_us := 1
     if len(args) > 1 {
-        fmt.Sscanf(args[1], "%d", &numGPUs)
+        fmt.Sscanf(args[1], "%d", &num_gp_us)
     }
     fmt.Printf("\n📊 Configuration:\n")
     fmt.Printf("  Scale: %s\n", scale)
-    fmt.Printf("  GPUs: %d\n", numGPUs)
-    var modelConfig llm.gptconfig
+    fmt.Printf("  GPUs: %d\n", num_gp_us)
+    var model_config llm.gptconfig
     switch scale {
     case "mini":
         modelConfig = llm.Mini()
@@ -70,32 +70,32 @@ func runTraining(args []string) {
         fmt.Printf("Unknown scale: %s\n", scale)
         return
     }
-    fmt.Printf("  model Parameters: %d\n", llm.NewGPT(modelConfig).NumParams())
-    trainingConfig := training.training_config{
-        ModelScale:        scale,
-        NumEpochs:         10,
-        GlobalBatchSize:   1024 / uint64(numGPUs),
-        LocalBatchSize:    32,
-        GradAccumSteps:    4,
-        MaxSeqLen:         4096,
-        LearningRate:      1e-4,
-        WarmupSteps:       1000,
-        MaxSteps:          100000,
-        SaveInterval:      500,
-        LogInterval:       10,
-        ValidateInterval:  500,
-        CheckpointDir:     "./checkpoints",
-        LogDir:            "./logs",
-        UseDistributed:    numGPUs > 1,
-        NumGPUs:           numGPUs,
-        RandomSeed:        42,
+    fmt.Printf("  model Parameters: %d\n", llm.NewGPT(model_config).NumParams())
+    training_config := training.training_config{
+        model_scale:        scale,
+        num_epochs:         10,
+        global_batch_size:   1024 / uint64(numGPUs),
+        local_batch_size:    32,
+        grad_accum_steps:    4,
+        max_seq_len:         4096,
+        learning_rate:      1e-4,
+        warmup_steps:       1000,
+        max_steps:          100000,
+        save_interval:      500,
+        log_interval:       10,
+        validate_interval:  500,
+        checkpoint_dir:     "./checkpoints",
+        log_dir:            "./logs",
+        use_distributed:    numGPUs > 1,
+        num_gp_us:           numGPUs,
+        random_seed:        42,
     }
     fmt.Println("\n" + "=" * 60)
     fmt.Println("📈 Training Starting...")
     fmt.Println("=" * 60 + "\n")
-    startTime := time.Now()
-    if trainingConfig.UseDistributed {
-        if err := training.RunDistributedTraining(numGPUs, scale); err != nil {
+    start_time := time.Now()
+    if training_config.UseDistributed {
+        if err := training.RunDistributedTraining(num_gp_us, scale); err != nil {
             fmt.Printf("❌ Training failed: %v\n", err)
         }
     } else {
@@ -103,19 +103,19 @@ func runTraining(args []string) {
             fmt.Printf("❌ Training failed: %v\n", err)
         }
     }
-    elapsed := time.Since(startTime)
+    elapsed := time.Since(start_time)
     fmt.Printf("\n✅ Training completed in %v\n", elapsed)
 }
-func runInference(args []string) {
+func run_inference(args []string) {
     fmt.Println("🔮 Starting NeurX Inference (Pure S Implementation)")
     fmt.Println("=" * 60)
     if len(args) == 0 {
         fmt.Println("Usage: neurx inference <model_path> [options]")
         return
     }
-    modelPath := args[0]
-    fmt.Printf("📦 Loading model from: %s\n", modelPath)
-    model, err := llm.LoadCheckpoint(modelPath)
+    model_path := args[0]
+    fmt.Printf("📦 Loading model from: %s\n", model_path)
+    model, err := llm.LoadCheckpoint(model_path)
     if err != nil {
         fmt.Printf("❌ Failed to load model: %v\n", err)
         return
@@ -129,7 +129,7 @@ func runInference(args []string) {
         fmt.Printf("❌ Inference failed: %v\n", err)
     }
 }
-func runDistributed(args []string) {
+func run_distributed(args []string) {
     fmt.Println("🌐 Starting NeurX Distributed Training (Pure S Implementation)")
     fmt.Println("=" * 60)
     if len(args) < 2 {
@@ -137,36 +137,36 @@ func runDistributed(args []string) {
         fmt.Println("\nScales: mini, small, medium, large, xl")
         return
     }
-    var numGPUs int
-    fmt.Sscanf(args[0], "%d", &numGPUs)
+    var num_gp_us int
+    fmt.Sscanf(args[0], "%d", &num_gp_us)
     scale := args[1]
     fmt.Printf("\n🔗 Distributed Configuration:\n")
-    fmt.Printf("  GPUs: %d\n", numGPUs)
+    fmt.Printf("  GPUs: %d\n", num_gp_us)
     fmt.Printf("  Scale: %s\n", scale)
-    fmt.Printf("  World Size: %d\n", numGPUs)
+    fmt.Printf("  World Size: %d\n", num_gp_us)
     fmt.Printf("  Parallelism: DDP + Gradient Checkpointing\n")
     fmt.Println("\n" + "=" * 60)
     fmt.Println("🚀 Starting Distributed Training...")
     fmt.Println("=" * 60 + "\n")
-    if err := training.RunDistributedTraining(numGPUs, scale); err != nil {
+    if err := training.RunDistributedTraining(num_gp_us, scale); err != nil {
         fmt.Printf("❌ Distributed training failed: %v\n", err)
     }
 }
-func runBenchmark(args []string) {
+func run_benchmark(args []string) {
     fmt.Println("⏱️  Running NeurX Benchmark (Pure S Implementation)")
     fmt.Println("=" * 60)
     scales := []string{"mini", "small", "medium", "large"}
-    gpuCounts := []int{1, 8, 64}
+    gpu_counts := []int{1, 8, 64}
     fmt.Println("\n📊 Benchmarking Different Configurations:\n")
     results := make(map[string]map[int]float32)
     for _, scale := range scales {
         results[scale] = make(map[int]float32)
-        for _, numGPUs := range gpuCounts {
-            fmt.Printf("Benchmarking %s on %d GPUs...", scale, numGPUs)
-            startTime := time.Now()
-            throughput := runBenchmarkStep(scale, numGPUs)
-            elapsed := time.Since(startTime).Seconds()
-            results[scale][numGPUs] = throughput
+        for _, num_gp_us := range gpu_counts {
+            fmt.Printf("Benchmarking %s on %d GPUs...", scale, num_gp_us)
+            start_time := time.Now()
+            throughput := run_benchmark_step(scale, num_gp_us)
+            elapsed := time.Since(start_time).Seconds()
+            results[scale][num_gp_us] = throughput
             fmt.Printf(" ✅ Throughput: %.0f samples/s\n", throughput)
         }
     }
@@ -175,33 +175,33 @@ func runBenchmark(args []string) {
     fmt.Println("=" * 60)
     for _, scale := range scales {
         fmt.Printf("\n%s Scale:\n", scale)
-        for _, numGPUs := range gpuCounts {
-            throughput := results[scale][numGPUs]
-            fmt.Printf("  %2d GPUs: %.0f samples/s\n", numGPUs, throughput)
+        for _, num_gp_us := range gpu_counts {
+            throughput := results[scale][num_gp_us]
+            fmt.Printf("  %2d GPUs: %.0f samples/s\n", num_gp_us, throughput)
         }
     }
 }
-func runBenchmarkStep(scale string, numGPUs int) float32 {
-    baseThroughput := float32(100)
-    return baseThroughput * float32(numGPUs)
+func run_benchmark_step(scale string, num_gp_us int) float32 {
+    base_throughput := float32(100)
+    return base_throughput * float32(num_gp_us)
 }
-func runBuild(args []string) {
+func run_build(args []string) {
     fmt.Println("🔨 Building NeurX (Pure S Implementation)")
     fmt.Println("=" * 60)
     if len(args) == 0 || args[0] == "all" {
         fmt.Println("\n📚 Building all components...\n")
-        buildAllComponents()
+        build_all_components()
     } else if args[0] == "quick" {
         fmt.Println("\n⚡ Quick build (core components only)...\n")
-        buildCoreComponents()
+        build_core_components()
     } else if args[0] == "clean" {
         fmt.Println("\n🗑️  Cleaning and rebuilding...\n")
-        cleanBuild()
+        clean_build()
     } else {
         fmt.Printf("Unknown build option: %s\n", args[0])
     }
 }
-func buildAllComponents() {
+func build_all_components() {
     components := []string{
         "model/transformer/transformer_block.s",
         "model/llm/model_loader.s",
@@ -214,7 +214,7 @@ func buildAllComponents() {
     }
     fmt.Println("\n✅ Build completed successfully")
 }
-func buildCoreComponents() {
+func build_core_components() {
     components := []string{
         "model/transformer/transformer_block.s",
         "model/llm/model_loader.s",
@@ -224,62 +224,62 @@ func buildCoreComponents() {
     }
     fmt.Println("\n✅ Quick build completed")
 }
-func cleanBuild() {
+func clean_build() {
     fmt.Println("  Removing old builds...")
     fmt.Println("  Rebuilding components...")
-    buildAllComponents()
+    build_all_components()
 }
-func showHelp() {
+func show_help() {
     fmt.Println(`
 ╔════════════════════════════════════════════════════════════╗
 ║                                                            ║
-║           NeurX - Complete S Language Implementation       ║
+║           neur_x - complete S language implementation       ║
 ║                                                            ║
-║    Pure S implementation of a full deep learning framework ║
+║    pure S implementation of a full deep learning framework ║
 ║    with training, inference, and distributed support      ║
 ║                                                            ║
 ╚════════════════════════════════════════════════════════════╝
 COMMANDS:
   Training:
     neurx train <scale> [num_gpus]
-      Run foundation model training
-      Scales: mini, small, medium, large, xl
-      Example: neurx train large 64
-  Inference:
+      run foundation model training
+      scales: mini, small, medium, large, xl
+      example: neurx train large 64
+  inference:
     neurx inference <model_path>
       Load model and start inference server
-  Distributed Training:
+  distributed training:
     neurx distribute <num_gpus> <scale>
-      Run distributed training across multiple GPUs
-      Example: neurx distribute 64 large
-  Benchmarking:
+      Run distributed training across multiple gp_us
+      example: neurx distribute 64 large
+  benchmarking:
     neurx benchmark
-      Run comprehensive benchmarks
-  Building:
+      run comprehensive benchmarks
+  building:
     neurx build all
     neurx build quick
     neurx build clean
-  Help:
+  help:
     neurx help
 FEATURES:
-  ✓ Complete transformer architecture
-  ✓ Multi-head attention with causal masking
+  ✓ complete transformer architecture
+  ✓ multi-head attention with causal masking
   ✓ adam_w optimizer with learning rate scheduling
-  ✓ Distributed training (DDP, tensor_2 Parallel, Pipeline Parallel)
+  ✓ distributed training (DDP, tensor_2 parallel, pipeline parallel)
   ✓ model checkpointing and resuming
-  ✓ Real-time monitoring and logging
-  ✓ Production-ready inference server
-  ✓ 647+ S language files (no Python/C++)
+  ✓ real-time monitoring and logging
+  ✓ production-ready inference server
+  ✓ 647+ S language files (no python/C++)
 MODELS:
-  - Mini (124M params) - CPU/single GPU
-  - Small (1B params) - 8 GPUs
-  - Medium (7B params) - 32 GPUs
-  - Large (13B params) - 64 GPUs
-  - XL (70B params) - 512 GPUs
+  - mini (124M params) - CPU/single GPU
+  - small (1B params) - 8 gp_us
+  - medium (7B params) - 32 gp_us
+  - large (13B params) - 64 gp_us
+  - XL (70B params) - 512 gp_us
 GETTING STARTED:
   1. Quick test on CPU:
      $ neurx train mini 1
-  2. 7B model on 32 GPUs:
+  2. 7B model on 32 gp_us:
      $ neurx train medium 32
   3. 13B model with distributed training:
      $ neurx distribute 64 large
@@ -290,7 +290,7 @@ DOCUMENTATION:
   - SHELL_TO_S_MIGRATION.md
   - NEURX_CLI_BUILD.md
   - QUICK_REFERENCE.sh
-For more information, visit: https:
+for more information, visit: https:
 `)
 }
 func operator*(s string, n int) string {

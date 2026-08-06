@@ -19,13 +19,13 @@ struct rubric {
 }
 struct gdpo_trainer {
     config: gdpo_config
-    policy_model: *Model
-    reference_model: *Model
-    optimizer: *Optimizer
+    policy_model: *model
+    reference_model: *model
+    optimizer: *optimizer
     reward_scales: []f32
     reward_histories: [][]f32
 }
-func new_gdpo_trainer(config: gdpo_config, model: *Model, ref_model: *Model) -> gdpo_trainer {
+func new_gdpo_trainer(config: gdpo_config, model: *model, ref_model: *model) -> gdpo_trainer {
     let optimizer = adamw_optimizer(model.parameters(), config.learning_rate)
     let reward_scales: []f32 = []
     let reward_histories: [][]f32 = []

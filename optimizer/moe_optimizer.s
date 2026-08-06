@@ -63,10 +63,10 @@ struct moe_router {
         this.router_type = config.router_type
         this.top_k = config.num_selected_experts
         if config.jitter_noise > 0 && config.training:
-            this.noise = new Normal(mean=0.0, std=config.jitter_noise)
+            this.noise = new normal(mean=0.0, std=config.jitter_noise)
     }
 }
-class LoadBalanceLossComputer {
+class load_balance_loss_computer {
     config: moe_config
     init(config: moe_config) {
         this.config = config
@@ -86,7 +86,7 @@ class LoadBalanceLossComputer {
         return (load_balance_loss * this.config.loss_coef, aux_loss * this.config.aux_loss_coef)
     }
 }
-class MoEFFNLayer {
+class mo_effn_layer {
     config: moe_config
     experts: list<moe_expert>
     shared_experts: list<moe_expert>
@@ -95,7 +95,7 @@ class MoEFFNLayer {
     training: bool = true
     init(config: moe_config) {
         this.config = config
-        this.loss_computer = new LoadBalanceLossComputer(config)
+        this.loss_computer = new load_balance_loss_computer(config)
         this.training = true
         this.experts = []
         for i in range(config.num_experts):
@@ -103,7 +103,7 @@ class MoEFFNLayer {
                 id=i,
                 up_proj=new linear(config.hidden_size, config.intermediate_size),
                 down_proj=new linear(config.intermediate_size, config.hidden_size),
-                gate=new SiLU(),
+                gate=new si_lu(),
                 is_active=true
             }
             this.experts.append(expert)
@@ -114,7 +114,7 @@ class MoEFFNLayer {
                     id=config.num_experts + i,
                     up_proj=new linear(config.hidden_size, config.intermediate_size),
                     down_proj=new linear(config.intermediate_size, config.hidden_size),
-                    gate=new SiLU(),
+                    gate=new si_lu(),
                     is_active=true
                 }
                 this.shared_experts.append(shared_exp)
@@ -307,7 +307,7 @@ class MoEFFNLayer {
         }
     }
 }
-class ExpertSpecializer {
+class expert_specializer {
     config: moe_config
     moe_layer: MoEFFNLayer?
     init(config: moe_config) {
@@ -423,14 +423,14 @@ struct individual_expert_report {
     specialization_score: float
     importance_weight: float
 }
-class ExpertManager {
-    moe_layers: list<MoEFFNLayer>
+class expert_manager {
+    moe_layers: list<mo_effn_layer>
     specializer: ExpertSpecializer
     config: moe_config
-    init(moe_layers: list<MoEFFNLayer>, config: moe_config) {
+    init(moe_layers: list<mo_effn_layer>, config: moe_config) {
         this.moe_layers = moe_layers
         this.config = config
-        this.specializer = new ExpertSpecializer(config)
+        this.specializer = new expert_specializer(config)
         for layer in moe_layers {
             this.specializer.bind(layer)
         }
@@ -533,7 +533,7 @@ struct moe_efficiency_report {
     theoretical_flops_reduction: string
 }
 function create_moe_ffn_layer(config?: moe_config) {
-    return new MoEFFNLayer(config=config ?? new moe_config())
+    return new mo_effn_layer(config=config ?? new moe_config())
 }
 function test_moe_system() {
     print("🧪 Testing NEURX MOE Optimization System...")
@@ -545,7 +545,7 @@ function test_moe_system() {
         num_shared_experts=1,
         training=true
     )
-    moe_layer = new MoEFFNLayer(cfg)
+    moe_layer = new mo_effn_layer(cfg)
     print("  ✓ Test 1: MoE Forward Pass")
     dummy_input = randn(2, 16, 256)
     output = moe_layer.forward(dummy_input, null)
@@ -560,7 +560,7 @@ function test_moe_system() {
     print(f"      - Expert utilization: {[f'{u:.2f}' for u in stats.expert_utilization]}")
     print(f"      - Load balance ratio: {stats.max_load_imbalance_ratio:.2f}x")
     print("  ✓ Test 3: Expert Specialization Analysis")
-    specializer = new ExpertSpecializer(cfg)
+    specializer = new expert_specializer(cfg)
     specializer.bind(moe_layer)
     spec_loss = specializer.compute_specialization_loss(output)
     assert spec_loss.requires_grad, "Specialization loss should support gradients"
@@ -570,7 +570,7 @@ function test_moe_system() {
     for report in analysis.expert_reports:
         assert report.up_projection_l2_norm > 0, "Norm should be positive"
     print("  ✓ Test 4: Expert Management")
-    manager = new ExpertManager([moe_layer], cfg)
+    manager = new expert_manager([moe_layer], cfg)
     eff_report = manager.get_global_efficiency_report()
     assert eff_report.total_moe_layers == 1
     assert eff_report.active_experts_per_layer[0] == cfg.num_experts
@@ -581,8 +581,8 @@ function test_moe_system() {
 }
 export {
     moe_config, moe_forward_output, dispatch_pattern, moe_expert, moe_router,
-    MoEFFNLayer, LoadBalanceLossComputer,
-    ExpertSpecializer, expert_analysis_report, individual_expert_report,
-    ExpertManager, pruning_report, merging_report, merge_operation, moe_efficiency_report,
+    mo_effn_layer, load_balance_loss_computer,
+    expert_specializer, expert_analysis_report, individual_expert_report,
+    expert_manager, pruning_report, merging_report, merge_operation, moe_efficiency_report,
     create_moe_ffn_layer, test_moe_system
 }

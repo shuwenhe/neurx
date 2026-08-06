@@ -12,7 +12,7 @@ struct storage {
     version: i64
     shared: bool
 }
-interface IStorage {
+interface i_storage {
     data_ptr() -> i64
     size_bytes() -> i64
     dtype() -> DType
@@ -27,12 +27,12 @@ interface IStorage {
     reshape(shape: []i64) -> storage
     transpose(dim0: i64, dim1: i64) -> storage
 }
-interface IStorageFactory {
+interface i_storage_factory {
     create(size_bytes: i64, dtype: DType, layout: Layout, device: device) -> storage
     from_ptr(ptr: i64, size_bytes: i64, dtype: DType, layout: Layout, device: device) -> storage
     share(storage: storage) -> storage
 }
-interface IStorageDebug {
+interface i_storage_debug {
     debug_info(storage: storage) -> string
     print_info(storage: storage) -> void
 }

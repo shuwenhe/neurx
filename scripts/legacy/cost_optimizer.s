@@ -254,7 +254,7 @@ func (co *cost_optimizer) get_cost_report() {
     fmt.Printf("  Cost per Step: $%.2e\n", total_cost/float64(len(co.metrics_history)))
     fmt.Printf("  Cost per Token: $%.2e\n", total_cost/(last.tokens_per_second*1000))
 }
-func NewCostOptimizer() *cost_optimizer {
+func new_cost_optimizer() *cost_optimizer {
     return &cost_optimizer{
         metrics_history: make([]resource_metrics, 0),
         optimization_strategies: make([]optimization_strategy, 0),

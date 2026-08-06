@@ -1,10 +1,10 @@
 package step2_embedding
-struct EmbeddingLayer {
+struct embedding_layer {
     int vocab_size
     int hidden_size
 }
-func create_embedding_layer() EmbeddingLayer {
-    return EmbeddingLayer{
+func create_embedding_layer() embedding_layer {
+    return embedding_layer{
         vocab_size: 151936,
         hidden_size: 896
     }

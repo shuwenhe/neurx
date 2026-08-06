@@ -56,7 +56,7 @@ func main() {
     println("🚀 quickstartexample: ")
     println("")
     println("
-    println("auto system = std::make_unique<NeurXToolSystem>();")
+    println("auto system = std::make_unique<neur_x_tool_system>();")
     println("system->initialize();")
     println("")
     println("

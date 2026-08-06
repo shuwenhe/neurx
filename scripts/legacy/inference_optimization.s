@@ -38,7 +38,7 @@ type inference_response struct {
 }
 type inference_engine struct {
     config              inference_config
-    model               PolicyModel
+    model               policy_model
     kv_cache            *kvcache
     request_queue       []inference_request
     response_cache      map[string]inference_response
@@ -270,7 +270,7 @@ func (engine *inference_engine) print_stats() {
     fmt.Printf("  tensor_2 Parallelism: %v\n", engine.config.use_tensor_parallel)
     fmt.Printf("  Quantization: %s\n", engine.config.quantization_type)
 }
-func NewInferenceEngine(config inference_config, model PolicyModel) *inference_engine {
+func new_inference_engine(config inference_config, model policy_model) *inference_engine {
     engine := &inference_engine{
         config: config,
         model: model,

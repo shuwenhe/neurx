@@ -116,7 +116,7 @@ func generate_kubernetes_deployment(config: deployment_config, output_path: stri
     let num_nodes = config.num_nodes
     let gpus_per_node = config.gpus_per_node
     let total_replicas = num_nodes
-    let k8s_yaml = `apiVersion: batch/v1
+    let k8s_yaml = `api_version: batch/v1
 kind: Job
 metadata:
   name: neurx-training
@@ -124,29 +124,29 @@ metadata:
 spec:
   parallelism: ` + strings.from_i32(total_replicas) + `
   completions: ` + strings.from_i32(total_replicas) + `
-  backoffLimit: 3
-  ttlSecondsAfterFinished: 86400
+  backoff_limit: 3
+  ttl_seconds_after_finished: 86400
   template:
     metadata:
       labels:
         app: neurx-training
     spec:
       restartPolicy: Never
-      serviceAccountName: neurx-trainer
+      service_account_name: neurx-trainer
       containers:
       - name: neurx-trainer
         image: neurx:v1.0
-        imagePullPolicy: Always
+        image_pull_policy: Always
         env:
         - name: MASTER_ADDR
           value: neurx-training-0
         - name: MASTER_PORT
           value: "12355"
         - name: RANK
-          valueFrom:
+          value_from:
             fieldRef:
               fieldPath: metadata.name
-              containerPort: 29500
+              container_port: 29500
         - name: WORLD_SIZE
           value: "` + strings.from_i32(total_replicas) + `"
         - name: CUDA_VISIBLE_DEVICES
@@ -160,13 +160,13 @@ spec:
             memory: "500Gi"
             cpu: "64"
             nvidia.com/gpu: ` + strings.from_i32(gpus_per_node) + `
-        volumeMounts:
+        volume_mounts:
         - name: data
-          mountPath: /data
+          mount_path: /data
         - name: checkpoints
-          mountPath: /checkpoints
+          mount_path: /checkpoints
         - name: logs
-          mountPath: /logs
+          mount_path: /logs
         command:
         - /bin/bash
         - -c
@@ -179,67 +179,67 @@ spec:
             --output=/checkpoints/model
       volumes:
       - name: data
-        persistentVolumeClaim:
+        persistent_volume_claim:
           claimName: neurx-data-pvc
       - name: checkpoints
-        persistentVolumeClaim:
+        persistent_volume_claim:
           claimName: neurx-checkpoints-pvc
       - name: logs
-        persistentVolumeClaim:
+        persistent_volume_claim:
           claimName: neurx-logs-pvc
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
           - weight: 100
-            podAffinityTerm:
+            pod_affinity_term:
               labelSelector:
                 matchExpressions:
                 - key: app
                   operator: In
                   values:
                   - neurx-training
-              topologyKey: kubernetes.io/hostname
+              topology_key: kubernetes.io/hostname
 ---
-apiVersion: v1
+api_version: v1
 kind: ServiceAccount
 metadata:
   name: neurx-trainer
 ---
-apiVersion: v1
+api_version: v1
 kind: PersistentVolumeClaim
 metadata:
   name: neurx-data-pvc
 spec:
   accessModes:
-    - ReadWriteMany
-  storageClassName: fast-ssd
+    - read_write_many
+  storage_class_name: fast-ssd
   resources:
     requests:
-      storage: 1Ti
+      storage: 1ti
 ---
-apiVersion: v1
+api_version: v1
 kind: PersistentVolumeClaim
 metadata:
   name: neurx-checkpoints-pvc
 spec:
   accessModes:
-    - ReadWriteMany
-  storageClassName: fast-ssd
+    - read_write_many
+  storage_class_name: fast-ssd
   resources:
     requests:
-      storage: 100Gi
+      storage: 100gi
 ---
-apiVersion: v1
+api_version: v1
 kind: PersistentVolumeClaim
 metadata:
   name: neurx-logs-pvc
 spec:
   accessModes:
-    - ReadWriteMany
-  storageClassName: standard
+    - read_write_many
+  storage_class_name: standard
   resources:
     requests:
-      storage: 50Gi
+      storage: 50gi
 `
     println("Generated Kubernetes manifest: " + output_path)
     return true

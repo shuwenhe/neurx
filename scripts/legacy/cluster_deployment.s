@@ -234,7 +234,7 @@ func (manager *cluster_manager) handle_node_failure(node_id int) {
         fmt.Printf("[FaultTolerance] Recovery complete\n")
     }
 }
-func NewClusterManager(config cluster_config) *cluster_manager {
+func new_cluster_manager(config cluster_config) *cluster_manager {
     return &cluster_manager{
         config:        config,
         nodes:         []node_spec{},

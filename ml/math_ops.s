@@ -78,12 +78,12 @@ func relu(tensor X) tensor {
     }
     result
 }
-func relu_backward(tensor dY, tensor X) tensor {
+func relu_backward(tensor d_y, tensor X) tensor {
     tensor result = zeros(X.shape)
     int i = 0
-    while i < len(dY.data) {
+    while i < len(d_y.data) {
         if X.data[i] > 0.0 {
-            result.data[i] = dY.data[i]
+            result.data[i] = d_y.data[i]
         } else {
             result.data[i] = 0.0
         }

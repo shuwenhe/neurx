@@ -4,7 +4,7 @@ import "fmt"
 import "path/filepath"
 import "strings"
 import "core"
-func isRunnableCandidate(candidate string) bool {
+func is_runnable_candidate(candidate string) bool {
     if candidate == "" {
         return false
     }
@@ -21,15 +21,15 @@ func isRunnableCandidate(candidate string) bool {
     mode := stat.Mode()
     return (mode & 0111) != 0
 }
-func findSBinary(rootDir string) string {
+func find_s_binary(root_dir string) string {
     var candidate string
-    if sBin := os.Getenv("S_BIN"); sBin != "" {
-        if isRunnableCandidate(sBin) {
-            return sBin
+    if s_bin := os.Getenv("S_BIN"); s_bin != "" {
+        if is_runnable_candidate(s_bin) {
+            return s_bin
         }
     }
-    if sPath, err := exec.LookPath("s"); err == nil {
-        return sPath
+    if s_path, err := exec.LookPath("s"); err == nil {
+        return s_path
     }
     candidates := []string{
         core.ExpandHome("${S_ROOT}/bin/s.cmd"),
@@ -40,42 +40,42 @@ func findSBinary(rootDir string) string {
         core.ExpandHome("${HOME}/s/bin/s.exe"),
         core.ExpandHome("${HOME}/s/bin/s"),
         core.ExpandHome("${HOME}/s/bin/s_x86_64"),
-        filepath.Join(rootDir, "../s/bin/s.cmd"),
-        filepath.Join(rootDir, "../s/bin/s.exe"),
-        filepath.Join(rootDir, "../s/bin/s"),
-        filepath.Join(rootDir, "../s/bin/s_x86_64"),
+        filepath.Join(root_dir, "../s/bin/s.cmd"),
+        filepath.Join(root_dir, "../s/bin/s.exe"),
+        filepath.Join(root_dir, "../s/bin/s"),
+        filepath.Join(root_dir, "../s/bin/s_x86_64"),
     }
     for _, cand := range candidates {
         expanded := os.ExpandEnv(cand)
-        if isRunnableCandidate(expanded) {
+        if is_runnable_candidate(expanded) {
             return expanded
         }
     }
     return ""
 }
-func ResolveSBin(rootDir string) (string, error) {
-    if rootDir == "" {
+func resolve_s_bin(root_dir string) (string, error) {
+    if root_dir == "" {
         pwd, err := os.Getwd()
         if err != nil {
             return "", err
         }
-        rootDir = pwd
+        root_dir = pwd
     }
-    sBinary := findSBinary(rootDir)
-    if sBinary == "" {
+    s_binary := find_s_binary(root_dir)
+    if s_binary == "" {
         return "", fmt.Errorf("S compiler not found in system")
     }
-    return sBinary, nil
+    return s_binary, nil
 }
 func main() {
-    rootDir := ""
+    root_dir := ""
     if len(os.Args) > 1 {
-        rootDir = os.Args[1]
+        root_dir = os.Args[1]
     }
-    sBinary, err := ResolveSBin(rootDir)
+    s_binary, err := resolve_s_bin(root_dir)
     if err != nil {
         fmt.Fprintf(os.Stderr, "Error: %v\n", err)
         os.Exit(1)
     }
-    fmt.Println(sBinary)
+    fmt.Println(s_binary)
 }

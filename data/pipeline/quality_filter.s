@@ -398,11 +398,11 @@ func measure_repetition(map<int, int> freq, int total) float:
         sum_squared = sum_squared + p * p
     return (sum_squared - 1.0/float(total)) / (1.0 - 1.0/float(total))
 func detect_language(string text) (string, float):
-    if contains_range(text, 0x4E00, 0x9FFF):
+    if contains_range(text, 0x_4_e_00, 0x_9_fff):
         return ("zh", 0.9)
-    elif contains_range(text, 0x0400, 0x04FF):
+    elif contains_range(text, 0x0400, 0x_04_ff):
         return ("ru", 0.8)
-    elif contains_range(text, 0x0600, 0x06FF):
+    elif contains_range(text, 0x0600, 0x_06_ff):
         return ("ar", 0.8)
     else:
         return ("en", 0.7)

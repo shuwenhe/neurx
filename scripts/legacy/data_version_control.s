@@ -42,7 +42,7 @@ type dataset_version struct {
 }
 type data_version_control struct {
     datasets            map[string][]dataset_version
-    audit_logs          []DatauditLog
+    audit_logs          []dataudit_log
     current_version     map[string]string
     quality_threshold   float64
 }
@@ -282,7 +282,7 @@ func (dvc *data_version_control) generate_governance_report(
         }
     }
 }
-func NewDataVersionControl() *data_version_control {
+func new_data_version_control() *data_version_control {
     return &data_version_control{
         datasets:       make(map[string][]dataset_version),
         audit_logs:     make([]data_audit_log, 0),

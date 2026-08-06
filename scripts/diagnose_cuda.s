@@ -4,7 +4,7 @@ use std.os
 use std.exec
 use std.time
 use std.path
-func checkNvidiaSmi() int {
+func check_nvidia_smi() int {
     cmd := exec.command("nvidia-smi", "-L")
     output, err := cmd.Output()
     if err != nil {
@@ -21,7 +21,7 @@ func checkNvidiaSmi() int {
     }
     return count
 }
-func checkCudaBinary(bin string) bool {
+func check_cuda_binary(bin string) bool {
     stat, err := os.Stat(bin)
     if err != nil || stat.IsDir() {
         io.Println("   ❌ Binary not found: " + bin)
@@ -30,7 +30,7 @@ func checkCudaBinary(bin string) bool {
     io.Println("   ✓ Binary exists: " + bin)
     return true
 }
-func checkRequiredFiles(files []string) {
+func check_required_files(files []string) {
     for _, file := range files {
         stat, err := os.Stat(file)
         if err == nil && !stat.IsDir() {
@@ -40,7 +40,7 @@ func checkRequiredFiles(files []string) {
         }
     }
 }
-func testCudaBinary(bin string) {
+func test_cuda_binary(bin string) {
     cmd := exec.command("timeout", "30s", bin)
     cmd.Env = append(os.Environ(),
         "NEURX_PRETRAIN_STEPS=1",
@@ -69,28 +69,28 @@ func testCudaBinary(bin string) {
 }
 func main() {
     curdir := "/home/shuwen/shuwen/train/neurx"
-    cudaTrainBin := curdir + "/artifacts/build/cuda_train/neurx_cuda_train_bridge"
+    cuda_train_bin := curdir + "/artifacts/build/cuda_train/neurx_cuda_train_bridge"
     io.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     io.Println("🔍 NeurX CUDA Training Environment Diagnostic")
     io.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     io.Println("")
     io.Println("📌 Step 1: Checking NVIDIA GPU...")
-    checkNvidiaSmi()
+    check_nvidia_smi()
     io.Println("")
     io.Println("📌 Step 2: Checking CUDA training binary...")
-    if !checkCudaBinary(cudaTrainBin) {
+    if !check_cuda_binary(cuda_train_bin) {
         os.Exit(1)
     }
     io.Println("")
     io.Println("📌 Step 3: Checking required files...")
-    checkRequiredFiles([]string{
+    check_required_files([]string{
         curdir + "/data/corpus/vocab.json",
         curdir + "/data/corpus/merges.txt",
         curdir + "/artifacts/build/run_large_pretrain/shard_list.txt",
     })
     io.Println("")
     io.Println("📌 Step 4: Testing CUDA binary (timeout 30s)...")
-    testCudaBinary(cudaTrainBin)
+    test_cuda_binary(cuda_train_bin)
     io.Println("")
     io.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     io.Println("📊 Summary:")

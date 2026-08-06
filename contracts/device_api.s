@@ -1,9 +1,9 @@
-enum DeviceType {
+enum device_type {
     CPU
     CUDA
     CANN
-    Metal
-    Custom
+    metal
+    custom
 }
 struct cpu_device {
     id: i64
@@ -23,7 +23,7 @@ struct device {
     device_type: DeviceType
     id: i64
 }
-interface IDevice {
+interface i_device {
     device_type() -> DeviceType
     device_id() -> i64
     name() -> string
@@ -39,7 +39,7 @@ interface IDevice {
     allocated_memory() -> i64
     free_memory() -> i64
 }
-interface IDeviceMemory {
+interface i_device_memory {
     allocate(size: i64) -> memory_ptr
     deallocate(ptr: memory_ptr) -> void
     memset(ptr: memory_ptr, value: i32, size: i64) -> void
@@ -47,27 +47,27 @@ interface IDeviceMemory {
     memcpy_d2h(dst: i64, src: memory_ptr, size: i64) -> void
     memcpy_d2d(dst: memory_ptr, src: memory_ptr, size: i64) -> void
 }
-interface IDeviceSynchronization {
+interface i_device_synchronization {
     synchronize() -> void
     is_idle() -> bool
 }
-interface IDeviceProperties {
+interface i_device_properties {
     get_properties() -> map[string]string
     get_arch_name() -> string
     get_driver_version() -> string
     get_runtime_version() -> string
 }
-interface IDeviceFactory {
+interface i_device_factory {
     create_device(device_type: DeviceType, device_id: i64) -> device
     get_device(device_type: DeviceType, device_id: i64) -> device
     list_devices(device_type: DeviceType) -> []device
     get_device_count(device_type: DeviceType) -> i64
 }
-interface IDeviceRegistry {
+interface i_device_registry {
     register_device(device_type: DeviceType, factory_ptr: i64) -> void
     get_factory(device_type: DeviceType) -> i64
 }
-interface IDeviceContext {
+interface i_device_context {
     set_current_device(device: device) -> void
     get_current_device() -> device
     push_device(device: device) -> void

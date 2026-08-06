@@ -16,7 +16,7 @@ struct reward_request {
 }
 struct batch_reward_manager {
     config: batch_reward_manager_config
-    reward_model: *Model
+    reward_model: *model
     request_queue: []reward_request
     queue_mutex: mutex
     workers: []worker
@@ -24,7 +24,7 @@ struct batch_reward_manager {
     total_batches: i64
     avg_batch_size: f32
 }
-func new_batch_reward_manager(config: batch_reward_manager_config, model: *Model) -> batch_reward_manager {
+func new_batch_reward_manager(config: batch_reward_manager_config, model: *model) -> batch_reward_manager {
     let workers: []worker = []
     for i in 0..config.num_workers {
         workers.push(new_worker(i))
@@ -99,7 +99,7 @@ struct rate_limited_reward_manager_config {
 }
 struct rate_limited_reward_manager {
     config: rate_limited_reward_manager_config
-    reward_model: *Model
+    reward_model: *model
     tokens: f32
     last_refill_time: i64
     delayed_queue: []delayed_request
@@ -112,7 +112,7 @@ struct delayed_request {
 }
 func new_rate_limited_reward_manager(
     config: rate_limited_reward_manager_config,
-    model: *Model
+    model: *model
 ) -> rate_limited_reward_manager {
     return rate_limited_reward_manager{
         config: config,
@@ -215,13 +215,13 @@ struct prime_reward_manager_config {
 }
 struct prime_reward_manager {
     config: prime_reward_manager_config
-    step_reward_model: *Model
-    final_reward_model: *Model
+    step_reward_model: *model
+    final_reward_model: *model
 }
 func new_prime_reward_manager(
     config: prime_reward_manager_config,
-    step_model: *Model,
-    final_model: *Model
+    step_model: *model,
+    final_model: *model
 ) -> prime_reward_manager {
     return prime_reward_manager{
         config: config,

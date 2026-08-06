@@ -1,7 +1,7 @@
 import "tensor/tensor.s"
 import "optimizer/optimizer.s"
 import "posttrain/alignment/ppo/ppo.s"
-struct OTBConfig {
+struct otb_config {
     learning_rate: f32
     num_epochs: i32
     max_grad_norm: f32
@@ -18,12 +18,12 @@ struct OTBConfig {
     clip_epsilon: f32
     entropy_coeff: f32
 }
-struct OTBTrainer {
+struct otb_trainer {
     config: OTBConfig
-    policy_model: *Model
-    baseline_model: *Model
-    optimizer: *Optimizer
-    baseline_optimizer: *Optimizer
+    policy_model: *model
+    baseline_model: *model
+    optimizer: *optimizer
+    baseline_optimizer: *optimizer
     token_ema_baselines: map[i64]f32
     advantage_variance_before: f32
     advantage_variance_after: f32
@@ -31,18 +31,18 @@ struct OTBTrainer {
 }
 func new_otb_trainer(
     config: OTBConfig,
-    policy: *Model,
-    baseline: *Model
+    policy: *model,
+    baseline: *model
 ) -> OTBTrainer {
     let optimizer = adamw_optimizer(policy.parameters(), config.learning_rate)
-    let baseline_optimizer: *Optimizer = nil
+    let baseline_optimizer: *optimizer = nil
     if config.use_learned_baseline {
         baseline_optimizer = adamw_optimizer(
             baseline.parameters(),
             config.baseline_lr
         )
     }
-    return OTBTrainer{
+    return otb_trainer{
         config: config,
         policy_model: policy,
         baseline_model: baseline,
@@ -54,7 +54,7 @@ func new_otb_trainer(
         step_count: 0,
     }
 }
-func (trainer: *OTBTrainer) compute_token_baseline(
+func (trainer: *otb_trainer) compute_token_baseline(
     tokens: Tensor,
     rewards: Tensor
 ) -> Tensor {
@@ -110,7 +110,7 @@ func (trainer: *OTBTrainer) compute_token_baseline(
     }
     return baselines
 }
-func (trainer: *OTBTrainer) compute_advantages(
+func (trainer: *otb_trainer) compute_advantages(
     tokens: Tensor,
     rewards: Tensor
 ) -> Tensor {
@@ -130,13 +130,13 @@ func (trainer: *OTBTrainer) compute_advantages(
     }
     return advantages
 }
-func (trainer: *OTBTrainer) train_step(
-    prompts: []Tensor,
-    responses: []Tensor,
-    rewards: []Tensor
+func (trainer: *otb_trainer) train_step(
+    prompts: []tensor,
+    responses: []tensor,
+    rewards: []tensor
 ) -> (f32, f32, f32) {
     let batch_size = prompts.len()
-    let inputs: []Tensor = []
+    let inputs: []tensor = []
     for i in 0..batch_size {
         inputs.push(concat(prompts[i], responses[i]))
     }
@@ -191,7 +191,7 @@ func (trainer: *OTBTrainer) train_step(
         total_entropy / f32(num_updates)
     )
 }
-func (trainer: *OTBTrainer) train(train_data: DataLoader) -> []f32 {
+func (trainer: *otb_trainer) train(train_data: DataLoader) -> []f32 {
     let policy_losses: []f32 = []
     for batch in train_data {
         let policy_loss, baseline_loss, entropy = trainer.train_step(
@@ -220,7 +220,7 @@ func (trainer: *OTBTrainer) train(train_data: DataLoader) -> []f32 {
     }
     return policy_losses
 }
-func (trainer: *OTBTrainer) get_variance_reduction() -> f32 {
+func (trainer: *otb_trainer) get_variance_reduction() -> f32 {
     if trainer.advantage_variance_before < 1e-8 {
         return 0.0
     }

@@ -35,8 +35,8 @@ struct lora_linear {
     []float base_weight
     int out_dim
     int in_dim
-    []float lora_A
-    []float lora_B
+    []float lora_a
+    []float lora_b
     int rank
     float scaling
     float dropout_rate
@@ -49,8 +49,8 @@ struct named_lora_module {
     int in_dim
     int rank
     float scaling
-    []float lora_A
-    []float lora_B
+    []float lora_a
+    []float lora_b
     []float initial_a
     []float initial_b
 }
@@ -270,8 +270,8 @@ func run_posttrain_lora_sft() int {
             base_weight: []float{cap: 0},
             out_dim: hidden_size,
             in_dim: hidden_size,
-            lora_A: init_gaussian(rank * hidden_size, 0.02),
-            lora_B: init_gaussian(hidden_size * rank, 0.01),
+            lora_a: init_gaussian(rank * hidden_size, 0.02),
+            lora_b: init_gaussian(hidden_size * rank, 0.01),
             rank: rank,
             scaling: alpha / (rank as float),
             dropout_rate: dropout,
@@ -284,8 +284,8 @@ func run_posttrain_lora_sft() int {
             in_dim: hidden_size,
             rank: rank,
             scaling: alpha / (rank as float),
-            lora_A: init_gaussian(rank * hidden_size, 0.02),
-            lora_B: init_gaussian(hidden_size * rank, 0.01),
+            lora_a: init_gaussian(rank * hidden_size, 0.02),
+            lora_b: init_gaussian(hidden_size * rank, 0.01),
             initial_a: copy_float_array(q_layer.lora_A),
             initial_b: copy_float_array(q_layer.lora_B)
         }
@@ -295,8 +295,8 @@ func run_posttrain_lora_sft() int {
             base_weight: []float{cap: 0},
             out_dim: v_out,
             in_dim: hidden_size,
-            lora_A: init_gaussian(rank * hidden_size, 0.02),
-            lora_B: init_gaussian(v_out * rank, 0.01),
+            lora_a: init_gaussian(rank * hidden_size, 0.02),
+            lora_b: init_gaussian(v_out * rank, 0.01),
             rank: rank,
             scaling: alpha / (rank as float),
             dropout_rate: dropout,
@@ -309,8 +309,8 @@ func run_posttrain_lora_sft() int {
             in_dim: hidden_size,
             rank: rank,
             scaling: v_layer.scaling,
-            lora_A: copy_float_array(v_layer.lora_A),
-            lora_B: copy_float_array(v_layer.lora_B),
+            lora_a: copy_float_array(v_layer.lora_A),
+            lora_b: copy_float_array(v_layer.lora_B),
             initial_a: copy_float_array(v_layer.lora_A),
             initial_b: copy_float_array(v_layer.lora_B)
         }
@@ -380,8 +380,8 @@ func run_posttrain_lora_sft() int {
                 int in_dim = module.in_dim
                 int rank_val = module.rank
                 float scaling_val = module.scaling
-                []float lora_A = module.lora_A
-                []float lora_B = module.lora_B
+                []float lora_a = module.lora_A
+                []float lora_b = module.lora_B
                 []float target = target_q
                 int is_odd = module_cursor - ((module_cursor / 2) * 2)
                 if is_odd == 1 {
@@ -402,8 +402,8 @@ func run_posttrain_lora_sft() int {
                     int in_idx = 0
                     while in_idx < in_dim && in_idx < len(prompt_vec) {
                         int a_idx = r * in_dim + in_idx
-                        if a_idx < len(lora_A) {
-                            hidden_reuse[r] = hidden_reuse[r] + lora_A[a_idx] * prompt_vec[in_idx]
+                        if a_idx < len(lora_a) {
+                            hidden_reuse[r] = hidden_reuse[r] + lora_a[a_idx] * prompt_vec[in_idx]
                         }
                         in_idx = in_idx + 1
                     }
@@ -415,8 +415,8 @@ func run_posttrain_lora_sft() int {
                     int rank_idx = 0
                     while rank_idx < rank_val {
                         int b_idx = out_idx * rank_val + rank_idx
-                        if b_idx < len(lora_B) {
-                            sum = sum + scaling_val * lora_B[b_idx] * hidden_reuse[rank_idx]
+                        if b_idx < len(lora_b) {
+                            sum = sum + scaling_val * lora_b[b_idx] * hidden_reuse[rank_idx]
                         }
                         rank_idx = rank_idx + 1
                     }
@@ -697,13 +697,13 @@ func compute_stats_from_layer([]named_lora_module modules) adapter_stats {
         if is_odd == 1 {
             out_dim = v_out_const
         }
-        []float lora_A_copy = copy_float_array(module.lora_A)
-        []float lora_B_copy = copy_float_array(module.lora_B)
+        []float lora_a_copy = copy_float_array(module.lora_A)
+        []float lora_b_copy = copy_float_array(module.lora_B)
         int i = 0
         int a_len = rank * in_dim
         while i < a_len {
-            if i < len(lora_A_copy) {
-                float value = lora_A_copy[i]
+            if i < len(lora_a_copy) {
+                float value = lora_a_copy[i]
                 float abs_value = abs_float(value)
                 l1 = l1 + abs_value
                 l2 = l2 + value * value
@@ -720,8 +720,8 @@ func compute_stats_from_layer([]named_lora_module modules) adapter_stats {
         i = 0
         int b_len = out_dim * rank
         while i < b_len {
-            if i < len(lora_B_copy) {
-                float value = lora_B_copy[i]
+            if i < len(lora_b_copy) {
+                float value = lora_b_copy[i]
                 float abs_value = abs_float(value)
                 l1 = l1 + abs_value
                 l2 = l2 + value * value
@@ -763,15 +763,15 @@ func compute_delta_stats_from_layer([]named_lora_module modules) delta_stats {
         if is_odd == 1 {
             out_dim = v_out_const
         }
-        []float lora_A_copy = copy_float_array(module.lora_A)
-        []float lora_B_copy = copy_float_array(module.lora_B)
+        []float lora_a_copy = copy_float_array(module.lora_A)
+        []float lora_b_copy = copy_float_array(module.lora_B)
         []float init_a_copy = copy_float_array(module.initial_a)
         []float init_b_copy = copy_float_array(module.initial_b)
         int i = 0
         int a_len = rank * in_dim
         while i < a_len {
-            if i < len(lora_A_copy) && i < len(init_a_copy) {
-                float delta = lora_A_copy[i] - init_a_copy[i]
+            if i < len(lora_a_copy) && i < len(init_a_copy) {
+                float delta = lora_a_copy[i] - init_a_copy[i]
                 float abs_delta = abs_float(delta)
                 l1 = l1 + abs_delta
                 l2 = l2 + delta * delta
@@ -787,8 +787,8 @@ func compute_delta_stats_from_layer([]named_lora_module modules) delta_stats {
         i = 0
         int b_len = out_dim * rank
         while i < b_len {
-            if i < len(lora_B_copy) && i < len(init_b_copy) {
-                float delta = lora_B_copy[i] - init_b_copy[i]
+            if i < len(lora_b_copy) && i < len(init_b_copy) {
+                float delta = lora_b_copy[i] - init_b_copy[i]
                 float abs_delta = abs_float(delta)
                 l1 = l1 + abs_delta
                 l2 = l2 + delta * delta

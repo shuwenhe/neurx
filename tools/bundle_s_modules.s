@@ -3,7 +3,7 @@ use std.io
 use std.os
 use std.path
 use std.strings
-func stripPackageAndImports(content string) string {
+func strip_package_and_imports(content string) string {
     lines := strings.Split(content, "\n")
     result := []string{}
     for _, line := range lines {
@@ -37,15 +37,15 @@ func main() {
             os.Stderr.WriteString("error reading " + source + ": " + err.Error() + "\n")
             os.Exit(1)
         }
-        processed := stripPackageAndImports(string(content))
+        processed := strip_package_and_imports(string(content))
         bundled += processed + "\n\n"
     }
-    entryContent, err := os.ReadFile(entry)
+    entry_content, err := os.ReadFile(entry)
     if err != nil {
         os.Stderr.WriteString("error reading " + entry + ": " + err.Error() + "\n")
         os.Exit(1)
     }
-    processed := stripPackageAndImports(string(entryContent))
+    processed := strip_package_and_imports(string(entry_content))
     bundled += processed
     err = os.WriteFile(output, []byte(bundled), 0644)
     if err != nil {

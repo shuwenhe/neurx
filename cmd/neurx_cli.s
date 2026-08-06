@@ -18,13 +18,13 @@ func cmd_train(args []string) error {
         return nil
     }
     scale := args[0]
-    numGpus := 1
+    num_gpus := 1
     if len(args) > 1 {
         if n, err := strconv.Atoi(args[1]); err == nil {
-            numGpus = n
+            num_gpus = n
         }
     }
-    return scripts.run_foundation_model_training(scale, numGpus)
+    return scripts.run_foundation_model_training(scale, num_gpus)
 }
 func cmd_quick_start(args []string) error {
     logger := scripts.new_logger("CLI")
@@ -32,31 +32,31 @@ func cmd_quick_start(args []string) error {
     return scripts.start_quick_training()
 }
 func cmd_launch_70b(args []string) error {
-    numGpus := 512
+    num_gpus := 512
     if len(args) > 0 {
         if n, err := strconv.Atoi(args[0]); err == nil {
-            numGpus = n
+            num_gpus = n
         }
     }
-    return scripts.launch_70b_training(numGpus)
+    return scripts.launch_70b_training(num_gpus)
 }
 func cmd_launch_7b(args []string) error {
-    numGpus := 64
+    num_gpus := 64
     if len(args) > 0 {
         if n, err := strconv.Atoi(args[0]); err == nil {
-            numGpus = n
+            num_gpus = n
         }
     }
-    return scripts.launch_7b_training(numGpus)
+    return scripts.launch_7b_training(num_gpus)
 }
 func cmd_launch_1t(args []string) error {
-    numGpus := 1024
+    num_gpus := 1024
     if len(args) > 0 {
         if n, err := strconv.Atoi(args[0]); err == nil {
-            numGpus = n
+            num_gpus = n
         }
     }
-    return scripts.launch_1t_training(numGpus)
+    return scripts.launch_1t_training(num_gpus)
 }
 func cmd_build(args []string) error {
     return scripts.build_everything()
@@ -75,18 +75,18 @@ func cmd_inference(args []string) error {
     return scripts.run_inference_server(args[0])
 }
 func cmd_chat(args []string) error {
-    modelPath := "model.bin"
+    model_path := "model.bin"
     if len(args) > 0 {
-        modelPath = args[0]
+        model_path = args[0]
     }
-    return scripts.run_chat_interface(modelPath)
+    return scripts.run_chat_interface(model_path)
 }
 func cmd_benchmark(args []string) error {
-    modelPath := "model.bin"
+    model_path := "model.bin"
     if len(args) > 0 {
-        modelPath = args[0]
+        model_path = args[0]
     }
-    return scripts.run_inference_benchmark(modelPath)
+    return scripts.run_inference_benchmark(model_path)
 }
 func cmd_version(args []string) error {
     fmt.Println("NeurX CLI v1.0.0")
@@ -212,57 +212,57 @@ func find_command(name string) *command {
 }
 func show_help() {
     fmt.Println(`╔════════════════════════════════════════════════════════════╗
-║                   NeurX CLI - Main Interface                ║
+║                   neur_x CLI - main interface                ║
 ║                                                              ║
-║  Unified command-line tool replacing 159+ shell scripts    ║
-║  Provides: Training, Building, Inference, and Utilities    ║
+║  unified command-line tool replacing 159+ shell scripts    ║
+║  provides: Training, building, inference, and utilities    ║
 ╚════════════════════════════════════════════════════════════╝
 TRAINING COMMANDS:
   neurx train <scale> [num_gpus]
-    Start foundation model training
-    Scales: mini, small, medium, large, xl
-    Example: neurx train large 64
+    start foundation model training
+    scales: mini, small, medium, large, xl
+    example: neurx train large 64
   neurx quick-start
-    Quick training with mini scale (1 GPU, great for testing)
+    quick training with mini scale (1 GPU, great for testing)
   neurx launch-70b [num_gpus]
-    Launch 70B model training (default: 512 GPUs)
+    launch 70B model training (default: 512 gp_us)
   neurx launch-7b [num_gpus]
-    Launch 7B model training (default: 64 GPUs)
+    launch 7B model training (default: 64 gp_us)
   neurx launch-1t [num_gpus]
-    Launch 1T+ model training (default: 1024 GPUs)
+    launch 1T+ model training (default: 1024 gp_us)
 BUILD COMMANDS:
   neurx build
-    Build all components
+    build all components
   neurx build-quick
-    Quick build of core components only
+    quick build of core components only
   neurx build-clean
-    Clean all artifacts and rebuild
+    clean all artifacts and rebuild
 INFERENCE COMMANDS:
   neurx inference <model_path>
     Start inference server
   neurx chat [model_path]
-    Start interactive chat interface
+    start interactive chat interface
   neurx benchmark [model_path]
-    Run inference benchmarks
+    run inference benchmarks
 UTILITIES:
   neurx status
-    Show project status and configuration
+    show project status and configuration
   neurx version
-    Show version information
+    show version information
   neurx help [command]
-    Show help for specific command
+    show help for specific command
 ENVIRONMENT VARIABLES:
-  NEURX_ROOT        Root directory of NeurX project
-  S_COMPILER        Path to S language compiler
-  NEURX_GPUS        Number of GPUs to use
+  NEURX_ROOT        root directory of neur_x project
+  S_COMPILER        path to S language compiler
+  NEURX_GPUS        number of gp_us to use
   NEURX_BATCH_SIZE  batch_2 size for training
-  NEURX_LOG_DIR     Directory for logs
+  NEURX_LOG_DIR     directory for logs
 EXAMPLES:
   $ neurx quick-start
   $ neurx launch-70b 512
   $ neurx build-clean
   $ neurx inference ./model.bin
-For more information, visit: https:
+for more information, visit: https:
 `)
 }
 func show_detailed_help(cmd string) {
@@ -282,22 +282,22 @@ func main() {
         show_help()
         return
     }
-    cmdName := args[0]
-    if cmdName == "help" && len(args) > 1 {
+    cmd_name := args[0]
+    if cmd_name == "help" && len(args) > 1 {
         show_detailed_help(args[1])
         return
     }
-    cmd := find_command(cmdName)
+    cmd := find_command(cmd_name)
     if cmd == nil {
-        logger.error("Unknown command: %s", cmdName)
+        logger.error("Unknown command: %s", cmd_name)
         logger.log("Use 'neurx help' for usage information")
         os.Exit(1)
     }
-    var cmdArgs []string
+    var cmd_args []string
     if len(args) > 1 {
-        cmdArgs = args[1:]
+        cmd_args = args[1:]
     }
-    if err := cmd.handler(cmdArgs); err != nil {
+    if err := cmd.handler(cmd_args); err != nil {
         logger.error("command failed: %v", err)
         os.Exit(1)
     }

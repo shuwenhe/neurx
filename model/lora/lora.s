@@ -153,17 +153,17 @@ struct lora_linear {
     []float base_weight
     nf4_tensor base_nf4
     bool quantized
-    []float lora_A
-    []float lora_B
-    []float lora_A_grad
-    []float lora_B_grad
+    []float lora_a
+    []float lora_b
+    []float lora_a_grad
+    []float lora_b_grad
     int in_dim
     int out_dim
     int rank
     float scaling
     float dropout_rate
     []float last_input
-    []float last_Ax
+    []float last_ax
 }
 func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config cfg) lora_linear {
     if cfg.use_qlora {
@@ -172,34 +172,34 @@ func new_lora_linear(int in_dim, int out_dim, []float base_weight, lora_config c
             base_weight: []float{},
             base_nf4: q,
             quantized: true,
-            lora_A: []float{cap: cfg.rank * in_dim},
-            lora_B: []float{cap: out_dim * cfg.rank},
-            lora_A_grad: []float{cap: cfg.rank * in_dim},
-            lora_B_grad: []float{cap: out_dim * cfg.rank},
+            lora_a: []float{cap: cfg.rank * in_dim},
+            lora_b: []float{cap: out_dim * cfg.rank},
+            lora_a_grad: []float{cap: cfg.rank * in_dim},
+            lora_b_grad: []float{cap: out_dim * cfg.rank},
             in_dim: in_dim,
             out_dim: out_dim,
             rank: cfg.rank,
             scaling: cfg.alpha,
             dropout_rate: cfg.dropout,
             last_input: []float{},
-            last_Ax: []float{},
+            last_ax: []float{},
         }
     } else {
         lora_linear {
             base_weight: base_weight,
             base_nf4: nf4_tensor{ codes: []int{}, absmax: 0.0, num_elem: 0, codebook: []float{} },
             quantized: false,
-            lora_A: []float{cap: cfg.rank * in_dim},
-            lora_B: []float{cap: out_dim * cfg.rank},
-            lora_A_grad: []float{cap: cfg.rank * in_dim},
-            lora_B_grad: []float{cap: out_dim * cfg.rank},
+            lora_a: []float{cap: cfg.rank * in_dim},
+            lora_b: []float{cap: out_dim * cfg.rank},
+            lora_a_grad: []float{cap: cfg.rank * in_dim},
+            lora_b_grad: []float{cap: out_dim * cfg.rank},
             in_dim: in_dim,
             out_dim: out_dim,
             rank: cfg.rank,
             scaling: cfg.alpha,
             dropout_rate: cfg.dropout,
             last_input: []float{},
-            last_Ax: []float{},
+            last_ax: []float{},
         }
     }
 }
@@ -298,20 +298,20 @@ struct lora_backward_result {
 func lora_backward(lora_linear layer, []float dy, int batch) lora_backward_result {
     []float x  = []float{}
     []float ax = []float{}
-    []float dB = []float{}
-    []float dA = []float{}
+    []float d_b = []float{}
+    []float d_a = []float{}
     []float dx = []float{}
     int in_dim = layer.in_dim
     x = layer.last_input
     ax = layer.last_Ax
     int fill_d = 0
     while fill_d < layer.out_dim * layer.rank {
-        dB = append(dB, 0.0)
+        d_b = append(d_b, 0.0)
         fill_d = fill_d + 1
     }
     fill_d = 0
     while fill_d < layer.rank * in_dim {
-        dA = append(dA, 0.0)
+        d_a = append(d_a, 0.0)
         fill_d = fill_d + 1
     }
     fill_d = 0
@@ -326,7 +326,7 @@ func lora_backward(lora_linear layer, []float dy, int batch) lora_backward_resul
             float dy_scaled = dy[b*layer.out_dim+o] * layer.scaling
             int r = 0
             while r < layer.rank {
-                dB[o*layer.rank+r] = dB[o*layer.rank+r] + dy_scaled * ax[b*layer.rank+r]
+                d_b[o*layer.rank+r] = d_b[o*layer.rank+r] + dy_scaled * ax[b*layer.rank+r]
                 r = r + 1
             }
             int i = 0
@@ -346,7 +346,7 @@ func lora_backward(lora_linear layer, []float dy, int batch) lora_backward_resul
                     accum = accum + dy[b*layer.out_dim+o2] * layer.scaling * layer.lora_B[o2*layer.rank+r2]
                     o2 = o2 + 1
                 }
-                dA[r2*in_dim+i2] = dA[r2*in_dim+i2] + accum * x[b*in_dim+i2]
+                d_a[r2*in_dim+i2] = d_a[r2*in_dim+i2] + accum * x[b*in_dim+i2]
                 dx[b*in_dim+i2] = dx[b*in_dim+i2] + accum * layer.lora_A[r2*in_dim+i2]
                 i2 = i2 + 1
             }
@@ -357,21 +357,21 @@ func lora_backward(lora_linear layer, []float dy, int batch) lora_backward_resul
     lora_linear updated = layer
     int ga = 0
     for ga < layer.rank * layer.in_dim {
-        updated.lora_A_grad[ga] = updated.lora_A_grad[ga] + dA[ga]
+        updated.lora_A_grad[ga] = updated.lora_A_grad[ga] + d_a[ga]
         ga = ga + 1
     }
     int gb = 0
     for gb < layer.out_dim * layer.rank {
-        updated.lora_B_grad[gb] = updated.lora_B_grad[gb] + dB[gb]
+        updated.lora_B_grad[gb] = updated.lora_B_grad[gb] + d_b[gb]
         gb = gb + 1
     }
     lora_backward_result { updated_layer: updated, dx: dx }
 }
 struct lora_adamw_state {
-    []float mA
-    []float vA
-    []float mB
-    []float vB
+    []float m_a
+    []float v_a
+    []float m_b
+    []float v_b
     float lr
     float beta1
     float beta2
@@ -381,10 +381,10 @@ struct lora_adamw_state {
 }
 func new_lora_adamw(int rank, int in_dim, int out_dim, float lr) lora_adamw_state {
     lora_adamw_state {
-        mA: []float{cap: rank * in_dim},
-        vA: []float{cap: rank * in_dim},
-        mB: []float{cap: out_dim * rank},
-        vB: []float{cap: out_dim * rank},
+        m_a: []float{cap: rank * in_dim},
+        v_a: []float{cap: rank * in_dim},
+        m_b: []float{cap: out_dim * rank},
+        v_b: []float{cap: out_dim * rank},
         lr: lr,
         beta1: 0.9,
         beta2: 0.999,
@@ -458,8 +458,8 @@ struct lora_checkpoint {
     int out_dim
     int rank
     float alpha
-    []float lora_A
-    []float lora_B
+    []float lora_a
+    []float lora_b
     string layer_name
 }
 func lora_save_checkpoint(lora_linear layer, float alpha, string name) lora_checkpoint {
@@ -468,8 +468,8 @@ func lora_save_checkpoint(lora_linear layer, float alpha, string name) lora_chec
         out_dim: layer.out_dim,
         rank: layer.rank,
         alpha: alpha,
-        lora_A: layer.lora_A,
-        lora_B: layer.lora_B,
+        lora_a: layer.lora_A,
+        lora_b: layer.lora_B,
         layer_name: name,
     }
 }

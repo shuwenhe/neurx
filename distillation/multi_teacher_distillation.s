@@ -18,23 +18,23 @@ struct multi_teacher_config {
     layer_loss_weight: f32
 }
 struct teacher {
-    model: *Model
+    model: *model
     weight: f32
     name: string
     performance_score: f32
 }
 struct multi_teacher_distillation {
     config: multi_teacher_config
-    student: *Model
+    student: *model
     teachers: []teacher
-    optimizer: *Optimizer
+    optimizer: *optimizer
     teacher_losses: [][]f32
     teacher_contributions: []f32
 }
 func new_multi_teacher_distillation(
     config: multi_teacher_config,
-    student: *Model,
-    teacher_models: []*Model
+    student: *model,
+    teacher_models: []*model
 ) -> multi_teacher_distillation {
     let optimizer = adamw_optimizer(student.parameters(), config.learning_rate)
     let teachers: []teacher = []

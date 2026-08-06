@@ -30,7 +30,7 @@ func main() {
         println("  Install CUDA Toolkit from https:
         return
     }
-    print_success("CUDA Toolkit found", GREEN, NC)
+    print_success("CUDA toolkit found", GREEN, NC)
     string cuda_version = runtime_run_command_output("nvcc --version 2>/dev/null | grep release | awk '{print $5}' | tr -d ',' || true")
     println("  Version: " + trim(cuda_version))
     println("")

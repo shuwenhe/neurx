@@ -264,7 +264,7 @@ func (monitor *performance_monitor) snapshot_summary() string {
         len(health.alerts),
     )
 }
-func NewPerformanceMonitor() *performance_monitor {
+func new_performance_monitor() *performance_monitor {
     return &performance_monitor{
         config: performance_monitor_config{
             sampling_interval: 5,

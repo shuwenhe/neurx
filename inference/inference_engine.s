@@ -7,7 +7,7 @@ struct kv_cache_entry {
     tensor value_cache
     int current_length
 }
-class KVCacheManager {
+class kv_cache_manager {
     int num_layers
     int num_kv_heads
     int head_dim
@@ -33,7 +33,7 @@ func init(
     )
     float memory_gb = float(total_memory_bytes) / (1024**3)
     print(f"   Pre-allocated Memory: {memory_gb:.2f} GB")
-    return KVCacheManager{
+    return kv_cache_manager{
         num_layers: num_layers,
         num_kv_heads: num_kv_heads,
         head_dim: head_dim,
@@ -119,7 +119,7 @@ struct sequence_metadata {
     int context_length
     bool is_finished
 }
-class PagedAttentionManager {
+class paged_attention_manager {
     int block_size
     int num_blocks
     int num_kv_heads
@@ -162,7 +162,7 @@ func init_paged_attention(
             is_free: true,
             ref_count: 0,
         })
-    return PagedAttentionManager{
+    return paged_attention_manager{
         block_size: block_size,
         num_blocks: num_blocks,
         num_kv_heads: num_kv_heads,
@@ -198,7 +198,7 @@ func allocate_sequence(
     for i in range(blocks_needed):
         int block_id = _find_free_block()
         if block_id == -1:
-            raise OutOfMemoryError("No free blocks available! Consider reducing batch size or sequence length.")
+            raise out_of_memory_error("No free blocks available! Consider reducing batch size or sequence length.")
         self.physical_blocks[block_id].is_free = false
         self.physical_blocks[block_id].ref_count += 1
         append(allocated_blocks, block_id)
@@ -225,7 +225,7 @@ func extend_sequence(
     extensionEnglish text KV cache (generateEnglish text token English text)
     """
     if seq_id not in self.active_sequences:
-        raise ValueError(f"Sequence {seq_id} not found")
+        raise value_error(f"Sequence {seq_id} not found")
     sequence_metadata meta = self.active_sequences[seq_id]
     int new_tokens = shape(new_keys)[2]
     int global_token_offset = meta.current_length
@@ -237,7 +237,7 @@ func extend_sequence(
         if block_index >= len(meta.block_table):
             int new_block_id = _find_free_block()
             if new_block_id == -1:
-                raise OutOfMemoryError("Cannot allocate new block for sequence extension!")
+                raise out_of_memory_error("Cannot allocate new block for sequence extension!")
             self.physical_blocks[new_block_id].is_free = false
             self.physical_blocks[new_block_id].ref_count += 1
             append(meta.block_table, new_block_id)
@@ -333,7 +333,7 @@ struct inference_request {
     float tokens_per_second
     int total_tokens_processed
 }
-class ContinuousBatchScheduler {
+class continuous_batch_scheduler {
     int max_batch_size
     int max_queue_size
     float scheduling_policy
@@ -356,7 +356,7 @@ func init_scheduler(
     print(f"   Max Concurrent Requests: {max_batch_size}")
     print(f"   Max Queue Size: {max_queue_size}")
     print(f"   Scheduling Policy: {policy.upper()}")
-    return ContinuousBatchScheduler{
+    return continuous_batch_scheduler{
         max_batch_size: max_batch_size,
         max_queue_size: max_queue_size,
         scheduling_policy: policy,
@@ -386,7 +386,7 @@ func add_request(
         request_id for tracking
     """
     if len(self.waiting_queue) >= self.max_queue_size:
-        raise QueueFullError("request queue is full. Try again later.")
+        raise queue_full_error("request queue is full. Try again later.")
     static int next_id = 0
     next_id += 1
     inference_request req {
@@ -490,9 +490,9 @@ func get_status_report(self: ContinuousBatchScheduler):
 class inference_engine {
     neurx_model model
     tokenizer_state tokenizer
-    KVCacheManager kv_manager
-    option[PagedAttentionManager] paged_manager
-    ContinuousBatchScheduler scheduler
+    kv_cache_manager kv_manager
+    option[paged_attention_manager] paged_manager
+    continuous_batch_scheduler scheduler
     struct gen_config {
         float default_temperature = 0.7
         float default_top_p = 0.9
@@ -525,8 +525,8 @@ func init_engine(
     neurx_config cfg = model.config
     int num_kv_heads = cfg.num_key_value_heads
     int head_dim = cfg.hidden_size / cfg.num_attention_heads
-    KVCacheManager kv_mgr = init(num_layers=cfg.num_layers, num_kv_heads=num_kv_heads, head_dim=head_dim)
-    option[PagedAttentionManager] paged_mgr = none
+    kv_cache_manager kv_mgr = init(num_layers=cfg.num_layers, num_kv_heads=num_kv_heads, head_dim=head_dim)
+    option[paged_attention_manager] paged_mgr = none
     if enable_paged_attention:
         paged_mgr = some(init_paged_attention(
             num_kv_heads=num_kv_heads,
@@ -534,7 +534,7 @@ func init_engine(
             gpu_memory_mb=gpu_memory_mb,
             block_size=16
         ))
-    ContinuousBatchScheduler sched = init_scheduler(max_batch_size=max_batch_size)
+    continuous_batch_scheduler sched = init_scheduler(max_batch_size=max_batch_size)
     print(f"\n✅ Inference Engine Ready!")
     print(f"   model: {cfg.name}")
     print(f"   Vocab Size: {cfg.vocab_size:,}")
@@ -804,7 +804,7 @@ func test_inference_system() {
     print("Testing NEURX Inference Optimization System")
     print("="*70)
     print("\n[Test 1] Testing KV cache Manager...")
-    KVCacheManager kv_mgr = init(num_layers=4, num_kv_heads=8, head_dim=64)
+    kv_cache_manager kv_mgr = init(num_layers=4, num_kv_heads=8, head_dim=64)
     for layer in range(4):
         tensor new_k = randn(1, 8, 10, 64)
         tensor new_v = randn(1, 8, 10, 64)
@@ -815,7 +815,7 @@ func test_inference_system() {
     print(f"   Memory usage: {mem_info['total_memory_bytes'] / 1024:.1f} KB")
     print("✅ KV cache Manager works!")
     print("\n[Test 2] Testing Paged Attention Manager...")
-    PagedAttentionManager paged_mgr = init_paged_attention(
+    paged_attention_manager paged_mgr = init_paged_attention(
         num_kv_heads=8,
         head_dim=64,
         gpu_memory_mb=1024,
@@ -834,7 +834,7 @@ func test_inference_system() {
     print(f"   Free blocks after free: {paged_mgr.stats.free_blocks}")
     print("✅ Paged Attention Manager works!")
     print("\n[Test 3] Testing Continuous Batching Scheduler...")
-    ContinuousBatchScheduler sched = init_scheduler(max_batch_size=4)
+    continuous_batch_scheduler sched = init_scheduler(max_batch_size=4)
     tensor dummy_input = tensor([[1, 2, 3]])
     int id1 = sched.add_request("Hello", dummy_input, max_output_len=100)
     int id2 = sched.add_request("How are you?", dummy_input, max_output_len=50)

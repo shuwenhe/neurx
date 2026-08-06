@@ -27,7 +27,7 @@ struct tensor_impl {
     autograd_meta: autograd_meta
     ref_count: i64
 }
-interface ITensorImpl {
+interface i_tensor_impl {
     shape() -> []i64
     stride() -> []i64
     dtype() -> DType
@@ -51,14 +51,14 @@ interface ITensorImpl {
     decref() -> void
     ref_count() -> i64
 }
-interface ITensorImplFactory {
+interface i_tensor_impl_factory {
     create(storage: storage, metadata: tensor_metadata) -> tensor_impl
     create_leaf(storage: storage, metadata: tensor_metadata) -> tensor_impl
     clone(impl: tensor_impl) -> tensor_impl
     view(impl: tensor_impl, new_shape: []i64, new_stride: []i64) -> tensor_impl
     reshape(impl: tensor_impl, new_shape: []i64) -> tensor_impl
 }
-interface ITensorImplLifecycle {
+interface i_tensor_impl_lifecycle {
     finalize(impl: tensor_impl) -> void
     debug_info(impl: tensor_impl) -> string
 }

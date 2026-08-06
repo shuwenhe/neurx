@@ -265,21 +265,21 @@ func transformer_layer_forward_cached(
     int nh = layer.n_head
     int nkv = layer.n_kv_head
     int hd = layer.head_dim
-    int kv_D = nkv * hd
-    int ffn_D = len(layer.ffn.glu_ffn.gate_weight) / D
+    int kv_d = nkv * hd
+    int ffn_d = len(layer.ffn.glu_ffn.gate_weight) / D
     []float normed1 = rms_normalize(layer.norm1, x, batch_size, seq_len)
     []float q_proj = gpt_matmul(normed1, layer.attn.query_weight, total, D, D)
-    []float k_proj = gpt_matmul_kv(normed1, layer.attn.key_weight,   total, D, kv_D, D)
-    []float v_proj = gpt_matmul_kv(normed1, layer.attn.value_weight, total, D, kv_D, D)
+    []float k_proj = gpt_matmul_kv(normed1, layer.attn.key_weight,   total, D, kv_d, D)
+    []float v_proj = gpt_matmul_kv(normed1, layer.attn.value_weight, total, D, kv_d, D)
     if layer.attn.config.use_qkv_bias {
         int i = 0
         while i < total {
             int d = 0
             while d < D { q_proj[i*D+d] = q_proj[i*D+d] + layer.attn.query_bias[d]; d=d+1 }
             d = 0
-            while d < kv_D {
-                k_proj[i*kv_D+d] = k_proj[i*kv_D+d] + layer.attn.key_bias[d]
-                v_proj[i*kv_D+d] = v_proj[i*kv_D+d] + layer.attn.value_bias[d]
+            while d < kv_d {
+                k_proj[i*kv_d+d] = k_proj[i*kv_d+d] + layer.attn.key_bias[d]
+                v_proj[i*kv_d+d] = v_proj[i*kv_d+d] + layer.attn.value_bias[d]
                 d = d + 1
             }
             i = i + 1
@@ -317,7 +317,7 @@ func transformer_layer_forward_cached(
                     float angle = (s * 1.0) * freq
                     float cv = gpt_cos(angle)
                     float sv = gpt_sin(angle)
-                    int base = tok * kv_D + hk * hd
+                    int base = tok * kv_d + hk * hd
                     float k0 = k_rope[base + 2*p];   float k1 = k_rope[base + 2*p+1]
                     k_rope[base + 2*p]   = k0*cv - k1*sv
                     k_rope[base + 2*p+1] = k0*sv + k1*cv
@@ -334,14 +334,14 @@ func transformer_layer_forward_cached(
     b = 0
     while b < batch_size {
         int off_q = b * seq_len * D
-        int off_k = b * seq_len * kv_D
+        int off_k = b * seq_len * kv_d
         []float qb = bk_alloc(seq_len * D)
-        []float kb = bk_alloc(seq_len * kv_D)
-        []float vb = bk_alloc(seq_len * kv_D)
+        []float kb = bk_alloc(seq_len * kv_d)
+        []float vb = bk_alloc(seq_len * kv_d)
         int i = 0
         while i < seq_len * D    { qb[i] = q_rope[off_q + i]; i = i+1 }
         i = 0
-        while i < seq_len * kv_D { kb[i] = k_rope[off_k + i]; vb[i] = v_proj[off_k + i]; i = i+1 }
+        while i < seq_len * kv_d { kb[i] = k_rope[off_k + i]; vb[i] = v_proj[off_k + i]; i = i+1 }
         []float sdpa_out = gpt_causal_sdpa(qb, kb, vb, seq_len, nh, nkv, hd)
         []float weights = bk_compute_attn_weights(qb, kb, seq_len, nh, nkv, hd)
         sdpa_caches[b] = gpt_sdpa_cache {
@@ -363,21 +363,21 @@ func transformer_layer_forward_cached(
     }
     []float h_attn = gpt_add(x, attn_proj)
     []float normed2 = rms_normalize(layer.norm2, h_attn, batch_size, seq_len)
-    []float ffn_gate_pre = gpt_matmul(normed2, layer.ffn.glu_ffn.gate_weight, total, D, ffn_D)
-    []float ffn_val_pre  = gpt_matmul(normed2, layer.ffn.glu_ffn.value_weight, total, D, ffn_D)
+    []float ffn_gate_pre = gpt_matmul(normed2, layer.ffn.glu_ffn.gate_weight, total, D, ffn_d)
+    []float ffn_val_pre  = gpt_matmul(normed2, layer.ffn.glu_ffn.value_weight, total, D, ffn_d)
     int idx = 0
-    while idx < total * ffn_D {
-        ffn_gate_pre[idx] = ffn_gate_pre[idx] + layer.ffn.glu_ffn.gate_bias[idx % ffn_D]
-        ffn_val_pre[idx]  = ffn_val_pre[idx]  + layer.ffn.glu_ffn.value_bias[idx % ffn_D]
+    while idx < total * ffn_d {
+        ffn_gate_pre[idx] = ffn_gate_pre[idx] + layer.ffn.glu_ffn.gate_bias[idx % ffn_d]
+        ffn_val_pre[idx]  = ffn_val_pre[idx]  + layer.ffn.glu_ffn.value_bias[idx % ffn_d]
         idx = idx + 1
     }
-    []float gv_out = bk_alloc(total * ffn_D)
+    []float gv_out = bk_alloc(total * ffn_d)
     idx = 0
-    while idx < total * ffn_D {
+    while idx < total * ffn_d {
         gv_out[idx] = gpt_swish(ffn_gate_pre[idx]) * ffn_val_pre[idx]
         idx = idx + 1
     }
-    []float ffn_out_full = gpt_matmul(gv_out, layer.ffn.glu_ffn.down_weight, total, ffn_D, D)
+    []float ffn_out_full = gpt_matmul(gv_out, layer.ffn.glu_ffn.down_weight, total, ffn_d, D)
     idx = 0
     while idx < total * D {
         ffn_out_full[idx] = ffn_out_full[idx] + layer.ffn.glu_ffn.down_bias[idx % D]
@@ -579,11 +579,11 @@ func bk_causal_sdpa(
     int nkv = cache.n_kv_head
     int hd = cache.head_dim
     int D  = nh * hd
-    int kv_D = nkv * hd
+    int kv_d = nkv * hd
     float scale = 1.0 / gpt_sqrt(hd * 1.0)
     []float d_q = bk_alloc(S * D)
-    []float d_k = bk_alloc(S * kv_D)
-    []float d_v = bk_alloc(S * kv_D)
+    []float d_k = bk_alloc(S * kv_d)
+    []float d_v = bk_alloc(S * kv_d)
     int h = 0
     while h < nh {
         int hk = h - (h / nkv) * nkv
@@ -597,7 +597,7 @@ func bk_causal_sdpa(
                 j = 0
                 while j <= i {
                     float dv = w_row[j] * d_out[i*(D) + h*hd + d]
-                    d_v[j*kv_D + hk*hd + d] = d_v[j*kv_D + hk*hd + d] + dv
+                    d_v[j*kv_d + hk*hd + d] = d_v[j*kv_d + hk*hd + d] + dv
                     j = j + 1
                 }
                 d = d + 1
@@ -607,7 +607,7 @@ func bk_causal_sdpa(
             while d < hd {
                 j = 0
                 while j <= i {
-                    d_w_row[j] = d_w_row[j] + d_out[i*D + h*hd + d] * cache.v[j*kv_D + hk*hd + d]
+                    d_w_row[j] = d_w_row[j] + d_out[i*D + h*hd + d] * cache.v[j*kv_d + hk*hd + d]
                     j = j + 1
                 }
                 d = d + 1
@@ -619,8 +619,8 @@ func bk_causal_sdpa(
                 j = 0
                 while j <= i {
                     float sc = d_scores[j] * scale
-                    dq = dq + sc * cache.k[j*kv_D + hk*hd + d]
-                    d_k[j*kv_D + hk*hd + d] = d_k[j*kv_D + hk*hd + d] + sc * cache.q[i*D + h*hd + d]
+                    dq = dq + sc * cache.k[j*kv_d + hk*hd + d]
+                    d_k[j*kv_d + hk*hd + d] = d_k[j*kv_d + hk*hd + d] + sc * cache.q[i*D + h*hd + d]
                     j = j + 1
                 }
                 d_q[i*D + h*hd + d] = d_q[i*D + h*hd + d] + dq
@@ -662,7 +662,7 @@ func bk_rope_q([]float d_q_rope, int batch_size, int seq_len, int nh, int hd, in
     }
     d_q
 }
-func bk_rope_k([]float d_k_rope, int batch_size, int seq_len, int nkv, int hd, int kv_D, []float freqs) []float {
+func bk_rope_k([]float d_k_rope, int batch_size, int seq_len, int nkv, int hd, int kv_d, []float freqs) []float {
     []float d_k = gpt_copy(d_k_rope)
     int pair_dim = hd / 2
     int b = 0
@@ -677,7 +677,7 @@ func bk_rope_k([]float d_k_rope, int batch_size, int seq_len, int nkv, int hd, i
                     float angle = (s * 1.0) * freqs[p]
                     float cv = gpt_cos(angle)
                     float sv = gpt_sin(angle)
-                    int base = tok * kv_D + hk * hd
+                    int base = tok * kv_d + hk * hd
                     float g0 = d_k_rope[base + 2*p]
                     float g1 = d_k_rope[base + 2*p+1]
                     d_k[base + 2*p]   =  g0 * cv + g1 * sv
@@ -703,38 +703,38 @@ func transformer_layer_backward(
     int nh = layer.n_head
     int nkv = layer.n_kv_head
     int hd = layer.head_dim
-    int kv_D = nkv * hd
-    int ffn_D = len(layer.ffn.glu_ffn.gate_weight) / D
+    int kv_d = nkv * hd
+    int ffn_d = len(layer.ffn.glu_ffn.gate_weight) / D
     []float d_ffn_out = bk_copy(d_out)
     []float d_h_attn  = bk_copy(d_out)
-    []float d_gv = bk_matmul_da(d_ffn_out, layer.ffn.glu_ffn.down_weight, total, ffn_D, D)
-    []float d_ffn_down_w = bk_matmul_db(cache.ffn_gate_pre, d_ffn_out, total, ffn_D, D)
-    []float gv_out = bk_alloc(total * ffn_D)
+    []float d_gv = bk_matmul_da(d_ffn_out, layer.ffn.glu_ffn.down_weight, total, ffn_d, D)
+    []float d_ffn_down_w = bk_matmul_db(cache.ffn_gate_pre, d_ffn_out, total, ffn_d, D)
+    []float gv_out = bk_alloc(total * ffn_d)
     int idx = 0
-    while idx < total * ffn_D {
+    while idx < total * ffn_d {
         gv_out[idx] = gpt_swish(cache.ffn_gate_pre[idx]) * cache.ffn_val_pre[idx]
         idx = idx + 1
     }
-    d_ffn_down_w = bk_matmul_db(gv_out, d_ffn_out, total, ffn_D, D)
-    []float d_swish_gate = bk_alloc(total * ffn_D)
-    []float d_val_pre    = bk_alloc(total * ffn_D)
+    d_ffn_down_w = bk_matmul_db(gv_out, d_ffn_out, total, ffn_d, D)
+    []float d_swish_gate = bk_alloc(total * ffn_d)
+    []float d_val_pre    = bk_alloc(total * ffn_d)
     idx = 0
-    while idx < total * ffn_D {
+    while idx < total * ffn_d {
         d_swish_gate[idx] = d_gv[idx] * cache.ffn_val_pre[idx]
         d_val_pre[idx]    = d_gv[idx] * gpt_swish(cache.ffn_gate_pre[idx])
         idx = idx + 1
     }
-    []float d_gate_pre = bk_alloc(total * ffn_D)
+    []float d_gate_pre = bk_alloc(total * ffn_d)
     idx = 0
-    while idx < total * ffn_D {
+    while idx < total * ffn_d {
         d_gate_pre[idx] = d_swish_gate[idx] * bk_swish_grad(cache.ffn_gate_pre[idx])
         idx = idx + 1
     }
-    []float d_normed2_from_gate  = bk_matmul_da(d_gate_pre, layer.ffn.glu_ffn.gate_weight,  total, D, ffn_D)
-    []float d_normed2_from_value = bk_matmul_da(d_val_pre,  layer.ffn.glu_ffn.value_weight, total, D, ffn_D)
+    []float d_normed2_from_gate  = bk_matmul_da(d_gate_pre, layer.ffn.glu_ffn.gate_weight,  total, D, ffn_d)
+    []float d_normed2_from_value = bk_matmul_da(d_val_pre,  layer.ffn.glu_ffn.value_weight, total, D, ffn_d)
     []float d_normed2 = gpt_add(d_normed2_from_gate, d_normed2_from_value)
-    []float d_ffn_gate_w  = bk_matmul_db(cache.normed2, d_gate_pre, total, D, ffn_D)
-    []float d_ffn_val_w   = bk_matmul_db(cache.normed2, d_val_pre,  total, D, ffn_D)
+    []float d_ffn_gate_w  = bk_matmul_db(cache.normed2, d_gate_pre, total, D, ffn_d)
+    []float d_ffn_val_w   = bk_matmul_db(cache.normed2, d_val_pre,  total, D, ffn_d)
     []float d_h_attn2
     []float d_norm2_gamma
     (d_h_attn2, d_norm2_gamma) = bk_rmsn(layer.norm2, d_normed2, cache.h_attn, cache.batch_size, cache.seq_len)
@@ -744,12 +744,12 @@ func transformer_layer_backward(
     []float d_attn_out = bk_matmul_da(d_attn_proj, layer.attn.output_weight, total, D, D)
     []float d_wo       = bk_matmul_db(cache.attn_out, d_attn_proj, total, D, D)
     []float d_q_rope_all = bk_alloc(total * D)
-    []float d_k_rope_all = bk_alloc(total * kv_D)
-    []float d_v_all      = bk_alloc(total * kv_D)
+    []float d_k_rope_all = bk_alloc(total * kv_d)
+    []float d_v_all      = bk_alloc(total * kv_d)
     int b = 0
     while b < cache.batch_size {
         int off_q = b * cache.seq_len * D
-        int off_k = b * cache.seq_len * kv_D
+        int off_k = b * cache.seq_len * kv_d
         []float d_out_b = bk_alloc(cache.seq_len * D)
         int i = 0
         while i < cache.seq_len * D { d_out_b[i] = d_attn_out[off_q + i]; i = i+1 }
@@ -758,7 +758,7 @@ func transformer_layer_backward(
         i = 0
         while i < cache.seq_len * D    { d_q_rope_all[off_q + i] = sr.d_q[i]; i = i+1 }
         i = 0
-        while i < cache.seq_len * kv_D {
+        while i < cache.seq_len * kv_d {
             d_k_rope_all[off_k + i] = sr.d_k[i]
             d_v_all[off_k + i]      = sr.d_v[i]
             i = i + 1
@@ -766,13 +766,13 @@ func transformer_layer_backward(
         b = b + 1
     }
     []float d_q_proj = bk_rope_q(d_q_rope_all, cache.batch_size, cache.seq_len, nh, hd, D,    rope_freqs)
-    []float d_k_proj = bk_rope_k(d_k_rope_all, cache.batch_size, cache.seq_len, nkv, hd, kv_D, rope_freqs)
+    []float d_k_proj = bk_rope_k(d_k_rope_all, cache.batch_size, cache.seq_len, nkv, hd, kv_d, rope_freqs)
     []float d_wq = bk_matmul_db(cache.normed1, d_q_proj, total, D, D)
-    []float d_wk = bk_matmul_kv_db(cache.normed1, d_k_proj, total, D, kv_D, D)
-    []float d_wv = bk_matmul_kv_db(cache.normed1, d_v_all,  total, D, kv_D, D)
+    []float d_wk = bk_matmul_kv_db(cache.normed1, d_k_proj, total, D, kv_d, D)
+    []float d_wv = bk_matmul_kv_db(cache.normed1, d_v_all,  total, D, kv_d, D)
     []float d_normed1 = bk_matmul_da(d_q_proj, layer.attn.query_weight, total, D, D)
-    d_normed1 = bk_add_inplace(d_normed1, bk_matmul_kv_da(d_k_proj, layer.attn.key_weight,   total, D, kv_D, D))
-    d_normed1 = bk_add_inplace(d_normed1, bk_matmul_kv_da(d_v_all,  layer.attn.value_weight, total, D, kv_D, D))
+    d_normed1 = bk_add_inplace(d_normed1, bk_matmul_kv_da(d_k_proj, layer.attn.key_weight,   total, D, kv_d, D))
+    d_normed1 = bk_add_inplace(d_normed1, bk_matmul_kv_da(d_v_all,  layer.attn.value_weight, total, D, kv_d, D))
     []float d_x_from_norm
     []float d_norm1_gamma
     (d_x_from_norm, d_norm1_gamma) = bk_rmsn(layer.norm1, d_normed1, cache.x_in, cache.batch_size, cache.seq_len)
@@ -781,8 +781,8 @@ func transformer_layer_backward(
         d_norm1_gamma: d_norm1_gamma,
         d_norm2_gamma: d_norm2_gamma,
         d_wq: d_wq, d_wk: d_wk, d_wv: d_wv, d_wo: d_wo,
-        d_wq_bias: bk_alloc(D), d_wk_bias: bk_alloc(kv_D),
-        d_wv_bias: bk_alloc(kv_D), d_wo_bias: bk_alloc(D),
+        d_wq_bias: bk_alloc(D), d_wk_bias: bk_alloc(kv_d),
+        d_wv_bias: bk_alloc(kv_d), d_wo_bias: bk_alloc(D),
         d_ffn_gate_w: d_ffn_gate_w,
         d_ffn_val_w:  d_ffn_val_w,
         d_ffn_down_w: d_ffn_down_w,
@@ -858,8 +858,8 @@ func new_gpt_adamw_state(language_model model, float lr, float beta1, float beta
     int l = 0
     while l < nl {
         transformer_layer layer = transformer_layer_at(model.layers, l)
-        int kv_D = layer.n_kv_head * layer.head_dim
-        int ffn_D = len(layer.ffn.glu_ffn.gate_weight) / D
+        int kv_d = layer.n_kv_head * layer.head_dim
+        int ffn_d = len(layer.ffn.glu_ffn.gate_weight) / D
         layer_states[l] = transformer_layer_adamw {
             m_norm1_gamma: bk_alloc(D),    v_norm1_gamma: bk_alloc(D),
             m_norm2_gamma: bk_alloc(D),    v_norm2_gamma: bk_alloc(D),
@@ -867,9 +867,9 @@ func new_gpt_adamw_state(language_model model, float lr, float beta1, float beta
             m_wk: bk_alloc(D*D),           v_wk: bk_alloc(D*D),
             m_wv: bk_alloc(D*D),           v_wv: bk_alloc(D*D),
             m_wo: bk_alloc(D*D),           v_wo: bk_alloc(D*D),
-            m_ffn_gate_w: bk_alloc(D*ffn_D), v_ffn_gate_w: bk_alloc(D*ffn_D),
-            m_ffn_val_w:  bk_alloc(D*ffn_D), v_ffn_val_w:  bk_alloc(D*ffn_D),
-            m_ffn_down_w: bk_alloc(ffn_D*D), v_ffn_down_w: bk_alloc(ffn_D*D),
+            m_ffn_gate_w: bk_alloc(D*ffn_d), v_ffn_gate_w: bk_alloc(D*ffn_d),
+            m_ffn_val_w:  bk_alloc(D*ffn_d), v_ffn_val_w:  bk_alloc(D*ffn_d),
+            m_ffn_down_w: bk_alloc(ffn_d*D), v_ffn_down_w: bk_alloc(ffn_d*D),
         }
         l = l + 1
     }

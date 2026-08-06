@@ -16,13 +16,13 @@ struct gspo_config {
 }
 struct gspo_trainer {
     config: gspo_config
-    policy_model: *Model
-    reference_model: *Model
-    optimizer: *Optimizer
+    policy_model: *model
+    reference_model: *model
+    optimizer: *optimizer
     expert_routing_counts: []i32
     load_balance_losses: []f32
 }
-func new_gspo_trainer(config: gspo_config, model: *Model, ref_model: *Model) -> gspo_trainer {
+func new_gspo_trainer(config: gspo_config, model: *model, ref_model: *model) -> gspo_trainer {
     let optimizer = adamw_optimizer(model.parameters(), config.learning_rate)
     return gspo_trainer{
         config: config,

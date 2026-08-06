@@ -22,9 +22,9 @@ struct tensorrt_engine {
     runtime: *tensorrt_runtime
     engine: *tensorrt_model_engine
     decoder: *tensorrt_decoder
-    kv_cache_manager: *KVCacheManager
-    lora_manager: *LoRAManager
-    active_adapters: map[string]*LoRAAdapter
+    kv_cache_manager: *kv_cache_manager
+    lora_manager: *lo_ra_manager
+    active_adapters: map[string]*lo_ra_adapter
     total_requests: i64
     total_tokens_generated: i64
 }
@@ -36,7 +36,7 @@ struct tensorrt_runtime {
 }
 struct tensorrt_model_engine {
     engine_path: string
-    context: *TensorRTContext
+    context: *tensor_rt_context
     max_batch_size: i32
     max_seq_len: i32
 }
@@ -71,7 +71,7 @@ func new_tensorrt_engine(config: tensorrt_config) -> tensorrt_engine {
         config.max_output_len,
         config.kv_cache_free_gpu_memory_fraction
     )
-    let lora_manager: *LoRAManager = null
+    let lora_manager: *lo_ra_manager = null
     if config.lora_dir != "" {
         lora_manager = new_lora_manager(config.lora_dir, config.lora_target_modules)
     }
@@ -241,7 +241,7 @@ struct tensorrt_decoder_input {
     max_new_tokens: i32
     end_id: i32
     pad_id: i32
-    cache_blocks: []KVCacheBlock
+    cache_blocks: []kv_cache_block
     sampling_config: SamplingConfig
 }
 struct generation_request {

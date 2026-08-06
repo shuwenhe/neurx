@@ -242,7 +242,7 @@ func (engine *data_synthesis_engine) export_to_jsonl() {
     fmt.Printf("  Preference pairs: %d\n", len(engine.preference_pairs))
     fmt.Println("  Format: JSONL (JSON Lines)")
 }
-func NewDataSynthesisEngine(config data_synthesis_config) *data_synthesis_engine {
+func new_data_synthesis_engine(config data_synthesis_config) *data_synthesis_engine {
     return &data_synthesis_engine{
         config: config,
         synthetic_examples: []synthetic_example{},

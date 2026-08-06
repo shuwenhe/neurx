@@ -22,8 +22,8 @@ type distillation_metrics struct {
 }
 type distillation_framework struct {
     config                  distillation_config
-    teacher_model           PolicyModel
-    student_model           PolicyModel
+    teacher_model           policy_model
+    student_model           policy_model
     metrics_history         []distillation_metrics
     best_loss               float64
 }
@@ -193,10 +193,10 @@ func (framework *distillation_framework) get_temperature(step int, total_steps i
     temp := initial_temp + (final_temp-initial_temp)*progress
     return temp
 }
-func NewDistillationFramework(
+func new_distillation_framework(
     config distillation_config,
-    teacher PolicyModel,
-    student PolicyModel) *distillation_framework {
+    teacher policy_model,
+    student policy_model) *distillation_framework {
     return &distillation_framework{
         config: config,
         teacher_model: teacher,

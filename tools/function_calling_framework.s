@@ -37,7 +37,7 @@ struct parameter_schema {
     format?: string
     description?: string
     default?: any
-    additionalProperties?: bool | parameter_schema
+    additional_properties?: bool | parameter_schema
 }
 struct property_definition {
     type: string
@@ -62,7 +62,7 @@ struct tool_call {
     name: string
     arguments: string
     parsed_arguments: map<string, any>?
-    status: CallStatus = CallStatus.PENDING
+    status: CallStatus = call_status.PENDING
     result?: tool_call_result
     error?: tool_call_error
     start_time: float?
@@ -72,7 +72,7 @@ struct tool_call {
     children_ids: list<string> = []
     retry_count: int = 0
 }
-enum CallStatus {
+enum call_status {
     PENDING
     RUNNING
     COMPLETED
@@ -136,15 +136,15 @@ struct execution_summary {
     avg_duration_per_call_ms: float
     retry_count: int
 }
-class ToolRegistry {
+class tool_registry {
     tools: map<string, tool_definition>
-    executors: map<string, ToolExecutor>
+    executors: map<string, tool_executor>
     categories: map<string, list<string>>
     config: function_calling_config
     init(config?: function_calling_config) {
         this.config = config ?? new function_calling_config()
         this.tools = map<string, tool_definition>{}
-        this.executors = map<string, ToolExecutor>{}
+        this.executors = map<string, tool_executor>{}
         this.categories = map<string, list<string>>{}
     register(definition: tool_definition, executor: ToolExecutor) {
         if definition.name in this.tools:
@@ -232,7 +232,7 @@ struct registry_statistics {
     dangerous_tools: int
     permission_required_tools: int
 }
-interface ToolExecutor {
+interface tool_executor {
     execute(arguments: map<string, any>)
     get_name()
     validate_arguments(args: map<string, any>, schema: parameter_schema)
@@ -243,7 +243,7 @@ struct validation_report {
     invalid_params: list<map<string, string>>
     warnings: list<string>
 }
-class FunctionCallingEngine {
+class function_calling_engine {
     registry: ToolRegistry
     llm_client: any
     config: function_calling_config
@@ -252,9 +252,9 @@ class FunctionCallingEngine {
     init(llm_client: any, config?: function_calling_config, registry?: ToolRegistry) {
         this.llm_client = llm_client
         this.config = config ?? new function_calling_config()
-        this.registry = registry ?? new ToolRegistry(this.config)
+        this.registry = registry ?? new tool_registry(this.config)
         this.conversation_history = []
-        this.call_tracker = new CallTracker()
+        this.call_tracker = new call_tracker()
     }
     async process_user_request(user_message: string, available_tools?: list<tool_definition>) {
         total_start = current_time_millis()
@@ -281,8 +281,8 @@ class FunctionCallingEngine {
             }
         }
         total_time = current_time_millis() - total_start
-        completed_calls = [tc for tc in response.tool_calls if tc.status == CallStatus.COMPLETED]
-        failed_calls = [tc for tc in response.tool_calls if tc.status == CallStatus.FAILED or tc.status == CallStatus.TIMEOUT]
+        completed_calls = [tc for tc in response.tool_calls if tc.status == call_status.COMPLETED]
+        failed_calls = [tc for tc in response.tool_calls if tc.status == call_status.FAILED or tc.status == call_status.TIMEOUT]
         response.execution_summary = execution_summary{
             total_tool_calls_initiated=len(response.tool_calls),
             total_tool_calls_completed=len(completed_calls),
@@ -297,7 +297,7 @@ class FunctionCallingEngine {
             print_execution_log(response)
         return response
     }
-    async _single_stepExecution(user_msg: user_message, tools?: list<tool_definition>) {
+    async _single_step_execution(user_msg: user_message, tools?: list<tool_definition>) {
         """Execute at most one round of tool calls, then generate final response."""
         tool_defs = tools ?? this.registry.list_tools()
         llm_response = await this._call_llm_with_tools(
@@ -357,7 +357,7 @@ class FunctionCallingEngine {
             has_unrecoverable_errors = any(
                 tc.error?.recoverable == false
                 for tc in executed
-                if tc.status != CallStatus.COMPLETED
+                if tc.status != call_status.COMPLETED
             )
             if has_unrecoverable_errors && this.config.error_handling == "stop":
                 break
@@ -404,7 +404,7 @@ class FunctionCallingEngine {
                 parsed = json_parse(call.arguments)
                 tool_def = this.registry.get(call.name)
                 if tool_def == None {
-                    call.status = CallStatus.FAILED
+                    call.status = call_status.FAILED
                     call.error = tool_call_error{
                         code="NOT_FOUND",
                         message=f"Unknown tool: {call.name}",
@@ -415,7 +415,7 @@ class FunctionCallingEngine {
                 executor = this.registry.get_executor(call.name)
                 validation = executor.validate_arguments(parsed, tool_def.parameters)
                 if !validation.is_valid {
-                    call.status = CallStatus.FAILED
+                    call.status = call_status.FAILED
                     call.error = tool_call_error{
                         code="INVALID_ARGS",
                         message=f"Invalid arguments: {', '.join(validation.missing_params + [p for p in validation.invalid_params])}",
@@ -426,10 +426,10 @@ class FunctionCallingEngine {
                     validated_calls.append(call)
                     continue
                 call.parsed_arguments = parsed
-                call.status = CallStatus.PENDING
+                call.status = call_status.PENDING
                 validated_calls.append(call)
-            } catch Exception as e {
-                call.status = CallStatus.FAILED
+            } catch exception as e {
+                call.status = call_status.FAILED
                 call.error = tool_call_error{
                     code="INVALID_ARGS",
                     message=f"Failed to parse arguments: {e.message}",
@@ -442,11 +442,11 @@ class FunctionCallingEngine {
         pending_permission: list<tool_call> = []
         ready_to_execute: list<tool_call> = []
         for call in validated_calls {
-            if call.status != CallStatus.PENDING:
+            if call.status != call_status.PENDING:
                 continue
             tool_def = this.registry.get(call.name)!
             if tool_def.requires_permission or (tool_def.is_dangerous and this.config.require_permission_for.contains("execute")):
-                call.status = CallStatus.PERMISSION_REQUIRED
+                call.status = call_status.PERMISSION_REQUIRED
                 pending_permission.append(call)
             else:
                 ready_to_execute.append(call)
@@ -464,13 +464,13 @@ class FunctionCallingEngine {
                     for tc in batch:
                         result = await this._execute_single_call(tc)
                         executed.append(result)
-        all_results = executed + [c for c in validated_calls if c.status == CallStatus.FAILED] + pending_permission
+        all_results = executed + [c for c in validated_calls if c.status == call_status.FAILED] + pending_permission
         return all_results
     }
     async _execute_single_call(call: tool_call) {
         """Execute a single tool call with error handling and retries."""
         call.start_time = current_time()
-        call.status = CallStatus.RUNNING
+        call.status = call_status.RUNNING
         try {
             executor = this.registry.get_executor(call.name)!
             tool_def = this.registry.get(call.name)!
@@ -481,37 +481,37 @@ class FunctionCallingEngine {
             call.end_time = current_time()
             call.duration_ms = (call.end_time! - call.start_time!) * 1000
             call.result = result
-            call.status = CallStatus.COMPLETED if result.success else CallStatus.FAILED
+            call.status = call_status.COMPLETED if result.success else call_status.FAILED
             if !result.success:
                 call.error = tool_call_error{
                     code="EXECUTION_ERROR",
                     message=result.content?.toString() ?? "Tool execution failed",
                     recoverable=true
                 }
-            if call.status == CallStatus.FAILED and call.error?.recoverable and call.retry_count < this.config.max_retries:
+            if call.status == call_status.FAILED and call.error?.recoverable and call.retry_count < this.config.max_retries:
                 call.retry_count += 1
                 if this.config.verbose_logging:
                     print(f"   🔄 Retrying {call.name} (attempt {call.retry_count}/{this.config.max_retries})")
                 await sleep(1)
                 return await this._execute_single_call(call)
-        } catch TimeoutException:
+        } catch timeout_exception:
             call.end_time = current_time()
             call.duration_ms = (call.end_time! - call.start_time!) * 1000
-            call.status = CallStatus.TIMEOUT
+            call.status = call_status.TIMEOUT
             call.error = tool_call_error{
                 code="TIMEOUT",
                 message=f"Tool execution timed out after {tool_def.timeout_seconds}s",
                 recoverable=false
             }
-        except Exception as e:
+        except exception as e:
             call.end_time = current_time()
             call.duration_ms = (call.end_time! - call.start_time!) * 1000
-            call.status = CallStatus.FAILED
+            call.status = call_status.FAILED
             call.error = tool_call_error{
                 code="EXECUTION_ERROR",
                 message=str(e),
                 details={"exception_type": e.__class__.__name__},
-                recoverable=isinstance(e, NetworkError) or isinstance(e, RateLimitError)
+                recoverable=isinstance(e, network_error) or isinstance(e, rate_limit_error)
             }
         this.call_tracker.record_call(call)
         return call
@@ -539,7 +539,7 @@ struct conversation_summary {
     unique_tools_used: set<string>
     success_rate: float
 }
-class CallTracker {
+class call_tracker {
     history: list<tool_call>
     total_calls: int = 0
     successful_calls: int = 0
@@ -552,9 +552,9 @@ class CallTracker {
         this.history.append(call)
         this.total_calls += 1
         this.tools_used.add(call.name)
-        if call.status == CallStatus.COMPLETED:
+        if call.status == call_status.COMPLETED:
             this.successful_calls += 1
-        elif call.status in [CallStatus.FAILED, CallStatus.TIMEOUT]:
+        elif call.status in [call_status.FAILED, call_status.TIMEOUT]:
             this.failed_calls += 1
     }
     get success_rate -> float {
@@ -596,7 +596,7 @@ function create_builtin_web_search_tool() {
         category="search",
         tags=["internet", "information", "real-time"]
     }
-    executor = WebSearchExecutor()
+    executor = web_search_executor()
     return (defn, executor)
 }
 function create_builtin_code_executor_tool() {
@@ -624,7 +624,7 @@ function create_builtin_code_executor_tool() {
         is_dangerous=true,
         requires_permission=True
     }
-    executor = CodeInterpreterExecutor()
+    executor = code_interpreter_executor()
     return (defn, executor)
 }
 function create_builtin_file_operations_tool() {
@@ -658,10 +658,10 @@ function create_builtin_file_operations_tool() {
         category="filesystem",
         tags=["file", "io", "storage"]
     }
-    executor = FileOperationsExecutor()
+    executor = file_operations_executor()
     return (defn, executor)
 }
-class WebSearchExecutor implements ToolExecutor {
+class web_search_executor implements tool_executor {
     get_name() { return "web_search" }
     validate_arguments(args, schema) {
         if "query" not in args:
@@ -690,7 +690,7 @@ class CodeInterpreterExecutor implements ToolExecutor {
     async execute(args) {
         return tool_call_result{
             success=true,
-            content=f"Code executed successfully.\nOutput:\n[Simulated output for {args.get('language', 'python')} code]",
+            content=f"code executed successfully.\n_output:\n[simulated output for {args.get('language', 'python')} code]",
             content_type="text"
         }
     }
@@ -713,7 +713,7 @@ class FileOperationsExecutor implements ToolExecutor {
                 }
                 "write" => {
                     write_file(path, args["content"])
-                    return tool_call_result{success=true, content=f"File written: {path}", content_type="text"}
+                    return tool_call_result{success=true, content=f"file written: {path}", content_type="text"}
                 }
                 "list_dir" => {
                     entries = list_dir(path)
@@ -724,7 +724,7 @@ class FileOperationsExecutor implements ToolExecutor {
                     return tool_call_result{success=true, content={"exists": exists}, content_type="json"}
                 }
                 _ => {
-                    return tool_call_result{success=false, content=f"Unsupported action: {action}", content_type="error"}
+                    return tool_call_result{success=false, content=f"unsupported action: {action}", content_type="error"}
                 }
             }
         } catch Exception as e {
@@ -743,49 +743,49 @@ function create_function_calling_engine(llm_client: any, config?: function_calli
     return engine
 }
 async function test_function_calling() {
-    print("🧪 Testing NEURX FUNCTION Calling System...")
+    print("🧪 testing NEURX FUNCTION calling system...")
     mock_llc = MockLLMClientForFC()
     fc_engine = create_function_calling_engine(mock_llc, function_calling_config(verbose_logging=false))
-    print("  ✓ Test 1: Tool Registration")
+    print("  ✓ test 1: Tool registration")
     stats = fc_engine.registry.get_statistics()
-    assert stats.total_tools >= 3, f"Expected >=3 tools, got {stats.total_tools}"
-    assert "web_search" in [t.name for t in fc_engine.registry.list_tools()], "Web search tool should be registered"
-    print("  ✓ Test 2: Tool Search")
+    assert stats.total_tools >= 3, f"expected >=3 tools, got {stats.total_tools}"
+    assert "web_search" in [t.name for t in fc_engine.registry.list_tools()], "web search tool should be registered"
+    print("  ✓ test 2: Tool search")
     search_results = fc_engine.registry.search("find information internet")
-    assert search_results.length > 0, "Search should find web_search tool"
-    assert any(t.name == "web_search" for t in search_results), "Should find web_search"
-    print("  ✓ Test 3: Argument Validation")
+    assert search_results.length > 0, "search should find web_search tool"
+    assert any(t.name == "web_search" for t in search_results), "should find web_search"
+    print("  ✓ test 3: Argument validation")
     web_exec = fc_engine.registry.get_executor("web_search")!
     valid_report = web_exec.validate_arguments({"query": "test"}, parameter_schema{type="object", properties={}, required=["query"]})
-    assert valid_report.is_valid, "Valid args should pass"
+    assert valid_report.is_valid, "valid args should pass"
     invalid_report = web_exec.validate_arguments({}, parameter_schema{type="object", properties={}, required=["query"]})
-    assert !invalid_report.is_valid, "Missing args should fail"
+    assert !invalid_report.is_valid, "missing args should fail"
     assert "query" in invalid_report.missing_params, "'query' should be in missing params"
-    print("  ✓ Test 4: Schema Serialization for LLM")
+    print("  ✓ test 4: Schema serialization for LLM")
     llm_defs = fc_engine.registry.get_definitions_for_llm()
-    assert llm_defs.length == stats.total_tools, "All tools should be serialized"
+    assert llm_defs.length == stats.total_tools, "all tools should be serialized"
     for def_dict in llm_defs:
-        assert "type" in def_dict, "Each tool def should have 'type'"
-        assert "function" in def_dict, "Each should have 'function'"
-        assert "name" in def_dict["function"], "Each function should have 'name'"
-        assert "parameters" in def_dict["function"], "Each function should have 'parameters'"
-    print("  ✓ Test 5: End-to-End request Processing")
-    response = await fc_engine.process_user_request("Search for the latest news about AI breakthroughs")
+        assert "type" in def_dict, "each tool def should have 'type'"
+        assert "function" in def_dict, "each should have 'function'"
+        assert "name" in def_dict["function"], "each function should have 'name'"
+        assert "parameters" in def_dict["function"], "each function should have 'parameters'"
+    print("  ✓ test 5: End-to-end request processing")
+    response = await fc_engine.process_user_request("search for the latest news about AI breakthroughs")
     assert response.tool_calls.length > 0 or response.final_text_response != null, \
-           "Should have either tool calls or text response"
+           "should have either tool calls or text response"
     if response.tool_calls.length > 0:
         first_call = response.tool_calls[0]
-        assert first_call.id != null, "Tool call should have ID"
-        assert first_call.name != null, "Tool call should have name"
+        assert first_call.id != null, "tool call should have ID"
+        assert first_call.name != null, "tool call should have name"
         assert first_call.status in [CallStatus.COMPLETED, CallStatus.FAILED, CallStatus.PERMISSION_REQUIRED], \
-               f"Unexpected status: {first_call.status}"
-    assert response.execution_summary != null, "Should have execution summary"
+               f"unexpected status: {first_call.status}"
+    assert response.execution_summary != null, "should have execution summary"
     assert response.execution_summary!.total_tool_calls_initiated == response.tool_calls.length
-    print("  ✓ Test 6: Conversation Tracking")
+    print("  ✓ test 6: Conversation tracking")
     conv_summary = fc_engine.get_conversation_summary()
-    assert conv_summary.total_messages >= 2, "Should have at least user+assistant messages"
-    assert conv_summary.user_messages >= 1, "Should have user message"
-    print("\n✅ All Function Calling Tests Passed!")
+    assert conv_summary.total_messages >= 2, "should have at least user+assistant messages"
+    assert conv_summary.user_messages >= 1, "should have user message"
+    print("\n✅ all function calling tests passed!")
     return true
 }
 class MockLLMClientForFC {
@@ -816,7 +816,7 @@ class MockLLMClientForFC {
                 choices=[{
                     message={
                         role="assistant",
-                        content="Based on my search, here are the latest AI breakthroughs:\n\n1. New advances in multimodal learning...\n2. Breakthrough in efficient training...\n\nThese developments represent significant progress in the field."
+                        content="based on my search, here are the latest AI breakthroughs:\n\n1. New advances in multimodal learning...\n2. Breakthrough in efficient training...\n\n_these developments represent significant progress in the field."
                     }
                 }]
             }

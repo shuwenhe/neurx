@@ -85,7 +85,7 @@ func tp_attention_forward(
     int seq_len = 0
     if batch_size > 0 { seq_len = len(input[0]) }
     int H = state.config.hidden_dim
-    int local_H = state.local_hidden_dim
+    int local_h = state.local_hidden_dim
     int nh = state.local_num_heads
     int nkh = state.local_num_kv_heads
     int d = state.head_dim

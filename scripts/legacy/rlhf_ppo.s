@@ -45,7 +45,7 @@ type ppoconfig struct {
 }
 type ppotrainer struct {
     config              ppoconfig
-    policy_model        PolicyModel
+    policy_model        policy_model
     value_model         value_model
     reward_model        reward_model
     optimizer           optimizer_2
@@ -310,7 +310,7 @@ func (trainer *ppotrainer) sample_from_logits(logits []float64) int {
     }
     return len(probs) - 1
 }
-func (model *PolicyModel) forward(tokens []int) []float64 {
+func (model *policy_model) forward(tokens []int) []float64 {
     logits := make([]float64, model.vocab_size)
     for i := range logits {
         logits[i] = math.Sin(float64(i) / float64(model.vocab_size))
@@ -334,7 +334,7 @@ func (model *reward_model) predict_reward(tokens []int) float64 {
     }
     return sum / float64(len(tokens))
 }
-func NewPPOTrainer(config ppoconfig) *ppotrainer {
+func new_ppo_trainer(config ppoconfig) *ppotrainer {
     return &ppotrainer{
         config: config,
         policy_model: policy_model{
@@ -420,6 +420,6 @@ func main() {
         checkpoint_interval: 500,
         eval_interval: 100,
     }
-    trainer := NewPPOTrainer(config)
+    trainer := new_ppo_trainer(config)
     trainer.train(10)
 }

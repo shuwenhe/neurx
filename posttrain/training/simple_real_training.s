@@ -88,8 +88,8 @@ func main() {
     int lora_a_size = lora_rank * hidden_size
     int lora_b_size = hidden_size * lora_rank
     println("[Initializing LoRA Weights]")
-    []float lora_A = []float{cap: lora_a_size}
-    []float lora_B = []float{cap: lora_b_size}
+    []float lora_a = []float{cap: lora_a_size}
+    []float lora_b = []float{cap: lora_b_size}
     int seed = 42
     int i = 0
     while i < lora_a_size {
@@ -97,12 +97,12 @@ func main() {
         if seed < 0 { seed = 0 - seed }
         int remainder = seed - (seed / 10000) * 10000
         float val = (float(remainder) / 10000.0 - 0.5) * 0.02
-        lora_A = append(lora_A, val)
+        lora_a = append(lora_a, val)
         i = i + 1
     }
     i = 0
     while i < lora_b_size {
-        lora_B = append(lora_B, 0.0)
+        lora_b = append(lora_b, 0.0)
         i = i + 1
     }
     println("✓ Initialized LoRA weights (lora_A: " + int_to_str(lora_a_size) + ", lora_B: " + int_to_str(lora_b_size) + ")")
@@ -126,7 +126,7 @@ func main() {
             current_loss = current_loss - loss_delta
             if current_loss < 0.3 { current_loss = 0.3 + loss_delta * 0.1 }
             int update_idx = total_steps - (total_steps / lora_b_size) * lora_b_size
-            lora_B[update_idx] = lora_B[update_idx] + learning_rate * (current_loss - 0.5) * 0.1
+            lora_b[update_idx] = lora_b[update_idx] + learning_rate * (current_loss - 0.5) * 0.1
             if current_loss < best_loss {
                 best_loss = current_loss
             }
@@ -156,7 +156,7 @@ func main() {
     }
     i = 0
     while i < lora_a_size {
-        int val_int = int(lora_A[i] * 1000000.0)
+        int val_int = int(lora_a[i] * 1000000.0)
         buffer = append(buffer, byte(val_int))
         buffer = append(buffer, byte(val_int / 256))
         buffer = append(buffer, byte(val_int / 65536))
@@ -165,7 +165,7 @@ func main() {
     }
     i = 0
     while i < lora_b_size {
-        int val_int = int(lora_B[i] * 1000000.0)
+        int val_int = int(lora_b[i] * 1000000.0)
         buffer = append(buffer, byte(val_int))
         buffer = append(buffer, byte(val_int / 256))
         buffer = append(buffer, byte(val_int / 65536))

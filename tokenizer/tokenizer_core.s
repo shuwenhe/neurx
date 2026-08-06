@@ -89,7 +89,7 @@ func _create_mock_vocab(
     for i, token in enumerate(common_en):
         encoder[token] = offset + i
         decoder[offset + i] = token
-    for c in range(0x4E00, 0x4E00 + 100):
+    for c in range(0x_4_e_00, 0x_4_e_00 + 100):
         string char = chr(c)
         if char not in encoder:
             encoder[char] = len(encoder)

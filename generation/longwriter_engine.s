@@ -39,10 +39,10 @@ struct outline_node {
     content?: string
     word_count?: int
     quality_score?: float
-    status: SectionStatus = SectionStatus.PENDING
+    status: SectionStatus = section_status.PENDING
     revisions: int = 0
 }
-enum SectionStatus {
+enum section_status {
     PENDING
     GENERATING
     COMPLETED
@@ -115,7 +115,7 @@ struct generation_metadata {
     api_calls_made: int
     errors_encountered: int
 }
-class OutlinePlanner {
+class outline_planner {
     config: long_writer_config
     llm_client: any
     init(config: long_writer_config, llm_client: any) {
@@ -207,12 +207,12 @@ TASK: Create a comprehensive, well-structured writing outline for the following 
 {detail_instructions}
 Respond with a valid JSON object representing the outline tree structure. Use this schema:
 {{
-  "title": "Main Title",
+  "title": "main title",
   "sections": [{{
     "id": "1",
-    "title": "Section Title",
+    "title": "section title",
     "level": 1,
-    "description": "Detailed description...",
+    "description": "detailed description...",
     "estimated_words": 500,
     "keywords": ["key", "terms"],
     "must_include": ["point 1", "point 2"],
@@ -232,7 +232,7 @@ Now create the outline:"""
         try {
             data = json_parse(json_str)
             return parse_outline_data(data, topic)
-        } catch Exception as e:
+        } catch exception as e:
             print(f"Warning: Failed to parse outline JSON, falling back to text parsing: {e.message}")
             return this._fallback_parse_outline(llm_response_text, topic)
     }
@@ -243,7 +243,7 @@ Now create the outline:"""
             title=topic,
             level=0,
             children=[],
-            status=SectionStatus.COMPLETED
+            status=section_status.COMPLETED
         }
         node_stack: list<tuple<outline_node, int>> = [(root, 0)]
         for line in lines:
@@ -267,14 +267,14 @@ Now create the outline:"""
                 title=title,
                 level=level,
                 children=[],
-                status=SectionStatus.PENDING
+                status=section_status.PENDING
             }
             parent.children.append(new_node)
             node_stack.append((new_node, level))
         return root
     }
 }
-class ContentGenerator {
+class content_generator {
     config: long_writer_config
     llm_client: any
     quality_checker: QualityChecker?
@@ -282,7 +282,7 @@ class ContentGenerator {
         this.config = config
         this.llm_client = llm_client
         if config.quality_check_enabled:
-            this.quality_checker = new QualityChecker(config=config, llm_client=llm_client)
+            this.quality_checker = new quality_checker(config=config, llm_client=llm_client)
     }
     async generate_section(section: outline_node, context: generation_context) {
         start_time = current_time_millis()
@@ -298,7 +298,7 @@ class ContentGenerator {
         processed = this._post_process(raw_content, section)
         section.content = processed.text
         section.word_count = count_words(processed.text)
-        section.status = SectionStatus.COMPLETED
+        section.status = section_status.COMPLETED
         elapsed = current_time_millis() - start_time
         generated = generated_section{
             section=section,
@@ -314,7 +314,7 @@ class ContentGenerator {
             generated.quality_feedback = quality_result.feedback
             if quality_result.needs_revision && section.revisions < this.config.max_revision_rounds:
                 generated.revision_suggested = True
-                section.status = SectionStatus.REVISION_NEEDED
+                section.status = section_status.REVISION_NEEDED
         print(f"   ✓ {section.id}: {section.word_count} words ({elapsed:.0f}ms, score: {generated.quality_score ?? 'N/A'})")
         return generated
     }
@@ -354,8 +354,8 @@ Write section **{section.id}: {section.title}**
 **Overall document Topic**: {context.document_topic}
 **Current Position**: This is section {get_section_position(context.full_outline, section.id)} of {context.total_sections} total sections.
 **Parent Section**: {parent_context}
-{"**Previous Section Summary**:\n" + prev_context if prev_context != None else ""}
-{"**Upcoming Next**: " + next_hint if next_hint != None else ""}
+{"**previous section summary**:\n" + prev_context if prev_context != None else ""}
+{"**upcoming next**: " + next_hint if next_hint != None else ""}
 {f'Description:\n{section.description}\n' if section.description != None else ''}{f'Key Points to Cover:\n- ' + '\n- '.join(section.must_include!) + '\n' if section.must_include != None && section.must_include!.length > 0 else ''}
 {f'Relevant Keywords/Topics: ' + ', '.join(section.keywords!) if section.keywords != None && section.keywords!.length > 0 else ''}
 {style_instruction}
@@ -418,7 +418,7 @@ struct post_process_result {
     text: string
     formatting_changes: list<string>
 }
-class QualityChecker {
+class quality_checker {
     config: long_writer_config
     llm_client: any
     init(config: long_writer_config, llm_client: any) {
@@ -515,7 +515,7 @@ struct coherence_check_result {
     smooth_transition: bool
     has_bridge_phrase: bool
 }
-class LongWriterEngine {
+class long_writer_engine {
     config: long_writer_config
     llm_client: any
     planner: OutlinePlanner
@@ -524,8 +524,8 @@ class LongWriterEngine {
     init(config: long_writer_config, llm_client: any) {
         this.config = config
         this.llm_client = llm_client
-        this.planner = new OutlinePlanner(config=config, llm_client=llm_client)
-        this.generator = new ContentGenerator(config=config, llm_client=llm_client)
+        this.planner = new outline_planner(config=config, llm_client=llm_client)
+        this.generator = new content_generator(config=config, llm_client=llm_client)
         this.documents_history = []
     }
     async write_document(topic: string, requirements?: string) {
@@ -578,7 +578,7 @@ class LongWriterEngine {
                     if result.revision_suggested && section.revisions < this.config.max_revision_rounds:
                         revised_count += 1
                     break
-                } catch Exception as e:
+                } catch exception as e:
                     last_error = e
                     errors.append(str(e))
                     if attempt < max_attempts - 1:
@@ -587,7 +587,7 @@ class LongWriterEngine {
             if last_error != null and (generated_sections.length == 0 or generated_sections[-1].section.id != section.id):
                 print(f"   ❌ Failed to generate section {section.id} after {max_attempts} attempts")
                 section.content = f"[Error: Unable to generate this section. {last_error.message}]"
-                section.status = SectionStatus.REVISION_NEEDED
+                section.status = section_status.REVISION_NEEDED
         print(f"\n--- PHASE 3: POST-PROCESSING ---\n")
         full_text = assemble_full_text(generated_sections, this.config)
         toc = generate_toc(generated_sections, this.config)
@@ -703,7 +703,7 @@ function print_generation_summary(doc: long_document) {
     print(f"Quality Checks: ✅{m.quality_checks_passed} ❌{m.quality_checks_failed}")
     print(f"{'='*60}\n")
 function create_long_writer(config?: long_writer_config, llm_client: any) {
-    return new LongWriterEngine(config=config ?? new long_writer_config(), llm_client=llm_client)
+    return new long_writer_engine(config=config ?? new long_writer_config(), llm_client=llm_client)
 }
 async function test_long_writer() {
     print("🧪 Testing NEURX LONGWRITER Engine...")
@@ -713,7 +713,7 @@ async function test_long_writer() {
         output_format="markdown",
         include_toc=true
     )
-    mock_llm = MockLLMClient()
+    mock_llm = mock_llm_client()
     engine = create_long_writer(cfg, mock_llc)
     print("  ✓ Test 1: Outline Planning")
     plan = await engine.planner.create_plan("Benefits of Artificial Intelligence in Healthcare", "Focus on diagnostics, treatment, and patient care")
@@ -755,7 +755,7 @@ async function test_long_writer() {
     print("\n✅ All LongWriter Tests Passed!")
     return true
 }
-class MockLLMClient {
+class mock_llm_client {
     async generate(prompt: string, temperature?: float, max_tokens?: int,
                    response_format?: string, stop_sequences?: list<string>) {
         content_length = min(max_tokens ?? 256, 300)
@@ -791,11 +791,11 @@ struct llm_response {
     usage: usage_info
 }
 export {
-    long_writer_config, outline_node, SectionStatus, writing_plan, plan_metadata,
+    long_writer_config, outline_node, section_status, writing_plan, plan_metadata,
     writing_constraints, long_document, table_of_contents, toc_entry,
     document_statistics, generation_metadata,
-    ContentGenerator, generated_section, post_process_result,
-    QualityChecker, quality_check_result, coherence_check_result,
-    LongWriterEngine,
+    content_generator, generated_section, post_process_result,
+    quality_checker, quality_check_result, coherence_check_result,
+    long_writer_engine,
     create_long_writer, test_long_writer
 }

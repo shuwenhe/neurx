@@ -10,131 +10,131 @@ import (
 	"time"
 )
 type training_config struct {
-	ModelName       string `json:"model_name"`
-	ModelSize       string `json:"model_size"`
-	ParamCount      int64  `json:"param_count"`
-	BatchSize       int    `json:"batch_size"`
-	SeqLen          int    `json:"seq_len"`
-	VocabSize       int    `json:"vocab_size"`
-	TotalSteps      int    `json:"total_steps"`
-	EvalSteps       int    `json:"eval_steps"`
-	CheckpointSteps int    `json:"checkpoint_steps"`
-	LearningRate    float64 `json:"learning_rate"`
-	WarmupSteps     int    `json:"warmup_steps"`
-	MaxGradNorm     float64 `json:"max_grad_norm"`
-	WeightDecay     float64 `json:"weight_decay"`
-	DataDir         string `json:"data_dir"`
-	OutputDir       string `json:"output_dir"`
-	CheckpointDir   string `json:"checkpoint_dir"`
-	LogDir          string `json:"log_dir"`
-	NumGPUs         int    `json:"num_gpus"`
-	DataParallel    bool   `json:"data_parallel"`
-	TensorParallel  bool   `json:"tensor_parallel"`
-	PipelineParallel bool  `json:"pipeline_parallel"`
-	UseAmplifier    bool   `json:"use_amplifier"`
-	MixedPrecision  string `json:"mixed_precision"`
-	Seed            int64  `json:"seed"`
+	model_name       string `json:"model_name"`
+	model_size       string `json:"model_size"`
+	param_count      int64  `json:"param_count"`
+	batch_size       int    `json:"batch_size"`
+	seq_len          int    `json:"seq_len"`
+	vocab_size       int    `json:"vocab_size"`
+	total_steps      int    `json:"total_steps"`
+	eval_steps       int    `json:"eval_steps"`
+	checkpoint_steps int    `json:"checkpoint_steps"`
+	learning_rate    float64 `json:"learning_rate"`
+	warmup_steps     int    `json:"warmup_steps"`
+	max_grad_norm     float64 `json:"max_grad_norm"`
+	weight_decay     float64 `json:"weight_decay"`
+	data_dir         string `json:"data_dir"`
+	output_dir       string `json:"output_dir"`
+	checkpoint_dir   string `json:"checkpoint_dir"`
+	log_dir          string `json:"log_dir"`
+	num_gp_us         int    `json:"num_gpus"`
+	data_parallel    bool   `json:"data_parallel"`
+	tensor_parallel  bool   `json:"tensor_parallel"`
+	pipeline_parallel bool  `json:"pipeline_parallel"`
+	use_amplifier    bool   `json:"use_amplifier"`
+	mixed_precision  string `json:"mixed_precision"`
+	seed            int64  `json:"seed"`
 }
 type training_state struct {
-	CurrentStep     int64
-	CurrentEpoch    int
-	TotalLoss       float64
-	AvgLoss         float64
-	LearningRate    float64
-	TimesPerStep    float64
-	TokPerSec       float64
-	GradientNorm    float64
-	LastCheckpoint  string
-	LastEvalLoss    float64
-	EvalAccuracy    float64
+	current_step     int64
+	current_epoch    int
+	total_loss       float64
+	avg_loss         float64
+	learning_rate    float64
+	times_per_step    float64
+	tok_per_sec       float64
+	gradient_norm    float64
+	last_checkpoint  string
+	last_eval_loss    float64
+	eval_accuracy    float64
 }
 type training_metrics struct {
-	Step        int64       `json:"step"`
-	TrainLoss   float64     `json:"train_loss"`
-	EvalLoss    float64     `json:"eval_loss"`
-	Accuracy    float64     `json:"accuracy"`
-	LearningRate float64    `json:"learning_rate"`
-	TimePerStep float64     `json:"time_per_step"`
-	TokPerSec   float64     `json:"tok_per_sec"`
-	Timestamp   string      `json:"timestamp"`
+	step        int64       `json:"step"`
+	train_loss   float64     `json:"train_loss"`
+	eval_loss    float64     `json:"eval_loss"`
+	accuracy    float64     `json:"accuracy"`
+	learning_rate float64    `json:"learning_rate"`
+	time_per_step float64     `json:"time_per_step"`
+	tok_per_sec   float64     `json:"tok_per_sec"`
+	timestamp   string      `json:"timestamp"`
 }
 var gtraining_state = &training_state{
-	CurrentStep: 0,
-	CurrentEpoch: 0,
-	TotalLoss: 0.0,
-	AvgLoss: 0.0,
+	current_step: 0,
+	current_epoch: 0,
+	total_loss: 0.0,
+	avg_loss: 0.0,
 }
-var gConfig = &training_config{
-	ModelName: "neurx-1t",
-	ModelSize: "1t",
-	ParamCount: 1000000000,
-	BatchSize: 16,
-	SeqLen: 512,
-	VocabSize: 32000,
-	TotalSteps: 1000,
-	EvalSteps: 100,
-	CheckpointSteps: 500,
-	LearningRate: 0.0001,
-	WarmupSteps: 1000,
-	MaxGradNorm: 1.0,
-	WeightDecay: 0.01,
-	NumGPUs: 8,
-	DataParallel: true,
-	TensorParallel: false,
-	PipelineParallel: false,
-	UseAmplifier: true,
-	MixedPrecision: "fp16",
-	Seed: 42,
+var g_config = &training_config{
+	model_name: "neurx-1t",
+	model_size: "1t",
+	param_count: 1000000000,
+	batch_size: 16,
+	seq_len: 512,
+	vocab_size: 32000,
+	total_steps: 1000,
+	eval_steps: 100,
+	checkpoint_steps: 500,
+	learning_rate: 0.0001,
+	warmup_steps: 1000,
+	max_grad_norm: 1.0,
+	weight_decay: 0.01,
+	num_gp_us: 8,
+	data_parallel: true,
+	tensor_parallel: false,
+	pipeline_parallel: false,
+	use_amplifier: true,
+	mixed_precision: "fp16",
+	seed: 42,
 }
-func loadConfigFromEnv() {
+func load_config_from_env() {
 	if home := os.Getenv("NEURX_HOME"); home != "" {
-		gConfig.DataDir = filepath.Join(home, "dataset", "pretrain")
-		gConfig.OutputDir = filepath.Join(home, "artifacts", "output")
-		gConfig.CheckpointDir = filepath.Join(home, "artifacts", "checkpoints")
-		gConfig.LogDir = filepath.Join(home, "artifacts", "logs")
+		g_config.DataDir = filepath.Join(home, "dataset", "pretrain")
+		g_config.OutputDir = filepath.Join(home, "artifacts", "output")
+		g_config.CheckpointDir = filepath.Join(home, "artifacts", "checkpoints")
+		g_config.LogDir = filepath.Join(home, "artifacts", "logs")
 	}
 	if val := os.Getenv("NEURX_BATCH_SIZE"); val != "" {
 		if bs, err := strconv.Atoi(val); err == nil {
-			gConfig.BatchSize = bs
+			g_config.BatchSize = bs
 		}
 	}
 	if val := os.Getenv("NEURX_SEQ_LEN"); val != "" {
 		if sl, err := strconv.Atoi(val); err == nil {
-			gConfig.SeqLen = sl
+			g_config.SeqLen = sl
 		}
 	}
 	if val := os.Getenv("NEURX_TOTAL_STEPS"); val != "" {
 		if ts, err := strconv.Atoi(val); err == nil {
-			gConfig.TotalSteps = ts
+			g_config.TotalSteps = ts
 		}
 	}
 	if val := os.Getenv("NEURX_NUM_GPUS"); val != "" {
 		if ng, err := strconv.Atoi(val); err == nil {
-			gConfig.NumGPUs = ng
+			g_config.NumGPUs = ng
 		}
 	}
 	if val := os.Getenv("NEURX_LEARNING_RATE"); val != "" {
 		if lr, err := strconv.ParseFloat(val, 64); err == nil {
-			gConfig.LearningRate = lr
+			g_config.LearningRate = lr
 		}
 	}
 	if val := os.Getenv("NEURX_MIXED_PRECISION"); val != "" {
-		gConfig.MixedPrecision = val
+		g_config.MixedPrecision = val
 	}
 }
-func loadConfigFromFile(path string) error {
+func load_config_from_file(path string) error {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(data, gConfig)
+	err = json.Unmarshal(data, g_config)
 	if err != nil {
 		return err
 	}
 	return nil
 }
-func saveConfigToFile(path string) error {
-	data, err := json.MarshalIndent(gConfig, "", "  ")
+func save_config_to_file(path string) error {
+	data, err := json.MarshalIndent(g_config, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -144,12 +144,12 @@ func saveConfigToFile(path string) error {
 	}
 	return nil
 }
-func initializeTraining() error {
-	logInfo("Initializing training...")
+func initialize_training() error {
+	log_info("Initializing training...")
 	dirs := []string{
-		gConfig.OutputDir,
-		gConfig.CheckpointDir,
-		gConfig.LogDir,
+		g_config.OutputDir,
+		g_config.CheckpointDir,
+		g_config.LogDir,
 	}
 	for _, dir := range dirs {
 		err := os.MkdirAll(dir, 0755)
@@ -157,28 +157,28 @@ func initializeTraining() error {
 			return err
 		}
 	}
-	stat, err := os.Stat(gConfig.DataDir)
+	stat, err := os.Stat(g_config.DataDir)
 	if err != nil || !stat.IsDir() {
-		return fmt.Errorf("data directory not found: %s", gConfig.DataDir)
+		return fmt.Errorf("data directory not found: %s", g_config.DataDir)
 	}
-	configPath := filepath.Join(gConfig.OutputDir, "config_initial.json")
-	err = saveConfigToFile(configPath)
+	config_path := filepath.Join(g_config.OutputDir, "config_initial.json")
+	err = save_config_to_file(config_path)
 	if err != nil {
-		logWarn("Failed to save initial config: " + err.Error())
+		log_warn("Failed to save initial config: " + err.Error())
 	}
-	logInfo(fmt.Sprintf("Training initialized: %d GPUs, batch size %d, seq len %d",
-		gConfig.NumGPUs, gConfig.BatchSize, gConfig.SeqLen))
+	log_info(fmt.Sprintf("Training initialized: %d GPUs, batch size %d, seq len %d",
+		g_config.NumGPUs, g_config.BatchSize, g_config.SeqLen))
 	return nil
 }
-func loadCheckpoint(path string) error {
-	logInfo("Loading checkpoint: " + path)
+func load_checkpoint(path string) error {
+	log_info("Loading checkpoint: " + path)
 	stat, err := os.Stat(path)
 	if err != nil {
 		return fmt.Errorf("checkpoint not found: %s", path)
 	}
 	if stat.IsDir() {
-		statePath := filepath.Join(path, "state.json")
-		data, err := ioutil.ReadFile(statePath)
+		state_path := filepath.Join(path, "state.json")
+		data, err := ioutil.ReadFile(state_path)
 		if err != nil {
 			return err
 		}
@@ -188,149 +188,149 @@ func loadCheckpoint(path string) error {
 			return err
 		}
 		gtraining_state = &state
-		logInfo(fmt.Sprintf("Resumed from step %d, epoch %d",
+		log_info(fmt.Sprintf("Resumed from step %d, epoch %d",
 			gtraining_state.CurrentStep, gtraining_state.CurrentEpoch))
 		return nil
 	}
 	return fmt.Errorf("checkpoint path is not a directory: %s", path)
 }
-func saveCheckpoint(step int64) error {
-	checkpointDir := filepath.Join(gConfig.CheckpointDir,
+func save_checkpoint(step int64) error {
+	checkpoint_dir := filepath.Join(g_config.CheckpointDir,
 		fmt.Sprintf("checkpoint_step_%d", step))
-	err := os.MkdirAll(checkpointDir, 0755)
+	err := os.MkdirAll(checkpoint_dir, 0755)
 	if err != nil {
 		return err
 	}
-	statePath := filepath.Join(checkpointDir, "state.json")
+	state_path := filepath.Join(checkpoint_dir, "state.json")
 	data, err := json.MarshalIndent(gtraining_state, "", "  ")
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(statePath, data, 0644)
+	err = ioutil.WriteFile(state_path, data, 0644)
 	if err != nil {
 		return err
 	}
-	configPath := filepath.Join(checkpointDir, "config.json")
-	err = saveConfigToFile(configPath)
+	config_path := filepath.Join(checkpoint_dir, "config.json")
+	err = save_config_to_file(config_path)
 	if err != nil {
 		return err
 	}
-	gtraining_state.LastCheckpoint = checkpointDir
-	logInfo("checkpoint saved: " + checkpointDir)
+	gtraining_state.LastCheckpoint = checkpoint_dir
+	log_info("checkpoint saved: " + checkpoint_dir)
 	return nil
 }
-func trainingStep(step int64) error {
-	startTime := time.Now()
+func training_step(step int64) error {
+	start_time := time.Now()
 	gtraining_state.CurrentStep = step
 	gtraining_state.AvgLoss = gtraining_state.AvgLoss*0.99 + 2.5*0.01
-	gtraining_state.GradientNorm = calculateGradientNorm()
-	lr := calculateLearningRate(step)
+	gtraining_state.GradientNorm = calculate_gradient_norm()
+	lr := calculate_learning_rate(step)
 	gtraining_state.LearningRate = lr
-	elapsed := time.Since(startTime).Seconds()
+	elapsed := time.Since(start_time).Seconds()
 	gtraining_state.TimesPerStep = elapsed
-	tokPerStep := int64(gConfig.BatchSize) * int64(gConfig.SeqLen)
-	gtraining_state.TokPerSec = float64(tokPerStep) / elapsed
+	tok_per_step := int64(g_config.BatchSize) * int64(g_config.SeqLen)
+	gtraining_state.TokPerSec = float64(tok_per_step) / elapsed
 	return nil
 }
-func evaluationStep(step int64) error {
-	logInfo(fmt.Sprintf("Running evaluation at step %d...", step))
-	evalLoss := 2.3
+func evaluation_step(step int64) error {
+	log_info(fmt.Sprintf("Running evaluation at step %d...", step))
+	eval_loss := 2.3
 	accuracy := 0.45
-	gtraining_state.LastEvalLoss = evalLoss
+	gtraining_state.LastEvalLoss = eval_loss
 	gtraining_state.EvalAccuracy = accuracy
-	logInfo(fmt.Sprintf("  Eval Loss: %.4f, Accuracy: %.4f", evalLoss, accuracy))
+	log_info(fmt.Sprintf("  Eval Loss: %.4f, Accuracy: %.4f", eval_loss, accuracy))
 	return nil
 }
-func calculateLearningRate(step int64) float64 {
-	if step < int64(gConfig.WarmupSteps) {
-		return gConfig.LearningRate * float64(step) / float64(gConfig.WarmupSteps)
+func calculate_learning_rate(step int64) float64 {
+	if step < int64(g_config.WarmupSteps) {
+		return g_config.LearningRate * float64(step) / float64(gConfig.WarmupSteps)
 	}
-	decaySteps := int64(gConfig.TotalSteps) - int64(gConfig.WarmupSteps)
-	progress := float64(step-int64(gConfig.WarmupSteps)) / float64(decaySteps)
+	decay_steps := int64(g_config.TotalSteps) - int64(g_config.WarmupSteps)
+	progress := float64(step-int64(g_config.WarmupSteps)) / float64(decaySteps)
 	if progress > 1.0 {
 		progress = 1.0
 	}
-	decayFactor := 0.5 * (1.0 + cosine(progress*3.14159))
-	return gConfig.LearningRate * decayFactor
+	decay_factor := 0.5 * (1.0 + cosine(progress*3.14159))
+	return g_config.LearningRate * decay_factor
 }
-func calculateGradientNorm() float64 {
+func calculate_gradient_norm() float64 {
 	return 0.5
 }
 func cosine(x float64) float64 {
 	return 1.0 - x*x/2.0
 }
-func runTraining() error {
-	logInfo("Starting training loop...")
-	logInfo(fmt.Sprintf("model: %s, Params: %d, Total Steps: %d",
-		gConfig.ModelName, gConfig.ParamCount, gConfig.TotalSteps))
-	for step := int64(0); step < int64(gConfig.TotalSteps); step++ {
-		err := trainingStep(step)
+func run_training() error {
+	log_info("Starting training loop...")
+	log_info(fmt.Sprintf("model: %s, Params: %d, Total Steps: %d",
+		g_config.ModelName, g_config.ParamCount, g_config.TotalSteps))
+	for step := int64(0); step < int64(g_config.TotalSteps); step++ {
+		err := training_step(step)
 		if err != nil {
-			logError("Training step failed: " + err.Error())
+			log_error("Training step failed: " + err.Error())
 			return err
 		}
-		if step % int64(gConfig.EvalSteps) == 0 && step > 0 {
-			err := evaluationStep(step)
+		if step % int64(g_config.EvalSteps) == 0 && step > 0 {
+			err := evaluation_step(step)
 			if err != nil {
-				logWarn("Evaluation failed: " + err.Error())
+				log_warn("Evaluation failed: " + err.Error())
 			}
 		}
-		if step % int64(gConfig.CheckpointSteps) == 0 && step > 0 {
-			err := saveCheckpoint(step)
+		if step % int64(g_config.CheckpointSteps) == 0 && step > 0 {
+			err := save_checkpoint(step)
 			if err != nil {
-				logWarn("checkpoint failed: " + err.Error())
+				log_warn("checkpoint failed: " + err.Error())
 			}
 		}
 		if step % 10 == 0 {
 			metric := training_metrics{
-				Step: step,
-				TrainLoss: gtraining_state.AvgLoss,
-				EvalLoss: gtraining_state.LastEvalLoss,
-				Accuracy: gtraining_state.EvalAccuracy,
-				LearningRate: gtraining_state.LearningRate,
-				TimePerStep: gtraining_state.TimesPerStep,
-				TokPerSec: gtraining_state.TokPerSec,
-				Timestamp: time.Now().Format("2006-01-02 15:04:05"),
+				step: step,
+				train_loss: gtraining_state.AvgLoss,
+				eval_loss: gtraining_state.LastEvalLoss,
+				accuracy: gtraining_state.EvalAccuracy,
+				learning_rate: gtraining_state.LearningRate,
+				time_per_step: gtraining_state.TimesPerStep,
+				tok_per_sec: gtraining_state.TokPerSec,
+				timestamp: time.Now().Format("2006-01-02 15:04:05"),
 			}
-			logMetric(&metric)
+			log_metric(&metric)
 		}
 		if step % 100 == 0 {
-			logInfo(fmt.Sprintf("[Step %d/%d] Loss: %.4f, LR: %.6f, Tok/s: %.0f",
-				step, gConfig.TotalSteps, gtraining_state.AvgLoss,
+			log_info(fmt.Sprintf("[Step %d/%d] Loss: %.4f, LR: %.6f, Tok/s: %.0f",
+				step, g_config.TotalSteps, gtraining_state.AvgLoss,
 				gtraining_state.LearningRate, gtraining_state.TokPerSec))
 		}
 	}
-	err := saveCheckpoint(int64(gConfig.TotalSteps))
+	err := save_checkpoint(int64(g_config.TotalSteps))
 	if err != nil {
-		logWarn("Failed to save final checkpoint: " + err.Error())
+		log_warn("Failed to save final checkpoint: " + err.Error())
 	}
-	logInfo("Training completed successfully!")
+	log_info("Training completed successfully!")
 	return nil
 }
-func logInfo(msg string) {
+func log_info(msg string) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] INFO: %s\n", timestamp, msg)
 }
-func logWarn(msg string) {
+func log_warn(msg string) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] WARN: %s\n", timestamp, msg)
 }
-func logError(msg string) {
+func log_error(msg string) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] ERROR: %s\n", timestamp, msg)
 }
-func logMetric(m *training_metrics) {
+func log_metric(m *training_metrics) {
 	data, _ := json.Marshal(m)
-	metricsPath := filepath.Join(gConfig.LogDir, "metrics.jsonl")
-	f, err := os.OpenFile(metricsPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	metrics_path := filepath.Join(g_config.LogDir, "metrics.jsonl")
+	f, err := os.OpenFile(metrics_path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		logWarn("Failed to write metrics: " + err.Error())
+		log_warn("Failed to write metrics: " + err.Error())
 		return
 	}
 	defer f.Close()
 	f.WriteString(string(data) + "\n")
 }
-func printUsage() {
+func print_usage() {
 	fmt.Println("NeurX Training runner - Usage:")
 	fmt.Println("")
 	fmt.Println("Commands:")
@@ -356,80 +356,80 @@ func printUsage() {
 	fmt.Println("  NEURX_BATCH_SIZE=32 ./training_runner run")
 	fmt.Println("  ./training_runner resume")
 }
-func printConfig() {
-	data, _ := json.MarshalIndent(gConfig, "", "  ")
+func print_config() {
+	data, _ := json.MarshalIndent(g_config, "", "  ")
 	fmt.Println(string(data))
 }
 func main() {
 	if len(os.Args) < 2 {
-		printUsage()
+		print_usage()
 		return
 	}
 	command := os.Args[1]
-	loadConfigFromEnv()
+	load_config_from_env()
 	switch command {
 	case "run":
-		err := initializeTraining()
+		err := initialize_training()
 		if err != nil {
-			logError(err.Error())
+			log_error(err.Error())
 			os.Exit(1)
 		}
-		err = runTraining()
+		err = run_training()
 		if err != nil {
-			logError(err.Error())
+			log_error(err.Error())
 			os.Exit(1)
 		}
 	case "resume":
-		latestCheckpoint := filepath.Join(gConfig.CheckpointDir, "checkpoint_step_0")
-		entries, err := ioutil.ReadDir(gConfig.CheckpointDir)
+		latestCheckpoint := filepath.Join(g_config.CheckpointDir, "checkpoint_step_0")
+		entries, err := ioutil.ReadDir(g_config.CheckpointDir)
 		if err == nil && len(entries) > 0 {
-			latestCheckpoint = filepath.Join(gConfig.CheckpointDir, entries[len(entries)-1].Name())
+			latest_checkpoint = filepath.Join(g_config.CheckpointDir, entries[len(entries)-1].Name())
 		}
-		err = loadCheckpoint(latestCheckpoint)
+		err = load_checkpoint(latest_checkpoint)
 		if err != nil {
-			logError(err.Error())
+			log_error(err.Error())
 			os.Exit(1)
 		}
-		err = runTraining()
+		err = run_training()
 		if err != nil {
-			logError(err.Error())
+			log_error(err.Error())
 			os.Exit(1)
 		}
 	case "eval":
-		err := evaluationStep(0)
+		err := evaluation_step(0)
 		if err != nil {
-			logError(err.Error())
+			log_error(err.Error())
 			os.Exit(1)
 		}
 	case "config":
 		printConfig()
 	case "config-load":
 		if len(os.Args) < 3 {
-			logError("Missing config file path")
+			log_error("Missing config file path")
 			os.Exit(1)
 		}
-		err := loadConfigFromFile(os.Args[2])
+		err := load_config_from_file(os.Args[2])
 		if err != nil {
-			logError(err.Error())
+			log_error(err.Error())
 			os.Exit(1)
 		}
-		logInfo("config loaded successfully")
+		log_info("config loaded successfully")
 	case "config-save":
 		if len(os.Args) < 3 {
-			logError("Missing output path")
+			log_error("Missing output path")
 			os.Exit(1)
 		}
-		err := saveConfigToFile(os.Args[2])
+		err := save_config_to_file(os.Args[2])
 		if err != nil {
-			logError(err.Error())
+			log_error(err.Error())
 			os.Exit(1)
 		}
-		logInfo("config saved successfully")
+		log_info("config saved successfully")
 	case "help":
 		printUsage()
 	default:
 		fmt.Printf("Unknown command: %s\n", command)
-		printUsage()
+		print_usage()
 		os.Exit(1)
 	}
 }

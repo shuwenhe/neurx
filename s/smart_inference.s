@@ -9,15 +9,15 @@ struct keyword_match {
     int count
 }
 struct similarity_result {
-    int docId
+    int doc_id
     float score
     string text
 }
 struct inference_config {
-    int maxContextLength
-    float similarityThreshold
-    int topKDocs
-    bool useGenericResponse
+    int max_context_length
+    float similarity_threshold
+    int top_k_docs
+    bool use_generic_response
 }
 func strlen(string s) int {
     int count = 0
@@ -151,7 +151,7 @@ func calculate_similarity(string query, string doc) float {
     }
     score
 }
-func find_relevant_documents(string question, int topK) {
+func find_relevant_documents(string question, int top_k) {
     int kb_size = get_knowledge_base_size()
     float best_score = 0.0
     int best_doc = -1

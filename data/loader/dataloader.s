@@ -370,7 +370,7 @@ func tokenize_single(raw_sample raw, dataloader_config cfg) tokenized_sample {
     result.metadata = ""
     return result
 }
-func run_tokenizer(string text, dataloaderConfig cfg) []int {
+func run_tokenizer(string text, dataloader_config cfg) []int {
     int estimated_len = len(text) / 4
     []int ids = []int{cap: estimated_len}
     int i = 0

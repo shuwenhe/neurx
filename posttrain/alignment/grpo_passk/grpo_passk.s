@@ -1,6 +1,6 @@
 import "tensor/tensor.s"
 import "optimizer/optimizer.s"
-struct GRPOPassKConfig {
+struct grpo_pass_k_config {
     learning_rate: f32
     num_epochs: i32
     max_grad_norm: f32
@@ -17,7 +17,7 @@ struct GRPOPassKConfig {
     use_value_loss: bool
     value_loss_coeff: f32
 }
-struct CodeEvaluation {
+struct code_evaluation {
     compiles: bool
     passes_tests: bool
     num_tests_passed: i32
@@ -26,28 +26,28 @@ struct CodeEvaluation {
     execution_time: f32
     correctness_score: f32
 }
-struct GRPOPassKTrainer {
+struct grpo_pass_k_trainer {
     config: GRPOPassKConfig
-    policy_model: *Model
-    value_model: *Model
-    reference_model: *Model
-    optimizer: *Optimizer
+    policy_model: *model
+    value_model: *model
+    reference_model: *model
+    optimizer: *optimizer
     passk_history: []f32
     success_rate: f32
     step_count: i64
 }
 func new_grpo_passk_trainer(
     config: GRPOPassKConfig,
-    policy: *Model,
-    value: *Model,
-    reference: *Model
+    policy: *model,
+    value: *model,
+    reference: *model
 ) -> GRPOPassKTrainer {
     let params = policy.parameters()
     if config.use_value_loss {
         params = params + value.parameters()
     }
     let optimizer = adamw_optimizer(params, config.learning_rate)
-    return GRPOPassKTrainer{
+    return grpo_pass_k_trainer{
         config: config,
         policy_model: policy,
         value_model: value,
@@ -58,8 +58,8 @@ func new_grpo_passk_trainer(
         step_count: 0,
     }
 }
-func evaluate_code(code: string, test_cases: []TestCase) -> CodeEvaluation {
-    return CodeEvaluation{
+func evaluate_code(code: string, test_cases: []test_case) -> CodeEvaluation {
+    return code_evaluation{
         compiles: true,
         passes_tests: true,
         num_tests_passed: test_cases.len(),
@@ -69,7 +69,7 @@ func evaluate_code(code: string, test_cases: []TestCase) -> CodeEvaluation {
         correctness_score: 1.0,
     }
 }
-func compute_passk(evaluations: []CodeEvaluation, k: i32) -> f32 {
+func compute_passk(evaluations: []code_evaluation, k: i32) -> f32 {
     let num_passed = 0
     for eval in evaluations {
         if eval.passes_tests {
@@ -81,7 +81,7 @@ func compute_passk(evaluations: []CodeEvaluation, k: i32) -> f32 {
     }
     return 0.0
 }
-func (trainer: *GRPOPassKTrainer) compute_code_reward(eval: CodeEvaluation) -> f32 {
+func (trainer: *grpo_pass_k_trainer) compute_code_reward(eval: CodeEvaluation) -> f32 {
     let reward: f32 = 0.0
     if eval.compiles {
         reward += trainer.config.compilation_weight
@@ -91,8 +91,8 @@ func (trainer: *GRPOPassKTrainer) compute_code_reward(eval: CodeEvaluation) -> f
     reward += eval.style_score * trainer.config.style_weight
     return reward
 }
-func (trainer: *GRPOPassKTrainer) compute_passk_advantages(
-    evaluations: [][]CodeEvaluation,
+func (trainer: *grpo_pass_k_trainer) compute_passk_advantages(
+    evaluations: [][]code_evaluation,
     rewards: [][]f32
 ) -> [][]f32 {
     let batch_size = evaluations.len()
@@ -121,7 +121,7 @@ func (trainer: *GRPOPassKTrainer) compute_passk_advantages(
     }
     return advantages
 }
-func (trainer: *GRPOPassKTrainer) normalize_advantages(
+func (trainer: *grpo_pass_k_trainer) normalize_advantages(
     advantages: [][]f32
 ) -> [][]f32 {
     if !trainer.config.normalize_advantages {
@@ -149,17 +149,17 @@ func (trainer: *GRPOPassKTrainer) normalize_advantages(
     }
     return normalized
 }
-func (trainer: *GRPOPassKTrainer) train_step(
+func (trainer: *grpo_pass_k_trainer) train_step(
     prompts: []string,
-    test_cases: [][]TestCase
+    test_cases: [][]test_case
 ) -> (f32, f32, f32) {
     let batch_size = prompts.len()
     let k = trainer.config.k_samples
     let all_codes: [][]string = []
-    let all_log_probs: [][]Tensor = []
+    let all_log_probs: [][]tensor = []
     for prompt in prompts {
         let codes: []string = []
-        let log_probs: []Tensor = []
+        let log_probs: []tensor = []
         for i in 0..k {
             let code, log_prob = trainer.policy_model.generate(
                 prompt,
@@ -172,10 +172,10 @@ func (trainer: *GRPOPassKTrainer) train_step(
         all_codes.push(codes)
         all_log_probs.push(log_probs)
     }
-    let all_evaluations: [][]CodeEvaluation = []
+    let all_evaluations: [][]code_evaluation = []
     let all_rewards: [][]f32 = []
     for b in 0..batch_size {
-        let evaluations: []CodeEvaluation = []
+        let evaluations: []code_evaluation = []
         let rewards: []f32 = []
         for i in 0..k {
             let eval = evaluate_code(all_codes[b][i], test_cases[b])
@@ -268,7 +268,7 @@ func sort(values: []f32) -> []f32 {
 func concat_prompt_code(prompt: string, code: string) -> Tensor {
     return tensor_zeros([1])
 }
-struct TestCase {
+struct test_case {
     input: string
     expected_output: string
     timeout_ms: i32

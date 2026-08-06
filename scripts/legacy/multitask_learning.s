@@ -26,7 +26,7 @@ type multi_task_config struct {
 type multi_task_learner struct {
     config                  multi_task_config
     tasks                   []task
-    shared_encoder          PolicyModel
+    shared_encoder          policy_model
     task_heads              map[int][]float64
     task_losses             map[int][]float64
     task_performance        map[int]float64
@@ -207,7 +207,7 @@ func (mtl *multi_task_learner) analyze_performance() {
         }
     }
 }
-func NewMultiTaskLearner(config multi_task_config) *multi_task_learner {
+func new_multi_task_learner(config multi_task_config) *multi_task_learner {
     return &multi_task_learner{
         config: config,
         tasks: []task{},

@@ -209,10 +209,10 @@ struct runtime_lora_module {
     int rank
     float alpha
     float scaling
-    []float lora_A
-    []float lora_B
-    []float initial_A
-    []float initial_B
+    []float lora_a
+    []float lora_b
+    []float initial_a
+    []float initial_b
 }
 struct runtime_module_step_result {
     runtime_lora_module module
@@ -494,8 +494,8 @@ func runtime_lora_step(runtime_lora_module module, []float input_vec, []float ta
         grad_output[o] = out_scale * (output[o] - target_vec[o])
         o = o + 1
     }
-    []float grad_A = runtime_fill_f32(rank * in_dim, 0.0)
-    []float grad_B = runtime_fill_f32(out_dim * rank, 0.0)
+    []float grad_a = runtime_fill_f32(rank * in_dim, 0.0)
+    []float grad_b = runtime_fill_f32(out_dim * rank, 0.0)
     float grad_norm_sq = 0.0
     o = 0
     while o < out_dim {
@@ -503,7 +503,7 @@ func runtime_lora_step(runtime_lora_module module, []float input_vec, []float ta
         while r < rank {
             int idx = o * rank + r
             float g = module.scaling * grad_output[o] * ax[r]
-            grad_B[idx] = g
+            grad_b[idx] = g
             grad_norm_sq = grad_norm_sq + g * g
             r = r + 1
         }
@@ -526,7 +526,7 @@ func runtime_lora_step(runtime_lora_module module, []float input_vec, []float ta
         int i = 0
         while i < in_dim {
             float g = grad_hidden[r] * input_vec[i]
-            grad_A[r * in_dim + i] = g
+            grad_a[r * in_dim + i] = g
             grad_norm_sq = grad_norm_sq + g * g
             i = i + 1
         }
@@ -539,12 +539,12 @@ func runtime_lora_step(runtime_lora_module module, []float input_vec, []float ta
     }
     int j = 0
     while j < len(module.lora_A) {
-        module.lora_A[j] = module.lora_A[j] - lr * clip_scale * grad_A[j]
+        module.lora_A[j] = module.lora_A[j] - lr * clip_scale * grad_a[j]
         j = j + 1
     }
     j = 0
     while j < len(module.lora_B) {
-        module.lora_B[j] = module.lora_B[j] - lr * clip_scale * grad_B[j]
+        module.lora_B[j] = module.lora_B[j] - lr * clip_scale * grad_b[j]
         j = j + 1
     }
     runtime_module_step_result result

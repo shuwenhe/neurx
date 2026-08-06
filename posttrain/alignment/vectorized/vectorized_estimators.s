@@ -29,7 +29,7 @@ func compute_rloo_loss_vectorized(
     rewards: Tensor,
     response_mask: Tensor,
     use_whitening: bool
-) -> (Tensor, Tensor) {
+) -> (tensor, tensor) {
     let advantages = compute_rloo_advantages_vectorized(rewards, response_mask, use_whitening)
     let policy_loss = -(log_probs * advantages * response_mask)
     let valid_count = response_mask.sum()
@@ -74,7 +74,7 @@ func compute_grpo_loss_vectorized(
     kl_coef: f32,
     use_whitening: bool,
     advantage_eps: f32
-) -> (Tensor, Tensor, Tensor) {
+) -> (tensor, tensor, tensor) {
     let advantages = compute_grpo_advantages_vectorized(
         rewards,
         response_mask,
@@ -94,7 +94,7 @@ func compute_grpo_loss_vectorized(
     let total_loss = mean_policy_loss + kl_coef * mean_kl
     return total_loss, advantages, mean_kl
 }
-func stack_sequences(sequences: []Tensor) -> Tensor {
+func stack_sequences(sequences: []tensor) -> Tensor {
     if sequences.len() == 0 {
         return tensor_zeros([0, 0])
     }
@@ -106,7 +106,7 @@ func stack_sequences(sequences: []Tensor) -> Tensor {
     }
     return stacked
 }
-func stack_grouped_sequences(grouped_sequences: [][]Tensor) -> Tensor {
+func stack_grouped_sequences(grouped_sequences: [][]tensor) -> Tensor {
     if grouped_sequences.len() == 0 {
         return tensor_zeros([0, 0, 0])
     }
@@ -121,9 +121,9 @@ func stack_grouped_sequences(grouped_sequences: [][]Tensor) -> Tensor {
     }
     return stacked
 }
-func unstack_tensor(stacked: Tensor) -> []Tensor {
+func unstack_tensor(stacked: Tensor) -> []tensor {
     let batch_size = stacked.shape[0]
-    let sequences: []Tensor = []
+    let sequences: []tensor = []
     for i in 0..batch_size {
         sequences.push(stacked[i])
     }

@@ -1,7 +1,7 @@
 import "tensor/tensor.s"
 import "optimizer/optimizer.s"
 import "posttrain/alignment/ppo/ppo.s"
-struct SAPOConfig {
+struct sapo_config {
     learning_rate: f32
     num_epochs: i32
     max_grad_norm: f32
@@ -15,16 +15,16 @@ struct SAPOConfig {
     use_value_loss: bool
     value_loss_coeff: f32
 }
-struct SAPOTrainer {
+struct sapo_trainer {
     config: SAPOConfig
-    policy_model: *Model
-    value_model: *Model
-    reference_model: *Model
-    optimizer: *Optimizer
+    policy_model: *model
+    value_model: *model
+    reference_model: *model
+    optimizer: *optimizer
     step_count: i64
     advantage_stats: AdvantageStats
 }
-struct AdvantageStats {
+struct advantage_stats {
     mean: f32
     std: f32
     max_abs: f32
@@ -32,16 +32,16 @@ struct AdvantageStats {
 }
 func new_sapo_trainer(
     config: SAPOConfig,
-    policy: *Model,
-    value: *Model,
-    reference: *Model
+    policy: *model,
+    value: *model,
+    reference: *model
 ) -> SAPOTrainer {
     let params = policy.parameters()
     if config.use_value_loss {
         params = params + value.parameters()
     }
     let optimizer = adamw_optimizer(params, config.learning_rate)
-    return SAPOTrainer{
+    return sapo_trainer{
         config: config,
         policy_model: policy,
         value_model: value,
@@ -56,7 +56,7 @@ func new_sapo_trainer(
         },
     }
 }
-func (trainer: *SAPOTrainer) smooth_clip(x: Tensor, lower: f32, upper: f32) -> Tensor {
+func (trainer: *sapo_trainer) smooth_clip(x: Tensor, lower: f32, upper: f32) -> Tensor {
     let tau = trainer.config.tau
     let lower_weight = sigmoid((x - lower) / tau)
     let upper_weight = sigmoid((upper - x) / tau)
@@ -65,7 +65,7 @@ func (trainer: *SAPOTrainer) smooth_clip(x: Tensor, lower: f32, upper: f32) -> T
                          upper * (1.0 - upper_weight)
     return smooth_clipped
 }
-func (trainer: *SAPOTrainer) compute_smooth_surrogate(
+func (trainer: *sapo_trainer) compute_smooth_surrogate(
     ratio: Tensor,
     advantage: Tensor
 ) -> Tensor {
@@ -81,14 +81,14 @@ func (trainer: *SAPOTrainer) compute_smooth_surrogate(
         return smooth_obj
     }
 }
-func (trainer: *SAPOTrainer) compute_gae(
-    rewards: []Tensor,
-    values: []Tensor,
-    dones: []Tensor
-) -> ([]Tensor, []Tensor) {
+func (trainer: *sapo_trainer) compute_gae(
+    rewards: []tensor,
+    values: []tensor,
+    dones: []tensor
+) -> ([]tensor, []tensor) {
     let batch_size = rewards.len()
-    let advantages: []Tensor = []
-    let returns: []Tensor = []
+    let advantages: []tensor = []
+    let returns: []tensor = []
     for b in 0..batch_size {
         let seq_len = rewards[b].shape[0]
         let seq_advantages = tensor_zeros([seq_len])
@@ -110,7 +110,7 @@ func (trainer: *SAPOTrainer) compute_gae(
     }
     return advantages, returns
 }
-func (trainer: *SAPOTrainer) normalize_advantages(advantages: []Tensor) -> []Tensor {
+func (trainer: *sapo_trainer) normalize_advantages(advantages: []tensor) -> []tensor {
     if !trainer.config.normalize_advantages {
         return advantages
     }
@@ -129,7 +129,7 @@ func (trainer: *SAPOTrainer) normalize_advantages(advantages: []Tensor) -> []Ten
         }
     }
     trainer.advantage_stats.max_abs = max_abs
-    let normalized: []Tensor = []
+    let normalized: []tensor = []
     for adv in advantages {
         let norm_adv = (adv - trainer.advantage_stats.mean) /
                        (trainer.advantage_stats.std + trainer.config.advantage_epsilon)
@@ -137,22 +137,22 @@ func (trainer: *SAPOTrainer) normalize_advantages(advantages: []Tensor) -> []Ten
     }
     return normalized
 }
-func (trainer: *SAPOTrainer) train_step(
-    prompts: []Tensor,
-    responses: []Tensor,
-    rewards: []Tensor
+func (trainer: *sapo_trainer) train_step(
+    prompts: []tensor,
+    responses: []tensor,
+    rewards: []tensor
 ) -> (f32, f32, f32) {
     let batch_size = prompts.len()
-    let inputs: []Tensor = []
+    let inputs: []tensor = []
     for i in 0..batch_size {
         inputs.push(concat(prompts[i], responses[i]))
     }
-    let values: []Tensor = []
+    let values: []tensor = []
     for input in inputs {
         let value = trainer.value_model.forward(input)
         values.push(value)
     }
-    let dones: []Tensor = []
+    let dones: []tensor = []
     for resp in responses {
         let seq_len = resp.shape[0]
         let done = tensor_zeros([seq_len])
@@ -161,13 +161,13 @@ func (trainer: *SAPOTrainer) train_step(
     }
     let advantages, returns = trainer.compute_gae(rewards, values, dones)
     let normalized_advantages = trainer.normalize_advantages(advantages)
-    let old_log_probs: []Tensor = []
+    let old_log_probs: []tensor = []
     for input in inputs {
         let logits = trainer.policy_model.forward(input)
         let log_probs = log_softmax(logits, dim: -1)
         old_log_probs.push(log_probs)
     }
-    let ref_log_probs: []Tensor = []
+    let ref_log_probs: []tensor = []
     for input in inputs {
         let logits = trainer.reference_model.forward(input)
         let log_probs = log_softmax(logits, dim: -1)
@@ -218,7 +218,7 @@ func (trainer: *SAPOTrainer) train_step(
         total_kl / f32(num_updates)
     )
 }
-func (trainer: *SAPOTrainer) train(train_data: DataLoader) -> ([]f32, []f32) {
+func (trainer: *sapo_trainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let value_losses: []f32 = []
     for batch in train_data {

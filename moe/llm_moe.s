@@ -140,11 +140,11 @@ func gpt_moe_block_forward(
     int nh = block.dense_block.n_head
     int nkv = block.dense_block.n_kv_head
     int hd = block.dense_block.head_dim
-    int kv_D = nkv * hd
+    int kv_d = nkv * hd
     []float normed1 = rms_normalize(block.dense_block.norm1, x, batch_size, seq_len)
     []float q = gpt_matmul(normed1, block.dense_block.attn.query_weight, total, H, H)
-    []float k = gpt_matmul_kv(normed1, block.dense_block.attn.key_weight,   total, H, kv_D, H)
-    []float v = gpt_matmul_kv(normed1, block.dense_block.attn.value_weight, total, H, kv_D, H)
+    []float k = gpt_matmul_kv(normed1, block.dense_block.attn.key_weight,   total, H, kv_d, H)
+    []float v = gpt_matmul_kv(normed1, block.dense_block.attn.value_weight, total, H, kv_d, H)
     int pair_dim = hd / 2
     []float qr = gpt_copy(q)
     []float kr = gpt_copy(k)
@@ -175,7 +175,7 @@ func gpt_moe_block_forward(
                     float angle = (s * 1.0) * rope_freqs[p]
                     float cv = gpt_cos(angle)
                     float sv = gpt_sin(angle)
-                    int base_k = tok * kv_D + hk * hd
+                    int base_k = tok * kv_d + hk * hd
                     float k0 = kr[base_k + 2*p]; float k1 = kr[base_k + 2*p+1]
                     kr[base_k + 2*p]   = k0*cv - k1*sv
                     kr[base_k + 2*p+1] = k0*sv + k1*cv
@@ -191,14 +191,14 @@ func gpt_moe_block_forward(
     b = 0
     while b < batch_size {
         int off_q = b * seq_len * H
-        int off_k = b * seq_len * kv_D
+        int off_k = b * seq_len * kv_d
         []float qb = gpt_alloc(seq_len * H, 0.0)
-        []float kb = gpt_alloc(seq_len * kv_D, 0.0)
-        []float vb = gpt_alloc(seq_len * kv_D, 0.0)
+        []float kb = gpt_alloc(seq_len * kv_d, 0.0)
+        []float vb = gpt_alloc(seq_len * kv_d, 0.0)
         int i = 0
         while i < seq_len * H    { qb[i] = qr[off_q + i]; i = i+1 }
         i = 0
-        while i < seq_len * kv_D { kb[i] = kr[off_k + i]; vb[i] = v[off_k + i]; i = i+1 }
+        while i < seq_len * kv_d { kb[i] = kr[off_k + i]; vb[i] = v[off_k + i]; i = i+1 }
         []float sdpa = gpt_causal_sdpa(qb, kb, vb, seq_len, nh, nkv, hd)
         i = 0
         while i < seq_len * H { attn_out[b*seq_len*H + i] = sdpa[i]; i = i+1 }
@@ -220,22 +220,22 @@ func gpt_moe_block_forward(
 }
 func gpt_dense_ffn_forward(transformer_layer layer, []float normed2, int total) []float {
     int H = layer.hidden_dim
-    int ffn_D = len(layer.ffn.glu_ffn.gate_weight) / H
-    []float gate = gpt_matmul(normed2, layer.ffn.glu_ffn.gate_weight, total, H, ffn_D)
-    []float val  = gpt_matmul(normed2, layer.ffn.glu_ffn.value_weight, total, H, ffn_D)
+    int ffn_d = len(layer.ffn.glu_ffn.gate_weight) / H
+    []float gate = gpt_matmul(normed2, layer.ffn.glu_ffn.gate_weight, total, H, ffn_d)
+    []float val  = gpt_matmul(normed2, layer.ffn.glu_ffn.value_weight, total, H, ffn_d)
     int i = 0
-    while i < total * ffn_D {
-        gate[i] = gate[i] + layer.ffn.glu_ffn.gate_bias[i % ffn_D]
-        val[i]  = val[i]  + layer.ffn.glu_ffn.value_bias[i % ffn_D]
+    while i < total * ffn_d {
+        gate[i] = gate[i] + layer.ffn.glu_ffn.gate_bias[i % ffn_d]
+        val[i]  = val[i]  + layer.ffn.glu_ffn.value_bias[i % ffn_d]
         i = i + 1
     }
-    []float gv = gpt_alloc(total * ffn_D, 0.0)
+    []float gv = gpt_alloc(total * ffn_d, 0.0)
     i = 0
-    while i < total * ffn_D {
+    while i < total * ffn_d {
         gv[i] = gpt_swish(gate[i]) * val[i]
         i = i + 1
     }
-    []float down = gpt_matmul(gv, layer.ffn.glu_ffn.down_weight, total, ffn_D, H)
+    []float down = gpt_matmul(gv, layer.ffn.glu_ffn.down_weight, total, ffn_d, H)
     i = 0
     while i < total * H {
         down[i] = down[i] + layer.ffn.glu_ffn.down_bias[i % H]

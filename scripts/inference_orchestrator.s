@@ -5,66 +5,66 @@ import (
     "path/filepath"
     "strings"
 )
-enum InferenceBackend {
+enum inference_backend {
     ONNX,
-    TensorRT,
-    vLLM,
-    DeepSpeed,
-    Native,
+    tensor_rt,
+    v_llm,
+    deep_speed,
+    native,
 }
 struct inference_config {
-    modelPath    string
-    backend      InferenceBackend
-    batchSize    int
-    maxTokens    int
+    model_path    string
+    backend      inference_backend
+    batch_size    int
+    max_tokens    int
     temperature  float32
-    topK         int
-    topP         float32
-    repetitionPenalty float32
-    useCache     bool
-    useSpectral  bool
+    top_k         int
+    top_p         float32
+    repetition_penalty float32
+    use_cache     bool
+    use_spectral  bool
     port         int
-    logDir       string
+    log_dir       string
 }
 struct inference_orchestrator {
     logger  logger_2
     config  inference_config
-    sCompiler string
-    neurxRoot string
+    s_compiler string
+    neurx_root string
 }
-func new_inference_orchestrator(modelPath string) (*inference_orchestrator, error) {
+func new_inference_orchestrator(model_path string) (*inference_orchestrator, error) {
     logger := new_logger("inference_orchestrator")
-    neurxRoot := get_env("NEURX_ROOT", "")
-    if neurxRoot == "" {
+    neurx_root := get_env("NEURX_ROOT", "")
+    if neurx_root == "" {
         pwd, _ := os.Getwd()
-        neurxRoot = pwd
+        neurx_root = pwd
     }
-    sCompiler := get_env("S_COMPILER", "s")
-    if !command_exists(sCompiler) {
-        sCompiler = filepath.Join(neurxRoot, "..", "s", ".local", "bin", "s")
+    s_compiler := get_env("S_COMPILER", "s")
+    if !command_exists(s_compiler) {
+        s_compiler = filepath.Join(neurx_root, "..", "s", ".local", "bin", "s")
     }
-    if !file_exists(modelPath) {
-        return nil, fmt.Errorf("model not found at %s", modelPath)
+    if !file_exists(model_path) {
+        return nil, fmt.Errorf("model not found at %s", model_path)
     }
     config := inference_config{
-        modelPath:        modelPath,
+        model_path:        modelPath,
         backend:          InferenceBackend.Native,
-        batchSize:        1,
-        maxTokens:        2048,
+        batch_size:        1,
+        max_tokens:        2048,
         temperature:      0.8,
-        topK:             40,
-        topP:             0.95,
-        repetitionPenalty: 1.0,
-        useCache:         true,
-        useSpectral:      false,
+        top_k:             40,
+        top_p:             0.95,
+        repetition_penalty: 1.0,
+        use_cache:         true,
+        use_spectral:      false,
         port:             8000,
-        logDir:           filepath.Join(neurxRoot, "logs", "inference"),
+        log_dir:           filepath.Join(neurx_root, "logs", "inference"),
     }
     return &inference_orchestrator{
         logger:    logger,
         config:    config,
-        sCompiler: sCompiler,
-        neurxRoot: neurxRoot,
+        s_compiler: sCompiler,
+        neurx_root: neurxRoot,
     }, nil
 }
 func (i *inference_orchestrator) setup() error {
@@ -75,50 +75,50 @@ func (i *inference_orchestrator) setup() error {
     i.log_config()
     return nil
 }
-func (i *inference_orchestrator) Compile() error {
+func (i *inference_orchestrator) compile() error {
     i.logger.log("Compiling inference server...")
-    buildDir := filepath.Join(i.neurxRoot, ".build", "inference")
-    if err := mkdir(buildDir); err != nil {
+    build_dir := filepath.Join(i.neurxRoot, ".build", "inference")
+    if err := mkdir(build_dir); err != nil {
         return err
     }
-    irFile := filepath.Join(buildDir, "inference_server.ir")
-    binFile := filepath.Join(buildDir, "inference_server")
-    sourceFile := filepath.Join(i.neurxRoot, "infer", "inference_server.s")
-    if !file_exists(sourceFile) {
-        i.logger.warn("Inference server source not found at %s", sourceFile)
+    ir_file := filepath.Join(build_dir, "inference_server.ir")
+    bin_file := filepath.Join(build_dir, "inference_server")
+    source_file := filepath.Join(i.neurxRoot, "infer", "inference_server.s")
+    if !file_exists(source_file) {
+        i.logger.warn("Inference server source not found at %s", source_file)
         return fmt.Errorf("inference source not found")
     }
     i.logger.log("Compiling to IR...")
-    result := exec_command(i.sCompiler, sourceFile, irFile)
+    result := exec_command(i.sCompiler, source_file, ir_file)
     if result.ExitCode != 0 {
         i.logger.error("Compilation failed: %s", result.Stderr)
         return fmt.Errorf("compilation failed")
     }
     i.logger.log("Generating binary...")
-    result = exec_command(i.sCompiler, "--emit-bin", irFile, binFile)
+    result = exec_command(i.sCompiler, "--emit-bin", ir_file, bin_file)
     if result.ExitCode != 0 {
         i.logger.error("Binary generation failed: %s", result.Stderr)
         return fmt.Errorf("binary generation failed")
     }
-    i.logger.success("Inference server compiled: %s", binFile)
+    i.logger.success("Inference server compiled: %s", bin_file)
     return nil
 }
 func (i *inference_orchestrator) start_server() error {
     i.logger.log("Starting inference server...")
-    binFile := filepath.Join(i.neurxRoot, ".build", "inference", "inference_server")
-    if !file_exists(binFile) {
+    bin_file := filepath.Join(i.neurxRoot, ".build", "inference", "inference_server")
+    if !file_exists(bin_file) {
         if err := i.Compile(); err != nil {
             return err
         }
     }
-    logFile := filepath.Join(i.config.logDir, "inference_server.log")
+    log_file := filepath.Join(i.config.logDir, "inference_server.log")
     cmd := fmt.Sprintf("cd %s && ", i.neurxRoot)
     cmd += fmt.Sprintf("NEURX_MODEL=%s ", i.config.modelPath)
     cmd += fmt.Sprintf("NEURX_BACKEND=%s ", backend_string(i.config.backend))
     cmd += fmt.Sprintf("NEURX_BATCH_SIZE=%d ", i.config.batchSize)
     cmd += fmt.Sprintf("NEURX_MAX_TOKENS=%d ", i.config.maxTokens)
     cmd += fmt.Sprintf("NEURX_PORT=%d ", i.config.port)
-    cmd += fmt.Sprintf("%s 2>&1 | tee %s", binFile, logFile)
+    cmd += fmt.Sprintf("%s 2>&1 | tee %s", bin_file, log_file)
     i.logger.log("exec_commanduting: %s", cmd)
     go func() {
         result := shell(cmd)
@@ -138,11 +138,11 @@ func (i *inference_orchestrator) start_server() error {
 }
 func (i *inference_orchestrator) interactive() error {
     i.logger.log("Starting interactive inference session...")
-    binFile := filepath.Join(i.neurxRoot, ".build", "inference", "inference_interactive")
-    if !file_exists(binFile) {
+    bin_file := filepath.Join(i.neurxRoot, ".build", "inference", "inference_interactive")
+    if !file_exists(bin_file) {
         i.logger.log("Building interactive inference...")
     }
-    result := shell(binFile)
+    result := shell(bin_file)
     if result.ExitCode != 0 {
         i.logger.error("Session failed: %s", result.Stderr)
         return fmt.Errorf("inference session failed")
@@ -151,22 +151,22 @@ func (i *inference_orchestrator) interactive() error {
 }
 func (i *inference_orchestrator) chat() error {
     i.logger.log("Starting chat interface...")
-    sourceFile := filepath.Join(i.neurxRoot, "tools", "chat.s")
-    if !file_exists(sourceFile) {
+    source_file := filepath.Join(i.neurxRoot, "tools", "chat.s")
+    if !file_exists(source_file) {
         return fmt.Errorf("chat tool not found")
     }
-    buildDir := filepath.Join(i.neurxRoot, ".build", "chat")
-    if err := mkdir(buildDir); err != nil {
+    build_dir := filepath.Join(i.neurxRoot, ".build", "chat")
+    if err := mkdir(build_dir); err != nil {
         return err
     }
-    binFile := filepath.Join(buildDir, "chat")
-    irFile := filepath.Join(buildDir, "chat.ir")
+    bin_file := filepath.Join(build_dir, "chat")
+    ir_file := filepath.Join(build_dir, "chat.ir")
     i.logger.log("Compiling chat tool...")
-    result := exec_command(i.sCompiler, sourceFile, irFile)
+    result := exec_command(i.sCompiler, source_file, ir_file)
     if result.ExitCode != 0 {
         return fmt.Errorf("compilation failed")
     }
-    result = exec_command(i.sCompiler, "--emit-bin", irFile, binFile)
+    result = exec_command(i.sCompiler, "--emit-bin", ir_file, bin_file)
     if result.ExitCode != 0 {
         return fmt.Errorf("binary generation failed")
     }
@@ -174,7 +174,7 @@ func (i *inference_orchestrator) chat() error {
     cmd += fmt.Sprintf("NEURX_MODEL=%s ", i.config.modelPath)
     cmd += fmt.Sprintf("NEURX_BACKEND=%s ", backend_string(i.config.backend))
     cmd += fmt.Sprintf("NEURX_MAX_TOKENS=%d ", i.config.maxTokens)
-    cmd += binFile
+    cmd += bin_file
     result = shell(cmd)
     if result.ExitCode != 0 {
         return fmt.Errorf("chat failed")
@@ -183,36 +183,36 @@ func (i *inference_orchestrator) chat() error {
 }
 func (i *inference_orchestrator) benchmark() error {
     i.logger.log("Running inference benchmarks...")
-    sourceFile := filepath.Join(i.neurxRoot, "eval", "benchmark_eval.s")
-    if !file_exists(sourceFile) {
+    source_file := filepath.Join(i.neurxRoot, "eval", "benchmark_eval.s")
+    if !file_exists(source_file) {
         return fmt.Errorf("benchmark tool not found")
     }
-    buildDir := filepath.Join(i.neurxRoot, ".build", "benchmark")
-    if err := mkdir(buildDir); err != nil {
+    build_dir := filepath.Join(i.neurxRoot, ".build", "benchmark")
+    if err := mkdir(build_dir); err != nil {
         return err
     }
-    binFile := filepath.Join(buildDir, "benchmark")
-    irFile := filepath.Join(buildDir, "benchmark.ir")
+    bin_file := filepath.Join(build_dir, "benchmark")
+    ir_file := filepath.Join(build_dir, "benchmark.ir")
     i.logger.log("Compiling benchmark tool...")
-    result := exec_command(i.sCompiler, sourceFile, irFile)
+    result := exec_command(i.sCompiler, source_file, ir_file)
     if result.ExitCode != 0 {
         return fmt.Errorf("compilation failed")
     }
-    result = exec_command(i.sCompiler, "--emit-bin", irFile, binFile)
+    result = exec_command(i.sCompiler, "--emit-bin", ir_file, bin_file)
     if result.ExitCode != 0 {
         return fmt.Errorf("binary generation failed")
     }
-    logFile := filepath.Join(i.config.logDir, "benchmark.log")
+    log_file := filepath.Join(i.config.logDir, "benchmark.log")
     cmd := fmt.Sprintf("cd %s && ", i.neurxRoot)
     cmd += fmt.Sprintf("NEURX_MODEL=%s ", i.config.modelPath)
     cmd += fmt.Sprintf("NEURX_BATCH_SIZE=%d ", i.config.batchSize)
-    cmd += fmt.Sprintf("%s 2>&1 | tee %s", binFile, logFile)
+    cmd += fmt.Sprintf("%s 2>&1 | tee %s", bin_file, log_file)
     result = shell(cmd)
     if result.ExitCode != 0 {
         i.logger.error("benchmark failed: %s", result.Stderr)
         return fmt.Errorf("benchmark failed")
     }
-    i.logger.success("benchmark results saved to %s", logFile)
+    i.logger.success("benchmark results saved to %s", log_file)
     return nil
 }
 func (i *inference_orchestrator) is_server_ready() bool {

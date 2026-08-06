@@ -351,20 +351,20 @@ func main() {
     data, _ := json.MarshalIndent(step_info, "", "  ")
     fmt.Printf("%s\n", string(data))
 }
-func CreateTrainer(model_size: string, world_size: int, rank: int): (*large_model_trainer, error) {
+func create_trainer(model_size: string, world_size: int, rank: int): (*large_model_trainer, error) {
     trainer := &large_model_trainer{}
     err := trainer.init(model_size, world_size, rank)
     return trainer, err
 }
-func (lmt *large_model_trainer) GetMemoryEstimate(): memory_estimate {
+func (lmt *large_model_trainer) get_memory_estimate(): memory_estimate {
     return lmt.memory_est
 }
-func (lmt *large_model_trainer) GetConfig(): large_model_config {
+func (lmt *large_model_trainer) get_config(): large_model_config {
     return lmt.config
 }
-func (lmt *large_model_trainer) GetGradientAccumulator(): *gradient_accumulator {
+func (lmt *large_model_trainer) get_gradient_accumulator(): *gradient_accumulator {
     return &lmt.grad_accumulator
 }
-func (lmt *large_model_trainer) GetActivationCheckpointer(): *activation_checkpointer {
+func (lmt *large_model_trainer) get_activation_checkpointer(): *activation_checkpointer {
     return &lmt.activation_ckpt
 }

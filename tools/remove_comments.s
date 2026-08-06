@@ -5,25 +5,25 @@ import (
   "strings"
   "path/filepath"
 )
-func RemoveComments(content string) string {
+func remove_comments(content string) string {
   lines := strings.Split(content, "\n")
   result := []string{}
-  inBlockComment := false
+  in_block_comment := false
   for _, line := range lines {
-    if inBlockComment {
+    if in_block_comment {
       if strings.Contains(line, "*/") {
         idx := strings.Index(line, "*/")
         line = line[idx+2:]
-        inBlockComment = false
+        in_block_comment = false
       } else {
         continue
       }
     }
-        endIdx := strings.Index(line[idx:], "*/")
-        line = line[:idx] + line[idx+endIdx+2:]
+        end_idx := strings.Index(line[idx:], "*/")
+        line = line[:idx] + line[idx+end_idx+2:]
       } else {
         line = line[:idx]
-        inBlockComment = true
+        in_block_comment = true
         break
       }
     }
@@ -70,14 +70,14 @@ func GetFilesWithComments(rootDir string) []string {
   return files
 }
 func main() {
-  rootDir := "."
+  root_dir := "."
   if len(os.Args) > 1 {
-    rootDir = os.Args[1]
+    root_dir = os.Args[1]
   }
-  files := GetFilesWithComments(rootDir)
+  files := get_files_with_comments(root_dir)
   println("Found", len(files), "files with comments")
   for _, file := range files {
-    err := ProcessFile(file)
+    err := process_file(file)
     if err != nil {
       println("Error processing", file, ":", err.Error())
     } else {

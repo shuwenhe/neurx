@@ -139,7 +139,7 @@ func (mpt *mixed_precision_trainer) get_stats(): map[string]interface{} {
         "dynamics_enabled": mpt.config.dynamics_loss_scale,
     }
 }
-type LRScheduleType int
+type lr_schedule_type int
 const (
     LINEAR_WARMUP = iota
     COSINE_ANNEALING

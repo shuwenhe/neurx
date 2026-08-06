@@ -154,7 +154,7 @@ func apply_rms_norm_layer(float* x, rms_norm_layer norm) float* {
     }
     normalized
 }
-func swiGLU_activation(
+func swi_glu_activation(
     float* x,
     float* W,
     float* V,
@@ -288,7 +288,7 @@ func transformer_block_forward(
     transformer_output attn_out = improved_multihead_attention(x_norm, x_norm, x_norm, batch_size, seq_len, block.attention)
     float* attn_residual = alloc(float, batch_size * seq_len * config.hidden_size)
     float* x_norm2 = apply_rms_norm_layer(attn_out.hidden_states, block.norm2)
-    float* ffn_out = swiGLU_activation(x_norm2, block.ffn_w, block.ffn_v, 0, 0, config.hidden_size, config.intermediate_size)
+    float* ffn_out = swi_glu_activation(x_norm2, block.ffn_w, block.ffn_v, 0, 0, config.hidden_size, config.intermediate_size)
     output.hidden_states = ffn_out
     output.batch_size = batch_size
     output.seq_length = seq_len

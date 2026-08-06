@@ -188,7 +188,7 @@ func grpo_step(grpo_group group, grpo_config cfg) grpo_step_result {
         total_loss = total_loss + (0.0 - chosen) + cfg.kl_coef * kl
         j = j + 1
     }
-    float fG = float_grpo(G)
+    float f_g = float_grpo(G)
     total_loss = total_loss / fG
     kl_total   = kl_total / fG
     float mean_r = 0.0

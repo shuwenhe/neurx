@@ -6,14 +6,14 @@ use std.strings
 struct multi_node_config_2 {
     root string
     hostfile string
-    masterAddr string
-    masterPort string
-    sharedId string
+    master_addr string
+    master_port string
+    shared_id string
     output string
-    resumeEnabled bool
+    resume_enabled bool
     hosts []string
 }
-func parseHostFile(hostfile string) []string {
+func parse_host_file(hostfile string) []string {
     content, _ := os.ReadFile(hostfile)
     lines := strings.Split(string(content), "\n")
     hosts := []string{}
@@ -25,14 +25,14 @@ func parseHostFile(hostfile string) []string {
     }
     return hosts
 }
-func getGpuCount(host string) int {
+func get_gpu_count(host string) int {
     cmd := exec.command("ssh", host, "nvidia-smi -L | wc -l")
     output, _ := cmd.Output()
     count := 0
     strings.TrimSpace(string(output))
     return count
 }
-func launchOnHost(host string, rank int, config multi_node_config_2) {
+func launch_on_host(host string, rank int, config multi_node_config_2) {
     env := os.Environ()
     env = append(env,
         "NEURX_ROOT=" + config.root,
@@ -64,9 +64,9 @@ func main() {
     config := multi_node_config_2{
         root: root,
         hostfile: hostfile,
-        masterAddr: os.Getenv("MASTER_ADDR"),
-        masterPort: os.Getenv("MASTER_PORT"),
-        sharedId: os.Getenv("NEURX_SHARED_NCCL_ID_FILE"),
+        master_addr: os.Getenv("MASTER_ADDR"),
+        master_port: os.Getenv("MASTER_PORT"),
+        shared_id: os.Getenv("NEURX_SHARED_NCCL_ID_FILE"),
         output: os.Getenv("NEURX_PRETRAIN_OUTPUT_DIR"),
     }
     if config.masterPort == "" {
@@ -78,7 +78,7 @@ func main() {
     if config.output == "" {
         config.output = root + "/checkpoint/NeurX-1.3"
     }
-    config.hosts = parseHostFile(config.hostfile)
+    config.hosts = parse_host_file(config.hostfile)
     if config.masterAddr == "" && len(config.hosts) > 0 {
         config.masterAddr = strings.Fields(config.hosts[0])[0]
     }
@@ -86,6 +86,6 @@ func main() {
     os.MkdirAll(path.Dir(config.sharedId), 0755)
     io.Println("[multinode] nodes=" + string(len(config.hosts)) + " master=" + config.masterAddr + ":" + config.masterPort)
     for i, host := range config.hosts {
-        launchOnHost(host, i, config)
+        launch_on_host(host, i, config)
     }
 }

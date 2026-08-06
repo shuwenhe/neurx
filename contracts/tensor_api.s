@@ -5,7 +5,7 @@ import "dtype_api"
 struct tensor {
     impl: tensor_impl
 }
-interface ITensor {
+interface i_tensor {
     shape() -> []i64
     dtype() -> DType
     device() -> device
@@ -35,7 +35,7 @@ interface ITensor {
     version() -> i64
     bump_version() -> void
 }
-interface ITensorFactory {
+interface i_tensor_factory {
     zeros(shape: []i64, dtype: DType, device: device) -> tensor
     ones(shape: []i64, dtype: DType, device: device) -> tensor
     full(shape: []i64, fill_value: f64, dtype: DType, device: device) -> tensor
@@ -47,19 +47,19 @@ interface ITensorFactory {
     eye(n: i64, m: i64, dtype: DType, device: device) -> tensor
     from_array(data: []f64, shape: []i64, dtype: DType, device: device) -> tensor
 }
-interface ITensorCloning {
+interface i_tensor_cloning {
     clone(tensor: tensor) -> tensor
     clone_with_dtype(tensor: tensor, dtype: DType) -> tensor
     clone_with_device(tensor: tensor, device: device) -> tensor
 }
-interface ITensorComparison {
+interface i_tensor_comparison {
     equal(t1: tensor, t2: tensor) -> bool
     allclose(t1: tensor, t2: tensor, rtol: f64, atol: f64) -> bool
     less(t1: tensor, t2: tensor) -> tensor
     greater(t1: tensor, t2: tensor) -> tensor
     equal_element(t1: tensor, t2: tensor) -> tensor
 }
-interface ITensorDebug {
+interface i_tensor_debug {
     print_shape(tensor: tensor) -> void
     print_info(tensor: tensor) -> void
     print_values(tensor: tensor) -> void

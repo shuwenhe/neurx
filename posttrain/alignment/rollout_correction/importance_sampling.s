@@ -1,6 +1,6 @@
 import "tensor/tensor.s"
 import "posttrain/alignment/rollout_correction/config.s"
-struct ISWeights {
+struct is_weights {
     weights: Tensor
     level: ISAggregationLevel
     is_clipped: Tensor
@@ -38,7 +38,7 @@ func compute_token_is_weights(
     let mean_weight = masked_weights.sum() / (valid_count + 1e-8)
     let max_weight = masked_weights.max()
     let min_weight = masked_weights.min()
-    return ISWeights{
+    return is_weights{
         weights: clipped_weights,
         level: ISAggregationLevel.TOKEN,
         is_clipped: is_clipped,
@@ -76,7 +76,7 @@ func compute_sequence_is_weights(
     let mean_weight = clipped_weights.mean()
     let max_weight = clipped_weights.max()
     let min_weight = clipped_weights.min()
-    return ISWeights{
+    return is_weights{
         weights: clipped_weights,
         level: ISAggregationLevel.SEQUENCE,
         is_clipped: is_clipped,
@@ -88,16 +88,16 @@ func compute_sequence_is_weights(
 }
 func batch_normalize_is_weights(is_weights: ISWeights) -> ISWeights {
     let normalized_weights: Tensor
-    if is_weights.level == ISAggregationLevel.TOKEN {
+    if is_weights.level == is_aggregation_level.TOKEN {
         let mean = is_weights.weights.mean()
         normalized_weights = is_weights.weights / (mean + 1e-8)
-    } else if is_weights.level == ISAggregationLevel.SEQUENCE {
+    } else if is_weights.level == is_aggregation_level.SEQUENCE {
         let mean = is_weights.weights.mean()
         normalized_weights = is_weights.weights / (mean + 1e-8)
     } else {
         normalized_weights = is_weights.weights
     }
-    return ISWeights{
+    return is_weights{
         weights: normalized_weights,
         level: is_weights.level,
         is_clipped: is_weights.is_clipped,
@@ -122,9 +122,9 @@ func compute_is_weights(
     }
     let is_weights: ISWeights
     match config.is_level {
-        ISAggregationLevel.NONE => {
+        is_aggregation_level.NONE => {
             let weights = tensor_ones_like(new_log_probs)
-            is_weights = ISWeights{
+            is_weights = is_weights{
                 weights: weights,
                 level: ISAggregationLevel.NONE,
                 is_clipped: tensor_zeros_like(new_log_probs).to_bool(),
@@ -134,7 +134,7 @@ func compute_is_weights(
                 min_weight: 1.0,
             }
         },
-        ISAggregationLevel.TOKEN => {
+        is_aggregation_level.TOKEN => {
             is_weights = compute_token_is_weights(
                 new_log_probs,
                 reference_log_probs,
@@ -142,7 +142,7 @@ func compute_is_weights(
                 response_mask
             )
         },
-        ISAggregationLevel.SEQUENCE => {
+        is_aggregation_level.SEQUENCE => {
             is_weights = compute_sequence_is_weights(
                 new_log_probs,
                 reference_log_probs,
@@ -151,7 +151,7 @@ func compute_is_weights(
             )
         }
     }
-    if config.is_batch_normalize && config.is_level != ISAggregationLevel.NONE {
+    if config.is_batch_normalize && config.is_level != is_aggregation_level.NONE {
         is_weights = batch_normalize_is_weights(is_weights)
     }
     return is_weights
@@ -161,9 +161,9 @@ func apply_is_weights_to_loss(
     is_weights: ISWeights,
     response_mask: Tensor
 ) -> Tensor {
-    if is_weights.level == ISAggregationLevel.TOKEN {
+    if is_weights.level == is_aggregation_level.TOKEN {
         return loss * is_weights.weights * response_mask
-    } else if is_weights.level == ISAggregationLevel.SEQUENCE {
+    } else if is_weights.level == is_aggregation_level.SEQUENCE {
         let batch_size = loss.shape[0]
         let seq_len = loss.shape[1]
         let expanded_weights = is_weights.weights.unsqueeze(1).expand([batch_size, seq_len])

@@ -1,11 +1,11 @@
 package real_inference_pipeline
-struct InferencePipeline {
+struct inference_pipeline {
     string model_path
     string tokenizer_path
     int max_seq_length
 }
-func create_inference_pipeline(string model_path, string tokenizer_path) InferencePipeline {
-    return InferencePipeline{
+func create_inference_pipeline(string model_path, string tokenizer_path) inference_pipeline {
+    return inference_pipeline{
         model_path: model_path,
         tokenizer_path: tokenizer_path,
         max_seq_length: 512

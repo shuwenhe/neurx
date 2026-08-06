@@ -17,7 +17,7 @@ optimization:
 data:
   train_path: data/train.txt
   eval_path: data/eval.txt
-  checkpoint_dir: checkpoint/NeurX-1.3/
+  checkpoint_dir: checkpoint/neur_x-1.3/
 distributed:
   world_size: 1
   backend: nccl

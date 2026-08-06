@@ -263,7 +263,7 @@ func (manager *experiment_manager) find_best_experiment() string {
     fmt.Printf("  Best experiment: %s (PPL: %.2f)\n", best_exp, best_ppl)
     return best_exp
 }
-func NewExperimentManager() *experiment_manager {
+func new_experiment_manager() *experiment_manager {
     return &experiment_manager{
         experiments:        make(map[string]experiment_result),
         current_experiment: "",

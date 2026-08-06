@@ -48,7 +48,7 @@ func check_system_status() {
         assert(test_cfg.enable_long_context == true)
         status.modules.architecture_loaded = true
         print("   ✅ NEURX Architecture module loaded")
-    except Exception as e:
+    except exception as e:
         append(status.errors, f"NEURX Architecture error: {e}")
         print(f"   ❌ {e}")
     print("[2/6] Checking NEURX tokenizer...")
@@ -57,7 +57,7 @@ func check_system_status() {
         status.modules.tokenizer_loaded = true
         status.tokenizer_ready = true
         print(f"   ✅ NEURX tokenizer loaded (vocab size: {tok.vocab_size})")
-    except Exception as e:
+    except exception as e:
         append(status.warnings, "tokenizer using mock vocabulary (for testing)")
         status.modules.tokenizer_loaded = true
         print("   ⚠️ Using mock tokenizer (testing mode)")
@@ -68,7 +68,7 @@ func check_system_status() {
         status.modules.pretraining_framework = true
         print("   ✅ Pretraining framework ready")
         print(f"      task distribution: CLM={pt_cfg.clm_ratio:.0%} MLM={pt_cfg.mlm_ratio:.0%} PrefixLM={pt_cfg.prefix_lm_ratio:.0%}")
-    except Exception as e:
+    except exception as e:
         append(status.errors, f"Pretraining error: {e}")
         print(f"   ❌ {e}")
     print("[4/6] Checking Attention Mechanism...")
@@ -86,10 +86,10 @@ func check_system_status() {
             softmax_scale: 1.0 / sqrt(128.0),
             use_gradient_checkpointing: False,
         }
-        NeurxAttention attn = init(attn_cfg)
+        neurx_attention attn = init(attn_cfg)
         status.modules.attention_mechanism = true
         print("   ✅ NEURX Attention mechanism ready (Flash Attn + GQA enabled)")
-    except Exception as e:
+    except exception as e:
         append(status.errors, f"Attention error: {e}")
         print(f"   ❌ {e}")
     print("[5/6] Checking Alignment System...")
@@ -100,22 +100,22 @@ func check_system_status() {
         alignment_config sft_cfg = create_sft_config()
         status.modules.alignment_system = true
         print("   ✅ Alignment system ready (SFT/DPO/GRPO/PPO)")
-    except Exception as e:
+    except exception as e:
         append(status.errors, f"Alignment error: {e}")
         print(f"   ❌ {e}")
     print("[6/6] Checking Inference Optimization...")
     try:
         KVCacheManager kv_mgr = init(num_layers=4, num_kv_heads=8, head_dim=64)
-        PagedAttentionManager paged_mgr = init_paged_attention(
+        paged_attention_manager paged_mgr = init_paged_attention(
             num_kv_heads=8,
             head_dim=64,
             gpu_memory_mb=1024
         )
-        ContinuousBatchScheduler sched = init_scheduler(max_batch_size=16)
+        continuous_batch_scheduler sched = init_scheduler(max_batch_size=16)
         status.modules.inference_optimization = true
         status.inference_engine_ready = true
         print("   ✅ Inference optimization ready (KV cache + PagedAttn + Continuous batch_2)")
-    except Exception as e:
+    except exception as e:
         append(status.errors, f"Inference error: {e}")
         print(f"   ❌ {e}")
     int ready_count = sum([
@@ -326,7 +326,7 @@ func show_usage_examples():
 ║  )                                                           ║
 ║                                                              ║
 ║  ══════════════════════════════════════════════════════════  ║
-║  📚 SUPERVISED FINE-TUNING (English text)                         ║
+║  📚 SUPERVISED FINE-TUNING (english text)                         ║
 ║                                                              ║
 ║
 ║  start_neurx_training(mode="sft",                             ║
@@ -348,7 +348,7 @@ func show_usage_examples():
 ║
 ║                                                              ║
 ║  ══════════════════════════════════════════════════════════  ║
-║  🌐 INFERENCE SERVER (inferenceEnglish text)                                 ║
+║  🌐 INFERENCE SERVER (inference_english text)                                 ║
 ║                                                              ║
 ║
 ║  start_neurx_inference_server(                                 ║
@@ -357,7 +357,7 @@ func show_usage_examples():
 ║  )                                                           ║
 ║                                                              ║
 ║  ══════════════════════════════════════════════════════════  ║
-║  🧪 TESTING (testEnglish text)                                          ║
+║  🧪 TESTING (test_english text)                                          ║
 ║                                                              ║
 ║
 ║  run_all_tests()                                              ║
@@ -366,7 +366,7 @@ func show_usage_examples():
 ║  check_system_status()                                         ║
 ║                                                              ║
 ║  ══════════════════════════════════════════════════════════  ║
-║  🔧 ADVANCED USAGE (advancedEnglish text)                                    ║
+║  🔧 ADVANCED USAGE (advanced_english text)                                    ║
 ║                                                              ║
 ║
 ║  neurx_config my_cfg = create_custom_neurx_config(                  ║
@@ -389,7 +389,7 @@ func show_usage_examples():
 """
     print(examples)
 func main():
-    """mainEnglish text"""
+    """main_english text"""
     print("""
     ╔═══════════════════════════════════════════════════════╗
     ║                                                      ║
@@ -400,13 +400,13 @@ func main():
     ║     ██║     ╚██████╔╝██║ ╚████║   ██║   ██║  ██║██║  ██║ ║
     ║     ╚═╝      ╚═════╝ ╚═╝  ╚═══╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ║
     ║                                                      ║
-    ║              Complete Training & Inference               ║
-    ║                      System v1.0                        ║
+    ║              complete training & inference               ║
+    ║                      system v1.0                        ║
     ║                                                      ║
     ╚═══════════════════════════════════════════════════════╝
     """)
     show_usage_examples()
-    print("\n🔍 Running initial system check...\n")
+    print("\n🔍 running initial system check...\n")
     check_system_status()
 if __name__ == "__main__":
     main()

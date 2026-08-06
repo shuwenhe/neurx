@@ -13,21 +13,21 @@ func num_transformer_layers() int { 24 }
 func num_attention_heads() int { 14 }
 func max_sequence_length() int { 32768 }
 
-struct ModelConfig {
+struct model_config {
     int vocab_size
     int hidden_size
     int num_hidden_layers
     int num_attention_heads
 }
 
-struct Tokenizer {
+struct tokenizer {
     int bos_id
     int eos_id
     int pad_id
     int unk_id
 }
 
-struct PerformanceMetrics {
+struct performance_metrics {
     int inference_time_ms
     float throughput_tps
 }
@@ -123,8 +123,8 @@ func pow_f(float x, float p) float {
     return x
 }
 
-func load_model_config(string model_dir) ModelConfig {
-    ModelConfig{
+func load_model_config(string model_dir) model_config {
+    model_config{
         vocab_size: vocab_size(),
         hidden_size: model_hidden_dim(),
         num_hidden_layers: num_transformer_layers(),
@@ -132,8 +132,8 @@ func load_model_config(string model_dir) ModelConfig {
     }
 }
 
-func load_tokenizer(string model_dir) Tokenizer {
-    Tokenizer{
+func load_tokenizer(string model_dir) tokenizer {
+    tokenizer{
         bos_id: 151643,
         eos_id: 151645,
         pad_id: 151643,

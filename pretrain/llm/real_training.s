@@ -79,7 +79,7 @@ func matmul(tensor A, tensor B) tensor {
     int m = A.shape[0]
     int k = A.shape[1]
     int n = B.shape[1]
-    []float C_data = []float{cap: m * n}
+    []float c_data = []float{cap: m * n}
     int i = 0
     while i < m {
         int j = 0
@@ -92,7 +92,7 @@ func matmul(tensor A, tensor B) tensor {
                 sum = sum + A.data[a_idx] * B.data[b_idx]
                 p = p + 1
             }
-            C_data[i * n + j] = sum
+            c_data[i * n + j] = sum
             j = j + 1
         }
         i = i + 1
@@ -100,7 +100,7 @@ func matmul(tensor A, tensor B) tensor {
     []int shape = []int{cap: 2}
     shape[0] = m
     shape[1] = n
-    new(C_data, shape, true)
+    new(c_data, shape, true)
 }
 func transpose(tensor A, int dim1, int dim2) tensor {
     if dim1 != 0 || dim2 != 1 {

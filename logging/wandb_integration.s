@@ -28,7 +28,7 @@ func init_wandb(
         steps_logged: 0,
     }
     log_wandb_config(r)
-    println("WandB initialized. View at: " + r.run_url)
+    println("wand_b initialized. View at: " + r.run_url)
     r
 }
 func wandb_log_metric(

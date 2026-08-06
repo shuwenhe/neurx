@@ -12,38 +12,38 @@ import (
     "sort"
 )
 type clean_config struct {
-    RawDir         string
-    CleanedDir     string
-    OutputFile     string
-    ManifestFile   string
-    CheckpointFile string
+    raw_dir         string
+    cleaned_dir     string
+    output_file     string
+    manifest_file   string
+    checkpoint_file string
 }
 type shard_config struct {
-    InputFile      string
-    ShardDir       string
-    ManifestFile   string
-    MaxShards      int
-    LinesPerShard  int
+    input_file      string
+    shard_dir       string
+    manifest_file   string
+    max_shards      int
+    lines_per_shard  int
 }
 type shard_metadata struct {
-    ShardID       string `json:"shard_id"`
-    FilePath      string `json:"file_path"`
-    NumDocuments  int64  `json:"num_documents"`
-    SizeBytes     int64  `json:"size_bytes"`
+    shard_id       string `json:"shard_id"`
+    file_path      string `json:"file_path"`
+    num_documents  int64  `json:"num_documents"`
+    size_bytes     int64  `json:"size_bytes"`
 }
 type manifest struct {
-    DatasetName         string           `json:"dataset_name"`
-    Version             string           `json:"version"`
-    CreatedAt           string           `json:"created_at"`
-    TotalShards         int64            `json:"total_shards"`
-    TotalDocuments      int64            `json:"total_documents"`
-    TotalSizeBytes      int64            `json:"total_size_bytes"`
-    AverageDocsPerShard int64            `json:"average_docs_per_shard"`
-    Shards              []shard_metadata  `json:"shards"`
+    dataset_name         string           `json:"dataset_name"`
+    version             string           `json:"version"`
+    created_at           string           `json:"created_at"`
+    total_shards         int64            `json:"total_shards"`
+    total_documents      int64            `json:"total_documents"`
+    total_size_bytes      int64            `json:"total_size_bytes"`
+    average_docs_per_shard int64            `json:"average_docs_per_shard"`
+    shards              []shard_metadata  `json:"shards"`
 }
 func main() {
     if len(os.Args) < 2 {
-        printHelp()
+        print_help()
         os.Exit(0)
     }
     command := os.Args[1]
@@ -62,14 +62,14 @@ func main() {
         os.Exit(1)
     }
 }
-func cmdClean() {
+func cmd_clean() {
     fmt.Println("")
     fmt.Println("╔════════════════════════════════════════════╗")
     fmt.Println("║     NeurX Data Cleaning (S Language)      ║")
     fmt.Println("╚════════════════════════════════════════════╝")
     fmt.Println("")
-    config := getCleanConfig()
-    if err := ensureDir(config.CleanedDir); err != nil {
+    config := get_clean_config()
+    if err := ensure_dir(config.CleanedDir); err != nil {
         fmt.Printf("✗ Failed to create directory: %v\n", err)
         os.Exit(1)
     }
@@ -78,88 +78,88 @@ func cmdClean() {
     fmt.Printf("  • Output: %s\n", config.OutputFile)
     fmt.Printf("  • manifest: %s\n", config.ManifestFile)
     fmt.Println("")
-    if err := cleanData(config); err != nil {
+    if err := clean_data(config); err != nil {
         fmt.Printf("✗ Cleaning failed: %v\n", err)
         os.Exit(1)
     }
     fmt.Println("")
     fmt.Println("✓ Data cleaning completed successfully")
 }
-func cmdShard() {
+func cmd_shard() {
     fmt.Println("")
     fmt.Println("╔════════════════════════════════════════════╗")
     fmt.Println("║    NeurX Data Sharding (S Language)       ║")
     fmt.Println("╚════════════════════════════════════════════╝")
     fmt.Println("")
-    config := getShardConfig()
-    if err := ensureDir(config.ShardDir); err != nil {
+    config := get_shard_config()
+    if err := ensure_dir(config.ShardDir); err != nil {
         fmt.Printf("✗ Failed to create directory: %v\n", err)
         os.Exit(1)
     }
-    if err := generateShards(config); err != nil {
+    if err := generate_shards(config); err != nil {
         fmt.Printf("✗ Sharding failed: %v\n", err)
         os.Exit(1)
     }
     fmt.Println("")
     fmt.Println("✓ Data sharding completed successfully")
 }
-func cmdPipeline() {
+func cmd_pipeline() {
     fmt.Println("")
     fmt.Println("╔════════════════════════════════════════════╗")
     fmt.Println("║   NeurX Full Pipeline (Clean + Shard)     ║")
     fmt.Println("╚════════════════════════════════════════════╝")
     fmt.Println("")
     fmt.Println("Step 1/2: Cleaning data...")
-    cmdClean()
+    cmd_clean()
     fmt.Println("")
     fmt.Println("Step 2/2: Generating shards...")
-    cmdShard()
+    cmd_shard()
 }
-func getCleanConfig() CleanConfig {
-    home := getEnv("NEURX_HOME", ".")
-    return CleanConfig{
-        RawDir:         getEnv("RAW_DIR", filepath.Join(home, "dataset", "pretrain", "raw")),
-        CleanedDir:     getEnv("CLEANED_DIR", filepath.Join(home, "dataset", "pretrain", "cleaned")),
-        OutputFile:     getEnv("OUTPUT_FILE", filepath.Join(home, "dataset", "pretrain", "cleaned", "pretrain_data_cleaned.jsonl")),
-        ManifestFile:   getEnv("MANIFEST_FILE", filepath.Join(home, "dataset", "pretrain", "manifest.json")),
-        CheckpointFile: getEnv("CHECKPOINT_FILE", filepath.Join(home, "dataset", "pretrain", "cleaned", ".cleaning_checkpoint.json")),
+func get_clean_config() clean_config {
+    home := get_env("NEURX_HOME", ".")
+    return clean_config{
+        raw_dir:         getEnv("RAW_DIR", filepath.Join(home, "dataset", "pretrain", "raw")),
+        cleaned_dir:     getEnv("CLEANED_DIR", filepath.Join(home, "dataset", "pretrain", "cleaned")),
+        output_file:     getEnv("OUTPUT_FILE", filepath.Join(home, "dataset", "pretrain", "cleaned", "pretrain_data_cleaned.jsonl")),
+        manifest_file:   getEnv("MANIFEST_FILE", filepath.Join(home, "dataset", "pretrain", "manifest.json")),
+        checkpoint_file: getEnv("CHECKPOINT_FILE", filepath.Join(home, "dataset", "pretrain", "cleaned", ".cleaning_checkpoint.json")),
     }
 }
-func getShardConfig() ShardConfig {
-    home := getEnv("NEURX_HOME", ".")
-    datasetRoot := getEnv("DATASET_ROOT", filepath.Join(home, "dataset", "pretrain"))
-    return ShardConfig{
-        InputFile:     getEnv("INPUT_FILE", filepath.Join(datasetRoot, "cleaned", "train.jsonl")),
-        ShardDir:      getEnv("SHARD_DIR", filepath.Join(datasetRoot, "shard")),
-        ManifestFile:  getEnv("MANIFEST_FILE", filepath.Join(datasetRoot, "manifest.json")),
-        MaxShards:     getEnvInt("MAX_SHARDS", 128),
-        LinesPerShard: getEnvInt("LINES_PER_SHARD", 100),
+func get_shard_config() shard_config {
+    home := get_env("NEURX_HOME", ".")
+    dataset_root := get_env("DATASET_ROOT", filepath.Join(home, "dataset", "pretrain"))
+    return shard_config{
+        input_file:     getEnv("INPUT_FILE", filepath.Join(dataset_root, "cleaned", "train.jsonl")),
+        shard_dir:      getEnv("SHARD_DIR", filepath.Join(dataset_root, "shard")),
+        manifest_file:  getEnv("MANIFEST_FILE", filepath.Join(dataset_root, "manifest.json")),
+        max_shards:     getEnvInt("MAX_SHARDS", 128),
+        lines_per_shard: getEnvInt("LINES_PER_SHARD", 100),
     }
 }
-func cleanData(config CleanConfig) error {
-    files, err := findSourceFiles(config.RawDir)
+func clean_data(config clean_config) error {
+    files, err := find_source_files(config.RawDir)
     if err != nil {
         return err
     }
     if len(files) == 0 {
         fmt.Println("⚠ No raw data files found")
-        return writeEmptyManifest(config)
+        return write_empty_manifest(config)
     }
     fmt.Printf("📚 Found %d source files\n", len(files))
     fmt.Println("")
-    seenHashes := make(map[string]bool)
+    seen_hashes := make(map[string]bool)
     stats := &clean_stats{
-        TotalProcessed: 0,
-        TotalWritten:   0,
-        Duplicates:     0,
-        Errors:         0,
+        total_processed: 0,
+        total_written:   0,
+        duplicates:     0,
+        errors:         0,
     }
-    outputHandle, err := os.Create(config.OutputFile)
+    output_handle, err := os.Create(config.OutputFile)
     if err != nil {
         return err
     }
-    defer outputHandle.Close()
-    writer := bufio.NewWriter(outputHandle)
+    defer output_handle.Close()
+    writer := bufio.NewWriter(output_handle)
     for _, file := range files {
         fmt.Printf("  Processing: %s\n", filepath.Base(file))
         content, err := ioutil.ReadFile(file)
@@ -168,7 +168,7 @@ func cleanData(config CleanConfig) error {
             stats.Errors++
             continue
         }
-        processFileContent(writer, string(content), seenHashes, stats)
+        process_file_content(writer, string(content), seen_hashes, stats)
     }
     writer.Flush()
     fmt.Println("")
@@ -179,18 +179,18 @@ func cleanData(config CleanConfig) error {
     fmt.Printf("  • Duplicates skipped: %d\n", stats.Duplicates)
     fmt.Printf("  • Errors: %d\n", stats.Errors)
     fmt.Println("")
-    if err := generateSplits(config); err != nil {
+    if err := generate_splits(config); err != nil {
         return err
     }
-    return writeManifest(config, stats.TotalWritten)
+    return write_manifest(config, stats.TotalWritten)
 }
 type clean_stats struct {
-    TotalProcessed int64
-    TotalWritten   int64
-    Duplicates     int64
-    Errors         int64
+    total_processed int64
+    total_written   int64
+    duplicates     int64
+    errors         int64
 }
-func processFileContent(writer *bufio.Writer, content string, seen map[string]bool, stats *clean_stats) {
+func process_file_content(writer *bufio.Writer, content string, seen map[string]bool, stats *clean_stats) {
     lines := strings.Split(content, "\n")
     for _, line := range lines {
         line = strings.TrimSpace(line)
@@ -198,60 +198,60 @@ func processFileContent(writer *bufio.Writer, content string, seen map[string]bo
             continue
         }
         stats.TotalProcessed++
-        text := extractText(line)
+        text := extract_text(line)
         if text == "" {
             continue
         }
-        hash := hashKey(normalizeText(text))
+        hash := hash_key(normalize_text(text))
         if seen[hash] {
             stats.Duplicates++
             continue
         }
         seen[hash] = true
-        record := createRecord(text)
+        record := create_record(text)
         writer.WriteString(record + "\n")
         stats.TotalWritten++
     }
 }
-func generateSplits(config CleanConfig) error {
+func generate_splits(config clean_config) error {
     content, err := ioutil.ReadFile(config.OutputFile)
     if err != nil {
         return err
     }
     lines := strings.Split(string(content), "\n")
     total := int64(len(lines))
-    trainSize := total * 8 / 10
-    valSize := total / 10
-    testSize := total - trainSize - valSize
-    trainFile := filepath.Join(config.CleanedDir, "train.jsonl")
-    valFile := filepath.Join(config.CleanedDir, "val.jsonl")
-    testFile := filepath.Join(config.CleanedDir, "test.jsonl")
-    trainHandle, _ := os.Create(trainFile)
-    valHandle, _ := os.Create(valFile)
-    testHandle, _ := os.Create(testFile)
-    defer trainHandle.Close()
-    defer valHandle.Close()
-    defer testHandle.Close()
+    train_size := total * 8 / 10
+    val_size := total / 10
+    test_size := total - train_size - val_size
+    train_file := filepath.Join(config.CleanedDir, "train.jsonl")
+    val_file := filepath.Join(config.CleanedDir, "val.jsonl")
+    test_file := filepath.Join(config.CleanedDir, "test.jsonl")
+    train_handle, _ := os.Create(train_file)
+    val_handle, _ := os.Create(val_file)
+    test_handle, _ := os.Create(test_file)
+    defer train_handle.Close()
+    defer val_handle.Close()
+    defer test_handle.Close()
     for i, line := range lines {
         if line == "" {
             continue
         }
         idx := int64(i)
-        if idx < trainSize {
-            trainHandle.WriteString(line + "\n")
-        } else if idx < trainSize+valSize {
-            valHandle.WriteString(line + "\n")
+        if idx < train_size {
+            train_handle.WriteString(line + "\n")
+        } else if idx < train_size+val_size {
+            val_handle.WriteString(line + "\n")
         } else {
-            testHandle.WriteString(line + "\n")
+            test_handle.WriteString(line + "\n")
         }
     }
     fmt.Printf("✓ Dataset splits created (train: %.1f%%, val: %.1f%%, test: %.1f%%)\n",
-        float64(trainSize)*100/float64(total),
-        float64(valSize)*100/float64(total),
-        float64(testSize)*100/float64(total))
+        float64(train_size)*100/float64(total),
+        float64(val_size)*100/float64(total),
+        float64(test_size)*100/float64(total))
     return nil
 }
-func generateShards(config ShardConfig) error {
+func generate_shards(config shard_config) error {
     info, err := os.Stat(config.InputFile)
     if err != nil {
         return fmt.Errorf("input file not found: %s", config.InputFile)
@@ -264,76 +264,76 @@ func generateShards(config ShardConfig) error {
         return err
     }
     lines := strings.Split(string(content), "\n")
-    totalLines := int64(0)
+    total_lines := int64(0)
     for _, line := range lines {
         if strings.TrimSpace(line) != "" {
-            totalLines++
+            total_lines++
         }
     }
-    fmt.Printf("  • Total lines: %d\n", totalLines)
+    fmt.Printf("  • Total lines: %d\n", total_lines)
     fmt.Println("")
-    if totalLines == 0 {
+    if total_lines == 0 {
         fmt.Println("⚠ No documents found in input file")
-        return writeEmptyManifest(CleanConfig{ManifestFile: config.ManifestFile})
+        return write_empty_manifest(clean_config{manifest_file: config.ManifestFile})
     }
-    idealShards := (totalLines + int64(config.LinesPerShard) - 1) / int64(config.LinesPerShard)
-    actualShards := idealShards
-    if actualShards > int64(config.MaxShards) {
-        actualShards = int64(config.MaxShards)
+    ideal_shards := (total_lines + int64(config.LinesPerShard) - 1) / int64(config.LinesPerShard)
+    actual_shards := ideal_shards
+    if actual_shards > int64(config.MaxShards) {
+        actual_shards = int64(config.MaxShards)
     }
-    linesPerShard := (totalLines + actualShards - 1) / actualShards
+    lines_per_shard := (total_lines + actual_shards - 1) / actualShards
     fmt.Printf("📊 Shard calculation:\n")
-    fmt.Printf("  • Ideal shards: %d\n", idealShards)
-    fmt.Printf("  • Actual shards: %d\n", actualShards)
-    fmt.Printf("  • Lines per shard: %d\n", linesPerShard)
+    fmt.Printf("  • Ideal shards: %d\n", ideal_shards)
+    fmt.Printf("  • Actual shards: %d\n", actual_shards)
+    fmt.Printf("  • Lines per shard: %d\n", lines_per_shard)
     fmt.Println("")
     fmt.Println("✂️ Generating shards...")
     var shards []shard_metadata
-    currentShard := 0
-    currentData := ""
-    currentCount := int64(0)
+    current_shard := 0
+    current_data := ""
+    current_count := int64(0)
     for _, line := range lines {
         line = strings.TrimSpace(line)
         if line == "" {
             continue
         }
-        currentData += line + "\n"
-        currentCount++
-        if currentCount >= linesPerShard {
-            shardFile := formatShardFilename(config.ShardDir, currentShard)
-            size, err := writeShardFile(shardFile, currentData)
+        current_data += line + "\n"
+        current_count++
+        if current_count >= lines_per_shard {
+            shard_file := format_shard_filename(config.ShardDir, current_shard)
+            size, err := write_shard_file(shard_file, current_data)
             if err != nil {
                 return err
             }
             shards = append(shards, shard_metadata{
-                ShardID:       formatShardID(currentShard),
-                FilePath:      shardFile,
-                NumDocuments:  currentCount,
-                SizeBytes:     size,
+                shard_id:       formatShardID(current_shard),
+                file_path:      shardFile,
+                num_documents:  currentCount,
+                size_bytes:     size,
             })
-            currentData = ""
-            currentCount = 0
-            currentShard++
+            current_data = ""
+            current_count = 0
+            current_shard++
         }
     }
-    if currentCount > 0 {
-        shardFile := formatShardFilename(config.ShardDir, currentShard)
-        size, err := writeShardFile(shardFile, currentData)
+    if current_count > 0 {
+        shard_file := format_shard_filename(config.ShardDir, current_shard)
+        size, err := write_shard_file(shard_file, current_data)
         if err != nil {
             return err
         }
         shards = append(shards, shard_metadata{
-            ShardID:       formatShardID(currentShard),
-            FilePath:      shardFile,
-            NumDocuments:  currentCount,
-            SizeBytes:     size,
+            shard_id:       formatShardID(current_shard),
+            file_path:      shardFile,
+            num_documents:  currentCount,
+            size_bytes:     size,
         })
     }
     fmt.Printf("✓ Generated %d shards\n", len(shards))
     fmt.Println("")
-    return writeShardManifest(config.ManifestFile, shards)
+    return write_shard_manifest(config.ManifestFile, shards)
 }
-func writeShardFile(path string, content string) (int64, error) {
+func write_shard_file(path string, content string) (int64, error) {
     err := ioutil.WriteFile(path, []byte(content), 0644)
     if err != nil {
         return 0, err
@@ -344,7 +344,7 @@ func writeShardFile(path string, content string) (int64, error) {
     }
     return info.Size(), nil
 }
-func findSourceFiles(dir string) ([]string, error) {
+func find_source_files(dir string) ([]string, error) {
     var files []string
     entries, err := ioutil.ReadDir(dir)
     if err != nil {
@@ -365,7 +365,7 @@ func findSourceFiles(dir string) ([]string, error) {
     sort.Strings(files)
     return files, nil
 }
-func extractText(line string) string {
+func extract_text(line string) string {
     if !strings.Contains(line, "\"text\"") {
         return ""
     }
@@ -379,24 +379,24 @@ func extractText(line string) string {
         return ""
     }
     rest = rest[idx+1:]
-    endIdx := strings.Index(rest, "\"")
-    if endIdx < 0 {
+    end_idx := strings.Index(rest, "\"")
+    if end_idx < 0 {
         return ""
     }
     return rest[:endIdx]
 }
-func normalizeText(text string) string {
+func normalize_text(text string) string {
     text = strings.TrimSpace(text)
     text = strings.ToLower(text)
     parts := strings.Fields(text)
     return strings.Join(parts, " ")
 }
-func hashKey(text string) string {
+func hash_key(text string) string {
     h := sha256.New()
     h.Write([]byte(text))
     return hex.EncodeToString(h.Sum(nil))
 }
-func createRecord(text string) string {
+func create_record(text string) string {
     tokens := len(text) / 4
     if tokens < 1 {
         tokens = 1
@@ -408,32 +408,32 @@ func createRecord(text string) string {
     data, _ := json.Marshal(record)
     return string(data)
 }
-func formatShardID(index int) string {
+func format_shard_id(index int) string {
     return fmt.Sprintf("shard_%05d", index)
 }
-func formatShardFilename(dir string, index int) string {
-    return filepath.Join(dir, formatShardID(index)+".jsonl")
+func format_shard_filename(dir string, index int) string {
+    return filepath.Join(dir, format_shard_id(index)+".jsonl")
 }
-func writeShardManifest(path string, shards []shard_metadata) error {
-    var totalDocs int64
-    var totalSize int64
+func write_shard_manifest(path string, shards []shard_metadata) error {
+    var total_docs int64
+    var total_size int64
     for _, shard := range shards {
-        totalDocs += shard.NumDocuments
-        totalSize += shard.SizeBytes
+        total_docs += shard.NumDocuments
+        total_size += shard.SizeBytes
     }
-    avgDocs := int64(0)
+    avg_docs := int64(0)
     if len(shards) > 0 {
-        avgDocs = totalDocs / int64(len(shards))
+        avg_docs = total_docs / int64(len(shards))
     }
     manifest := manifest{
-        DatasetName:         "neurx-pretrain-dataset",
-        Version:             "1.0",
-        CreatedAt:           "2026-07-07T00:00:00Z",
-        TotalShards:         int64(len(shards)),
-        TotalDocuments:      totalDocs,
-        TotalSizeBytes:      totalSize,
-        AverageDocsPerShard: avgDocs,
-        Shards:              shards,
+        dataset_name:         "neurx-pretrain-dataset",
+        version:             "1.0",
+        created_at:           "2026-07-07T00:00:00Z",
+        total_shards:         int64(len(shards)),
+        total_documents:      totalDocs,
+        total_size_bytes:      totalSize,
+        average_docs_per_shard: avgDocs,
+        shards:              shards,
     }
     data, err := json.MarshalIndent(manifest, "", "  ")
     if err != nil {
@@ -441,7 +441,7 @@ func writeShardManifest(path string, shards []shard_metadata) error {
     }
     return ioutil.WriteFile(path, data, 0644)
 }
-func writeManifest(config CleanConfig, totalDocs int64) error {
+func write_manifest(config clean_config, total_docs int64) error {
     manifest := map[string]interface{}{
         "dataset_name": "neurx-pretrain-dataset",
         "version":      "1.0",
@@ -459,7 +459,7 @@ func writeManifest(config CleanConfig, totalDocs int64) error {
     }
     return ioutil.WriteFile(config.ManifestFile, data, 0644)
 }
-func writeEmptyManifest(config CleanConfig) error {
+func write_empty_manifest(config clean_config) error {
     manifest := map[string]interface{}{
         "dataset_name": "neurx-pretrain-dataset",
         "version":      "1.0",
@@ -469,24 +469,24 @@ func writeEmptyManifest(config CleanConfig) error {
     data, _ := json.MarshalIndent(manifest, "", "  ")
     return ioutil.WriteFile(config.ManifestFile, data, 0644)
 }
-func ensureDir(dir string) error {
+func ensure_dir(dir string) error {
     return os.MkdirAll(dir, 0755)
 }
-func getEnv(key, defaultVal string) string {
+func get_env(key, default_val string) string {
     if val := os.Getenv(key); val != "" {
         return val
     }
-    return defaultVal
+    return default_val
 }
-func getEnvInt(key string, defaultVal int) int {
+func get_env_int(key string, default_val int) int {
     if val := os.Getenv(key); val != "" {
         var num int
         fmt.Sscanf(val, "%d", &num)
         return num
     }
-    return defaultVal
+    return default_val
 }
-func printHelp() {
+func print_help() {
     fmt.Println("")
     fmt.Println("╔════════════════════════════════════════════╗")
     fmt.Println("║  NeurX Data Processing Pipeline (S Lang)  ║")

@@ -76,10 +76,10 @@ func float_to_bytes(float val, int byte_order) []int {
         val = 0.0 - val
     }
     []int bytes = []int{cap: 4}
-    bytes[0] = (bits >> 0) & 0xFF
-    bytes[1] = (bits >> 8) & 0xFF
-    bytes[2] = (bits >> 16) & 0xFF
-    bytes[3] = (bits >> 24) & 0xFF
+    bytes[0] = (bits >> 0) & 0x_ff
+    bytes[1] = (bits >> 8) & 0x_ff
+    bytes[2] = (bits >> 16) & 0x_ff
+    bytes[3] = (bits >> 24) & 0x_ff
     bytes
 }
 func write_float_tensor_data([]float data, int count) []int {

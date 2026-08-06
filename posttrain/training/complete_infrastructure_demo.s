@@ -10,7 +10,7 @@ use neurx.posttrain.training.metrics.{
     update_learning_rate,
     print_metrics_inline,
     print_metrics_summary,
-    TrainMetrics
+    train_metrics
 }
 use neurx.posttrain.training.accuracy.{compute_token_accuracy, accuracy_percentage}
 func main() {
@@ -27,7 +27,7 @@ func main() {
     println("  Steps per Epoch: 100")
     println("  Max Gradient Norm: 1.0")
     println("")
-    TrainMetrics metrics
+    train_metrics metrics
     metrics = create_metrics()
     float loss = 10.0
     int epoch = 0

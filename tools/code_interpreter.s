@@ -58,7 +58,7 @@ struct code_block {
     code: string
     filename: string?
 }
-class SandboxEnvironment {
+class sandbox_environment {
     config: code_interpreter_config
     session_id: string
     working_dir: string
@@ -72,7 +72,7 @@ class SandboxEnvironment {
         this.session_id = generate_uuid()
         this.working_dir = config.working_directory + this.session_id + "/"
         create_directory(this.working_dir)
-        this.state = new SessionState(
+        this.state = new session_state(
             session_id=this.session_id,
             created_at=current_timestamp(),
             variables=map<string, any>{},
@@ -80,20 +80,20 @@ class SandboxEnvironment {
             execution_history=list<execution_record>{}
         )
         if "python" in config.supported_languages {
-            this.python_runtime = new PythonRuntime(
+            this.python_runtime = new python_runtime(
                 sandbox_dir=this.working_dir,
                 memory_limit=config.max_memory_mb,
                 timeout=config.execution_timeout_seconds
             )
         }
         if "javascript" in config.supported_languages {
-            this.javascript_runtime = new JavaScriptRuntime()
+            this.javascript_runtime = new java_script_runtime()
         }
         if "s" in config.supported_languages {
-            this.s_runtime = new ShellRuntime(allow_network=config.allow_network_access)
+            this.s_runtime = new shell_runtime(allow_network=config.allow_network_access)
         }
         if "sql" in config.supported_languages {
-            this.sql_runtime = new SQLRuntime(db_path=this.working_dir + "sandbox.db")
+            this.sql_runtime = new sql_runtime(db_path=this.working_dir + "sandbox.db")
         }
     }
     execute(code_block: code_block) {
@@ -235,7 +235,7 @@ struct security_check_result {
     allowed: bool
     reason: string
 }
-class SessionState {
+class session_state {
     session_id: string
     created_at: float
     last_execution_time: float = 0
@@ -290,7 +290,7 @@ struct session_summary {
     variable_names: list<string>
     success_rate: float
 }
-class PythonRuntime {
+class python_runtime {
     sandbox_dir: string
     memory_limit: int
     timeout: int
@@ -356,7 +356,7 @@ class PythonRuntime {
                 line_count=count_lines(code),
                 memory_used_mb=0
             }
-        } catch TimeoutExpired {
+        } catch timeout_expired {
             kill_process(this.process)
             return execution_result{
                 success=false,
@@ -367,7 +367,7 @@ class PythonRuntime {
                 line_count=count_lines(code),
                 memory_used_mb=0
             }
-        } catch Exception as e {
+        } catch exception as e {
             return execution_result{
                 success=false,
                 output="",
@@ -408,7 +408,7 @@ class PythonRuntime {
                 return json_parse(last_line)
             }
             try {
-                return parseFloat(last_line)
+                return parse_float(last_line)
             }
             return last_line
         }
@@ -420,7 +420,7 @@ struct error_info {
     message: string
     traceback: list<string>
 }
-class JavaScriptRuntime {
+class java_script_runtime {
     vm_context: any
     init() {
         this.vm_context = create_javascript_vm()
@@ -453,7 +453,7 @@ class JavaScriptRuntime {
                 line_count=count_lines(code),
                 memory_used_mb=0
             }
-        } catch Exception as e {
+        } catch exception as e {
             return execution_result{
                 success=false,
                 output="",
@@ -465,7 +465,7 @@ class JavaScriptRuntime {
         }
     }
 }
-class ShellRuntime {
+class shell_runtime {
     allow_network: bool
     allowed_commands: set<string>
     init(allow_network: bool) {
@@ -507,7 +507,7 @@ class ShellRuntime {
                 line_count=count_lines(command),
                 memory_used_mb=0
             }
-        } catch TimeoutExpired {
+        } catch timeout_expired {
             return execution_result{
                 success=false,
                 output="",
@@ -516,7 +516,7 @@ class ShellRuntime {
                 line_count=count_lines(command),
                 memory_used_mb=0
             }
-        } catch Exception as e {
+        } catch exception as e {
             return execution_result{
                 success=false,
                 output="",
@@ -528,7 +528,7 @@ class ShellRuntime {
         }
     }
 }
-class SQLRuntime {
+class sql_runtime {
     db_path: string
     connection: DatabaseConnection?
     init(db_path: string) {
@@ -581,7 +581,7 @@ class SQLRuntime {
                     }
                 }
             }
-        } catch SQLException as e {
+        } catch sql_exception as e {
             return execution_result{
                 success=false,
                 output="",
@@ -601,7 +601,7 @@ struct sql_query_result {
     rows: list<list<any>>
     row_count: int
 }
-class ResultFormatter {
+class result_formatter {
     config: code_interpreter_config
     init(config: code_interpreter_config) {
         this.config = config
@@ -674,12 +674,12 @@ struct formatted_output {
     has_visualizations: bool
     has_files: bool
 }
-class DataAnalysisHelper {
+class data_analysis_helper {
     sandbox: SandboxEnvironment
     formatter: ResultFormatter
     init(sandbox: SandboxEnvironment) {
         this.sandbox = sandbox
-        this.formatter = new ResultFormatter(sandbox.config)
+        this.formatter = new result_formatter(sandbox.config)
     }
     explore_dataset(csv_path: string, max_rows: int = 5) {
         code = f"""
@@ -689,9 +689,9 @@ df = pd.read_csv("{csv_path}")
 print("=" * 60)
 print("DATASET OVERVIEW")
 print("=" * 60)
-print(f"\\nShape: {{df.shape}}")
-print(f"\\nColumns: {{list(df.columns)}}")
-print(f"\\nDtypes:\\n{{df.dtypes}}")
+print(f"\\n_shape: {{df.shape}}")
+print(f"\\n_columns: {{list(df.columns)}}")
+print(f"\\n_dtypes:\\n{{df.dtypes}}")
 print("\\n" + "=" * 60)
 print("STATISTICAL SUMMARY")
 print("=" * 60)
@@ -707,12 +707,12 @@ missing = df.isnull().sum()
 if missing.sum() > 0:
     print(missing[missing > 0])
 else:
-    print("No missing values")
+    print("no missing values")
 print("\\n" + "=" * 60)
 print("MEMORY USAGE")
 print("=" * 60)
 mem = df.memory_usage(deep=True)
-print(f"Total: {{mem.sum() / 1024 / 1024:.2f}} MB")
+print(f"total: {{mem.sum() / 1024 / 1024:.2f}} MB")
 """
         let code_block = code_block{language="python", code=code}
         let result = this.sandbox.execute(code_block)
@@ -788,8 +788,8 @@ print("Chart saved as chart_correlation.png")
         if chart_type.to_lower() not in viz_templates {
             return execution_result{
                 success=false,
-                error=f"Unsupported chart type: {chart_type}. Supported: {', '.join(viz_templates.keys())}",
-                error_type="VisualizationError",
+                error=f"unsupported chart type: {chart_type}. Supported: {', '.join(viz_templates.keys())}",
+                error_type="visualization_error",
                 line_count=0
             }
         }
@@ -909,37 +909,37 @@ function create_code_interpreter(config?: code_interpreter_config) {
     return new CodeInterpreter(config=config)
 }
 function test_code_interpreter() {
-    print("🧪 Testing NEURX Code Interpreter...")
+    print("🧪 testing NEURX code interpreter...")
     ci = new CodeInterpreter()
-    print("  ✓ Test 1: Basic Python Execution")
+    print("  ✓ test 1: Basic python execution")
     result1 = ci.run_python("""
 x = 42
 y = x * 2
 print(f"The answer is: {{y}}")
 """)
-    assert result1.raw.success, f"Python exec failed: {result1.raw.error}"
-    assert "84" in result1.raw.output, "Unexpected output"
-    print("  ✓ Test 2: Security Violation Detection")
+    assert result1.raw.success, f"python exec failed: {result1.raw.error}"
+    assert "84" in result1.raw.output, "unexpected output"
+    print("  ✓ test 2: Security violation detection")
     result2 = ci.run_python("import os; os.system('rm -rf /')")
-    assert !result2.raw.success, "Should block dangerous code"
-    assert result2.raw.error_type == "SecurityError", "Should be security error"
-    print("  ✓ Test 3: Safe Shell command Execution")
+    assert !result2.raw.success, "should block dangerous code"
+    assert result2.raw.error_type == "security_error", "should be security error"
+    print("  ✓ test 3: Safe shell command execution")
     result3 = ci.run_s("echo 'Hello from s'")
     assert result3.raw.success, "S exec failed"
-    assert "Hello from s" in result3.raw.output, "Unexpected s output"
-    print("  ✓ Test 4: SQL Execution")
+    assert "hello from s" in result3.raw.output, "unexpected s output"
+    print("  ✓ test 4: SQL execution")
     result4 = ci.run_sql("""
 CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, age INTEGER);
 INSERT INTO users VALUES (1, 'Alice', 30), (2, 'Bob', 25);
 SELECT * FROM users ORDER BY age DESC;
 """)
     assert result4.raw.success, "SQL failed"
-    print("  ✓ Test 5: State Persistence Across Calls")
+    print("  ✓ test 5: State persistence across calls")
     ci.run_python("counter = 0")
     ci.run_python("counter += 1")
     result5 = ci.run_python("print(counter)")
-    assert "1" in result5.raw.output, "State should persist"
-    print("  ✓ Test 6: Data Analysis Helper")
+    assert "1" in result5.raw.output, "state should persist"
+    print("  ✓ test 6: Data analysis helper")
     ci.run_python("""
 import pandas as pd
 data = {'A': [1, 2, 3, 4, 5], 'B': [10, 20, 30, 40, 50]}
@@ -948,9 +948,9 @@ df.to_csv('sample.csv', index=False)
 print("CSV created")
 """)
     summary = ci.analyze_csv(ci.default_session!.working_dir + "sample.csv")
-    assert summary.raw.success, "Data analysis failed"
+    assert summary.raw.success, "data analysis failed"
     ci.cleanup()
-    print("\n✅ All Code Interpreter Tests Passed!")
+    print("\n✅ all code interpreter tests passed!")
     return true
 }
 export {

@@ -91,8 +91,8 @@ func model_forward_with_lora(
 }
 struct lora_adapter {
     string name
-    []float lora_A
-    []float lora_B
+    []float lora_a
+    []float lora_b
     int rank
     float scaling
 }

@@ -273,7 +273,7 @@ func prepare_clm_batch(
 ) {
     """
     English text CLM (Causal LM) batchdata
-    Input: "The quick brown fox jumps"
+    Input: "the quick brown fox jumps"
     Labels: "quick brown fox jumps "
     """
     dict[str, any] encoded = batch_encode(
@@ -568,7 +568,7 @@ func run_pretraining(
         eps=config.adam_epsilon,
         weight_decay=config.weight_decay
     )
-    GradScaler scaler = GradScaler(enabled=(config.precision != "fp32"))
+    grad_scaler scaler = grad_scaler(enabled=(config.precision != "fp32"))
     pretrain_state state = create_pretrain_state(config)
     if resume_from_checkpoint != none:
         tuple[model, optimizer, state, scaler] = load_checkpoint(
@@ -638,7 +638,7 @@ func run_pretraining(
                     step=state.current_step
                 )
             update_training_phase(state)
-    except KeyboardInterrupt:
+    except keyboard_interrupt:
         print("\n\n⚠️ Training interrupted by user!")
         save_emergency_checkpoint(model, optimizer, state, scaler, config.output_dir)
     if rank == 0:

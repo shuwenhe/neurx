@@ -332,7 +332,7 @@ func (framework *evaluation_framework) compare_with_baseline() {
             status, result.benchmark_name, result.score, baseline_score, gap)
     }
 }
-func NewEvaluationFramework(config evaluation_config) *evaluation_framework {
+func new_evaluation_framework(config evaluation_config) *evaluation_framework {
     return &evaluation_framework{
         config: config,
         benchmarks: make(map[string]benchmark_dataset),

@@ -239,7 +239,7 @@ func (trainer *reward_model_trainer) calculate_auc(logits []float64, labels []in
     }
     return float64(correct) / float64(pairs)
 }
-func NewRewardModelTrainer(config reward_model_config) *reward_model_trainer {
+func new_reward_model_trainer(config reward_model_config) *reward_model_trainer {
     return &reward_model_trainer{
         config: config,
         model: reward_model{

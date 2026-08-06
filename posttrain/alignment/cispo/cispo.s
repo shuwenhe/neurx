@@ -1,7 +1,7 @@
 import "tensor/tensor.s"
 import "optimizer/optimizer.s"
 import "posttrain/alignment/ppo/ppo.s"
-struct CISPOConfig {
+struct cispo_config {
     learning_rate: f32
     num_epochs: i32
     max_grad_norm: f32
@@ -18,17 +18,17 @@ struct CISPOConfig {
     value_clip_epsilon: f32
     kl_coeff: f32
 }
-struct CISPOTrainer {
+struct cispo_trainer {
     config: CISPOConfig
-    policy_model: *Model
-    value_model: *Model
-    reference_model: *Model
-    optimizer: *Optimizer
-    behavior_log_probs: []Tensor
+    policy_model: *model
+    value_model: *model
+    reference_model: *model
+    optimizer: *optimizer
+    behavior_log_probs: []tensor
     step_count: i64
     is_weight_stats: ISWeightStats
 }
-struct ISWeightStats {
+struct is_weight_stats {
     mean: f32
     std: f32
     min: f32
@@ -37,16 +37,16 @@ struct ISWeightStats {
 }
 func new_cispo_trainer(
     config: CISPOConfig,
-    policy: *Model,
-    value: *Model,
-    reference: *Model
+    policy: *model,
+    value: *model,
+    reference: *model
 ) -> CISPOTrainer {
     let params = policy.parameters()
     if config.use_value_loss {
         params = params + value.parameters()
     }
     let optimizer = adamw_optimizer(params, config.learning_rate)
-    return CISPOTrainer{
+    return cispo_trainer{
         config: config,
         policy_model: policy,
         value_model: value,
@@ -63,11 +63,11 @@ func new_cispo_trainer(
         },
     }
 }
-func (trainer: *CISPOTrainer) compute_is_weights(
-    new_log_probs: []Tensor,
-    behavior_log_probs: []Tensor
-) -> []Tensor {
-    let is_weights: []Tensor = []
+func (trainer: *cispo_trainer) compute_is_weights(
+    new_log_probs: []tensor,
+    behavior_log_probs: []tensor
+) -> []tensor {
+    let is_weights: []tensor = []
     for i in 0..new_log_probs.len() {
         let log_ratio = new_log_probs[i] - behavior_log_probs[i]
         let ratio = exp(log_ratio)
@@ -81,7 +81,7 @@ func (trainer: *CISPOTrainer) compute_is_weights(
     trainer.update_is_weight_stats(is_weights)
     return is_weights
 }
-func (trainer: *CISPOTrainer) update_is_weight_stats(is_weights: []Tensor) {
+func (trainer: *cispo_trainer) update_is_weight_stats(is_weights: []tensor) {
     let values: []f32 = []
     let clipped_count = 0
     let total_count = 0
@@ -113,7 +113,7 @@ func (trainer: *CISPOTrainer) update_is_weight_stats(is_weights: []Tensor) {
     }
     trainer.is_weight_stats.clipped_ratio = f32(clipped_count) / f32(total_count)
 }
-func (trainer: *CISPOTrainer) compute_cispo_objective(
+func (trainer: *cispo_trainer) compute_cispo_objective(
     ratio: Tensor,
     advantage: Tensor,
     is_weight: Tensor
@@ -139,14 +139,14 @@ func (trainer: *CISPOTrainer) compute_cispo_objective(
     }
     return weighted_obj
 }
-func (trainer: *CISPOTrainer) compute_gae(
-    rewards: []Tensor,
-    values: []Tensor,
-    dones: []Tensor
-) -> ([]Tensor, []Tensor) {
+func (trainer: *cispo_trainer) compute_gae(
+    rewards: []tensor,
+    values: []tensor,
+    dones: []tensor
+) -> ([]tensor, []tensor) {
     let batch_size = rewards.len()
-    let advantages: []Tensor = []
-    let returns: []Tensor = []
+    let advantages: []tensor = []
+    let returns: []tensor = []
     for b in 0..batch_size {
         let seq_len = rewards[b].shape[0]
         let seq_advantages = tensor_zeros([seq_len])
@@ -168,17 +168,17 @@ func (trainer: *CISPOTrainer) compute_gae(
     }
     return advantages, returns
 }
-func (trainer: *CISPOTrainer) train_step(
-    prompts: []Tensor,
-    responses: []Tensor,
-    rewards: []Tensor
+func (trainer: *cispo_trainer) train_step(
+    prompts: []tensor,
+    responses: []tensor,
+    rewards: []tensor
 ) -> (f32, f32, f32) {
     let batch_size = prompts.len()
-    let inputs: []Tensor = []
+    let inputs: []tensor = []
     for i in 0..batch_size {
         inputs.push(concat(prompts[i], responses[i]))
     }
-    let values: []Tensor = []
+    let values: []tensor = []
     if trainer.config.use_value_loss {
         for input in inputs {
             let value = trainer.value_model.forward(input)
@@ -189,7 +189,7 @@ func (trainer: *CISPOTrainer) train_step(
             values.push(tensor_zeros([responses[i].shape[0]]))
         }
     }
-    let dones: []Tensor = []
+    let dones: []tensor = []
     for resp in responses {
         let seq_len = resp.shape[0]
         let done = tensor_zeros([seq_len])
@@ -205,18 +205,18 @@ func (trainer: *CISPOTrainer) train_step(
     }
     let adv_mean = compute_mean(all_advantages)
     let adv_std = compute_std(all_advantages, adv_mean)
-    let normalized_advantages: []Tensor = []
+    let normalized_advantages: []tensor = []
     for adv in advantages {
         let norm_adv = (adv - adv_mean) / (adv_std + 1e-8)
         normalized_advantages.push(norm_adv)
     }
-    let behavior_log_probs: []Tensor = []
+    let behavior_log_probs: []tensor = []
     for input in inputs {
         let logits = trainer.policy_model.forward(input)
         let log_probs = log_softmax(logits, dim: -1)
         behavior_log_probs.push(log_probs)
     }
-    let ref_log_probs: []Tensor = []
+    let ref_log_probs: []tensor = []
     for input in inputs {
         let logits = trainer.reference_model.forward(input)
         let log_probs = log_softmax(logits, dim: -1)
@@ -283,7 +283,7 @@ func (trainer: *CISPOTrainer) train_step(
         total_kl / f32(num_updates)
     )
 }
-func (trainer: *CISPOTrainer) train(train_data: DataLoader) -> ([]f32, []f32) {
+func (trainer: *cispo_trainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let value_losses: []f32 = []
     for batch in train_data {

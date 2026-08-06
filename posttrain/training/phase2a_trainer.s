@@ -16,16 +16,16 @@ struct training_config {
     int total_steps
 }
 struct lora_weights {
-    []float lora_A
-    []float lora_B
+    []float lora_a
+    []float lora_b
     int rank
     int hidden_size
 }
 struct optimizer_state {
-    []float m_A
-    []float v_A
-    []float m_B
-    []float v_B
+    []float m_a
+    []float v_a
+    []float m_b
+    []float v_b
     float beta1
     float beta2
     float epsilon
@@ -115,22 +115,22 @@ func init_lora_weights(int rank, int hidden_size, int layer_idx) lora_weights {
     lora_weights lora
     lora.rank = rank
     lora.hidden_size = hidden_size
-    int size_A = rank * hidden_size
+    int size_a = rank * hidden_size
     lora.lora_A = []float{cap: size_A}
     int seed = 42 + layer_idx * 1000
-    float std_A = sqrt_approx(2.0 / float(hidden_size))
+    float std_a = sqrt_approx(2.0 / float(hidden_size))
     int i = 0
-    while i < size_A {
+    while i < size_a {
         seed = random_seed(seed)
         float rand_val = random_float(seed)
-        float val = (rand_val - 0.5) * 2.0 * std_A
+        float val = (rand_val - 0.5) * 2.0 * std_a
         lora.lora_A = append(lora.lora_A, val)
         i = i + 1
     }
-    int size_B = hidden_size * rank
+    int size_b = hidden_size * rank
     lora.lora_B = []float{cap: size_B}
     i = 0
-    while i < size_B {
+    while i < size_b {
         lora.lora_B = append(lora.lora_B, 0.0)
         i = i + 1
     }
@@ -245,8 +245,8 @@ func log_approx(float x) float {
     return 2.0 * result
 }
 struct gradient_pair {
-    []float grad_A
-    []float grad_B
+    []float grad_a
+    []float grad_b
 }
 func compute_lora_gradients(
     []float hidden_input,
@@ -258,27 +258,27 @@ func compute_lora_gradients(
     int tokens = batch_size * seq_len
     int h = lora.hidden_size
     int r = lora.rank
-    []float grad_A = []float{cap: r * h}
-    []float grad_B = []float{cap: h * r}
+    []float grad_a = []float{cap: r * h}
+    []float grad_b = []float{cap: h * r}
     int seed = 999
     int i = 0
     while i < r * h {
         seed = random_seed(seed)
-        grad_A = append(grad_A, random_float(seed) * 0.01)
+        grad_a = append(grad_a, random_float(seed) * 0.01)
         i = i + 1
     }
     i = 0
     while i < h * r {
         seed = random_seed(seed)
-        grad_B = append(grad_B, random_float(seed) * 0.01)
+        grad_b = append(grad_b, random_float(seed) * 0.01)
         i = i + 1
     }
     gradient_pair result
-    result.grad_A = grad_A
-    result.grad_B = grad_B
+    result.grad_A = grad_a
+    result.grad_B = grad_b
     return result
 }
-func init_optimizer(int size_A, int size_B) optimizer_state {
+func init_optimizer(int size_a, int size_b) optimizer_state {
     optimizer_state opt
     opt.beta1 = 0.9
     opt.beta2 = 0.999
@@ -288,13 +288,13 @@ func init_optimizer(int size_A, int size_B) optimizer_state {
     opt.m_B = []float{cap: size_B}
     opt.v_B = []float{cap: size_B}
     int i = 0
-    while i < size_A {
+    while i < size_a {
         opt.m_A = append(opt.m_A, 0.0)
         opt.v_A = append(opt.v_A, 0.0)
         i = i + 1
     }
     i = 0
-    while i < size_B {
+    while i < size_b {
         opt.m_B = append(opt.m_B, 0.0)
         opt.v_B = append(opt.v_B, 0.0)
         i = i + 1
@@ -307,8 +307,8 @@ struct optimizer_result {
 }
 func optimizer_step(
     lora_weights lora,
-    []float grad_A,
-    []float grad_B,
+    []float grad_a,
+    []float grad_b,
     optimizer_state opt,
     float lr,
     int step
@@ -318,8 +318,8 @@ func optimizer_step(
     float lr_corrected = lr * sqrt_approx(1.0 - beta2_t) / (1.0 - beta1_t)
     int i = 0
     while i < len(lora.lora_A) {
-        opt.m_A[i] = opt.beta1 * opt.m_A[i] + (1.0 - opt.beta1) * grad_A[i]
-        opt.v_A[i] = opt.beta2 * opt.v_A[i] + (1.0 - opt.beta2) * grad_A[i] * grad_A[i]
+        opt.m_A[i] = opt.beta1 * opt.m_A[i] + (1.0 - opt.beta1) * grad_a[i]
+        opt.v_A[i] = opt.beta2 * opt.v_A[i] + (1.0 - opt.beta2) * grad_a[i] * grad_a[i]
         float m_hat = opt.m_A[i] / (1.0 - beta1_t)
         float v_hat = opt.v_A[i] / (1.0 - beta2_t)
         lora.lora_A[i] = lora.lora_A[i] - lr_corrected * m_hat / (sqrt_approx(v_hat) + opt.epsilon)
@@ -327,8 +327,8 @@ func optimizer_step(
     }
     i = 0
     while i < len(lora.lora_B) {
-        opt.m_B[i] = opt.beta1 * opt.m_B[i] + (1.0 - opt.beta1) * grad_B[i]
-        opt.v_B[i] = opt.beta2 * opt.v_B[i] + (1.0 - opt.beta2) * grad_B[i] * grad_B[i]
+        opt.m_B[i] = opt.beta1 * opt.m_B[i] + (1.0 - opt.beta1) * grad_b[i]
+        opt.v_B[i] = opt.beta2 * opt.v_B[i] + (1.0 - opt.beta2) * grad_b[i] * grad_b[i]
         float m_hat = opt.m_B[i] / (1.0 - beta1_t)
         float v_hat = opt.v_B[i] / (1.0 - beta2_t)
         lora.lora_B[i] = lora.lora_B[i] - lr_corrected * m_hat / (sqrt_approx(v_hat) + opt.epsilon)
@@ -487,9 +487,9 @@ func run_real_training(training_config config) training_state {
         layer_idx = layer_idx + 1
     }
     println("✓ Initialized " + int_to_str(config.num_layers) + " LoRA adapters")
-    int size_A = config.lora_rank * config.hidden_size
-    int size_B = config.hidden_size * config.lora_rank
-    optimizer_state opt = init_optimizer(size_A, size_B)
+    int size_a = config.lora_rank * config.hidden_size
+    int size_b = config.hidden_size * config.lora_rank
+    optimizer_state opt = init_optimizer(size_a, size_b)
     println("✓ Initialized Adam optimizer (β1=0.9, β2=0.999)")
     println("")
     training_state state

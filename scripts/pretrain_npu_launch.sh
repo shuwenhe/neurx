@@ -71,8 +71,8 @@ if [[ -z "$acl_lib" ]]; then
 fi
 log_step "step 3/8: checking NPU availability"
 npu_smi_bin="${NPU_SMI:-$(command -v npu-smi 2>/dev/null || true)}"
-if [[ -z "$npu_smi_bin" && -x /usr/local/Ascend/driver/tools/npu-smi ]]; then
-  npu_smi_bin=/usr/local/Ascend/driver/tools/npu-smi
+if [[ -z "$npu_smi_bin" && -x /usr/local/ascend/driver/tools/npu-smi ]]; then
+  npu_smi_bin=/usr/local/ascend/driver/tools/npu-smi
 fi
 if [[ -z "$npu_smi_bin" ]] || ! "$npu_smi_bin" info >/dev/null 2>&1; then
   echo "error: no usable Ascend NPU was detected with npu-smi."
@@ -206,13 +206,13 @@ if [[ "$requested_world_size" -gt 1 ]]; then
     host="${worker_hosts[$idx]}"
     vis="${worker_visibles[$idx]}"
     log_step "worker $((idx + 1))/$(( ${#worker_hosts[@]} )): probing $host"
-    if ! ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=no "$host" "$npu_smi_bin info >/dev/null 2>&1"; then
+    if ! ssh -o batch_mode=yes -o connect_timeout=10 -o strict_host_key_checking=no "$host" "$npu_smi_bin info >/dev/null 2>&1"; then
       echo "error: worker host is not reachable or npu-smi failed on $host."
       echo "       Check SSH access, NPU driver state, and worker host permissions."
       exit 1
     fi
     log_step "worker $((idx + 1))/$(( ${#worker_hosts[@]} )): syncing code to $host"
-    if ! ssh -o StrictHostKeyChecking=no "$host" "mkdir -p '$root_dir'"; then
+    if ! ssh -o strict_host_key_checking=no "$host" "mkdir -p '$root_dir'"; then
       echo "error: failed to create remote code directory on $host."
       exit 1
     fi
@@ -227,14 +227,14 @@ if [[ "$requested_world_size" -gt 1 ]]; then
       exit 1
     fi
     log_step "worker $((idx + 1))/$(( ${#worker_hosts[@]} )): building s_ir_runner on $host"
-    if ! ssh -o StrictHostKeyChecking=no "$host" "cd '$root_dir' && make build-s-ir-runner"; then
+    if ! ssh -o strict_host_key_checking=no "$host" "cd '$root_dir' && make build-s-ir-runner"; then
       echo "error: failed to build s_ir_runner on $host."
       exit 1
     fi
     rank=$((idx + 1))
     log_step "worker $((idx + 1))/$(( ${#worker_hosts[@]} )): starting rank=$rank on $host"
     remote_cmd="cd '$root_dir' && env ${common_env[*]} NEURX_NPU_ROLE=worker RANK=$rank LOCAL_RANK=0 MASTER_ADDR='$master_addr' MASTER_PORT='$master_port' NEURX_NPU_MASTER_ADDR='$master_addr' NEURX_NPU_MASTER_PORT='$master_port' ASCEND_RT_VISIBLE_DEVICES='$vis' NEURX_NPU_VISIBLE_DEVICES='$vis' WORLD_SIZE='$requested_world_size' make run-large-pretrain-s"
-    ssh -o StrictHostKeyChecking=no "$host" "bash -lc $(printf '%q' "$remote_cmd")" &
+    ssh -o strict_host_key_checking=no "$host" "bash -lc $(printf '%q' "$remote_cmd")" &
   done
 fi
 log_step "starting master locally (rank=0)"
