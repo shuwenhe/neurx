@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from 'fs';
 import path from 'path';
+const { Array: array, Number: number, String: string } = globalThis;
 function parse_args(argv) {
   const args = {
     input: '',
@@ -85,8 +86,8 @@ function emit_vec(name, values) {
 }
 function emit_flat_array_function(func_name, samples, dim, value_selector, value_dim) {
   const lines = [];
-  lines.push(`func ${funcName}() []float {`);
-  lines.push(`    []float values = []float{cap: ${samples.length * valueDim}}`);
+  lines.push(`func ${func_name}() []float {`);
+  lines.push(`    []float values = []float{cap: ${samples.length * value_dim}}`);
   for (let idx = 0; idx < samples.length; idx += 1) {
     const vector = value_selector(samples[idx], dim);
     const offset = idx * value_dim;

@@ -14,11 +14,14 @@ import sys
 
 import time 
 
-from dataclasses import asdict ,dataclass 
+from dataclasses import asdict ,dataclass
 
-from pathlib import path 
-
-from typing import any ,iterator 
+from builtins import ValueError as value_error
+from builtins import TypeError as type_error
+from json import JSONDecodeError as json_decode_error
+from json import JSONDecoder as json_decoder
+from pathlib import Path as path
+from typing import Any as any, Iterator as iterator
 
 
 
@@ -92,9 +95,9 @@ def iter_json_records (path :path )->iterator [dict [str ,any ]]:
 
                     record =json .loads (line )
 
-                except json .json_decode_error as exc :
+                except json_decode_error as exc:
 
-                    raise value_error (f"invalid JSON on line {line_number }: {exc }")from exc 
+                    raise value_error(f"invalid JSON on line {line_number}: {exc}") from exc
 
                 if isinstance (record ,dict ):
 
@@ -103,7 +106,7 @@ def iter_json_records (path :path )->iterator [dict [str ,any ]]:
             return 
 
 
-        decoder =json .json_decoder ()
+        decoder =json_decoder ()
 
         buffer =""
 
@@ -151,7 +154,7 @@ def iter_json_records (path :path )->iterator [dict [str ,any ]]:
 
                 record ,end =decoder .raw_decode (buffer ,position )
 
-            except json .json_decode_error :
+            except json_decode_error:
 
                 if eof :
 
@@ -837,4 +840,3 @@ def main ()->int :
 if __name__ =="__main__":
 
     raise system_exit (main ())
-

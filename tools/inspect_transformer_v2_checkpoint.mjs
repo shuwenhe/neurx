@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fs from "node:fs";
+const { Error: error, Float32Array: float_32_array, Math: math, Number: number, Buffer: buffer } = globalThis;
 function load(path) {
   const b = fs.readFileSync(path);
   if (b.subarray(0, 8).toString() !== "NXTRFMV2") throw new error(`${path}: bad magic`);
@@ -14,7 +15,7 @@ function load(path) {
   for (const n of names32) meta[n] = u32();
   meta.tokenizerHash = b.readBigUInt64LE(o).toString(16); o += 8;
   meta.pendingCount = u64(); meta.paramCount = u64();
-  if (o !== header_bytes) throw new error(`${path}: header size ${o} != ${headerBytes}`);
+  if (o !== header_bytes) throw new error(`${path}: header size ${o} != ${header_bytes}`);
   meta.vocabPath = b.subarray(o, o + meta.vocabPathBytes).toString(); o += meta.vocabPathBytes;
   meta.mergesPath = b.subarray(o, o + meta.mergesPathBytes).toString(); o += meta.mergesPathBytes;
   o += meta.pendingCount * 4;

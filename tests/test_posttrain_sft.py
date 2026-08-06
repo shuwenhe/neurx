@@ -1,12 +1,12 @@
-import importlib .util 
+import importlib .util
 
-import json 
+import json
 
-import tempfile 
+import tempfile
 
-import unittest 
+import unittest
 
-from pathlib import path 
+from pathlib import Path as path
 
 
 
@@ -130,4 +130,3 @@ class posttrain_data_test (unittest .test_case ):
 if __name__ =="__main__":
 
     unittest .main ()
-

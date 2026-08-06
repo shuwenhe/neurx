@@ -1,10 +1,10 @@
-import importlib .util 
+import importlib .util
 
-import sys 
+import sys
 
-import unittest 
+import unittest
 
-from pathlib import path 
+from pathlib import Path as path
 
 
 
@@ -83,4 +83,3 @@ class medical_mcq_evaluation_test (unittest .test_case ):
 if __name__ =="__main__":
 
     unittest .main ()
-

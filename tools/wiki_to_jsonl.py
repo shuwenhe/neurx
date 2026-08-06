@@ -4,9 +4,9 @@ import json
 
 import bz2 
 
-import xml .etree .element_tree as ET 
+import xml .etree .ElementTree as element_tree
 
-from pathlib import path 
+from pathlib import Path as path
 
 
 def extract_pages (xml_path ,max_pages =0 ):
@@ -17,7 +17,7 @@ def extract_pages (xml_path ,max_pages =0 ):
 
         count =0 
 
-        for event ,elem in ET .iterparse (f ,events =('end',)):
+        for event ,elem in element_tree .iterparse (f ,events =('end',)):
 
             if elem .tag .endswith ('}page'):
 
@@ -83,4 +83,3 @@ def main ():
 if __name__ =='__main__':
 
     main ()
-

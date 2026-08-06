@@ -324,8 +324,9 @@ func main() {
     initialize_backend()
     print("Backend initialized successfully.\n")
     int server_fd = __sys_socket(2, 1, 0)  
+    print("Socket creation: fd=" + int_to_string(server_fd) + "\n")
     if server_fd < 0 {
-        print("Warning: Socket creation failed, running in compatibility mode\n")
+        print("ERROR: Socket creation failed!\n")
         print("HTTP server listening on 127.0.0.1:18082 (compatibility mode)\n")
         int counter = 0
         while true {
@@ -336,7 +337,7 @@ func main() {
         }
     }
     if __sys_bind(server_fd, "127.0.0.1", 18082, 2) < 0 {
-        print("Warning: Socket binding failed, running in compatibility mode\n")
+        print("ERROR: Socket binding failed!\n")
         print("HTTP server listening on 127.0.0.1:18082 (compatibility mode)\n")
         _ = __sys_close(server_fd)
         int counter = 0
@@ -348,7 +349,7 @@ func main() {
         }
     }
     if __sys_listen(server_fd, 128) < 0 {
-        print("Warning: Socket listen failed, running in compatibility mode\n")
+        print("ERROR: Socket listen failed!\n")
         print("HTTP server listening on 127.0.0.1:18082 (compatibility mode)\n")
         _ = __sys_close(server_fd)
         int counter = 0
