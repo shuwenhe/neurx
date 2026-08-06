@@ -4,6 +4,7 @@ func abs_float(float x) float {
     if x < 0.0 { return 0.0 - x }
     return x
 }
+
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -30,6 +31,7 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
+
 func float_to_str(float value, int decimals) string {
     float current = value
     bool negative = current < 0.0
@@ -66,6 +68,7 @@ func float_to_str(float value, int decimals) string {
     if negative { result = "-" + result }
     return result
 }
+
 func test_embedding_shape() bool {
     println("[TEST 1] Embedding Shape Verification")
     println("  Testing: vocab_size=151936, hidden_size=896")
@@ -80,6 +83,7 @@ func test_embedding_shape() bool {
     println("  ✗ Shape calculation failed")
     return false
 }
+
 func test_embedding_lookup() bool {
     println("[TEST 2] Embedding Lookup Simulation")
     println("  Testing: Single token lookup")
@@ -91,6 +95,7 @@ func test_embedding_lookup() bool {
     println("  ✓ Lookup simulation successful")
     return true
 }
+
 func test_batch_embedding() bool {
     println("[TEST 3] Batch Embedding Simulation")
     println("  Testing: Batch of 2 sequences, 3 tokens each")
@@ -108,6 +113,7 @@ func test_batch_embedding() bool {
     println("  ✗ Batch size calculation failed")
     return false
 }
+
 func test_model_loading() bool {
     println("[TEST 4] Model File Availability")
     string model_path = runtime_env_get("NEURX_MODEL_PATH", "../model/base-model")
@@ -127,6 +133,7 @@ func test_model_loading() bool {
     println("  ✗ Model directory not found")
     return false
 }
+
 func main() {
     println("============================================================")
     println("NeurX Embedding Tests (Pure S, No PyTorch)")

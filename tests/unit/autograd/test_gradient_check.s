@@ -19,6 +19,7 @@ func test_gradient_check_simple() bool {
     println("    PASS (error = " + float_to_str(error) + ")")
     return true
 }
+
 func test_gradient_check_exp() bool {
     println("  [Test] Gradient Check - Exponential Function")
     println("    f(x) = exp(x), f'(x) = exp(x)")
@@ -39,6 +40,7 @@ func test_gradient_check_exp() bool {
     println("    PASS (error = " + float_to_str(error) + ")")
     return true
 }
+
 func test_gradient_check_embedding_loss() bool {
     println("  [Test] Gradient Check - Embedding Loss")
     println("    Simplified: L = sum(w * input)")
@@ -65,6 +67,7 @@ func test_gradient_check_embedding_loss() bool {
     println("    PASS (error = " + float_to_str(error) + ")")
     return true
 }
+
 func run_gradient_check_tests() {
     println("=== Gradient Check Test Suite ===")
     println("")
@@ -78,12 +81,14 @@ func run_gradient_check_tests() {
         println("=== SOME GRADIENT CHECK TESTS FAILED ===")
     }
 }
+
 func abs(float x) float {
     if x < 0.0 {
         return -x
     }
     return x
 }
+
 func exp_approx(float x) float {
     if x > 10.0 {
         return 22026.0
@@ -101,6 +106,7 @@ func exp_approx(float x) float {
     }
     return result
 }
+
 func float_to_str(float val) string {
     return ""
 }

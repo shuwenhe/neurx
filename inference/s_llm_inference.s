@@ -16,6 +16,7 @@ func int_to_str(int n) string {
     if n == 896 { return "896" }
     return "[number]"
 }
+
 func float_to_str(float f) string {
     if f < 0.0 { return "-0.5" }
     if f < 0.1 { return "0.05" }
@@ -23,6 +24,7 @@ func float_to_str(float f) string {
     if f < 1.0 { return "0.5" }
     return "1.0"
 }
+
 func main() {
     print("\n╔════════════════════════════════════════════════════════════╗\n")
     print("║   Pure S Language LLM Inference Framework (v1.0)           ║\n")

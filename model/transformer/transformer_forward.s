@@ -34,6 +34,7 @@ struct transformer_forward_config {
     bool use_causal_mask
     bool pre_norm
 }
+
 struct transformer_layer_state {
     []float wq
     []float wk
@@ -50,6 +51,7 @@ struct transformer_layer_state {
     layer_norm_state norm1
     layer_norm_state norm2
 }
+
 struct transformer_forward_state {
     int vocab_size
     int hidden_dim
@@ -66,16 +68,19 @@ struct transformer_forward_state {
     rope_position_encoding pos_encoding_rope
     transformer_forward_config config
 }
+
 struct forward_pass_output {
     []float logits
     []float hidden_states
     []float layer_outputs
 }
+
 struct forward_pass_cache {
     [][]float attention_scores
     [][]float ffn_outputs
     [][]float layer_norms
 }
+
 func write_slice([]float dst, int dst_offset, []float src) {
     int i = 0
     while i < len(src) {
@@ -83,6 +88,7 @@ func write_slice([]float dst, int dst_offset, []float src) {
         i = i + 1
     }
 }
+
 func apply_rope_batch(
     rope_position_encoding rope_encoding,
     []float q,
@@ -118,6 +124,7 @@ func apply_rope_batch(
     result[1] = k_out
     result
 }
+
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
@@ -127,6 +134,7 @@ func allocate_vector(int size, float init_val) []float {
     }
     v
 }
+
 func copy_vector([]float src) []float {
     []float out = allocate_vector(len(src), 0.0)
     int i = 0
@@ -136,6 +144,7 @@ func copy_vector([]float src) []float {
     }
     out
 }
+
 func transformer_layer_at([]transformer_layer_state layers, int index) transformer_layer_state {
     int i = 0
     transformer_layer_state out = layers[0]
@@ -148,6 +157,7 @@ func transformer_layer_at([]transformer_layer_state layers, int index) transform
     }
     out
 }
+
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -160,6 +170,7 @@ func sqrt_approx(float x) float {
     }
     y
 }
+
 func exp_approx(float x) float {
     if x > 20.0 {
         return 485165195.0
@@ -177,6 +188,7 @@ func exp_approx(float x) float {
     }
     result
 }
+
 func softmax([]float scores, int seq_len) []float {
     []float output = copy_vector(scores)
     float max_score = scores[0]
@@ -201,12 +213,14 @@ func softmax([]float scores, int seq_len) []float {
     }
     output
 }
+
 func gelu(float x) float {
     float pi = 3.141592653589793
     float sqrt_2_over_pi = sqrt_approx(2.0 / pi)
     float cdf = 0.5 * (1.0 + sqrt_2_over_pi * (x + 0.044715 * x * x * x))
     x * cdf
 }
+
 func project_rows(
     []float input,
     []float weight,
@@ -238,6 +252,7 @@ func project_rows(
     }
     output
 }
+
 func embed_tokens(
     []float token_embedding,
     []int token_ids,
@@ -266,6 +281,7 @@ func embed_tokens(
     }
     output
 }
+
 func multi_head_attention_forward(
     transformer_layer_state layer,
     []float hidden_states,
@@ -343,6 +359,7 @@ func multi_head_attention_forward(
     output = project_rows(context, layer.wo, layer.output_bias, token_count, hidden_dim, hidden_dim)
     output
 }
+
 func feed_forward_forward(
     transformer_layer_state layer,
     []float hidden_states,
@@ -378,6 +395,7 @@ func feed_forward_forward(
     }
     output
 }
+
 func transformer_layer_forward(
     transformer_layer_state layer,
     []float hidden_states,
@@ -461,6 +479,7 @@ func transformer_layer_forward(
     }
     output
 }
+
 func transformer_forward_pass(
     transformer_forward_state model_state,
     []int input_ids,

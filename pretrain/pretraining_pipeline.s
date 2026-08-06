@@ -45,6 +45,7 @@ struct pretrain_config {
     string precision
     bool enable_gradient_checkpointing
 }
+
 func create_neurx_200b_pretrain_config() pretrain_config {
     neurx_config model_cfg = create_neurx_200b_config_200b()
     return pretrain_config {
@@ -91,6 +92,7 @@ func create_neurx_200b_pretrain_config() pretrain_config {
         enable_gradient_checkpointing: true,
     }
 }
+
 func create_test_pretrain_config() pretrain_config {
     neurx_config model_cfg = create_custom_neurx_config(
         vocab_size=32000,
@@ -144,6 +146,7 @@ enum training_phase {
     FINE_TUNING_PHASE
     COMPLETED
 }
+
 struct pretrain_state {
     pretrain_config config
     int current_step
@@ -178,6 +181,7 @@ struct pretrain_state {
         int samples_per_step
     } performance
 }
+
 func create_pretrain_state(config: pretrain_config) pretrain_state {
     print("\n" + "="*70)
     print("Initializing NEURX Pretraining State")
@@ -228,6 +232,7 @@ func create_pretrain_state(config: pretrain_config) pretrain_state {
         },
     }
 }
+
 func get_learning_rate(
     state: pretrain_state,
     step: int
@@ -250,6 +255,7 @@ func get_learning_rate(
             case _:
                 return cfg.peak_lr * (1.0 - progress)
 }
+
 func sample_training_task(
     state: pretrain_state
 ) {
@@ -266,6 +272,7 @@ func sample_training_task(
         return PREFIX_LM
     return PREFIX_LM
 }
+
 func prepare_clm_batch(
     tokenizer: tokenizer_state,
     batch_texts: []string,

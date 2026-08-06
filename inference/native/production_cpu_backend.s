@@ -1,16 +1,28 @@
 package neurx.inference.cpu_backend
 extern "intrinsic" func __sys_socket(int domain, int socket_type, int protocol) int
+
 extern "intrinsic" func __sys_bind(int fd, string addr, int port, int family) int
+
 extern "intrinsic" func __sys_listen(int fd, int backlog) int
+
 extern "intrinsic" func __sys_accept(int fd) int
+
 extern "intrinsic" func __sys_read_string(int fd, int count) string
+
 extern "intrinsic" func __sys_write_string(int fd, string data) int
+
 extern "intrinsic" func __sys_close(int fd) int
+
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
 func vocab_size() int { 151936 }
+
 func model_hidden_dim() int { 896 }
+
 func num_transformer_layers() int { 24 }
+
 func num_attention_heads() int { 14 }
+
 func max_sequence_length() int { 32768 }
 
 struct model_config {
@@ -326,12 +338,15 @@ func extract_http_body(string request) string {
     print("DEBUG: extracted " + int_to_string(len(result)) + " bytes of body\n")
     return result
 }
+
 func create_ready_file(string path) {
     print("✓ Backend ready file: " + path + "\n")
 }
+
 func runtime_env_get(string name, string default_value) string {
     default_value
 }
+
 func main() {
     initialize_backend()
     print("Backend initialized successfully.\n")

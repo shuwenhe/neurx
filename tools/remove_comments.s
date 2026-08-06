@@ -37,6 +37,7 @@ func remove_comments(content string) string {
   }
   return strings.Join(result, "\n")
 }
+
 func ProcessFile(filepath string) error {
   content, err := ioutil.ReadFile(filepath)
   if err != nil {
@@ -49,6 +50,7 @@ func ProcessFile(filepath string) error {
   }
   return nil
 }
+
 func GetFilesWithComments(rootDir string) []string {
   var files []string
   filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
@@ -69,6 +71,7 @@ func GetFilesWithComments(rootDir string) []string {
   })
   return files
 }
+
 func main() {
   root_dir := "."
   if len(os.Args) > 1 {

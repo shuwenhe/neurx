@@ -7,6 +7,7 @@ struct linear_layer {
     int out_features
     float learning_rate
 }
+
 struct lora_adapter {
     matrix lora_a
     matrix lora_b
@@ -16,6 +17,7 @@ struct lora_adapter {
     int out_features
     float learning_rate
 }
+
 struct lora_linear_layer {
     matrix base_weight
     vector base_bias
@@ -23,17 +25,20 @@ struct lora_linear_layer {
     int in_features
     int out_features
 }
+
 struct embedding_layer {
     matrix embeddings
     int vocab_size
     int embedding_dim
 }
+
 struct layer_norm {
     vector gamma
     vector beta
     float epsilon
     int hidden_size
 }
+
 func create_linear_layer(int in_features, int out_features, float lr, int seed) linear_layer {
     linear_layer layer
     layer.in_features = in_features
@@ -53,11 +58,13 @@ func create_linear_layer(int in_features, int out_features, float lr, int seed) 
     layer.bias = create_vector(out_features)
     layer
 }
+
 func linear_forward(linear_layer layer, vector x) vector {
     vector y = matrix_vector_multiply(layer.weight, x)
     y = vector_add(y, layer.bias)
     y
 }
+
 func create_lora_adapter(int in_features, int out_features, int rank, float alpha, float lr, int seed) lora_adapter {
     lora_adapter adapter
     adapter.in_features = in_features
@@ -70,6 +77,7 @@ func create_lora_adapter(int in_features, int out_features, int rank, float alph
     adapter.lora_b = create_matrix(rank, out_features)
     adapter
 }
+
 func lora_forward(lora_linear_layer layer, vector x) vector {
     vector output = matrix_vector_multiply(layer.base_weight, x)
     output = vector_add(output, layer.base_bias)
@@ -80,6 +88,7 @@ func lora_forward(lora_linear_layer layer, vector x) vector {
     output = vector_add(output, b_ax)
     output
 }
+
 func create_lora_linear_layer(int in_features, int out_features, int rank, float alpha, float lr, int seed) lora_linear_layer {
     lora_linear_layer layer
     layer.in_features = in_features
@@ -91,6 +100,7 @@ func create_lora_linear_layer(int in_features, int out_features, int rank, float
     layer.adapter = create_lora_adapter(in_features, out_features, rank, alpha, lr, seed + 1)
     layer
 }
+
 func create_embedding_layer(int vocab_size, int embedding_dim, int seed) embedding_layer {
     embedding_layer layer
     layer.vocab_size = vocab_size
@@ -99,6 +109,7 @@ func create_embedding_layer(int vocab_size, int embedding_dim, int seed) embeddi
     layer.embeddings = matrix_scale(layer.embeddings, 0.02)
     layer
 }
+
 func embedding_lookup(embedding_layer layer, int token_id) vector {
     vector result = create_vector(layer.embedding_dim)
     if token_id < 0 || token_id >= layer.vocab_size {
@@ -111,6 +122,7 @@ func embedding_lookup(embedding_layer layer, int token_id) vector {
     }
     result
 }
+
 func create_layer_norm(int hidden_size) layer_norm {
     layer_norm ln
     ln.hidden_size = hidden_size
@@ -124,6 +136,7 @@ func create_layer_norm(int hidden_size) layer_norm {
     ln.beta = create_vector(hidden_size)
     ln
 }
+
 func layer_norm_forward(layer_norm ln, vector x) vector {
     float mean = 0.0
     int i = 0
@@ -162,6 +175,7 @@ func layer_norm_forward(layer_norm ln, vector x) vector {
     }
     output
 }
+
 func dropout(vector x, float dropout_rate, int seed) vector {
     vector result = create_vector(x.size)
     int state = seed
@@ -181,12 +195,14 @@ func dropout(vector x, float dropout_rate, int seed) vector {
     }
     result
 }
+
 struct batch_norm_stats {
     vector running_mean
     vector running_var
     float momentum
     int feature_size
 }
+
 func create_batch_norm_stats(int feature_size) batch_norm_stats {
     batch_norm_stats stats
     stats.feature_size = feature_size

@@ -19,12 +19,14 @@ struct vision_config {
     image_resolution_adaptive: bool = true
     support_video: bool = true
 }
+
 struct image_input {
     pixel_values: tensor
     image_path: string?
     image_url: string?
     metadata: map<string, any>?
 }
+
 struct video_input {
     frames: list<tensor>
     video_path: string?
@@ -32,6 +34,7 @@ struct video_input {
     duration_seconds: float
     audio_track: tensor?
 }
+
 struct vision_output {
     image_features: tensor
     pooled_features: tensor
@@ -40,6 +43,7 @@ struct vision_output {
     multimodal_embedding: tensor?,
     metadata: vision_metadata
 }
+
 struct vision_metadata {
     num_patches_h: int
     num_patches_w: int
@@ -49,6 +53,7 @@ struct vision_metadata {
     is_video: bool
     frame_count: int
 }
+
 class vi_t_encoder {
     config: vision_config
     embeddings: ViTPatchEmbeddings
@@ -107,6 +112,7 @@ class vi_t_encoder {
         }
     }
 }
+
 class vi_t_patch_embeddings {
     projection: Conv2D
     cls_token: Parameter
@@ -146,10 +152,12 @@ class vi_t_patch_embeddings {
         }
     }
 }
+
 struct embeddings_output {
     hidden_states: tensor
     attention_mask: tensor
 }
+
 class vi_t_encoder_blocks {
     layers: list<vi_t_layer>
     gradient_checkpointing: bool
@@ -184,10 +192,12 @@ class vi_t_encoder_blocks {
         }
     }
 }
+
 struct encoder_output {
     last_hidden_state: tensor
     attentions: list<tensor>?
 }
+
 class vi_t_layer {
     attention: ViTAttention
     intermediate: Intermediate
@@ -214,10 +224,12 @@ class vi_t_layer {
         }
     }
 }
+
 struct layer_output {
     hidden_states: tensor
     attention_weights: tensor?
 }
+
 class vi_t_attention {
     query: linear
     key: linear
@@ -258,10 +270,12 @@ class vi_t_attention {
         }
     }
 }
+
 struct attention_output {
     hidden_states: tensor
     attention_weights: tensor?
 }
+
 class intermediate {
     dense: linear
     activation: GELU
@@ -274,6 +288,7 @@ class intermediate {
         return this.activation.forward(x)
     }
 }
+
 class output {
     dense: linear
     dropout: Dropout
@@ -293,6 +308,7 @@ enum pool_type {
     MAX_POOLING
     ATTENTION_POOL
 }
+
 class vision_pooler {
     pool_type: PoolType
     attention_pool?: LearnableAttentionPool
@@ -324,6 +340,7 @@ class vision_pooler {
         }
     }
 }
+
 class learnable_attention_pool {
     query: Parameter
     attention: ViTAttention
@@ -341,6 +358,7 @@ class learnable_attention_pool {
         return output.hidden_states.squeeze(1)
     }
 }
+
 class visual_adapter {
     input_dim: int
     output_dim: int
@@ -365,6 +383,7 @@ class visual_adapter {
         return normalized
     }
 }
+
 class clip_contrastive_model {
     vision_encoder: ViTEncoder
     text_encoder: CLIPTextEncoder
@@ -421,6 +440,7 @@ class clip_contrastive_model {
         return (loss_i2t + loss_t2i) / 2
     }
 }
+
 struct clipoutput {
     image_features: tensor
     text_features: tensor
@@ -429,6 +449,7 @@ struct clipoutput {
     contrastive_loss: tensor
     similarity_score: tensor
 }
+
 class clip_text_encoder {
     token_embedding: embedding
     positional_embedding: Parameter
@@ -482,6 +503,7 @@ class clip_text_encoder {
         return mask
     }
 }
+
 class clip_transformer_block {
     self_attn: multi_head_attention
     mlp: mlp
@@ -502,6 +524,7 @@ class clip_transformer_block {
         return residual + mlp_out
     }
 }
+
 class video_processor {
     config: vision_config
     frame_sampler: FrameSampler
@@ -538,6 +561,7 @@ class video_processor {
         }
     }
 }
+
 struct video_vision_output {
     per_frame_features: tensor
     temporal_encoded: tensor
@@ -545,6 +569,7 @@ struct video_vision_output {
     num_frames: int
     frame_timestamps: list<float>
 }
+
 class frame_sampler {
     max_frames: int
     fps_sample: float
@@ -574,6 +599,7 @@ class frame_sampler {
         return this.cached_timestamps
     }
 }
+
 class temporal_encoder {
     position_embedding: Parameter
     transformer_layers: list<temporal_transformer_block>
@@ -599,6 +625,7 @@ class temporal_encoder {
         return this.layer_norm.forward(x)
     }
 }
+
 class temporal_transformer_block {
     self_attn: multi_head_attention
     mlp: mlp
@@ -619,6 +646,7 @@ class temporal_transformer_block {
         return x
     }
 }
+
 class multi_image_processor {
     config: vision_config
     vit_encoder: ViTEncoder
@@ -672,12 +700,14 @@ class multi_image_processor {
         }
     }
 }
+
 struct multimodal_embedding_result {
     per_image_features: list<tensor>
     fused_multimodal_embedding: tensor?
     num_images: int
     metadata: vision_metadata?
 }
+
 class cross_image_attention {
     query: linear
     key: linear
@@ -708,6 +738,7 @@ class cross_image_attention {
         return this.output_proj.forward(output)
     }
 }
+
 class image_preprocessor {
     config: vision_config
     transforms: list<image_transform>
@@ -748,6 +779,7 @@ class image_preprocessor {
         return metadata
     }
 }
+
 class multimodal_vision_model {
     config: vision_config
     vision_encoder: ViTEncoder
@@ -844,6 +876,7 @@ class multimodal_vision_model {
         }
     }
 }
+
 struct vision_language_output {
     answer: string
     visual_tokens: tensor

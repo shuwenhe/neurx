@@ -4,10 +4,12 @@ struct inner_data {
     float score
     []float weights
 }
+
 struct outer_data {
     string name
     inner_data data
 }
+
 func test_direct_access() {
     outer_data obj
     obj.name = "test"
@@ -22,6 +24,7 @@ func test_direct_access() {
     println("  obj.data.score = " + float_to_str(obj.data.score, 2))
     println("  obj.data.weights[0] = " + float_to_str(obj.data.weights[0], 1))
 }
+
 func test_array_element_access() {
     []outer_data arr = []outer_data{cap: 2}
     arr[0].name = "first"
@@ -37,6 +40,7 @@ func test_array_element_access() {
     println("  arr[0].data.value = " + int_to_str(arr[0].data.value))
     println("  arr[1].data.value = " + int_to_str(arr[1].data.value))
 }
+
 func test_local_extraction() {
     []outer_data arr = []outer_data{cap: 1}
     arr[0].name = "extract"
@@ -51,12 +55,14 @@ func test_local_extraction() {
     int val2 = inner.value
     println("  Double extraction = " + int_to_str(val2))
 }
+
 func test_function_param(outer_data param) {
     println("")
     println("[Test 4] Function parameter field access:")
     int val = param.data.value
     println("  param.data.value = " + int_to_str(val))
 }
+
 func test_loop_iteration() {
     []outer_data arr = []outer_data{cap: 3}
     int i = 0
@@ -75,6 +81,7 @@ func test_loop_iteration() {
         i = i + 1
     }
 }
+
 func main() {
     println("===================================")
     println("S Compiler Nested Struct Test")

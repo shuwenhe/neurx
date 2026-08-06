@@ -118,6 +118,7 @@ func load_config_from_env() {
 		g_config.EnableCache = true
 	}
 }
+
 func validate_config() error {
 	if g_config.ModelPath == "" {
 		return fmt.Errorf("model path is not set")
@@ -137,6 +138,7 @@ func validate_config() error {
 	}
 	return nil
 }
+
 func load_config_from_file(path string) error {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -148,6 +150,7 @@ func load_config_from_file(path string) error {
 	}
 	return nil
 }
+
 func initialize_model() error {
 	log_info("Initializing model...")
 	stat, err := os.Stat(g_config.ModelPath)
@@ -162,6 +165,7 @@ func initialize_model() error {
 	}
 	return nil
 }
+
 func process_inference_request(req *inference_request) (*inference_response, error) {
 	start_time := time.Now()
 	if req.Prompt == "" {
@@ -201,6 +205,7 @@ func process_inference_request(req *inference_request) (*inference_response, err
 	}
 	return response, nil
 }
+
 func handle_inference_request(json_data []byte) ([]byte, error) {
 	var req inference_request
 	err := json.Unmarshal(json_data, &req)
@@ -218,6 +223,7 @@ func handle_inference_request(json_data []byte) ([]byte, error) {
 	}
 	return resp_data, nil
 }
+
 func handle_metrics_request() ([]byte, error) {
 	g_metrics.UptimeSeconds = int64(time.Since(g_server_start_time).Seconds())
 	data, err := json.MarshalIndent(g_metrics, "", "  ")
@@ -226,6 +232,7 @@ func handle_metrics_request() ([]byte, error) {
 	}
 	return data, nil
 }
+
 func handle_health_check() ([]byte, error) {
 	health := map[string]interface{}{
 		"status": "healthy",
@@ -240,18 +247,22 @@ func handle_health_check() ([]byte, error) {
 	}
 	return data, nil
 }
+
 func log_info(msg string) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] INFO: %s\n", timestamp, msg)
 }
+
 func log_warn(msg string) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] WARN: %s\n", timestamp, msg)
 }
+
 func log_error(msg string) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] ERROR: %s\n", timestamp, msg)
 }
+
 func start_server() error {
 	log_info("Starting inference server...")
 	log_info(fmt.Sprintf("Server: %s:%d", g_config.Host, g_config.Port))

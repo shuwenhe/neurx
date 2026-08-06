@@ -8,6 +8,7 @@ func phase5_summary_command(string path) string {
     cmd = cmd + " && printf 'prompts=%s default=%s tokens=%s\\n' \"$count\" \"$default\" \"$tokens\""
     cmd
 }
+
 func main() {
     string prompt_path = "tests/golden/prompts.json"
     if !runtime_file_exists(prompt_path) {

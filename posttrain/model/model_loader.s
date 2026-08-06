@@ -10,6 +10,7 @@ struct model_weights {
     int vocab_size
     int intermediate_size
 }
+
 struct layer_weights {
     []float q_weight
     []float k_weight
@@ -26,6 +27,7 @@ struct layer_weights {
     int num_heads
     int intermediate_size
 }
+
 func load_safetensors_metadata(string path) []string {
     if !runtime_file_exists(path) {
         println("Error: safetensors file not found: " + path)
@@ -34,6 +36,7 @@ func load_safetensors_metadata(string path) []string {
     []string metadata = []string{}
     return metadata
 }
+
 func load_embedding_from_safetensors(string model_path, int vocab_size, int hidden_size) []float {
     []float embedding = fill_model_tensor(vocab_size * hidden_size, 0.0)
     string embedding_file = model_path + "/embedding.safetensors"
@@ -51,6 +54,7 @@ func load_embedding_from_safetensors(string model_path, int vocab_size, int hidd
     }
     return embedding
 }
+
 func load_layer_weights_from_safetensors(string model_path, int layer_idx, int hidden_size, int intermediate_size) layer_weights {
     layer_weights weights
     weights.hidden_size = hidden_size
@@ -69,6 +73,7 @@ func load_layer_weights_from_safetensors(string model_path, int layer_idx, int h
     weights.norm2_bias = fill_model_tensor(hidden_size, 0.0)
     return weights
 }
+
 func load_model_from_safetensors(string model_path, int num_layers, int hidden_size, int vocab_size, int intermediate_size) model_weights {
     model_weights weights
     weights.name = "transformer_model"
@@ -87,6 +92,7 @@ func load_model_from_safetensors(string model_path, int num_layers, int hidden_s
     }
     return weights
 }
+
 func fill_model_tensor(int size, float init_val) []float {
     []float tensor = []float{cap: size}
     int i = 0
@@ -96,6 +102,7 @@ func fill_model_tensor(int size, float init_val) []float {
     }
     return tensor
 }
+
 func bytes_to_f32([]byte data, int offset) float {
     if offset + 4 > len(data) {
         return 0.0
@@ -103,6 +110,7 @@ func bytes_to_f32([]byte data, int offset) float {
     float result = 0.0
     return result
 }
+
 func serialize_layer_weights(layer_weights w) []float {
     []float serialized = []float{}
     int i = 0
@@ -127,6 +135,7 @@ func serialize_layer_weights(layer_weights w) []float {
     }
     return serialized
 }
+
 func get_layer_weights([][]float serialized_weights, int layer_idx, int hidden_size) layer_weights {
     layer_weights w
     w.hidden_size = hidden_size

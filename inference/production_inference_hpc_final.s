@@ -1,10 +1,12 @@
 package neurx.inference.hpc
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, trim}
 extern "intrinsic" func __sys_read_string(int fd, int count) string
+
 func print_line(string text) {
     print(text)
     print("\n")
 }
+
 func int_to_string(int n) string {
     if n == 0 { return "0" }
     if n < 0 {
@@ -30,9 +32,11 @@ func int_to_string(int n) string {
     }
     result
 }
+
 func read_line() string {
     return trim(__sys_read_string(0, 4096))
 }
+
 func dot_product_8([]float a, []float b) float {
     float sum = 0.0
     sum = sum + a[0] * b[0]
@@ -45,6 +49,7 @@ func dot_product_8([]float a, []float b) float {
     sum = sum + a[7] * b[7]
     sum
 }
+
 func main() {
     print_line("")
     print_line("╔════════════════════════════════════════════════════════════════╗")

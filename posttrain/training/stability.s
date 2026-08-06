@@ -26,14 +26,17 @@ func clip_all_gradients([][]float all_grads, float max_norm) float {
     }
     return global_norm
 }
+
 func has_nan(float x) bool {
     return x != x
 }
+
 func has_inf(float x) bool {
     if x > 1e38 { return true }
     if x < -1e38 { return true }
     return false
 }
+
 func check_grads_healthy([][]float all_grads) bool {
     int layer = 0
     while layer < len(all_grads) {
@@ -54,6 +57,7 @@ func check_grads_healthy([][]float all_grads) bool {
     }
     return true
 }
+
 func compute_accuracy([][][]float logits, [][]int targets) float {
     int correct = 0
     int total = 0

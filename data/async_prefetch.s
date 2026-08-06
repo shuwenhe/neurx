@@ -11,6 +11,7 @@ struct prefetch_config {
     int max_queue_size_bytes
     bool enable_backpressure
 }
+
 func default_prefetch_config() prefetch_config {
     prefetch_config cfg
     cfg.prefetch_queue_size = 3

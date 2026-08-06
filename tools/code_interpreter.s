@@ -25,6 +25,7 @@ struct code_interpreter_config {
     enable_dataframe_display: bool = true
     image_format: string = "png"
 }
+
 struct execution_result {
     success: bool
     output: string
@@ -39,6 +40,7 @@ struct execution_result {
     memory_used_mb: float
     line_count: int
 }
+
 struct file_info {
     path: string
     size_bytes: int
@@ -46,6 +48,7 @@ struct file_info {
     preview: string?
     is_image: bool
 }
+
 struct image_data {
     data: bytes
     format: string
@@ -53,11 +56,13 @@ struct image_data {
     height: int
     alt_text: string?
 }
+
 struct code_block {
     language: string
     code: string
     filename: string?
 }
+
 class sandbox_environment {
     config: code_interpreter_config
     session_id: string
@@ -231,10 +236,12 @@ class sandbox_environment {
         this.state.files_created.clear()
     }
 }
+
 struct security_check_result {
     allowed: bool
     reason: string
 }
+
 class session_state {
     session_id: string
     created_at: float
@@ -275,12 +282,14 @@ class session_state {
         return successes / this.execution_history.length
     }
 }
+
 struct execution_record {
     code: string
     language: string
     result: execution_result
     timestamp: float
 }
+
 struct session_summary {
     session_id: string
     duration_seconds: float
@@ -290,6 +299,7 @@ struct session_summary {
     variable_names: list<string>
     success_rate: float
 }
+
 class python_runtime {
     sandbox_dir: string
     memory_limit: int
@@ -415,11 +425,13 @@ class python_runtime {
         return null
     }
 }
+
 struct error_info {
     error_type: string
     message: string
     traceback: list<string>
 }
+
 class java_script_runtime {
     vm_context: any
     init() {
@@ -465,6 +477,7 @@ class java_script_runtime {
         }
     }
 }
+
 class shell_runtime {
     allow_network: bool
     allowed_commands: set<string>
@@ -528,6 +541,7 @@ class shell_runtime {
         }
     }
 }
+
 class sql_runtime {
     db_path: string
     connection: DatabaseConnection?
@@ -596,11 +610,13 @@ class sql_runtime {
         this.connection?.close()
     }
 }
+
 struct sql_query_result {
     columns: list<string>
     rows: list<list<any>>
     row_count: int
 }
+
 class result_formatter {
     config: code_interpreter_config
     init(config: code_interpreter_config) {
@@ -668,12 +684,14 @@ class result_formatter {
         return "```\n" + content + "\n```"
     }
 }
+
 struct formatted_output {
     raw: execution_result
     formatted_text: string
     has_visualizations: bool
     has_files: bool
 }
+
 class data_analysis_helper {
     sandbox: SandboxEnvironment
     formatter: ResultFormatter
@@ -832,6 +850,7 @@ else:
         return this.sandbox.execute(code_block)
     }
 }
+
 class CodeInterpreter {
     config: code_interpreter_config
     sandbox: SandboxEnvironment?

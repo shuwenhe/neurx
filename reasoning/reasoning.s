@@ -5,12 +5,14 @@ struct agent_reasoning_step {
     string thought
     string conclusion
 }
+
 struct agent_reasoning_state {
     []agent_reasoning_step steps
     int count
     string scratchpad
     bool chain_complete
 }
+
 func new_agent_reasoning_step(int index, string thought, string conclusion) agent_reasoning_step {
     agent_reasoning_step {
         index: index,
@@ -18,6 +20,7 @@ func new_agent_reasoning_step(int index, string thought, string conclusion) agen
         conclusion: conclusion,
     }
 }
+
 func new_agent_reasoning_state() agent_reasoning_state {
     agent_reasoning_state {
         steps: [],
@@ -26,6 +29,7 @@ func new_agent_reasoning_state() agent_reasoning_state {
         chain_complete: false,
     }
 }
+
 func agent_reasoning_append(agent_reasoning_state state, string thought, string conclusion) agent_reasoning_state {
     int n = state.count
     []agent_reasoning_step steps = []agent_reasoning_step{cap: n + 1}
@@ -47,6 +51,7 @@ func agent_reasoning_append(agent_reasoning_state state, string thought, string 
         chain_complete: state.chain_complete,
     }
 }
+
 func agent_reasoning_conclude(agent_reasoning_state state, string final_conclusion) agent_reasoning_state {
     agent_reasoning_state updated = agent_reasoning_append(state, "final", final_conclusion)
     agent_reasoning_state {
@@ -56,6 +61,7 @@ func agent_reasoning_conclude(agent_reasoning_state state, string final_conclusi
         chain_complete: true,
     }
 }
+
 func agent_reasoning_for_goal(agent_reasoning_state state, string goal, string observation) agent_reasoning_state {
     string thought1 = "goal=" + goal
     string concl1 = "observation=" + observation
@@ -69,12 +75,14 @@ func agent_reasoning_for_goal(agent_reasoning_state state, string goal, string o
     }
     agent_reasoning_append(s1, thought2, concl2)
 }
+
 func agent_reasoning_last_conclusion(agent_reasoning_state state) string {
     if state.count <= 0 {
         return ""
     }
     state.steps[state.count - 1].conclusion
 }
+
 func agent_reasoning_export(agent_reasoning_state state) string {
     state.scratchpad
 }

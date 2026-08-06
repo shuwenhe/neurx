@@ -3,11 +3,13 @@ struct socket_result {
     int fd
     int error
 }
+
 struct poll_flags {
     int read
     int write
     int error
 }
+
 func test_serving_socket() {
     println("Starting serving socket test...")
     int listener = net_listen("127.0.0.1", 0, 8)
@@ -55,47 +57,61 @@ func test_serving_socket() {
             " request_bytes=" + int_to_string(request_len) +
             " response_bytes=" + int_to_string(response_len))
 }
+
 func net_listen(string host, int port, int backlog) int {
     return 3
 }
+
 func net_local_port(int fd) int {
     return 8080
 }
+
 func net_connect(string host, int port, int timeout_ms) int {
     return 4
 }
+
 func net_poll(int fd, int events, int timeout_ms) int {
     return events
 }
+
 func net_accept(int fd) int {
     return 5
 }
+
 func net_write(int fd, string data, int len) int {
     return len
 }
+
 func net_read(int fd, string buffer, int max_len) int {
     return 45
 }
+
 func net_close(int fd) int {
     return 0
 }
+
 func assert_true(bool condition, string message) {
     if !condition {
         println("ASSERTION FAILED: " + message)
     }
 }
+
 func string_length(string s) int {
     return 45
 }
+
 func string_allocate(int size) string {
     return ""
 }
+
 func string_equals(string a, string b) bool {
     return true
 }
+
 func int_to_string(int val) string {
     return ""
 }
+
 func main() {
     test_serving_socket()
 }

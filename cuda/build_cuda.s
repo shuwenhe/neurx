@@ -26,28 +26,34 @@ func main() {
         build_all()
     }
 }
+
 func build_all() {
     println("[BUILD] Complete CUDA System")
     build_kernels()
     build_runtime()
     build_verify()
 }
+
 func build_kernels() {
     println("[BUILD] CUDA Kernels")
     execute_s_script("cuda/build_kernels_simple.s")
 }
+
 func build_runtime() {
     println("[BUILD] CUDA Runtime")
     execute_s_script("cuda/build_cuda_runtime.s")
 }
+
 func build_verify() {
     println("[BUILD] Environment Verification")
     execute_s_script("cuda/verify_environment.s")
 }
+
 func clean_all() {
     println("[CLEAN] CUDA Build Artifacts")
     execute_s_script("cuda/clean_build.s")
 }
+
 func verify_environment() {
     println("[VERIFY] CUDA Environment")
     string nvcc_out = runtime_run_command_output("which nvcc 2>/dev/null || echo 'not_found'")

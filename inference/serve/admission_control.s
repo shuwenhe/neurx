@@ -10,12 +10,14 @@ struct admission_control_state {
     int last_remaining_tokens
     int last_priority_score
 }
+
 func normalize_policy(string policy) string {
     if policy == "srpt" {
         return "srpt"
     }
     "fcfs"
 }
+
 func new_admission_control_state_with_policy(int max_active_requests, int max_prefill_tokens, string policy) admission_control_state {
     int normalized_active = max_active_requests
     if normalized_active <= 0 {
@@ -38,9 +40,11 @@ func new_admission_control_state_with_policy(int max_active_requests, int max_pr
         last_priority_score: 0,
     }
 }
+
 func new_admission_control_state(int max_active_requests, int max_prefill_tokens) admission_control_state {
     new_admission_control_state_with_policy(max_active_requests, max_prefill_tokens, "fcfs")
 }
+
 func admission_priority_score(admission_control_state state, int remaining_tokens, int queue_depth) int {
     int normalized_remaining = remaining_tokens
     if normalized_remaining < 0 {
@@ -55,6 +59,7 @@ func admission_priority_score(admission_control_state state, int remaining_token
     }
     normalized_queue
 }
+
 func admission_should_preempt(admission_control_state state, int running_remaining_tokens, int candidate_remaining_tokens) bool {
     if state.policy != "srpt" {
         return false
@@ -63,6 +68,7 @@ func admission_should_preempt(admission_control_state state, int running_remaini
     int candidate_score = admission_priority_score(state, candidate_remaining_tokens, 0)
     candidate_score < running_score
 }
+
 func admission_can_enqueue_with_remaining(admission_control_state state, int active_requests, int prefill_tokens, int remaining_tokens) bool {
     int add_prefill = prefill_tokens
     if add_prefill < 0 {
@@ -83,9 +89,11 @@ func admission_can_enqueue_with_remaining(admission_control_state state, int act
     }
     true
 }
+
 func admission_can_enqueue(admission_control_state state, int active_requests, int prefill_tokens) bool {
     admission_can_enqueue_with_remaining(state, active_requests, prefill_tokens, prefill_tokens)
 }
+
 func admission_on_enqueue_with_remaining(admission_control_state state, int prefill_tokens, int remaining_tokens, bool accepted) admission_control_state {
     int add_prefill = prefill_tokens
     if add_prefill < 0 {
@@ -121,9 +129,11 @@ func admission_on_enqueue_with_remaining(admission_control_state state, int pref
         last_priority_score: priority_score,
     }
 }
+
 func admission_on_enqueue(admission_control_state state, int prefill_tokens, bool accepted) admission_control_state {
     admission_on_enqueue_with_remaining(state, prefill_tokens, prefill_tokens, accepted)
 }
+
 func admission_on_decode_step(admission_control_state state, int decode_tokens) admission_control_state {
     int add_decode = decode_tokens
     if add_decode < 0 {
@@ -141,6 +151,7 @@ func admission_on_decode_step(admission_control_state state, int decode_tokens) 
         last_priority_score: state.last_priority_score,
     }
 }
+
 func admission_on_finish(admission_control_state state, int release_prefill_tokens) admission_control_state {
     int release_tokens = release_prefill_tokens
     if release_tokens < 0 {
@@ -162,9 +173,11 @@ func admission_on_finish(admission_control_state state, int release_prefill_toke
         last_priority_score: state.last_priority_score,
     }
 }
+
 func admission_control_state_dict(admission_control_state state) admission_control_state {
     state
 }
+
 func admission_control_load_state_dict(admission_control_state state, admission_control_state other) admission_control_state {
     other
 }

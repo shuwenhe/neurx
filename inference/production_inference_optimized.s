@@ -1,6 +1,7 @@
 package neurx.inference.production
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, trim}
 extern "intrinsic" func __sys_read_string(int fd, int count) string
+
 func matrix_vector_mul([]float matrix, int rows, int cols, []float vec, []float out) {
     int idx = 0
     int i = 0
@@ -16,6 +17,7 @@ func matrix_vector_mul([]float matrix, int rows, int cols, []float vec, []float 
         i = i + 1
     }
 }
+
 func dot_prod([]float a, []float b, int len) float {
     float result = 0.0
     int i = 0
@@ -25,6 +27,7 @@ func dot_prod([]float a, []float b, int len) float {
     }
     result
 }
+
 func rms_norm([]float x, []float weight, []float out, int dim) {
     float sum_sq = 0.0
     int i = 0
@@ -41,6 +44,7 @@ func rms_norm([]float x, []float weight, []float out, int dim) {
         i = i + 1
     }
 }
+
 func softmax([]float logits, []float probs, int dim) {
     float max_val = logits[0]
     int i = 1
@@ -72,6 +76,7 @@ func softmax([]float logits, []float probs, int dim) {
         i = i + 1
     }
 }
+
 func attention_forward(
     []float hidden,
     []float q_weight,
@@ -100,6 +105,7 @@ func attention_forward(
         i = i + 1
     }
 }
+
 func ffn_forward(
     []float hidden,
     []float gate_weight,
@@ -120,6 +126,7 @@ func ffn_forward(
     }
     matrix_vector_mul(down_weight, 896, 3584, gate, output)
 }
+
 func transformer_layer(
     []float input_hidden,
     []float q_w,
@@ -151,6 +158,7 @@ func transformer_layer(
         i = i + 1
     }
 }
+
 func model_forward(int token_id) string {
     []float hidden = make_float_array(896)
     []float output = make_float_array(896)
@@ -181,6 +189,7 @@ func model_forward(int token_id) string {
     }
     int_to_str(max_idx)
 }
+
 func sqrt_approx(float x) float {
     if x < 0.0 {
         return 0.0
@@ -196,6 +205,7 @@ func sqrt_approx(float x) float {
     }
     guess
 }
+
 func exp_approx(float x) float {
     if x < -20.0 {
         return 0.0
@@ -206,6 +216,7 @@ func exp_approx(float x) float {
     float result = 1.0 + x + x*x*0.5 + x*x*x*0.16667 + x*x*x*x*0.04167
     result
 }
+
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     string result = ""
@@ -230,22 +241,27 @@ func int_to_str(int n) string {
     }
     result
 }
+
 func make_float_array(int size) []float {
     []float x
     x
 }
+
 func allocate_int(int size) []int {
     []int x
     x
 }
+
 func allocate_floats(int size) []float {
     []float x
     x
 }
+
 func allocate_ints(int size) []int {
     []int x
     x
 }
+
 func main() {
     println("")
     println("╔════════════════════════════════════════════════════════════════╗")

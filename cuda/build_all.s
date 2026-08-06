@@ -14,11 +14,13 @@ struct build_config {
     string cuda_version
     bool verbose
 }
+
 struct build_result {
     bool success
     string output
     int exit_code
 }
+
 func main() {
     println("[CUDA Build] NeurX CUDA System Builder (S Language)")
     println("")

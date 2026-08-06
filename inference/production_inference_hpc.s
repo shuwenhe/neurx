@@ -1,9 +1,11 @@
 package neurx.inference.high_performance_chat
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, trim, printf}
 extern "intrinsic" func __sys_read_string(int fd, int count) string
+
 func read_user_input() string {
     return trim(__sys_read_string(0, 4096))
 }
+
 func int_to_string(int value) string {
     if value == 0 { return "0" }
     string out = ""
@@ -29,6 +31,7 @@ func int_to_string(int value) string {
     }
     out + tmp
 }
+
 func float_to_string(float value, int decimals) string {
     int int_part = int(value)
     string result = int_to_string(int_part)
@@ -41,6 +44,7 @@ func float_to_string(float value, int decimals) string {
     result = result + int_to_string(dec_val)
     result
 }
+
 struct performance_metrics {
     int prompt_tokens
     int generated_tokens
@@ -48,6 +52,7 @@ struct performance_metrics {
     int elapsed_ms
     float throughput_tps
 }
+
 func calculate_throughput(int tokens, int time_ms) float {
     if time_ms == 0 {
         return 0.0
@@ -56,6 +61,7 @@ func calculate_throughput(int tokens, int time_ms) float {
     float time_f = float(time_ms)
     (tokens_f / time_f) * 1000.0
 }
+
 func main() {
     print("")
     print("╔════════════════════════════════════════════════════════════════╗")

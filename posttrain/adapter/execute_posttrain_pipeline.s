@@ -4,6 +4,7 @@ func println_separator() int {
     println("═══════════════════════════════════════════════════════════════")
     0
 }
+
 func println_subheader(string title) int {
     println("")
     println("──────────────────────────────────────────────────────────────")
@@ -11,6 +12,7 @@ func println_subheader(string title) int {
     println("──────────────────────────────────────────────────────────────")
     0
 }
+
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -43,6 +45,7 @@ func int_to_str(int n) string {
     }
     out
 }
+
 func float_to_str(float value, int decimals) string {
     float current = value
     bool neg = current < 0.0
@@ -83,6 +86,7 @@ func float_to_str(float value, int decimals) string {
     }
     out
 }
+
 func step_verify_environment() int {
     println_subheader("Step 1: verify环境")
     println("")
@@ -106,6 +110,7 @@ func step_verify_environment() int {
     println("✅ 环境verifycomplete")
     0
 }
+
 func step_show_configuration() int {
     println_subheader("Step 2: configurationConfirm")
     println("")
@@ -135,6 +140,7 @@ func step_show_configuration() int {
     println("✅ configurationConfirmcomplete")
     0
 }
+
 func step_run_lora_training() int {
     println_subheader("Step 3: Launch LoRA SFT Training")
     println("")
@@ -161,6 +167,7 @@ func step_run_lora_training() int {
     println("")
     0
 }
+
 func step_merge_lora() int {
     println_subheader("Step 4: merge LoRA adapter to basemodel")
     println("")
@@ -184,6 +191,7 @@ func step_merge_lora() int {
     println("")
     0
 }
+
 func step_verify_output() int {
     println_subheader("Step 5: Verify output")
     println("")
@@ -209,6 +217,7 @@ func step_verify_output() int {
     println("✅ allfileverifycomplete")
     0
 }
+
 func main() {
     println("")
     println_separator()

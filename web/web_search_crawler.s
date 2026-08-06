@@ -260,6 +260,7 @@ class BingSearchEngine implements SearchEngineInterface {
         }
     }
 }
+
 class web_crawler {
     config: web_search_config
     session: HTTPSession

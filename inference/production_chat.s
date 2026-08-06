@@ -1,20 +1,30 @@
 package neurx.inference.production_chat
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
 extern "intrinsic" func __sys_read_string(int fd, int count) string
+
 extern "intrinsic" func __sys_socket(int domain, int socket_type, int protocol) int
+
 extern "intrinsic" func __sys_connect(int fd, string host, int port, int family) int
+
 extern "intrinsic" func __sys_write_string(int fd, string data) int
+
 extern "intrinsic" func __sys_close(int fd) int
+
 extern "intrinsic" func __sys_set_deadline_ms(int fd, int read_timeout_ms, int write_timeout_ms) int
+
 func runtime_env_get(string name, string default_value) string {
     default_value
 }
+
 func runtime_file_exists(string path) bool {
     true
 }
+
 func runtime_run_command_output(string command) string {
     ""
 }
+
 func trim(string s) string {
     int i = 0
     while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
@@ -29,6 +39,7 @@ func trim(string s) string {
     }
     return __host_slice(s, i, j + 1)
 }
+
 func shell_escape(string value) string {
     string output = "'"
     int index = 0
@@ -43,9 +54,11 @@ func shell_escape(string value) string {
     }
     output + "'"
 }
+
 func read_user_line() string {
     trim(__sys_read_string(0, 4096))
 }
+
 func int_to_string(int value) string {
     if value == 0 {
         return "0"
@@ -59,6 +72,7 @@ func int_to_string(int value) string {
     }
     output
 }
+
 func parse_positive_int(string text, int fallback) int {
     if len(text) == 0 {
         return fallback
@@ -89,6 +103,7 @@ func parse_positive_int(string text, int fallback) int {
     }
     value
 }
+
 func index_of(string text, string needle) int {
     if len(needle) == 0 || len(needle) > len(text) {
         return -1
@@ -108,6 +123,7 @@ func index_of(string text, string needle) int {
     }
     -1
 }
+
 func starts_with(string text, string prefix) bool {
     if len(prefix) > len(text) {
         return false
@@ -207,6 +223,7 @@ func http_request(string host, int port, string method, string path, string body
     _ = __sys_close(fd)
     response
 }
+
 func http_body(string response) string {
     if !starts_with(response, "HTTP/1.1 200") {
         return ""
@@ -217,10 +234,12 @@ func http_body(string response) string {
     }
     __host_slice(response, separator + 4, len(response))
 }
+
 func backend_ready(string host, int port) bool {
     string response = http_request(host, port, "GET", "/health", "", "")
     index_of(http_body(response), "\"status\":\"ok\"") >= 0
 }
+
 func stop_owned_backend(bool owned, string pid_file) int {
     if !owned {
         return 0
@@ -232,6 +251,7 @@ func stop_owned_backend(bool owned, string pid_file) int {
     )
     0
 }
+
 func ends_with(string text, string suffix) bool {
     int text_len = len(text)
     int suffix_len = len(suffix)
@@ -248,6 +268,7 @@ func ends_with(string text, string suffix) bool {
     }
     return true
 }
+
 func main() {
     string root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/neurx")
     string model = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain")

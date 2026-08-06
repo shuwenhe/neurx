@@ -15,6 +15,7 @@ struct attention_config {
     int softmax_scale
     bool use_gradient_checkpointing
 }
+
 class neurx_attention {
     attention_config config
     tensor q_proj_weight
@@ -31,6 +32,7 @@ class neurx_attention {
         float memory_usage_mb
     } stats
 }
+
 func init(attention_config cfg) neurx_attention {
     int kv_dim = cfg.head_dim * cfg.num_key_value_heads
     print("🔧 Initializing NEURX Attention:")
@@ -55,6 +57,7 @@ func init(attention_config cfg) neurx_attention {
         }
     }
 }
+
 func forward(
     self: NeurxAttention,
     hidden_states: tensor,

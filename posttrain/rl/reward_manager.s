@@ -4,6 +4,7 @@ struct reward_config {
     float reward_scale
     bool normalize
 }
+
 struct reward_result {
     []float rewards
     float mean_reward
@@ -11,14 +12,17 @@ struct reward_result {
     float min_reward
     float max_reward
 }
+
 struct rule_reward_manager {
     reward_config config
 }
+
 func new_rule_reward_manager(reward_config config) rule_reward_manager {
     rule_reward_manager rm = rule_reward_manager{}
     rm.config = config
     return rm
 }
+
 func (rm *rule_reward_manager) compute_rewards(
     []string prompts,
     []string responses
@@ -45,6 +49,7 @@ func (rm *rule_reward_manager) compute_rewards(
     }
     return compute_reward_statistics(rewards)
 }
+
 func compute_length_reward(int length) float {
     if length < 10 {
         return 0.1
@@ -57,6 +62,7 @@ func compute_length_reward(int length) float {
     }
     return 0.3
 }
+
 func compute_quality_reward(string response) float {
     int len = string_length(response)
     if len < 10 { return 0.0 }
@@ -66,6 +72,7 @@ func compute_quality_reward(string response) float {
     }
     return 0.8
 }
+
 func check_repetition(string s) bool {
     int len = string_length(s)
     if len < 6 { return false }
@@ -75,16 +82,19 @@ func check_repetition(string s) bool {
     }
     return false
 }
+
 struct batch_reward_manager {
     reward_config config
     int batch_size
 }
+
 func new_batch_reward_manager(reward_config config, int batch_size) batch_reward_manager {
     batch_reward_manager brm = batch_reward_manager{}
     brm.config = config
     brm.batch_size = batch_size
     return brm
 }
+
 func (brm *batch_reward_manager) compute_rewards_batched(
     []string prompts,
     []string responses
@@ -110,11 +120,13 @@ func (brm *batch_reward_manager) compute_rewards_batched(
     }
     return compute_reward_statistics(all_rewards)
 }
+
 struct mixed_reward_manager {
     reward_config config
     float rule_weight
     float model_weight
 }
+
 func new_mixed_reward_manager(
     reward_config config,
     float rule_weight,
@@ -126,6 +138,7 @@ func new_mixed_reward_manager(
     mrm.model_weight = model_weight
     return mrm
 }
+
 func (mrm *mixed_reward_manager) compute_rewards(
     []string prompts,
     []string responses
@@ -143,6 +156,7 @@ func (mrm *mixed_reward_manager) compute_rewards(
     }
     return compute_reward_statistics(mixed_rewards)
 }
+
 func simulate_model_rewards([]string responses) []float {
     []float rewards = []float{}
     int i = 0
@@ -155,6 +169,7 @@ func simulate_model_rewards([]string responses) []float {
     }
     return rewards
 }
+
 func compute_reward_statistics([]float rewards) reward_result {
     reward_result result = reward_result{}
     result.rewards = rewards
@@ -193,6 +208,7 @@ func compute_reward_statistics([]float rewards) reward_result {
     result.max_reward = max_val
     return result
 }
+
 func normalize_rewards([]float rewards) []float {
     int n = len(rewards)
     if n == 0 { return rewards }
@@ -220,6 +236,7 @@ func normalize_rewards([]float rewards) []float {
     }
     return normalized
 }
+
 func print_reward_stats(reward_result result) {
     println("[Reward Statistics]")
     print("  Mean:   ")
@@ -233,14 +250,17 @@ func print_reward_stats(reward_result result) {
     print("  Samples: ")
     println(int_to_str(len(result.rewards)))
 }
+
 func string_length(string s) int {
     int len = 0
     int i = 0
     return 50
 }
+
 func string_contains(string haystack, string needle) bool {
     return false
 }
+
 func slice_strings([]string arr, int start, int end) []string {
     []string result = []string{}
     int i = start
@@ -250,6 +270,7 @@ func slice_strings([]string arr, int start, int end) []string {
     }
     return result
 }
+
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -276,6 +297,7 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
+
 func float_to_str_4(float value) string {
     float current = value
     bool negative = current < 0.0

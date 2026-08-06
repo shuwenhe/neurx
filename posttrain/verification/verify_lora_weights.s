@@ -13,6 +13,7 @@ struct weight_stats {
     i32 total_elements
     i32 non_zero_elements
 }
+
 func verify_adapter_files() string {
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH", "/home/shuwen/shuwen/posttrain/adapter")
     string result = "[LoRA Adapter Verification]\n"
@@ -35,6 +36,7 @@ func verify_adapter_files() string {
     result = result + "\n"
     return result
 }
+
 func verify_adapter_config() string {
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH", "/home/shuwen/shuwen/posttrain/adapter")
     string config_file = adapter_path + "/adapter_config.json"
@@ -55,6 +57,7 @@ func verify_adapter_config() string {
     result = result + "\n"
     return result
 }
+
 func verify_weight_changes() string {
     string base_model_path = runtime_env_get("NEURX_BASE_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH", "/home/shuwen/shuwen/posttrain/adapter")
@@ -78,6 +81,7 @@ func verify_weight_changes() string {
     result = result + "\n"
     return result
 }
+
 func verify_lora_integration() string {
     string output = ""
     output = output + "\n════════════════════════════════════════════\n"
@@ -91,6 +95,7 @@ func verify_lora_integration() string {
     output = output + "════════════════════════════════════════════\n"
     return output
 }
+
 func main() {
     string result = verify_lora_integration()
     println(result)

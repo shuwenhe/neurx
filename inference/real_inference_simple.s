@@ -29,6 +29,7 @@ func int_to_string(int value) string {
     }
     return out + tmp
 }
+
 func tokenize_simple(string text) string {
     string result = ""
     int i = 0
@@ -38,6 +39,7 @@ func tokenize_simple(string text) string {
     }
     return result
 }
+
 func main() {
     print("\n╔═══════════════════════════════════════════╗\n")
     print("║  NeurX Real Inference Engine (S)          ║\n")

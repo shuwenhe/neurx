@@ -73,6 +73,7 @@ func (engine *inference_engine) initialize_kv_cache() {
     cache_memory := float64(cache_size*16) / 1e9
     fmt.Printf("  KV cache size: %.2f GB\n", cache_memory)
 }
+
 func (engine *inference_engine) update_kv_cache(layer_idx int, tokens []int, values []float64) {
     cache_idx := layer_idx * engine.config.max_batch_size * engine.config.max_seq_length
     for i, v := range values {
@@ -81,6 +82,7 @@ func (engine *inference_engine) update_kv_cache(layer_idx int, tokens []int, val
         }
     }
 }
+
 func (engine *inference_engine) get_cached_kv(layer_idx int, seq_len int) ([][]float64, [][]float64) {
     cache_idx := layer_idx * seq_len
     keys := [][]float64{}
@@ -91,6 +93,7 @@ func (engine *inference_engine) get_cached_kv(layer_idx int, seq_len int) ([][]f
     }
     return keys, values
 }
+
 func (engine *inference_engine) create_batch(requests []inference_request) [][]int {
     batch := [][]int{}
     max_len := 0
@@ -106,6 +109,7 @@ func (engine *inference_engine) create_batch(requests []inference_request) [][]i
     }
     return batch
 }
+
 func (engine *inference_engine) process_batch(batch [][]int) [][]float64 {
     batch_size := len(batch)
     logits := make([][]float64, batch_size)
@@ -114,6 +118,7 @@ func (engine *inference_engine) process_batch(batch [][]int) [][]float64 {
     }
     return logits
 }
+
 func (engine *inference_engine) flash_attention_forward(q []float64, k []float64, v []float64) []float64 {
     scores := engine.compute_attention_scores(q, k)
     max_score := scores[0]
@@ -140,6 +145,7 @@ func (engine *inference_engine) flash_attention_forward(q []float64, k []float64
     }
     return output
 }
+
 func (engine *inference_engine) compute_attention_scores(q []float64, k []float64) []float64 {
     scores := make([]float64, len(k))
     for i := 0; i < len(k); i++ {
@@ -151,11 +157,13 @@ func (engine *inference_engine) compute_attention_scores(q []float64, k []float6
     }
     return scores
 }
+
 func (engine *inference_engine) enable_tensor_parallelism(num_replicas int) {
     fmt.Printf("[Inference] Enabling tensor_2 Parallelism (%d replicas)\n", num_replicas)
     heads_per_replica := engine.model.hidden_size / num_replicas
     fmt.Printf("  Heads per replica: %d\n", heads_per_replica)
 }
+
 func (engine *inference_engine) sample_token(logits []float64, temperature float64, top_p float64) int {
     for i := range logits {
         logits[i] /= temperature
@@ -189,6 +197,7 @@ func (engine *inference_engine) sample_token(logits []float64, temperature float
     }
     return 0
 }
+
 func (engine *inference_engine) generate(request inference_request) inference_response {
     start_time := time.Now()
     generated_tokens := []int{}
@@ -222,6 +231,7 @@ func (engine *inference_engine) generate(request inference_request) inference_re
         tokens_per_second: throughput,
     }
 }
+
 func (engine *inference_engine) model_forward(tokens []int) []float64 {
     logits := make([]float64, 128000)
     for i := range logits {
@@ -229,6 +239,7 @@ func (engine *inference_engine) model_forward(tokens []int) []float64 {
     }
     return logits
 }
+
 func (engine *inference_engine) handle_request(request inference_request) inference_response {
     engine.request_queue = append(engine.request_queue, request)
     if len(engine.request_queue) >= engine.config.max_batch_size ||
@@ -241,6 +252,7 @@ func (engine *inference_engine) handle_request(request inference_request) infere
     }
     return engine.response_cache[request.request_id]
 }
+
 func (engine *inference_engine) process_batch_requests() []inference_response {
     responses := []inference_response{}
     for _, req := range engine.request_queue {
@@ -252,6 +264,7 @@ func (engine *inference_engine) process_batch_requests() []inference_response {
     }
     return responses
 }
+
 func (engine *inference_engine) print_stats() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Inference Performance Statistics                     ║")
@@ -270,6 +283,7 @@ func (engine *inference_engine) print_stats() {
     fmt.Printf("  tensor_2 Parallelism: %v\n", engine.config.use_tensor_parallel)
     fmt.Printf("  Quantization: %s\n", engine.config.quantization_type)
 }
+
 func new_inference_engine(config inference_config, model policy_model) *inference_engine {
     engine := &inference_engine{
         config: config,
@@ -281,6 +295,7 @@ func new_inference_engine(config inference_config, model policy_model) *inferenc
     engine.initialize_kv_cache()
     return engine
 }
+
 func (engine *inference_engine) start_serving() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Inference Engine - Production Serving               ║")

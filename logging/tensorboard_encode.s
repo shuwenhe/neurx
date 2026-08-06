@@ -7,12 +7,14 @@ func encode_scalar_summary(
     string content = "scalar:" + tag + ":" + float_to_string(value) + ":" + int_to_string(step)
     string_to_bytes(content)
 }
+
 func write_event(
     file_handle f,
     int step,
     []byte data
 ) {
 }
+
 func float_to_string(float x) string {
     if x == float(int(x)) {
         return int_to_string(int(x)) + ".0"
@@ -29,6 +31,7 @@ func float_to_string(float x) string {
     }
     result
 }
+
 func int_to_string(int x) string {
     if x == 0 { return "0" }
     bool negative = false
@@ -48,6 +51,7 @@ func int_to_string(int x) string {
     }
     result
 }
+
 func char_to_string(byte c) string {
     string(1, c)
 }

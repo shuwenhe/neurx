@@ -16,6 +16,7 @@ struct function_calling_config {
     verbose_logging: bool = false
     log_all_intermediate_steps: bool = false
 }
+
 struct tool_definition {
     name: string
     description: string
@@ -28,6 +29,7 @@ struct tool_definition {
     timeout_seconds: float = 30.0
     metadata?: map<string, any>
 }
+
 struct parameter_schema {
     type: string
     properties?: map<string, property_definition>
@@ -39,6 +41,7 @@ struct parameter_schema {
     default?: any
     additional_properties?: bool | parameter_schema
 }
+
 struct property_definition {
     type: string
     description: string
@@ -51,12 +54,14 @@ struct property_definition {
     properties?: map<string, property_definition>
     required?: list<string>
 }
+
 struct rate_limit {
     calls_per_minute: int = 60
     calls_per_day: int = 1000
     current_calls_today: int = 0
     last_reset_date: string = ""
 }
+
 struct tool_call {
     id: string
     name: string
@@ -81,6 +86,7 @@ enum call_status {
     PERMISSION_REQUIRED
     CANCELLED
 }
+
 struct tool_call_result {
     success: bool
     content: any
@@ -89,6 +95,7 @@ struct tool_call_result {
     raw_output?: string
     metadata?: map<string, any>
 }
+
 struct tool_call_error {
     code: string
     message: string
@@ -96,6 +103,7 @@ struct tool_call_error {
     recoverable: bool = false
     suggestion?: string
 }
+
 struct function_calling_response {
     tool_calls: list<tool_call>
     final_text_response: string?
@@ -104,12 +112,14 @@ struct function_calling_response {
     intermediate_messages: list<assistant_message>
     execution_summary: execution_summary?
 }
+
 struct assistant_message {
     role: string = "assistant"
     content: string? | list<content_block>
     tool_calls?: list<tool_call>
     reasoning_content?: string
 }
+
 struct content_block {
     type: string
     text?: string
