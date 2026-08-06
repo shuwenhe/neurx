@@ -21,25 +21,25 @@ inline void* neurx_nccl_symbol(const char* name) {
 }
 inline const char* nccl_get_error_string(nccl_result_t) { return "NCCL runtime unavailable or call failed"; }
 inline nccl_result_t nccl_get_unique_id(nccl_unique_id* id) {
-  using fn = nccl_result_t (*)(nccl_unique_id*);
-  auto fn = reinterpret_cast<fn>(neurx_nccl_symbol("ncclGetUniqueId"));
-  return fn ? fn(id) : 1;
+  using function_t = nccl_result_t (*)(nccl_unique_id*);
+  auto function_ptr = reinterpret_cast<function_t>(neurx_nccl_symbol("ncclGetUniqueId"));
+  return function_ptr ? function_ptr(id) : 1;
 }
 inline nccl_result_t nccl_comm_init_rank(nccl_comm_t* comm, int nranks, nccl_unique_id id, int rank) {
-  using fn = nccl_result_t (*)(nccl_comm_t*, int, nccl_unique_id, int);
-  auto fn = reinterpret_cast<fn>(neurx_nccl_symbol("ncclCommInitRank"));
-  return fn ? fn(comm, nranks, id, rank) : 1;
+  using function_t = nccl_result_t (*)(nccl_comm_t*, int, nccl_unique_id, int);
+  auto function_ptr = reinterpret_cast<function_t>(neurx_nccl_symbol("ncclCommInitRank"));
+  return function_ptr ? function_ptr(comm, nranks, id, rank) : 1;
 }
 inline nccl_result_t nccl_all_reduce(const void* send, void* recv, std::size_t count,
                                   nccl_data_type_t dtype, nccl_red_op_t op,
                                   nccl_comm_t comm, cuda_stream_t stream) {
-  using fn = nccl_result_t (*)(const void*, void*, std::size_t, nccl_data_type_t,
-                              nccl_red_op_t, nccl_comm_t, cuda_stream_t);
-  auto fn = reinterpret_cast<fn>(neurx_nccl_symbol("ncclAllReduce"));
-  return fn ? fn(send, recv, count, dtype, op, comm, stream) : 1;
+  using function_t = nccl_result_t (*)(const void*, void*, std::size_t, nccl_data_type_t,
+                                        nccl_red_op_t, nccl_comm_t, cuda_stream_t);
+  auto function_ptr = reinterpret_cast<function_t>(neurx_nccl_symbol("ncclAllReduce"));
+  return function_ptr ? function_ptr(send, recv, count, dtype, op, comm, stream) : 1;
 }
 inline nccl_result_t nccl_comm_destroy(nccl_comm_t comm) {
-  using fn = nccl_result_t (*)(nccl_comm_t);
-  auto fn = reinterpret_cast<fn>(neurx_nccl_symbol("ncclCommDestroy"));
-  return fn ? fn(comm) : 1;
+  using function_t = nccl_result_t (*)(nccl_comm_t);
+  auto function_ptr = reinterpret_cast<function_t>(neurx_nccl_symbol("ncclCommDestroy"));
+  return function_ptr ? function_ptr(comm) : 1;
 }

@@ -19,32 +19,32 @@ inline void* library() {
   }();
   return handle;
 }
-template <typename function>
-inline function symbol(const char* name) {
-  return library() ? reinterpret_cast<function>(dlsym(library(), name)) : nullptr;
+template <typename function_t>
+inline function_t symbol(const char* name) {
+  return library() ? reinterpret_cast<function_t>(dlsym(library(), name)) : nullptr;
 }
 inline bool available() { return library() != nullptr; }
 inline result all_reduce(const void* send, void* receive, uint64_t count,
                          int dtype, int operation, comm comm, stream stream) {
-  using fn = result (*)(const void*, void*, uint64_t, int, int, comm, stream);
-  auto fn = symbol<fn>("HcclAllReduce");
-  return fn ? fn(send, receive, count, dtype, operation, comm, stream) : -1;
+  using function_t = result (*)(const void*, void*, uint64_t, int, int, comm, stream);
+  auto function_ptr = symbol<function_t>("HcclAllReduce");
+  return function_ptr ? function_ptr(send, receive, count, dtype, operation, comm, stream) : -1;
 }
 inline result all_gather(const void* send, void* receive, uint64_t count,
                          int dtype, comm comm, stream stream) {
-  using fn = result (*)(const void*, void*, uint64_t, int, comm, stream);
-  auto fn = symbol<fn>("HcclAllGather");
-  return fn ? fn(send, receive, count, dtype, comm, stream) : -1;
+  using function_t = result (*)(const void*, void*, uint64_t, int, comm, stream);
+  auto function_ptr = symbol<function_t>("HcclAllGather");
+  return function_ptr ? function_ptr(send, receive, count, dtype, comm, stream) : -1;
 }
 inline result reduce_scatter(const void* send, void* receive, uint64_t count,
                              int dtype, int operation, comm comm, stream stream) {
-  using fn = result (*)(const void*, void*, uint64_t, int, int, comm, stream);
-  auto fn = symbol<fn>("HcclReduceScatter");
-  return fn ? fn(send, receive, count, dtype, operation, comm, stream) : -1;
+  using function_t = result (*)(const void*, void*, uint64_t, int, int, comm, stream);
+  auto function_ptr = symbol<function_t>("HcclReduceScatter");
+  return function_ptr ? function_ptr(send, receive, count, dtype, operation, comm, stream) : -1;
 }
 inline result destroy(comm comm) {
-  using fn = result (*)(comm);
-  auto fn = symbol<fn>("HcclCommDestroy");
-  return fn ? fn(comm) : -1;
+  using function_t = result (*)(comm);
+  auto function_ptr = symbol<function_t>("HcclCommDestroy");
+  return function_ptr ? function_ptr(comm) : -1;
 }
 }

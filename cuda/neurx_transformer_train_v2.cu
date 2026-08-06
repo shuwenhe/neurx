@@ -439,7 +439,7 @@ int main(){
       if(!sync_gradients(model,dist))return 7;
       double raw_squared_norm=0.0;if(!squared_l2_norm(model.params(),&param::g,raw_squared_norm))return 7;
       double average_scale=1.0/double(accumulated*mb);
-      neurx_training::gradient_decision decision=neurx_training::gradient_decision(raw_squared_norm*average_scale*average_scale,gradient_policy);
+      neurx_training::gradient_decision decision=neurx_training::compute_gradient_decision(raw_squared_norm*average_scale*average_scale,gradient_policy);
       last_grad_norm=decision.norm;
       if(!decision.finite){
         std::fprintf(stderr,"[trainer-v2] non-finite gradient at step=%llu optimizer_step=%llu\n",(unsigned long long)step,(unsigned long long)optstep);
