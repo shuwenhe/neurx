@@ -25,26 +25,26 @@ inline function_t symbol(const char* name) {
 }
 inline bool available() { return library() != nullptr; }
 inline result all_reduce(const void* send, void* receive, uint64_t count,
-                         int dtype, int operation, comm comm, stream stream) {
+                         int dtype, int operation, comm comm_handle, stream stream_handle) {
   using function_t = result (*)(const void*, void*, uint64_t, int, int, comm, stream);
   auto function_ptr = symbol<function_t>("HcclAllReduce");
-  return function_ptr ? function_ptr(send, receive, count, dtype, operation, comm, stream) : -1;
+  return function_ptr ? function_ptr(send, receive, count, dtype, operation, comm_handle, stream_handle) : -1;
 }
 inline result all_gather(const void* send, void* receive, uint64_t count,
-                         int dtype, comm comm, stream stream) {
+                         int dtype, comm comm_handle, stream stream_handle) {
   using function_t = result (*)(const void*, void*, uint64_t, int, comm, stream);
   auto function_ptr = symbol<function_t>("HcclAllGather");
-  return function_ptr ? function_ptr(send, receive, count, dtype, comm, stream) : -1;
+  return function_ptr ? function_ptr(send, receive, count, dtype, comm_handle, stream_handle) : -1;
 }
 inline result reduce_scatter(const void* send, void* receive, uint64_t count,
-                             int dtype, int operation, comm comm, stream stream) {
+                             int dtype, int operation, comm comm_handle, stream stream_handle) {
   using function_t = result (*)(const void*, void*, uint64_t, int, int, comm, stream);
   auto function_ptr = symbol<function_t>("HcclReduceScatter");
-  return function_ptr ? function_ptr(send, receive, count, dtype, operation, comm, stream) : -1;
+  return function_ptr ? function_ptr(send, receive, count, dtype, operation, comm_handle, stream_handle) : -1;
 }
-inline result destroy(comm comm) {
+inline result destroy(comm comm_handle) {
   using function_t = result (*)(comm);
   auto function_ptr = symbol<function_t>("HcclCommDestroy");
-  return function_ptr ? function_ptr(comm) : -1;
+  return function_ptr ? function_ptr(comm_handle) : -1;
 }
 }

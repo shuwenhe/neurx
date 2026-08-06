@@ -53,35 +53,35 @@ inline error reset_device(int32_t device) {
   auto function_ptr = acl_symbol<function_t>("aclrtResetDevice");
   return function_ptr ? function_ptr(device) : -1;
 }
-inline error create_context(context* context, int32_t device) {
+inline error create_context(context* context_handle, int32_t device) {
   using function_t = error (*)(context*, int32_t);
   auto function_ptr = acl_symbol<function_t>("aclrtCreateContext");
-  return function_ptr ? function_ptr(context, device) : -1;
+  return function_ptr ? function_ptr(context_handle, device) : -1;
 }
-inline error destroy_context(context context) {
+inline error destroy_context(context context_handle) {
   using function_t = error (*)(context);
   auto function_ptr = acl_symbol<function_t>("aclrtDestroyContext");
-  return function_ptr ? function_ptr(context) : -1;
+  return function_ptr ? function_ptr(context_handle) : -1;
 }
-inline error set_current_context(context context) {
+inline error set_current_context(context context_handle) {
   using function_t = error (*)(context);
   auto function_ptr = acl_symbol<function_t>("aclrtSetCurrentContext");
-  return function_ptr ? function_ptr(context) : -1;
+  return function_ptr ? function_ptr(context_handle) : -1;
 }
-inline error create_stream(stream* stream) {
+inline error create_stream(stream* stream_handle) {
   using function_t = error (*)(stream*);
   auto function_ptr = acl_symbol<function_t>("aclrtCreateStream");
-  return function_ptr ? function_ptr(stream) : -1;
+  return function_ptr ? function_ptr(stream_handle) : -1;
 }
-inline error destroy_stream(stream stream) {
+inline error destroy_stream(stream stream_handle) {
   using function_t = error (*)(stream);
   auto function_ptr = acl_symbol<function_t>("aclrtDestroyStream");
-  return function_ptr ? function_ptr(stream) : -1;
+  return function_ptr ? function_ptr(stream_handle) : -1;
 }
-inline error synchronize_stream(stream stream) {
+inline error synchronize_stream(stream stream_handle) {
   using function_t = error (*)(stream);
   auto function_ptr = acl_symbol<function_t>("aclrtSynchronizeStream");
-  return function_ptr ? function_ptr(stream) : -1;
+  return function_ptr ? function_ptr(stream_handle) : -1;
 }
 inline error synchronize_device() {
   using function_t = error (*)();
@@ -111,38 +111,38 @@ inline error free_host(void* address) {
 }
 inline error memcpy_async(void* destination, std::size_t destination_bytes,
                           const void* source, std::size_t source_bytes,
-                          memcpy_kind kind, stream stream) {
+                          memcpy_kind kind, stream stream_handle) {
   using function_t = error (*)(void*, std::size_t, const void*, std::size_t, int, stream);
   auto function_ptr = acl_symbol<function_t>("aclrtMemcpyAsync");
   return function_ptr ? function_ptr(destination, destination_bytes, source, source_bytes,
-                 static_cast<int>(kind), stream)
+                 static_cast<int>(kind), stream_handle)
             : -1;
 }
 inline error memset_async(void* destination, std::size_t destination_bytes,
-                          uint32_t value, std::size_t count, stream stream) {
+                          uint32_t value, std::size_t count, stream stream_handle) {
   using function_t = error (*)(void*, std::size_t, uint32_t, std::size_t, stream);
   auto function_ptr = acl_symbol<function_t>("aclrtMemsetAsync");
-  return function_ptr ? function_ptr(destination, destination_bytes, value, count, stream) : -1;
+  return function_ptr ? function_ptr(destination, destination_bytes, value, count, stream_handle) : -1;
 }
-inline error create_event(event* event) {
+inline error create_event(event* event_handle) {
   using function_t = error (*)(event*);
   auto function_ptr = acl_symbol<function_t>("aclrtCreateEvent");
-  return function_ptr ? function_ptr(event) : -1;
+  return function_ptr ? function_ptr(event_handle) : -1;
 }
-inline error destroy_event(event event) {
+inline error destroy_event(event event_handle) {
   using function_t = error (*)(event);
   auto function_ptr = acl_symbol<function_t>("aclrtDestroyEvent");
-  return function_ptr ? function_ptr(event) : -1;
+  return function_ptr ? function_ptr(event_handle) : -1;
 }
-inline error record_event(event event, stream stream) {
+inline error record_event(event event_handle, stream stream_handle) {
   using function_t = error (*)(event, stream);
   auto function_ptr = acl_symbol<function_t>("aclrtRecordEvent");
-  return function_ptr ? function_ptr(event, stream) : -1;
+  return function_ptr ? function_ptr(event_handle, stream_handle) : -1;
 }
-inline error synchronize_event(event event) {
+inline error synchronize_event(event event_handle) {
   using function_t = error (*)(event);
   auto function_ptr = acl_symbol<function_t>("aclrtSynchronizeEvent");
-  return function_ptr ? function_ptr(event) : -1;
+  return function_ptr ? function_ptr(event_handle) : -1;
 }
 inline const char* recent_error() {
   using function_t = const char* (*)();

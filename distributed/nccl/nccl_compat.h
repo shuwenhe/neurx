@@ -32,9 +32,9 @@ inline nccl_result_t nccl_comm_init_rank(nccl_comm_t* comm, int nranks, nccl_uni
 }
 inline nccl_result_t nccl_all_reduce(const void* send, void* recv, std::size_t count,
                                   nccl_data_type_t dtype, nccl_red_op_t op,
-                                  nccl_comm_t comm, cuda_stream_t stream) {
+                                  nccl_comm_t comm, cudaStream_t stream) {
   using function_t = nccl_result_t (*)(const void*, void*, std::size_t, nccl_data_type_t,
-                                        nccl_red_op_t, nccl_comm_t, cuda_stream_t);
+                                        nccl_red_op_t, nccl_comm_t, cudaStream_t);
   auto function_ptr = reinterpret_cast<function_t>(neurx_nccl_symbol("ncclAllReduce"));
   return function_ptr ? function_ptr(send, recv, count, dtype, op, comm, stream) : 1;
 }
