@@ -1,4 +1,5 @@
 package neurx.inference.kv_cache_manager
+
 struct page_config {
     int page_size_tokens
     int num_pages

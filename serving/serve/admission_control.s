@@ -1,4 +1,5 @@
 package neurx.serving.serve.admission_control
+
 struct admission_control_state {
     int max_active_requests
     int max_prefill_tokens

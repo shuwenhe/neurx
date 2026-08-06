@@ -1,4 +1,5 @@
 package neurx.scheduler.scheduler_base
+
 struct scheduler_base {
     float base_lr
     []float last_lr

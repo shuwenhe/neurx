@@ -1,6 +1,7 @@
 import "tensor/tensor.s"
 import "distributed/nccl_collectives.s"
 import "checkpoint/checkpoint.s"
+
 struct mooncake_config {
     world_size: i32
     rank: i32

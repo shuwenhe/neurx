@@ -1,4 +1,5 @@
 package neurx.alignment.rlhf_complete
+
 struct sft_config {
     int num_epochs
     int batch_size

@@ -1,4 +1,5 @@
 package neurx.posttrain.rl.rollout
+
 struct rollout_config {
     int max_seq_len
     float temperature

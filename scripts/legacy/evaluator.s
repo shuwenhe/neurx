@@ -19,6 +19,7 @@ type evaluator struct {
     accumulation_steps: int
     history: []evaluation_metrics
 }
+
 func (e *evaluator) init(batch_size: int, accumulation_steps: int) {
     e.batch_size = batch_size
     e.accumulation_steps = accumulation_steps

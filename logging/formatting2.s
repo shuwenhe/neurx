@@ -1,4 +1,5 @@
 package neurx.logging
+
 func format_scientific(float value) string {
     if value == 0.0 { return "0e+0" }
     bool negative = false

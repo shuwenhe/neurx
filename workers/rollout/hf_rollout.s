@@ -1,5 +1,6 @@
 package neurx.workers.rollout.hf
 use neurx.tensor
+
 struct hf_rollout_config {
     string model_name_or_path
     string device

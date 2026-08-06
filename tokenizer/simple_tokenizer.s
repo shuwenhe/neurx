@@ -1,5 +1,6 @@
 package neurx.tokenizer.simple_tokenizer
 use std.io.eprintln
+
 struct simple_tokenizer {
     int vocab_size
     int bos_token_id

@@ -4,6 +4,7 @@ int PRECISION_BF16 = 1
 int PRECISION_FP16 = 2
 int PRECISION_FP8_E4M3 = 3
 int PRECISION_FP8_E5M2 = 4
+
 struct dtype_info {
     int id
     string name

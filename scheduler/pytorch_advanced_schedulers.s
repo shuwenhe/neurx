@@ -1,4 +1,5 @@
 package neurx.scheduler.pytorch_advanced_schedulers
+
 struct lambda_lr_state {
     float base_lr
     float current_lr

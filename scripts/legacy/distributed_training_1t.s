@@ -28,6 +28,7 @@ type checkpoint_manager struct {
     keep_last_n: int
     saved_checkpoints: int
 }
+
 func initialize_distributed_1t(world_size: int, rank: int,
                               local_rank: int): distributed_trainer1_t {
     trainer := distributed_trainer1_t{

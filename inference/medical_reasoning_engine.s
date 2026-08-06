@@ -3,14 +3,23 @@ package neurx.inference.medical_reasoning_engine
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 
 func CATEGORY_UNKNOWN() int { return 0 }
+
 func CATEGORY_TREATMENT() int { return 1 }
+
 func CATEGORY_SYMPTOM() int { return 2 }
+
 func CATEGORY_DIAGNOSIS() int { return 3 }
+
 func CATEGORY_DISEASE() int { return 4 }
+
 func CATEGORY_DRUG() int { return 5 }
+
 func CATEGORY_INFECTION() int { return 6 }
+
 func CATEGORY_HEALTH() int { return 7 }
+
 func CATEGORY_ANATOMY() int { return 8 }
+
 func CATEGORY_PATHOLOGY() int { return 9 }
 
 func to_lower(string text) string {
@@ -60,56 +69,56 @@ func contains_any_two(string text, string pattern1, string pattern2) bool {
 func detect_category(string text) int {
     string lower = to_lower(text)
 
-    if contains_substr(lower, "treatment") || contains_substr(lower, "treat") || 
+    if contains_substr(lower, "treatment") || contains_substr(lower, "treat") ||
        contains_substr(lower, "therapy") || contains_substr(lower, "therapeutic") ||
        contains_substr(lower, "治疗") || contains_substr(lower, "疗法") {
         return CATEGORY_TREATMENT()
     }
 
-    if contains_substr(lower, "symptom") || contains_substr(lower, "pain") || 
+    if contains_substr(lower, "symptom") || contains_substr(lower, "pain") ||
        contains_substr(lower, "fever") || contains_substr(lower, "sign") ||
        contains_substr(lower, "症状") || contains_substr(lower, "疼痛") ||
        contains_substr(lower, "发热") || contains_substr(lower, "体征") {
         return CATEGORY_SYMPTOM()
     }
 
-    if contains_substr(lower, "diagnos") || contains_substr(lower, "detect") || 
+    if contains_substr(lower, "diagnos") || contains_substr(lower, "detect") ||
        contains_substr(lower, "identify") || contains_substr(lower, "test") ||
        contains_substr(lower, "诊断") || contains_substr(lower, "检查") {
         return CATEGORY_DIAGNOSIS()
     }
 
-    if contains_substr(lower, "disease") || contains_substr(lower, "disorder") || 
+    if contains_substr(lower, "disease") || contains_substr(lower, "disorder") ||
        contains_substr(lower, "condition") || contains_substr(lower, "illness") ||
        contains_substr(lower, "疾病") || contains_substr(lower, "病") {
         return CATEGORY_DISEASE()
     }
 
-    if contains_substr(lower, "medicine") || contains_substr(lower, "drug") || 
+    if contains_substr(lower, "medicine") || contains_substr(lower, "drug") ||
        contains_substr(lower, "medication") || contains_substr(lower, "pharma") ||
        contains_substr(lower, "药") || contains_substr(lower, "药物") {
         return CATEGORY_DRUG()
     }
 
-    if contains_substr(lower, "infection") || contains_substr(lower, "infect") || 
+    if contains_substr(lower, "infection") || contains_substr(lower, "infect") ||
        contains_substr(lower, "virus") || contains_substr(lower, "bacteria") ||
        contains_substr(lower, "感染") || contains_substr(lower, "病原") {
         return CATEGORY_INFECTION()
     }
 
-    if contains_substr(lower, "health") || contains_substr(lower, "wellness") || 
+    if contains_substr(lower, "health") || contains_substr(lower, "wellness") ||
        contains_substr(lower, "preventive") || contains_substr(lower, "prevention") ||
        contains_substr(lower, "健康") || contains_substr(lower, "保健") {
         return CATEGORY_HEALTH()
     }
 
-    if contains_substr(lower, "anatomy") || contains_substr(lower, "organ") || 
+    if contains_substr(lower, "anatomy") || contains_substr(lower, "organ") ||
        contains_substr(lower, "tissue") || contains_substr(lower, "bone") ||
        contains_substr(lower, "解剖") || contains_substr(lower, "器官") {
         return CATEGORY_ANATOMY()
     }
 
-    if contains_substr(lower, "pathology") || contains_substr(lower, "patholog") || 
+    if contains_substr(lower, "pathology") || contains_substr(lower, "patholog") ||
        contains_substr(lower, "lesion") || contains_substr(lower, "abnormal") ||
        contains_substr(lower, "病理") || contains_substr(lower, "病变") {
         return CATEGORY_PATHOLOGY()

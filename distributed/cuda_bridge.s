@@ -1,4 +1,5 @@
 package neurx.distributed.cuda_bridge
+
 struct cuda_device {
     int device_id
     int local_rank

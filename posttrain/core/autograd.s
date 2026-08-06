@@ -1,5 +1,6 @@
 package neurx.posttrain.core.autograd
 use std.io.println
+
 struct computation_node_s {
     string op_name
     tensor_s output

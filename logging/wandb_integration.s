@@ -1,4 +1,5 @@
 package neurx.logging
+
 struct wandb_run {
     bool active
     string run_id
@@ -32,6 +33,7 @@ func init_wandb(
     println("wand_b initialized. View at: " + r.run_url)
     r
 }
+
 func wandb_log_metric(
     wandb_run *run,
     string name,

@@ -1,4 +1,5 @@
 package neurx.model.transformer.transformer
+
 struct model_preset {
     string name
     string family

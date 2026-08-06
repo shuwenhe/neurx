@@ -1,5 +1,6 @@
 package neurx.nn.conv
 use neurx.tensor.tensor
+
 func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}

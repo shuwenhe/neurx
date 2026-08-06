@@ -1,4 +1,5 @@
 package main
+
 struct training_data {
     text: string
     category: string

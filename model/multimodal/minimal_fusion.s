@@ -1,4 +1,5 @@
 package neurx.model.multimodal.minimal_fusion
+
 struct minimal_fusion_state {
     string name
     string family

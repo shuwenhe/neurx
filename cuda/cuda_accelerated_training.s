@@ -1,6 +1,7 @@
 package neurx.cuda_backend
 use std.io
 use std.math
+
 struct cuda_device {
     device_id: int
     device_name: string

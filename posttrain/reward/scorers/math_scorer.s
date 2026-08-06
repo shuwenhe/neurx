@@ -1,4 +1,5 @@
 package neurx.posttrain.reward.scorers.math
+
 func compute_math_score(string solution_str, string ground_truth) float {
     string boxed = last_boxed_only_string(solution_str)
     if boxed == "" {

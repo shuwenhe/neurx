@@ -1,4 +1,5 @@
 package neurx.model.neurx.mtp
+
 struct mtp_config {
     int hidden_dim
     int vocab_size

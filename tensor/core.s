@@ -1,4 +1,5 @@
 package neurx.tensor.core
+
 struct tensor_desc {
     []int shape
     []int strides

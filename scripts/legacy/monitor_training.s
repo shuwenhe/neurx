@@ -1,5 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command_output, runtime_shell_escape, trim}
+
 func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/app/shuwen/neurx")
     string log_dir = project_root + "/artifacts/logs"

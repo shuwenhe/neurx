@@ -1,4 +1,5 @@
 package neurx.inference.sampling_strategies
+
 struct sampling_config {
     string strategy
     float temperature

@@ -1,4 +1,5 @@
 package main
+
 func str_len(string s) int {
     return __host_str_len(s)
 }

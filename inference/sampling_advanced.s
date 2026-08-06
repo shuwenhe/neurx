@@ -1,4 +1,5 @@
 package neurx.inference.sampling
+
 func top_p_sample(
     []float logits,
     sampling_config config,

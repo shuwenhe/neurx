@@ -1,4 +1,5 @@
 package step5_sampling_step6_decode
+
 struct sampling_config {
     string strategy
     float temperature

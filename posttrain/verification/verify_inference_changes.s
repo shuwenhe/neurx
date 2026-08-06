@@ -2,6 +2,7 @@ package neurx.posttrain.verification.inference_changes
 use neurx.runtime.io.{
     runtime_env_get
 }
+
 struct test_query {
     string question
     string expected_topic

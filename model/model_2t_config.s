@@ -1,4 +1,5 @@
 package neurx.model
+
 struct model_2t_config {
     int vocab_size
     int hidden_dim

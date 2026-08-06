@@ -1,5 +1,6 @@
 package neurx.agent.skill_evaluator
 use neurx.agent.skill_schema
+
 struct agent_skill_eval_result {
     float score
     bool should_promote

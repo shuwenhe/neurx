@@ -38,6 +38,7 @@ type cost_optimizer struct {
     total_cost          float64
     optimization_strategies []optimization_strategy
 }
+
 func (co *cost_optimizer) initialize(config cost_model) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Cost Optimization and Resource Management            ║")

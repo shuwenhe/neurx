@@ -4,6 +4,7 @@ import (
     "../../../core/tensor"
     "../../../nn/activation"
 )
+
 struct transformer_block {
     attention       *multi_head_attention
     ffn             *feed_forward_network

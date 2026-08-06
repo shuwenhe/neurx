@@ -1,4 +1,5 @@
 package neurx.data.pipeline.preprocessing
+
 struct text_quality_metrics {
     float entropy
     float language_confidence

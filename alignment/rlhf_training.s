@@ -1,4 +1,5 @@
 package neurx.alignment.rlhf_training
+
 struct human_preference {
     string prompt
     string chosen_response

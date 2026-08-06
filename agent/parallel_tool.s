@@ -2,6 +2,7 @@ package neurx.agent.parallel_tool
 use neurx.agent.tool_registry
 use neurx.agent.memory
 use neurx.tool.workspace_tools
+
 struct parallel_tool_call {
     string id
     string tool_name

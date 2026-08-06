@@ -1,4 +1,5 @@
 package neurx.model.core.demo_or_classifier
+
 struct demo_or_classifier_state {
     string name
     string family

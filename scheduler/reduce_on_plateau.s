@@ -1,4 +1,5 @@
 package neurx.scheduler.reduce_on_plateau
+
 struct reduce_lr_on_plateau_state {
     float lr
     string mode

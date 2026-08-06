@@ -1,4 +1,5 @@
 package neurx.posttrain.checkpoint.json_encoder
+
 func trainer_state_to_json(
     int version,
     int step,

@@ -1,4 +1,5 @@
 package neurx.optimizer.zero_infinity
+
 struct zero_infinity_config {
     bool enable_cpu_offload
     bool enable_nvme_offload

@@ -1,4 +1,5 @@
 package neurx.nn.loss
+
 struct cross_entropy_loss {
     reduction string
     label_smoothing f64

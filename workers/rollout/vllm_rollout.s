@@ -1,5 +1,6 @@
 package neurx.workers.rollout.vllm
 use neurx.tensor
+
 struct vllm_config {
     string model_path
     int tensor_parallel_size

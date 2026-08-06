@@ -1,4 +1,5 @@
 package neurx.attention.cuda
+
 struct attention_config {
     int batch_size
     int num_heads

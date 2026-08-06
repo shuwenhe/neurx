@@ -1,4 +1,5 @@
 package neurx.distributed.partition
+
 struct partition_info {
     int total_params
     int num_partitions

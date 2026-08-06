@@ -5,6 +5,7 @@ use neurx.runtime.io.{
     runtime_file_exists,
     runtime_run_command_output,
 }
+
 func main() {
     println("[CUDA Manager] NeurX GPU Build System")
     println("")
@@ -85,6 +86,7 @@ func verify_environment() {
     }
     println("[SUCCESS] CUDA environment verified")
 }
+
 func execute_s_script(string script_path) {
     string s_compiler = runtime_env_get("S_COMPILER", "/home/shuwen/.local/bin/s")
     if !runtime_file_exists(s_compiler) {
@@ -103,6 +105,7 @@ func execute_s_script(string script_path) {
         println(output)
     }
 }
+
 func get_cuda_home() string {
     string cuda_home = trim(runtime_env_get("CUDA_HOME", ""))
     if str_len(cuda_home) > 0 {
@@ -113,6 +116,7 @@ func get_cuda_home() string {
     }
     "/usr"
 }
+
 func contains_string(string haystack, string needle) bool {
     int h_len = str_len(haystack)
     int n_len = str_len(needle)
@@ -136,6 +140,7 @@ func contains_string(string haystack, string needle) bool {
     }
     false
 }
+
 func eq_string(string a, string b) bool {
     int a_len = str_len(a)
     int b_len = str_len(b)
@@ -151,6 +156,7 @@ func eq_string(string a, string b) bool {
     }
     true
 }
+
 func str_len(string s) int {
     int n = 0
     while n < 10000000 && s[n] != 0 {
@@ -158,6 +164,7 @@ func str_len(string s) int {
     }
     n
 }
+
 func trim(string s) string {
     int len = str_len(s)
     int i = 0
@@ -173,6 +180,7 @@ func trim(string s) string {
     }
     substring(s, i, j + 1)
 }
+
 func substring(string s, int start, int end) string {
     string out = ""
     int i = start
@@ -183,6 +191,7 @@ func substring(string s, int start, int end) string {
     }
     out
 }
+
 func chr(int code) string {
     string(code)
 }

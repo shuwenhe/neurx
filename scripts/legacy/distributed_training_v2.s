@@ -23,6 +23,7 @@ type distributed_config_v2 struct {
     enable_flash_attention: bool
     mixed_precision_dtype: string
 }
+
 func create_7b_distributed_config(): distributed_config_v2 {
     return distributed_config_v2{
         backend: "nccl",

@@ -1,6 +1,7 @@
 package neurx.posttrain.alignment.remax
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
+
 struct remax_config {
     float learning_rate
     int batch_size

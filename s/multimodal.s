@@ -1,6 +1,7 @@
 package neurx.multimodal
 use neurx.tensor.tensor
 use neurx.tensor.new
+
 func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}

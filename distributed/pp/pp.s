@@ -1,5 +1,6 @@
 package neurx.distributed.pp
 use neurx.strings
+
 struct pipeline_parallel_state {
     string name
     string strategy

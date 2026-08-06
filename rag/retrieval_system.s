@@ -1,4 +1,5 @@
 module rag_system
+
 struct retrieval_system_config {
     vector_db_backend: string = "faiss"
     vector_dim: int = 768

@@ -1,4 +1,5 @@
 package real_inference_pipeline
+
 struct inference_pipeline {
     string model_path
     string tokenizer_path

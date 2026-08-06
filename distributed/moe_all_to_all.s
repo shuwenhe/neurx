@@ -2,6 +2,7 @@ package neurx.distributed.moe_all_to_all
 use neurx.strings
 use neurx.runtime.io.{io_println}
 use neurx.distributed.collective.{collective_state, alltoall_async}
+
 struct routing_decision {
     []int expert_indices
     []float expert_weights

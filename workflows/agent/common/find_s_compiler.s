@@ -4,6 +4,7 @@ import "fmt"
 import "path/filepath"
 import "strings"
 import "core"
+
 func is_runnable_candidate(candidate string) bool {
     if candidate == "" {
         return false

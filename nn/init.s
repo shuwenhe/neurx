@@ -1,4 +1,5 @@
 package neurx.nn.init
+
 struct init_config {
     string method
     float gain

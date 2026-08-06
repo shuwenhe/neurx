@@ -1,4 +1,5 @@
 module transformer_engine
+
 struct transformer_config {
     int vocab_size
     int hidden_size

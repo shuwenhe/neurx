@@ -1,4 +1,5 @@
 package neurx.data.dataset.dataset
+
 struct dataset_state {
     []float items
 }

@@ -1,6 +1,7 @@
 package neurx.posttrain.inference.vllm
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
+
 struct vllm_config {
     int max_num_batched_tokens
     int max_num_seqs

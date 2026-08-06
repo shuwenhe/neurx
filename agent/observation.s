@@ -1,4 +1,5 @@
 package neurx.agent.observation
+
 struct agent_observation_state {
     string raw
     string kind

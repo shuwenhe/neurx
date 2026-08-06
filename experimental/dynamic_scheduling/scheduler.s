@@ -1,5 +1,6 @@
 package neurx.experimental.dynamic_scheduling
 use neurx.tensor
+
 struct dynamic_scheduler_config {
     int min_rollout_workers
     int max_rollout_workers

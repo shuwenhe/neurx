@@ -1,4 +1,5 @@
 package step2_embedding
+
 struct embedding_layer {
     int vocab_size
     int hidden_size

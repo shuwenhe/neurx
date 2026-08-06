@@ -1,5 +1,6 @@
 package neurx.examples.production_training
 use neurx.trainer.production.*
+
 func example_single_gpu_training() {
     println("=== Example 1: Single GPU Training ===\n")
     training_system_config cfg = new_training_system_config()

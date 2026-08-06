@@ -409,10 +409,12 @@ func infer_remote_descriptor_backend(string model_path) string {
     }
     ""
 }
+
 func infer_remote_response_text(string response_path) string {
     string parser = "jq -r '.choices[0].message.content
     trim(runtime_run_command_output(parser))
 }
+
 func infer_run_remote(string model_path, string prompt) string {
     string url = infer_find_field(model_path, "url")
     if url == "" {
@@ -451,6 +453,7 @@ func infer_run_remote(string model_path, string prompt) string {
     runtime_run_command("rm -f " + runtime_shell_escape(payload_path) + " " + runtime_shell_escape(response_path) + " " + runtime_shell_escape(error_path))
     text
 }
+
 func infer_run(string model_path, string prompt) string {
     string resolved = trim(model_path)
     if resolved == "" {
@@ -468,21 +471,27 @@ func infer_run(string model_path, string prompt) string {
     }
     ""
 }
+
 func infer_pipeline_queue_depth(infer_pipeline_state state) int {
     vllm_runtime_queue_depth(state.vllm)
 }
+
 func infer_pipeline_state_dict(infer_pipeline_state state) infer_pipeline_state {
     state
 }
+
 func infer_pipeline_load_state_dict(infer_pipeline_state state, infer_pipeline_state other) infer_pipeline_state {
     other
 }
+
 func infer_pipeline_to_vllm_runtime(infer_pipeline_state state) vllm_runtime_state {
     state.vllm
 }
+
 func infer_pipeline_vllm_schedule_next(infer_pipeline_state state) vllm_runtime_step_result {
     vllm_runtime_schedule_next(state.vllm)
 }
+
 func infer_pipeline_last_observation(infer_pipeline_state state) string {
     if state.response.finished {
         return "infer:done"

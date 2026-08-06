@@ -4,6 +4,7 @@ use neurx.distributed.ddp.{ddp_state, new_ddp_state, ddp_attach_process_group, d
 use neurx.runtime.io.{runtime_env_get}
 use neurx.tensor.tensor
 use neurx.tensor.new
+
 struct pretrain_ddp_state {
     ddp_state ddp
     process_group_state process_group

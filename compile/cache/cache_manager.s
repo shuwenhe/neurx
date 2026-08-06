@@ -1,5 +1,6 @@
 package neurx.compile.cache.cache_manager
 use neurx.compile.ir.{ir_graph, ir_node}
+
 struct cache_entry {
     string cache_key
     ir_graph optimized_graph

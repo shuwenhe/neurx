@@ -1,4 +1,5 @@
 package neurx.amp.scaler
+
 struct mixed_precision_config {
     string precision_type
     float loss_scale

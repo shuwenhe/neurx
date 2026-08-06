@@ -7,6 +7,7 @@ import "neurx.inference.speculative_decoding"
 import "neurx.distributed.veomni.veomni"
 import "neurx.model.reasoning.chain_of_thought"
 import "neurx.util.math"
+
 func test_trae_moe() bool {
     trae_moe_config config = trae_moe.new_trae_moe_config()
     config.num_experts = 4

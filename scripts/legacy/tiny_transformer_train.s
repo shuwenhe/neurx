@@ -2,6 +2,7 @@ package main
 import fmt
 import os
 import neurx.model
+
 struct train_config {
     vocab_size: int
     embed_dim: int

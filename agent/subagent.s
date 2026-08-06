@@ -1,4 +1,5 @@
 package neurx.agent.subagent
+
 struct agent_subagent_task {
     string id
     string goal

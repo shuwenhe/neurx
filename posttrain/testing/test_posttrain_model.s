@@ -9,6 +9,7 @@ use neurx.runtime.io.{
     runtime_time_now,
     runtime_time_elapsed
 }
+
 struct test_result {
     string name
     string category
@@ -350,9 +351,9 @@ func print_final_summary(int passed, int failed, int skipped) void {
     println("TEST SUMMARY")
     println(repeat_char("=", 60))
     int total = passed + failed + skipped
-    string msg = "\nTotal: " + int_to_str(total) + 
-                 " | Passed: " + int_to_str(passed) + 
-                 " | Failed: " + int_to_str(failed) + 
+    string msg = "\nTotal: " + int_to_str(total) +
+                 " | Passed: " + int_to_str(passed) +
+                 " | Failed: " + int_to_str(failed) +
                  " | Skipped: " + int_to_str(skipped) + "\n"
     println(msg)
     if total > 0 {

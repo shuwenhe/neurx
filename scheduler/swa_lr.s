@@ -1,4 +1,5 @@
 package neurx.scheduler.swa_lr
+
 struct swa_lr_state {
     []float current_lrs
     []float swa_lrs

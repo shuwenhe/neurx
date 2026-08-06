@@ -1,4 +1,5 @@
 package neurx.logging
+
 func format_percent(float value, int width, int decimals) string {
     string formatted = format_float(value, width, decimals) + "%"
     while len(formatted) < width {

@@ -9,6 +9,7 @@ enum checkpoint_format {
     FORMAT_SAFE_TENSORS,
     FORMAT_HF_DS,
 }
+
 struct checkpoint_config {
     string base_directory
     int save_interval

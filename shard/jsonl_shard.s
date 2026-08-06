@@ -1,5 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}
+
 func pick_input_file(string root) string {
     string candidate = runtime_env_get("SHARD_INPUT_FILE", "")
     if candidate != "" && runtime_file_exists(candidate) {

@@ -350,7 +350,7 @@ func runtime_env_get(string name, string default_value) string {
 func main() {
     initialize_backend()
     print("Backend initialized successfully.\n")
-    int server_fd = __sys_socket(2, 1, 0)  
+    int server_fd = __sys_socket(2, 1, 0)
     print("Socket creation: fd=" + int_to_string(server_fd) + "\n")
     if server_fd < 0 {
         print("ERROR: Socket creation failed!\n")

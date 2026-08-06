@@ -1,4 +1,5 @@
 package neurx.distributed.sync
+
 struct distributed_context {
     rank i64
     world_size i64

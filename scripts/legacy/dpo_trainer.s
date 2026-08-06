@@ -46,6 +46,7 @@ type dpotrainer struct {
     metrics_history     []dpometrics
     best_loss           float64
 }
+
 func (trainer *dpotrainer) initialize(config dpoconfig) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Direct Preference Optimization (DPO) Trainer         ║")

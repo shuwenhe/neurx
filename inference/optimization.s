@@ -1,4 +1,5 @@
 package neurx.inference.optimization
+
 struct flash_attention_config {
     int block_size
     bool use_flash_attention

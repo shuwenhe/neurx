@@ -1,4 +1,5 @@
 package neurx.model.robotics.data
+
 struct robotics_dataset_state {
     string source_name
     int sample_count

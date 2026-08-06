@@ -1,4 +1,5 @@
 package neurx.scheduler.cyclic_schedulers
+
 struct cyclic_lr_state {
     float base_lr
     float max_lr

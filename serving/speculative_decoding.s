@@ -1,4 +1,5 @@
 package neurx.serving.speculative_decoding
+
 struct spec_decode_config {
     int gamma
     float acceptance_threshold

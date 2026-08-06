@@ -6,6 +6,7 @@ enum message_role {
     ASSISTANT,
     TOOL,
 }
+
 struct message {
     message_role role
     string content

@@ -1,4 +1,5 @@
 package neurx.trainer
+
 struct trainer_config {
     string name
     string mode

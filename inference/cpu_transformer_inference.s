@@ -1,4 +1,5 @@
 package neurx::inference::cpu
+
 struct model_info {
   step: uint64
   vocabulary: uint32

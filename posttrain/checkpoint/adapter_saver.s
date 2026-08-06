@@ -1,5 +1,6 @@
 package neurx.posttrain.checkpoint.adapter_saver
 use neurx.runtime.io.{runtime_make_dirs, runtime_write_binary_file, runtime_file_exists, runtime_write_text_file, trim}
+
 struct safetensors_header {
     string version
     int num_tensors

@@ -1,4 +1,5 @@
 package neurx.posttrain.checkpoint.scheduler_state
+
 struct scheduler_state {
     int step
     int warmup_steps

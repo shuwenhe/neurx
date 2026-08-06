@@ -23,6 +23,7 @@ type checkpoint_manager struct {
     max_checkpoints: int
     checkpoints: []checkpoint_metadata
 }
+
 func (cm *checkpoint_manager) init(checkpoint_dir: string, max_checkpoints: int) error {
     cm.checkpoint_dir = checkpoint_dir
     cm.max_checkpoints = max_checkpoints

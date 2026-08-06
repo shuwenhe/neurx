@@ -53,6 +53,7 @@ type data_governance_report struct {
     compliance_status   string
     audit_summary       string
 }
+
 func (dvc *data_version_control) initialize() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Data Version Control and Governance System           ║")

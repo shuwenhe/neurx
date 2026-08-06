@@ -1,5 +1,6 @@
 package neurx.platform.logging
 use neurx.platform.config.{runtime_config_parse_result, get_runtime_config}
+
 struct logger_state {
     string name
     string level

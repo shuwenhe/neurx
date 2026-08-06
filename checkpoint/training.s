@@ -7,6 +7,7 @@ enum checkpoint_type {
     OPTIMIZER_ONLY = 2
     GRADIENT_ONLY = 3
 }
+
 struct checkpoint_config {
     save_dir: string
     save_interval: int

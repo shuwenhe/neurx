@@ -1,4 +1,5 @@
 package neurx.distributed.megatron.microbatch_calculator
+
 struct schedule_entry {
     int threshold
     int batch_size

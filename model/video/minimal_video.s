@@ -1,4 +1,5 @@
 package neurx.model.video.minimal_video
+
 struct minimal_video_state {
     string name
     string family

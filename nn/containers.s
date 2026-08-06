@@ -1,4 +1,5 @@
 package neurx.nn.containers
+
 struct sequential_module {
     []string layer_names
     []string layer_types

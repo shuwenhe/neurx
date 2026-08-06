@@ -1,4 +1,5 @@
 package neurx.agent.tool_registry
+
 struct agent_tool_registry_state {
     []string tool_names
     []bool enabled

@@ -1,4 +1,5 @@
 package neurx.distributed.launcher
+
 struct distributed_config {
     int world_size
     int rank

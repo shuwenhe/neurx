@@ -38,6 +38,7 @@ type safety_stats struct {
     flagged_unsafe          int64
     blocked_generation      int64
 }
+
 func (filter *safety_filter) detect_harmful_keywords(text string) []string {
     harmful := []string{}
     text_lower := strings.ToLower(text)

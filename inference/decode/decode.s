@@ -1,6 +1,7 @@
 package neurx.inference.decode
 use neurx.inference.cache
 use neurx.inference.sampling
+
 struct decode_state {
     int step
     int max_new_tokens

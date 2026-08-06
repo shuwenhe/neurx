@@ -1,4 +1,5 @@
 package neurx.runtime
+
 struct runtime_state {
     bool available
     bool ops_backend_enabled

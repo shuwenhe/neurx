@@ -1,4 +1,5 @@
 package neurx.tools.safetensors
+
 struct tensor_metadata {
     string name
     string dtype

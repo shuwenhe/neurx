@@ -1,4 +1,5 @@
 package main
+
 func test_trainer_state_roundtrip() {
     println("====================================")
     println("[Round Trip Test] TrainerState")

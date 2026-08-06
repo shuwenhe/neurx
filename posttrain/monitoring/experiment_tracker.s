@@ -6,6 +6,7 @@ enum tracker_backend {
     TENSORBOARD,
     LOCAL,
 }
+
 struct experiment_metadata {
     string experiment_name
     string run_id

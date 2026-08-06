@@ -1,4 +1,5 @@
 package neurx.data.loader
+
 struct batch {
     input_ids [][]i64
     labels []i64

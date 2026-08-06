@@ -2,6 +2,7 @@ package neurx.trainer.scaled_training_system
 use std.io
 use std.math
 use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file}
+
 struct data_bundle {
     input_ids: [][]int
     labels: [][]int

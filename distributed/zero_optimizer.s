@@ -1,4 +1,5 @@
 package neurx.distributed.zero
+
 struct zero_config {
     int stage
     bool cpu_offload

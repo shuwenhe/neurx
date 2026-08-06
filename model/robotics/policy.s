@@ -1,4 +1,5 @@
 package neurx.model.robotics.policy
+
 struct robotics_policy_state {
     string policy_name
     int input_dim

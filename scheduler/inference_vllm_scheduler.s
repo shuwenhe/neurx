@@ -1,5 +1,6 @@
 package neurx.scheduler.inference_vllm_scheduler
 use neurx.inference.vllm.request_queue
+
 struct vllm_scheduler_state {
     string strategy
     int tick

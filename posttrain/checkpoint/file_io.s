@@ -1,4 +1,5 @@
 package neurx.posttrain.checkpoint.file_io
+
 func write_file(string filepath, string content) bool {
     println("[FileIO] Writing to: " + filepath)
     println("[FileIO] Content length: " + int_to_str(str_len(content)))

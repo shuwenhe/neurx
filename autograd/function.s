@@ -1,6 +1,7 @@
 package neurx.autograd.function
 use neurx.autograd.eqn
 use neurx.strings
+
 struct function_record {
     string name
     bool forward_enabled

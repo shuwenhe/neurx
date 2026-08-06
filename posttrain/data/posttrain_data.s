@@ -1,4 +1,5 @@
 package neurx.posttrain.data
+
 struct posttrain_data_state {
     string dataset_name
     string sample_mode

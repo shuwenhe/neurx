@@ -1,5 +1,6 @@
 import "tensor/tensor.s"
 import "optimizer/optimizer.s"
+
 struct gpg_config {
     learning_rate: f32
     num_epochs: i32

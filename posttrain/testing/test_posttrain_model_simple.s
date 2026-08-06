@@ -4,6 +4,7 @@ use neurx.runtime.io.{
     runtime_file_exists,
     runtime_file_size
 }
+
 func test_base_model() string {
     string base_path = runtime_env_get("NEURX_BASE_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
     bool exists = runtime_file_exists(base_path)

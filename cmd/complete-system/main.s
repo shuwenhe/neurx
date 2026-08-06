@@ -13,6 +13,7 @@ import (
     "../../cmd"
     "../../scripts"
 )
+
 func main() {
     args := os.Args[1:]
     if len(args) == 0 {

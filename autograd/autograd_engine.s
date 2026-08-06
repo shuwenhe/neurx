@@ -39,6 +39,7 @@ enum node_type {
     MASKED_FILL,
     NORM,
 }
+
 struct edge {
     int source_node_id
     int target_node_id

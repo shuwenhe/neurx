@@ -14,6 +14,7 @@ use neurx.model.transformer.norm.{
     rope_embedding, new_rope_embedding, apply_rope, rope_apply_result,
     position_embedding_config
 }
+
 struct model_config {
     string name
     int vocab_size

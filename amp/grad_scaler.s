@@ -1,4 +1,5 @@
 package neurx.amp.grad_scaler
+
 struct grad_scaler_state {
     float scale
     float growth_factor

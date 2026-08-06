@@ -1,5 +1,6 @@
 package neurx.data.dynamic_batching
 use neurx.strings
+
 struct packing_config:
     int max_seq_len
     int target_batch_size

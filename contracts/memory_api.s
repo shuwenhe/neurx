@@ -1,5 +1,6 @@
 import "device_api"
 import "stream_api"
+
 struct memory_ptr {
     addr: i64
     device: device

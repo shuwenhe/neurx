@@ -1,4 +1,5 @@
 package neurx.training.grad_clip
+
 struct grad_clip_config {
     string clip_mode
     float max_norm

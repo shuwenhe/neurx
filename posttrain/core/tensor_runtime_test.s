@@ -10,6 +10,7 @@ use neurx.posttrain.core.tensor_runtime.{
     tensor_cat_s,
     tensor_to_string_s
 }
+
 struct test_result_s {
     string test_name
     bool passed

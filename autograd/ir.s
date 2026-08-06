@@ -1,4 +1,5 @@
 use neurx.autograd.tracer
+
 func trace_to_ir(tracer_state state, string name) ir_graph {
     ir_from_tracer(state, name)
 }

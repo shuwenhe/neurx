@@ -32,6 +32,7 @@ type multi_task_learner struct {
     task_performance        map[int]float64
     uncertainty_weights     map[int]float64
 }
+
 func (mtl *multi_task_learner) register_task(task_name string, data_size int, weight float64) int {
     task_id := len(mtl.tasks)
     task := task{

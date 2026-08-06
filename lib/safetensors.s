@@ -1,4 +1,5 @@
 module safetensors
+
 struct tensor_info {
     string name
     []int shape

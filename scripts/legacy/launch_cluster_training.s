@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get}
 use neurx.strings.{string_concat}
+
 struct cluster_config {
     int num_nodes
     []string node_addresses

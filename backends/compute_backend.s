@@ -1,4 +1,5 @@
 package neurx.backends.compute_backend
+
 struct device_info {
     string backend
     int device_id

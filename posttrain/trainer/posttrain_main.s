@@ -1,6 +1,7 @@
 package neurx.posttrain.trainer.posttrain_main
 use std.io.eprintln
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_text_file, runtime_make_dirs, trim}
+
 func write_file_simple(string path, string content) int {
     eprintln("[DEBUG] Writing file to: " + path)
     eprintln("[DEBUG] Content length: " + int_to_str(len(content)))
@@ -466,7 +467,7 @@ func run_posttrain_lora_sft() int {
         model_path, rank, 16.0, 0.05, 896, 48
     )
     var config_result = write_file_simple(
-        output_dir + "/adapter_config.json", 
+        output_dir + "/adapter_config.json",
         config_json
     )
     eprintln("[✓] Saved adapter_config.json")

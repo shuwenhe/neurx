@@ -5,6 +5,7 @@ use neurx.distributed.nccl_backend
 use neurx.cuda.device_manager
 use neurx.optimizer.adamw
 use neurx.data.tokenizer
+
 struct training_config {
     string model_name
     int vocab_size

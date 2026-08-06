@@ -91,6 +91,7 @@ var g_metrics = &server_metrics{
 	uptime_seconds: 0,
 }
 var g_server_start_time = time.Now()
+
 func load_config_from_env() {
 	if home := os.Getenv("NEURX_HOME"); home != "" {
 		g_config.ModelPath = filepath.Join(home, "artifacts", "models", "1t.bin")
@@ -276,6 +277,7 @@ func start_server() error {
 	logInfo(fmt.Sprintf("  GET  http:
 	return nil
 }
+
 func runInteractiveMode() {
 	logInfo("entering interactive mode (simulation)...")
 	logInfo("type 'quit' to exit")
@@ -297,6 +299,7 @@ func runInteractiveMode() {
 	}
 	logInfo("interactive mode completed")
 }
+
 func printUsage() {
 	fmt.Println("neur_x inference server - usage:")
 	fmt.Println("")
@@ -322,10 +325,12 @@ func printUsage() {
 	fmt.Println("  ./inference_server interactive")
 	fmt.Println("  ./inference_server benchmark")
 }
+
 func print_config() {
 	data, _ := json.MarshalIndent(g_config, "", "  ")
 	fmt.Println(string(data))
 }
+
 func run_benchmark() {
 	log_info("Running inference benchmark...")
 	test_requests := []inference_request{
@@ -355,6 +360,7 @@ func run_benchmark() {
 	fmt.Printf("  Avg latency: %.3f s\n", g_metrics.AvgLatency)
 	fmt.Printf("  Max latency: %.3f s\n", g_metrics.MaxLatency)
 }
+
 func main() {
 	if len(os.Args) < 2 {
 		print_usage()

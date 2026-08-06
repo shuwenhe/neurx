@@ -1,4 +1,5 @@
 package neurx.data.batch_optimization
+
 struct batch_config {
     int batch_size
     int seq_len

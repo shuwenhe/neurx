@@ -8,6 +8,7 @@ type industrial_run_summary struct {
     matched_records int
     score           float64
 }
+
 struct command_args {
     command string
     options map[string]string

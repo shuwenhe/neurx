@@ -1,5 +1,6 @@
 package neurx.inference.production
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_file, trim, println, printf}
+
 func vocab_size() int { return 151936 }
 
 func hidden_dim() int { return 896 }
@@ -28,30 +29,30 @@ struct matrix {
 }
 
 struct attention_cache {
-    [][]float key_cache      
-    [][]float value_cache    
-    int cache_size          
+    [][]float key_cache
+    [][]float value_cache
+    int cache_size
 }
 
 struct model_weights {
-    []matrix embed_tokens           
-    []matrix norm_weights           
-    []matrix q_proj_weight          
-    []matrix k_proj_weight          
-    []matrix v_proj_weight          
-    []matrix out_proj_weight        
-    []matrix gate_proj_weight       
-    []matrix up_proj_weight         
-    []matrix down_proj_weight       
-    matrix lm_head_weight           
-    matrix final_norm_weight        
+    []matrix embed_tokens
+    []matrix norm_weights
+    []matrix q_proj_weight
+    []matrix k_proj_weight
+    []matrix v_proj_weight
+    []matrix out_proj_weight
+    []matrix gate_proj_weight
+    []matrix up_proj_weight
+    []matrix down_proj_weight
+    matrix lm_head_weight
+    matrix final_norm_weight
 }
 
 struct inference_state {
-    []float hidden_states           
-    []float attention_output        
-    []float ffn_output              
-    []float logits                  
+    []float hidden_states
+    []float attention_output
+    []float ffn_output
+    []float logits
     attention_cache kv_cache
     int generated_tokens
     int sequence_length
@@ -177,8 +178,8 @@ func multi_head_attention_cached(
         int head_offset = h * head_dim
         float scale = 1.0 / sqrt(float(head_dim))
         float score = dot_product(
-            q_heads, 
-            k_heads, 
+            q_heads,
+            k_heads,
             head_dim
         ) * scale
         attention_scores[h] = score
@@ -257,7 +258,7 @@ func model_forward(
 ) int {
     int i = 0
     while i < HIDDEN_DIM {
-        state.hidden_states[i] = 0.1  
+        state.hidden_states[i] = 0.1
         i = i + 1
     }
     []float layer_input = allocate(HIDDEN_DIM)
@@ -303,13 +304,13 @@ func model_forward(
 
 func tokenize(string text) []int {
     []int tokens = allocate(len(text) + 2)
-    tokens[0] = 0  
+    tokens[0] = 0
     int i = 0
     while i < len(text) {
-        tokens[i + 1] = int(text[i]) + 100  
+        tokens[i + 1] = int(text[i]) + 100
         i = i + 1
     }
-    tokens[len(text) + 1] = 2  
+    tokens[len(text) + 1] = 2
     tokens
 }
 
@@ -346,8 +347,8 @@ func generate(
     string generated = ""
     int token_count = 0
     while token_count < max_new_tokens {
-        int next_token = model_forward(0, weights, state)  
-        if next_token == 2 {  
+        int next_token = model_forward(0, weights, state)
+        if next_token == 2 {
             break
         }
         string token_text = decode_token(next_token)

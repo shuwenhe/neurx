@@ -11,6 +11,7 @@ enum rl_stage {
     TRAINING = 1
     EVALUATING = 2
 }
+
 struct rl_config {
     rl_algorithm algorithm
     int batch_size

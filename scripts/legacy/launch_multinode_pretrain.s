@@ -3,6 +3,7 @@ use std.exec
 use std.os
 use std.path
 use std.strings
+
 struct multi_node_config_2 {
     root string
     hostfile string

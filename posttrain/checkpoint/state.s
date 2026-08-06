@@ -1,4 +1,5 @@
 package neurx.posttrain.checkpoint.state
+
 struct trainer_state {
     int step
     int epoch

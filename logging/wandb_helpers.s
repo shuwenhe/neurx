@@ -1,4 +1,5 @@
 package neurx.logging
+
 func generate_uuid() string {
     string uuid = ""
     uint64 rng = 42

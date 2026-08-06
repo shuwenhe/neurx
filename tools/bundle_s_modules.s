@@ -3,6 +3,7 @@ use std.io
 use std.os
 use std.path
 use std.strings
+
 func strip_package_and_imports(content string) string {
     lines := strings.Split(content, "\n")
     result := []string{}

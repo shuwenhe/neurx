@@ -1,6 +1,7 @@
 package neurx.posttrain.inference.sglang
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
+
 struct sglang_config {
     int max_total_tokens
     int max_prefill_tokens

@@ -1,5 +1,6 @@
 package neurx.autograd.eqn
 use neurx.strings
+
 struct ir_eqn {
     string primitive
     []string params

@@ -1,4 +1,5 @@
 package neurx.logging
+
 struct logger_config {
     string experiment_name
     string run_name

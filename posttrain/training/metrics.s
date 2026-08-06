@@ -1,4 +1,5 @@
 package neurx.posttrain.training.metrics
+
 func record_loss(float loss) float {
     return compute_perplexity(loss)
 }

@@ -1,4 +1,5 @@
 package step3_transformer
+
 struct transformer_config {
     int num_layers
     int hidden_size

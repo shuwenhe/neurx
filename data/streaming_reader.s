@@ -1,5 +1,6 @@
 package neurx.data.streaming_reader
 use neurx.strings
+
 struct stream_reader_config {
     int64 chunk_size_bytes
     int read_ahead_buffers

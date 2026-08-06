@@ -1,4 +1,5 @@
 package neurx.agent.interrupt
+
 struct agent_interrupt_state {
     bool pending
     string reason

@@ -1,4 +1,5 @@
 package neurx.distributed
+
 struct sequence_parallel_config {
     int sp_degree
     int sp_rank

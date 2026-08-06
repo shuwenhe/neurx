@@ -1,5 +1,6 @@
 module verify_posttrain_tensors
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_binary_file, trim}
+
 struct tensor_stats {
     float mean
     float std

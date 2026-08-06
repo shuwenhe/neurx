@@ -10,6 +10,7 @@ type tokenizer struct {
     vocab_size: int
     special_tokens: map[string]int
 }
+
 func (t *tokenizer) init(vocab_size: int) {
     t.vocab_size = vocab_size
     t.vocab = make(map[string]int)

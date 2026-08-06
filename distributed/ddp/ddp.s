@@ -1,6 +1,7 @@
 package neurx.distributed.ddp
 use neurx.strings
 use neurx.distributed.comm
+
 struct ddp_state {
     string name
     string backend

@@ -27,6 +27,7 @@ type distillation_framework struct {
     metrics_history         []distillation_metrics
     best_loss               float64
 }
+
 func (framework *distillation_framework) apply_temperature(logits []float64, temperature float64) []float64 {
     scaled := make([]float64, len(logits))
     for i, logit := range logits {

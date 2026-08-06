@@ -2,6 +2,7 @@ package neurx.data.jsonl_loader
 use neurx.strings
 use neurx.runtime.io.{io_println, runtime_file_exists, runtime_read_text_file}
 use neurx.tokenizer.model_bpe.{bpe_tokenizer, token_config, new_tokenizer_config, new_bpe_tokenizer, encode, pad_sequence}
+
 struct jsonl_document {
     string text
     string source

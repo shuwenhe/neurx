@@ -1,4 +1,5 @@
 package neurx.serving.runtime.production_runtime
+
 struct production_queue {
     []string request_ids
     []string backends

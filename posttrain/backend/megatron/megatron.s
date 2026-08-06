@@ -2,6 +2,7 @@ package neurx.posttrain.backend.megatron
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
 use neurx.distributed.{distributed_context}
+
 struct megatron_config {
     int tensor_parallel_size
     int pipeline_parallel_size

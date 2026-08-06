@@ -1,4 +1,5 @@
 package step1_tokenizer
+
 struct qwen_tokenizer {
     int vocab_size
 }

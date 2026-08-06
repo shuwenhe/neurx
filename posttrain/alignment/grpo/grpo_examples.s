@@ -2,6 +2,7 @@ package neurx.posttrain.grpo.examples
 use neurx.posttrain.grpo.grpo_trainer.*
 use neurx.model.llm.neurx.*
 use neurx.tokenizer.neurx.*
+
 func create_grpo_example_config() grpo_train_config {
     grpo_train_config {
         method: "grpo",

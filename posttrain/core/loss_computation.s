@@ -1,5 +1,6 @@
 package neurx.posttrain.core.loss_computation
 use std.io.println
+
 struct loss_state_s {
     float current_loss
     int batch_size

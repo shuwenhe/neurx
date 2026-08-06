@@ -1,4 +1,5 @@
 package neurx.tests.distributed
+
 func main() {
     println("============================================================")
     println("DeepSpeed ZeRO-1 Optimizer Test (S Language Implementation)")

@@ -9,6 +9,7 @@ use neurx.inference
 use neurx.executor.model_tool_select
 use neurx.safety.safety
 use neurx.runtime.io.{runtime_env_get, runtime_read_text_file, runtime_file_exists}
+
 struct agent_execute_result {
     agent_tool_registry_state tools
     agent_memory_state memory

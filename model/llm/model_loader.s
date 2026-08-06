@@ -6,6 +6,7 @@ import (
     "../../core/tensor"
     "../transformer"
 )
+
 struct gptconfig {
     vocab_size      int
     max_seq_len      int

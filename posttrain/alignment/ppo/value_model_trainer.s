@@ -1,4 +1,5 @@
 package neurx.posttrain.rlhf.value_model_trainer
+
 struct value_network {
     [][]float hidden_weights
     []float hidden_bias

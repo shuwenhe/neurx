@@ -1,4 +1,5 @@
 package main
+
 func test_adamw_init() {
     println("Test 1: adam_w initialization")
     let lr = 1e-4

@@ -14,6 +14,7 @@ enum training_scale {
     XL,
     one_t,
 }
+
 struct training_config {
     scale         training_scale
     num_gpus       int

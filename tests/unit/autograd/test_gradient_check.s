@@ -1,4 +1,5 @@
 package neurx.tests.gradient
+
 func test_gradient_check_simple() bool {
     println("  [Test] Gradient Check - Simple Function")
     println("    f(x) = x^2, f'(x) = 2x")

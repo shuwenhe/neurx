@@ -6,6 +6,7 @@ enum prefetch_strategy {
     ADVANCED,
     AGGRESSIVE,
 }
+
 struct data_load_config {
     int batch_size
     int num_workers

@@ -1,6 +1,7 @@
 package neurx.moe.hybrid
 use neurx.moe.core.{moe_config, moe_weights, moe_result, new_moe_config, new_moe_weights, moe_forward}
 use neurx.attention.nda.{nda_config, nda_weights, nda_result, new_nda_config, new_nda_weights, nda_forward}
+
 struct hybrid_moe_config {
     int hidden_dim
     int state_dim

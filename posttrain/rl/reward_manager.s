@@ -1,4 +1,5 @@
 package neurx.posttrain.rl.reward_manager
+
 struct reward_config {
     string reward_type
     float reward_scale

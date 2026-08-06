@@ -1,6 +1,7 @@
 package neurx.posttrain.benchmark
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_text_file, runtime_make_dirs}
 use std.io.{println, eprintln}
+
 struct benchmark_timer {
     string name
     int64 start_ns
@@ -273,8 +274,8 @@ func main() void {
     println("✓ Backward Pass: " + int_to_str(int(backward_metric.total_time_ms)) + " ms (avg " + float_to_str(backward_metric.tokens_per_sec, 1) + " tokens/sec)")
     var optimizer_metric = benchmark_optimizer_step(num_steps, batch_size)
     println("✓ Optimizer Step: " + int_to_str(int(optimizer_metric.total_time_ms)) + " ms")
-    var total_time = data_metric.total_time_ms + model_metric.total_time_ms + 
-                     forward_metric.total_time_ms + backward_metric.total_time_ms + 
+    var total_time = data_metric.total_time_ms + model_metric.total_time_ms +
+                     forward_metric.total_time_ms + backward_metric.total_time_ms +
                      optimizer_metric.total_time_ms
     var avg_throughput = (forward_metric.tokens_per_sec + backward_metric.tokens_per_sec) / 2.0
     var report benchmark_report

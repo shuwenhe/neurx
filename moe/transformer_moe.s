@@ -1,4 +1,5 @@
 package neurx.moe.transformer
+
 struct moe_config {
     int num_experts
     int num_experts_per_token

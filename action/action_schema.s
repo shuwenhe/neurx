@@ -1,4 +1,5 @@
 package neurx.agent.action_schema
+
 struct agent_action_state {
     string tool
     string path

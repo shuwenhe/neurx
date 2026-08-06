@@ -4,6 +4,7 @@ use std.os
 use std.exec
 use std.time
 use std.path
+
 func check_nvidia_smi() int {
     cmd := exec.command("nvidia-smi", "-L")
     output, err := cmd.Output()

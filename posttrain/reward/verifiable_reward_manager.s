@@ -1,11 +1,12 @@
 package neurx.posttrain.reward.verifiable_reward_manager
 use std.io.eprintln
 enum reward_type {
-    MODEL_BASED,           
-    FUNCTION_BASED,        
-    HUMAN_FEEDBACK,        
-    VERIFIABLE,            
+    MODEL_BASED,
+    FUNCTION_BASED,
+    HUMAN_FEEDBACK,
+    VERIFIABLE,
 }
+
 struct verification_result {
     bool is_valid
     bool is_correct
@@ -122,9 +123,9 @@ func reward_compute_code_reward(verifiable_reward_manager_state state, int step,
     if verification.is_correct {
         reward_value = 1.0
     } else if verification.is_valid {
-        reward_value = 0.3  
+        reward_value = 0.3
     } else {
-        reward_value = -1.0  
+        reward_value = -1.0
     }
     reward_sample sample = reward_sample {
         sample_id: state.sample_count,

@@ -1,4 +1,5 @@
 package neurx.distributed
+
 struct distributed_training_config {
     int world_size
     int global_rank

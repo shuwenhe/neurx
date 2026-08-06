@@ -1,4 +1,5 @@
 package neurx.backends.cuda.bindings
+
 struct device_array {
     []float data
     int size

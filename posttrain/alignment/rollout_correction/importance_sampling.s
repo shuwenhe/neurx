@@ -1,5 +1,6 @@
 import "tensor/tensor.s"
 import "posttrain/alignment/rollout_correction/config.s"
+
 struct is_weights {
     weights: Tensor
     level: ISAggregationLevel

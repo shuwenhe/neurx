@@ -20,6 +20,7 @@ type mixed_precision_trainer struct {
     overflow_counter: int
     steps_since_overflow: int
 }
+
 func (mpt *mixed_precision_trainer) init(config: mixed_precision_config) {
     mpt.config = config
     mpt.current_loss_scale = config.loss_scale

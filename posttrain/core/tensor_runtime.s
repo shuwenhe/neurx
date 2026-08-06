@@ -1,4 +1,5 @@
 package neurx.posttrain.core.tensor_runtime
+
 struct tensor_s {
     []float data
     []int shape

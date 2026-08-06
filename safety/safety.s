@@ -1,4 +1,5 @@
 package neurx.safety.safety
+
 struct agent_safety_result {
     bool allowed
     string reason

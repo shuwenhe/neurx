@@ -1,4 +1,5 @@
 package neurx.data
+
 struct sample {
     []int token_ids
     string text

@@ -1,6 +1,7 @@
 package neurx.model.llm.long_context_32k
 use neurx.strings
 use neurx.runtime.io.{io_println}
+
 struct rope_config {
     int dim
     int max_seq_len

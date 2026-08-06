@@ -5,6 +5,7 @@ float MIN_LOSS_DROP = 1e-6
 float MAX_LOSS_STEP_INCREASE = 1e-7
 float MIN_WEIGHT_DELTA_L2 = 1e-6
 int MIN_CHANGED_ELEMENTS = 1
+
 func main() {
     string base_dir = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "../model/base-model")
     string adapter_dir = runtime_env_get("NEURX_POSTTRAIN_OUTPUT_DIR", "/home/shuwen/shuwen/posttrain_adapter")

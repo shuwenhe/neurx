@@ -1,6 +1,7 @@
 package neurx.tests.tokenizer_test
 use std.io.println
 use neurx.inference.tokenizer_loader
+
 struct test_result_2 {
     test_name: string
     passed: bool

@@ -2,6 +2,7 @@ package neurx.agent.prompt_builder
 use neurx.agent.memory
 use neurx.agent.tool_registry
 use neurx.reasoning.reasoning
+
 struct agent_prompt_builder_state {
     string system_role
     string goal

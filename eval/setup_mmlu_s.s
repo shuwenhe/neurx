@@ -9,6 +9,7 @@ use neurx.runtime.io.{
     runtime_run_command,
     runtime_run_command_output,
 }
+
 func all_mmlu_stem_tasks() []string {
     []string{
         "abstract_algebra",

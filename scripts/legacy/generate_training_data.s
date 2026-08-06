@@ -1,6 +1,7 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_shell_escape}
 use std.io.println
+
 func main() {
     let root = runtime_env_get("NEURX_ROOT", ".")
     println("NeurX S entry: generate_training_data")

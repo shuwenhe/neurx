@@ -1,6 +1,7 @@
 package neurx.agent.workspace_search
 use neurx.agent.workspace_tools.{agent_workspace_read, agent_workspace_text_contains, agent_workspace_clip, agent_workspace_root}
 use neurx.runtime.io.{runtime_run_command_output, runtime_shell_escape}
+
 struct agent_search_hit {
     string path
     string snippet

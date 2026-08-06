@@ -1,4 +1,5 @@
 package neurx.session.session
+
 struct agent_session_turn {
     int index
     string role

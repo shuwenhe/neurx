@@ -1,4 +1,5 @@
 package neurx.posttrain.training.gradient_utils
+
 struct global_gradient_stats {
     float total_norm
     float clip_coefficient

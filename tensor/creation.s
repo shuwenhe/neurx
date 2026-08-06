@@ -1,4 +1,5 @@
 package neurx.creation
+
 struct tensor {
     []float data
     []int shape

@@ -8,6 +8,7 @@ enum reasoning_strategy {
     REFLECTION = 4
     MULTI_PART = 5
 }
+
 struct cot_config {
     reasoning_strategy strategy
     int max_steps

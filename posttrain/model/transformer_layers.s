@@ -1,5 +1,6 @@
 package neurx.posttrain.model.transformer_layers
 use neurx.posttrain.model.model_loader.{fill_model_tensor}
+
 struct embedding_layer {
     []float weight
     int vocab_size

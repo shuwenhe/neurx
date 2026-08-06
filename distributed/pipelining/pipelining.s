@@ -1,5 +1,6 @@
 package neurx.distributed.pipelining
 use neurx.strings
+
 struct pipeline_stage {
     string name
     int stage_index

@@ -1,5 +1,6 @@
 package neurx.posttrain.monitoring.performance_monitor
 use std.io.eprintln
+
 struct performance_metric {
     string metric_name
     float value
@@ -126,7 +127,7 @@ func perf_step(training_performance_state state, int step, float loss, int sampl
         state = perf_update_throughput(state, samples, tokens, int(elapsed_secs))
     }
     if state.total_time_seconds > 0 && state.throughput.tokens_per_second > 0.0 {
-        float theoretical_max_tokens_per_sec = 1000.0  
+        float theoretical_max_tokens_per_sec = 1000.0
         state.training_efficiency_percent = (state.throughput.tokens_per_second / theoretical_max_tokens_per_sec) * 100.0
     }
     state

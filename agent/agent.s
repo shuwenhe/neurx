@@ -7,6 +7,7 @@ use neurx.agent.tool_registry
 use neurx.executor.executor
 use neurx.agent.trace
 use neurx.registry.skill_registry
+
 func new_default_agent(string goal) agent_runtime_state {
     new_agent_runtime_state(goal, "analyze", 8)
 }

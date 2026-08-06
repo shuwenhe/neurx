@@ -5,6 +5,7 @@ use neurx.compile.pass_manager
 use neurx.compile.lowering
 use neurx.compile.executor
 use neurx.compile.cache
+
 struct compile_pipeline_state {
     compile_state state
     ir_graph_state graph

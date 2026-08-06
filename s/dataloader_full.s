@@ -1,4 +1,5 @@
 package neurx.data
+
 struct dataloader_config {
     int batch_size
     bool shuffle

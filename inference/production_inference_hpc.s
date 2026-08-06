@@ -175,7 +175,7 @@ func main() {
             continue
         }
         session_turns = session_turns + 1
-        int prompt_token_count = len(user_input) / 4 + 2  
+        int prompt_token_count = len(user_input) / 4 + 2
         total_prompt_tokens = total_prompt_tokens + prompt_token_count
         print("")
         print("🔄 [Inference Pipeline Execution]")
@@ -206,8 +206,8 @@ func main() {
         print("  STEP 6: Token Decoding")
         print("    └─ Token → Text: ✓")
         print("")
-        int tokens_generated = 42  
-        int inference_time = int(float(tokens_generated) * 2.1)  
+        int tokens_generated = 42
+        int inference_time = int(float(tokens_generated) * 2.1)
         total_generated_tokens = total_generated_tokens + tokens_generated
         total_time_ms = total_time_ms + inference_time
         float throughput = calculate_throughput(tokens_generated, inference_time)

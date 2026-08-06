@@ -1,4 +1,5 @@
 package neurx.cuda
+
 struct softmax_config {
     int rows
     int cols

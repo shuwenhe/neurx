@@ -44,6 +44,7 @@ type alert struct {
     threshold               float64
     message                 string
 }
+
 func (monitor *performance_monitor) collect_metrics() performance_metrics {
     sample_idx := float64(len(monitor.metrics_history))
     perplexity := 100.0 / (float64(len(monitor.metrics_history)/100) + 1.0)

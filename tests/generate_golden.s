@@ -1,4 +1,5 @@
 package neurx.tests.golden
+
 struct golden_config {
     float lr
     float beta1

@@ -1,4 +1,5 @@
 package neurx.model.robotics.eval
+
 struct robotics_eval_state {
     string metric_name
     float score

@@ -1,4 +1,5 @@
 package neurx.distributed.fault_tolerance
+
 struct checkpoint_state {
     int step_number
     int timestamp_ms

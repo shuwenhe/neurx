@@ -1,5 +1,6 @@
 package main
 use std.io.println
+
 func merge_lora_adapters(string base_model_dir, string adapter_dir, string out_dir) int {
     println("Merging PEFT-compatible LoRA adapters:")
     println("  base model  : " + base_model_dir)

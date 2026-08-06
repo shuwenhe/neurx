@@ -13,6 +13,7 @@ int PKT_ACK          = 1
 int PKT_SYN          = 2
 int PKT_FIN          = 3
 int PKT_CONTROL      = 4
+
 struct net_addr {
     string host
     int    port

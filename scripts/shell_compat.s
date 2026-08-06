@@ -7,6 +7,7 @@ import (
     "strings"
     "time"
 )
+
 func mkdir(path string) error {
     err := os.MkdirAll(path, 0755)
     if err != nil {

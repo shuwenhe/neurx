@@ -1,5 +1,6 @@
 package neurx.posttrain.trainer
 use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file}
+
 struct reference_trainer {
     trainer_config config
     trainer_state state

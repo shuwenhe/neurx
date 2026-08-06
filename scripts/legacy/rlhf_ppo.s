@@ -97,6 +97,7 @@ type optimizer struct {
     weight_decay        float64
     grad_accumulation   int
 }
+
 func (trainer *ppotrainer) collect_trajectories(num_trajectories int) []trajectory {
     fmt.Println("[PPO] Collecting trajectories...")
     trajectories := []trajectory{}

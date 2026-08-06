@@ -53,6 +53,7 @@ type experiment_manager struct {
     comparison_history  []experiment_comparison
     best_experiment     string
 }
+
 func (manager *experiment_manager) initialize() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Industrial Experiment Management System              ║")

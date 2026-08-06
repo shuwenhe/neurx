@@ -1,6 +1,7 @@
 package neurx.optimizer.asgd
 use neurx.tensor.tensor
 use neurx.tensor.new
+
 struct asgd_optimizer {
     float lr
     float lambd

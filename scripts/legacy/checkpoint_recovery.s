@@ -62,6 +62,7 @@ type checkpoint_storage struct {
     compression_enabled bool
     replication_factor  int
 }
+
 func (manager *checkpoint_manager) initialize() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Complete checkpoint Recovery System                  ║")

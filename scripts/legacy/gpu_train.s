@@ -25,6 +25,7 @@ extern func cuda_error_loss_kernel(int64 pred, int64 target, int size) float
 extern func cuda_sgd_update_kernel(int64 weights, int64 grads, float lr, int size) int
 extern func cuda_relu_forward(int64 out, int64 in, int size) int
 extern func cuda_relu_backward(int64 grad_in, int64 grad_out, int64 in, int size) int
+
 struct gpu_context {
     int64 cublas_handle
     bool initialized

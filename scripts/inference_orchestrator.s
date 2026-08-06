@@ -12,6 +12,7 @@ enum inference_backend {
     deep_speed,
     native,
 }
+
 struct inference_config {
     model_path    string
     backend      inference_backend
@@ -228,6 +229,7 @@ func (i *inference_orchestrator) is_server_ready() bool {
     result := exec_command("curl", "-s", fmt.Sprintf("http:
     return result.ExitCode == 0
 }
+
 func (i *inference_orchestrator) log_config() {
     config := fmt.Sprintf(`Inference Configuration
 model: %s
@@ -248,6 +250,7 @@ Log Directory: %s
     logFile := filepath.Join(i.config.logDir, "inference_config.txt")
     write_file(logFile, config)
 }
+
 func backend_string(backend InferenceBackend) string {
     switch backend {
     case InferenceBackend.ONNX:
@@ -264,6 +267,7 @@ func backend_string(backend InferenceBackend) string {
         return "native"
     }
 }
+
 func run_inference_server(modelPath string) error {
     orchestrator, err := new_inference_orchestrator(modelPath)
     if err != nil {
@@ -274,6 +278,7 @@ func run_inference_server(modelPath string) error {
     }
     return orchestrator.start_server()
 }
+
 func run_interactive_inference(modelPath string) error {
     orchestrator, err := new_inference_orchestrator(modelPath)
     if err != nil {
@@ -284,6 +289,7 @@ func run_interactive_inference(modelPath string) error {
     }
     return orchestrator.interactive()
 }
+
 func run_chat_interface(modelPath string) error {
     orchestrator, err := new_inference_orchestrator(modelPath)
     if err != nil {
@@ -294,6 +300,7 @@ func run_chat_interface(modelPath string) error {
     }
     return orchestrator.chat()
 }
+
 func run_inference_benchmark(modelPath string) error {
     orchestrator, err := new_inference_orchestrator(modelPath)
     if err != nil {

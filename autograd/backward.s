@@ -8,6 +8,7 @@ use neurx.autograd.tensor
 use neurx.strings
 use neurx.tensor.tensor
 use neurx.strings
+
 struct backward_state {
     string name
     bool ready

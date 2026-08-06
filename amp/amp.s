@@ -1,4 +1,5 @@
 package neurx.amp
+
 struct amp_runtime_config {
     string dtype
     bool enabled

@@ -1,5 +1,6 @@
 package main
 use neurx.stats
+
 func assert_true(bool value, string name) {
     if value {
         println("PASS " + name)

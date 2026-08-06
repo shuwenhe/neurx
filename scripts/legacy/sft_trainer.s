@@ -54,6 +54,7 @@ type sft_metric struct {
     float64 throughput
     int64 timestamp
 }
+
 func (trainer *sft_trainer) load_instruction_data(data_path string) {
     fmt.Printf("[SFT] Loading instruction data from %s\n", data_path)
     categories := []string{"math", "writing", "coding", "qa", "reasoning"}

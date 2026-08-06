@@ -1,5 +1,6 @@
 package neurx.posttrain.data.medical_data_loader
 use neurx.posttrain.model.model_loader.{fill_model_tensor}
+
 struct medical_sample {
     string question
     string answer

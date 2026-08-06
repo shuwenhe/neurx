@@ -1,5 +1,6 @@
 package neurx.posttrain.optimization.prefix_grouping
 use neurx.tensor
+
 struct prefix_group {
     []int token_ids
     []int sample_indices

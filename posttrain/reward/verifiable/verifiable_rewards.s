@@ -1,5 +1,6 @@
 package neurx.posttrain.reward.verifiable
 use neurx.tensor.{tensor}
+
 struct math_problem {
     string question
     string answer
