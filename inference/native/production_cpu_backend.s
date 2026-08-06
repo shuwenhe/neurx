@@ -203,7 +203,7 @@ func main() {
     // Create ready file to signal startup
     string ready_file = runtime_env_get("NEURX_S_READY_FILE", "")
     if len(ready_file) > 0 {
-        _ = runtime_run_command("echo ready > " + shell_escape(ready_file))
+        _ = runtime_run_command("touch " + ready_file)
     }
     
     // Keep process alive indefinitely
