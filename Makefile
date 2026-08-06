@@ -1084,11 +1084,6 @@ build-hf-posttrain-chat-s: build-real-inference-s build-s-ir-runner
 hf-posttrain-chat: build-hf-posttrain-chat-s
 	@'$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/hf_posttrain_chat/hf_posttrain_chat.ir'
 
-# ============================================================================
-# High-Performance Production Inference Engine (Pure S Language)
-# 5-10x faster than Python implementation
-# ============================================================================
-
 build-production-inference-engine-s: build-s-ir-runner
 	@mkdir -p artifacts/build/production_inference_engine
 	@echo "🚀 Compiling NeurX High-Performance Production Inference Engine (S)..."
@@ -1111,7 +1106,6 @@ build-production-hpc-chat-s: build-s-ir-runner
 	@echo "✓ HPC Chat Interface compiled successfully"
 	@echo "  File: artifacts/build/production_hpc_chat/production_hpc_chat.ir"
 
-# Run high-performance production inference
 production-inference: build-production-inference-engine-s
 	@echo ""
 	@echo "╔════════════════════════════════════════════════════════════════╗"
@@ -1125,7 +1119,6 @@ production-inference: build-production-inference-engine-s
 		NEURX_MAX_TOKENS=128 \
 		'$(S_RUNNER_BIN)' artifacts/build/production_inference_engine/production_inference_engine.ir
 
-# Run interactive chat with production inference (HPC optimized)
 production-chat: build-production-hpc-chat-s
 	@echo ""
 	@echo "╔════════════════════════════════════════════════════════════════╗"
@@ -1137,7 +1130,6 @@ production-chat: build-production-hpc-chat-s
 		NEURX_TOKENIZER_PATH='$(CHAT_MODEL_PATH)/../model/Qwen2.5-0.5B-Instruct/tokenizer.json' \
 		'$(S_RUNNER_BIN)' artifacts/build/production_hpc_chat/production_hpc_chat.ir
 
-# Benchmark production inference engine
 benchmark-production-inference: build-production-inference-engine-s
 	@echo ""
 	@echo "🔬 Benchmarking Production Inference Engine..."
