@@ -11,19 +11,19 @@ void print_logits(const char* name, const std::vector<float>& logits) {
 int main(int argc, char** argv) {
   if (argc < 4) return 2;
   int devices = 0;
-  if (cudaGetDeviceCount(&devices) != cudaSuccess || devices == 0) {
+  if (cuda_get_device_count(&devices) != cuda_success || devices == 0) {
     std::puts("SKIP no-CUDA-device");
     return 0;
   }
   try {
     std::vector<int32_t> ids;
     for (int index = 2; index < argc; ++index) ids.push_back(std::stoi(argv[index]));
-    neurx::cuda::HfDecoderCuda model(argv[1]);
-    neurx::cuda::HfCudaKvCache full_cache;
+    neurx::cuda::hf_decoder_cuda model(argv[1]);
+    neurx::cuda::hf_cuda_kv_cache full_cache;
     const auto full = model.prefill(ids, &full_cache);
     const int32_t last = ids.back();
     ids.pop_back();
-    neurx::cuda::HfCudaKvCache incremental_cache;
+    neurx::cuda::hf_cuda_kv_cache incremental_cache;
     (void)model.prefill(ids, &incremental_cache);
     const auto incremental = model.decode(last, &incremental_cache);
     print_logits("full", full);

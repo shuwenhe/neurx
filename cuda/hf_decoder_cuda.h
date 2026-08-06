@@ -5,36 +5,36 @@
 #include <string>
 #include <vector>
 namespace neurx::cuda {
-class HfDecoderCuda;
-class HfCudaKvCache {
+class hf_decoder_cuda;
+class hf_cuda_kv_cache {
  public:
-  HfCudaKvCache();
-  ~HfCudaKvCache();
-  HfCudaKvCache(HfCudaKvCache&&) noexcept;
-  HfCudaKvCache& operator=(HfCudaKvCache&&) noexcept;
-  HfCudaKvCache(const HfCudaKvCache&) = delete;
-  HfCudaKvCache& operator=(const HfCudaKvCache&) = delete;
+  hf_cuda_kv_cache();
+  ~hf_cuda_kv_cache();
+  hf_cuda_kv_cache(hf_cuda_kv_cache&&) noexcept;
+  hf_cuda_kv_cache& operator=(hf_cuda_kv_cache&&) noexcept;
+  hf_cuda_kv_cache(const hf_cuda_kv_cache&) = delete;
+  hf_cuda_kv_cache& operator=(const hf_cuda_kv_cache&) = delete;
   std::size_t length() const;
   void clear();
  private:
-  struct State;
-  std::unique_ptr<State> state_;
-  friend class HfDecoderCuda;
+  struct state;
+  std::unique_ptr<state> state_;
+  friend class hf_decoder_cuda;
 };
-class HfDecoderCuda {
+class hf_decoder_cuda {
  public:
-  explicit HfDecoderCuda(const std::string& model_directory, int device = 0);
-  ~HfDecoderCuda();
-  HfDecoderCuda(HfDecoderCuda&&) noexcept;
-  HfDecoderCuda& operator=(HfDecoderCuda&&) noexcept;
-  HfDecoderCuda(const HfDecoderCuda&) = delete;
-  HfDecoderCuda& operator=(const HfDecoderCuda&) = delete;
-  const runtime::model::HfConfig& config() const;
-  std::vector<float> prefill(const std::vector<int32_t>& token_ids, HfCudaKvCache* cache);
-  std::vector<float> decode(int32_t token_id, HfCudaKvCache* cache);
+  explicit hf_decoder_cuda(const std::string& model_directory, int device = 0);
+  ~hf_decoder_cuda();
+  hf_decoder_cuda(hf_decoder_cuda&&) noexcept;
+  hf_decoder_cuda& operator=(hf_decoder_cuda&&) noexcept;
+  hf_decoder_cuda(const hf_decoder_cuda&) = delete;
+  hf_decoder_cuda& operator=(const hf_decoder_cuda&) = delete;
+  const runtime::model::hf_config& config() const;
+  std::vector<float> prefill(const std::vector<int32_t>& token_ids, hf_cuda_kv_cache* cache);
+  std::vector<float> decode(int32_t token_id, hf_cuda_kv_cache* cache);
   static int32_t greedy(const std::vector<float>& logits);
  private:
-  struct Impl;
-  std::unique_ptr<Impl> impl_;
+  struct impl;
+  std::unique_ptr<impl> impl_;
 };
 }

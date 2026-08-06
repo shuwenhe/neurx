@@ -5,10 +5,10 @@
 #include <unordered_map>
 #include <vector>
 namespace neurx::runtime::model {
-class BpeTokenizer {
+class bpe_tokenizer {
  public:
-  static BpeTokenizer from_tokenizer_json(const std::string& path);
-  static BpeTokenizer from_directory(const std::string& directory);
+  static bpe_tokenizer from_tokenizer_json(const std::string& path);
+  static bpe_tokenizer from_directory(const std::string& directory);
   std::vector<int32_t> encode(const std::string& text, bool allow_special = true) const;
   std::string decode(const std::vector<int32_t>& ids, bool skip_special = false) const;
   std::size_t vocab_size() const { return id_to_token_.size(); }

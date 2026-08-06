@@ -6,9 +6,9 @@
 #include <string>
 #include <vector>
 namespace neurx::runtime::model {
-enum class ModelArchitecture { llama, base_model };
-struct HfConfig {
-  ModelArchitecture architecture = ModelArchitecture::llama;
+enum class model_architecture { llama, base_model };
+struct hf_config {
+  model_architecture architecture = model_architecture::llama;
   std::string model_type;
   int64_t vocab_size = 0;
   int64_t hidden_size = 0;
@@ -25,28 +25,28 @@ struct HfConfig {
   bool tie_word_embeddings = false;
   int64_t head_dim() const;
   void validate() const;
-  static HfConfig from_file(const std::string& path);
+  static hf_config from_file(const std::string& path);
 };
-struct WeightSpec {
+struct weight_spec {
   std::string name;
   std::vector<int64_t> shape;
   bool optional = false;
 };
-std::vector<WeightSpec> expected_weights(const HfConfig& config);
-class HfWeightStore {
+std::vector<weight_spec> expected_weights(const hf_config& config);
+class hf_weight_store {
  public:
-  static HfWeightStore open(const std::string& model_directory);
+  static hf_weight_store open(const std::string& model_directory);
   bool contains(const std::string& name) const;
-  const SafeTensorInfo& info(const std::string& name) const;
-  native::Tensor load(const std::string& name,
-                      native::Device device = {native::DeviceType::cpu, 0}) const;
-  void validate_architecture(const HfConfig& config) const;
+  const safe_tensor_info& info(const std::string& name) const;
+  native::tensor load(const std::string& name,
+                      native::device device = {native::device_type::cpu, 0}) const;
+  void validate_architecture(const hf_config& config) const;
   std::size_t size() const { return locations_.size(); }
  private:
-  struct Location {
-    std::shared_ptr<SafeTensorFile> file;
-    SafeTensorInfo info;
+  struct location {
+    std::shared_ptr<safe_tensor_file> file;
+    safe_tensor_info info;
   };
-  std::map<std::string, Location> locations_;
+  std::map<std::string, location> locations_;
 };
 }

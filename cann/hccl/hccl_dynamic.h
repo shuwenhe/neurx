@@ -3,14 +3,14 @@
 #include <cstdint>
 #include <dlfcn.h>
 namespace neurx::hccl {
-using Result = int;
-using Comm = void*;
-using Stream = void*;
-constexpr Result kSuccess = 0;
-constexpr int kFloat32 = 0;
-constexpr int kFloat16 = 1;
-constexpr int kBfloat16 = 9;
-constexpr int kSum = 0;
+using result = int;
+using comm = void*;
+using stream = void*;
+constexpr result k_success = 0;
+constexpr int k_float32 = 0;
+constexpr int k_float16 = 1;
+constexpr int k_bfloat16 = 9;
+constexpr int k_sum = 0;
 inline void* library() {
   static void* handle = [] {
     void* loaded = dlopen("libhccl.so", RTLD_NOW | RTLD_LOCAL);
@@ -19,32 +19,32 @@ inline void* library() {
   }();
   return handle;
 }
-template <typename Function>
-inline Function symbol(const char* name) {
-  return library() ? reinterpret_cast<Function>(dlsym(library(), name)) : nullptr;
+template <typename function>
+inline function symbol(const char* name) {
+  return library() ? reinterpret_cast<function>(dlsym(library(), name)) : nullptr;
 }
 inline bool available() { return library() != nullptr; }
-inline Result all_reduce(const void* send, void* receive, uint64_t count,
-                         int dtype, int operation, Comm comm, Stream stream) {
-  using Fn = Result (*)(const void*, void*, uint64_t, int, int, Comm, Stream);
-  auto fn = symbol<Fn>("HcclAllReduce");
+inline result all_reduce(const void* send, void* receive, uint64_t count,
+                         int dtype, int operation, comm comm, stream stream) {
+  using fn = result (*)(const void*, void*, uint64_t, int, int, comm, stream);
+  auto fn = symbol<fn>("HcclAllReduce");
   return fn ? fn(send, receive, count, dtype, operation, comm, stream) : -1;
 }
-inline Result all_gather(const void* send, void* receive, uint64_t count,
-                         int dtype, Comm comm, Stream stream) {
-  using Fn = Result (*)(const void*, void*, uint64_t, int, Comm, Stream);
-  auto fn = symbol<Fn>("HcclAllGather");
+inline result all_gather(const void* send, void* receive, uint64_t count,
+                         int dtype, comm comm, stream stream) {
+  using fn = result (*)(const void*, void*, uint64_t, int, comm, stream);
+  auto fn = symbol<fn>("HcclAllGather");
   return fn ? fn(send, receive, count, dtype, comm, stream) : -1;
 }
-inline Result reduce_scatter(const void* send, void* receive, uint64_t count,
-                             int dtype, int operation, Comm comm, Stream stream) {
-  using Fn = Result (*)(const void*, void*, uint64_t, int, int, Comm, Stream);
-  auto fn = symbol<Fn>("HcclReduceScatter");
+inline result reduce_scatter(const void* send, void* receive, uint64_t count,
+                             int dtype, int operation, comm comm, stream stream) {
+  using fn = result (*)(const void*, void*, uint64_t, int, int, comm, stream);
+  auto fn = symbol<fn>("HcclReduceScatter");
   return fn ? fn(send, receive, count, dtype, operation, comm, stream) : -1;
 }
-inline Result destroy(Comm comm) {
-  using Fn = Result (*)(Comm);
-  auto fn = symbol<Fn>("HcclCommDestroy");
+inline result destroy(comm comm) {
+  using fn = result (*)(comm);
+  auto fn = symbol<fn>("HcclCommDestroy");
   return fn ? fn(comm) : -1;
 }
 }

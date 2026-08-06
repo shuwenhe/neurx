@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 namespace neurx::runtime::model {
-struct DecoderLayerTrace {
+struct decoder_layer_trace {
   std::vector<float> q;
   std::vector<float> k;
   std::vector<float> v;
@@ -14,50 +14,50 @@ struct DecoderLayerTrace {
   std::vector<float> attention_output;
   std::vector<float> hidden;
 };
-struct DecoderTrace {
+struct decoder_trace {
   std::vector<float> embedding;
-  std::vector<DecoderLayerTrace> layers;
+  std::vector<decoder_layer_trace> layers;
   std::vector<float> final_hidden;
   std::vector<float> logits;
 };
-struct DecoderLayerKvCache {
+struct decoder_layer_kv_cache {
   std::vector<float> key;
   std::vector<float> value;
 };
-struct DecoderKvCache {
+struct decoder_kv_cache {
   std::size_t length = 0;
-  std::vector<DecoderLayerKvCache> layers;
+  std::vector<decoder_layer_kv_cache> layers;
   void clear() {
     length = 0;
     layers.clear();
   }
 };
-class DecoderCpuModel {
+class decoder_cpu_model {
  public:
-  static DecoderCpuModel load(const std::string& directory);
-  DecoderTrace forward(const std::vector<int32_t>& token_ids) const;
-  DecoderTrace prefill(const std::vector<int32_t>& token_ids, DecoderKvCache* cache) const;
-  DecoderTrace decode(int32_t token_id, DecoderKvCache* cache) const;
-  const HfConfig& config() const { return config_; }
+  static decoder_cpu_model load(const std::string& directory);
+  decoder_trace forward(const std::vector<int32_t>& token_ids) const;
+  decoder_trace prefill(const std::vector<int32_t>& token_ids, decoder_kv_cache* cache) const;
+  decoder_trace decode(int32_t token_id, decoder_kv_cache* cache) const;
+  const hf_config& config() const { return config_; }
  private:
-  struct Linear {
+  struct linear {
     std::size_t output = 0;
     std::size_t input = 0;
     std::vector<float> weight;
     std::vector<float> bias;
   };
-  struct Layer {
+  struct layer {
     std::vector<float> input_norm;
-    Linear q, k, v, o;
+    linear q, k, v, o;
     std::vector<float> post_norm;
-    Linear gate, up, down;
+    linear gate, up, down;
   };
-  HfConfig config_;
+  hf_config config_;
   std::vector<float> embedding_;
-  std::vector<Layer> layers_;
+  std::vector<layer> layers_;
   std::vector<float> final_norm_;
   std::vector<float> lm_head_;
-  DecoderTrace forward_cached(const std::vector<int32_t>& token_ids,
-                              DecoderKvCache* cache) const;
+  decoder_trace forward_cached(const std::vector<int32_t>& token_ids,
+                              decoder_kv_cache* cache) const;
 };
 }

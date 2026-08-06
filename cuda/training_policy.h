@@ -4,33 +4,33 @@
 #include <cstdint>
 #include <string>
 namespace neurx_training {
-enum class LrSchedule {
-    Constant,
-    Linear,
-    Cosine,
+enum class lr_schedule {
+    constant,
+    linear,
+    cosine,
 };
-inline bool parse_lr_schedule(const std::string& name, LrSchedule& schedule) {
+inline bool parse_lr_schedule(const std::string& name, lr_schedule& schedule) {
     if (name == "constant") {
-        schedule = LrSchedule::Constant;
+        schedule = lr_schedule::constant;
         return true;
     }
     if (name == "linear") {
-        schedule = LrSchedule::Linear;
+        schedule = lr_schedule::linear;
         return true;
     }
     if (name == "cosine") {
-        schedule = LrSchedule::Cosine;
+        schedule = lr_schedule::cosine;
         return true;
     }
     return false;
 }
-inline const char* lr_schedule_name(LrSchedule schedule) {
+inline const char* lr_schedule_name(lr_schedule schedule) {
     switch (schedule) {
-        case LrSchedule::Constant:
+        case lr_schedule::constant:
             return "constant";
-        case LrSchedule::Linear:
+        case lr_schedule::linear:
             return "linear";
-        case LrSchedule::Cosine:
+        case lr_schedule::cosine:
             return "cosine";
     }
     return "unknown";
@@ -40,9 +40,9 @@ struct lr_config {
     double min_lr = 2e-5;
     std::uint64_t warmup_steps = 0;
     std::uint64_t total_steps = 1;
-    LrSchedule schedule = LrSchedule::Cosine;
+    lr_schedule schedule = lr_schedule::cosine;
 };
-using LrConfig = lr_config;
+using lr_config = lr_config;
 inline double learning_rate(const lr_config& config,
                             std::uint64_t optimizer_step) {
     if (!(config.peak_lr >= 0.0) || !(config.min_lr >= 0.0) ||
@@ -55,7 +55,7 @@ inline double learning_rate(const lr_config& config,
                (static_cast<double>(optimizer_step) /
                 static_cast<double>(config.warmup_steps));
     }
-    if (config.schedule == LrSchedule::Constant ||
+    if (config.schedule == lr_schedule::constant ||
         config.total_steps <= config.warmup_steps) {
         return config.peak_lr;
     }
@@ -65,9 +65,9 @@ inline double learning_rate(const lr_config& config,
         static_cast<double>(bounded_step - config.warmup_steps) /
         static_cast<double>(config.total_steps - config.warmup_steps);
     double multiplier = 1.0;
-    if (config.schedule == LrSchedule::Linear) {
+    if (config.schedule == lr_schedule::linear) {
         multiplier = 1.0 - progress;
-    } else if (config.schedule == LrSchedule::Cosine) {
+    } else if (config.schedule == lr_schedule::cosine) {
         constexpr double pi = 3.14159265358979323846;
         multiplier = 0.5 * (1.0 + std::cos(pi * progress));
     }
@@ -78,14 +78,14 @@ struct gradient_policy {
     double max_norm = 1.0;
     double epsilon = 1e-6;
 };
-using GradientPolicy = gradient_policy;
+using gradient_policy = gradient_policy;
 struct gradient_decision {
     bool finite = false;
     bool clipped = false;
     double norm = 0.0;
     double scale = 0.0;
 };
-using GradientDecision = gradient_decision;
+using gradient_decision = gradient_decision;
 inline gradient_decision gradient_decision(double squared_norm,
                                           const gradient_policy& policy) {
     struct gradient_decision result;

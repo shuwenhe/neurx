@@ -30,11 +30,11 @@ struct device_batch {
   void* sampled_token_ids = nullptr;
   bool device_sampling = false;
 };
-using KernelLauncher = std::function<adapter_status(const device_batch&)>;
-class BackendAdapter {
+using kernel_launcher = std::function<adapter_status(const device_batch&)>;
+class backend_adapter {
  public:
-  virtual ~BackendAdapter() = default;
-  virtual Backend kind() const = 0;
+  virtual ~backend_adapter() = default;
+  virtual backend kind() const = 0;
   virtual const char* name() const = 0;
   virtual adapter_status initialize(int device_id) = 0;
   virtual bool ready() const = 0;

@@ -2,15 +2,15 @@
 #include <cuda_runtime.h>
 #include <dlfcn.h>
 #include <cstddef>
-using ncclResult_t = int;
-using ncclComm_t = void*;
-using ncclDataType_t = int;
-using ncclRedOp_t = int;
-struct ncclUniqueId { char internal[128]; };
-static constexpr ncclResult_t ncclSuccess = 0;
-static constexpr ncclDataType_t ncclFloat = 7;
-static constexpr ncclDataType_t ncclDouble = 8;
-static constexpr ncclRedOp_t ncclSum = 0;
+using nccl_result_t = int;
+using nccl_comm_t = void*;
+using nccl_data_type_t = int;
+using nccl_red_op_t = int;
+struct nccl_unique_id { char internal[128]; };
+static constexpr nccl_result_t nccl_success = 0;
+static constexpr nccl_data_type_t nccl_float = 7;
+static constexpr nccl_data_type_t nccl_double = 8;
+static constexpr nccl_red_op_t nccl_sum = 0;
 inline void* neurx_nccl_symbol(const char* name) {
   static void* handle = nullptr;
   if (!handle) {
@@ -19,27 +19,27 @@ inline void* neurx_nccl_symbol(const char* name) {
   }
   return handle ? dlsym(handle, name) : nullptr;
 }
-inline const char* ncclGetErrorString(ncclResult_t) { return "NCCL runtime unavailable or call failed"; }
-inline ncclResult_t ncclGetUniqueId(ncclUniqueId* id) {
-  using Fn = ncclResult_t (*)(ncclUniqueId*);
-  auto fn = reinterpret_cast<Fn>(neurx_nccl_symbol("ncclGetUniqueId"));
+inline const char* nccl_get_error_string(nccl_result_t) { return "NCCL runtime unavailable or call failed"; }
+inline nccl_result_t nccl_get_unique_id(nccl_unique_id* id) {
+  using fn = nccl_result_t (*)(nccl_unique_id*);
+  auto fn = reinterpret_cast<fn>(neurx_nccl_symbol("ncclGetUniqueId"));
   return fn ? fn(id) : 1;
 }
-inline ncclResult_t ncclCommInitRank(ncclComm_t* comm, int nranks, ncclUniqueId id, int rank) {
-  using Fn = ncclResult_t (*)(ncclComm_t*, int, ncclUniqueId, int);
-  auto fn = reinterpret_cast<Fn>(neurx_nccl_symbol("ncclCommInitRank"));
+inline nccl_result_t nccl_comm_init_rank(nccl_comm_t* comm, int nranks, nccl_unique_id id, int rank) {
+  using fn = nccl_result_t (*)(nccl_comm_t*, int, nccl_unique_id, int);
+  auto fn = reinterpret_cast<fn>(neurx_nccl_symbol("ncclCommInitRank"));
   return fn ? fn(comm, nranks, id, rank) : 1;
 }
-inline ncclResult_t ncclAllReduce(const void* send, void* recv, std::size_t count,
-                                  ncclDataType_t dtype, ncclRedOp_t op,
-                                  ncclComm_t comm, cudaStream_t stream) {
-  using Fn = ncclResult_t (*)(const void*, void*, std::size_t, ncclDataType_t,
-                              ncclRedOp_t, ncclComm_t, cudaStream_t);
-  auto fn = reinterpret_cast<Fn>(neurx_nccl_symbol("ncclAllReduce"));
+inline nccl_result_t nccl_all_reduce(const void* send, void* recv, std::size_t count,
+                                  nccl_data_type_t dtype, nccl_red_op_t op,
+                                  nccl_comm_t comm, cuda_stream_t stream) {
+  using fn = nccl_result_t (*)(const void*, void*, std::size_t, nccl_data_type_t,
+                              nccl_red_op_t, nccl_comm_t, cuda_stream_t);
+  auto fn = reinterpret_cast<fn>(neurx_nccl_symbol("ncclAllReduce"));
   return fn ? fn(send, recv, count, dtype, op, comm, stream) : 1;
 }
-inline ncclResult_t ncclCommDestroy(ncclComm_t comm) {
-  using Fn = ncclResult_t (*)(ncclComm_t);
-  auto fn = reinterpret_cast<Fn>(neurx_nccl_symbol("ncclCommDestroy"));
+inline nccl_result_t nccl_comm_destroy(nccl_comm_t comm) {
+  using fn = nccl_result_t (*)(nccl_comm_t);
+  auto fn = reinterpret_cast<fn>(neurx_nccl_symbol("ncclCommDestroy"));
   return fn ? fn(comm) : 1;
 }

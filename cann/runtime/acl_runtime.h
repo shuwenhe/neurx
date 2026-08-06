@@ -10,34 +10,34 @@ struct status {
   static status success() { return {true, {}}; }
   static status failure(std::string message) { return {false, std::move(message)}; }
 };
-class DeviceSession {
+class device_session {
  public:
-  DeviceSession() = default;
-  ~DeviceSession();
-  DeviceSession(const DeviceSession&) = delete;
-  DeviceSession& operator=(const DeviceSession&) = delete;
+  device_session() = default;
+  ~device_session();
+  device_session(const device_session&) = delete;
+  device_session& operator=(const device_session&) = delete;
   status initialize(int device_id);
   void shutdown();
   bool ready() const { return ready_; }
   int device_id() const { return device_id_; }
-  Context context() const { return context_; }
-  Stream stream() const { return stream_; }
+  context context() const { return context_; }
+  stream stream() const { return stream_; }
   status synchronize() const;
  private:
   int device_id_ = -1;
-  Context context_ = nullptr;
-  Stream stream_ = nullptr;
+  context context_ = nullptr;
+  stream stream_ = nullptr;
   bool acl_initialized_ = false;
   bool ready_ = false;
 };
-class DeviceBuffer {
+class device_buffer {
  public:
-  DeviceBuffer() = default;
-  ~DeviceBuffer();
-  DeviceBuffer(const DeviceBuffer&) = delete;
-  DeviceBuffer& operator=(const DeviceBuffer&) = delete;
-  DeviceBuffer(DeviceBuffer&& other) noexcept;
-  DeviceBuffer& operator=(DeviceBuffer&& other) noexcept;
+  device_buffer() = default;
+  ~device_buffer();
+  device_buffer(const device_buffer&) = delete;
+  device_buffer& operator=(const device_buffer&) = delete;
+  device_buffer(device_buffer&& other) noexcept;
+  device_buffer& operator=(device_buffer&& other) noexcept;
   status allocate(std::size_t bytes);
   void reset();
   void* data() const { return data_; }
@@ -46,12 +46,12 @@ class DeviceBuffer {
   void* data_ = nullptr;
   std::size_t size_ = 0;
 };
-class HostBuffer {
+class host_buffer {
  public:
-  HostBuffer() = default;
-  ~HostBuffer();
-  HostBuffer(const HostBuffer&) = delete;
-  HostBuffer& operator=(const HostBuffer&) = delete;
+  host_buffer() = default;
+  ~host_buffer();
+  host_buffer(const host_buffer&) = delete;
+  host_buffer& operator=(const host_buffer&) = delete;
   status allocate(std::size_t bytes);
   void reset();
   void* data() const { return data_; }

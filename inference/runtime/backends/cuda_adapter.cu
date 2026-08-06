@@ -1,31 +1,31 @@
 #include "cuda_adapter.h"
 #include <cuda_runtime.h>
 namespace neurx::inference {
-CudaAdapter::CudaAdapter(KernelLauncher prefill, KernelLauncher decode)
+cuda_adapter::cuda_adapter(kernel_launcher prefill, kernel_launcher decode)
     : prefill_(prefill), decode_(decode) {}
-CudaAdapter::~CudaAdapter() {
-  if (stream_) cudaStreamDestroy(static_cast<cudaStream_t>(stream_));
+cuda_adapter::~cuda_adapter() {
+  if (stream_) cuda_stream_destroy(static_cast<cuda_stream_t>(stream_));
 }
-adapter_status CudaAdapter::initialize(int device_id) {
-  if (cudaSetDevice(device_id) != cudaSuccess) return adapter_status::failure("cudaSetDevice failed");
-  cudaStream_t stream = nullptr;
-  if (cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking) != cudaSuccess)
+adapter_status cuda_adapter::initialize(int device_id) {
+  if (cuda_set_device(device_id) != cuda_success) return adapter_status::failure("cudaSetDevice failed");
+  cuda_stream_t stream = nullptr;
+  if (cuda_stream_create_with_flags(&stream, cuda_stream_non_blocking) != cuda_success)
     return adapter_status::failure("CUDA non-blocking stream creation failed");
   stream_ = stream;
   ready_ = true;
   return adapter_status::success();
 }
-adapter_status CudaAdapter::execute(const device_batch& batch) {
+adapter_status cuda_adapter::execute(const device_batch& batch) {
   if (!ready_) return adapter_status::failure("CUDA adapter is not initialized");
   device_batch launch = batch;
   if (!launch.stream) launch.stream = stream_;
-  KernelLauncher launcher = launch.schedule.phase == Phase::prefill ? prefill_ : decode_;
+  kernel_launcher launcher = launch.schedule.phase == phase::prefill ? prefill_ : decode_;
   if (!launcher) return adapter_status::failure("CUDA kernel launcher is not bound");
   return launcher(launch);
 }
-adapter_status CudaAdapter::synchronize() {
+adapter_status cuda_adapter::synchronize() {
   if (!ready_) return adapter_status::failure("CUDA adapter is not initialized");
-  return cudaStreamSynchronize(static_cast<cudaStream_t>(stream_)) == cudaSuccess
+  return cuda_stream_synchronize(static_cast<cuda_stream_t>(stream_)) == cuda_success
              ? adapter_status::success()
              : adapter_status::failure("CUDA stream synchronization failed");
 }

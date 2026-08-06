@@ -3,13 +3,13 @@
 #include "neurx_transformer_train_v2.cu"
 #include <iostream>
 namespace {
-struct InferenceCache {
+struct inference_cache {
   int *ids;
   float *embedding, *x, *n1, *inv1, *q, *k, *v, *att, *ctx;
   float *proj, *res, *n2, *inv2, *gate, *up, *sw, *down, *h, *logits;
   std::vector<float *> key_cache, value_cache;
   int cache_length = 0;
-  explicit InferenceCache(const Model &m) {
+  explicit inference_cache(const model &m) {
     int64_t td = int64_t(m.seq) * m.dim;
     int64_t tf = int64_t(m.seq) * m.ffn;
     ids = managed_i(m.seq);
@@ -25,17 +25,17 @@ struct InferenceCache {
       value_cache.push_back(managed_f(td));
     }
   }
-  ~InferenceCache() {
+  ~inference_cache() {
     void *allocations[] = {ids, embedding, x, n1, inv1, q, k, v, att, ctx,
                            proj, res, n2, inv2, gate, up, sw, down, h, logits};
     for (void *p : allocations) {
-      if (p) cudaFree(p);
+      if (p) cuda_free(p);
     }
-    for (float *p : key_cache) if (p) cudaFree(p);
-    for (float *p : value_cache) if (p) cudaFree(p);
+    for (float *p : key_cache) if (p) cuda_free(p);
+    for (float *p : value_cache) if (p) cuda_free(p);
   }
 };
-static bool read_checkpoint_header(const std::string &path, HeaderV2 &h) {
+static bool read_checkpoint_header(const std::string &path, header_v2 &h) {
   std::ifstream in(path, std::ios::binary);
   if (!in || !read_exact(in, &h, sizeof(h))) {
     std::fprintf(stderr, "Cannot read checkpoint: %s\n", path.c_str());
@@ -48,11 +48,11 @@ static bool read_checkpoint_header(const std::string &path, HeaderV2 &h) {
   }
   return true;
 }
-static bool load_inference_weights(Model &model, const Tokenizer &tok,
+static bool load_inference_weights(model &model, const tokenizer &tok,
                                    const std::string &path,
-                                   const HeaderV2 &expected) {
+                                   const header_v2 &expected) {
   std::ifstream in(path, std::ios::binary);
-  HeaderV2 h{};
+  header_v2 h{};
   if (!in || !read_exact(in, &h, sizeof(h))) return false;
   if (std::memcmp(&h, &expected, sizeof(h)) != 0) return false;
   if (h.tokenizer_kind != uint32_t(tok.kind == "bpe") ||
@@ -68,7 +68,7 @@ static bool load_inference_weights(Model &model, const Tokenizer &tok,
     std::fprintf(stderr, "Checkpoint parameter count mismatch\n");
     return false;
   }
-  for (Param *p : params) {
+  for (param *p : params) {
     uint64_t count = 0;
     if (!read_exact(in, &count, sizeof(count)) || count != uint64_t(p->n) ||
         !read_exact(in, p->v, count * sizeof(float))) {
@@ -80,14 +80,14 @@ static bool load_inference_weights(Model &model, const Tokenizer &tok,
   }
   return true;
 }
-static bool forward_prefill(Model &m, InferenceCache &c, const std::vector<int> &ids) {
+static bool forward_prefill(model &m, inference_cache &c, const std::vector<int> &ids) {
   int t = int(ids.size()), d = m.dim, f = m.ffn, td = t * d, tf = t * f;
   for (int i = 0; i < t; ++i) c.ids[i] = ids[i];
   embedding_fwd<<<blocks(td), 256>>>(c.ids, m.emb.v, c.embedding, t, d);
   float *input = c.embedding;
   for (int li = 0; li < m.nlayers; ++li) {
-    Layer &l = *m.layers[li];
-    CUDA_CHECK(cudaMemcpy(c.x, input, td * sizeof(float), cudaMemcpyDeviceToDevice));
+    layer &l = *m.layers[li];
+    CUDA_CHECK(cuda_memcpy(c.x, input, td * sizeof(float), cuda_memcpy_device_to_device));
     rms_fwd<<<blocks(t), 256>>>(c.x, l.nq.v, c.n1, c.inv1, t, d);
     if (!gemm(c.n1, l.wq.v, c.q, t, d, d) ||
         !gemm(c.n1, l.wk.v, c.k, t, d, d) ||
@@ -95,8 +95,8 @@ static bool forward_prefill(Model &m, InferenceCache &c, const std::vector<int> 
     int rope_items = t * m.heads * (d / m.heads / 2);
     rope<<<blocks(rope_items), 256>>>(c.q, t, d, m.heads, false);
     rope<<<blocks(rope_items), 256>>>(c.k, t, d, m.heads, false);
-    CUDA_CHECK(cudaMemcpy(c.key_cache[li], c.k, td * sizeof(float), cudaMemcpyDeviceToDevice));
-    CUDA_CHECK(cudaMemcpy(c.value_cache[li], c.v, td * sizeof(float), cudaMemcpyDeviceToDevice));
+    CUDA_CHECK(cuda_memcpy(c.key_cache[li], c.k, td * sizeof(float), cuda_memcpy_device_to_device));
+    CUDA_CHECK(cuda_memcpy(c.value_cache[li], c.v, td * sizeof(float), cuda_memcpy_device_to_device));
     attention_fwd<<<m.heads * t, 1>>>(c.q, c.k, c.v, c.att, c.ctx, t, d, m.heads);
     if (!gemm(c.ctx, l.wo.v, c.proj, t, d, d)) return false;
     add<<<blocks(td), 256>>>(c.x, c.proj, c.res, td);
@@ -109,11 +109,11 @@ static bool forward_prefill(Model &m, InferenceCache &c, const std::vector<int> 
     input = c.h;
   }
   if (!gemm(input, m.out.v, c.logits, t, d, m.vocab)) return false;
-  CUDA_CHECK(cudaDeviceSynchronize());
+  CUDA_CHECK(cuda_device_synchronize());
   c.cache_length = t;
   return true;
 }
-static bool forward_decode(Model &m, InferenceCache &c, int token, int position) {
+static bool forward_decode(model &m, inference_cache &c, int token, int position) {
   if (position != c.cache_length || position < 0 || position >= m.seq) {
     std::fprintf(stderr, "KV cache position mismatch: position=%d cache_length=%d\n",
                  position, c.cache_length);
@@ -124,8 +124,8 @@ static bool forward_decode(Model &m, InferenceCache &c, int token, int position)
   embedding_fwd<<<blocks(d), 256>>>(c.ids, m.emb.v, c.embedding, 1, d);
   float *input = c.embedding;
   for (int li = 0; li < m.nlayers; ++li) {
-    Layer &l = *m.layers[li];
-    CUDA_CHECK(cudaMemcpy(c.x, input, d * sizeof(float), cudaMemcpyDeviceToDevice));
+    layer &l = *m.layers[li];
+    CUDA_CHECK(cuda_memcpy(c.x, input, d * sizeof(float), cuda_memcpy_device_to_device));
     rms_fwd<<<1, 1>>>(c.x, l.nq.v, c.n1, c.inv1, 1, d);
     if (!gemm(c.n1, l.wq.v, c.q, 1, d, d) ||
         !gemm(c.n1, l.wk.v, c.k, 1, d, d) ||
@@ -133,10 +133,10 @@ static bool forward_decode(Model &m, InferenceCache &c, int token, int position)
     const int rope_items = m.heads * (d / m.heads / 2);
     rope_position<<<blocks(rope_items), 256>>>(c.q, d, m.heads, position);
     rope_position<<<blocks(rope_items), 256>>>(c.k, d, m.heads, position);
-    CUDA_CHECK(cudaMemcpy(c.key_cache[li] + int64_t(position) * d, c.k,
-                          d * sizeof(float), cudaMemcpyDeviceToDevice));
-    CUDA_CHECK(cudaMemcpy(c.value_cache[li] + int64_t(position) * d, c.v,
-                          d * sizeof(float), cudaMemcpyDeviceToDevice));
+    CUDA_CHECK(cuda_memcpy(c.key_cache[li] + int64_t(position) * d, c.k,
+                          d * sizeof(float), cuda_memcpy_device_to_device));
+    CUDA_CHECK(cuda_memcpy(c.value_cache[li] + int64_t(position) * d, c.v,
+                          d * sizeof(float), cuda_memcpy_device_to_device));
     attention_decode<<<blocks(m.heads), 256>>>(c.q, c.key_cache[li], c.value_cache[li],
                                                c.att, c.ctx, position, m.seq, d, m.heads);
     if (!gemm(c.ctx, l.wo.v, c.proj, 1, d, d)) return false;
@@ -150,17 +150,17 @@ static bool forward_decode(Model &m, InferenceCache &c, int token, int position)
     input = c.h;
   }
   if (!gemm(input, m.out.v, c.logits, 1, d, m.vocab)) return false;
-  CUDA_CHECK(cudaDeviceSynchronize());
+  CUDA_CHECK(cuda_device_synchronize());
   c.cache_length = position + 1;
   return true;
 }
-static int greedy_token(const Model &m, const InferenceCache &c, int position) {
+static int greedy_token(const model &m, const inference_cache &c, int position) {
   const float *row = c.logits + int64_t(position) * m.vocab;
   int best = 0;
   for (int i = 1; i < m.vocab; ++i) if (row[i] > row[best]) best = i;
   return best;
 }
-static std::vector<std::string> decoder_for(const Tokenizer &tok) {
+static std::vector<std::string> decoder_for(const tokenizer &tok) {
   std::vector<std::string> decoder(tok.size());
   for (const auto &entry : tok.vocab) {
     if (entry.second >= 0 && entry.second < int(decoder.size()))
@@ -172,15 +172,15 @@ static std::vector<std::string> decoder_for(const Tokenizer &tok) {
 int main() {
   std::setvbuf(stdout, nullptr, _IOLBF, 0);
   int device_count = 0;
-  cudaError_t status = cudaGetDeviceCount(&device_count);
-  if (status != cudaSuccess || device_count < 1) {
-    std::fprintf(stderr, "CUDA device unavailable: %s\n", cudaGetErrorString(status));
+  cuda_error_t status = cuda_get_device_count(&device_count);
+  if (status != cuda_success || device_count < 1) {
+    std::fprintf(stderr, "CUDA device unavailable: %s\n", cuda_get_error_string(status));
     return 2;
   }
   std::string checkpoint = env_str("NEURX_CHECKPOINT", "checkpoint/NeurX-1.3/transformer_v2.ckpt");
-  HeaderV2 header{};
+  header_v2 header{};
   if (!read_checkpoint_header(checkpoint, header)) return 3;
-  Tokenizer tok;
+  tokenizer tok;
   if (!tok.load(env_str("NEURX_TOKENIZER_VOCAB", "data/corpus/vocab.json"),
                 env_str("NEURX_TOKENIZER_MERGES", "data/corpus/merges.txt"))) return 4;
   if (tok.size() != int(header.vocab)) {
@@ -189,10 +189,10 @@ int main() {
   }
   std::printf("Loading %.2f GiB NXTRFMV2 checkpoint weights...\n",
               std::filesystem::file_size(checkpoint) / double(1ULL << 30));
-  Model model(header.vocab, header.seq, header.dim, header.heads,
+  model model(header.vocab, header.seq, header.dim, header.heads,
               header.ffn, header.layers);
   if (!load_inference_weights(model, tok, checkpoint, header)) return 5;
-  InferenceCache cache(model);
+  inference_cache cache(model);
   auto decoder = decoder_for(tok);
   int max_new_tokens = std::max(1, env_int("NEURX_CHAT_MAX_TOKENS", 64));
   std::printf("NeurX real CUDA inference ready (step=%llu, layers=%u, context=%u).\n",

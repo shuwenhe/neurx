@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <vector>
 namespace neurx::runtime::native {
-struct QuantizedWeight {
+struct quantized_weight {
   int bits = 8;
   std::size_t rows = 0;
   std::size_t columns = 0;
@@ -11,8 +11,8 @@ struct QuantizedWeight {
   std::vector<uint8_t> packed;
   int8_t value(std::size_t row, std::size_t column) const;
 };
-QuantizedWeight quantize_weight_symmetric(const float* weights, std::size_t rows,
+quantized_weight quantize_weight_symmetric(const float* weights, std::size_t rows,
                                            std::size_t columns, int bits);
 std::vector<float> weight_only_matmul(const float* input, std::size_t batch,
-                                      std::size_t inner, const QuantizedWeight& weight);
+                                      std::size_t inner, const quantized_weight& weight);
 }

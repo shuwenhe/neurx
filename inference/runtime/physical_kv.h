@@ -10,9 +10,9 @@ struct physical_kv_allocation {
   std::vector<int32_t> block_table;
   std::vector<uintptr_t> device_addresses;
 };
-class PhysicalKvPool {
+class physical_kv_pool {
  public:
-  PhysicalKvPool(std::size_t blocks, std::size_t block_tokens)
+  physical_kv_pool(std::size_t blocks, std::size_t block_tokens)
       : block_tokens_(block_tokens), addresses_(blocks), references_(blocks) {
     if (blocks == 0 || block_tokens == 0) throw std::invalid_argument("physical KV dimensions must be positive");
   }

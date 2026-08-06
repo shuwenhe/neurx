@@ -3,18 +3,18 @@
 #include <cstdint>
 #include <dlfcn.h>
 namespace neurx::cann {
-using Error = int;
-using Context = void*;
-using Stream = void*;
-using Event = void*;
-constexpr Error kSuccess = 0;
-enum class MemcpyKind : int {
+using error = int;
+using context = void*;
+using stream = void*;
+using event = void*;
+constexpr error k_success = 0;
+enum class memcpy_kind : int {
   host_to_host = 0,
   host_to_device = 1,
   device_to_host = 2,
   device_to_device = 3,
 };
-enum class MallocPolicy : int {
+enum class malloc_policy : int {
   huge_first = 0,
   huge_only = 1,
   normal_only = 2,
@@ -27,126 +27,126 @@ inline void* acl_library() {
   }();
   return library;
 }
-template <typename Function>
-inline Function acl_symbol(const char* name) {
+template <typename function>
+inline function acl_symbol(const char* name) {
   void* library = acl_library();
-  return library ? reinterpret_cast<Function>(dlsym(library, name)) : nullptr;
+  return library ? reinterpret_cast<function>(dlsym(library, name)) : nullptr;
 }
 inline bool available() { return acl_library() != nullptr; }
-inline Error init() {
-  using Fn = Error (*)(const char*);
-  auto fn = acl_symbol<Fn>("aclInit");
+inline error init() {
+  using fn = error (*)(const char*);
+  auto fn = acl_symbol<fn>("aclInit");
   return fn ? fn(nullptr) : -1;
 }
-inline Error finalize() {
-  using Fn = Error (*)();
-  auto fn = acl_symbol<Fn>("aclFinalize");
+inline error finalize() {
+  using fn = error (*)();
+  auto fn = acl_symbol<fn>("aclFinalize");
   return fn ? fn() : -1;
 }
-inline Error set_device(int32_t device) {
-  using Fn = Error (*)(int32_t);
-  auto fn = acl_symbol<Fn>("aclrtSetDevice");
+inline error set_device(int32_t device) {
+  using fn = error (*)(int32_t);
+  auto fn = acl_symbol<fn>("aclrtSetDevice");
   return fn ? fn(device) : -1;
 }
-inline Error reset_device(int32_t device) {
-  using Fn = Error (*)(int32_t);
-  auto fn = acl_symbol<Fn>("aclrtResetDevice");
+inline error reset_device(int32_t device) {
+  using fn = error (*)(int32_t);
+  auto fn = acl_symbol<fn>("aclrtResetDevice");
   return fn ? fn(device) : -1;
 }
-inline Error create_context(Context* context, int32_t device) {
-  using Fn = Error (*)(Context*, int32_t);
-  auto fn = acl_symbol<Fn>("aclrtCreateContext");
+inline error create_context(context* context, int32_t device) {
+  using fn = error (*)(context*, int32_t);
+  auto fn = acl_symbol<fn>("aclrtCreateContext");
   return fn ? fn(context, device) : -1;
 }
-inline Error destroy_context(Context context) {
-  using Fn = Error (*)(Context);
-  auto fn = acl_symbol<Fn>("aclrtDestroyContext");
+inline error destroy_context(context context) {
+  using fn = error (*)(context);
+  auto fn = acl_symbol<fn>("aclrtDestroyContext");
   return fn ? fn(context) : -1;
 }
-inline Error set_current_context(Context context) {
-  using Fn = Error (*)(Context);
-  auto fn = acl_symbol<Fn>("aclrtSetCurrentContext");
+inline error set_current_context(context context) {
+  using fn = error (*)(context);
+  auto fn = acl_symbol<fn>("aclrtSetCurrentContext");
   return fn ? fn(context) : -1;
 }
-inline Error create_stream(Stream* stream) {
-  using Fn = Error (*)(Stream*);
-  auto fn = acl_symbol<Fn>("aclrtCreateStream");
+inline error create_stream(stream* stream) {
+  using fn = error (*)(stream*);
+  auto fn = acl_symbol<fn>("aclrtCreateStream");
   return fn ? fn(stream) : -1;
 }
-inline Error destroy_stream(Stream stream) {
-  using Fn = Error (*)(Stream);
-  auto fn = acl_symbol<Fn>("aclrtDestroyStream");
+inline error destroy_stream(stream stream) {
+  using fn = error (*)(stream);
+  auto fn = acl_symbol<fn>("aclrtDestroyStream");
   return fn ? fn(stream) : -1;
 }
-inline Error synchronize_stream(Stream stream) {
-  using Fn = Error (*)(Stream);
-  auto fn = acl_symbol<Fn>("aclrtSynchronizeStream");
+inline error synchronize_stream(stream stream) {
+  using fn = error (*)(stream);
+  auto fn = acl_symbol<fn>("aclrtSynchronizeStream");
   return fn ? fn(stream) : -1;
 }
-inline Error synchronize_device() {
-  using Fn = Error (*)();
-  auto fn = acl_symbol<Fn>("aclrtSynchronizeDevice");
+inline error synchronize_device() {
+  using fn = error (*)();
+  auto fn = acl_symbol<fn>("aclrtSynchronizeDevice");
   return fn ? fn() : -1;
 }
-inline Error malloc_device(void** address, std::size_t bytes,
-                           MallocPolicy policy = MallocPolicy::huge_first) {
-  using Fn = Error (*)(void**, std::size_t, int);
-  auto fn = acl_symbol<Fn>("aclrtMalloc");
+inline error malloc_device(void** address, std::size_t bytes,
+                           malloc_policy policy = malloc_policy::huge_first) {
+  using fn = error (*)(void**, std::size_t, int);
+  auto fn = acl_symbol<fn>("aclrtMalloc");
   return fn ? fn(address, bytes, static_cast<int>(policy)) : -1;
 }
-inline Error free_device(void* address) {
-  using Fn = Error (*)(void*);
-  auto fn = acl_symbol<Fn>("aclrtFree");
+inline error free_device(void* address) {
+  using fn = error (*)(void*);
+  auto fn = acl_symbol<fn>("aclrtFree");
   return fn ? fn(address) : -1;
 }
-inline Error malloc_host(void** address, std::size_t bytes) {
-  using Fn = Error (*)(void**, std::size_t);
-  auto fn = acl_symbol<Fn>("aclrtMallocHost");
+inline error malloc_host(void** address, std::size_t bytes) {
+  using fn = error (*)(void**, std::size_t);
+  auto fn = acl_symbol<fn>("aclrtMallocHost");
   return fn ? fn(address, bytes) : -1;
 }
-inline Error free_host(void* address) {
-  using Fn = Error (*)(void*);
-  auto fn = acl_symbol<Fn>("aclrtFreeHost");
+inline error free_host(void* address) {
+  using fn = error (*)(void*);
+  auto fn = acl_symbol<fn>("aclrtFreeHost");
   return fn ? fn(address) : -1;
 }
-inline Error memcpy_async(void* destination, std::size_t destination_bytes,
+inline error memcpy_async(void* destination, std::size_t destination_bytes,
                           const void* source, std::size_t source_bytes,
-                          MemcpyKind kind, Stream stream) {
-  using Fn = Error (*)(void*, std::size_t, const void*, std::size_t, int, Stream);
-  auto fn = acl_symbol<Fn>("aclrtMemcpyAsync");
+                          memcpy_kind kind, stream stream) {
+  using fn = error (*)(void*, std::size_t, const void*, std::size_t, int, stream);
+  auto fn = acl_symbol<fn>("aclrtMemcpyAsync");
   return fn ? fn(destination, destination_bytes, source, source_bytes,
                  static_cast<int>(kind), stream)
             : -1;
 }
-inline Error memset_async(void* destination, std::size_t destination_bytes,
-                          uint32_t value, std::size_t count, Stream stream) {
-  using Fn = Error (*)(void*, std::size_t, uint32_t, std::size_t, Stream);
-  auto fn = acl_symbol<Fn>("aclrtMemsetAsync");
+inline error memset_async(void* destination, std::size_t destination_bytes,
+                          uint32_t value, std::size_t count, stream stream) {
+  using fn = error (*)(void*, std::size_t, uint32_t, std::size_t, stream);
+  auto fn = acl_symbol<fn>("aclrtMemsetAsync");
   return fn ? fn(destination, destination_bytes, value, count, stream) : -1;
 }
-inline Error create_event(Event* event) {
-  using Fn = Error (*)(Event*);
-  auto fn = acl_symbol<Fn>("aclrtCreateEvent");
+inline error create_event(event* event) {
+  using fn = error (*)(event*);
+  auto fn = acl_symbol<fn>("aclrtCreateEvent");
   return fn ? fn(event) : -1;
 }
-inline Error destroy_event(Event event) {
-  using Fn = Error (*)(Event);
-  auto fn = acl_symbol<Fn>("aclrtDestroyEvent");
+inline error destroy_event(event event) {
+  using fn = error (*)(event);
+  auto fn = acl_symbol<fn>("aclrtDestroyEvent");
   return fn ? fn(event) : -1;
 }
-inline Error record_event(Event event, Stream stream) {
-  using Fn = Error (*)(Event, Stream);
-  auto fn = acl_symbol<Fn>("aclrtRecordEvent");
+inline error record_event(event event, stream stream) {
+  using fn = error (*)(event, stream);
+  auto fn = acl_symbol<fn>("aclrtRecordEvent");
   return fn ? fn(event, stream) : -1;
 }
-inline Error synchronize_event(Event event) {
-  using Fn = Error (*)(Event);
-  auto fn = acl_symbol<Fn>("aclrtSynchronizeEvent");
+inline error synchronize_event(event event) {
+  using fn = error (*)(event);
+  auto fn = acl_symbol<fn>("aclrtSynchronizeEvent");
   return fn ? fn(event) : -1;
 }
 inline const char* recent_error() {
-  using Fn = const char* (*)();
-  auto fn = acl_symbol<Fn>("aclGetRecentErrMsg");
+  using fn = const char* (*)();
+  auto fn = acl_symbol<fn>("aclGetRecentErrMsg");
   const char* message = fn ? fn() : nullptr;
   return message ? message : "CANN ACL call failed";
 }

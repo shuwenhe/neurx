@@ -280,6 +280,11 @@ func handle_client(int client_fd) {
         }
         if first_five == "POST " {
             string body = extract_http_body(request)
+            print("DEBUG: extracted body length=" + int_to_string(len(body)) + "\n")
+            print("DEBUG: request total length=" + int_to_string(len(request)) + "\n")
+            if len(body) > 0 {
+                print("DEBUG: body preview='" + __host_slice(body, 0, 50) + "'\n")
+            }
             string prompt = body
             if len(prompt) == 0 {
                 prompt = "test"
@@ -298,21 +303,28 @@ func handle_client(int client_fd) {
 func extract_http_body(string request) string {
     int header_end = 0
     int i = 0
-    while i < len(request) - 3 {
+    int req_len = len(request)
+    print("DEBUG extract_http_body: searching in " + int_to_string(req_len) + " bytes\n")
+    while i < req_len - 3 {
         string chunk = __host_slice(request, i, i + 4)
         if chunk == "\r\n\r\n" {
             header_end = i + 4
+            print("DEBUG: found header/body separator at offset " + int_to_string(i) + "\n")
             break
         }
         i = i + 1
     }
     if header_end == 0 {
+        print("DEBUG: separator not found, scanning further\n")
         return ""
     }
-    if header_end >= len(request) {
+    if header_end >= req_len {
+        print("DEBUG: separator at end of request\n")
         return ""
     }
-    return __host_slice(request, header_end, len(request))
+    string result = __host_slice(request, header_end, req_len)
+    print("DEBUG: extracted " + int_to_string(len(result)) + " bytes of body\n")
+    return result
 }
 func create_ready_file(string path) {
     print("✓ Backend ready file: " + path + "\n")

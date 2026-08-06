@@ -7,37 +7,37 @@
 #include <utility>
 namespace neurx::cuda {
 namespace {
-void check_cuda(cudaError_t status, const char* operation) {
-  if (status != cudaSuccess) {
-    throw std::runtime_error(std::string(operation) + ": " + cudaGetErrorString(status));
+void check_cuda(cuda_error_t status, const char* operation) {
+  if (status != cuda_success) {
+    throw std::runtime_error(std::string(operation) + ": " + cuda_get_error_string(status));
   }
 }
-void check_cublas(cublasStatus_t status, const char* operation) {
+void check_cublas(cublas_status_t status, const char* operation) {
   if (status != CUBLAS_STATUS_SUCCESS) throw std::runtime_error(std::string(operation) + " failed");
 }
-class DeviceBuffer {
+class device_buffer {
  public:
-  DeviceBuffer() = default;
-  explicit DeviceBuffer(std::size_t bytes) { resize(bytes); }
-  ~DeviceBuffer() { if (data_) cudaFree(data_); }
-  DeviceBuffer(DeviceBuffer&& other) noexcept
+  device_buffer() = default;
+  explicit device_buffer(std::size_t bytes) { resize(bytes); }
+  ~device_buffer() { if (data_) cuda_free(data_); }
+  device_buffer(device_buffer&& other) noexcept
       : data_(std::exchange(other.data_, nullptr)), bytes_(std::exchange(other.bytes_, 0)) {}
-  DeviceBuffer& operator=(DeviceBuffer&& other) noexcept {
+  device_buffer& operator=(device_buffer&& other) noexcept {
     if (this != &other) {
-      if (data_) cudaFree(data_);
+      if (data_) cuda_free(data_);
       data_ = std::exchange(other.data_, nullptr);
       bytes_ = std::exchange(other.bytes_, 0);
     }
     return *this;
   }
-  DeviceBuffer(const DeviceBuffer&) = delete;
-  DeviceBuffer& operator=(const DeviceBuffer&) = delete;
+  device_buffer(const device_buffer&) = delete;
+  device_buffer& operator=(const device_buffer&) = delete;
   void resize(std::size_t bytes) {
     if (bytes == bytes_) return;
-    if (data_) check_cuda(cudaFree(data_), "cudaFree");
+    if (data_) check_cuda(cuda_free(data_), "cudaFree");
     data_ = nullptr;
     bytes_ = 0;
-    if (bytes) check_cuda(cudaMalloc(&data_, bytes), "cudaMalloc");
+    if (bytes) check_cuda(cuda_malloc(&data_, bytes), "cudaMalloc");
     bytes_ = bytes;
   }
   void* data() { return data_; }
@@ -47,32 +47,32 @@ class DeviceBuffer {
   void* data_ = nullptr;
   std::size_t bytes_ = 0;
 };
-DeviceBuffer load_weight(const runtime::model::HfWeightStore& store, const std::string& name) {
-  const runtime::native::Tensor tensor = store.load(name).to(runtime::native::DType::float32);
+device_buffer load_weight(const runtime::model::hf_weight_store& store, const std::string& name) {
+  const runtime::native::tensor tensor = store.load(name).to(runtime::native::d_type::float32);
   std::vector<float> host(static_cast<std::size_t>(tensor.numel()));
   tensor.copy_to_host(host.data(), host.size() * sizeof(float));
-  DeviceBuffer result(host.size() * sizeof(float));
-  check_cuda(cudaMemcpy(result.data(), host.data(), result.bytes(), cudaMemcpyHostToDevice),
+  device_buffer result(host.size() * sizeof(float));
+  check_cuda(cuda_memcpy(result.data(), host.data(), result.bytes(), cuda_memcpy_host_to_device),
              "copy HF weight to CUDA");
   return result;
 }
-struct Linear {
+struct linear {
   int input = 0;
   int output = 0;
-  DeviceBuffer weight;
-  DeviceBuffer bias;
+  device_buffer weight;
+  device_buffer bias;
 };
-struct Layer {
-  DeviceBuffer input_norm;
-  Linear q, k, v, o;
-  DeviceBuffer post_norm;
-  Linear gate, up, down;
+struct layer {
+  device_buffer input_norm;
+  linear q, k, v, o;
+  device_buffer post_norm;
+  linear gate, up, down;
 };
-void run_linear(cublasHandle_t handle, const float* input, int rows, const Linear& linear,
+void run_linear(cublas_handle_t handle, const float* input, int rows, const linear& linear,
                 float* output) {
   const float alpha = 1.0F;
   const float beta = 0.0F;
-  check_cublas(cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, linear.output, rows,
+  check_cublas(cublas_sgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, linear.output, rows,
                            linear.input, &alpha,
                            static_cast<const float*>(linear.weight.data()), linear.input,
                            input, linear.input, &beta, output, linear.output),
@@ -83,34 +83,34 @@ void run_linear(cublasHandle_t handle, const float* input, int rows, const Linea
   }
 }
 }
-struct HfCudaKvCache::State {
+struct hf_cuda_kv_cache::state {
   std::size_t length = 0;
   std::size_t capacity = 0;
-  std::vector<DeviceBuffer> keys;
-  std::vector<DeviceBuffer> values;
+  std::vector<device_buffer> keys;
+  std::vector<device_buffer> values;
 };
-HfCudaKvCache::HfCudaKvCache() : state_(new State) {}
-HfCudaKvCache::~HfCudaKvCache() = default;
-HfCudaKvCache::HfCudaKvCache(HfCudaKvCache&&) noexcept = default;
-HfCudaKvCache& HfCudaKvCache::operator=(HfCudaKvCache&&) noexcept = default;
-std::size_t HfCudaKvCache::length() const { return state_->length; }
-void HfCudaKvCache::clear() {
+hf_cuda_kv_cache::hf_cuda_kv_cache() : state_(new state) {}
+hf_cuda_kv_cache::~hf_cuda_kv_cache() = default;
+hf_cuda_kv_cache::hf_cuda_kv_cache(hf_cuda_kv_cache&&) noexcept = default;
+hf_cuda_kv_cache& hf_cuda_kv_cache::operator=(hf_cuda_kv_cache&&) noexcept = default;
+std::size_t hf_cuda_kv_cache::length() const { return state_->length; }
+void hf_cuda_kv_cache::clear() {
   state_->length = 0;
 }
-struct HfDecoderCuda::Impl {
-  runtime::model::HfConfig config;
+struct hf_decoder_cuda::impl {
+  runtime::model::hf_config config;
   int device = 0;
-  cublasHandle_t handle = nullptr;
-  DeviceBuffer embedding;
-  std::vector<Layer> layers;
-  DeviceBuffer final_norm;
-  DeviceBuffer lm_head;
-  Impl(const std::string& directory, int device_id)
-      : config(runtime::model::HfConfig::from_file(directory + "/config.json")),
+  cublas_handle_t handle = nullptr;
+  device_buffer embedding;
+  std::vector<layer> layers;
+  device_buffer final_norm;
+  device_buffer lm_head;
+  impl(const std::string& directory, int device_id)
+      : config(runtime::model::hf_config::from_file(directory + "/config.json")),
         device(device_id) {
-    check_cuda(cudaSetDevice(device), "cudaSetDevice");
-    check_cublas(cublasCreate(&handle), "cublasCreate");
-    const auto store = runtime::model::HfWeightStore::open(directory);
+    check_cuda(cuda_set_device(device), "cudaSetDevice");
+    check_cublas(cublas_create(&handle), "cublasCreate");
+    const auto store = runtime::model::hf_weight_store::open(directory);
     store.validate_architecture(config);
     embedding = load_weight(store, "model.embed_tokens.weight");
     const int hidden = static_cast<int>(config.hidden_size);
@@ -119,10 +119,10 @@ struct HfDecoderCuda::Impl {
     const int intermediate = static_cast<int>(config.intermediate_size);
     for (int64_t index = 0; index < config.num_hidden_layers; ++index) {
       const std::string prefix = "model.layers." + std::to_string(index) + ".";
-      Layer layer;
+      layer layer;
       layer.input_norm = load_weight(store, prefix + "input_layernorm.weight");
       layer.post_norm = load_weight(store, prefix + "post_attention_layernorm.weight");
-      const auto load_linear = [&](Linear* linear, const std::string& name,
+      const auto load_linear = [&](linear* linear, const std::string& name,
                                    int output, int input) {
         linear->input = input;
         linear->output = output;
@@ -144,16 +144,16 @@ struct HfDecoderCuda::Impl {
     lm_head = config.tie_word_embeddings ? load_weight(store, "model.embed_tokens.weight")
                                            : load_weight(store, "lm_head.weight");
   }
-  ~Impl() {
-    if (handle) cublasDestroy(handle);
+  ~impl() {
+    if (handle) cublas_destroy(handle);
   }
-  Linear output_linear() const {
-    Linear linear;
+  linear output_linear() const {
+    linear linear;
     linear.input = static_cast<int>(config.hidden_size);
     linear.output = static_cast<int>(config.vocab_size);
     return linear;
   }
-  void ensure_cache(HfCudaKvCache::State* cache, std::size_t required) {
+  void ensure_cache(hf_cuda_kv_cache::state* cache, std::size_t required) {
     const std::size_t layers_count = layers.size();
     const std::size_t kv_width = static_cast<std::size_t>(
         config.num_key_value_heads * config.head_dim());
@@ -167,21 +167,21 @@ struct HfDecoderCuda::Impl {
     if (required <= cache->capacity) return;
     const std::size_t capacity = std::max(required, std::max<std::size_t>(16, cache->capacity * 2));
     for (std::size_t layer = 0; layer < layers_count; ++layer) {
-      DeviceBuffer next_key(capacity * kv_width * sizeof(float));
-      DeviceBuffer next_value(capacity * kv_width * sizeof(float));
+      device_buffer next_key(capacity * kv_width * sizeof(float));
+      device_buffer next_value(capacity * kv_width * sizeof(float));
       if (cache->length) {
         const std::size_t used = cache->length * kv_width * sizeof(float);
-        check_cuda(cudaMemcpy(next_key.data(), cache->keys[layer].data(), used,
-                              cudaMemcpyDeviceToDevice), "grow CUDA K cache");
-        check_cuda(cudaMemcpy(next_value.data(), cache->values[layer].data(), used,
-                              cudaMemcpyDeviceToDevice), "grow CUDA V cache");
+        check_cuda(cuda_memcpy(next_key.data(), cache->keys[layer].data(), used,
+                              cuda_memcpy_device_to_device), "grow CUDA K cache");
+        check_cuda(cuda_memcpy(next_value.data(), cache->values[layer].data(), used,
+                              cuda_memcpy_device_to_device), "grow CUDA V cache");
       }
       cache->keys[layer] = std::move(next_key);
       cache->values[layer] = std::move(next_value);
     }
     cache->capacity = capacity;
   }
-  std::vector<float> forward(const std::vector<int32_t>& ids, HfCudaKvCache::State* cache) {
+  std::vector<float> forward(const std::vector<int32_t>& ids, hf_cuda_kv_cache::state* cache) {
     if (ids.empty()) throw std::invalid_argument("CUDA decoder requires at least one token");
     if (cache == nullptr) throw std::invalid_argument("CUDA decoder KV cache is null");
     const int tokens = static_cast<int>(ids.size());
@@ -200,24 +200,24 @@ struct HfDecoderCuda::Impl {
     const int query_width = query_heads * head_dimension;
     const int kv_width = kv_heads * head_dimension;
     const int intermediate = static_cast<int>(config.intermediate_size);
-    DeviceBuffer device_ids(ids.size() * sizeof(int32_t));
-    DeviceBuffer state(static_cast<std::size_t>(tokens) * hidden * sizeof(float));
-    DeviceBuffer normalized(static_cast<std::size_t>(tokens) * hidden * sizeof(float));
-    DeviceBuffer query(static_cast<std::size_t>(tokens) * query_width * sizeof(float));
-    DeviceBuffer key(static_cast<std::size_t>(tokens) * kv_width * sizeof(float));
-    DeviceBuffer value(static_cast<std::size_t>(tokens) * kv_width * sizeof(float));
-    DeviceBuffer attention(static_cast<std::size_t>(tokens) * query_width * sizeof(float));
-    DeviceBuffer projection(static_cast<std::size_t>(tokens) * hidden * sizeof(float));
-    DeviceBuffer gate(static_cast<std::size_t>(tokens) * intermediate * sizeof(float));
-    DeviceBuffer up(static_cast<std::size_t>(tokens) * intermediate * sizeof(float));
-    check_cuda(cudaMemcpy(device_ids.data(), ids.data(), device_ids.bytes(), cudaMemcpyHostToDevice),
+    device_buffer device_ids(ids.size() * sizeof(int32_t));
+    device_buffer state(static_cast<std::size_t>(tokens) * hidden * sizeof(float));
+    device_buffer normalized(static_cast<std::size_t>(tokens) * hidden * sizeof(float));
+    device_buffer query(static_cast<std::size_t>(tokens) * query_width * sizeof(float));
+    device_buffer key(static_cast<std::size_t>(tokens) * kv_width * sizeof(float));
+    device_buffer value(static_cast<std::size_t>(tokens) * kv_width * sizeof(float));
+    device_buffer attention(static_cast<std::size_t>(tokens) * query_width * sizeof(float));
+    device_buffer projection(static_cast<std::size_t>(tokens) * hidden * sizeof(float));
+    device_buffer gate(static_cast<std::size_t>(tokens) * intermediate * sizeof(float));
+    device_buffer up(static_cast<std::size_t>(tokens) * intermediate * sizeof(float));
+    check_cuda(cuda_memcpy(device_ids.data(), ids.data(), device_ids.bytes(), cuda_memcpy_host_to_device),
                "copy token ids to CUDA");
     kernels::embedding<<<kernels::blocks(tokens * hidden), 256>>>(
         static_cast<const int32_t*>(device_ids.data()),
         static_cast<const float*>(embedding.data()), static_cast<float*>(state.data()),
         tokens, hidden);
     for (std::size_t index = 0; index < layers.size(); ++index) {
-      const Layer& layer = layers[index];
+      const layer& layer = layers[index];
       kernels::rms_norm<<<kernels::blocks(tokens), 256>>>(
           static_cast<const float*>(state.data()),
           static_cast<const float*>(layer.input_norm.data()),
@@ -236,10 +236,10 @@ struct HfDecoderCuda::Impl {
           static_cast<float*>(key.data()), tokens, kv_heads, head_dimension, past,
           static_cast<float>(config.rope_theta));
       const std::size_t offset = cache->length * static_cast<std::size_t>(kv_width) * sizeof(float);
-      check_cuda(cudaMemcpy(static_cast<char*>(cache->keys[index].data()) + offset, key.data(),
-                            key.bytes(), cudaMemcpyDeviceToDevice), "append CUDA K cache");
-      check_cuda(cudaMemcpy(static_cast<char*>(cache->values[index].data()) + offset, value.data(),
-                            value.bytes(), cudaMemcpyDeviceToDevice), "append CUDA V cache");
+      check_cuda(cuda_memcpy(static_cast<char*>(cache->keys[index].data()) + offset, key.data(),
+                            key.bytes(), cuda_memcpy_device_to_device), "append CUDA K cache");
+      check_cuda(cuda_memcpy(static_cast<char*>(cache->values[index].data()) + offset, value.data(),
+                            value.bytes(), cuda_memcpy_device_to_device), "append CUDA V cache");
       kernels::attention_gqa<<<kernels::blocks(tokens * query_heads), 256>>>(
           static_cast<const float*>(query.data()),
           static_cast<const float*>(cache->keys[index].data()),
@@ -273,42 +273,42 @@ struct HfDecoderCuda::Impl {
         static_cast<const float*>(state.data()), static_cast<const float*>(final_norm.data()),
         static_cast<float*>(normalized.data()), tokens, hidden,
         static_cast<float>(config.rms_norm_eps));
-    DeviceBuffer logits(static_cast<std::size_t>(config.vocab_size) * sizeof(float));
+    device_buffer logits(static_cast<std::size_t>(config.vocab_size) * sizeof(float));
     const float alpha = 1.0F;
     const float beta = 0.0F;
     const float* last_hidden = static_cast<const float*>(normalized.data()) +
                                static_cast<std::size_t>(tokens - 1) * hidden;
-    check_cublas(cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N,
+    check_cublas(cublas_sgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N,
                              static_cast<int>(config.vocab_size), 1, hidden, &alpha,
                              static_cast<const float*>(lm_head.data()), hidden,
                              last_hidden, hidden, &beta,
                              static_cast<float*>(logits.data()), static_cast<int>(config.vocab_size)),
                  "CUDA lm_head");
-    check_cuda(cudaGetLastError(), "CUDA HF decoder kernel launch");
+    check_cuda(cuda_get_last_error(), "CUDA HF decoder kernel launch");
     std::vector<float> host(static_cast<std::size_t>(config.vocab_size));
-    check_cuda(cudaMemcpy(host.data(), logits.data(), logits.bytes(), cudaMemcpyDeviceToHost),
+    check_cuda(cuda_memcpy(host.data(), logits.data(), logits.bytes(), cuda_memcpy_device_to_host),
                "copy CUDA logits to host");
     cache->length += ids.size();
     return host;
   }
 };
-HfDecoderCuda::HfDecoderCuda(const std::string& directory, int device)
-    : impl_(new Impl(directory, device)) {}
-HfDecoderCuda::~HfDecoderCuda() = default;
-HfDecoderCuda::HfDecoderCuda(HfDecoderCuda&&) noexcept = default;
-HfDecoderCuda& HfDecoderCuda::operator=(HfDecoderCuda&&) noexcept = default;
-const runtime::model::HfConfig& HfDecoderCuda::config() const { return impl_->config; }
-std::vector<float> HfDecoderCuda::prefill(const std::vector<int32_t>& ids,
-                                          HfCudaKvCache* cache) {
+hf_decoder_cuda::hf_decoder_cuda(const std::string& directory, int device)
+    : impl_(new impl(directory, device)) {}
+hf_decoder_cuda::~hf_decoder_cuda() = default;
+hf_decoder_cuda::hf_decoder_cuda(hf_decoder_cuda&&) noexcept = default;
+hf_decoder_cuda& hf_decoder_cuda::operator=(hf_decoder_cuda&&) noexcept = default;
+const runtime::model::hf_config& hf_decoder_cuda::config() const { return impl_->config; }
+std::vector<float> hf_decoder_cuda::prefill(const std::vector<int32_t>& ids,
+                                          hf_cuda_kv_cache* cache) {
   if (cache == nullptr) throw std::invalid_argument("CUDA decoder KV cache is null");
   cache->clear();
   return impl_->forward(ids, cache->state_.get());
 }
-std::vector<float> HfDecoderCuda::decode(int32_t token, HfCudaKvCache* cache) {
+std::vector<float> hf_decoder_cuda::decode(int32_t token, hf_cuda_kv_cache* cache) {
   if (cache == nullptr) throw std::invalid_argument("CUDA decoder KV cache is null");
   return impl_->forward({token}, cache->state_.get());
 }
-int32_t HfDecoderCuda::greedy(const std::vector<float>& logits) {
+int32_t hf_decoder_cuda::greedy(const std::vector<float>& logits) {
   if (logits.empty()) throw std::invalid_argument("cannot sample empty CUDA logits");
   return static_cast<int32_t>(std::max_element(logits.begin(), logits.end()) - logits.begin());
 }

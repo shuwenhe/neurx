@@ -19,30 +19,30 @@ void request_stop(int) {
     stop_requested = 1;
 }
 __global__ void error_loss_kernel(float *pred, const float *target, float *loss, int n) {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    int i = block_idx.x * block_dim.x + thread_idx.x;
     if (i >= n) {
         return;
     }
     float diff = pred[i] - target[i];
     pred[i] = diff;
-    atomicAdd(loss, diff * diff);
+    atomic_add(loss, diff * diff);
 }
 __global__ void sgd_update_kernel(float *w, const float *grad, float lr, float inv_batch, int n) {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    int i = block_idx.x * block_dim.x + thread_idx.x;
     if (i >= n) {
         return;
     }
     w[i] -= lr * grad[i] * inv_batch;
 }
-void fail_cuda(cudaError_t err, const char *expr, const char *file, int line) {
-    if (err == cudaSuccess) {
+void fail_cuda(cuda_error_t err, const char *expr, const char *file, int line) {
+    if (err == cuda_success) {
         return;
     }
     std::fprintf(stderr, "[cuda-train] CUDA error at %s:%d: %s -> %s\n",
-                 file, line, expr, cudaGetErrorString(err));
+                 file, line, expr, cuda_get_error_string(err));
     std::exit(2);
 }
-void fail_cublas(cublasStatus_t status, const char *expr, const char *file, int line) {
+void fail_cublas(cublas_status_t status, const char *expr, const char *file, int line) {
     if (status == CUBLAS_STATUS_SUCCESS) {
         return;
     }
@@ -105,7 +105,7 @@ std::string basename(const std::string &path) {
     }
     return path.substr(slash + 1);
 }
-struct PairReader {
+struct pair_reader {
     std::vector<std::string> shards;
     size_t shard_index = 0;
     int line_in_shard = 0;
@@ -113,7 +113,7 @@ struct PairReader {
     std::string current_path;
     std::vector<unsigned char> pending;
     size_t pending_offset = 0;
-    explicit PairReader(std::vector<std::string> input) : shards(std::move(input)) {}
+    explicit pair_reader(std::vector<std::string> input) : shards(std::move(input)) {}
     bool open_next() {
         if (current.is_open()) {
             current.close();
@@ -192,7 +192,7 @@ struct PairReader {
         return true;
     }
 };
-struct ResumeState {
+struct resume_state {
     int completed_step = 0;
     long long pairs_seen = 0;
     size_t shard_index = 0;
@@ -213,7 +213,7 @@ bool atomic_replace(const std::string &temporary, const std::string &destination
                  temporary.c_str(), destination.c_str(), ec.message().c_str());
     return false;
 }
-bool load_resume_state(const std::string &path, ResumeState *state) {
+bool load_resume_state(const std::string &path, resume_state *state) {
     std::ifstream in(path);
     if (!in) {
         return false;
@@ -250,17 +250,17 @@ bool save_training_checkpoint(const std::string &output_dir,
                               int vocab_size,
                               int batch_pairs,
                               float loss,
-                              const PairReader &reader) {
+                              const pair_reader &reader) {
     std::filesystem::create_directories(output_dir);
     std::string state_path = output_dir + "/checkpoint.state";
-    ResumeState previous;
+    resume_state previous;
     bool had_previous = load_resume_state(state_path, &previous);
     std::string weights_path = output_dir + "/checkpoint_step_" +
                                std::to_string(completed_step) + ".weights.f32";
     std::string weights_tmp = weights_path + ".tmp";
     std::string state_tmp = state_path + ".tmp";
-    CUDA_OK(cudaMemcpy(host_weights->data(), device_weights,
-                       host_weights->size() * sizeof(float), cudaMemcpyDeviceToHost));
+    CUDA_OK(cuda_memcpy(host_weights->data(), device_weights,
+                       host_weights->size() * sizeof(float), cuda_memcpy_device_to_host));
     {
         std::ofstream weights(weights_tmp, std::ios::binary | std::ios::trunc);
         weights.write(reinterpret_cast<const char *>(host_weights->data()),
@@ -354,7 +354,7 @@ int main() {
     bool resume = env_int("NEURX_PRETRAIN_RESUME", 1) != 0;
     float lr = env_float("NEURX_PRETRAIN_LR", 0.0002f);
     int device_count = 0;
-    CUDA_OK(cudaGetDeviceCount(&device_count));
+    CUDA_OK(cuda_get_device_count(&device_count));
     if (device_count <= 0) {
         std::fprintf(stderr, "[cuda-train] no CUDA devices available\n");
         return 5;
@@ -364,12 +364,12 @@ int main() {
                      device, device_count);
         return 6;
     }
-    CUDA_OK(cudaSetDevice(device));
-    cudaDeviceProp prop{};
-    CUDA_OK(cudaGetDeviceProperties(&prop, device));
+    CUDA_OK(cuda_set_device(device));
+    cuda_device_prop prop{};
+    CUDA_OK(cuda_get_device_properties(&prop, device));
     size_t free_bytes = 0;
     size_t total_bytes = 0;
-    CUDA_OK(cudaMemGetInfo(&free_bytes, &total_bytes));
+    CUDA_OK(cuda_mem_get_info(&free_bytes, &total_bytes));
     std::vector<std::string> shards = read_shard_list(shard_list_file);
     if (shards.empty()) {
         std::fprintf(stderr, "[cuda-train] shard list is empty: %s\n", shard_list_file.c_str());
@@ -390,7 +390,7 @@ int main() {
     for (float &v : h_w) {
         v = dist(rng);
     }
-    ResumeState resume_state;
+    resume_state resume_state;
     std::string resume_path = env_str("NEURX_PRETRAIN_RESUME_FROM", output_dir + "/checkpoint.state");
     int start_step = 1;
     long long pairs_seen = 0;
@@ -428,16 +428,16 @@ int main() {
     float *d_err = nullptr;
     float *d_grad = nullptr;
     float *d_loss = nullptr;
-    CUDA_OK(cudaMalloc(&d_w, matrix_elems * sizeof(float)));
-    CUDA_OK(cudaMalloc(&d_x, batch_elems * sizeof(float)));
-    CUDA_OK(cudaMalloc(&d_y, batch_elems * sizeof(float)));
-    CUDA_OK(cudaMalloc(&d_err, batch_elems * sizeof(float)));
-    CUDA_OK(cudaMalloc(&d_grad, matrix_elems * sizeof(float)));
-    CUDA_OK(cudaMalloc(&d_loss, sizeof(float)));
-    CUDA_OK(cudaMemcpy(d_w, h_w.data(), matrix_elems * sizeof(float), cudaMemcpyHostToDevice));
-    cublasHandle_t handle = nullptr;
-    CUBLAS_OK(cublasCreate(&handle));
-    PairReader reader(std::move(shards));
+    CUDA_OK(cuda_malloc(&d_w, matrix_elems * sizeof(float)));
+    CUDA_OK(cuda_malloc(&d_x, batch_elems * sizeof(float)));
+    CUDA_OK(cuda_malloc(&d_y, batch_elems * sizeof(float)));
+    CUDA_OK(cuda_malloc(&d_err, batch_elems * sizeof(float)));
+    CUDA_OK(cuda_malloc(&d_grad, matrix_elems * sizeof(float)));
+    CUDA_OK(cuda_malloc(&d_loss, sizeof(float)));
+    CUDA_OK(cuda_memcpy(d_w, h_w.data(), matrix_elems * sizeof(float), cuda_memcpy_host_to_device));
+    cublas_handle_t handle = nullptr;
+    CUBLAS_OK(cublas_create(&handle));
+    pair_reader reader(std::move(shards));
     if (resumed && !reader.restore(resume_state.shard_index,
                                    resume_state.line_in_shard,
                                    resume_state.pending_offset)) {
@@ -478,9 +478,9 @@ int main() {
             steps = step - 1;
             break;
         }
-        CUDA_OK(cudaMemcpy(d_x, h_x.data(), batch_elems * sizeof(float), cudaMemcpyHostToDevice));
-        CUDA_OK(cudaMemcpy(d_y, h_y.data(), batch_elems * sizeof(float), cudaMemcpyHostToDevice));
-        CUBLAS_OK(cublasSgemm(handle,
+        CUDA_OK(cuda_memcpy(d_x, h_x.data(), batch_elems * sizeof(float), cuda_memcpy_host_to_device));
+        CUDA_OK(cuda_memcpy(d_y, h_y.data(), batch_elems * sizeof(float), cuda_memcpy_host_to_device));
+        CUBLAS_OK(cublas_sgemm(handle,
                               CUBLAS_OP_N, CUBLAS_OP_N,
                               vocab_size, batch_pairs, vocab_size,
                               &one,
@@ -488,10 +488,10 @@ int main() {
                               d_x, vocab_size,
                               &zero,
                               d_err, vocab_size));
-        CUDA_OK(cudaMemset(d_loss, 0, sizeof(float)));
+        CUDA_OK(cuda_memset(d_loss, 0, sizeof(float)));
         error_loss_kernel<<<loss_blocks, 256>>>(d_err, d_y, d_loss, static_cast<int>(batch_elems));
-        CUDA_OK(cudaGetLastError());
-        CUBLAS_OK(cublasSgemm(handle,
+        CUDA_OK(cuda_get_last_error());
+        CUBLAS_OK(cublas_sgemm(handle,
                               CUBLAS_OP_N, CUBLAS_OP_T,
                               vocab_size, vocab_size, batch_pairs,
                               &one,
@@ -501,8 +501,8 @@ int main() {
                               d_grad, vocab_size));
         float inv_batch = 1.0f / static_cast<float>(std::max(1, actual_pairs));
         sgd_update_kernel<<<update_blocks, 256>>>(d_w, d_grad, lr, inv_batch, static_cast<int>(matrix_elems));
-        CUDA_OK(cudaGetLastError());
-        CUDA_OK(cudaMemcpy(&final_loss, d_loss, sizeof(float), cudaMemcpyDeviceToHost));
+        CUDA_OK(cuda_get_last_error());
+        CUDA_OK(cuda_memcpy(&final_loss, d_loss, sizeof(float), cuda_memcpy_device_to_host));
         final_loss = final_loss / static_cast<float>(std::max(1, actual_pairs));
         pairs_seen += actual_pairs;
         completed_step = step;
@@ -528,25 +528,25 @@ int main() {
             break;
         }
     }
-    CUDA_OK(cudaDeviceSynchronize());
+    CUDA_OK(cuda_device_synchronize());
     if (!save_training_checkpoint(output_dir, d_w, &h_w, completed_step, pairs_seen,
                                   vocab_size, batch_pairs, final_loss, reader)) {
         return 12;
     }
     std::filesystem::create_directories(output_dir);
     std::string weights_path = output_dir + "/weights.f32";
-    CUDA_OK(cudaMemcpy(h_w.data(), d_w, matrix_elems * sizeof(float), cudaMemcpyDeviceToHost));
+    CUDA_OK(cuda_memcpy(h_w.data(), d_w, matrix_elems * sizeof(float), cuda_memcpy_device_to_host));
     std::ofstream weights(weights_path, std::ios::binary);
     weights.write(reinterpret_cast<const char *>(h_w.data()), static_cast<std::streamsize>(matrix_elems * sizeof(float)));
     weights.close();
     write_checkpoint(output_dir, weights_path, completed_step, pairs_seen, vocab_size, batch_pairs, final_loss);
-    CUBLAS_OK(cublasDestroy(handle));
-    CUDA_OK(cudaFree(d_loss));
-    CUDA_OK(cudaFree(d_grad));
-    CUDA_OK(cudaFree(d_err));
-    CUDA_OK(cudaFree(d_y));
-    CUDA_OK(cudaFree(d_x));
-    CUDA_OK(cudaFree(d_w));
+    CUBLAS_OK(cublas_destroy(handle));
+    CUDA_OK(cuda_free(d_loss));
+    CUDA_OK(cuda_free(d_grad));
+    CUDA_OK(cuda_free(d_err));
+    CUDA_OK(cuda_free(d_y));
+    CUDA_OK(cuda_free(d_x));
+    CUDA_OK(cuda_free(d_w));
     std::printf("[cuda-train] complete steps=%d pairs=%lld loss=%.6f\n", completed_step, pairs_seen, final_loss);
     std::printf("[cuda-train] checkpoint=%s/final_model.neurx\n", output_dir.c_str());
     std::printf("[cuda-train] weights=%s\n", weights_path.c_str());

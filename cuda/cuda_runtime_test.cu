@@ -62,50 +62,50 @@ void test_cublas_sgemm() {
     print_test_header("cuBLAS SGEMM (Matrix Multiply)");
     int m = 3, n = 3, k = 3;
     int size = m * n;
-    float A_host[9] = {
+    float a_host[9] = {
         1.0f, 2.0f, 3.0f,
         4.0f, 5.0f, 6.0f,
         7.0f, 8.0f, 9.0f
     };
-    float B_host[9] = {
+    float b_host[9] = {
         1.0f, 0.0f, 0.0f,
         0.0f, 1.0f, 0.0f,
         0.0f, 0.0f, 1.0f
     };
-    float C_host[9] = {
+    float c_host[9] = {
         0.0f, 0.0f, 0.0f,
         0.0f, 0.0f, 0.0f,
         0.0f, 0.0f, 0.0f
     };
-    float C_expected[9] = {
+    float c_expected[9] = {
         1.0f, 2.0f, 3.0f,
         4.0f, 5.0f, 6.0f,
         7.0f, 8.0f, 9.0f
     };
-    void* A_gpu = neurx_cuda_malloc(size * sizeof(float));
-    void* B_gpu = neurx_cuda_malloc(size * sizeof(float));
-    void* C_gpu = neurx_cuda_malloc(size * sizeof(float));
-    neurx_cuda_memcpy_htod(A_gpu, A_host, size * sizeof(float));
-    neurx_cuda_memcpy_htod(B_gpu, B_host, size * sizeof(float));
-    neurx_cuda_memcpy_htod(C_gpu, C_host, size * sizeof(float));
+    void* a_gpu = neurx_cuda_malloc(size * sizeof(float));
+    void* b_gpu = neurx_cuda_malloc(size * sizeof(float));
+    void* c_gpu = neurx_cuda_malloc(size * sizeof(float));
+    neurx_cuda_memcpy_htod(a_gpu, a_host, size * sizeof(float));
+    neurx_cuda_memcpy_htod(b_gpu, b_host, size * sizeof(float));
+    neurx_cuda_memcpy_htod(c_gpu, c_host, size * sizeof(float));
     void* handle = neurx_cublas_create();
     CHECK(handle != NULL, "cuBLAS create failed");
     int status = neurx_cublas_sgemm(handle, m, n, k, 1.0f,
-                                    (float*)A_gpu, (float*)B_gpu,
-                                    0.0f, (float*)C_gpu);
+                                    (float*)a_gpu, (float*)b_gpu,
+                                    0.0f, (float*)c_gpu);
     CHECK(status == 0, "cuBLAS SGEMM failed");
-    float C_result[9];
-    neurx_cuda_memcpy_dtoh(C_result, C_gpu, size * sizeof(float));
-    int match = compare_arrays(C_result, C_expected, size, 1e-4);
+    float c_result[9];
+    neurx_cuda_memcpy_dtoh(c_result, c_gpu, size * sizeof(float));
+    int match = compare_arrays(c_result, c_expected, size, 1e-4);
     CHECK(match, "Matrix multiply result incorrect");
     printf("  Result (A @ I):\n");
     for (int i = 0; i < 3; i++) {
-        printf("    %.1f %.1f %.1f\n", C_result[i*3], C_result[i*3+1], C_result[i*3+2]);
+        printf("    %.1f %.1f %.1f\n", c_result[i*3], c_result[i*3+1], c_result[i*3+2]);
     }
     neurx_cublas_destroy(handle);
-    neurx_cuda_free(A_gpu);
-    neurx_cuda_free(B_gpu);
-    neurx_cuda_free(C_gpu);
+    neurx_cuda_free(a_gpu);
+    neurx_cuda_free(b_gpu);
+    neurx_cuda_free(c_gpu);
 }
 void test_linear_forward() {
     print_test_header("Linear Layer Forward Pass");

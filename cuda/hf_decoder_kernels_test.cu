@@ -10,19 +10,19 @@ bool close(float actual, float expected, float tolerance = 2.0e-5F) {
 template <typename T>
 T* device_copy(const std::vector<T>& values) {
   T* result = nullptr;
-  cudaMalloc(&result, values.size() * sizeof(T));
-  cudaMemcpy(result, values.data(), values.size() * sizeof(T), cudaMemcpyHostToDevice);
+  cuda_malloc(&result, values.size() * sizeof(T));
+  cuda_memcpy(result, values.data(), values.size() * sizeof(T), cuda_memcpy_host_to_device);
   return result;
 }
 std::vector<float> host_copy(float* values, std::size_t count) {
   std::vector<float> result(count);
-  cudaMemcpy(result.data(), values, count * sizeof(float), cudaMemcpyDeviceToHost);
+  cuda_memcpy(result.data(), values, count * sizeof(float), cuda_memcpy_device_to_host);
   return result;
 }
 }
 int main() {
   int devices = 0;
-  if (cudaGetDeviceCount(&devices) != cudaSuccess || devices == 0) {
+  if (cuda_get_device_count(&devices) != cuda_success || devices == 0) {
     std::puts("hf-decoder-cuda-kernels SKIP reason=no-CUDA-device (binary compiled)");
     return 0;
   }
@@ -31,7 +31,7 @@ int main() {
   float* rms_input = device_copy<float>({1.0F, 2.0F, -1.0F, -2.0F});
   float* rms_weight = device_copy<float>({0.5F, 1.5F, 2.0F, 0.25F});
   float* rms_output = nullptr;
-  cudaMalloc(&rms_output, 4 * sizeof(float));
+  cuda_malloc(&rms_output, 4 * sizeof(float));
   rms_norm<<<1, 1>>>(rms_input, rms_weight, rms_output, 1, 4, 1.0e-6F);
   const auto rms = host_copy(rms_output, 4);
   const float inverse = 1.0F / std::sqrt(2.5F + 1.0e-6F);
@@ -50,15 +50,15 @@ int main() {
   float* key = device_copy<float>({1.0F, 0.0F, 0.0F, 1.0F});
   float* value = device_copy<float>({2.0F, 3.0F, 5.0F, 7.0F});
   float* attention = nullptr;
-  cudaMalloc(&attention, 8 * sizeof(float));
+  cuda_malloc(&attention, 8 * sizeof(float));
   attention_gqa<<<1, 4>>>(query, key, value, attention, 2, 0, 2, 1, 2);
   const auto result = host_copy(attention, 8);
   ok = ok && close(result[0], 2.0F) && close(result[1], 3.0F);
   ok = ok && close(result[2], 2.0F) && close(result[3], 3.0F);
   void* allocations[] = {rms_input, rms_weight, rms_output, rope_values,
                          query, key, value, attention};
-  for (void* pointer : allocations) cudaFree(pointer);
-  if (cudaGetLastError() != cudaSuccess || !ok) {
+  for (void* pointer : allocations) cuda_free(pointer);
+  if (cuda_get_last_error() != cuda_success || !ok) {
     std::puts("hf-decoder-cuda-kernels FAIL");
     return 1;
   }

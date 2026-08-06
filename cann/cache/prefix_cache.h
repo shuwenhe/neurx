@@ -22,12 +22,12 @@ struct prefix_cache_hit {
   bool matched = false;
   std::size_t token_count = 0;
 };
-class PrefixCache {
+class prefix_cache {
  public:
-  PrefixCache(PagedKvCache* cache, prefix_cache_config config = {});
-  ~PrefixCache();
-  PrefixCache(const PrefixCache&) = delete;
-  PrefixCache& operator=(const PrefixCache&) = delete;
+  prefix_cache(paged_kv_cache* cache, prefix_cache_config config = {});
+  ~prefix_cache();
+  prefix_cache(const prefix_cache&) = delete;
+  prefix_cache& operator=(const prefix_cache&) = delete;
   status insert(const std::string& request_id,
                 const std::vector<int32_t>& tokens);
   status attach_longest(const std::string& request_id,
@@ -42,12 +42,12 @@ class PrefixCache {
     std::vector<int32_t> tokens;
     std::vector<uint32_t> blocks;
   };
-  using Entries = std::list<entry>;
+  using entries = std::list<entry>;
   void evict_lru_locked();
-  PagedKvCache* cache_ = nullptr;
+  paged_kv_cache* cache_ = nullptr;
   prefix_cache_config config_;
   mutable std::mutex mutex_;
-  Entries entries_;
+  entries entries_;
   std::size_t retained_blocks_ = 0;
   uint64_t lookups_ = 0;
   uint64_t hits_ = 0;

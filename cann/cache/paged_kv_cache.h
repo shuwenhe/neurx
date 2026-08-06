@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 namespace neurx::cann {
-enum class KvStorageFormat { contiguous_nd, fractal_nz };
+enum class kv_storage_format { contiguous_nd, fractal_nz };
 struct kv_cache_config_2 {
   std::size_t block_count = 0;
   std::size_t block_bytes = 0;
@@ -16,7 +16,7 @@ struct kv_cache_config_2 {
   std::size_t kv_heads = 0;
   std::size_t head_size = 0;
   std::size_t element_bytes = 0;
-  KvStorageFormat format = KvStorageFormat::contiguous_nd;
+  kv_storage_format format = kv_storage_format::contiguous_nd;
   static kv_cache_config_2 fp16_transformer(std::size_t block_count,
                                         std::size_t tokens_per_block,
                                         std::size_t layers,
@@ -38,23 +38,23 @@ struct kv_cache_stats {
   std::size_t active_requests = 0;
   std::size_t allocated_tokens = 0;
 };
-class DeviceAllocator {
+class device_allocator {
  public:
-  virtual ~DeviceAllocator() = default;
+  virtual ~device_allocator() = default;
   virtual status allocate(void** address, std::size_t bytes) = 0;
   virtual void release(void* address) = 0;
 };
-class AclDeviceAllocator final : public DeviceAllocator {
+class acl_device_allocator final : public device_allocator {
  public:
   status allocate(void** address, std::size_t bytes) override;
   void release(void* address) override;
 };
-class PagedKvCache {
+class paged_kv_cache {
  public:
-  explicit PagedKvCache(kv_cache_config_2 config, DeviceAllocator* allocator = nullptr);
-  ~PagedKvCache();
-  PagedKvCache(const PagedKvCache&) = delete;
-  PagedKvCache& operator=(const PagedKvCache&) = delete;
+  explicit paged_kv_cache(kv_cache_config_2 config, device_allocator* allocator = nullptr);
+  ~paged_kv_cache();
+  paged_kv_cache(const paged_kv_cache&) = delete;
+  paged_kv_cache& operator=(const paged_kv_cache&) = delete;
   status initialize();
   status reserve(const std::string& request_id, std::size_t total_tokens);
   status resize(const std::string& request_id, std::size_t total_tokens);
@@ -93,8 +93,8 @@ class PagedKvCache {
   void* slot_address(bool value, std::size_t layer, uint32_t block,
                      std::size_t token_offset) const;
   kv_cache_config_2 config_;
-  AclDeviceAllocator default_allocator_;
-  DeviceAllocator* allocator_ = nullptr;
+  acl_device_allocator default_allocator_;
+  device_allocator* allocator_ = nullptr;
   void* storage_ = nullptr;
   mutable std::mutex mutex_;
   std::vector<uint32_t> free_blocks_;

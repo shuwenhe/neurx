@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 namespace {
-using neurx::runtime::model::Json;
+using neurx::runtime::model::json;
 volatile std::sig_atomic_t running = 1;
 void stop(int) { running = 0; }
 std::string environment(const char* name, const char* fallback) {
@@ -77,12 +77,12 @@ void respond(int fd, int code, const char* status, const std::string& body) {
 std::vector<int32_t> eos_tokens(const std::string& directory) {
   const std::filesystem::path path = std::filesystem::path(directory) / "generation_config.json";
   if (!std::filesystem::exists(path)) return {};
-  const Json root = Json::parse_file(path.string());
+  const json root = json::parse_file(path.string());
   if (!root.contains("eos_token_id")) return {};
-  const Json& value = root.at("eos_token_id");
+  const json& value = root.at("eos_token_id");
   std::vector<int32_t> result;
   if (value.is_array()) {
-    for (const Json& item : value.as_array()) result.push_back(static_cast<int32_t>(item.as_int()));
+    for (const json& item : value.as_array()) result.push_back(static_cast<int32_t>(item.as_int()));
   } else if (value.is_number()) {
     result.push_back(static_cast<int32_t>(value.as_int()));
   }
@@ -97,7 +97,7 @@ int main() {
   try {
     const std::string directory = environment("NEURX_MODEL_DIR", "");
     if (directory.empty()) throw std::runtime_error("NEURX_MODEL_DIR is required");
-    neurx::cuda::HfDecoderCuda model(directory, environment_int("NEURX_CUDA_DEVICE", 0));
+    neurx::cuda::hf_decoder_cuda model(directory, environment_int("NEURX_CUDA_DEVICE", 0));
     const std::vector<int32_t> stop_tokens = eos_tokens(directory);
     const std::string host = environment("NEURX_HF_CUDA_HOST", "127.0.0.1");
     const int port = environment_int("NEURX_HF_CUDA_PORT", 18081);
@@ -116,9 +116,9 @@ int main() {
         } else if (method == "GET" && path == "/health") {
           respond(client, 200, "OK", "{\"status\":\"ok\",\"backend\":\"hf-cuda\"}");
         } else if (method == "POST" && path == "/v1/token-stream") {
-          const Json request = Json::parse(body);
+          const json request = json::parse(body);
           std::vector<int32_t> ids;
-          for (const Json& item : request.at("input_ids").as_array()) {
+          for (const json& item : request.at("input_ids").as_array()) {
             ids.push_back(static_cast<int32_t>(item.as_int()));
           }
           const int maximum = static_cast<int>(request.at("max_new_tokens").as_int());
@@ -127,10 +127,10 @@ int main() {
                                  "Cache-Control: no-cache\r\nConnection: close\r\n\r\n")) {
             throw std::runtime_error("token stream header write failed");
           }
-          neurx::cuda::HfCudaKvCache cache;
+          neurx::cuda::hf_cuda_kv_cache cache;
           std::vector<float> logits = model.prefill(ids, &cache);
           for (int index = 0; index < maximum; ++index) {
-            const int32_t token = neurx::cuda::HfDecoderCuda::greedy(logits);
+            const int32_t token = neurx::cuda::hf_decoder_cuda::greedy(logits);
             const bool finished = contains(stop_tokens, token) || index + 1 == maximum;
             if (!write_all(client, "{\"token\":" + std::to_string(token) +
                                        ",\"finish\":" + (finished ? "true" : "false") + "}\n")) {

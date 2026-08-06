@@ -14,7 +14,7 @@ struct request_kv_plan {
   std::vector<int32_t> write_slots;
 };
 struct transformer_batch_plan {
-  inference::Phase phase = inference::Phase::prefill;
+  inference::phase phase = inference::phase::prefill;
   std::size_t batch_size = 0;
   std::size_t token_count = 0;
   std::size_t hidden_size = 0;
@@ -36,8 +36,8 @@ struct paged_attention_metadata {
 status validate_310p_model(const model_metadata& model,
                            const kv_cache_config_2& cache);
 status build_transformer_batch_plan(
-    const inference::device_batch& batch, const Nxtrfmv2Model& model,
-    const PagedKvCache& cache, transformer_batch_plan* plan);
+    const inference::device_batch& batch, const nxtrfmv2_model& model,
+    const paged_kv_cache& cache, transformer_batch_plan* plan);
 status build_paged_attention_metadata(const transformer_batch_plan& plan,
                                       paged_attention_metadata* metadata);
 }
