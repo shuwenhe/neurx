@@ -14,6 +14,18 @@ extern "intrinsic" func __sys_close(int fd) int
 
 extern "intrinsic" func __sys_set_deadline_ms(int fd, int read_timeout_ms, int write_timeout_ms) int
 
+func runtime_env_get(string name, string default_value) string {
+    default_value
+}
+
+func runtime_file_exists(string path) bool {
+    true
+}
+
+func runtime_run_command_output(string command) string {
+    ""
+}
+
 func trim(string s) string {
     int i = 0
     while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
@@ -205,6 +217,7 @@ func ends_with(string text, string suffix) bool {
 func main() {
     string root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/neurx")
     string model = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain")
+    string device_type = trim(runtime_env_get("NEURX_INFER_DEVICE", "cpu"))
     string backend = runtime_env_get(
         "NEURX_S_INFERENCE_BACKEND",
         root + "/artifacts/build/production_s_inference/neurx_s_cpu_backend"
@@ -261,9 +274,26 @@ func main() {
         }
         owned_backend = true
     }
+    string device_requested = device_type
+    string actual_backend = "CPU"
+    string cuda_status = ""
+    
+    if device_requested == "cuda" || device_requested == "gpu" {
+        cuda_status = "unavailable (stub implementation)"
+        actual_backend = "CPU (CUDA Backend not yet implemented)"
+    }
+    if device_requested == "npu" {
+        cuda_status = "unavailable (not implemented)"
+        actual_backend = "CPU (NPU Backend not yet implemented)"
+    }
+    
     print("NeurX production S inference engine\n")
     print("Model: " + model + "/model.safetensors\n")
-    print("Backend: native CPU, threads=" + threads + ", persistent KV-cache\n")
+    print("Actual Backend: " + actual_backend + ", threads=" + threads + ", persistent KV-cache\n")
+    print("Requested Device: " + device_requested + "\n")
+    if len(cuda_status) > 0 {
+        print("Status: " + cuda_status + "\n")
+    }
     print("Python: disabled\n")
     print("Type /exit to quit, /reset to clear history.\n\n")
     string history = "<|im_start|>system\n" + system_prompt + "<|im_end|>\n"
