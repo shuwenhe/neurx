@@ -220,7 +220,7 @@ func main() {
     string device_type = trim(runtime_env_get("NEURX_INFER_DEVICE", "cpu"))
     string backend = runtime_env_get(
         "NEURX_S_INFERENCE_BACKEND",
-        root + "/artifacts/build/production_s_inference/neurx_s_cpu_backend"
+        root + "/artifacts/build/production_s_inference/cpu_backend.ir"
     )
     string host = runtime_env_get("NEURX_S_HOST", "127.0.0.1")
     string port = runtime_env_get("NEURX_S_PORT", "18083")
@@ -258,11 +258,7 @@ func main() {
             " NEURX_S_PORT=" + shell_escape(port) +
             " NEURX_S_READY_FILE=" + shell_escape(ready_file) +
             " nohup " + backend_cmd +
-            " >" + shell_escape(log_file) + " 2>&1 < /dev/null & " +
-            "pid=$!; printf '%s\\n' \"$pid\" >" + shell_escape(pid_file) + "; " +
-            "i=0; while test $i -lt 1200 && kill -0 \"$pid\" 2>/dev/null && " +
-            "test ! -s " + shell_escape(ready_file) + "; do " +
-            "sleep 0.1; i=$((i + 1)); done"
+            " >" + shell_escape(log_file) + " 2>&1 < /dev/null &"
         _ = runtime_run_command_output(launch)
         int attempts = 0
         while attempts < 10000 && !backend_ready(host, port_number) {

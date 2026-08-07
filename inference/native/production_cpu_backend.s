@@ -241,7 +241,7 @@ func int_to_string(int value) string {
 }
 
 func health_check_response() string {
-    return http_response_ok("{\"status\":\"ok\"}")
+    return http_response_ok("{\"status\":\"ok\",\"backend\":\"neurx-s-cpu\"}")
 }
 
 func contains_keyword(string text, string keyword) bool {
@@ -391,9 +391,9 @@ func main() {
             }
         }
     }
-    if __sys_bind(server_fd, "127.0.0.1", 18082, 2) < 0 {
+    if __sys_bind(server_fd, "127.0.0.1", 18083, 2) < 0 {
         print("ERROR: Socket binding failed!\n")
-        print("HTTP server listening on 127.0.0.1:18082 (compatibility mode)\n")
+        print("HTTP server listening on 127.0.0.1:18083 (compatibility mode)\n")
         _ = __sys_close(server_fd)
         int counter = 0
         while true {
@@ -405,7 +405,7 @@ func main() {
     }
     if __sys_listen(server_fd, 128) < 0 {
         print("ERROR: Socket listen failed!\n")
-        print("HTTP server listening on 127.0.0.1:18082 (compatibility mode)\n")
+        print("HTTP server listening on 127.0.0.1:18083 (compatibility mode)\n")
         _ = __sys_close(server_fd)
         int counter = 0
         while true {
@@ -415,7 +415,7 @@ func main() {
             }
         }
     }
-    print("HTTP server listening on 127.0.0.1:18082\n")
+    print("HTTP server listening on 127.0.0.1:18083\n")
     string ready_file = runtime_env_get("NEURX_S_READY_FILE", "")
     if len(ready_file) > 0 {
         print("Signaling readiness at: " + ready_file + "\n")
