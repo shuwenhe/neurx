@@ -135,12 +135,16 @@ func starts_with(string text, string prefix) bool {
 func http_request(string host, int port, string method, string path, string body, string extra_headers) string {
     int fd = __sys_socket(2, 1, 0)
     if fd < 0 {
+        print("[HTTP] Socket creation failed\n")
         return ""
     }
+    print("[HTTP] Socket created: fd=" + int_to_string(fd) + "\n")
     if __sys_connect(fd, host, port, 2) < 0 {
+        print("[HTTP] Connection failed to " + host + ":" + int_to_string(port) + "\n")
         _ = __sys_close(fd)
         return ""
     }
+    print("[HTTP] Connected to " + host + ":" + int_to_string(port) + "\n")
     _ = __sys_set_deadline_ms(fd, 600000, 30000)
     string request = method + " " + path + " HTTP/1.1\r\n" +
         "Host: " + host + "\r\n" +
@@ -261,9 +265,22 @@ func main() {
             " >" + shell_escape(log_file) + " 2>&1 < /dev/null &"
         _ = runtime_run_command_output(launch)
         int attempts = 0
-        while attempts < 10000 && !backend_ready(host, port_number) {
+        int max_attempts = 200
+        print("[DEBUG] Starting health check attempts for backend at " + host + ":" + int_to_string(port_number) + "\n")
+        while attempts < max_attempts && !backend_ready(host, port_number) {
             attempts = attempts + 1
+            if attempts == 1 {
+                string debug_response = http_request(host, port_number, "GET", "/health", "", "")
+                print("[DEBUG] First HTTP response length: " + int_to_string(len(debug_response)) + "\n")
+                if len(debug_response) > 0 {
+                    print("[DEBUG] Response preview: " + __host_slice(debug_response, 0, 200) + "\n")
+                }
+            }
+            if attempts < 10 {
+                runtime_run_command_output("sleep 0.05")
+            }
         }
+        print("[DEBUG] Health check completed after " + int_to_string(attempts) + " attempts\n")
         if !backend_ready(host, port_number) {
             print("error: NeurX S backend failed to start; log: " + log_file + "\n")
             return 1
