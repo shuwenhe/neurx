@@ -53,6 +53,7 @@ S_RUNNER_BIN := $(S_RUNNER_BUILD_DIR)/s_ir_runner$(BIN_EXT)
 PRODUCTION_S_INFERENCE_DIR := $(CURDIR_UNIX)/artifacts/build/production_s_inference
 PRODUCTION_S_BACKEND := $(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir
 PRODUCTION_S_CHAT_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat.ir
+PRODUCTION_S_CHAT_DIRECT_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat_direct.ir
 NEURX_CPU_THREADS ?= 6
 CUDA_NVCC ?= $(shell command -v nvcc 2>/dev/null)
 CUDA_TRAIN_BRIDGE_SRC := $(CURDIR_UNIX)/cuda/neurx_transformer_train_v2.cu
@@ -916,10 +917,15 @@ $(PRODUCTION_S_CHAT_IR): inference/production_chat.s | $(PRODUCTION_S_INFERENCE_
 	@echo "Compiling production chat control plane in S..."
 	@$(S_SEED_COMPILER) inference/production_chat.s '$(PRODUCTION_S_CHAT_IR)'
 
-build-production-s-inference: build-s-ir-runner $(PRODUCTION_S_BACKEND) $(PRODUCTION_S_CHAT_IR)
+$(PRODUCTION_S_CHAT_DIRECT_IR): inference/production_chat_direct.s | $(PRODUCTION_S_INFERENCE_DIR)
+	@echo "Compiling direct production chat (no HTTP backend)..."
+	@$(S_SEED_COMPILER) inference/production_chat_direct.s '$(PRODUCTION_S_CHAT_DIRECT_IR)'
+
+build-production-s-inference: build-s-ir-runner $(PRODUCTION_S_BACKEND) $(PRODUCTION_S_CHAT_IR) $(PRODUCTION_S_CHAT_DIRECT_IR)
 	@test -f '$(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir'
 	@test -f '$(PRODUCTION_S_CHAT_IR)'
-	@echo "✓ NeurX production S inference ready (pure S backend + KV-cache)"
+	@test -f '$(PRODUCTION_S_CHAT_DIRECT_IR)'
+	@echo "✓ NeurX production S inference ready (pure S backend + KV-cache + direct chat)"
 
 build-real-model-chat-s: build-production-s-inference
 
@@ -943,18 +949,12 @@ chat-gpu: build-real-model-chat-s
 		echo "Model weights not found: $(CHAT_MODEL_PATH)/model.safetensors"; \
 		exit 1; \
 	}
-	@if [ -z "$$(command -v nvidia-smi 2>/dev/null)" ]; then \
-		echo "Error: NVIDIA GPU not detected. Install NVIDIA CUDA Toolkit."; \
-		exit 1; \
-	fi
 	@mkdir -p /tmp
 	@NEURX_ROOT='$(CURDIR_UNIX)' \
 		NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
 		NEURX_CHAT_MAX_NEW_TOKENS='$(CHAT_MAX_NEW_TOKENS)' \
-		NEURX_S_PORT='18083' \
-		NEURX_S_INFERENCE_BACKEND='$(PRODUCTION_S_BACKEND)' \
-		NEURX_INFER_DEVICE='cuda' \
-		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_CHAT_IR)'
+		NEURX_INFER_DEVICE='gpu' \
+		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_CHAT_DIRECT_IR)'
 
 chat-npu: build-real-model-chat-s
 	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' || { \
