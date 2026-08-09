@@ -393,7 +393,7 @@ build-posttrain-golden-s: check-bash
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir'
 posttrain-install-deps:
 	@'$(POSTTRAIN_PYTHON)' -m pip install -r '$(CURDIR_UNIX)/posttrain/requirements.txt'
-posttrain-cpu: check-bash
+posttrain-cpu: check-bash build-s-ir-runner build-posttrain-sft-s
 	@echo "======================================================"
 	@echo "[PostTrain] Real LoRA SFT Training (CPU only)"
 	@echo "======================================================"
@@ -401,6 +401,7 @@ posttrain-cpu: check-bash
 	@mkdir -p '$(POSTTRAIN_OUTPUT_DIR)' '$(LOG_DIR)'
 	@cd '$(CURDIR_UNIX)' && \
 		set -o pipefail; \
+		export NEURX_ROOT='$(CURDIR_UNIX)'; \
 		export NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)'; \
 		export NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)'; \
 		export NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)'; \
@@ -415,12 +416,12 @@ posttrain-cpu: check-bash
 		export NEURX_POSTTRAIN_LORA_ALPHA='$(POSTTRAIN_LORA_ALPHA)'; \
 		export NEURX_POSTTRAIN_DEVICE='cpu'; \
 		export NEURX_POSTTRAIN_MERGE_MODEL='$(POSTTRAIN_MERGE_MODEL)'; \
-		'$(POSTTRAIN_PYTHON)' 'posttrain/trainer/train_sft.py' 2>&1 | tee -a '$(LOG_DIR)/posttrain_sft_cpu_$(shell date +%Y%m%d_%H%M%S).log'
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' '$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_sft_cpu_$(shell date +%Y%m%d_%H%M%S).log'
 	@echo ""
 	@echo "[✓] CPU training completed"
 	@echo "Model: $(POSTTRAIN_OUTPUT_DIR)"
 	@echo "Adapter: $(POSTTRAIN_OUTPUT_DIR)/adapter"
-posttrain-gpu: check-bash
+posttrain-gpu: check-bash build-s-ir-runner build-posttrain-sft-s
 	@echo "======================================================"
 	@echo "[PostTrain] Real LoRA SFT Training (NVIDIA GPU)"
 	@echo "======================================================"
@@ -436,6 +437,7 @@ posttrain-gpu: check-bash
 	@mkdir -p '$(POSTTRAIN_OUTPUT_DIR)' '$(LOG_DIR)'
 	@cd '$(CURDIR_UNIX)' && \
 		set -o pipefail; \
+		export NEURX_ROOT='$(CURDIR_UNIX)'; \
 		export NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)'; \
 		export NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)'; \
 		export NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)'; \
@@ -450,12 +452,12 @@ posttrain-gpu: check-bash
 		export NEURX_POSTTRAIN_LORA_ALPHA='$(POSTTRAIN_LORA_ALPHA)'; \
 		export NEURX_POSTTRAIN_DEVICE='cuda'; \
 		export NEURX_POSTTRAIN_MERGE_MODEL='$(POSTTRAIN_MERGE_MODEL)'; \
-		'$(POSTTRAIN_PYTHON)' 'posttrain/trainer/train_sft.py' 2>&1 | tee -a '$(LOG_DIR)/posttrain_sft_gpu_$(shell date +%Y%m%d_%H%M%S).log'
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' '$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_sft_gpu_$(shell date +%Y%m%d_%H%M%S).log'
 	@echo ""
 	@echo "[✓] GPU training completed"
 	@echo "Model: $(POSTTRAIN_OUTPUT_DIR)"
 	@echo "Adapter: $(POSTTRAIN_OUTPUT_DIR)/adapter"
-posttrain-npu: check-bash
+posttrain-npu: check-bash build-s-ir-runner build-posttrain-sft-s
 	@echo "======================================================"
 	@echo "[PostTrain] Real LoRA SFT Training (Ascend NPU)"
 	@echo "======================================================"
@@ -471,6 +473,7 @@ posttrain-npu: check-bash
 	@cd '$(CURDIR_UNIX)' && \
 		set -o pipefail; \
 		export ASCEND_HOME="$${ASCEND_HOME:-$(ASCEND_HOME_DEFAULT)}"; \
+		export NEURX_ROOT='$(CURDIR_UNIX)'; \
 		export NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)'; \
 		export NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)'; \
 		export NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)'; \
@@ -485,7 +488,7 @@ posttrain-npu: check-bash
 		export NEURX_POSTTRAIN_LORA_ALPHA='$(POSTTRAIN_LORA_ALPHA)'; \
 		export NEURX_POSTTRAIN_DEVICE='npu'; \
 		export NEURX_POSTTRAIN_MERGE_MODEL='$(POSTTRAIN_MERGE_MODEL)'; \
-		'$(POSTTRAIN_PYTHON)' 'posttrain/trainer/train_sft.py' 2>&1 | tee -a '$(LOG_DIR)/posttrain_sft_npu_$(shell date +%Y%m%d_%H%M%S).log'
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' '$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_sft_npu_$(shell date +%Y%m%d_%H%M%S).log'
 	@echo ""
 	@echo "[✓] NPU training completed"
 	@echo "Model: $(POSTTRAIN_OUTPUT_DIR)"
@@ -908,7 +911,7 @@ build-production-s-inference: build-s-ir-runner $(PRODUCTION_S_BACKEND) $(PRODUC
 
 build-real-model-chat-s: build-production-s-inference
 
-chat-cpu: build-real-model-chat-s
+chat-cpu: build-real-inference-s
 	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' || { \
 		echo "Model weights not found: $(CHAT_MODEL_PATH)/model.safetensors"; \
 		exit 1; \
@@ -918,9 +921,9 @@ chat-cpu: build-real-model-chat-s
 		NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
 		NEURX_CHAT_MAX_NEW_TOKENS='$(CHAT_MAX_NEW_TOKENS)' \
 		NEURX_INFER_DEVICE='cpu' \
-		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_CHAT_ENHANCED_IR)'
+		'$(CURDIR_UNIX)/scripts/run_real_posttrain_inference.sh'
 
-chat-gpu: build-real-model-chat-s
+chat-gpu: build-real-inference-s
 	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' || { \
 		echo "Model weights not found: $(CHAT_MODEL_PATH)/model.safetensors"; \
 		exit 1; \
@@ -930,7 +933,7 @@ chat-gpu: build-real-model-chat-s
 		NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
 		NEURX_CHAT_MAX_NEW_TOKENS='$(CHAT_MAX_NEW_TOKENS)' \
 		NEURX_INFER_DEVICE='gpu' \
-		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_CHAT_ENHANCED_IR)'
+		'$(CURDIR_UNIX)/scripts/run_real_posttrain_inference.sh'
 
 chat-npu: build-real-model-chat-s
 	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' || { \

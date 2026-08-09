@@ -3,7 +3,13 @@ set -euo pipefail
 
 neurx_root="${NEURX_ROOT:-/home/shuwen/shuwen/neurx}"
 configured_model="${NEURX_CHAT_MODEL_PATH:-$(cd "${neurx_root}/.." && pwd)/posttrain}"
-python_bin="${NEURX_CHAT_PYTHON:-/home/shuwen/.venv/bin/python}"
+if [[ -n "${NEURX_CHAT_PYTHON:-}" ]]; then
+    python_bin="$NEURX_CHAT_PYTHON"
+elif [[ -x /home/shuwen/.venv/bin/python ]]; then
+    python_bin=/home/shuwen/.venv/bin/python
+else
+    python_bin="$(command -v python3)"
+fi
 inference_script="${NEURX_POSTTRAIN_INFERENCE_SCRIPT:-$neurx_root/inference/posttrain_inference.py}"
 max_new_tokens="${NEURX_CHAT_MAX_NEW_TOKENS:-128}"
 
@@ -17,6 +23,7 @@ args=(
     "$inference_script"
     --model-dir "$model_dir"
     --neurx-root "$neurx_root"
+    --device "${NEURX_INFER_DEVICE:-auto}"
     --max-new-tokens "$max_new_tokens"
 )
 
