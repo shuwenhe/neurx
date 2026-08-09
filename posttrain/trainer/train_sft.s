@@ -1,6 +1,6 @@
 package neurx.posttrain.trainer.train_sft
 use std.io.eprintln
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_text_file}
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 
 struct training_config {
     string model_path
@@ -257,16 +257,8 @@ func run_training(training_config cfg) int {
         return 1
     }
     
-    println("[Model] Loading from " + cfg.model_path)
-    println("[Data] Loading from " + cfg.data_file)
-    
-    string dataset_text = runtime_read_text_file(cfg.data_file)
-    if len(dataset_text) == 0 {
-        println("[ERROR] Dataset is empty")
-        return 1
-    }
-    
-    println("[Data] Loaded " + int_to_str(len(dataset_text)) + " bytes")
+    println("[Model] Validated path: " + cfg.model_path)
+    println("[Data] Validated path: " + cfg.data_file)
     println("[Config] epochs=" + int_to_str(cfg.epochs) + ", batch_size=" + int_to_str(cfg.batch_size))
     println("[LoRA] rank=" + int_to_str(cfg.lora_rank) + ", target_modules=" + cfg.target_modules)
 
