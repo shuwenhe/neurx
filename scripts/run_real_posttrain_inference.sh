@@ -2,7 +2,7 @@
 set -euo pipefail
 
 neurx_root="${NEURX_ROOT:-/home/shuwen/shuwen/neurx}"
-configured_model="${NEURX_CHAT_MODEL_PATH:-/home/shuwen/shuwen/posttrain}"
+configured_model="${NEURX_CHAT_MODEL_PATH:-$(cd "${neurx_root}/.." && pwd)/posttrain}"
 python_bin="${NEURX_CHAT_PYTHON:-/home/shuwen/.venv/bin/python}"
 inference_script="${NEURX_POSTTRAIN_INFERENCE_SCRIPT:-$neurx_root/inference/posttrain_inference.py}"
 max_new_tokens="${NEURX_CHAT_MAX_NEW_TOKENS:-128}"

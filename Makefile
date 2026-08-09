@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain posttrain-cpu posttrain-gpu posttrain-npu posttrain-benchmark posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain verify-lora-weights verify-inference verify-adapter-integration verify-posttrain-complete runtime-test test-golden regenerate-golden pretrain-watch chat-cpu chat-gpu chat-npu real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 production-inference production-chat benchmark-production-inference \
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain-cpu posttrain-gpu posttrain-npu posttrain-benchmark posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain verify-lora-weights verify-inference verify-adapter-integration verify-posttrain-complete runtime-test test-golden regenerate-golden pretrain-watch chat-cpu chat-gpu chat-npu real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 production-inference production-chat benchmark-production-inference \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -108,9 +108,9 @@ PRETRAIN_RUNNER_BIN := $(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_lar
 NEURX_SHARD_CMD ?= wikipedia
 NEURX_SHARD_RESUME ?= 1
 NEURX_SHARD_FORCE_REBUILD ?= 0
-POSTTRAIN_MODEL_PATH ?= /home/shuwen/shuwen/model/qwen_2.5-0.5B-instruct
-POSTTRAIN_DATA_FILE ?= /home/shuwen/shuwen/dataset/medical/train.json
-POSTTRAIN_OUTPUT_DIR ?= /home/shuwen/shuwen/posttrain
+POSTTRAIN_MODEL_PATH ?= $(CURDIR_UNIX)/../model/Qwen2.5-0.5B-Instruct
+POSTTRAIN_DATA_FILE ?= $(CURDIR_UNIX)/../dataset/medical/train.json
+POSTTRAIN_OUTPUT_DIR ?= $(CURDIR_UNIX)/../posttrain
 POSTTRAIN_PYTHON ?= $(if $(wildcard /home/shuwen/.venv/bin/python),/home/shuwen/.venv/bin/python,python3)
 POSTTRAIN_EPOCHS ?= 1
 POSTTRAIN_BATCH_SIZE ?= 1
@@ -121,7 +121,7 @@ POSTTRAIN_LEARNING_RATE ?= 0.0002
 POSTTRAIN_TARGET_MODULES ?= q_proj,k_proj,v_proj,o_proj
 POSTTRAIN_DEVICE ?= auto
 POSTTRAIN_MERGE_MODEL ?= 1
-POSTTRAIN_EVAL_DATA ?= /home/shuwen/shuwen/dataset/medical/test.json
+POSTTRAIN_EVAL_DATA ?= $(CURDIR_UNIX)/../dataset/medical/test.json
 POSTTRAIN_EVAL_OUTPUT ?= $(POSTTRAIN_OUTPUT_DIR)/evaluation
 POSTTRAIN_EVAL_MAX_SAMPLES ?= 256
 POSTTRAIN_EVAL_MAX_LENGTH ?= 256
@@ -134,7 +134,7 @@ POSTTRAIN_ADAPTER_DIR ?= $(POSTTRAIN_OUTPUT_DIR)/adapter
 POSTTRAIN_MERGED_MODEL_DIR ?= $(POSTTRAIN_OUTPUT_DIR)
 POSTTRAIN_LORA_ALPHA ?= 16
 POSTTRAIN_LORA_RANK ?= 8
-CHAT_MODEL_PATH ?= $(POSTTRAIN_OUTPUT_DIR)
+CHAT_MODEL_PATH ?= $(if $(wildcard $(CURDIR_UNIX)/../posttrain/model.safetensors),$(CURDIR_UNIX)/../posttrain,$(POSTTRAIN_OUTPUT_DIR))
 CHAT_MAX_NEW_TOKENS ?= 128
 POSTTRAIN_GOLDEN_DIR ?= /home/shuwen/shuwen/posttrain/golden
 POSTTRAIN_GOLDEN_SOURCE ?= $(CURDIR_UNIX)/scripts/posttrain_golden.s
@@ -147,7 +147,6 @@ help:
 	@echo "  make shard"
 	@echo "  make pretrain-npu"
 	@echo "  make pretrain-gpu"
-	@echo "  make posttrain"
 	@echo "  make posttrain-cpu"
 	@echo "  make posttrain-gpu"
 	@echo "  make posttrain-npu"
@@ -363,7 +362,7 @@ build-posttrain-sft-s: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_sft'
 	@cd '$(CURDIR_UNIX)' && \
 		rm -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir'; \
-		"$(POSTTRAIN_S_COMPILER)" 'posttrain/trainer/posttrain_main.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' 2>&1 || exit 1; \
+		"$(POSTTRAIN_S_COMPILER)" 'posttrain/trainer/train_sft.s' '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' 2>&1 || exit 1; \
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir'
 build-posttrain-verify-adapter-s: check-bash
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/posttrain_verify_adapter'
@@ -394,32 +393,6 @@ build-posttrain-golden-s: check-bash
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir'
 posttrain-install-deps:
 	@'$(POSTTRAIN_PYTHON)' -m pip install -r '$(CURDIR_UNIX)/posttrain/requirements.txt'
-posttrain: check-bash
-	@echo "======================================================"
-	@echo "[PostTrain] Real LoRA SFT Training (auto device)"
-	@echo "======================================================"
-	@mkdir -p '$(POSTTRAIN_OUTPUT_DIR)' '$(LOG_DIR)'
-	@cd '$(CURDIR_UNIX)' && \
-		set -o pipefail; \
-		export NEURX_POSTTRAIN_OUTPUT_DIR='$(POSTTRAIN_OUTPUT_DIR)'; \
-		export NEURX_POSTTRAIN_MODEL_PATH='$(POSTTRAIN_MODEL_PATH)'; \
-		export NEURX_POSTTRAIN_DATA_FILE='$(POSTTRAIN_DATA_FILE)'; \
-		export NEURX_POSTTRAIN_EPOCHS='$(POSTTRAIN_EPOCHS)'; \
-		export NEURX_POSTTRAIN_BATCH_SIZE='$(POSTTRAIN_BATCH_SIZE)'; \
-		export NEURX_POSTTRAIN_GRAD_ACCUM='$(POSTTRAIN_GRAD_ACCUM)'; \
-		export NEURX_POSTTRAIN_MAX_LENGTH='$(POSTTRAIN_MAX_LENGTH)'; \
-		export NEURX_POSTTRAIN_MAX_SAMPLES='$(POSTTRAIN_MAX_SAMPLES)'; \
-		export NEURX_POSTTRAIN_LR='$(POSTTRAIN_LEARNING_RATE)'; \
-		export NEURX_POSTTRAIN_TARGET_MODULES='$(POSTTRAIN_TARGET_MODULES)'; \
-		export NEURX_POSTTRAIN_LORA_RANK='$(POSTTRAIN_LORA_RANK)'; \
-		export NEURX_POSTTRAIN_LORA_ALPHA='$(POSTTRAIN_LORA_ALPHA)'; \
-		export NEURX_POSTTRAIN_DEVICE='$(POSTTRAIN_DEVICE)'; \
-		export NEURX_POSTTRAIN_MERGE_MODEL='$(POSTTRAIN_MERGE_MODEL)'; \
-		'$(POSTTRAIN_PYTHON)' 'posttrain/trainer/train_sft.py' 2>&1 | tee -a '$(LOG_DIR)/posttrain_sft_$(shell date +%Y%m%d_%H%M%S).log'
-	@echo ""
-	@echo "[✓] SFT training and model merge completed"
-	@echo "Model: $(POSTTRAIN_OUTPUT_DIR)"
-	@echo "Adapter: $(POSTTRAIN_OUTPUT_DIR)/adapter"
 posttrain-cpu: check-bash
 	@echo "======================================================"
 	@echo "[PostTrain] Real LoRA SFT Training (CPU only)"

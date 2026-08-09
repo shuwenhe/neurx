@@ -1,12 +1,15 @@
 package neurx.posttrain.trainer.posttrain_main
 use std.io.eprintln
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_text_file, runtime_make_dirs, trim}
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, trim}
 
 func write_file_simple(string path, string content) int {
     eprintln("[DEBUG] Writing file to: " + path)
     eprintln("[DEBUG] Content length: " + int_to_str(len(content)))
-    runtime_make_dirs("/home/shuwen/shuwen/posttrain")
-    runtime_write_text_file(path, content)
+    int write_ok = __host_write_file(path, content)
+    if write_ok == 0 {
+        eprintln("[ERROR] Failed to write file: " + path)
+        return 1
+    }
     eprintln("[✓] File written: " + path)
     0
 }
@@ -298,10 +301,10 @@ func run_posttrain_lora_sft() int {
             in_dim: hidden_size,
             rank: rank,
             scaling: alpha / (rank as float),
-            lora_a: init_gaussian(rank * hidden_size, 0.02),
-            lora_b: init_gaussian(hidden_size * rank, 0.01),
-            initial_a: copy_float_array(q_layer.lora_A),
-            initial_b: copy_float_array(q_layer.lora_B)
+            lora_a: copy_float_array(q_layer.lora_a),
+            lora_b: copy_float_array(q_layer.lora_b),
+            initial_a: copy_float_array(q_layer.lora_a),
+            initial_b: copy_float_array(q_layer.lora_b)
         }
         modules[module_idx] = q_module
         module_idx = module_idx + 1
@@ -323,10 +326,10 @@ func run_posttrain_lora_sft() int {
             in_dim: hidden_size,
             rank: rank,
             scaling: v_layer.scaling,
-            lora_a: copy_float_array(v_layer.lora_A),
-            lora_b: copy_float_array(v_layer.lora_B),
-            initial_a: copy_float_array(v_layer.lora_A),
-            initial_b: copy_float_array(v_layer.lora_B)
+            lora_a: copy_float_array(v_layer.lora_a),
+            lora_b: copy_float_array(v_layer.lora_b),
+            initial_a: copy_float_array(v_layer.lora_a),
+            initial_b: copy_float_array(v_layer.lora_b)
         }
         modules[module_idx] = v_module
         module_idx = module_idx + 1
@@ -394,8 +397,8 @@ func run_posttrain_lora_sft() int {
                 int in_dim = module.in_dim
                 int rank_val = module.rank
                 float scaling_val = module.scaling
-                []float lora_a = module.lora_A
-                []float lora_b = module.lora_B
+                []float lora_a = module.lora_a
+                []float lora_b = module.lora_b
                 []float target = target_q
                 int is_odd = module_cursor - ((module_cursor / 2) * 2)
                 if is_odd == 1 {
@@ -718,8 +721,8 @@ func compute_stats_from_layer([]named_lora_module modules) adapter_stats {
         if is_odd == 1 {
             out_dim = v_out_const
         }
-        []float lora_a_copy = copy_float_array(module.lora_A)
-        []float lora_b_copy = copy_float_array(module.lora_B)
+        []float lora_a_copy = copy_float_array(module.lora_a)
+        []float lora_b_copy = copy_float_array(module.lora_b)
         int i = 0
         int a_len = rank * in_dim
         while i < a_len {
@@ -785,8 +788,8 @@ func compute_delta_stats_from_layer([]named_lora_module modules) delta_stats {
         if is_odd == 1 {
             out_dim = v_out_const
         }
-        []float lora_a_copy = copy_float_array(module.lora_A)
-        []float lora_b_copy = copy_float_array(module.lora_B)
+        []float lora_a_copy = copy_float_array(module.lora_a)
+        []float lora_b_copy = copy_float_array(module.lora_b)
         []float init_a_copy = copy_float_array(module.initial_a)
         []float init_b_copy = copy_float_array(module.initial_b)
         int i = 0
@@ -849,37 +852,37 @@ func save_lora_weights_json(
         weights_json = weights_json + "    {\n"
         weights_json = weights_json + "      \"name\": " + json_escape(curr.name) + ",\n"
         weights_json = weights_json + "      \"rank\": " + int_to_str(rank) + ",\n"
-        weights_json = weights_json + "      \"lora_a_len\": " + int_to_str(len(curr.lora_A)) + ",\n"
+        weights_json = weights_json + "      \"lora_a_len\": " + int_to_str(len(curr.lora_a)) + ",\n"
         weights_json = weights_json + "      \"lora_a_sample\": ["
         int a_sample_count = 0
-        if len(curr.lora_A) > 10 {
+        if len(curr.lora_a) > 10 {
             a_sample_count = 10
         } else {
-            a_sample_count = len(curr.lora_A)
+            a_sample_count = len(curr.lora_a)
         }
         int a_idx = 0
         while a_idx < a_sample_count {
             if a_idx > 0 {
                 weights_json = weights_json + ", "
             }
-            weights_json = weights_json + float_to_str(curr.lora_A[a_idx], 8)
+            weights_json = weights_json + float_to_str(curr.lora_a[a_idx], 8)
             a_idx = a_idx + 1
         }
         weights_json = weights_json + "],\n"
-        weights_json = weights_json + "      \"lora_b_len\": " + int_to_str(len(curr.lora_B)) + ",\n"
+        weights_json = weights_json + "      \"lora_b_len\": " + int_to_str(len(curr.lora_b)) + ",\n"
         weights_json = weights_json + "      \"lora_b_sample\": ["
         int b_sample_count = 0
-        if len(curr.lora_B) > 10 {
+        if len(curr.lora_b) > 10 {
             b_sample_count = 10
         } else {
-            b_sample_count = len(curr.lora_B)
+            b_sample_count = len(curr.lora_b)
         }
         int b_idx = 0
         while b_idx < b_sample_count {
             if b_idx > 0 {
                 weights_json = weights_json + ", "
             }
-            weights_json = weights_json + float_to_str(curr.lora_B[b_idx], 8)
+            weights_json = weights_json + float_to_str(curr.lora_b[b_idx], 8)
             b_idx = b_idx + 1
         }
         weights_json = weights_json + "],\n"
@@ -994,9 +997,9 @@ func save_adapter_weights_safetensors(
             name: curr_module.name + ".lora_A.weight",
             dtype: "F32",
             shape: a_shape,
-            data: curr_module.lora_A,
+            data: curr_module.lora_a,
             shape_count: 2,
-            data_count: len(curr_module.lora_A),
+            data_count: len(curr_module.lora_a),
         }
         safetensors_writer_add_tensor(writer, a_tensor)
         int b_out_dim = 896
@@ -1010,9 +1013,9 @@ func save_adapter_weights_safetensors(
             name: curr_module.name + ".lora_B.weight",
             dtype: "F32",
             shape: b_shape,
-            data: curr_module.lora_B,
+            data: curr_module.lora_b,
             shape_count: 2,
-            data_count: len(curr_module.lora_B),
+            data_count: len(curr_module.lora_b),
         }
         safetensors_writer_add_tensor(writer, b_tensor)
         m_idx = m_idx + 1
@@ -1474,4 +1477,3 @@ func json_escape(string s) string {
 func main() {
     return run_posttrain_lora_sft()
 }
-

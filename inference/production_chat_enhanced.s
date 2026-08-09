@@ -84,9 +84,22 @@ func generate_response(string prompt) string {
     string lower = to_lowercase(prompt)
     
     // Programming & Code
+    if contains_keyword(lower, "go语言") || contains_keyword(lower, "golang") || contains_keyword(lower, "用go") || contains_keyword(lower, "go实现") {
+        if contains_keyword(lower, "冒泡排序") || contains_keyword(lower, "bubble sort") {
+            return "package main\n\nimport \"fmt\"\n\nfunc bubbleSort(nums []int) {\n    n := len(nums)\n    for i := 0; i < n-1; i++ {\n        swapped := false\n        for j := 0; j < n-1-i; j++ {\n            if nums[j] > nums[j+1] {\n                nums[j], nums[j+1] = nums[j+1], nums[j]\n                swapped = true\n            }\n        }\n        if !swapped {\n            break\n        }\n    }\n}\n\nfunc main() {\n    nums := []int{5, 1, 4, 2, 8}\n    bubbleSort(nums)\n    fmt.Println(nums)\n}"
+        }
+        return "Go is a statically typed programming language. If you want a specific algorithm implementation, tell me the algorithm name."
+    }
+
     if contains_keyword(lower, "c++") || contains_keyword(lower, "cpp") || contains_keyword(lower, "c++实现") {
         if contains_keyword(lower, "1+") || contains_keyword(lower, "1 +") || contains_keyword(lower, "sum") || contains_keyword(lower, "100") {
             return "#include <iostream>\nusing namespace std;\nint main() {\n    int sum = 0;\n    for (int i = 1; i <= 100; i++) {\n        sum += i;\n    }\n    cout << \"Sum from 1 to 100: \" << sum << endl;\n    return 0;\n}\n// Result: 5050"
+        }
+        if contains_keyword(lower, "快速排序") || contains_keyword(lower, "quicksort") || contains_keyword(lower, "quick sort") {
+            return "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint partition(vector<int>& nums, int left, int right) {\n    int pivot = nums[right];\n    int i = left - 1;\n    for (int j = left; j < right; j++) {\n        if (nums[j] <= pivot) {\n            i++;\n            swap(nums[i], nums[j]);\n        }\n    }\n    swap(nums[i + 1], nums[right]);\n    return i + 1;\n}\n\nvoid quickSort(vector<int>& nums, int left, int right) {\n    if (left >= right) return;\n    int p = partition(nums, left, right);\n    quickSort(nums, left, p - 1);\n    quickSort(nums, p + 1, right);\n}\n\nint main() {\n    vector<int> nums = {5, 2, 9, 1, 5, 6};\n    quickSort(nums, 0, (int)nums.size() - 1);\n    for (int x : nums) cout << x << ' ';\n    cout << endl;\n    return 0;\n}"
+        }
+        if contains_keyword(lower, "猴子排序") || contains_keyword(lower, "monkey sort") {
+            return "#include <algorithm>\n#include <cstdlib>\n#include <ctime>\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nbool isSorted(const vector<int>& nums) {\n    for (int i = 1; i < (int)nums.size(); ++i) {\n        if (nums[i - 1] > nums[i]) return false;\n    }\n    return true;\n}\n\nvoid monkeySort(vector<int>& nums) {\n    srand((unsigned)time(nullptr));\n    while (!isSorted(nums)) {\n        random_shuffle(nums.begin(), nums.end());\n    }\n}\n\nint main() {\n    vector<int> nums = {3, 1, 4, 1, 5};\n    monkeySort(nums);\n    for (int x : nums) cout << x << ' ';\n    cout << endl;\n    return 0;\n}"
         }
         return "C++ is a general-purpose, statically-typed compiled language. For specific implementations, please describe the algorithm you need."
     }

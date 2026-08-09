@@ -16,8 +16,12 @@ import time
 
 from dataclasses import asdict ,dataclass
 
+from builtins import Exception as exception
+from builtins import ImportError as import_error
 from builtins import ValueError as value_error
 from builtins import TypeError as type_error
+from builtins import RuntimeError as runtime_error
+from builtins import SystemExit as system_exit
 from json import JSONDecodeError as json_decode_error
 from json import JSONDecoder as json_decoder
 from pathlib import Path as path
@@ -422,7 +426,8 @@ def load_examples (tokenizer :any ,path :path ,max_length :int ,max_samples :int
 
         raise runtime_error (f"no trainable examples found in {path }; skipped {invalid } invalid records")
 
-    random .random (seed ).shuffle (examples )
+    rng =random .Random (seed )
+    rng .shuffle (examples )
 
     target_tokens =sum (sum (label !=IGNORE_INDEX for label in item .labels )for item in examples )
 
@@ -446,11 +451,11 @@ def load_backend ()->tuple [any ,...]:
 
     try :
 
-        import torch 
+        import torch
 
-        from peft import lora_config ,get_peft_model 
+        from peft import LoraConfig as lora_config ,get_peft_model
 
-        from transformers import auto_model_for_causal_lm ,auto_tokenizer ,get_cosine_schedule_with_warmup 
+        from transformers import AutoModelForCausalLM as auto_model_for_causal_lm ,AutoTokenizer as auto_tokenizer ,get_cosine_schedule_with_warmup
 
     except import_error as exc :
 
@@ -462,13 +467,13 @@ def load_backend ()->tuple [any ,...]:
 
 
 
-def parse_args ()->argparse .namespace :
+def parse_args ()->argparse .Namespace :
 
-    parser =argparse .argument_parser (description ="LoRA supervised fine-tuning for a local Hugging Face causal LM")
+    parser =argparse .ArgumentParser (description ="LoRA supervised fine-tuning for a local Hugging Face causal LM")
 
-    parser .add_argument ("--model-path",default =env_value ("NEURX_POSTTRAIN_MODEL_PATH","/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"))
+    parser .add_argument ("--model-path",default =env_value ("NEURX_POSTTRAIN_MODEL_PATH","/app/shuwen/model/Qwen2.5-0.5B-Instruct"))
 
-    parser .add_argument ("--data-file",default =env_value ("NEURX_POSTTRAIN_DATA_FILE","/home/shuwen/shuwen/dataset/medical/train.json"))
+    parser .add_argument ("--data-file",default =env_value ("NEURX_POSTTRAIN_DATA_FILE","/app/shuwen/dataset/medical/train.json"))
 
     parser .add_argument ("--output-dir",default =env_value ("NEURX_POSTTRAIN_OUTPUT_DIR","/home/shuwen/shuwen/posttrain"))
 
@@ -502,15 +507,15 @@ def parse_args ()->argparse .namespace :
 
     parser .add_argument ("--log-steps",type =int ,default =int (env_value ("NEURX_POSTTRAIN_LOG_STEPS","1")))
 
-    parser .add_argument ("--merge-model",action =argparse .boolean_optional_action ,default =env_bool ("NEURX_POSTTRAIN_MERGE_MODEL",True ))
+    parser .add_argument ("--merge-model",action =argparse .BooleanOptionalAction ,default =env_bool ("NEURX_POSTTRAIN_MERGE_MODEL",True ))
 
-    parser .add_argument ("--gradient-checkpointing",action =argparse .boolean_optional_action ,default =env_bool ("NEURX_POSTTRAIN_GRADIENT_CHECKPOINTING",True ))
+    parser .add_argument ("--gradient-checkpointing",action =argparse .BooleanOptionalAction ,default =env_bool ("NEURX_POSTTRAIN_GRADIENT_CHECKPOINTING",True ))
 
     return parser .parse_args ()
 
 
 
-def validate_args (args :argparse .namespace )->tuple [path ,path ,path ]:
+def validate_args (args :argparse .Namespace )->tuple [path ,path ,path ]:
 
     model_path =path (args .model_path ).expanduser ().resolve ()
 
@@ -540,7 +545,7 @@ def validate_args (args :argparse .namespace )->tuple [path ,path ,path ]:
 
 
 
-def train (args :argparse .namespace )->dict [str ,any ]:
+def train (args :argparse .Namespace )->dict [str ,any ]:
 
     model_path ,data_file ,output_dir =validate_args (args )
 
@@ -638,7 +643,7 @@ def train (args :argparse .namespace )->dict [str ,any ]:
 
     warmup_steps =int (optimizer_steps *args .warmup_ratio )
 
-    optimizer =torch .optim .adam_w (
+    optimizer =torch .optim .AdamW (
     (parameter for _ ,parameter in trainable ),
     lr =args .learning_rate ,
     weight_decay =args .weight_decay ,
@@ -664,7 +669,8 @@ def train (args :argparse .namespace )->dict [str ,any ]:
 
     for epoch in range (args .epochs ):
 
-        random .random (args .seed +epoch ).shuffle (examples )
+        rng =random .Random (args .seed +epoch )
+        rng .shuffle (examples )
 
         for batch_index in range (batches_per_epoch ):
 
