@@ -281,7 +281,7 @@ func run_training(training_config cfg) int {
     2
 }
 
-func main() int {
+func main() {
     training_config cfg = load_config()
     
     int validation_result = validate_config(cfg)
