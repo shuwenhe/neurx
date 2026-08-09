@@ -238,12 +238,12 @@ func string_char(int ch) string {
 
 func run_training(training_config cfg) int {
     println("====================================================")
-    println("[PostTrain] Real LoRA SFT Training (S Runtime)")
+    println("[PostTrain] LoRA SFT Training Preflight (S Runtime)")
     println("====================================================")
-    println("[Backend] S Runtime Implementation")
+    println("[Backend] Strict S Runtime")
     println("")
-    println("[NeurX PostTrain] LoRA SFT Training Pipeline")
-    println("[LoRA config] rank=" + int_to_str(cfg.lora_rank) + ", alpha=" + float_to_str(cfg.lora_alpha, 1))
+    string alpha_text = runtime_env_get("NEURX_POSTTRAIN_LORA_ALPHA", "16.0")
+    println("[LoRA config] rank=" + int_to_str(cfg.lora_rank) + ", alpha=" + alpha_text)
     println("[Device] " + cfg.device)
     println("")
     
@@ -269,24 +269,24 @@ func run_training(training_config cfg) int {
     println("[Data] Loaded " + int_to_str(len(dataset_text)) + " bytes")
     println("[Config] epochs=" + int_to_str(cfg.epochs) + ", batch_size=" + int_to_str(cfg.batch_size))
     println("[LoRA] rank=" + int_to_str(cfg.lora_rank) + ", target_modules=" + cfg.target_modules)
-    println("[Training] Starting training loop...")
-    println("")
-    println("[Step] 1/1: Training step 1")
-    println("[Loss] 0.5234")
-    println("[Done] Training completed")
-    println("")
-    
+
     int hidden_size = 896
+    int kv_size = 128
     int num_layers = 24
-    int v_out = 896
-    int trainable_params = num_layers * (2 * cfg.lora_rank * hidden_size + cfg.lora_rank * (hidden_size + v_out))
-    println("[Model] trainable=" + int_to_str(trainable_params) + " total=631248768 (0.1713%)")
-    println("[Adapter] Saving to " + cfg.output_dir + "/adapter")
-    println("[Save] merged model: " + cfg.output_dir)
+    int q_params = cfg.lora_rank * (hidden_size + hidden_size)
+    int k_params = cfg.lora_rank * (hidden_size + kv_size)
+    int v_params = cfg.lora_rank * (hidden_size + kv_size)
+    int o_params = cfg.lora_rank * (hidden_size + hidden_size)
+    int trainable_params = num_layers * (q_params + k_params + v_params + o_params)
+    int total_params = 494032768
+    println("[Model] trainable=" + int_to_str(trainable_params) + " total=" + int_to_str(total_params))
+    println("[Model] trainable ratio for rank 8 is approximately 0.2189%")
     println("")
-    println("[✓] Training completed successfully")
-    
-    0
+    println("[ERROR] Real Qwen2.5 LoRA training is not implemented in this S runtime.")
+    println("[ERROR] Missing verified path: tokenizer -> Qwen forward -> token cross entropy -> LoRA backward -> optimizer update.")
+    println("[ERROR] No adapter or merged-model files were written by this run.")
+    println("[ERROR] Refusing to report simulated loss or a successful checkpoint save.")
+    2
 }
 
 func main() int {
