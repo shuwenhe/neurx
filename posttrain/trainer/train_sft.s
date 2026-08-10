@@ -1,6 +1,6 @@
 package neurx.posttrain.trainer.train_sft
 use std.io.eprintln
-use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
+use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}
 
 struct training_config {
     string model_path
@@ -217,6 +217,49 @@ func scaled_ratio_to_str(int scaled) string {
     int_to_str(whole) + "." + digits
 }
 
+func contains_text(string text, string needle) bool {
+    if len(needle) == 0 {
+        return true
+    }
+    if len(text) < len(needle) {
+        return false
+    }
+    int i = 0
+    while i + len(needle) <= len(text) {
+        int j = 0
+        bool matches = true
+        while j < len(needle) {
+            if __host_byte_at(text, i + j) != __host_byte_at(needle, j) {
+                matches = false
+                break
+            }
+            j = j + 1
+        }
+        if matches {
+            return true
+        }
+        i = i + 1
+    }
+    false
+}
+
+func safe_command_path(string value) bool {
+    if len(value) == 0 {
+        return false
+    }
+    int i = 0
+    while i < len(value) {
+        int ch = __host_byte_at(value, i)
+        bool allowed = (ch >= 48 && ch <= 57) || (ch >= 65 && ch <= 90) ||
+            (ch >= 97 && ch <= 122) || ch == 47 || ch == 46 || ch == 95 || ch == 45
+        if !allowed {
+            return false
+        }
+        i = i + 1
+    }
+    true
+}
+
 func escape_json_string(string s) string {
     string out = "\""
     int i = 0
@@ -311,8 +354,28 @@ func run_training(training_config cfg) int {
     println("[Config] learning_rate=" + float_to_str(cfg.learning_rate, 6) + ", lora_alpha=" + float_to_str(cfg.lora_alpha, 1))
     println("[✓] Preflight paths and configuration validated")
     println("")
-    println("[HARD VALIDATION GATE: FAILED]")
-    println("[MISSING 1/6] tokenized input_ids and supervised labels")
+    string batch_probe = runtime_env_get("NEURX_POSTTRAIN_BATCH_PROBE", "")
+    if len(batch_probe) == 0 || !runtime_file_exists(batch_probe) {
+        println("[ERROR] native SFT batch probe is missing: " + batch_probe)
+        return 2
+    }
+    if !safe_command_path(batch_probe) || !safe_command_path(cfg.model_path) || !safe_command_path(cfg.data_file) {
+        println("[ERROR] tokenizer probe paths contain unsupported shell characters")
+        return 2
+    }
+    string probe_command = batch_probe + " " + cfg.model_path + " " +
+        cfg.data_file + " " + int_to_str(cfg.max_length)
+    string tokenization_evidence = runtime_run_command_output(probe_command)
+    bool tokenization_valid = contains_text(tokenization_evidence, "TOKENIZATION_VALIDATION=PASS")
+    println("")
+    if !tokenization_valid {
+        println("[HARD VALIDATION GATE: FAILED]")
+        println("[MISSING 1/6] tokenized input_ids and supervised labels")
+        println("[ERROR] Native tokenizer did not return its validation marker.")
+        return 2
+    }
+    println("[HARD VALIDATION GATE: FAILED (1/6 passed)]")
+    println("[PASS 1/6] real tokenizer input_ids, supervised labels, and round-trip validation")
     println("[MISSING 2/6] Model logits with shape [batch, seq, 151936]")
     println("[MISSING 3/6] finite non-zero shifted-token cross-entropy loss")
     println("[MISSING 4/6] LoRA A/B gradients and gradient norms")

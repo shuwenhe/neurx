@@ -50,6 +50,8 @@ S_RUNNER_SRC := $(CURDIR_UNIX)/tools/s_ir_runner.s
 S_RUNNER_C_SRC := $(CURDIR_UNIX)/tools/s_ir_runner.c
 S_RUNNER_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/s_runner
 S_RUNNER_BIN := $(S_RUNNER_BUILD_DIR)/s_ir_runner$(BIN_EXT)
+POSTTRAIN_SFT_NATIVE_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/posttrain_sft_native
+POSTTRAIN_SFT_BATCH_PROBE := $(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/sft_batch_probe$(BIN_EXT)
 PRODUCTION_S_INFERENCE_DIR := $(CURDIR_UNIX)/artifacts/build/production_s_inference
 PRODUCTION_S_BACKEND := $(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir
 PRODUCTION_S_CHAT_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat.ir
@@ -393,7 +395,7 @@ build-posttrain-golden-s: check-bash
 		test -f '$(CURDIR_UNIX)/artifacts/build/posttrain_golden/posttrain_golden.ir'
 posttrain-install-deps:
 	@'$(POSTTRAIN_PYTHON)' -m pip install -r '$(CURDIR_UNIX)/posttrain/requirements.txt'
-posttrain-cpu: check-bash build-s-ir-runner build-posttrain-sft-s
+posttrain-cpu: check-bash build-s-ir-runner build-posttrain-sft-native build-posttrain-sft-s
 	@echo "======================================================"
 	@echo "[PostTrain] Strict S LoRA SFT Training (CPU only)"
 	@echo "======================================================"
@@ -415,13 +417,14 @@ posttrain-cpu: check-bash build-s-ir-runner build-posttrain-sft-s
 		export NEURX_POSTTRAIN_LORA_RANK='$(POSTTRAIN_LORA_RANK)'; \
 		export NEURX_POSTTRAIN_LORA_ALPHA='$(POSTTRAIN_LORA_ALPHA)'; \
 		export NEURX_POSTTRAIN_DEVICE='cpu'; \
+		export NEURX_POSTTRAIN_BATCH_PROBE='$(POSTTRAIN_SFT_BATCH_PROBE)'; \
 		export NEURX_POSTTRAIN_MERGE_MODEL='$(POSTTRAIN_MERGE_MODEL)'; \
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' '$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_sft_cpu_$(shell date +%Y%m%d_%H%M%S).log'
 	@echo ""
 	@echo "[✓] CPU training completed"
 	@echo "Model: $(POSTTRAIN_OUTPUT_DIR)"
 	@echo "Adapter: $(POSTTRAIN_OUTPUT_DIR)/adapter"
-posttrain-gpu: check-bash build-s-ir-runner build-posttrain-sft-s
+posttrain-gpu: check-bash build-s-ir-runner build-posttrain-sft-native build-posttrain-sft-s
 	@echo "======================================================"
 	@echo "[PostTrain] Real LoRA SFT Training (NVIDIA GPU)"
 	@echo "======================================================"
@@ -452,13 +455,14 @@ posttrain-gpu: check-bash build-s-ir-runner build-posttrain-sft-s
 		export NEURX_POSTTRAIN_LORA_RANK='$(POSTTRAIN_LORA_RANK)'; \
 		export NEURX_POSTTRAIN_LORA_ALPHA='$(POSTTRAIN_LORA_ALPHA)'; \
 		export NEURX_POSTTRAIN_DEVICE='cuda'; \
+		export NEURX_POSTTRAIN_BATCH_PROBE='$(POSTTRAIN_SFT_BATCH_PROBE)'; \
 		export NEURX_POSTTRAIN_MERGE_MODEL='$(POSTTRAIN_MERGE_MODEL)'; \
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' '$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_sft_gpu_$(shell date +%Y%m%d_%H%M%S).log'
 	@echo ""
 	@echo "[✓] GPU training completed"
 	@echo "Model: $(POSTTRAIN_OUTPUT_DIR)"
 	@echo "Adapter: $(POSTTRAIN_OUTPUT_DIR)/adapter"
-posttrain-npu: check-bash build-s-ir-runner build-posttrain-sft-s
+posttrain-npu: check-bash build-s-ir-runner build-posttrain-sft-native build-posttrain-sft-s
 	@echo "======================================================"
 	@echo "[PostTrain] Real LoRA SFT Training (Ascend NPU)"
 	@echo "======================================================"
@@ -488,6 +492,7 @@ posttrain-npu: check-bash build-s-ir-runner build-posttrain-sft-s
 		export NEURX_POSTTRAIN_LORA_RANK='$(POSTTRAIN_LORA_RANK)'; \
 		export NEURX_POSTTRAIN_LORA_ALPHA='$(POSTTRAIN_LORA_ALPHA)'; \
 		export NEURX_POSTTRAIN_DEVICE='npu'; \
+		export NEURX_POSTTRAIN_BATCH_PROBE='$(POSTTRAIN_SFT_BATCH_PROBE)'; \
 		export NEURX_POSTTRAIN_MERGE_MODEL='$(POSTTRAIN_MERGE_MODEL)'; \
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' '$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_sft_npu_$(shell date +%Y%m%d_%H%M%S).log'
 	@echo ""
@@ -1708,6 +1713,15 @@ build-s-ir-runner: check-bash
 		2>&1 && \
 		chmod +x '$(S_RUNNER_BIN)' && \
 		test -f '$(S_RUNNER_BIN)'
+build-posttrain-sft-native: check-bash
+	@echo "Building native Qwen tokenizer/SFT batch probe..."
+	@mkdir -p '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)'
+	@'$(CXX)' -O2 -std=c++17 -Wall -Wextra -Werror \
+		'posttrain/native/sft_batch_probe.cpp' \
+		'runtime/model/json.cpp' 'runtime/model/bpe_tokenizer.cpp' \
+		-licui18n -licuuc -licudata \
+		-o '$(POSTTRAIN_SFT_BATCH_PROBE)'
+	@test -x '$(POSTTRAIN_SFT_BATCH_PROBE)'
 build-cuda-train-bridge: check-bash
 	@echo "Building native CUDA/cuBLAS train bridge..."
 	@if [ '$(PLATFORM)' != 'linux' ]; then \
@@ -1799,7 +1813,7 @@ tokenizer-hf-parity-test:
 		tests/tokenizer_parity_probe.cpp runtime/model/json.cpp \
 		runtime/model/bpe_tokenizer.cpp -licui18n -licuuc -licudata \
 		-o artifacts/build/model_runtime_native/tokenizer_parity_probe
-	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
+	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-$(POSTTRAIN_PYTHON)}"; \
 		HF_MODEL_DIR="$${HF_MODEL_DIR:-/home/shuwen/model/base-model}"; \
 		"$$PYTORCH_PYTHON" tests/tokenizer_hf_parity.py \
 		artifacts/build/model_runtime_native/tokenizer_parity_probe "$$HF_MODEL_DIR"
