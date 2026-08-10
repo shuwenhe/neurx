@@ -2,9 +2,8 @@ package neurx.posttrain.lib.json_parser
 
 use std.io.{readfile, writefile}
 
-// JSON value type - represents any JSON value
 struct json_value {
-    int type  // 0: null, 1: bool, 2: number, 3: string, 4: array, 5: object
+    int type
     bool bool_value
     float number_value
     string string_value
@@ -103,7 +102,6 @@ func (j json_value) at(key string) json_value {
     return val
 }
 
-// Parse JSON from string
 func parse(text string) json_value {
     parser := json_parser_create(text)
     result := parser_parse_value(&parser)
@@ -116,7 +114,6 @@ func parse(text string) json_value {
     return result
 }
 
-// Parse JSON from file
 func parse_file(path string) json_value {
     content := readfile(path)
     if len(content) == 0 {
@@ -124,8 +121,6 @@ func parse_file(path string) json_value {
     }
     return parse(string(content))
 }
-
-// ==================== Private Parser Implementation ====================
 
 struct json_parser {
     string text
@@ -252,7 +247,6 @@ func parser_parse_string(p *json_parser) string {
             } else if escaped == 't' {
                 result = result + "\t"
             } else if escaped == 'u' {
-                // Unicode escape - simplified, just skip for now
                 p.pos = p.pos + 4
             } else {
                 panic("invalid escape sequence")
@@ -384,8 +378,6 @@ func parser_parse_object(p *json_parser) map[string]json_value {
 }
 
 func parse_float(s string) float {
-    // Simple float parsing - S runtime should handle this
-    // For now, use a basic implementation
     f := 0.0
     negative := false
     dot_pos := -1
@@ -397,7 +389,6 @@ func parse_float(s string) float {
         start_idx = 1
     }
 
-    // Find positions of '.' and 'e'/'E'
     for i := start_idx; i < len(s); i = i + 1 {
         if s[i] == '.' && dot_pos == -1 {
             dot_pos = i
@@ -406,7 +397,6 @@ func parse_float(s string) float {
         }
     }
 
-    // Parse main number part
     int_part := 0
     frac_part := 0
     frac_digits := 0
@@ -420,7 +410,6 @@ func parse_float(s string) float {
         dot_pos = end_pos
     }
 
-    // Parse integer part
     for i := start_idx; i < dot_pos; i = i + 1 {
         ch := s[i]
         if ch >= '0' && ch <= '9' {
@@ -428,7 +417,6 @@ func parse_float(s string) float {
         }
     }
 
-    // Parse fractional part
     if dot_pos < end_pos {
         for i := dot_pos + 1; i < end_pos; i = i + 1 {
             ch := s[i]
@@ -439,7 +427,6 @@ func parse_float(s string) float {
         }
     }
 
-    // Build float value
     f = float(int_part)
     if frac_digits > 0 {
         divisor := 1.0
@@ -449,7 +436,6 @@ func parse_float(s string) float {
         f = f + float(frac_part) / divisor
     }
 
-    // Parse exponent
     if e_pos != -1 {
         exp_str := s[e_pos+1:]
         exp_negative := false
