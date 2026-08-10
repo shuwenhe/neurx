@@ -1,6 +1,7 @@
 package neurx.runtime.model.model_loader
 
 use std.io.eprintln
+use neurx.posttrain.lib.hf_config as hf_cfg
 
 // Model loader - integrates all components for end-to-end model loading
 // Combines: HF config, safetensors, decoder, and tokenizer
@@ -18,12 +19,8 @@ struct RuntimeModel {
 // Load model configuration from config.json
 func load_config(string path) interface {
     eprintln("Loading configuration from: " + path)
-    
-    // TODO: Read config.json
-    // TODO: Parse with json.s
-    // TODO: Extract HuggingFace config fields
-    
-    interface config
+
+    interface config = hf_cfg.load_from_file(path)
     return config
 }
 
