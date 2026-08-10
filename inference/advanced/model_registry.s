@@ -1,6 +1,6 @@
 package neurx.inference.advanced.model_registry
 
-enum ModelType {
+enum model_type {
     QWEN
     LLAMA
     MIXTRAL
@@ -8,9 +8,9 @@ enum ModelType {
     GEMMA
 }
 
-struct ArchitectureConfig {
+struct architecture_config {
     name string
-    model_type ModelType
+    model_type model_type
 
     num_hidden_layers int
     hidden_size int
@@ -32,17 +32,17 @@ struct ArchitectureConfig {
     initializer_range float
 }
 
-type ModelFactory func(config ArchitectureConfig) any
+type model_factory func(config architecture_config) any
 
-struct GlobalRegistry {
-    factories map[string]ModelFactory
-    configs map[string]ArchitectureConfig
+struct model_registry_state {
+    factories map[string]model_factory
+    configs map[string]architecture_config
     is_initialized bool
 }
 
-var global_registry GlobalRegistry = GlobalRegistry {
-    factories: make(map[string]ModelFactory),
-    configs: make(map[string]ArchitectureConfig),
+var global_registry model_registry_state = model_registry_state {
+    factories: make(map[string]model_factory),
+    configs: make(map[string]architecture_config),
     is_initialized: false,
 }
 
@@ -60,8 +60,8 @@ func InitializeRegistry() {
 
 func RegisterModel(
     arch_name string,
-    config ArchitectureConfig,
-    factory ModelFactory,
+    config architecture_config,
+    factory model_factory,
 ) bool {
     if _, exists := global_registry.factories[arch_name]; exists {
         return false
@@ -72,15 +72,15 @@ func RegisterModel(
     return true
 }
 
-func GetArchitectureConfig(arch_name string) ArchitectureConfig {
+func GetArchitectureConfig(arch_name string) architecture_config {
     if config, ok := global_registry.configs[arch_name]; ok {
         return config
     }
 
-    return ArchitectureConfig{}
+    return architecture_config{}
 }
 
-func CreateModel(arch_name string, config ArchitectureConfig) any {
+func CreateModel(arch_name string, config architecture_config) any {
     if factory, ok := global_registry.factories[arch_name]; ok {
         return factory(config)
     }
@@ -100,7 +100,7 @@ func ListAvailableModels() []string {
 
 func register_qwen_models() {
 
-    qwen_config := ArchitectureConfig {
+    qwen_config := architecture_config {
         name: "Qwen2.5-7B",
         model_type: QWEN,
         num_hidden_layers: 32,
@@ -119,7 +119,7 @@ func register_qwen_models() {
     RegisterModel(
         "QwenForCausalLM",
         qwen_config,
-        func(cfg ArchitectureConfig) any {
+        func(cfg architecture_config) any {
 
             return nil
         },
@@ -134,7 +134,7 @@ func register_qwen_models() {
     RegisterModel(
         "QwenForCausalLM-0.5B",
         qwen_small,
-        func(cfg ArchitectureConfig) any {
+        func(cfg architecture_config) any {
             return nil
         },
     )
@@ -142,7 +142,7 @@ func register_qwen_models() {
 
 func register_llama_models() {
 
-    llama_config := ArchitectureConfig {
+    llama_config := architecture_config {
         name: "Llama-2-7B",
         model_type: LLAMA,
         num_hidden_layers: 32,
@@ -159,7 +159,7 @@ func register_llama_models() {
     RegisterModel(
         "LlamaForCausalLM",
         llama_config,
-        func(cfg ArchitectureConfig) any {
+        func(cfg architecture_config) any {
             return nil
         },
     )
@@ -167,7 +167,7 @@ func register_llama_models() {
 
 func register_mixtral_models() {
 
-    mixtral_config := ArchitectureConfig {
+    mixtral_config := architecture_config {
         name: "Mixtral-8x7B",
         model_type: MIXTRAL,
         num_hidden_layers: 32,
@@ -184,7 +184,7 @@ func register_mixtral_models() {
     RegisterModel(
         "MixtralForCausalLM",
         mixtral_config,
-        func(cfg ArchitectureConfig) any {
+        func(cfg architecture_config) any {
             return nil
         },
     )

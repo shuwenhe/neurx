@@ -2,7 +2,7 @@ package neurx.inference.advanced.async_engine
 
 import "time"
 
-enum RequestStatus {
+enum request_status {
     PENDING
     SCHEDULING
     RUNNING
@@ -41,7 +41,7 @@ struct inference_request {
     timeout_seconds int
     user_id string
 
-    status RequestStatus
+    status request_status
     output_tokens []completion_output
     error_message string
 }

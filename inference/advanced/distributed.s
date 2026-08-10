@@ -5,14 +5,14 @@ package neurx.inference.advanced.distributed
 import "time"
 
 // DeviceType identifies compute devices
-enum DeviceType {
+enum device_type {
     CPU
     CUDA_GPU
     ROCm_GPU
 }
 
 // ParallelMode specifies the parallelism strategy
-enum ParallelMode {
+enum parallel_mode {
     DATA_PARALLEL      // Data distributed, model replicated
     TENSOR_PARALLEL    // Model weights sharded across devices
     PIPELINE_PARALLEL  // Model layers partitioned
@@ -20,21 +20,21 @@ enum ParallelMode {
 }
 
 // CommBackend specifies the communication protocol
-enum CommBackend {
+enum comm_backend {
     NCCL        // For NVIDIA GPUs
     GLOO        // CPU/GPU flexible
     MPI         // High-performance computing
 }
 
 // ProcessGroupConfig defines a group of processes for communication
-struct ProcessGroupConfig {
+struct process_group_config {
     group_name string
     rank int           // 0-indexed position in group
     world_size int     // Total processes in group
-    backend CommBackend
+    backend comm_backend
     
     // Device binding
-    device_type DeviceType
+    device_type device_type
     device_id int      // GPU ID
     
     // Networking
@@ -43,9 +43,9 @@ struct ProcessGroupConfig {
 }
 
 // DistributedConfig holds the complete distributed setup
-struct DistributedConfig {
+struct distributed_config {
     enabled bool
-    parallel_mode ParallelMode
+    parallel_mode parallel_mode
     
     // Grid topology
     tp_size int       // Tensor parallel degree
@@ -57,11 +57,11 @@ struct DistributedConfig {
     rank int
     
     // Process groups for each dimension
-    pg_config ProcessGroupConfig
+    pg_config process_group_config
 }
 
 // TensorShard represents metadata about a sharded tensor
-struct TensorShard {
+struct tensor_shard {
     tensor_name string
     shape []int           // Global shape
     shard_dims []int      // Which dimensions are sharded
@@ -73,7 +73,7 @@ struct TensorShard {
 }
 
 // CommunicationOp represents a collective communication operation
-enum CommunicationOp {
+enum communication_op {
     ALL_REDUCE
     ALL_GATHER
     REDUCE_SCATTER
@@ -82,8 +82,8 @@ enum CommunicationOp {
 }
 
 // CollectiveOpHandle tracks a communication operation
-struct CollectiveOpHandle {
-    op_type CommunicationOp
+struct collective_op_handle {
+    op_type communication_op
     tensor_name string
     
     // Timing and status
@@ -98,30 +98,30 @@ struct CollectiveOpHandle {
 }
 
 // DistributedTensorManager handles sharded tensor operations
-struct DistributedTensorManager {
+struct distributed_tensor_manager {
     local_tensors map[string][][]float
-    tensor_shards map[string]TensorShard
-    
+    tensor_shards map[string]tensor_shard
+
     // Communication state
-    pending_ops []CollectiveOpHandle
-    completed_ops []CollectiveOpHandle
+    pending_ops []collective_op_handle
+    completed_ops []collective_op_handle
 }
 
 // ProcessGroupManager manages multiple process groups
-struct ProcessGroupManager {
-    global_pg ProcessGroupConfig  // All processes
-    tp_pg ProcessGroupConfig      // Tensor parallel group
-    pp_pg ProcessGroupConfig      // Pipeline parallel group
-    dp_pg ProcessGroupConfig      // Data parallel group
-    
+struct process_group_manager {
+    global_pg process_group_config  // All processes
+    tp_pg process_group_config      // Tensor parallel group
+    pp_pg process_group_config      // Pipeline parallel group
+    dp_pg process_group_config      // Data parallel group
+
     is_initialized bool
 }
 
 // DistributedState represents the overall distributed execution context
-struct DistributedState {
-    config DistributedConfig
-    pg_manager ProcessGroupManager
-    tensor_mgr DistributedTensorManager
+struct distributed_state {
+    config distributed_config
+    pg_manager process_group_manager
+    tensor_mgr distributed_tensor_manager
     
     // Monitoring
     total_collectives int
@@ -131,18 +131,18 @@ struct DistributedState {
 
 // InitializeDistributedEnvironment sets up distributed backend
 func InitializeDistributedEnvironment(
-    config DistributedConfig,
+    config distributed_config,
     timeout_seconds int,
-) (DistributedState, bool) {
+) (distributed_state, bool) {
     
-    state := DistributedState {
+    state := distributed_state {
         config: config,
-        pg_manager: ProcessGroupManager{},
-        tensor_mgr: DistributedTensorManager {
+        pg_manager: process_group_manager{},
+        tensor_mgr: distributed_tensor_manager {
             local_tensors: make(map[string][][]float),
-            tensor_shards: make(map[string]TensorShard),
-            pending_ops: make([]CollectiveOpHandle, 0),
-            completed_ops: make([]CollectiveOpHandle, 0),
+            tensor_shards: make(map[string]tensor_shard),
+            pending_ops: make([]collective_op_handle, 0),
+            completed_ops: make([]collective_op_handle, 0),
         },
     }
     
@@ -166,14 +166,14 @@ func InitializeDistributedEnvironment(
 }
 
 // RegisterTensorShard registers a sharded tensor
-func (mgr *DistributedTensorManager) RegisterTensorShard(
-    shard TensorShard,
+func (mgr *distributed_tensor_manager) RegisterTensorShard(
+    shard tensor_shard,
 ) {
     mgr.tensor_shards[shard.tensor_name] = shard
 }
 
 // AllReduce performs a collective sum + broadcast operation
-func (state *DistributedState) AllReduce(
+func (state *distributed_state) AllReduce(
     tensor_name string,
     pg_type string,  // "global" | "tp" | "pp" | "dp"
 ) bool {
@@ -186,7 +186,7 @@ func (state *DistributedState) AllReduce(
     tensor_shard := state.tensor_mgr.tensor_shards[tensor_name]
     
     // 2. Create communication operation
-    op := CollectiveOpHandle {
+    op := collective_op_handle {
         op_type: ALL_REDUCE,
         tensor_name: tensor_name,
         started_at: current_time_us(),
@@ -214,7 +214,7 @@ func (state *DistributedState) AllReduce(
 }
 
 // AllGather collects tensors from all processes
-func (state *DistributedState) AllGather(
+func (state *distributed_state) AllGather(
     tensor_name string,
     src_rank int,
 ) [][]float {
@@ -231,7 +231,7 @@ func (state *DistributedState) AllGather(
 }
 
 // ReduceScatter inverse of AllGather
-func (state *DistributedState) ReduceScatter(
+func (state *distributed_state) ReduceScatter(
     global_tensor [][]float,
 ) [][]float {
     
@@ -243,7 +243,7 @@ func (state *DistributedState) ReduceScatter(
 }
 
 // BroadcastTensor sends tensor from source rank to all
-func (state *DistributedState) BroadcastTensor(
+func (state *distributed_state) BroadcastTensor(
     tensor_name string,
     src_rank int,
 ) bool {
@@ -252,7 +252,7 @@ func (state *DistributedState) BroadcastTensor(
     // - If rank == src_rank, send to all
     // - Else, receive from src_rank
     
-    op := CollectiveOpHandle {
+    op := collective_op_handle {
         op_type: BROADCAST,
         tensor_name: tensor_name,
         started_at: current_time_us(),
@@ -267,7 +267,7 @@ func (state *DistributedState) BroadcastTensor(
 }
 
 // TensorParallelLinear performs matrix multiplication with tensor parallelism
-func (state *DistributedState) TensorParallelLinear(
+func (state *distributed_state) TensorParallelLinear(
     input [][]float,
     weight_name string,
     bias_name string,
@@ -287,7 +287,7 @@ func (state *DistributedState) TensorParallelLinear(
 }
 
 // PipelineParallelForward executes forward pass with pipeline parallelism
-func (state *DistributedState) PipelineParallelForward(
+func (state *distributed_state) PipelineParallelForward(
     input [][]float,
     layer_id int,
 ) ([][]float, bool) {
@@ -318,7 +318,7 @@ func (state *DistributedState) PipelineParallelForward(
 }
 
 // WaitForCollectives blocks until all pending operations complete
-func (state *DistributedState) WaitForCollectives() bool {
+func (state *distributed_state) WaitForCollectives() bool {
     
     // In real implementation, would use NCCL/GLOO events
     // For now, just move pending to completed
@@ -340,13 +340,13 @@ func (state *DistributedState) WaitForCollectives() bool {
         )
     }
     
-    state.tensor_mgr.pending_ops = make([]CollectiveOpHandle, 0)
+    state.tensor_mgr.pending_ops = make([]collective_op_handle, 0)
     
     return true
 }
 
 // GetCommunicationStats returns performance statistics
-func (state *DistributedState) GetCommunicationStats() map[string]any {
+func (state *distributed_state) GetCommunicationStats() map[string]any {
     
     total_time_ms := int64(0)
     total_data := int64(0)
@@ -376,7 +376,7 @@ func current_time_us() int64 {
     return time.Now().Unix() * 1000000  // Microseconds
 }
 
-func compute_tensor_bytes(shard TensorShard) int {
+func compute_tensor_bytes(shard tensor_shard) int {
     bytes_per_elem := 4  // float32
     num_elems := 1
     
@@ -387,7 +387,7 @@ func compute_tensor_bytes(shard TensorShard) int {
     return num_elems * bytes_per_elem
 }
 
-func validate_parallel_config(config DistributedConfig) bool {
+func validate_parallel_config(config distributed_config) bool {
     // Check that parallelism dimensions multiply to world_size
     if config.tp_size * config.pp_size * config.dp_size != config.world_size {
         return false
@@ -405,7 +405,7 @@ func main() {
     // Example: 4-GPU distributed setup
     // 2x Tensor Parallel, 2x Data Parallel
     
-    config := DistributedConfig {
+    config := distributed_config {
         enabled: true,
         parallel_mode: TENSOR_PARALLEL,
         tp_size: 2,

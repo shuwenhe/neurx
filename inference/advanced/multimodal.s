@@ -1,26 +1,26 @@
 package neurx.inference.advanced.multimodal
 
-enum ModalityType {
+enum modality_type {
     TEXT
     IMAGE
     VIDEO
     AUDIO
 }
 
-enum ImageFormat {
+enum image_format {
     PNG
     JPEG
     WEBP
 }
 
-enum AudioFormat {
+enum audio_format {
     WAV
     MP3
     FLAC
 }
 
-struct ImageData {
-    format ImageFormat
+struct image_data {
+    format image_format
     width int
     height int
     channels int
@@ -29,8 +29,8 @@ struct ImageData {
     processed_tensor [][]float
 }
 
-struct AudioData {
-    format AudioFormat
+struct audio_data {
+    format audio_format
     sample_rate int
     duration_ms int
     num_channels int
@@ -39,28 +39,28 @@ struct AudioData {
     mel_spectrogram [][]float
 }
 
-struct VideoData {
+struct video_data {
     fps int
     num_frames int
     width int
     height int
-    frames []ImageData
+    frames []image_data
 
     temporal_features [][]float
 }
 
-struct MultimodalInput {
+struct multimodal_input {
     text string
-    images []ImageData
-    videos []VideoData
-    audio []AudioData
+    images []image_data
+    videos []video_data
+    audio []audio_data
 
     text_weight float
     image_weight float
     audio_weight float
 }
 
-struct VisionEncoderConfig {
+struct vision_encoder_config {
     encoder_name string
     model_path string
     hidden_size int
@@ -72,7 +72,7 @@ struct VisionEncoderConfig {
     normalize_std []float
 }
 
-struct AudioEncoderConfig {
+struct audio_encoder_config {
     encoder_name string
     model_path string
     sample_rate int
@@ -81,14 +81,14 @@ struct AudioEncoderConfig {
     hop_length_ms int
 }
 
-struct VisionEncoder {
-    config VisionEncoderConfig
+struct vision_encoder {
+    config vision_encoder_config
     weights map[string][][]float
     is_loaded bool
 }
 
-func LoadVisionEncoder(config VisionEncoderConfig) VisionEncoder {
-    encoder := VisionEncoder {
+func LoadVisionEncoder(config vision_encoder_config) vision_encoder {
+    encoder := vision_encoder {
         config: config,
         weights: make(map[string][][]float),
         is_loaded: false,
@@ -98,8 +98,8 @@ func LoadVisionEncoder(config VisionEncoderConfig) VisionEncoder {
     return encoder
 }
 
-func (encoder VisionEncoder) EncodeImage(
-    image ImageData,
+func (encoder vision_encoder) EncodeImage(
+    image image_data,
 ) [][]float {
     if !encoder.is_loaded {
         return make([][]float, 0)
@@ -117,14 +117,14 @@ func (encoder VisionEncoder) EncodeImage(
     return features
 }
 
-struct AudioEncoder {
-    config AudioEncoderConfig
+struct audio_encoder {
+    config audio_encoder_config
     weights map[string][][]float
     is_loaded bool
 }
 
-func LoadAudioEncoder(config AudioEncoderConfig) AudioEncoder {
-    encoder := AudioEncoder {
+func LoadAudioEncoder(config audio_encoder_config) audio_encoder {
+    encoder := audio_encoder {
         config: config,
         weights: make(map[string][][]float),
         is_loaded: false,
@@ -134,8 +134,8 @@ func LoadAudioEncoder(config AudioEncoderConfig) AudioEncoder {
     return encoder
 }
 
-func (encoder AudioEncoder) EncodeAudio(
-    audio AudioData,
+func (encoder audio_encoder) EncodeAudio(
+    audio audio_data,
 ) [][]float {
     if !encoder.is_loaded {
         return make([][]float, 0)
@@ -153,9 +153,9 @@ func (encoder AudioEncoder) EncodeAudio(
     return features
 }
 
-struct MultimodalProcessor {
-    vision_encoder VisionEncoder
-    audio_encoder AudioEncoder
+struct multimodal_processor {
+    vision_encoder vision_encoder
+    audio_encoder audio_encoder
 
     text_only_fallback bool
     max_image_tokens int
@@ -163,10 +163,10 @@ struct MultimodalProcessor {
 }
 
 func NewMultimodalProcessor(
-    vision_config VisionEncoderConfig,
-    audio_config AudioEncoderConfig,
-) MultimodalProcessor {
-    return MultimodalProcessor {
+    vision_config vision_encoder_config,
+    audio_config audio_encoder_config,
+) multimodal_processor {
+    return multimodal_processor {
         vision_encoder: LoadVisionEncoder(vision_config),
         audio_encoder: LoadAudioEncoder(audio_config),
         text_only_fallback: true,
@@ -175,8 +175,8 @@ func NewMultimodalProcessor(
     }
 }
 
-func (processor MultimodalProcessor) ProcessInput(
-    input MultimodalInput,
+func (processor multimodal_processor) ProcessInput(
+    input multimodal_input,
 ) ([]int, [][]float, []string) {
 
     text_tokens := tokenize(input.text)
@@ -229,15 +229,15 @@ func (processor MultimodalProcessor) ProcessInput(
     return text_tokens, all_features, special_tokens
 }
 
-type ImagePreprocessor struct {
+type image_preprocessor struct {
     target_size int
     normalize_mean []float
     normalize_std []float
 }
 
 func preprocess_image(
-    image ImageData,
-    config VisionEncoderConfig,
+    image image_data,
+    config vision_encoder_config,
 ) [][]float {
 
     result := make([][]float, config.num_patches)
@@ -249,8 +249,8 @@ func preprocess_image(
 }
 
 func extract_mel_spectrogram(
-    audio AudioData,
-    config AudioEncoderConfig,
+    audio audio_data,
+    config audio_encoder_config,
 ) [][]float {
 
     num_frames := (len(audio.samples) - config.frame_length_ms) /
@@ -349,7 +349,7 @@ func scale_vector(vec []float, scale float) []float {
 
 func main() {
 
-    vision_config := VisionEncoderConfig {
+    vision_config := vision_encoder_config {
         encoder_name: "clip",
         model_path: "/path/to/clip/model",
         hidden_size: 768,
@@ -357,7 +357,7 @@ func main() {
         image_size: 224,
     }
 
-    audio_config := AudioEncoderConfig {
+    audio_config := audio_encoder_config {
         encoder_name: "wav2vec",
         model_path: "/path/to/wav2vec/model",
         sample_rate: 16000,
@@ -366,7 +366,7 @@ func main() {
 
     processor := NewMultimodalProcessor(vision_config, audio_config)
 
-    input := MultimodalInput {
+    input := multimodal_input {
         text: "Describe this medical image",
         text_weight: 1.0,
         image_weight: 1.0,
