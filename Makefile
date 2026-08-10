@@ -6,7 +6,8 @@
 	run-train-compiled-s run-train-large-model-s run-train-model-ir-s run-with-logs-s verify-framework-s verify-inference-pipeline-s test-build-s test-smart-inference-s \
 	run-full-inference-s compile-all-components-s integration-s complete-training-cycle-s verify-transformer-implementation-s cluster-launch-s setup-production-deployment-s \
 	run-end-to-end-verification-s run-integration-tests-s minimal-diagnostic-s diagnose-file-creation-s diagnose-tool-registration-s diagnose-autoscroll-s \
-	build-pretrain-manifest-s build-cuda-train-bridge build-cuda-chat-bridge run-gpu-pretrain-s cuda-tools-s cuda-verify-s cuda-build-s cuda-build-runtime-s cuda-build-runtime-alt-s cuda-build-kernels-s cuda-build-kernels-simple-s run-interactive-chat-repl-s transformer-cuda-checkpoint-resume-test build-real-inference-s build-real-model-chat-s build-production-s-inference production-s-inference build-hf-posttrain-chat-s hf-posttrain-chat
+	build-pretrain-manifest-s build-cuda-train-bridge build-cuda-chat-bridge run-gpu-pretrain-s cuda-tools-s cuda-verify-s cuda-build-s cuda-build-runtime-s cuda-build-runtime-alt-s cuda-build-kernels-s cuda-build-kernels-simple-s run-interactive-chat-repl-s transformer-cuda-checkpoint-resume-test build-real-inference-s build-real-model-chat-s build-production-s-inference production-s-inference build-hf-posttrain-chat-s hf-posttrain-chat \
+	build-json-parser-s test-json-parser-s build-cpp2s-migration
 ifeq ($(OS),windows_nt)
 PLATFORM := windows
 WINDOWS_GIT_BASH := C:/progra~1/git/bin/bash.exe
@@ -2799,3 +2800,66 @@ build-posttrain-real-s: check-bash
 		'$(CURDIR_UNIX)/posttrain/trainer/standalone_real.s' \
 		'$(CURDIR_UNIX)/artifacts/build/posttrain_real/posttrain_real_ir.json' || exit 1
 	@echo "[✓] Real training IR generated"
+
+# ==================== C++ to S Language Migration ====================
+
+build-json-parser-s: check-bash
+	@echo "╔════════════════════════════════════════════════════════════════╗"
+	@echo "║  Building Pure-S JSON Parser Library                           ║"
+	@echo "╚════════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/json_parser'
+	@echo "✓ JSON parser source: posttrain/lib/json_parser.s"
+	@echo "  This is a complete S-language JSON implementation"
+	@echo "  No compilation required - ready to use with import"
+	@echo ""
+	@echo "Usage in other S files:"
+	@echo "  use neurx.posttrain.lib.json_parser"
+	@echo "  val := json_parser.parse(json_string)"
+	@echo ""
+
+test-json-parser-s: check-bash build-s-ir-runner
+	@echo "╔════════════════════════════════════════════════════════════════╗"
+	@echo "║  Testing Pure-S JSON Parser                                    ║"
+	@echo "╚════════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/test_json'
+	@cd '$(CURDIR_UNIX)' && \
+		rm -f '$(CURDIR_UNIX)/artifacts/build/test_json/test_json_parser.ir'; \
+		"$(S_SEED_COMPILER)" 'posttrain/lib/test_json_parser.s' '$(CURDIR_UNIX)/artifacts/build/test_json/test_json_parser.ir' 2>&1 || exit 1; \
+		test -f '$(CURDIR_UNIX)/artifacts/build/test_json/test_json_parser.ir'
+	@echo ""
+	@echo "[Running Tests]"
+	@cd '$(CURDIR_UNIX)' && \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/test_json/test_json_parser.ir' \
+		'$(S_RUNNER_BIN)' 2>&1
+	@echo ""
+	@echo "✅ Pure-S JSON Parser tests complete!"
+	@echo ""
+
+build-cpp2s-migration: build-json-parser-s
+	@echo "╔════════════════════════════════════════════════════════════════╗"
+	@echo "║  C++ to S Language Migration Status                            ║"
+	@echo "╚════════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "Phase 1: JSON Library (✓ Complete)"
+	@echo "  ✅ json_parser.s - Pure S implementation"
+	@echo "  ✅ test_json_parser.s - Unit tests"
+	@echo "  📊 Size: ~400 lines vs ~150 lines (C++)"
+	@echo "  🚀 Performance: Pure S, no external dependencies"
+	@echo ""
+	@echo "Phase 2: HF Config Library (Planned)"
+	@echo "  📋 hf_config.s - HuggingFace config loader"
+	@echo "  📋 Tests for config parsing"
+	@echo ""
+	@echo "Phase 3: Safetensors Library (Planned)"
+	@echo "  📋 safetensors.s - Binary weight file loader"
+	@echo "  📋 Dtype conversion support"
+	@echo ""
+	@echo "Phase 4: BPE Tokenizer (Keep C++ for now)"
+	@echo "  ⚠️  Requires ICU Unicode support"
+	@echo "  💡 Current: S wrapper for C++ tokenizer"
+	@echo "  🔮 Future: Full S implementation with Unicode lib"
+	@echo ""
+	@echo "Progress: Phase 1/4 (25%)"
+	@echo ""
