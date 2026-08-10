@@ -68,4 +68,3 @@ func capture_as_cuda_graph(execution_context ctx) string {
 func get_execution_stats(execution_context ctx) string {
     "total_time=0,completed_kernels=0,streams_used=0"
 }
-

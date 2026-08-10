@@ -268,4 +268,3 @@ func zero_infinity_step(zero_infinity_state state) zero_infinity_state {
     state.current_step = state.current_step + 1
     return state
 }
-

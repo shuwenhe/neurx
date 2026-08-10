@@ -413,4 +413,3 @@ func pp_reset_progress(pipeline_parallel_state state) pipeline_parallel_state {
         schedule: copy_strings(state.schedule),
     }
 }
-

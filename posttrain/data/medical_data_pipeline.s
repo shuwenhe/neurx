@@ -378,5 +378,5 @@ func append_int([]int arr, int elem) []int {
 }
 
 func write_line(string filepath, string line) {
-}
 
+}

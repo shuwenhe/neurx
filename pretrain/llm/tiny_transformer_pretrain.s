@@ -744,4 +744,3 @@ func shell_escape(string text) string {
     }
     out + "'"
 }
-

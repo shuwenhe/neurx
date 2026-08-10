@@ -268,4 +268,3 @@ func load_simpo_checkpoint(string path) simpo_state {
         save_interval: 10,
     })
 }
-

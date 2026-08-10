@@ -1242,4 +1242,3 @@ func prod(tensor a, int dim) tensor {
         grad: none,
     }
 }
-

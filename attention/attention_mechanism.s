@@ -492,4 +492,3 @@ func test_attention() {
     print("\n" + "="*60)
     print("All NEURX attention tests passed! ✨")
     print("="*60 + "\n")
-

@@ -783,4 +783,3 @@ func apply_rope(tensor input, rope_cache cache, int start_pos) tensor {
     }
     new(out, copy_int(input.shape), input.requires_grad)
 }
-

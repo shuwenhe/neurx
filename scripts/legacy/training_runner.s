@@ -88,6 +88,7 @@ var g_config = &training_config{
 }
 
 func load_config_from_env() {
+
 	if home := os.Getenv("NEURX_HOME"); home != "" {
 		g_config.DataDir = filepath.Join(home, "dataset", "pretrain")
 		g_config.OutputDir = filepath.Join(home, "artifacts", "output")
@@ -125,6 +126,7 @@ func load_config_from_env() {
 }
 
 func load_config_from_file(path string) error {
+
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
@@ -137,6 +139,7 @@ func load_config_from_file(path string) error {
 }
 
 func save_config_to_file(path string) error {
+
 	data, err := json.MarshalIndent(g_config, "", "  ")
 	if err != nil {
 		return err
@@ -149,6 +152,7 @@ func save_config_to_file(path string) error {
 }
 
 func initialize_training() error {
+
 	log_info("Initializing training...")
 	dirs := []string{
 		g_config.OutputDir,
@@ -176,6 +180,7 @@ func initialize_training() error {
 }
 
 func load_checkpoint(path string) error {
+
 	log_info("Loading checkpoint: " + path)
 	stat, err := os.Stat(path)
 	if err != nil {
@@ -201,6 +206,7 @@ func load_checkpoint(path string) error {
 }
 
 func save_checkpoint(step int64) error {
+
 	checkpoint_dir := filepath.Join(g_config.CheckpointDir,
 		fmt.Sprintf("checkpoint_step_%d", step))
 	err := os.MkdirAll(checkpoint_dir, 0755)
@@ -227,6 +233,7 @@ func save_checkpoint(step int64) error {
 }
 
 func training_step(step int64) error {
+
 	start_time := time.Now()
 	gtraining_state.CurrentStep = step
 	gtraining_state.AvgLoss = gtraining_state.AvgLoss*0.99 + 2.5*0.01
@@ -241,6 +248,7 @@ func training_step(step int64) error {
 }
 
 func evaluation_step(step int64) error {
+
 	log_info(fmt.Sprintf("Running evaluation at step %d...", step))
 	eval_loss := 2.3
 	accuracy := 0.45
@@ -251,6 +259,7 @@ func evaluation_step(step int64) error {
 }
 
 func calculate_learning_rate(step int64) float64 {
+
 	if step < int64(g_config.WarmupSteps) {
 		return g_config.LearningRate * float64(step) / float64(gConfig.WarmupSteps)
 	}
@@ -264,14 +273,17 @@ func calculate_learning_rate(step int64) float64 {
 }
 
 func calculate_gradient_norm() float64 {
+
 	return 0.5
 }
 
 func cosine(x float64) float64 {
+
 	return 1.0 - x*x/2.0
 }
 
 func run_training() error {
+
 	log_info("Starting training loop...")
 	log_info(fmt.Sprintf("model: %s, Params: %d, Total Steps: %d",
 		g_config.ModelName, g_config.ParamCount, g_config.TotalSteps))
@@ -321,21 +333,25 @@ func run_training() error {
 }
 
 func log_info(msg string) {
+
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] INFO: %s\n", timestamp, msg)
 }
 
 func log_warn(msg string) {
+
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] WARN: %s\n", timestamp, msg)
 }
 
 func log_error(msg string) {
+
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] ERROR: %s\n", timestamp, msg)
 }
 
 func log_metric(m *training_metrics) {
+
 	data, _ := json.Marshal(m)
 	metrics_path := filepath.Join(g_config.LogDir, "metrics.jsonl")
 	f, err := os.OpenFile(metrics_path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -348,6 +364,7 @@ func log_metric(m *training_metrics) {
 }
 
 func print_usage() {
+
 	fmt.Println("NeurX Training runner - Usage:")
 	fmt.Println("")
 	fmt.Println("Commands:")
@@ -375,11 +392,13 @@ func print_usage() {
 }
 
 func print_config() {
+
 	data, _ := json.MarshalIndent(g_config, "", "  ")
 	fmt.Println(string(data))
 }
 
 func main() {
+
 	if len(os.Args) < 2 {
 		print_usage()
 		return
@@ -452,4 +471,3 @@ func main() {
 		os.Exit(1)
 	}
 }
-

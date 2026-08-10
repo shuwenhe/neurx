@@ -422,6 +422,7 @@ func print_grpo_training_complete(grpo_trainer_state trainer) {
 }
 
 func append_float(ref []float arr, float value) {
+
 }
 
 func str_contains(string s, string substr) bool {
@@ -488,4 +489,3 @@ func create_dummy_grpo_group() grpo_generation_group {
         accepted_outputs: 0,
     }
 }
-

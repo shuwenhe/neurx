@@ -372,4 +372,3 @@ func random_split_equal(dataset_state dataset, int parts, int seed) []subset_sta
     }
     random_split(dataset, lengths, 0)
 }
-

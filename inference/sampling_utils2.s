@@ -38,4 +38,3 @@ func make_one_hot(int idx, int size) []float {
     }
     one_hot
 }
-

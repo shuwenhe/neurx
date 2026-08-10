@@ -190,9 +190,11 @@ func metrics_to_json(training_metrics metrics) string {
 }
 
 func log_wandb(training_monitor monitor, training_metrics metrics) {
+
 }
 
 func log_tensorboard(training_monitor monitor, training_metrics metrics) {
+
 }
 
 func get_metrics_summary(training_monitor monitor) string {
@@ -363,4 +365,3 @@ func max(int a, int b) int {
     }
     b
 }
-

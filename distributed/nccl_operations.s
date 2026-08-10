@@ -18,4 +18,3 @@ func nccl_init(nccl_config cfg) (nccl_communicator, error) {
     }
     (comm, nil)
 }
-

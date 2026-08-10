@@ -17,4 +17,3 @@ func nccl_allreduce(
     log_collective_op("ALLREDUCE", reduce_op, bytes, comm->config.world_size)
     nil
 }
-

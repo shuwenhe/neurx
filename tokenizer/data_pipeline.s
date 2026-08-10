@@ -487,4 +487,3 @@ func unicode_normalize(string s) string {
 }
 }
 }
-

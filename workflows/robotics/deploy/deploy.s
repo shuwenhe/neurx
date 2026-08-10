@@ -45,4 +45,3 @@ func robotics_deploy_trigger_emergency_stop(robotics_deploy_state state) robotic
         emergency_stop: true,
     }
 }
-

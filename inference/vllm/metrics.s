@@ -132,4 +132,3 @@ func vllm_metrics_state_dict(vllm_metrics_state state) vllm_metrics_state {
 func vllm_metrics_load_state_dict(vllm_metrics_state state, vllm_metrics_state other) vllm_metrics_state {
     other
 }
-

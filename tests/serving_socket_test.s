@@ -116,4 +116,3 @@ func int_to_string(int val) string {
 func main() {
     test_serving_socket()
 }
-

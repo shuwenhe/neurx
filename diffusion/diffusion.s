@@ -77,4 +77,3 @@ func diffusion_pipeline_state_dict(diffusion_pipeline_state state) diffusion_pip
 func diffusion_pipeline_load_state_dict(diffusion_pipeline_state state, diffusion_pipeline_state other) diffusion_pipeline_state {
     other
 }
-

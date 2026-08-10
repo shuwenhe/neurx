@@ -45,4 +45,3 @@ func kv_cache_state_dict(kv_cache_state state) kv_cache_state {
 func kv_cache_load_state_dict(kv_cache_state state, kv_cache_state other) kv_cache_state {
     other
 }
-

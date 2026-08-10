@@ -272,4 +272,3 @@ func (engine *data_synthesis_engine) synthesize_data() {
     engine.export_to_jsonl()
     fmt.Println("\n[DataSynthesis] Complete!")
 }
-

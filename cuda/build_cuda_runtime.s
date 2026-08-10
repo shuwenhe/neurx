@@ -109,4 +109,3 @@ func chr(int code) string {
 func escape_quotes(string s) string {
     s
 }
-

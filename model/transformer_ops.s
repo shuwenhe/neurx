@@ -283,4 +283,3 @@ func transformer_layer(
     []float output = add_arrays(after_attn, mlp_output)
     output
 }
-

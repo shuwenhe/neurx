@@ -824,4 +824,3 @@ func main() {
     string response = decode_token_sequence(logits_seed, max_new_tokens)
     print("Assistant: " + response + "\n")
 }
-

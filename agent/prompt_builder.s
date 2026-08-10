@@ -142,4 +142,3 @@ func agent_prompt_summary(agent_prompt_builder_state b) string {
     }
     "prompt;goal=" + b.goal + ";task=" + b.task + ";has_memory=" + has_mem + ";has_tools=" + has_tools
 }
-

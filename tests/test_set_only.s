@@ -12,4 +12,3 @@ func main() {
     println("Test complete")
     0
 }
-

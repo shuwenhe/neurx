@@ -78,4 +78,3 @@ func pick_next_task(rq run_queue) (run_queue, task_struct, bool) {
     }
     return (rq, task_struct{}, false)
 }
-

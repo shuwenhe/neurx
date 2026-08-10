@@ -266,4 +266,3 @@ func grad_enabled_state(autograd_state state) bool {
 func grad_accumulation_state(autograd_state state) bool {
     state.grad_accumulation
 }
-

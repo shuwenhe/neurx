@@ -282,4 +282,3 @@ func main() {
     print_dataset_stats(c4_stats)
     fmt.printfln("✅ Data loader ready for production training!\n")
 }
-

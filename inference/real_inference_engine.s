@@ -116,4 +116,3 @@ func main() {
     print("Implement actual matmul operations\n")
     print("Generate longer sequences (multiple tokens)\n")
 }
-

@@ -106,4 +106,3 @@ func get_embedding_layer(transformer_model model) embedding_layer {
 func get_lm_head(transformer_model model) linear_layer {
     return model.lm_head
 }
-

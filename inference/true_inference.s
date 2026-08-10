@@ -57,5 +57,3 @@ func compute_mean_std([][]float mat) mean_std {
     float std = sqrt_approx(variance)
     return mean_std{mean: mean, std: std}
 }
-
-

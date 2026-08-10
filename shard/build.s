@@ -80,4 +80,3 @@ func main() {
     println("All shard files compiled successfully")
     0
 }
-

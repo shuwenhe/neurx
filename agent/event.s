@@ -117,4 +117,3 @@ func agent_event_export(agent_event_state state) string {
 func agent_event_summary(agent_event_state state) string {
     "events=" + string(state.count) + ";last=" + agent_event_last_kind(state)
 }
-

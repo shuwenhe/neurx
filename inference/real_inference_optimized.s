@@ -413,4 +413,3 @@ func main() {
     string response = decode_token_sequence_mixed(logits_seed, max_new_tokens)
     print("Response: " + response + "\n")
 }
-

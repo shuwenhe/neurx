@@ -49,4 +49,3 @@ func distributed_trainer_state_dict(distributed_trainer_state state) distributed
 func distributed_trainer_load_state_dict(distributed_trainer_state state, distributed_trainer_state other) distributed_trainer_state {
     other
 }
-

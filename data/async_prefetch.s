@@ -388,4 +388,3 @@ func pass_raw_data_to_tokenizers(async_prefetch_manager mgr, []string lines) voi
     return
 func get_raw_data_from_io_queue(async_prefetch_manager mgr, []string out_lines) bool:
     return false
-

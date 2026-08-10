@@ -271,4 +271,3 @@ func tool_cache_summary(tool_cache_state state) string {
     " hit_rate=" + string(tool_cache_hit_rate_pct(state)) + "%" +
     " evictions=" + string(state.total_evictions)
 }
-

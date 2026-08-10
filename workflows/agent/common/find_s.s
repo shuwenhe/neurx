@@ -57,4 +57,3 @@ func is_runnable(string path) bool {
     }
     runtime_file_exists(trimmed) && runtime_run_command_output("test -x " + runtime_shell_escape(trimmed) + " && printf ok || true") == "ok"
 }
-

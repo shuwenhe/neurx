@@ -314,4 +314,3 @@ func (manager *cluster_manager) run_full_deployment() {
     scheduler.complete_jobs()
     fmt.Println("\n[cluster_manager] Deployment complete!")
 }
-

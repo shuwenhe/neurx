@@ -181,4 +181,3 @@ func elementwise_div([]float a, []float b) []float {
 func abs_float(float x) float {
     if x < 0.0 { -x } else { x }
 }
-

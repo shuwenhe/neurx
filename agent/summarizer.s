@@ -127,4 +127,3 @@ func agent_summary_result_format(agent_summary_result result) string {
     }
     "summary;original_len=" + string(result.original_len) + ";clipped=" + clipped_str + ";text=" + result.text
 }
-

@@ -54,4 +54,3 @@ func wandb_log_metric(
         flush_wandb(run)
     }
 }
-

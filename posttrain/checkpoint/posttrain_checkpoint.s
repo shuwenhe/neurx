@@ -53,4 +53,3 @@ func posttrain_checkpoint_state_dict(posttrain_checkpoint_state state) posttrain
 func posttrain_checkpoint_load_state_dict(posttrain_checkpoint_state state, posttrain_checkpoint_state other) posttrain_checkpoint_state {
     other
 }
-

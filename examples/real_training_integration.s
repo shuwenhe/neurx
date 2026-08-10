@@ -10,4 +10,3 @@ func main() {
     run_real_training_loop(config)
     return 0
 }
-

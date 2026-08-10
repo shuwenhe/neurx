@@ -156,4 +156,3 @@ func char_to_digit(string c) int {
     if c == "9" { return 9 }
     return 0 - 1
 }
-

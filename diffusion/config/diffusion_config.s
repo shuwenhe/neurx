@@ -49,4 +49,3 @@ func diffusion_config_state_dict(diffusion_config cfg) diffusion_config {
 func diffusion_config_load_state_dict(diffusion_config cfg, diffusion_config other) diffusion_config {
     other
 }
-

@@ -232,4 +232,3 @@ func main() {
     println("Training Complete!")
     println(repeat_string("=", 60))
 }
-

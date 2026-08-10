@@ -107,4 +107,3 @@ func parse_int(string s, int fallback) int {
     if sign < 0 { return 0 - value }
     value
 }
-

@@ -56,4 +56,3 @@ func int_to_string(int x) string {
 func char_to_string(byte c) string {
     string(1, c)
 }
-

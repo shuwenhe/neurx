@@ -217,4 +217,3 @@ func float_to_str_2(float f) string {
 func int_to_str_2(int n) string {
     ""
 }
-

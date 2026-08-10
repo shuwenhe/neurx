@@ -122,4 +122,3 @@ struct scheduler_stats {
     int total_steps
     float avg_buffer_utilization
 }
-

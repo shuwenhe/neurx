@@ -319,6 +319,7 @@ func analyze_pipeline_performance(pipeline_state state, double wall_clock_time_m
 }
 
 func print_pipeline_stats(pipeline_state state, pipeline_metrics metrics) {
+
 }
 
 func recommended_pp_config_2t(int num_gpus_available) pipeline_config {
@@ -341,4 +342,3 @@ func recommended_pp_config_2t(int num_gpus_available) pipeline_config {
     cfg.overlap_comm_compute = true
     return cfg
 }
-

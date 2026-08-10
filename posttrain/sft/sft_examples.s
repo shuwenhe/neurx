@@ -75,4 +75,3 @@ func load_pretrained_sft_model(string model_name) neurx_model {
 func load_tokenizer_sft() tokenizer_state {
     tokenizer_state{}
 }
-

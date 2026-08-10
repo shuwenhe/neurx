@@ -109,4 +109,3 @@ func main() {
     }
     fmt.Printf("[✓ Complete] training finished - steps: %d, loss: %.6f\n", total_steps, total_loss)
 }
-

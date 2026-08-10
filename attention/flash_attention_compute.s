@@ -219,6 +219,7 @@ func load_block(data: vector, start_idx: int, block_size: int, num_heads: int, h
 }
 
 func store_block(output: vector, block: vector, start_idx: int, block_size: int, num_heads: int, head_dim: int): void {
+
 }
 
 func block_matrix_multiply(
@@ -462,4 +463,3 @@ func recommended_flash_attention_config_2t(): flash_attention_config {
     config.sequence_parallel_size = 4
     return config
 }
-

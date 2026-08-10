@@ -87,4 +87,3 @@ func adagrad_sqrt(float x) float {
     }
     y
 }
-

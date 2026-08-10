@@ -133,4 +133,3 @@ func vllm_queue_state_dict(vllm_request_queue_state state) vllm_request_queue_st
 func vllm_queue_load_state_dict(vllm_request_queue_state state, vllm_request_queue_state other) vllm_request_queue_state {
     other
 }
-

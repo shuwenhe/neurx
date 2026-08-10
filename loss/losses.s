@@ -376,4 +376,3 @@ func triplet_margin_loss(tensor anchor, tensor positive, tensor negative) tensor
     }
     scalar(mean_from_sum(total, n), anchor.requires_grad || positive.requires_grad || negative.requires_grad)
 }
-

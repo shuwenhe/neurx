@@ -220,4 +220,3 @@ func ln_approx(float x) float {
     }
     return 2.0 * result
 }
-

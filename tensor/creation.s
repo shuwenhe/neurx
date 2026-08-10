@@ -252,4 +252,3 @@ func empty([]int shape) tensor {
 func empty_like(tensor like) tensor {
     make(like.shape, 0.0, like.requires_grad)
 }
-

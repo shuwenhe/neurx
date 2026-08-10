@@ -250,4 +250,3 @@ func tool_schema_registry_to_prompt(tool_schema_registry reg) string {
 func tool_schema_registry_summary(tool_schema_registry reg) string {
     "tool_schemas count=" + string(reg.count)
 }
-

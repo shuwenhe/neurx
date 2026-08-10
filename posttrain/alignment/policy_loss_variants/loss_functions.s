@@ -158,4 +158,3 @@ func exp_approx(float x) float {
     }
     return result
 }
-

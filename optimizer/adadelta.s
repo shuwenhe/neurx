@@ -83,4 +83,3 @@ func adadelta_sqrt(float x) float {
     }
     y
 }
-

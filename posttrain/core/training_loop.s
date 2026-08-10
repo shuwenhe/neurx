@@ -189,4 +189,3 @@ func float_to_str(float f, int decimals) string {
     }
     result
 }
-

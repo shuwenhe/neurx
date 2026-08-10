@@ -103,4 +103,3 @@ func vllm_runtime_state_dict(vllm_runtime_state state) vllm_runtime_state {
 func vllm_runtime_load_state_dict(vllm_runtime_state state, vllm_runtime_state other) vllm_runtime_state {
     other
 }
-

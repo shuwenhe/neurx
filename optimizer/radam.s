@@ -112,4 +112,3 @@ func radam_pow(float base, int exponent) float {
     }
     result
 }
-

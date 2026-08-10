@@ -97,4 +97,3 @@ func clear_cache(cache_manager mgr) cache_manager {
     mgr.entries = []cache_entry{cap: 10000}
     mgr
 }
-

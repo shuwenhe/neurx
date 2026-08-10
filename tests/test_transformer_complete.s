@@ -65,6 +65,7 @@ func assert_equal(string test_name, float actual, float expected, float epsilon)
 }
 
 func print_test_result(string test_name, bool passed) {
+
 }
 
 func test_layer_norm_forward_basic() {
@@ -335,4 +336,3 @@ func run_all_tests() {
     test_transformer_layer_forward_backward()
     test_complete_forward_backward_cycle()
 }
-

@@ -82,4 +82,3 @@ func pad_sequence_s([]int seq, int target_len, int pad_token) []int {
     }
     result
 }
-

@@ -351,4 +351,3 @@ func trae_moe_reset_load_stats(trae_moe_layer layer) trae_moe_layer {
     layer.router_state.total_routed_tokens = 0
     layer
 }
-

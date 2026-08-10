@@ -54,4 +54,3 @@ func update_averaged_model(averaged_model_state state, tensor model_params) aver
 func averaged_model_parameters(averaged_model_state state) tensor {
     return state.averaged_params
 }
-

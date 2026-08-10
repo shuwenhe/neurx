@@ -224,4 +224,3 @@ func last_index_of(string text, string pattern) int {
     }
     last
 }
-

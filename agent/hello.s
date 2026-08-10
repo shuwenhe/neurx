@@ -4,4 +4,3 @@ func main() {
     print("hello,world")
     0
 }
-

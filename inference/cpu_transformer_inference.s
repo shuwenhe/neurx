@@ -100,4 +100,3 @@ func resolve_checkpoint_path(input string) string {
   }
   return input
 }
-

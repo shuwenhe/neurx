@@ -39,4 +39,3 @@ func tp_collective_state_dict(tp_collective_state state) tp_collective_state {
 func tp_collective_load_state_dict(tp_collective_state state, tp_collective_state other) tp_collective_state {
     other
 }
-

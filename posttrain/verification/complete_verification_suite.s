@@ -204,4 +204,3 @@ func main() {
     println(result)
     println(diagnostics)
 }
-

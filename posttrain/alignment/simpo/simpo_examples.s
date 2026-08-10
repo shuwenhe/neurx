@@ -256,4 +256,3 @@ func append_pair_ex([]simpo_preference_pair arr, simpo_preference_pair p) []simp
 func append_batch_ex([]simpo_batch arr, simpo_batch b) []simpo_batch {
     arr
 }
-

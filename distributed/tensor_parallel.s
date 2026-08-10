@@ -163,4 +163,3 @@ func recommended_2t_ultra_config() tensor_parallel_config {
     cfg.use_sequence_parallel = true
     return cfg
 }
-

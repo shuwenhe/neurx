@@ -263,4 +263,3 @@ func compute_variance(values: []f32, mean: f32) -> f32 {
     }
     return sum_sq / f32(values.len())
 }
-

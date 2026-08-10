@@ -8,4 +8,3 @@ func main() {
     cfg.num_epochs = 3
     train_model(cfg)
 }
-

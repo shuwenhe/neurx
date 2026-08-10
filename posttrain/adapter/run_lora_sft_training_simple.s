@@ -90,4 +90,3 @@ func string_char(int code) string {
     println("")
     0
 }
-

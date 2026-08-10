@@ -273,4 +273,3 @@ struct scheduler_stats {
     int avg_wait_time_ms
     float kv_cache_utilization
 }
-

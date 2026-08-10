@@ -198,4 +198,3 @@ func step_lr_lr(step_lr_state sched) float {
 func constant_scheduler_step(float lr, int step) float {
     lr
 }
-

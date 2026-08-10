@@ -235,4 +235,3 @@ func join_strings([]string parts, string sep) string {
     }
     result
 }
-

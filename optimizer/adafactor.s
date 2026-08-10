@@ -213,4 +213,3 @@ func adafactor_ln(float x) float {
     }
     2.0 * result
 }
-

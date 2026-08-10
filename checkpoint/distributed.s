@@ -193,6 +193,7 @@ func init_checkpoint_manager(checkpoint_config cfg) checkpoint_manager {
 }
 
 func create_directory_if_not_exists(string path) {
+
 }
 
 func trigger_async_save(ref checkpoint_manager mgr, model_checkpoint ckpt_data) bool {
@@ -597,4 +598,3 @@ func quick_resume_training(string checkpoint_path) bool {
     checkpoint_manager mgr = init_checkpoint_manager(cfg)
     return restore_training_state(mgr, checkpoint_path)
 }
-

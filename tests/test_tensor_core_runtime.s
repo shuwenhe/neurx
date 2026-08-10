@@ -154,4 +154,3 @@ func main() {
     assert_close(ddata[0], 19.0, "matmul 00")
     assert_close(ddata[3], 50.0, "matmul 11")
 }
-

@@ -42,4 +42,3 @@ func decode_state_dict(decode_state state) decode_state {
 func decode_load_state_dict(decode_state state, decode_state other) decode_state {
     other
 }
-

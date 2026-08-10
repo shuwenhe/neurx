@@ -87,4 +87,3 @@ func ends_with(string s, string suffix) bool {
 func strip_last_char(string s) string {
     return substring(s, 0, len(s) - 1)
 }
-

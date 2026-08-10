@@ -6,4 +6,3 @@ func main() {
     println("This tool is intentionally conservative; use the rewrite helper only after reviewing the commit history.")
     0
 }
-

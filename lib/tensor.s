@@ -447,4 +447,3 @@ func matrix_row_mean(matrix m) vector {
     }
     result
 }
-

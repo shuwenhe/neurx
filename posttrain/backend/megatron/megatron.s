@@ -186,4 +186,3 @@ func new_megatron_module(
         global_ctx: global_ctx,
     }
 }
-

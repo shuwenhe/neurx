@@ -21,4 +21,3 @@ func launch_softmax(
                       cfg.rows * cfg.cols * 4 * 2)
     nil
 }
-

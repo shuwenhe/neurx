@@ -178,4 +178,3 @@ func main() {
     test_broadcast_backward_rules()
     test_reduce_package()
 }
-

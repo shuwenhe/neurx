@@ -315,4 +315,3 @@ func matrix_power(tensor a, int n) tensor {
     }
     result
 }
-

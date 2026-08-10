@@ -36,4 +36,3 @@ func runtime_status_state_dict(runtime_status_state state) runtime_status_state 
 func runtime_status_load_state_dict(runtime_status_state state, runtime_status_state other) runtime_status_state {
     other
 }
-

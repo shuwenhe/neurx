@@ -120,4 +120,3 @@ func float_to_bits(float f) int {
     bits = bits + mantissa
     bits
 }
-

@@ -1114,4 +1114,3 @@ func gru_cell_forward(gru_cell_state cell, []float x, []float h_prev) []float {
 func gru_forward(gru_cell_state cell, []float input, int seq_len, []float h0) gru_output {
     return neurx.nn.rnn.gru_forward(cell, input, seq_len, h0)
 }
-

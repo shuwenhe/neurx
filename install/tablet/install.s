@@ -9,4 +9,3 @@ func main() {
     println("Use the Android build and adb push workflow from this S entrypoint.")
     0
 }
-

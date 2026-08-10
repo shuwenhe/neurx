@@ -79,5 +79,5 @@ func trtllm_generate_batch(
 }
 
 func trtllm_shutdown(trtllm_rollout_state state) {
-}
 
+}

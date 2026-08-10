@@ -147,4 +147,3 @@ func compute_token_accuracy([][]float logits_batch, []int target_ids) float {
     }
     return ((correct as float)) / ((len(logits_batch) as float))
 }
-

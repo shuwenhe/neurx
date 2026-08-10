@@ -77,4 +77,3 @@ func pretrain_data_state_dict(pretrain_data_state state) pretrain_data_state {
 func pretrain_data_load_state_dict(pretrain_data_state state, pretrain_data_state other) pretrain_data_state {
     other
 }
-

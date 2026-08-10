@@ -235,4 +235,3 @@ func (framework *quantization_framework) quantize_model(calibration_data [][]flo
     framework.estimate_inference_speedup()
     fmt.Println("\n[Quantization] Complete")
 }
-

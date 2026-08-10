@@ -174,4 +174,3 @@ func where(condition: Tensor, x: Tensor, y: Tensor) -> Tensor {
 func sqrt(x: Tensor) -> Tensor {
     return x.pow(0.5)
 }
-

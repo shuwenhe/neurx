@@ -40,4 +40,3 @@ func compute_length_penalty(int length, float alpha) float {
     }
     pow_approx(lp, alpha)
 }
-

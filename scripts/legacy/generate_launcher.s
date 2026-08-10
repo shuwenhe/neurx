@@ -247,4 +247,3 @@ func main() {
     os::chmod(output_script, 0755)
     io::println("✓ Ready to launch: bash " + output_script)
 }
-

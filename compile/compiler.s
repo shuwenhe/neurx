@@ -143,4 +143,3 @@ func compiled_module_state_dict(compiled_module_state state) compiled_module_sta
 func compiled_module_load_state_dict(compiled_module_state state, compiled_module_state other) compiled_module_state {
     other
 }
-

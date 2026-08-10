@@ -161,4 +161,3 @@ func main() {
     list_checkpoints(config)
     print_footer(config)
 }
-

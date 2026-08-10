@@ -43,4 +43,3 @@ func minimal_decoder_state_dict(minimal_decoder_state state) minimal_decoder_sta
 func minimal_decoder_load_state_dict(minimal_decoder_state state, minimal_decoder_state other) minimal_decoder_state {
     other
 }
-

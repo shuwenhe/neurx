@@ -54,4 +54,3 @@ func apply_memory_passes(ir_graph graph, memory_config cfg) ir_graph {
 func get_memory_statistics(ir_graph graph) memory_stats {
     analyze_memory_usage(graph)
 }
-

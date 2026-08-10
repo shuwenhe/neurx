@@ -237,4 +237,3 @@ func abs_approx(float x) float {
     }
     return x
 }
-

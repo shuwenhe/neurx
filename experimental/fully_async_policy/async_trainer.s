@@ -118,6 +118,7 @@ func sample_from_buffer(rollout_buffer buffer, int batch_size) []rollout_sample 
 }
 
 func train_step_async(async_policy_state state, []rollout_sample batch) {
+
 }
 
 func get_async_stats(async_policy_state state) async_stats {
@@ -135,4 +136,3 @@ struct async_stats {
     int policy_version
     float buffer_utilization
 }
-

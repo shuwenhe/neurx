@@ -69,4 +69,3 @@ func clamp_float(float x, float min_val, float max_val) float {
     }
     return x
 }
-

@@ -333,4 +333,3 @@ func fmt_float(float value, int decimals) string {
     }
     out
 }
-

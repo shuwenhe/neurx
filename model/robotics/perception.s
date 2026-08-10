@@ -111,4 +111,3 @@ func robotics_perception_mark_normalized(robotics_perception_state state) roboti
         trained: state.trained,
     }
 }
-

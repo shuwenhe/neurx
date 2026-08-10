@@ -455,6 +455,7 @@ func moe_ffn_forward(model_parallel_config cfg, int layer, [][]float x) [][]floa
 func residual_add([][]float a, [][]float b) [][]float { a }
 
 func execute_pipeline_backward(ref orchestrator_state orch, int micro_batch_id) {
+
 }
 
 func synchronize_gradients_across_dp(ref orchestrator_state orch) {
@@ -796,4 +797,3 @@ func estimate_params(model_parallel_config cfg) float {
     float total = embed + float_of_int(cfg.num_layers) * per_layer + float_of_int(cfg.hidden_dim)
     return total / 1e9
 }
-

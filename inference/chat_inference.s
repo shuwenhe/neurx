@@ -248,4 +248,3 @@ func main() {
         io.println("Example: chat_inference 'Hello, how are you?'")
     }
 }
-

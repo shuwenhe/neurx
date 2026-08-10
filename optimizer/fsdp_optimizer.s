@@ -418,10 +418,10 @@ func compute_fsdp_stats(fsdp_unit_state state) fsdp_stats {
 }
 
 func print_fsdp_summary(fsdp_unit_state state, fsdp_stats stats) {
+
 }
 
 func recommend_fsdp_for_2t(int num_gpus, int tp_degree, int pp_degree) fsdp_config {
     int effective_dp = num_gpus / (tp_degree * pp_degree)
     return default_fsdp_config_2t(effective_dp, 0)
 }
-

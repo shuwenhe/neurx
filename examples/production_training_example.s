@@ -174,4 +174,3 @@ func main() {
     println("Training Complete!")
     println("="*80 + "\n")
 }
-

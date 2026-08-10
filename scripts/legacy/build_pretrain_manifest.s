@@ -269,4 +269,3 @@ func path_dirname(string path) string {
     }
     out
 }
-

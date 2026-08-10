@@ -18,4 +18,3 @@ struct nccl_communicator {
     int bytes_received
     int num_collective_ops
 }
-

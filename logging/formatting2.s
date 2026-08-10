@@ -76,4 +76,3 @@ func substring(string s, int start, int length) string {
     }
     result
 }
-

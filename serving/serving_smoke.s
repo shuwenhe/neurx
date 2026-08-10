@@ -24,4 +24,3 @@ func main() {
     println("cache_misses=" + string(serving_runtime_cache_misses(state)))
     0
 }
-

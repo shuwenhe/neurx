@@ -30,4 +30,3 @@ func main() {
         println("FAILURE: Loss increased")
     }
 }
-

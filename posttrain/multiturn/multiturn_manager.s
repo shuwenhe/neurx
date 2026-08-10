@@ -245,4 +245,3 @@ func reward_to_str(float reward) string {
 func int_to_str(int n) string {
     ""
 }
-

@@ -251,4 +251,3 @@ func append([]medical_fact arr, medical_fact elem) []medical_fact {
     }
     return arr
 }
-

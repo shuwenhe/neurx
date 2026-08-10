@@ -48,4 +48,3 @@ func lowering_plan_state_dict(lowering_plan_state plan) lowering_plan_state {
 func lowering_plan_load_state_dict(lowering_plan_state plan, lowering_plan_state other) lowering_plan_state {
     other
 }
-

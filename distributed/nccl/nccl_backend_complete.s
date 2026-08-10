@@ -302,4 +302,3 @@ func print_comm_stats(nccl_communicator comm) {
     printf("Data Received: %.2f GB\n", float64(comm.bytes_received) / 1e9)
     printf("Avg Op Time: %.3f ms\n", avg_op_time * 1000)
 }
-

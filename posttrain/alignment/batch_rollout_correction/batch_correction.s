@@ -153,4 +153,3 @@ func less_than(tensor a, tensor b) tensor {
 func abs_tensor(tensor x) tensor {
     return x
 }
-

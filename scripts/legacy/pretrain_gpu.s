@@ -708,4 +708,3 @@ func create_cuda_resume_state(string state_file, training_state state, string we
     runtime_write_text_file(state_file, content)
     println("[PRETRAIN-GPU] \u2713 Created CUDA resume state: " + state_file)
 }
-

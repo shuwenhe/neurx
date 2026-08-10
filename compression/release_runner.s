@@ -18,4 +18,3 @@ func main() {
     println("  summary: " + artifact.summary_path)
     0
 }
-

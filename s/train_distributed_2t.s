@@ -94,6 +94,7 @@ func validate_config(training_orchestrator_config config, int ws) {
 }
 
 func print_startup_banner(training_orchestrator_config config, int ws) {
+
 }
 
 func lpad(string s, int width) string {
@@ -115,6 +116,7 @@ func initialize_model_weights(orchestrator_state orch) {
 }
 
 func initialize_optimizer(orchestrator_state orch) {
+
 }
 
 struct data_loader {
@@ -144,6 +146,7 @@ func create_data_loader(int sl, int bs, int vsz, int dp_r, int dp_d, int seed) d
 }
 
 func pre_fetch(data_loader dl) {
+
 }
 
 func get_microbatch(data_loader dl, int step) []int {
@@ -159,15 +162,18 @@ func get_microbatch(data_loader dl, int step) []int {
 }
 
 func set_device(int local_rank) {
+
 }
 
 func set_random_seed(int seed) {
+
 }
 
 func cleanup(orchestrator_state orch) {
+
 }
 
 func print_memory_report(memory_estimate_result m) {
+
 }
 main()
-

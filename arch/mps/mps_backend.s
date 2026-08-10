@@ -269,9 +269,11 @@ func mps_tensor_reshape(mps_tensor input, []int new_shape) mps_tensor {
 }
 
 func mps_free_tensor(mps_tensor tensor) {
+
 }
 
 func mps_sync() {
+
 }
 
 func mps_get_device_info(mps_device device) string {
@@ -313,4 +315,3 @@ func exp(float x) float {
     }
     result
 }
-

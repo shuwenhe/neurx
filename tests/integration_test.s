@@ -141,9 +141,9 @@ func allocate_vector(int size, float init_val) []float {
 }
 
 func print(string msg) {
+
 }
 
 func main() {
     test_all_modules()
 }
-

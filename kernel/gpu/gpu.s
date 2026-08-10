@@ -180,4 +180,3 @@ func gpu_fence_query(gs gpu_state, fence_id int) bool {
     }
     return false
 }
-

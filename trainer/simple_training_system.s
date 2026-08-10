@@ -329,4 +329,3 @@ func simple_randn(int seed) float {
     int r = simple_rand(seed)
     return float(r) / 16384.0 - 1.0
 }
-

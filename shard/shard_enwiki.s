@@ -211,4 +211,3 @@ func max(int a, int b) int {
 func char(int n) int {
     n
 }
-

@@ -57,4 +57,3 @@ func check_file(string path, string label) bool {
     println("❌ " + label + " : missing (" + path + ")")
     false
 }
-

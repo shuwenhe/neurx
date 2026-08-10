@@ -199,4 +199,3 @@ func compute_is_statistics(is_weights: ISWeights) -> map[string]f32 {
 func clamp(x: Tensor, min_val: f32, max_val: f32) -> Tensor {
     return maximum(minimum(x, max_val), min_val)
 }
-

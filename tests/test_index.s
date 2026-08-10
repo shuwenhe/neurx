@@ -10,4 +10,3 @@ func main() {
     test_func(s[i])
     0
 }
-

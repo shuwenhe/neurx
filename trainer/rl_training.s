@@ -473,4 +473,3 @@ func rl_reset(rl_state state) rl_state {
     state.buffer = new_rollout_data(state.config.horizon, state.config.seq_len, state.config.seq_len)
     state
 }
-

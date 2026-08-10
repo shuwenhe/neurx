@@ -86,4 +86,3 @@ enum trainer_type {
 func create_trainer(trainer_type ttype) int {
     return 0
 }
-

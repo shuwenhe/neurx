@@ -562,4 +562,3 @@ func update_parameter(
         param.data[i] = param.data[i] - lr * (m_hat / (math.Sqrt(v_hat) + eps))
     }
 }
-

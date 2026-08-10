@@ -22,4 +22,3 @@ func main() {
     println("  tools/cleanup-old-commits.sh -> cleanup-old-commits.s")
     0
 }
-

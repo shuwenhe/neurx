@@ -207,6 +207,7 @@ func (dp *distributed_process) is_main_process(): bool {
 }
 
 func (dp *distributed_process) barrier() {
+
 }
 
 func (dp *distributed_process) destroy_process_group() {
@@ -310,4 +311,3 @@ func main() {
     launch_json, _ := json.Marshal(launch_config)
     println(string(launch_json))
 }
-

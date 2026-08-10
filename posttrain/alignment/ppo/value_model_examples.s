@@ -320,4 +320,3 @@ func append_step_ex([]value_trajectory_step arr, value_trajectory_step s) []valu
 func append_trajectory_ex([]value_trajectory arr, value_trajectory t) []value_trajectory {
     arr
 }
-

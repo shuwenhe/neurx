@@ -284,6 +284,7 @@ struct batch_2 {
 }
 
 func next_batch(data_loader loader) int {
+
 }
 
 func compute_cross_entropy_loss(auto_grad_tensor logits, []int targets) auto_grad_tensor {
@@ -543,4 +544,3 @@ func main():
         println("\n⚠ Training completed but may need tuning.")
 if __name__ == "__main__":
     exit(main())
-

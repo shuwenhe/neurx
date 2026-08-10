@@ -568,4 +568,3 @@ func agent_plan_set_budget(agent_plan_state state, int budget) agent_plan_state 
         code_attempts: state.code_attempts,
     }
 }
-

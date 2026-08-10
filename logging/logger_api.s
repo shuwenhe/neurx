@@ -92,4 +92,3 @@ func log_message(
         print_message_to_console(lg.config, entry)
     }
 }
-

@@ -570,4 +570,3 @@ func transformer_forward_pass(
         layer_outputs: layer_outputs,
     }
 }
-

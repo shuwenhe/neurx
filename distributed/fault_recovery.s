@@ -376,15 +376,19 @@ func get_time(): float {
 }
 
 func create_directory(path: string): void {
+
 }
 
 func save_metadata(metadata: checkpoint_metadata, file: string): void {
+
 }
 
 func save_binary(data: vector, file: string): void {
+
 }
 
 func compress_and_save(data: vector, file: string, level: int): void {
+
 }
 
 func is_compressed(file: string): bool {
@@ -425,18 +429,23 @@ func extract_training_state(data: vector): vector {
 }
 
 func barrier_all_ranks(num_ranks: int, rank: int): void {
+
 }
 
 func replicate_checkpoint_files(dir: string, factor: int): void {
+
 }
 
 func add_to_checkpoint_db(db: vector, metadata: checkpoint_metadata, max_keep: int): void {
+
 }
 
 func cleanup_old_checkpoints(base_path: string, max_keep: int): void {
+
 }
 
 func broadcast_metadata(metadata: checkpoint_metadata, num_ranks: int, rank: int): void {
+
 }
 
 func all_reduce_and(value: bool, num_ranks: int, rank: int): bool {
@@ -452,6 +461,7 @@ func find_previous_valid_checkpoint(ckpt_id: int, manager: checkpoint_manager, n
 }
 
 func broadcast_recovery_state(model_params: vector, optimizer_state: vector, training_state: vector, num_ranks: int, rank: int): void {
+
 }
 
 func is_nan(val: float): bool {
@@ -473,4 +483,3 @@ func backward_pass(loss: float): vector {
 func recommended_fault_recovery_config_2t(): checkpoint_manager {
     return new_checkpoint_manager("/checkpoints", 1000, 5)
 }
-

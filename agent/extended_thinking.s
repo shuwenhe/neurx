@@ -303,4 +303,3 @@ func agent_thinking_clip(string s, int max_len) string {
     }
     out + "..."
 }
-

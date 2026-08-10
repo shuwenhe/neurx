@@ -146,4 +146,3 @@ func compare_model_versions([]string version_ids) [string:float {
 func generate_alignment_report(alignment_trainer trainer) string {
     "Alignment Report"
 }
-

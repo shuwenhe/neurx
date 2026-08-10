@@ -1087,4 +1087,3 @@ func scale_all_grads(gpt_param_grads grads, float scale) gpt_param_grads {
     }
     grads
 }
-

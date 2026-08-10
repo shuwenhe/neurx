@@ -354,4 +354,3 @@ func format_benchmark_report(benchmark_report r) string {
     s = s + "╚════════════════════════════════════════╝\n"
     s
 }
-

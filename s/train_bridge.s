@@ -62,4 +62,3 @@ func format_param_count(int count) string {
     }
     string(count)
 }
-

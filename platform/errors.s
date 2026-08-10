@@ -73,4 +73,3 @@ func platform_error_load_state_dict(platform_error_state state, platform_error_s
         active: other.active,
     }
 }
-

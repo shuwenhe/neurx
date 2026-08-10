@@ -306,4 +306,3 @@ func main() {
     string max_pages = runtime_env_get("MAX_PAGES", "0")
     process_wikipedia(input_bz2_file, output_dir, manifest_file, docs_per_shard, max_pages)
 }
-

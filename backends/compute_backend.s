@@ -427,4 +427,3 @@ func bf16_max_relative_error([]float arr) float {
     }
     max_err
 }
-

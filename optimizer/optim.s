@@ -306,4 +306,3 @@ func clip_grad_norm([]tensor params, float max_norm, float eps) float {
     }
     sqrt_approx(total_sq)
 }
-

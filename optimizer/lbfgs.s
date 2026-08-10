@@ -202,4 +202,3 @@ func pop_front_1d([]float arr) []float {
     }
     out
 }
-

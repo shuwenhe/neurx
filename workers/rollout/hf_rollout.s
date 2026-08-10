@@ -121,4 +121,3 @@ func hf_update_generation_config(
     state.config.top_p = new_top_p
     return state
 }
-

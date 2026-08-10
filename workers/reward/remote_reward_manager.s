@@ -170,4 +170,3 @@ func slice_strings([]string arr, int start, int end) []string {
     }
     return result
 }
-

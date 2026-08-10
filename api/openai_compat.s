@@ -377,4 +377,3 @@ func main() {
     println("embedding dimension: " + int_to_string(emb_resp.embedding_dimension))
     println("\n=== API Tests Complete ===")
 }
-

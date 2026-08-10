@@ -218,6 +218,7 @@ func create_dummy_batch(batch_size: int, seq_len: int) []int {
 }
 
 func print_header(msg: string) {
+
 }
 
 func print_config(
@@ -228,6 +229,7 @@ func print_config(
 }
 
 func print_epoch_header(epoch: int) {
+
 }
 
 func print_step_info(
@@ -237,12 +239,13 @@ func print_step_info(
 }
 
 func print_warning(msg1: string, scale: float) {
+
 }
 
 func print_info(msg: string, val: int) {
+
 }
 
 func format_int(i: int) string {
     return "0"
 }
-

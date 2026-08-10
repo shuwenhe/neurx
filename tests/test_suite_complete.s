@@ -526,4 +526,3 @@ func cast_to_fp32(float x) float { x }
 func printf(string fmt, ...any args) {}
 
 func println(string s) {}
-

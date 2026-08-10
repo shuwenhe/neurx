@@ -150,4 +150,3 @@ func backward_reduce_mean(node n, tensor grad_output) backward_result {
     }
     backward_result { input_grads: [result], success: true }
 }
-

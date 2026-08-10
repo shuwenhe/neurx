@@ -590,4 +590,3 @@ func print_ring_attn_summary(ring_attn_config cfg) string {
     "  Causal Mask: " + string(cfg.causal_mask) + "\n" +
     "  Async Comm: " + string(cfg.use_async_comm)
 }
-

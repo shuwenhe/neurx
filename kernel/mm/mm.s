@@ -99,4 +99,3 @@ func mem_pressure(ms mem_state) float {
     }
     return float(used) / float(total)
 }
-

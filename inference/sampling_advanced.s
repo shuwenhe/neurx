@@ -113,4 +113,3 @@ func beam_search_decode(
     }
     []
 }
-

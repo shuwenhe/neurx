@@ -103,4 +103,3 @@ interface i_autograd_checkpoint {
     checkpoint(tensor: tensor) -> void
     recompute_forward(node_id: i64) -> tensor
 }
-

@@ -626,4 +626,3 @@ func agent_model_verify(agent_memory_state memory, string goal, string route, st
     }
     response
 }
-

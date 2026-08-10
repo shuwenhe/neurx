@@ -107,4 +107,3 @@ func serving_alert_summary(serving_observability_state state) string {
     if state.kv_capacity_alert { alerts = alerts + "kv_capacity_high;" }
     alerts
 }
-

@@ -31,4 +31,3 @@ func check_path(string path) string {
     }
     return "missing (" + path + ")"
 }
-

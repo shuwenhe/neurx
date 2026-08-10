@@ -341,9 +341,9 @@ func is_nan(val: float): bool {
 }
 
 func println(msg: string): void {
+
 }
 
 func recommended_monitoring_config_2t(): metrics_aggregator {
     return new_metrics_aggregator(1000)
 }
-

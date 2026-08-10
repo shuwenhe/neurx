@@ -95,4 +95,3 @@ func continuous_batch_state_dict(continuous_batch_state state) continuous_batch_
 func continuous_batch_load_state_dict(continuous_batch_state state, continuous_batch_state other) continuous_batch_state {
     other
 }
-

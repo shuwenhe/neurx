@@ -52,9 +52,11 @@ func query_cuda_device(int device_id) cuda_device {
 }
 
 func cuda_set_device(int device_id) {
+
 }
 
 func cuda_device_synchronize() {
+
 }
 
 func cuda_get_device_memory_info() (int, int) {
@@ -176,6 +178,7 @@ func cuda_bridge_malloc_gradients(
 }
 
 func cuda_bridge_free_gradients(int gpu_mem_ptr) {
+
 }
 
 struct cuda_event {
@@ -191,9 +194,11 @@ func cuda_create_event() cuda_event {
 }
 
 func cuda_record_event(event cuda_event, int stream_id) {
+
 }
 
 func cuda_event_synchronize(event cuda_event) {
+
 }
 
 func cuda_bridge_finalize(cuda_bridge cb) {
@@ -234,4 +239,3 @@ func itoa(int n) string {
     }
     s
 }
-

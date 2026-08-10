@@ -32,4 +32,3 @@ func diffusion_eval_state_dict(diffusion_eval_state state) diffusion_eval_state 
 func diffusion_eval_load_state_dict(diffusion_eval_state state, diffusion_eval_state other) diffusion_eval_state {
     other
 }
-

@@ -88,6 +88,7 @@ func allgather(local_data []f64, rank i64, world_size i64) [][]f64 {
 }
 
 func barrier(ctx distributed_context) {
+
 }
 
 func send_recv(send_data []f64, send_rank i64, recv_rank i64, rank i64) []f64 {
@@ -225,4 +226,3 @@ func i64_to_string(val i64) string {
     }
     return result
 }
-

@@ -297,4 +297,3 @@ func get_cuda_wrapper_c() string {
 "}\n"
     c_code
 }
-

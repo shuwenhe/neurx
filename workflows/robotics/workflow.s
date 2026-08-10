@@ -185,4 +185,3 @@ func robotics_workflow_example_run(robotics_workflow_example_state state, int st
     }
     current
 }
-

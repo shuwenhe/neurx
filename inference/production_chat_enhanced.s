@@ -1,7 +1,5 @@
 package neurx.inference.production_chat_enhanced
 
-// Enhanced production chat with generalized knowledge
-// Pure S language - expanded response generation
 
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __host_slice(string text, int start, int end) string
@@ -79,11 +77,9 @@ func to_lowercase(string text) string {
     return result
 }
 
-// Generate response based on query type
 func generate_response(string prompt) string {
     string lower = to_lowercase(prompt)
     
-    // Programming & Code
     if contains_keyword(lower, "go语言") || contains_keyword(lower, "golang") || contains_keyword(lower, "用go") || contains_keyword(lower, "go实现") {
         if contains_keyword(lower, "冒泡排序") || contains_keyword(lower, "bubble sort") {
             return "package main\n\nimport \"fmt\"\n\nfunc bubbleSort(nums []int) {\n    n := len(nums)\n    for i := 0; i < n-1; i++ {\n        swapped := false\n        for j := 0; j < n-1-i; j++ {\n            if nums[j] > nums[j+1] {\n                nums[j], nums[j+1] = nums[j+1], nums[j]\n                swapped = true\n            }\n        }\n        if !swapped {\n            break\n        }\n    }\n}\n\nfunc main() {\n    nums := []int{5, 1, 4, 2, 8}\n    bubbleSort(nums)\n    fmt.Println(nums)\n}"
@@ -108,7 +104,6 @@ func generate_response(string prompt) string {
         return "Please specify what program you want to implement. I can help with code examples in various languages."
     }
     
-    // Math & Calculations
     if contains_keyword(lower, "1+") || contains_keyword(lower, "1 +") || contains_keyword(lower, "sum") {
         if contains_keyword(lower, "100") {
             return "The sum from 1 to 100 is: 5050\nFormula: sum = n * (n + 1) / 2 = 100 * 101 / 2 = 5050"
@@ -120,7 +115,6 @@ func generate_response(string prompt) string {
         return "To implement an algorithm, please specify: 1) The algorithm name or description, 2) Your preferred programming language, 3) Any specific constraints or performance requirements."
     }
     
-    // General Knowledge
     if contains_keyword(lower, "what is") || contains_keyword(lower, "explain") || contains_keyword(lower, "tell me") {
         return "I can help explain concepts in medicine, programming, mathematics, and general knowledge. Please ask your specific question."
     }
@@ -129,7 +123,6 @@ func generate_response(string prompt) string {
         return "Hello! I'm an AI assistant trained on medical and general knowledge. I can help you with medical questions, programming, mathematics, and general information. What would you like to know?"
     }
     
-    // Medical queries
     if contains_keyword(lower, "treatment") || contains_keyword(lower, "治疗") {
         return "Treatment approaches depend on the specific condition. Common options include medication therapy, physical therapy, surgical intervention, or conservative management. Please consult with a healthcare provider for personalized treatment recommendations."
     }
@@ -162,7 +155,6 @@ func generate_response(string prompt) string {
         return "You're welcome! Please feel free to ask if you have any other questions about programming, mathematics, medicine, or general topics."
     }
     
-    // Default response
     return "I can help you with questions about programming (C++, Python, etc.), mathematics, medical knowledge, and general information. Please provide more details about what you'd like to know."
 }
 
@@ -218,12 +210,10 @@ func main() {
         
         turn_count = turn_count + 1
         
-        // Generate response based on user input
         string response = generate_response(user_input)
         
         print("\nAssistant: " + response + "\n\n")
         
-        // Update conversation history (simplified)
         conversation_history = conversation_history + "User: " + user_input + "\n"
         conversation_history = conversation_history + "Assistant: " + response + "\n"
     }

@@ -43,4 +43,3 @@ func apply_elimination_passes(ir_graph graph, elimination_config cfg) ir_graph {
     }
     optimized
 }
-

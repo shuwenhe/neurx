@@ -375,4 +375,3 @@ func main() {
     println("Head dimension: 64")
     println("Causal mask: enabled")
 }
-

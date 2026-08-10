@@ -154,6 +154,7 @@ func sft_forward_pass(instruction_data* batch, int batch_size, rlhf_config confi
 }
 
 func sft_backward_pass(instruction_data* batch, int batch_size, rlhf_config config, float loss) void {
+
 }
 
 func init_reward_model_state() reward_model_state {
@@ -291,6 +292,7 @@ func log_sigmoid(float x) float {
 }
 
 func reward_model_backward(preference_data* batch, int batch_size, rlhf_config config) void {
+
 }
 
 func init_ppo_state() ppo_train_state {
@@ -462,4 +464,3 @@ func main() {
     println("Overall Alignment: " + float_to_string(metrics.overall_alignment_score))
     println("\n=== RLHF Training Complete ===")
 }
-

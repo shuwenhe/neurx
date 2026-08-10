@@ -26,4 +26,3 @@ func main() {
     let (_, code) = command("make -C " + shell_escape(neurx_root) + " shard")
     code
 }
-

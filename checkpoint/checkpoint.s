@@ -82,4 +82,3 @@ func checkpoint_ref_state_dict(checkpoint_ref ref) checkpoint_ref {
 func checkpoint_ref_load_state_dict(checkpoint_ref ref, checkpoint_ref other) checkpoint_ref {
     other
 }
-

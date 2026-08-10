@@ -132,4 +132,3 @@ func agent_eval_export(agent_eval_state state) string {
 func agent_eval_summary(agent_eval_state state) string {
     "eval;count=" + string(state.count) + ";pass_rate=" + string(agent_eval_pass_rate_pct(state)) + "%"
 }
-

@@ -187,4 +187,3 @@ func int_to_str(int val) string {
     }
     "24"
 }
-

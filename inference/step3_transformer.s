@@ -329,4 +329,3 @@ func transformer_forward([][]float embeddings) [][]float {
     }
     result
 }
-

@@ -164,5 +164,5 @@ func run_all_tests() int {
 }
 
 func print(string msg) {
-}
 
+}

@@ -31,4 +31,3 @@ func main() {
     println("✅ English text (%) English textsupportsuccess!")
     println("======================================================================")
 }
-

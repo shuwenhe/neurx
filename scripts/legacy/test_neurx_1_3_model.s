@@ -83,4 +83,3 @@ func print_checkpoint_size(string checkpoint_dir) int {
     runtime_run_command(cmd)
     return 0
 }
-

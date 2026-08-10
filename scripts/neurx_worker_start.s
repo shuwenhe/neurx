@@ -19,4 +19,3 @@ func main() {
     runtime_run_command(cmd)
     0
 }
-

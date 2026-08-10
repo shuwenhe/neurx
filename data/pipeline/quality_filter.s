@@ -498,4 +498,3 @@ func max(int a, int b) int:
 
 func substring(string s, int start, int end) string:
     return ""
-

@@ -103,4 +103,3 @@ func rprop_max(float a, float b) float {
     }
     return b
 }
-

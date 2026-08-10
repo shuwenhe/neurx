@@ -135,4 +135,3 @@ func agent_skill_record_load_state_dict(agent_skill_record record, agent_skill_r
         score: other.score,
     }
 }
-

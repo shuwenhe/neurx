@@ -39,4 +39,3 @@ func ddpm_sampler_state_dict(ddpm_sampler_state state) ddpm_sampler_state {
 func ddpm_sampler_load_state_dict(ddpm_sampler_state state, ddpm_sampler_state other) ddpm_sampler_state {
     other
 }
-

@@ -87,4 +87,3 @@ func masked_mean(tensor values, tensor mask) tensor {
     tensor count = sum_all(mask)
     return div(total, count)
 }
-

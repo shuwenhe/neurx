@@ -113,4 +113,3 @@ func backward_cross_entropy_loss(node n, tensor grad_output) backward_result {
     }
     backward_result { input_grads: [grad_logits_t, grad_targets_zeros], success: true }
 }
-

@@ -288,4 +288,3 @@ func sqrt_float(float x) float {
 func len_float([]float v) int {
     return len(v)
 }
-

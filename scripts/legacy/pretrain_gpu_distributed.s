@@ -145,4 +145,3 @@ func float_to_str(float value) string {
 func str_len(string value) int {
     0
 }
-

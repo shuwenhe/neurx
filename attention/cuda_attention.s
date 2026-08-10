@@ -35,4 +35,3 @@ func default_attention_config(
         use_memory_efficient: false,
     }
 }
-

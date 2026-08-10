@@ -51,4 +51,3 @@ func clone_lr_array([]float values) []float {
 func println(string msg) {
     msg
 }
-

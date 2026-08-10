@@ -104,4 +104,3 @@ func lsm_check_network(ls lsm_state, agent_pid int, url string) (lsm_state, int)
     }
     return (ls, LSM_ALLOW)
 }
-

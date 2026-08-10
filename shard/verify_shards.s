@@ -21,4 +21,3 @@ func main() {
     println("")
     0
 }
-

@@ -52,4 +52,3 @@ func memcpy_dtoh(
 ) {
     log_memory_transfer("D2H", size_bytes)
 }
-

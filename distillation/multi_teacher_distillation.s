@@ -280,4 +280,3 @@ func kl_divergence_loss(student_logits: tensor, teacher_logits: tensor, temperat
     let kl = -(teacher_probs * student_log_probs).sum(dim: -1).mean()
     return kl * (temperature * temperature)
 }
-

@@ -322,4 +322,3 @@ func (engine *inference_engine) start_serving() {
     }
     engine.print_stats()
 }
-

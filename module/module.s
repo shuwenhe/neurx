@@ -137,4 +137,3 @@ func sequential_from_modules([]nn.module layers) nn.sequential {
 func sequential_module(nn.sequential seq) nn.module {
     neurx.nn.sequential_module(seq)
 }
-

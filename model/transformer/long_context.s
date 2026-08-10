@@ -500,4 +500,3 @@ func long_context_reset(long_context_state state) long_context_state {
     state.current_segment_idx = 0
     state
 }
-

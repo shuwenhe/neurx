@@ -202,6 +202,7 @@ func start_neurx_training(
 func initialize_model_weights(orchestrator_state orch) {}
 
 func get_current_gradient_norm(orchestrator_state o) float { return 0.0 }
+
 model_checkpoint build_checkpoint_from_orchestrator(orchestrator_state o) {
     return model_checkpoint{}
 }
@@ -215,6 +216,7 @@ func cleanup_dataloader(dataloader d) {}
 func generate_complete_training_report(orchestrator_state o, monitoring_manager m, checkpoint_manager c, dataloader d) {}
 
 func should_log_at_step(int step, int interval) bool { return step % interval == 0 }
+
 performance_snapshot collect_performance_snapshot(orchestrator_state orch) {
     return performance_snapshot{}
 }
@@ -310,4 +312,3 @@ func test_3d_parallel_module() {
     print("3D Parallel config valid: " + string(valid))
     print(print_full_config_summary(mcfg, create_64gpu_training_config()))
 }
-

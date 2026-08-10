@@ -175,4 +175,3 @@ func lora_adapter_forward(lora_adapter adapter, int layer_idx, []float hidden_st
     }
     return hidden_state
 }
-

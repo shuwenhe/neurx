@@ -87,4 +87,3 @@ func compute_accuracy([][][]float logits, [][]int targets) float {
     if total == 0 { return 0.0 }
     return ((correct as float)) / ((total as float))
 }
-

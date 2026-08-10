@@ -197,4 +197,3 @@ func cos(double x) double {
 func pi() double {
     3.141592653589793
 }
-

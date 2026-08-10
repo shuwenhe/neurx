@@ -353,4 +353,3 @@ func load_checkpoint(string path) orpo_state {
     print("[ORPO] Loading checkpoint from " + path)
     create_orpo_state(create_orpo_default_config())
 }
-

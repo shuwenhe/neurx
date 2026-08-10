@@ -444,4 +444,3 @@ func pow_dbl_o(double base, double exp) double {
     }
     return result
 }
-

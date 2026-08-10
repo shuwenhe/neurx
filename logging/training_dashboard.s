@@ -49,4 +49,3 @@ func new_training_metrics() training_metrics {
         best_step: -1,
     }
 }
-

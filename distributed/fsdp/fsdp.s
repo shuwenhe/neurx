@@ -326,6 +326,7 @@ func fsdp_load_checkpoint(fsdp_module module, string path) bool {
 }
 
 func write_float_to_file(string path, float value) {
+
 }
 
 func read_float_from_file(string path, int idx) float {
@@ -394,4 +395,3 @@ func copy_vector([]float src) []float {
     }
     out
 }
-

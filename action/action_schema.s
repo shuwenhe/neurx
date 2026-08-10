@@ -453,4 +453,3 @@ func agent_action_summary(agent_action_state state) string {
     }
     out
 }
-

@@ -275,4 +275,3 @@ func float_to_str_4(float value) string {
     if negative { result = "-" + result }
     return result
 }
-

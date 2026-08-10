@@ -2679,4 +2679,3 @@ func gpt_large_pretrain_ensure_quantization_release_artifact(gpt_large_pretrain_
 func gpt_large_pretrain_ensure_distillation_release_artifact(gpt_large_pretrain_state state, string manifest_path) () {
     return
 }
-

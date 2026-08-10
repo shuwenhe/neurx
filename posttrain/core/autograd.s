@@ -210,4 +210,3 @@ func matmul_s(tensor_s a, tensor_s b) tensor_s {
 func transpose_s(tensor_s t) tensor_s {
     t
 }
-

@@ -34,4 +34,3 @@ func main() {
     println("[pretrain-eval] perplexity exp(mean_nll): PASS")
     0
 }
-

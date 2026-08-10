@@ -267,4 +267,3 @@ func main() {
     println("✓ All training integration tests passed!")
     println("============================================")
 }
-

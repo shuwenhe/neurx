@@ -89,4 +89,3 @@ func vfs_close(vfs vfs_state, ino int) vfs_state {
     }
     return vfs
 }
-

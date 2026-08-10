@@ -444,4 +444,3 @@ func apply_alibi_bias(
 func get_embedding_stats(position_embedding_config cfg) map[string]double {
     map[string]double{}
 }
-

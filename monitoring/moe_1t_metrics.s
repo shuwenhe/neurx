@@ -479,4 +479,3 @@ func parse_int_str(string s) int {
     }
     value
 }
-

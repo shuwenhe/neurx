@@ -431,4 +431,3 @@ func main() {
     print("  5. Test single token generation\n\n")
     close_safetensors(archive)
 }
-

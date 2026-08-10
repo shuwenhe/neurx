@@ -45,4 +45,3 @@ func parameter_list_state_dict(nn.parameter_list list) nn.parameter_list {
 func parameter_list_load_state_dict(nn.parameter_list list, nn.parameter_list state) nn.parameter_list {
     neurx.nn.parameter_list_load_state_dict(list, state)
 }
-

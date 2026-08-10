@@ -70,6 +70,7 @@ struct optimization_metrics {
 }
 
 func init_flash_attention(flash_attention_config config) void {
+
 }
 
 func flash_attention_forward(
@@ -171,6 +172,7 @@ func compute_block_attention(
 }
 
 func accumulate_block_output(float* output, float* attention, int q_size, int hidden_dim) void {
+
 }
 
 func init_kv_cache(int seq_length, int hidden_dim, int layer_id) kvcache {
@@ -360,4 +362,3 @@ func main() {
     println("Inference time: " + int_to_string(resp.inference_time_ms) + "ms")
     println("\n=== Inference Optimization Complete ===")
 }
-

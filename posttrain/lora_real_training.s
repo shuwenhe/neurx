@@ -73,4 +73,3 @@ func main() {
     println("DO NOT implement until scalar BCE tests pass!")
     println("")
 }
-

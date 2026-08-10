@@ -263,4 +263,3 @@ func checkpoint_data_load(string path) checkpoint_data {
     }
     data
 }
-

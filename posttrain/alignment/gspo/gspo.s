@@ -242,4 +242,3 @@ func kmeans_clustering(embeddings: []tensor, k: i32) -> []i32 {
 func compute_reward(prompt: tensor, response: tensor) -> f32 {
     return random_uniform(-1.0, 1.0)
 }
-

@@ -301,6 +301,7 @@ func get_time_ms() -> i64 {
 }
 
 func sleep_ms(duration: i64) {
+
 }
 
 func compute_mean(values: []f32) -> f32 {
@@ -341,4 +342,3 @@ func (m: *mutex) unlock() {}
 func decode_tokens(t: tensor) -> string { return "" }
 
 func encode_text(s: string) -> tensor { return tensor_zeros([1]) }
-

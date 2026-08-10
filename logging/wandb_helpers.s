@@ -45,4 +45,3 @@ func merge_maps(
     for key in b { result[key] = b[key] }
     result
 }
-

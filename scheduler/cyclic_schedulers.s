@@ -148,4 +148,3 @@ func cyclic_cos(float x) float {
     }
     result
 }
-

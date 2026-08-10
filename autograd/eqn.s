@@ -26,4 +26,3 @@ func copy_eqns([]ir_eqn values) []ir_eqn {
     }
     out
 }
-

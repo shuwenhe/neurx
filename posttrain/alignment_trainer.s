@@ -779,4 +779,3 @@ func compute_kl_divergence(
     tensor ref_log_probs = log_softmax(ref_logits, dim=-1)
     tensor kl = (policy_log_probs - ref_log_probs) * exp(policy_log_probs)
     return kl.sum(dim=-1).mean()
-

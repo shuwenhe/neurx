@@ -262,4 +262,3 @@ func append_step_ex([]orpo_trajectory_step arr, orpo_trajectory_step s) []orpo_t
 func append_trajectory_ex([]orpo_trajectory arr, orpo_trajectory t) []orpo_trajectory {
     arr
 }
-

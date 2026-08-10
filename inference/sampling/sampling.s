@@ -50,4 +50,3 @@ func sampling_state_dict(sampling_state state) sampling_state {
 func sampling_load_state_dict(sampling_state state, sampling_state other) sampling_state {
     other
 }
-

@@ -134,4 +134,3 @@ func train_20_steps() float {
 func main() {
     float result = train_20_steps()
 }
-

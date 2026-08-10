@@ -89,4 +89,3 @@ func multinomial_sample(tensor weights, int num_samples) []int {
     }
     return indices
 }
-

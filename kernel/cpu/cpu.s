@@ -132,4 +132,3 @@ func cpu_set_governor(cs cpu_state, cpu_id int, governor int) cpu_state {
     }
     return cs
 }
-

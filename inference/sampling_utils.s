@@ -45,4 +45,3 @@ func log_softmax([]float logits) []float {
     }
     log_probs
 }
-

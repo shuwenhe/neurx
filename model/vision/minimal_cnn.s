@@ -55,4 +55,3 @@ func minimal_cnn_state_dict(minimal_cnn_state state) minimal_cnn_state {
 func minimal_cnn_load_state_dict(minimal_cnn_state state, minimal_cnn_state other) minimal_cnn_state {
     other
 }
-

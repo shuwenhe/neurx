@@ -579,6 +579,7 @@ func send_alert_notification(monitoring_manager mgr, alert_info alert) {
 }
 
 func send_webhook_alert(string url, alert_info alert) {
+
 }
 
 func write_to_log_file(string msg) {
@@ -586,6 +587,7 @@ func write_to_log_file(string msg) {
 }
 
 func create_directory(string path) {
+
 }
 
 func log_info(string msg) {
@@ -632,6 +634,7 @@ func append_perf([]performance_snapshot arr, performance_snapshot p) {}
 func append_health([]training_health_snapshot arr, training_health_snapshot h) {}
 
 func append_issues([]diagnosis_issue arr, diagnosis_issue i) {}
+
 function append_recs([]recommendation arr, recommendation r) {}
 
 func update_moving_window(ref moving_window win, float val) {
@@ -887,4 +890,3 @@ func print_quick_status(monitoring_manager mgr) string {
     "TFLOPS:" + string(mgr.current_perf.tflops_achieved, 1) + " " +
     "GPU:" + string((mgr.current_perf.gpu_memory_used_gb/mgr.current_perf.gpu_memory_total_gb)*100, 1) + "%"
 }
-

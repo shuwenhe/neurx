@@ -32,4 +32,3 @@ func denoiser_state_dict(denoiser_state state) denoiser_state {
 func denoiser_load_state_dict(denoiser_state state, denoiser_state other) denoiser_state {
     other
 }
-

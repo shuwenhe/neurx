@@ -134,4 +134,3 @@ func validate_schedule([]schedule_entry schedule) bool {
     }
     return true
 }
-

@@ -37,4 +37,3 @@ func minimal_speech_state_dict(minimal_speech_state state) minimal_speech_state 
 func minimal_speech_load_state_dict(minimal_speech_state state, minimal_speech_state other) minimal_speech_state {
     other
 }
-

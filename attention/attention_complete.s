@@ -274,4 +274,3 @@ func sqrt(float x) float {
 func panic(string msg) {
     println("ERROR: " + msg)
 }
-

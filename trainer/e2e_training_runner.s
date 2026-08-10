@@ -444,12 +444,15 @@ func log_loss(log: logger, step: int, loss: float) {
 }
 
 func logger_close(log: logger) {
+
 }
 
 func save_checkpoint(path: string, model: mini_language_model, optimizer: any, step: int) {
+
 }
 
 func write_file(path: string, content: string) {
+
 }
 
 func main() {
@@ -476,4 +479,3 @@ func main() {
     }
     run_training(config)
 }
-

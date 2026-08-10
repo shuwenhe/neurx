@@ -341,4 +341,3 @@ func main() {
     println("")
     println("Ready for 3-stage alignment training")
 }
-

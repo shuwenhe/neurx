@@ -220,4 +220,3 @@ func float_to_string_example(float f) string {
 func string_int(int i) string {
     string(i)
 }
-

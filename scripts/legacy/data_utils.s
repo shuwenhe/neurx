@@ -247,4 +247,3 @@ func max(a: i64, b: i64) i64 {
 func div_round_up(a: i64, b: i64) i64 {
     (a + b - 1) / b
 }
-

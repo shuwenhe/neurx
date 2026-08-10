@@ -5,4 +5,3 @@ func main() {
     simple_config cfg = new_simple_config()
     simple_training_loop(cfg)
 }
-

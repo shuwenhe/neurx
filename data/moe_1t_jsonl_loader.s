@@ -438,4 +438,3 @@ func build_default_vocab() []string {
     vocab.push("\t")
     vocab
 }
-

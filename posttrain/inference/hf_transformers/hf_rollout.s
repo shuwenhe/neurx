@@ -324,4 +324,3 @@ struct layer_norm {}
 func get_time_ms() -> i64 {
     return 0
 }
-

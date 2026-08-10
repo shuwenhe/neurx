@@ -347,4 +347,3 @@ func compute_variance([]float data, int size) float {
     }
     variance / float(size)
 }
-

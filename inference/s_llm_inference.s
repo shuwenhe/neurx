@@ -108,4 +108,3 @@ func main() {
     print("status: ✓ Fully Operational\n")
     print("Location: /home/shuwen/shuwen/posttrain/\n\n")
 }
-

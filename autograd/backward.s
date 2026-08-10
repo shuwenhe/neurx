@@ -633,4 +633,3 @@ func backward_pass(backward_state state, tensor loss) tensor {
 func backward(tensor t) tensor {
     backward_pass(new_backward_state("backward"), t)
 }
-

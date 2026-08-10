@@ -244,4 +244,3 @@ func bool_text(bool value) string {
     }
     "false"
 }
-

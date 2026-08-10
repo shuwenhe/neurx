@@ -505,4 +505,3 @@ pub func main(args: []string) i32 {
             return 1
     }
 }
-

@@ -733,4 +733,3 @@ func agent_run_until_stalled(agent_runtime_state state, string input, int max_st
 func agent_merge_memory(agent_runtime_state state, agent_runtime_state other) agent_runtime_state {
     agent_runtime_merge_memory(state, other)
 }
-

@@ -221,4 +221,3 @@ func ln_approx(x f64) f64 {
         return ln_approx(y) + exp*0.693147180559945
     }
 }
-

@@ -301,4 +301,3 @@ func json_string_to_int(string json_str) int {
     }
     result
 }
-

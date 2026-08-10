@@ -307,6 +307,7 @@ func quantize_per_layer(
 }
 
 func init_gptq_quantization(gptqconfig config) void {
+
 }
 
 func gptq_quantize(float* layer_weights, int layer_size, gptqconfig config) quantized_tensor {
@@ -457,4 +458,3 @@ func main() {
     println("Speed improvement: " + float_to_string(metrics.speed_improvement) + "x")
     println("\n=== Quantization Complete ===")
 }
-

@@ -64,4 +64,3 @@ func print_progress_bar(
     }
     print_overwrite(status_line)
 }
-

@@ -106,4 +106,3 @@ func get_rank_utilization_distribution(performance_monitor monitor) [int]float {
 func suggest_batch_size_adjustment(performance_monitor monitor) int {
     32
 }
-

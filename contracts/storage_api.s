@@ -37,4 +37,3 @@ interface i_storage_debug {
     debug_info(storage: storage) -> string
     print_info(storage: storage) -> void
 }
-

@@ -704,4 +704,3 @@ func dequeue_gpu_queue(dataloader l) training_batch { return training_batch{} }
 func enqueue_gpu_queue(ref dataloader l, training_batch b) {}
 
 func hash_string(string s) int64 { return 0 }
-

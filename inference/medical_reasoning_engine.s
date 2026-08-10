@@ -256,4 +256,3 @@ func main() {
     string response4 = reason_medical_response(test4)
     print("Response:\n" + response4 + "\n\n")
 }
-

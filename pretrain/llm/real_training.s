@@ -295,4 +295,3 @@ func fmt_float(float f, int precision) string {
     }
     result
 }
-

@@ -65,4 +65,3 @@ func agent_interrupt_should_request(string action, string observation) bool {
 func agent_interrupt_summary(agent_interrupt_state state) string {
     "pending=" + string(state.pending) + " kind=" + state.kind + " count=" + string(state.interrupt_count) + " resolved=" + string(state.resolved)
 }
-

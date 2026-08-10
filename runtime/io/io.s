@@ -7,6 +7,7 @@ use std.process.run_process_output
 use std.vec.vec
 
 struct json_value {
+
 }
 
 struct runtime_command_result {
@@ -453,4 +454,3 @@ extern "intrinsic" func __host_write_binary_file(string path, []byte data) ()
 func runtime_write_binary_file(string path, []byte data) () {
     __host_write_binary_file(path, data)
 }
-

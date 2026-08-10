@@ -295,4 +295,3 @@ func (loader *data_loader) run_full_pipeline() {
     }
     fmt.Println("\n[data_loader] Complete!")
 }
-

@@ -314,4 +314,3 @@ func to_lower(str string) string {
 func to_upper(str string) string {
     return strings.ToUpper(str)
 }
-

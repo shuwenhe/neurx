@@ -146,4 +146,3 @@ func get_layer_weights([][]float serialized_weights, int layer_idx, int hidden_s
     w.o_weight = fill_model_tensor(hidden_size * hidden_size, 0.0)
     return w
 }
-

@@ -117,4 +117,3 @@ func benchmark_blas_gemm(int M, int K, int N) float {
 
     0.0
 }
-

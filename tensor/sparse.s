@@ -175,4 +175,3 @@ func allocate_int_array(int n) []int {
     }
     return arr
 }
-

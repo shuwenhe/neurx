@@ -62,4 +62,3 @@ report = report + "  hit_count=" + string(hit_count) + "/" + string(len(expected
 report = report + key_report
 report = report + "\n=== stall_check ===\nis_stalled=" + stall_str + "\n"
 runtime_write_text_file(report_path, report)
-

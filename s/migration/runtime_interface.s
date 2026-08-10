@@ -76,4 +76,3 @@ func trim_simple(string s) string {
     }
     neurx.strings.substring(s, start, end)
 }
-

@@ -334,4 +334,3 @@ func main() {
     println("Duplicate ratio: " + int_to_string(stats.duplicate_ratio) + "%")
     println("Computation time: " + int_to_string(stats.computation_time_ms) + "ms")
 }
-

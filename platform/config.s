@@ -250,4 +250,3 @@ func runtime_config_load_state_dict(runtime_config cfg, runtime_config other) ru
         has_seed: other.has_seed,
     }
 }
-

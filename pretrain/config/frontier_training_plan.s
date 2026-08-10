@@ -390,4 +390,3 @@ func next_frontier_p0_work(frontier_audit audit) []frontier_capability {
     }
     work
 }
-

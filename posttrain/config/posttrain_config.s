@@ -81,4 +81,3 @@ func posttrain_config_state_dict(posttrain_config cfg) posttrain_config {
 func posttrain_config_load_state_dict(posttrain_config cfg, posttrain_config other) posttrain_config {
     other
 }
-

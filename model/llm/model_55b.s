@@ -252,4 +252,3 @@ func float_to_string(float x) string {
     s = s + int_to_str_simple(frac)
     s
 }
-

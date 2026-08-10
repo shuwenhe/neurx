@@ -206,4 +206,3 @@ func agent_context_to_string(agent_context_state state) string {
 func agent_context_summary(agent_context_state state) string {
     "tokens=" + string(state.token_count) + " max=" + string(state.max_tokens) + " compressed=" + string(state.compressed) + " compressions=" + string(state.compressions)
 }
-

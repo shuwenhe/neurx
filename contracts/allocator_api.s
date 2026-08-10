@@ -65,4 +65,3 @@ interface i_allocator_monitoring {
     on_allocate(ptr: i64, size: i64) -> void
     on_deallocate(ptr: i64) -> void
 }
-

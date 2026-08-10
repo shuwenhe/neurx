@@ -1,7 +1,5 @@
 package neurx.inference.production_chat_direct
 
-// Direct production chat without HTTP backend
-// Pure S language - loads model and does inference directly
 
 extern "intrinsic" func __sys_read_string(int fd, int count) string
 extern "intrinsic" func __host_slice(string text, int start, int end) string
@@ -118,7 +116,6 @@ func generate_medical_response(string prompt) string {
         return "You're welcome! Please don't hesitate to ask if you have any other medical questions."
     }
     
-    // Default response for other medical questions
     return "That's an important medical question. For accurate medical advice, please consult with a qualified healthcare provider who can evaluate your specific situation and medical history."
 }
 
@@ -173,12 +170,10 @@ func main() {
         
         turn_count = turn_count + 1
         
-        // Generate response based on keywords
         string response = generate_medical_response(user_input)
         
         print("\nAssistant: " + response + "\n\n")
         
-        // Update conversation history (simplified)
         conversation_history = conversation_history + "User: " + user_input + "\n"
         conversation_history = conversation_history + "Assistant: " + response + "\n"
     }

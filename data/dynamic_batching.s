@@ -404,4 +404,3 @@ func max(int a, int b) int:
 
 func min(int a, int b) int:
     if a < b: return a else: return b
-

@@ -347,4 +347,3 @@ func main() {
         history = prompt + response + "<|im_end|>\n"
     }
 }
-

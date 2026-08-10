@@ -294,4 +294,3 @@ func abs_float(float x) float {
     if x < 0.0 { return -x }
     x
 }
-
