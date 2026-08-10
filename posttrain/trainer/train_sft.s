@@ -374,10 +374,48 @@ func run_training(training_config cfg) int {
         println("[ERROR] Native tokenizer did not return its validation marker.")
         return 2
     }
-    println("[HARD VALIDATION GATE: FAILED (1/6 passed)]")
+    println("[VALIDATION PROGRESS: 1/6 passed]")
     println("[PASS 1/6] real tokenizer input_ids, supervised labels, and round-trip validation")
-    println("[MISSING 2/6] Model logits with shape [batch, seq, 151936]")
-    println("[MISSING 3/6] finite non-zero shifted-token cross-entropy loss")
+    string forward_probe = runtime_env_get("NEURX_POSTTRAIN_FORWARD_PROBE", "")
+    if len(forward_probe) == 0 || !runtime_file_exists(forward_probe) {
+        println("[HARD VALIDATION GATE: FAILED (1/6 passed)]")
+        println("[MISSING 2/6] Model logits with shape [batch, seq, 151936]")
+        println("[MISSING 3/6] finite non-zero shifted-token cross-entropy loss")
+        println("[ERROR] native CUDA forward probe is missing: " + forward_probe)
+        println("[MISSING 4/6] LoRA A/B gradients and gradient norms")
+        println("[MISSING 5/6] measured LoRA parameter values before and after optimizer update")
+        println("[MISSING 6/6] safetensors reload with tensor names, shapes, counts, and changed values")
+        return 2
+    }
+    if !safe_command_path(forward_probe) {
+        println("[ERROR] CUDA forward probe path contains unsupported shell characters")
+        return 2
+    }
+    string forward_command = forward_probe + " " + cfg.model_path + " " +
+        cfg.data_file + " " + int_to_str(cfg.max_length) + " || true"
+    string forward_evidence = runtime_run_command_output(forward_command)
+    bool forward_valid = contains_text(forward_evidence, "FORWARD_VALIDATION=PASS")
+    bool loss_valid = contains_text(forward_evidence, "LOSS_VALIDATION=PASS")
+    println("")
+    if !forward_valid {
+        println("[HARD VALIDATION GATE: FAILED (1/6 passed)]")
+        println("[MISSING 2/6] Model logits with shape [batch, seq, 151936]")
+        println("[MISSING 3/6] finite non-zero shifted-token cross-entropy loss")
+        println("[ERROR] Full model CUDA forward validation failed.")
+        println("[MISSING 4/6] LoRA A/B gradients and gradient norms")
+        println("[MISSING 5/6] measured LoRA parameter values before and after optimizer update")
+        println("[MISSING 6/6] safetensors reload with tensor names, shapes, counts, and changed values")
+        return 2
+    }
+    println("[PASS 2/6] full-sequence model logits [1, seq, 151936] are finite and non-constant")
+    if !loss_valid {
+        println("[MISSING 3/6] finite non-zero shifted-token cross-entropy loss")
+        println("[ERROR] Shifted-token cross-entropy validation failed.")
+        return 2
+    }
+    println("[PASS 3/6] finite non-zero shifted-token cross-entropy from real logits")
+    println("")
+    println("[HARD VALIDATION GATE: FAILED (3/6 passed)]")
     println("[MISSING 4/6] LoRA A/B gradients and gradient norms")
     println("[MISSING 5/6] measured LoRA parameter values before and after optimizer update")
     println("[MISSING 6/6] safetensors reload with tensor names, shapes, counts, and changed values")
