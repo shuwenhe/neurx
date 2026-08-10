@@ -122,7 +122,7 @@ func load_config() training_config {
         weight_decay: 0.01,
         lora_rank: parse_env_int("NEURX_POSTTRAIN_LORA_RANK", 8),
         lora_alpha: parse_env_float("NEURX_POSTTRAIN_LORA_ALPHA", 16.0),
-        lora_dropout: 0.05,
+        lora_dropout: 0.0,
         target_modules: runtime_env_get("NEURX_POSTTRAIN_TARGET_MODULES", "q_proj,k_proj,v_proj,o_proj"),
         device: runtime_env_get("NEURX_POSTTRAIN_DEVICE", "cpu"),
         seed: 42,
@@ -415,14 +415,57 @@ func run_training(training_config cfg) int {
     }
     println("[PASS 3/6] finite non-zero shifted-token cross-entropy from real logits")
     println("")
-    println("[HARD VALIDATION GATE: FAILED (3/6 passed)]")
-    println("[MISSING 4/6] LoRA A/B gradients and gradient norms")
-    println("[MISSING 5/6] measured LoRA parameter values before and after optimizer update")
-    println("[MISSING 6/6] safetensors reload with tensor names, shapes, counts, and changed values")
+    string train_probe = runtime_env_get("NEURX_POSTTRAIN_TRAIN_PROBE", "")
+    if len(train_probe) == 0 || !runtime_file_exists(train_probe) {
+        println("[HARD VALIDATION GATE: FAILED (3/6 passed)]")
+        println("[MISSING 4/6] LoRA A/B gradients and gradient norms")
+        println("[MISSING 5/6] measured LoRA parameter values before and after optimizer update")
+        println("[MISSING 6/6] safetensors reload with tensor names, shapes, counts, and changed values")
+        println("[ERROR] native CUDA LoRA training probe is missing: " + train_probe)
+        return 2
+    }
+    if !safe_command_path(train_probe) || !safe_command_path(cfg.output_dir) {
+        println("[ERROR] CUDA LoRA training probe paths contain unsupported shell characters")
+        return 2
+    }
+    string train_command = train_probe + " " + cfg.model_path + " " + cfg.data_file +
+        " " + int_to_str(cfg.max_length) + " " + cfg.output_dir + " " +
+        int_to_str(cfg.lora_rank) + " " + float_to_str(cfg.lora_alpha, 6) + " " +
+        float_to_str(cfg.learning_rate, 8) + " || true"
+    string training_evidence = runtime_run_command_output(train_command)
+    bool backward_valid = contains_text(training_evidence, "LORA_BACKWARD_VALIDATION=PASS")
+    bool update_valid = contains_text(training_evidence, "LORA_UPDATE_VALIDATION=PASS")
+    bool checkpoint_valid = contains_text(training_evidence, "CHECKPOINT_VALIDATION=PASS")
     println("")
-    println("[ERROR] Real Language Model LoRA training has not run.")
-    println("[ERROR] No adapter checkpoint was written or validated.")
-    return 2
+    if !backward_valid {
+        println("[HARD VALIDATION GATE: FAILED (3/6 passed)]")
+        println("[MISSING 4/6] LoRA A/B gradients and gradient norms")
+        println("[MISSING 5/6] measured LoRA parameter values before and after optimizer update")
+        println("[MISSING 6/6] safetensors reload with tensor names, shapes, counts, and changed values")
+        println("[ERROR] CUDA LoRA backward validation failed.")
+        return 2
+    }
+    println("[PASS 4/6] finite non-zero LoRA A/B gradients from full-model backward")
+    if !update_valid {
+        println("[HARD VALIDATION GATE: FAILED (4/6 passed)]")
+        println("[MISSING 5/6] measured LoRA parameter values before and after optimizer update")
+        println("[MISSING 6/6] safetensors reload with tensor names, shapes, counts, and changed values")
+        println("[ERROR] CUDA LoRA optimizer update validation failed.")
+        return 2
+    }
+    println("[PASS 5/6] measured layer0 q_proj LoRA A/B values changed after Adam updates")
+    if !checkpoint_valid {
+        println("[HARD VALIDATION GATE: FAILED (5/6 passed)]")
+        println("[MISSING 6/6] safetensors reload with tensor names, shapes, counts, and changed values")
+        println("[ERROR] Adapter safetensors reload validation failed.")
+        return 2
+    }
+    println("[PASS 6/6] adapter safetensors tensor names, shapes, counts, and changed values reload exactly")
+    println("")
+    println("[HARD VALIDATION GATE: PASSED (6/6)]")
+    println("[✓] Real two-step LoRA forward/backward/update path validated")
+    println("[✓] Adapter checkpoint was written only after temporary-file reload validation")
+    return 0
 }
 
 func main() int {
