@@ -468,12 +468,12 @@ func run_training(training_config cfg) int {
     return 0
 }
 
-func main() int {
+func main() {
     training_config cfg = load_config()
     
     int validation_result = validate_config(cfg)
     if validation_result != 0 {
-        return validation_result
+        return
     }
     
     int training_result = run_training(cfg)
@@ -490,6 +490,4 @@ func main() int {
         println("  \"lora_alpha\": " + float_to_str(cfg.lora_alpha, 2))
         println("}")
     }
-    
-    training_result
 }
