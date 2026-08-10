@@ -41,51 +41,51 @@ struct layer_norm {
 }
 
 func new_transformer_block(config transformer_config) *transformer_block {
-    hidden_dim := config.HiddenDim
-    num_heads := config.NumHeads
-    head_dim := hidden_dim / numHeads
-    inner_dim := config.InnerDim
+    hidden_dim := config.hidden_dim
+    num_heads := config.num_heads
+    head_dim := hidden_dim / num_heads
+    inner_dim := config.inner_dim
     return &transformer_block{
         attention: &multi_head_attention{
             query_proj: tensor.Randn(hidden_dim, head_dim*num_heads),
             key_proj:   tensor.Randn(hidden_dim, head_dim*num_heads),
             value_proj: tensor.Randn(hidden_dim, head_dim*num_heads),
             out_proj:   tensor.Randn(head_dim*num_heads, hidden_dim),
-            num_heads:  numHeads,
-            head_dim:   headDim,
-            scale:     1.0 / sqrt(float32(headDim)),
+            num_heads:  num_heads,
+            head_dim:   head_dim,
+            scale:     1.0 / sqrt(float32(head_dim)),
         },
         ffn: &feed_forward_network{
             proj1:     tensor.Randn(hidden_dim, inner_dim),
             proj2:     tensor.Randn(inner_dim, hidden_dim),
             gate_proj:  tensor.Randn(hidden_dim, inner_dim),
-            inner_dim:  innerDim,
-            hidden_dim: hiddenDim,
+            inner_dim:  inner_dim,
+            hidden_dim: hidden_dim,
         },
         norm1: &layer_norm{
             weight:    tensor.Ones(hidden_dim),
             bias:      tensor.Zeros(hidden_dim),
             eps:       1e-5,
-            hidden_dim: hiddenDim,
+            hidden_dim: hidden_dim,
         },
         norm2: &layer_norm{
             weight:    tensor.Ones(hidden_dim),
             bias:      tensor.Zeros(hidden_dim),
             eps:       1e-5,
-            hidden_dim: hiddenDim,
+            hidden_dim: hidden_dim,
         },
-        hidden_dim: hiddenDim,
-        num_heads:  numHeads,
-        dropout:   config.Dropout,
+        hidden_dim: hidden_dim,
+        num_heads:  num_heads,
+        dropout:   config.dropout,
     }
 }
 
 func (tb *transformer_block) forward(x *tensor.tensor_2, causal_mask *tensor.tensor_2) *tensor.tensor_2 {
-    x_norm := tb.norm1.Forward(x)
-    attn_out := tb.selfAttention(x_norm, causal_mask)
+    x_norm := tb.norm1.forward(x)
+    attn_out := tb.self_attention(x_norm, causal_mask)
     x = tensor.Add(x, attn_out)
-    x_norm = tb.norm2.Forward(x)
-    ffn_out := tb.feedForward(x_norm)
+    x_norm = tb.norm2.forward(x)
+    ffn_out := tb.feed_forward(x_norm)
     x = tensor.Add(x, ffn_out)
     return x
 }
@@ -93,12 +93,12 @@ func (tb *transformer_block) forward(x *tensor.tensor_2, causal_mask *tensor.ten
 func (tb *transformer_block) self_attention(x *tensor.tensor_2, causal_mask *tensor.tensor_2) *tensor.tensor_2 {
     batch_size := x.Shape[0]
     seq_len := x.Shape[1]
-    q := tensor.MatMul(x, tb.attention.queryProj)
-    k := tensor.MatMul(x, tb.attention.keyProj)
-    v := tensor.MatMul(x, tb.attention.valueProj)
-    q = reshape_for_heads(q, tb.attention.numHeads)
-    k = reshape_for_heads(k, tb.attention.numHeads)
-    v = reshape_for_heads(v, tb.attention.numHeads)
+    q := tensor.MatMul(x, tb.attention.query_proj)
+    k := tensor.MatMul(x, tb.attention.key_proj)
+    v := tensor.MatMul(x, tb.attention.value_proj)
+    q = reshape_for_heads(q, tb.attention.num_heads)
+    k = reshape_for_heads(k, tb.attention.num_heads)
+    v = reshape_for_heads(v, tb.attention.num_heads)
     scores := tensor.MatMul(q, tensor.Transpose(k))
     scores = tensor.ScalarMul(scores, tb.attention.scale)
     if causal_mask != nil {
@@ -107,14 +107,14 @@ func (tb *transformer_block) self_attention(x *tensor.tensor_2, causal_mask *ten
     attn := softmax(scores, -1)
     attn = dropout(attn, tb.dropout)
     output := tensor.MatMul(attn, v)
-    output = reshape_from_heads(output, tb.attention.numHeads)
-    output = tensor.MatMul(output, tb.attention.outProj)
+    output = reshape_from_heads(output, tb.attention.num_heads)
+    output = tensor.MatMul(output, tb.attention.out_proj)
     return output
 }
 
 func (tb *transformer_block) feed_forward(x *tensor.tensor_2) *tensor.tensor_2 {
     proj := tensor.MatMul(x, tb.ffn.proj1)
-    gate := tensor.MatMul(x, tb.ffn.gateProj)
+    gate := tensor.MatMul(x, tb.ffn.gate_proj)
     gate = activation.Swish(gate)
     combined := tensor.ElementMul(proj, gate)
     output := tensor.MatMul(combined, tb.ffn.proj2)
@@ -123,11 +123,11 @@ func (tb *transformer_block) feed_forward(x *tensor.tensor_2) *tensor.tensor_2 {
 
 func (tb *transformer_block) backward(grad_output *tensor.tensor_2) (*tensor.tensor_2, error) {
     grad_after_ffn := tensor.Add(grad_output, grad_output)
-    grad_norm_2 := tb.norm2.Backward(grad_after_ffn)
-    grad_ffn_input := tb.ffnBackward(grad_norm_2)
+    grad_norm_2 := tb.norm2.backward(grad_after_ffn)
+    grad_ffn_input := tb.ffn_backward(grad_norm_2)
     grad_after_attn := tensor.Add(grad_ffn_input, grad_output)
-    grad_norm_1 := tb.norm1.Backward(grad_after_attn)
-    grad_attn_input := tb.attentionBackward(grad_norm_1)
+    grad_norm_1 := tb.norm1.backward(grad_after_attn)
+    grad_attn_input := tb.attention_backward(grad_norm_1)
     grad_input := tensor.Add(grad_attn_input, grad_after_ffn)
     return grad_input, nil
 }

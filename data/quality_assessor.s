@@ -167,7 +167,7 @@ func (qa: *quality_assessor) assess_file(filepath: string) quality_metrics {
         qa.metrics.total_chars += i64(len(text))
         tokens := i64(len(text)) / 4
         qa.metrics.total_tokens += tokens
-        quality := qa.calculateQualityScore(text)
+        quality := qa.calculate_quality_score(text)
         qa.metrics.quality_score += quality
         if len(text) < 100 {
             qa.metrics.length_distribution["too_short"] += 1
@@ -315,8 +315,8 @@ func main() {
         sample_size = i64(string_to_int(os.Args[2]))
     }
     assessor := new_quality_assessor(sample_size)
-    metrics := assessor.AssessFile(filepath)
-    metrics.PrintReport()
+    metrics := assessor.assess_file(filepath)
+    metrics.print_report()
 }
 
 func string_to_int(s: string) i64 {
