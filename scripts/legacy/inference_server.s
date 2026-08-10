@@ -95,49 +95,49 @@ var g_server_start_time = time.Now()
 func load_config_from_env() {
 
 	if home := os.Getenv("NEURX_HOME"); home != "" {
-		g_config.ModelPath = filepath.Join(home, "artifacts", "models", "1t.bin")
+		g_config.model_path = filepath.Join(home, "artifacts", "models", "1t.bin")
 	}
 	if val := os.Getenv("NEURX_INFERENCE_HOST"); val != "" {
-		g_config.Host = val
+		g_config.host = val
 	}
 	if val := os.Getenv("NEURX_INFERENCE_PORT"); val != "" {
 		if port, err := strconv.Atoi(val); err == nil {
-			g_config.Port = port
+			g_config.port = port
 		}
 	}
 	if val := os.Getenv("NEURX_INFERENCE_MODEL"); val != "" {
-		g_config.ModelPath = val
+		g_config.model_path = val
 	}
 	if val := os.Getenv("NEURX_INFERENCE_MAX_BATCH"); val != "" {
 		if bs, err := strconv.Atoi(val); err == nil {
-			g_config.MaxBatchSize = bs
+			g_config.max_batch_size = bs
 		}
 	}
 	if val := os.Getenv("NEURX_INFERENCE_QUANTIZED"); val == "1" || val == "true" {
-		g_config.EnableQuantized = true
+		g_config.enable_quantized = true
 	}
 	if val := os.Getenv("NEURX_INFERENCE_CACHE"); val == "1" || val == "true" {
-		g_config.EnableCache = true
+		g_config.enable_cache = true
 	}
 }
 
 func validate_config() error {
 
-	if g_config.ModelPath == "" {
+	if g_config.model_path == "" {
 		return fmt.Errorf("model path is not set")
 	}
-	stat, err := os.Stat(g_config.ModelPath)
+	stat, err := os.Stat(g_config.model_path)
 	if err != nil || stat.IsDir() {
-		return fmt.Errorf("model file not found: %s", g_config.ModelPath)
+		return fmt.Errorf("model file not found: %s", g_config.model_path)
 	}
-	if g_config.Port < 1 || g_config.Port > 65535 {
-		return fmt.Errorf("invalid port: %d", g_config.Port)
+	if g_config.port < 1 || g_config.port > 65535 {
+		return fmt.Errorf("invalid port: %d", g_config.port)
 	}
-	if g_config.MaxBatchSize < 1 || g_config.MaxBatchSize > 256 {
-		return fmt.Errorf("invalid batch size: %d", g_config.MaxBatchSize)
+	if g_config.max_batch_size < 1 || g_config.max_batch_size > 256 {
+		return fmt.Errorf("invalid batch size: %d", g_config.max_batch_size)
 	}
-	if g_config.MaxSequenceLen < 128 || g_config.MaxSequenceLen > 32768 {
-		return fmt.Errorf("invalid sequence length: %d", g_config.MaxSequenceLen)
+	if g_config.max_sequence_len < 128 || g_config.max_sequence_len > 32768 {
+		return fmt.Errorf("invalid sequence length: %d", g_config.max_sequence_len)
 	}
 	return nil
 }
@@ -158,15 +158,15 @@ func load_config_from_file(path string) error {
 func initialize_model() error {
 
 	log_info("Initializing model...")
-	stat, err := os.Stat(g_config.ModelPath)
+	stat, err := os.Stat(g_config.model_path)
 	if err != nil {
-		return fmt.Errorf("model not found: %s", g_config.ModelPath)
+		return fmt.Errorf("model not found: %s", g_config.model_path)
 	}
 	model_size_mb := stat.Size() / (1024 * 1024)
 	log_info(fmt.Sprintf("model loaded: %s (size: %d MB)",
-		filepath.Base(g_config.ModelPath), model_size_mb))
-	if g_config.EnableQuantized {
-		log_info(fmt.Sprintf("Quantization enabled: %s", g_config.QuantizationType))
+		filepath.Base(g_config.model_path), model_size_mb))
+	if g_config.enable_quantized {
+		log_info(fmt.Sprintf("Quantization enabled: %s", g_config.quantization_type))
 	}
 	return nil
 }
@@ -174,40 +174,40 @@ func initialize_model() error {
 func process_inference_request(req *inference_request) (*inference_response, error) {
 
 	start_time := time.Now()
-	if req.Prompt == "" {
+	if req.prompt == "" {
 		return nil, fmt.Errorf("prompt is empty")
 	}
-	if req.MaxTokens <= 0 || req.MaxTokens > gConfig.MaxSequenceLen {
-		req.MaxTokens = g_config.MaxSequenceLen
+	if req.max_tokens <= 0 || req.max_tokens > g_config.max_sequence_len {
+		req.max_tokens = g_config.max_sequence_len
 	}
-	prompt_tokens := len(strings.Fields(req.Prompt))
-	generated_tokens := req.MaxTokens
-	if req.Temperature > 1.0 {
-		generated_tokens = req.MaxTokens / 2
+	prompt_tokens := len(strings.Fields(req.prompt))
+	generated_tokens := req.max_tokens
+	if req.temperature > 1.0 {
+		generated_tokens = req.max_tokens / 2
 	}
 	generated := "This is a simulated response. In production, this would contain actual model output."
 	elapsed := time.Since(start_time).Seconds()
 	total_tokens := prompt_tokens + generated_tokens
-	throughput_ms := elapsed * 1000.0 / float64(totalTokens)
+	throughput_ms := elapsed * 1000.0 / float64(total_tokens)
 	response := &inference_response{
 		request_id: fmt.Sprintf("req_%d", time.Now().UnixNano()),
 		generated: generated,
-		token_count: generatedTokens,
+		token_count: generated_tokens,
 		latency: elapsed,
-		throughput_ms: throughputMS,
-		model_used: filepath.Base(g_config.ModelPath),
+		throughput_ms: throughput_ms,
+		model_used: filepath.Base(g_config.model_path),
 		finish_reason: "length",
 		timestamp: time.Now().Format("2006-01-02T15:04:05Z"),
 	}
-	g_metrics.TotalRequests++
-	g_metrics.SuccessfulRequests++
-	g_metrics.AvgLatency = (g_metrics.AvgLatency*float64(g_metrics.SuccessfulRequests-1) + elapsed) /
-		float64(g_metrics.SuccessfulRequests)
-	if elapsed > gMetrics.MaxLatency {
-		g_metrics.MaxLatency = elapsed
+	g_metrics.total_requests++
+	g_metrics.successful_requests++
+	g_metrics.avg_latency = (g_metrics.avg_latency*float64(g_metrics.successful_requests-1) + elapsed) /
+		float64(g_metrics.successful_requests)
+	if elapsed > g_metrics.max_latency {
+		g_metrics.max_latency = elapsed
 	}
-	if elapsed < g_metrics.MinLatency {
-		g_metrics.MinLatency = elapsed
+	if elapsed < g_metrics.min_latency {
+		g_metrics.min_latency = elapsed
 	}
 	return response, nil
 }
@@ -221,7 +221,7 @@ func handle_inference_request(json_data []byte) ([]byte, error) {
 	}
 	resp, err := process_inference_request(&req)
 	if err != nil {
-		g_metrics.FailedRequests++
+		g_metrics.failed_requests++
 		return nil, err
 	}
 	resp_data, err := json.MarshalIndent(resp, "", "  ")
@@ -245,10 +245,10 @@ func handle_health_check() ([]byte, error) {
 
 	health := map[string]interface{}{
 		"status": "healthy",
-		"model": filepath.Base(g_config.ModelPath),
+	"model": filepath.Base(g_config.model_path),
 		"uptime_seconds": int64(time.Since(g_server_start_time).Seconds()),
-		"total_requests": gMetrics.TotalRequests,
-		"cache_enabled": gConfig.EnableCache,
+	"total_requests": g_metrics.total_requests,
+	"cache_enabled": g_config.enable_cache,
 	}
 	data, err := json.MarshalIndent(health, "", "  ")
 	if err != nil {
@@ -278,22 +278,19 @@ func log_error(msg string) {
 func start_server() error {
 
 	log_info("Starting inference server...")
-	log_info(fmt.Sprintf("Server: %s:%d", g_config.Host, g_config.Port))
-	log_info(fmt.Sprintf("model: %s", g_config.ModelPath))
+	log_info(fmt.Sprintf("Server: %s:%d", g_config.host, g_config.port))
+	log_info(fmt.Sprintf("model: %s", g_config.model_path))
 	log_info(fmt.Sprintf("config: batch_size=%d, seq_len=%d, workers=%d",
-		g_config.MaxBatchSize, g_config.MaxSequenceLen, g_config.WorkerThreads))
+		g_config.max_batch_size, g_config.max_sequence_len, g_config.worker_threads))
 	log_info("Server started successfully!")
-	log_info("Endpoints:")
-	log_info(fmt.Sprintf("  POST http:
-	logInfo(fmt.Sprintf("  GET  http:
-	logInfo(fmt.Sprintf("  GET  http:
+	log_info("Endpoints: POST /generate, GET /health, GET /metrics")
 	return nil
 }
 
-func runInteractiveMode() {
+func run_interactive_mode() {
 
-	logInfo("entering interactive mode (simulation)...")
-	logInfo("type 'quit' to exit")
+	log_info("entering interactive mode (simulation)...")
+	log_info("type 'quit' to exit")
 	requests := []string{
 		`{"prompt":"what is artificial intelligence?","max_tokens":100}`,
 		`{"prompt":"explain machine learning in one sentence","max_tokens":50}`,
@@ -302,18 +299,18 @@ func runInteractiveMode() {
 	for i, reqStr := range requests {
 		fmt.Printf("\n[request %d]\n", i+1)
 		fmt.Printf("input: %s\n", reqStr)
-		resp, err := handleInferenceRequest([]byte(reqStr))
+		resp, err := handle_inference_request([]byte(reqStr))
 		if err != nil {
-			logError("request failed: " + err.Error())
+			log_error("request failed: " + err.Error())
 		} else {
 			fmt.Printf("response:\n%s\n", string(resp))
 		}
 		time.Sleep(500 * time.Millisecond)
 	}
-	logInfo("interactive mode completed")
+	log_info("interactive mode completed")
 }
 
-func printUsage() {
+func print_usage() {
 
 	fmt.Println("neur_x inference server - usage:")
 	fmt.Println("")
@@ -363,18 +360,18 @@ func run_benchmark() {
 		}
 		elapsed := time.Since(start_time).Seconds()
 		fmt.Printf("\n[Benchmark %d]\n", i+1)
-		fmt.Printf("  Prompt length: %d chars\n", len(req.Prompt))
-		fmt.Printf("  Max tokens: %d\n", req.MaxTokens)
-		fmt.Printf("  Generated tokens: %d\n", resp.TokenCount)
-		fmt.Printf("  Latency: %.3f s\n", resp.Latency)
-		fmt.Printf("  Throughput: %.2f ms/token\n", resp.ThroughputMS)
+		fmt.Printf("  Prompt length: %d chars\n", len(req.prompt))
+		fmt.Printf("  Max tokens: %d\n", req.max_tokens)
+		fmt.Printf("  Generated tokens: %d\n", resp.token_count)
+		fmt.Printf("  Latency: %.3f s\n", resp.latency)
+		fmt.Printf("  Throughput: %.2f ms/token\n", resp.throughput_ms)
 	}
 	fmt.Println("\nBenchmark Summary:")
-	fmt.Printf("  Total requests: %d\n", g_metrics.TotalRequests)
-	fmt.Printf("  Successful: %d\n", g_metrics.SuccessfulRequests)
-	fmt.Printf("  Failed: %d\n", g_metrics.FailedRequests)
-	fmt.Printf("  Avg latency: %.3f s\n", g_metrics.AvgLatency)
-	fmt.Printf("  Max latency: %.3f s\n", g_metrics.MaxLatency)
+	fmt.Printf("  Total requests: %d\n", g_metrics.total_requests)
+	fmt.Printf("  Successful: %d\n", g_metrics.successful_requests)
+	fmt.Printf("  Failed: %d\n", g_metrics.failed_requests)
+	fmt.Printf("  Avg latency: %.3f s\n", g_metrics.avg_latency)
+	fmt.Printf("  Max latency: %.3f s\n", g_metrics.max_latency)
 }
 
 func main() {
@@ -405,11 +402,11 @@ func main() {
 		fmt.Println("Server running. Press Ctrl+C to stop.")
 		select {}
 	case "interactive":
-		runInteractiveMode()
-	case "benchmark":
-		runBenchmark()
-	case "config":
-		printConfig()
+			run_interactive_mode()
+		case "benchmark":
+			run_benchmark()
+		case "config":
+			print_config()
 	case "config-load":
 		if len(os.Args) < 3 {
 			log_error("Missing config file path")
@@ -423,7 +420,7 @@ func main() {
 		log_info("config loaded successfully")
 		print_config()
 	case "help":
-		printUsage()
+		print_usage()
 	default:
 		fmt.Printf("Unknown command: %s\n", command)
 		print_usage()

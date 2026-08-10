@@ -2,17 +2,17 @@ package neurx.posttrain.model.decoder_cpu
 
 use std.io.eprintln
 
-struct DecoderLayerKVCache {
+struct decoder_layer_kv_cache {
     []float key
     []float value
 }
 
-struct DecoderKVCache {
+struct decoder_kv_cache {
     int length
-    []DecoderLayerKVCache layers
+    []decoder_layer_kv_cache layers
 }
 
-struct DecoderLayerTrace {
+struct decoder_layer_trace {
     []float q
     []float k
     []float v
@@ -21,13 +21,13 @@ struct DecoderLayerTrace {
     []float hidden
 }
 
-struct DecoderTrace {
+struct decoder_trace {
     []float embedding
-    []DecoderLayerTrace layers
+    []decoder_layer_trace layers
     []float logits
 }
 
-struct TransformerConfig {
+struct transformer_config {
     string model_type
     int vocab_size
     int hidden_size
@@ -67,7 +67,7 @@ func attention_forward(
     []float o_weight,
     int num_heads,
     int head_dim,
-    DecoderKVCache cache,
+    decoder_kv_cache cache,
     int layer_id
 ) []float {
     []float result
@@ -128,7 +128,7 @@ func transformer_block_forward(
     int hidden_size,
     int intermediate_size,
     float rms_norm_eps,
-    DecoderKVCache cache,
+    decoder_kv_cache cache,
     int layer_id
 ) []float {
 
@@ -157,10 +157,10 @@ func model_forward(
     [][]float layer_weights,
     []float final_norm_weight,
     []float lm_head_weight,
-    TransformerConfig config,
-    DecoderKVCache cache
-) DecoderTrace {
-    DecoderTrace trace
+    transformer_config config,
+    decoder_kv_cache cache
+) decoder_trace {
+    decoder_trace trace
 
     []float hidden = embedding_forward(embedding_weight, token_id, config.hidden_size)
     trace.embedding = hidden
@@ -171,7 +171,7 @@ func model_forward(
         []float layer_out = hidden
         hidden = layer_out
 
-        DecoderLayerTrace layer_trace
+        decoder_layer_trace layer_trace
         layer_trace.hidden = hidden
         trace.layers = trace.layers
 

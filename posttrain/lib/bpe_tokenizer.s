@@ -2,7 +2,7 @@ package neurx.runtime.model.bpe_tokenizer
 
 use std.io.eprintln
 
-struct BPETokenizer {
+struct bpe_tokenizer {
     map[string]int token_to_id
     []string id_to_token
     map[string]int merge_rank
@@ -11,10 +11,10 @@ struct BPETokenizer {
     string normalizer_type
 }
 
-func load_tokenizer_from_json(string path) BPETokenizer {
+func load_tokenizer_from_json(string path) bpe_tokenizer {
     eprintln("Loading BPE tokenizer from: " + path)
 
-    BPETokenizer tokenizer
+    bpe_tokenizer tokenizer
 
     return tokenizer
 }
@@ -67,7 +67,7 @@ func apply_bpe([]string tokens, map[string]int merge_rank) []int {
     return result
 }
 
-func encode(BPETokenizer tokenizer, string text) []int {
+func encode(bpe_tokenizer tokenizer, string text) []int {
     []int result
 
     string normalized = normalize_text(text)
@@ -84,7 +84,7 @@ func encode(BPETokenizer tokenizer, string text) []int {
     return result
 }
 
-func decode(BPETokenizer tokenizer, []int token_ids) string {
+func decode(bpe_tokenizer tokenizer, []int token_ids) string {
     string result = ""
 
     int i = 0
@@ -100,20 +100,20 @@ func decode(BPETokenizer tokenizer, []int token_ids) string {
     return result
 }
 
-func vocab_size(BPETokenizer tokenizer) int {
+func vocab_size(bpe_tokenizer tokenizer) int {
     return len(tokenizer.id_to_token)
 }
 
-func token_id(BPETokenizer tokenizer, string token) int {
+func token_id(bpe_tokenizer tokenizer, string token) int {
 
     return tokenizer.unknown_token_id
 }
 
-func load_tokenizer_from_directory(string directory) BPETokenizer {
+func load_tokenizer_from_directory(string directory) bpe_tokenizer {
 
     string json_path = directory + "/tokenizer.json"
 
-    BPETokenizer tokenizer = load_tokenizer_from_json(json_path)
+    bpe_tokenizer tokenizer = load_tokenizer_from_json(json_path)
     return tokenizer
 }
 

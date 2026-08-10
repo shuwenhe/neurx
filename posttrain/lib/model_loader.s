@@ -3,7 +3,7 @@ package neurx.runtime.model.model_loader
 use std.io.eprintln
 use neurx.posttrain.lib.hf_config as hf_cfg
 
-struct RuntimeModel {
+struct runtime_model {
     string model_type
     int vocab_size
     int hidden_size
@@ -41,7 +41,7 @@ func load_tokenizer(string directory) interface {
     return tokenizer
 }
 
-func load_model(string directory) RuntimeModel {
+func load_model(string directory) runtime_model {
     eprintln("╔════════════════════════════════════════════════════════════════╗")
     eprintln("║  Loading Model - Pure S Runtime                                ║")
     eprintln("╚════════════════════════════════════════════════════════════════╝")
@@ -69,7 +69,7 @@ func load_model(string directory) RuntimeModel {
     eprintln("")
     eprintln("✓ Model loading complete!")
 
-    RuntimeModel model
+    runtime_model model
     model.model_type = "transformer"
     model.vocab_size = 32000
     model.hidden_size = 3200
@@ -81,7 +81,7 @@ func load_model(string directory) RuntimeModel {
     return model
 }
 
-func generate(RuntimeModel model, string prompt, int max_tokens) []int {
+func generate(runtime_model model, string prompt, int max_tokens) []int {
     eprintln("Generating tokens from prompt...")
 
     []int tokens
@@ -89,7 +89,7 @@ func generate(RuntimeModel model, string prompt, int max_tokens) []int {
     return tokens
 }
 
-func chat(RuntimeModel model, string message) string {
+func chat(runtime_model model, string message) string {
     eprintln("Processing message...")
 
     []int token_ids = generate(model, message, 100)
@@ -99,7 +99,7 @@ func chat(RuntimeModel model, string message) string {
     return response
 }
 
-func verify_model(RuntimeModel model) bool {
+func verify_model(runtime_model model) bool {
     eprintln("Verifying model structure...")
 
     if model.vocab_size <= 0 {
@@ -125,5 +125,5 @@ func main() {
     eprintln("  - Transformer decoder (decoder_cpu.s)")
     eprintln("  - BPE tokenizer (bpe_tokenizer.s)")
     eprintln("")
-    eprintln("Usage: load_model(directory) -> RuntimeModel")
+    eprintln("Usage: load_model(directory) -> runtime_model")
 }

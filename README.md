@@ -1,9 +1,5 @@
 # NeurX: Post-Training Framework for Large Language Models
 
-![Status](https://img.shields.io/badge/status-alpha-yellow)
-![Language](https://img.shields.io/badge/language-S-blue)
-![Phase](https://img.shields.io/badge/phase-2A%2B3-orange)
-
 NeurX is a pure S language framework for post-training large language models. It provides a complete pipeline for fine-tuning, inference, and evaluation of open-source LLMs on custom datasets.
 
 ## 🎯 Features

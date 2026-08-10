@@ -2,7 +2,7 @@ package neurx.runtime.model.safetensors
 
 use std.io.eprintln
 
-struct SafeTensorInfo {
+struct safe_tensor_info {
     string name
     string dtype
     []int shape
@@ -10,7 +10,7 @@ struct SafeTensorInfo {
     int byte_end
 }
 
-struct SafeTensorFile {
+struct safe_tensor_file {
     string path
     interface data
     int header_size
@@ -48,17 +48,17 @@ func shape_numel([]int shape) int {
     return result
 }
 
-func parse_safetensors_header(string json_header) map[string]SafeTensorInfo {
+func parse_safetensors_header(string json_header) map[string]safe_tensor_info {
 
-    map[string]SafeTensorInfo tensors
+    map[string]safe_tensor_info tensors
 
     return tensors
 }
 
-func open_safetensors(string path) SafeTensorFile {
+func open_safetensors(string path) safe_tensor_file {
     interface file_data = readfile(path)
 
-    SafeTensorFile file
+    safe_tensor_file file
     file.path = path
     file.data = file_data
     file.header_size = 0
@@ -67,13 +67,13 @@ func open_safetensors(string path) SafeTensorFile {
     return file
 }
 
-func load_tensor_float(SafeTensorFile file, SafeTensorInfo info) []float {
+func load_tensor_float(safe_tensor_file file, safe_tensor_info info) []float {
     []float result
 
     return result
 }
 
-func contains_tensor(SafeTensorFile file, string name) bool {
+func contains_tensor(safe_tensor_file file, string name) bool {
 
     return false
 }

@@ -23,17 +23,17 @@ func main() {
     cmd := args[0]
     switch cmd {
     case "train":
-        runTraining(args[1:])
+        run_training(args[1:])
     case "inference":
-        runInference(args[1:])
+        run_inference(args[1:])
     case "build":
-        runBuild(args[1:])
+        run_build(args[1:])
     case "benchmark":
-        runBenchmark(args[1:])
+        run_benchmark(args[1:])
     case "distribute":
-        runDistributed(args[1:])
+        run_distributed(args[1:])
     case "help":
-        showHelp()
+        show_help()
     default:
         fmt.Printf("Unknown command: %s\n", cmd)
         show_help()
@@ -49,34 +49,34 @@ func run_training(args []string) {
         return
     }
     scale := args[0]
-    num_gp_us := 1
+    num_gpus := 1
     if len(args) > 1 {
-        fmt.Sscanf(args[1], "%d", &num_gp_us)
+        fmt.Sscanf(args[1], "%d", &num_gpus)
     }
     fmt.Printf("\n📊 Configuration:\n")
     fmt.Printf("  Scale: %s\n", scale)
-    fmt.Printf("  GPUs: %d\n", num_gp_us)
+    fmt.Printf("  GPUs: %d\n", num_gpus)
     var model_config llm.gptconfig
     switch scale {
     case "mini":
-        modelConfig = llm.Mini()
+        model_config = llm.mini()
     case "small":
-        modelConfig = llm.GPT7B()
+        model_config = llm.gpt7b()
     case "medium":
-        modelConfig = llm.GPT7B()
+        model_config = llm.gpt7b()
     case "large":
-        modelConfig = llm.GPT13B()
+        model_config = llm.gpt13b()
     case "xl":
-        modelConfig = llm.GPT70B()
+        model_config = llm.gpt70b()
     default:
         fmt.Printf("Unknown scale: %s\n", scale)
         return
     }
-    fmt.Printf("  model Parameters: %d\n", llm.NewGPT(model_config).NumParams())
+    fmt.Printf("  model Parameters: %d\n", llm.new_gpt(model_config).num_params())
     training_config := training.training_config{
         model_scale:        scale,
         num_epochs:         10,
-        global_batch_size:   1024 / uint64(numGPUs),
+        global_batch_size:   1024 / uint64(num_gpus),
         local_batch_size:    32,
         grad_accum_steps:    4,
         max_seq_len:         4096,
@@ -88,20 +88,20 @@ func run_training(args []string) {
         validate_interval:  500,
         checkpoint_dir:     "./checkpoints",
         log_dir:            "./logs",
-        use_distributed:    numGPUs > 1,
-        num_gp_us:           numGPUs,
+        use_distributed:    num_gpus > 1,
+        num_gp_us:           num_gpus,
         random_seed:        42,
     }
     fmt.Println("\n" + "=" * 60)
     fmt.Println("📈 Training Starting...")
     fmt.Println("=" * 60 + "\n")
     start_time := time.Now()
-    if training_config.UseDistributed {
-        if err := training.RunDistributedTraining(num_gp_us, scale); err != nil {
+    if training_config.use_distributed {
+        if err := training.run_distributed_training(num_gpus, scale); err != nil {
             fmt.Printf("❌ Training failed: %v\n", err)
         }
     } else {
-        if err := training.RunCompleteTrainingPipeline(""); err != nil {
+        if err := training.run_complete_training_pipeline(""); err != nil {
             fmt.Printf("❌ Training failed: %v\n", err)
         }
     }
@@ -118,17 +118,17 @@ func run_inference(args []string) {
     }
     model_path := args[0]
     fmt.Printf("📦 Loading model from: %s\n", model_path)
-    model, err := llm.LoadCheckpoint(model_path)
+    model, err := llm.load_checkpoint(model_path)
     if err != nil {
         fmt.Printf("❌ Failed to load model: %v\n", err)
         return
     }
     fmt.Printf("✅ model loaded successfully\n")
-    fmt.Printf("📊 model parameters: %d\n", model.NumParams())
+    fmt.Printf("📊 model parameters: %d\n", model.num_params())
     fmt.Println("\n" + "=" * 60)
     fmt.Println("🚀 Starting Inference Server...")
     fmt.Println("=" * 60 + "\n")
-    if err := inference.StartServer(model); err != nil {
+    if err := inference.start_server(model); err != nil {
         fmt.Printf("❌ Inference failed: %v\n", err)
     }
 }
@@ -141,18 +141,18 @@ func run_distributed(args []string) {
         fmt.Println("\nScales: mini, small, medium, large, xl")
         return
     }
-    var num_gp_us int
-    fmt.Sscanf(args[0], "%d", &num_gp_us)
+    var num_gpus int
+    fmt.Sscanf(args[0], "%d", &num_gpus)
     scale := args[1]
     fmt.Printf("\n🔗 Distributed Configuration:\n")
-    fmt.Printf("  GPUs: %d\n", num_gp_us)
+    fmt.Printf("  GPUs: %d\n", num_gpus)
     fmt.Printf("  Scale: %s\n", scale)
-    fmt.Printf("  World Size: %d\n", num_gp_us)
+    fmt.Printf("  World Size: %d\n", num_gpus)
     fmt.Printf("  Parallelism: DDP + Gradient Checkpointing\n")
     fmt.Println("\n" + "=" * 60)
     fmt.Println("🚀 Starting Distributed Training...")
     fmt.Println("=" * 60 + "\n")
-    if err := training.RunDistributedTraining(num_gp_us, scale); err != nil {
+    if err := training.run_distributed_training(num_gpus, scale); err != nil {
         fmt.Printf("❌ Distributed training failed: %v\n", err)
     }
 }
@@ -166,12 +166,12 @@ func run_benchmark(args []string) {
     results := make(map[string]map[int]float32)
     for _, scale := range scales {
         results[scale] = make(map[int]float32)
-        for _, num_gp_us := range gpu_counts {
-            fmt.Printf("Benchmarking %s on %d GPUs...", scale, num_gp_us)
+        for _, num_gpus := range gpu_counts {
+            fmt.Printf("Benchmarking %s on %d GPUs...", scale, num_gpus)
             start_time := time.Now()
-            throughput := run_benchmark_step(scale, num_gp_us)
+            throughput := run_benchmark_step(scale, num_gpus)
             elapsed := time.Since(start_time).Seconds()
-            results[scale][num_gp_us] = throughput
+            results[scale][num_gpus] = throughput
             fmt.Printf(" ✅ Throughput: %.0f samples/s\n", throughput)
         }
     }
@@ -180,9 +180,9 @@ func run_benchmark(args []string) {
     fmt.Println("=" * 60)
     for _, scale := range scales {
         fmt.Printf("\n%s Scale:\n", scale)
-        for _, num_gp_us := range gpu_counts {
-            throughput := results[scale][num_gp_us]
-            fmt.Printf("  %2d GPUs: %.0f samples/s\n", num_gp_us, throughput)
+        for _, num_gpus := range gpu_counts {
+            throughput := results[scale][num_gpus]
+            fmt.Printf("  %2d GPUs: %.0f samples/s\n", num_gpus, throughput)
         }
     }
 }

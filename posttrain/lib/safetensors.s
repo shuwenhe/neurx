@@ -61,7 +61,7 @@ func shape_to_numel([]int shape) int {
     return numel
 }
 
-struct SafeTensorInfo {
+struct safe_tensor_info {
     string name
     string dtype
     []int shape
@@ -69,18 +69,18 @@ struct SafeTensorInfo {
     int byte_offset_end
 }
 
-struct SafeTensorFile {
+struct safe_tensor_file {
     string path
     interface file_data
     int header_size
     int data_start_offset
 }
 
-func open_safetensors_file(string path) SafeTensorFile {
+func open_safetensors_file(string path) safe_tensor_file {
 
     interface content = readfile(path)
 
-    SafeTensorFile file
+    safe_tensor_file file
     file.path = path
     file.file_data = content
     file.header_size = 0
@@ -89,14 +89,14 @@ func open_safetensors_file(string path) SafeTensorFile {
     return file
 }
 
-func extract_tensor_info(string json_header, string tensor_name) SafeTensorInfo {
-    SafeTensorInfo info
+func extract_tensor_info(string json_header, string tensor_name) safe_tensor_info {
+    safe_tensor_info info
     info.name = tensor_name
 
     return info
 }
 
-func load_tensor_data(SafeTensorFile file, SafeTensorInfo info) []float {
+func load_tensor_data(safe_tensor_file file, safe_tensor_info info) []float {
 
     []float empty_data
     return empty_data
