@@ -1,6 +1,6 @@
 package neurx.inference.metrics.inference_metrics
 
-struct vllm_metrics_state {
+struct neurx_metrics_state {
     int admitted
     int rejected
     int completed
@@ -12,8 +12,8 @@ struct vllm_metrics_state {
     int cache_misses
 }
 
-func new_vllm_metrics_state() vllm_metrics_state {
-    vllm_metrics_state {
+func new_neurx_metrics_state() neurx_metrics_state {
+    neurx_metrics_state {
         admitted: 0,
         rejected: 0,
         completed: 0,
@@ -26,7 +26,7 @@ func new_vllm_metrics_state() vllm_metrics_state {
     }
 }
 
-func vllm_metrics_record_enqueue(vllm_metrics_state state, bool accepted, int queue_depth, int prefill_tokens) vllm_metrics_state {
+func neurx_metrics_record_enqueue(neurx_metrics_state state, bool accepted, int queue_depth, int prefill_tokens) neurx_metrics_state {
     int normalized_depth = queue_depth
     if normalized_depth < 0 {
         normalized_depth = 0
@@ -44,7 +44,7 @@ func vllm_metrics_record_enqueue(vllm_metrics_state state, bool accepted, int qu
     } else {
         next_rejected = next_rejected + 1
     }
-    vllm_metrics_state {
+    neurx_metrics_state {
         admitted: next_admitted,
         rejected: next_rejected,
         completed: state.completed,
@@ -57,12 +57,12 @@ func vllm_metrics_record_enqueue(vllm_metrics_state state, bool accepted, int qu
     }
 }
 
-func vllm_metrics_record_decode(vllm_metrics_state state, int tokens) vllm_metrics_state {
+func neurx_metrics_record_decode(neurx_metrics_state state, int tokens) neurx_metrics_state {
     int add_tokens = tokens
     if add_tokens < 0 {
         add_tokens = 0
     }
-    vllm_metrics_state {
+    neurx_metrics_state {
         admitted: state.admitted,
         rejected: state.rejected,
         completed: state.completed,
@@ -75,7 +75,7 @@ func vllm_metrics_record_decode(vllm_metrics_state state, int tokens) vllm_metri
     }
 }
 
-func vllm_metrics_record_cache(vllm_metrics_state state, bool hit) vllm_metrics_state {
+func neurx_metrics_record_cache(neurx_metrics_state state, bool hit) neurx_metrics_state {
     int next_hits = state.cache_hits
     int next_misses = state.cache_misses
     if hit {
@@ -83,7 +83,7 @@ func vllm_metrics_record_cache(vllm_metrics_state state, bool hit) vllm_metrics_
     } else {
         next_misses = next_misses + 1
     }
-    vllm_metrics_state {
+    neurx_metrics_state {
         admitted: state.admitted,
         rejected: state.rejected,
         completed: state.completed,
@@ -96,8 +96,8 @@ func vllm_metrics_record_cache(vllm_metrics_state state, bool hit) vllm_metrics_
     }
 }
 
-func vllm_metrics_record_finish(vllm_metrics_state state) vllm_metrics_state {
-    vllm_metrics_state {
+func neurx_metrics_record_finish(neurx_metrics_state state) neurx_metrics_state {
+    neurx_metrics_state {
         admitted: state.admitted,
         rejected: state.rejected,
         completed: state.completed + 1,
@@ -110,14 +110,14 @@ func vllm_metrics_record_finish(vllm_metrics_state state) vllm_metrics_state {
     }
 }
 
-func vllm_metrics_avg_queue_depth(vllm_metrics_state state) float {
+func neurx_metrics_avg_queue_depth(neurx_metrics_state state) float {
     if state.queue_depth_samples <= 0 {
         return 0.0
     }
     state.queue_depth_sum / state.queue_depth_samples
 }
 
-func vllm_metrics_hit_rate(vllm_metrics_state state) float {
+func neurx_metrics_hit_rate(neurx_metrics_state state) float {
     int total = state.cache_hits + state.cache_misses
     if total <= 0 {
         return 0.0
@@ -125,10 +125,10 @@ func vllm_metrics_hit_rate(vllm_metrics_state state) float {
     state.cache_hits / total
 }
 
-func vllm_metrics_state_dict(vllm_metrics_state state) vllm_metrics_state {
+func neurx_metrics_state_dict(neurx_metrics_state state) neurx_metrics_state {
     state
 }
 
-func vllm_metrics_load_state_dict(vllm_metrics_state state, vllm_metrics_state other) vllm_metrics_state {
+func neurx_metrics_load_state_dict(neurx_metrics_state state, neurx_metrics_state other) neurx_metrics_state {
     other
 }
