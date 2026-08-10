@@ -1,4 +1,4 @@
-package neurx.inference.vllm.metrics
+package neurx.inference.metrics.inference_metrics
 
 struct vllm_metrics_state {
     int admitted

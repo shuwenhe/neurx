@@ -1,4 +1,4 @@
-package neurx.inference.vllm.prefix_cache
+package neurx.inference.cache.vllm_prefix_cache
 use neurx.inference.cache.prefix_cache
 
 struct vllm_prefix_cache_state {
