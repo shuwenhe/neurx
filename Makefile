@@ -2818,21 +2818,21 @@ build-json-parser-s: check-bash
 
 test-json-parser-s: check-bash build-s-ir-runner
 	@echo "╔════════════════════════════════════════════════════════════════╗"
-	@echo "║  Testing Minimal Pure-S JSON Parser                            ║"
+	@echo "║  Testing Pure-S JSON Parser (RFC 8259 Compliant)               ║"
 	@echo "╚════════════════════════════════════════════════════════════════╝"
 	@echo ""
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/test_json'
 	@cd '$(CURDIR_UNIX)' && \
-		rm -f '$(CURDIR_UNIX)/artifacts/build/test_json/json_minimal.ir'; \
-		"$(S_SEED_COMPILER)" 'posttrain/lib/json_minimal.s' '$(CURDIR_UNIX)/artifacts/build/test_json/json_minimal.ir' 2>&1 || exit 1; \
-		test -f '$(CURDIR_UNIX)/artifacts/build/test_json/json_minimal.ir'
+		rm -f '$(CURDIR_UNIX)/artifacts/build/test_json/json.ir'; \
+		"$(S_SEED_COMPILER)" 'posttrain/lib/json.s' '$(CURDIR_UNIX)/artifacts/build/test_json/json.ir' 2>&1 || exit 1; \
+		test -f '$(CURDIR_UNIX)/artifacts/build/test_json/json.ir'
 	@echo ""
-	@echo "[Running Tests]"
+	@echo "[Running JSON Parser Tests]"
 	@cd '$(CURDIR_UNIX)' && \
-		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/test_json/json_minimal.ir' \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/test_json/json.ir' \
 		'$(S_RUNNER_BIN)' 2>&1
 	@echo ""
-	@echo "✅ Minimal JSON Parser tests complete!"
+	@echo "✅ Pure-S JSON Parser tests complete!"
 	@echo ""
 
 build-cpp2s-migration: build-json-parser-s
