@@ -64,6 +64,7 @@ struct neurx_state {
     float validation_loss
     bool is_loaded
     bool is_training
+
     struct stats {
         float avg_tokens_per_sec
         float peak_memory_mb

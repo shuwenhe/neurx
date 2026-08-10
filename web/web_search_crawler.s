@@ -487,6 +487,7 @@ class main_content_extractor {
         full_text = "".join(content_parts).strip()
         return (full_text, sections)
     }
+
     struct extraction_result {
         text_content: string
         metadata: page_metadata
@@ -677,6 +678,7 @@ Also provide a comma-separated ranking of the most relevant result indices (0-ba
             reranked_indices=reranked_indices
         }
     }
+
     struct llm_summary_result {
         summary: string
         key_findings: list<string>?
@@ -723,6 +725,7 @@ Also provide a comma-separated ranking of the most relevant result indices (0-ba
         return final_output
     }
 }
+
 struct search_options {
     crawl_results: bool = true
     generate_summary: bool = true

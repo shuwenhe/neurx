@@ -54,6 +54,7 @@ func checkpoint_wrapper(func layer_fn, []autograd.tensor inputs, checkpoint_conf
     for i := 0; i < len(outputs); i += 1 {
         detached_outputs.push(autograd.tensor_detach(outputs[i]))
     }
+
     func backward_fn([]autograd.tensor grads) []autograd.tensor {
         autograd.enable_grad()
         []autograd.tensor recomputed_outputs = layer_fn(inputs...)
@@ -87,6 +88,7 @@ func checkpoint_module(pointer module, []autograd.tensor inputs, checkpoint_conf
     for i := 0; i < len(outputs); i += 1 {
         detached_outputs.push(autograd.tensor_detach(outputs[i]))
     }
+
     func recompute_fn() []autograd.tensor {
         autograd.enable_grad()
         []autograd.tensor result = module.forward(inputs...)
@@ -116,6 +118,7 @@ func apply_checkpointing_to_transformer(pointer transformer, checkpoint_config c
     int num_layers = len(transformer.layers)
     for i := 0; i < num_layers; i += 1 {
         pointer layer = transformer.layers[i]
+
         func wrapped_forward([]autograd.tensor inputs) []autograd.tensor {
             checkpoint_wrapper(layer.forward, inputs, config)
         }

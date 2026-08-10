@@ -1,5 +1,6 @@
 package contracts
 interface dispatcher {
+
     func select_kernel(op_name: string, device: device) -> Kernel
 
     func execute(op_name: string, inputs: []tensor, device: device) -> tensor
@@ -19,6 +20,7 @@ interface dispatcher {
     func get_fallback_device() -> DeviceType
 }
 interface operator_impl {
+
     func forward(inputs: []tensor) -> tensor
 
     func backward(grad_output: tensor, inputs: []tensor) -> []tensor

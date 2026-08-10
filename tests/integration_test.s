@@ -73,6 +73,7 @@ func test_streaming_dataloader() {
     config.seq_len = 512
     config.prefetch_size = 2
     streaming.streaming_dataloader loader = streaming.new_streaming_dataloader(config)
+
     func mock_tokenizer(string text) []int {
         []int tokens = []int{cap: 512}
         int i = 0

@@ -413,6 +413,7 @@ class expert_specializer {
         return cv < 0.1
     }
 }
+
 struct expert_analysis_report {
     num_total_experts: int
     num_active_experts: int
@@ -421,6 +422,7 @@ struct expert_analysis_report {
     importance_range: tuple<float, float>
     redundancy_detected: bool
 }
+
 struct individual_expert_report {
     expert_id: int
     is_active: bool
@@ -514,17 +516,20 @@ class expert_manager {
         }
     }
 }
+
 struct pruning_report {
     experts_pruned: int
     pruned_expert_ids: list<int>
     threshold_used: float
     remaining_active: int
 }
+
 struct merging_report {
     merges_performed: int
     operations: list<merge_operation>
     estimated_memory_savings_pct: float
 }
+
 struct merge_operation {
     layer_index: int
     expert_a_id: int
@@ -532,6 +537,7 @@ struct merge_operation {
     similarity: float
     action: string
 }
+
 struct moe_efficiency_report {
     total_experts_per_layer: int
     total_moe_layers: int

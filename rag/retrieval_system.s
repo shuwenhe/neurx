@@ -609,6 +609,7 @@ Expanded queries:
         return expanded[:num]
     }
 }
+
 struct query_expansion_result {
     original: string
     expanded: list<string>
@@ -688,6 +689,7 @@ class b_m_25_retriever {
             .filter(t => t.length >= 2)
     }
 }
+
 struct bm25_result {
     chunk_id: string
     score: float
@@ -736,6 +738,7 @@ class cross_encoder_reranker {
         return results
     }
 }
+
 struct reranked_result {
     chunk: document_chunk
     rerank_score: float
@@ -829,6 +832,7 @@ class hybrid_fusion_engine {
         return this._weighted_average_fusion(vector_results, bm25_results, top_k)
     }
 }
+
 struct fused_result {
     chunk_id: string
     fused_score: float
@@ -1024,6 +1028,7 @@ class retrieval_engine {
         }
     }
 }
+
 struct ingestion_report {
     documents_ingested: int
     chunks_created: int
@@ -1031,6 +1036,7 @@ struct ingestion_report {
     processing_time_ms: float
     db_status: dbstatus
 }
+
 struct rag_statistics {
     total_documents: int
     db_status: dbstatus

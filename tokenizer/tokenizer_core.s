@@ -37,6 +37,7 @@ struct tokenizer_state {
     dict[int, string] decoder
     special_tokens_config special_tokens
     int num_added_tokens
+
     struct stats {
         int total_encoded_tokens
         int total_decoded_tokens

@@ -70,6 +70,7 @@ struct trainer_report {
     loss_stats loss
 }
 interface trainer {
+
     func step(trainer_config config, trainer_state state, []string batch_data) trainer_state
 
     func save_adapter(trainer_state state, string output_dir) int

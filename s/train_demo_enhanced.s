@@ -495,6 +495,7 @@ func run_training(gptconfig config) training_result {
         total_time_ms: total_time,
         saved_checkpoints: checkpoints_saved,
     }
+
 func format_step_line(int step, float loss, float best_loss,
                        float grad_norm, float lr, int time_ms) string {
     string line = ""
@@ -515,10 +516,12 @@ func format_step_line(int step, float loss, float best_loss,
     line = line + lr_str + " | "
     line = line + string(time_ms) + " ms"
     line
+
 func check_should_save(int step, int every_n) bool {
     if every_n <= 0 { return true }
     return mod(step, every_n) == 0 && step > 0
 }
+
 func save_manifest(string manifest_path, []string checkpoints) void:
     content = "# NeurX checkpoint manifest\n"
     content += "# Generated: " + get_timestamp() + "\n\n"
@@ -526,12 +529,14 @@ func save_manifest(string manifest_path, []string checkpoints) void:
     for ckpt in checkpoints:
         content += ckpt + "\n"
     write_text_file(manifest_path, content)
+
 func get_time_ms() int:
 
 func write_text_file(string path, string content) result[void, error]:
     pass
 def rename_file(string old_path, string new_path) void:
     pass
+
 func main():
     gptconfig config = default_model_config()
     println("NeurX GPT Training - AI Native Edition")
