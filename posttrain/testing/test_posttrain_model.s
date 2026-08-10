@@ -127,7 +127,7 @@ func test_base_model_files() test_result {
     print_header("[Test 1] Base Model Files Validation")
     string base_path = runtime_env_get("NEURX_BASE_MODEL_PATH")
     if base_path == "" {
-        base_path = "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
+        base_path = "/home/shuwen/shuwen/model/base-model"
     }
     bool exists = runtime_file_exists(base_path)
     test_result result
@@ -307,7 +307,7 @@ func test_model_summary() test_result {
     print_header("[Test 7] Model Summary Report")
     string base_path = runtime_env_get("NEURX_BASE_MODEL_PATH")
     if base_path == "" {
-        base_path = "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
+        base_path = "/home/shuwen/shuwen/model/base-model"
     }
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH")
     if adapter_path == "" {

@@ -6,7 +6,7 @@ use neurx.runtime.io.{
 }
 
 func test_base_model() string {
-    string base_path = runtime_env_get("NEURX_BASE_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
+    string base_path = runtime_env_get("NEURX_BASE_MODEL_PATH", "/home/shuwen/shuwen/model/base-model")
     bool exists = runtime_file_exists(base_path)
     if !exists {
         return "✗ [loading] base_model_files: FAILED\n  → Base model directory not found: " + base_path
@@ -81,7 +81,7 @@ func test_output_directory() string {
 
 func test_model_summary() string {
     string result = "✓ [info] model_summary: PASSED"
-    result = result + "\n  → Base Model: Qwen2.5-0.5B-Instruct"
+    result = result + "\n  → Base Model: Language Model 0.5B Instruct"
     result = result + "\n  → LoRA Rank: 8"
     result = result + "\n  → LoRA Alpha: 16.0"
     result = result + "\n  → Target Modules: q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj"

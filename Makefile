@@ -822,7 +822,7 @@ posttrain-simulated: check-bash build-s-ir-runner
 	@echo ""
 build-lora-merge: check-bash
 	@mkdir -p '$(LORA_MERGE_BUILD_DIR)'
-	@$(CC) -std=c11 -O2 -wall -wextra \
+	@$(CC) -std=c11 -O2 -Wall -Wextra \
 		-o '$(LORA_MERGE_BIN)' \
 		'$(CURDIR_UNIX)/tools/lora_safetensors_merge.c'
 posttrain-merge-lora: check-bash build-s-ir-runner build-lora-merge
@@ -1754,30 +1754,30 @@ pretrain-bigram-gpu: build-cuda-bigram-bridge build-pretrain-manifest-s
 		'$(CUDA_TRAIN_BRIDGE_BUILD_DIR)/neurx_cuda_bigram_bridge'
 transformer-reference-test:
 	@mkdir -p artifacts/build/transformer_reference
-	@$(CXX) -O2 -std=c++17 -wall -wextra -werror \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		tests/transformer_reference.cpp -o artifacts/build/transformer_reference/transformer_reference
 	@artifacts/build/transformer_reference/transformer_reference
 adam-optimizer-test:
 	@mkdir -p artifacts/build/adam_optimizer
-	@$(CXX) -O2 -std=c++17 -wall -wextra -werror \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		tests/adam_optimizer_regression_test.cpp \
 		-o artifacts/build/adam_optimizer/adam_optimizer_regression_test
 	@artifacts/build/adam_optimizer/adam_optimizer_regression_test
 training-policy-test:
 	@mkdir -p artifacts/build/training_policy
-	@$(CXX) -O2 -std=c++17 -wall -wextra -werror \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		tests/training_policy_test.cpp \
 		-o artifacts/build/training_policy/training_policy_test
 	@artifacts/build/training_policy/training_policy_test
 tensor-runtime-native-test:
 	@mkdir -p artifacts/build/tensor_runtime_native
-	@$(CXX) -O2 -std=c++17 -wall -wextra -werror \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		tests/tensor_runtime_native_test.cpp runtime/native/tensor_runtime.cpp \
 		-o artifacts/build/tensor_runtime_native/tensor_runtime_native_test
 	@artifacts/build/tensor_runtime_native/tensor_runtime_native_test
 tensor-runtime-native-backends-build: check-nvcc
 	@mkdir -p artifacts/build/tensor_runtime_native
-	@$(CXX) -O2 -std=c++17 -wall -wextra -werror -c \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c \
 		runtime/native/cann_memory_backend.cpp \
 		-o artifacts/build/tensor_runtime_native/cann_memory_backend.o
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
@@ -1785,7 +1785,7 @@ tensor-runtime-native-backends-build: check-nvcc
 		-o artifacts/build/tensor_runtime_native/cuda_memory_backend.o
 model-runtime-native-test:
 	@mkdir -p artifacts/build/model_runtime_native
-	@$(CXX) -O2 -std=c++17 -wall -wextra -werror \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		tests/model_runtime_native_test.cpp \
 		runtime/model/json.cpp runtime/model/safetensors.cpp \
 		runtime/model/hf_model.cpp runtime/model/bpe_tokenizer.cpp \
@@ -1795,7 +1795,7 @@ model-runtime-native-test:
 	@artifacts/build/model_runtime_native/model_runtime_native_test
 tokenizer-hf-parity-test:
 	@mkdir -p artifacts/build/model_runtime_native
-	@$(CXX) -O2 -std=c++17 -wall -wextra -werror \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		tests/tokenizer_parity_probe.cpp runtime/model/json.cpp \
 		runtime/model/bpe_tokenizer.cpp -licui18n -licuuc -licudata \
 		-o artifacts/build/model_runtime_native/tokenizer_parity_probe
@@ -1805,7 +1805,7 @@ tokenizer-hf-parity-test:
 		artifacts/build/model_runtime_native/tokenizer_parity_probe "$$HF_MODEL_DIR"
 hf-checkpoint-level1-test:
 	@mkdir -p artifacts/build/model_runtime_native
-	@$(CXX) -O2 -std=c++17 -wall -wextra -werror \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		tests/hf_checkpoint_level1_probe.cpp runtime/model/json.cpp \
 		runtime/model/safetensors.cpp runtime/model/hf_model.cpp \
 		runtime/native/tensor_runtime.cpp \
@@ -1816,7 +1816,7 @@ hf-checkpoint-level1-test:
 		artifacts/build/model_runtime_native/hf_checkpoint_level1_probe "$$HF_MODEL_DIR"
 hf-decoder-cpu-parity-test:
 	@mkdir -p artifacts/build/model_runtime_native
-	@$(CXX) -O2 -std=c++17 -wall -wextra -werror \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		tests/hf_decoder_cpu_probe.cpp runtime/model/json.cpp \
 		runtime/model/safetensors.cpp runtime/model/hf_model.cpp \
 		runtime/model/decoder_cpu.cpp runtime/native/tensor_runtime.cpp \
@@ -1826,7 +1826,7 @@ hf-decoder-cpu-parity-test:
 		artifacts/build/model_runtime_native/hf_decoder_cpu_probe
 hf-kv-generation-parity-test:
 	@mkdir -p artifacts/build/model_runtime_native
-	@$(CXX) -O2 -std=c++17 -wall -wextra -werror \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		tests/hf_kv_generation_probe.cpp runtime/model/json.cpp \
 		runtime/model/safetensors.cpp runtime/model/hf_model.cpp \
 		runtime/model/decoder_cpu.cpp runtime/native/tensor_runtime.cpp \
@@ -1836,13 +1836,13 @@ hf-kv-generation-parity-test:
 		artifacts/build/model_runtime_native/hf_kv_generation_probe
 kv-cache-reference-test:
 	@mkdir -p artifacts/build/kv_cache
-	@$(CXX) -O2 -std=c++17 -wall -wextra -werror \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		tests/kv_cache_reference_test.cpp \
 		-o artifacts/build/kv_cache/kv_cache_reference_test
 	@artifacts/build/kv_cache/kv_cache_reference_test
 numeric-alignment-test:
 	@mkdir -p artifacts/build/numeric_alignment
-	@$(CXX) -O2 -std=c++17 -wall -wextra -werror \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		tests/numeric_alignment_probe.cpp runtime/native/quantization.cpp \
 		runtime/native/tensor_runtime.cpp \
 		-o artifacts/build/numeric_alignment/numeric_alignment_probe
@@ -1851,7 +1851,7 @@ numeric-alignment-test:
 		artifacts/build/numeric_alignment/numeric_alignment_probe
 inference-runtime-test:
 	@mkdir -p artifacts/build/inference_runtime
-	@$(CXX) -O2 -std=c++17 -wall -wextra -werror \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		tests/inference_runtime_test.cpp cann/inference/ascend_adapter.cpp \
 		cann/runtime/acl_runtime.cpp \
 		-ldl -o artifacts/build/inference_runtime/inference_runtime_test
@@ -1867,16 +1867,16 @@ serving-native-socket-test:
 	@echo "ℹ️  Replaces former C implementation"
 build-openai-gateway:
 	@mkdir -p artifacts/build/serving_native
-	@$(CC) -O2 -std=c11 -D_POSIX_C_SOURCE=200809L -wall -wextra -werror -c \
+	@$(CC) -O2 -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -Werror -c \
 		serving/native/serving_socket.c \
 		-o artifacts/build/serving_native/serving_socket.o
-	@$(CXX) -O2 -std=c++17 -wall -wextra -werror \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		serving/native/openai_gateway.cpp \
 		runtime/model/json.cpp runtime/model/bpe_tokenizer.cpp \
 		artifacts/build/serving_native/serving_socket.o \
 		-licui18n -licuuc -licudata \
 		-o artifacts/build/serving_native/neurx_openai_gateway
-	@$(CXX) -O2 -std=c++17 -wall -wextra -werror \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
 		tests/openai_gateway_fake_backend.cpp \
 		artifacts/build/serving_native/serving_socket.o \
 		-o artifacts/build/serving_native/openai_gateway_fake_backend
@@ -1923,13 +1923,13 @@ hf-decoder-cuda-build: check-nvcc
 	@mkdir -p artifacts/build/hf_decoder_cuda
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
 		cuda/hf_decoder_cuda.cu -o artifacts/build/hf_decoder_cuda/hf_decoder_cuda.o
-	@$(CXX) -O2 -std=c++17 -wall -wextra -werror -c runtime/model/json.cpp \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c runtime/model/json.cpp \
 		-o artifacts/build/hf_decoder_cuda/json.o
-	@$(CXX) -O2 -std=c++17 -wall -wextra -werror -c runtime/model/safetensors.cpp \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c runtime/model/safetensors.cpp \
 		-o artifacts/build/hf_decoder_cuda/safetensors.o
-	@$(CXX) -O2 -std=c++17 -wall -wextra -werror -c runtime/model/hf_model.cpp \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c runtime/model/hf_model.cpp \
 		-o artifacts/build/hf_decoder_cuda/hf_model.o
-	@$(CXX) -O2 -std=c++17 -wall -wextra -werror -c runtime/native/tensor_runtime.cpp \
+	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror -c runtime/native/tensor_runtime.cpp \
 		-o artifacts/build/hf_decoder_cuda/tensor_runtime.o
 hf-decoder-cuda-kernels-test: check-nvcc
 	@mkdir -p artifacts/build/hf_decoder_cuda
@@ -1952,7 +1952,7 @@ hf-decoder-cuda-parity-test: hf-decoder-cuda-build
 		"$$PYTORCH_PYTHON" tests/hf_decoder_cuda_parity.py \
 		artifacts/build/hf_decoder_cuda/hf_decoder_cuda_probe
 build-hf-cuda-backend: hf-decoder-cuda-build
-	@$(CC) -O2 -std=c11 -D_POSIX_C_SOURCE=200809L -wall -wextra -werror -c serving/native/serving_socket.c \
+	@$(CC) -O2 -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -Werror -c serving/native/serving_socket.c \
 		-o artifacts/build/hf_decoder_cuda/serving_socket.o
 	@$(CUDA_NVCC) -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
 		serving/native/hf_cuda_backend.cu \
