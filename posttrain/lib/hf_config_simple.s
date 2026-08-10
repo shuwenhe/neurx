@@ -9,7 +9,7 @@ struct hf_config {
 }
 
 func main() {
-    eprintln("HuggingFace Config Loader - Test Suite")
+    eprintln("hugging_face config loader - test suite")
     eprintln("")
     eprintln("Reading config file...")
     string config_path = "../../../model/Qwen2.5-0.5B-Instruct/config.json"

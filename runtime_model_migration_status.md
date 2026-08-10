@@ -1,4 +1,4 @@
-# Runtime/Model C++ → S Migration Status Report
+# runtime_model_cxx_to_s_migration_status_report
 
 **Date**: 2026-08-16  
 **Target**: Eliminate all C++ from `/home/shuwen/shuwen/neurx/runtime/model/`  
@@ -12,10 +12,10 @@ Comprehensive plan created to migrate **100% of C++ code** in `runtime/model/` t
 
 ### Current Progress
 - ✅ **Phase 1**: JSON Parser (json.s) - COMPLETE
-- ✅ **Phase 2**: HuggingFace Config (hf_config_func.s) - COMPLETE  
-- 🟡 **Phase 3**: SafeTensors Binary Parser (safetensors.s) - IN PROGRESS
-- 🟡 **Phase 3B**: Decoder CPU Model (decoder_cpu.s) - PARALLEL
-- ⏳ **Phase 4**: BPE Tokenizer (bpe_tokenizer.s) - PLANNED
+- ✅ **phase_2**: hugging_face_config (hf_config_func.s) - COMPLETE
+- 🟡 **phase_3**: safetensors_binary_parser (safetensors.s) - IN PROGRESS
+- 🟡 **phase_3b**: decoder_cpu_model (decoder_cpu.s) - PARALLEL
+- ⏳ **phase_4**: bpe_tokenizer (bpe_tokenizer.s) - PLANNED
 
 ---
 
@@ -63,7 +63,7 @@ Comprehensive plan created to migrate **100% of C++ code** in `runtime/model/` t
 ✓ All test cases pass
 ```
 
-### HuggingFace Config (Phase 2)  
+### hugging_face_config (phase_2)
 **File**: `/home/shuwen/shuwen/neurx/posttrain/lib/hf_config_func.s`  
 **Status**: ✅ **WORKING**
 
@@ -86,7 +86,7 @@ Comprehensive plan created to migrate **100% of C++ code** in `runtime/model/` t
 
 ## In Progress (Phase 3)
 
-### SafeTensors Binary Parser (Phase 3)
+### safetensors_binary_parser (phase_3)
 **File**: `/home/shuwen/shuwen/neurx/posttrain/lib/safetensors.s`  
 **Status**: 🔧 **SKELETON CREATED**
 
@@ -111,7 +111,7 @@ Comprehensive plan created to migrate **100% of C++ code** in `runtime/model/` t
 
 ## Planned (Phase 3B, 4)
 
-### Decoder CPU Model (Phase 3B)
+### decoder_cpu_model (phase_3b)
 **File**: `/home/shuwen/shuwen/neurx/posttrain/lib/decoder_cpu.s`  
 **Complexity**: ⭐⭐⭐⭐
 
@@ -125,7 +125,7 @@ Comprehensive plan created to migrate **100% of C++ code** in `runtime/model/` t
 - KV cache management
 - Token generation loop
 
-### BPE Tokenizer (Phase 4)
+### bpe_tokenizer (phase_4)
 **File**: `/home/shuwen/shuwen/neurx/posttrain/lib/bpe_tokenizer.s`  
 **Complexity**: ⭐⭐⭐⭐⭐
 
@@ -163,7 +163,7 @@ Comprehensive plan created to migrate **100% of C++ code** in `runtime/model/` t
 2. Extended type system (not available)
 3. Document limitations
 
-### Challenge 4: Unicode Support
+### challenge_4_unicode_support
 **Issue**: S lacks ICU/Unicode library  
 **Status**: ⚠️ BLOCKING tokenizer Phase 4  
 **Solution**: Keep C++ for tokenizer Unicode parts
@@ -274,7 +274,6 @@ Comprehensive plan created to migrate **100% of C++ code** in `runtime/model/` t
 
 ## Conclusion
 
-Clear path established to eliminate **all C++ from runtime/model**. Two phases (JSON, HF Config) proven working and verified. Remaining phases (SafeTensors, Decoder, Tokenizer) have detailed implementation plans with identified blockers and solutions.
+Clear path established to eliminate **all C++ from runtime/model**. Two phases (json, hf_config) proven working and verified. Remaining phases (safetensors, decoder_cpu, bpe_tokenizer) have detailed implementation plans with identified blockers and solutions.
 
 **Next immediate action**: Complete Phase 3 safetensors.s binary parser.
-
