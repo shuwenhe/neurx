@@ -88,10 +88,9 @@ func test_matmul_numeric() {
     int M = 4
     int N = 8
     int P = 4
-    
+
     [][]float A_mat = create_test_matrix(M, N, 1.0)
     [][]float B_mat = create_test_matrix(N, P, 0.5)
-    
 
     []float A = []float{cap: M * N}
     int i = 0
@@ -103,7 +102,7 @@ func test_matmul_numeric() {
         }
         i = i + 1
     }
-    
+
     []float B = []float{cap: N * P}
     i = 0
     while i < N {
@@ -114,17 +113,17 @@ func test_matmul_numeric() {
         }
         i = i + 1
     }
-    
+
     []float C = fast_matmul_flat_opt(A, B, M, N, P)
-    
+
     print("A (" + int_to_string(M) + "x" + int_to_string(N) + "): ")
     matrix_stats stats_a = compute_matrix_stats(A_mat)
     print("mean=" + float_to_string(stats_a.mean) + ", sample=" + float_to_string(stats_a.sample) + "\n")
-    
+
     print("B (" + int_to_string(N) + "x" + int_to_string(P) + "): ")
     matrix_stats stats_b = compute_matrix_stats(B_mat)
     print("mean=" + float_to_string(stats_b.mean) + ", sample=" + float_to_string(stats_b.sample) + "\n")
-    
+
     print("C = A @ B (" + int_to_string(M) + "x" + int_to_string(P) + "): ")
     print("[")
     int k = 0
@@ -148,10 +147,10 @@ func test_softmax_numeric() {
     logits[5] = -1.0
     logits[6] = 0.0
     logits[7] = 2.5
-    
+
     []float probs = []float{cap: len_x}
     fast_softmax(logits, probs, len_x)
-    
+
     print("logits: [")
     int i = 0
     while i < len_x {
@@ -160,7 +159,7 @@ func test_softmax_numeric() {
         i = i + 1
     }
     print("]\n")
-    
+
     print("probs:  [")
     i = 0
     float sum_probs = 0.0
@@ -182,7 +181,7 @@ func test_gelu_numeric() {
     test_vals[2] = 0.0
     test_vals[3] = 0.5
     test_vals[4] = 2.0
-    
+
     print("GELU outputs:\n")
     int i = 0
     while i < 5 {
@@ -196,14 +195,13 @@ func test_attention_numeric() {
     print("\n=== SCALED DOT-PRODUCT ATTENTION TEST ===\n")
     int seq_len = 4
     int head_dim = 8
-    
 
     [][]float Q_mat = create_test_matrix(seq_len, head_dim, 0.1)
     [][]float K_mat = create_test_matrix(seq_len, head_dim, 0.1)
-    
+
     []float Q = []float{cap: seq_len * head_dim}
     []float K = []float{cap: seq_len * head_dim}
-    
+
     int i = 0
     while i < seq_len {
         int j = 0
@@ -214,11 +212,10 @@ func test_attention_numeric() {
         }
         i = i + 1
     }
-    
 
     float scale = 1.0 / pow_f(float(head_dim), 0.5)
     print("scale = 1/sqrt(" + int_to_string(head_dim) + ") = " + float_to_string(scale) + "\n")
-    
+
     print("\nAttention scores (with causal mask):\n")
     int qi = 0
     while qi < seq_len {
@@ -244,11 +241,11 @@ func main() {
     print("║  NeurX Numeric Path Verification                             ║\n")
     print("║  Testing: matmul, softmax, GELU, attention                   ║\n")
     print("╚════════════════════════════════════════════════════════════════╝\n")
-    
+
     test_matmul_numeric()
     test_softmax_numeric()
     test_gelu_numeric()
     test_attention_numeric()
-    
+
     print("\n=== VERIFICATION COMPLETE ===\n")
 }

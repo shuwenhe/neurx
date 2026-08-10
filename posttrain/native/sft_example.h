@@ -123,4 +123,4 @@ inline sft_example load_sft_example(const std::string& model_dir, const std::str
   return example;
 }
 
-}  // namespace neurx::posttrain::native
+}

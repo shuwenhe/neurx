@@ -1,13 +1,12 @@
-import sys 
+import sys
 
-import json 
+import json
 
-import bz2 
+import bz2
 
 import xml .etree .ElementTree as element_tree
 
 from pathlib import Path as path
-
 
 def extract_pages (xml_path ,max_pages =0 ):
 
@@ -15,7 +14,7 @@ def extract_pages (xml_path ,max_pages =0 ):
 
     with bz2 .open (xml_path ,'rt',encoding ='utf-8')as f :
 
-        count =0 
+        count =0
 
         for event ,elem in element_tree .iterparse (f ,events =('end',)):
 
@@ -38,7 +37,7 @@ def extract_pages (xml_path ,max_pages =0 ):
                         "meta":{"source":"wikipedia","title":title }
                         }
 
-                        count +=1 
+                        count +=1
 
                         if count %1000 ==0 :
 
@@ -46,12 +45,11 @@ def extract_pages (xml_path ,max_pages =0 ):
 
                         if max_pages >0 and count >=max_pages :
 
-                            break 
+                            break
 
                 elem .clear ()
 
     print (f"[*] Total extracted: {count } pages")
-
 
 def main ():
 
@@ -65,7 +63,7 @@ def main ():
 
     output_file =sys .argv [2 ]
 
-    max_pages =int (sys .argv [3 ])if len (sys .argv )>3 else 0 
+    max_pages =int (sys .argv [3 ])if len (sys .argv )>3 else 0
 
     path (output_file ).parent .mkdir (parents =True ,exist_ok =True )
 
@@ -78,7 +76,6 @@ def main ():
             out .write ('\\n')
 
     print (f"[✓] Saved to {output_file }")
-
 
 if __name__ =='__main__':
 

@@ -36,7 +36,7 @@ func enqueue_request(request_queue queue, request_item item) bool {
         print("error: request queue full\n")
         return false
     }
-    
+
     queue.items = append(queue.items, item)
     return true
 }
@@ -52,15 +52,15 @@ func dequeue_request(request_queue queue) request_item {
             retry_count: 0,
         }
     }
-    
+
     item := queue.items[0]
-    
+
     new_items := []request_item{}
     for i := 1; i < len(queue.items); i++ {
         new_items = append(new_items, queue.items[i])
     }
     queue.items = new_items
-    
+
     return item
 }
 
@@ -75,7 +75,7 @@ func peek_request(request_queue queue) request_item {
             retry_count: 0,
         }
     }
-    
+
     return queue.items[0]
 }
 
@@ -119,18 +119,18 @@ func prioritize_queue(request_queue queue) {
 
 func remove_expired_requests(request_queue queue, float current_time_ms) {
     new_items := []request_item{}
-    
+
     for i := 0; i < len(queue.items); i++ {
         item := queue.items[i]
         elapsed := current_time_ms - item.timestamp_ms
-        
+
         if elapsed < float(queue.timeout_ms) {
             new_items = append(new_items, item)
         } else {
             print("removed expired request: " + item.request_id + "\n")
         }
     }
-    
+
     queue.items = new_items
 }
 
@@ -138,7 +138,7 @@ func retry_failed_request(request_queue queue, string request_id) bool {
     for i := 0; i < len(queue.items); i++ {
         if queue.items[i].request_id == request_id {
             queue.items[i].retry_count = queue.items[i].retry_count + 1
-            
+
             if queue.items[i].retry_count <= 3 {
                 queue.items[i].timestamp_ms = 0.0
                 return true
@@ -148,7 +148,7 @@ func retry_failed_request(request_queue queue, string request_id) bool {
             }
         }
     }
-    
+
     return false
 }
 
@@ -158,7 +158,7 @@ func find_request_by_id(request_queue queue, string request_id) request_item {
             return queue.items[i]
         }
     }
-    
+
     return request_item{
         request_id: "",
         prompt: "",
@@ -171,21 +171,21 @@ func find_request_by_id(request_queue queue, string request_id) request_item {
 
 func batch_requests(request_queue queue, int batch_size) [][]request_item {
     batches := [][]request_item{}
-    
+
     for i := 0; i < len(queue.items); i = i + batch_size {
         end := i + batch_size
         if end > len(queue.items) {
             end = len(queue.items)
         }
-        
+
         batch := []request_item{}
         for j := i; j < end; j++ {
             batch = append(batch, queue.items[j])
         }
-        
+
         batches = append(batches, batch)
     }
-    
+
     return batches
 }
 
@@ -194,7 +194,7 @@ func print_queue_info(request_queue queue) {
     print("   Total items: " + int_to_string(len(queue.items)) + "\n")
     print("   Max size: " + int_to_string(queue.max_queue_size) + "\n")
     print("   Utilization: " + int_to_string((len(queue.items) * 100) / queue.max_queue_size) + "%\n")
-    
+
     if len(queue.items) > 0 {
         print("   Next request ID: " + queue.items[0].request_id + "\n")
     }

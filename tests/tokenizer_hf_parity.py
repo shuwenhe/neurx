@@ -4,7 +4,6 @@ import sys
 
 from tokenizers import Tokenizer
 
-
 def main() -> int:
     if len(sys.argv) != 3:
         print("usage: tokenizer_hf_parity.py PROBE MODEL_DIR", file=sys.stderr)
@@ -30,7 +29,6 @@ def main() -> int:
             return 1
     print(f"tokenizer parity PASS ({len(samples)} cases)")
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

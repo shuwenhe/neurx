@@ -321,17 +321,17 @@ func run_training(training_config cfg) int {
     println("[LoRA config] rank=" + int_to_str(cfg.lora_rank) + ", alpha=" + alpha_text)
     println("[Device] " + cfg.device)
     println("")
-    
+
     if !runtime_file_exists(cfg.model_path) {
         println("[ERROR] Model path not found: " + cfg.model_path)
         return 1
     }
-    
+
     if !runtime_file_exists(cfg.data_file) {
         println("[ERROR] Data file not found: " + cfg.data_file)
         return 1
     }
-    
+
     println("[Model] Validated path: " + cfg.model_path)
     println("[Data] Validated path: " + cfg.data_file)
     println("[Config] epochs=" + int_to_str(cfg.epochs) + ", batch_size=" + int_to_str(cfg.batch_size))
@@ -470,14 +470,14 @@ func run_training(training_config cfg) int {
 
 func main() {
     training_config cfg = load_config()
-    
+
     int validation_result = validate_config(cfg)
     if validation_result != 0 {
         return
     }
-    
+
     int training_result = run_training(cfg)
-    
+
     if training_result == 0 {
         println("{")
         println("  \"status\": \"success\",")

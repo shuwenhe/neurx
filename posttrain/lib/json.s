@@ -54,26 +54,26 @@ func parse_false(string text, int pos) int {
 func parse_number(string text, int pos) int {
     int start = pos
     int current = pos
-    
+
     if current < len(text) && byte(text[current]) == byte(45) {
         current = current + 1
     }
-    
+
     while current < len(text) && byte(text[current]) >= byte(48) && byte(text[current]) <= byte(57) {
         current = current + 1
     }
-    
+
     if current < len(text) && byte(text[current]) == byte(46) {
         current = current + 1
         while current < len(text) && byte(text[current]) >= byte(48) && byte(text[current]) <= byte(57) {
             current = current + 1
         }
     }
-    
+
     if start == current {
         return -1
     }
-    
+
     return current
 }
 
@@ -81,7 +81,7 @@ func parse_string(string text, int pos) int {
     if pos >= len(text) || byte(text[pos]) != byte(34) {
         return -1
     }
-    
+
     int current = pos + 1
     while current < len(text) {
         byte ch = byte(text[current])
@@ -94,7 +94,7 @@ func parse_string(string text, int pos) int {
             current = current + 1
         }
     }
-    
+
     return -1
 }
 
@@ -102,14 +102,14 @@ func parse_array(string text, int pos) int {
     if pos >= len(text) || byte(text[pos]) != byte(91) {
         return -1
     }
-    
+
     int current = pos + 1
     current = skip_whitespace(text, current)
-    
+
     if current < len(text) && byte(text[current]) == byte(93) {
         return current + 1
     }
-    
+
     bool first = true
     while true {
         if !first {
@@ -119,19 +119,19 @@ func parse_array(string text, int pos) int {
             current = current + 1
         }
         first = false
-        
+
         int new_pos = parse_value(text, current)
         if new_pos == -1 {
             return -1
         }
         current = new_pos
-        
+
         current = skip_whitespace(text, current)
-        
+
         if current >= len(text) {
             return -1
         }
-        
+
         byte next_ch = byte(text[current])
         if next_ch == byte(93) {
             return current + 1
@@ -147,14 +147,14 @@ func parse_object(string text, int pos) int {
     if pos >= len(text) || byte(text[pos]) != byte(123) {
         return -1
     }
-    
+
     int current = pos + 1
     current = skip_whitespace(text, current)
-    
+
     if current < len(text) && byte(text[current]) == byte(125) {
         return current + 1
     }
-    
+
     bool first = true
     while true {
         if !first {
@@ -164,38 +164,38 @@ func parse_object(string text, int pos) int {
             current = current + 1
         }
         first = false
-        
+
         current = skip_whitespace(text, current)
-        
+
         if current >= len(text) || byte(text[current]) != byte(34) {
             return -1
         }
-        
+
         int new_pos = parse_string(text, current)
         if new_pos == -1 {
             return -1
         }
         current = new_pos
-        
+
         current = skip_whitespace(text, current)
-        
+
         if current >= len(text) || byte(text[current]) != byte(58) {
             return -1
         }
         current = current + 1
-        
+
         new_pos = parse_value(text, current)
         if new_pos == -1 {
             return -1
         }
         current = new_pos
-        
+
         current = skip_whitespace(text, current)
-        
+
         if current >= len(text) {
             return -1
         }
-        
+
         byte next_ch = byte(text[current])
         if next_ch == byte(125) {
             return current + 1
@@ -209,13 +209,13 @@ func parse_object(string text, int pos) int {
 
 func parse_value(string text, int pos) int {
     int current = skip_whitespace(text, pos)
-    
+
     if current >= len(text) {
         return -1
     }
-    
+
     int ch_int = int(byte(text[current]))
-    
+
     if ch_int == 110 {
         return parse_null(text, current)
     }
@@ -237,7 +237,7 @@ func parse_value(string text, int pos) int {
     if ch_int == 123 {
         return parse_object(text, current)
     }
-    
+
     return -1
 }
 
@@ -246,7 +246,7 @@ func parse(string text) bool {
     if pos == -1 {
         return false
     }
-    
+
     int final_pos = skip_whitespace(text, pos)
     if final_pos != len(text) {
     }

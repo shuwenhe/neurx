@@ -2,9 +2,6 @@ package neurx.posttrain.model.decoder_cpu
 
 use std.io.eprintln
 
-// CPU-based inference engine for transformer models
-// Implements forward pass for text generation
-
 struct DecoderLayerKVCache {
     []float key
     []float value
@@ -43,28 +40,25 @@ struct TransformerConfig {
     float rope_theta
 }
 
-// Embedding layer forward pass
 func embedding_forward([]float weight, int token_id, int hidden_size) []float {
     []float result
     int start = token_id * hidden_size
     int i = 0
     while i < hidden_size {
         if start + i < len(weight) {
-            // TODO: Copy weight[start+i] to result
+
         }
         i = i + 1
     }
     return result
 }
 
-// RoPE (Rotary Position Embedding) forward pass
 func rope_forward([]float x, int pos, int dim, float rope_theta) []float {
     []float result
-    // TODO: Apply rotary positional embeddings
+
     return result
 }
 
-// Multi-head attention forward pass
 func attention_forward(
     []float hidden,
     []float q_weight,
@@ -77,32 +71,14 @@ func attention_forward(
     int layer_id
 ) []float {
     []float result
-    
-    // Project Q, K, V
-    []float q = hidden  // TODO: q_proj(hidden)
-    []float k = hidden  // TODO: k_proj(hidden)
-    []float v = hidden  // TODO: v_proj(hidden)
-    
-    // Apply RoPE
-    // TODO: rope_forward for Q and K
-    
-    // Update KV cache
-    // TODO: cache.layers[layer_id].key = k
-    // TODO: cache.layers[layer_id].value = v
-    
-    // Compute attention scores
-    // TODO: scores = softmax(Q @ K^T / sqrt(head_dim))
-    
-    // Apply attention to values
-    // TODO: attn_output = scores @ V
-    
-    // Project output
-    // TODO: result = o_proj(attn_output)
-    
+
+    []float q = hidden
+    []float k = hidden
+    []float v = hidden
+
     return result
 }
 
-// Feed-forward network forward pass
 func mlp_forward(
     []float hidden,
     []float gate_weight,
@@ -112,27 +88,19 @@ func mlp_forward(
     int intermediate_size
 ) []float {
     []float result
-    
-    // Gate projection
-    []float gate = hidden  // TODO: gate_proj(hidden)
-    
-    // Up projection
-    []float up = hidden  // TODO: up_proj(hidden)
-    
-    // Element-wise multiply (GELU-style gating)
-    // TODO: gated = gate * up (element-wise)
-    
-    // Down projection
-    []float down = gate  // TODO: down_proj(gated)
-    
+
+    []float gate = hidden
+
+    []float up = hidden
+
+    []float down = gate
+
     return down
 }
 
-// RMS normalization
 func rms_norm_forward([]float x, []float weight, float epsilon) []float {
     []float result
-    
-    // Compute RMS
+
     float rms = 0.0
     int i = 0
     while i < len(x) {
@@ -140,13 +108,10 @@ func rms_norm_forward([]float x, []float weight, float epsilon) []float {
         i = i + 1
     }
     rms = rms / float(len(x))
-    
-    // TODO: Apply RMS norm and weight scaling
-    
+
     return result
 }
 
-// Single transformer block forward pass
 func transformer_block_forward(
     []float hidden,
     []float attn_norm_weight,
@@ -166,28 +131,26 @@ func transformer_block_forward(
     DecoderKVCache cache,
     int layer_id
 ) []float {
-    // Attention block with residual
+
     []float attn_input = hidden
     []float attn_norm_out = rms_norm_forward(attn_input, attn_norm_weight, rms_norm_eps)
     []float attn_out = attention_forward(
         attn_norm_out, q_weight, k_weight, v_weight, o_weight,
         num_heads, head_dim, cache, layer_id
     )
-    []float after_attn = attn_input  // TODO: residual add: attn_input + attn_out
-    
-    // MLP block with residual
+    []float after_attn = attn_input
+
     []float mlp_input = after_attn
     []float mlp_norm_out = rms_norm_forward(mlp_input, mlp_norm_weight, rms_norm_eps)
     []float mlp_out = mlp_forward(
         mlp_norm_out, gate_weight, up_weight, down_weight,
         hidden_size, intermediate_size
     )
-    []float output = mlp_input  // TODO: residual add: mlp_input + mlp_out
-    
+    []float output = mlp_input
+
     return output
 }
 
-// Full model forward pass for inference
 func model_forward(
     int token_id,
     []float embedding_weight,
@@ -198,44 +161,34 @@ func model_forward(
     DecoderKVCache cache
 ) DecoderTrace {
     DecoderTrace trace
-    
-    // Embedding
+
     []float hidden = embedding_forward(embedding_weight, token_id, config.hidden_size)
     trace.embedding = hidden
-    
-    // Transformer layers
+
     int layer = 0
     while layer < config.num_layers {
-        // TODO: Extract layer weights
-        []float layer_out = hidden  // TODO: transformer_block_forward(...)
+
+        []float layer_out = hidden
         hidden = layer_out
-        
+
         DecoderLayerTrace layer_trace
         layer_trace.hidden = hidden
-        trace.layers = trace.layers  // TODO: append
-        
+        trace.layers = trace.layers
+
         layer = layer + 1
     }
-    
-    // Final normalization
+
     []float final_hidden = rms_norm_forward(hidden, final_norm_weight, config.rms_norm_eps)
-    
-    // Output projection (language model head)
-    []float logits = final_hidden  // TODO: lm_head_weight @ final_hidden
+
+    []float logits = final_hidden
     trace.logits = logits
-    
+
     return trace
 }
 
-// Load model from directory
 func load_decoder_model(string directory) interface {
     eprintln("Loading decoder model from: " + directory)
-    
-    // TODO: Load model weights and config
-    // 1. Load config.json
-    // 2. Load model.safetensors or model_*.safetensors files
-    // 3. Construct model weights
-    
+
     interface model
     return model
 }

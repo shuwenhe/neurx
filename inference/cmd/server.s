@@ -10,46 +10,46 @@ func main() {
     print("║    NeurX Production Inference Server       ║\n")
     print("║         Pure S Language Implementation      ║\n")
     print("╚════════════════════════════════════════════╝\n\n")
-    
+
     print("🚀 Initializing production server...\n")
-    
+
     string host = "0.0.0.0"
     int port = 8000
-    
+
     print("📊 Configuration:\n")
     print("   Host: " + host + "\n")
     print("   Port: " + int_to_string(port) + "\n")
     print("   Backend: Native CPU (6 threads)\n")
     print("   Model: /home/shuwen/shuwen/posttrain/model.safetensors\n")
     print("   Language: Pure S (No Python, No Shell)\n\n")
-    
+
     server := create_http_server(host, port)
-    
+
     if server.listen_fd < 0 {
         print("❌ Failed to start server\n")
         return
     }
-    
+
     print("✅ Server started successfully!\n\n")
-    
+
     print("📡 Available Endpoints:\n")
     print("   POST   /api/generate          - Text generation\n")
     print("   POST   /api/chat/completions  - Chat endpoint (OpenAI compatible)\n")
     print("   GET    /api/models            - List available models\n")
     print("   GET    /api/health            - Health check\n")
     print("   POST   /api/embeddings        - Generate embeddings\n\n")
-    
+
     print("🧪 Quick Test:\n")
     print("   curl -X POST http://localhost:8000/api/generate \\\n")
     print("     -H 'Content-Type: application/json' \\\n")
     print("     -d '{\"prompt\": \"医学术语\", \"max_tokens\": 100}'\n\n")
-    
+
     print("📝 Type 'quit' to shutdown server\n")
     print("─────────────────────────────────────────────\n")
     print("Server is ready to accept requests...\n\n")
-    
+
     handle_requests(server)
-    
+
     close_http_server(server)
     print("✅ Server shutdown complete\n")
 }
@@ -57,20 +57,20 @@ func main() {
 func handle_requests(http_server server) {
     while server.running {
         prompt := __host_readline("neurx> ")
-        
+
         if prompt == "quit" || prompt == "exit" {
             break
         }
-        
+
         if len(prompt) == 0 {
             continue
         }
-        
+
         if prompt == "status" {
             print_server_status()
             continue
         }
-        
+
         if prompt == "help" {
             print_help()
             continue

@@ -9,26 +9,26 @@ func main() {
     print("Backend: native CPU, threads=6, persistent KV-cache\n")
     print("Python: disabled\n\n")
     print("Type /exit to quit, /reset to clear history.\n\n")
-    
+
     string model_dir = "/home/shuwen/shuwen/posttrain"
-    
+
     if !__host_file_exists(model_dir + "/config.json") {
         print("error: config.json not found\n")
         return
     }
-    
+
     while true {
         string prompt = __host_readline("User: ")
-        
+
         if prompt == "/exit" || prompt == "exit" || prompt == "quit" {
             break
         }
-        
+
         if prompt == "/reset" {
             print("[Session cleared]\n")
             continue
         }
-        
+
         if len(prompt) > 0 {
             print("Assistant: Full inference pipeline (6 steps):\n")
             print("[1] Tokenize: text → token IDs (BPE tokenizer)\n")

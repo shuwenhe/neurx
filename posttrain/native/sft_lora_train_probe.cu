@@ -156,7 +156,7 @@ void publish_file(const std::filesystem::path& temporary,
   }
 }
 
-}  // namespace
+}
 
 int main(int argc, char** argv) {
   if (argc == 3 && std::string(argv[1]) == "--checkpoint-self-test") {

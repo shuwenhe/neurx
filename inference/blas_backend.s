@@ -14,7 +14,6 @@ func blas_sgemm(
     float alpha,
     float beta
 ) []float {
-    
 
     return blas_sgemm_native_s(A, M, K, B, K2, N, C, M2, N2, alpha, beta)
 }
@@ -27,7 +26,6 @@ func blas_sgemm_native_s(
 ) []float {
 
     if K != K2 || M != M2 || N != N2 { return C }
-    
 
     []float out = []float{cap: M * N}
     int i = 0
@@ -35,7 +33,6 @@ func blas_sgemm_native_s(
         out[i] = C[i] * beta
         i = i + 1
     }
-    
 
     int m = 0
     while m < M {
@@ -54,7 +51,7 @@ func blas_sgemm_native_s(
         }
         m = m + 1
     }
-    
+
     out
 }
 
@@ -113,7 +110,6 @@ func get_default_blas_config() blas_config {
 }
 
 func benchmark_blas_gemm(int M, int K, int N) float {
-    
 
     0.0
 }

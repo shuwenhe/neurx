@@ -290,7 +290,7 @@ func main() {
     string device_requested = device_type
     string actual_backend = "CPU"
     string cuda_status = ""
-    
+
     if device_requested == "cuda" || device_requested == "gpu" {
         cuda_status = "unavailable (stub implementation)"
         actual_backend = "CPU (CUDA Backend not yet implemented)"
@@ -299,7 +299,7 @@ func main() {
         cuda_status = "unavailable (not implemented)"
         actual_backend = "CPU (NPU Backend not yet implemented)"
     }
-    
+
     print("NeurX production S inference engine\n")
     print("Model: " + model + "/model.safetensors\n")
     print("Actual Backend: " + actual_backend + ", threads=" + threads + ", persistent KV-cache\n")

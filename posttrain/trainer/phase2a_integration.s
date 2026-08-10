@@ -101,7 +101,7 @@ func run_phase2a_training_pipeline(training_config cfg) training_result {
     println("[Phase 2A] Complete SFT Training Pipeline")
     println("====================================================")
     println("")
-    
+
     println("[Step 1/6] Validating training configuration...")
     println("  Model Path: " + cfg.model_path)
     println("  Data File: " + cfg.data_file)
@@ -113,7 +113,7 @@ func run_phase2a_training_pipeline(training_config cfg) training_result {
     println("  LoRA Alpha: " + float_to_str(cfg.lora_alpha, 1))
     println("  Device: " + cfg.device)
     println("")
-    
+
     if !runtime_file_exists(cfg.model_path) {
         training_result result
         result.exit_code = 1
@@ -122,7 +122,7 @@ func run_phase2a_training_pipeline(training_config cfg) training_result {
         return result
     }
     println("  ✓ Model path validated")
-    
+
     if !runtime_file_exists(cfg.data_file) {
         training_result result
         result.exit_code = 1
@@ -132,7 +132,7 @@ func run_phase2a_training_pipeline(training_config cfg) training_result {
     }
     println("  ✓ Data file validated")
     println("")
-    
+
     println("[Step 2/6] Creating output directory structure...")
     runtime_command_result dir_result = runtime_make_dirs(cfg.output_dir)
     if !dir_result.ok {
@@ -144,7 +144,7 @@ func run_phase2a_training_pipeline(training_config cfg) training_result {
     }
     println("  ✓ Output directory created: " + cfg.output_dir)
     println("")
-    
+
     println("[Step 3/6] Initializing LoRA adapters...")
     int hidden_size = 896
     int lora_total_params = cfg.lora_rank * hidden_size * 7 * 24
@@ -152,7 +152,7 @@ func run_phase2a_training_pipeline(training_config cfg) training_result {
     println("  Target Modules: " + cfg.target_modules)
     println("  ✓ LoRA adapters initialized")
     println("")
-    
+
     println("[Step 4/6] Loading model weights and tokenizer...")
     println("  Model: Language Model 0.5B Instruct")
     println("  Hidden Size: 896")
@@ -161,49 +161,49 @@ func run_phase2a_training_pipeline(training_config cfg) training_result {
     println("  ✓ Model weights loaded (1.2GB)")
     println("  ✓ Tokenizer loaded (vocab=151643)")
     println("")
-    
+
     println("[Step 5/6] Starting training loop...")
     println("  Total Steps: " + int_to_str(cfg.epochs * 100))
     println("  Warmup Steps: " + int_to_str((cfg.epochs * 100) / 10))
     println("")
-    
+
     int epoch = 0
     float best_loss = 999.9
     float current_loss = 2.5
-    
+
     while epoch < cfg.epochs {
         println("[Epoch " + int_to_str(epoch + 1) + "/" + int_to_str(cfg.epochs) + "]")
-        
+
         int step = 0
         int steps_per_epoch = 10
         while step < steps_per_epoch {
             int global_step = epoch * steps_per_epoch + step + 1
-            
+
             current_loss = current_loss - 0.12
             if current_loss < 0.5 { current_loss = 0.5 }
-            
+
             if current_loss < best_loss {
                 best_loss = current_loss
             }
-            
+
             if (step + 1) == ((step + 1) / 5) * 5 {
                 println("  [Step " + int_to_str(global_step) + "] Loss: " + float_to_str(current_loss, 4) + " | Best: " + float_to_str(best_loss, 4))
             }
-            
+
             step = step + 1
         }
-        
+
         epoch = epoch + 1
     }
     println("")
-    
+
     println("[Step 6/6] Saving trained adapters...")
     println("  Saving: adapter_model.safetensors")
     println("  Saving: adapter_config.json")
     println("  Saving: training_state.json")
     println("  ✓ Adapters saved to: " + cfg.output_dir)
     println("")
-    
+
     println("====================================================")
     println("[Phase 2A] Training Pipeline Complete")
     println("====================================================")
@@ -212,7 +212,7 @@ func run_phase2a_training_pipeline(training_config cfg) training_result {
     println("Total Epochs: " + int_to_str(cfg.epochs))
     println("✓ Model adapters ready for inference")
     println("")
-    
+
     training_result result
     result.exit_code = 0
     result.status = "success"
@@ -222,7 +222,7 @@ func run_phase2a_training_pipeline(training_config cfg) training_result {
 
 func run_phase2a_training_entry_point(training_config cfg) int {
     training_result result = run_phase2a_training_pipeline(cfg)
-    
+
     if result.exit_code == 0 {
         println("[✓] " + result.message)
         return 0

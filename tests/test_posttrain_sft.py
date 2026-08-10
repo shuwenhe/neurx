@@ -8,26 +8,21 @@ import unittest
 
 from pathlib import Path as path
 
-
-
 SCRIPT =path (__file__ ).parents [1 ]/"posttrain"/"trainer"/"train_sft.py"
 
 SPEC =importlib .util .spec_from_file_location ("train_sft",SCRIPT )
 
 MODULE =importlib .util .module_from_spec (SPEC )
 
-assert SPEC .loader is not None 
+assert SPEC .loader is not None
 
 SPEC .loader .exec_module (MODULE )
 
-
-
 class fake_tokenizer :
 
-    chat_template =None 
+    chat_template =None
 
-    eos_token_id =99 
-
+    eos_token_id =99
 
     def __call__ (self ,text ,add_special_tokens ):
 
@@ -35,12 +30,9 @@ class fake_tokenizer :
 
         return {"input_ids":prefix +[2 +index for index ,_ in enumerate (text .split ())]}
 
-
-
 class fake_chat_tokenizer (fake_tokenizer ):
 
     chat_template ="template"
-
 
     def apply_chat_template (self ,messages ,tokenize ,add_generation_prompt ):
 
@@ -55,8 +47,6 @@ class fake_chat_tokenizer (fake_tokenizer ):
             ids .append (30 )
 
         return {"input_ids":ids ,"attention_mask":[1 ]*len (ids )}
-
-
 
 class posttrain_data_test (unittest .test_case ):
 
@@ -82,7 +72,6 @@ class posttrain_data_test (unittest .test_case ):
 
         self .assert_greater (sum (label !=MODULE .IGNORE_INDEX for label in example .labels ),1 )
 
-
     def test_pretokenized_record_preserves_response (self ):
 
         record ={"input_ids":list (range (10 )),"labels":[-100 ]*6 +list (range (6 ,10 ))}
@@ -92,7 +81,6 @@ class posttrain_data_test (unittest .test_case ):
         self .assert_equal (example .input_ids ,[4 ,5 ,6 ,7 ,8 ,9 ])
 
         self .assert_equal (example .labels ,[-100 ,-100 ,6 ,7 ,8 ,9 ])
-
 
     def test_chat_template_batch_encoding_is_supported (self ):
 
@@ -105,7 +93,6 @@ class posttrain_data_test (unittest .test_case ):
         self .assert_greater (sum (label ==MODULE .IGNORE_INDEX for label in example .labels ),0 )
 
         self .assert_greater (sum (label !=MODULE .IGNORE_INDEX for label in example .labels ),0 )
-
 
     def test_jsonl_and_json_array_are_streamed (self ):
 
@@ -124,8 +111,6 @@ class posttrain_data_test (unittest .test_case ):
             self .assert_equal (list (MODULE .iter_json_records (jsonl )),records )
 
             self .assert_equal (list (MODULE .iter_json_records (array )),records )
-
-
 
 if __name__ =="__main__":
 

@@ -19,7 +19,7 @@ void print_prefix(const char* name, const std::vector<T>& values, std::size_t li
   std::cout << "]\n";
 }
 
-}  // namespace
+}
 
 int main(int argc, char** argv) {
   if (argc != 4) {

@@ -122,7 +122,7 @@ void write_number(void* data, d_type dtype, int64_t index, double value) {
   throw std::runtime_error("unsupported tensor dtype");
 }
 
-}  // namespace
+}
 
 const char* dtype_name(d_type dtype) {
   static const char* names[] = {"BOOL", "U8", "I8", "I16", "I32", "I64", "F16", "BF16", "F32", "F64"};
@@ -368,4 +368,4 @@ tensor dispatcher::execute(const std::string& operation, const std::vector<tenso
 
 void dispatcher::register_builtin_cpu_kernels() { cpu_kernels_registered_ = true; }
 
-}  // namespace neurx::runtime::native
+}

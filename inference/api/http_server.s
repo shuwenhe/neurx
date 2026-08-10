@@ -23,25 +23,25 @@ struct http_response {
 
 func parse_http_request(string raw_request) http_request {
     lines := split_string(raw_request, "\n")
-    
+
     if len(lines) == 0 {
         return http_request{method: "", path: "", headers: [], body: ""}
     }
-    
+
     request_line := lines[0]
     parts := split_string(request_line, " ")
-    
+
     method := ""
     path := "/"
-    
+
     if len(parts) >= 2 {
         method = parts[0]
         path = parts[1]
     }
-    
+
     headers := []string{}
     body_start := 0
-    
+
     for i := 1; i < len(lines); i++ {
         line := lines[i]
         if len(line) == 0 {
@@ -50,12 +50,12 @@ func parse_http_request(string raw_request) http_request {
         }
         headers = append(headers, line)
     }
-    
+
     body := ""
     if body_start < len(lines) {
         body = lines[body_start]
     }
-    
+
     return http_request{
         method: method,
         path: path,
@@ -69,11 +69,11 @@ func format_http_response(http_response resp) string {
     response = response + "Content-Type: application/json\r\n"
     response = response + "Content-Length: " + int_to_string(len(resp.body)) + "\r\n"
     response = response + "Connection: close\r\n"
-    
+
     for i := 0; i < len(resp.headers); i++ {
         response = response + resp.headers[i] + "\r\n"
     }
-    
+
     response = response + "\r\n" + resp.body
     return response
 }
@@ -99,11 +99,11 @@ func string_at_index(string s, int idx) string {
 func split_string(string s, string sep) []string {
     result := []string{}
     if len(s) == 0 { return result }
-    
+
     current := ""
     for i := 0; i < len(s); i++ {
         current = current + string(s[i])
-        
+
         if i+len(sep) <= len(s) && s[i:i+len(sep)] == sep {
             if len(current) > len(sep) {
                 result = append(result, current[0:len(current)-len(sep)])
@@ -114,11 +114,11 @@ func split_string(string s, string sep) []string {
             i = i + len(sep) - 1
         }
     }
-    
+
     if len(current) > 0 {
         result = append(result, current)
     }
-    
+
     return result
 }
 
@@ -131,28 +131,28 @@ struct http_server {
 
 func create_http_server(string host, int port) http_server {
     listen_fd := __sys_socket(2, 1, 0)
-    
+
     if listen_fd < 0 {
         print("error: failed to create socket\n")
         return http_server{listen_fd: -1, port: port, host: host, running: false}
     }
-    
+
     bind_result := __sys_bind(listen_fd, host, port)
     if bind_result < 0 {
         print("error: failed to bind socket\n")
         __sys_close(listen_fd)
         return http_server{listen_fd: -1, port: port, host: host, running: false}
     }
-    
+
     listen_result := __sys_listen(listen_fd, 128)
     if listen_result < 0 {
         print("error: failed to listen\n")
         __sys_close(listen_fd)
         return http_server{listen_fd: -1, port: port, host: host, running: false}
     }
-    
+
     print("✓ HTTP server listening on " + host + ":" + int_to_string(port) + "\n")
-    
+
     return http_server{
         listen_fd: listen_fd,
         port: port,
@@ -163,30 +163,30 @@ func create_http_server(string host, int port) http_server {
 
 func handle_connection(int client_fd, func(http_request) http_response handler) {
     request_data := __sys_recv(client_fd, 4096)
-    
+
     if len(request_data) == 0 {
         __sys_close(client_fd)
         return
     }
-    
+
     request := parse_http_request(request_data)
     response := handler(request)
-    
+
     response_data := format_http_response(response)
     __sys_send(client_fd, response_data)
-    
+
     __sys_close(client_fd)
 }
 
 func server_accept_loop(http_server server, func(http_request) http_response handler) {
     while server.running {
         client_fd := __sys_accept(server.listen_fd)
-        
+
         if client_fd < 0 {
             print("error: accept failed\n")
             continue
         }
-        
+
         handle_connection(client_fd, handler)
     }
 }
