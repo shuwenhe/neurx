@@ -35,7 +35,7 @@ func int_to_string(int value) string {
 func generate_response(string prompt, int max_tokens) string {
     int token_count = len(prompt) + 2
     string response = ""
-    response = "I am Qwen2.5-0.5B-Instruct, a medical AI assistant.\n"
+    response = "I am Language Model 0.5B, a medical AI assistant.\n"
     response = response + "Processing input: \"" + prompt + "\" (" + int_to_string(token_count) + " tokens)\n"
     response = response + "Generating response through all 6 inference steps..."
     return response
@@ -43,9 +43,9 @@ func generate_response(string prompt, int max_tokens) string {
 
 func main() {
     string model_path = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain/model.safetensors")
-    string tokenizer_path = runtime_env_get("NEURX_TOKENIZER_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct/tokenizer.json")
+    string tokenizer_path = runtime_env_get("NEURX_TOKENIZER_PATH", "/home/shuwen/shuwen/model/base-model/tokenizer.json")
     print("🚀 NeurX Phase 2B: Real Transformer Inference Engine\n")
-    print("✓ Model: Qwen2.5-0.5B-Instruct\n")
+    print("✓ Model: Language Model 0.5B Instruct\n")
     print("✓ Pure S Language Implementation\n")
     print("✓ Real 6-Step Inference Pipeline\n\n")
     print("╔════════════════════════════════════════════════════════════════╗\n")

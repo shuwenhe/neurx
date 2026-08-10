@@ -172,7 +172,7 @@ func handle_generate(http_request req) http_response {
 }
 
 func handle_health(http_request req) http_response {
-    health_json := "{\"status\":\"healthy\",\"model\":\"qwen2.5-0.5b\",\"backend\":\"cpu\"}"
+    health_json := "{\"status\":\"healthy\",\"model\":\"language-model-0.5b\",\"backend\":\"cpu\"}"
     
     return http_response{
         status_code: 200,
@@ -182,7 +182,7 @@ func handle_health(http_request req) http_response {
 }
 
 func handle_models(http_request req) http_response {
-    models_json := "{\"models\":[\"qwen2.5-0.5b-instruct\"]}"
+    models_json := "{\"models\":[\"language-model-0.5b-instruct\"]}"
     
     return http_response{
         status_code: 200,

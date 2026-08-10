@@ -9,7 +9,7 @@ func main() {
     println("\n════════════════════════════════════════════════════════════════")
     println("    POSTTRAIN VERIFICATION TEST SUITE - COMPLETE RESULTS")
     println("════════════════════════════════════════════════════════════════\n")
-    string base_model_path = runtime_env_get("NEURX_BASE_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
+    string base_model_path = runtime_env_get("NEURX_BASE_MODEL_PATH", "/home/shuwen/shuwen/model/base-model")
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH", "/home/shuwen/shuwen/posttrain/adapter")
     println("[Test 1] Adapter Files Integrity")
     bool test1_model = runtime_file_exists(adapter_path + "/adapter_model.safetensors")
@@ -97,7 +97,7 @@ func main() {
     }
     println("\n════════════════════════════════════════════════════════════════")
     println("[DETAILS]")
-    println("  Base Model: Qwen2.5-0.5B-Instruct (378M parameters)")
+    println("  Base Model: Language Model 0.5B (378M parameters)")
     println("  LoRA Adapter: ~903K parameters (rank=8)")
     println("  Training Data: MedMCQA dataset")
     println("  Fine-tuning Method: Supervised Fine-Tuning (SFT)")

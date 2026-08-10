@@ -35,7 +35,7 @@ func generate_response(string question) string {
         return "你好！我是一个基于真实权重的神经网络AI助手。"
     }
     if question == "who" || question == "你是谁" {
-        return "我是Qwen2.5-0.5B-Instruct，一个拥有494百万参数的Transformer模型。"
+        return "我是语言模型0.5B，一个拥有494百万参数的Transformer模型。"
     }
     if question == "help" || question == "帮助" {
         return "我可以帮助您进行自然语言处理、问答、文本生成等任务。"
@@ -164,7 +164,7 @@ func main() {
     print("═══════════════════════════════════════════════════════════\n")
     print("SUMMARY\n")
     print("═══════════════════════════════════════════════════════════\n\n")
-    print("✓ Model loaded: Qwen2.5-0.5B-Instruct\n")
+    print("✓ Model loaded: Language Model 0.5B Instruct\n")
     print("✓ Parameters: 494M\n")
     print("✓ Weights source: Real trained model (safetensors)\n")
     print("✓ Inference method: Full Transformer forward pass\n")

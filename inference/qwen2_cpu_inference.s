@@ -1,4 +1,4 @@
-package neurx.inference.qwen2_cpu
+package neurx.inference.model_cpu_inference
 
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 
@@ -278,9 +278,9 @@ func validate_model(safetensors_model model) bool {
 func run_probe(safetensors_model model) int {
     tensor_location embedding = find_tensor(model, "model.embed_tokens.weight")
     tensor_location q_proj = find_tensor(model, "model.layers.0.self_attn.q_proj.weight")
-    print("[Qwen2 S] safetensors header bytes=" + int_to_string(model.data_offset - 8) + "\n")
-    print("[Qwen2 S] embedding absolute offset=" + int_to_string(embedding.offset) + " bytes=" + int_to_string(embedding.byte_size) + "\n")
-    print("[Qwen2 S] layer0 q_proj absolute offset=" + int_to_string(q_proj.offset) + " bytes=" + int_to_string(q_proj.byte_size) + "\n")
+    print("[Model S] safetensors header bytes=" + int_to_string(model.data_offset - 8) + "\n")
+    print("[Model S] embedding absolute offset=" + int_to_string(embedding.offset) + " bytes=" + int_to_string(embedding.byte_size) + "\n")
+    print("[Model S] layer0 q_proj absolute offset=" + int_to_string(q_proj.offset) + " bytes=" + int_to_string(q_proj.byte_size) + "\n")
     []int first_embedding = __host_read_binary_file_range(model.path, embedding.offset, 16)
     if len(first_embedding) != 16 {
         print("error: failed to read embedding bytes\n")
@@ -291,8 +291,8 @@ func run_probe(safetensors_model model) int {
         print("error: invalid BF16 embedding value\n")
         return 1
     }
-    print("[Qwen2 S] embedding[0] BF16 bytes=" + int_to_string(first_embedding[0]) + "," + int_to_string(first_embedding[1]) + "\n")
-    print("[Qwen2 S] real BF16 weight probe passed\n")
+    print("[Model S] embedding[0] BF16 bytes=" + int_to_string(first_embedding[0]) + "," + int_to_string(first_embedding[1]) + "\n")
+    print("[Model S] real BF16 weight probe passed\n")
     0
 }
 
@@ -324,7 +324,7 @@ func run_projection_probe(safetensors_model model) int {
         print("error: real q_proj produced an all-zero vector\n")
         return 1
     }
-    print("[Qwen2 S] real embedding + RMSNorm + q_proj passed\n")
+    print("[Model S] real embedding + RMSNorm + q_proj passed\n")
     0
 }
 
@@ -337,10 +337,10 @@ func main() {
     }
     safetensors_model model = open_model(model_path)
     if len(model.metadata) == 0 || !validate_model(model) {
-        print("error: invalid Qwen2 safetensors model\n")
+        print("error: invalid model safetensors format\n")
         return 1
     }
-    string mode = runtime_env_get("NEURX_QWEN_MODE", "probe")
+    string mode = runtime_env_get("NEURX_MODEL_MODE", "probe")
     if mode == "probe" { return run_probe(model) }
     if mode == "projection-probe" { return run_projection_probe(model) }
     print("error: generation path is not enabled until tokenizer and Transformer validation pass\n")

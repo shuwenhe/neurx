@@ -102,7 +102,7 @@ func analyze_precomputed_header() string {
     print("   Type: BF16  |  Size: 272.3 MB\n\n")
     print("[ARCHITECTURE SUMMARY]\n")
     print("────────────────────────────────────────────────────\n")
-    print("Model: Qwen2.5-0.5B-Instruct\n")
+    print("Model: Language Model 0.5B Instruct\n")
     print("Vocabulary: 151,936 tokens\n")
     print("Hidden size: 896 dimensions\n")
     print("Attention heads: 14\n")

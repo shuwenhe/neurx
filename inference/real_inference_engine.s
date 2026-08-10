@@ -84,7 +84,7 @@ func main() {
     print("╚═══════════════════════════════════════════════════════════╝\n")
     print("\n📊 MODEL CONFIGURATION\n")
     print("─────────────────────────────────────────────────────\n")
-    print("Model: Qwen2.5-0.5B-Instruct\n")
+    print("Model: Language Model 0.5B Instruct\n")
     print("Path: /home/shuwen/shuwen/posttrain/model.safetensors\n")
     print("Size: 1.95 GB (BF16 precision)\n")
     print("Architecture:\n")

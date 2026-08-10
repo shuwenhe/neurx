@@ -28,7 +28,7 @@ struct training_config {
 
 func default_training_config() training_config {
     training_config{
-        model_path: "../model/Qwen2.5-0.5B-Instruct",
+        model_path: "../model/base-model",
         data_path: "../dataset/medical/train.json",
         output_dir: "../posttrain/checkpoints",
         hidden_size: 896,
@@ -49,7 +49,7 @@ func default_training_config() training_config {
 
 func run_real_training() int {
     eprintln("============================================================")
-    eprintln("[Real Training Pipeline] Real Qwen2.5-0.5B Training")
+    eprintln("[Real Training Pipeline] Real Language Model 0.5B Training")
     eprintln("============================================================")
     training_config config = default_training_config()
     eprintln("[Config] Model: " + config.model_path)
@@ -62,9 +62,9 @@ func run_real_training() int {
     eprintln("[Config] LoRA Rank: " + int_to_str(config.lora_rank))
     eprintln("[Config] Output Dir: " + config.output_dir)
     eprintln("")
-    eprintln("[Step 1/6] Loading REAL Qwen2.5-0.5B model weights")
+    eprintln("[Step 1/6] Loading REAL Language Model 0.5B weights")
     model_weights weights = load_model_weights_real(config.model_path)
-    eprintln("[Step 1/6] ✓ Real Qwen weights loaded successfully")
+    eprintln("[Step 1/6] ✓ Real model weights loaded successfully")
     eprintln("")
     eprintln("[Step 2/6] Creating LoRA adapters")
     [][]float lora_a_matrices = [][]float{cap: 7}
@@ -94,7 +94,7 @@ func run_real_training() int {
         int step = 0
         while step < config.steps_per_epoch {
             eprintln("  [Step " + int_to_str(step + 1) + "/" + int_to_str(config.steps_per_epoch) + "]")
-            eprintln("    Forward pass (real Qwen forward)...")
+            eprintln("    Forward pass (real model forward)...")
             []float logits = model_forward(
                 input_ids,
                 weights,
@@ -176,7 +176,7 @@ func run_real_training() int {
     eprintln("============================================================")
     eprintln("")
     eprintln("[Status Summary]")
-    eprintln("[✓] Real Qwen2.5-0.5B model weights loaded")
+    eprintln("[✓] Real Language Model 0.5B weights loaded")
     eprintln("[✓] LoRA adapters initialized")
     eprintln("[✓] REAL LM loss computed")
     eprintln("[✓] Gradients computed for backpropagation")

@@ -136,7 +136,7 @@ func benchmark_data_loading() benchmark_metrics {
 }
 
 func benchmark_model_loading() benchmark_metrics {
-    var model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
+    var model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/home/shuwen/shuwen/model/base-model")
     var timer = timer_start("model_loading", 0)
     var model_file = model_path + "/model.safetensors"
     var exists = runtime_file_exists(model_file)

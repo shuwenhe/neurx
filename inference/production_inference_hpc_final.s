@@ -55,7 +55,7 @@ func main() {
     print_line("╔════════════════════════════════════════════════════════════════╗")
     print_line("║       NeurX Production Inference Engine (Pure S)               ║")
     print_line("║  High-Performance CPU Inference • 5-10x Faster than Python    ║")
-    print_line("║       Model: Qwen2.5-0.5B-Instruct                             ║")
+    print_line("║       Model: Language Model 0.5B Instruct                      ║")
     print_line("╚════════════════════════════════════════════════════════════════╝")
     print_line("")
     string model_path = runtime_env_get(
@@ -64,7 +64,7 @@ func main() {
     )
     string tokenizer_path = runtime_env_get(
         "NEURX_TOKENIZER_PATH",
-        "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct/tokenizer.json"
+        "/home/shuwen/shuwen/model/base-model/tokenizer.json"
     )
     print_line("🚀 Configuration:")
     print_line("   Model Path:    " + model_path)
@@ -196,7 +196,7 @@ func main() {
         print_line("")
         print_line("🤖 Assistant:")
         print_line("")
-        print_line("I am Qwen2.5-0.5B-Instruct, a specialized medical AI assistant.")
+        print_line("I am Language Model 0.5B, a specialized medical AI assistant.")
         print_line("I have been fine-tuned on medical knowledge and can help with:")
         print_line("")
         print_line("  • Medical information and disease understanding")

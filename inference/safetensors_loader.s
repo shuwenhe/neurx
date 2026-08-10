@@ -413,7 +413,7 @@ func main() {
     print("✓ LM head interface ready\n\n")
     print("STEP 5: Model Architecture Summary\n")
     print("════════════════════════════════\n")
-    print("Model: Qwen2.5-0.5B-Instruct\n")
+    print("Model: Language Model 0.5B Instruct\n")
     print("Path: " + model_path + "/model.safetensors\n")
     print("Format: SafeTensors (BF16 weights)\n\n")
     print("Layers loaded (interface):\n")

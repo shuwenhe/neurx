@@ -76,10 +76,10 @@ func main() {
     )
     string tokenizer_path = runtime_env_get(
         "NEURX_TOKENIZER_PATH",
-        "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct/tokenizer.json"
+        "/home/shuwen/shuwen/model/base-model/tokenizer.json"
     )
     print("📋 Model Configuration:")
-    print("   Model:              Qwen2.5-0.5B-Instruct")
+    print("   Model:              Language Model 0.5B Instruct")
     print("   Implementation:     Pure S Language")
     print("   Mode:               High-Performance CPU Inference")
     print("")
@@ -156,7 +156,7 @@ func main() {
             print("   • Type questions or statements to get AI responses")
             print("   • Responses use real Transformer model weights")
             print("   • Performance is optimized with KV cache")
-            print("   • Medical knowledge built-in (Qwen2.5-0.5B-Instruct)")
+            print("   • Medical knowledge built-in (Language Model 0.5B Instruct)")
             print("")
             continue
         }
@@ -221,7 +221,7 @@ func main() {
         print("")
         print("🤖 Assistant:")
         print("")
-        print("I am Qwen2.5-0.5B-Instruct, a specialized medical AI assistant developed")
+        print("I am Language Model 0.5B, a specialized medical AI assistant developed")
         print("for healthcare and medical knowledge tasks. I can assist you with:")
         print("")
         print("  • Medical information and health education")

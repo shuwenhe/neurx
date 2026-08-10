@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain-cpu posttrain-gpu posttrain-npu posttrain-benchmark posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain verify-lora-weights verify-inference verify-adapter-integration verify-posttrain-complete runtime-test test-golden regenerate-golden pretrain-watch chat-cpu chat-gpu chat-npu real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 production-inference production-chat benchmark-production-inference build-qwen2-inference-s qwen2-weight-probe qwen2-projection-probe \
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain-cpu posttrain-gpu posttrain-npu posttrain-benchmark posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain verify-lora-weights verify-inference verify-adapter-integration verify-posttrain-complete runtime-test test-golden regenerate-golden pretrain-watch chat-cpu chat-gpu chat-npu real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 production-inference production-chat benchmark-production-inference build-model-inference-s model-weight-probe model-projection-probe \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -429,10 +429,11 @@ posttrain-gpu: check-bash build-s-ir-runner build-posttrain-sft-s
 		echo "Error: NVIDIA GPU not detected. Install NVIDIA CUDA Toolkit."; \
 		exit 1; \
 	fi
-	@GPU_COUNT="$$(nvidia-smi -L 2>/dev/null | grep -c '^GPU ' || echo 0)"; \
+	@GPU_COUNT="$$(nvidia-smi -L 2>/dev/null | grep -c '^GPU ' || true)"; \
 	echo "Available GPUs: $$GPU_COUNT"; \
-	if [ "$$GPU_COUNT" -eq 0 ]; then \
-		echo "Warning: No NVIDIA GPU found. Fallback to auto device selection."; \
+	if [ "$${GPU_COUNT:-0}" -le 0 ]; then \
+		echo "Error: No NVIDIA GPU found."; \
+		exit 1; \
 	fi
 	@mkdir -p '$(POSTTRAIN_OUTPUT_DIR)' '$(LOG_DIR)'
 	@cd '$(CURDIR_UNIX)' && \
@@ -1023,21 +1024,21 @@ build-real-inference-s: build-s-ir-runner
 	@chmod +x artifacts/build/real_inference/real_inference
 	@echo "✓ NeurX S inference runner ready"
 
-build-qwen2-inference-s: build-s-ir-runner
-	@mkdir -p artifacts/build/qwen2_inference
-	@echo "Compiling strict pure-S Qwen2 CPU inference kernel..."
-	@$(S_SEED_COMPILER) inference/qwen2_cpu_inference.s artifacts/build/qwen2_inference/qwen2_cpu_inference.ir
-	@test -f artifacts/build/qwen2_inference/qwen2_cpu_inference.ir
+build-model-inference-s: build-s-ir-runner
+	@mkdir -p artifacts/build/model_inference
+	@echo "Compiling strict pure-S Language Model CPU inference kernel..."
+	@$(S_SEED_COMPILER) inference/qwen2_cpu_inference.s artifacts/build/model_inference/model_cpu_inference.ir
+	@test -f artifacts/build/model_inference/model_cpu_inference.ir
 
-qwen2-weight-probe: build-qwen2-inference-s
+model-weight-probe: build-model-inference-s
 	@NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
-		NEURX_QWEN_MODE=probe \
-		'$(S_RUNNER_BIN)' artifacts/build/qwen2_inference/qwen2_cpu_inference.ir
+		NEURX_MODEL_MODE=probe \
+		'$(S_RUNNER_BIN)' artifacts/build/model_inference/model_cpu_inference.ir
 
-qwen2-projection-probe: build-qwen2-inference-s
+model-projection-probe: build-model-inference-s
 	@NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
-		NEURX_QWEN_MODE=projection-probe \
-		'$(S_RUNNER_BIN)' artifacts/build/qwen2_inference/qwen2_cpu_inference.ir
+		NEURX_MODEL_MODE=projection-probe \
+		'$(S_RUNNER_BIN)' artifacts/build/model_inference/model_cpu_inference.ir
 build-fast-chat-inference-s:
 	@mkdir -p artifacts/build/fast_chat_inference
 	@echo "Compiling Fast Chat Inference (S)..."
@@ -1109,11 +1110,11 @@ production-inference: build-production-inference-engine-s
 	@echo ""
 	@echo "╔════════════════════════════════════════════════════════════════╗"
 	@echo "║  Running Production Inference Engine (Pure S Language)         ║"
-	@echo "║  Model: Qwen2.5-0.5B-Instruct                                  ║"
+	@echo "║  Model: Language Model 0.5B Instruct                          ║"
 	@echo "╚════════════════════════════════════════════════════════════════╝"
 	@echo ""
 	@NEURX_MODEL_PATH='$(CHAT_MODEL_PATH)/model.safetensors' \
-		NEURX_TOKENIZER_PATH='$(CHAT_MODEL_PATH)/../model/Qwen2.5-0.5B-Instruct/tokenizer.json' \
+		NEURX_TOKENIZER_PATH='$(CHAT_MODEL_PATH)/../model/base-model/tokenizer.json' \
 		NEURX_PROMPT='Hello, I am' \
 		NEURX_MAX_TOKENS=128 \
 		'$(S_RUNNER_BIN)' artifacts/build/production_inference_engine/production_inference_engine.ir
@@ -1126,7 +1127,7 @@ production-chat: build-production-hpc-chat-s
 	@echo "╚════════════════════════════════════════════════════════════════╝"
 	@echo ""
 	@NEURX_MODEL_PATH='$(CHAT_MODEL_PATH)/model.safetensors' \
-		NEURX_TOKENIZER_PATH='$(CHAT_MODEL_PATH)/../model/Qwen2.5-0.5B-Instruct/tokenizer.json' \
+		NEURX_TOKENIZER_PATH='$(CHAT_MODEL_PATH)/../model/base-model/tokenizer.json' \
 		'$(S_RUNNER_BIN)' artifacts/build/production_hpc_chat/production_hpc_chat.ir
 
 benchmark-production-inference: build-production-inference-engine-s

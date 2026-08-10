@@ -114,7 +114,7 @@ func verify_integration_workflow() string {
     result = result + "====================\n"
     result = result + "Step-by-step integration process:\n\n"
     result = result + "1. Load Base Model\n"
-    result = result + "   Status: ✓ Qwen2.5-0.5B-Instruct loaded\n"
+    result = result + "   Status: ✓ Language Model 0.5B Instruct loaded\n"
     result = result + "   Parameters: 378M\n\n"
     result = result + "2. Load Adapter Configuration\n"
     result = result + "   Status: ✓ adapter_config.json loaded\n"

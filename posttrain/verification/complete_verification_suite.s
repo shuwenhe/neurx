@@ -35,7 +35,7 @@ func test_adapter_config() bool {
 }
 
 func test_weights_changed() bool {
-    string base_model_path = runtime_env_get("NEURX_BASE_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
+    string base_model_path = runtime_env_get("NEURX_BASE_MODEL_PATH", "/home/shuwen/shuwen/model/base-model")
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH", "/home/shuwen/shuwen/posttrain/adapter")
     string base_model_file = base_model_path + "/model.safetensors"
     string adapter_model_file = adapter_path + "/adapter_model.safetensors"
@@ -159,7 +159,7 @@ func display_test_results() string {
     }
     output = output + "\n════════════════════════════════════════════════════════════════\n"
     output = output + "[DETAILS]\n"
-    output = output + "  Base Model: Qwen2.5-0.5B-Instruct (378M parameters)\n"
+    output = output + "  Base Model: Language Model 0.5B (378M parameters)\n"
     output = output + "  LoRA Adapter: ~903K parameters (rank=8)\n"
     output = output + "  Training Data: MedMCQA dataset\n"
     output = output + "  Fine-tuning Method: Supervised Fine-Tuning (SFT)\n"

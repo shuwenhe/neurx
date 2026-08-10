@@ -14,7 +14,7 @@ func run_verl_style_training() int {
     eprintln("[Step 1/5] Initializing Experiment Tracker...")
     experiment_tracker_state tracker = new_experiment_tracker("math_reasoning_v1", "neurx-posttrain", LOCAL)
     tracker = tracker_init(tracker)
-    tracker = tracker_log_config(tracker, "model", "Qwen2.5-0.5B")
+    tracker = tracker_log_config(tracker, "model", "Language Model 0.5B")
     tracker = tracker_log_config(tracker, "dataset", "GSM8K")
     tracker = tracker_log_config(tracker, "algorithm", "GRPO")
     tracker = tracker_add_tag(tracker, "math")

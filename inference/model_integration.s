@@ -88,7 +88,7 @@ func decode_token(int token_id) string {
 func generate_with_model(string prompt, string model_path) string {
     print("\n╔════════════════════════════════════════════════════════╗\n")
     print("║  REAL MODEL INFERENCE PIPELINE                        ║\n")
-    print("║  Qwen2.5-0.5B-Instruct (24 layers, 896 hidden)        ║\n")
+    print("║  Language Model 0.5B (24 layers, 896 hidden)        ║\n")
     print("╚════════════════════════════════════════════════════════╝\n\n")
 
     int vocab_size = 151936

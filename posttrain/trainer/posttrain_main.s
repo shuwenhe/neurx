@@ -208,7 +208,7 @@ func text_window_to_vector(string text, int start, int count, int dim) []float {
 }
 
 func run_posttrain_lora_sft() int {
-    string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
+    string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/home/shuwen/shuwen/model/base-model")
     string data_file = runtime_env_get("NEURX_POSTTRAIN_DATA_FILE", "/home/shuwen/shuwen/dataset/medical/train.json")
     string output_dir = runtime_env_get("NEURX_POSTTRAIN_OUTPUT_DIR", "/tmp/posttrain_adapter")
     int rank = 8
@@ -493,7 +493,7 @@ func run_posttrain_lora_sft() int {
     println("[Training] Loss: " + float_to_str(best_loss, 6))
     println("[Training] ✓ Phase 5A (Steps 1-4) validated:")
     println("  [✓] Step 1: Medical JSON data parsing")
-    println("  [✓] Step 2B: Real Qwen tokenization (176 tokens)")
+    println("  [✓] Step 2B: Real model tokenization (176 tokens)")
     println("  [✓] Step 3: Embedding + forward pass (22,528 dims)")
     println("  [✓] Step 4: Shifted-label loss calculation")
     println("  [✓] Training loop: 48 modules, 1 epoch, gradient descent with OLD parameter snapshots")
@@ -925,7 +925,7 @@ func save_adapter_weights(
         return 1
     }
     string config_json = "{\n"
-    config_json = config_json + "  \"base_model_name_or_path\": \"/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct\",\n"
+    config_json = config_json + "  \"base_model_name_or_path\": \"/home/shuwen/shuwen/model/base-model\",\n"
     config_json = config_json + "  \"bias\": \"none\",\n"
     config_json = config_json + "  \"fan_in_fan_out\": false,\n"
     config_json = config_json + "  \"inference_mode\": true,\n"

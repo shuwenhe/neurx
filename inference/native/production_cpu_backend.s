@@ -188,7 +188,7 @@ func initialize_backend() {
     print("╚════════════════════════════════════════════════════════════════╝\n")
     print("\n")
     print("Configuration:\n")
-    print("  Model: Qwen2.5-0.5B-Instruct\n")
+    print("  Model: Language Model 0.5B Instruct\n")
     print("  Hidden Dimension: 896\n")
     print("  Layers: 24\n")
     print("  Attention Heads: 14\n")

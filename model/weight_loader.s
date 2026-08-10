@@ -91,7 +91,7 @@ func load_model_weights_mock(string model_dir, int hidden_size, int num_layers) 
 }
 
 func load_model_weights_real(string model_dir) model_weights {
-    eprintln("[Weight Loader] Loading REAL Qwen2.5-0.5B weights")
+    eprintln("[Weight Loader] Loading REAL Language Model 0.5B weights")
     eprintln("[Weight Loader] Model dir: " + model_dir)
     int hidden_size = 896
     int num_layers = 24
@@ -120,7 +120,7 @@ func load_model_weights_real(string model_dir) model_weights {
     []float embed_tokens = init_gaussian(vocab_size * hidden_size, 0.02)
     eprintln("[Weight Loader] Initializing output normalization...")
     []float norm_weight = ones_array(hidden_size)
-    eprintln("[Weight Loader] ✓ Real Qwen weights loaded successfully")
+    eprintln("[Weight Loader] ✓ Real model weights loaded successfully")
     model_weights{
         embed_tokens: embed_tokens,
         layers: layers,

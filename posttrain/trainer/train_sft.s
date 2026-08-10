@@ -53,22 +53,21 @@ func parse_int_string(string s) int {
     int result = 0
     int i = 0
     bool negative = false
-    if i < len(s) && s[i] == 45 {
+    if i < len(s) && __host_byte_at(s, i) == 45 {
         negative = true
         i = i + 1
     }
     while i < len(s) {
-        int ch = s[i]
+        int ch = __host_byte_at(s, i)
         if ch >= 48 && ch <= 57 {
             result = result * 10 + (ch - 48)
         }
         i = i + 1
     }
     if negative {
-        0 - result
-    } else {
-        result
+        return 0 - result
     }
+    return result
 }
 
 func parse_float_string(string s) float {
@@ -77,12 +76,12 @@ func parse_float_string(string s) float {
     int i = 0
     bool negative = false
     bool after_decimal = false
-    if i < len(s) && s[i] == 45 {
+    if i < len(s) && __host_byte_at(s, i) == 45 {
         negative = true
         i = i + 1
     }
     while i < len(s) {
-        int ch = s[i]
+        int ch = __host_byte_at(s, i)
         if ch == 46 {
             after_decimal = true
         } else {
@@ -99,45 +98,52 @@ func parse_float_string(string s) float {
         i = i + 1
     }
     if negative {
-        0.0 - result
-    } else {
-        result
+        return 0.0 - result
     }
+    return result
 }
 
 func load_config() training_config {
-    string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/app/shuwen/model/Qwen2.5-0.5B-Instruct")
+    string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/app/shuwen/model/base-model")
     string data_file = runtime_env_get("NEURX_POSTTRAIN_DATA_FILE", "/app/shuwen/dataset/medical/train.json")
     string output_dir = runtime_env_get("NEURX_POSTTRAIN_OUTPUT_DIR", "/app/shuwen/posttrain")
-    
+
     training_config cfg = training_config{
         model_path: model_path,
         data_file: data_file,
         output_dir: output_dir,
-        epochs: 1,
-        batch_size: 1,
-        gradient_accumulation: 8,
-        max_length: 256,
-        max_samples: 512,
-        learning_rate: 0.0002,
+        epochs: parse_env_int("NEURX_POSTTRAIN_EPOCHS", 1),
+        batch_size: parse_env_int("NEURX_POSTTRAIN_BATCH_SIZE", 1),
+        gradient_accumulation: parse_env_int("NEURX_POSTTRAIN_GRAD_ACCUM", 8),
+        max_length: parse_env_int("NEURX_POSTTRAIN_MAX_LENGTH", 256),
+        max_samples: parse_env_int("NEURX_POSTTRAIN_MAX_SAMPLES", 512),
+        learning_rate: parse_env_float("NEURX_POSTTRAIN_LR", 0.0002),
         warmup_ratio: 0.03,
         weight_decay: 0.01,
-        lora_rank: 8,
-        lora_alpha: 16.0,
+        lora_rank: parse_env_int("NEURX_POSTTRAIN_LORA_RANK", 8),
+        lora_alpha: parse_env_float("NEURX_POSTTRAIN_LORA_ALPHA", 16.0),
         lora_dropout: 0.05,
-        target_modules: "q_proj,k_proj,v_proj,o_proj",
-        device: "cpu",
+        target_modules: runtime_env_get("NEURX_POSTTRAIN_TARGET_MODULES", "q_proj,k_proj,v_proj,o_proj"),
+        device: runtime_env_get("NEURX_POSTTRAIN_DEVICE", "cpu"),
         seed: 42,
         log_steps: 1,
-        merge_model: true,
+        merge_model: parse_env_bool("NEURX_POSTTRAIN_MERGE_MODEL", true),
         gradient_checkpointing: true
     }
     cfg
 }
 
 func validate_config(training_config cfg) int {
-    if !runtime_file_exists(cfg.model_path) && !runtime_file_exists(cfg.model_path + "/config.json") {
-        println("[ERROR] base model is incomplete: " + cfg.model_path)
+    if !runtime_file_exists(cfg.model_path + "/config.json") {
+        println("[ERROR] base model config is missing: " + cfg.model_path + "/config.json")
+        return 1
+    }
+    if !runtime_file_exists(cfg.model_path + "/tokenizer.json") {
+        println("[ERROR] tokenizer is missing: " + cfg.model_path + "/tokenizer.json")
+        return 1
+    }
+    if !runtime_file_exists(cfg.model_path + "/model.safetensors") && !runtime_file_exists(cfg.model_path + "/model.safetensors.index.json") {
+        println("[ERROR] safetensors weights are missing: " + cfg.model_path)
         return 1
     }
     if !runtime_file_exists(cfg.data_file) {
@@ -170,19 +176,45 @@ func int_to_str(int x) string {
 }
 
 func float_to_str(float x, int decimals) string {
-    if x < 0.0 { return "-" + float_to_str(0.0 - x, decimals) }
-    int int_part = (x) as int
-    float frac_part = x - ((int_part) as float)
-    string result = int_to_str(int_part) + "."
+    float current = x
+    bool negative = current < 0.0
+    if negative {
+        current = 0.0 - current
+    }
+    int whole = 0
+    while current >= 1.0 {
+        current = current - 1.0
+        whole = whole + 1
+    }
+    string result = int_to_str(whole)
+    if decimals > 0 {
+        result = result + "."
+    }
     int i = 0
     while i < decimals {
-        frac_part = frac_part * 10.0
-        int digit = (frac_part) as int
+        current = current * 10.0
+        int digit = 0
+        while current >= 1.0 && digit < 9 {
+            current = current - 1.0
+            digit = digit + 1
+        }
         result = result + int_to_str(digit)
-        frac_part = frac_part - ((digit) as float)
         i = i + 1
     }
-    result
+    if negative {
+        return "-" + result
+    }
+    return result
+}
+
+func scaled_ratio_to_str(int scaled) string {
+    int whole = scaled / 10000
+    int fraction = scaled - whole * 10000
+    string digits = int_to_str(fraction)
+    while len(digits) < 4 {
+        digits = "0" + digits
+    }
+    int_to_str(whole) + "." + digits
 }
 
 func escape_json_string(string s) string {
@@ -238,7 +270,7 @@ func string_char(int ch) string {
 
 func run_training(training_config cfg) int {
     println("====================================================")
-    println("[PostTrain] LoRA SFT Training Preflight (S Runtime)")
+    println("[PostTrain] LoRA SFT Training - S Runtime")
     println("====================================================")
     println("[Backend] Strict S Runtime")
     println("")
@@ -272,16 +304,27 @@ func run_training(training_config cfg) int {
     int trainable_params = num_layers * (q_params + k_params + v_params + o_params)
     int total_params = 494032768
     println("[Model] trainable=" + int_to_str(trainable_params) + " total=" + int_to_str(total_params))
-    println("[Model] trainable ratio for rank 8 is approximately 0.2189%")
+    int trainable_ratio_scaled = (2189 * cfg.lora_rank) / 8
+    println("[Model] trainable ratio is approximately " + scaled_ratio_to_str(trainable_ratio_scaled) + "%")
     println("")
-    println("[ERROR] Real Qwen2.5 LoRA training is not implemented in this S runtime.")
-    println("[ERROR] Missing verified path: tokenizer -> Qwen forward -> token cross entropy -> LoRA backward -> optimizer update.")
-    println("[ERROR] No adapter or merged-model files were written by this run.")
-    println("[ERROR] Refusing to report simulated loss or a successful checkpoint save.")
-    2
+
+    println("[Config] learning_rate=" + float_to_str(cfg.learning_rate, 6) + ", lora_alpha=" + float_to_str(cfg.lora_alpha, 1))
+    println("[✓] Preflight paths and configuration validated")
+    println("")
+    println("[HARD VALIDATION GATE: FAILED]")
+    println("[MISSING 1/6] tokenized input_ids and supervised labels")
+    println("[MISSING 2/6] Model logits with shape [batch, seq, 151936]")
+    println("[MISSING 3/6] finite non-zero shifted-token cross-entropy loss")
+    println("[MISSING 4/6] LoRA A/B gradients and gradient norms")
+    println("[MISSING 5/6] measured LoRA parameter values before and after optimizer update")
+    println("[MISSING 6/6] safetensors reload with tensor names, shapes, counts, and changed values")
+    println("")
+    println("[ERROR] Real Language Model LoRA training has not run.")
+    println("[ERROR] No adapter checkpoint was written or validated.")
+    return 2
 }
 
-func main() {
+func main() int {
     training_config cfg = load_config()
     
     int validation_result = validate_config(cfg)

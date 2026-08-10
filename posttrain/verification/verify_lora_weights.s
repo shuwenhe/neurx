@@ -60,7 +60,7 @@ func verify_adapter_config() string {
 }
 
 func verify_weight_changes() string {
-    string base_model_path = runtime_env_get("NEURX_BASE_MODEL_PATH", "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
+    string base_model_path = runtime_env_get("NEURX_BASE_MODEL_PATH", "/home/shuwen/shuwen/model/base-model")
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH", "/home/shuwen/shuwen/posttrain/adapter")
     string result = "[Weight Analysis]\n"
     result = result + "=================\n"

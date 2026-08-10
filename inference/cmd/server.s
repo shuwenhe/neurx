@@ -82,7 +82,7 @@ func print_server_status() {
     print("\n📊 Server Status:\n")
     print("   Status: ✅ Running\n")
     print("   Connections: Active\n")
-    print("   Model: Loaded (Qwen2.5-0.5B-Instruct)\n")
+    print("   Model: Loaded (Language Model 0.5B Instruct)\n")
     print("   Memory: 1.9 GB / 2.5 GB\n")
     print("   Throughput: ~50 tok/s (estimated)\n")
     print("   Uptime: Running\n\n")

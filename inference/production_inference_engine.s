@@ -362,7 +362,7 @@ func main() {
     println("")
     println("╔════════════════════════════════════════════════════════════════╗")
     println("║  NeurX Production Inference Engine (Pure S Language)           ║")
-    println("║  Model: Qwen2.5-0.5B-Instruct                                  ║")
+    println("║  Model: Language Model 0.5B Instruct                          ║")
     println("║  Hardware: CPU (Optimized for single-thread performance)       ║")
     println("╚════════════════════════════════════════════════════════════════╝")
     println("")
