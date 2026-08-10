@@ -11,7 +11,7 @@ enum RequestStatus {
     CANCELLED
 }
 
-struct CompletionOutput {
+struct completion_output {
     request_id string
     token_id int
     token string
@@ -20,7 +20,7 @@ struct CompletionOutput {
     finished bool
 }
 
-struct SamplingParams {
+struct sampling_params {
     max_tokens int
     temperature float
     top_p float
@@ -31,10 +31,10 @@ struct SamplingParams {
     stop_sequences []string
 }
 
-struct InferenceRequest {
+struct inference_request {
     request_id string
     prompt string
-    sampling_params SamplingParams
+    sampling_params sampling_params
 
     created_at int64
     priority int
@@ -42,21 +42,21 @@ struct InferenceRequest {
     user_id string
 
     status RequestStatus
-    output_tokens []CompletionOutput
+    output_tokens []completion_output
     error_message string
 }
 
-struct RequestQueue {
-    pending []InferenceRequest
-    active map[string]InferenceRequest
-    completed map[string]InferenceRequest
+struct request_queue {
+    pending []inference_request
+    active map[string]inference_request
+    completed map[string]inference_request
     max_queue_size int
 
     total_enqueued int
     total_completed int
 }
 
-struct AsyncEngineMetrics {
+struct async_engine_metrics {
     throughput float
     avg_latency int64
     p95_latency int64
@@ -67,11 +67,11 @@ struct AsyncEngineMetrics {
     cache_hit_rate float
 }
 
-struct AsyncInferenceEngine {
-    queue RequestQueue
+struct async_inference_engine {
+    queue request_queue
     scheduler any
     executor any
-    metrics AsyncEngineMetrics
+    metrics async_engine_metrics
 
     batch_size int
     max_concurrent int
@@ -82,23 +82,23 @@ func NewAsyncEngine(
     batch_size int,
     max_concurrent int,
     enable_streaming bool,
-) AsyncInferenceEngine {
-    return AsyncInferenceEngine {
-        queue: RequestQueue {
-            pending: make([]InferenceRequest, 0),
-            active: make(map[string]InferenceRequest),
-            completed: make(map[string]InferenceRequest),
+) async_inference_engine {
+    return async_inference_engine {
+        queue: request_queue {
+            pending: make([]inference_request, 0),
+            active: make(map[string]inference_request),
+            completed: make(map[string]inference_request),
             max_queue_size: max_concurrent * 4,
         },
         batch_size: batch_size,
         max_concurrent: max_concurrent,
         enable_streaming: enable_streaming,
-        metrics: AsyncEngineMetrics{},
+        metrics: async_engine_metrics{},
     }
 }
 
-func (engine *AsyncInferenceEngine) EnqueueRequest(
-    request InferenceRequest,
+func (engine *async_inference_engine) EnqueueRequest(
+    request inference_request,
 ) bool {
 
     if len(engine.queue.pending) >= engine.queue.max_queue_size {
@@ -107,7 +107,7 @@ func (engine *AsyncInferenceEngine) EnqueueRequest(
 
     request.status = PENDING
     request.created_at = current_timestamp()
-    request.output_tokens = make([]CompletionOutput, 0)
+    request.output_tokens = make([]completion_output, 0)
 
     engine.queue.pending = append(engine.queue.pending, request)
     engine.queue.total_enqueued++
@@ -115,8 +115,8 @@ func (engine *AsyncInferenceEngine) EnqueueRequest(
     return true
 }
 
-func (engine *AsyncInferenceEngine) SchedulingStep() []InferenceRequest {
-    batch := make([]InferenceRequest, 0)
+func (engine *async_inference_engine) SchedulingStep() []inference_request {
+    batch := make([]inference_request, 0)
 
     available_slots := engine.max_concurrent - len(engine.queue.active)
 
@@ -144,14 +144,14 @@ func (engine *AsyncInferenceEngine) SchedulingStep() []InferenceRequest {
     return batch
 }
 
-func (engine *AsyncInferenceEngine) ProcessBatch(
-    batch []InferenceRequest,
-) []CompletionOutput {
+func (engine *async_inference_engine) ProcessBatch(
+    batch []inference_request,
+) []completion_output {
     if len(batch) == 0 {
-        return make([]CompletionOutput, 0)
+        return make([]completion_output, 0)
     }
 
-    outputs := make([]CompletionOutput, 0)
+    outputs := make([]completion_output, 0)
 
     for i := 0; i < len(batch); i++ {
         req := batch[i]
@@ -171,12 +171,12 @@ func (engine *AsyncInferenceEngine) ProcessBatch(
     return outputs
 }
 
-func (engine *AsyncInferenceEngine) EngineStep() []CompletionOutput {
+func (engine *async_inference_engine) EngineStep() []completion_output {
 
     batch := engine.SchedulingStep()
 
     if len(batch) == 0 {
-        return make([]CompletionOutput, 0)
+        return make([]completion_output, 0)
     }
 
     outputs := engine.ProcessBatch(batch)
@@ -198,9 +198,9 @@ func (engine *AsyncInferenceEngine) EngineStep() []CompletionOutput {
     return outputs
 }
 
-func (engine *AsyncInferenceEngine) GetOutput(
+func (engine *async_inference_engine) GetOutput(
     request_id string,
-) ([]CompletionOutput, bool) {
+) ([]completion_output, bool) {
 
     if req, ok := engine.queue.active[request_id]; ok {
         return req.output_tokens, false
@@ -210,10 +210,10 @@ func (engine *AsyncInferenceEngine) GetOutput(
         return req.output_tokens, true
     }
 
-    return make([]CompletionOutput, 0), false
+    return make([]completion_output, 0), false
 }
 
-func (engine *AsyncInferenceEngine) CancelRequest(request_id string) bool {
+func (engine *async_inference_engine) CancelRequest(request_id string) bool {
 
     for i := 0; i < len(engine.queue.pending); i++ {
         if engine.queue.pending[i].request_id == request_id {
@@ -235,7 +235,7 @@ func (engine *AsyncInferenceEngine) CancelRequest(request_id string) bool {
     return false
 }
 
-func (engine *AsyncInferenceEngine) GetMetrics() AsyncEngineMetrics {
+func (engine *async_inference_engine) GetMetrics() async_engine_metrics {
     return engine.metrics
 }
 
@@ -251,10 +251,10 @@ func min(a int, b int) int {
 }
 
 func sort_requests_by_priority(
-    requests []InferenceRequest,
-) []InferenceRequest {
+    requests []inference_request,
+) []inference_request {
 
-    result := make([]InferenceRequest, len(requests))
+    result := make([]inference_request, len(requests))
     copy(result, requests)
 
     for i := 0; i < len(result); i++ {
@@ -275,10 +275,10 @@ func sort_requests_by_priority(
 }
 
 func remove_scheduled_from_pending(
-    pending []InferenceRequest,
-    scheduled []InferenceRequest,
-) []InferenceRequest {
-    result := make([]InferenceRequest, 0)
+    pending []inference_request,
+    scheduled []inference_request,
+) []inference_request {
+    result := make([]inference_request, 0)
 
     scheduled_ids := make(map[string]bool)
     for i := 0; i < len(scheduled); i++ {
@@ -294,8 +294,8 @@ func remove_scheduled_from_pending(
     return result
 }
 
-func remove_at_index(arr []InferenceRequest, index int) []InferenceRequest {
-    result := make([]InferenceRequest, 0)
+func remove_at_index(arr []inference_request, index int) []inference_request {
+    result := make([]inference_request, 0)
 
     for i := 0; i < len(arr); i++ {
         if i != index {
@@ -306,7 +306,7 @@ func remove_at_index(arr []InferenceRequest, index int) []InferenceRequest {
     return result
 }
 
-func check_finish_condition(req InferenceRequest) bool {
+func check_finish_condition(req inference_request) bool {
 
     if len(req.output_tokens) >= req.sampling_params.max_tokens {
         return true
@@ -320,7 +320,7 @@ func check_finish_condition(req InferenceRequest) bool {
     return false
 }
 
-func (engine *AsyncInferenceEngine) update_metrics() {
+func (engine *async_inference_engine) update_metrics() {
 
     if engine.queue.total_completed > 0 {
         engine.metrics.throughput = float(engine.queue.total_completed) / 60.0
@@ -338,10 +338,10 @@ func main() {
         true,
     )
 
-    req := InferenceRequest {
+    req := inference_request {
         request_id: "req-001",
         prompt: "What is machine learning?",
-        sampling_params: SamplingParams {
+        sampling_params: sampling_params {
             max_tokens: 100,
             temperature: 0.7,
             top_p: 0.9,
