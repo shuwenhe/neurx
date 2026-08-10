@@ -7,7 +7,9 @@ use neurx.inference.sampling
 use neurx.inference.serve
 use neurx.inference.serve.continuous_batch
 use neurx.inference.serve.admission_control
-use neurx.inference.vllm.vllm
+use neurx.inference.scheduler.inference_runtime
+use neurx.inference.queue.request_queue
+use neurx.inference.metrics.inference_metrics
 use neurx.inference.eval
 use neurx.runtime.io.{runtime_env_get, runtime_write_text_file, runtime_run_command_output, runtime_run_command, runtime_shell_escape}
 use neurx.ops
@@ -22,7 +24,7 @@ struct infer_pipeline_state {
     paged_kv_cache_state paged_kv
     prefix_cache_state prefix_cache
     admission_control_state admission
-    vllm_runtime_state vllm
+    neurx_inference_runtime_state runtime
     infer_eval_state eval
     checkpoint model_weights
 }
@@ -42,7 +44,7 @@ func new_infer_pipeline_state(string request_id, string model, int input_tokens,
     admission_control_state admission = new_admission_control_state_with_policy(batch.capacity, max_seq_len * 2, "srpt")
     bool accepted = admission_can_enqueue_with_remaining(admission, batch.active_requests, input_tokens, max_new_tokens)
     admission = admission_on_enqueue_with_remaining(admission, input_tokens, max_new_tokens, accepted)
-    vllm_runtime_state vllm = new_vllm_runtime_state(
+    neurx_inference_runtime_state runtime = new_neurx_inference_runtime_state(
         layer_count,
         block_size,
         max_blocks,
@@ -50,7 +52,7 @@ func new_infer_pipeline_state(string request_id, string model, int input_tokens,
         prefix_cache.max_tokens,
         admission.policy
     )
-    vllm = vllm_runtime_enqueue_request(vllm, request_id, input_tokens, max_new_tokens, accepted)
+    runtime = neurx_runtime_enqueue_request(runtime, request_id, input_tokens, max_new_tokens, accepted)
     prefix_cache = prefix_cache_lookup_with_key(prefix_cache, request_id, input_tokens)
     if accepted {
         prefix_cache = prefix_cache_insert_with_key(prefix_cache, request_id, input_tokens)
@@ -69,7 +71,7 @@ func new_infer_pipeline_state(string request_id, string model, int input_tokens,
         paged_kv: paged,
         prefix_cache: prefix_cache,
         admission: admission,
-        vllm: vllm,
+        runtime: runtime,
         eval: new_infer_eval_state(),
         model_weights: new_checkpoint(0, 0.0, []),
     }
@@ -86,7 +88,7 @@ func new_infer_pipeline_from_checkpoint(string request_id, string checkpoint_pat
         paged_kv: base.paged_kv,
         prefix_cache: base.prefix_cache,
         admission: base.admission,
-        vllm: base.vllm,
+        runtime: base.runtime,
         eval: base.eval,
         model_weights: weights,
     }
@@ -100,12 +102,12 @@ func infer_pipeline_step(infer_pipeline_state state, int next_token_id) infer_pi
     continuous_batch_state next_batch = continuous_batch_record_decode_step(state.batch, 1)
     paged_kv_cache_state next_paged = paged_kv_reserve_tokens(state.paged_kv, 1)
     admission_control_state next_admission = admission_on_decode_step(state.admission, 1)
-    vllm_runtime_state next_vllm = vllm_runtime_record_decode(state.vllm, 1)
+    neurx_inference_runtime_state next_runtime = neurx_runtime_record_decode(state.runtime, 1)
     if next_decode.finished {
         next_batch = continuous_batch_finish_request(next_batch)
         next_paged = paged_kv_release_tokens(next_paged, next_decode.step)
         next_admission = admission_on_finish(next_admission, state.request.input_tokens)
-        next_vllm = vllm_runtime_finish_request(next_vllm, state.request.input_tokens)
+        next_runtime = neurx_runtime_finish_request(next_runtime, state.request.input_tokens)
     }
     infer_response_state next_response = infer_response_update(
         state.response,
@@ -121,7 +123,7 @@ func infer_pipeline_step(infer_pipeline_state state, int next_token_id) infer_pi
         paged_kv: next_paged,
         prefix_cache: state.prefix_cache,
         admission: next_admission,
-        vllm: next_vllm,
+        runtime: next_runtime,
         eval: state.eval,
         model_weights: state.model_weights
     }
@@ -138,10 +140,10 @@ func infer_pipeline_enqueue_request(infer_pipeline_state state, string request_i
     }
     bool accepted = admission_can_enqueue_with_remaining(state.admission, state.batch.active_requests, prefill_tokens, decode_remaining)
     admission_control_state next_admission = admission_on_enqueue_with_remaining(state.admission, prefill_tokens, decode_remaining, accepted)
-    vllm_runtime_state next_vllm = vllm_runtime_enqueue_request(state.vllm, request_id, prefill_tokens, decode_remaining, accepted)
-    prefix_cache_state next_prefix = next_vllm.prefix_cache.cache
+    neurx_inference_runtime_state next_runtime = neurx_runtime_enqueue_request(state.runtime, request_id, prefill_tokens, decode_remaining, accepted)
+    prefix_cache_state next_prefix = next_runtime.prefix_cache.cache
     continuous_batch_state next_batch = state.batch
-    paged_kv_cache_state next_paged = next_vllm.paged_attention.kv
+    paged_kv_cache_state next_paged = next_runtime.paged_attention.kv
     if accepted {
         next_batch = continuous_batch_enqueue_request(next_batch, prefill_tokens)
     }
@@ -153,7 +155,7 @@ func infer_pipeline_enqueue_request(infer_pipeline_state state, string request_i
         paged_kv: next_paged,
         prefix_cache: next_prefix,
         admission: next_admission,
-        vllm: next_vllm,
+        runtime: next_runtime,
         eval: state.eval,
         model_weights: state.model_weights,
     }
@@ -175,8 +177,8 @@ func infer_pipeline_step_from_logits(infer_pipeline_state state, tensor logits, 
     if state.response.finished {
         return state
     }
-    if vllm_runtime_queue_depth(state.vllm) > 0 {
-        vllm_runtime_step_result scheduled = vllm_runtime_schedule_next(state.vllm)
+    if neurx_runtime_queue_depth(state.runtime) > 0 {
+        neurx_inference_runtime_step_result scheduled = neurx_runtime_schedule_next(state.runtime)
         if scheduled.selected {
             infer_pipeline_state scheduled_state = infer_pipeline_state {
                 request: state.request,
@@ -186,7 +188,7 @@ func infer_pipeline_step_from_logits(infer_pipeline_state state, tensor logits, 
                 paged_kv: scheduled.state.paged_attention.kv,
                 prefix_cache: scheduled.state.prefix_cache.cache,
                 admission: state.admission,
-                vllm: scheduled.state,
+                runtime: scheduled.state,
                 eval: state.eval,
                 model_weights: state.model_weights,
             }
@@ -230,7 +232,7 @@ func infer_pipeline_set_sampling(infer_pipeline_state state, sampling_state samp
         paged_kv: state.paged_kv,
         prefix_cache: state.prefix_cache,
         admission: state.admission,
-        vllm: state.vllm,
+        runtime: state.runtime,
         eval: state.eval,
         model_weights: state.model_weights,
     }
@@ -473,7 +475,7 @@ func infer_run(string model_path, string prompt) string {
 }
 
 func infer_pipeline_queue_depth(infer_pipeline_state state) int {
-    vllm_runtime_queue_depth(state.vllm)
+    neurx_runtime_queue_depth(state.runtime)
 }
 
 func infer_pipeline_state_dict(infer_pipeline_state state) infer_pipeline_state {
@@ -484,12 +486,12 @@ func infer_pipeline_load_state_dict(infer_pipeline_state state, infer_pipeline_s
     other
 }
 
-func infer_pipeline_to_vllm_runtime(infer_pipeline_state state) vllm_runtime_state {
-    state.vllm
+func infer_pipeline_to_neurx_inference_runtime(infer_pipeline_state state) neurx_inference_runtime_state {
+    state.runtime
 }
 
-func infer_pipeline_vllm_schedule_next(infer_pipeline_state state) vllm_runtime_step_result {
-    vllm_runtime_schedule_next(state.vllm)
+func infer_pipeline_neurx_schedule_next(infer_pipeline_state state) neurx_inference_runtime_step_result {
+    neurx_runtime_schedule_next(state.runtime)
 }
 
 func infer_pipeline_last_observation(infer_pipeline_state state) string {
