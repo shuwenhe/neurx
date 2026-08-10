@@ -2801,8 +2801,6 @@ build-posttrain-real-s: check-bash
 		'$(CURDIR_UNIX)/artifacts/build/posttrain_real/posttrain_real_ir.json' || exit 1
 	@echo "[✓] Real training IR generated"
 
-# ==================== C++ to S Language Migration ====================
-
 build-json-parser-s: check-bash
 	@echo "╔════════════════════════════════════════════════════════════════╗"
 	@echo "║  Building Pure-S JSON Parser Library                           ║"
@@ -2820,21 +2818,21 @@ build-json-parser-s: check-bash
 
 test-json-parser-s: check-bash build-s-ir-runner
 	@echo "╔════════════════════════════════════════════════════════════════╗"
-	@echo "║  Testing Pure-S JSON Parser                                    ║"
+	@echo "║  Testing Pure-S Simplified JSON Parser                         ║"
 	@echo "╚════════════════════════════════════════════════════════════════╝"
 	@echo ""
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/test_json'
 	@cd '$(CURDIR_UNIX)' && \
-		rm -f '$(CURDIR_UNIX)/artifacts/build/test_json/test_json_parser.ir'; \
-		"$(S_SEED_COMPILER)" 'posttrain/lib/test_json_parser.s' '$(CURDIR_UNIX)/artifacts/build/test_json/test_json_parser.ir' 2>&1 || exit 1; \
-		test -f '$(CURDIR_UNIX)/artifacts/build/test_json/test_json_parser.ir'
+		rm -f '$(CURDIR_UNIX)/artifacts/build/test_json/test_json_simple.ir'; \
+		"$(S_SEED_COMPILER)" 'posttrain/lib/test_json_simple.s' '$(CURDIR_UNIX)/artifacts/build/test_json/test_json_simple.ir' 2>&1 || exit 1; \
+		test -f '$(CURDIR_UNIX)/artifacts/build/test_json/test_json_simple.ir'
 	@echo ""
 	@echo "[Running Tests]"
 	@cd '$(CURDIR_UNIX)' && \
-		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/test_json/test_json_parser.ir' \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/test_json/test_json_simple.ir' \
 		'$(S_RUNNER_BIN)' 2>&1
 	@echo ""
-	@echo "✅ Pure-S JSON Parser tests complete!"
+	@echo "✅ Pure-S Simplified JSON Parser tests complete!"
 	@echo ""
 
 build-cpp2s-migration: build-json-parser-s

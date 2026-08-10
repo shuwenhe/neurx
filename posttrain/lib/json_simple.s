@@ -2,9 +2,8 @@ package neurx.posttrain.lib.json_simple
 
 use std.io.readfile
 
-// Simplified JSON value type
 struct json_value {
-    int type  // 0: null, 1: bool, 2: number, 3: string, 4: array, 5: object
+    int type
     bool bool_value
     float number_value
     string string_value
@@ -100,7 +99,6 @@ func (j json_value) at(key string) json_value {
     panic("missing JSON field: " + key)
 }
 
-// Parse JSON from string
 func parse(text string) json_value {
     parser := json_parser_create(text)
     result := parser_parse_value(&parser)
@@ -113,7 +111,6 @@ func parse(text string) json_value {
     return result
 }
 
-// Parse JSON from file
 func parse_file(path string) json_value {
     content := readfile(path)
     if len(content) == 0 {
@@ -128,7 +125,10 @@ struct json_parser {
 }
 
 func json_parser_create(text string) json_parser {
-    return json_parser{text: text, pos: 0}
+    p := json_parser{}
+    p.text = text
+    p.pos = 0
+    return p
 }
 
 func parser_skip_whitespace(p *json_parser) {
@@ -170,24 +170,33 @@ func parser_parse_value(p *json_parser) json_value {
     }
     if ch == byte('"') {
         str := parser_parse_string(p)
-        val := json_value{type: 3, string_value: str}
+        val := json_value{}
+        val.type = 3
+        val.string_value = str
         return val
     }
     if ch == byte('[') {
         arr := parser_parse_array(p)
-        val := json_value{type: 4, array_value: arr}
+        val := json_value{}
+        val.type = 4
+        val.array_value = arr
         return val
     }
     if ch == byte('{') {
         keys := make([]string, 0)
         vals := make([]json_value, 0)
         parser_parse_object(p, &keys, &vals)
-        val := json_value{type: 5, object_keys: keys, object_values: vals}
+        val := json_value{}
+        val.type = 5
+        val.object_keys = keys
+        val.object_values = vals
         return val
     }
     if ch == byte('-') || (ch >= byte('0') && ch <= byte('9')) {
         num := parser_parse_number(p)
-        val := json_value{type: 2, number_value: num}
+        val := json_value{}
+        val.type = 2
+        val.number_value = num
         return val
     }
 
@@ -199,7 +208,9 @@ func parser_parse_null(p *json_parser) json_value {
     parser_advance(p)
     parser_advance(p)
     parser_advance(p)
-    return json_value{type: 0}
+    val := json_value{}
+    val.type = 0
+    return val
 }
 
 func parser_parse_bool(p *json_parser) json_value {
@@ -208,14 +219,20 @@ func parser_parse_bool(p *json_parser) json_value {
         parser_advance(p)
         parser_advance(p)
         parser_advance(p)
-        return json_value{type: 1, bool_value: true}
+        val := json_value{}
+        val.type = 1
+        val.bool_value = true
+        return val
     } else {
         parser_advance(p)
         parser_advance(p)
         parser_advance(p)
         parser_advance(p)
         parser_advance(p)
-        return json_value{type: 1, bool_value: false}
+        val := json_value{}
+        val.type = 1
+        val.bool_value = false
+        return val
     }
 }
 
