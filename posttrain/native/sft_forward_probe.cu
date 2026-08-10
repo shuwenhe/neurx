@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
         argv[1], argv[2], std::stoi(argv[3]));
     neurx::cuda::hf_decoder_cuda model(argv[1]);
     const auto& config = model.config();
-    if (config.vocab_size != neurx::posttrain::native::qwen_vocab_size) {
+    if (config.vocab_size != neurx::posttrain::native::model_vocab_size) {
       throw std::runtime_error("model vocab_size is not 151936");
     }
     neurx::cuda::hf_cuda_kv_cache cache;

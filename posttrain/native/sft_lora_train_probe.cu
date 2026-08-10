@@ -159,6 +159,32 @@ void publish_file(const std::filesystem::path& temporary,
 }  // namespace
 
 int main(int argc, char** argv) {
+  if (argc == 3 && std::string(argv[1]) == "--checkpoint-self-test") {
+    try {
+      lora_training_report report;
+      report.measured_tensor = "base_model.model.model.layers.0.self_attn.q_proj";
+      report.a_changed_index = 2;
+      report.b_changed_index = 3;
+      report.a_before = -0.5F;
+      report.a_after = -0.25F;
+      report.b_before = 0.0F;
+      report.b_after = 0.125F;
+      report.tensors = {
+          {report.measured_tensor + ".lora_A.weight", {2, 3},
+           {0.0F, 0.1F, report.a_after, 0.3F, 0.4F, 0.5F}},
+          {report.measured_tensor + ".lora_B.weight", {4, 2},
+           {0.0F, 0.0F, 0.0F, report.b_after, 0.0F, 0.0F, 0.0F, 0.0F}}};
+      const std::filesystem::path path = argv[2];
+      write_safetensors(path, report.tensors);
+      verify_checkpoint(path, report);
+      std::printf("CHECKPOINT_HOST_SELF_TEST=PASS tensors=%zu bytes=%ju\n",
+                  report.tensors.size(), std::filesystem::file_size(path));
+      return 0;
+    } catch (const std::exception& error) {
+      std::fprintf(stderr, "CHECKPOINT_HOST_SELF_TEST=FAIL: %s\n", error.what());
+      return 1;
+    }
+  }
   if (argc != 8) {
     std::fprintf(stderr,
                  "usage: sft_lora_train_probe MODEL_DIR DATA_FILE MAX_LENGTH OUTPUT_DIR "

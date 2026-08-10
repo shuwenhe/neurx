@@ -30,8 +30,8 @@ int64_t hf_config::head_dim() const {
 }
 
 void hf_config::validate() const {
-  if (architecture != model_architecture::base_model || model_type != "qwen2") {
-    throw std::runtime_error("only Qwen2ForCausalLM checkpoints are supported");
+  if (architecture != model_architecture::base_model) {
+    throw std::runtime_error("only causal language model checkpoints are supported");
   }
   if (vocab_size <= 0 || hidden_size <= 0 || intermediate_size <= 0 ||
       num_hidden_layers <= 0 || num_attention_heads <= 0 || num_key_value_heads <= 0 ||
@@ -48,7 +48,8 @@ hf_config hf_config::from_file(const std::string& path) {
   const json root = json::parse_file(path);
   hf_config config;
   config.model_type = root.at("model_type").as_string();
-  if (config.model_type == "qwen2") config.architecture = model_architecture::base_model;
+  // Support causal language models (llama, mistral, etc.)
+  config.architecture = model_architecture::base_model;
   config.vocab_size = root.at("vocab_size").as_int();
   config.hidden_size = root.at("hidden_size").as_int();
   config.intermediate_size = root.at("intermediate_size").as_int();

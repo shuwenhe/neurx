@@ -14,7 +14,7 @@
 namespace neurx::posttrain::native {
 
 constexpr int32_t ignore_index = -100;
-constexpr int32_t qwen_vocab_size = 151936;
+constexpr int32_t model_vocab_size = 151936;
 
 struct sft_example {
   std::vector<int32_t> input_ids;
@@ -76,8 +76,8 @@ inline sft_example load_sft_example(const std::string& model_dir, const std::str
   const nlohmann::json record = nlohmann::json::parse(first_jsonl_record(data_file));
   const auto tokenizer = runtime::model::bpe_tokenizer::from_directory(model_dir);
   const std::string system =
-      "<|im_start|>system\nYou are Qwen, created by Alibaba Cloud. You are a helpful "
-      "assistant.<|im_end|>\n";
+      "<|im_start|>system\nYou are a helpful assistant. Answer medical questions accurately.\n"
+      "<|im_end|>\n";
   const std::string user = "<|im_start|>user\n" + prompt_for(record) + "<|im_end|>\n";
   const std::string assistant_prefix = "<|im_start|>assistant\n";
   const std::string response = answer_for(record) + "<|im_end|>\n";
@@ -106,8 +106,8 @@ inline sft_example load_sft_example(const std::string& model_dir, const std::str
   int supervised = 0;
   int masked = 0;
   for (std::size_t index = 0; index < example.input_ids.size(); ++index) {
-    if (example.input_ids[index] < 0 || example.input_ids[index] >= qwen_vocab_size) {
-      throw std::runtime_error("input token id is outside model vocab_size=151936");
+    if (example.input_ids[index] < 0 || example.input_ids[index] >= model_vocab_size) {
+      throw std::runtime_error("input token id is outside model vocab_size=" + std::to_string(model_vocab_size));
     }
     if (example.labels[index] == ignore_index) {
       ++masked;

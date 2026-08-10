@@ -6,7 +6,7 @@ echo "    POSTTRAIN VERIFICATION TEST SUITE - COMPLETE RESULTS"
 echo "════════════════════════════════════════════════════════════════"
 echo ""
 
-BASE_MODEL_PATH="${NEURX_BASE_MODEL_PATH:-/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct}"
+BASE_MODEL_PATH="${NEURX_BASE_MODEL_PATH:-/home/shuwen/shuwen/model/base-model}"
 ADAPTER_PATH="${NEURX_ADAPTER_PATH:-/home/shuwen/shuwen/posttrain/adapter}"
 
 echo "[Test 1] Adapter Files Integrity"
@@ -98,7 +98,7 @@ fi
 echo ""
 echo "════════════════════════════════════════════════════════════════"
 echo "[DETAILS]"
-echo "  Base Model: Qwen2.5-0.5B-Instruct (378M parameters)"
+echo "  Base Model: base-model (configurable parameters)"
 echo "  LoRA Adapter: ~903K parameters (rank=8)"
 echo "  Training Data: MedMCQA dataset"
 echo "  Fine-tuning Method: Supervised Fine-Tuning (SFT)"

@@ -112,7 +112,7 @@ PRETRAIN_RUNNER_BIN := $(CURDIR_UNIX)/artifacts/build/run_large_pretrain/run_lar
 NEURX_SHARD_CMD ?= wikipedia
 NEURX_SHARD_RESUME ?= 1
 NEURX_SHARD_FORCE_REBUILD ?= 0
-POSTTRAIN_MODEL_PATH ?= $(if $(wildcard $(CURDIR_UNIX)/../model/Qwen2.5-0.5B-Instruct-official/model.safetensors),$(CURDIR_UNIX)/../model/Qwen2.5-0.5B-Instruct-official,$(CURDIR_UNIX)/../model/Qwen2.5-0.5B-Instruct)
+POSTTRAIN_MODEL_PATH ?= $(if $(wildcard $(CURDIR_UNIX)/../model/base-model-official/model.safetensors),$(CURDIR_UNIX)/../model/base-model-official,$(CURDIR_UNIX)/../model/base-model)
 POSTTRAIN_DATA_FILE ?= $(CURDIR_UNIX)/../dataset/medical/train.json
 POSTTRAIN_OUTPUT_DIR ?= $(CURDIR_UNIX)/../posttrain
 POSTTRAIN_PYTHON ?= $(if $(wildcard /home/shuwen/.venv/bin/python),/home/shuwen/.venv/bin/python,python3)
@@ -463,7 +463,7 @@ posttrain-gpu: check-bash build-s-ir-runner build-posttrain-sft-native build-pos
 		export NEURX_POSTTRAIN_MERGE_MODEL='$(POSTTRAIN_MERGE_MODEL)'; \
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' '$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_sft_gpu_$(shell date +%Y%m%d_%H%M%S).log'
 	@echo ""
-	@echo "[✓] GPU training completed"
+	@echo "[✓] GPU LoRA hard-validation training completed"
 	@echo "Model: $(POSTTRAIN_OUTPUT_DIR)"
 	@echo "Adapter: $(POSTTRAIN_OUTPUT_DIR)/adapter"
 posttrain-npu: check-bash build-s-ir-runner build-posttrain-sft-native build-posttrain-sft-s
@@ -1036,7 +1036,7 @@ build-real-inference-s: build-s-ir-runner
 build-model-inference-s: build-s-ir-runner
 	@mkdir -p artifacts/build/model_inference
 	@echo "Compiling strict pure-S Language Model CPU inference kernel..."
-	@$(S_SEED_COMPILER) inference/qwen2_cpu_inference.s artifacts/build/model_inference/model_cpu_inference.ir
+	@$(S_SEED_COMPILER) inference/model_cpu_inference.s artifacts/build/model_inference/model_cpu_inference.ir
 	@test -f artifacts/build/model_inference/model_cpu_inference.ir
 
 model-weight-probe: build-model-inference-s
@@ -1718,7 +1718,7 @@ build-s-ir-runner: check-bash
 		chmod +x '$(S_RUNNER_BIN)' && \
 		test -f '$(S_RUNNER_BIN)'
 build-posttrain-sft-native: check-bash
-	@echo "Building native Qwen tokenizer/SFT batch probe..."
+	@echo "Building native model tokenizer/SFT batch probe..."
 	@mkdir -p '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)'
 	@'$(CXX)' -O2 -std=c++17 -Wall -Wextra -Werror \
 		'posttrain/native/sft_batch_probe.cpp' \
@@ -1727,7 +1727,7 @@ build-posttrain-sft-native: check-bash
 		-o '$(POSTTRAIN_SFT_BATCH_PROBE)'
 	@test -x '$(POSTTRAIN_SFT_BATCH_PROBE)'
 build-posttrain-sft-forward: check-bash check-nvcc
-	@echo "Building native Qwen full-sequence CUDA forward probe..."
+	@echo "Building native model full-sequence CUDA forward probe..."
 	@mkdir -p '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)'
 	@'$(CXX)' -O2 -std=c++17 -Wall -Wextra -Werror -c \
 		'runtime/model/json.cpp' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/json.o'
@@ -1755,7 +1755,7 @@ build-posttrain-sft-forward: check-bash check-nvcc
 		-o '$(POSTTRAIN_SFT_FORWARD_PROBE)'
 	@test -x '$(POSTTRAIN_SFT_FORWARD_PROBE)'
 build-posttrain-sft-training: build-posttrain-sft-forward
-	@echo "Building native Qwen LoRA CUDA training/checkpoint probe..."
+	@echo "Building native model LoRA CUDA training/checkpoint probe..."
 	@'$(CUDA_NVCC)' -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
 		'posttrain/native/sft_lora_train_probe.cu' \
 		-o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/sft_lora_train_probe.o'
