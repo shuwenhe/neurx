@@ -30,7 +30,10 @@ class hf_decoder_cuda {
   hf_decoder_cuda(const hf_decoder_cuda&) = delete;
   hf_decoder_cuda& operator=(const hf_decoder_cuda&) = delete;
   const runtime::model::hf_config& config() const;
+  std::size_t weight_count() const;
   std::vector<float> prefill(const std::vector<int32_t>& token_ids, hf_cuda_kv_cache* cache);
+  std::vector<float> prefill_all(const std::vector<int32_t>& token_ids,
+                                 hf_cuda_kv_cache* cache);
   std::vector<float> decode(int32_t token_id, hf_cuda_kv_cache* cache);
   static int32_t greedy(const std::vector<float>& logits);
  private:

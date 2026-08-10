@@ -11,7 +11,7 @@ void print_logits(const char* name, const std::vector<float>& logits) {
 int main(int argc, char** argv) {
   if (argc < 4) return 2;
   int devices = 0;
-  if (cuda_get_device_count(&devices) != cuda_success || devices == 0) {
+  if (cudaGetDeviceCount(&devices) != cudaSuccess || devices == 0) {
     std::puts("SKIP no-CUDA-device");
     return 0;
   }

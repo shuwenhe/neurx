@@ -58,16 +58,16 @@ class memory_registry {
 };
 class storage {
  public:
-  storage(device device, std::size_t bytes);
+  storage(::neurx::runtime::native::device device, std::size_t bytes);
   ~storage();
   storage(const storage&) = delete;
   storage& operator=(const storage&) = delete;
   void* data() { return data_; }
   const void* data() const { return data_; }
   std::size_t bytes() const { return bytes_; }
-  device device() const { return device_; }
+  ::neurx::runtime::native::device device() const { return device_; }
  private:
-  device device_;
+  ::neurx::runtime::native::device device_;
   std::size_t bytes_ = 0;
   void* data_ = nullptr;
   memory_ops memory_ops_;
@@ -81,7 +81,9 @@ class tensor {
                       device device = {device_type::cpu, 0});
   bool defined() const { return static_cast<bool>(storage_); }
   d_type dtype() const { return dtype_; }
-  device device() const { return storage_ ? storage_->device() : device{}; }
+  ::neurx::runtime::native::device device() const {
+    return storage_ ? storage_->device() : ::neurx::runtime::native::device{};
+  }
   const std::vector<int64_t>& shape() const { return shape_; }
   const std::vector<int64_t>& strides() const { return strides_; }
   int64_t storage_offset() const { return storage_offset_; }
@@ -99,7 +101,7 @@ class tensor {
   tensor reshape(std::vector<int64_t> shape) const;
   tensor contiguous() const;
   tensor to(d_type dtype) const;
-  tensor to(device device) const;
+  tensor to(::neurx::runtime::native::device device) const;
   void bump_version();
  private:
   tensor(std::shared_ptr<storage> storage, d_type dtype, std::vector<int64_t> shape,

@@ -52,6 +52,7 @@ S_RUNNER_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/s_runner
 S_RUNNER_BIN := $(S_RUNNER_BUILD_DIR)/s_ir_runner$(BIN_EXT)
 POSTTRAIN_SFT_NATIVE_BUILD_DIR := $(CURDIR_UNIX)/artifacts/build/posttrain_sft_native
 POSTTRAIN_SFT_BATCH_PROBE := $(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/sft_batch_probe$(BIN_EXT)
+POSTTRAIN_SFT_FORWARD_PROBE := $(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/sft_forward_probe$(BIN_EXT)
 PRODUCTION_S_INFERENCE_DIR := $(CURDIR_UNIX)/artifacts/build/production_s_inference
 PRODUCTION_S_BACKEND := $(PRODUCTION_S_INFERENCE_DIR)/cpu_backend.ir
 PRODUCTION_S_CHAT_IR := $(PRODUCTION_S_INFERENCE_DIR)/production_chat.ir
@@ -424,7 +425,7 @@ posttrain-cpu: check-bash build-s-ir-runner build-posttrain-sft-native build-pos
 	@echo "[✓] CPU training completed"
 	@echo "Model: $(POSTTRAIN_OUTPUT_DIR)"
 	@echo "Adapter: $(POSTTRAIN_OUTPUT_DIR)/adapter"
-posttrain-gpu: check-bash build-s-ir-runner build-posttrain-sft-native build-posttrain-sft-s
+posttrain-gpu: check-bash build-s-ir-runner build-posttrain-sft-native build-posttrain-sft-forward build-posttrain-sft-s
 	@echo "======================================================"
 	@echo "[PostTrain] Real LoRA SFT Training (NVIDIA GPU)"
 	@echo "======================================================"
@@ -456,6 +457,7 @@ posttrain-gpu: check-bash build-s-ir-runner build-posttrain-sft-native build-pos
 		export NEURX_POSTTRAIN_LORA_ALPHA='$(POSTTRAIN_LORA_ALPHA)'; \
 		export NEURX_POSTTRAIN_DEVICE='cuda'; \
 		export NEURX_POSTTRAIN_BATCH_PROBE='$(POSTTRAIN_SFT_BATCH_PROBE)'; \
+		export NEURX_POSTTRAIN_FORWARD_PROBE='$(POSTTRAIN_SFT_FORWARD_PROBE)'; \
 		export NEURX_POSTTRAIN_MERGE_MODEL='$(POSTTRAIN_MERGE_MODEL)'; \
 		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/posttrain_sft/posttrain_lora_train.ir' '$(S_RUNNER_BIN)' 2>&1 | tee -a '$(LOG_DIR)/posttrain_sft_gpu_$(shell date +%Y%m%d_%H%M%S).log'
 	@echo ""
@@ -1722,6 +1724,34 @@ build-posttrain-sft-native: check-bash
 		-licui18n -licuuc -licudata \
 		-o '$(POSTTRAIN_SFT_BATCH_PROBE)'
 	@test -x '$(POSTTRAIN_SFT_BATCH_PROBE)'
+build-posttrain-sft-forward: check-bash check-nvcc
+	@echo "Building native Qwen full-sequence CUDA forward probe..."
+	@mkdir -p '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)'
+	@'$(CXX)' -O2 -std=c++17 -Wall -Wextra -Werror -c \
+		'runtime/model/json.cpp' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/json.o'
+	@'$(CXX)' -O2 -std=c++17 -Wall -Wextra -Werror -c \
+		'runtime/model/bpe_tokenizer.cpp' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/bpe_tokenizer.o'
+	@'$(CXX)' -O2 -std=c++17 -Wall -Wextra -Werror -c \
+		'runtime/native/tensor_runtime.cpp' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/tensor_runtime.o'
+	@'$(CXX)' -O2 -std=c++17 -Wall -Wextra -Werror -c \
+		'runtime/model/safetensors.cpp' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/safetensors.o'
+	@'$(CXX)' -O2 -std=c++17 -Wall -Wextra -Werror -c \
+		'runtime/model/hf_model.cpp' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/hf_model.o'
+	@'$(CUDA_NVCC)' -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
+		'cuda/hf_decoder_cuda.cu' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/hf_decoder_cuda.o'
+	@'$(CUDA_NVCC)' -O2 -std=c++17 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -c \
+		'posttrain/native/sft_forward_probe.cu' -o '$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/sft_forward_probe.o'
+	@'$(CXX)' -O2 -std=c++17 -Wall -Wextra -Werror \
+		'$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/sft_forward_probe.o' \
+		'$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/hf_decoder_cuda.o' \
+		'$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/hf_model.o' \
+		'$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/safetensors.o' \
+		'$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/tensor_runtime.o' \
+		'$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/json.o' \
+		'$(POSTTRAIN_SFT_NATIVE_BUILD_DIR)/bpe_tokenizer.o' \
+		-licui18n -licuuc -licudata -lcublas -lcudart \
+		-o '$(POSTTRAIN_SFT_FORWARD_PROBE)'
+	@test -x '$(POSTTRAIN_SFT_FORWARD_PROBE)'
 build-cuda-train-bridge: check-bash
 	@echo "Building native CUDA/cuBLAS train bridge..."
 	@if [ '$(PLATFORM)' != 'linux' ]; then \
