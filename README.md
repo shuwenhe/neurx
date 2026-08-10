@@ -1,4 +1,4 @@
-# NeurX: Post-Training Framework for Large Language Models
+# NeurX: Training & Inference Framework for Large Language Models
 
 NeurX is a pure S language framework for training & inference large language models. It provides a complete pipeline for fine-tuning, inference, and evaluation of open-source LLMs on custom datasets.
 
