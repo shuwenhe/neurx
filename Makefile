@@ -7,7 +7,7 @@
 	run-full-inference-s compile-all-components-s integration-s complete-training-cycle-s verify-transformer-implementation-s cluster-launch-s setup-production-deployment-s \
 	run-end-to-end-verification-s run-integration-tests-s minimal-diagnostic-s diagnose-file-creation-s diagnose-tool-registration-s diagnose-autoscroll-s \
 	build-pretrain-manifest-s build-cuda-train-bridge build-cuda-chat-bridge run-gpu-pretrain-s cuda-tools-s cuda-verify-s cuda-build-s cuda-build-runtime-s cuda-build-runtime-alt-s cuda-build-kernels-s cuda-build-kernels-simple-s run-interactive-chat-repl-s transformer-cuda-checkpoint-resume-test build-real-inference-s build-real-model-chat-s build-production-s-inference production-s-inference build-hf-posttrain-chat-s hf-posttrain-chat \
-	build-json-parser-s test-json-parser-s build-cpp2s-migration
+	build-json-parser-s test-json-parser-s test-hf-config-s build-cpp2s-migration
 ifeq ($(OS),windows_nt)
 PLATFORM := windows
 WINDOWS_GIT_BASH := C:/progra~1/git/bin/bash.exe
@@ -2833,6 +2833,25 @@ test-json-parser-s: check-bash build-s-ir-runner
 		'$(S_RUNNER_BIN)' 2>&1
 	@echo ""
 	@echo "✅ Pure-S JSON Parser tests complete!"
+	@echo ""
+
+test-hf-config-s: check-bash build-s-ir-runner
+	@echo "╔════════════════════════════════════════════════════════════════╗"
+	@echo "║  Testing HuggingFace Config Loader (Pure-S)                    ║"
+	@echo "╚════════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/test_hf_config'
+	@cd '$(CURDIR_UNIX)' && \
+		rm -f '$(CURDIR_UNIX)/artifacts/build/test_hf_config/hf_config.ir'; \
+		"$(S_SEED_COMPILER)" 'posttrain/lib/hf_config.s' '$(CURDIR_UNIX)/artifacts/build/test_hf_config/hf_config.ir' 2>&1 || exit 1; \
+		test -f '$(CURDIR_UNIX)/artifacts/build/test_hf_config/hf_config.ir'
+	@echo ""
+	@echo "[Running HF Config Tests]"
+	@cd '$(CURDIR_UNIX)' && \
+		S_IR_RUNNER_INPUT='$(CURDIR_UNIX)/artifacts/build/test_hf_config/hf_config.ir' \
+		'$(S_RUNNER_BIN)' 2>&1
+	@echo ""
+	@echo "✅ Pure-S HF Config Loader tests complete!"
 	@echo ""
 
 build-cpp2s-migration: build-json-parser-s
