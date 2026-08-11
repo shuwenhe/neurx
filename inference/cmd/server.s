@@ -1,7 +1,8 @@
 package neurx.inference.cmd.server
-use neurx.inference.api.http_server.{create_http_server, close_http_server, server_accept_loop, http_request, http_response}
+use neurx.inference.api.http_server.{create_http_server, close_http_server, server_accept_loop, http_request, http_response, http_server}
 use neurx.inference.api.rest_api.{route_request}
 extern "intrinsic" func __host_readline(string prompt) string
+extern "intrinsic" func __host_slice(string text, int start, int end) string
 func main() {
     print("╔════════════════════════════════════════════╗\n")
     print("║    NeurX Production Inference Server       ║\n")
@@ -16,7 +17,7 @@ func main() {
     print("   Backend: Native CPU (6 threads)\n")
     print("   Model: /home/shuwen/shuwen/posttrain/model.safetensors\n")
     print("   Language: Pure S (No Python, No Shell)\n\n")
-    server := create_http_server(host, port)
+    http_server server = create_http_server(host, port)
     if server.listen_fd < 0 {
         print("❌ Failed to start server\n")
         return
@@ -29,7 +30,7 @@ func main() {
     print("   GET    /api/health            - Health check\n")
     print("   POST   /api/embeddings        - Generate embeddings\n\n")
     print("🧪 Quick Test:\n")
-    print("   curl -X POST http:
+    print("   curl -X POST http://127.0.0.1:8000/api/generate \\\n")
     print("     -H 'Content-Type: application/json' \\\n")
     print("     -d '{\"prompt\": \"医学术语\", \"max_tokens\": 100}'\n\n")
     print("📝 Type 'quit' to shutdown server\n")
@@ -41,7 +42,7 @@ func main() {
 }
 func handle_requests(http_server server) {
     while server.running {
-        prompt := __host_readline("neurx> ")
+        string prompt = __host_readline("neurx> ")
         if prompt == "quit" || prompt == "exit" {
             break
         }
@@ -88,5 +89,5 @@ func int_to_string(int val) string {
 }
 func string_at_index(string s, int idx) string {
     if idx < 0 || idx >= len(s) { return "" }
-    return string(s[idx : idx+1])
+    return __host_slice(s, idx, idx + 1)
 }

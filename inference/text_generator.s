@@ -139,22 +139,49 @@ func stub_next_logits(
     int max_steps,
     int vocab_size
 ) []float {
+    if vocab_size <= 0 {
+        vocab_size = 16
+    }
     []float logits = []float{cap: vocab_size}
+    int signature = (len(current_ids) + 1) * 97 + step * 31 + max_steps * 11
     int i = 0
-    while i < vocab_size {
-        logits[i] = -4.0 - float(i % 5)
+    while i < len(current_ids) {
+        signature = signature + current_ids[i] * (i + 1)
         i = i + 1
     }
-    int preferred = (len(current_ids) + step + 3) % vocab_size
-    logits[preferred] = 8.0 + float(step)
-    logits[(preferred + 1) % vocab_size] = 4.0
-    logits[(preferred + 2) % vocab_size] = 2.0
+    int slot = signature - (signature / vocab_size) * vocab_size
+    if slot < 0 {
+        slot = 0 - slot
+    }
+    int preferred = slot
+    int secondary = (preferred + 7 + cfg.top_k) - (((preferred + 7 + cfg.top_k) / vocab_size) * vocab_size)
+    int tertiary = (preferred + 13 + step) - (((preferred + 13 + step) / vocab_size) * vocab_size)
+    i = 0
+    while i < vocab_size {
+        logits[i] = -8.0 + float((i + signature) - (((i + signature) / 9) * 9)) * 0.15
+        i = i + 1
+    }
+    logits[preferred] = 12.0 + float(step)
+    logits[secondary] = 6.0 + float(len(current_ids))
+    logits[tertiary] = 3.0 + float(cfg.top_k) * 0.05
+    i = 0
+    while i < len(current_ids) {
+        int token = current_ids[i]
+        int penalized = token - ((token / vocab_size) * vocab_size)
+        if penalized < 0 {
+            penalized = 0 - penalized
+        }
+        logits[penalized] = logits[penalized] - 0.5
+        i = i + 1
+    }
     if step + 1 >= max_steps {
-        logits[cfg.eos_token_id] = 12.0
+        logits[cfg.eos_token_id] = 15.0
     } else if step + 2 >= max_steps {
-        logits[cfg.eos_token_id] = 6.0
+        logits[cfg.eos_token_id] = 7.5
     } else if cfg.min_new_tokens > step {
-        logits[cfg.eos_token_id] = -12.0
+        logits[cfg.eos_token_id] = -15.0
+    } else if cfg.min_new_tokens == step {
+        logits[cfg.eos_token_id] = -2.0
     }
     logits
 }

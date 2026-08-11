@@ -1,0 +1,11 @@
+[Unit]
+Description=NeurX NVIDIA boot self check and auto repair
+After=systemd-modules-load.service systemd-udevd.service
+Before=display-manager.service
+
+[Service]
+Type=oneshot
+ExecStart=/home/shuwen/shuwen/neurx/scripts/nvidia_boot_self_heal.sh
+
+[Install]
+WantedBy=multi-user.target

@@ -1,5 +1,6 @@
 package neurx.inference.api.rest_api
 use neurx.inference.api.http_server.{http_request, http_response}
+use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result, load_real_text_engine, generate_response, resolve_model_path_from_env, resolve_prompt_from_body, parse_max_tokens, parse_bool, build_health_json, build_models_json, build_generate_json, build_chat_completion_json}
 struct inference_request {
     string prompt
     int max_tokens
@@ -104,21 +105,8 @@ func parse_inference_request(string body) inference_request {
         stream: false,
     }
 }
-func create_json_response(string response, int tokens, float latency) string {
-    json := "{"
-    json = json + "\"response\":\"" + response + "\","
-    json = json + "\"tokens_generated\":" + int_to_string(tokens) + ","
-    json = json + "\"latency_ms\":" + float_to_string(latency)
-    json = json + "}"
-    return json
-}
-func float_to_string(float val) string {
-    int_part := int(val)
-    frac_part := int((val - float(int_part)) * 1000.0)
-    result := int_to_string(int_part)
-    result = result + "."
-    result = result + int_to_string(frac_part)
-    return result
+func load_engine() real_text_engine_state {
+    load_real_text_engine(resolve_model_path_from_env())
 }
 func handle_generate(http_request req) http_response {
     if req.method != "POST" {
@@ -128,31 +116,72 @@ func handle_generate(http_request req) http_response {
             body: "{\"error\":\"Method not allowed\"}",
         }
     }
-    inference_req := parse_inference_request(req.body)
-    response_text := "Medical response to: " + inference_req.prompt
-    tokens_generated := 50
-    latency := 123.45
-    response_json := create_json_response(response_text, tokens_generated, latency)
+    real_text_engine_state state = load_engine()
+    if !state.ready {
+        return http_response{
+            status_code: 503,
+            headers: [],
+            body: build_health_json(state),
+        }
+    }
+    string prompt = resolve_prompt_from_body(req.body)
+    int max_tokens = parse_max_tokens(req.body, 128)
+    real_generation_result result = generate_response(state, prompt, max_tokens)
+    result.stream = parse_bool(req.body, "\"stream\"", false)
     return http_response{
         status_code: 200,
         headers: [],
-        body: response_json,
+        body: build_generate_json(result),
+    }
+}
+func handle_chat_completions(http_request req) http_response {
+    if req.method != "POST" {
+        return http_response{
+            status_code: 405,
+            headers: [],
+            body: "{\"error\":\"Method not allowed\"}",
+        }
+    }
+    real_text_engine_state state = load_engine()
+    if !state.ready {
+        return http_response{
+            status_code: 503,
+            headers: [],
+            body: build_health_json(state),
+        }
+    }
+    string prompt = resolve_prompt_from_body(req.body)
+    int max_tokens = parse_max_tokens(req.body, 128)
+    real_generation_result result = generate_response(state, prompt, max_tokens)
+    result.stream = parse_bool(req.body, "\"stream\"", false)
+    return http_response{
+        status_code: 200,
+        headers: [],
+        body: build_chat_completion_json(result),
     }
 }
 func handle_health(http_request req) http_response {
-    health_json := "{\"status\":\"healthy\",\"model\":\"language-model-0.5b\",\"backend\":\"cpu\"}"
+    real_text_engine_state state = load_engine()
+    int status_code = 200
+    if !state.ready {
+        status_code = 503
+    }
     return http_response{
-        status_code: 200,
+        status_code: status_code,
         headers: [],
-        body: health_json,
+        body: build_health_json(state),
     }
 }
 func handle_models(http_request req) http_response {
-    models_json := "{\"models\":[\"language-model-0.5b-instruct\"]}"
+    real_text_engine_state state = load_engine()
+    int status_code = 200
+    if !state.ready {
+        status_code = 503
+    }
     return http_response{
-        status_code: 200,
+        status_code: status_code,
         headers: [],
-        body: models_json,
+        body: build_models_json(state),
     }
 }
 func route_request(http_request req) http_response {
@@ -160,14 +189,26 @@ func route_request(http_request req) http_response {
     if path == "/api/generate" {
         return handle_generate(req)
     }
+    if path == "/v1/completions" {
+        return handle_generate(req)
+    }
     if path == "/api/health" {
+        return handle_health(req)
+    }
+    if path == "/health" {
         return handle_health(req)
     }
     if path == "/api/models" {
         return handle_models(req)
     }
     if path == "/api/chat/completions" {
-        return handle_generate(req)
+        return handle_chat_completions(req)
+    }
+    if path == "/v1/chat/completions" {
+        return handle_chat_completions(req)
+    }
+    if path == "/models" {
+        return handle_models(req)
     }
     return http_response{
         status_code: 404,

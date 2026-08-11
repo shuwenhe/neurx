@@ -1,14 +1,17 @@
 package neurx.inference.transformer_layer
 extern "intrinsic" func __host_slice(string text, int start, int end) string
+
 struct tensor_one_d {
     []float data
     int size
 }
+
 struct tensor_two_d {
     [][]float data
     int rows
     int cols
 }
+
 func create_tensor_one_d(int size) tensor_one_d {
     return tensor_one_d{
         size: size
