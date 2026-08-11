@@ -6,7 +6,7 @@ int STMT_TYPE_CONDITION = 3
 int STMT_TYPE_LOOP = 4
 int STMT_TYPE_FUNCTION_CALL = 5
 
-struct DslStatement {
+struct dsl_statement {
     int statement_type
     string name
     string operation
@@ -15,16 +15,16 @@ struct DslStatement {
     map[string]string attributes
 }
 
-struct DslProgram {
+struct dsl_program {
     string program_id
     string program_name
-    []DslStatement statements
+    []dsl_statement statements
     map[string]any state
     map[string]string types
 }
 
-struct DslExecutionContext {
-    DslProgram program
+struct dsl_execution_context {
+    dsl_program program
     int current_statement_index
     map[string]any current_state
     []string execution_trace
@@ -32,7 +32,7 @@ struct DslExecutionContext {
     string halt_reason
 }
 
-struct DslFunctionDef {
+struct dsl_function_def {
     string function_name
     []string parameters
     []string return_types
@@ -42,21 +42,21 @@ struct DslFunctionDef {
 func NewDslProgram(
     string program_id,
     string program_name,
-) DslProgram {
-    return DslProgram {
+) dsl_program {
+    return dsl_program {
         program_id: program_id,
         program_name: program_name,
-        statements: make([]DslStatement, 0),
+        statements: make([]dsl_statement, 0),
         state: make(map[string]any),
         types: make(map[string]string),
     }
 }
 
-func (prog *DslProgram) AddStatement(stmt DslStatement) {
+func (prog *dsl_program) AddStatement(stmt dsl_statement) {
     prog.statements = append(prog.statements, stmt)
 }
 
-func (prog *DslProgram) SetVariable(
+func (prog *dsl_program) SetVariable(
     string name,
     any value,
     string var_type,
@@ -65,7 +65,7 @@ func (prog *DslProgram) SetVariable(
     prog.types[name] = var_type
 }
 
-func (prog *DslProgram) GetVariable(string name) any {
+func (prog *dsl_program) GetVariable(string name) any {
     if val, ok := prog.state[name]; ok {
         return val
     }
@@ -76,8 +76,8 @@ func CreateLlmCallStatement(
     string prompt,
     string model_name,
     int max_tokens,
-) DslStatement {
-    stmt := DslStatement {
+) dsl_statement {
+    stmt := dsl_statement {
         statement_type: STMT_TYPE_LLM_CALL,
         operation: "llm",
         name: "llm_response",
@@ -100,8 +100,8 @@ func CreateLlmCallStatement(
 func CreateAssignmentStatement(
     string variable,
     string value,
-) DslStatement {
-    return DslStatement {
+) dsl_statement {
+    return dsl_statement {
         statement_type: STMT_TYPE_ASSIGNMENT,
         operation: "set",
         name: variable,
@@ -115,8 +115,8 @@ func CreateLoopStatement(
     string loop_var,
     string collection,
     int num_iterations,
-) DslStatement {
-    stmt := DslStatement {
+) dsl_statement {
+    stmt := dsl_statement {
         statement_type: STMT_TYPE_LOOP,
         operation: "for",
         name: loop_var,
@@ -133,8 +133,8 @@ func CreateLoopStatement(
 func CreateFunctionCallStatement(
     string function_name,
     []string args,
-) DslStatement {
-    return DslStatement {
+) dsl_statement {
+    return dsl_statement {
         statement_type: STMT_TYPE_FUNCTION_CALL,
         operation: "call",
         name: function_name,
@@ -144,26 +144,26 @@ func CreateFunctionCallStatement(
     }
 }
 
-struct DslInterpreter {
-    DslExecutionContext context
-    map[string]DslFunctionDef functions
+struct dsl_interpreter {
+    dsl_execution_context context
+    map[string]dsl_function_def functions
 }
 
-func NewDslInterpreter(prog DslProgram) DslInterpreter {
-    return DslInterpreter {
-        context: DslExecutionContext {
+func NewDslInterpreter(prog dsl_program) dsl_interpreter {
+    return dsl_interpreter {
+        context: dsl_execution_context {
             program: prog,
             current_statement_index: 0,
             current_state: make(map[string]any),
             execution_trace: make([]string, 0),
             halted: false,
         },
-        functions: make(map[string]DslFunctionDef),
+        functions: make(map[string]dsl_function_def),
     }
 }
 
-func (interp *DslInterpreter) ExecuteStatement(
-    stmt DslStatement,
+func (interp *dsl_interpreter) ExecuteStatement(
+    stmt dsl_statement,
 ) (any, bool) {
 
     interp.context.execution_trace = append(
@@ -192,8 +192,8 @@ func (interp *DslInterpreter) ExecuteStatement(
     }
 }
 
-func (interp *DslInterpreter) execute_llm_call(
-    stmt DslStatement,
+func (interp *dsl_interpreter) execute_llm_call(
+    stmt dsl_statement,
 ) (any, bool) {
 
     prompt := ""
@@ -213,23 +213,23 @@ func (interp *DslInterpreter) execute_llm_call(
     return response, true
 }
 
-func (interp *DslInterpreter) execute_assignment(
-    stmt DslStatement,
+func (interp *dsl_interpreter) execute_assignment(
+    stmt dsl_statement,
 ) (any, bool) {
     value := stmt.arguments[0]
     interp.context.current_state[stmt.name] = value
     return value, true
 }
 
-func (interp *DslInterpreter) execute_condition(
-    stmt DslStatement,
+func (interp *dsl_interpreter) execute_condition(
+    stmt dsl_statement,
 ) (any, bool) {
 
     return true, true
 }
 
-func (interp *DslInterpreter) execute_loop(
-    stmt DslStatement,
+func (interp *dsl_interpreter) execute_loop(
+    stmt dsl_statement,
 ) (any, bool) {
     iterations := 1
     if iter_str, ok := stmt.attributes["iterations"]; ok {
@@ -243,8 +243,8 @@ func (interp *DslInterpreter) execute_loop(
     return nil, true
 }
 
-func (interp *DslInterpreter) execute_function_call(
-    stmt DslStatement,
+func (interp *dsl_interpreter) execute_function_call(
+    stmt dsl_statement,
 ) (any, bool) {
 
     if fn, ok := interp.functions[stmt.name]; ok {
@@ -256,7 +256,7 @@ func (interp *DslInterpreter) execute_function_call(
     return nil, false
 }
 
-func (interp *DslInterpreter) ExecuteProgram() (map[string]any, bool) {
+func (interp *dsl_interpreter) ExecuteProgram() (map[string]any, bool) {
     for i := 0; i < len(interp.context.program.statements); i++ {
         stmt := interp.context.program.statements[i]
 
@@ -272,7 +272,7 @@ func (interp *DslInterpreter) ExecuteProgram() (map[string]any, bool) {
     return interp.context.current_state, true
 }
 
-func (interp *DslInterpreter) GetExecutionTrace() []string {
+func (interp *dsl_interpreter) GetExecutionTrace() []string {
     return interp.context.execution_trace
 }
 

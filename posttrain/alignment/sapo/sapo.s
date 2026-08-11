@@ -18,7 +18,7 @@ struct sapo_config {
 }
 
 struct sapo_trainer {
-    config: SAPOConfig
+    config: sapo_config
     policy_model: *model
     value_model: *model
     reference_model: *model
@@ -35,7 +35,7 @@ struct advantage_stats {
 }
 
 func new_sapo_trainer(
-    config: SAPOConfig,
+    config: sapo_config,
     policy: *model,
     value: *model,
     reference: *model

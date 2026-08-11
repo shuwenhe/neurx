@@ -2,7 +2,7 @@ package neurx.inference.attention_example
 
 use neurx.inference.attention_integration
 
-struct ExampleConfig {
+struct example_config {
     int num_layers
     int num_heads
     int head_size
@@ -14,7 +14,7 @@ struct ExampleConfig {
     bool use_prefix_cache
 }
 
-struct ExampleInput {
+struct example_input {
     string prompt
     []int token_ids
     []float embeddings
@@ -23,7 +23,7 @@ struct ExampleInput {
 func example_basic_inference() {
     println("=== Example 1: Basic Attention Inference ===\n")
 
-    config = ExampleConfig{
+    config = example_config{
         num_layers: 24,
         num_heads: 32,
         head_size: 128,

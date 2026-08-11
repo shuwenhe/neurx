@@ -4,7 +4,7 @@ use neurx.attention.paged_attention_core
 use neurx.inference.paged_attention_runtime
 
 func test_basic_paged_cache() {
-    config = PagedAttentionConfig{
+    config = paged_attention_config{
         block_size: 16,
         num_kv_heads: 8,
         head_size: 128,
@@ -34,7 +34,7 @@ func test_basic_paged_cache() {
 }
 
 func test_block_allocation() {
-    config = PagedAttentionConfig{
+    config = paged_attention_config{
         block_size: 16,
         num_kv_heads: 8,
         head_size: 128,
@@ -52,7 +52,7 @@ func test_block_allocation() {
 }
 
 func test_cache_stats() {
-    config = PagedAttentionConfig{
+    config = paged_attention_config{
         block_size: 16,
         num_kv_heads: 8,
         head_size: 128,

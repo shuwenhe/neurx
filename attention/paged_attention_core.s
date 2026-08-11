@@ -1,6 +1,6 @@
 package neurx.attention.paged_attention_core
 
-struct PagedBlock {
+struct paged_block {
     []float key_data
     []float value_data
     int block_id
@@ -8,14 +8,14 @@ struct PagedBlock {
     bool is_full
 }
 
-struct SlotMapping {
+struct slot_mapping {
     int block_id
     int offset_in_block
 }
 
-struct PagedKVCache {
-    []PagedBlock blocks
-    []SlotMapping token_to_slot
+struct paged_kv_cache {
+    []paged_block blocks
+    []slot_mapping token_to_slot
     int block_size
     int num_kv_heads
     int head_size
@@ -24,7 +24,7 @@ struct PagedKVCache {
     int total_tokens
 }
 
-struct PagedAttentionConfig {
+struct paged_attention_config {
     int block_size
     int num_kv_heads
     int head_size
@@ -32,7 +32,7 @@ struct PagedAttentionConfig {
     float scale
 }
 
-func new_paged_kv_cache(config PagedAttentionConfig) PagedKVCache {
+func new_paged_kv_cache(config paged_attention_config) paged_kv_cache {
     int normalized_block = config.block_size
     if normalized_block <= 0 {
         normalized_block = 16
@@ -53,11 +53,11 @@ func new_paged_kv_cache(config PagedAttentionConfig) PagedKVCache {
         normalized_max = 1024
     }
 
-    []PagedBlock blocks = []PagedBlock{}
+    []paged_block blocks = []paged_block{}
     int i = 0
     for i < normalized_max {
         int kv_size = normalized_heads * normalized_head_size * normalized_block
-        PagedBlock block = PagedBlock{
+        paged_block block = paged_block{
             key_data: new_float_array(kv_size),
             value_data: new_float_array(kv_size),
             block_id: i,
@@ -68,9 +68,9 @@ func new_paged_kv_cache(config PagedAttentionConfig) PagedKVCache {
         i = i + 1
     }
 
-    PagedKVCache{
+    paged_kv_cache{
         blocks: blocks,
-        token_to_slot: []SlotMapping{},
+        token_to_slot: []slot_mapping{},
         block_size: normalized_block,
         num_kv_heads: normalized_heads,
         head_size: normalized_head_size,
@@ -85,7 +85,7 @@ func new_float_array(int size) []float {
     return arr
 }
 
-func reserve_tokens(cache PagedKVCache, int num_new_tokens) PagedKVCache {
+func reserve_tokens(cache paged_kv_cache, int num_new_tokens) paged_kv_cache {
     if num_new_tokens <= 0 {
         return cache
     }
@@ -102,7 +102,7 @@ func reserve_tokens(cache PagedKVCache, int num_new_tokens) PagedKVCache {
 
     int new_slot_count = new_total
 
-    PagedKVCache{
+    paged_kv_cache{
         blocks: cache.blocks,
         token_to_slot: cache.token_to_slot,
         block_size: cache.block_size,
@@ -114,7 +114,7 @@ func reserve_tokens(cache PagedKVCache, int num_new_tokens) PagedKVCache {
     }
 }
 
-func release_tokens(cache PagedKVCache, int num_release) PagedKVCache {
+func release_tokens(cache paged_kv_cache, int num_release) paged_kv_cache {
     if num_release <= 0 {
         return cache
     }
@@ -129,12 +129,12 @@ func release_tokens(cache PagedKVCache, int num_release) PagedKVCache {
         needed_blocks = 0
     }
 
-    []SlotMapping truncated = cache.token_to_slot
+    []slot_mapping truncated = cache.token_to_slot
     if new_total < len(cache.token_to_slot) {
         truncated = truncated[:new_total]
     }
 
-    PagedKVCache{
+    paged_kv_cache{
         blocks: cache.blocks,
         token_to_slot: truncated,
         block_size: cache.block_size,
@@ -146,10 +146,10 @@ func release_tokens(cache PagedKVCache, int num_release) PagedKVCache {
     }
 }
 
-func reset_cache(cache PagedKVCache) PagedKVCache {
-    PagedKVCache{
+func reset_cache(cache paged_kv_cache) paged_kv_cache {
+    paged_kv_cache{
         blocks: cache.blocks,
-        token_to_slot: []SlotMapping{},
+        token_to_slot: []slot_mapping{},
         block_size: cache.block_size,
         num_kv_heads: cache.num_kv_heads,
         head_size: cache.head_size,
@@ -160,11 +160,11 @@ func reset_cache(cache PagedKVCache) PagedKVCache {
 }
 
 func write_kv_to_cache(
-    cache PagedKVCache,
+    cache paged_kv_cache,
     []float keys,
     []float values,
     int start_token_idx
-) PagedKVCache {
+) paged_kv_cache {
     if len(keys) == 0 || len(values) == 0 {
         return cache
     }
@@ -181,7 +181,7 @@ func write_kv_to_cache(
             break
         }
 
-        SlotMapping slot = cache.token_to_slot[logical_pos]
+        slot_mapping slot = cache.token_to_slot[logical_pos]
         int block_id = slot.block_id
         int offset_in_block = slot.offset_in_block
 
@@ -196,10 +196,10 @@ func write_kv_to_cache(
 }
 
 func compute_paged_attention(
-    cache PagedKVCache,
+    cache paged_kv_cache,
     []float queries,
     []float output,
-    []SlotMapping slot_mappings,
+    []slot_mapping slot_mappings,
     int num_heads,
     int head_size,
     float scale
@@ -310,14 +310,14 @@ func f(int n) float {
     return result
 }
 
-struct PagedCacheStats {
+struct paged_cache_stats {
     int total_tokens
     int allocated_blocks
     int memory_used_mb
     float utilization_percent
 }
 
-func get_cache_stats(cache PagedKVCache) PagedCacheStats {
+func get_cache_stats(cache paged_kv_cache) paged_cache_stats {
     int bytes_per_token = cache.num_kv_heads * cache.head_size * 4 * 2
     int memory_used = cache.total_tokens * bytes_per_token
     int memory_mb = memory_used / (1024 * 1024)
@@ -328,7 +328,7 @@ func get_cache_stats(cache PagedKVCache) PagedCacheStats {
         utilization = f(cache.total_tokens) / f(max_capacity) * 100.0
     }
 
-    PagedCacheStats{
+    paged_cache_stats{
         total_tokens: cache.total_tokens,
         allocated_blocks: cache.allocated_blocks,
         memory_used_mb: memory_mb,
@@ -336,7 +336,7 @@ func get_cache_stats(cache PagedKVCache) PagedCacheStats {
     }
 }
 
-func debug_print_cache_state(cache PagedKVCache) string {
+func debug_print_cache_state(cache paged_kv_cache) string {
     stats = get_cache_stats(cache)
     result = ""
     result = result + "PagedAttention Cache State:\n"

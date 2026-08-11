@@ -2,7 +2,7 @@ package neurx.attention.paged_attention_inference
 
 use neurx.attention.paged_attention_core
 
-struct AttentionConfig {
+struct attention_config {
     int num_heads
     int num_kv_heads
     int head_size
@@ -12,7 +12,7 @@ struct AttentionConfig {
     float softmax_cap
 }
 
-struct AttentionOutput {
+struct attention_output {
     []float output
     []float attention_weights
     float avg_attention_entropy
@@ -75,9 +75,9 @@ func vector_sum_product(
 
 func compute_head_attention(
     []float query,
-    PagedKVCache kv_cache,
+    paged_kv_cache kv_cache,
     int head_idx,
-    AttentionConfig config,
+    attention_config config,
     [][]float values_buffer
 ) []float {
     if len(query) != config.head_size {
@@ -115,8 +115,8 @@ func compute_head_attention(
 
 func compute_multi_head_attention(
     []float queries,
-    PagedKVCache kv_cache,
-    AttentionConfig config
+    paged_kv_cache kv_cache,
+    attention_config config
 ) []float {
     if len(queries) == 0 {
         return queries
@@ -204,7 +204,7 @@ func apply_softmax_cap([]float weights, float cap_value) []float {
 
 func compute_grouped_query_attention(
     []float queries,
-    PagedKVCache kv_cache,
+    paged_kv_cache kv_cache,
     int num_heads,
     int num_kv_heads,
     int head_size,
@@ -220,9 +220,9 @@ func compute_grouped_query_attention(
 
 func compute_chunked_attention(
     []float queries,
-    PagedKVCache kv_cache,
+    paged_kv_cache kv_cache,
     int chunk_size,
-    AttentionConfig config
+    attention_config config
 ) []float {
     if len(queries) == 0 || chunk_size <= 0 {
         return queries
@@ -244,15 +244,15 @@ func compute_chunked_attention(
     return output
 }
 
-struct BatchAttentionInput {
+struct batch_attention_input {
     [][]float queries
-    []PagedKVCache caches
+    []paged_kv_cache caches
 }
 
 func compute_batch_attention(
     [][]float batch_queries,
-    []PagedKVCache batch_caches,
-    AttentionConfig config
+    []paged_kv_cache batch_caches,
+    attention_config config
 ) [][]float {
     if len(batch_queries) == 0 || len(batch_caches) == 0 {
         return batch_queries

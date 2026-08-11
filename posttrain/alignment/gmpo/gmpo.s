@@ -19,7 +19,7 @@ struct gmpo_config {
 }
 
 struct gmpo_trainer {
-    config: GMPOConfig
+    config: gmpo_config
     policy_model: *model
     value_model: *model
     reference_model: *model
@@ -37,7 +37,7 @@ struct reward_stats {
 }
 
 func new_gmpo_trainer(
-    config: GMPOConfig,
+    config: gmpo_config,
     policy: *model,
     value: *model,
     reference: *model

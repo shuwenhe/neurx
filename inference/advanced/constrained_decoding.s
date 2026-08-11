@@ -5,14 +5,14 @@ int CONSTRAINT_REGEX_PATTERN = 2
 int CONSTRAINT_CHOICE_SET = 3
 int CONSTRAINT_INTEGER_RANGE = 4
 
-struct OutputConstraint {
+struct output_constraint {
     int constraint_type
     string schema_definition
     string name
     bool optional
 }
 
-struct JsonSchemaProperty {
+struct json_schema_property {
     string property_name
     string property_type
     string description
@@ -23,19 +23,19 @@ struct JsonSchemaProperty {
     int maximum
 }
 
-struct JsonSchema {
+struct json_schema {
     string schema_type
-    []JsonSchemaProperty properties
+    []json_schema_property properties
     map[string]int field_index
 }
 
-struct ConstraintValidator {
-    OutputConstraint constraint
-    JsonSchema json_schema
+struct constraint_validator {
+    output_constraint constraint
+    json_schema json_schema
     string regex_pattern
 }
 
-struct ConstrainedOutput {
+struct constrained_output {
     string text
     bool valid
     []string validation_errors
@@ -44,9 +44,9 @@ struct ConstrainedOutput {
 
 func CreateJsonSchemaConstraint(
     string name,
-    []JsonSchemaProperty properties,
-) OutputConstraint {
-    return OutputConstraint {
+    []json_schema_property properties,
+) output_constraint {
+    return output_constraint {
         constraint_type: CONSTRAINT_JSON_SCHEMA,
         name: name,
         schema_definition: "",
@@ -57,8 +57,8 @@ func CreateJsonSchemaConstraint(
 func CreateRegexConstraint(
     string name,
     string pattern,
-) OutputConstraint {
-    return OutputConstraint {
+) output_constraint {
+    return output_constraint {
         constraint_type: CONSTRAINT_REGEX_PATTERN,
         name: name,
         schema_definition: pattern,
@@ -69,8 +69,8 @@ func CreateRegexConstraint(
 func CreateChoiceConstraint(
     string name,
     []string choices,
-) OutputConstraint {
-    return OutputConstraint {
+) output_constraint {
+    return output_constraint {
         constraint_type: CONSTRAINT_CHOICE_SET,
         name: name,
         schema_definition: "",
@@ -82,8 +82,8 @@ func CreateIntegerRangeConstraint(
     string name,
     int minimum,
     int maximum,
-) OutputConstraint {
-    return OutputConstraint {
+) output_constraint {
+    return output_constraint {
         constraint_type: CONSTRAINT_INTEGER_RANGE,
         name: name,
         schema_definition: "",
@@ -91,18 +91,18 @@ func CreateIntegerRangeConstraint(
     }
 }
 
-struct JsonSchemaBuilder {
-    []JsonSchemaProperty properties
+struct json_schema_builder {
+    []json_schema_property properties
 }
 
-func (builder *JsonSchemaBuilder) AddProperty(
-    prop JsonSchemaProperty,
+func (builder *json_schema_builder) AddProperty(
+    prop json_schema_property,
 ) {
     builder.properties = append(builder.properties, prop)
 }
 
-func (builder *JsonSchemaBuilder) Build() JsonSchema {
-    schema := JsonSchema {
+func (builder *json_schema_builder) Build() json_schema {
+    schema := json_schema {
         schema_type: "object",
         properties: builder.properties,
         field_index: make(map[string]int),
@@ -115,21 +115,21 @@ func (builder *JsonSchemaBuilder) Build() JsonSchema {
     return schema
 }
 
-struct ConstrainedSampler {
-    []OutputConstraint constraints
+struct constrained_sampler {
+    []output_constraint constraints
 }
 
 func NewConstrainedSampler(
-    []OutputConstraint constraints,
-) ConstrainedSampler {
-    return ConstrainedSampler {
+    []output_constraint constraints,
+) constrained_sampler {
+    return constrained_sampler {
         constraints: constraints,
     }
 }
 
 func validate_json_schema(
     string text,
-    JsonSchema schema,
+    json_schema schema,
 ) (bool, []string) {
 
     errors := make([]string, 0)
@@ -219,10 +219,10 @@ func validate_integer_range(
     return true, errors
 }
 
-func (sampler *ConstrainedSampler) ValidateOutput(
+func (sampler *constrained_sampler) ValidateOutput(
     string output,
-    OutputConstraint constraint,
-) ConstrainedOutput {
+    output_constraint constraint,
+) constrained_output {
 
     valid := false
     errors := make([]string, 0)
@@ -230,7 +230,7 @@ func (sampler *ConstrainedSampler) ValidateOutput(
     switch constraint.constraint_type {
     case CONSTRAINT_JSON_SCHEMA:
 
-        valid, errors = validate_json_schema(output, JsonSchema{})
+        valid, errors = validate_json_schema(output, json_schema{})
 
     case CONSTRAINT_REGEX_PATTERN:
         valid, errors = validate_regex_pattern(
@@ -246,7 +246,7 @@ func (sampler *ConstrainedSampler) ValidateOutput(
         valid, errors = validate_integer_range(output, 0, 100)
     }
 
-    return ConstrainedOutput {
+    return constrained_output {
         text: output,
         valid: valid,
         validation_errors: errors,
@@ -254,9 +254,9 @@ func (sampler *ConstrainedSampler) ValidateOutput(
     }
 }
 
-func (sampler *ConstrainedSampler) FilterLogits(
+func (sampler *constrained_sampler) FilterLogits(
     []float logits,
-    OutputConstraint constraint,
+    output_constraint constraint,
 ) []float {
 
     filtered := make([]float, len(logits))
@@ -276,9 +276,9 @@ func (sampler *ConstrainedSampler) FilterLogits(
     return filtered
 }
 
-func (sampler *ConstrainedSampler) SampleWithConstraint(
+func (sampler *constrained_sampler) SampleWithConstraint(
     []float logits,
-    OutputConstraint constraint,
+    output_constraint constraint,
 ) int {
 
     filtered_logits := sampler.FilterLogits(logits, constraint)
@@ -311,18 +311,18 @@ func (sampler *ConstrainedSampler) SampleWithConstraint(
     return len(exp_logits) - 1
 }
 
-struct ConstrainedDecodingEngine {
-    []OutputConstraint constraints
-    map[string]ConstrainedSampler samplers
+struct constrained_decoding_engine {
+    []output_constraint constraints
+    map[string]constrained_sampler samplers
 }
 
 func NewConstrainedDecodingEngine(
-    []OutputConstraint constraints,
-) ConstrainedDecodingEngine {
+    []output_constraint constraints,
+) constrained_decoding_engine {
 
-    engine := ConstrainedDecodingEngine {
+    engine := constrained_decoding_engine {
         constraints: constraints,
-        samplers: make(map[string]ConstrainedSampler),
+        samplers: make(map[string]constrained_sampler),
     }
 
     for i := 0; i < len(constraints); i++ {
@@ -333,7 +333,7 @@ func NewConstrainedDecodingEngine(
     return engine
 }
 
-func (engine *ConstrainedDecodingEngine) DecodeWithConstraints(
+func (engine *constrained_decoding_engine) DecodeWithConstraints(
     []float logits,
     string constraint_name,
 ) int {
@@ -389,17 +389,17 @@ func float_rand() float {
 
 func main() {
 
-    schema_builder := JsonSchemaBuilder {
-        properties: make([]JsonSchemaProperty, 0),
+    schema_builder := json_schema_builder {
+        properties: make([]json_schema_property, 0),
     }
 
-    schema_builder.AddProperty(JsonSchemaProperty {
+    schema_builder.AddProperty(json_schema_property {
         property_name: "name",
         property_type: "string",
         required: true,
     })
 
-    schema_builder.AddProperty(JsonSchemaProperty {
+    schema_builder.AddProperty(json_schema_property {
         property_name: "age",
         property_type: "integer",
         required: true,
@@ -410,9 +410,9 @@ func main() {
         schema_builder.properties,
     )
 
-    sampler := NewConstrainedSampler([]OutputConstraint{constraint})
+    sampler := NewConstrainedSampler([]output_constraint{constraint})
 
-    output := ConstrainedOutput {
+    output := constrained_output {
         text: `{"name": "John", "age": 30}`,
         valid: false,
     }

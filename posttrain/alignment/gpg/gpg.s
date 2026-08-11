@@ -16,7 +16,7 @@ struct gpg_config {
 }
 
 struct gpg_trainer {
-    config: GPGConfig
+    config: gpg_config
     policy_model: *model
     optimizer: *optimizer
     ema_baseline: f32
@@ -24,7 +24,7 @@ struct gpg_trainer {
     reward_history: []f32
 }
 
-func new_gpg_trainer(config: GPGConfig, policy: *model) -> GPGTrainer {
+func new_gpg_trainer(config: gpg_config, policy: *model) -> GPGTrainer {
     let optimizer = adamw_optimizer(policy.parameters(), config.learning_rate)
     return gpg_trainer{
         config: config,

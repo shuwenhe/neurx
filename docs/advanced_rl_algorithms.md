@@ -22,7 +22,7 @@ All algorithms are located in `/app/shuwen/neurx/posttrain/alignment/` and writt
 
 **Configuration**:
 ```s
-struct GMPOConfig {
+struct gmpo_config {
     learning_rate: f32
     num_epochs: i32
     num_rewards: i32              // Number of reward components
@@ -54,7 +54,7 @@ struct GMPOConfig {
 
 **Configuration**:
 ```s
-struct SAPOConfig {
+struct sapo_config {
     learning_rate: f32
     num_epochs: i32
     clip_epsilon: f32        // Standard clip range
@@ -84,7 +84,7 @@ struct SAPOConfig {
 
 **Configuration**:
 ```s
-struct DPPOConfig {
+struct dppo_config {
     learning_rate: f32
     divergence_type: string         // "binary_kl" or "binary_tv"
     epsilon: f32                    // Trust region constraint
@@ -115,7 +115,7 @@ struct DPPOConfig {
 
 **Configuration**:
 ```s
-struct CISPOConfig {
+struct cispo_config {
     learning_rate: f32
     clip_epsilon_positive: f32   // Clip for positive advantages
     clip_epsilon_negative: f32   // Clip for negative advantages (usually smaller)
@@ -146,7 +146,7 @@ struct CISPOConfig {
 
 **Configuration**:
 ```s
-struct GPGConfig {
+struct gpg_config {
     learning_rate: f32
     group_size: i32              // Samples per prompt (e.g., 4-16)
     use_baseline: bool
@@ -177,7 +177,7 @@ struct GPGConfig {
 
 **Configuration**:
 ```s
-struct OPOConfig {
+struct opo_config {
     learning_rate: f32
     target_kl: f32               // Target KL (e.g., 0.01)
     kl_tolerance: f32            // Tolerance (e.g., 0.2)
@@ -208,7 +208,7 @@ struct OPOConfig {
 
 **Configuration**:
 ```s
-struct OTBConfig {
+struct otb_config {
     learning_rate: f32
     baseline_type: string          // "optimal", "mean", "ema", "learned"
     use_token_wise_baseline: bool  // Per-token vs global
@@ -246,7 +246,7 @@ struct OTBConfig {
 ```s
 import "posttrain/alignment/gmpo/gmpo.s"
 
-let config = GMPOConfig{
+let config = gmpo_config{
     learning_rate: 1e-5,
     num_epochs: 4,
     max_grad_norm: 1.0,
@@ -268,7 +268,7 @@ let losses, _ = trainer.train(train_data)
 ```s
 import "posttrain/alignment/sapo/sapo.s"
 
-let config = SAPOConfig{
+let config = sapo_config{
     learning_rate: 3e-6,
     num_epochs: 3,
     clip_epsilon: 0.2,
@@ -286,7 +286,7 @@ let losses, _ = trainer.train(train_data)
 ```s
 import "posttrain/alignment/gpg/gpg.s"
 
-let config = GPGConfig{
+let config = gpg_config{
     learning_rate: 1e-4,
     num_epochs: 2,
     group_size: 8,

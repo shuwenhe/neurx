@@ -1,6 +1,6 @@
 package neurx.attention.prefix_cache_radix
 
-struct PrefixNode {
+struct prefix_node {
     string prefix_hash
     []float kv_data
     int prefix_len
@@ -11,8 +11,8 @@ struct PrefixNode {
     int access_count
 }
 
-struct RadixPrefixCache {
-    []PrefixNode nodes
+struct radix_prefix_cache {
+    []prefix_node nodes
     int next_node_id
     int max_nodes
     int max_prefix_len
@@ -20,7 +20,7 @@ struct RadixPrefixCache {
     int cache_misses
 }
 
-struct PrefixLookupResult {
+struct prefix_lookup_result {
     bool found
     int node_id
     []float kv_data
@@ -28,7 +28,7 @@ struct PrefixLookupResult {
     float memory_saved_mb
 }
 
-func new_radix_prefix_cache(int max_nodes, int max_prefix_len) RadixPrefixCache {
+func new_radix_prefix_cache(int max_nodes, int max_prefix_len) radix_prefix_cache {
     int normalized_max = max_nodes
     if normalized_max <= 0 {
         normalized_max = 1024
@@ -39,8 +39,8 @@ func new_radix_prefix_cache(int max_nodes, int max_prefix_len) RadixPrefixCache 
         normalized_prefix = 4096
     }
 
-    RadixPrefixCache{
-        nodes: make([]PrefixNode, 0),
+    radix_prefix_cache{
+        nodes: make([]prefix_node, 0),
         next_node_id: 0,
         max_nodes: normalized_max,
         max_prefix_len: normalized_prefix,
@@ -50,11 +50,11 @@ func new_radix_prefix_cache(int max_nodes, int max_prefix_len) RadixPrefixCache 
 }
 
 func insert_prefix(
-    cache RadixPrefixCache,
+    cache radix_prefix_cache,
     string prefix_hash,
     []float kv_data,
     int prefix_len
-) RadixPrefixCache {
+) radix_prefix_cache {
     if len(prefix_hash) == 0 || len(kv_data) == 0 {
         return cache
     }
@@ -64,7 +64,7 @@ func insert_prefix(
         cache = evict_lru_node(cache)
     }
 
-    PrefixNode new_node = PrefixNode{
+    prefix_node new_node = prefix_node{
         prefix_hash: prefix_hash,
         kv_data: kv_data,
         prefix_len: prefix_len,
@@ -77,7 +77,7 @@ func insert_prefix(
 
     cache.nodes = append(cache.nodes, new_node)
 
-    RadixPrefixCache{
+    radix_prefix_cache{
         nodes: cache.nodes,
         next_node_id: cache.next_node_id + 1,
         max_nodes: cache.max_nodes,
@@ -88,12 +88,12 @@ func insert_prefix(
 }
 
 func lookup_prefix(
-    cache RadixPrefixCache,
+    cache radix_prefix_cache,
     string prefix_hash,
     int expected_len
-) PrefixLookupResult {
+) prefix_lookup_result {
     if len(prefix_hash) == 0 {
-        return PrefixLookupResult{
+        return prefix_lookup_result{
             found: false,
             node_id: -1,
             kv_data: []float{},
@@ -114,7 +114,7 @@ func lookup_prefix(
             float memory_bytes = f(expected_len) * 8192.0
             float memory_mb = memory_bytes / (1024.0 * 1024.0)
 
-            return PrefixLookupResult{
+            return prefix_lookup_result{
                 found: true,
                 node_id: node.node_id,
                 kv_data: node.kv_data,
@@ -125,7 +125,7 @@ func lookup_prefix(
         i = i + 1
     }
 
-    return PrefixLookupResult{
+    return prefix_lookup_result{
         found: false,
         node_id: -1,
         kv_data: []float{},
@@ -153,12 +153,12 @@ func compute_prefix_hash([]int token_ids) string {
 }
 
 func find_longest_prefix(
-    cache RadixPrefixCache,
+    cache radix_prefix_cache,
     []int token_ids,
     int min_prefix_len
-) PrefixLookupResult {
+) prefix_lookup_result {
     if len(token_ids) < min_prefix_len {
-        return PrefixLookupResult{
+        return prefix_lookup_result{
             found: false,
             node_id: -1,
             kv_data: []float{},
@@ -180,7 +180,7 @@ func find_longest_prefix(
         check_len = check_len - 1
     }
 
-    return PrefixLookupResult{
+    return prefix_lookup_result{
         found: false,
         node_id: -1,
         kv_data: []float{},
@@ -189,7 +189,7 @@ func find_longest_prefix(
     }
 }
 
-func evict_lru_node(cache RadixPrefixCache) RadixPrefixCache {
+func evict_lru_node(cache radix_prefix_cache) radix_prefix_cache {
     if len(cache.nodes) == 0 {
         return cache
     }
@@ -206,7 +206,7 @@ func evict_lru_node(cache RadixPrefixCache) RadixPrefixCache {
         i = i + 1
     }
 
-    []PrefixNode new_nodes = make([]PrefixNode, 0)
+    []prefix_node new_nodes = make([]prefix_node, 0)
     i = 0
     for i < len(cache.nodes) {
         if i != lru_idx {
@@ -215,7 +215,7 @@ func evict_lru_node(cache RadixPrefixCache) RadixPrefixCache {
         i = i + 1
     }
 
-    RadixPrefixCache{
+    radix_prefix_cache{
         nodes: new_nodes,
         next_node_id: cache.next_node_id,
         max_nodes: cache.max_nodes,
@@ -226,15 +226,15 @@ func evict_lru_node(cache RadixPrefixCache) RadixPrefixCache {
 }
 
 func lookup_batch_prefixes(
-    cache RadixPrefixCache,
+    cache radix_prefix_cache,
     [][]int batch_token_ids,
     []int batch_min_lens
-) []PrefixLookupResult {
+) []prefix_lookup_result {
     if len(batch_token_ids) == 0 {
-        return []PrefixLookupResult{}
+        return []prefix_lookup_result{}
     }
 
-    []PrefixLookupResult results = make([]PrefixLookupResult, len(batch_token_ids))
+    []prefix_lookup_result results = make([]prefix_lookup_result, len(batch_token_ids))
 
     int b = 0
     for b < len(batch_token_ids) {
@@ -258,11 +258,11 @@ func lookup_batch_prefixes(
 }
 
 func insert_batch_prefixes(
-    cache RadixPrefixCache,
+    cache radix_prefix_cache,
     []string prefix_hashes,
     [][]float batch_kv_data,
     []int prefix_lengths
-) RadixPrefixCache {
+) radix_prefix_cache {
     if len(prefix_hashes) == 0 {
         return cache
     }
@@ -283,7 +283,7 @@ func insert_batch_prefixes(
     return cache
 }
 
-struct CacheStats {
+struct cache_stats {
     int total_nodes
     int total_cached_tokens
     int cache_hits
@@ -293,9 +293,9 @@ struct CacheStats {
     int total_memory_mb
 }
 
-func get_prefix_cache_stats(cache RadixPrefixCache) CacheStats {
+func get_prefix_cache_stats(cache radix_prefix_cache) cache_stats {
     if len(cache.nodes) == 0 {
-        return CacheStats{
+        return cache_stats{
             total_nodes: 0,
             total_cached_tokens: 0,
             cache_hits: 0,
@@ -330,7 +330,7 @@ func get_prefix_cache_stats(cache RadixPrefixCache) CacheStats {
 
     int memory_mb = total_memory / (1024 * 1024)
 
-    CacheStats{
+    cache_stats{
         total_nodes: len(cache.nodes),
         total_cached_tokens: total_tokens,
         cache_hits: cache.cache_hits,
@@ -341,7 +341,7 @@ func get_prefix_cache_stats(cache RadixPrefixCache) CacheStats {
     }
 }
 
-func print_prefix_cache_stats(cache RadixPrefixCache) string {
+func print_prefix_cache_stats(cache radix_prefix_cache) string {
     stats = get_prefix_cache_stats(cache)
 
     result = ""
@@ -380,9 +380,9 @@ func str_float_2(float x) string {
     return "0.0"
 }
 
-struct PrefixCachedAttentionRuntime {
-    PagedKVCache paged_cache
-    RadixPrefixCache prefix_cache
+struct prefix_cached_attention_runtime {
+    paged_kv_cache paged_cache
+    radix_prefix_cache prefix_cache
     int prefill_tokens
     int decode_steps
     bool use_prefix_cache
@@ -395,9 +395,9 @@ func new_prefix_cached_runtime(
     int max_blocks,
     int max_prefix_nodes,
     int max_prefix_len
-) PrefixCachedAttentionRuntime {
+) prefix_cached_attention_runtime {
 
-    paged_config = PagedAttentionConfig{
+    paged_config = paged_attention_config{
         block_size: block_size,
         num_kv_heads: num_kv_heads,
         head_size: head_size,
@@ -408,7 +408,7 @@ func new_prefix_cached_runtime(
 
     prefix_cache = new_radix_prefix_cache(max_prefix_nodes, max_prefix_len)
 
-    PrefixCachedAttentionRuntime{
+    prefix_cached_attention_runtime{
         paged_cache: paged_cache,
         prefix_cache: prefix_cache,
         prefill_tokens: 0,

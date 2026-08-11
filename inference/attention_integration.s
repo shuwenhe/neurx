@@ -4,22 +4,22 @@ use neurx.attention.paged_attention_core
 use neurx.attention.paged_attention_inference
 use neurx.attention.prefix_cache_radix
 
-struct IntegratedAttentionEngine {
-    PagedAttentionRuntime paged_runtime
-    PrefixCachedAttentionRuntime prefix_runtime
-    AttentionConfig attn_config
+struct integrated_attention_engine {
+    paged_attention_runtime paged_runtime
+    prefix_cached_attention_runtime prefix_runtime
+    attention_config attn_config
     string optimization_mode
     []float layer_scales
 }
 
-struct AttentionInput {
+struct attention_input {
     []float queries
     []int token_ids
     string layer_name
     int layer_idx
 }
 
-struct AttentionResult {
+struct attention_result {
     []float output
     float compute_time_ms
     bool used_prefix_cache
@@ -37,7 +37,7 @@ func new_integrated_attention_engine(
     int max_prefix_nodes,
     int max_prefix_len,
     string optimization_mode
-) IntegratedAttentionEngine {
+) integrated_attention_engine {
 
     paged_runtime = new_paged_attention_runtime(
         1,
@@ -56,7 +56,7 @@ func new_integrated_attention_engine(
         max_prefix_len,
     )
 
-    attn_config = AttentionConfig{
+    attn_config = attention_config{
         num_heads: num_heads,
         num_kv_heads: num_kv_heads,
         head_size: head_size,
@@ -73,7 +73,7 @@ func new_integrated_attention_engine(
         i = i + 1
     }
 
-    IntegratedAttentionEngine{
+    integrated_attention_engine{
         paged_runtime: paged_runtime,
         prefix_runtime: prefix_runtime,
         attn_config: attn_config,
@@ -103,9 +103,9 @@ func f(int n) float {
 }
 
 func compute_layer_attention(
-    engine IntegratedAttentionEngine,
-    AttentionInput input
-) AttentionResult {
+    engine integrated_attention_engine,
+    attention_input input
+) attention_result {
     start_time = get_timestamp()
 
     prefix_result = lookup_prefix(
@@ -155,7 +155,7 @@ func compute_layer_attention(
     end_time = get_timestamp()
     elapsed_ms = f(end_time - start_time) / 1000.0
 
-    AttentionResult{
+    attention_result{
         output: output,
         compute_time_ms: elapsed_ms,
         used_prefix_cache: used_cache,
@@ -165,14 +165,14 @@ func compute_layer_attention(
 }
 
 func compute_batch_layer_attention(
-    engine IntegratedAttentionEngine,
-    []AttentionInput batch_inputs
-) []AttentionResult {
+    engine integrated_attention_engine,
+    []attention_input batch_inputs
+) []attention_result {
     if len(batch_inputs) == 0 {
-        return []AttentionResult{}
+        return []attention_result{}
     }
 
-    []AttentionResult results = make([]AttentionResult, len(batch_inputs))
+    []attention_result results = make([]attention_result, len(batch_inputs))
 
     int i = 0
     for i < len(batch_inputs) {
@@ -183,8 +183,8 @@ func compute_batch_layer_attention(
     return results
 }
 
-struct TransformerWithPagedAttention {
-    IntegratedAttentionEngine attention_engine
+struct transformer_with_paged_attention {
+    integrated_attention_engine attention_engine
     int num_layers
     int num_heads
     int head_size
@@ -199,7 +199,7 @@ func new_transformer_with_paged_attention(
     int head_size,
     int block_size,
     int max_blocks
-) TransformerWithPagedAttention {
+) transformer_with_paged_attention {
     engine = new_integrated_attention_engine(
         num_heads,
         num_heads / 2,
@@ -212,7 +212,7 @@ func new_transformer_with_paged_attention(
         "standard",
     )
 
-    TransformerWithPagedAttention{
+    transformer_with_paged_attention{
         attention_engine: engine,
         num_layers: num_layers,
         num_heads: num_heads,
@@ -224,17 +224,17 @@ func new_transformer_with_paged_attention(
 }
 
 func forward_layer_stack(
-    transformer TransformerWithPagedAttention,
+    transformer transformer_with_paged_attention,
     []float embeddings,
     []int token_ids,
     string phase
-) TransformerWithPagedAttention {
+) transformer_with_paged_attention {
 
     []float layer_input = embeddings
     int layer = 0
     for layer < transformer.num_layers {
 
-        input = AttentionInput{
+        input = attention_input{
             queries: layer_input,
             token_ids: token_ids,
             layer_name: "layer_" + str(layer),
@@ -261,8 +261,8 @@ func forward_layer_stack(
 
 func compute_multi_head_attention_optimized(
     []float queries,
-    PagedKVCache kv_cache,
-    AttentionConfig config
+    paged_kv_cache kv_cache,
+    attention_config config
 ) []float {
 
     int chunk_size = 4
@@ -282,8 +282,8 @@ func compute_multi_head_attention_optimized(
     return output
 }
 
-struct AttentionInferencePipeline {
-    TransformerWithPagedAttention transformer
+struct attention_inference_pipeline {
+    transformer_with_paged_attention transformer
     int max_new_tokens
     float temperature
     bool use_prefix_cache
@@ -297,7 +297,7 @@ func new_attention_inference_pipeline(
     int max_blocks,
     int max_new_tokens,
     float temperature
-) AttentionInferencePipeline {
+) attention_inference_pipeline {
     transformer = new_transformer_with_paged_attention(
         num_layers,
         num_heads,
@@ -306,7 +306,7 @@ func new_attention_inference_pipeline(
         max_blocks,
     )
 
-    AttentionInferencePipeline{
+    attention_inference_pipeline{
         transformer: transformer,
         max_new_tokens: max_new_tokens,
         temperature: temperature,
@@ -315,10 +315,10 @@ func new_attention_inference_pipeline(
 }
 
 func run_prefill_phase(
-    pipeline AttentionInferencePipeline,
+    pipeline attention_inference_pipeline,
     []float prompt_embeddings,
     []int prompt_token_ids
-) AttentionInferencePipeline {
+) attention_inference_pipeline {
 
     pipeline.transformer = forward_layer_stack(
         pipeline.transformer,
@@ -331,10 +331,10 @@ func run_prefill_phase(
 }
 
 func run_decode_phase(
-    pipeline AttentionInferencePipeline,
+    pipeline attention_inference_pipeline,
     []float token_embedding,
     []int token_id_so_far
-) AttentionInferencePipeline {
+) attention_inference_pipeline {
 
     pipeline.transformer = forward_layer_stack(
         pipeline.transformer,
@@ -346,7 +346,7 @@ func run_decode_phase(
     return pipeline
 }
 
-struct PipelineStats {
+struct pipeline_stats {
     int total_prefill_tokens
     int total_decode_tokens
     long total_compute_time_ms
@@ -357,10 +357,10 @@ struct PipelineStats {
     float cache_hit_rate
 }
 
-func get_pipeline_stats(pipeline AttentionInferencePipeline) PipelineStats {
+func get_pipeline_stats(pipeline attention_inference_pipeline) pipeline_stats {
     cache_stats = get_prefix_cache_stats(pipeline.transformer.attention_engine.prefix_runtime.prefix_cache)
 
-    PipelineStats{
+    pipeline_stats{
         total_prefill_tokens: pipeline.transformer.total_prefill_tokens,
         total_decode_tokens: pipeline.transformer.total_decode_tokens,
         total_compute_time_ms: 0,
@@ -372,7 +372,7 @@ func get_pipeline_stats(pipeline AttentionInferencePipeline) PipelineStats {
     }
 }
 
-func print_pipeline_stats(pipeline AttentionInferencePipeline) string {
+func print_pipeline_stats(pipeline attention_inference_pipeline) string {
     stats = get_pipeline_stats(pipeline)
 
     result = ""

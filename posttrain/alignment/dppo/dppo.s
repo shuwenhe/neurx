@@ -21,7 +21,7 @@ struct dppo_config {
 }
 
 struct dppo_trainer {
-    config: DPPOConfig
+    config: dppo_config
     policy_model: *model
     value_model: *model
     reference_model: *model
@@ -32,7 +32,7 @@ struct dppo_trainer {
 }
 
 func new_dppo_trainer(
-    config: DPPOConfig,
+    config: dppo_config,
     policy: *model,
     value: *model,
     reference: *model

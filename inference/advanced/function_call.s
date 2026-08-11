@@ -5,67 +5,67 @@ int FORMAT_ANTHROPIC = 2
 int FORMAT_DEEPSEEK = 3
 int FORMAT_CUSTOM = 4
 
-struct FunctionParameter {
+struct function_parameter {
     string parameter_name
     string parameter_type
     string description
     bool required
 }
 
-struct FunctionDef {
+struct function_def {
     string function_name
-    []FunctionParameter parameters
+    []function_parameter parameters
     string description
     string return_type
 }
 
-struct ArgumentValue {
+struct argument_value {
     string name
     string value_type
     any value
 }
 
-struct DetectedFunctionCall {
+struct detected_function_call {
     string function_name
-    []ArgumentValue arguments
+    []argument_value arguments
     int format_type
     bool valid
     []string validation_errors
 }
 
-struct OpenAiFunctionCall {
+struct open_ai_function_call {
     string name
     map[string]any arguments
 }
 
-struct AnthropicToolUse {
+struct anthropic_tool_use {
     string type
     string id
     string name
     map[string]any input
 }
 
-struct FunctionRegistry {
-    map[string]FunctionDef functions
+struct function_registry {
+    map[string]function_def functions
 }
 
-struct FunctionExecutor {
-    FunctionRegistry registry
+struct function_executor {
+    function_registry registry
 }
 
-func NewFunctionRegistry() FunctionRegistry {
-    return FunctionRegistry {
-        functions: make(map[string]FunctionDef),
+func NewFunctionRegistry() function_registry {
+    return function_registry {
+        functions: make(map[string]function_def),
     }
 }
 
-func (registry *FunctionRegistry) RegisterFunction(
-    fn FunctionDef,
+func (registry *function_registry) RegisterFunction(
+    fn function_def,
 ) {
     registry.functions[fn.function_name] = fn
 }
 
-func (registry *FunctionRegistry) ListFunctions() []string {
+func (registry *function_registry) ListFunctions() []string {
     functions := make([]string, 0)
     for name := range registry.functions {
         functions = append(functions, name)
@@ -73,23 +73,23 @@ func (registry *FunctionRegistry) ListFunctions() []string {
     return functions
 }
 
-func (registry *FunctionRegistry) GetFunction(
+func (registry *function_registry) GetFunction(
     string name,
-) (FunctionDef, bool) {
+) (function_def, bool) {
     fn, ok := registry.functions[name]
     return fn, ok
 }
 
-struct FunctionCallDetector {
+struct function_call_detector {
     int format_type
-    FunctionRegistry registry
+    function_registry registry
 }
 
 func NewFunctionCallDetector(
     int format_type,
-    FunctionRegistry registry,
-) FunctionCallDetector {
-    return FunctionCallDetector {
+    function_registry registry,
+) function_call_detector {
+    return function_call_detector {
         format_type: format_type,
         registry: registry,
     }
@@ -97,12 +97,12 @@ func NewFunctionCallDetector(
 
 func detect_openai_function_call(
     string text,
-    FunctionRegistry registry,
-) (DetectedFunctionCall, bool) {
+    function_registry registry,
+) (detected_function_call, bool) {
 
-    call := DetectedFunctionCall {
+    call := detected_function_call {
         format_type: FORMAT_OPENAI,
-        arguments: make([]ArgumentValue, 0),
+        arguments: make([]argument_value, 0),
         valid: false,
         validation_errors: make([]string, 0),
     }
@@ -154,12 +154,12 @@ func detect_openai_function_call(
 
 func detect_anthropic_tool_use(
     string text,
-    FunctionRegistry registry,
-) (DetectedFunctionCall, bool) {
+    function_registry registry,
+) (detected_function_call, bool) {
 
-    call := DetectedFunctionCall {
+    call := detected_function_call {
         format_type: FORMAT_ANTHROPIC,
-        arguments: make([]ArgumentValue, 0),
+        arguments: make([]argument_value, 0),
         valid: false,
         validation_errors: make([]string, 0),
     }
@@ -206,12 +206,12 @@ func detect_anthropic_tool_use(
 
 func detect_deepseek_function_call(
     string text,
-    FunctionRegistry registry,
-) (DetectedFunctionCall, bool) {
+    function_registry registry,
+) (detected_function_call, bool) {
 
-    call := DetectedFunctionCall {
+    call := detected_function_call {
         format_type: FORMAT_DEEPSEEK,
-        arguments: make([]ArgumentValue, 0),
+        arguments: make([]argument_value, 0),
         valid: false,
         validation_errors: make([]string, 0),
     }
@@ -260,9 +260,9 @@ func detect_deepseek_function_call(
     return call, true
 }
 
-func (detector *FunctionCallDetector) DetectFunctionCall(
+func (detector *function_call_detector) DetectFunctionCall(
     string output,
-) (DetectedFunctionCall, bool) {
+) (detected_function_call, bool) {
 
     switch detector.format_type {
     case FORMAT_OPENAI:
@@ -286,12 +286,12 @@ func (detector *FunctionCallDetector) DetectFunctionCall(
             return call, true
         }
 
-        return DetectedFunctionCall{}, false
+        return detected_function_call{}, false
     }
 }
 
-func (detector *FunctionCallDetector) ValidateFunctionCall(
-    call DetectedFunctionCall,
+func (detector *function_call_detector) ValidateFunctionCall(
+    call detected_function_call,
 ) bool {
 
     if !call.valid {
@@ -317,7 +317,7 @@ func (detector *FunctionCallDetector) ValidateFunctionCall(
     return true
 }
 
-struct FunctionExecutionResult {
+struct function_execution_result {
     string function_name
     any result
     bool success
@@ -325,18 +325,18 @@ struct FunctionExecutionResult {
 }
 
 func NewFunctionExecutor(
-    FunctionRegistry registry,
-) FunctionExecutor {
-    return FunctionExecutor {
+    function_registry registry,
+) function_executor {
+    return function_executor {
         registry: registry,
     }
 }
 
-func (executor *FunctionExecutor) ExecuteFunctionCall(
-    call DetectedFunctionCall,
-) FunctionExecutionResult {
+func (executor *function_executor) ExecuteFunctionCall(
+    call detected_function_call,
+) function_execution_result {
 
-    result := FunctionExecutionResult {
+    result := function_execution_result {
         function_name: call.function_name,
         success: false,
     }
@@ -383,10 +383,10 @@ func main() {
 
     registry := NewFunctionRegistry()
 
-    registry.RegisterFunction(FunctionDef {
+    registry.RegisterFunction(function_def {
         function_name: "get_patient_info",
-        parameters: []FunctionParameter{
-            FunctionParameter {
+        parameters: []function_parameter{
+            function_parameter {
                 parameter_name: "patient_id",
                 parameter_type: "string",
                 required: true,
@@ -396,15 +396,15 @@ func main() {
         return_type: "object",
     })
 
-    registry.RegisterFunction(FunctionDef {
+    registry.RegisterFunction(function_def {
         function_name: "prescribe_medication",
-        parameters: []FunctionParameter{
-            FunctionParameter {
+        parameters: []function_parameter{
+            function_parameter {
                 parameter_name: "patient_id",
                 parameter_type: "string",
                 required: true,
             },
-            FunctionParameter {
+            function_parameter {
                 parameter_name: "medication",
                 parameter_type: "string",
                 required: true,

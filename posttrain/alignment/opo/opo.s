@@ -23,7 +23,7 @@ struct opo_config {
 }
 
 struct opo_trainer {
-    config: OPOConfig
+    config: opo_config
     policy_model: *model
     value_model: *model
     reference_model: *model
@@ -34,7 +34,7 @@ struct opo_trainer {
 }
 
 func new_opo_trainer(
-    config: OPOConfig,
+    config: opo_config,
     policy: *model,
     value: *model,
     reference: *model

@@ -21,7 +21,7 @@ struct cispo_config {
 }
 
 struct cispo_trainer {
-    config: CISPOConfig
+    config: cispo_config
     policy_model: *model
     value_model: *model
     reference_model: *model
@@ -40,7 +40,7 @@ struct is_weight_stats {
 }
 
 func new_cispo_trainer(
-    config: CISPOConfig,
+    config: cispo_config,
     policy: *model,
     value: *model,
     reference: *model

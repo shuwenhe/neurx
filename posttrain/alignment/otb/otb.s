@@ -21,7 +21,7 @@ struct otb_config {
 }
 
 struct otb_trainer {
-    config: OTBConfig
+    config: otb_config
     policy_model: *model
     baseline_model: *model
     optimizer: *optimizer
@@ -33,7 +33,7 @@ struct otb_trainer {
 }
 
 func new_otb_trainer(
-    config: OTBConfig,
+    config: otb_config,
     policy: *model,
     baseline: *model
 ) -> OTBTrainer {
