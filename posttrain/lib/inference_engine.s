@@ -2,9 +2,6 @@ package neurx.posttrain.model.inference_engine
 
 use std.io.eprintln
 
-// Complete CPU Inference Engine for Transformer Models
-// Optimized architecture for CPU execution with GPU-ready design
-
 struct inference_config {
     int vocab_size
     int hidden_size
@@ -37,13 +34,12 @@ struct model_weights {
     []float lm_head_weight
 }
 
-// Vector operations - optimized for CPU
 func vec_add([]float a, []float b) []float {
     []float result
     int i = 0
     int min_len = len(a)
     if len(b) < min_len { min_len = len(b) }
-    
+
     while i < min_len {
         result = append(result, a[i] + b[i])
         i = i + 1
@@ -66,7 +62,7 @@ func vec_dot([]float a, []float b) float {
     int i = 0
     int min_len = len(a)
     if len(b) < min_len { min_len = len(b) }
-    
+
     while i < min_len {
         result = result + a[i] * b[i]
         i = i + 1
@@ -84,7 +80,6 @@ func vec_norm([]float v) float {
     return sum
 }
 
-// Matrix-vector multiply: result = matrix @ vector
 func matvec([]float matrix, []float vector, int rows, int cols) []float {
     []float result
     int i = 0
@@ -103,19 +98,16 @@ func matvec([]float matrix, []float vector, int rows, int cols) []float {
     return result
 }
 
-// Softmax function for attention weights
 func softmax([]float logits) []float {
     []float result
-    
-    // Find max for numerical stability
+
     float max_val = 0.0
     int i = 0
     while i < len(logits) {
         if logits[i] > max_val { max_val = logits[i] }
         i = i + 1
     }
-    
-    // Compute exp(x - max)
+
     float exp_sum = 0.0
     i = 0
     while i < len(logits) {
@@ -124,8 +116,7 @@ func softmax([]float logits) []float {
         exp_sum = exp_sum + exp_val
         i = i + 1
     }
-    
-    // Normalize
+
     if exp_sum > 0.0 {
         i = 0
         while i < len(result) {
@@ -133,15 +124,14 @@ func softmax([]float logits) []float {
             i = i + 1
         }
     }
-    
+
     return result
 }
 
-// Exponential approximation
 func exp_approx(float x) float {
     if x > 20.0 { return 1e9 }
     if x < -20.0 { return 0.0 }
-    
+
     float result = 1.0
     float term = 1.0
     int i = 1
@@ -154,11 +144,10 @@ func exp_approx(float x) float {
     return result
 }
 
-// Square root approximation
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     if x == 1.0 { return 1.0 }
-    
+
     float guess = x / 2.0
     int i = 0
     while i < 5 {
@@ -168,11 +157,9 @@ func sqrt_approx(float x) float {
     return guess
 }
 
-// RMS Normalization
 func rms_norm([]float x, []float weight, float epsilon) []float {
     []float result
-    
-    // Compute RMS
+
     float sum_sq = 0.0
     int i = 0
     while i < len(x) {
@@ -180,8 +167,7 @@ func rms_norm([]float x, []float weight, float epsilon) []float {
         i = i + 1
     }
     float rms = sqrt_approx(sum_sq / float(len(x)) + epsilon)
-    
-    // Normalize and scale
+
     i = 0
     while i < len(x) {
         float normalized = x[i] / rms
@@ -192,53 +178,50 @@ func rms_norm([]float x, []float weight, float epsilon) []float {
         }
         i = i + 1
     }
-    
+
     return result
 }
 
-// Rotation Position Embedding (RoPE)
 func apply_rope([]float q, int pos, int head_dim, float rope_theta) []float {
     []float result
-    
+
     int i = 0
     while i < len(q) {
         int j = (i - (i / head_dim) * head_dim) / 2
         float freq = rope_theta
-        
+
         int k = 0
         while k < j {
             freq = freq * rope_theta
             k = k + 1
         }
-        
+
         float angle = float(pos) / freq
-        
-        // Check if position in head_dim is even
+
         int pos_in_head = i - (i / head_dim) * head_dim
         int is_even = 1 - (pos_in_head - (pos_in_head / 2) * 2)
-        
+
         if is_even == 1 {
-            // cos component
+
             float cos_val = cos_approx(angle)
             result = append(result, q[i] * cos_val)
         } else {
-            // sin component
+
             float sin_val = sin_approx(angle)
             result = append(result, q[i] * sin_val)
         }
         i = i + 1
     }
-    
+
     return result
 }
 
-// Cosine approximation
 func cos_approx(float x) float {
-    // Normalize to [-pi, pi]
+
     float pi = 3.14159265359
     while x > pi { x = x - 2.0 * pi }
     while x < 0.0 - pi { x = x + 2.0 * pi }
-    
+
     float result = 1.0
     float term = 1.0
     int i = 1
@@ -255,12 +238,11 @@ func cos_approx(float x) float {
     return result
 }
 
-// Sine approximation
 func sin_approx(float x) float {
     float pi = 3.14159265359
     while x > pi { x = x - 2.0 * pi }
     while x < 0.0 - pi { x = x + 2.0 * pi }
-    
+
     float result = x
     float term = x
     int i = 1
@@ -277,7 +259,6 @@ func sin_approx(float x) float {
     return result
 }
 
-// Multi-head attention
 func attention(
     []float query,
     []float key,
@@ -286,30 +267,27 @@ func attention(
     int head_dim
 ) []float {
     []float result
-    
+
     if len(query) == 0 || len(key) == 0 || len(value) == 0 {
         return result
     }
-    
-    // Compute attention scores: Q @ K^T / sqrt(d_k)
+
     int seq_len = len(query) / head_dim
     int kv_len = len(key) / head_dim
-    
+
     float scale = 1.0 / sqrt_approx(float(head_dim))
-    
+
     int head = 0
     while head < num_heads {
         int head_start = head * head_dim
-        
-        // Extract query vectors for this head
+
         []float q_head
         int i = 0
         while i < head_dim && head_start + i < len(query) {
             q_head = append(q_head, query[head_start + i])
             i = i + 1
         }
-        
-        // Compute attention scores
+
         []float scores
         i = 0
         while i < kv_len {
@@ -319,16 +297,14 @@ func attention(
                 k_head = append(k_head, key[i * head_dim + head_start + j])
                 j = j + 1
             }
-            
+
             float score = vec_dot(q_head, k_head) * scale
             scores = append(scores, score)
             i = i + 1
         }
-        
-        // Apply softmax
+
         []float attn_weights = softmax(scores)
-        
-        // Aggregate values
+
         []float head_out
         i = 0
         while i < head_dim {
@@ -343,15 +319,14 @@ func attention(
             head_out = append(head_out, sum)
             i = i + 1
         }
-        
+
         result = vec_add(result, head_out)
         head = head + 1
     }
-    
+
     return result
 }
 
-// Feed-forward network (MLP)
 func ffn(
     []float x,
     []float gate_weight,
@@ -361,30 +336,25 @@ func ffn(
     int intermediate_size
 ) []float {
     []float result
-    
-    // Gate projection
+
     []float gate = matvec(gate_weight, x, intermediate_size, hidden_size)
-    
-    // Up projection
+
     []float up = matvec(up_weight, x, intermediate_size, hidden_size)
-    
-    // Element-wise multiply (GELU approximation)
+
     []float gated
     int i = 0
     while i < len(up) && i < len(gate) {
-        // Simple GELU: x * sigmoid(1.702 * x)
+
         float sigmoid_val = 1.0 / (1.0 + exp_approx(-1.702 * gate[i]))
         gated = append(gated, up[i] * sigmoid_val)
         i = i + 1
     }
-    
-    // Down projection
+
     result = matvec(down_weight, gated, hidden_size, intermediate_size)
-    
+
     return result
 }
 
-// Embedding lookup
 func embedding_lookup([]float embed_weight, int token_id, int hidden_size) []float {
     []float result
     int start = token_id * hidden_size
@@ -396,7 +366,6 @@ func embedding_lookup([]float embed_weight, int token_id, int hidden_size) []flo
     return result
 }
 
-// Single transformer block forward pass
 func transformer_block_forward(
     []float hidden,
     []float norm_w,
@@ -409,46 +378,39 @@ func transformer_block_forward(
     float rms_eps,
     int position
 ) []float {
-    
-    // Self-attention block
+
     []float attn_norm = rms_norm(hidden, norm_w, rms_eps)
-    
+
     []float q = matvec(q_w, attn_norm, hidden_size, hidden_size)
     q = apply_rope(q, position, head_dim, 10000.0)
-    
+
     []float k = matvec(k_w, attn_norm, hidden_size, hidden_size)
     k = apply_rope(k, position, head_dim, 10000.0)
-    
+
     []float v = matvec(v_w, attn_norm, hidden_size, hidden_size)
-    
+
     []float attn_out = attention(q, k, v, num_heads, head_dim)
     attn_out = matvec(o_w, attn_out, hidden_size, hidden_size)
-    
-    // Residual connection
+
     []float after_attn = vec_add(hidden, attn_out)
-    
-    // FFN block
+
     []float ffn_norm = rms_norm(after_attn, norm_w, rms_eps)
     []float ffn_out = ffn(ffn_norm, ffn_gate_w, ffn_up_w, ffn_down_w, hidden_size, intermediate_size)
-    
-    // Residual connection
+
     []float output = vec_add(after_attn, ffn_out)
-    
+
     return output
 }
 
-// Complete forward pass
 func model_forward(
     int token_id,
     model_weights weights,
     inference_config config,
     int position
 ) []float {
-    
-    // Embedding
+
     []float hidden = embedding_lookup(weights.embed_tokens, token_id, config.hidden_size)
-    
-    // Transformer layers
+
     int layer = 0
     while layer < config.num_layers {
         hidden = transformer_block_forward(
@@ -470,13 +432,11 @@ func model_forward(
         )
         layer = layer + 1
     }
-    
-    // Final normalization
+
     hidden = rms_norm(hidden, weights.final_norm_weight, config.rms_norm_eps)
-    
-    // Language modeling head
+
     []float logits = matvec(weights.lm_head_weight, hidden, config.vocab_size, config.hidden_size)
-    
+
     return logits
 }
 

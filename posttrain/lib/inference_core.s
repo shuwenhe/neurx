@@ -2,9 +2,6 @@ package neurx.posttrain.lib.inference_core
 
 use std.io.eprintln
 
-// Post-Training Inference Core - Ultra-Minimal Implementation
-// Demonstrates architecture without complex S language features
-
 func model_load(string path) string {
     string msg = "Loaded model: " + path
     return msg
