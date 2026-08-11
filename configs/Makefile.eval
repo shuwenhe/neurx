@@ -1,10 +1,5 @@
 
-
-
-
-
 .PHONY: help build train eval monitor checkpoint report clean build-eval-tools
-
 
 S_COMPILER ?= s
 BASH := bash
@@ -14,7 +9,6 @@ SCRIPT_DIR := $(PROJECT_ROOT)/script
 CHECKPOINT_DIR := $(PROJECT_ROOT)/artifacts/checkpoints
 LOG_DIR := $(PROJECT_ROOT)/logs
 CONFIG_FILE := $(PROJECT_ROOT)/configs/config_large_model.json
-
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
@@ -27,16 +21,11 @@ ifeq ($(OS),Windows_NT)
     PLATFORM := windows
 endif
 
-
 RED := \033[0;31m
 GREEN := \033[0;32m
 YELLOW := \033[1;33m
 BLUE := \033[0;34m
 NC := \033[0m
-
-
-
-
 
 help:
 	@echo "$(BLUE)╔════════════════════════════════════════════════════════╗$(NC)"
@@ -66,17 +55,9 @@ help:
 	@echo "  make clean-all         - Clean everything including checkpoints"
 	@echo ""
 
-
-
-
-
 dirs:
 	@mkdir -p $(BIN_DIR) $(LOG_DIR) $(CHECKPOINT_DIR)
 	@echo "$(GREEN)✓ Directories created$(NC)"
-
-
-
-
 
 build-eval-tools: dirs
 	@echo "$(BLUE)🔨 Building evaluation tools...$(NC)"
@@ -94,10 +75,6 @@ build-eval-tools: dirs
 	fi
 	@echo "$(GREEN)✓ Evaluation tools ready$(NC)"
 
-
-
-
-
 train: dirs build-eval-tools
 	@echo "$(BLUE)🚀 Starting NeurX LLM training...$(NC)"
 	@echo "  Config: $(CONFIG_FILE)"
@@ -112,10 +89,6 @@ train-with-monitoring: dirs build-eval-tools
 	@(bash $(SCRIPT_DIR)/integration.sh monitor &)
 	@wait
 	@echo "$(GREEN)✓ Training complete$(NC)"
-
-
-
-
 
 eval: dirs build-eval-tools
 	@echo "$(BLUE)📊 Computing evaluation metrics...$(NC)"
@@ -136,10 +109,6 @@ perplexity:
 		echo "$(YELLOW)⚠ No checkpoints found$(NC)"; \
 	fi
 
-
-
-
-
 monitor: build-eval-tools
 	@echo "$(BLUE)📈 Starting training monitor...$(NC)"
 	@LOG_FILE="$(LOG_DIR)/training_$(shell date +%Y%m%d_%H%M%S).jsonl"; \
@@ -148,10 +117,6 @@ monitor: build-eval-tools
 	else \
 		bash $(SCRIPT_DIR)/integration.sh monitor "$(CONFIG_FILE)"; \
 	fi
-
-
-
-
 
 checkpoint-list:
 	@echo "$(BLUE)📂 Available checkpoints:$(NC)"
@@ -185,10 +150,6 @@ checkpoint-load:
 		echo "  $(YELLOW)No checkpoints found$(NC)"; \
 	fi
 
-
-
-
-
 report:
 	@echo "$(BLUE)📊 Generating training report...$(NC)"
 	@if [ -f "$(LOG_DIR)/training.jsonl" ]; then \
@@ -216,10 +177,6 @@ if os.path.exists(log_file): \
 else: \
     print('  No training logs found')" || true
 
-
-
-
-
 shard:
 	@echo "$(BLUE)📦 Sharding training data...$(NC)"
 	@make -f Makefile shard 2>/dev/null || $(PYTHON) scripts/legacy/data_pipeline_v2.py shard
@@ -239,10 +196,6 @@ tokenize: build-eval-tools
 	fi
 	@echo "$(GREEN)✓ Tokenization complete$(NC)"
 
-
-
-
-
 infer:
 	@echo "$(BLUE)🎯 Running inference demo...$(NC)"
 	@bash $(SCRIPT_DIR)/demo_complete_pipeline.sh
@@ -251,10 +204,6 @@ infer:
 chat:
 	@echo "$(BLUE)💬 Starting interactive chat...$(NC)"
 	@bash $(SCRIPT_DIR)/chat.sh
-
-
-
-
 
 clean:
 	@echo "$(BLUE)🧹 Cleaning build artifacts...$(NC)"
@@ -269,10 +218,6 @@ clean-all: clean
 	@rm -rf $(CHECKPOINT_DIR)
 	@rm -rf $(LOG_DIR)
 	@echo "$(GREEN)✓ Deep clean complete$(NC)"
-
-
-
-
 
 status:
 	@echo "$(BLUE)📊 NeurX System Status:$(NC)"
@@ -295,10 +240,6 @@ version:
 	@if command -v $(S_COMPILER) > /dev/null; then \
 		$(S_COMPILER) --version; \
 	fi
-
-
-
-
 
 quick-train:
 	@echo "$(BLUE)🚀 Quick start: Build tools + Train$(NC)"

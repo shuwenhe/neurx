@@ -215,9 +215,7 @@ rollout_correction/
 import "posttrain/alignment/rollout_correction/config.s"
 import "posttrain/alignment/rollout_correction/rollout_correction.s"
 
-
 let config = decoupled_seq_is(threshold: 2.0)
-
 
 let corrected_loss, result = compute_policy_loss_decoupled_mode(
     new_log_probs,
@@ -228,7 +226,6 @@ let corrected_loss, result = compute_policy_loss_decoupled_mode(
     config,
     clip_epsilon: 0.2
 )
-
 
 println(f"IS mean: {result.statistics['is_mean']}")
 println(f"Rejection rate: {result.statistics['rc_total_rejection_rate']}")
@@ -257,10 +254,8 @@ println(f"Pass@8: {passk:.2%}")
 ```s
 import "posttrain/alignment/vectorized/vectorized_estimators.s"
 
-
 let stacked_rewards = stack_grouped_sequences(grouped_rewards)
 let stacked_mask = stack_grouped_sequences(grouped_masks)
-
 
 let loss, advantages = compute_rloo_loss_vectorized(
     log_probs,

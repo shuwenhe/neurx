@@ -111,7 +111,7 @@ neurx/
   - `text_tokenizer.s` (250 lines) - BPE tokenization
   - `inference_core.s` (20 lines) ✅ Minimal working version
 
-- **Status:** 
+- **Status:**
   - Architecture: ✅ Complete
   - Compilation: 🟡 In progress (S compiler type inference issues being addressed)
   - Testing: ⏳ Pending
@@ -140,7 +140,7 @@ make clean                    # Clean build artifacts
 ### Compilation Flow
 
 ```
-S Source (.s) 
+S Source (.s)
     ↓
 [S Compiler: s_seed]
     ↓
@@ -164,17 +164,17 @@ Architecture:
   Head Dimension: 400
   Intermediate Size: 8640
   Vocab Size: 32000
-  
+
 Position Encoding:
   Type: RoPE (Rotary Position Embedding)
   Base: 1000000.0
   Theta: 1000000.0
-  
+
 Activations:
   Attention: SiLU
   FFN: SiLU + ReLU
   Normalization: RMSNorm (eps: 1e-6)
-  
+
 Training Config:
   Learning Rate: 2e-4
   Beta1: 0.9
@@ -402,6 +402,6 @@ This project is part of the NeurX framework research initiative.
 
 ---
 
-**Last Updated:** 2026-08-10  
-**Current Status:** Phase 2A ✅ Complete | Phase 3 🟡 In Progress | Phase 4 ⏳ Pending  
-**Language:** Pure S (no Python, C++, or Shell)  
+**Last Updated:** 2026-08-10
+**Current Status:** Phase 2A ✅ Complete | Phase 3 🟡 In Progress | Phase 4 ⏳ Pending
+**Language:** Pure S (no Python, C++, or Shell)

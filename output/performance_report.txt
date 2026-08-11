@@ -46,7 +46,7 @@ Prompt 1: "The future of AI is"
   Tokens Generated: 20
   Latency: 12.34 ms
   Throughput: 1,618.86 tokens/sec
-  
+
 Prompt 2: "Machine learning enables"
   Tokens Generated: 15
   Latency: 9.25 ms
@@ -77,7 +77,7 @@ Average Throughput: 1,620.24 tokens/sec
 PyTorch Reference:
   Training: 12,000 tokens/sec
   Inference: 9 ms
-  
+
 S Language Implementation:
   Training: 13,118 tokens/sec (+9.3%)
   Inference: 10.8 ms (+20% slower, but with better memory efficiency)

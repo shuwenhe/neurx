@@ -222,7 +222,6 @@ s compile posttrain/alignment/vectorized/vectorized_estimators.s
 测试方法:
 ```python
 
-
 ```
 
 #### Rejection Sampling Golden Test

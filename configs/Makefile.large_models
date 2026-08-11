@@ -1,8 +1,4 @@
 
-
-
-
-
 .PHONY: train-large train-large-watch train-xlarge train-xlarge-watch \
         train-tensor train-tensor-watch train-pipeline train-pipeline-watch \
         train-dist train-dist-watch \
@@ -10,11 +6,6 @@
         finetune finetune-watch eval eval-watch benchmark \
         setup-distributed setup-kubernetes setup-slurm \
         monitor logs clean-logs train-help infer-help
-
-
-
-
-
 
 train-large: check-bash
 	@echo "🚀 Running Large Model Training (7B-13B parameters)"
@@ -69,7 +60,6 @@ train-large-watch: check-bash
 	rm -f .run/train_large_watch_pid.txt; \
 	exit $$STATUS
 
-
 train-xlarge: check-bash
 	@echo "🚀 Running XLarge Model Training (70B+ parameters - NeurX Scale)"
 	@echo "   GPU: 32×A100-40GB | Time: 1-4 weeks | Memory: 1.2TB"
@@ -123,7 +113,6 @@ train-xlarge-watch: check-bash
 	rm -f .run/train_xlarge_watch_pid.txt; \
 	exit $$STATUS
 
-
 train-tensor: check-bash
 	@echo "🚀 Tensor Parallelism Training (weight matrix distribution)"
 	@echo "   GPU: 8-16×A100-40GB | Model: 20B-70B parameters"
@@ -164,7 +153,6 @@ train-tensor-watch: check-bash
 	rm -f .run/train_tensor_watch_pid.txt; \
 	exit $$STATUS
 
-
 train-pipeline: check-bash
 	@echo "🚀 Pipeline Parallelism Training (layer distribution)"
 	@echo "   GPU: 16×A100-40GB | Model: 70B-175B parameters"
@@ -200,7 +188,6 @@ train-pipeline-watch: check-bash
 	rm -f .run/train_pipeline_watch_pid.txt; \
 	exit $$STATUS
 
-
 train-dist: check-bash
 	@echo "🚀 Distributed Multi-Node Training"
 	@echo "   Nodes: $${NEURX_NUM_NODES:-4} | Total GPUs: $${NEURX_WORLD_SIZE:-32}"
@@ -232,11 +219,6 @@ train-dist-watch: check-bash
 	rm -f .run/train_dist_watch_pid.txt; \
 	exit $$STATUS
 
-
-
-
-
-
 infer-batch: check-bash
 	@echo "🔮 Running Batch Inference"
 	@echo "   Mode: Batch processing | Input: prompts file"
@@ -266,7 +248,6 @@ infer-batch-watch: check-bash
 	STATUS=$$?; \
 	exit $$STATUS
 
-
 infer-stream: check-bash
 	@echo "🔮 Running Streaming Inference"
 	@echo "   Mode: Real-time token streaming | Latency: optimized"
@@ -278,7 +259,6 @@ infer-stream: check-bash
 	$(MAKE) run-full-inference-s 2>&1; \
 	STATUS=$$?; \
 	exit $$STATUS
-
 
 infer-serving: check-bash
 	@echo "🔮 Running Inference Server"
@@ -295,10 +275,6 @@ infer-serving: check-bash
 	$(MAKE) run-full-inference-s 2>&1; \
 	STATUS=$$?; \
 	exit $$STATUS
-
-
-
-
 
 finetune: check-bash
 	@echo "🎯 Running Fine-tuning"
@@ -330,10 +306,6 @@ finetune-watch: check-bash
 	wait $$TRAIN_PID; STATUS=$$?; \
 	rm -f .run/finetune_watch_pid.txt; \
 	exit $$STATUS
-
-
-
-
 
 eval: check-bash
 	@echo "📊 Running Model Evaluation"
@@ -369,10 +341,6 @@ benchmark: check-bash
 	echo "✅ Benchmark completed. Report: artifacts/benchmark_report/"; \
 	exit $$STATUS
 
-
-
-
-
 setup-distributed: check-bash
 	@echo "🔧 Setting up Distributed Training Environment"
 	@cd '$(CURDIR_UNIX)' && \
@@ -403,10 +371,6 @@ setup-slurm: check-bash
 	echo "✅ SLURM setup completed"; \
 	echo "   Submit: sbatch artifacts/slurm/train_job.sh"
 
-
-
-
-
 monitor: check-bash
 	@echo "📡 Monitoring Training"
 	@if [ -f "/tmp/neurx_llm_train.log" ]; then \
@@ -427,10 +391,6 @@ clean-logs: check-bash
 	@rm -f /tmp/neurx*.log
 	@rm -rf .run/
 	@echo "✅ Logs cleaned"
-
-
-
-
 
 train-help: check-bash
 	@echo "=== NeurX Training Commands ==="

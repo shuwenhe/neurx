@@ -9,9 +9,9 @@ struct gpu_device {
 
 struct gpu_tensor {
     int gpu_id
-    []float host_data  
+    []float host_data
     int size
-    string dtype  
+    string dtype
 }
 
 func get_available_gpus() []gpu_device {
@@ -71,7 +71,7 @@ struct session_state {
     string user_id
     int total_tokens_generated
     inference_checkpoint latest_checkpoint
-    int checkpoint_frequency  
+    int checkpoint_frequency
     bool auto_save_enabled
 }
 
@@ -127,30 +127,30 @@ func resume_inference_from_checkpoint(
 }
 
 struct tp_config {
-    int world_size      
-    int rank            
-    string backend      
+    int world_size
+    int rank
+    string backend
 }
 
 struct tp_weight_shard {
     int rank
     int world_size
     []float weight_shard
-    string shard_type   
+    string shard_type
 }
 
 func shard_linear_weight(
-    []float weight,     
+    []float weight,
     int rank,
     int world_size,
-    string shard_type   
+    string shard_type
 ) tp_weight_shard {
     cols = len(weight[0])
     cols_per_rank = cols / world_size
     shard = make([]float, 4096 * cols_per_rank)
     for i < len(weight) {
         for j < cols_per_rank {
-            shard[i * cols_per_rank + j] = 
+            shard[i * cols_per_rank + j] =
                 weight[i * cols + rank * cols_per_rank + j]
         }
     }
@@ -163,7 +163,7 @@ func shard_linear_weight(
 }
 
 func allgather_output(
-    []float local_output,  
+    []float local_output,
     int rank,
     int world_size
 ) []float {
@@ -172,7 +172,7 @@ func allgather_output(
 }
 
 func reduce_scatter(
-    []float global_gradient,  
+    []float global_gradient,
     int rank,
     int world_size
 ) []float {
@@ -181,7 +181,7 @@ func reduce_scatter(
 }
 
 struct quantization_config {
-    string dtype        
+    string dtype
     float scale_factor
     bool per_channel
     bool symmetric
@@ -189,7 +189,7 @@ struct quantization_config {
 
 struct quantized_tensor {
     []int8 data
-    []float scales  
+    []float scales
     quantization_config config
 }
 
@@ -227,11 +227,11 @@ func dequantize_for_attention(
 struct multimodal_input {
     string text
     []uint8 image_data
-    string image_format  
+    string image_format
 }
 
 struct vision_features {
-    []float embedding    
+    []float embedding
     int num_patches
     int feature_dim
 }
@@ -254,22 +254,22 @@ func vision_transformer_encode(
 }
 
 func fuse_text_and_vision(
-    []float text_embedding,    
-    vision_features vis_feat   
+    []float text_embedding,
+    vision_features vis_feat
 ) []float {
     fused = []float{}
-    fused = append(fused, text_embedding[0:])  
-    fused = append(fused, vis_feat.embedding)  
+    fused = append(fused, text_embedding[0:])
+    fused = append(fused, vis_feat.embedding)
     return fused
 }
 
 struct json_schema {
-    string json_str   
+    string json_str
 }
 
 struct constrained_generation_state {
-    []string valid_tokens  
-    bool is_complete       
+    []string valid_tokens
+    bool is_complete
 }
 
 func build_json_vocabulary(json_schema schema) []string {
@@ -286,7 +286,7 @@ func build_json_vocabulary(json_schema schema) []string {
 func constrained_sample_next_token(
     []float logits,
     json_schema schema,
-    string current_output  
+    string current_output
 ) int {
     valid_vocab = build_json_vocabulary(schema)
     for token_idx < len(logits) {
@@ -294,9 +294,9 @@ func constrained_sample_next_token(
         if contains(valid_vocab, token_str) {
             test_str = current_output + token_str
             if is_valid_json_prefix(test_str, schema) {
-                logits[token_idx] = logits[token_idx] + 100.0  
+                logits[token_idx] = logits[token_idx] + 100.0
             } else {
-                logits[token_idx] = -inf  
+                logits[token_idx] = -inf
             }
         } else {
             logits[token_idx] = -inf
@@ -317,8 +317,8 @@ func is_valid_json_prefix(string json_str, json_schema schema) bool {
 
 struct lora_adapter {
     string adapter_id
-    []float lora_a     
-    []float lora_b     
+    []float lora_a
+    []float lora_b
     float scale
     int rank
 }
@@ -361,20 +361,20 @@ func switch_lora_adapter(
 }
 
 func apply_lora_to_linear(
-    []float weight,      
+    []float weight,
     lora_adapter adapter,
-    []float input         
+    []float input
 ) []float {
     standard_output = matmul(input, transpose(weight))
-    lora_input = matmul(input, transpose(adapter.lora_a))  
-    lora_output = matmul(lora_input, transpose(adapter.lora_b))  
+    lora_input = matmul(input, transpose(adapter.lora_a))
+    lora_output = matmul(lora_input, transpose(adapter.lora_b))
     output = standard_output + (lora_output * adapter.scale)
     return output
 }
 
 struct beam_search_state {
-    []float hypothesis      
-    []float scores          
+    []float hypothesis
+    []float scores
     int beam_size
 }
 
@@ -386,7 +386,7 @@ struct dynamic_batch_scheduler {
 }
 
 struct anthropic_message {
-    string role      
+    string role
     string content
 }
 
@@ -407,7 +407,7 @@ func start_grpc_server(grpc_server server) {
 }
 
 func current_timestamp_ms() int64 {
-    return 0  
+    return 0
 }
 
 func f(int x) float {

@@ -251,7 +251,6 @@ from verl.workers.rollout import vLLMRollout
 from verl.workers.checkpoint import MooncakeCheckpointEngine
 from verl.reward import BatchRewardManager
 
-
 config = PPOConfig(
     learning_rate=1e-5,
     clip_epsilon=0.2,
@@ -282,7 +281,6 @@ trainer = PPOTrainer(
     reward_manager=reward_manager,
 )
 
-
 trainer.fit(train_dataloader)
 ```
 
@@ -292,7 +290,6 @@ import "posttrain/alignment/ppo/ppo.s"
 import "posttrain/inference/vllm/vllm.s"
 import "checkpoint/mooncake_engine.s"
 import "posttrain/reward/reward_managers.s"
-
 
 let config = PPOConfig{
     learning_rate: 1e-5,
@@ -325,7 +322,6 @@ let trainer = new_ppo_trainer(
     checkpoint_engine,
     reward_manager
 )
-
 
 trainer.train(train_dataloader)
 ```

@@ -1,10 +1,5 @@
 
-
-
-
-
 .PHONY: help build train train-full train-amp train-distributed demo test clean
-
 
 S_COMPILER ?= s
 BASH := bash
@@ -15,19 +10,16 @@ CHECKPOINT_DIR := $(PROJECT_ROOT)/artifacts/checkpoints
 LOG_DIR := $(PROJECT_ROOT)/logs
 CONFIG_FILE := $(PROJECT_ROOT)/configs/config_large_model.json
 
-
 ENABLE_AMP ?= 1
 ENABLE_LR_SCHEDULE ?= 1
 ENABLE_GRADIENT_CLIP ?= 1
 ENABLE_DISTRIBUTED ?= 0
 ENABLE_MONITORING ?= 1
 
-
 WORLD_SIZE ?= 1
 RANK ?= 0
 MASTER_ADDR ?= localhost
 MASTER_PORT ?= 29500
-
 
 RED := \033[0;31m
 GREEN := \033[0;32m
@@ -35,10 +27,6 @@ YELLOW := \033[1;33m
 BLUE := \033[0;34m
 CYAN := \033[0;36m
 NC := \033[0m
-
-
-
-
 
 help:
 	@echo "$(CYAN)╔════════════════════════════════════════════════════════╗$(NC)"
@@ -83,17 +71,9 @@ help:
 	@echo "  make clean                   - Clean build files"
 	@echo ""
 
-
-
-
-
 dirs:
 	@mkdir -p $(BIN_DIR) $(LOG_DIR) $(CHECKPOINT_DIR)
 	@echo "$(GREEN)✓ Directories created$(NC)"
-
-
-
-
 
 build: dirs
 	@echo "$(BLUE)🔨 Building all components...$(NC)"
@@ -120,10 +100,6 @@ build-distributed: dirs
 		$(S_COMPILER) build $(SCRIPT_DIR)/distributed_training.s -o $(BIN_DIR)/distributed_training 2>/dev/null || echo "    ⚠ Distributed build skipped"; \
 	fi
 
-
-
-
-
 train: build
 	@echo "$(BLUE)🚀 Starting standard training...$(NC)"
 	@echo "  Config: $(CONFIG_FILE)"
@@ -149,10 +125,6 @@ train-distributed: build
 train-with-profile: build
 	@echo "$(BLUE)🚀 Starting training with profiling...$(NC)"
 	@NEURX_PROFILE=1 bash $(SCRIPT_DIR)/complete_training_cycle.sh
-
-
-
-
 
 demo:
 	@if [ "$(ARGS)" == "all" ]; then \
@@ -187,10 +159,6 @@ demo-checkpoint:
 
 demo-report:
 	@bash $(SCRIPT_DIR)/training_demo.sh 8
-
-
-
-
 
 eval:
 	@echo "$(BLUE)📊 Evaluating model...$(NC)"
@@ -250,7 +218,6 @@ elif final < 100:
 else:
     print(f"\n⚠️  Needs more training")
 
-
 print(f"\nTrend (last 10 evaluations):")
 for i in range(max(0, len(lines)-10), len(lines)):
     ppl = lines[i]['val_perplexity']
@@ -258,10 +225,6 @@ for i in range(max(0, len(lines)-10), len(lines)):
     bar = "█" * min(bar_len, 50)
     print(f"  {bar} {ppl:.1f}")
 EOF
-
-
-
-
 
 checkpoint-list:
 	@echo "$(BLUE)📂 Available checkpoints:$(NC)"
@@ -282,10 +245,6 @@ checkpoint-cleanup:
 	@bash $(SCRIPT_DIR)/integration.sh checkpoint cleanup 5
 	@echo "$(GREEN)✓ Cleanup complete$(NC)"
 
-
-
-
-
 test: build
 	@echo "$(BLUE)🧪 Running tests...$(NC)"
 	@echo "  Testing data loading..."
@@ -296,10 +255,6 @@ test: build
 	@[ -f "$(BIN_DIR)/mixed_precision_trainer" ] && echo "    ✓ AMP built" || echo "    ⚠ AMP skipped"
 	@[ -f "$(BIN_DIR)/distributed_training" ] && echo "    ✓ Distributed built" || echo "    ⚠ Distributed skipped"
 	@echo "$(GREEN)✓ Tests complete$(NC)"
-
-
-
-
 
 status:
 	@echo "$(CYAN)📊 NeurX System Status:$(NC)"
@@ -317,10 +272,6 @@ status:
 	@echo "  Build Status:"
 	@ls -1 $(BIN_DIR)/ 2>/dev/null | sed 's/^/    ✓ /' || echo "    (No tools built)"
 
-
-
-
-
 clean:
 	@echo "$(BLUE)🧹 Cleaning...$(NC)"
 	@rm -rf $(BIN_DIR) build/
@@ -332,10 +283,6 @@ clean-all: clean
 	@echo "$(BLUE)🧹 Deep cleaning...$(NC)"
 	@rm -rf $(CHECKPOINT_DIR) $(LOG_DIR)
 	@echo "$(GREEN)✓ Deep clean complete$(NC)"
-
-
-
-
 
 version:
 	@echo "NeurX Training System v2.0"

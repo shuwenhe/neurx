@@ -2,7 +2,7 @@
 
 **Purpose**: Validate NeurX implementation against Hugging Face reference model, layer by layer
 
-**Design Philosophy**: 
+**Design Philosophy**:
 - Fixed inputs for reproducibility
 - Per-layer comparison for fast debugging
 - Regression detection (which layer broke?)
@@ -79,7 +79,7 @@ assert error < 0.1, f"Embedding mismatch: {error}"
 ## Week 1: Tokenizer + Embedding
 
 **Input**: Fixed text (medical QA question)
-**Output**: 
+**Output**:
 - Token IDs (integers)
 - Embeddings (4096-dim vectors)
 
@@ -160,7 +160,6 @@ assert error < 0.1, f"Embedding mismatch: {error}"
 python3 tests/reference/week1_verify.py
 python3 tests/reference/week2_verify.py
 python3 tests/reference/week3_verify.py
-
 
 for week in 1 2 3; do
   python3 tests/reference/week${week}_verify.py

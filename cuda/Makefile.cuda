@@ -1,6 +1,4 @@
 
-
-
 .PHONY: all build-cuda build-trainer train-gpu clean help
 
 NEURX_ROOT ?= $(CURDIR)
@@ -10,10 +8,8 @@ CUDA_BUILD = $(BUILD_DIR)/cuda
 ARTIFACTS = $(NEURX_ROOT)/artifacts
 CUDA_LIB = $(ARTIFACTS)/lib/libneurx_cuda_runtime.so
 
-
 CUDA_COMPUTE_CAP ?= 89
 NVCC_OPTS ?= -O3 -std=c++14 -gencode arch=compute_$(CUDA_COMPUTE_CAP),code=sm_$(CUDA_COMPUTE_CAP)
-
 
 S_COMPILER ?= /home/shuwen/.local/bin/s
 S_RUNNER ?= $(ARTIFACTS)/build/s_runner/s_ir_runner
@@ -21,10 +17,6 @@ PRETRAIN_BATCH = 32
 PRETRAIN_SEQ_LEN = 256
 PRETRAIN_LR = 0.0002
 PRETRAIN_STEPS = 1000000000
-
-
-
-
 
 all: build-cuda build-trainer
 
@@ -44,10 +36,6 @@ help:
 	@echo "  PRETRAIN_LR=N           - Learning rate (default: $(PRETRAIN_LR))"
 	@echo "  PRETRAIN_STEPS=N        - Max steps (default: $(PRETRAIN_STEPS))"
 
-
-
-
-
 build-cuda: $(CUDA_LIB)
 
 $(CUDA_LIB): $(CUDA_DIR)/cuda_runtime_binding.cu $(CUDA_DIR)/cuda_runtime_binding.h $(CUDA_DIR)/CMakeLists.txt
@@ -62,20 +50,12 @@ $(CUDA_LIB): $(CUDA_DIR)/cuda_runtime_binding.cu $(CUDA_DIR)/cuda_runtime_bindin
 		cmake --install .
 	@echo "[CUDA] ✓ Library built: $@"
 
-
-
-
-
 build-trainer: $(S_RUNNER) scripts/legacy/gpu_train_cuda.ir
 
 scripts/legacy/gpu_train_cuda.ir: scripts/legacy/gpu_train_cuda.s
 	@echo "[S] Compiling GPU trainer..."
 	@$(S_COMPILER) ir scripts/legacy/gpu_train_cuda.s > $@
 	@echo "[S] ✓ Compiled: $@"
-
-
-
-
 
 train-gpu: build-cuda build-trainer
 	@echo ""
@@ -92,10 +72,6 @@ train-gpu: build-cuda build-trainer
 	export LD_LIBRARY_PATH=$(ARTIFACTS)/lib:$$LD_LIBRARY_PATH && \
 	$(S_RUNNER) scripts/legacy/gpu_train_cuda.ir
 
-
-
-
-
 check-cuda:
 	@echo "Checking CUDA setup..."
 	@which nvcc || (echo "ERROR: nvcc not found"; exit 1)
@@ -111,10 +87,6 @@ check-all: check-cuda check-s
 	@echo "✓ CUDA: Found"
 	@echo "✓ S compiler: Found"
 
-
-
-
-
 clean:
 	@echo "Cleaning build artifacts..."
 	@rm -rf $(BUILD_DIR)
@@ -129,10 +101,6 @@ clean-install:
 
 distclean: clean clean-install
 	@echo "✓ Full clean complete"
-
-
-
-
 
 debug-cuda:
 	@echo "CUDA Configuration:"

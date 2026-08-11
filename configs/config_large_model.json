@@ -1,7 +1,7 @@
 {
   "name": "NeurX Large Model Training Config",
   "description": "Complete LLM training configuration with all advanced features",
-  
+
   "model": {
     "vocab_size": 128000,
     "hidden_dim": 768,

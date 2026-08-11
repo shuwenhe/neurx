@@ -58,12 +58,12 @@ merge_text_and_image_embeddings(text_embed, images)
   - 每组缩放因子
   - 对称/非对称支持
   - 4-bit, 8-bit 支持
-  
+
 - **GPTQ (Generative Pre-trained Transformer Quantization)** - GPTQ 量化
   - Hessian 信息跟踪
   - 每组量化
   - 最优重建
-  
+
 - **压缩比**：4-6x（32-bit → 8-bit 或 4-bit）
 
 **核心接口**：

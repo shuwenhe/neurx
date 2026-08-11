@@ -174,7 +174,6 @@ prompt = golden["default_prompt"]
 ```python
 golden = load_json("tests/golden/metrics.json")
 
-
 l2_threshold = golden["phase_2a_target_metrics"]["week_1"]["l2_error_threshold"]
 assert embedding_l2_error < l2_threshold
 ```
@@ -196,7 +195,6 @@ model = AutoModel.from_pretrained(model_path)
 
 prompt = "What is the treatment for chronic urinary tract infection?"
 
-
 tokens = tokenizer.encode(prompt)
 with open("tests/golden/tokenizer.json", "w") as f:
     json.dump({
@@ -205,7 +203,6 @@ with open("tests/golden/tokenizer.json", "w") as f:
         "token_count": len(tokens),
         "vocab_size": len(tokenizer)
     }, f, indent=2)
-
 
 input_ids = np.array([tokens])
 outputs = model(input_ids=input_ids, output_hidden_states=True)
@@ -235,10 +232,6 @@ If you update any HF reference, edit the .json files directly:
 
 ```bash
 
-
-
-
-
 ```
 
 ---
@@ -263,8 +256,6 @@ golden = load_golden("logits")
 ### `tests/reference/week3_verify.py`
 ```python
 golden = load_golden("metrics")
-
-
 
 ```
 
