@@ -1,5 +1,4 @@
 package neurx.distributed
-
 struct nccl_config {
     int world_size
     int rank
@@ -9,7 +8,6 @@ struct nccl_config {
     string blocking_mode
     float timeout_secs
 }
-
 struct nccl_communicator {
     bool initialized
     uint64 comm_handle

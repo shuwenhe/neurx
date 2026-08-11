@@ -1,7 +1,6 @@
 package neurx.optimizer.adadelta
 use neurx.tensor.tensor
 use neurx.tensor.new
-
 struct adadelta_optimizer {
     float lr
     float rho
@@ -11,7 +10,6 @@ struct adadelta_optimizer {
     []float square_avg
     []float acc_delta
 }
-
 func new_adadelta(float lr, float rho, float eps, float weight_decay) adadelta_optimizer {
     adadelta_optimizer {
         lr: lr,
@@ -23,7 +21,6 @@ func new_adadelta(float lr, float rho, float eps, float weight_decay) adadelta_o
         acc_delta: [],
     }
 }
-
 func adadelta_step(adadelta_optimizer optimizer, tensor params, tensor grads) adadelta_optimizer_step_output {
     int n = len(params.data)
     optimizer.step = optimizer.step + 1
@@ -48,12 +45,10 @@ func adadelta_step(adadelta_optimizer optimizer, tensor params, tensor grads) ad
         params: new(out, params.shape, params.requires_grad),
     }
 }
-
 struct adadelta_optimizer_step_output {
     adadelta_optimizer optimizer
     tensor params
 }
-
 func ensure_adadelta_state([]float values, int n) []float {
     []float out = []float{cap: n}
     int i = 0
@@ -67,7 +62,6 @@ func ensure_adadelta_state([]float values, int n) []float {
     }
     out
 }
-
 func adadelta_sqrt(float x) float {
     if x <= 0.0 {
         return 0.0

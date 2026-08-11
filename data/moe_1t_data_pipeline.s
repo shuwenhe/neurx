@@ -2,7 +2,6 @@ package neurx.data.moe_1t_data_pipeline
 use neurx.strings
 use neurx.runtime.io.{io_println, io_file_exists, io_read_lines, io_mkdir_recursive}
 use neurx.tokenizer.bpe_trainer.{bpe_tokenizer_state}
-
 struct data_shard_meta {
     string shard_id
     string file_path
@@ -14,7 +13,6 @@ struct data_shard_meta {
     string checksum
     int processed
 }
-
 struct data_shard_directory {
     string root_path
     []data_shard_meta shards
@@ -27,7 +25,6 @@ struct data_shard_directory {
     int tokens_consumed
     int shards_completed
 }
-
 func moe_1t_load_shard_directory(string manifest_path) data_shard_directory {
     data_shard_directory dir = data_shard_directory {
         root_path: manifest_path,
@@ -44,7 +41,6 @@ func moe_1t_load_shard_directory(string manifest_path) data_shard_directory {
     io_println("Loading data shard directory from: " + manifest_path)
     dir
 }
-
 struct token_batch {
     []int token_ids
     int batch_size
@@ -56,7 +52,6 @@ struct token_batch {
     int epoch
     int batch_idx
 }
-
 struct moe_1t_token_loader {
     data_shard_directory shard_dir
     bpe_tokenizer_state tokenizer
@@ -73,7 +68,6 @@ struct moe_1t_token_loader {
     int duplicate_tokens_skipped
     int validation_errors
 }
-
 func moe_1t_token_loader_new(
     string manifest_path,
     bpe_tokenizer_state tokenizer,
@@ -121,7 +115,6 @@ func moe_1t_token_loader_new(
     }
     loader
 }
-
 func moe_1t_assign_shard_partition(
     moe_1t_token_loader loader
 ) []int {
@@ -145,7 +138,6 @@ func moe_1t_assign_shard_partition(
     }
     assigned_shards
 }
-
 func moe_1t_validate_tokens(
     []int tokens,
     int vocab_size
@@ -160,7 +152,6 @@ func moe_1t_validate_tokens(
     }
     errors
 }
-
 func moe_1t_dedup_tokens(
     []int tokens,
     float max_dup_ratio
@@ -188,7 +179,6 @@ func moe_1t_dedup_tokens(
     }
     result
 }
-
 func moe_1t_compute_importance_weights(
     []float per_token_loss,
     float difficulty_factor
@@ -211,7 +201,6 @@ func moe_1t_compute_importance_weights(
     }
     weight
 }
-
 func moe_1t_prefetch_next_batch(
     moe_1t_token_loader loader,
     int prefetch_id
@@ -237,7 +226,6 @@ func moe_1t_prefetch_next_batch(
     }
     batch
 }
-
 func moe_1t_swap_buffers(
     moe_1t_token_loader loader,
     int next_batch_idx
@@ -247,7 +235,6 @@ func moe_1t_swap_buffers(
     loader.prefetch_batch = temp
     loader.prefetch_batch = moe_1t_prefetch_next_batch(loader, next_batch_idx)
 }
-
 func moe_1t_assemble_context_window(
     []int token_stream,
     int window_len,
@@ -282,7 +269,6 @@ func moe_1t_assemble_context_window(
     }
     windows
 }
-
 func moe_1t_get_next_batch(
     moe_1t_token_loader loader
 ) token_batch {
@@ -293,7 +279,6 @@ func moe_1t_get_next_batch(
     loader.total_tokens_served = loader.total_tokens_served + batch.num_tokens_total
     batch
 }
-
 func moe_1t_reset_epoch(
     moe_1t_token_loader loader
 ) {
@@ -302,7 +287,6 @@ func moe_1t_reset_epoch(
     loader.shard_dir.current_shard_idx = 0
     loader.shard_dir.tokens_consumed = 0
 }
-
 func moe_1t_get_loader_stats(
     moe_1t_token_loader loader
 ) string {
@@ -313,7 +297,6 @@ func moe_1t_get_loader_stats(
     stats = stats + "  Duplicates skipped: " + int_to_string(loader.duplicate_tokens_skipped)
     stats
 }
-
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -335,7 +318,6 @@ func int_to_string(int n) string {
     }
     result
 }
-
 func float_to_string(float x) string {
     int whole = int(x)
     string result = int_to_string(whole) + "."
@@ -347,11 +329,9 @@ func float_to_string(float x) string {
     result = result + int_to_string(frac_int)
     result
 }
-
 func chr(int code) string {
     string(code)
 }
-
 func append([][]int arrays, []int arr) [][]int {
     arrays
 }

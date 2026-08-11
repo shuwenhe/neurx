@@ -1,6 +1,5 @@
 import "tensor/tensor.s"
 import "posttrain/alignment/rollout_correction/config.s"
-
 struct rs_result {
     rejection_mask: Tensor
     rejection_scores: Tensor
@@ -8,7 +7,6 @@ struct rs_result {
     mean_score: f32
     max_score: f32
 }
-
 func compute_k1_divergence(
     new_log_probs: Tensor,
     rollout_log_probs: Tensor
@@ -18,7 +16,6 @@ func compute_k1_divergence(
     let neg_log_r = -log(clamp(ratio, 1e-10, 1e10))
     return neg_log_r
 }
-
 func compute_k2_divergence(
     new_log_probs: Tensor,
     rollout_log_probs: Tensor
@@ -26,7 +23,6 @@ func compute_k2_divergence(
     let log_ratio = new_log_probs - rollout_log_probs
     return 0.5 * (log_ratio * log_ratio)
 }
-
 func compute_k3_divergence(
     new_log_probs: Tensor,
     rollout_log_probs: Tensor
@@ -35,7 +31,6 @@ func compute_k3_divergence(
     let ratio = exp(log_ratio)
     return ratio - 1.0 - log_ratio
 }
-
 func compute_token_rejection(
     new_log_probs: Tensor,
     rollout_log_probs: Tensor,
@@ -78,7 +73,6 @@ func compute_token_rejection(
         max_score: max_score.item(),
     }
 }
-
 func compute_sequence_rejection(
     new_log_probs: Tensor,
     rollout_log_probs: Tensor,
@@ -147,7 +141,6 @@ func compute_sequence_rejection(
         max_score: max_score.item(),
     }
 }
-
 func compute_rejection_sampling(
     new_log_probs: Tensor,
     rollout_log_probs: Tensor,
@@ -193,7 +186,6 @@ func compute_rejection_sampling(
     }
     return results
 }
-
 func combine_rejection_results(results: []rs_result) -> RSResult {
     if results.len() == 0 {
         return rs_result{
@@ -229,14 +221,12 @@ func combine_rejection_results(results: []rs_result) -> RSResult {
         max_score: max_score,
     }
 }
-
 func apply_rejection_to_mask(
     response_mask: Tensor,
     rejection_result: RSResult
 ) -> Tensor {
     return response_mask * (1.0 - rejection_result.rejection_mask.to_float())
 }
-
 func compute_rs_statistics(results: []rs_result) -> map[string]f32 {
     let stats = map[string]f32{}
     for i in 0..results.len() {
@@ -251,11 +241,9 @@ func compute_rs_statistics(results: []rs_result) -> map[string]f32 {
     }
     return stats
 }
-
 func clamp(x: Tensor, min_val: f32, max_val: f32) -> Tensor {
     return maximum(minimum(x, max_val), min_val)
 }
-
 func where(condition: Tensor, x: Tensor, y: Tensor) -> Tensor {
     return condition.to_float() * x + (1.0 - condition.to_float()) * y
 }

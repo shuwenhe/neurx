@@ -1,5 +1,4 @@
 package neurx.tensor.core
-
 struct tensor_desc {
     []int shape
     []int strides
@@ -11,30 +10,24 @@ struct tensor_desc {
     bool is_view
     bool is_contiguous
 }
-
 struct tensor {
     []float storage
     tensor_desc desc
     []float grad
     bool has_grad
 }
-
 func tensor_numel(tensor t) int {
     return t.desc.numel
 }
-
 func tensor_rank(tensor t) int {
     return len(t.desc.shape)
 }
-
 func tensor_is_view(tensor t) bool {
     return t.desc.is_view
 }
-
 func tensor_is_contiguous(tensor t) bool {
     return t.desc.is_contiguous
 }
-
 func tensor_clone_storage(tensor t) tensor {
     tensor {
         storage: copy_float(t.storage),
@@ -53,7 +46,6 @@ func tensor_clone_storage(tensor t) tensor {
         has_grad: t.has_grad,
     }
 }
-
 func tensor_summary(tensor t) string {
     string summary = "tensor(shape="
     summary = summary + str(t.desc.shape)
@@ -70,7 +62,6 @@ func tensor_summary(tensor t) string {
     summary = summary + ")"
     return summary
 }
-
 func copy_int([]int values) []int {
     int n = len(values)
     []int out = []int{cap: n}
@@ -81,7 +72,6 @@ func copy_int([]int values) []int {
     }
     return out
 }
-
 func copy_float([]float values) []float {
     int n = len(values)
     []float out = []float{cap: n}
@@ -92,7 +82,6 @@ func copy_float([]float values) []float {
     }
     return out
 }
-
 func zeros_float(int n) []float {
     []float out = []float{cap: n}
     int i = 0
@@ -102,7 +91,6 @@ func zeros_float(int n) []float {
     }
     return out
 }
-
 func shape_numel([]int shape) int {
     int n = 1
     int i = 0
@@ -112,7 +100,6 @@ func shape_numel([]int shape) int {
     }
     return n
 }
-
 func contiguous_strides([]int shape) []int {
     int ndim = len(shape)
     []int strides = []int{cap: ndim}
@@ -125,7 +112,6 @@ func contiguous_strides([]int shape) []int {
     }
     return strides
 }
-
 func same_ints([]int a, []int b) bool {
     if len(a) != len(b) {
         return false
@@ -139,11 +125,9 @@ func same_ints([]int a, []int b) bool {
     }
     return true
 }
-
 func int_to_float(int n) float {
     return 0.0 + n
 }
-
 func broadcast_shape([]int a, []int b) []int {
     if !broadcastable_shape(a, b) {
         []int empty_shape = []int{cap: 1}
@@ -189,7 +173,6 @@ func broadcast_shape([]int a, []int b) []int {
     }
     return out
 }
-
 func broadcastable_shape([]int a, []int b) bool {
     int ndim_a = len(a)
     int ndim_b = len(b)
@@ -218,7 +201,6 @@ func broadcastable_shape([]int a, []int b) bool {
     }
     return true
 }
-
 func sum_to_shape(tensor src, []int target_shape) tensor {
     tensor input = contiguous(src)
     if !broadcastable_shape(target_shape, input.desc.shape) {
@@ -268,7 +250,6 @@ func sum_to_shape(tensor src, []int target_shape) tensor {
     }
     return out
 }
-
 func unravel_index(int flat_index, []int shape) []int {
     int ndim = len(shape)
     []int coords = []int{cap: ndim}
@@ -291,7 +272,6 @@ func unravel_index(int flat_index, []int shape) []int {
     }
     return coords
 }
-
 func ravel_index([]int coords, []int shape) int {
     int ndim = len(shape)
     int flat = 0
@@ -304,7 +284,6 @@ func ravel_index([]int coords, []int shape) int {
     }
     return flat
 }
-
 func dtype_size_bytes(string dtype) int {
     if dtype == "fp32" {
         return 4
@@ -323,7 +302,6 @@ func dtype_size_bytes(string dtype) int {
     }
     return 4
 }
-
 func make_desc([]int shape, string dtype, string device, bool requires_grad) tensor_desc {
     []int shape_copy = copy_int(shape)
     []int strides = contiguous_strides(shape_copy)
@@ -339,7 +317,6 @@ func make_desc([]int shape, string dtype, string device, bool requires_grad) ten
         is_contiguous: true,
     }
 }
-
 func empty([]int shape, string dtype, string device, bool requires_grad) tensor {
     tensor_desc desc = make_desc(shape, dtype, device, requires_grad)
     return tensor {
@@ -349,7 +326,6 @@ func empty([]int shape, string dtype, string device, bool requires_grad) tensor 
         has_grad: false,
     }
 }
-
 func full([]int shape, float value, string dtype, string device, bool requires_grad) tensor {
     tensor out = empty(shape, dtype, device, requires_grad)
     int i = 0
@@ -359,15 +335,12 @@ func full([]int shape, float value, string dtype, string device, bool requires_g
     }
     return out
 }
-
 func zeros([]int shape, string dtype, string device, bool requires_grad) tensor {
     return full(shape, 0.0, dtype, device, requires_grad)
 }
-
 func ones([]int shape, string dtype, string device, bool requires_grad) tensor {
     return full(shape, 1.0, dtype, device, requires_grad)
 }
-
 func from_data([]float data, []int shape, string dtype, string device, bool requires_grad) tensor {
     tensor_desc desc = make_desc(shape, dtype, device, requires_grad)
     []float storage = zeros_float(desc.numel)
@@ -383,11 +356,9 @@ func from_data([]float data, []int shape, string dtype, string device, bool requ
         has_grad: false,
     }
 }
-
 func tensor_nbytes(tensor t) int {
     return t.desc.numel * dtype_size_bytes(t.desc.dtype)
 }
-
 func storage_offset_for_linear(tensor t, int linear_index) int {
     int remaining = linear_index
     int offset = t.desc.storage_offset
@@ -404,19 +375,16 @@ func storage_offset_for_linear(tensor t, int linear_index) int {
     }
     return offset
 }
-
 func get(tensor t, int linear_index) float {
     int offset = storage_offset_for_linear(t, linear_index)
     return t.storage[offset]
 }
-
 func set_value(tensor t, int linear_index, float value) tensor {
     tensor out = t
     int offset = storage_offset_for_linear(out, linear_index)
     out.storage[offset] = value
     return out
 }
-
 func as_strided(tensor base, []int shape, []int strides, int storage_offset) tensor {
     tensor_desc desc = tensor_desc {
         shape: copy_int(shape),
@@ -436,18 +404,15 @@ func as_strided(tensor base, []int shape, []int strides, int storage_offset) ten
         has_grad: false,
     }
 }
-
 func view(tensor base, []int shape) tensor {
     if shape_numel(shape) != base.desc.numel {
         return base
     }
     return as_strided(base, shape, contiguous_strides(shape), base.desc.storage_offset)
 }
-
 func reshape(tensor base, []int shape) tensor {
     return view(base, shape)
 }
-
 func transpose2d(tensor base) tensor {
     if len(base.desc.shape) != 2 {
         return clone(base)
@@ -460,7 +425,6 @@ func transpose2d(tensor base) tensor {
     strides[1] = base.desc.strides[0]
     return as_strided(base, shape, strides, base.desc.storage_offset)
 }
-
 func broadcast_offset(tensor t, []int out_coords) int {
     int out_ndim = len(out_coords)
     int src_ndim = len(t.desc.shape)
@@ -481,7 +445,6 @@ func broadcast_offset(tensor t, []int out_coords) int {
     }
     return offset
 }
-
 func elementwise_binary(tensor a, tensor b, string op) tensor {
     tensor left = contiguous(a)
     tensor right = contiguous(b)
@@ -515,7 +478,6 @@ func elementwise_binary(tensor a, tensor b, string op) tensor {
     }
     return out
 }
-
 func broadcast_to(tensor a, []int target_shape) tensor {
     tensor src = contiguous(a)
     if !broadcastable_shape(src.desc.shape, target_shape) {
@@ -534,7 +496,6 @@ func broadcast_to(tensor a, []int target_shape) tensor {
     }
     return out
 }
-
 func contiguous(tensor t) tensor {
     if t.desc.is_contiguous && t.desc.storage_offset == 0 {
         return t
@@ -547,15 +508,12 @@ func contiguous(tensor t) tensor {
     }
     return out
 }
-
 func tensor_materialize(tensor t) tensor {
     return contiguous(t)
 }
-
 func clone(tensor t) tensor {
     return contiguous(t)
 }
-
 func exp_approx(float x) float {
     float x2 = x * x
     float x3 = x2 * x
@@ -563,12 +521,10 @@ func exp_approx(float x) float {
     float x5 = x4 * x
     return 1.0 + x + (x2 / 2.0) + (x3 / 6.0) + (x4 / 24.0) + (x5 / 120.0)
 }
-
 func tanh_approx(float x) float {
     float x2 = x * x
     return (x * (27.0 + x2)) / (27.0 + 9.0 * x2)
 }
-
 func fill_like(tensor like, float value) tensor {
     tensor out = empty(like.desc.shape, like.desc.dtype, like.desc.device, like.desc.requires_grad)
     int i = 0
@@ -578,15 +534,12 @@ func fill_like(tensor like, float value) tensor {
     }
     return out
 }
-
 func zeros_like(tensor like) tensor {
     return fill_like(like, 0.0)
 }
-
 func ones_like(tensor like) tensor {
     return fill_like(like, 1.0)
 }
-
 func unary_elementwise(tensor a, string op) tensor {
     tensor src = contiguous(a)
     tensor out = empty(src.desc.shape, src.desc.dtype, src.desc.device, src.desc.requires_grad)
@@ -641,27 +594,21 @@ func unary_elementwise(tensor a, string op) tensor {
     }
     return out
 }
-
 func relu(tensor a) tensor {
     return unary_elementwise(a, "relu")
 }
-
 func exp(tensor a) tensor {
     return unary_elementwise(a, "exp")
 }
-
 func log(tensor a) tensor {
     return unary_elementwise(a, "log")
 }
-
 func sqrt(tensor a) tensor {
     return unary_elementwise(a, "sqrt")
 }
-
 func tanh(tensor a) tensor {
     return unary_elementwise(a, "tanh")
 }
-
 func gelu(tensor a) tensor {
     tensor src = contiguous(a)
     tensor out = empty(src.desc.shape, src.desc.dtype, src.desc.device, src.desc.requires_grad)
@@ -674,7 +621,6 @@ func gelu(tensor a) tensor {
     }
     return out
 }
-
 func softmax(tensor a, int dim) tensor {
     tensor src = contiguous(a)
     int ndim = len(src.desc.shape)
@@ -748,7 +694,6 @@ func softmax(tensor a, int dim) tensor {
     }
     return out
 }
-
 func core_backend_smoke() bool {
     []int shape2 = []int{cap: 2}
     shape2[0] = 2
@@ -765,23 +710,18 @@ func core_backend_smoke() bool {
     }
     true
 }
-
 func add(tensor a, tensor b) tensor {
     return elementwise_binary(a, b, "add")
 }
-
 func sub(tensor a, tensor b) tensor {
     return elementwise_binary(a, b, "sub")
 }
-
 func mul(tensor a, tensor b) tensor {
     return elementwise_binary(a, b, "mul")
 }
-
 func div(tensor a, tensor b) tensor {
     return elementwise_binary(a, b, "div")
 }
-
 func sum_all(tensor a) tensor {
     tensor src = contiguous(a)
     []int scalar_shape = []int{cap: 1}
@@ -794,7 +734,6 @@ func sum_all(tensor a) tensor {
     }
     return out
 }
-
 func reduce_dim(tensor a, int dim, bool keepdim, string mode) tensor {
     tensor src = contiguous(a)
     int ndim = len(src.desc.shape)
@@ -951,27 +890,21 @@ func reduce_dim(tensor a, int dim, bool keepdim, string mode) tensor {
     }
     return out
 }
-
 func sum_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_dim(a, dim, keepdim, "sum")
 }
-
 func mean_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_dim(a, dim, keepdim, "mean")
 }
-
 func max_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_dim(a, dim, keepdim, "max")
 }
-
 func min_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_dim(a, dim, keepdim, "min")
 }
-
 func prod_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_dim(a, dim, keepdim, "prod")
 }
-
 func mean_all(tensor a) tensor {
     tensor out = sum_all(a)
     if a.desc.numel > 0 {
@@ -979,7 +912,6 @@ func mean_all(tensor a) tensor {
     }
     return out
 }
-
 func matmul2d(tensor a, tensor b) tensor {
     tensor left = contiguous(a)
     tensor right = contiguous(b)

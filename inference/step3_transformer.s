@@ -1,11 +1,8 @@
 package step3_transformer
-
 use neurx.inference.safetensors_loader.{load_transformer_layer}
 use neurx.inference.cpu_backend.{fast_matmul_flat_opt, fast_gelu, pow_f, fast_softmax}
 use neurx.model.transformer.position_encoding.{new_rope_position_encoding, position_encoding_config, apply_rope_position}
-
 extern "intrinsic" func __host_slice(string text, int start, int end) string\nextern \"intrinsic\" func __sys_gettimeofday(int sec_ptr, int usec_ptr) int
-
 func int_to_string(int val) string {
     if val == 0 { return "0" }
     string res = ""
@@ -18,7 +15,6 @@ func int_to_string(int val) string {
     }
     res
 }\n\nstruct timer {\n    int start_sec\n    int start_usec\n}\n\nfunc start_timer() timer {\n    return timer{start_sec: 0, start_usec: 0}\n}\n\nfunc elapsed_ms(timer t) int {\n    return 0\n}\n\nstruct perf_stats {\n    int layer\n    int matmul_time_ms\n    int rope_time_ms\n    int attention_time_ms\n    int ffn_time_ms\n    int total_time_ms\n}"
-
 struct transformer_config {
     int num_layers
     int hidden_size
@@ -27,19 +23,16 @@ struct transformer_config {
     int intermediate_size
     float rope_theta
 }
-
 struct matrix_stats {
     float mean
     float sample
 }
-
 struct layer_perf_stats {
     int layer_id
     int matmul_count
     int attention_ops
     int ffn_ops
 }
-
 func create_transformer_config() transformer_config {
     return transformer_config{
         num_layers: 24,
@@ -50,27 +43,21 @@ func create_transformer_config() transformer_config {
         rope_theta: 10000.0
     }
 }
-
 func apply_rope([]float x, int position, float theta) []float {
     return x
 }
-
 func multi_head_attention([][]float query, [][]float key, [][]float value, int num_heads) [][]float {
     return query
 }
-
 func feed_forward([][]float x) [][]float {
     return x
 }
-
 func rms_norm([][]float x) [][]float {
     return x
 }
-
 func transformer_layer([][]float hidden_states) [][]float {
     return hidden_states
 }
-
 func exp_approx(float x) float {
     if x > 20.0 { return 485165195.0 }
     if x < -20.0 { return 0.0 }
@@ -84,7 +71,6 @@ func exp_approx(float x) float {
     }
     result
 }
-
 func softmax_row([]float scores, int length) []float {
     []float out = []float{cap: length}
     if length == 0 { return out }
@@ -111,7 +97,6 @@ func softmax_row([]float scores, int length) []float {
     }
     out
 }
-
 func compute_matrix_stats(mat [][]float) matrix_stats {
     if len(mat) == 0 { return matrix_stats{mean: 0.0, sample: 0.0} }
     int R = len(mat)
@@ -144,7 +129,6 @@ func compute_matrix_stats(mat [][]float) matrix_stats {
     }
     return matrix_stats{mean: mean, sample: sample}
 }
-
 func flatten_mat(mat [][]float) []float {
     if len(mat) == 0 { return []float{} }
     int R = len(mat)
@@ -163,13 +147,11 @@ func flatten_mat(mat [][]float) []float {
     }
     return out
 }
-
 func transformer_forward([][]float embeddings) [][]float {
     int seq_len = len(embeddings)
     if seq_len == 0 { return embeddings }
     int hidden = len(embeddings[0])
     string model_file = "/home/shuwen/shuwen/posttrain/model.safetensors"
-
     []float A = []float{cap: seq_len * hidden}
     int i = 0
     while i < seq_len {
@@ -180,7 +162,6 @@ func transformer_forward([][]float embeddings) [][]float {
         }
         i = i + 1
     }
-
     int num_layers = 24
     int layer = 0
     int total_ops = 0
@@ -195,7 +176,6 @@ func transformer_forward([][]float embeddings) [][]float {
         [][]float Wgate = weights[base + "mlp.gate_proj.weight"]
         [][]float Wup = weights[base + "mlp.up_proj.weight"]
         [][]float Wdown = weights[base + "mlp.down_proj.weight"]
-
         matrix_stats stats_wq = compute_matrix_stats(Wq)
         matrix_stats stats_wk = compute_matrix_stats(Wk)
         matrix_stats stats_wv = compute_matrix_stats(Wv)
@@ -210,7 +190,6 @@ func transformer_forward([][]float embeddings) [][]float {
         print("[L" + int_to_string(layer) + "] Gate mean=" + int_to_string(int(stats_gate.mean * 1000000.0)) + " sample=" + int_to_string(int(stats_gate.sample * 1000000.0)) + "\n")
         print("[L" + int_to_string(layer) + "] Up mean=" + int_to_string(int(stats_up.mean * 1000000.0)) + " sample=" + int_to_string(int(stats_up.sample * 1000000.0)) + "\n")
         print("[L" + int_to_string(layer) + "] Down mean=" + int_to_string(int(stats_down.mean * 1000000.0)) + " sample=" + int_to_string(int(stats_down.sample * 1000000.0)) + "\n")
-
         []float fq = flatten_mat(Wq)
         []float fk = flatten_mat(Wk)
         []float fv = flatten_mat(Wv)
@@ -218,11 +197,9 @@ func transformer_forward([][]float embeddings) [][]float {
         []float fgate = flatten_mat(Wgate)
         []float fup = flatten_mat(Wup)
         []float fdown = flatten_mat(Wdown)
-
         []float Q = fast_matmul_flat_opt(A, fq, seq_len, hidden, hidden)
         []float K = fast_matmul_flat_opt(A, fk, seq_len, hidden, hidden)
         []float V = fast_matmul_flat_opt(A, fv, seq_len, hidden, hidden)
-
         pos_enc_cfg := position_encoding_config{
             hidden_dim: hidden,
             max_seq_len: seq_len,
@@ -233,7 +210,6 @@ func transformer_forward([][]float embeddings) [][]float {
         [][]float rope_res = apply_rope_position(rope_enc, Q, K, seq_len, 0)
         Q = rope_res[0]
         K = rope_res[1]
-
         int num_heads = 14
         int head_dim = hidden / num_heads
         []float Out = []float{cap: seq_len * hidden}
@@ -276,15 +252,12 @@ func transformer_forward([][]float embeddings) [][]float {
             }
             qi = qi + 1
         }
-
         []float AttnProjected = fast_matmul_flat_opt(Out, fo, seq_len, hidden, hidden)
-
         int idx = 0
         while idx < seq_len * hidden {
             A[idx] = A[idx] + AttnProjected[idx]
             idx = idx + 1
         }
-
         []float Gate = fast_matmul_flat_opt(A, fgate, seq_len, hidden, 4864)
         []float Up = fast_matmul_flat_opt(A, fup, seq_len, hidden, 4864)
         []float Gated = []float{cap: seq_len * 4864}
@@ -299,22 +272,17 @@ func transformer_forward([][]float embeddings) [][]float {
             ii = ii + 1
         }
         []float FfnOut = fast_matmul_flat_opt(Gated, fdown, seq_len, 4864, hidden)
-
         int kk = 0
         while kk < seq_len * hidden {
             A[kk] = A[kk] + FfnOut[kk]
             kk = kk + 1
         }
-
         int layer_ops = seq_len * hidden * hidden * 3 + seq_len * seq_len * hidden + seq_len * hidden * 4864 * 2
         total_ops = total_ops + layer_ops
         print("[L" + int_to_string(layer) + "] ops=" + int_to_string(layer_ops / 1000000) + "M\n")
-
         layer = layer + 1
     }
-
     print("[TRANSFORMER INFERENCE END] total_ops=" + int_to_string(total_ops / 1000000000) + "B\n\n")
-
     [][]float result = [][]float{cap: seq_len}
     int r = 0
     while r < seq_len {

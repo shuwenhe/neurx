@@ -1,7 +1,6 @@
 package neurx.optimizer.lbfgs
 use neurx.tensor.tensor
 use neurx.tensor.new
-
 struct lbfgs_optimizer {
     float lr
     int max_iter
@@ -15,7 +14,6 @@ struct lbfgs_optimizer {
     []float rho
     []float prev_params
 }
-
 func new_lbfgs(
     float lr,
     int max_iter,
@@ -37,7 +35,6 @@ func new_lbfgs(
         prev_params: [],
     }
 }
-
 func lbfgs_step(lbfgs_optimizer optimizer, tensor params, tensor grads) lbfgs_optimizer_step_output {
     int n = len(params.data)
     optimizer.step = optimizer.step + 1
@@ -93,7 +90,6 @@ func lbfgs_step(lbfgs_optimizer optimizer, tensor params, tensor grads) lbfgs_op
         params: new(out, params.shape, params.requires_grad),
     }
 }
-
 func two_loop_recursion(
     lbfgs_optimizer optimizer,
     []float flat_grad,
@@ -141,12 +137,10 @@ func two_loop_recursion(
     }
     return q
 }
-
 struct lbfgs_optimizer_step_output {
     lbfgs_optimizer optimizer
     tensor params
 }
-
 func copy_float_array([]float src, int n) []float {
     []float out = []float{cap: n}
     int i = 0
@@ -156,7 +150,6 @@ func copy_float_array([]float src, int n) []float {
     }
     out
 }
-
 func lbfgs_dot([]float a, []float b, int n) float {
     float sum = 0.0
     int i = 0
@@ -166,7 +159,6 @@ func lbfgs_dot([]float a, []float b, int n) float {
     }
     sum
 }
-
 func lbfgs_abs_max([]float values, int n) float {
     float max_val = 0.0
     int i = 0
@@ -182,7 +174,6 @@ func lbfgs_abs_max([]float values, int n) float {
     }
     max_val
 }
-
 func pop_front_2d([][]float arr) [][]float {
     [][]float out = [][]float{cap: len(arr) - 1}
     int i = 1
@@ -192,7 +183,6 @@ func pop_front_2d([][]float arr) [][]float {
     }
     out
 }
-
 func pop_front_1d([]float arr) []float {
     []float out = []float{cap: len(arr) - 1}
     int i = 1

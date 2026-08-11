@@ -1,5 +1,4 @@
 module main
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -23,7 +22,6 @@ func int_to_str(int n) string {
     if neg { out = "-" + out }
     out
 }
-
 func main() {
     println("\n" + "============================================================")
     println("SafeTensors Weight Modifier - LoRA Merge Tool")

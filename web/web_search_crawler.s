@@ -1,5 +1,4 @@
 module web_search_crawler
-
 struct web_search_config {
     search_engines: list<string> = ["google", "bing"]
     max_results_per_engine: int = 10
@@ -29,7 +28,6 @@ struct web_search_config {
     cache_enabled: bool = true
     cache_ttl_hours: int = 24
 }
-
 struct search_result_item {
     url: string
     title: string
@@ -42,7 +40,6 @@ struct search_result_item {
     crawl_status?: string
     crawl_error?: string
 }
-
 struct crawled_content {
     raw_html_size: int
     text_content: string
@@ -52,7 +49,6 @@ struct crawled_content {
     extraction_timestamp: float
     word_count: int
 }
-
 struct page_metadata {
     title: string
     description: string?
@@ -67,13 +63,11 @@ struct page_metadata {
     keywords: list<string>?
     og_data: map<string, string>?
 }
-
 struct page_section {
     heading: string?
     level: int
     content: string
 }
-
 struct search_response {
     query: string
     corrected_query?: string
@@ -85,7 +79,6 @@ struct search_response {
     key_findings: list<string>?
     stats: search_statistics
 }
-
 struct search_statistics {
     engine_query_times_ms: map<string, float>
     crawl_times_ms: list<float>
@@ -99,7 +92,6 @@ interface SearchEngineInterface {
     name: string { get }
     search(query: string, config: web_search_config)
 }
-
 struct engine_search_result {
     items: list<search_result_item>
     total_estimated: int
@@ -268,7 +260,6 @@ class BingSearchEngine implements SearchEngineInterface {
         }
     }
 }
-
 class web_crawler {
     config: web_search_config
     session: HTTPSession
@@ -487,7 +478,6 @@ class main_content_extractor {
         full_text = "".join(content_parts).strip()
         return (full_text, sections)
     }
-
     struct extraction_result {
         text_content: string
         metadata: page_metadata
@@ -678,7 +668,6 @@ Also provide a comma-separated ranking of the most relevant result indices (0-ba
             reranked_indices=reranked_indices
         }
     }
-
     struct llm_summary_result {
         summary: string
         key_findings: list<string>?
@@ -725,7 +714,6 @@ Also provide a comma-separated ranking of the most relevant result indices (0-ba
         return final_output
     }
 }
-
 struct search_options {
     crawl_results: bool = true
     generate_summary: bool = true

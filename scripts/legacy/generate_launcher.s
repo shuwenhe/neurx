@@ -2,7 +2,6 @@ package neurx.script
 use std.fs
 use std.os
 use std.strings
-
 struct training_config {
     string root_dir
     string hostfile
@@ -27,7 +26,6 @@ struct training_config {
     string tokenizer_merges
     string shard_list_file
 }
-
 func load_config_from_env() training_config {
     training_config cfg
     string root = os::getenv("NEURX_ROOT")
@@ -82,7 +80,6 @@ func load_config_from_env() training_config {
     }
     return cfg
 }
-
 func parse_env_int(string key, int default_val) int {
     string val = os::getenv(key)
     if val == "" {
@@ -90,7 +87,6 @@ func parse_env_int(string key, int default_val) int {
     }
     return strings::parse_int(val)
 }
-
 func parse_env_float(string key, float default_val) float {
     string val = os::getenv(key)
     if val == "" {
@@ -98,7 +94,6 @@ func parse_env_float(string key, float default_val) float {
     }
     return strings::parse_float(val)
 }
-
 func parse_hostfile(string hostfile_path) []string {
     []string hosts = []string{}
     if !fs::exists(hostfile_path) {
@@ -119,7 +114,6 @@ func parse_hostfile(string hostfile_path) []string {
     }
     return hosts
 }
-
 func generate_launcher_script(training_config cfg, []string hosts) string {
     string script = ""
     script = script + "#!/usr/bin/env bash\n"
@@ -213,7 +207,6 @@ func generate_launcher_script(training_config cfg, []string hosts) string {
     script = script + "exit \"$status\"\n"
     return script
 }
-
 func generate_hosts_array([]string hosts) string {
     string result = ""
     for i := 0; i < len(hosts); i++ {
@@ -224,7 +217,6 @@ func generate_hosts_array([]string hosts) string {
     }
     return result
 }
-
 func main() {
     training_config cfg = load_config_from_env()
     []string hosts = parse_hostfile(cfg.hostfile)

@@ -3,7 +3,6 @@ use std.exec
 use std.os
 use std.strings
 use std.sync
-
 func main() {
     devices := os.Getenv("ASCEND_RT_VISIBLE_DEVICES")
     if devices == "" {

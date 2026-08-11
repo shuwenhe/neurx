@@ -1,7 +1,6 @@
 package neurx.posttrain.trainer.train_sft
 use std.io.eprintln
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}
-
 struct training_config {
     string model_path
     string data_file
@@ -24,7 +23,6 @@ struct training_config {
     bool merge_model
     bool gradient_checkpointing
 }
-
 func parse_env_int(string name, int default_val) int {
     string val = runtime_env_get(name, "")
     if len(val) == 0 {
@@ -32,7 +30,6 @@ func parse_env_int(string name, int default_val) int {
     }
     parse_int_string(val)
 }
-
 func parse_env_float(string name, float default_val) float {
     string val = runtime_env_get(name, "")
     if len(val) == 0 {
@@ -40,7 +37,6 @@ func parse_env_float(string name, float default_val) float {
     }
     parse_float_string(val)
 }
-
 func parse_env_bool(string name, bool default_val) bool {
     string val = runtime_env_get(name, "")
     if len(val) == 0 {
@@ -48,7 +44,6 @@ func parse_env_bool(string name, bool default_val) bool {
     }
     val == "1" || val == "true" || val == "True" || val == "TRUE" || val == "yes"
 }
-
 func parse_int_string(string s) int {
     int result = 0
     int i = 0
@@ -69,7 +64,6 @@ func parse_int_string(string s) int {
     }
     return result
 }
-
 func parse_float_string(string s) float {
     float result = 0.0
     float divisor = 1.0
@@ -102,12 +96,10 @@ func parse_float_string(string s) float {
     }
     return result
 }
-
 func load_config() training_config {
     string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/app/shuwen/model/base-model")
     string data_file = runtime_env_get("NEURX_POSTTRAIN_DATA_FILE", "/app/shuwen/dataset/medical/train.json")
     string output_dir = runtime_env_get("NEURX_POSTTRAIN_OUTPUT_DIR", "/app/shuwen/posttrain")
-
     training_config cfg = training_config{
         model_path: model_path,
         data_file: data_file,
@@ -132,7 +124,6 @@ func load_config() training_config {
     }
     cfg
 }
-
 func validate_config(training_config cfg) int {
     if !runtime_file_exists(cfg.model_path + "/config.json") {
         println("[ERROR] base model config is missing: " + cfg.model_path + "/config.json")
@@ -152,7 +143,6 @@ func validate_config(training_config cfg) int {
     }
     0
 }
-
 func int_to_str(int x) string {
     if x == 0 { return "0" }
     if x < 0 { return "-" + int_to_str(0 - x) }
@@ -174,7 +164,6 @@ func int_to_str(int x) string {
     }
     result
 }
-
 func float_to_str(float x, int decimals) string {
     float current = x
     bool negative = current < 0.0
@@ -206,7 +195,6 @@ func float_to_str(float x, int decimals) string {
     }
     return result
 }
-
 func scaled_ratio_to_str(int scaled) string {
     int whole = scaled / 10000
     int fraction = scaled - whole * 10000
@@ -216,7 +204,6 @@ func scaled_ratio_to_str(int scaled) string {
     }
     int_to_str(whole) + "." + digits
 }
-
 func contains_text(string text, string needle) bool {
     if len(needle) == 0 {
         return true
@@ -242,7 +229,6 @@ func contains_text(string text, string needle) bool {
     }
     false
 }
-
 func safe_command_path(string value) bool {
     if len(value) == 0 {
         return false
@@ -259,7 +245,6 @@ func safe_command_path(string value) bool {
     }
     true
 }
-
 func escape_json_string(string s) string {
     string out = "\""
     int i = 0
@@ -285,7 +270,6 @@ func escape_json_string(string s) string {
     out = out + "\""
     out
 }
-
 func int_to_hex(int x) string {
     string hex = "0123456789abcdef"
     string result = ""
@@ -301,7 +285,6 @@ func int_to_hex(int x) string {
     if len(result) == 3 { return "0" + result }
     result
 }
-
 func string_char(int ch) string {
     string chars = "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
     if ch >= 0 && ch < 127 {
@@ -310,7 +293,6 @@ func string_char(int ch) string {
         "?"
     }
 }
-
 func run_training(training_config cfg) int {
     println("====================================================")
     println("[PostTrain] LoRA SFT Training - S Runtime")
@@ -321,22 +303,18 @@ func run_training(training_config cfg) int {
     println("[LoRA config] rank=" + int_to_str(cfg.lora_rank) + ", alpha=" + alpha_text)
     println("[Device] " + cfg.device)
     println("")
-
     if !runtime_file_exists(cfg.model_path) {
         println("[ERROR] Model path not found: " + cfg.model_path)
         return 1
     }
-
     if !runtime_file_exists(cfg.data_file) {
         println("[ERROR] Data file not found: " + cfg.data_file)
         return 1
     }
-
     println("[Model] Validated path: " + cfg.model_path)
     println("[Data] Validated path: " + cfg.data_file)
     println("[Config] epochs=" + int_to_str(cfg.epochs) + ", batch_size=" + int_to_str(cfg.batch_size))
     println("[LoRA] rank=" + int_to_str(cfg.lora_rank) + ", target_modules=" + cfg.target_modules)
-
     int hidden_size = 896
     int kv_size = 128
     int num_layers = 24
@@ -350,7 +328,6 @@ func run_training(training_config cfg) int {
     int trainable_ratio_scaled = (2189 * cfg.lora_rank) / 8
     println("[Model] trainable ratio is approximately " + scaled_ratio_to_str(trainable_ratio_scaled) + "%")
     println("")
-
     println("[Config] learning_rate=" + float_to_str(cfg.learning_rate, 6) + ", lora_alpha=" + float_to_str(cfg.lora_alpha, 1))
     println("[✓] Preflight paths and configuration validated")
     println("")
@@ -467,17 +444,13 @@ func run_training(training_config cfg) int {
     println("[✓] Adapter checkpoint was written only after temporary-file reload validation")
     return 0
 }
-
 func main() {
     training_config cfg = load_config()
-
     int validation_result = validate_config(cfg)
     if validation_result != 0 {
         return
     }
-
     int training_result = run_training(cfg)
-
     if training_result == 0 {
         println("{")
         println("  \"status\": \"success\",")

@@ -1,13 +1,8 @@
 package neurx.inference.serve.lora_router
-
 func lora_unloaded_status() int { 1 }
-
 func lora_loading_status() int { 2 }
-
 func lora_ready_status() int { 3 }
-
 func lora_failed_status() int { 4 }
-
 struct lora_adapter {
     string adapter_id
     string base_model
@@ -19,20 +14,17 @@ struct lora_adapter {
     int last_used_ms
     string error_message
 }
-
 struct lora_router_state {
     []lora_adapter adapters
     int max_loaded_adapters
     int max_lora_rank
 }
-
 struct lora_route_result {
     lora_router_state state
     lora_adapter adapter
     bool accepted
     string error_message
 }
-
 func new_lora_route_result(lora_router_state state, lora_adapter adapter, bool accepted, string error_message) lora_route_result {
     lora_route_result result
     result.state = state
@@ -41,7 +33,6 @@ func new_lora_route_result(lora_router_state state, lora_adapter adapter, bool a
     result.error_message = error_message
     result
 }
-
 func new_lora_router(int max_loaded_adapters, int max_lora_rank) lora_router_state {
     int loaded_limit = max_loaded_adapters
     if loaded_limit <= 0 {
@@ -53,7 +44,6 @@ func new_lora_router(int max_loaded_adapters, int max_lora_rank) lora_router_sta
     }
     lora_router_state {adapters: [], max_loaded_adapters: loaded_limit, max_lora_rank: rank_limit}
 }
-
 func lora_find_adapter(lora_router_state state, string adapter_id) int {
     int i = 0
     while i < len(state.adapters) {
@@ -64,11 +54,9 @@ func lora_find_adapter(lora_router_state state, string adapter_id) int {
     }
     -1
 }
-
 func lora_adapter_at(lora_router_state state, int index) lora_adapter {
     state.adapters[index]
 }
-
 func lora_loaded_count(lora_router_state state) int {
     int count = 0
     int i = 0
@@ -80,7 +68,6 @@ func lora_loaded_count(lora_router_state state) int {
     }
     count
 }
-
 func empty_lora_adapter() lora_adapter {
     lora_adapter {
         adapter_id: "",
@@ -94,7 +81,6 @@ func empty_lora_adapter() lora_adapter {
         error_message: "",
     }
 }
-
 func lora_register(lora_router_state state, string adapter_id, string base_model, string path, int rank, float alpha) lora_route_result {
     if adapter_id == "" || base_model == "" || path == "" {
         return new_lora_route_result(state, empty_lora_adapter(), false, "invalid adapter metadata")
@@ -121,7 +107,6 @@ func lora_register(lora_router_state state, string adapter_id, string base_model
     state.adapters = append(state.adapters, adapter)
     new_lora_route_result(state, adapter, true, "")
 }
-
 func lora_mark_loaded(lora_router_state state, string adapter_id, bool success, string error_message) lora_router_state {
     int index = lora_find_adapter(state, adapter_id)
     if index < 0 {
@@ -138,7 +123,6 @@ func lora_mark_loaded(lora_router_state state, string adapter_id, bool success, 
     state.adapters[index] = adapter
     state
 }
-
 func lora_acquire(lora_router_state state, string base_model, string adapter_id, int now_ms) lora_route_result {
     int index = lora_find_adapter(state, adapter_id)
     if index < 0 {
@@ -156,7 +140,6 @@ func lora_acquire(lora_router_state state, string base_model, string adapter_id,
     state.adapters[index] = adapter
     new_lora_route_result(state, adapter, true, "")
 }
-
 func lora_release(lora_router_state state, string adapter_id, int now_ms) lora_router_state {
     int index = lora_find_adapter(state, adapter_id)
     if index < 0 {
@@ -170,7 +153,6 @@ func lora_release(lora_router_state state, string adapter_id, int now_ms) lora_r
     state.adapters[index] = adapter
     state
 }
-
 func lora_unload(lora_router_state state, string adapter_id) lora_route_result {
     int index = lora_find_adapter(state, adapter_id)
     if index < 0 {
@@ -184,7 +166,6 @@ func lora_unload(lora_router_state state, string adapter_id) lora_route_result {
     state.adapters[index] = adapter
     new_lora_route_result(state, adapter, true, "")
 }
-
 func apply_lora_linear([]float input, []float base_output, []float lora_a, []float lora_b, int input_dim, int output_dim, int rank, float alpha) []float {
     []float output = []float{cap: output_dim}
     int i = 0

@@ -1,12 +1,10 @@
 package neurx.posttrain.training.gradient_utils
-
 struct global_gradient_stats {
     float total_norm
     float clip_coefficient
     bool clipped
     int total_params
 }
-
 func compute_global_grad_norm([][]float all_layer_grads) float {
     float total_norm_squared = 0.0
     int layer_idx = 0
@@ -22,7 +20,6 @@ func compute_global_grad_norm([][]float all_layer_grads) float {
     }
     return sqrt(total_norm_squared)
 }
-
 func clip_gradients_global([][]float all_layer_grads, float max_norm) global_gradient_stats {
     float global_norm = compute_global_grad_norm(all_layer_grads)
     float clip_coef = max_norm / (global_norm + 1e-6)
@@ -53,7 +50,6 @@ func clip_gradients_global([][]float all_layer_grads, float max_norm) global_gra
     stats.total_params = total_params
     return stats
 }
-
 struct na_n_inf_stats {
     bool has_nan
     bool has_inf
@@ -63,18 +59,15 @@ struct na_n_inf_stats {
     string first_nan_layer
     string first_inf_layer
 }
-
 func is_nan(float x) bool {
     return x != x
 }
-
 func is_inf(float x) bool {
     float max_float = 3.4e38
     if x > max_float { return true }
     if x < (0.0 - max_float) { return true }
     return false
 }
-
 func check_gradients_nan_inf([][]float all_layer_grads, []string layer_names) na_n_inf_stats {
     na_n_inf_stats stats
     stats.has_nan = false
@@ -115,11 +108,9 @@ func check_gradients_nan_inf([][]float all_layer_grads, []string layer_names) na
     }
     return stats
 }
-
 func check_parameters_nan_inf([][]float all_layer_params, []string layer_names) na_n_inf_stats {
     return check_gradients_nan_inf(all_layer_params, layer_names)
 }
-
 struct gradient_statistics {
     float mean
     float std
@@ -129,7 +120,6 @@ struct gradient_statistics {
     int zero_count
     float sparsity
 }
-
 func compute_gradient_statistics([]float gradients) gradient_statistics {
     gradient_statistics stats
     int n = len(gradients)
@@ -175,7 +165,6 @@ func compute_gradient_statistics([]float gradients) gradient_statistics {
     stats.sparsity = sparsity
     return stats
 }
-
 func print_gradient_clip_stats(global_gradient_stats stats) {
     println("[Gradient Clip]")
     print("  Total Norm: ")
@@ -191,7 +180,6 @@ func print_gradient_clip_stats(global_gradient_stats stats) {
     print("  Total Params: ")
     println(int_to_str(stats.total_params))
 }
-
 func print_nan_inf_stats(na_n_inf_stats stats) {
     if stats.has_nan || stats.has_inf {
         println("[ERROR] Detected NaN/Inf in gradients!")
@@ -210,7 +198,6 @@ func print_nan_inf_stats(na_n_inf_stats stats) {
         println("  Training should be stopped or checkpointed!")
     }
 }
-
 func print_gradient_stats(gradient_statistics stats, string layer_name) {
     print("[Gradient Stats] ")
     println(layer_name)
@@ -223,7 +210,6 @@ func print_gradient_stats(gradient_statistics stats, string layer_name) {
     print("  Sparsity: ")
     println(float_to_str_4(stats.sparsity))
 }
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -250,7 +236,6 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
-
 func float_to_str_4(float value) string {
     float current = value
     bool negative = current < 0.0

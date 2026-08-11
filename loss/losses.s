@@ -1,17 +1,14 @@
 package neurx.loss
 use neurx.tensor.tensor
 use neurx.tensor.new
-
 struct loss {
     string name
 }
-
 func shape1(int n) []int {
     []int shape = []int{cap: 1}
     shape[0] = n
     shape
 }
-
 func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
@@ -22,7 +19,6 @@ func copy_float([]float data) []float {
     }
     out
 }
-
 func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
@@ -33,7 +29,6 @@ func copy_int([]int data) []int {
     }
     out
 }
-
 func exp_approx(float x) float {
     if x > 20.0 {
         return 485165195.0
@@ -51,7 +46,6 @@ func exp_approx(float x) float {
     }
     result
 }
-
 func log_approx(float x) float {
     float v = x
     if v <= 0.0 {
@@ -64,31 +58,26 @@ func log_approx(float x) float {
     float y7 = y5 * y2
     2.0 * (y + (y3 / 3.0) + (y5 / 5.0) + (y7 / 7.0))
 }
-
 func scalar(float value, bool requires_grad) tensor {
     []float out = []float{cap: 1}
     out[0] = value
     new(out, shape1(1), requires_grad)
 }
-
 func mean_from_sum(float total, int n) float {
     if n <= 0 {
         return 0.0
     }
     total / n
 }
-
 func abs(float x) float {
     if x < 0.0 {
         return 0.0 - x
     }
     x
 }
-
 func sigmoid(float x) float {
     1.0 / (1.0 + exp_approx(0.0 - x))
 }
-
 func softplus(float x) float {
     if x > 20.0 {
         x
@@ -100,11 +89,9 @@ func softplus(float x) float {
         }
     }
 }
-
 func new_loss() loss {
     loss { name: "generic" }
 }
-
 func cross_entropy_loss(tensor input, tensor target) tensor {
     int n = len(input.data)
     int ndim = len(input.shape)
@@ -196,7 +183,6 @@ func cross_entropy_loss(tensor input, tensor target) tensor {
         scalar(mean_from_sum(total, n), input.requires_grad || target.requires_grad)
     }
 }
-
 func bce_loss(tensor input, tensor target) tensor {
     int n = len(input.data)
     float total = 0.0
@@ -218,7 +204,6 @@ func bce_loss(tensor input, tensor target) tensor {
     }
     scalar(mean_from_sum(total, n), input.requires_grad || target.requires_grad)
 }
-
 func bce_with_logits_loss(tensor input, tensor target) tensor {
     int n = len(input.data)
     float total = 0.0
@@ -240,7 +225,6 @@ func bce_with_logits_loss(tensor input, tensor target) tensor {
     }
     scalar(mean_from_sum(total, n), input.requires_grad || target.requires_grad)
 }
-
 func l1_loss(tensor input, tensor target) tensor {
     int n = len(input.data)
     float total = 0.0
@@ -255,7 +239,6 @@ func l1_loss(tensor input, tensor target) tensor {
     }
     scalar(mean_from_sum(total, n), input.requires_grad || target.requires_grad)
 }
-
 func mse_loss(tensor input, tensor target) tensor {
     int n = len(input.data)
     float total = 0.0
@@ -270,7 +253,6 @@ func mse_loss(tensor input, tensor target) tensor {
     }
     scalar(mean_from_sum(total, n), input.requires_grad || target.requires_grad)
 }
-
 func smooth_l1_loss(tensor input, tensor target) tensor {
     int n = len(input.data)
     float total = 0.0
@@ -290,7 +272,6 @@ func smooth_l1_loss(tensor input, tensor target) tensor {
     }
     scalar(mean_from_sum(total, n), input.requires_grad || target.requires_grad)
 }
-
 func kl_div_loss(tensor input, tensor target) tensor {
     int n = len(input.data)
     float total = 0.0
@@ -307,15 +288,12 @@ func kl_div_loss(tensor input, tensor target) tensor {
     }
     scalar(mean_from_sum(total, n), input.requires_grad || target.requires_grad)
 }
-
 func nll_loss(tensor input, tensor target) tensor {
     cross_entropy_loss(input, target)
 }
-
 func huber_loss(tensor input, tensor target) tensor {
     smooth_l1_loss(input, target)
 }
-
 func poisson_nll_loss(tensor input, tensor target) tensor {
     int n = len(input.data)
     float total = 0.0
@@ -335,11 +313,9 @@ func poisson_nll_loss(tensor input, tensor target) tensor {
     }
     scalar(mean_from_sum(total, n), input.requires_grad || target.requires_grad)
 }
-
 func ctc_loss(tensor input, tensor target) tensor {
     cross_entropy_loss(input, target)
 }
-
 func margin_ranking_loss(tensor input1, tensor input2, tensor target) tensor {
     int n = len(input1.data)
     float total = 0.0
@@ -359,7 +335,6 @@ func margin_ranking_loss(tensor input1, tensor input2, tensor target) tensor {
     }
     scalar(mean_from_sum(total, n), input1.requires_grad || input2.requires_grad || target.requires_grad)
 }
-
 func triplet_margin_loss(tensor anchor, tensor positive, tensor negative) tensor {
     int n = len(anchor.data)
     float total = 0.0

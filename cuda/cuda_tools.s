@@ -2,7 +2,6 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_write_text_file, trim}
 use std.io.println
 extern func runtime_run_command(string command) int
-
 func main() {
     string action = runtime_env_get("NEURX_CUDA_TOOL", "verify")
     string root = runtime_env_get("NEURX_ROOT", ".")
@@ -28,7 +27,6 @@ func main() {
     println("[cuda-tools] actions: verify, build, build-runtime, build-runtime-alt, build-kernels, build-kernels-simple")
     2
 }
-
 func verify(string root) int {
     header("NVIDIA CUDA Environment Check")
     if !require_command("nvidia-smi", "Install NVIDIA driver first.") { return 1 }
@@ -82,7 +80,6 @@ func verify(string root) int {
     println("[OK] System ready for CUDA GPU training.")
     0
 }
-
 func build_cmake_runtime(string root) int {
     header("Build NeurX CUDA Runtime through CMake")
     if !require_command("nvcc", "Install NVIDIA CUDA Toolkit first.") { return 1 }
@@ -100,7 +97,6 @@ func build_cmake_runtime(string root) int {
     println("[OK] CUDA runtime installed to: " + install_prefix)
     0
 }
-
 func build_runtime_library(string root) int {
     header("Build CUDA Runtime Shared Library")
     if !require_command("nvcc", "Install NVIDIA CUDA Toolkit first.") { return 1 }
@@ -122,7 +118,6 @@ func build_runtime_library(string root) int {
     println("[OK] Library: " + lib)
     0
 }
-
 func build_runtime_alt(string root) int {
     header("Build CUDA Runtime Alternative")
     if !require_command("nvcc", "Install NVIDIA CUDA Toolkit first.") { return 1 }
@@ -137,7 +132,6 @@ func build_runtime_alt(string root) int {
     println("[OK] Library: " + lib)
     0
 }
-
 func build_kernels(string root, bool simple) int {
     header("Build CUDA Kernels")
     if !require_command("nvcc", "Install NVIDIA CUDA Toolkit first.") { return 1 }
@@ -166,16 +160,13 @@ func build_kernels(string root, bool simple) int {
     println("[OK] Library: " + lib)
     0
 }
-
 func header(string text) {
     println("")
     println("=== " + text + " ===")
 }
-
 func command_exists(string name) bool {
     runtime_run_command("command -v " + shell_escape(name) + " >/dev/null 2>&1") == 1
 }
-
 func require_command(string name, string hint) bool {
     if command_exists(name) {
         println("[OK] " + name + " found.")
@@ -184,7 +175,6 @@ func require_command(string name, string hint) bool {
     println("[ERROR] " + name + " not found. " + hint)
     false
 }
-
 func run_logged(string command) bool {
     println("[RUN] " + command)
     int result = runtime_run_command(command)
@@ -195,7 +185,6 @@ func run_logged(string command) bool {
     println("[ERROR] command failed")
     false
 }
-
 func detect_gpu_arch(string fallback) string {
     string arch = trim(runtime_env_get("NEURX_CUDA_GPU_ARCH", ""))
     if arch == "" {
@@ -203,7 +192,6 @@ func detect_gpu_arch(string fallback) string {
     }
     arch
 }
-
 func cpu_count() string {
     string n = trim(runtime_env_get("NEURX_BUILD_JOBS", ""))
     if n == "" {
@@ -211,7 +199,6 @@ func cpu_count() string {
     }
     n
 }
-
 func one_line(string text) string {
     int i = 0
     string out = ""
@@ -224,7 +211,6 @@ func one_line(string text) string {
     }
     out
 }
-
 func parse_int(string s, int fallback) int {
     string text = trim(s)
     if text == "" {
@@ -242,7 +228,6 @@ func parse_int(string s, int fallback) int {
     }
     value
 }
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -261,7 +246,6 @@ func int_to_str(int n) string {
     }
     out
 }
-
 func shell_escape(string s) string {
     string out = "'"
     int i = 0

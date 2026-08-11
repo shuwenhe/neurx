@@ -2,7 +2,6 @@ package neurx.autograd.tracer
 use neurx.autograd.function
 use neurx.autograd.eqn
 use neurx.strings
-
 struct tracer_state {
     string name
     bool active
@@ -15,39 +14,30 @@ struct tracer_state {
     []ir_eqn eqns
     []string tags
 }
-
 func get_op(tracer_state state, int index) string {
     state.ops[index]
 }
-
 func get_param_string(tracer_state state, int index) string {
     state.params[index]
 }
-
 func get_input(tracer_state state, int index) string {
     state.inputs[index]
 }
-
 func get_output(tracer_state state, int index) string {
     state.outputs[index]
 }
-
 func get_eqn(tracer_state state, int index) ir_eqn {
     state.eqns[index]
 }
-
 func get_tag(tracer_state state, int index) string {
     state.tags[index]
 }
-
 func get_chain_step(transform_chain chain, int index) string {
     chain.steps[index]
 }
-
 func get_chain_param(transform_chain chain, int index) string {
     chain.params[index]
 }
-
 func copy_eqn(ir_eqn eqn) ir_eqn {
     ir_eqn {
         primitive: eqn.primitive,
@@ -56,7 +46,6 @@ func copy_eqn(ir_eqn eqn) ir_eqn {
         outputs: copy_strings(eqn.outputs),
     }
 }
-
 func copy_eqns([]ir_eqn values) []ir_eqn {
     []ir_eqn out = []ir_eqn{cap: len(values)}
     int i = 0
@@ -66,7 +55,6 @@ func copy_eqns([]ir_eqn values) []ir_eqn {
     }
     out
 }
-
 func new_tracer_state(string name) tracer_state {
     tracer_state {
         name: name,
@@ -81,43 +69,33 @@ func new_tracer_state(string name) tracer_state {
         tags: [],
     }
 }
-
 func tracer_name(tracer_state state) string {
     state.name
 }
-
 func tracer_active(tracer_state state) bool {
     state.active
 }
-
 func tracer_linearized(tracer_state state) bool {
     state.linearized
 }
-
 func tracer_op_count(tracer_state state) int {
     state.op_count
 }
-
 func tracer_tag_count(tracer_state state) int {
     len(state.tags)
 }
-
 func tracer_param_count(tracer_state state) int {
     len(state.params)
 }
-
 func tracer_input_count(tracer_state state) int {
     len(state.inputs)
 }
-
 func tracer_output_count(tracer_state state) int {
     len(state.outputs)
 }
-
 func tracer_eqn_count(tracer_state state) int {
     len(state.eqns)
 }
-
 func tracer_has_op(tracer_state state, string op) bool {
     int i = 0
     while i < len(state.ops) {
@@ -128,7 +106,6 @@ func tracer_has_op(tracer_state state, string op) bool {
     }
     false
 }
-
 func tracer_has_param(tracer_state state, string param) bool {
     int i = 0
     while i < len(state.params) {
@@ -139,7 +116,6 @@ func tracer_has_param(tracer_state state, string param) bool {
     }
     false
 }
-
 func tracer_has_input(tracer_state state, string input) bool {
     int i = 0
     while i < len(state.inputs) {
@@ -150,7 +126,6 @@ func tracer_has_input(tracer_state state, string input) bool {
     }
     false
 }
-
 func tracer_has_output(tracer_state state, string output) bool {
     int i = 0
     while i < len(state.outputs) {
@@ -161,7 +136,6 @@ func tracer_has_output(tracer_state state, string output) bool {
     }
     false
 }
-
 func tracer_has_eqn(tracer_state state, string primitive) bool {
     int i = 0
     while i < len(state.eqns) {
@@ -173,7 +147,6 @@ func tracer_has_eqn(tracer_state state, string primitive) bool {
     }
     false
 }
-
 func tracer_has_tag(tracer_state state, string tag) bool {
     int i = 0
     while i < len(state.tags) {
@@ -184,7 +157,6 @@ func tracer_has_tag(tracer_state state, string tag) bool {
     }
     false
 }
-
 func tracer_add_op(tracer_state state, string op) tracer_state {
     []string ops = copy_strings(state.ops)
     ops.push(op)
@@ -201,7 +173,6 @@ func tracer_add_op(tracer_state state, string op) tracer_state {
         tags: copy_strings(state.tags),
     }
 }
-
 func tracer_add_op_with_param(tracer_state state, string op, string param) tracer_state {
     []string ops = copy_strings(state.ops)
     []string params = copy_strings(state.params)
@@ -220,7 +191,6 @@ func tracer_add_op_with_param(tracer_state state, string op, string param) trace
         tags: copy_strings(state.tags),
     }
 }
-
 func tracer_add_input(tracer_state state, string input) tracer_state {
     []string inputs = copy_strings(state.inputs)
     inputs.push(input)
@@ -237,7 +207,6 @@ func tracer_add_input(tracer_state state, string input) tracer_state {
         tags: copy_strings(state.tags),
     }
 }
-
 func tracer_add_output(tracer_state state, string output) tracer_state {
     []string outputs = copy_strings(state.outputs)
     outputs.push(output)
@@ -254,15 +223,12 @@ func tracer_add_output(tracer_state state, string output) tracer_state {
         tags: copy_strings(state.tags),
     }
 }
-
 func eqn_inputs([]string inputs) []string {
     copy_strings(inputs)
 }
-
 func eqn_outputs([]string outputs) []string {
     copy_strings(outputs)
 }
-
 func tracer_add_eqn_with_io(tracer_state state, string primitive, []string params, []string inputs, []string outputs) tracer_state {
     []string ops = copy_strings(state.ops)
     []string param_list = copy_strings(state.params)
@@ -302,17 +268,14 @@ func tracer_add_eqn_with_io(tracer_state state, string primitive, []string param
         tags: copy_strings(state.tags),
     }
 }
-
 func tracer_add_eqn(tracer_state state, string primitive) tracer_state {
     tracer_add_eqn_with_io(state, primitive, [], [], [])
 }
-
 func tracer_add_eqn_with_param(tracer_state state, string primitive, string param) tracer_state {
     []string params = []string{cap: 1}
     params[0] = param
     tracer_add_eqn_with_io(state, primitive, params, [], [])
 }
-
 func tracer_clear_tags(tracer_state state) tracer_state {
     tracer_state {
         name: state.name,
@@ -327,7 +290,6 @@ func tracer_clear_tags(tracer_state state) tracer_state {
         tags: [],
     }
 }
-
 func tracer_clear_inputs(tracer_state state) tracer_state {
     tracer_state {
         name: state.name,
@@ -342,7 +304,6 @@ func tracer_clear_inputs(tracer_state state) tracer_state {
         tags: copy_strings(state.tags),
     }
 }
-
 func tracer_clear_outputs(tracer_state state) tracer_state {
     tracer_state {
         name: state.name,
@@ -357,7 +318,6 @@ func tracer_clear_outputs(tracer_state state) tracer_state {
         tags: copy_strings(state.tags),
     }
 }
-
 func tracer_clear_eqns(tracer_state state) tracer_state {
     tracer_state {
         name: state.name,
@@ -372,7 +332,6 @@ func tracer_clear_eqns(tracer_state state) tracer_state {
         tags: copy_strings(state.tags),
     }
 }
-
 func tracer_set_active(tracer_state state, bool active) tracer_state {
     tracer_state {
         name: state.name,
@@ -387,7 +346,6 @@ func tracer_set_active(tracer_state state, bool active) tracer_state {
         tags: copy_strings(state.tags),
     }
 }
-
 func tracer_set_linearized(tracer_state state, bool linearized) tracer_state {
     tracer_state {
         name: state.name,
@@ -402,7 +360,6 @@ func tracer_set_linearized(tracer_state state, bool linearized) tracer_state {
         tags: copy_strings(state.tags),
     }
 }
-
 func tracer_state_dict(tracer_state state) tracer_state {
     tracer_state {
         name: state.name,
@@ -417,23 +374,18 @@ func tracer_state_dict(tracer_state state) tracer_state {
         tags: copy_strings(state.tags),
     }
 }
-
 func tracer_load_state_dict(tracer_state state, tracer_state other) tracer_state {
     other
 }
-
 func tracer_capture(tracer_state state, string op) tracer_state {
     tracer_add_op(state, op)
 }
-
 func tracer_capture_with_param(tracer_state state, string op, string param) tracer_state {
     tracer_add_op_with_param(state, op, param)
 }
-
 func tracer_capture_with_io(tracer_state state, string op, []string params, []string inputs, []string outputs) tracer_state {
     tracer_add_eqn_with_io(state, op, params, inputs, outputs)
 }
-
 func tracer_to_transform_chain(tracer_state state) transform_chain {
     transform_chain {
         steps: copy_strings(state.ops),
@@ -445,7 +397,6 @@ func tracer_to_transform_chain(tracer_state state) transform_chain {
         linearized: state.linearized,
     }
 }
-
 func transform_chain_to_tracer(transform_chain chain, string name) tracer_state {
     []ir_eqn eqns = copy_eqns(chain.eqns)
     if len(eqns) == 0 {

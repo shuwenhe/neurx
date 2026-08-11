@@ -8,7 +8,6 @@ enum reasoning_strategy {
     REFLECTION = 4
     MULTI_PART = 5
 }
-
 struct cot_config {
     reasoning_strategy strategy
     int max_steps
@@ -27,7 +26,6 @@ struct cot_config {
     int num_reflection_rounds
     float consistency_threshold
 }
-
 struct thought_step {
     []int tokens
     float confidence
@@ -35,7 +33,6 @@ struct thought_step {
     int step_index
     bool is_final
 }
-
 struct reasoning_tree {
     int token
     float probability
@@ -44,13 +41,11 @@ struct reasoning_tree {
     int depth
     bool is_terminal
 }
-
 struct decomposition_result {
     []string sub_problems
     []float sub_problem_difficulty
     []int sub_problem_order
 }
-
 struct reflection_result {
     []int original_tokens
     []int revised_tokens
@@ -58,7 +53,6 @@ struct reflection_result {
     float confidence_change
     int reflection_round
 }
-
 struct cot_state {
     cot_config config
     []thought_step steps
@@ -70,7 +64,6 @@ struct cot_state {
     float total_confidence
     float best_score
 }
-
 struct reasoning_result {
     []int final_tokens
     []thought_step steps
@@ -80,7 +73,6 @@ struct reasoning_result {
     int num_samples
     bool is_consistent
 }
-
 func new_cot_config() cot_config {
     cot_config {
         strategy: STEP_BY_STEP,
@@ -101,7 +93,6 @@ func new_cot_config() cot_config {
         consistency_threshold: 0.7,
     }
 }
-
 func new_thought_step([]int tokens, float confidence, float reward, int step_index, bool is_final) thought_step {
     thought_step {
         tokens: tokens,
@@ -111,7 +102,6 @@ func new_thought_step([]int tokens, float confidence, float reward, int step_ind
         is_final: is_final,
     }
 }
-
 func new_reasoning_tree(int token, float probability, float score, int depth, bool is_terminal) reasoning_tree {
     reasoning_tree {
         token: token,
@@ -122,7 +112,6 @@ func new_reasoning_tree(int token, float probability, float score, int depth, bo
         is_terminal: is_terminal,
     }
 }
-
 func new_cot_state(cot_config config) cot_state {
     cot_state {
         config: config,
@@ -140,7 +129,6 @@ func new_cot_state(cot_config config) cot_state {
         best_score: 0.0,
     }
 }
-
 func step_by_step_reasoning(cot_state state, []int input_tokens, int seq_len) reasoning_result {
     cot_config config = state.config
     []int current_input = math.copy_int(input_tokens)
@@ -179,7 +167,6 @@ func step_by_step_reasoning(cot_state state, []int input_tokens, int seq_len) re
         is_consistent: true,
     }
 }
-
 func generate_next_step([]int input_tokens, int seq_len, cot_config config) []int {
     int output_len = 64
     []int next_tokens = math.allocate_int(output_len, 0)
@@ -191,18 +178,15 @@ func generate_next_step([]int input_tokens, int seq_len, cot_config config) []in
     }
     next_tokens
 }
-
 func compute_confidence([]int tokens, cot_config config) float {
     float confidence = 0.5 + float(len(tokens)) * 0.01
     confidence = math.clamp_float(confidence, 0.0, 1.0)
     confidence
 }
-
 func compute_reward([]int tokens, cot_config config) float {
     float reward = float(len(tokens)) * 0.1
     reward
 }
-
 func compute_final_score([]thought_step steps, cot_config config) float {
     float score = 0.0
     int i = 0
@@ -212,7 +196,6 @@ func compute_final_score([]thought_step steps, cot_config config) float {
     }
     score / float(len(steps))
 }
-
 func self_consistency_reasoning(cot_state state, []int input_tokens, int seq_len) reasoning_result {
     cot_config config = state.config
     []reasoning_result samples = []reasoning_result{cap: config.num_samples}
@@ -251,7 +234,6 @@ func self_consistency_reasoning(cot_state state, []int input_tokens, int seq_len
         is_consistent: consistency >= config.consistency_threshold,
     }
 }
-
 func compute_consistency([]reasoning_result samples, cot_config config) float {
     if len(samples) < 2 {
         return 1.0
@@ -271,7 +253,6 @@ func compute_consistency([]reasoning_result samples, cot_config config) float {
     }
     total_similarity / float(count)
 }
-
 func compute_sequence_similarity([]int a, []int b) float {
     if len(a) == 0 || len(b) == 0 {
         return 0.0
@@ -287,7 +268,6 @@ func compute_sequence_similarity([]int a, []int b) float {
     }
     float(common) / float(max_len)
 }
-
 func tree_search_reasoning(cot_state state, []int input_tokens, int seq_len) reasoning_result {
     cot_config config = state.config
     reasoning_tree root = build_reasoning_tree(input_tokens, seq_len, config)
@@ -309,13 +289,11 @@ func tree_search_reasoning(cot_state state, []int input_tokens, int seq_len) rea
         is_consistent: true,
     }
 }
-
 func build_reasoning_tree([]int input_tokens, int seq_len, cot_config config) reasoning_tree {
     reasoning_tree root = new_reasoning_tree(-1, 1.0, 0.0, 0, false)
     expand_tree(root, input_tokens, seq_len, config)
     root
 }
-
 func expand_tree(reasoning_tree node, []int input_tokens, int seq_len, cot_config config) {
     if node.depth >= config.tree_depth {
         node.is_terminal = true
@@ -337,7 +315,6 @@ func expand_tree(reasoning_tree node, []int input_tokens, int seq_len, cot_confi
         i = i + 1
     }
 }
-
 func select_best_path(reasoning_tree root) []int {
     []int path = []int{cap: 10}
     reasoning_tree curr = root
@@ -361,7 +338,6 @@ func select_best_path(reasoning_tree root) []int {
     }
     path
 }
-
 func decomposition_reasoning(cot_state state, []int input_tokens, int seq_len) reasoning_result {
     cot_config config = state.config
     decomposition_result decomp = decompose_problem(input_tokens, config)
@@ -399,7 +375,6 @@ func decomposition_reasoning(cot_state state, []int input_tokens, int seq_len) r
         is_consistent: true,
     }
 }
-
 func decompose_problem([]int input_tokens, cot_config config) decomposition_result {
     int num_sub_problems = 3
     decomposition_result decomp {
@@ -416,7 +391,6 @@ func decompose_problem([]int input_tokens, cot_config config) decomposition_resu
     }
     decomp
 }
-
 func reflection_reasoning(cot_state state, []int input_tokens, int seq_len) reasoning_result {
     cot_config config = state.config
     []int current_tokens = math.copy_int(input_tokens)
@@ -454,7 +428,6 @@ func reflection_reasoning(cot_state state, []int input_tokens, int seq_len) reas
         is_consistent: true,
     }
 }
-
 func revise_reasoning(reasoning_result result, cot_config config) []int {
     []int revised = math.copy_int(result.final_tokens)
     float noise = 0.01
@@ -467,13 +440,11 @@ func revise_reasoning(reasoning_result result, cot_config config) []int {
     }
     revised
 }
-
 func compute_improvement([]int original, []int revised) float {
     float original_confidence = float(len(original)) / 1000.0
     float revised_confidence = float(len(revised)) / 1000.0
     revised_confidence - original_confidence
 }
-
 func cot_reason(cot_state state, []int input_tokens, int seq_len) reasoning_result {
     cot_config config = state.config
     switch config.strategy {
@@ -492,7 +463,6 @@ func cot_reason(cot_state state, []int input_tokens, int seq_len) reasoning_resu
     }
     step_by_step_reasoning(state, input_tokens, seq_len)
 }
-
 func multi_part_reasoning(cot_state state, []int input_tokens, int seq_len) reasoning_result {
     decomposition_result decomp = decompose_problem(input_tokens, state.config)
     []reasoning_result results = []reasoning_result{cap: len(decomp.sub_problems)}
@@ -527,7 +497,6 @@ func multi_part_reasoning(cot_state state, []int input_tokens, int seq_len) reas
         is_consistent: true,
     }
 }
-
 func cot_get_best_result(cot_state state) reasoning_result {
     float best_score = -1e10
     reasoning_result best_result = reasoning_result {
@@ -558,7 +527,6 @@ func cot_get_best_result(cot_state state) reasoning_result {
     }
     best_result
 }
-
 func cot_reset(cot_state state) cot_state {
     state.steps = []thought_step{cap: state.config.max_steps}
     state.reflections = []reflection_result{cap: state.config.num_reflection_rounds}

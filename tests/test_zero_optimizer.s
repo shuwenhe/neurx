@@ -1,5 +1,4 @@
 package neurx.tests.distributed
-
 func main() {
     println("============================================================")
     println("DeepSpeed ZeRO-1 Optimizer Test (S Language Implementation)")
@@ -11,7 +10,6 @@ func main() {
     println("✅ All ZeRO-1 tests completed")
     println("============================================================")
 }
-
 func test_single_gpu() {
     println("\n=== Test 1: Single GPU (Baseline) ===\n")
     int total_params = 1000
@@ -24,7 +22,6 @@ func test_single_gpu() {
     println("\nExpected: Full optimizer state on single GPU")
     println("Local params should equal total params: " + int_to_string(total_params))
 }
-
 func test_multi_gpu() {
     println("\n=== Test 2: Multi-GPU (4 GPUs) ===\n")
     int total_params = 1000
@@ -46,7 +43,6 @@ func test_multi_gpu() {
     println("\nExpected: Each GPU stores 1/4 of optimizer state")
     println("Memory saving: 75% compared to full replication")
 }
-
 func test_memory_savings() {
     println("\n=== Test 3: Memory Savings Analysis ===\n")
     int total_params = 1000000
@@ -59,7 +55,6 @@ func test_memory_savings() {
     test_world_size(total_params, 4, baseline_bytes)
     test_world_size(total_params, 8, baseline_bytes)
 }
-
 func test_world_size(int total_params, int world_size, int baseline_bytes) {
     int local_params = total_params / world_size
     int local_bytes = local_params * 4 * 2
@@ -69,7 +64,6 @@ func test_world_size(int total_params, int world_size, int baseline_bytes) {
     println("  Local optimizer state: " + int_to_string(local_bytes) + " bytes (" + int_to_string(local_bytes / 1024 / 1024) + " MB)")
     println("  Memory saved: " + int_to_string(saved_bytes) + " bytes (" + int_to_string(saved_percent) + "%)")
 }
-
 func int_to_string(int n) string {
     if n == 0 { return "0" }
     if n == 1 { return "1" }

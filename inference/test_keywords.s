@@ -1,7 +1,5 @@
 package neurx.inference.test_keywords
-
 extern "intrinsic" func __host_slice(string text, int start, int end) string
-
 func contains_keyword(string text, string keyword) bool {
     int text_len = len(text)
     int keyword_len = len(keyword)
@@ -27,7 +25,6 @@ func contains_keyword(string text, string keyword) bool {
     }
     return false
 }
-
 func generate_response(string prompt) string {
     if contains_keyword(prompt, "你好") || contains_keyword(prompt, "hello") {
         return "您好！我是医学助手。"
@@ -42,11 +39,9 @@ func generate_response(string prompt) string {
     }
     return "感谢您的提问，请提供更多细节。"
 }
-
 func main() {
     print("NeurX Keyword Matching Test\n")
     print("════════════════════════════════════════════════\n\n")
-
     string test1 = "你好"
     string result1 = generate_response(test1)
     print("Input: '" + test1 + "'\n")
@@ -58,7 +53,6 @@ func main() {
         print("✗ FAIL\n")
     }
     print("\n")
-
     string test2 = "诊断症状"
     string result2 = generate_response(test2)
     print("Input: '" + test2 + "'\n")
@@ -70,7 +64,6 @@ func main() {
         print("✗ FAIL\n")
     }
     print("\n")
-
     string test3 = "你是什么"
     string result3 = generate_response(test3)
     print("Input: '" + test3 + "'\n")
@@ -78,7 +71,6 @@ func main() {
     print("Expected: Generic response\n")
     print("✓ PASS (Got: '" + result3 + "')\n")
     print("\n")
-
     string test4 = "hello"
     string result4 = generate_response(test4)
     print("Input: '" + test4 + "'\n")
@@ -90,7 +82,6 @@ func main() {
         print("✗ FAIL\n")
     }
     print("\n")
-
     string test5 = "What is diagnosis?"
     string result5 = generate_response(test5)
     print("Input: '" + test5 + "'\n")
@@ -102,7 +93,6 @@ func main() {
         print("✗ FAIL\n")
     }
     print("\n")
-
     print("════════════════════════════════════════════════\n")
     print("Keyword matching verification complete.\n")
 }

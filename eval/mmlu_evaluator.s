@@ -3,12 +3,10 @@ use neurx.eval.mmlu_data
 use neurx.eval.benchmark_eval
 use neurx.model.llm.gpt
 use std.io.println
-
 struct mmlu_fewshot_prompt {
     []mmlu_data.mmlu_question examples
     mmlu_data.mmlu_question test_q
 }
-
 struct mmlu_eval_config {
     int num_shots
     bool normalize_by_length
@@ -16,7 +14,6 @@ struct mmlu_eval_config {
     string data_root
     string model_type
 }
-
 func default_mmlu_eval_config() mmlu_eval_config {
     mmlu_eval_config {
         num_shots: 5,
@@ -26,7 +23,6 @@ func default_mmlu_eval_config() mmlu_eval_config {
         model_type: "base-model",
     }
 }
-
 func format_mmlu_question(mmlu_data.mmlu_question q, bool include_answer) string {
     string prompt = "Question: " + q.question + "\n"
     prompt = prompt + "A) " + q.choice_a + "\n"
@@ -38,7 +34,6 @@ func format_mmlu_question(mmlu_data.mmlu_question q, bool include_answer) string
     }
     prompt
 }
-
 func build_mmlu_fewshot_prompt(
     []mmlu_data.mmlu_question examples,
     mmlu_data.mmlu_question test_q
@@ -54,7 +49,6 @@ func build_mmlu_fewshot_prompt(
     prompt = prompt + "Answer: "
     prompt
 }
-
 func mmlu_get_choice_tokens(string choice, bool for_answer) []int {
     []int tokens = []int{}
     if choice == "A" {
@@ -70,14 +64,12 @@ func mmlu_get_choice_tokens(string choice, bool for_answer) []int {
     }
     tokens
 }
-
 struct mmlu_task_result {
     string task_name
     int total
     int correct
     float accuracy
 }
-
 struct mmlu_eval_result {
     float overall_accuracy
     []mmlu_task_result task_results
@@ -85,7 +77,6 @@ struct mmlu_eval_result {
     int total_correct
     string timestamp
 }
-
 func evaluate_mmlu_task(
     gpt.language_model model,
     string task_name,
@@ -143,7 +134,6 @@ func evaluate_mmlu_task(
         accuracy: accuracy,
     }
 }
-
 func evaluate_mmlu_benchmark(
     gpt.language_model model,
     mmlu_data.mmlu_dataset_state dataset,
@@ -251,7 +241,6 @@ func evaluate_mmlu_benchmark(
         timestamp: "2026-07-20",
     }
 }
-
 func tokenize_prompt(string prompt) []int {
     []int tokens = []int{}
     int i = 0
@@ -261,7 +250,6 @@ func tokenize_prompt(string prompt) []int {
     }
     tokens
 }
-
 func concat_token_sequences([]int a, []int b) []int {
     []int result = []int{}
     int i = 0
@@ -276,7 +264,6 @@ func concat_token_sequences([]int a, []int b) []int {
     }
     result
 }
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -294,7 +281,6 @@ func int_to_str(int n) string {
     if neg { out = "-" + out }
     out
 }
-
 func digit_to_str(int digit) string {
     if digit == 0 { return "0" }
     if digit == 1 { return "1" }
@@ -307,7 +293,6 @@ func digit_to_str(int digit) string {
     if digit == 8 { return "8" }
     "9"
 }
-
 func fmt_float(float value, int decimals) string {
     float current = value
     bool neg = current < 0.0

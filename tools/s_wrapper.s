@@ -2,7 +2,6 @@ package main
 use std.exec
 use std.os
 use std.path
-
 func find_s_compiler() string {
     real_s := "/usr/local/bin/s"
     _, err := os.Stat(real_s)
@@ -15,7 +14,6 @@ func find_s_compiler() string {
     }
     return ""
 }
-
 func main() {
     real_s := find_s_compiler()
     if real_s == "" {

@@ -1,7 +1,5 @@
 package neurx.inference.test_backend
-
 extern "intrinsic" func __host_slice(string text, int start, int end) string
-
 func contains_keyword(string text, string keyword) bool {
     int text_len = len(text)
     int keyword_len = len(keyword)
@@ -27,10 +25,8 @@ func contains_keyword(string text, string keyword) bool {
     }
     return false
 }
-
 func generate_response(string prompt, int max_tokens) string {
     string response = ""
-
     if contains_keyword(prompt, "你好") || contains_keyword(prompt, "hello") || contains_keyword(prompt, "hi") {
         response = "您好！我是医学助手，已准备就绪。请告诉我您想了解的医学问题。"
     } else if contains_keyword(prompt, "你是") || contains_keyword(prompt, "who are") {
@@ -54,10 +50,8 @@ func generate_response(string prompt, int max_tokens) string {
     } else {
         response = "感谢您的提问。这是一个有趣的医学问题。基于医学知识库，我理解您可能在询问相关的医学概念。请提供更多细节以便我给出更准确的回答。"
     }
-
     return response
 }
-
 func int_to_string(int value) string {
     if value == 0 {
         return "0"
@@ -79,27 +73,21 @@ func int_to_string(int value) string {
     }
     return result
 }
-
 extern "intrinsic" func __sys_read_string(int fd, int count) string
-
 func main() {
     print("NeurX Medical AI Backend - Interactive Mode\n")
     print("Type medical queries (or /exit to quit)\n")
     print("\n")
-
     while true {
         print("You: ")
         string input = __sys_read_string(0, 512)
-
         if input == "/exit" || input == "exit" {
             print("Goodbye!\n")
             return
         }
-
         if len(input) == 0 {
             continue
         }
-
         string response = generate_response(input, 128)
         print("Assistant: " + response + "\n\n")
     }

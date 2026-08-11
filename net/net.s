@@ -13,13 +13,11 @@ int PKT_ACK          = 1
 int PKT_SYN          = 2
 int PKT_FIN          = 3
 int PKT_CONTROL      = 4
-
 struct net_addr {
     string host
     int    port
     int    pid
 }
-
 struct net_socket {
     int      sock_id
     int      proto
@@ -31,7 +29,6 @@ struct net_socket {
     int      owner_pid
     bool     nonblocking
 }
-
 struct sk_buff {
     int    pkt_id
     int    sock_id
@@ -45,7 +42,6 @@ struct sk_buff {
     int    seq_num
     int    created_at_ms
 }
-
 struct net_state {
     []net_socket sockets
     []sk_buff    recv_queue
@@ -53,7 +49,6 @@ struct net_state {
     int          next_sock_id
     int          next_pkt_id
 }
-
 func new_net_state() net_state {
     return net_state{
         sockets:       [],
@@ -63,7 +58,6 @@ func new_net_state() net_state {
         next_pkt_id:   0,
     }
 }
-
 func net_socket(ns net_state, proto int, owner_pid int) (net_state, int) {
     int sid = ns.next_sock_id
     net_socket s = net_socket{
@@ -81,7 +75,6 @@ func net_socket(ns net_state, proto int, owner_pid int) (net_state, int) {
     ns.next_sock_id = ns.next_sock_id + 1
     return (ns, sid)
 }
-
 func net_connect(ns net_state, sock_id int, remote net_addr) net_state {
     int i = 0
     while i < len(ns.sockets) {
@@ -97,7 +90,6 @@ func net_connect(ns net_state, sock_id int, remote net_addr) net_state {
     }
     return ns
 }
-
 func net_send(ns net_state, sock_id int, payload string, pkt_type int) (net_state, int) {
     int src_port = 0
     string dst_host = ""
@@ -129,7 +121,6 @@ func net_send(ns net_state, sock_id int, payload string, pkt_type int) (net_stat
     ns.next_pkt_id  = ns.next_pkt_id + 1
     return (ns, pkt_id)
 }
-
 func net_recv(ns net_state, sock_id int) (net_state, sk_buff, bool) {
     int i = 0
     while i < len(ns.recv_queue) {
@@ -150,12 +141,10 @@ func net_recv(ns net_state, sock_id int) (net_state, sk_buff, bool) {
     }
     return (ns, sk_buff{}, false)
 }
-
 func net_deliver(ns net_state, pkt sk_buff) net_state {
     ns.recv_queue = append(ns.recv_queue, pkt)
     return ns
 }
-
 func net_close(ns net_state, sock_id int) net_state {
     int i = 0
     while i < len(ns.sockets) {

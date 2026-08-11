@@ -8,7 +8,6 @@ struct robot_target_config {
     []string actuators
     []string sensors
 }
-
 func default_robot_target() robot_target_config {
     return robot_target_config{
         platform:       "jetson_orin",

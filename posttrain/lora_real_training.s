@@ -1,5 +1,4 @@
 package posttrain.lora_real_training
-
 func sigmoid_fn(float x) float {
     if x > 100.0 {
         return 1.0
@@ -9,7 +8,6 @@ func sigmoid_fn(float x) float {
     }
     return 1.0 / (1.0 + exp_fn(-x))
 }
-
 func exp_fn(float x) float {
     if x > 50.0 {
         return 1e10
@@ -27,7 +25,6 @@ func exp_fn(float x) float {
     }
     return result
 }
-
 func ln_fn(float x) float {
     if x <= 0.0 {
         return -100.0
@@ -49,7 +46,6 @@ func ln_fn(float x) float {
         return -ln_fn(inv)
     }
 }
-
 func main() {
     println("======================================================")
     println("LoRA Real Training (Placeholder)")

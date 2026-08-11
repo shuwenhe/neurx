@@ -2,7 +2,6 @@ package neurx.attention.mechanism
 import neurx.arch.cuda.bindings.*
 import neurx.tensor.*
 import neurx.nn.*
-
 struct attention_config {
     int hidden_size
     int num_attention_heads
@@ -16,7 +15,6 @@ struct attention_config {
     int softmax_scale
     bool use_gradient_checkpointing
 }
-
 class neurx_attention {
     attention_config config
     tensor q_proj_weight
@@ -26,7 +24,6 @@ class neurx_attention {
     tensor layernorm_qk_gamma
     option[rope_cache] rope_cos_cache
     option[rope_cache] rope_sin_cache
-
     struct stats {
         int64 total_flops
         int64 forward_time_us
@@ -34,7 +31,6 @@ class neurx_attention {
         float memory_usage_mb
     } stats
 }
-
 func init(attention_config cfg) neurx_attention {
     int kv_dim = cfg.head_dim * cfg.num_key_value_heads
     print("🔧 Initializing NEURX Attention:")
@@ -59,7 +55,6 @@ func init(attention_config cfg) neurx_attention {
         }
     }
 }
-
 func forward(
     self: NeurxAttention,
     hidden_states: tensor,
@@ -166,7 +161,6 @@ func forward(
     timer.stop("attention_forward")
     _update_stats(self, batch_size, seq_len, cfg, timer)
     return (attn_output, present_kv, attn_weights)
-
 func _standard_attention_forward(
     tensor query_states,
     tensor key_states,
@@ -185,7 +179,6 @@ func _standard_attention_forward(
     tensor context = matmul(attn_probs, value_states)
     option[tensor] weights = return_attn_weights ? some(attn_probs) : none
     return (context, weights)
-
 func _flash_attention_forward(
     tensor query_states,
     tensor key_states,
@@ -300,13 +293,11 @@ class mask_builder {
             return base_mask
         tensor padding_2d = (1.0 - padding_mask.unsqueeze(1).unsqueeze(2)) * -10000.0
         return base_mask + padding_2d
-
 struct rope_cache {
     tensor cos_vals
     tensor sin_vals
     int cached_max_seq
 }
-
 func compute_rope_embeddings(
     []int position_ids,
     int head_dim,
@@ -338,7 +329,6 @@ func compute_rope_embeddings(
     cos_vals = cos_vals.unsqueeze(0).unsqueeze(2)
     sin_vals = sin_vals.unsqueeze(0).unsqueeze(2)
     return (cos_vals, sin_vals)
-
 func apply_rotary_emb(
     tensor x,
     tensor cos_vals,
@@ -357,7 +347,6 @@ func apply_rotary_emb(
     tensor result = stack([rotated_even, rotated_odd], dim=-1)
     result = result.reshape(shape(x)[:-1])
     return result
-
 func apply_rope_scaling(
     tensor freqs,
     int scaling_type,
@@ -385,7 +374,6 @@ func apply_rope_scaling(
             return freqs * scale
         case _:
             return freqs
-
 func _update_stats(
     ref neurx_attention self,
     int batch_size,
@@ -404,7 +392,6 @@ func _update_stats(
     if !cfg.use_flash_attention:
         mem_per_sample += seq_len * seq_len * cfg.num_attention_heads
     self.stats.memory_usage_mb = float(mem_per_sample * batch_size) / (1024 * 1024)
-
 func test_attention() {
     print("\n" + "="*60)
     print("Testing NEURX Attention Mechanism")

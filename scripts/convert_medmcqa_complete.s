@@ -2,7 +2,6 @@ package neurx.scripts.convert_medmcqa
 use std.io.println
 use neurx.runtime.io.{runtime_env_get, runtime_read_text_file, runtime_write_text_file,
                        runtime_file_exists, runtime_make_dirs, runtime_run_command_output}
-
 struct question_data {
     string qid
     string question
@@ -11,13 +10,11 @@ struct question_data {
     string category
     string explanation
 }
-
 struct sft_record {
     string instruction
     string input
     string output
 }
-
 func parse_jsonl_question(string line) question_data {
     question_data q = question_data{
         qid: "",
@@ -64,7 +61,6 @@ func parse_jsonl_question(string line) question_data {
     q.options = extract_options_from_json(line)
     q
 }
-
 func extract_options_from_json(string line) []string {
     []string opts = []string{}
     int opt_start = find_substring(line, "\"options\":[")
@@ -97,7 +93,6 @@ func extract_options_from_json(string line) []string {
     }
     opts
 }
-
 func find_substring(string text, string pattern) int {
     if len(pattern) > len(text) {
         return -1
@@ -116,7 +111,6 @@ func find_substring(string text, string pattern) int {
     }
     -1
 }
-
 func find_substring_from(string text, string pattern, int start) int {
     if start < 0 || start >= len(text) || len(pattern) > len(text)-start {
         return -1
@@ -135,7 +129,6 @@ func find_substring_from(string text, string pattern, int start) int {
     }
     -1
 }
-
 func find_char_index(string text, string ch, int start) int {
     for i in start..len(text)-1 {
         if text[i] == ch[0] {
@@ -144,7 +137,6 @@ func find_char_index(string text, string ch, int start) int {
     }
     len(text)
 }
-
 func substring(string text, int start, int end) string {
     if start < 0 || end > len(text) || start >= end {
         return ""
@@ -155,7 +147,6 @@ func substring(string text, int start, int end) string {
     }
     result
 }
-
 func unescape_json_string(string s) string {
     string result = ""
     int i = 0
@@ -184,7 +175,6 @@ func unescape_json_string(string s) string {
     }
     result
 }
-
 func parse_int(string s) int {
     int result = 0
     int i = 0
@@ -205,7 +195,6 @@ func parse_int(string s) int {
     }
     result
 }
-
 func question_to_sft(question_data q) sft_record {
     string instruction = "Answer the following medical multiple-choice question accurately."
     string input = q.question + "\n\nOptions:\n"
@@ -228,7 +217,6 @@ func question_to_sft(question_data q) sft_record {
         output: output
     }
 }
-
 func escape_for_json(string s) string {
     string result = ""
     for i in 0..len(s)-1 {
@@ -249,7 +237,6 @@ func escape_for_json(string s) string {
     }
     result
 }
-
 func sft_to_jsonl(sft_record rec) string {
     string json = "{"
     json = json + "\"instruction\":\""
@@ -261,7 +248,6 @@ func sft_to_jsonl(sft_record rec) string {
     json = json + "\"}"
     json
 }
-
 func main() {
     println("╔═══════════════════════════════════════════════════════════════╗")
     println("║ MedMCQA → SFT Dataset Converter (S Language Implementation)  ║")

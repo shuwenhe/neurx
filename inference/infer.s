@@ -15,7 +15,6 @@ use neurx.runtime.io.{runtime_env_get, runtime_write_text_file, runtime_run_comm
 use neurx.ops
 use neurx.tensor.tensor
 use neurx.checkpoint
-
 struct infer_pipeline_state {
     infer_request_state request
     infer_response_state response
@@ -28,7 +27,6 @@ struct infer_pipeline_state {
     infer_eval_state eval
     checkpoint model_weights
 }
-
 func new_infer_pipeline_state(string request_id, string model, int input_tokens, int max_new_tokens, int layer_count, int max_seq_len) infer_pipeline_state {
     kv_cache_state cache = new_kv_cache_state(layer_count, max_seq_len)
     int block_size = 16
@@ -76,7 +74,6 @@ func new_infer_pipeline_state(string request_id, string model, int input_tokens,
         model_weights: new_checkpoint(0, 0.0, []),
     }
 }
-
 func new_infer_pipeline_from_checkpoint(string request_id, string checkpoint_path, int input_tokens, int max_new_tokens, int layer_count, int max_seq_len) infer_pipeline_state {
     checkpoint weights = load_checkpoint(checkpoint_path)
     infer_pipeline_state base = new_infer_pipeline_state(request_id, checkpoint_path, input_tokens, max_new_tokens, layer_count, max_seq_len)
@@ -93,7 +90,6 @@ func new_infer_pipeline_from_checkpoint(string request_id, string checkpoint_pat
         model_weights: weights,
     }
 }
-
 func infer_pipeline_step(infer_pipeline_state state, int next_token_id) infer_pipeline_state {
     if state.response.finished {
         return state
@@ -128,7 +124,6 @@ func infer_pipeline_step(infer_pipeline_state state, int next_token_id) infer_pi
         model_weights: state.model_weights
     }
 }
-
 func infer_pipeline_enqueue_request(infer_pipeline_state state, string request_id, int input_tokens, int remaining_tokens) infer_pipeline_state {
     int prefill_tokens = input_tokens
     if prefill_tokens < 0 {
@@ -160,7 +155,6 @@ func infer_pipeline_enqueue_request(infer_pipeline_state state, string request_i
         model_weights: state.model_weights,
     }
 }
-
 func infer_pipeline_sample_logits(infer_pipeline_state state, tensor logits, tensor token_ids) tensor {
     sampling_state sample = state.decode.sampling
     ops.sampling_top_k_top_p(
@@ -172,7 +166,6 @@ func infer_pipeline_sample_logits(infer_pipeline_state state, tensor logits, ten
         sample.repetition_penalty
     )
 }
-
 func infer_pipeline_step_from_logits(infer_pipeline_state state, tensor logits, tensor token_ids) infer_pipeline_state {
     if state.response.finished {
         return state
@@ -215,7 +208,6 @@ func infer_pipeline_step_from_logits(infer_pipeline_state state, tensor logits, 
     )
     infer_pipeline_step(state, next_token_id)
 }
-
 func infer_pipeline_set_sampling(infer_pipeline_state state, sampling_state sample) infer_pipeline_state {
     infer_pipeline_state {
         request: state.request,
@@ -237,23 +229,18 @@ func infer_pipeline_set_sampling(infer_pipeline_state state, sampling_state samp
         model_weights: state.model_weights,
     }
 }
-
 func infer_pipeline_batch_active(infer_pipeline_state state) int {
     state.batch.active_requests
 }
-
 func infer_pipeline_paged_kv_blocks(infer_pipeline_state state) int {
     state.paged_kv.allocated_blocks
 }
-
 func infer_pipeline_prefix_cache_hits(infer_pipeline_state state) int {
     state.prefix_cache.hits
 }
-
 func infer_pipeline_admission_rejected(infer_pipeline_state state) int {
     state.admission.rejected
 }
-
 func infer_text_contains(string text, string pattern) bool {
     string haystack = lower(trim(text))
     string needle = lower(trim(pattern))
@@ -283,7 +270,6 @@ func infer_text_contains(string text, string pattern) bool {
     }
     false
 }
-
 func infer_starts_with(string text, string prefix) bool {
     int tl = len(text)
     int pl = len(prefix)
@@ -299,7 +285,6 @@ func infer_starts_with(string text, string prefix) bool {
     }
     true
 }
-
 func infer_find_field(string raw, string key) string {
     string marker = key + "="
     int raw_len = len(raw)
@@ -350,7 +335,6 @@ func infer_find_field(string raw, string key) string {
     }
     ""
 }
-
 func infer_json_escape(string value) string {
     string out = ""
     int i = 0
@@ -373,7 +357,6 @@ func infer_json_escape(string value) string {
     }
     out
 }
-
 func infer_http_join_url(string base_url, string chat_path) string {
     string base = trim(base_url)
     string path = trim(chat_path)
@@ -400,7 +383,6 @@ func infer_http_join_url(string base_url, string chat_path) string {
     }
     base + path
 }
-
 func infer_remote_descriptor_backend(string model_path) string {
     string backend = infer_find_field(model_path, "backend")
     if backend != "" {
@@ -411,12 +393,10 @@ func infer_remote_descriptor_backend(string model_path) string {
     }
     ""
 }
-
 func infer_remote_response_text(string response_path) string {
     string parser = "jq -r '.choices[0].message.content
     trim(runtime_run_command_output(parser))
 }
-
 func infer_run_remote(string model_path, string prompt) string {
     string url = infer_find_field(model_path, "url")
     if url == "" {
@@ -455,7 +435,6 @@ func infer_run_remote(string model_path, string prompt) string {
     runtime_run_command("rm -f " + runtime_shell_escape(payload_path) + " " + runtime_shell_escape(response_path) + " " + runtime_shell_escape(error_path))
     text
 }
-
 func infer_run(string model_path, string prompt) string {
     string resolved = trim(model_path)
     if resolved == "" {
@@ -473,27 +452,21 @@ func infer_run(string model_path, string prompt) string {
     }
     ""
 }
-
 func infer_pipeline_queue_depth(infer_pipeline_state state) int {
     neurx_runtime_queue_depth(state.runtime)
 }
-
 func infer_pipeline_state_dict(infer_pipeline_state state) infer_pipeline_state {
     state
 }
-
 func infer_pipeline_load_state_dict(infer_pipeline_state state, infer_pipeline_state other) infer_pipeline_state {
     other
 }
-
 func infer_pipeline_to_neurx_inference_runtime(infer_pipeline_state state) neurx_inference_runtime_state {
     state.runtime
 }
-
 func infer_pipeline_neurx_schedule_next(infer_pipeline_state state) neurx_inference_runtime_step_result {
     neurx_runtime_schedule_next(state.runtime)
 }
-
 func infer_pipeline_last_observation(infer_pipeline_state state) string {
     if state.response.finished {
         return "infer:done"

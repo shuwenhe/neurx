@@ -5,7 +5,6 @@ use std.path
 use std.exec
 use std.strings
 use std.regexp
-
 func find_latest_log(dir string) string {
     stat, err := os.Stat(dir)
     if err != nil || !stat.IsDir() {
@@ -28,7 +27,6 @@ func find_latest_log(dir string) string {
     }
     return latest_file
 }
-
 func main() {
     neurx_root := os.Getenv("NEURX_ROOT")
     if neurx_root == "" {

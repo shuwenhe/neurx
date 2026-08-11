@@ -1,5 +1,4 @@
 package neurx.inference.sampling
-
 func get_blocked_tokens(
     []int generated_ids,
     int no_repeat_ngram_size,
@@ -36,7 +35,6 @@ func get_blocked_tokens(
     }
     blocked_tokens
 }
-
 func apply_ngram_blocking(
     []float logits,
     []int generated_ids,

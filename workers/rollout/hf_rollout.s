@@ -1,6 +1,5 @@
 package neurx.workers.rollout.hf
 use neurx.tensor
-
 struct hf_rollout_config {
     string model_name_or_path
     string device
@@ -13,20 +12,17 @@ struct hf_rollout_config {
     int num_return_sequences
     bool use_cache
 }
-
 struct hf_rollout_state {
     hf_rollout_config config
     bool model_loaded
     int num_generations
 }
-
 struct hf_generation_request {
     []int input_ids
     int max_new_tokens
     float temperature
     int request_id
 }
-
 struct hf_generation_response {
     []int generated_ids
     []float log_probs
@@ -34,7 +30,6 @@ struct hf_generation_response {
     int request_id
     bool finished
 }
-
 func default_hf_rollout_config() hf_rollout_config {
     hf_rollout_config {
         model_name_or_path: "",
@@ -49,7 +44,6 @@ func default_hf_rollout_config() hf_rollout_config {
         use_cache: true,
     }
 }
-
 func init_hf_model(hf_rollout_config config) hf_rollout_state {
     hf_rollout_state {
         config: config,
@@ -57,7 +51,6 @@ func init_hf_model(hf_rollout_config config) hf_rollout_state {
         num_generations: 0,
     }
 }
-
 func hf_generate_batch(
     hf_rollout_state state,
     []hf_generation_request requests
@@ -84,7 +77,6 @@ func hf_generate_batch(
     }
     return responses
 }
-
 func hf_generate_with_constraints(
     hf_rollout_state state,
     []hf_generation_request requests,
@@ -92,7 +84,6 @@ func hf_generate_with_constraints(
 ) []hf_generation_response {
     return hf_generate_batch(state, requests)
 }
-
 func hf_compute_log_probs(
     hf_rollout_state state,
     []int input_ids,
@@ -104,14 +95,12 @@ func hf_compute_log_probs(
     }
     return log_probs
 }
-
 func hf_model_forward(
     hf_rollout_state state,
     []int input_ids
 ) tensor {
     return zeros([]int{len(input_ids), 32000})
 }
-
 func hf_update_generation_config(
     hf_rollout_state state,
     float new_temperature,

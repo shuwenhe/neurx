@@ -1,49 +1,33 @@
 package neurx.inference.cpu_backend
 extern "intrinsic" func __sys_socket(int domain, int socket_type, int protocol) int
-
 extern "intrinsic" func __sys_bind(int fd, string addr, int port, int family) int
-
 extern "intrinsic" func __sys_listen(int fd, int backlog) int
-
 extern "intrinsic" func __sys_accept(int fd) int
-
 extern "intrinsic" func __sys_read_string(int fd, int count) string
-
 extern "intrinsic" func __sys_write_string(int fd, string data) int
-
 extern "intrinsic" func __sys_close(int fd) int
-
 extern "intrinsic" func __host_slice(string text, int start, int end) string
-
 func vocab_size() int { 151936 }
-
 func model_hidden_dim() int { 896 }
-
 func num_transformer_layers() int { 24 }
-
 func num_attention_heads() int { 14 }
-
 func max_sequence_length() int { 32768 }
-
 struct model_config {
     int vocab_size
     int hidden_size
     int num_hidden_layers
     int num_attention_heads
 }
-
 struct tokenizer {
     int bos_id
     int eos_id
     int pad_id
     int unk_id
 }
-
 struct performance_metrics {
     int inference_time_ms
     float throughput_tps
 }
-
 func fast_matmul([]float matrix, int rows, int cols, []float vec, []float out) {
     int idx = 0
     int i = 0
@@ -59,7 +43,6 @@ func fast_matmul([]float matrix, int rows, int cols, []float vec, []float out) {
         i = i + 1
     }
 }
-
 func fast_matmul_flat([]float A, []float B, int M, int N, int P) []float {
     []float out = []float{cap: M * P}
     int i = 0
@@ -83,11 +66,9 @@ func fast_matmul_flat([]float A, []float B, int M, int N, int P) []float {
     }
     out
 }
-
 func fast_matmul_flat_opt([]float A, []float B, int M, int N, int P) []float {
     return fast_matmul_flat(A, B, M, N, P)
 }
-
 func fast_softmax([]float logits, []float probs, int size) {
     float max_val = logits[0]
     int i = 1
@@ -121,7 +102,6 @@ func fast_softmax([]float logits, []float probs, int size) {
         }
     }
 }
-
 func fast_rms_norm([]float input, []float weight, []float output, int size) {
     float sum_sq = 0.0
     int i = 0
@@ -136,7 +116,6 @@ func fast_rms_norm([]float input, []float weight, []float output, int size) {
         i = i + 1
     }
 }
-
 func fast_gelu(float x) float {
     float t = 1.702 * x
     float tanh_t = t
@@ -147,7 +126,6 @@ func fast_gelu(float x) float {
     }
     return 0.5 * x * (1.0 + tanh_t)
 }
-
 func pow_f(float x, float p) float {
     if p == 0.5 {
         if x < 0.0 { return 0.0 }
@@ -162,7 +140,6 @@ func pow_f(float x, float p) float {
     }
     return x
 }
-
 func load_model_config(string model_dir) model_config {
     model_config{
         vocab_size: vocab_size(),
@@ -171,7 +148,6 @@ func load_model_config(string model_dir) model_config {
         num_attention_heads: num_attention_heads(),
     }
 }
-
 func load_tokenizer(string model_dir) tokenizer {
     tokenizer{
         bos_id: 151643,
@@ -180,7 +156,6 @@ func load_tokenizer(string model_dir) tokenizer {
         unk_id: 151643,
     }
 }
-
 func initialize_backend() {
     print("╔════════════════════════════════════════════════════════════════╗\n")
     print("║  NeurX CPU Backend - Pure S Implementation                     ║\n")
@@ -199,11 +174,9 @@ func initialize_backend() {
     print("CPU Optimization: Cache-Friendly + SIMD-Ready\n")
     print("\n")
 }
-
 func run_inference(string input_text, int max_tokens) string {
     return "Model output: " + input_text
 }
-
 func http_response_ok(string body) string {
     string response = "HTTP/1.1 200 OK\r\n"
     response = response + "Content-Type: application/json\r\n"
@@ -213,7 +186,6 @@ func http_response_ok(string body) string {
     response = response + body
     return response
 }
-
 func int_to_string(int value) string {
     if value == 0 { return "0" }
     string out = ""
@@ -239,11 +211,9 @@ func int_to_string(int value) string {
     }
     return out + tmp
 }
-
 func health_check_response() string {
     return http_response_ok("{\"status\":\"ok\",\"backend\":\"neurx-s-cpu\"}")
 }
-
 func contains_keyword(string text, string keyword) bool {
     int text_len = len(text)
     int keyword_len = len(keyword)
@@ -269,10 +239,8 @@ func contains_keyword(string text, string keyword) bool {
     }
     return false
 }
-
 func generate_response(string prompt, int max_tokens) string {
     string response = ""
-
     if contains_keyword(prompt, "你好") || contains_keyword(prompt, "hello") || contains_keyword(prompt, "hi") {
         response = "您好！我是医学助手，已准备就绪。请告诉我您想了解的医学问题。"
     } else if contains_keyword(prompt, "你是") || contains_keyword(prompt, "who are") {
@@ -296,10 +264,8 @@ func generate_response(string prompt, int max_tokens) string {
     } else {
         response = "感谢您的提问。这是一个有趣的医学问题。基于医学知识库，我理解您可能在询问相关的医学概念。请提供更多细节以便我给出更准确的回答。"
     }
-
     return "{\"output\":\"" + response + "\"}"
 }
-
 func handle_client(int client_fd) {
     string request = __sys_read_string(client_fd, 4096)
     if len(request) < 4 {
@@ -339,7 +305,6 @@ func handle_client(int client_fd) {
     }
     _ = __sys_close(client_fd)
 }
-
 func extract_http_body(string request) string {
     int header_end = 0
     int i = 0
@@ -366,15 +331,12 @@ func extract_http_body(string request) string {
     print("DEBUG: extracted " + int_to_string(len(result)) + " bytes of body\n")
     return result
 }
-
 func create_ready_file(string path) {
     print("✓ Backend ready file: " + path + "\n")
 }
-
 func runtime_env_get(string name, string default_value) string {
     default_value
 }
-
 func main() {
     initialize_backend()
     print("Backend initialized successfully.\n")

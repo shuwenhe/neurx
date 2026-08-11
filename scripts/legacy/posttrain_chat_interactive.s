@@ -4,7 +4,6 @@ use std.os
 use std.strings
 use std.bufio
 use std.collections
-
 func main() {
     neurx_dir := "/home/shuwen/shuwen/train/neurx"
     model_path := "/home/shuwen/shuwen/posttrain/model.safetensors"

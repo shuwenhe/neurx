@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_run_command_output, runtime_shell_escape}
 use std.io.println
-
 func main() {
     string config = runtime_env_get("NEURX_PRETRAIN_CONFIG", "workflows/llm/pretrain/config/sample.yaml")
     string steps_override = runtime_env_get("NEURX_PRETRAIN_STEPS_OVERRIDE", "")
@@ -70,18 +69,15 @@ func main() {
     println("Compiled pretrain workflow entrypoint with steps=" + max_steps + ", micro_batch=" + micro_batch + ", seq_len=" + seq_len + ", lr=" + lr + ", model=" + hidden_dim + "h/" + num_layers + "l/" + num_attn_heads + "q/" + num_kv_heads + "kv/" + intermediate_dim + "ff/" + vocab_size + "v, log/eval/save=" + log_interval + "/" + eval_interval + "/" + save_interval + ", manifest=" + dataset_manifest + ", checkpoint_root=" + checkpoint_root + ", tp/pp/dp/sp/zero=" + tp_degree + "/" + pp_degree + "/" + dp_degree + "/" + sp_degree + "/" + zero_stage)
     0
 }
-
 func usage() {
     println("Usage: run_with_config.s")
     println("Configure via NEURX_PRETRAIN_CONFIG, NEURX_PRETRAIN_STEPS_OVERRIDE and S_BIN.")
 }
-
 func yaml_value(string file, string key) string {
     string cmd = "awk -F\":\" '/^" + key + "[[:space:]]*:/ {sub(/^[[:space:]]*/, \"\", $2); gsub(/^\"|\"$/, \"\", $2); gsub(/ /, \"\", $2); print $2; exit}' " + runtime_shell_escape(file)
     string value = runtime_run_command_output(cmd)
     trim(value)
 }
-
 func default_if_empty(string value, string fallback) string {
     if value == "" {
         return fallback

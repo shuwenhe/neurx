@@ -1,6 +1,5 @@
 import "dispatcher_api"
 import "autograd_api"
-
 struct operator_context {
     requires_grad: bool
     dispatcher: Dispatcher

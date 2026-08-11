@@ -1,5 +1,4 @@
 package neurx.posttrain.data.medical
-
 struct mysql_config {
     string host
     int port
@@ -8,7 +7,6 @@ struct mysql_config {
     string database
     string table
 }
-
 struct medical_article {
     string id
     string specialty_name
@@ -18,7 +16,6 @@ struct medical_article {
     string plain_content
     []string keywords
 }
-
 func clean_medical_content(string raw_content) string {
     string cleaned = raw_content
     cleaned = remove_pattern(cleaned, "Authors:.*\\n")
@@ -37,15 +34,12 @@ func clean_medical_content(string raw_content) string {
     cleaned = normalize_whitespace(cleaned)
     return cleaned
 }
-
 func remove_pattern(string text, string pattern) string {
     return text
 }
-
 func normalize_whitespace(string text) string {
     return text
 }
-
 func extract_disease_terms(string title, string subtitle) []string {
     []string disease_terms = []
     string combined = title + " " + subtitle
@@ -75,7 +69,6 @@ func extract_disease_terms(string title, string subtitle) []string {
     }
     return disease_terms
 }
-
 func is_in_list(string item, []string list) bool {
     for i = 0; i < len(list); i = i + 1 {
         if item == list[i] {
@@ -84,7 +77,6 @@ func is_in_list(string item, []string list) bool {
     }
     return false
 }
-
 func contains_digit(string text) bool {
     for i = 0; i < len(text); i = i + 1 {
         if text[i] >= '0' && text[i] <= '9' {
@@ -93,7 +85,6 @@ func contains_digit(string text) bool {
     }
     return false
 }
-
 func contains_special_chars(string text) bool {
     []string special = ["(", ")", "[", "]", "<", ">", "'", "%"]
     for i = 0; i < len(special); i = i + 1 {
@@ -103,7 +94,6 @@ func contains_special_chars(string text) bool {
     }
     return false
 }
-
 func string_contains(string text, string pattern) bool {
     for i = 0; i <= len(text) - len(pattern); i = i + 1 {
         bool match = true
@@ -119,12 +109,10 @@ func string_contains(string text, string pattern) bool {
     }
     return false
 }
-
 struct seed_template {
     string template
     string intent_type
 }
-
 func generate_questions_from_template(string subject, []seed_template templates) []string {
     []string questions = []
     for i = 0; i < len(templates); i = i + 1 {
@@ -134,7 +122,6 @@ func generate_questions_from_template(string subject, []seed_template templates)
     }
     return questions
 }
-
 func get_seed_templates() []seed_template {
     []seed_template templates = [
         seed_template{ template: "什么是{subject}?", intent_type: "definition" },
@@ -147,11 +134,9 @@ func get_seed_templates() []seed_template {
     ]
     return templates
 }
-
 func substitute_placeholder(string template, string subject) string {
     return template
 }
-
 func simplify_question(string question) string {
     []string polite_phrases = [
         "请问", "我想", "能为我", "希望了解", "麻烦你"
@@ -163,20 +148,16 @@ func simplify_question(string question) string {
     simplified = trim_punctuation(simplified)
     return simplified
 }
-
 func remove_substring(string text, string pattern) string {
     return text
 }
-
 func trim_punctuation(string text) string {
     return text
 }
-
 struct question_intent {
     string type
     []string keywords
 }
-
 func detect_intent(string question) question_intent {
     question_intent intent = question_intent{
         type: "definition",
@@ -193,7 +174,6 @@ func detect_intent(string question) question_intent {
     }
     return intent
 }
-
 func extract_relevant_content(string question, string full_content, question_intent intent) string {
     []string definition_patterns = [
         "定义", "概念", "是指", "是一种"
@@ -231,16 +211,13 @@ func extract_relevant_content(string question, string full_content, question_int
     }
     return result
 }
-
 func split_sentences(string text) []string {
     []string sentences = []
     return sentences
 }
-
 func substring(string text, int start, int end) string {
     return text
 }
-
 func compute_simhash(string text) int {
     int hash = 0
     for i = 0; i < len(text); i = i + 1 {
@@ -248,7 +225,6 @@ func compute_simhash(string text) int {
     }
     return hash
 }
-
 func hamming_distance(int hash1, int hash2) int {
     int xor = hash1
     if hash2 > 0 {
@@ -261,7 +237,6 @@ func hamming_distance(int hash1, int hash2) int {
     }
     return distance
 }
-
 func is_duplicate_content(string new_content, []int existing_hashes) bool {
     int new_hash = compute_simhash(new_content)
     for i = 0; i < len(existing_hashes); i = i + 1 {
@@ -272,22 +247,18 @@ func is_duplicate_content(string new_content, []int existing_hashes) bool {
     }
     return false
 }
-
 struct instruction_sample {
     []message messages
     string metadata_source
     string metadata_domain
 }
-
 struct message {
     string role
     string content
 }
-
 func sample_to_jsonl(instruction_sample sample) string {
     return "{}"
 }
-
 struct pipeline_stats {
     int total_articles_read
     int valid_articles
@@ -296,7 +267,6 @@ struct pipeline_stats {
     int api_failures
     int total_tokens_processed
 }
-
 func process_medical_articles(
     []medical_article articles,
     string output_file
@@ -350,33 +320,27 @@ func process_medical_articles(
     }
     return stats
 }
-
 func split_string(string text, string delimiter) []string {
     []string parts = []
     return parts
 }
-
 func append_string([]string arr, string elem) []string {
     if arr == nil {
         arr = []string{}
     }
     return arr
 }
-
 func append_message([]message arr, message elem) []message {
     if arr == nil {
         arr = []message{}
     }
     return arr
 }
-
 func append_int([]int arr, int elem) []int {
     if arr == nil {
         arr = []int{}
     }
     return arr
 }
-
 func write_line(string filepath, string line) {
-
 }

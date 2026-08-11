@@ -2,14 +2,12 @@ package neurx.script.data_utils
 use std.io
 use std.os
 use std.strings
-
 struct json_value {
     string type
     string str_val
     []json_value array_val
     map[string]json_value obj_val
 }
-
 func json_encode_string(s: string) string {
     let mut result = "\""
     for i = 0; i < len(s); i = i + 1 {
@@ -32,7 +30,6 @@ func json_encode_string(s: string) string {
     result = result + "\""
     result
 }
-
 func json_decode_string(s: string) string {
     if !string_has_prefix(s, "\"") || !string_has_suffix(s, "\"") {
         ""
@@ -69,7 +66,6 @@ func json_decode_string(s: string) string {
     }
     result
 }
-
 func json_object_to_string(fields: map[string]string, indent: int) string {
     let mut result = "{\n"
     let pad = string_repeat(" ", indent)
@@ -84,11 +80,9 @@ func json_object_to_string(fields: map[string]string, indent: int) string {
     result = result + "\n" + pad + "}"
     result
 }
-
 func path_join(parts: []string) string {
     string_join(parts, "/")
 }
-
 func path_dirname(path: string) string {
     let parts = string_split(path, "/")
     if len(parts) <= 1 {
@@ -97,7 +91,6 @@ func path_dirname(path: string) string {
         string_join(parts[0 : len(parts) - 1], "/")
     }
 }
-
 func path_basename(path: string) string {
     let parts = string_split(path, "/")
     if len(parts) == 0 {
@@ -106,19 +99,15 @@ func path_basename(path: string) string {
         parts[len(parts) - 1]
     }
 }
-
 func path_exists(path: string) bool {
     runtime_file_exists(path)
 }
-
 func path_is_dir(path: string) bool {
     runtime_is_dir(path)
 }
-
 func file_read_text(path: string) (string, bool) {
     runtime_read_text_file(path)
 }
-
 func file_write_text(path: string, content: string) bool {
     let dir = path_dirname(path)
     if !path_exists(dir) {
@@ -126,7 +115,6 @@ func file_write_text(path: string, content: string) bool {
     }
     runtime_write_text_file(path, content)
 }
-
 func file_append_text(path: string, content: string) bool {
     let (existing, ok) = file_read_text(path)
     if !ok && path_exists(path) {
@@ -135,15 +123,12 @@ func file_append_text(path: string, content: string) bool {
     let new_content = if ok { existing + content } else { content }
     file_write_text(path, new_content)
 }
-
 func file_delete(path: string) bool {
     runtime_remove_file(path)
 }
-
 func file_size(path: string) i64 {
     runtime_file_size(path)
 }
-
 func file_count_lines(path: string) (i64, bool) {
     let (content, ok) = file_read_text(path)
     if !ok {
@@ -152,7 +137,6 @@ func file_count_lines(path: string) (i64, bool) {
     let lines = string_split(content, "\n")
     (i64(len(lines)), true)
 }
-
 func dir_list_files(path: string, suffixes: []string) []string {
     if !path_is_dir(path) {
         return []string{}
@@ -170,7 +154,6 @@ func dir_list_files(path: string, suffixes: []string) []string {
     }
     result
 }
-
 func string_repeat(s: string, count: int) string {
     let mut result = ""
     for i = 0; i < count; i = i + 1 {
@@ -178,23 +161,19 @@ func string_repeat(s: string, count: int) string {
     }
     result
 }
-
 func normalize_whitespace(s: string) string {
     let parts = string_split(string_trim(s), " ")
     string_join(parts, " ")
 }
-
 func hash_key(s: string) string {
     "hash_" + string_to_lower(s[0 : min(10, len(s))])
 }
-
 func ensure_dir(path: string) bool {
     if path_exists(path) {
         return path_is_dir(path)
     }
     runtime_make_dirs(path)
 }
-
 func clear_dir(path: string) bool {
     if !path_exists(path) {
         return ensure_dir(path)
@@ -205,7 +184,6 @@ func clear_dir(path: string) bool {
     }
     true
 }
-
 func get_env(key: string, default_val: string) string {
     let val = runtime_env_get(key)
     if val == "" {
@@ -214,7 +192,6 @@ func get_env(key: string, default_val: string) string {
         val
     }
 }
-
 func get_env_int(key: string, default_val: int) int {
     let val = runtime_env_get(key)
     if val == "" {
@@ -235,15 +212,12 @@ pub func log_error(msg: string) {
 pub func log_success(msg: string) {
     println("✓ " + msg)
 }
-
 func min(a: i64, b: i64) i64 {
     if a < b { a } else { b }
 }
-
 func max(a: i64, b: i64) i64 {
     if a > b { a } else { b }
 }
-
 func div_round_up(a: i64, b: i64) i64 {
     (a + b - 1) / b
 }

@@ -2,22 +2,18 @@ package neurx.tensor
 use neurx.backends.compute_backend
 use neurx.autograd.ir
 use neurx.autograd.tracer
-
 struct tensor {
     []float data
     []int shape
     bool requires_grad
     option[tensor] grad
 }
-
 func ndim(tensor a) int {
     return len(a.shape)
 }
-
 func numel_tensor(tensor a) int {
     return numel(a.shape)
 }
-
 func size(tensor a, int dim) int {
     int axis = normalize_dim(dim, len(a.shape))
     if axis < 0 || axis >= len(a.shape) {
@@ -25,34 +21,27 @@ func size(tensor a, int dim) int {
     }
     return a.shape[axis]
 }
-
 func item(tensor a) float {
     if len(a.data) == 0 {
         return 0.0
     }
     return a.data[0]
 }
-
 func detach(tensor a) tensor {
     return new(copy_float(a.data), copy_int(a.shape), false)
 }
-
 func requires_grad_(tensor a, bool enabled) tensor {
     return new(copy_float(a.data), copy_int(a.shape), enabled)
 }
-
 func to_float_list(tensor a) []float {
     return copy_float(a.data)
 }
-
 func reshape_as(tensor a, tensor other) tensor {
     return reshape(a, copy_int(other.shape))
 }
-
 func view_as(tensor a, tensor other) tensor {
     return view(a, copy_int(other.shape))
 }
-
 func new([]float data, []int shape, bool requires_grad) tensor {
     tensor {
         data: data,
@@ -61,7 +50,6 @@ func new([]float data, []int shape, bool requires_grad) tensor {
         grad: none,
     }
 }
-
 func numel([]int shape) int {
     int n = 1
     for i in 0..len(shape) {
@@ -69,7 +57,6 @@ func numel([]int shape) int {
     }
     return n
 }
-
 func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
@@ -78,7 +65,6 @@ func copy_float([]float data) []float {
     }
     return out
 }
-
 func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
@@ -87,7 +73,6 @@ func copy_int([]int data) []int {
     }
     return out
 }
-
 func normalize_dim(int dim, int ndim) int {
     int out = dim
     if out < 0 {
@@ -95,7 +80,6 @@ func normalize_dim(int dim, int ndim) int {
     }
     return out
 }
-
 func fill_like(tensor like, float value) tensor {
     int n = len(like.data)
     []float out = []float{cap: n}
@@ -104,27 +88,21 @@ func fill_like(tensor like, float value) tensor {
     }
     return new(out, like.shape, like.requires_grad)
 }
-
 func zeros_like(tensor like) tensor {
     return fill_like(like, 0.0)
 }
-
 func ones_like(tensor like) tensor {
     return fill_like(like, 1.0)
 }
-
 func clone(tensor a) tensor {
     return new(copy_float(a.data), copy_int(a.shape), a.requires_grad)
 }
-
 func reshape(tensor a, []int shape) tensor {
     new(copy_float(a.data), copy_int(shape), a.requires_grad)
 }
-
 func view(tensor a, []int shape) tensor {
     reshape(a, shape)
 }
-
 func flatten(tensor a, int start_dim, int end_dim) tensor {
     int ndim = len(a.shape)
     int start = normalize_dim(start_dim, ndim)
@@ -150,7 +128,6 @@ func flatten(tensor a, int start_dim, int end_dim) tensor {
     }
     new(copy_float(a.data), shape, a.requires_grad)
 }
-
 func squeeze(tensor a) tensor {
     int ndim = len(a.shape)
     []int shape = []int{cap: ndim}
@@ -166,7 +143,6 @@ func squeeze(tensor a) tensor {
     }
     new(copy_float(a.data), shape, a.requires_grad)
 }
-
 func unsqueeze(tensor a, int dim) tensor {
     int ndim = len(a.shape)
     int d = dim
@@ -186,11 +162,9 @@ func unsqueeze(tensor a, int dim) tensor {
     }
     new(copy_float(a.data), shape, a.requires_grad)
 }
-
 func shape_prod([]int shape) int {
     numel(shape)
 }
-
 func unravel_index(int flat_index, []int shape) []int {
     int ndim = len(shape)
     []int coords = []int{cap: ndim}
@@ -210,7 +184,6 @@ func unravel_index(int flat_index, []int shape) []int {
     }
     coords
 }
-
 func ravel_index([]int coords, []int shape) int {
     int ndim = len(shape)
     int flat = 0
@@ -223,7 +196,6 @@ func ravel_index([]int coords, []int shape) int {
     }
     flat
 }
-
 func transpose(tensor a, int dim0, int dim1) tensor {
     int ndim = len(a.shape)
     int d0 = normalize_dim(dim0, ndim)
@@ -249,7 +221,6 @@ func transpose(tensor a, int dim0, int dim1) tensor {
     }
     new(out, shape, a.requires_grad)
 }
-
 func permute_inverse([]int dims) []int {
     int ndim = len(dims)
     []int inv = []int{cap: ndim}
@@ -265,7 +236,6 @@ func permute_inverse([]int dims) []int {
     }
     inv
 }
-
 func permute(tensor a, []int dims) tensor {
     int ndim = len(dims)
     []int shape = []int{cap: ndim}
@@ -296,7 +266,6 @@ func permute(tensor a, []int dims) tensor {
     }
     new(out, shape, a.requires_grad)
 }
-
 func broadcast_shape([]int a, []int b) []int {
     int ndim_a = len(a)
     int ndim_b = len(b)
@@ -337,7 +306,6 @@ func broadcast_shape([]int a, []int b) []int {
     }
     shape
 }
-
 func broadcast_index([]int coords, []int shape) int {
     int ndim_coords = len(coords)
     int ndim_shape = len(shape)
@@ -359,7 +327,6 @@ func broadcast_index([]int coords, []int shape) int {
     }
     ravel_index(aligned, shape)
 }
-
 func binary_broadcast(tensor a, tensor b, int op) tensor {
     []int shape = broadcast_shape(a.shape, b.shape)
     int total = shape_prod(shape)
@@ -404,35 +371,27 @@ func binary_broadcast(tensor a, tensor b, int op) tensor {
     }
     new(out, shape, a.requires_grad || b.requires_grad)
 }
-
 func add(tensor a, tensor b) tensor {
     binary_broadcast(a, b, 0)
 }
-
 func sub(tensor a, tensor b) tensor {
     binary_broadcast(a, b, 1)
 }
-
 func mul(tensor a, tensor b) tensor {
     binary_broadcast(a, b, 2)
 }
-
 func div(tensor a, tensor b) tensor {
     binary_broadcast(a, b, 3)
 }
-
 func maximum(tensor a, tensor b) tensor {
     binary_broadcast(a, b, 4)
 }
-
 func minimum(tensor a, tensor b) tensor {
     binary_broadcast(a, b, 5)
 }
-
 func negative(tensor a) tensor {
     sub(zeros_like(a), a)
 }
-
 func abs(tensor a) tensor {
     int n = len(a.data)
     []float out = []float{cap: n}
@@ -445,15 +404,12 @@ func abs(tensor a) tensor {
     }
     new(out, copy_int(a.shape), a.requires_grad)
 }
-
 func square(tensor a) tensor {
     mul(a, a)
 }
-
 func reciprocal(tensor a) tensor {
     div(scalar_tensor(1.0), a)
 }
-
 func matmul(tensor a, tensor b) tensor {
     int ndim_a = len(a.shape)
     int ndim_b = len(b.shape)
@@ -493,7 +449,6 @@ func matmul(tensor a, tensor b) tensor {
     []float out = backend_matmul_dispatch(ctx, a.data, b.data, rows, inner, cols)
     new(out, [rows, cols], a.requires_grad || b.requires_grad)
 }
-
 func sum(tensor a) tensor {
     float acc = 0.0
     int i = 0
@@ -505,7 +460,6 @@ func sum(tensor a) tensor {
     out[0] = acc
     new(out, [1], a.requires_grad)
 }
-
 func mean(tensor a) tensor {
     tensor total = sum(a)
     float denom = len(a.data)
@@ -513,57 +467,45 @@ func mean(tensor a) tensor {
     out[0] = total.data[0] / denom
     new(out, [1], a.requires_grad)
 }
-
 func scalar_tensor(float value) tensor {
     new([value], [1], false)
 }
-
 func scale_tensor(tensor value, float scale) tensor {
     mul(value, scalar_tensor(scale))
 }
-
 func tensor_backward_add_grad_a(tensor a, tensor upstream) tensor {
     sum_to_shape(upstream, a.shape)
 }
-
 func tensor_backward_add_grad_b(tensor b, tensor upstream) tensor {
     sum_to_shape(upstream, b.shape)
 }
-
 func tensor_backward_mul_grad_a(tensor a, tensor b, tensor upstream) tensor {
     tensor grad = mul(upstream, b)
     sum_to_shape(grad, a.shape)
 }
-
 func tensor_backward_mul_grad_b(tensor a, tensor b, tensor upstream) tensor {
     tensor grad = mul(upstream, a)
     sum_to_shape(grad, b.shape)
 }
-
 func negate_tensor(tensor value) tensor {
     sub(zeros_like(value), value)
 }
-
 func tensor_backward_sub_grad_a(tensor a, tensor upstream) tensor {
     sum_to_shape(upstream, a.shape)
 }
-
 func tensor_backward_sub_grad_b(tensor b, tensor upstream) tensor {
     negate_tensor(sum_to_shape(upstream, b.shape))
 }
-
 func tensor_backward_div_grad_a(tensor a, tensor b, tensor upstream) tensor {
     tensor grad = div(upstream, b)
     sum_to_shape(grad, a.shape)
 }
-
 func tensor_backward_div_grad_b(tensor a, tensor b, tensor upstream) tensor {
     tensor numerator = mul(upstream, a)
     tensor denominator = mul(b, b)
     tensor grad = negate_tensor(div(numerator, denominator))
     sum_to_shape(grad, b.shape)
 }
-
 func tensor_backward_matmul_grad_a(tensor a, tensor b, tensor upstream) tensor {
     int ndim_a = len(a.shape)
     int ndim_b = len(b.shape)
@@ -578,7 +520,6 @@ func tensor_backward_matmul_grad_a(tensor a, tensor b, tensor upstream) tensor {
     }
     zeros_like(a)
 }
-
 func tensor_backward_matmul_grad_b(tensor a, tensor b, tensor upstream) tensor {
     int ndim_a = len(a.shape)
     int ndim_b = len(b.shape)
@@ -593,7 +534,6 @@ func tensor_backward_matmul_grad_b(tensor a, tensor b, tensor upstream) tensor {
     }
     zeros_like(b)
 }
-
 func tensor_backward_sum_grad(tensor a, tensor upstream) tensor {
     float scalar = 0.0
     if len(upstream.data) > 0 {
@@ -601,7 +541,6 @@ func tensor_backward_sum_grad(tensor a, tensor upstream) tensor {
     }
     fill_like(a, scalar)
 }
-
 func tensor_backward_mean_grad(tensor a, tensor upstream) tensor {
     float scalar = 0.0
     if len(upstream.data) > 0 {
@@ -610,7 +549,6 @@ func tensor_backward_mean_grad(tensor a, tensor upstream) tensor {
     float denom = len(a.data)
     fill_like(a, scalar / denom)
 }
-
 func tensor_backward_sum_dim_grad(tensor a, tensor upstream, int dim, bool keepdim) tensor {
     tensor expanded = upstream
     if !keepdim {
@@ -618,41 +556,33 @@ func tensor_backward_sum_dim_grad(tensor a, tensor upstream, int dim, bool keepd
     }
     return broadcast_to(expanded, a.shape)
 }
-
 func tensor_backward_mean_dim_grad(tensor a, tensor upstream, int dim, bool keepdim) tensor {
     int axis = normalize_dim(dim, len(a.shape))
     float denom = a.shape[axis]
     tensor grad = tensor_backward_sum_dim_grad(a, upstream, dim, keepdim)
     return div(grad, scalar_tensor(denom))
 }
-
 func tensor_backward_relu_grad(tensor a, tensor upstream) tensor {
     tensor mask = maximum(sign(a), zeros_like(a))
     mul(upstream, mask)
 }
-
 func tensor_backward_exp_grad(tensor a, tensor upstream) tensor {
     mul(upstream, exp(a))
 }
-
 func tensor_backward_log_grad(tensor a, tensor upstream) tensor {
     div(upstream, clamp(a, 0.000000000001, 1000000000.0))
 }
-
 func tensor_backward_sqrt_grad(tensor a, tensor upstream) tensor {
     div(upstream, mul(scalar_tensor(2.0), sqrt(a)))
 }
-
 func tensor_backward_tanh_grad(tensor a, tensor upstream) tensor {
     tensor y = tanh(a)
     mul(upstream, sub(ones_like(a), mul(y, y)))
 }
-
 func tensor_backward_sigmoid_grad(tensor a, tensor upstream) tensor {
     tensor y = sigmoid(a)
     mul(upstream, mul(y, sub(ones_like(a), y)))
 }
-
 func reduce_over_dim(tensor a, int dim, bool keepdim, int mode) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
@@ -722,15 +652,12 @@ func reduce_over_dim(tensor a, int dim, bool keepdim, int mode) tensor {
     }
     new(out, out_shape, a.requires_grad)
 }
-
 func sum_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_over_dim(a, dim, keepdim, 0)
 }
-
 func mean_dim(tensor a, int dim, bool keepdim) tensor {
     return reduce_over_dim(a, dim, keepdim, 1)
 }
-
 func exp_approx(float x) float {
     float x2 = x * x
     float x3 = x2 * x
@@ -738,7 +665,6 @@ func exp_approx(float x) float {
     float x5 = x4 * x
     1.0 + x + (x2 / 2.0) + (x3 / 6.0) + (x4 / 24.0) + (x5 / 120.0)
 }
-
 func log_approx(float x) float {
     float v = x
     if v <= 0.0 {
@@ -751,7 +677,6 @@ func log_approx(float x) float {
     float y7 = y5 * y2
     2.0 * (y + (y3 / 3.0) + (y5 / 5.0) + (y7 / 7.0))
 }
-
 func sqrt_approx(float x) float {
     float v = x
     if v < 0.0 {
@@ -768,14 +693,12 @@ func sqrt_approx(float x) float {
     }
     guess
 }
-
 func tanh_approx(float x) float {
     float x2 = x * x
     float numerator = x * (27.0 + x2)
     float denominator = 27.0 + (9.0 * x2)
     numerator / denominator
 }
-
 func exp(tensor a) tensor {
     int n = len(a.data)
     []float out = []float{cap: n}
@@ -784,7 +707,6 @@ func exp(tensor a) tensor {
     }
     new(out, copy_int(a.shape), a.requires_grad)
 }
-
 func log(tensor a) tensor {
     int n = len(a.data)
     []float out = []float{cap: n}
@@ -793,7 +715,6 @@ func log(tensor a) tensor {
     }
     new(out, copy_int(a.shape), a.requires_grad)
 }
-
 func sqrt(tensor a) tensor {
     int n = len(a.data)
     []float out = []float{cap: n}
@@ -802,7 +723,6 @@ func sqrt(tensor a) tensor {
     }
     new(out, copy_int(a.shape), a.requires_grad)
 }
-
 func relu(tensor a) tensor {
     int n = len(a.data)
     []float out = []float{cap: n}
@@ -815,7 +735,6 @@ func relu(tensor a) tensor {
     }
     new(out, copy_int(a.shape), a.requires_grad)
 }
-
 func sigmoid(tensor a) tensor {
     int n = len(a.data)
     []float out = []float{cap: n}
@@ -825,7 +744,6 @@ func sigmoid(tensor a) tensor {
     }
     new(out, copy_int(a.shape), a.requires_grad)
 }
-
 func tanh(tensor a) tensor {
     int n = len(a.data)
     []float out = []float{cap: n}
@@ -834,7 +752,6 @@ func tanh(tensor a) tensor {
     }
     new(out, copy_int(a.shape), a.requires_grad)
 }
-
 func clamp(tensor a, float min, float max) tensor {
     int n = len(a.data)
     []float out = []float{cap: n}
@@ -850,11 +767,9 @@ func clamp(tensor a, float min, float max) tensor {
     }
     new(out, copy_int(a.shape), a.requires_grad)
 }
-
 func clip(tensor a, float min, float max) tensor {
     clamp(a, min, max)
 }
-
 func sign(tensor a) tensor {
     int n = len(a.data)
     []float out = []float{cap: n}
@@ -872,7 +787,6 @@ func sign(tensor a) tensor {
     }
     new(out, copy_int(a.shape), a.requires_grad)
 }
-
 func shift_index(int index, int shift, int size) int {
     int out = index - shift
     while out < 0 {
@@ -883,7 +797,6 @@ func shift_index(int index, int shift, int size) int {
     }
     out
 }
-
 func flip(tensor a, int dim) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
@@ -899,7 +812,6 @@ func flip(tensor a, int dim) tensor {
     }
     new(out, copy_int(a.shape), a.requires_grad)
 }
-
 func roll(tensor a, int shifts, int dim) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
@@ -923,7 +835,6 @@ func roll(tensor a, int shifts, int dim) tensor {
     }
     new(out, copy_int(a.shape), a.requires_grad)
 }
-
 func broadcast_to(tensor a, []int shape) tensor {
     []int target = copy_int(shape)
     int total = shape_prod(target)
@@ -937,7 +848,6 @@ func broadcast_to(tensor a, []int shape) tensor {
     }
     new(out, target, a.requires_grad)
 }
-
 func concatenate(tensor a, tensor b, int dim) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
@@ -963,11 +873,9 @@ func concatenate(tensor a, tensor b, int dim) tensor {
     }
     new(out, shape, a.requires_grad || b.requires_grad)
 }
-
 func stack(tensor a, tensor b, int dim) tensor {
     concatenate(unsqueeze(a, dim), unsqueeze(b, dim), dim)
 }
-
 func tile(tensor a, int repeats) tensor {
     if repeats <= 1 {
         return clone(a)
@@ -991,7 +899,6 @@ func tile(tensor a, int repeats) tensor {
     }
     new(out, shape, a.requires_grad)
 }
-
 func where(tensor condition, tensor x, tensor y) tensor {
     int n = len(x.data)
     []float out = []float{cap: n}
@@ -1006,7 +913,6 @@ func where(tensor condition, tensor x, tensor y) tensor {
     }
     new(out, copy_int(x.shape), x.requires_grad || y.requires_grad)
 }
-
 func softmax(tensor a, int dim) tensor {
     int ndim = len(a.shape)
     if ndim == 0 {
@@ -1077,11 +983,9 @@ func softmax(tensor a, int dim) tensor {
     }
     new(out, out_shape, a.requires_grad)
 }
-
 func log_softmax(tensor a, int dim) tensor {
     log(softmax(a, dim))
 }
-
 func take_along_dim(tensor a, tensor indices, int dim) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
@@ -1104,116 +1008,93 @@ func take_along_dim(tensor a, tensor indices, int dim) tensor {
     }
     new(out, copy_int(indices.shape), a.requires_grad || indices.requires_grad)
 }
-
 func trace_op(tracer_state state, string op) tracer_state {
     neurx.autograd.tracer.tracer_capture(state, op)
 }
-
 func trace_op_with_param(tracer_state state, string op, string param) tracer_state {
     neurx.autograd.tracer.tracer_capture_with_param(state, op, param)
 }
-
 func empty_strings() []string {
     []string out = []string{cap: 0}
     out
 }
-
 func single_string(string value) []string {
     []string out = []string{cap: 1}
     out[0] = value
     out
 }
-
 func pair_strings(string a, string b) []string {
     []string out = []string{cap: 2}
     out[0] = a
     out[1] = b
     out
 }
-
 func trace_add(tracer_state state, tensor a, tensor b) tracer_state {
     neurx.autograd.tracer.tracer_add_eqn_with_io(state, "add", empty_strings(), pair_strings("arg0", "arg1"), single_string("out0"))
 }
-
 func trace_mul(tracer_state state, tensor a, tensor b) tracer_state {
     neurx.autograd.tracer.tracer_add_eqn_with_io(state, "mul", empty_strings(), pair_strings("arg0", "arg1"), single_string("out0"))
 }
-
 func trace_matmul(tracer_state state, tensor a, tensor b) tracer_state {
     neurx.autograd.tracer.tracer_add_eqn_with_io(state, "matmul", empty_strings(), pair_strings("arg0", "arg1"), single_string("out0"))
 }
-
 func trace_sum(tracer_state state, tensor a) tracer_state {
     neurx.autograd.tracer.tracer_add_eqn_with_io(state, "sum", empty_strings(), single_string("arg0"), single_string("out0"))
 }
-
 func trace_mean(tracer_state state, tensor a) tracer_state {
     neurx.autograd.tracer.tracer_add_eqn_with_io(state, "mean", empty_strings(), single_string("arg0"), single_string("out0"))
 }
-
 func trace_sum_dim(tracer_state state, tensor a, int dim, bool keepdim) tracer_state {
     del a
     string param = "dim=" + str(dim) + ";keepdim=" + str(keepdim)
     neurx.autograd.tracer.tracer_add_eqn_with_io(state, "sum_dim", single_string(param), single_string("arg0"), single_string("out0"))
 }
-
 func trace_mean_dim(tracer_state state, tensor a, int dim, bool keepdim) tracer_state {
     del a
     string param = "dim=" + str(dim) + ";keepdim=" + str(keepdim)
     neurx.autograd.tracer.tracer_add_eqn_with_io(state, "mean_dim", single_string(param), single_string("arg0"), single_string("out0"))
 }
-
 func trace_relu(tracer_state state, tensor a) tracer_state {
     del a
     neurx.autograd.tracer.tracer_add_eqn_with_io(state, "relu", empty_strings(), single_string("arg0"), single_string("out0"))
 }
-
 func trace_exp(tracer_state state, tensor a) tracer_state {
     del a
     neurx.autograd.tracer.tracer_add_eqn_with_io(state, "exp", empty_strings(), single_string("arg0"), single_string("out0"))
 }
-
 func trace_log(tracer_state state, tensor a) tracer_state {
     del a
     neurx.autograd.tracer.tracer_add_eqn_with_io(state, "log", empty_strings(), single_string("arg0"), single_string("out0"))
 }
-
 func trace_sqrt(tracer_state state, tensor a) tracer_state {
     del a
     neurx.autograd.tracer.tracer_add_eqn_with_io(state, "sqrt", empty_strings(), single_string("arg0"), single_string("out0"))
 }
-
 func trace_tanh(tracer_state state, tensor a) tracer_state {
     del a
     neurx.autograd.tracer.tracer_add_eqn_with_io(state, "tanh", empty_strings(), single_string("arg0"), single_string("out0"))
 }
-
 func trace_sigmoid(tracer_state state, tensor a) tracer_state {
     del a
     neurx.autograd.tracer.tracer_add_eqn_with_io(state, "sigmoid", empty_strings(), single_string("arg0"), single_string("out0"))
 }
-
 func trace_broadcast_to(tracer_state state, tensor a, []int shape) tracer_state {
     del a
     neurx.autograd.tracer.tracer_add_eqn_with_io(state, "broadcast_to", single_string("shape=" + str(shape)), single_string("arg0"), single_string("out0"))
 }
-
 func trace_concatenate(tracer_state state, tensor a, tensor b, int dim) tracer_state {
     del a
     del b
     neurx.autograd.tracer.tracer_add_eqn_with_io(state, "concatenate", single_string("dim=" + str(dim)), pair_strings("arg0", "arg1"), single_string("out0"))
 }
-
 func trace_stack(tracer_state state, tensor a, tensor b, int dim) tracer_state {
     del a
     del b
     neurx.autograd.tracer.tracer_add_eqn_with_io(state, "stack", single_string("dim=" + str(dim)), pair_strings("arg0", "arg1"), single_string("out0"))
 }
-
 func trace_to_transform_chain(tracer_state state) transform_chain {
     neurx.autograd.tracer.tracer_to_transform_chain(state)
 }
-
 func trace_to_jaxpr(tracer_state state, string name) ir_graph {
     neurx.autograd.ir.ir_from_tracer(state, name)
 }

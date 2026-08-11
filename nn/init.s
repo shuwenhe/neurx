@@ -1,5 +1,4 @@
 package neurx.nn.init
-
 struct init_config {
     string method
     float gain
@@ -8,7 +7,6 @@ struct init_config {
     float mean
     float std
 }
-
 func new_init_config(string method) init_config {
     init_config {
         method: method,
@@ -19,7 +17,6 @@ func new_init_config(string method) init_config {
         std: 1.0,
     }
 }
-
 func uniform_([]float tensor, float a, float b) []float {
     int i = 0
     while i < len(tensor) {
@@ -29,7 +26,6 @@ func uniform_([]float tensor, float a, float b) []float {
     }
     return tensor
 }
-
 func normal_([]float tensor, float mean, float std) []float {
     int i = 0
     while i < len(tensor) {
@@ -39,7 +35,6 @@ func normal_([]float tensor, float mean, float std) []float {
     }
     return tensor
 }
-
 func constant_([]float tensor, float val) []float {
     int i = 0
     while i < len(tensor) {
@@ -48,15 +43,12 @@ func constant_([]float tensor, float val) []float {
     }
     return tensor
 }
-
 func ones_([]float tensor) []float {
     return constant_(tensor, 1.0)
 }
-
 func zeros_([]float tensor) []float {
     return constant_(tensor, 0.0)
 }
-
 func eye_([]float tensor, int size) []float {
     int i = 0
     while i < size {
@@ -72,30 +64,25 @@ func eye_([]float tensor, int size) []float {
     }
     return tensor
 }
-
 func xavier_uniform_([]float tensor, int fan_in, int fan_out) []float {
     float limit = calculate_gain_xavier() * sqrt_approx(6.0 / float(fan_in + fan_out))
     return uniform_(tensor, 0.0 - limit, limit)
 }
-
 func xavier_normal_([]float tensor, int fan_in, int fan_out) []float {
     float std = calculate_gain_xavier() * sqrt_approx(2.0 / float(fan_in + fan_out))
     return normal_(tensor, 0.0, std)
 }
-
 func kaiming_uniform_([]float tensor, int fan_in, int fan_out, float a) []float {
     float gain = sqrt_approx(2.0 / (1.0 + a * a))
     float std = gain / sqrt_approx(float(fan_in))
     float bound = sqrt_approx(3.0) * std
     return uniform_(tensor, 0.0 - bound, bound)
 }
-
 func kaiming_normal_([]float tensor, int fan_in, int fan_out, float a) []float {
     float gain = sqrt_approx(2.0 / (1.0 + a * a))
     float std = gain / sqrt_approx(float(fan_in))
     return normal_(tensor, 0.0, std)
 }
-
 func orthogonal_([]float tensor, int rows, int cols, float gain) []float {
     if rows < cols {
         rows = cols
@@ -133,7 +120,6 @@ func orthogonal_([]float tensor, int rows, int cols, float gain) []float {
     }
     return tensor
 }
-
 func dirac_([]float tensor, int size) []float {
     int i = 0
     while i < len(tensor) {
@@ -148,7 +134,6 @@ func dirac_([]float tensor, int size) []float {
     }
     return tensor
 }
-
 func sparse_([]float tensor, int size, float sparsity) []float {
     int count = 0
     int i = 0
@@ -174,11 +159,9 @@ func sparse_([]float tensor, int size, float sparsity) []float {
     }
     return tensor
 }
-
 func calculate_gain_xavier() float {
     return 1.0
 }
-
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -194,11 +177,9 @@ func sqrt_approx(float x) float {
     }
     return y
 }
-
 func uniform_random() float {
     return 0.5
 }
-
 func box_muller_random() float {
     float u1 = uniform_random()
     float u2 = uniform_random()
@@ -206,7 +187,6 @@ func box_muller_random() float {
     float theta = 2.0 * 3.14159265358979323846 * u2
     return r * cos_approx(theta)
 }
-
 func log_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -223,7 +203,6 @@ func log_approx(float x) float {
     }
     return 2.0 * result
 }
-
 func cos_approx(float x) float {
     float x2 = x * x
     float x4 = x2 * x2

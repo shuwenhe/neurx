@@ -1,7 +1,5 @@
 package neurx.inference.real_inference_engine
-
 extern "intrinsic" func __host_slice(string text, int start, int end) string
-
 func tokenize_input(string text) int {
     print("[Tokenizer] Converting text to token ID...\n")
     print("Input: \"" + text + "\"\n")
@@ -12,7 +10,6 @@ func tokenize_input(string text) int {
     print("Token ID: 100\n")
     100
 }
-
 func forward_through_transformer(int token_id) string {
     print("\n[Model Forward Pass] Processing token through 24 layers...\n")
     print("\nSTEP 1: Embedding Layer\n")
@@ -51,7 +48,6 @@ func forward_through_transformer(int token_id) string {
     print("  ✓ Text generated\n")
     "医学"
 }
-
 func int_to_string(int val) string {
     if val == 0 {
         return "0"
@@ -65,7 +61,6 @@ func int_to_string(int val) string {
     }
     result
 }
-
 func float(int val) float {
     float result = 0.0
     int i = 0
@@ -75,7 +70,6 @@ func float(int val) float {
     }
     result
 }
-
 func main() {
     print("\n╔═══════════════════════════════════════════════════════════╗\n")
     print("║  🎯 PHASE 2B: REAL MODEL INFERENCE IN PURE S             ║\n")

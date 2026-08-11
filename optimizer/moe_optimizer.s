@@ -1,5 +1,4 @@
 module moe_optimization
-
 struct moe_config {
     hidden_size: int = 4096
     intermediate_size: int = 14336
@@ -24,7 +23,6 @@ struct moe_config {
     apply_residual: bool = true
     expert_pruning_threshold: float = 0.001
 }
-
 struct moe_forward_output {
     output: tensor
     aux_loss: tensor?
@@ -35,7 +33,6 @@ struct moe_forward_output {
     dispatch_pattern: dispatch_pattern
     perexpert_output?: list<tensor>
 }
-
 struct dispatch_pattern {
     total_tokens: int
     tokens_per_expert: list<int>
@@ -46,7 +43,6 @@ struct dispatch_pattern {
     entropy: float
     dropped_tokens: int
 }
-
 struct moe_expert {
     id: int
     up_proj: linear
@@ -56,7 +52,6 @@ struct moe_expert {
     importance_weight: float = 1.0
     is_active: bool = true
 }
-
 struct moe_router {
     gate_layer: linear
     bias: Parameter?
@@ -71,7 +66,6 @@ struct moe_router {
             this.noise = new normal(mean=0.0, std=config.jitter_noise)
     }
 }
-
 class load_balance_loss_computer {
     config: moe_config
     init(config: moe_config) {
@@ -92,7 +86,6 @@ class load_balance_loss_computer {
         return (load_balance_loss * this.config.loss_coef, aux_loss * this.config.aux_loss_coef)
     }
 }
-
 class mo_effn_layer {
     config: moe_config
     experts: list<moe_expert>
@@ -413,7 +406,6 @@ class expert_specializer {
         return cv < 0.1
     }
 }
-
 struct expert_analysis_report {
     num_total_experts: int
     num_active_experts: int
@@ -422,7 +414,6 @@ struct expert_analysis_report {
     importance_range: tuple<float, float>
     redundancy_detected: bool
 }
-
 struct individual_expert_report {
     expert_id: int
     is_active: bool
@@ -516,20 +507,17 @@ class expert_manager {
         }
     }
 }
-
 struct pruning_report {
     experts_pruned: int
     pruned_expert_ids: list<int>
     threshold_used: float
     remaining_active: int
 }
-
 struct merging_report {
     merges_performed: int
     operations: list<merge_operation>
     estimated_memory_savings_pct: float
 }
-
 struct merge_operation {
     layer_index: int
     expert_a_id: int
@@ -537,7 +525,6 @@ struct merge_operation {
     similarity: float
     action: string
 }
-
 struct moe_efficiency_report {
     total_experts_per_layer: int
     total_moe_layers: int

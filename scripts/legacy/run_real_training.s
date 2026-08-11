@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use neurx.pretrain.llm.real_training_loop.{run_training_loop}
-
 func main() {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     let manifest = runtime_env_get("NEURX_PRETRAIN_MANIFEST", project_root + "/dataset/pretrain/manifest.json")
@@ -45,7 +44,6 @@ func main() {
     println("═══════════════════════════════════════════════════════════")
     0
 }
-
 func str_to_int(string s, int fallback) int {
     string text = trim(s)
     if len(text) == 0 {
@@ -68,7 +66,6 @@ func str_to_int(string s, int fallback) int {
     }
     sign * value
 }
-
 func str_to_float(string s) float {
     string text = trim(s)
     if len(text) == 0 {
@@ -101,7 +98,6 @@ func str_to_float(string s) float {
     }
     value
 }
-
 func clamp_int(int value, int min_value, int max_value) int {
     if value < min_value {
         return min_value
@@ -111,7 +107,6 @@ func clamp_int(int value, int min_value, int max_value) int {
     }
     value
 }
-
 func trim(string s) string {
     int i = 0
     while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
@@ -132,7 +127,6 @@ func trim(string s) string {
     }
     out
 }
-
 func int_to_str(int n, int fallback) string {
     int value = n
     if value == 0 {
@@ -152,7 +146,6 @@ func int_to_str(int n, int fallback) string {
     }
     s
 }
-
 func fmt_float(float val, int decimals) string {
     float value = val
     if value == 0.0 {
@@ -189,7 +182,6 @@ func fmt_float(float val, int decimals) string {
     }
     s
 }
-
 func string_char(int c) string {
     string(c)
 }

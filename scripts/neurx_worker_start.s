@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command, runtime_shell_escape}
 use std.io.println
-
 func main() {
     string tmp_bin = runtime_env_get("TMP_BIN", "/tmp/neurx_train")
     string world_size = runtime_env_get("WORLD_SIZE", "2")

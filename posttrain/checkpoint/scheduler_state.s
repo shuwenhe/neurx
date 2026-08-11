@@ -1,5 +1,4 @@
 package neurx.posttrain.checkpoint.scheduler_state
-
 struct scheduler_state {
     int step
     int warmup_steps
@@ -7,7 +6,6 @@ struct scheduler_state {
     float min_lr
     string schedule_type
 }
-
 func init_scheduler_state(
     int warmup_steps,
     float max_lr,
@@ -21,7 +19,6 @@ func init_scheduler_state(
     print("  Min LR: ")
     println(float_to_str(min_lr))
 }
-
 func compute_learning_rate(
     int current_step,
     int warmup_steps,
@@ -55,7 +52,6 @@ func compute_learning_rate(
     float cosine_factor = 0.5 * (1.0 + cosine_term)
     return min_lr + (max_lr - min_lr) * cosine_factor
 }
-
 func print_scheduler_state_fields(
     int step,
     int warmup_steps,
@@ -81,7 +77,6 @@ func print_scheduler_state_fields(
     println(float_to_str(current_lr))
     println("====================================")
 }
-
 func cos_approx(float x) float {
     float pi = 3.14159265359
     float normalized = x
@@ -102,7 +97,6 @@ func cos_approx(float x) float {
     result = result + x8 / 40320.0
     return result
 }
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -129,7 +123,6 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
-
 func float_to_str(float value) string {
     float current = value
     bool negative = current < 0.0

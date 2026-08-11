@@ -1,10 +1,8 @@
 package main
 use std.os.{command, getenv}
-
 func string_char(int c) string {
     string(c)
 }
-
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
@@ -20,7 +18,6 @@ func shell_escape(string s) string {
     out = out + "'"
     out
 }
-
 func compile_one(string compiler, string script_dir, string build_dir, string shard_file) bool {
     string input_path = script_dir + "/" + shard_file
     string output_name = shard_file
@@ -49,7 +46,6 @@ func compile_one(string compiler, string script_dir, string build_dir, string sh
     println("✗ Failed: " + shard_file)
     false
 }
-
 func main() {
     string script_dir = getenv("SHARD_SCRIPT_DIR", ".")
     string build_dir = getenv("SHARD_BUILD_DIR", "../artifacts/build/shard")

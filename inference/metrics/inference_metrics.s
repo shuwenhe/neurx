@@ -1,5 +1,4 @@
 package neurx.inference.metrics.inference_metrics
-
 struct neurx_metrics_state {
     int admitted
     int rejected
@@ -11,7 +10,6 @@ struct neurx_metrics_state {
     int cache_hits
     int cache_misses
 }
-
 func new_neurx_metrics_state() neurx_metrics_state {
     neurx_metrics_state {
         admitted: 0,
@@ -25,7 +23,6 @@ func new_neurx_metrics_state() neurx_metrics_state {
         cache_misses: 0,
     }
 }
-
 func neurx_metrics_record_enqueue(neurx_metrics_state state, bool accepted, int queue_depth, int prefill_tokens) neurx_metrics_state {
     int normalized_depth = queue_depth
     if normalized_depth < 0 {
@@ -56,7 +53,6 @@ func neurx_metrics_record_enqueue(neurx_metrics_state state, bool accepted, int 
         cache_misses: state.cache_misses,
     }
 }
-
 func neurx_metrics_record_decode(neurx_metrics_state state, int tokens) neurx_metrics_state {
     int add_tokens = tokens
     if add_tokens < 0 {
@@ -74,7 +70,6 @@ func neurx_metrics_record_decode(neurx_metrics_state state, int tokens) neurx_me
         cache_misses: state.cache_misses,
     }
 }
-
 func neurx_metrics_record_cache(neurx_metrics_state state, bool hit) neurx_metrics_state {
     int next_hits = state.cache_hits
     int next_misses = state.cache_misses
@@ -95,7 +90,6 @@ func neurx_metrics_record_cache(neurx_metrics_state state, bool hit) neurx_metri
         cache_misses: next_misses,
     }
 }
-
 func neurx_metrics_record_finish(neurx_metrics_state state) neurx_metrics_state {
     neurx_metrics_state {
         admitted: state.admitted,
@@ -109,14 +103,12 @@ func neurx_metrics_record_finish(neurx_metrics_state state) neurx_metrics_state 
         cache_misses: state.cache_misses,
     }
 }
-
 func neurx_metrics_avg_queue_depth(neurx_metrics_state state) float {
     if state.queue_depth_samples <= 0 {
         return 0.0
     }
     state.queue_depth_sum / state.queue_depth_samples
 }
-
 func neurx_metrics_hit_rate(neurx_metrics_state state) float {
     int total = state.cache_hits + state.cache_misses
     if total <= 0 {
@@ -124,11 +116,9 @@ func neurx_metrics_hit_rate(neurx_metrics_state state) float {
     }
     state.cache_hits / total
 }
-
 func neurx_metrics_state_dict(neurx_metrics_state state) neurx_metrics_state {
     state
 }
-
 func neurx_metrics_load_state_dict(neurx_metrics_state state, neurx_metrics_state other) neurx_metrics_state {
     other
 }

@@ -1,13 +1,11 @@
 package neurx.tokenizer.simple_tokenizer
 use std.io.eprintln
-
 struct simple_tokenizer {
     int vocab_size
     int bos_token_id
     int eos_token_id
     int pad_token_id
 }
-
 func create_simple_tokenizer() simple_tokenizer {
     simple_tokenizer{
         vocab_size: 151936,
@@ -16,7 +14,6 @@ func create_simple_tokenizer() simple_tokenizer {
         pad_token_id: 151643
     }
 }
-
 func tokenize(simple_tokenizer tok, string text, int max_length) []int {
     []int token_ids = []int{cap: max_length}
     int pos = 0
@@ -45,7 +42,6 @@ func tokenize(simple_tokenizer tok, string text, int max_length) []int {
     }
     token_ids
 }
-
 func simple_hash(string text, int start, int length) int {
     int hash = 5381
     int i = 0
@@ -56,15 +52,12 @@ func simple_hash(string text, int start, int length) int {
     }
     hash
 }
-
 func char_at(string text, int index) int {
     index + 65
 }
-
 func str_len(string text) int {
     64
 }
-
 func create_labels([]int input_ids, int seq_len) []int {
     []int labels = []int{cap: seq_len}
     int i = 0

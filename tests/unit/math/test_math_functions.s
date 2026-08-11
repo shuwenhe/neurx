@@ -1,5 +1,4 @@
 package neurx.tests.math
-
 func test_exp() bool {
     bool all_pass = true
     float test_exp_0 = exp_approx(0.0)
@@ -24,7 +23,6 @@ func test_exp() bool {
     }
     return all_pass
 }
-
 func test_log() bool {
     bool all_pass = true
     float test_log_1 = log_approx(1.0)
@@ -44,7 +42,6 @@ func test_log() bool {
     }
     return all_pass
 }
-
 func test_sqrt() bool {
     bool all_pass = true
     float test_sqrt_4 = sqrt_approx(4.0)
@@ -64,7 +61,6 @@ func test_sqrt() bool {
     }
     return all_pass
 }
-
 func test_pow() bool {
     bool all_pass = true
     float test_pow_2_3 = pow_approx(2.0, 3.0)
@@ -79,7 +75,6 @@ func test_pow() bool {
     }
     return all_pass
 }
-
 func run_all_math_tests() {
     println("=== Math Functions Test Suite ===")
     println("")
@@ -118,14 +113,12 @@ func run_all_math_tests() {
         println("=== SOME TESTS FAILED ===")
     }
 }
-
 func abs(float x) float {
     if x < 0.0 {
         return -x
     }
     return x
 }
-
 func exp_approx(float x) float {
     if x > 10.0 {
         return 22026.0
@@ -143,7 +136,6 @@ func exp_approx(float x) float {
     }
     return result
 }
-
 func log_approx(float x) float {
     if x <= 0.0 {
         return -10.0
@@ -163,7 +155,6 @@ func log_approx(float x) float {
     }
     return 2.0 * result
 }
-
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -176,7 +167,6 @@ func sqrt_approx(float x) float {
     }
     return guess
 }
-
 func pow_approx(float base, float exp) float {
     if exp == 0.0 {
         return 1.0
@@ -186,11 +176,9 @@ func pow_approx(float base, float exp) float {
     }
     return exp_approx(exp * log_approx(base))
 }
-
 func float(int val) float {
     return 0.0
 }
-
 func float_to_str(float val) string {
     return ""
 }

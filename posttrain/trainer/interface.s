@@ -1,5 +1,4 @@
 package neurx.posttrain.trainer
-
 struct trainer_config {
     string model_path
     string data_file
@@ -25,7 +24,6 @@ struct trainer_config {
     bool use_qlora
     string qlora_dtype
 }
-
 struct trainer_state {
     int step
     int epoch
@@ -40,7 +38,6 @@ struct trainer_state {
     int v_a_len
     int v_b_len
 }
-
 struct adapter_stats {
     float l1_norm
     float l2_norm
@@ -48,7 +45,6 @@ struct adapter_stats {
     int nonzero_weights
     int total_weights
 }
-
 struct weight_delta_stats {
     float l1_delta
     float l2_delta
@@ -56,34 +52,27 @@ struct weight_delta_stats {
     int changed_elements
     int total_elements
 }
-
 struct loss_stats {
     float initial_loss
     float final_loss
     float best_loss
     float improvement_percent
 }
-
 struct trainer_report {
     adapter_stats adapter
     weight_delta_stats delta
     loss_stats loss
 }
 interface trainer {
-
     func step(trainer_config config, trainer_state state, []string batch_data) trainer_state
-
     func save_adapter(trainer_state state, string output_dir) int
-
     func get_stats(trainer_state state) trainer_report
-
     func initialize(trainer_config config) trainer_state
 }
 enum trainer_type {
     REFERENCE
     RUNTIME
 }
-
 func create_trainer(trainer_type ttype) int {
     return 0
 }

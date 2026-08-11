@@ -1,5 +1,4 @@
 package main
-
 import (
 	"fmt"
 	"io/ioutil"
@@ -7,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 )
-
 func remove_comments(content string) string {
 	lines := strings.Split(content, "\n")
 	result := make([]string, 0, len(lines))
@@ -24,14 +22,9 @@ func remove_comments(content string) string {
 				current = current[end_idx+2:]
 				in_block_comment = false
 			}
-			line_comment_idx := strings.Index(current, "//")
-			block_comment_idx := strings.Index(current, "/*")
-			if line_comment_idx >= 0 && (block_comment_idx == -1 || line_comment_idx < block_comment_idx) {
-				current = current[:line_comment_idx]
-				break
-			}
-			if block_comment_idx >= 0 {
-				closing_idx := strings.Index(current[block_comment_idx+2:], "*/")
+			line_comment_idx := strings.Index(current, "
+			block_comment_idx := strings.Index(current, "
+")
 				if closing_idx >= 0 {
 					current = current[:block_comment_idx] + current[block_comment_idx+2+closing_idx+2:]
 					continue
@@ -48,7 +41,6 @@ func remove_comments(content string) string {
 	}
 	return strings.Join(result, "\n")
 }
-
 func process_file(file_path string) error {
 	content, err := ioutil.ReadFile(file_path)
 	if err != nil {
@@ -57,7 +49,6 @@ func process_file(file_path string) error {
 	clean_content := remove_comments(string(content))
 	return ioutil.WriteFile(file_path, []byte(clean_content), 0644)
 }
-
 func get_files_with_comments(root_dir string) []string {
 	files := []string{}
 	_ = filepath.Walk(root_dir, func(current_path string, info os.FileInfo, walk_err error) error {
@@ -71,14 +62,13 @@ func get_files_with_comments(root_dir string) []string {
 		if err != nil {
 			return nil
 		}
-		if strings.Contains(string(content), "//") || strings.Contains(string(content), "/*") {
+		if strings.Contains(string(content), "
 			files = append(files, current_path)
 		}
 		return nil
 	})
 	return files
 }
-
 func main() {
 	root_dir := "."
 	if len(os.Args) > 1 {

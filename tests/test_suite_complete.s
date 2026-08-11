@@ -7,21 +7,18 @@ use neurx.model.transformer
 use neurx.amp.scaler
 use neurx.optimizer.adamw
 use neurx.tokenizer.data_pipeline
-
 struct test_result {
     string name
     bool passed
     string error_message
     float duration_ms
 }
-
 struct test_suite {
     string name
     []test_result results
     int num_passed
     int num_failed
 }
-
 func run_all_tests() {
     println("=" * 70)
     println("🧪 NeurX Industrial-Grade Test Suite")
@@ -58,7 +55,6 @@ func run_all_tests() {
         println("\n⚠️  Some tests failed. Please review above.")
     }
 }
-
 func run_cuda_tests() test_suite {
     suite := test_suite{name: "CUDA Device Management", results: make([]test_result, 0)}
     suite.results = append(suite.results, test_cuda_device_detection())
@@ -69,7 +65,6 @@ func run_cuda_tests() test_suite {
     print_test_suite_results(&suite)
     suite
 }
-
 func test_cuda_device_detection() test_result {
     start := get_timestamp()
     device_count := get_device_count()
@@ -85,7 +80,6 @@ func test_cuda_device_detection() test_result {
         duration_ms: (get_timestamp() - start) * 1000,
     }
 }
-
 func test_cuda_device_selection() test_result {
     start := get_timestamp()
     device_count := get_device_count()
@@ -106,7 +100,6 @@ func test_cuda_device_selection() test_result {
         duration_ms: (get_timestamp() - start) * 1000,
     }
 }
-
 func test_cuda_memory_allocation() test_result {
     start := get_timestamp()
     ctx, err := init_cuda_context(0)
@@ -131,7 +124,6 @@ func test_cuda_memory_allocation() test_result {
         duration_ms: (get_timestamp() - start) * 1000,
     }
 }
-
 func test_cuda_memcpy() test_result {
     start := get_timestamp()
     ctx, err := init_cuda_context(0)
@@ -158,7 +150,6 @@ func test_cuda_memcpy() test_result {
         duration_ms: (get_timestamp() - start) * 1000,
     }
 }
-
 func test_cuda_synchronization() test_result {
     start := get_timestamp()
     ctx, err := init_cuda_context(0)
@@ -181,7 +172,6 @@ func test_cuda_synchronization() test_result {
         duration_ms: (get_timestamp() - start) * 1000,
     }
 }
-
 func run_nccl_tests() test_suite {
     suite := test_suite{name: "NCCL Communication", results: make([]test_result, 0)}
     suite.results = append(suite.results, test_nccl_initialization())
@@ -189,7 +179,6 @@ func run_nccl_tests() test_suite {
     print_test_suite_results(&suite)
     suite
 }
-
 func test_nccl_initialization() test_result {
     start := get_timestamp()
     cfg := nccl_config{
@@ -211,7 +200,6 @@ func test_nccl_initialization() test_result {
         duration_ms: (get_timestamp() - start) * 1000,
     }
 }
-
 func test_nccl_barrier() test_result {
     start := get_timestamp()
     cfg := nccl_config{
@@ -240,7 +228,6 @@ func test_nccl_barrier() test_result {
         duration_ms: (get_timestamp() - start) * 1000,
     }
 }
-
 func run_model_tests() test_suite {
     suite := test_suite{name: "model Architecture", results: make([]test_result, 0)}
     suite.results = append(suite.results, test_transformer_forward_pass())
@@ -249,7 +236,6 @@ func run_model_tests() test_suite {
     print_test_suite_results(&suite)
     suite
 }
-
 func test_transformer_forward_pass() test_result {
     start := get_timestamp()
     cfg := transformer_config{
@@ -274,7 +260,6 @@ func test_transformer_forward_pass() test_result {
         duration_ms: (get_timestamp() - start) * 1000,
     }
 }
-
 func test_transformer_backward_pass() test_result {
     start := get_timestamp()
     test_result{
@@ -284,7 +269,6 @@ func test_transformer_backward_pass() test_result {
         duration_ms: (get_timestamp() - start) * 1000,
     }
 }
-
 func test_attention_computation() test_result {
     start := get_timestamp()
     test_result{
@@ -294,7 +278,6 @@ func test_attention_computation() test_result {
         duration_ms: (get_timestamp() - start) * 1000,
     }
 }
-
 func run_optimizer_tests() test_suite {
     suite := test_suite{name: "optimizer_2", results: make([]test_result, 0)}
     suite.results = append(suite.results, test_adamw_optimizer())
@@ -302,7 +285,6 @@ func run_optimizer_tests() test_suite {
     print_test_suite_results(&suite)
     suite
 }
-
 func test_adamw_optimizer() test_result {
     start := get_timestamp()
     optimizer := adamw_optimizer{
@@ -320,7 +302,6 @@ func test_adamw_optimizer() test_result {
         duration_ms: (get_timestamp() - start) * 1000,
     }
 }
-
 func test_learning_rate_schedule() test_result {
     start := get_timestamp()
     cfg := training_config{
@@ -339,7 +320,6 @@ func test_learning_rate_schedule() test_result {
         duration_ms: (get_timestamp() - start) * 1000,
     }
 }
-
 func run_integration_tests() test_suite {
     suite := test_suite{name: "Integration", results: make([]test_result, 0)}
     suite.results = append(suite.results, test_end_to_end_training_step())
@@ -348,14 +328,12 @@ func run_integration_tests() test_suite {
     print_test_suite_results(&suite)
     suite
 }
-
 func run_industrial_training_tests() test_suite {
     suite := test_suite{name: "Industrial Training", results: make([]test_result, 0)}
     suite.results = append(suite.results, test_industrial_training_smoke())
     print_test_suite_results(&suite)
     suite
 }
-
 func test_end_to_end_training_step() test_result {
     start := get_timestamp()
     cfg := training_config{
@@ -384,7 +362,6 @@ func test_end_to_end_training_step() test_result {
         duration_ms: (get_timestamp() - start) * 1000,
     }
 }
-
 func test_checkpoint_save_load() test_result {
     start := get_timestamp()
     test_result{
@@ -394,7 +371,6 @@ func test_checkpoint_save_load() test_result {
         duration_ms: (get_timestamp() - start) * 1000,
     }
 }
-
 func test_mixed_precision() test_result {
     start := get_timestamp()
     fp32_value := 1.0
@@ -409,7 +385,6 @@ func test_mixed_precision() test_result {
         duration_ms: (get_timestamp() - start) * 1000,
     }
 }
-
 func test_industrial_training_smoke() test_result {
     start := get_timestamp()
     result := industrial_gpt_training.industrial_smoke_training_run()
@@ -425,7 +400,6 @@ func test_industrial_training_smoke() test_result {
         duration_ms: (get_timestamp() - start) * 1000,
     }
 }
-
 func run_performance_tests() {
     println("\n📈 Performance Benchmarks")
     println("=" * 70)
@@ -433,7 +407,6 @@ func run_performance_tests() {
     benchmark_communication_bandwidth()
     benchmark_model_inference()
 }
-
 func benchmark_gpu_throughput() {
     println("\nGPU Throughput Benchmark:")
     ctx, _ := init_cuda_context(0)
@@ -450,14 +423,12 @@ func benchmark_gpu_throughput() {
     cuda_free(ctx, "throughput_bench")
     cleanup_cuda_context(ctx)
 }
-
 func benchmark_communication_bandwidth() {
     println("\nCommunication Bandwidth (single GPU):")
     printf("  PCIe Theoretical: 32 GB/s (Gen4)\n")
     printf("  PCIe Theoretical: 64 GB/s (Gen5)\n")
     printf("  NVLink Theoretical: 900 GB/s (H100)\n")
 }
-
 func benchmark_model_inference() {
     println("\nModel Inference Benchmark:")
     cfg := transformer_config{
@@ -484,7 +455,6 @@ func benchmark_model_inference() {
     printf("  Time per inference (batch=1, seq=1): %.2f ms\n", time_per_inference)
     cleanup_cuda_context(ctx)
 }
-
 func print_test_suite_results(test_suite suite) {
     println("\n" + "=" * 70)
     printf("📋 %s\n", suite.name)
@@ -507,22 +477,16 @@ func print_test_suite_results(test_suite suite) {
     }
     printf("\nResults: %d passed, %d failed\n", suite.num_passed, suite.num_failed)
 }
-
 func get_timestamp() float64 {
     0.0
 }
-
 func abs(float x) float {
     if x < 0 {
         return -x
     }
     x
 }
-
 func cast_to_bf16(float x) float { x }
-
 func cast_to_fp32(float x) float { x }
-
 func printf(string fmt, ...any args) {}
-
 func println(string s) {}

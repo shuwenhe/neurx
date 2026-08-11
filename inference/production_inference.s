@@ -1,21 +1,16 @@
 package neurx.inference.simple
-
 func runtime_env_get(string name, string default_value) string {
     default_value
 }
-
 func runtime_file_exists(string path) bool {
     false
 }
-
 func runtime_read_text_file(string path) string {
     ""
 }
-
 func runtime_run_command_output(string command) string {
     ""
 }
-
 func trim(string s) string {
     int i = 0
     while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
@@ -36,7 +31,6 @@ func trim(string s) string {
     }
     out
 }
-
 func int_to_str(int val, int radix) string {
     if val == 0 {
         return "0"
@@ -55,7 +49,6 @@ func int_to_str(int val, int radix) string {
     }
     result
 }
-
 func main() {
     string model_name = trim(runtime_env_get("NEURX_INFER_MODEL_NAME", "llm_s"))
     string device_type = trim(runtime_env_get("NEURX_INFER_DEVICE", "cpu"))

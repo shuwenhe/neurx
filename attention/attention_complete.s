@@ -1,7 +1,6 @@
 package neurx.attention.complete
 use neurx.tensor.{tensor, new, zeros, ones, fill, reshape}
 use neurx.ml.math_ops.{softmax, softmax_backward, scale_tensor, add_tensors, matmul_2d, transpose_2d}
-
 struct attention_cache {
     tensor Q
     tensor K
@@ -14,7 +13,6 @@ struct attention_cache {
     tensor scores
     tensor attention_weights
 }
-
 struct multihead_attention_state {
     int num_heads
     int d_model
@@ -37,7 +35,6 @@ struct multihead_attention_state {
     tensor grad_b_v
     tensor grad_b_o
 }
-
 func xavier_init_attention(int in_dim, int out_dim) tensor {
     float limit = sqrt(6.0 / float_from_int(in_dim + out_dim))
     int total = in_dim * out_dim
@@ -56,7 +53,6 @@ func xavier_init_attention(int in_dim, int out_dim) tensor {
         is_parameter: true,
     }
 }
-
 func zero_bias_attention(int dim) tensor {
     []float data = fill(dim, 0.0)
     tensor {
@@ -67,7 +63,6 @@ func zero_bias_attention(int dim) tensor {
         is_parameter: true,
     }
 }
-
 func init_multihead_attention(int num_heads, int d_model) multihead_attention_state {
     if d_model % num_heads != 0 {
         panic("d_model must be divisible by num_heads")
@@ -96,18 +91,15 @@ func init_multihead_attention(int num_heads, int d_model) multihead_attention_st
         grad_b_o: zeros([d_model]),
     }
 }
-
 func split_heads(tensor X, int num_heads, int batch_size, int seq_len) tensor {
     int head_dim = X.shape[1] / num_heads
     int total_tokens = batch_size * seq_len
     reshape(X, [total_tokens * num_heads, head_dim])
 }
-
 func merge_heads(tensor X, int num_heads, int batch_size, int seq_len) tensor {
     int d_model = X.shape[1] * num_heads
     reshape(X, [batch_size * seq_len, d_model])
 }
-
 func linear_forward(tensor X, tensor W, tensor b) tensor {
     int rank = len(X.shape)
     int leading = 1
@@ -125,7 +117,6 @@ func linear_forward(tensor X, tensor W, tensor b) tensor {
     }
     output
 }
-
 func scaled_dot_product_attention(tensor Q, tensor K, tensor V, float scale) tensor {
     tensor K_T = transpose_2d(K)
     tensor scores = matmul_2d(Q, K_T)
@@ -134,7 +125,6 @@ func scaled_dot_product_attention(tensor Q, tensor K, tensor V, float scale) ten
     tensor output = matmul_2d(attention_weights, V)
     output
 }
-
 func multihead_attention_forward(multihead_attention_state state, tensor X) multihead_attention_state {
     tensor Q = linear_forward(X, state.W_Q, state.b_Q)
     tensor K = linear_forward(X, state.W_K, state.b_K)
@@ -171,7 +161,6 @@ func multihead_attention_forward(multihead_attention_state state, tensor X) mult
     state.cache.V = V
     state
 }
-
 func multihead_attention_backward(
     multihead_attention_state state,
     tensor grad_output,
@@ -216,11 +205,9 @@ func multihead_attention_backward(
     )
     (state, grad_input)
 }
-
 func float_from_int(int x) float {
     0.0 + x
 }
-
 func sum_columns(tensor X) tensor {
     int cols = X.shape[1]
     []float out = []float{cap: cols}
@@ -245,21 +232,18 @@ func sum_columns(tensor X) tensor {
         grad: none,
     }
 }
-
 func batch_size_of(tensor X) int {
     if len(X.shape) >= 1 {
         return X.shape[0]
     }
     1
 }
-
 func seq_len_of(tensor X) int {
     if len(X.shape) >= 2 {
         return X.shape[1]
     }
     1
 }
-
 func sqrt(float x) float {
     if x <= 0.0 { return 0.0 }
     float y = x
@@ -270,7 +254,6 @@ func sqrt(float x) float {
     }
     y
 }
-
 func panic(string msg) {
     println("ERROR: " + msg)
 }

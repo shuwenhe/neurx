@@ -1,5 +1,4 @@
 module rag_system
-
 struct retrieval_system_config {
     vector_db_backend: string = "faiss"
     vector_dim: int = 768
@@ -25,7 +24,6 @@ struct retrieval_system_config {
     max_context_tokens: int = 4096
     citation_format: string = "[doc{index}]"
 }
-
 struct document_chunk {
     id: string
     content: string
@@ -34,7 +32,6 @@ struct document_chunk {
     chunk_index: int
     token_count: int
 }
-
 struct document_metadata {
     source_id: string
     source_path: string?
@@ -49,7 +46,6 @@ struct document_metadata {
     section?: string
     relevance_score?: float
 }
-
 struct search_result {
     chunks: list<document_chunk>
     scores: list<float>
@@ -57,7 +53,6 @@ struct search_result {
     expanded_query: string?
     retrieval_metadata: retrieval_metadata
 }
-
 struct retrieval_metadata {
     total_scanned: int
     total_returned: int
@@ -79,13 +74,11 @@ interface vector_db_interface {
     clear()
     get_status()
 }
-
 struct search_result_item {
     chunk_id: string
     score: float
     metadata: document_metadata
 }
-
 struct dbstatus {
     total_documents: int
     index_type: string
@@ -93,7 +86,6 @@ struct dbstatus {
     is_initialized: bool
     last_updated: float
 }
-
 class in_memory_vector_db implements vector_db_interface {
     config: retrieval_system_config
     embeddings: map<str, tensor>
@@ -184,7 +176,6 @@ class in_memory_vector_db implements vector_db_interface {
         }
     }
 }
-
 class faiss_vector_db implements vector_db_interface {
     config: retrieval_system_config
     index: any
@@ -329,7 +320,6 @@ class faiss_vector_db implements vector_db_interface {
         }
     }
 }
-
 class embedding_service {
     model_name: string
     model: any
@@ -609,7 +599,6 @@ Expanded queries:
         return expanded[:num]
     }
 }
-
 struct query_expansion_result {
     original: string
     expanded: list<string>
@@ -689,7 +678,6 @@ class b_m_25_retriever {
             .filter(t => t.length >= 2)
     }
 }
-
 struct bm25_result {
     chunk_id: string
     score: float
@@ -738,7 +726,6 @@ class cross_encoder_reranker {
         return results
     }
 }
-
 struct reranked_result {
     chunk: document_chunk
     rerank_score: float
@@ -832,7 +819,6 @@ class hybrid_fusion_engine {
         return this._weighted_average_fusion(vector_results, bm25_results, top_k)
     }
 }
-
 struct fused_result {
     chunk_id: string
     fused_score: float
@@ -1028,7 +1014,6 @@ class retrieval_engine {
         }
     }
 }
-
 struct ingestion_report {
     documents_ingested: int
     chunks_created: int
@@ -1036,7 +1021,6 @@ struct ingestion_report {
     processing_time_ms: float
     db_status: dbstatus
 }
-
 struct rag_statistics {
     total_documents: int
     db_status: dbstatus

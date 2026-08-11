@@ -1,10 +1,8 @@
 package neurx.shard.shard_wikipedia
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output}
-
 func string_char(int c) string {
     string(c)
 }
-
 func trim(string s) string {
     var begin = 0
     while begin < len(s) {
@@ -32,7 +30,6 @@ func trim(string s) string {
     }
     out
 }
-
 func shell_escape(string s) string {
     var out = "'"
     var i = 0
@@ -48,41 +45,33 @@ func shell_escape(string s) string {
     out = out + "'"
     out
 }
-
 func get_neurx_home() string {
     runtime_env_get("NEURX_HOME", ".")
 }
-
 func get_input_file() string {
     var neurx_home = get_neurx_home()
     var dataset_root = neurx_home + "/dataset/pretrain"
     runtime_env_get("ENWIKI_BZ2_FILE", dataset_root + "/raw/enwiki-latest-pages-articles.xml.bz2")
 }
-
 func get_output_dir() string {
     var neurx_home = get_neurx_home()
     var dataset_root = neurx_home + "/dataset/pretrain"
     runtime_env_get("ENWIKI_SHARD_DIR", dataset_root + "/shard")
 }
-
 func get_manifest_file() string {
     var neurx_home = get_neurx_home()
     var dataset_root = neurx_home + "/dataset/pretrain"
     runtime_env_get("ENWIKI_MANIFEST_FILE", dataset_root + "/manifest.json")
 }
-
 func get_docs_per_shard() string {
     runtime_env_get("DOCS_PER_SHARD", "5000")
 }
-
 func emit_progress(string message) {
     runtime_run_command_output("printf '%s\\n' " + shell_escape(message) + " >&2")
 }
-
 func get_max_pages() string {
     runtime_env_get("MAX_PAGES", "0")
 }
-
 func main() {
     println("")
     println("[*] NeurX Wikipedia Shard Processing")

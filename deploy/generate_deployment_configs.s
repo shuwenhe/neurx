@@ -3,7 +3,6 @@ use std.io
 use std.strings
 use std.path
 use std.env
-
 struct deployment_config {
     cluster_name: string
     num_nodes: i32
@@ -14,7 +13,6 @@ struct deployment_config {
     learning_rate: f64
     warmup_steps: i32
 }
-
 struct gpu_config {
     device_id: i32
     device_name: string
@@ -22,7 +20,6 @@ struct gpu_config {
     total_memory: i64
     available_memory: i64
 }
-
 func generate_slurm_script(config: deployment_config, output_path: string) bool {
     let num_nodes = config.num_nodes
     let gpus_per_node = config.gpus_per_node
@@ -69,7 +66,6 @@ echo "Training completed!"
     println("Generated SLURM script: " + output_path)
     return true
 }
-
 func generate_docker_compose(config: deployment_config, output_path: string) bool {
     let num_nodes = config.num_nodes
     let gpus_per_node = config.gpus_per_node
@@ -116,7 +112,6 @@ networks:
     println("Generated Docker Compose: " + output_path)
     return true
 }
-
 func generate_kubernetes_deployment(config: deployment_config, output_path: string) bool {
     let num_nodes = config.num_nodes
     let gpus_per_node = config.gpus_per_node
@@ -249,7 +244,6 @@ spec:
     println("Generated Kubernetes manifest: " + output_path)
     return true
 }
-
 func generate_cluster_config(config: deployment_config, output_path: string) bool {
     let total_batch = config.batch_size_per_gpu * config.num_nodes * 4
     let config_json = `{
@@ -294,7 +288,6 @@ func generate_cluster_config(config: deployment_config, output_path: string) boo
     println("Generated cluster config: " + output_path)
     return true
 }
-
 func main() {
     println("")
     println("╔" + strings.repeat("═", 62) + "╗")

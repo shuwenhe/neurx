@@ -1923,7 +1923,10 @@ INFERENCE_FEATURE_GAP_S_MODULES := \
 	inference/advanced/pooling.s \
 	inference/api/openai_protocol.s \
 	inference/metrics/observability.s \
-	inference/runtime/backend_registry.s
+	inference/runtime/backend_registry.s \
+	inference/cache/block_manager.s \
+	inference/scheduler/vllm_scheduler.s \
+	inference/runtime/engine_lifecycle.s
 inference-feature-gap-check:
 	@mkdir -p artifacts/build/inference_feature_gap
 	@set -e; for source in $(INFERENCE_FEATURE_GAP_S_MODULES); do \
@@ -1931,6 +1934,8 @@ inference-feature-gap-check:
 	done
 	@"$(S_INFERENCE_CHECK_COMPILER)" ir tests/inference_feature_gap_test.s \
 		-o artifacts/build/inference_feature_gap/inference_feature_gap_test.ir
+	@"$(S_INFERENCE_CHECK_COMPILER)" ir tests/vllm_industrial_core_test.s \
+		-o artifacts/build/inference_feature_gap/vllm_industrial_core_test.ir
 inference-runtime-test:
 	@mkdir -p artifacts/build/inference_runtime
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
