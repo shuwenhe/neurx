@@ -14,6 +14,8 @@ int neurx_cuda_memcpy_htod(void* dst, const void* src, size_t size);
 int neurx_cuda_memcpy_dtoh(void* dst, const void* src, size_t size);
 int neurx_cuda_memcpy_dtod(void* dst, const void* src, size_t size);
 int neurx_cuda_get_memory_info(size_t* free_bytes, size_t* total_bytes);
+int64_t neurx_cuda_get_free_memory_bytes();
+int64_t neurx_cuda_get_total_memory_bytes();
 void* neurx_cublas_create();
 int neurx_cublas_destroy(void* handle);
 int neurx_cublas_sgemm(void* handle,

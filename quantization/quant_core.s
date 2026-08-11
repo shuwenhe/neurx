@@ -8,7 +8,6 @@ func quant_granularity_tensor() string { "per_tensor" }
 
 func quant_granularity_group() string { "per_group" }
 
-
 struct quantization_config {
     string quant_type
     string granularity

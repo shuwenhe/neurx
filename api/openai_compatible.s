@@ -3,11 +3,17 @@ package neurx.api.openai_compatible
 use neurx.inference.api.openai_protocol
 
 func api_route_unknown() int { 0 }
+
 func api_route_health() int { 1 }
+
 func api_route_models() int { 2 }
+
 func api_route_chat() int { 3 }
+
 func api_route_completion() int { 4 }
+
 func api_route_embeddings() int { 5 }
+
 func api_route_metrics() int { 6 }
 
 struct production_api_config {
@@ -210,16 +216,17 @@ func api_chat_completion_body(openai_request request, string generated_text, str
     string escaped_model = neurx.inference.api.openai_protocol.openai_json_escape(request.model)
     string escaped_text = neurx.inference.api.openai_protocol.openai_json_escape(generated_text)
     string escaped_finish = neurx.inference.api.openai_protocol.openai_json_escape(finish_reason)
-    "{\"id\":\"" + escaped_id + "\",\"object\":\"chat.completion\",\"model\":\"" + escaped_model + "\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"" + escaped_text + "\"},\"finish_reason\":\"" + escaped_finish + "\"}],\"usage\":{\"prompt_tokens\":" + int_to_str(prompt_tokens) + ",\"completion_tokens\":" + int_to_str(completion_tokens) + ",\"total_tokens\":" + int_to_str(prompt_tokens + completion_tokens) + "}}"
+    "{\"id\":\"" + escaped_id + "\",\"object\":\"chat.completion\",\"model\":\"" + escaped_model + "\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"" + escaped_text + "\"},\"finish_reason\":\"" + escaped_finish + "\"}],\"usage\":{\"prompt_tokens\":" + neurx.inference.api.openai_protocol.int_to_str(prompt_tokens) + ",\"completion_tokens\":" + neurx.inference.api.openai_protocol.int_to_str(completion_tokens) + ",\"total_tokens\":" + neurx.inference.api.openai_protocol.int_to_str(prompt_tokens + completion_tokens) + "}}"
 }
 
 func api_complete(openai_request request, string generated_text, string finish_reason, int prompt_tokens, int completion_tokens) production_api_response {
     if request.stream {
         string body = neurx.inference.api.openai_protocol.openai_chat_chunk(request.request_id, request.model, generated_text, finish_reason)
-        body = body + neurx.inference.api.openai_protocol.openai_done_event()
+        body = body + "data: [DONE]\n\n"
         return api_response(200, "text/event-stream", body, true)
     }
-    api_response(200, "application/json", api_chat_completion_body(request, generated_text, finish_reason, prompt_tokens, completion_tokens), false)
+    string completion_body = api_chat_completion_body(request, generated_text, finish_reason, prompt_tokens, completion_tokens)
+    api_response(200, "application/json", completion_body, false)
 }
 
 func api_contract_valid() bool {

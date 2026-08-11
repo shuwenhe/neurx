@@ -1,308 +1,309 @@
 package neurx.distributed.rank_manager
 
-struct rank_config {
+extern func neurx_nccl_init_rank(int rank, int world_size, int local_rank) int64
+extern func neurx_nccl_destroy(int64 communicator) int
+extern func neurx_nccl_all_reduce_f32(int64 communicator, int64 send_pointer, int64 receive_pointer, int count, int operation, int64 stream) int
+extern func neurx_nccl_all_gather_f32(int64 communicator, int64 send_pointer, int64 receive_pointer, int count, int64 stream) int
+extern func neurx_nccl_reduce_scatter_f32(int64 communicator, int64 send_pointer, int64 receive_pointer, int count, int operation, int64 stream) int
+extern func neurx_nccl_broadcast_f32(int64 communicator, int64 pointer, int count, int root, int64 stream) int
+extern func neurx_nccl_barrier(int64 communicator, int64 stream) int
+
+func group_world() int { 0 }
+
+func group_tensor_parallel() int { 1 }
+
+func group_pipeline_parallel() int { 2 }
+
+func group_data_parallel() int { 3 }
+
+func group_expert_parallel() int { 4 }
+
+func reduce_sum() int { 0 }
+
+func reduce_product() int { 1 }
+
+func reduce_maximum() int { 2 }
+
+func reduce_minimum() int { 3 }
+
+struct parallel_topology {
+    int tensor_parallel_size
+    int pipeline_parallel_size
+    int data_parallel_size
+    int expert_parallel_size
     int world_size
-    int rank
-    int local_rank
-    int master_port
-    string master_addr
-    string backend
 }
 
-struct process_group {
-    int group_id
-    int world_size
-    int rank
+struct rank_coordinates {
+    int global_rank
+    int local_rank
+    int tensor_parallel_rank
+    int pipeline_parallel_rank
+    int data_parallel_rank
+    int expert_parallel_rank
+}
+
+struct rank_group {
+    int kind
     []int ranks
-    string backend
+    int rank_in_group
+    int64 communicator
     bool initialized
 }
 
 struct distributed_context {
-    rank_config config
-    []process_group groups
-    int default_group_id
+    parallel_topology topology
+    rank_coordinates coordinates
+    string backend
+    rank_group world_group
+    rank_group tensor_group
+    rank_group pipeline_group
+    rank_group data_group
+    rank_group expert_group
     bool initialized
-    int iteration_count
+    string error_message
 }
 
-struct rank_synchronization {
-    int barrier_count
-    int broadcast_count
-    int allreduce_count
-    int allgather_count
+struct distributed_collective_result {
+    distributed_context context
+    bool success
+    int status_code
+    string error_message
 }
 
-func rank_init_from_env() rank_config {
-    rank_config {
-        world_size: 1,
-        rank: 0,
-        local_rank: 0,
-        master_port: 29500,
-        master_addr: "localhost",
-        backend: "nccl",
-    }
+func distributed_remainder(int value, int divisor) int {
+    value - (value / divisor) * divisor
 }
 
-func distributed_context_init(rank_config cfg) distributed_context {
-    []process_group groups = []process_group{}
-
-    process_group default_group = process_group {
-        group_id: 0,
-        world_size: cfg.world_size,
-        rank: cfg.rank,
-        ranks: make_rank_list(cfg.world_size),
-        backend: cfg.backend,
-        initialized: true,
-    }
-
-    groups = append_group(groups, default_group)
-
-    distributed_context {
-        config: cfg,
-        groups: groups,
-        default_group_id: 0,
-        initialized: true,
-        iteration_count: 0,
-    }
+func normalize_parallel_topology(parallel_topology topology) parallel_topology {
+    if topology.tensor_parallel_size <= 0 { topology.tensor_parallel_size = 1 }
+    if topology.pipeline_parallel_size <= 0 { topology.pipeline_parallel_size = 1 }
+    if topology.data_parallel_size <= 0 { topology.data_parallel_size = 1 }
+    if topology.expert_parallel_size <= 0 { topology.expert_parallel_size = 1 }
+    topology.world_size = topology.tensor_parallel_size * topology.pipeline_parallel_size * topology.data_parallel_size
+    topology
 }
 
-func get_tensor_parallel_rank(distributed_context ctx) int {
-    ctx.config.rank
+func parallel_topology_valid(parallel_topology topology) bool {
+    if topology.tensor_parallel_size <= 0 || topology.pipeline_parallel_size <= 0 || topology.data_parallel_size <= 0 || topology.expert_parallel_size <= 0 { return false }
+    if topology.world_size != topology.tensor_parallel_size * topology.pipeline_parallel_size * topology.data_parallel_size { return false }
+    int expert_domain = topology.tensor_parallel_size * topology.data_parallel_size
+    distributed_remainder(expert_domain, topology.expert_parallel_size) == 0
 }
 
-func get_pipeline_parallel_rank(distributed_context ctx, int num_stages) int {
-    ctx.config.rank / (ctx.config.world_size / num_stages)
+func rank_coordinates_for(parallel_topology topology, int global_rank, int local_rank) rank_coordinates {
+    rank_coordinates coordinates
+    coordinates.global_rank = global_rank
+    coordinates.local_rank = local_rank
+    coordinates.tensor_parallel_rank = -1
+    coordinates.pipeline_parallel_rank = -1
+    coordinates.data_parallel_rank = -1
+    coordinates.expert_parallel_rank = -1
+    if !parallel_topology_valid(topology) || global_rank < 0 || global_rank >= topology.world_size { return coordinates }
+    int model_parallel_size = topology.tensor_parallel_size * topology.pipeline_parallel_size
+    coordinates.data_parallel_rank = global_rank / model_parallel_size
+    int model_rank = global_rank - coordinates.data_parallel_rank * model_parallel_size
+    coordinates.pipeline_parallel_rank = model_rank / topology.tensor_parallel_size
+    coordinates.tensor_parallel_rank = model_rank - coordinates.pipeline_parallel_rank * topology.tensor_parallel_size
+    int expert_linear_rank = coordinates.data_parallel_rank * topology.tensor_parallel_size + coordinates.tensor_parallel_rank
+    coordinates.expert_parallel_rank = distributed_remainder(expert_linear_rank, topology.expert_parallel_size)
+    coordinates
 }
 
-func get_data_parallel_group(distributed_context ctx, int num_model_parallel) process_group {
-    int data_parallel_size = ctx.config.world_size / num_model_parallel
-    int data_parallel_rank = ctx.config.rank / num_model_parallel
-
-    []int group_ranks = []int{}
-    int i = 0
-    while i < data_parallel_size {
-        group_ranks = append_int(group_ranks, data_parallel_rank * data_parallel_size + i)
-        i = i + 1
-    }
-
-    process_group {
-        group_id: 1,
-        world_size: data_parallel_size,
-        rank: ctx.config.rank % data_parallel_size,
-        ranks: group_ranks,
-        backend: ctx.config.backend,
-        initialized: true,
-    }
+func empty_rank_group(int kind) rank_group {
+    rank_group group
+    group.kind = kind
+    group.ranks = []
+    group.rank_in_group = -1
+    group.communicator = i64(0)
+    group.initialized = false
+    group
 }
 
-func distributed_barrier(distributed_context ctx, int group_id) distributed_context {
-    if group_id < 0 || group_id >= ctx.groups.len {
-        return ctx
+func build_world_group(parallel_topology topology, rank_coordinates coordinates) rank_group {
+    rank_group group = empty_rank_group(group_world())
+    int rank = 0
+    while rank < topology.world_size {
+        group.ranks = append(group.ranks, rank)
+        rank = rank + 1
     }
-
-    distributed_context {
-        config: ctx.config,
-        groups: ctx.groups,
-        default_group_id: ctx.default_group_id,
-        initialized: ctx.initialized,
-        iteration_count: ctx.iteration_count + 1,
-    }
+    group.rank_in_group = coordinates.global_rank
+    group.initialized = coordinates.global_rank >= 0
+    group
 }
 
-func distributed_broadcast(
-    distributed_context ctx,
-    []float data,
-    int src_rank,
-    int group_id,
-) []float {
-    if ctx.config.rank == src_rank {
-        return data
+func build_tensor_group(parallel_topology topology, rank_coordinates coordinates) rank_group {
+    rank_group group = empty_rank_group(group_tensor_parallel())
+    if coordinates.tensor_parallel_rank < 0 { return group }
+    int model_parallel_size = topology.tensor_parallel_size * topology.pipeline_parallel_size
+    int base = coordinates.data_parallel_rank * model_parallel_size + coordinates.pipeline_parallel_rank * topology.tensor_parallel_size
+    int rank = 0
+    while rank < topology.tensor_parallel_size {
+        group.ranks = append(group.ranks, base + rank)
+        rank = rank + 1
     }
-
-    data
+    group.rank_in_group = coordinates.tensor_parallel_rank
+    group.initialized = true
+    group
 }
 
-func distributed_allreduce(
-    distributed_context ctx,
-    []float data,
-    string operation,
-    int group_id,
-) []float {
-
-    if operation == "sum" {
-
-        []float result = []float{}
-        int i = 0
-        while i < data.len {
-            result = append_f(result, data[i])
-            i = i + 1
-        }
-        return result
+func build_pipeline_group(parallel_topology topology, rank_coordinates coordinates) rank_group {
+    rank_group group = empty_rank_group(group_pipeline_parallel())
+    if coordinates.pipeline_parallel_rank < 0 { return group }
+    int model_parallel_size = topology.tensor_parallel_size * topology.pipeline_parallel_size
+    int data_base = coordinates.data_parallel_rank * model_parallel_size
+    int stage = 0
+    while stage < topology.pipeline_parallel_size {
+        group.ranks = append(group.ranks, data_base + stage * topology.tensor_parallel_size + coordinates.tensor_parallel_rank)
+        stage = stage + 1
     }
-    data
+    group.rank_in_group = coordinates.pipeline_parallel_rank
+    group.initialized = true
+    group
 }
 
-func distributed_allgather(
-    distributed_context ctx,
-    []float send_data,
-    int group_id,
-) [][]float {
-    [][]float result = [][]float{}
-
-    int i = 0
-    while i < ctx.groups[group_id].world_size {
-        result = append_data(result, send_data)
-        i = i + 1
+func build_data_group(parallel_topology topology, rank_coordinates coordinates) rank_group {
+    rank_group group = empty_rank_group(group_data_parallel())
+    if coordinates.data_parallel_rank < 0 { return group }
+    int model_parallel_size = topology.tensor_parallel_size * topology.pipeline_parallel_size
+    int model_offset = coordinates.pipeline_parallel_rank * topology.tensor_parallel_size + coordinates.tensor_parallel_rank
+    int data_rank = 0
+    while data_rank < topology.data_parallel_size {
+        group.ranks = append(group.ranks, data_rank * model_parallel_size + model_offset)
+        data_rank = data_rank + 1
     }
+    group.rank_in_group = coordinates.data_parallel_rank
+    group.initialized = true
+    group
+}
+
+func build_expert_group(parallel_topology topology, rank_coordinates coordinates) rank_group {
+    rank_group group = empty_rank_group(group_expert_parallel())
+    if coordinates.expert_parallel_rank < 0 { return group }
+    int linear_rank = coordinates.data_parallel_rank * topology.tensor_parallel_size + coordinates.tensor_parallel_rank
+    int expert_group_index = linear_rank / topology.expert_parallel_size
+    int member = 0
+    while member < topology.expert_parallel_size {
+        int member_linear_rank = expert_group_index * topology.expert_parallel_size + member
+        int member_data_rank = member_linear_rank / topology.tensor_parallel_size
+        int member_tensor_rank = member_linear_rank - member_data_rank * topology.tensor_parallel_size
+        int model_parallel_size = topology.tensor_parallel_size * topology.pipeline_parallel_size
+        int global_rank = member_data_rank * model_parallel_size + coordinates.pipeline_parallel_rank * topology.tensor_parallel_size + member_tensor_rank
+        group.ranks = append(group.ranks, global_rank)
+        member = member + 1
+    }
+    group.rank_in_group = coordinates.expert_parallel_rank
+    group.initialized = true
+    group
+}
+
+func distributed_context_init(parallel_topology requested, int global_rank, int local_rank, string backend) distributed_context {
+    distributed_context context
+    context.topology = normalize_parallel_topology(requested)
+    context.coordinates = rank_coordinates_for(context.topology, global_rank, local_rank)
+    context.backend = backend
+    context.world_group = build_world_group(context.topology, context.coordinates)
+    context.tensor_group = build_tensor_group(context.topology, context.coordinates)
+    context.pipeline_group = build_pipeline_group(context.topology, context.coordinates)
+    context.data_group = build_data_group(context.topology, context.coordinates)
+    context.expert_group = build_expert_group(context.topology, context.coordinates)
+    context.initialized = parallel_topology_valid(context.topology) && global_rank >= 0 && global_rank < context.topology.world_size && (backend == "nccl" || backend == "gloo" || backend == "hccl")
+    context.error_message = ""
+    if !context.initialized { context.error_message = "invalid distributed configuration" }
+    context
+}
+
+func distributed_group(distributed_context context, int kind) rank_group {
+    if kind == group_tensor_parallel() { return context.tensor_group }
+    if kind == group_pipeline_parallel() { return context.pipeline_group }
+    if kind == group_data_parallel() { return context.data_group }
+    if kind == group_expert_parallel() { return context.expert_group }
+    context.world_group
+}
+
+func distributed_attach_communicator(distributed_context context, int kind, int64 communicator) distributed_context {
+    if kind == group_tensor_parallel() { context.tensor_group.communicator = communicator }
+    else if kind == group_pipeline_parallel() { context.pipeline_group.communicator = communicator }
+    else if kind == group_data_parallel() { context.data_group.communicator = communicator }
+    else if kind == group_expert_parallel() { context.expert_group.communicator = communicator }
+    else { context.world_group.communicator = communicator }
+    context
+}
+
+func new_collective_result(distributed_context context, int status_code, string error_message) distributed_collective_result {
+    distributed_collective_result result
+    result.context = context
+    result.success = status_code == 0
+    result.status_code = status_code
+    result.error_message = error_message
     result
 }
 
-func distributed_reduce_scatter(
-    distributed_context ctx,
-    [][]float data_by_rank,
-    string operation,
-    int group_id,
-) []float {
-    if data_by_rank.len == 0 {
-        return []float{}
-    }
-
-    int data_size = data_by_rank[0].len
-    []float scatter_result = []float{}
-
-    int chunk_size = data_size / ctx.groups[group_id].world_size
-    int start_idx = ctx.config.rank * chunk_size
-    int end_idx = start_idx + chunk_size
-
-    int i = start_idx
-    while i < end_idx && i < data_size {
-        scatter_result = append_f(scatter_result, 0.0)
-        i = i + 1
-    }
-
-    scatter_result
+func distributed_collective_ready(distributed_context context, int kind, int count) bool {
+    rank_group group = distributed_group(context, kind)
+    context.initialized && context.backend == "nccl" && group.initialized && group.communicator != i64(0) && count > 0
 }
 
-func distributed_send(
-    []float data,
-    int dst_rank,
-    int tag,
-) bool {
+func distributed_all_reduce_f32(distributed_context context, int kind, int64 send_pointer, int64 receive_pointer, int count, int operation, int64 stream) distributed_collective_result {
+    if !distributed_collective_ready(context, kind, count) || send_pointer == i64(0) || receive_pointer == i64(0) {
+        return new_collective_result(context, -1, "all-reduce is not ready")
+    }
+    int status = neurx_nccl_all_reduce_f32(distributed_group(context, kind).communicator, send_pointer, receive_pointer, count, operation, stream)
+    string message = ""
+    if status != 0 { message = "NCCL all-reduce failed" }
+    new_collective_result(context, status, message)
+}
 
+func distributed_all_gather_f32(distributed_context context, int kind, int64 send_pointer, int64 receive_pointer, int count, int64 stream) distributed_collective_result {
+    if !distributed_collective_ready(context, kind, count) || send_pointer == i64(0) || receive_pointer == i64(0) {
+        return new_collective_result(context, -1, "all-gather is not ready")
+    }
+    int status = neurx_nccl_all_gather_f32(distributed_group(context, kind).communicator, send_pointer, receive_pointer, count, stream)
+    string message = ""
+    if status != 0 { message = "NCCL all-gather failed" }
+    new_collective_result(context, status, message)
+}
+
+func distributed_reduce_scatter_f32(distributed_context context, int kind, int64 send_pointer, int64 receive_pointer, int count, int operation, int64 stream) distributed_collective_result {
+    if !distributed_collective_ready(context, kind, count) || send_pointer == i64(0) || receive_pointer == i64(0) {
+        return new_collective_result(context, -1, "reduce-scatter is not ready")
+    }
+    int status = neurx_nccl_reduce_scatter_f32(distributed_group(context, kind).communicator, send_pointer, receive_pointer, count, operation, stream)
+    string message = ""
+    if status != 0 { message = "NCCL reduce-scatter failed" }
+    new_collective_result(context, status, message)
+}
+
+func distributed_broadcast_f32(distributed_context context, int kind, int64 pointer, int count, int root, int64 stream) distributed_collective_result {
+    rank_group group = distributed_group(context, kind)
+    if !distributed_collective_ready(context, kind, count) || pointer == i64(0) || root < 0 || root >= len(group.ranks) {
+        return new_collective_result(context, -1, "broadcast is not ready")
+    }
+    int status = neurx_nccl_broadcast_f32(group.communicator, pointer, count, root, stream)
+    string message = ""
+    if status != 0 { message = "NCCL broadcast failed" }
+    new_collective_result(context, status, message)
+}
+
+func distributed_barrier(distributed_context context, int kind, int64 stream) distributed_collective_result {
+    rank_group group = distributed_group(context, kind)
+    if !context.initialized || !group.initialized || group.communicator == i64(0) {
+        return new_collective_result(context, -1, "barrier is not ready")
+    }
+    int status = neurx_nccl_barrier(group.communicator, stream)
+    string message = ""
+    if status != 0 { message = "NCCL barrier failed" }
+    new_collective_result(context, status, message)
+}
+
+func distributed_topology_contract_valid(parallel_topology requested) bool {
+    parallel_topology topology = normalize_parallel_topology(requested)
+    if !parallel_topology_valid(topology) { return false }
+    int rank = 0
+    while rank < topology.world_size {
+        rank_coordinates coordinates = rank_coordinates_for(topology, rank, rank)
+        if coordinates.global_rank != rank || coordinates.tensor_parallel_rank < 0 || coordinates.pipeline_parallel_rank < 0 || coordinates.data_parallel_rank < 0 || coordinates.expert_parallel_rank < 0 { return false }
+        rank = rank + 1
+    }
     true
-}
-
-func distributed_recv(
-    []float buffer,
-    int src_rank,
-    int tag,
-) []float {
-
-    buffer
-}
-
-func tensor_parallel_matmul_output(
-    distributed_context ctx,
-    [][]float A,
-    [][]float B,
-) [][]float {
-
-    int rank = ctx.config.rank
-    int world_size = ctx.config.world_size
-
-    int num_rows = A.len
-    int num_cols = B[0].len / world_size
-
-    [][]float local_output = [][]float{}
-    local_output
-}
-
-func pipeline_parallel_forward(
-    distributed_context ctx,
-    []float input,
-    int num_stages,
-) []float {
-    int stage = get_pipeline_parallel_rank(ctx, num_stages)
-
-    []float activation = input
-    if stage > 0 {
-        activation = distributed_recv(activation, stage - 1, 0)
-    }
-
-    if stage < num_stages - 1 {
-        distributed_send(activation, stage + 1, 0)
-    }
-
-    activation
-}
-
-func make_rank_list(int world_size) []int {
-    []int ranks = []int{}
-    int i = 0
-    while i < world_size {
-        ranks = append_int(ranks, i)
-        i = i + 1
-    }
-    ranks
-}
-
-func append_group([]process_group groups, process_group g) []process_group {
-    new_groups := make_groups(groups.len + 1)
-    int i = 0
-    while i < groups.len {
-        new_groups[i] = groups[i]
-        i = i + 1
-    }
-    new_groups[groups.len] = g
-    new_groups
-}
-
-func append_int([]int slice, int elem) []int {
-    new_slice := make_int(slice.len + 1)
-    int i = 0
-    while i < slice.len {
-        new_slice[i] = slice[i]
-        i = i + 1
-    }
-    new_slice[slice.len] = elem
-    new_slice
-}
-
-func append_f([]float slice, float elem) []float {
-    new_slice := make_f(slice.len + 1)
-    int i = 0
-    while i < slice.len {
-        new_slice[i] = slice[i]
-        i = i + 1
-    }
-    new_slice[slice.len] = elem
-    new_slice
-}
-
-func append_data([][]float data, []float row) [][]float {
-    new_data := make_data(data.len + 1)
-    int i = 0
-    while i < data.len {
-        new_data[i] = data[i]
-        i = i + 1
-    }
-    new_data[data.len] = row
-    new_data
-}
-
-func make_groups(int len) []process_group {
-    []process_group{}
-}
-
-func make_int(int len) []int {
-    []int{}
-}
-
-func make_f(int len) []float {
-    []float{}
-}
-
-func make_data(int len) [][]float {
-    [][]float{}
 }
