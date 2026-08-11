@@ -9,6 +9,7 @@ struct kv_cache_block {
     bool pending_free
     int generation
 }
+
 struct request_block_table {
     string request_id
     []int block_ids
@@ -16,6 +17,7 @@ struct request_block_table {
     int computed_tokens
     int preemptions
 }
+
 struct block_manager_state {
     int block_size
     int total_blocks
@@ -30,6 +32,7 @@ struct block_manager_state {
     int evictions
     int allocation_failures
 }
+
 struct block_allocation_result {
     block_manager_state state
     request_block_table table
@@ -37,6 +40,7 @@ struct block_allocation_result {
     bool success
     string error_message
 }
+
 struct prefix_match_result {
     block_manager_state state
     request_block_table table
@@ -44,6 +48,7 @@ struct prefix_match_result {
     int matched_blocks
     bool success
 }
+
 struct block_reset_result {
     block_manager_state state
     bool success
