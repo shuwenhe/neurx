@@ -139,15 +139,18 @@ func forward(
             cfg.softmax_scale
         )
     else:
-        attn_output, attn_weights = _standard_attention_forward(
+        tuple[context, weights] = _standard_attention_forward(
             query_states,
             key_states,
             value_states,
             attention_mask,
             cfg.softmax_scale,
             cfg.attention_dropout,
-            output_attentions
+            output_attentions,
+            false
         )
+        attn_output = context
+        attn_weights = weights
     timer.stop("attention_compute")
     timer.start("output_projection")
     attn_output = attn_output.transpose(1, 2).contiguous().view(
@@ -168,13 +171,14 @@ func _standard_attention_forward(
     option[tensor] mask,
     float scale,
     float dropout_p,
-    bool return_attn_weights
+    bool return_attn_weights,
+    bool is_training
 ) {
     tensor attn_scores = matmul(query_states, key_states.transpose(-2, -1)) * scale
     if mask != none:
         attn_scores = attn_scores + mask
     tensor attn_probs = softmax(attn_scores, dim=-1)
-    if self.training && dropout_p > 0:
+    if is_training && dropout_p > 0:
         attn_probs = dropout(attn_probs, p=dropout_p)
     tensor context = matmul(attn_probs, value_states)
     option[tensor] weights = return_attn_weights ? some(attn_probs) : none
@@ -234,7 +238,7 @@ func _flash_attention_forward(
         m[:, :, i_start:i_end, :] = mi
     return output
 class mask_builder {
-    static func build_prefix_lm_mask(
+    func build_prefix_lm_mask(
         int batch_size,
         int total_seq_len,
         []int prefix_lengths,
@@ -265,7 +269,7 @@ class mask_builder {
                 mask[b, 0, prefix_len:, :prefix_len] = 0.0
         mask = mask.unsqueeze(0).expand(batch_size, -1, -1, -1)
         return mask
-    static func build_causal_mask(
+    func build_causal_mask(
         int seq_len,
         int kv_seq_len = -1
     ) {
@@ -274,7 +278,7 @@ class mask_builder {
             kv_seq_len = seq_len
         tensor mask = triu(ones(seq_len, kv_seq_len), diagonal=1)
         return mask.unsqueeze(0).unsqueeze(0) * -10000.0
-    static func build_bidirectional_mask(
+    func build_bidirectional_mask(
         int seq_len,
         int kv_seq_len = -1
     ) {
@@ -282,16 +286,15 @@ class mask_builder {
         if kv_seq_len == -1:
             kv_seq_len = seq_len
         return zeros(1, 1, seq_len, kv_seq_len)
-    @staticmethod
-    def combine_masks(
+    func combine_masks(
         tensor base_mask,
         option[tensor] padding_mask,
         int kv_seq_len
     ) {
         """English text mask English text padding mask"""
-        if padding_mask is None:
+        if padding_mask == none:
             return base_mask
-        tensor padding_2d = (1.0 - padding_mask.unsqueeze(1).unsqueeze(2)) * -10000.0
+        tensor padding_2d = (1.0 - padding_mask!.unsqueeze(1).unsqueeze(2)) * -10000.0
         return base_mask + padding_2d
 struct rope_cache {
     tensor cos_vals
@@ -350,7 +353,8 @@ func apply_rotary_emb(
 func apply_rope_scaling(
     tensor freqs,
     int scaling_type,
-    float factor
+    float factor,
+    float base = 10000.0
 ) {
     """
     English text RoPE Scaling English textsupportEnglish text
@@ -364,13 +368,17 @@ func apply_rope_scaling(
         case 1:
             return freqs / factor
         case 2:
-            float base_new = base * ((factor * factor - 1) / (factor ** (2 * (len(freqs) - 1) / (len(freqs) - 1))) ** (1 / (len(freqs) - 1))) ** (len(freqs) - 2) / (len(freqs) - 1)
-            return freqs * (1.0 - log(factor) / log(base) * (arange(len(freqs)) / (len(freqs) - 1)))
+            float log_factor = log(factor)
+            float log_base = log(base)
+            tensor scale = 1.0 - log_factor / log_base
+            return freqs * scale
         case 3:
-            float yarn_beta = 0.1 * log(factor) - 0.1 * log(log(factor))
+            float log_factor = log(factor)
+            float yarn_beta = 0.1 * log_factor - 0.1 * log(max(log_factor, 1e-6))
             float yarn_alpha = factor - 1.0
-            tensor scale = 1.0 + yarn_alpha * freqs / (freqs.max())
-            scale = tanh(scale / yarn_beta) * yarn_beta
+            float max_freq = 1.0
+            tensor scale = 1.0 + yarn_alpha * freqs / max_freq
+            scale = tanh(scale / max(yarn_beta, 1e-6))
             return freqs * scale
         case _:
             return freqs
@@ -379,14 +387,14 @@ func _update_stats(
     int batch_size,
     int seq_len,
     attention_config cfg,
-    timer timer) {
+    ref timer tm) {
     int64 flops_per_head = int64(seq_len) * seq_len * cfg.head_dim * 2
     int64 total_flops = flops_per_head * cfg.num_attention_heads * batch_size
     if cfg.use_gqa:
         int kv_ratio = cfg.num_attention_heads / cfg.num_key_value_heads
         total_flops = total_flops / kv_ratio
     self.stats.total_flops += total_flops
-    self.stats.forward_time_us += timer.get_elapsed_us("attention_forward")
+    self.stats.forward_time_us += tm.get_elapsed_us("attention_forward")
     int mem_per_sample = cfg.hidden_size * seq_len * 4
     mem_per_sample += 3 * cfg.hidden_size * seq_len * 2
     if !cfg.use_flash_attention:
@@ -428,7 +436,8 @@ func test_attention() {
     print(f"   Output shape: {shape(output)}")
     print("✅ Causal attention works!")
     print("\n[Test 3] Testing Prefix-LM attention...")
-    tensor prefix_mask = mask_builder.build_prefix_lm_mask(
+    mask_builder mb = mask_builder{}
+    tensor prefix_mask = mb.build_prefix_lm_mask(
         batch_size=2,
         total_seq_len=64,
         prefix_lengths=[20, 30]
