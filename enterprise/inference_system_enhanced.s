@@ -81,15 +81,15 @@ func inference_enhanced_single(
 
     if updated_sys.config.enable_speculative_decode {
         input_tokens := tokenize_prompt(prompt)
-        
+
         updated_speculative_sys, output_tokens := speculative_inference.speculative_inference_single(
             updated_sys.speculative_sys,
             input_tokens,
             max_new_tokens,
         )
-        
+
         updated_sys.speculative_sys = updated_speculative_sys
-        
+
         output_text := decode_tokens(output_tokens)
         (updated_sys, output_text)
     } else {
@@ -107,7 +107,7 @@ func inference_enhanced_batch(
 
     if updated_sys.config.enable_speculative_decode {
         batch_input_ids := [][]int{}
-        
+
         i := 0
         while i < prompts.len {
             tokens := tokenize_prompt(prompts[i])
@@ -120,7 +120,7 @@ func inference_enhanced_batch(
             batch_input_ids,
             max_new_tokens,
         )
-        
+
         updated_sys.speculative_sys = updated_speculative_sys
 
         i = 0

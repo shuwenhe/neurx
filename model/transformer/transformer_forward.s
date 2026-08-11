@@ -21,6 +21,7 @@ use neurx.model.transformer.position_encoding.{
     apply_rope_position,
     add_position_encoding_to_hidden
 }
+
 struct transformer_forward_config {
     int vocab_size
     int hidden_dim

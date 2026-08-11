@@ -49,6 +49,7 @@ type ragintegration struct {
     cache               map[string][]retrieval_result
     knowledge_base_size int
 }
+
 func (rag *ragintegration) initialize(config retrieval_system_config) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  RAG Integration System                               ║")

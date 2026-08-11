@@ -31,6 +31,7 @@ type memory_estimate struct {
     activation_gb: float
     total_gb: float
 }
+
 func create_7b_config(): large_model_config {
     return large_model_config{
         model_name: "neurx-7b",

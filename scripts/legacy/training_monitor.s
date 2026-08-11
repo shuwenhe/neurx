@@ -22,6 +22,7 @@ type training_monitor struct {
     log_file: string
     update_interval: int
 }
+
 func (tm *training_monitor) init(
     total_steps: int,
     log_file: string,

@@ -13,6 +13,7 @@ enum alert_channel {
     ALERT_CONSOLE,
     ALERT_LOGGER,
 }
+
 struct monitoring_config {
     string experiment_name
     string run_id

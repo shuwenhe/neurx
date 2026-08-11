@@ -53,6 +53,7 @@ type rate_limiter struct {
     current_concurrent  int
     rejected_requests   int64
 }
+
 func (server *apiserver) initialize() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  REST API Service                                     ║")

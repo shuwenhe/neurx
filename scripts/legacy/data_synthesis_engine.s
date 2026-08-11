@@ -44,6 +44,7 @@ type synthesis_quality_stats struct {
     total_generated         int
     passed_quality_filter   int
 }
+
 func (engine *data_synthesis_engine) generate_synthetic_examples() {
     fmt.Println("[DataSynthesis] Generating synthetic examples...")
     tasks := []string{"qa", "writing", "coding", "math", "reasoning", "translation"}

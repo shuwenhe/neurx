@@ -4,6 +4,7 @@ enum rope_scaling_type {
     ROPE_SCALING_NTK
     ROPE_SCALING_YARN
 }
+
 struct rope_scaling_config {
     rope_scaling_type method
     int original_max_seq_len

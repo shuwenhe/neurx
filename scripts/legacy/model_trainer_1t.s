@@ -49,6 +49,7 @@ type training_optimization1_t struct {
     eval_steps: int
     max_grad_norm: float
 }
+
 func create_1t_config(): model_config1_t {
     config := model_config1_t{
         model_name: "neurx-1t",

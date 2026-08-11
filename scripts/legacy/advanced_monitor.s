@@ -39,6 +39,7 @@ type advanced_training_monitor struct {
     convergence_window: int
     convergence_threshold: float
 }
+
 func (atm *advanced_training_monitor) init(
     total_steps: int,
     log_file: string,

@@ -29,6 +29,7 @@ use neurx.model.transformer.transformer_backward.{
     transformer_backward_pass,
     backward_pass_output
 }
+
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0

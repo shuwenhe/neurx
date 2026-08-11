@@ -66,6 +66,7 @@ type bradley_terry_loss struct {
     reward_b            float64
     preference_label    int
 }
+
 func (trainer *reward_model_trainer) load_preference_data(data_path string) {
     fmt.Printf("[Reward model] Loading preference data from %s\n", data_path)
     for i := 0; i < 1000; i++ {

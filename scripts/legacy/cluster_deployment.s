@@ -52,6 +52,7 @@ type job_scheduler struct {
     failed_jobs         []string
     job_queue           []map[string]string
 }
+
 func (manager *cluster_manager) initialize_cluster() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Cluster Deployment & Orchestration System            ║")

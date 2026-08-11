@@ -2,6 +2,7 @@ package neurx.attention.flash_v2
 use neurx.attention.core.{
     attention_config, multi_head_attention_module
 }
+
 struct flash_attn_config {
     int block_q
     int block_kv

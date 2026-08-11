@@ -55,6 +55,7 @@ type inference_stats struct {
     p99_latency         float64
     cache_hit_rate      float64
 }
+
 func (engine *inference_engine) initialize_kv_cache() {
     fmt.Println("[Inference] Initializing KV cache...")
     cache_size := engine.config.max_batch_size *

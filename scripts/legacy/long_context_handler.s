@@ -28,6 +28,7 @@ type cache_stats struct {
     cache_misses            int64
     avg_cache_time          float64
 }
+
 func (encoder *ro_pepositional_encoding) compute_rope_frequencies() []float64 {
     frequencies := make([]float64, encoder.dimensions)
     for i := 0; i < encoder.dimensions; i += 2 {

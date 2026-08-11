@@ -86,6 +86,7 @@ var g_config = &training_config{
 	mixed_precision: "fp16",
 	seed: 42,
 }
+
 func load_config_from_env() {
 	if home := os.Getenv("NEURX_HOME"); home != "" {
 		g_config.data_dir = filepath.Join(home, "dataset", "pretrain")

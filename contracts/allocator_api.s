@@ -7,6 +7,7 @@ enum allocator_strategy {
     async_alloc
     unified_alloc
 }
+
 struct allocation_info {
     device: device
     size: i64

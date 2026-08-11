@@ -5,6 +5,7 @@ use neurx.posttrain.alignment.lora_trainer.{
     start_lora_training, lora_compute_stats, lora_adamw_state,
     init_gaussian, fill_lora, create_lora_linear,
 }
+
 func example_1_basic_lora_finetuning() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ Example 1: Basic LoRA Fine-tuning (Rank-8)             ║")

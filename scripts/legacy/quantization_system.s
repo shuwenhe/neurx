@@ -36,6 +36,7 @@ type quantization_framework struct {
     compression_ratio   float64
     accuracy_loss       float64
 }
+
 func (framework *quantization_framework) calculate_stats(data [][]float64) quantization_stats {
     if len(data) == 0 {
         return quantization_stats{}

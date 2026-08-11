@@ -28,6 +28,7 @@ type lora_adapter struct {
     policy_model original_model
     float64 scaling_factor
 }
+
 func (adapter *lora_adapter) initialize_lora_modules(model policy_model) {
     fmt.Println("[LoRA] Initializing LoRA modules...")
     for layer_idx := 0; layer_idx < model.num_layers; layer_idx++ {

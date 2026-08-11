@@ -10,6 +10,7 @@ type sample struct {
     text: string
     index: i64
 }
+
 func main() {
     io.println("🚀 dataloadEnglish text - Slanguageimplementation")
     io.println("")

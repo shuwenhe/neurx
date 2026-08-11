@@ -9,6 +9,7 @@ use neurx.runtime.io.{
     runtime_time_now,
     runtime_time_elapsed
 }
+
 struct test_result {
     string name
     string category

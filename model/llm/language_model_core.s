@@ -11,6 +11,7 @@ enum neurx_version {
     NEURX_4_LONG
     NEURX_5_2
 }
+
 struct neurx_config {
     neurx_version version
     string name

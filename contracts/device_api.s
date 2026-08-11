@@ -5,6 +5,7 @@ enum device_type {
     metal
     custom
 }
+
 struct cpu_device {
     id: i64
 }

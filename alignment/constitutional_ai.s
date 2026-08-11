@@ -3,6 +3,7 @@ use neurx.model.llm.gpt.{
     model_config, language_model,
     gpt_generate_greedy, gpt_generate_topk
 }
+
 struct constitutional_principle {
     string id
     string critique_request

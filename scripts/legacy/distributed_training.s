@@ -27,6 +27,7 @@ type distributed_process struct {
     grad_buckets: [][]float
     bucket_size: int
 }
+
 func (dp *distributed_process) init_from_env(backend: string) error {
     config := distributed_config{
         backend: backend,

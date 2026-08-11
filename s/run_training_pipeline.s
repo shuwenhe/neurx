@@ -14,6 +14,7 @@ type training_config struct {
     materialize_warmup_steps int
     materialize_corpus_path  string
 }
+
 func setup_training_config(train_bin string) (*training_config, error) {
     script_dir := core.ResolveScriptDir()
     neurx_dir := core.ResolveRelativePath(script_dir, "../neurx")

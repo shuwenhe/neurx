@@ -13,6 +13,7 @@ enum packing_strategy {
     PACKING_BINNING,
     PACKING_SMART_PACKING,
 }
+
 struct dataloader_config {
     []string data_paths
     data_format format

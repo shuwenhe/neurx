@@ -7,6 +7,7 @@ enum parallel_mode {
     PIPELINE_PARALLEL = 3
     HYBRID = 4
 }
+
 struct veomni_config {
     parallel_mode mode
     int world_size

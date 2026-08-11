@@ -15,6 +15,7 @@ enum audio_format {
     MP3
     FLAC
 }
+
 struct image_data {
     format image_format
     width int

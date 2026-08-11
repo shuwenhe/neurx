@@ -9,6 +9,7 @@ enum layout_type {
 type layout interface {
     name() string
 }
+
 struct layout_info {
     layout_type: LayoutType
     strides: []i64
