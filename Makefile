@@ -1926,7 +1926,10 @@ INFERENCE_FEATURE_GAP_S_MODULES := \
 	inference/runtime/backend_registry.s \
 	inference/cache/block_manager.s \
 	inference/scheduler/vllm_scheduler.s \
-	inference/runtime/engine_lifecycle.s
+	inference/runtime/engine_lifecycle.s \
+	inference/runtime/model_manifest.s \
+	inference/runtime/worker_cluster.s \
+	inference/runtime/production_engine.s
 inference-feature-gap-check:
 	@mkdir -p artifacts/build/inference_feature_gap
 	@set -e; for source in $(INFERENCE_FEATURE_GAP_S_MODULES); do \
@@ -1936,6 +1939,10 @@ inference-feature-gap-check:
 		-o artifacts/build/inference_feature_gap/inference_feature_gap_test.ir
 	@"$(S_INFERENCE_CHECK_COMPILER)" ir tests/vllm_industrial_core_test.s \
 		-o artifacts/build/inference_feature_gap/vllm_industrial_core_test.ir
+	@"$(S_INFERENCE_CHECK_COMPILER)" ir tests/model_manifest_test.s \
+		-o artifacts/build/inference_feature_gap/model_manifest_test.ir
+	@"$(S_INFERENCE_CHECK_COMPILER)" ir tests/production_engine_contract_test.s \
+		-o artifacts/build/inference_feature_gap/production_engine_contract_test.ir
 inference-runtime-test:
 	@mkdir -p artifacts/build/inference_runtime
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
