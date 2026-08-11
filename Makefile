@@ -1912,6 +1912,25 @@ numeric-alignment-test:
 	@PYTORCH_PYTHON="$${PYTORCH_PYTHON:-/home/shuwen/venv/bin/python}"; \
 		"$$PYTORCH_PYTHON" tests/numeric_alignment_pytorch.py \
 		artifacts/build/numeric_alignment/numeric_alignment_probe
+.PHONY: inference-feature-gap-check
+S_INFERENCE_CHECK_COMPILER ?= $(firstword $(wildcard $(CURDIR_UNIX)/../../s/bin/s /home/shuwen/s/bin/s) $(S_COMPILER))
+INFERENCE_FEATURE_GAP_S_MODULES := \
+	inference/serve/request_lifecycle.s \
+	inference/advanced/structured_output.s \
+	inference/advanced/tool_parser.s \
+	inference/serve/lora_router.s \
+	inference/serve/disaggregated_runtime.s \
+	inference/advanced/pooling.s \
+	inference/api/openai_protocol.s \
+	inference/metrics/observability.s \
+	inference/runtime/backend_registry.s
+inference-feature-gap-check:
+	@mkdir -p artifacts/build/inference_feature_gap
+	@set -e; for source in $(INFERENCE_FEATURE_GAP_S_MODULES); do \
+		"$(S_INFERENCE_CHECK_COMPILER)" check "$$source"; \
+	done
+	@"$(S_INFERENCE_CHECK_COMPILER)" ir tests/inference_feature_gap_test.s \
+		-o artifacts/build/inference_feature_gap/inference_feature_gap_test.ir
 inference-runtime-test:
 	@mkdir -p artifacts/build/inference_runtime
 	@$(CXX) -O2 -std=c++17 -Wall -Wextra -Werror \
