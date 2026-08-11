@@ -7,11 +7,13 @@ struct tokenizer_stats {
     double cache_hit_rate
     int vocab_size
 }
+
 struct tokenizer_cache_entry {
     []int token_ids
     int length
     long long timestamp
 }
+
 struct tokenizer_manager {
     int vocab_size
     int pad_token_id
@@ -28,6 +30,7 @@ struct tokenizer_manager {
     bool truncate_to_max_length
     int max_sequence_length
 }
+
 func new_tokenizer_manager(int vocab_size) tokenizer_manager {
     tokenizer_manager {
         vocab_size: vocab_size,
@@ -53,6 +56,7 @@ func new_tokenizer_manager(int vocab_size) tokenizer_manager {
         max_sequence_length: 2048,
     }
 }
+
 func encode_sequence(tokenizer_manager mgr, string text) []int {
     []int token_ids = []int{cap: 256}
     int i = 0
@@ -69,6 +73,7 @@ func encode_sequence(tokenizer_manager mgr, string text) []int {
     mgr.stats.total_sequences_processed = mgr.stats.total_sequences_processed + 1
     token_ids
 }
+
 func encode_batch(tokenizer_manager mgr, []string texts) [][]int {
     [][]int batch_tokens = [][]int{cap: len(texts)}
     int i = 0
@@ -78,6 +83,7 @@ func encode_batch(tokenizer_manager mgr, []string texts) [][]int {
     }
     batch_tokens
 }
+
 func decode_sequence(tokenizer_manager mgr, []int token_ids) string {
     string text = ""
     int i = 0
@@ -89,6 +95,7 @@ func decode_sequence(tokenizer_manager mgr, []int token_ids) string {
     }
     text
 }
+
 func decode_batch(tokenizer_manager mgr, [][]int batch_token_ids) []string {
     []string texts = []string{cap: len(batch_token_ids)}
     int i = 0
@@ -98,6 +105,7 @@ func decode_batch(tokenizer_manager mgr, [][]int batch_token_ids) []string {
     }
     texts
 }
+
 func pad_sequences(tokenizer_manager mgr, [][]int sequences, int target_length) [][]int {
     [][]int padded = [][]int{cap: len(sequences)}
     int i = 0
@@ -118,6 +126,7 @@ func pad_sequences(tokenizer_manager mgr, [][]int sequences, int target_length) 
     }
     padded
 }
+
 func create_attention_mask(tokenizer_manager mgr, [][]int sequences) [][]int {
     [][]int masks = [][]int{cap: len(sequences)}
     int i = 0
@@ -138,6 +147,7 @@ func create_attention_mask(tokenizer_manager mgr, [][]int sequences) [][]int {
     }
     masks
 }
+
 func get_statistics(tokenizer_manager mgr) tokenizer_stats {
     long long total_accesses = long(mgr.cache_hits + mgr.cache_misses)
     if total_accesses > 0 {
@@ -148,6 +158,7 @@ func get_statistics(tokenizer_manager mgr) tokenizer_stats {
     }
     mgr.stats
 }
+
 func clear_cache(tokenizer_manager mgr) tokenizer_manager {
     mgr.cache = [string]tokenizer_cache_entry{cap: 50000}
     mgr.cache_memory_used = 0
@@ -155,6 +166,7 @@ func clear_cache(tokenizer_manager mgr) tokenizer_manager {
     mgr.cache_misses = 0
     mgr
 }
+
 func get_special_tokens(tokenizer_manager mgr) [string:int {
     [string:int {
         "pad": mgr.pad_token_id,
@@ -163,6 +175,7 @@ func get_special_tokens(tokenizer_manager mgr) [string:int {
         "unk": mgr.unk_token_id,
     }
 }
+
 func print_tokenizer_info(tokenizer_manager mgr) string {
     string info = "tokenizer Manager Information:\n"
     info

@@ -8,6 +8,7 @@ struct compile_options {
     bool dynamic
     bool debug
 }
+
 struct compiled_module_state {
     string module_name
     compile_options options
@@ -20,11 +21,13 @@ struct compiled_module_state {
     int pass_count
     string cache_key
 }
+
 struct compile_result {
     compiled_module_state state
     bool ok
     platform_error_state error
 }
+
 func new_compile_options() compile_options {
     compile_options {
         backend: "eager",
@@ -34,6 +37,7 @@ func new_compile_options() compile_options {
         debug: false,
     }
 }
+
 func make_compile_result(compiled_module_state state, bool ok, platform_error_state error) compile_result {
     compile_result {
         state: state,
@@ -41,12 +45,15 @@ func make_compile_result(compiled_module_state state, bool ok, platform_error_st
         error: error,
     }
 }
+
 func is_valid_backend(string backend) bool {
     backend == "eager" || backend == "aot"
 }
+
 func is_valid_mode(string mode) bool {
     mode == "default" || mode == "reduce-overhead" || mode == "max-autotune"
 }
+
 func validate_compile_options(compile_options options) platform_error_state {
     if !is_valid_backend(options.backend) {
         return new_configuration_error("compile backend must be one of {eager,aot}")
@@ -56,6 +63,7 @@ func validate_compile_options(compile_options options) platform_error_state {
     }
     clear_error()
 }
+
 func new_compiled_module_state(string module_name, compile_options options) compiled_module_state {
     compiled_module_state {
         module_name: module_name,
@@ -70,6 +78,7 @@ func new_compiled_module_state(string module_name, compile_options options) comp
         cache_key: "",
     }
 }
+
 func pipeline_to_compiled_state(compile_pipeline_state pipeline, string module_name, compile_options options) compiled_module_state {
     compiled_module_state {
         module_name: module_name,
@@ -84,6 +93,7 @@ func pipeline_to_compiled_state(compile_pipeline_state pipeline, string module_n
         cache_key: pipeline.cache_key,
     }
 }
+
 func compile_module(string module_name, compile_options options) compile_result {
     platform_error_state err = validate_compile_options(options)
     compiled_module_state state = new_compiled_module_state(module_name, options)
@@ -101,6 +111,7 @@ func compile_module(string module_name, compile_options options) compile_result 
         make_compile_result(pipeline_to_compiled_state(pipeline, module_name, options), true, clear_error())
     }
 }
+
 func compiled_module_execute(compiled_module_state state) compiled_module_state {
     compile_pipeline_state pipeline = run_compile_execute_pipeline(
         state.module_name,
@@ -123,9 +134,11 @@ func compiled_module_execute(compiled_module_state state) compiled_module_state 
         cache_key: pipeline.cache_key,
     }
 }
+
 func compiled_module_state_dict(compiled_module_state state) compiled_module_state {
     state
 }
+
 func compiled_module_load_state_dict(compiled_module_state state, compiled_module_state other) compiled_module_state {
     other
 }

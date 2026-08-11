@@ -20,6 +20,7 @@ struct log_entry {
     string message
     map[string]any metadata
 }
+
 struct metric_entry {
     int step
     string name

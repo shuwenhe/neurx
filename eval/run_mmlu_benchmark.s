@@ -83,6 +83,7 @@ func main() {
     println("")
     0
 }
+
 func parse_int(string s, int fallback) int {
     if len(s) < 1 { return fallback }
     int i = 0

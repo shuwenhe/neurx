@@ -44,10 +44,12 @@ struct agent_runtime_state {
     string last_observation
     string model_path
 }
+
 func trim_or_empty(string value) string {
     string next = trim(value)
     next
 }
+
 func agent_runtime_observation(string kind, string status, string details) string {
     string obs = kind + ":status=" + status
     if trim(details) != "" {
@@ -55,6 +57,7 @@ func agent_runtime_observation(string kind, string status, string details) strin
     }
     obs
 }
+
 func agent_runtime_finalize_memory(agent_memory_state memory_state, agent_trace_state trace_state) agent_memory_state {
     agent_memory_lookup_result final_result = agent_memory_lookup_long(memory_state, "final_answer")
     if final_result.found && trim(final_result.value) != "" {
@@ -66,9 +69,11 @@ func agent_runtime_finalize_memory(agent_memory_state memory_state, agent_trace_
     }
     agent_memory_write_long(memory_state, "final_answer", fallback)
 }
+
 func agent_runtime_max_repair_attempts() int {
     2
 }
+
 func agent_runtime_repair_attempt_count(agent_memory_state memory_state) int {
     agent_memory_lookup_result count_result = agent_memory_lookup_short(memory_state, "repair_attempt_count")
     if !count_result.found || trim(count_result.value) == "" {
@@ -85,6 +90,7 @@ func agent_runtime_repair_attempt_count(agent_memory_state memory_state) int {
     }
     value
 }
+
 func agent_runtime_clear_repair_state(agent_memory_state memory_state) agent_memory_state {
     agent_memory_state next = memory_state
     next = agent_memory_delete(next, "repair_attempt_count")
@@ -93,6 +99,7 @@ func agent_runtime_clear_repair_state(agent_memory_state memory_state) agent_mem
     next = agent_memory_delete(next, "repair_failure_summary")
     next
 }
+
 func agent_runtime_record_repair_failure(agent_memory_state memory_state, string task, string observation) agent_memory_state {
     int attempts = agent_runtime_repair_attempt_count(memory_state) + 1
     agent_memory_state next = agent_memory_write_short(memory_state, "repair_attempt_count", string(attempts))
@@ -100,6 +107,7 @@ func agent_runtime_record_repair_failure(agent_memory_state memory_state, string
     next = agent_memory_write_short(next, "repair_last_failure_kind", lower(trim(task)))
     next
 }
+
 func agent_runtime_preferred_failure_summary(agent_memory_state memory_state, string task, string observation) string {
     string kind = lower(trim(task))
     agent_memory_lookup_result summary_result = agent_memory_lookup_long(memory_state, "last_" + kind + "_failure_summary")
@@ -112,6 +120,7 @@ func agent_runtime_preferred_failure_summary(agent_memory_state memory_state, st
     }
     observation
 }
+
 func agent_runtime_repair_failure_summary(string task, string failure_summary_source, int attempts, int limit, string reason) string {
     string details = "kind=" + lower(trim(task))
     details = details + ";attempts=" + string(attempts)
@@ -122,6 +131,7 @@ func agent_runtime_repair_failure_summary(string task, string failure_summary_so
     }
     agent_runtime_observation("repair", "failed", details)
 }
+
 func agent_runtime_finish_after_repair_failure(agent_runtime_state state, agent_plan_state next_plan, agent_memory_state memory_state, agent_execute_result result, string input, string failure_summary) agent_runtime_state {
     agent_memory_state final_memory = agent_memory_write_long(memory_state, "repair_failure_summary", failure_summary)
     final_memory = agent_memory_write_long(final_memory, "final_answer", failure_summary)
@@ -177,10 +187,12 @@ func agent_runtime_finish_after_repair_failure(agent_runtime_state state, agent_
     agent_runtime_persist_skill_snapshot(finished_state, ".neurx_skills.snapshot")
     finished_state
 }
+
 func agent_runtime_requires_approval(string task) bool {
     string t = lower(trim(task))
     t == "write" || t == "write_file" || t == "create_file" || t == "mkdir" || t == "create_directory" || t == "delete" || t == "delete_path" || t == "apply_patch" || t == "patch" || t == "code"
 }
+
 func agent_runtime_approval_matches(string granted, string task) bool {
     string g = lower(trim(granted))
     string t = lower(trim(task))
@@ -210,6 +222,7 @@ func agent_runtime_approval_matches(string granted, string task) bool {
     }
     false
 }
+
 func agent_runtime_interrupt_observation(string reason, string action) string {
     string details = "reason=" + reason
     if trim(action) != "" {
@@ -217,6 +230,7 @@ func agent_runtime_interrupt_observation(string reason, string action) string {
     }
     agent_runtime_observation("interrupt", "blocked", details)
 }
+
 func agent_runtime_pending_count(agent_memory_state memory_state) int {
     agent_memory_lookup_result count_result = agent_memory_lookup_short(memory_state, "pending_change_count")
     if !count_result.found || trim(count_result.value) == "" {
@@ -233,6 +247,7 @@ func agent_runtime_pending_count(agent_memory_state memory_state) int {
     }
     value
 }
+
 func agent_runtime_pending_change_path(string action, string raw_input) string {
     agent_action_state parsed = agent_action_parse(raw_input, action)
     string path = trim(parsed.path)
@@ -244,6 +259,7 @@ func agent_runtime_pending_change_path(string action, string raw_input) string {
     }
     ""
 }
+
 func agent_runtime_pending_change_preview(string action, string raw_input) string {
     agent_action_state parsed = agent_action_parse(raw_input, action)
     if action == "write" || action == "write_file" || action == "create_file" || action == "code" {
@@ -260,6 +276,7 @@ func agent_runtime_pending_change_preview(string action, string raw_input) strin
     }
     agent_workspace_clip(raw_input, 180)
 }
+
 func agent_runtime_stage_pending_change(agent_memory_state memory_state, string action, string raw_input) agent_memory_state {
     int count = agent_runtime_pending_count(memory_state)
     string idx = string(count)
@@ -276,6 +293,7 @@ func agent_runtime_stage_pending_change(agent_memory_state memory_state, string 
     next = agent_memory_write_short(next, "pending_change_count", string(count + 1))
     next
 }
+
 func agent_runtime_pending_summary(agent_memory_state memory_state) string {
     int count = agent_runtime_pending_count(memory_state)
     if count <= 0 {
@@ -300,6 +318,7 @@ func agent_runtime_pending_summary(agent_memory_state memory_state) string {
     }
     out
 }
+
 func agent_runtime_apply_staged_change(string action, string raw_input) string {
     agent_action_state parsed = agent_action_parse(raw_input, action)
     if action == "write" || action == "write_file" || action == "create_file" {
@@ -343,6 +362,7 @@ func agent_runtime_apply_staged_change(string action, string raw_input) string {
     }
     agent_runtime_observation("apply_pending_changes", "failed", "action=" + action + ";reason=unsupported")
 }
+
 func agent_runtime_clear_pending_changes(agent_memory_state memory_state) agent_memory_state {
     int count = agent_runtime_pending_count(memory_state)
     agent_memory_state next = memory_state
@@ -357,6 +377,7 @@ func agent_runtime_clear_pending_changes(agent_memory_state memory_state) agent_
     }
     agent_memory_write_short(next, "pending_change_count", "0")
 }
+
 func agent_runtime_apply_pending_changes(agent_memory_state memory_state) agent_workspace_result {
     int count = agent_runtime_pending_count(memory_state)
     if count <= 0 {
@@ -395,6 +416,7 @@ func agent_runtime_apply_pending_changes(agent_memory_state memory_state) agent_
         resolved_path: "",
     }
 }
+
 func agent_runtime_with_interrupt(agent_runtime_state state, agent_interrupt_state interrupt_state) agent_runtime_state {
     agent_runtime_state {
         plan: state.plan,
@@ -417,6 +439,7 @@ func agent_runtime_with_interrupt(agent_runtime_state state, agent_interrupt_sta
         model_path: state.model_path,
     }
 }
+
 func agent_runtime_make_interrupt_pending(agent_runtime_state state, string input) agent_runtime_state {
     string action = state.plan.current_task
     string observation = agent_runtime_interrupt_observation("approval_required", action)
@@ -462,6 +485,7 @@ func agent_runtime_make_interrupt_pending(agent_runtime_state state, string inpu
         model_path: state.model_path,
     }
 }
+
 func agent_runtime_handle_interrupt_response(agent_runtime_state state, string input) agent_runtime_state {
     agent_interrupt_state resolved = agent_interrupt_resolve(state.interrupt, input)
     if agent_interrupt_approved(resolved) {
@@ -562,10 +586,12 @@ func agent_runtime_handle_interrupt_response(agent_runtime_state state, string i
         model_path: state.model_path,
     }
 }
+
 func s_char_is_digit(string s, int i) bool {
     string ch = string(s[i])
     ch == "0" || ch == "1" || ch == "2" || ch == "3" || ch == "4" || ch == "5" || ch == "6" || ch == "7" || ch == "8" || ch == "9"
 }
+
 func s_char_digit_val(string s, int i) int {
     string ch = string(s[i])
     if ch == "1" { return 1 }
@@ -579,6 +605,7 @@ func s_char_digit_val(string s, int i) int {
     if ch == "9" { return 9 }
     0
 }
+
 func resolve_agent_model_path(string model_path) string {
     string direct = trim_or_empty(model_path)
     if direct != "" {
@@ -613,9 +640,11 @@ func resolve_agent_model_path(string model_path) string {
     }
     ""
 }
+
 func new_agent_runtime_state(string goal, string initial_task, int step_budget) agent_runtime_state {
     new_agent_runtime_state_with_model(goal, initial_task, step_budget, "")
 }
+
 func agent_runtime_append_task([]string queue, string task) []string {
     if trim(task) == "" {
         return queue
@@ -623,6 +652,7 @@ func agent_runtime_append_task([]string queue, string task) []string {
     queue.push(task)
     queue
 }
+
 func agent_runtime_code_agent_task_queue(agent_tool_registry_state tools) []string {
     []string queue = []string{cap: 12}
     if agent_tool_registry_has_enabled(tools, "git_status") {
@@ -653,6 +683,7 @@ func agent_runtime_code_agent_task_queue(agent_tool_registry_state tools) []stri
     queue = agent_runtime_append_task(queue, "finalize")
     queue
 }
+
 func agent_runtime_plan_with_task_queue(agent_plan_state plan, []string tasks) agent_plan_state {
     agent_plan_state next = plan
     int i = 0
@@ -662,6 +693,7 @@ func agent_runtime_plan_with_task_queue(agent_plan_state plan, []string tasks) a
     }
     next
 }
+
 func new_agent_runtime_state_with_model(string goal, string initial_task, int step_budget, string model_path) agent_runtime_state {
     string resolved_model_path = resolve_agent_model_path(model_path)
     agent_tool_registry_state tools = new_agent_tool_registry_state()
@@ -709,9 +741,11 @@ func new_agent_runtime_state_with_model(string goal, string initial_task, int st
         model_path: resolved_model_path,
     }
 }
+
 func new_code_agent_runtime_state(string goal, int step_budget) agent_runtime_state {
     new_code_agent_runtime_state_with_model(goal, step_budget, "", "", "")
 }
+
 func new_code_agent_runtime_state_with_model(string goal, int step_budget, string model_path, string build_command, string test_command) agent_runtime_state {
     agent_runtime_state base = new_agent_runtime_state_with_model(goal, "analyze", step_budget, model_path)
     agent_memory_state memory_state = agent_memory_write_short(base.memory, "route", "code")
@@ -726,15 +760,18 @@ func new_code_agent_runtime_state_with_model(string goal, int step_budget, strin
     agent_plan_state plan_state = agent_runtime_plan_with_task_queue(base.plan, agent_runtime_code_agent_task_queue(base.tools))
     agent_runtime_with_memory(agent_runtime_with_plan(base, plan_state), memory_state)
 }
+
 func agent_runtime_should_synthesize_skill(agent_skill_feedback_state feedback) bool {
     if !feedback.success {
         return false
     }
         feedback.task == "verify" || feedback.task == "infer" || feedback.task == "finalize" || feedback.task == "s"
 }
+
 func agent_runtime_retire_failure_threshold() int {
     2
 }
+
 func agent_runtime_failed_skill_name(agent_runtime_state state, agent_skill_feedback_state feedback) string {
     string active = trim_or_empty(state.skill_execution.active_skill)
     if active != "" && active != "none" {
@@ -742,6 +779,7 @@ func agent_runtime_failed_skill_name(agent_runtime_state state, agent_skill_feed
     }
     agent_skill_name_from_feedback(feedback)
 }
+
 func agent_runtime_update_skills(agent_runtime_state state, agent_trace_state trace_state, agent_memory_state memory_state) agent_skill_registry_state {
     agent_skill_feedback_state feedback = agent_skill_feedback_from_trace(trace_state, memory_state)
     if feedback.task == "" {
@@ -776,6 +814,7 @@ func agent_runtime_update_skills(agent_runtime_state state, agent_trace_state tr
     }
     next
 }
+
 func agent_runtime_skill_snapshot(agent_runtime_state state) string {
     string out = "steps=" + string(state.steps)
     out = out + "\nfinished=" + state.plan.status
@@ -792,6 +831,7 @@ func agent_runtime_skill_snapshot(agent_runtime_state state) string {
     out = out + "\n" + agent_skill_registry_snapshot(state.skills)
     out
 }
+
 func agent_runtime_trajectory_export(agent_runtime_state state) string {
     string out = "goal=" + state.plan.goal
     out = out + "\ncurrent_task=" + state.plan.current_task
@@ -802,14 +842,17 @@ func agent_runtime_trajectory_export(agent_runtime_state state) string {
     out = out + "\n" + agent_runtime_skill_snapshot(state)
     out
 }
+
 func agent_runtime_persist_skill_snapshot(agent_runtime_state state, string path) string {
     runtime_write_text_file(path, agent_runtime_skill_snapshot(state))
     path
 }
+
 func agent_runtime_export_trajectory(agent_runtime_state state, string path) string {
     runtime_write_text_file(path, agent_runtime_trajectory_export(state))
     path
 }
+
 func agent_runtime_make_blocked(agent_runtime_state state, string reason) agent_runtime_state {
     string blocked_observation = agent_runtime_observation("safety", "blocked", "reason=" + reason)
     agent_trace_state next_trace = agent_trace_append(
@@ -849,6 +892,7 @@ func agent_runtime_make_blocked(agent_runtime_state state, string reason) agent_
         model_path: state.model_path,
     }
 }
+
 func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_state {
     if state.finished {
         return state
@@ -1153,6 +1197,7 @@ func agent_runtime_step(agent_runtime_state state, string input) agent_runtime_s
         model_path: state.model_path,
     }
 }
+
 func agent_runtime_run_pending_subagents(agent_runtime_state state) agent_runtime_state {
     agent_subagent_registry_state registry = state.subagents
     int n = registry.count
@@ -1202,6 +1247,7 @@ func agent_runtime_run_pending_subagents(agent_runtime_state state) agent_runtim
         model_path: state.model_path,
     }
 }
+
 func run_agent_steps(agent_runtime_state state, string input, int max_steps) agent_runtime_state {
     int total = max_steps
     if total < 0 {
@@ -1227,6 +1273,7 @@ func run_agent_steps(agent_runtime_state state, string input, int max_steps) age
     call_trace_maybe_write(current.memory)
     current
 }
+
 func run_agent_steps_batch(agent_runtime_state state, []string inputs, int max_steps_per_input) agent_runtime_state {
     agent_runtime_state current = state
     int ni = 0
@@ -1239,6 +1286,7 @@ func run_agent_steps_batch(agent_runtime_state state, []string inputs, int max_s
     }
     current
 }
+
 func agent_runtime_replay_line_value(string line) string {
     int eq = 0
     int li = 0
@@ -1261,6 +1309,7 @@ func agent_runtime_replay_line_value(string line) string {
     }
     val
 }
+
 func agent_runtime_replay_trajectory(agent_runtime_state state, string path) agent_skill_registry_state {
     if !runtime_file_exists(path) {
         return state.skills
@@ -1343,6 +1392,7 @@ func agent_runtime_replay_trajectory(agent_runtime_state state, string path) age
     }
     agent_skill_registry_activate_best(next)
 }
+
 func agent_runtime_import_skill_snapshot(agent_runtime_state state, string path) agent_skill_registry_state {
     if !runtime_file_exists(path) {
         return state.skills
@@ -1487,12 +1537,15 @@ func agent_runtime_import_skill_snapshot(agent_runtime_state state, string path)
     }
     agent_skill_registry_activate_best(next)
 }
+
 func agent_runtime_state_dict(agent_runtime_state state) agent_runtime_state {
     state
 }
+
 func agent_runtime_load_state_dict(agent_runtime_state state, agent_runtime_state other) agent_runtime_state {
     other
 }
+
 func agent_runtime_set_route(agent_runtime_state state, string route) agent_runtime_state {
     agent_memory_state next_memory = agent_memory_write_short(state.memory, "route", route)
     agent_plan_state next_plan = agent_plan_set_task(state.plan, "plan")
@@ -1510,6 +1563,7 @@ func agent_runtime_set_route(agent_runtime_state state, string route) agent_runt
         model_path: state.model_path,
     }
 }
+
 func agent_runtime_extend_budget(agent_runtime_state state, int extra) agent_runtime_state {
     int add = extra
     if add < 0 {
@@ -1562,6 +1616,7 @@ func agent_runtime_extend_budget(agent_runtime_state state, int extra) agent_run
         model_path: state.model_path,
     }
 }
+
 func agent_runtime_with_plan(agent_runtime_state state, agent_plan_state plan) agent_runtime_state {
     agent_runtime_state {
         plan: plan,
@@ -1584,6 +1639,7 @@ func agent_runtime_with_plan(agent_runtime_state state, agent_plan_state plan) a
         model_path: state.model_path,
     }
 }
+
 func agent_runtime_with_memory(agent_runtime_state state, agent_memory_state memory) agent_runtime_state {
     agent_runtime_state {
         plan: state.plan,
@@ -1606,6 +1662,7 @@ func agent_runtime_with_memory(agent_runtime_state state, agent_memory_state mem
         model_path: state.model_path,
     }
 }
+
 func agent_runtime_with_skills(agent_runtime_state state, agent_skill_registry_state skills) agent_runtime_state {
     agent_runtime_state {
         plan: state.plan,
@@ -1628,10 +1685,12 @@ func agent_runtime_with_skills(agent_runtime_state state, agent_skill_registry_s
         model_path: state.model_path,
     }
 }
+
 func agent_runtime_step_with_task(agent_runtime_state state, string task, string input) agent_runtime_state {
     agent_plan_state forced_plan = agent_plan_set_task(state.plan, task)
     agent_runtime_step(agent_runtime_with_plan(state, forced_plan), input)
 }
+
 func agent_runtime_warm_start(string goal, string memory_path, string skill_path, string model_path) agent_runtime_state {
     agent_runtime_state base = new_agent_runtime_state_with_model(goal, "analyze", 32, model_path)
     agent_memory_state loaded_memory = base.memory
@@ -1649,6 +1708,7 @@ func agent_runtime_warm_start(string goal, string memory_path, string skill_path
     }
     agent_runtime_with_skills(mid, loaded_skills)
 }
+
 func agent_runtime_summary(agent_runtime_state state) string {
     string finished_str = "false"
     if state.finished {
@@ -1664,6 +1724,7 @@ func agent_runtime_summary(agent_runtime_state state) string {
     out = out + "\nobs=" + state.last_observation
     out
 }
+
 func agent_runtime_is_stalled(agent_runtime_state state) bool {
     int size = len(state.trace.tasks)
     if size < 3 {
@@ -1687,6 +1748,7 @@ func agent_runtime_is_stalled(agent_runtime_state state) bool {
     }
     true
 }
+
 func agent_runtime_checkpoint(agent_runtime_state state, string dir) string {
     string mem_path  = dir + "/memory.txt"
     string snap_path = dir + "/snapshot.txt"
@@ -1694,9 +1756,11 @@ func agent_runtime_checkpoint(agent_runtime_state state, string dir) string {
     agent_skill_registry_persist(state.skills, snap_path)
     dir
 }
+
 func agent_runtime_restore_checkpoint(string goal, string dir) agent_runtime_state {
     agent_runtime_warm_start(goal, dir + "/memory.txt", dir + "/snapshot.txt", "")
 }
+
 func agent_runtime_run_until_stalled(agent_runtime_state state, string input, int max_steps) agent_runtime_state {
     agent_runtime_state current = state
     int i = 0
@@ -1712,6 +1776,7 @@ func agent_runtime_run_until_stalled(agent_runtime_state state, string input, in
     }
     current
 }
+
 func agent_runtime_merge_memory(agent_runtime_state state, agent_runtime_state other) agent_runtime_state {
     agent_memory_state merged = state.memory
     int si = 0

@@ -21,6 +21,7 @@ func trim(string s) string {
     }
     out
 }
+
 func main() {
     println("╔════════════════════════════════════════════════════╗")
     println("║      NeurX-1.3 Full model Inference Pipeline      ║")
@@ -109,6 +110,7 @@ func main() {
     println("Output saved to: " + output_dir)
     0
 }
+
 func int_to_str(int val) string {
     if val == 0 {
         return "0"

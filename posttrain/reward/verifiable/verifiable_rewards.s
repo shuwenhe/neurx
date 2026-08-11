@@ -5,18 +5,21 @@ struct math_problem {
     string answer
     string problem_type
 }
+
 struct code_problem {
     string description
     string test_cases
     string expected_output
     string language
 }
+
 struct verification_result {
     bool correct
     float reward
     string error_message
     []string intermediate_steps
 }
+
 func verify_math_solution(
     math_problem problem,
     string solution
@@ -41,6 +44,7 @@ func verify_math_solution(
         intermediate_steps: steps,
     }
 }
+
 func verify_code_solution(
     code_problem problem,
     string code
@@ -72,6 +76,7 @@ func verify_code_solution(
         intermediate_steps: []string{},
     }
 }
+
 func extract_final_answer(string solution) string {
     string answer = ""
     if contains(solution, "\\boxed{") {
@@ -92,6 +97,7 @@ func extract_final_answer(string solution) string {
     }
     answer
 }
+
 func compare_math_answers(string answer1, string answer2) bool {
     string norm1 = normalize_math_expression(answer1)
     string norm2 = normalize_math_expression(answer2)
@@ -109,6 +115,7 @@ func compare_math_answers(string answer1, string answer2) bool {
     }
     false
 }
+
 func normalize_math_expression(string expr) string {
     string result = expr
     result = remove_all(result, " ")
@@ -119,6 +126,7 @@ func normalize_math_expression(string expr) string {
     result = replace_all(result, "\\sqrt", "sqrt")
     result
 }
+
 func extract_reasoning_steps(string solution) []string {
     []string steps = []string{}
     []string lines = split(solution, "\n")
@@ -132,6 +140,7 @@ func extract_reasoning_steps(string solution) []string {
     }
     steps
 }
+
 func evaluate_reasoning_steps(
     []string steps,
     math_problem problem
@@ -155,6 +164,7 @@ func evaluate_reasoning_steps(
     float score = (valid_steps * 1.0) / (steps.len * 1.0)
     score
 }
+
 func run_code_sandbox(
     string code,
     string language,
@@ -162,6 +172,7 @@ func run_code_sandbox(
 ) (bool, string, string) {
     (true, "", "")
 }
+
 func compute_output_similarity(string output, string expected) float {
     if output == expected {
         return 1.0
@@ -177,6 +188,7 @@ func compute_output_similarity(string output, string expected) float {
     }
     (matches * 1.0) / (total * 1.0)
 }
+
 func trim_whitespace(string s) string { s }
 func contains(string s, string sub) bool { false }
 func index_of(string s, string sub) int { 0 }

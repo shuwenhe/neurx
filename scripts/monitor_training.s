@@ -27,6 +27,7 @@ func find_latest_log(dir string) string {
     }
     return latest_file
 }
+
 func main() {
     neurx_root := os.Getenv("NEURX_ROOT")
     if neurx_root == "" {

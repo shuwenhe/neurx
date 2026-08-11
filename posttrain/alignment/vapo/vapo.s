@@ -16,6 +16,7 @@ struct vapo_config {
     float value_weight
     int num_value_samples
 }
+
 struct vapo_state {
     tensor policy_logits
     tensor value_estimates
@@ -28,6 +29,7 @@ struct vapo_state {
     float entropy
     float total_loss
 }
+
 func new_vapo_config() vapo_config {
     vapo_config {
         learning_rate: 1e-5,
@@ -45,6 +47,7 @@ func new_vapo_config() vapo_config {
         num_value_samples: 8,
     }
 }
+
 func vapo_compute_value_augmented_advantages(
     []tensor advantages,
     []tensor values,
@@ -68,6 +71,7 @@ func vapo_compute_value_augmented_advantages(
     }
     augmented
 }
+
 func vapo_compute_advantages_with_gae(
     []tensor rewards,
     []tensor values,
@@ -111,6 +115,7 @@ func vapo_compute_advantages_with_gae(
     }
     (advantages, returns)
 }
+
 func vapo_step(
     module policy,
     module value_model,

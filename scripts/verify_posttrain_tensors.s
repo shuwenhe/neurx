@@ -9,6 +9,7 @@ struct tensor_stats {
     int count
     int nonzero
 }
+
 struct tensor_sample {
     string name
     string dtype
@@ -16,6 +17,7 @@ struct tensor_sample {
     int data_start
     int data_end
 }
+
 func main() {
     println("============================================================")
     println("NeurX PostTrain Tensor-Level Verification")
@@ -121,6 +123,7 @@ func main() {
     println("- lora_B changed from 0.0 → non-zero")
     println("- This can only happen via gradient descent")
 }
+
 func read_tensor_sample([]int file_bytes, string header, string tensor_name) tensor_sample {
     int name_pos = find_substring(header, "\"" + tensor_name + "\":{")
     if name_pos < 0 {
@@ -152,6 +155,7 @@ func read_tensor_sample([]int file_bytes, string header, string tensor_name) ten
         data_end: data_end,
     }
 }
+
 func decode_f32_values([]int bytes, int start, int end) []float {
     []float values = []float{}
     int i = start
@@ -161,6 +165,7 @@ func decode_f32_values([]int bytes, int start, int end) []float {
     }
     values
 }
+
 func f32_from_le_bytes([]int bytes, int idx) float {
     int b0 = bytes[idx]
     int b1 = bytes[idx + 1]
@@ -191,6 +196,7 @@ func f32_from_le_bytes([]int bytes, int idx) float {
     }
     value
 }
+
 func pow2_int(int exponent) float {
     float value = 1.0
     int e = exponent
@@ -209,6 +215,7 @@ func pow2_int(int exponent) float {
     }
     value
 }
+
 func compute_stats([]float values) tensor_stats {
     if len(values) == 0 {
         tensor_stats empty
@@ -261,6 +268,7 @@ func compute_stats([]float values) tensor_stats {
     stats.nonzero = nonzero
     return stats
 }
+
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -273,6 +281,7 @@ func sqrt_approx(float x) float {
     }
     guess
 }
+
 func find_substring(string text, string pattern) int {
     if len(pattern) > len(text) {
         return -1
@@ -295,6 +304,7 @@ func find_substring(string text, string pattern) int {
     }
     -1
 }
+
 func find_substring_from(string text, string pattern, int start) int {
     if start < 0 || start >= len(text) || len(pattern) > len(text) - start {
         return -1
@@ -317,6 +327,7 @@ func find_substring_from(string text, string pattern, int start) int {
     }
     -1
 }
+
 func find_char_from(string text, string ch, int start) int {
     int i = start
     while i < len(text) {
@@ -327,6 +338,7 @@ func find_char_from(string text, string ch, int start) int {
     }
     -1
 }
+
 func substring(string text, int start, int end) string {
     if start < 0 || end > len(text) || start >= end {
         return ""
@@ -339,6 +351,7 @@ func substring(string text, int start, int end) string {
     }
     result
 }
+
 func parse_int(string s, int fallback) int {
     string text = trim(s)
     if text == "" {
@@ -361,9 +374,11 @@ func parse_int(string s, int fallback) int {
     }
     sign * value
 }
+
 func string_char(int c) string {
     string(c)
 }
+
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -394,6 +409,7 @@ func int_to_str(int n) string {
     }
     out
 }
+
 func float_to_str(float value, int decimals) string {
     float current = value
     bool neg = current < 0.0
@@ -432,6 +448,7 @@ func float_to_str(float value, int decimals) string {
     }
     out
 }
+
 func bytes_to_string([]int bytes, int start, int length) string {
     string out = ""
     int i = 0

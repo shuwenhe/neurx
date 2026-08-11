@@ -15,12 +15,14 @@ struct megatron_config {
     int global_batch_size
     bool use_distributed_optimizer
 }
+
 struct tensor_parallel_state {
     int tp_rank
     int tp_world_size
     []int tp_group_ranks
     distributed_context tp_ctx
 }
+
 struct pipeline_parallel_state {
     int pp_rank
     int pp_world_size
@@ -28,6 +30,7 @@ struct pipeline_parallel_state {
     distributed_context pp_ctx
     int num_microbatches
 }
+
 struct megatron_module {
     module base_module
     megatron_config config
@@ -35,6 +38,7 @@ struct megatron_module {
     pipeline_parallel_state pp_state
     distributed_context global_ctx
 }
+
 func new_megatron_config() megatron_config {
     megatron_config {
         tensor_parallel_size: 1,
@@ -50,6 +54,7 @@ func new_megatron_config() megatron_config {
         use_distributed_optimizer: true,
     }
 }
+
 func megatron_column_parallel_linear(
     tensor input,
     tensor weight,
@@ -66,6 +71,7 @@ func megatron_column_parallel_linear(
     tensor output_shard = tensor_ops.matmul(input, weight_shard)
     output_shard
 }
+
 func megatron_row_parallel_linear(
     tensor input,
     tensor weight,
@@ -84,6 +90,7 @@ func megatron_row_parallel_linear(
     tensor output = tp_state.tp_ctx.all_reduce(output_shard)
     output
 }
+
 func megatron_attention_with_tp(
     tensor query,
     tensor key,
@@ -112,6 +119,7 @@ func megatron_attention_with_tp(
     tensor output_local = tensor_ops.matmul(attn_weights, v_local)
     output_local
 }
+
 func megatron_pipeline_forward(
     megatron_module meg_mod,
     tensor input
@@ -134,6 +142,7 @@ func megatron_pipeline_forward(
         return output
     }
 }
+
 func megatron_sequence_parallel_forward(
     tensor input,
     tensor_parallel_state tp_state
@@ -149,6 +158,7 @@ func megatron_sequence_parallel_forward(
     tensor input_shard = tensor_ops.slice(input, 1, seq_start, seq_end)
     input_shard
 }
+
 func new_megatron_module(
     module base_module,
     megatron_config config,

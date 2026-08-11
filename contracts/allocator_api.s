@@ -13,6 +13,7 @@ struct allocation_info {
     alignment: i64
     strategy: AllocatorStrategy
 }
+
 struct allocation_result {
     ptr: i64
     allocated_size: i64

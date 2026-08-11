@@ -53,6 +53,7 @@ struct block_reset_result {
     block_manager_state state
     bool success
 }
+
 func empty_request_block_table() request_block_table {
     request_block_table table
     table.request_id = ""
@@ -62,6 +63,7 @@ func empty_request_block_table() request_block_table {
     table.preemptions = 0
     table
 }
+
 func new_block_allocation_result(block_manager_state state, request_block_table table, []int new_block_ids, bool success, string error_message) block_allocation_result {
     block_allocation_result result
     result.state = state
@@ -71,6 +73,7 @@ func new_block_allocation_result(block_manager_state state, request_block_table 
     result.error_message = error_message
     result
 }
+
 func new_prefix_match_result(block_manager_state state, request_block_table table, int matched_tokens, int matched_blocks, bool success) prefix_match_result {
     prefix_match_result result
     result.state = state
@@ -80,6 +83,7 @@ func new_prefix_match_result(block_manager_state state, request_block_table tabl
     result.success = success
     result
 }
+
 func new_block_manager(int total_blocks, int block_size, int watermark_blocks) block_manager_state {
     int normalized_total = total_blocks
     if normalized_total <= 0 {
@@ -126,12 +130,15 @@ func new_block_manager(int total_blocks, int block_size, int watermark_blocks) b
     }
     state
 }
+
 func block_manager_block_at(block_manager_state state, int index) kv_cache_block {
     state.blocks[index]
 }
+
 func block_manager_table_at(block_manager_state state, int index) request_block_table {
     state.tables[index]
 }
+
 func block_manager_find_table(block_manager_state state, string request_id) int {
     int i = 0
     while i < len(state.tables) {
@@ -143,6 +150,7 @@ func block_manager_find_table(block_manager_state state, string request_id) int 
     }
     -1
 }
+
 func block_manager_get_table(block_manager_state state, string request_id) request_block_table {
     int index = block_manager_find_table(state, request_id)
     if index < 0 {
@@ -152,6 +160,7 @@ func block_manager_get_table(block_manager_state state, string request_id) reque
     }
     block_manager_table_at(state, index)
 }
+
 func block_manager_get_allocation_table(block_manager_state state, string request_id) request_block_table {
     int index = block_manager_find_table(state, request_id)
     if index < 0 {
@@ -161,6 +170,7 @@ func block_manager_get_allocation_table(block_manager_state state, string reques
     }
     block_manager_table_at(state, index)
 }
+
 func block_manager_upsert_table(block_manager_state state, request_block_table table) block_manager_state {
     int index = block_manager_find_table(state, table.request_id)
     if index < 0 {
@@ -170,6 +180,7 @@ func block_manager_upsert_table(block_manager_state state, request_block_table t
     }
     state
 }
+
 func block_manager_remove_int([]int values, int expected) []int {
     []int result = []int{cap: len(values)}
     int i = 0
@@ -181,6 +192,7 @@ func block_manager_remove_int([]int values, int expected) []int {
     }
     result
 }
+
 func block_manager_contains_int([]int values, int expected) bool {
     int i = 0
     while i < len(values) {
@@ -191,6 +203,7 @@ func block_manager_contains_int([]int values, int expected) bool {
     }
     false
 }
+
 func block_manager_prepend_int([]int values, int value) []int {
     []int result = []int{cap: len(values) + 1}
     result = append(result, value)
@@ -203,12 +216,14 @@ func block_manager_prepend_int([]int values, int value) []int {
     }
     result
 }
+
 func block_manager_append_unique([]int values, int value) []int {
     if block_manager_contains_int(values, value) {
         return values
     }
     append(values, value)
 }
+
 func block_manager_remove_table(block_manager_state state, int remove_index) block_manager_state {
     []request_block_table tables = []request_block_table{cap: len(state.tables)}
     int i = 0
@@ -221,6 +236,7 @@ func block_manager_remove_table(block_manager_state state, int remove_index) blo
     state.tables = tables
     state
 }
+
 func block_manager_find_cached(block_manager_state state, string block_hash) int {
     if block_hash == "" {
         return -1
@@ -235,6 +251,7 @@ func block_manager_find_cached(block_manager_state state, string block_hash) int
     }
     -1
 }
+
 func block_manager_touch(block_manager_state state, int block_id) block_manager_state {
     if block_id < 0 || block_id >= len(state.blocks) {
         return state
@@ -250,12 +267,14 @@ func block_manager_touch(block_manager_state state, int block_id) block_manager_
     state.blocks[block_id] = block
     state
 }
+
 func block_manager_mod(int value, int divisor) int {
     if divisor <= 0 {
         return 0
     }
     value - (value / divisor) * divisor
 }
+
 func block_manager_hash_tokens([]int token_ids, int start, int token_count, string parent_hash, string adapter_key, string multimodal_key) string {
     int hash_value = 216613
     int i = 0
@@ -288,6 +307,7 @@ func block_manager_hash_tokens([]int token_ids, int start, int token_count, stri
     }
     int_to_str(hash_value) + ":" + int_to_str(token_count)
 }
+
 func block_manager_match_prefix(block_manager_state state, string request_id, []string block_hashes) prefix_match_result {
     request_block_table table = block_manager_get_table(state, request_id)
     if len(table.block_ids) > 0 {
@@ -311,6 +331,7 @@ func block_manager_match_prefix(block_manager_state state, string request_id, []
     state = block_manager_upsert_table(state, table)
     new_prefix_match_result(state, table, table.computed_tokens, i, true)
 }
+
 func block_manager_required_blocks(block_manager_state state, request_block_table table, int new_tokens, int lookahead_tokens) int {
     int tokens = new_tokens + lookahead_tokens
     if tokens < 0 {
@@ -324,6 +345,7 @@ func block_manager_required_blocks(block_manager_state state, request_block_tabl
     }
     required
 }
+
 func block_manager_can_allocate(block_manager_state state, request_block_table table, int new_tokens, int lookahead_tokens, bool apply_watermark) bool {
     int required = block_manager_required_blocks(state, table, new_tokens, lookahead_tokens)
     int reserve = 0
@@ -332,6 +354,7 @@ func block_manager_can_allocate(block_manager_state state, request_block_table t
     }
     len(state.free_block_ids) >= required + reserve
 }
+
 func block_manager_pop_free(block_manager_state state) block_allocation_result {
     []int allocated = []
     request_block_table table = empty_request_block_table()
@@ -357,6 +380,7 @@ func block_manager_pop_free(block_manager_state state) block_allocation_result {
     allocated = append(allocated, block_id)
     new_block_allocation_result(state, table, allocated, true, "")
 }
+
 func block_manager_release_block(block_manager_state state, int block_id) block_manager_state {
     if block_id < 0 || block_id >= len(state.blocks) {
         return state
@@ -377,6 +401,7 @@ func block_manager_release_block(block_manager_state state, int block_id) block_
     state.blocks[block_id] = block
     state
 }
+
 func block_manager_allocate(block_manager_state state, string request_id, int new_tokens, int lookahead_tokens, bool apply_watermark) block_allocation_result {
     []int allocation_ids = []
     request_block_table allocation_table = block_manager_get_allocation_table(state, request_id)
@@ -410,6 +435,7 @@ func block_manager_allocate(block_manager_state state, string request_id, int ne
     state = block_manager_upsert_table(state, allocation_table)
     new_block_allocation_result(state, allocation_table, allocation_ids, true, "")
 }
+
 func block_manager_cache_full_blocks(block_manager_state state, string request_id, []string block_hashes) block_manager_state {
     int table_index = block_manager_find_table(state, request_id)
     if table_index < 0 {
@@ -439,6 +465,7 @@ func block_manager_cache_full_blocks(block_manager_state state, string request_i
     }
     state
 }
+
 func block_manager_mark_computed(block_manager_state state, string request_id, int computed_tokens) block_manager_state {
     int table_index = block_manager_find_table(state, request_id)
     if table_index < 0 {
@@ -456,6 +483,7 @@ func block_manager_mark_computed(block_manager_state state, string request_id, i
     state.tables[table_index] = table
     state
 }
+
 func block_manager_free_request(block_manager_state state, string request_id, bool defer_free) block_manager_state {
     int table_index = block_manager_find_table(state, request_id)
     if table_index < 0 {
@@ -477,6 +505,7 @@ func block_manager_free_request(block_manager_state state, string request_id, bo
     }
     block_manager_remove_table(state, table_index)
 }
+
 func block_manager_flush_deferred(block_manager_state state) block_manager_state {
     []int pending = state.deferred_free_ids
     state.deferred_free_ids = []
@@ -487,6 +516,7 @@ func block_manager_flush_deferred(block_manager_state state) block_manager_state
     }
     state
 }
+
 func block_manager_preempt_request(block_manager_state state, string request_id) block_manager_state {
     int table_index = block_manager_find_table(state, request_id)
     if table_index < 0 {
@@ -505,6 +535,7 @@ func block_manager_preempt_request(block_manager_state state, string request_id)
     state.tables[table_index] = table
     state
 }
+
 func block_manager_reset_prefix_cache(block_manager_state state) block_reset_result {
     int i = 0
     while i < len(state.blocks) {
@@ -535,9 +566,11 @@ func block_manager_reset_prefix_cache(block_manager_state state) block_reset_res
     result.success = true
     result
 }
+
 func block_manager_num_free(block_manager_state state) int {
     len(state.free_block_ids)
 }
+
 func block_manager_usage(block_manager_state state) float {
     if state.total_blocks <= 0 {
         return 0.0

@@ -20,11 +20,13 @@ struct request_lifecycle_state {
     string finish_reason
     string error_message
 }
+
 struct request_transition_result {
     request_lifecycle_state state
     bool changed
     string error_message
 }
+
 func new_request_transition_result(request_lifecycle_state state, bool changed, string error_message) request_transition_result {
     request_transition_result result
     result.state = state
@@ -32,6 +34,7 @@ func new_request_transition_result(request_lifecycle_state state, bool changed, 
     result.error_message = error_message
     result
 }
+
 func new_request_lifecycle(string request_id, int prompt_tokens, int max_new_tokens, int now_ms, int timeout_ms) request_lifecycle_state {
     int normalized_prompt = prompt_tokens
     if normalized_prompt < 0 {
@@ -60,9 +63,11 @@ func new_request_lifecycle(string request_id, int prompt_tokens, int max_new_tok
         error_message: "",
     }
 }
+
 func request_is_terminal(request_lifecycle_state state) bool {
     state.status == request_finished_status() || state.status == request_cancelled_status() || state.status == request_failed_status()
 }
+
 func request_remaining_tokens(request_lifecycle_state state) int {
     int remaining = state.max_new_tokens - state.generated_tokens
     if remaining < 0 {
@@ -70,6 +75,7 @@ func request_remaining_tokens(request_lifecycle_state state) int {
     }
     remaining
 }
+
 func request_transition(request_lifecycle_state state, int next_status, int now_ms) request_transition_result {
     if request_is_terminal(state) {
         return new_request_transition_result(state, false, "request is terminal")
@@ -91,12 +97,15 @@ func request_transition(request_lifecycle_state state, int next_status, int now_
     state.updated_at_ms = now_ms
     new_request_transition_result(state, true, "")
 }
+
 func request_start_prefill(request_lifecycle_state state, int now_ms) request_transition_result {
     request_transition(state, request_prefilling_status(), now_ms)
 }
+
 func request_start_decode(request_lifecycle_state state, int now_ms) request_transition_result {
     request_transition(state, request_decoding_status(), now_ms)
 }
+
 func request_pause(request_lifecycle_state state, string reason, int now_ms) request_transition_result {
     if request_is_terminal(state) || state.status == request_paused_status() {
         return new_request_transition_result(state, false, "request cannot be paused")
@@ -109,6 +118,7 @@ func request_pause(request_lifecycle_state state, string reason, int now_ms) req
     }
     result
 }
+
 func request_resume(request_lifecycle_state state, int now_ms) request_transition_result {
     if state.status != request_paused_status() {
         return new_request_transition_result(state, false, "request is not paused")
@@ -119,6 +129,7 @@ func request_resume(request_lifecycle_state state, int now_ms) request_transitio
     }
     result
 }
+
 func request_cancel(request_lifecycle_state state, int now_ms) request_transition_result {
     request_transition_result result = request_transition(state, request_cancelled_status(), now_ms)
     if result.changed {
@@ -126,6 +137,7 @@ func request_cancel(request_lifecycle_state state, int now_ms) request_transitio
     }
     result
 }
+
 func request_fail(request_lifecycle_state state, string message, int now_ms) request_transition_result {
     request_transition_result result = request_transition(state, request_failed_status(), now_ms)
     if result.changed {
@@ -134,6 +146,7 @@ func request_fail(request_lifecycle_state state, string message, int now_ms) req
     }
     result
 }
+
 func request_append_tokens(request_lifecycle_state state, int token_count, bool eos, int now_ms) request_transition_result {
     if state.status != request_decoding_status() {
         return new_request_transition_result(state, false, "request is not decoding")
@@ -157,12 +170,14 @@ func request_append_tokens(request_lifecycle_state state, int token_count, bool 
     }
     new_request_transition_result(state, add_tokens > 0 || eos, "")
 }
+
 func request_expire(request_lifecycle_state state, int now_ms) request_transition_result {
     if state.deadline_ms <= 0 || now_ms < state.deadline_ms || request_is_terminal(state) {
         return new_request_transition_result(state, false, "")
     }
     request_fail(state, "request deadline exceeded", now_ms)
 }
+
 func request_status_name(int status) string {
     if status == request_queued_status() { return "queued" }
     if status == request_prefilling_status() { return "prefilling" }

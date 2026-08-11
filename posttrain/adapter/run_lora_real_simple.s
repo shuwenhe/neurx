@@ -3,6 +3,7 @@ struct tensor_2 {
     []float data
     []int shape
 }
+
 struct lora_weights {
     string name
     tensor_2 A
@@ -10,6 +11,7 @@ struct lora_weights {
     float alpha
     int rank
 }
+
 struct training_config {
     string model_path
     int batch_size
@@ -20,12 +22,14 @@ struct training_config {
     float lora_alpha
     int num_layers
 }
+
 struct training_state {
     int current_epoch
     int total_steps
     float total_loss
     float best_loss
 }
+
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -69,6 +73,7 @@ func int_to_string(int n) string {
     }
     return result
 }
+
 func float_to_string(float f) string {
     int int_part = f
     int frac_part = (f - int_part) * 1000
@@ -86,6 +91,7 @@ func float_to_string(float f) string {
     result = result + int_to_string(frac_part)
     return result
 }
+
 func repeat_string(string s, int count) string {
     string result = ""
     int i = 0
@@ -95,6 +101,7 @@ func repeat_string(string s, int count) string {
     }
     return result
 }
+
 func create_vector(int size, float value) tensor_2 {
     tensor_2 t
     t.data = []
@@ -106,6 +113,7 @@ func create_vector(int size, float value) tensor_2 {
     t.shape = append(t.shape, size)
     return t
 }
+
 func create_matrix(int rows, int cols, float value) tensor_2 {
     tensor_2 t
     t.data = []
@@ -119,9 +127,11 @@ func create_matrix(int rows, int cols, float value) tensor_2 {
     t.shape = append(t.shape, cols)
     return t
 }
+
 func zeros(int rows, int cols) tensor_2 {
     return create_matrix(rows, cols, 0.0)
 }
+
 func load_model_config(string model_path) training_config {
     training_config config
     config.model_path = model_path
@@ -134,15 +144,18 @@ func load_model_config(string model_path) training_config {
     config.num_layers = 12
     return config
 }
+
 func forward_pass(tensor_2 input_ids) float {
     println("Forward pass...")
     float logits = 0.0
     return logits
 }
+
 func compute_loss(float logits, float labels) float {
     float loss = 0.5
     return loss
 }
+
 func train_epoch(training_config config, training_state state) float {
     println("Epoch " + int_to_string(state.current_epoch + 1) + "/" + int_to_string(config.num_epochs))
     float epoch_loss = 0.0
@@ -163,6 +176,7 @@ func train_epoch(training_config config, training_state state) float {
     }
     return avg_loss
 }
+
 func train_model(training_config config) training_state {
     training_state state
     state.current_epoch = 0
@@ -182,12 +196,14 @@ func train_model(training_config config) training_state {
     }
     return state
 }
+
 func save_model(training_config config, training_state state) {
     println("\nSaving model...")
     println("  Output: " + config.model_path + "/../base-model-posttrain/")
     println("  Total steps: " + int_to_string(state.total_steps))
     println("  Best loss: " + float_to_string(state.best_loss))
 }
+
 func verify_results(training_state state) {
     println("\nVerifying results...")
     println("  Total steps: " + int_to_string(state.total_steps))
@@ -195,6 +211,7 @@ func verify_results(training_state state) {
     println("  Best loss: " + float_to_string(state.best_loss))
     println("  Weights modified: YES")
 }
+
 func main() {
     println("\n" + repeat_string("=", 60))
     println("Real LoRA SFT Training Implementation")

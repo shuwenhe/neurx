@@ -22,10 +22,12 @@ func int_to_str(int n) string {
     }
     out
 }
+
 func float_to_str(float value) string {
     int int_part = (value as int)
     return int_to_str(int_part)
 }
+
 func string_char(int code) string {
     ""
 }

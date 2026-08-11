@@ -18,6 +18,7 @@ struct zero_state {
     int gathered_bucket_count
     float last_sync_scale
 }
+
 func copy_ints([]int values) []int {
     []int out = []int{cap: len(values)}
     int i = 0
@@ -27,12 +28,14 @@ func copy_ints([]int values) []int {
     }
     out
 }
+
 func clamp_positive(int value, int fallback) int {
     if value > 0 {
         return value
     }
     fallback
 }
+
 func clamp_rank(int rank, int world_size) int {
     if rank < 0 {
         return 0
@@ -42,6 +45,7 @@ func clamp_rank(int rank, int world_size) int {
     }
     rank
 }
+
 func has_string([]string values, string value) bool {
     int i = 0
     while i < len(values) {
@@ -52,12 +56,14 @@ func has_string([]string values, string value) bool {
     }
     false
 }
+
 func normalize_stage(string stage) string {
     if stage == "zero-1" || stage == "zero-2" || stage == "zero-3" {
         return stage
     }
     "zero-2"
 }
+
 func new_zero_state(string name, string backend, int world_size, int rank, int shard_dim, int bucket_cap, string stage) zero_state {
     int normalized_world = clamp_positive(world_size, 1)
     zero_state {
@@ -77,6 +83,7 @@ func new_zero_state(string name, string backend, int world_size, int rank, int s
         last_sync_scale: 1.0,
     }
 }
+
 func zero_state_dict(zero_state state) zero_state {
     zero_state {
         name: state.name,
@@ -95,6 +102,7 @@ func zero_state_dict(zero_state state) zero_state {
         last_sync_scale: state.last_sync_scale,
     }
 }
+
 func zero_load_state_dict(zero_state state, zero_state other) zero_state {
     zero_state {
         name: other.name,
@@ -113,30 +121,39 @@ func zero_load_state_dict(zero_state state, zero_state other) zero_state {
         last_sync_scale: other.last_sync_scale,
     }
 }
+
 func zero_name(zero_state state) string {
     state.name
 }
+
 func zero_stage(zero_state state) string {
     state.stage
 }
+
 func zero_enabled(zero_state state) bool {
     state.initialized && state.world_size > 1
 }
+
 func zero_optimizer_sharded(zero_state state) bool {
     zero_enabled(state) && state.stage != "zero-1"
 }
+
 func zero_param_count(zero_state state) int {
     len(state.params)
 }
+
 func zero_ready_param_count(zero_state state) int {
     len(state.ready_params)
 }
+
 func zero_reduced_bucket_count(zero_state state) int {
     state.reduced_bucket_count
 }
+
 func zero_gathered_bucket_count(zero_state state) int {
     state.gathered_bucket_count
 }
+
 func zero_add_param(zero_state state, string param_name, int size) zero_state {
     if has_string(state.params, param_name) {
         return zero_state_dict(state)
@@ -162,6 +179,7 @@ func zero_add_param(zero_state state, string param_name, int size) zero_state {
         last_sync_scale: state.last_sync_scale,
     }
 }
+
 func zero_mark_grad_ready(zero_state state, string param_name) zero_state {
     if !has_string(state.params, param_name) {
         return zero_state_dict(state)
@@ -188,18 +206,21 @@ func zero_mark_grad_ready(zero_state state, string param_name) zero_state {
         last_sync_scale: state.last_sync_scale,
     }
 }
+
 func zero_reduce_scatter_grads(zero_state state, []float grads) []float {
     if !zero_optimizer_sharded(state) {
         return copy_float(grads)
     }
     reduce_scatter_sum(new_process_group(state.backend, state.rank, state.world_size), grads)
 }
+
 func zero_all_gather_params(zero_state state, []float shard_values) []float {
     if !zero_optimizer_sharded(state) {
         return copy_float(shard_values)
     }
     all_gather(new_process_group(state.backend, state.rank, state.world_size), shard_values)
 }
+
 func zero_mark_reduced(zero_state state) zero_state {
     zero_state {
         name: state.name,
@@ -218,6 +239,7 @@ func zero_mark_reduced(zero_state state) zero_state {
         last_sync_scale: 1.0 / clamp_positive(state.world_size, 1),
     }
 }
+
 func zero_mark_gathered(zero_state state) zero_state {
     zero_state {
         name: state.name,
@@ -236,6 +258,7 @@ func zero_mark_gathered(zero_state state) zero_state {
         last_sync_scale: state.last_sync_scale,
     }
 }
+
 func zero_finalize_step(zero_state state) zero_state {
     zero_state {
         name: state.name,

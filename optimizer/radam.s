@@ -11,6 +11,7 @@ struct radam_optimizer {
     []float exp_avg
     []float exp_avg_sq
 }
+
 func new_radam(float lr, float beta1, float beta2, float eps, float weight_decay) radam_optimizer {
     radam_optimizer {
         lr: lr,
@@ -23,6 +24,7 @@ func new_radam(float lr, float beta1, float beta2, float eps, float weight_decay
         exp_avg_sq: [],
     }
 }
+
 func radam_step(radam_optimizer optimizer, tensor params, tensor grads) radam_optimizer_step_output {
     int n = len(params.data)
     optimizer.step = optimizer.step + 1
@@ -64,10 +66,12 @@ func radam_step(radam_optimizer optimizer, tensor params, tensor grads) radam_op
         params: new(out, params.shape, params.requires_grad),
     }
 }
+
 struct radam_optimizer_step_output {
     radam_optimizer optimizer
     tensor params
 }
+
 func ensure_radam_state([]float values, int n) []float {
     []float out = []float{cap: n}
     int i = 0
@@ -81,6 +85,7 @@ func ensure_radam_state([]float values, int n) []float {
     }
     out
 }
+
 func radam_sqrt(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -96,6 +101,7 @@ func radam_sqrt(float x) float {
     }
     y
 }
+
 func radam_pow(float base, int exponent) float {
     float result = 1.0
     int i = 0

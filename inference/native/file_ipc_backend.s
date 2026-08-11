@@ -25,6 +25,7 @@ func contains_keyword(string text, string keyword) bool {
     }
     return false
 }
+
 func generate_response(string prompt, int max_tokens) string {
     string response = ""
     if contains_keyword(prompt, "你好") || contains_keyword(prompt, "hello") || contains_keyword(prompt, "hi") {
@@ -52,6 +53,7 @@ func generate_response(string prompt, int max_tokens) string {
     }
     return response
 }
+
 func main() {
     print("NeurX Medical AI Backend - File IPC Mode\n")
     print("Listening on: /tmp/neurx_request.txt\n")

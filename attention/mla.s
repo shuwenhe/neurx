@@ -10,6 +10,7 @@ struct mla_config {
     float softmax_scale
     bool causal
 }
+
 func new_mla_config(int hidden_dim, int num_heads, int kv_lora_rank, int q_lora_rank) mla_config {
     int head_dim = hidden_dim / num_heads
     int rope_dim = 64
@@ -25,6 +26,7 @@ func new_mla_config(int hidden_dim, int num_heads, int kv_lora_rank, int q_lora_
         causal: true,
     }
 }
+
 struct mla_weights {
     mla_config config
     []float w_dq
@@ -38,6 +40,7 @@ struct mla_weights {
     []float w_kr
     []float w_o
 }
+
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float y = x
@@ -48,6 +51,7 @@ func sqrt_approx(float x) float {
     }
     y
 }
+
 func zeros(int n) []float {
     []float out = []float{cap: n}
     int i = 0
@@ -57,6 +61,7 @@ func zeros(int n) []float {
     }
     out
 }
+
 func fill_ramp(int n, float scale) []float {
     []float out = []float{cap: n}
     int i = 0
@@ -66,6 +71,7 @@ func fill_ramp(int n, float scale) []float {
     }
     out
 }
+
 func exp_approx(float x) float {
     if x > 20.0 { return 485165195.0 }
     if x < -20.0 { return 0.0 }
@@ -79,6 +85,7 @@ func exp_approx(float x) float {
     }
     result
 }
+
 func matmul([]float a, []float b, int m, int k, int n) []float {
     []float result = zeros(m * n)
     int i = 0
@@ -98,6 +105,7 @@ func matmul([]float a, []float b, int m, int k, int n) []float {
     }
     result
 }
+
 func rms_norm([]float x, int n, float eps) []float {
     []float out = []float{cap: n}
     float sum_sq = 0.0
@@ -114,6 +122,7 @@ func rms_norm([]float x, int n, float eps) []float {
     }
     out
 }
+
 func new_mla_weights(mla_config cfg) mla_weights {
     int d = cfg.hidden_dim
     int n_h = cfg.num_q_heads
@@ -135,6 +144,7 @@ func new_mla_weights(mla_config cfg) mla_weights {
         w_o:   fill_ramp(n_h * d_h * d, 0.01),
     }
 }
+
 func apply_rope([]float x, int seq_len, int head_dim, int start_pos) []float {
     []float out = []float{cap: seq_len * head_dim}
     int s = 0
@@ -177,10 +187,12 @@ func apply_rope([]float x, int seq_len, int head_dim, int start_pos) []float {
     }
     out
 }
+
 func pow_approx(float base, float exp) float {
     if exp == 0.0 { return 1.0 }
     exp_approx(exp * ln_approx(base))
 }
+
 func ln_approx(float x) float {
     if x <= 0.0 { return -1e9 }
     float y = (x - 1.0) / (x + 1.0)
@@ -190,12 +202,14 @@ func ln_approx(float x) float {
     float y7 = y5 * y2
     2.0 * (y + y3 / 3.0 + y5 / 5.0 + y7 / 7.0)
 }
+
 func cos_approx(float x) float {
     float x2 = x * x
     float x4 = x2 * x2
     float x6 = x4 * x2
     1.0 - x2 / 2.0 + x4 / 24.0 - x6 / 720.0
 }
+
 func sin_approx(float x) float {
     float x2 = x * x
     float x3 = x2 * x
@@ -203,10 +217,12 @@ func sin_approx(float x) float {
     float x7 = x5 * x2
     x - x3 / 6.0 + x5 / 120.0 - x7 / 5040.0
 }
+
 struct mla_forward_state {
     []float kv_latent
     []float k_rope
 }
+
 func mla_forward(mla_weights w, []float h, int seq_len, int start_pos) ([]float, mla_forward_state) {
     mla_config cfg = w.config
     int d = cfg.hidden_dim
@@ -275,6 +291,7 @@ func mla_forward(mla_weights w, []float h, int seq_len, int start_pos) ([]float,
     }
     (output, fwd_state)
 }
+
 func mla_attention_core(
     []float q, []float k, []float v,
     int seq_len, int n_h, int d_h, int d_r,
@@ -341,11 +358,13 @@ func mla_attention_core(
     }
     output
 }
+
 struct mla_kv_cache {
     []float kv_latent
     []float k_rope
     int current_len
 }
+
 func new_mla_kv_cache(int batch_size, int max_seq_len, mla_config cfg) mla_kv_cache {
     int d_c = cfg.kv_lora_rank
     int d_r = cfg.rope_head_dim
@@ -356,6 +375,7 @@ func new_mla_kv_cache(int batch_size, int max_seq_len, mla_config cfg) mla_kv_ca
         current_len: 0,
     }
 }
+
 func mla_forward_incremental(
     mla_weights w, []float h, mla_kv_cache cache, int pos
 ) ([]float, mla_kv_cache) {
@@ -436,6 +456,7 @@ func mla_forward_incremental(
     new_cache.current_len = cached_len
     (output, new_cache)
 }
+
 func mla_attention_single_query(
     []float q, []float k, []float v,
     int kv_len, int n_h, int d_h, int d_r, float scale
@@ -491,17 +512,21 @@ func mla_attention_single_query(
     }
     output
 }
+
 func compute_kv_cache_size(int n_layers, int n_heads, int d_head, int d_lora, int d_rope) (int, int) {
     int standard_size = 2 * n_layers * n_heads * d_head
     int mla_size = 2 * n_layers * (d_lora + n_heads * d_rope)
     (standard_size, mla_size)
 }
+
 func compute_savings_ratio(int standard_size, int mla_size) float {
     (standard_size - mla_size) as float / standard_size as float * 100.0
 }
+
 func unit_name() string {
     "neurx/model/neurx/mla"
 }
+
 func unit_ready() int {
     1
 }

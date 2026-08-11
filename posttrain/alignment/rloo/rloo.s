@@ -12,6 +12,7 @@ struct rloo_config {
     bool use_baseline_normalization
     float clip_range_reward
 }
+
 struct rloo_state {
     tensor policy_logits
     tensor log_probs
@@ -25,6 +26,7 @@ struct rloo_state {
     float avg_reward
     float baseline_var
 }
+
 func new_rloo_config() rloo_config {
     rloo_config {
         learning_rate: 1e-5,
@@ -38,6 +40,7 @@ func new_rloo_config() rloo_config {
         clip_range_reward: 10.0,
     }
 }
+
 func rloo_compute_loo_baselines(
     []tensor rewards,
     int num_samples
@@ -68,6 +71,7 @@ func rloo_compute_loo_baselines(
     }
     baselines
 }
+
 func rloo_compute_policy_loss(
     tensor log_probs,
     tensor old_log_probs,
@@ -92,6 +96,7 @@ func rloo_compute_policy_loss(
     )
     (policy_loss, kl_div)
 }
+
 func rloo_step(
     module policy,
     module reference_policy,

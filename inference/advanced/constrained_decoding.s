@@ -9,6 +9,7 @@ struct output_constraint {
     string name
     bool optional
 }
+
 struct json_schema_property {
     string property_name
     string property_type
@@ -19,22 +20,26 @@ struct json_schema_property {
     int minimum
     int maximum
 }
+
 struct json_schema {
     string schema_type
     []json_schema_property properties
     map[string]int field_index
 }
+
 struct constraint_validator {
     output_constraint constraint
     json_schema json_schema
     string regex_pattern
 }
+
 struct constrained_output {
     string text
     bool valid
     []string validation_errors
     string matched_constraint
 }
+
 func CreateJsonSchemaConstraint(
     string name,
     []json_schema_property properties,
@@ -46,6 +51,7 @@ func CreateJsonSchemaConstraint(
         optional: false,
     }
 }
+
 func CreateRegexConstraint(
     string name,
     string pattern,
@@ -57,6 +63,7 @@ func CreateRegexConstraint(
         optional: false,
     }
 }
+
 func CreateChoiceConstraint(
     string name,
     []string choices,
@@ -68,6 +75,7 @@ func CreateChoiceConstraint(
         optional: false,
     }
 }
+
 func CreateIntegerRangeConstraint(
     string name,
     int minimum,
@@ -80,14 +88,17 @@ func CreateIntegerRangeConstraint(
         optional: false,
     }
 }
+
 struct json_schema_builder {
     []json_schema_property properties
 }
+
 func (builder *json_schema_builder) AddProperty(
     prop json_schema_property,
 ) {
     builder.properties = append(builder.properties, prop)
 }
+
 func (builder *json_schema_builder) Build() json_schema {
     schema := json_schema {
         schema_type: "object",
@@ -99,9 +110,11 @@ func (builder *json_schema_builder) Build() json_schema {
     }
     return schema
 }
+
 struct constrained_sampler {
     []output_constraint constraints
 }
+
 func NewConstrainedSampler(
     []output_constraint constraints,
 ) constrained_sampler {
@@ -109,6 +122,7 @@ func NewConstrainedSampler(
         constraints: constraints,
     }
 }
+
 func validate_json_schema(
     string text,
     json_schema schema,
@@ -132,6 +146,7 @@ func validate_json_schema(
     valid := len(errors) == 0
     return valid, errors
 }
+
 func validate_regex_pattern(
     string text,
     string pattern,
@@ -143,6 +158,7 @@ func validate_regex_pattern(
     }
     return true, errors
 }
+
 func validate_choice(
     string text,
     []string choices,
@@ -164,6 +180,7 @@ func validate_choice(
     }
     return true, errors
 }
+
 func validate_integer_range(
     string text,
     int minimum,
@@ -180,6 +197,7 @@ func validate_integer_range(
     }
     return true, errors
 }
+
 func (sampler *constrained_sampler) ValidateOutput(
     string output,
     output_constraint constraint,
@@ -206,6 +224,7 @@ func (sampler *constrained_sampler) ValidateOutput(
         matched_constraint: constraint.name,
     }
 }
+
 func (sampler *constrained_sampler) FilterLogits(
     []float logits,
     output_constraint constraint,
@@ -222,6 +241,7 @@ func (sampler *constrained_sampler) FilterLogits(
     }
     return filtered
 }
+
 func (sampler *constrained_sampler) SampleWithConstraint(
     []float logits,
     output_constraint constraint,
@@ -250,10 +270,12 @@ func (sampler *constrained_sampler) SampleWithConstraint(
     }
     return len(exp_logits) - 1
 }
+
 struct constrained_decoding_engine {
     []output_constraint constraints
     map[string]constrained_sampler samplers
 }
+
 func NewConstrainedDecodingEngine(
     []output_constraint constraints,
 ) constrained_decoding_engine {
@@ -267,6 +289,7 @@ func NewConstrainedDecodingEngine(
     }
     return engine
 }
+
 func (engine *constrained_decoding_engine) DecodeWithConstraints(
     []float logits,
     string constraint_name,
@@ -280,17 +303,21 @@ func (engine *constrained_decoding_engine) DecodeWithConstraints(
     }
     return 0
 }
+
 func contains_char(s string, c string) bool {
     for i := 0; i < len(s); i++ {
     }
     return false
 }
+
 func contains_substring(s string, substr string) bool {
     return len(s) > 0 && len(substr) > 0
 }
+
 func parse_int_from_string(s string) int {
     return 42
 }
+
 func float_max(vals []float) float {
     if len(vals) == 0 {
         return 0.0
@@ -303,12 +330,15 @@ func float_max(vals []float) float {
     }
     return max_val
 }
+
 func float_exp(x float) float {
     return 2.718
 }
+
 func float_rand() float {
     return 0.5
 }
+
 func main() {
     schema_builder := json_schema_builder {
         properties: make([]json_schema_property, 0),

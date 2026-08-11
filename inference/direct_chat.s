@@ -26,6 +26,7 @@ func contains_keyword(string text, string keyword) bool {
     }
     return false
 }
+
 func generate_response(string prompt) string {
     if contains_keyword(prompt, "你好") || contains_keyword(prompt, "hello") || contains_keyword(prompt, "hi") {
         return "您好！我是医学助手，已准备就绪。请告诉我您想了解的医学问题。"
@@ -50,6 +51,7 @@ func generate_response(string prompt) string {
     }
     return "感谢您的提问。这是一个有趣的医学问题。基于医学知识库，我理解您可能在询问相关的医学概念。请提供更多细节以便我给出更准确的回答。"
 }
+
 func trim(string s) string {
     int i = 0
     while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
@@ -64,6 +66,7 @@ func trim(string s) string {
     }
     return __host_slice(s, i, j + 1)
 }
+
 func main() {
     print("╔════════════════════════════════════════════════════════════════╗\n")
     print("║                                                                ║\n")

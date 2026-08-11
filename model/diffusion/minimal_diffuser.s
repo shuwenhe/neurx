@@ -9,6 +9,7 @@ struct minimal_diffuser_state {
     float sample_quality
     bool trained
 }
+
 func new_minimal_diffuser_state() minimal_diffuser_state {
     minimal_diffuser_state {
         name: "minimal_diffuser",
@@ -21,6 +22,7 @@ func new_minimal_diffuser_state() minimal_diffuser_state {
         trained: true,
     }
 }
+
 func minimal_diffuser_step(minimal_diffuser_state state, float noise_level) minimal_diffuser_state {
     float next_quality = state.sample_quality + (1.0 - noise_level) * 0.01
     if next_quality > 1.0 {
@@ -37,9 +39,11 @@ func minimal_diffuser_step(minimal_diffuser_state state, float noise_level) mini
         trained: state.trained,
     }
 }
+
 func minimal_diffuser_state_dict(minimal_diffuser_state state) minimal_diffuser_state {
     state
 }
+
 func minimal_diffuser_load_state_dict(minimal_diffuser_state state, minimal_diffuser_state other) minimal_diffuser_state {
     other
 }

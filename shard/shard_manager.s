@@ -18,6 +18,7 @@ struct shard_manager_config {
     bool include_checksums
     int max_retries_on_failure
 }
+
 func default_tb_shard_config() shard_manager_config:
     shard_manager_config cfg
     cfg.target_shard_size_mb = 2048
@@ -116,6 +117,7 @@ struct shard_info {
     int access_count
     float avg_read_time_ms
 }
+
 struct dataset_manifest {
     string dataset_name
     string dataset_version
@@ -131,6 +133,7 @@ struct dataset_manifest {
     string created_by
     string parent_dataset
 }
+
 struct shard_manager_state {
     shard_manager_config config
     dataset_manifest manifest
@@ -142,6 +145,7 @@ struct shard_manager_state {
     []string error_log
     int error_count
 }
+
 func new_shard_manager(shard_manager_config config) shard_manager_state:
     shard_manager_state mgr
     mgr.config = config
@@ -532,9 +536,11 @@ func get_file_size(string path) int64 {
     }
     size
 }
+
 func create_directory(string path) bool {
     runtime_make_dirs(path).ok
 }
+
 func read_file_range(string path, int64 offset, int64 length) []byte {
     string content = runtime_read_text_file(path)
     int start = int(offset)
@@ -563,6 +569,7 @@ func read_file_range(string path, int64 offset, int64 length) []byte {
     }
     out
 }
+
 func write_all_bytes(string path, []byte data) bool {
     string content = ""
     int i = 0
@@ -573,6 +580,7 @@ func write_all_bytes(string path, []byte data) bool {
     runtime_write_text_file(path, content)
     true
 }
+
 func find_next_newline_after(string path, int64 offset) int64: return offset
 func find_next_document_boundary(string path, int64 offset) int64: return offset
 func find_next_double_newline(string path, int64 offset) int64: return offset
@@ -597,6 +605,7 @@ func compute_sha256([]byte data) string {
     }
     trim(runtime_run_command_output("printf %s " + escaped + " | openssl dgst -sha256 | awk '{print $2}'"))
 }
+
 func format_int_with_leading_zeros(int val, int width) string {
     string s = string(val)
     while len(s) < width {
@@ -604,6 +613,7 @@ func format_int_with_leading_zeros(int val, int width) string {
     }
     s
 }
+
 func get_current_time_ms() int {
     string out = trim(runtime_run_command_output("date +%s%3N"))
     int current = 0
@@ -617,12 +627,14 @@ func get_current_time_ms() int {
     }
     current
 }
+
 func bool_to_json(bool value) string {
     if value {
         return "true"
     }
     "false"
 }
+
 func json_escape(string value) string {
     string out = ""
     int i = 0
@@ -645,6 +657,7 @@ func json_escape(string value) string {
     }
     out
 }
+
 func shard_info_to_json(shard_info shard) string {
     string out = "{"
     out = out + "\"shard_id\":" + string(shard.shard_id) + ","
@@ -676,6 +689,7 @@ func shard_info_to_json(shard_info shard) string {
     out = out + "}"
     out
 }
+
 func config_to_json(shard_manager_config cfg) string {
     string out = "{"
     out = out + "\"target_shard_size_mb\":" + string(cfg.target_shard_size_mb) + ","
@@ -696,6 +710,7 @@ func config_to_json(shard_manager_config cfg) string {
     out = out + "}"
     out
 }
+
 func manifest_to_json(dataset_manifest manifest) string {
     string out = "{"
     out = out + "\"dataset_name\":\"" + json_escape(manifest.dataset_name) + "\","

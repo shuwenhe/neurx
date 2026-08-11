@@ -21,6 +21,7 @@ func main() {
     println("run with TOOLCHAIN_CMD=status|roadmap|all|help")
     return 2
 }
+
 func toolchain_command([]string args) string {
     let env_cmd = runtime_env_get("TOOLCHAIN_CMD", "")
     if env_cmd != "" {
@@ -31,6 +32,7 @@ func toolchain_command([]string args) string {
     }
     "status"
 }
+
 func toolchain_status() int {
     println("NeurX S-Only Toolchain status")
     println("")
@@ -67,11 +69,13 @@ func toolchain_roadmap() int {
     println("  - roadmap output is stable")
     0
 }
+
 func toolchain_all() int {
     println("toolchain-all is staged behind the build dispatcher")
     println("Use make build-data-scripts / make verify-dataset-s / make industrial-ops")
     0
 }
+
 func toolchain_help() int {
     println("NeurX S-Only Toolchain Coordinator")
     println("")
@@ -82,6 +86,7 @@ func toolchain_help() int {
     println("  help     Show this message")
     0
 }
+
 func print_flag(string name, bool ok) {
     if ok {
         println("  - " + name + ": ready")

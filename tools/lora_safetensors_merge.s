@@ -4,6 +4,7 @@ use neurx.runtime.io.{runtime_env_get}
 func concat(string a, string b) string {
     a + b
 }
+
 func repeat_string(string s, int times) string {
     string result
     for i in 0..times {
@@ -11,6 +12,7 @@ func repeat_string(string s, int times) string {
     }
     result
 }
+
 func print_header() {
     println("")
     println("========================================")
@@ -18,6 +20,7 @@ func print_header() {
     println("========================================")
     println("")
 }
+
 func print_config(string base_dir, string adapter_dir, string output_dir, string merger_bin) {
     println("Configuration:")
     println("  Base model dir: " + base_dir)
@@ -28,6 +31,7 @@ func print_config(string base_dir, string adapter_dir, string output_dir, string
     println("  Merger binary:  " + merger_bin)
     println("")
 }
+
 func print_lora_merge_info() {
     println("LoRA Merge Algorithm:")
     println("  W_merged = W_base + (alpha / rank) * (B @ A)")
@@ -39,6 +43,7 @@ func print_lora_merge_info() {
     println("  - B @ A:  LoRA adapter composed transformation")
     println("")
 }
+
 func print_workflow() {
     println("Merge Workflow:")
     println("  1. Load base model safetensors index")
@@ -53,15 +58,19 @@ func print_workflow() {
     println("  5. Output merged model ready for inference")
     println("")
 }
+
 func calculate_tensor_numel(int dim0, int dim1) int {
     dim0 * dim1
 }
+
 func calculate_scale_factor(float alpha, float rank) float {
     alpha / rank
 }
+
 func conceptual_lora_merge(float base_value, float lora_delta, float scale) float {
     base_value + (scale * lora_delta)
 }
+
 func describe_safetensors_format() {
     println("Safetensors Format:")
     println("  [Header Size (8 bytes, little-endian)]")
@@ -77,6 +86,7 @@ func describe_safetensors_format() {
     println("         +-- F16  (2 bytes per element)")
     println("")
 }
+
 func list_supported_adapter_types() {
     println("Supported LoRA Adapter Types:")
     println("  - Standard LoRA: lora_A and lora_B weight matrices")
@@ -84,6 +94,7 @@ func list_supported_adapter_types() {
     println("  - PEFT format: HuggingFace PEFT library format")
     println("")
 }
+
 func main() {
     print_header()
     string root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")

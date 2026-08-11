@@ -11,6 +11,7 @@ struct spec_decode_config {
     int medusa_heads
     int self_skip_layers
 }
+
 func default_spec_decode_config(int vocab_size) spec_decode_config {
     spec_decode_config {
         gamma: 5,
@@ -25,6 +26,7 @@ func default_spec_decode_config(int vocab_size) spec_decode_config {
         self_skip_layers: 16,
     }
 }
+
 func spec_softmax([]float logits, int V) []float {
     float m = logits[0]
     int i = 0
@@ -49,6 +51,7 @@ func spec_softmax([]float logits, int V) []float {
     }
     probs
 }
+
 func spec_softmax_temp([]float logits, int V, float temp) []float {
     []float scaled = []
     int i = 0
@@ -58,6 +61,7 @@ func spec_softmax_temp([]float logits, int V, float temp) []float {
     }
     spec_softmax(scaled, V)
 }
+
 func spec_top_p_sample([]float probs, int V, float top_p, int seed) int {
     int best = 0
     float best_p = probs[0]
@@ -71,6 +75,7 @@ func spec_top_p_sample([]float probs, int V, float top_p, int seed) int {
     }
     best
 }
+
 func spec_residual_sample([]float q, []float p, int V, int seed) int {
     []float diff = []
     float sum = 0.0
@@ -97,17 +102,20 @@ func spec_residual_sample([]float q, []float p, int V, int seed) int {
     }
     V - 1
 }
+
 struct spec_draft_output {
     []int   token_ids
     []float log_probs
     [][]float all_probs
 }
+
 struct spec_verify_result {
     []int accepted_tokens
     int   num_accepted
     float acceptance_rate
     bool  all_accepted
 }
+
 func spec_accept_reject(
     float q_prob,
     float p_prob,
@@ -125,6 +133,7 @@ func spec_accept_reject(
     float rand_val = pseudo_rand(seed)
     rand_val < ratio
 }
+
 func spec_verify(
     spec_draft_output draft,
     [][]float target_probs,
@@ -167,6 +176,7 @@ func spec_verify(
         all_accepted: all_ok,
     }
 }
+
 struct spec_decode_state {
     spec_decode_config cfg
     []int  token_buffer
@@ -178,6 +188,7 @@ struct spec_decode_state {
     int    step
     int    seed_state
 }
+
 func new_spec_decode_state([]int prompt_ids, spec_decode_config cfg) spec_decode_state {
     spec_decode_state {
         cfg: cfg,
@@ -191,6 +202,7 @@ func new_spec_decode_state([]int prompt_ids, spec_decode_config cfg) spec_decode
         seed_state: 42,
     }
 }
+
 struct spec_decode_step_result {
     spec_decode_state state
     []int new_tokens
@@ -198,6 +210,7 @@ struct spec_decode_step_result {
     float step_acceptance_rate
     bool  done
 }
+
 func spec_decode_step(
     spec_decode_state state,
     spec_draft_output draft,
@@ -236,6 +249,7 @@ func spec_decode_step(
         done: done,
     }
 }
+
 struct medusa_config {
     int num_heads
     int hidden_dim
@@ -244,11 +258,13 @@ struct medusa_config {
     float posterior_threshold
     float posterior_alpha
 }
+
 struct medusa_head {
     []float weight
     []float bias
     int head_idx
 }
+
 func new_medusa_head(int hidden_dim, int vocab_size, int head_idx) medusa_head {
     medusa_head {
         weight: zeros_spec(vocab_size * hidden_dim),
@@ -256,6 +272,7 @@ func new_medusa_head(int hidden_dim, int vocab_size, int head_idx) medusa_head {
         head_idx: head_idx,
     }
 }
+
 func medusa_head_forward(medusa_head head, []float hidden, int H, int V) []float {
     []float logits = zeros_spec(V)
     int j = 0
@@ -271,11 +288,13 @@ func medusa_head_forward(medusa_head head, []float hidden, int H, int V) []float
     }
     logits
 }
+
 struct medusa_output {
     [][]float head_logits
     []int     candidates
     int       tree_depth
 }
+
 func medusa_forward([]medusa_head heads, []float last_hidden, int H, int V) medusa_output {
     [][]float all_logits = []
     []int candidates = []
@@ -293,6 +312,7 @@ func medusa_forward([]medusa_head heads, []float last_hidden, int H, int V) medu
         tree_depth: len(heads),
     }
 }
+
 struct spec_perf_stats {
     float speedup_ratio
     float avg_acceptance_rate
@@ -300,6 +320,7 @@ struct spec_perf_stats {
     int total_target_calls
     float tokens_per_call
 }
+
 func compute_spec_perf(spec_decode_state state) spec_perf_stats {
     int calls = state.total_verify_calls
     if calls == 0 { calls = 1 }
@@ -319,6 +340,7 @@ func compute_spec_perf(spec_decode_state state) spec_perf_stats {
         tokens_per_call: tpc,
     }
 }
+
 func zeros_spec(int n) []float {
     []float out = []
     int i = 0
@@ -328,6 +350,7 @@ func zeros_spec(int n) []float {
     }
     out
 }
+
 func float_spec(int n) float {
     float v = 0.0
     int i = 0
@@ -337,6 +360,7 @@ func float_spec(int n) float {
     }
     v
 }
+
 func spec_exp(float x) float {
     if x > 20.0  { return 485165195.4 }
     if x < -20.0 { return 0.0 }
@@ -345,11 +369,13 @@ func spec_exp(float x) float {
     float x4 = x3 * x
     1.0 + x + x2/2.0 + x3/6.0 + x4/24.0
 }
+
 func pseudo_rand(int seed) float {
     int s = (seed * 1664525 + 1013904223) % 2147483647
     if s < 0 { s = 0 - s }
     float_spec(s % 10000) / 10000.0
 }
+
 func argmax_spec([]float arr, int n) int {
     int best = 0
     float best_v = arr[0]

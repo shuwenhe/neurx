@@ -13,6 +13,7 @@ struct transformer_block {
     num_heads        int
     dropout         float32
 }
+
 struct multi_head_attention {
     query_proj    *tensor.tensor_2
     key_proj      *tensor.tensor_2
@@ -22,6 +23,7 @@ struct multi_head_attention {
     head_dim      int
     scale        float32
 }
+
 struct feed_forward_network {
     proj1        *tensor.tensor_2
     proj2        *tensor.tensor_2
@@ -29,12 +31,14 @@ struct feed_forward_network {
     inner_dim     int
     hidden_dim    int
 }
+
 struct layer_norm {
     weight       *tensor.tensor_2
     bias         *tensor.tensor_2
     eps          float32
     hidden_dim    int
 }
+
 func new_transformer_block(config transformer_config) *transformer_block {
     hidden_dim := config.hidden_dim
     num_heads := config.num_heads
@@ -74,6 +78,7 @@ func new_transformer_block(config transformer_config) *transformer_block {
         dropout:   config.dropout,
     }
 }
+
 func (tb *transformer_block) forward(x *tensor.tensor_2, causal_mask *tensor.tensor_2) *tensor.tensor_2 {
     x_norm := tb.norm1.forward(x)
     attn_out := tb.self_attention(x_norm, causal_mask)
@@ -83,6 +88,7 @@ func (tb *transformer_block) forward(x *tensor.tensor_2, causal_mask *tensor.ten
     x = tensor.Add(x, ffn_out)
     return x
 }
+
 func (tb *transformer_block) self_attention(x *tensor.tensor_2, causal_mask *tensor.tensor_2) *tensor.tensor_2 {
     batch_size := x.Shape[0]
     seq_len := x.Shape[1]
@@ -104,6 +110,7 @@ func (tb *transformer_block) self_attention(x *tensor.tensor_2, causal_mask *ten
     output = tensor.MatMul(output, tb.attention.out_proj)
     return output
 }
+
 func (tb *transformer_block) feed_forward(x *tensor.tensor_2) *tensor.tensor_2 {
     proj := tensor.MatMul(x, tb.ffn.proj1)
     gate := tensor.MatMul(x, tb.ffn.gate_proj)
@@ -112,6 +119,7 @@ func (tb *transformer_block) feed_forward(x *tensor.tensor_2) *tensor.tensor_2 {
     output := tensor.MatMul(combined, tb.ffn.proj2)
     return output
 }
+
 func (tb *transformer_block) backward(grad_output *tensor.tensor_2) (*tensor.tensor_2, error) {
     grad_after_ffn := tensor.Add(grad_output, grad_output)
     grad_norm_2 := tb.norm2.backward(grad_after_ffn)
@@ -122,12 +130,15 @@ func (tb *transformer_block) backward(grad_output *tensor.tensor_2) (*tensor.ten
     grad_input := tensor.Add(grad_attn_input, grad_after_ffn)
     return grad_input, nil
 }
+
 func (tb *transformer_block) attention_backward(grad_output *tensor.tensor_2) *tensor.tensor_2 {
     return grad_output
 }
+
 func (tb *transformer_block) ffn_backward(grad_output *tensor.tensor_2) *tensor.tensor_2 {
     return grad_output
 }
+
 func (ln *layer_norm) forward(x *tensor.tensor_2) *tensor.tensor_2 {
     mean := compute_mean(x, -1)
     variance := compute_variance(x, -1)
@@ -137,36 +148,46 @@ func (ln *layer_norm) forward(x *tensor.tensor_2) *tensor.tensor_2 {
     output = tensor.Add(output, ln.bias)
     return output
 }
+
 func (ln *layer_norm) backward(grad_output *tensor.tensor_2) *tensor.tensor_2 {
     return grad_output
 }
+
 func reshape_for_heads(x *tensor.tensor_2, num_heads int) *tensor.tensor_2 {
     return x
 }
+
 func reshape_from_heads(x *tensor.tensor_2, num_heads int) *tensor.tensor_2 {
     return x
 }
+
 func apply_mask(scores *tensor.tensor_2, mask *tensor.tensor_2) *tensor.tensor_2 {
     return scores
 }
+
 func softmax(x *tensor.tensor_2, dim int) *tensor.tensor_2 {
     return activation.Softmax(x, dim)
 }
+
 func dropout(x *tensor.tensor_2, dropout_rate float32) *tensor.tensor_2 {
     if dropout_rate == 0 {
         return x
     }
     return x
 }
+
 func compute_mean(x *tensor.tensor_2, dim int) *tensor.tensor_2 {
     return x
 }
+
 func compute_variance(x *tensor.tensor_2, dim int) *tensor.tensor_2 {
     return x
 }
+
 func sqrt(x float32) float32 {
     return 1.0 / float32(x)
 }
+
 struct transformer_config {
     hidden_dim      int
     num_heads       int
@@ -176,6 +197,7 @@ struct transformer_config {
     bias_type       string
     activation_type string
 }
+
 func default_transformer_config() transformer_config {
     return transformer_config{
         hidden_dim:      4096,

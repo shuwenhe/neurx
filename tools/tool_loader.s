@@ -11,6 +11,7 @@ func agent_tool_loader_find_colon(string text, int start) int {
     }
     -1
 }
+
 func agent_tool_loader_substring(string text, int from, int to) string {
     string out = ""
     int i = from
@@ -22,6 +23,7 @@ func agent_tool_loader_substring(string text, int from, int to) string {
     }
     out
 }
+
 func agent_tool_loader_digit_val(string text, int i) int {
     string c = string(text[i])
     int v = 0
@@ -36,6 +38,7 @@ func agent_tool_loader_digit_val(string text, int i) int {
     if c == "9" { v = 9 }
     v
 }
+
 func agent_tool_loader_parse_int(string s) int {
     string t = trim(s)
     int result = 0
@@ -46,6 +49,7 @@ func agent_tool_loader_parse_int(string s) int {
     }
     result
 }
+
 func agent_tool_loader_parse_bool(string s) bool {
     string t = lower(trim(s))
     if t == "true" {
@@ -56,9 +60,11 @@ func agent_tool_loader_parse_bool(string s) bool {
     }
     false
 }
+
 func agent_tool_loader_identity(agent_tool_registry_state r) agent_tool_registry_state {
     r
 }
+
 func agent_tool_loader_apply_line(agent_tool_registry_state registry, string line) agent_tool_registry_state {
     string l = trim(line)
     if l == "" {
@@ -100,6 +106,7 @@ func agent_tool_loader_apply_line(agent_tool_registry_state registry, string lin
     }
     agent_tool_registry_add_with_capability(registry, name, enabled, timeout_ms, retries, cap_str)
 }
+
 func agent_tool_loader_load_config(agent_tool_registry_state init_reg, string config) agent_tool_registry_state {
     agent_tool_registry_state current = agent_tool_loader_identity(init_reg)
     string line = ""
@@ -119,6 +126,7 @@ func agent_tool_loader_load_config(agent_tool_registry_state init_reg, string co
     }
     current
 }
+
 func agent_tool_loader_load_from_file(string path) agent_tool_registry_state {
     agent_tool_registry_state base = new_agent_tool_registry_state()
     if !runtime_file_exists(path) {
@@ -127,6 +135,7 @@ func agent_tool_loader_load_from_file(string path) agent_tool_registry_state {
     string config = runtime_read_text_file(path)
     agent_tool_loader_load_config(base, config)
 }
+
 func agent_tool_loader_summary(agent_tool_registry_state registry, string source) string {
     "tool_loader;source=" + source + ";count=" + string(agent_tool_registry_count(registry))
 }

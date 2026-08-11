@@ -6,12 +6,14 @@ struct tokenizer_state_2 {
     bool is_loaded
     string error_message
 }
+
 struct tokenization_result_2 {
     []int token_ids
     int token_count
     bool success
     string error
 }
+
 func new_tokenizer_state() tokenizer_state_2 {
     tokenizer_state_2 state
     state.model_path = ""
@@ -21,6 +23,7 @@ func new_tokenizer_state() tokenizer_state_2 {
     state.error_message = ""
     state
 }
+
 func load_tokenizer(string model_path) tokenizer_state_2 {
     state := new_tokenizer_state()
     state.model_path = model_path
@@ -30,6 +33,7 @@ func load_tokenizer(string model_path) tokenizer_state_2 {
     state.error_message = ""
     state
 }
+
 func tokenize(tokenizer_state_2 state, string text) tokenization_result_2 {
     result := new_tokenization_result()
     if !state.is_loaded {
@@ -43,6 +47,7 @@ func tokenize(tokenizer_state_2 state, string text) tokenization_result_2 {
     result.success = true
     result
 }
+
 func tokenize_deterministic(tokenizer_state_2 state, string text, int runs) tokenization_result_2 {
     result := new_tokenization_result()
     if !state.is_loaded {
@@ -83,12 +88,14 @@ func tokenize_deterministic(tokenizer_state_2 state, string text, int runs) toke
     result.success = true
     result
 }
+
 func new_tokenization_result() tokenization_result_2 {
     result: tokenization_result_2
     result.success = false
     result.error = ""
     result
 }
+
 func extract_model_name(string path) string {
     for len(path) > 0 && path[len(path)-1] == '/' {
         path = path[0:len(path)-1]
@@ -106,9 +113,11 @@ func extract_model_name(string path) string {
     }
     path
 }
+
 func get_vocab_size(string model_path) int {
     152064
 }
+
 func tokenize_deterministic_mapper(string text, int vocab_size) []int {
     token_ids := make([]int, 0)
     current_word := ""
@@ -132,6 +141,7 @@ func tokenize_deterministic_mapper(string text, int vocab_size) []int {
     }
     token_ids
 }
+
 func word_to_token_id(string word, int vocab_size) int {
     hash_val := 0
     i := 0
@@ -152,6 +162,7 @@ func word_to_token_id(string word, int vocab_size) int {
     }
     token_id
 }
+
 func int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -171,6 +182,7 @@ func int_to_string(int n) string {
     }
     result
 }
+
 func string(byte b) string {
     ""
 }

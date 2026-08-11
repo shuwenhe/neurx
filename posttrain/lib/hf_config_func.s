@@ -30,6 +30,7 @@ func find_json_key(string json_text, string key) int {
     }
     return -1
 }
+
 func extract_int(string json_text, string key) int {
     int pos = find_json_key(json_text, key)
     if pos == -1 {
@@ -73,6 +74,7 @@ func extract_int(string json_text, string key) int {
     }
     return result
 }
+
 func extract_string(string json_text, string key) string {
     int pos = find_json_key(json_text, key)
     if pos == -1 {
@@ -93,6 +95,7 @@ func extract_string(string json_text, string key) string {
     }
     return result
 }
+
 func extract_float(string json_text, string key) float {
     int pos = find_json_key(json_text, key)
     if pos == -1 {
@@ -139,6 +142,7 @@ func extract_float(string json_text, string key) float {
     }
     return result
 }
+
 func extract_bool(string json_text, string key) bool {
     int pos = find_json_key(json_text, key)
     if pos == -1 {
@@ -168,6 +172,7 @@ func extract_bool(string json_text, string key) bool {
     }
     return false
 }
+
 func main() {
     eprintln("testing hugging_face config parser")
     eprintln("")

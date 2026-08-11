@@ -9,6 +9,7 @@ struct mean_std {
     float mean
     float std
 }
+
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float y = x
@@ -19,6 +20,7 @@ func sqrt_approx(float x) float {
     }
     return y
 }
+
 func compute_mean_std([][]float mat) mean_std {
     int rows = len(mat)
     if rows == 0 {

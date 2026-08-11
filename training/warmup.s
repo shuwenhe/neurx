@@ -6,6 +6,7 @@ struct warmup_scheduler {
     int current_step
     float current_lr
 }
+
 func new_warmup_scheduler(float base_lr, int warmup_steps, string warmup_mode) warmup_scheduler {
     warmup_scheduler {
         base_lr: base_lr,
@@ -15,6 +16,7 @@ func new_warmup_scheduler(float base_lr, int warmup_steps, string warmup_mode) w
         current_lr: 0.0,
     }
 }
+
 func warmup_compute_lr(warmup_scheduler sched, int step) float {
     if step >= sched.warmup_steps {
         return sched.base_lr
@@ -32,14 +34,17 @@ func warmup_compute_lr(warmup_scheduler sched, int step) float {
     float cos_out = 0.5 * (1.0 - cos_approx(3.14159265358979323846 * progress))
     return sched.base_lr * cos_out
 }
+
 func warmup_step(warmup_scheduler sched, int step) warmup_scheduler {
     sched.current_step = step
     sched.current_lr = warmup_compute_lr(sched, step)
     return sched
 }
+
 func warmup_get_lr(warmup_scheduler sched) float {
     return sched.current_lr
 }
+
 func cos_approx(float x) float {
     float x2 = x * x
     float x4 = x2 * x2

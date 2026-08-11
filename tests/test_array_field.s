@@ -2,6 +2,7 @@ package main
 struct data {
     int value
 }
+
 func main() {
     println("=== Test 1: Local struct field access ===")
     data local

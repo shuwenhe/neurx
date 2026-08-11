@@ -14,6 +14,7 @@ struct prime_config {
     int num_intermediate_rewards
     float intermediate_reward_weight
 }
+
 struct prime_state {
     tensor policy_logits
     tensor value_estimates
@@ -26,11 +27,13 @@ struct prime_state {
     float entropy
     float total_loss
 }
+
 struct process_reward_model {
     module backbone
     []module step_heads
     int num_steps
 }
+
 func new_prime_config() prime_config {
     prime_config {
         learning_rate: 1e-5,
@@ -46,6 +49,7 @@ func new_prime_config() prime_config {
         intermediate_reward_weight: 0.5,
     }
 }
+
 func prime_compute_process_rewards(
     process_reward_model rm,
     []tensor states,
@@ -62,6 +66,7 @@ func prime_compute_process_rewards(
     }
     step_rewards
 }
+
 func prime_compute_cumulative_rewards(
     []tensor step_rewards,
     float gamma,
@@ -81,6 +86,7 @@ func prime_compute_cumulative_rewards(
     }
     cumulative
 }
+
 func prime_step(
     module policy,
     module value_model,

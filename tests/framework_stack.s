@@ -6,6 +6,7 @@ func resolve_path(string root, string rel) string {
     }
     return root + "/" + rel
 }
+
 func print_path(string root, string rel) bool {
     string full = resolve_path(root, rel)
     bool ready = runtime_file_exists(full)
@@ -16,6 +17,7 @@ func print_path(string root, string rel) bool {
     println("    " + icon + " " + rel)
     ready
 }
+
 func main() {
     string root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/neurx")
     println("========================================")
@@ -123,6 +125,7 @@ func main() {
     println("status: PASS")
     0
 }
+
 func int_to_string(int n) string {
     if n == 0 {
         return "0"

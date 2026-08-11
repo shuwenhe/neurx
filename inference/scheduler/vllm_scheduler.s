@@ -144,12 +144,15 @@ func empty_scheduler_request() scheduler_request {
     request.error_message = ""
     request
 }
+
 func scheduler_request_at([]scheduler_request requests, int index) scheduler_request {
     requests[index]
 }
+
 func scheduled_request_at([]scheduled_request requests, int index) scheduled_request {
     requests[index]
 }
+
 func scheduler_remove_request_at([]scheduler_request requests, int remove_index) []scheduler_request {
     []scheduler_request filtered_requests = []scheduler_request{cap: len(requests)}
     int i = 0
@@ -161,6 +164,7 @@ func scheduler_remove_request_at([]scheduler_request requests, int remove_index)
     }
     filtered_requests
 }
+
 func scheduler_find_request([]scheduler_request requests, string request_id) int {
     int i = 0
     while i < len(requests) {
@@ -172,9 +176,11 @@ func scheduler_find_request([]scheduler_request requests, string request_id) int
     }
     -1
 }
+
 func scheduler_has_request(neurx_scheduler_state state, string request_id) bool {
     scheduler_find_request(state.waiting, request_id) >= 0 || scheduler_find_request(state.running, request_id) >= 0
 }
+
 func scheduler_effective_priority(neurx_scheduler_state state, scheduler_request request) int {
     if state.config.policy != "priority" {
         return 0 - request.arrival_tick
@@ -183,6 +189,7 @@ func scheduler_effective_priority(neurx_scheduler_state state, scheduler_request
     if waited < 0 { waited = 0 }
     request.priority + waited / state.config.priority_aging_interval
 }
+
 func scheduler_best_waiting_index(neurx_scheduler_state state) int {
     if len(state.waiting) == 0 { return -1 }
     int best_index = 0
@@ -201,6 +208,7 @@ func scheduler_best_waiting_index(neurx_scheduler_state state) int {
     }
     best_index
 }
+
 func scheduler_submit(neurx_scheduler_state state, string request_id, int prompt_tokens, int max_new_tokens, int priority, []string prefix_hashes, string adapter_id) scheduler_update_result {
     scheduler_update_result result
     result.state = state
@@ -238,9 +246,11 @@ func scheduler_submit(neurx_scheduler_state state, string request_id, int prompt
     result.success = true
     result
 }
+
 func scheduler_request_is_prefill(scheduler_request request) bool {
     request.computed_tokens < request.prompt_tokens
 }
+
 func scheduler_request_remaining(scheduler_request request) int {
     if scheduler_request_is_prefill(request) {
         return request.prompt_tokens - request.computed_tokens
@@ -249,6 +259,7 @@ func scheduler_request_remaining(scheduler_request request) int {
     if remaining < 0 { return 0 }
     remaining
 }
+
 func scheduler_chunk_size(neurx_scheduler_state state, scheduler_request request, int token_budget) int {
     int remaining = scheduler_request_remaining(request)
     if remaining <= 0 || token_budget <= 0 { return 0 }
@@ -266,6 +277,7 @@ func scheduler_chunk_size(neurx_scheduler_state state, scheduler_request request
     if tokens > token_budget { tokens = token_budget }
     tokens
 }
+
 func scheduler_lowest_priority_running(neurx_scheduler_state state, string protected_request_id, []string scheduled_ids) int {
     int selected_index = -1
     int selected_score = 2147483647
@@ -289,6 +301,7 @@ func scheduler_lowest_priority_running(neurx_scheduler_state state, string prote
     }
     selected_index
 }
+
 func scheduler_preempt_at(neurx_scheduler_state state, int running_index) neurx_scheduler_state {
     if running_index < 0 || running_index >= len(state.running) { return state }
     scheduler_request victim = scheduler_request_at(state.running, running_index)
@@ -302,6 +315,7 @@ func scheduler_preempt_at(neurx_scheduler_state state, int running_index) neurx_
     state.total_preemptions = state.total_preemptions + 1
     state
 }
+
 func scheduler_copy_block_ids(request_block_table table) []int {
     []int copied_ids = []int{cap: len(table.block_ids)}
     int i = 0
@@ -311,6 +325,7 @@ func scheduler_copy_block_ids(request_block_table table) []int {
     }
     copied_ids
 }
+
 func scheduler_make_scheduled(scheduler_request request, int token_count, bool new_request, bool resumed, request_block_table table) scheduled_request {
     scheduled_request scheduled
     scheduled.request_id = request.request_id
@@ -322,6 +337,7 @@ func scheduler_make_scheduled(scheduler_request request, int token_count, bool n
     scheduled.block_ids = scheduler_copy_block_ids(table)
     scheduled
 }
+
 func scheduler_schedule_running(neurx_scheduler_state state, scheduler_step_output output, int token_budget) scheduler_step_result {
     []string scheduled_ids = []
     int phase = 0
@@ -382,6 +398,7 @@ func scheduler_schedule_running(neurx_scheduler_state state, scheduler_step_outp
     result.output = output
     result
 }
+
 func scheduler_schedule_waiting(neurx_scheduler_state state, scheduler_step_output output, int token_budget) scheduler_step_result {
     while len(state.waiting) > 0 && len(state.running) < state.config.max_running_requests && token_budget > 0 {
         int waiting_index = scheduler_best_waiting_index(state)
@@ -434,6 +451,7 @@ func scheduler_schedule_waiting(neurx_scheduler_state state, scheduler_step_outp
     result.output = output
     result
 }
+
 func scheduler_step(neurx_scheduler_state state) scheduler_step_result {
     scheduler_step_output output
     output.requests = []
@@ -466,6 +484,7 @@ func scheduler_step(neurx_scheduler_state state) scheduler_step_result {
     result.output = output
     result
 }
+
 func scheduler_finish_running(neurx_scheduler_state state, int running_index, int terminal_status, string error_message) scheduler_update_result {
     scheduler_request request = scheduler_request_at(state.running, running_index)
     request.status = terminal_status
@@ -482,6 +501,7 @@ func scheduler_finish_running(neurx_scheduler_state state, int running_index, in
     result.error_message = ""
     result
 }
+
 func scheduler_apply_output(neurx_scheduler_state state, string request_id, int computed_tokens, int generated_tokens, bool eos, string error_message) scheduler_update_result {
     int running_index = scheduler_find_request(state.running, request_id)
     if running_index < 0 {
@@ -521,6 +541,7 @@ func scheduler_apply_output(neurx_scheduler_state state, string request_id, int 
     result.error_message = ""
     result
 }
+
 func scheduler_cancel(neurx_scheduler_state state, string request_id) scheduler_update_result {
     int waiting_index = scheduler_find_request(state.waiting, request_id)
     if waiting_index >= 0 {
@@ -548,10 +569,12 @@ func scheduler_cancel(neurx_scheduler_state state, string request_id) scheduler_
     missing.error_message = "request not found"
     missing
 }
+
 func scheduler_set_paused(neurx_scheduler_state state, bool paused) neurx_scheduler_state {
     state.paused = paused
     state
 }
+
 func scheduler_unfinished_count(neurx_scheduler_state state) int {
     len(state.waiting) + len(state.running)
 }

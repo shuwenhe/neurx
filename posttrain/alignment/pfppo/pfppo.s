@@ -17,6 +17,7 @@ struct pfppo_config {
     reuse_count: i32
     buffer_sample_ratio: f32
 }
+
 struct experience {
     prompt: tensor
     response: tensor
@@ -28,6 +29,7 @@ struct experience {
     done: bool
     timestep: i32
 }
+
 struct replay_buffer {
     capacity: i32
     experiences: []experience
@@ -35,6 +37,7 @@ struct replay_buffer {
     current_size: i32
     insertion_index: i32
 }
+
 func new_replay_buffer(capacity: i32) -> replay_buffer {
     return replay_buffer{
         capacity: capacity,
@@ -44,6 +47,7 @@ func new_replay_buffer(capacity: i32) -> replay_buffer {
         insertion_index: 0,
     }
 }
+
 func (buffer: *replay_buffer) add(exp: experience, reward: f32) {
     if buffer.current_size < buffer.capacity {
         buffer.experiences.push(exp)
@@ -55,6 +59,7 @@ func (buffer: *replay_buffer) add(exp: experience, reward: f32) {
     }
     buffer.insertion_index = (buffer.insertion_index + 1) % buffer.capacity
 }
+
 func (buffer: *replay_buffer) sample(n: i32) -> []experience {
     if buffer.current_size == 0 {
         return []
@@ -67,6 +72,7 @@ func (buffer: *replay_buffer) sample(n: i32) -> []experience {
     }
     return sampled
 }
+
 func (buffer: *replay_buffer) filter_by_reward(threshold: f32, percentile: f32) {
     if buffer.current_size == 0 {
         return
@@ -91,6 +97,7 @@ func (buffer: *replay_buffer) filter_by_reward(threshold: f32, percentile: f32) 
     buffer.current_size = filtered_exps.len()
     buffer.insertion_index = 0
 }
+
 func (buffer: *replay_buffer) get_statistics() -> (f32, f32, f32) {
     if buffer.current_size == 0 {
         return 0.0, 0.0, 0.0
@@ -105,6 +112,7 @@ func (buffer: *replay_buffer) get_statistics() -> (f32, f32, f32) {
     }
     return mean, std, max_reward
 }
+
 struct pfppo_trainer {
     config: pfppo_config
     policy_model: *model
@@ -116,6 +124,7 @@ struct pfppo_trainer {
     filtered_count: i32
     total_count: i32
 }
+
 func new_pfppo_trainer(
     config: pfppo_config,
     policy: *model,
@@ -139,6 +148,7 @@ func new_pfppo_trainer(
         total_count: 0,
     }
 }
+
 func (trainer: *pfppo_trainer) collect_experiences(prompts: []tensor) -> []experience {
     let experiences: []experience = []
     for prompt in prompts {
@@ -175,6 +185,7 @@ func (trainer: *pfppo_trainer) collect_experiences(prompts: []tensor) -> []exper
     }
     return experiences
 }
+
 func (trainer: *pfppo_trainer) compute_gae(experiences: []experience) {
     for exp in experiences {
         let T = exp.rewards.shape[0]
@@ -195,6 +206,7 @@ func (trainer: *pfppo_trainer) compute_gae(experiences: []experience) {
         exp.returns = returns
     }
 }
+
 func (trainer: *pfppo_trainer) train_step(new_prompts: []tensor) -> (f32, f32, f32) {
     let new_experiences = trainer.collect_experiences(new_prompts)
     let buffer_sample_size = i32(
@@ -258,6 +270,7 @@ func (trainer: *pfppo_trainer) train_step(new_prompts: []tensor) -> (f32, f32, f
         total_kl / f32(num_updates)
     )
 }
+
 func (trainer: *pfppo_trainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let value_losses: []f32 = []
@@ -280,6 +293,7 @@ func (trainer: *pfppo_trainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     }
     return policy_losses, value_losses
 }
+
 func compute_reward(prompt: tensor, response: tensor) -> f32 {
     return random_uniform(-1.0, 1.0)
 }
