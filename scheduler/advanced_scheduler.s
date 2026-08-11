@@ -147,7 +147,7 @@ func select_requests_for_prefill([][]int requests, []int scheduler_state, int cu
     if policy == 0 {
 
         int count = 0
-        []int result = []
+        []int result = []int{}
         i = 0
         for i < len(candidates) {
             if count >= max_prefill {
@@ -177,13 +177,15 @@ func select_requests_for_prefill([][]int requests, []int scheduler_state, int cu
 
         if len(candidates) > 0 {
             []int result = []
-            result = append(result, candidates[min_idx])
+            int min_element = candidates[min_idx]
+            result = append(result, min_element)
             return result
         }
-        return []
+        []int empty_result = []int{}
+        return empty_result
     }
 
-    []int result = []
+    []int result = []int{}
     int count = 0
     i = 0
     for i < len(candidates) {
@@ -201,7 +203,7 @@ func select_requests_for_decode([][]int requests, []int scheduler_state) []int {
     int max_decode = get_max_decode(scheduler_state)
     int policy = get_policy(scheduler_state)
 
-    []int candidates = []
+    []int candidates = []int{}
     int i = 0
     for i < len(requests) {
         if requests[i][1] == 2 {
@@ -227,13 +229,14 @@ func select_requests_for_decode([][]int requests, []int scheduler_state) []int {
 
         if len(candidates) > 0 {
             []int result = []
-            result = append(result, candidates[min_idx])
+            int min_element = candidates[min_idx]
+            result = append(result, min_element)
             return result
         }
         return []
     }
 
-    []int result = []
+    []int result = []int{}
     int count = 0
     i = 0
     for i < len(candidates) {

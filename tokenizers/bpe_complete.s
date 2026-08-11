@@ -157,10 +157,14 @@ func tokenize_add_special_tokens([]int tokens) []int {
     int sos = get_sos_token()
     int eos = get_eos_token()
 
-    []int with_special = []
-    with_special = append(with_special, sos)
-
+    []int with_special = []int{}
     int i = 0
+
+    i = 0
+    int first_elem = sos
+    with_special = append(with_special, first_elem)
+
+    i = 0
     for i < len(tokens) {
         with_special = append(with_special, tokens[i])
         i = i + 1

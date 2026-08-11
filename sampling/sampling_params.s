@@ -5,7 +5,7 @@ func apply_temperature([]float logits, float temperature) []float {
         return logits
     }
 
-    []float scaled = []
+    []float scaled = []float{}
     int i = 0
     for i < len(logits) {
         float scaled_val = logits[i] / temperature
@@ -24,7 +24,7 @@ func top_k_filter([]float logits, int k) []float {
         return logits
     }
 
-    []float result = []
+    []float result = []float{}
     int i = 0
     for i < len(logits) {
         if i < k {
@@ -43,7 +43,7 @@ func top_p_filter([]float logits, float top_p) []float {
     }
 
     if top_p <= 0.0 {
-        []float filtered = []
+        []float filtered = []float{}
         int i = 0
         for i < len(logits) {
             filtered = append(filtered, -10000.0)
@@ -67,7 +67,7 @@ func top_p_filter([]float logits, float top_p) []float {
         i = i + 1
     }
 
-    []float result = []
+    []float result = []float{}
     i = 0
     for i < total {
         if i <= threshold_idx {
@@ -85,7 +85,7 @@ func apply_repetition_penalty([]float logits, []int prev_tokens, float penalty) 
         return logits
     }
 
-    []float penalized = []
+    []float penalized = []float{}
     int i = 0
     for i < len(logits) {
         int j = 0
@@ -117,7 +117,7 @@ func apply_frequency_penalty([]float logits, []int prev_tokens, float alpha) []f
         return logits
     }
 
-    []int token_counts = []
+    []int token_counts = []int{}
     int vocab_size = len(logits)
     int i = 0
     for i < vocab_size {
@@ -134,7 +134,7 @@ func apply_frequency_penalty([]float logits, []int prev_tokens, float alpha) []f
         j = j + 1
     }
 
-    []float penalized = []
+    []float penalized = []float{}
     i = 0
     for i < vocab_size {
         float penalty_amount = float(token_counts[i]) * alpha
@@ -161,7 +161,7 @@ func min_p_filter([]float logits, float min_p) []float {
 
     float threshold = min_p * max_logit
 
-    []float result = []
+    []float result = []float{}
     i = 0
     for i < len(logits) {
         if logits[i] >= threshold {
@@ -198,7 +198,7 @@ func contains_stop_sequence([]int tokens, []int stop_seq) bool {
 }
 
 func filter_bad_words([]float logits, []int bad_tokens) []float {
-    []float filtered = []
+    []float filtered = []float{}
     int i = 0
     for i < len(logits) {
         int j = 0
@@ -222,7 +222,8 @@ func filter_bad_words([]float logits, []int bad_tokens) []float {
 }
 
 func new_sampling_config(float temp, int top_k, float top_p) []float {
-    []float config = []float{temp, float(top_k), top_p, 0.0, 0.0, 0.0}
+    float top_k_float = float(top_k)
+    []float config = []float{temp, top_k_float, top_p, 0.0, 0.0, 0.0}
     return config
 }
 
@@ -301,17 +302,21 @@ func softmax_logits([]float logits) []float {
         i = i + 1
     }
 
-    []float exp_vals = []
+    []float exp_vals = []float{}
     float sum_exp = 0.0
     i = 0
     for i < len(logits) {
-        float exp_val = 2.718281828 ^ (logits[i] - max_logit)
+        float diff = logits[i] - max_logit
+        float exp_val = 1.0 + diff + (diff * diff / 2.0) + (diff * diff * diff / 6.0) + (diff * diff * diff * diff / 24.0)
+        if exp_val < 0.0 {
+            exp_val = 0.00001
+        }
         exp_vals = append(exp_vals, exp_val)
         sum_exp = sum_exp + exp_val
         i = i + 1
     }
 
-    []float probs = []
+    []float probs = []float{}
     i = 0
     for i < len(exp_vals) {
         float prob = exp_vals[i] / sum_exp
