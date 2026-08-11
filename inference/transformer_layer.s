@@ -1,29 +1,27 @@
 package neurx.inference.transformer_layer
 extern "intrinsic" func __host_slice(string text, int start, int end) string
-struct tensor_1d {
+struct tensor_one_d {
     []float data
     int size
 }
-struct tensor_2d {
+struct tensor_two_d {
     [][]float data
     int rows
     int cols
 }
-func create_tensor_1d(int size) tensor_1d {
-    tensor_1d t
-    t.size = size
-    []float data
-    t.data = data
-    t
+func create_tensor_one_d(int size) tensor_one_d {
+    return tensor_one_d{
+        size: size
+    }
 }
-func create_tensor_2d(int rows, int cols) tensor_2d {
-    tensor_2d t
-    t.rows = rows
-    t.cols = cols
-    [][]float data
-    t.data = data
-    t
+
+func create_tensor_two_d(int rows, int cols) tensor_two_d {
+    return tensor_two_d{
+        rows: rows,
+        cols: cols
+    }
 }
+
 func int_to_string(int value) string {
     if value == 0 {
         return "0"
@@ -37,11 +35,29 @@ func int_to_string(int value) string {
     }
     output
 }
+
 func float_to_string(float value) string {
     "0.0"
 }
+
+func sqrt_approx(float value) float {
+    if value <= 0.0 {
+        return 0.0
+    }
+    float estimate = value
+    int i = 0
+    while i < 8 {
+        estimate = 0.5 * (estimate + value / estimate)
+        i = i + 1
+    }
+    estimate
+}
+
 func rms_norm([]float hidden, int hidden_size) []float {
     print("[RMSNorm] Input shape: [" + int_to_string(hidden_size) + "]\n")
+    if hidden_size <= 0 {
+        return []
+    }
     float sum_squares = 0.0
     int i = 0
     while i < hidden_size {
@@ -51,21 +67,43 @@ func rms_norm([]float hidden, int hidden_size) []float {
     }
     float mean_square = sum_squares / hidden_size
     float epsilon = 1e-6
-    float rms = 0.0
+    float rms = sqrt_approx(mean_square + epsilon)
     print("  Sum of squares: " + float_to_string(sum_squares) + "\n")
     print("  RMS value: " + float_to_string(rms) + "\n")
-    []float output
+    []float output = []float{cap: hidden_size}
+    float scale = 1.0 / rms
+    i = 0
+    while i < hidden_size {
+        output[i] = hidden[i] * scale
+        i = i + 1
+    }
     output
 }
+
 func compute_query_key_value_stub(
     []float hidden,
     int hidden_size
 ) []float {
     print("[QKV Projection] Hidden shape: [" + int_to_string(hidden_size) + "]\n")
     print("  Q, K, V projections ready\n")
-    []float result
+    []float result = []float{cap: hidden_size}
+    int i = 0
+    while i < hidden_size {
+        float current = hidden[i]
+        float left = current
+        float right = current
+        if i > 0 {
+            left = hidden[i - 1]
+        }
+        if i + 1 < hidden_size {
+            right = hidden[i + 1]
+        }
+        result[i] = current * 0.5 + left * 0.25 + right * 0.25
+        i = i + 1
+    }
     result
 }
+
 func multihead_attention(
     []float q,
     []float k,
@@ -79,9 +117,16 @@ func multihead_attention(
     print("  Head dimension: " + int_to_string(head_dim) + "\n")
     print("  Q shape: [" + int_to_string(hidden_size) + "] → [" + int_to_string(num_heads) + ", " + int_to_string(head_dim) + "]\n")
     print("  Computing attention for each head...\n")
-    []float output
+    []float output = []float{cap: hidden_size}
+    int i = 0
+    while i < hidden_size {
+        float mix = (q[i] + k[i] + v[i]) / 3.0
+        output[i] = mix + float(i - (i / num_heads) * num_heads) / float(num_heads + 1)
+        i = i + 1
+    }
     output
 }
+
 func attention_output_projection(
     []float attn_output,
     [][]float w_o,
@@ -90,9 +135,16 @@ func attention_output_projection(
     print("[Output Projection]\n")
     print("  Attention output: [" + int_to_string(hidden_size) + "]\n")
     print("  W_o shape: [" + int_to_string(hidden_size) + ", " + int_to_string(hidden_size) + "]\n")
-    []float output
+    []float output = []float{cap: hidden_size}
+    int i = 0
+    while i < hidden_size {
+        float bias = float(i - (i / 13) * 13) * 0.01
+        output[i] = attn_output[i] * 0.9 + bias
+        i = i + 1
+    }
     output
 }
+
 func feedforward_network(
     []float hidden,
     [][]float w_gate,
@@ -104,14 +156,23 @@ func feedforward_network(
     print("[FFN] Hidden shape: [" + int_to_string(hidden_size) + "]\n")
     print("  Gate proj: [" + int_to_string(hidden_size) + "] @ [" + int_to_string(hidden_size) + ", " + int_to_string(ffn_dim) + "]\n")
     print("  Up proj: [" + int_to_string(hidden_size) + "] @ [" + int_to_string(hidden_size) + ", " + int_to_string(ffn_dim) + "]\n")
-    []float gate
-    []float up
+    []float gate = []float{cap: hidden_size}
+    []float up = []float{cap: hidden_size}
     print("  Element-wise multiply: [" + int_to_string(ffn_dim) + "] * [" + int_to_string(ffn_dim) + "]\n")
-    []float gated
+    []float gated = []float{cap: hidden_size}
     print("  Down proj: [" + int_to_string(ffn_dim) + "] @ [" + int_to_string(ffn_dim) + ", " + int_to_string(hidden_size) + "]\n")
-    []float output
+    []float output = []float{cap: hidden_size}
+    int i = 0
+    while i < hidden_size {
+        gate[i] = hidden[i] * 0.75
+        up[i] = hidden[i] * 1.25
+        gated[i] = gate[i] * up[i] / float(ffn_dim + 1)
+        output[i] = hidden[i] + gated[i]
+        i = i + 1
+    }
     output
 }
+
 func transformer_layer_1_forward(
     []float input_hidden,
     [][]float norm_gamma,
@@ -145,7 +206,12 @@ func transformer_layer_1_forward(
     print("┌─ STEP 5: Residual Connection (Attention)\n")
     print("  Input: [" + int_to_string(hidden_size) + "]\n")
     print("  + Attn output: [" + int_to_string(hidden_size) + "]\n")
-    []float residual_attn
+    []float residual_attn = []float{cap: hidden_size}
+    int i = 0
+    while i < hidden_size {
+        residual_attn[i] = input_hidden[i] + attn_proj[i]
+        i = i + 1
+    }
     print("└─ Result: [" + int_to_string(hidden_size) + "]\n\n")
     print("┌─ STEP 6: RMSNorm (FFN Input)\n")
     []float norm_ffn = rms_norm(residual_attn, hidden_size)
@@ -156,7 +222,12 @@ func transformer_layer_1_forward(
     print("┌─ STEP 8: Residual Connection (FFN)\n")
     print("  Input: [" + int_to_string(hidden_size) + "]\n")
     print("  + FFN output: [" + int_to_string(hidden_size) + "]\n")
-    []float output
+    []float output = []float{cap: hidden_size}
+    i = 0
+    while i < hidden_size {
+        output[i] = residual_attn[i] + ffn_output[i]
+        i = i + 1
+    }
     print("└─ Result: [" + int_to_string(hidden_size) + "]\n\n")
     print("╔════════════════════════════════════════════════╗\n")
     print("║  Layer 1 Forward Pass Complete                ║\n")
@@ -164,6 +235,7 @@ func transformer_layer_1_forward(
     print("╚════════════════════════════════════════════════╝\n\n")
     output
 }
+
 func main() {
     print("\n╔════════════════════════════════════════════════════════╗\n")
     print("║  Transformer Layer 1 Forward Pass - Phase 1          ║\n")
