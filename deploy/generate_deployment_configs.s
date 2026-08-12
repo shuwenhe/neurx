@@ -3,6 +3,7 @@ use std.io
 use std.strings
 use std.path
 use std.env
+
 struct deployment_config {
     cluster_name: string
     num_nodes: i32
