@@ -1,17 +1,27 @@
 package neurx.inference.production
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_file, trim, println, printf}
+
 func vocab_size() int { return 151936 }
+
 func hidden_dim() int { return 896 }
+
 func num_layers() int { return 24 }
+
 func num_heads() int { return 14 }
+
 func head_dim() int { return 64 }
+
 func intermediate_size() int { return 3584 }
+
 func max_seq_len() int { return 2048 }
+
 func context_len() int { return 512 }
+
 struct vec {
     []float data
     int size
 }
+
 
 struct matrix {
     []float data
@@ -19,11 +29,13 @@ struct matrix {
     int cols
 }
 
+
 struct attention_cache {
     [][]float key_cache
     [][]float value_cache
     int cache_size
 }
+
 
 struct model_weights {
     []matrix embed_tokens
@@ -39,6 +51,7 @@ struct model_weights {
     matrix final_norm_weight
 }
 
+
 struct inference_state {
     []float hidden_states
     []float attention_output
@@ -48,6 +61,7 @@ struct inference_state {
     int generated_tokens
     int sequence_length
 }
+
 
 func matmul_vec_optimized(matrix m, []float v, []float out) {
     int rows = m.rows
@@ -67,6 +81,7 @@ func matmul_vec_optimized(matrix m, []float v, []float out) {
     }
 }
 
+
 func dot_product([]float a, []float b, int len) float {
     float result = 0.0
     int i = 0
@@ -76,6 +91,7 @@ func dot_product([]float a, []float b, int len) float {
     }
     result
 }
+
 
 func rms_norm_optimized([]float x, []float weight, []float out, int dim) {
     float sum_sq = 0.0
@@ -93,6 +109,7 @@ func rms_norm_optimized([]float x, []float weight, []float out, int dim) {
         i = i + 1
     }
 }
+
 
 func softmax_optimized([]float logits, []float probs, int dim) {
     float max_val = logits[0]
@@ -118,6 +135,7 @@ func softmax_optimized([]float logits, []float probs, int dim) {
     }
 }
 
+
 func exp(float x) float {
     if x < -20.0 {
         return 0.0
@@ -128,6 +146,7 @@ func exp(float x) float {
     float result = 1.0 + x + x*x*0.5 + x*x*x*0.16667 + x*x*x*x*0.04167
     result
 }
+
 
 func multi_head_attention_cached(
     []float hidden_state,
@@ -194,6 +213,7 @@ func multi_head_attention_cached(
     matmul_vec_optimized(weights.out_proj_weight[layer_idx], attn_output, output)
 }
 
+
 func feed_forward_network(
     []float hidden_state,
     model_weights weights,
@@ -213,6 +233,7 @@ func feed_forward_network(
     }
     matmul_vec_optimized(weights.down_proj_weight[layer_idx], gate_out, output)
 }
+
 
 func transformer_layer_forward(
     []float input_hidden,
@@ -241,6 +262,7 @@ func transformer_layer_forward(
         i = i + 1
     }
 }
+
 
 func model_forward(
     int token_id,
@@ -293,6 +315,7 @@ func model_forward(
     max_idx
 }
 
+
 func tokenize(string text) []int {
     []int tokens = allocate(len(text) + 2)
     tokens[0] = 0
@@ -305,12 +328,14 @@ func tokenize(string text) []int {
     tokens
 }
 
+
 func decode_token(int token_id) string {
     if token_id >= 100 && token_id < 256 {
         return string(token_id - 100)
     }
     return ""
 }
+
 
 func generate(
     string prompt,
@@ -349,6 +374,7 @@ func generate(
     generated
 }
 
+
 func main() {
     println("")
     println("╔════════════════════════════════════════════════════════════════╗")
@@ -382,10 +408,12 @@ func main() {
     println("✓ Inference complete")
 }
 
+
 func allocate(int size) []float {
     []float out
     out
 }
+
 
 func sqrt(float x) float {
     if x < 0.0 {
@@ -402,3 +430,4 @@ func sqrt(float x) float {
     }
     guess
 }
+

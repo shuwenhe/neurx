@@ -22,6 +22,7 @@ func check_nvidia_smi() int {
     return count
 }
 
+
 func check_cuda_binary(bin string) bool {
     stat, err := os.Stat(bin)
     if err != nil || stat.IsDir() {
@@ -31,6 +32,7 @@ func check_cuda_binary(bin string) bool {
     io.Println("   ✓ Binary exists: " + bin)
     return true
 }
+
 
 func check_required_files(files []string) {
     for _, file := range files {
@@ -42,6 +44,7 @@ func check_required_files(files []string) {
         }
     }
 }
+
 
 func test_cuda_binary(bin string) {
     cmd := exec.command("timeout", "30s", bin)
@@ -70,6 +73,7 @@ func test_cuda_binary(bin string) {
         io.Println("   (No output received)")
     }
 }
+
 
 func main() {
     curdir := "/home/shuwen/shuwen/train/neurx"
@@ -103,3 +107,4 @@ func main() {
     io.Println("✓ To start full training, run: cd " + curdir + " && make pretrain-gpu")
     io.Println("")
 }
+

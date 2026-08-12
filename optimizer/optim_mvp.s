@@ -5,6 +5,7 @@ struct sgd_optimizer {
     float lr
 }
 
+
 struct adam_optimizer {
     float lr
     float beta1
@@ -17,6 +18,7 @@ struct adam_optimizer {
     []float v
 }
 
+
 struct rmsprop_optimizer {
     float lr
     float alpha
@@ -24,21 +26,25 @@ struct rmsprop_optimizer {
     []float avg
 }
 
+
 struct adam_step_output {
     adam_optimizer optimizer
     tensor params
 }
+
 
 struct rmsprop_step_output {
     rmsprop_optimizer optimizer
     tensor params
 }
 
+
 func new_sgd(float lr) sgd_optimizer {
     sgd_optimizer {
         lr: lr,
     }
 }
+
 
 func new_adam(float lr, float beta1, float beta2, float eps) adam_optimizer {
     adam_optimizer {
@@ -54,6 +60,7 @@ func new_adam(float lr, float beta1, float beta2, float eps) adam_optimizer {
     }
 }
 
+
 func new_rmsprop(float lr, float alpha, float eps) rmsprop_optimizer {
     rmsprop_optimizer {
         lr: lr,
@@ -62,6 +69,7 @@ func new_rmsprop(float lr, float alpha, float eps) rmsprop_optimizer {
         avg: [],
     }
 }
+
 
 func inv_sqrt(float x) float {
     if x <= 0.0 {
@@ -74,6 +82,7 @@ func inv_sqrt(float x) float {
     y
 }
 
+
 func ensure_size([]float values, int n) []float {
     if len(values) == n {
         return values
@@ -85,6 +94,7 @@ func ensure_size([]float values, int n) []float {
     out
 }
 
+
 func step_tensor(sgd_optimizer optimizer, tensor params, tensor grads) tensor {
     int n = len(params.data)
     []float out = []float{cap: n}
@@ -93,6 +103,7 @@ func step_tensor(sgd_optimizer optimizer, tensor params, tensor grads) tensor {
     }
     new(out, params.shape, params.requires_grad)
 }
+
 
 func adam_step(adam_optimizer optimizer, tensor params, tensor grads) adam_step_output {
     int n = len(params.data)
@@ -132,6 +143,7 @@ func adam_step(adam_optimizer optimizer, tensor params, tensor grads) adam_step_
     }
 }
 
+
 func rmsprop_step(rmsprop_optimizer optimizer, tensor params, tensor grads) rmsprop_step_output {
     int n = len(params.data)
     []float avg = ensure_size(optimizer.avg, n)
@@ -153,3 +165,4 @@ func rmsprop_step(rmsprop_optimizer optimizer, tensor params, tensor grads) rmsp
         params: new(out, params.shape, params.requires_grad),
     }
 }
+

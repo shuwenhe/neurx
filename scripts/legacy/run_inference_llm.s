@@ -22,6 +22,7 @@ func main() {
     0
 }
 
+
 func print_flag(string name, bool ok) {
     if ok {
         println("  - " + name + ": ready")
@@ -29,3 +30,4 @@ func print_flag(string name, bool ok) {
         println("  - " + name + ": missing")
     }
 }
+

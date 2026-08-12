@@ -15,6 +15,7 @@ struct train_config {
     log_interval: int
 }
 
+
 func get_default_config() train_config {
     config := train_config{
         vocab_size: 256,
@@ -31,6 +32,7 @@ func get_default_config() train_config {
     config
 }
 
+
 func load_shard_data(shard_path: string) []int {
     content, _ := os.ReadFile(shard_path)
     tokens := make([]int, 0)
@@ -39,6 +41,7 @@ func load_shard_data(shard_path: string) []int {
     }
     tokens
 }
+
 
 func main() {
     config := get_default_config()
@@ -108,3 +111,4 @@ func main() {
     }
     fmt.Printf("[✓ Complete] training finished - steps: %d, loss: %.6f\n", total_steps, total_loss)
 }
+

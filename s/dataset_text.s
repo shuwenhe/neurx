@@ -11,6 +11,7 @@ struct text_corpus_state {
     int token_count
 }
 
+
 func copy_ints([]int values) []int {
     []int out = []int{cap: len(values)}
     int i = 0
@@ -20,6 +21,7 @@ func copy_ints([]int values) []int {
     }
     out
 }
+
 
 func has_string([]string values, string target) bool {
     int i = 0
@@ -31,6 +33,7 @@ func has_string([]string values, string target) bool {
     }
     false
 }
+
 
 func count_lines(string text) int {
     int n = len(text)
@@ -52,6 +55,7 @@ func count_lines(string text) int {
     }
     lines
 }
+
 
 func split_lines(string text) []string {
     int n = len(text)
@@ -98,6 +102,7 @@ func split_lines(string text) []string {
     out
 }
 
+
 func build_vocab(string text) []string {
     int n = len(text)
     []string vocab = []string{cap: n}
@@ -114,6 +119,7 @@ func build_vocab(string text) []string {
     vocab
 }
 
+
 func vocab_index([]string vocab, string ch) int {
     int i = 0
     while i < len(vocab) {
@@ -124,6 +130,7 @@ func vocab_index([]string vocab, string ch) int {
     }
     -1
 }
+
 
 func encode_text(string text, []string vocab) []int {
     int n = len(text)
@@ -144,6 +151,7 @@ func encode_text(string text, []string vocab) []int {
     }
     token_ids
 }
+
 
 func load_text_corpus(string path) text_corpus_state {
     if !neurx.runtime.io.runtime_file_exists(path) {
@@ -177,6 +185,7 @@ func load_text_corpus(string path) text_corpus_state {
     state
 }
 
+
 func text_corpus_state_dict(text_corpus_state state) text_corpus_state {
     text_corpus_state {
         path: state.path,
@@ -190,6 +199,7 @@ func text_corpus_state_dict(text_corpus_state state) text_corpus_state {
     }
 }
 
+
 func text_corpus_load_state_dict(text_corpus_state state, text_corpus_state other) text_corpus_state {
     text_corpus_state {
         path: other.path,
@@ -202,3 +212,4 @@ func text_corpus_load_state_dict(text_corpus_state state, text_corpus_state othe
         token_count: other.token_count,
     }
 }
+

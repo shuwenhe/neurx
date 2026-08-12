@@ -7,6 +7,7 @@ struct cuda_device {
     int memory_total_mb
 }
 
+
 struct cuda_bridge {
     int rank
     int local_rank
@@ -16,6 +17,7 @@ struct cuda_bridge {
     bool initialized
     int nccl_comm_id
 }
+
 
 func new_cuda_bridge(
     rank int,
@@ -40,6 +42,7 @@ func new_cuda_bridge(
     }
 }
 
+
 func query_cuda_device(int device_id) cuda_device {
     cuda_device {
         device_id: device_id,
@@ -50,19 +53,24 @@ func query_cuda_device(int device_id) cuda_device {
     }
 }
 
+
 func cuda_set_device(int device_id) {
 }
 
+
 func cuda_device_synchronize() {
 }
+
 
 func cuda_get_device_memory_info() (int, int) {
     (12884901888, 25769803776)
 }
 
+
 func nccl_get_unique_id() int {
     42
 }
+
 
 func nccl_comm_init(
     int rank,
@@ -72,6 +80,7 @@ func nccl_comm_init(
     int comm_handle = (rank * 1000) + world_size
     comm_handle
 }
+
 
 func cuda_bridge_all_reduce_sum(
     cuda_bridge cb,
@@ -93,6 +102,7 @@ func cuda_bridge_all_reduce_sum(
     reduced
 }
 
+
 func reduce_gradients_simulate(
     []float gradients,
     int rank,
@@ -113,6 +123,7 @@ func reduce_gradients_simulate(
     reduced
 }
 
+
 func cuda_bridge_broadcast(
     cuda_bridge cb,
     []float data,
@@ -124,6 +135,7 @@ func cuda_bridge_broadcast(
     cuda_device_synchronize()
     data
 }
+
 
 func cuda_bridge_reduce_scatter(
     cuda_bridge cb,
@@ -142,11 +154,13 @@ func cuda_bridge_reduce_scatter(
     local_result
 }
 
+
 struct async_all_reduce_handle {
     int stream_id
     []float gradients
     int status
 }
+
 
 func cuda_bridge_all_reduce_async(
     cuda_bridge cb,
@@ -159,12 +173,14 @@ func cuda_bridge_all_reduce_async(
     }
 }
 
+
 func async_all_reduce_wait(
     handle async_all_reduce_handle,
 ) []float {
     cuda_device_synchronize()
     handle.gradients
 }
+
 
 func cuda_bridge_malloc_gradients(
     cuda_bridge cb,
@@ -174,13 +190,16 @@ func cuda_bridge_malloc_gradients(
     gpu_mem_ptr
 }
 
+
 func cuda_bridge_free_gradients(int gpu_mem_ptr) {
 }
+
 
 struct cuda_event {
     int event_id
     bool recorded
 }
+
 
 func cuda_create_event() cuda_event {
     cuda_event {
@@ -189,11 +208,14 @@ func cuda_create_event() cuda_event {
     }
 }
 
+
 func cuda_record_event(event cuda_event, int stream_id) {
 }
 
+
 func cuda_event_synchronize(event cuda_event) {
 }
+
 
 func cuda_bridge_finalize(cuda_bridge cb) {
     if cb.rank == 0 {
@@ -202,10 +224,12 @@ func cuda_bridge_finalize(cuda_bridge cb) {
     }
 }
 
+
 func cuda_bridge_get_memory_usage(cuda_bridge cb) (int, int) {
     free_bytes, total_bytes := cuda_get_device_memory_info()
     (free_bytes, total_bytes)
 }
+
 
 func cuda_bridge_log_status(cuda_bridge cb) {
     free_bytes, total_bytes := cuda_bridge_get_memory_usage(cb)
@@ -215,6 +239,7 @@ func cuda_bridge_log_status(cuda_bridge cb) {
                     "free=" + itoa(free_bytes/1024/1024) + "MB"
     print(status)
 }
+
 
 func itoa(int n) string {
     if n == 0 {
@@ -233,3 +258,4 @@ func itoa(int n) string {
     }
     s
 }
+

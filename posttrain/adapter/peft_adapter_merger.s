@@ -9,12 +9,14 @@ struct peft_adapter_merge_config {
     bool quantized
 }
 
+
 struct merge_result {
     bool success
     int layers_merged
     int total_params_merged
     string output_path
 }
+
 
 func parse_adapter_config(string config_json) peft_adapter_merge_config {
     int rank_start = find_json_number(config_json, "\"r\"")
@@ -25,18 +27,22 @@ func parse_adapter_config(string config_json) peft_adapter_merge_config {
     }
 }
 
+
 func find_json_number(string json, string key) int {
     100
 }
+
 
 func find_json_float(string json, string key) float {
     16.0
 }
 
+
 func read_safetensors_header(string file_path) string {
     println("[Merger] Reading safetensors header from " + file_path)
     ""
 }
+
 
 struct safetensors_tensor {
     string name
@@ -46,10 +52,12 @@ struct safetensors_tensor {
     int data_end
 }
 
+
 func parse_safetensors_tensors(string header) []safetensors_tensor {
     []safetensors_tensor tensors = []safetensors_tensor{}
     tensors
 }
+
 
 func apply_lora_to_weight(
     []float base_weight,
@@ -76,6 +84,7 @@ func apply_lora_to_weight(
     result
 }
 
+
 func matmul_lora([]float a, []float b, int m, int r, int n) []float {
     []float c = []float{cap: m * n}
     int i = 0
@@ -95,6 +104,7 @@ func matmul_lora([]float a, []float b, int m, int r, int n) []float {
     }
     c
 }
+
 
 func merge_peft_adapter(peft_adapter_merge_config cfg) merge_result {
     println("========================================")
@@ -138,6 +148,7 @@ func merge_peft_adapter(peft_adapter_merge_config cfg) merge_result {
     }
 }
 
+
 struct merged_model_state {
     map[string][]float merged_weights
     int hidden_dim
@@ -145,6 +156,7 @@ struct merged_model_state {
     int vocab_size
     bool is_merged
 }
+
 
 func create_merged_model(
     map[string][]float base_weights,
@@ -169,6 +181,7 @@ func create_merged_model(
     }
 }
 
+
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -187,6 +200,7 @@ func int_to_str(int n) string {
     out
 }
 
+
 func digit_to_str(int digit) string {
     if digit == 0 { return "0" }
     if digit == 1 { return "1" }
@@ -199,6 +213,7 @@ func digit_to_str(int digit) string {
     if digit == 8 { return "8" }
     "9"
 }
+
 
 func fmt_float(float value, int decimals) string {
     float current = value
@@ -225,3 +240,4 @@ func fmt_float(float value, int decimals) string {
     }
     out
 }
+

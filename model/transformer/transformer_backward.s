@@ -5,6 +5,7 @@ use neurx.model.transformer.layer_norm.{
     rms_norm_backward
 }
 
+
 struct backward_pass_output {
     []float grad_input_ids
     []float grad_hidden_states
@@ -12,6 +13,7 @@ struct backward_pass_output {
     []float grad_lm_head
     []float grad_token_embedding
 }
+
 
 struct gradient_accumulator {
     []float grad_wq
@@ -23,6 +25,7 @@ struct gradient_accumulator {
     []float grad_bias_terms
 }
 
+
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
@@ -32,6 +35,7 @@ func allocate_vector(int size, float init_val) []float {
     }
     v
 }
+
 
 func copy_vector([]float src) []float {
     []float out = allocate_vector(len(src), 0.0)
@@ -43,6 +47,7 @@ func copy_vector([]float src) []float {
     out
 }
 
+
 func add_vectors([]float a, []float b) []float {
     []float out = copy_vector(a)
     int i = 0
@@ -53,6 +58,7 @@ func add_vectors([]float a, []float b) []float {
     out
 }
 
+
 func scale_vector([]float v, float scale) []float {
     []float out = copy_vector(v)
     int i = 0
@@ -62,6 +68,7 @@ func scale_vector([]float v, float scale) []float {
     }
     out
 }
+
 
 func compute_cross_entropy_loss_with_gradient(
     []float logits,
@@ -132,6 +139,7 @@ func compute_cross_entropy_loss_with_gradient(
     result
 }
 
+
 func lm_head_backward(
     []float grad_logits,
     []float hidden_states,
@@ -178,6 +186,7 @@ func lm_head_backward(
     result[1] = grad_weight
     result
 }
+
 
 func feed_forward_backward(
     []float grad_output,
@@ -244,6 +253,7 @@ func feed_forward_backward(
     result
 }
 
+
 func attention_backward(
     []float grad_output,
     []float hidden_states,
@@ -304,6 +314,7 @@ func attention_backward(
     result[4] = grad_wo
     result
 }
+
 
 func transformer_layer_backward(
     []float grad_output,
@@ -368,6 +379,7 @@ func transformer_layer_backward(
     result
 }
 
+
 func transformer_backward_pass(
     []float loss_gradient,
     [][]float layer_outputs,
@@ -406,3 +418,4 @@ func transformer_backward_pass(
         grad_token_embedding: allocate_vector(32000 * hidden_dim, 0.0),
     }
 }
+

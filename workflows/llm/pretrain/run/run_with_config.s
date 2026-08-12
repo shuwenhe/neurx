@@ -70,10 +70,12 @@ func main() {
     0
 }
 
+
 func usage() {
     println("Usage: run_with_config.s")
     println("Configure via NEURX_PRETRAIN_CONFIG, NEURX_PRETRAIN_STEPS_OVERRIDE and S_BIN.")
 }
+
 
 func yaml_value(string file, string key) string {
     string cmd = "awk -F\":\" '/^" + key + "[[:space:]]*:/ {sub(/^[[:space:]]*/, \"\", $2); gsub(/^\"|\"$/, \"\", $2); gsub(/ /, \"\", $2); print $2; exit}' " + runtime_shell_escape(file)
@@ -81,9 +83,11 @@ func yaml_value(string file, string key) string {
     trim(value)
 }
 
+
 func default_if_empty(string value, string fallback) string {
     if value == "" {
         return fallback
     }
     value
 }
+

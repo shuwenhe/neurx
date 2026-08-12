@@ -21,6 +21,7 @@ struct hf_transformers_config {
     revision: string
 }
 
+
 struct hf_transformers_rollout {
     config: hf_transformers_config
     model: *hf_model
@@ -30,6 +31,7 @@ struct hf_transformers_rollout {
     total_tokens_generated: i64
     total_time_ms: i64
 }
+
 
 struct hf_model {
     model_type: string
@@ -41,6 +43,7 @@ struct hf_model {
     past_key_values: [][]tensor
 }
 
+
 struct hf_tokenizer {
     vocab_size: i32
     pad_token_id: i32
@@ -50,6 +53,7 @@ struct hf_tokenizer {
     inverse_vocab: map[i32]string
     special_tokens: map[string]i32
 }
+
 
 func new_hf_transformers_rollout(config: hf_transformers_config) -> hf_transformers_rollout {
     let model = load_hf_model(
@@ -76,6 +80,7 @@ func new_hf_transformers_rollout(config: hf_transformers_config) -> hf_transform
     }
 }
 
+
 func (rollout: *hf_transformers_rollout) generate_batch(
     prompts: []string
 ) -> ([]string, [][]f32) {
@@ -98,6 +103,7 @@ func (rollout: *hf_transformers_rollout) generate_batch(
     rollout.total_time_ms += elapsed
     return responses, log_probs
 }
+
 
 func (rollout: *hf_transformers_rollout) generate(
     input_ids: tensor,
@@ -159,6 +165,7 @@ func (rollout: *hf_transformers_rollout) generate(
     return output_ids, all_log_probs
 }
 
+
 func (rollout: *hf_transformers_rollout) sample_next_tokens(
     logits: tensor,
     finished: tensor
@@ -200,6 +207,7 @@ func (rollout: *hf_transformers_rollout) sample_next_tokens(
     return next_tokens, token_log_probs
 }
 
+
 func (rollout: *hf_transformers_rollout) tokenize_batch(
     prompts: []string
 ) -> (tensor, tensor) {
@@ -237,6 +245,7 @@ func (rollout: *hf_transformers_rollout) tokenize_batch(
     return input_ids_tensor, attention_mask
 }
 
+
 func (rollout: *hf_transformers_rollout) get_statistics() -> (i64, i64, f32, f32) {
     let avg_tokens_per_prompt: f32 = 0.0
     if rollout.total_prompts > 0 {
@@ -254,6 +263,7 @@ func (rollout: *hf_transformers_rollout) get_statistics() -> (i64, i64, f32, f32
     )
 }
 
+
 func (rollout: *hf_transformers_rollout) print_statistics() {
     let prompts, tokens, avg_tokens, throughput = rollout.get_statistics()
     println("HuggingFace Transformers Rollout Statistics:")
@@ -263,6 +273,7 @@ func (rollout: *hf_transformers_rollout) print_statistics() {
     println(f"  Throughput: {throughput:.2f} tokens/s")
     println(f"  Total time: {rollout.total_time_ms / 1000} s")
 }
+
 
 func load_hf_model(
     model_name: string,
@@ -277,6 +288,7 @@ func load_hf_model(
     return null
 }
 
+
 func load_hf_tokenizer(
     model_name: string,
     padding_side: string,
@@ -287,14 +299,17 @@ func load_hf_tokenizer(
     return null
 }
 
+
 func parse_device(device_str: string) -> device {
     return device{}
 }
+
 
 struct device {
     device_type: string
     device_id: i32
 }
+
 
 struct model_config {
     hidden_size: i32
@@ -303,6 +318,7 @@ struct model_config {
     vocab_size: i32
 }
 
+
 struct transformer_layer {
     self_attention: *attention
     mlp: *mlp
@@ -310,11 +326,18 @@ struct transformer_layer {
     layer_norm2: *layer_norm
 }
 
+
 struct embedding {}
+
 struct linear {}
+
 struct attention {}
+
 struct mlp {}
+
 struct layer_norm {}
+
 func get_time_ms() -> i64 {
     return 0
 }
+

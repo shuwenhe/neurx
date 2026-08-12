@@ -41,3 +41,4 @@ func main() {
     println("[neurx-master] Done. Logs: ~/neurx_master_train.log (master), ~/neurx_worker_train.log (worker remote)")
     0
 }
+

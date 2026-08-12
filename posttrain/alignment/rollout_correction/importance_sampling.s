@@ -10,6 +10,7 @@ struct is_weights {
     min_weight: f32
 }
 
+
 func compute_token_is_weights(
     new_log_probs: Tensor,
     rollout_log_probs: Tensor,
@@ -50,6 +51,7 @@ func compute_token_is_weights(
     }
 }
 
+
 func compute_sequence_is_weights(
     new_log_probs: Tensor,
     rollout_log_probs: Tensor,
@@ -89,6 +91,7 @@ func compute_sequence_is_weights(
     }
 }
 
+
 func batch_normalize_is_weights(is_weights: ISWeights) -> ISWeights {
     let normalized_weights: Tensor
     if is_weights.level == is_aggregation_level.TOKEN {
@@ -110,6 +113,7 @@ func batch_normalize_is_weights(is_weights: ISWeights) -> ISWeights {
         min_weight: is_weights.min_weight,
     }
 }
+
 
 func compute_is_weights(
     new_log_probs: Tensor,
@@ -161,6 +165,7 @@ func compute_is_weights(
     return is_weights
 }
 
+
 func apply_is_weights_to_loss(
     loss: Tensor,
     is_weights: ISWeights,
@@ -178,6 +183,7 @@ func apply_is_weights_to_loss(
     }
 }
 
+
 func apply_is_weights_to_advantages(
     advantages: Tensor,
     is_weights: ISWeights,
@@ -185,6 +191,7 @@ func apply_is_weights_to_advantages(
 ) -> Tensor {
     return apply_is_weights_to_loss(advantages, is_weights, response_mask)
 }
+
 
 func compute_is_statistics(is_weights: ISWeights) -> map[string]f32 {
     let stats = map[string]f32{}
@@ -195,6 +202,8 @@ func compute_is_statistics(is_weights: ISWeights) -> map[string]f32 {
     return stats
 }
 
+
 func clamp(x: Tensor, min_val: f32, max_val: f32) -> Tensor {
     return maximum(minimum(x, max_val), min_val)
 }
+

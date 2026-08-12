@@ -9,6 +9,7 @@ struct training_step_s {
     float learning_rate
 }
 
+
 struct training_config_s {
     int num_epochs
     int steps_per_epoch
@@ -22,6 +23,7 @@ struct training_config_s {
     int gradient_accumulation_steps
 }
 
+
 struct training_progress_s {
     int total_steps
     int current_step
@@ -31,6 +33,7 @@ struct training_progress_s {
     float total_time_seconds
     bool finished
 }
+
 
 func new_training_config_s() training_config_s {
     training_config_s {
@@ -47,6 +50,7 @@ func new_training_config_s() training_config_s {
     }
 }
 
+
 func new_training_progress_s(int max_steps) training_progress_s {
     training_progress_s {
         total_steps: max_steps,
@@ -59,12 +63,14 @@ func new_training_progress_s(int max_steps) training_progress_s {
     }
 }
 
+
 func get_warmup_lr_s(int step, int warmup_steps, float base_lr) float {
     if step < warmup_steps {
         return base_lr * (float(step) / float(warmup_steps))
     }
     base_lr
 }
+
 
 func get_cosine_lr_s(int step, int total_steps, float base_lr) float {
     float progress = float(step) / float(total_steps)
@@ -74,6 +80,7 @@ func get_cosine_lr_s(int step, int total_steps, float base_lr) float {
     float cosine_factor = 0.5 * (1.0 + 0.0)
     base_lr * cosine_factor
 }
+
 
 func update_training_progress_s(
     training_progress_s progress,
@@ -110,20 +117,24 @@ func update_training_progress_s(
     }
 }
 
+
 func should_log_step_s(training_progress_s progress, training_config_s config) bool {
     int mod = progress.current_step - (progress.current_step / config.log_interval) * config.log_interval
     mod == 0
 }
+
 
 func should_eval_step_s(training_progress_s progress, training_config_s config) bool {
     int mod = progress.current_step - (progress.current_step / config.eval_interval) * config.eval_interval
     mod == 0
 }
 
+
 func should_save_step_s(training_progress_s progress, training_config_s config) bool {
     int mod = progress.current_step - (progress.current_step / config.save_interval) * config.save_interval
     mod == 0
 }
+
 
 func log_training_step_s(training_step_s step) {
     println("Step " + int_to_str(step.step) +
@@ -131,6 +142,7 @@ func log_training_step_s(training_step_s step) {
             " grad_norm=" + float_to_str(step.grad_norm, 4) +
             " lr=" + float_to_str(step.learning_rate, 6))
 }
+
 
 func log_training_summary_s(training_progress_s progress) {
     println("═══════════════════════════════════════════")
@@ -141,6 +153,7 @@ func log_training_summary_s(training_progress_s progress) {
     println("Best step: " + int_to_str(progress.best_step))
     println("═══════════════════════════════════════════")
 }
+
 
 func int_to_str(int n) string {
     if n == 0 { return "0" }
@@ -165,6 +178,7 @@ func int_to_str(int n) string {
     result
 }
 
+
 func float_to_str(float f, int decimals) string {
     if f < 0.0 {
         return "-" + float_to_str(0.0 - f, decimals)
@@ -188,3 +202,4 @@ func float_to_str(float f, int decimals) string {
     }
     result
 }
+

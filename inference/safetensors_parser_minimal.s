@@ -5,6 +5,7 @@ func byte_to_int(int byte_val) int {
     byte_val
 }
 
+
 func bytes_to_int64_le([]int bytes, int offset) int {
     int value = 0
     int shift = 0
@@ -24,6 +25,7 @@ func bytes_to_int64_le([]int bytes, int offset) int {
     value
 }
 
+
 func int_to_string(int val) string {
     if val == 0 {
         return "0"
@@ -38,6 +40,7 @@ func int_to_string(int val) string {
     result
 }
 
+
 func validate_file_format(string path) bool {
     if !(__host_slice(path, 0, 1) != "") {
         return false
@@ -47,6 +50,7 @@ func validate_file_format(string path) bool {
     true
 }
 
+
 func read_header_length([]int file_bytes) int {
     int header_len = bytes_to_int64_le(file_bytes, 0)
     if header_len < 0 || header_len > 1000000 {
@@ -55,6 +59,7 @@ func read_header_length([]int file_bytes) int {
     }
     header_len
 }
+
 
 func parse_safetensors_file(string file_path) string {
     print("\n╔════════════════════════════════════════════════════════╗\n")
@@ -115,6 +120,7 @@ func parse_safetensors_file(string file_path) string {
     "Phase 2A parsing framework initialized"
 }
 
+
 func main() {
     string model_path = "/home/shuwen/shuwen/posttrain/model.safetensors"
     string result = parse_safetensors_file(model_path)
@@ -129,3 +135,4 @@ func main() {
     print("Intrinsic: __host_read_binary_file(path) → []int\n")
     print("Goal: Read model.safetensors header and print metadata\n\n")
 }
+

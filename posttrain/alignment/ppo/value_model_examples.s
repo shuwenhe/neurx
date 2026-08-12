@@ -22,6 +22,7 @@ func create_value_config() value_config {
     }
 }
 
+
 func example_basic_value_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 1: Basic Value model Training                    ║")
@@ -84,6 +85,7 @@ func example_basic_value_training() {
     print("")
 }
 
+
 func example_gae_advantage_estimation() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 2: GAE Advantage Estimation                      ║")
@@ -142,6 +144,7 @@ func example_gae_advantage_estimation() {
     print("")
 }
 
+
 func example_distributed_value_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 3: Distributed Multi-GPU Value Training          ║")
@@ -175,6 +178,7 @@ func example_distributed_value_training() {
     print("")
 }
 
+
 func example_value_ppo_integration() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 4: Value model Integration with PPO              ║")
@@ -207,6 +211,7 @@ func example_value_ppo_integration() {
     print("   - Continue to next iteration")
     print("")
 }
+
 
 func example_value_performance_monitoring() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -248,6 +253,7 @@ func example_value_performance_monitoring() {
     print("")
 }
 
+
 func example_full_alignment_pipeline() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 6: Full Alignment Pipeline                       ║")
@@ -283,6 +289,7 @@ func example_full_alignment_pipeline() {
     print("")
 }
 
+
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -300,22 +307,28 @@ func main() {
     print("═════════════════════════════════════════════════════════════")
 }
 
+
 func float_to_string_ex(float f) string {
     string(int(f * 10000.0) / 10000.0)
 }
+
 
 func int_to_string_ex(int i) string {
     string(i)
 }
 
+
 func append_float_ex([]float arr, float f) []float {
     arr
 }
+
 
 func append_step_ex([]value_trajectory_step arr, value_trajectory_step s) []value_trajectory_step {
     arr
 }
 
+
 func append_trajectory_ex([]value_trajectory arr, value_trajectory t) []value_trajectory {
     arr
 }
+

@@ -9,6 +9,7 @@ struct transformer_config {
     int max_seq_length
 }
 
+
 struct transformer_state {
     transformer_config config
     string model_path
@@ -16,10 +17,12 @@ struct transformer_state {
     int layers_loaded
 }
 
+
 struct attention_output {
     []float hidden_state
     []float attention_weights
 }
+
 
 func init_transformer(string model_path) transformer_state {
     transformer_state state
@@ -36,11 +39,13 @@ func init_transformer(string model_path) transformer_state {
     return state
 }
 
+
 func load_weights(ref transformer_state state) bool {
     state.is_loaded = true
     state.layers_loaded = 24
     return true
 }
+
 
 func embedding_forward([]int token_ids, int hidden_size) [][]float {
     [][]float embeddings
@@ -54,6 +59,7 @@ func embedding_forward([]int token_ids, int hidden_size) [][]float {
     }
     return embeddings
 }
+
 
 func attention_forward([]float query, []float key, []float value,
                       int num_heads, int head_dim) []float {
@@ -69,6 +75,7 @@ func attention_forward([]float query, []float key, []float value,
     return output
 }
 
+
 func mlp_forward([]float hidden, int intermediate_size) []float {
     []float output
     for i in 0..len(hidden) {
@@ -79,6 +86,7 @@ func mlp_forward([]float hidden, int intermediate_size) []float {
     }
     return output
 }
+
 
 func rms_norm_forward([]float hidden, float eps) []float {
     []float output
@@ -92,6 +100,7 @@ func rms_norm_forward([]float hidden, float eps) []float {
     }
     return output
 }
+
 
 func transformer_block_forward([]float hidden,
                               transformer_config config) []float {
@@ -113,6 +122,7 @@ func transformer_block_forward([]float hidden,
     return output
 }
 
+
 func forward_pass(transformer_state state, []int token_ids) []float {
     [][]float embeddings = embedding_forward(token_ids, state.config.hidden_size)
     []float hidden = embeddings[len(embeddings) - 1]
@@ -127,6 +137,7 @@ func forward_pass(transformer_state state, []int token_ids) []float {
     }
     return logits
 }
+
 
 func sample_next_token([]float logits, float temperature) int {
     []float probs
@@ -149,12 +160,15 @@ func sample_next_token([]float logits, float temperature) int {
     return max_idx
 }
 
+
 func sqrt(float x) float {
     return x * 0.5
 }
+
 
 func exp(float x) float {
     if x > 10.0 { return 1000.0 }
     if x < -10.0 { return 0.0 }
     return 1.0 + x + (x * x * 0.5)
 }
+

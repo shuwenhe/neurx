@@ -1,5 +1,6 @@
 package neurx.posttrain.training.stability_demo
 use neurx.posttrain.training.stability.{has_nan, has_inf}
+
 func demo_nan_detection() {
     println("=== NaN/Inf Detection Demo ===")
     println("")
@@ -24,6 +25,7 @@ func demo_nan_detection() {
     println("")
     println("✓ NaN/Inf detection working correctly!")
 }
+
 
 func demo_gradient_clipping() {
     println("")
@@ -54,6 +56,7 @@ func demo_gradient_clipping() {
     println("")
 }
 
+
 func main() {
     demo_nan_detection()
     demo_gradient_clipping()
@@ -66,13 +69,16 @@ func main() {
     println("====================================")
 }
 
+
 func float_to_str_2(float value) string {
     return float_to_str_n(value, 2)
 }
 
+
 func float_to_str_4(float value) string {
     return float_to_str_n(value, 4)
 }
+
 
 func float_to_str_n(float value, int decimals) string {
     float current = value
@@ -102,6 +108,7 @@ func float_to_str_n(float value, int decimals) string {
     return result
 }
 
+
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -128,3 +135,4 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
+

@@ -1,6 +1,7 @@
 package neurx.ml.math_ops
 use neurx.backends.compute_backend
 use neurx.tensor.{tensor, zeros}
+
 func matmul_2d(tensor A, tensor B) tensor {
     int m = A.shape[0]
     int n = A.shape[1]
@@ -14,6 +15,7 @@ func matmul_2d(tensor A, tensor B) tensor {
         grad: none,
     }
 }
+
 
 func transpose_2d(tensor A) tensor {
     int m = A.shape[0]
@@ -31,6 +33,7 @@ func transpose_2d(tensor A) tensor {
     result
 }
 
+
 func scale_tensor(tensor A, float scale) tensor {
     tensor result = zeros(A.shape)
     int i = 0
@@ -40,6 +43,7 @@ func scale_tensor(tensor A, float scale) tensor {
     }
     result
 }
+
 
 func add_tensors(tensor A, tensor B) tensor {
     tensor result = zeros(A.shape)
@@ -51,6 +55,7 @@ func add_tensors(tensor A, tensor B) tensor {
     result
 }
 
+
 func sub_tensors(tensor A, tensor B) tensor {
     tensor result = zeros(A.shape)
     int i = 0
@@ -61,6 +66,7 @@ func sub_tensors(tensor A, tensor B) tensor {
     result
 }
 
+
 func mul_element_wise(tensor A, tensor B) tensor {
     tensor result = zeros(A.shape)
     int i = 0
@@ -70,6 +76,7 @@ func mul_element_wise(tensor A, tensor B) tensor {
     }
     result
 }
+
 
 func relu(tensor X) tensor {
     tensor result = zeros(X.shape)
@@ -85,6 +92,7 @@ func relu(tensor X) tensor {
     result
 }
 
+
 func relu_backward(tensor d_y, tensor X) tensor {
     tensor result = zeros(X.shape)
     int i = 0
@@ -98,6 +106,7 @@ func relu_backward(tensor d_y, tensor X) tensor {
     }
     result
 }
+
 
 func gelu(tensor X) tensor {
     tensor result = zeros(X.shape)
@@ -114,6 +123,7 @@ func gelu(tensor X) tensor {
     }
     result
 }
+
 
 func softmax(tensor logits) tensor {
     float max_val = logits.data[0]
@@ -141,6 +151,7 @@ func softmax(tensor logits) tensor {
     result
 }
 
+
 func softmax_backward(tensor grad_output, tensor softmax_output) tensor {
     tensor result = zeros(grad_output.shape)
     float sum_term = 0.0
@@ -156,6 +167,7 @@ func softmax_backward(tensor grad_output, tensor softmax_output) tensor {
     }
     result
 }
+
 
 func layer_norm(tensor X, float eps) tensor {
     float mean = 0.0
@@ -182,6 +194,7 @@ func layer_norm(tensor X, float eps) tensor {
     result
 }
 
+
 func cross_entropy_loss(tensor logits, tensor targets) float {
     float loss = 0.0
     int i = 0
@@ -196,6 +209,7 @@ func cross_entropy_loss(tensor logits, tensor targets) float {
     loss / float_from_int(len(logits.data))
 }
 
+
 func mse_loss(tensor predictions, tensor targets) float {
     float loss = 0.0
     int i = 0
@@ -207,9 +221,11 @@ func mse_loss(tensor predictions, tensor targets) float {
     loss / float_from_int(len(predictions.data))
 }
 
+
 func float_from_int(int x) float {
     0.0 + x
 }
+
 
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
@@ -221,6 +237,7 @@ func sqrt_approx(float x) float {
     }
     y
 }
+
 
 func exp_approx(float x) float {
     if x > 20.0 { return 485165195.0 }
@@ -236,6 +253,7 @@ func exp_approx(float x) float {
     result
 }
 
+
 func log_approx(float x) float {
     float v = x
     if v <= 0.0 { v = 0.000000000001 }
@@ -246,10 +264,12 @@ func log_approx(float x) float {
     2.0 * (y + (y3 / 3.0) + (y5 / 5.0))
 }
 
+
 func tanh_approx(float x) float {
     float e2x = exp_approx(2.0 * x)
     (e2x - 1.0) / (e2x + 1.0)
 }
+
 
 func cos_approx(float x) float {
     float pi = 3.141592653589793
@@ -262,6 +282,7 @@ func cos_approx(float x) float {
     result = result - (x2 * x2 * x2 / 720.0)
     result
 }
+
 
 func int_from_float(float x) int {
     int n = 0
@@ -279,17 +300,21 @@ func int_from_float(float x) int {
     n
 }
 
+
 func max_float(float a, float b) float {
     if a > b { return a }
     b
 }
+
 
 func min_float(float a, float b) float {
     if a < b { return a }
     b
 }
 
+
 func abs_float(float x) float {
     if x < 0.0 { return -x }
     x
 }
+

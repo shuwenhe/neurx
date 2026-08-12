@@ -11,6 +11,7 @@ struct cpu_info {
     int    governor
 }
 
+
 struct worker {
     int    worker_id
     int    cpu_affinity
@@ -20,11 +21,13 @@ struct worker {
     int    tasks_completed
 }
 
+
 struct cpu_state {
     []cpu_info cpus
     []worker   workers
     int        next_worker_id
 }
+
 
 func new_cpu_state() cpu_state {
     return cpu_state{
@@ -33,6 +36,7 @@ func new_cpu_state() cpu_state {
         next_worker_id: 0,
     }
 }
+
 
 func cpu_register(cs cpu_state, cpu_id int, numa_node int, base_mhz int, max_mhz int) cpu_state {
     cpu_info c = cpu_info{
@@ -47,6 +51,7 @@ func cpu_register(cs cpu_state, cpu_id int, numa_node int, base_mhz int, max_mhz
     cs.cpus = append(cs.cpus, c)
     return cs
 }
+
 
 func cpu_spawn_worker(cs cpu_state, cpu_affinity int, numa_affinity int) (cpu_state, int) {
     worker w = worker{
@@ -63,6 +68,7 @@ func cpu_spawn_worker(cs cpu_state, cpu_affinity int, numa_affinity int) (cpu_st
     return (cs, id)
 }
 
+
 func cpu_assign_task(cs cpu_state, worker_id int, task_name string) (cpu_state, bool) {
     int i = 0
     while i < len(cs.workers) {
@@ -76,6 +82,7 @@ func cpu_assign_task(cs cpu_state, worker_id int, task_name string) (cpu_state, 
     return (cs, false)
 }
 
+
 func cpu_complete_task(cs cpu_state, worker_id int) cpu_state {
     int i = 0
     while i < len(cs.workers) {
@@ -88,6 +95,7 @@ func cpu_complete_task(cs cpu_state, worker_id int) cpu_state {
     }
     return cs
 }
+
 
 func cpu_pick_idle_worker(cs cpu_state, prefer_cpu int, prefer_numa int) (worker, bool) {
     int i = 0
@@ -116,6 +124,7 @@ func cpu_pick_idle_worker(cs cpu_state, prefer_cpu int, prefer_numa int) (worker
     return (worker{}, false)
 }
 
+
 func cpu_set_governor(cs cpu_state, cpu_id int, governor int) cpu_state {
     int i = 0
     while i < len(cs.cpus) {
@@ -131,3 +140,4 @@ func cpu_set_governor(cs cpu_state, cpu_id int, governor int) cpu_state {
     }
     return cs
 }
+

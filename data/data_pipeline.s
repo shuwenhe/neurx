@@ -6,6 +6,7 @@ use neurx.tokenizer.data_pipeline.{bpe_tokenizer_state, streaming_encode_state, 
 use neurx.data.pipeline.preprocessing.{preprocessing_config, new_preprocessing_config, compute_quality_metrics}
 use neurx.data.batch_optimization.{batch_config, optimized_batch, sequence_info, create_dynamic_batch, new_batch_config}
 use neurx.runtime.io.{runtime_file_exists, runtime_dir_exists, runtime_read_text_file, runtime_run_command_output, runtime_shell_escape}
+
 struct data_pipeline_config {
     int rank_id
     int world_size
@@ -19,6 +20,7 @@ struct data_pipeline_config {
     bool enable_quality_filter
     bool enable_packing
 }
+
 
 struct data_pipeline {
     dataset_manifest manifest
@@ -47,6 +49,7 @@ struct data_pipeline {
     int tokens_processed
 }
 
+
 struct data_pipeline_stats {
     int batches_total
     int samples_skipped_quality
@@ -56,11 +59,13 @@ struct data_pipeline_stats {
     int data_pipeline_cache_size_mb
 }
 
+
 struct data_pipeline_batch_result {
     data_pipeline pipeline
     optimized_batch batch
     bool end_of_data
 }
+
 
 func new_data_pipeline_config() data_pipeline_config {
     data_pipeline_config {
@@ -78,9 +83,11 @@ func new_data_pipeline_config() data_pipeline_config {
     }
 }
 
+
 func new_training_data_pipeline_config() data_pipeline_config {
     new_data_pipeline_config()
 }
+
 
 func new_data_pipeline(data_pipeline_config cfg) data_pipeline {
     string manifest_path = data_pipeline_resolve_manifest_path(cfg.dataset_path)
@@ -145,9 +152,11 @@ func new_data_pipeline(data_pipeline_config cfg) data_pipeline {
     }
 }
 
+
 func new_training_data_pipeline() data_pipeline {
     new_data_pipeline(new_training_data_pipeline_config())
 }
+
 
 func estimate_text_tokens(string text, int fallback) int {
     int length = len(text)
@@ -160,6 +169,7 @@ func estimate_text_tokens(string text, int fallback) int {
     }
     estimated
 }
+
 
 func data_pipeline_trim(string s) string {
     int left = 0
@@ -182,6 +192,7 @@ func data_pipeline_trim(string s) string {
     out
 }
 
+
 func data_pipeline_split_lines(string text) []string {
     []string lines = []string{cap: 1}
     string current = ""
@@ -203,6 +214,7 @@ func data_pipeline_split_lines(string text) []string {
     lines
 }
 
+
 func data_pipeline_find_substring(string text, string pattern) int {
     if len(pattern) == 0 {
         return 0
@@ -220,6 +232,7 @@ func data_pipeline_find_substring(string text, string pattern) int {
     }
     -1
 }
+
 
 func data_pipeline_extract_jsonl_text(string line) string {
     string text = data_pipeline_trim(line)
@@ -266,6 +279,7 @@ func data_pipeline_extract_jsonl_text(string line) string {
     data_pipeline_trim(value)
 }
 
+
 func data_pipeline_parse_manifest_file(string manifest_path) []string {
     if !runtime_file_exists(manifest_path) {
         return []string{cap: 0}
@@ -290,6 +304,7 @@ func data_pipeline_parse_manifest_file(string manifest_path) []string {
     }
     paths
 }
+
 
 func data_pipeline_extract_json_manifest_paths(string text, string key) []string {
     []string paths = []string{cap: 16}
@@ -328,6 +343,7 @@ func data_pipeline_extract_json_manifest_paths(string text, string key) []string
     paths
 }
 
+
 func data_pipeline_extract_json_manifest_value(string text, string key, string fallback) string {
     []string lines = data_pipeline_split_lines(text)
     string needle = "\"" + key + "\""
@@ -361,6 +377,7 @@ func data_pipeline_extract_json_manifest_value(string text, string key, string f
     fallback
 }
 
+
 func data_pipeline_resolve_dataset_path(string source_path) string {
     string path = data_pipeline_trim(source_path)
     if path == "" {
@@ -383,6 +400,7 @@ func data_pipeline_resolve_dataset_path(string source_path) string {
     default_training_dataset_path()
 }
 
+
 func data_pipeline_resolve_manifest_path(string source_path) string {
     string path = data_pipeline_trim(source_path)
     if path == "" {
@@ -397,6 +415,7 @@ func data_pipeline_resolve_manifest_path(string source_path) string {
     path
 }
 
+
 func data_pipeline_resolve_shard_paths(string manifest_path) []string {
     if runtime_dir_exists(manifest_path) {
         return data_pipeline_parse_directory_shards(manifest_path)
@@ -406,6 +425,7 @@ func data_pipeline_resolve_shard_paths(string manifest_path) []string {
     }
     []string{cap: 0}
 }
+
 
 func data_pipeline_parse_directory_shards(string dir_path) []string {
     string cmd = "find " + runtime_shell_escape(dir_path) + " -maxdepth 1 -name '*.jsonl' | sort"
@@ -430,6 +450,7 @@ func data_pipeline_parse_directory_shards(string dir_path) []string {
     paths
 }
 
+
 func data_pipeline_positive_mod(int value, int modulus) int {
     if modulus <= 0 {
         return 0
@@ -441,6 +462,7 @@ func data_pipeline_positive_mod(int value, int modulus) int {
     }
     result
 }
+
 
 func data_pipeline_shuffle_ints([]int values, int seed) []int {
     []int out = []int{cap: len(values)}
@@ -462,6 +484,7 @@ func data_pipeline_shuffle_ints([]int values, int seed) []int {
     out
 }
 
+
 func data_pipeline_build_shard_order(int shard_count, int seed, int epoch) []int {
     if shard_count <= 0 {
         return []int{cap: 0}
@@ -474,6 +497,7 @@ func data_pipeline_build_shard_order(int shard_count, int seed, int epoch) []int
     }
     data_pipeline_shuffle_ints(order, seed + epoch * 1103515245 + shard_count)
 }
+
 
 func data_pipeline_shard_path_at([]string paths, int index) string {
     if len(paths) == 0 {
@@ -492,6 +516,7 @@ func data_pipeline_shard_path_at([]string paths, int index) string {
     paths[idx]
 }
 
+
 func data_pipeline_jsonl_to_documents(string text) []string {
     []string lines = data_pipeline_split_lines(text)
     []string docs = []string{cap: len(lines)}
@@ -506,6 +531,7 @@ func data_pipeline_jsonl_to_documents(string text) []string {
     }
     docs
 }
+
 
 func data_pipeline_documents_to_tokens([]string documents) []int {
     []int tokens = []int{cap: 0}
@@ -525,6 +551,7 @@ func data_pipeline_documents_to_tokens([]string documents) []int {
     tokens
 }
 
+
 func line_to_sequence_info(string line, int doc_id, int seq_id, int target_seq_len) sequence_info {
     sequence_info {
         doc_id: doc_id,
@@ -534,6 +561,7 @@ func line_to_sequence_info(string line, int doc_id, int seq_id, int target_seq_l
     }
 }
 
+
 func token_chunk_to_sequence_info(int token_count, int doc_id, int seq_id, int target_seq_len) sequence_info {
     sequence_info {
         doc_id: doc_id,
@@ -542,6 +570,7 @@ func token_chunk_to_sequence_info(int token_count, int doc_id, int seq_id, int t
         loss_weight: 1.0,
     }
 }
+
 
 func data_pipeline_active_documents_for_shard(string shard_path) []string {
     if shard_path == "" || !runtime_file_exists(shard_path) {
@@ -554,6 +583,7 @@ func data_pipeline_active_documents_for_shard(string shard_path) []string {
     []string docs = data_pipeline_split_lines(text)
     docs
 }
+
 
 func data_pipeline_refresh_active_shard(data_pipeline pipeline) data_pipeline {
     if len(pipeline.shard_paths) == 0 {
@@ -603,12 +633,14 @@ func data_pipeline_refresh_active_shard(data_pipeline pipeline) data_pipeline {
     pipeline
 }
 
+
 func data_pipeline_epoch_limit_reached(data_pipeline pipeline) bool {
     if pipeline.pipeline_cfg.num_epochs <= 0 {
         return false
     }
     pipeline.shard_epoch >= pipeline.pipeline_cfg.num_epochs
 }
+
 
 func build_empty_optimized_batch() optimized_batch {
     optimized_batch {
@@ -618,6 +650,7 @@ func build_empty_optimized_batch() optimized_batch {
         avg_loss_weight: 1.0,
     }
 }
+
 
 func get_next_batch_with_state(data_pipeline pipeline) data_pipeline_batch_result {
     data_pipeline_batch_result result
@@ -709,9 +742,11 @@ func get_next_batch_with_state(data_pipeline pipeline) data_pipeline_batch_resul
     result
 }
 
+
 func get_next_batch(data_pipeline pipeline) optimized_batch {
     get_next_batch_with_state(pipeline).batch
 }
+
 
 func process_epoch(data_pipeline pipeline) data_pipeline {
     data_pipeline current = pipeline
@@ -721,6 +756,7 @@ func process_epoch(data_pipeline pipeline) data_pipeline {
     current = data_pipeline_refresh_active_shard(current)
     current
 }
+
 
 func get_pipeline_stats(data_pipeline pipeline) data_pipeline_stats {
     float avg_tokens = 0.0
@@ -737,6 +773,7 @@ func get_pipeline_stats(data_pipeline pipeline) data_pipeline_stats {
     }
 }
 
+
 func warmup_pipeline(data_pipeline pipeline, int num_batches) data_pipeline {
     int i = 0
     data_pipeline current = pipeline
@@ -748,9 +785,11 @@ func warmup_pipeline(data_pipeline pipeline, int num_batches) data_pipeline {
     current
 }
 
+
 func create_epoch_iterator(data_pipeline pipeline) int {
     pipeline.shard_epoch
 }
+
 
 func get_rank_data_stats(data_pipeline pipeline) map[string]int {
     map[string]int{
@@ -767,6 +806,7 @@ func get_rank_data_stats(data_pipeline pipeline) map[string]int {
     }
 }
 
+
 func verify_data_integrity(data_pipeline pipeline) bool {
     if len(pipeline.shard_paths) == 0 {
         return false
@@ -781,6 +821,7 @@ func verify_data_integrity(data_pipeline pipeline) bool {
     true
 }
 
+
 func reset_pipeline(data_pipeline pipeline) data_pipeline {
     data_pipeline current = pipeline
     current.batches_yielded = 0
@@ -793,6 +834,7 @@ func reset_pipeline(data_pipeline pipeline) data_pipeline {
     current
 }
 
+
 func set_random_seed(data_pipeline pipeline, int seed) data_pipeline {
     data_pipeline current = pipeline
     current.shard_shuffle_seed = seed
@@ -800,6 +842,7 @@ func set_random_seed(data_pipeline pipeline, int seed) data_pipeline {
     current = data_pipeline_refresh_active_shard(current)
     current
 }
+
 
 func data_pipeline_state_dict(data_pipeline pipeline) data_pipeline {
     data_pipeline {
@@ -830,7 +873,9 @@ func data_pipeline_state_dict(data_pipeline pipeline) data_pipeline {
     }
 }
 
+
 func data_pipeline_load_state_dict(data_pipeline pipeline, data_pipeline other) data_pipeline {
     del pipeline
     other
 }
+

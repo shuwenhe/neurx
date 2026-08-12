@@ -20,12 +20,14 @@ struct vision_config {
     support_video: bool = true
 }
 
+
 struct image_input {
     pixel_values: tensor
     image_path: string?
     image_url: string?
     metadata: map<string, any>?
 }
+
 
 struct video_input {
     frames: list<tensor>
@@ -35,6 +37,7 @@ struct video_input {
     audio_track: tensor?
 }
 
+
 struct vision_output {
     image_features: tensor
     pooled_features: tensor
@@ -43,6 +46,7 @@ struct vision_output {
     multimodal_embedding: tensor?,
     metadata: vision_metadata
 }
+
 
 struct vision_metadata {
     num_patches_h: int
@@ -151,6 +155,7 @@ class vi_t_patch_embeddings {
     }
 }
 
+
 struct embeddings_output {
     hidden_states: tensor
     attention_mask: tensor
@@ -190,6 +195,7 @@ class vi_t_encoder_blocks {
     }
 }
 
+
 struct encoder_output {
     last_hidden_state: tensor
     attentions: list<tensor>?
@@ -220,6 +226,7 @@ class vi_t_layer {
         }
     }
 }
+
 
 struct layer_output {
     hidden_states: tensor
@@ -265,6 +272,7 @@ class vi_t_attention {
         }
     }
 }
+
 
 struct attention_output {
     hidden_states: tensor
@@ -430,6 +438,7 @@ class clip_contrastive_model {
     }
 }
 
+
 struct clipoutput {
     image_features: tensor
     text_features: tensor
@@ -547,6 +556,7 @@ class video_processor {
         }
     }
 }
+
 
 struct video_vision_output {
     per_frame_features: tensor
@@ -682,6 +692,7 @@ class multi_image_processor {
         }
     }
 }
+
 
 struct multimodal_embedding_result {
     per_image_features: list<tensor>
@@ -856,6 +867,7 @@ class multimodal_vision_model {
     }
 }
 
+
 struct vision_language_output {
     answer: string
     visual_tokens: tensor
@@ -941,3 +953,4 @@ export {
     multi_image_processor, video_processor,
     create_multimodal_vision, test_multimodal_vision_system
 }
+

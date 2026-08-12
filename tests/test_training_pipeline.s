@@ -38,6 +38,7 @@ func test_forward_pass_basic() bool {
     return true
 }
 
+
 func test_forward_pass_logits_shape() bool {
     var model_state: model.transformer_state
     model_state.hidden_dim = 768
@@ -52,6 +53,7 @@ func test_forward_pass_logits_shape() bool {
     }
     return true
 }
+
 
 func test_forward_pass_different_batch_sizes() bool {
     var model_state: model.transformer_state
@@ -78,6 +80,7 @@ func test_forward_pass_different_batch_sizes() bool {
     return true
 }
 
+
 func test_backward_pass_basic() bool {
     var model_state: model.transformer_state
     model_state.hidden_dim = 768
@@ -102,6 +105,7 @@ func test_backward_pass_basic() bool {
     return true
 }
 
+
 func test_backward_pass_gradient_overflow_detection() bool {
     var model_state: model.transformer_state
     model_state.hidden_dim = 768
@@ -119,6 +123,7 @@ func test_backward_pass_gradient_overflow_detection() bool {
         training_pipeline.backward_pass(forward_result, model_state, target_ids, 0.0001)
     return true
 }
+
 
 func test_gradient_clipping() bool {
     var model_state: model.transformer_state
@@ -140,6 +145,7 @@ func test_gradient_clipping() bool {
     }
     return true
 }
+
 
 func test_gradient_scaling_basic() bool {
     var gradients: [][]float = [][]float(10 * 768)
@@ -163,6 +169,7 @@ func test_gradient_scaling_basic() bool {
     return true
 }
 
+
 func test_loss_scale_update_on_overflow() bool {
     var current_scale: float = 65536.0
     var new_scale: float = training_pipeline.update_loss_scale(current_scale, true, 0)
@@ -175,6 +182,7 @@ func test_loss_scale_update_on_overflow() bool {
     return true
 }
 
+
 func test_loss_scale_update_growth() bool {
     var current_scale: float = 1024.0
     var new_scale: float = training_pipeline.update_loss_scale(current_scale, false, 2001)
@@ -183,6 +191,7 @@ func test_loss_scale_update_growth() bool {
     }
     return true
 }
+
 
 func test_loss_scale_bounds() bool {
     var scale: float = 65536.0
@@ -197,6 +206,7 @@ func test_loss_scale_bounds() bool {
     }
     return true
 }
+
 
 func test_gradient_accumulation_basic() bool {
     var accumulated: gradient_accumulation.accumulated_gradients
@@ -219,6 +229,7 @@ func test_gradient_accumulation_basic() bool {
     return true
 }
 
+
 func test_accumulation_readiness() bool {
     var accumulated: gradient_accumulation.accumulated_gradients
     accumulated.accumulation_steps = 4
@@ -238,6 +249,7 @@ func test_accumulation_readiness() bool {
     }
     return true
 }
+
 
 func test_gradient_accumulation_reset() bool {
     var accumulated: gradient_accumulation.accumulated_gradients
@@ -259,6 +271,7 @@ func test_gradient_accumulation_reset() bool {
     }
     return true
 }
+
 
 func test_checkpoint_creation() bool {
     var model_state: model.transformer_state
@@ -285,6 +298,7 @@ func test_checkpoint_creation() bool {
     return success
 }
 
+
 func test_checkpoint_load() bool {
     var checkpoint: training_pipeline.checkpoint_data =
         training_pipeline.load_checkpoint("test_checkpoint.pt")
@@ -299,6 +313,7 @@ func test_checkpoint_load() bool {
     }
     return true
 }
+
 
 func test_checkpoint_interval_decision() bool {
     var interval: int = 500
@@ -316,6 +331,7 @@ func test_checkpoint_interval_decision() bool {
     }
     return true
 }
+
 
 func test_training_step_complete_pipeline() bool {
     var model_state: model.transformer_state
@@ -355,6 +371,7 @@ func test_training_step_complete_pipeline() bool {
     return true
 }
 
+
 func test_mixed_precision_integration() bool {
     var model_state: model.transformer_state
     model_state.hidden_dim = 768
@@ -374,6 +391,7 @@ func test_mixed_precision_integration() bool {
     }
     return true
 }
+
 
 func test_gradient_accumulation_integration() bool {
     var accumulated: gradient_accumulation.accumulated_gradients
@@ -398,6 +416,7 @@ func test_gradient_accumulation_integration() bool {
     return true
 }
 
+
 func test_throughput_calculation() bool {
     var batch_size: int = 32
     var seq_length: int = 512
@@ -411,6 +430,7 @@ func test_throughput_calculation() bool {
     return true
 }
 
+
 func test_perplexity_calculation() bool {
     var loss: float = 5.5
     var perplexity: float = training_pipeline.compute_perplexity(loss)
@@ -419,6 +439,7 @@ func test_perplexity_calculation() bool {
     }
     return true
 }
+
 
 func run_all_training_pipeline_tests() bool {
     var passed: int = 0
@@ -467,3 +488,4 @@ func run_all_training_pipeline_tests() bool {
     if test_perplexity_calculation() { passed = passed + 1 }
     return passed == total
 }
+

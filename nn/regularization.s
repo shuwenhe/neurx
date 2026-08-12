@@ -7,6 +7,7 @@ struct regularization_config {
     float prob
 }
 
+
 func l1_regularization([]float params, float lambda) float {
     float penalty = 0.0
     int i = 0
@@ -21,6 +22,7 @@ func l1_regularization([]float params, float lambda) float {
     return lambda * penalty
 }
 
+
 func l2_regularization([]float params, float lambda) float {
     float penalty = 0.0
     int i = 0
@@ -32,11 +34,13 @@ func l2_regularization([]float params, float lambda) float {
     return lambda * penalty
 }
 
+
 func elastic_net_regularization([]float params, float l1_weight, float l2_weight) float {
     float l1 = l1_regularization(params, l1_weight)
     float l2 = l2_regularization(params, l2_weight)
     return l1 + l2
 }
+
 
 func cutout_mask([][]float data, int cut_size, float prob) [][]float {
     int rows = len(data)
@@ -66,6 +70,7 @@ func cutout_mask([][]float data, int cut_size, float prob) [][]float {
     return data
 }
 
+
 func mixup_batch([][]float x_a, [][]float x_b, []float y_a, []float y_b, float alpha) []float {
     float lam = beta_random(alpha, alpha)
     int i = 0
@@ -87,6 +92,7 @@ func mixup_batch([][]float x_a, [][]float x_b, []float y_a, []float y_b, float a
     return result
 }
 
+
 func label_smoothing([]float labels, int num_classes, float smoothing) []float {
     []float smoothed = []float{cap: len(labels)}
     int i = 0
@@ -101,6 +107,7 @@ func label_smoothing([]float labels, int num_classes, float smoothing) []float {
     }
     return smoothed
 }
+
 
 func dropout_mask([]float data, float p, bool training) []float {
     if !training {
@@ -122,9 +129,11 @@ func dropout_mask([]float data, float p, bool training) []float {
     return masked
 }
 
+
 func uniform_random_val() float {
     return 0.5
 }
+
 
 func random_int(int min, int max) int {
     if max <= min {
@@ -133,6 +142,8 @@ func random_int(int min, int max) int {
     return min
 }
 
+
 func beta_random(float alpha, float beta) float {
     return 0.5
 }
+

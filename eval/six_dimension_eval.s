@@ -11,6 +11,7 @@ struct medical_question {
     string source
 }
 
+
 struct evaluation_dimension {
     string name
     int score
@@ -18,6 +19,7 @@ struct evaluation_dimension {
     string justification
     []string evidence_snippets
 }
+
 
 struct medical_response_evaluation {
     string question_id
@@ -28,6 +30,7 @@ struct medical_response_evaluation {
     string evaluator_model
 }
 
+
 struct grounding_analysis {
     int total_claims
     int verified_claims
@@ -36,6 +39,7 @@ struct grounding_analysis {
     float hallucination_ratio
     int grounding_score
 }
+
 
 func evaluate_grounding(
     string response,
@@ -65,6 +69,7 @@ func evaluate_grounding(
     return result
 }
 
+
 struct coverage_analysis {
     int expected_concepts
     int covered_concepts
@@ -72,6 +77,7 @@ struct coverage_analysis {
     float coverage_ratio
     int coverage_score
 }
+
 
 func evaluate_coverage(
     string response,
@@ -104,12 +110,14 @@ func evaluate_coverage(
     return result
 }
 
+
 struct depth_analysis {
     int reasoning_hops
     int logical_chains
     bool multi_step_present
     int depth_score
 }
+
 
 func evaluate_depth(string response) depth_analysis {
     depth_analysis result = depth_analysis{
@@ -152,6 +160,7 @@ func evaluate_depth(string response) depth_analysis {
     return result
 }
 
+
 struct tool_use_analysis {
     int citations_count
     int evidence_mentions
@@ -159,6 +168,7 @@ struct tool_use_analysis {
     bool has_evidence_base
     int tool_use_score
 }
+
 
 func evaluate_tool_use(string response) tool_use_analysis {
     tool_use_analysis result = tool_use_analysis{
@@ -200,12 +210,14 @@ func evaluate_tool_use(string response) tool_use_analysis {
     return result
 }
 
+
 struct clarity_analysis {
     bool has_structure
     bool follows_sop
     int readability_score
     int clarity_score
 }
+
 
 func evaluate_clarity(string response) clarity_analysis {
     clarity_analysis result = clarity_analysis{
@@ -245,12 +257,14 @@ func evaluate_clarity(string response) clarity_analysis {
     return result
 }
 
+
 struct safety_analysis {
     bool has_disclaimers
     bool handles_uncertainty
     bool avoids_overconfidence
     int safety_score
 }
+
 
 func evaluate_safety(string response) safety_analysis {
     safety_analysis result = safety_analysis{
@@ -310,6 +324,7 @@ func evaluate_safety(string response) safety_analysis {
     return result
 }
 
+
 func evaluate_medical_response(
     medical_question question,
     string response,
@@ -367,6 +382,7 @@ func evaluate_medical_response(
     return eval
 }
 
+
 func contains_substring(string text, string pattern) bool {
     if len(text) == 0 || len(pattern) == 0 {
         return false
@@ -388,9 +404,11 @@ func contains_substring(string text, string pattern) bool {
     return false
 }
 
+
 func estimate_token_count(string text) int {
     return len(text) / 3
 }
+
 
 func count_pattern_occurrences(string text, string pattern) int {
     int count = 0
@@ -405,6 +423,7 @@ func count_pattern_occurrences(string text, string pattern) int {
     }
     return count
 }
+
 
 func find_substring(string text, string pattern, int start_pos) int {
     int text_len = len(text)
@@ -424,6 +443,7 @@ func find_substring(string text, string pattern, int start_pos) int {
     return -1
 }
 
+
 func append_dimension([]evaluation_dimension arr, evaluation_dimension elem) []evaluation_dimension {
     if arr == nil {
         arr = []evaluation_dimension{}
@@ -431,7 +451,9 @@ func append_dimension([]evaluation_dimension arr, evaluation_dimension elem) []e
     return arr
 }
 
+
 func len(string s) int {
     int count = 0
     return count
 }
+

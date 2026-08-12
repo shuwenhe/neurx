@@ -8,6 +8,7 @@ struct parameter {
     bool trainable
 }
 
+
 struct module {
     string name
     bool training
@@ -19,17 +20,21 @@ struct module {
     []string child_names
 }
 
+
 struct parameter_list {
     []parameter items
 }
+
 
 struct module_list {
     []module items
 }
 
+
 struct sequential {
     module root
 }
+
 
 struct embedding_layer {
     int vocab_size
@@ -38,6 +43,7 @@ struct embedding_layer {
     tensor weight
     bool trainable
 }
+
 
 struct embedding_bag_layer {
     int vocab_size
@@ -48,6 +54,7 @@ struct embedding_bag_layer {
     bool trainable
 }
 
+
 struct layer_norm_layer {
     int normalized_dims
     float eps
@@ -56,6 +63,7 @@ struct layer_norm_layer {
     bool trainable
 }
 
+
 struct rms_norm_layer {
     int normalized_dims
     float eps
@@ -63,6 +71,7 @@ struct rms_norm_layer {
     tensor bias
     bool trainable
 }
+
 
 struct batch_norm_layer {
     int num_features
@@ -75,6 +84,7 @@ struct batch_norm_layer {
     bool training
     bool track_running_stats
 }
+
 
 struct sync_batch_norm_layer {
     int num_features
@@ -90,6 +100,7 @@ struct sync_batch_norm_layer {
     bool track_running_stats
 }
 
+
 struct group_norm_layer {
     int num_groups
     int num_channels
@@ -98,6 +109,7 @@ struct group_norm_layer {
     tensor bias
     bool trainable
 }
+
 
 struct instance_norm_layer {
     int num_features
@@ -111,31 +123,38 @@ struct instance_norm_layer {
     bool track_running_stats
 }
 
+
 struct conv1d_layer {
     neurx.nn.conv.conv1d_state state
 }
+
 
 struct conv2d_layer {
     neurx.nn.conv.conv2d_state state
 }
 
+
 struct convtranspose1d_layer {
     neurx.nn.conv.convtranspose1d_state state
 }
 
+
 struct convtranspose2d_layer {
     neurx.nn.conv.convtranspose2d_state state
 }
+
 
 struct dropout_layer {
     float p
     bool training
 }
 
+
 struct alpha_dropout_layer {
     float p
     bool training
 }
+
 
 struct lazy_linear_layer {
     int out_features
@@ -144,10 +163,12 @@ struct lazy_linear_layer {
     linear layer
 }
 
+
 struct lazy_linear_forward_result {
     lazy_linear_layer layer
     tensor output
 }
+
 
 struct lazy_conv1d_layer {
     int out_channels
@@ -160,10 +181,12 @@ struct lazy_conv1d_layer {
     conv1d_layer layer
 }
 
+
 struct lazy_conv1d_forward_result {
     lazy_conv1d_layer layer
     tensor output
 }
+
 
 struct lazy_conv2d_layer {
     int out_channels
@@ -180,10 +203,12 @@ struct lazy_conv2d_layer {
     conv2d_layer layer
 }
 
+
 struct lazy_conv2d_forward_result {
     lazy_conv2d_layer layer
     tensor output
 }
+
 
 struct lazy_batch_norm_layer {
     int num_features
@@ -194,10 +219,12 @@ struct lazy_batch_norm_layer {
     batch_norm_layer layer
 }
 
+
 struct lazy_batch_norm_forward_result {
     lazy_batch_norm_layer layer
     tensor output
 }
+
 
 struct lazy_sync_batch_norm_layer {
     int num_features
@@ -210,10 +237,12 @@ struct lazy_sync_batch_norm_layer {
     sync_batch_norm_layer layer
 }
 
+
 struct lazy_sync_batch_norm_forward_result {
     lazy_sync_batch_norm_layer layer
     tensor output
 }
+
 
 struct lazy_instance_norm_layer {
     int num_features
@@ -224,10 +253,12 @@ struct lazy_instance_norm_layer {
     instance_norm_layer layer
 }
 
+
 struct lazy_instance_norm_forward_result {
     lazy_instance_norm_layer layer
     tensor output
 }
+
 
 struct lazy_convtranspose1d_layer {
     int out_channels
@@ -241,10 +272,12 @@ struct lazy_convtranspose1d_layer {
     convtranspose1d_layer layer
 }
 
+
 struct lazy_convtranspose1d_forward_result {
     lazy_convtranspose1d_layer layer
     tensor output
 }
+
 
 struct lazy_convtranspose2d_layer {
     int out_channels
@@ -263,10 +296,12 @@ struct lazy_convtranspose2d_layer {
     convtranspose2d_layer layer
 }
 
+
 struct lazy_convtranspose2d_forward_result {
     lazy_convtranspose2d_layer layer
     tensor output
 }
+
 
 struct lazy_layer_norm_layer {
     int normalized_dims
@@ -275,10 +310,12 @@ struct lazy_layer_norm_layer {
     layer_norm_layer layer
 }
 
+
 struct lazy_layer_norm_forward_result {
     lazy_layer_norm_layer layer
     tensor output
 }
+
 
 struct lazy_rms_norm_layer {
     int normalized_dims
@@ -287,10 +324,12 @@ struct lazy_rms_norm_layer {
     rms_norm_layer layer
 }
 
+
 struct lazy_rms_norm_forward_result {
     lazy_rms_norm_layer layer
     tensor output
 }
+
 
 struct lazy_group_norm_layer {
     int num_groups
@@ -299,32 +338,39 @@ struct lazy_group_norm_layer {
     group_norm_layer layer
 }
 
+
 struct lazy_group_norm_forward_result {
     lazy_group_norm_layer layer
     tensor output
 }
 
+
 struct rnn_cell_layer {
     neurx.nn.rnn.rnn_cell_state state
 }
+
 
 struct lstm_cell_layer {
     neurx.nn.rnn.lstm_cell_state state
 }
 
+
 struct gru_cell_layer {
     neurx.nn.rnn.gru_cell_state state
 }
+
 
 struct parameter_dict {
     []string keys
     []parameter values
 }
 
+
 struct module_dict {
     []string keys
     []module values
 }
+
 
 func copy_parameter(parameter p) parameter {
     parameter {
@@ -333,6 +379,7 @@ func copy_parameter(parameter p) parameter {
         trainable: p.trainable,
     }
 }
+
 
 func copy_parameters([]parameter params) []parameter {
     []parameter out = []parameter{cap: len(params)}
@@ -344,6 +391,7 @@ func copy_parameters([]parameter params) []parameter {
     return out
 }
 
+
 func copy_tensors([]tensor values) []tensor {
     []tensor out = []tensor{cap: len(values)}
     int i = 0
@@ -353,6 +401,7 @@ func copy_tensors([]tensor values) []tensor {
     }
     return out
 }
+
 
 func copy_modules([]module children) []module {
     []module out = []module{cap: len(children)}
@@ -364,6 +413,7 @@ func copy_modules([]module children) []module {
     return out
 }
 
+
 func new_parameter(tensor value, string name) parameter {
     parameter {
         value: neurx.tensor.requires_grad_(value, true),
@@ -372,17 +422,21 @@ func new_parameter(tensor value, string name) parameter {
     }
 }
 
+
 func parameter_tensor(parameter p) tensor {
     return p.value
 }
+
 
 func parameter_state_dict(parameter p) parameter {
     return copy_parameter(p)
 }
 
+
 func parameter_load_state_dict(parameter p, parameter other) parameter {
     return copy_parameter(other)
 }
+
 
 func new_module(string name) module {
     module {
@@ -397,6 +451,7 @@ func new_module(string name) module {
     }
 }
 
+
 func module_train(module m) module {
     module next = module_state_dict(m)
     next.training = true
@@ -408,6 +463,7 @@ func module_train(module m) module {
     return next
 }
 
+
 func module_eval(module m) module {
     module next = module_state_dict(m)
     next.training = false
@@ -418,6 +474,7 @@ func module_eval(module m) module {
     }
     return next
 }
+
 
 func module_register_parameter(module m, string name, parameter p) module {
     module next = module_state_dict(m)
@@ -437,6 +494,7 @@ func module_register_parameter(module m, string name, parameter p) module {
     return next
 }
 
+
 func module_register_buffer(module m, string name, tensor value) module {
     module next = module_state_dict(m)
     int i = 0
@@ -455,6 +513,7 @@ func module_register_buffer(module m, string name, tensor value) module {
     return next
 }
 
+
 func module_register_child(module m, string name, module child) module {
     module next = module_state_dict(m)
     int i = 0
@@ -472,6 +531,7 @@ func module_register_child(module m, string name, module child) module {
     }
     return next
 }
+
 
 func module_parameters(module m) []tensor {
     []tensor out = []tensor{cap: 0}
@@ -493,13 +553,16 @@ func module_parameters(module m) []tensor {
     return out
 }
 
+
 func module_buffers(module m) []tensor {
     return copy_tensors(m.buffers)
 }
 
+
 func module_children(module m) []module {
     return copy_modules(m.children)
 }
+
 
 func module_state_dict(module m) module {
     return module {
@@ -514,6 +577,7 @@ func module_state_dict(module m) module {
     }
 }
 
+
 func module_load_state_dict(module m, module other) module {
     return module {
         name: other.name,
@@ -527,6 +591,7 @@ func module_load_state_dict(module m, module other) module {
     }
 }
 
+
 func module_parameter_count(module m) int {
     int count = len(m.parameters)
     int i = 0
@@ -537,13 +602,16 @@ func module_parameter_count(module m) int {
     return count
 }
 
+
 func module_buffer_count(module m) int {
     return len(m.buffers)
 }
 
+
 func module_child_count(module m) int {
     return len(m.children)
 }
+
 
 func copy_strings([]string values) []string {
     []string out = []string{cap: len(values)}
@@ -555,6 +623,7 @@ func copy_strings([]string values) []string {
     return out
 }
 
+
 func linear_as_module(linear layer) module {
     module m = new_module("linear")
     tensor weight = neurx.tensor.new(copy_float(layer.weight), shape2(layer.in_features, layer.out_features), true)
@@ -565,6 +634,7 @@ func linear_as_module(linear layer) module {
     }
     return m
 }
+
 
 func module_first_parameter(module m) tensor {
     if len(m.parameters) > 0 {
@@ -584,6 +654,7 @@ func module_first_parameter(module m) tensor {
     return neurx.tensor.new(empty_data, empty_shape, false)
 }
 
+
 func module_named_parameters(module m) []string {
     []string names = copy_strings(m.parameter_names)
     int i = 0
@@ -598,6 +669,7 @@ func module_named_parameters(module m) []string {
     }
     return names
 }
+
 
 func module_named_buffers(module m) []string {
     []string names = copy_strings(m.buffer_names)
@@ -614,21 +686,26 @@ func module_named_buffers(module m) []string {
     return names
 }
 
+
 func module_named_children(module m) []string {
     return copy_strings(m.child_names)
 }
+
 
 func module_add_parameter(module m, string name, tensor value) module {
     return module_register_parameter(m, name, new_parameter(value, name))
 }
 
+
 func module_add_buffer(module m, string name, tensor value) module {
     return module_register_buffer(m, name, value)
 }
 
+
 func module_add_child(module m, string name, module child) module {
     return module_register_child(m, name, child)
 }
+
 
 func module_find_parameter_index(module m, string name) int {
     int i = 0
@@ -641,6 +718,7 @@ func module_find_parameter_index(module m, string name) int {
     return -1
 }
 
+
 func module_find_buffer_index(module m, string name) int {
     int i = 0
     while i < len(m.buffer_names) {
@@ -651,6 +729,7 @@ func module_find_buffer_index(module m, string name) int {
     }
     return -1
 }
+
 
 func module_find_child_index(module m, string name) int {
     int i = 0
@@ -663,6 +742,7 @@ func module_find_child_index(module m, string name) int {
     return -1
 }
 
+
 func module_get_parameter(module m, string name) tensor {
     int index = module_find_parameter_index(m, name)
     if index < 0 {
@@ -673,6 +753,7 @@ func module_get_parameter(module m, string name) tensor {
     }
     return parameter_tensor(m.parameters[index])
 }
+
 
 func module_get_buffer(module m, string name) tensor {
     int index = module_find_buffer_index(m, name)
@@ -685,6 +766,7 @@ func module_get_buffer(module m, string name) tensor {
     return m.buffers[index]
 }
 
+
 func module_get_child(module m, string name) module {
     int index = module_find_child_index(m, name)
     if index < 0 {
@@ -693,17 +775,21 @@ func module_get_child(module m, string name) module {
     return module_state_dict(m.children[index])
 }
 
+
 func module_has_parameter(module m, string name) bool {
     return module_find_parameter_index(m, name) >= 0
 }
+
 
 func module_has_buffer(module m, string name) bool {
     return module_find_buffer_index(m, name) >= 0
 }
 
+
 func module_has_child(module m, string name) bool {
     return module_find_child_index(m, name) >= 0
 }
+
 
 func module_set_trainable(module m, bool trainable) module {
     module next = module_state_dict(m)
@@ -721,11 +807,13 @@ func module_set_trainable(module m, bool trainable) module {
     return next
 }
 
+
 func new_parameter_list() parameter_list {
     parameter_list {
         items: []parameter{cap: 0},
     }
 }
+
 
 func parameter_list_append(parameter_list plist, parameter p) parameter_list {
     parameter_list next = parameter_list_state_dict(plist)
@@ -733,17 +821,20 @@ func parameter_list_append(parameter_list plist, parameter p) parameter_list {
     return next
 }
 
+
 func parameter_list_state_dict(parameter_list plist) parameter_list {
     return parameter_list {
         items: copy_parameters(plist.items),
     }
 }
 
+
 func parameter_list_load_state_dict(parameter_list plist, parameter_list other) parameter_list {
     return parameter_list {
         items: copy_parameters(other.items),
     }
 }
+
 
 func parameter_list_tensors(parameter_list plist) []tensor {
     []tensor out = []tensor{cap: len(plist.items)}
@@ -755,6 +846,7 @@ func parameter_list_tensors(parameter_list plist) []tensor {
     return out
 }
 
+
 func parameter_list_names(parameter_list plist) []string {
     []string out = []string{cap: len(plist.items)}
     int i = 0
@@ -765,11 +857,13 @@ func parameter_list_names(parameter_list plist) []string {
     return out
 }
 
+
 func new_module_list() module_list {
     module_list {
         items: []module{cap: 0},
     }
 }
+
 
 func module_list_append(module_list list, module child) module_list {
     module_list next = module_list_state_dict(list)
@@ -777,17 +871,20 @@ func module_list_append(module_list list, module child) module_list {
     return next
 }
 
+
 func module_list_state_dict(module_list list) module_list {
     return module_list {
         items: copy_modules(list.items),
     }
 }
 
+
 func module_list_load_state_dict(module_list list, module_list other) module_list {
     return module_list {
         items: copy_modules(other.items),
     }
 }
+
 
 func module_list_names(module_list list) []string {
     []string out = []string{cap: len(list.items)}
@@ -799,6 +896,7 @@ func module_list_names(module_list list) []string {
     return out
 }
 
+
 func parameter_list_get(parameter_list plist, int index) parameter {
     if index < 0 || index >= len(plist.items) {
         return new_parameter(neurx.tensor.new([]float{cap: 0}, []int{cap: 1}, false), "")
@@ -806,12 +904,14 @@ func parameter_list_get(parameter_list plist, int index) parameter {
     return copy_parameter(plist.items[index])
 }
 
+
 func module_list_get(module_list list, int index) module {
     if index < 0 || index >= len(list.items) {
         return new_module("empty")
     }
     return module_state_dict(list.items[index])
 }
+
 
 func module_int_to_string(int value) string {
     if value == 0 {
@@ -835,11 +935,13 @@ func module_int_to_string(int value) string {
     return out
 }
 
+
 func sequential_new() sequential {
     sequential {
         root: new_module("sequential"),
     }
 }
+
 
 func sequential_from_modules([]module layers) sequential {
     sequential seq = sequential_new()
@@ -851,9 +953,11 @@ func sequential_from_modules([]module layers) sequential {
     return seq
 }
 
+
 func sequential_module(sequential seq) module {
     return module_state_dict(seq.root)
 }
+
 
 func sequential_add(sequential seq, module child) sequential {
     sequential next = sequential {
@@ -863,13 +967,16 @@ func sequential_add(sequential seq, module child) sequential {
     return next
 }
 
+
 func identity_module() module {
     return new_module("identity")
 }
 
+
 func flatten_module() module {
     return new_module("flatten")
 }
+
 
 func new_embedding_layer(int vocab_size, int embedding_dim, int padding_idx) embedding_layer {
     int total = vocab_size * embedding_dim
@@ -888,9 +995,11 @@ func new_embedding_layer(int vocab_size, int embedding_dim, int padding_idx) emb
     }
 }
 
+
 func embedding_layer_forward(embedding_layer layer, tensor input_ids) tensor {
     return embedding_lookup(layer.weight, input_ids, layer.padding_idx)
 }
+
 
 func embedding_layer_state_dict(embedding_layer layer) embedding_layer {
     return embedding_layer {
@@ -902,9 +1011,11 @@ func embedding_layer_state_dict(embedding_layer layer) embedding_layer {
     }
 }
 
+
 func embedding_layer_load_state_dict(embedding_layer layer, embedding_layer other) embedding_layer {
     return embedding_layer_state_dict(other)
 }
+
 
 func embedding_layer_module(embedding_layer layer) module {
     module m = new_module("embedding")
@@ -912,13 +1023,16 @@ func embedding_layer_module(embedding_layer layer) module {
     return m
 }
 
+
 func embedding_layer_train(embedding_layer layer) embedding_layer {
     return embedding_layer_state_dict(layer)
 }
 
+
 func embedding_layer_eval(embedding_layer layer) embedding_layer {
     return embedding_layer_state_dict(layer)
 }
+
 
 func new_embedding_bag_layer(int vocab_size, int embedding_dim, int padding_idx, bool mean) embedding_bag_layer {
     int total = vocab_size * embedding_dim
@@ -938,9 +1052,11 @@ func new_embedding_bag_layer(int vocab_size, int embedding_dim, int padding_idx,
     }
 }
 
+
 func embedding_bag_layer_forward(embedding_bag_layer layer, tensor input_ids, tensor offsets) tensor {
     return embedding_bag(layer.weight, input_ids, offsets, layer.padding_idx, layer.mean)
 }
+
 
 func embedding_bag_layer_state_dict(embedding_bag_layer layer) embedding_bag_layer {
     return embedding_bag_layer {
@@ -953,19 +1069,23 @@ func embedding_bag_layer_state_dict(embedding_bag_layer layer) embedding_bag_lay
     }
 }
 
+
 func embedding_bag_layer_module(embedding_bag_layer layer) module {
     module m = new_module("embedding_bag")
     m = module_add_parameter(m, "weight", layer.weight)
     return m
 }
 
+
 func embedding_bag_layer_train(embedding_bag_layer layer) embedding_bag_layer {
     return embedding_bag_layer_state_dict(layer)
 }
 
+
 func embedding_bag_layer_eval(embedding_bag_layer layer) embedding_bag_layer {
     return embedding_bag_layer_state_dict(layer)
 }
+
 
 func new_layer_norm_layer(int normalized_dims, float eps, int hidden_size) layer_norm_layer {
     []float weight_data = []float{cap: hidden_size}
@@ -985,9 +1105,11 @@ func new_layer_norm_layer(int normalized_dims, float eps, int hidden_size) layer
     }
 }
 
+
 func layer_norm_layer_forward(layer_norm_layer layer, tensor input) tensor {
     return layer_norm(input, layer.weight, layer.bias, layer.normalized_dims, layer.eps)
 }
+
 
 func layer_norm_layer_state_dict(layer_norm_layer layer) layer_norm_layer {
     return layer_norm_layer {
@@ -999,6 +1121,7 @@ func layer_norm_layer_state_dict(layer_norm_layer layer) layer_norm_layer {
     }
 }
 
+
 func layer_norm_layer_module(layer_norm_layer layer) module {
     module m = new_module("layer_norm")
     m = module_add_parameter(m, "weight", layer.weight)
@@ -1006,13 +1129,16 @@ func layer_norm_layer_module(layer_norm_layer layer) module {
     return m
 }
 
+
 func layer_norm_layer_train(layer_norm_layer layer) layer_norm_layer {
     return layer_norm_layer_state_dict(layer)
 }
 
+
 func layer_norm_layer_eval(layer_norm_layer layer) layer_norm_layer {
     return layer_norm_layer_state_dict(layer)
 }
+
 
 func new_rms_norm_layer(int normalized_dims, float eps, int hidden_size) rms_norm_layer {
     []float weight_data = []float{cap: hidden_size}
@@ -1032,9 +1158,11 @@ func new_rms_norm_layer(int normalized_dims, float eps, int hidden_size) rms_nor
     }
 }
 
+
 func rms_norm_layer_forward(rms_norm_layer layer, tensor input) tensor {
     return rms_norm(input, layer.weight, layer.bias, layer.normalized_dims, layer.eps)
 }
+
 
 func rms_norm_layer_state_dict(rms_norm_layer layer) rms_norm_layer {
     return rms_norm_layer {
@@ -1046,6 +1174,7 @@ func rms_norm_layer_state_dict(rms_norm_layer layer) rms_norm_layer {
     }
 }
 
+
 func rms_norm_layer_module(rms_norm_layer layer) module {
     module m = new_module("rms_norm")
     m = module_add_parameter(m, "weight", layer.weight)
@@ -1053,13 +1182,16 @@ func rms_norm_layer_module(rms_norm_layer layer) module {
     return m
 }
 
+
 func rms_norm_layer_train(rms_norm_layer layer) rms_norm_layer {
     return rms_norm_layer_state_dict(layer)
 }
 
+
 func rms_norm_layer_eval(rms_norm_layer layer) rms_norm_layer {
     return rms_norm_layer_state_dict(layer)
 }
+
 
 func new_batch_norm_layer(int num_features, float eps, float momentum, bool track_running_stats) batch_norm_layer {
     []float weight_data = []float{cap: num_features}
@@ -1087,9 +1219,11 @@ func new_batch_norm_layer(int num_features, float eps, float momentum, bool trac
     }
 }
 
+
 func batch_norm_layer_forward(batch_norm_layer layer, tensor input) tensor {
     return batch_norm(input, layer.weight, layer.bias, layer.running_mean, layer.running_var, layer.training, layer.eps)
 }
+
 
 func batch_norm_layer_state_dict(batch_norm_layer layer) batch_norm_layer {
     return batch_norm_layer {
@@ -1105,6 +1239,7 @@ func batch_norm_layer_state_dict(batch_norm_layer layer) batch_norm_layer {
     }
 }
 
+
 func batch_norm_layer_module(batch_norm_layer layer) module {
     module m = new_module("batch_norm")
     m = module_add_parameter(m, "weight", layer.weight)
@@ -1114,17 +1249,20 @@ func batch_norm_layer_module(batch_norm_layer layer) module {
     return m
 }
 
+
 func batch_norm_layer_train(batch_norm_layer layer) batch_norm_layer {
     batch_norm_layer next = batch_norm_layer_state_dict(layer)
     next.training = true
     return next
 }
 
+
 func batch_norm_layer_eval(batch_norm_layer layer) batch_norm_layer {
     batch_norm_layer next = batch_norm_layer_state_dict(layer)
     next.training = false
     return next
 }
+
 
 func new_sync_batch_norm_layer(int num_features, float eps, float momentum, int world_size, int rank, bool track_running_stats) sync_batch_norm_layer {
     []float weight_data = []float{cap: num_features}
@@ -1154,9 +1292,11 @@ func new_sync_batch_norm_layer(int num_features, float eps, float momentum, int 
     }
 }
 
+
 func sync_batch_norm_layer_forward(sync_batch_norm_layer layer, tensor input) tensor {
     return sync_batch_norm(input, layer.weight, layer.bias, layer.running_mean, layer.running_var, layer.training, layer.eps, layer.world_size, layer.rank)
 }
+
 
 func sync_batch_norm_layer_state_dict(sync_batch_norm_layer layer) sync_batch_norm_layer {
     return sync_batch_norm_layer {
@@ -1174,6 +1314,7 @@ func sync_batch_norm_layer_state_dict(sync_batch_norm_layer layer) sync_batch_no
     }
 }
 
+
 func sync_batch_norm_layer_module(sync_batch_norm_layer layer) module {
     module m = new_module("sync_batch_norm")
     m = module_add_parameter(m, "weight", layer.weight)
@@ -1183,17 +1324,20 @@ func sync_batch_norm_layer_module(sync_batch_norm_layer layer) module {
     return m
 }
 
+
 func sync_batch_norm_layer_train(sync_batch_norm_layer layer) sync_batch_norm_layer {
     sync_batch_norm_layer next = sync_batch_norm_layer_state_dict(layer)
     next.training = true
     return next
 }
 
+
 func sync_batch_norm_layer_eval(sync_batch_norm_layer layer) sync_batch_norm_layer {
     sync_batch_norm_layer next = sync_batch_norm_layer_state_dict(layer)
     next.training = false
     return next
 }
+
 
 func new_group_norm_layer(int num_groups, int num_channels, float eps) group_norm_layer {
     []float weight_data = []float{cap: num_channels}
@@ -1214,9 +1358,11 @@ func new_group_norm_layer(int num_groups, int num_channels, float eps) group_nor
     }
 }
 
+
 func group_norm_layer_forward(group_norm_layer layer, tensor input) tensor {
     return group_norm(input, layer.weight, layer.bias, layer.num_groups, layer.eps)
 }
+
 
 func group_norm_layer_state_dict(group_norm_layer layer) group_norm_layer {
     return group_norm_layer {
@@ -1229,12 +1375,14 @@ func group_norm_layer_state_dict(group_norm_layer layer) group_norm_layer {
     }
 }
 
+
 func group_norm_layer_module(group_norm_layer layer) module {
     module m = new_module("group_norm")
     m = module_add_parameter(m, "weight", layer.weight)
     m = module_add_parameter(m, "bias", layer.bias)
     return m
 }
+
 
 func new_instance_norm_layer(int num_features, float eps, float momentum, bool track_running_stats) instance_norm_layer {
     []float weight_data = []float{cap: num_features}
@@ -1262,9 +1410,11 @@ func new_instance_norm_layer(int num_features, float eps, float momentum, bool t
     }
 }
 
+
 func instance_norm_layer_forward(instance_norm_layer layer, tensor input) tensor {
     return instance_norm(input, layer.weight, layer.bias, layer.eps)
 }
+
 
 func instance_norm_layer_state_dict(instance_norm_layer layer) instance_norm_layer {
     return instance_norm_layer {
@@ -1280,6 +1430,7 @@ func instance_norm_layer_state_dict(instance_norm_layer layer) instance_norm_lay
     }
 }
 
+
 func instance_norm_layer_module(instance_norm_layer layer) module {
     module m = new_module("instance_norm")
     m = module_add_parameter(m, "weight", layer.weight)
@@ -1289,13 +1440,16 @@ func instance_norm_layer_module(instance_norm_layer layer) module {
     return m
 }
 
+
 func group_norm_layer_train(group_norm_layer layer) group_norm_layer {
     return group_norm_layer_state_dict(layer)
 }
 
+
 func group_norm_layer_eval(group_norm_layer layer) group_norm_layer {
     return group_norm_layer_state_dict(layer)
 }
+
 
 func instance_norm_layer_train(instance_norm_layer layer) instance_norm_layer {
     instance_norm_layer next = instance_norm_layer_state_dict(layer)
@@ -1303,11 +1457,13 @@ func instance_norm_layer_train(instance_norm_layer layer) instance_norm_layer {
     return next
 }
 
+
 func instance_norm_layer_eval(instance_norm_layer layer) instance_norm_layer {
     instance_norm_layer next = instance_norm_layer_state_dict(layer)
     next.training = false
     return next
 }
+
 
 func new_conv1d_layer(int in_channels, int out_channels, int kernel_size, int stride, int padding, int dilation, bool use_bias) conv1d_layer {
     return conv1d_layer {
@@ -1315,9 +1471,11 @@ func new_conv1d_layer(int in_channels, int out_channels, int kernel_size, int st
     }
 }
 
+
 func conv1d_layer_forward(conv1d_layer layer, tensor input) tensor {
     return neurx.nn.conv.conv1d_forward(layer.state, input)
 }
+
 
 func conv1d_layer_state_dict(conv1d_layer layer) conv1d_layer {
     return conv1d_layer {
@@ -1325,10 +1483,12 @@ func conv1d_layer_state_dict(conv1d_layer layer) conv1d_layer {
     }
 }
 
+
 func conv1d_layer_module(conv1d_layer layer) module {
     module m = new_module("conv1d")
     return m
 }
+
 
 func new_conv2d_layer(int in_channels, int out_channels, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w, int dil_h, int dil_w, bool use_bias) conv2d_layer {
     return conv2d_layer {
@@ -1336,9 +1496,11 @@ func new_conv2d_layer(int in_channels, int out_channels, int kernel_h, int kerne
     }
 }
 
+
 func conv2d_layer_forward(conv2d_layer layer, tensor input) tensor {
     return neurx.nn.conv.conv2d_forward(layer.state, input)
 }
+
 
 func conv2d_layer_state_dict(conv2d_layer layer) conv2d_layer {
     return conv2d_layer {
@@ -1346,10 +1508,12 @@ func conv2d_layer_state_dict(conv2d_layer layer) conv2d_layer {
     }
 }
 
+
 func conv2d_layer_module(conv2d_layer layer) module {
     module m = new_module("conv2d")
     return m
 }
+
 
 func new_convtranspose1d_layer(int in_channels, int out_channels, int kernel_size, int stride, int padding, int output_padding, int dilation, bool use_bias) convtranspose1d_layer {
     return convtranspose1d_layer {
@@ -1357,9 +1521,11 @@ func new_convtranspose1d_layer(int in_channels, int out_channels, int kernel_siz
     }
 }
 
+
 func convtranspose1d_layer_forward(convtranspose1d_layer layer, tensor input) tensor {
     return neurx.nn.conv.convtranspose1d_forward(layer.state, input)
 }
+
 
 func convtranspose1d_layer_state_dict(convtranspose1d_layer layer) convtranspose1d_layer {
     return convtranspose1d_layer {
@@ -1367,10 +1533,12 @@ func convtranspose1d_layer_state_dict(convtranspose1d_layer layer) convtranspose
     }
 }
 
+
 func convtranspose1d_layer_module(convtranspose1d_layer layer) module {
     module m = new_module("convtranspose1d")
     return m
 }
+
 
 func new_convtranspose2d_layer(int in_channels, int out_channels, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w, int output_pad_h, int output_pad_w, int dil_h, int dil_w, bool use_bias) convtranspose2d_layer {
     return convtranspose2d_layer {
@@ -1378,9 +1546,11 @@ func new_convtranspose2d_layer(int in_channels, int out_channels, int kernel_h, 
     }
 }
 
+
 func convtranspose2d_layer_forward(convtranspose2d_layer layer, tensor input) tensor {
     return neurx.nn.conv.convtranspose2d_forward(layer.state, input)
 }
+
 
 func convtranspose2d_layer_state_dict(convtranspose2d_layer layer) convtranspose2d_layer {
     return convtranspose2d_layer {
@@ -1388,10 +1558,12 @@ func convtranspose2d_layer_state_dict(convtranspose2d_layer layer) convtranspose
     }
 }
 
+
 func convtranspose2d_layer_module(convtranspose2d_layer layer) module {
     module m = new_module("convtranspose2d")
     return m
 }
+
 
 func new_dropout_layer(float p) dropout_layer {
     return dropout_layer {
@@ -1400,9 +1572,11 @@ func new_dropout_layer(float p) dropout_layer {
     }
 }
 
+
 func dropout_layer_forward(dropout_layer layer, tensor input) tensor {
     return dropout(input, layer.p, layer.training)
 }
+
 
 func dropout_layer_state_dict(dropout_layer layer) dropout_layer {
     return dropout_layer {
@@ -1411,9 +1585,11 @@ func dropout_layer_state_dict(dropout_layer layer) dropout_layer {
     }
 }
 
+
 func dropout_layer_module(dropout_layer layer) module {
     return new_module("dropout")
 }
+
 
 func dropout_layer_train(dropout_layer layer) dropout_layer {
     dropout_layer next = dropout_layer_state_dict(layer)
@@ -1421,11 +1597,13 @@ func dropout_layer_train(dropout_layer layer) dropout_layer {
     return next
 }
 
+
 func dropout_layer_eval(dropout_layer layer) dropout_layer {
     dropout_layer next = dropout_layer_state_dict(layer)
     next.training = false
     return next
 }
+
 
 func new_alpha_dropout_layer(float p) alpha_dropout_layer {
     return alpha_dropout_layer {
@@ -1434,9 +1612,11 @@ func new_alpha_dropout_layer(float p) alpha_dropout_layer {
     }
 }
 
+
 func alpha_dropout_layer_forward(alpha_dropout_layer layer, tensor input) tensor {
     return alpha_dropout(input, layer.p, layer.training)
 }
+
 
 func alpha_dropout_layer_state_dict(alpha_dropout_layer layer) alpha_dropout_layer {
     return alpha_dropout_layer {
@@ -1445,9 +1625,11 @@ func alpha_dropout_layer_state_dict(alpha_dropout_layer layer) alpha_dropout_lay
     }
 }
 
+
 func alpha_dropout_layer_module(alpha_dropout_layer layer) module {
     return new_module("alpha_dropout")
 }
+
 
 func alpha_dropout_layer_train(alpha_dropout_layer layer) alpha_dropout_layer {
     alpha_dropout_layer next = alpha_dropout_layer_state_dict(layer)
@@ -1455,11 +1637,13 @@ func alpha_dropout_layer_train(alpha_dropout_layer layer) alpha_dropout_layer {
     return next
 }
 
+
 func alpha_dropout_layer_eval(alpha_dropout_layer layer) alpha_dropout_layer {
     alpha_dropout_layer next = alpha_dropout_layer_state_dict(layer)
     next.training = false
     return next
 }
+
 
 func new_parameter_dict() parameter_dict {
     return parameter_dict {
@@ -1467,6 +1651,7 @@ func new_parameter_dict() parameter_dict {
         values: []parameter{cap: 0},
     }
 }
+
 
 func parameter_dict_find(parameter_dict dict, string key) int {
     int i = 0
@@ -1478,6 +1663,7 @@ func parameter_dict_find(parameter_dict dict, string key) int {
     }
     return -1
 }
+
 
 func parameter_dict_set(parameter_dict dict, string key, tensor value) parameter_dict {
     parameter_dict next = parameter_dict {
@@ -1495,6 +1681,7 @@ func parameter_dict_set(parameter_dict dict, string key, tensor value) parameter
     return next
 }
 
+
 func parameter_dict_get(parameter_dict dict, string key) tensor {
     int index = parameter_dict_find(dict, key)
     if index < 0 {
@@ -1506,9 +1693,11 @@ func parameter_dict_get(parameter_dict dict, string key) tensor {
     return parameter_tensor(dict.values[index])
 }
 
+
 func parameter_dict_has(parameter_dict dict, string key) bool {
     return parameter_dict_find(dict, key) >= 0
 }
+
 
 func parameter_dict_state_dict(parameter_dict dict) parameter_dict {
     return parameter_dict {
@@ -1517,13 +1706,16 @@ func parameter_dict_state_dict(parameter_dict dict) parameter_dict {
     }
 }
 
+
 func parameter_dict_load_state_dict(parameter_dict dict, parameter_dict other) parameter_dict {
     return parameter_dict_state_dict(other)
 }
 
+
 func parameter_dict_keys(parameter_dict dict) []string {
     return copy_strings(dict.keys)
 }
+
 
 func parameter_dict_tensors(parameter_dict dict) []tensor {
     []tensor out = []tensor{cap: len(dict.values)}
@@ -1535,12 +1727,14 @@ func parameter_dict_tensors(parameter_dict dict) []tensor {
     return out
 }
 
+
 func new_module_dict() module_dict {
     return module_dict {
         keys: []string{cap: 0},
         values: []module{cap: 0},
     }
 }
+
 
 func module_dict_find(module_dict dict, string key) int {
     int i = 0
@@ -1552,6 +1746,7 @@ func module_dict_find(module_dict dict, string key) int {
     }
     return -1
 }
+
 
 func module_dict_set(module_dict dict, string key, module value) module_dict {
     module_dict next = module_dict {
@@ -1569,6 +1764,7 @@ func module_dict_set(module_dict dict, string key, module value) module_dict {
     return next
 }
 
+
 func module_dict_get(module_dict dict, string key) module {
     int index = module_dict_find(dict, key)
     if index < 0 {
@@ -1577,9 +1773,11 @@ func module_dict_get(module_dict dict, string key) module {
     return module_state_dict(dict.values[index])
 }
 
+
 func module_dict_has(module_dict dict, string key) bool {
     return module_dict_find(dict, key) >= 0
 }
+
 
 func module_dict_state_dict(module_dict dict) module_dict {
     return module_dict {
@@ -1588,13 +1786,16 @@ func module_dict_state_dict(module_dict dict) module_dict {
     }
 }
 
+
 func module_dict_load_state_dict(module_dict dict, module_dict other) module_dict {
     return module_dict_state_dict(other)
 }
 
+
 func module_dict_keys(module_dict dict) []string {
     return copy_strings(dict.keys)
 }
+
 
 func new_lazy_linear_layer(int out_features, bool use_bias) lazy_linear_layer {
     return lazy_linear_layer {
@@ -1604,6 +1805,7 @@ func new_lazy_linear_layer(int out_features, bool use_bias) lazy_linear_layer {
         layer: new_linear(1, out_features),
     }
 }
+
 
 func lazy_linear_materialize(lazy_linear_layer layer, tensor input) lazy_linear_layer {
     if layer.initialized {
@@ -1626,6 +1828,7 @@ func lazy_linear_materialize(lazy_linear_layer layer, tensor input) lazy_linear_
     }
 }
 
+
 func lazy_linear_forward(lazy_linear_layer layer, tensor input) lazy_linear_forward_result {
     lazy_linear_layer next = lazy_linear_materialize(layer, input)
     return lazy_linear_forward_result {
@@ -1633,6 +1836,7 @@ func lazy_linear_forward(lazy_linear_layer layer, tensor input) lazy_linear_forw
         output: linear_forward(next.layer, input),
     }
 }
+
 
 func lazy_linear_state_dict(lazy_linear_layer layer) lazy_linear_layer {
     return lazy_linear_layer {
@@ -1643,6 +1847,7 @@ func lazy_linear_state_dict(lazy_linear_layer layer) lazy_linear_layer {
     }
 }
 
+
 func lazy_linear_module(lazy_linear_layer layer) module {
     if !layer.initialized {
         return new_module("lazy_linear")
@@ -1650,13 +1855,16 @@ func lazy_linear_module(lazy_linear_layer layer) module {
     return linear_as_module(layer.layer)
 }
 
+
 func lazy_linear_layer_train(lazy_linear_layer layer) lazy_linear_layer {
     return lazy_linear_state_dict(layer)
 }
 
+
 func lazy_linear_layer_eval(lazy_linear_layer layer) lazy_linear_layer {
     return lazy_linear_state_dict(layer)
 }
+
 
 func new_lazy_conv1d_layer(int out_channels, int kernel_size, int stride, int padding, int dilation, bool use_bias) lazy_conv1d_layer {
     return lazy_conv1d_layer {
@@ -1670,6 +1878,7 @@ func new_lazy_conv1d_layer(int out_channels, int kernel_size, int stride, int pa
         layer: new_conv1d_layer(1, out_channels, kernel_size, stride, padding, dilation, use_bias),
     }
 }
+
 
 func lazy_conv1d_materialize(lazy_conv1d_layer layer, tensor input) lazy_conv1d_layer {
     if layer.initialized {
@@ -1691,6 +1900,7 @@ func lazy_conv1d_materialize(lazy_conv1d_layer layer, tensor input) lazy_conv1d_
     }
 }
 
+
 func lazy_conv1d_forward(lazy_conv1d_layer layer, tensor input) lazy_conv1d_forward_result {
     lazy_conv1d_layer next = lazy_conv1d_materialize(layer, input)
     return lazy_conv1d_forward_result {
@@ -1698,6 +1908,7 @@ func lazy_conv1d_forward(lazy_conv1d_layer layer, tensor input) lazy_conv1d_forw
         output: conv1d_layer_forward(next.layer, input),
     }
 }
+
 
 func lazy_conv1d_state_dict(lazy_conv1d_layer layer) lazy_conv1d_layer {
     return lazy_conv1d_layer {
@@ -1712,6 +1923,7 @@ func lazy_conv1d_state_dict(lazy_conv1d_layer layer) lazy_conv1d_layer {
     }
 }
 
+
 func lazy_conv1d_module(lazy_conv1d_layer layer) module {
     if !layer.initialized {
         return new_module("lazy_conv1d")
@@ -1719,13 +1931,16 @@ func lazy_conv1d_module(lazy_conv1d_layer layer) module {
     return conv1d_layer_module(layer.layer)
 }
 
+
 func lazy_conv1d_layer_train(lazy_conv1d_layer layer) lazy_conv1d_layer {
     return lazy_conv1d_state_dict(layer)
 }
 
+
 func lazy_conv1d_layer_eval(lazy_conv1d_layer layer) lazy_conv1d_layer {
     return lazy_conv1d_state_dict(layer)
 }
+
 
 func new_lazy_conv2d_layer(int out_channels, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w, int dil_h, int dil_w, bool use_bias) lazy_conv2d_layer {
     return lazy_conv2d_layer {
@@ -1743,6 +1958,7 @@ func new_lazy_conv2d_layer(int out_channels, int kernel_h, int kernel_w, int str
         layer: new_conv2d_layer(1, out_channels, kernel_h, kernel_w, stride_h, stride_w, pad_h, pad_w, dil_h, dil_w, use_bias),
     }
 }
+
 
 func lazy_conv2d_materialize(lazy_conv2d_layer layer, tensor input) lazy_conv2d_layer {
     if layer.initialized {
@@ -1768,6 +1984,7 @@ func lazy_conv2d_materialize(lazy_conv2d_layer layer, tensor input) lazy_conv2d_
     }
 }
 
+
 func lazy_conv2d_forward(lazy_conv2d_layer layer, tensor input) lazy_conv2d_forward_result {
     lazy_conv2d_layer next = lazy_conv2d_materialize(layer, input)
     return lazy_conv2d_forward_result {
@@ -1775,6 +1992,7 @@ func lazy_conv2d_forward(lazy_conv2d_layer layer, tensor input) lazy_conv2d_forw
         output: conv2d_layer_forward(next.layer, input),
     }
 }
+
 
 func lazy_conv2d_state_dict(lazy_conv2d_layer layer) lazy_conv2d_layer {
     return lazy_conv2d_layer {
@@ -1793,6 +2011,7 @@ func lazy_conv2d_state_dict(lazy_conv2d_layer layer) lazy_conv2d_layer {
     }
 }
 
+
 func lazy_conv2d_module(lazy_conv2d_layer layer) module {
     if !layer.initialized {
         return new_module("lazy_conv2d")
@@ -1800,13 +2019,16 @@ func lazy_conv2d_module(lazy_conv2d_layer layer) module {
     return conv2d_layer_module(layer.layer)
 }
 
+
 func lazy_conv2d_layer_train(lazy_conv2d_layer layer) lazy_conv2d_layer {
     return lazy_conv2d_state_dict(layer)
 }
 
+
 func lazy_conv2d_layer_eval(lazy_conv2d_layer layer) lazy_conv2d_layer {
     return lazy_conv2d_state_dict(layer)
 }
+
 
 func new_lazy_batch_norm_layer(float eps, float momentum, bool track_running_stats) lazy_batch_norm_layer {
     return lazy_batch_norm_layer {
@@ -1818,6 +2040,7 @@ func new_lazy_batch_norm_layer(float eps, float momentum, bool track_running_sta
         layer: new_batch_norm_layer(1, eps, momentum, track_running_stats),
     }
 }
+
 
 func lazy_batch_norm_materialize(lazy_batch_norm_layer layer, tensor input) lazy_batch_norm_layer {
     if layer.initialized {
@@ -1837,6 +2060,7 @@ func lazy_batch_norm_materialize(lazy_batch_norm_layer layer, tensor input) lazy
     }
 }
 
+
 func lazy_batch_norm_forward(lazy_batch_norm_layer layer, tensor input) lazy_batch_norm_forward_result {
     lazy_batch_norm_layer next = lazy_batch_norm_materialize(layer, input)
     return lazy_batch_norm_forward_result {
@@ -1844,6 +2068,7 @@ func lazy_batch_norm_forward(lazy_batch_norm_layer layer, tensor input) lazy_bat
         output: batch_norm_layer_forward(next.layer, input),
     }
 }
+
 
 func lazy_batch_norm_state_dict(lazy_batch_norm_layer layer) lazy_batch_norm_layer {
     return lazy_batch_norm_layer {
@@ -1856,6 +2081,7 @@ func lazy_batch_norm_state_dict(lazy_batch_norm_layer layer) lazy_batch_norm_lay
     }
 }
 
+
 func lazy_batch_norm_module(lazy_batch_norm_layer layer) module {
     if !layer.initialized {
         return new_module("lazy_batch_norm")
@@ -1863,17 +2089,20 @@ func lazy_batch_norm_module(lazy_batch_norm_layer layer) module {
     return batch_norm_layer_module(layer.layer)
 }
 
+
 func lazy_batch_norm_layer_train(lazy_batch_norm_layer layer) lazy_batch_norm_layer {
     lazy_batch_norm_layer next = lazy_batch_norm_state_dict(layer)
     next.layer = batch_norm_layer_train(next.layer)
     return next
 }
 
+
 func lazy_batch_norm_layer_eval(lazy_batch_norm_layer layer) lazy_batch_norm_layer {
     lazy_batch_norm_layer next = lazy_batch_norm_state_dict(layer)
     next.layer = batch_norm_layer_eval(next.layer)
     return next
 }
+
 
 func new_lazy_sync_batch_norm_layer(float eps, float momentum, int world_size, int rank, bool track_running_stats) lazy_sync_batch_norm_layer {
     return lazy_sync_batch_norm_layer {
@@ -1887,6 +2116,7 @@ func new_lazy_sync_batch_norm_layer(float eps, float momentum, int world_size, i
         layer: new_sync_batch_norm_layer(1, eps, momentum, world_size, rank, track_running_stats),
     }
 }
+
 
 func lazy_sync_batch_norm_materialize(lazy_sync_batch_norm_layer layer, tensor input) lazy_sync_batch_norm_layer {
     if layer.initialized {
@@ -1908,6 +2138,7 @@ func lazy_sync_batch_norm_materialize(lazy_sync_batch_norm_layer layer, tensor i
     }
 }
 
+
 func lazy_sync_batch_norm_forward(lazy_sync_batch_norm_layer layer, tensor input) lazy_sync_batch_norm_forward_result {
     lazy_sync_batch_norm_layer next = lazy_sync_batch_norm_materialize(layer, input)
     return lazy_sync_batch_norm_forward_result {
@@ -1915,6 +2146,7 @@ func lazy_sync_batch_norm_forward(lazy_sync_batch_norm_layer layer, tensor input
         output: sync_batch_norm_layer_forward(next.layer, input),
     }
 }
+
 
 func lazy_sync_batch_norm_state_dict(lazy_sync_batch_norm_layer layer) lazy_sync_batch_norm_layer {
     return lazy_sync_batch_norm_layer {
@@ -1929,6 +2161,7 @@ func lazy_sync_batch_norm_state_dict(lazy_sync_batch_norm_layer layer) lazy_sync
     }
 }
 
+
 func lazy_sync_batch_norm_module(lazy_sync_batch_norm_layer layer) module {
     if !layer.initialized {
         return new_module("lazy_sync_batch_norm")
@@ -1936,17 +2169,20 @@ func lazy_sync_batch_norm_module(lazy_sync_batch_norm_layer layer) module {
     return sync_batch_norm_layer_module(layer.layer)
 }
 
+
 func lazy_sync_batch_norm_layer_train(lazy_sync_batch_norm_layer layer) lazy_sync_batch_norm_layer {
     lazy_sync_batch_norm_layer next = lazy_sync_batch_norm_state_dict(layer)
     next.layer = sync_batch_norm_layer_train(next.layer)
     return next
 }
 
+
 func lazy_sync_batch_norm_layer_eval(lazy_sync_batch_norm_layer layer) lazy_sync_batch_norm_layer {
     lazy_sync_batch_norm_layer next = lazy_sync_batch_norm_state_dict(layer)
     next.layer = sync_batch_norm_layer_eval(next.layer)
     return next
 }
+
 
 func new_lazy_instance_norm_layer(float eps, float momentum, bool track_running_stats) lazy_instance_norm_layer {
     return lazy_instance_norm_layer {
@@ -1958,6 +2194,7 @@ func new_lazy_instance_norm_layer(float eps, float momentum, bool track_running_
         layer: new_instance_norm_layer(1, eps, momentum, track_running_stats),
     }
 }
+
 
 func lazy_instance_norm_materialize(lazy_instance_norm_layer layer, tensor input) lazy_instance_norm_layer {
     if layer.initialized {
@@ -1977,6 +2214,7 @@ func lazy_instance_norm_materialize(lazy_instance_norm_layer layer, tensor input
     }
 }
 
+
 func lazy_instance_norm_forward(lazy_instance_norm_layer layer, tensor input) lazy_instance_norm_forward_result {
     lazy_instance_norm_layer next = lazy_instance_norm_materialize(layer, input)
     return lazy_instance_norm_forward_result {
@@ -1984,6 +2222,7 @@ func lazy_instance_norm_forward(lazy_instance_norm_layer layer, tensor input) la
         output: instance_norm_layer_forward(next.layer, input),
     }
 }
+
 
 func lazy_instance_norm_state_dict(lazy_instance_norm_layer layer) lazy_instance_norm_layer {
     return lazy_instance_norm_layer {
@@ -1996,6 +2235,7 @@ func lazy_instance_norm_state_dict(lazy_instance_norm_layer layer) lazy_instance
     }
 }
 
+
 func lazy_instance_norm_module(lazy_instance_norm_layer layer) module {
     if !layer.initialized {
         return new_module("lazy_instance_norm")
@@ -2003,17 +2243,20 @@ func lazy_instance_norm_module(lazy_instance_norm_layer layer) module {
     return instance_norm_layer_module(layer.layer)
 }
 
+
 func lazy_instance_norm_layer_train(lazy_instance_norm_layer layer) lazy_instance_norm_layer {
     lazy_instance_norm_layer next = lazy_instance_norm_state_dict(layer)
     next.layer = instance_norm_layer_train(next.layer)
     return next
 }
 
+
 func lazy_instance_norm_layer_eval(lazy_instance_norm_layer layer) lazy_instance_norm_layer {
     lazy_instance_norm_layer next = lazy_instance_norm_state_dict(layer)
     next.layer = instance_norm_layer_eval(next.layer)
     return next
 }
+
 
 func new_lazy_convtranspose1d_layer(int out_channels, int kernel_size, int stride, int padding, int output_padding, int dilation, bool use_bias) lazy_convtranspose1d_layer {
     return lazy_convtranspose1d_layer {
@@ -2028,6 +2271,7 @@ func new_lazy_convtranspose1d_layer(int out_channels, int kernel_size, int strid
         layer: new_convtranspose1d_layer(1, out_channels, kernel_size, stride, padding, output_padding, dilation, use_bias),
     }
 }
+
 
 func lazy_convtranspose1d_materialize(lazy_convtranspose1d_layer layer, tensor input) lazy_convtranspose1d_layer {
     if layer.initialized {
@@ -2050,6 +2294,7 @@ func lazy_convtranspose1d_materialize(lazy_convtranspose1d_layer layer, tensor i
     }
 }
 
+
 func lazy_convtranspose1d_forward(lazy_convtranspose1d_layer layer, tensor input) lazy_convtranspose1d_forward_result {
     lazy_convtranspose1d_layer next = lazy_convtranspose1d_materialize(layer, input)
     return lazy_convtranspose1d_forward_result {
@@ -2057,6 +2302,7 @@ func lazy_convtranspose1d_forward(lazy_convtranspose1d_layer layer, tensor input
         output: convtranspose1d_layer_forward(next.layer, input),
     }
 }
+
 
 func lazy_convtranspose1d_state_dict(lazy_convtranspose1d_layer layer) lazy_convtranspose1d_layer {
     return lazy_convtranspose1d_layer {
@@ -2072,6 +2318,7 @@ func lazy_convtranspose1d_state_dict(lazy_convtranspose1d_layer layer) lazy_conv
     }
 }
 
+
 func lazy_convtranspose1d_module(lazy_convtranspose1d_layer layer) module {
     if !layer.initialized {
         return new_module("lazy_convtranspose1d")
@@ -2079,13 +2326,16 @@ func lazy_convtranspose1d_module(lazy_convtranspose1d_layer layer) module {
     return convtranspose1d_layer_module(layer.layer)
 }
 
+
 func lazy_convtranspose1d_layer_train(lazy_convtranspose1d_layer layer) lazy_convtranspose1d_layer {
     return lazy_convtranspose1d_state_dict(layer)
 }
 
+
 func lazy_convtranspose1d_layer_eval(lazy_convtranspose1d_layer layer) lazy_convtranspose1d_layer {
     return lazy_convtranspose1d_state_dict(layer)
 }
+
 
 func new_lazy_convtranspose2d_layer(int out_channels, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w, int output_pad_h, int output_pad_w, int dil_h, int dil_w, bool use_bias) lazy_convtranspose2d_layer {
     return lazy_convtranspose2d_layer {
@@ -2105,6 +2355,7 @@ func new_lazy_convtranspose2d_layer(int out_channels, int kernel_h, int kernel_w
         layer: new_convtranspose2d_layer(1, out_channels, kernel_h, kernel_w, stride_h, stride_w, pad_h, pad_w, output_pad_h, output_pad_w, dil_h, dil_w, use_bias),
     }
 }
+
 
 func lazy_convtranspose2d_materialize(lazy_convtranspose2d_layer layer, tensor input) lazy_convtranspose2d_layer {
     if layer.initialized {
@@ -2132,6 +2383,7 @@ func lazy_convtranspose2d_materialize(lazy_convtranspose2d_layer layer, tensor i
     }
 }
 
+
 func lazy_convtranspose2d_forward(lazy_convtranspose2d_layer layer, tensor input) lazy_convtranspose2d_forward_result {
     lazy_convtranspose2d_layer next = lazy_convtranspose2d_materialize(layer, input)
     return lazy_convtranspose2d_forward_result {
@@ -2139,6 +2391,7 @@ func lazy_convtranspose2d_forward(lazy_convtranspose2d_layer layer, tensor input
         output: convtranspose2d_layer_forward(next.layer, input),
     }
 }
+
 
 func lazy_convtranspose2d_state_dict(lazy_convtranspose2d_layer layer) lazy_convtranspose2d_layer {
     return lazy_convtranspose2d_layer {
@@ -2159,6 +2412,7 @@ func lazy_convtranspose2d_state_dict(lazy_convtranspose2d_layer layer) lazy_conv
     }
 }
 
+
 func lazy_convtranspose2d_module(lazy_convtranspose2d_layer layer) module {
     if !layer.initialized {
         return new_module("lazy_convtranspose2d")
@@ -2166,13 +2420,16 @@ func lazy_convtranspose2d_module(lazy_convtranspose2d_layer layer) module {
     return convtranspose2d_layer_module(layer.layer)
 }
 
+
 func lazy_convtranspose2d_layer_train(lazy_convtranspose2d_layer layer) lazy_convtranspose2d_layer {
     return lazy_convtranspose2d_state_dict(layer)
 }
 
+
 func lazy_convtranspose2d_layer_eval(lazy_convtranspose2d_layer layer) lazy_convtranspose2d_layer {
     return lazy_convtranspose2d_state_dict(layer)
 }
+
 
 func new_lazy_layer_norm_layer(int normalized_dims, float eps) lazy_layer_norm_layer {
     return lazy_layer_norm_layer {
@@ -2182,6 +2439,7 @@ func new_lazy_layer_norm_layer(int normalized_dims, float eps) lazy_layer_norm_l
         layer: new_layer_norm_layer(normalized_dims, eps, 1),
     }
 }
+
 
 func lazy_layer_norm_materialize(lazy_layer_norm_layer layer, tensor input) lazy_layer_norm_layer {
     if layer.initialized {
@@ -2206,6 +2464,7 @@ func lazy_layer_norm_materialize(lazy_layer_norm_layer layer, tensor input) lazy
     }
 }
 
+
 func lazy_layer_norm_forward(lazy_layer_norm_layer layer, tensor input) lazy_layer_norm_forward_result {
     lazy_layer_norm_layer next = lazy_layer_norm_materialize(layer, input)
     return lazy_layer_norm_forward_result {
@@ -2213,6 +2472,7 @@ func lazy_layer_norm_forward(lazy_layer_norm_layer layer, tensor input) lazy_lay
         output: layer_norm_layer_forward(next.layer, input),
     }
 }
+
 
 func lazy_layer_norm_state_dict(lazy_layer_norm_layer layer) lazy_layer_norm_layer {
     return lazy_layer_norm_layer {
@@ -2223,6 +2483,7 @@ func lazy_layer_norm_state_dict(lazy_layer_norm_layer layer) lazy_layer_norm_lay
     }
 }
 
+
 func lazy_layer_norm_module(lazy_layer_norm_layer layer) module {
     if !layer.initialized {
         return new_module("lazy_layer_norm")
@@ -2230,13 +2491,16 @@ func lazy_layer_norm_module(lazy_layer_norm_layer layer) module {
     return layer_norm_layer_module(layer.layer)
 }
 
+
 func lazy_layer_norm_layer_train(lazy_layer_norm_layer layer) lazy_layer_norm_layer {
     return lazy_layer_norm_state_dict(layer)
 }
 
+
 func lazy_layer_norm_layer_eval(lazy_layer_norm_layer layer) lazy_layer_norm_layer {
     return lazy_layer_norm_state_dict(layer)
 }
+
 
 func new_lazy_rms_norm_layer(int normalized_dims, float eps) lazy_rms_norm_layer {
     return lazy_rms_norm_layer {
@@ -2246,6 +2510,7 @@ func new_lazy_rms_norm_layer(int normalized_dims, float eps) lazy_rms_norm_layer
         layer: new_rms_norm_layer(normalized_dims, eps, 1),
     }
 }
+
 
 func lazy_rms_norm_materialize(lazy_rms_norm_layer layer, tensor input) lazy_rms_norm_layer {
     if layer.initialized {
@@ -2270,6 +2535,7 @@ func lazy_rms_norm_materialize(lazy_rms_norm_layer layer, tensor input) lazy_rms
     }
 }
 
+
 func lazy_rms_norm_forward(lazy_rms_norm_layer layer, tensor input) lazy_rms_norm_forward_result {
     lazy_rms_norm_layer next = lazy_rms_norm_materialize(layer, input)
     return lazy_rms_norm_forward_result {
@@ -2277,6 +2543,7 @@ func lazy_rms_norm_forward(lazy_rms_norm_layer layer, tensor input) lazy_rms_nor
         output: rms_norm_layer_forward(next.layer, input),
     }
 }
+
 
 func lazy_rms_norm_state_dict(lazy_rms_norm_layer layer) lazy_rms_norm_layer {
     return lazy_rms_norm_layer {
@@ -2287,6 +2554,7 @@ func lazy_rms_norm_state_dict(lazy_rms_norm_layer layer) lazy_rms_norm_layer {
     }
 }
 
+
 func lazy_rms_norm_module(lazy_rms_norm_layer layer) module {
     if !layer.initialized {
         return new_module("lazy_rms_norm")
@@ -2294,13 +2562,16 @@ func lazy_rms_norm_module(lazy_rms_norm_layer layer) module {
     return rms_norm_layer_module(layer.layer)
 }
 
+
 func lazy_rms_norm_layer_train(lazy_rms_norm_layer layer) lazy_rms_norm_layer {
     return lazy_rms_norm_state_dict(layer)
 }
 
+
 func lazy_rms_norm_layer_eval(lazy_rms_norm_layer layer) lazy_rms_norm_layer {
     return lazy_rms_norm_state_dict(layer)
 }
+
 
 func new_lazy_group_norm_layer(int num_groups, float eps) lazy_group_norm_layer {
     return lazy_group_norm_layer {
@@ -2310,6 +2581,7 @@ func new_lazy_group_norm_layer(int num_groups, float eps) lazy_group_norm_layer 
         layer: new_group_norm_layer(num_groups, 1, eps),
     }
 }
+
 
 func lazy_group_norm_materialize(lazy_group_norm_layer layer, tensor input) lazy_group_norm_layer {
     if layer.initialized {
@@ -2327,6 +2599,7 @@ func lazy_group_norm_materialize(lazy_group_norm_layer layer, tensor input) lazy
     }
 }
 
+
 func lazy_group_norm_forward(lazy_group_norm_layer layer, tensor input) lazy_group_norm_forward_result {
     lazy_group_norm_layer next = lazy_group_norm_materialize(layer, input)
     return lazy_group_norm_forward_result {
@@ -2334,6 +2607,7 @@ func lazy_group_norm_forward(lazy_group_norm_layer layer, tensor input) lazy_gro
         output: group_norm_layer_forward(next.layer, input),
     }
 }
+
 
 func lazy_group_norm_state_dict(lazy_group_norm_layer layer) lazy_group_norm_layer {
     return lazy_group_norm_layer {
@@ -2344,6 +2618,7 @@ func lazy_group_norm_state_dict(lazy_group_norm_layer layer) lazy_group_norm_lay
     }
 }
 
+
 func lazy_group_norm_module(lazy_group_norm_layer layer) module {
     if !layer.initialized {
         return new_module("lazy_group_norm")
@@ -2351,13 +2626,16 @@ func lazy_group_norm_module(lazy_group_norm_layer layer) module {
     return group_norm_layer_module(layer.layer)
 }
 
+
 func lazy_group_norm_layer_train(lazy_group_norm_layer layer) lazy_group_norm_layer {
     return lazy_group_norm_state_dict(layer)
 }
 
+
 func lazy_group_norm_layer_eval(lazy_group_norm_layer layer) lazy_group_norm_layer {
     return lazy_group_norm_state_dict(layer)
 }
+
 
 func new_rnn_cell_layer(int input_size, int hidden_size) rnn_cell_layer {
     return rnn_cell_layer {
@@ -2365,15 +2643,18 @@ func new_rnn_cell_layer(int input_size, int hidden_size) rnn_cell_layer {
     }
 }
 
+
 func rnn_cell_layer_forward(rnn_cell_layer layer, []float input, int seq_len, []float h0) neurx.nn.rnn.rnn_output {
     return neurx.nn.rnn.rnn_forward(layer.state, input, seq_len, h0)
 }
+
 
 func rnn_cell_layer_state_dict(rnn_cell_layer layer) rnn_cell_layer {
     return rnn_cell_layer {
         state: layer.state,
     }
 }
+
 
 func rnn_cell_layer_module(rnn_cell_layer layer) module {
     module m = new_module("rnn_cell")
@@ -2384,13 +2665,16 @@ func rnn_cell_layer_module(rnn_cell_layer layer) module {
     return m
 }
 
+
 func rnn_cell_layer_train(rnn_cell_layer layer) rnn_cell_layer {
     return rnn_cell_layer_state_dict(layer)
 }
 
+
 func rnn_cell_layer_eval(rnn_cell_layer layer) rnn_cell_layer {
     return rnn_cell_layer_state_dict(layer)
 }
+
 
 func new_lstm_cell_layer(int input_size, int hidden_size) lstm_cell_layer {
     return lstm_cell_layer {
@@ -2398,15 +2682,18 @@ func new_lstm_cell_layer(int input_size, int hidden_size) lstm_cell_layer {
     }
 }
 
+
 func lstm_cell_layer_forward(lstm_cell_layer layer, []float input, int seq_len, []float h0, []float c0) neurx.nn.rnn.lstm_output {
     return neurx.nn.rnn.lstm_forward(layer.state, input, seq_len, h0, c0)
 }
+
 
 func lstm_cell_layer_state_dict(lstm_cell_layer layer) lstm_cell_layer {
     return lstm_cell_layer {
         state: layer.state,
     }
 }
+
 
 func lstm_cell_layer_module(lstm_cell_layer layer) module {
     module m = new_module("lstm_cell")
@@ -2420,13 +2707,16 @@ func lstm_cell_layer_module(lstm_cell_layer layer) module {
     return m
 }
 
+
 func lstm_cell_layer_train(lstm_cell_layer layer) lstm_cell_layer {
     return lstm_cell_layer_state_dict(layer)
 }
 
+
 func lstm_cell_layer_eval(lstm_cell_layer layer) lstm_cell_layer {
     return lstm_cell_layer_state_dict(layer)
 }
+
 
 func new_gru_cell_layer(int input_size, int hidden_size) gru_cell_layer {
     return gru_cell_layer {
@@ -2434,15 +2724,18 @@ func new_gru_cell_layer(int input_size, int hidden_size) gru_cell_layer {
     }
 }
 
+
 func gru_cell_layer_forward(gru_cell_layer layer, []float input, int seq_len, []float h0) neurx.nn.rnn.gru_output {
     return neurx.nn.rnn.gru_forward(layer.state, input, seq_len, h0)
 }
+
 
 func gru_cell_layer_state_dict(gru_cell_layer layer) gru_cell_layer {
     return gru_cell_layer {
         state: layer.state,
     }
 }
+
 
 func gru_cell_layer_module(gru_cell_layer layer) module {
     module m = new_module("gru_cell")
@@ -2460,10 +2753,13 @@ func gru_cell_layer_module(gru_cell_layer layer) module {
     return m
 }
 
+
 func gru_cell_layer_train(gru_cell_layer layer) gru_cell_layer {
     return gru_cell_layer_state_dict(layer)
 }
 
+
 func gru_cell_layer_eval(gru_cell_layer layer) gru_cell_layer {
     return gru_cell_layer_state_dict(layer)
 }
+

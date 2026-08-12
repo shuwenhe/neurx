@@ -22,6 +22,7 @@ struct system_status {
     []string errors
 }
 
+
 func check_system_status() {
     print("\n" + "="*70)
     print("🔍 Checking NEURX-5.2 Training System status")
@@ -411,3 +412,4 @@ func main():
     check_system_status()
 if __name__ == "__main__":
     main()
+

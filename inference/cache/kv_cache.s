@@ -6,6 +6,7 @@ struct kv_cache_state {
     bool enabled
 }
 
+
 func new_kv_cache_state(int layer_count, int max_seq_len) kv_cache_state {
     kv_cache_state {
         layer_count: layer_count,
@@ -14,6 +15,7 @@ func new_kv_cache_state(int layer_count, int max_seq_len) kv_cache_state {
         enabled: true,
     }
 }
+
 
 func kv_cache_append(kv_cache_state state, int new_tokens) kv_cache_state {
     int next_used = state.used_tokens + new_tokens
@@ -28,6 +30,7 @@ func kv_cache_append(kv_cache_state state, int new_tokens) kv_cache_state {
     }
 }
 
+
 func kv_cache_reset(kv_cache_state state) kv_cache_state {
     kv_cache_state {
         layer_count: state.layer_count,
@@ -37,10 +40,13 @@ func kv_cache_reset(kv_cache_state state) kv_cache_state {
     }
 }
 
+
 func kv_cache_state_dict(kv_cache_state state) kv_cache_state {
     state
 }
 
+
 func kv_cache_load_state_dict(kv_cache_state state, kv_cache_state other) kv_cache_state {
     other
 }
+

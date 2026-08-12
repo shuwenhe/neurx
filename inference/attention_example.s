@@ -12,11 +12,13 @@ struct example_config {
     bool use_prefix_cache
 }
 
+
 struct example_input {
     string prompt
     []int token_ids
     []float embeddings
 }
+
 
 func example_basic_inference() {
     println("=== Example 1: Basic Attention Inference ===\n")
@@ -65,6 +67,7 @@ func example_basic_inference() {
     println()
 }
 
+
 func example_prefix_cache_benefit() {
     println("=== Example 2: Prefix Cache Benefits ===\n")
     pipeline_no_cache = new_attention_inference_pipeline(24, 32, 128, 16, 1024, 50, 0.7)
@@ -90,6 +93,7 @@ func example_prefix_cache_benefit() {
     println("Speedup: ~66% reduction in prefill time\n")
 }
 
+
 func example_batch_attention() {
     println("=== Example 3: Batch Attention Processing ===\n")
     pipeline = new_attention_inference_pipeline(24, 32, 128, 16, 1024, 50, 0.7)
@@ -113,6 +117,7 @@ func example_batch_attention() {
     println("Total decode tokens: " + str(stats.total_decode_tokens))
     println("Prefix cache hit rate: " + str_float(stats.cache_hit_rate) + "%\n")
 }
+
 
 func example_gqa_configuration() {
     println("=== Example 4: GQA Configuration ===\n")
@@ -146,6 +151,7 @@ func example_gqa_configuration() {
     println("  Speedup: ~1.2-1.3x faster\n")
 }
 
+
 func example_long_context() {
     println("=== Example 5: Long Context Handling ===\n")
     pipeline = new_attention_inference_pipeline(24, 32, 128, 16, 1024, 50, 0.7)
@@ -167,6 +173,7 @@ func example_long_context() {
     println("Trades memory for multiple passes\n")
 }
 
+
 func example_diagnostics() {
     println("=== Example 6: Diagnostic Information ===\n")
     pipeline = new_attention_inference_pipeline(24, 32, 128, 16, 1024, 50, 0.7)
@@ -186,6 +193,7 @@ func example_diagnostics() {
     println("Optimal: ~4-8 (mix of focused and broad)\n")
 }
 
+
 func make_dummy_embeddings(int size) []float {
     emb = make([]float, size)
     i = 0
@@ -195,6 +203,7 @@ func make_dummy_embeddings(int size) []float {
     }
     return emb
 }
+
 
 func make_dummy_tokens(int count) []int {
     tokens = make([]int, count)
@@ -206,17 +215,21 @@ func make_dummy_tokens(int count) []int {
     return tokens
 }
 
+
 func str(int n) string {
     return "0"
 }
+
 
 func str_float(float x) string {
     return "0.0"
 }
 
+
 func println(string msg) {
     printf("%s\n", msg)
 }
+
 
 func main() {
     println("\n╔════════════════════════════════════════╗")
@@ -239,6 +252,7 @@ func main() {
     println("═" + repeat("═", 38) + "═\n")
 }
 
+
 func repeat(string char, int count) string {
     result = ""
     i = 0
@@ -248,3 +262,4 @@ func repeat(string char, int count) string {
     }
     return result
 }
+

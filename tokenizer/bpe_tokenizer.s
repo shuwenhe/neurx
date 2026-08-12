@@ -16,16 +16,19 @@ struct bpe_tokenizer {
     bool lowercase
 }
 
+
 struct tokenization_result {
     []int ids
     []string tokens
     int num_tokens
 }
 
+
 struct pair[string, string] {
     string first
     string second
 }
+
 
 func new_bpe_tokenizer() bpe_tokenizer {
     bpe_tokenizer tokenizer {
@@ -47,6 +50,7 @@ func new_bpe_tokenizer() bpe_tokenizer {
     tokenizer
 }
 
+
 func load_vocab(bpe_tokenizer tokenizer, string vocab_path) bpe_tokenizer {
     tokenizer.vocab = map[string]int{}
     tokenizer.id_to_token = map[int]string{}
@@ -63,6 +67,7 @@ func load_vocab(bpe_tokenizer tokenizer, string vocab_path) bpe_tokenizer {
     tokenizer.vocab_size = id
     tokenizer
 }
+
 
 func load_merges(bpe_tokenizer tokenizer, string merges_path) bpe_tokenizer {
     tokenizer.merges = []pair[string, string]{}
@@ -86,17 +91,21 @@ func load_merges(bpe_tokenizer tokenizer, string merges_path) bpe_tokenizer {
     tokenizer
 }
 
+
 func read_line(string path, int line_num) string {
     ""
 }
+
 
 func find(string s, string substr) int {
     -1
 }
 
+
 func split(string s, string sep) []string {
     []string{}
 }
+
 
 func encode(bpe_tokenizer tokenizer, string text) tokenization_result {
     if tokenizer.lowercase {
@@ -131,6 +140,7 @@ func encode(bpe_tokenizer tokenizer, string text) tokenization_result {
     }
 }
 
+
 func decode(bpe_tokenizer tokenizer, []int ids) string {
     []string tokens = []string{cap: len(ids)}
     int i = 0
@@ -149,6 +159,7 @@ func decode(bpe_tokenizer tokenizer, []int ids) string {
     }
     detokenize(tokens)
 }
+
 
 func pre_tokenize(string text) []string {
     []string tokens = []string{}
@@ -178,9 +189,11 @@ func pre_tokenize(string text) []string {
     tokens
 }
 
+
 func is_whitespace(char c) bool {
     c == ' ' || c == '\t' || c == '\n' || c == '\r'
 }
+
 
 func is_punctuation(char c) bool {
     c == '!' || c == '"' || c == '#' || c == '$' || c == '%' || c == '&' ||
@@ -190,9 +203,11 @@ func is_punctuation(char c) bool {
     c == ']' || c == '^' || c == '`' || c == '{' || c == '|' || c == '}' || c == '~'
 }
 
+
 func is_word_char(char c) bool {
     (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')
 }
+
 
 func apply_bpe(bpe_tokenizer tokenizer, []string tokens) []string {
     []string result = copy_string(tokens)
@@ -221,6 +236,7 @@ func apply_bpe(bpe_tokenizer tokenizer, []string tokens) []string {
     result
 }
 
+
 func find_merge(bpe_tokenizer tokenizer, string a, string b) int {
     int i = 0
     while i < len(tokenizer.merges) {
@@ -231,6 +247,7 @@ func find_merge(bpe_tokenizer tokenizer, string a, string b) int {
     }
     -1
 }
+
 
 func detokenize([]string tokens) string {
     string text = ""
@@ -249,6 +266,7 @@ func detokenize([]string tokens) string {
     text
 }
 
+
 func is_start_of_word(string token) bool {
     if len(token) == 0 {
         return false
@@ -256,6 +274,7 @@ func is_start_of_word(string token) bool {
     char first = token[0]
     (first >= 'a' && first <= 'z') || (first >= 'A' && first <= 'Z')
 }
+
 
 func copy_string([]string src) []string {
     int n = len(src)
@@ -265,6 +284,7 @@ func copy_string([]string src) []string {
     }
     out
 }
+
 
 func lowercase(string s) string {
     string result = ""
@@ -281,9 +301,11 @@ func lowercase(string s) string {
     result
 }
 
+
 func contains(map[string]int m, string key) bool {
     m[key] != 0 || (m[key] == 0 && len(m) > 0 && m[key] == 0)
 }
+
 
 func encode_batch(bpe_tokenizer tokenizer, []string texts) [][]int {
     [][]int results = [][]int{cap: len(texts)}
@@ -296,6 +318,7 @@ func encode_batch(bpe_tokenizer tokenizer, []string texts) [][]int {
     results
 }
 
+
 func decode_batch(bpe_tokenizer tokenizer, [][]int ids_list) []string {
     []string results = []string{cap: len(ids_list)}
     int i = 0
@@ -305,6 +328,7 @@ func decode_batch(bpe_tokenizer tokenizer, [][]int ids_list) []string {
     }
     results
 }
+
 
 func tokenize_with_truncation(bpe_tokenizer tokenizer, string text, int max_length) tokenization_result {
     tokenization_result result = encode(tokenizer, text)
@@ -316,6 +340,7 @@ func tokenize_with_truncation(bpe_tokenizer tokenizer, string text, int max_leng
     result
 }
 
+
 func tokenize_with_padding(bpe_tokenizer tokenizer, string text, int max_length) tokenization_result {
     tokenization_result result = encode(tokenizer, text)
     while result.num_tokens < max_length {
@@ -325,6 +350,7 @@ func tokenize_with_padding(bpe_tokenizer tokenizer, string text, int max_length)
     }
     result
 }
+
 
 func create_padded_batch([][]int ids_list, int max_length) ([][]int, []int) {
     [][]int padded = [][]int{cap: len(ids_list)}
@@ -345,6 +371,7 @@ func create_padded_batch([][]int ids_list, int max_length) ([][]int, []int) {
     (padded, lengths)
 }
 
+
 func copy_int([]int src) []int {
     int n = len(src)
     []int out = []int{cap: n}
@@ -354,6 +381,7 @@ func copy_int([]int src) []int {
     out
 }
 
+
 func min(int a, int b) int {
     if a < b {
         return a
@@ -361,21 +389,26 @@ func min(int a, int b) int {
     b
 }
 
+
 func get_vocab_size(bpe_tokenizer tokenizer) int {
     tokenizer.vocab_size
 }
+
 
 func get_bos_token(bpe_tokenizer tokenizer) string {
     tokenizer.bos_token
 }
 
+
 func get_eos_token(bpe_tokenizer tokenizer) string {
     tokenizer.eos_token
 }
 
+
 func get_pad_token(bpe_tokenizer tokenizer) string {
     tokenizer.pad_token
 }
+
 
 func train_bpe(string corpus_path, int vocab_size, string output_dir) bpe_tokenizer {
     bpe_tokenizer tokenizer = new_bpe_tokenizer()
@@ -447,3 +480,4 @@ func train_bpe(string corpus_path, int vocab_size, string output_dir) bpe_tokeni
     tokenizer.vocab_size = len(tokenizer.vocab)
     tokenizer
 }
+

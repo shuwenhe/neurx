@@ -34,6 +34,7 @@ structure gradient_overflow_info {
     num_overflowing_params: int
 }
 
+
 func new_mixed_precision_state(config: loss_scale_config): mixed_precision_state {
     var state: mixed_precision_state
     state.compute_precision = BF16
@@ -50,6 +51,7 @@ func new_mixed_precision_state(config: loss_scale_config): mixed_precision_state
     return state
 }
 
+
 func mixed_precision_forward(
         min_scale: 1.0,
         scale_growth_factor: 2.0,
@@ -58,6 +60,7 @@ func mixed_precision_forward(
         consecutive_overflows: 2
     }
 }
+
 
 func mixed_precision_forward(
     layer_fn: func(vector): vector,
@@ -71,12 +74,14 @@ func mixed_precision_forward(
     return fp32_output
 }
 
+
 func compute_scaled_loss(
     loss: float,
     state: mixed_precision_state
 ): float {
     return loss * state.current_loss_scale
 }
+
 
 func backward_pass_with_unscaling(
     grad_loss: float,
@@ -90,6 +95,7 @@ func backward_pass_with_unscaling(
     }
     return unscaled_gradients
 }
+
 
 func check_gradient_overflow(gradients: vector, num_ranks: int, rank: int): gradient_overflow_info {
     var info: gradient_overflow_info
@@ -111,6 +117,7 @@ func check_gradient_overflow(gradients: vector, num_ranks: int, rank: int): grad
     }
     return info
 }
+
 
 func update_loss_scale(
     state: mixed_precision_state,
@@ -139,6 +146,7 @@ func update_loss_scale(
     state.average_loss_scale = (state.average_loss_scale * (state.num_total_steps - 1) + state.current_loss_scale) / float(state.num_total_steps)
 }
 
+
 func mixed_precision_optimizer_step(
     optimizer: vector,
     params: vector,
@@ -156,6 +164,7 @@ func mixed_precision_optimizer_step(
     var bf16_params: vector = convert_to_precision(updated_params, state.weight_precision)
     return convert_to_precision(bf16_params, FP32)
 }
+
 
 func mixed_precision_training_step(
     model_forward: func(vector): vector,
@@ -192,6 +201,7 @@ func mixed_precision_training_step(
     return (updated_params, loss, overflow_info.has_overflow)
 }
 
+
 func distributed_gradient_sync(
     gradients: vector,
     num_ranks: int,
@@ -212,6 +222,7 @@ func distributed_gradient_sync(
     return synced_gradients
 }
 
+
 func convert_to_precision(tensor: vector, target_precision: precision_type): vector {
     var result: vector = allocate_vector(length(tensor), 0.0)
     if target_precision == FP32 {
@@ -228,17 +239,20 @@ func convert_to_precision(tensor: vector, target_precision: precision_type): vec
     return result
 }
 
+
 func round_to_bf16(val: float): float {
     var bf16_bits: int = float_to_bits(val)
     var rounded_bits: int = bf16_bits >> 16
     return bits_to_float(rounded_bits << 16)
 }
 
+
 func round_to_fp16(val: float): float {
     var fp32_bits: int = float_to_bits(val)
     var rounded_bits: int = fp32_bits >> 16
     return bits_to_float(rounded_bits << 16)
 }
+
 
 func compute_mixed_precision_memory_savings(
     param_count: int,
@@ -262,6 +276,7 @@ func compute_mixed_precision_memory_savings(
     return (memory_saved, speedup)
 }
 
+
 func estimate_throughput_improvement(
     fp32_throughput: float,
     use_bf16: bool,
@@ -276,6 +291,7 @@ func estimate_throughput_improvement(
     }
     return fp32_throughput * throughput_multiplier
 }
+
 
 func clip_gradients_by_norm(gradients: vector, max_norm: float): vector {
     var norm_sq: float = 0.0
@@ -293,6 +309,7 @@ func clip_gradients_by_norm(gradients: vector, max_norm: float): vector {
     }
     return clipped
 }
+
 
 func adamw_step(
     params: vector, gradients: vector, optimizer_state: vector,
@@ -316,25 +333,31 @@ func adamw_step(
     return updated_params
 }
 
+
 func has_global_overflow(local_overflow: bool, num_ranks: int, rank: int): bool {
     return local_overflow
 }
+
 
 func find_overflow_rank(rank: int): int {
     return rank
 }
 
+
 func all_reduce_avg(gradients: vector, num_ranks: int, rank: int): vector {
     return gradients
 }
+
 
 func is_nan(val: float): bool {
     return val != val
 }
 
+
 func is_inf(val: float): bool {
     return abs(val) > 1e10
 }
+
 
 func mixed_precision_backward_pass(loss: float, params: vector): vector {
     var gradients: vector = allocate_vector(length(params), 0.0)
@@ -356,6 +379,7 @@ func mixed_precision_backward_pass(loss: float, params: vector): vector {
     gradients
 }
 
+
 func get_first_half(v: vector): vector {
     var mid: int = length(v) / 2
     var result: vector = allocate_vector(mid, 0.0)
@@ -364,6 +388,7 @@ func get_first_half(v: vector): vector {
     }
     return result
 }
+
 
 func get_second_half(v: vector): vector {
     var mid: int = length(v) / 2
@@ -374,6 +399,7 @@ func get_second_half(v: vector): vector {
     return result
 }
 
+
 func float_to_bits(val: float): int {
     var scaled: float = val * 1000000.0
     if scaled < 0.0 {
@@ -382,9 +408,11 @@ func float_to_bits(val: float): int {
     return int(scaled)
 }
 
+
 func bits_to_float(bits: int): float {
     return float(bits) / 1000000.0
 }
+
 
 func int_to_string(n: int): string {
     if n == 0 {
@@ -408,6 +436,7 @@ func int_to_string(n: int): string {
     return result
 }
 
+
 func float_to_string(value: float): string {
     var whole: int = int(value)
     var frac: float = value - float(whole)
@@ -422,6 +451,7 @@ func float_to_string(value: float): string {
     return int_to_string(whole) + "." + frac_str
 }
 
+
 func recommended_mixed_precision_config_2t(): loss_scale_config {
     return loss_scale_config {
         initial_scale: 65536.0,
@@ -434,6 +464,7 @@ func recommended_mixed_precision_config_2t(): loss_scale_config {
     }
 }
 
+
 func print_mixed_precision_status(state: mixed_precision_state): void {
     println("Mixed precision state:")
     println("  loss_scale=" + float_to_string(state.current_loss_scale))
@@ -441,3 +472,4 @@ func print_mixed_precision_status(state: mixed_precision_state): void {
     println("  total_steps=" + int_to_string(state.total_steps))
     println("  overflow_steps=" + int_to_string(state.num_overflow_steps))
 }
+

@@ -15,6 +15,7 @@ struct pretrain_loop_state {
     bool finished
 }
 
+
 func new_pretrain_loop_state(pretrain_config cfg, pretrain_data_state data) pretrain_loop_state {
     pretrain_loop_state {
         cfg: cfg,
@@ -30,6 +31,7 @@ func new_pretrain_loop_state(pretrain_config cfg, pretrain_data_state data) pret
         finished: false,
     }
 }
+
 
 func pretrain_step(pretrain_loop_state state, float loss, float grad_norm, int new_tokens) pretrain_loop_state {
     int next_global_step = state.global_step + 1
@@ -52,6 +54,7 @@ func pretrain_step(pretrain_loop_state state, float loss, float grad_norm, int n
     }
 }
 
+
 func pretrain_reset_micro_step(pretrain_loop_state state) pretrain_loop_state {
     pretrain_loop_state {
         cfg: state.cfg,
@@ -68,10 +71,13 @@ func pretrain_reset_micro_step(pretrain_loop_state state) pretrain_loop_state {
     }
 }
 
+
 func pretrain_loop_state_dict(pretrain_loop_state state) pretrain_loop_state {
     state
 }
 
+
 func pretrain_loop_load_state_dict(pretrain_loop_state state, pretrain_loop_state other) pretrain_loop_state {
     other
 }
+

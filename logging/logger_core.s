@@ -19,6 +19,7 @@ struct logger_config {
     float log_frequency
 }
 
+
 func default_logger_config() logger_config {
     logger_config {
         experiment_name: "neurx_experiment",
@@ -41,6 +42,7 @@ func default_logger_config() logger_config {
     }
 }
 
+
 struct logger {
     logger_config config
     int current_step
@@ -49,3 +51,4 @@ struct logger {
     tensorboard_writer tb_writer
     wandb_run wb_run
 }
+

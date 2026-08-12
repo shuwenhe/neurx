@@ -6,6 +6,7 @@ struct comm_context {
     bool initialized
 }
 
+
 func create_comm_context(int world_size, int rank, string backend) comm_context {
     comm_context ctx
     ctx.world_size = world_size
@@ -14,6 +15,7 @@ func create_comm_context(int world_size, int rank, string backend) comm_context 
     ctx.initialized = true
     return ctx
 }
+
 
 func all_reduce(comm_context ctx, []float data, string op) []float {
     if !ctx.initialized {
@@ -29,6 +31,7 @@ func all_reduce(comm_context ctx, []float data, string op) []float {
             " size=" + int_to_string(len(data)))
     return data
 }
+
 
 func all_gather(comm_context ctx, []float local_data) []float {
     if !ctx.initialized {
@@ -57,6 +60,7 @@ func all_gather(comm_context ctx, []float local_data) []float {
     return gathered_data
 }
 
+
 func reduce_scatter(comm_context ctx, []float data) []float {
     if !ctx.initialized {
         println("[ERROR] Communication context not initialized")
@@ -80,6 +84,7 @@ func reduce_scatter(comm_context ctx, []float data) []float {
     return local_chunk
 }
 
+
 func broadcast(comm_context ctx, []float data, int root) []float {
     if !ctx.initialized {
         println("[ERROR] Communication context not initialized")
@@ -94,6 +99,7 @@ func broadcast(comm_context ctx, []float data, int root) []float {
     return data
 }
 
+
 func barrier(comm_context ctx) {
     if !ctx.initialized {
         println("[ERROR] Communication context not initialized")
@@ -105,17 +111,21 @@ func barrier(comm_context ctx) {
     println("[Barrier] rank=" + int_to_string(ctx.rank) + " syncing")
 }
 
+
 func get_rank(comm_context ctx) int {
     return ctx.rank
 }
+
 
 func get_world_size(comm_context ctx) int {
     return ctx.world_size
 }
 
+
 func is_initialized(comm_context ctx) bool {
     return ctx.initialized
 }
+
 
 func int_to_string(int n) string {
     if n == 0 { return "0" }
@@ -129,3 +139,4 @@ func int_to_string(int n) string {
     if n == 8 { return "8" }
     return "N"
 }
+

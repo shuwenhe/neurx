@@ -1,6 +1,7 @@
 package neurx.model.robotics.train_robotics
 use neurx.data.loader.dataloader.{dataloader_state, dataloader_step_output, has_next, next_batch, reset_state, new_state}
 use neurx.pretrain.config.{pretrain_config, new_pretrain_config, with_max_steps, with_lr}
+
 struct robotics_training_config {
     int batch_size
     int seq_len
@@ -9,10 +10,12 @@ struct robotics_training_config {
     string task_name
 }
 
+
 struct robotics_training_loop_state {
     int global_step
     int epoch
 }
+
 
 struct robotics_training_metrics {
     int step
@@ -22,6 +25,7 @@ struct robotics_training_metrics {
     float loss
     bool trained
 }
+
 
 struct robotics_training_state {
     pretrain_config cfg
@@ -33,6 +37,7 @@ struct robotics_training_state {
     bool finished
 }
 
+
 func new_robotics_training_config(int batch_size, int seq_len, int max_steps, float learning_rate, string task_name) robotics_training_config {
     robotics_training_config {
         batch_size: batch_size,
@@ -42,6 +47,7 @@ func new_robotics_training_config(int batch_size, int seq_len, int max_steps, fl
         task_name: task_name,
     }
 }
+
 
 func new_robotics_training_metrics() robotics_training_metrics {
     robotics_training_metrics {
@@ -54,6 +60,7 @@ func new_robotics_training_metrics() robotics_training_metrics {
     }
 }
 
+
 func robotics_training_corpus() []int {
     []int token_ids = []int{cap: 16}
     int i = 0
@@ -64,12 +71,14 @@ func robotics_training_corpus() []int {
     token_ids
 }
 
+
 func new_robotics_training_loop_state() robotics_training_loop_state {
     robotics_training_loop_state {
         global_step: 0,
         epoch: 0,
     }
 }
+
 
 func new_robotics_training_state(robotics_training_config task) robotics_training_state {
     pretrain_config cfg = new_pretrain_config()
@@ -88,6 +97,7 @@ func new_robotics_training_state(robotics_training_config task) robotics_trainin
     }
 }
 
+
 func robotics_training_state_dict(robotics_training_state state) robotics_training_state {
     robotics_training_state {
         cfg: state.cfg,
@@ -99,6 +109,7 @@ func robotics_training_state_dict(robotics_training_state state) robotics_traini
         finished: state.finished,
     }
 }
+
 
 func robotics_training_load_state_dict(robotics_training_state state, robotics_training_state other) robotics_training_state {
     robotics_training_state {
@@ -112,6 +123,7 @@ func robotics_training_load_state_dict(robotics_training_state state, robotics_t
     }
 }
 
+
 func robotics_training_loss(int valid_tokens, int step) float {
     float loss = 1.0
     if valid_tokens > 0 {
@@ -122,6 +134,7 @@ func robotics_training_loss(int valid_tokens, int step) float {
     }
     loss
 }
+
 
 func robotics_training_step(robotics_training_state state) robotics_training_state {
     if state.finished {
@@ -158,6 +171,7 @@ func robotics_training_step(robotics_training_state state) robotics_training_sta
     }
 }
 
+
 func robotics_training_run(robotics_training_state state, int steps) robotics_training_state {
     int loops = steps
     if loops < 0 {
@@ -175,6 +189,8 @@ func robotics_training_run(robotics_training_state state, int steps) robotics_tr
     current
 }
 
+
 func robotics_training_complete(robotics_training_state state) bool {
     state.finished
 }
+

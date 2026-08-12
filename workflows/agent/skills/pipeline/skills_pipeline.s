@@ -65,3 +65,4 @@ report = report + "=== candidates ===\n" + candidate_report + "\n\n"
 report = report + "=== monitor ===\nis_stalled=" + stall_str + "\n"
 report = report + "tool_summary=\n" + agent_tool_summary(evolved)
 runtime_write_text_file(report_path, report)
+

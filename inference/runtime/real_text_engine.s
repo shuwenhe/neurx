@@ -20,6 +20,7 @@ struct real_text_engine_state {
     string error_message
 }
 
+
 struct real_generation_result {
     string text
     int prompt_tokens
@@ -31,6 +32,7 @@ struct real_generation_result {
     bool ok
     string error_message
 }
+
 
 func int_to_string(int value) string {
     if value == 0 {
@@ -53,6 +55,7 @@ func int_to_string(int value) string {
     sign + tmp
 }
 
+
 func float_to_string(float value) string {
     int int_part = int(value)
     float frac_value = value - float(int_part)
@@ -70,12 +73,14 @@ func float_to_string(float value) string {
     result + int_to_string(frac_part)
 }
 
+
 func abs_float(float value) float {
     if value < 0.0 {
         return 0.0 - value
     }
     value
 }
+
 
 func min_int(int a, int b) int {
     if a < b {
@@ -84,12 +89,14 @@ func min_int(int a, int b) int {
     b
 }
 
+
 func max_int(int a, int b) int {
     if a > b {
         return a
     }
     b
 }
+
 
 func last_index_of(string text, string needle) int {
     if len(needle) == 0 || len(needle) > len(text) {
@@ -114,6 +121,7 @@ func last_index_of(string text, string needle) int {
     -1
 }
 
+
 func index_of(string text, string needle) int {
     if len(needle) == 0 || len(needle) > len(text) {
         return -1
@@ -136,6 +144,7 @@ func index_of(string text, string needle) int {
     }
     -1
 }
+
 
 func index_of_from(string text, string needle, int start) int {
     if start < 0 {
@@ -163,6 +172,7 @@ func index_of_from(string text, string needle, int start) int {
     -1
 }
 
+
 func starts_with(string text, string prefix) bool {
     if len(prefix) > len(text) {
         return false
@@ -170,12 +180,14 @@ func starts_with(string text, string prefix) bool {
     __host_slice(text, 0, len(prefix)) == prefix
 }
 
+
 func ends_with(string text, string suffix) bool {
     if len(suffix) > len(text) {
         return false
     }
     __host_slice(text, len(text) - len(suffix), len(text)) == suffix
 }
+
 
 func lower_ascii(string text) string {
     string output = ""
@@ -191,9 +203,11 @@ func lower_ascii(string text) string {
     output
 }
 
+
 func contains_text(string text, string needle) bool {
     index_of(text, needle) >= 0
 }
+
 
 func bool_to_string(bool value) string {
     if value {
@@ -201,6 +215,7 @@ func bool_to_string(bool value) string {
     }
     "false"
 }
+
 
 func json_escape(string value) string {
     string output = ""
@@ -225,6 +240,7 @@ func json_escape(string value) string {
     output
 }
 
+
 func resolve_model_directory(string configured_path) string {
     string path = trim(configured_path)
     if len(path) == 0 {
@@ -247,6 +263,7 @@ func resolve_model_directory(string configured_path) string {
     path
 }
 
+
 func resolve_model_file(string configured_path) string {
     string path = trim(configured_path)
     if len(path) == 0 {
@@ -264,6 +281,7 @@ func resolve_model_file(string configured_path) string {
     path + "/model.safetensors"
 }
 
+
 func safe_hidden_size(real_text_engine_state state) int {
     if state.hidden_size > 0 {
         return state.hidden_size
@@ -273,6 +291,7 @@ func safe_hidden_size(real_text_engine_state state) int {
     }
     896
 }
+
 
 func safe_intermediate_size(real_text_engine_state state) int {
     if state.intermediate_size > 0 {
@@ -284,6 +303,7 @@ func safe_intermediate_size(real_text_engine_state state) int {
     safe_hidden_size(state) * 4
 }
 
+
 func safe_vocab_size(real_text_engine_state state) int {
     if state.vocab_size > 0 {
         return state.vocab_size
@@ -293,6 +313,7 @@ func safe_vocab_size(real_text_engine_state state) int {
     }
     151936
 }
+
 
 func safe_num_layers(real_text_engine_state state) int {
     if state.num_layers > 0 {
@@ -304,6 +325,7 @@ func safe_num_layers(real_text_engine_state state) int {
     24
 }
 
+
 func safe_bos_token_id(real_text_engine_state state) int {
     if state.bos_token_id >= 0 {
         return state.bos_token_id
@@ -313,6 +335,7 @@ func safe_bos_token_id(real_text_engine_state state) int {
     }
     151643
 }
+
 
 func safe_eos_token_id(real_text_engine_state state) int {
     if state.eos_token_id >= 0 {
@@ -324,9 +347,11 @@ func safe_eos_token_id(real_text_engine_state state) int {
     151645
 }
 
+
 func layer_name(int layer, string suffix) string {
     "model.layers." + int_to_string(layer) + "." + suffix
 }
+
 
 func normalize_token_id(int token_id, int vocab_size) int {
     if vocab_size <= 0 {
@@ -338,6 +363,7 @@ func normalize_token_id(int token_id, int vocab_size) int {
     }
     value - (value / vocab_size) * vocab_size
 }
+
 
 func word_to_token(string word) int {
     if word == "what" { return 100 }
@@ -378,6 +404,7 @@ func word_to_token(string word) int {
     }
     50000 + (hash - (hash / 10000) * 10000)
 }
+
 
 func token_to_word(int token) string {
     if token == 100 { return "what" }
@@ -448,6 +475,7 @@ func token_to_word(int token) string {
     "token"
 }
 
+
 func tokenize_prompt(string text) []int {
     []int tokens = []int{cap: len(text) + 8}
     int count = 0
@@ -495,6 +523,7 @@ func tokenize_prompt(string text) []int {
     output
 }
 
+
 func prompt_signature([]int tokens) int {
     int signature = 17
     int index = 0
@@ -508,6 +537,7 @@ func prompt_signature([]int tokens) int {
     signature - (signature / 100000) * 100000
 }
 
+
 func load_embedding_row(safetensors_model model, string tensor_name, int token_id, int hidden_size, int vocab_size) []float {
     int normalized_token = normalize_token_id(token_id, vocab_size)
     []int raw = read_tensor_elements(model, tensor_name, normalized_token * hidden_size, hidden_size)
@@ -520,6 +550,7 @@ func load_embedding_row(safetensors_model model, string tensor_name, int token_i
     row
 }
 
+
 func add_in_place([]float target, []float source, float scale) {
     int index = 0
     while index < len(target) && index < len(source) {
@@ -527,6 +558,7 @@ func add_in_place([]float target, []float source, float scale) {
         index = index + 1
     }
 }
+
 
 func copy_vector([]float source) []float {
     []float output = []float{cap: len(source)}
@@ -537,6 +569,7 @@ func copy_vector([]float source) []float {
     }
     output
 }
+
 
 func blend_vectors([]float left, []float right, float left_scale, float right_scale) []float {
     int size = min_int(len(left), len(right))
@@ -549,6 +582,7 @@ func blend_vectors([]float left, []float right, float left_scale, float right_sc
     output
 }
 
+
 func approx_silu(float value) float {
     if value < -8.0 {
         return 0.0
@@ -558,6 +592,7 @@ func approx_silu(float value) float {
     }
     value / (1.0 + abs_float(value))
 }
+
 
 func run_transformer_layer(real_text_engine_state state, int layer, []float hidden) []float {
     int hidden_size = safe_hidden_size(state)
@@ -625,6 +660,7 @@ func run_transformer_layer(real_text_engine_state state, int layer, []float hidd
     hidden
 }
 
+
 func run_transformer_stack(real_text_engine_state state, []float hidden) []float {
     int layer_count = safe_num_layers(state)
     int layer = 0
@@ -641,6 +677,7 @@ func run_transformer_stack(real_text_engine_state state, []float hidden) []float
     hidden
 }
 
+
 func project_logits(real_text_engine_state state, []float hidden) []float {
     int hidden_size = safe_hidden_size(state)
     int vocab_size = safe_vocab_size(state)
@@ -656,6 +693,7 @@ func project_logits(real_text_engine_state state, []float hidden) []float {
     }
     matvec_named(state.model, "model.embed_tokens.weight", vocab_size, hidden_size, hidden)
 }
+
 
 func argmax_float([]float values) int {
     if len(values) == 0 {
@@ -674,6 +712,7 @@ func argmax_float([]float values) int {
     best_index
 }
 
+
 func prompt_fallback(string prompt, string reason) string {
     string lower = lower_ascii(prompt)
     if contains_text(lower, "difference") || contains_text(lower, "区别") || contains_text(lower, "compare") {
@@ -690,6 +729,7 @@ func prompt_fallback(string prompt, string reason) string {
     }
     "NeurX model execution completed, but the decoded response was empty."
 }
+
 
 func read_prompt_from_env() string {
     string prompt = trim(runtime_env_get("NEURX_PROMPT", ""))
@@ -713,6 +753,7 @@ func read_prompt_from_env() string {
     }
     "Hello"
 }
+
 
 func load_real_text_engine(string configured_path) real_text_engine_state {
     real_text_engine_state state
@@ -755,6 +796,7 @@ func load_real_text_engine(string configured_path) real_text_engine_state {
     state
 }
 
+
 func encode_prompt_state(real_text_engine_state state, []int prompt_tokens) []float {
     int hidden_size = safe_hidden_size(state)
     int vocab_size = safe_vocab_size(state)
@@ -778,6 +820,7 @@ func encode_prompt_state(real_text_engine_state state, []int prompt_tokens) []fl
     run_transformer_stack(state, hidden)
 }
 
+
 func advance_hidden_state(real_text_engine_state state, []float hidden, int token_id) []float {
     int hidden_size = safe_hidden_size(state)
     int vocab_size = safe_vocab_size(state)
@@ -788,6 +831,7 @@ func advance_hidden_state(real_text_engine_state state, []float hidden, int toke
     []float blended = blend_vectors(hidden, row, 0.78, 0.22)
     run_transformer_stack(state, blended)
 }
+
 
 func decode_generated_tokens([]int tokens) string {
     string output = ""
@@ -810,11 +854,13 @@ func decode_generated_tokens([]int tokens) string {
     output
 }
 
+
 func estimate_latency_ms(int prompt_tokens, int generated_tokens, int layers) float {
     float base = float(prompt_tokens * layers) * 0.7
     float decode = float(generated_tokens * layers) * 1.1
     base + decode + 3.0
 }
+
 
 func generate_response(real_text_engine_state state, string prompt, int max_new_tokens) real_generation_result {
     real_generation_result result
@@ -879,6 +925,7 @@ func generate_response(real_text_engine_state state, string prompt, int max_new_
     result
 }
 
+
 func build_health_json(real_text_engine_state state) string {
     string json = "{"
     string status = "unhealthy"
@@ -901,6 +948,7 @@ func build_health_json(real_text_engine_state state) string {
     json + "}"
 }
 
+
 func build_models_json(real_text_engine_state state) string {
     string json = "{"
     json = json + "\"object\":\"list\","
@@ -912,6 +960,7 @@ func build_models_json(real_text_engine_state state) string {
     json = json + "}]}"
     json
 }
+
 
 func build_generate_json(real_generation_result result) string {
     string json = "{"
@@ -929,6 +978,7 @@ func build_generate_json(real_generation_result result) string {
     }
     json + "}"
 }
+
 
 func build_chat_completion_json(real_generation_result result) string {
     string json = "{"
@@ -951,6 +1001,7 @@ func build_chat_completion_json(real_generation_result result) string {
     }
     json + "}"
 }
+
 
 func resolve_prompt_from_body(string body) string {
     string prompt_key = "\"prompt\""
@@ -1010,6 +1061,7 @@ func resolve_prompt_from_body(string body) string {
     trim(body)
 }
 
+
 func parse_max_tokens(string body, int fallback) int {
     string key = "\"max_tokens\""
     int pos = index_of(body, key)
@@ -1037,6 +1089,7 @@ func parse_max_tokens(string body, int fallback) int {
     value
 }
 
+
 func parse_bool(string body, string key, bool fallback) bool {
     int pos = index_of(body, key)
     if pos < 0 {
@@ -1059,6 +1112,7 @@ func parse_bool(string body, string key, bool fallback) bool {
     fallback
 }
 
+
 func resolve_model_path_from_env() string {
     string path = trim(runtime_env_get("NEURX_MODEL_PATH", ""))
     if len(path) > 0 {
@@ -1074,3 +1128,4 @@ func resolve_model_path_from_env() string {
     }
     "/home/shuwen/shuwen/posttrain"
 }
+

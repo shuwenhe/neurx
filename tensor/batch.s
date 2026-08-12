@@ -13,6 +13,7 @@ struct batch_state {
     []string params
 }
 
+
 func join_strings([]string values) string {
     string out = ""
     int i = 0
@@ -25,6 +26,7 @@ func join_strings([]string values) string {
     }
     out
 }
+
 
 func copy_shape_tail(tensor a) []int {
     int ndim = len(a.shape)
@@ -41,6 +43,7 @@ func copy_shape_tail(tensor a) []int {
     }
     shape
 }
+
 
 func slice_axis0(tensor a, int index) tensor {
     int ndim = len(a.shape)
@@ -63,6 +66,7 @@ func slice_axis0(tensor a, int index) tensor {
     neurx.tensor.tensor.new(out, copy_shape_tail(a), a.requires_grad)
 }
 
+
 func batch_reduce_scalar(tensor a, int mode) tensor {
     int batch = a.shape[0]
     []float out = []float{cap: batch}
@@ -82,6 +86,7 @@ func batch_reduce_scalar(tensor a, int mode) tensor {
     }
     neurx.tensor.tensor.new(out, [batch], a.requires_grad)
 }
+
 
 func batch_matmul(tensor a, tensor b) tensor {
     int ndim_a = len(a.shape)
@@ -145,6 +150,7 @@ func batch_matmul(tensor a, tensor b) tensor {
     neurx.tensor.tensor.new(out, out_shape, a.requires_grad || b.requires_grad)
 }
 
+
 func new_batch_state(string name, int batch_size, int batch_dim) batch_state {
     batch_state {
         name: name,
@@ -156,29 +162,36 @@ func new_batch_state(string name, int batch_size, int batch_dim) batch_state {
     }
 }
 
+
 func batch_name(batch_state state) string {
     state.name
 }
+
 
 func batch_active(batch_state state) bool {
     state.active
 }
 
+
 func batch_batch_size(batch_state state) int {
     state.batch_size
 }
+
 
 func batch_batch_dim(batch_state state) int {
     state.batch_dim
 }
 
+
 func batch_primitive_count(batch_state state) int {
     len(state.primitives)
 }
 
+
 func batch_param_count(batch_state state) int {
     len(state.params)
 }
+
 
 func batch_has_primitive(batch_state state, string primitive) bool {
     int i = 0
@@ -191,6 +204,7 @@ func batch_has_primitive(batch_state state, string primitive) bool {
     false
 }
 
+
 func batch_has_param(batch_state state, string param) bool {
     int i = 0
     while i < len(state.params) {
@@ -201,6 +215,7 @@ func batch_has_param(batch_state state, string param) bool {
     }
     false
 }
+
 
 func batch_add_primitive(batch_state state, string primitive) batch_state {
     []string primitives = copy_strings(state.primitives)
@@ -222,6 +237,7 @@ func batch_add_primitive(batch_state state, string primitive) batch_state {
     }
 }
 
+
 func batch_add_param(batch_state state, string param) batch_state {
     []string params = copy_strings(state.params)
     int n = len(params)
@@ -242,6 +258,7 @@ func batch_add_param(batch_state state, string param) batch_state {
     }
 }
 
+
 func batch_set_active(batch_state state, bool active) batch_state {
     batch_state {
         name: state.name,
@@ -252,6 +269,7 @@ func batch_set_active(batch_state state, bool active) batch_state {
         params: copy_strings(state.params),
     }
 }
+
 
 func batch_set_batch_size(batch_state state, int batch_size) batch_state {
     batch_state {
@@ -264,6 +282,7 @@ func batch_set_batch_size(batch_state state, int batch_size) batch_state {
     }
 }
 
+
 func batch_set_batch_dim(batch_state state, int batch_dim) batch_state {
     batch_state {
         name: state.name,
@@ -274,6 +293,7 @@ func batch_set_batch_dim(batch_state state, int batch_dim) batch_state {
         params: copy_strings(state.params),
     }
 }
+
 
 func batch_clear_primitives(batch_state state) batch_state {
     batch_state {
@@ -286,6 +306,7 @@ func batch_clear_primitives(batch_state state) batch_state {
     }
 }
 
+
 func batch_clear_params(batch_state state) batch_state {
     batch_state {
         name: state.name,
@@ -296,6 +317,7 @@ func batch_clear_params(batch_state state) batch_state {
         params: [],
     }
 }
+
 
 func batch_state_dict(batch_state state) batch_state {
     batch_state {
@@ -308,9 +330,11 @@ func batch_state_dict(batch_state state) batch_state {
     }
 }
 
+
 func batch_load_state_dict(batch_state state, batch_state other) batch_state {
     other
 }
+
 
 func batch_to_transform_chain(batch_state state) transform_chain {
     transform_chain {
@@ -324,6 +348,7 @@ func batch_to_transform_chain(batch_state state) transform_chain {
     }
 }
 
+
 func transform_chain_to_batch(transform_chain chain, string name, int batch_size, int batch_dim) batch_state {
     batch_state {
         name: name,
@@ -334,6 +359,7 @@ func transform_chain_to_batch(transform_chain chain, string name, int batch_size
         params: copy_strings(chain.params),
     }
 }
+
 
 func vmap_unary(string primitive, tensor a) tensor {
     if primitive == "negative" {
@@ -356,6 +382,7 @@ func vmap_unary(string primitive, tensor a) tensor {
     }
     neurx.tensor.tensor.clone(a)
 }
+
 
 func vmap_binary(string primitive, tensor a, tensor b) tensor {
     if primitive == "add" {
@@ -388,6 +415,7 @@ func vmap_binary(string primitive, tensor a, tensor b) tensor {
     neurx.tensor.tensor.add(a, b)
 }
 
+
 func vmap_ternary(string primitive, tensor condition, tensor x, tensor y) tensor {
     if primitive == "where" {
         return neurx.tensor.tensor.where(condition, x, y)
@@ -395,58 +423,73 @@ func vmap_ternary(string primitive, tensor condition, tensor x, tensor y) tensor
     neurx.tensor.tensor.where(condition, x, y)
 }
 
+
 func vmap_add(tensor a, tensor b) tensor {
     vmap_binary("add", a, b)
 }
+
 
 func vmap_sub(tensor a, tensor b) tensor {
     vmap_binary("sub", a, b)
 }
 
+
 func vmap_mul(tensor a, tensor b) tensor {
     vmap_binary("mul", a, b)
 }
+
 
 func vmap_div(tensor a, tensor b) tensor {
     vmap_binary("div", a, b)
 }
 
+
 func vmap_maximum(tensor a, tensor b) tensor {
     vmap_binary("maximum", a, b)
 }
+
 
 func vmap_minimum(tensor a, tensor b) tensor {
     vmap_binary("minimum", a, b)
 }
 
+
 func vmap_matmul(tensor a, tensor b) tensor {
     vmap_binary("matmul", a, b)
 }
+
 
 func vmap_sum(tensor a) tensor {
     vmap_unary("sum", a)
 }
 
+
 func vmap_mean(tensor a) tensor {
     vmap_unary("mean", a)
 }
+
 
 func vmap_negative(tensor a) tensor {
     vmap_unary("negative", a)
 }
 
+
 func vmap_abs(tensor a) tensor {
     vmap_unary("abs", a)
 }
+
 
 func vmap_square(tensor a) tensor {
     vmap_unary("square", a)
 }
 
+
 func vmap_reciprocal(tensor a) tensor {
     vmap_unary("reciprocal", a)
 }
 
+
 func vmap_where(tensor condition, tensor x, tensor y) tensor {
     vmap_ternary("where", condition, x, y)
 }
+

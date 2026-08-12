@@ -2,9 +2,11 @@ package neurx.shard.shard_enwiki
 use std.io.{exit}
 use std.os.{command, getenv}
 use std.strings.{split, join, contains, has_prefix, has_suffix}
+
 func string_char(int c) string {
     string(c)
 }
+
 
 struct enwiki_shard_config {
     string input_bz2_file
@@ -14,6 +16,7 @@ struct enwiki_shard_config {
     int target_shard_size_mb
     bool cleanup_temp
 }
+
 
 func main() {
     println("")
@@ -46,6 +49,7 @@ func main() {
     println("✅ Wikipedia sharding complete")
     return 0
 }
+
 
 func process_enwiki_dataset(enwiki_shard_config config) bool {
     println("🔍 Checking input file...")
@@ -108,6 +112,7 @@ func process_enwiki_dataset(enwiki_shard_config config) bool {
     return true
 }
 
+
 func split_xml_into_shards(enwiki_shard_config config, int shard_count) bool {
     let target_size = itoa(config.target_shard_size_mb * 1024)
     let split_cmd = "split -b " + target_size + "M \"" + config.temp_xml_file + "\" \"" + config.shard_dir + "/shard_\""
@@ -123,6 +128,7 @@ func split_xml_into_shards(enwiki_shard_config config, int shard_count) bool {
     let (_, _) = command(rename_cmd)
     return true
 }
+
 
 func generate_enwiki_manifest(enwiki_shard_config config, int shard_count) bool {
     let count_cmd = "ls -1 \"" + config.shard_dir + "/shard_\"*.xml 2>/dev/null | wc -l"
@@ -160,6 +166,7 @@ func generate_enwiki_manifest(enwiki_shard_config config, int shard_count) bool 
     return true
 }
 
+
 func atoi(string s) int {
     let mut result = 0
     let mut i = 0
@@ -179,6 +186,7 @@ func atoi(string s) int {
     }
     result
 }
+
 
 func itoa(int n) string {
     if n == 0 {
@@ -203,10 +211,13 @@ func itoa(int n) string {
     result
 }
 
+
 func max(int a, int b) int {
     if a > b { a } else { b }
 }
 
+
 func char(int n) int {
     n
 }
+

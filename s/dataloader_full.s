@@ -14,6 +14,7 @@ struct dataloader_config {
     collator_config collator
 }
 
+
 struct dataloader {
     dataset ds
     sampler samp
@@ -23,6 +24,7 @@ struct dataloader {
     int batches_served
     []batch prefetch_buffer
 }
+
 
 func new_dataloader(
     dataset ds,
@@ -56,6 +58,7 @@ func new_dataloader(
     }
 }
 
+
 func reset_epoch(dataloader dl) dataloader {
     dl.current_epoch = dl.current_epoch + 1
     dl.batches_served = 0
@@ -68,6 +71,7 @@ func reset_epoch(dataloader dl) dataloader {
     dl = fill_prefetch_buffer(dl)
     dl
 }
+
 
 func next_batch(dataloader dl) (batch, bool) {
     if len(dl.prefetch_buffer) > 0 {
@@ -91,6 +95,7 @@ func next_batch(dataloader dl) (batch, bool) {
     }
 }
 
+
 func load_samples_for_indices(dataset ds, []int indices) []sample {
     []sample samples = []int{cap: len(indices)}
     for idx in indices {
@@ -103,6 +108,7 @@ func load_samples_for_indices(dataset ds, []int indices) []sample {
     }
     samples
 }
+
 
 func fill_prefetch_buffer(dataloader dl) dataloader {
     int target_count = dl.config.prefetch_factor * 2
@@ -119,6 +125,7 @@ func fill_prefetch_buffer(dataloader dl) dataloader {
     dl
 }
 
+
 struct bucket_config {
     int num_buckets
     int min_bucket_size
@@ -126,12 +133,14 @@ struct bucket_config {
     bool dynamic_buckets
 }
 
+
 struct bucketed_dataloader {
     dataloader base_dl
     bucket_config bconfig
     map[int][]int length_to_samples
     []int current_bucket_order
 }
+
 
 func create_bucketed_dataloader(
     dataset ds,
@@ -155,6 +164,7 @@ func create_bucketed_dataloader(
     }
 }
 
+
 func assign_to_bucket(int seq_len, bucket_config bcfg) int {
     float range_val = float(bcfg.max_bucket_size - bcfg.min_bucket_size)
     if range_val <= 0.0 { return 0 }
@@ -164,6 +174,7 @@ func assign_to_bucket(int seq_len, bucket_config bcfg) int {
     if bucket >= bcfg.num_buckets { bucket = bcfg.num_buckets - 1 }
     bucket
 }
+
 
 func generate_bucket_order(map[int][]int buckets) []int {
     []int order = []
@@ -181,3 +192,4 @@ func generate_bucket_order(map[int][]int buckets) []int {
     }
     order
 }
+

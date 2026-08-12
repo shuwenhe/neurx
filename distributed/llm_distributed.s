@@ -6,6 +6,7 @@ use neurx.model.llm.gpt_backward.{
     gpt_train_step_result, scale_all_grads
 }
 
+
 struct dist_config {
     int world_size
     int rank
@@ -17,6 +18,7 @@ struct dist_config {
     int bucket_size_mb
     bool overlap_comm
 }
+
 
 func new_dist_config(int world_size, int rank, int dp_size) dist_config {
     dist_config {
@@ -31,6 +33,7 @@ func new_dist_config(int world_size, int rank, int dp_size) dist_config {
         overlap_comm: true,
     }
 }
+
 
 func dist_add_vec([]float a, []float b) []float {
     int n = len(a)
@@ -47,6 +50,7 @@ func dist_add_vec([]float a, []float b) []float {
     out
 }
 
+
 func dist_scale_vec([]float v, float scale) []float {
     int n = len(v)
     []float out = gpt_alloc(n, 0.0)
@@ -57,6 +61,7 @@ func dist_scale_vec([]float v, float scale) []float {
     }
     out
 }
+
 
 func dist_add_layer_grads(transformer_layer_grads a, transformer_layer_grads b) transformer_layer_grads {
     transformer_layer_grads {
@@ -76,6 +81,7 @@ func dist_add_layer_grads(transformer_layer_grads a, transformer_layer_grads b) 
     }
 }
 
+
 func dist_scale_layer_grads(transformer_layer_grads g, float scale) transformer_layer_grads {
     transformer_layer_grads {
         d_norm1_gamma: dist_scale_vec(g.d_norm1_gamma, scale),
@@ -94,6 +100,7 @@ func dist_scale_layer_grads(transformer_layer_grads g, float scale) transformer_
     }
 }
 
+
 func dist_add_grads(gpt_param_grads a, gpt_param_grads b) gpt_param_grads {
     []transformer_layer_grads merged = []transformer_layer_grads{cap: a.n_layer}
     int l = 0
@@ -111,6 +118,7 @@ func dist_add_grads(gpt_param_grads a, gpt_param_grads b) gpt_param_grads {
     }
 }
 
+
 func dist_scale_grads(gpt_param_grads g, float scale) gpt_param_grads {
     []transformer_layer_grads scaled = []transformer_layer_grads{cap: g.n_layer}
     int l = 0
@@ -127,6 +135,7 @@ func dist_scale_grads(gpt_param_grads g, float scale) gpt_param_grads {
         n_layer: g.n_layer,
     }
 }
+
 
 func dist_all_reduce_grads([]gpt_param_grads per_rank_grads) gpt_param_grads {
     int world = len(per_rank_grads)
@@ -146,6 +155,7 @@ func dist_all_reduce_grads([]gpt_param_grads per_rank_grads) gpt_param_grads {
     dist_scale_grads(summed, scale)
 }
 
+
 struct dist_train_result {
     language_model model
     gpt_adamw_state opt
@@ -153,6 +163,7 @@ struct dist_train_result {
     float grad_norm
     int world_size
 }
+
 
 func dist_compute_rank_grads(
     language_model model,
@@ -166,6 +177,7 @@ func dist_compute_rank_grads(
     (fc, logits) = gpt_forward_cached(model, token_ids, batch_size, seq_len)
     gpt_backward(model, fc, targets)
 }
+
 
 func dist_grad_norm(gpt_param_grads grads) float {
     float sq = 0.0
@@ -188,6 +200,7 @@ func dist_grad_norm(gpt_param_grads grads) float {
     dist_sqrt(sq)
 }
 
+
 func dist_vec_norm_sq([]float v) float {
     float s = 0.0
     int i = 0
@@ -198,6 +211,7 @@ func dist_vec_norm_sq([]float v) float {
     s
 }
 
+
 func dist_sqrt(float x) float {
     if x <= 0.0 { return 0.0 }
     float y = x
@@ -205,6 +219,7 @@ func dist_sqrt(float x) float {
     while i < 15 { y = 0.5 * (y + x / y); i = i + 1 }
     y
 }
+
 
 func distributed_train_step(
     language_model model,
@@ -243,6 +258,7 @@ func distributed_train_step(
     }
 }
 
+
 struct zero1_partition {
     int rank
     int world_size
@@ -250,6 +266,7 @@ struct zero1_partition {
     int end_index
     int total_params
 }
+
 
 func zero1_compute_partition(int rank, int world_size, int total_params) zero1_partition {
     int per_rank = total_params / world_size
@@ -274,11 +291,13 @@ func zero1_compute_partition(int rank, int world_size, int total_params) zero1_p
     }
 }
 
+
 func zero1_memory_savings_bytes(int total_params, int world_size) int {
     int full = total_params * 12
     int sharded = full / world_size
     full - sharded
 }
+
 
 struct grad_bucket {
     int bucket_id
@@ -286,6 +305,7 @@ struct grad_bucket {
     int num_tensors
     bool ready
 }
+
 
 func compute_num_buckets(int total_params, int bucket_size_mb) int {
     int bucket_elements = bucket_size_mb * 1024 * 1024 / 4
@@ -302,6 +322,7 @@ func compute_num_buckets(int total_params, int bucket_size_mb) int {
     num
 }
 
+
 func estimate_comm_bytes(int total_params, int world_size) int {
     if world_size <= 1 {
         return 0
@@ -309,3 +330,4 @@ func estimate_comm_bytes(int total_params, int world_size) int {
     int param_bytes = total_params * 4
     2 * param_bytes * (world_size - 1) / world_size
 }
+

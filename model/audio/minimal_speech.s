@@ -10,6 +10,7 @@ struct minimal_speech_state {
     bool trained
 }
 
+
 func new_minimal_speech_state() minimal_speech_state {
     minimal_speech_state {
         name: "minimal_speech",
@@ -23,16 +24,20 @@ func new_minimal_speech_state() minimal_speech_state {
     }
 }
 
+
 func minimal_speech_score(minimal_speech_state state, int feature_count) float {
     float score = feature_count
     score = score / state.feature_dim
     score
 }
 
+
 func minimal_speech_state_dict(minimal_speech_state state) minimal_speech_state {
     state
 }
 
+
 func minimal_speech_load_state_dict(minimal_speech_state state, minimal_speech_state other) minimal_speech_state {
     other
 }
+

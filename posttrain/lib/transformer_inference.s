@@ -14,6 +14,7 @@ func vec_add([]float a, []float b) []float {
     return result
 }
 
+
 func vec_mul_scalar([]float v, float scalar) []float {
     []float result
     int i = 0
@@ -23,6 +24,7 @@ func vec_mul_scalar([]float v, float scalar) []float {
     }
     return result
 }
+
 
 func vec_dot([]float a, []float b) float {
     float result = 0.0
@@ -35,6 +37,7 @@ func vec_dot([]float a, []float b) float {
     }
     return result
 }
+
 
 func rms_norm([]float x, []float weight, float epsilon) []float {
     []float result
@@ -58,6 +61,7 @@ func rms_norm([]float x, []float weight, float epsilon) []float {
     return result
 }
 
+
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     if x == 1.0 { return 1.0 }
@@ -69,6 +73,7 @@ func sqrt_approx(float x) float {
     }
     return guess
 }
+
 
 func exp_approx(float x) float {
     if x > 20.0 { return 1e9 }
@@ -83,6 +88,7 @@ func exp_approx(float x) float {
     }
     return result
 }
+
 
 func softmax([]float logits) []float {
     []float result
@@ -110,6 +116,7 @@ func softmax([]float logits) []float {
     return result
 }
 
+
 func matvec([]float matrix, []float vector, int rows, int cols) []float {
     []float result
     int i = 0
@@ -128,6 +135,7 @@ func matvec([]float matrix, []float vector, int rows, int cols) []float {
     return result
 }
 
+
 func embedding_lookup([]float embed_weight, int token_id, int hidden_size) []float {
     []float result
     int start = token_id * hidden_size
@@ -138,6 +146,7 @@ func embedding_lookup([]float embed_weight, int token_id, int hidden_size) []flo
     }
     return result
 }
+
 
 func attention_forward(
     []float query,
@@ -196,6 +205,7 @@ func attention_forward(
     return result
 }
 
+
 func ffn([]float x, []float gate_w, []float up_w, []float down_w, int hidden_size, int intermediate_size) []float {
     []float result
     []float gate = matvec(gate_w, x, intermediate_size, hidden_size)
@@ -210,6 +220,7 @@ func ffn([]float x, []float gate_w, []float up_w, []float down_w, int hidden_siz
     result = matvec(down_w, gated, hidden_size, intermediate_size)
     return result
 }
+
 
 func transformer_block_forward(
     []float hidden,
@@ -234,6 +245,7 @@ func transformer_block_forward(
     []float output = vec_add(after_attn, ffn_out)
     return output
 }
+
 
 func model_forward(
     int token_id,
@@ -275,6 +287,7 @@ func model_forward(
     return logits
 }
 
+
 func main() {
     eprintln("Transformer Inference Engine - Pure S Implementation")
     eprintln("✓ Attention mechanisms")
@@ -282,3 +295,4 @@ func main() {
     eprintln("✓ Layer normalization")
     eprintln("✓ Full transformer stack")
 }
+

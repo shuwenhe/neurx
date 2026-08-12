@@ -7,6 +7,7 @@ use neurx.runtime.io.{
     runtime_exec
 }
 
+
 struct verification_result {
     string phase_name
     bool adapter_files_ok
@@ -17,12 +18,14 @@ struct verification_result {
     string verdict
 }
 
+
 func test_adapter_files_exist() bool {
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH", "/home/shuwen/shuwen/posttrain/adapter")
     string model_file = adapter_path + "/adapter_model.safetensors"
     string config_file = adapter_path + "/adapter_config.json"
     return runtime_file_exists(model_file) && runtime_file_exists(config_file)
 }
+
 
 func test_adapter_config() bool {
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH", "/home/shuwen/shuwen/posttrain/adapter")
@@ -33,6 +36,7 @@ func test_adapter_config() bool {
     string config = runtime_file_read_all(config_file)
     return contains(config, "lora") || contains(config, "LORA")
 }
+
 
 func test_weights_changed() bool {
     string base_model_path = runtime_env_get("NEURX_BASE_MODEL_PATH", "/home/shuwen/shuwen/model/base-model")
@@ -47,6 +51,7 @@ func test_weights_changed() bool {
     return adapter_size > 20971520 && adapter_size < 209715200
 }
 
+
 func test_inference_quality() bool {
     i32 test_cases = 5
     i32 improved_cases = 4
@@ -54,12 +59,14 @@ func test_inference_quality() bool {
     return improvement_rate > 0.6
 }
 
+
 func test_integration_ready() bool {
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH", "/home/shuwen/shuwen/posttrain/adapter")
     string config_file = adapter_path + "/adapter_config.json"
     string model_file = adapter_path + "/adapter_model.safetensors"
     return runtime_file_exists(config_file) && runtime_file_exists(model_file)
 }
+
 
 func contains(str string, substr string) bool {
     i32 str_len = len(str)
@@ -81,6 +88,7 @@ func contains(str string, substr string) bool {
     }
     return false
 }
+
 
 func display_test_results() string {
     string output = ""
@@ -168,6 +176,7 @@ func display_test_results() string {
     return output
 }
 
+
 func run_diagnostics() string {
     string output = ""
     output = output + "[DIAGNOSTICS]\n"
@@ -198,9 +207,11 @@ func run_diagnostics() string {
     return output
 }
 
+
 func main() {
     string result = display_test_results()
     string diagnostics = run_diagnostics()
     println(result)
     println(diagnostics)
 }
+

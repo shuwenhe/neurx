@@ -1,5 +1,6 @@
 package real_inference_simple
 use std.io.{print, println}
+
 func int_to_string(int value) string {
     if value == 0 {
         return "0"
@@ -30,6 +31,7 @@ func int_to_string(int value) string {
     return out + tmp
 }
 
+
 func tokenize_simple(string text) string {
     string result = ""
     int i = 0
@@ -39,6 +41,7 @@ func tokenize_simple(string text) string {
     }
     return result
 }
+
 
 func main() {
     print("\n╔═══════════════════════════════════════════╗\n")
@@ -66,3 +69,4 @@ func main() {
     }
     print("Session ended.\n")
 }
+

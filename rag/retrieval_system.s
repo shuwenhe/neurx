@@ -25,6 +25,7 @@ struct retrieval_system_config {
     citation_format: string = "[doc{index}]"
 }
 
+
 struct document_chunk {
     id: string
     content: string
@@ -33,6 +34,7 @@ struct document_chunk {
     chunk_index: int
     token_count: int
 }
+
 
 struct document_metadata {
     source_id: string
@@ -49,6 +51,7 @@ struct document_metadata {
     relevance_score?: float
 }
 
+
 struct search_result {
     chunks: list<document_chunk>
     scores: list<float>
@@ -56,6 +59,7 @@ struct search_result {
     expanded_query: string?
     retrieval_metadata: retrieval_metadata
 }
+
 
 struct retrieval_metadata {
     total_scanned: int
@@ -79,11 +83,13 @@ interface vector_db_interface {
     get_status()
 }
 
+
 struct search_result_item {
     chunk_id: string
     score: float
     metadata: document_metadata
 }
+
 
 struct dbstatus {
     total_documents: int
@@ -606,6 +612,7 @@ Expanded queries:
     }
 }
 
+
 struct query_expansion_result {
     original: string
     expanded: list<string>
@@ -686,6 +693,7 @@ class b_m_25_retriever {
     }
 }
 
+
 struct bm25_result {
     chunk_id: string
     score: float
@@ -734,6 +742,7 @@ class cross_encoder_reranker {
         return results
     }
 }
+
 
 struct reranked_result {
     chunk: document_chunk
@@ -828,6 +837,7 @@ class hybrid_fusion_engine {
         return this._weighted_average_fusion(vector_results, bm25_results, top_k)
     }
 }
+
 
 struct fused_result {
     chunk_id: string
@@ -1025,6 +1035,7 @@ class retrieval_engine {
     }
 }
 
+
 struct ingestion_report {
     documents_ingested: int
     chunks_created: int
@@ -1032,6 +1043,7 @@ struct ingestion_report {
     processing_time_ms: float
     db_status: dbstatus
 }
+
 
 struct rag_statistics {
     total_documents: int
@@ -1095,3 +1107,4 @@ export {
     retrieval_engine, ingestion_report, rag_statistics,
     create_retrieval_system, test_rag_system
 }
+

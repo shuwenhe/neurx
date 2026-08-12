@@ -7,12 +7,14 @@ enum reward_type {
     VERIFIABLE,
 }
 
+
 struct verification_result {
     bool is_valid
     bool is_correct
     string error_message
     float confidence
 }
+
 
 struct reward_function_config {
     string function_name
@@ -22,6 +24,7 @@ struct reward_function_config {
     float max_reward
     float min_reward
 }
+
 
 struct reward_sample {
     int sample_id
@@ -33,6 +36,7 @@ struct reward_sample {
     int step
 }
 
+
 struct verifiable_reward_manager_state {
     []reward_function_config reward_functions
     []reward_sample history
@@ -42,6 +46,7 @@ struct verifiable_reward_manager_state {
     map string = int function_call_count
     bool enable_verification
 }
+
 
 func new_verifiable_reward_manager() verifiable_reward_manager_state {
     verifiable_reward_manager_state {
@@ -54,6 +59,7 @@ func new_verifiable_reward_manager() verifiable_reward_manager_state {
         enable_verification: true,
     }
 }
+
 
 func reward_register_function(verifiable_reward_manager_state state, string func_name, reward_type reward_t, string description, bool is_verifiable, float max_reward) verifiable_reward_manager_state {
     reward_function_config config = reward_function_config {
@@ -70,6 +76,7 @@ func reward_register_function(verifiable_reward_manager_state state, string func
     state
 }
 
+
 func reward_verify_math(string expected_output, string model_output) verification_result {
     bool is_correct = expected_output == model_output
     verification_result {
@@ -79,6 +86,7 @@ func reward_verify_math(string expected_output, string model_output) verificatio
         confidence: (if is_correct then 1.0 else 0.0),
     }
 }
+
 
 func reward_verify_code(string code_output, string expected_output) verification_result {
     bool is_valid = len(code_output) > 0
@@ -90,6 +98,7 @@ func reward_verify_code(string code_output, string expected_output) verification
         confidence: (if is_correct then 0.95 else 0.1),
     }
 }
+
 
 func reward_compute_math_reward(verifiable_reward_manager_state state, int step, string input_text, string output_text, string expected_output) verifiable_reward_manager_state {
     verification_result verification = reward_verify_math(expected_output, output_text)
@@ -116,6 +125,7 @@ func reward_compute_math_reward(verifiable_reward_manager_state state, int step,
     eprintln("[RewardManager] Math reward: " + reward_to_string(reward_value) + " (correct: " + (if verification.is_correct then "yes" else "no") + ")")
     state
 }
+
 
 func reward_compute_code_reward(verifiable_reward_manager_state state, int step, string input_text, string output_text, string expected_output) verifiable_reward_manager_state {
     verification_result verification = reward_verify_code(output_text, expected_output)
@@ -145,6 +155,7 @@ func reward_compute_code_reward(verifiable_reward_manager_state state, int step,
     state
 }
 
+
 func reward_compute_model_based(verifiable_reward_manager_state state, int step, string input_text, string output_text, float model_score) verifiable_reward_manager_state {
     reward_sample sample = reward_sample {
         sample_id: state.sample_count,
@@ -169,6 +180,7 @@ func reward_compute_model_based(verifiable_reward_manager_state state, int step,
     state
 }
 
+
 func reward_update_statistics(verifiable_reward_manager_state state) verifiable_reward_manager_state {
     if state.sample_count == 0 {
         return state
@@ -191,6 +203,7 @@ func reward_update_statistics(verifiable_reward_manager_state state) verifiable_
     state
 }
 
+
 func reward_get_verification_ratio(verifiable_reward_manager_state state) float {
     if state.sample_count == 0 {
         return 0.0
@@ -204,6 +217,7 @@ func reward_get_verification_ratio(verifiable_reward_manager_state state) float 
     }
     float(verifiable_count) / float(state.sample_count)
 }
+
 
 func reward_get_accuracy(verifiable_reward_manager_state state) float {
     if state.sample_count == 0 {
@@ -226,6 +240,7 @@ func reward_get_accuracy(verifiable_reward_manager_state state) float {
     float(correct_count) / float(verifiable_count)
 }
 
+
 func reward_get_report(verifiable_reward_manager_state state) string {
     string report = "[RewardManager] Report\n"
     report = report + "Total Samples: " + int_to_str_func(state.sample_count) + "\n"
@@ -243,6 +258,7 @@ func reward_get_report(verifiable_reward_manager_state state) string {
     report
 }
 
+
 func reward_type_to_string(reward_type rt) string {
     if rt == MODEL_BASED {
         return "model-based"
@@ -253,6 +269,7 @@ func reward_type_to_string(reward_type rt) string {
     }
     return "human-feedback"
 }
+
 
 func reward_to_string(float r) string {
     if r > 0.5 {
@@ -267,15 +284,19 @@ func reward_to_string(float r) string {
     return "neutral"
 }
 
+
 func int_to_str_func(int n) string {
     ""
 }
+
 
 func float_to_str_func(float f) string {
     ""
 }
 
+
 func map_keys_func(map string = int m) []string {
     []string keys = []string{cap: 100}
     keys
 }
+

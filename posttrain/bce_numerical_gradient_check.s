@@ -9,6 +9,7 @@ func sigmoid_fn(float x) float {
     return 1.0 / (1.0 + exp_fn(-x))
 }
 
+
 func exp_fn(float x) float {
     if x > 50.0 {
         return 1e10
@@ -26,6 +27,7 @@ func exp_fn(float x) float {
     }
     return result
 }
+
 
 func ln_fn(float x) float {
     if x <= 0.0 {
@@ -49,6 +51,7 @@ func ln_fn(float x) float {
     }
 }
 
+
 func float_to_str(float f) string {
     int i_part = int(f)
     float frac = f - float(i_part)
@@ -58,6 +61,7 @@ func float_to_str(float f) string {
     int frac_int = int(frac * 1000000.0)
     return int_to_string(i_part) + "." + int_to_string(frac_int)
 }
+
 
 func forward_fn(float w1, float w2, float b1) float {
     float x = 2.0
@@ -78,6 +82,7 @@ func forward_fn(float w1, float w2, float b1) float {
     }
 }
 
+
 func compute_analytical_grad_w1(float w1, float w2, float b1) float {
     float x = 2.0
     float target = 1.0
@@ -87,6 +92,7 @@ func compute_analytical_grad_w1(float w1, float w2, float b1) float {
     float dw1 = dz * x
     return dw1
 }
+
 
 func compute_analytical_grad_w2(float w1, float w2, float b1) float {
     float x = 2.0
@@ -98,6 +104,7 @@ func compute_analytical_grad_w2(float w1, float w2, float b1) float {
     return dw2
 }
 
+
 func compute_analytical_grad_b1(float w1, float w2, float b1) float {
     float x = 2.0
     float target = 1.0
@@ -108,6 +115,7 @@ func compute_analytical_grad_b1(float w1, float w2, float b1) float {
     return db1
 }
 
+
 func abs_val(float x) float {
     if x < 0.0 {
         return -x
@@ -115,11 +123,13 @@ func abs_val(float x) float {
     return x
 }
 
+
 func rel_error(float analytical, float numerical) float {
     float num = abs_val(analytical - numerical)
     float denom = abs_val(analytical) + abs_val(numerical) + 1e-8
     return num / denom
 }
+
 
 func main() {
     float eps = 1e-4
@@ -188,3 +198,4 @@ func main() {
     println("  dL/db1 = dL/dz * dz/db1 = (p - target) * 1")
     println("")
 }
+

@@ -14,6 +14,7 @@ struct chat_config {
     temperature: f64
 }
 
+
 struct chat_request {
     user_input: string
     conversation_history: []string
@@ -21,11 +22,13 @@ struct chat_request {
     temperature: f64
 }
 
+
 struct chat_response {
     assistant_reply: string
     tokens_generated: i32
     latency_ms: f64
 }
+
 
 struct simple_transformer {
     config: chat_config
@@ -33,6 +36,7 @@ struct simple_transformer {
     head_dim: i32
     total_params: i64
 }
+
 
 func create_chat_config() chat_config {
     var config: chat_config
@@ -47,6 +51,7 @@ func create_chat_config() chat_config {
     return config
 }
 
+
 func init_model(config: chat_config) simple_transformer {
     var model: simple_transformer
     model.config = config
@@ -59,6 +64,7 @@ func init_model(config: chat_config) simple_transformer {
     return model
 }
 
+
 func tokenize_input(text: string) []i32 {
     var tokens: []i32
     var words: []string = strings.split(text, " ")
@@ -70,6 +76,7 @@ func tokenize_input(text: string) []i32 {
     }
     return tokens
 }
+
 
 func generate_token(model: simple_transformer, context: []i32) i32 {
     if len(context) == 0 {
@@ -101,6 +108,7 @@ func generate_token(model: simple_transformer, context: []i32) i32 {
     }
     return next_token
 }
+
 
 func decode_tokens(tokens: []i32) string {
     var result: string = ""
@@ -168,6 +176,7 @@ func decode_tokens(tokens: []i32) string {
     return strings.trim_space(result)
 }
 
+
 func process_chat_request(model: simple_transformer, request: chat_request) chat_response {
     var start_time: i64 = time.now_ms()
     var input_tokens: []i32 = tokenize_input(request.user_input)
@@ -212,6 +221,7 @@ func process_chat_request(model: simple_transformer, request: chat_request) chat
     return response
 }
 
+
 func main() {
     io.println("")
     io.println("╔════════════════════════════════════════════════════════════════════╗")
@@ -247,3 +257,4 @@ func main() {
         io.println("Example: chat_inference 'Hello, how are you?'")
     }
 }
+

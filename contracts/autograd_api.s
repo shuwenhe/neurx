@@ -6,12 +6,14 @@ struct graph_node {
     backward_fn: func(grad: tensor) -> []tensor
 }
 
+
 struct graph_edge {
     from_node_id: i64
     to_node_id: i64
     tensor_index: i64
     prev_func: func(grad: tensor) -> tensor
 }
+
 
 struct computation_graph {
     nodes: map[i64]graph_node
@@ -20,6 +22,7 @@ struct computation_graph {
     output_tensor: tensor
 }
 
+
 struct graph_task {
     id: i64
     node_id: i64
@@ -27,9 +30,11 @@ struct graph_task {
     dependencies_remaining: i64
 }
 
+
 struct ready_queue {
     tasks: []graph_task
 }
+
 
 struct autograd_engine {
     graph: computation_graph
@@ -103,3 +108,4 @@ interface i_autograd_checkpoint {
     checkpoint(tensor: tensor) -> void
     recompute_forward(node_id: i64) -> tensor
 }
+

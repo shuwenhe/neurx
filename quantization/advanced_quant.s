@@ -8,6 +8,7 @@ struct awq_config {
     float alpha
 }
 
+
 struct gptq_config {
     int bits
     int group_size
@@ -15,6 +16,7 @@ struct gptq_config {
     string sym
     string damp_percent
 }
+
 
 struct awq_quantized_weight {
     []int qweight
@@ -24,6 +26,7 @@ struct awq_quantized_weight {
     int group_size
 }
 
+
 struct gptq_quantized_weight {
     []int qweight
     []int qzeros
@@ -32,6 +35,7 @@ struct gptq_quantized_weight {
     int group_size
     []float h
 }
+
 
 func new_awq_config(int bits, int group_size) awq_config {
     awq_config{
@@ -43,6 +47,7 @@ func new_awq_config(int bits, int group_size) awq_config {
     }
 }
 
+
 func new_gptq_config(int bits, int group_size) gptq_config {
     gptq_config{
         bits: bits,
@@ -52,6 +57,7 @@ func new_gptq_config(int bits, int group_size) gptq_config {
         damp_percent: "0.01",
     }
 }
+
 
 func quantize_with_awq(
     []float weights,
@@ -133,6 +139,7 @@ func quantize_with_awq(
     }
 }
 
+
 func quantize_with_gptq(
     []float weights,
     gptq_config config,
@@ -209,6 +216,7 @@ func quantize_with_gptq(
     }
 }
 
+
 func dequantize_awq(awq_quantized_weight quant) []float {
     deq := []float{}
 
@@ -231,6 +239,7 @@ func dequantize_awq(awq_quantized_weight quant) []float {
 
     deq
 }
+
 
 func dequantize_gptq(gptq_quantized_weight quant) []float {
     deq := []float{}
@@ -255,17 +264,20 @@ func dequantize_gptq(gptq_quantized_weight quant) []float {
     deq
 }
 
+
 func get_awq_compression_ratio(awq_quantized_weight quant) float {
     original_bits := 32.0
     quantized_bits := float(quant.bits)
     original_bits / quantized_bits
 }
 
+
 func get_gptq_compression_ratio(gptq_quantized_weight quant) float {
     original_bits := 32.0
     quantized_bits := float(quant.bits)
     original_bits / quantized_bits
 }
+
 
 func append_float([]float slice, float elem) []float {
     new_slice := []float{}
@@ -278,6 +290,7 @@ func append_float([]float slice, float elem) []float {
     new_slice
 }
 
+
 func append_int([]int slice, int elem) []int {
     new_slice := []int{}
     i := 0
@@ -288,3 +301,4 @@ func append_int([]int slice, int elem) []int {
     new_slice = append_int(new_slice, elem)
     new_slice
 }
+

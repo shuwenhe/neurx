@@ -11,9 +11,11 @@ struct grad_node {
     bool has_grad
 }
 
+
 struct grad_graph {
     []grad_node nodes
 }
+
 
 func copy_float([]float data) []float {
     []float out = []float{cap: len(data)}
@@ -25,6 +27,7 @@ func copy_float([]float data) []float {
     out
 }
 
+
 func copy_int([]int data) []int {
     []int out = []int{cap: len(data)}
     int i = 0
@@ -34,6 +37,7 @@ func copy_int([]int data) []int {
     }
     out
 }
+
 
 func copy_node(grad_node node) grad_node {
     grad_node {
@@ -49,6 +53,7 @@ func copy_node(grad_node node) grad_node {
     }
 }
 
+
 func copy_nodes([]grad_node nodes) []grad_node {
     []grad_node out = []grad_node{cap: len(nodes)}
     int i = 0
@@ -58,6 +63,7 @@ func copy_nodes([]grad_node nodes) []grad_node {
     }
     out
 }
+
 
 func zeros(int n) []float {
     []float out = []float{cap: n}
@@ -69,6 +75,7 @@ func zeros(int n) []float {
     out
 }
 
+
 func ones(int n) []float {
     []float out = []float{cap: n}
     int i = 0
@@ -78,6 +85,7 @@ func ones(int n) []float {
     }
     out
 }
+
 
 func same_shape([]int a, []int b) bool {
     if len(a) != len(b) {
@@ -93,6 +101,7 @@ func same_shape([]int a, []int b) bool {
     true
 }
 
+
 func add_values([]float a, []float b) []float {
     []float out = []float{cap: len(a)}
     int i = 0
@@ -102,6 +111,7 @@ func add_values([]float a, []float b) []float {
     }
     out
 }
+
 
 func sub_values([]float a, []float b) []float {
     []float out = []float{cap: len(a)}
@@ -113,6 +123,7 @@ func sub_values([]float a, []float b) []float {
     out
 }
 
+
 func mul_values([]float a, []float b) []float {
     []float out = []float{cap: len(a)}
     int i = 0
@@ -122,6 +133,7 @@ func mul_values([]float a, []float b) []float {
     }
     out
 }
+
 
 func div_values([]float a, []float b) []float {
     []float out = []float{cap: len(a)}
@@ -133,6 +145,7 @@ func div_values([]float a, []float b) []float {
     out
 }
 
+
 func fill(int n, float value) []float {
     []float out = []float{cap: n}
     int i = 0
@@ -142,6 +155,7 @@ func fill(int n, float value) []float {
     }
     out
 }
+
 
 func scale_values([]float values, float scale) []float {
     []float out = []float{cap: len(values)}
@@ -153,19 +167,23 @@ func scale_values([]float values, float scale) []float {
     out
 }
 
+
 func new_graph() grad_graph {
     grad_graph {
         nodes: [],
     }
 }
 
+
 func node_count(grad_graph graph) int {
     len(graph.nodes)
 }
 
+
 func last_node_id(grad_graph graph) int {
     len(graph.nodes) - 1
 }
+
 
 func add_leaf(grad_graph graph, []float data, []int shape, bool requires_grad) grad_graph {
     []grad_node nodes = copy_nodes(graph.nodes)
@@ -187,13 +205,16 @@ func add_leaf(grad_graph graph, []float data, []int shape, bool requires_grad) g
     }
 }
 
+
 func node_data(grad_graph graph, int id) []float {
     copy_float(graph.nodes[id].data)
 }
 
+
 func node_grad(grad_graph graph, int id) []float {
     copy_float(graph.nodes[id].grad)
 }
+
 
 func add_node(grad_graph graph, int left, int right) grad_graph {
     grad_node lhs = graph.nodes[left]
@@ -217,6 +238,7 @@ func add_node(grad_graph graph, int left, int right) grad_graph {
     }
 }
 
+
 func sub_node(grad_graph graph, int left, int right) grad_graph {
     grad_node lhs = graph.nodes[left]
     grad_node rhs = graph.nodes[right]
@@ -238,6 +260,7 @@ func sub_node(grad_graph graph, int left, int right) grad_graph {
         nodes: nodes,
     }
 }
+
 
 func mul_node(grad_graph graph, int left, int right) grad_graph {
     grad_node lhs = graph.nodes[left]
@@ -261,6 +284,7 @@ func mul_node(grad_graph graph, int left, int right) grad_graph {
     }
 }
 
+
 func div_node(grad_graph graph, int left, int right) grad_graph {
     grad_node lhs = graph.nodes[left]
     grad_node rhs = graph.nodes[right]
@@ -282,6 +306,7 @@ func div_node(grad_graph graph, int left, int right) grad_graph {
         nodes: nodes,
     }
 }
+
 
 func sum_node(grad_graph graph, int input_id) grad_graph {
     grad_node input = graph.nodes[input_id]
@@ -309,6 +334,7 @@ func sum_node(grad_graph graph, int input_id) grad_graph {
         nodes: nodes,
     }
 }
+
 
 func mean_node(grad_graph graph, int input_id) grad_graph {
     grad_node input = graph.nodes[input_id]
@@ -338,6 +364,7 @@ func mean_node(grad_graph graph, int input_id) grad_graph {
     }
 }
 
+
 func accumulate_grad([]grad_node nodes, int id, []float grad) []grad_node {
     if id < 0 {
         return nodes
@@ -353,6 +380,7 @@ func accumulate_grad([]grad_node nodes, int id, []float grad) []grad_node {
     }
     nodes
 }
+
 
 func backward(grad_graph graph, int output_id) grad_graph {
     []grad_node nodes = copy_nodes(graph.nodes)
@@ -413,6 +441,7 @@ func backward(grad_graph graph, int output_id) grad_graph {
     }
 }
 
+
 func ready_for_binary_op(grad_graph graph, int left, int right) bool {
     if left < 0 || right < 0 {
         return false
@@ -422,6 +451,7 @@ func ready_for_binary_op(grad_graph graph, int left, int right) bool {
     }
     same_shape(graph.nodes[left].shape, graph.nodes[right].shape)
 }
+
 
 func matmul_node(grad_graph graph, int left, int right) grad_graph {
     grad_node lhs = graph.nodes[left]
@@ -448,11 +478,13 @@ func matmul_node(grad_graph graph, int left, int right) grad_graph {
     }
 }
 
+
 func create_dynamic_graph() grad_graph {
     grad_graph {
         nodes: []grad_node{cap: 0},
     }
 }
+
 
 func add_node_dynamic(grad_graph graph, grad_node node) grad_graph {
     []grad_node nodes = copy_nodes(graph.nodes)
@@ -462,6 +494,7 @@ func add_node_dynamic(grad_graph graph, grad_node node) grad_graph {
         nodes: nodes,
     }
 }
+
 
 func execute_dynamic_graph(grad_graph graph, int output_id) []float {
     []float out = []float{cap: 0}
@@ -473,6 +506,7 @@ func execute_dynamic_graph(grad_graph graph, int output_id) []float {
     }
     out
 }
+
 
 func compute_higher_order_grad(grad_graph graph, int output_id) grad_graph {
     grad_graph first_order_graph = backward(graph, output_id)
@@ -490,6 +524,7 @@ func compute_higher_order_grad(grad_graph graph, int output_id) grad_graph {
     }
 }
 
+
 func synchronize_gradients([]grad_node nodes, int num_workers) []grad_node {
     int i = 0
     while i < len(nodes) {
@@ -501,6 +536,7 @@ func synchronize_gradients([]grad_node nodes, int num_workers) []grad_node {
     nodes
 }
 
+
 func distributed_backward(grad_graph graph, int output_id, int num_workers) grad_graph {
     grad_graph local_graph = backward(graph, output_id)
     []grad_node synchronized_nodes = synchronize_gradients(local_graph.nodes, num_workers)
@@ -508,3 +544,4 @@ func distributed_backward(grad_graph graph, int output_id, int num_workers) grad
         nodes: synchronized_nodes,
     }
 }
+

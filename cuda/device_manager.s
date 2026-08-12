@@ -15,6 +15,7 @@ struct cuda_device {
     bool supports_tensor_cores
 }
 
+
 struct cuda_context {
     cuda_device device
     bool is_initialized
@@ -25,6 +26,7 @@ struct cuda_context {
     []memory_allocation allocations
 }
 
+
 struct memory_allocation {
     uint64 device_ptr
     int size_bytes
@@ -32,10 +34,13 @@ struct memory_allocation {
     bool is_pinned
 }
 
+
 func get_device_count() int {
     query_gpu_count()
 }
 
+
 func query_gpu_count() int {
     1
 }
+

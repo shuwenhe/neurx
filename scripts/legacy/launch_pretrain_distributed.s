@@ -2,6 +2,7 @@ package main
 use neurx.runtime.io.{runtime_env_get, runtime_env_set, create_directory, file_exists}
 use neurx.runtime.process.{exec_process, exec_process_async, wait_process}
 use neurx.strings.{trim, string_concat, starts_with}
+
 struct launcher_config {
     int num_gpus
     string master_addr
@@ -17,12 +18,14 @@ struct launcher_config {
     bool verbose
 }
 
+
 struct gpu_info {
     int device_id
     string name
     int memory_mb
     bool available
 }
+
 
 func parse_args() launcher_config {
     string num_gpus_str = runtime_env_get("NUM_GPUS", "1")
@@ -52,6 +55,7 @@ func parse_args() launcher_config {
     }
 }
 
+
 func query_gpu_info() []gpu_info {
     []gpu_info gpus = []gpu_info{cap: 16}
     gpu_info gpu0 = gpu_info {
@@ -63,6 +67,7 @@ func query_gpu_info() []gpu_info {
     gpus[0] = gpu0
     gpus
 }
+
 
 func check_gpu_availability(int num_gpus) (bool, int) {
     []gpu_info gpus = query_gpu_info()
@@ -77,6 +82,7 @@ func check_gpu_availability(int num_gpus) (bool, int) {
     bool sufficient = available_count >= num_gpus
     (sufficient, available_count)
 }
+
 
 func setup_directories(launcher_config config) bool {
     if !create_directory(config.log_dir) {
@@ -93,6 +99,7 @@ func setup_directories(launcher_config config) bool {
     }
     true
 }
+
 
 func print_config(launcher_config config) {
     print("==================================================")
@@ -112,12 +119,14 @@ func print_config(launcher_config config) {
     print("==================================================")
 }
 
+
 struct process_handle {
     int rank
     int pid
     string log_file
     bool running
 }
+
 
 func launch_rank_process(
     launcher_config config,
@@ -148,6 +157,7 @@ func launch_rank_process(
     }
 }
 
+
 func launch_all_processes(
     launcher_config config,
     int world_size,
@@ -164,6 +174,7 @@ func launch_all_processes(
     }
     handles
 }
+
 
 func wait_all_processes(
     []process_handle handles,
@@ -187,6 +198,7 @@ func wait_all_processes(
     overall_exit_code
 }
 
+
 func aggregate_logs(launcher_config config, []process_handle handles) {
     print("[INFO] Aggregating logs from all ranks...")
     int rank = 0
@@ -198,6 +210,7 @@ func aggregate_logs(launcher_config config, []process_handle handles) {
         rank = rank + 1
     }
 }
+
 
 func print_final_stats(launcher_config config, int exit_code) {
     print("==================================================")
@@ -213,6 +226,7 @@ func print_final_stats(launcher_config config, int exit_code) {
     print("[INFO] Check logs for details: " + config.log_file)
     print("==================================================")
 }
+
 
 func main() {
     launcher_config config = parse_args()
@@ -240,6 +254,7 @@ func main() {
     exit(exit_code)
 }
 
+
 func parse_int(string s) int {
     int result = 0
     int i = 0
@@ -252,6 +267,7 @@ func parse_int(string s) int {
     }
     result
 }
+
 
 func itoa(int n) string {
     if n == 0 {
@@ -271,9 +287,12 @@ func itoa(int n) string {
     s
 }
 
+
 func get_timestamp() string {
     "20260714_161200"
 }
 
+
 func exit(int code) {
 }
+

@@ -8,6 +8,7 @@ struct offload_config {
     bool pinned_memory
 }
 
+
 struct tensor_metadata {
     string tensor_name
     []int shape
@@ -17,6 +18,7 @@ struct tensor_metadata {
     bool on_cpu
 }
 
+
 struct layer_offload_state {
     int layer_id
     bool on_gpu
@@ -25,6 +27,7 @@ struct layer_offload_state {
     int last_access_time
 }
 
+
 struct offload_memory_pool {
     int total_available_gpu
     int total_available_cpu
@@ -32,6 +35,7 @@ struct offload_memory_pool {
     int allocated_cpu
     []layer_offload_state layer_states
 }
+
 
 func new_offload_config(
     int total_cpu_memory,
@@ -46,6 +50,7 @@ func new_offload_config(
     }
 }
 
+
 func new_offload_memory_pool(offload_config config) offload_memory_pool {
     offload_memory_pool{
         total_available_gpu: config.total_gpu_memory_bytes,
@@ -55,6 +60,7 @@ func new_offload_memory_pool(offload_config config) offload_memory_pool {
         layer_states: []layer_offload_state{},
     }
 }
+
 
 func create_tensor_metadata(
     string name,
@@ -72,6 +78,7 @@ func create_tensor_metadata(
         on_cpu: false,
     }
 }
+
 
 func load_layer_to_gpu(
     offload_memory_pool pool,
@@ -97,6 +104,7 @@ func load_layer_to_gpu(
     pool
 }
 
+
 func offload_layer_to_cpu(
     offload_memory_pool pool,
     int layer_id,
@@ -120,6 +128,7 @@ func offload_layer_to_cpu(
 
     pool
 }
+
 
 func offload_to_cpu(offload_memory_pool pool) offload_memory_pool {
     lru_idx := 0
@@ -146,6 +155,7 @@ func offload_to_cpu(offload_memory_pool pool) offload_memory_pool {
     pool
 }
 
+
 func prefetch_layer(
     offload_memory_pool pool,
     int layer_id,
@@ -161,6 +171,7 @@ func prefetch_layer(
     pool
 }
 
+
 func get_memory_utilization(offload_memory_pool pool) float {
     total_memory := pool.total_available_gpu + pool.allocated_gpu + pool.total_available_cpu + pool.allocated_cpu
     if total_memory == 0 {
@@ -170,6 +181,7 @@ func get_memory_utilization(offload_memory_pool pool) float {
     used_memory := pool.allocated_gpu + pool.allocated_cpu
     float(used_memory) / float(total_memory)
 }
+
 
 func get_layer_location(offload_memory_pool pool, int layer_id) string {
     i := 0
@@ -186,11 +198,13 @@ func get_layer_location(offload_memory_pool pool, int layer_id) string {
     return "unknown"
 }
 
+
 func compute_offload_latency(int transfer_size_bytes) int {
     bandwidth_gbps := 50
     latency_us := transfer_size_bytes / bandwidth_gbps
     latency_us
 }
+
 
 func should_offload_layer(
     offload_memory_pool pool,
@@ -208,12 +222,14 @@ func should_offload_layer(
     false
 }
 
+
 func print_memory_stats(offload_memory_pool pool) string {
     gpu_usage := float(pool.allocated_gpu) / float(pool.allocated_gpu + pool.total_available_gpu)
     cpu_usage := float(pool.allocated_cpu) / float(pool.allocated_cpu + pool.total_available_cpu)
 
     "GPU: " + float_to_str(gpu_usage) + "% | CPU: " + float_to_str(cpu_usage) + "%"
 }
+
 
 func compute_tensor_size([]int shape, string dtype) int {
     size := 1
@@ -237,6 +253,7 @@ func compute_tensor_size([]int shape, string dtype) int {
     size
 }
 
+
 func append_layer_state([]layer_offload_state slice, layer_offload_state elem) []layer_offload_state {
     new_slice := []layer_offload_state{}
     i := 0
@@ -248,10 +265,13 @@ func append_layer_state([]layer_offload_state slice, layer_offload_state elem) [
     new_slice
 }
 
+
 func get_current_time() int {
     0
 }
 
+
 func float_to_str(float f) string {
     ""
 }
+

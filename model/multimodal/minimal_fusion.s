@@ -10,6 +10,7 @@ struct minimal_fusion_state {
     bool trained
 }
 
+
 func new_minimal_fusion_state() minimal_fusion_state {
     minimal_fusion_state {
         name: "minimal_fusion",
@@ -23,14 +24,18 @@ func new_minimal_fusion_state() minimal_fusion_state {
     }
 }
 
+
 func minimal_fusion_score(minimal_fusion_state state, float vision_score, float text_score) float {
     vision_score + text_score + state.fused_dim
 }
+
 
 func minimal_fusion_state_dict(minimal_fusion_state state) minimal_fusion_state {
     state
 }
 
+
 func minimal_fusion_load_state_dict(minimal_fusion_state state, minimal_fusion_state other) minimal_fusion_state {
     other
 }
+

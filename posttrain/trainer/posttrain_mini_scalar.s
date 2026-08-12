@@ -1,11 +1,13 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
+
 func abs_float(float x) float {
     if x < 0.0 {
         return 0.0 - x
     }
     return x
 }
+
 
 func int_to_str(int n) string {
     if n == 0 {
@@ -37,6 +39,7 @@ func int_to_str(int n) string {
     }
     return out
 }
+
 
 func float_to_str(float value, int decimals) string {
     float current = value
@@ -76,6 +79,7 @@ func float_to_str(float value, int decimals) string {
     }
     return out
 }
+
 
 func run_mini_scalar_posttrain() int {
     string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "../model/base-model")
@@ -132,6 +136,8 @@ func run_mini_scalar_posttrain() int {
     return 0
 }
 
+
 func main() {
     return run_mini_scalar_posttrain()
 }
+

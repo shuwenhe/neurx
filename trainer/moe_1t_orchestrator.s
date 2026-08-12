@@ -9,6 +9,7 @@ use neurx.moe.llm.{gpt_moe_config, gpt_moe_state, new_gpt_moe_state}
 use neurx.loss.llm_moe_1t_loss.{loss_state_new, compute_total_loss, compute_ce_gradient}
 use neurx.distributed.collective.{collective_state}
 use neurx.runtime.io.{io_println, io_get_env, io_mkdir_recursive, runtime_file_exists, runtime_read_text_file}
+
 struct moe_routing_stats {
     int total_tokens
     []int expert_load
@@ -18,6 +19,7 @@ struct moe_routing_stats {
     float compute_cost_ms
     float aux_loss_value
 }
+
 
 struct moe_1t_step_state {
     int global_step
@@ -31,6 +33,7 @@ struct moe_1t_step_state {
     int allreduce_time_us
     int compute_time_us
 }
+
 
 struct moe_1t_orchestrator {
     moe_1t_framework framework
@@ -66,6 +69,7 @@ struct moe_1t_orchestrator {
     int profile_enabled
 }
 
+
 func moe_1t_trim(string s) string {
     int i = 0
     while i < len(s) && (s[i] == 32 || s[i] == 9 || s[i] == 10 || s[i] == 13) {
@@ -86,6 +90,7 @@ func moe_1t_trim(string s) string {
     }
     out
 }
+
 
 func moe_1t_split_lines(string text) []string {
     []string lines = []string{cap: 0}
@@ -110,6 +115,7 @@ func moe_1t_split_lines(string text) []string {
     lines
 }
 
+
 func moe_1t_positive_mod(int value, int modulus) int {
     if modulus <= 0 {
         return 0
@@ -121,6 +127,7 @@ func moe_1t_positive_mod(int value, int modulus) int {
     }
     result
 }
+
 
 func moe_1t_manifest_refs(string manifest_path) []string {
     if moe_1t_trim(manifest_path) == "" {
@@ -141,6 +148,7 @@ func moe_1t_manifest_refs(string manifest_path) []string {
     }
     refs
 }
+
 
 func moe_1t_text_to_tokens(string text, int batch_size_tokens, int seed) []int {
     if batch_size_tokens <= 0 {
@@ -177,6 +185,7 @@ func moe_1t_text_to_tokens(string text, int batch_size_tokens, int seed) []int {
     tokens
 }
 
+
 func moe_1t_shard_tokens(string shard_path, int batch_size_tokens, int seed) []int {
     if batch_size_tokens <= 0 {
         return []int{cap: 0}
@@ -203,6 +212,7 @@ func moe_1t_shard_tokens(string shard_path, int batch_size_tokens, int seed) []i
     moe_1t_text_to_tokens(shard_text, batch_size_tokens, seed)
 }
 
+
 func moe_1t_build_labels([]int batch_tokens, int vocab_size) []int {
     int count = len(batch_tokens)
     []int labels = []int{cap: count}
@@ -220,6 +230,7 @@ func moe_1t_build_labels([]int batch_tokens, int vocab_size) []int {
     }
     labels
 }
+
 
 func moe_1t_build_top1_routing(
     moe_1t_orchestrator orch,
@@ -241,6 +252,7 @@ func moe_1t_build_top1_routing(
     (expert_indices, expert_weights)
 }
 
+
 func moe_1t_average_abs([]float values) float {
     if len(values) == 0 {
         return 0.0
@@ -258,6 +270,7 @@ func moe_1t_average_abs([]float values) float {
     total / float(len(values))
 }
 
+
 func moe_1t_tp_local_hidden_dim(moe_1t_orchestrator orch) int {
     int hidden_dim = orch.model_config.base.n_embd
     int tp_size = orch.tp_size
@@ -273,6 +286,7 @@ func moe_1t_tp_local_hidden_dim(moe_1t_orchestrator orch) int {
     hidden_dim
 }
 
+
 func moe_1t_tp_global_offset(moe_1t_orchestrator orch) int {
     int local_hidden = moe_1t_tp_local_hidden_dim(orch)
     int offset = orch.tp_rank * local_hidden
@@ -281,6 +295,7 @@ func moe_1t_tp_global_offset(moe_1t_orchestrator orch) int {
     }
     offset
 }
+
 
 func moe_1t_orchestrator_new() moe_1t_orchestrator {
     moe_1t_framework fw = moe_1t_framework_default()
@@ -363,6 +378,7 @@ func moe_1t_orchestrator_new() moe_1t_orchestrator {
     orch
 }
 
+
 func moe_1t_load_data_manifest(moe_1t_orchestrator orch) moe_1t_orchestrator {
     moe_1t_orchestrator next_orch = orch
     next_orch.token_shards = moe_1t_manifest_refs(orch.data_manifest_path)
@@ -373,6 +389,7 @@ func moe_1t_load_data_manifest(moe_1t_orchestrator orch) moe_1t_orchestrator {
     }
     next_orch
 }
+
 
 func moe_1t_get_next_batch(
     moe_1t_orchestrator orch,
@@ -405,6 +422,7 @@ func moe_1t_get_next_batch(
     next_orch.tokens_in_shard = len(tokens)
     (next_orch, tokens)
 }
+
 
 func moe_1t_forward_pass(
     moe_1t_orchestrator orch,
@@ -523,6 +541,7 @@ func moe_1t_forward_pass(
     (logits, stats)
 }
 
+
 func moe_1t_allreduce_gradients(
     moe_1t_orchestrator orch,
     []float gradients
@@ -536,6 +555,7 @@ func moe_1t_allreduce_gradients(
     }
     0
 }
+
 
 func moe_1t_optimizer_step(
     moe_1t_orchestrator orch,
@@ -573,6 +593,7 @@ func moe_1t_optimizer_step(
     orch
 }
 
+
 func moe_1t_zero_pad_int(int value, int width) string {
     string text = int_to_string(value)
     if len(text) >= width {
@@ -587,6 +608,7 @@ func moe_1t_zero_pad_int(int value, int width) string {
     return out + text
 }
 
+
 func moe_1t_checkpoint_path(moe_1t_orchestrator orch, int step) string {
     string root = orch.checkpoint_dir
     if root == "" {
@@ -594,6 +616,7 @@ func moe_1t_checkpoint_path(moe_1t_orchestrator orch, int step) string {
     }
     root + "/step_" + moe_1t_zero_pad_int(step, 7) + "/latest/" + "moe_1t_training"
 }
+
 
 func moe_1t_save_checkpoint(
     moe_1t_orchestrator orch,
@@ -621,6 +644,7 @@ func moe_1t_save_checkpoint(
     orch.latest_checkpoint_path = checkpoint_path
     orch
 }
+
 
 func moe_1t_load_checkpoint(
     moe_1t_orchestrator orch,
@@ -660,6 +684,7 @@ func moe_1t_load_checkpoint(
     (orch, resumed_step)
 }
 
+
 func moe_1t_log_step_metrics(
     moe_1t_orchestrator orch,
     moe_1t_step_state step_state
@@ -672,6 +697,7 @@ func moe_1t_log_step_metrics(
         io_println(log_msg)
     }
 }
+
 
 func moe_1t_training_loop(moe_1t_orchestrator orch) int {
     moe_1t_orchestrator state = moe_1t_load_data_manifest(orch)
@@ -751,6 +777,7 @@ func moe_1t_training_loop(moe_1t_orchestrator orch) int {
     0
 }
 
+
 func string_to_int(string s) int {
     int result = 0
     int i = 0
@@ -765,6 +792,7 @@ func string_to_int(string s) int {
     }
     result
 }
+
 
 func int_to_string(int n) string {
     if n == 0 {
@@ -788,6 +816,7 @@ func int_to_string(int n) string {
     result
 }
 
+
 func float_to_string(float x) string {
     int whole = int(x)
     string result = int_to_string(whole) + "."
@@ -806,6 +835,7 @@ func float_to_string(float x) string {
     result
 }
 
+
 func moe_1t_cos(float x) float {
     float x2 = x * x
     float x4 = x2 * x2
@@ -813,6 +843,8 @@ func moe_1t_cos(float x) float {
     1.0 - x2 / 2.0 + x4 / 24.0 - x6 / 720.0
 }
 
+
 func chr(int code) string {
     string(code)
 }
+

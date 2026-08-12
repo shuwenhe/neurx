@@ -21,6 +21,7 @@ func create_cai_config() cai_config {
     }
 }
 
+
 func example_basic_constitutional_ai() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 1: Basic Constitutional AI Training              ║")
@@ -51,6 +52,7 @@ func example_basic_constitutional_ai() {
     print("")
 }
 
+
 func example_principle_library() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 2: Constitutional Principles Library             ║")
@@ -80,6 +82,7 @@ func example_principle_library() {
     print("  ✓ Transparency (2/5) - Least critical")
     print("")
 }
+
 
 func example_critique_revision_cycle() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -113,6 +116,7 @@ func example_critique_revision_cycle() {
     print("")
 }
 
+
 func example_rlaif_scale() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 4: RLAIF Data Generation at Scale                ║")
@@ -141,6 +145,7 @@ func example_rlaif_scale() {
     print("  ✓ Iterative refinement")
     print("")
 }
+
 
 func example_cai_dpo_grpo_integration() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -175,6 +180,7 @@ func example_cai_dpo_grpo_integration() {
     print("")
 }
 
+
 func example_quality_metrics() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 6: Quality Metrics and Monitoring                ║")
@@ -208,6 +214,7 @@ func example_quality_metrics() {
     print("")
 }
 
+
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -225,12 +232,15 @@ func main() {
     print("═════════════════════════════════════════════════════════════")
 }
 
+
 func float_to_string_ex(float f) string {
     int i_part = int(f)
     int f_part = int((f - float(i_part)) * 10000.0)
     string(i_part) + "." + string(f_part)
 }
 
+
 func int_to_string_ex(int i) string {
     string(i)
 }
+

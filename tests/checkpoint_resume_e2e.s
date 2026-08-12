@@ -14,6 +14,7 @@ struct test_config {
     max_steps int
 }
 
+
 func log_test(config test_config, message string) error {
     timestamp = time.Now().Format(time.RFC3339)
     line = "[TEST] " + message
@@ -21,17 +22,20 @@ func log_test(config test_config, message string) error {
     return io.AppendFile(config.testLog, line + "\n")
 }
 
+
 func log_info(config test_config, message string) error {
     line = "[INFO] " + message
     io.Println(line)
     return io.AppendFile(config.testLog, line + "\n")
 }
 
+
 func log_error(config test_config, message string) error {
     line = "[ERROR] " + message
     io.Println(line)
     return io.AppendFile(config.testLog, line + "\n")
 }
+
 
 func log_section(config test_config, title string) error {
     io.Println("")
@@ -40,6 +44,7 @@ func log_section(config test_config, title string) error {
     io.Println("")
     return io.AppendFile(config.testLog, "\n" + line + "\n\n")
 }
+
 
 func read_state_file(file_path string) map[string]string {
     content, err = os.ReadFile(file_path)
@@ -56,6 +61,7 @@ func read_state_file(file_path string) map[string]string {
     }
     return state
 }
+
 
 func main() {
     script_dir = os.Args[0]
@@ -82,3 +88,4 @@ func main() {
     log_test(config, "Clearing old checkpoint...")
     os.Remove(config.checkpointDir + "/training_state.txt")
     os.Remove(config.checkpointDir + "/checkpoint.state")
+

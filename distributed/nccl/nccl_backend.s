@@ -9,6 +9,7 @@ struct nccl_config {
     float timeout_secs
 }
 
+
 struct nccl_communicator {
     bool initialized
     uint64 comm_handle
@@ -17,3 +18,4 @@ struct nccl_communicator {
     int bytes_received
     int num_collective_ops
 }
+

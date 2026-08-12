@@ -13,12 +13,14 @@ struct vllm_config {
     int block_size
 }
 
+
 struct vllm_rollout_state {
     vllm_config config
     bool initialized
     int num_requests
     int num_tokens_generated
 }
+
 
 struct rollout_request {
     []int prompt_tokens
@@ -28,12 +30,14 @@ struct rollout_request {
     int request_id
 }
 
+
 struct rollout_response {
     []int generated_tokens
     []float log_probs
     int request_id
     bool finished
 }
+
 
 func default_vllm_config() vllm_config {
     vllm_config {
@@ -50,6 +54,7 @@ func default_vllm_config() vllm_config {
     }
 }
 
+
 func init_vllm_engine(vllm_config config) vllm_rollout_state {
     vllm_rollout_state {
         config: config,
@@ -58,6 +63,7 @@ func init_vllm_engine(vllm_config config) vllm_rollout_state {
         num_tokens_generated: 0,
     }
 }
+
 
 func vllm_generate_batch(
     vllm_rollout_state state,
@@ -71,6 +77,7 @@ func vllm_generate_batch(
     }
     return responses
 }
+
 
 func vllm_generate_single(
     vllm_rollout_state state,
@@ -90,6 +97,7 @@ func vllm_generate_single(
     }
 }
 
+
 func vllm_get_engine_stats(vllm_rollout_state state) vllm_engine_stats {
     vllm_engine_stats {
         num_requests_running: 0,
@@ -100,6 +108,7 @@ func vllm_get_engine_stats(vllm_rollout_state state) vllm_engine_stats {
     }
 }
 
+
 struct vllm_engine_stats {
     int num_requests_running
     int num_requests_waiting
@@ -107,3 +116,4 @@ struct vllm_engine_stats {
     int num_gpu_blocks_free
     float gpu_cache_usage
 }
+

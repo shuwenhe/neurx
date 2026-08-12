@@ -84,6 +84,7 @@ func main() {
     0
 }
 
+
 func parse_int(string s, int fallback) int {
     if len(s) < 1 { return fallback }
     int i = 0
@@ -106,3 +107,4 @@ func parse_int(string s, int fallback) int {
     if sign < 0 { return 0 - value }
     value
 }
+

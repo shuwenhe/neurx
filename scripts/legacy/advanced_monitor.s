@@ -40,6 +40,7 @@ type advanced_training_monitor struct {
     convergence_threshold: float
 }
 
+
 func (atm *advanced_training_monitor) init(
     total_steps: int,
     log_file: string,
@@ -63,12 +64,14 @@ func (atm *advanced_training_monitor) init(
     return nil
 }
 
+
 func calculate_perplexity(loss: float): float {
     if loss < 0 {
         return -1.0
     }
     return math.Exp(loss)
 }
+
 
 func (atm *advanced_training_monitor) log_perplexity(
     step: int,
@@ -95,6 +98,7 @@ func (atm *advanced_training_monitor) log_perplexity(
         atm.best_step = step
     }
 }
+
 
 func (atm *advanced_training_monitor) log_step(
     step: int,
@@ -128,6 +132,7 @@ func (atm *advanced_training_monitor) log_step(
     atm.log_to_file(metrics)
 }
 
+
 func (atm *advanced_training_monitor) calculate_eta(step: int, elapsed: float): float {
     if step <= 0 {
         return 0.0
@@ -136,6 +141,7 @@ func (atm *advanced_training_monitor) calculate_eta(step: int, elapsed: float): 
     remaining_steps := atm.total_steps - step
     return avg_step_time * float(remaining_steps)
 }
+
 
 func (atm *advanced_training_monitor) print_progress(metrics: training_metrics) {
     progress := float(metrics.step) / float(atm.total_steps) * 100.0
@@ -168,6 +174,7 @@ func (atm *advanced_training_monitor) print_progress(metrics: training_metrics) 
     println(status)
 }
 
+
 func (atm *advanced_training_monitor) log_to_file(metrics: training_metrics) {
     f, err := os.OpenFile(atm.log_file, os.O_APPEND|os.O_WRONLY, 0644)
     if err != nil {
@@ -177,6 +184,7 @@ func (atm *advanced_training_monitor) log_to_file(metrics: training_metrics) {
     json_data, _ := json.Marshal(metrics)
     f.WriteString(string(json_data) + "\n")
 }
+
 
 func (atm *advanced_training_monitor) check_convergence(): bool {
     if len(atm.ppl_history) < atm.convergence_window {
@@ -188,6 +196,7 @@ func (atm *advanced_training_monitor) check_convergence(): bool {
     change := math.Abs(current_ppl - recent_ppl) / recent_ppl
     return change < atm.convergence_threshold
 }
+
 
 func (atm *advanced_training_monitor) get_stats(): map[string]interface{} {
     if len(atm.steps) == 0 {
@@ -241,6 +250,7 @@ func (atm *advanced_training_monitor) get_stats(): map[string]interface{} {
     }
 }
 
+
 func (atm *advanced_training_monitor) generate_report(): string {
     stats := atm.get_stats()
     report := "╔════════════════════════════════════════════════════════════╗\n"
@@ -285,6 +295,7 @@ func (atm *advanced_training_monitor) generate_report(): string {
     return report
 }
 
+
 func (atm *advanced_training_monitor) export_json(): string {
     data := map[string]interface{}{
         "summary": atm.get_stats(),
@@ -299,6 +310,7 @@ func (atm *advanced_training_monitor) export_json(): string {
     json_bytes, _ := json.Marshal(data)
     return string(json_bytes)
 }
+
 
 func format_time(seconds: float): string {
     if seconds < 0 {
@@ -315,6 +327,7 @@ func format_time(seconds: float): string {
         return fmt.Sprintf("%ds", s)
     }
 }
+
 
 func main() {
     monitor := &advanced_training_monitor{}
@@ -341,3 +354,4 @@ func main() {
     }
     println("\n" + monitor.generate_report())
 }
+

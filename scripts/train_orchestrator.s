@@ -15,6 +15,7 @@ enum training_scale {
     one_t,
 }
 
+
 struct training_config {
     scale         training_scale
     num_gpus       int
@@ -28,6 +29,7 @@ struct training_config {
     model_path     string
     timestamp     string
 }
+
 
 func get_scale_config(scale training_scale) struct {
     params    int
@@ -95,12 +97,14 @@ func get_scale_config(scale training_scale) struct {
     }
 }
 
+
 struct train_orchestrator {
     logger logger_2
     config training_config
     s_compiler string
     neurx_root string
 }
+
 
 func new_train_orchestrator(scale training_scale, num_gpus int) (*train_orchestrator, error) {
     logger := new_logger("train_orchestrator")
@@ -136,6 +140,7 @@ func new_train_orchestrator(scale training_scale, num_gpus int) (*train_orchestr
     }, nil
 }
 
+
 func (t *train_orchestrator) setup() error {
     t.logger.log("Setting up training environment...")
     for _, dir := range []string{t.config.log_dir, t.config.checkpoint_dir, t.config.output_dir} {
@@ -146,6 +151,7 @@ func (t *train_orchestrator) setup() error {
     t.log_config()
     return nil
 }
+
 
 func (t *train_orchestrator) check_environment() error {
     t.logger.log("Checking environment...")
@@ -161,6 +167,7 @@ func (t *train_orchestrator) check_environment() error {
     }
     return nil
 }
+
 
 func (t *train_orchestrator) compile() error {
     t.logger.log("Compiling NeurX training module...")
@@ -189,6 +196,7 @@ func (t *train_orchestrator) compile() error {
     return nil
 }
 
+
 func (t *train_orchestrator) run() error {
     t.logger.log("Starting training...")
     bin_file := filepath.Join(t.config.output_dir, "neurx_train")
@@ -210,6 +218,7 @@ func (t *train_orchestrator) run() error {
     return nil
 }
 
+
 func (t *train_orchestrator) monitor() error {
     t.logger.log("Starting training monitor...")
     log_file := filepath.Join(t.config.log_dir, "train.log")
@@ -229,6 +238,7 @@ func (t *train_orchestrator) monitor() error {
     return nil
 }
 
+
 func (t *train_orchestrator) detect_gp_us() (int, string) {
     if command_exists("nvidia-smi") {
         result := exec_command("nvidia-smi", "--query-gpu=name", "--format=csv,noheader")
@@ -246,6 +256,7 @@ func (t *train_orchestrator) detect_gp_us() (int, string) {
     return 1, "CPU"
 }
 
+
 func (t *train_orchestrator) log_config() error {
     config := fmt.Sprintf(`╔══════════════════════════════════════════════════╗
 ║   neur_x foundation model training               ║
@@ -261,6 +272,7 @@ func (t *train_orchestrator) log_config() error {
     log_file := filepath.Join(t.config.log_dir, "config.txt")
     return write_file(log_file, config)
 }
+
 
 func (t *train_orchestrator) generate_training_source(output_path string) error {
     scale_config := get_scale_config(t.config.scale)
@@ -287,6 +299,7 @@ func main() {
     return write_file(output_path, source)
 }
 
+
 func scale_string(scale training_scale) string {
     switch scale {
     case training_scale.Mini:
@@ -303,6 +316,7 @@ func scale_string(scale training_scale) string {
         return "unknown"
     }
 }
+
 
 func run_foundation_model_training(scale string, num_gpus int) error {
     var scale_enum training_scale
@@ -344,17 +358,21 @@ func run_foundation_model_training(scale string, num_gpus int) error {
     return nil
 }
 
+
 func start_quick_training() error {
     return run_foundation_model_training("mini", 1)
 }
+
 
 func launch_70b_training(num_gpus int) error {
     return run_foundation_model_training("xl", num_gpus)
 }
 
+
 func launch_7b_training(num_gpus int) error {
     return run_foundation_model_training("large", num_gpus)
 }
+
 
 func launch_1t_training(num_gpus int) error {
     orchestrator, err := new_train_orchestrator(training_scale.OneT, num_gpus)
@@ -363,3 +381,4 @@ func launch_1t_training(num_gpus int) error {
     }
     return orchestrator.setup()
 }
+

@@ -89,6 +89,7 @@ func main() {
     0
 }
 
+
 func resolve_root(string fallback) string {
     string root = trim(runtime_env_get("NEURX_ROOT", ""))
     if root != "" {
@@ -99,6 +100,7 @@ func resolve_root(string fallback) string {
     }
     trim(runtime_run_command_output("git rev-parse --show-toplevel 2>/dev/null || pwd"))
 }
+
 
 func resolve_s_bin(string root_dir, string override) string {
     string candidate = trim(override)
@@ -146,6 +148,7 @@ func resolve_s_bin(string root_dir, string override) string {
     ""
 }
 
+
 func is_runnable(string path) bool {
     string trimmed = trim(path)
     if trimmed == "" {
@@ -153,6 +156,7 @@ func is_runnable(string path) bool {
     }
     runtime_file_exists(trimmed) && runtime_run_command_output("test -x " + runtime_shell_escape(trimmed) + " && printf ok || true") == "ok"
 }
+
 
 func compile_one(string s_bin, bool legacy_mode, string src) bool {
     string base = basename_no_ext(src)
@@ -170,6 +174,7 @@ func compile_one(string s_bin, bool legacy_mode, string src) bool {
     }
     return runtime_run_command(runtime_shell_escape(s_bin) + " ir " + runtime_shell_escape(src) + " -o " + runtime_shell_escape(target)).ok
 }
+
 
 func split_lines(string text) []string {
     []string lines = []string{cap: 0}
@@ -195,6 +200,7 @@ func split_lines(string text) []string {
     lines
 }
 
+
 func basename_no_ext(string path) string {
     string base = basename(path)
     int dot = last_index_of(base, ".")
@@ -204,6 +210,7 @@ func basename_no_ext(string path) string {
     slice(base, 0, dot)
 }
 
+
 func basename(string path) string {
     int last = last_index_of(path, "/")
     if last < 0 {
@@ -211,6 +218,7 @@ func basename(string path) string {
     }
     slice(path, last + 1, len(path))
 }
+
 
 func dirname_of(string path) string {
     int last = last_index_of(path, "/")
@@ -223,6 +231,7 @@ func dirname_of(string path) string {
     slice(path, 0, last)
 }
 
+
 func last_index_of(string text, string pattern) int {
     int last = -1
     int i = 0
@@ -234,6 +243,7 @@ func last_index_of(string text, string pattern) int {
     }
     last
 }
+
 
 func contains_text(string text, string pattern) bool {
     if pattern == "" {
@@ -248,6 +258,7 @@ func contains_text(string text, string pattern) bool {
     }
     false
 }
+
 
 func json_escape(string s) string {
     string out = "\""
@@ -266,3 +277,4 @@ func json_escape(string s) string {
     out = out + "\""
     out
 }
+

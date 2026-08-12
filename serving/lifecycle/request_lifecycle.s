@@ -16,6 +16,7 @@ struct lifecycle_state {
     int failed
 }
 
+
 func new_lifecycle_state() lifecycle_state {
     lifecycle_state {
         request_ids: [], statuses: [], deadlines_ms: [], attempts: [], max_retries: [], next_retry_ms: [],
@@ -23,6 +24,7 @@ func new_lifecycle_state() lifecycle_state {
         completed: 0, cancelled: 0, timed_out: 0, retries: 0, failed: 0,
     }
 }
+
 
 func lifecycle_find(lifecycle_state state, string request_id) int {
     int i = 0
@@ -32,6 +34,7 @@ func lifecycle_find(lifecycle_state state, string request_id) int {
     }
     -1
 }
+
 
 func lifecycle_register(lifecycle_state state, string request_id, int now_ms, int timeout_ms, int max_retries) lifecycle_state {
     if !state.accepting_requests || request_id == "" || lifecycle_find(state, request_id) >= 0 { return state }
@@ -47,6 +50,7 @@ func lifecycle_register(lifecycle_state state, string request_id, int now_ms, in
     state
 }
 
+
 func lifecycle_backoff_ms(int attempt) int {
     int delay = 100
     int i = 1
@@ -57,6 +61,7 @@ func lifecycle_backoff_ms(int attempt) int {
     if delay > 5000 { delay = 5000 }
     delay
 }
+
 
 func lifecycle_fail_attempt(lifecycle_state state, string request_id, int now_ms, bool retryable) lifecycle_state {
     int index = lifecycle_find(state, request_id)
@@ -73,6 +78,7 @@ func lifecycle_fail_attempt(lifecycle_state state, string request_id, int now_ms
     state.failed = state.failed + 1
     state
 }
+
 
 func lifecycle_tick(lifecycle_state state, int now_ms) lifecycle_state {
     int i = 0
@@ -91,6 +97,7 @@ func lifecycle_tick(lifecycle_state state, int now_ms) lifecycle_state {
     state
 }
 
+
 func lifecycle_cancel(lifecycle_state state, string request_id) lifecycle_state {
     int index = lifecycle_find(state, request_id)
     if index < 0 || (state.statuses[index] != "running" && state.statuses[index] != "retry_wait") { return state }
@@ -100,6 +107,7 @@ func lifecycle_cancel(lifecycle_state state, string request_id) lifecycle_state 
     state.cancelled = state.cancelled + 1
     state
 }
+
 
 func lifecycle_complete(lifecycle_state state, string request_id) lifecycle_state {
     int index = lifecycle_find(state, request_id)
@@ -111,12 +119,15 @@ func lifecycle_complete(lifecycle_state state, string request_id) lifecycle_stat
     state
 }
 
+
 func lifecycle_begin_shutdown(lifecycle_state state) lifecycle_state {
     state.accepting_requests = false
     state.draining = true
     state
 }
 
+
 func lifecycle_shutdown_complete(lifecycle_state state) bool {
     state.draining && state.active_requests == 0
 }
+

@@ -8,6 +8,7 @@ struct model_weights {
     bool weights_loaded
 }
 
+
 struct layer_weights {
     []float q_proj
     []float k_proj
@@ -19,6 +20,7 @@ struct layer_weights {
     []float input_layernorm
     []float post_attention_layernorm
 }
+
 
 func parse_u64_le([]int bytes, int offset) int {
     int b0 = bytes[offset]
@@ -32,6 +34,7 @@ func parse_u64_le([]int bytes, int offset) int {
     int result = b0 + (b1 * 256) + (b2 * 65536) + (b3 * 16777216)
     result
 }
+
 
 func parse_f32_le([]int bytes, int offset) float {
     int b0 = bytes[offset]
@@ -47,6 +50,7 @@ func parse_f32_le([]int bytes, int offset) float {
     val * (sign as float)
 }
 
+
 func load_tensor_simple([]int file_bytes, int tensor_offset, int num_elements) []float {
     []float data = []float{cap: num_elements}
     int i = 0
@@ -57,6 +61,7 @@ func load_tensor_simple([]int file_bytes, int tensor_offset, int num_elements) [
     }
     data
 }
+
 
 func load_model_weights_mock(string model_dir, int hidden_size, int num_layers) model_weights {
     eprintln("[Weight Loader] Loading mock weights for testing")
@@ -88,6 +93,7 @@ func load_model_weights_mock(string model_dir, int hidden_size, int num_layers) 
         weights_loaded: true
     }
 }
+
 
 func load_model_weights_real(string model_dir) model_weights {
     eprintln("[Weight Loader] Loading REAL Language Model 0.5B weights")
@@ -128,6 +134,7 @@ func load_model_weights_real(string model_dir) model_weights {
     }
 }
 
+
 func init_gaussian(int size, float std) []float {
     []float arr = []float{cap: size}
     int i = 0
@@ -140,6 +147,7 @@ func init_gaussian(int size, float std) []float {
     arr
 }
 
+
 func ones_array(int size) []float {
     []float arr = []float{cap: size}
     int i = 0
@@ -149,6 +157,7 @@ func ones_array(int size) []float {
     }
     arr
 }
+
 
 func int_to_str(int x) string {
     if x == 0 { return "0" }
@@ -171,3 +180,4 @@ func int_to_str(int x) string {
     }
     result
 }
+

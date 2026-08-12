@@ -1,29 +1,35 @@
 package neurx.lib.loss
 use neurx.lib.tensor.{vector, matrix, create_vector, create_matrix, vector_scale, vector_subtract, matrix_scale}
+
 struct mse_loss {
     string name
 }
+
 
 struct cross_entropy_loss {
     float epsilon
     string name
 }
 
+
 struct bceloss {
     float epsilon
     string name
 }
+
 
 struct smooth_l1_loss {
     float delta
     string name
 }
 
+
 func create_mse_loss() mse_loss {
     mse_loss loss
     loss.name = "MSE"
     loss
 }
+
 
 func mse_loss_forward(vector pred, vector target) float {
     if pred.size != target.size {
@@ -39,6 +45,7 @@ func mse_loss_forward(vector pred, vector target) float {
     sum / (pred.size as float)
 }
 
+
 func mse_loss_backward(vector pred, vector target) vector {
     if pred.size != target.size {
         return create_vector(pred.size)
@@ -53,12 +60,14 @@ func mse_loss_backward(vector pred, vector target) vector {
     grad
 }
 
+
 func create_cross_entropy_loss() cross_entropy_loss {
     cross_entropy_loss loss
     loss.epsilon = 0.0000001
     loss.name = "CrossEntropy"
     loss
 }
+
 
 func cross_entropy_loss_forward(vector pred, vector target) float {
     if pred.size != target.size {
@@ -96,6 +105,7 @@ func cross_entropy_loss_forward(vector pred, vector target) float {
     loss / (pred.size as float)
 }
 
+
 func cross_entropy_loss_backward(vector pred, vector target) vector {
     if pred.size != target.size {
         return create_vector(pred.size)
@@ -110,12 +120,14 @@ func cross_entropy_loss_backward(vector pred, vector target) vector {
     grad
 }
 
+
 func create_bce_loss() bceloss {
     bceloss loss
     loss.epsilon = 0.0000001
     loss.name = "BCE"
     loss
 }
+
 
 func bce_loss_forward(vector pred, vector target) float {
     if pred.size != target.size {
@@ -171,12 +183,14 @@ func bce_loss_forward(vector pred, vector target) float {
     loss / (pred.size as float)
 }
 
+
 func create_smooth_l1_loss() smooth_l1_loss {
     smooth_l1_loss loss
     loss.delta = 1.0
     loss.name = "SmoothL1"
     loss
 }
+
 
 func smooth_l1_loss_forward(vector pred, vector target) float {
     if pred.size != target.size {
@@ -202,12 +216,14 @@ func smooth_l1_loss_forward(vector pred, vector target) float {
     loss / (pred.size as float)
 }
 
+
 struct sgd_optimizer {
     float learning_rate
     float momentum
     float weight_decay
     vector velocity
 }
+
 
 struct adam_optimizer {
     float learning_rate
@@ -219,6 +235,7 @@ struct adam_optimizer {
     vector v
 }
 
+
 func create_sgd_optimizer(float lr, float momentum, float weight_decay) sgd_optimizer {
     sgd_optimizer opt
     opt.learning_rate = lr
@@ -226,6 +243,7 @@ func create_sgd_optimizer(float lr, float momentum, float weight_decay) sgd_opti
     opt.weight_decay = weight_decay
     opt
 }
+
 
 func sgd_step(sgd_optimizer opt, vector params, vector grads) vector {
     if params.size != grads.size {
@@ -245,6 +263,7 @@ func sgd_step(sgd_optimizer opt, vector params, vector grads) vector {
     updated
 }
 
+
 func create_adam_optimizer(float lr) adam_optimizer {
     adam_optimizer opt
     opt.learning_rate = lr
@@ -254,6 +273,7 @@ func create_adam_optimizer(float lr) adam_optimizer {
     opt.step_count = 0
     opt
 }
+
 
 func adam_step(adam_optimizer opt, vector params, vector grads) vector {
     if params.size != grads.size {
@@ -284,12 +304,14 @@ func adam_step(adam_optimizer opt, vector params, vector grads) vector {
     updated
 }
 
+
 struct rmsprop_optimizer {
     float learning_rate
     float alpha
     float epsilon
     vector mean_square
 }
+
 
 func create_rmsprop_optimizer(float lr) rmsprop_optimizer {
     rmsprop_optimizer opt
@@ -298,6 +320,7 @@ func create_rmsprop_optimizer(float lr) rmsprop_optimizer {
     opt.epsilon = 0.00000001
     opt
 }
+
 
 func rmsprop_step(rmsprop_optimizer opt, vector params, vector grads) vector {
     if params.size != grads.size {
@@ -322,3 +345,4 @@ func rmsprop_step(rmsprop_optimizer opt, vector params, vector grads) vector {
     }
     updated
 }
+

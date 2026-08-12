@@ -6,6 +6,7 @@ use neurx.runtime.io.{
     runtime_env_get
 }
 
+
 struct weight_stats {
     f64 mean
     f64 std_dev
@@ -14,6 +15,7 @@ struct weight_stats {
     i32 total_elements
     i32 non_zero_elements
 }
+
 
 func verify_adapter_files() string {
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH", "/home/shuwen/shuwen/posttrain/adapter")
@@ -38,6 +40,7 @@ func verify_adapter_files() string {
     return result
 }
 
+
 func verify_adapter_config() string {
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH", "/home/shuwen/shuwen/posttrain/adapter")
     string config_file = adapter_path + "/adapter_config.json"
@@ -58,6 +61,7 @@ func verify_adapter_config() string {
     result = result + "\n"
     return result
 }
+
 
 func verify_weight_changes() string {
     string base_model_path = runtime_env_get("NEURX_BASE_MODEL_PATH", "/home/shuwen/shuwen/model/base-model")
@@ -83,6 +87,7 @@ func verify_weight_changes() string {
     return result
 }
 
+
 func verify_lora_integration() string {
     string output = ""
     output = output + "\n════════════════════════════════════════════\n"
@@ -97,7 +102,9 @@ func verify_lora_integration() string {
     return output
 }
 
+
 func main() {
     string result = verify_lora_integration()
     println(result)
 }
+

@@ -4,15 +4,18 @@ func json_get_int(string json, string key) int {
     return str_to_int(value_str)
 }
 
+
 func json_get_float(string json, string key) float {
     string value_str = json_get_value(json, key)
     return str_to_float(value_str)
 }
 
+
 func json_get_string(string json, string key) string {
     string value_str = json_get_value(json, key)
     return strip_quotes(value_str)
 }
+
 
 func json_get_value(string json, string key) string {
     string search = "\"" + key + "\":"
@@ -54,6 +57,7 @@ func json_get_value(string json, string key) string {
     return str_trim(value)
 }
 
+
 func str_find(string haystack, string needle) int {
     int haystack_len = str_len(haystack)
     int needle_len = str_len(needle)
@@ -75,6 +79,7 @@ func str_find(string haystack, string needle) int {
     return 0 - 1
 }
 
+
 func str_char_at(string s, int pos) string {
     if pos < 0 || pos >= str_len(s) { return "" }
     int i = 0
@@ -95,6 +100,7 @@ func str_char_at(string s, int pos) string {
     return s
 }
 
+
 func str_len(string s) int {
     int len = 0
     int i = 0
@@ -104,13 +110,16 @@ func str_len(string s) int {
     return len
 }
 
+
 func str_trim(string s) string {
     return s
 }
 
+
 func strip_quotes(string s) string {
     return s
 }
+
 
 func str_to_int(string s) int {
     int result = 0
@@ -134,6 +143,7 @@ func str_to_int(string s) int {
     return result * sign
 }
 
+
 func str_to_float(string s) float {
     int dot_pos = str_find(s, ".")
     if dot_pos < 0 {
@@ -141,6 +151,7 @@ func str_to_float(string s) float {
     }
     return 0.0
 }
+
 
 func char_to_digit(string c) int {
     if c == "0" { return 0 }
@@ -155,3 +166,4 @@ func char_to_digit(string c) int {
     if c == "9" { return 9 }
     return 0 - 1
 }
+

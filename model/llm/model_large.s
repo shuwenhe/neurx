@@ -1,5 +1,6 @@
 package neurx.model.llm.base_large
 use neurx.util.math.{exp_approx}
+
 struct gpt_large_state {
     string name
     string family
@@ -31,6 +32,7 @@ struct gpt_large_state {
     bool trained
 }
 
+
 struct gpt_large_train_config {
     int steps
     int batch_size
@@ -41,6 +43,7 @@ struct gpt_large_train_config {
     float target_loss
     float min_lr
 }
+
 
 func new_gpt_large_state() gpt_large_state {
     gpt_large_state {
@@ -75,6 +78,7 @@ func new_gpt_large_state() gpt_large_state {
     }
 }
 
+
 func new_gpt_large_train_config() gpt_large_train_config {
     gpt_large_train_config {
         steps: 2000,
@@ -87,6 +91,7 @@ func new_gpt_large_train_config() gpt_large_train_config {
         min_lr: 0.00001,
     }
 }
+
 
 func gpt_large_is_transformer_valid(gpt_large_state state) bool {
     if state.hidden_size <= 0 {
@@ -107,12 +112,14 @@ func gpt_large_is_transformer_valid(gpt_large_state state) bool {
     true
 }
 
+
 func gpt_large_head_dim(gpt_large_state state) int {
     if state.num_heads <= 0 {
         return 0
     }
     state.hidden_size / state.num_heads
 }
+
 
 func gpt_large_effective_lr(gpt_large_state state, gpt_large_train_config config, int step) float {
     float lr = state.learning_rate
@@ -124,6 +131,7 @@ func gpt_large_effective_lr(gpt_large_state state, gpt_large_train_config config
     }
     lr
 }
+
 
 func gpt_large_loss_after_step(gpt_large_state state, gpt_large_train_config config, int step) float {
     float capacity = (state.hidden_size * state.num_layers) * 1.0 / 131072.0
@@ -142,13 +150,16 @@ func gpt_large_loss_after_step(gpt_large_state state, gpt_large_train_config con
     loss
 }
 
+
 func gpt_large_perplexity_from_loss(float loss) float {
     exp_approx(loss)
 }
 
+
 func gpt_large_validation_loss_from_train(float train_loss) float {
     train_loss + 0.08
 }
+
 
 func gpt_large_train_step(gpt_large_state state, gpt_large_train_config config, int step) gpt_large_state {
     float train_loss = gpt_large_loss_after_step(state, config, step)
@@ -193,6 +204,7 @@ func gpt_large_train_step(gpt_large_state state, gpt_large_train_config config, 
     }
 }
 
+
 func train_gpt_large(gpt_large_state state, gpt_large_train_config config) gpt_large_state {
     if !gpt_large_is_transformer_valid(state) {
         return state
@@ -236,11 +248,13 @@ func train_gpt_large(gpt_large_state state, gpt_large_train_config config) gpt_l
     }
 }
 
+
 func train_default_gpt_large() gpt_large_state {
     gpt_large_state init_state = new_gpt_large_state()
     gpt_large_train_config config = new_gpt_large_train_config()
     train_gpt_large(init_state, config)
 }
+
 
 func gpt_large_next_token(gpt_large_state state, int token_id, int position) int {
     int next_token = token_id + position + state.num_layers + state.num_heads
@@ -250,14 +264,18 @@ func gpt_large_next_token(gpt_large_state state, int token_id, int position) int
     next_token
 }
 
+
 func gpt_large_summary(gpt_large_state state) string {
     state.name + "[" + state.architecture + "," + string(state.parameter_count_m) + "M" + ",layers=" + string(state.num_layers) + ",heads=" + string(state.num_heads) + ",ctx=" + string(state.context_window) + "]"
 }
+
 
 func gpt_large_state_dict(gpt_large_state state) gpt_large_state {
     state
 }
 
+
 func gpt_large_load_state_dict(gpt_large_state state, gpt_large_state other) gpt_large_state {
     other
 }
+

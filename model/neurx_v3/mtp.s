@@ -10,6 +10,7 @@ struct mtp_config {
     bool causal
 }
 
+
 func new_mtp_config() mtp_config {
     mtp_config {
         hidden_dim: 5120,
@@ -22,6 +23,7 @@ func new_mtp_config() mtp_config {
         causal: true,
     }
 }
+
 
 struct mtp_module_weights {
     []float proj_h
@@ -38,11 +40,13 @@ struct mtp_module_weights {
     []float output_head
 }
 
+
 struct mtp_weights {
     mtp_config config
     []float token_embedding
     []mtp_module_weights modules
 }
+
 
 func zeros(int n) []float {
     []float out = []float{cap: n}
@@ -50,6 +54,7 @@ func zeros(int n) []float {
     while i < n { out[i] = 0.0; i = i + 1 }
     out
 }
+
 
 func fill_ramp(int n, float scale) []float {
     []float out = []float{cap: n}
@@ -60,6 +65,7 @@ func fill_ramp(int n, float scale) []float {
     }
     out
 }
+
 
 func exp_approx(float x) float {
     if x > 20.0 { return 485165195.0 }
@@ -75,6 +81,7 @@ func exp_approx(float x) float {
     result
 }
 
+
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float y = x
@@ -82,6 +89,7 @@ func sqrt_approx(float x) float {
     while i < 10 { y = 0.5 * (y + x / y); i = i + 1 }
     y
 }
+
 
 func gelu(float x) float {
     float c = 0.7978845608028654
@@ -91,6 +99,7 @@ func gelu(float x) float {
     float tanh_val = (e2 - 1.0) / (e2 + 1.0)
     0.5 * x * (1.0 + tanh_val)
 }
+
 
 func matmul_2d([]float a, []float b, int m, int k, int n) []float {
     []float result = zeros(m * n)
@@ -112,6 +121,7 @@ func matmul_2d([]float a, []float b, int m, int k, int n) []float {
     result
 }
 
+
 func rms_norm([]float x, int n, []float weight, float eps) []float {
     []float out = []float{cap: n}
     float sum_sq = 0.0
@@ -128,6 +138,7 @@ func rms_norm([]float x, int n, []float weight, float eps) []float {
     }
     out
 }
+
 
 func new_mtp_module_weights(mtp_config cfg) mtp_module_weights {
     int d = cfg.hidden_dim
@@ -152,6 +163,7 @@ func new_mtp_module_weights(mtp_config cfg) mtp_module_weights {
     }
 }
 
+
 func new_mtp_weights(mtp_config cfg) mtp_weights {
     int D = cfg.num_mtp_layers
     int d = cfg.hidden_dim
@@ -169,10 +181,12 @@ func new_mtp_weights(mtp_config cfg) mtp_weights {
     }
 }
 
+
 struct mtp_module_output {
     []float hidden_state
     []float logits
 }
+
 
 func mtp_module_forward(
     mtp_module_weights w, []float main_hidden,
@@ -237,6 +251,7 @@ func mtp_module_forward(
     }
 }
 
+
 func multi_head_attention(
     []float q, []float k, []float v,
     int seq_len, int n_h, int d_h, bool causal
@@ -298,12 +313,14 @@ func multi_head_attention(
     output
 }
 
+
 struct mtp_forward_output {
     [][]float all_logits
     [][]float all_hidden
     float total_loss
     []float per_module_loss
 }
+
 
 func mtp_forward(
     mtp_weights w, []float main_hidden,
@@ -350,6 +367,7 @@ func mtp_forward(
     }
 }
 
+
 func cross_entropy_loss([]float logits, []int targets, int seq_len, int vocab_size) float {
     float total_loss = 0.0
     int s = 0
@@ -377,6 +395,7 @@ func cross_entropy_loss([]float logits, []int targets, int seq_len, int vocab_si
     total_loss / seq_len as float
 }
 
+
 func ln_approx(float x) float {
     if x <= 0.0 { return -1e9 }
     float y = (x - 1.0) / (x + 1.0)
@@ -387,10 +406,12 @@ func ln_approx(float x) float {
     2.0 * (y + y3 / 3.0 + y5 / 5.0 + y7 / 7.0)
 }
 
+
 struct mtp_speculative_output {
     [][]int predicted_tokens
     [][]float confidence
 }
+
 
 func mtp_inference(
     mtp_weights w, []float main_hidden,
@@ -449,6 +470,7 @@ func mtp_inference(
     }
 }
 
+
 func compute_combined_loss(
     float main_loss, mtp_forward_output mtp_output,
     float mtp_weight
@@ -456,10 +478,13 @@ func compute_combined_loss(
     main_loss + mtp_weight * mtp_output.total_loss
 }
 
+
 func unit_name() string {
     "neurx/model/neurx/mtp"
 }
 
+
 func unit_ready() int {
     1
 }
+

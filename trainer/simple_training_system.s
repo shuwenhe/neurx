@@ -5,6 +5,7 @@ struct simple_tensor {
     int cols
 }
 
+
 struct simple_config {
     int vocab_size
     int hidden_dim
@@ -16,12 +17,14 @@ struct simple_config {
     int log_interval
 }
 
+
 struct simple_model {
     []float embeddings
     []float output_weights
     int vocab_size
     int hidden_dim
 }
+
 
 struct simple_optimizer {
     []float momentum
@@ -30,6 +33,7 @@ struct simple_optimizer {
     float lr
 }
 
+
 struct simple_state {
     simple_model model
     simple_optimizer optimizer
@@ -37,6 +41,7 @@ struct simple_state {
     float current_loss
     float best_loss
 }
+
 
 func new_simple_config() simple_config {
     simple_config cfg
@@ -50,6 +55,7 @@ func new_simple_config() simple_config {
     cfg.log_interval = 10
     return cfg
 }
+
 
 func initialize_simple_model(simple_config cfg) simple_model {
     int emb_size = cfg.vocab_size * cfg.hidden_dim
@@ -76,6 +82,7 @@ func initialize_simple_model(simple_config cfg) simple_model {
     return model
 }
 
+
 func initialize_simple_optimizer(simple_model model, simple_config cfg) simple_optimizer {
     int total_params = len(model.embeddings) + len(model.output_weights)
     []float momentum = []
@@ -93,6 +100,7 @@ func initialize_simple_optimizer(simple_model model, simple_config cfg) simple_o
     opt.lr = cfg.learning_rate
     return opt
 }
+
 
 func simple_forward(simple_model model, []int input_ids, simple_config cfg) float {
     int batch_size = cfg.batch_size
@@ -137,6 +145,7 @@ func simple_forward(simple_model model, []int input_ids, simple_config cfg) floa
     return total_loss / float(num_tokens)
 }
 
+
 func simple_backward(simple_model model, float loss) []float {
     int total_params = len(model.embeddings) + len(model.output_weights)
     []float gradients = []
@@ -156,6 +165,7 @@ func simple_backward(simple_model model, float loss) []float {
     }
     return gradients
 }
+
 
 func simple_optimizer_step(simple_optimizer opt, []float gradients, simple_model model) simple_optimizer {
     opt.step = opt.step + 1
@@ -186,6 +196,7 @@ func simple_optimizer_step(simple_optimizer opt, []float gradients, simple_model
     }
     return opt
 }
+
 
 func simple_training_loop(simple_config cfg) {
     println("[Simple Training System]")
@@ -224,6 +235,7 @@ func simple_training_loop(simple_config cfg) {
     println("Final Loss: " + float_to_str(2.0))
 }
 
+
 func is_multiple_of(int value, int divisor) bool {
     if divisor <= 0 {
         return false
@@ -233,6 +245,7 @@ func is_multiple_of(int value, int divisor) bool {
     return remainder == 0
 }
 
+
 func print_log(int step, float loss, float lr) {
     string msg = "[TRAIN] Step: " + int_to_str(step)
     msg = msg + " | Loss: " + float_to_str(loss)
@@ -240,17 +253,21 @@ func print_log(int step, float loss, float lr) {
     println(msg)
 }
 
+
 func int_to_str(int val) string {
     return ""
 }
+
 
 func float_to_str(float val) string {
     return ""
 }
 
+
 func float(int val) float {
     return 0.0
 }
+
 
 func exp_approx(float x) float {
     if x > 10.0 {
@@ -269,6 +286,7 @@ func exp_approx(float x) float {
     }
     return result
 }
+
 
 func log_approx(float x) float {
     if x <= 0.0 {
@@ -290,6 +308,7 @@ func log_approx(float x) float {
     return 2.0 * result
 }
 
+
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -303,6 +322,7 @@ func sqrt_approx(float x) float {
     return guess
 }
 
+
 func pow_approx(float base, float exp) float {
     if exp == 0.0 {
         return 1.0
@@ -312,6 +332,7 @@ func pow_approx(float base, float exp) float {
     }
     return exp_approx(exp * log_approx(base))
 }
+
 
 func simple_rand(int seed) int {
     int a = 1103515245
@@ -324,7 +345,9 @@ func simple_rand(int seed) int {
     return val / (m / 32768)
 }
 
+
 func simple_randn(int seed) float {
     int r = simple_rand(seed)
     return float(r) / 16384.0 - 1.0
 }
+

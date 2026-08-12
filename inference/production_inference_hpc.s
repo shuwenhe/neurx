@@ -7,9 +7,11 @@ func print_line(string text) {
     print("\n")
 }
 
+
 func read_user_line() string {
     trim(__sys_read_string(0, 4096))
 }
+
 
 func parse_positive_int(string text, int fallback) int {
     if len(text) == 0 {
@@ -30,6 +32,7 @@ func parse_positive_int(string text, int fallback) int {
     }
     value
 }
+
 
 func main() {
     string model_path = resolve_model_path_from_env()
@@ -92,3 +95,4 @@ func main() {
         print_line("")
     }
 }
+

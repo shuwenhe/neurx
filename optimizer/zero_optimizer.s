@@ -9,6 +9,7 @@ struct zero_optimizer_config {
     bool use_gradient_accumulation
 }
 
+
 struct zero_stage_1_state {
     int local_param_count
     []float local_params
@@ -18,15 +19,18 @@ struct zero_stage_1_state {
     int step
 }
 
+
 struct zero_stage_2_state {
     zero_stage_1_state stage_1
     []float gradient_buffer
     int gradient_buffer_size
 }
 
+
 struct zero_stage_3_state {
     zero_stage_2_state stage_2
 }
+
 
 func zero_mod_nonneg(int value, int divisor) int {
     if divisor <= 0 {
@@ -41,6 +45,7 @@ func zero_mod_nonneg(int value, int divisor) int {
     }
     current
 }
+
 
 func new_zero_stage_1_optimizer(
     int total_params,
@@ -69,6 +74,7 @@ func new_zero_stage_1_optimizer(
     return state
 }
 
+
 func zero_stage_1_all_reduce_grads(
     []float local_grads,
     int local_param_count,
@@ -86,6 +92,7 @@ func zero_stage_1_all_reduce_grads(
     return full_grads
 }
 
+
 func zero_pow(float base, int exp) float {
     float out = 1.0
     int i = 0
@@ -95,6 +102,7 @@ func zero_pow(float base, int exp) float {
     }
     return out
 }
+
 
 func zero_sqrt(float x) float {
     if x <= 0.0 {
@@ -108,6 +116,7 @@ func zero_sqrt(float x) float {
     }
     return guess
 }
+
 
 func zero_stage_1_optimizer_step(
     zero_stage_1_state state,
@@ -137,6 +146,7 @@ func zero_stage_1_optimizer_step(
     }
 }
 
+
 func new_zero_stage_2_optimizer(
     int total_params,
     int dp_degree,
@@ -146,6 +156,7 @@ func new_zero_stage_2_optimizer(
     state.gradient_buffer_size = total_params
     return state
 }
+
 
 func zero_stage_2_reduce_scatter_grads(
     []float full_grads,
@@ -175,6 +186,7 @@ func zero_stage_2_reduce_scatter_grads(
     return local_grads
 }
 
+
 func zero_stage_2_optimizer_step(
     zero_stage_2_state state,
     []float local_grads,
@@ -203,6 +215,7 @@ func zero_stage_2_optimizer_step(
     }
 }
 
+
 func new_zero_stage_3_optimizer(
     int total_params,
     int dp_degree,
@@ -211,6 +224,7 @@ func new_zero_stage_3_optimizer(
     state.stage_2 = new_zero_stage_2_optimizer(total_params, dp_degree, dp_rank)
     return state
 }
+
 
 func zero_stage_3_all_gather_params(
     [][]float local_params,
@@ -234,6 +248,7 @@ func zero_stage_3_all_gather_params(
     return full_params
 }
 
+
 func zero_stage_3_forward(
     []float input,
     [][]float local_params,
@@ -249,6 +264,7 @@ func zero_stage_3_forward(
     }
     return output
 }
+
 
 func zero_stage_3_backward(
     []float output_grad,
@@ -268,6 +284,7 @@ func zero_stage_3_backward(
     return local_grads
 }
 
+
 func calculate_zero_memory_savings(
     int total_params,
     int dp_degree,
@@ -283,6 +300,7 @@ func calculate_zero_memory_savings(
     return reduction_factor
 }
 
+
 func recommended_2t_zero_optimizer() zero_optimizer_config {
     zero_optimizer_config cfg
     cfg.zero_stage = 3
@@ -291,6 +309,7 @@ func recommended_2t_zero_optimizer() zero_optimizer_config {
     cfg.memory_limit_mb = 80000
     return cfg
 }
+
 
 func recommended_2t_ultra_zero_optimizer() zero_optimizer_config {
     zero_optimizer_config cfg
@@ -301,6 +320,7 @@ func recommended_2t_ultra_zero_optimizer() zero_optimizer_config {
     return cfg
 }
 
+
 struct zero_memory_stats {
     float param_memory
     float grad_memory
@@ -309,6 +329,7 @@ struct zero_memory_stats {
     float total_memory
     float memory_reduction_factor
 }
+
 
 func calculate_zero_memory_usage(
     int total_params,
@@ -334,3 +355,4 @@ func calculate_zero_memory_usage(
     stats.memory_reduction_factor = calculate_zero_memory_savings(total_params, dp_degree, zero_stage)
     return stats
 }
+

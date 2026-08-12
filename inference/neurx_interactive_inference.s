@@ -6,6 +6,7 @@ func read_user_line() string {
     trim(__sys_read_string(0, 4096))
 }
 
+
 func resolve_model_file(string configured_path) string {
     string path = trim(configured_path)
     if len(path) == 0 {
@@ -19,6 +20,7 @@ func resolve_model_file(string configured_path) string {
     }
     path
 }
+
 
 func main() {
     string root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/neurx")
@@ -59,3 +61,4 @@ func main() {
         print("Assistant: " + response + "\n\n")
     }
 }
+

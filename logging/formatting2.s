@@ -30,6 +30,7 @@ func format_scientific(float value) string {
     result
 }
 
+
 func format_duration(float seconds) string {
     if seconds < 60.0 {
         return int_to_string(int(seconds)) + "s"
@@ -44,6 +45,7 @@ func format_duration(float seconds) string {
     }
 }
 
+
 func compute_rolling_average([]float values) float {
     if len(values) == 0 { return 0.0 }
     float ema = values[0]
@@ -54,6 +56,7 @@ func compute_rolling_average([]float values) float {
     ema
 }
 
+
 func repeat_char(byte c, int n) string {
     string s = ""
     for i in 0..n {
@@ -62,9 +65,11 @@ func repeat_char(byte c, int n) string {
     s
 }
 
+
 func print_overwrite(string message) {
     print("\r" + message)
 }
+
 
 func substring(string s, int start, int length) string {
     if start >= len(s) { return "" }
@@ -75,3 +80,4 @@ func substring(string s, int start, int length) string {
     }
     result
 }
+

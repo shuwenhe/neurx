@@ -14,6 +14,7 @@ struct governance_state {
     int quota_rejected
 }
 
+
 func new_governance_state() governance_state {
     governance_state {
         tenant_ids: [], key_fingerprints: [], roles: [],
@@ -22,6 +23,7 @@ func new_governance_state() governance_state {
         authorized: 0, denied: 0, quota_rejected: 0,
     }
 }
+
 
 func governance_constant_time_fingerprint_equal(string left, string right) bool {
     if len(left) != 64 || len(right) != 64 { return false }
@@ -34,12 +36,14 @@ func governance_constant_time_fingerprint_equal(string left, string right) bool 
     difference == 0
 }
 
+
 func governance_role_allows(string role, string permission) bool {
     if role == "admin" { return true }
     if role == "inference" && (permission == "generate" || permission == "models:read" || permission == "metrics:read") { return true }
     if role == "observer" && (permission == "models:read" || permission == "metrics:read") { return true }
     false
 }
+
 
 func governance_register_tenant(governance_state state, string tenant_id, string key_fingerprint, string role, int requests_per_minute, int tokens_per_minute, int now_ms) governance_state {
     if tenant_id == "" || len(key_fingerprint) != 64 { return state }
@@ -57,6 +61,7 @@ func governance_register_tenant(governance_state state, string tenant_id, string
     state
 }
 
+
 struct governance_decision {
     governance_state state
     bool allowed
@@ -66,11 +71,13 @@ struct governance_decision {
     int retry_after_ms
 }
 
+
 func governance_deny(governance_state state, int status, string reason, bool quota, int retry_after_ms) governance_decision {
     state.denied = state.denied + 1
     if quota { state.quota_rejected = state.quota_rejected + 1 }
     governance_decision { state: state, allowed: false, tenant_id: "", http_status: status, reason: reason, retry_after_ms: retry_after_ms }
 }
+
 
 func governance_authorize(governance_state state, string key_fingerprint, string permission, int requested_tokens, int now_ms) governance_decision {
     int index = -1
@@ -102,6 +109,7 @@ func governance_authorize(governance_state state, string key_fingerprint, string
     governance_decision { state: state, allowed: true, tenant_id: state.tenant_ids[index], http_status: 200, reason: "allowed", retry_after_ms: 0 }
 }
 
+
 func governance_disable_tenant(governance_state state, string tenant_id) governance_state {
     int i = 0
     while i < len(state.tenant_ids) {
@@ -110,3 +118,4 @@ func governance_disable_tenant(governance_state state, string tenant_id) governa
     }
     state
 }
+

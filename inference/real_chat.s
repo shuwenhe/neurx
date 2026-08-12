@@ -5,6 +5,7 @@ func read_user_line() string {
     return trim(__sys_read_string(0, 4096))
 }
 
+
 func int_to_string(int value) string {
     if value == 0 { return "0" }
     string out = ""
@@ -31,6 +32,7 @@ func int_to_string(int value) string {
     return out + tmp
 }
 
+
 func generate_response(string prompt, int max_tokens) string {
     int token_count = len(prompt) + 2
     string response = ""
@@ -39,6 +41,7 @@ func generate_response(string prompt, int max_tokens) string {
     response = response + "Generating response through all 6 inference steps..."
     return response
 }
+
 
 func main() {
     string model_path = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain/model.safetensors")
@@ -127,3 +130,4 @@ func main() {
         print("════════════════════════════════════════════════════════════════\n\n")
     }
 }
+

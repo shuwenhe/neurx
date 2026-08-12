@@ -17,6 +17,7 @@ func main() {
     0
 }
 
+
 func check_dir(string path) string {
     if runtime_dir_exists(path) {
         return "ready (" + path + ")"
@@ -24,9 +25,11 @@ func check_dir(string path) string {
     return "missing (" + path + ")"
 }
 
+
 func check_path(string path) string {
     if runtime_file_exists(path) {
         return "ready (" + path + ")"
     }
     return "missing (" + path + ")"
 }
+

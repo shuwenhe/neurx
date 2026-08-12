@@ -7,6 +7,7 @@ struct gpu_device {
     float compute_capability
 }
 
+
 struct gpu_tensor {
     int gpu_id
     []float host_data
@@ -14,24 +15,30 @@ struct gpu_tensor {
     string dtype
 }
 
+
 func get_available_gpus() []gpu_device {
     return []gpu_device{}
 }
+
 
 func allocate_gpu_memory(int gpu_id, int size_mb) gpu_tensor {
     return gpu_tensor{}
 }
 
+
 func free_gpu_memory(gpu_tensor tensor) {
 }
+
 
 func gpu_to_host(gpu_tensor tensor) []float {
     return []float{}
 }
 
+
 func host_to_gpu(gpu_tensor tensor, []float host_data) gpu_tensor {
     return tensor
 }
+
 
 func gpu_multi_head_attention(
     gpu_tensor queries,
@@ -44,12 +51,14 @@ func gpu_multi_head_attention(
     return output
 }
 
+
 func gpu_matrix_multiply(
     gpu_tensor a,
     gpu_tensor b
 ) gpu_tensor {
     return gpu_tensor{}
 }
+
 
 struct inference_checkpoint {
     string session_id
@@ -66,6 +75,7 @@ struct inference_checkpoint {
     string checkpoint_version
 }
 
+
 struct session_state {
     string session_id
     string user_id
@@ -74,6 +84,7 @@ struct session_state {
     int checkpoint_frequency
     bool auto_save_enabled
 }
+
 
 func save_checkpoint(session_state state, int checkpoint_id) string {
     checkpoint = inference_checkpoint{
@@ -93,6 +104,7 @@ func save_checkpoint(session_state state, int checkpoint_id) string {
     return checkpoint_path
 }
 
+
 func load_checkpoint(string session_id, int checkpoint_id) inference_checkpoint {
     checkpoint_path = fmt.Sprintf(
         "/checkpoints/%s/ckpt_%d.pb",
@@ -106,6 +118,7 @@ func load_checkpoint(string session_id, int checkpoint_id) inference_checkpoint 
     checkpoint = deserialize_checkpoint(data)
     return checkpoint
 }
+
 
 func resume_inference_from_checkpoint(
     string session_id,
@@ -126,11 +139,13 @@ func resume_inference_from_checkpoint(
     return checkpoint.tokens_generated + result
 }
 
+
 struct tp_config {
     int world_size
     int rank
     string backend
 }
+
 
 struct tp_weight_shard {
     int rank
@@ -138,6 +153,7 @@ struct tp_weight_shard {
     []float weight_shard
     string shard_type
 }
+
 
 func shard_linear_weight(
     []float weight,
@@ -162,6 +178,7 @@ func shard_linear_weight(
     }
 }
 
+
 func allgather_output(
     []float local_output,
     int rank,
@@ -170,6 +187,7 @@ func allgather_output(
     global_output = make([]float, len(local_output) * world_size)
     return global_output
 }
+
 
 func reduce_scatter(
     []float global_gradient,
@@ -180,6 +198,7 @@ func reduce_scatter(
     return local_gradient
 }
 
+
 struct quantization_config {
     string dtype
     float scale_factor
@@ -187,11 +206,13 @@ struct quantization_config {
     bool symmetric
 }
 
+
 struct quantized_tensor {
     []int8 data
     []float scales
     quantization_config config
 }
+
 
 func quantize_kv_cache(
     []float kv_cache,
@@ -212,6 +233,7 @@ func quantize_kv_cache(
     }
 }
 
+
 func dequantize_for_attention(
     quantized_tensor q_tensor
 ) []float {
@@ -224,11 +246,13 @@ func dequantize_for_attention(
     return output
 }
 
+
 struct multimodal_input {
     string text
     []uint8 image_data
     string image_format
 }
+
 
 struct vision_features {
     []float embedding
@@ -236,10 +260,12 @@ struct vision_features {
     int feature_dim
 }
 
+
 func extract_image_patches([]uint8 image) [][]float {
     patches = [][]float{}
     return patches
 }
+
 
 func vision_transformer_encode(
     [][]float patches,
@@ -253,6 +279,7 @@ func vision_transformer_encode(
     }
 }
 
+
 func fuse_text_and_vision(
     []float text_embedding,
     vision_features vis_feat
@@ -263,14 +290,17 @@ func fuse_text_and_vision(
     return fused
 }
 
+
 struct json_schema {
     string json_str
 }
+
 
 struct constrained_generation_state {
     []string valid_tokens
     bool is_complete
 }
+
 
 func build_json_vocabulary(json_schema schema) []string {
     vocab = []string{
@@ -282,6 +312,7 @@ func build_json_vocabulary(json_schema schema) []string {
     }
     return vocab
 }
+
 
 func constrained_sample_next_token(
     []float logits,
@@ -306,6 +337,7 @@ func constrained_sample_next_token(
     return next_token
 }
 
+
 func is_valid_json_prefix(string json_str, json_schema schema) bool {
     result = try_parse_json(json_str)
     if result.is_complete {
@@ -315,6 +347,7 @@ func is_valid_json_prefix(string json_str, json_schema schema) bool {
     }
 }
 
+
 struct lora_adapter {
     string adapter_id
     []float lora_a
@@ -323,10 +356,12 @@ struct lora_adapter {
     int rank
 }
 
+
 struct lora_adapter_pool {
     map[string, lora_adapter] adapters
     string current_adapter_id
 }
+
 
 func load_lora_adapter(string adapter_path) lora_adapter {
     config = load_json(adapter_path + "/adapter_config.json")
@@ -341,6 +376,7 @@ func load_lora_adapter(string adapter_path) lora_adapter {
     }
 }
 
+
 func register_lora_adapter(
     lora_adapter_pool pool,
     lora_adapter adapter
@@ -348,6 +384,7 @@ func register_lora_adapter(
     pool.adapters[adapter.adapter_id] = adapter
     return pool
 }
+
 
 func switch_lora_adapter(
     lora_adapter_pool pool,
@@ -359,6 +396,7 @@ func switch_lora_adapter(
     }
     return pool
 }
+
 
 func apply_lora_to_linear(
     []float weight,
@@ -372,11 +410,13 @@ func apply_lora_to_linear(
     return output
 }
 
+
 struct beam_search_state {
     []float hypothesis
     []float scores
     int beam_size
 }
+
 
 struct dynamic_batch_scheduler {
     int min_batch_size
@@ -385,10 +425,12 @@ struct dynamic_batch_scheduler {
     []inference_request queue
 }
 
+
 struct anthropic_message {
     string role
     string content
 }
+
 
 func convert_to_anthropic_format(string neurx_output) anthropic_message {
     return anthropic_message{
@@ -397,22 +439,27 @@ func convert_to_anthropic_format(string neurx_output) anthropic_message {
     }
 }
 
+
 struct grpc_server {
     string address
     int port
     bool tls_enabled
 }
 
+
 func start_grpc_server(grpc_server server) {
 }
+
 
 func current_timestamp_ms() int64 {
     return 0
 }
 
+
 func f(int x) float {
     return float(x)
 }
+
 
 func contains([]string arr, string elem) bool {
     for i < len(arr) {
@@ -423,6 +470,7 @@ func contains([]string arr, string elem) bool {
     }
     return false
 }
+
 
 func min([]float arr) float {
     if len(arr) == 0 {
@@ -438,6 +486,7 @@ func min([]float arr) float {
     return result
 }
 
+
 func max([]float arr) float {
     if len(arr) == 0 {
         return 0.0
@@ -451,3 +500,4 @@ func max([]float arr) float {
     }
     return result
 }
+

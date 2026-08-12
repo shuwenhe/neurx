@@ -8,6 +8,7 @@ use neurx.runtime.io.{
     runtime_write_text_file,
 }
 
+
 func main() {
     println("[CUDA Runtime] Building CUDA Runtime Library")
     println("")
@@ -43,6 +44,7 @@ func main() {
     println("  Size: " + trim(size_info))
 }
 
+
 func get_cuda_home() string {
     string cuda_home = trim(runtime_env_get("CUDA_HOME", ""))
     if str_len(cuda_home) > 0 && runtime_file_exists(cuda_home + "/include/cuda.h") {
@@ -57,15 +59,18 @@ func get_cuda_home() string {
     "/usr"
 }
 
+
 func create_runtime_env_metadata(string build_dir, string cuda_lib) {
     string text = "CUDA_RUNTIME_LIB=" + build_dir + "/libcuda_runtime.so" + chr(10) +
         "CUDA_LIBRARY_PATH=" + cuda_lib + ":" + build_dir + chr(10)
     runtime_write_text_file(build_dir + "/env.txt", text)
 }
 
+
 func create_dir(string path) {
     runtime_make_dirs(path)
 }
+
 
 func str_len(string s) int {
     int n = 0
@@ -74,6 +79,7 @@ func str_len(string s) int {
     }
     n
 }
+
 
 func trim(string s) string {
     int len = str_len(s)
@@ -91,6 +97,7 @@ func trim(string s) string {
     substring(s, i, j + 1)
 }
 
+
 func substring(string s, int start, int end) string {
     string out = ""
     int i = start
@@ -102,10 +109,13 @@ func substring(string s, int start, int end) string {
     out
 }
 
+
 func chr(int code) string {
     string(code)
 }
 
+
 func escape_quotes(string s) string {
     s
 }
+

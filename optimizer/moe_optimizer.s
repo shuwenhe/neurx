@@ -24,6 +24,7 @@ struct moe_config {
     expert_pruning_threshold: float = 0.001
 }
 
+
 struct moe_forward_output {
     output: tensor
     aux_loss: tensor?
@@ -34,6 +35,7 @@ struct moe_forward_output {
     dispatch_pattern: dispatch_pattern
     perexpert_output?: list<tensor>
 }
+
 
 struct dispatch_pattern {
     total_tokens: int
@@ -46,6 +48,7 @@ struct dispatch_pattern {
     dropped_tokens: int
 }
 
+
 struct moe_expert {
     id: int
     up_proj: linear
@@ -55,6 +58,7 @@ struct moe_expert {
     importance_weight: float = 1.0
     is_active: bool = true
 }
+
 
 struct moe_router {
     gate_layer: linear
@@ -411,6 +415,7 @@ class expert_specializer {
     }
 }
 
+
 struct expert_analysis_report {
     num_total_experts: int
     num_active_experts: int
@@ -419,6 +424,7 @@ struct expert_analysis_report {
     importance_range: tuple<float, float>
     redundancy_detected: bool
 }
+
 
 struct individual_expert_report {
     expert_id: int
@@ -514,6 +520,7 @@ class expert_manager {
     }
 }
 
+
 struct pruning_report {
     experts_pruned: int
     pruned_expert_ids: list<int>
@@ -521,11 +528,13 @@ struct pruning_report {
     remaining_active: int
 }
 
+
 struct merging_report {
     merges_performed: int
     operations: list<merge_operation>
     estimated_memory_savings_pct: float
 }
+
 
 struct merge_operation {
     layer_index: int
@@ -534,6 +543,7 @@ struct merge_operation {
     similarity: float
     action: string
 }
+
 
 struct moe_efficiency_report {
     total_experts_per_layer: int
@@ -596,3 +606,4 @@ export {
     expert_manager, pruning_report, merging_report, merge_operation, moe_efficiency_report,
     create_moe_ffn_layer, test_moe_system
 }
+

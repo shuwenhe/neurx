@@ -29,6 +29,7 @@ func int_to_str(int n) string {
     out
 }
 
+
 func float_to_str(float value, int decimals) string {
     float current = value
     bool neg = current < 0.0
@@ -65,6 +66,7 @@ func float_to_str(float value, int decimals) string {
     }
     out
 }
+
 
 func main() {
     println("")
@@ -163,3 +165,4 @@ func main() {
     println("")
     0
 }
+

@@ -20,6 +20,7 @@ func create_simpo_config() simpo_config {
     }
 }
 
+
 func example_basic_simpo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 1: Basic SimPO Training                          ║")
@@ -64,6 +65,7 @@ func example_basic_simpo_training() {
     print("")
 }
 
+
 func example_algorithm_comparison() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 2: Algorithm Comparison                          ║")
@@ -98,6 +100,7 @@ func example_algorithm_comparison() {
     print("")
 }
 
+
 func example_margin_based_learning() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 3: Margin-Based Learning                         ║")
@@ -127,6 +130,7 @@ func example_margin_based_learning() {
     print("")
 }
 
+
 func example_training_dynamics() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 4: Training Dynamics                             ║")
@@ -148,6 +152,7 @@ func example_training_dynamics() {
     print("  • Convergence in ~2-3 epochs")
     print("")
 }
+
 
 func example_hyperparameter_sensitivity() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -175,6 +180,7 @@ func example_hyperparameter_sensitivity() {
     print("  1e-3 | Fast      | Risky     | May diverge")
     print("")
 }
+
 
 func example_complete_pipeline() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -219,6 +225,7 @@ func example_complete_pipeline() {
     print("")
 }
 
+
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -236,22 +243,28 @@ func main() {
     print("═════════════════════════════════════════════════════════════")
 }
 
+
 func int_to_string_ex(int i) string {
     string(i)
 }
+
 
 func float_to_string_ex(float f) string {
     string(int(f * 10000.0) / 10000.0)
 }
 
+
 func append_int_ex([]int arr, int val) []int {
     arr
 }
+
 
 func append_pair_ex([]simpo_preference_pair arr, simpo_preference_pair p) []simpo_preference_pair {
     arr
 }
 
+
 func append_batch_ex([]simpo_batch arr, simpo_batch b) []simpo_batch {
     arr
 }
+

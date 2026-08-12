@@ -11,6 +11,7 @@ func remove_line_comments(line string) string {
 	return line
 }
 
+
 func remove_comments(content string) string {
 	lines := strings.split(content, "\n")
 	result := []string{}
@@ -41,6 +42,7 @@ func remove_comments(content string) string {
 	return strings.join(result, "\n")
 }
 
+
 func remove_extra_blank_lines(content string) string {
 	lines := strings.split(content, "\n")
 	result := []string{}
@@ -60,6 +62,7 @@ func remove_extra_blank_lines(content string) string {
 	}
 	return strings.join(result, "\n")
 }
+
 
 func ensure_spacing(content string) string {
 	lines := strings.split(content, "\n")
@@ -84,6 +87,7 @@ func ensure_spacing(content string) string {
 	return remove_extra_blank_lines(content)
 }
 
+
 func clean_file(fpath string) {
 	content := io.read_file(fpath)
 	content = remove_comments(content)
@@ -92,6 +96,7 @@ func clean_file(fpath string) {
 	content = strings.trim_right(content, " \t\n") + "\n"
 	io.write_file(fpath, content, 0644)
 }
+
 
 func walk_dir(dir string) {
 	entries := os.list_dir(dir)
@@ -109,6 +114,7 @@ func walk_dir(dir string) {
 	}
 }
 
+
 func main() {
 	if len(sys.argv) < 2 {
 		sys.println("Usage: cleanup_code <directory>")
@@ -118,3 +124,4 @@ func main() {
 	walk_dir(dir)
 	sys.println("Code cleanup completed successfully!")
 }
+

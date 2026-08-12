@@ -12,6 +12,7 @@ struct rollout_correction_result {
     statistics: map[string]f32
 }
 
+
 func apply_rollout_correction_to_advantages(
     advantages: Tensor,
     new_log_probs: Tensor,
@@ -54,6 +55,7 @@ func apply_rollout_correction_to_advantages(
         statistics: statistics,
     }
 }
+
 
 func apply_rollout_correction_to_loss(
     policy_loss: Tensor,
@@ -98,6 +100,7 @@ func apply_rollout_correction_to_loss(
     }
 }
 
+
 func compute_policy_loss_bypass_mode(
     new_log_probs: Tensor,
     rollout_log_probs: Tensor,
@@ -130,6 +133,7 @@ func compute_policy_loss_bypass_mode(
     return correction_result.corrected_loss, correction_result
 }
 
+
 func compute_policy_loss_decoupled_mode(
     new_log_probs: Tensor,
     rollout_log_probs: Tensor,
@@ -153,6 +157,7 @@ func compute_policy_loss_decoupled_mode(
     )
     return correction_result.corrected_loss, correction_result
 }
+
 
 func collect_statistics(
     is_weights: ISWeights,
@@ -178,18 +183,23 @@ func collect_statistics(
     return stats
 }
 
+
 func is_rollout_correction_enabled(config: RolloutCorrectionConfig) -> bool {
     return config.is_level != is_aggregation_level.NONE || config.rs_modes.len() > 0
 }
+
 
 func clamp(x: Tensor, min_val: f32, max_val: f32) -> Tensor {
     return maximum(minimum(x, max_val), min_val)
 }
 
+
 func minimum(x: Tensor, y: Tensor) -> Tensor {
     return where((x < y), x, y)
 }
 
+
 func where(condition: Tensor, x: Tensor, y: Tensor) -> Tensor {
     return condition.to_float() * x + (1.0 - condition.to_float()) * y
 }
+

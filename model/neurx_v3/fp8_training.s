@@ -10,6 +10,7 @@ struct fp8_config {
     bool compress_moe_tokens
 }
 
+
 func new_fp8_config() fp8_config {
     []string no_quant = []string{cap: 4}
     no_quant[0] = "embedding"
@@ -28,6 +29,7 @@ func new_fp8_config() fp8_config {
     }
 }
 
+
 struct fp8_tensor {
     []int data
     []float scale
@@ -36,6 +38,7 @@ struct fp8_tensor {
     int tile_m
     int tile_n
 }
+
 
 struct fp8_quant_stats {
     int tiles_quantized
@@ -46,10 +49,15 @@ struct fp8_quant_stats {
     int underflow_count
 }
 
+
 func e4m3_max() float { 448.0 }
+
 func e4m3_min_normal() float { 0.015625 }
+
 func e5m2_max() float { 57344.0 }
+
 func e5m2_min_normal() float { 0.00006103515625 }
+
 func float_to_e4m3(float x) int {
     if x == 0.0 { return 0 }
     if x < 0.0 { return float_to_e4m3(-x) | 0x80 }
@@ -68,6 +76,7 @@ func float_to_e4m3(float x) int {
     if mant_bits > 7 { mant_bits = 7 }
     (biased_exp << 3) | mant_bits
 }
+
 
 func float_to_e5m2(float x) int {
     if x == 0.0 { return 0 }
@@ -88,6 +97,7 @@ func float_to_e5m2(float x) int {
     (biased_exp << 2) | mant_bits
 }
 
+
 func e4m3_to_float(int fp8) float {
     int sign = (fp8 >> 7) & 1
     int exp = (fp8 >> 3) & 0x_f
@@ -105,6 +115,7 @@ func e4m3_to_float(int fp8) float {
     if sign == 1 { val = -val }
     val
 }
+
 
 func e5m2_to_float(int fp8) float {
     int sign = (fp8 >> 7) & 1
@@ -124,6 +135,7 @@ func e5m2_to_float(int fp8) float {
     val
 }
 
+
 func pow2(int n) float {
     float result = 1.0
     if n >= 0 {
@@ -135,6 +147,7 @@ func pow2(int n) float {
     }
     result
 }
+
 
 func tile_abs_max([]float data, int start, int length) float {
     float max_val = 0.0
@@ -148,6 +161,7 @@ func tile_abs_max([]float data, int start, int length) float {
     }
     max_val
 }
+
 
 func quantize_matrix_blockwise(
     []float data, int M, int N,
@@ -239,6 +253,7 @@ func quantize_matrix_blockwise(
     (tensor, stats)
 }
 
+
 func dequantize_matrix_blockwise(fp8_tensor t, bool is_e5m2) []float {
     int M = t.rows
     int N = t.cols
@@ -277,6 +292,7 @@ func dequantize_matrix_blockwise(fp8_tensor t, bool is_e5m2) []float {
     }
     result
 }
+
 
 func fp8_gemm(
     fp8_tensor a, fp8_tensor b, int M, int K, int N,
@@ -338,6 +354,7 @@ func fp8_gemm(
     c
 }
 
+
 struct fp8_training_state {
     fp8_config config
     int step
@@ -346,6 +363,7 @@ struct fp8_training_state {
     float grad_scale_growth
     float grad_scale_backoff
 }
+
 
 func new_fp8_training_state(fp8_config cfg) fp8_training_state {
     fp8_training_state {
@@ -357,6 +375,7 @@ func new_fp8_training_state(fp8_config cfg) fp8_training_state {
         grad_scale_backoff: 0.5,
     }
 }
+
 
 func fp8_linear_forward(
     fp8_training_state state, []float input, []float weight,
@@ -374,6 +393,7 @@ func fp8_linear_forward(
     output
 }
 
+
 func fp8_gradient_quantize(
     fp8_training_state state, []float grad, int M, int N
 ) fp8_tensor {
@@ -385,6 +405,7 @@ func fp8_gradient_quantize(
     grad_fp8
 }
 
+
 struct fp8_monitor {
     int step
     float avg_overflow_rate
@@ -393,6 +414,7 @@ struct fp8_monitor {
     float memory_saved_percent
     float speedup_estimated
 }
+
 
 func fp8_get_monitor(fp8_training_state state, int total_elems) fp8_monitor {
     float avg_overflow = 0.0
@@ -419,6 +441,7 @@ func fp8_get_monitor(fp8_training_state state, int total_elems) fp8_monitor {
     }
 }
 
+
 func should_skip_quantization(string module_name, fp8_config cfg) bool {
     int i = 0
     while i < len(cfg.no_quant_modules) {
@@ -429,6 +452,7 @@ func should_skip_quantization(string module_name, fp8_config cfg) bool {
     }
     false
 }
+
 
 func contains_string(string s, string substr) bool {
     int s_len = len(s)
@@ -451,10 +475,13 @@ func contains_string(string s, string substr) bool {
     false
 }
 
+
 func unit_name() string {
     "neurx/model/neurx/fp8_training"
 }
 
+
 func unit_ready() int {
     1
 }
+

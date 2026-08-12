@@ -14,6 +14,7 @@ func test_block_manager_prefix_reuse() bool {
     prefix.success && prefix.matched_blocks == 1 && prefix.matched_tokens == 4 && prefix.state.cache_hits == 1
 }
 
+
 func test_scheduler_budget() bool {
     vllm_scheduler_config config = neurx.inference.scheduler.vllm_scheduler.default_vllm_scheduler_config()
     config.max_scheduled_tokens = 4
@@ -25,6 +26,7 @@ func test_scheduler_budget() bool {
     scheduler_step_result step = neurx.inference.scheduler.vllm_scheduler.scheduler_step(submitted.state)
     step.output.scheduled_tokens == 4 && step.output.token_budget_remaining == 0 && len(step.output.requests) == 1 && step.output.requests[0].prefill
 }
+
 
 func test_engine_sleep_wake() bool {
     engine_lifecycle_state state = neurx.inference.runtime.engine_lifecycle.new_engine_lifecycle(true, "cumem", true, true)
@@ -45,6 +47,7 @@ func test_engine_sleep_wake() bool {
     awake.accepted && awake.state.status == neurx.inference.runtime.engine_lifecycle.engine_awake_status() && awake.state.device_bytes == 160
 }
 
+
 func main() {
     bool passed = test_block_manager_prefix_reuse()
     passed = passed && test_scheduler_budget()
@@ -56,3 +59,4 @@ func main() {
     println("FAIL vllm industrial core")
     1
 }
+

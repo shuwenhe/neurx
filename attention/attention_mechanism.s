@@ -32,6 +32,7 @@ class neurx_attention {
     } stats
 }
 
+
 func init(attention_config cfg) neurx_attention {
     int kv_dim = cfg.head_dim * cfg.num_key_value_heads
     print("🔧 Initializing NEURX Attention:")
@@ -56,6 +57,7 @@ func init(attention_config cfg) neurx_attention {
         }
     }
 }
+
 
 func forward(
     self: NeurxAttention,
@@ -304,6 +306,7 @@ struct rope_cache {
     int cached_max_seq
 }
 
+
 func compute_rope_embeddings(
     []int position_ids,
     int head_dim,
@@ -500,3 +503,4 @@ func test_attention() {
     print("\n" + "="*60)
     print("All NEURX attention tests passed! ✨")
     print("="*60 + "\n")
+

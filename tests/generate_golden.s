@@ -7,6 +7,7 @@ struct golden_config {
     float weight_decay
 }
 
+
 func generate_adamw_golden() {
     println("\n=== Generating AdamW Golden Tests ===\n")
     float lr = 0.001
@@ -40,6 +41,7 @@ func generate_adamw_golden() {
     println("\n✅ AdamW golden tests generated in " + output_dir + "/\n")
 }
 
+
 func generate_math_golden() {
     println("\n=== Generating Math Functions Golden Tests ===\n")
     string output_dir = "tests/golden/math"
@@ -70,11 +72,13 @@ func generate_math_golden() {
     println("✅ Math golden tests generated in " + output_dir + "/\n")
 }
 
+
 func test_exp(float x, string output_dir) {
     float result = exp_approx(x)
     string filename = output_dir + "/exp_" + float_to_string(x) + ".bin"
     save_float_to_file(result, filename)
 }
+
 
 func test_log(float x, string output_dir) {
     float result = log_approx(x)
@@ -82,11 +86,13 @@ func test_log(float x, string output_dir) {
     save_float_to_file(result, filename)
 }
 
+
 func test_sqrt(float x, string output_dir) {
     float result = sqrt_approx(x)
     string filename = output_dir + "/sqrt_" + float_to_string(x) + ".bin"
     save_float_to_file(result, filename)
 }
+
 
 func generate_embedding_golden() {
     println("\n=== Generating Embedding Golden Tests ===\n")
@@ -108,6 +114,7 @@ func generate_embedding_golden() {
     println("\n✅ Embedding golden tests generated in " + output_dir + "/\n")
 }
 
+
 func process_embedding_test([]float embedding_weight, []int input_ids, int test_id, int hidden_dim, string output_dir) {
     []float output = []
     int j = 0
@@ -126,12 +133,14 @@ func process_embedding_test([]float embedding_weight, []int input_ids, int test_
     println("  Test " + int_to_string(test_id) + ": input_len=" + int_to_string(len(input_ids)))
 }
 
+
 func generate_cross_entropy_golden() {
     println("\n=== Generating Cross-Entropy Golden Tests ===\n")
     string output_dir = "tests/golden/loss"
     println("Note: Cross-entropy test generation simplified due to S language array constraints\n")
     println("\n✅ Cross-Entropy golden tests generated in " + output_dir + "/\n")
 }
+
 
 func main() {
     println("============================================================")
@@ -151,21 +160,26 @@ func main() {
     println("")
 }
 
+
 func save_float_to_file(float value, string path) {
     println("✅ Saved: " + path + " (value=" + float_to_string(value) + ")")
 }
+
 
 func save_float_array_to_file([]float data, string path) {
     println("✅ Saved: " + path + " (len=" + int_to_string(len(data)) + ")")
 }
 
+
 func save_int_array_to_file([]int data, string path) {
     println("✅ Saved: " + path + " (len=" + int_to_string(len(data)) + ")")
 }
 
+
 func write_string_to_file(string path, string content) {
     println("✅ Saved: " + path)
 }
+
 
 func exp_approx(float x) float {
     if x > 10.0 {
@@ -184,6 +198,7 @@ func exp_approx(float x) float {
     }
     return result
 }
+
 
 func log_approx(float x) float {
     if x <= 0.0 {
@@ -205,6 +220,7 @@ func log_approx(float x) float {
     return 2.0 * result
 }
 
+
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -218,6 +234,7 @@ func sqrt_approx(float x) float {
     return guess
 }
 
+
 func pow_approx(float base, float exp) float {
     if exp == 0.0 {
         return 1.0
@@ -227,6 +244,7 @@ func pow_approx(float base, float exp) float {
     }
     return exp_approx(exp * log_approx(base))
 }
+
 
 func simple_rand(int seed) int {
     int a = 1103515245
@@ -239,19 +257,24 @@ func simple_rand(int seed) int {
     return val / (m / 32768)
 }
 
+
 func simple_randn(int seed) float {
     int r = simple_rand(seed)
     return float_from_int(r) / 16384.0 - 1.0
 }
 
+
 func float_from_int(int val) float {
     return 0.0
 }
+
 
 func int_to_string(int val) string {
     return ""
 }
 
+
 func float_to_string(float val) string {
     return ""
 }
+

@@ -10,6 +10,7 @@ struct process_group_state {
     int recv_count
 }
 
+
 func copy_float([]float values) []float {
     []float out = []float{cap: len(values)}
     int i = 0
@@ -20,12 +21,14 @@ func copy_float([]float values) []float {
     out
 }
 
+
 func clamp_positive(int value, int fallback) int {
     if value > 0 {
         return value
     }
     fallback
 }
+
 
 func clamp_rank(int rank, int world_size) int {
     if rank < 0 {
@@ -36,6 +39,7 @@ func clamp_rank(int rank, int world_size) int {
     }
     rank
 }
+
 
 func new_process_group(string backend, int rank, int world_size) process_group_state {
     int normalized_world = clamp_positive(world_size, 1)
@@ -51,6 +55,7 @@ func new_process_group(string backend, int rank, int world_size) process_group_s
     }
 }
 
+
 func process_group_state_dict(process_group_state state) process_group_state {
     process_group_state {
         backend: state.backend,
@@ -63,6 +68,7 @@ func process_group_state_dict(process_group_state state) process_group_state {
         recv_count: state.recv_count,
     }
 }
+
 
 func process_group_load_state_dict(process_group_state state, process_group_state other) process_group_state {
     process_group_state {
@@ -77,41 +83,51 @@ func process_group_load_state_dict(process_group_state state, process_group_stat
     }
 }
 
+
 func process_group_backend(process_group_state state) string {
     state.backend
 }
+
 
 func process_group_rank(process_group_state state) int {
     state.rank
 }
 
+
 func process_group_world_size(process_group_state state) int {
     state.world_size
 }
+
 
 func process_group_initialized(process_group_state state) bool {
     state.initialized
 }
 
+
 func process_group_last_peer(process_group_state state) int {
     state.last_peer
 }
+
 
 func process_group_last_payload(process_group_state state) []float {
     copy_float(state.last_payload)
 }
 
+
 func process_group_send_count(process_group_state state) int {
     state.send_count
 }
+
 
 func process_group_recv_count(process_group_state state) int {
     state.recv_count
 }
 
+
 func process_group_is_ready(process_group_state state) bool {
     state.initialized && state.world_size > 0
 }
+
 
 func destroy_process_group(process_group_state state) process_group_state {
     process_group_state {
@@ -126,6 +142,7 @@ func destroy_process_group(process_group_state state) process_group_state {
     }
 }
 
+
 func process_group_reset(process_group_state state) process_group_state {
     process_group_state {
         backend: state.backend,
@@ -139,14 +156,17 @@ func process_group_reset(process_group_state state) process_group_state {
     }
 }
 
+
 func barrier(process_group_state state) process_group_state {
     process_group_state_dict(state)
 }
+
 
 func broadcast(process_group_state state, int root_rank, []float values) []float {
     int _root = clamp_rank(root_rank, state.world_size)
     copy_float(values)
 }
+
 
 func all_reduce_max(process_group_state state, []float values) []float {
     []float out = copy_float(values)
@@ -161,6 +181,7 @@ func all_reduce_max(process_group_state state, []float values) []float {
     out
 }
 
+
 func all_reduce_min(process_group_state state, []float values) []float {
     []float out = copy_float(values)
     if state.world_size <= 1 {
@@ -173,6 +194,7 @@ func all_reduce_min(process_group_state state, []float values) []float {
     }
     out
 }
+
 
 func all_reduce_prod(process_group_state state, []float values) []float {
     []float out = copy_float(values)
@@ -187,6 +209,7 @@ func all_reduce_prod(process_group_state state, []float values) []float {
     out
 }
 
+
 func all_reduce_sum(process_group_state state, []float values) []float {
     []float out = copy_float(values)
     if state.world_size <= 1 {
@@ -200,9 +223,11 @@ func all_reduce_sum(process_group_state state, []float values) []float {
     out
 }
 
+
 func all_reduce_mean(process_group_state state, []float values) []float {
     copy_float(values)
 }
+
 
 func all_gather(process_group_state state, []float values) []float {
     if state.world_size <= 1 {
@@ -222,6 +247,7 @@ func all_gather(process_group_state state, []float values) []float {
     out
 }
 
+
 func reduce_scatter_sum(process_group_state state, []float values) []float {
     if state.world_size <= 1 {
         return copy_float(values)
@@ -239,9 +265,11 @@ func reduce_scatter_sum(process_group_state state, []float values) []float {
     out
 }
 
+
 func all_to_all(process_group_state state, []float values) []float {
     copy_float(values)
 }
+
 
 func p2p_send(process_group_state state, int peer_rank, []float payload) process_group_state {
     process_group_state {
@@ -255,6 +283,7 @@ func p2p_send(process_group_state state, int peer_rank, []float payload) process
         recv_count: state.recv_count,
     }
 }
+
 
 func p2p_recv(process_group_state state, int peer_rank, int expected_size) []float {
     int size = expected_size
@@ -282,3 +311,4 @@ func p2p_recv(process_group_state state, int peer_rank, int expected_size) []flo
     }
     out
 }
+

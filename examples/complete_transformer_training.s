@@ -26,6 +26,7 @@ use neurx.model.transformer.transformer_backward.{
     backward_pass_output
 }
 
+
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
@@ -36,6 +37,7 @@ func allocate_vector(int size, float init_val) []float {
     v
 }
 
+
 func copy_vector([]float src) []float {
     []float out = allocate_vector(len(src), 0.0)
     int i = 0
@@ -45,6 +47,7 @@ func copy_vector([]float src) []float {
     }
     out
 }
+
 
 func create_small_transformer_config() transformer_forward_config {
     transformer_forward_config {
@@ -62,6 +65,7 @@ func create_small_transformer_config() transformer_forward_config {
     }
 }
 
+
 func create_medium_transformer_config() transformer_forward_config {
     transformer_forward_config {
         vocab_size: 2048,
@@ -77,6 +81,7 @@ func create_medium_transformer_config() transformer_forward_config {
         pre_norm: true,
     }
 }
+
 
 func initialize_transformer_layer(int hidden_dim, int intermediate_dim) transformer_layer_state {
     layer_norm_config ln_cfg = layer_norm_config {
@@ -101,6 +106,7 @@ func initialize_transformer_layer(int hidden_dim, int intermediate_dim) transfor
         norm2: new_layer_norm(ln_cfg),
     }
 }
+
 
 func initialize_transformer_state(transformer_forward_config cfg) transformer_forward_state {
     int head_dim = cfg.hidden_dim / cfg.num_heads
@@ -142,12 +148,14 @@ func initialize_transformer_state(transformer_forward_config cfg) transformer_fo
     }
 }
 
+
 struct training_batch {
     []int input_ids
     []int target_ids
     int batch_size
     int seq_len
 }
+
 
 func create_dummy_batch(int batch_size, int seq_len, int vocab_size) training_batch {
     []int input_ids = allocate_vector(batch_size * seq_len, 1)
@@ -170,6 +178,7 @@ func create_dummy_batch(int batch_size, int seq_len, int vocab_size) training_ba
         seq_len: seq_len,
     }
 }
+
 
 func training_step(
     transformer_forward_state transformer,
@@ -220,6 +229,7 @@ func training_step(
     metrics
 }
 
+
 func example_small_transformer_training() {
     var transformer_cfg = create_small_transformer_config()
     var transformer = initialize_transformer_state(transformer_cfg)
@@ -235,6 +245,7 @@ func example_small_transformer_training() {
         step = step + 1
     }
 }
+
 
 func example_inference_forward_pass() {
     var transformer_cfg = create_medium_transformer_config()
@@ -271,6 +282,7 @@ func example_inference_forward_pass() {
     }
 }
 
+
 func example_multi_batch_training() {
     var transformer_cfg = create_small_transformer_config()
     var transformer = initialize_transformer_state(transformer_cfg)
@@ -297,5 +309,7 @@ func example_multi_batch_training() {
     }
 }
 
+
 func main() {
 }
+

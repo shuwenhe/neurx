@@ -23,6 +23,7 @@ type training_monitor struct {
     update_interval: int
 }
 
+
 func (tm *training_monitor) init(
     total_steps: int,
     log_file: string,
@@ -39,6 +40,7 @@ func (tm *training_monitor) init(
     defer f.Close()
     return nil
 }
+
 
 func (tm *training_monitor) log_step(
     step: int,
@@ -71,6 +73,7 @@ func (tm *training_monitor) log_step(
     tm.log_to_file(metrics)
 }
 
+
 func (tm *training_monitor) print_progress(metrics: training_metrics) {
     progress := float(metrics.step) / float(tm.total_steps) * 100.0
     bar_length := 50
@@ -96,6 +99,7 @@ func (tm *training_monitor) print_progress(metrics: training_metrics) {
     println(status)
 }
 
+
 func (tm *training_monitor) log_to_file(metrics: training_metrics) {
     f, err := os.OpenFile(tm.log_file, os.O_APPEND|os.O_WRONLY, 0644)
     if err != nil {
@@ -105,6 +109,7 @@ func (tm *training_monitor) log_to_file(metrics: training_metrics) {
     json_data, _ := json.Marshal(metrics)
     f.WriteString(string(json_data) + "\n")
 }
+
 
 func (tm *training_monitor) get_stats(): map[string]interface{} {
     if len(tm.steps) == 0 {
@@ -142,6 +147,7 @@ func (tm *training_monitor) get_stats(): map[string]interface{} {
     }
 }
 
+
 func (tm *training_monitor) generate_report(): string {
     stats := tm.get_stats()
     report := "========================================\n"
@@ -162,6 +168,7 @@ func (tm *training_monitor) generate_report(): string {
     return report
 }
 
+
 func (tm *training_monitor) export_json(): string {
     data := map[string]interface{}{
         "training_info": tm.get_stats(),
@@ -170,6 +177,7 @@ func (tm *training_monitor) export_json(): string {
     json_bytes, _ := json.Marshal(data)
     return string(json_bytes)
 }
+
 
 func format_time(seconds: float): string {
     if seconds < 0 {
@@ -186,6 +194,7 @@ func format_time(seconds: float): string {
         return fmt.Sprintf("%ds", s)
     }
 }
+
 
 func main() {
     monitor := &training_monitor{}
@@ -204,3 +213,4 @@ func main() {
     println("\nJSON Export:")
     println(monitor.export_json())
 }
+

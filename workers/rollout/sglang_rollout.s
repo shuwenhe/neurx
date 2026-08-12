@@ -12,11 +12,13 @@ struct sglang_config {
     bool enable_torch_compile
 }
 
+
 struct sglang_rollout_state {
     sglang_config config
     bool initialized
     int requests_completed
 }
+
 
 struct sglang_request {
     string text
@@ -25,6 +27,7 @@ struct sglang_request {
     int request_id
 }
 
+
 struct sglang_response {
     string generated_text
     []int generated_ids
@@ -32,6 +35,7 @@ struct sglang_response {
     int request_id
     float generation_time
 }
+
 
 func default_sglang_config() sglang_config {
     sglang_config {
@@ -47,6 +51,7 @@ func default_sglang_config() sglang_config {
     }
 }
 
+
 func init_sglang_engine(sglang_config config) sglang_rollout_state {
     sglang_rollout_state {
         config: config,
@@ -54,6 +59,7 @@ func init_sglang_engine(sglang_config config) sglang_rollout_state {
         requests_completed: 0,
     }
 }
+
 
 func sglang_generate_batch(
     sglang_rollout_state state,
@@ -80,5 +86,7 @@ func sglang_generate_batch(
     return responses
 }
 
+
 func sglang_update_weights(sglang_rollout_state state, string new_model_path) {
 }
+

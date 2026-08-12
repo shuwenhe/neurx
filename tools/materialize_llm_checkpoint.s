@@ -13,6 +13,7 @@ func parse_int(string text, int fallback) int {
     value
 }
 
+
 func digit_string(int digit) string {
     if digit == 0 { return "0" }
     if digit == 1 { return "1" }
@@ -26,6 +27,7 @@ func digit_string(int digit) string {
     "9"
 }
 
+
 func int_to_string(int value) string {
     if value == 0 { return "0" }
     string out = ""
@@ -36,6 +38,7 @@ func int_to_string(int value) string {
     }
     out
 }
+
 
 func fixed6(float value) string {
     float current = value
@@ -63,6 +66,7 @@ func fixed6(float value) string {
     out
 }
 
+
 func serialize_weights(int vocab_size) string {
     string out = ""
     int total = vocab_size * vocab_size
@@ -76,6 +80,7 @@ func serialize_weights(int vocab_size) string {
     out
 }
 
+
 func serialize_bias(int vocab_size) string {
     string out = ""
     int i = 0
@@ -86,6 +91,7 @@ func serialize_bias(int vocab_size) string {
     }
     out
 }
+
 
 func checkpoint_text(int step, float loss, int vocab_size, string weights, string bias) string {
     "checkpoint_v1\n" +
@@ -100,6 +106,7 @@ func checkpoint_text(int step, float loss, int vocab_size, string weights, strin
     "param1.data=" + bias + "\n"
 }
 
+
 func main() {
     int vocab_size = 256
     int steps = 80
@@ -109,3 +116,4 @@ func main() {
     println(checkpoint_text(steps, loss, vocab_size, weights, bias))
     0
 }
+

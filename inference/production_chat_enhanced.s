@@ -16,9 +16,11 @@ func trim(string s) string {
     return __host_slice(s, i, j + 1)
 }
 
+
 func read_user_line() string {
     trim(__sys_read_string(0, 4096))
 }
+
 
 func int_to_string(int value) string {
     if value == 0 {
@@ -33,6 +35,7 @@ func int_to_string(int value) string {
     }
     output
 }
+
 
 func contains_keyword(string text, string keyword) bool {
     int text_len = len(text)
@@ -60,6 +63,7 @@ func contains_keyword(string text, string keyword) bool {
     return false
 }
 
+
 func to_lowercase(string text) string {
     string result = ""
     int i = 0
@@ -73,6 +77,7 @@ func to_lowercase(string text) string {
     }
     return result
 }
+
 
 func generate_response(string prompt) string {
     string lower = to_lowercase(prompt)
@@ -139,6 +144,7 @@ func generate_response(string prompt) string {
     return "I can help you with questions about programming (C++, Python, etc.), mathematics, medical knowledge, and general information. Please provide more details about what you'd like to know."
 }
 
+
 func main() {
     string model_path = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain")
     string device_type = trim(runtime_env_get("NEURX_INFER_DEVICE", "cpu"))
@@ -187,6 +193,8 @@ func main() {
     }
 }
 
+
 func runtime_env_get(string name, string default_value) string {
     default_value
 }
+

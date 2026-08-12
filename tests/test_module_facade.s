@@ -49,3 +49,4 @@ func test_module_facade_basic() bool {
     nn.module eval_mode = neurx.module.module_eval(train_mode)
     return train_mode.training && !eval_mode.training
 }
+

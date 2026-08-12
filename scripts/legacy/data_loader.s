@@ -11,6 +11,7 @@ type sample struct {
     index: i64
 }
 
+
 func main() {
     io.println("🚀 dataloadEnglish text - Slanguageimplementation")
     io.println("")
@@ -73,3 +74,4 @@ package os {
     extern func args() []string
     extern func exit(code: i64)
 }
+

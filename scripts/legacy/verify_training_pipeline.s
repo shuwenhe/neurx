@@ -44,6 +44,7 @@ func main() {
     1
 }
 
+
 func check_file(string path, string label) bool {
     if runtime_file_exists(path) {
         println("✅ " + label + " : ready (" + path + ")")
@@ -56,3 +57,4 @@ func check_file(string path, string label) bool {
     println("❌ " + label + " : missing (" + path + ")")
     false
 }
+

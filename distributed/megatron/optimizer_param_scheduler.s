@@ -15,6 +15,7 @@ struct optimizer_param_scheduler {
     int num_steps
 }
 
+
 func new_optimizer_param_scheduler(
     float init_lr,
     float max_lr,
@@ -46,6 +47,7 @@ func new_optimizer_param_scheduler(
     }
 }
 
+
 func get_wd(optimizer_param_scheduler sched) float {
     if sched.num_steps > sched.wd_incr_steps {
         return sched.end_wd
@@ -65,6 +67,7 @@ func get_wd(optimizer_param_scheduler sched) float {
     }
     return sched.start_wd + coeff * delta_wd
 }
+
 
 func get_lr(optimizer_param_scheduler sched) float {
     if sched.lr_warmup_steps > 0 {
@@ -104,6 +107,7 @@ func get_lr(optimizer_param_scheduler sched) float {
     return sched.min_lr + coeff * delta_lr
 }
 
+
 func compute_wsd_coeff(optimizer_param_scheduler sched) float {
     int wsd_anneal_start = sched.lr_decay_steps - sched.wsd_decay_steps
     if sched.num_steps <= wsd_anneal_start {
@@ -126,14 +130,17 @@ func compute_wsd_coeff(optimizer_param_scheduler sched) float {
     return 1.0
 }
 
+
 func step_scheduler(optimizer_param_scheduler sched, int increment) optimizer_param_scheduler {
     sched.num_steps = sched.num_steps + increment
     return sched
 }
 
+
 func pi_value() float {
     return 3.14159265358979323846
 }
+
 
 func max_int(int a, int b) int {
     if a > b {
@@ -142,12 +149,14 @@ func max_int(int a, int b) int {
     return b
 }
 
+
 func max_float(float a, float b) float {
     if a > b {
         return a
     }
     return b
 }
+
 
 func sqrt_approx(float x) float {
     if x <= 0.0 {
@@ -162,6 +171,7 @@ func sqrt_approx(float x) float {
     }
     return guess
 }
+
 
 func cos_approx(float x) float {
     float two_pi = 2.0 * pi_value()
@@ -182,12 +192,14 @@ func cos_approx(float x) float {
     return result
 }
 
+
 func pow_approx(float base, float exponent) float {
     if base <= 0.0 {
         return 0.0
     }
     return exp_approx(exponent * ln_approx(base))
 }
+
 
 func exp_approx(float x) float {
     if x > 20.0 {
@@ -205,6 +217,7 @@ func exp_approx(float x) float {
     return result
 }
 
+
 func ln_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -219,3 +232,4 @@ func ln_approx(float x) float {
     }
     return 2.0 * result
 }
+

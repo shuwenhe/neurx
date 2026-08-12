@@ -8,16 +8,22 @@ extern "intrinsic" func __sys_write_string(int fd, string data) int
 extern "intrinsic" func __sys_close(int fd) int
 extern "intrinsic" func __host_slice(string text, int start, int end) string
 func vocab_size() int { 151936 }
+
 func model_hidden_dim() int { 896 }
+
 func num_transformer_layers() int { 24 }
+
 func num_attention_heads() int { 14 }
+
 func max_sequence_length() int { 32768 }
+
 struct model_config {
     int vocab_size
     int hidden_size
     int num_hidden_layers
     int num_attention_heads
 }
+
 
 struct tokenizer {
     int bos_id
@@ -26,10 +32,12 @@ struct tokenizer {
     int unk_id
 }
 
+
 struct performance_metrics {
     int inference_time_ms
     float throughput_tps
 }
+
 
 func fast_matmul([]float matrix, int rows, int cols, []float vec, []float out) {
     int idx = 0
@@ -46,6 +54,7 @@ func fast_matmul([]float matrix, int rows, int cols, []float vec, []float out) {
         i = i + 1
     }
 }
+
 
 func fast_matmul_flat([]float A, []float B, int M, int N, int P) []float {
     []float out = []float{cap: M * P}
@@ -71,9 +80,11 @@ func fast_matmul_flat([]float A, []float B, int M, int N, int P) []float {
     out
 }
 
+
 func fast_matmul_flat_opt([]float A, []float B, int M, int N, int P) []float {
     return fast_matmul_flat(A, B, M, N, P)
 }
+
 
 func fast_softmax([]float logits, []float probs, int size) {
     float max_val = logits[0]
@@ -109,6 +120,7 @@ func fast_softmax([]float logits, []float probs, int size) {
     }
 }
 
+
 func fast_rms_norm([]float input, []float weight, []float output, int size) {
     float sum_sq = 0.0
     int i = 0
@@ -124,6 +136,7 @@ func fast_rms_norm([]float input, []float weight, []float output, int size) {
     }
 }
 
+
 func fast_gelu(float x) float {
     float t = 1.702 * x
     float tanh_t = t
@@ -134,6 +147,7 @@ func fast_gelu(float x) float {
     }
     return 0.5 * x * (1.0 + tanh_t)
 }
+
 
 func pow_f(float x, float p) float {
     if p == 0.5 {
@@ -150,6 +164,7 @@ func pow_f(float x, float p) float {
     return x
 }
 
+
 func load_model_config(string model_dir) model_config {
     model_config{
         vocab_size: vocab_size(),
@@ -159,6 +174,7 @@ func load_model_config(string model_dir) model_config {
     }
 }
 
+
 func load_tokenizer(string model_dir) tokenizer {
     tokenizer{
         bos_id: 151643,
@@ -167,6 +183,7 @@ func load_tokenizer(string model_dir) tokenizer {
         unk_id: 151643,
     }
 }
+
 
 func initialize_backend() {
     print("╔════════════════════════════════════════════════════════════════╗\n")
@@ -187,9 +204,11 @@ func initialize_backend() {
     print("\n")
 }
 
+
 func run_inference(string input_text, int max_tokens) string {
     return "Model output: " + input_text
 }
+
 
 func http_response_ok(string body) string {
     string response = "HTTP/1.1 200 OK\r\n"
@@ -200,6 +219,7 @@ func http_response_ok(string body) string {
     response = response + body
     return response
 }
+
 
 func int_to_string(int value) string {
     if value == 0 { return "0" }
@@ -227,9 +247,11 @@ func int_to_string(int value) string {
     return out + tmp
 }
 
+
 func health_check_response() string {
     return http_response_ok("{\"status\":\"ok\",\"backend\":\"neurx-s-cpu\"}")
 }
+
 
 func contains_keyword(string text, string keyword) bool {
     int text_len = len(text)
@@ -256,6 +278,7 @@ func contains_keyword(string text, string keyword) bool {
     }
     return false
 }
+
 
 func generate_response(string prompt, int max_tokens) string {
     string response = ""
@@ -284,6 +307,7 @@ func generate_response(string prompt, int max_tokens) string {
     }
     return "{\"output\":\"" + response + "\"}"
 }
+
 
 func handle_client(int client_fd) {
     string request = __sys_read_string(client_fd, 4096)
@@ -325,6 +349,7 @@ func handle_client(int client_fd) {
     _ = __sys_close(client_fd)
 }
 
+
 func extract_http_body(string request) string {
     int header_end = 0
     int i = 0
@@ -352,13 +377,16 @@ func extract_http_body(string request) string {
     return result
 }
 
+
 func create_ready_file(string path) {
     print("✓ Backend ready file: " + path + "\n")
 }
 
+
 func runtime_env_get(string name, string default_value) string {
     default_value
 }
+
 
 func main() {
     initialize_backend()
@@ -420,3 +448,4 @@ func main() {
         }
     }
 }
+

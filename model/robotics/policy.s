@@ -9,6 +9,7 @@ struct robotics_policy_state {
     bool trained
 }
 
+
 func robotics_policy_copy_float([]float values) []float {
     int n = len(values)
     []float out = []float{cap: n}
@@ -20,6 +21,7 @@ func robotics_policy_copy_float([]float values) []float {
     out
 }
 
+
 func robotics_policy_ramp_values(int n, float scale) []float {
     []float out = []float{cap: n}
     int i = 0
@@ -29,6 +31,7 @@ func robotics_policy_ramp_values(int n, float scale) []float {
     }
     out
 }
+
 
 func new_robotics_policy_state(string policy_name, int obs_dim, int act_dim) robotics_policy_state {
     int weight_count = obs_dim * act_dim
@@ -43,6 +46,7 @@ func new_robotics_policy_state(string policy_name, int obs_dim, int act_dim) rob
     }
 }
 
+
 func robotics_policy_state_dict(robotics_policy_state state) robotics_policy_state {
     robotics_policy_state {
         policy_name: state.policy_name,
@@ -54,6 +58,7 @@ func robotics_policy_state_dict(robotics_policy_state state) robotics_policy_sta
         trained: state.trained,
     }
 }
+
 
 func robotics_policy_load_state_dict(robotics_policy_state state, robotics_policy_state other) robotics_policy_state {
     robotics_policy_state {
@@ -67,6 +72,7 @@ func robotics_policy_load_state_dict(robotics_policy_state state, robotics_polic
     }
 }
 
+
 func robotics_policy_mark_trained(robotics_policy_state state) robotics_policy_state {
     robotics_policy_state {
         policy_name: state.policy_name,
@@ -78,6 +84,7 @@ func robotics_policy_mark_trained(robotics_policy_state state) robotics_policy_s
         trained: true,
     }
 }
+
 
 func robotics_policy_forward(robotics_policy_state state, []float input) []float {
     []float action = []float{cap: state.act_dim}
@@ -99,3 +106,4 @@ func robotics_policy_forward(robotics_policy_state state, []float input) []float
     }
     action
 }
+

@@ -14,6 +14,7 @@ struct agent_trace_state {
     int count
 }
 
+
 func new_agent_trace_state() agent_trace_state {
     agent_trace_state {
         steps: [],
@@ -29,6 +30,7 @@ func new_agent_trace_state() agent_trace_state {
         count: 0,
     }
 }
+
 
 func agent_trace_append(agent_trace_state state, int step, string task, string input, string action, string observation, string active_skill, string tool_name, int timeout_ms, int retries, bool ok) agent_trace_state {
     int size = len(state.steps)
@@ -81,9 +83,11 @@ func agent_trace_append(agent_trace_state state, int step, string task, string i
     }
 }
 
+
 func agent_trace_count(agent_trace_state state) int {
     state.count
 }
+
 
 func agent_trace_last_step(agent_trace_state state) int {
     int size = len(state.steps)
@@ -93,6 +97,7 @@ func agent_trace_last_step(agent_trace_state state) int {
     state.steps[size - 1]
 }
 
+
 func agent_trace_last_task(agent_trace_state state) string {
     int size = len(state.tasks)
     if size <= 0 {
@@ -100,6 +105,7 @@ func agent_trace_last_task(agent_trace_state state) string {
     }
     state.tasks[size - 1]
 }
+
 
 func agent_trace_last_action(agent_trace_state state) string {
     int size = len(state.actions)
@@ -109,6 +115,7 @@ func agent_trace_last_action(agent_trace_state state) string {
     state.actions[size - 1]
 }
 
+
 func agent_trace_last_observation(agent_trace_state state) string {
     int size = len(state.observations)
     if size <= 0 {
@@ -117,6 +124,7 @@ func agent_trace_last_observation(agent_trace_state state) string {
     state.observations[size - 1]
 }
 
+
 func agent_trace_last_ok(agent_trace_state state) bool {
     int size = len(state.ok_flags)
     if size <= 0 {
@@ -124,6 +132,7 @@ func agent_trace_last_ok(agent_trace_state state) bool {
     }
     state.ok_flags[size - 1]
 }
+
 
 func agent_trace_last_progress_observation(agent_trace_state state) string {
     int i = len(state.observations) - 1
@@ -136,6 +145,7 @@ func agent_trace_last_progress_observation(agent_trace_state state) string {
     }
     ""
 }
+
 
 func agent_trace_export(agent_trace_state state) string {
     string out = "trace_count=" + string(state.count)
@@ -163,13 +173,16 @@ func agent_trace_export(agent_trace_state state) string {
     out + "\n"
 }
 
+
 func agent_trace_state_dict(agent_trace_state state) agent_trace_state {
     state
 }
 
+
 func agent_trace_load_state_dict(agent_trace_state state, agent_trace_state other) agent_trace_state {
     other
 }
+
 
 func agent_trace_window(agent_trace_state state, int max_entries) agent_trace_state {
     int size = len(state.steps)
@@ -220,6 +233,7 @@ func agent_trace_window(agent_trace_state state, int max_entries) agent_trace_st
     }
 }
 
+
 func agent_trace_clear(agent_trace_state state) agent_trace_state {
     agent_trace_state {
         steps: [],
@@ -235,6 +249,7 @@ func agent_trace_clear(agent_trace_state state) agent_trace_state {
         count: 0,
     }
 }
+
 
 func agent_trace_ok_rate(agent_trace_state state) float {
     int size = len(state.observations)
@@ -252,6 +267,7 @@ func agent_trace_ok_rate(agent_trace_state state) float {
     }
     float(ok_count) / float(size)
 }
+
 
 func agent_trace_filter_task_obs(agent_trace_state state, string task) []string {
     int count = 0
@@ -274,3 +290,4 @@ func agent_trace_filter_task_obs(agent_trace_state state, string task) []string 
     }
     out
 }
+

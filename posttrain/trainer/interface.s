@@ -25,6 +25,7 @@ struct trainer_config {
     string qlora_dtype
 }
 
+
 struct trainer_state {
     int step
     int epoch
@@ -40,6 +41,7 @@ struct trainer_state {
     int v_b_len
 }
 
+
 struct adapter_stats {
     float l1_norm
     float l2_norm
@@ -47,6 +49,7 @@ struct adapter_stats {
     int nonzero_weights
     int total_weights
 }
+
 
 struct weight_delta_stats {
     float l1_delta
@@ -56,12 +59,14 @@ struct weight_delta_stats {
     int total_elements
 }
 
+
 struct loss_stats {
     float initial_loss
     float final_loss
     float best_loss
     float improvement_percent
 }
+
 
 struct trainer_report {
     adapter_stats adapter
@@ -79,6 +84,8 @@ enum trainer_type {
     RUNTIME
 }
 
+
 func create_trainer(trainer_type ttype) int {
     return 0
 }
+

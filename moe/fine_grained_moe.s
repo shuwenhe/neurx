@@ -10,6 +10,7 @@ struct neurx_moe_config {
     float bias_update_speed
 }
 
+
 func new_neurx_moe_config() neurx_moe_config {
     neurx_moe_config {
         hidden_dim: 5120,
@@ -23,6 +24,7 @@ func new_neurx_moe_config() neurx_moe_config {
     }
 }
 
+
 struct neurx_moe_weights {
     neurx_moe_config config
     []float gate_weight
@@ -33,12 +35,14 @@ struct neurx_moe_weights {
     []float shared_w2
 }
 
+
 func zeros(int n) []float {
     []float out = []float{cap: n}
     int i = 0
     while i < n { out[i] = 0.0; i = i + 1 }
     out
 }
+
 
 func fill_ramp(int n, float scale) []float {
     []float out = []float{cap: n}
@@ -49,6 +53,7 @@ func fill_ramp(int n, float scale) []float {
     }
     out
 }
+
 
 func exp_approx(float x) float {
     if x > 20.0 { return 485165195.0 }
@@ -63,6 +68,7 @@ func exp_approx(float x) float {
     }
     result
 }
+
 
 func matmul_2d([]float a, []float b, int m, int k, int n) []float {
     []float result = zeros(m * n)
@@ -84,6 +90,7 @@ func matmul_2d([]float a, []float b, int m, int k, int n) []float {
     result
 }
 
+
 func gelu(float x) float {
     float c = 0.7978845608028654
     float x3 = x * x * x
@@ -92,6 +99,7 @@ func gelu(float x) float {
     float tanh_val = (e2 - 1.0) / (e2 + 1.0)
     0.5 * x * (1.0 + tanh_val)
 }
+
 
 func new_neurx_moe_weights(neurx_moe_config cfg) neurx_moe_weights {
     int d = cfg.hidden_dim
@@ -121,6 +129,7 @@ func new_neurx_moe_weights(neurx_moe_config cfg) neurx_moe_weights {
     }
 }
 
+
 func update_expert_bias(
     []float bias, []float expert_load, int n_experts,
     float avg_load, float gamma
@@ -140,11 +149,13 @@ func update_expert_bias(
     new_bias
 }
 
+
 struct route_result {
     []int expert_indices
     []float expert_weights
     []float expert_load
 }
+
 
 func route_tokens_neurx(
     neurx_moe_weights w, []float hidden_states,
@@ -226,6 +237,7 @@ func route_tokens_neurx(
     }
 }
 
+
 func top_k_indices_single([]float probs, int offset, int n_experts, int k) []int {
     []int result = []int{cap: k}
     []bool used = []bool{cap: n_experts}
@@ -249,6 +261,7 @@ func top_k_indices_single([]float probs, int offset, int n_experts, int k) []int
     }
     result
 }
+
 
 func shared_experts_forward(
     neurx_moe_weights w, []float hidden_states, int n_tokens
@@ -276,6 +289,7 @@ func shared_experts_forward(
     []float output = matmul_2d(hidden, w.shared_w2, n_tokens, s_dim, d)
     output
 }
+
 
 func routed_experts_forward(
     neurx_moe_weights w, []float hidden_states,
@@ -317,10 +331,12 @@ func routed_experts_forward(
     output
 }
 
+
 struct neurx_moe_output {
     []float output
     route_result route
 }
+
 
 func neurx_moe_forward(
     neurx_moe_weights w, []float hidden_states,
@@ -340,6 +356,7 @@ func neurx_moe_forward(
     neurx_moe_output { output: output, route: route }
 }
 
+
 func neurx_moe_step_update_bias(
     neurx_moe_weights w, route_result route,
     int n_tokens
@@ -354,6 +371,7 @@ func neurx_moe_step_update_bias(
     new_w
 }
 
+
 struct load_balance_stats {
     float max_load
     float min_load
@@ -361,6 +379,7 @@ struct load_balance_stats {
     float load_imbalance_ratio
     float utilization
 }
+
 
 func compute_load_stats([]float load, int n_experts, int n_tokens, int top_k) load_balance_stats {
     float max_l = load[0]
@@ -387,6 +406,7 @@ func compute_load_stats([]float load, int n_experts, int n_tokens, int top_k) lo
     }
 }
 
+
 func compute_moe_params(neurx_moe_config cfg) int {
     int d = cfg.hidden_dim
     int df = cfg.ffn_dim
@@ -398,6 +418,7 @@ func compute_moe_params(neurx_moe_config cfg) int {
     router_params + routed_params + shared_params
 }
 
+
 func compute_activated_params(neurx_moe_config cfg) int {
     int d = cfg.hidden_dim
     int df = cfg.ffn_dim
@@ -406,10 +427,13 @@ func compute_activated_params(neurx_moe_config cfg) int {
     cfg.n_routed_experts + top_k * 2 * d * df + 2 * d * df * n_s
 }
 
+
 func unit_name() string {
     "neurx/model/neurx/moe"
 }
 
+
 func unit_ready() int {
     1
 }
+

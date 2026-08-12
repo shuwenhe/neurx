@@ -55,6 +55,7 @@ struct training_config {
     int rank
 }
 
+
 func default_training_config() training_config {
     training_config {
         vocab_size: 50257,
@@ -96,6 +97,7 @@ func default_training_config() training_config {
     }
 }
 
+
 struct transformer_model {
     tensor token_embedding
     tensor position_embedding
@@ -105,6 +107,7 @@ struct transformer_model {
     training_config config
     computation_graph graph
 }
+
 
 struct transformer_layer {
     tensor wq
@@ -117,6 +120,7 @@ struct transformer_layer {
     tensor ln_1
     tensor ln_2
 }
+
 
 func init_transformer_model(training_config cfg) transformer_model {
     println("Initializing transformer_2 model...")
@@ -146,6 +150,7 @@ func init_transformer_model(training_config cfg) transformer_model {
     }
 }
 
+
 func init_transformer_layer(int d_model, int d_ff) transformer_layer {
     float scale = sqrt(2.0 / float(d_model))
     transformer_layer {
@@ -161,12 +166,14 @@ func init_transformer_layer(int d_model, int d_ff) transformer_layer {
     }
 }
 
+
 struct forward_result {
     tensor logits
     tensor loss
     []tensor activations
     float forward_time_ms
 }
+
 
 func model_forward(
     transformer_model model,
@@ -229,11 +236,13 @@ func model_forward(
     }
 }
 
+
 struct backward_result_info {
     []tensor parameter_gradients
     float backward_time_ms
     float grad_norm
 }
+
 
 func compute_gradients(
     transformer_model *model,
@@ -253,6 +262,7 @@ func compute_gradients(
     }
 }
 
+
 struct training_state {
     int global_step
     int current_epoch
@@ -265,6 +275,7 @@ struct training_state {
     wandb_run wb_run
     tensorboard_writer tb_writer
 }
+
 
 func run_training(training_config cfg) {
     println("=" * 80)
@@ -516,6 +527,7 @@ func run_validation(
     total_loss / float(total_samples)
 }
 
+
 func generate_validation_samples(
     transformer_model model,
     training_config cfg,
@@ -649,6 +661,7 @@ func make_tensor([]float data, []int shape, bool requires_grad) tensor:
         requires_grad: requires_grad,
         grad: none,
     }
+
 
 func copy_int_shape([]int shape) []int:
     []int out = []int{cap: len(shape)}
@@ -1112,6 +1125,7 @@ func print_config_pretty(training_config cfg):
         printf("  %-20s %s\n", name, value)
     }
 
+
 func log_model_summary(logger lg, transformer_model model, training_config cfg):
     """Log model architecture summary"""
     log_scalar(&lg, "config/vocab_size", float(cfg.vocab_size), 0, {})
@@ -1154,3 +1168,4 @@ func to_gpu(tensor t, device_context ctx) tensor:
 func distribute_model(transformer_model model, nccl_communicator comm) transformer_model:
     """Distribute model across GPUs for data parallelism"""
     model
+

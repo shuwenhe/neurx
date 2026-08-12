@@ -1,6 +1,7 @@
 package neurx.posttrain.training.phase2a_simple
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs}
 use neurx.posttrain.training.stability.{clip_all_gradients, check_grads_healthy}
+
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -27,6 +28,7 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
+
 
 func float_to_str(float value, int decimals) string {
     float current = value
@@ -65,6 +67,7 @@ func float_to_str(float value, int decimals) string {
     return result
 }
 
+
 struct training_config {
     int num_epochs
     int batch_size
@@ -81,6 +84,7 @@ struct training_config {
     string data_path
 }
 
+
 struct training_state {
     int current_step
     int current_epoch
@@ -89,6 +93,7 @@ struct training_state {
     int best_step
     int total_tokens_seen
 }
+
 
 func create_training_config_from_env() training_config {
     training_config config
@@ -108,6 +113,7 @@ func create_training_config_from_env() training_config {
     return config
 }
 
+
 func create_training_state(training_config config) training_state {
     training_state state
     state.current_step = 0
@@ -118,6 +124,7 @@ func create_training_state(training_config config) training_state {
     state.total_tokens_seen = 0
     return state
 }
+
 
 func run_phase2a_training(training_config config) training_state {
     if !runtime_file_exists(config.model_path) {
@@ -259,6 +266,7 @@ func run_phase2a_training(training_config config) training_state {
     return state
 }
 
+
 func main() {
     println("====================================================")
     println("[Phase 2A] Complete SFT Training with LoRA")
@@ -339,3 +347,4 @@ func main() {
     println("Ready for inference with: model.generate(...)")
     return 0
 }
+

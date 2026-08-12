@@ -29,6 +29,7 @@ func test_trae_moe() bool {
     success
 }
 
+
 func test_rl_training() bool {
     rl_config config = rl_training.new_rl_config()
     config.rollout_length = 10
@@ -44,6 +45,7 @@ func test_rl_training() bool {
     }
     success
 }
+
 
 func test_vision_encoder() bool {
     vision_encoder_config config = vision_encoder.new_vision_encoder_config()
@@ -67,6 +69,7 @@ func test_vision_encoder() bool {
     success
 }
 
+
 func test_long_context() bool {
     long_context_config config = long_context.new_long_context_config()
     config.max_context_length = 8192
@@ -87,6 +90,7 @@ func test_long_context() bool {
     success
 }
 
+
 func test_speculative_decoding() bool {
     speculative_config config = speculative_decoding.new_speculative_config()
     config.max_speculation_steps = 3
@@ -102,6 +106,7 @@ func test_speculative_decoding() bool {
     }
     success
 }
+
 
 func test_veomni() bool {
     veomni_config config = veomni.new_veomni_config()
@@ -124,6 +129,7 @@ func test_veomni() bool {
     success
 }
 
+
 func test_chain_of_thought() bool {
     cot_config config = chain_of_thought.new_cot_config()
     config.max_steps = 5
@@ -140,6 +146,7 @@ func test_chain_of_thought() bool {
     }
     success
 }
+
 
 func run_all_tests() int {
     int passed = 0
@@ -162,5 +169,7 @@ func run_all_tests() int {
     }
 }
 
+
 func print(string msg) {
 }
+

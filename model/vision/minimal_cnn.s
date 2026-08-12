@@ -13,6 +13,7 @@ struct minimal_cnn_state {
     bool trained
 }
 
+
 func new_minimal_cnn_state() minimal_cnn_state {
     []float weight = []float{cap: 3}
     weight[0] = 0.5
@@ -33,6 +34,7 @@ func new_minimal_cnn_state() minimal_cnn_state {
     }
 }
 
+
 func minimal_cnn_score(minimal_cnn_state state, []float input) float {
     float score = state.bias
     int i = 0
@@ -47,10 +49,13 @@ func minimal_cnn_score(minimal_cnn_state state, []float input) float {
     score
 }
 
+
 func minimal_cnn_state_dict(minimal_cnn_state state) minimal_cnn_state {
     state
 }
 
+
 func minimal_cnn_load_state_dict(minimal_cnn_state state, minimal_cnn_state other) minimal_cnn_state {
     other
 }
+

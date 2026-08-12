@@ -8,6 +8,7 @@ use neurx.runtime.io.{
     runtime_run_command_output,
 }
 
+
 struct build_config {
     string cuda_home
     string cuda_lib
@@ -16,11 +17,13 @@ struct build_config {
     bool verbose
 }
 
+
 struct build_result {
     bool success
     string output
     int exit_code
 }
+
 
 func main() {
     println("[CUDA Build] NeurX CUDA System Builder (S Language)")
@@ -62,6 +65,7 @@ func main() {
     }
 }
 
+
 func build_cuda_runtime(build_config cfg) {
     println("[BUILD] CUDA runtime library")
     println("")
@@ -85,6 +89,7 @@ func build_cuda_runtime(build_config cfg) {
     println("[SUCCESS] libcuda_runtime.so created")
     check_file_exists(build_dir + "/libcuda_runtime.so")
 }
+
 
 func build_cuda_kernels(build_config cfg) {
     println("[BUILD] CUDA Kernels Library")
@@ -115,6 +120,7 @@ func build_cuda_kernels(build_config cfg) {
     check_file_exists(build_dir + "/libcuda_kernels.so")
 }
 
+
 func build_verify_env(build_config cfg) {
     println("[BUILD] Environment Verification Tool")
     println("")
@@ -135,6 +141,7 @@ func build_verify_env(build_config cfg) {
     }
 }
 
+
 func detect_cuda_environment() build_config {
     build_config cfg
     cfg.verbose = parse_bool(runtime_env_get("CUDA_BUILD_VERBOSE", "false"))
@@ -152,6 +159,7 @@ func detect_cuda_environment() build_config {
     cfg
 }
 
+
 func is_cuda_available(build_config cfg) bool {
     if str_len(trim(cfg.cuda_version)) == 0 {
         return false
@@ -164,6 +172,7 @@ func is_cuda_available(build_config cfg) bool {
     }
     true
 }
+
 
 func compile_cuda_runtime(build_config cfg, string build_dir) build_result {
     string cmd = "gcc -shared -fPIC " +
@@ -184,9 +193,11 @@ func compile_cuda_runtime(build_config cfg, string build_dir) build_result {
     }
 }
 
+
 func link_cuda_runtime(build_config cfg, string build_dir) build_result {
     build_result{success: true, output: "Linked successfully", exit_code: 0}
 }
+
 
 func compile_kernels_ptx(build_config cfg, string build_dir) build_result {
     string cmd = "nvcc -ptx cuda/cuda_kernels.cu " +
@@ -197,6 +208,7 @@ func compile_kernels_ptx(build_config cfg, string build_dir) build_result {
     bool success = str_len(trim(output)) > 0 && !contains_string(output, "error:")
     build_result{success: success, output: output, exit_code: success ? 0 : 1}
 }
+
 
 func compile_cuda_wrapper(build_config cfg, string build_dir) build_result {
     string cmd = "gcc -c -fPIC " +
@@ -210,6 +222,7 @@ func compile_cuda_wrapper(build_config cfg, string build_dir) build_result {
         build_result{success: false, output: output, exit_code: 1}
     }
 }
+
 
 func link_cuda_kernels(build_config cfg, string build_dir) build_result {
     string cmd = "gcc -shared -fPIC " +
@@ -230,9 +243,11 @@ func link_cuda_kernels(build_config cfg, string build_dir) build_result {
     }
 }
 
+
 func create_directory(string path) {
     runtime_run_command_output("mkdir -p " + path + " 2>&1")
 }
+
 
 func check_file_exists(string path) {
     if runtime_file_exists(path) {
@@ -244,11 +259,13 @@ func check_file_exists(string path) {
     }
 }
 
+
 func create_env_script(string build_dir, build_config cfg) {
     string text = "CUDA_HOME=" + cfg.cuda_home + "\n" +
         "CUDA_LIBRARY_PATH=" + cfg.cuda_lib + ":" + build_dir + "\n"
     runtime_write_text_file(build_dir + "/env.txt", text)
 }
+
 
 func create_cuda_wrapper(string build_dir) {
     string wrapper = "\n" +
@@ -266,12 +283,14 @@ func create_cuda_wrapper(string build_dir) {
     runtime_write_text_file(build_dir + "/cuda_kernels_wrapper.c", wrapper)
 }
 
+
 func clean_build_artifacts() {
     println("[CLEAN] Removing build artifacts...")
     runtime_run_command_output("rm -rf ./artifacts/build/cuda_runtime 2>&1")
     runtime_run_command_output("rm -rf ./artifacts/build/cuda_kernels 2>&1")
     println("[SUCCESS] Cleaned")
 }
+
 
 func str_len(string s) int {
     int n = 0
@@ -280,6 +299,7 @@ func str_len(string s) int {
     }
     n
 }
+
 
 func trim(string s) string {
     int i = 0
@@ -297,6 +317,7 @@ func trim(string s) string {
     substring(s, i, j + 1)
 }
 
+
 func substring(string s, int start, int end) string {
     string out = ""
     int i = start
@@ -307,9 +328,11 @@ func substring(string s, int start, int end) string {
     out
 }
 
+
 func string_char(int c) string {
     string(c)
 }
+
 
 func contains_string(string haystack, string needle) bool {
     int h_len = str_len(haystack)
@@ -339,6 +362,7 @@ func contains_string(string haystack, string needle) bool {
     false
 }
 
+
 func parse_bool(string s) bool {
     string lower = to_lower(s)
     if contains_string(lower, "true") || contains_string(lower, "yes") || contains_string(lower, "1") {
@@ -346,6 +370,7 @@ func parse_bool(string s) bool {
     }
     false
 }
+
 
 func to_lower(string s) string {
     string out = ""
@@ -361,3 +386,4 @@ func to_lower(string s) string {
     }
     out
 }
+

@@ -6,6 +6,7 @@ func read_user_line() string {
     trim(__sys_read_string(0, 4096))
 }
 
+
 func generate_medical_response(string input) string {
     string lower_input = to_lowercase(input)
     if len(lower_input) == 0 {
@@ -43,6 +44,7 @@ func generate_medical_response(string input) string {
     return "这是一个重要的医学问题。对于具体的医疗建议，请咨询能够评估您具体情况的医疗专业人士。"
 }
 
+
 func to_lowercase(string text) string {
     string result = ""
     int i = 0
@@ -56,6 +58,7 @@ func to_lowercase(string text) string {
     }
     return result
 }
+
 
 func contains(string text, string substr) int {
     if len(substr) == 0 || len(substr) > len(text) {
@@ -98,3 +101,4 @@ func main() {
         print("Assistant / 助手: " + response + "\n\n")
     }
 }
+

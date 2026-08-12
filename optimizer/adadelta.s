@@ -11,6 +11,7 @@ struct adadelta_optimizer {
     []float acc_delta
 }
 
+
 func new_adadelta(float lr, float rho, float eps, float weight_decay) adadelta_optimizer {
     adadelta_optimizer {
         lr: lr,
@@ -22,6 +23,7 @@ func new_adadelta(float lr, float rho, float eps, float weight_decay) adadelta_o
         acc_delta: [],
     }
 }
+
 
 func adadelta_step(adadelta_optimizer optimizer, tensor params, tensor grads) adadelta_optimizer_step_output {
     int n = len(params.data)
@@ -48,10 +50,12 @@ func adadelta_step(adadelta_optimizer optimizer, tensor params, tensor grads) ad
     }
 }
 
+
 struct adadelta_optimizer_step_output {
     adadelta_optimizer optimizer
     tensor params
 }
+
 
 func ensure_adadelta_state([]float values, int n) []float {
     []float out = []float{cap: n}
@@ -66,6 +70,7 @@ func ensure_adadelta_state([]float values, int n) []float {
     }
     out
 }
+
 
 func adadelta_sqrt(float x) float {
     if x <= 0.0 {
@@ -82,3 +87,4 @@ func adadelta_sqrt(float x) float {
     }
     y
 }
+

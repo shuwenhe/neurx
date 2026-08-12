@@ -23,6 +23,7 @@ func int_to_str(int n) string {
     out
 }
 
+
 func fmt_float(float f, int precision) string {
     if f < 0.0 {
         return "-" + fmt_float(0.0 - f, precision)
@@ -50,6 +51,7 @@ func fmt_float(float f, int precision) string {
     }
     int_str + "." + frac_str
 }
+
 
 func main() {
     println("\n" + "============================================================")
@@ -292,3 +294,4 @@ func main() {
     println("")
     0
 }
+

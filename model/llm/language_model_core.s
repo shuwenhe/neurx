@@ -12,6 +12,7 @@ enum neurx_version {
     NEURX_5_2
 }
 
+
 struct neurx_config {
     neurx_version version
     string name
@@ -55,6 +56,7 @@ struct neurx_config {
     int long_context_max_len
 }
 
+
 struct neurx_state {
     neurx_config config
     string model_path
@@ -70,6 +72,7 @@ struct neurx_state {
         int total_flops
     } stats
 }
+
 
 func create_neurx_200b_config_200b() neurx_config {
     neurx_config {
@@ -107,6 +110,7 @@ func create_neurx_200b_config_200b() neurx_config {
     }
 }
 
+
 func create_neurx_9b_config() neurx_config {
     neurx_config {
         version: NEURX_4_9B,
@@ -143,6 +147,7 @@ func create_neurx_9b_config() neurx_config {
     }
 }
 
+
 func create_vision_9b_config() neurx_config {
     neurx_config cfg = create_neurx_9b_config()
     cfg.version = MULTIMODAL_VISION
@@ -157,6 +162,7 @@ func create_vision_9b_config() neurx_config {
     return cfg
 }
 
+
 func create_moe_200b_config_200b() neurx_config {
     neurx_config cfg = create_neurx_200b_config_200b()
     cfg.name = "NEURX-MoE-200B"
@@ -168,6 +174,7 @@ func create_moe_200b_config_200b() neurx_config {
     cfg.intermediate_size = 49152
     return cfg
 }
+
 
 func create_custom_neurx_config(
     vocab_size: int,
@@ -215,6 +222,7 @@ func create_custom_neurx_config(
     }
 }
 
+
 struct position_encoding_2d {
     tensor absolute_embedding
     tensor relative_embedding
@@ -222,6 +230,7 @@ struct position_encoding_2d {
     int max_distance
     int max_pos
 }
+
 
 func create_position_encoding_2d(
     max_pos: int,
@@ -242,6 +251,7 @@ func create_position_encoding_2d(
     }
 }
 
+
 func _relative_position_bucket(
     relative_positions: tensor,
     num_buckets: int,
@@ -258,6 +268,7 @@ func _relative_position_bucket(
     bucket = where(is_small, relative_positions + num_buckets_half, val_if_large)
     return where(relative_positions < 0, num_buckets - 1 - bucket, bucket)
 }
+
 
 func apply_position_encoding_2d(
     pe: position_encoding_2d,
@@ -288,6 +299,7 @@ enum mask_type {
     PREFIX_LM
 }
 
+
 func build_prefix_mask(
     input_ids: tensor,
     sop_position: option(tensor),
@@ -317,6 +329,7 @@ func build_prefix_mask(
     return final_mask
 }
 
+
 func build_mlm_mask(
     input_ids: tensor,
     mask_token_id: int,
@@ -332,6 +345,7 @@ func build_mlm_mask(
     return (mask_positions, masked_labels)
 }
 
+
 struct transformer_block_state {
     tensor q_proj_weight
     tensor k_proj_weight
@@ -344,6 +358,7 @@ struct transformer_block_state {
     tensor down_proj_weight
     option[moe_layer_state] moe_layer
 }
+
 
 func transformer_block_forward(
     block: transformer_block_state,
@@ -401,6 +416,7 @@ func transformer_block_forward(
     return (hidden_states, maybe_attn_weights)
 }
 
+
 struct neurx_model {
     neurx_config config
     tensor word_embeddings
@@ -411,6 +427,7 @@ struct neurx_model {
     option[vision_encoder] vision_encoder
     option[tensor] vision_projector
 }
+
 
 func create_neurx_model(config: neurx_config) neurx_model {
     print("🚀 Initializing NEURX model: {config.name}")
@@ -506,6 +523,7 @@ func create_neurx_model(config: neurx_config) neurx_model {
     }
 }
 
+
 func count_parameters(config: neurx_config) int {
     int params = 0
     params += config.vocab_size * config.hidden_size
@@ -547,6 +565,7 @@ func count_parameters(config: neurx_config) int {
     return params
 }
 
+
 func format_number(num: int) {
     if num >= 1_000_000_000_000:
         return "{num / 1_000_000_000}T"
@@ -559,6 +578,7 @@ func format_number(num: int) {
     else:
         return "{num}"
 }
+
 
 func neurx_forward(
     model: neurx_model,
@@ -652,6 +672,7 @@ enum neurx_loss_type {
     PREFIX_LM
 }
 
+
 func compute_neurx_loss(
     logits: tensor,
     labels: tensor,
@@ -677,6 +698,7 @@ func compute_neurx_loss(
         num_tokens = int((attention_mask! != 0).sum().item())
     return (loss, num_tokens)
 }
+
 
 func test_neurx_architecture() {
     print("\n" + "="*60)
@@ -751,3 +773,4 @@ func test_neurx_architecture() {
     print("All NEURX architecture tests passed! ✨")
     print("="*60 + "\n")
 }
+

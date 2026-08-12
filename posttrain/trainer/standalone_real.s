@@ -11,6 +11,7 @@ struct training_config {
     int steps_per_epoch
 }
 
+
 func default_config() training_config {
     training_config{
         hidden_size: 32,
@@ -24,6 +25,7 @@ func default_config() training_config {
     }
 }
 
+
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float guess = x / 2.0
@@ -34,6 +36,7 @@ func sqrt_approx(float x) float {
     }
     guess
 }
+
 
 func exp_approx(float x) float {
     if x > 20.0 { return 485165195.0 }
@@ -49,6 +52,7 @@ func exp_approx(float x) float {
     result
 }
 
+
 func init_weights(int size, float std) []float {
     []float arr = []float{cap: size}
     int i = 0
@@ -60,6 +64,7 @@ func init_weights(int size, float std) []float {
     }
     arr
 }
+
 
 func matmul([]float A, []float B, int M, int K, int N) []float {
     []float C = []float{cap: M * N}
@@ -80,6 +85,7 @@ func matmul([]float A, []float B, int M, int K, int N) []float {
     }
     C
 }
+
 
 func rms_norm([]float x, []float weight, int batch_seq, int hidden) []float {
     []float output = []float{cap: batch_seq * hidden}
@@ -104,6 +110,7 @@ func rms_norm([]float x, []float weight, int batch_seq, int hidden) []float {
     output
 }
 
+
 func embedding([]int token_ids, []float embed_weight, int batch_seq, int hidden, int vocab) []float {
     []float output = []float{cap: batch_seq * hidden}
     int i = 0
@@ -121,6 +128,7 @@ func embedding([]int token_ids, []float embed_weight, int batch_seq, int hidden,
     output
 }
 
+
 func add_arrays([]float a, []float b) []float {
     int size = len(a)
     []float output = []float{cap: size}
@@ -131,6 +139,7 @@ func add_arrays([]float a, []float b) []float {
     }
     output
 }
+
 
 func simple_transformer_layer(
     []float hidden_states,
@@ -148,6 +157,7 @@ func simple_transformer_layer(
     []float output = add_arrays(hidden_states, attn_out)
     output
 }
+
 
 func cross_entropy_loss([]float logits, []int labels, int batch_seq, int vocab) float {
     float total_loss = 0.0
@@ -178,6 +188,7 @@ func cross_entropy_loss([]float logits, []int labels, int batch_seq, int vocab) 
     total_loss / (batch_seq as float)
 }
 
+
 func log_approx(float x) float {
     if x <= 0.0 { return -10.0 }
     if x == 1.0 { return 0.0 }
@@ -193,6 +204,7 @@ func log_approx(float x) float {
     }
     result * 2.0
 }
+
 
 func main() {
     eprintln("============================================================")
@@ -258,6 +270,7 @@ func main() {
     0
 }
 
+
 func int_to_str(int x) string {
     if x == 0 { return "0" }
     if x < 0 { return "-" + int_to_str(0 - x) }
@@ -280,6 +293,7 @@ func int_to_str(int x) string {
     result
 }
 
+
 func float_to_str(float x, int precision) string {
     int integer_part = x as int
     float decimal_part = x - (integer_part as float)
@@ -295,3 +309,4 @@ func float_to_str(float x, int precision) string {
     }
     result
 }
+

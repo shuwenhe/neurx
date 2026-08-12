@@ -17,6 +17,7 @@ struct optimizer_param_group {
     []float beta2_pows
 }
 
+
 struct optimizer {
     string kind
     int step
@@ -24,6 +25,7 @@ struct optimizer {
     lr_scheduler scheduler
     bool has_scheduler
 }
+
 
 func copy_tensors([]tensor values) []tensor {
     []tensor out = []tensor{cap: len(values)}
@@ -35,6 +37,7 @@ func copy_tensors([]tensor values) []tensor {
     return out
 }
 
+
 func copy_float([]float data) []float {
     []float out = []float{cap: len(data)}
     int i = 0
@@ -44,6 +47,7 @@ func copy_float([]float data) []float {
     }
     return out
 }
+
 
 func copy_int([]int data) []int {
     []int out = []int{cap: len(data)}
@@ -55,6 +59,7 @@ func copy_int([]int data) []int {
     return out
 }
 
+
 func optimizer_zero_moment(tensor value) tensor {
     int n = len(value.data)
     []float data = []float{cap: n}
@@ -65,6 +70,7 @@ func optimizer_zero_moment(tensor value) tensor {
     }
     return neurx.tensor.new(data, value.shape, false)
 }
+
 
 func copy_param_group(optimizer_param_group group) optimizer_param_group {
     return optimizer_param_group {
@@ -83,6 +89,7 @@ func copy_param_group(optimizer_param_group group) optimizer_param_group {
     }
 }
 
+
 func copy_param_groups([]optimizer_param_group groups) []optimizer_param_group {
     []optimizer_param_group out = []optimizer_param_group{cap: len(groups)}
     int i = 0
@@ -93,6 +100,7 @@ func copy_param_groups([]optimizer_param_group groups) []optimizer_param_group {
     return out
 }
 
+
 func new_optimizer() optimizer {
     return optimizer {
         kind: "none",
@@ -102,6 +110,7 @@ func new_optimizer() optimizer {
         has_scheduler: false,
     }
 }
+
 
 func optimizer_make_group([]tensor params, float lr, float weight_decay, float beta1, float beta2, float eps, string kind) optimizer_param_group {
     int n = len(params)
@@ -135,6 +144,7 @@ func optimizer_make_group([]tensor params, float lr, float weight_decay, float b
     }
 }
 
+
 func optimizer_with_group(optimizer opt, optimizer_param_group group) optimizer {
     optimizer next = optimizer_state_dict(opt)
     next.param_groups.push(group)
@@ -144,9 +154,11 @@ func optimizer_with_group(optimizer opt, optimizer_param_group group) optimizer 
     return next
 }
 
+
 func optimizer_add_param_group(optimizer opt, []tensor params, float lr, float weight_decay, float beta1, float beta2, float eps, string kind) optimizer {
     return optimizer_with_group(opt, optimizer_make_group(params, lr, weight_decay, beta1, beta2, eps, kind))
 }
+
 
 func optimizer_set_scheduler(optimizer opt, lr_scheduler sched) optimizer {
     optimizer next = optimizer_state_dict(opt)
@@ -154,6 +166,7 @@ func optimizer_set_scheduler(optimizer opt, lr_scheduler sched) optimizer {
     next.has_scheduler = true
     return next
 }
+
 
 func optimizer_step_scheduler(optimizer opt, int epoch) optimizer {
     if !opt.has_scheduler {
@@ -170,6 +183,7 @@ func optimizer_step_scheduler(optimizer opt, int epoch) optimizer {
     return next
 }
 
+
 func optimizer_sync_group_lrs(optimizer opt, float lr) optimizer {
     optimizer next = optimizer_state_dict(opt)
     int i = 0
@@ -179,6 +193,7 @@ func optimizer_sync_group_lrs(optimizer opt, float lr) optimizer {
     }
     return next
 }
+
 
 func optimizer_current_lr(optimizer opt) float {
     if opt.has_scheduler {
@@ -190,6 +205,7 @@ func optimizer_current_lr(optimizer opt) float {
     return 0.0
 }
 
+
 func optimizer_zero_grad_tensor(tensor value) tensor {
     return tensor {
         data: copy_float(value.data),
@@ -198,6 +214,7 @@ func optimizer_zero_grad_tensor(tensor value) tensor {
         grad: none,
     }
 }
+
 
 func optimizer_zero_grad_group(optimizer_param_group group) optimizer_param_group {
     optimizer_param_group next = copy_param_group(group)
@@ -209,6 +226,7 @@ func optimizer_zero_grad_group(optimizer_param_group group) optimizer_param_grou
     return next
 }
 
+
 func optimizer_zero_grad(optimizer opt) optimizer {
     optimizer next = optimizer_state_dict(opt)
     int i = 0
@@ -219,9 +237,11 @@ func optimizer_zero_grad(optimizer opt) optimizer {
     return next
 }
 
+
 func optimizer_step_tensor_group(optimizer_param_group group, []tensor grads, float lr_override) optimizer_param_group {
     return optimizer_step_tensor_group_from(group, grads, 0, lr_override)
 }
+
 
 func optimizer_step_tensor_group_from(optimizer_param_group group, []tensor grads, int start, float lr_override) optimizer_param_group {
     optimizer_param_group next = copy_param_group(group)
@@ -283,6 +303,7 @@ func optimizer_step_tensor_group_from(optimizer_param_group group, []tensor grad
     return next
 }
 
+
 func optimizer_step_group(optimizer opt, int group_index, []tensor grads) optimizer {
     if group_index < 0 || group_index >= len(opt.param_groups) {
         return opt
@@ -293,6 +314,7 @@ func optimizer_step_group(optimizer opt, int group_index, []tensor grads) optimi
     next.step = next.step + 1
     return next
 }
+
 
 func optimizer_step(optimizer opt, []tensor grads) optimizer {
     optimizer next = optimizer_state_dict(opt)
@@ -308,26 +330,31 @@ func optimizer_step(optimizer opt, []tensor grads) optimizer {
     return next
 }
 
+
 func optimizer_step_with_scheduler(optimizer opt, int epoch, []tensor grads) optimizer {
     optimizer next = optimizer_step_scheduler(opt, epoch)
     return optimizer_step(next, grads)
 }
+
 
 func optimizer_step_with_scheduler_and_zero_grad(optimizer opt, int epoch, []tensor grads) optimizer {
     optimizer next = optimizer_step_with_scheduler(opt, epoch, grads)
     return optimizer_zero_grad(next)
 }
 
+
 func optimizer_step_group_with_scheduler(optimizer opt, int epoch, int group_index, []tensor grads) optimizer {
     optimizer next = optimizer_step_scheduler(opt, epoch)
     return optimizer_step_group(next, group_index, grads)
 }
+
 
 func optimizer_step_all_groups_with_scheduler(optimizer opt, int epoch) optimizer {
     optimizer next = optimizer_step_scheduler(opt, epoch)
     next.step = next.step + 1
     return next
 }
+
 
 func optimizer_state_dict(optimizer opt) optimizer {
     return optimizer {
@@ -339,6 +366,7 @@ func optimizer_state_dict(optimizer opt) optimizer {
     }
 }
 
+
 func optimizer_load_state_dict_from(optimizer opt, optimizer other) optimizer {
     return optimizer {
         kind: other.kind,
@@ -349,13 +377,16 @@ func optimizer_load_state_dict_from(optimizer opt, optimizer other) optimizer {
     }
 }
 
+
 func optimizer_load_state_dict(optimizer opt, optimizer other) optimizer {
     return optimizer_load_state_dict_from(opt, other)
 }
 
+
 func optimizer_num_groups(optimizer opt) int {
     return len(opt.param_groups)
 }
+
 
 func optimizer_num_parameters(optimizer opt) int {
     int total = 0
@@ -367,12 +398,14 @@ func optimizer_num_parameters(optimizer opt) int {
     return total
 }
 
+
 func new_sgd_optimizer([]tensor params, float lr) optimizer {
     optimizer opt = new_optimizer()
     opt.kind = "sgd"
     opt = optimizer_add_param_group(opt, params, lr, 0.0, 0.9, 0.999, 1e-8, "sgd")
     return opt
 }
+
 
 func new_adam_optimizer([]tensor params, float lr, float beta1, float beta2, float eps) optimizer {
     optimizer opt = new_optimizer()
@@ -381,6 +414,7 @@ func new_adam_optimizer([]tensor params, float lr, float beta1, float beta2, flo
     return opt
 }
 
+
 func new_adamw_optimizer([]tensor params, float lr, float beta1, float beta2, float eps, float weight_decay) optimizer {
     optimizer opt = new_optimizer()
     opt.kind = "adamw"
@@ -388,12 +422,14 @@ func new_adamw_optimizer([]tensor params, float lr, float beta1, float beta2, fl
     return opt
 }
 
+
 func optimizer_get_group_lr(optimizer opt, int group_index) float {
     if group_index < 0 || group_index >= len(opt.param_groups) {
         return 0.0
     }
     return opt.param_groups[group_index].lr
 }
+
 
 func optimizer_set_group_lr(optimizer opt, int group_index, float lr) optimizer {
     if group_index < 0 || group_index >= len(opt.param_groups) {
@@ -403,3 +439,4 @@ func optimizer_set_group_lr(optimizer opt, int group_index, float lr) optimizer 
     next.param_groups[group_index].lr = lr
     return next
 }
+

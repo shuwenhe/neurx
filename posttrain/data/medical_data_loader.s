@@ -1,5 +1,6 @@
 package neurx.posttrain.data.medical_data_loader
 use neurx.posttrain.model.model_loader.{fill_model_tensor}
+
 struct medical_sample {
     string question
     string answer
@@ -9,6 +10,7 @@ struct medical_sample {
     string explanation
 }
 
+
 struct medical_dataset {
     []medical_sample train_samples
     []medical_sample eval_samples
@@ -17,11 +19,13 @@ struct medical_dataset {
     int total_samples
 }
 
+
 struct tokenized_sample {
     []int input_ids
     []int target_ids
     int seq_len
 }
+
 
 func parse_medical_sample_json(string json_line) medical_sample {
     medical_sample sample
@@ -34,6 +38,7 @@ func parse_medical_sample_json(string json_line) medical_sample {
     return sample
 }
 
+
 func load_medical_dataset_from_json(string file_path, int max_samples) medical_dataset {
     medical_dataset dataset
     dataset.vocab_size = 151936
@@ -43,6 +48,7 @@ func load_medical_dataset_from_json(string file_path, int max_samples) medical_d
     dataset.total_samples = 0
     return dataset
 }
+
 
 func tokenize_text(string text, int vocab_size) []int {
     []int token_ids = []int{}
@@ -55,6 +61,7 @@ func tokenize_text(string text, int vocab_size) []int {
     }
     return token_ids
 }
+
 
 func create_batch_from_samples([]medical_sample samples, int batch_size, int seq_len, int vocab_size) [][]int {
     [][]int batches = [][]int{}
@@ -80,3 +87,4 @@ func create_batch_from_samples([]medical_sample samples, int batch_size, int seq
     }
     return batches
 }
+

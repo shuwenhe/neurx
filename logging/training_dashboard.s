@@ -23,6 +23,7 @@ struct training_metrics {
     int best_step
 }
 
+
 func new_training_metrics() training_metrics {
     training_metrics {
         current_loss: 0.0,
@@ -48,3 +49,4 @@ func new_training_metrics() training_metrics {
         best_step: -1,
     }
 }
+

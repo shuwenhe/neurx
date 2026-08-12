@@ -11,6 +11,7 @@ struct zero_config {
     float weight_decay
 }
 
+
 struct zero_state {
     []float local_momentum
     []float local_variance
@@ -22,6 +23,7 @@ struct zero_state {
     int total_params
     int local_param_count
 }
+
 
 func create_zero_config(int stage) zero_config {
     zero_config cfg
@@ -36,6 +38,7 @@ func create_zero_config(int stage) zero_config {
     cfg.weight_decay = 0.01
     return cfg
 }
+
 
 func create_zero_state(int total_params, int world_size, int rank) zero_state {
     zero_state state
@@ -60,6 +63,7 @@ func create_zero_state(int total_params, int world_size, int rank) zero_state {
     }
     return state
 }
+
 
 func zero_step(zero_state state, zero_config cfg) zero_state {
     state.step = state.step + 1
@@ -98,6 +102,7 @@ func zero_step(zero_state state, zero_config cfg) zero_state {
     return state
 }
 
+
 func compute_local_start(int total, int world_size, int rank) int {
     int base_size = total / world_size
     int remainder = total - (base_size * world_size)
@@ -106,6 +111,7 @@ func compute_local_start(int total, int world_size, int rank) int {
     }
     return remainder * (base_size + 1) + (rank - remainder) * base_size
 }
+
 
 func sqrt_approx(float x) float {
     if x <= 0.0 {
@@ -119,6 +125,7 @@ func sqrt_approx(float x) float {
     }
     return guess
 }
+
 
 func pow_approx(float base, float exp) float {
     if exp == 0.0 {
@@ -137,6 +144,7 @@ func pow_approx(float base, float exp) float {
     return result
 }
 
+
 func float_from_int(int n) float {
     float result = 0.0
     int i = 0
@@ -147,6 +155,7 @@ func float_from_int(int n) float {
     return result
 }
 
+
 func int_from_float(float f) int {
     int result = 0
     float remaining = f
@@ -156,6 +165,7 @@ func int_from_float(float f) int {
     }
     return result
 }
+
 
 func int_to_string(int n) string {
     if n == 0 { return "0" }
@@ -199,6 +209,7 @@ func int_to_string(int n) string {
     return result
 }
 
+
 func print_zero_memory_stats(zero_state state) {
     int momentum_bytes = len(state.local_momentum) * 4
     int variance_bytes = len(state.local_variance) * 4
@@ -213,3 +224,4 @@ func print_zero_memory_stats(zero_state state) {
         println("  Memory saving: " + int_to_string(int_from_float(memory_ratio * 100.0)) + "% vs full replication")
     }
 }
+

@@ -4,6 +4,7 @@ struct chat_message {
     string content
 }
 
+
 struct chat_completion_request {
     string model
     chat_message* messages
@@ -18,6 +19,7 @@ struct chat_completion_request {
     int stop_count
 }
 
+
 struct chat_completion_response {
     string id
     string object
@@ -29,6 +31,7 @@ struct chat_completion_response {
     int usage_completion_tokens
     int usage_total_tokens
 }
+
 
 struct completion_request {
     string model
@@ -42,6 +45,7 @@ struct completion_request {
     int stop_count
 }
 
+
 struct completion_response {
     string id
     string object
@@ -54,11 +58,13 @@ struct completion_response {
     int usage_total_tokens
 }
 
+
 struct embedding_request {
     string model
     string input
     string encoding_format
 }
+
 
 struct embedding_response {
     string object
@@ -67,11 +73,13 @@ struct embedding_response {
     int embedding_dimension
 }
 
+
 struct api_error {
     int error_code
     string error_message
     string error_type
 }
+
 
 struct api_config {
     int max_tokens_default
@@ -83,6 +91,7 @@ struct api_config {
     bool enable_batching
     int batch_size
 }
+
 
 func validate_chat_completion_request(chat_completion_request req) api_error {
     api_error err
@@ -143,6 +152,7 @@ func validate_chat_completion_request(chat_completion_request req) api_error {
     err
 }
 
+
 func is_valid_role(string role) bool {
     if str_equals(role, "system") {
         return true
@@ -155,6 +165,7 @@ func is_valid_role(string role) bool {
     }
     false
 }
+
 
 func handle_chat_completion(chat_completion_request req, api_config config) chat_completion_response {
     chat_completion_response resp
@@ -176,6 +187,7 @@ func handle_chat_completion(chat_completion_request req, api_config config) chat
     resp
 }
 
+
 func build_chat_prompt(chat_message* messages, int count) string {
     string prompt = ""
     int i = 0
@@ -188,9 +200,11 @@ func build_chat_prompt(chat_message* messages, int count) string {
     prompt
 }
 
+
 func generate_response(string prompt, float temperature, int max_tokens, api_config config) string {
     "This is a generated response to: " + prompt
 }
+
 
 func count_tokens(string text) int {
     int count = 1
@@ -204,6 +218,7 @@ func count_tokens(string text) int {
     }
     count
 }
+
 
 func handle_completion(completion_request req, api_config config) completion_response {
     completion_response resp
@@ -222,9 +237,11 @@ func handle_completion(completion_request req, api_config config) completion_res
     resp
 }
 
+
 func generate_completion(string prompt, float temperature, int max_tokens, api_config config) string {
     "Generated completion for: " + prompt
 }
+
 
 func handle_embeddings(embedding_request req, api_config config) embedding_response {
     embedding_response resp
@@ -238,6 +255,7 @@ func handle_embeddings(embedding_request req, api_config config) embedding_respo
     resp
 }
 
+
 func generate_embedding(string text) float* {
     float* embedding = alloc(float, 768)
     int i = 0
@@ -247,6 +265,7 @@ func generate_embedding(string text) float* {
     }
     embedding
 }
+
 
 func stream_chat_completion(chat_completion_request req, api_config config) void {
     if !req.stream {
@@ -263,9 +282,11 @@ func stream_chat_completion(chat_completion_request req, api_config config) void
     }
 }
 
+
 func generate_next_token(string prompt, int position) string {
     "token"
 }
+
 
 func is_stop_token(string token, string* stop_tokens, int stop_count) bool {
     int i = 0
@@ -278,13 +299,16 @@ func is_stop_token(string token, string* stop_tokens, int stop_count) bool {
     false
 }
 
+
 func generate_request_id() string {
     "chatcmpl-" + int_to_string(get_current_timestamp())
 }
 
+
 func get_current_timestamp() int {
     0
 }
+
 
 func str_equals(string s1, string s2) bool {
     if strlen(s1) != strlen(s2) {
@@ -300,6 +324,7 @@ func str_equals(string s1, string s2) bool {
     true
 }
 
+
 func strlen(string s) int {
     int count = 0
     int i = 0
@@ -309,6 +334,7 @@ func strlen(string s) int {
     }
     count
 }
+
 
 func int_to_string(int n) string {
     if n == 0 {
@@ -331,9 +357,11 @@ func int_to_string(int n) string {
     result
 }
 
+
 func char_to_string(int c) string {
     ""
 }
+
 
 func main() {
     println("=== NeurX Compatible API Service ===")
@@ -376,3 +404,4 @@ func main() {
     println("embedding dimension: " + int_to_string(emb_resp.embedding_dimension))
     println("\n=== API Tests Complete ===")
 }
+

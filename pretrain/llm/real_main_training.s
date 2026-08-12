@@ -1,6 +1,7 @@
 package neurx.pretrain.llm.real_main_training
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_run_command_output, runtime_write_text_file}
 use neurx.pretrain.llm.real_training_loop.{run_training_loop}
+
 struct real_training_config {
     string manifest_path
     string data_dir
@@ -12,6 +13,7 @@ struct real_training_config {
     int max_steps
     float learning_rate
 }
+
 
 func default_training_config() real_training_config {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
@@ -29,6 +31,7 @@ func default_training_config() real_training_config {
     }
 }
 
+
 func build_fallback_manifest(real_training_config config) string {
     string shard_dir = config.data_dir + "/shard"
     string fallback_manifest = config.output_dir + "/shard_manifest.txt"
@@ -41,6 +44,7 @@ func build_fallback_manifest(real_training_config config) string {
     println("Using shard list manifest: " + fallback_manifest)
     fallback_manifest
 }
+
 
 func run_real_training_loop(real_training_config config) int {
     string manifest_path = config.manifest_path
@@ -56,6 +60,7 @@ func run_real_training_loop(real_training_config config) int {
     println("Tokens seen: " + int_to_str(state.tokens_seen, 0))
     0
 }
+
 
 func str_to_int(string s, int fallback) int {
     string text = trim(s)
@@ -79,6 +84,7 @@ func str_to_int(string s, int fallback) int {
     }
     sign * value
 }
+
 
 func str_to_float(string s) float {
     string text = trim(s)
@@ -113,6 +119,7 @@ func str_to_float(string s) float {
     value
 }
 
+
 func clamp_int(int value, int min_value, int max_value) int {
     if value < min_value {
         return min_value
@@ -122,6 +129,7 @@ func clamp_int(int value, int min_value, int max_value) int {
     }
     value
 }
+
 
 func trim(string s) string {
     int i = 0
@@ -144,6 +152,7 @@ func trim(string s) string {
     out
 }
 
+
 func int_to_str(int n, int fallback) string {
     int value = n
     if value == 0 {
@@ -164,6 +173,8 @@ func int_to_str(int n, int fallback) string {
     s
 }
 
+
 func string_char(int c) string {
     string(c)
 }
+

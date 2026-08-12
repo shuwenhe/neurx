@@ -1,6 +1,7 @@
 package neurx.context.context_manager
 use neurx.inference
 use neurx.tool.workspace_tools.{agent_workspace_clip}
+
 struct agent_context_state {
     int token_count
     int max_tokens
@@ -10,6 +11,7 @@ struct agent_context_state {
     []int segment_tokens
     bool compressed
 }
+
 
 func new_agent_context_state(int max_tokens) agent_context_state {
     int threshold = max_tokens * 3 / 4
@@ -24,9 +26,11 @@ func new_agent_context_state(int max_tokens) agent_context_state {
     }
 }
 
+
 func agent_context_default_max_tokens() int {
     8192
 }
+
 
 func agent_context_estimate_tokens(string text) int {
     int l = len(text)
@@ -37,13 +41,16 @@ func agent_context_estimate_tokens(string text) int {
     t
 }
 
+
 func agent_context_near_limit(agent_context_state state) bool {
     state.token_count >= state.compression_threshold
 }
 
+
 func agent_context_is_full(agent_context_state state) bool {
     state.token_count >= state.max_tokens
 }
+
 
 func agent_context_append(agent_context_state state, string text) agent_context_state {
     int tokens = agent_context_estimate_tokens(text)
@@ -68,6 +75,7 @@ func agent_context_append(agent_context_state state, string text) agent_context_
         compressed: state.compressed,
     }
 }
+
 
 func agent_context_compress(agent_context_state state, int keep_last) agent_context_state {
     int total = len(state.segments)
@@ -100,6 +108,7 @@ func agent_context_compress(agent_context_state state, int keep_last) agent_cont
     }
 }
 
+
 func agent_context_maybe_compress(agent_context_state state) agent_context_state {
     if !agent_context_near_limit(state) {
         return state
@@ -110,6 +119,7 @@ func agent_context_maybe_compress(agent_context_state state) agent_context_state
     }
     agent_context_compress(state, keep)
 }
+
 
 func agent_context_extract_dropped(agent_context_state state, int keep_last) string {
     int total = len(state.segments)
@@ -129,6 +139,7 @@ func agent_context_extract_dropped(agent_context_state state, int keep_last) str
     }
     out
 }
+
 
 func agent_context_compress_with_summary(agent_context_state state, string summary, int keep_last) agent_context_state {
     int total = len(state.segments)
@@ -165,6 +176,7 @@ func agent_context_compress_with_summary(agent_context_state state, string summa
     }
 }
 
+
 func agent_context_smart_compress(agent_context_state state, string model_path) agent_context_state {
     if !agent_context_near_limit(state) {
         return state
@@ -188,6 +200,7 @@ func agent_context_smart_compress(agent_context_state state, string model_path) 
     agent_context_compress_with_summary(state, summary, keep)
 }
 
+
 func agent_context_to_string(agent_context_state state) string {
     int n = len(state.segments)
     string out = ""
@@ -202,6 +215,8 @@ func agent_context_to_string(agent_context_state state) string {
     out
 }
 
+
 func agent_context_summary(agent_context_state state) string {
     "tokens=" + string(state.token_count) + " max=" + string(state.max_tokens) + " compressed=" + string(state.compressed) + " compressions=" + string(state.compressions)
 }
+

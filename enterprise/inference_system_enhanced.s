@@ -25,6 +25,7 @@ struct inference_system_config {
     bool enable_metrics
 }
 
+
 struct inference_system_enhanced {
     inference_system_config config
     speculative_inference.speculative_inference_system speculative_sys
@@ -32,6 +33,7 @@ struct inference_system_enhanced {
     metrics.inference_metrics system_metrics
     bool initialized
 }
+
 
 func new_inference_config() inference_system_config {
     spec_cfg := speculative_inference.new_speculative_inference_config()
@@ -54,6 +56,7 @@ func new_inference_config() inference_system_config {
     cfg
 }
 
+
 func init_enhanced_inference_system(cfg: inference_system_config) inference_system_enhanced {
     gpu_context := cuda_core.cuda_context_create(cfg.gpu_device_id)
     system_metrics := metrics.init_inference_metrics()
@@ -70,6 +73,7 @@ func init_enhanced_inference_system(cfg: inference_system_config) inference_syst
 
     sys
 }
+
 
 func inference_enhanced_single(
     sys: inference_system_enhanced,
@@ -96,6 +100,7 @@ func inference_enhanced_single(
         (updated_sys, "fallback output")
     }
 }
+
 
 func inference_enhanced_batch(
     sys: inference_system_enhanced,
@@ -134,6 +139,7 @@ func inference_enhanced_batch(
     (updated_sys, outputs)
 }
 
+
 func adaptive_speculative_inference(sys: inference_system_enhanced) inference_system_enhanced {
     updated_sys := sys
     updated_sys.speculative_sys = speculative_inference.adaptive_update_speculative_params(
@@ -142,10 +148,12 @@ func adaptive_speculative_inference(sys: inference_system_enhanced) inference_sy
     updated_sys
 }
 
+
 func get_system_performance_stats(sys: inference_system_enhanced) string {
     stats := speculative_inference.get_speculative_performance_stats(sys.speculative_sys)
     stats
 }
+
 
 func handle_enhanced_openai_request(
     sys: inference_system_enhanced,
@@ -191,17 +199,20 @@ func handle_enhanced_openai_request(
     (updated_sys, response)
 }
 
+
 func enable_speculative_mode(sys: inference_system_enhanced) inference_system_enhanced {
     updated_sys := sys
     updated_sys.config.enable_speculative_decode = true
     updated_sys
 }
 
+
 func disable_speculative_mode(sys: inference_system_enhanced) inference_system_enhanced {
     updated_sys := sys
     updated_sys.config.enable_speculative_decode = false
     updated_sys
 }
+
 
 func tokenize_prompt(prompt: string) []int {
     tokens := []int{}
@@ -213,6 +224,7 @@ func tokenize_prompt(prompt: string) []int {
     tokens
 }
 
+
 func decode_tokens(tokens: []int) string {
     result := ""
     i := 0
@@ -223,9 +235,11 @@ func decode_tokens(tokens: []int) string {
     result
 }
 
+
 func get_timestamp() int {
     1234567890
 }
+
 
 func int_to_str(n: int) string {
     if n == 0 {
@@ -245,3 +259,4 @@ func int_to_str(n: int) string {
     }
     s
 }
+

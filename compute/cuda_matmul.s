@@ -9,6 +9,7 @@ struct cuda_matrix {
     cuda_buffer storage
 }
 
+
 struct cuda_matmul_result {
     cuda_context context
     cuda_matrix output
@@ -16,6 +17,7 @@ struct cuda_matmul_result {
     bool success
     string error_message
 }
+
 
 func cuda_empty_matrix() cuda_matrix {
     cuda_matrix value
@@ -25,6 +27,7 @@ func cuda_empty_matrix() cuda_matrix {
     value.storage = neurx.backends.cuda_core.cuda_empty_buffer()
     value
 }
+
 
 func cuda_new_matrix(cuda_context context, int rows, int columns, string dtype) cuda_matmul_result {
     cuda_matmul_result result
@@ -56,6 +59,7 @@ func cuda_new_matrix(cuda_context context, int rows, int columns, string dtype) 
     result
 }
 
+
 func cuda_matrix_multiply(cuda_context context, cuda_matrix left, cuda_matrix right) cuda_matmul_result {
     cuda_matmul_result result
     result.context = context
@@ -84,6 +88,8 @@ func cuda_matrix_multiply(cuda_context context, cuda_matrix left, cuda_matrix ri
     result
 }
 
+
 func cuda_matmul_contract_valid(cuda_matrix left, cuda_matrix right) bool {
     left.rows > 0 && left.columns > 0 && right.rows == left.columns && right.columns > 0
 }
+

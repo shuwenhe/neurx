@@ -12,6 +12,7 @@ struct tokenizer {
     pad_token_id: int
 }
 
+
 func create_tokenizer(int vocab_size) tokenizer {
     vocab := make([]string, vocab_size)
     token_to_id := make(map[string]int)
@@ -36,6 +37,7 @@ func create_tokenizer(int vocab_size) tokenizer {
     }
 }
 
+
 func encode(tokenizer tok, string text) []int {
     words := strings.split(text, " ")
     token_ids := make([]int, len(words))
@@ -50,6 +52,7 @@ func encode(tokenizer tok, string text) []int {
     token_ids
 }
 
+
 struct wikitext_dataset {
     file_path: string
     split: string
@@ -58,6 +61,7 @@ struct wikitext_dataset {
     samples: [][]int
     num_samples: int
 }
+
 
 func load_wikitext_dataset(string file_path, string split, int max_seq_len, tokenizer tok) wikitext_dataset {
     fmt.printfln("📚 Loading WikiText dataset from: %s (split: %s)", file_path, split)
@@ -81,6 +85,7 @@ func load_wikitext_dataset(string file_path, string split, int max_seq_len, toke
     }
 }
 
+
 func get_wikitext_batch(wikitext_dataset dataset, int batch_start, int batch_size, int seq_len) [][]int {
     batch := make([][]int, batch_size)
     for b := 0; b < batch_size; b += 1 {
@@ -97,6 +102,7 @@ func get_wikitext_batch(wikitext_dataset dataset, int batch_start, int batch_siz
     batch
 }
 
+
 struct c4_dataset {
     file_path: string
     split: string
@@ -105,6 +111,7 @@ struct c4_dataset {
     samples: [][]int
     num_samples: int
 }
+
 
 func load_c4_dataset(string file_path, string split, int max_seq_len, tokenizer tok) c4_dataset {
     fmt.printfln("🌐 Loading C4 dataset from: %s (split: %s)", file_path, split)
@@ -128,6 +135,7 @@ func load_c4_dataset(string file_path, string split, int max_seq_len, tokenizer 
     }
 }
 
+
 func get_c4_batch(c4_dataset dataset, int batch_start, int batch_size, int seq_len) [][]int {
     batch := make([][]int, batch_size)
     for b := 0; b < batch_size; b += 1 {
@@ -144,6 +152,7 @@ func get_c4_batch(c4_dataset dataset, int batch_start, int batch_size, int seq_l
     batch
 }
 
+
 struct data_loader {
     dataset_type: string
     batch_size: int
@@ -153,6 +162,7 @@ struct data_loader {
     wikitext: wikitext_dataset
     c4: c4_dataset
 }
+
 
 func create_wikitext_loader(int batch_size, int seq_len, int vocab_size, string split) data_loader {
     tok := create_tokenizer(vocab_size)
@@ -167,6 +177,7 @@ func create_wikitext_loader(int batch_size, int seq_len, int vocab_size, string 
     }
 }
 
+
 func create_c4_loader(int batch_size, int seq_len, int vocab_size, string split) data_loader {
     tok := create_tokenizer(vocab_size)
     dataset := load_c4_dataset("./data/c4", split, 2048, tok)
@@ -179,6 +190,7 @@ func create_c4_loader(int batch_size, int seq_len, int vocab_size, string split)
         c4: dataset,
     }
 }
+
 
 func next_batch(data_loader* loader, int batch_idx) [][]int {
     batch_start := (batch_idx * loader.batch_size) % 1000
@@ -198,6 +210,7 @@ func next_batch(data_loader* loader, int batch_idx) [][]int {
     }
 }
 
+
 struct dataset_statistics {
     name: string
     num_samples: int
@@ -207,6 +220,7 @@ struct dataset_statistics {
     min_token_id: int
     max_token_id: int
 }
+
 
 func compute_dataset_stats(string dataset_name, string split) dataset_statistics {
     fmt.printfln("📊 Computing statistics for %s (%s)...", dataset_name, split)
@@ -243,6 +257,7 @@ func compute_dataset_stats(string dataset_name, string split) dataset_statistics
     }
 }
 
+
 func print_dataset_stats(dataset_statistics stats) {
     fmt.printfln("   Dataset: %s", stats.name)
     fmt.printfln("   Samples: %d", stats.num_samples)
@@ -251,6 +266,7 @@ func print_dataset_stats(dataset_statistics stats) {
     fmt.printfln("   Avg length: %d", stats.avg_sample_length)
     fmt.printfln("   Token range: [%d, %d]\n", stats.min_token_id, stats.max_token_id)
 }
+
 
 func main() {
     fmt.printfln("\n═══════════════════════════════════════════════════════")
@@ -281,3 +297,4 @@ func main() {
     print_dataset_stats(c4_stats)
     fmt.printfln("✅ Data loader ready for production training!\n")
 }
+

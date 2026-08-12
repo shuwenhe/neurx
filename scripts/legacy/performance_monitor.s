@@ -45,6 +45,7 @@ type alert struct {
     message                 string
 }
 
+
 func (monitor *performance_monitor) collect_metrics() performance_metrics {
     sample_idx := float64(len(monitor.metrics_history))
     perplexity := 100.0 / (float64(len(monitor.metrics_history)/100) + 1.0)
@@ -68,6 +69,7 @@ func (monitor *performance_monitor) collect_metrics() performance_metrics {
     }
     return metrics
 }
+
 
 func (monitor *performance_monitor) assess_health() system_health_status {
     status := system_health_status{
@@ -113,6 +115,7 @@ func (monitor *performance_monitor) assess_health() system_health_status {
     monitor.health_history = append(monitor.health_history, status)
     return status
 }
+
 
 func (monitor *performance_monitor) check_alerts() []alert {
     alerts := []alert{}
@@ -180,6 +183,7 @@ func (monitor *performance_monitor) check_alerts() []alert {
     return alerts
 }
 
+
 func (monitor *performance_monitor) generate_recommendations() {
     monitor.recommendations = []string{}
     if len(monitor.metrics_history) < 2 {
@@ -215,6 +219,7 @@ func (monitor *performance_monitor) generate_recommendations() {
         }
     }
 }
+
 
 func (monitor *performance_monitor) print_dashboard() {
     if len(monitor.metrics_history) == 0 {
@@ -252,6 +257,7 @@ func (monitor *performance_monitor) print_dashboard() {
     }
 }
 
+
 func (monitor *performance_monitor) snapshot_summary() string {
     if len(monitor.metrics_history) == 0 {
         return "no metrics collected"
@@ -270,6 +276,7 @@ func (monitor *performance_monitor) snapshot_summary() string {
         len(health.alerts),
     )
 }
+
 
 func new_performance_monitor() *performance_monitor {
     return &performance_monitor{
@@ -291,6 +298,7 @@ func new_performance_monitor() *performance_monitor {
     }
 }
 
+
 func (monitor *performance_monitor) monitor_training(duration_steps int) {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Performance Monitoring System                        ║")
@@ -306,3 +314,4 @@ func (monitor *performance_monitor) monitor_training(duration_steps int) {
     }
     monitor.print_dashboard()
 }
+

@@ -14,6 +14,7 @@ struct nadam_optimizer {
     []float exp_avg_sq
 }
 
+
 func new_nadam(
     float lr,
     float beta1,
@@ -35,6 +36,7 @@ func new_nadam(
         exp_avg_sq: [],
     }
 }
+
 
 func nadam_step(nadam_optimizer optimizer, tensor params, tensor grads) nadam_optimizer_step_output {
     int n = len(params.data)
@@ -67,10 +69,12 @@ func nadam_step(nadam_optimizer optimizer, tensor params, tensor grads) nadam_op
     }
 }
 
+
 struct nadam_optimizer_step_output {
     nadam_optimizer optimizer
     tensor params
 }
+
 
 func ensure_nadam_state([]float values, int n) []float {
     []float out = []float{cap: n}
@@ -85,6 +89,7 @@ func ensure_nadam_state([]float values, int n) []float {
     }
     out
 }
+
 
 func nadam_sqrt(float x) float {
     if x <= 0.0 {
@@ -102,6 +107,7 @@ func nadam_sqrt(float x) float {
     y
 }
 
+
 func nadam_pow_int(float base, int exponent) float {
     float result = 1.0
     int i = 0
@@ -112,12 +118,14 @@ func nadam_pow_int(float base, int exponent) float {
     result
 }
 
+
 func nadam_pow_float(float base, float exponent) float {
     if base <= 0.0 {
         return 0.0
     }
     return nadam_exp(exponent * nadam_ln(base))
 }
+
 
 func nadam_exp(float x) float {
     float result = 1.0
@@ -130,6 +138,7 @@ func nadam_exp(float x) float {
     }
     result
 }
+
 
 func nadam_ln(float x) float {
     if x <= 0.0 {
@@ -147,3 +156,4 @@ func nadam_ln(float x) float {
     }
     2.0 * result
 }
+

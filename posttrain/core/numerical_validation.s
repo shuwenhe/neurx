@@ -10,6 +10,7 @@ struct golden_test_case_s {
     bool passed
 }
 
+
 struct numerical_gradient_s {
     tensor_s analytical
     tensor_s numerical
@@ -18,12 +19,14 @@ struct numerical_gradient_s {
     bool passed
 }
 
+
 struct regression_test_suite_s {
     []golden_test_case_s test_cases
     int total_tests
     int passed_tests
     int failed_tests
 }
+
 
 func new_regression_test_suite_s() regression_test_suite_s {
     regression_test_suite_s {
@@ -33,6 +36,7 @@ func new_regression_test_suite_s() regression_test_suite_s {
         failed_tests: 0,
     }
 }
+
 
 func add_golden_test_s(
     regression_test_suite_s suite,
@@ -59,6 +63,7 @@ func add_golden_test_s(
         failed_tests: suite.failed_tests,
     }
 }
+
 
 func run_golden_tests_s(regression_test_suite_s suite) regression_test_suite_s {
     println("═══════════════════════════════════════════")
@@ -90,11 +95,13 @@ func run_golden_tests_s(regression_test_suite_s suite) regression_test_suite_s {
     }
 }
 
+
 func run_single_test_s(golden_test_case_s test) bool {
     tensor_s actual = execute_operation_s(test.operation, test.input_a, test.input_b)
     bool match = compare_tensors_s(actual, test.expected_output, test.tolerance)
     match
 }
+
 
 func execute_operation_s(string op, tensor_s a, tensor_s b) tensor_s {
     if op == "matmul" {
@@ -112,6 +119,7 @@ func execute_operation_s(string op, tensor_s a, tensor_s b) tensor_s {
     a
 }
 
+
 func compare_tensors_s(tensor_s t1, tensor_s t2, float tolerance) bool {
     if t1.total_elements != t2.total_elements {
         return false
@@ -127,6 +135,7 @@ func compare_tensors_s(tensor_s t1, tensor_s t2, float tolerance) bool {
     }
     true
 }
+
 
 func numerical_gradient_check_s(
     string op,
@@ -156,10 +165,12 @@ func numerical_gradient_check_s(
     }
 }
 
+
 func compute_analytical_gradient_s(string op, tensor_s input) tensor_s {
     tensor_s grad = make_zeros_like_s(input)
     grad
 }
+
 
 func compute_numerical_gradient_s(string op, tensor_s input, float epsilon) tensor_s {
     []float grad = make([]float, 0)
@@ -186,9 +197,11 @@ func compute_numerical_gradient_s(string op, tensor_s input, float epsilon) tens
     }
 }
 
+
 func matmul_forward_s(tensor_s a, tensor_s b) tensor_s {
     make_zeros_like_s(a)
 }
+
 
 func add_forward_s(tensor_s a, tensor_s b) tensor_s {
     []float result = make([]float, 0)
@@ -208,6 +221,7 @@ func add_forward_s(tensor_s a, tensor_s b) tensor_s {
     }
 }
 
+
 func mul_forward_s(tensor_s a, tensor_s b) tensor_s {
     []float result = make([]float, 0)
     int i = 0
@@ -226,9 +240,11 @@ func mul_forward_s(tensor_s a, tensor_s b) tensor_s {
     }
 }
 
+
 func softmax_forward_s(tensor_s a) tensor_s {
     make_zeros_like_s(a)
 }
+
 
 func make_zeros_like_s(tensor_s t) tensor_s {
     []float zeros = make([]float, 0)
@@ -248,6 +264,7 @@ func make_zeros_like_s(tensor_s t) tensor_s {
     }
 }
 
+
 func copy_tensor_s(tensor_s t) tensor_s {
     []float copied = make([]float, 0)
     int i = 0
@@ -265,6 +282,7 @@ func copy_tensor_s(tensor_s t) tensor_s {
         device: t.device,
     }
 }
+
 
 func int_to_str(int n) string {
     if n == 0 { return "0" }
@@ -288,3 +306,4 @@ func int_to_str(int n) string {
     if neg { result = "-" + result }
     result
 }
+

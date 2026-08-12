@@ -1,10 +1,12 @@
 package neurx.posttrain.reward.verifiable
 use neurx.tensor.{tensor}
+
 struct math_problem {
     string question
     string answer
     string problem_type
 }
+
 
 struct code_problem {
     string description
@@ -13,12 +15,14 @@ struct code_problem {
     string language
 }
 
+
 struct verification_result {
     bool correct
     float reward
     string error_message
     []string intermediate_steps
 }
+
 
 func verify_math_solution(
     math_problem problem,
@@ -44,6 +48,7 @@ func verify_math_solution(
         intermediate_steps: steps,
     }
 }
+
 
 func verify_code_solution(
     code_problem problem,
@@ -77,6 +82,7 @@ func verify_code_solution(
     }
 }
 
+
 func extract_final_answer(string solution) string {
     string answer = ""
     if contains(solution, "\\boxed{") {
@@ -98,6 +104,7 @@ func extract_final_answer(string solution) string {
     answer
 }
 
+
 func compare_math_answers(string answer1, string answer2) bool {
     string norm1 = normalize_math_expression(answer1)
     string norm2 = normalize_math_expression(answer2)
@@ -116,6 +123,7 @@ func compare_math_answers(string answer1, string answer2) bool {
     false
 }
 
+
 func normalize_math_expression(string expr) string {
     string result = expr
     result = remove_all(result, " ")
@@ -126,6 +134,7 @@ func normalize_math_expression(string expr) string {
     result = replace_all(result, "\\sqrt", "sqrt")
     result
 }
+
 
 func extract_reasoning_steps(string solution) []string {
     []string steps = []string{}
@@ -140,6 +149,7 @@ func extract_reasoning_steps(string solution) []string {
     }
     steps
 }
+
 
 func evaluate_reasoning_steps(
     []string steps,
@@ -165,6 +175,7 @@ func evaluate_reasoning_steps(
     score
 }
 
+
 func run_code_sandbox(
     string code,
     string language,
@@ -172,6 +183,7 @@ func run_code_sandbox(
 ) (bool, string, string) {
     (true, "", "")
 }
+
 
 func compute_output_similarity(string output, string expected) float {
     if output == expected {
@@ -189,16 +201,30 @@ func compute_output_similarity(string output, string expected) float {
     (matches * 1.0) / (total * 1.0)
 }
 
+
 func trim_whitespace(string s) string { s }
+
 func contains(string s, string sub) bool { false }
+
 func index_of(string s, string sub) int { 0 }
+
 func index_of_from(string s, string sub, int from) int { 0 }
+
 func last_index_of(string s, string sub) int { 0 }
+
 func substring(string s, int start, int end) string { s }
+
 func extract_next_value(string s, int pos) string { "" }
+
 func remove_all(string s, string sub) string { s }
+
 func to_lower(string s) string { s }
+
 func replace_all(string s, string old, string new) string { s }
+
 func split(string s, string delim) []string { []string{} }
+
 func len(string s) int { 0 }
+
 func try_parse_number(string s) (bool, float) { (false, 0.0) }
+

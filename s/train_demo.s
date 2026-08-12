@@ -10,6 +10,7 @@ struct training_config {
     int save_every_n_steps
 }
 
+
 func new_training_config(int batch_size, int seq_len, int max_steps, float learning_rate) training_config {
     training_config {
         batch_size: batch_size,
@@ -21,6 +22,7 @@ func new_training_config(int batch_size, int seq_len, int max_steps, float learn
     }
 }
 
+
 struct training_state {
     int step
     float loss
@@ -29,11 +31,13 @@ struct training_state {
     bool trained
 }
 
+
 func new_training_state() training_state {
     training_state {
         step: 0, loss: 5.0, best_loss: 5.0, best_step: 0, trained: false,
     }
 }
+
 
 struct model_config {
     int vocab_size
@@ -43,6 +47,7 @@ struct model_config {
     int num_layers
     int param_count
 }
+
 
 func new_model_config() model_config {
     int vocab = 256
@@ -65,6 +70,7 @@ func new_model_config() model_config {
     }
 }
 
+
 func my_mod(int a, int b) int {
     if b <= 0 { return 0 }
     int result = a
@@ -72,6 +78,7 @@ func my_mod(int a, int b) int {
     while result < 0 { result = result + b }
     result
 }
+
 
 func compute_loss(int step, int tokens) float {
     float initial_loss = 5.0
@@ -84,6 +91,7 @@ func compute_loss(int step, int tokens) float {
     if loss < 0.30 { loss = 0.30 }
     loss
 }
+
 
 func format_checkpoint_content(int step, float loss, float best_loss, int best_step, bool trained, int param_count) string {
     string content = "checkpoint_v1\n"
@@ -118,6 +126,7 @@ func format_checkpoint_content(int step, float loss, float best_loss, int best_s
     content
 }
 
+
 func save_checkpoint_to_file(int step, float loss, float best_loss, int best_step, bool trained, int param_count, string name) string {
     string file_path = "artifacts/checkpoints/" + name + ".neurx"
     string manifest_path = "artifacts/checkpoints/latest_checkpoint.txt"
@@ -132,6 +141,7 @@ func save_checkpoint_to_file(int step, float loss, float best_loss, int best_ste
     }
     "[ERROR] Save failed"
 }
+
 
 func do_train_step(training_state state, training_config tconfig) training_state {
     int next_step = state.step + 1
@@ -161,10 +171,12 @@ func do_train_step(training_state state, training_config tconfig) training_state
     }
 }
 
+
 func check_should_save(int step, int save_every) bool {
     if save_every <= 0 { return true }
     my_mod(step, save_every) == 0 && step > 0
 }
+
 
 func run_training(training_config tconfig) training_context {
     println("")
@@ -203,10 +215,12 @@ func run_training(training_config tconfig) training_context {
     }
 }
 
+
 struct training_context {
     training_state final_state
     int model_param_count
 }
+
 
 func main() {
     training_config tconfig = new_training_config(8, 32, 50, 0.001)
@@ -241,3 +255,4 @@ func main() {
     println("NeurX Training Complete!")
     if result.trained && result.loss < result.best_loss + 1.0 { 0 } else { 1 }
 }
+

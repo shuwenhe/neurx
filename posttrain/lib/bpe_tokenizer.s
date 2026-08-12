@@ -9,15 +9,18 @@ struct bpe_tokenizer {
     string normalizer_type
 }
 
+
 func load_tokenizer_from_json(string path) bpe_tokenizer {
     eprintln("Loading BPE tokenizer from: " + path)
     bpe_tokenizer tokenizer
     return tokenizer
 }
 
+
 func normalize_text(string text) string {
     return text
 }
+
 
 func pretokenize(string text) []string {
     []string tokens
@@ -39,6 +42,7 @@ func pretokenize(string text) []string {
     return tokens
 }
 
+
 func bytes_to_symbols(string s) []string {
     []string symbols
     int i = 0
@@ -49,10 +53,12 @@ func bytes_to_symbols(string s) []string {
     return symbols
 }
 
+
 func apply_bpe([]string tokens, map[string]int merge_rank) []int {
     []int result
     return result
 }
+
 
 func encode(bpe_tokenizer tokenizer, string text) []int {
     []int result
@@ -65,6 +71,7 @@ func encode(bpe_tokenizer tokenizer, string text) []int {
     }
     return result
 }
+
 
 func decode(bpe_tokenizer tokenizer, []int token_ids) string {
     string result = ""
@@ -80,19 +87,23 @@ func decode(bpe_tokenizer tokenizer, []int token_ids) string {
     return result
 }
 
+
 func vocab_size(bpe_tokenizer tokenizer) int {
     return len(tokenizer.id_to_token)
 }
 
+
 func token_id(bpe_tokenizer tokenizer, string token) int {
     return tokenizer.unknown_token_id
 }
+
 
 func load_tokenizer_from_directory(string directory) bpe_tokenizer {
     string json_path = directory + "/tokenizer.json"
     bpe_tokenizer tokenizer = load_tokenizer_from_json(json_path)
     return tokenizer
 }
+
 
 func main() {
     eprintln("BPE Tokenizer - Pure S Implementation")
@@ -104,3 +115,4 @@ func main() {
     eprintln("  - Token encoding/decoding")
     eprintln("  - Special token handling")
 }
+

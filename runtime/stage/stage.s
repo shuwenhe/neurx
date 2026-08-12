@@ -23,6 +23,7 @@ struct stage_state {
     []string control_params
 }
 
+
 func join_strings([]string values) string {
     string out = ""
     int i = 0
@@ -35,6 +36,7 @@ func join_strings([]string values) string {
     }
     out
 }
+
 
 func new_stage_state(string name, string backend, string mode) stage_state {
     stage_state {
@@ -57,41 +59,51 @@ func new_stage_state(string name, string backend, string mode) stage_state {
     }
 }
 
+
 func stage_name(stage_state state) string {
     state.name
 }
+
 
 func stage_backend(stage_state state) string {
     state.backend
 }
 
+
 func stage_mode(stage_state state) string {
     state.mode
 }
+
 
 func stage_jit_enabled(stage_state state) bool {
     state.jit_enabled
 }
 
+
 func stage_lowered(stage_state state) bool {
     state.lowered
 }
+
 
 func stage_compiled(stage_state state) bool {
     state.compiled
 }
 
+
 func stage_executed(stage_state state) bool {
     state.executed
 }
+
 
 func stage_stage_count(stage_state state) int {
     len(state.stages)
 }
 
+
 func stage_param_count(stage_state state) int {
     len(state.params)
 }
+
 
 func stage_has_stage(stage_state state, string value) bool {
     int i = 0
@@ -104,6 +116,7 @@ func stage_has_stage(stage_state state, string value) bool {
     false
 }
 
+
 func stage_has_param(stage_state state, string value) bool {
     int i = 0
     while i < len(state.params) {
@@ -114,6 +127,7 @@ func stage_has_param(stage_state state, string value) bool {
     }
     false
 }
+
 
 func stage_add_stage(stage_state state, string value) stage_state {
     []string stages = copy_strings(state.stages)
@@ -138,6 +152,7 @@ func stage_add_stage(stage_state state, string value) stage_state {
     }
 }
 
+
 func stage_add_param(stage_state state, string value) stage_state {
     []string params = copy_strings(state.params)
     params.push(value)
@@ -161,6 +176,7 @@ func stage_add_param(stage_state state, string value) stage_state {
     }
 }
 
+
 func stage_set_jit_enabled(stage_state state, bool enabled) stage_state {
     stage_state {
         name: state.name,
@@ -181,6 +197,7 @@ func stage_set_jit_enabled(stage_state state, bool enabled) stage_state {
         control_params: copy_strings(state.control_params),
     }
 }
+
 
 func stage_set_lowered(stage_state state, bool lowered) stage_state {
     stage_state {
@@ -203,6 +220,7 @@ func stage_set_lowered(stage_state state, bool lowered) stage_state {
     }
 }
 
+
 func stage_set_compiled(stage_state state, bool compiled) stage_state {
     stage_state {
         name: state.name,
@@ -223,6 +241,7 @@ func stage_set_compiled(stage_state state, bool compiled) stage_state {
         control_params: copy_strings(state.control_params),
     }
 }
+
 
 func stage_set_executed(stage_state state, bool executed) stage_state {
     stage_state {
@@ -245,6 +264,7 @@ func stage_set_executed(stage_state state, bool executed) stage_state {
     }
 }
 
+
 func stage_clear_stages(stage_state state) stage_state {
     stage_state {
         name: state.name,
@@ -265,6 +285,7 @@ func stage_clear_stages(stage_state state) stage_state {
         control_params: copy_strings(state.control_params),
     }
 }
+
 
 func stage_clear_params(stage_state state) stage_state {
     stage_state {
@@ -287,33 +308,41 @@ func stage_clear_params(stage_state state) stage_state {
     }
 }
 
+
 func stage_control_enabled(stage_state state) bool {
     state.control_enabled
 }
+
 
 func stage_control_cond_enabled(stage_state state) bool {
     state.control_cond_enabled
 }
 
+
 func stage_control_loop_enabled(stage_state state) bool {
     state.control_loop_enabled
 }
+
 
 func stage_control_scan_enabled(stage_state state) bool {
     state.control_scan_enabled
 }
 
+
 func stage_control_iterations(stage_state state) int {
     state.control_iterations
 }
+
 
 func stage_control_branch_count(stage_state state) int {
     len(state.control_branches)
 }
 
+
 func stage_control_param_count(stage_state state) int {
     len(state.control_params)
 }
+
 
 func stage_has_control_branch(stage_state state, string branch) bool {
     int i = 0
@@ -326,6 +355,7 @@ func stage_has_control_branch(stage_state state, string branch) bool {
     false
 }
 
+
 func stage_has_control_param(stage_state state, string param) bool {
     int i = 0
     while i < len(state.control_params) {
@@ -336,6 +366,7 @@ func stage_has_control_param(stage_state state, string param) bool {
     }
     false
 }
+
 
 func stage_add_control_branch(stage_state state, string branch) stage_state {
     []string branches = copy_strings(state.control_branches)
@@ -360,6 +391,7 @@ func stage_add_control_branch(stage_state state, string branch) stage_state {
     }
 }
 
+
 func stage_add_control_param(stage_state state, string param) stage_state {
     []string params = copy_strings(state.control_params)
     params.push(param)
@@ -383,6 +415,7 @@ func stage_add_control_param(stage_state state, string param) stage_state {
     }
 }
 
+
 func stage_set_control_enabled(stage_state state, bool enabled) stage_state {
     stage_state {
         name: state.name,
@@ -403,6 +436,7 @@ func stage_set_control_enabled(stage_state state, bool enabled) stage_state {
         control_params: copy_strings(state.control_params),
     }
 }
+
 
 func stage_set_control_cond_enabled(stage_state state, bool enabled) stage_state {
     stage_state {
@@ -425,6 +459,7 @@ func stage_set_control_cond_enabled(stage_state state, bool enabled) stage_state
     }
 }
 
+
 func stage_set_control_loop_enabled(stage_state state, bool enabled) stage_state {
     stage_state {
         name: state.name,
@@ -445,6 +480,7 @@ func stage_set_control_loop_enabled(stage_state state, bool enabled) stage_state
         control_params: copy_strings(state.control_params),
     }
 }
+
 
 func stage_set_control_scan_enabled(stage_state state, bool enabled) stage_state {
     stage_state {
@@ -467,6 +503,7 @@ func stage_set_control_scan_enabled(stage_state state, bool enabled) stage_state
     }
 }
 
+
 func stage_set_control_iterations(stage_state state, int iterations) stage_state {
     stage_state {
         name: state.name,
@@ -487,6 +524,7 @@ func stage_set_control_iterations(stage_state state, int iterations) stage_state
         control_params: copy_strings(state.control_params),
     }
 }
+
 
 func stage_clear_control_branches(stage_state state) stage_state {
     stage_state {
@@ -509,6 +547,7 @@ func stage_clear_control_branches(stage_state state) stage_state {
     }
 }
 
+
 func stage_clear_control_params(stage_state state) stage_state {
     stage_state {
         name: state.name,
@@ -529,6 +568,7 @@ func stage_clear_control_params(stage_state state) stage_state {
         control_params: [],
     }
 }
+
 
 func stage_state_dict(stage_state state) stage_state {
     stage_state {
@@ -551,9 +591,11 @@ func stage_state_dict(stage_state state) stage_state {
     }
 }
 
+
 func stage_load_state_dict(stage_state state, stage_state other) stage_state {
     other
 }
+
 
 func stage_control_state_dict(stage_state state) stage_state {
     stage_state {
@@ -576,6 +618,7 @@ func stage_control_state_dict(stage_state state) stage_state {
     }
 }
 
+
 func stage_to_control_state(stage_state state) control_state {
     control_state {
         name: state.name,
@@ -587,6 +630,7 @@ func stage_to_control_state(stage_state state) control_state {
         params: copy_strings(state.control_params),
     }
 }
+
 
 func control_state_to_stage(control_state state, string backend, string mode) stage_state {
     stage_state {
@@ -609,6 +653,7 @@ func control_state_to_stage(control_state state, string backend, string mode) st
     }
 }
 
+
 func jit(stage_state state) stage_state {
     stage_state next = state
     if !stage_has_stage(next, "jit") {
@@ -616,6 +661,7 @@ func jit(stage_state state) stage_state {
     }
     stage_set_jit_enabled(next, true)
 }
+
 
 func lower(stage_state state) stage_state {
     stage_state next = state
@@ -628,6 +674,7 @@ func lower(stage_state state) stage_state {
     stage_set_lowered(next, true)
 }
 
+
 func compile(stage_state state) stage_state {
     stage_state next = lower(state)
     if !stage_has_stage(next, "compile") {
@@ -636,6 +683,7 @@ func compile(stage_state state) stage_state {
     stage_set_compiled(next, true)
 }
 
+
 func execute(stage_state state) stage_state {
     stage_state next = compile(state)
     if !stage_has_stage(next, "execute") {
@@ -643,6 +691,7 @@ func execute(stage_state state) stage_state {
     }
     stage_set_executed(next, true)
 }
+
 
 func stage_to_transform_chain(stage_state state) transform_chain {
     transform_chain chain = neurx.autograd.function.new_transform_chain()
@@ -678,6 +727,7 @@ func stage_to_transform_chain(stage_state state) transform_chain {
     chain = neurx.autograd.function.transform_chain_set_linearized(chain, state.lowered || state.compiled || state.executed)
     chain
 }
+
 
 func transform_chain_to_stage(transform_chain chain, string name, string backend, string mode) stage_state {
     []string stages = copy_strings(chain.steps)
@@ -764,3 +814,4 @@ func transform_chain_to_stage(transform_chain chain, string name, string backend
         control_params: control_params,
     }
 }
+

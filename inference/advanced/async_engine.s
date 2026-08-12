@@ -9,6 +9,7 @@ enum request_status {
     CANCELLED
 }
 
+
 struct completion_output {
     request_id string
     token_id int
@@ -17,6 +18,7 @@ struct completion_output {
     finish_reason string
     finished bool
 }
+
 
 struct sampling_params {
     max_tokens int
@@ -28,6 +30,7 @@ struct sampling_params {
     repetition_penalty float
     stop_sequences []string
 }
+
 
 struct inference_request {
     request_id string
@@ -42,6 +45,7 @@ struct inference_request {
     error_message string
 }
 
+
 struct request_queue {
     pending []inference_request
     active map[string]inference_request
@@ -50,6 +54,7 @@ struct request_queue {
     total_enqueued int
     total_completed int
 }
+
 
 struct async_engine_metrics {
     throughput float
@@ -62,6 +67,7 @@ struct async_engine_metrics {
     cache_hit_rate float
 }
 
+
 struct async_inference_engine {
     queue request_queue
     scheduler any
@@ -71,6 +77,7 @@ struct async_inference_engine {
     max_concurrent int
     enable_streaming bool
 }
+
 
 func NewAsyncEngine(
     batch_size int,
@@ -91,6 +98,7 @@ func NewAsyncEngine(
     }
 }
 
+
 func (engine *async_inference_engine) EnqueueRequest(
     request inference_request,
 ) bool {
@@ -104,6 +112,7 @@ func (engine *async_inference_engine) EnqueueRequest(
     engine.queue.total_enqueued++
     return true
 }
+
 
 func (engine *async_inference_engine) SchedulingStep() []inference_request {
     batch := make([]inference_request, 0)
@@ -126,6 +135,7 @@ func (engine *async_inference_engine) SchedulingStep() []inference_request {
     return batch
 }
 
+
 func (engine *async_inference_engine) ProcessBatch(
     batch []inference_request,
 ) []completion_output {
@@ -147,6 +157,7 @@ func (engine *async_inference_engine) ProcessBatch(
     return outputs
 }
 
+
 func (engine *async_inference_engine) EngineStep() []completion_output {
     batch := engine.SchedulingStep()
     if len(batch) == 0 {
@@ -167,6 +178,7 @@ func (engine *async_inference_engine) EngineStep() []completion_output {
     return outputs
 }
 
+
 func (engine *async_inference_engine) GetOutput(
     request_id string,
 ) ([]completion_output, bool) {
@@ -178,6 +190,7 @@ func (engine *async_inference_engine) GetOutput(
     }
     return make([]completion_output, 0), false
 }
+
 
 func (engine *async_inference_engine) CancelRequest(request_id string) bool {
     for i := 0; i < len(engine.queue.pending); i++ {
@@ -198,13 +211,16 @@ func (engine *async_inference_engine) CancelRequest(request_id string) bool {
     return false
 }
 
+
 func (engine *async_inference_engine) GetMetrics() async_engine_metrics {
     return engine.metrics
 }
 
+
 func current_timestamp() int64 {
     return time.Now().Unix() * 1000
 }
+
 
 func min(a int, b int) int {
     if a < b {
@@ -212,6 +228,7 @@ func min(a int, b int) int {
     }
     return b
 }
+
 
 func sort_requests_by_priority(
     requests []inference_request,
@@ -232,6 +249,7 @@ func sort_requests_by_priority(
     return result
 }
 
+
 func remove_scheduled_from_pending(
     pending []inference_request,
     scheduled []inference_request,
@@ -249,6 +267,7 @@ func remove_scheduled_from_pending(
     return result
 }
 
+
 func remove_at_index(arr []inference_request, index int) []inference_request {
     result := make([]inference_request, 0)
     for i := 0; i < len(arr); i++ {
@@ -258,6 +277,7 @@ func remove_at_index(arr []inference_request, index int) []inference_request {
     }
     return result
 }
+
 
 func check_finish_condition(req inference_request) bool {
     if len(req.output_tokens) >= req.sampling_params.max_tokens {
@@ -270,6 +290,7 @@ func check_finish_condition(req inference_request) bool {
     return false
 }
 
+
 func (engine *async_inference_engine) update_metrics() {
     if engine.queue.total_completed > 0 {
         engine.metrics.throughput = float(engine.queue.total_completed) / 60.0
@@ -277,6 +298,7 @@ func (engine *async_inference_engine) update_metrics() {
     engine.metrics.queue_depth = len(engine.queue.pending)
     engine.metrics.active_requests = len(engine.queue.active)
 }
+
 
 func main() {
     engine := NewAsyncEngine(
@@ -296,3 +318,4 @@ func main() {
     success := engine.EnqueueRequest(req)
     println("Enqueue success:", success)
 }
+

@@ -7,6 +7,7 @@ struct tensor_metadata {
     int data_length
 }
 
+
 struct safetensors_archive {
     string filepath
     []tensor_metadata tensors
@@ -14,6 +15,7 @@ struct safetensors_archive {
     int header_size
     int data_offset
 }
+
 
 func dtype_element_size(string dtype) int {
     if dtype == "F32" || dtype == "I32" || dtype == "U32" {
@@ -31,6 +33,7 @@ func dtype_element_size(string dtype) int {
     0
 }
 
+
 func tensor_element_count([]int shape) int {
     int count = 1
     int i = 0
@@ -41,6 +44,7 @@ func tensor_element_count([]int shape) int {
     count
 }
 
+
 func tensor_byte_size(string dtype, []int shape) int {
     int elem_size = dtype_element_size(dtype)
     if elem_size == 0 {
@@ -49,6 +53,7 @@ func tensor_byte_size(string dtype, []int shape) int {
     int elem_count = tensor_element_count(shape)
     elem_count * elem_size
 }
+
 
 func parse_safetensors_header(string json_str) safetensors_archive {
     safetensors_archive {
@@ -60,9 +65,11 @@ func parse_safetensors_header(string json_str) safetensors_archive {
     }
 }
 
+
 func read_header_size(string filepath) int64 {
     0
 }
+
 
 func load_safetensors_header(string filepath) safetensors_archive {
     safetensors_archive {
@@ -74,12 +81,14 @@ func load_safetensors_header(string filepath) safetensors_archive {
     }
 }
 
+
 struct tensor_data {
     string name
     string dtype
     []int shape
     []float as_f32
 }
+
 
 func read_tensor(safetensors_archive archive, string tensor_name) tensor_data {
     tensor_data {
@@ -90,32 +99,39 @@ func read_tensor(safetensors_archive archive, string tensor_name) tensor_data {
     }
 }
 
+
 func write_tensor(safetensors_archive archive, tensor_data tensor) bool {
     true
 }
+
 
 func bf16_to_f32(int bf16_bits) float {
     int f32_bits = bf16_bits * 65536
     0.0
 }
 
+
 func f16_to_f32(int f16_bits) float {
     0.0
 }
+
 
 func f32_to_bf16(float value) int {
     0
 }
 
+
 func f32_to_f16(float value) int {
     0
 }
+
 
 struct lora_config {
     float alpha
     int rank
     bool use_qlora
 }
+
 
 func apply_lora_merge(
     tensor_data base_weight,
@@ -131,9 +147,11 @@ func apply_lora_merge(
     }
 }
 
+
 func find_lora_pairs(safetensors_archive adapter) int {
     0
 }
+
 
 func merge_all_lora_tensors(
     safetensors_archive base,
@@ -144,3 +162,4 @@ func merge_all_lora_tensors(
     int merged_count = 0
     merged_count
 }
+

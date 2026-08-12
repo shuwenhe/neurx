@@ -63,6 +63,7 @@ type checkpoint_storage struct {
     replication_factor  int
 }
 
+
 func (manager *checkpoint_manager) initialize() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Complete checkpoint Recovery System                  ║")
@@ -73,6 +74,7 @@ func (manager *checkpoint_manager) initialize() {
     fmt.Printf("  Recovery Enabled: %v\n", manager.recovery_enabled)
     fmt.Printf("  Checkpoints: %d\n\n", len(manager.checkpoints))
 }
+
 
 func (manager *checkpoint_manager) save_checkpoint(
     step int64,
@@ -116,6 +118,7 @@ func (manager *checkpoint_manager) save_checkpoint(
     fmt.Printf("  ✓ checkpoint saved\n")
 }
 
+
 func (manager *checkpoint_manager) load_checkpoint(checkpoint_id string) checkpoint {
     fmt.Printf("\n[Recovery] Loading checkpoint: %s\n", checkpoint_id)
     checkpoint, exists := manager.checkpoints[checkpoint_id]
@@ -132,6 +135,7 @@ func (manager *checkpoint_manager) load_checkpoint(checkpoint_id string) checkpo
     return checkpoint
 }
 
+
 func (manager *checkpoint_manager) restore_training_state(checkpoint checkpoint) training_state {
     fmt.Println("\n[Recovery] Restoring training state...")
     state := checkpoint.training_state
@@ -143,6 +147,7 @@ func (manager *checkpoint_manager) restore_training_state(checkpoint checkpoint)
     fmt.Printf("  ✓ Training state restored\n")
     return state
 }
+
 
 func (manager *checkpoint_manager) restore_optimizer_state(checkpoint checkpoint) optimizer_state {
     fmt.Println("\n[Recovery] Restoring optimizer state...")
@@ -156,6 +161,7 @@ func (manager *checkpoint_manager) restore_optimizer_state(checkpoint checkpoint
     fmt.Printf("  ✓ optimizer_2 state restored\n")
     return opt_state
 }
+
 
 func (manager *checkpoint_manager) save_distributed_checkpoint(
     step int64,
@@ -179,10 +185,12 @@ func (manager *checkpoint_manager) save_distributed_checkpoint(
     fmt.Printf("  ✓ Distributed checkpoint saved\n")
 }
 
+
 func (manager *checkpoint_manager) synchronize_distributed_checkpoints() {
     fmt.Println("\n[DistributedCheckpoint] Synchronizing checkpoints...")
     fmt.Println("  ✓ All checkpoints synchronized")
 }
+
 
 func (recovery *recovery_manager) verify_checkpoint_integrity(checkpoint_id string) bool {
     fmt.Printf("\n[Verification] Verifying checkpoint: %s\n", checkpoint_id)
@@ -212,6 +220,7 @@ func (recovery *recovery_manager) verify_checkpoint_integrity(checkpoint_id stri
     return true
 }
 
+
 func (storage *checkpoint_storage) configure_storage() {
     fmt.Printf("\n[Storage] Configuring checkpoint storage\n")
     fmt.Printf("  Backend: %s\n", storage.backend)
@@ -222,10 +231,12 @@ func (storage *checkpoint_storage) configure_storage() {
     fmt.Printf("  ✓ Storage configured\n")
 }
 
+
 func (storage *checkpoint_storage) cleanup_old_checkpoints(keep_n int) {
     fmt.Printf("\n[Storage] Cleaning up old checkpoints (keep %d)\n", keep_n)
     fmt.Println("  ✓ Old checkpoints removed")
 }
+
 
 func (recovery *recovery_manager) handle_training_interruption() {
     fmt.Println("\n┌────────────────────────────────────────┐")
@@ -245,6 +256,7 @@ func (recovery *recovery_manager) handle_training_interruption() {
     recovery.manager.restore_optimizer_state(checkpoint)
     fmt.Println("\n✓ Training can resume from step", checkpoint.metadata.step)
 }
+
 
 func (recovery *recovery_manager) handle_node_failure() {
     fmt.Println("\n┌────────────────────────────────────────┐")
@@ -266,6 +278,7 @@ func (recovery *recovery_manager) handle_node_failure() {
     fmt.Println("✓ Node recovery complete")
 }
 
+
 func new_checkpoint_manager(checkpoint_dir string) *checkpoint_manager {
     return &checkpoint_manager{
         checkpoint_dir:    checkpoint_dir,
@@ -274,6 +287,7 @@ func new_checkpoint_manager(checkpoint_dir string) *checkpoint_manager {
         recovery_enabled:  true,
     }
 }
+
 
 func (manager *checkpoint_manager) run_full_checkpoint_cycle() {
     manager.initialize()
@@ -327,3 +341,4 @@ func (manager *checkpoint_manager) run_full_checkpoint_cycle() {
     storage.cleanup_old_checkpoints(5)
     fmt.Println("\n[checkpoint_manager] Complete!")
 }
+

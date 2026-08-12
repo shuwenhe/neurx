@@ -7,6 +7,7 @@ struct compile_cache_state {
     int miss_count
 }
 
+
 func new_compile_cache_state() compile_cache_state {
     compile_cache_state {
         keys: [],
@@ -15,6 +16,7 @@ func new_compile_cache_state() compile_cache_state {
         miss_count: 0,
     }
 }
+
 
 func make_cache_key(string module_name, string backend, string mode, bool dynamic, bool fullgraph, bool debug) string {
     string dyn = "0"
@@ -32,13 +34,16 @@ func make_cache_key(string module_name, string backend, string mode, bool dynami
     module_name + "|" + backend + "|" + mode + "|" + dyn + "|" + full + "|" + dbg
 }
 
+
 func get_key(compile_cache_state cache, int index) string {
     cache.keys[index]
 }
 
+
 func get_entry(compile_cache_state cache, int index) string {
     cache.entries[index]
 }
+
 
 func cache_find_index(compile_cache_state cache, string key) int {
     int i = 0
@@ -51,9 +56,11 @@ func cache_find_index(compile_cache_state cache, string key) int {
     -1
 }
 
+
 func cache_has_key(compile_cache_state cache, string key) bool {
     cache_find_index(cache, key) >= 0
 }
+
 
 func cache_put(compile_cache_state cache, string key, string entry) compile_cache_state {
     int idx = cache_find_index(cache, key)
@@ -78,6 +85,7 @@ func cache_put(compile_cache_state cache, string key, string entry) compile_cach
     }
 }
 
+
 func cache_hit(compile_cache_state cache) compile_cache_state {
     compile_cache_state {
         keys: copy_strings(cache.keys),
@@ -87,6 +95,7 @@ func cache_hit(compile_cache_state cache) compile_cache_state {
     }
 }
 
+
 func cache_entry(compile_cache_state cache, string key) string {
     int idx = cache_find_index(cache, key)
     if idx < 0 {
@@ -95,10 +104,13 @@ func cache_entry(compile_cache_state cache, string key) string {
     get_entry(cache, idx)
 }
 
+
 func compile_cache_state_dict(compile_cache_state cache) compile_cache_state {
     cache
 }
 
+
 func compile_cache_load_state_dict(compile_cache_state cache, compile_cache_state other) compile_cache_state {
     other
 }
+

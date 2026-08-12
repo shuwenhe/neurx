@@ -8,6 +8,7 @@ enum log_level {
     CRITICAL = 4
 }
 
+
 struct log_entry {
     timestamp: string
     level: log_level
@@ -17,6 +18,7 @@ struct log_entry {
     loss: float
     metric: float
 }
+
 
 struct training_metrics {
     loss: float
@@ -29,6 +31,7 @@ struct training_metrics {
     grad_norm: float
     loss_scale: float
 }
+
 
 struct monitor_config {
     log_level: log_level
@@ -44,6 +47,7 @@ struct monitor_config {
     enable_progress_bar: bool
 }
 
+
 struct training_monitor {
     config: monitor_config
     logs: []log_entry
@@ -53,6 +57,7 @@ struct training_monitor {
     start_time: float
     step_times: []float
 }
+
 
 func new_monitor_config() monitor_config {
     monitor_config config {
@@ -71,6 +76,7 @@ func new_monitor_config() monitor_config {
     config
 }
 
+
 func new_training_monitor(monitor_config config) training_monitor {
     training_monitor monitor {
         config: config,
@@ -84,30 +90,36 @@ func new_training_monitor(monitor_config config) training_monitor {
     monitor
 }
 
+
 func log_debug(training_monitor monitor, string message) training_monitor {
     monitor = add_log_entry(monitor, log_level.DEBUG, message)
     monitor
 }
+
 
 func log_info(training_monitor monitor, string message) training_monitor {
     monitor = add_log_entry(monitor, log_level.INFO, message)
     monitor
 }
 
+
 func log_warn(training_monitor monitor, string message) training_monitor {
     monitor = add_log_entry(monitor, log_level.WARN, message)
     monitor
 }
+
 
 func log_error(training_monitor monitor, string message) training_monitor {
     monitor = add_log_entry(monitor, log_level.ERROR, message)
     monitor
 }
 
+
 func log_critical(training_monitor monitor, string message) training_monitor {
     monitor = add_log_entry(monitor, log_level.CRITICAL, message)
     monitor
 }
+
 
 func add_log_entry(training_monitor monitor, log_level level, string message) training_monitor {
     if int(level) < int(monitor.config.log_level) {
@@ -130,11 +142,13 @@ func add_log_entry(training_monitor monitor, log_level level, string message) tr
     monitor
 }
 
+
 func print_log_entry(log_entry entry) {
     string level_str = level_to_string(entry.level)
     string log = "[" + entry.timestamp + "] [" + level_str + "] " + entry.message
     print(log)
 }
+
 
 func level_to_string(log_level level) string {
     switch level {
@@ -146,6 +160,7 @@ func level_to_string(log_level level) string {
         default: return "UNKNOWN"
     }
 }
+
 
 func update_metrics(training_monitor monitor, training_metrics metrics) training_monitor {
     monitor.current_metrics = metrics
@@ -163,6 +178,7 @@ func update_metrics(training_monitor monitor, training_metrics metrics) training
     monitor
 }
 
+
 func save_metrics(training_monitor monitor) {
     string content = "["
     for i := 0; i < len(monitor.metrics_history); i += 1 {
@@ -173,6 +189,7 @@ func save_metrics(training_monitor monitor) {
     }
     content = content + "]"
 }
+
 
 func metrics_to_json(training_metrics metrics) string {
     string json = "{"
@@ -189,11 +206,14 @@ func metrics_to_json(training_metrics metrics) string {
     json
 }
 
+
 func log_wandb(training_monitor monitor, training_metrics metrics) {
 }
 
+
 func log_tensorboard(training_monitor monitor, training_metrics metrics) {
 }
+
 
 func get_metrics_summary(training_monitor monitor) string {
     string summary = "Training Metrics Summary:\n"
@@ -209,6 +229,7 @@ func get_metrics_summary(training_monitor monitor) string {
     summary = summary + "\nLog Count: " + string(len(monitor.logs))
     summary
 }
+
 
 func format_float(float x, int decimals) string {
     string s = string(x)
@@ -229,6 +250,7 @@ func format_float(float x, int decimals) string {
     s[0..needed]
 }
 
+
 func format_time(float seconds) string {
     int hours = int(seconds / 3600)
     int minutes = int((seconds % 3600) / 60)
@@ -239,6 +261,7 @@ func format_time(float seconds) string {
     h + ":" + m + ":" + s
 }
 
+
 func make_string(int n, char c) string {
     string s = ""
     for i := 0; i < n; i += 1 {
@@ -246,6 +269,7 @@ func make_string(int n, char c) string {
     }
     s
 }
+
 
 func log_training_step(training_monitor monitor, int step, int epoch, float loss, float lr) training_monitor {
     string message = "Step " + string(step) + " | Epoch " + string(epoch) +
@@ -255,6 +279,7 @@ func log_training_step(training_monitor monitor, int step, int epoch, float loss
     monitor
 }
 
+
 func log_validation(training_monitor monitor, int step, float val_loss, float val_ppl) training_monitor {
     string message = "Validation | Step " + string(step) +
                      " | Loss: " + format_float(val_loss, 6) +
@@ -263,11 +288,13 @@ func log_validation(training_monitor monitor, int step, float val_loss, float va
     monitor
 }
 
+
 func log_checkpoint(training_monitor monitor, string path, int step) training_monitor {
     string message = "checkpoint saved: " + path + " (step " + string(step) + ")"
     monitor = add_log_entry(monitor, log_level.INFO, message)
     monitor
 }
+
 
 func log_device_info(training_monitor monitor, mps.mps_context ctx) training_monitor {
     for i := 0; i < len(ctx.devices); i += 1 {
@@ -277,11 +304,13 @@ func log_device_info(training_monitor monitor, mps.mps_context ctx) training_mon
     monitor
 }
 
+
 func log_config(training_monitor monitor, string config_str) training_monitor {
     monitor = add_log_entry(monitor, log_level.INFO, "Training Configuration:")
     monitor = add_log_entry(monitor, log_level.INFO, config_str)
     monitor
 }
+
 
 func log_start(training_monitor monitor, int total_steps, int epochs) training_monitor {
     string message = "Training started | Total Steps: " + string(total_steps) +
@@ -291,6 +320,7 @@ func log_start(training_monitor monitor, int total_steps, int epochs) training_m
     monitor
 }
 
+
 func log_end(training_monitor monitor, float final_loss, float elapsed_time) training_monitor {
     string message = "Training completed | Final Loss: " + format_float(final_loss, 6) +
                      " | Elapsed Time: " + format_time(elapsed_time)
@@ -298,13 +328,16 @@ func log_end(training_monitor monitor, float final_loss, float elapsed_time) tra
     monitor
 }
 
+
 func current_time() float {
     0.0
 }
 
+
 func current_timestamp() string {
     "2024-01-01_00-00-00"
 }
+
 
 func calculate_throughput(training_monitor monitor, int samples, float step_time) float {
     monitor.step_times.push(step_time)
@@ -321,6 +354,7 @@ func calculate_throughput(training_monitor monitor, int samples, float step_time
     }
     samples / avg_time
 }
+
 
 func get_average_metrics(training_monitor monitor, int window) training_metrics {
     int n = len(monitor.metrics_history)
@@ -357,9 +391,11 @@ func get_average_metrics(training_monitor monitor, int window) training_metrics 
     avg
 }
 
+
 func max(int a, int b) int {
     if a > b {
         return a
     }
     b
 }
+

@@ -32,6 +32,7 @@ func call_trace_make_entry(int step, string phase, string module_path, string fu
     "[step=" + string(step) + " phase=" + phase + " module=" + module_path + " func=" + func_name + " status=" + status + "]"
 }
 
+
 func call_trace_append(agent_memory_state memory, int step, string phase, string module_path, string func_name, bool ok) agent_memory_state {
     string entry = call_trace_make_entry(step, phase, module_path, func_name, ok)
     agent_memory_lookup_result existing = agent_memory_lookup_long(memory, CALL_TRACE_MEM_KEY)
@@ -42,6 +43,7 @@ func call_trace_append(agent_memory_state memory, int step, string phase, string
     }
 }
 
+
 func call_trace_get_log(agent_memory_state memory) string {
     agent_memory_lookup_result r = agent_memory_lookup_long(memory, CALL_TRACE_MEM_KEY)
     if r.found {
@@ -49,6 +51,7 @@ func call_trace_get_log(agent_memory_state memory) string {
     }
     ""
 }
+
 
 func call_trace_write_log(agent_memory_state memory, string path) string {
     string log_str = call_trace_get_log(memory)
@@ -58,6 +61,7 @@ func call_trace_write_log(agent_memory_state memory, string path) string {
     runtime_write_text_file(path, log_str)
 }
 
+
 func call_trace_default_log_path() string {
     string env_path = trim(runtime_env_get("NEURX_CALL_TRACE_LOG", ""))
     if env_path != "" {
@@ -66,7 +70,9 @@ func call_trace_default_log_path() string {
     ".neurx_call_trace.log"
 }
 
+
 func call_trace_maybe_write(agent_memory_state memory) string {
     string path = call_trace_default_log_path()
     call_trace_write_log(memory, path)
 }
+

@@ -1,5 +1,6 @@
 package neurx.posttrain.optimizer.adamw
 use neurx.posttrain.model.model_loader.{fill_model_tensor}
+
 struct adamw_optimizer {
     []float param_groups
     [][]float param_states_m
@@ -13,11 +14,13 @@ struct adamw_optimizer {
     int warmup_steps
 }
 
+
 struct gradient_state {
     []float gradients
     float total_grad_norm
     int grad_count
 }
+
 
 struct optimizer_config {
     float learning_rate
@@ -31,6 +34,7 @@ struct optimizer_config {
     string scheduler_type
 }
 
+
 struct learning_rate_schedule {
     float current_lr
     float base_lr
@@ -39,6 +43,7 @@ struct learning_rate_schedule {
     string scheduler_type
     int current_step
 }
+
 
 func create_optimizer_config(float lr, float wd) optimizer_config {
     optimizer_config config
@@ -53,6 +58,7 @@ func create_optimizer_config(float lr, float wd) optimizer_config {
     config.scheduler_type = "cosine"
     return config
 }
+
 
 func create_adamw_optimizer(int num_params, optimizer_config config) adamw_optimizer {
     adamw_optimizer optimizer
@@ -74,6 +80,7 @@ func create_adamw_optimizer(int num_params, optimizer_config config) adamw_optim
     }
     return optimizer
 }
+
 
 func clip_grad_norm([]float gradients, float max_norm) []float {
     float total_norm = 0.0
@@ -101,12 +108,14 @@ func clip_grad_norm([]float gradients, float max_norm) []float {
     return clipped
 }
 
+
 func get_learning_rate_with_warmup(adamw_optimizer opt, optimizer_config config) float {
     if opt.step_count < config.warmup_steps {
         return config.learning_rate * (((opt.step_count as float)) / ((config.warmup_steps as float)))
     }
     return config.learning_rate
 }
+
 
 func get_learning_rate_cosine_annealing(adamw_optimizer opt, optimizer_config config) float {
     float progress = (((opt.step_count as float)) / ((config.total_steps as float)))
@@ -116,6 +125,7 @@ func get_learning_rate_cosine_annealing(adamw_optimizer opt, optimizer_config co
     float cosine_decay = 0.5 * (1.0 + cos(3.14159265359 * progress))
     return config.learning_rate * cosine_decay
 }
+
 
 func adamw_step(adamw_optimizer opt, []float params, []float gradients, optimizer_config config) adamw_optimizer {
     opt.step_count = opt.step_count + 1
@@ -139,6 +149,7 @@ func adamw_step(adamw_optimizer opt, []float params, []float gradients, optimize
     return opt
 }
 
+
 func adamw_zero_grad(adamw_optimizer opt) adamw_optimizer {
     int i = 0
     while i < len(opt.param_states_m) {
@@ -153,6 +164,7 @@ func adamw_zero_grad(adamw_optimizer opt) adamw_optimizer {
     return opt
 }
 
+
 func create_learning_rate_schedule(optimizer_config config) learning_rate_schedule {
     learning_rate_schedule schedule
     schedule.base_lr = config.learning_rate
@@ -163,6 +175,7 @@ func create_learning_rate_schedule(optimizer_config config) learning_rate_schedu
     schedule.current_step = 0
     return schedule
 }
+
 
 func get_learning_rate_from_schedule(learning_rate_schedule schedule) float {
     float progress = (((schedule.current_step as float)) / ((schedule.total_steps as float)))
@@ -181,8 +194,10 @@ func get_learning_rate_from_schedule(learning_rate_schedule schedule) float {
     return schedule.base_lr
 }
 
+
 func step_learning_rate_schedule(learning_rate_schedule schedule) learning_rate_schedule {
     schedule.current_step = schedule.current_step + 1
     schedule.current_lr = get_learning_rate_from_schedule(schedule)
     return schedule
 }
+

@@ -1,6 +1,7 @@
 package neurx.inference.api.rest_api
 use neurx.inference.api.http_server.{http_request, http_response}
 use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result, load_real_text_engine, generate_response, resolve_model_path_from_env, resolve_prompt_from_body, parse_max_tokens, parse_bool, build_health_json, build_models_json, build_generate_json, build_chat_completion_json}
+
 struct inference_request {
     string prompt
     int max_tokens
@@ -10,11 +11,13 @@ struct inference_request {
     bool stream
 }
 
+
 struct inference_response {
     string response
     int tokens_generated
     float latency_ms
 }
+
 
 func parse_json_string(string json_str, string key) string {
     start_key := "\"" + key + "\":"
@@ -34,6 +37,7 @@ func parse_json_string(string json_str, string key) string {
     return ""
 }
 
+
 func parse_json_int(string json_str, string key) int {
     start_key := "\"" + key + "\":"
     start_idx := index_of(json_str, start_key)
@@ -52,6 +56,7 @@ func parse_json_int(string json_str, string key) int {
     return 0
 }
 
+
 func index_of(string s, string substr) int {
     for i := 0; i < len(s) - len(substr) + 1; i++ {
         if s[i:i+len(substr)] == substr {
@@ -61,6 +66,7 @@ func index_of(string s, string substr) int {
     return -1
 }
 
+
 func index_of_from(string s, string substr, int start) int {
     for i := start; i < len(s) - len(substr) + 1; i++ {
         if s[i:i+len(substr)] == substr {
@@ -69,6 +75,7 @@ func index_of_from(string s, string substr, int start) int {
     }
     return -1
 }
+
 
 func string_to_int(string s) int {
     result := 0
@@ -80,6 +87,7 @@ func string_to_int(string s) int {
     }
     return result
 }
+
 
 func int_to_string(int val) string {
     if val == 0 { return "0" }
@@ -94,10 +102,12 @@ func int_to_string(int val) string {
     return res
 }
 
+
 func string_at_index(string s, int idx) string {
     if idx < 0 || idx >= len(s) { return "" }
     return string(s[idx : idx+1])
 }
+
 
 func parse_inference_request(string body) inference_request {
     prompt := parse_json_string(body, "prompt")
@@ -115,9 +125,11 @@ func parse_inference_request(string body) inference_request {
     }
 }
 
+
 func load_engine() real_text_engine_state {
     load_real_text_engine(resolve_model_path_from_env())
 }
+
 
 func handle_generate(http_request req) http_response {
     if req.method != "POST" {
@@ -146,6 +158,7 @@ func handle_generate(http_request req) http_response {
     }
 }
 
+
 func handle_chat_completions(http_request req) http_response {
     if req.method != "POST" {
         return http_response{
@@ -173,6 +186,7 @@ func handle_chat_completions(http_request req) http_response {
     }
 }
 
+
 func handle_health(http_request req) http_response {
     real_text_engine_state state = load_engine()
     int status_code = 200
@@ -186,6 +200,7 @@ func handle_health(http_request req) http_response {
     }
 }
 
+
 func handle_models(http_request req) http_response {
     real_text_engine_state state = load_engine()
     int status_code = 200
@@ -198,6 +213,7 @@ func handle_models(http_request req) http_response {
         body: build_models_json(state),
     }
 }
+
 
 func route_request(http_request req) http_response {
     path := req.path
@@ -231,3 +247,4 @@ func route_request(http_request req) http_response {
         body: "{\"error\":\"Not found\"}",
     }
 }
+

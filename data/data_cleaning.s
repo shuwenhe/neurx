@@ -5,6 +5,7 @@ use neurx.runtime.io.{
     io_write_file, io_list_files, io_file_size
 }
 
+
 struct cleaning_config {
     string raw_dir
     string cleaned_dir
@@ -15,6 +16,7 @@ struct cleaning_config {
     bool enable_filtering
 }
 
+
 struct cleaning_stats {
     int total_documents
     int valid_documents
@@ -24,6 +26,7 @@ struct cleaning_stats {
     int long_documents
     long total_tokens_estimate
 }
+
 
 func new_cleaning_config() cleaning_config {
     cleaning_config {
@@ -37,6 +40,7 @@ func new_cleaning_config() cleaning_config {
     }
 }
 
+
 func new_cleaning_stats() cleaning_stats {
     cleaning_stats {
         total_documents: 0,
@@ -49,11 +53,13 @@ func new_cleaning_stats() cleaning_stats {
     }
 }
 
+
 struct cleaning_result {
     string cleaned_text
     bool is_valid
     cleaning_stats stats
 }
+
 
 func simple_hash(string text) string {
     int len = string_length(text)
@@ -66,10 +72,12 @@ func simple_hash(string text) string {
     return prefix + "_" + string(len)
 }
 
+
 func is_empty_text(string text) bool {
     string trimmed = string_trim(text)
     return string_length(trimmed) == 0
 }
+
 
 func clean_record(string line) cleaning_result {
     cleaning_stats stats = new_cleaning_stats()
@@ -111,6 +119,7 @@ func clean_record(string line) cleaning_result {
     result.stats.total_tokens_estimate = long(text_len / 4)
     return result
 }
+
 
 func clean_raw_data(cleaning_config cfg) cleaning_stats {
     io_println("🔄 startdatacleanpipeline...\n")
@@ -167,6 +176,7 @@ func clean_raw_data(cleaning_config cfg) cleaning_stats {
     return total_stats
 }
 
+
 func generate_dataset_splits(cleaning_config cfg) {
     io_println("\n📊 generatedataEnglish text...")
     []string all_lines = io_read_lines(cfg.output_file)
@@ -178,6 +188,7 @@ func generate_dataset_splits(cleaning_config cfg) {
     int test_size = total - train_size - val_size
     io_println("  ✓ generatetestEnglish text: " + string(test_size) + " English text")
 }
+
 
 func run_data_cleaning() {
     cleaning_config cfg = new_cleaning_config()
@@ -193,3 +204,4 @@ func run_data_cleaning() {
     io_println("\n✨ datacleanpipelineEnglish text!")
     io_println("English textstep: generateEnglish textdataEnglish text shard/ directory")
 }
+

@@ -43,6 +43,7 @@ func top_p_sample(
     (selected_token, advance_rng(rng_state))
 }
 
+
 func beam_search_decode(
     [][]float all_logits,
     sampling_config config,
@@ -112,3 +113,4 @@ func beam_search_decode(
     }
     []
 }
+

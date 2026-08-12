@@ -12,6 +12,7 @@ func schema_sql(string password) string {
     "ALTER TABLE `user` MODIFY COLUMN `phone` VARCHAR(32) NOT NULL;\n"
 }
 
+
 func main() {
     string password = runtime_env_get("NEURX_DB_PASSWORD", "")
     if password == "" {
@@ -33,3 +34,4 @@ func main() {
     println("NeurX MySQL schema initialized")
     0
 }
+

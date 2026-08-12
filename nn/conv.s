@@ -11,6 +11,7 @@ func copy_float([]float data) []float {
     out
 }
 
+
 func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
@@ -22,12 +23,14 @@ func copy_int([]int data) []int {
     out
 }
 
+
 func shape2(int a, int b) []int {
     []int s = []int{cap: 2}
     s[0] = a
     s[1] = b
     s
 }
+
 
 func shape3(int a, int b, int c) []int {
     []int s = []int{cap: 3}
@@ -36,6 +39,7 @@ func shape3(int a, int b, int c) []int {
     s[2] = c
     s
 }
+
 
 func shape4(int a, int b, int c, int d) []int {
     []int s = []int{cap: 4}
@@ -46,9 +50,11 @@ func shape4(int a, int b, int c, int d) []int {
     s
 }
 
+
 func out_size(int in_size, int kernel, int stride, int padding, int dilation) int {
     (in_size + 2 * padding - dilation * (kernel - 1) - 1) / stride + 1
 }
+
 
 struct conv1d_state {
     int in_channels
@@ -61,6 +67,7 @@ struct conv1d_state {
     []float bias
     bool use_bias
 }
+
 
 func new_conv1d(int in_channels, int out_channels, int kernel_size, int stride, int padding, int dilation, bool use_bias) conv1d_state {
     int w_size = out_channels * in_channels * kernel_size
@@ -88,6 +95,7 @@ func new_conv1d(int in_channels, int out_channels, int kernel_size, int stride, 
         use_bias: use_bias,
     }
 }
+
 
 func conv1d_forward(conv1d_state layer, tensor input) tensor {
     int batch = input.shape[0]
@@ -134,6 +142,7 @@ func conv1d_forward(conv1d_state layer, tensor input) tensor {
     neurx.tensor.new(out, shape3(batch, out_ch, out_len), input.requires_grad)
 }
 
+
 struct conv2d_state {
     int in_channels
     int out_channels
@@ -149,6 +158,7 @@ struct conv2d_state {
     []float bias
     bool use_bias
 }
+
 
 func new_conv2d(int in_channels, int out_channels, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w, int dil_h, int dil_w, bool use_bias) conv2d_state {
     int w_size = out_channels * in_channels * kernel_h * kernel_w
@@ -180,6 +190,7 @@ func new_conv2d(int in_channels, int out_channels, int kernel_h, int kernel_w, i
         use_bias: use_bias,
     }
 }
+
 
 func conv2d_forward(conv2d_state layer, tensor input) tensor {
     int batch = input.shape[0]
@@ -235,6 +246,7 @@ func conv2d_forward(conv2d_state layer, tensor input) tensor {
     neurx.tensor.new(out, shape4(batch, out_ch, out_h, out_w), input.requires_grad)
 }
 
+
 struct convtranspose1d_state {
     int in_channels
     int out_channels
@@ -247,6 +259,7 @@ struct convtranspose1d_state {
     []float bias
     bool use_bias
 }
+
 
 func new_convtranspose1d(int in_channels, int out_channels, int kernel_size, int stride, int padding, int output_padding, int dilation, bool use_bias) convtranspose1d_state {
     int w_size = in_channels * out_channels * kernel_size
@@ -275,6 +288,7 @@ func new_convtranspose1d(int in_channels, int out_channels, int kernel_size, int
         use_bias: use_bias,
     }
 }
+
 
 func convtranspose1d_forward(convtranspose1d_state layer, tensor input) tensor {
     int batch = input.shape[0]
@@ -327,6 +341,7 @@ func convtranspose1d_forward(convtranspose1d_state layer, tensor input) tensor {
     neurx.tensor.new(out, shape3(batch, out_ch, out_len), input.requires_grad)
 }
 
+
 struct convtranspose2d_state {
     int in_channels
     int out_channels
@@ -344,6 +359,7 @@ struct convtranspose2d_state {
     []float bias
     bool use_bias
 }
+
 
 func new_convtranspose2d(int in_channels, int out_channels, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w, int output_pad_h, int output_pad_w, int dil_h, int dil_w, bool use_bias) convtranspose2d_state {
     int w_size = in_channels * out_channels * kernel_h * kernel_w
@@ -377,6 +393,7 @@ func new_convtranspose2d(int in_channels, int out_channels, int kernel_h, int ke
         use_bias: use_bias,
     }
 }
+
 
 func convtranspose2d_forward(convtranspose2d_state layer, tensor input) tensor {
     int batch = input.shape[0]
@@ -447,3 +464,4 @@ func convtranspose2d_forward(convtranspose2d_state layer, tensor input) tensor {
     }
     neurx.tensor.new(out, shape4(batch, out_ch, out_h, out_w), input.requires_grad)
 }
+

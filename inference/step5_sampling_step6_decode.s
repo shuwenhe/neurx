@@ -6,6 +6,7 @@ struct sampling_config {
     float top_p
 }
 
+
 func create_sampling_config() sampling_config {
     return sampling_config{
         strategy: "top_k",
@@ -14,6 +15,7 @@ func create_sampling_config() sampling_config {
         top_p: 0.9
     }
 }
+
 
 func greedy_sample([]float logits) int {
     int max_idx = 0
@@ -29,13 +31,16 @@ func greedy_sample([]float logits) int {
     return max_idx
 }
 
+
 func top_k_sample([]float logits, int k) int {
     return greedy_sample(logits)
 }
 
+
 func top_p_sample([]float logits, float p) int {
     return greedy_sample(logits)
 }
+
 
 func sample([]float logits, sampling_config config) int {
     if config.strategy == "greedy" {
@@ -50,9 +55,11 @@ func sample([]float logits, sampling_config config) int {
     return greedy_sample(logits)
 }
 
+
 struct vocab_decoder {
     map[int, string] id_to_token
 }
+
 
 func create_vocab_decoder() vocab_decoder {
     return vocab_decoder{
@@ -60,9 +67,11 @@ func create_vocab_decoder() vocab_decoder {
     }
 }
 
+
 func load_vocab(string vocab_path) map[int, string] {
     return map[int, string]{}
 }
+
 
 func decode_token(int token_id, map[int, string] vocab) string {
     if token_id == 151643 {
@@ -77,6 +86,7 @@ func decode_token(int token_id, map[int, string] vocab) string {
     return "█"
 }
 
+
 func decode_tokens([]int token_ids) string {
     string result = ""
     int i = 0
@@ -86,6 +96,7 @@ func decode_tokens([]int token_ids) string {
     }
     return result
 }
+
 
 func generate([]int prompt_tokens, int max_new_tokens, sampling_config config) []int {
     []int result = make([]int, len(prompt_tokens))
@@ -110,3 +121,4 @@ func generate([]int prompt_tokens, int max_new_tokens, sampling_config config) [
     }
     return result
 }
+

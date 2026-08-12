@@ -18,6 +18,7 @@ struct sampling_config {
     uint64 seed
 }
 
+
 struct generation_state {
     []int input_ids
     [][]float scores
@@ -28,11 +29,13 @@ struct generation_state {
     []beam_state beams
 }
 
+
 struct beam_state {
     []int token_ids
     float score
     bool is_finished
 }
+
 
 func default_sampling_config() sampling_config {
     sampling_config {
@@ -55,6 +58,7 @@ func default_sampling_config() sampling_config {
     }
 }
 
+
 func greedy_config() sampling_config {
     sampling_config {
         strategy: "greedy",
@@ -67,6 +71,7 @@ func greedy_config() sampling_config {
     }
 }
 
+
 func creative_config() sampling_config {
     sampling_config {
         strategy: "top_p",
@@ -78,3 +83,4 @@ func creative_config() sampling_config {
         do_sample: true,
     }
 }
+

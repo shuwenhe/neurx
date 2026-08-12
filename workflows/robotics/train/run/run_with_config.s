@@ -41,15 +41,18 @@ func main() {
     0
 }
 
+
 func usage() {
     println("Usage: run_with_config.s")
     println("Configure via NEURX_ROBOTICS_CONFIG and NEURX_ROBOTICS_STEPS.")
 }
 
+
 func yaml_value(string file, string key) string {
     string cmd = "awk -F\":\" '/^" + key + "[[:space:]]*:/ {gsub(/ /, \"\", $2); print $2; exit}' " + runtime_shell_escape(file)
     trim(runtime_run_command_output(cmd))
 }
+
 
 func default_if_empty(string value, string fallback) string {
     if value == "" {
@@ -57,3 +60,4 @@ func default_if_empty(string value, string fallback) string {
     }
     value
 }
+

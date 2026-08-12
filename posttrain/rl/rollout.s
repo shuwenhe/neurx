@@ -8,6 +8,7 @@ struct rollout_config {
     int num_return_sequences
 }
 
+
 struct rollout_sample {
     string prompt
     string response
@@ -18,6 +19,7 @@ struct rollout_sample {
     int length
 }
 
+
 struct rollout_batch {
     []rollout_sample samples
     float avg_length
@@ -25,10 +27,12 @@ struct rollout_batch {
     int total_tokens
 }
 
+
 struct rollout_generator {
     rollout_config config
     int vocab_size
 }
+
 
 func new_rollout_generator(rollout_config config, int vocab_size) rollout_generator {
     rollout_generator rg = rollout_generator{}
@@ -36,6 +40,7 @@ func new_rollout_generator(rollout_config config, int vocab_size) rollout_genera
     rg.vocab_size = vocab_size
     return rg
 }
+
 
 func (rg *rollout_generator) generate_single(
     string prompt,
@@ -89,6 +94,7 @@ func (rg *rollout_generator) generate_single(
     return sample
 }
 
+
 func (rg *rollout_generator) generate_batch(
     []string prompts,
     [][]int prompt_token_ids_batch
@@ -135,6 +141,7 @@ func (rg *rollout_generator) generate_batch(
     return batch
 }
 
+
 func apply_temperature([]float logits, float temperature) []float {
     []float scaled = []float{}
     int i = 0
@@ -144,6 +151,7 @@ func apply_temperature([]float logits, float temperature) []float {
     }
     return scaled
 }
+
 
 func apply_top_k_filtering([]float logits, int k) []float {
     int n = len(logits)
@@ -163,6 +171,7 @@ func apply_top_k_filtering([]float logits, int k) []float {
     }
     return filtered
 }
+
 
 func apply_top_p_filtering([]float logits, float top_p) []float {
     []float probs = softmax(logits)
@@ -191,6 +200,7 @@ func apply_top_p_filtering([]float logits, float top_p) []float {
     }
     return filtered
 }
+
 
 func softmax([]float logits) []float {
     int n = len(logits)
@@ -221,6 +231,7 @@ func softmax([]float logits) []float {
     return probs
 }
 
+
 func sample_from_distribution([]float probs) int {
     []float cumsum = []float{}
     float sum = 0.0
@@ -241,6 +252,7 @@ func sample_from_distribution([]float probs) int {
     return len(probs) - 1
 }
 
+
 func argmax([]float arr) int {
     if len(arr) == 0 { return -1 }
     int max_idx = 0
@@ -256,6 +268,7 @@ func argmax([]float arr) int {
     return max_idx
 }
 
+
 func get_model_logits_placeholder([]int token_ids, int vocab_size) []float {
     []float logits = []float{}
     int i = 0
@@ -266,13 +279,16 @@ func get_model_logits_placeholder([]int token_ids, int vocab_size) []float {
     return logits
 }
 
+
 func decode_tokens_placeholder([]int token_ids, int prompt_len) string {
     return "Generated response placeholder"
 }
 
+
 func get_random_float() float {
     return 0.5
 }
+
 
 func copy_float_array([]float arr) []float {
     []float copy = []float{}
@@ -283,6 +299,7 @@ func copy_float_array([]float arr) []float {
     }
     return copy
 }
+
 
 func sort_float_array_desc([]float arr) {
     int n = len(arr)
@@ -300,6 +317,7 @@ func sort_float_array_desc([]float arr) {
         i = i + 1
     }
 }
+
 
 func argsort_desc([]float arr) []int {
     int n = len(arr)
@@ -325,6 +343,7 @@ func argsort_desc([]float arr) []int {
     return indices
 }
 
+
 func make_bool_array(int size, bool default_val) []bool {
     []bool arr = []bool{}
     int i = 0
@@ -334,6 +353,7 @@ func make_bool_array(int size, bool default_val) []bool {
     }
     return arr
 }
+
 
 func print_rollout_batch_stats(rollout_batch batch) {
     println("[Rollout Batch Stats]")
@@ -346,6 +366,7 @@ func print_rollout_batch_stats(rollout_batch batch) {
     print("  Total Tokens:     ")
     println(int_to_str(batch.total_tokens))
 }
+
 
 func int_to_str(int n) string {
     if n == 0 { return "0" }
@@ -374,13 +395,16 @@ func int_to_str(int n) string {
     return out
 }
 
+
 func float_to_str_2(float value) string {
     return float_to_str_n(value, 2)
 }
 
+
 func float_to_str_4(float value) string {
     return float_to_str_n(value, 4)
 }
+
 
 func float_to_str_n(float value, int decimals) string {
     float current = value
@@ -409,3 +433,4 @@ func float_to_str_n(float value, int decimals) string {
     if negative { result = "-" + result }
     return result
 }
+

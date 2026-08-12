@@ -1,6 +1,7 @@
 package neurx.posttrain.alignment.prime
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
+
 struct prime_config {
     float learning_rate
     int batch_size
@@ -15,6 +16,7 @@ struct prime_config {
     float intermediate_reward_weight
 }
 
+
 struct prime_state {
     tensor policy_logits
     tensor value_estimates
@@ -28,11 +30,13 @@ struct prime_state {
     float total_loss
 }
 
+
 struct process_reward_model {
     module backbone
     []module step_heads
     int num_steps
 }
+
 
 func new_prime_config() prime_config {
     prime_config {
@@ -50,6 +54,7 @@ func new_prime_config() prime_config {
     }
 }
 
+
 func prime_compute_process_rewards(
     process_reward_model rm,
     []tensor states,
@@ -66,6 +71,7 @@ func prime_compute_process_rewards(
     }
     step_rewards
 }
+
 
 func prime_compute_cumulative_rewards(
     []tensor step_rewards,
@@ -86,6 +92,7 @@ func prime_compute_cumulative_rewards(
     }
     cumulative
 }
+
 
 func prime_step(
     module policy,
@@ -219,3 +226,4 @@ func prime_step(
         total_loss: tensor_ops.item(total_loss),
     }
 }
+

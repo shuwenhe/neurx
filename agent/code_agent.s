@@ -2,9 +2,11 @@ package neurx.agent.code_agent
 use neurx.agent.runtime
 use neurx.agent.memory
 use neurx.runtime.io.{runtime_env_get, runtime_run_command_output, runtime_write_text_file}
+
 func code_agent_default_step_budget() int {
     64
 }
+
 
 func code_agent_resolve_model_path() string {
     string mp = trim(runtime_env_get("NEURX_AGENT_MODEL_PATH", ""))
@@ -28,6 +30,7 @@ func code_agent_resolve_model_path() string {
     }
     ""
 }
+
 
 func code_agent_parse_int(string s, int default_val) int {
     string trimmed = trim(s)
@@ -71,6 +74,7 @@ func code_agent_parse_int(string s, int default_val) int {
     result
 }
 
+
 func code_agent_clip(string s, int max_len) string {
     if len(s) <= max_len {
         return s
@@ -84,6 +88,7 @@ func code_agent_clip(string s, int max_len) string {
     out + "..."
 }
 
+
 func code_agent_pending_count(agent_runtime_state state) int {
     agent_memory_lookup_result r = agent_memory_lookup_short(state.memory, "pending_change_count")
     if !r.found || trim(r.value) == "" {
@@ -92,13 +97,16 @@ func code_agent_pending_count(agent_runtime_state state) int {
     code_agent_parse_int(r.value, 0)
 }
 
+
 func code_agent_read_line() string {
     trim(runtime_run_command_output("head -1 /dev/stdin 2>/dev/null"))
 }
 
+
 func code_agent_read_stdin() string {
     trim(runtime_run_command_output("cat /dev/stdin 2>/dev/null"))
 }
+
 
 func code_agent_step_label(string action, string observation) string {
     string obs_short = ""
@@ -115,6 +123,7 @@ func code_agent_step_label(string action, string observation) string {
     }
     "action=" + action + " obs=" + obs_short
 }
+
 
 func code_agent_find(string text, string pattern, int start) int {
     int tl = len(text)
@@ -144,6 +153,7 @@ func code_agent_find(string text, string pattern, int start) int {
     -1
 }
 
+
 func code_agent_starts_with(string text, string prefix) bool {
     if len(prefix) > len(text) {
         return false
@@ -157,6 +167,7 @@ func code_agent_starts_with(string text, string prefix) bool {
     }
     true
 }
+
 
 func code_agent_extract_trailing_field(string observation, string marker) string {
     int pos = code_agent_find(observation, marker, 0)
@@ -172,6 +183,7 @@ func code_agent_extract_trailing_field(string observation, string marker) string
     }
     trim(out)
 }
+
 
 func code_agent_slice(string text, int start, int end) string {
     int lo = start
@@ -194,6 +206,7 @@ func code_agent_slice(string text, int start, int end) string {
     out
 }
 
+
 func code_agent_shell_escape(string text) string {
     string out = "'"
     int i = 0
@@ -209,6 +222,7 @@ func code_agent_shell_escape(string text) string {
     out + "'"
 }
 
+
 func code_agent_normalize_command_text(string task) string {
     string trimmed = trim(task)
     if code_agent_starts_with(trimmed, "```") {
@@ -220,6 +234,7 @@ func code_agent_normalize_command_text(string task) string {
     }
     trimmed
 }
+
 
 func code_agent_resolve_task_path(string rel_path) string {
     string root = trim(runtime_env_get("NEURX_AGENT_WORKSPACE_ROOT", "."))
@@ -237,6 +252,7 @@ func code_agent_resolve_task_path(string rel_path) string {
     }
     abs_path
 }
+
 
 func code_agent_fast_path_touch_file(string task) string {
     string command = code_agent_normalize_command_text(task)
@@ -257,6 +273,7 @@ func code_agent_fast_path_touch_file(string task) string {
     }
     "create_file_failed path=" + abs_path
 }
+
 
 func code_agent_fast_path_create_file(string task) string {
     string trimmed = code_agent_normalize_command_text(task)
@@ -284,6 +301,7 @@ func code_agent_fast_path_create_file(string task) string {
     "create_file_failed path=" + abs_path
 }
 
+
 func code_agent_print_terminal_log(string action, string observation) () {
     string output = code_agent_extract_trailing_field(observation, ";output_summary=")
     if output == "" {
@@ -296,18 +314,22 @@ func code_agent_print_terminal_log(string action, string observation) () {
     println(output)
 }
 
+
 func code_agent_print_step(int step, string action, string observation) {
     println("[code_agent] step=", string(step), " ", code_agent_step_label(action, observation))
     code_agent_print_terminal_log(action, observation)
 }
 
+
 func code_agent_resolve_build_command() string {
     trim(runtime_env_get("NEURX_CODE_AGENT_BUILD_COMMAND", runtime_env_get("NEURX_AGENT_BUILD_COMMAND", "")))
 }
 
+
 func code_agent_resolve_test_command() string {
     trim(runtime_env_get("NEURX_CODE_AGENT_TEST_COMMAND", runtime_env_get("NEURX_AGENT_TEST_COMMAND", "")))
 }
+
 
 func code_agent_extract_response(agent_runtime_state state) string {
     agent_memory_lookup_result fa = agent_memory_lookup_long(state.memory, "final_answer")
@@ -321,6 +343,7 @@ func code_agent_extract_response(agent_runtime_state state) string {
     state.last_observation
 }
 
+
 func code_agent_run_status(agent_runtime_state state, int steps_done, int max_steps) string {
     if state.finished {
         return "completed"
@@ -333,6 +356,7 @@ func code_agent_run_status(agent_runtime_state state, int steps_done, int max_st
     }
     "running"
 }
+
 
 func code_agent_write_report(agent_runtime_state state, string path, string task, int steps_done, int max_steps) () {
     if trim(path) == "" {
@@ -356,6 +380,7 @@ func code_agent_write_report(agent_runtime_state state, string path, string task
     }
     runtime_write_text_file(path, report)
 }
+
 
 func code_agent_run(string task, string model_path, int max_steps, bool full_auto, string build_command, string test_command) agent_runtime_state {
     agent_runtime_state state = new_code_agent_runtime_state_with_model(task, max_steps, model_path, build_command, test_command)
@@ -414,6 +439,7 @@ func code_agent_run(string task, string model_path, int max_steps, bool full_aut
     current
 }
 
+
 func code_agent_print_git_diff() {
     string root = trim(runtime_env_get("NEURX_AGENT_WORKSPACE_ROOT", "."))
     string diff = trim(runtime_run_command_output("cd " + root + " && git diff --stat HEAD 2>/dev/null"))
@@ -422,6 +448,7 @@ func code_agent_print_git_diff() {
         println(diff)
     }
 }
+
 
 func code_agent_print_answer(agent_runtime_state state) {
     agent_memory_lookup_result fa = agent_memory_lookup_long(state.memory, "final_answer")
@@ -438,6 +465,7 @@ func code_agent_print_answer(agent_runtime_state state) {
     }
     println("[code_agent] last_observation: ", state.last_observation)
 }
+
 
 func main() {
     string task = trim(runtime_env_get("NEURX_CODE_AGENT_TASK", ""))
@@ -487,3 +515,4 @@ func main() {
     code_agent_print_answer(result)
     0
 }
+

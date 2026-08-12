@@ -1,12 +1,14 @@
 package neurx.posttrain.trainer
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_text_file, runtime_make_dirs, safetensors_writer_new, safetensors_writer_add_tensor, safetensors_writer_finish, tensor, trim}
 use neurx.lib.json.{extract_json_field, parse_json_number, parse_json_string}
+
 struct training_pipeline {
     trainer_factory factory
     trainer_config config
     trainer_state state
     trainer_report report
 }
+
 
 func run_training_pipeline(
     string model_path,
@@ -44,6 +46,7 @@ func run_training_pipeline(
     println("error: unknown trainer type")
     return -1
 }
+
 
 func run_reference_training(trainer_config config) int {
     println("====================================================")
@@ -194,6 +197,7 @@ func run_reference_training(trainer_config config) int {
     return 1
 }
 
+
 struct runtime_training_sample {
     string prompt_text
     string target_text
@@ -201,10 +205,12 @@ struct runtime_training_sample {
     string answer_text
 }
 
+
 struct runtime_sample_batch {
     []runtime_training_sample samples
     int count
 }
+
 
 struct runtime_lora_module {
     string name
@@ -220,10 +226,12 @@ struct runtime_lora_module {
     []float initial_b
 }
 
+
 struct runtime_module_step_result {
     runtime_lora_module module
     float loss
 }
+
 
 func runtime_fill_f32(int size, float value) []float {
     []float arr = []float{cap: size}
@@ -234,6 +242,7 @@ func runtime_fill_f32(int size, float value) []float {
     }
     arr
 }
+
 
 func runtime_json_escape(string s) string {
     string out = "\""
@@ -259,6 +268,7 @@ func runtime_json_escape(string s) string {
     out
 }
 
+
 func runtime_choice_text(int cop, string opa, string opb, string opc, string opd, string fallback) string {
     if cop == 1 {
         return opa
@@ -274,6 +284,7 @@ func runtime_choice_text(int cop, string opa, string opb, string opc, string opd
     }
     fallback
 }
+
 
 func runtime_parse_medmcqa_sample(string line) runtime_training_sample {
     runtime_training_sample sample
@@ -346,6 +357,7 @@ func runtime_parse_medmcqa_sample(string line) runtime_training_sample {
     sample
 }
 
+
 func runtime_collect_samples(string dataset_text, int limit) runtime_sample_batch {
     runtime_sample_batch batch
     batch.samples = []runtime_training_sample{cap: limit}
@@ -384,6 +396,7 @@ func runtime_collect_samples(string dataset_text, int limit) runtime_sample_batc
     }
     batch
 }
+
 
 func runtime_text_vector(string text, int size, float scale, int salt) []float {
     []float vec = runtime_fill_f32(size, 0.0)
@@ -424,6 +437,7 @@ func runtime_text_vector(string text, int size, float scale, int salt) []float {
     vec
 }
 
+
 func runtime_init_lora_module(string name, int layer_index, int in_dim, int out_dim, int rank, float alpha, int seed) runtime_lora_module {
     runtime_lora_module module
     module.name = name
@@ -459,6 +473,7 @@ func runtime_init_lora_module(string name, int layer_index, int in_dim, int out_
     module
 }
 
+
 func runtime_mse_loss([]float pred, []float target) float {
     if len(pred) == 0 || len(pred) != len(target) {
         return 0.0
@@ -472,6 +487,7 @@ func runtime_mse_loss([]float pred, []float target) float {
     }
     loss / (len(pred) as float)
 }
+
 
 func runtime_lora_step(runtime_lora_module module, []float input_vec, []float target_vec, float lr, float max_grad_norm) runtime_module_step_result {
     int in_dim = module.in_dim
@@ -568,6 +584,7 @@ func runtime_lora_step(runtime_lora_module module, []float input_vec, []float ta
     result
 }
 
+
 func runtime_compute_adapter_stats([]runtime_lora_module modules) adapter_stats {
     adapter_stats stats
     float l1 = 0.0
@@ -617,6 +634,7 @@ func runtime_compute_adapter_stats([]runtime_lora_module modules) adapter_stats 
     stats.total_weights = total
     stats
 }
+
 
 func runtime_compute_delta_stats([]runtime_lora_module modules) weight_delta_stats {
     weight_delta_stats stats
@@ -668,6 +686,7 @@ func runtime_compute_delta_stats([]runtime_lora_module modules) weight_delta_sta
     stats
 }
 
+
 func runtime_float_array_json([]float values) string {
     string json = "["
     int i = 0
@@ -681,6 +700,7 @@ func runtime_float_array_json([]float values) string {
     json = json + "]"
     json
 }
+
 
 func runtime_build_adapter_config_json(trainer_config config, int module_count) string {
     string json = "{\n"
@@ -702,6 +722,7 @@ func runtime_build_adapter_config_json(trainer_config config, int module_count) 
     json = json + "}\n"
     json
 }
+
 
 func runtime_build_training_state_json(
     trainer_config config,
@@ -743,6 +764,7 @@ func runtime_build_training_state_json(
     json = json + "}\n"
     json
 }
+
 
 func runtime_write_adapter_checkpoint(
     trainer_config config,
@@ -817,6 +839,7 @@ func runtime_write_adapter_checkpoint(
     )
     0
 }
+
 
 func run_runtime_training(trainer_config config) int {
     println("====================================================")
@@ -974,6 +997,7 @@ func run_runtime_training(trainer_config config) int {
     0
 }
 
+
 func get_trainer_type_name(trainer_type ttype) string {
     if ttype == 0 {
         return "Reference Trainer (Simulation)"
@@ -984,12 +1008,14 @@ func get_trainer_type_name(trainer_type ttype) string {
     return "Unknown"
 }
 
+
 func abs_float(float x) float {
     if x < 0.0 {
         return 0.0 - x
     }
     return x
 }
+
 
 func sqrt_lora(float x) float {
     if x <= 0.0 {
@@ -1008,6 +1034,7 @@ func sqrt_lora(float x) float {
     return guess
 }
 
+
 func reference_fill_f32(int size, float value) []float {
     []float arr = []float{cap: size}
     int i = 0
@@ -1017,6 +1044,7 @@ func reference_fill_f32(int size, float value) []float {
     }
     return arr
 }
+
 
 func int_to_str(int n) string {
     if n == 0 {
@@ -1040,6 +1068,7 @@ func int_to_str(int n) string {
     return result
 }
 
+
 func float_to_str(float f, int precision) string {
     int int_part = f as int
     float frac_part = f - (int_part as float)
@@ -1057,3 +1086,4 @@ func float_to_str(float f, int precision) string {
     }
     return result
 }
+

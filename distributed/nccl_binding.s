@@ -9,12 +9,14 @@ struct nccl_config {
     bool enable_trace
 }
 
+
 struct nccl_communicator {
     int rank
     int world_size
     int64 handle
     bool initialized
 }
+
 
 struct nccl_operation {
     string op_type
@@ -24,6 +26,7 @@ struct nccl_operation {
     string data_type
     string reduction_op
 }
+
 
 struct nccl_performance_stats {
     int total_ops
@@ -54,6 +57,7 @@ func new_nccl_config(int rank, int world_size) nccl_config {
     }
 }
 
+
 func init_nccl_communicator(nccl_config config) nccl_communicator {
     nccl_communicator{
         rank: config.rank,
@@ -62,6 +66,7 @@ func init_nccl_communicator(nccl_config config) nccl_communicator {
         initialized: false,
     }
 }
+
 
 func nccl_all_reduce(
     nccl_communicator comm,
@@ -73,6 +78,7 @@ func nccl_all_reduce(
     result := neurx_nccl_all_reduce(comm.handle, buffer_ptr, count, dtype, op)
     result
 }
+
 
 func nccl_reduce(
     nccl_communicator comm,
@@ -87,6 +93,7 @@ func nccl_reduce(
     result
 }
 
+
 func nccl_broadcast(
     nccl_communicator comm,
     int64 buffer,
@@ -98,6 +105,7 @@ func nccl_broadcast(
     result
 }
 
+
 func nccl_all_gather(
     nccl_communicator comm,
     int64 send_buffer,
@@ -108,6 +116,7 @@ func nccl_all_gather(
     result := neurx_nccl_all_gather(comm.handle, send_buffer, recv_buffer, count, dtype)
     result
 }
+
 
 func nccl_reduce_scatter(
     nccl_communicator comm,
@@ -121,6 +130,7 @@ func nccl_reduce_scatter(
     result
 }
 
+
 func nccl_send(
     nccl_communicator comm,
     int64 buffer,
@@ -132,6 +142,7 @@ func nccl_send(
     result
 }
 
+
 func nccl_recv(
     nccl_communicator comm,
     int64 buffer,
@@ -142,6 +153,7 @@ func nccl_recv(
     result := neurx_nccl_recv(comm.handle, buffer, count, dtype, peer, 0)
     result
 }
+
 
 func compute_allreduce_latency(int world_size, int count, string dtype) int {
     data_size := count
@@ -160,6 +172,7 @@ func compute_allreduce_latency(int world_size, int count, string dtype) int {
     total_latency
 }
 
+
 func compute_broadcast_latency(int count, string dtype) int {
     data_size := count
     if dtype == "float32" || dtype == "int32" {
@@ -173,6 +186,7 @@ func compute_broadcast_latency(int count, string dtype) int {
     latency := data_size / network_bandwidth_gbps
     latency
 }
+
 
 func get_nccl_topology(int world_size) string {
     if world_size == 1 {
@@ -189,6 +203,7 @@ func get_nccl_topology(int world_size) string {
     }
     return "general"
 }
+
 
 func estimate_collective_bandwidth(
     string op_type,
@@ -213,6 +228,7 @@ func estimate_collective_bandwidth(
     base_bandwidth
 }
 
+
 func log2(int n) int {
     result := 0
     val := 1
@@ -222,3 +238,4 @@ func log2(int n) int {
     }
     result
 }
+

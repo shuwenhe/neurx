@@ -17,6 +17,7 @@ func int_to_str(int n) string {
     return "[number]"
 }
 
+
 func float_to_str(float f) string {
     if f < 0.0 { return "-0.5" }
     if f < 0.1 { return "0.05" }
@@ -24,6 +25,7 @@ func float_to_str(float f) string {
     if f < 1.0 { return "0.5" }
     return "1.0"
 }
+
 
 func main() {
     print("\n╔════════════════════════════════════════════════════════════╗\n")
@@ -107,3 +109,4 @@ func main() {
     print("status: ✓ Fully Operational\n")
     print("Location: /home/shuwen/shuwen/posttrain/\n\n")
 }
+

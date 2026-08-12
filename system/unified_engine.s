@@ -5,52 +5,64 @@ func new_engine_state(int total_blocks, int block_size, int max_prefill, int max
     return state
 }
 
+
 func get_engine_total_blocks([]int state) int {
     return state[0]
 }
+
 
 func get_engine_block_size([]int state) int {
     return state[1]
 }
 
+
 func get_engine_max_prefill([]int state) int {
     return state[2]
 }
+
 
 func get_engine_max_decode([]int state) int {
     return state[3]
 }
 
+
 func get_engine_iterations([]int state) int {
     return state[4]
 }
+
 
 func get_engine_tokens_generated([]int state) int {
     return state[5]
 }
 
+
 func get_engine_memory_used([]int state) int {
     return state[6]
 }
 
+
 func get_engine_cache_hits([]int state) int {
     return state[7]
 }
+
 
 func increment_iterations([]int state) []int {
     state[4] = state[4] + 1
     return state
 }
 
+
 func add_tokens_generated([]int state, int tokens) []int {
     state[5] = state[5] + tokens
     return state
 }
 
+
 func set_memory_used([]int state, int memory) []int {
     state[6] = memory
     return state
 }
+
 
 func record_cache_event([]int state, int is_hit) []int {
     if is_hit > 0 {
@@ -58,6 +70,7 @@ func record_cache_event([]int state, int is_hit) []int {
     }
     return state
 }
+
 
 func execute_iteration([][]int requests, []int prefill_indices, []int decode_indices) string {
     int total_prefill = len(prefill_indices)
@@ -74,6 +87,7 @@ func execute_iteration([][]int requests, []int prefill_indices, []int decode_ind
     return result
 }
 
+
 func compute_memory_utilization(int allocated_blocks, int total_blocks) float {
     if total_blocks <= 0 {
         return 0.0
@@ -81,12 +95,14 @@ func compute_memory_utilization(int allocated_blocks, int total_blocks) float {
     return float(allocated_blocks) / float(total_blocks)
 }
 
+
 func compute_throughput(int tokens_generated, int iterations, int block_size) float {
     if iterations <= 0 {
         return 0.0
     }
     return float(tokens_generated) / float(iterations)
 }
+
 
 func get_engine_stats([]int engine_state, []int paged_stats, [][]int requests) string {
     int total_requests = len(requests)
@@ -108,6 +124,7 @@ func get_engine_stats([]int engine_state, []int paged_stats, [][]int requests) s
     return stats
 }
 
+
 func estimate_speedup(int baseline_throughput, int current_throughput) float {
     if baseline_throughput <= 0 {
         return 1.0
@@ -117,6 +134,7 @@ func estimate_speedup(int baseline_throughput, int current_throughput) float {
     }
     return float(current_throughput) / float(baseline_throughput)
 }
+
 
 func should_continue_inference([][]int requests) bool {
     int i = 0
@@ -129,17 +147,20 @@ func should_continue_inference([][]int requests) bool {
     return false
 }
 
+
 func check_kv_memory_available(int used, int total, float threshold) bool {
     int available = total - used
     float usage = float(used) / float(total)
     return usage < threshold
 }
 
+
 func estimate_kv_cache_size(int num_layers, int seq_len, int hidden_dim, int batch_size) int {
     int cache_per_seq = num_layers * seq_len * hidden_dim * 2
     int total_cache = cache_per_seq * batch_size
     return total_cache
 }
+
 
 func format_engine_config(int total_blocks, int block_size, int max_prefill, int max_decode) string {
     string config = "Config: TotalBlocks="
@@ -153,6 +174,7 @@ func format_engine_config(int total_blocks, int block_size, int max_prefill, int
     return config
 }
 
+
 func validate_config(int block_size, int max_prefill, int max_decode) bool {
     if block_size <= 0 {
         return false
@@ -165,3 +187,4 @@ func validate_config(int block_size, int max_prefill, int max_decode) bool {
     }
     return true
 }
+

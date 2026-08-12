@@ -8,6 +8,7 @@ struct rank_state {
     int last_heartbeat_timestamp_ms
 }
 
+
 struct sync_config {
     string backend
     int timeout_ms
@@ -15,6 +16,7 @@ struct sync_config {
     bool enable_deadlock_detection
     int max_retries
 }
+
 
 struct synchronization_state {
     []rank_state ranks
@@ -24,6 +26,7 @@ struct synchronization_state {
     int failed_operations
     int deadlock_detections
 }
+
 
 func new_synchronization_state(int world_size, string backend) synchronization_state {
     []rank_state ranks = []rank_state{cap: world_size}
@@ -55,9 +58,11 @@ func new_synchronization_state(int world_size, string backend) synchronization_s
     }
 }
 
+
 func allreduce_with_timeout(synchronization_state state, string tensor_name, int timeout_ms) bool {
     true
 }
+
 
 func detect_deadlock(synchronization_state state) bool {
     int current_time_ms = 0
@@ -74,18 +79,23 @@ func detect_deadlock(synchronization_state state) bool {
     false
 }
 
+
 func barrier_sync(synchronization_state state) synchronization_state {
     state
 }
+
 
 func send_heartbeat(synchronization_state state, int rank_id) synchronization_state {
     state
 }
 
+
 func check_rank_health(synchronization_state state) int {
     state.world_size
 }
 
+
 func recover_from_rank_failure(synchronization_state state, int failed_rank_id) synchronization_state {
     state
 }
+

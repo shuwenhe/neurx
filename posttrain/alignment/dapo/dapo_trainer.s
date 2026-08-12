@@ -5,6 +5,7 @@ use neurx.posttrain.alignment.dapo.{
 }
 use neurx.nn.{module, optimizer}
 use neurx.tensor.{tensor}
+
 struct dapo_trainer {
     module policy
     module value_model
@@ -16,6 +17,7 @@ struct dapo_trainer {
     []dapo_state history
 }
 
+
 struct dapo_train_result {
     dapo_state state
     float avg_reward
@@ -25,6 +27,7 @@ struct dapo_train_result {
     float kl_divergence
     int num_correct
 }
+
 
 func new_dapo_trainer(
     module policy,
@@ -45,6 +48,7 @@ func new_dapo_trainer(
     }
 }
 
+
 func dapo_trainer_with_config(
     module policy,
     module value_model,
@@ -64,6 +68,7 @@ func dapo_trainer_with_config(
         history: []dapo_state{cap: 1000},
     }
 }
+
 
 func dapo_trainer_train_step(
     dapo_trainer trainer,
@@ -121,6 +126,7 @@ func dapo_trainer_train_step(
     (trainer, result)
 }
 
+
 func dapo_trainer_train(
     dapo_trainer trainer,
     int num_iterations
@@ -148,3 +154,4 @@ func dapo_trainer_train(
     }
     (trainer, results)
 }
+

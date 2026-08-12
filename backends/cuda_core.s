@@ -23,6 +23,7 @@ struct cuda_device {
     bool available
 }
 
+
 struct cuda_context {
     cuda_device device
     int64 cublas_handle
@@ -31,6 +32,7 @@ struct cuda_context {
     string error_message
 }
 
+
 struct cuda_buffer {
     int64 pointer
     int bytes
@@ -38,12 +40,14 @@ struct cuda_buffer {
     bool allocated
 }
 
+
 struct cuda_context_result {
     cuda_context context
     cuda_buffer buffer
     bool success
     string error_message
 }
+
 
 func cuda_empty_device(int device_id) cuda_device {
     cuda_device device
@@ -55,6 +59,7 @@ func cuda_empty_device(int device_id) cuda_device {
     device
 }
 
+
 func cuda_empty_buffer() cuda_buffer {
     cuda_buffer buffer
     buffer.pointer = 0
@@ -63,6 +68,7 @@ func cuda_empty_buffer() cuda_buffer {
     buffer.allocated = false
     buffer
 }
+
 
 func cuda_new_result(cuda_context context, cuda_buffer buffer, bool success, string error_message) cuda_context_result {
     cuda_context_result result
@@ -73,11 +79,13 @@ func cuda_new_result(cuda_context context, cuda_buffer buffer, bool success, str
     result
 }
 
+
 func cuda_device_count() int {
     int count = neurx_cuda_get_device_count()
     if count < 0 { return 0 }
     count
 }
+
 
 func cuda_query_device(int device_id) cuda_device {
     cuda_device device = cuda_empty_device(device_id)
@@ -93,6 +101,7 @@ func cuda_query_device(int device_id) cuda_device {
     device.available = total_bytes > 0
     device
 }
+
 
 func cuda_context_create(int device_id) cuda_context {
     cuda_context context
@@ -114,6 +123,7 @@ func cuda_context_create(int device_id) cuda_context {
     context
 }
 
+
 func cuda_context_destroy(cuda_context context) cuda_context {
     if context.cublas_handle != i64(0) {
         neurx_cublas_destroy(context.cublas_handle)
@@ -123,6 +133,7 @@ func cuda_context_destroy(cuda_context context) cuda_context {
     context.initialized = false
     context
 }
+
 
 func cuda_allocate(cuda_context context, int bytes) cuda_context_result {
     if !context.initialized {
@@ -147,6 +158,7 @@ func cuda_allocate(cuda_context context, int bytes) cuda_context_result {
     cuda_new_result(context, buffer, true, "")
 }
 
+
 func cuda_release(cuda_context context, cuda_buffer buffer) cuda_context_result {
     if !buffer.allocated || buffer.pointer == i64(0) {
         return cuda_new_result(context, buffer, false, "CUDA buffer is not allocated")
@@ -162,17 +174,21 @@ func cuda_release(cuda_context context, cuda_buffer buffer) cuda_context_result 
     cuda_new_result(context, buffer, true, "")
 }
 
+
 func cuda_copy_host_to_device(cuda_buffer destination, int64 host_pointer, int bytes) bool {
     destination.allocated && host_pointer != i64(0) && bytes > 0 && bytes <= destination.bytes && neurx_cuda_memcpy_htod(destination.pointer, host_pointer, bytes) == 0
 }
+
 
 func cuda_copy_device_to_host(int64 host_pointer, cuda_buffer source, int bytes) bool {
     source.allocated && host_pointer != i64(0) && bytes > 0 && bytes <= source.bytes && neurx_cuda_memcpy_dtoh(host_pointer, source.pointer, bytes) == 0
 }
 
+
 func cuda_copy_device_to_device(cuda_buffer destination, cuda_buffer source, int bytes) bool {
     destination.allocated && source.allocated && bytes > 0 && bytes <= destination.bytes && bytes <= source.bytes && neurx_cuda_memcpy_dtod(destination.pointer, source.pointer, bytes) == 0
 }
+
 
 func cuda_sgemm(cuda_context context, cuda_buffer left, cuda_buffer right, cuda_buffer output, int m, int n, int k) bool {
     if !context.initialized || !left.allocated || !right.allocated || !output.allocated { return false }
@@ -185,7 +201,9 @@ func cuda_sgemm(cuda_context context, cuda_buffer left, cuda_buffer right, cuda_
     neurx_cuda_synchronize() == 0
 }
 
+
 func cuda_abi_contract_valid() bool {
     cuda_buffer empty = cuda_empty_buffer()
     !empty.allocated && empty.pointer == i64(0) && empty.device_id == -1
 }
+

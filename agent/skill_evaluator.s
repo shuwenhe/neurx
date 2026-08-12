@@ -7,6 +7,7 @@ struct agent_skill_eval_result {
     string reason
 }
 
+
 func new_agent_skill_eval_result() agent_skill_eval_result {
     agent_skill_eval_result {
         score: 0.0,
@@ -16,6 +17,7 @@ func new_agent_skill_eval_result() agent_skill_eval_result {
     }
 }
 
+
 func agent_skill_score(agent_skill_record record) float {
     float score = record.metrics.success_rate * 100.0
     score = score + (record.metrics.stability * 25.0)
@@ -23,6 +25,7 @@ func agent_skill_score(agent_skill_record record) float {
     score = score - record.metrics.tool_cost
     score
 }
+
 
 func agent_skill_evaluate(agent_skill_record record, float promotion_threshold, float retire_threshold) agent_skill_eval_result {
     float score = agent_skill_score(record)
@@ -42,10 +45,13 @@ func agent_skill_evaluate(agent_skill_record record, float promotion_threshold, 
     }
 }
 
+
 func agent_skill_eval_result_state_dict(agent_skill_eval_result result) agent_skill_eval_result {
     result
 }
 
+
 func agent_skill_eval_result_load_state_dict(agent_skill_eval_result result, agent_skill_eval_result other) agent_skill_eval_result {
     other
 }
+

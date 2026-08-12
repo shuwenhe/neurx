@@ -3,10 +3,12 @@ use neurx.runtime.io.{
     runtime_env_get
 }
 
+
 struct test_query {
     string question
     string expected_topic
 }
+
 
 struct response_metrics {
     string base_response
@@ -14,6 +16,7 @@ struct response_metrics {
     bool has_difference
     string response_quality
 }
+
 
 func create_test_queries() []test_query {
     []test_query queries = make([]test_query, 5)
@@ -40,6 +43,7 @@ func create_test_queries() []test_query {
     return queries
 }
 
+
 func simulate_base_model_response(question string) string {
     string base_responses = ""
     if contains(question, "diabetes") {
@@ -58,6 +62,7 @@ func simulate_base_model_response(question string) string {
     return base_responses
 }
 
+
 func simulate_finetuned_model_response(question string) string {
     string finetuned_responses = ""
     if contains(question, "diabetes") {
@@ -75,6 +80,7 @@ func simulate_finetuned_model_response(question string) string {
     }
     return finetuned_responses
 }
+
 
 func contains(str string, substr string) bool {
     i32 str_len = len(str)
@@ -97,6 +103,7 @@ func contains(str string, substr string) bool {
     return false
 }
 
+
 func analyze_response_quality(base_resp string, finetuned_resp string) string {
     i32 base_len = len(base_resp)
     i32 finetuned_len = len(finetuned_resp)
@@ -111,6 +118,7 @@ func analyze_response_quality(base_resp string, finetuned_resp string) string {
     }
     return quality + " (" + string(length_improvement) + "% change)"
 }
+
 
 func verify_inference_changes() string {
     string output = ""
@@ -158,7 +166,9 @@ func verify_inference_changes() string {
     return output
 }
 
+
 func main() {
     string result = verify_inference_changes()
     println(result)
 }
+

@@ -10,29 +10,36 @@ struct json_value {
     []json_value object_values
 }
 
+
 func (j json_value) is_null() bool {
     return j.type == 0
 }
+
 
 func (j json_value) is_bool() bool {
     return j.type == 1
 }
 
+
 func (j json_value) is_number() bool {
     return j.type == 2
 }
+
 
 func (j json_value) is_string() bool {
     return j.type == 3
 }
 
+
 func (j json_value) is_array() bool {
     return j.type == 4
 }
 
+
 func (j json_value) is_object() bool {
     return j.type == 5
 }
+
 
 func (j json_value) as_bool() bool {
     if j.type != 1 {
@@ -41,6 +48,7 @@ func (j json_value) as_bool() bool {
     return j.bool_value
 }
 
+
 func (j json_value) as_string() string {
     if j.type != 3 {
         panic("JSON value is not a string")
@@ -48,12 +56,14 @@ func (j json_value) as_string() string {
     return j.string_value
 }
 
+
 func (j json_value) as_array() []json_value {
     if j.type != 4 {
         panic("JSON value is not an array")
     }
     return j.array_value
 }
+
 
 func (j json_value) contains(key string) bool {
     if j.type != 5 {
@@ -67,6 +77,7 @@ func (j json_value) contains(key string) bool {
     return false
 }
 
+
 func (j json_value) at(key string) json_value {
     if j.type != 5 {
         panic("JSON value is not an object")
@@ -79,10 +90,12 @@ func (j json_value) at(key string) json_value {
     panic("missing JSON field: " + key)
 }
 
+
 struct json_parser {
     string text
     int pos
 }
+
 
 func json_parser_create(text string) json_parser {
     p := json_parser{}
@@ -90,6 +103,7 @@ func json_parser_create(text string) json_parser {
     p.pos = 0
     return p
 }
+
 
 func parser_skip_whitespace(p *json_parser) {
     for p.pos < len(p.text) {
@@ -101,12 +115,14 @@ func parser_skip_whitespace(p *json_parser) {
     }
 }
 
+
 func parser_peek(p *json_parser) byte {
     if p.pos >= len(p.text) {
         return 0
     }
     return byte(p.text[p.pos])
 }
+
 
 func parser_advance(p *json_parser) byte {
     if p.pos >= len(p.text) {
@@ -116,6 +132,7 @@ func parser_advance(p *json_parser) byte {
     p.pos = p.pos + 1
     return ch
 }
+
 
 func parser_parse_value(p *json_parser) json_value {
     parser_skip_whitespace(p)
@@ -160,6 +177,7 @@ func parser_parse_value(p *json_parser) json_value {
     panic("unexpected character in JSON")
 }
 
+
 func parser_parse_null(p *json_parser) json_value {
     parser_advance(p)
     parser_advance(p)
@@ -169,6 +187,7 @@ func parser_parse_null(p *json_parser) json_value {
     val.type = 0
     return val
 }
+
 
 func parser_parse_bool(p *json_parser) json_value {
     if parser_peek(p) == byte(116) {
@@ -192,6 +211,7 @@ func parser_parse_bool(p *json_parser) json_value {
         return val
     }
 }
+
 
 func parser_parse_string(p *json_parser) string {
     if parser_advance(p) != byte(34) {
@@ -226,6 +246,7 @@ func parser_parse_string(p *json_parser) string {
     panic("unexpected end of string")
 }
 
+
 func parser_parse_number(p *json_parser) float {
     start := p.pos
     if parser_peek(p) == byte(45) {
@@ -243,6 +264,7 @@ func parser_parse_number(p *json_parser) float {
     num_str := p.text[start:p.pos]
     return parse_float(num_str)
 }
+
 
 func parser_parse_array(p *json_parser) []json_value {
     if parser_advance(p) != byte(91) {
@@ -269,6 +291,7 @@ func parser_parse_array(p *json_parser) []json_value {
         parser_advance(p)
     }
 }
+
 
 func parser_parse_object(p *json_parser, keys *[]string, values *[]json_value) {
     if parser_advance(p) != byte(123) {
@@ -304,6 +327,7 @@ func parser_parse_object(p *json_parser, keys *[]string, values *[]json_value) {
         parser_advance(p)
     }
 }
+
 
 func parse_float(s string) float {
     f := 0.0
@@ -346,6 +370,7 @@ func parse_float(s string) float {
     return f
 }
 
+
 func json_parse(text string) json_value {
     parser := json_parser_create(text)
     result := parser_parse_value(&parser)
@@ -355,6 +380,7 @@ func json_parse(text string) json_value {
     }
     return result
 }
+
 
 func main() {
     eprintln("Testing Pure-S JSON Parser")
@@ -367,6 +393,7 @@ func main() {
     eprintln("All JSON tests passed")
 }
 
+
 func test_null() {
     eprintln("Test 1: Null value")
     val := json_parse("null")
@@ -375,6 +402,7 @@ func test_null() {
     }
     eprintln("  OK")
 }
+
 
 func test_bool() {
     eprintln("Test 2: Boolean values")
@@ -390,6 +418,7 @@ func test_bool() {
     eprintln("  false OK")
 }
 
+
 func test_number() {
     eprintln("Test 3: Number values")
     val_int := json_parse("42")
@@ -404,6 +433,7 @@ func test_number() {
     eprintln("  float OK")
 }
 
+
 func test_string() {
     eprintln("Test 4: String values")
     val := json_parse("\"hello\"")
@@ -412,6 +442,7 @@ func test_string() {
     }
     eprintln("  OK")
 }
+
 
 func test_array() {
     eprintln("Test 5: Array values")
@@ -425,6 +456,7 @@ func test_array() {
     }
     eprintln("  OK")
 }
+
 
 func test_object() {
     eprintln("Test 6: Object values")
@@ -441,3 +473,4 @@ func test_object() {
     }
     eprintln("  OK")
 }
+

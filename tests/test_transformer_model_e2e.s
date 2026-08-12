@@ -1,6 +1,7 @@
 package main
 use neurx.model.transformer.ffn.{ffn_layer, new_ffn_layer, forward_ffn_layer}
 use neurx.model.transformer.transformer.{transformer_config, transformer_layer_config, transformer_block, transformer_model, transformer_output, new_transformer_config, new_transformer_layer_config, new_transformer_block, new_transformer_model, forward_transformer_block, forward_transformer, new_7b_transformer_config, new_13b_transformer_config, new_70b_transformer_config, new_foundation_model, foundation_model_forward}
+
 func build_hidden_states(int batch_size, int seq_len, int hidden_dim) []float {
     int total = batch_size * seq_len * hidden_dim
     []float values = []float{cap: total}
@@ -12,12 +13,14 @@ func build_hidden_states(int batch_size, int seq_len, int hidden_dim) []float {
     values
 }
 
+
 func test_ffn_layer() bool {
     ffn_layer layer = new_ffn_layer(8, "gelu")
     []float input = build_hidden_states(1, 2, 8)
     []float output = forward_ffn_layer(layer, input, 2)
     return len(output) == len(input)
 }
+
 
 func test_transformer_block_with_rope() bool {
     transformer_layer_config cfg = new_transformer_layer_config()
@@ -31,6 +34,7 @@ func test_transformer_block_with_rope() bool {
     []float output = forward_transformer_block(block, input, 1, 2)
     return len(output) == len(input)
 }
+
 
 func test_transformer_with_learned_pe() bool {
     transformer_config cfg = new_transformer_config()
@@ -48,6 +52,7 @@ func test_transformer_with_learned_pe() bool {
     return len(output.hidden_states) == len(input) && len(output.logits) == 1 * 2 * 16
 }
 
+
 func test_model_presets() bool {
     transformer_config cfg7 = new_7b_transformer_config()
     transformer_config cfg13 = new_13b_transformer_config()
@@ -63,6 +68,7 @@ func test_model_presets() bool {
     }
     return true
 }
+
 
 func test_foundation_model_runtime_materialization() bool {
     var model7 = new_foundation_model("7B", "rope")
@@ -86,6 +92,7 @@ func test_foundation_model_runtime_materialization() bool {
     return true
 }
 
+
 func test_end_to_end_forward() bool {
     var model = new_foundation_model("7B", "rope")
     int batch_size = 1
@@ -100,6 +107,7 @@ func test_end_to_end_forward() bool {
     }
     return true
 }
+
 
 func main() {
     println("========================================")
@@ -137,3 +145,4 @@ func main() {
     }
     println("========================================")
 }
+

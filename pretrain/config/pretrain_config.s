@@ -18,6 +18,7 @@ struct pretrain_config {
     string backend
 }
 
+
 func new_pretrain_config() pretrain_config {
     pretrain_config {
         global_batch_size: 256,
@@ -38,6 +39,7 @@ func new_pretrain_config() pretrain_config {
         backend: "cuda",
     }
 }
+
 
 func with_max_steps(pretrain_config cfg, int max_steps) pretrain_config {
     pretrain_config {
@@ -60,6 +62,7 @@ func with_max_steps(pretrain_config cfg, int max_steps) pretrain_config {
     }
 }
 
+
 func with_lr(pretrain_config cfg, float lr) pretrain_config {
     pretrain_config {
         global_batch_size: cfg.global_batch_size,
@@ -81,10 +84,13 @@ func with_lr(pretrain_config cfg, float lr) pretrain_config {
     }
 }
 
+
 func pretrain_config_state_dict(pretrain_config cfg) pretrain_config {
     cfg
 }
 
+
 func pretrain_config_load_state_dict(pretrain_config cfg, pretrain_config other) pretrain_config {
     other
 }
+

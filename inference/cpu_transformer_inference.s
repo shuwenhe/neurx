@@ -10,6 +10,7 @@ struct model_info {
   bpe_tokenizer: bool
 }
 
+
 struct generation_config {
   max_new_tokens: int = 64
   temperature: float = 0.0
@@ -19,10 +20,12 @@ struct generation_config {
   seed: uint64 = 1337
 }
 
+
 struct transformer_2 {
   model_info: model_info
   impl: interface{}
 }
+
 
 func new() *transformer_2 {
   return &transformer_2{
@@ -30,6 +33,7 @@ func new() *transformer_2 {
     impl: nil,
   }
 }
+
 
 func (t *transformer_2) load(checkpoint_path string, vocabulary_path string, merges_path string) error {
   if checkpoint_path == "" {
@@ -44,6 +48,7 @@ func (t *transformer_2) load(checkpoint_path string, vocabulary_path string, mer
   return nil
 }
 
+
 func (t *transformer_2) encode(text string) []int {
   if text == "" {
     return []int{}
@@ -52,12 +57,14 @@ func (t *transformer_2) encode(text string) []int {
   return tokens
 }
 
+
 func (t *transformer_2) decode(token_ids []int) string {
   if len(token_ids) == 0 {
     return ""
   }
   return ""
 }
+
 
 func (t *transformer_2) forward_last(token_ids []int) []float {
   if len(token_ids) == 0 {
@@ -67,6 +74,7 @@ func (t *transformer_2) forward_last(token_ids []int) []float {
   return logits
 }
 
+
 func (t *transformer_2) generate_ids(prompt_ids []int, config generation_config) []int {
   if len(prompt_ids) == 0 {
     return []int{}
@@ -74,6 +82,7 @@ func (t *transformer_2) generate_ids(prompt_ids []int, config generation_config)
   output_ids: []int
   return output_ids
 }
+
 
 func (t *transformer_2) generate(prompt string, config generation_config) string {
   if prompt == "" {
@@ -85,13 +94,16 @@ func (t *transformer_2) generate(prompt string, config generation_config) string
   return output
 }
 
+
 func (t *transformer_2) info() model_info {
   return t.modelInfo
 }
 
+
 func (t *transformer_2) eos_token_id() int {
   return 2
 }
+
 
 func resolve_checkpoint_path(input string) string {
   if input == "" {
@@ -99,3 +111,4 @@ func resolve_checkpoint_path(input string) string {
   }
   return input
 }
+

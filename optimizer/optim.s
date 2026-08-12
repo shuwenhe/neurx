@@ -5,6 +5,7 @@ struct sgd_optimizer {
     float lr
 }
 
+
 struct adam_optimizer {
     float lr
     float beta1
@@ -16,6 +17,7 @@ struct adam_optimizer {
     []float m
     []float v
 }
+
 
 struct adamw_optimizer {
     float lr
@@ -30,11 +32,13 @@ struct adamw_optimizer {
     []float v
 }
 
+
 struct adamw_step_output {
     adamw_optimizer optimizer
     tensor params
     float grad_norm
 }
+
 
 struct adam_step_output {
     adam_optimizer optimizer
@@ -42,12 +46,14 @@ struct adam_step_output {
     float grad_norm
 }
 
+
 struct rmsprop_optimizer {
     float lr
     float alpha
     float eps
     []float avg
 }
+
 
 func ensure_size([]float values, int n) []float {
     []float out = []float{cap: n}
@@ -63,12 +69,14 @@ func ensure_size([]float values, int n) []float {
     out
 }
 
+
 func inv_sqrt(float x) float {
     if x <= 0.0 {
         return 0.0
     }
     return 1.0 / sqrt_approx(x)
 }
+
 
 func sqrt_approx(float x) float {
     if x <= 0.0 {
@@ -86,9 +94,11 @@ func sqrt_approx(float x) float {
     y
 }
 
+
 func new_sgd(float lr) sgd_optimizer {
     sgd_optimizer { lr: lr }
 }
+
 
 func new_adam(float lr, float beta1, float beta2, float eps) adam_optimizer {
     adam_optimizer {
@@ -103,6 +113,7 @@ func new_adam(float lr, float beta1, float beta2, float eps) adam_optimizer {
         v: [],
     }
 }
+
 
 func new_adamw(float lr, float beta1, float beta2, float eps, float weight_decay) adamw_optimizer {
     adamw_optimizer {
@@ -119,6 +130,7 @@ func new_adamw(float lr, float beta1, float beta2, float eps, float weight_decay
     }
 }
 
+
 func new_rmsprop(float lr, float alpha, float eps) rmsprop_optimizer {
     rmsprop_optimizer {
         lr: lr,
@@ -127,6 +139,7 @@ func new_rmsprop(float lr, float alpha, float eps) rmsprop_optimizer {
         avg: [],
     }
 }
+
 
 func step_tensor(sgd_optimizer optimizer, tensor params, tensor grads) tensor {
     int n = len(params.data)
@@ -138,6 +151,7 @@ func step_tensor(sgd_optimizer optimizer, tensor params, tensor grads) tensor {
     }
     new(out, params.shape, params.requires_grad)
 }
+
 
 func adam_step_state(adam_optimizer optimizer, tensor params, tensor grads) adam_step_output {
     int n = len(params.data)
@@ -183,15 +197,18 @@ func adam_step_state(adam_optimizer optimizer, tensor params, tensor grads) adam
     }
 }
 
+
 func adam_step(adam_optimizer optimizer, tensor params, tensor grads) tensor {
     adam_step_output step_out = adam_step_state(optimizer, params, grads)
     step_out.params
 }
 
+
 func adamw_step(adamw_optimizer optimizer, tensor params, tensor grads) tensor {
     adamw_step_output step_out = adamw_step_state(optimizer, params, grads)
     step_out.params
 }
+
 
 func rmsprop_step(rmsprop_optimizer optimizer, tensor params, tensor grads) tensor {
     int n = len(params.data)
@@ -208,6 +225,7 @@ func rmsprop_step(rmsprop_optimizer optimizer, tensor params, tensor grads) tens
     new(out, params.shape, params.requires_grad)
 }
 
+
 func tensor_l2_norm(tensor value) float {
     float total_sq = 0.0
     int i = 0
@@ -222,6 +240,7 @@ func tensor_l2_norm(tensor value) float {
     sqrt_approx(total_sq)
 }
 
+
 func scale_tensor(tensor value, float scale) tensor {
     int n = len(value.data)
     []float out = []float{cap: n}
@@ -232,6 +251,7 @@ func scale_tensor(tensor value, float scale) tensor {
     }
     new(out, value.shape, value.requires_grad)
 }
+
 
 func clip_grad_tensor(tensor grads, float max_norm, float eps) tensor {
     if max_norm <= 0.0 {
@@ -244,6 +264,7 @@ func clip_grad_tensor(tensor grads, float max_norm, float eps) tensor {
     float scale = max_norm / (norm + eps)
     scale_tensor(grads, scale)
 }
+
 
 func adamw_step_state(adamw_optimizer optimizer, tensor params, tensor grads) adamw_step_output {
     int n = len(params.data)
@@ -291,6 +312,7 @@ func adamw_step_state(adamw_optimizer optimizer, tensor params, tensor grads) ad
     }
 }
 
+
 func clip_grad_norm([]tensor params, float max_norm, float eps) float {
     float total_sq = 0.0
     int p = 0
@@ -305,3 +327,4 @@ func clip_grad_norm([]tensor params, float max_norm, float eps) float {
     }
     sqrt_approx(total_sq)
 }
+

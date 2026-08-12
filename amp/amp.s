@@ -6,6 +6,7 @@ struct amp_runtime_config {
     float initial_scale
 }
 
+
 func new_amp_runtime_config(string dtype, bool enabled) amp_runtime_config {
     amp_runtime_config {
         dtype: dtype,
@@ -15,10 +16,13 @@ func new_amp_runtime_config(string dtype, bool enabled) amp_runtime_config {
     }
 }
 
+
 func amp_enabled(amp_runtime_config cfg) bool {
     cfg.enabled
 }
 
+
 func amp_dtype(amp_runtime_config cfg) string {
     cfg.dtype
 }
+

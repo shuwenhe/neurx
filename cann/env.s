@@ -19,3 +19,4 @@ func main() {
     println("export ASCEND_SLOG_PRINT_TO_STDOUT=\"${ASCEND_SLOG_PRINT_TO_STDOUT:-0}\"")
     0
 }
+

@@ -1,16 +1,28 @@
 package neurx.inference.serve.disaggregated_runtime
 func disaggregated_queued_prefill() int { 1 }
+
 func disaggregated_prefilling() int { 2 }
+
 func disaggregated_transferring() int { 3 }
+
 func disaggregated_queued_decode() int { 4 }
+
 func disaggregated_decoding() int { 5 }
+
 func disaggregated_finished() int { 6 }
+
 func disaggregated_failed() int { 7 }
+
 func disaggregated_cancelled() int { 8 }
+
 func kv_transfer_pending() int { 1 }
+
 func kv_transfer_ready() int { 2 }
+
 func kv_transfer_complete() int { 3 }
+
 func kv_transfer_failed() int { 4 }
+
 struct inference_worker {
     string worker_id
     string role
@@ -19,6 +31,7 @@ struct inference_worker {
     int active_requests
     bool healthy
 }
+
 
 struct disaggregated_request {
     string request_id
@@ -31,6 +44,7 @@ struct disaggregated_request {
     string kv_handle
     string error_message
 }
+
 
 struct kv_transfer_ticket {
     string transfer_id
@@ -45,6 +59,7 @@ struct kv_transfer_ticket {
     int max_retries
 }
 
+
 struct disaggregated_runtime_state {
     []inference_worker workers
     []disaggregated_request requests
@@ -53,6 +68,7 @@ struct disaggregated_runtime_state {
     int transfer_failures
 }
 
+
 struct disaggregated_result {
     disaggregated_runtime_state state
     disaggregated_request request
@@ -60,6 +76,7 @@ struct disaggregated_result {
     bool accepted
     string error_message
 }
+
 
 func empty_inference_worker() inference_worker {
     inference_worker worker
@@ -71,6 +88,7 @@ func empty_inference_worker() inference_worker {
     worker.healthy = false
     worker
 }
+
 
 func empty_disaggregated_request() disaggregated_request {
     disaggregated_request request
@@ -85,6 +103,7 @@ func empty_disaggregated_request() disaggregated_request {
     request.error_message = ""
     request
 }
+
 
 func empty_kv_transfer_ticket() kv_transfer_ticket {
     kv_transfer_ticket transfer
@@ -101,6 +120,7 @@ func empty_kv_transfer_ticket() kv_transfer_ticket {
     transfer
 }
 
+
 func new_disaggregated_result(disaggregated_runtime_state state, disaggregated_request request, kv_transfer_ticket transfer, bool accepted, string error_message) disaggregated_result {
     disaggregated_result result
     result.state = state
@@ -110,6 +130,7 @@ func new_disaggregated_result(disaggregated_runtime_state state, disaggregated_r
     result.error_message = error_message
     result
 }
+
 
 func new_disaggregated_runtime() disaggregated_runtime_state {
     disaggregated_runtime_state state
@@ -121,17 +142,21 @@ func new_disaggregated_runtime() disaggregated_runtime_state {
     state
 }
 
+
 func disaggregated_worker_at(disaggregated_runtime_state state, int index) inference_worker {
     state.workers[index]
 }
+
 
 func disaggregated_request_at(disaggregated_runtime_state state, int index) disaggregated_request {
     state.requests[index]
 }
 
+
 func disaggregated_transfer_at(disaggregated_runtime_state state, int index) kv_transfer_ticket {
     state.transfers[index]
 }
+
 
 func disaggregated_find_worker(disaggregated_runtime_state state, string worker_id) int {
     int i = 0
@@ -145,6 +170,7 @@ func disaggregated_find_worker(disaggregated_runtime_state state, string worker_
     -1
 }
 
+
 func disaggregated_find_request(disaggregated_runtime_state state, string request_id) int {
     int i = 0
     while i < len(state.requests) {
@@ -157,6 +183,7 @@ func disaggregated_find_request(disaggregated_runtime_state state, string reques
     -1
 }
 
+
 func disaggregated_find_transfer(disaggregated_runtime_state state, string request_id) int {
     int i = 0
     while i < len(state.transfers) {
@@ -168,6 +195,7 @@ func disaggregated_find_transfer(disaggregated_runtime_state state, string reque
     }
     -1
 }
+
 
 func disaggregated_select_worker(disaggregated_runtime_state state, string role) int {
     int selected = -1
@@ -183,6 +211,7 @@ func disaggregated_select_worker(disaggregated_runtime_state state, string role)
     }
     selected
 }
+
 
 func disaggregated_register_worker(disaggregated_runtime_state state, string worker_id, string role, string backend, int capacity) disaggregated_runtime_state {
     if worker_id == "" || disaggregated_find_worker(state, worker_id) >= 0 || capacity <= 0 {
@@ -201,6 +230,7 @@ func disaggregated_register_worker(disaggregated_runtime_state state, string wor
     state.workers = append(state.workers, worker)
     state
 }
+
 
 func disaggregated_submit(disaggregated_runtime_state state, string request_id, int prompt_tokens, int max_new_tokens) disaggregated_result {
     if request_id == "" || max_new_tokens <= 0 || disaggregated_find_request(state, request_id) >= 0 {
@@ -242,6 +272,7 @@ func disaggregated_submit(disaggregated_runtime_state state, string request_id, 
     new_disaggregated_result(state, request, empty_kv_transfer_ticket(), true, "")
 }
 
+
 func disaggregated_start_prefill(disaggregated_runtime_state state, string request_id) disaggregated_result {
     int request_index = disaggregated_find_request(state, request_id)
     if request_index < 0 {
@@ -255,6 +286,7 @@ func disaggregated_start_prefill(disaggregated_runtime_state state, string reque
     state.requests[request_index] = request
     new_disaggregated_result(state, request, empty_kv_transfer_ticket(), true, "")
 }
+
 
 func disaggregated_complete_prefill(disaggregated_runtime_state state, string request_id, string kv_handle, int byte_count, int checksum, int max_retries) disaggregated_result {
     int request_index = disaggregated_find_request(state, request_id)
@@ -293,6 +325,7 @@ func disaggregated_complete_prefill(disaggregated_runtime_state state, string re
     state.transfers = append(state.transfers, transfer)
     new_disaggregated_result(state, request, transfer, true, "")
 }
+
 
 func disaggregated_ack_transfer(disaggregated_runtime_state state, string request_id, int checksum) disaggregated_result {
     int request_index = disaggregated_find_request(state, request_id)
@@ -334,6 +367,7 @@ func disaggregated_ack_transfer(disaggregated_runtime_state state, string reques
     new_disaggregated_result(state, request, transfer, true, "")
 }
 
+
 func disaggregated_decode_step(disaggregated_runtime_state state, string request_id, int token_count, bool eos) disaggregated_result {
     int request_index = disaggregated_find_request(state, request_id)
     if request_index < 0 {
@@ -360,6 +394,7 @@ func disaggregated_decode_step(disaggregated_runtime_state state, string request
     new_disaggregated_result(state, request, empty_kv_transfer_ticket(), true, "")
 }
 
+
 func disaggregated_set_worker_health(disaggregated_runtime_state state, string worker_id, bool healthy) disaggregated_runtime_state {
     int worker_index = disaggregated_find_worker(state, worker_id)
     if worker_index < 0 {
@@ -368,6 +403,7 @@ func disaggregated_set_worker_health(disaggregated_runtime_state state, string w
     state.workers[worker_index].healthy = healthy
     state
 }
+
 
 func disaggregated_cancel(disaggregated_runtime_state state, string request_id) disaggregated_result {
     int request_index = disaggregated_find_request(state, request_id)
@@ -393,3 +429,4 @@ func disaggregated_cancel(disaggregated_runtime_state state, string request_id) 
     state.requests[request_index] = request
     new_disaggregated_result(state, request, empty_kv_transfer_ticket(), true, "")
 }
+

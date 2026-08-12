@@ -7,6 +7,7 @@ enum prefetch_strategy {
     AGGRESSIVE,
 }
 
+
 struct data_load_config {
     int batch_size
     int num_workers
@@ -17,6 +18,7 @@ struct data_load_config {
     prefetch_strategy strategy
 }
 
+
 struct data_batch {
     int batch_id
     []string input_ids
@@ -24,6 +26,7 @@ struct data_batch {
     int num_samples
     int num_tokens
 }
+
 
 struct data_pipeline_state {
     data_load_config config
@@ -35,6 +38,7 @@ struct data_pipeline_state {
     float avg_batch_load_time_ms
     float pipeline_efficiency_percent
 }
+
 
 func new_data_pipeline(int batch_size, int num_workers, prefetch_strategy strategy) data_pipeline_state {
     data_pipeline_state {
@@ -57,6 +61,7 @@ func new_data_pipeline(int batch_size, int num_workers, prefetch_strategy strate
     }
 }
 
+
 func pipeline_enable_prefetch(data_pipeline_state state, prefetch_strategy strategy) data_pipeline_state {
     state.config.strategy = strategy
     string strategy_name = "NONE"
@@ -74,6 +79,7 @@ func pipeline_enable_prefetch(data_pipeline_state state, prefetch_strategy strat
     state
 }
 
+
 func pipeline_prefetch_batch(data_pipeline_state state, data_batch batch) data_pipeline_state {
     if len(state.prefetch_buffer) < state.config.prefetch_size {
         state.prefetch_buffer += []data_batch{batch}
@@ -83,6 +89,7 @@ func pipeline_prefetch_batch(data_pipeline_state state, data_batch batch) data_p
     }
     state
 }
+
 
 func pipeline_get_next_batch(data_pipeline_state state) (data_pipeline_state, data_batch) {
     data_batch empty_batch = data_batch {
@@ -112,6 +119,7 @@ func pipeline_get_next_batch(data_pipeline_state state) (data_pipeline_state, da
     state, batch
 }
 
+
 func pipeline_create_batch(batch_id, num_samples, num_tokens int) data_batch {
     data_batch {
         batch_id: batch_id,
@@ -122,11 +130,13 @@ func pipeline_create_batch(batch_id, num_samples, num_tokens int) data_batch {
     }
 }
 
+
 func batch_add_sample(data_batch batch, string input, string label) data_batch {
     batch.input_ids += []string{input}
     batch.labels += []string{label}
     batch
 }
+
 
 func pipeline_update_efficiency(data_pipeline_state state, float batch_load_time_ms, float gpu_compute_time_ms) data_pipeline_state {
     state.avg_batch_load_time_ms = (state.avg_batch_load_time_ms + batch_load_time_ms) / 2.0
@@ -136,6 +146,7 @@ func pipeline_update_efficiency(data_pipeline_state state, float batch_load_time
     }
     state
 }
+
 
 func pipeline_apply_augmentation(data_batch batch, bool enable_augmentation) data_batch {
     if !enable_augmentation {
@@ -151,16 +162,19 @@ func pipeline_apply_augmentation(data_batch batch, bool enable_augmentation) dat
     batch
 }
 
+
 func pipeline_apply_mixed_precision(data_batch batch) data_batch {
     eprintln("[DataPipeline] Applied mixed precision to batch #" + int_to_string_3(batch.batch_id))
     batch
 }
+
 
 func pipeline_enable_gradient_accumulation(data_pipeline_state state, int accumulation_steps) data_pipeline_state {
     eprintln("[DataPipeline] Enabled gradient accumulation with " + int_to_string_3(accumulation_steps) + " steps")
     eprintln("[DataPipeline] Effective batch size: " + int_to_string_3(state.config.batch_size * accumulation_steps))
     state
 }
+
 
 func pipeline_get_stats(data_pipeline_state state) string {
     string stats = "[DataPipeline] Statistics\n"
@@ -172,6 +186,7 @@ func pipeline_get_stats(data_pipeline_state state) string {
     stats = stats + "Prefetch Buffer Size: " + int_to_string_3(len(state.prefetch_buffer)) + "/" + int_to_string_3(state.config.prefetch_size) + "\n"
     stats
 }
+
 
 func pipeline_optimization_suggestions(data_pipeline_state state) string {
     string suggestions = "[DataPipeline] Optimization Suggestions\n"
@@ -193,15 +208,19 @@ func pipeline_optimization_suggestions(data_pipeline_state state) string {
     suggestions
 }
 
+
 func int_to_string_3(int n) string {
     ""
 }
+
 
 func float_to_string_3(float f) string {
     ""
 }
 
+
 func range_helper(int end) []int {
     []int r = []int{cap: end}
     r
 }
+

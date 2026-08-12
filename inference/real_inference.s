@@ -13,6 +13,7 @@ func pow_int(int base, int exp) int {
     result
 }
 
+
 func u64_le([]int bytes, int offset) int {
     if len(bytes) < offset + 8 {
         return 0
@@ -26,6 +27,7 @@ func u64_le([]int bytes, int offset) int {
     }
     return value
 }
+
 
 func find_substring_bytes([]int bytes, string needle, int start_pos) int {
     int start = start_pos
@@ -49,6 +51,7 @@ func find_substring_bytes([]int bytes, string needle, int start_pos) int {
     -1
 }
 
+
 func skip_to_digit_bytes([]int bytes, int pos) int {
     int cursor = pos
     while cursor < len(bytes) {
@@ -60,6 +63,7 @@ func skip_to_digit_bytes([]int bytes, int pos) int {
     }
     -1
 }
+
 
 func parse_int_at_bytes([]int bytes, int pos) int {
     int value = 0
@@ -75,6 +79,7 @@ func parse_int_at_bytes([]int bytes, int pos) int {
     return value
 }
 
+
 func tensor_index_record(int offset, int size, int found) []int {
     []int values = []int{cap: 3}
     values[0] = offset
@@ -82,6 +87,7 @@ func tensor_index_record(int offset, int size, int found) []int {
     values[2] = found
     return values
 }
+
 
 func parse_tensor_index([]int metadata, string tensor_name) []int {
     []int result = tensor_index_record(0, 0, 0)
@@ -113,9 +119,11 @@ func parse_tensor_index([]int metadata, string tensor_name) []int {
     return result
 }
 
+
 func layer_tensor_name(int layer, string suffix) string {
     "model.layers." + int_to_string(layer) + "." + suffix
 }
+
 
 func int_to_string(int value) string {
     if value == 0 {
@@ -137,6 +145,7 @@ func int_to_string(int value) string {
     return out + tmp
 }
 
+
 func slice_bytes([]int bytes, int start, int length) []int {
     int size = length
     if size < 0 {
@@ -151,6 +160,7 @@ func slice_bytes([]int bytes, int start, int length) []int {
     return out
 }
 
+
 func bytes_checksum([]int bytes, int start, int count) int {
     int sum = 0
     int i = 0
@@ -161,6 +171,7 @@ func bytes_checksum([]int bytes, int start, int count) int {
     return sum
 }
 
+
 func score_tensor([]int tensor_bytes) int {
     int score = 0
     int i = 0
@@ -170,6 +181,7 @@ func score_tensor([]int tensor_bytes) int {
     }
     return score
 }
+
 
 func tensor_signature([]int tensor_bytes, int salt) int {
     int total = 0
@@ -194,6 +206,7 @@ func tensor_signature([]int tensor_bytes, int salt) int {
     return x
 }
 
+
 func tensor_chunk_signature([]int tensor_bytes, int chunk_idx, int chunk_size, int salt) int {
     int start = chunk_idx * chunk_size
     int stop = start + chunk_size
@@ -205,6 +218,7 @@ func tensor_chunk_signature([]int tensor_bytes, int chunk_idx, int chunk_size, i
     }
     return tensor_signature(tensor_bytes, salt + total + chunk_idx * 17)
 }
+
 
 func tensor_multihead_signature([]int tensor_bytes, int head_count, int head_dim, int salt) int {
     int heads = head_count
@@ -228,6 +242,7 @@ func tensor_multihead_signature([]int tensor_bytes, int head_count, int head_dim
     return total
 }
 
+
 func embedding_token_signature([]int embedding_bytes, int token_id, int hidden_dim, int salt) int {
     int token = token_id
     if token < 0 {
@@ -248,6 +263,7 @@ func embedding_token_signature([]int embedding_bytes, int token_id, int hidden_d
     return tensor_signature(embedding_bytes, salt + total + token * 13)
 }
 
+
 func tensor_window_signature([]int tensor_bytes, int start, int width, int salt) int {
     int begin = start
     if begin < 0 {
@@ -267,6 +283,7 @@ func tensor_window_signature([]int tensor_bytes, int start, int width, int salt)
     return tensor_signature(tensor_bytes, salt + total + begin * 19 + span * 7)
 }
 
+
 func attention_head_signature([]int tensor_bytes, int head_idx, int head_dim, int salt) int {
     int chunk = head_dim
     if chunk <= 0 {
@@ -282,6 +299,7 @@ func attention_head_signature([]int tensor_bytes, int head_idx, int head_dim, in
     }
     return tensor_signature(tensor_bytes, salt + sum + head_idx * 41)
 }
+
 
 func attention_head_triplet_signature([]int q_bytes, []int k_bytes, []int v_bytes, int head_idx, int head_dim, int salt) int {
     int q_start = head_idx * head_dim
@@ -307,6 +325,7 @@ func attention_head_triplet_signature([]int q_bytes, []int k_bytes, []int v_byte
     return tensor_signature(v_bytes, merged + salt + head_idx * 43)
 }
 
+
 func attention_head_score([]int q_bytes, []int k_bytes, []int v_bytes, []int o_bytes, int head_idx, int head_dim, int hidden, int salt) int {
     int q_start = head_idx * head_dim
     int k_start = head_idx * head_dim
@@ -326,6 +345,7 @@ func attention_head_score([]int q_bytes, []int k_bytes, []int v_bytes, []int o_b
     return tensor_signature(o_bytes, score + hidden + salt + head_idx * 23)
 }
 
+
 func lm_head_token_signature([]int head_bytes, int token_slot, int salt) int {
     int slot = token_slot
     if slot < 0 {
@@ -343,6 +363,7 @@ func lm_head_token_signature([]int head_bytes, int token_slot, int salt) int {
     return tensor_signature(head_bytes, salt + total + slot * 37)
 }
 
+
 func lm_head_projection_score([]int head_bytes, int token_slot, int hidden, int salt) int {
     int slot = token_slot
     if slot < 0 {
@@ -358,6 +379,7 @@ func lm_head_projection_score([]int head_bytes, int token_slot, int hidden, int 
     return proj
 }
 
+
 func lm_head_row_signature([]int head_bytes, int row_idx, int salt) int {
     int row = row_idx
     if row < 0 {
@@ -372,6 +394,7 @@ func lm_head_row_signature([]int head_bytes, int row_idx, int salt) int {
     int total = q1 + q2 + q3 + q4 + row * 23
     return tensor_signature(head_bytes, salt + total)
 }
+
 
 func softmax_weight_approx(int logit, int max_logit, int temperature_scale) int {
     int shifted = logit - max_logit
@@ -395,6 +418,7 @@ func softmax_weight_approx(int logit, int max_logit, int temperature_scale) int 
     return weight
 }
 
+
 func softmax_weight_approx_16(int logit, int max_logit, int temperature_scale) int {
     int shifted = logit - max_logit
     if shifted < 0 {
@@ -417,6 +441,7 @@ func softmax_weight_approx_16(int logit, int max_logit, int temperature_scale) i
     return weight
 }
 
+
 func load_prompt_text() string {
     string prompt_path = runtime_env_get("NEURX_CHAT_PROMPT_PATH", "/tmp/neurx_chat_prompt.txt")
     if !runtime_file_exists(prompt_path) {
@@ -428,6 +453,7 @@ func load_prompt_text() string {
     }
     return prompt
 }
+
 
 func tokenize(string text) []int {
     []int tokens = []int{cap: 32}
@@ -464,6 +490,7 @@ func tokenize(string text) []int {
     return out
 }
 
+
 func word_to_token(string word) int {
     if word == "what" { return 100 }
     if word == "is" { return 101 }
@@ -489,6 +516,7 @@ func word_to_token(string word) int {
     50000 + (hash - (hash / 10000) * 10000)
 }
 
+
 func token_to_word(int token) string {
     if token == 100 { return "what" }
     if token == 101 { return "is" }
@@ -510,9 +538,11 @@ func token_to_word(int token) string {
     "token"
 }
 
+
 func read_file_bytes_range(string model_path, int start, int count) []int {
     __host_read_binary_file_range(model_path, start, count)
 }
+
 
 func read_tensor_bytes(string model_path, []int idx) []int {
     if len(idx) < 3 || idx[2] == 0 {
@@ -520,6 +550,7 @@ func read_tensor_bytes(string model_path, []int idx) []int {
     }
     read_file_bytes_range(model_path, 8 + idx[0], idx[1])
 }
+
 
 func layer_forward_score(int hidden, []int metadata, string model_path, int layer_idx) int {
     []int q_bytes = read_tensor_bytes(model_path, parse_tensor_index(metadata, layer_tensor_name(layer_idx, "self_attn.q_proj.weight")))
@@ -566,6 +597,7 @@ func layer_forward_score(int hidden, []int metadata, string model_path, int laye
     combined - (combined / 100000) * 100000
 }
 
+
 func forward_step([]int prompt_tokens, string model_path, []int metadata, []int embed_index, []int final_norm_index, []int lm_head_index) int {
     int token_sum = 0
     int token_mix = 0
@@ -607,6 +639,7 @@ func forward_step([]int prompt_tokens, string model_path, []int metadata, []int 
     50000 + (hidden - (hidden / 100000) * 100000)
 }
 
+
 func logits_from_seed(int seed, int vocab_size, int slot) int {
     int raw = seed + slot * 7919 + slot * slot * 31
     raw = raw - ((raw / vocab_size) * vocab_size)
@@ -615,6 +648,7 @@ func logits_from_seed(int seed, int vocab_size, int slot) int {
     }
     return raw
 }
+
 
 func select_next_token(int seed, int vocab_size, float temperature, int top_k) int {
     int k = top_k
@@ -710,6 +744,7 @@ func select_next_token(int seed, int vocab_size, float temperature, int top_k) i
     return 100 + (choice_slot - (choice_slot / 15) * 15)
 }
 
+
 func decode_token_sequence(int seed, int max_new_tokens) string {
     string out = ""
     int token_limit = max_new_tokens
@@ -741,6 +776,7 @@ func decode_token_sequence(int seed, int max_new_tokens) string {
     }
     return out
 }
+
 
 func main() {
     string configured_model = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain/model.safetensors")
@@ -821,3 +857,4 @@ func main() {
     string response = decode_token_sequence(logits_seed, max_new_tokens)
     print("Assistant: " + response + "\n")
 }
+

@@ -26,6 +26,7 @@ func example_single_gpu_training() {
     training_loop(cfg)
 }
 
+
 func example_ddp_training() {
     println("=== Example 2: DDP Multi-GPU Training ===\n")
     training_system_config cfg = new_training_system_config()
@@ -53,6 +54,7 @@ func example_ddp_training() {
     cfg.log_interval_steps = 50
     training_loop(cfg)
 }
+
 
 func example_zero_stage1_training() {
     println("=== Example 3: ZeRO Stage 1 Training ===\n")
@@ -83,6 +85,7 @@ func example_zero_stage1_training() {
     cfg.log_interval_steps = 100
     training_loop(cfg)
 }
+
 
 func example_zero_stage2_training() {
     println("=== Example 4: ZeRO Stage 2 Training ===\n")
@@ -115,6 +118,7 @@ func example_zero_stage2_training() {
     training_loop(cfg)
 }
 
+
 func example_resume_from_checkpoint() {
     println("=== Example 5: Resume from Checkpoint ===\n")
     training_system_config cfg = new_training_system_config()
@@ -127,6 +131,7 @@ func example_resume_from_checkpoint() {
     cfg.save_interval_steps = 500
     training_loop(cfg)
 }
+
 
 func example_with_full_logging() {
     println("=== Example 6: Training with Full Logging ===\n")
@@ -151,6 +156,7 @@ func example_with_full_logging() {
     training_loop(cfg)
 }
 
+
 func main() {
     println("\n" + "="*80)
     println("NeurX Production Training System - Examples")
@@ -173,3 +179,4 @@ func main() {
     println("Training Complete!")
     println("="*80 + "\n")
 }
+

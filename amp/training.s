@@ -6,6 +6,7 @@ enum amp_dtype {
     BF16 = 2
 }
 
+
 struct amp_config {
     dtype: amp_dtype
     enable_grad_scaling: bool
@@ -17,6 +18,7 @@ struct amp_config {
     growth_interval: int
 }
 
+
 struct amp_state {
     scale: float
     growth_step: int
@@ -26,6 +28,7 @@ struct amp_state {
     fp32_params: []autograd.tensor
 }
 
+
 struct mixed_precision_model {
     model: pointer
     amp_config: amp_config
@@ -33,10 +36,12 @@ struct mixed_precision_model {
     param_groups: [][]autograd.tensor
 }
 
+
 struct autocast_state {
     bool enabled
     int dtype
 }
+
 
 struct grad_scaler_state {
     float scale
@@ -46,12 +51,14 @@ struct grad_scaler_state {
     bool found_inf
 }
 
+
 func new_autocast_state(bool enabled, int dtype) autocast_state {
     autocast_state {
         enabled: enabled,
         dtype: dtype,
     }
 }
+
 
 func autocast_enter(autocast_state state) autocast_state {
     autocast_state {
@@ -60,6 +67,7 @@ func autocast_enter(autocast_state state) autocast_state {
     }
 }
 
+
 func autocast_exit(autocast_state state) autocast_state {
     autocast_state {
         enabled: false,
@@ -67,9 +75,11 @@ func autocast_exit(autocast_state state) autocast_state {
     }
 }
 
+
 func is_autocast_enabled(autocast_state state) bool {
     state.enabled
 }
+
 
 func new_grad_scaler(float scale, float growth_factor, float backoff_factor, int growth_interval, bool enabled) grad_scaler_state {
     grad_scaler_state {
@@ -80,6 +90,7 @@ func new_grad_scaler(float scale, float growth_factor, float backoff_factor, int
         found_inf: false,
     }
 }
+
 
 func grad_scaler_step(grad_scaler_state scaler, float value) grad_scaler_state {
     bool found_inf = value > 1000000000000000000000000000000000000.0 || value < -1000000000000000000000000000000000000.0 || value != value
@@ -96,13 +107,16 @@ func grad_scaler_step(grad_scaler_state scaler, float value) grad_scaler_state {
     }
 }
 
+
 func grad_scaler_get_scale(grad_scaler_state scaler) float {
     scaler.scale
 }
 
+
 func grad_scaler_found_inf(grad_scaler_state scaler) bool {
     scaler.found_inf
 }
+
 
 func new_amp_config(amp_dtype dtype, bool enable_grad_scaling) amp_config {
     amp_config config {
@@ -118,6 +132,7 @@ func new_amp_config(amp_dtype dtype, bool enable_grad_scaling) amp_config {
     config
 }
 
+
 func new_amp_state(amp_config config, int num_params) amp_state {
     amp_state state {
         scale: config.initial_scale,
@@ -129,6 +144,7 @@ func new_amp_state(amp_config config, int num_params) amp_state {
     }
     state
 }
+
 
 func amp_init_params([]autograd.tensor params, amp_config config) amp_state {
     int n = len(params)
@@ -143,6 +159,7 @@ func amp_init_params([]autograd.tensor params, amp_config config) amp_state {
     state
 }
 
+
 func amp_cast_to_fp16(mixed_precision_model model) mixed_precision_model {
     for i := 0; i < len(model.amp_state.fp32_params); i += 1 {
         model.amp_state.fp16_params[i] = autograd.tensor_cast(
@@ -152,6 +169,7 @@ func amp_cast_to_fp16(mixed_precision_model model) mixed_precision_model {
     }
     model
 }
+
 
 func amp_cast_grad_to_fp32(mixed_precision_model model) mixed_precision_model {
     for i := 0; i < len(model.amp_state.fp16_grads); i += 1 {
@@ -167,12 +185,14 @@ func amp_cast_grad_to_fp32(mixed_precision_model model) mixed_precision_model {
     model
 }
 
+
 func amp_scale_loss(float loss, amp_state state) float {
     if state.last_overflow {
         return loss
     }
     loss * state.scale
 }
+
 
 func amp_check_overflow([]autograd.tensor grads) bool {
     for i := 0; i < len(grads); i += 1 {
@@ -182,6 +202,7 @@ func amp_check_overflow([]autograd.tensor grads) bool {
     }
     false
 }
+
 
 func amp_update_scale(amp_state state, amp_config config, bool has_overflow) amp_state {
     if has_overflow {
@@ -201,6 +222,7 @@ func amp_update_scale(amp_state state, amp_config config, bool has_overflow) amp
     state
 }
 
+
 func amp_step(mixed_precision_model model) bool {
     bool overflow = amp_check_overflow(model.amp_state.fp16_grads)
     if overflow {
@@ -213,6 +235,7 @@ func amp_step(mixed_precision_model model) bool {
     true
 }
 
+
 func amp_grad_scaling(mixed_precision_model model) mixed_precision_model {
     if !model.amp_config.enable_grad_scaling {
         return model
@@ -224,6 +247,7 @@ func amp_grad_scaling(mixed_precision_model model) mixed_precision_model {
     model
 }
 
+
 func amp_sync_params(mixed_precision_model model) mixed_precision_model {
     for i := 0; i < len(model.amp_state.fp32_params); i += 1 {
         model.amp_state.fp16_params[i] = autograd.tensor_cast(
@@ -234,6 +258,7 @@ func amp_sync_params(mixed_precision_model model) mixed_precision_model {
     model
 }
 
+
 func amp_zero_grad(mixed_precision_model model) mixed_precision_model {
     autograd.zero_grad(model.amp_state.fp32_params)
     for i := 0; i < len(model.amp_state.fp16_grads); i += 1 {
@@ -241,6 +266,7 @@ func amp_zero_grad(mixed_precision_model model) mixed_precision_model {
     }
     model
 }
+
 
 func mixed_precision_forward(mixed_precision_model model, func f) float {
     amp_cast_to_fp16(model)
@@ -251,6 +277,7 @@ func mixed_precision_forward(mixed_precision_model model, func f) float {
     loss
 }
 
+
 func mixed_precision_backward(mixed_precision_model model, float loss) mixed_precision_model {
     autograd.backward(loss)
     for i := 0; i < len(model.amp_state.fp16_params); i += 1 {
@@ -260,6 +287,7 @@ func mixed_precision_backward(mixed_precision_model model, float loss) mixed_pre
     model
 }
 
+
 func max(float a, float b) float {
     if a > b {
         return a
@@ -267,9 +295,11 @@ func max(float a, float b) float {
     b
 }
 
+
 func min(float a, float b) float {
     if a < b {
         return a
     }
     b
 }
+

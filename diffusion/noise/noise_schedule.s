@@ -9,6 +9,7 @@ struct noise_schedule_state {
     float alpha_bar_t
 }
 
+
 func linear_beta(float beta_start, float beta_end, int t, int timesteps) float {
     if timesteps <= 1 {
         return beta_end
@@ -16,6 +17,7 @@ func linear_beta(float beta_start, float beta_end, int t, int timesteps) float {
     float r = t / (timesteps - 1)
     beta_start + (beta_end - beta_start) * r
 }
+
 
 func new_noise_schedule_state(diffusion_config cfg) noise_schedule_state {
     float beta_0 = neurx.ops.diffusion_noise_step(cfg.beta_start, cfg.beta_end, 0, cfg.timesteps)
@@ -28,6 +30,7 @@ func new_noise_schedule_state(diffusion_config cfg) noise_schedule_state {
         alpha_bar_t: alpha_0,
     }
 }
+
 
 func noise_schedule_step(noise_schedule_state state, int t) noise_schedule_state {
     int step = t
@@ -54,10 +57,13 @@ func noise_schedule_step(noise_schedule_state state, int t) noise_schedule_state
     }
 }
 
+
 func noise_schedule_state_dict(noise_schedule_state state) noise_schedule_state {
     state
 }
 
+
 func noise_schedule_load_state_dict(noise_schedule_state state, noise_schedule_state other) noise_schedule_state {
     other
 }
+

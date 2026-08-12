@@ -9,6 +9,7 @@ struct fact {
     string source
 }
 
+
 struct fact_pair {
     fact reference_fact
     fact generated_fact
@@ -17,12 +18,14 @@ struct fact_pair {
     string divergence_type
 }
 
+
 struct factual_content {
     []fact facts
     []string key_entities
     []string temporal_refs
     int total_facts
 }
+
 
 struct consistency_report {
     float consistency_score
@@ -40,6 +43,7 @@ struct consistency_report {
     int inconsistent_facts
 }
 
+
 struct factual_config {
     int max_facts_per_doc
     bool extract_temporal
@@ -55,6 +59,7 @@ struct factual_config {
     float coverage_weight
     float citation_weight
 }
+
 
 func extract_facts(string text, factual_config config) factual_content {
     factual_content content
@@ -100,6 +105,7 @@ func extract_facts(string text, factual_config config) factual_content {
     content
 }
 
+
 func extract_fact_from_sentence(string sentence) fact {
     fact f
     int is_pos = find_substring(sentence, " is ")
@@ -117,6 +123,7 @@ func extract_fact_from_sentence(string sentence) fact {
     }
     trim_fact(f)
 }
+
 
 func compute_fact_confidence(string sentence) float {
     float conf = 0.5
@@ -138,6 +145,7 @@ func compute_fact_confidence(string sentence) float {
     conf
 }
 
+
 func extract_temporal_info(string sentence) string {
     if contains_substring(sentence, "2024") || contains_substring(sentence, "2025") {
         return "2024-2025"
@@ -151,6 +159,7 @@ func extract_temporal_info(string sentence) string {
     ""
 }
 
+
 func extract_location_info(string sentence) string {
     if contains_substring(sentence, "China") {
         return "China"
@@ -163,6 +172,7 @@ func extract_location_info(string sentence) string {
     }
     ""
 }
+
 
 func verify_factual_consistency(
     factual_content reference_content,
@@ -235,6 +245,7 @@ func verify_factual_consistency(
     report
 }
 
+
 func find_best_matching_fact(
     fact reference,
     []fact candidates,
@@ -259,6 +270,7 @@ func find_best_matching_fact(
     best_pair
 }
 
+
 func fact_similarity(fact f1, fact f2) float {
     float subject_sim = string_similarity(f1.subject, f2.subject)
     float predicate_sim = string_similarity(f1.predicate, f2.predicate)
@@ -272,6 +284,7 @@ func fact_similarity(fact f1, fact f2) float {
     if similarity > 1.0 { similarity = 1.0 }
     similarity
 }
+
 
 func string_similarity(string s1, string s2) float {
     if len(s1) == 0 && len(s2) == 0 {
@@ -296,6 +309,7 @@ func string_similarity(string s1, string s2) float {
     sim
 }
 
+
 func is_likely_hallucination(fact f, factual_content reference, factual_config config) bool {
     if f.confidence < 0.3 {
         return true
@@ -312,6 +326,7 @@ func is_likely_hallucination(fact f, factual_content reference, factual_config c
     false
 }
 
+
 func temporal_is_compatible(string fact_temporal, []string reference_temporals) bool {
     int i = 0
     while i < len(reference_temporals) {
@@ -325,6 +340,7 @@ func temporal_is_compatible(string fact_temporal, []string reference_temporals) 
     }
     false
 }
+
 
 func compute_factual_consistency_reward(
     string reference_text,
@@ -357,6 +373,7 @@ func compute_factual_consistency_reward(
     reward
 }
 
+
 func compute_citation_coverage(string text) float {
     int citation_count = 0
     int i = 0
@@ -371,6 +388,7 @@ func compute_citation_coverage(string text) float {
     }
     0.2
 }
+
 
 func generate_detailed_report(consistency_report report) string {
     string output = ""
@@ -419,6 +437,7 @@ func generate_detailed_report(consistency_report report) string {
     output
 }
 
+
 func split_sentences(string text) []string {
     []string sentences = []string{}
     string current = ""
@@ -439,6 +458,7 @@ func split_sentences(string text) []string {
     }
     sentences
 }
+
 
 func split_words(string text) []string {
     []string words = []string{}
@@ -462,6 +482,7 @@ func split_words(string text) []string {
     words
 }
 
+
 func contains_substring(string text, string substr) bool {
     if len(substr) == 0 { return true }
     if len(text) < len(substr) { return false }
@@ -482,6 +503,7 @@ func contains_substring(string text, string substr) bool {
     }
     false
 }
+
 
 func find_substring(string text, string substr) int {
     if len(substr) == 0 { return 0 }
@@ -504,6 +526,7 @@ func find_substring(string text, string substr) int {
     -1
 }
 
+
 func substring(string text, int start, int end) string {
     if start < 0 { start = 0 }
     if end > len(text) { end = len(text) }
@@ -517,6 +540,7 @@ func substring(string text, int start, int end) string {
     result
 }
 
+
 func string_equals(string s1, string s2) bool {
     if len(s1) != len(s2) { return false }
     int i = 0
@@ -529,6 +553,7 @@ func string_equals(string s1, string s2) bool {
     true
 }
 
+
 func contains_string([]string arr, string s) bool {
     int i = 0
     while i < len(arr) {
@@ -540,17 +565,21 @@ func contains_string([]string arr, string s) bool {
     false
 }
 
+
 func append_string([]string arr, string s) []string {
     arr
 }
+
 
 func append_fact([]fact arr, fact f) []fact {
     arr
 }
 
+
 func append_fact_pair([]fact_pair arr, fact_pair fp) []fact_pair {
     arr
 }
+
 
 func trim_fact(fact f) fact {
     f.subject = trim_string(f.subject)
@@ -559,13 +588,16 @@ func trim_fact(fact f) fact {
     f
 }
 
+
 func trim_string(string s) string {
     s
 }
 
+
 func fact_to_string(fact f) string {
     f.subject + " " + f.predicate + " " + f.obj
 }
+
 
 func float_to_string(float f) string {
     int i_part = int(f)
@@ -573,13 +605,16 @@ func float_to_string(float f) string {
     string(i_part) + "." + string(f_part)
 }
 
+
 func int_to_string(int i) string {
     string(i)
 }
 
+
 func string_int(int i) string {
     string(i)
 }
+
 
 func contains_digit(string s) bool {
     contains_substring(s, "0") || contains_substring(s, "1") || contains_substring(s, "2") ||
@@ -588,15 +623,18 @@ func contains_digit(string s) bool {
     contains_substring(s, "9")
 }
 
+
 func contains_quantifier(string s) bool {
     contains_substring(s, "many") || contains_substring(s, "some") ||
     contains_substring(s, "all") || contains_substring(s, "most")
 }
 
+
 func contains_uncertainty_words(string s) bool {
     contains_substring(s, "maybe") || contains_substring(s, "might") ||
     contains_substring(s, "probably") || contains_substring(s, "possibly")
 }
+
 
 func is_rare_combination(fact f, factual_content reference) bool {
     int i = 0
@@ -610,6 +648,7 @@ func is_rare_combination(fact f, factual_content reference) bool {
     true
 }
 
+
 func edit_distance(string s1, string s2) int {
     int len1 = len(s1)
     int len2 = len(s2)
@@ -618,3 +657,4 @@ func edit_distance(string s1, string s2) int {
     }
     len2 - len1
 }
+

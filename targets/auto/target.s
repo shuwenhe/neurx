@@ -8,6 +8,7 @@ struct auto_target_config {
     bool    v2x_enabled
 }
 
+
 func default_auto_target() auto_target_config {
     return auto_target_config{
         soc_family:       "orin",
@@ -19,3 +20,4 @@ func default_auto_target() auto_target_config {
         v2x_enabled:      false,
     }
 }
+

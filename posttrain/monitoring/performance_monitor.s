@@ -7,6 +7,7 @@ struct performance_metric {
     int timestamp
 }
 
+
 struct gpu_memory_stats {
     float allocated_gb
     float reserved_gb
@@ -14,6 +15,7 @@ struct gpu_memory_stats {
     float utilization_percent
     float peak_allocated_gb
 }
+
 
 struct throughput_stats {
     float samples_per_second
@@ -23,6 +25,7 @@ struct throughput_stats {
     int total_tokens_processed
 }
 
+
 struct latency_stats {
     float avg_latency_ms
     float min_latency_ms
@@ -30,6 +33,7 @@ struct latency_stats {
     float p50_latency_ms
     float p99_latency_ms
 }
+
 
 struct training_performance_state {
     []performance_metric metrics
@@ -40,6 +44,7 @@ struct training_performance_state {
     int total_time_seconds
     float training_efficiency_percent
 }
+
 
 func new_performance_monitor() training_performance_state {
     training_performance_state {
@@ -71,6 +76,7 @@ func new_performance_monitor() training_performance_state {
     }
 }
 
+
 func perf_record_metric(training_performance_state state, string metric_name, float value, string unit) training_performance_state {
     performance_metric metric = performance_metric {
         metric_name: metric_name,
@@ -81,6 +87,7 @@ func perf_record_metric(training_performance_state state, string metric_name, fl
     state.metrics += []performance_metric{metric}
     state
 }
+
 
 func perf_update_gpu_memory(training_performance_state state, float allocated_gb, float reserved_gb, float free_gb) training_performance_state {
     state.gpu_memory.allocated_gb = allocated_gb
@@ -96,6 +103,7 @@ func perf_update_gpu_memory(training_performance_state state, float allocated_gb
     state
 }
 
+
 func perf_update_throughput(training_performance_state state, int samples_processed, int tokens_processed, int elapsed_seconds) training_performance_state {
     state.throughput.total_samples_processed = state.throughput.total_samples_processed + samples_processed
     state.throughput.total_tokens_processed = state.throughput.total_tokens_processed + tokens_processed
@@ -107,6 +115,7 @@ func perf_update_throughput(training_performance_state state, int samples_proces
     state
 }
 
+
 func perf_update_latency(training_performance_state state, float avg_latency_ms, float min_latency_ms, float max_latency_ms) training_performance_state {
     state.latency.avg_latency_ms = avg_latency_ms
     state.latency.min_latency_ms = min_latency_ms
@@ -116,6 +125,7 @@ func perf_update_latency(training_performance_state state, float avg_latency_ms,
     eprintln("[PerfMonitor] Latency - Avg: " + float_to_str_2(avg_latency_ms) + "ms, Min: " + float_to_str_2(min_latency_ms) + "ms, Max: " + float_to_str_2(max_latency_ms) + "ms")
     state
 }
+
 
 func perf_step(training_performance_state state, int step, float loss, int samples, int tokens, int elapsed_ms) training_performance_state {
     state.step_count = step
@@ -131,6 +141,7 @@ func perf_step(training_performance_state state, int step, float loss, int sampl
     }
     state
 }
+
 
 func perf_generate_report(training_performance_state state) string {
     string report = "[PerfMonitor] Performance Report\n"
@@ -159,6 +170,7 @@ func perf_generate_report(training_performance_state state) string {
     report
 }
 
+
 func perf_get_metric_history(training_performance_state state, string metric_name) []float {
     []float history = []float{cap: len(state.metrics)}
     for i in range(len(state.metrics)) {
@@ -169,6 +181,7 @@ func perf_get_metric_history(training_performance_state state, string metric_nam
     }
     history
 }
+
 
 func perf_get_metric_stats(training_performance_state state, string metric_name) (float, float, float) {
     []float values = perf_get_metric_history(state, metric_name)
@@ -192,6 +205,7 @@ func perf_get_metric_stats(training_performance_state state, string metric_name)
     avg, min_val, max_val
 }
 
+
 func perf_detect_bottleneck(training_performance_state state) string {
     string bottleneck = "[PerfMonitor] Bottleneck Analysis:\n"
     if state.gpu_memory.utilization_percent > 90.0 {
@@ -209,10 +223,13 @@ func perf_detect_bottleneck(training_performance_state state) string {
     bottleneck
 }
 
+
 func float_to_str_2(float f) string {
     ""
 }
 
+
 func int_to_str_2(int n) string {
     ""
 }
+

@@ -10,6 +10,7 @@ struct decode_state {
     sampling_state sampling
 }
 
+
 func new_decode_state(int max_new_tokens, kv_cache_state cache, sampling_state sampling) decode_state {
     decode_state {
         step: 0,
@@ -20,6 +21,7 @@ func new_decode_state(int max_new_tokens, kv_cache_state cache, sampling_state s
         sampling: sampling,
     }
 }
+
 
 func decode_step(decode_state state, int next_token_id) decode_state {
     int next_step = state.step + 1
@@ -34,10 +36,13 @@ func decode_step(decode_state state, int next_token_id) decode_state {
     }
 }
 
+
 func decode_state_dict(decode_state state) decode_state {
     state
 }
 
+
 func decode_load_state_dict(decode_state state, decode_state other) decode_state {
     other
 }
+

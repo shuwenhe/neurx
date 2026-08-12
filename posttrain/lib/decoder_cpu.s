@@ -5,10 +5,12 @@ struct decoder_layer_kv_cache {
     []float value
 }
 
+
 struct decoder_kv_cache {
     int length
     []decoder_layer_kv_cache layers
 }
+
 
 struct decoder_layer_trace {
     []float q
@@ -19,11 +21,13 @@ struct decoder_layer_trace {
     []float hidden
 }
 
+
 struct decoder_trace {
     []float embedding
     []decoder_layer_trace layers
     []float logits
 }
+
 
 struct transformer_config {
     string model_type
@@ -38,6 +42,7 @@ struct transformer_config {
     float rope_theta
 }
 
+
 func embedding_forward([]float weight, int token_id, int hidden_size) []float {
     []float result
     int start = token_id * hidden_size
@@ -50,10 +55,12 @@ func embedding_forward([]float weight, int token_id, int hidden_size) []float {
     return result
 }
 
+
 func rope_forward([]float x, int pos, int dim, float rope_theta) []float {
     []float result
     return result
 }
+
 
 func attention_forward(
     []float hidden,
@@ -73,6 +80,7 @@ func attention_forward(
     return result
 }
 
+
 func mlp_forward(
     []float hidden,
     []float gate_weight,
@@ -88,6 +96,7 @@ func mlp_forward(
     return down
 }
 
+
 func rms_norm_forward([]float x, []float weight, float epsilon) []float {
     []float result
     float rms = 0.0
@@ -99,6 +108,7 @@ func rms_norm_forward([]float x, []float weight, float epsilon) []float {
     rms = rms / float(len(x))
     return result
 }
+
 
 func transformer_block_forward(
     []float hidden,
@@ -136,6 +146,7 @@ func transformer_block_forward(
     return output
 }
 
+
 func model_forward(
     int token_id,
     []float embedding_weight,
@@ -163,13 +174,16 @@ func model_forward(
     return trace
 }
 
+
 func load_decoder_model(string directory) interface {
     eprintln("Loading decoder model from: " + directory)
     interface model
     return model
 }
 
+
 func main() {
     eprintln("CPU Decoder Model - Inference Engine")
     eprintln("Status: Pure S implementation")
 }
+

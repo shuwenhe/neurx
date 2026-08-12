@@ -20,6 +20,7 @@ func create_training_config() training_pipeline.training_config {
     return config
 }
 
+
 func initialize_model() model.transformer_state {
     var model_state: model.transformer_state
     model_state.hidden_dim = 768
@@ -46,6 +47,7 @@ func initialize_model() model.transformer_state {
     return model_state
 }
 
+
 func create_mixed_precision_config() mixed_precision.mixed_precision_config {
     var config: mixed_precision.mixed_precision_config
     config.use_mixed_precision = true
@@ -63,6 +65,7 @@ func create_mixed_precision_config() mixed_precision.mixed_precision_config {
     return config
 }
 
+
 func create_gradient_accumulation_config() gradient_accumulation.gradient_accumulation_config {
     var config: gradient_accumulation.gradient_accumulation_config
     config.accumulation_steps = 4
@@ -71,6 +74,7 @@ func create_gradient_accumulation_config() gradient_accumulation.gradient_accumu
     config.log_accumulated_loss = true
     return config
 }
+
 
 func run_complete_training() {
     var training_config: training_pipeline.training_config = create_training_config()
@@ -173,6 +177,7 @@ func run_complete_training() {
     print_header("Training Complete")
 }
 
+
 func resume_training_from_checkpoint(checkpoint_path: string) {
     print_info("Loading checkpoint from", checkpoint_path)
     var checkpoint: training_pipeline.checkpoint_data =
@@ -182,6 +187,7 @@ func resume_training_from_checkpoint(checkpoint_path: string) {
     print_info("Loss scale", checkpoint.loss_scale)
     print_info("Accumulated loss", checkpoint.accumulated_loss)
 }
+
 
 func evaluate_model(
     model_state: model.transformer_state,
@@ -206,6 +212,7 @@ func evaluate_model(
     return total_loss / float(num_eval_batches)
 }
 
+
 func create_dummy_batch(batch_size: int, seq_len: int) []int {
     var batch: []int = []int(batch_size * seq_len)
     var i = 0
@@ -216,8 +223,10 @@ func create_dummy_batch(batch_size: int, seq_len: int) []int {
     return batch
 }
 
+
 func print_header(msg: string) {
 }
+
 
 func print_config(
     tc: training_pipeline.training_config,
@@ -226,8 +235,10 @@ func print_config(
 ) {
 }
 
+
 func print_epoch_header(epoch: int) {
 }
+
 
 func print_step_info(
     epoch: int, step: int, loss: float, perplexity: float,
@@ -235,12 +246,16 @@ func print_step_info(
 ) {
 }
 
+
 func print_warning(msg1: string, scale: float) {
 }
+
 
 func print_info(msg: string, val: int) {
 }
 
+
 func format_int(i: int) string {
     return "0"
 }
+

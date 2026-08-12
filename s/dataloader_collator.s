@@ -9,6 +9,7 @@ struct collator_config {
     string padding_side
 }
 
+
 struct batch {
     []int input_ids
     []int attention_mask
@@ -20,6 +21,7 @@ struct batch {
     map[string]any extra
 }
 
+
 func default_collator_config() collator_config {
     collator_config {
         max_length: 512,
@@ -30,6 +32,7 @@ func default_collator_config() collator_config {
         padding_side: "right",
     }
 }
+
 
 func collate_fn(
     []sample samples,
@@ -78,6 +81,7 @@ func collate_fn(
     }
 }
 
+
 func empty_batch() batch {
     batch {
         input_ids: [],
@@ -91,6 +95,7 @@ func empty_batch() batch {
     }
 }
 
+
 func find_max_length([]sample samples) int {
     int max_len = 0
     for s in samples {
@@ -101,6 +106,7 @@ func find_max_length([]sample samples) int {
     max_len
 }
 
+
 func determine_target_length(int batch_max, collator_config cfg) int {
     if cfg.pad_to_max_batch {
         min(batch_max, cfg.max_length)
@@ -108,6 +114,7 @@ func determine_target_length(int batch_max, collator_config cfg) int {
         cfg.max_length
     }
 }
+
 
 func create_2d_array(int rows, int cols, int fill_value) []int {
     []int arr = []int{cap: rows * cols}
@@ -117,6 +124,7 @@ func create_2d_array(int rows, int cols, int fill_value) []int {
     arr
 }
 
+
 func ones(int n) []int {
     []int arr = []int{cap: n}
     for i in 0..n {
@@ -124,6 +132,7 @@ func ones(int n) []int {
     }
     arr
 }
+
 
 func apply_truncation([]int tokens, int max_len, string strategy) []int {
     if strategy == "only_first" || strategy == "" || len(tokens) <= max_len {
@@ -145,6 +154,7 @@ func apply_truncation([]int tokens, int max_len, string strategy) []int {
         result
     }
 }
+
 
 func copy_with_padding(
     []int dst,
@@ -175,3 +185,4 @@ func copy_with_padding(
         }
     }
 }
+

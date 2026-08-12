@@ -20,6 +20,7 @@ use neurx.script.data_utils.{
     hash_key,
 }
 use neurx.strings.{string_split, string_join, string_contains, string_trim}
+
 struct clean_config {
     string raw_dir
     string cleaned_dir
@@ -29,6 +30,7 @@ struct clean_config {
     int checkpoint_interval
 }
 
+
 struct clean_stats {
     i64 total_processed
     i64 total_written
@@ -37,11 +39,13 @@ struct clean_stats {
     i64 errors
 }
 
+
 struct dataset_splits {
     string train_file
     string val_file
     string test_file
 }
+
 
 func new_clean_config_from_env() clean_config {
     let neurx_home = get_env("NEURX_HOME", ".")
@@ -108,10 +112,12 @@ pub func clean_data(config: clean_config) bool {
     true
 }
 
+
 func find_source_files(raw_dir: string) []string {
     let supported = []string{".jsonl", ".txt", ".xml", ".xml.bz2"}
     dir_list_files(raw_dir, supported)
 }
+
 
 func process_source_file(config: clean_config, source_file: string, stats: &clean_stats, seen_hashes: map[string]bool) bool {
     let (content, ok) = file_read_text(source_file)
@@ -132,6 +138,7 @@ func process_source_file(config: clean_config, source_file: string, stats: &clea
         false
     }
 }
+
 
 func process_jsonl(config: clean_config, content: string, stats: &clean_stats, seen_hashes: map[string]bool) bool {
     let lines = string_split(content, "\n")
@@ -162,6 +169,7 @@ func process_jsonl(config: clean_config, content: string, stats: &clean_stats, s
     true
 }
 
+
 func process_text(config: clean_config, content: string, stats: &clean_stats, seen_hashes: map[string]bool) bool {
     let paragraphs = string_split(content, "\n\n")
     for _, para in paragraphs {
@@ -185,6 +193,7 @@ func process_text(config: clean_config, content: string, stats: &clean_stats, se
     }
     true
 }
+
 
 func process_xml(config: clean_config, content: string, stats: &clean_stats, seen_hashes: map[string]bool) bool {
     let mut text_blocks = []string{}
@@ -227,11 +236,13 @@ func process_xml(config: clean_config, content: string, stats: &clean_stats, see
     true
 }
 
+
 func create_cleaned_record(text: string, source: string) string {
     let encoded_text = escape_json_string(text)
     let token_count = estimate_tokens(text)
     "{\"text\": " + "\"" + encoded_text + "\", \"source\": \"" + source + "\", \"tokens\": " + i64_to_string(token_count) + "}"
 }
+
 
 func extract_text_from_jsonl(jsonl_line: string) string {
     if !string_contains(jsonl_line, "\"text\"") {
@@ -263,6 +274,7 @@ func extract_text_from_jsonl(jsonl_line: string) string {
     }
 }
 
+
 func escape_json_string(s: string) string {
     let mut result = ""
     for i = 0; i < len(s); i = i + 1 {
@@ -285,9 +297,11 @@ func escape_json_string(s: string) string {
     result
 }
 
+
 func estimate_tokens(text: string) i64 {
     i64(max(1, len(text) / 4))
 }
+
 
 func finalize_dataset(config: clean_config, stats: &clean_stats) bool {
     log_info("")
@@ -321,6 +335,7 @@ func finalize_dataset(config: clean_config, stats: &clean_stats) bool {
     true
 }
 
+
 func split_dataset(input_file: string, splits: dataset_splits, train_size: i64, val_size: i64) bool {
     let (content, ok) = file_read_text(input_file)
     if !ok {
@@ -349,6 +364,7 @@ func split_dataset(input_file: string, splits: dataset_splits, train_size: i64, 
     file_write_text(splits.test_file, test_data)
 }
 
+
 func write_cleaned_manifest(config: clean_config, splits: dataset_splits, total: i64, stats: &clean_stats) bool {
     let manifest = "{
   \"dataset_name\": \"neurx-pretrain-dataset\",
@@ -368,6 +384,7 @@ func write_cleaned_manifest(config: clean_config, splits: dataset_splits, total:
     file_write_text(config.manifest_file, manifest)
 }
 
+
 func write_empty_manifest(config: clean_config) bool {
     let manifest = "{
   \"dataset_name\": \"neurx-pretrain-dataset\",
@@ -383,6 +400,7 @@ func write_empty_manifest(config: clean_config) bool {
 "
     file_write_text(config.manifest_file, manifest)
 }
+
 
 func find_substring(s: string, substr: string) i32 {
     for i = 0; i <= len(s) - len(substr); i = i + 1 {
@@ -400,13 +418,16 @@ func find_substring(s: string, substr: string) i32 {
     -1
 }
 
+
 func max(a: i64, b: i64) i64 {
     if a > b { a } else { b }
 }
 
+
 func i64_to_string(n: i64) string {
     ""
 }
+
 
 func string(ch: u8) string {
     ""
@@ -419,3 +440,4 @@ pub func main() i32 {
         1
     }
 }
+

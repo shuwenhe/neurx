@@ -6,6 +6,7 @@ use neurx.runtime.io.{
     runtime_exec
 }
 
+
 struct adapter_config {
     string peft_type
     i32 r_rank
@@ -14,6 +15,7 @@ struct adapter_config {
     []string target_modules
     bool modules_to_save
 }
+
 
 func parse_adapter_config() adapter_config {
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH", "/home/shuwen/shuwen/posttrain/adapter")
@@ -44,6 +46,7 @@ func parse_adapter_config() adapter_config {
     return config
 }
 
+
 func verify_target_modules(config adapter_config) string {
     string result = "[Target Modules Verification]\n"
     result = result + "=============================\n"
@@ -68,6 +71,7 @@ func verify_target_modules(config adapter_config) string {
     return result
 }
 
+
 func verify_adapter_parameters(config adapter_config) string {
     string result = "[Adapter Parameter Analysis]\n"
     result = result + "============================\n"
@@ -90,6 +94,7 @@ func verify_adapter_parameters(config adapter_config) string {
     return result
 }
 
+
 func verify_safetensors_format() string {
     string result = "[Safetensors Format Verification]\n"
     result = result + "================================\n"
@@ -108,6 +113,7 @@ func verify_safetensors_format() string {
     result = result + "    → Transformers compatible\n\n"
     return result
 }
+
 
 func verify_integration_workflow() string {
     string result = "[Integration Workflow]\n"
@@ -134,6 +140,7 @@ func verify_integration_workflow() string {
     return result
 }
 
+
 func contains(str string, substr string) bool {
     i32 str_len = len(str)
     i32 substr_len = len(substr)
@@ -155,6 +162,7 @@ func contains(str string, substr string) bool {
     return false
 }
 
+
 func verify_adapter_integration() string {
     string output = ""
     output = output + "\n════════════════════════════════════════════\n"
@@ -172,7 +180,9 @@ func verify_adapter_integration() string {
     return output
 }
 
+
 func main() {
     string result = verify_adapter_integration()
     println(result)
 }
+

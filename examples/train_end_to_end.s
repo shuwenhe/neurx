@@ -3,10 +3,12 @@ func simple_forward(float w, float b, float x) float {
     return w * x + b
 }
 
+
 func compute_loss_mse(float pred, float target) float {
     float diff = pred - target
     return diff * diff
 }
+
 
 func train_demo() float {
     float w = 0.5
@@ -40,6 +42,7 @@ func train_demo() float {
     }
 }
 
+
 func main() {
     float result = train_demo()
     if result > 0.5 {
@@ -48,3 +51,4 @@ func main() {
         println("FAILURE: Loss did not decrease")
     }
 }
+

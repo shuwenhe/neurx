@@ -7,11 +7,13 @@ struct checkpoint_config {
     recomputation_strategy: int
 }
 
+
 struct checkpoint_state {
     saved_tensors: [][]autograd.tensor
     recomputation_count: int
     memory_saved: float
 }
+
 
 struct checkpoint_layer {
     layer_fn: func([][]autograd.tensor) [][]autograd.tensor
@@ -19,6 +21,7 @@ struct checkpoint_layer {
     outputs: [][]autograd.tensor
     needs_recompute: bool
 }
+
 
 func new_checkpoint_config(bool enabled) checkpoint_config {
     checkpoint_config config {
@@ -30,6 +33,7 @@ func new_checkpoint_config(bool enabled) checkpoint_config {
     config
 }
 
+
 func new_checkpoint_state() checkpoint_state {
     checkpoint_state state {
         saved_tensors: [][]autograd.tensor{},
@@ -38,6 +42,7 @@ func new_checkpoint_state() checkpoint_state {
     }
     state
 }
+
 
 func checkpoint_wrapper(func layer_fn, []autograd.tensor inputs, checkpoint_config config) []autograd.tensor {
     if !config.enabled {
@@ -71,6 +76,7 @@ func checkpoint_wrapper(func layer_fn, []autograd.tensor inputs, checkpoint_conf
     }
     detached_outputs
 }
+
 
 func checkpoint_module(pointer module, []autograd.tensor inputs, checkpoint_config config) []autograd.tensor {
     if !config.enabled {
@@ -108,6 +114,7 @@ func checkpoint_module(pointer module, []autograd.tensor inputs, checkpoint_conf
     detached_outputs
 }
 
+
 func apply_checkpointing_to_transformer(pointer transformer, checkpoint_config config) pointer {
     if !config.enabled {
         return transformer
@@ -122,6 +129,7 @@ func apply_checkpointing_to_transformer(pointer transformer, checkpoint_config c
     }
     transformer
 }
+
 
 func gradient_checkpointing_step(
     pointer model,
@@ -141,6 +149,7 @@ func gradient_checkpointing_step(
     loss
 }
 
+
 func estimate_memory_savings(checkpoint_config config, int num_layers, int layer_memory_mb) float {
     if !config.enabled {
         return 0.0
@@ -150,15 +159,18 @@ func estimate_memory_savings(checkpoint_config config, int num_layers, int layer
     baseline - with_checkpointing
 }
 
+
 func checkpoint_save_tensor(autograd.tensor tensor, checkpoint_state state) checkpoint_state {
     state.saved_tensors.push([tensor])
     state
 }
 
+
 func checkpoint_save_tensors([][]autograd.tensor tensors, checkpoint_state state) checkpoint_state {
     state.saved_tensors.push(tensors)
     state
 }
+
 
 func checkpoint_clear(checkpoint_state state) checkpoint_state {
     state.saved_tensors = [][]autograd.tensor{}
@@ -166,10 +178,12 @@ func checkpoint_clear(checkpoint_state state) checkpoint_state {
     state
 }
 
+
 func get_checkpoint_stats(checkpoint_state state) string {
     "checkpoint Stats: Recomputations=" + string(state.recomputation_count) +
     ", Memory Saved=" + string(state.memory_saved) + "MB"
 }
+
 
 func create_checkpoint_layer(func layer_fn) checkpoint_layer {
     checkpoint_layer layer {
@@ -181,6 +195,7 @@ func create_checkpoint_layer(func layer_fn) checkpoint_layer {
     layer
 }
 
+
 func checkpoint_layer_forward(checkpoint_layer layer, []autograd.tensor inputs) []autograd.tensor {
     layer.inputs = [inputs]
     layer.outputs = [layer.layer_fn(inputs...)]
@@ -191,6 +206,7 @@ func checkpoint_layer_forward(checkpoint_layer layer, []autograd.tensor inputs) 
     }
     detached
 }
+
 
 func checkpoint_layer_backward(checkpoint_layer layer, []autograd.tensor grads) []autograd.tensor {
     if !layer.needs_recompute {
@@ -209,3 +225,4 @@ func checkpoint_layer_backward(checkpoint_layer layer, []autograd.tensor grads) 
     layer.needs_recompute = false
     input_grads
 }
+

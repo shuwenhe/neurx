@@ -17,6 +17,7 @@ func int_to_str(int n) string {
     out
 }
 
+
 func float_to_str(float value, int decimals) string {
     float current = value
     bool neg = current < 0.0
@@ -45,6 +46,7 @@ func float_to_str(float value, int decimals) string {
     out
 }
 
+
 func print_header(string title) int {
     println("")
     println("╔" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╗")
@@ -54,12 +56,14 @@ func print_header(string title) int {
     0
 }
 
+
 func print_step(string step, string title) int {
     println("")
     println("► " + step + ": " + title)
     println("─" + "─" + "─" + "─" + "─" + "─" + "─" + "─" + "─" + "─" + "─" + "─" + "─" + "─" + "─" + "─" + "─" + "─" + "─" + "─")
     0
 }
+
 
 func step1_train() int {
     print_step("Step 1", "LoRA SFT Training")
@@ -98,6 +102,7 @@ func step1_train() int {
     0
 }
 
+
 func step2_merge() int {
     print_step("Step 2", "LoRA weightsmerge")
     println("🔗 Startmerge...")
@@ -122,6 +127,7 @@ func step2_merge() int {
     0
 }
 
+
 func step3_save() int {
     print_step("Step 3", "savefinalmodel")
     println("💾 save to 目标Directory...")
@@ -142,6 +148,7 @@ func step3_save() int {
     println("")
     0
 }
+
 
 func step4_summary() int {
     print_step("Step 4", "completeSummary")
@@ -177,6 +184,7 @@ func step4_summary() int {
     0
 }
 
+
 func main() {
     println("")
     println("╔" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "=" + "╗")
@@ -194,3 +202,4 @@ func main() {
     println("")
     0
 }
+

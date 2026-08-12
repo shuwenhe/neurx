@@ -6,6 +6,7 @@ struct layer_norm_config {
     string norm_type
 }
 
+
 struct layer_norm {
     int hidden_dim
     float epsilon
@@ -14,11 +15,13 @@ struct layer_norm {
     bool use_bias
 }
 
+
 struct rms_norm {
     int hidden_dim
     float epsilon
     []float gamma
 }
+
 
 struct position_embedding_config {
     int hidden_dim
@@ -28,11 +31,13 @@ struct position_embedding_config {
     bool use_flash_attention
 }
 
+
 struct learned_position_embedding {
     int hidden_dim
     int max_seq_len
     []float weight
 }
+
 
 struct rope_embedding {
     int hidden_dim
@@ -43,19 +48,23 @@ struct rope_embedding {
     int max_seq_len
 }
 
+
 struct alibi_embedding {
     int num_heads
     []float head_slopes
 }
+
 
 struct rope_apply_result {
     []float query
     []float key
 }
 
+
 struct alibi_apply_result {
     []float scores
 }
+
 
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
@@ -67,6 +76,7 @@ func allocate_vector(int size, float init_val) []float {
     v
 }
 
+
 func copy_vector([]float src) []float {
     []float out = allocate_vector(len(src), 0.0)
     int i = 0
@@ -76,6 +86,7 @@ func copy_vector([]float src) []float {
     }
     out
 }
+
 
 func sqrt_approx(float x) float {
     if x <= 0.0 {
@@ -89,6 +100,7 @@ func sqrt_approx(float x) float {
     }
     y
 }
+
 
 func exp_approx(float x) float {
     if x > 20.0 {
@@ -107,6 +119,7 @@ func exp_approx(float x) float {
     }
     result
 }
+
 
 func cos_approx(float x) float {
     float pi = 3.141592653589793
@@ -130,6 +143,7 @@ func cos_approx(float x) float {
     result
 }
 
+
 func sin_approx(float x) float {
     float pi = 3.141592653589793
     float two_pi = 6.283185307179586
@@ -152,6 +166,7 @@ func sin_approx(float x) float {
     result
 }
 
+
 func new_layer_norm(layer_norm_config cfg) layer_norm {
     layer_norm {
         hidden_dim: cfg.hidden_dim,
@@ -162,6 +177,7 @@ func new_layer_norm(layer_norm_config cfg) layer_norm {
     }
 }
 
+
 func new_rms_norm(layer_norm_config cfg) rms_norm {
     rms_norm {
         hidden_dim: cfg.hidden_dim,
@@ -169,6 +185,7 @@ func new_rms_norm(layer_norm_config cfg) rms_norm {
         gamma: allocate_vector(cfg.hidden_dim, 1.0),
     }
 }
+
 
 func layer_normalize(
     layer_norm ln,
@@ -216,6 +233,7 @@ func layer_normalize(
     output
 }
 
+
 func rms_normalize(
     rms_norm rn,
     []float input,
@@ -250,6 +268,7 @@ func rms_normalize(
     output
 }
 
+
 func new_absolute_position_embedding(position_embedding_config cfg) []float {
     int total = cfg.max_seq_len * cfg.hidden_dim
     []float embedding = allocate_vector(total, 0.0)
@@ -273,6 +292,7 @@ func new_absolute_position_embedding(position_embedding_config cfg) []float {
     embedding
 }
 
+
 func new_learned_position_embedding(position_embedding_config cfg) learned_position_embedding {
     int total = cfg.max_seq_len * cfg.hidden_dim
     []float weight = allocate_vector(total, 0.0)
@@ -293,6 +313,7 @@ func new_learned_position_embedding(position_embedding_config cfg) learned_posit
     }
 }
 
+
 func get_position_embedding(
     []float embedding,
     int hidden_dim,
@@ -308,6 +329,7 @@ func get_position_embedding(
     out
 }
 
+
 func get_learned_position_embedding(
     learned_position_embedding embedding,
     int seq_len
@@ -321,6 +343,7 @@ func get_learned_position_embedding(
     }
     out
 }
+
 
 func new_rope_embedding(position_embedding_config cfg) rope_embedding {
     int half_dim = cfg.hidden_dim / 2
@@ -341,6 +364,7 @@ func new_rope_embedding(position_embedding_config cfg) rope_embedding {
         max_seq_len: cfg.max_seq_len,
     }
 }
+
 
 func apply_rope(
     rope_embedding rope,
@@ -392,6 +416,7 @@ func apply_rope(
     }
 }
 
+
 func new_alibi_embedding(position_embedding_config cfg, int num_heads) alibi_embedding {
     []float slopes = allocate_vector(num_heads, 0.0)
     int h = 0
@@ -404,6 +429,7 @@ func new_alibi_embedding(position_embedding_config cfg, int num_heads) alibi_emb
         head_slopes: slopes,
     }
 }
+
 
 func apply_alibi_bias(
     alibi_embedding alibi,
@@ -440,6 +466,8 @@ func apply_alibi_bias(
     }
 }
 
+
 func get_embedding_stats(position_embedding_config cfg) map[string]double {
     map[string]double{}
 }
+

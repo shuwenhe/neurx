@@ -7,6 +7,7 @@ struct verifier_config {
     max_verification_depth: int
 }
 
+
 struct verification_context {
     draft_token_id: int
     draft_logits: []float
@@ -15,6 +16,7 @@ struct verification_context {
     match_found: bool
     verification_depth: int
 }
+
 
 struct verifier_executor {
     config: verifier_config
@@ -26,6 +28,7 @@ struct verifier_executor {
     total_verify_time_ms: float64
 }
 
+
 struct verification_batch {
     batch_id: int
     draft_predictions: [][]draft_token
@@ -33,6 +36,7 @@ struct verification_batch {
     batch_accept_rate: float
     batch_verify_time_ms: float
 }
+
 
 func new_verifier_config(vocab: int, threshold: float) verifier_config {
     cfg := verifier_config{
@@ -46,6 +50,7 @@ func new_verifier_config(vocab: int, threshold: float) verifier_config {
     cfg
 }
 
+
 func new_verifier_executor(config: verifier_config) verifier_executor {
     executor := verifier_executor{
         config: config,
@@ -58,6 +63,7 @@ func new_verifier_executor(config: verifier_config) verifier_executor {
     }
     executor
 }
+
 
 func initialize_verifier_embeddings(executor: verifier_executor, vocab_size: int, embed_dim: int) verifier_executor {
     updated := executor
@@ -77,6 +83,7 @@ func initialize_verifier_embeddings(executor: verifier_executor, vocab_size: int
     updated
 }
 
+
 func verifier_embedding_lookup(executor: verifier_executor, token_id: int) []float {
     if token_id >= 0 && token_id < executor.model_embeddings.len {
         executor.model_embeddings[token_id]
@@ -84,6 +91,7 @@ func verifier_embedding_lookup(executor: verifier_executor, token_id: int) []flo
         []float{}
     }
 }
+
 
 func verifier_layer_forward(input: []float, layer_weight: []float, hidden_dim: int) []float {
     output := []float{}
@@ -106,6 +114,7 @@ func verifier_layer_forward(input: []float, layer_weight: []float, hidden_dim: i
     output
 }
 
+
 func verifier_apply_residual(original: []float, transformed: []float) []float {
     result := []float{}
     i := 0
@@ -115,6 +124,7 @@ func verifier_apply_residual(original: []float, transformed: []float) []float {
     }
     result
 }
+
 
 func verifier_forward_single(executor: verifier_executor, token_id: int, hidden_dim: int) []float {
     hidden := verifier_embedding_lookup(executor, token_id)
@@ -134,6 +144,7 @@ func verifier_forward_single(executor: verifier_executor, token_id: int, hidden_
 
     hidden
 }
+
 
 func verifier_output_logits(hidden_states: []float, vocab_size: int) []float {
     logits := []float{}
@@ -155,6 +166,7 @@ func verifier_output_logits(hidden_states: []float, vocab_size: int) []float {
 
     logits
 }
+
 
 func verify_single_draft(executor: verifier_executor, draft: draft_token) verification_result {
     hidden := verifier_forward_single(executor, draft.token_id, 768)
@@ -185,6 +197,7 @@ func verify_single_draft(executor: verifier_executor, draft: draft_token) verifi
     }
 }
 
+
 func verify_draft_sequence(executor: verifier_executor, draft_sequence: []draft_token) []verification_result {
     results := []verification_result{}
 
@@ -206,10 +219,12 @@ func verify_draft_sequence(executor: verifier_executor, draft_sequence: []draft_
     results
 }
 
+
 func verify_with_confidence_filtering(executor: verifier_executor, draft_sequence: []draft_token, confidence_threshold: float) []verification_result {
     high_confidence := filter_predictions_by_confidence(draft_sequence, confidence_threshold)
     verify_draft_sequence(executor, high_confidence)
 }
+
 
 func compute_acceptance_rate(results: []verification_result) float {
     accepted := 0
@@ -228,6 +243,7 @@ func compute_acceptance_rate(results: []verification_result) float {
     }
 }
 
+
 func should_accept_draft(result: verification_result, config: verifier_config) bool {
     if !config.verify_all {
         return result.accepted
@@ -235,6 +251,7 @@ func should_accept_draft(result: verification_result, config: verifier_config) b
 
     result.accepted
 }
+
 
 func get_verifier_stats(executor: verifier_executor) string {
     result := "Verifier Stats:"
@@ -250,6 +267,7 @@ func get_verifier_stats(executor: verifier_executor) string {
     result
 }
 
+
 func reset_verifier_statistics(executor: verifier_executor) verifier_executor {
     updated := executor
     updated.verification_count = 0
@@ -258,6 +276,7 @@ func reset_verifier_statistics(executor: verifier_executor) verifier_executor {
     updated.total_verify_time_ms = 0.0
     updated
 }
+
 
 func adaptive_threshold_adjustment(executor: verifier_executor, current_acceptance_rate: float) verifier_executor {
     updated := executor
@@ -277,3 +296,4 @@ func adaptive_threshold_adjustment(executor: verifier_executor, current_acceptan
 
     updated
 }
+

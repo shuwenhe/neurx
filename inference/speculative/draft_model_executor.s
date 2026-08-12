@@ -8,6 +8,7 @@ struct draft_model_config {
     shared_embeddings: bool
 }
 
+
 struct draft_model_executor {
     config: draft_model_config
     embeddings: [][]float
@@ -18,6 +19,7 @@ struct draft_model_executor {
     total_time_ms: float64
 }
 
+
 struct draft_prediction_batch {
     batch_id: int
     input_ids: [][]int
@@ -26,6 +28,7 @@ struct draft_prediction_batch {
     batch_embeddings: [][]float
     batch_time_ms: float
 }
+
 
 func new_draft_model_config(size: string, num_layers: int, hidden: int, vocab: int) draft_model_config {
     cfg := draft_model_config{
@@ -40,6 +43,7 @@ func new_draft_model_config(size: string, num_layers: int, hidden: int, vocab: i
     cfg
 }
 
+
 func new_draft_model_executor(config: draft_model_config) draft_model_executor {
     executor := draft_model_executor{
         config: config,
@@ -52,6 +56,7 @@ func new_draft_model_executor(config: draft_model_config) draft_model_executor {
     }
     executor
 }
+
 
 func initialize_draft_embeddings(executor: draft_model_executor, vocab_size: int, embed_dim: int) draft_model_executor {
     updated := executor
@@ -71,6 +76,7 @@ func initialize_draft_embeddings(executor: draft_model_executor, vocab_size: int
     updated
 }
 
+
 func initialize_draft_layers(executor: draft_model_executor, num_layers: int, hidden_dim: int) draft_model_executor {
     updated := executor
 
@@ -89,6 +95,7 @@ func initialize_draft_layers(executor: draft_model_executor, num_layers: int, hi
     updated
 }
 
+
 func draft_embedding_lookup(executor: draft_model_executor, token_id: int) []float {
     if token_id >= 0 && token_id < executor.embeddings.len {
         executor.embeddings[token_id]
@@ -96,6 +103,7 @@ func draft_embedding_lookup(executor: draft_model_executor, token_id: int) []flo
         []float{}
     }
 }
+
 
 func draft_layer_forward(input: []float, layer_weight: []float, hidden_dim: int) []float {
     output := []float{}
@@ -118,6 +126,7 @@ func draft_layer_forward(input: []float, layer_weight: []float, hidden_dim: int)
     output
 }
 
+
 func draft_apply_activation(hidden_states: []float) []float {
     activated := []float{}
     i := 0
@@ -132,6 +141,7 @@ func draft_apply_activation(hidden_states: []float) []float {
     }
     activated
 }
+
 
 func draft_normalize(hidden_states: []float) []float {
     mean := 0.0
@@ -164,6 +174,7 @@ func draft_normalize(hidden_states: []float) []float {
     normalized
 }
 
+
 func draft_forward_single(executor: draft_model_executor, token_id: int) []float {
     hidden := draft_embedding_lookup(executor, token_id)
 
@@ -181,6 +192,7 @@ func draft_forward_single(executor: draft_model_executor, token_id: int) []float
 
     hidden
 }
+
 
 func draft_output_logits(executor: draft_model_executor, hidden_states: []float) []float {
     logits := []float{}
@@ -200,6 +212,7 @@ func draft_output_logits(executor: draft_model_executor, hidden_states: []float)
     logits
 }
 
+
 func draft_predict_next_token(executor: draft_model_executor, token_id: int, config: speculative_decode_config) draft_token {
     hidden := draft_forward_single(executor, token_id)
     logits := draft_output_logits(executor, hidden)
@@ -212,6 +225,7 @@ func draft_predict_next_token(executor: draft_model_executor, token_id: int, con
     )
     dt
 }
+
 
 func draft_predict_batch(executor: draft_model_executor, input_ids: []int, config: speculative_decode_config) []draft_token {
     predictions := []draft_token{}
@@ -228,6 +242,7 @@ func draft_predict_batch(executor: draft_model_executor, input_ids: []int, confi
     predictions
 }
 
+
 func draft_batch_forward(executor: draft_model_executor, batch: draft_prediction_batch, config: speculative_decode_config) draft_prediction_batch {
     updated := batch
 
@@ -242,6 +257,7 @@ func draft_batch_forward(executor: draft_model_executor, batch: draft_prediction
     updated
 }
 
+
 func get_draft_model_stats(executor: draft_model_executor) string {
     result := "Draft Model Stats:"
     result = result + " Inferences=" + (executor.inference_count as string)
@@ -253,8 +269,10 @@ func get_draft_model_stats(executor: draft_model_executor) string {
     result
 }
 
+
 func clear_draft_cache(executor: draft_model_executor) draft_model_executor {
     updated := executor
     updated.layer_cache = [][]float{}
     updated
 }
+

@@ -9,6 +9,7 @@ enum serialization_format {
     custom
 }
 
+
 struct serialization_config {
     format: SerializationFormat
     version: string
@@ -16,6 +17,7 @@ struct serialization_config {
     compression: bool
     compression_level: i64
 }
+
 
 struct state_dict {
     tensors: map[string]tensor
@@ -69,3 +71,4 @@ interface i_maliformed_checkpoint_handler {
     repair(path: string) -> bool
     get_error_details(path: string) -> string
 }
+

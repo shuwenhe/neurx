@@ -13,6 +13,7 @@ func main() {
     eprintln("\n✅ All JSON parser tests passed!\n")
 }
 
+
 func test_null() {
     eprintln("[Test 1] Null value")
     val := json_parser.parse("null")
@@ -21,6 +22,7 @@ func test_null() {
     }
     eprintln("  ✓ null parsing OK")
 }
+
 
 func test_bool() {
     eprintln("[Test 2] Boolean values")
@@ -35,6 +37,7 @@ func test_bool() {
     }
     eprintln("  ✓ false parsing OK")
 }
+
 
 func test_number() {
     eprintln("[Test 3] Number values")
@@ -55,6 +58,7 @@ func test_number() {
     eprintln("  ✓ float parsing OK")
 }
 
+
 func test_string() {
     eprintln("[Test 4] String values")
     val := json_parser.parse("\"hello\"")
@@ -68,6 +72,7 @@ func test_string() {
     }
     eprintln("  ✓ escaped string parsing OK")
 }
+
 
 func test_array() {
     eprintln("[Test 5] Array values")
@@ -90,6 +95,7 @@ func test_array() {
     eprintln("  ✓ empty array parsing OK")
 }
 
+
 func test_object() {
     eprintln("[Test 6] Object values")
     val := json_parser.parse("{\"key\": \"value\"}")
@@ -110,6 +116,7 @@ func test_object() {
     }
     eprintln("  ✓ empty object parsing OK")
 }
+
 
 func test_nested() {
     eprintln("[Test 7] Nested structures")
@@ -136,3 +143,4 @@ func test_nested() {
     }
     eprintln("  ✓ nested structure parsing OK")
 }
+

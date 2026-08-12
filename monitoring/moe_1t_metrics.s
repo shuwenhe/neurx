@@ -1,6 +1,7 @@
 package neurx.monitoring.moe_1t_metrics
 use neurx.strings
 use neurx.runtime.io.{io_println, runtime_make_dirs, runtime_write_text_file, runtime_run_command_output}
+
 struct training_metrics {
     float loss
     float loss_ce
@@ -13,6 +14,7 @@ struct training_metrics {
     float gradient_flow
 }
 
+
 struct moe_metrics {
     []float expert_load
     []float expert_utilization
@@ -20,6 +22,7 @@ struct moe_metrics {
     float load_balance_ratio
     float expert_diversity
 }
+
 
 struct communication_metrics {
     long allgather_bytes
@@ -30,6 +33,7 @@ struct communication_metrics {
     float reduce_scatter_time_ms
     float communication_compute_overlap_ratio
 }
+
 
 struct system_metrics {
     long gpu_memory_used_bytes
@@ -42,6 +46,7 @@ struct system_metrics {
     float iteration_time_ms
 }
 
+
 struct metrics_frame {
     int step
     int global_rank
@@ -51,6 +56,7 @@ struct metrics_frame {
     communication_metrics comm_metrics
     system_metrics sys_metrics
 }
+
 
 struct metrics_collector {
     int global_rank
@@ -68,6 +74,7 @@ struct metrics_collector {
     int save_frequency
     string metrics_output_dir
 }
+
 
 func metrics_collector_new(
     int global_rank,
@@ -139,6 +146,7 @@ func metrics_collector_new(
     collector
 }
 
+
 func update_training_metrics(
     metrics_collector collector,
     float loss,
@@ -168,6 +176,7 @@ func update_training_metrics(
         collector.min_loss = loss
     }
 }
+
 
 func update_moe_metrics(
     metrics_collector collector,
@@ -206,6 +215,7 @@ func update_moe_metrics(
     }
 }
 
+
 func update_communication_metrics(
     metrics_collector collector,
     long allgather_bytes,
@@ -222,6 +232,7 @@ func update_communication_metrics(
     collector.current_frame.comm_metrics.allreduce_time_ms = allreduce_time_ms
     collector.current_frame.comm_metrics.reduce_scatter_time_ms = reduce_scatter_time_ms
 }
+
 
 func update_system_metrics(
     metrics_collector collector,
@@ -244,6 +255,7 @@ func update_system_metrics(
     }
 }
 
+
 func log_step(
     metrics_collector collector,
     int step
@@ -261,6 +273,7 @@ func log_step(
     }
 }
 
+
 func log_metrics_frame(metrics_frame frame) {
     string log_str = ""
     log_str = log_str + "Step=" + int_to_string(frame.step) + " "
@@ -274,12 +287,14 @@ func log_metrics_frame(metrics_frame frame) {
     io_println(log_str)
 }
 
+
 func collect_global_stats(
     metrics_collector collector,
     collective_state comm
 ) {
     io_println("Global stats collected for rank=" + int_to_string(collector.global_rank))
 }
+
 
 func save_metrics(
     metrics_collector collector,
@@ -289,6 +304,7 @@ func save_metrics(
     runtime_write_text_file(filename, payload)
     io_println("Metrics saved to " + filename)
 }
+
 
 func append_frame([]metrics_frame frames, metrics_frame f) []metrics_frame {
     int n = len(frames)
@@ -301,6 +317,7 @@ func append_frame([]metrics_frame frames, metrics_frame f) []metrics_frame {
     out[n] = f
     out
 }
+
 
 func exp(float x) float {
     if x > 20.0 {
@@ -319,6 +336,7 @@ func exp(float x) float {
     }
     result
 }
+
 
 func int_to_string(int x) string {
     if x == 0 {
@@ -341,6 +359,7 @@ func int_to_string(int x) string {
     }
     out
 }
+
 
 func float_to_string(float x, int precision) string {
     if precision < 0 {
@@ -385,6 +404,7 @@ func float_to_string(float x, int precision) string {
     result
 }
 
+
 func trim_history([]metrics_frame frames, int limit) []metrics_frame {
     int n = len(frames)
     if n <= limit {
@@ -399,6 +419,7 @@ func trim_history([]metrics_frame frames, int limit) []metrics_frame {
     }
     out
 }
+
 
 func metrics_to_csv(metrics_collector collector) string {
     string out = "step,rank,timestamp_ms,loss,loss_ce,loss_aux,loss_kl,perplexity,learning_rate,gradient_norm,weight_norm,gradient_flow,load_balance_ratio,expert_diversity,allgather_bytes,allreduce_bytes,reduce_scatter_bytes,allgather_time_ms,allreduce_time_ms,reduce_scatter_time_ms,overlap_ratio,gpu_memory_used_bytes,gpu_memory_total_bytes,gpu_memory_percent,gpu_power_watts,gpu_temperature_celsius,throughput_tokens_per_sec,wall_clock_time_ms,iteration_time_ms\n"
@@ -439,10 +460,12 @@ func metrics_to_csv(metrics_collector collector) string {
     out
 }
 
+
 func long_to_string(long x) string {
     int value = int(x)
     int_to_string(value)
 }
+
 
 func current_timestamp_ms() long {
     string raw = runtime_run_command_output("date +%s%3N")
@@ -452,6 +475,7 @@ func current_timestamp_ms() long {
     }
     0
 }
+
 
 func parse_int_str(string s) int {
     string text = trim(s)
@@ -478,3 +502,4 @@ func parse_int_str(string s) int {
     }
     value
 }
+

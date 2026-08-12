@@ -1,6 +1,7 @@
 package neurx.posttrain.alignment.remax
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
+
 struct remax_config {
     float learning_rate
     int batch_size
@@ -16,6 +17,7 @@ struct remax_config {
     bool use_advantage_normalization
 }
 
+
 struct remax_state {
     tensor policy_logits
     tensor value_estimates
@@ -29,6 +31,7 @@ struct remax_state {
     float total_loss
     float relaxation_loss
 }
+
 
 func new_remax_config() remax_config {
     remax_config {
@@ -46,6 +49,7 @@ func new_remax_config() remax_config {
         use_advantage_normalization: true,
     }
 }
+
 
 func remax_compute_policy_loss(
     tensor log_probs,
@@ -77,6 +81,7 @@ func remax_compute_policy_loss(
     )
     (policy_loss, kl_div)
 }
+
 
 func remax_step(
     module policy,
@@ -185,3 +190,4 @@ func remax_step(
         relaxation_loss: 0.0,
     }
 }
+

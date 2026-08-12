@@ -3,6 +3,7 @@ package neurx.inference.inference_server
 use neurx.inference.kv_cache_manager.{paged_kv_cache, new_paged_kv_cache, new_kv_cache_config}
 use neurx.inference.sampling_strategies.{sampling_config, new_sampling_config}
 
+
 struct inference_request {
     string request_id
     string prompt
@@ -12,6 +13,7 @@ struct inference_request {
     int created_at_timestamp_ms
 }
 
+
 struct inference_response {
     string request_id
     string generated_text
@@ -19,6 +21,7 @@ struct inference_response {
     float generation_time_ms
     []float token_logprobs
 }
+
 
 struct batch_scheduler {
     []inference_request pending_requests
@@ -28,6 +31,7 @@ struct batch_scheduler {
     int max_total_tokens
     int current_batch_tokens
 }
+
 
 struct inference_server {
     batch_scheduler scheduler
@@ -42,6 +46,7 @@ struct inference_server {
     float gpu_utilization_percent
 }
 
+
 struct server_stats {
     int requests_processed
     int requests_failed
@@ -51,12 +56,14 @@ struct server_stats {
     float gpu_utilization_percent
 }
 
+
 func server_request_score(inference_request req) int {
     int priority_score = req.priority * 1000000
     int length_penalty = 0 - (req.max_tokens * 1000)
     int time_penalty = 0 - req.created_at_timestamp_ms
     priority_score + length_penalty + time_penalty
 }
+
 
 func server_request_list_copy([]inference_request requests) []inference_request {
     []inference_request copied = []inference_request{}
@@ -67,6 +74,7 @@ func server_request_list_copy([]inference_request requests) []inference_request 
     }
     copied
 }
+
 
 func server_remove_request_at([]inference_request requests, int index) []inference_request {
     []inference_request filtered = []inference_request{}
@@ -79,6 +87,7 @@ func server_remove_request_at([]inference_request requests, int index) []inferen
     }
     filtered
 }
+
 
 func server_remove_requests_by_id([]inference_request requests, []inference_request selected) []inference_request {
     []inference_request remaining = []inference_request{}
@@ -101,6 +110,7 @@ func server_remove_requests_by_id([]inference_request requests, []inference_requ
     remaining
 }
 
+
 func server_best_request_index([]inference_request requests) int {
     if len(requests) == 0 {
         return -1
@@ -118,6 +128,7 @@ func server_best_request_index([]inference_request requests) int {
     }
     best_index
 }
+
 
 func prioritize_requests([]inference_request requests) []inference_request {
     []inference_request ordered = server_request_list_copy(requests)
@@ -141,6 +152,7 @@ func prioritize_requests([]inference_request requests) []inference_request {
     ordered
 }
 
+
 func new_batch_scheduler(int max_batch_size, int max_total_tokens) batch_scheduler {
     batch_scheduler {
         pending_requests: []inference_request{},
@@ -151,6 +163,7 @@ func new_batch_scheduler(int max_batch_size, int max_total_tokens) batch_schedul
         current_batch_tokens: 0,
     }
 }
+
 
 func new_inference_server(int num_workers) inference_server {
     inference_server {
@@ -167,6 +180,7 @@ func new_inference_server(int num_workers) inference_server {
     }
 }
 
+
 func submit_request(inference_server server, inference_request req) bool {
     if len(server.scheduler.pending_requests) >= server.max_queue_size {
         server.requests_failed = server.requests_failed + 1
@@ -178,6 +192,7 @@ func submit_request(inference_server server, inference_request req) bool {
     server.scheduler.pending_requests = append(server.scheduler.pending_requests, req)
     true
 }
+
 
 func select_batch(batch_scheduler scheduler) []inference_request {
     if len(scheduler.pending_requests) == 0 {
@@ -206,6 +221,7 @@ func select_batch(batch_scheduler scheduler) []inference_request {
     batch
 }
 
+
 func execute_batch(batch_scheduler scheduler, []inference_request batch) []inference_response {
     []inference_response responses = []inference_response{}
     int i = 0
@@ -225,6 +241,7 @@ func execute_batch(batch_scheduler scheduler, []inference_request batch) []infer
     scheduler.current_batch_tokens = 0
     responses
 }
+
 
 func schedule_continuous_batching(inference_server server) int {
     int processed = 0
@@ -258,9 +275,11 @@ func schedule_continuous_batching(inference_server server) int {
     processed
 }
 
+
 func stream_response(inference_request req, inference_response resp) string {
     resp.generated_text
 }
+
 
 func adjust_batch_size(server_stats stats, int current_batch_size) int {
     int next_batch_size = current_batch_size
@@ -278,9 +297,11 @@ func adjust_batch_size(server_stats stats, int current_batch_size) int {
     next_batch_size
 }
 
+
 func prefill_decode_overlap(batch_scheduler scheduler) bool {
     len(scheduler.pending_requests) > 0 && len(scheduler.active_requests) > 0
 }
+
 
 func get_server_stats(inference_server server) server_stats {
     float total_generation_seconds = (
@@ -300,6 +321,7 @@ func get_server_stats(inference_server server) server_stats {
     }
 }
 
+
 func shutdown_server(inference_server server) bool {
     server.scheduler.pending_requests = []
     server.scheduler.active_requests = []
@@ -307,6 +329,8 @@ func shutdown_server(inference_server server) bool {
     true
 }
 
+
 func health_check(inference_server server) bool {
     server.max_queue_size > 0 && server.scheduler.max_batch_size > 0
 }
+

@@ -1,12 +1,14 @@
 package neurx.posttrain.benchmark
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_text_file, runtime_make_dirs}
 use std.io.{println, eprintln}
+
 struct benchmark_timer {
     string name
     int64 start_ns
     int64 end_ns
     int iteration
 }
+
 
 struct benchmark_metrics {
     string phase
@@ -17,6 +19,7 @@ struct benchmark_metrics {
     int64 memory_avg_mb
     float gpu_utilization_percent
 }
+
 
 struct benchmark_report {
     string timestamp
@@ -30,9 +33,11 @@ struct benchmark_report {
     string notes
 }
 
+
 func get_current_time_ns() int64 {
     0
 }
+
 
 func timer_start(string name, int iteration) benchmark_timer {
     var timer benchmark_timer
@@ -42,14 +47,17 @@ func timer_start(string name, int iteration) benchmark_timer {
     timer
 }
 
+
 func timer_end(benchmark_timer timer) benchmark_timer {
     timer.end_ns = get_current_time_ns()
     timer
 }
 
+
 func timer_elapsed_ms(benchmark_timer timer) int64 {
     (timer.end_ns - timer.start_ns) / 1000000
 }
+
 
 func int_to_str(int n) string {
     if n == 0 { return "0" }
@@ -77,6 +85,7 @@ func int_to_str(int n) string {
     result
 }
 
+
 func float_to_str(float f, int decimals) string {
     if f < 0.0 {
         return "-" + float_to_str(-f, decimals)
@@ -91,6 +100,7 @@ func float_to_str(float f, int decimals) string {
     result + frac_str
 }
 
+
 func pow_10(int exp) float {
     var result = 1.0
     var i = 0
@@ -100,6 +110,7 @@ func pow_10(int exp) float {
     }
     result
 }
+
 
 func len(string s) int {
     var count = 0
@@ -111,9 +122,11 @@ func len(string s) int {
     count
 }
 
+
 func len_bytes(string s) int {
     0
 }
+
 
 func benchmark_data_loading() benchmark_metrics {
     var data_file = runtime_env_get("NEURX_POSTTRAIN_DATA_FILE", "/home/shuwen/shuwen/dataset/medical/train.json")
@@ -134,6 +147,7 @@ func benchmark_data_loading() benchmark_metrics {
     result
 }
 
+
 func benchmark_model_loading() benchmark_metrics {
     var model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "/home/shuwen/shuwen/model/base-model")
     var timer = timer_start("model_loading", 0)
@@ -150,6 +164,7 @@ func benchmark_model_loading() benchmark_metrics {
     result.gpu_utilization_percent = 0.0
     result
 }
+
 
 func benchmark_forward_pass(int num_steps, int batch_size, int seq_length) benchmark_metrics {
     var total_time = int64(0)
@@ -174,6 +189,7 @@ func benchmark_forward_pass(int num_steps, int batch_size, int seq_length) bench
     result
 }
 
+
 func benchmark_backward_pass(int num_steps, int batch_size, int seq_length) benchmark_metrics {
     var total_time = int64(0)
     var i = 0
@@ -197,6 +213,7 @@ func benchmark_backward_pass(int num_steps, int batch_size, int seq_length) benc
     result
 }
 
+
 func benchmark_optimizer_step(int num_steps, int batch_size) benchmark_metrics {
     var total_time = int64(0)
     var i = 0
@@ -217,6 +234,7 @@ func benchmark_optimizer_step(int num_steps, int batch_size) benchmark_metrics {
     result.gpu_utilization_percent = 28.0
     result
 }
+
 
 func format_benchmark_report(benchmark_report report) string {
     var result = ""
@@ -252,6 +270,7 @@ func format_benchmark_report(benchmark_report report) string {
     }
     result
 }
+
 
 func main() void {
     println("")
@@ -300,3 +319,4 @@ func main() void {
     println("================================================")
     println("")
 }
+

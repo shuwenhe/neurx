@@ -9,6 +9,7 @@ struct data_parallel_config {
     int bucket_size_mb
 }
 
+
 struct data_parallel_state {
     int world_size
     int rank
@@ -25,6 +26,7 @@ struct data_parallel_state {
     bool overflow_detected
 }
 
+
 struct distributed_training_metrics {
     float synchronization_time
     float computation_time
@@ -33,6 +35,7 @@ struct distributed_training_metrics {
     int gradient_overflows
     float average_bucket_size
 }
+
 
 func init_data_parallel(
     int world_size,
@@ -64,6 +67,7 @@ func init_data_parallel(
     state.loss_scale = 1.0
     state
 }
+
 
 func allreduce_gradients(
     float* gradients,
@@ -104,6 +108,7 @@ func allreduce_gradients(
     synchronized
 }
 
+
 func async_allreduce_gradients(
     float* gradients,
     int gradient_count,
@@ -117,6 +122,7 @@ func async_allreduce_gradients(
     }
     result
 }
+
 
 func accumulate_gradients(
     float* current_gradients,
@@ -136,6 +142,7 @@ func accumulate_gradients(
     result
 }
 
+
 func reset_accumulated_gradients(float* accumulated_gradients, int gradient_count) float* {
     float* result = alloc(float, gradient_count)
     int i = 0
@@ -145,6 +152,7 @@ func reset_accumulated_gradients(float* accumulated_gradients, int gradient_coun
     }
     result
 }
+
 
 func bucket_gradients(
     float* gradients,
@@ -178,6 +186,7 @@ func bucket_gradients(
     bucketed
 }
 
+
 func check_gradient_quality(
     float* gradients,
     int gradient_count
@@ -195,6 +204,7 @@ func check_gradient_quality(
     }
     true
 }
+
 
 func compute_gradient_stats(
     float* gradients,
@@ -243,6 +253,7 @@ func compute_gradient_stats(
     stats
 }
 
+
 func data_parallel_training_step(
     float* model_params,
     float* gradients,
@@ -280,6 +291,7 @@ func data_parallel_training_step(
     state
 }
 
+
 func compute_distributed_metrics(
     data_parallel_state state,
     float total_time_ms,
@@ -299,6 +311,7 @@ func compute_distributed_metrics(
     metrics
 }
 
+
 func sqrt_f(float x) float {
     if x < 0.0 {
         return 0.0
@@ -311,6 +324,7 @@ func sqrt_f(float x) float {
     }
     guess
 }
+
 
 func main() {
     println("=== Data Parallel Training System ===")
@@ -327,6 +341,8 @@ func main() {
     println("Number of buckets: " + int_to_string(state.num_buckets))
 }
 
+
 func int_to_string(int n) string {
     ""
 }
+

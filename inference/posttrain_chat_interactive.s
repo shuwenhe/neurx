@@ -1,5 +1,6 @@
 package posttrain_chat_interactive
 use neurx.runtime.io.{runtime_file_exists, runtime_env_get}
+
 func tokenize(string input) []int {
     []int tokens = make([]int, 0)
     tokens = append(tokens, 151643)
@@ -31,6 +32,7 @@ func tokenize(string input) []int {
     tokens = append(tokens, 151645)
     return tokens
 }
+
 
 func decode([]int tokens) string {
     string result = ""
@@ -70,6 +72,7 @@ func decode([]int tokens) string {
     return result
 }
 
+
 func generate_response(string user_input) string {
     string response = ""
     []int output_tokens = make([]int, 0)
@@ -95,6 +98,7 @@ func generate_response(string user_input) string {
     return response
 }
 
+
 func main() {
     string MODEL_PATH = "/home/shuwen/shuwen/posttrain/model.safetensors"
     if !runtime_file_exists(MODEL_PATH) {
@@ -111,3 +115,4 @@ func main() {
     print(response)
     print("\n")
 }
+

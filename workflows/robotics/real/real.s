@@ -5,6 +5,7 @@ struct robotics_real_state {
     bool emergency_stop
 }
 
+
 func new_robotics_real_state(string robot_name) robotics_real_state {
     robotics_real_state {
         robot_name: robot_name,
@@ -13,13 +14,16 @@ func new_robotics_real_state(string robot_name) robotics_real_state {
     }
 }
 
+
 func robotics_real_state_dict(robotics_real_state state) robotics_real_state {
     state
 }
 
+
 func robotics_real_load_state_dict(robotics_real_state state, robotics_real_state other) robotics_real_state {
     other
 }
+
 
 func robotics_real_connect(robotics_real_state state) robotics_real_state {
     robotics_real_state {
@@ -29,6 +33,7 @@ func robotics_real_connect(robotics_real_state state) robotics_real_state {
     }
 }
 
+
 func robotics_real_trigger_emergency_stop(robotics_real_state state) robotics_real_state {
     robotics_real_state {
         robot_name: state.robot_name,
@@ -36,3 +41,4 @@ func robotics_real_trigger_emergency_stop(robotics_real_state state) robotics_re
         emergency_stop: true,
     }
 }
+

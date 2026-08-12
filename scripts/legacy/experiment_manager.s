@@ -54,6 +54,7 @@ type experiment_manager struct {
     best_experiment     string
 }
 
+
 func (manager *experiment_manager) initialize() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Industrial Experiment Management System              ║")
@@ -63,6 +64,7 @@ func (manager *experiment_manager) initialize() {
     fmt.Printf("  Total Experiments: %d\n", len(manager.experiments))
     fmt.Printf("  Current: %s\n\n", manager.current_experiment)
 }
+
 
 func (manager *experiment_manager) create_experiment(
     experiment_id string,
@@ -89,6 +91,7 @@ func (manager *experiment_manager) create_experiment(
     return config
 }
 
+
 func (manager *experiment_manager) add_hyperparameter(
     experiment_id string,
     param_name string,
@@ -106,6 +109,7 @@ func (manager *experiment_manager) add_hyperparameter(
     }
 }
 
+
 func (manager *experiment_manager) log_hyperparameters(experiment_id string) {
     fmt.Printf("\n[Experiment] Hyperparameters for %s:\n", experiment_id)
     if result, exists := manager.experiments[experiment_id]; exists {
@@ -114,6 +118,7 @@ func (manager *experiment_manager) log_hyperparameters(experiment_id string) {
         }
     }
 }
+
 
 func (manager *experiment_manager) record_metrics(
     experiment_id string,
@@ -148,6 +153,7 @@ func (manager *experiment_manager) record_metrics(
     }
 }
 
+
 func (manager *experiment_manager) get_metrics_summary(experiment_id string) {
     fmt.Printf("\n[Metrics] Summary for %s:\n", experiment_id)
     if result, exists := manager.experiments[experiment_id]; exists {
@@ -164,6 +170,7 @@ func (manager *experiment_manager) get_metrics_summary(experiment_id string) {
         }
     }
 }
+
 
 func (manager *experiment_manager) compare_experiments(
     exp_ids []string,
@@ -208,6 +215,7 @@ func (manager *experiment_manager) compare_experiments(
     return comparison
 }
 
+
 func (manager *experiment_manager) mark_experiment_complete(
     experiment_id string,
     converged bool) {
@@ -226,6 +234,7 @@ func (manager *experiment_manager) mark_experiment_complete(
     }
 }
 
+
 func (manager *experiment_manager) get_experiment_history() {
     fmt.Println("\n[History] Experiment History:")
     fmt.Println("  ID                    status      Loss        PPL         Time")
@@ -239,6 +248,7 @@ func (manager *experiment_manager) get_experiment_history() {
             exp_id, status, loss, ppl, duration)
     }
 }
+
 
 func (manager *experiment_manager) export_experiment_config(experiment_id string) string {
     if result, exists := manager.experiments[experiment_id]; exists {
@@ -260,6 +270,7 @@ func (manager *experiment_manager) export_experiment_config(experiment_id string
     return ""
 }
 
+
 func (manager *experiment_manager) find_best_experiment() string {
     var best_exp string = ""
     var best_ppl float64 = math.MaxFloat64
@@ -275,6 +286,7 @@ func (manager *experiment_manager) find_best_experiment() string {
     return best_exp
 }
 
+
 func new_experiment_manager() *experiment_manager {
     return &experiment_manager{
         experiments:        make(map[string]experiment_result),
@@ -283,6 +295,7 @@ func new_experiment_manager() *experiment_manager {
         best_experiment:    "",
     }
 }
+
 
 func (manager *experiment_manager) run_complete_experiment_cycle() {
     manager.initialize()
@@ -357,3 +370,4 @@ func (manager *experiment_manager) run_complete_experiment_cycle() {
     fmt.Println("\n" + config_export)
     fmt.Println("[experiment_manager] Complete!")
 }
+

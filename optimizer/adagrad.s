@@ -11,6 +11,7 @@ struct adagrad_optimizer {
     []float state_sum
 }
 
+
 func new_adagrad(
     float lr,
     float lr_decay,
@@ -28,6 +29,7 @@ func new_adagrad(
         state_sum: [],
     }
 }
+
 
 func adagrad_step(adagrad_optimizer optimizer, tensor params, tensor grads) adagrad_optimizer_step_output {
     int n = len(params.data)
@@ -52,10 +54,12 @@ func adagrad_step(adagrad_optimizer optimizer, tensor params, tensor grads) adag
     }
 }
 
+
 struct adagrad_optimizer_step_output {
     adagrad_optimizer optimizer
     tensor params
 }
+
 
 func ensure_adagrad_state([]float values, int n, float initial_value) []float {
     []float out = []float{cap: n}
@@ -70,6 +74,7 @@ func ensure_adagrad_state([]float values, int n, float initial_value) []float {
     }
     out
 }
+
 
 func adagrad_sqrt(float x) float {
     if x <= 0.0 {
@@ -86,3 +91,4 @@ func adagrad_sqrt(float x) float {
     }
     y
 }
+

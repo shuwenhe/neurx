@@ -74,6 +74,7 @@ structure anomaly_detector {
     anomaly_count: int
 }
 
+
 func new_metrics_aggregator(window_size: int): metrics_aggregator {
     var agg: metrics_aggregator
     agg.window_size = window_size
@@ -85,6 +86,7 @@ func new_metrics_aggregator(window_size: int): metrics_aggregator {
     agg.memory_threshold_gb = 78.0
     return agg
 }
+
 
 func collect_training_metrics(
     global_step: int,
@@ -140,6 +142,7 @@ func collect_training_metrics(
     return metrics
 }
 
+
 func collect_rank_metrics(
     rank: int,
     metrics: training_metrics,
@@ -157,6 +160,7 @@ func collect_rank_metrics(
     rank_m.network_recv_gb = network_recv_gb
     return rank_m
 }
+
 
 func aggregate_metrics_across_ranks(
     all_rank_metrics: vector,
@@ -193,6 +197,7 @@ func aggregate_metrics_across_ranks(
     agg_metrics.communication_volume_gb = sum_comm_volume
     return agg_metrics
 }
+
 
 func detect_anomalies(
     current_metrics: training_metrics,
@@ -234,6 +239,7 @@ func detect_anomalies(
     return (is_anomaly, description)
 }
 
+
 func compute_timing_breakdown(
     metrics: training_metrics
 ): (float, float, float, float, float) {
@@ -249,6 +255,7 @@ func compute_timing_breakdown(
     var pct_data_load: float = (metrics.data_loading_time / total_time) * 100.0
     return (pct_forward, pct_backward, pct_optimizer, pct_communication, pct_data_load)
 }
+
 
 func identify_communication_bottlenecks(
     metrics: training_metrics,
@@ -272,6 +279,7 @@ func identify_communication_bottlenecks(
     return bottleneck_info
 }
 
+
 func print_metrics_summary(
     metrics: training_metrics,
     aggregator: metrics_aggregator
@@ -287,11 +295,13 @@ func print_metrics_summary(
     println("Grad norm: " + str(metrics.gradient_norm) + " (max: " + str(metrics.gradient_max) + ")")
 }
 
+
 func export_metrics_to_file(
     metrics: training_metrics,
     output_file: string
 ): void {
 }
+
 
 func new_anomaly_detector(): anomaly_detector {
     var detector: anomaly_detector
@@ -304,6 +314,7 @@ func new_anomaly_detector(): anomaly_detector {
     return detector
 }
 
+
 func compute_vector_norm(v: vector): float {
     var norm_sq: float = 0.0
     for i in range(0, length(v)) {
@@ -311,6 +322,7 @@ func compute_vector_norm(v: vector): float {
     }
     return sqrt(norm_sq)
 }
+
 
 func compute_vector_max(v: vector): float {
     var max_val: float = -inf
@@ -322,6 +334,7 @@ func compute_vector_max(v: vector): float {
     return max_val
 }
 
+
 func compute_vector_min(v: vector): float {
     var min_val: float = inf
     for i in range(0, length(v)) {
@@ -332,17 +345,22 @@ func compute_vector_min(v: vector): float {
     return min_val
 }
 
+
 func get_time(): float {
     return 0.0
 }
+
 
 func is_nan(val: float): bool {
     return val != val
 }
 
+
 func println(msg: string): void {
 }
+
 
 func recommended_monitoring_config_2t(): metrics_aggregator {
     return new_metrics_aggregator(1000)
 }
+

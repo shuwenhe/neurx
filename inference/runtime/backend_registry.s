@@ -14,6 +14,7 @@ struct inference_backend_capability {
     bool available
 }
 
+
 struct backend_requirement {
     string preferred_backend
     string dtype
@@ -25,15 +26,18 @@ struct backend_requirement {
     bool require_multimodal
 }
 
+
 struct backend_registry_state {
     []inference_backend_capability backends
 }
+
 
 struct backend_selection_result {
     inference_backend_capability backend
     bool selected
     string error_message
 }
+
 
 func empty_backend_capability() inference_backend_capability {
     inference_backend_capability backend
@@ -52,6 +56,7 @@ func empty_backend_capability() inference_backend_capability {
     backend
 }
 
+
 func new_backend_selection_result(inference_backend_capability backend, bool selected, string error_message) backend_selection_result {
     backend_selection_result result
     result.backend = backend
@@ -60,19 +65,23 @@ func new_backend_selection_result(inference_backend_capability backend, bool sel
     result
 }
 
+
 func new_backend_registry() backend_registry_state {
     backend_registry_state state
     state.backends = []inference_backend_capability{cap: 16}
     state
 }
 
+
 func backend_capability_at(backend_registry_state state, int index) inference_backend_capability {
     state.backends[index]
 }
 
+
 func backend_string_at([]string values, int index) string {
     values[index]
 }
+
 
 func backend_contains([]string values, string expected) bool {
     int i = 0
@@ -85,6 +94,7 @@ func backend_contains([]string values, string expected) bool {
     }
     false
 }
+
 
 func backend_register(backend_registry_state state, inference_backend_capability backend) backend_registry_state {
     if backend.backend_name == "" {
@@ -103,6 +113,7 @@ func backend_register(backend_registry_state state, inference_backend_capability
     state
 }
 
+
 func backend_set_available(backend_registry_state state, string backend_name, bool available) backend_registry_state {
     int i = 0
     while i < len(state.backends) {
@@ -116,6 +127,7 @@ func backend_set_available(backend_registry_state state, string backend_name, bo
     }
     state
 }
+
 
 func backend_matches(inference_backend_capability backend, backend_requirement requirement) bool {
     if !backend.available {
@@ -148,6 +160,7 @@ func backend_matches(inference_backend_capability backend, backend_requirement r
     true
 }
 
+
 func backend_select(backend_registry_state state, backend_requirement requirement) backend_selection_result {
     int selected_index = -1
     int selected_priority = -2147483647
@@ -166,6 +179,7 @@ func backend_select(backend_registry_state state, backend_requirement requiremen
     new_backend_selection_result(backend_capability_at(state, selected_index), true, "")
 }
 
+
 func backend_cpu_capability() inference_backend_capability {
     inference_backend_capability backend
     backend.backend_name = "cpu"
@@ -182,6 +196,7 @@ func backend_cpu_capability() inference_backend_capability {
     backend.available = true
     backend
 }
+
 
 func backend_cuda_capability(bool available) inference_backend_capability {
     inference_backend_capability backend
@@ -200,6 +215,7 @@ func backend_cuda_capability(bool available) inference_backend_capability {
     backend
 }
 
+
 func backend_ascend_capability(bool available) inference_backend_capability {
     inference_backend_capability backend
     backend.backend_name = "ascend"
@@ -217,6 +233,7 @@ func backend_ascend_capability(bool available) inference_backend_capability {
     backend
 }
 
+
 func default_backend_registry(bool cuda_available, bool ascend_available) backend_registry_state {
     backend_registry_state state = new_backend_registry()
     state = backend_register(state, backend_cuda_capability(cuda_available))
@@ -224,3 +241,4 @@ func default_backend_registry(bool cuda_available, bool ascend_available) backen
     state = backend_register(state, backend_cpu_capability())
     state
 }
+

@@ -41,6 +41,7 @@ func main() {
     print("✅ Server shutdown complete\n")
 }
 
+
 func handle_requests(http_server server) {
     while server.running {
         string prompt = __host_readline("neurx> ")
@@ -61,6 +62,7 @@ func handle_requests(http_server server) {
     }
 }
 
+
 func print_server_status() {
     print("\n📊 Server Status:\n")
     print("   Status: ✅ Running\n")
@@ -71,6 +73,7 @@ func print_server_status() {
     print("   Uptime: Running\n\n")
 }
 
+
 func print_help() {
     print("\n📖 Commands:\n")
     print("   status   - Show server status\n")
@@ -78,6 +81,7 @@ func print_help() {
     print("   quit     - Shutdown server\n")
     print("   exit     - Shutdown server\n\n")
 }
+
 
 func int_to_string(int val) string {
     if val == 0 { return "0" }
@@ -92,7 +96,9 @@ func int_to_string(int val) string {
     return res
 }
 
+
 func string_at_index(string s, int idx) string {
     if idx < 0 || idx >= len(s) { return "" }
     return __host_slice(s, idx, idx + 1)
 }
+

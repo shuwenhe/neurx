@@ -10,9 +10,11 @@ struct trainer_state {
     int last_checkpoint_step
 }
 
+
 func init_trainer_state(int dummy) {
     println("[TrainerState] Initialized with defaults")
 }
+
 
 func print_trainer_state_fields(
     int step,
@@ -47,6 +49,7 @@ func print_trainer_state_fields(
     println("====================================")
 }
 
+
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -74,6 +77,7 @@ func int_to_str(int n) string {
     return out
 }
 
+
 func float_to_str(float value) string {
     float current = value
     bool negative = current < 0.0
@@ -99,3 +103,4 @@ func float_to_str(float value) string {
     if negative { result = "-" + result }
     return result
 }
+

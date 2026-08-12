@@ -23,6 +23,7 @@ struct model_deployment_config {
     string model_name
 }
 
+
 struct model_deployment_artifact {
     string deployment_dir
     string slurm_path
@@ -33,6 +34,7 @@ struct model_deployment_artifact {
     string launch_plan_path
     string summary_path
 }
+
 
 func default_model_deployment_config() model_deployment_config {
     model_deployment_config {
@@ -58,6 +60,7 @@ func default_model_deployment_config() model_deployment_config {
     }
 }
 
+
 func model_deployment_artifact_paths(string deployment_dir) model_deployment_artifact {
     model_deployment_artifact {
         deployment_dir: deployment_dir,
@@ -70,6 +73,7 @@ func model_deployment_artifact_paths(string deployment_dir) model_deployment_art
         summary_path: deployment_dir + "/deployment_summary.txt",
     }
 }
+
 
 func model_deployment_slurm_text(model_deployment_config config) string {
     string out = ""
@@ -100,6 +104,7 @@ func model_deployment_slurm_text(model_deployment_config config) string {
     out
 }
 
+
 func model_deployment_docker_text(model_deployment_config config) string {
     string out = ""
     out = out + "version: '3.8'\n\nservices:\n"
@@ -124,6 +129,7 @@ func model_deployment_docker_text(model_deployment_config config) string {
     out = out + "\nnetworks:\n  neurx_network:\n    driver: bridge\n"
     out
 }
+
 
 func model_deployment_kubernetes_text(model_deployment_config config) string {
     string out = ""
@@ -163,6 +169,7 @@ func model_deployment_kubernetes_text(model_deployment_config config) string {
     out
 }
 
+
 func model_deployment_cluster_config_text(model_deployment_config config) string {
     string out = ""
     out = out + "{\n"
@@ -180,6 +187,7 @@ func model_deployment_cluster_config_text(model_deployment_config config) string
     out
 }
 
+
 func model_deployment_startup_env_text(model_deployment_config config) string {
     string out = ""
     out = out + "NEURX_CLUSTER_NAME=" + config.cluster_name + "\n"
@@ -196,6 +204,7 @@ func model_deployment_startup_env_text(model_deployment_config config) string {
     out
 }
 
+
 func model_deployment_launch_plan_text(model_deployment_config config) string {
     string out = ""
     out = out + "1. export model bundle from " + config.export_dir + "\n"
@@ -204,6 +213,7 @@ func model_deployment_launch_plan_text(model_deployment_config config) string {
     out = out + "4. monitor logs and verify exported artifact path\n"
     out
 }
+
 
 func model_deployment_summary_text(model_deployment_config config, model_deployment_artifact artifact) string {
     string out = ""
@@ -219,6 +229,7 @@ func model_deployment_summary_text(model_deployment_config config, model_deploym
     out = out + "model_name=" + config.model_name + "\n"
     out
 }
+
 
 func prepare_model_deployment_bundle(model_deployment_config config) model_deployment_artifact {
     string root = trim(config.deployment_dir)
@@ -237,9 +248,11 @@ func prepare_model_deployment_bundle(model_deployment_config config) model_deplo
     artifact
 }
 
+
 func bool_text(bool value) string {
     if value {
         return "true"
     }
     "false"
 }
+

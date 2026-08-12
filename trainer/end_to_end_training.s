@@ -9,6 +9,7 @@ struct data_bundle {
     num_tokens: int
 }
 
+
 func create_dummy_data_bundle(int batch_size, int seq_len, int vocab_size) data_bundle {
     input_ids := make([][]int, batch_size)
     labels := make([][]int, batch_size)
@@ -30,6 +31,7 @@ func create_dummy_data_bundle(int batch_size, int seq_len, int vocab_size) data_
     }
 }
 
+
 struct tensor {
     data: []float64
     shape: []int
@@ -37,6 +39,7 @@ struct tensor {
     grad: []float64
     requires_grad: bool
 }
+
 
 func create_tensor([]int shape) tensor {
     size := 1
@@ -52,6 +55,7 @@ func create_tensor([]int shape) tensor {
     }
 }
 
+
 func create_tensor_with_data([]int shape, []float64 data) tensor {
     t := create_tensor(shape)
     for i := 0; i < len(data); i += 1 {
@@ -61,6 +65,7 @@ func create_tensor_with_data([]int shape, []float64 data) tensor {
     }
     t
 }
+
 
 func tensor_shape_string([]int shape) string {
     result := "["
@@ -74,11 +79,13 @@ func tensor_shape_string([]int shape) string {
     result
 }
 
+
 func zero_grad(tensor t) {
     for i := 0; i < len(t.grad); i += 1 {
         t.grad[i] = 0.0
     }
 }
+
 
 struct mini_transformer {
     embedding_weight: tensor
@@ -94,6 +101,7 @@ struct mini_transformer {
     ff_dim: int
     num_heads: int
 }
+
 
 func create_mini_transformer(int vocab_size, int hidden_dim, int ff_dim, int num_heads) mini_transformer {
     seed_rng(42)
@@ -122,11 +130,13 @@ func create_mini_transformer(int vocab_size, int hidden_dim, int ff_dim, int num
     model
 }
 
+
 func init_weights(tensor t) {
     for i := 0; i < t.size; i += 1 {
         t.data[i] = (random_float() - 0.5) * 0.1
     }
 }
+
 
 func transformer_forward(
     mini_transformer model,
@@ -143,6 +153,7 @@ func transformer_forward(
     logits := tensor_linear(ff_out, model.lm_head)
     logits
 }
+
 
 func tensor_embedding(tensor weight, [][]int input_ids) tensor {
     batch_size := len(input_ids)
@@ -163,6 +174,7 @@ func tensor_embedding(tensor weight, [][]int input_ids) tensor {
     }
     output
 }
+
 
 func simple_attention(
     tensor input,
@@ -220,6 +232,7 @@ func simple_attention(
     output
 }
 
+
 func feed_forward(tensor input, tensor fc1, tensor fc2) tensor {
     batch_size := input.shape[0]
     seq_len := input.shape[1]
@@ -259,6 +272,7 @@ func feed_forward(tensor input, tensor fc1, tensor fc2) tensor {
     output
 }
 
+
 func tensor_linear(tensor input, tensor weight) tensor {
     batch_size := input.shape[0]
     seq_len := input.shape[1]
@@ -280,6 +294,7 @@ func tensor_linear(tensor input, tensor weight) tensor {
     }
     output
 }
+
 
 func cross_entropy_loss(tensor logits, [][]int labels) float64 {
     batch_size := len(labels)
@@ -316,6 +331,7 @@ func cross_entropy_loss(tensor logits, [][]int labels) float64 {
     }
 }
 
+
 struct adamw_optimizer {
     learning_rate: float64
     beta1: float64
@@ -326,6 +342,7 @@ struct adamw_optimizer {
     second_moment: map[string]tensor
     t: int
 }
+
 
 func create_adamw_optimizer(float64 lr) adamw_optimizer {
     adamw_optimizer{
@@ -339,6 +356,7 @@ func create_adamw_optimizer(float64 lr) adamw_optimizer {
         t: 0,
     }
 }
+
 
 func adamw_step(
     adamw_optimizer opt,
@@ -363,6 +381,7 @@ func adamw_step(
         param.data[i] = param.data[i] - opt.learning_rate * (m_hat / (math.sqrt(v_hat) + opt.epsilon))
     }
 }
+
 
 func run_training_loop(
     int num_epochs,
@@ -434,6 +453,7 @@ func run_training_loop(
     println("=" * 70)
 }
 
+
 func print_loss_curve([]float64 losses) {
     if len(losses) == 0 {
         return
@@ -458,6 +478,7 @@ func print_loss_curve([]float64 losses) {
         printf("  Step %2d: %s %.4f\n", i + 1, bar, losses[i])
     }
 }
+
 
 func verify_training_progress([]float64 losses) {
     if len(losses) < 2 {
@@ -489,6 +510,7 @@ func verify_training_progress([]float64 losses) {
     }
 }
 
+
 func is_nan(float64 x) bool {
     x != x
 }
@@ -497,10 +519,12 @@ func seed_rng(int s) {
     random_seed = s
 }
 
+
 func random_float() float64 {
     random_seed = (random_seed * 1664525 + 1013904223) % 2147483647
     float64(random_seed) / 2147483647.0
 }
+
 
 func main() {
     println("╔══════════════════════════════════════════════════════════════════════╗")
@@ -514,6 +538,7 @@ func main() {
     learning_rate := 0.001
     run_training_loop(num_epochs, steps_per_epoch, learning_rate)
 }
+
 
 func string(int n) string {
     if n == 0 {
@@ -535,14 +560,17 @@ func string(int n) string {
     result
 }
 
+
 func printf(string format, ...any args) {
     println(format)
 }
+
 
 func println(string s) {
     io.print(s)
     io.print("\n")
 }
+
 
 func print_char(string s, int n) string {
     result := ""
@@ -554,3 +582,4 @@ func print_char(string s, int n) string {
 infix "*" (left: string, right: int): string {
     print_char(left, right)
 }
+

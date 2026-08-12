@@ -5,15 +5,18 @@ func model_load(string path) string {
     return msg
 }
 
+
 func model_inference(string input) string {
     string output = "Response to: " + input
     return output
 }
 
+
 func tokenize(string text) string {
     string tokens = "Tokenized: " + text
     return tokens
 }
+
 
 func main() {
     eprintln("Post-Training Inference Core")
@@ -21,3 +24,4 @@ func main() {
     eprintln("✓ Inference engine core")
     eprintln("✓ Tokenization")
 }
+

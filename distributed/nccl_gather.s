@@ -18,6 +18,7 @@ func nccl_allgather(
     nil
 }
 
+
 func nccl_reducescatter(
     nccl_communicator *comm,
     uint64 recv_buffer,
@@ -37,3 +38,4 @@ func nccl_reducescatter(
     log_collective_op("REDUCESCATTER", reduce_op, send_bytes, comm->config.world_size)
     nil
 }
+

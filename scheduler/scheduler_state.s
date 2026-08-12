@@ -6,6 +6,7 @@ struct scheduler_state_dict {
     [][]float state_values
 }
 
+
 func scheduler_state_dict_create(
     int last_epoch,
     []float last_lr
@@ -18,6 +19,7 @@ func scheduler_state_dict_create(
     }
 }
 
+
 func scheduler_state_dict_add_state(
     scheduler_state_dict state,
     string key,
@@ -27,6 +29,7 @@ func scheduler_state_dict_add_state(
     state.state_values = append(state.state_values, clone_lr_array(value))
     return state
 }
+
 
 func scheduler_state_dict_get_state(
     scheduler_state_dict state,
@@ -42,6 +45,7 @@ func scheduler_state_dict_get_state(
     return []float{}
 }
 
+
 func scheduler_load_state_dict(
     scheduler_state_dict state,
     int current_epoch
@@ -52,9 +56,11 @@ func scheduler_load_state_dict(
     return current_epoch
 }
 
+
 func scheduler_get_last_lr([]float current_lrs) []float {
     return clone_lr_array(current_lrs)
 }
+
 
 func clone_lr_array([]float values) []float {
     []float out = []float{cap: len(values)}
@@ -65,3 +71,4 @@ func clone_lr_array([]float values) []float {
     }
     return out
 }
+

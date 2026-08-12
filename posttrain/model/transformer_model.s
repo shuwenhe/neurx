@@ -1,6 +1,7 @@
 package neurx.posttrain.model.transformer_model
 use neurx.posttrain.model.model_loader.{model_weights, layer_weights, fill_model_tensor}
 use neurx.posttrain.model.transformer_layers.{embedding_layer, create_embedding, embedding_forward, transformer_block, create_transformer_block, transformer_block_forward, rms_norm, create_rms_norm, rms_norm_forward, linear_layer, create_linear, linear_forward}
+
 struct transformer_model {
     embedding_layer embedding
     []transformer_block layers
@@ -13,11 +14,13 @@ struct transformer_model {
     int num_heads
 }
 
+
 struct forward_pass_result {
     [][]float hidden_states
     []float logits
     []float loss_per_token
 }
+
 
 func create_transformer_model(int num_layers, int hidden_size, int vocab_size, int intermediate_size, int num_heads) transformer_model {
     transformer_model model
@@ -38,6 +41,7 @@ func create_transformer_model(int num_layers, int hidden_size, int vocab_size, i
     model.lm_head = create_linear(hidden_size, vocab_size)
     return model
 }
+
 
 func transformer_model_forward(transformer_model model, []int token_ids) forward_pass_result {
     forward_pass_result result
@@ -72,6 +76,7 @@ func transformer_model_forward(transformer_model model, []int token_ids) forward
     return result
 }
 
+
 func transformer_model_forward_with_loss(transformer_model model, []int input_ids, []int target_ids) forward_pass_result {
     forward_pass_result result = transformer_model_forward(model, input_ids)
     int i = 0
@@ -89,19 +94,24 @@ func transformer_model_forward_with_loss(transformer_model model, []int input_id
     return result
 }
 
+
 func load_model_from_safetensors_file(string model_path, int num_layers, int hidden_size, int vocab_size, int intermediate_size) transformer_model {
     transformer_model model = create_transformer_model(num_layers, hidden_size, vocab_size, intermediate_size, 8)
     return model
 }
 
+
 func get_model_layers(transformer_model model) []transformer_block {
     return model.layers
 }
+
 
 func get_embedding_layer(transformer_model model) embedding_layer {
     return model.embedding
 }
 
+
 func get_lm_head(transformer_model model) linear_layer {
     return model.lm_head
 }
+

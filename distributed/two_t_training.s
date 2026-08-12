@@ -1,6 +1,7 @@
 package neurx.distributed.two_t_training
 use neurx.distributed.comm.{process_group_state, new_process_group, process_group_rank, process_group_world_size, process_group_state_dict, process_group_load_state_dict}
 use neurx.distributed.ddp.{ddp_state, new_ddp_state, ddp_attach_process_group, ddp_is_distributed, ddp_state_dict, ddp_load_state_dict, ddp_finalize_step, ddp_sync_scale}
+
 struct two_t_training_plan {
     int world_size
     int rank
@@ -22,6 +23,7 @@ struct two_t_training_plan {
     int epoch
 }
 
+
 func two_t_mod_nonneg(int value, int divisor) int {
     if divisor <= 0 {
         return 0
@@ -35,6 +37,7 @@ func two_t_mod_nonneg(int value, int divisor) int {
     }
     current
 }
+
 
 func recommended_two_t_plan(int world_size, int rank) two_t_training_plan {
     int tp = 16
@@ -69,9 +72,11 @@ func recommended_two_t_plan(int world_size, int rank) two_t_training_plan {
     }
 }
 
+
 func new_two_t_training_plan(int world_size, int rank) two_t_training_plan {
     recommended_two_t_plan(world_size, rank)
 }
+
 
 func two_t_training_plan_state_dict(two_t_training_plan plan) two_t_training_plan {
     two_t_training_plan {
@@ -96,6 +101,7 @@ func two_t_training_plan_state_dict(two_t_training_plan plan) two_t_training_pla
     }
 }
 
+
 func two_t_training_plan_load_state_dict(two_t_training_plan plan, two_t_training_plan other) two_t_training_plan {
     two_t_training_plan {
         world_size: other.world_size,
@@ -118,6 +124,7 @@ func two_t_training_plan_load_state_dict(two_t_training_plan plan, two_t_trainin
         epoch: other.epoch,
     }
 }
+
 
 func two_t_training_plan_step(two_t_training_plan plan) two_t_training_plan {
     two_t_training_plan {
@@ -142,9 +149,11 @@ func two_t_training_plan_step(two_t_training_plan plan) two_t_training_plan {
     }
 }
 
+
 func two_t_training_plan_ddp_scale(two_t_training_plan plan) float {
     ddp_sync_scale(plan.ddp)
 }
+
 
 func two_t_training_plan_summary(two_t_training_plan plan) string {
     string out = "two_t_training_plan("
@@ -164,3 +173,4 @@ func two_t_training_plan_summary(two_t_training_plan plan) string {
     out = out + ")"
     out
 }
+

@@ -13,6 +13,7 @@ struct device_info {
     string driver
 }
 
+
 struct dispatch_state {
     []device_info devices
     int           next_dev_id
@@ -20,10 +21,12 @@ struct dispatch_state {
     string        default_gpu
 }
 
+
 struct device_pick_result {
     device_info device
     bool ok
 }
+
 
 struct register_device_params {
     int dev_type
@@ -33,6 +36,7 @@ struct register_device_params {
     string driver
 }
 
+
 func new_dispatch_state() dispatch_state {
     return dispatch_state{
         devices:     [],
@@ -41,6 +45,7 @@ func new_dispatch_state() dispatch_state {
         default_gpu: "",
     }
 }
+
 
 func register_device(ds dispatch_state, params register_device_params) dispatch_state {
     device_info d = device_info{
@@ -60,6 +65,7 @@ func register_device(ds dispatch_state, params register_device_params) dispatch_
     }
     return ds
 }
+
 
 func pick_device(ds dispatch_state, op_type string, tensor_size_mb int) device_pick_result {
     if op_type == "control" || op_type == "scalar" {
@@ -120,6 +126,7 @@ func pick_device(ds dispatch_state, op_type string, tensor_size_mb int) device_p
     return failed
 }
 
+
 func update_device_mem(ds dispatch_state, name string, delta_mb int) dispatch_state {
     int i = 0
     while i < len(ds.devices) {
@@ -130,3 +137,4 @@ func update_device_mem(ds dispatch_state, name string, delta_mb int) dispatch_st
     }
     return ds
 }
+

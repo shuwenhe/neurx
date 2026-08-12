@@ -29,6 +29,7 @@ func create_ppo_config() ppo_config {
     }
 }
 
+
 func example_basic_ppo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 1: Basic PPO Training Loop                       ║")
@@ -55,6 +56,7 @@ func example_basic_ppo_training() {
     print("  Final Value Loss:   " + float_to_string_ex(state.avg_value_loss))
     print("")
 }
+
 
 func example_distributed_ppo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -86,6 +88,7 @@ func example_distributed_ppo_training() {
     print("  Ready for distributed training")
     print("")
 }
+
 
 func example_hyperparameter_comparison() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -122,6 +125,7 @@ func example_hyperparameter_comparison() {
     print("  Higher entropy_coef    → More exploration, less exploitation")
     print("")
 }
+
 
 func example_ppo_with_reward_model() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -160,6 +164,7 @@ func example_ppo_with_reward_model() {
     print("")
 }
 
+
 func example_kl_constraint_and_early_stopping() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 5: KL Constraint & Early Stopping                ║")
@@ -194,6 +199,7 @@ func example_kl_constraint_and_early_stopping() {
     print("  ✓ Improves training stability")
     print("")
 }
+
 
 func example_complete_alignment_pipeline() {
     print("╔════════════════════════════════════════════════════════════╗")
@@ -232,6 +238,7 @@ func example_complete_alignment_pipeline() {
     print("")
 }
 
+
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -249,12 +256,15 @@ func main() {
     print("═════════════════════════════════════════════════════════════")
 }
 
+
 func float_to_string_ex(float f) string {
     int i_part = int(f)
     int f_part = int((f - float(i_part)) * 10000.0)
     string(i_part) + "." + string(f_part)
 }
 
+
 func int_to_string_ex(int i) string {
     string(i)
 }
+

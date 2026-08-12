@@ -1,6 +1,7 @@
 package neurx.posttrain.alignment.drgrpo
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
+
 struct drgrpo_config {
     float learning_rate
     int batch_size
@@ -15,6 +16,7 @@ struct drgrpo_config {
     float target_kl
 }
 
+
 struct drgrpo_state {
     tensor policy_logits
     tensor log_probs
@@ -28,6 +30,7 @@ struct drgrpo_state {
     float total_loss
     float avg_group_reward
 }
+
 
 func new_drgrpo_config() drgrpo_config {
     drgrpo_config {
@@ -44,6 +47,7 @@ func new_drgrpo_config() drgrpo_config {
         target_kl: 0.01,
     }
 }
+
 
 func drgrpo_compute_group_baselines(
     []tensor rewards,
@@ -69,6 +73,7 @@ func drgrpo_compute_group_baselines(
     }
     baselines
 }
+
 
 func drgrpo_compute_divergence(
     tensor log_probs,
@@ -97,6 +102,7 @@ func drgrpo_compute_divergence(
     }
     tensor_ops.concat(divergences, 0)
 }
+
 
 func drgrpo_step(
     module policy,
@@ -199,3 +205,4 @@ func drgrpo_step(
         avg_group_reward: avg_group_reward,
     }
 }
+

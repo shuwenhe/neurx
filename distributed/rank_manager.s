@@ -10,21 +10,30 @@ extern func neurx_nccl_barrier(int64 communicator, int64 stream) int
 
 func group_world() int { 0 }
 
+
 func group_tensor_parallel() int { 1 }
+
 
 func group_pipeline_parallel() int { 2 }
 
+
 func group_data_parallel() int { 3 }
+
 
 func group_expert_parallel() int { 4 }
 
+
 func reduce_sum() int { 0 }
+
 
 func reduce_product() int { 1 }
 
+
 func reduce_maximum() int { 2 }
 
+
 func reduce_minimum() int { 3 }
+
 
 struct parallel_topology {
     int tensor_parallel_size
@@ -33,6 +42,7 @@ struct parallel_topology {
     int expert_parallel_size
     int world_size
 }
+
 
 struct rank_coordinates {
     int global_rank
@@ -43,6 +53,7 @@ struct rank_coordinates {
     int expert_parallel_rank
 }
 
+
 struct rank_group {
     int kind
     []int ranks
@@ -50,6 +61,7 @@ struct rank_group {
     int64 communicator
     bool initialized
 }
+
 
 struct distributed_context {
     parallel_topology topology
@@ -64,6 +76,7 @@ struct distributed_context {
     string error_message
 }
 
+
 struct distributed_collective_result {
     distributed_context context
     bool success
@@ -71,9 +84,11 @@ struct distributed_collective_result {
     string error_message
 }
 
+
 func distributed_remainder(int value, int divisor) int {
     value - (value / divisor) * divisor
 }
+
 
 func normalize_parallel_topology(parallel_topology topology) parallel_topology {
     if topology.tensor_parallel_size <= 0 { topology.tensor_parallel_size = 1 }
@@ -84,12 +99,14 @@ func normalize_parallel_topology(parallel_topology topology) parallel_topology {
     topology
 }
 
+
 func parallel_topology_valid(parallel_topology topology) bool {
     if topology.tensor_parallel_size <= 0 || topology.pipeline_parallel_size <= 0 || topology.data_parallel_size <= 0 || topology.expert_parallel_size <= 0 { return false }
     if topology.world_size != topology.tensor_parallel_size * topology.pipeline_parallel_size * topology.data_parallel_size { return false }
     int expert_domain = topology.tensor_parallel_size * topology.data_parallel_size
     distributed_remainder(expert_domain, topology.expert_parallel_size) == 0
 }
+
 
 func rank_coordinates_for(parallel_topology topology, int global_rank, int local_rank) rank_coordinates {
     rank_coordinates coordinates
@@ -110,6 +127,7 @@ func rank_coordinates_for(parallel_topology topology, int global_rank, int local
     coordinates
 }
 
+
 func empty_rank_group(int kind) rank_group {
     rank_group group
     group.kind = kind
@@ -119,6 +137,7 @@ func empty_rank_group(int kind) rank_group {
     group.initialized = false
     group
 }
+
 
 func build_world_group(parallel_topology topology, rank_coordinates coordinates) rank_group {
     rank_group group = empty_rank_group(group_world())
@@ -131,6 +150,7 @@ func build_world_group(parallel_topology topology, rank_coordinates coordinates)
     group.initialized = coordinates.global_rank >= 0
     group
 }
+
 
 func build_tensor_group(parallel_topology topology, rank_coordinates coordinates) rank_group {
     rank_group group = empty_rank_group(group_tensor_parallel())
@@ -147,6 +167,7 @@ func build_tensor_group(parallel_topology topology, rank_coordinates coordinates
     group
 }
 
+
 func build_pipeline_group(parallel_topology topology, rank_coordinates coordinates) rank_group {
     rank_group group = empty_rank_group(group_pipeline_parallel())
     if coordinates.pipeline_parallel_rank < 0 { return group }
@@ -162,6 +183,7 @@ func build_pipeline_group(parallel_topology topology, rank_coordinates coordinat
     group
 }
 
+
 func build_data_group(parallel_topology topology, rank_coordinates coordinates) rank_group {
     rank_group group = empty_rank_group(group_data_parallel())
     if coordinates.data_parallel_rank < 0 { return group }
@@ -176,6 +198,7 @@ func build_data_group(parallel_topology topology, rank_coordinates coordinates) 
     group.initialized = true
     group
 }
+
 
 func build_expert_group(parallel_topology topology, rank_coordinates coordinates) rank_group {
     rank_group group = empty_rank_group(group_expert_parallel())
@@ -197,6 +220,7 @@ func build_expert_group(parallel_topology topology, rank_coordinates coordinates
     group
 }
 
+
 func distributed_context_init(parallel_topology requested, int global_rank, int local_rank, string backend) distributed_context {
     distributed_context context
     context.topology = normalize_parallel_topology(requested)
@@ -213,6 +237,7 @@ func distributed_context_init(parallel_topology requested, int global_rank, int 
     context
 }
 
+
 func distributed_group(distributed_context context, int kind) rank_group {
     if kind == group_tensor_parallel() { return context.tensor_group }
     if kind == group_pipeline_parallel() { return context.pipeline_group }
@@ -220,6 +245,7 @@ func distributed_group(distributed_context context, int kind) rank_group {
     if kind == group_expert_parallel() { return context.expert_group }
     context.world_group
 }
+
 
 func distributed_attach_communicator(distributed_context context, int kind, int64 communicator) distributed_context {
     if kind == group_tensor_parallel() { context.tensor_group.communicator = communicator }
@@ -230,6 +256,7 @@ func distributed_attach_communicator(distributed_context context, int kind, int6
     context
 }
 
+
 func new_collective_result(distributed_context context, int status_code, string error_message) distributed_collective_result {
     distributed_collective_result result
     result.context = context
@@ -239,10 +266,12 @@ func new_collective_result(distributed_context context, int status_code, string 
     result
 }
 
+
 func distributed_collective_ready(distributed_context context, int kind, int count) bool {
     rank_group group = distributed_group(context, kind)
     context.initialized && context.backend == "nccl" && group.initialized && group.communicator != i64(0) && count > 0
 }
+
 
 func distributed_all_reduce_f32(distributed_context context, int kind, int64 send_pointer, int64 receive_pointer, int count, int operation, int64 stream) distributed_collective_result {
     if !distributed_collective_ready(context, kind, count) || send_pointer == i64(0) || receive_pointer == i64(0) {
@@ -254,6 +283,7 @@ func distributed_all_reduce_f32(distributed_context context, int kind, int64 sen
     new_collective_result(context, status, message)
 }
 
+
 func distributed_all_gather_f32(distributed_context context, int kind, int64 send_pointer, int64 receive_pointer, int count, int64 stream) distributed_collective_result {
     if !distributed_collective_ready(context, kind, count) || send_pointer == i64(0) || receive_pointer == i64(0) {
         return new_collective_result(context, -1, "all-gather is not ready")
@@ -264,6 +294,7 @@ func distributed_all_gather_f32(distributed_context context, int kind, int64 sen
     new_collective_result(context, status, message)
 }
 
+
 func distributed_reduce_scatter_f32(distributed_context context, int kind, int64 send_pointer, int64 receive_pointer, int count, int operation, int64 stream) distributed_collective_result {
     if !distributed_collective_ready(context, kind, count) || send_pointer == i64(0) || receive_pointer == i64(0) {
         return new_collective_result(context, -1, "reduce-scatter is not ready")
@@ -273,6 +304,7 @@ func distributed_reduce_scatter_f32(distributed_context context, int kind, int64
     if status != 0 { message = "NCCL reduce-scatter failed" }
     new_collective_result(context, status, message)
 }
+
 
 func distributed_broadcast_f32(distributed_context context, int kind, int64 pointer, int count, int root, int64 stream) distributed_collective_result {
     rank_group group = distributed_group(context, kind)
@@ -285,6 +317,7 @@ func distributed_broadcast_f32(distributed_context context, int kind, int64 poin
     new_collective_result(context, status, message)
 }
 
+
 func distributed_barrier(distributed_context context, int kind, int64 stream) distributed_collective_result {
     rank_group group = distributed_group(context, kind)
     if !context.initialized || !group.initialized || group.communicator == i64(0) {
@@ -295,6 +328,7 @@ func distributed_barrier(distributed_context context, int kind, int64 stream) di
     if status != 0 { message = "NCCL barrier failed" }
     new_collective_result(context, status, message)
 }
+
 
 func distributed_topology_contract_valid(parallel_topology requested) bool {
     parallel_topology topology = normalize_parallel_topology(requested)
@@ -307,3 +341,4 @@ func distributed_topology_contract_valid(parallel_topology requested) bool {
     }
     true
 }
+

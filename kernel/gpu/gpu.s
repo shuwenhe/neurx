@@ -21,6 +21,7 @@ struct gpu_device {
     string driver_version
 }
 
+
 struct gpu_stream {
     int    stream_id
     int    gpu_id
@@ -29,6 +30,7 @@ struct gpu_stream {
     int    pending_jobs
     int    completed_jobs
 }
+
 
 struct gpu_job {
     int    job_id
@@ -44,11 +46,13 @@ struct gpu_job {
     string err
 }
 
+
 struct gpu_fence {
     int    fence_id
     int    stream_id
     bool   signaled
 }
+
 
 struct gpu_state {
     []gpu_device devices
@@ -59,6 +63,7 @@ struct gpu_state {
     int           next_job_id
     int           next_fence_id
 }
+
 
 func new_gpu_state() gpu_state {
     return gpu_state{
@@ -71,6 +76,7 @@ func new_gpu_state() gpu_state {
         next_fence_id:   0,
     }
 }
+
 
 func gpu_register(gs gpu_state, gpu_type int, name string, total_mem_mb int,
                   sm_count int, max_streams int, driver_version string) (gpu_state, int) {
@@ -90,6 +96,7 @@ func gpu_register(gs gpu_state, gpu_type int, name string, total_mem_mb int,
     return (gs, id)
 }
 
+
 func gpu_stream_create(gs gpu_state, gpu_id int, priority int) (gpu_state, int) {
     int sid = gs.next_stream_id
     gpu_stream s = gpu_stream{
@@ -104,6 +111,7 @@ func gpu_stream_create(gs gpu_state, gpu_id int, priority int) (gpu_state, int) 
     gs.next_stream_id = gs.next_stream_id + 1
     return (gs, sid)
 }
+
 
 func gpu_submit_job(gs gpu_state, stream_id int, kernel_name string,
                     grid_x int, grid_y int, block_size int, shared_mem_bytes int) (gpu_state, int) {
@@ -133,6 +141,7 @@ func gpu_submit_job(gs gpu_state, stream_id int, kernel_name string,
     return (gs, jid)
 }
 
+
 func gpu_record_fence(gs gpu_state, stream_id int) (gpu_state, int) {
     int fid = gs.next_fence_id
     gpu_fence f = gpu_fence{fence_id: fid, stream_id: stream_id, signaled: false}
@@ -140,6 +149,7 @@ func gpu_record_fence(gs gpu_state, stream_id int) (gpu_state, int) {
     gs.next_fence_id = gs.next_fence_id + 1
     return (gs, fid)
 }
+
 
 func gpu_complete_job(gs gpu_state, job_id int) gpu_state {
     int i = 0
@@ -169,6 +179,7 @@ func gpu_complete_job(gs gpu_state, job_id int) gpu_state {
     return gs
 }
 
+
 func gpu_fence_query(gs gpu_state, fence_id int) bool {
     int i = 0
     while i < len(gs.fences) {
@@ -179,3 +190,4 @@ func gpu_fence_query(gs gpu_state, fence_id int) bool {
     }
     return false
 }
+

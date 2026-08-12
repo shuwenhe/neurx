@@ -1,6 +1,7 @@
 package neurx.posttrain.tools.model_merger
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
+
 struct merge_config {
     string merge_method
     []float weights
@@ -10,10 +11,12 @@ struct merge_config {
     bool normalize_weights
 }
 
+
 struct model_delta {
     []tensor param_deltas
     []string param_names
 }
+
 
 func new_merge_config() merge_config {
     merge_config {
@@ -25,6 +28,7 @@ func new_merge_config() merge_config {
         normalize_weights: true,
     }
 }
+
 
 func compute_model_delta(
     module finetuned,
@@ -46,6 +50,7 @@ func compute_model_delta(
         param_names: names,
     }
 }
+
 
 func merge_models_average(
     []module models,
@@ -88,6 +93,7 @@ func merge_models_average(
     result
 }
 
+
 func merge_task_arithmetic(
     module base,
     []model_delta deltas,
@@ -119,6 +125,7 @@ func merge_task_arithmetic(
     result
 }
 
+
 func merge_ties(
     module base,
     []model_delta deltas,
@@ -147,6 +154,7 @@ func merge_ties(
     result.load_parameters(result_params)
     result
 }
+
 
 func merge_dare(
     module base,
@@ -180,6 +188,7 @@ func merge_dare(
     result
 }
 
+
 func trim_top_k([]tensor deltas, int top_k_percent) tensor {
     if deltas.len == 0 {
         return tensor{}
@@ -193,12 +202,14 @@ func trim_top_k([]tensor deltas, int top_k_percent) tensor {
     trimmed
 }
 
+
 func elect_sign(tensor trimmed) tensor {
     tensor sum = tensor_ops.sum(trimmed, 0, true)
     tensor sign_mask = tensor_ops.sign(sum)
     tensor signed = tensor_ops.mul(trimmed, sign_mask)
     signed
 }
+
 
 func weighted_average(tensor values, []float weights) tensor {
     tensor result = tensor_ops.zeros_like(values)
@@ -214,8 +225,10 @@ func weighted_average(tensor values, []float weights) tensor {
     result
 }
 
+
 func random_dropout_mask(tensor t, float drop_rate) tensor {
     tensor mask = tensor_ops.random_uniform_like(t)
     mask = tensor_ops.gt(mask, drop_rate)
     tensor_ops.to_float(mask)
 }
+

@@ -9,6 +9,7 @@ struct continuous_batch_state {
     int decode_tokens
 }
 
+
 func new_continuous_batch_state(int capacity) continuous_batch_state {
     int effective_capacity = capacity
     if effective_capacity <= 0 {
@@ -24,6 +25,7 @@ func new_continuous_batch_state(int capacity) continuous_batch_state {
         decode_tokens: 0,
     }
 }
+
 
 func continuous_batch_enqueue_request(continuous_batch_state state, int prefill_tokens) continuous_batch_state {
     int next_active = state.active_requests
@@ -48,6 +50,7 @@ func continuous_batch_enqueue_request(continuous_batch_state state, int prefill_
     }
 }
 
+
 func continuous_batch_record_decode_step(continuous_batch_state state, int tokens) continuous_batch_state {
     int add_tokens = tokens
     if add_tokens < 0 {
@@ -63,6 +66,7 @@ func continuous_batch_record_decode_step(continuous_batch_state state, int token
         decode_tokens: state.decode_tokens + add_tokens,
     }
 }
+
 
 func continuous_batch_finish_request(continuous_batch_state state) continuous_batch_state {
     int next_active = state.active_requests
@@ -87,10 +91,13 @@ func continuous_batch_finish_request(continuous_batch_state state) continuous_ba
     }
 }
 
+
 func continuous_batch_state_dict(continuous_batch_state state) continuous_batch_state {
     state
 }
 
+
 func continuous_batch_load_state_dict(continuous_batch_state state, continuous_batch_state other) continuous_batch_state {
     other
 }
+

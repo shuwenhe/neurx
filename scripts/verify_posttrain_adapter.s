@@ -90,6 +90,7 @@ func main() {
     println("posttrain adapter verification passed")
 }
 
+
 func extract_json_number_field(string json_text, string field_name, string fallback) string {
     string needle = "\"" + field_name + "\""
     int pos = find_substring(json_text, needle)
@@ -117,6 +118,7 @@ func extract_json_number_field(string json_text, string field_name, string fallb
     }
     token
 }
+
 
 func extract_json_array_values(string json_text, string field_name) []float {
     []float values = []float{}
@@ -154,6 +156,7 @@ func extract_json_array_values(string json_text, string field_name) []float {
     }
     values
 }
+
 
 func parse_float(string s, float fallback) float {
     string text = trim(s)
@@ -231,9 +234,11 @@ func parse_float(string s, float fallback) float {
     result * (sign as float)
 }
 
+
 func is_number_token_char(int ch) bool {
     ch >= 48 && ch <= 57 || ch == 45 || ch == 43 || ch == 46 || ch == 101 || ch == 69
 }
+
 
 func find_substring(string text, string pattern) int {
     if len(pattern) > len(text) {
@@ -258,6 +263,7 @@ func find_substring(string text, string pattern) int {
     -1
 }
 
+
 func read_u64_le([]int bytes, int offset) int {
     int value = 0
     int i = 0
@@ -269,6 +275,7 @@ func read_u64_le([]int bytes, int offset) int {
     }
     value
 }
+
 
 func parse_int(string s, int fallback) int {
     string text = trim(s)
@@ -293,9 +300,11 @@ func parse_int(string s, int fallback) int {
     sign * value
 }
 
+
 func string_char(int c) string {
     string(c)
 }
+
 
 func int_to_str(int n) string {
     if n == 0 {
@@ -327,6 +336,7 @@ func int_to_str(int n) string {
     }
     out
 }
+
 
 func float_to_str(float value, int decimals) string {
     float current = value
@@ -367,6 +377,7 @@ func float_to_str(float value, int decimals) string {
     out
 }
 
+
 func shell_escape(string value) string {
     string out = "'"
     int i = 0
@@ -381,3 +392,4 @@ func shell_escape(string value) string {
     }
     out + "'"
 }
+

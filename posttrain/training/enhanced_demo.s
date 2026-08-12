@@ -1,5 +1,6 @@
 package neurx.posttrain.training.enhanced_demo
 use neurx.posttrain.training.stability.{clip_all_gradients, check_grads_healthy, compute_accuracy}
+
 func training_loop_with_stability() {
     println("=== Enhanced Training Loop Demo ===")
     println("")
@@ -46,9 +47,11 @@ func training_loop_with_stability() {
     println("✓ All gradient checks passed!")
 }
 
+
 func main() {
     training_loop_with_stability()
 }
+
 
 func make_float_array(int size) []float {
     []float arr = []float{}
@@ -60,6 +63,7 @@ func make_float_array(int size) []float {
     return arr
 }
 
+
 func make_2d_array(int size) [][]float {
     [][]float arr = [][]float{}
     int i = 0
@@ -69,6 +73,7 @@ func make_2d_array(int size) [][]float {
     }
     return arr
 }
+
 
 func int_to_str(int n) string {
     if n == 0 { return "0" }
@@ -97,13 +102,16 @@ func int_to_str(int n) string {
     return out
 }
 
+
 func float_to_str_2(float value) string {
     return float_to_str_n(value, 2)
 }
 
+
 func float_to_str_4(float value) string {
     return float_to_str_n(value, 4)
 }
+
 
 func float_to_str_n(float value, int decimals) string {
     float current = value
@@ -132,3 +140,4 @@ func float_to_str_n(float value, int decimals) string {
     if negative { result = "-" + result }
     return result
 }
+

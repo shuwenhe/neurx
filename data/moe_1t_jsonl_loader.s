@@ -2,6 +2,7 @@ package neurx.data.jsonl_loader
 use neurx.strings
 use neurx.runtime.io.{io_println, runtime_file_exists, runtime_read_text_file}
 use neurx.tokenizer.model_bpe.{bpe_tokenizer, token_config, new_tokenizer_config, new_bpe_tokenizer, encode, pad_sequence}
+
 struct jsonl_document {
     string text
     string source
@@ -9,6 +10,7 @@ struct jsonl_document {
     []string metadata_keys
     []string metadata_values
 }
+
 
 func read_jsonl_file(string filepath) []jsonl_document {
     []jsonl_document docs = []jsonl_document{cap: 0}
@@ -33,6 +35,7 @@ func read_jsonl_file(string filepath) []jsonl_document {
     docs
 }
 
+
 func parse_json_document(string json_line) jsonl_document {
     jsonl_document doc = jsonl_document {
         text: "",
@@ -50,6 +53,7 @@ func parse_json_document(string json_line) jsonl_document {
     doc
 }
 
+
 struct jsonl_data_config {
     string data_dir
     int num_shards
@@ -62,12 +66,14 @@ struct jsonl_data_config {
     int shuffle_buffer_size
 }
 
+
 struct jsonl_batch {
     []int token_ids
     []int attention_mask
     []long document_ids
     []string metadata
 }
+
 
 struct jsonl_data_loader {
     jsonl_data_config config
@@ -82,6 +88,7 @@ struct jsonl_data_loader {
     int num_batches_generated
     int documents_per_shard
 }
+
 
 func jsonl_data_loader_new(
     string data_dir,
@@ -118,6 +125,7 @@ func jsonl_data_loader_new(
     loader
 }
 
+
 func get_shard_indices_for_rank(
     int dp_rank,
     int dp_size,
@@ -131,6 +139,7 @@ func get_shard_indices_for_rank(
     }
     shard_indices
 }
+
 
 func pack_tokens_into_batch(
     jsonl_data_loader loader,
@@ -173,6 +182,7 @@ func pack_tokens_into_batch(
     }
     batch
 }
+
 
 func get_next_batch(
     jsonl_data_loader loader
@@ -217,6 +227,7 @@ func get_next_batch(
     batch
 }
 
+
 func load_next_shard(jsonl_data_loader loader) {
     []int shard_indices = get_shard_indices_for_rank(
         loader.config.dp_rank,
@@ -235,6 +246,7 @@ func load_next_shard(jsonl_data_loader loader) {
     loader.current_shard_idx = loader.current_shard_idx + 1
 }
 
+
 func get_loader_stats(jsonl_data_loader loader) string {
     string stats = "JSONL Loader Stats:\n"
     stats = stats + "  Total tokens processed: " + long_to_string(loader.total_tokens_processed) + "\n"
@@ -242,6 +254,7 @@ func get_loader_stats(jsonl_data_loader loader) string {
     stats = stats + "  Current shard: " + int_to_string(loader.current_shard_idx) + "\n"
     stats
 }
+
 
 func append_int([]int arr, int val) []int {
     []int out = []int{cap: len(arr) + 1}
@@ -254,6 +267,7 @@ func append_int([]int arr, int val) []int {
     out
 }
 
+
 func append_string([]string arr, string val) []string {
     []string out = []string{cap: len(arr) + 1}
     int i = 0
@@ -264,6 +278,7 @@ func append_string([]string arr, string val) []string {
     out.push(val)
     out
 }
+
 
 func int_to_string(int x) string {
     if x == 0 {
@@ -287,10 +302,12 @@ func int_to_string(int x) string {
     out
 }
 
+
 func long_to_string(long x) string {
     int value = int(x)
     int_to_string(value)
 }
+
 
 func split_lines(string text) []string {
     []string lines = []string{cap: 0}
@@ -314,6 +331,7 @@ func split_lines(string text) []string {
     lines
 }
 
+
 func trim_string(string text) string {
     int left = 0
     int right = len(text) - 1
@@ -336,6 +354,7 @@ func trim_string(string text) string {
     }
     neurx.strings.substring(text, left, right + 1)
 }
+
 
 func extract_json_string_field(string json_line, string field_name) string {
     string needle = "\"" + field_name + "\""
@@ -401,6 +420,7 @@ func extract_json_string_field(string json_line, string field_name) string {
     out
 }
 
+
 func find_substring(string text, string pattern) int {
     if len(pattern) == 0 {
         return 0
@@ -422,6 +442,7 @@ func find_substring(string text, string pattern) int {
     -1
 }
 
+
 func build_default_vocab() []string {
     []string vocab = []string{cap: 0}
     vocab.push("<pad>")
@@ -437,3 +458,4 @@ func build_default_vocab() []string {
     vocab.push("\t")
     vocab
 }
+

@@ -13,10 +13,12 @@ struct inference_config {
     int max_seq_len
 }
 
+
 struct kv_cache {
     [][]float keys
     [][]float values
 }
+
 
 struct model_weights {
     []float embed_tokens
@@ -32,6 +34,7 @@ struct model_weights {
     []float lm_head_weight
 }
 
+
 func vec_add([]float a, []float b) []float {
     []float result
     int i = 0
@@ -44,6 +47,7 @@ func vec_add([]float a, []float b) []float {
     return result
 }
 
+
 func vec_mul_scalar([]float v, float scalar) []float {
     []float result
     int i = 0
@@ -53,6 +57,7 @@ func vec_mul_scalar([]float v, float scalar) []float {
     }
     return result
 }
+
 
 func vec_dot([]float a, []float b) float {
     float result = 0.0
@@ -66,6 +71,7 @@ func vec_dot([]float a, []float b) float {
     return result
 }
 
+
 func vec_norm([]float v) float {
     float sum = 0.0
     int i = 0
@@ -75,6 +81,7 @@ func vec_norm([]float v) float {
     }
     return sum
 }
+
 
 func matvec([]float matrix, []float vector, int rows, int cols) []float {
     []float result
@@ -93,6 +100,7 @@ func matvec([]float matrix, []float vector, int rows, int cols) []float {
     }
     return result
 }
+
 
 func softmax([]float logits) []float {
     []float result
@@ -120,6 +128,7 @@ func softmax([]float logits) []float {
     return result
 }
 
+
 func exp_approx(float x) float {
     if x > 20.0 { return 1e9 }
     if x < -20.0 { return 0.0 }
@@ -135,6 +144,7 @@ func exp_approx(float x) float {
     return result
 }
 
+
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     if x == 1.0 { return 1.0 }
@@ -146,6 +156,7 @@ func sqrt_approx(float x) float {
     }
     return guess
 }
+
 
 func rms_norm([]float x, []float weight, float epsilon) []float {
     []float result
@@ -168,6 +179,7 @@ func rms_norm([]float x, []float weight, float epsilon) []float {
     }
     return result
 }
+
 
 func apply_rope([]float q, int pos, int head_dim, float rope_theta) []float {
     []float result
@@ -195,6 +207,7 @@ func apply_rope([]float q, int pos, int head_dim, float rope_theta) []float {
     return result
 }
 
+
 func cos_approx(float x) float {
     float pi = 3.14159265359
     while x > pi { x = x - 2.0 * pi }
@@ -215,6 +228,7 @@ func cos_approx(float x) float {
     return result
 }
 
+
 func sin_approx(float x) float {
     float pi = 3.14159265359
     while x > pi { x = x - 2.0 * pi }
@@ -234,6 +248,7 @@ func sin_approx(float x) float {
     }
     return result
 }
+
 
 func attention(
     []float query,
@@ -292,6 +307,7 @@ func attention(
     return result
 }
 
+
 func ffn(
     []float x,
     []float gate_weight,
@@ -314,6 +330,7 @@ func ffn(
     return result
 }
 
+
 func embedding_lookup([]float embed_weight, int token_id, int hidden_size) []float {
     []float result
     int start = token_id * hidden_size
@@ -324,6 +341,7 @@ func embedding_lookup([]float embed_weight, int token_id, int hidden_size) []flo
     }
     return result
 }
+
 
 func transformer_block_forward(
     []float hidden,
@@ -351,6 +369,7 @@ func transformer_block_forward(
     []float output = vec_add(after_attn, ffn_out)
     return output
 }
+
 
 func model_forward(
     int token_id,
@@ -385,6 +404,7 @@ func model_forward(
     return logits
 }
 
+
 func main() {
     eprintln("Transformer Inference Engine - Complete CPU Implementation")
     eprintln("✓ RoPE position encoding")
@@ -393,3 +413,4 @@ func main() {
     eprintln("✓ RMS normalization")
     eprintln("✓ Full transformer stack")
 }
+

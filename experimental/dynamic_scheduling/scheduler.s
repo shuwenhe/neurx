@@ -11,6 +11,7 @@ struct dynamic_scheduler_config {
     int adjustment_interval_steps
 }
 
+
 struct dynamic_scheduler_state {
     dynamic_scheduler_config config
     int current_rollout_workers
@@ -20,12 +21,14 @@ struct dynamic_scheduler_state {
     []float throughput_history
 }
 
+
 struct resource_allocation {
     int num_rollout_workers
     int num_training_workers
     float estimated_throughput
     string reason
 }
+
 
 func default_dynamic_scheduler_config() dynamic_scheduler_config {
     dynamic_scheduler_config {
@@ -40,6 +43,7 @@ func default_dynamic_scheduler_config() dynamic_scheduler_config {
     }
 }
 
+
 func init_dynamic_scheduler(dynamic_scheduler_config config) dynamic_scheduler_state {
     dynamic_scheduler_state {
         config: config,
@@ -50,6 +54,7 @@ func init_dynamic_scheduler(dynamic_scheduler_config config) dynamic_scheduler_s
         throughput_history: make([]float, 0),
     }
 }
+
 
 func compute_resource_allocation(
     dynamic_scheduler_state state,
@@ -90,6 +95,7 @@ func compute_resource_allocation(
     }
 }
 
+
 func estimate_throughput(int rollout_workers, int training_workers) float {
     float rollout_rate = float(rollout_workers) * 100.0
     float training_rate = float(training_workers) * 50.0
@@ -98,6 +104,7 @@ func estimate_throughput(int rollout_workers, int training_workers) float {
     }
     return training_rate
 }
+
 
 func get_scheduler_stats(dynamic_scheduler_state state) scheduler_stats {
     float avg_buffer_util = 0.0
@@ -115,9 +122,11 @@ func get_scheduler_stats(dynamic_scheduler_state state) scheduler_stats {
     }
 }
 
+
 struct scheduler_stats {
     int current_rollout_workers
     int current_training_workers
     int total_steps
     float avg_buffer_utilization
 }
+

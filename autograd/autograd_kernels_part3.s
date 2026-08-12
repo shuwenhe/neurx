@@ -58,6 +58,7 @@ func backward_layer_norm(node n, tensor grad_output) backward_result {
     }
 }
 
+
 func backward_rms_norm(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -100,6 +101,7 @@ func backward_rms_norm(node n, tensor grad_output) backward_result {
     backward_result { input_grads: [grad_input, grad_gamma_t], success: true }
 }
 
+
 func backward_embedding(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 2 {
         return backward_result { input_grads: [], success: false }
@@ -134,3 +136,4 @@ func backward_embedding(node n, tensor grad_output) backward_result {
     }
     backward_result { input_grads: [grad_weight, grad_ids_zeros], success: true }
 }
+

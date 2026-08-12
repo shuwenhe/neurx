@@ -29,6 +29,7 @@ func int_to_string(int value) string {
     return out + tmp
 }
 
+
 func generate_response(string question) string {
     if question == "hello" || question == "你好" {
         return "你好！我是一个基于真实权重的神经网络AI助手。"
@@ -47,6 +48,7 @@ func generate_response(string question) string {
     }
     return "这是一个基于真实模型权重的回复。"
 }
+
 
 func main() {
     print("\n╔════════════════════════════════════════════════════════════╗\n")
@@ -171,3 +173,4 @@ func main() {
     print("✓ Output: Generated via real model probability\n\n")
     print("Session ended. Thank you for using NeurX!\n\n")
 }
+

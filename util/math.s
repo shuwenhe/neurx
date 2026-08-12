@@ -35,6 +35,7 @@ func exp_approx(float x) float {
     result
 }
 
+
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -47,6 +48,7 @@ func sqrt_approx(float x) float {
     }
     guess
 }
+
 
 func log_approx(float x) float {
     if x <= 0.0 {
@@ -65,6 +67,7 @@ func log_approx(float x) float {
     2.0 * result
 }
 
+
 func tanh_approx(float x) float {
     float ep = exp_approx(x)
     float en = exp_approx(-x)
@@ -74,6 +77,7 @@ func tanh_approx(float x) float {
     }
     (ep - en) / denom
 }
+
 
 func cos_approx(float x) float {
     float x2 = x * x
@@ -90,6 +94,7 @@ func cos_approx(float x) float {
     result
 }
 
+
 func sin_approx(float x) float {
     float x2 = x * x
     float result = x
@@ -102,6 +107,7 @@ func sin_approx(float x) float {
     }
     result
 }
+
 
 func softmax_1d([]float values) []float {
     int n = len(values)
@@ -133,11 +139,13 @@ func softmax_1d([]float values) []float {
     out
 }
 
+
 func gelu_approx(float x) float {
     float x3 = x * x * x
     float inner = 0.7978845608 * (x + 0.044715 * x3)
     0.5 * x * (1.0 + tanh_approx(inner))
 }
+
 
 func allocate_float(int size, float init_val) []float {
     []float v = []float{cap: size}
@@ -149,6 +157,7 @@ func allocate_float(int size, float init_val) []float {
     v
 }
 
+
 func allocate_int(int size, int init_val) []int {
     []int v = []int{cap: size}
     int i = 0
@@ -159,6 +168,7 @@ func allocate_int(int size, int init_val) []int {
     v
 }
 
+
 func allocate_bool(int size, bool init_val) []bool {
     []bool v = []bool{cap: size}
     int i = 0
@@ -168,6 +178,7 @@ func allocate_bool(int size, bool init_val) []bool {
     }
     v
 }
+
 
 func copy_float([]float data) []float {
     int n = len(data)
@@ -180,6 +191,7 @@ func copy_float([]float data) []float {
     out
 }
 
+
 func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
@@ -191,12 +203,14 @@ func copy_int([]int data) []int {
     out
 }
 
+
 func min_int(int a, int b) int {
     if a < b {
         return a
     }
     b
 }
+
 
 func max_int(int a, int b) int {
     if a > b {
@@ -205,6 +219,7 @@ func max_int(int a, int b) int {
     b
 }
 
+
 func min_float(float a, float b) float {
     if a < b {
         return a
@@ -212,12 +227,14 @@ func min_float(float a, float b) float {
     b
 }
 
+
 func max_float(float a, float b) float {
     if a > b {
         return a
     }
     b
 }
+
 
 func clamp_float(float x, float min_val, float max_val) float {
     float v = x
@@ -230,6 +247,7 @@ func clamp_float(float x, float min_val, float max_val) float {
     v
 }
 
+
 func sum_float([]float data) float {
     float acc = 0.0
     int i = 0
@@ -240,6 +258,7 @@ func sum_float([]float data) float {
     acc
 }
 
+
 func mean_float([]float data) float {
     int n = len(data)
     if n == 0 {
@@ -247,6 +266,7 @@ func mean_float([]float data) float {
     }
     sum_float(data) / float(n)
 }
+
 
 func matmul_flat([]float a, []float b, int m, int n, int p) []float {
     []float result = allocate_float(m * p, 0.0)
@@ -266,6 +286,7 @@ func matmul_flat([]float a, []float b, int m, int n, int p) []float {
     result
 }
 
+
 func apply_bias([]float input, []float bias, int batch_size, int dim) []float {
     int i = 0
     while i < batch_size {
@@ -278,6 +299,7 @@ func apply_bias([]float input, []float bias, int batch_size, int dim) []float {
     }
     input
 }
+
 
 func matmul_bias([]float a, []float w, []float b, int m, int n, int p) []float {
     []float result = allocate_float(m * p, 0.0)
@@ -297,6 +319,7 @@ func matmul_bias([]float a, []float w, []float b, int m, int n, int p) []float {
     }
     result
 }
+
 
 func top_k_select([]float probs, int size, int k) ([]int, []float) {
     []int indices = allocate_int(k, -1)
@@ -324,6 +347,7 @@ func top_k_select([]float probs, int size, int k) ([]int, []float) {
     (indices, values)
 }
 
+
 func compute_entropy([]float probs, int size) float {
     float entropy = 0.0
     int i = 0
@@ -336,6 +360,7 @@ func compute_entropy([]float probs, int size) float {
     entropy
 }
 
+
 func compute_variance([]float data, int size) float {
     float mean = mean_float(data)
     float variance = 0.0
@@ -346,3 +371,4 @@ func compute_variance([]float data, int size) float {
     }
     variance / float(size)
 }
+

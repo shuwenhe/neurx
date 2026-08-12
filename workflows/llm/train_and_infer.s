@@ -13,6 +13,7 @@ struct model_config {
     batch_size: i32
 }
 
+
 struct training_config {
     num_epochs: i32
     steps_per_epoch: i32
@@ -20,6 +21,7 @@ struct training_config {
     warmup_steps: i32
     max_grad_norm: f64
 }
+
 
 struct training_metrics {
     step: i32
@@ -29,6 +31,7 @@ struct training_metrics {
     throughput: f64
 }
 
+
 struct inference_result {
     prompt: string
     generated: string
@@ -36,13 +39,16 @@ struct inference_result {
     latency_ms: f64
 }
 
+
 func println(s: string) {
     io.println(s)
 }
 
+
 func format_float(val: f64, precision: i32) string {
     return strings.format("%." + strings.from_i32(precision) + "f", val)
 }
+
 
 func format_large_number(n: i64) string {
     if n < 1000 {
@@ -56,6 +62,7 @@ func format_large_number(n: i64) string {
     }
 }
 
+
 struct transformer_model {
     config: model_config
     embedding_table: [][]f64
@@ -63,6 +70,7 @@ struct transformer_model {
     ffn_weights: [][]f64
     layer_norms: [][]f64
 }
+
 
 func create_model(config: model_config) transformer_model {
     var model: transformer_model
@@ -84,12 +92,14 @@ func create_model(config: model_config) transformer_model {
     return model
 }
 
+
 struct data_batch {
     input_ids: []i32
     labels: []i32
     batch_size: i32
     seq_len: i32
 }
+
 
 func create_dummy_batch(config: model_config) data_batch {
     var batch: data_batch
@@ -106,6 +116,7 @@ func create_dummy_batch(config: model_config) data_batch {
     return batch
 }
 
+
 func compute_loss(model: transformer_model, batch: data_batch) f64 {
     let num_tokens = f64(len(batch.labels))
     let avg_logit_score = 0.5
@@ -113,11 +124,13 @@ func compute_loss(model: transformer_model, batch: data_batch) f64 {
     return loss
 }
 
+
 func train_step(model: transformer_model, batch: data_batch, lr: f64) (transformer_model, f64) {
     let loss = compute_loss(model, batch)
     let learning_rate_scaled = lr * 0.001
     return (model, loss)
 }
+
 
 func print_training_progress(metrics: training_metrics) {
     let step_str = strings.from_i32(metrics.step)
@@ -131,6 +144,7 @@ func print_training_progress(metrics: training_metrics) {
             " | LR: " + lr_str +
             " | Tokens/sec: " + throughput_str)
 }
+
 
 func train_epoch(model: transformer_model, config: training_config, epoch: i32) (transformer_model, f64) {
     println("")
@@ -172,16 +186,19 @@ func train_epoch(model: transformer_model, config: training_config, epoch: i32) 
     return (model_state, avg_epoch_loss)
 }
 
+
 func save_checkpoint(model: transformer_model, epoch: i32) {
     let checkpoint_path = "checkpoints/epoch_" + strings.from_i32(epoch) + ".ckpt"
     println("💾 Saving checkpoint: " + checkpoint_path)
 }
+
 
 func load_checkpoint(checkpoint_path: string) transformer_model {
     println("📂 Loading checkpoint: " + checkpoint_path)
     var model: transformer_model
     return model
 }
+
 
 func generate_text(model: transformer_model, prompt: string, max_tokens: i32) inference_result {
     println("")
@@ -207,6 +224,7 @@ func generate_text(model: transformer_model, prompt: string, max_tokens: i32) in
     return result
 }
 
+
 func print_inference_result(result: inference_result) {
     println("")
     println("📝 Generated Text:")
@@ -218,6 +236,7 @@ func print_inference_result(result: inference_result) {
     let tokens_per_sec = f64(result.num_tokens) * 1000.0 / result.latency_ms
     println("   Throughput: " + format_float(tokens_per_sec, 0) + " tokens/sec")
 }
+
 
 func main() {
     println("")
@@ -296,3 +315,4 @@ func main() {
     println("║                    ✅ NeurX System Complete! ✅                    ║")
     println("╚" + strings.repeat("═", 68) + "╝")
 }
+

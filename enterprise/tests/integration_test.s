@@ -48,6 +48,7 @@ func main() {
     print("╚════════════════════════════════════════════════════════════╝\n\n")
 }
 
+
 func test_cuda_support() {
     print("1. Initialize CUDA device...\n")
     cuda_core.cuda_device device = cuda_core.cuda_device_init(0)
@@ -97,6 +98,7 @@ func test_cuda_support() {
     print("   ✓ Status: SUCCESS\n")
 }
 
+
 func test_quantization_system() {
     print("1. Prepare test weights...\n")
     []float weights = []float{0.1, 0.2, 0.3, 0.4, 0.5, -0.1, -0.2, -0.3}
@@ -136,6 +138,7 @@ func test_quantization_system() {
     print("   ✓ Max error: ~0.004 (0.4% of range)\n")
     print("   ✓ Status: PASSED\n")
 }
+
 
 func test_api_layer() {
     print("1. Parse chat completion request...\n")
@@ -193,6 +196,7 @@ func test_api_layer() {
     print("   ✓ GPU Memory: 6144MB / 12288MB (50%)\n")
 }
 
+
 func test_distributed_system() {
     print("1. Initialize distributed environment...\n")
     rank_manager.rank_config rank_cfg = rank_manager.rank_init_from_env()
@@ -224,6 +228,7 @@ func test_distributed_system() {
     print("   ✓ AllGather overhead: ~8ms (for 1MB)\n")
     print("   ✓ Bandwidth: 25GB/s (PCIe 4.0)\n")
 }
+
 
 func test_complete_pipeline() {
     print("1. Initialize Enterprise System...\n")
@@ -310,6 +315,7 @@ func test_complete_pipeline() {
     print("   ✓ Message: " + health.message + "\n")
 }
 
+
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -329,6 +335,7 @@ func int_to_str(int n) string {
     return s
 }
 
+
 func float_to_str(float f) string {
     int int_part = int_cast(f)
     int frac_part = int_cast((f - float(int_part)) * 100.0)
@@ -338,6 +345,7 @@ func float_to_str(float f) string {
     return int_to_str(int_part) + "." + pad_zero(int_to_str(frac_part))
 }
 
+
 func int_cast(float f) int {
     if f >= 0.0 {
         int(f + 0.5)
@@ -346,6 +354,7 @@ func int_cast(float f) int {
     }
 }
 
+
 func pad_zero(string s) string {
     if s.len == 1 {
         "0" + s
@@ -353,3 +362,4 @@ func pad_zero(string s) string {
         s
     }
 }
+

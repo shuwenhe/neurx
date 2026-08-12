@@ -37,9 +37,11 @@ func create_sft_example_config() sft_train_config {
     }
 }
 
+
 func create_sft_example_dataset() sft_dataset {
     create_sft_dataset("./data/sft/instruction_data.jsonl")
 }
+
 
 func create_sft_example_trainer(
     neurx_model model,
@@ -52,6 +54,7 @@ func create_sft_example_trainer(
     neurx.posttrain.sft.sft_trainer.create_sft_trainer(model, tokenizer, config, dataset, global_rank, world_size)
 }
 
+
 func example_basic_sft_training() {
     neurx_model model = load_pretrained_sft_model("neurx_200b")
     tokenizer_state tokenizer = load_tokenizer_sft()
@@ -62,15 +65,19 @@ func example_basic_sft_training() {
     println("SFT completed: " + fmt_float(result.final_loss, 4))
 }
 
+
 func main() {
     println("NEURX SFT examples")
     example_basic_sft_training()
 }
 
+
 func load_pretrained_sft_model(string model_name) neurx_model {
     neurx_model{}
 }
 
+
 func load_tokenizer_sft() tokenizer_state {
     tokenizer_state{}
 }
+

@@ -7,6 +7,7 @@ struct embedding_config {
     int padding_idx
 }
 
+
 func launch_embedding_forward(
     cuda_context ctx,
     uint64 ptr_weight,
@@ -23,6 +24,7 @@ func launch_embedding_forward(
     nil
 }
 
+
 func launch_embedding_backward(
     cuda_context ctx,
     uint64 ptr_grad_output,
@@ -38,3 +40,4 @@ func launch_embedding_backward(
                       cfg.num_tokens * cfg.embedding_dim * 8)
     nil
 }
+

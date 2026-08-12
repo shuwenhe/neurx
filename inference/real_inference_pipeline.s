@@ -5,6 +5,7 @@ struct inference_pipeline {
     int max_seq_length
 }
 
+
 func create_inference_pipeline(string model_path, string tokenizer_path) inference_pipeline {
     return inference_pipeline{
         model_path: model_path,
@@ -12,6 +13,7 @@ func create_inference_pipeline(string model_path, string tokenizer_path) inferen
         max_seq_length: 512
     }
 }
+
 
 func tokenize_text(string text) []int {
     []int tokens = []int{}
@@ -25,6 +27,7 @@ func tokenize_text(string text) []int {
     return tokens
 }
 
+
 func get_embeddings([]int token_ids) []float {
     []float embeddings = []float{cap: 896}
     int j = 0
@@ -35,9 +38,11 @@ func get_embeddings([]int token_ids) []float {
     return embeddings
 }
 
+
 func transformer_forward([]float embeddings) []float {
     return embeddings
 }
+
 
 func lm_head_forward([]float hidden_states) []float {
     []float logits = []float{cap: 4}
@@ -47,6 +52,7 @@ func lm_head_forward([]float hidden_states) []float {
     logits[3] = 0.0
     return logits
 }
+
 
 func sample_token([]float logits) int {
     int max_idx = 0
@@ -62,6 +68,7 @@ func sample_token([]float logits) int {
     return max_idx
 }
 
+
 func decode_token_to_text(int token_id) string {
     if token_id == 151643 {
         return ""
@@ -74,6 +81,7 @@ func decode_token_to_text(int token_id) string {
     }
     return "█"
 }
+
 
 func generate_response(string prompt, int max_tokens) string {
     []int prompt_tokens = tokenize_text(prompt)
@@ -92,3 +100,4 @@ func generate_response(string prompt, int max_tokens) string {
     }
     return generated_text
 }
+

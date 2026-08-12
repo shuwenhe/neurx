@@ -7,6 +7,7 @@ enum message_role {
     TOOL,
 }
 
+
 struct message {
     message_role role
     string content
@@ -16,6 +17,7 @@ struct message {
     string tool_input
 }
 
+
 struct conversation_turn {
     int turn_id
     []message messages
@@ -24,6 +26,7 @@ struct conversation_turn {
     float reward
     bool is_valid
 }
+
 
 struct multiturn_conversation {
     int conversation_id
@@ -35,6 +38,7 @@ struct multiturn_conversation {
     int end_step
 }
 
+
 struct multiturn_manager_state {
     []multiturn_conversation conversations
     int conversation_count
@@ -43,6 +47,7 @@ struct multiturn_manager_state {
     int max_turns_per_conversation
     bool enable_tool_calling
 }
+
 
 func new_multiturn_manager(int max_turns) multiturn_manager_state {
     multiturn_manager_state {
@@ -55,11 +60,13 @@ func new_multiturn_manager(int max_turns) multiturn_manager_state {
     }
 }
 
+
 func multiturn_enable_tool_calling(multiturn_manager_state state, bool enable) multiturn_manager_state {
     state.enable_tool_calling = enable
     eprintln("[MultiTurn] Tool calling: " + (if enable then "enabled" else "disabled"))
     state
 }
+
 
 func multiturn_start_conversation(multiturn_manager_state state, string task_type, int step) (multiturn_manager_state, int) {
     multiturn_conversation conv = multiturn_conversation {
@@ -76,6 +83,7 @@ func multiturn_start_conversation(multiturn_manager_state state, string task_typ
     eprintln("[MultiTurn] Started conversation #" + int_to_str(state.conversation_count - 1))
     state, state.conversation_count - 1
 }
+
 
 func multiturn_add_message(multiturn_manager_state state, int conv_id, message_role role, string content) multiturn_manager_state {
     if conv_id >= len(state.conversations) {
@@ -99,6 +107,7 @@ func multiturn_add_message(multiturn_manager_state state, int conv_id, message_r
     state.conversations[conv_id] = conv
     state
 }
+
 
 func multiturn_start_turn(multiturn_manager_state state, int conv_id, string query) multiturn_manager_state {
     if conv_id >= len(state.conversations) {
@@ -134,6 +143,7 @@ func multiturn_start_turn(multiturn_manager_state state, int conv_id, string que
     state
 }
 
+
 func multiturn_complete_turn(multiturn_manager_state state, int conv_id, string response, float reward) multiturn_manager_state {
     if conv_id >= len(state.conversations) {
         return state
@@ -161,6 +171,7 @@ func multiturn_complete_turn(multiturn_manager_state state, int conv_id, string 
     state
 }
 
+
 func multiturn_add_tool_call(multiturn_manager_state state, int conv_id, string tool_name, string tool_input) multiturn_manager_state {
     if !state.enable_tool_calling || conv_id >= len(state.conversations) {
         return state
@@ -186,6 +197,7 @@ func multiturn_add_tool_call(multiturn_manager_state state, int conv_id, string 
     state
 }
 
+
 func multiturn_finish_conversation(multiturn_manager_state state, int conv_id, int step) multiturn_manager_state {
     if conv_id >= len(state.conversations) {
         return state
@@ -200,6 +212,7 @@ func multiturn_finish_conversation(multiturn_manager_state state, int conv_id, i
     state.conversations[conv_id] = conv
     state
 }
+
 
 func multiturn_get_stats(multiturn_manager_state state) (int, int, float) {
     int total_convs = state.conversation_count
@@ -216,12 +229,14 @@ func multiturn_get_stats(multiturn_manager_state state) (int, int, float) {
     total_convs, total_turns, avg_reward
 }
 
+
 func multiturn_get_conversation(multiturn_manager_state state, int conv_id) multiturn_conversation {
     if conv_id < len(state.conversations) {
         return state.conversations[conv_id]
     }
     multiturn_conversation{}
 }
+
 
 func multiturn_get_summary(multiturn_manager_state state) string {
     int convs, turns, avg_reward = multiturn_get_stats(state)
@@ -233,6 +248,7 @@ func multiturn_get_summary(multiturn_manager_state state) string {
     summary
 }
 
+
 func reward_to_str(float reward) string {
     if reward > 0.1 {
         return "positive"
@@ -242,6 +258,8 @@ func reward_to_str(float reward) string {
     return "neutral"
 }
 
+
 func int_to_str(int n) string {
     ""
 }
+

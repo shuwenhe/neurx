@@ -12,6 +12,7 @@ struct neurx_inference_runtime_state {
     neurx_paged_attention_state paged_attention
 }
 
+
 struct neurx_inference_runtime_step_result {
     neurx_inference_runtime_state state
     string request_id
@@ -19,6 +20,7 @@ struct neurx_inference_runtime_step_result {
     int remaining_tokens
     bool selected
 }
+
 
 func new_neurx_inference_runtime_state(int layer_count, int page_size, int max_pages, int max_prefix_entries, int max_prefix_tokens, string strategy) neurx_inference_runtime_state {
     neurx_inference_runtime_state {
@@ -29,6 +31,7 @@ func new_neurx_inference_runtime_state(int layer_count, int page_size, int max_p
         paged_attention: new_neurx_paged_attention_state(layer_count, page_size, max_pages),
     }
 }
+
 
 func neurx_runtime_enqueue_request(neurx_inference_runtime_state state, string request_id, int prefill_tokens, int remaining_tokens, bool accepted) neurx_inference_runtime_state {
     neurx_request_queue_state queue = state.queue
@@ -49,6 +52,7 @@ func neurx_runtime_enqueue_request(neurx_inference_runtime_state state, string r
         paged_attention: state.paged_attention,
     }
 }
+
 
 func neurx_runtime_schedule_next(neurx_inference_runtime_state state) neurx_inference_runtime_step_result {
     neurx_schedule_result scheduled = neurx_scheduler_next(state.scheduler, state.queue)
@@ -71,6 +75,7 @@ func neurx_runtime_schedule_next(neurx_inference_runtime_state state) neurx_infe
     }
 }
 
+
 func neurx_runtime_record_decode(neurx_inference_runtime_state state, int decode_tokens) neurx_inference_runtime_state {
     neurx_inference_runtime_state {
         queue: state.queue,
@@ -80,6 +85,7 @@ func neurx_runtime_record_decode(neurx_inference_runtime_state state, int decode
         paged_attention: neurx_paged_attention_decode_step(state.paged_attention, decode_tokens),
     }
 }
+
 
 func neurx_runtime_finish_request(neurx_inference_runtime_state state, int release_tokens) neurx_inference_runtime_state {
     neurx_inference_runtime_state {
@@ -91,14 +97,18 @@ func neurx_runtime_finish_request(neurx_inference_runtime_state state, int relea
     }
 }
 
+
 func neurx_runtime_queue_depth(neurx_inference_runtime_state state) int {
     neurx_queue_size(state.queue)
 }
+
 
 func neurx_inference_runtime_state_dict(neurx_inference_runtime_state state) neurx_inference_runtime_state {
     state
 }
 
+
 func neurx_runtime_load_state_dict(neurx_inference_runtime_state state, neurx_inference_runtime_state other) neurx_inference_runtime_state {
     other
 }
+

@@ -26,6 +26,7 @@ struct code_interpreter_config {
     image_format: string = "png"
 }
 
+
 struct execution_result {
     success: bool
     output: string
@@ -41,6 +42,7 @@ struct execution_result {
     line_count: int
 }
 
+
 struct file_info {
     path: string
     size_bytes: int
@@ -49,6 +51,7 @@ struct file_info {
     is_image: bool
 }
 
+
 struct image_data {
     data: bytes
     format: string
@@ -56,6 +59,7 @@ struct image_data {
     height: int
     alt_text: string?
 }
+
 
 struct code_block {
     language: string
@@ -236,6 +240,7 @@ class sandbox_environment {
     }
 }
 
+
 struct security_check_result {
     allowed: bool
     reason: string
@@ -281,12 +286,14 @@ class session_state {
     }
 }
 
+
 struct execution_record {
     code: string
     language: string
     result: execution_result
     timestamp: float
 }
+
 
 struct session_summary {
     session_id: string
@@ -422,6 +429,7 @@ class python_runtime {
         return null
     }
 }
+
 
 struct error_info {
     error_type: string
@@ -605,6 +613,7 @@ class sql_runtime {
     }
 }
 
+
 struct sql_query_result {
     columns: list<string>
     rows: list<list<any>>
@@ -677,6 +686,7 @@ class result_formatter {
         return "```\n" + content + "\n```"
     }
 }
+
 
 struct formatted_output {
     raw: execution_result
@@ -969,3 +979,4 @@ export {
     DataAnalysisHelper, ResultFormatter,
     create_code_interpreter, test_code_interpreter
 }
+

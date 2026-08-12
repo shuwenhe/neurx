@@ -15,6 +15,7 @@ func find_s_compiler() string {
     return ""
 }
 
+
 func main() {
     real_s := find_s_compiler()
     if real_s == "" {
@@ -44,3 +45,4 @@ func main() {
     cmd.Stderr = os.Stderr
     cmd.Run()
 }
+

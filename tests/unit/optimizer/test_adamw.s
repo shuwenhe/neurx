@@ -7,6 +7,7 @@ struct adamw_test_state {
     int step
 }
 
+
 func test_adamw_single_step() bool {
     println("  [Test] AdamW Single Step")
     float param = 1.0
@@ -50,6 +51,7 @@ func test_adamw_single_step() bool {
     return false
 }
 
+
 func test_adamw_multi_step() bool {
     println("  [Test] AdamW Multi Step (10 iterations)")
     float param = 1.0
@@ -83,6 +85,7 @@ func test_adamw_multi_step() bool {
     return true
 }
 
+
 func run_adamw_tests() {
     println("=== AdamW Optimizer Test Suite ===")
     println("")
@@ -96,12 +99,14 @@ func run_adamw_tests() {
     }
 }
 
+
 func abs(float x) float {
     if x < 0.0 {
         return -x
     }
     return x
 }
+
 
 func exp_approx(float x) float {
     if x > 10.0 {
@@ -120,6 +125,7 @@ func exp_approx(float x) float {
     }
     return result
 }
+
 
 func log_approx(float x) float {
     if x <= 0.0 {
@@ -141,6 +147,7 @@ func log_approx(float x) float {
     return 2.0 * result
 }
 
+
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -154,6 +161,7 @@ func sqrt_approx(float x) float {
     return guess
 }
 
+
 func pow_approx(float base, float exp) float {
     if exp == 0.0 {
         return 1.0
@@ -164,10 +172,13 @@ func pow_approx(float base, float exp) float {
     return exp_approx(exp * log_approx(base))
 }
 
+
 func float(int val) float {
     return 0.0
 }
 
+
 func float_to_str(float val) string {
     return ""
 }
+

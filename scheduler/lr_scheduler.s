@@ -7,11 +7,13 @@ struct lr_schedule_config {
     string schedule_type
 }
 
+
 struct lr_scheduler {
     lr_schedule_config config
     int current_step
     float current_lr
 }
+
 
 func new_lr_scheduler(lr_schedule_config cfg) lr_scheduler {
     lr_scheduler {
@@ -20,6 +22,7 @@ func new_lr_scheduler(lr_schedule_config cfg) lr_scheduler {
         current_lr: cfg.base_lr,
     }
 }
+
 
 func compute_warmup_lr(float base_lr, int warmup_steps, int current_step) float {
     if current_step >= warmup_steps {
@@ -30,6 +33,7 @@ func compute_warmup_lr(float base_lr, int warmup_steps, int current_step) float 
     }
     return base_lr * (float(current_step) / float(warmup_steps))
 }
+
 
 func compute_cosine_lr(
     float base_lr,
@@ -55,6 +59,7 @@ func compute_cosine_lr(
     return max_approx(lr, min_lr)
 }
 
+
 func compute_linear_lr(
     float base_lr,
     float min_lr,
@@ -78,12 +83,14 @@ func compute_linear_lr(
     return max_approx(lr, min_lr)
 }
 
+
 func compute_constant_lr(float base_lr, int warmup_steps, int current_step) float {
     if current_step < warmup_steps {
         return compute_warmup_lr(base_lr, warmup_steps, current_step)
     }
     return base_lr
 }
+
 
 func lr_scheduler_step(lr_scheduler sched) lr_scheduler {
     let current_step = sched.current_step
@@ -115,13 +122,16 @@ func lr_scheduler_step(lr_scheduler sched) lr_scheduler {
     }
 }
 
+
 func get_current_lr(lr_scheduler sched) float {
     return sched.current_lr
 }
 
+
 func get_current_step(lr_scheduler sched) int {
     return sched.current_step
 }
+
 
 func new_llm_scheduler(
     float base_lr,
@@ -139,6 +149,7 @@ func new_llm_scheduler(
     return new_lr_scheduler(cfg)
 }
 
+
 func new_finetune_scheduler(
     float base_lr,
     int total_steps
@@ -153,6 +164,7 @@ func new_finetune_scheduler(
     }
     return new_lr_scheduler(cfg)
 }
+
 
 func cosine_approx(float x) float {
     var x_reduced = x
@@ -171,6 +183,7 @@ func cosine_approx(float x) float {
     return result
 }
 
+
 func max_approx(float a, float b) float {
     if a > b {
         return a
@@ -178,9 +191,11 @@ func max_approx(float a, float b) float {
     return b
 }
 
+
 func abs_approx(float x) float {
     if x < 0.0 {
         return -x
     }
     return x
 }
+

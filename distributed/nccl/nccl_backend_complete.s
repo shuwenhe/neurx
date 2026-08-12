@@ -10,6 +10,7 @@ struct nccl_config {
     bool debug_enabled
 }
 
+
 struct nccl_communicator {
     bool initialized
     uint64 comm_handle
@@ -21,6 +22,7 @@ struct nccl_communicator {
     int num_collective_ops
     []float64 op_times
 }
+
 
 func init_nccl(nccl_config cfg) (nccl_communicator, error) {
     if cfg.rank < 0 || cfg.rank >= cfg.world_size {
@@ -48,6 +50,7 @@ func init_nccl(nccl_config cfg) (nccl_communicator, error) {
     }
 }
 
+
 func cleanup_nccl(nccl_communicator comm) error {
     if !comm.initialized {
         return nil
@@ -65,6 +68,7 @@ func cleanup_nccl(nccl_communicator comm) error {
     }
     nil
 }
+
 
 func nccl_allreduce(
     nccl_communicator comm,
@@ -101,6 +105,7 @@ func nccl_allreduce(
     nil
 }
 
+
 func nccl_allgather(
     nccl_communicator comm,
     uint64 send_buf,
@@ -127,6 +132,7 @@ func nccl_allgather(
     nil
 }
 
+
 func nccl_reduce_scatter(
     nccl_communicator comm,
     uint64 send_buf,
@@ -150,6 +156,7 @@ func nccl_reduce_scatter(
     comm.num_collective_ops += 1
     nil
 }
+
 
 func nccl_broadcast(
     nccl_communicator comm,
@@ -180,6 +187,7 @@ func nccl_broadcast(
     nil
 }
 
+
 func nccl_send(
     nccl_communicator comm,
     uint64 send_buf,
@@ -206,6 +214,7 @@ func nccl_send(
     nil
 }
 
+
 func nccl_recv(
     nccl_communicator comm,
     uint64 recv_buf,
@@ -229,6 +238,7 @@ func nccl_recv(
     nil
 }
 
+
 func map_reduce_op(string op) int {
     if op == "sum" {
         return 0
@@ -241,6 +251,7 @@ func map_reduce_op(string op) int {
     }
     0
 }
+
 
 func map_dtype(string dtype) int {
     if dtype == "float32" {
@@ -257,6 +268,7 @@ func map_dtype(string dtype) int {
     0
 }
 
+
 func dtype_size(string dtype) int {
     if dtype == "float32" || dtype == "int32" {
         return 4
@@ -268,13 +280,16 @@ func dtype_size(string dtype) int {
     4
 }
 
+
 func nccl_runtime_call(string api_name, []any args, int flags) (any, error) {
     any{}
 }
 
+
 func get_timestamp() float64 {
     0.0
 }
+
 
 func nccl_barrier(nccl_communicator comm) error {
     dummy_buf := make([]float32, 1)
@@ -284,6 +299,7 @@ func nccl_barrier(nccl_communicator comm) error {
     }
     nil
 }
+
 
 func print_comm_stats(nccl_communicator comm) {
     avg_op_time := 0.0
@@ -301,3 +317,4 @@ func print_comm_stats(nccl_communicator comm) {
     printf("Data Received: %.2f GB\n", float64(comm.bytes_received) / 1e9)
     printf("Avg Op Time: %.3f ms\n", avg_op_time * 1000)
 }
+

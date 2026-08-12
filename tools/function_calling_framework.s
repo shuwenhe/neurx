@@ -17,6 +17,7 @@ struct function_calling_config {
     log_all_intermediate_steps: bool = false
 }
 
+
 struct tool_definition {
     name: string
     description: string
@@ -30,6 +31,7 @@ struct tool_definition {
     metadata?: map<string, any>
 }
 
+
 struct parameter_schema {
     type: string
     properties?: map<string, property_definition>
@@ -41,6 +43,7 @@ struct parameter_schema {
     default?: any
     additional_properties?: bool | parameter_schema
 }
+
 
 struct property_definition {
     type: string
@@ -55,12 +58,14 @@ struct property_definition {
     required?: list<string>
 }
 
+
 struct rate_limit {
     calls_per_minute: int = 60
     calls_per_day: int = 1000
     current_calls_today: int = 0
     last_reset_date: string = ""
 }
+
 
 struct tool_call {
     id: string
@@ -87,6 +92,7 @@ enum call_status {
     CANCELLED
 }
 
+
 struct tool_call_result {
     success: bool
     content: any
@@ -96,6 +102,7 @@ struct tool_call_result {
     metadata?: map<string, any>
 }
 
+
 struct tool_call_error {
     code: string
     message: string
@@ -103,6 +110,7 @@ struct tool_call_error {
     recoverable: bool = false
     suggestion?: string
 }
+
 
 struct function_calling_response {
     tool_calls: list<tool_call>
@@ -113,12 +121,14 @@ struct function_calling_response {
     execution_summary: execution_summary?
 }
 
+
 struct assistant_message {
     role: string = "assistant"
     content: string? | list<content_block>
     tool_calls?: list<tool_call>
     reasoning_content?: string
 }
+
 
 struct content_block {
     type: string
@@ -132,11 +142,13 @@ struct user_message {
     tool_results?: list<tool_call_result_block>
 }
 
+
 struct tool_call_result_block {
     tool_call_id: string
     content: any
     is_error: bool = false
 }
+
 
 struct execution_summary {
     total_tool_calls_initiated: int
@@ -239,6 +251,7 @@ class tool_registry {
     }
 }
 
+
 struct registry_statistics {
     total_tools: int
     categories: map<string, int>
@@ -250,6 +263,7 @@ interface tool_executor {
     get_name()
     validate_arguments(args: map<string, any>, schema: parameter_schema)
 }
+
 
 struct validation_report {
     is_valid: bool
@@ -546,6 +560,7 @@ class function_calling_engine {
     }
 }
 
+
 struct conversation_summary {
     total_messages: int
     user_messages: int
@@ -839,6 +854,7 @@ class MockLLMClientForFC {
     }
 }
 
+
 struct llm_raw_response {
     finished_reason?: string
     choices: list<map<string, any>>
@@ -853,3 +869,4 @@ export {
     create_function_calling_engine, test_function_calling,
     create_builtin_web_search_tool, create_builtin_code_executor_tool, create_builtin_file_operations_tool
 }
+

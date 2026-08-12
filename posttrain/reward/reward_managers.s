@@ -9,12 +9,14 @@ struct batch_reward_manager_config {
     gpu_device: i32
 }
 
+
 struct reward_request {
     request_id: string
     prompt: tensor
     response: tensor
     callback: fn(f32)
 }
+
 
 struct batch_reward_manager {
     config: batch_reward_manager_config
@@ -26,6 +28,7 @@ struct batch_reward_manager {
     total_batches: i64
     avg_batch_size: f32
 }
+
 
 func new_batch_reward_manager(config: batch_reward_manager_config, model: *model) -> batch_reward_manager {
     let workers: []worker = []
@@ -43,6 +46,7 @@ func new_batch_reward_manager(config: batch_reward_manager_config, model: *model
         avg_batch_size: 0.0,
     }
 }
+
 
 func (manager: *batch_reward_manager) compute_reward_async(
     prompt: tensor,
@@ -63,6 +67,7 @@ func (manager: *batch_reward_manager) compute_reward_async(
         manager.process_batch()
     }
 }
+
 
 func (manager: *batch_reward_manager) process_batch() {
     manager.queue_mutex.lock()
@@ -93,17 +98,20 @@ func (manager: *batch_reward_manager) process_batch() {
                               f32(batch_size)) / f32(manager.total_batches)
 }
 
+
 func (manager: *batch_reward_manager) flush() {
     while manager.request_queue.len() > 0 {
         manager.process_batch()
     }
 }
 
+
 struct rate_limited_reward_manager_config {
     max_requests_per_second: f32
     burst_size: i32
     use_token_bucket: bool
 }
+
 
 struct rate_limited_reward_manager {
     config: rate_limited_reward_manager_config
@@ -115,10 +123,12 @@ struct rate_limited_reward_manager {
     rate_limited_count: i64
 }
 
+
 struct delayed_request {
     request: reward_request
     scheduled_time: i64
 }
+
 
 func new_rate_limited_reward_manager(
     config: rate_limited_reward_manager_config,
@@ -134,6 +144,7 @@ func new_rate_limited_reward_manager(
         rate_limited_count: 0,
     }
 }
+
 
 func (manager: *rate_limited_reward_manager) compute_reward(
     prompt: tensor,
@@ -154,6 +165,7 @@ func (manager: *rate_limited_reward_manager) compute_reward(
     }
 }
 
+
 func (manager: *rate_limited_reward_manager) refill_tokens() {
     let now = get_time_ms()
     let elapsed = f32(now - manager.last_refill_time) / 1000.0
@@ -165,6 +177,7 @@ func (manager: *rate_limited_reward_manager) refill_tokens() {
     manager.last_refill_time = now
 }
 
+
 func (manager: *rate_limited_reward_manager) compute_reward_internal(
     prompt: tensor,
     response: tensor
@@ -174,6 +187,7 @@ func (manager: *rate_limited_reward_manager) compute_reward_internal(
     return reward.item()
 }
 
+
 struct dapo_reward_manager_config {
     format_weight: f32
     accuracy_weight: f32
@@ -182,12 +196,14 @@ struct dapo_reward_manager_config {
     verification_method: string
 }
 
+
 struct dapo_reward_manager {
     config: dapo_reward_manager_config
     format_checker: *format_checker
     accuracy_verifier: *answer_verifier
     reasoning_scorer: *reasoning_scorer
 }
+
 
 func new_dapo_reward_manager(config: dapo_reward_manager_config) -> dapo_reward_manager {
     return dapo_reward_manager{
@@ -197,6 +213,7 @@ func new_dapo_reward_manager(config: dapo_reward_manager_config) -> dapo_reward_
         reasoning_scorer: new_reasoning_scorer(),
     }
 }
+
 
 func (manager: *dapo_reward_manager) compute_reward(
     prompt: tensor,
@@ -225,6 +242,7 @@ func (manager: *dapo_reward_manager) compute_reward(
     return total_reward, breakdown
 }
 
+
 struct prime_reward_manager_config {
     num_steps: i32
     step_reward_weight: f32
@@ -232,11 +250,13 @@ struct prime_reward_manager_config {
     use_step_verification: bool
 }
 
+
 struct prime_reward_manager {
     config: prime_reward_manager_config
     step_reward_model: *model
     final_reward_model: *model
 }
+
 
 func new_prime_reward_manager(
     config: prime_reward_manager_config,
@@ -249,6 +269,7 @@ func new_prime_reward_manager(
         final_reward_model: final_model,
     }
 }
+
 
 func (manager: *prime_reward_manager) compute_reward(
     prompt: tensor,
@@ -272,6 +293,7 @@ func (manager: *prime_reward_manager) compute_reward(
     return total_reward, step_rewards
 }
 
+
 func stack_and_pad(tensors: []tensor) -> tensor {
     let max_len = 0
     for t in tensors {
@@ -291,16 +313,20 @@ func stack_and_pad(tensors: []tensor) -> tensor {
     return stack(padded)
 }
 
+
 func generate_uuid() -> string {
     return f"{random_int(0, 999999)}-{get_time_ms()}"
 }
+
 
 func get_time_ms() -> i64 {
     return 0
 }
 
+
 func sleep_ms(duration: i64) {
 }
+
 
 func compute_mean(values: []f32) -> f32 {
     if values.len() == 0 {
@@ -313,17 +339,32 @@ func compute_mean(values: []f32) -> f32 {
     return sum / f32(values.len())
 }
 
+
 struct format_checker {}
+
 struct answer_verifier { method: string }
+
 struct reasoning_scorer {}
+
 struct worker { id: i32 }
+
 struct mutex {}
+
 func new_format_checker() -> *format_checker { return null }
+
 func new_answer_verifier(method: string) -> *answer_verifier { return null }
+
 func new_reasoning_scorer() -> *reasoning_scorer { return null }
+
 func new_worker(id: i32) -> worker { return worker{ id: id } }
+
 func mutex_new() -> mutex { return mutex{} }
+
 func (m: *mutex) lock() {}
+
 func (m: *mutex) unlock() {}
+
 func decode_tokens(t: tensor) -> string { return "" }
+
 func encode_text(s: string) -> tensor { return tensor_zeros([1]) }
+

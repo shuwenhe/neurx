@@ -6,6 +6,7 @@ struct layernorm_config {
     bool compute_stats_only
 }
 
+
 func launch_layernorm(
     cuda_context ctx,
     uint64 ptr_input,
@@ -22,3 +23,4 @@ func launch_layernorm(
                       cfg.batch_size * cfg.normalized_size * 6 * 2)
     nil
 }
+

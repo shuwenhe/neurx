@@ -6,6 +6,7 @@ struct named_tensor {
     tensor value
 }
 
+
 struct module_state {
     nn.module root
     []string parameter_names
@@ -14,6 +15,7 @@ struct module_state {
     int buffer_count
     int child_count
 }
+
 
 func module_state_dict(nn.module m) module_state {
     module_state {
@@ -26,9 +28,11 @@ func module_state_dict(nn.module m) module_state {
     }
 }
 
+
 func module_load_state_dict(nn.module m, module_state state) nn.module {
     neurx.nn.module_load_state_dict(m, state.root)
 }
+
 
 func module_named_parameter_tensors(nn.module m) []named_tensor {
     []string names = neurx.nn.module_named_parameters(m)
@@ -49,6 +53,7 @@ func module_named_parameter_tensors(nn.module m) []named_tensor {
     out
 }
 
+
 func module_named_buffer_tensors(nn.module m) []named_tensor {
     []string names = neurx.nn.module_named_buffers(m)
     []tensor values = neurx.nn.module_buffers(m)
@@ -68,14 +73,18 @@ func module_named_buffer_tensors(nn.module m) []named_tensor {
     out
 }
 
+
 func module_state_parameter_count(module_state state) int {
     state.parameter_count
 }
+
 
 func module_state_buffer_count(module_state state) int {
     state.buffer_count
 }
 
+
 func module_state_child_count(module_state state) int {
     state.child_count
 }
+

@@ -6,12 +6,14 @@ struct infer_request_state {
     int max_new_tokens
 }
 
+
 struct infer_response_state {
     string request_id
     int output_tokens
     bool finished
     int status
 }
+
 
 func new_infer_request_state(string request_id, string model, int input_tokens, int max_new_tokens) infer_request_state {
     infer_request_state {
@@ -22,6 +24,7 @@ func new_infer_request_state(string request_id, string model, int input_tokens, 
     }
 }
 
+
 func new_infer_response_state(string request_id) infer_response_state {
     infer_response_state {
         request_id: request_id,
@@ -30,6 +33,7 @@ func new_infer_response_state(string request_id) infer_response_state {
         status: 200,
     }
 }
+
 
 func infer_response_update(infer_response_state state, int output_tokens, bool finished, int status) infer_response_state {
     infer_response_state {
@@ -40,18 +44,23 @@ func infer_response_update(infer_response_state state, int output_tokens, bool f
     }
 }
 
+
 func infer_request_state_dict(infer_request_state state) infer_request_state {
     state
 }
+
 
 func infer_request_load_state_dict(infer_request_state state, infer_request_state other) infer_request_state {
     other
 }
 
+
 func infer_response_state_dict(infer_response_state state) infer_response_state {
     state
 }
 
+
 func infer_response_load_state_dict(infer_response_state state, infer_response_state other) infer_response_state {
     other
 }
+

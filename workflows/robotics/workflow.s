@@ -2,6 +2,7 @@ package neurx.workflows.robotics
 use neurx.workflows.robotics.sim.{robotics_sim_state, robotics_sim_state_dict, robotics_sim_load_state_dict, robotics_sim_enable_domain_randomization, new_robotics_sim_state}
 use neurx.workflows.robotics.real.{robotics_real_state, robotics_real_state_dict, robotics_real_load_state_dict, robotics_real_connect, robotics_real_trigger_emergency_stop, new_robotics_real_state}
 use neurx.workflows.robotics.deploy.{robotics_deploy_state, robotics_deploy_state_dict, robotics_deploy_load_state_dict, robotics_deploy_start, robotics_deploy_trigger_emergency_stop, new_robotics_deploy_state}
+
 struct robotics_workflow_pipeline_state {
     robotics_workflow_state workflow
     robotics_sim_state sim
@@ -10,6 +11,7 @@ struct robotics_workflow_pipeline_state {
     bool simulation_ready
     bool deployment_ready
 }
+
 
 func new_robotics_workflow_pipeline_state(
     string name,
@@ -28,6 +30,7 @@ func new_robotics_workflow_pipeline_state(
     }
 }
 
+
 func robotics_workflow_pipeline_state_dict(robotics_workflow_pipeline_state state) robotics_workflow_pipeline_state {
     robotics_workflow_pipeline_state {
         workflow: robotics_workflow_state_dict(state.workflow),
@@ -38,6 +41,7 @@ func robotics_workflow_pipeline_state_dict(robotics_workflow_pipeline_state stat
         deployment_ready: state.deployment_ready,
     }
 }
+
 
 func robotics_workflow_pipeline_load_state_dict(robotics_workflow_pipeline_state state, robotics_workflow_pipeline_state other) robotics_workflow_pipeline_state {
     robotics_workflow_pipeline_state {
@@ -50,6 +54,7 @@ func robotics_workflow_pipeline_load_state_dict(robotics_workflow_pipeline_state
     }
 }
 
+
 func robotics_workflow_prepare_sim(robotics_workflow_pipeline_state state, bool enable_domain_randomization) robotics_workflow_pipeline_state {
     robotics_workflow_pipeline_state {
         workflow: robotics_workflow_mark_ready(state.workflow),
@@ -60,6 +65,7 @@ func robotics_workflow_prepare_sim(robotics_workflow_pipeline_state state, bool 
         deployment_ready: state.deployment_ready,
     }
 }
+
 
 func robotics_workflow_deploy(robotics_workflow_pipeline_state state) robotics_workflow_pipeline_state {
     robotics_workflow_pipeline_state {
@@ -72,6 +78,7 @@ func robotics_workflow_deploy(robotics_workflow_pipeline_state state) robotics_w
     }
 }
 
+
 func robotics_workflow_shutdown(robotics_workflow_pipeline_state state) robotics_workflow_pipeline_state {
     robotics_workflow_pipeline_state {
         workflow: state.workflow,
@@ -83,15 +90,18 @@ func robotics_workflow_shutdown(robotics_workflow_pipeline_state state) robotics
     }
 }
 
+
 func robotics_workflow_pipeline_complete(robotics_workflow_pipeline_state state) bool {
     state.workflow.ready && state.deploy.running && !state.deploy.emergency_stop
 }
+
 
 struct robotics_workflow_example_state {
     robotics_workflow_pipeline_state pipeline
     int stage
     bool finished
 }
+
 
 func new_robotics_workflow_example_state(
     string name,
@@ -107,6 +117,7 @@ func new_robotics_workflow_example_state(
     }
 }
 
+
 func robotics_workflow_example_state_dict(robotics_workflow_example_state state) robotics_workflow_example_state {
     robotics_workflow_example_state {
         pipeline: robotics_workflow_pipeline_state_dict(state.pipeline),
@@ -114,6 +125,7 @@ func robotics_workflow_example_state_dict(robotics_workflow_example_state state)
         finished: state.finished,
     }
 }
+
 
 func robotics_workflow_example_load_state_dict(robotics_workflow_example_state state, robotics_workflow_example_state other) robotics_workflow_example_state {
     robotics_workflow_example_state {
@@ -123,6 +135,7 @@ func robotics_workflow_example_load_state_dict(robotics_workflow_example_state s
     }
 }
 
+
 func robotics_workflow_example_prepare(robotics_workflow_example_state state, bool enable_domain_randomization) robotics_workflow_example_state {
     robotics_workflow_example_state {
         pipeline: robotics_workflow_prepare_sim(state.pipeline, enable_domain_randomization),
@@ -130,6 +143,7 @@ func robotics_workflow_example_prepare(robotics_workflow_example_state state, bo
         finished: false,
     }
 }
+
 
 func robotics_workflow_example_deploy(robotics_workflow_example_state state) robotics_workflow_example_state {
     robotics_workflow_example_state {
@@ -139,6 +153,7 @@ func robotics_workflow_example_deploy(robotics_workflow_example_state state) rob
     }
 }
 
+
 func robotics_workflow_example_shutdown(robotics_workflow_example_state state) robotics_workflow_example_state {
     robotics_workflow_example_state {
         pipeline: robotics_workflow_shutdown(state.pipeline),
@@ -147,13 +162,16 @@ func robotics_workflow_example_shutdown(robotics_workflow_example_state state) r
     }
 }
 
+
 func robotics_workflow_example_complete(robotics_workflow_example_state state) bool {
     state.finished && robotics_workflow_pipeline_complete(state.pipeline)
 }
 
+
 func robotics_workflow_example_pipeline(robotics_workflow_example_state state) robotics_workflow_pipeline_state {
     state.pipeline
 }
+
 
 func robotics_workflow_example_step(robotics_workflow_example_state state, bool enable_domain_randomization) robotics_workflow_example_state {
     if state.finished {
@@ -167,6 +185,7 @@ func robotics_workflow_example_step(robotics_workflow_example_state state, bool 
     }
     robotics_workflow_example_shutdown(state)
 }
+
 
 func robotics_workflow_example_run(robotics_workflow_example_state state, int steps, bool enable_domain_randomization) robotics_workflow_example_state {
     int loops = steps
@@ -184,3 +203,4 @@ func robotics_workflow_example_run(robotics_workflow_example_state state, int st
     }
     current
 }
+

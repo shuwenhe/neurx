@@ -13,6 +13,7 @@ struct agent_skill_spec {
     []string failure_signals
 }
 
+
 struct agent_skill_metrics {
     float success_rate
     float avg_steps
@@ -20,6 +21,7 @@ struct agent_skill_metrics {
     float tool_cost
     float stability
 }
+
 
 struct agent_skill_record {
     agent_skill_spec spec
@@ -34,6 +36,7 @@ struct agent_skill_record {
     bool retired
     float score
 }
+
 
 func new_agent_skill_spec(string name, string version, string intent, string status) agent_skill_spec {
     agent_skill_spec {
@@ -50,6 +53,7 @@ func new_agent_skill_spec(string name, string version, string intent, string sta
     }
 }
 
+
 func new_agent_skill_metrics() agent_skill_metrics {
     agent_skill_metrics {
         success_rate: 0.0,
@@ -59,6 +63,7 @@ func new_agent_skill_metrics() agent_skill_metrics {
         stability: 0.0,
     }
 }
+
 
 func new_agent_skill_record(agent_skill_spec spec, agent_skill_metrics metrics, int created_step) agent_skill_record {
     agent_skill_record {
@@ -76,6 +81,7 @@ func new_agent_skill_record(agent_skill_spec spec, agent_skill_metrics metrics, 
     }
 }
 
+
 func agent_skill_spec_state_dict(agent_skill_spec spec) agent_skill_spec {
     agent_skill_spec {
         name: spec.name,
@@ -91,17 +97,21 @@ func agent_skill_spec_state_dict(agent_skill_spec spec) agent_skill_spec {
     }
 }
 
+
 func agent_skill_spec_load_state_dict(agent_skill_spec spec, agent_skill_spec other) agent_skill_spec {
     agent_skill_spec_state_dict(other)
 }
+
 
 func agent_skill_metrics_state_dict(agent_skill_metrics metrics) agent_skill_metrics {
     metrics
 }
 
+
 func agent_skill_metrics_load_state_dict(agent_skill_metrics metrics, agent_skill_metrics other) agent_skill_metrics {
     other
 }
+
 
 func agent_skill_record_state_dict(agent_skill_record record) agent_skill_record {
     agent_skill_record {
@@ -119,6 +129,7 @@ func agent_skill_record_state_dict(agent_skill_record record) agent_skill_record
     }
 }
 
+
 func agent_skill_record_load_state_dict(agent_skill_record record, agent_skill_record other) agent_skill_record {
     agent_skill_record {
         spec: agent_skill_spec_load_state_dict(record.spec, other.spec),
@@ -134,3 +145,4 @@ func agent_skill_record_load_state_dict(agent_skill_record record, agent_skill_r
         score: other.score,
     }
 }
+

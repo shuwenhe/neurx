@@ -21,3 +21,4 @@ func main() {
     println("This entrypoint now lives in S and intentionally stays conservative.")
     0
 }
+

@@ -8,6 +8,7 @@ func assert_true(bool value, string name) {
     }
 }
 
+
 func assert_close(float actual, float expected, string name) {
     float diff = actual - expected
     if diff < 0.0 {
@@ -15,6 +16,7 @@ func assert_close(float actual, float expected, string name) {
     }
     assert_true(diff < 0.0001, name)
 }
+
 
 func test_sort_topk_cumsum() {
     tensor a = tensor {
@@ -45,6 +47,7 @@ func test_sort_topk_cumsum() {
     assert_close(prod.data[0], 24.0, "prod all")
 }
 
+
 func test_dim_reductions() {
     tensor b = tensor {
         data: [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
@@ -74,6 +77,7 @@ func test_dim_reductions() {
     assert_close(prod_dim0.data[1], 10.0, "prod dim0 col1")
     assert_close(prod_dim0.data[2], 18.0, "prod dim0 col2")
 }
+
 
 func test_sort_argsort_topk_dim() {
     tensor a = tensor {
@@ -117,6 +121,7 @@ func test_sort_argsort_topk_dim() {
     assert_close(top2_cols.data[5], 2.0, "topk dim col2 1")
 }
 
+
 func test_scalar_stats() {
     tensor a = tensor {
         data: [2.0, 4.0, 4.0, 8.0, 1.0],
@@ -148,6 +153,7 @@ func test_scalar_stats() {
     assert_close(argmax_val.data[0], 3.0, "argmax")
     assert_close(argmin_val.data[0], 4.0, "argmin")
 }
+
 
 func test_dim_stats() {
     tensor a = tensor {
@@ -235,6 +241,7 @@ func test_dim_stats() {
     assert_close(sum_cols.data[3], 15.0, "sum dim col3")
 }
 
+
 func main() {
     println("NeurX stats tests")
     test_sort_topk_cumsum()
@@ -243,3 +250,4 @@ func main() {
     test_scalar_stats()
     test_dim_stats()
 }
+

@@ -17,6 +17,7 @@ enum comm_backend {
     MPI
 }
 
+
 struct process_group_config {
     group_name string
     rank int
@@ -28,6 +29,7 @@ struct process_group_config {
     master_port int
 }
 
+
 struct distributed_config {
     enabled bool
     parallel_mode parallel_mode
@@ -38,6 +40,7 @@ struct distributed_config {
     rank int
     pg_config process_group_config
 }
+
 
 struct tensor_shard {
     tensor_name string
@@ -55,6 +58,7 @@ enum communication_op {
     SEND_RECV
 }
 
+
 struct collective_op_handle {
     op_type communication_op
     tensor_name string
@@ -66,12 +70,14 @@ struct collective_op_handle {
     latency_us int64
 }
 
+
 struct distributed_tensor_manager {
     local_tensors map[string][][]float
     tensor_shards map[string]tensor_shard
     pending_ops []collective_op_handle
     completed_ops []collective_op_handle
 }
+
 
 struct process_group_manager {
     global_pg process_group_config
@@ -81,6 +87,7 @@ struct process_group_manager {
     is_initialized bool
 }
 
+
 struct distributed_state {
     config distributed_config
     pg_manager process_group_manager
@@ -89,6 +96,7 @@ struct distributed_state {
     overlapped_collectives int
     total_data_transferred int64
 }
+
 
 func InitializeDistributedEnvironment(
     config distributed_config,
@@ -112,11 +120,13 @@ func InitializeDistributedEnvironment(
     return state, true
 }
 
+
 func (mgr *distributed_tensor_manager) RegisterTensorShard(
     shard tensor_shard,
 ) {
     mgr.tensor_shards[shard.tensor_name] = shard
 }
+
 
 func (state *distributed_state) AllReduce(
     tensor_name string,
@@ -141,6 +151,7 @@ func (state *distributed_state) AllReduce(
     return true
 }
 
+
 func (state *distributed_state) AllGather(
     tensor_name string,
     src_rank int,
@@ -149,11 +160,13 @@ func (state *distributed_state) AllGather(
     return result
 }
 
+
 func (state *distributed_state) ReduceScatter(
     global_tensor [][]float,
 ) [][]float {
     return make([][]float, 0)
 }
+
 
 func (state *distributed_state) BroadcastTensor(
     tensor_name string,
@@ -171,6 +184,7 @@ func (state *distributed_state) BroadcastTensor(
     return true
 }
 
+
 func (state *distributed_state) TensorParallelLinear(
     input [][]float,
     weight_name string,
@@ -179,6 +193,7 @@ func (state *distributed_state) TensorParallelLinear(
     state.AllReduce(weight_name, "tp")
     return make([][]float, 0)
 }
+
 
 func (state *distributed_state) PipelineParallelForward(
     input [][]float,
@@ -194,6 +209,7 @@ func (state *distributed_state) PipelineParallelForward(
     }
     return output, true
 }
+
 
 func (state *distributed_state) WaitForCollectives() bool {
     for i := 0; i < len(state.tensor_mgr.pending_ops); i++ {
@@ -212,6 +228,7 @@ func (state *distributed_state) WaitForCollectives() bool {
     state.tensor_mgr.pending_ops = make([]collective_op_handle, 0)
     return true
 }
+
 
 func (state *distributed_state) GetCommunicationStats() map[string]any {
     total_time_ms := int64(0)
@@ -232,9 +249,11 @@ func (state *distributed_state) GetCommunicationStats() map[string]any {
     return stats
 }
 
+
 func current_time_us() int64 {
     return time.Now().Unix() * 1000000
 }
+
 
 func compute_tensor_bytes(shard tensor_shard) int {
     bytes_per_elem := 4
@@ -245,6 +264,7 @@ func compute_tensor_bytes(shard tensor_shard) int {
     return num_elems * bytes_per_elem
 }
 
+
 func validate_parallel_config(config distributed_config) bool {
     if config.tp_size * config.pp_size * config.dp_size != config.world_size {
         return false
@@ -254,6 +274,7 @@ func validate_parallel_config(config distributed_config) bool {
     }
     return true
 }
+
 
 func main() {
     config := distributed_config {
@@ -274,3 +295,4 @@ func main() {
     println("Rank:", state.config.rank)
     println("World size:", state.config.world_size)
 }
+

@@ -5,3 +5,4 @@ func main() {
     println("Use --dry-run to inspect the mapping strategy before any history rewrite.")
     0
 }
+

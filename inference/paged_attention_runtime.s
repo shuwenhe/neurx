@@ -9,6 +9,7 @@ struct paged_attention_runtime {
     int decode_steps
 }
 
+
 struct runtime_stats {
     int total_prefill_tokens
     int total_decode_tokens
@@ -16,6 +17,7 @@ struct runtime_stats {
     int total_cache_misses
     float avg_cache_utilization
 }
+
 
 func new_paged_attention_runtime(
     int batch_size,
@@ -42,6 +44,7 @@ func new_paged_attention_runtime(
     }
 }
 
+
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 1.0
@@ -54,6 +57,7 @@ func sqrt_approx(float x) float {
     }
     return guess
 }
+
 
 func run_prefill(
     runtime paged_attention_runtime,
@@ -74,9 +78,11 @@ func run_prefill(
     }
 }
 
+
 func compute_seq_len([]float embeddings, int num_kv_heads, int head_size) int {
     return 32
 }
+
 
 func run_decode_step(
     runtime paged_attention_runtime,
@@ -97,6 +103,7 @@ func run_decode_step(
     }
 }
 
+
 func run_decode_batch(
     runtime paged_attention_runtime,
     int num_steps,
@@ -109,6 +116,7 @@ func run_decode_batch(
     }
     return current
 }
+
 
 func compute_paged_attention_output(
     runtime paged_attention_runtime,
@@ -126,6 +134,7 @@ func compute_paged_attention_output(
     return output
 }
 
+
 func reset_cache(runtime paged_attention_runtime) paged_attention_runtime {
     paged_attention_runtime{
         cache: reset_cache(runtime.cache),
@@ -137,10 +146,12 @@ func reset_cache(runtime paged_attention_runtime) paged_attention_runtime {
     }
 }
 
+
 func get_cache_memory_usage(runtime paged_attention_runtime) int {
     bytes_per_token = runtime.config.num_kv_heads * runtime.config.head_size * 4 * 2
     return runtime.cache.total_tokens * bytes_per_token
 }
+
 
 func get_cache_utilization(runtime paged_attention_runtime) float {
     max_tokens = runtime.cache.total_blocks * runtime.cache.block_size
@@ -150,11 +161,13 @@ func get_cache_utilization(runtime paged_attention_runtime) float {
     return f(runtime.cache.total_tokens) / f(max_tokens) * 100.0
 }
 
+
 struct batched_paged_attention_runtime {
     []paged_attention_runtime runtimes
     int num_sequences
     int total_tokens
 }
+
 
 func new_batched_runtime(
     int num_sequences,
@@ -182,6 +195,7 @@ func new_batched_runtime(
     }
 }
 
+
 func update_batched_prefill(
     batched batched_paged_attention_runtime,
     int seq_idx,
@@ -199,6 +213,7 @@ func update_batched_prefill(
     return batched
 }
 
+
 func compute_batched_total_tokens(batched batched_paged_attention_runtime) int {
     total = 0
     i = 0
@@ -208,6 +223,7 @@ func compute_batched_total_tokens(batched batched_paged_attention_runtime) int {
     }
     return total
 }
+
 
 func get_runtime_stats(runtime paged_attention_runtime) runtime_stats {
     cache_stats = get_cache_stats(runtime.cache)
@@ -220,6 +236,7 @@ func get_runtime_stats(runtime paged_attention_runtime) runtime_stats {
     }
 }
 
+
 func print_runtime_stats(runtime paged_attention_runtime) string {
     stats = get_runtime_stats(runtime)
     result = ""
@@ -230,3 +247,4 @@ func print_runtime_stats(runtime paged_attention_runtime) string {
     result = result + "Memory Usage: " + str(get_cache_memory_usage(runtime)) + " bytes\n"
     return result
 }
+

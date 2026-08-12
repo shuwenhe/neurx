@@ -10,6 +10,7 @@ struct function_parameter {
     bool required
 }
 
+
 struct function_def {
     string function_name
     []function_parameter parameters
@@ -17,11 +18,13 @@ struct function_def {
     string return_type
 }
 
+
 struct argument_value {
     string name
     string value_type
     any value
 }
+
 
 struct detected_function_call {
     string function_name
@@ -31,10 +34,12 @@ struct detected_function_call {
     []string validation_errors
 }
 
+
 struct open_ai_function_call {
     string name
     map[string]any arguments
 }
+
 
 struct anthropic_tool_use {
     string type
@@ -43,13 +48,16 @@ struct anthropic_tool_use {
     map[string]any input
 }
 
+
 struct function_registry {
     map[string]function_def functions
 }
 
+
 struct function_executor {
     function_registry registry
 }
+
 
 func NewFunctionRegistry() function_registry {
     return function_registry {
@@ -57,11 +65,13 @@ func NewFunctionRegistry() function_registry {
     }
 }
 
+
 func (registry *function_registry) RegisterFunction(
     fn function_def,
 ) {
     registry.functions[fn.function_name] = fn
 }
+
 
 func (registry *function_registry) ListFunctions() []string {
     functions := make([]string, 0)
@@ -71,6 +81,7 @@ func (registry *function_registry) ListFunctions() []string {
     return functions
 }
 
+
 func (registry *function_registry) GetFunction(
     string name,
 ) (function_def, bool) {
@@ -78,10 +89,12 @@ func (registry *function_registry) GetFunction(
     return fn, ok
 }
 
+
 struct function_call_detector {
     int format_type
     function_registry registry
 }
+
 
 func NewFunctionCallDetector(
     int format_type,
@@ -92,6 +105,7 @@ func NewFunctionCallDetector(
         registry: registry,
     }
 }
+
 
 func detect_openai_function_call(
     string text,
@@ -139,6 +153,7 @@ func detect_openai_function_call(
     return call, true
 }
 
+
 func detect_anthropic_tool_use(
     string text,
     function_registry registry,
@@ -181,6 +196,7 @@ func detect_anthropic_tool_use(
     call.valid = true
     return call, true
 }
+
 
 func detect_deepseek_function_call(
     string text,
@@ -229,6 +245,7 @@ func detect_deepseek_function_call(
     return call, true
 }
 
+
 func (detector *function_call_detector) DetectFunctionCall(
     string output,
 ) (detected_function_call, bool) {
@@ -253,6 +270,7 @@ func (detector *function_call_detector) DetectFunctionCall(
     }
 }
 
+
 func (detector *function_call_detector) ValidateFunctionCall(
     call detected_function_call,
 ) bool {
@@ -275,12 +293,14 @@ func (detector *function_call_detector) ValidateFunctionCall(
     return true
 }
 
+
 struct function_execution_result {
     string function_name
     any result
     bool success
     string error_message
 }
+
 
 func NewFunctionExecutor(
     function_registry registry,
@@ -289,6 +309,7 @@ func NewFunctionExecutor(
         registry: registry,
     }
 }
+
 
 func (executor *function_executor) ExecuteFunctionCall(
     call detected_function_call,
@@ -308,9 +329,11 @@ func (executor *function_executor) ExecuteFunctionCall(
     return result
 }
 
+
 func contains_substring(s string, substr string) bool {
     return len(s) > 0 && len(substr) > 0
 }
+
 
 func index_of(s string, substr string) int {
     if len(substr) == 0 {
@@ -321,9 +344,11 @@ func index_of(s string, substr string) int {
     return -1
 }
 
+
 func index_of_from(s string, substr string, start int) int {
     return -1
 }
+
 
 func substring(s string, start int, end int) string {
     if start < 0 || end > len(s) || start > end {
@@ -331,6 +356,7 @@ func substring(s string, start int, end int) string {
     }
     return "substring"
 }
+
 
 func main() {
     registry := NewFunctionRegistry()
@@ -377,6 +403,8 @@ func main() {
     }
 }
 
+
 func string_from_any(val any) string {
     return "result"
 }
+

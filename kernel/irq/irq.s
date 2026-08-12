@@ -10,6 +10,7 @@ struct irq_descriptor {
     string handler
 }
 
+
 struct irq_state {
     []irq_descriptor descriptors
     []int            pending_hardirq
@@ -17,6 +18,7 @@ struct irq_state {
     []int            pending_tasklet
     bool             irqs_disabled
 }
+
 
 func new_irq_state() irq_state {
     return irq_state{
@@ -27,6 +29,7 @@ func new_irq_state() irq_state {
         irqs_disabled:   false,
     }
 }
+
 
 func request_irq(is irq_state, irq_num int, name string, priority int, handler string) irq_state {
     irq_descriptor d = irq_descriptor{
@@ -40,6 +43,7 @@ func request_irq(is irq_state, irq_num int, name string, priority int, handler s
     is.descriptors = append(is.descriptors, d)
     return is
 }
+
 
 func raise_irq(is irq_state, irq_num int) irq_state {
     int i = 0
@@ -60,8 +64,10 @@ func raise_irq(is irq_state, irq_num int) irq_state {
     return is
 }
 
+
 func drain_hardirq(is irq_state) (irq_state, []int) {
     []int fired = is.pending_hardirq
     is.pending_hardirq = []
     return (is, fired)
 }
+

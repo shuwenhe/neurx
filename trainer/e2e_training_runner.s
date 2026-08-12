@@ -25,6 +25,7 @@ struct training_config {
     output_dir: string
 }
 
+
 struct mini_language_model {
     vocab_size: int
     embedding_dim: int
@@ -39,6 +40,7 @@ struct mini_language_model {
     gradients_computed: bool
 }
 
+
 struct transformer_layer {
     attention_qkv: bundle.tensor_2
     attention_output: bundle.tensor_2
@@ -47,6 +49,7 @@ struct transformer_layer {
     fc2: bundle.tensor_2
     fc_norm: bundle.tensor_2
 }
+
 
 func generate_synthetic_data(
     batch_size: int,
@@ -64,6 +67,7 @@ func generate_synthetic_data(
     }
     data
 }
+
 
 func create_mini_gpt(config training_config) mini_language_model {
     model := mini_language_model{
@@ -119,6 +123,7 @@ func create_mini_gpt(config training_config) mini_language_model {
     model
 }
 
+
 func forward_pass(
     model: mini_language_model,
     input_ids: []int,
@@ -143,6 +148,7 @@ func forward_pass(
     }
     logits, hidden_states
 }
+
 
 func compute_loss(logits: bundle.tensor_2, targets: []int) float {
     batch_size := logits.shape[0]
@@ -186,6 +192,7 @@ func compute_loss(logits: bundle.tensor_2, targets: []int) float {
     }
     0.0
 }
+
 
 func run_training(config: training_config) {
     log_file := fmt.Sprintf("%s/training.log", config.output_dir)
@@ -257,6 +264,7 @@ func run_training(config: training_config) {
     fmt.Printf("   • loss_curve.txt - ASCII loss visualization\n")
 }
 
+
 func count_parameters(model: mini_language_model) int {
     count := model.token_embedding.num_elements()
     count += model.position_embedding.num_elements()
@@ -273,6 +281,7 @@ func count_parameters(model: mini_language_model) int {
     count
 }
 
+
 func compute_learning_rate(
     step: int,
     total_steps: int,
@@ -287,6 +296,7 @@ func compute_learning_rate(
     }
 }
 
+
 func initialize_normal(size: int, mean: float, std: float) []float {
     data := make([]float, size)
     for i := 0; i < size; i += 1 {
@@ -295,6 +305,7 @@ func initialize_normal(size: int, mean: float, std: float) []float {
     data
 }
 
+
 func initialize_ones(size: int) []float {
     data := make([]float, size)
     for i := 0; i < size; i += 1 {
@@ -302,6 +313,7 @@ func initialize_ones(size: int) []float {
     }
     data
 }
+
 
 func verify_training(model: mini_language_model, losses: []float, log: logger) {
     fmt.Printf("   Parameters: %d\n", count_parameters(model))
@@ -330,6 +342,7 @@ func verify_training(model: mini_language_model, losses: []float, log: logger) {
     }
 }
 
+
 func find_min_loss(losses: []float) float {
     if len(losses) == 0 {
         return 0.0
@@ -342,6 +355,7 @@ func find_min_loss(losses: []float) float {
     }
     min_loss
 }
+
 
 func find_max_loss(losses: []float) float {
     if len(losses) == 0 {
@@ -356,6 +370,7 @@ func find_max_loss(losses: []float) float {
     max_loss
 }
 
+
 func compute_avg_loss(losses: []float) float {
     if len(losses) == 0 {
         return 0.0
@@ -366,6 +381,7 @@ func compute_avg_loss(losses: []float) float {
     }
     sum / float(len(losses))
 }
+
 
 func generate_loss_curve(losses: []float, output_dir: string) {
     output := "Loss Curve Visualization\n"
@@ -409,12 +425,14 @@ func generate_loss_curve(losses: []float, output_dir: string) {
     write_file(curve_file, output)
 }
 
+
 struct logger {
     log_file: string
     loss_file: string
     log_handle: io.Writer
     loss_handle: io.Writer
 }
+
 
 func logger_new(log_file: string, loss_file: string) logger {
     log := logger{
@@ -424,9 +442,11 @@ func logger_new(log_file: string, loss_file: string) logger {
     log
 }
 
+
 func log_message(log: logger, message: string) {
     fmt.Printf("[LOG] %s\n", message)
 }
+
 
 func log_config(log: logger, config: training_config) {
     log_message(log, "=== CONFIGURATION ===")
@@ -438,18 +458,23 @@ func log_config(log: logger, config: training_config) {
     log_message(log, fmt.Sprintf("Epochs: %d", config.num_epochs))
 }
 
+
 func log_loss(log: logger, step: int, loss: float) {
     fmt.Printf("%.4f,%d\n", loss, step)
 }
 
+
 func logger_close(log: logger) {
 }
+
 
 func save_checkpoint(path: string, model: mini_language_model, optimizer: any, step: int) {
 }
 
+
 func write_file(path: string, content: string) {
 }
+
 
 func main() {
     fmt.Printf("╔════════════════════════════════════════════════════════════════╗\n")
@@ -475,3 +500,4 @@ func main() {
     }
     run_training(config)
 }
+

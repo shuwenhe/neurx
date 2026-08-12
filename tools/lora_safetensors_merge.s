@@ -1,9 +1,11 @@
 package neurx.tools.lora_safetensors_merge_s
 use std.io.println
 use neurx.runtime.io.{runtime_env_get}
+
 func concat(string a, string b) string {
     a + b
 }
+
 
 func repeat_string(string s, int times) string {
     string result
@@ -13,6 +15,7 @@ func repeat_string(string s, int times) string {
     result
 }
 
+
 func print_header() {
     println("")
     println("========================================")
@@ -20,6 +23,7 @@ func print_header() {
     println("========================================")
     println("")
 }
+
 
 func print_config(string base_dir, string adapter_dir, string output_dir, string merger_bin) {
     println("Configuration:")
@@ -32,6 +36,7 @@ func print_config(string base_dir, string adapter_dir, string output_dir, string
     println("")
 }
 
+
 func print_lora_merge_info() {
     println("LoRA Merge Algorithm:")
     println("  W_merged = W_base + (alpha / rank) * (B @ A)")
@@ -43,6 +48,7 @@ func print_lora_merge_info() {
     println("  - B @ A:  LoRA adapter composed transformation")
     println("")
 }
+
 
 func print_workflow() {
     println("Merge Workflow:")
@@ -59,17 +65,21 @@ func print_workflow() {
     println("")
 }
 
+
 func calculate_tensor_numel(int dim0, int dim1) int {
     dim0 * dim1
 }
+
 
 func calculate_scale_factor(float alpha, float rank) float {
     alpha / rank
 }
 
+
 func conceptual_lora_merge(float base_value, float lora_delta, float scale) float {
     base_value + (scale * lora_delta)
 }
+
 
 func describe_safetensors_format() {
     println("Safetensors Format:")
@@ -87,6 +97,7 @@ func describe_safetensors_format() {
     println("")
 }
 
+
 func list_supported_adapter_types() {
     println("Supported LoRA Adapter Types:")
     println("  - Standard LoRA: lora_A and lora_B weight matrices")
@@ -94,6 +105,7 @@ func list_supported_adapter_types() {
     println("  - PEFT format: HuggingFace PEFT library format")
     println("")
 }
+
 
 func main() {
     print_header()
@@ -131,3 +143,4 @@ func main() {
     println("")
     return 0
 }
+

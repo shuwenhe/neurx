@@ -18,6 +18,7 @@ struct tensorrt_config {
     lora_target_modules: []string
 }
 
+
 struct tensorrt_engine {
     config: tensorrt_config
     runtime: *tensorrt_runtime
@@ -30,12 +31,14 @@ struct tensorrt_engine {
     total_tokens_generated: i64
 }
 
+
 struct tensorrt_runtime {
     world_size: i32
     rank: i32
     device_id: i32
     stream: CudaStream
 }
+
 
 struct tensorrt_model_engine {
     engine_path: string
@@ -44,12 +47,14 @@ struct tensorrt_model_engine {
     max_seq_len: i32
 }
 
+
 struct tensorrt_decoder {
     config: tensorrt_config
     sampling_config: SamplingConfig
     stop_words: []string
     bad_words: []string
 }
+
 
 func new_tensorrt_engine(config: tensorrt_config) -> tensorrt_engine {
     let runtime = tensorrt_runtime{
@@ -93,6 +98,7 @@ func new_tensorrt_engine(config: tensorrt_config) -> tensorrt_engine {
     }
 }
 
+
 func (engine: *tensorrt_engine) generate(
     input_ids: tensor,
     max_new_tokens: i32,
@@ -118,6 +124,7 @@ func (engine: *tensorrt_engine) generate(
     engine.total_tokens_generated += i64(output_ids.numel())
     return output_ids, log_probs
 }
+
 
 func (engine: *tensorrt_engine) run_generation(
     input: tensorrt_decoder_input
@@ -159,6 +166,7 @@ func (engine: *tensorrt_engine) run_generation(
     return output_ids, log_probs
 }
 
+
 func (engine: *tensorrt_engine) sample(
     logits: tensor,
     config: SamplingConfig,
@@ -190,6 +198,7 @@ func (engine: *tensorrt_engine) sample(
     return next_tokens, token_log_probs
 }
 
+
 func (engine: *tensorrt_engine) load_lora_adapter(adapter_name: string, adapter_path: string) {
     if engine.lora_manager == null {
         println("Error: LoRA manager not initialized")
@@ -199,11 +208,13 @@ func (engine: *tensorrt_engine) load_lora_adapter(adapter_name: string, adapter_
     engine.active_adapters[adapter_name] = adapter
 }
 
+
 func (engine: *tensorrt_engine) apply_lora_adapters() {
     for name, adapter in engine.active_adapters {
         engine.lora_manager.apply_adapter(adapter, engine.engine)
     }
 }
+
 
 func (engine: *tensorrt_engine) generate_batch(
     requests: []generation_request
@@ -237,6 +248,7 @@ func (engine: *tensorrt_engine) generate_batch(
     return responses
 }
 
+
 func (engine: *tensorrt_engine) get_statistics() -> (i64, i64, f32) {
     let avg_tokens_per_request: f32 = 0.0
     if engine.total_requests > 0 {
@@ -249,6 +261,7 @@ func (engine: *tensorrt_engine) get_statistics() -> (i64, i64, f32) {
     )
 }
 
+
 struct tensorrt_decoder_input {
     input_ids: tensor
     max_new_tokens: i32
@@ -258,6 +271,7 @@ struct tensorrt_decoder_input {
     sampling_config: SamplingConfig
 }
 
+
 struct generation_request {
     request_id: string
     input_ids: tensor
@@ -265,24 +279,30 @@ struct generation_request {
     sampling_config: SamplingConfig
 }
 
+
 struct generation_response {
     request_id: string
     output_ids: tensor
     log_probs: []f32
 }
 
+
 func load_tensorrt_engine(model_dir: string, engine_name: string) -> *tensorrt_model_engine {
     return null
 }
+
 
 func get_end_token_id() -> i32 {
     return 2
 }
 
+
 func get_pad_token_id() -> i32 {
     return 0
 }
 
+
 func pad_sequences(sequences: []tensor, max_len: i32) -> tensor {
     return sequences[0]
 }
+

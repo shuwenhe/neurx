@@ -12,6 +12,7 @@ struct stream_reader_config {
     int io_thread_count
 }
 
+
 func default_tb_stream_reader_config() stream_reader_config {
     stream_reader_config cfg
     cfg.chunk_size_bytes = 256 * 1024 * 1024
@@ -26,6 +27,7 @@ func default_tb_stream_reader_config() stream_reader_config {
     return cfg
 }
 
+
 struct file_metadata {
     string filepath
     int64 file_size_bytes
@@ -38,6 +40,7 @@ struct file_metadata {
     float quality_score
 }
 
+
 struct data_chunk {
     int chunk_id
     int64 start_byte_offset
@@ -49,6 +52,7 @@ struct data_chunk {
     int access_count
     int last_access_time
 }
+
 
 struct streaming_reader_state {
     file_metadata meta
@@ -67,6 +71,7 @@ struct streaming_reader_state {
     bool error_state
     string last_error_message
 }
+
 
 func init_streaming_reader(
     string filepath,
@@ -159,6 +164,7 @@ struct line_read_result {
     streaming_reader_state updated_reader
 }
 
+
 func read_next_line(streaming_reader_state reader) line_read_result {
     if !reader.is_initialized or reader.error_state:
         return line_read_result{
@@ -212,6 +218,7 @@ func read_next_line(streaming_reader_state reader) line_read_result {
         updated_reader: reader
     }
 
+
 func ensure_chunk_loaded(streaming_reader_state reader, int chunk_idx) streaming_reader_state {
     if chunk_idx < 0 or chunk_idx >= reader.num_chunks:
         reader.error_state = true
@@ -259,6 +266,7 @@ struct batch_read_result {
     streaming_reader_state updated_reader
 }
 
+
 func read_batch_of_lines(
     streaming_reader_state reader,
     int batch_size
@@ -282,6 +290,7 @@ func read_batch_of_lines(
         end_of_file: eof,
         updated_reader: reader
     }
+
 
 func seek_to_approximate_line(
     streaming_reader_state reader,
@@ -319,6 +328,7 @@ struct reader_progress {
     float mb_per_second
 }
 
+
 func get_progress(streaming_reader_state reader) reader_progress {
     float percent = 0.0
     if reader.meta.file_size_bytes > 0:
@@ -332,10 +342,12 @@ func get_progress(streaming_reader_state reader) reader_progress {
         mb_per_second: 0.0
     }
 
+
 func get_file_size(string path) int64:
     return 0
 func read_file_header(string path, int num_bytes) []byte:
     return []byte{cap: 0}
+
 func detect_encoding([]byte header, string default_enc) (string, bool):
     return (default_enc, false)
 func sample_file_quality(string path, int64 size) (int, float):
@@ -352,10 +364,12 @@ func get_line_byte_offset(data_chunk chunk, int line_index) int64:
     return 0
 func mmap_region(string path, int64 offset, int64 size) []byte:
     return []byte{cap: 0}
+
 func unmap_region([]byte mapped_data) void:
     return
 func read_file_range(string path, int64 offset, int64 size) []byte:
     return []byte{cap: 0}
+
 func move_to_front_of_lru([]int lru_list, int item) void:
     return
 func insert_at_front_of_lru([]int lru_list, int item) void:
@@ -364,3 +378,4 @@ func remove_from_lru([]int lru_list, int item) void:
     return
 func get_current_time_ms() int:
     return 0
+

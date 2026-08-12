@@ -7,12 +7,14 @@ struct metric_counter {
     map[string]string labels
 }
 
+
 struct metric_gauge {
     string name
     string help
     float value
     map[string]string labels
 }
+
 
 struct metric_histogram {
     string name
@@ -21,6 +23,7 @@ struct metric_histogram {
     []int bucket_counts
     map[string]string labels
 }
+
 
 struct inference_metrics {
 
@@ -52,11 +55,13 @@ struct inference_metrics {
     metric_gauge batch_latency_ms
 }
 
+
 struct prometheus_registry {
     []metric_counter counters
     []metric_gauge gauges
     []metric_histogram histograms
 }
+
 
 func init_inference_metrics() inference_metrics {
     inference_metrics {
@@ -185,6 +190,7 @@ func init_inference_metrics() inference_metrics {
     }
 }
 
+
 func record_request(inference_metrics m, bool success, float latency_ms) inference_metrics {
     m.requests_total.value = m.requests_total.value + 1
     if success {
@@ -196,6 +202,7 @@ func record_request(inference_metrics m, bool success, float latency_ms) inferen
     m
 }
 
+
 func record_batch(inference_metrics m, int batch_size, float latency_ms) inference_metrics {
     m.batch_size_avg.value = (m.batch_size_avg.value + float(batch_size)) / 2.0
     if float(batch_size) > m.batch_size_max.value {
@@ -204,6 +211,7 @@ func record_batch(inference_metrics m, int batch_size, float latency_ms) inferen
     m.batch_latency_ms.value = latency_ms
     m
 }
+
 
 func record_gpu_metrics(
     inference_metrics m,
@@ -219,6 +227,7 @@ func record_gpu_metrics(
     m
 }
 
+
 func update_cache_metrics(
     inference_metrics m,
     float hits,
@@ -231,6 +240,7 @@ func update_cache_metrics(
     }
     m
 }
+
 
 func export_prometheus_metrics(inference_metrics m) string {
     string output = ""
@@ -278,12 +288,14 @@ func export_prometheus_metrics(inference_metrics m) string {
     output
 }
 
+
 struct health_status {
     bool healthy
     string status
     string message
     int uptime_seconds
 }
+
 
 func check_system_health(inference_metrics m) health_status {
     bool healthy = true
@@ -313,6 +325,7 @@ func check_system_health(inference_metrics m) health_status {
     }
 }
 
+
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -332,6 +345,7 @@ func int_to_str(int n) string {
     return s
 }
 
+
 func float_to_str(float f) string {
     int int_part = int(f)
     int frac_part = int((f - float(int_part)) * 100.0)
@@ -341,6 +355,7 @@ func float_to_str(float f) string {
     return int_to_str(int_part) + "." + int_to_str(frac_part)
 }
 
+
 func int(float f) int {
     if f >= 0.0 {
         int(f + 0.5)
@@ -348,3 +363,4 @@ func int(float f) int {
         int(f - 0.5)
     }
 }
+

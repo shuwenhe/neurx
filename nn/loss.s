@@ -4,12 +4,14 @@ struct cross_entropy_loss {
     label_smoothing f64
 }
 
+
 func cross_entropy_new(reduction string, label_smoothing f64) cross_entropy_loss {
     return cross_entropy_loss{
         reduction: reduction,
         label_smoothing: label_smoothing,
     }
 }
+
 
 func cross_entropy_forward(loss_fn cross_entropy_loss, logits [][]f64, targets []i64) f64 {
     batch_size := len(logits)
@@ -62,13 +64,16 @@ func cross_entropy_forward(loss_fn cross_entropy_loss, logits [][]f64, targets [
     return total_loss
 }
 
+
 struct mse_loss {
     reduction string
 }
 
+
 func mse_new(reduction string) mse_loss {
     return mse_loss{reduction: reduction}
 }
+
 
 func mse_forward(loss_fn mse_loss, pred []f64, target []f64) f64 {
     if len(pred) != len(target) {
@@ -87,13 +92,16 @@ func mse_forward(loss_fn mse_loss, pred []f64, target []f64) f64 {
     return total_loss
 }
 
+
 struct bce_loss {
     reduction string
 }
 
+
 func bce_new(reduction string) bce_loss {
     return bce_loss{reduction: reduction}
 }
+
 
 func bce_forward(loss_fn bce_loss, pred []f64, target []f64) f64 {
     if len(pred) != len(target) {
@@ -117,13 +125,16 @@ func bce_forward(loss_fn bce_loss, pred []f64, target []f64) f64 {
     return total_loss
 }
 
+
 struct kldiv_loss {
     reduction string
 }
 
+
 func kldiv_new(reduction string) kldiv_loss {
     return kldiv_loss{reduction: reduction}
 }
+
 
 func kldiv_forward(loss_fn kldiv_loss, log_pred []f64, target []f64) f64 {
     if len(log_pred) != len(target) {
@@ -141,13 +152,16 @@ func kldiv_forward(loss_fn kldiv_loss, log_pred []f64, target []f64) f64 {
     return total_loss
 }
 
+
 struct l1_loss {
     reduction string
 }
 
+
 func l1_new(reduction string) l1_loss {
     return l1_loss{reduction: reduction}
 }
+
 
 func l1_forward(loss_fn l1_loss, pred []f64, target []f64) f64 {
     if len(pred) != len(target) {
@@ -167,6 +181,7 @@ func l1_forward(loss_fn l1_loss, pred []f64, target []f64) f64 {
     return total_loss
 }
 
+
 func exp_approx(x f64) f64 {
     if x > 100.0 {
         return 1e10
@@ -185,6 +200,7 @@ func exp_approx(x f64) f64 {
     }
     return result
 }
+
 
 func ln_approx(x f64) f64 {
     if x <= 0.0 {
@@ -220,3 +236,4 @@ func ln_approx(x f64) f64 {
         return ln_approx(y) + exp*0.693147180559945
     }
 }
+

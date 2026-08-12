@@ -22,6 +22,7 @@ func strip_package_and_imports(content string) string {
     return strings.Join(result, "\n")
 }
 
+
 func main() {
     if len(os.Args) < 4 {
         os.Stderr.WriteString("usage: " + os.Args[0] + " <output.s> <entry.s> <dependency.s>...\n")
@@ -54,3 +55,4 @@ func main() {
         os.Exit(1)
     }
 }
+

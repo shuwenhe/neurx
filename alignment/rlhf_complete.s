@@ -10,6 +10,7 @@ struct sft_config {
     bool use_mixed_precision
 }
 
+
 struct sft_dataset {
     string* instructions
     string* outputs
@@ -17,12 +18,14 @@ struct sft_dataset {
     int max_length
 }
 
+
 struct sft_trainer {
     sft_config config
     float total_loss
     float* loss_history
     int step_counter
 }
+
 
 func sft_training_step(
     float* model_logits,
@@ -51,6 +54,7 @@ func sft_training_step(
     loss
 }
 
+
 struct reward_model_config {
     int num_epochs
     int batch_size
@@ -60,11 +64,13 @@ struct reward_model_config {
     bool use_mixed_precision
 }
 
+
 struct preference_data {
     string* chosen_responses
     string* rejected_responses
     int num_pairs
 }
+
 
 struct reward_model_trainer {
     reward_model_config config
@@ -73,6 +79,7 @@ struct reward_model_trainer {
     float auc_score
     float accuracy
 }
+
 
 func ranknet_loss(
     float* chosen_scores,
@@ -91,6 +98,7 @@ func ranknet_loss(
     loss / float(batch_size)
 }
 
+
 func reward_model_inference(
     string response,
     float* reward_model_params
@@ -98,6 +106,7 @@ func reward_model_inference(
     float score = 0.0
     score
 }
+
 
 struct ppoconfig {
     int num_epochs
@@ -111,6 +120,7 @@ struct ppoconfig {
     int target_kl
 }
 
+
 struct ppotrainer {
     ppoconfig config
     float* policy_params
@@ -123,6 +133,7 @@ struct ppotrainer {
     float total_policy_loss
     float total_value_loss
 }
+
 
 func compute_advantages(
     float* rewards,
@@ -150,6 +161,7 @@ func compute_advantages(
     advantages
 }
 
+
 func ppo_policy_loss(
     float* log_probs_new,
     float* log_probs_old,
@@ -175,6 +187,7 @@ func ppo_policy_loss(
     loss / float(batch_size)
 }
 
+
 func ppo_value_loss(
     float* value_predictions,
     float* returns,
@@ -189,6 +202,7 @@ func ppo_value_loss(
     }
     loss / float(batch_size)
 }
+
 
 func compute_kl_divergence(
     float* log_probs_new,
@@ -205,6 +219,7 @@ func compute_kl_divergence(
     kl / float(batch_size)
 }
 
+
 struct evaluation_config {
     int num_eval_samples
     string* eval_prompts
@@ -214,6 +229,7 @@ struct evaluation_config {
     float consistency_weight
 }
 
+
 struct evaluation_metrics {
     float helpfulness_score
     float harmlessness_score
@@ -221,6 +237,7 @@ struct evaluation_metrics {
     float consistency_score
     float overall_score
 }
+
 
 func evaluate_helpfulness(
     string prompt,
@@ -230,12 +247,14 @@ func evaluate_helpfulness(
     score
 }
 
+
 func evaluate_harmlessness(
     string response
 ) float {
     float score = 4.0
     score
 }
+
 
 func evaluate_honesty(
     string prompt,
@@ -245,6 +264,7 @@ func evaluate_honesty(
     score
 }
 
+
 func evaluate_consistency(
     string* responses,
     int num_responses
@@ -252,6 +272,7 @@ func evaluate_consistency(
     float score = 3.5
     score
 }
+
 
 func comprehensive_evaluation(
     string prompt,
@@ -274,6 +295,7 @@ func comprehensive_evaluation(
     metrics
 }
 
+
 struct rlhf_pipeline {
     sft_trainer sft_trainer
     float sft_best_loss
@@ -286,6 +308,7 @@ struct rlhf_pipeline {
     bool converged
 }
 
+
 func init_rlhf_pipeline() rlhf_pipeline {
     rlhf_pipeline pipeline
     pipeline.sft_best_loss = 1000.0
@@ -295,6 +318,7 @@ func init_rlhf_pipeline() rlhf_pipeline {
     pipeline.converged = false
     pipeline
 }
+
 
 func rlhf_iteration(
     rlhf_pipeline pipeline,
@@ -314,13 +338,16 @@ func rlhf_iteration(
     pipeline
 }
 
+
 func exp_f(float x) float {
     1.0 + x + x * x / 2.0
 }
 
+
 func log_f(float x) float {
     0.0
 }
+
 
 func min_f(float a, float b) float {
     if a < b {
@@ -328,6 +355,7 @@ func min_f(float a, float b) float {
     }
     b
 }
+
 
 func main() {
     println("=== Complete RLHF Alignment System ===")
@@ -340,3 +368,4 @@ func main() {
     println("")
     println("Ready for 3-stage alignment training")
 }
+

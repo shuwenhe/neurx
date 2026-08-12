@@ -14,6 +14,7 @@ enum alert_channel {
     ALERT_LOGGER,
 }
 
+
 struct monitoring_config {
     string experiment_name
     string run_id
@@ -40,6 +41,7 @@ struct monitoring_config {
     bool enable_auto_diagnosis
     bool save_full_history
 }
+
 
 func default_monitoring_config() monitoring_config {
     monitoring_config {
@@ -70,6 +72,7 @@ func default_monitoring_config() monitoring_config {
     }
 }
 
+
 struct metric_record {
     string name
     float value
@@ -77,6 +80,7 @@ struct metric_record {
     int step
     string tag
 }
+
 
 struct histogram_metric {
     string name
@@ -90,6 +94,7 @@ struct histogram_metric {
     float std_dev
     float p50, p90, p99
 }
+
 
 struct performance_snapshot {
     int64 timestamp_ms
@@ -120,6 +125,7 @@ struct performance_snapshot {
     float network_tx_mb_s
 }
 
+
 struct training_health_snapshot {
     int64 timestamp_ms
     int step
@@ -140,6 +146,7 @@ struct training_health_snapshot {
     diagnosis_result auto_diagnosis
 }
 
+
 struct alert_info {
     string alert_type
     severity_level severity
@@ -157,6 +164,7 @@ enum severity_level {
     SEVERITY_CRITICAL,
 }
 
+
 struct diagnosis_result {
     string overall_status
     string summary
@@ -165,12 +173,14 @@ struct diagnosis_result {
     float confidence_score
 }
 
+
 struct diagnosis_issue {
     string category
     string description
     float impact_score
     string root_cause_hint
 }
+
 
 struct recommendation {
     string action
@@ -180,6 +190,7 @@ struct recommendation {
 }
 enum priority { PRIORITY_HIGH, PRIORITY_MEDIUM, PRIORITY_LOW }
 enum complexity { COMPLEXITY_EASY, COMPLEXITY_MEDIUM, COMPLEXITY_HARD }
+
 struct monitoring_manager {
     monitoring_config config
     bool is_running
@@ -199,12 +210,14 @@ struct monitoring_manager {
     console_writer console
 }
 
+
 struct moving_window {
     []float values
     int window_size
     int current_index
     bool is_filled_once
 }
+
 
 struct profiler_state {
     bool is_active
@@ -213,13 +226,17 @@ struct profiler_state {
     string output_path
 }
 
+
 struct tensorboard_writer {
     string log_dir
     file_handle file_handles[10]
 }
 
+
 struct wandb_writer { string project; string run_id }
+
 struct console_writer { bool verbose }
+
 func init_monitoring(monitoring_config cfg) monitoring_manager {
     create_directory(cfg.tensorboard_log_dir)
     tensorboard_writer tbw
@@ -249,11 +266,13 @@ func init_monitoring(monitoring_config cfg) monitoring_manager {
     return mgr
 }
 
+
 func start_monitoring(ref monitoring_manager mgr) {
     mgr.is_running = true
     log_info("Monitoring started for experiment: " + mgr.config.experiment_name)
     log_info("Run ID: " + mgr.config.run_id)
 }
+
 
 func stop_monitoring(ref monitoring_manager mgr) {
     mgr.is_running = false
@@ -261,6 +280,7 @@ func stop_monitoring(ref monitoring_manager mgr) {
     generate_final_report(mgr)
     log_info("Monitoring stopped. Total records logged: " + string(len(mgr.scalar_history)))
 }
+
 
 func log_scalar(
     ref monitoring_manager mgr,
@@ -287,6 +307,7 @@ func log_scalar(
     }
 }
 
+
 func log_histogram(
     ref monitoring_manager mgr,
     string name,
@@ -305,6 +326,7 @@ func log_histogram(
     write_histogram_to_backends(mgr, hist)
 }
 
+
 func log_performance_snapshot(ref monitoring_manager mgr, performance_snapshot snap) {
     if !mgr.is_running { return }
     snap.timestamp_ms = get_current_time_ms()
@@ -317,6 +339,7 @@ func log_performance_snapshot(ref monitoring_manager mgr, performance_snapshot s
     write_perf_snapshot_to_backends(mgr, snap)
     check_system_health_alerts(mgr, snap)
 }
+
 
 func update_training_health(
     ref monitoring_manager mgr,
@@ -349,6 +372,7 @@ func update_training_health(
         log_scalar(mgr, "train/loss_std", sqrt_approx(health.loss_variance), step)
     }
 }
+
 
 func run_auto_diagnosis(
     monitoring_manager mgr,
@@ -480,6 +504,7 @@ func run_auto_diagnosis(
     return result
 }
 
+
 func check_for_loss_anomalies(ref monitoring_manager mgr, float loss, int step) {
     if !mgr.config.enable_alerts { return }
     float avg = compute_moving_average(mgr.loss_window)
@@ -504,6 +529,7 @@ func check_for_loss_anomalies(ref monitoring_manager mgr, float loss, int step) 
     }
 }
 
+
 func check_for_grad_anomalies(ref monitoring_manager mgr, float grad_norm, int step) {
     if !mgr.config.enable_alerts { return }
     if grad_norm > mgr.config.grad_explosion_threshold {
@@ -513,6 +539,7 @@ func check_for_grad_anomalies(ref monitoring_manager mgr, float grad_norm, int s
             "Reduce learning rate or increase gradient clipping!")
     }
 }
+
 
 func check_system_health_alerts(ref monitoring_manager mgr, performance_snapshot snap) {
     if !mgr.config.enable_alerts { return }
@@ -529,6 +556,7 @@ func check_system_health_alerts(ref monitoring_manager mgr, performance_snapshot
             "Consider enabling gradient checkpointing")
     }
 }
+
 
 func trigger_alert(
     ref monitoring_manager mgr,
@@ -561,6 +589,7 @@ func trigger_alert(
           "\n   Suggestion: " + alert.suggested_action + "\n")
 }
 
+
 func send_alert_notification(monitoring_manager mgr, alert_info alert) {
     int ch_idx = 0
     while ch_idx < len(mgr.config.alert_channels) {
@@ -575,24 +604,30 @@ func send_alert_notification(monitoring_manager mgr, alert_info alert) {
     }
 }
 
+
 func send_webhook_alert(string url, alert_info alert) {
 }
+
 
 func write_to_log_file(string msg) {
     print(msg)
 }
 
+
 func create_directory(string path) {
 }
+
 
 func log_info(string msg) {
     print("[" + format_timestamp(get_current_time_ms()) + "] " + msg)
 }
 
+
 func get_current_time_ms() int64 {
     extern get_system_time_ms() int64
     return get_system_time_ms()
 }
+
 
 func format_timestamp(int64 time_ms) string {
     int64 secs = time_ms / 1000
@@ -612,20 +647,28 @@ func format_timestamp(int64 time_ms) string {
     return h_str + ":" + m_str + ":" + s_str + "." + ms_str
 }
 
+
 func generate_run_id() string {
     return "run_" + string(get_current_time_ms())
 }
+
 
 func should_log_at_step(int step, int interval) bool {
     return (step % interval == 0)
 }
 
+
 func append_ref([]metric_record arr, metric_record r) {}
+
 func append_hist([]histogram_metric arr, histogram_metric h) {}
+
 func append_perf([]performance_snapshot arr, performance_snapshot p) {}
+
 func append_health([]training_health_snapshot arr, training_health_snapshot h) {}
+
 func append_issues([]diagnosis_issue arr, diagnosis_issue i) {}
 function append_recs([]recommendation arr, recommendation r) {}
+
 func update_moving_window(ref moving_window win, float val) {
     win.values[win.current_index] = val
     win.current_index = win.current_index + 1
@@ -634,6 +677,7 @@ func update_moving_window(ref moving_window win, float val) {
         win.is_filled_once = true
     }
 }
+
 
 func compute_moving_average(moving_window win) float {
     if !win.is_filled_once { return 0.0 }
@@ -648,6 +692,7 @@ func compute_moving_average(moving_window win) float {
     if count == 0 { return 0.0 }
     return sum / float_of_int(count)
 }
+
 
 func compute_variance(moving_window win) float {
     if !win.is_filled_once { return 0.0 }
@@ -664,6 +709,7 @@ func compute_variance(moving_window win) float {
     if count <= 1 { return 0.0 }
     return var_sum / float_of_int(count - 1)
 }
+
 
 func detect_stagnation(moving_window win, float threshold) bool {
     if !win.is_filled_once { return false }
@@ -683,6 +729,7 @@ func detect_stagnation(moving_window win, float threshold) bool {
     return change < threshold
 }
 
+
 func detect_divergence(moving_window win) bool {
     if !win.is_filled_once { return false }
     float early_avg = 0.0
@@ -699,6 +746,7 @@ func detect_divergence(moving_window win) bool {
     if early_avg == 0.0 { return false }
     return recent_avg > early_avg * 2.0 && early_avg > 0.01
 }
+
 
 func compute_histogram_statistics([]float values, ref histogram_metric hist) {
     int n = len(values)
@@ -753,6 +801,7 @@ func compute_histogram_statistics([]float values, ref histogram_metric hist) {
     hist.p99 = values[n * 99 / 100]
 }
 
+
 func sort_float_array(ref []float arr) {
     int n = len(arr)
     int i = 0
@@ -770,18 +819,22 @@ func sort_float_array(ref []float arr) {
     }
 }
 
+
 func is_nan(float x) bool {
     return !(x == x)
 }
+
 
 func is_inf(float x) bool {
     return x > 1e38 || x < -1e38
 }
 
+
 func abs(float x) float {
     if x < 0 { return -x }
     return x
 }
+
 
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
@@ -796,6 +849,7 @@ func sqrt_approx(float x) float {
     return g
 }
 
+
 func float_of_int(int n) float {
     float r = 0.0
     int i = 0
@@ -803,15 +857,18 @@ func float_of_int(int n) float {
     return r
 }
 
+
 func string(float f, int prec) string {
     extern float_to_string(float f) string
     return float_to_string(f)
 }
 
+
 func string(int i) string {
     extern int_to_string(int i) string
     return int_to_string(i)
 }
+
 
 func write_scalar_to_backends(monitoring_manager m, metric_record r) {
     if m.config.primary_backend == LOG_CONSOLE || m.config.primary_backend == LOG_ALL {
@@ -821,10 +878,12 @@ func write_scalar_to_backends(monitoring_manager m, metric_record r) {
     write_to_log_file(r.name + " " + string(r.value) + " step=" + string(r.step))
 }
 
+
 func write_histogram_to_backends(monitoring_manager m, histogram_metric h) {
     string output = "[HIST] " + h.name + " @step " + string(h.step)
     log_info(output)
 }
+
 
 func write_perf_snapshot_to_backends(monitoring_manager m, performance_snapshot p) {
     string output = "[PERF] throughput=" + string(p.tokens_per_second) + " tokens/s, " +
@@ -833,13 +892,16 @@ func write_perf_snapshot_to_backends(monitoring_manager m, performance_snapshot 
     log_info(output)
 }
 
+
 func flush_all_writers(monitoring_manager m) {
     log_info("Flushing all monitoring outputs...")
 }
 
+
 func generate_final_report(monitoring_manager m) {
     log_info("Training completed. Generated " + string(len(m.scalar_history)) + " metric records")
 }
+
 
 func get_monitoring_dashboard_layout() string {
     return `
@@ -865,6 +927,7 @@ func get_monitoring_dashboard_layout() string {
 `
 }
 
+
 func print_quick_status(monitoring_manager mgr) string {
     string status = "✅"
     if len(mgr.current_health.active_alerts) > 0 {
@@ -879,3 +942,4 @@ func print_quick_status(monitoring_manager mgr) string {
     "TFLOPS:" + string(mgr.current_perf.tflops_achieved, 1) + " " +
     "GPU:" + string((mgr.current_perf.gpu_memory_used_gb/mgr.current_perf.gpu_memory_total_gb)*100, 1) + "%"
 }
+

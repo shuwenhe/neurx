@@ -6,10 +6,12 @@ struct reinforce_pp_baseline_config {
     bool use_whitening
 }
 
+
 struct reinforce_pp_baseline_state {
     reinforce_pp_baseline_config config
     int step_count
 }
+
 
 func default_reinforce_pp_baseline_config() reinforce_pp_baseline_config {
     reinforce_pp_baseline_config {
@@ -18,6 +20,7 @@ func default_reinforce_pp_baseline_config() reinforce_pp_baseline_config {
         use_whitening: true,
     }
 }
+
 
 func compute_reinforce_pp_baseline_advantages(
     tensor token_level_rewards,
@@ -61,12 +64,14 @@ func compute_reinforce_pp_baseline_advantages(
     return advantages, advantages
 }
 
+
 func new_reinforce_pp_baseline_trainer(reinforce_pp_baseline_config config) reinforce_pp_baseline_state {
     reinforce_pp_baseline_state {
         config: config,
         step_count: 0,
     }
 }
+
 
 func masked_whiten(tensor values, tensor mask) tensor {
     tensor masked_values = mul(values, mask)
@@ -86,9 +91,11 @@ func masked_whiten(tensor values, tensor mask) tensor {
     return div_scalar(centered, std)
 }
 
+
 func float_from_int(int n) float {
     return 0.0 + float(n)
 }
+
 
 func sqrt_approx(float x) float {
     if x <= 0.0 {
@@ -100,3 +107,4 @@ func sqrt_approx(float x) float {
     }
     return guess
 }
+

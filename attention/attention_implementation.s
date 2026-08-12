@@ -8,11 +8,13 @@ struct attention_config {
     string attention_type
 }
 
+
 struct attention_cache {
     []float key_cache
     []float value_cache
     int cache_len
 }
+
 
 struct multi_head_attention_module {
     attention_config config
@@ -26,11 +28,13 @@ struct multi_head_attention_module {
     int num_query_groups
 }
 
+
 struct project_qkv_result {
     []float query
     []float key
     []float value
 }
+
 
 func new_multi_head_attention(attention_config cfg) multi_head_attention_module {
     int head_dim = cfg.hidden_dim / cfg.num_attention_heads
@@ -49,6 +53,7 @@ func new_multi_head_attention(attention_config cfg) multi_head_attention_module 
     return module
 }
 
+
 func project_qkv(
     multi_head_attention_module attn,
     []float hidden_states,
@@ -64,6 +69,7 @@ func project_qkv(
         value: value,
     }
 }
+
 
 func reshape_for_attention(
     []float x,
@@ -82,6 +88,7 @@ func reshape_for_attention(
     }
     return reshaped
 }
+
 
 func scaled_dot_product_attention(
     []float query,
@@ -142,6 +149,7 @@ func scaled_dot_product_attention(
     return output
 }
 
+
 func forward_attention(
     multi_head_attention_module attn,
     []float hidden_states,
@@ -171,6 +179,7 @@ func forward_attention(
     return output
 }
 
+
 func softmax_stable([]float scores, int size) []float {
     []float probs = allocate_vector(size, 0.0)
     float max_score = scores[0]
@@ -197,6 +206,7 @@ func softmax_stable([]float scores, int size) []float {
     return probs
 }
 
+
 func matrix_multiply([]float a, []float b, int m, int k, int n) []float {
     []float result = allocate_vector(m * n, 0.0)
     int i = 0
@@ -220,6 +230,7 @@ func matrix_multiply([]float a, []float b, int m, int k, int n) []float {
     return result
 }
 
+
 func reshape_from_heads([]float x, int seq_len, int num_heads, int head_dim) []float {
     int hidden_dim = num_heads * head_dim
     []float reshaped = allocate_vector(seq_len * hidden_dim, 0.0)
@@ -230,6 +241,7 @@ func reshape_from_heads([]float x, int seq_len, int num_heads, int head_dim) []f
     }
     return reshaped
 }
+
 
 func allocate_weights(int rows, int cols) []float {
     int size = rows * cols
@@ -243,6 +255,7 @@ func allocate_weights(int rows, int cols) []float {
     return w
 }
 
+
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
@@ -252,6 +265,7 @@ func allocate_vector(int size, float init_val) []float {
     }
     return v
 }
+
 
 func exp_float(float x) float {
     if x > 20.0 {
@@ -271,6 +285,7 @@ func exp_float(float x) float {
     return result
 }
 
+
 func sqrt_float(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -284,6 +299,8 @@ func sqrt_float(float x) float {
     return guess
 }
 
+
 func len_float([]float v) int {
     return len(v)
 }
+

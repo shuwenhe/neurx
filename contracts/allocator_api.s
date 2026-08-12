@@ -8,12 +8,14 @@ enum allocator_strategy {
     unified_alloc
 }
 
+
 struct allocation_info {
     device: device
     size: i64
     alignment: i64
     strategy: AllocatorStrategy
 }
+
 
 struct allocation_result {
     ptr: i64
@@ -65,3 +67,4 @@ interface i_allocator_monitoring {
     on_allocate(ptr: i64, size: i64) -> void
     on_deallocate(ptr: i64) -> void
 }
+

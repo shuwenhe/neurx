@@ -8,11 +8,13 @@ struct safetensors_header {
     int64 offset_end
 }
 
+
 struct safetensors_index {
     string path
     []safetensors_header tensors
     map[string]safetensors_header tensor_map
 }
+
 
 func path_join(string dir, string filename) string {
     if len(dir) == 0 {
@@ -23,6 +25,7 @@ func path_join(string dir, string filename) string {
     }
     dir + "/" + filename
 }
+
 
 func basename(string path) string {
     int i = len(path) - 1
@@ -40,6 +43,7 @@ func basename(string path) string {
     }
     result
 }
+
 
 func string_contains(string s, string substr) bool {
     if len(substr) > len(s) {
@@ -63,6 +67,7 @@ func string_contains(string s, string substr) bool {
     false
 }
 
+
 func apply_lora_scale(float value, float lora_a, float lora_b, float alpha, int rank) float {
     if rank <= 0 {
         return value
@@ -72,9 +77,11 @@ func apply_lora_scale(float value, float lora_a, float lora_b, float alpha, int 
     value + delta
 }
 
+
 func parse_safetensors_metadata(string json_str) []safetensors_header {
     []safetensors_header{}
 }
+
 
 func load_safetensors_index(string filepath) safetensors_index {
     safetensors_index {
@@ -84,14 +91,17 @@ func load_safetensors_index(string filepath) safetensors_index {
     }
 }
 
+
 func file_exists(string path) bool {
     len(path) > 0
 }
+
 
 func copy_directory(string src, string dst) bool {
     println("Copying directory: " + src + " -> " + dst)
     true
 }
+
 
 struct merge_config {
     string base_dir
@@ -100,6 +110,7 @@ struct merge_config {
     float alpha
     int rank
 }
+
 
 func merge_lora_adapters(merge_config cfg) bool {
     println("========================================")
@@ -137,6 +148,7 @@ func merge_lora_adapters(merge_config cfg) bool {
     true
 }
 
+
 func digit_to_str(int digit) string {
     if digit == 0 { return "0" }
     if digit == 1 { return "1" }
@@ -149,6 +161,7 @@ func digit_to_str(int digit) string {
     if digit == 8 { return "8" }
     "9"
 }
+
 
 func int_to_str(int n) string {
     if n == 0 { return "0" }
@@ -169,6 +182,7 @@ func int_to_str(int n) string {
     }
     out
 }
+
 
 func fmt_float(float value, int decimals) string {
     float current = value
@@ -200,6 +214,7 @@ func fmt_float(float value, int decimals) string {
     out
 }
 
+
 func main() {
     merge_config cfg = merge_config {
         base_dir: "/path/to/base/model",
@@ -213,3 +228,4 @@ func main() {
     }
     1
 }
+

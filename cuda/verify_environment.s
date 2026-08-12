@@ -84,6 +84,7 @@ func main() {
     print_success("CUDA environment is ready for GPU training", GREEN, NC)
 }
 
+
 func check_cuda_library(string lib_name, string BLUE, string NC, string GREEN, string RED) {
     string result = runtime_run_command_output("ldconfig -p 2>/dev/null | grep " + lib_name + " | head -1 || echo 'NOT_FOUND'")
     if contains_string(result, "NOT_FOUND") || str_len(trim(result)) == 0 {
@@ -93,27 +94,33 @@ func check_cuda_library(string lib_name, string BLUE, string NC, string GREEN, s
     }
 }
 
+
 func print_header(string text, string color, string NC) {
     println(color + "╔════════════════════════════════════════════════════╗" + NC)
     println(color + "║" + NC + " " + text)
     println(color + "╚════════════════════════════════════════════════════╝" + NC)
 }
 
+
 func print_info(string text, string color, string NC) {
     println(color + "[INFO]" + NC + " " + text)
 }
+
 
 func print_success(string text, string color, string NC) {
     println(color + "[✓]" + NC + " " + text)
 }
 
+
 func print_error(string text, string color, string NC) {
     println(color + "[✗]" + NC + " " + text)
 }
 
+
 func print_warning(string text, string color, string NC) {
     println(color + "[!]" + NC + " " + text)
 }
+
 
 func trim(string s) string {
     int i = 0
@@ -130,6 +137,7 @@ func trim(string s) string {
     substring(s, i, j + 1)
 }
 
+
 func substring(string s, int start, int end) string {
     string out = ""
     int i = start
@@ -140,9 +148,11 @@ func substring(string s, int start, int end) string {
     out
 }
 
+
 func string_char(int c) string {
     string(c)
 }
+
 
 func str_len(string s) int {
     int n = 0
@@ -151,6 +161,7 @@ func str_len(string s) int {
     }
     n
 }
+
 
 func contains_string(string haystack, string needle) bool {
     int h_len = str_len(haystack)
@@ -180,6 +191,7 @@ func contains_string(string haystack, string needle) bool {
     false
 }
 
+
 func count_lines(string text) int {
     int count = 0
     int i = 0
@@ -195,6 +207,7 @@ func count_lines(string text) int {
     }
     count
 }
+
 
 func int_to_str(int n) string {
     if n == 0 {
@@ -221,3 +234,4 @@ func int_to_str(int n) string {
     }
     out
 }
+

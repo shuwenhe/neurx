@@ -2,6 +2,7 @@ package neurx.moe.llm_1t
 use neurx.model.llm.gpt.{model_config, gpt_param_count}
 use neurx.moe.llm.{gpt_moe_config, gpt_moe_param_count}
 use neurx.moe.transformer.{moe_config, moe_stats, moe_compute_stats, new_moe_config}
+
 struct moe_1t_scale_profile {
     string model_name
     int target_total_params
@@ -18,6 +19,7 @@ struct moe_1t_scale_profile {
     int target_tokens_b
 }
 
+
 struct moe_1t_parallel_plan {
     int world_size
     int tensor_parallel_size
@@ -31,6 +33,7 @@ struct moe_1t_parallel_plan {
     bool sharded_checkpoint
     bool elastic_recovery
 }
+
 
 struct moe_1t_training_plan {
     string tokenizer_path
@@ -50,12 +53,14 @@ struct moe_1t_training_plan {
     bool resumeable
 }
 
+
 struct moe_1t_framework {
     gpt_moe_config model
     moe_1t_scale_profile scale
     moe_1t_parallel_plan parallel
     moe_1t_training_plan training
 }
+
 
 func moe_1t_base_arch() model_config {
     model_config {
@@ -75,6 +80,7 @@ func moe_1t_base_arch() model_config {
     }
 }
 
+
 func moe_1t_expert_config() moe_config {
     moe_config cfg = new_moe_config(12288, 49152, 128, 2)
     cfg.capacity_factor = 1.5
@@ -82,6 +88,7 @@ func moe_1t_expert_config() moe_config {
     cfg.normalize_top_k = true
     cfg
 }
+
 
 func moe_1t_model_config() gpt_moe_config {
     gpt_moe_config {
@@ -91,6 +98,7 @@ func moe_1t_model_config() gpt_moe_config {
         moe_aux_loss_weight: 0.0025,
     }
 }
+
 
 func moe_1t_profile(gpt_moe_config cfg) moe_1t_scale_profile {
     int total_params = gpt_moe_param_count(cfg)
@@ -124,6 +132,7 @@ func moe_1t_profile(gpt_moe_config cfg) moe_1t_scale_profile {
     }
 }
 
+
 func moe_1t_parallel_layout(moe_1t_scale_profile scale) moe_1t_parallel_plan {
     int tensor_parallel_size = 8
     int pipeline_parallel_size = 8
@@ -144,6 +153,7 @@ func moe_1t_parallel_layout(moe_1t_scale_profile scale) moe_1t_parallel_plan {
         elastic_recovery: true,
     }
 }
+
 
 func moe_1t_training_layout(moe_1t_scale_profile scale, moe_1t_parallel_plan parallel) moe_1t_training_plan {
     int total_steps = 750000
@@ -170,6 +180,7 @@ func moe_1t_training_layout(moe_1t_scale_profile scale, moe_1t_parallel_plan par
     }
 }
 
+
 func moe_1t_framework_default() moe_1t_framework {
     gpt_moe_config model = moe_1t_model_config()
     moe_1t_scale_profile scale = moe_1t_profile(model)
@@ -182,6 +193,7 @@ func moe_1t_framework_default() moe_1t_framework {
         training: training,
     }
 }
+
 
 func int_to_string(int n) string {
     if n == 0 {
@@ -205,6 +217,7 @@ func int_to_string(int n) string {
     out
 }
 
+
 func float_to_string(float x) string {
     int whole = int_from_float(x)
     float remainder = x - float_from_int(whole)
@@ -219,6 +232,7 @@ func float_to_string(float x) string {
     s = s + int_to_string(frac)
     s
 }
+
 
 func moe_1t_summary(moe_1t_framework fw) string {
     string s = ""
@@ -243,9 +257,11 @@ func moe_1t_summary(moe_1t_framework fw) string {
     s
 }
 
+
 func float_from_int(int x) float {
     0.0 + x
 }
+
 
 func int_from_float(float x) int {
     int n = 0
@@ -263,6 +279,7 @@ func int_from_float(float x) int {
     n
 }
 
+
 func main() {
     moe_1t_framework fw = moe_1t_framework_default()
     println("════════════════════════════════════════════════════════════")
@@ -271,3 +288,4 @@ func main() {
     println(moe_1t_summary(fw))
     println("Ready for MoE-scale training orchestration.")
 }
+

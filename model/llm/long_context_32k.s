@@ -1,6 +1,7 @@
 package neurx.model.llm.long_context_32k
 use neurx.strings
 use neurx.runtime.io.{io_println}
+
 struct rope_config {
     int dim
     int max_seq_len
@@ -9,6 +10,7 @@ struct rope_config {
     float alpha
     string pos_interpolation
 }
+
 
 struct rope_state {
     rope_config config
@@ -20,6 +22,7 @@ struct rope_state {
     float freq_max
 }
 
+
 struct rope_cache {
     []float cos_cache
     []float sin_cache
@@ -27,10 +30,12 @@ struct rope_cache {
     int freq_dim
 }
 
+
 struct rope_qk_result {
     []float rotated_q
     []float rotated_k
 }
+
 
 func rope_config_new(
     int dim,
@@ -47,6 +52,7 @@ func rope_config_new(
     cfg
 }
 
+
 func compute_rope_frequencies(
     rope_config config
 ) []float {
@@ -61,6 +67,7 @@ func compute_rope_frequencies(
     }
     freqs
 }
+
 
 func apply_ntk_scaling(
     rope_config config,
@@ -80,6 +87,7 @@ func apply_ntk_scaling(
     }
     scaled_freqs
 }
+
 
 func apply_linear_interpolation_scaling(
     rope_config config,
@@ -101,6 +109,7 @@ func apply_linear_interpolation_scaling(
     }
     scaled_freqs
 }
+
 
 func precompute_rope_cache(
     rope_config config,
@@ -130,6 +139,7 @@ func precompute_rope_cache(
         freq_dim: freq_dim,
     }
 }
+
 
 func apply_rope_to_qk(
     rope_state rope,
@@ -180,6 +190,7 @@ func apply_rope_to_qk(
     }
 }
 
+
 func rope_state_new(
     rope_config config
 ) rope_state {
@@ -207,6 +218,7 @@ func rope_state_new(
     state
 }
 
+
 func handle_longer_context(
     rope_state rope,
     int actual_seq_len
@@ -218,6 +230,7 @@ func handle_longer_context(
     io_println("Handling context longer than max_seq_len: " +
               int_to_string(actual_seq_len) + " > " + int_to_string(rope.config.max_seq_len))
 }
+
 
 func cos(float x) float {
     float x2 = x * x
@@ -232,6 +245,7 @@ func cos(float x) float {
     result
 }
 
+
 func sin(float x) float {
     float x2 = x * x
     float result = x
@@ -244,6 +258,7 @@ func sin(float x) float {
     }
     result
 }
+
 
 func pow(float base, float exp) float {
     if exp == 0.0 {
@@ -259,6 +274,7 @@ func pow(float base, float exp) float {
     float result = exp_func(exp * log_base)
     result
 }
+
 
 func exp_func(float x) float {
     if x > 20.0 {
@@ -278,9 +294,11 @@ func exp_func(float x) float {
     result
 }
 
+
 func float(int x) float {
     0.0 + x
 }
+
 
 func int_to_string(int x) string {
     if x == 0 {
@@ -303,3 +321,4 @@ func int_to_string(int x) string {
     }
     out
 }
+

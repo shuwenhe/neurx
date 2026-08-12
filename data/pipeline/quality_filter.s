@@ -459,3 +459,4 @@ func max(int a, int b) int:
     if a > b: return a else: return b
 func substring(string s, int start, int end) string:
     return ""
+

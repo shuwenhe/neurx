@@ -3,9 +3,11 @@ func min(int a, int b) int {
     if a < b { a } else { b }
 }
 
+
 func max(int a, int b) int {
     if a > b { a } else { b }
 }
+
 
 func copy_int_array([]int arr) []int {
     []int copy = []int{cap: len(arr)}
@@ -14,6 +16,7 @@ func copy_int_array([]int arr) []int {
     }
     copy
 }
+
 
 func apply_temperature([]float logits, float temp) []float {
     if temp <= 0.0 {
@@ -27,6 +30,7 @@ func apply_temperature([]float logits, float temp) []float {
     scaled
 }
 
+
 func make_one_hot(int idx, int size) []float {
     []float one_hot = []float{cap: size}
     for i in 0..size {
@@ -37,3 +41,4 @@ func make_one_hot(int idx, int size) []float {
     }
     one_hot
 }
+

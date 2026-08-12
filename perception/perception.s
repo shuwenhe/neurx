@@ -9,6 +9,7 @@ struct agent_perception_result {
     int field_count
 }
 
+
 func new_agent_perception_result(string kind, string content, string source) agent_perception_result {
     agent_perception_result {
         kind: kind,
@@ -21,13 +22,16 @@ func new_agent_perception_result(string kind, string content, string source) age
     }
 }
 
+
 func get_key(agent_perception_result result, int index) string {
     result.keys[index]
 }
 
+
 func get_value(agent_perception_result result, int index) string {
     result.values[index]
 }
+
 
 func agent_perception_starts_with(string text, string prefix) bool {
     int tl = len(text)
@@ -45,6 +49,7 @@ func agent_perception_starts_with(string text, string prefix) bool {
     true
 }
 
+
 func agent_perception_contains_kv(string text) bool {
     int i = 0
     while i < len(text) {
@@ -55,6 +60,7 @@ func agent_perception_contains_kv(string text) bool {
     }
     false
 }
+
 
 func agent_perception_detect_kind(string raw) string {
     string text = lower(trim(raw))
@@ -78,6 +84,7 @@ func agent_perception_detect_kind(string raw) string {
     }
     "text"
 }
+
 
 func agent_perception_parse_kv(string raw) agent_perception_result {
     string text = trim(raw)
@@ -125,6 +132,7 @@ func agent_perception_parse_kv(string raw) agent_perception_result {
     }
 }
 
+
 func agent_perceive(string raw, string source) agent_perception_result {
     string kind = agent_perception_detect_kind(raw)
     if kind == "kv" {
@@ -132,6 +140,7 @@ func agent_perceive(string raw, string source) agent_perception_result {
     }
     new_agent_perception_result(kind, raw, source)
 }
+
 
 func agent_perception_get_field(agent_perception_result result, string key) string {
     int i = 0
@@ -144,6 +153,8 @@ func agent_perception_get_field(agent_perception_result result, string key) stri
     ""
 }
 
+
 func agent_perception_summary(agent_perception_result result) string {
     "kind=" + result.kind + " source=" + result.source + " structured=" + string(result.structured) + " fields=" + string(result.field_count)
 }
+

@@ -1,16 +1,19 @@
 package neurx.agent.workspace_tools
 use neurx.runtime.io.{runtime_env_get, runtime_read_text_file, runtime_write_text_file, runtime_file_exists, runtime_dir_exists, runtime_make_dirs, runtime_delete_path, runtime_run_command, runtime_run_command_output, runtime_shell_escape}
+
 struct agent_workspace_result {
     bool ok
     string observation
     string resolved_path
 }
 
+
 struct agent_workspace_command_result {
     bool ok
     string command
     string observation
 }
+
 
 struct agent_workspace_patch_result {
     bool ok
@@ -19,6 +22,7 @@ struct agent_workspace_patch_result {
     int replacements
 }
 
+
 func agent_workspace_root() string {
     string root = trim(runtime_env_get("NEURX_AGENT_WORKSPACE_ROOT", "."))
     if root == "" {
@@ -26,6 +30,7 @@ func agent_workspace_root() string {
     }
     root
 }
+
 
 func agent_workspace_text_contains(string text, string pattern) bool {
     string haystack = lower(trim(text))
@@ -57,6 +62,7 @@ func agent_workspace_text_contains(string text, string pattern) bool {
     false
 }
 
+
 func agent_workspace_starts_with(string text, string prefix) bool {
     int tl = len(text)
     int pl = len(prefix)
@@ -72,6 +78,7 @@ func agent_workspace_starts_with(string text, string prefix) bool {
     }
     true
 }
+
 
 func agent_workspace_join_path(string root, string path) string {
     if path == "" {
@@ -89,6 +96,7 @@ func agent_workspace_join_path(string root, string path) string {
     root + "/" + path
 }
 
+
 func agent_workspace_path_allowed(string path) bool {
     string trimmed = trim(path)
     if trimmed == "" {
@@ -99,6 +107,7 @@ func agent_workspace_path_allowed(string path) bool {
     }
     true
 }
+
 
 func agent_workspace_resolve_path(string path) string {
     if !agent_workspace_path_allowed(path) {
@@ -111,6 +120,7 @@ func agent_workspace_resolve_path(string path) string {
     }
     resolved
 }
+
 
 func agent_workspace_clip(string text, int max_chars) string {
     if max_chars <= 0 || len(text) <= max_chars {
@@ -125,6 +135,7 @@ func agent_workspace_clip(string text, int max_chars) string {
     out + "...[truncated]"
 }
 
+
 func agent_workspace_observation(string kind, string status, string details) string {
     string obs = kind + ":status=" + status
     if trim(details) != "" {
@@ -132,6 +143,7 @@ func agent_workspace_observation(string kind, string status, string details) str
     }
     obs
 }
+
 
 func agent_workspace_count_lines(string text) int {
     string trimmed = trim(text)
@@ -149,6 +161,7 @@ func agent_workspace_count_lines(string text) int {
     count
 }
 
+
 func agent_workspace_result_ok(string obs, string path) agent_workspace_result {
     agent_workspace_result {
         ok: true,
@@ -156,6 +169,7 @@ func agent_workspace_result_ok(string obs, string path) agent_workspace_result {
         resolved_path: path,
     }
 }
+
 
 func agent_workspace_result_fail(string obs, string path) agent_workspace_result {
     agent_workspace_result {
@@ -165,6 +179,7 @@ func agent_workspace_result_fail(string obs, string path) agent_workspace_result
     }
 }
 
+
 func agent_workspace_command_result_ok(string cmd, string obs) agent_workspace_command_result {
     agent_workspace_command_result {
         ok: true,
@@ -172,6 +187,7 @@ func agent_workspace_command_result_ok(string cmd, string obs) agent_workspace_c
         observation: obs,
     }
 }
+
 
 func agent_workspace_command_result_fail(string cmd, string obs) agent_workspace_command_result {
     agent_workspace_command_result {
@@ -181,6 +197,7 @@ func agent_workspace_command_result_fail(string cmd, string obs) agent_workspace
     }
 }
 
+
 func agent_workspace_command_output_detail(string output, int max_chars) string {
     string trimmed = trim(output)
     if trimmed == "" {
@@ -188,6 +205,7 @@ func agent_workspace_command_output_detail(string output, int max_chars) string 
     }
     ";output_summary=" + agent_workspace_clip(trimmed, max_chars)
 }
+
 
 func agent_workspace_patch_result_ok(string obs, string path, int replacements) agent_workspace_patch_result {
     agent_workspace_patch_result {
@@ -198,6 +216,7 @@ func agent_workspace_patch_result_ok(string obs, string path, int replacements) 
     }
 }
 
+
 func agent_workspace_patch_result_fail(string obs, string path) agent_workspace_patch_result {
     agent_workspace_patch_result {
         ok: false,
@@ -206,6 +225,7 @@ func agent_workspace_patch_result_fail(string obs, string path) agent_workspace_
         replacements: 0,
     }
 }
+
 
 func agent_workspace_read(string path, int max_chars) agent_workspace_result {
     string resolved = agent_workspace_resolve_path(path)
@@ -218,6 +238,7 @@ func agent_workspace_read(string path, int max_chars) agent_workspace_result {
     string content = runtime_read_text_file(resolved)
     agent_workspace_result_ok(agent_workspace_observation("retrieve", "ok", "path=" + resolved + ";content=" + agent_workspace_clip(content, max_chars)), resolved)
 }
+
 
 func agent_workspace_read_file(string path, int start_line, int line_count, int max_chars) agent_workspace_result {
     string resolved = agent_workspace_resolve_path(path)
@@ -267,6 +288,7 @@ func agent_workspace_read_file(string path, int start_line, int line_count, int 
     )
 }
 
+
 func agent_workspace_write(string path, string content) agent_workspace_result {
     string resolved = agent_workspace_resolve_path(path)
     if resolved == "" {
@@ -296,6 +318,7 @@ func agent_workspace_write(string path, string content) agent_workspace_result {
     agent_workspace_result_ok(agent_workspace_observation("write", "ok", "path=" + resolved + ";bytes=" + string(len(content))), resolved)
 }
 
+
 func agent_workspace_write_file(string path, string content) agent_workspace_result {
     agent_workspace_result base = agent_workspace_write(path, content)
     if !base.ok {
@@ -309,6 +332,7 @@ func agent_workspace_write_file(string path, string content) agent_workspace_res
         base.resolved_path
     )
 }
+
 
 func agent_workspace_mkdir(string path) agent_workspace_result {
     string resolved = agent_workspace_resolve_path(path)
@@ -324,6 +348,7 @@ func agent_workspace_mkdir(string path) agent_workspace_result {
     }
     agent_workspace_result_ok(agent_workspace_observation("mkdir", "ok", "path=" + resolved), resolved)
 }
+
 
 func agent_workspace_delete(string path) agent_workspace_result {
     string resolved = agent_workspace_resolve_path(path)
@@ -341,6 +366,7 @@ func agent_workspace_delete(string path) agent_workspace_result {
     agent_workspace_result_ok(agent_workspace_observation("delete", "ok", "path=" + resolved), resolved)
 }
 
+
 func agent_workspace_default_build_command() string {
     if runtime_file_exists("app/CMakeLists.txt") {
         return "cmake --build app/build/make-linux"
@@ -351,6 +377,7 @@ func agent_workspace_default_build_command() string {
     "build_unconfigured"
 }
 
+
 func agent_workspace_default_test_command() string {
     if runtime_file_exists("app/build/make-linux/CTestTestfile.cmake") {
         return "ctest --test-dir app/build/make-linux --output-on-failure"
@@ -360,6 +387,7 @@ func agent_workspace_default_test_command() string {
     }
     "test_unconfigured"
 }
+
 
 func agent_workspace_plan_command(string tool_name, string requested) agent_workspace_command_result {
     string command = trim(requested)
@@ -375,6 +403,7 @@ func agent_workspace_plan_command(string tool_name, string requested) agent_work
     }
     agent_workspace_command_result_ok(command, agent_workspace_observation(tool_name, "ok", "phase=planned;command=" + command))
 }
+
 
 func agent_workspace_run_command(string tool_name, string requested) agent_workspace_command_result {
     agent_workspace_command_result planned = agent_workspace_plan_command(tool_name, requested)
@@ -392,6 +421,7 @@ func agent_workspace_run_command(string tool_name, string requested) agent_works
     failure = failure + agent_workspace_command_output_detail(output, 800)
     agent_workspace_command_result_fail(planned.command, failure)
 }
+
 
 func agent_workspace_find(string text, string pattern, int start) int {
     int text_len = len(text)
@@ -420,6 +450,7 @@ func agent_workspace_find(string text, string pattern, int start) int {
     }
     -1
 }
+
 
 func agent_workspace_replace_exact(string text, string old_text, string new_text, bool replace_all) agent_workspace_patch_result {
     if old_text == "" {
@@ -459,6 +490,7 @@ func agent_workspace_replace_exact(string text, string old_text, string new_text
     }
 }
 
+
 func agent_workspace_split_lines(string text) []string {
     int count = agent_workspace_count_lines(text)
     if count < 1 {
@@ -481,6 +513,7 @@ func agent_workspace_split_lines(string text) []string {
     result
 }
 
+
 func agent_workspace_normalize_line(string line) string {
     string expanded = ""
     int i = 0
@@ -495,6 +528,7 @@ func agent_workspace_normalize_line(string line) string {
     }
     trim(expanded)
 }
+
 
 func agent_workspace_replace_fuzzy(string content, string old_text, string new_text, bool replace_all) agent_workspace_patch_result {
     []string cl = agent_workspace_split_lines(content)
@@ -571,6 +605,7 @@ func agent_workspace_replace_fuzzy(string content, string old_text, string new_t
     }
 }
 
+
 func agent_workspace_apply_patch(string path, string old_text, string new_text, bool replace_all) agent_workspace_patch_result {
     string resolved = agent_workspace_resolve_path(path)
     if resolved == "" {
@@ -591,10 +626,13 @@ func agent_workspace_apply_patch(string path, string old_text, string new_text, 
     agent_workspace_patch_result_ok(agent_workspace_observation("patch", "ok", "path=" + resolved + ";replacements=" + string(replaced.replacements)), resolved, replaced.replacements)
 }
 
+
 func agent_workspace_patch_file(string path, string old_text, string new_text, bool replace_all) agent_workspace_patch_result {
     agent_workspace_apply_patch(path, old_text, new_text, replace_all)
 }
 
+
 func agent_workspace_repo_map(int max_files) string {
     string root = agent_workspace_root()
     string cap_str = string(max_files)
+

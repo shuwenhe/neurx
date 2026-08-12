@@ -1,6 +1,7 @@
 package neurx.inference.production_inference
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists}
 use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result, load_real_text_engine, generate_response, resolve_model_path_from_env, read_prompt_from_env, int_to_string, float_to_string}
+
 func main() {
     string model_path = resolve_model_path_from_env()
     string prompt = read_prompt_from_env()
@@ -46,3 +47,4 @@ func main() {
     print("Response:\n")
     print(result.text + "\n")
 }
+

@@ -12,6 +12,7 @@ struct sparse_adam_optimizer {
     []int step_count
 }
 
+
 func new_sparse_adam(float lr, float beta1, float beta2, float eps) sparse_adam_optimizer {
     sparse_adam_optimizer {
         lr: lr,
@@ -24,6 +25,7 @@ func new_sparse_adam(float lr, float beta1, float beta2, float eps) sparse_adam_
         step_count: [],
     }
 }
+
 
 func sparse_adam_step(
     sparse_adam_optimizer optimizer,
@@ -63,10 +65,12 @@ func sparse_adam_step(
     }
 }
 
+
 struct sparse_adam_optimizer_step_output {
     sparse_adam_optimizer optimizer
     tensor params
 }
+
 
 func ensure_sparse_adam_state([]float values, int n) []float {
     []float out = []float{cap: n}
@@ -82,6 +86,7 @@ func ensure_sparse_adam_state([]float values, int n) []float {
     out
 }
 
+
 func ensure_sparse_adam_step_count([]int values, int n) []int {
     []int out = []int{cap: n}
     int i = 0
@@ -95,6 +100,7 @@ func ensure_sparse_adam_step_count([]int values, int n) []int {
     }
     out
 }
+
 
 func sparse_adam_sqrt(float x) float {
     if x <= 0.0 {
@@ -112,6 +118,7 @@ func sparse_adam_sqrt(float x) float {
     y
 }
 
+
 func sparse_adam_pow(float base, int exponent) float {
     float result = 1.0
     int i = 0
@@ -121,3 +128,4 @@ func sparse_adam_pow(float base, int exponent) float {
     }
     result
 }
+

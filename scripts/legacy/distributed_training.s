@@ -28,6 +28,7 @@ type distributed_process struct {
     bucket_size: int
 }
 
+
 func (dp *distributed_process) init_from_env(backend: string) error {
     config := distributed_config{
         backend: backend,
@@ -66,6 +67,7 @@ func (dp *distributed_process) init_from_env(backend: string) error {
     return nil
 }
 
+
 func (dp *distributed_process) all_reduce_grad(grad_norm: float): float {
     if !dp.config.sync_gradients || dp.config.world_size == 1 {
         return grad_norm
@@ -74,12 +76,14 @@ func (dp *distributed_process) all_reduce_grad(grad_norm: float): float {
     return reduced_grad / float(dp.config.world_size)
 }
 
+
 func (dp *distributed_process) broadcast_parameters(param: float): float {
     if dp.config.world_size == 1 {
         return param
     }
     return param
 }
+
 
 func (dp *distributed_process) build_grad_buckets(total_params: int) {
     if dp.config.world_size == 1 {
@@ -99,6 +103,7 @@ func (dp *distributed_process) build_grad_buckets(total_params: int) {
     }
 }
 
+
 func (dp *distributed_process) reduce_bucket(bucket_idx: int) {
     if bucket_idx >= len(dp.grad_buckets) {
         return
@@ -115,6 +120,7 @@ type data_partitioner struct {
     total_samples: int
     local_batch_size: int
 }
+
 
 func (dp *data_partitioner) get_local_indices(): []int {
     indices := make([]int, 0)
@@ -136,6 +142,7 @@ func (dp *data_partitioner) get_local_indices(): []int {
     return indices
 }
 
+
 func (dp *data_partitioner) get_local_batch_size(): int {
     total_batch := dp.local_batch_size * dp.world_size
     return total_batch / dp.world_size
@@ -149,6 +156,7 @@ type distributed_sampler struct {
     epoch: int
 }
 
+
 func (ds *distributed_sampler) get_indices(): []int {
     indices := make([]int, 0)
     samples_per_rank := ds.num_samples / ds.world_size
@@ -161,6 +169,7 @@ func (ds *distributed_sampler) get_indices(): []int {
     return indices
 }
 
+
 func (ds *distributed_sampler) set_epoch(epoch: int) {
     ds.epoch = epoch
 }
@@ -171,6 +180,7 @@ type communication_metrics struct {
     communication_time_ms: float
     computation_time_ms: float
 }
+
 
 func (cm *communication_metrics) get_efficiency(): float {
     total_time := cm.communication_time_ms + cm.computation_time_ms
@@ -187,6 +197,7 @@ type multi_node_config struct {
     timeout_minutes: int
 }
 
+
 func (dp *distributed_process) get_stats(): map[string]interface{} {
     return map[string]interface{}{
         "rank": dp.config.rank,
@@ -202,12 +213,15 @@ func (dp *distributed_process) get_stats(): map[string]interface{} {
     }
 }
 
+
 func (dp *distributed_process) is_main_process(): bool {
     return dp.is_master
 }
 
+
 func (dp *distributed_process) barrier() {
 }
+
 
 func (dp *distributed_process) destroy_process_group() {
     dp.initialized = false
@@ -217,10 +231,12 @@ type distributed_context struct {
     comm_metrics: communication_metrics
 }
 
+
 func (dc *distributed_context) enter(): error {
     dc.process = &distributed_process{}
     return dc.process.init_from_env("nccl")
 }
+
 
 func (dc *distributed_context) exit() {
     if dc.process != nil {
@@ -235,6 +251,7 @@ type launch_config struct {
     master_port: string
     backend: string
 }
+
 
 func create_launch_config_from_env(): launch_config {
     config := launch_config{
@@ -268,6 +285,7 @@ func create_launch_config_from_env(): launch_config {
     }
     return config
 }
+
 
 func main() {
     process := &distributed_process{}
@@ -310,3 +328,4 @@ func main() {
     launch_json, _ := json.Marshal(launch_config)
     println(string(launch_json))
 }
+

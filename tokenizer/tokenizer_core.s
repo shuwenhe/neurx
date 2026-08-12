@@ -19,6 +19,7 @@ struct special_tokens_config {
     string eop_token      = ""
 }
 
+
 func default_special_tokens() special_tokens_config {
     return special_tokens_config{}
 }
@@ -27,6 +28,7 @@ enum encoding_type {
     BPE
     WORD_PIECE
 }
+
 
 struct tokenizer_state {
     string vocab_file_path
@@ -43,6 +45,7 @@ struct tokenizer_state {
         float avg_chars_per_token
     } stats
 }
+
 
 func create_tokenizer(
     vocab_file_path: string,
@@ -81,6 +84,7 @@ func create_tokenizer(
     return state
 }
 
+
 func _create_mock_vocab(
     ref dict[string, int] encoder,
     ref dict[int, string] decoder) {
@@ -105,6 +109,7 @@ func _create_mock_vocab(
             decoder[len(encoder) - 1] = char
 }
 
+
 func _add_special_tokens(
     ref dict[string, int] encoder,
     ref dict[int, string] decoder,
@@ -128,6 +133,7 @@ func _add_special_tokens(
         }
     }
 }
+
 
 func encode(
     state: tokenizer_state,
@@ -163,6 +169,7 @@ func encode(
         result["attention_mask"] = tensor(result["attention_mask"])
     return result
 }
+
 
 func batch_encode(
     state: tokenizer_state,
@@ -210,6 +217,7 @@ func batch_encode(
     return batch_result
 }
 
+
 func decode(
     state: tokenizer_state,
     []int token_ids,
@@ -232,6 +240,7 @@ func decode(
     return text
 }
 
+
 func batch_decode(
     state: tokenizer_state,
     tensor token_ids,
@@ -246,6 +255,7 @@ func batch_decode(
     return results
 }
 
+
 func preprocess_text(text: string) string {
     text = normalize_unicode(text)
     text = replace_control_characters(text)
@@ -253,9 +263,11 @@ func preprocess_text(text: string) string {
     return text
 }
 
+
 func normalize_unicode(text: string) {
     return text
 }
+
 
 func replace_control_characters(text: string) {
     string chars = []
@@ -268,17 +280,20 @@ func replace_control_characters(text: string) {
     return join(chars, "")
 }
 
+
 func normalize_whitespace(text: string) {
     while "  " in text:
         text = text.replace("  ", " ")
     return text.strip()
 }
 
+
 func cleanup_spaces(text: string) {
     text = text.replace("  ", " ")
     text = text.strip()
     return text
 }
+
 
 func tokenize(state: tokenizer_state, text: string) []string {
     if len(text) == 0:
@@ -302,6 +317,7 @@ func tokenize(state: tokenizer_state, text: string) []string {
     return tokens
 }
 
+
 func convert_tokens_to_ids(state: tokenizer_state, []string tokens) []int {
     []int ids = []
     for token in tokens:
@@ -316,6 +332,7 @@ func convert_tokens_to_ids(state: tokenizer_state, []string tokens) []int {
     return ids
 }
 
+
 func convert_ids_to_tokens(state: tokenizer_state, []int ids) []string {
     []string tokens = []
     for id in ids:
@@ -325,6 +342,7 @@ func convert_ids_to_tokens(state: tokenizer_state, []int ids) []string {
             append(tokens, state.special_tokens.unk_token)
     return tokens
 }
+
 
 func build_chat_prompt(
     state: tokenizer_state,
@@ -350,6 +368,7 @@ func build_chat_prompt(
         return_tensors=True
     )
 }
+
 
 func build_prefix_lm_input(
     state: tokenizer_state,
@@ -378,6 +397,7 @@ func build_prefix_lm_input(
     encoded["prefix_length"] = eop_pos - sop_pos
     return encoded
 }
+
 
 func build_mlm_input(
     state: tokenizer_state,
@@ -416,6 +436,7 @@ func build_mlm_input(
     return result
 }
 
+
 func _is_special_token(token_id: int, specs: special_tokens_config) {
     return token_id == specs.pad_token_id ||
            token_id == specs.bos_token_id ||
@@ -427,12 +448,14 @@ func _is_special_token(token_id: int, specs: special_tokens_config) {
            token_id == specs.eop_token_id
 }
 
+
 func index_of([]int list, target: int) {
     for i, val in enumerate(list):
         if val == target:
             return i
     return -1
 }
+
 
 func sample_without_replacement([]int pool, int k) {
     if k >= len(pool):
@@ -441,6 +464,7 @@ func sample_without_replacement([]int pool, int k) {
     shuffle(result)
     return result[:k]
 }
+
 
 func print_special_tokens_info(state: tokenizer_state) {
     print("\n📋 NEURX Special Tokens:")
@@ -456,6 +480,7 @@ func print_special_tokens_info(state: tokenizer_state) {
     print(f"\n  Total vocabulary size: {state.vocab_size}")
     print("-" * 40)
 }
+
 
 func test_tokenizer() {
     print("\n" + "="*60)
@@ -529,3 +554,4 @@ func test_tokenizer() {
     print(f"   Masked positions: {mlm_input['mask_positions']}")
     print("✅ MLM input construction works!")
     print("\n[Tes
+

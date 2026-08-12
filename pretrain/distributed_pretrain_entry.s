@@ -8,6 +8,7 @@ use neurx.distributed.cuda_bridge.{
     cuda_bridge_log_status,
 }
 use neurx.runtime.io.{runtime_env_get}
+
 struct training_config {
     string model_path
     string dataset_path
@@ -21,6 +22,7 @@ struct training_config {
     string log_dir
 }
 
+
 struct training_metrics {
     int step
     int optimizer_step
@@ -30,6 +32,7 @@ struct training_metrics {
     int shard_idx
     int line_idx
 }
+
 
 func main() {
     training_config config = parse_config()
@@ -112,6 +115,7 @@ func main() {
     launcher.finalize()
 }
 
+
 func parse_config() training_config {
     training_config {
         model_path: "./checkpoint/NeurX-1.3/NeurX-1.3.neurx",
@@ -127,6 +131,7 @@ func parse_config() training_config {
     }
 }
 
+
 func load_batch(string shard_path, int line_idx) []float {
     []float batch = []float{cap: 8 * 2048}
     int i = 0
@@ -136,6 +141,7 @@ func load_batch(string shard_path, int line_idx) []float {
     }
     batch
 }
+
 
 func forward_pass([]float batch_data) float {
     float loss = 0.0
@@ -147,6 +153,7 @@ func forward_pass([]float batch_data) float {
     loss / float(len(batch_data))
 }
 
+
 func backward_pass(float loss) []float {
     []float gradients = []float{cap: 1024}
     int i = 0
@@ -156,6 +163,7 @@ func backward_pass(float loss) []float {
     }
     gradients
 }
+
 
 func print_metrics(training_metrics metrics) {
     string log_msg = "[trainer-v2] step=" + itoa(metrics.step) +
@@ -167,6 +175,7 @@ func print_metrics(training_metrics metrics) {
                      " line=" + itoa(metrics.line_idx)
     print(log_msg)
 }
+
 
 func itoa(int n) string {
     if n == 0 {
@@ -186,8 +195,10 @@ func itoa(int n) string {
     s
 }
 
+
 func ftoa(float f) string {
     int int_part = int(f)
     int frac_part = int((f - float(int_part)) * 1000000)
     itoa(int_part) + "." + itoa(frac_part)
 }
+

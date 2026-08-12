@@ -15,6 +15,7 @@ type training_config struct {
     materialize_corpus_path  string
 }
 
+
 func setup_training_config(train_bin string) (*training_config, error) {
     script_dir := core.ResolveScriptDir()
     neurx_dir := core.ResolveRelativePath(script_dir, "../neurx")
@@ -37,6 +38,7 @@ func setup_training_config(train_bin string) (*training_config, error) {
     return config, nil
 }
 
+
 func print_header(config *training_config) {
     fmt.Println("========================================")
     fmt.Println("NeurX Training Pipeline")
@@ -45,6 +47,7 @@ func print_header(config *training_config) {
     fmt.Println("========================================")
     fmt.Println("")
 }
+
 
 func run_training(config *training_config) (string, error) {
     if !core.FileExists(config.TrainBin) {
@@ -61,6 +64,7 @@ func run_training(config *training_config) (string, error) {
     fmt.Print(result)
     return result, nil
 }
+
 
 func parse_training_output(output string) map[string]string {
     result := make(map[string]string)
@@ -94,6 +98,7 @@ func parse_training_output(output string) map[string]string {
     return result
 }
 
+
 func generate_checkpoints(config *training_config, metrics map[string]string) error {
     fmt.Println("")
     fmt.Println("--- Generating checkpoint Files ---")
@@ -110,6 +115,7 @@ func generate_checkpoints(config *training_config, metrics map[string]string) er
     return nil
 }
 
+
 func list_checkpoints(config *training_config) {
     fmt.Println("")
     fmt.Println("--- checkpoint Files Generated ---")
@@ -124,6 +130,7 @@ func list_checkpoints(config *training_config) {
     })
 }
 
+
 func print_footer(config *training_config) {
     fmt.Println("")
     fmt.Println("========================================")
@@ -136,6 +143,7 @@ func print_footer(config *training_config) {
     fmt.Println("  - latest_checkpoint.txt")
     fmt.Println("")
 }
+
 
 func main() {
     train_bin := "/tmp/neurx_train"
@@ -161,3 +169,4 @@ func main() {
     list_checkpoints(config)
     print_footer(config)
 }
+

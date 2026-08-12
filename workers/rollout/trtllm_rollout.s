@@ -12,11 +12,13 @@ struct trtllm_config {
     float temperature
 }
 
+
 struct trtllm_rollout_state {
     trtllm_config config
     bool initialized
     int num_requests_processed
 }
+
 
 struct trtllm_request {
     []int input_ids
@@ -24,12 +26,14 @@ struct trtllm_request {
     int request_id
 }
 
+
 struct trtllm_response {
     []int output_ids
     []float output_log_probs
     int request_id
     bool success
 }
+
 
 func default_trtllm_config() trtllm_config {
     trtllm_config {
@@ -45,6 +49,7 @@ func default_trtllm_config() trtllm_config {
     }
 }
 
+
 func init_trtllm_engine(trtllm_config config) trtllm_rollout_state {
     trtllm_rollout_state {
         config: config,
@@ -52,6 +57,7 @@ func init_trtllm_engine(trtllm_config config) trtllm_rollout_state {
         num_requests_processed: 0,
     }
 }
+
 
 func trtllm_generate_batch(
     trtllm_rollout_state state,
@@ -77,5 +83,7 @@ func trtllm_generate_batch(
     return responses
 }
 
+
 func trtllm_shutdown(trtllm_rollout_state state) {
 }
+

@@ -1,6 +1,7 @@
 package neurx.data.loader.distributed
 use neurx.runtime.io.{runtime_run_command_output}
 use neurx.data.dataset.dataset.{dataset}
+
 struct data_shard {
     string shard_id
     int shard_index
@@ -9,6 +10,7 @@ struct data_shard {
     int num_samples
     int byte_size
 }
+
 
 struct distributed_loader_config {
     int batch_size
@@ -21,6 +23,7 @@ struct distributed_loader_config {
     string shuffle_strategy
 }
 
+
 struct distributed_dataloader {
     []data_shard shards
     distributed_loader_config config
@@ -29,6 +32,7 @@ struct distributed_dataloader {
     int samples_seen
     int tokens_seen
 }
+
 
 func new_training_data_shard(string dataset_path) data_shard {
     []string paths = []string{cap: 1}
@@ -43,6 +47,7 @@ func new_training_data_shard(string dataset_path) data_shard {
     }
 }
 
+
 func new_distributed_loader_config() distributed_loader_config {
     distributed_loader_config {
         batch_size: 32,
@@ -56,6 +61,7 @@ func new_distributed_loader_config() distributed_loader_config {
     }
 }
 
+
 func new_distributed_dataloader([]data_shard shards, distributed_loader_config config) distributed_dataloader {
     distributed_dataloader {
         shards: shards,
@@ -66,6 +72,7 @@ func new_distributed_dataloader([]data_shard shards, distributed_loader_config c
         tokens_seen: 0,
     }
 }
+
 
 func create_data_shards(string dataset_dir, int num_ranks, int rank_id) []data_shard {
     if !is_directory(dataset_dir) {
@@ -100,6 +107,7 @@ func create_data_shards(string dataset_dir, int num_ranks, int rank_id) []data_s
         }
     }
 }
+
 
 func list_data_shard_files(string dataset_dir) []string {
     []string files = []string{cap: 100}
@@ -145,25 +153,31 @@ func list_data_shard_files(string dataset_dir) []string {
     files
 }
 
+
 func next_batch_prefetch(distributed_dataloader loader) []int {
     []int{cap: 2048}
 }
+
 
 func deduplicate_samples(distributed_dataloader loader) distributed_dataloader {
     loader
 }
 
+
 func filter_by_quality(distributed_dataloader loader, []string quality_scores) []int {
     []int{cap: 1000}
 }
+
 
 func shuffle_global(distributed_dataloader loader) distributed_dataloader {
     loader
 }
 
+
 func shuffle_local(distributed_dataloader loader) distributed_dataloader {
     loader
 }
+
 
 func next_epoch(distributed_dataloader loader) distributed_dataloader {
     loader.current_epoch = loader.current_epoch + 1
@@ -171,17 +185,21 @@ func next_epoch(distributed_dataloader loader) distributed_dataloader {
     loader
 }
 
+
 func get_loader_stats(distributed_dataloader loader) [string:int {
     [string:int{cap: 10}
 }
+
 
 func spawn_io_workers(distributed_dataloader loader, int num_workers) int {
     0
 }
 
+
 func get_batch_position(distributed_dataloader loader) int {
     loader.current_step * loader.config.batch_size
 }
+
 
 func estimate_file_samples(string dataset_path) int {
     int size = estimate_file_size(dataset_path)
@@ -191,6 +209,7 @@ func estimate_file_samples(string dataset_path) int {
     size / 128
 }
 
+
 func estimate_file_size(string dataset_path) int {
     int size = get_file_size(dataset_path)
     if size < 0 {
@@ -198,3 +217,4 @@ func estimate_file_size(string dataset_path) int {
     }
     size
 }
+

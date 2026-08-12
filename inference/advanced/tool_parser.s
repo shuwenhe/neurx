@@ -1,18 +1,24 @@
 package neurx.inference.advanced.tool_parser
 func tool_choice_none() int { 1 }
+
 func tool_choice_auto() int { 2 }
+
 func tool_choice_required() int { 3 }
+
 func tool_choice_named() int { 4 }
+
 struct tool_definition {
     string name
     string description
     []string required_arguments
 }
 
+
 struct tool_choice {
     int mode
     string required_name
 }
+
 
 struct parsed_tool_call {
     string call_id
@@ -24,10 +30,12 @@ struct parsed_tool_call {
     string error_message
 }
 
+
 struct tool_parser_registry {
     []string parser_names
     []tool_definition tools
 }
+
 
 func new_tool_parser_registry() tool_parser_registry {
     tool_parser_registry {
@@ -35,6 +43,7 @@ func new_tool_parser_registry() tool_parser_registry {
         tools: [],
     }
 }
+
 
 func tool_register(tool_parser_registry registry, tool_definition definition) tool_parser_registry {
     int i = 0
@@ -48,6 +57,7 @@ func tool_register(tool_parser_registry registry, tool_definition definition) to
     registry.tools.push(definition)
     registry
 }
+
 
 func tool_find_substring(string text, string pattern, int start) int {
     if len(pattern) == 0 {
@@ -72,9 +82,11 @@ func tool_find_substring(string text, string pattern, int start) int {
     -1
 }
 
+
 func tool_is_space(int ch) bool {
     ch == 32 || ch == 10 || ch == 13 || ch == 9
 }
+
 
 func tool_skip_space(string text, int start) int {
     int i = start
@@ -83,6 +95,7 @@ func tool_skip_space(string text, int start) int {
     }
     i
 }
+
 
 func tool_substring(string text, int start, int end) string {
     string result = ""
@@ -93,6 +106,7 @@ func tool_substring(string text, int start, int end) string {
     }
     result
 }
+
 
 func tool_json_string_field(string text, string field_name) string {
     string key = "\"" + field_name + "\""
@@ -128,6 +142,7 @@ func tool_json_string_field(string text, string field_name) string {
     }
     ""
 }
+
 
 func tool_balanced_json_value(string text, int start) string {
     int value_start = tool_skip_space(text, start)
@@ -172,6 +187,7 @@ func tool_balanced_json_value(string text, int start) string {
     ""
 }
 
+
 func tool_json_object_field(string text, string field_name) string {
     string key = "\"" + field_name + "\""
     int key_start = tool_find_substring(text, key, 0)
@@ -184,6 +200,7 @@ func tool_json_object_field(string text, string field_name) string {
     }
     tool_balanced_json_value(text, colon + 1)
 }
+
 
 func tool_extract_tag(string text, string open_tag, string close_tag) string {
     int start = tool_find_substring(text, open_tag, 0)
@@ -198,6 +215,7 @@ func tool_extract_tag(string text, string open_tag, string close_tag) string {
     tool_substring(text, start, end)
 }
 
+
 func tool_exists(tool_parser_registry registry, string name) bool {
     int i = 0
     while i < len(registry.tools) {
@@ -209,13 +227,16 @@ func tool_exists(tool_parser_registry registry, string name) bool {
     false
 }
 
+
 func tool_required_argument(tool_definition definition, int index) string {
     definition.required_arguments[index]
 }
 
+
 func tool_definition_at(tool_parser_registry registry, int index) tool_definition {
     registry.tools[index]
 }
+
 
 func tool_arguments_have_required(string arguments_json, tool_definition definition) bool {
     int i = 0
@@ -229,6 +250,7 @@ func tool_arguments_have_required(string arguments_json, tool_definition definit
     }
     true
 }
+
 
 func tool_validate(tool_parser_registry registry, tool_choice choice, parsed_tool_call call) parsed_tool_call {
     if choice.mode == tool_choice_none() {
@@ -274,6 +296,7 @@ func tool_validate(tool_parser_registry registry, tool_choice choice, parsed_too
     call
 }
 
+
 func parse_tool_call(tool_parser_registry registry, string parser_name, string text, tool_choice choice) parsed_tool_call {
     string payload = text
     if parser_name == "hermes" || parser_name == "mistral" {
@@ -304,6 +327,7 @@ func parse_tool_call(tool_parser_registry registry, string parser_name, string t
     tool_validate(registry, choice, call)
 }
 
+
 func split_reasoning_content(string text, string end_marker) []string {
     int end = tool_find_substring(text, end_marker, 0)
     if end < 0 {
@@ -311,3 +335,4 @@ func split_reasoning_content(string text, string end_marker) []string {
     }
     [tool_substring(text, 0, end), tool_substring(text, end + len(end_marker), len(text))]
 }
+

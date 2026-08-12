@@ -2,6 +2,7 @@ package neurx.checkpoint
 use neurx.tensor.tensor
 use neurx.tensor.new
 use neurx.runtime.io.{runtime_file_exists, runtime_read_text_file, runtime_write_text_file}
+
 func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
@@ -12,6 +13,7 @@ func copy_float([]float data) []float {
     }
     out
 }
+
 
 func copy_int([]int data) []int {
     int n = len(data)
@@ -24,9 +26,11 @@ func copy_int([]int data) []int {
     out
 }
 
+
 func copy_tensor(tensor value) tensor {
     new(copy_float(value.data), copy_int(value.shape), value.requires_grad)
 }
+
 
 func has_prefix(string value, string prefix) bool {
     int value_len = len(value)
@@ -43,6 +47,7 @@ func has_prefix(string value, string prefix) bool {
     }
     true
 }
+
 
 func has_suffix(string value, string suffix) bool {
     int value_len = len(value)
@@ -61,6 +66,7 @@ func has_suffix(string value, string suffix) bool {
     true
 }
 
+
 func last_path_separator_index(string path) int {
     int i = len(path) - 1
     while i >= 0 {
@@ -73,6 +79,7 @@ func last_path_separator_index(string path) int {
     -1
 }
 
+
 func path_dirname(string path) string {
     int idx = last_path_separator_index(path)
     if idx < 0 {
@@ -81,6 +88,7 @@ func path_dirname(string path) string {
     neurx.strings.substring(path, 0, idx)
 }
 
+
 func path_basename(string path) string {
     int idx = last_path_separator_index(path)
     if idx < 0 {
@@ -88,6 +96,7 @@ func path_basename(string path) string {
     }
     neurx.strings.substring(path, idx + 1, len(path))
 }
+
 
 func path_join(string left, string right) string {
     string base = trim(left)
@@ -104,6 +113,7 @@ func path_join(string left, string right) string {
     }
     neurx.strings.concat3(base, "/", tail)
 }
+
 
 func strip_checkpoint_file_tail(string path) string {
     string current = trim(path)
@@ -125,6 +135,7 @@ func strip_checkpoint_file_tail(string path) string {
     current
 }
 
+
 func checkpoint_manifest_path(string checkpoint_path) string {
     string root = strip_checkpoint_file_tail(checkpoint_path)
     if root == "" {
@@ -132,6 +143,7 @@ func checkpoint_manifest_path(string checkpoint_path) string {
     }
     path_join(root, "latest_checkpoint.txt")
 }
+
 
 func resolve_checkpoint_path(string path) string {
     string target = trim(path)
@@ -179,6 +191,7 @@ func resolve_checkpoint_path(string path) string {
     target
 }
 
+
 func split_lines(string text) []string {
     int n = len(text)
     []string lines = []string{cap: 0}
@@ -205,6 +218,7 @@ func split_lines(string text) []string {
     lines
 }
 
+
 func csv_tokens(string text) []string {
     int n = len(text)
     []string tokens = []string{cap: 0}
@@ -227,6 +241,7 @@ func csv_tokens(string text) []string {
     tokens
 }
 
+
 func join_ints([]int values) string {
     string out = ""
     int i = 0
@@ -240,6 +255,7 @@ func join_ints([]int values) string {
     out
 }
 
+
 func join_floats([]float values) string {
     string out = ""
     int i = 0
@@ -252,6 +268,7 @@ func join_floats([]float values) string {
     }
     out
 }
+
 
 func parse_int_list(string value) []int {
     []string parts = csv_tokens(value)
@@ -267,6 +284,7 @@ func parse_int_list(string value) []int {
     out
 }
 
+
 func parse_float_list(string value) []float {
     []string parts = csv_tokens(value)
     []float out = []float{cap: 0}
@@ -281,6 +299,7 @@ func parse_float_list(string value) []float {
     out
 }
 
+
 func parse_bool_flag(string value) bool {
     string v = lower(trim(value))
     bool r1 = neurx.strings.strings_eq(v, "1")
@@ -289,6 +308,7 @@ func parse_bool_flag(string value) bool {
     bool r4 = neurx.strings.strings_eq(v, "on")
     r1 || r2 || r3 || r4
 }
+
 
 func tensor_to_checkpoint_lines(int index, tensor value) []string {
     []string lines = []string{cap: 0}
@@ -301,6 +321,7 @@ func tensor_to_checkpoint_lines(int index, tensor value) []string {
     lines.push(line3)
     lines
 }
+
 
 func tensor_to_checkpoint_lines_from_params([]tensor params, int index) []string {
     []float empty_data = []float{cap: 0}
@@ -318,6 +339,7 @@ func tensor_to_checkpoint_lines_from_params([]tensor params, int index) []string
     }
     tensor_to_checkpoint_lines(index, t)
 }
+
 
 func checkpoint_to_text(checkpoint state) string {
     string out = "checkpoint_v1\n"
@@ -340,6 +362,7 @@ func checkpoint_to_text(checkpoint state) string {
     }
     out
 }
+
 
 func parse_checkpoint_lines([]string lines) checkpoint {
     if len(lines) == 0 {
@@ -417,6 +440,7 @@ func parse_checkpoint_lines([]string lines) checkpoint {
     new_checkpoint(step, loss, params)
 }
 
+
 func copy_params([]tensor params) []tensor {
     int n = len(params)
     []tensor out = []tensor{cap: n}
@@ -428,11 +452,13 @@ func copy_params([]tensor params) []tensor {
     out
 }
 
+
 struct checkpoint {
     int step
     float loss
     []tensor params
 }
+
 
 func new_checkpoint(int step, float loss, []tensor params) checkpoint {
     checkpoint {
@@ -442,6 +468,7 @@ func new_checkpoint(int step, float loss, []tensor params) checkpoint {
     }
 }
 
+
 func checkpoint_state_dict(checkpoint state) checkpoint {
     checkpoint {
         step: state.step,
@@ -450,6 +477,7 @@ func checkpoint_state_dict(checkpoint state) checkpoint {
     }
 }
 
+
 func checkpoint_load_state_dict(checkpoint state, checkpoint other) checkpoint {
     checkpoint {
         step: other.step,
@@ -457,6 +485,7 @@ func checkpoint_load_state_dict(checkpoint state, checkpoint other) checkpoint {
         params: copy_params(other.params),
     }
 }
+
 
 func save_checkpoint(string path, int step, float loss, []tensor params) () {
     string target = normalize_checkpoint_path(path)
@@ -467,6 +496,7 @@ func save_checkpoint(string path, int step, float loss, []tensor params) () {
     }
 }
 
+
 func load_checkpoint(string path) checkpoint {
     string target = resolve_checkpoint_path(path)
     if !runtime_file_exists(target) {
@@ -475,6 +505,7 @@ func load_checkpoint(string path) checkpoint {
     string content = runtime_read_text_file(target)
     parse_checkpoint_lines(split_lines(content))
 }
+
 
 func normalize_checkpoint_path(string path) string {
     string target = trim(path)
@@ -496,18 +527,23 @@ func normalize_checkpoint_path(string path) string {
     target
 }
 
+
 func checkpoint_step(checkpoint state) int {
     state.step
 }
+
 
 func checkpoint_loss(checkpoint state) float {
     state.loss
 }
 
+
 func checkpoint_params(checkpoint state) []tensor {
     state.params
 }
 
+
 func checkpoint_param_count(checkpoint state) int {
     len(state.params)
 }
+

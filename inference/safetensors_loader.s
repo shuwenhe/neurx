@@ -10,12 +10,14 @@ struct safetensors_header {
     string dtype
 }
 
+
 struct safetensors_archive {
     string path
     int total_size
     safetensors_header[] tensors
     bool is_loaded
 }
+
 
 func bytes_to_int32([]int bytes, int offset) int {
     int b0 = 0
@@ -27,11 +29,13 @@ func bytes_to_int32([]int bytes, int offset) int {
     b0
 }
 
+
 func int64_from_bytes([]int bytes, int offset) int {
     int low = int32_from_bytes(bytes, offset)
     int high = int32_from_bytes(bytes, offset + 4)
     low
 }
+
 
 func load_tensor_embedding(string model_path, int vocab_size, int hidden_size) [][]float {
     print("[Loader] Reading embedding matrix\n")
@@ -83,6 +87,7 @@ func load_tensor_embedding(string model_path, int vocab_size, int hidden_size) [
     }
     embedding
 }
+
 
 func load_transformer_layer(string model_path, int layer_id, int hidden_size, int num_heads) map[string][][]float {
     print("[Loader] Loading transformer layer " + int_to_string(layer_id) + "\n")
@@ -140,6 +145,7 @@ func load_transformer_layer(string model_path, int layer_id, int hidden_size, in
     weights
 }
 
+
 func load_lm_head(string model_path, int hidden_size, int vocab_size) [][]float {
     print("[Loader] Loading LM head\n")
     print("  Input dim: " + int_to_string(hidden_size) + "\n")
@@ -180,6 +186,7 @@ func load_lm_head(string model_path, int hidden_size, int vocab_size) [][]float 
     result
 }
 
+
 func bytes_to_int64_le([]int bytes, int offset) int {
     int b0 = bytes[offset]
     if b0 < 0 { b0 = 256 + b0 }
@@ -200,6 +207,7 @@ func bytes_to_int64_le([]int bytes, int offset) int {
     b0 + (b1 * 256) + (b2 * 65536) + (b3 * 16777216) + (b4 * 4294967296) + (b5 * 1099511627776) + (b6 * 281474976710656) + (b7 * 72057594037927936)
 }
 
+
 func extract_json_from_bytes([]int bytes, int start, int len_json) string {
     string result = ""
     int i = 0
@@ -212,6 +220,7 @@ func extract_json_from_bytes([]int bytes, int start, int len_json) string {
     }
     result
 }
+
 
 func char(int code) string {
     if code == 34 { return "\"" }
@@ -226,6 +235,7 @@ func char(int code) string {
     ""
 }
 
+
 func find_tensor_data_offset(string json, string tensor_name) int {
     int pos = index_of(json, tensor_name)
     if pos < 0 { return -1 }
@@ -237,6 +247,7 @@ func find_tensor_data_offset(string json, string tensor_name) int {
     int num = parse_int_from(json, num_start)
     num
 }
+
 
 func find_tensor_data_end(string json, string tensor_name) int {
     int pos = index_of(json, tensor_name)
@@ -250,6 +261,7 @@ func find_tensor_data_end(string json, string tensor_name) int {
     int num = parse_int_from(json, comma + 1)
     num
 }
+
 
 func index_of(string s, string sub) int {
     int n = len(s)
@@ -268,6 +280,7 @@ func index_of(string s, string sub) int {
     -1
 }
 
+
 func index_of_from(string s, string sub, int start) int {
     int n = len(s)
     int m = len(sub)
@@ -285,6 +298,7 @@ func index_of_from(string s, string sub, int start) int {
     -1
 }
 
+
 func parse_int_from(string s, int start) int {
     int i = start
     while i < len(s) && (s[i] < '0' || s[i] > '9') { i = i + 1 }
@@ -295,6 +309,7 @@ func parse_int_from(string s, int start) int {
     }
     val
 }
+
 
 func bf16_to_float(int b0, int b1) float {
     int low = b0
@@ -331,6 +346,7 @@ func bf16_to_float(int b0, int b1) float {
     val
 }
 
+
 func int_to_string(int value) string {
     if value == 0 {
         return "0"
@@ -344,6 +360,7 @@ func int_to_string(int value) string {
     }
     output
 }
+
 
 func verify_tensor_shape([]int shape, []int expected) bool {
     if len(shape) != len(expected) {
@@ -359,6 +376,7 @@ func verify_tensor_shape([]int shape, []int expected) bool {
     true
 }
 
+
 func calculate_tensor_size([]int shape) int {
     int size = 1
     int i = 0
@@ -368,6 +386,7 @@ func calculate_tensor_size([]int shape) int {
     }
     size
 }
+
 
 func open_safetensors(string path) safetensors_archive {
     print("[SafeTensors] Opening archive: " + path + "\n")
@@ -379,9 +398,11 @@ func open_safetensors(string path) safetensors_archive {
     archive
 }
 
+
 func close_safetensors(safetensors_archive archive) {
     print("[SafeTensors] Closed: " + archive.path + "\n")
 }
+
 
 func main() {
     print("\n╔════════════════════════════════════════════════════╗\n")
@@ -429,3 +450,4 @@ func main() {
     print("  5. Test single token generation\n\n")
     close_safetensors(archive)
 }
+

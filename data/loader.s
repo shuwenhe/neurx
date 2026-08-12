@@ -5,12 +5,14 @@ struct batch {
     attention_mask [][]i64
 }
 
+
 struct data_loader {
     data []batch
     batch_size i64
     shuffle bool
     current_idx i64
 }
+
 
 func data_loader_new(data []batch, batch_size i64, shuffle bool) data_loader {
     return data_loader{
@@ -20,6 +22,7 @@ func data_loader_new(data []batch, batch_size i64, shuffle bool) data_loader {
         current_idx: 0,
     }
 }
+
 
 func create_synthetic_dataset(num_samples i64, seq_len i64, vocab_size i64, num_classes i64) []batch {
     batches := make([]batch, 0)
@@ -41,6 +44,7 @@ func create_synthetic_dataset(num_samples i64, seq_len i64, vocab_size i64, num_
     return batches
 }
 
+
 func data_loader_next_batch(loader data_loader) batch {
     if loader.current_idx >= i64(len(loader.data)) {
         return batch{}
@@ -49,23 +53,28 @@ func data_loader_next_batch(loader data_loader) batch {
     return batch_item
 }
 
+
 func data_loader_has_next(loader data_loader) bool {
     return loader.current_idx < i64(len(loader.data))
 }
+
 
 func data_loader_step(loader data_loader) data_loader {
     loader.current_idx = loader.current_idx + 1
     return loader
 }
 
+
 func data_loader_reset(loader data_loader) data_loader {
     loader.current_idx = 0
     return loader
 }
 
+
 func data_loader_len(loader data_loader) i64 {
     return i64(len(loader.data))
 }
+
 
 func simple_random() int {
     static_seed := 12345
@@ -73,10 +82,12 @@ func simple_random() int {
     return static_seed % 100000
 }
 
+
 struct batch_iterator {
     loader data_loader
     idx i64
 }
+
 
 func batch_iterator_new(loader data_loader) batch_iterator {
     return batch_iterator{
@@ -84,6 +95,7 @@ func batch_iterator_new(loader data_loader) batch_iterator {
         idx: 0,
     }
 }
+
 
 func batch_iterator_next(it batch_iterator) (batch, bool) {
     if it.idx >= i64(len(it.loader.data)) {
@@ -93,15 +105,18 @@ func batch_iterator_next(it batch_iterator) (batch, bool) {
     return batch_item, true
 }
 
+
 func batch_iterator_step(it batch_iterator) batch_iterator {
     it.idx = it.idx + 1
     return it
 }
 
+
 struct random_sampler {
     data_size i64
     indices []i64
 }
+
 
 func random_sampler_new(data_size i64) random_sampler {
     indices := make([]i64, data_size)
@@ -113,6 +128,7 @@ func random_sampler_new(data_size i64) random_sampler {
         indices: indices,
     }
 }
+
 
 func collate_fn(batches []batch) batch {
     if len(batches) == 0 {
@@ -133,12 +149,14 @@ func collate_fn(batches []batch) batch {
     return combined
 }
 
+
 struct distributed_sampler {
     data_size i64
     rank i64
     world_size i64
     indices []i64
 }
+
 
 func distributed_sampler_new(data_size i64, rank i64, world_size i64) distributed_sampler {
     indices := make([]i64, 0)
@@ -157,9 +175,11 @@ func distributed_sampler_new(data_size i64, rank i64, world_size i64) distribute
     }
 }
 
+
 func distributed_sampler_len(sampler distributed_sampler) i64 {
     return i64(len(sampler.indices))
 }
+
 
 func distributed_sampler_get(sampler distributed_sampler, idx i64) i64 {
     if idx < 0 || idx >= i64(len(sampler.indices)) {
@@ -167,3 +187,4 @@ func distributed_sampler_get(sampler distributed_sampler, idx i64) i64 {
     }
     return sampler.indices[idx]
 }
+

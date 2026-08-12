@@ -9,6 +9,7 @@ func phase5_summary_command(string path) string {
     cmd
 }
 
+
 func main() {
     string prompt_path = "tests/golden/prompts.json"
     if !runtime_file_exists(prompt_path) {
@@ -23,3 +24,4 @@ func main() {
     println("phase5-golden-prompt PASS " + summary)
     0
 }
+

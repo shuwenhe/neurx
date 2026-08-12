@@ -14,6 +14,7 @@ func int_to_string(int value) string {
     output
 }
 
+
 func load_safetensors_header(string model_path) string {
     print("[SafeTensors] Opening: " + model_path + "/model.safetensors\n")
     print("  Format: Binary SafeTensors (BF16 weights)\n")
@@ -26,12 +27,14 @@ func load_safetensors_header(string model_path) string {
     "ok"
 }
 
+
 func verify_embedding_shape(int vocab_size, int hidden_size) bool {
     if vocab_size != 151936 || hidden_size != 896 {
         return false
     }
     true
 }
+
 
 func verify_layer_shapes(int hidden_size, int num_heads, int ffn_dim) bool {
     if hidden_size != 896 || num_heads != 14 || ffn_dim != 4864 {
@@ -40,6 +43,7 @@ func verify_layer_shapes(int hidden_size, int num_heads, int ffn_dim) bool {
     true
 }
 
+
 func tokenize_input(string prompt) int {
     print("[Tokenizer] Input: \"" + prompt + "\"\n")
     print("  BPE vocab size: 151643\n")
@@ -47,11 +51,13 @@ func tokenize_input(string prompt) int {
     100
 }
 
+
 func embedding_lookup(int token_id, int hidden_size) int {
     print("[Embedding] Token ID " + int_to_string(token_id) + " → ")
     print("vector [" + int_to_string(hidden_size) + "]\n")
     hidden_size
 }
+
 
 func layer_forward_pass(int layer_id, int hidden_size) int {
     print("[Layer " + int_to_string(layer_id) + "] ")
@@ -60,11 +66,13 @@ func layer_forward_pass(int layer_id, int hidden_size) int {
     hidden_size
 }
 
+
 func lm_head_projection(int hidden_size, int vocab_size) int {
     print("[LM Head] [" + int_to_string(hidden_size) + "] → ")
     print("[" + int_to_string(vocab_size) + "]\n")
     vocab_size
 }
+
 
 func sample_next_token(int vocab_size) int {
     print("[Sampling] argmax from " + int_to_string(vocab_size) + " logits\n")
@@ -72,10 +80,12 @@ func sample_next_token(int vocab_size) int {
     200
 }
 
+
 func decode_token(int token_id) string {
     print("[Decode] Token " + int_to_string(token_id) + " → 'response'\n")
     "response"
 }
+
 
 func generate_with_model(string prompt, string model_path) string {
     print("\n╔════════════════════════════════════════════════════════╗\n")
@@ -138,6 +148,7 @@ func generate_with_model(string prompt, string model_path) string {
     response
 }
 
+
 func main() {
     print("\n╔════════════════════════════════════════════════════════╗\n")
     print("║  Model Integration Framework - Phase 1               ║\n")
@@ -166,3 +177,4 @@ func main() {
     print("Phase 8: Test end-to-end inference\n\n")
     print("STATUS: Framework ready for weight loading and computation\n")
 }
+

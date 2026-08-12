@@ -1,5 +1,6 @@
 package neurx.checkpoint.pretrain
 use neurx.runtime.io.{runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file}
+
 struct pretrain_checkpoint_state {
     string run_name
     string root
@@ -15,6 +16,7 @@ struct pretrain_checkpoint_state {
     bool has_best
 }
 
+
 struct pretrain_checkpoint_bundle_state {
     pretrain_checkpoint_state checkpoint
     string checkpoint_path
@@ -24,6 +26,7 @@ struct pretrain_checkpoint_bundle_state {
     string tokenizer_manifest_path
     bool resumable
 }
+
 
 func new_pretrain_checkpoint_state(string run_name, string root) pretrain_checkpoint_state {
     int next_save_step = 1000
@@ -43,6 +46,7 @@ func new_pretrain_checkpoint_state(string run_name, string root) pretrain_checkp
     }
 }
 
+
 func new_pretrain_checkpoint_bundle_state(pretrain_checkpoint_state checkpoint, string checkpoint_path, string optimizer_manifest_path, string data_manifest_path, string tokenizer_manifest_path) pretrain_checkpoint_bundle_state {
     pretrain_checkpoint_bundle_state {
         checkpoint: checkpoint,
@@ -54,6 +58,7 @@ func new_pretrain_checkpoint_bundle_state(pretrain_checkpoint_state checkpoint, 
         resumable: true,
     }
 }
+
 
 func pretrain_checkpoint_trim(string s) string {
     int i = 0
@@ -76,9 +81,11 @@ func pretrain_checkpoint_trim(string s) string {
     out
 }
 
+
 func pretrain_checkpoint_chr(int c) string {
     string(c)
 }
+
 
 func pretrain_checkpoint_split_lines(string text) []string {
     []string lines = []string{cap: 0}
@@ -102,6 +109,7 @@ func pretrain_checkpoint_split_lines(string text) []string {
     }
     lines
 }
+
 
 func pretrain_checkpoint_string_to_int(string s, int fallback) int {
     string text = pretrain_checkpoint_trim(s)
@@ -129,6 +137,7 @@ func pretrain_checkpoint_string_to_int(string s, int fallback) int {
     value
 }
 
+
 func pretrain_checkpoint_int_to_string(int value) string {
     if value == 0 {
         return "0"
@@ -148,6 +157,7 @@ func pretrain_checkpoint_int_to_string(int value) string {
     }
     out
 }
+
 
 func pretrain_checkpoint_float_to_string(float value) string {
     float x = value
@@ -190,6 +200,7 @@ func pretrain_checkpoint_float_to_string(float value) string {
     out
 }
 
+
 func pretrain_checkpoint_metadata_text(pretrain_checkpoint_state state) string {
     string out = "pretrain_checkpoint_v1\n"
     out = out + "run_name=" + state.run_name + "\n"
@@ -215,6 +226,7 @@ func pretrain_checkpoint_metadata_text(pretrain_checkpoint_state state) string {
     out
 }
 
+
 func pretrain_checkpoint_bundle_text(pretrain_checkpoint_bundle_state state) string {
     string out = "pretrain_checkpoint_bundle_v1\n"
     out = out + "checkpoint_path=" + state.checkpoint_path + "\n"
@@ -229,6 +241,7 @@ func pretrain_checkpoint_bundle_text(pretrain_checkpoint_bundle_state state) str
     out = out + "resumable=" + pretrain_checkpoint_int_to_string(resumable) + "\n"
     out
 }
+
 
 func pretrain_checkpoint_metadata_value(string text, string key, string fallback) string {
     []string lines = pretrain_checkpoint_split_lines(text)
@@ -261,9 +274,11 @@ func pretrain_checkpoint_metadata_value(string text, string key, string fallback
     fallback
 }
 
+
 func pretrain_checkpoint_metadata_int(string text, string key, int fallback) int {
     pretrain_checkpoint_string_to_int(pretrain_checkpoint_metadata_value(text, key, pretrain_checkpoint_int_to_string(fallback)), fallback)
 }
+
 
 func pretrain_checkpoint_metadata_float(string text, string key, float fallback) float {
     string raw = pretrain_checkpoint_trim(pretrain_checkpoint_metadata_value(text, key, pretrain_checkpoint_float_to_string(fallback)))
@@ -306,6 +321,7 @@ func pretrain_checkpoint_metadata_float(string text, string key, float fallback)
     out
 }
 
+
 func pretrain_checkpoint_path_dir(string path) string {
     int i = len(path) - 1
     while i >= 0 {
@@ -329,6 +345,7 @@ func pretrain_checkpoint_path_dir(string path) string {
     out
 }
 
+
 func save_pretrain_checkpoint(pretrain_checkpoint_bundle_state bundle) pretrain_checkpoint_bundle_state {
     runtime_make_dirs(bundle.checkpoint.root)
     runtime_make_dirs(pretrain_checkpoint_path_dir(bundle.checkpoint_path))
@@ -337,6 +354,7 @@ func save_pretrain_checkpoint(pretrain_checkpoint_bundle_state bundle) pretrain_
     runtime_write_text_file(bundle.checkpoint.root + "/latest_checkpoint.txt", bundle.checkpoint_path)
     bundle
 }
+
 
 func load_pretrain_checkpoint(pretrain_checkpoint_bundle_state bundle) pretrain_checkpoint_bundle_state {
     pretrain_checkpoint_bundle_state next = bundle
@@ -371,6 +389,7 @@ func load_pretrain_checkpoint(pretrain_checkpoint_bundle_state bundle) pretrain_
     next
 }
 
+
 func pretrain_checkpoint_should_save(pretrain_checkpoint_state state, int step) bool {
     if state.save_best_only {
         return false
@@ -381,6 +400,7 @@ func pretrain_checkpoint_should_save(pretrain_checkpoint_state state, int step) 
     step >= state.next_save_step
 }
 
+
 func pretrain_checkpoint_should_save_best(pretrain_checkpoint_state state, float metric) bool {
     if !state.has_best {
         return true
@@ -388,17 +408,21 @@ func pretrain_checkpoint_should_save_best(pretrain_checkpoint_state state, float
     metric < state.best_metric
 }
 
+
 func pretrain_checkpoint_next_save_step(pretrain_checkpoint_state state) int {
     state.next_save_step
 }
+
 
 func pretrain_checkpoint_has_best(pretrain_checkpoint_state state) bool {
     state.has_best
 }
 
+
 func pretrain_checkpoint_prune_count(pretrain_checkpoint_state state) int {
     state.prune_count
 }
+
 
 func mark_saved(pretrain_checkpoint_state state, int step) pretrain_checkpoint_state {
     int save_count = state.save_count + 1
@@ -428,6 +452,7 @@ func mark_saved(pretrain_checkpoint_state state, int step) pretrain_checkpoint_s
     }
 }
 
+
 func mark_best(pretrain_checkpoint_state state, int step, float metric) pretrain_checkpoint_state {
     if state.has_best && metric >= state.best_metric {
         return state
@@ -448,13 +473,16 @@ func mark_best(pretrain_checkpoint_state state, int step, float metric) pretrain
     }
 }
 
+
 func pretrain_checkpoint_state_dict(pretrain_checkpoint_state state) pretrain_checkpoint_state {
     state
 }
 
+
 func pretrain_checkpoint_load_state_dict(pretrain_checkpoint_state state, pretrain_checkpoint_state other) pretrain_checkpoint_state {
     other
 }
+
 
 func pretrain_checkpoint_bundle_state_dict(pretrain_checkpoint_bundle_state state) pretrain_checkpoint_bundle_state {
     pretrain_checkpoint_bundle_state {
@@ -468,6 +496,7 @@ func pretrain_checkpoint_bundle_state_dict(pretrain_checkpoint_bundle_state stat
     }
 }
 
+
 func pretrain_checkpoint_bundle_load_state_dict(pretrain_checkpoint_bundle_state state, pretrain_checkpoint_bundle_state other) pretrain_checkpoint_bundle_state {
     pretrain_checkpoint_bundle_state {
         checkpoint: pretrain_checkpoint_load_state_dict(state.checkpoint, other.checkpoint),
@@ -479,3 +508,4 @@ func pretrain_checkpoint_bundle_load_state_dict(pretrain_checkpoint_bundle_state
         resumable: other.resumable,
     }
 }
+

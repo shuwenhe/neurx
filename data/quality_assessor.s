@@ -21,11 +21,13 @@ struct quality_metrics {
     issues: []string
 }
 
+
 struct quality_assessor {
     sample_size: i64
     metrics: quality_metrics
     seen_hashes: set<string>
 }
+
 
 func new_quality_assessor(sample_size: i64) quality_assessor {
     return quality_assessor{
@@ -44,6 +46,7 @@ func new_quality_assessor(sample_size: i64) quality_assessor {
         seen_hashes: make(set<string>),
     }
 }
+
 
 func (qa: *quality_assessor) calculate_quality_score(text: string) f64 {
     if len(text) == 0 {
@@ -83,6 +86,7 @@ func (qa: *quality_assessor) calculate_quality_score(text: string) f64 {
     return score
 }
 
+
 func count_unique_chars(text: string) i64 {
     seen := make(set<rune>)
     for c in text {
@@ -90,6 +94,7 @@ func count_unique_chars(text: string) i64 {
     }
     return i64(len(seen))
 }
+
 
 func has_natural_language_features(text: string) bool {
     words := strings.Split(text, " ")
@@ -101,6 +106,7 @@ func has_natural_language_features(text: string) bool {
     }
     return long_word_count > 0 && long_word_count > len(words) / 100
 }
+
 
 func detect_language(text: string) string {
     if strings.Contains(text, "é") || strings.Contains(text, "à") {
@@ -123,6 +129,7 @@ func detect_language(text: string) string {
     }
     return "en"
 }
+
 
 func (qa: *quality_assessor) assess_file(filepath: string) quality_metrics {
     println("📊 evaluationfile: " + filepath)
@@ -199,6 +206,7 @@ func (qa: *quality_assessor) assess_file(filepath: string) quality_metrics {
     return qa.metrics
 }
 
+
 func (metrics: quality_metrics) print_report() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║         📊 NeurX dataEnglish textevaluationEnglish text                      ║")
@@ -254,6 +262,7 @@ func (metrics: quality_metrics) print_report() {
     println("═══════════════════════════════════════════════════════════")
 }
 
+
 func format_size(size: i64) string {
     if size < 1024 {
         return string(size) + " B"
@@ -266,6 +275,7 @@ func format_size(size: i64) string {
     }
     return format_float(f64(size) / (1024.0 * 1024.0 * 1024.0), 1) + " GB"
 }
+
 
 func format_tokens(tokens: i64) string {
     if tokens < 1000 {
@@ -280,19 +290,23 @@ func format_tokens(tokens: i64) string {
     return format_float(f64(tokens) / 1000000000.0, 1) + "B"
 }
 
+
 func format_score(score: f64) string {
     return format_float(score, 2) + " / 1.0"
 }
 
+
 func format_percent(percent: f64) string {
     return format_float(percent * 100.0, 1) + "%"
 }
+
 
 func format_float(num: f64, decimals: i32) string {
     multiplier := pow(10.0, f64(decimals))
     rounded := math.Floor(num * multiplier) / multiplier
     return string(rounded)
 }
+
 
 func pow(base: f64, exp: f64) f64 {
     result := 1.0
@@ -301,6 +315,7 @@ func pow(base: f64, exp: f64) f64 {
     }
     return result
 }
+
 
 func main() {
     if len(os.Args) < 2 {
@@ -318,6 +333,7 @@ func main() {
     metrics.print_report()
 }
 
+
 func string_to_int(s: string) i64 {
     result := i64(0)
     for c in s {
@@ -327,3 +343,4 @@ func string_to_int(s: string) i64 {
     }
     return result
 }
+

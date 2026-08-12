@@ -14,6 +14,7 @@ struct multi_node_config_2 {
     hosts []string
 }
 
+
 func parse_host_file(hostfile string) []string {
     content, _ := os.ReadFile(hostfile)
     lines := strings.Split(string(content), "\n")
@@ -27,6 +28,7 @@ func parse_host_file(hostfile string) []string {
     return hosts
 }
 
+
 func get_gpu_count(host string) int {
     cmd := exec.command("ssh", host, "nvidia-smi -L | wc -l")
     output, _ := cmd.Output()
@@ -34,6 +36,7 @@ func get_gpu_count(host string) int {
     strings.TrimSpace(string(output))
     return count
 }
+
 
 func launch_on_host(host string, rank int, config multi_node_config_2) {
     env := os.Environ()
@@ -55,6 +58,7 @@ func launch_on_host(host string, rank int, config multi_node_config_2) {
     cmd.Stderr = os.Stderr
     cmd.Run()
 }
+
 
 func main() {
     root := os.Getenv("NEURX_ROOT")
@@ -93,3 +97,4 @@ func main() {
         launch_on_host(host, i, config)
     }
 }
+

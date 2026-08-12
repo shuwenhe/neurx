@@ -1,10 +1,12 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_write_binary_file}
+
 struct tensor {
     int rows
     int cols
     int size
 }
+
 
 struct lora_module {
     int rank
@@ -16,6 +18,7 @@ struct lora_module {
     int lora_b_cols
 }
 
+
 func matmul_element(
     float lora_a_val,
     float lora_b_val,
@@ -26,6 +29,7 @@ func matmul_element(
     float lora_output = lora_intermediate * lora_b_val
     return lora_output
 }
+
 
 func exp_approx(float x) float {
     if x > 10.0 { return 22026.0 }
@@ -40,6 +44,7 @@ func exp_approx(float x) float {
     }
     return result
 }
+
 
 func log_approx(float x) float {
     if x <= 0.0 { return -10.0 }
@@ -56,6 +61,7 @@ func log_approx(float x) float {
     }
     return 2.0 * result
 }
+
 
 func cross_entropy_loss(
     float logit0,
@@ -82,12 +88,14 @@ func cross_entropy_loss(
     return loss
 }
 
+
 struct gradient_result {
     float grad0
     float grad1
     float grad2
     float grad3
 }
+
 
 func cross_entropy_backward(
     float logit0,
@@ -125,6 +133,7 @@ func cross_entropy_backward(
     return result
 }
 
+
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -151,6 +160,7 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
+
 
 func float_to_str(float value, int decimals) string {
     float current = value
@@ -186,6 +196,7 @@ func float_to_str(float value, int decimals) string {
     }
     return out
 }
+
 
 func main() {
     string output_dir = runtime_env_get("NEURX_OUTPUT_DIR", "/home/shuwen/shuwen/posttrain")
@@ -320,3 +331,4 @@ func main() {
     println("")
     return 0
 }
+

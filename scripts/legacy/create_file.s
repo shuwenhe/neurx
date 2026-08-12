@@ -18,6 +18,7 @@ func parent_path(string path) string {
     out
 }
 
+
 func main() {
     string path = runtime_env_get("NEURX_CREATE_FILE_PATH", "")
     string content = runtime_env_get("NEURX_CREATE_FILE_TEXT", "")
@@ -38,3 +39,4 @@ func main() {
     println("Created: " + path)
     0
 }
+

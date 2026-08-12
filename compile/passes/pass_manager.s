@@ -8,6 +8,7 @@ struct pass_plan_state {
     bool has_lowering
 }
 
+
 func default_passes(string mode, bool dynamic, bool fullgraph) []string {
     []string passes = []
     passes.push("normalize")
@@ -27,6 +28,7 @@ func default_passes(string mode, bool dynamic, bool fullgraph) []string {
     passes
 }
 
+
 func new_pass_plan_state(string mode, bool dynamic, bool fullgraph) pass_plan_state {
     []string passes = default_passes(mode, dynamic, fullgraph)
     pass_plan_state {
@@ -37,14 +39,17 @@ func new_pass_plan_state(string mode, bool dynamic, bool fullgraph) pass_plan_st
     }
 }
 
+
 func pass_count(pass_plan_state plan) int {
     int count = len(plan.passes)
     count
 }
 
+
 func get_pass(pass_plan_state plan, int index) string {
     plan.passes[index]
 }
+
 
 func apply_pass_plan(compile_state state, pass_plan_state plan) compile_state {
     compile_state next = state
@@ -68,6 +73,8 @@ func apply_pass_plan(compile_state state, pass_plan_state plan) compile_state {
     next
 }
 
+
 func pass_plan_load_state_dict(pass_plan_state plan, pass_plan_state other) pass_plan_state {
     other
 }
+

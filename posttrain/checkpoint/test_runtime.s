@@ -3,22 +3,27 @@ func str_len(string s) int {
     return __host_str_len(s)
 }
 
+
 func str_find(string haystack, string needle) int {
     return __host_str_find(haystack, needle)
 }
 
+
 func str_char_at(string s, int pos) string {
     return __host_str_char_at(s, pos)
 }
+
 
 func str_substring(string s, int start) string {
     println("[PLACEHOLDER] str_substring() - needs runtime.c implementation")
     return s
 }
 
+
 func file_size(string path) int {
     return __host_file_size(path)
 }
+
 
 func file_exists(string filepath) bool {
     int result = __host_file_exists(filepath)
@@ -28,6 +33,7 @@ func file_exists(string filepath) bool {
     return false
 }
 
+
 func write_file(string filepath, string content) bool {
     int result = __host_write_file(filepath, content)
     if result == 1 {
@@ -36,9 +42,11 @@ func write_file(string filepath, string content) bool {
     return false
 }
 
+
 func read_file(string filepath) string {
     return __host_read_file(filepath)
 }
+
 
 func atomic_replace(string tmp_path, string final_path) bool {
     int result = __host_atomic_replace(tmp_path, final_path)
@@ -47,6 +55,7 @@ func atomic_replace(string tmp_path, string final_path) bool {
     }
     return false
 }
+
 
 func test_str_len() {
     println("====================================")
@@ -76,6 +85,7 @@ func test_str_len() {
     }
     println("")
 }
+
 
 func test_str_find() {
     println("====================================")
@@ -109,6 +119,7 @@ func test_str_find() {
     println("")
 }
 
+
 func test_str_char_at() {
     println("====================================")
     println("[Test] str_char_at()")
@@ -139,6 +150,7 @@ func test_str_char_at() {
     println("")
 }
 
+
 func test_str_substring() {
     println("====================================")
     println("[Test] str_substring()")
@@ -157,6 +169,7 @@ func test_str_substring() {
     }
     println("")
 }
+
 
 func test_file_io() {
     println("====================================")
@@ -207,6 +220,7 @@ func test_file_io() {
     }
     println("")
 }
+
 
 func test_atomic_rename() {
     println("====================================")
@@ -312,6 +326,7 @@ func test_atomic_rename() {
     println("")
 }
 
+
 func main() {
     println("")
     println("========================================")
@@ -336,6 +351,7 @@ func main() {
     println("   → Re-run test_runtime.s")
     println("")
 }
+
 
 func int_to_str(int n) string {
     if n == 0 { return "0" }
@@ -363,3 +379,4 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
+

@@ -11,9 +11,11 @@ func main() {
     0
 }
 
+
 func bool_text(bool value) string {
     if value {
         return "true"
     }
     "false"
 }
+

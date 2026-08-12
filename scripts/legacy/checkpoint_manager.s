@@ -24,6 +24,7 @@ type checkpoint_manager struct {
     checkpoints: []checkpoint_metadata
 }
 
+
 func (cm *checkpoint_manager) init(checkpoint_dir: string, max_checkpoints: int) error {
     cm.checkpoint_dir = checkpoint_dir
     cm.max_checkpoints = max_checkpoints
@@ -33,6 +34,7 @@ func (cm *checkpoint_manager) init(checkpoint_dir: string, max_checkpoints: int)
     }
     return nil
 }
+
 
 func (cm *checkpoint_manager) save_checkpoint(
     step: int,
@@ -92,6 +94,7 @@ func (cm *checkpoint_manager) save_checkpoint(
     return nil
 }
 
+
 func (cm *checkpoint_manager) load_latest(): (map[string]interface{}, error) {
     if len(cm.checkpoints) == 0 {
         return nil, error("No checkpoints available")
@@ -99,6 +102,7 @@ func (cm *checkpoint_manager) load_latest(): (map[string]interface{}, error) {
     latest := cm.checkpoints[len(cm.checkpoints)-1]
     return cm.load_checkpoint(latest.step)
 }
+
 
 func (cm *checkpoint_manager) load_checkpoint(step: int): (map[string]interface{}, error) {
     checkpoint_name := "checkpoint-" + format_int(step)
@@ -128,6 +132,7 @@ func (cm *checkpoint_manager) load_checkpoint(step: int): (map[string]interface{
     }, nil
 }
 
+
 func (cm *checkpoint_manager) validate_checkpoint(
     checkpoint_path: string,
     metadata: checkpoint_metadata) error {
@@ -150,6 +155,7 @@ func (cm *checkpoint_manager) validate_checkpoint(
     return nil
 }
 
+
 func (cm *checkpoint_manager) list_checkpoints(): []map[string]interface{} {
     result := make([]map[string]interface{}, len(cm.checkpoints))
     for i, metadata := range cm.checkpoints {
@@ -164,6 +170,7 @@ func (cm *checkpoint_manager) list_checkpoints(): []map[string]interface{} {
     }
     return result
 }
+
 
 func (cm *checkpoint_manager) get_checkpoint_info(step: int): map[string]interface{} {
     for _, metadata := range cm.checkpoints {
@@ -182,6 +189,7 @@ func (cm *checkpoint_manager) get_checkpoint_info(step: int): map[string]interfa
     return nil
 }
 
+
 func (cm *checkpoint_manager) cleanup_old_checkpoints() error {
     if len(cm.checkpoints) <= cm.max_checkpoints {
         return nil
@@ -197,6 +205,7 @@ func (cm *checkpoint_manager) cleanup_old_checkpoints() error {
     cm.checkpoints = cm.checkpoints[num_to_delete:]
     return nil
 }
+
 
 func (cm *checkpoint_manager) export_stats(): string {
     if len(cm.checkpoints) == 0 {
@@ -215,6 +224,7 @@ func (cm *checkpoint_manager) export_stats(): string {
     return string(json_bytes)
 }
 
+
 func (cm *checkpoint_manager) get_best_perplexity(): float {
     if len(cm.checkpoints) == 0 {
         return 0.0
@@ -228,14 +238,17 @@ func (cm *checkpoint_manager) get_best_perplexity(): float {
     return best
 }
 
+
 func compute_hash(data: []byte): string {
     h := sha256.Sum256(data)
     return fmt.Sprintf("%x", h)
 }
 
+
 func format_int(i: int): string {
     return fmt.Sprintf("%d", i)
 }
+
 
 func main() {
     cm := &checkpoint_manager{}
@@ -269,3 +282,4 @@ func main() {
     }
     println("\n" + cm.export_stats())
 }
+

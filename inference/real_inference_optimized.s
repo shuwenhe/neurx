@@ -13,6 +13,7 @@ func pow_int(int base, int exp) int {
     result
 }
 
+
 func u64_le([]int bytes, int offset) int {
     if len(bytes) < offset + 8 {
         return 0
@@ -26,6 +27,7 @@ func u64_le([]int bytes, int offset) int {
     }
     return value
 }
+
 
 func find_substring_bytes([]int bytes, string needle, int start_pos) int {
     int start = start_pos
@@ -49,6 +51,7 @@ func find_substring_bytes([]int bytes, string needle, int start_pos) int {
     -1
 }
 
+
 func skip_to_digit_bytes([]int bytes, int pos) int {
     int cursor = pos
     while cursor < len(bytes) {
@@ -60,6 +63,7 @@ func skip_to_digit_bytes([]int bytes, int pos) int {
     }
     -1
 }
+
 
 func parse_int_at_bytes([]int bytes, int pos) int {
     int value = 0
@@ -75,6 +79,7 @@ func parse_int_at_bytes([]int bytes, int pos) int {
     return value
 }
 
+
 func tensor_index_record(int offset, int size, int found) []int {
     []int record
     record = []int{cap: 3}
@@ -83,6 +88,7 @@ func tensor_index_record(int offset, int size, int found) []int {
     record[2] = found
     return record
 }
+
 
 func parse_tensor_index([]int metadata, string tensor_name) []int {
     []int result
@@ -115,6 +121,7 @@ func parse_tensor_index([]int metadata, string tensor_name) []int {
     return result
 }
 
+
 func int_to_string(int value) string {
     if value == 0 {
         return "0"
@@ -135,6 +142,7 @@ func int_to_string(int value) string {
     return out + tmp
 }
 
+
 func slice_bytes([]int bytes, int start, int length) []int {
     []int out
     int size = length
@@ -150,9 +158,11 @@ func slice_bytes([]int bytes, int start, int length) []int {
     return out
 }
 
+
 func layer_tensor_name(int layer, string suffix) string {
     "model.layers." + int_to_string(layer) + "." + suffix
 }
+
 
 func tensor_signature([]int tensor_bytes, int salt) int {
     int total = 0
@@ -177,6 +187,7 @@ func tensor_signature([]int tensor_bytes, int salt) int {
     return x
 }
 
+
 func load_prompt_text() string {
     string prompt_path = runtime_env_get("NEURX_CHAT_PROMPT_PATH", "/tmp/neurx_chat_prompt.txt")
     if !runtime_file_exists(prompt_path) {
@@ -189,12 +200,14 @@ func load_prompt_text() string {
     return prompt
 }
 
+
 func is_chinese_char(int char_code) int {
     if char_code >= 19968 && char_code <= 40959 {
         return 1
     }
     return 0
 }
+
 
 func tokenize_mixed(string text) []int {
     []int tokens
@@ -241,6 +254,7 @@ func tokenize_mixed(string text) []int {
     return out
 }
 
+
 func word_to_token(string word) int {
     if word == "what" { return 100 }
     if word == "is" { return 101 }
@@ -264,6 +278,7 @@ func word_to_token(string word) int {
     50000 + (hash - (hash / 10000) * 10000)
 }
 
+
 func token_to_word(int token) string {
     if token == 100 { return "what" }
     if token == 101 { return "is" }
@@ -286,12 +301,14 @@ func token_to_word(int token) string {
     "token"
 }
 
+
 func read_tensor_bytes_cached(string model_path, []int idx) []int {
     if len(idx) < 3 || idx[2] == 0 {
         return []int{cap: 0}
     }
     __host_read_binary_file_range(model_path, 8 + idx[0], idx[1])
 }
+
 
 func fast_forward_step([]int prompt_tokens, string model_path, []int metadata, []int embed_index, []int final_norm_index, []int lm_head_index) int {
     int token_sum = 0
@@ -312,6 +329,7 @@ func fast_forward_step([]int prompt_tokens, string model_path, []int metadata, [
     return 50000 + (hidden - (hidden / 100000) * 100000)
 }
 
+
 func select_next_token_fast(int seed, int vocab_size) int {
     int logit = seed
     int slot = logit - (logit / vocab_size) * vocab_size
@@ -320,6 +338,7 @@ func select_next_token_fast(int seed, int vocab_size) int {
     }
     return 100 + (slot - (slot / 15) * 15)
 }
+
 
 func decode_token_sequence_mixed(int seed, int max_new_tokens) string {
     string out = ""
@@ -352,6 +371,7 @@ func decode_token_sequence_mixed(int seed, int max_new_tokens) string {
     }
     return out
 }
+
 
 func main() {
     string configured_model = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain/model.safetensors")
@@ -410,3 +430,4 @@ func main() {
     string response = decode_token_sequence_mixed(logits_seed, max_new_tokens)
     print("Response: " + response + "\n")
 }
+
