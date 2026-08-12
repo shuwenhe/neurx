@@ -17,12 +17,14 @@ struct hf_config {
     bool mlp_bias
     bool tie_word_embeddings
 }
+
 func (c hf_config) head_dim() int {
     if c.head_dimension > 0 {
         return c.head_dimension
     }
     return c.hidden_size / c.num_attention_heads
 }
+
 func (c hf_config) validate() bool {
     if c.vocab_size <= 0 {
         eprintln("ERROR: vocab_size must be positive")
@@ -70,6 +72,7 @@ func (c hf_config) validate() bool {
     }
     return true
 }
+
 func extract_json_int(string json_text, string key) int {
     string search = "\"" + key + "\":"
     int pos = 0
@@ -131,6 +134,7 @@ func extract_json_int(string json_text, string key) int {
     }
     return result
 }
+
 func extract_json_float(string json_text, string key) float {
     string search = "\"" + key + "\":"
     int pos = 0
@@ -210,6 +214,7 @@ func extract_json_float(string json_text, string key) float {
     }
     return result
 }
+
 func extract_json_string(string json_text, string key) string {
     string search = "\"" + key + "\":"
     int pos = 0
@@ -262,6 +267,7 @@ func extract_json_string(string json_text, string key) string {
     }
     return result
 }
+
 func extract_json_bool(string json_text, string key) bool {
     string search = "\"" + key + "\":"
     int pos = 0
@@ -317,6 +323,7 @@ func extract_json_bool(string json_text, string key) bool {
     }
     return false
 }
+
 func load_from_file(string path) hf_config {
     interface file_content = readfile(path)
     string json_text = string(file_content)
@@ -343,6 +350,7 @@ func load_from_file(string path) hf_config {
     cfg.tie_word_embeddings = extract_json_bool(json_text, "tie_word_embeddings")
     return cfg
 }
+
 func main() {
     eprintln("HuggingFace Config Loader - Test Suite")
     eprintln("")
@@ -368,3 +376,4 @@ func main() {
     eprintln("HF Config Loader tests complete")
     0
 }
+

@@ -9,6 +9,7 @@ struct reasoning_trace_sample_state {
     string observation
     bool ok
 }
+
 struct reasoning_trace_dataset_state {
     string source
     []reasoning_trace_sample_state samples
@@ -16,14 +17,17 @@ struct reasoning_trace_dataset_state {
     int epoch
     bool exhausted
 }
+
 struct reasoning_trace_step_output {
     reasoning_trace_dataset_state state
     reasoning_trace_sample_state sample
     bool ok
 }
+
 func get_reasoning_trace_sample(reasoning_trace_dataset_state state, int index) reasoning_trace_sample_state {
     state.samples[index]
 }
+
 func copy_reasoning_trace_samples([]reasoning_trace_sample_state samples) []reasoning_trace_sample_state {
     []reasoning_trace_sample_state out = []reasoning_trace_sample_state{cap: len(samples)}
     int i = 0
@@ -41,6 +45,7 @@ func copy_reasoning_trace_samples([]reasoning_trace_sample_state samples) []reas
     }
     out
 }
+
 func new_reasoning_trace_dataset_state(string source) reasoning_trace_dataset_state {
     reasoning_trace_dataset_state {
         source: source,
@@ -50,6 +55,7 @@ func new_reasoning_trace_dataset_state(string source) reasoning_trace_dataset_st
         exhausted: false,
     }
 }
+
 func reasoning_trace_sample_prompt(reasoning_trace_sample_state sample) string {
     string prompt = "### Goal\n" + sample.goal
     prompt = prompt + "\n\n### Current Step\n" + sample.task
@@ -58,6 +64,7 @@ func reasoning_trace_sample_prompt(reasoning_trace_sample_state sample) string {
     }
     prompt
 }
+
 func reasoning_trace_sample_target(reasoning_trace_sample_state sample) string {
     string target = "### Action\n" + sample.action
     target = target + "\n\n### Observation\n" + sample.observation
@@ -68,9 +75,11 @@ func reasoning_trace_sample_target(reasoning_trace_sample_state sample) string {
     }
     target
 }
+
 func reasoning_trace_sample_render(reasoning_trace_sample_state sample) string {
     reasoning_trace_sample_prompt(sample) + "\n\n" + reasoning_trace_sample_target(sample)
 }
+
 func reasoning_trace_dataset_add_sample(reasoning_trace_dataset_state state, reasoning_trace_sample_state sample) reasoning_trace_dataset_state {
     int size = len(state.samples)
     []reasoning_trace_sample_state samples = []reasoning_trace_sample_state{cap: size + 1}
@@ -88,12 +97,15 @@ func reasoning_trace_dataset_add_sample(reasoning_trace_dataset_state state, rea
         exhausted: state.exhausted,
     }
 }
+
 func reasoning_trace_dataset_count(reasoning_trace_dataset_state state) int {
     len(state.samples)
 }
+
 func reasoning_trace_dataset_has_next(reasoning_trace_dataset_state state) bool {
     !state.exhausted && state.cursor < len(state.samples)
 }
+
 func reasoning_trace_dataset_reset(reasoning_trace_dataset_state state) reasoning_trace_dataset_state {
     reasoning_trace_dataset_state {
         source: state.source,
@@ -103,6 +115,7 @@ func reasoning_trace_dataset_reset(reasoning_trace_dataset_state state) reasonin
         exhausted: false,
     }
 }
+
 func reasoning_trace_dataset_next(reasoning_trace_dataset_state state) reasoning_trace_step_output {
     if !reasoning_trace_dataset_has_next(state) {
         reasoning_trace_step_output {
@@ -141,6 +154,7 @@ func reasoning_trace_dataset_next(reasoning_trace_dataset_state state) reasoning
         }
     }
 }
+
 func reasoning_trace_dataset_render(reasoning_trace_dataset_state state) string {
     string out = ""
     int i = 0
@@ -156,6 +170,7 @@ func reasoning_trace_dataset_render(reasoning_trace_dataset_state state) string 
     }
     out
 }
+
 func reasoning_trace_from_agent(agent_runtime_state state, string source) reasoning_trace_dataset_state {
     reasoning_trace_dataset_state ds = new_reasoning_trace_dataset_state(source)
     int total = len(state.trace.steps)
@@ -177,21 +192,28 @@ func reasoning_trace_from_agent(agent_runtime_state state, string source) reason
     }
     ds
 }
+
 func reasoning_trace_dataset_state_dict(reasoning_trace_dataset_state state) reasoning_trace_dataset_state {
     state
 }
+
 func reasoning_trace_dataset_load_state_dict(reasoning_trace_dataset_state state, reasoning_trace_dataset_state other) reasoning_trace_dataset_state {
     other
 }
+
 func reasoning_trace_sample_state_dict(reasoning_trace_sample_state sample) reasoning_trace_sample_state {
     sample
 }
+
 func reasoning_trace_sample_load_state_dict(reasoning_trace_sample_state sample, reasoning_trace_sample_state other) reasoning_trace_sample_state {
     other
 }
+
 func reasoning_trace_step_output_state_dict(reasoning_trace_step_output output) reasoning_trace_step_output {
     output
 }
+
 func reasoning_trace_step_output_load_state_dict(reasoning_trace_step_output output, reasoning_trace_step_output other) reasoning_trace_step_output {
     other
 }
+

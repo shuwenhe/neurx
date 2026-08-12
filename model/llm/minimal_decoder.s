@@ -11,6 +11,7 @@ struct minimal_decoder_state {
     float train_perplexity
     bool trained
 }
+
 func new_minimal_decoder_state() minimal_decoder_state {
     minimal_decoder_state {
         name: "minimal_decoder",
@@ -25,6 +26,7 @@ func new_minimal_decoder_state() minimal_decoder_state {
         trained: true,
     }
 }
+
 func minimal_decoder_generate_next(minimal_decoder_state state, int token_id, int position) int {
     int next_token = token_id + position + state.num_layers
     if state.vocab_size > 0 {
@@ -32,9 +34,12 @@ func minimal_decoder_generate_next(minimal_decoder_state state, int token_id, in
     }
     next_token
 }
+
 func minimal_decoder_state_dict(minimal_decoder_state state) minimal_decoder_state {
     state
 }
+
 func minimal_decoder_load_state_dict(minimal_decoder_state state, minimal_decoder_state other) minimal_decoder_state {
     other
 }
+

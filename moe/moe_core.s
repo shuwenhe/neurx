@@ -7,6 +7,7 @@ struct moe_config {
     int n_routed_experts
     int top_k
 }
+
 struct moe_weights {
     moe_config config
     []float router_down
@@ -17,12 +18,14 @@ struct moe_weights {
     []float routed_w1
     []float routed_w2
 }
+
 struct moe_result {
     []float output
     []int expert_indices
     []float expert_weights
     []float expert_load
 }
+
 func new_moe_config(
     int hidden_dim,
     int latent_dim,
@@ -40,6 +43,7 @@ func new_moe_config(
         top_k: top_k,
     }
 }
+
 func moe_zeros(int n) []float {
     []float out = []float{cap: n}
     int i = 0
@@ -49,6 +53,7 @@ func moe_zeros(int n) []float {
     }
     out
 }
+
 func moe_zeros_int(int n) []int {
     []int out = []int{cap: n}
     int i = 0
@@ -58,6 +63,7 @@ func moe_zeros_int(int n) []int {
     }
     out
 }
+
 func moe_deterministic_weights(int n, int salt, float scale) []float {
     []float out = moe_zeros(n)
     int i = 0
@@ -69,6 +75,7 @@ func moe_deterministic_weights(int n, int salt, float scale) []float {
     }
     out
 }
+
 func moe_exp(float x) float {
     float value = x
     if value > 10.0 {
@@ -90,15 +97,18 @@ func moe_exp(float x) float {
     }
     result
 }
+
 func moe_sigmoid(float x) float {
     1.0 / (1.0 + moe_exp(0.0 - x))
 }
+
 func moe_situ(float x) float {
     float s = moe_sigmoid(x)
     float e2 = moe_exp(2.0 * x)
     float t = (e2 - 1.0) / (e2 + 1.0)
     s * t
 }
+
 func moe_linear([]float input, []float weight, int rows, int in_dim, int out_dim) []float {
     []float out = moe_zeros(rows * out_dim)
     int row = 0
@@ -117,6 +127,7 @@ func moe_linear([]float input, []float weight, int rows, int in_dim, int out_dim
     }
     out
 }
+
 func new_moe_weights(moe_config cfg) moe_weights {
     int h = cfg.hidden_dim
     int l = cfg.latent_dim
@@ -133,6 +144,7 @@ func new_moe_weights(moe_config cfg) moe_weights {
         routed_w2: moe_deterministic_weights(e * f * h, 35, 0.01),
     }
 }
+
 func moe_top_k_indices([]float scores, int offset, int count, int top_k) []int {
     []int indices = moe_zeros_int(top_k)
     []float selected = moe_zeros(top_k)
@@ -167,6 +179,7 @@ func moe_top_k_indices([]float scores, int offset, int count, int top_k) []int {
     }
     indices
 }
+
 func moe_expert_ffn(
     []float input,
     []float w1,
@@ -199,6 +212,7 @@ func moe_expert_ffn(
     }
     out
 }
+
 func moe_forward(moe_weights weights, []float input, int tokens) moe_result {
     moe_config cfg = weights.config
     int h = cfg.hidden_dim
@@ -289,6 +303,7 @@ func moe_forward(moe_weights weights, []float input, int tokens) moe_result {
         expert_load: load,
     }
 }
+
 func moe_sum([]float values, int offset, int count) float {
     float result = 0.0
     int i = 0
@@ -298,12 +313,14 @@ func moe_sum([]float values, int offset, int count) float {
     }
     result
 }
+
 func moe_abs(float value) float {
     if value < 0.0 {
         return 0.0 - value
     }
     value
 }
+
 func moe_core_self_test() int {
     moe_config cfg = new_moe_config(4, 2, 6, 1, 4, 2)
     moe_weights weights = new_moe_weights(cfg)
@@ -324,3 +341,4 @@ func moe_core_self_test() int {
     }
     0
 }
+

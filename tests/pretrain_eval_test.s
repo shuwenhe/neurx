@@ -6,6 +6,7 @@ func test_close(float actual, float expected, float tolerance) bool {
     }
     delta <= tolerance
 }
+
 func main() {
     if !test_close(pretrain_eval_perplexity_from_loss(0.0), 1.0, 0.000001) {
         println("[pretrain-eval] FAIL: exp(0)")
@@ -32,3 +33,4 @@ func main() {
     println("[pretrain-eval] perplexity exp(mean_nll): PASS")
     0
 }
+

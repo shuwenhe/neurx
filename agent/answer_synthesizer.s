@@ -10,6 +10,7 @@ struct agent_answer_state {
     bool ready
     int synthesized_at_step
 }
+
 func new_agent_answer_state(string goal) agent_answer_state {
     agent_answer_state {
         goal: goal,
@@ -20,6 +21,7 @@ func new_agent_answer_state(string goal) agent_answer_state {
         synthesized_at_step: 0,
     }
 }
+
 func agent_answer_confidence_from_trace(agent_trace_state trace_state) string {
     int n = trace_state.count
     if n == 0 {
@@ -33,6 +35,7 @@ func agent_answer_confidence_from_trace(agent_trace_state trace_state) string {
     }
     "low"
 }
+
 func agent_answer_extract_from_memory(agent_memory_state memory_state) string {
     agent_memory_lookup_result final_result = agent_memory_lookup_long(memory_state, "final_answer")
     if final_result.found && final_result.value != "" {
@@ -48,6 +51,7 @@ func agent_answer_extract_from_memory(agent_memory_state memory_state) string {
     }
     ""
 }
+
 func agent_answer_extract_from_trace(agent_trace_state trace_state) string {
     string obs = agent_trace_last_progress_observation(trace_state)
     if obs == "" {
@@ -59,6 +63,7 @@ func agent_answer_extract_from_trace(agent_trace_state trace_state) string {
     }
     obs
 }
+
 func agent_answer_synthesize(agent_answer_state state, agent_trace_state trace_state, agent_memory_state memory_state, int step) agent_answer_state {
     string answer = agent_answer_extract_from_memory(memory_state)
     string source = "memory"
@@ -78,12 +83,15 @@ func agent_answer_synthesize(agent_answer_state state, agent_trace_state trace_s
         synthesized_at_step: step,
     }
 }
+
 func agent_answer_format(agent_answer_state state) string {
     if !state.ready {
         return "answer_not_ready goal=" + state.goal
     }
     "goal=" + state.goal + "\nanswer=" + state.answer + "\nconfidence=" + state.confidence + "\nsource=" + state.source
 }
+
 func agent_answer_summary(agent_answer_state state) string {
     "ready=" + string(state.ready) + " confidence=" + state.confidence + " step=" + string(state.synthesized_at_step)
 }
+

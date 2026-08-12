@@ -1,5 +1,6 @@
 package real_model_inference
 use neurx.runtime.io.{runtime_file_exists}
+
 func main() {
     string MODEL_PATH = "/home/shuwen/shuwen/posttrain/model.safetensors"
     print("\n╔════════════════════════════════════════════════════════╗\n")
@@ -79,3 +80,4 @@ func main() {
     print("  ✓ Dynamic text output\n")
     print("  ✓ 100% Pure S Language (no external dependencies)\n\n")
 }
+

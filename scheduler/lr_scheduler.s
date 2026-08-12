@@ -6,11 +6,13 @@ struct lr_schedule_config {
     int total_steps
     string schedule_type
 }
+
 struct lr_scheduler {
     lr_schedule_config config
     int current_step
     float current_lr
 }
+
 func new_lr_scheduler(lr_schedule_config cfg) lr_scheduler {
     lr_scheduler {
         config: cfg,
@@ -18,6 +20,7 @@ func new_lr_scheduler(lr_schedule_config cfg) lr_scheduler {
         current_lr: cfg.base_lr,
     }
 }
+
 func compute_warmup_lr(float base_lr, int warmup_steps, int current_step) float {
     if current_step >= warmup_steps {
         return base_lr
@@ -27,6 +30,7 @@ func compute_warmup_lr(float base_lr, int warmup_steps, int current_step) float 
     }
     return base_lr * (float(current_step) / float(warmup_steps))
 }
+
 func compute_cosine_lr(
     float base_lr,
     float min_lr,
@@ -50,6 +54,7 @@ func compute_cosine_lr(
     let lr = min_lr + 0.5 * (base_lr - min_lr) * (1.0 + cos_val)
     return max_approx(lr, min_lr)
 }
+
 func compute_linear_lr(
     float base_lr,
     float min_lr,
@@ -72,12 +77,14 @@ func compute_linear_lr(
     let lr = base_lr + (min_lr - base_lr) * progress
     return max_approx(lr, min_lr)
 }
+
 func compute_constant_lr(float base_lr, int warmup_steps, int current_step) float {
     if current_step < warmup_steps {
         return compute_warmup_lr(base_lr, warmup_steps, current_step)
     }
     return base_lr
 }
+
 func lr_scheduler_step(lr_scheduler sched) lr_scheduler {
     let current_step = sched.current_step
     let cfg = sched.config
@@ -107,12 +114,15 @@ func lr_scheduler_step(lr_scheduler sched) lr_scheduler {
         current_lr: new_lr,
     }
 }
+
 func get_current_lr(lr_scheduler sched) float {
     return sched.current_lr
 }
+
 func get_current_step(lr_scheduler sched) int {
     return sched.current_step
 }
+
 func new_llm_scheduler(
     float base_lr,
     int total_steps
@@ -128,6 +138,7 @@ func new_llm_scheduler(
     }
     return new_lr_scheduler(cfg)
 }
+
 func new_finetune_scheduler(
     float base_lr,
     int total_steps
@@ -142,6 +153,7 @@ func new_finetune_scheduler(
     }
     return new_lr_scheduler(cfg)
 }
+
 func cosine_approx(float x) float {
     var x_reduced = x
     while x_reduced > 3.14159 {
@@ -158,15 +170,18 @@ func cosine_approx(float x) float {
             + (x2 * x2 * x2 * x2) / 40320.0
     return result
 }
+
 func max_approx(float a, float b) float {
     if a > b {
         return a
     }
     return b
 }
+
 func abs_approx(float x) float {
     if x < 0.0 {
         return -x
     }
     return x
 }
+

@@ -28,6 +28,7 @@ struct enterprise_inference_config {
     bool enable_metrics
     bool enable_prometheus
 }
+
 struct enterprise_inference_system {
     enterprise_inference_config config
     cuda_core.cuda_context gpu_context
@@ -37,6 +38,7 @@ struct enterprise_inference_system {
     metrics.inference_metrics system_metrics
     bool initialized
 }
+
 func init_enterprise_system(enterprise_inference_config cfg) enterprise_inference_system {
     cuda_core.cuda_device gpu_device = cuda_core.cuda_device_init(cfg.gpu_device_id)
     cuda_core.cuda_context gpu_ctx = cuda_core.cuda_context_create(cfg.gpu_device_id)
@@ -67,6 +69,7 @@ func init_enterprise_system(enterprise_inference_config cfg) enterprise_inferenc
         initialized: true,
     }
 }
+
 func inference_single(
     enterprise_inference_system sys,
     string prompt,
@@ -111,6 +114,7 @@ func inference_single(
     sys.system_metrics.requests_in_progress.value = sys.system_metrics.requests_in_progress.value - 1.0
     output_text
 }
+
 func inference_batch(
     enterprise_inference_system sys,
     []string prompts,
@@ -131,6 +135,7 @@ func inference_batch(
     sys.system_metrics = metrics.record_batch(sys.system_metrics, batch_size, latency_ms)
     outputs
 }
+
 func inference_distributed(
     enterprise_inference_system sys,
     string prompt,
@@ -158,6 +163,7 @@ func inference_distributed(
     }
     output_text
 }
+
 func inference_quantized(
     enterprise_inference_system sys,
     string prompt,
@@ -168,6 +174,7 @@ func inference_quantized(
     }
     inference_single(sys, prompt, max_new_tokens, 0.7)
 }
+
 func handle_openai_request(
     enterprise_inference_system sys,
     openai_compatible.chat_completion_request req,
@@ -206,12 +213,15 @@ func handle_openai_request(
         },
     }
 }
+
 func get_metrics_json(enterprise_inference_system sys) string {
     return metrics.export_prometheus_metrics(sys.system_metrics)
 }
+
 func get_health_status(enterprise_inference_system sys) metrics.health_status {
     return metrics.check_system_health(sys.system_metrics)
 }
+
 func tokenize_prompt(string prompt) []int {
     []int tokens = []int{}
     int i = 0
@@ -221,6 +231,7 @@ func tokenize_prompt(string prompt) []int {
     }
     tokens
 }
+
 func decode_tokens([]int tokens) string {
     string result = ""
     int i = 0
@@ -230,9 +241,11 @@ func decode_tokens([]int tokens) string {
     }
     result
 }
+
 func get_timestamp() int {
     1234567890
 }
+
 func append_int([]int slice, int elem) []int {
     new_slice := make_int(slice.len + 1)
     int i = 0
@@ -243,6 +256,7 @@ func append_int([]int slice, int elem) []int {
     new_slice[slice.len] = elem
     new_slice
 }
+
 func append_str([]string slice, string elem) []string {
     new_slice := make_str(slice.len + 1)
     int i = 0
@@ -253,12 +267,15 @@ func append_str([]string slice, string elem) []string {
     new_slice[slice.len] = elem
     new_slice
 }
+
 func make_int(int len) []int {
     []int{}
 }
+
 func make_str(int len) []string {
     []string{}
 }
+
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -277,3 +294,4 @@ func int_to_str(int n) string {
     }
     return s
 }
+

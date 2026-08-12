@@ -7,3 +7,4 @@ func main() {
     println("The command creates parent directories and refuses accidental overwrite.")
     0
 }
+

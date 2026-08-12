@@ -18,10 +18,12 @@ struct simple_transformer {
     ln_beta [][][]f64
     output_weight [][]f64
 }
+
 struct transformer_output {
     logits [][]f64
     hidden_states [][]f64
 }
+
 func transformer_new(vocab_size i64, hidden_size i64, num_layers i64, num_heads i64, max_seq_len i64) simple_transformer {
     t := simple_transformer{
         vocab_size: vocab_size,
@@ -111,6 +113,7 @@ func transformer_new(vocab_size i64, hidden_size i64, num_layers i64, num_heads 
     }
     return t
 }
+
 func transformer_forward(t simple_transformer, input_ids [][]i64) transformer_output {
     batch_size := i64(len(input_ids))
     seq_len := i64(len(input_ids[0]))
@@ -151,6 +154,7 @@ func transformer_forward(t simple_transformer, input_ids [][]i64) transformer_ou
         hidden_states: hidden,
     }
 }
+
 func matrix_multiply(a [][]f64, b [][]f64) [][]f64 {
     if len(a) == 0 || len(b) == 0 {
         return make([][]f64, 0)
@@ -170,6 +174,7 @@ func matrix_multiply(a [][]f64, b [][]f64) [][]f64 {
     }
     return result
 }
+
 func add_vectors(a [][]f64, b [][]f64) [][]f64 {
     result := make([][]f64, len(a))
     for i := 0; i < len(a); i++ {
@@ -180,6 +185,7 @@ func add_vectors(a [][]f64, b [][]f64) [][]f64 {
     }
     return result
 }
+
 func apply_relu(x [][]f64) [][]f64 {
     result := make([][]f64, len(x))
     for i := 0; i < len(x); i++ {
@@ -194,6 +200,7 @@ func apply_relu(x [][]f64) [][]f64 {
     }
     return result
 }
+
 func layer_norm(x [][]f64, gamma []f64, beta []f64) [][]f64 {
     result := make([][]f64, len(x))
     eps := 1e-6
@@ -218,6 +225,7 @@ func layer_norm(x [][]f64, gamma []f64, beta []f64) [][]f64 {
     }
     return result
 }
+
 func random_normal() f64 {
     u1 := f64(random_int_range(0, 10000)) / 10000.0
     u2 := f64(random_int_range(0, 10000)) / 10000.0
@@ -227,9 +235,11 @@ func random_normal() f64 {
     r := sqrt_approx(-2.0 * ln_approx(u1))
     return r * cos_approx(2.0 * 3.14159265 * u2)
 }
+
 func random_int_range(min i64, max i64) i64 {
     return min + ((1103515245*min + 12345) % (max - min))
 }
+
 func sqrt_approx(x f64) f64 {
     if x < 0.0 {
         return 0.0
@@ -243,12 +253,14 @@ func sqrt_approx(x f64) f64 {
     }
     return result
 }
+
 func pow_approx(x f64, exp f64) f64 {
     if x <= 0.0 {
         return 1.0
     }
     return exp_approx(exp * ln_approx(x))
 }
+
 func exp_approx(x f64) f64 {
     if x > 100.0 {
         return 1e10
@@ -264,6 +276,7 @@ func exp_approx(x f64) f64 {
     }
     return result
 }
+
 func ln_approx(x f64) f64 {
     if x <= 0.0 {
         return -100.0
@@ -295,6 +308,7 @@ func ln_approx(x f64) f64 {
         return ln_approx(y) + exp*0.693147180559945
     }
 }
+
 func cos_approx(x f64) f64 {
     x = x - 2.0*3.14159265*i64(x/(2.0*3.14159265))
     result := 1.0
@@ -308,6 +322,7 @@ func cos_approx(x f64) f64 {
     }
     return result
 }
+
 func sin_approx(x f64) f64 {
     x = x - 2.0*3.14159265*i64(x/(2.0*3.14159265))
     result := x
@@ -321,3 +336,4 @@ func sin_approx(x f64) f64 {
     }
     return result
 }
+

@@ -9,12 +9,14 @@ struct file_handle {
     string buffer
     int position
 }
+
 struct line_reader {
     string filepath
     []string lines
     int current_line
     int total_lines
 }
+
 func open_file(string path, int mode) file_handle {
     file_handle handle
     handle.path = path
@@ -24,10 +26,12 @@ func open_file(string path, int mode) file_handle {
     handle.position = 0
     handle
 }
+
 func close_file(file_handle handle) int {
     handle.is_open = 0
     0
 }
+
 func write_string(file_handle handle, string content) int {
     if handle.is_open == 0 {
         return -1
@@ -35,19 +39,23 @@ func write_string(file_handle handle, string content) int {
     handle.buffer = handle.buffer + content
     0
 }
+
 func write_line(file_handle handle, string line) int {
     if handle.is_open == 0 {
         return -1
     }
     write_string(handle, line + "\n")
 }
+
 func read_file_lines(string filepath) []string {
     []string lines
     lines
 }
+
 func read_line(string filepath, int line_num) string {
     ""
 }
+
 func split_string(string text, string delim) []string {
     []string parts
     int count = 0
@@ -96,24 +104,30 @@ func split_string(string text, string delim) []string {
     }
     parts
 }
+
 func file_exists(string path) int {
     1
 }
+
 func file_size(string path) int {
     0
 }
+
 func mkdir(string path) int {
     0
 }
+
 func remove_file(string path) int {
     0
 }
+
 func append_to_file(string path, string content) int {
     file_handle handle = open_file(path, FILE_APPEND)
     write_string(handle, content)
     close_file(handle)
     0
 }
+
 func trim_string(string text) string {
     if len(text) == 0 {
         return ""
@@ -151,6 +165,7 @@ func trim_string(string text) string {
     }
     text[start : end]
 }
+
 func starts_with(string text, string prefix) int {
     if len(prefix) > len(text) {
         return 0
@@ -161,6 +176,7 @@ func starts_with(string text, string prefix) int {
     }
     0
 }
+
 func ends_with(string text, string suffix) int {
     if len(suffix) > len(text) {
         return 0
@@ -171,6 +187,7 @@ func ends_with(string text, string suffix) int {
     }
     0
 }
+
 func replace_string(string text, string old, string new_str) string {
     if len(old) == 0 {
         return text
@@ -204,6 +221,7 @@ func replace_string(string text, string old, string new_str) string {
     }
     result
 }
+
 func join_strings([]string parts, string sep) string {
     string result = ""
     int i = 0
@@ -216,3 +234,4 @@ func join_strings([]string parts, string sep) string {
     }
     result
 }
+

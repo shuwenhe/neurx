@@ -17,6 +17,7 @@ func create_factual_config() factual_config {
         citation_weight: 0.1,
     }
 }
+
 func example_basic_factual_consistency() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 1: Basic Factual Consistency Evaluation          ║")
@@ -37,6 +38,7 @@ func example_basic_factual_consistency() {
     print("Factual Consistency Reward: " + float_to_string_example(reward))
     print("")
 }
+
 func example_hallucination_detection() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 2: Hallucination Detection                       ║")
@@ -74,6 +76,7 @@ func example_hallucination_detection() {
     }
     print("")
 }
+
 func example_medical_fact_checking() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 3: Medical Text Fact Checking                    ║")
@@ -103,6 +106,7 @@ func example_medical_fact_checking() {
     }
     print("")
 }
+
 func example_news_fact_checking() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 4: News Fact Checking                            ║")
@@ -130,6 +134,7 @@ func example_news_fact_checking() {
     print("  Accuracy: " + float_to_string_example(report.factual_accuracy * 100.0) + "%")
     print("")
 }
+
 func example_quality_comparison() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 5: Quality Comparison                            ║")
@@ -159,6 +164,7 @@ func example_quality_comparison() {
     print("Difference: " + float_to_string_example((good_reward - poor_reward) * 100.0) + " points")
     print("")
 }
+
 func example_reward_for_alignment() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 6: Factual Reward in Alignment Training          ║")
@@ -186,6 +192,7 @@ func example_reward_for_alignment() {
     print("This guides the model towards factually accurate responses")
     print("")
 }
+
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -202,11 +209,14 @@ func main() {
     print("     All examples completed!                                 ")
     print("═════════════════════════════════════════════════════════════")
 }
+
 func float_to_string_example(float f) string {
     int i_part = int(f)
     int f_part = int((f - float(i_part)) * 1000.0)
     string(i_part) + "." + string(f_part)
 }
+
 func string_int(int i) string {
     string(i)
 }
+

@@ -12,6 +12,7 @@ func test_tokenizer_config() {
         println("  ✓ Space prefix enabled")
     }
 }
+
 func test_vocab_creation() {
     println("Test 2: Vocabulary creation")
     []string vocab = []string{cap: 5}
@@ -24,6 +25,7 @@ func test_vocab_creation() {
         println("  ✓ Vocab list created")
     }
 }
+
 func test_tokenizer_init() {
     println("Test 3: tokenizer initialization")
     []string vocab = []string{cap: 10}
@@ -46,6 +48,7 @@ func test_tokenizer_init() {
         println("  ✓ Special token IDs found")
     }
 }
+
 func test_special_token_detection() {
     println("Test 4: Special token detection")
     let is_pad = is_special_token("<pad>")
@@ -55,6 +58,7 @@ func test_special_token_detection() {
         println("  ✓ Special token detection works")
     }
 }
+
 func test_space_handling() {
     println("Test 5: Space handling")
     let needs_space_hello = should_add_space_before("hello")
@@ -63,6 +67,7 @@ func test_space_handling() {
         println("  ✓ Space handling correct")
     }
 }
+
 func test_padding() {
     println("Test 6: Sequence padding")
     []int tokens = []int{cap: 3}
@@ -74,6 +79,7 @@ func test_padding() {
         println("  ✓ Padding to length 5 works")
     }
 }
+
 func test_truncation() {
     println("Test 7: Sequence truncation")
     []int tokens = []int{cap: 10}
@@ -87,6 +93,7 @@ func test_truncation() {
         println("  ✓ Truncation to length 5 works")
     }
 }
+
 func test_vocab_size() {
     println("Test 8: Vocabulary size query")
     []string vocab = []string{cap: 100}
@@ -102,6 +109,7 @@ func test_vocab_size() {
         println("  ✓ Vocab size query correct")
     }
 }
+
 func test_token_id_lookup() {
     println("Test 9: Token ID lookup")
     []string vocab = []string{cap: 5}
@@ -121,6 +129,7 @@ func test_token_id_lookup() {
         println("  ✓ Token to ID works")
     }
 }
+
 func test_cache_stats() {
     println("Test 10: cache statistics")
     []string vocab = []string{cap: 5}
@@ -136,6 +145,7 @@ func test_cache_stats() {
         println("  ✓ Initial cache stats zero")
     }
 }
+
 func test_batch_operations() {
     println("Test 11: batch_2 encode/decode")
     []string vocab = []string{cap: 10}
@@ -160,6 +170,7 @@ func test_batch_operations() {
         println("  ✓ batch_2 operations work")
     }
 }
+
 func test_end_to_end_encode() {
     println("Test 12: End-to-end encoding")
     []string vocab = []string{cap: 10}
@@ -176,6 +187,7 @@ func test_end_to_end_encode() {
         println("  ✓ Encoding includes special tokens")
     }
 }
+
 func to_string_int(int x) string {
     if x == 0 { return "0" }
     if x == 1 { return "1" }
@@ -189,6 +201,7 @@ func to_string_int(int x) string {
     if x == 9 { return "9" }
     return "0"
 }
+
 func main() {
     println("============================================")
     println("BPE tokenizer Tests")
@@ -222,3 +235,4 @@ func main() {
     println("✓ All tokenizer tests completed!")
     println("============================================")
 }
+

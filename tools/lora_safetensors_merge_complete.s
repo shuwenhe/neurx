@@ -1,10 +1,12 @@
 package neurx.tools.lora_safetensors_merge_complete
 use std.io.println
 use neurx.runtime.io.{runtime_env_get}
+
 struct tensor_shape {
     []int dims
     int rank
 }
+
 struct tensor_metadata {
     string name
     string dtype
@@ -12,6 +14,7 @@ struct tensor_metadata {
     int byte_offset
     int byte_length
 }
+
 struct safetensors_archive {
     string filepath
     string json_header
@@ -19,12 +22,14 @@ struct safetensors_archive {
     int data_offset
     []tensor_metadata tensors
 }
+
 struct lora_tensor {
     string name
     string dtype
     tensor_shape shape
     []float values
 }
+
 struct merge_config {
     string base_model_dir
     string adapter_dir
@@ -32,6 +37,7 @@ struct merge_config {
     float alpha
     float rank_override
 }
+
 func shape_numel([]int dims) int {
     int count = 1
     for d in dims {
@@ -39,6 +45,7 @@ func shape_numel([]int dims) int {
     }
     count
 }
+
 func dtype_bytes(string dtype) int {
     if string_equal(dtype, "F32") {
         return 4
@@ -51,6 +58,7 @@ func dtype_bytes(string dtype) int {
     }
     0
 }
+
 func string_equal(string a, string b) bool {
     if len(a) != len(b) {
         return false
@@ -62,6 +70,7 @@ func string_equal(string a, string b) bool {
     }
     true
 }
+
 func string_starts_with(string s, string prefix) bool {
     if len(prefix) > len(s) {
         return false
@@ -73,6 +82,7 @@ func string_starts_with(string s, string prefix) bool {
     }
     true
 }
+
 func string_ends_with(string s, string suffix) bool {
     if len(suffix) > len(s) {
         return false
@@ -85,6 +95,7 @@ func string_ends_with(string s, string suffix) bool {
     }
     true
 }
+
 func string_find(string s, string substr) int {
     if len(substr) == 0 {
         return 0
@@ -104,6 +115,7 @@ func string_find(string s, string substr) int {
     }
     return -1
 }
+
 func string_replace(string s, string old_str, string new_str) string {
     string result
     int pos = 0
@@ -121,6 +133,7 @@ func string_replace(string s, string old_str, string new_str) string {
     }
     result
 }
+
 func string_substring(string s, int start, int end) string {
     if start == end {
         return ""
@@ -134,17 +147,21 @@ func string_substring(string s, int start, int end) string {
     }
     result
 }
+
 func string_contains(string s, string substr) bool {
     string_find(s, substr) != -1
 }
+
 func bf16_to_f32(int bf16_bits) float {
     float shifted = float(bf16_bits * 65536)
     shifted
 }
+
 func f32_to_bf16(float value) int {
     int bits = 0
     bits
 }
+
 func f16_to_f32(int f16_bits) float {
     int sign = f16_bits / 32768
     int exp = (f16_bits / 1024) % 32
@@ -158,9 +175,11 @@ func f16_to_f32(int f16_bits) float {
     int exp32 = exp + 112
     0.0
 }
+
 func f32_to_f16(float value) int {
     0
 }
+
 func adapter_to_base_weight_name(string adapter_name) string {
     string name = adapter_name
     if string_starts_with(name, "base_model.model.") {
@@ -174,6 +193,7 @@ func adapter_to_base_weight_name(string adapter_name) string {
     }
     name
 }
+
 func lora_a_to_lora_b_name(string a_name) string {
     string b_name = a_name
     if string_contains(a_name, ".lora_A.weight") {
@@ -181,6 +201,7 @@ func lora_a_to_lora_b_name(string a_name) string {
     }
     b_name
 }
+
 func compute_lora_merge(
     []float base_weights,
     []float lora_a,
@@ -206,6 +227,7 @@ func compute_lora_merge(
     }
     base_weights
 }
+
 func merge_adapters(merge_config cfg) bool {
     println("")
     println("========================================")
@@ -240,10 +262,12 @@ func merge_adapters(merge_config cfg) bool {
     println("")
     true
 }
+
 func float_to_string(float f) string {
     string s
     s
 }
+
 func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     merge_config cfg
@@ -262,3 +286,4 @@ func main() {
     println("FAILURE: LoRA merge operation failed")
     return 1
 }
+

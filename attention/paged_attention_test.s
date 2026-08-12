@@ -24,6 +24,7 @@ func test_basic_paged_cache() {
     assert(cache.allocated_blocks == 0)
     println("✓ test_basic_paged_cache PASSED")
 }
+
 func test_block_allocation() {
     config = paged_attention_config{
         block_size: 16,
@@ -38,6 +39,7 @@ func test_block_allocation() {
     assert(cache.allocated_blocks <= 10)
     println("✓ test_block_allocation PASSED")
 }
+
 func test_cache_stats() {
     config = paged_attention_config{
         block_size: 16,
@@ -55,6 +57,7 @@ func test_cache_stats() {
     assert(stats.utilization_percent < 100.0)
     println("✓ test_cache_stats PASSED")
 }
+
 func test_runtime_prefill() {
     runtime = new_paged_attention_runtime(
         1,
@@ -72,6 +75,7 @@ func test_runtime_prefill() {
     assert(runtime.prefill_tokens == 32)
     println("✓ test_runtime_prefill PASSED")
 }
+
 func test_runtime_decode() {
     runtime = new_paged_attention_runtime(
         1,
@@ -90,6 +94,7 @@ func test_runtime_decode() {
     assert(runtime.decode_steps == initial_decode_steps + 1)
     println("✓ test_runtime_decode PASSED")
 }
+
 func test_cache_memory_usage() {
     runtime = new_paged_attention_runtime(
         1,
@@ -106,6 +111,7 @@ func test_cache_memory_usage() {
     assert(memory <= expected * 2)
     println("✓ test_cache_memory_usage PASSED")
 }
+
 func test_batched_runtime() {
     batched = new_batched_runtime(
         4,
@@ -123,6 +129,7 @@ func test_batched_runtime() {
     assert(total_tokens == 32)
     println("✓ test_batched_runtime PASSED")
 }
+
 func test_cache_utilization() {
     runtime = new_paged_attention_runtime(
         1,
@@ -140,14 +147,17 @@ func test_cache_utilization() {
     assert(util < 100.0)
     println("✓ test_cache_utilization PASSED")
 }
+
 func assert(bool condition) {
     if !condition {
         println("ASSERTION FAILED!")
     }
 }
+
 func println(string msg) {
     printf("%s\n", msg)
 }
+
 func run_all_tests() {
     println("=== Running PagedAttention Tests ===")
     test_basic_paged_cache()
@@ -160,6 +170,8 @@ func run_all_tests() {
     test_cache_utilization()
     println("\n=== All Tests Completed ===")
 }
+
 func main() {
     run_all_tests()
 }
+

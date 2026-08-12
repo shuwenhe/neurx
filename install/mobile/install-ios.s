@@ -9,9 +9,11 @@ func main() {
     println("Device: " + device_udid)
     0
 }
+
 func bool_text(bool value) string {
     if value {
         return "true"
     }
     "false"
 }
+

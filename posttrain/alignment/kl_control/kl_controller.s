@@ -6,12 +6,14 @@ struct kl_controller_config {
     float target_kl
     int horizon
 }
+
 struct kl_controller_state {
     string controller_type
     float value
     float target
     int horizon
 }
+
 func default_adaptive_kl_config() kl_controller_config {
     kl_controller_config {
         controller_type: "adaptive",
@@ -20,6 +22,7 @@ func default_adaptive_kl_config() kl_controller_config {
         horizon: 10000,
     }
 }
+
 func default_fixed_kl_config() kl_controller_config {
     kl_controller_config {
         controller_type: "fixed",
@@ -28,6 +31,7 @@ func default_fixed_kl_config() kl_controller_config {
         horizon: 0,
     }
 }
+
 func init_kl_controller(kl_controller_config config) kl_controller_state {
     kl_controller_state {
         controller_type: config.controller_type,
@@ -36,6 +40,7 @@ func init_kl_controller(kl_controller_config config) kl_controller_state {
         horizon: config.horizon,
     }
 }
+
 func update_kl_controller(
     kl_controller_state state,
     float current_kl,
@@ -49,9 +54,11 @@ func update_kl_controller(
     state.value = state.value * mult
     return state
 }
+
 func get_kl_coef(kl_controller_state state) float {
     return state.value
 }
+
 func clamp_float(float x, float min_val, float max_val) float {
     if x < min_val {
         return min_val
@@ -61,3 +68,4 @@ func clamp_float(float x, float min_val, float max_val) float {
     }
     return x
 }
+

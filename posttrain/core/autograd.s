@@ -7,23 +7,27 @@ struct computation_node_s {
     int node_id
     bool requires_grad
 }
+
 struct gradient_tape_s {
     []computation_node_s operations
     int op_count
     bool is_recording
 }
+
 struct backward_context_s {
     tensor_s grad_output
     []tensor_s grad_inputs
     string op_type
     int tensor_id
 }
+
 struct autograd_state_s {
     gradient_tape_s tape
     []tensor_s gradient_buffer
     bool grad_enabled
     int tape_depth
 }
+
 func new_gradient_tape_s() gradient_tape_s {
     gradient_tape_s {
         operations: make([]computation_node_s, 0),
@@ -31,6 +35,7 @@ func new_gradient_tape_s() gradient_tape_s {
         is_recording: true,
     }
 }
+
 func new_computation_node_s(string op, tensor_s out, []tensor_s ins) computation_node_s {
     computation_node_s {
         op_name: op,
@@ -40,6 +45,7 @@ func new_computation_node_s(string op, tensor_s out, []tensor_s ins) computation
         requires_grad: true,
     }
 }
+
 func record_operation_s(gradient_tape_s tape, string op_name, tensor_s output, []tensor_s inputs) gradient_tape_s {
     computation_node_s node = new_computation_node_s(op_name, output, inputs)
     node.node_id = tape.op_count
@@ -49,12 +55,15 @@ func record_operation_s(gradient_tape_s tape, string op_name, tensor_s output, [
         is_recording: tape.is_recording,
     }
 }
+
 func enable_grad_s() {
     println("[Autograd] Gradient tracking enabled")
 }
+
 func disable_grad_s() {
     println("[Autograd] Gradient tracking disabled")
 }
+
 func backward_matmul_s(tensor_s grad_output, tensor_s input_a, tensor_s input_b) []tensor_s {
     []tensor_s grads
     tensor_s grad_a = make_zeros_like_s(input_a)
@@ -63,6 +72,7 @@ func backward_matmul_s(tensor_s grad_output, tensor_s input_a, tensor_s input_b)
     grads = append(grads, grad_b)
     grads
 }
+
 func backward_add_s(tensor_s grad_output, tensor_s input_a, tensor_s input_b) []tensor_s {
     []tensor_s grads
     tensor_s grad_a = copy_tensor_s(grad_output)
@@ -71,6 +81,7 @@ func backward_add_s(tensor_s grad_output, tensor_s input_a, tensor_s input_b) []
     grads = append(grads, grad_b)
     grads
 }
+
 func backward_mul_s(tensor_s grad_output, tensor_s input_a, tensor_s input_b) []tensor_s {
     []tensor_s grads
     tensor_s grad_a = mul_tensors_s(grad_output, input_b)
@@ -79,14 +90,17 @@ func backward_mul_s(tensor_s grad_output, tensor_s input_a, tensor_s input_b) []
     grads = append(grads, grad_b)
     grads
 }
+
 func backward_softmax_s(tensor_s grad_output, tensor_s forward_output) tensor_s {
     println("[Autograd] Softmax backward")
     grad_output
 }
+
 func backward_layer_norm_s(tensor_s grad_output, tensor_s input, float epsilon) tensor_s {
     println("[Autograd] LayerNorm backward")
     grad_output
 }
+
 func backward_relu_s(tensor_s grad_output, tensor_s input) tensor_s {
     []float grad_data = make([]float, 0)
     int i = 0
@@ -108,6 +122,7 @@ func backward_relu_s(tensor_s grad_output, tensor_s input) tensor_s {
         device: grad_output.device,
     }
 }
+
 func backward_linear_s(tensor_s grad_output, tensor_s input, tensor_s weight) []tensor_s {
     []tensor_s grads
     tensor_s grad_input = matmul_s(grad_output, transpose_s(weight))
@@ -116,12 +131,14 @@ func backward_linear_s(tensor_s grad_output, tensor_s input, tensor_s weight) []
     grads = append(grads, grad_weight)
     grads
 }
+
 func chain_rule_s(tensor_s upstream_grad, string op_type, tensor_s input) tensor_s {
     if op_type == "relu" {
         return backward_relu_s(upstream_grad, input)
     }
     upstream_grad
 }
+
 func make_zeros_like_s(tensor_s t) tensor_s {
     []float zeros = make([]float, 0)
     int i = 0
@@ -139,6 +156,7 @@ func make_zeros_like_s(tensor_s t) tensor_s {
         device: t.device,
     }
 }
+
 func copy_tensor_s(tensor_s t) tensor_s {
     []float copied = make([]float, 0)
     int i = 0
@@ -156,6 +174,7 @@ func copy_tensor_s(tensor_s t) tensor_s {
         device: t.device,
     }
 }
+
 func mul_tensors_s(tensor_s a, tensor_s b) tensor_s {
     []float result = make([]float, 0)
     int i = 0
@@ -173,6 +192,7 @@ func mul_tensors_s(tensor_s a, tensor_s b) tensor_s {
         device: a.device,
     }
 }
+
 func matmul_s(tensor_s a, tensor_s b) tensor_s {
     []float result = make([]float, 0)
     tensor_s {
@@ -185,6 +205,8 @@ func matmul_s(tensor_s a, tensor_s b) tensor_s {
         device: "cpu",
     }
 }
+
 func transpose_s(tensor_s t) tensor_s {
     t
 }
+

@@ -12,6 +12,7 @@ struct model_config {
     seq_len: i32
     batch_size: i32
 }
+
 struct training_config {
     num_epochs: i32
     steps_per_epoch: i32
@@ -19,6 +20,7 @@ struct training_config {
     warmup_steps: i32
     max_grad_norm: f64
 }
+
 struct training_metrics {
     step: i32
     loss: f64
@@ -26,18 +28,22 @@ struct training_metrics {
     learning_rate: f64
     throughput: f64
 }
+
 struct inference_result {
     prompt: string
     generated: string
     num_tokens: i32
     latency_ms: f64
 }
+
 func println(s: string) {
     io.println(s)
 }
+
 func format_float(val: f64, precision: i32) string {
     return strings.format("%." + strings.from_i32(precision) + "f", val)
 }
+
 func format_large_number(n: i64) string {
     if n < 1000 {
         return strings.from_i64(n)
@@ -49,6 +55,7 @@ func format_large_number(n: i64) string {
         return format_float(f64(n) / 1000000000.0, 1) + "B"
     }
 }
+
 struct transformer_model {
     config: model_config
     embedding_table: [][]f64
@@ -56,6 +63,7 @@ struct transformer_model {
     ffn_weights: [][]f64
     layer_norms: [][]f64
 }
+
 func create_model(config: model_config) transformer_model {
     var model: transformer_model
     model.config = config
@@ -75,12 +83,14 @@ func create_model(config: model_config) transformer_model {
     println("   Total parameters: " + format_large_number(total_params))
     return model
 }
+
 struct data_batch {
     input_ids: []i32
     labels: []i32
     batch_size: i32
     seq_len: i32
 }
+
 func create_dummy_batch(config: model_config) data_batch {
     var batch: data_batch
     batch.batch_size = config.batch_size
@@ -95,17 +105,20 @@ func create_dummy_batch(config: model_config) data_batch {
     }
     return batch
 }
+
 func compute_loss(model: transformer_model, batch: data_batch) f64 {
     let num_tokens = f64(len(batch.labels))
     let avg_logit_score = 0.5
     let loss = -math.log(avg_logit_score + 0.01)
     return loss
 }
+
 func train_step(model: transformer_model, batch: data_batch, lr: f64) (transformer_model, f64) {
     let loss = compute_loss(model, batch)
     let learning_rate_scaled = lr * 0.001
     return (model, loss)
 }
+
 func print_training_progress(metrics: training_metrics) {
     let step_str = strings.from_i32(metrics.step)
     let loss_str = format_float(metrics.loss, 4)
@@ -118,6 +131,7 @@ func print_training_progress(metrics: training_metrics) {
             " | LR: " + lr_str +
             " | Tokens/sec: " + throughput_str)
 }
+
 func train_epoch(model: transformer_model, config: training_config, epoch: i32) (transformer_model, f64) {
     println("")
     println("🔄 Epoch " + strings.from_i32(epoch + 1))
@@ -157,15 +171,18 @@ func train_epoch(model: transformer_model, config: training_config, epoch: i32) 
     println("   Duration: " + format_float(total_time, 2) + "s")
     return (model_state, avg_epoch_loss)
 }
+
 func save_checkpoint(model: transformer_model, epoch: i32) {
     let checkpoint_path = "checkpoints/epoch_" + strings.from_i32(epoch) + ".ckpt"
     println("💾 Saving checkpoint: " + checkpoint_path)
 }
+
 func load_checkpoint(checkpoint_path: string) transformer_model {
     println("📂 Loading checkpoint: " + checkpoint_path)
     var model: transformer_model
     return model
 }
+
 func generate_text(model: transformer_model, prompt: string, max_tokens: i32) inference_result {
     println("")
     println("🎯 Inference")
@@ -189,6 +206,7 @@ func generate_text(model: transformer_model, prompt: string, max_tokens: i32) in
     result.latency_ms = latency
     return result
 }
+
 func print_inference_result(result: inference_result) {
     println("")
     println("📝 Generated Text:")
@@ -200,6 +218,7 @@ func print_inference_result(result: inference_result) {
     let tokens_per_sec = f64(result.num_tokens) * 1000.0 / result.latency_ms
     println("   Throughput: " + format_float(tokens_per_sec, 0) + " tokens/sec")
 }
+
 func main() {
     println("")
     println("╔" + strings.repeat("═", 68) + "╗")
@@ -277,3 +296,4 @@ func main() {
     println("║                    ✅ NeurX System Complete! ✅                    ║")
     println("╚" + strings.repeat("═", 68) + "╝")
 }
+

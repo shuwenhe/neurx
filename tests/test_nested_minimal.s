@@ -2,9 +2,11 @@ package main
 struct inner {
     int value
 }
+
 struct outer {
     inner data
 }
+
 func main() {
     println("=== Test 1: Extract inner first ===")
     outer obj
@@ -17,3 +19,4 @@ func main() {
     println("obj.data.value = " + int_to_str(obj.data.value))
     0
 }
+

@@ -25,6 +25,7 @@ func embedding_lookup(
     }
     output
 }
+
 func rms_norm(
     []float x,
     []float weight,
@@ -58,6 +59,7 @@ func rms_norm(
     }
     output
 }
+
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float guess = x / 2.0
@@ -68,6 +70,7 @@ func sqrt_approx(float x) float {
     }
     guess
 }
+
 func matmul(
     []float A,
     []float B,
@@ -93,6 +96,7 @@ func matmul(
     }
     C
 }
+
 func softmax(
     []float x,
     int total_size,
@@ -128,6 +132,7 @@ func softmax(
     }
     output
 }
+
 func exp_approx(float x) float {
     if x > 20.0 { return 485165195.0 }
     if x < -20.0 { return 0.0 }
@@ -141,6 +146,7 @@ func exp_approx(float x) float {
     }
     result
 }
+
 func silu([]float x) []float {
     []float output = []float{cap: len(x)}
     int i = 0
@@ -151,6 +157,7 @@ func silu([]float x) []float {
     }
     output
 }
+
 func add_arrays([]float a, []float b) []float {
     int size = len(a)
     if len(b) < size { size = len(b) }
@@ -162,6 +169,7 @@ func add_arrays([]float a, []float b) []float {
     }
     output
 }
+
 func mul_arrays([]float a, []float b) []float {
     int size = len(a)
     if len(b) < size { size = len(b) }
@@ -173,6 +181,7 @@ func mul_arrays([]float a, []float b) []float {
     }
     output
 }
+
 func simplified_attention(
     []float hidden_states,
     []float q_weight,
@@ -226,6 +235,7 @@ func simplified_attention(
     []float output = matmul(context, o_weight, total_tokens, hidden_size, hidden_size)
     output
 }
+
 func swiglu_mlp(
     []float hidden_states,
     []float gate_weight,
@@ -244,6 +254,7 @@ func swiglu_mlp(
     []float output = matmul(activated, down_weight, total_tokens, intermediate_size, hidden_size)
     output
 }
+
 func transformer_layer(
     []float hidden_states,
     []float input_ln_weight,
@@ -271,3 +282,4 @@ func transformer_layer(
     []float output = add_arrays(after_attn, mlp_output)
     output
 }
+

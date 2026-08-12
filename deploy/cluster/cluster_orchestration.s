@@ -1,5 +1,6 @@
 package neurx.deployment.cluster_orchestration
 use neurx.runtime.io.{runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file}
+
 struct cluster_node_spec {
     int node_id
     string node_name
@@ -11,6 +12,7 @@ struct cluster_node_spec {
     string status
     float utilization
 }
+
 struct cluster_deployment_spec {
     string deployment_name
     string cluster_name
@@ -27,6 +29,7 @@ struct cluster_deployment_spec {
     string data_dir
     string output_dir
 }
+
 struct cluster_orchestration_state {
     string cluster_name
     string deployment_dir
@@ -39,6 +42,7 @@ struct cluster_orchestration_state {
     string last_summary
     string last_manifest_path
 }
+
 func new_cluster_node_spec(int node_id, string node_name, string ip_address, int gpu_count, string gpu_type, int cpu_cores, int memory_gb, string status, float utilization) cluster_node_spec {
     cluster_node_spec {
         node_id: node_id,
@@ -52,6 +56,7 @@ func new_cluster_node_spec(int node_id, string node_name, string ip_address, int
         utilization: utilization,
     }
 }
+
 func new_cluster_deployment_spec(string cluster_name, string image_name, string backend, string master_addr, int master_port, int replica_count, int world_size, string checkpoint_dir, string data_dir, string output_dir) cluster_deployment_spec {
     cluster_deployment_spec {
         deployment_name: cluster_name + "-llm-train",
@@ -70,6 +75,7 @@ func new_cluster_deployment_spec(string cluster_name, string image_name, string 
         output_dir: output_dir,
     }
 }
+
 func new_cluster_orchestration_state(string cluster_name, string deployment_dir, string backend) cluster_orchestration_state {
     cluster_orchestration_state {
         cluster_name: cluster_name,
@@ -84,6 +90,7 @@ func new_cluster_orchestration_state(string cluster_name, string deployment_dir,
         last_manifest_path: "",
     }
 }
+
 func cluster_add_node(cluster_orchestration_state state, cluster_node_spec node) cluster_orchestration_state {
     cluster_orchestration_state next = state
     next.nodes.push(node)
@@ -93,6 +100,7 @@ func cluster_add_node(cluster_orchestration_state state, cluster_node_spec node)
     }
     next
 }
+
 func cluster_trim(string s) string {
     int left = 0
     while left < len(s) && (s[left] == 32 || s[left] == 9 || s[left] == 10 || s[left] == 13) {
@@ -113,6 +121,7 @@ func cluster_trim(string s) string {
     }
     out
 }
+
 func cluster_split_lines(string text) []string {
     []string lines = []string{cap: 0}
     string current = ""
@@ -133,6 +142,7 @@ func cluster_split_lines(string text) []string {
     }
     lines
 }
+
 func cluster_find_substring(string text, string pattern) int {
     if len(pattern) == 0 {
         return 0
@@ -150,6 +160,7 @@ func cluster_find_substring(string text, string pattern) int {
     }
     -1
 }
+
 func cluster_parse_int(string text, int fallback) int {
     string s = cluster_trim(text)
     if s == "" {
@@ -172,6 +183,7 @@ func cluster_parse_int(string text, int fallback) int {
     }
     sign * value
 }
+
 func cluster_parse_float(string text, float fallback) float {
     string s = cluster_trim(text)
     if s == "" {
@@ -204,6 +216,7 @@ func cluster_parse_float(string text, float fallback) float {
     }
     value
 }
+
 func cluster_parse_node_record(string line) cluster_node_spec {
     []string parts = []string{cap: 8}
     string current = ""
@@ -252,9 +265,11 @@ func cluster_parse_node_record(string line) cluster_node_spec {
     }
     new_cluster_node_spec(0, node_name, ip_address, gpu_count, gpu_type, cpu_cores, memory_gb, status, utilization)
 }
+
 func cluster_node_manifest_path() string {
     "./artifacts/cluster_nodes.manifest"
 }
+
 func cluster_discover_nodes_from_manifest() []cluster_node_spec {
     string manifest_path = cluster_node_manifest_path()
     if !runtime_file_exists(manifest_path) {
@@ -275,11 +290,13 @@ func cluster_discover_nodes_from_manifest() []cluster_node_spec {
     }
     nodes
 }
+
 func cluster_discover_local_fallback() []cluster_node_spec {
     []cluster_node_spec nodes = []cluster_node_spec{cap: 1}
     nodes.push(new_cluster_node_spec(0, "localhost", "127.0.0.1", 1, "local", 8, 16, "healthy", 0.0))
     nodes
 }
+
 func cluster_discover_nodes(cluster_orchestration_state state) cluster_orchestration_state {
     cluster_orchestration_state next = state
     []cluster_node_spec discovered = cluster_discover_nodes_from_manifest()
@@ -300,6 +317,7 @@ func cluster_discover_nodes(cluster_orchestration_state state) cluster_orchestra
     next.ready = cluster_validate_setup(next)
     next
 }
+
 func cluster_elastic_recover(cluster_orchestration_state state) cluster_orchestration_state {
     cluster_orchestration_state next = state
     int recovered = 0
@@ -320,6 +338,7 @@ func cluster_elastic_recover(cluster_orchestration_state state) cluster_orchestr
     next.last_summary = next.last_summary + "recovered_nodes=" + cluster_int_to_string(recovered) + "\n"
     next
 }
+
 func cluster_training_launch_command(cluster_deployment_spec spec) string {
     string cmd = "NEURX_CLUSTER_NAME=" + spec.cluster_name
     cmd = cmd + " NEURX_CLUSTER_BACKEND=" + spec.backend
@@ -331,6 +350,7 @@ func cluster_training_launch_command(cluster_deployment_spec spec) string {
     cmd = cmd + " make run-training-s"
     cmd
 }
+
 func cluster_healthy_node_count(cluster_orchestration_state state) int {
     int healthy = 0
     int i = 0
@@ -342,12 +362,14 @@ func cluster_healthy_node_count(cluster_orchestration_state state) int {
     }
     healthy
 }
+
 func cluster_validate_setup(cluster_orchestration_state state) bool {
     if len(state.nodes) == 0 {
         return false
     }
     cluster_healthy_node_count(state) > 0
 }
+
 func cluster_recommended_world_size(cluster_orchestration_state state) int {
     int world = 0
     int i = 0
@@ -362,6 +384,7 @@ func cluster_recommended_world_size(cluster_orchestration_state state) int {
     }
     world
 }
+
 func cluster_recommended_backend(cluster_orchestration_state state) string {
     if state.backend != "" {
         return state.backend
@@ -371,6 +394,7 @@ func cluster_recommended_backend(cluster_orchestration_state state) string {
     }
     "gloo"
 }
+
 func cluster_join_lines([]string lines) string {
     string out = ""
     int i = 0
@@ -383,6 +407,7 @@ func cluster_join_lines([]string lines) string {
     }
     out
 }
+
 func cluster_int_to_string(int value) string {
     if value == 0 {
         return "0"
@@ -404,6 +429,7 @@ func cluster_int_to_string(int value) string {
     }
     out
 }
+
 func cluster_generate_env_lines(cluster_deployment_spec spec) []string {
     []string lines = []string{cap: 12}
     lines.push("export CLUSTER_NAME=" + spec.cluster_name)
@@ -420,15 +446,19 @@ func cluster_generate_env_lines(cluster_deployment_spec spec) []string {
     lines.push("export NEURX_IMAGE=" + spec.image_name)
     lines
 }
+
 func cluster_default_pretrain_output_dir(cluster_deployment_spec spec) string {
     spec.checkpoint_dir + "/gpt_large_pretrain"
 }
+
 func cluster_default_pretrain_manifest_path(cluster_deployment_spec spec) string {
     spec.data_dir + "/manifest.json"
 }
+
 func cluster_default_pretrain_tokenizer_manifest_path(cluster_deployment_spec spec) string {
     "./data/tokenizer.manifest"
 }
+
 func cluster_generate_training_startup_lines(cluster_orchestration_state state, cluster_deployment_spec spec) []string {
     []string lines = []string{cap: 32}
     string pretrain_output_dir = cluster_default_pretrain_output_dir(spec)
@@ -471,6 +501,7 @@ func cluster_generate_training_startup_lines(cluster_orchestration_state state, 
     lines.push("NEURX_PRETRAIN_USE_LAUNCH_PLAN=1")
     lines
 }
+
 func cluster_generate_training_startup_env(cluster_orchestration_state state, cluster_deployment_spec spec) string {
     string out = ""
     []string lines = cluster_generate_training_startup_lines(state, spec)
@@ -484,6 +515,7 @@ func cluster_generate_training_startup_env(cluster_orchestration_state state, cl
     }
     out
 }
+
 func cluster_generate_slurm_script(cluster_deployment_spec spec) string {
     []string lines = []string{cap: 32}
     lines.push("#!/bin/bash")
@@ -519,6 +551,7 @@ func cluster_generate_slurm_script(cluster_deployment_spec spec) string {
     lines.push("  --master_port=" + cluster_int_to_string(spec.master_port))
     cluster_join_lines(lines)
 }
+
 func cluster_generate_kubernetes_yaml(cluster_deployment_spec spec) string {
     []string lines = []string{cap: 40}
     lines.push("apiVersion: apps/v1")
@@ -565,6 +598,7 @@ func cluster_generate_kubernetes_yaml(cluster_deployment_spec spec) string {
     lines.push("            memory: \"128Gi\"")
     cluster_join_lines(lines)
 }
+
 func cluster_state_summary(cluster_orchestration_state state, cluster_deployment_spec spec) string {
     string out = ""
     out = out + "cluster=" + state.cluster_name + "\n"
@@ -580,6 +614,7 @@ func cluster_state_summary(cluster_orchestration_state state, cluster_deployment
     out = out + "output_dir=" + spec.output_dir + "\n"
     out
 }
+
 func cluster_write_deployment_bundle(cluster_orchestration_state state, cluster_deployment_spec spec) cluster_orchestration_state {
     cluster_orchestration_state next = state
     if next.deployment_dir == "" {
@@ -601,6 +636,7 @@ func cluster_write_deployment_bundle(cluster_orchestration_state state, cluster_
     next.ready = cluster_validate_setup(next)
     next
 }
+
 func cluster_write_launch_plan(cluster_orchestration_state state, cluster_deployment_spec spec) cluster_orchestration_state {
     cluster_orchestration_state next = state
     string launch_path = next.deployment_dir + "/launch_plan.s"
@@ -609,13 +645,16 @@ func cluster_write_launch_plan(cluster_orchestration_state state, cluster_deploy
     next.last_summary = next.last_summary + "launch_plan=" + launch_path + "\n"
     next
 }
+
 func cluster_state_dict(cluster_orchestration_state state) cluster_orchestration_state {
     state
 }
+
 func cluster_load_state_dict(cluster_orchestration_state state, cluster_orchestration_state other) cluster_orchestration_state {
     del state
     other
 }
+
 func new_demo_cluster_state() cluster_orchestration_state {
     cluster_orchestration_state state = new_cluster_orchestration_state("neurx-prod", "./production_deployment", "nccl")
     state = cluster_add_node(state, new_cluster_node_spec(0, "node-0", "10.0.0.10", 8, "H100", 64, 512, "healthy", 0.18))
@@ -624,6 +663,7 @@ func new_demo_cluster_state() cluster_orchestration_state {
     state = cluster_add_node(state, new_cluster_node_spec(3, "node-3", "10.0.0.13", 8, "H100", 64, 512, "degraded", 0.37))
     state
 }
+
 func main() {
     cluster_orchestration_state state = new_demo_cluster_state()
     state = cluster_discover_nodes(state)
@@ -644,3 +684,4 @@ func main() {
     state = cluster_write_launch_plan(state, spec)
     runtime_write_text_file(state.deployment_dir + "/latest_cluster_summary.txt", state.last_summary)
 }
+

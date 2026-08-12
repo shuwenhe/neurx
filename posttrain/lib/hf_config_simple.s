@@ -5,6 +5,7 @@ struct hf_config {
     string model_type
     int vocab_size
 }
+
 func main() {
     eprintln("hugging_face config loader - test suite")
     eprintln("")
@@ -20,3 +21,4 @@ func main() {
     eprintln("")
     eprintln("All tests completed!")
 }
+

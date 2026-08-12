@@ -8,6 +8,7 @@ struct inference_trace_span {
     int status_code
     string error_message
 }
+
 struct inference_observability_state {
     int requests_total
     int requests_active
@@ -27,6 +28,7 @@ struct inference_observability_state {
     int latency_sum_ms
     []inference_trace_span spans
 }
+
 func new_inference_observability() inference_observability_state {
     inference_observability_state state
     state.requests_total = 0
@@ -48,6 +50,7 @@ func new_inference_observability() inference_observability_state {
     state.spans = []inference_trace_span{cap: 4096}
     state
 }
+
 func observability_start_request(inference_observability_state state, int prompt_tokens) inference_observability_state {
     state.requests_total = state.requests_total + 1
     state.requests_active = state.requests_active + 1
@@ -56,6 +59,7 @@ func observability_start_request(inference_observability_state state, int prompt
     }
     state
 }
+
 func observability_finish_request(inference_observability_state state, int generated_tokens, int latency_ms, bool failed) inference_observability_state {
     if state.requests_active > 0 {
         state.requests_active = state.requests_active - 1
@@ -84,6 +88,7 @@ func observability_finish_request(inference_observability_state state, int gener
     }
     state
 }
+
 func observability_record_cache(inference_observability_state state, bool hit) inference_observability_state {
     if hit {
         state.cache_hits_total = state.cache_hits_total + 1
@@ -92,10 +97,12 @@ func observability_record_cache(inference_observability_state state, bool hit) i
     }
     state
 }
+
 func observability_record_kv_handoff(inference_observability_state state) inference_observability_state {
     state.kv_handoffs_total = state.kv_handoffs_total + 1
     state
 }
+
 func observability_record_tool_call(inference_observability_state state, bool valid) inference_observability_state {
     state.tool_calls_total = state.tool_calls_total + 1
     if !valid {
@@ -103,10 +110,12 @@ func observability_record_tool_call(inference_observability_state state, bool va
     }
     state
 }
+
 func observability_record_structured_failure(inference_observability_state state) inference_observability_state {
     state.structured_output_failures_total = state.structured_output_failures_total + 1
     state
 }
+
 func observability_add_span(inference_observability_state state, string trace_id, string request_id, string operation, int start_ms, int end_ms, int status_code, string error_message) inference_observability_state {
     inference_trace_span span
     span.trace_id = trace_id
@@ -119,6 +128,7 @@ func observability_add_span(inference_observability_state state, string trace_id
     state.spans = append(state.spans, span)
     state
 }
+
 func observability_prometheus(inference_observability_state state) string {
     int completed = state.requests_total - state.requests_active
     int bucket_50 = state.latency_le_10_ms + state.latency_le_50_ms
@@ -143,3 +153,4 @@ func observability_prometheus(inference_observability_state state) string {
     output = output + "neurx_inference_latency_ms_count " + int_to_str(completed) + "\n"
     output
 }
+

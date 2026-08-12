@@ -24,6 +24,7 @@ use neurx.script.data_utils.{
     dir_list_files,
 }
 use neurx.strings.{string_split, string_join}
+
 struct shard_config {
     string input_file
     string shard_dir
@@ -31,12 +32,14 @@ struct shard_config {
     int max_shards
     int min_lines_per_shard
 }
+
 struct shard_metadata {
     string shard_id
     string file_path
     i64 num_documents
     i64 size_bytes
 }
+
 struct shard_manifest {
     string dataset_name
     string version
@@ -47,6 +50,7 @@ struct shard_manifest {
     i64 average_docs_per_shard
     []shard_metadata shards
 }
+
 func new_shard_config_from_env() shard_config {
     let neurx_home = get_env("NEURX_HOME", ".")
     let dataset_root = get_env("DATASET_ROOT", path_join([]string{neurx_home, "dataset", "pretrain"}))
@@ -58,6 +62,7 @@ func new_shard_config_from_env() shard_config {
         min_lines_per_shard: get_env_int("MIN_LINES_PER_SHARD", 100),
     }
 }
+
 func generate_shards(config: shard_config) bool {
     log_info("")
     log_info("╔════════════════════════════════════════════╗")
@@ -150,9 +155,11 @@ func generate_shards(config: shard_config) bool {
     log_success("Shard generation completed successfully")
     true
 }
+
 func format_shard_filename(shard_dir: string, index: int) string {
     path_join([]string{shard_dir, format_shard_id(index) + ".jsonl"})
 }
+
 func format_shard_id(index: int) string {
     let idx_str = i64_to_string(i64(index))
     let mut padded = ""
@@ -161,6 +168,7 @@ func format_shard_id(index: int) string {
     }
     "shard_" + padded + idx_str
 }
+
 func write_empty_manifest(config: shard_config) bool {
     let manifest = shard_manifest{
         dataset_name: "neurx-pretrain-dataset",
@@ -174,6 +182,7 @@ func write_empty_manifest(config: shard_config) bool {
     }
     write_manifest(config.manifest_file, manifest)
 }
+
 func build_manifest(config: shard_config, shards: []shard_metadata) shard_manifest {
     let mut total_docs = i64(0)
     let mut total_size = i64(0)
@@ -193,6 +202,7 @@ func build_manifest(config: shard_config, shards: []shard_metadata) shard_manife
         shards: shards,
     }
 }
+
 func write_manifest(path: string, manifest: shard_manifest) bool {
     let mut json = "{\n"
     json = json + "  \"dataset_name\": \"" + manifest.dataset_name + "\",\n"
@@ -220,12 +230,15 @@ func write_manifest(path: string, manifest: shard_manifest) bool {
     json = json + "}\n"
     file_write_text(path, json)
 }
+
 func get_timestamp() string {
     "2026-07-07T00:00:00Z"
 }
+
 func i64_to_string(n: i64) string {
     ""
 }
+
 func main() i32 {
     let config = new_shard_config_from_env()
     if generate_shards(config) {
@@ -234,3 +247,4 @@ func main() i32 {
         1
     }
 }
+

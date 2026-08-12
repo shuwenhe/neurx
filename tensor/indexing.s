@@ -5,6 +5,7 @@ struct tensor {
     bool requires_grad
     option[tensor] grad
 }
+
 func clone(tensor a) tensor {
     tensor {
         data: a.data,
@@ -13,6 +14,7 @@ func clone(tensor a) tensor {
         grad: none,
     }
 }
+
 func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
@@ -21,6 +23,7 @@ func copy_int([]int data) []int {
     }
     out
 }
+
 func shape_prod([]int shape) int {
     int n = 1
     int i = 0
@@ -30,6 +33,7 @@ func shape_prod([]int shape) int {
     }
     n
 }
+
 func normalize_dim(int dim, int ndim) int {
     int axis = dim
     if axis < 0 {
@@ -37,6 +41,7 @@ func normalize_dim(int dim, int ndim) int {
     }
     axis
 }
+
 func unravel_index(int flat_index, []int shape) []int {
     int ndim = len(shape)
     []int coords = []int{cap: ndim}
@@ -56,6 +61,7 @@ func unravel_index(int flat_index, []int shape) []int {
     }
     coords
 }
+
 func ravel_index([]int coords, []int shape) int {
     int ndim = len(shape)
     int flat = 0
@@ -68,6 +74,7 @@ func ravel_index([]int coords, []int shape) int {
     }
     flat
 }
+
 func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
@@ -78,6 +85,7 @@ func copy_float([]float data) []float {
     }
     out
 }
+
 func index_select(tensor a, int dim, []int indices) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
@@ -124,6 +132,7 @@ func index_select(tensor a, int dim, []int indices) tensor {
         }
     }
 }
+
 func masked_select(tensor a, tensor mask) tensor {
     int n = len(a.data)
     int count = 0
@@ -153,6 +162,7 @@ func masked_select(tensor a, tensor mask) tensor {
         grad: none,
     }
 }
+
 func masked_fill(tensor a, tensor mask, float value) tensor {
     tensor out = clone(a)
     int n = len(out.data)
@@ -165,6 +175,7 @@ func masked_fill(tensor a, tensor mask, float value) tensor {
     }
     out
 }
+
 func masked_scatter(tensor a, tensor mask, tensor source) tensor {
     tensor out = clone(a)
     int n = len(out.data)
@@ -181,6 +192,7 @@ func masked_scatter(tensor a, tensor mask, tensor source) tensor {
     }
     out
 }
+
 func nonzero(tensor a) tensor {
     int n = len(a.data)
     int count = 0
@@ -210,6 +222,7 @@ func nonzero(tensor a) tensor {
         grad: none,
     }
 }
+
 func repeat_interleave(tensor a, int repeats) tensor {
     if repeats <= 1 {
         return clone(a)
@@ -236,6 +249,7 @@ func repeat_interleave(tensor a, int repeats) tensor {
         grad: none,
     }
 }
+
 func where(tensor condition, tensor x, tensor y) tensor {
     int n = len(x.data)
     []float out = []float{cap: n}
@@ -255,6 +269,7 @@ func where(tensor condition, tensor x, tensor y) tensor {
         grad: none,
     }
 }
+
 func cat([]tensor tensors, int dim) tensor {
     if len(tensors) == 0 {
         tensor { data: []float{cap: 0}, shape: []int{cap: 0}, requires_grad: false, grad: none }
@@ -296,6 +311,7 @@ func cat([]tensor tensors, int dim) tensor {
         }
     }
 }
+
 func split(tensor a, int sections) tensor {
     if sections <= 0 {
         return clone(a)
@@ -320,9 +336,11 @@ func split(tensor a, int sections) tensor {
         grad: none,
     }
 }
+
 func chunk(tensor a, int chunks) tensor {
     split(a, chunks)
 }
+
 func stack([]tensor tensors, int dim) tensor {
     if len(tensors) == 0 {
         tensor { data: []float{cap: 0}, shape: []int{cap: 0}, requires_grad: false, grad: none }
@@ -366,6 +384,7 @@ func stack([]tensor tensors, int dim) tensor {
         }
     }
 }
+
 func pad(tensor a, int before, int after, float value) tensor {
     int n = len(a.data)
     if before < 0 {
@@ -400,6 +419,7 @@ func pad(tensor a, int before, int after, float value) tensor {
         grad: none,
     }
 }
+
 func slice(tensor a, int start, int end) tensor {
     int n = len(a.data)
     int s = start
@@ -429,6 +449,7 @@ func slice(tensor a, int start, int end) tensor {
         grad: none,
     }
 }
+
 func gather(tensor a, []int indices) tensor {
     int n = len(indices)
     []float out = []float{cap: n}
@@ -446,3 +467,4 @@ func gather(tensor a, []int indices) tensor {
         grad: none,
     }
 }
+

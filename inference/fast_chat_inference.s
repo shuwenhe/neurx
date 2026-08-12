@@ -4,6 +4,7 @@ extern "intrinsic" func __sys_read_string(int fd, int count) string
 func read_user_line() string {
     trim(__sys_read_string(0, 4096))
 }
+
 func get_medical_response(string user_input) string {
     string lower = ""
     int i = 0
@@ -41,6 +42,7 @@ func get_medical_response(string user_input) string {
     }
     return "That's an important medical question. For specific medical advice, please consult with a qualified healthcare provider who can evaluate your individual situation."
 }
+
 func contains(string text, string substr) int {
     if len(substr) == 0 || len(substr) > len(text) {
         return 0
@@ -75,3 +77,4 @@ func main() {
         print("Assistant: " + response + "\n\n")
     }
 }
+

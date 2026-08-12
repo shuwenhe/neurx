@@ -6,6 +6,7 @@ struct agent_tool_registry_state {
     []int retries
     []string capabilities
 }
+
 func new_agent_tool_registry_state() agent_tool_registry_state {
     agent_tool_registry_state {
         tool_names: [],
@@ -15,12 +16,15 @@ func new_agent_tool_registry_state() agent_tool_registry_state {
         capabilities: [],
     }
 }
+
 func agent_tool_registry_count(agent_tool_registry_state state) int {
     len(state.tool_names)
 }
+
 func agent_tool_registry_add(agent_tool_registry_state state, string tool_name, bool is_enabled, int timeout_ms, int retries) agent_tool_registry_state {
     agent_tool_registry_add_with_capability(state, tool_name, is_enabled, timeout_ms, retries, tool_name)
 }
+
 func agent_tool_registry_add_with_capability(agent_tool_registry_state state, string tool_name, bool is_enabled, int timeout_ms, int retries, string capability) agent_tool_registry_state {
     int size = len(state.tool_names)
     []string names = []string{cap: size + 1}
@@ -58,6 +62,7 @@ func agent_tool_registry_add_with_capability(agent_tool_registry_state state, st
         capabilities: caps,
     }
 }
+
 func agent_tool_registry_has_enabled(agent_tool_registry_state state, string tool_name) bool {
     int i = 0
     while i < len(state.tool_names) {
@@ -68,6 +73,7 @@ func agent_tool_registry_has_enabled(agent_tool_registry_state state, string too
     }
     false
 }
+
 func agent_tool_registry_timeout_ms(agent_tool_registry_state state, string tool_name) int {
     int i = 0
     while i < len(state.tool_names) {
@@ -78,6 +84,7 @@ func agent_tool_registry_timeout_ms(agent_tool_registry_state state, string tool
     }
     0
 }
+
 func agent_tool_registry_retries(agent_tool_registry_state state, string tool_name) int {
     int i = 0
     while i < len(state.tool_names) {
@@ -88,6 +95,7 @@ func agent_tool_registry_retries(agent_tool_registry_state state, string tool_na
     }
     0
 }
+
 func agent_tool_registry_capability(agent_tool_registry_state state, string tool_name) string {
     int i = 0
     while i < len(state.tool_names) {
@@ -98,6 +106,7 @@ func agent_tool_registry_capability(agent_tool_registry_state state, string tool
     }
     ""
 }
+
 func agent_tool_registry_find_by_capability(agent_tool_registry_state state, string capability) string {
     int i = 0
     while i < len(state.tool_names) {
@@ -108,6 +117,7 @@ func agent_tool_registry_find_by_capability(agent_tool_registry_state state, str
     }
     ""
 }
+
 func agent_tool_registry_set_enabled(agent_tool_registry_state state, string tool_name, bool is_enabled) agent_tool_registry_state {
     int size = len(state.tool_names)
     int index = -1
@@ -137,18 +147,23 @@ func agent_tool_registry_set_enabled(agent_tool_registry_state state, string too
         capabilities: state.capabilities,
     }
 }
+
 func agent_tool_registry_disable(agent_tool_registry_state state, string tool_name) agent_tool_registry_state {
     agent_tool_registry_set_enabled(state, tool_name, false)
 }
+
 func agent_tool_registry_enable(agent_tool_registry_state state, string tool_name) agent_tool_registry_state {
     agent_tool_registry_set_enabled(state, tool_name, true)
 }
+
 func agent_tool_registry_state_dict(agent_tool_registry_state state) agent_tool_registry_state {
     state
 }
+
 func agent_tool_registry_load_state_dict(agent_tool_registry_state state, agent_tool_registry_state other) agent_tool_registry_state {
     other
 }
+
 func agent_tool_registry_enabled_names(agent_tool_registry_state state) []string {
     int count = 0
     int i = 0
@@ -170,6 +185,7 @@ func agent_tool_registry_enabled_names(agent_tool_registry_state state) []string
     }
     out
 }
+
 func agent_tool_registry_summary(agent_tool_registry_state state) string {
     string out = "tools=" + string(len(state.tool_names))
     int i = 0
@@ -183,6 +199,7 @@ func agent_tool_registry_summary(agent_tool_registry_state state) string {
     }
     out
 }
+
 func agent_tool_registry_set_retries(agent_tool_registry_state state, string tool_name, int retries) agent_tool_registry_state {
     int size = len(state.tool_names)
     int index = -1
@@ -216,6 +233,7 @@ func agent_tool_registry_set_retries(agent_tool_registry_state state, string too
         capabilities: state.capabilities,
     }
 }
+
 func agent_tool_registry_set_timeout(agent_tool_registry_state state, string tool_name, int ms) agent_tool_registry_state {
     int size = len(state.tool_names)
     int index = -1
@@ -249,3 +267,4 @@ func agent_tool_registry_set_timeout(agent_tool_registry_state state, string too
         capabilities: state.capabilities,
     }
 }
+

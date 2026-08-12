@@ -14,6 +14,7 @@ struct unified_inference_config {
     float draft_model_ratio
     int num_draft_tokens
 }
+
 struct unified_inference_engine {
     unified_inference_config config
     paged_attention_memory.paged_kv_cache_manager kv_cache_mgr
@@ -25,6 +26,7 @@ struct unified_inference_engine {
     int total_requests_served
     int total_tokens_generated
 }
+
 func new_unified_inference_engine(
     unified_inference_config config
 ) unified_inference_engine {
@@ -50,6 +52,7 @@ func new_unified_inference_engine(
         total_tokens_generated: 0,
     }
 }
+
 func submit_inference_request(
     unified_inference_engine engine,
     int request_id,
@@ -70,6 +73,7 @@ func submit_inference_request(
     )
     engine
 }
+
 func execute_inference_iteration(
     unified_inference_engine engine
 ) unified_inference_engine {
@@ -106,6 +110,7 @@ func execute_inference_iteration(
     engine.total_tokens_generated = engine.total_tokens_generated + decode_batch.num_requests
     engine
 }
+
 func run_inference_loop(
     unified_inference_engine engine,
     int max_iterations
@@ -122,6 +127,7 @@ func run_inference_loop(
     }
     engine
 }
+
 func get_engine_stats(unified_inference_engine engine) string {
     sched_stats := continuous_batch_scheduler.get_scheduler_stats(engine.batch_sched)
     cache_stats := paged_attention_memory.get_cache_stats(engine.kv_cache_mgr)
@@ -149,6 +155,7 @@ func get_engine_stats(unified_inference_engine engine) string {
     "Max Blocks: " + string(engine.config.max_blocks) + "\n" +
     "Block Size: " + string(engine.config.block_size) + "\n"
 }
+
 func complete_all_requests(
     unified_inference_engine engine
 ) unified_inference_engine {
@@ -165,6 +172,7 @@ func complete_all_requests(
     }
     engine
 }
+
 func reset_engine(unified_inference_engine engine) unified_inference_engine {
     engine.kv_cache_mgr = paged_attention_memory.new_paged_kv_cache_manager(
         engine.config.max_blocks,
@@ -177,6 +185,7 @@ func reset_engine(unified_inference_engine engine) unified_inference_engine {
     engine.iteration_count = 0
     engine
 }
+
 func update_config(
     unified_inference_engine engine,
     unified_inference_config new_config
@@ -193,6 +202,7 @@ func update_config(
         total_tokens_generated: engine.total_tokens_generated,
     }
 }
+
 func set_performance_baseline(
     unified_inference_engine engine,
     float baseline_latency,
@@ -214,5 +224,7 @@ func set_performance_baseline(
         total_tokens_generated: engine.total_tokens_generated,
     }
 }
+
 func main() {
 }
+

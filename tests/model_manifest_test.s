@@ -17,3 +17,4 @@ func main() {
     println("PASS model manifest")
     0
 }
+

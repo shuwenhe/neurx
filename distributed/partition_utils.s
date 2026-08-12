@@ -7,6 +7,7 @@ struct partition_info {
     int start_idx
     int end_idx
 }
+
 func create_partition_info(int total_params, int num_partitions, int partition_id) partition_info {
     partition_info info
     info.total_params = total_params
@@ -24,6 +25,7 @@ func create_partition_info(int total_params, int num_partitions, int partition_i
     info.end_idx = info.start_idx + info.partition_size
     return info
 }
+
 func get_local_partition([]float global_data, partition_info info) []float {
     []float local_data = []
     int i = info.start_idx
@@ -35,6 +37,7 @@ func get_local_partition([]float global_data, partition_info info) []float {
     }
     return local_data
 }
+
 func scatter_partition([]float local_data, partition_info info, int total_size) []float {
     []float global_data = []
     int i = 0
@@ -53,6 +56,7 @@ func scatter_partition([]float local_data, partition_info info, int total_size) 
     }
     return global_data
 }
+
 func print_partition_info(partition_info info) {
     println("Partition Info:")
     println("  total_params: " + int_to_string(info.total_params))
@@ -62,6 +66,7 @@ func print_partition_info(partition_info info) {
     println("  start_idx: " + int_to_string(info.start_idx))
     println("  end_idx: " + int_to_string(info.end_idx))
 }
+
 func int_to_string(int n) string {
     if n == 0 { return "0" }
     if n == 1 { return "1" }
@@ -103,3 +108,4 @@ func int_to_string(int n) string {
     if remaining == 9 { result = "9" + result }
     return result
 }
+

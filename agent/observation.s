@@ -9,6 +9,7 @@ struct agent_observation_state {
     bool no_progress
     bool ok
 }
+
 func new_agent_observation_state() agent_observation_state {
     agent_observation_state {
         raw: "",
@@ -21,6 +22,7 @@ func new_agent_observation_state() agent_observation_state {
         ok: false,
     }
 }
+
 func agent_observation_contains(string text, string pattern) bool {
     string haystack = lower(trim(text))
     string needle = lower(trim(pattern))
@@ -50,6 +52,7 @@ func agent_observation_contains(string text, string pattern) bool {
     }
     false
 }
+
 func agent_observation_kind(string observation) string {
     string raw = trim(observation)
     if raw == "" {
@@ -67,6 +70,7 @@ func agent_observation_kind(string observation) string {
     }
     lower(trim(kind))
 }
+
 func agent_observation_parse(string observation) agent_observation_state {
     string raw = trim(observation)
     if raw == "" {
@@ -145,18 +149,24 @@ func agent_observation_parse(string observation) agent_observation_state {
         ok: true,
     }
 }
+
 func agent_observation_requires_replan(string observation) bool {
     agent_observation_parse(observation).blocked
 }
+
 func agent_observation_is_failed(string observation) bool {
     agent_observation_parse(observation).failed
 }
+
 func agent_observation_is_terminal(string observation) bool {
     agent_observation_parse(observation).terminal
 }
+
 func agent_observation_is_progress(string observation) bool {
     agent_observation_parse(observation).ok
 }
+
 func agent_observation_is_no_progress(string observation) bool {
     agent_observation_parse(observation).no_progress
 }
+

@@ -1,10 +1,12 @@
 package neurx.inference.hpc
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, trim}
 use neurx.inference.runtime.real_text_engine.{real_text_engine_state, real_generation_result, load_real_text_engine, generate_response, resolve_model_path_from_env, read_prompt_from_env, int_to_string, float_to_string}
+
 func print_line(string text) {
     print(text)
     print("\n")
 }
+
 func parse_positive_int(string text, int fallback) int {
     if len(text) == 0 {
         return fallback
@@ -24,6 +26,7 @@ func parse_positive_int(string text, int fallback) int {
     }
     value
 }
+
 func main() {
     string model_path = resolve_model_path_from_env()
     string prompt = read_prompt_from_env()
@@ -63,3 +66,4 @@ func main() {
     }
     print_line("Status: " + status)
 }
+

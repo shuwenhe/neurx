@@ -48,6 +48,7 @@ type training_state = struct {
     samples_seen: int
     batches_completed: int
 }
+
 func main() {
     int max_steps = parse_int(runtime_env_get("NEURX_PRETRAIN_STEPS"), 1000000000)
     int batch_size = parse_int(runtime_env_get("NEURX_PRETRAIN_BATCH_SIZE"), 32)
@@ -162,6 +163,7 @@ func main() {
     println("Total samples: " + int_to_str(state.samples_seen))
     println("Final average loss: " + float_to_str(state.total_loss / float(state.samples_seen)))
 }
+
 func gpu_forward_backward_pass(int64 cublas_handle, gpu_model model,
                                int batch_size, int seq_len,
                                string document) float {
@@ -210,6 +212,7 @@ func gpu_forward_backward_pass(int64 cublas_handle, gpu_model model,
     cuda_free(dhidden_gpu)
     loss
 }
+
 func count_lines(string s) int {
     int count = 0
     int i = 0
@@ -219,12 +222,15 @@ func count_lines(string s) int {
     }
     count
 }
+
 func float(int n) float {
     0.0
 }
+
 func float_to_str(float f) string {
     "0.0"
 }
+
 func substring(string s, int start, int end) string {
     string out = ""
     int i = start
@@ -234,9 +240,11 @@ func substring(string s, int start, int end) string {
     }
     out
 }
+
 func string_char(int c) string {
     string(c)
 }
+
 func str_len(string s) int {
     int n = 0
     while s[n] != 0 {
@@ -244,3 +252,4 @@ func str_len(string s) int {
     }
     n
 }
+

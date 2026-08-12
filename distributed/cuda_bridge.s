@@ -6,6 +6,7 @@ struct cuda_device {
     int compute_capability
     int memory_total_mb
 }
+
 struct cuda_bridge {
     int rank
     int local_rank
@@ -15,6 +16,7 @@ struct cuda_bridge {
     bool initialized
     int nccl_comm_id
 }
+
 func new_cuda_bridge(
     rank int,
     local_rank int,
@@ -37,6 +39,7 @@ func new_cuda_bridge(
         nccl_comm_id: nccl_comm_id,
     }
 }
+
 func query_cuda_device(int device_id) cuda_device {
     cuda_device {
         device_id: device_id,
@@ -46,16 +49,21 @@ func query_cuda_device(int device_id) cuda_device {
         memory_total_mb: 24576,
     }
 }
+
 func cuda_set_device(int device_id) {
 }
+
 func cuda_device_synchronize() {
 }
+
 func cuda_get_device_memory_info() (int, int) {
     (12884901888, 25769803776)
 }
+
 func nccl_get_unique_id() int {
     42
 }
+
 func nccl_comm_init(
     int rank,
     int world_size,
@@ -64,6 +72,7 @@ func nccl_comm_init(
     int comm_handle = (rank * 1000) + world_size
     comm_handle
 }
+
 func cuda_bridge_all_reduce_sum(
     cuda_bridge cb,
     []float gradients,
@@ -83,6 +92,7 @@ func cuda_bridge_all_reduce_sum(
     )
     reduced
 }
+
 func reduce_gradients_simulate(
     []float gradients,
     int rank,
@@ -102,6 +112,7 @@ func reduce_gradients_simulate(
     }
     reduced
 }
+
 func cuda_bridge_broadcast(
     cuda_bridge cb,
     []float data,
@@ -113,6 +124,7 @@ func cuda_bridge_broadcast(
     cuda_device_synchronize()
     data
 }
+
 func cuda_bridge_reduce_scatter(
     cuda_bridge cb,
     []float gradients,
@@ -129,11 +141,13 @@ func cuda_bridge_reduce_scatter(
     }
     local_result
 }
+
 struct async_all_reduce_handle {
     int stream_id
     []float gradients
     int status
 }
+
 func cuda_bridge_all_reduce_async(
     cuda_bridge cb,
     []float gradients,
@@ -144,12 +158,14 @@ func cuda_bridge_all_reduce_async(
         status: 0,
     }
 }
+
 func async_all_reduce_wait(
     handle async_all_reduce_handle,
 ) []float {
     cuda_device_synchronize()
     handle.gradients
 }
+
 func cuda_bridge_malloc_gradients(
     cuda_bridge cb,
     int num_gradients,
@@ -157,32 +173,40 @@ func cuda_bridge_malloc_gradients(
     int gpu_mem_ptr = 0x_deadbeef
     gpu_mem_ptr
 }
+
 func cuda_bridge_free_gradients(int gpu_mem_ptr) {
 }
+
 struct cuda_event {
     int event_id
     bool recorded
 }
+
 func cuda_create_event() cuda_event {
     cuda_event {
         event_id: 0,
         recorded: false,
     }
 }
+
 func cuda_record_event(event cuda_event, int stream_id) {
 }
+
 func cuda_event_synchronize(event cuda_event) {
 }
+
 func cuda_bridge_finalize(cuda_bridge cb) {
     if cb.rank == 0 {
         print("[CUDA Bridge] Finalized: rank=" + itoa(cb.rank) +
               " world_size=" + itoa(cb.world_size))
     }
 }
+
 func cuda_bridge_get_memory_usage(cuda_bridge cb) (int, int) {
     free_bytes, total_bytes := cuda_get_device_memory_info()
     (free_bytes, total_bytes)
 }
+
 func cuda_bridge_log_status(cuda_bridge cb) {
     free_bytes, total_bytes := cuda_bridge_get_memory_usage(cb)
     string status = "[CUDA Bridge rank=" + itoa(cb.rank) + "] " +
@@ -191,6 +215,7 @@ func cuda_bridge_log_status(cuda_bridge cb) {
                     "free=" + itoa(free_bytes/1024/1024) + "MB"
     print(status)
 }
+
 func itoa(int n) string {
     if n == 0 {
         return "0"
@@ -208,3 +233,4 @@ func itoa(int n) string {
     }
     s
 }
+

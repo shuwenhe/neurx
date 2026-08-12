@@ -26,6 +26,7 @@ type memory_estimate struct {
     activation_gb: float
     total_gb: float
 }
+
 func create_7b_config(): large_model_config {
     config := large_model_config{
         model_name: "neurx-7b",
@@ -44,6 +45,7 @@ func create_7b_config(): large_model_config {
     }
     return config
 }
+
 func create_13b_config(): large_model_config {
     config := large_model_config{
         model_name: "neurx-13b",
@@ -62,6 +64,7 @@ func create_13b_config(): large_model_config {
     }
     return config
 }
+
 func create_70b_config(): large_model_config {
     config := large_model_config{
         model_name: "neurx-70b",
@@ -80,6 +83,7 @@ func create_70b_config(): large_model_config {
     }
     return config
 }
+
 func estimate_memory(config: large_model_config, batch_size: int): memory_estimate {
     num_params_f := float(config.num_params)
     weights_gb := num_params_f * 4.0 / (1024.0 * 1024.0 * 1024.0)
@@ -104,6 +108,7 @@ func estimate_memory(config: large_model_config, batch_size: int): memory_estima
     }
     return estimate
 }
+
 func print_config(config: large_model_config, memory: memory_estimate) {
     fmt.Printf("\n")
     fmt.Printf("model: %s\n", config.model_name)
@@ -130,6 +135,7 @@ func print_config(config: large_model_config, memory: memory_estimate) {
     fmt.Printf("  Total (with 20 percent margin): %.2f GB\n", memory.total_gb)
     fmt.Printf("\n")
 }
+
 func main() {
     model_size := os.Getenv("MODEL_SIZE")
     if model_size == "" {
@@ -182,3 +188,4 @@ func main() {
         fmt.Printf("\n")
     }
 }
+

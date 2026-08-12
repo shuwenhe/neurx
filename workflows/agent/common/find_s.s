@@ -10,6 +10,7 @@ func main() {
     println(resolved)
     0
 }
+
 func resolve_s_bin(string root_dir) string {
     string candidate = trim(runtime_env_get("S_BIN", ""))
     if is_runnable(candidate) {
@@ -47,6 +48,7 @@ func resolve_s_bin(string root_dir) string {
     }
     ""
 }
+
 func is_runnable(string path) bool {
     string trimmed = trim(path)
     if trimmed == "" {
@@ -54,3 +56,4 @@ func is_runnable(string path) bool {
     }
     runtime_file_exists(trimmed) && runtime_run_command_output("test -x " + runtime_shell_escape(trimmed) + " && printf ok || true") == "ok"
 }
+

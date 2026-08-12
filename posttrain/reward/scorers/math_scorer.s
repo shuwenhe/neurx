@@ -10,6 +10,7 @@ func compute_math_score(string solution_str, string ground_truth) float {
     }
     return 0.0
 }
+
 func last_boxed_only_string(string s) string {
     int idx = find_last_substring(s, "\\boxed")
     if idx < 0 {
@@ -41,6 +42,7 @@ func last_boxed_only_string(string s) string {
     }
     return substring(s, idx, right_brace_idx + 1)
 }
+
 func remove_boxed(string s) string {
     string boxed_space = "\\boxed "
     if starts_with(s, boxed_space) {
@@ -52,11 +54,13 @@ func remove_boxed(string s) string {
     }
     return s
 }
+
 func is_equiv(string str1, string str2) bool {
     string ss1 = strip_string(str1)
     string ss2 = strip_string(str2)
     return ss1 == ss2
 }
+
 func strip_string(string input) string {
     string result = input
     result = replace_all(result, "\n", "")
@@ -82,6 +86,7 @@ func strip_string(string input) string {
     }
     return result
 }
+
 func remove_units(string s) string {
     int idx = find_substring(s, "\\text{")
     if idx < 0 {
@@ -89,12 +94,15 @@ func remove_units(string s) string {
     }
     return substring(s, 0, idx)
 }
+
 func fix_sqrt(string s) string {
     return s
 }
+
 func fix_fracs(string s) string {
     return s
 }
+
 func find_last_substring(string s, string sub) int {
     int s_len = len(s)
     int sub_len = len(sub)
@@ -106,6 +114,7 @@ func find_last_substring(string s, string sub) int {
     }
     return found
 }
+
 func find_substring(string s, string sub) int {
     int s_len = len(s)
     int sub_len = len(sub)
@@ -116,6 +125,7 @@ func find_substring(string s, string sub) int {
     }
     return -1
 }
+
 func starts_with(string s, string prefix) bool {
     int prefix_len = len(prefix)
     if prefix_len > len(s) {
@@ -123,6 +133,7 @@ func starts_with(string s, string prefix) bool {
     }
     return substring(s, 0, prefix_len) == prefix
 }
+
 func replace_all(string s, string old_str, string new_str) string {
     if old_str == "" {
         return s
@@ -144,3 +155,4 @@ func replace_all(string s, string old_str, string new_str) string {
     }
     return result
 }
+

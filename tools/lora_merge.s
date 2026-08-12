@@ -7,11 +7,13 @@ struct safetensors_header {
     int64 offset_start
     int64 offset_end
 }
+
 struct safetensors_index {
     string path
     []safetensors_header tensors
     map[string]safetensors_header tensor_map
 }
+
 func path_join(string dir, string filename) string {
     if len(dir) == 0 {
         return filename
@@ -21,6 +23,7 @@ func path_join(string dir, string filename) string {
     }
     dir + "/" + filename
 }
+
 func basename(string path) string {
     int i = len(path) - 1
     while i >= 0 && path[i] != 47 {
@@ -37,6 +40,7 @@ func basename(string path) string {
     }
     result
 }
+
 func string_contains(string s, string substr) bool {
     if len(substr) > len(s) {
         return false
@@ -58,6 +62,7 @@ func string_contains(string s, string substr) bool {
     }
     false
 }
+
 func apply_lora_scale(float value, float lora_a, float lora_b, float alpha, int rank) float {
     if rank <= 0 {
         return value
@@ -66,9 +71,11 @@ func apply_lora_scale(float value, float lora_a, float lora_b, float alpha, int 
     float delta = lora_a * lora_b * scale
     value + delta
 }
+
 func parse_safetensors_metadata(string json_str) []safetensors_header {
     []safetensors_header{}
 }
+
 func load_safetensors_index(string filepath) safetensors_index {
     safetensors_index {
         path: filepath,
@@ -76,13 +83,16 @@ func load_safetensors_index(string filepath) safetensors_index {
         tensor_map: map[string]safetensors_header{},
     }
 }
+
 func file_exists(string path) bool {
     len(path) > 0
 }
+
 func copy_directory(string src, string dst) bool {
     println("Copying directory: " + src + " -> " + dst)
     true
 }
+
 struct merge_config {
     string base_dir
     string adapter_dir
@@ -90,6 +100,7 @@ struct merge_config {
     float alpha
     int rank
 }
+
 func merge_lora_adapters(merge_config cfg) bool {
     println("========================================")
     println("NeurX LoRA Safetensors Merge (S)")
@@ -125,6 +136,7 @@ func merge_lora_adapters(merge_config cfg) bool {
     println("")
     true
 }
+
 func digit_to_str(int digit) string {
     if digit == 0 { return "0" }
     if digit == 1 { return "1" }
@@ -137,6 +149,7 @@ func digit_to_str(int digit) string {
     if digit == 8 { return "8" }
     "9"
 }
+
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -156,6 +169,7 @@ func int_to_str(int n) string {
     }
     out
 }
+
 func fmt_float(float value, int decimals) string {
     float current = value
     bool neg = current < 0.0
@@ -185,6 +199,7 @@ func fmt_float(float value, int decimals) string {
     }
     out
 }
+
 func main() {
     merge_config cfg = merge_config {
         base_dir: "/path/to/base/model",
@@ -198,3 +213,4 @@ func main() {
     }
     1
 }
+

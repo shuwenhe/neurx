@@ -10,6 +10,7 @@ struct compile_config {
     optimization_level: i32
     debug_mode: bool
 }
+
 struct ir_module {
     name: string
     version: string
@@ -17,6 +18,7 @@ struct ir_module {
     instructions: []string
     data_section: []string
 }
+
 func compile_neurx_code(config: compile_config) (bool, ir_module) {
     println("\n╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 1: COMPILE & IR GENERATION                     ║")
@@ -70,18 +72,21 @@ func compile_neurx_code(config: compile_config) (bool, ir_module) {
     println("")
     return true, ir
 }
+
 struct tensor_2 {
     data: []f64
     shape: []i32
     dtype: string
     device: string
 }
+
 struct data_bundle {
     batch_id: i32
     input_tensor: tensor_2
     target_tensor: tensor_2
     metadata: map[string]string
 }
+
 func bundle_training_data(batch_size: i32, seq_len: i32, vocab_size: i32) data_bundle {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 2: DATA BUNDLING                                ║")
@@ -123,6 +128,7 @@ func bundle_training_data(batch_size: i32, seq_len: i32, vocab_size: i32) data_b
     println("")
     return bundle
 }
+
 struct model_config {
     hidden_dim: i32
     num_layers: i32
@@ -130,6 +136,7 @@ struct model_config {
     ffn_dim: i32
     vocab_size: i32
 }
+
 struct training_state {
     step: i32
     model_params: tensor_2
@@ -137,11 +144,13 @@ struct training_state {
     learning_rate: f64
     warmup_steps: i32
 }
+
 struct runner {
     config: model_config
     state: training_state
     batch: data_bundle
 }
+
 func init_runner(config: model_config, batch: data_bundle, learning_rate: f64) runner {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 3: RUNNER INITIALIZATION                        ║")
@@ -198,11 +207,13 @@ func init_runner(config: model_config, batch: data_bundle, learning_rate: f64) r
     println("")
     return runner
 }
+
 struct forward_output {
     logits: tensor_2
     hidden_states: []tensor_2
     cache: map[string]tensor_2
 }
+
 func forward_pass(runner: runner) (forward_output, f64) {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 4: FORWARD PASS                                 ║")
@@ -252,12 +263,14 @@ func forward_pass(runner: runner) (forward_output, f64) {
     println("")
     return output, f64(forward_time.Seconds())
 }
+
 struct loss_metrics {
     total_loss: f64
     avg_logit: f64
     max_logit: f64
     min_logit: f64
 }
+
 func compute_loss(output: forward_output, targets: tensor_2) (loss_metrics, f64) {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 5: LOSS COMPUTATION                             ║")
@@ -291,6 +304,7 @@ func compute_loss(output: forward_output, targets: tensor_2) (loss_metrics, f64)
     println("")
     return metrics, f64(loss_time.Seconds())
 }
+
 struct gradient_info {
     num_gradients: i32
     total_norm: f64
@@ -298,6 +312,7 @@ struct gradient_info {
     min_grad: f64
     grad_overflow: bool
 }
+
 func backward_pass(runner: runner, output: forward_output, loss: f64) (gradient_info, f64) {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 6: BACKWARD PASS                                ║")
@@ -347,12 +362,14 @@ func backward_pass(runner: runner, output: forward_output, loss: f64) (gradient_
     println("")
     return grad_info, f64(backward_time.Seconds())
 }
+
 struct optimizer_update {
     step_count: i32
     learning_rate_adjusted: f64
     param_update_norm: f64
     weight_decay_applied: bool
 }
+
 func adamw_optimizer_step(runner: runner, grad_info: gradient_info, step: i32) (optimizer_update, f64) {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 7: OPTIMIZER UPDATE (adam_w)                     ║")
@@ -422,6 +439,7 @@ func adamw_optimizer_step(runner: runner, grad_info: gradient_info, step: i32) (
     println("")
     return update, f64(optimizer_time.Seconds())
 }
+
 struct training_step {
     step_id: i32
     total_time: f64
@@ -433,6 +451,7 @@ struct training_step {
     loss_value: f64
     learning_rate: f64
 }
+
 func exit_and_summarize(
     step_id: i32,
     loss: f64,
@@ -485,6 +504,7 @@ func exit_and_summarize(
     step.learning_rate = lr
     return step
 }
+
 func main() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║   NeurX COMPLETE TRAINING PIPELINE SYSTEM             ║")
@@ -550,3 +570,4 @@ func main() {
     println("🚀 STATUS: ✅ ALL STAGES COMPLETE")
     println("")
 }
+

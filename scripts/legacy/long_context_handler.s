@@ -28,6 +28,7 @@ type cache_stats struct {
     cache_misses            int64
     avg_cache_time          float64
 }
+
 func (encoder *ro_pepositional_encoding) compute_rope_frequencies() []float64 {
     frequencies := make([]float64, encoder.dimensions)
     for i := 0; i < encoder.dimensions; i += 2 {
@@ -40,6 +41,7 @@ func (encoder *ro_pepositional_encoding) compute_rope_frequencies() []float64 {
     }
     return frequencies
 }
+
 func (encoder *ro_pepositional_encoding) apply_rope(
     query []float64,
     key []float64,
@@ -61,6 +63,7 @@ func (encoder *ro_pepositional_encoding) apply_rope(
     }
     return rotated_q, rotated_k
 }
+
 func (handler *long_context_handler) record_cache_request(hit bool, latency_ms float64) {
     handler.cache_stats.total_requests++
     if hit {
@@ -74,6 +77,7 @@ func (handler *long_context_handler) record_cache_request(hit bool, latency_ms f
     }
     handler.cache_stats.avg_cache_time = (handler.cache_stats.avg_cache_time*(total-1.0) + latency_ms) / total
 }
+
 func (handler *long_context_handler) estimate_memory_mb(token_count int) float64 {
     if token_count <= 0 {
         return 0.0
@@ -84,6 +88,7 @@ func (handler *long_context_handler) estimate_memory_mb(token_count int) float64
     }
     return float64(token_count) * width * 0.000008
 }
+
 func (handler *long_context_handler) chunk_sequence(
     tokens []int,
     chunk_size int) [][]int {
@@ -97,6 +102,7 @@ func (handler *long_context_handler) chunk_sequence(
     }
     return chunks
 }
+
 func (handler *long_context_handler) process_with_overlap(
     tokens []int,
     process_func func([]int) []float64) []float64 {
@@ -128,6 +134,7 @@ func (handler *long_context_handler) process_with_overlap(
     }
     return result
 }
+
 func (handler *long_context_handler) apply_sliding_window_attention(
     query []float64,
     key_cache [][]float64,
@@ -174,6 +181,7 @@ func (handler *long_context_handler) apply_sliding_window_attention(
     }
     return output
 }
+
 func (handler *long_context_handler) expand_context_window(
     current_max int,
     target_max int) {
@@ -186,6 +194,7 @@ func (handler *long_context_handler) expand_context_window(
     fmt.Printf("  Memory requirement: %.2f GB (estimated)\n",
         float64(target_max)*2.0*768.0*2.0/1e9)
 }
+
 func (handler *long_context_handler) process_long_sequence(
     tokens []int,
     model_forward func([]int) []float64) []float64 {
@@ -200,6 +209,7 @@ func (handler *long_context_handler) process_long_sequence(
         return handler.process_with_chunks(tokens, model_forward)
     }
 }
+
 func (handler *long_context_handler) process_with_sliding_window(
     tokens []int,
     model_forward func([]int) []float64) []float64 {
@@ -216,11 +226,13 @@ func (handler *long_context_handler) process_with_sliding_window(
     }
     return result
 }
+
 func (handler *long_context_handler) process_with_chunks(
     tokens []int,
     model_forward func([]int) []float64) []float64 {
     return handler.process_with_overlap(tokens, model_forward)
 }
+
 func (handler *long_context_handler) print_stats() {
     fmt.Println("\n╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Long Context Handler - Performance Statistics       ║")
@@ -247,6 +259,7 @@ func (handler *long_context_handler) print_stats() {
     fmt.Printf("  Extended (32K+): Long-form generation\n")
     fmt.Printf("  Estimated memory for max length: %.2f MB\n", handler.estimate_memory_mb(handler.config.max_seq_length))
 }
+
 func new_long_context_handler(config long_context_config) *long_context_handler {
     return &long_context_handler{
         config: config,
@@ -258,6 +271,7 @@ func new_long_context_handler(config long_context_config) *long_context_handler 
         cache_stats: cache_stats{},
     }
 }
+
 func (handler *long_context_handler) demonstrate() {
     fmt.Println("╔════════════════════════════════════════════════════════╗")
     fmt.Println("║  Long Context Support - Extended Sequences            ║")
@@ -275,3 +289,4 @@ func (handler *long_context_handler) demonstrate() {
     handler.print_stats()
     fmt.Println("\n[LongContext] Ready!")
 }
+

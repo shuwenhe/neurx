@@ -9,6 +9,7 @@ enum layout_type {
 type layout interface {
     name() string
 }
+
 struct layout_info {
     layout_type: LayoutType
     strides: []i64
@@ -49,3 +50,4 @@ interface i_sparse_layout {
     sparsity() -> f64
     to_sparse(tensor: tensor, format: string) -> tensor
 }
+

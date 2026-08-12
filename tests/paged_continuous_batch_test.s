@@ -25,6 +25,7 @@ func test_paged_kv_allocation() bool {
     }
     true
 }
+
 func test_paged_kv_multiple_sequences() bool {
     mgr := paged_attention_memory.new_paged_kv_cache_manager(200, 16, 24, 32, 4096)
     mgr, blocks1 := paged_attention_memory.allocate_blocks(mgr, 0, 64)
@@ -44,6 +45,7 @@ func test_paged_kv_multiple_sequences() bool {
     }
     true
 }
+
 func test_paged_kv_free() bool {
     mgr := paged_attention_memory.new_paged_kv_cache_manager(100, 16, 24, 32, 4096)
     mgr, _ := paged_attention_memory.allocate_blocks(mgr, 0, 64)
@@ -59,6 +61,7 @@ func test_paged_kv_free() bool {
     }
     true
 }
+
 func test_paged_kv_block_copy() bool {
     mgr := paged_attention_memory.new_paged_kv_cache_manager(100, 16, 24, 32, 4096)
     src_blocks := []int{0, 1, 2, 3}
@@ -69,6 +72,7 @@ func test_paged_kv_block_copy() bool {
     }
     true
 }
+
 func test_paged_kv_utilization() bool {
     mgr := paged_attention_memory.new_paged_kv_cache_manager(100, 16, 24, 32, 4096)
     mgr, _ := paged_attention_memory.allocate_blocks(mgr, 0, 800)
@@ -81,6 +85,7 @@ func test_paged_kv_utilization() bool {
     }
     true
 }
+
 func test_continuous_batch_creation() bool {
     sched := continuous_batch_scheduler.new_continuous_batch_scheduler(32)
     if sched.batch_capacity != 32 {
@@ -91,6 +96,7 @@ func test_continuous_batch_creation() bool {
     }
     true
 }
+
 func test_continuous_batch_add_request() bool {
     sched := continuous_batch_scheduler.new_continuous_batch_scheduler(32)
     input_ids := []int{1, 2, 3, 4, 5}
@@ -111,6 +117,7 @@ func test_continuous_batch_add_request() bool {
     }
     true
 }
+
 func test_continuous_batch_schedule() bool {
     sched := continuous_batch_scheduler.new_continuous_batch_scheduler(32)
     input1 := []int{1, 2, 3, 4, 5}
@@ -127,6 +134,7 @@ func test_continuous_batch_schedule() bool {
     }
     true
 }
+
 func test_continuous_batch_decode_step() bool {
     sched := continuous_batch_scheduler.new_continuous_batch_scheduler(32)
     input := []int{1, 2, 3}
@@ -146,6 +154,7 @@ func test_continuous_batch_decode_step() bool {
     }
     true
 }
+
 func test_continuous_batch_multiple_requests() bool {
     sched := continuous_batch_scheduler.new_continuous_batch_scheduler(64)
     i := 0
@@ -172,6 +181,7 @@ func test_continuous_batch_multiple_requests() bool {
     }
     true
 }
+
 func test_continuous_batch_prefill_decode_separation() bool {
     sched := continuous_batch_scheduler.new_continuous_batch_scheduler(32)
     input1 := []int{1, 2, 3}
@@ -195,6 +205,7 @@ func test_continuous_batch_prefill_decode_separation() bool {
     }
     true
 }
+
 func test_continuous_batch_max_tokens_limit() bool {
     sched := continuous_batch_scheduler.new_continuous_batch_scheduler(32)
     input := []int{1, 2}
@@ -211,6 +222,7 @@ func test_continuous_batch_max_tokens_limit() bool {
     }
     true
 }
+
 func test_continuous_batch_stats() bool {
     sched := continuous_batch_scheduler.new_continuous_batch_scheduler(32)
     input := []int{1, 2, 3}
@@ -222,6 +234,7 @@ func test_continuous_batch_stats() bool {
     }
     true
 }
+
 func test_continuous_batch_reset() bool {
     sched := continuous_batch_scheduler.new_continuous_batch_scheduler(32)
     input := []int{1, 2}
@@ -238,6 +251,7 @@ func test_continuous_batch_reset() bool {
     }
     true
 }
+
 func test_paged_attention_with_scheduling() bool {
     mgr := paged_attention_memory.new_paged_kv_cache_manager(200, 16, 24, 32, 4096)
     sched := continuous_batch_scheduler.new_continuous_batch_scheduler(64)
@@ -273,6 +287,7 @@ func test_paged_attention_with_scheduling() bool {
     }
     true
 }
+
 func run_all_tests() bool {
     tests := []string{
         "test_paged_kv_allocation",
@@ -374,6 +389,7 @@ func run_all_tests() bool {
     printf("==================================\n")
     failed == 0
 }
+
 func main() {
     success := run_all_tests()
     if success {
@@ -382,3 +398,4 @@ func main() {
         printf("❌ Some tests failed!\n")
     }
 }
+

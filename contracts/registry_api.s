@@ -8,6 +8,7 @@ enum component_type {
     data_format
     custom
 }
+
 struct registry_entry {
     component_type: ComponentType
     name: string
@@ -72,3 +73,4 @@ interface i_registry_thread_safety {
     release_write_lock() -> void
     is_locked() -> bool
 }
+

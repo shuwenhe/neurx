@@ -1,12 +1,15 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_text_file, trim}
+
 func manifest_log(string s) int {
     println(s)
     0
 }
+
 func string_char(int c) string {
     string(c)
 }
+
 func count_lines(string text) int {
     if text == "" {
         return 0
@@ -24,6 +27,7 @@ func count_lines(string text) int {
     }
     lines
 }
+
 func main() {
     let project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     let shard_dir = runtime_env_get("NEURX_PRETRAIN_SHARD_DIR", project_root + "/dataset/pretrain/shard")
@@ -111,6 +115,7 @@ func main() {
     manifest_log("[pretrain-manifest] bytes      : " + int_to_str(total_size_bytes))
     0
 }
+
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
@@ -125,6 +130,7 @@ func shell_escape(string s) string {
     }
     out + "'"
 }
+
 func json_escape(string s) string {
     string out = "\""
     int i = 0
@@ -142,6 +148,7 @@ func json_escape(string s) string {
     out = out + "\""
     out
 }
+
 func parse_int(string s, int fallback) int {
     string text = trim(s)
     if text == "" {
@@ -164,6 +171,7 @@ func parse_int(string s, int fallback) int {
     }
     sign * value
 }
+
 func path_basename(string path) string {
     int last = -1
     int i = 0
@@ -187,6 +195,7 @@ func path_basename(string path) string {
     }
     out
 }
+
 func path_dirname(string path) string {
     int last = -1
     int i = 0
@@ -210,3 +219,4 @@ func path_dirname(string path) string {
     }
     out
 }
+

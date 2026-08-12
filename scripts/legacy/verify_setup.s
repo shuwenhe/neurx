@@ -15,15 +15,18 @@ func main() {
     println("This S entrypoint centralizes the setup verification status layer.")
     0
 }
+
 func binary_status(string name) string {
     if runtime_env_get("PATH", "") != "" {
         return "available or unresolved (" + name + ")"
     }
     return "missing (" + name + ")"
 }
+
 func check_path(string path) string {
     if runtime_file_exists(path) {
         return "ready (" + path + ")"
     }
     return "missing (" + path + ")"
 }
+

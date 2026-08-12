@@ -55,6 +55,7 @@ func main() {
     println("[TRAINER] Total docs: " + int_to_str(docs_seen))
     write_progress(progress_file, "training-complete steps=" + int_to_str(step) + " docs=" + int_to_str(docs_seen))
 }
+
 func count_lines(string text) int {
     int count = 0
     int i = 0
@@ -66,6 +67,7 @@ func count_lines(string text) int {
     }
     count
 }
+
 func get_shard_path(string list_text, int index) string {
     int current_line = 0
     int line_start = 0
@@ -98,6 +100,7 @@ func get_shard_path(string list_text, int index) string {
     }
     ""
 }
+
 func extract_filename(string path) string {
     int i = str_len(path) - 1
     while i >= 0 && path[i] != 47 {
@@ -111,18 +114,22 @@ func extract_filename(string path) string {
     }
     result
 }
+
 func should_log(int step, int interval) bool {
     if interval <= 0 { return false }
     step % interval == 0
 }
+
 func write_progress(string path, string text) {
     if str_len(path) > 0 {
         runtime_write_text_file(path, text + "\n")
     }
 }
+
 func string_char(int c) string {
     string(c)
 }
+
 func parse_int(string s, int default_val) int {
     if str_len(s) == 0 { return default_val }
     bool neg = false
@@ -139,11 +146,13 @@ func parse_int(string s, int default_val) int {
     if neg { result = -result }
     result
 }
+
 func int_to_str(int v) string {
     if v == 0 { return "0" }
     if v < 0 { return "-" + int_to_str(-v) }
     int_to_str(v / 10) + string_char((v % 10) + 48)
 }
+
 func str_len(string s) int {
     int i = 0
     while i < 1000000000 {
@@ -154,3 +163,4 @@ func str_len(string s) int {
     }
     -1
 }
+

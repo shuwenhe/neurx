@@ -6,6 +6,7 @@ struct tensorboard_writer {
     int events_written
     file_handle output_file
 }
+
 func create_tensorboard_writer(string log_dir) tensorboard_writer {
     ensure_directory_exists(log_dir)
     string filename = "events.out.tfevents." + get_timestamp_string() + "." + get_hostname()
@@ -19,6 +20,7 @@ func create_tensorboard_writer(string log_dir) tensorboard_writer {
         output_file: f,
     }
 }
+
 func tb_write_scalar(
     tensorboard_writer *writer,
     string tag,
@@ -30,3 +32,4 @@ func tb_write_scalar(
     write_event(writer.output_file, step, summary_data)
     writer.events_written = writer.events_written + 1
 }
+

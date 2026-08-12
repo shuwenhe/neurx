@@ -1,5 +1,6 @@
 package neurx.scripts.posttrain_lora_train
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_write_binary_file, runtime_write_text_file, tensor_buffer_new, tensor_buffer_slice, tensor_buffer_write_f32_le, tensor_buffer_write_string, tensor_buffer_write_u64_le, trim}
+
 struct lora_config {
     int seq_len
     int hidden_size
@@ -22,6 +23,7 @@ struct lora_config {
     bool use_qlora
     string qlora_dtype
 }
+
 struct lora_linear {
     []float base_weight
     int out_dim
@@ -33,12 +35,14 @@ struct lora_linear {
     float dropout_rate
     []float last_input
 }
+
 struct named_lora_module {
     string name
     lora_linear layer
     []float initial_a
     []float initial_b
 }
+
 struct adapter_stats {
     float l1
     float l2
@@ -46,12 +50,14 @@ struct adapter_stats {
     int nonzero
     int total
 }
+
 struct delta_stats {
     float l1
     float l2
     float max_abs
     int changed_count
 }
+
 func run_posttrain_lora_sft() int {
     string model_path = runtime_env_get("NEURX_POSTTRAIN_MODEL_PATH", "../model/base-model")
     string data_file = runtime_env_get("NEURX_POSTTRAIN_DATA_FILE", "/home/shuwen/shuwen/dataset/medical/train.json")
@@ -421,6 +427,7 @@ func run_posttrain_lora_sft() int {
     println("  Improvement:       " + float_to_str(improvement, 2) + "%")
     0
 }
+
 func train_named_module(named_lora_module module, []float input_vec, []float target_vec, float lr) named_lora_module {
     []float output = fill_lora(module.layer.out_dim, 0.0)
     int base_len = module.layer.out_dim * module.layer.in_dim
@@ -484,6 +491,7 @@ func train_named_module(named_lora_module module, []float input_vec, []float tar
     }
     module
 }
+
 func fill_lora(int n, float val) []float {
     []float result = []float{cap: n}
     int i = 0
@@ -493,6 +501,7 @@ func fill_lora(int n, float val) []float {
     }
     result
 }
+
 func init_gaussian(int n, float std) []float {
     []float result = []float{cap: n}
     int i = 0
@@ -506,6 +515,7 @@ func init_gaussian(int n, float std) []float {
     }
     result
 }
+
 func sqrt_lora(float x) float {
     if x < 0.0 {
         return 0.0
@@ -518,6 +528,7 @@ func sqrt_lora(float x) float {
     }
     guess
 }
+
 func guarantee_nonzero_modules([]named_lora_module modules, []float input_vec, []float target_q, []float target_v, float lr) []named_lora_module {
     int module_idx = 0
     bool has_nonzero = false
@@ -550,6 +561,7 @@ func guarantee_nonzero_modules([]named_lora_module modules, []float input_vec, [
     }
     modules
 }
+
 func write_simple_adapter_checkpoint(
     string output_dir,
     string model_path,
@@ -646,6 +658,7 @@ func write_simple_adapter_checkpoint(
         2
     ))
 }
+
 func build_adapter_config_json_simple(string model_path, int rank, float alpha, float effective_lr, int v_out, int module_count) string {
     string json = "{\n"
     json = json + "  \"base_model_name_or_path\": " + json_escape(model_path) + ",\n"
@@ -667,6 +680,7 @@ func build_adapter_config_json_simple(string model_path, int rank, float alpha, 
     json = json + "}\n"
     json
 }
+
 func build_training_state_json_simple(
     string data_file,
     float loss0,
@@ -711,6 +725,7 @@ func build_training_state_json_simple(
     json = json + "}\n"
     json
 }
+
 func compute_stats([]named_lora_module modules) adapter_stats {
     float l1 = 0.0
     float l2 = 0.0
@@ -762,6 +777,7 @@ func compute_stats([]named_lora_module modules) adapter_stats {
         total: total,
     }
 }
+
 func compute_delta_stats([]named_lora_module modules) delta_stats {
     float l1 = 0.0
     float l2 = 0.0
@@ -809,6 +825,7 @@ func compute_delta_stats([]named_lora_module modules) delta_stats {
         changed_count: changed,
     }
 }
+
 func write_adapter_checkpoint(
     string output_dir,
     string model_path,
@@ -887,6 +904,7 @@ func write_adapter_checkpoint(
         len(modules)
     ))
 }
+
 func build_adapter_config_json(string model_path, int rank, float alpha, float effective_lr, int v_out, []named_lora_module modules) string {
     string json = "{\n"
     json = json + "  \"base_model_name_or_path\": " + json_escape(model_path) + ",\n"
@@ -908,6 +926,7 @@ func build_adapter_config_json(string model_path, int rank, float alpha, float e
     json = json + "}\n"
     json
 }
+
 func build_training_state_json(
     string data_file,
     []float loss_history,
@@ -961,6 +980,7 @@ func build_training_state_json(
     json = json + "}\n"
     json
 }
+
 func text_to_vector(string text, int dim) []float {
     []float vec = fill_lora(dim, 0.0)
     int i = 0
@@ -975,6 +995,7 @@ func text_to_vector(string text, int dim) []float {
     }
     vec
 }
+
 func mse_loss([]float predictions, []float targets) float {
     float loss = 0.0
     int i = 0
@@ -992,6 +1013,7 @@ func mse_loss([]float predictions, []float targets) float {
     }
     loss
 }
+
 func mse_gradient([]float predictions, []float targets) []float {
     int limit = len(predictions)
     if len(targets) < limit {
@@ -1005,12 +1027,14 @@ func mse_gradient([]float predictions, []float targets) []float {
     }
     grad
 }
+
 func abs_float(float value) float {
     if value < 0.0 {
         return 0.0 - value
     }
     value
 }
+
 func copy_float_array([]float source) []float {
     []float result = []float{cap: len(source)}
     int i = 0
@@ -1020,6 +1044,7 @@ func copy_float_array([]float source) []float {
     }
     result
 }
+
 func first_non_empty_line(string path) string {
     string content = runtime_read_text_file(path)
     string current = ""
@@ -1040,6 +1065,7 @@ func first_non_empty_line(string path) string {
     }
     ""
 }
+
 func extract_json_string_field(string json_text, string field_name) string {
     string needle = "\"" + field_name + "\""
     int pos = find_substring(json_text, needle)
@@ -1082,6 +1108,7 @@ func extract_json_string_field(string json_text, string field_name) string {
     }
     out
 }
+
 func extract_json_int_field(string json_text, string field_name, int fallback) int {
     string needle = "\"" + field_name + "\""
     int pos = find_substring(json_text, needle)
@@ -1109,6 +1136,7 @@ func extract_json_int_field(string json_text, string field_name, int fallback) i
     }
     parse_int(token, fallback)
 }
+
 func find_substring(string text, string pattern) int {
     if len(pattern) > len(text) {
         return -1
@@ -1131,6 +1159,7 @@ func find_substring(string text, string pattern) int {
     }
     -1
 }
+
 func parse_int(string s, int fallback) int {
     string text = trim(s)
     if text == "" {
@@ -1153,15 +1182,18 @@ func parse_int(string s, int fallback) int {
     }
     sign * value
 }
+
 func make_shape(int a, int b) []int {
     []int shape = []int{cap: 2}
     shape[0] = a
     shape[1] = b
     shape
 }
+
 func string_char(int c) string {
     string(c)
 }
+
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -1192,6 +1224,7 @@ func int_to_str(int n) string {
     }
     out
 }
+
 func float_to_str(float value, int decimals) string {
     float current = value
     bool neg = current < 0.0
@@ -1230,6 +1263,7 @@ func float_to_str(float value, int decimals) string {
     }
     out
 }
+
 func json_escape(string s) string {
     string out = "\""
     int i = 0
@@ -1253,6 +1287,8 @@ func json_escape(string s) string {
     out = out + "\""
     out
 }
+
 func main() {
     return run_posttrain_lora_sft()
 }
+

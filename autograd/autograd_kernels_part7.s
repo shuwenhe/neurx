@@ -18,42 +18,49 @@ func backward_masked_fill(node n, tensor grad_output) backward_result {
     tensor result { data: grad_input_data, grad: [], shape: input.shape, requires_grad: true }
     backward_result { input_grads: [result], success: true }
 }
+
 func get_context_safe(node n, string key, []int default_val) []int {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key].shape
     }
     default_val
 }
+
 func get_context_safe_tensor(node n, string key, tensor default_val) tensor {
     if key in n.ctx  n.ctx[key] != nil {
         return n.ctx[key]
     }
     default_val
 }
+
 func get_context_safe_float(node n, string key, float default_val) float {
     if "float_" + key in n.ctx  n.ctx["float_" + key] != nil {
         return n.ctx["float_" + key].data[0]
     }
     default_val
 }
+
 func get_context_safe_int(node n, string key, int default_val) int {
     if "int_" + key in n.ctx {
         return int(n.ctx["int_" + key].data[0])
     }
     default_val
 }
+
 func get_context_safe_bool(node n, string key, bool default_val) bool {
     if "bool_" + key in n.ctx {
         return n.ctx["bool_" + key].data[0] != 0.0
     }
     default_val
 }
+
 func get_context_safe_shape(node n, string key, []int default_val) []int {
     if "shape_" + key in n.ctx {
         return parse_shape_array(n.ctx["shape_" + key].data)
     }
     default_val
 }
+
 func parse_shape_array([]float data) []int {
     []int shapes = []int{cap: len(data)}
     for i in 0..len(data) {
@@ -61,6 +68,7 @@ func parse_shape_array([]float data) []int {
     }
     shapes
 }
+
 func broadcast_gradient(tensor grad, []int original_shape, []int broadcasted_shape) tensor {
     if shapes_equal(original_shape, broadcasted_shape) {
         return copy_tensor_with_grad(grad)
@@ -73,16 +81,19 @@ func broadcast_gradient(tensor grad, []int original_shape, []int broadcasted_sha
         requires_grad: true,
     }
 }
+
 struct gradient_manager {
     computation_graph graph
     map[int]tensor param_gradients
 }
+
 func new_gradient_manager() gradient_manager {
     gradient_manager {
         graph: new_graph(),
         param_gradients: {},
     }
 }
+
 func compute_gradients(
     gradient_manager mgr,
     tensor loss,
@@ -104,6 +115,7 @@ func compute_gradients(
     }
     mgr
 }
+
 func find_node_for_tensor(computation_graph g, tensor t) int {
     for i in 0..len(g.nodes) {
         if len(g.nodes[i].output.data) == len(t.data)
@@ -113,6 +125,7 @@ func find_node_for_tensor(computation_graph g, tensor t) int {
     }
     -1
 }
+
 func same_data([]float a, []float b, int check_n) bool {
     int n = min(check_n, min_len(a, b))
     for i in 0..n {
@@ -122,6 +135,7 @@ func same_data([]float a, []float b, int check_n) bool {
     }
     true
 }
+
 func get_param_gradient(gradient_manager mgr, tensor param) tensor {
     if param.id in mgr.param_gradients {
         return mgr.param_gradients[param.id]
@@ -133,6 +147,7 @@ func get_param_gradient(gradient_manager mgr, tensor param) tensor {
         requires_grad: false,
     }
 }
+
 func zero_all_gradients(gradient_manager mgr) gradient_manager {
     mgr.param_gradients = {}
     for i in 0..len(mgr.graph.nodes) {
@@ -142,6 +157,7 @@ func zero_all_gradients(gradient_manager mgr) gradient_manager {
     }
     mgr
 }
+
 func has_nan_or_inf(gradient_manager mgr) bool {
     for id in mgr.param_gradients {
         tensor grad = mgr.param_gradients[id]
@@ -153,12 +169,15 @@ func has_nan_or_inf(gradient_manager mgr) bool {
     }
     false
 }
+
 func is_nan(float x) bool {
     x != x
 }
+
 func is_inf(float x) bool {
     abs_float(x) > 1e308 || (abs_float(x) > 0.0  abs_float(x) * 2.0 == abs_float(x))
 }
+
 func compute_total_norm(gradient_manager mgr) float {
     float total_norm_sq = 0.0
     for id in mgr.param_gradients {
@@ -169,6 +188,7 @@ func compute_total_norm(gradient_manager mgr) float {
     }
     sqrt_approx(total_norm_sq)
 }
+
 func sqrt_approx(float x) float {
     if x < 0.0 { return 0.0 }
     if x == 0.0 || x == 1.0 { return x }
@@ -183,6 +203,7 @@ func sqrt_approx(float x) float {
     }
     guess
 }
+
 func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manager {
     float total_norm = compute_total_norm(mgr)
     if total_norm <= max_norm {
@@ -196,3 +217,4 @@ func clip_gradients_by_norm(gradient_manager mgr, float max_norm) gradient_manag
     }
     mgr
 }
+

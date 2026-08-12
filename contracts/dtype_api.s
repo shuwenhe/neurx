@@ -33,6 +33,7 @@ interface id_type {
     is_signed() -> bool
     equals(other: DType) -> bool
 }
+
 struct dtype_promotion_rule {
     from_dtype: DType
     to_dtype: DType
@@ -59,3 +60,4 @@ interface id_type_format_conversion {
     saturate_on_cast(tensor: tensor, target_dtype: DType) -> tensor
     bitcast(tensor: tensor, target_dtype: DType) -> tensor
 }
+

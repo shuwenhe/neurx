@@ -44,6 +44,7 @@ func main() {
     println("Loss Reduction: " + fmt_float(10.0 - last_loss, 4))
     return 0
 }
+
 func fmt_float(float val, int decimals) string {
     float value = val
     bool neg = value < 0.0
@@ -73,6 +74,7 @@ func fmt_float(float val, int decimals) string {
     }
     return out
 }
+
 func fmt_int(int n) string {
     int value = n
     if value == 0 {
@@ -142,6 +144,7 @@ func fmt_int(int n) string {
     }
     return "?"
 }
+
 func fmt_digit(int d) string {
     if d == 0 {
         return "0"
@@ -175,3 +178,4 @@ func fmt_digit(int d) string {
     }
     return "?"
 }
+

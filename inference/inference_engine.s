@@ -42,6 +42,7 @@ func init(
         layer_value_caches: [],
         cache_lengths: [0] * max_batch_size,
     }
+
 func update(
     self: KVCacheManager,
     int layer_idx,
@@ -105,6 +106,7 @@ func get_memory_usage(self: KVCacheManager):
         "current_max_seq_len": current_max_len,
         "num_active_entries": len(self.layer_key_caches),
     }
+
 struct memory_block {
     int block_id
     tensor key_data
@@ -112,6 +114,7 @@ struct memory_block {
     bool is_free
     int ref_count
 }
+
 struct sequence_metadata {
     int seq_id
     []int block_table
@@ -180,6 +183,7 @@ func init_paged_attention(
             peak_memory_bytes: 0,
         },
     }
+
 func allocate_sequence(
     self: PagedAttentionManager,
     int seq_id,
@@ -313,6 +317,7 @@ enum request_status {
     COMPLETED
     CANCELLED
 }
+
 struct inference_request {
     int request_id
     string prompt_text
@@ -371,6 +376,7 @@ func init_scheduler(
             peak_concurrent_requests: 0,
         },
     }
+
 func add_request(
     self: ContinuousBatchScheduler,
     string prompt,
@@ -556,6 +562,7 @@ func init_engine(
             peak_gpu_memory_gb: 0.0,
         },
     }
+
 func generate(
     self: inference_engine,
     string prompt,
@@ -752,12 +759,14 @@ enum quantization_type {
     GPTQ
     AWQ
 }
+
 struct quantization_config {
     quantization_type qtype
     int group_size
     bool symmetric
     float scale_dtype
 }
+
 func create_default_quant_config():
     return quantization_config{
         qtype: NONE,
@@ -765,6 +774,7 @@ func create_default_quant_config():
         symmetric: true,
         scale_dtype: "fp32",
     }
+
 func apply_quantization(
     neurx_model model,
     quantization_config config
@@ -892,3 +902,4 @@ func truncate_at_special_tokens(string text):
 def call_ai_judge(string prompt, string response):
     """English text AI Judge modelEnglish text (English textmodel)"""
     return 0.5
+

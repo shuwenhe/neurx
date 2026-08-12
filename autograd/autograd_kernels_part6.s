@@ -27,6 +27,7 @@ func backward_swiglu(node n, tensor grad_output) backward_result {
     tensor result { data: grad_input_data, grad: [], shape: input.shape, requires_grad: true }
     backward_result { input_grads: [result], success: true }
 }
+
 func backward_rope(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -56,18 +57,21 @@ func backward_rope(node n, tensor grad_output) backward_result {
     tensor result { data: grad_input_data, grad: [], shape: shape, requires_grad: true }
     backward_result { input_grads: [result], success: true }
 }
+
 func cos_approx(float x) float {
     float pi = 3.141592653589793
     while x > pi { x = x - 2.0 * pi }
     while x < -pi { x = x + 2.0 * pi }
     1.0 - x*x/2.0 + x*x*x*x/24.0 - x*x*x*x*x*x/720.0
 }
+
 func sin_approx(float x) float {
     float pi = 3.141592653589793
     while x > pi { x = x - 2.0 * pi }
     while x < -pi { x = x + 2.0 * pi }
     x - x*x*x/6.0 + x*x*x*x*x/120.0 - x*x*x*x*x*x*x/5040.0
 }
+
 func backward_broadcast(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -79,6 +83,7 @@ func backward_broadcast(node n, tensor grad_output) backward_result {
     tensor result { data: grad_input_data, grad: [], shape: original_shape, requires_grad: true }
     backward_result { input_grads: [result], success: true }
 }
+
 func reduce_gradient([]float grad, []int original_shape, []int target_shape) []float {
     int orig_size = 1
     for s in original_shape {
@@ -107,6 +112,7 @@ func reduce_gradient([]float grad, []int original_shape, []int target_shape) []f
     }
     reduced
 }
+
 func backward_reduce_sum(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -122,6 +128,7 @@ func backward_reduce_sum(node n, tensor grad_output) backward_result {
     }
     backward_result { input_grads: [result], success: true }
 }
+
 func backward_reduce_mean(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -142,3 +149,4 @@ func backward_reduce_mean(node n, tensor grad_output) backward_result {
     }
     backward_result { input_grads: [result], success: true }
 }
+

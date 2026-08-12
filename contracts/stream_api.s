@@ -11,6 +11,7 @@ enum stream_type {
     communication
     default
 }
+
 struct stream {
     id: i64
     device: device
@@ -56,3 +57,4 @@ interface i_stream_manager_singleton {
     initialize(device: device) -> void
     finalize(device: device) -> void
 }
+

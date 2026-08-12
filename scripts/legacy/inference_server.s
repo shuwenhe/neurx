@@ -118,6 +118,7 @@ func load_config_from_env() {
 		g_config.enable_cache = true
 	}
 }
+
 func validate_config() error {
 	if g_config.model_path == "" {
 		return fmt.Errorf("model path is not set")
@@ -137,6 +138,7 @@ func validate_config() error {
 	}
 	return nil
 }
+
 func load_config_from_file(path string) error {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -148,6 +150,7 @@ func load_config_from_file(path string) error {
 	}
 	return nil
 }
+
 func initialize_model() error {
 	log_info("Initializing model...")
 	stat, err := os.Stat(g_config.model_path)
@@ -162,6 +165,7 @@ func initialize_model() error {
 	}
 	return nil
 }
+
 func process_inference_request(req *inference_request) (*inference_response, error) {
 	start_time := time.Now()
 	if req.prompt == "" {
@@ -201,6 +205,7 @@ func process_inference_request(req *inference_request) (*inference_response, err
 	}
 	return response, nil
 }
+
 func handle_inference_request(json_data []byte) ([]byte, error) {
 	var req inference_request
 	err := json.Unmarshal(json_data, &req)
@@ -218,6 +223,7 @@ func handle_inference_request(json_data []byte) ([]byte, error) {
 	}
 	return resp_data, nil
 }
+
 func handle_metrics_request() ([]byte, error) {
 	g_metrics.UptimeSeconds = int64(time.Since(g_server_start_time).Seconds())
 	data, err := json.MarshalIndent(g_metrics, "", "  ")
@@ -226,6 +232,7 @@ func handle_metrics_request() ([]byte, error) {
 	}
 	return data, nil
 }
+
 func handle_health_check() ([]byte, error) {
 	health := map[string]interface{}{
 		"status": "healthy",
@@ -240,18 +247,22 @@ func handle_health_check() ([]byte, error) {
 	}
 	return data, nil
 }
+
 func log_info(msg string) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] INFO: %s\n", timestamp, msg)
 }
+
 func log_warn(msg string) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] WARN: %s\n", timestamp, msg)
 }
+
 func log_error(msg string) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] ERROR: %s\n", timestamp, msg)
 }
+
 func start_server() error {
 	log_info("Starting inference server...")
 	log_info(fmt.Sprintf("Server: %s:%d", g_config.host, g_config.port))
@@ -262,6 +273,7 @@ func start_server() error {
 	log_info("Endpoints: POST /generate, GET /health, GET /metrics")
 	return nil
 }
+
 func run_interactive_mode() {
 	log_info("entering interactive mode (simulation)...")
 	log_info("type 'quit' to exit")
@@ -283,6 +295,7 @@ func run_interactive_mode() {
 	}
 	log_info("interactive mode completed")
 }
+
 func print_usage() {
 	fmt.Println("neur_x inference server - usage:")
 	fmt.Println("")
@@ -308,10 +321,12 @@ func print_usage() {
 	fmt.Println("  ./inference_server interactive")
 	fmt.Println("  ./inference_server benchmark")
 }
+
 func print_config() {
 	data, _ := json.MarshalIndent(g_config, "", "  ")
 	fmt.Println(string(data))
 }
+
 func run_benchmark() {
 	log_info("Running inference benchmark...")
 	test_requests := []inference_request{
@@ -341,6 +356,7 @@ func run_benchmark() {
 	fmt.Printf("  Avg latency: %.3f s\n", g_metrics.avg_latency)
 	fmt.Printf("  Max latency: %.3f s\n", g_metrics.max_latency)
 }
+
 func main() {
 	if len(os.Args) < 2 {
 		print_usage()
@@ -393,3 +409,4 @@ func main() {
 		os.Exit(1)
 	}
 }
+

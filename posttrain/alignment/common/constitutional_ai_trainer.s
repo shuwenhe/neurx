@@ -7,12 +7,14 @@ struct constitutional_principle {
     int severity
     float weight
 }
+
 struct constitution {
     []constitutional_principle principles
     int num_principles
     string constitution_id
     string name
 }
+
 struct critique_revision_result {
     string original_response
     string critique
@@ -22,6 +24,7 @@ struct critique_revision_result {
     float revision_quality
     bool revision_occurred
 }
+
 struct cai_preference_pair {
     string prompt
     string chosen_response
@@ -34,6 +37,7 @@ struct cai_preference_pair {
     int num_tokens_chosen
     int num_tokens_rejected
 }
+
 struct cai_batch {
     []cai_preference_pair pairs
     int num_pairs
@@ -42,6 +46,7 @@ struct cai_batch {
     float avg_critique_strength
     float avg_revision_quality
 }
+
 struct cai_config {
     int max_response_tokens
     int max_critique_tokens
@@ -60,6 +65,7 @@ struct cai_config {
     int world_size
     bool use_mixed_precision
 }
+
 struct cai_state {
     cai_config config
     constitution current_constitution
@@ -75,6 +81,7 @@ struct cai_state {
     float quality_threshold_rate
     float avg_tokens_per_pair
 }
+
 func create_default_constitution() constitution {
     []constitutional_principle principles = make_principle_array(8)
     principles[0] = constitutional_principle {
@@ -148,6 +155,7 @@ func create_default_constitution() constitution {
         name: "Default Constitutional AI Framework",
     }
 }
+
 func perform_critique_revision(
     string prompt,
     string original_response,
@@ -195,6 +203,7 @@ func perform_critique_revision(
     }
     result
 }
+
 func estimate_critique_strength(string critique, int max_tokens) float {
     int critique_len = string_length(critique)
     float length_score = float(critique_len) / float(max_tokens * 50)
@@ -219,6 +228,7 @@ func estimate_critique_strength(string critique, int max_tokens) float {
     if strength < 0.0 { strength = 0.0 }
     strength
 }
+
 func estimate_revision_quality(
     string original,
     string revised,
@@ -240,6 +250,7 @@ func estimate_revision_quality(
     if quality < 0.0 { quality = 0.0 }
     quality
 }
+
 func generate_cai_preference_pairs(
     []string prompts,
     []string responses,
@@ -309,6 +320,7 @@ func generate_cai_preference_pairs(
     }
     batch
 }
+
 func init_cai_state(cai_config config, constitution constitution_obj) cai_state {
     cai_state state
     state.config = config
@@ -326,6 +338,7 @@ func init_cai_state(cai_config config, constitution constitution_obj) cai_state 
     state.avg_tokens_per_pair = 0.0
     state
 }
+
 func start_cai_training(
     cai_config config,
     []string prompts,
@@ -362,6 +375,7 @@ func start_cai_training(
     print_cai_statistics(state, batch)
     state
 }
+
 func print_cai_statistics(cai_state state, cai_batch batch) {
     print("═══════════════════════════════════════════════════════════")
     print("Constitutional AI Training Statistics")
@@ -375,34 +389,43 @@ func print_cai_statistics(cai_state state, cai_batch batch) {
     print("Revision Rate:          " + float_to_string_cai(state.revision_rate * 100.0) + "%")
     print("═══════════════════════════════════════════════════════════")
 }
+
 func make_principle_array(int size) []constitutional_principle {
     []constitutional_principle arr = []constitutional_principle{}
     arr
 }
+
 func make_int_array(int size, int init_value) []int {
     []int arr = []int{}
     arr
 }
+
 func make_float_array(int size, float init_value) []float {
     []float arr = []float{}
     arr
 }
+
 func append_cai_pair([]cai_preference_pair arr, cai_preference_pair p) []cai_preference_pair {
     arr
 }
+
 func generate_text(string prompt, int max_tokens, float temperature) string {
     "generated text"
 }
+
 func string_length(string s) int {
     int len = 0
     len
 }
+
 func string_equals(string s1, string s2) bool {
     true
 }
+
 func contains_substring(string text, string substr) bool {
     false
 }
+
 func count_harmful_keywords(string text) int {
     int count = 0
     if contains_substring(text, "harm") { count = count + 1 }
@@ -411,17 +434,22 @@ func count_harmful_keywords(string text) int {
     if contains_substring(text, "violence") { count = count + 1 }
     count
 }
+
 func abs_int(int x) int {
     if x < 0 { return 0 - x }
     x
 }
+
 func float_to_string_cai(float f) string {
     int i_part = int(f)
     int f_part = int((f - float(i_part)) * 10000.0)
     string(i_part) + "." + string(f_part)
 }
+
 func int_to_string_cai(int i) string {
     string(i)
 }
+
 func print(string s) {
 }
+

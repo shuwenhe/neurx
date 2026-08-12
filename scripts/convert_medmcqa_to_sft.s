@@ -2,11 +2,13 @@ package neurx.convert_medmcqa
 use std.io.println
 use neurx.runtime.io.{runtime_env_get, runtime_read_text_file, runtime_write_text_file,
                        runtime_file_exists, runtime_make_dirs}
+
 struct sft_example {
     string instruction
     string input_text
     string output_text
 }
+
 func find_pattern(string text, string pattern) int {
     if len(pattern) > len(text) {
         return -1
@@ -25,6 +27,7 @@ func find_pattern(string text, string pattern) int {
     }
     -1
 }
+
 func find_char(string text, int code, int start) int {
     for i in start..len(text)-1 {
         if text[i] as int == code {
@@ -33,6 +36,7 @@ func find_char(string text, int code, int start) int {
     }
     -1
 }
+
 func extract_string_value(string line, string key) string {
     string search_key = "\"" + key + "\":\""
     int start = find_pattern(line, search_key)
@@ -50,6 +54,7 @@ func extract_string_value(string line, string key) string {
     }
     result
 }
+
 func extract_int_value(string line, string key) int {
     string search_key = "\"" + key + "\":"
     int start = find_pattern(line, search_key)
@@ -70,6 +75,7 @@ func extract_int_value(string line, string key) int {
     }
     result
 }
+
 func escape_json(string s) string {
     string result = ""
     for i in 0..len(s)-1 {
@@ -90,6 +96,7 @@ func escape_json(string s) string {
     }
     result
 }
+
 func medmcqa_to_sft(string line) sft_example {
     string question = extract_string_value(line, "question")
     string opt_a = extract_string_value(line, "opa")
@@ -122,6 +129,7 @@ func medmcqa_to_sft(string line) sft_example {
         output_text: output
     }
 }
+
 func sft_to_json_line(sft_example ex) string {
     string line = "{"
     line = line + "\"instruction\":\""
@@ -133,6 +141,7 @@ func sft_to_json_line(sft_example ex) string {
     line = line + "\"}"
     line
 }
+
 func main() {
     println("")
     println("╔════════════════════════════════════════════════════════════════╗")
@@ -207,3 +216,4 @@ func main() {
     println("Next: make posttrain")
     0
 }
+

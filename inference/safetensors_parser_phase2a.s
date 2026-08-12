@@ -13,6 +13,7 @@ func int_to_string(int val) string {
     }
     result
 }
+
 func parse_safetensors_file(string file_path) string {
     print("\n╔════════════════════════════════════════════════════════╗\n")
     print("║  PHASE 2A: SafeTensors Parser                         ║\n")
@@ -71,6 +72,7 @@ func parse_safetensors_file(string file_path) string {
     print("Phase 2F: Test single embedding lookup\n\n")
     "Phase 2A parsing framework initialized"
 }
+
 func main() {
     string model_path = "/home/shuwen/shuwen/posttrain/model.safetensors"
     string result = parse_safetensors_file(model_path)
@@ -85,3 +87,4 @@ func main() {
     print("Intrinsic: __host_read_binary_file(path) → []int\n")
     print("Goal: Read model.safetensors header and print metadata\n\n")
 }
+

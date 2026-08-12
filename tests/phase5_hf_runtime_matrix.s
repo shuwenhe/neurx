@@ -8,6 +8,7 @@ func phase5_summary_command(string path) string {
     cmd = cmd + " && printf 'default_prompt=%s tokens=%s prompts=%s\\n' \"$default\" \"$tokens\" \"$count\""
     cmd
 }
+
 func main() {
     string prompt_path = "tests/golden/prompts.json"
     if !runtime_file_exists(prompt_path) {
@@ -41,3 +42,4 @@ func main() {
     println("phase5-hf-runtime PASS matrix=stable golden_prompt=locked")
     0
 }
+

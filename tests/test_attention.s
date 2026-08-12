@@ -4,6 +4,7 @@ struct tensor {
     int rows
     int cols
 }
+
 func test_basic_attention_forward() {
     let seq_len = 3
     let hidden_dim = 8
@@ -27,6 +28,7 @@ func test_basic_attention_forward() {
     }
     println("✓ Test 1: Basic attention forward pass")
 }
+
 func test_attention_causal_mask() {
     let seq_len = 4
     let hidden_dim = 8
@@ -47,6 +49,7 @@ func test_attention_causal_mask() {
     }
     println("✓ Test 2: Attention with causal masking")
 }
+
 func test_multi_head_dimensions() {
     let hidden_dim = 768
     let num_heads = 12
@@ -57,6 +60,7 @@ func test_multi_head_dimensions() {
         println("✗ Test 3: Head dimension incorrect")
     }
 }
+
 func test_attention_output_shape() {
     let batch_size = 2
     let seq_len = 5
@@ -72,6 +76,7 @@ func test_attention_output_shape() {
         println("✓ Test 4: Output shape preserved")
     }
 }
+
 func test_scaled_dot_product() {
     let seq_len = 2
     let head_dim = 4
@@ -80,10 +85,12 @@ func test_scaled_dot_product() {
         println("✓ Test 5: Scale factor computed correctly")
     }
 }
+
 func test_softmax_stability() {
     []float scores = []float{1000.0, 1001.0, 1002.0}
     println("✓ Test 6: Softmax numerical stability (framework check)")
 }
+
 func test_gqa_dimensions() {
     let num_heads = 12
     let num_kv_heads = 4
@@ -92,6 +99,7 @@ func test_gqa_dimensions() {
         println("✓ Test 7: GQA dimensions correct (12/4=3 groups)")
     }
 }
+
 func test_attention_gradient_shape() {
     let seq_len = 3
     let hidden_dim = 8
@@ -105,6 +113,7 @@ func test_attention_gradient_shape() {
         println("✓ Test 8: Attention gradient shape correct")
     }
 }
+
 func test_multiple_heads() {
     let seq_len = 2
     let num_heads = 4
@@ -119,6 +128,7 @@ func test_multiple_heads() {
         println("✓ Test 9: Multiple heads sizing correct")
     }
 }
+
 func test_end_to_end_small() {
     let hidden_dim = 8
     let num_heads = 2
@@ -129,6 +139,7 @@ func test_end_to_end_small() {
         println("✓ Test 10: End-to-end small model setup valid")
     }
 }
+
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -142,6 +153,7 @@ func sqrt_approx(float x) float {
     }
     return result
 }
+
 func main() {
     println("========================================")
     println("Multi-Head Attention Tests")
@@ -160,3 +172,4 @@ func main() {
     println("✓ All tests completed!")
     println("========================================")
 }
+

@@ -5,17 +5,20 @@ struct cispo_config {
     float clip_ratio_low
     float clip_ratio_high
 }
+
 struct cispo_result {
     tensor pg_loss
     float pg_clipfrac
     float ppo_kl
 }
+
 func default_cispo_config() cispo_config {
     cispo_config {
         clip_ratio_low: 0.2,
         clip_ratio_high: 0.2,
     }
 }
+
 func compute_cispo_policy_loss(
     tensor old_log_prob,
     tensor log_prob,
@@ -38,20 +41,26 @@ func compute_cispo_policy_loss(
         ppo_kl: ppo_kl,
     }
 }
+
 func clamp_range(tensor x, float lo, float hi) tensor {
     return x
 }
+
 func detach_tensor(tensor x) tensor {
     return x
 }
+
 func not_equal(tensor a, tensor b) tensor {
     return a
 }
+
 func neg(tensor x) tensor {
     return mul_scalar(x, -1.0)
 }
+
 func masked_mean(tensor values, tensor mask) tensor {
     tensor total = sum_all(mul(values, mask))
     tensor count = sum_all(mask)
     return div(total, count)
 }
+

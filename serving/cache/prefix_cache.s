@@ -12,6 +12,7 @@ struct prefix_cache_state {
     int misses
     int evictions
 }
+
 func new_prefix_cache_state(int max_entries, int max_tokens) prefix_cache_state {
     int normalized_entries = max_entries
     if normalized_entries <= 0 {
@@ -35,6 +36,7 @@ func new_prefix_cache_state(int max_entries, int max_tokens) prefix_cache_state 
         evictions: 0,
     }
 }
+
 func prefix_cache_lookup_with_key(prefix_cache_state state, string key, int prefix_tokens) prefix_cache_state {
     bool hit = false
     if key == state.last_key && prefix_tokens > 0 && prefix_tokens == state.last_key_tokens && state.entries > 0 {
@@ -85,9 +87,11 @@ func prefix_cache_lookup_with_key(prefix_cache_state state, string key, int pref
         evictions: state.evictions,
     }
 }
+
 func prefix_cache_lookup(prefix_cache_state state, int prefix_tokens) prefix_cache_state {
     prefix_cache_lookup_with_key(state, "", prefix_tokens)
 }
+
 func prefix_cache_insert_with_key(prefix_cache_state state, string key, int prefix_tokens) prefix_cache_state {
     int tokens = prefix_tokens
     if tokens < 0 {
@@ -140,12 +144,16 @@ func prefix_cache_insert_with_key(prefix_cache_state state, string key, int pref
         evictions: next_evictions,
     }
 }
+
 func prefix_cache_insert(prefix_cache_state state, int prefix_tokens) prefix_cache_state {
     prefix_cache_insert_with_key(state, "", prefix_tokens)
 }
+
 func prefix_cache_state_dict(prefix_cache_state state) prefix_cache_state {
     state
 }
+
 func prefix_cache_load_state_dict(prefix_cache_state state, prefix_cache_state other) prefix_cache_state {
     other
 }
+

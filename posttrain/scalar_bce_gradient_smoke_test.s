@@ -8,6 +8,7 @@ func sigmoid_fn(float x) float {
     }
     return 1.0 / (1.0 + exp_fn(-x))
 }
+
 func exp_fn(float x) float {
     if x > 50.0 {
         return 1e10
@@ -25,6 +26,7 @@ func exp_fn(float x) float {
     }
     return result
 }
+
 func ln_fn(float x) float {
     if x <= 0.0 {
         return -100.0
@@ -46,10 +48,12 @@ func ln_fn(float x) float {
         return -ln_fn(inv)
     }
 }
+
 func forward_simple(float w1, float w2, float b1, float x) float {
     float z = w1 * x + w2 * 0.1 + b1
     return sigmoid_fn(z)
 }
+
 func bce_loss_fn(float pred, float target) float {
     float p = pred
     if p <= 1e-8 {
@@ -64,6 +68,7 @@ func bce_loss_fn(float pred, float target) float {
         return -ln_fn(1.0 - p)
     }
 }
+
 func float_to_str(float f) string {
     int i_part = int(f)
     float frac = f - float(i_part)
@@ -73,6 +78,7 @@ func float_to_str(float f) string {
     int frac_int = int(frac * 10000.0)
     return int_to_string(i_part) + "." + int_to_string(frac_int)
 }
+
 func train_20_steps() float {
     float w1 = 0.5
     float w2 = 0.3
@@ -123,6 +129,8 @@ func train_20_steps() float {
         return 0.0
     }
 }
+
 func main() {
     float result = train_20_steps()
 }
+

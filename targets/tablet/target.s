@@ -8,6 +8,7 @@ struct tablet_target_config {
     bool    offline_first
     string  precision
 }
+
 func default_tablet_target() tablet_target_config {
     return tablet_target_config{
         os:           "ipados",
@@ -20,3 +21,4 @@ func default_tablet_target() tablet_target_config {
         precision:    "fp16",
     }
 }
+

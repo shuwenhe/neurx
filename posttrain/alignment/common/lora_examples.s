@@ -5,6 +5,7 @@ use neurx.posttrain.alignment.lora_trainer.{
     start_lora_training, lora_compute_stats, lora_adamw_state,
     init_gaussian, fill_lora, create_lora_linear,
 }
+
 func example_1_basic_lora_finetuning() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ Example 1: Basic LoRA Fine-tuning (Rank-8)             ║")
@@ -54,6 +55,7 @@ func example_1_basic_lora_finetuning() {
     println("Final loss: " + fmt_float(state.current_loss, 4))
     println("")
 }
+
 func example_2_rank_tradeoff() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ Example 2: Rank Trade-off Analysis                     ║")
@@ -98,6 +100,7 @@ func example_2_rank_tradeoff() {
     }
     println("")
 }
+
 func example_3_multilayer_lora() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ Example 3: Multi-Layer LoRA Adaptation                 ║")
@@ -144,6 +147,7 @@ func example_3_multilayer_lora() {
     println("✓ Training complete")
     println("")
 }
+
 func example_4_task_specific_lora() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ Example 4: task-Specific LoRA Configuration            ║")
@@ -173,6 +177,7 @@ func example_4_task_specific_lora() {
     }
     println("")
 }
+
 func example_5_distributed_lora() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ Example 5: Distributed LoRA Training (8 GPUs)          ║")
@@ -216,6 +221,7 @@ func example_5_distributed_lora() {
     println("  - Gradient synchronization: ~5ms per step (minimal overhead)")
     println("")
 }
+
 func example_6_qlora_quantization() {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ Example 6: QLoRA (Quantized LoRA) Configuration        ║")
@@ -262,6 +268,7 @@ func example_6_qlora_quantization() {
     println("  - Suitable for fine-tuning on consumer GPUs (24GB V100)")
     println("")
 }
+
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -290,6 +297,7 @@ func int_to_str(int n) string {
     }
     result
 }
+
 func fmt_float(float val, float precision) string {
     if val < 0.0 {
         return "-" + fmt_float(-val, precision)
@@ -321,3 +329,4 @@ func fmt_float(float val, float precision) string {
     }
     result
 }
+

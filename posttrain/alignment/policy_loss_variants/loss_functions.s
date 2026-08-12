@@ -7,6 +7,7 @@ struct policy_loss_config {
     bool use_coverage_penalty
     float coverage_beta
 }
+
 func default_policy_loss_config() policy_loss_config {
     policy_loss_config {
         clip_epsilon: 0.2,
@@ -16,6 +17,7 @@ func default_policy_loss_config() policy_loss_config {
         coverage_beta: 0.1,
     }
 }
+
 func compute_ppo_clip_loss(
     tensor new_log_probs,
     tensor old_log_probs,
@@ -30,6 +32,7 @@ func compute_ppo_clip_loss(
     tensor policy_loss = neg(minimum_tensor(surr1, surr2))
     return mul(policy_loss, response_mask)
 }
+
 func compute_vanilla_pg_loss(
     tensor log_probs,
     tensor advantages,
@@ -38,6 +41,7 @@ func compute_vanilla_pg_loss(
     tensor policy_loss = neg(mul(log_probs, advantages))
     return mul(policy_loss, response_mask)
 }
+
 func compute_clip_cov_loss(
     tensor new_log_probs,
     tensor old_log_probs,
@@ -56,6 +60,7 @@ func compute_clip_cov_loss(
     tensor total_loss = add(ppo_loss, coverage_penalty)
     return mul(total_loss, response_mask)
 }
+
 func compute_kl_cov_loss(
     tensor new_log_probs,
     tensor old_log_probs,
@@ -73,6 +78,7 @@ func compute_kl_cov_loss(
     tensor coverage_penalty = mul_scalar(mul(ratio_sq, response_mask), coverage_beta)
     return add(add(pg_loss, kl_loss), coverage_penalty)
 }
+
 func compute_geo_mean_loss(
     tensor new_log_probs,
     tensor old_log_probs,
@@ -90,6 +96,7 @@ func compute_geo_mean_loss(
     tensor policy_loss = neg(mul(mul(geo_ratio, advantages), response_mask))
     return policy_loss
 }
+
 func compute_reinforce_loss(
     tensor log_probs,
     tensor advantages,
@@ -97,6 +104,7 @@ func compute_reinforce_loss(
 ) tensor {
     return neg(mul(mul(log_probs, advantages), response_mask))
 }
+
 func compute_entropy_loss(
     tensor logits,
     tensor response_mask
@@ -107,6 +115,7 @@ func compute_entropy_loss(
     tensor entropy_per_token = sum_dim(entropy, 2)
     return mul(entropy_per_token, response_mask)
 }
+
 func compute_value_loss(
     tensor predicted_values,
     tensor returns,
@@ -116,18 +125,23 @@ func compute_value_loss(
     tensor value_loss = mul(value_error, value_error)
     return mul(value_loss, response_mask)
 }
+
 func clamp_scalar_tensor(tensor x, float min_val, float max_val) tensor {
     return x
 }
+
 func minimum_tensor(tensor a, tensor b) tensor {
     return a
 }
+
 func neg(tensor x) tensor {
     return mul_scalar(x, -1.0)
 }
+
 func log_softmax_tensor(tensor x) tensor {
     return x
 }
+
 func exp_approx(float x) float {
     if x > 20.0 {
         return 485165195.0
@@ -143,3 +157,4 @@ func exp_approx(float x) float {
     }
     return result
 }
+

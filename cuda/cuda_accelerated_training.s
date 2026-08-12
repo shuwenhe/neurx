@@ -9,15 +9,18 @@ struct cuda_device {
     available_memory: int64
     stream_id: int64
 }
+
 struct cuda_context {
     device: cuda_device
     is_initialized: bool
     current_stream: int64
 }
+
 func get_device_count() int {
     fmt.printfln("🖥️  Querying CUDA devices...")
     4
 }
+
 func get_device_properties(int device_id) cuda_device {
     names := []string{
         "NVIDIA A100-40GB",
@@ -34,6 +37,7 @@ func get_device_properties(int device_id) cuda_device {
         stream_id: int64(device_id),
     }
 }
+
 func init_cuda_context(int device_id) cuda_context {
     fmt.printfln("   Setting device %d...", device_id)
     device := get_device_properties(device_id)
@@ -44,16 +48,19 @@ func init_cuda_context(int device_id) cuda_context {
         current_stream: int64(device_id),
     }
 }
+
 func destroy_cuda_context(cuda_context* ctx) {
     fmt.printfln("   Cleaning up CUDA context for device %d", ctx.device.device_id)
     ctx.is_initialized = false
 }
+
 struct gpu_memory_allocator {
     device_id: int
     total_allocated: int64
     max_allocated: int64
     allocations: map[int64]int64
 }
+
 func create_memory_allocator(int device_id, int64 max_memory) gpu_memory_allocator {
     gpu_memory_allocator{
         device_id: device_id,
@@ -62,6 +69,7 @@ func create_memory_allocator(int device_id, int64 max_memory) gpu_memory_allocat
         allocations: make(map[int64]int64),
     }
 }
+
 func gpu_malloc(gpu_memory_allocator* alloc, int64 size) int64 {
     if alloc.total_allocated + size > alloc.max_allocated {
         fmt.printfln("   ⚠️  Out of GPU memory! Requested: %d, Available: %d",
@@ -75,6 +83,7 @@ func gpu_malloc(gpu_memory_allocator* alloc, int64 size) int64 {
                  size, ptr, alloc.total_allocated / (1024 * 1024))
     ptr
 }
+
 func gpu_free(gpu_memory_allocator* alloc, int64 ptr) {
     if size, exists := alloc.allocations[ptr]; exists {
         alloc.total_allocated -= size
@@ -83,6 +92,7 @@ func gpu_free(gpu_memory_allocator* alloc, int64 ptr) {
                      size, alloc.total_allocated / (1024 * 1024))
     }
 }
+
 func gpu_memory_info(gpu_memory_allocator alloc) {
     used := alloc.total_allocated
     free := alloc.max_allocated - used
@@ -92,11 +102,13 @@ func gpu_memory_info(gpu_memory_allocator alloc) {
                  float64(alloc.max_allocated) / (1024 * 1024),
                  pct)
 }
+
 struct transfer_stats {
     bytes_transferred: int64
     num_transfers: int
     avg_bandwidth_gbps: float64
 }
+
 func cuda_memcpy_h2d([]float64 host_data, int64 device_ptr, cuda_context ctx) transfer_stats {
     bytes := int64(len(host_data) * 8)
     bandwidth := 600.0
@@ -109,6 +121,7 @@ func cuda_memcpy_h2d([]float64 host_data, int64 device_ptr, cuda_context ctx) tr
         avg_bandwidth_gbps: bandwidth,
     }
 }
+
 func cuda_memcpy_d2h(int64 device_ptr, []float64* host_data, int bytes, cuda_context ctx) transfer_stats {
     bandwidth := 600.0
     transfer_time := float64(bytes) / (bandwidth * 1e9)
@@ -120,6 +133,7 @@ func cuda_memcpy_d2h(int64 device_ptr, []float64* host_data, int bytes, cuda_con
         avg_bandwidth_gbps: bandwidth,
     }
 }
+
 func cuda_memcpy_d2d(int64 src_ptr, int64 dst_ptr, int bytes, cuda_context ctx) transfer_stats {
     bandwidth := 2000.0
     transfer_time := float64(bytes) / (bandwidth * 1e9)
@@ -131,12 +145,14 @@ func cuda_memcpy_d2d(int64 src_ptr, int64 dst_ptr, int bytes, cuda_context ctx) 
         avg_bandwidth_gbps: bandwidth,
     }
 }
+
 struct kernel_launch_config {
     grid_dim: int
     block_dim: int
     shared_memory: int
     stream_id: int64
 }
+
 func launch_kernel(kernel_launch_config config, int data_size) {
     threads_total := config.grid_dim * config.block_dim
     fmt.printfln("   Launching kernel: grid=%d, block=%d (total threads=%d)",
@@ -144,6 +160,7 @@ func launch_kernel(kernel_launch_config config, int data_size) {
     fmt.printfln("   Processing %d data elements (%.2f per thread)",
                  data_size, float64(data_size) / float64(threads_total))
 }
+
 func cuda_gemm(int64 a_ptr, int64 b_ptr, int64 c_ptr,
                int m, int n, int k,
                cuda_context ctx) {
@@ -156,12 +173,14 @@ func cuda_gemm(int64 a_ptr, int64 b_ptr, int64 c_ptr,
     fmt.printfln("   Compute: %d FLOPS (%.1f ms on A100 at %.0f TFLOPS)",
                  flops, time_ms, tflops)
 }
+
 struct cuda_stream {
     stream_id: int64
     device_id: int
     tasks: int
     is_complete: bool
 }
+
 func create_stream(cuda_context ctx) cuda_stream {
     fmt.printfln("   Creating CUDA stream on device %d", ctx.device.device_id)
     cuda_stream{
@@ -171,20 +190,24 @@ func create_stream(cuda_context ctx) cuda_stream {
         is_complete: false,
     }
 }
+
 func stream_synchronize(cuda_stream* stream, cuda_context ctx) {
     fmt.printfln("   Stream %d synchronizing... (tasks: %d)", stream.stream_id, stream.tasks)
     stream.is_complete = true
     stream.tasks = 0
 }
+
 func cuda_synchronize(cuda_context ctx) {
     fmt.printfln("   Device %d synchronizing...", ctx.device.device_id)
 }
+
 struct multi_gpu_context {
     num_devices: int
     devices: []cuda_device
     contexts: []cuda_context
     streams: []cuda_stream
 }
+
 func init_multi_gpu_context(int num_gpus) multi_gpu_context {
     fmt.printfln("🖥️  Initializing %d GPUs...\n", num_gpus)
     devices := make([]cuda_device, num_gpus)
@@ -207,6 +230,7 @@ func init_multi_gpu_context(int num_gpus) multi_gpu_context {
         streams: streams,
     }
 }
+
 struct cuda_profiler {
     kernel_times: []float64
     transfer_times: []float64
@@ -214,6 +238,7 @@ struct cuda_profiler {
     total_transfer_time: float64
     kernel_count: int
 }
+
 func create_profiler() cuda_profiler {
     cuda_profiler{
         kernel_times: make([]float64, 0),
@@ -223,12 +248,14 @@ func create_profiler() cuda_profiler {
         kernel_count: 0,
     }
 }
+
 func profile_kernel(cuda_profiler* prof, string kernel_name, float64 time_ms) {
     prof.kernel_times = append(prof.kernel_times, time_ms)
     prof.total_compute_time += time_ms
     prof.kernel_count += 1
     fmt.printfln("   ⏱️  %s: %.3f ms", kernel_name, time_ms)
 }
+
 func print_profiling_summary(cuda_profiler prof) {
     fmt.printfln("\n📊 CUDA Performance Profile:")
     fmt.printfln("─────────────────────────────────────────────────────")
@@ -239,6 +266,7 @@ func print_profiling_summary(cuda_profiler prof) {
     fmt.printfln("   Compute/Transfer ratio: %.2fx",
                  prof.total_compute_time / (prof.total_transfer_time + 0.001))
 }
+
 func gpu_forward_pass_example(int batch_size, int seq_len, int hidden_dim, int vocab_size) {
     fmt.printfln("\n🚀 GPU Forward Pass Example")
     fmt.printfln("═════════════════════════════════════════════════════\n")
@@ -290,6 +318,7 @@ func gpu_forward_pass_example(int batch_size, int seq_len, int hidden_dim, int v
     destroy_cuda_context(&ctx)
     fmt.printfln("\n✅ GPU operations complete!\n")
 }
+
 func main() {
     fmt.printfln("\n═════════════════════════════════════════════════════")
     fmt.printfln("CUDA BACKEND - GPU Acceleration for NeurX")
@@ -299,3 +328,4 @@ func main() {
     multi_gpu := init_multi_gpu_context(4)
     gpu_forward_pass_example(32, 2048, 256, 32000)
 }
+

@@ -5,26 +5,31 @@ struct expert_layer {
     int output_dim
     bool available
 }
+
 struct moe_config {
     int num_experts
     int num_experts_per_token
     float expert_load_threshold
     string routing_policy
 }
+
 struct routing_decision {
     []int expert_indices
     []float routing_weights
 }
+
 struct expert_load_stats {
     []int expert_token_counts
     []float expert_load_factors
     float load_balance_loss
 }
+
 struct moe_layer {
     []expert_layer experts
     moe_config config
     expert_load_stats load_stats
 }
+
 func new_moe_config(
     int num_experts,
     int num_experts_per_token,
@@ -36,6 +41,7 @@ func new_moe_config(
         routing_policy: "top_k",
     }
 }
+
 func new_moe_layer(moe_config config, int hidden_dim) moe_layer {
     experts := []expert_layer{}
     i := 0
@@ -60,6 +66,7 @@ func new_moe_layer(moe_config config, int hidden_dim) moe_layer {
         load_stats: load_stats,
     }
 }
+
 func route_token_top_k(
     moe_layer layer,
     []float token_embedding,
@@ -98,6 +105,7 @@ func route_token_top_k(
         routing_weights: weights,
     }
 }
+
 func route_token_random(
     moe_layer layer,
     []float token_embedding,
@@ -119,6 +127,7 @@ func route_token_random(
         routing_weights: weights,
     }
 }
+
 func update_expert_load(
     moe_layer layer,
     routing_decision routing,
@@ -133,6 +142,7 @@ func update_expert_load(
     }
     layer
 }
+
 func compute_load_balance_loss(moe_layer layer) float {
     total_tokens := 0
     i := 0
@@ -153,6 +163,7 @@ func compute_load_balance_loss(moe_layer layer) float {
     }
     loss / float(total_tokens)
 }
+
 func check_expert_overload(moe_layer layer) []int {
     overloaded := []int{}
     mean_load := 0.0
@@ -172,6 +183,7 @@ func check_expert_overload(moe_layer layer) []int {
     }
     overloaded
 }
+
 func rebalance_expert_load(moe_layer layer) moe_layer {
     overloaded := check_expert_overload(layer)
     if overloaded.len > 0 {
@@ -183,6 +195,7 @@ func rebalance_expert_load(moe_layer layer) moe_layer {
     }
     layer
 }
+
 func get_expert_throughput(moe_layer layer) []float {
     throughputs := []float{}
     max_load := 0.0
@@ -204,6 +217,7 @@ func get_expert_throughput(moe_layer layer) []float {
     }
     throughputs
 }
+
 func compute_routing_logit([]float embedding, int expert_id) float {
     logit := 0.0
     i := 0
@@ -213,6 +227,7 @@ func compute_routing_logit([]float embedding, int expert_id) float {
     }
     logit
 }
+
 func normalize_routing_weights([]float weights) []float {
     total := 0.0
     i := 0
@@ -229,6 +244,7 @@ func normalize_routing_weights([]float weights) []float {
     }
     weights
 }
+
 func append_expert([]expert_layer slice, expert_layer elem) []expert_layer {
     new_slice := []expert_layer{}
     i := 0
@@ -239,6 +255,7 @@ func append_expert([]expert_layer slice, expert_layer elem) []expert_layer {
     new_slice = append_expert(new_slice, elem)
     new_slice
 }
+
 func append_float([]float slice, float elem) []float {
     new_slice := []float{}
     i := 0
@@ -249,6 +266,7 @@ func append_float([]float slice, float elem) []float {
     new_slice = append_float(new_slice, elem)
     new_slice
 }
+
 func append_int([]int slice, int elem) []int {
     new_slice := []int{}
     i := 0
@@ -259,6 +277,7 @@ func append_int([]int slice, int elem) []int {
     new_slice = append_int(new_slice, elem)
     new_slice
 }
+
 func make_int_array(int len) []int {
     arr := []int{}
     i := 0
@@ -268,6 +287,7 @@ func make_int_array(int len) []int {
     }
     arr
 }
+
 func make_float_array(int len) []float {
     arr := []float{}
     i := 0
@@ -277,3 +297,4 @@ func make_float_array(int len) []float {
     }
     arr
 }
+

@@ -6,6 +6,7 @@ struct agent_skill_execution_state {
     string status
     int step_count
 }
+
 func new_agent_skill_execution_state() agent_skill_execution_state {
     agent_skill_execution_state {
         active_skill: "",
@@ -13,12 +14,15 @@ func new_agent_skill_execution_state() agent_skill_execution_state {
         step_count: 0,
     }
 }
+
 func agent_skill_execution_state_dict(agent_skill_execution_state state) agent_skill_execution_state {
     state
 }
+
 func agent_skill_execution_load_state_dict(agent_skill_execution_state state, agent_skill_execution_state other) agent_skill_execution_state {
     other
 }
+
 func agent_skill_step_matches_task(string step, string task) bool {
     string s = lower(trim(step))
     string t = lower(trim(task))
@@ -48,6 +52,7 @@ func agent_skill_step_matches_task(string step, string task) bool {
     }
     false
 }
+
 func agent_skill_trigger_matches_task(string trigger, string task) bool {
     string trg = lower(trim(trigger))
     string t = lower(trim(task))
@@ -71,6 +76,7 @@ func agent_skill_trigger_matches_task(string trigger, string task) bool {
     }
     false
 }
+
 func agent_skill_execute(agent_skill_registry_state registry, string task) agent_skill_execution_state {
     agent_skill_record active = agent_skill_registry_active(registry)
     string status = "fallback"
@@ -109,3 +115,4 @@ func agent_skill_execute(agent_skill_registry_state registry, string task) agent
         step_count: 1,
     }
 }
+

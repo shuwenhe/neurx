@@ -9,6 +9,7 @@ use neurx.runtime.io.{
     runtime_time_now,
     runtime_time_elapsed
 }
+
 struct test_result {
     string name
     string category
@@ -17,6 +18,7 @@ struct test_result {
     string message
     []string details
 }
+
 struct test_results {
     []test_result results
     string start_time
@@ -25,6 +27,7 @@ struct test_results {
     int failed
     int skipped
 }
+
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -51,6 +54,7 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
+
 func float_to_str(float value, int decimals) string {
     float current = value
     bool negative = current < 0.0
@@ -87,6 +91,7 @@ func float_to_str(float value, int decimals) string {
     if negative { result = "-" + result }
     return result
 }
+
 func repeat_char(string ch, int count) string {
     string result = ""
     int i = 0
@@ -96,11 +101,13 @@ func repeat_char(string ch, int count) string {
     }
     return result
 }
+
 func print_header(string title) void {
     println("============================================================")
     println(title)
     println("============================================================")
 }
+
 func print_result(string category, string name, string status, string message) void {
     string symbol = "?"
     if status == "passed" { symbol = "✓" }
@@ -115,6 +122,7 @@ func print_result(string category, string name, string status, string message) v
         println("  → " + message)
     }
 }
+
 func test_base_model_files() test_result {
     print_header("[Test 1] Base Model Files Validation")
     string base_path = runtime_env_get("NEURX_BASE_MODEL_PATH")
@@ -146,6 +154,7 @@ func test_base_model_files() test_result {
         return result
     }
 }
+
 func test_adapter_config() test_result {
     print_header("[Test 2] Adapter Configuration Verification")
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH")
@@ -177,6 +186,7 @@ func test_adapter_config() test_result {
         return result
     }
 }
+
 func test_adapter_model_files() test_result {
     print_header("[Test 3] Adapter Model Files")
     string adapter_path = runtime_env_get("NEURX_ADAPTER_PATH")
@@ -211,6 +221,7 @@ func test_adapter_model_files() test_result {
         return result
     }
 }
+
 func test_merged_model_files() test_result {
     print_header("[Test 4] Merged Model Files")
     string merged_path = runtime_env_get("NEURX_MERGED_MODEL_PATH")
@@ -245,6 +256,7 @@ func test_merged_model_files() test_result {
         return result
     }
 }
+
 func test_data_files() test_result {
     print_header("[Test 5] Medical MCQ Data Files")
     string data_path = runtime_env_get("NEURX_DATA_PATH")
@@ -270,6 +282,7 @@ func test_data_files() test_result {
     print_result(result.category, result.name, result.status, result.message)
     return result
 }
+
 func test_output_directory() test_result {
     print_header("[Test 6] Output Directory Structure")
     string output_dir = runtime_env_get("NEURX_TEST_OUTPUT_DIR")
@@ -289,6 +302,7 @@ func test_output_directory() test_result {
     print_result(result.category, result.name, result.status, result.message)
     return result
 }
+
 func test_model_summary() test_result {
     print_header("[Test 7] Model Summary Report")
     string base_path = runtime_env_get("NEURX_BASE_MODEL_PATH")
@@ -331,6 +345,7 @@ func test_model_summary() test_result {
     print_result(result.category, result.name, result.status, result.message)
     return result
 }
+
 func print_final_summary(int passed, int failed, int skipped) void {
     println("\n" + repeat_char("=", 60))
     println("TEST SUMMARY")
@@ -347,6 +362,7 @@ func print_final_summary(int passed, int failed, int skipped) void {
     }
     println(repeat_char("=", 60) + "\n")
 }
+
 func main() void {
     println("\n")
     println("╔" + repeat_char("═", 58) + "╗")
@@ -386,3 +402,4 @@ func main() void {
     print_final_summary(passed, failed, skipped)
     println("✓ PostTrain model testing completed")
 }
+

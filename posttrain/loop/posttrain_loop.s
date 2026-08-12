@@ -19,6 +19,7 @@ struct posttrain_loop_state {
     bool should_save
     bool finished
 }
+
 struct posttrain_metrics_state {
     int step
     float objective
@@ -26,6 +27,7 @@ struct posttrain_metrics_state {
     float policy_loss
     float value_loss
 }
+
 struct posttrain_pipeline_state {
     posttrain_loop_state loop
     posttrain_checkpoint_state checkpoint
@@ -34,6 +36,7 @@ struct posttrain_pipeline_state {
     lr_scheduler sched
     posttrain_metrics_state metrics
 }
+
 func new_posttrain_loop_state(posttrain_config cfg, posttrain_data_state data, reward_state reward) posttrain_loop_state {
     posttrain_loop_state {
         cfg: cfg,
@@ -49,6 +52,7 @@ func new_posttrain_loop_state(posttrain_config cfg, posttrain_data_state data, r
         finished: false,
     }
 }
+
 func new_posttrain_metrics_state() posttrain_metrics_state {
     posttrain_metrics_state {
         step: 0,
@@ -58,6 +62,7 @@ func new_posttrain_metrics_state() posttrain_metrics_state {
         value_loss: 0.0,
     }
 }
+
 func new_posttrain_pipeline_state(posttrain_config cfg, posttrain_data_state data, reward_state reward, string run_name, string root) posttrain_pipeline_state {
     posttrain_pipeline_state {
         loop: new_posttrain_loop_state(cfg, data, reward),
@@ -68,6 +73,7 @@ func new_posttrain_pipeline_state(posttrain_config cfg, posttrain_data_state dat
         metrics: new_posttrain_metrics_state(),
     }
 }
+
 func posttrain_step(posttrain_loop_state state, float objective, float policy_loss, float value_loss, int samples) posttrain_loop_state {
     int next_step = state.global_step + 1
     bool should_log = (next_step / state.cfg.log_interval) * state.cfg.log_interval == next_step
@@ -94,6 +100,7 @@ func posttrain_step(posttrain_loop_state state, float objective, float policy_lo
         finished: finished,
     }
 }
+
 func posttrain_make_metrics(int step, float objective, float reward, float policy_loss, float value_loss) posttrain_metrics_state {
     posttrain_metrics_state {
         step: step,
@@ -103,6 +110,7 @@ func posttrain_make_metrics(int step, float objective, float reward, float polic
         value_loss: value_loss,
     }
 }
+
 func posttrain_pipeline_step(posttrain_pipeline_state state, float reward_value, float kl_value, float margin, float policy_loss, float value_loss, int samples) posttrain_pipeline_state {
     reward_state next_reward = update_reward_state(state.loop.reward, reward_value, kl_value, margin)
     float objective = policy_loss + value_loss - reward_value
@@ -149,21 +157,28 @@ func posttrain_pipeline_step(posttrain_pipeline_state state, float reward_value,
         metrics: posttrain_make_metrics(next_loop.global_step, objective, reward_value, policy_loss, value_loss),
     }
 }
+
 func posttrain_pipeline_state_dict(posttrain_pipeline_state state) posttrain_pipeline_state {
     state
 }
+
 func posttrain_pipeline_load_state_dict(posttrain_pipeline_state state, posttrain_pipeline_state other) posttrain_pipeline_state {
     other
 }
+
 func posttrain_metrics_state_dict(posttrain_metrics_state state) posttrain_metrics_state {
     state
 }
+
 func posttrain_metrics_load_state_dict(posttrain_metrics_state state, posttrain_metrics_state other) posttrain_metrics_state {
     other
 }
+
 func posttrain_loop_state_dict(posttrain_loop_state state) posttrain_loop_state {
     state
 }
+
 func posttrain_loop_load_state_dict(posttrain_loop_state state, posttrain_loop_state other) posttrain_loop_state {
     other
 }
+

@@ -29,6 +29,7 @@ func int_to_string(int value) string {
     }
     return out + tmp
 }
+
 struct transformer_config {
     int vocab_size
     int hidden_size
@@ -38,6 +39,7 @@ struct transformer_config {
     float attention_dropout
     float hidden_dropout
 }
+
 struct simple_transformer {
     embedding embedding_layer
     transformer_block[] layers
@@ -45,6 +47,7 @@ struct simple_transformer {
     linear lm_head
     transformer_config config
 }
+
 func load_embedding_weights(string model_path, int vocab_size, int hidden_size) tensor {
     print("Loading embedding weights...")
     int[] shape = []int{cap: 2}
@@ -53,6 +56,7 @@ func load_embedding_weights(string model_path, int vocab_size, int hidden_size) 
     tensor result = randn(shape, 0.0, 0.1)
     return result
 }
+
 func create_transformer_model(string model_path, transformer_config config) simple_transformer {
     simple_transformer model
     model.config = config
@@ -82,12 +86,14 @@ func create_transformer_model(string model_path, transformer_config config) simp
     print("✓ Using real matrix computations (S standard library)\n\n")
     return model
 }
+
 func transformer_forward(simple_transformer model, int[] token_ids) int[] {
     print("Executing Transformer inference...\n")
     int[] output = []int{cap: 1}
     output[0] = 100
     return output
 }
+
 func tokenize_chinese(string text) int[] {
     int[] tokens = []int{cap: 128}
     int count = 0
@@ -109,6 +115,7 @@ func tokenize_chinese(string text) int[] {
     }
     return result
 }
+
 func token_to_chinese(int token) string {
     if token >= 20000 && token < 20100 {
         int offset = token - 20000
@@ -121,6 +128,7 @@ func token_to_chinese(int token) string {
     }
     return "?"
 }
+
 func read_user_input() string {
     string input = ""
     int retries = 0
@@ -133,6 +141,7 @@ func read_user_input() string {
     }
     return trim(input)
 }
+
 func main() {
     string model_path = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/home/shuwen/shuwen/posttrain/model.safetensors")
     if !runtime_file_exists(model_path) {
@@ -178,3 +187,4 @@ func main() {
         }
     }
 }
+

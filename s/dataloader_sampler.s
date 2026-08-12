@@ -8,12 +8,14 @@ struct sampler_config {
     int rank
     bool drop_last
 }
+
 struct sampler {
     sampler_config config
     []int indices
     int current_position
     int epoch
 }
+
 func new_sampler(sampler_config cfg) sampler {
     []int indices = []int{cap: cfg.total_samples}
     for i in 0..cfg.total_samples {
@@ -26,10 +28,12 @@ func new_sampler(sampler_config cfg) sampler {
         epoch: 0,
     }
 }
+
 func reset_sequential(sampler s) sampler {
     s.current_position = 0
     s
 }
+
 func next_batch_sequential(sampler s) ([]int, bool) {
     if s.current_position >= len(s.indices) {
         ([], false)
@@ -49,6 +53,7 @@ func next_batch_sequential(sampler s) ([]int, bool) {
         (batch, true)
     }
 }
+
 func extract_indices([]int src, int start, int count) []int {
     []int result = []int{cap: count}
     for i in 0..count {
@@ -58,6 +63,7 @@ func extract_indices([]int src, int start, int count) []int {
     }
     result
 }
+
 func reset_random(sampler s) sampler {
     s.current_position = 0
     s.epoch = s.epoch + 1
@@ -73,12 +79,14 @@ func reset_random(sampler s) sampler {
     }
     s
 }
+
 func advance_rng(uint64 state) uint64 {
     state = state xor (state << 13)
     state = state xor (state >> 7)
     state = state xor (state << 17)
     state
 }
+
 func xor(uint64 a, uint64 b) uint64 {
     uint64 result = 0
     uint64 mask = 1
@@ -92,16 +100,19 @@ func xor(uint64 a, uint64 b) uint64 {
     }
     result
 }
+
 func random_int_range(uint64 rng, int min, int max) int {
     uint64 r = advance_rng(rng)
     int range_val = max - min + 1
     min + int(r(r - (r / uint64) * uint64)(range_val))
 }
+
 struct distributed_sampler {
     sampler base
     int num_samples_per_rank
     int global_offset
 }
+
 func create_distributed_sampler(
     sampler_config cfg,
     int num_replicas,
@@ -122,6 +133,7 @@ func create_distributed_sampler(
         global_offset: offset,
     }
 }
+
 func reset_distributed(distributed_sampler ds) distributed_sampler {
     ds.base = reset_random(ds.base)
     ds.base.indices = generate_distributed_indices(
@@ -131,6 +143,7 @@ func reset_distributed(distributed_sampler ds) distributed_sampler {
     )
     ds
 }
+
 func generate_distributed_indices(
     sampler_config cfg,
     int offset,
@@ -152,15 +165,18 @@ func generate_distributed_indices(
     }
     indices
 }
+
 func next_batch_distributed(distributed_sampler ds) ([]int, bool) {
     next_batch_sequential(ds.base)
 }
+
 struct weighted_sampler {
     sampler base
     []float sample_weights
     []float cumulative_weights
     int num_samples_to_yield
 }
+
 func create_weighted_sampler(
     sampler_config cfg,
     []float weights
@@ -182,6 +198,7 @@ func create_weighted_sampler(
         num_samples_to_yield: num_samples,
     }
 }
+
 func next_batch_weighted(weighted_sampler ws) ([]int, bool) {
     if ws.base.current_position >= ws.num_samples_to_yield {
         ([], false)
@@ -195,10 +212,12 @@ func next_batch_weighted(weighted_sampler ws) ([]int, bool) {
     }
     (batch, true)
 }
+
 func draw_weighted_sample(weighted_sampler ws) int {
     float r = random_float_01(advance_rng(uint64(ws.base.current_position)))
     return binary_search_cumsum(ws.cumulative_weights, r)
 }
+
 func binary_search_cumsum([]float cumsum, float target) int {
     int lo = 0
     int hi = len(cumsum) - 1
@@ -212,6 +231,8 @@ func binary_search_cumsum([]float cumsum, float target) int {
     }
     lo
 }
+
 func random_float_01(uint64 rng) float {
     float(advance_rng(rng)) / float(18446744073709551615)
 }
+

@@ -15,6 +15,7 @@ struct gptconfig {
     string norm_type
     float layer_norm_eps
 }
+
 struct rotary_embedding {
     int dim
     float* cos_cached
@@ -22,11 +23,13 @@ struct rotary_embedding {
     int cache_size
     float base
 }
+
 struct ali_bi_bias {
     int num_heads
     float* slopes
     int max_seq_len
 }
+
 struct transformer_output {
     float* hidden_states
     float* attention_weights
@@ -34,10 +37,12 @@ struct transformer_output {
     int seq_length
     int compute_time_ms
 }
+
 struct layer_scale {
     float* scale
     int hidden_size
 }
+
 func init_rotary_embedding(int dim, int max_seq_len) rotary_embedding {
     rotary_embedding rope
     rope.dim = dim
@@ -59,6 +64,7 @@ func init_rotary_embedding(int dim, int max_seq_len) rotary_embedding {
     }
     rope
 }
+
 func apply_rotary_embedding(
     float* query,
     float* key,
@@ -88,6 +94,7 @@ func apply_rotary_embedding(
         i = i + 1
     }
 }
+
 func init_alibi_bias(int num_heads, int max_seq_len) ali_bi_bias {
     ali_bi_bias alibi
     alibi.num_heads = num_heads
@@ -101,6 +108,7 @@ func init_alibi_bias(int num_heads, int max_seq_len) ali_bi_bias {
     }
     alibi
 }
+
 func compute_alibi_bias(
     int seq_len,
     ali_bi_bias alibi
@@ -124,6 +132,7 @@ func compute_alibi_bias(
     }
     bias
 }
+
 func rms_norm(float* x, int size, float eps) float* {
     float* output = alloc(float, size)
     float sum_squares = 0.0
@@ -140,11 +149,13 @@ func rms_norm(float* x, int size, float eps) float* {
     }
     output
 }
+
 struct rms_norm_layer {
     float* weight
     int hidden_size
     float eps
 }
+
 func apply_rms_norm_layer(float* x, rms_norm_layer norm) float* {
     float* normalized = rms_norm(x, norm.hidden_size, norm.eps)
     int i = 0
@@ -154,6 +165,7 @@ func apply_rms_norm_layer(float* x, rms_norm_layer norm) float* {
     }
     normalized
 }
+
 func swi_glu_activation(
     float* x,
     float* W,
@@ -189,6 +201,7 @@ func swi_glu_activation(
     }
     output
 }
+
 func apply_layer_scale(float* residual, layer_scale scale, float init_value) float* {
     float* output = alloc(float, scale.hidden_size)
     int i = 0
@@ -198,6 +211,7 @@ func apply_layer_scale(float* residual, layer_scale scale, float init_value) flo
     }
     output
 }
+
 func init_layer_scale(int hidden_size, float init_value) layer_scale {
     layer_scale ls
     ls.hidden_size = hidden_size
@@ -209,6 +223,7 @@ func init_layer_scale(int hidden_size, float init_value) layer_scale {
     }
     ls
 }
+
 struct improved_attention_layer {
     int num_heads
     int head_dim
@@ -218,6 +233,7 @@ struct improved_attention_layer {
     ali_bi_bias alibi
     layer_scale scale
 }
+
 func improved_multihead_attention(
     float* query,
     float* key,
@@ -267,6 +283,7 @@ func improved_multihead_attention(
     output.seq_length = seq_len
     output
 }
+
 struct transformer_block {
     improved_attention_layer attention
     rms_norm_layer norm1
@@ -276,6 +293,7 @@ struct transformer_block {
     layer_scale scale_attn
     layer_scale scale_ffn
 }
+
 func transformer_block_forward(
     float* x,
     int batch_size,
@@ -294,6 +312,7 @@ func transformer_block_forward(
     output.seq_length = seq_len
     output
 }
+
 struct gptmodel {
     gptconfig config
     float* token_embeddings
@@ -303,6 +322,7 @@ struct gptmodel {
     float* lm_head
     int total_params
 }
+
 func init_language_model(gptconfig config) gptmodel {
     gptmodel model
     model.config = config
@@ -325,6 +345,7 @@ func init_language_model(gptconfig config) gptmodel {
     model.total_params = model.total_params + config.vocab_size * config.hidden_size
     model
 }
+
 func model_forward
     int* input_ids,
     int batch_size,
@@ -345,21 +366,27 @@ func model_forward
     output.seq_length = seq_len
     output
 }
+
 func pow_f(float base, float exp) float {
     1.0
 }
+
 func cos_f(float x) float {
     1.0
 }
+
 func sin_f(float x) float {
     0.0
 }
+
 func sigmoid_f(float x) float {
     1.0 / (1.0 + exp_f(-x))
 }
+
 func exp_f(float x) float {
     1.0
 }
+
 func sqrt_f(float x) float {
     if x < 0.0 {
         return 0.0
@@ -372,6 +399,7 @@ func sqrt_f(float x) float {
     }
     guess
 }
+
 func main() {
     println("=== Industrial GPT transformer_2 ===")
     gptconfig config
@@ -392,6 +420,8 @@ func main() {
     println("Forward pass completed")
     println("Output shape: [1, 32, " + int_to_string(config.hidden_size) + "]")
 }
+
 func int_to_string(int n) string {
     ""
 }
+

@@ -1,8 +1,10 @@
 package neurx.shard.shard_wikipedia
 use neurx.runtime.io.{runtime_env_get, runtime_run_command_output}
+
 func string_char(int c) string {
     string(c)
 }
+
 func trim(string s) string {
     int begin = 0
     while begin < len(s) {
@@ -30,6 +32,7 @@ func trim(string s) string {
     }
     out
 }
+
 func parse_int(string s, int fallback) int {
     string text = trim(s)
     if len(text) == 0 {
@@ -54,6 +57,7 @@ func parse_int(string s, int fallback) int {
     }
     sign * value
 }
+
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -73,6 +77,7 @@ func int_to_str(int n) string {
     }
     out
 }
+
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
@@ -88,6 +93,7 @@ func shell_escape(string s) string {
     out = out + "'"
     out
 }
+
 func basename(string path) string {
     int last = -1
     int i = 0
@@ -111,6 +117,7 @@ func basename(string path) string {
     }
     out
 }
+
 func parent_dir(string path) string {
     int last = -1
     int i = 0
@@ -131,21 +138,27 @@ func parent_dir(string path) string {
     }
     out
 }
+
 func file_exists(string path) bool {
     runtime_run_command("test -f " + shell_escape(path)).ok
 }
+
 func dir_exists(string path) bool {
     runtime_run_command("test -d " + shell_escape(path)).ok
 }
+
 func make_dir(string path) bool {
     runtime_run_command("mkdir -p " + shell_escape(path)).ok
 }
+
 func write_text_file(string path, string content) bool {
     runtime_run_command("printf %s " + shell_escape(content) + " > " + shell_escape(path)).ok
 }
+
 func read_command_output(string cmd) string {
     trim(runtime_run_command_output(cmd))
 }
+
 func shard_name(int index) string {
     string s = int_to_str(index)
     while len(s) < 5 {
@@ -153,6 +166,7 @@ func shard_name(int index) string {
     }
     "shard_" + s + ".jsonl"
 }
+
 func json_escape(string s) string {
     string out = "\""
     int i = 0
@@ -176,6 +190,7 @@ func json_escape(string s) string {
     out = out + "\""
     out
 }
+
 func process_wikipedia(string input_bz2_file, string output_dir, string manifest_file, string docs_per_shard, string max_pages) int {
     println("")
     println("╔══════════════════════════════════════════════════════════╗")
@@ -280,6 +295,7 @@ func process_wikipedia(string input_bz2_file, string output_dir, string manifest
     println("[+] manifest : " + manifest_file)
     return 0
 }
+
 func main() {
     string neurx_home = runtime_env_get("NEURX_HOME", ".")
     string dataset_root = neurx_home + "/dataset/pretrain"
@@ -290,3 +306,4 @@ func main() {
     string max_pages = runtime_env_get("MAX_PAGES", "0")
     process_wikipedia(input_bz2_file, output_dir, manifest_file, docs_per_shard, max_pages)
 }
+

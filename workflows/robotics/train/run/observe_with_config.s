@@ -60,17 +60,21 @@ func main() {
     println("Note: current S CLI invocation validates compilation of the observation runner; it does not execute main() in this environment.")
     0
 }
+
 func usage() {
     println("Usage: observe_with_config.s")
     println("Configure via NEURX_ROBOTICS_OBSERVE_CONFIG and NEURX_ROBOTICS_OBSERVE_STEPS.")
 }
+
 func yaml_value(string file, string key) string {
     string cmd = "awk -F\":\" '/^" + key + "[[:space:]]*:/ {gsub(/ /, \"\", $2); print $2; exit}' " + runtime_shell_escape(file)
     trim(runtime_run_command_output(cmd))
 }
+
 func default_if_empty(string value, string fallback) string {
     if value == "" {
         return fallback
     }
     value
 }
+

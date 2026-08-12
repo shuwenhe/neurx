@@ -6,6 +6,7 @@ struct sample {
     float weight
     map[string]any metadata
 }
+
 struct dataset_config {
     string name
     string path
@@ -14,6 +15,7 @@ struct dataset_config {
     bool include_text
     string format
 }
+
 struct dataset_stats {
     int total_samples
     int total_tokens
@@ -22,12 +24,14 @@ struct dataset_stats {
     int max_length
     []int length_distribution
 }
+
 struct dataset {
     dataset_config config
     dataset_stats stats
     []sample samples
     bool is_loaded
 }
+
 func new_dataset(dataset_config cfg) dataset {
     dataset {
         config: cfg,
@@ -36,6 +40,7 @@ func new_dataset(dataset_config cfg) dataset {
         is_loaded: false,
     }
 }
+
 func load_dataset(dataset ds) (dataset, error) {
     switch ds.config.format {
         case "text":
@@ -50,15 +55,18 @@ func load_dataset(dataset ds) (dataset, error) {
             (ds, error{message: "Unknown dataset format: " + ds.config.format})
     }
 }
+
 func get_sample(dataset ds, int idx) (sample, error) {
     if !ds.is_loaded || idx < 0 || idx >= len(ds.samples) {
         return sample{}, error{message: "Invalid index or dataset not loaded"}
     }
     (ds.samples[idx], nil)
 }
+
 func len_dataset(dataset ds) int {
     if ds.is_loaded {
         return len(ds.samples)
     }
     0
 }
+

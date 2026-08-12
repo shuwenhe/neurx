@@ -17,6 +17,7 @@ struct pipeline_parallel_state {
     []int stage_ranks
     []string schedule
 }
+
 func copy_ints([]int values) []int {
     []int out = []int{cap: len(values)}
     int i = 0
@@ -26,12 +27,14 @@ func copy_ints([]int values) []int {
     }
     out
 }
+
 func clamp_positive(int value, int fallback) int {
     if value > 0 {
         return value
     }
     fallback
 }
+
 func normalize_stage_id(int stage_id, int num_stages) int {
     if stage_id < 0 {
         return 0
@@ -41,6 +44,7 @@ func normalize_stage_id(int stage_id, int num_stages) int {
     }
     stage_id
 }
+
 func normalize_rank(int rank, int world_size) int {
     if rank < 0 {
         return 0
@@ -50,6 +54,7 @@ func normalize_rank(int rank, int world_size) int {
     }
     rank
 }
+
 func mod_nonneg(int value, int divisor) int {
     if divisor <= 0 {
         return 0
@@ -63,6 +68,7 @@ func mod_nonneg(int value, int divisor) int {
     }
     current
 }
+
 func new_pipeline_parallel_state(string name, string strategy, int num_stages, int chunks, int stage_id, int world_size, int rank) pipeline_parallel_state {
     int normalized_stages = clamp_positive(num_stages, 1)
     int normalized_chunks = clamp_positive(chunks, 1)
@@ -87,6 +93,7 @@ func new_pipeline_parallel_state(string name, string strategy, int num_stages, i
         schedule: [],
     }
 }
+
 func pipeline_parallel_state_dict(pipeline_parallel_state state) pipeline_parallel_state {
     pipeline_parallel_state {
         name: state.name,
@@ -106,6 +113,7 @@ func pipeline_parallel_state_dict(pipeline_parallel_state state) pipeline_parall
         schedule: copy_strings(state.schedule),
     }
 }
+
 func pipeline_parallel_load_state_dict(pipeline_parallel_state state, pipeline_parallel_state other) pipeline_parallel_state {
     pipeline_parallel_state {
         name: other.name,
@@ -125,51 +133,67 @@ func pipeline_parallel_load_state_dict(pipeline_parallel_state state, pipeline_p
         schedule: copy_strings(other.schedule),
     }
 }
+
 func pp_name(pipeline_parallel_state state) string {
     state.name
 }
+
 func pp_strategy(pipeline_parallel_state state) string {
     state.strategy
 }
+
 func pp_num_stages(pipeline_parallel_state state) int {
     state.num_stages
 }
+
 func pp_chunks(pipeline_parallel_state state) int {
     state.chunks
 }
+
 func pp_stage_id(pipeline_parallel_state state) int {
     state.stage_id
 }
+
 func pp_world_size(pipeline_parallel_state state) int {
     state.world_size
 }
+
 func pp_rank(pipeline_parallel_state state) int {
     state.rank
 }
+
 func pp_microbatch_id(pipeline_parallel_state state) int {
     state.microbatch_id
 }
+
 func pp_step(pipeline_parallel_state state) int {
     state.step
 }
+
 func pp_active(pipeline_parallel_state state) bool {
     state.active
 }
+
 func pp_stage_count(pipeline_parallel_state state) int {
     len(state.stages)
 }
+
 func pp_schedule_count(pipeline_parallel_state state) int {
     len(state.schedule)
 }
+
 func pp_is_ready(pipeline_parallel_state state) bool {
     state.active && state.num_stages > 0 && state.chunks > 0
 }
+
 func pp_pipeline_depth(pipeline_parallel_state state) int {
     state.num_stages + state.chunks - 1
 }
+
 func pp_total_slots(pipeline_parallel_state state) int {
     state.num_stages + 2 * state.chunks - 2
 }
+
 func pp_add_stage(pipeline_parallel_state state, string name) pipeline_parallel_state {
     []string stages = copy_strings(state.stages)
     stages.push(name)
@@ -191,6 +215,7 @@ func pp_add_stage(pipeline_parallel_state state, string name) pipeline_parallel_
         schedule: copy_strings(state.schedule),
     }
 }
+
 func pp_add_stage_rank(pipeline_parallel_state state, int rank) pipeline_parallel_state {
     []int stage_ranks = copy_ints(state.stage_ranks)
     stage_ranks.push(normalize_rank(rank, state.world_size))
@@ -212,6 +237,7 @@ func pp_add_stage_rank(pipeline_parallel_state state, int rank) pipeline_paralle
         schedule: copy_strings(state.schedule),
     }
 }
+
 func pp_add_schedule_step(pipeline_parallel_state state, string step_name) pipeline_parallel_state {
     []string schedule = copy_strings(state.schedule)
     schedule.push(step_name)
@@ -233,6 +259,7 @@ func pp_add_schedule_step(pipeline_parallel_state state, string step_name) pipel
         schedule: schedule,
     }
 }
+
 func pp_assign_default_stage_ranks(pipeline_parallel_state state) pipeline_parallel_state {
     []int stage_ranks = []int{cap: state.num_stages}
     int i = 0
@@ -258,6 +285,7 @@ func pp_assign_default_stage_ranks(pipeline_parallel_state state) pipeline_paral
         schedule: copy_strings(state.schedule),
     }
 }
+
 func pp_stage_owner(pipeline_parallel_state state, int stage_idx) int {
     if stage_idx < 0 {
         return 0
@@ -270,6 +298,7 @@ func pp_stage_owner(pipeline_parallel_state state, int stage_idx) int {
     }
     mod_nonneg(stage_idx, state.world_size)
 }
+
 func pp_prepare_schedule(pipeline_parallel_state state) pipeline_parallel_state {
     []string schedule = []string{cap: 2 * state.chunks}
     int i = 0
@@ -300,6 +329,7 @@ func pp_prepare_schedule(pipeline_parallel_state state) pipeline_parallel_state 
         schedule: schedule,
     }
 }
+
 func pp_next_microbatch(pipeline_parallel_state state) pipeline_parallel_state {
     if !state.active {
         return state
@@ -334,6 +364,7 @@ func pp_next_microbatch(pipeline_parallel_state state) pipeline_parallel_state {
         schedule: copy_strings(state.schedule),
     }
 }
+
 func pp_set_active(pipeline_parallel_state state, bool active) pipeline_parallel_state {
     pipeline_parallel_state {
         name: state.name,
@@ -353,12 +384,15 @@ func pp_set_active(pipeline_parallel_state state, bool active) pipeline_parallel
         schedule: copy_strings(state.schedule),
     }
 }
+
 func pp_stop(pipeline_parallel_state state) pipeline_parallel_state {
     pp_set_active(state, false)
 }
+
 func pp_resume(pipeline_parallel_state state) pipeline_parallel_state {
     pp_set_active(state, true)
 }
+
 func pp_reset_progress(pipeline_parallel_state state) pipeline_parallel_state {
     pipeline_parallel_state {
         name: state.name,
@@ -378,3 +412,4 @@ func pp_reset_progress(pipeline_parallel_state state) pipeline_parallel_state {
         schedule: copy_strings(state.schedule),
     }
 }
+

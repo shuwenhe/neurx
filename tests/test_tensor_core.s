@@ -9,6 +9,7 @@ func assert_true(bool value, string name) {
         println("FAIL " + name)
     }
 }
+
 func assert_close(float actual, float expected, string name) {
     float diff = actual - expected
     if diff < 0.0 {
@@ -16,6 +17,7 @@ func assert_close(float actual, float expected, string name) {
     }
     assert_true(diff < 0.0001, name)
 }
+
 func test_descriptor() {
     tensor t = neurx.tensor.core.ones([2, 3], "bf16", "cpu", true)
     assert_true(t.desc.numel == 6, "numel")
@@ -23,6 +25,7 @@ func test_descriptor() {
     assert_true(t.desc.strides[1] == 1, "stride1")
     assert_true(neurx.tensor.core.tensor_nbytes(t) == 12, "bf16 nbytes")
 }
+
 func test_view_contiguous() {
     tensor t = neurx.tensor.core.from_data([1.0, 2.0, 3.0, 4.0], [2, 2], "fp32", "cpu", false)
     tensor v = neurx.tensor.core.view(t, [4])
@@ -30,6 +33,7 @@ func test_view_contiguous() {
     assert_true(v.desc.numel == 4, "view numel")
     assert_close(neurx.tensor.core.get(v, 2), 3.0, "view get")
 }
+
 func test_math() {
     tensor a = neurx.tensor.core.from_data([1.0, 2.0, 3.0, 4.0], [2, 2], "fp32", "cpu", true)
     tensor b = neurx.tensor.core.from_data([5.0, 6.0, 7.0, 8.0], [2, 2], "fp32", "cpu", true)
@@ -40,6 +44,7 @@ func test_math() {
     assert_close(d.storage[1], 12.0, "mul 1")
     assert_true(c.desc.requires_grad, "requires grad propagation")
 }
+
 func test_matmul_reduce() {
     tensor a = neurx.tensor.core.from_data([1.0, 2.0, 3.0, 4.0], [2, 2], "fp32", "cpu", false)
     tensor b = neurx.tensor.core.from_data([5.0, 6.0, 7.0, 8.0], [2, 2], "fp32", "cpu", false)
@@ -53,6 +58,7 @@ func test_matmul_reduce() {
     assert_close(s.storage[0], 134.0, "sum all")
     assert_close(m.storage[0], 33.5, "mean all")
 }
+
 func test_broadcast_and_shape_ops() {
     tensor a = neurx.tensor.core.from_data([1.0, 2.0, 3.0], [3], "fp32", "cpu", true)
     tensor b = neurx.tensor.core.from_data([10.0], [1], "fp32", "cpu", false)
@@ -83,6 +89,7 @@ func test_broadcast_and_shape_ops() {
     assert_true(!l, "broadcastable false")
     assert_true(!m.desc.is_view, "clone storage not view")
 }
+
 func test_broadcast_backward_rules() {
     tensor a = neurx.tensor.core.from_data([1.0, 2.0, 3.0], [3], "fp32", "cpu", true)
     tensor b = neurx.tensor.core.from_data([10.0], [1], "fp32", "cpu", true)
@@ -131,6 +138,7 @@ func test_broadcast_backward_rules() {
     assert_close(mean_dim_rule.grad_a.storage[4], 10.0, "mean_dim grad a 4")
     assert_close(mean_dim_rule.grad_a.storage[5], 15.0, "mean_dim grad a 5")
 }
+
 func test_reduce_package() {
     tensor a = neurx.tensor.core.from_data([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], [2, 3], "fp32", "cpu", false)
     tensor sum_rows = neurx.tensor.reduce.reduce_sum_dim(a, 1, false)
@@ -158,6 +166,7 @@ func test_reduce_package() {
     assert_close(argmin_rows.storage[0], 0.0, "reduce argmin row 0")
     assert_close(argmin_rows.storage[1], 0.0, "reduce argmin row 1")
 }
+
 func main() {
     println("NeurX tensor core tests")
     test_descriptor()
@@ -168,3 +177,4 @@ func main() {
     test_broadcast_backward_rules()
     test_reduce_package()
 }
+

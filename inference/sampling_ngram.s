@@ -35,6 +35,7 @@ func get_blocked_tokens(
     }
     blocked_tokens
 }
+
 func apply_ngram_blocking(
     []float logits,
     []int generated_ids,
@@ -53,3 +54,4 @@ func apply_ngram_blocking(
     }
     filtered
 }
+

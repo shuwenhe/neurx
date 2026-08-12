@@ -1,5 +1,6 @@
 module posttrain_golden
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs, runtime_read_text_file, runtime_write_text_file, trim}
+
 func main() {
     string mode = runtime_env_get("NEURX_POSTTRAIN_GOLDEN_MODE", "verify")
     string golden_dir = runtime_env_get("NEURX_POSTTRAIN_GOLDEN_DIR", "../posttrain/golden")
@@ -13,6 +14,7 @@ func main() {
     }
     verify_golden(golden_dir)
 }
+
 func generate_golden(string golden_dir, string model_dir, string data_file, int dataset_limit) {
     _ = runtime_make_dirs(golden_dir)
     copy_text_file(data_file, golden_dir + "/dataset.json")
@@ -93,6 +95,7 @@ func generate_golden(string golden_dir, string model_dir, string data_file, int 
     readme = readme + "Generated from current reference model and dataset snapshot.\n"
     runtime_write_text_file(golden_dir + "/README.md", readme)
 }
+
 func verify_golden(string golden_dir) {
     if !runtime_file_exists(golden_dir + "/dataset.json") {
         println("error: missing golden file: " + golden_dir + "/dataset.json")
@@ -147,6 +150,7 @@ func verify_golden(string golden_dir) {
     }
     println("PASS")
 }
+
 func copy_text_file(string source_path, string dest_path) {
     if runtime_file_exists(source_path) {
         runtime_write_text_file(dest_path, runtime_read_text_file(source_path))
@@ -154,6 +158,7 @@ func copy_text_file(string source_path, string dest_path) {
         runtime_write_text_file(dest_path, "")
     }
 }
+
 func first_non_empty_line(string path) string {
     string content = runtime_read_text_file(path)
     string current = ""
@@ -174,6 +179,7 @@ func first_non_empty_line(string path) string {
     }
     ""
 }
+
 func extract_json_string_field(string json_text, string field_name) string {
     string needle = "\"" + field_name + "\""
     int pos = find_substring(json_text, needle)
@@ -216,6 +222,7 @@ func extract_json_string_field(string json_text, string field_name) string {
     }
     out
 }
+
 func extract_json_int_field(string json_text, string field_name, int fallback) int {
     string needle = "\"" + field_name + "\""
     int pos = find_substring(json_text, needle)
@@ -243,6 +250,7 @@ func extract_json_int_field(string json_text, string field_name, int fallback) i
     }
     parse_int(token, fallback)
 }
+
 func find_substring(string text, string pattern) int {
     if len(pattern) > len(text) {
         return -1
@@ -265,6 +273,7 @@ func find_substring(string text, string pattern) int {
     }
     -1
 }
+
 func parse_int(string s, int fallback) int {
     string text = trim(s)
     if text == "" {
@@ -287,9 +296,11 @@ func parse_int(string s, int fallback) int {
     }
     sign * value
 }
+
 func string_char(int c) string {
     string(c)
 }
+
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -320,6 +331,7 @@ func int_to_str(int n) string {
     }
     out
 }
+
 func json_escape(string s) string {
     string out = "\""
     int i = 0
@@ -343,6 +355,7 @@ func json_escape(string s) string {
     out = out + "\""
     out
 }
+
 func find_substring_from(string text, string pattern, int start) int {
     if start < 0 || start >= len(text) || len(pattern) > len(text) - start {
         return -1
@@ -365,3 +378,4 @@ func find_substring_from(string text, string pattern, int start) int {
     }
     -1
 }
+

@@ -52,3 +52,4 @@ const required_in_operators = """
 ✅ Validate device compatibility       → via supports_device()
 ✅ Document assumptions                → shapes, dtypes, etc.
 """
+
