@@ -1,5 +1,5 @@
 package neurx.enterprise.speculative_inference
-use neurx.backends.cuda_core
+use neurx.cpu.cuda_core
 use neurx.inference.speculative.speculative_decode_core
 use neurx.inference.speculative.draft_model_executor
 use neurx.inference.speculative.speculative_verifier

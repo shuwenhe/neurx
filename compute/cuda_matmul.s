@@ -1,5 +1,5 @@
 package neurx.compute.cuda_matmul
-use neurx.backends.cuda_core
+use neurx.cpu.cuda_core
 struct cuda_matrix {
     int rows
     int columns
@@ -20,7 +20,7 @@ func cuda_empty_matrix() cuda_matrix {
     value.rows = 0
     value.columns = 0
     value.dtype = "float32"
-    value.storage = neurx.backends.cuda_core.cuda_empty_buffer()
+    value.storage = neurx.cpu.cuda_core.cuda_empty_buffer()
     value
 }
 
@@ -40,7 +40,7 @@ func cuda_new_matrix(cuda_context context, int rows, int columns, string dtype) 
         return result
     }
     int bytes = rows * columns * 4
-    cuda_context_result allocation = neurx.backends.cuda_core.cuda_allocate(context, bytes)
+    cuda_context_result allocation = neurx.cpu.cuda_core.cuda_allocate(context, bytes)
     result.context = allocation.context
     if !allocation.success {
         result.error_message = allocation.error_message
@@ -77,7 +77,7 @@ func cuda_matrix_multiply(cuda_context context, cuda_matrix left, cuda_matrix ri
     }
     result.output = allocation.output
     result.floating_point_operations = 2 * left.rows * right.columns * left.columns
-    result.success = neurx.backends.cuda_core.cuda_sgemm(result.context, left.storage, right.storage, result.output.storage, left.rows, right.columns, left.columns)
+    result.success = neurx.cpu.cuda_core.cuda_sgemm(result.context, left.storage, right.storage, result.output.storage, left.rows, right.columns, left.columns)
     if !result.success { result.error_message = "cuBLAS SGEMM failed" }
     result
 }

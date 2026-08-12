@@ -1,4 +1,4 @@
-.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain-cpu posttrain-gpu posttrain-npu posttrain-benchmark posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain verify-lora-weights verify-inference verify-adapter-integration verify-posttrain-complete runtime-test test-golden regenerate-golden pretrain-watch chat-cpu chat-gpu chat-npu real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 production-inference production-chat benchmark-production-inference build-model-inference-s model-weight-probe model-projection-probe \
+.PHONY: help train infer pretrain-npu pretrain-gpu pretrain-gpu-single-node pretrain-gpu-multinode pretrain-gpu-resume pretrain-gpu-fresh pretrain-s-p0 pretrain-eval-test hybrid-moe-s test-checkpoint-resume test-neurx-1-3 pretrain-bigram-gpu transformer-reference-test adam-optimizer-test training-policy-test tensor-runtime-native-test tensor-runtime-native-backends-build model-runtime-native-test tokenizer-hf-parity-test hf-checkpoint-level1-test hf-decoder-cpu-parity-test hf-kv-generation-parity-test kv-cache-reference-test numeric-alignment-test transformer-cuda-kernels-test transformer-cuda-integration-test hf-decoder-cuda-build hf-decoder-cuda-kernels-test hf-decoder-cuda-parity-test build-hf-cuda-backend inference-runtime-test cpu-inference-test serving-native-socket-test build-openai-gateway openai-sse-streaming-test phase5-golden-prompt-test phase5-hf-runtime-matrix phase5-hf-runtime-test posttrain-cpu posttrain-gpu posttrain-npu posttrain-benchmark posttrain-install-deps posttrain-eval-medical posttrain-phase2a build-posttrain-phase2a-s posttrain-e2e posttrain-merge-lora build-lora-merge verify-posttrain verify-lora-weights verify-inference verify-adapter-integration verify-posttrain-complete runtime-test test-golden regenerate-golden pretrain-watch chat-cpu chat-gpu chat-npu chat-xt real-inference check-bash check-nvcc shard split logs logs-tail gate-w1.1 gate-w1.2 gate-w2 gate-w3 production-inference production-chat benchmark-production-inference build-model-inference-s model-weight-probe model-projection-probe \
 	build-data-scripts clean-s shard-s shard-enwiki data-pipeline-s verify-dataset-s build-industrial-ops industrial-ops \
 	toolchain-s analyze-dataset-s build-s-ir-runner run-training-s train-and-infer-s run-inference-s run-s-pretrain-s \
 	split-data-s run-training-pipeline-s quick-start-s run-interactive-inference-s run-small-model-training-s \
@@ -160,6 +160,7 @@ help:
 	@echo "  make chat-cpu"
 	@echo "  make chat-gpu"
 	@echo "  make chat-npu"
+	@echo "  make chat-xt"
 	@echo "  make docker"
 train:
 pretrain-s-p0: check-bash build-s-ir-runner
@@ -962,6 +963,22 @@ chat-npu: build-real-model-chat-s
 		NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
 		NEURX_CHAT_MAX_NEW_TOKENS='$(CHAT_MAX_NEW_TOKENS)' \
 		NEURX_INFER_DEVICE='npu' \
+		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_CHAT_ENHANCED_IR)'
+
+chat-xt: build-real-model-chat-s
+	@test -f '$(CHAT_MODEL_PATH)/model.safetensors' || { \
+		echo "Model weights not found: $(CHAT_MODEL_PATH)/model.safetensors"; \
+		exit 1; \
+	}
+	@if [ -z "$$(PINGTOU_HOME)" ] || [ ! -d "$$(PINGTOU_HOME)" ]; then \
+		echo "Error: Pingtou Ge XiangTian toolkit not found. Set PINGTOU_HOME environment variable."; \
+		exit 1; \
+	fi
+	@mkdir -p /tmp
+	@NEURX_ROOT='$(CURDIR_UNIX)' \
+		NEURX_CHAT_MODEL_PATH='$(CHAT_MODEL_PATH)' \
+		NEURX_CHAT_MAX_NEW_TOKENS='$(CHAT_MAX_NEW_TOKENS)' \
+		NEURX_INFER_DEVICE='xt' \
 		'$(S_RUNNER_BIN)' '$(PRODUCTION_S_CHAT_ENHANCED_IR)'
 
 production-s-inference: chat

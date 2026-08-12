@@ -1,5 +1,5 @@
 package neurx.nn
-use neurx.backends.compute_backend
+use neurx.cpu.compute_backend
 use neurx.tensor.tensor
 use neurx.nn.activations
 use neurx.nn.conv

@@ -1,5 +1,5 @@
 package neurx.enterprise.inference_system
-use neurx.backends.cuda_core
+use neurx.cpu.cuda_core
 use neurx.compute.cuda_matmul
 use neurx.quantization.quant_core
 use neurx.api.openai_compatible
