@@ -14,16 +14,12 @@ enum metric_type {
     TABLE,
     SCALAR_LIST,
 }
-
-
 struct log_entry {
     float timestamp
     log_level level
     string message
     map[string]any metadata
 }
-
-
 struct metric_entry {
     int step
     string name
@@ -34,4 +30,3 @@ struct metric_entry {
     map<string]string tags
     float wall_time
 }
-

@@ -12,8 +12,6 @@ struct attention_config {
     bool use_flash_attention
     bool use_memory_efficient
 }
-
-
 func default_attention_config(
     int batch_size,
     int num_heads,
@@ -35,4 +33,3 @@ func default_attention_config(
         use_memory_efficient: false,
     }
 }
-

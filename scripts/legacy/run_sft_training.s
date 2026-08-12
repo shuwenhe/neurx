@@ -11,8 +11,6 @@ struct sft_state {
     float total_loss
     float best_eval_loss
 }
-
-
 func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/home/shuwen/shuwen/train/neurx")
     string data_path = runtime_env_get("NEURX_SFT_DATA_FILE", project_root + "/data/sft/instruction_data.jsonl")
@@ -187,8 +185,6 @@ func main() {
     println("Best eval loss    : " + fmt_float(state.best_eval_loss, 4))
     0
 }
-
-
 func builtin_sft_samples() []string {
     []string samples = []string{cap: 4}
     samples[0] = format_sft_text("Explain gradient descent", "", "Gradient descent updates parameters by following the negative loss gradient.")
@@ -197,8 +193,6 @@ func builtin_sft_samples() []string {
     samples[3] = format_sft_text("Answer politely", "Can you help me?", "Yes, I can help you with that.")
     samples
 }
-
-
 func load_sft_samples(string data_path) []string {
     if !runtime_file_exists(data_path) {
         []string empty = []string{cap: 0}
@@ -207,8 +201,6 @@ func load_sft_samples(string data_path) []string {
     println("SFT data file detected; using built-in sample set in this minimal S implementation.")
     builtin_sft_samples()
 }
-
-
 func format_sft_text(string instruction, string input_text, string output_text) string {
     string out = "### Instruction:\n" + instruction
     if str_len(input_text) > 0 {
@@ -217,8 +209,6 @@ func format_sft_text(string instruction, string input_text, string output_text) 
     out = out + "\n\n### Response:\n" + output_text
     out
 }
-
-
 func trim(string s) string {
     int start = 0
     while start < str_len(s) && is_space(s[start]) {
@@ -233,13 +223,9 @@ func trim(string s) string {
     }
     substring(s, start, end + 1)
 }
-
-
 func is_space(int c) bool {
     c == 32 || c == 9 || c == 10 || c == 13
 }
-
-
 func substring(string s, int start, int end) string {
     if start < 0 {
         start = 0
@@ -258,8 +244,6 @@ func substring(string s, int start, int end) string {
     }
     out
 }
-
-
 func str_len(string s) int {
     int n = 0
     while n < len(s) {
@@ -267,8 +251,6 @@ func str_len(string s) int {
     }
     n
 }
-
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -295,8 +277,6 @@ func int_to_str(int n) string {
     }
     out
 }
-
-
 func fmt_float(float value, int decimals) string {
     bool neg = value < 0.0
     if neg {
@@ -325,8 +305,6 @@ func fmt_float(float value, int decimals) string {
     }
     out
 }
-
-
 func parse_int(string s, int fallback) int {
     string text = trim(s)
     if str_len(text) == 0 {
@@ -349,8 +327,6 @@ func parse_int(string s, int fallback) int {
     }
     sign * value
 }
-
-
 func parse_float(string s) float {
     string text = trim(s)
     if str_len(text) == 0 {
@@ -383,12 +359,9 @@ func parse_float(string s) float {
     }
     value
 }
-
-
 func check_path(string path) string {
     if runtime_file_exists(path) {
         return "ready (" + path + ")"
     }
     "missing (" + path + ")"
 }
-

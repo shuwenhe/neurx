@@ -2,7 +2,6 @@ package main
 use neurx.compression.release.{compression_release_config, prepare_compression_release}
 use neurx.exporter.{default_model_export_config}
 use neurx.deployment.chain.{default_model_deployment_config}
-
 func main() {
     compression_release_config config = compression_release_config {
         release_dir: "artifacts/release",
@@ -18,4 +17,3 @@ func main() {
     println("  summary: " + artifact.summary_path)
     0
 }
-

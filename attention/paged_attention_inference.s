@@ -9,15 +9,11 @@ struct attention_config {
     bool use_softmax_cap
     float softmax_cap
 }
-
-
 struct attention_output {
     []float output
     []float attention_weights
     float avg_attention_entropy
 }
-
-
 func vector_dot_product(
     []float query,
     []float key,
@@ -34,8 +30,6 @@ func vector_dot_product(
     }
     return result
 }
-
-
 func vector_sum_product(
     []float attention_weights,
     [][]float values,
@@ -66,8 +60,6 @@ func vector_sum_product(
     }
     return accum
 }
-
-
 func compute_head_attention(
     []float query,
     paged_kv_cache kv_cache,
@@ -97,8 +89,6 @@ func compute_head_attention(
     []float output = vector_sum_product(attention_weights, values_buffer, make([]float, config.head_size))
     return output
 }
-
-
 func compute_multi_head_attention(
     []float queries,
     paged_kv_cache kv_cache,
@@ -132,8 +122,6 @@ func compute_multi_head_attention(
     }
     return output
 }
-
-
 func apply_causal_mask([]float scores, int seq_len) []float {
     int i = 0
     for i < len(scores) {
@@ -141,8 +129,6 @@ func apply_causal_mask([]float scores, int seq_len) []float {
     }
     return scores
 }
-
-
 func apply_softmax_cap([]float weights, float cap_value) []float {
     if cap_value <= 0.0 {
         return weights
@@ -172,8 +158,6 @@ func apply_softmax_cap([]float weights, float cap_value) []float {
     }
     return capped
 }
-
-
 func compute_grouped_query_attention(
     []float queries,
     paged_kv_cache kv_cache,
@@ -186,8 +170,6 @@ func compute_grouped_query_attention(
     []float output = make([]float, len(queries))
     return output
 }
-
-
 func compute_chunked_attention(
     []float queries,
     paged_kv_cache kv_cache,
@@ -209,14 +191,10 @@ func compute_chunked_attention(
     }
     return output
 }
-
-
 struct batch_attention_input {
     [][]float queries
     []paged_kv_cache caches
 }
-
-
 func compute_batch_attention(
     [][]float batch_queries,
     []paged_kv_cache batch_caches,
@@ -240,8 +218,6 @@ func compute_batch_attention(
     }
     return batch_output
 }
-
-
 func compute_attention_entropy([]float attention_weights) float {
     if len(attention_weights) == 0 {
         return 0.0
@@ -257,8 +233,6 @@ func compute_attention_entropy([]float attention_weights) float {
     }
     return entropy
 }
-
-
 func math_log(float x) float {
     if x <= 0.0 {
         return -100.0
@@ -288,8 +262,6 @@ func math_log(float x) float {
     }
     return result
 }
-
-
 func print_attention_stats([]float weights) string {
     if len(weights) == 0 {
         return "Empty attention weights"
@@ -318,13 +290,9 @@ func print_attention_stats([]float weights) string {
     result = result + "  Entropy: " + str_float(entropy) + "\n"
     return result
 }
-
-
 func str_float(float x) string {
     return "0.0"
 }
-
-
 func compute_softmax_for_attention([]float scores) []float {
     if len(scores) == 0 {
         return scores
@@ -357,8 +325,6 @@ func compute_softmax_for_attention([]float scores) []float {
     }
     return softmax
 }
-
-
 func math_exp(float x) float {
     if x > 100.0 {
         return 3.4028235e38
@@ -376,8 +342,6 @@ func math_exp(float x) float {
     }
     return result
 }
-
-
 func f(int n) float {
     if n <= 1 {
         return 1.0
@@ -390,4 +354,3 @@ func f(int n) float {
     }
     return result
 }
-

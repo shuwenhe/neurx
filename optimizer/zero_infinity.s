@@ -9,16 +9,12 @@ struct zero_infinity_config {
     int offload_params
     float overlap_comm_factor
 }
-
-
 struct cpu_offload_buffer {
     []float data
     int capacity
     int used
     []bool is_valid
 }
-
-
 struct nvme_offload_buffer {
     string file_path
     int file_handle
@@ -26,8 +22,6 @@ struct nvme_offload_buffer {
     int used_mb
     []int block_mapping
 }
-
-
 struct offload_param_metadata {
     int param_id
     int size_bytes
@@ -39,8 +33,6 @@ struct offload_param_metadata {
     int last_access_step
     int access_count
 }
-
-
 struct zero_infinity_state {
     zero_infinity_config config
     cpu_offload_buffer cpu_buffer
@@ -51,8 +43,6 @@ struct zero_infinity_state {
     float cpu_to_gpu_bandwidth_gbs
     float nvme_to_cpu_bandwidth_gbs
 }
-
-
 func new_zero_infinity_state(
     zero_infinity_config config,
     int total_params,
@@ -101,8 +91,6 @@ func new_zero_infinity_state(
         nvme_to_cpu_bandwidth_gbs: 7.0,
     }
 }
-
-
 func zero_infinity_offload_param_to_cpu(
     zero_infinity_state state,
     []float gpu_param,
@@ -128,8 +116,6 @@ func zero_infinity_offload_param_to_cpu(
     state.param_metadata[param_idx].size_bytes = param_size * 4
     return state
 }
-
-
 func zero_infinity_evict_cpu_to_nvme(
     zero_infinity_state state,
     int required_space) zero_infinity_state {
@@ -160,8 +146,6 @@ func zero_infinity_evict_cpu_to_nvme(
     }
     return state
 }
-
-
 func zero_infinity_write_to_nvme(
     zero_infinity_state state,
     int param_idx) zero_infinity_state {
@@ -178,14 +162,10 @@ func zero_infinity_write_to_nvme(
     state.param_metadata[param_idx].nvme_offset = nvme_offset
     return state
 }
-
-
 struct prefetch_result {
     zero_infinity_state state
     []float param_data
 }
-
-
 func zero_infinity_prefetch_param(
     zero_infinity_state state,
     int param_idx) prefetch_result {
@@ -217,8 +197,6 @@ func zero_infinity_prefetch_param(
     state.param_metadata[param_idx].access_count = state.param_metadata[param_idx].access_count + 1
     return prefetch_result{state: state, param_data: param_data}
 }
-
-
 func zero_infinity_read_from_nvme(
     zero_infinity_state state,
     int param_idx) zero_infinity_state {
@@ -234,8 +212,6 @@ func zero_infinity_read_from_nvme(
     state.cpu_buffer.is_valid[param_idx] = true
     return state
 }
-
-
 func zero_infinity_get_memory_stats(
     zero_infinity_state state) zero_infinity_memory_stats {
     int gpu_params = 0
@@ -264,8 +240,6 @@ func zero_infinity_get_memory_stats(
         nvme_capacity_mb: state.nvme_buffer.capacity_mb,
     }
 }
-
-
 struct zero_infinity_memory_stats {
     int gpu_param_count
     int cpu_param_count
@@ -275,10 +249,7 @@ struct zero_infinity_memory_stats {
     int nvme_used_mb
     int nvme_capacity_mb
 }
-
-
 func zero_infinity_step(zero_infinity_state state) zero_infinity_state {
     state.current_step = state.current_step + 1
     return state
 }
-

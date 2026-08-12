@@ -4,23 +4,15 @@ struct init_boot_result {
     string phase
     string summary
 }
-
-
 func neurx_boot_phase_kernel() string {
     "kernel"
 }
-
-
 func neurx_boot_phase_services() string {
     "services"
 }
-
-
 func neurx_boot_phase_ready() string {
     "ready"
 }
-
-
 func neurx_boot() init_boot_result {
     init_boot_result {
         ok: true,
@@ -28,4 +20,3 @@ func neurx_boot() init_boot_result {
         summary: "kernel_initialized services_started policy_loaded",
     }
 }
-

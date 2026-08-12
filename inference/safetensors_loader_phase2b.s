@@ -19,15 +19,11 @@ func bytes_to_int32_le([]int bytes, int offset) int {
     }
     b0 + (b1 * 256) + (b2 * 65536) + (b3 * 16777216)
 }
-
-
 func bytes_to_int64_le([]int bytes, int offset) int {
     int low = bytes_to_int32_le(bytes, offset)
     int high = bytes_to_int32_le(bytes, offset + 4)
     low + (high * 16777216)
 }
-
-
 func extract_json_from_bytes([]int bytes, int start, int len) string {
     string result = ""
     int i = 0
@@ -44,8 +40,6 @@ func extract_json_from_bytes([]int bytes, int start, int len) string {
     }
     result
 }
-
-
 func char(int code) string {
     if code == 34 {
         return "\""
@@ -76,8 +70,6 @@ func char(int code) string {
     }
     ""
 }
-
-
 func analyze_precomputed_header() string {
     print("[STEP 2] Analyzing actual model structure...\n")
     print("(Header from /home/shuwen/shuwen/posttrain/model.safetensors)\n\n")
@@ -128,8 +120,6 @@ func analyze_precomputed_header() string {
     print("✓ Ready for inference pipeline\n\n")
     "SUCCESS: Model safetensors fully analyzed and ready for real inference"
 }
-
-
 func load_model_safetensors(string model_path) string {
     print("\n╔══════════════════════════════════════════════════════╗\n")
     print("║  PHASE 2B: Real SafTensors Loader - Streaming       ║\n")
@@ -184,8 +174,6 @@ func load_model_safetensors(string model_path) string {
     print("✓ 896 hidden dimensions ready\n\n")
     "SUCCESS: Model safetensors loaded and ready for inference"
 }
-
-
 func count_substring_occurrences(string text, string substring) int {
     int count = 0
     int text_len = len(text)
@@ -210,8 +198,6 @@ func count_substring_occurrences(string text, string substring) int {
     }
     count
 }
-
-
 func int_to_string(int val) string {
     if val == 0 {
         return "0"
@@ -226,8 +212,6 @@ func int_to_string(int val) string {
     }
     result
 }
-
-
 func int_to_float(int val) float {
     float result = 0.0
     int i = 0
@@ -239,15 +223,11 @@ func int_to_float(int val) float {
     }
     result
 }
-
-
 func float_to_string(float val) string {
     int int_part = int(val)
     int decimal_part = int((val - float(int_part)) * 10000.0)
     return int_to_string(int_part) + "." + int_to_string(decimal_part)
 }
-
-
 func main() {
     string model_path = "/home/shuwen/shuwen/posttrain/model.safetensors"
     string result = load_model_safetensors(model_path)
@@ -256,4 +236,3 @@ func main() {
     print("Next: Phase 2C - Load embedding matrix from weights\n")
     print("═══════════════════════════════════════════════════════\n")
 }
-

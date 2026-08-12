@@ -11,4 +11,3 @@ extern func neurx_net_monotonic_ms() int64
 int NEURX_POLL_READ = 1
 int NEURX_POLL_WRITE = 2
 int NEURX_POLL_ERROR = 4
-

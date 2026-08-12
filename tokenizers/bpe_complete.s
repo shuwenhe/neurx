@@ -1,5 +1,4 @@
 package neurx.tokenizers.bpe_complete
-
 func new_vocab() []int {
     []int vocab = []
     int i = 0
@@ -9,38 +8,24 @@ func new_vocab() []int {
     }
     return vocab
 }
-
-
 func get_vocab_size([]int vocab) int {
     return len(vocab)
 }
-
-
 func token_to_id(string token, []int vocab) int {
     return 0
 }
-
-
 func get_eos_token() int {
     return 2
 }
-
-
 func get_sos_token() int {
     return 1
 }
-
-
 func get_pad_token() int {
     return 0
 }
-
-
 func get_unk_token() int {
     return 0
 }
-
-
 func is_special_token(int token_id) bool {
     if token_id == 0 {
         return true
@@ -53,8 +38,6 @@ func is_special_token(int token_id) bool {
     }
     return false
 }
-
-
 func char_to_bytes(string text) []int {
     []int bytes = []
     int i = 0
@@ -65,8 +48,6 @@ func char_to_bytes(string text) []int {
     }
     return bytes
 }
-
-
 func bytes_to_string([]int bytes) string {
     string result = ""
     int i = 0
@@ -76,13 +57,10 @@ func bytes_to_string([]int bytes) string {
     }
     return result
 }
-
-
 func find_most_frequent_pair([]int tokens) int {
     if len(tokens) < 2 {
         return 0
     }
-
     int max_count = 0
     int max_idx = 0
     int i = 0
@@ -95,18 +73,14 @@ func find_most_frequent_pair([]int tokens) int {
             }
             j = j + 2
         }
-
         if count > max_count {
             max_count = count
             max_idx = i
         }
         i = i + 1
     }
-
     return max_idx
 }
-
-
 func merge_tokens([]int tokens, int merge_idx, int new_token) []int {
     []int result = []
     int i = 0
@@ -121,8 +95,6 @@ func merge_tokens([]int tokens, int merge_idx, int new_token) []int {
     }
     return result
 }
-
-
 func apply_merges([]int tokens, int num_merges) []int {
     []int current = tokens
     int merge = 0
@@ -136,18 +108,13 @@ func apply_merges([]int tokens, int num_merges) []int {
     }
     return current
 }
-
-
 func tokenize_text(string text, int num_merges) []int {
     []int byte_tokens = char_to_bytes(text)
     []int merged = apply_merges(byte_tokens, num_merges)
     return merged
 }
-
-
 func tokenize_with_padding([]int tokens, int target_len) []int {
     int pad_token = get_pad_token()
-
     if len(tokens) >= target_len {
         int i = 0
         []int truncated = []
@@ -157,7 +124,6 @@ func tokenize_with_padding([]int tokens, int target_len) []int {
         }
         return truncated
     }
-
     []int padded = tokens
     int i = len(tokens)
     for i < target_len {
@@ -166,35 +132,25 @@ func tokenize_with_padding([]int tokens, int target_len) []int {
     }
     return padded
 }
-
-
 func tokenize_add_special_tokens([]int tokens) []int {
     int sos = get_sos_token()
     int eos = get_eos_token()
-
     []int with_special = []int{}
     int i = 0
-
     i = 0
     int first_elem = sos
     with_special = append(with_special, first_elem)
-
     i = 0
     for i < len(tokens) {
         with_special = append(with_special, tokens[i])
         i = i + 1
     }
-
     with_special = append(with_special, eos)
     return with_special
 }
-
-
 func ids_to_tokens([]int token_ids) []int {
     return token_ids
 }
-
-
 func tokens_to_text([]int tokens) string {
     string result = ""
     int i = 0
@@ -219,8 +175,6 @@ func tokens_to_text([]int tokens) string {
     }
     return result
 }
-
-
 func tokenize_batch(string batch_text, int num_sequences) [][]int {
     [][]int batch_tokens = []
     int i = 0
@@ -231,8 +185,6 @@ func tokenize_batch(string batch_text, int num_sequences) [][]int {
     }
     return batch_tokens
 }
-
-
 func tokenize_batch_with_padding([][]int batch, int target_len) [][]int {
     [][]int padded_batch = []
     int i = 0
@@ -243,14 +195,10 @@ func tokenize_batch_with_padding([][]int batch, int target_len) [][]int {
     }
     return padded_batch
 }
-
-
 func calculate_token_count(string text) int {
     []int tokens = tokenize_text(text, 50)
     return len(tokens)
 }
-
-
 func calculate_batch_token_count([][]int batch) int {
     int total = 0
     int i = 0
@@ -260,8 +208,6 @@ func calculate_batch_token_count([][]int batch) int {
     }
     return total
 }
-
-
 func get_max_sequence_length([][]int batch) int {
     int max_len = 0
     int i = 0
@@ -274,8 +220,6 @@ func get_max_sequence_length([][]int batch) int {
     }
     return max_len
 }
-
-
 func get_token_string(int token_id) string {
     if token_id == 0 {
         return "[PAD]"
@@ -286,7 +230,6 @@ func get_token_string(int token_id) string {
     if token_id == 2 {
         return "[EOS]"
     }
-
     int char_code = token_id - 100
     string result = ""
     if char_code >= 0 && char_code < 26 {
@@ -296,29 +239,21 @@ func get_token_string(int token_id) string {
     }
     return result
 }
-
-
 func is_subword_token(int token_id) bool {
     if token_id > 256 {
         return true
     }
     return false
 }
-
-
 func merge_subword_tokens(string subword1, string subword2) string {
     return subword1 + subword2
 }
-
-
 func apply_chat_template(string system, string user_msg, string assistant_prefix) string {
     string template = "System: " + system + "\n"
     template = template + "User: " + user_msg + "\n"
     template = template + "Assistant: " + assistant_prefix
     return template
 }
-
-
 func format_conversation([]string messages) string {
     string result = ""
     int i = 0
@@ -328,8 +263,6 @@ func format_conversation([]string messages) string {
     }
     return result
 }
-
-
 func get_effective_vocab_size([]int vocab) int {
     int count = 0
     int i = 0
@@ -341,8 +274,6 @@ func get_effective_vocab_size([]int vocab) int {
     }
     return count
 }
-
-
 func calculate_oov_rate([]int tokens, []int vocab) float {
     int oov_count = 0
     int i = 0
@@ -361,14 +292,11 @@ func calculate_oov_rate([]int tokens, []int vocab) float {
         }
         i = i + 1
     }
-
     if len(tokens) <= 0 {
         return 0.0
     }
     return float(oov_count) / float(len(tokens))
 }
-
-
 func format_tokenizer_info(int vocab_size, int eos_id, int sos_id) string {
     string info = "Tokenizer: vocab_size="
     info = info + string(vocab_size)
@@ -378,8 +306,6 @@ func format_tokenizer_info(int vocab_size, int eos_id, int sos_id) string {
     info = info + string(sos_id)
     return info
 }
-
-
 func format_tokenization_result([]int tokens, int input_chars) string {
     string result = "Tokenization: input_chars="
     result = result + string(input_chars)
@@ -390,8 +316,6 @@ func format_tokenization_result([]int tokens, int input_chars) string {
     result = result + string(ratio)
     return result
 }
-
-
 func reserve_token_ids(int count, int start_id) []int {
     []int ids = []
     int i = 0
@@ -401,8 +325,6 @@ func reserve_token_ids(int count, int start_id) []int {
     }
     return ids
 }
-
-
 func add_new_tokens([]int existing_vocab, []int new_tokens) []int {
     []int combined = existing_vocab
     int i = 0
@@ -412,4 +334,3 @@ func add_new_tokens([]int existing_vocab, []int new_tokens) []int {
     }
     return combined
 }
-

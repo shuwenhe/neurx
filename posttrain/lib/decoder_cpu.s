@@ -4,14 +4,10 @@ struct decoder_layer_kv_cache {
     []float key
     []float value
 }
-
-
 struct decoder_kv_cache {
     int length
     []decoder_layer_kv_cache layers
 }
-
-
 struct decoder_layer_trace {
     []float q
     []float k
@@ -20,15 +16,11 @@ struct decoder_layer_trace {
     []float mlp_output
     []float hidden
 }
-
-
 struct decoder_trace {
     []float embedding
     []decoder_layer_trace layers
     []float logits
 }
-
-
 struct transformer_config {
     string model_type
     int vocab_size
@@ -41,8 +33,6 @@ struct transformer_config {
     float rms_norm_eps
     float rope_theta
 }
-
-
 func embedding_forward([]float weight, int token_id, int hidden_size) []float {
     []float result
     int start = token_id * hidden_size
@@ -54,14 +44,10 @@ func embedding_forward([]float weight, int token_id, int hidden_size) []float {
     }
     return result
 }
-
-
 func rope_forward([]float x, int pos, int dim, float rope_theta) []float {
     []float result
     return result
 }
-
-
 func attention_forward(
     []float hidden,
     []float q_weight,
@@ -79,8 +65,6 @@ func attention_forward(
     []float v = hidden
     return result
 }
-
-
 func mlp_forward(
     []float hidden,
     []float gate_weight,
@@ -95,8 +79,6 @@ func mlp_forward(
     []float down = gate
     return down
 }
-
-
 func rms_norm_forward([]float x, []float weight, float epsilon) []float {
     []float result
     float rms = 0.0
@@ -108,8 +90,6 @@ func rms_norm_forward([]float x, []float weight, float epsilon) []float {
     rms = rms / float(len(x))
     return result
 }
-
-
 func transformer_block_forward(
     []float hidden,
     []float attn_norm_weight,
@@ -145,8 +125,6 @@ func transformer_block_forward(
     []float output = mlp_input
     return output
 }
-
-
 func model_forward(
     int token_id,
     []float embedding_weight,
@@ -173,17 +151,12 @@ func model_forward(
     trace.logits = logits
     return trace
 }
-
-
 func load_decoder_model(string directory) interface {
     eprintln("Loading decoder model from: " + directory)
     interface model
     return model
 }
-
-
 func main() {
     eprintln("CPU Decoder Model - Inference Engine")
     eprintln("Status: Pure S implementation")
 }
-

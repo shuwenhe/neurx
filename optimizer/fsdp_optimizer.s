@@ -22,8 +22,6 @@ struct fsdp_config {
     int reduce_dtype
     bool verbose_logging
 }
-
-
 struct fsdp_param_shard {
     string name
     int global_offset
@@ -34,15 +32,11 @@ struct fsdp_param_shard {
     bool is_currently_gathered
     int gather_refcount
 }
-
-
 struct fsdp_optimizer_state {
     []double exp_avg
     []double exp_avg_sq
     int step_count
 }
-
-
 struct fsdp_unit_state {
     fsdp_config config
     []double local_param_shard
@@ -60,8 +54,6 @@ struct fsdp_unit_state {
     double time_in_allgather_ms
     double time_in_reducescatter_ms
 }
-
-
 func mod_fsdn(int val, int div) int {
     if div <= 0 { return 0 }
     int r = val
@@ -69,8 +61,6 @@ func mod_fsdn(int val, int div) int {
     while r < 0 { r = r + div }
     return r
 }
-
-
 func default_fsdp_config_2t(int dp_degree, int dp_rank) fsdp_config {
     fsdp_config cfg
     cfg.sharding_policy = SHARDING_FULL_SHARD
@@ -91,8 +81,6 @@ func default_fsdp_config_2t(int dp_degree, int dp_rank) fsdp_config {
     cfg.verbose_logging = false
     return cfg
 }
-
-
 func init_fsdp(
     fsdp_config cfg,
     []double initial_model_params,
@@ -173,8 +161,6 @@ func init_fsdp(
     state.optimizer.step_count = 0
     return state
 }
-
-
 func pre_forward_allgather(
     ref fsdp_unit_state state,
     []string param_names_needed) {
@@ -196,8 +182,6 @@ func pre_forward_allgather(
     double elapsed = 0.0
     state.time_in_allgather_ms = state.time_in_allgather_ms + elapsed
 }
-
-
 func post_forward_unshard(
     ref fsdp_unit_state state,
     []string param_names_released) {
@@ -224,8 +208,6 @@ func post_forward_unshard(
         state.full_buffer_is_valid = false
     }
 }
-
-
 func get_full_param(fsdp_unit_state state, string param_name) []double {
     int pidx = find_param_idx(state, param_name)
     if pidx < 0 { return []double{} }
@@ -242,8 +224,6 @@ func get_full_param(fsdp_unit_state state, string param_name) []double {
     }
     return result
 }
-
-
 func post_backward_reducescatter(
     ref fsdp_unit_state state,
     []string param_names_with_grads,
@@ -259,8 +239,6 @@ func post_backward_reducescatter(
     double elapsed = 0.0
     state.time_in_reducescatter_ms = state.time_in_reducescatter_ms + elapsed
 }
-
-
 func fsdp_optimizer_step(
     ref fsdp_unit_state state,
     double learning_rate,
@@ -296,8 +274,6 @@ func fsdp_optimizer_step(
         i = i + 1
     }
 }
-
-
 func perform_allgather(ref fsdp_unit_state state) {
     int world_size = state.pg_world_size
     int rank = state.pg_my_rank
@@ -342,8 +318,6 @@ func perform_allgather(ref fsdp_unit_state state) {
         r = r + 1
     }
 }
-
-
 func perform_reducescatter(ref fsdp_unit_state state, [][]double full_grads) {
     int world_size = state.pg_world_size
     int rank = state.pg_my_rank
@@ -363,8 +337,6 @@ func perform_reducescatter(ref fsdp_unit_state state, [][]double full_grads) {
         i = i + 1
     }
 }
-
-
 func find_param_idx(fsdp_unit_state state, string name) int {
     int i = 0
     while i < len(state.param_shards) {
@@ -373,8 +345,6 @@ func find_param_idx(fsdp_unit_state state, string name) int {
     }
     return -1
 }
-
-
 func pow_dbl(double base, double exp) double {
     double result = 1.0
     double e = 0.0
@@ -384,8 +354,6 @@ func pow_dbl(double base, double exp) double {
     }
     return result
 }
-
-
 func sqrt_dbl(double x) double {
     if x <= 0.0 { return 0.0 }
     double guess = x / 2.0
@@ -398,8 +366,6 @@ func sqrt_dbl(double x) double {
     }
     return guess
 }
-
-
 struct fsdp_stats {
     double avg_time_allgather_ms
     double avg_time_reducescatter_ms
@@ -409,8 +375,6 @@ struct fsdp_stats {
     double memory_savings_ratio
     double communication_overhead_pct
 }
-
-
 func compute_fsdp_stats(fsdp_unit_state state) fsdp_stats {
     fsdp_stats stats
     stats.total_allgathers = state.num_allgathers
@@ -433,14 +397,9 @@ func compute_fsdp_stats(fsdp_unit_state state) fsdp_stats {
     stats.communication_overhead_pct = comm_time / (comm_time + estimated_compute_time) * 100.0
     return stats
 }
-
-
 func print_fsdp_summary(fsdp_unit_state state, fsdp_stats stats) {
 }
-
-
 func recommend_fsdp_for_2t(int num_gpus, int tp_degree, int pp_degree) fsdp_config {
     int effective_dp = num_gpus / (tp_degree * pp_degree)
     return default_fsdp_config_2t(effective_dp, 0)
 }
-

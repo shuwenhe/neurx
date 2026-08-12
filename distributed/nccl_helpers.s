@@ -15,8 +15,6 @@ func get_dtype_size(string dtype) int {
             4
     }
 }
-
-
 func log_collective_op(
     string op_name,
     string reduce_type,
@@ -27,4 +25,3 @@ func log_collective_op(
             int_to_string(bytes) + " bytes across " +
             int_to_string(world_size) + " GPUs")
 }
-

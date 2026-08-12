@@ -20,8 +20,6 @@ struct opo_config {
     value_clip_epsilon: f32
     entropy_coeff: f32
 }
-
-
 struct opo_trainer {
     config: opo_config
     policy_model: *model
@@ -32,8 +30,6 @@ struct opo_trainer {
     kl_history: []f32
     step_count: i64
 }
-
-
 func new_opo_trainer(
     config: opo_config,
     policy: *model,
@@ -56,8 +52,6 @@ func new_opo_trainer(
         step_count: 0,
     }
 }
-
-
 func (trainer: *opo_trainer) compute_advantage_weights(advantages: Tensor) -> Tensor {
     match trainer.config.advantage_weighting {
         "optimal" => {
@@ -87,8 +81,6 @@ func (trainer: *opo_trainer) compute_advantage_weights(advantages: Tensor) -> Te
         }
     }
 }
-
-
 func (trainer: *opo_trainer) compute_optimal_objective(
     new_log_probs: Tensor,
     ref_log_probs: Tensor,
@@ -100,8 +92,6 @@ func (trainer: *opo_trainer) compute_optimal_objective(
     let objective = log_ratio * weighted_advantage
     return objective
 }
-
-
 func (trainer: *opo_trainer) adapt_learning_rate(kl: f32) {
     if !trainer.config.use_adaptive_lr {
         return
@@ -121,8 +111,6 @@ func (trainer: *opo_trainer) adapt_learning_rate(kl: f32) {
     trainer.current_lr = clamp_scalar(trainer.current_lr, min_lr, max_lr)
     trainer.optimizer.set_learning_rate(trainer.current_lr)
 }
-
-
 func (trainer: *opo_trainer) compute_gae(
     rewards: []tensor,
     values: []tensor,
@@ -152,8 +140,6 @@ func (trainer: *opo_trainer) compute_gae(
     }
     return advantages, returns
 }
-
-
 func (trainer: *opo_trainer) train_step(
     prompts: []tensor,
     responses: []tensor,
@@ -259,8 +245,6 @@ func (trainer: *opo_trainer) train_step(
         avg_kl
     )
 }
-
-
 func (trainer: *opo_trainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     let policy_losses: []f32 = []
     let value_losses: []f32 = []
@@ -284,8 +268,6 @@ func (trainer: *opo_trainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     }
     return policy_losses, value_losses
 }
-
-
 func compute_mean(values: []f32) -> f32 {
     if values.len() == 0 {
         return 0.0
@@ -296,8 +278,6 @@ func compute_mean(values: []f32) -> f32 {
     }
     return sum / f32(values.len())
 }
-
-
 func compute_std(values: []f32, mean: f32) -> f32 {
     if values.len() == 0 {
         return 1.0
@@ -308,13 +288,9 @@ func compute_std(values: []f32, mean: f32) -> f32 {
     }
     return sqrt(sum_sq / f32(values.len()))
 }
-
-
 func clamp(x: Tensor, min_val: f32, max_val: f32) -> Tensor {
     return maximum(minimum(x, max_val), min_val)
 }
-
-
 func clamp_scalar(x: f32, min_val: f32, max_val: f32) -> f32 {
     if x < min_val {
         return min_val
@@ -324,4 +300,3 @@ func clamp_scalar(x: f32, min_val: f32, max_val: f32) -> f32 {
     }
     return x
 }
-

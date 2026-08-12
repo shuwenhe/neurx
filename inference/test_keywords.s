@@ -25,8 +25,6 @@ func contains_keyword(string text, string keyword) bool {
     }
     return false
 }
-
-
 func generate_response(string prompt) string {
     if contains_keyword(prompt, "你好") || contains_keyword(prompt, "hello") {
         return "您好！我是医学助手。"
@@ -41,8 +39,6 @@ func generate_response(string prompt) string {
     }
     return "感谢您的提问，请提供更多细节。"
 }
-
-
 func main() {
     print("NeurX Keyword Matching Test\n")
     print("════════════════════════════════════════════════\n\n")
@@ -100,4 +96,3 @@ func main() {
     print("════════════════════════════════════════════════\n")
     print("Keyword matching verification complete.\n")
 }
-

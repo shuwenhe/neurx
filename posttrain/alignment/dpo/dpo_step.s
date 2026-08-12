@@ -8,8 +8,6 @@ struct dpo_step_result {
     float chosen_reward
     float rejected_reward
 }
-
-
 func dpo_step(dpo_state state, float chosen_logp, float rejected_logp, float ref_chosen_logp, float ref_rejected_logp) dpo_step_result {
     float chosen_reward = state.beta * (chosen_logp - ref_chosen_logp)
     float rejected_reward = state.beta * (rejected_logp - ref_rejected_logp)
@@ -29,14 +27,9 @@ func dpo_step(dpo_state state, float chosen_logp, float rejected_logp, float ref
         rejected_reward: rejected_reward,
     }
 }
-
-
 func dpo_step_result_state_dict(dpo_step_result result) dpo_step_result {
     result
 }
-
-
 func dpo_step_result_load_state_dict(dpo_step_result result, dpo_step_result other) dpo_step_result {
     other
 }
-

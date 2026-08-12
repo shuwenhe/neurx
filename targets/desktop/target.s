@@ -7,8 +7,6 @@ struct desktop_target_config {
     bool    background_service
     string  precision
 }
-
-
 func default_desktop_target() desktop_target_config {
     return desktop_target_config{
         os:                 "linux",
@@ -20,4 +18,3 @@ func default_desktop_target() desktop_target_config {
         precision:          "bf16",
     }
 }
-

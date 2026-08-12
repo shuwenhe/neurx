@@ -5,4 +5,3 @@ func main() {
     string c = s[i]
     0
 }
-

@@ -19,4 +19,3 @@ func main() {
     println("Training session complete")
     0
 }
-

@@ -5,7 +5,6 @@ use neurx.compile.passes.elimination.{elimination_config, new_elimination_config
 use neurx.compile.passes.memory.{memory_config, new_memory_config, apply_memory_passes}
 use neurx.compile.executor.execution_engine.{executor_config, new_executor_config, execute_graph}
 use neurx.compile.cache.cache_manager.{cache_manager, new_cache_manager, cache_lookup, cache_store}
-
 struct optimization_pipeline {
     fusion_config fusion_cfg
     elimination_config elim_cfg
@@ -15,8 +14,6 @@ struct optimization_pipeline {
     bool enable_cache
     bool verbose_logging
 }
-
-
 struct optimization_stats {
     string input_graph_hash
     int original_node_count
@@ -27,8 +24,6 @@ struct optimization_stats {
     int compilation_time_ms
     float estimated_speedup
 }
-
-
 func new_optimization_pipeline() optimization_pipeline {
     optimization_pipeline {
         fusion_cfg: new_fusion_config(),
@@ -40,8 +35,6 @@ func new_optimization_pipeline() optimization_pipeline {
         verbose_logging: false,
     }
 }
-
-
 func optimize_graph(optimization_pipeline pipeline, ir_graph input_graph) ir_graph {
     ir_graph result = input_graph
     if pipeline.enable_cache {
@@ -54,8 +47,6 @@ func optimize_graph(optimization_pipeline pipeline, ir_graph input_graph) ir_gra
     }
     result
 }
-
-
 func optimize_graph_progressive(optimization_pipeline pipeline, ir_graph input_graph) ir_graph {
     ir_graph result = input_graph
     int max_iterations = 5
@@ -74,8 +65,6 @@ func optimize_graph_progressive(optimization_pipeline pipeline, ir_graph input_g
     }
     result
 }
-
-
 func get_optimization_stats(ir_graph original, ir_graph optimized) optimization_stats {
     optimization_stats {
         input_graph_hash: "original_hash",
@@ -88,10 +77,7 @@ func get_optimization_stats(ir_graph original, ir_graph optimized) optimization_
         estimated_speedup: 1.0,
     }
 }
-
-
 func compile_and_optimize(optimization_pipeline pipeline, ir_graph input_graph) ir_graph {
     ir_graph optimized = optimize_graph_progressive(pipeline, input_graph)
     optimized
 }
-

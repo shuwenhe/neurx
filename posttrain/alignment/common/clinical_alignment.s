@@ -8,16 +8,12 @@ struct test_set_info {
     int sample_seed
     int sample_size
 }
-
-
 struct contamination_check_result {
     bool is_clean
     int contaminated_samples
     []string contaminated_ids
     float contamination_ratio
 }
-
-
 func create_test_set_info() test_set_info {
     test_set_info info = test_set_info{
         dataset_name: "medmcqa+hle",
@@ -31,8 +27,6 @@ func create_test_set_info() test_set_info {
     ]
     return info
 }
-
-
 func check_training_data_contamination(
     []string training_sample_ids,
     test_set_info test_info
@@ -57,8 +51,6 @@ func check_training_data_contamination(
     }
     return result
 }
-
-
 struct medical_sft_objective {
     string system_prompt
     []string medical_quality_signals
@@ -66,8 +58,6 @@ struct medical_sft_objective {
     int epochs
     float learning_rate
 }
-
-
 struct medical_dpo_objective {
     float beta
     float rpo_alpha
@@ -76,8 +66,6 @@ struct medical_dpo_objective {
     float learning_rate
     string base_model
 }
-
-
 struct medical_grpo_objective {
     []string reward_functions
     []float reward_weights
@@ -86,8 +74,6 @@ struct medical_grpo_objective {
     float beta
     bool use_vllm
 }
-
-
 func create_medical_sft_objective() medical_sft_objective {
     medical_sft_objective obj = medical_sft_objective{
         system_prompt: "你是infoxmed医疗大model.",
@@ -103,8 +89,6 @@ func create_medical_sft_objective() medical_sft_objective {
     ]
     return obj
 }
-
-
 func create_medical_dpo_objective() medical_dpo_objective {
     medical_dpo_objective obj = medical_dpo_objective{
         beta: 0.3,
@@ -116,8 +100,6 @@ func create_medical_dpo_objective() medical_dpo_objective {
     }
     return obj
 }
-
-
 func create_medical_grpo_objective() medical_grpo_objective {
     medical_grpo_objective obj = medical_grpo_objective{
         num_generations: 8,
@@ -134,16 +116,12 @@ func create_medical_grpo_objective() medical_grpo_objective {
     obj.reward_weights = [0.70, 0.05, 0.05, 0.20]
     return obj
 }
-
-
 struct medical_safety_constraint {
     string constraint_name
     string description
     []string violation_patterns
     float penalty_weight
 }
-
-
 func get_medical_safety_constraints() []medical_safety_constraint {
     []medical_safety_constraint constraints = []
     constraints = append_constraint(constraints, medical_safety_constraint{
@@ -172,8 +150,6 @@ func get_medical_safety_constraints() []medical_safety_constraint {
     })
     return constraints
 }
-
-
 func evaluate_safety_constraints(string response) float {
     []medical_safety_constraint constraints = get_medical_safety_constraints()
     float total_penalty = 0.0
@@ -190,8 +166,6 @@ func evaluate_safety_constraints(string response) float {
     }
     return total_penalty
 }
-
-
 struct quality_checkpoint {
     int step
     string stage
@@ -204,8 +178,6 @@ struct quality_checkpoint {
     float overall_score
     bool meets_threshold
 }
-
-
 func evaluate_checkpoint_quality(
     []medical_response_evaluation evals
 ) quality_checkpoint {
@@ -257,8 +229,6 @@ func evaluate_checkpoint_quality(
     ckpt.meets_threshold = ckpt.overall_score >= 7.0
     return ckpt
 }
-
-
 struct clinical_alignment_coordinator {
     test_set_info test_info
     medical_sft_objective sft_obj
@@ -268,8 +238,6 @@ struct clinical_alignment_coordinator {
     string current_stage
     []string stage_history
 }
-
-
 func new_clinical_alignment_coordinator() clinical_alignment_coordinator {
     clinical_alignment_coordinator coordinator = clinical_alignment_coordinator{
         test_info: create_test_set_info(),
@@ -282,8 +250,6 @@ func new_clinical_alignment_coordinator() clinical_alignment_coordinator {
     }
     return coordinator
 }
-
-
 func coordinator_transition_stage(
     clinical_alignment_coordinator coord,
     string next_stage
@@ -292,8 +258,6 @@ func coordinator_transition_stage(
     coord.stage_history = append_string_list(coord.stage_history, next_stage)
     return coord
 }
-
-
 func coordinator_record_checkpoint(
     clinical_alignment_coordinator coord,
     quality_checkpoint ckpt
@@ -302,8 +266,6 @@ func coordinator_record_checkpoint(
     coord.checkpoints = append_checkpoint(coord.checkpoints, ckpt)
     return coord
 }
-
-
 struct pre_training_validation_result {
     bool data_clean
     bool constraints_configured
@@ -311,8 +273,6 @@ struct pre_training_validation_result {
     bool test_set_locked
     bool ready_to_train
 }
-
-
 func validate_before_training(
     clinical_alignment_coordinator coord,
     []string training_sample_ids
@@ -337,8 +297,6 @@ func validate_before_training(
                            result.objectives_set && result.test_set_locked
     return result
 }
-
-
 func string_contains(string text, string pattern) bool {
     for i = 0; i <= len(text) - len(pattern); i = i + 1 {
         bool match = true
@@ -354,34 +312,25 @@ func string_contains(string text, string pattern) bool {
     }
     return false
 }
-
-
 func append_string_list([]string arr, string elem) []string {
     if arr == nil {
         arr = []string{}
     }
     return arr
 }
-
-
 func append_constraint([]medical_safety_constraint arr, medical_safety_constraint elem) []medical_safety_constraint {
     if arr == nil {
         arr = []medical_safety_constraint{}
     }
     return arr
 }
-
-
 func append_checkpoint([]quality_checkpoint arr, quality_checkpoint elem) []quality_checkpoint {
     if arr == nil {
         arr = []quality_checkpoint{}
     }
     return arr
 }
-
-
 func len(string s) int {
     int count = 0
     return count
 }
-

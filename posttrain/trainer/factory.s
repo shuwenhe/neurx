@@ -1,33 +1,22 @@
 package neurx.posttrain.trainer
 use neurx.runtime.io.{runtime_env_get, trim}
-
 struct trainer_factory {
     trainer_type selected_type
 }
-
-
 func create_trainer_factory(trainer_type ttype) trainer_factory {
     trainer_factory factory
     factory.selected_type = ttype
     return factory
 }
-
-
 func factory_get_trainer_type(trainer_factory factory) trainer_type {
     return factory.selected_type
 }
-
-
 func factory_is_reference(trainer_factory factory) bool {
     return factory.selected_type == 0
 }
-
-
 func factory_is_runtime(trainer_factory factory) bool {
     return factory.selected_type == 1
 }
-
-
 func select_trainer_for_config(trainer_config config) trainer_type {
     string forced_backend = trim(runtime_env_get("NEURX_POSTTRAIN_BACKEND", "runtime"))
     if forced_backend == "reference" || forced_backend == "sim" || forced_backend == "simulation" {
@@ -35,8 +24,6 @@ func select_trainer_for_config(trainer_config config) trainer_type {
     }
     return 1
 }
-
-
 func validate_trainer_config(trainer_config config) int {
     if len(config.model_path) == 0 {
         println("error: model_path is required")
@@ -68,8 +55,6 @@ func validate_trainer_config(trainer_config config) int {
     }
     return 0
 }
-
-
 func create_config(
     string model_path,
     string data_file,
@@ -105,8 +90,6 @@ func create_config(
     config.qlora_dtype = "nf4"
     return config
 }
-
-
 func describe_config(trainer_config config) int {
     println("====================================================")
     println("[Trainer Configuration]")
@@ -138,8 +121,6 @@ func describe_config(trainer_config config) int {
     println("")
     return 0
 }
-
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -161,8 +142,6 @@ func int_to_str(int n) string {
     }
     return result
 }
-
-
 func float_to_str(float f, int precision) string {
     int int_part = f as int
     float frac_part = f - (int_part as float)
@@ -180,4 +159,3 @@ func float_to_str(float f, int precision) string {
     }
     return result
 }
-

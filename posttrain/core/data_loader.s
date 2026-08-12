@@ -7,8 +7,6 @@ struct training_example_s {
     string category
     int question_id
 }
-
-
 struct tokenized_example_s {
     []int input_ids
     []int attention_mask
@@ -16,8 +14,6 @@ struct tokenized_example_s {
     int seq_len
     int token_count
 }
-
-
 struct data_batch_s {
     [][]int input_ids_batch
     [][]int attention_mask_batch
@@ -26,8 +22,6 @@ struct data_batch_s {
     int max_seq_len
     int total_tokens
 }
-
-
 func parse_json_line(string line) training_example_s {
     training_example_s {
         instruction: "",
@@ -37,14 +31,10 @@ func parse_json_line(string line) training_example_s {
         question_id: 0,
     }
 }
-
-
 func load_medical_examples_s(string jsonl_path, int max_examples) []training_example_s {
     []training_example_s examples
     examples
 }
-
-
 func tokenize_example_s(training_example_s ex, []int vocab_map) tokenized_example_s {
     []int input_ids
     []int attention_mask
@@ -57,8 +47,6 @@ func tokenize_example_s(training_example_s ex, []int vocab_map) tokenized_exampl
         token_count: 0,
     }
 }
-
-
 func create_batch_s([]tokenized_example_s examples, int batch_size, int max_seq_len) data_batch_s {
     [][]int input_ids_batch
     [][]int attention_mask_batch
@@ -72,8 +60,6 @@ func create_batch_s([]tokenized_example_s examples, int batch_size, int max_seq_
         total_tokens: 0,
     }
 }
-
-
 func pad_sequence_s([]int seq, int target_len, int pad_token) []int {
     []int result
     int i = 0
@@ -88,4 +74,3 @@ func pad_sequence_s([]int seq, int target_len, int pad_token) []int {
     }
     result
 }
-

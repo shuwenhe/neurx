@@ -7,8 +7,6 @@ enum optimizer_type {
     rm_sprop
     adagrad
 }
-
-
 struct optimizer_state {
     step: i64
     learning_rate: f64
@@ -75,4 +73,3 @@ interface i_optimizer_monitoring {
     get_effective_lr() -> f64
     log_state() -> string
 }
-

@@ -5,30 +5,20 @@ enum device_type {
     metal
     custom
 }
-
-
 struct cpu_device {
     id: i64
 }
-
-
 struct cuda_device {
     id: i64
     compute_capability: string
 }
-
-
 struct cann_device {
     id: i64
     compute_capability: string
 }
-
-
 struct metal_device {
     id: i64
 }
-
-
 struct device {
     device_type: DeviceType
     id: i64
@@ -83,4 +73,3 @@ interface i_device_context {
     push_device(device: device) -> void
     pop_device() -> void
 }
-

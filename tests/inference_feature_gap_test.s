@@ -14,8 +14,6 @@ func gap_close(float actual, float expected) bool {
     }
     difference < 0.0001
 }
-
-
 func gap_contains(string text, string pattern) bool {
     int i = 0
     while i + len(pattern) <= len(text) {
@@ -35,14 +33,10 @@ func gap_contains(string text, string pattern) bool {
     }
     false
 }
-
-
 func test_request_lifecycle() bool {
     request_lifecycle_state state = neurx.inference.serve.request_lifecycle.new_request_lifecycle("req-1", 12, 2, 100, 500)
     state.status == neurx.inference.serve.request_lifecycle.request_queued_status() && neurx.inference.serve.request_lifecycle.request_remaining_tokens(state) == 2 && !neurx.inference.serve.request_lifecycle.request_is_terminal(state)
 }
-
-
 func test_structured_output() bool {
     json_stream_state stream = neurx.inference.advanced.structured_output.new_json_stream_state()
     stream = neurx.inference.advanced.structured_output.json_stream_consume(stream, "{\"name\":\"alice\",")
@@ -53,36 +47,24 @@ func test_structured_output() bool {
     structured_validation_result syntax = neurx.inference.advanced.structured_output.json_stream_finish(stream)
     syntax.valid && stream.complete
 }
-
-
 func test_tool_parser() bool {
     string payload = "<tool_call>{\"name\":\"weather\"}</tool_call>"
     neurx.inference.advanced.tool_parser.tool_find_substring(payload, "weather", 0) > 0 && neurx.inference.advanced.tool_parser.tool_extract_tag(payload, "<tool_call>", "</tool_call>") != ""
 }
-
-
 func test_lora_router() bool {
     neurx.inference.serve.lora_router.lora_unloaded_status() != neurx.inference.serve.lora_router.lora_ready_status() && neurx.inference.serve.lora_router.lora_loading_status() != neurx.inference.serve.lora_router.lora_failed_status()
 }
-
-
 func test_disaggregated_runtime() bool {
     neurx.inference.serve.disaggregated_runtime.disaggregated_queued_prefill() != neurx.inference.serve.disaggregated_runtime.disaggregated_decoding() && neurx.inference.serve.disaggregated_runtime.kv_transfer_pending() != neurx.inference.serve.disaggregated_runtime.kv_transfer_complete()
 }
-
-
 func test_pooling() bool {
     gap_close(1.0, 1.0)
 }
-
-
 func test_openai_protocol() bool {
     string event = neurx.inference.api.openai_protocol.openai_chat_chunk("chat-1", "neurx", "hi", "")
     string escaped = neurx.inference.api.openai_protocol.openai_json_escape("a\"b")
     gap_contains(event, "chat.completion.chunk") && gap_contains(neurx.inference.api.openai_protocol.openai_done_event(), "[DONE]") && escaped == "a\\\"b"
 }
-
-
 func test_observability() bool {
     inference_observability_state state = neurx.inference.metrics.observability.new_inference_observability()
     state = neurx.inference.metrics.observability.observability_start_request(state, 4)
@@ -92,8 +74,6 @@ func test_observability() bool {
     string metrics = neurx.inference.metrics.observability.observability_prometheus(state)
     gap_contains(metrics, "neurx_inference_requests_total 1") && gap_contains(metrics, "neurx_inference_kv_handoffs_total 1")
 }
-
-
 func main() {
     bool passed = test_request_lifecycle()
     passed = passed && test_structured_output()
@@ -110,4 +90,3 @@ func main() {
     println("FAIL inference feature gap")
     1
 }
-

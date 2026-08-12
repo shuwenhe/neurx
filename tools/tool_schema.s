@@ -12,29 +12,21 @@ struct tool_param_schema {
     bool   required
     string default_value
 }
-
-
 struct tool_schema {
     string name
     string description
     []tool_param_schema params
     int param_count
 }
-
-
 struct tool_schema_registry {
     []tool_schema schemas
     int count
 }
-
-
 struct tool_schema_validate_result {
     bool   ok
     string error
     string tool_name
 }
-
-
 func new_tool_param(string name, string param_type, string description, bool required, string default_value) tool_param_schema {
     tool_param_schema {
         name:          name,
@@ -44,8 +36,6 @@ func new_tool_param(string name, string param_type, string description, bool req
         default_value: default_value,
     }
 }
-
-
 func new_tool_schema(string name, string description) tool_schema {
     tool_schema {
         name:        name,
@@ -54,8 +44,6 @@ func new_tool_schema(string name, string description) tool_schema {
         param_count: 0,
     }
 }
-
-
 func tool_schema_add_param(tool_schema schema, tool_param_schema param) tool_schema {
     int n = schema.param_count
     []tool_param_schema next = []tool_param_schema{cap: n + 1}
@@ -72,16 +60,12 @@ func tool_schema_add_param(tool_schema schema, tool_param_schema param) tool_sch
         param_count: n + 1,
     }
 }
-
-
 func new_tool_schema_registry() tool_schema_registry {
     tool_schema_registry {
         schemas: []tool_schema{cap: 16},
         count:   0,
     }
 }
-
-
 func tool_schema_registry_register(tool_schema_registry reg, tool_schema schema) tool_schema_registry {
     int n = reg.count
     []tool_schema next = []tool_schema{cap: n + 1}
@@ -96,8 +80,6 @@ func tool_schema_registry_register(tool_schema_registry reg, tool_schema schema)
         count:   n + 1,
     }
 }
-
-
 func tool_schema_registry_find(tool_schema_registry reg, string name) tool_schema {
     int i = 0
     while i < reg.count {
@@ -108,8 +90,6 @@ func tool_schema_registry_find(tool_schema_registry reg, string name) tool_schem
     }
     new_tool_schema("", "")
 }
-
-
 func tool_schema_registry_has(tool_schema_registry reg, string name) bool {
     int i = 0
     while i < reg.count {
@@ -120,8 +100,6 @@ func tool_schema_registry_has(tool_schema_registry reg, string name) bool {
     }
     false
 }
-
-
 func tool_schema_workspace_defaults() tool_schema_registry {
     tool_schema_registry reg = new_tool_schema_registry()
     tool_schema s_read = new_tool_schema("read", "Read the contents of a file at the given workspace path.")
@@ -168,8 +146,6 @@ func tool_schema_workspace_defaults() tool_schema_registry {
     reg = tool_schema_registry_register(reg, s_gc)
     reg
 }
-
-
 func tool_schema_text_contains(string text, string pattern) bool {
     int tl = len(text)
     int pl = len(pattern)
@@ -197,8 +173,6 @@ func tool_schema_text_contains(string text, string pattern) bool {
     }
     false
 }
-
-
 func tool_schema_validate(tool_schema_registry reg, string tool_name, string raw_input) tool_schema_validate_result {
     if !tool_schema_registry_has(reg, tool_name) {
         return tool_schema_validate_result {
@@ -229,8 +203,6 @@ func tool_schema_validate(tool_schema_registry reg, string tool_name, string raw
         tool_name: tool_name,
     }
 }
-
-
 func tool_schema_to_prompt_block(tool_schema schema) string {
     string out = "tool: " + schema.name + "\n"
     out = out + "  description: " + schema.description + "\n"
@@ -249,8 +221,6 @@ func tool_schema_to_prompt_block(tool_schema schema) string {
     }
     out
 }
-
-
 func tool_schema_registry_to_prompt(tool_schema_registry reg) string {
     string out = "=== available tools ===\n"
     int i = 0
@@ -260,9 +230,6 @@ func tool_schema_registry_to_prompt(tool_schema_registry reg) string {
     }
     out + "=== end tools ==="
 }
-
-
 func tool_schema_registry_summary(tool_schema_registry reg) string {
     "tool_schemas count=" + string(reg.count)
 }
-

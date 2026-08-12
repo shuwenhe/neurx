@@ -7,16 +7,12 @@ struct safe_tensor_info {
     int byte_start
     int byte_end
 }
-
-
 struct safe_tensor_file {
     string path
     interface data
     int header_size
     int data_offset
 }
-
-
 func dtype_size(string dtype) int {
     if dtype == "F32" { return 4 }
     if dtype == "F64" { return 8 }
@@ -28,8 +24,6 @@ func dtype_size(string dtype) int {
     if dtype == "BOOL" { return 1 }
     return 0
 }
-
-
 func shape_numel([]int shape) int {
     int result = 1
     int i = 0
@@ -39,8 +33,6 @@ func shape_numel([]int shape) int {
     }
     return result
 }
-
-
 func read_uint64_le(string data, int offset) int {
     if offset + 8 > len(data) { return 0 }
     int result = 0
@@ -60,8 +52,6 @@ func read_uint64_le(string data, int offset) int {
     }
     return result
 }
-
-
 func read_int32_le(string data, int offset) int {
     if offset + 4 > len(data) { return 0 }
     int result = 0
@@ -81,8 +71,6 @@ func read_int32_le(string data, int offset) int {
     }
     return result
 }
-
-
 func bytes_to_float(string data, int offset) float {
     if offset + 4 > len(data) { return 0.0 }
     int bits = read_int32_le(data, offset)
@@ -106,8 +94,6 @@ func bytes_to_float(string data, int offset) float {
     }
     return sign * result
 }
-
-
 func extract_json_header(string data) string {
     if len(data) < 8 { return "" }
     int header_size = read_uint64_le(data, 0)
@@ -122,8 +108,6 @@ func extract_json_header(string data) string {
     }
     return json
 }
-
-
 func find_json_key_value(string json, string key) string {
     string search_key = "\"" + key + "\":"
     int pos = 0
@@ -173,8 +157,6 @@ func find_json_key_value(string json, string key) string {
     }
     return value
 }
-
-
 func parse_tensor_info(string json, string tensor_name) safe_tensor_info {
     safe_tensor_info info
     info.name = tensor_name
@@ -214,8 +196,6 @@ func parse_tensor_info(string json, string tensor_name) safe_tensor_info {
     }
     return info
 }
-
-
 func parse_safetensors_header(string json_header) map[string]safe_tensor_info {
     map[string]safe_tensor_info tensors
     int i = 0
@@ -236,8 +216,6 @@ func parse_safetensors_header(string json_header) map[string]safe_tensor_info {
     }
     return tensors
 }
-
-
 func open_safetensors(string path) safe_tensor_file {
     interface file_data = readfile(path)
     safe_tensor_file file
@@ -257,8 +235,6 @@ func open_safetensors(string path) safe_tensor_file {
     file.data_offset = 8 + header_size
     return file
 }
-
-
 func load_tensor_float(safe_tensor_file file, safe_tensor_info info) []float {
     []float result
     string data = string(file.data)
@@ -280,8 +256,6 @@ func load_tensor_float(safe_tensor_file file, safe_tensor_info info) []float {
     }
     return result
 }
-
-
 func contains_tensor(safe_tensor_file file, string name) bool {
     string data = string(file.data)
     if len(data) < 8 { return false }
@@ -303,8 +277,6 @@ func contains_tensor(safe_tensor_file file, string name) bool {
     }
     return false
 }
-
-
 func load_tensors_metadata(string path) map[string]safe_tensor_info {
     map[string]safe_tensor_info result
     safe_tensor_file file = open_safetensors(path)
@@ -314,11 +286,8 @@ func load_tensors_metadata(string path) map[string]safe_tensor_info {
     result = parse_safetensors_header(json)
     return result
 }
-
-
 func main() {
     eprintln("SafeTensors Binary Format Parser - Complete Implementation")
     eprintln("Supports: F32, F64, I32, I64, I16, U8, I8, BOOL")
     eprintln("Format: 8-byte LE header length + JSON metadata + binary data")
 }
-

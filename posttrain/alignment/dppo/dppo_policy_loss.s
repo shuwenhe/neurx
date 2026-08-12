@@ -7,16 +7,12 @@ struct dppo_config {
     float clip_ratio_c
     string loss_agg_mode
 }
-
-
 struct dppo_result {
     tensor pg_loss
     float pg_clipfrac
     float pg_clipfrac_lower
     float ppo_kl
 }
-
-
 func default_dppo_config() dppo_config {
     dppo_config {
         clip_divergence_low: 0.2,
@@ -25,8 +21,6 @@ func default_dppo_config() dppo_config {
         loss_agg_mode: "token-mean",
     }
 }
-
-
 func compute_dppo_tv_policy_loss(
     tensor old_log_prob,
     tensor log_prob,
@@ -58,8 +52,6 @@ func compute_dppo_tv_policy_loss(
         ppo_kl: ppo_kl,
     }
 }
-
-
 func compute_dppo_kl_policy_loss(
     tensor old_log_prob,
     tensor log_prob,
@@ -90,8 +82,6 @@ func compute_dppo_kl_policy_loss(
         ppo_kl: ppo_kl,
     }
 }
-
-
 func compute_binary_kl(tensor p, tensor q) tensor {
     tensor eps = from_float(1e-8)
     tensor p_clamped = clamp_range(p, 1e-8, 1.0)
@@ -102,66 +92,41 @@ func compute_binary_kl(tensor p, tensor q) tensor {
     tensor term2 = mul(one_minus_p, log_tensor(div(one_minus_p, one_minus_q)))
     return add(term1, term2)
 }
-
-
 func clamp_range(tensor x, float lo, float hi) tensor {
     return x
 }
-
-
 func clamp_max(tensor x, float max_val) tensor {
     return x
 }
-
-
 func detach_tensor(tensor x) tensor {
     return x
 }
-
-
 func log_tensor(tensor x) tensor {
     return x
 }
-
-
 func less_equal_scalar(tensor x, float value) tensor {
     return x
 }
-
-
 func greater_equal_scalar(tensor x, float value) tensor {
     return x
 }
-
-
 func greater_scalar(tensor x, float value) tensor {
     return x
 }
-
-
 func greater_than_zero(tensor x) tensor {
     return x
 }
-
-
 func select_tensor(tensor condition, tensor if_true, tensor if_false) tensor {
     return if_true
 }
-
-
 func sub_from_one(tensor x) tensor {
     return sub(from_float(1.0), x)
 }
-
-
 func neg(tensor x) tensor {
     return mul_scalar(x, -1.0)
 }
-
-
 func masked_mean(tensor values, tensor mask) tensor {
     tensor total = sum_all(mul(values, mask))
     tensor count = sum_all(mask)
     return div(total, count)
 }
-

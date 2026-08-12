@@ -1,6 +1,5 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_write_binary_file}
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -27,8 +26,6 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
-
-
 func float_to_str(float value, int decimals) string {
     float current = value
     bool negative = current < 0.0
@@ -63,8 +60,6 @@ func float_to_str(float value, int decimals) string {
     }
     return out
 }
-
-
 func main() {
     string output_dir = runtime_env_get("NEURX_OUTPUT_DIR", "/home/shuwen/shuwen/posttrain")
     println("====================================================")
@@ -171,4 +166,3 @@ func main() {
     println("")
     return 0
 }
-

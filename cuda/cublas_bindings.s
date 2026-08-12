@@ -68,14 +68,10 @@ struct gpu_tensor {
     int cols
     bool is_allocated
 }
-
-
 struct cuda_context {
     int64 cublas_handle
     bool initialized
 }
-
-
 func gpu_matrix_multiply(
     cuda_context ctx,
     gpu_tensor A,
@@ -113,8 +109,6 @@ func gpu_matrix_multiply(
     cuda_device_synchronize()
     status
 }
-
-
 func gpu_matrix_multiply_backward_a(
     cuda_context ctx,
     gpu_tensor grad_c,
@@ -143,8 +137,6 @@ func gpu_matrix_multiply_backward_a(
     cuda_device_synchronize()
     status
 }
-
-
 func gpu_matrix_multiply_backward_b(
     cuda_context ctx,
     gpu_tensor A,
@@ -173,8 +165,6 @@ func gpu_matrix_multiply_backward_b(
     cuda_device_synchronize()
     status
 }
-
-
 func init_cuda_context() cuda_context {
     println("[CUDA] Initializing cuBLAS context...")
     int64 handle = cublas_create()
@@ -183,8 +173,6 @@ func init_cuda_context() cuda_context {
         initialized: handle != 0,
     }
 }
-
-
 func destroy_cuda_context(cuda_context* ctx) int {
     if !ctx.initialized {
         return 0
@@ -194,8 +182,6 @@ func destroy_cuda_context(cuda_context* ctx) int {
     ctx.initialized = false
     status
 }
-
-
 func allocate_gpu_tensor(int rows, int cols) gpu_tensor {
     int size = rows * cols
     int bytes = size * 4
@@ -212,8 +198,6 @@ func allocate_gpu_tensor(int rows, int cols) gpu_tensor {
         is_allocated: ptr != 0,
     }
 }
-
-
 func free_gpu_tensor(gpu_tensor* tensor) int {
     if tensor.is_allocated && tensor.device_ptr != 0 {
         println("[CUDA] Freeing GPU memory: " + int_to_str(tensor.size) + " elements")
@@ -222,8 +206,6 @@ func free_gpu_tensor(gpu_tensor* tensor) int {
     }
     0
 }
-
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -243,9 +225,6 @@ func int_to_str(int n) string {
     if neg { out = "-" + out }
     out
 }
-
-
 func string_char(int c) string {
     string(c)
 }
-

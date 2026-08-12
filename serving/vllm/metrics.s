@@ -10,8 +10,6 @@ struct vllm_metrics_state {
     int cache_hits
     int cache_misses
 }
-
-
 func new_vllm_metrics_state() vllm_metrics_state {
     vllm_metrics_state {
         admitted: 0,
@@ -25,8 +23,6 @@ func new_vllm_metrics_state() vllm_metrics_state {
         cache_misses: 0,
     }
 }
-
-
 func vllm_metrics_record_enqueue(vllm_metrics_state state, bool accepted, int queue_depth, int prefill_tokens) vllm_metrics_state {
     int normalized_depth = queue_depth
     if normalized_depth < 0 {
@@ -57,8 +53,6 @@ func vllm_metrics_record_enqueue(vllm_metrics_state state, bool accepted, int qu
         cache_misses: state.cache_misses,
     }
 }
-
-
 func vllm_metrics_record_decode(vllm_metrics_state state, int tokens) vllm_metrics_state {
     int add_tokens = tokens
     if add_tokens < 0 {
@@ -76,8 +70,6 @@ func vllm_metrics_record_decode(vllm_metrics_state state, int tokens) vllm_metri
         cache_misses: state.cache_misses,
     }
 }
-
-
 func vllm_metrics_record_cache(vllm_metrics_state state, bool hit) vllm_metrics_state {
     int next_hits = state.cache_hits
     int next_misses = state.cache_misses
@@ -98,8 +90,6 @@ func vllm_metrics_record_cache(vllm_metrics_state state, bool hit) vllm_metrics_
         cache_misses: next_misses,
     }
 }
-
-
 func vllm_metrics_record_finish(vllm_metrics_state state) vllm_metrics_state {
     vllm_metrics_state {
         admitted: state.admitted,
@@ -113,12 +103,9 @@ func vllm_metrics_record_finish(vllm_metrics_state state) vllm_metrics_state {
         cache_misses: state.cache_misses,
     }
 }
-
-
 func vllm_metrics_avg_queue_depth(vllm_metrics_state state) float {
     if state.queue_depth_samples <= 0 {
         return 0.0
     }
     state.queue_depth_sum / state.queue_depth_samples
 }
-

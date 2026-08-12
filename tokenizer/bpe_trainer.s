@@ -3,16 +3,12 @@ use neurx.strings
 func string_char(int c) string {
     string(c)
 }
-
-
 struct bpe_split_state {
     []string train_documents
     []string valid_documents
     float valid_ratio
     int seed
 }
-
-
 struct bpe_tokenizer_state {
     int vocab_limit
     int min_pair_frequency
@@ -22,23 +18,17 @@ struct bpe_tokenizer_state {
     []string merge_tokens
     bool trained
 }
-
-
 struct bpe_tokenized_corpus_state {
     bpe_split_state split
     bpe_tokenizer_state tokenizer
     []int train_token_ids
     []int valid_token_ids
 }
-
-
 struct bpe_pair_choice {
     string left
     string right
     int count
 }
-
-
 func copy_strings([]string values) []string {
     []string out = []string{cap: len(values)}
     int i = 0
@@ -48,8 +38,6 @@ func copy_strings([]string values) []string {
     }
     out
 }
-
-
 func copy_ints([]int values) []int {
     []int out = []int{cap: len(values)}
     int i = 0
@@ -59,8 +47,6 @@ func copy_ints([]int values) []int {
     }
     out
 }
-
-
 func positive_mod(int value, int modulus) int {
     if modulus <= 0 {
         return 0
@@ -72,8 +58,6 @@ func positive_mod(int value, int modulus) int {
     }
     result
 }
-
-
 func has_string([]string values, string target) bool {
     int i = 0
     while i < len(values) {
@@ -84,8 +68,6 @@ func has_string([]string values, string target) bool {
     }
     false
 }
-
-
 func append_unique_string([]string values, string value) []string {
     if has_string(values, value) {
         return values
@@ -93,8 +75,6 @@ func append_unique_string([]string values, string value) []string {
     values.push(value)
     values
 }
-
-
 func join_documents([]string documents) string {
     string out = ""
     int i = 0
@@ -110,8 +90,6 @@ func join_documents([]string documents) string {
     }
     out
 }
-
-
 func split_documents([]string documents, float valid_ratio, int seed) bpe_split_state {
     []string train_documents = []string{cap: 0}
     []string valid_documents = []string{cap: 0}
@@ -143,8 +121,6 @@ func split_documents([]string documents, float valid_ratio, int seed) bpe_split_
         seed: seed,
     }
 }
-
-
 func bpe_tokenizer_new(int vocab_limit, int min_pair_frequency) bpe_tokenizer_state {
     bpe_tokenizer_state {
         vocab_limit: vocab_limit,
@@ -156,8 +132,6 @@ func bpe_tokenizer_new(int vocab_limit, int min_pair_frequency) bpe_tokenizer_st
         trained: false,
     }
 }
-
-
 func tokenize_chars(string text) []string {
     int n = len(text)
     []string tokens = []string{cap: n}
@@ -171,8 +145,6 @@ func tokenize_chars(string text) []string {
     }
     tokens
 }
-
-
 func apply_merge_pass([]string tokens, string left, string right, string merged) []string {
     []string out = []string{cap: len(tokens)}
     int i = 0
@@ -187,23 +159,15 @@ func apply_merge_pass([]string tokens, string left, string right, string merged)
     }
     out
 }
-
-
 func bpe_merge_left(bpe_tokenizer_state tokenizer, int index) string {
     tokenizer.merge_lefts[index]
 }
-
-
 func bpe_merge_right(bpe_tokenizer_state tokenizer, int index) string {
     tokenizer.merge_rights[index]
 }
-
-
 func bpe_merge_token(bpe_tokenizer_state tokenizer, int index) string {
     tokenizer.merge_tokens[index]
 }
-
-
 func bpe_has_merge_token(bpe_tokenizer_state tokenizer, string token) bool {
     int i = 0
     while i < len(tokenizer.merge_tokens) {
@@ -214,8 +178,6 @@ func bpe_has_merge_token(bpe_tokenizer_state tokenizer, string token) bool {
     }
     false
 }
-
-
 func bpe_tokenize_text(string text, bpe_tokenizer_state tokenizer) []string {
     []string tokens = tokenize_chars(text)
     int i = 0
@@ -228,13 +190,9 @@ func bpe_tokenize_text(string text, bpe_tokenizer_state tokenizer) []string {
     }
     tokens
 }
-
-
 func token_pair_key(string left, string right) string {
     left + "||" + right
 }
-
-
 func token_pair_index([]string pair_keys, string key) int {
     int i = 0
     while i < len(pair_keys) {
@@ -245,8 +203,6 @@ func token_pair_index([]string pair_keys, string key) int {
     }
     -1
 }
-
-
 func count_pair_occurrences([]string documents, bpe_tokenizer_state tokenizer, []string pair_keys, []string pair_lefts, []string pair_rights, []int pair_counts) {
     int total_docs = len(documents)
     int d = 0
@@ -274,8 +230,6 @@ func count_pair_occurrences([]string documents, bpe_tokenizer_state tokenizer, [
         d = d + 1
     }
 }
-
-
 func find_best_pair([]string pair_lefts, []string pair_rights, []int pair_counts, int min_pair_frequency) bpe_pair_choice {
     string best_left = ""
     string best_right = ""
@@ -296,8 +250,6 @@ func find_best_pair([]string pair_lefts, []string pair_rights, []int pair_counts
         count: best_count,
     }
 }
-
-
 func bpe_tokenizer_train([]string documents, int vocab_limit, int min_pair_frequency) bpe_tokenizer_state {
     bpe_tokenizer_state tokenizer = bpe_tokenizer_new(vocab_limit, min_pair_frequency)
     []string vocab = []string{cap: 0}
@@ -349,8 +301,6 @@ func bpe_tokenizer_train([]string documents, int vocab_limit, int min_pair_frequ
     println("[bpe] tokenizer train complete: merges=" + int_to_str(len(tokenizer.merge_tokens), 0) + ", vocab=" + int_to_str(len(tokenizer.vocab), 0))
     tokenizer
 }
-
-
 func bpe_token_to_id(bpe_tokenizer_state tokenizer, string token) int {
     int i = 0
     while i < len(tokenizer.vocab) {
@@ -361,8 +311,6 @@ func bpe_token_to_id(bpe_tokenizer_state tokenizer, string token) int {
     }
     0
 }
-
-
 func bpe_encode_text(string text, bpe_tokenizer_state tokenizer) []int {
     []string tokens = bpe_tokenize_text(text, tokenizer)
     []int out = []int{cap: len(tokens)}
@@ -373,8 +321,6 @@ func bpe_encode_text(string text, bpe_tokenizer_state tokenizer) []int {
     }
     out
 }
-
-
 func bpe_encode_documents([]string documents, bpe_tokenizer_state tokenizer) []int {
     println("[bpe] encoding documents: docs=" + int_to_str(len(documents), 0))
     println("[bpe] joining documents into corpus...")
@@ -388,8 +334,6 @@ func bpe_encode_documents([]string documents, bpe_tokenizer_state tokenizer) []i
     println("[bpe] encoding documents complete: tokens=" + int_to_str(len(token_ids), 0))
     token_ids
 }
-
-
 func bpe_tokenized_corpus_from_documents([]string documents, int vocab_limit, int min_pair_frequency, float valid_ratio, int seed) bpe_tokenized_corpus_state {
     println("[bpe] corpus build start: docs=" + int_to_str(len(documents), 0))
     bpe_split_state split = split_documents(documents, valid_ratio, seed)
@@ -408,8 +352,6 @@ func bpe_tokenized_corpus_from_documents([]string documents, int vocab_limit, in
         valid_token_ids: valid_token_ids,
     }
 }
-
-
 func bpe_find_substring(string text, string pattern) int {
     if len(pattern) == 0 {
         return 0
@@ -427,8 +369,6 @@ func bpe_find_substring(string text, string pattern) int {
     }
     -1
 }
-
-
 func bpe_trim(string s) string {
     int left = 0
     while left < len(s) && (s[left] == 32 || s[left] == 9 || s[left] == 10 || s[left] == 13) {
@@ -449,8 +389,6 @@ func bpe_trim(string s) string {
         }
     out
 }
-
-
 func bpe_normalize_text(string text) string {
     string out = ""
     bool in_space = false
@@ -470,8 +408,6 @@ func bpe_normalize_text(string text) string {
     }
     bpe_trim(out)
 }
-
-
 func bpe_extract_jsonl_text(string line) string {
     string text = bpe_trim(line)
     if text == "" {
@@ -517,16 +453,12 @@ func bpe_extract_jsonl_text(string line) string {
     }
     bpe_normalize_text(value)
 }
-
-
 struct bpe_split_state_dict {
     []string train_documents
     []string valid_documents
     float valid_ratio
     int seed
 }
-
-
 struct bpe_tokenizer_state_dict {
     int vocab_limit
     int min_pair_frequency
@@ -536,16 +468,12 @@ struct bpe_tokenizer_state_dict {
     []string merge_tokens
     bool trained
 }
-
-
 struct bpe_tokenized_corpus_state_dict {
     bpe_split_state_dict split
     bpe_tokenizer_state_dict tokenizer
     []int train_token_ids
     []int valid_token_ids
 }
-
-
 func bpe_split_state_dict(bpe_split_state state) bpe_split_state_dict {
     bpe_split_state_dict {
         train_documents: copy_strings(state.train_documents),
@@ -554,8 +482,6 @@ func bpe_split_state_dict(bpe_split_state state) bpe_split_state_dict {
         seed: state.seed,
     }
 }
-
-
 func bpe_split_load_state_dict(bpe_split_state_dict dict) bpe_split_state {
     bpe_split_state {
         train_documents: copy_strings(dict.train_documents),
@@ -564,8 +490,6 @@ func bpe_split_load_state_dict(bpe_split_state_dict dict) bpe_split_state {
         seed: dict.seed,
     }
 }
-
-
 func bpe_tokenizer_state_dict(bpe_tokenizer_state state) bpe_tokenizer_state_dict {
     bpe_tokenizer_state_dict {
         vocab_limit: state.vocab_limit,
@@ -577,8 +501,6 @@ func bpe_tokenizer_state_dict(bpe_tokenizer_state state) bpe_tokenizer_state_dic
         trained: state.trained,
     }
 }
-
-
 func bpe_tokenizer_load_state_dict(bpe_tokenizer_state_dict dict) bpe_tokenizer_state {
     bpe_tokenizer_state {
         vocab_limit: dict.vocab_limit,
@@ -590,8 +512,6 @@ func bpe_tokenizer_load_state_dict(bpe_tokenizer_state_dict dict) bpe_tokenizer_
         trained: dict.trained,
     }
 }
-
-
 func bpe_tokenized_corpus_state_dict(bpe_tokenized_corpus_state state) bpe_tokenized_corpus_state_dict {
     bpe_tokenized_corpus_state_dict {
         split: bpe_split_state_dict(state.split),
@@ -600,8 +520,6 @@ func bpe_tokenized_corpus_state_dict(bpe_tokenized_corpus_state state) bpe_token
         valid_token_ids: copy_ints(state.valid_token_ids),
     }
 }
-
-
 func bpe_tokenized_corpus_load_state_dict(bpe_tokenized_corpus_state_dict dict) bpe_tokenized_corpus_state {
     bpe_tokenized_corpus_state {
         split: bpe_split_load_state_dict(dict.split),
@@ -610,4 +528,3 @@ func bpe_tokenized_corpus_load_state_dict(bpe_tokenized_corpus_state_dict dict) 
         valid_token_ids: copy_ints(dict.valid_token_ids),
     }
 }
-

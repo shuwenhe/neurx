@@ -6,14 +6,10 @@ struct topk_kl_config {
     float temperature
     bool use_fp32_logsumexp
 }
-
-
 struct topk_kl_state {
     topk_kl_config config
     int step_count
 }
-
-
 func default_topk_kl_config() topk_kl_config {
     topk_kl_config {
         top_k: 256,
@@ -22,8 +18,6 @@ func default_topk_kl_config() topk_kl_config {
         use_fp32_logsumexp: true,
     }
 }
-
-
 func compute_topk_kl_loss(
     tensor student_logits,
     tensor teacher_logits,
@@ -56,8 +50,6 @@ func compute_topk_kl_loss(
     }
     return div_scalar(sum_all(masked_loss), num_tokens)
 }
-
-
 func log_softmax_topk(tensor logits, topk_kl_config config) tensor {
     tensor scaled = div_scalar(logits, config.temperature)
     tensor max_vals = max_dim(scaled, 2, true)
@@ -67,8 +59,6 @@ func log_softmax_topk(tensor logits, topk_kl_config config) tensor {
     tensor log_sum_exp = add(log_tensor(sum_exp), max_vals)
     return sub(scaled, log_sum_exp)
 }
-
-
 func chunked_topk_forward(
     tensor student_logits,
     tensor teacher_logits,
@@ -91,20 +81,15 @@ func chunked_topk_forward(
     tensor teacher_topk = concat_tensors(teacher_topk_chunks, 2)
     return student_topk, teacher_topk
 }
-
-
 func new_topk_kl_trainer(topk_kl_config config) topk_kl_state {
     topk_kl_state {
         config: config,
         step_count: 0,
     }
 }
-
-
 func min_int(int a, int b) int {
     if a < b {
         return a
     }
     return b
 }
-

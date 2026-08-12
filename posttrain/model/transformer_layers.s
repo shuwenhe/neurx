@@ -1,43 +1,32 @@
 package neurx.posttrain.model.transformer_layers
 use neurx.posttrain.model.model_loader.{fill_model_tensor}
-
 struct embedding_layer {
     []float weight
     int vocab_size
     int hidden_size
 }
-
-
 struct position_embedding {
     [][]float weight
     int max_seq_len
     int hidden_size
 }
-
-
 struct rope_config {
     int dim
     int max_seq_len
     float base
 }
-
-
 struct rms_norm {
     []float weight
     []float bias
     float epsilon
     int hidden_size
 }
-
-
 struct linear_layer {
     []float weight
     []float bias
     int in_features
     int out_features
 }
-
-
 struct multi_head_attention {
     linear_layer q_proj
     linear_layer k_proj
@@ -47,8 +36,6 @@ struct multi_head_attention {
     int head_dim
     int hidden_size
 }
-
-
 struct mlp_layer {
     linear_layer gate_proj
     linear_layer up_proj
@@ -56,8 +43,6 @@ struct mlp_layer {
     int hidden_size
     int intermediate_size
 }
-
-
 struct transformer_block {
     rms_norm attention_norm
     multi_head_attention attention
@@ -65,8 +50,6 @@ struct transformer_block {
     mlp_layer mlp
     int hidden_size
 }
-
-
 func create_embedding(int vocab_size, int hidden_size) embedding_layer {
     embedding_layer emb
     emb.vocab_size = vocab_size
@@ -74,8 +57,6 @@ func create_embedding(int vocab_size, int hidden_size) embedding_layer {
     emb.weight = fill_model_tensor(vocab_size * hidden_size, 0.01)
     return emb
 }
-
-
 func embedding_forward(embedding_layer emb, []int token_ids) [][]float {
     [][]float embeddings = [][]float{}
     int i = 0
@@ -97,8 +78,6 @@ func embedding_forward(embedding_layer emb, []int token_ids) [][]float {
     }
     return embeddings
 }
-
-
 func create_rms_norm(int hidden_size) rms_norm {
     rms_norm norm
     norm.hidden_size = hidden_size
@@ -107,8 +86,6 @@ func create_rms_norm(int hidden_size) rms_norm {
     norm.bias = fill_model_tensor(hidden_size, 0.0)
     return norm
 }
-
-
 func rms_norm_forward(rms_norm norm, []float hidden_state) []float {
     []float normalized = fill_model_tensor(len(hidden_state), 0.0)
     float sum_sq = 0.0
@@ -125,8 +102,6 @@ func rms_norm_forward(rms_norm norm, []float hidden_state) []float {
     }
     return normalized
 }
-
-
 func create_linear(int in_features, int out_features) linear_layer {
     linear_layer linear
     linear.in_features = in_features
@@ -135,8 +110,6 @@ func create_linear(int in_features, int out_features) linear_layer {
     linear.bias = fill_model_tensor(out_features, 0.0)
     return linear
 }
-
-
 func linear_forward(linear_layer layer, []float input) []float {
     []float output = fill_model_tensor(layer.out_features, 0.0)
     int out_idx = 0
@@ -155,8 +128,6 @@ func linear_forward(linear_layer layer, []float input) []float {
     }
     return output
 }
-
-
 func create_rope_config(int dim, int max_seq_len) rope_config {
     rope_config config
     config.dim = dim
@@ -164,8 +135,6 @@ func create_rope_config(int dim, int max_seq_len) rope_config {
     config.base = 10000.0
     return config
 }
-
-
 func rope_apply(rope_config config, []float query, int position) []float {
     []float rotated = fill_model_tensor(len(query), 0.0)
     int i = 0
@@ -186,8 +155,6 @@ func rope_apply(rope_config config, []float query, int position) []float {
     }
     return rotated
 }
-
-
 func create_multi_head_attention(int hidden_size, int num_heads) multi_head_attention {
     multi_head_attention attn
     attn.hidden_size = hidden_size
@@ -199,8 +166,6 @@ func create_multi_head_attention(int hidden_size, int num_heads) multi_head_atte
     attn.o_proj = create_linear(hidden_size, hidden_size)
     return attn
 }
-
-
 func scaled_dot_product_attention([]float query, []float key, []float value, float scale) []float {
     []float attention = fill_model_tensor(len(query), 0.0)
     float dot_product = 0.0
@@ -218,8 +183,6 @@ func scaled_dot_product_attention([]float query, []float key, []float value, flo
     }
     return attention
 }
-
-
 func multi_head_attention_forward(multi_head_attention attn, []float hidden_state, []float context) []float {
     []float q = linear_forward(attn.q_proj, hidden_state)
     []float k = linear_forward(attn.k_proj, context)
@@ -229,8 +192,6 @@ func multi_head_attention_forward(multi_head_attention attn, []float hidden_stat
     []float output = linear_forward(attn.o_proj, attention_output)
     return output
 }
-
-
 func create_mlp(int hidden_size, int intermediate_size) mlp_layer {
     mlp_layer mlp
     mlp.hidden_size = hidden_size
@@ -240,8 +201,6 @@ func create_mlp(int hidden_size, int intermediate_size) mlp_layer {
     mlp.down_proj = create_linear(intermediate_size, hidden_size)
     return mlp
 }
-
-
 func mlp_forward(mlp_layer mlp, []float hidden_state) []float {
     []float gate = linear_forward(mlp.gate_proj, hidden_state)
     []float up = linear_forward(mlp.up_proj, hidden_state)
@@ -254,8 +213,6 @@ func mlp_forward(mlp_layer mlp, []float hidden_state) []float {
     []float output = linear_forward(mlp.down_proj, gated)
     return output
 }
-
-
 func create_transformer_block(int hidden_size, int intermediate_size, int num_heads) transformer_block {
     transformer_block block
     block.hidden_size = hidden_size
@@ -265,8 +222,6 @@ func create_transformer_block(int hidden_size, int intermediate_size, int num_he
     block.mlp = create_mlp(hidden_size, intermediate_size)
     return block
 }
-
-
 func transformer_block_forward(transformer_block block, []float hidden_state) []float {
     []float normed_hidden = rms_norm_forward(block.attention_norm, hidden_state)
     []float attention_output = multi_head_attention_forward(block.attention, normed_hidden, normed_hidden)
@@ -286,4 +241,3 @@ func transformer_block_forward(transformer_block block, []float hidden_state) []
     }
     return final_output
 }
-

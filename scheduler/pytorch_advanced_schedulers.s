@@ -7,8 +7,6 @@ struct lambda_lr_state {
     float lambda_a
     float lambda_b
 }
-
-
 func new_lambda_lr(
     float base_lr,
     string lambda_mode,
@@ -24,8 +22,6 @@ func new_lambda_lr(
         lambda_b: lambda_b,
     }
 }
-
-
 func lambda_lr_factor(lambda_lr_state sched, int step) float {
     if sched.lambda_mode == "linear" {
         return sched.lambda_a + sched.lambda_b * float(step)
@@ -38,24 +34,18 @@ func lambda_lr_factor(lambda_lr_state sched, int step) float {
     }
     return 1.0
 }
-
-
 func lambda_lr_step(lambda_lr_state sched, int step) lambda_lr_state {
     float factor = lambda_lr_factor(sched, step)
     sched.current_step = step
     sched.current_lr = sched.base_lr * factor
     return sched
 }
-
-
 struct multiplicative_lr_state {
     float base_lr
     float current_lr
     int current_step
     float gamma
 }
-
-
 func new_multiplicative_lr(float base_lr, float gamma) multiplicative_lr_state {
     multiplicative_lr_state {
         base_lr: base_lr,
@@ -64,15 +54,11 @@ func new_multiplicative_lr(float base_lr, float gamma) multiplicative_lr_state {
         gamma: gamma,
     }
 }
-
-
 func multiplicative_lr_step(multiplicative_lr_state sched, int step) multiplicative_lr_state {
     sched.current_step = step
     sched.current_lr = sched.base_lr * pow_int(sched.gamma, step)
     return sched
 }
-
-
 struct constant_lr_state {
     float base_lr
     float factor
@@ -80,8 +66,6 @@ struct constant_lr_state {
     int current_step
     float current_lr
 }
-
-
 func new_constant_lr(float base_lr, float factor, int total_iters) constant_lr_state {
     constant_lr_state {
         base_lr: base_lr,
@@ -91,8 +75,6 @@ func new_constant_lr(float base_lr, float factor, int total_iters) constant_lr_s
         current_lr: base_lr * factor,
     }
 }
-
-
 func constant_lr_step(constant_lr_state sched, int step) constant_lr_state {
     sched.current_step = step
     if step < sched.total_iters {
@@ -102,8 +84,6 @@ func constant_lr_step(constant_lr_state sched, int step) constant_lr_state {
     }
     return sched
 }
-
-
 struct linear_lr_state {
     float base_lr
     float start_factor
@@ -112,8 +92,6 @@ struct linear_lr_state {
     int current_step
     float current_lr
 }
-
-
 func new_linear_lr(
     float base_lr,
     float start_factor,
@@ -129,8 +107,6 @@ func new_linear_lr(
         current_lr: base_lr * start_factor,
     }
 }
-
-
 func linear_lr_step(linear_lr_state sched, int step) linear_lr_state {
     sched.current_step = step
     if step >= sched.total_iters {
@@ -142,8 +118,6 @@ func linear_lr_step(linear_lr_state sched, int step) linear_lr_state {
     sched.current_lr = sched.base_lr * factor
     return sched
 }
-
-
 struct sequential_lr_state {
     []float base_lrs
     []float current_lrs
@@ -151,8 +125,6 @@ struct sequential_lr_state {
     int active_scheduler_index
     int current_step
 }
-
-
 func new_sequential_lr([]float base_lrs, []int milestones) sequential_lr_state {
     []float current_lrs = clone_float_array(base_lrs)
     sequential_lr_state {
@@ -163,8 +135,6 @@ func new_sequential_lr([]float base_lrs, []int milestones) sequential_lr_state {
         current_step: 0,
     }
 }
-
-
 func sequential_lr_step(sequential_lr_state sched, int step) sequential_lr_state {
     int idx = 0
     int i = 0
@@ -181,8 +151,6 @@ func sequential_lr_step(sequential_lr_state sched, int step) sequential_lr_state
     sched.current_step = step
     return sched
 }
-
-
 func sequential_lr_get_lr(sequential_lr_state sched) float {
     if len(sched.current_lrs) == 0 {
         return 0.0
@@ -196,16 +164,12 @@ func sequential_lr_get_lr(sequential_lr_state sched) float {
     }
     return sched.current_lrs[idx]
 }
-
-
 struct chained_scheduler_state {
     []float multipliers
     float base_lr
     float current_lr
     int current_step
 }
-
-
 func new_chained_scheduler(float base_lr, []float multipliers) chained_scheduler_state {
     chained_scheduler_state {
         multipliers: multipliers,
@@ -214,8 +178,6 @@ func new_chained_scheduler(float base_lr, []float multipliers) chained_scheduler
         current_step: 0,
     }
 }
-
-
 func chained_scheduler_step(chained_scheduler_state sched, int step) chained_scheduler_state {
     sched.current_step = step
     float lr = sched.base_lr
@@ -227,8 +189,6 @@ func chained_scheduler_step(chained_scheduler_state sched, int step) chained_sch
     sched.current_lr = lr
     return sched
 }
-
-
 struct one_cycle_lr_state {
     float max_lr
     float min_lr
@@ -240,8 +200,6 @@ struct one_cycle_lr_state {
     int current_step
     float current_lr
 }
-
-
 func new_one_cycle_lr(
     float max_lr,
     float min_lr,
@@ -263,8 +221,6 @@ func new_one_cycle_lr(
         current_lr: initial_lr,
     }
 }
-
-
 func one_cycle_anneal(float start_lr, float end_lr, float pct, string strategy) float {
     if strategy == "linear" {
         return start_lr + pct * (end_lr - start_lr)
@@ -272,8 +228,6 @@ func one_cycle_anneal(float start_lr, float end_lr, float pct, string strategy) 
     float cos_out = 0.5 * (1.0 - cos_approx(3.14159265358979323846 * pct))
     return start_lr + cos_out * (end_lr - start_lr)
 }
-
-
 func one_cycle_lr_step(one_cycle_lr_state sched, int step) one_cycle_lr_state {
     sched.current_step = step
     if step >= sched.total_steps {
@@ -317,8 +271,6 @@ func one_cycle_lr_step(one_cycle_lr_state sched, int step) one_cycle_lr_state {
     }
     return sched
 }
-
-
 func cos_approx(float x) float {
     float x2 = x * x
     float x4 = x2 * x2
@@ -327,8 +279,6 @@ func cos_approx(float x) float {
     float x10 = x8 * x2
     return 1.0 - (x2 / 2.0) + (x4 / 24.0) - (x6 / 720.0) + (x8 / 40320.0) - (x10 / 3628800.0)
 }
-
-
 func pow_int(float base, int exponent) float {
     float result = 1.0
     int i = 0
@@ -338,8 +288,6 @@ func pow_int(float base, int exponent) float {
     }
     return result
 }
-
-
 func clone_float_array([]float values) []float {
     []float out = []float{cap: len(values)}
     int i = 0
@@ -349,4 +297,3 @@ func clone_float_array([]float values) []float {
     }
     return out
 }
-

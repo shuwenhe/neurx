@@ -2,8 +2,6 @@ package neurx.trainer.production
 struct matrix_2d {
     [][]float data
 }
-
-
 struct training_system_config {
     string model_name
     int vocab_size
@@ -35,16 +33,12 @@ struct training_system_config {
     bool resume_from_checkpoint
     string resume_checkpoint_path
 }
-
-
 struct model_state {
     [][]float embeddings
     []layer_weights layers
     []float output_weights
     int total_params
 }
-
-
 struct layer_weights {
     [][]float attention_qkv
     [][]float attention_output
@@ -54,8 +48,6 @@ struct layer_weights {
     []float layernorm_1_weight
     []float layernorm_2_weight
 }
-
-
 struct optimizer_state {
     [][]float param_momentum
     [][]float param_variance
@@ -65,8 +57,6 @@ struct optimizer_state {
     float beta2
     float epsilon
 }
-
-
 struct training_state {
     model_state model
     optimizer_state optimizer
@@ -80,16 +70,12 @@ struct training_state {
     []float lr_history
     bool is_training
 }
-
-
 struct ddp_state {
     int rank
     int world_size
     []int ranks
     bool is_initialized
 }
-
-
 struct zero_state {
     int stage
     int rank
@@ -98,8 +84,6 @@ struct zero_state {
     [][]float sharded_grads
     []int param_partition_sizes
 }
-
-
 struct checkpoint_metadata {
     int global_step
     int epoch
@@ -108,8 +92,6 @@ struct checkpoint_metadata {
     int model_params
     string timestamp
 }
-
-
 struct training_metrics {
     float loss
     float learning_rate
@@ -119,8 +101,6 @@ struct training_metrics {
     int epoch
     float elapsed_time_sec
 }
-
-
 func new_training_system_config() training_system_config {
     return training_system_config {
         model_name: "neurx-model",
@@ -154,8 +134,6 @@ func new_training_system_config() training_system_config {
         resume_checkpoint_path: "",
     }
 }
-
-
 func initialize_model(training_system_config cfg) model_state {
     int total_params = 0
     [][]float embeddings = []
@@ -193,8 +171,6 @@ func initialize_model(training_system_config cfg) model_state {
         total_params: total_params,
     }
 }
-
-
 func initialize_layer_weights(training_system_config cfg) layer_weights {
     int qkv_size = cfg.hidden_dim * cfg.hidden_dim * 3
     [][]float attention_qkv = []
@@ -236,8 +212,6 @@ func initialize_layer_weights(training_system_config cfg) layer_weights {
         layernorm_2_weight: layernorm_2,
     }
 }
-
-
 func create_weight_matrix(int size) [][]float {
     [][]float matrix = []
     int i = 0
@@ -249,8 +223,6 @@ func create_weight_matrix(int size) [][]float {
     }
     return matrix
 }
-
-
 func count_layer_params(training_system_config cfg) int {
     int params = 0
     params = params + cfg.hidden_dim * cfg.hidden_dim * 3
@@ -259,8 +231,6 @@ func count_layer_params(training_system_config cfg) int {
     params = params + cfg.hidden_dim * 2
     return params
 }
-
-
 func initialize_optimizer(
     model_state model,
     training_system_config cfg) optimizer_state {
@@ -287,8 +257,6 @@ func initialize_optimizer(
         epsilon: 1e-8,
     }
 }
-
-
 func forward_pass(
     model_state model,
     [][]int input_ids,
@@ -323,14 +291,10 @@ func forward_pass(
         hidden_states: hidden,
     }
 }
-
-
 struct forward_result {
     [][]float logits
     [][]float hidden_states
 }
-
-
 func layer_forward(
     [][]float hidden,
     layer_weights layer,
@@ -341,24 +305,18 @@ func layer_forward(
     [][]float output = add_residual(residual_1, ffn_out)
     return output
 }
-
-
 func attention_forward(
     [][]float hidden,
     layer_weights layer,
     training_system_config cfg) [][]float {
     return hidden
 }
-
-
 func ffn_forward(
     [][]float hidden,
     layer_weights layer,
     training_system_config cfg) [][]float {
     return hidden
 }
-
-
 func add_residual([][]float x, [][]float y) [][]float {
     [][]float result = []
     int i = 0
@@ -374,8 +332,6 @@ func add_residual([][]float x, [][]float y) [][]float {
     }
     return result
 }
-
-
 func compute_logits(
     [][]float hidden,
     []float output_weights,
@@ -394,8 +350,6 @@ func compute_logits(
     }
     return logits
 }
-
-
 func compute_loss(
     [][]float logits,
     [][]int labels) float {
@@ -416,8 +370,6 @@ func compute_loss(
     }
     return total_loss / float(count)
 }
-
-
 func softmax_single([]float logits, int idx) float {
     float max_logit = logits[0]
     int i = 1
@@ -435,8 +387,6 @@ func softmax_single([]float logits, int idx) float {
     }
     return exp_approx(logits[idx] - max_logit) / sum_exp
 }
-
-
 func backward_pass(
     model_state model,
     float loss,
@@ -451,8 +401,6 @@ func backward_pass(
     }
     return gradients
 }
-
-
 func optimizer_step(
     model_state model,
     optimizer_state optimizer,
@@ -479,8 +427,6 @@ func optimizer_step(
     optimizer.learning_rate = lr
     return optimizer
 }
-
-
 func get_learning_rate(int step, training_system_config cfg) float {
     int warmup_steps = int(float(cfg.max_steps) * cfg.warmup_ratio)
     if step < warmup_steps {
@@ -490,8 +436,6 @@ func get_learning_rate(int step, training_system_config cfg) float {
     float cosine_decay = 0.5 * (1.0 + cos_approx(3.14159 * progress))
     return cfg.learning_rate * cosine_decay
 }
-
-
 func clip_gradients([][]float gradients, float max_norm) float {
     float total_norm = 0.0
     int i = 0
@@ -511,8 +455,6 @@ func clip_gradients([][]float gradients, float max_norm) float {
     }
     return total_norm
 }
-
-
 func save_checkpoint(
     training_state state,
     training_system_config cfg,
@@ -531,16 +473,12 @@ func save_checkpoint(
     }
     return true
 }
-
-
 func load_checkpoint(
     string checkpoint_path,
     training_system_config cfg) training_state {
     training_state state = new_training_state(cfg)
     return state
 }
-
-
 func new_training_state(training_system_config cfg) training_state {
     model_state model = initialize_model(cfg)
     optimizer_state optimizer = initialize_optimizer(model, cfg)
@@ -558,8 +496,6 @@ func new_training_state(training_system_config cfg) training_state {
         is_training: true,
     }
 }
-
-
 func initialize_ddp(training_system_config cfg) ddp_state {
     return ddp_state {
         rank: cfg.rank,
@@ -568,8 +504,6 @@ func initialize_ddp(training_system_config cfg) ddp_state {
         is_initialized: cfg.enable_ddp,
     }
 }
-
-
 func ddp_all_reduce_gradients(
     [][]float gradients,
     ddp_state ddp) [][]float {
@@ -583,8 +517,6 @@ func ddp_all_reduce_gradients(
     }
     return gradients
 }
-
-
 func initialize_zero(training_system_config cfg, model_state model) zero_state {
     int params_per_rank = model.total_params / cfg.world_size
     return zero_state {
@@ -596,8 +528,6 @@ func initialize_zero(training_system_config cfg, model_state model) zero_state {
         param_partition_sizes: [],
     }
 }
-
-
 func zero_reduce_scatter_gradients(
     [][]float gradients,
     zero_state zero) [][]float {
@@ -615,8 +545,6 @@ func zero_reduce_scatter_gradients(
     }
     return sharded_grads
 }
-
-
 func log_training_metrics(
     training_metrics metrics,
     training_system_config cfg) {
@@ -627,8 +555,6 @@ func log_training_metrics(
         print_training_log(metrics)
     }
 }
-
-
 func print_training_log(training_metrics metrics) {
     string log = "[TRAIN] "
     log = log + "Step: " + int_to_string(metrics.step)
@@ -639,8 +565,6 @@ func print_training_log(training_metrics metrics) {
     log = log + " | Tok/s: " + int_to_string(metrics.tokens_per_sec)
     println(log)
 }
-
-
 func training_loop(training_system_config cfg) {
     println("=== Production Training System ===")
     println("Model: " + cfg.model_name)
@@ -716,8 +640,6 @@ func training_loop(training_system_config cfg) {
     println("Best Loss: " + float_to_string_4(state.best_loss) + " (Step " + int_to_string(state.best_step) + ")")
     println("Total Time: " + float_to_string_2(float(total_time) / 1000.0) + "s")
 }
-
-
 func generate_dummy_batch(training_system_config cfg) [][]int {
     [][]int batch = []
     int b = 0
@@ -733,23 +655,15 @@ func generate_dummy_batch(training_system_config cfg) [][]int {
     }
     return batch
 }
-
-
 func generate_dummy_labels(training_system_config cfg) [][]int {
     return generate_dummy_batch(cfg)
 }
-
-
 func randn() float {
     return 0.0
 }
-
-
 func rand_int(int max_val) int {
     return 0
 }
-
-
 func exp_approx(float x) float {
     if x < -10.0 { return 0.0 }
     if x > 10.0 { return 22026.0 }
@@ -763,8 +677,6 @@ func exp_approx(float x) float {
     }
     return result
 }
-
-
 func log_approx(float x) float {
     if x <= 0.0 { return -10.0 }
     if x == 1.0 { return 0.0 }
@@ -779,8 +691,6 @@ func log_approx(float x) float {
     }
     return result
 }
-
-
 func sqrt_approx(float x) float {
     if x <= 0.0 { return 0.0 }
     float guess = x / 2.0
@@ -791,13 +701,9 @@ func sqrt_approx(float x) float {
     }
     return guess
 }
-
-
 func pow_approx(float base, float exp) float {
     return exp_approx(exp * log_approx(base))
 }
-
-
 func cos_approx(float x) float {
     float result = 1.0
     float term = 1.0
@@ -809,18 +715,12 @@ func cos_approx(float x) float {
     }
     return result
 }
-
-
 func get_time_ms() int {
     return 0
 }
-
-
 func get_timestamp() string {
     return "2026-07-29T00:00:00Z"
 }
-
-
 func is_multiple_of(int value, int divisor) bool {
     if divisor <= 0 {
         return false
@@ -829,28 +729,17 @@ func is_multiple_of(int value, int divisor) bool {
     int remainder = value - quotient * divisor
     return remainder == 0
 }
-
-
 func int_to_string(int val) string {
     return ""
 }
-
-
 func float_to_string_2(float val) string {
     return ""
 }
-
-
 func float_to_string_4(float val) string {
     return ""
 }
-
-
 func float_to_string_6(float val) string {
     return ""
 }
-
-
 func println(string msg) {
 }
-

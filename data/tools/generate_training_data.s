@@ -4,8 +4,6 @@ use std.strings
 type training_data struct {
     text: string
 }
-
-
 func main() {
     io.println("🚀 NeurXEnglish textLLMtrainingdatagenerateEnglish text (Slanguageimplementation)")
     io.println("")
@@ -147,4 +145,3 @@ func main() {
     io.println("✨ trainingdataEnglish text: " + output_file)
     io.println("🎯 English textNeurXEnglish textLLMmodelEnglish texttraining")
 }
-

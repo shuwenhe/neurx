@@ -69,8 +69,6 @@ func test_trainer_state_roundtrip() {
     }
     println("====================================")
 }
-
-
 func test_scheduler_state_roundtrip() {
     println("")
     println("====================================")
@@ -126,8 +124,6 @@ func test_scheduler_state_roundtrip() {
     }
     println("====================================")
 }
-
-
 func test_optimizer_metadata_roundtrip() {
     println("")
     println("====================================")
@@ -180,8 +176,6 @@ func test_optimizer_metadata_roundtrip() {
     }
     println("====================================")
 }
-
-
 func main() {
     println("")
     println("========================================")
@@ -196,38 +190,24 @@ func main() {
     println("All Round Trip Tests Complete")
     println("========================================")
 }
-
-
 func trainer_state_to_json(int v, int s, int e, int gt, int ss, float bl, float ll, float wt, int lcs) string {
     return "{}"
 }
-
-
 func scheduler_state_to_json(int v, int s, int ws, float max, float min, string t) string {
     return "{}"
 }
-
-
 func optimizer_state_to_json(int v, string t, int s, int nl, int ppl) string {
     return "{}"
 }
-
-
 func json_get_int(string json, string key) int {
     return 0
 }
-
-
 func json_get_float(string json, string key) float {
     return 0.0
 }
-
-
 func json_get_string(string json, string key) string {
     return ""
 }
-
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -254,4 +234,3 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
-

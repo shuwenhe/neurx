@@ -1,18 +1,13 @@
 package neurx.scripts.verify_golden_embedding
 use neurx.runtime.io.{runtime_file_exists, runtime_env_get}
-
 func abs_float(float x) float {
     if x < 0.0 { return 0.0 - x }
     return x
 }
-
-
 func max_float(float a, float b) float {
     if a > b { return a }
     return b
 }
-
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -39,8 +34,6 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
-
-
 func float_to_str(float value, int decimals) string {
     float current = value
     bool negative = current < 0.0
@@ -77,8 +70,6 @@ func float_to_str(float value, int decimals) string {
     if negative { result = "-" + result }
     return result
 }
-
-
 func float_to_scientific(float value) string {
     if value == 0.0 { return "0.00e+00" }
     float abs_val = abs_float(value)
@@ -102,8 +93,6 @@ func float_to_scientific(float value) string {
     if exponent >= 0 { exp_sign = "+" }
     return sign + float_to_str(mantissa, 2) + "e" + exp_sign + int_to_str(exponent)
 }
-
-
 struct embedding_test_result {
     string test_name
     bool passed
@@ -112,8 +101,6 @@ struct embedding_test_result {
     float max_rel_error
     int total_elements
 }
-
-
 func verify_embedding_test(string test_name, string golden_dir, string output_dir) embedding_test_result {
     embedding_test_result result
     result.test_name = test_name
@@ -140,8 +127,6 @@ func verify_embedding_test(string test_name, string golden_dir, string output_di
     result.passed = true
     return result
 }
-
-
 func main() {
     println("============================================================")
     println("Stage 1: Embedding Verification (NeurX S Implementation)")
@@ -222,4 +207,3 @@ func main() {
         return 1
     }
 }
-

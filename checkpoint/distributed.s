@@ -9,8 +9,6 @@ enum checkpoint_format {
     FORMAT_SAFE_TENSORS,
     FORMAT_HF_DS,
 }
-
-
 struct checkpoint_config {
     string base_directory
     int save_interval
@@ -33,8 +31,6 @@ struct checkpoint_config {
     int io_threads
     int chunk_size_mb
 }
-
-
 func default_checkpoint_config_for_large_model() checkpoint_config {
     checkpoint_config {
         base_directory: "./checkpoints",
@@ -58,8 +54,6 @@ func default_checkpoint_config_for_large_model() checkpoint_config {
         chunk_size_mb: 512,
     }
 }
-
-
 struct model_checkpoint {
     int version
     int training_step
@@ -74,8 +68,6 @@ struct model_checkpoint {
     string checksum_md5
     string checksum_crc32
 }
-
-
 struct tensor_shard {
     string name
     []int shape
@@ -87,15 +79,11 @@ struct tensor_shard {
     string prev_checksum
     bool has_changed
 }
-
-
 struct optimizer_state {
     int step_count
     []float exp_avg
     []float exp_avg_sq
 }
-
-
 struct training_metadata {
     float loss
     float learning_rate
@@ -108,8 +96,6 @@ struct training_metadata {
     []uint64 cpu_rng_state
     data_iterator_state data_iter_state
 }
-
-
 struct data_iterator_state {
     int current_file_idx
     int current_offset_in_file
@@ -125,8 +111,6 @@ enum checkpoint_status {
     CKPT_FAILED,
     CKPT_CANCELLED,
 }
-
-
 struct checkpoint_manager {
     checkpoint_config config
     checkpoint_status status
@@ -142,15 +126,11 @@ struct checkpoint_manager {
     function on_save_complete
     function on_save_failed
 }
-
-
 struct checkpoint_buffer {
     model_checkpoint ckpt
     bool is_valid
     float64 frozen_time
 }
-
-
 struct checkpoint_task {
     int task_id
     checkpoint_buffer data
@@ -158,8 +138,6 @@ struct checkpoint_task {
     int priority
     bool is_cancelled
 }
-
-
 struct checkpoint_stats {
     int total_saves_attempted
     int total_saves_completed
@@ -171,8 +149,6 @@ struct checkpoint_stats {
     int last_error_code
     string last_error_message
 }
-
-
 func init_checkpoint_manager(checkpoint_config cfg) checkpoint_manager {
     create_directory_if_not_exists(cfg.base_directory)
     checkpoint_stats init_stats
@@ -203,12 +179,8 @@ func init_checkpoint_manager(checkpoint_config cfg) checkpoint_manager {
     }
     return mgr
 }
-
-
 func create_directory_if_not_exists(string path) {
 }
-
-
 func trigger_async_save(ref checkpoint_manager mgr, model_checkpoint ckpt_data) bool {
     if !mgr.config.async_enabled {
         return sync_save(mgr, ckpt_data)
@@ -235,8 +207,6 @@ func trigger_async_save(ref checkpoint_manager mgr, model_checkpoint ckpt_data) 
     mgr.current_checkpoint_version = mgr.current_checkpoint_version + 1
     return true
 }
-
-
 func sync_save(ref checkpoint_manager mgr, model_checkpoint ckpt_data) bool {
     mgr.status = CKPT_PREPARING
     float64 start_time = get_current_time_ms()
@@ -261,8 +231,6 @@ func sync_save(ref checkpoint_manager mgr, model_checkpoint ckpt_data) bool {
     }
     return success
 }
-
-
 func write_checkpoint_to_disk(
     ref checkpoint_manager mgr,
     model_checkpoint ckpt,
@@ -277,8 +245,6 @@ func write_checkpoint_to_disk(
     }
     return false
 }
-
-
 func attempt_write_checkpoint(
     ref checkpoint_manager mgr,
     model_checkpoint ckpt,
@@ -318,8 +284,6 @@ func attempt_write_checkpoint(
     }
     return true
 }
-
-
 func save_model_parameters(
     ref checkpoint_manager mgr,
     model_checkpoint ckpt,
@@ -352,8 +316,6 @@ func save_model_parameters(
     }
     return true
 }
-
-
 func save_optimizer_state(
     ref checkpoint_manager mgr,
     optimizer_state opt,
@@ -366,8 +328,6 @@ func save_optimizer_state(
     filepath = filepath + ".pt"
     return true
 }
-
-
 func save_training_metadata(
     ref checkpoint_manager mgr,
     training_metadata meta,
@@ -377,8 +337,6 @@ func save_training_metadata(
     string json_content = serialize_metadata_to_json(meta)
     return write_string_to_file(filepath, json_content)
 }
-
-
 func save_manifest(
     ref checkpoint_manager mgr,
     model_checkpoint ckpt,
@@ -399,8 +357,6 @@ func save_manifest(
         "}\n"
     return write_string_to_file(filepath, manifest_json)
 }
-
-
 func load_checkpoint(
     ref checkpoint_manager mgr,
     string ckpt_path_or_step
@@ -418,8 +374,6 @@ func load_checkpoint(
     }
     return loaded
 }
-
-
 func resolve_checkpoint_path(ref checkpoint_manager mgr, string input) string {
     if input == "latest" {
         return find_latest_checkpoint(mgr.config.base_directory)
@@ -435,8 +389,6 @@ func resolve_checkpoint_path(ref checkpoint_manager mgr, string input) string {
         return ""
     }
 }
-
-
 func restore_training_state(
     ref checkpoint_manager mgr,
     string ckpt_path
@@ -453,8 +405,6 @@ func restore_training_state(
     mgr.current_checkpoint_version = ckpt.version + 1
     return true
 }
-
-
 func background_writer_loop(ref checkpoint_manager mgr) {
     while true {
         checkpoint_task task = dequeue_task(mgr)
@@ -472,8 +422,6 @@ func background_writer_loop(ref checkpoint_manager mgr) {
         }
     }
 }
-
-
 func cleanup_old_checkpoints(ref checkpoint_manager mgr) {
     int keep_n = mgr.config.keep_last_n_checkpoints
     if keep_n <= 0 { return }
@@ -487,8 +435,6 @@ func cleanup_old_checkpoints(ref checkpoint_manager mgr) {
         idx = idx + 1
     }
 }
-
-
 func find_latest_checkpoint(string base_dir) string {
     []string all_ckpts = list_all_checkpoints(base_dir)
     if len(all_ckpts) == 0 { return "" }
@@ -505,8 +451,6 @@ func find_latest_checkpoint(string base_dir) string {
     }
     return latest
 }
-
-
 func verify_checkpoint(string ckpt_dir) bool {
     if !file_exists(ckpt_dir + "/training_state.json") {
         return false
@@ -516,13 +460,9 @@ func verify_checkpoint(string ckpt_dir) bool {
     }
     return true
 }
-
-
 func build_checkpoint_path(checkpoint_manager mgr, int step) string {
     mgr.config.base_directory + "/step_" + pad_with_zeros(step, 8)
 }
-
-
 func pad_with_zeros(int value, int width) string {
     string s = string(value)
     while len(s) < width {
@@ -530,40 +470,27 @@ func pad_with_zeros(int value, int width) string {
     }
     return s
 }
-
-
 func get_current_time_ms() float64 { return 0.0 }
-
 func get_unique_id() int { return 0 }
-
 func is_queue_full(checkpoint_manager mgr) bool {
     return (mgr.queue_rear + 1) % len(mgr.task_queue) == mgr.queue_front
 }
-
-
 func swap_buffers(ref checkpoint_manager mgr) {
     checkpoint_buffer temp = mgr.front_buffer
     mgr.front_buffer = mgr.back_buffer
     mgr.back_buffer = temp
     mgr.buffer_locked = true
 }
-
-
 func enqueue_task(ref checkpoint_manager mgr, checkpoint_task task) {
     mgr.task_queue[mgr.queue_rear] = task
     mgr.queue_rear = (mgr.queue_rear + 1) % len(mgr.task_queue)
 }
-
-
 func dequeue_task(checkpoint_manager mgr) checkpoint_task {
     checkpoint_task task = mgr.task_queue[mgr.queue_front]
     mgr.queue_front = (mgr.queue_front + 1) % len(mgr.task_queue)
     return task
 }
-
-
 func start_background_writer_if_needed(ref checkpoint_manager mgr) {}
-
 func update_save_stats_success(ref checkpoint_manager mgr, float64 time_ms, int size_mb) {
     mgr.stats.total_saves_completed = mgr.stats.total_saves_completed + 1
     mgr.stats.total_saves_attempted = mgr.stats.total_saves_attempted + 1
@@ -571,68 +498,38 @@ func update_save_stats_success(ref checkpoint_manager mgr, float64 time_ms, int 
     mgr.stats.avg_save_time_ms = mgr.stats.total_save_time_ms / float_of_int(mgr.stats.total_saves_completed)
     mgr.stats.total_data_written_mb = mgr.stats.total_data_written_mb + float_of_int(size_mb)
 }
-
-
 func update_save_stats_failure(ref checkpoint_manager mgr) {
     mgr.stats.total_saves_failed = mgr.stats.total_saves_failed + 1
     mgr.stats.total_saves_attempted = mgr.stats.total_saves_attempted + 1
 }
-
-
 func write_tensor_to_file(tensor_shard t, string path, compression_type c) bool { return true }
-
 func write_string_to_file(string path, string content) bool { return true }
-
 func serialize_metadata_to_json(training_metadata m) string { return "{}" }
-
 func empty_checkpoint() model_checkpoint {
     return model_checkpoint{}
 }
-
-
 func is_valid_checkpoint(model_checkpoint c) bool { return true }
-
 func restore_parameters_to_model([]tensor_shard shards) {}
-
 func restore_optimizer_state(optimizer_state opt) {}
-
 func restore_rng_states([]uint64 cuda, []uint64 cpu) {}
-
 func restore_data_iterator(data_iterator_state iter) {}
-
 func find_best_checkpoint(string base_dir) string { return "" }
-
 func list_all_checkpoints(string base_dir) []string { return []string{} }
-
 func sort_checkpoints_by_step_desc(ref []string paths) {}
-
 func extract_step_from_path(string path) int { return 0 }
-
 func delete_directory_recursive(string path) {}
-
 func file_exists(string path) bool { return false }
-
 func directory_exists(string path) bool { return false }
-
 func cleanup_directory(string path) {}
-
 func atomic_rename(string from, string to) bool { return true }
-
 func log_info(string msg) {}
-
 func sanitize_filename(string name) string { return name }
-
 func string_timestamp(float64 ts) string { return "" }
-
 func is_numeric(string s) bool { return false }
-
 func parse_int(string s) int { return 0 }
-
 func float_of_int(int n) float { return 0.0 }
-
 func quick_resume_training(string checkpoint_path) bool {
     checkpoint_config cfg = default_checkpoint_config_for_large_model()
     checkpoint_manager mgr = init_checkpoint_manager(cfg)
     return restore_training_state(mgr, checkpoint_path)
 }
-

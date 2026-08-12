@@ -12,8 +12,6 @@ struct agent_prompt_builder_state {
     string last_observation
     string extra
 }
-
-
 func new_agent_prompt_builder(string goal, string task) agent_prompt_builder_state {
     agent_prompt_builder_state {
         system_role: "You are a precise AI agent. Think step by step, use available tools, and complete the task.",
@@ -26,8 +24,6 @@ func new_agent_prompt_builder(string goal, string task) agent_prompt_builder_sta
         extra: "",
     }
 }
-
-
 func agent_prompt_with_system(agent_prompt_builder_state b, string role) agent_prompt_builder_state {
     agent_prompt_builder_state {
         system_role: role,
@@ -40,8 +36,6 @@ func agent_prompt_with_system(agent_prompt_builder_state b, string role) agent_p
         extra: b.extra,
     }
 }
-
-
 func agent_prompt_with_memory(agent_prompt_builder_state b, agent_memory_state memory) agent_prompt_builder_state {
     agent_prompt_builder_state {
         system_role: b.system_role,
@@ -54,8 +48,6 @@ func agent_prompt_with_memory(agent_prompt_builder_state b, agent_memory_state m
         extra: b.extra,
     }
 }
-
-
 func agent_prompt_with_tools(agent_prompt_builder_state b, agent_tool_registry_state tools) agent_prompt_builder_state {
     agent_prompt_builder_state {
         system_role: b.system_role,
@@ -68,8 +60,6 @@ func agent_prompt_with_tools(agent_prompt_builder_state b, agent_tool_registry_s
         extra: b.extra,
     }
 }
-
-
 func agent_prompt_with_reasoning(agent_prompt_builder_state b, agent_reasoning_state reasoning) agent_prompt_builder_state {
     agent_prompt_builder_state {
         system_role: b.system_role,
@@ -82,8 +72,6 @@ func agent_prompt_with_reasoning(agent_prompt_builder_state b, agent_reasoning_s
         extra: b.extra,
     }
 }
-
-
 func agent_prompt_with_observation(agent_prompt_builder_state b, string obs) agent_prompt_builder_state {
     agent_prompt_builder_state {
         system_role: b.system_role,
@@ -96,8 +84,6 @@ func agent_prompt_with_observation(agent_prompt_builder_state b, string obs) age
         extra: b.extra,
     }
 }
-
-
 func agent_prompt_with_extra(agent_prompt_builder_state b, string extra) agent_prompt_builder_state {
     agent_prompt_builder_state {
         system_role: b.system_role,
@@ -110,8 +96,6 @@ func agent_prompt_with_extra(agent_prompt_builder_state b, string extra) agent_p
         extra: extra,
     }
 }
-
-
 func agent_prompt_build(agent_prompt_builder_state b) string {
     string out = "SYSTEM: " + b.system_role + "\n"
     out = out + "GOAL: " + b.goal + "\n"
@@ -133,13 +117,9 @@ func agent_prompt_build(agent_prompt_builder_state b) string {
     }
     out + "ACTION:"
 }
-
-
 func agent_prompt_build_system_only(agent_prompt_builder_state b) string {
     b.system_role
 }
-
-
 func agent_prompt_summary(agent_prompt_builder_state b) string {
     string has_mem = "no"
     if b.memory_summary != "" {
@@ -151,4 +131,3 @@ func agent_prompt_summary(agent_prompt_builder_state b) string {
     }
     "prompt;goal=" + b.goal + ";task=" + b.task + ";has_memory=" + has_mem + ";has_tools=" + has_tools
 }
-

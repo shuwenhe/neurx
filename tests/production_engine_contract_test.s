@@ -1,9 +1,7 @@
 package main
-
 use neurx.inference.runtime.production_engine
 use neurx.inference.runtime.worker_cluster
 use neurx.inference.scheduler.vllm_scheduler
-
 func test_parallel_topology() bool {
     parallel_topology topology
     topology.tensor_parallel_size = 2
@@ -25,8 +23,6 @@ func test_parallel_topology() bool {
     }
     neurx.inference.runtime.worker_cluster.worker_cluster_ready(cluster) && neurx.inference.runtime.worker_cluster.worker_replica_ready(cluster, 0) && neurx.inference.runtime.worker_cluster.worker_replica_ready(cluster, 1)
 }
-
-
 func test_production_engine_contract() bool {
     production_engine_config config
     config.model_directory = "/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct"
@@ -54,8 +50,6 @@ func test_production_engine_contract() bool {
     production_engine_result scheduled = neurx.inference.runtime.production_engine.engine_schedule(submitted.state, 120)
     scheduled.success && scheduled.batch.ready && len(scheduled.batch.commands) == 1 && scheduled.batch.scheduled_tokens > 0
 }
-
-
 func main() {
     bool passed = test_parallel_topology()
     passed = passed && test_production_engine_contract()
@@ -66,4 +60,3 @@ func main() {
     println("FAIL production engine contract")
     1
 }
-

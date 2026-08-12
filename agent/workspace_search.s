@@ -1,22 +1,17 @@
 package neurx.agent.workspace_search
 use neurx.agent.workspace_tools.{agent_workspace_read, agent_workspace_text_contains, agent_workspace_clip, agent_workspace_root}
 use neurx.runtime.io.{runtime_run_command_output, runtime_shell_escape}
-
 struct agent_search_hit {
     string path
     string snippet
     bool matched
 }
-
-
 struct agent_search_result {
     bool ok
     string query
     int hit_count
     string observation
 }
-
-
 func agent_search_observation(string status, string query, string details) string {
     string obs = "search:status=" + status + ";query=" + query
     if trim(details) != "" {
@@ -24,8 +19,6 @@ func agent_search_observation(string status, string query, string details) strin
     }
     obs
 }
-
-
 func agent_search_count_lines(string text) int {
     string trimmed = trim(text)
     if trimmed == "" {
@@ -41,8 +34,6 @@ func agent_search_count_lines(string text) int {
     }
     count
 }
-
-
 func agent_search_candidate_paths(string route) []string {
     []string paths = []string{cap: 12}
     paths.push("agent/runtime.s")
@@ -61,8 +52,6 @@ func agent_search_candidate_paths(string route) []string {
     }
     paths
 }
-
-
 func agent_search_make_hit(string path, string query, int max_chars) agent_search_hit {
     agent_workspace_result read_result = agent_workspace_read(path, max_chars)
     bool matched = false
@@ -79,8 +68,6 @@ func agent_search_make_hit(string path, string query, int max_chars) agent_searc
         matched: matched,
     }
 }
-
-
 func agent_search_workspace(string query, string route, int max_hits, int max_chars_per_hit) agent_search_result {
     string q = trim(query)
     int limit = max_hits
@@ -94,4 +81,3 @@ func agent_search_workspace(string query, string route, int max_hits, int max_ch
     string root = agent_workspace_root()
     if q != "" {
         string limit_str = string(limit)
-

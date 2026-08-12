@@ -17,8 +17,6 @@ func exp_approx(float x) float {
     }
     result
 }
-
-
 func tanh_approx(float x) float {
     float ep = exp_approx(x)
     float en = exp_approx(-x)
@@ -28,13 +26,9 @@ func tanh_approx(float x) float {
     }
     (ep - en) / denom
 }
-
-
 func sigmoid(float x) float {
     1.0 / (1.0 + exp_approx(-x))
 }
-
-
 func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
@@ -45,8 +39,6 @@ func copy_float([]float data) []float {
     }
     out
 }
-
-
 func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
@@ -57,16 +49,12 @@ func copy_int([]int data) []int {
     }
     out
 }
-
-
 func shape2(int a, int b) []int {
     []int s = []int{cap: 2}
     s[0] = a
     s[1] = b
     s
 }
-
-
 func shape3(int a, int b, int c) []int {
     []int s = []int{cap: 3}
     s[0] = a
@@ -74,8 +62,6 @@ func shape3(int a, int b, int c) []int {
     s[2] = c
     s
 }
-
-
 func mat_vec([]float weight, int rows, int cols, []float vec) []float {
     []float out = []float{cap: rows}
     int r = 0
@@ -91,8 +77,6 @@ func mat_vec([]float weight, int rows, int cols, []float vec) []float {
     }
     out
 }
-
-
 func vec_add([]float a, []float b, int n) []float {
     []float out = []float{cap: n}
     int i = 0
@@ -102,8 +86,6 @@ func vec_add([]float a, []float b, int n) []float {
     }
     out
 }
-
-
 func vec_mul([]float a, []float b, int n) []float {
     []float out = []float{cap: n}
     int i = 0
@@ -113,8 +95,6 @@ func vec_mul([]float a, []float b, int n) []float {
     }
     out
 }
-
-
 func zeros(int n) []float {
     []float out = []float{cap: n}
     int i = 0
@@ -124,8 +104,6 @@ func zeros(int n) []float {
     }
     out
 }
-
-
 struct rnn_cell_state {
     int input_size
     int hidden_size
@@ -134,8 +112,6 @@ struct rnn_cell_state {
     []float bias_ih
     []float bias_hh
 }
-
-
 func new_rnn_cell(int input_size, int hidden_size) rnn_cell_state {
     rnn_cell_state {
         input_size: input_size,
@@ -146,8 +122,6 @@ func new_rnn_cell(int input_size, int hidden_size) rnn_cell_state {
         bias_hh: zeros(hidden_size),
     }
 }
-
-
 func rnn_cell_forward(rnn_cell_state cell, []float x, []float h_prev) []float {
     int hs = cell.hidden_size
     []float gi = mat_vec(cell.weight_ih, hs, cell.input_size, x)
@@ -161,16 +135,12 @@ func rnn_cell_forward(rnn_cell_state cell, []float x, []float h_prev) []float {
     }
     out
 }
-
-
 struct rnn_output {
     []float last_hidden
     []float all_hidden
     int seq_len
     int hidden_size
 }
-
-
 func rnn_forward(rnn_cell_state cell, []float input, int seq_len, []float h0) rnn_output {
     int hs = cell.hidden_size
     int is_ = cell.input_size
@@ -199,8 +169,6 @@ func rnn_forward(rnn_cell_state cell, []float input, int seq_len, []float h0) rn
         hidden_size: hs,
     }
 }
-
-
 struct lstm_cell_state {
     int input_size
     int hidden_size
@@ -209,8 +177,6 @@ struct lstm_cell_state {
     []float bias_ih
     []float bias_hh
 }
-
-
 func new_lstm_cell(int input_size, int hidden_size) lstm_cell_state {
     int g = 4 * hidden_size
     lstm_cell_state {
@@ -222,14 +188,10 @@ func new_lstm_cell(int input_size, int hidden_size) lstm_cell_state {
         bias_hh: zeros(g),
     }
 }
-
-
 struct lstm_cell_output {
     []float h_next
     []float c_next
 }
-
-
 func lstm_cell_forward(lstm_cell_state cell, []float x, []float h_prev, []float c_prev) lstm_cell_output {
     int hs = cell.hidden_size
     int g = 4 * hs
@@ -261,8 +223,6 @@ func lstm_cell_forward(lstm_cell_state cell, []float x, []float h_prev, []float 
         c_next: c_next,
     }
 }
-
-
 struct lstm_output {
     []float last_hidden
     []float last_cell
@@ -270,8 +230,6 @@ struct lstm_output {
     int seq_len
     int hidden_size
 }
-
-
 func lstm_forward(lstm_cell_state cell, []float input, int seq_len, []float h0, []float c0) lstm_output {
     int hs = cell.hidden_size
     int is_ = cell.input_size
@@ -304,8 +262,6 @@ func lstm_forward(lstm_cell_state cell, []float input, int seq_len, []float h0, 
         hidden_size: hs,
     }
 }
-
-
 struct gru_cell_state {
     int input_size
     int hidden_size
@@ -318,8 +274,6 @@ struct gru_cell_state {
     []float bias_ih_n
     []float bias_hh_n
 }
-
-
 func new_gru_cell(int input_size, int hidden_size) gru_cell_state {
     int rz = 2 * hidden_size
     gru_cell_state {
@@ -335,8 +289,6 @@ func new_gru_cell(int input_size, int hidden_size) gru_cell_state {
         bias_hh_n: zeros(hidden_size),
     }
 }
-
-
 func gru_cell_forward(gru_cell_state cell, []float x, []float h_prev) []float {
     int hs = cell.hidden_size
     int rz = 2 * hs
@@ -368,16 +320,12 @@ func gru_cell_forward(gru_cell_state cell, []float x, []float h_prev) []float {
     }
     h_next
 }
-
-
 struct gru_output {
     []float last_hidden
     []float all_hidden
     int seq_len
     int hidden_size
 }
-
-
 func gru_forward(gru_cell_state cell, []float input, int seq_len, []float h0) gru_output {
     int hs = cell.hidden_size
     int is_ = cell.input_size
@@ -406,4 +354,3 @@ func gru_forward(gru_cell_state cell, []float input, int seq_len, []float h0) gr
         hidden_size: hs,
     }
 }
-

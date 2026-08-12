@@ -200,15 +200,11 @@ func main() {
     println("[pretrain] checkpoint: " + final_model_path)
     write_progress(progress_file, "complete step=" + int_to_str(step) + " docs=" + int_to_str(docs_seen) + " tokens=" + int_to_str(tokens_seen) + " checkpoint=" + final_model_path)
 }
-
-
 func write_progress(string path, string text) {
     if str_len(path) > 0 {
         runtime_run_command_output("echo '" + text + "' >> " + shell_escape(path) + "; printf ok")
     }
 }
-
-
 func should_log_step(int step, int log_interval) bool {
     int interval = log_interval
     if interval < 1 {
@@ -216,8 +212,6 @@ func should_log_step(int step, int log_interval) bool {
     }
     step == 1 || step == interval || step - (step / interval) * interval == 0
 }
-
-
 func training_progress_line(int step, int max_steps, int docs_seen, int tokens_seen, float loss, float lr, string shard_name) string {
     "[train] step=" + int_to_str(step) + "/" + int_to_str(max_steps) +
         " loss=" + fmt_float(loss, 6) +
@@ -226,8 +220,6 @@ func training_progress_line(int step, int max_steps, int docs_seen, int tokens_s
         " tokens=" + int_to_str(tokens_seen) +
         " shard=" + shard_name
 }
-
-
 func shard_complete_line(int shard_no, int shard_count, string shard_name, int shard_docs, int shard_tokens, int shard_steps, int total_steps, int total_docs, int total_tokens, float loss) string {
     "[shard] done " + int_to_str(shard_no) + "/" + int_to_str(shard_count) +
         " shard=" + shard_name +
@@ -239,8 +231,6 @@ func shard_complete_line(int shard_no, int shard_count, string shard_name, int s
         " total_tokens=" + int_to_str(total_tokens) +
         " loss=" + fmt_float(loss, 6)
 }
-
-
 func shard_progress_bar(int done, int total, int width) string {
     int bar_total = total
     int bar_width = width
@@ -278,8 +268,6 @@ func shard_progress_bar(int done, int total, int width) string {
     out = out + "]"
     out
 }
-
-
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
@@ -295,8 +283,6 @@ func shell_escape(string s) string {
     out = out + "'"
     out
 }
-
-
 func count_non_empty_lines(string text) int {
     int count = 0
     int i = 0
@@ -318,8 +304,6 @@ func count_non_empty_lines(string text) int {
     }
     count
 }
-
-
 func has_non_space(string text) bool {
     int i = 0
     int n = str_len(text)
@@ -331,8 +315,6 @@ func has_non_space(string text) bool {
     }
     false
 }
-
-
 func shard_path_at(string shard_list, int index) string {
     int current = 0
     int start = 0
@@ -354,8 +336,6 @@ func shard_path_at(string shard_list, int index) string {
     }
     ""
 }
-
-
 func shard_path_for_index(string shard_list, string shard_list_file, string shard_dir, int index, int index_mode) string {
     if index_mode > 0 {
         return shard_dir + "/shard_" + zero_pad_int(index, 5) + ".jsonl"
@@ -365,8 +345,6 @@ func shard_path_for_index(string shard_list, string shard_list_file, string shar
     }
     trim(runtime_run_command_output("sed -n '" + int_to_str(index + 1) + "p' " + shell_escape(shard_list_file)))
 }
-
-
 func zero_pad_int(int value, int width) string {
     string digits = int_to_str(value)
     string out = ""
@@ -378,8 +356,6 @@ func zero_pad_int(int value, int width) string {
     }
     out + digits
 }
-
-
 func extract_filename(string path) string {
     int last_slash = -1
     int i = 0
@@ -394,8 +370,6 @@ func extract_filename(string path) string {
     }
     path
 }
-
-
 func hash_token(string word, int vocab_size) int {
     int h = 5381
     int i = 0
@@ -405,16 +379,12 @@ func hash_token(string word, int vocab_size) int {
     }
     mod_int(h, vocab_size)
 }
-
-
 func token_as_float(int token, int vocab_size) float {
     if vocab_size <= 0 {
         return 0.0
     }
     (token as float) / (vocab_size as float)
 }
-
-
 func extract_json_string_field_prefix(string json_line, string field, int scan_limit) string {
     int json_len = str_len(json_line)
     if scan_limit > 0 && scan_limit < json_len {
@@ -467,8 +437,6 @@ func extract_json_string_field_prefix(string json_line, string field, int scan_l
     }
     out
 }
-
-
 func find_string_prefix(string s, string pattern, int start, int limit) int {
     int i = start
     while i + str_len(pattern) <= limit {
@@ -488,8 +456,6 @@ func find_string_prefix(string s, string pattern, int start, int limit) int {
     }
     -1
 }
-
-
 func trim(string s) string {
     int i = 0
     while i < str_len(s) && is_space(s[i]) {
@@ -504,8 +470,6 @@ func trim(string s) string {
     }
     substring(s, i, j + 1)
 }
-
-
 func substring(string s, int start, int end) string {
     int s_start = start
     int s_end = end
@@ -526,13 +490,9 @@ func substring(string s, int start, int end) string {
     }
     out
 }
-
-
 func is_space(int c) bool {
     c == 32 || c == 9 || c == 10 || c == 13
 }
-
-
 func mod_int(int a, int b) int {
     if b <= 0 {
         return 0
@@ -546,13 +506,9 @@ func mod_int(int a, int b) int {
     }
     value
 }
-
-
 func byte_token(int c, int vocab_size) int {
     mod_int(c + 1, vocab_size)
 }
-
-
 func parse_int(string s, int fallback) int {
     string text = trim(s)
     if str_len(text) == 0 {
@@ -575,8 +531,6 @@ func parse_int(string s, int fallback) int {
     }
     sign * value
 }
-
-
 func parse_float(string s) float {
     string text = trim(s)
     if str_len(text) == 0 {
@@ -609,16 +563,12 @@ func parse_float(string s) float {
     }
     value
 }
-
-
 func next_lr(int step, float base_lr, int warmup_steps) float {
     if warmup_steps > 0 && step < warmup_steps {
         return base_lr * ((step + 1) as float) / (warmup_steps as float)
     }
     base_lr
 }
-
-
 func fmt_float(float value, int decimals) string {
     float val = value
     bool neg = val < 0.0
@@ -648,8 +598,6 @@ func fmt_float(float value, int decimals) string {
     }
     out
 }
-
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -675,8 +623,6 @@ func int_to_str(int n) string {
     }
     out
 }
-
-
 func progress_bar(int done, int total, int width) string {
     int w = width
     int t = total
@@ -713,15 +659,11 @@ func progress_bar(int done, int total, int width) string {
     out = out + "]"
     out
 }
-
-
 func shard_progress_line(int shard_no, int shard_count, string shard_path, int shard_docs, int shard_docs_target) string {
     string label = "Shard " + int_to_str(shard_no) + "/" + int_to_str(shard_count)
     string bar = shard_progress_bar(shard_docs, shard_docs_target, 36)
     label + " " + bar + " docs=" + int_to_str(shard_docs) + "/" + int_to_str(shard_docs_target) + " path=" + shard_path
 }
-
-
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -734,8 +676,6 @@ func sqrt_approx(float x) float {
     }
     guess
 }
-
-
 func str_len(string s) int {
     int n = 0
     while s[n] != 0 {
@@ -743,9 +683,6 @@ func str_len(string s) int {
     }
     n
 }
-
-
 func string_char(int c) string {
     string(c)
 }
-

@@ -1,14 +1,11 @@
 package neurx.trainer.industrial_1t_training
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_read_text_file, runtime_run_command_output, runtime_write_text_file}
-
 struct industrial_batch {
     tokens: []int
     labels: []int
     batch_size: int
     seq_len: int
 }
-
-
 struct industrial_dataset_state {
     manifest_path: string
     shard_paths: []string
@@ -18,8 +15,6 @@ struct industrial_dataset_state {
     batch_size: int
     seq_len: int
 }
-
-
 struct industrial_dist_state {
     rank: int
     world_size: int
@@ -28,8 +23,6 @@ struct industrial_dist_state {
     dp_size: int
     ep_size: int
 }
-
-
 struct industrial_mp_state {
     use_bf16: int
     loss_scale: float
@@ -38,8 +31,6 @@ struct industrial_mp_state {
     overflow_steps: int
     growth_interval: int
 }
-
-
 struct industrial_optimizer_state {
     step: int
     param_count: int
@@ -53,16 +44,12 @@ struct industrial_optimizer_state {
     scalar_momentum: float
     scalar_variance: float
 }
-
-
 struct industrial_checkpoint_state {
     base_dir: string
     latest_step: int
     best_loss: float
     latest_path: string
 }
-
-
 struct industrial_trainer {
     dataset: industrial_dataset_state
     dist: industrial_dist_state
@@ -77,20 +64,14 @@ struct industrial_trainer {
     global_step: int
     tokens_seen: int
 }
-
-
 struct industrial_batch_result {
     dataset: industrial_dataset_state
     batch: industrial_batch
 }
-
-
 struct industrial_adamw_result {
     params: []float
     opt: industrial_optimizer_state
 }
-
-
 struct industrial_mp_step_result {
     params: []float
     mp: industrial_mp_state
@@ -98,16 +79,12 @@ struct industrial_mp_step_result {
     loss: float
     overflow: int
 }
-
-
 struct industrial_scalar_adamw_result {
     param: float
     opt_step: int
     scalar_momentum: float
     scalar_variance: float
 }
-
-
 struct industrial_scalar_mp_step_result {
     param: float
     mp: industrial_mp_state
@@ -117,8 +94,6 @@ struct industrial_scalar_mp_step_result {
     scalar_momentum: float
     scalar_variance: float
 }
-
-
 struct industrial_train_step_result {
     params: []float
     mp: industrial_mp_state
@@ -127,8 +102,6 @@ struct industrial_train_step_result {
     global_step: int
     tokens_seen: int
 }
-
-
 struct industrial_checkpoint_load_result {
     ckpt: industrial_checkpoint_state
     params: []float
@@ -146,8 +119,6 @@ struct industrial_checkpoint_load_result {
     data_shard_index: int
     data_line_index: int
 }
-
-
 func industrial_chr(int code) string {
     if code == 48 { return "0" }
     if code == 49 { return "1" }
@@ -220,8 +191,6 @@ func industrial_chr(int code) string {
     if code == 122 { return "z" }
     "?"
 }
-
-
 func industrial_int_to_string(int n) string {
     if n == 0 {
         return "0"
@@ -243,13 +212,9 @@ func industrial_int_to_string(int n) string {
     }
     result
 }
-
-
 func industrial_float_from_int(int n) float {
     0.0 + n
 }
-
-
 func industrial_int_from_float(float x) int {
     float value = x
     if value < 0.0 {
@@ -265,8 +230,6 @@ func industrial_int_from_float(float x) int {
     }
     whole
 }
-
-
 func industrial_char_to_digit(string ch) int {
     if ch == "0" { return 0 }
     if ch == "1" { return 1 }
@@ -280,8 +243,6 @@ func industrial_char_to_digit(string ch) int {
     if ch == "9" { return 9 }
     -1
 }
-
-
 func industrial_float_to_string(float x) string {
     int whole = industrial_int_from_float(x)
     float frac = x - industrial_float_from_int(whole)
@@ -299,8 +260,6 @@ func industrial_float_to_string(float x) string {
     result = result + industrial_int_to_string(frac_int)
     result
 }
-
-
 func industrial_float_to_string_safe(float x) string {
     if x == 0.0 {
         return "0.0"
@@ -345,8 +304,6 @@ func industrial_float_to_string_safe(float x) string {
     result = result + industrial_int_to_string(exp)
     result
 }
-
-
 func industrial_trim(string text) string {
     int start = 0
     int end = len(text) - 1
@@ -375,8 +332,6 @@ func industrial_trim(string text) string {
     }
     result
 }
-
-
 func industrial_split_lines(string text) []string {
     int count = 1
     int i = 0
@@ -404,8 +359,6 @@ func industrial_split_lines(string text) []string {
     lines[line_idx] = industrial_trim(current)
     lines
 }
-
-
 func industrial_split_words(string text) []string {
     int count = 0
     bool in_word = false
@@ -448,8 +401,6 @@ func industrial_split_words(string text) []string {
     }
     words
 }
-
-
 func industrial_substring(string text, int start, int end) string {
     int begin = start
     int finish = end
@@ -470,8 +421,6 @@ func industrial_substring(string text, int start, int end) string {
     }
     result
 }
-
-
 func industrial_hash_token(string token, int vocab_size) int {
     if vocab_size <= 1 {
         return 0
@@ -487,8 +436,6 @@ func industrial_hash_token(string token, int vocab_size) int {
     }
     h % vocab_size
 }
-
-
 func industrial_parse_int(string text) int {
     string s = industrial_trim(text)
     if s == "" {
@@ -515,8 +462,6 @@ func industrial_parse_int(string text) int {
     }
     sign * value
 }
-
-
 func industrial_parse_float(string text) float {
     string s = industrial_trim(text)
     if s == "" {
@@ -596,16 +541,12 @@ func industrial_parse_float(string text) float {
     }
     sign * value
 }
-
-
 func industrial_min_int(int a, int b) int {
     if a < b {
         return a
     }
     b
 }
-
-
 func industrial_manifest_path_normalize(string path) string {
     string p = industrial_trim(path)
     if len(p) >= 2 && p[0] == 34 && p[len(p) - 1] == 34 {
@@ -619,16 +560,12 @@ func industrial_manifest_path_normalize(string path) string {
     }
     p
 }
-
-
 func industrial_abs_float(float x) float {
     if x < 0.0 {
         return -x
     }
     x
 }
-
-
 func industrial_sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -646,8 +583,6 @@ func industrial_sqrt_approx(float x) float {
     }
     current
 }
-
-
 func industrial_pow_int(float base, int exponent) float {
     if exponent <= 0 {
         return 1.0
@@ -660,8 +595,6 @@ func industrial_pow_int(float base, int exponent) float {
     }
     result
 }
-
-
 func industrial_string_has_prefix(string text, string prefix) bool {
     if len(text) < len(prefix) {
         return false
@@ -675,8 +608,6 @@ func industrial_string_has_prefix(string text, string prefix) bool {
     }
     true
 }
-
-
 func industrial_string_has_suffix(string text, string suffix) bool {
     if len(text) < len(suffix) {
         return false
@@ -691,8 +622,6 @@ func industrial_string_has_suffix(string text, string suffix) bool {
     }
     true
 }
-
-
 func industrial_find_substring(string text, string needle) int {
     if len(needle) == 0 {
         return 0
@@ -718,8 +647,6 @@ func industrial_find_substring(string text, string needle) int {
     }
     -1
 }
-
-
 func industrial_extract_json_string_field(string json_line, string field_name) string {
     string needle = "\"" + field_name + "\""
     int pos = industrial_find_substring(json_line, needle)
@@ -779,8 +706,6 @@ func industrial_extract_json_string_field(string json_line, string field_name) s
     }
     out
 }
-
-
 func industrial_path_basename(string path) string {
     int last = -1
     int i = 0
@@ -795,8 +720,6 @@ func industrial_path_basename(string path) string {
     }
     industrial_substring(path, last + 1, len(path))
 }
-
-
 func industrial_path_dirname(string path) string {
     int last = -1
     int i = 0
@@ -814,8 +737,6 @@ func industrial_path_dirname(string path) string {
     }
     industrial_substring(path, 0, last)
 }
-
-
 func industrial_path_join(string dir, string leaf) string {
     if len(dir) == 0 {
         return leaf
@@ -825,8 +746,6 @@ func industrial_path_join(string dir, string leaf) string {
     }
     dir + "/" + leaf
 }
-
-
 func industrial_manifest_entry_resolve(string manifest_path, string entry) string {
     string candidate = industrial_trim(entry)
     if len(candidate) == 0 {
@@ -843,8 +762,6 @@ func industrial_manifest_entry_resolve(string manifest_path, string entry) strin
     }
     local_candidate
 }
-
-
 func industrial_json_string_value(string text, string key) string {
     int key_pos = industrial_find_substring(text, key)
     if key_pos < 0 {
@@ -873,8 +790,6 @@ func industrial_json_string_value(string text, string key) string {
     }
     industrial_substring(text, start + 1, finish)
 }
-
-
 func industrial_manifest_paths_from_json(string manifest_path, string manifest) []string {
     []string paths = []string{cap: 0}
     string shard_list_path = industrial_json_string_value(manifest, "\"shard_list_path\"")
@@ -932,8 +847,6 @@ func industrial_manifest_paths_from_json(string manifest_path, string manifest) 
     }
     paths
 }
-
-
 func industrial_init_params(int param_count) []float {
     int count = param_count
     if count < 1 {
@@ -947,8 +860,6 @@ func industrial_init_params(int param_count) []float {
     }
     params
 }
-
-
 func industrial_manifest_paths(string manifest_path) []string {
     []string paths = []string{cap: 0}
     if !runtime_file_exists(manifest_path) {
@@ -1001,8 +912,6 @@ func industrial_manifest_paths(string manifest_path) []string {
     }
     paths
 }
-
-
 func industrial_dataset_new(
     string manifest_path,
     int batch_size,
@@ -1020,8 +929,6 @@ func industrial_dataset_new(
         seq_len: seq_len,
     }
 }
-
-
 func industrial_tokenize_text(string text, int vocab_size) []int {
     []string words = industrial_split_words(text)
     if len(words) == 0 {
@@ -1037,8 +944,6 @@ func industrial_tokenize_text(string text, int vocab_size) []int {
     }
     token_ids
 }
-
-
 func industrial_generate_synthetic_text(int shard_index, int seq_len) string {
     string text = ""
     int i = 0
@@ -1048,8 +953,6 @@ func industrial_generate_synthetic_text(int shard_index, int seq_len) string {
     }
     text
 }
-
-
 func industrial_batch_text_window(int batch_size, int seq_len) int {
     int window = batch_size * seq_len * 32
     if window < 256 {
@@ -1060,8 +963,6 @@ func industrial_batch_text_window(int batch_size, int seq_len) int {
     }
     window
 }
-
-
 func industrial_pack_batch(
     []int token_ids,
     int batch_size,
@@ -1091,8 +992,6 @@ func industrial_pack_batch(
         seq_len: seq_len,
     }
 }
-
-
 func industrial_next_batch(industrial_dataset_state ds) industrial_batch_result {
     string source_text = ""
     if len(ds.shard_paths) > 0 {
@@ -1139,8 +1038,6 @@ func industrial_next_batch(industrial_dataset_state ds) industrial_batch_result 
         batch: batch,
     }
 }
-
-
 func industrial_dist_from_env() industrial_dist_state {
     industrial_dist_state {
         rank: industrial_parse_int(runtime_env_get("RANK", "0")),
@@ -1151,8 +1048,6 @@ func industrial_dist_from_env() industrial_dist_state {
         ep_size: industrial_parse_int(runtime_env_get("EP_SIZE", "1")),
     }
 }
-
-
 func industrial_partition_batch(
     industrial_batch batch,
     industrial_dist_state dist
@@ -1187,8 +1082,6 @@ func industrial_partition_batch(
         seq_len: batch.seq_len,
     }
 }
-
-
 func industrial_average_vector([]float values, int value_count, int world_size) []float {
     []float out = []float{cap: value_count}
     float scale = 1.0
@@ -1202,8 +1095,6 @@ func industrial_average_vector([]float values, int value_count, int world_size) 
     }
     out
 }
-
-
 func industrial_print_dist_summary(industrial_dist_state dist) {
     println(
         "dist rank=" + industrial_int_to_string(dist.rank) +
@@ -1214,8 +1105,6 @@ func industrial_print_dist_summary(industrial_dist_state dist) {
         " ep=" + industrial_int_to_string(dist.ep_size)
     )
 }
-
-
 func industrial_mp_default() industrial_mp_state {
     industrial_mp_state {
         use_bf16: 1,
@@ -1226,8 +1115,6 @@ func industrial_mp_default() industrial_mp_state {
         growth_interval: 2000,
     }
 }
-
-
 func industrial_optimizer_new(int param_count, float learning_rate) industrial_optimizer_state {
     industrial_optimizer_state {
         step: 0,
@@ -1243,8 +1130,6 @@ func industrial_optimizer_new(int param_count, float learning_rate) industrial_o
         scalar_variance: 0.0,
     }
 }
-
-
 func industrial_lr_schedule(float base_lr, int step_idx, int total_steps, int warmup_steps) float {
     int effective_total = total_steps
     if effective_total < 1 {
@@ -1278,8 +1163,6 @@ func industrial_lr_schedule(float base_lr, int step_idx, int total_steps, int wa
     }
     base_lr * decay_ratio
 }
-
-
 func industrial_vector_norm([]float values, int value_count) float {
     float sum = 0.0
     int i = 0
@@ -1289,8 +1172,6 @@ func industrial_vector_norm([]float values, int value_count) float {
     }
     industrial_sqrt_approx(sum)
 }
-
-
 func industrial_clip_gradients([]float grads, int grad_count, float max_norm) []float {
     float norm = industrial_vector_norm(grads, grad_count)
     float scale = 1.0
@@ -1305,8 +1186,6 @@ func industrial_clip_gradients([]float grads, int grad_count, float max_norm) []
     }
     clipped
 }
-
-
 func industrial_model_forward(
     []float params,
     int param_count,
@@ -1329,8 +1208,6 @@ func industrial_model_forward(
         0.0
     }
 }
-
-
 func industrial_model_backward(
     []float params,
     int param_count,
@@ -1349,8 +1226,6 @@ func industrial_model_backward(
     }
     grads
 }
-
-
 func industrial_model_forward_scalar(float param, industrial_batch batch) float {
     float loss = 0.0
     int total = batch.batch_size * batch.seq_len
@@ -1368,8 +1243,6 @@ func industrial_model_forward_scalar(float param, industrial_batch batch) float 
         0.0
     }
 }
-
-
 func industrial_model_backward_scalar(float param, industrial_batch batch, float loss_scale) float {
     float grad = 0.0
     int total = batch.batch_size * batch.seq_len
@@ -1382,8 +1255,6 @@ func industrial_model_backward_scalar(float param, industrial_batch batch, float
     }
     grad
 }
-
-
 func industrial_adamw_step_scalar(
     industrial_optimizer_state opt,
     float param,
@@ -1401,8 +1272,6 @@ func industrial_adamw_step_scalar(
         scalar_variance: opt.scalar_variance,
     }
 }
-
-
 func industrial_mixed_precision_step_scalar(
     industrial_mp_state mp,
     industrial_optimizer_state opt,
@@ -1457,8 +1326,6 @@ func industrial_mixed_precision_step_scalar(
         scalar_variance: adamw_result.scalar_variance,
     }
 }
-
-
 func industrial_adamw_step(
     industrial_optimizer_state opt,
     []float params,
@@ -1480,8 +1347,6 @@ func industrial_adamw_step(
         opt: opt,
     }
 }
-
-
 func industrial_mixed_precision_step(
     industrial_mp_state mp,
     industrial_optimizer_state opt,
@@ -1536,8 +1401,6 @@ func industrial_mixed_precision_step(
         overflow: 0,
     }
 }
-
-
 func industrial_checkpoint_new(string base_dir) industrial_checkpoint_state {
     string manifest_path = base_dir + "/latest_checkpoint.txt"
     string manifest_text = ""
@@ -1552,18 +1415,12 @@ func industrial_checkpoint_new(string base_dir) industrial_checkpoint_state {
         latest_path: latest,
     }
 }
-
-
 func industrial_checkpoint_manifest_path(industrial_checkpoint_state ckpt) string {
     ckpt.base_dir + "/latest_checkpoint.txt"
 }
-
-
 func industrial_checkpoint_path(industrial_checkpoint_state ckpt, int step) string {
     ckpt.base_dir + "/industrial_1t_ckpt_step_" + industrial_int_to_string(step) + ".txt"
 }
-
-
 func industrial_checkpoint_line_index(string key, string prefix) int {
     if !industrial_string_has_prefix(key, prefix) {
         return -1
@@ -1574,8 +1431,6 @@ func industrial_checkpoint_line_index(string key, string prefix) int {
     }
     index
 }
-
-
 func industrial_checkpoint_write_text(
     industrial_checkpoint_state ckpt,
     industrial_dist_state dist,
@@ -1639,8 +1494,6 @@ func industrial_checkpoint_write_text(
     runtime_write_text_file(industrial_checkpoint_manifest_path(ckpt), path + "\n")
     path
 }
-
-
 func industrial_checkpoint_save(
     industrial_checkpoint_state ckpt,
     industrial_dist_state dist,
@@ -1669,8 +1522,6 @@ func industrial_checkpoint_save(
     }
     ckpt
 }
-
-
 func industrial_checkpoint_load(
     industrial_checkpoint_state ckpt,
     string checkpoint_path
@@ -1923,8 +1774,6 @@ func industrial_checkpoint_load(
         data_line_index: data_line_index,
     }
 }
-
-
 func industrial_trainer_new(
     string manifest_path,
     string checkpoint_dir,
@@ -1956,8 +1805,6 @@ func industrial_trainer_new(
     }
     trainer
 }
-
-
 func industrial_trainer_restore(industrial_trainer tr) industrial_trainer {
     if len(tr.ckpt.latest_path) == 0 {
         return tr
@@ -1993,8 +1840,6 @@ func industrial_trainer_restore(industrial_trainer tr) industrial_trainer {
     tr.mp.loss_scale = restored.loss_scale
     tr
 }
-
-
 func industrial_train_step(industrial_trainer tr) industrial_train_step_result {
     industrial_batch_result batch_result = industrial_next_batch(tr.dataset)
     industrial_batch batch = industrial_partition_batch(batch_result.batch, tr.dist)
@@ -2010,8 +1855,6 @@ func industrial_train_step(industrial_trainer tr) industrial_train_step_result {
         tokens_seen: tr.tokens_seen + batch.batch_size * batch.seq_len,
     }
 }
-
-
 func industrial_run_training(
     industrial_trainer tr,
     int total_steps
@@ -2073,8 +1916,6 @@ func industrial_run_training(
         )
     }
 }
-
-
 struct industrial_enterprise_pipeline_result {
     string checkpoint_path
     string eval_report_path
@@ -2085,8 +1926,6 @@ struct industrial_enterprise_pipeline_result {
     float eval_loss
     float eval_perplexity
 }
-
-
 func industrial_exp_approx(float x) float {
     if x > 20.0 {
         return 4.851651954e8
@@ -2104,8 +1943,6 @@ func industrial_exp_approx(float x) float {
     }
     result
 }
-
-
 func industrial_enterprise_evaluate(
     industrial_checkpoint_load_result restored,
     industrial_dataset_state dataset,
@@ -2142,8 +1979,6 @@ func industrial_enterprise_evaluate(
     report = report + "eval.perplexity=" + industrial_float_to_string_safe(ppl) + "\n"
     report
 }
-
-
 func industrial_quantize_params_text(
     []float params,
     int param_count,
@@ -2201,8 +2036,6 @@ func industrial_quantize_params_text(
     }
     out
 }
-
-
 func industrial_distill_params_text(
     []float teacher_params,
     int teacher_count,
@@ -2242,8 +2075,6 @@ func industrial_distill_params_text(
     }
     out
 }
-
-
 func industrial_export_bundle_text(
     string checkpoint_path,
     string eval_report_path,
@@ -2261,8 +2092,6 @@ func industrial_export_bundle_text(
     out = out + "export.param_count=" + industrial_int_to_string(param_count) + "\n"
     out
 }
-
-
 func industrial_deployment_bundle_text(
     string export_dir,
     string checkpoint_path,
@@ -2283,8 +2112,6 @@ func industrial_deployment_bundle_text(
     out = out + "deploy.notes=generated entirely in S\n"
     out
 }
-
-
 func industrial_run_enterprise_pipeline(
     string manifest_path,
     string checkpoint_dir,
@@ -2379,8 +2206,6 @@ func industrial_run_enterprise_pipeline(
         eval_perplexity: industrial_exp_approx(restored.loss),
     }
 }
-
-
 func main() {
     string manifest_path = runtime_env_get("NEURX_1T_MANIFEST", "./data/training_data_shards/manifest.txt")
     string checkpoint_dir = runtime_env_get("NEURX_1T_CHECKPOINT_DIR", "./checkpoints/industrial_1t")
@@ -2408,4 +2233,3 @@ func main() {
         )
     }
 }
-

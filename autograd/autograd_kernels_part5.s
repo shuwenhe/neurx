@@ -10,8 +10,6 @@ func backward_exp(node n, tensor grad_output) backward_result {
     tensor result { data: grad_data, grad: [], shape: input.shape, requires_grad: true }
     backward_result { input_grads: [result], success: true }
 }
-
-
 func backward_log(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -28,8 +26,6 @@ func backward_log(node n, tensor grad_output) backward_result {
     tensor result { data: grad_data, grad: [], shape: input.shape, requires_grad: true }
     backward_result { input_grads: [result], success: true }
 }
-
-
 func backward_concat(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 1 {
         return backward_result { input_grads: [], success: false }
@@ -52,8 +48,6 @@ func backward_concat(node n, tensor grad_output) backward_result {
     }
     backward_result { input_grads: grads, success: true }
 }
-
-
 func extract_slice([]float data, int start, int size, int dim, []int target_shape) []float {
     []float result = []float{cap: size}
     if dim == 0 || len(target_shape) <= 1 {
@@ -82,8 +76,6 @@ func extract_slice([]float data, int start, int size, int dim, []int target_shap
     }
     result
 }
-
-
 func backward_cross_entropy_loss(node n, tensor grad_output) backward_result {
     if len(n.inputs) < 2 {
         return backward_result { input_grads: [], success: false }
@@ -116,4 +108,3 @@ func backward_cross_entropy_loss(node n, tensor grad_output) backward_result {
     }
     backward_result { input_grads: [grad_logits_t, grad_targets_zeros], success: true }
 }
-

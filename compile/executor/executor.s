@@ -6,8 +6,6 @@ struct executor_plan_state {
     bool async_enabled
     int launch_count
 }
-
-
 func new_executor_plan_state(string backend) executor_plan_state {
     executor_plan_state {
         backend: backend,
@@ -16,8 +14,6 @@ func new_executor_plan_state(string backend) executor_plan_state {
         launch_count: 0,
     }
 }
-
-
 func execute_compile_state(compile_state state, executor_plan_state plan) compile_state {
     if !plan.can_execute {
         return state
@@ -30,8 +26,6 @@ func execute_compile_state(compile_state state, executor_plan_state plan) compil
     next = compile_set_executed(next, true)
     compile_add_pass(next, "execute")
 }
-
-
 func executor_mark_launch(executor_plan_state plan) executor_plan_state {
     executor_plan_state {
         backend: plan.backend,
@@ -40,14 +34,9 @@ func executor_mark_launch(executor_plan_state plan) executor_plan_state {
         launch_count: plan.launch_count + 1,
     }
 }
-
-
 func executor_plan_state_dict(executor_plan_state plan) executor_plan_state {
     plan
 }
-
-
 func executor_plan_load_state_dict(executor_plan_state plan, executor_plan_state other) executor_plan_state {
     other
 }
-

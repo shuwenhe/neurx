@@ -1,12 +1,9 @@
 package main
 use neurx.serving.runtime.production_runtime.{production_runtime_config, production_runtime_state, production_schedule_result, new_production_runtime_config, new_production_runtime_state, production_submit, production_schedule, production_complete_prefill, production_complete_decode, production_queue_size}
-
 func fail(string message) int {
     println("production-serving FAIL " + message)
     1
 }
-
-
 func main() {
     production_runtime_config config = new_production_runtime_config(8, 128, 128, 8, 1, 4)
     production_runtime_state state = new_production_runtime_state(config)
@@ -35,4 +32,3 @@ func main() {
     println("production-serving PASS admitted=" + string(state.admitted_requests) + " completed=" + string(state.completed_requests) + " prefill_tokens=" + string(state.prefill_tokens) + " decode_tokens=" + string(state.decode_tokens))
     0
 }
-

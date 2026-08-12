@@ -7,8 +7,6 @@ struct request_item {
     int priority
     int retry_count
 }
-
-
 struct queue_stats {
     int total_requests
     int pending_requests
@@ -16,15 +14,11 @@ struct queue_stats {
     int failed_requests
     float avg_wait_time_ms
 }
-
-
 struct request_queue {
     []request_item items
     int max_queue_size
     int timeout_ms
 }
-
-
 func create_request_queue(int max_size, int timeout_ms) request_queue {
     return request_queue{
         items: []request_item{},
@@ -32,8 +26,6 @@ func create_request_queue(int max_size, int timeout_ms) request_queue {
         timeout_ms: timeout_ms,
     }
 }
-
-
 func enqueue_request(request_queue queue, request_item item) bool {
     if len(queue.items) >= queue.max_queue_size {
         print("error: request queue full\n")
@@ -42,8 +34,6 @@ func enqueue_request(request_queue queue, request_item item) bool {
     queue.items = append(queue.items, item)
     return true
 }
-
-
 func dequeue_request(request_queue queue) request_item {
     if len(queue.items) == 0 {
         return request_item{
@@ -63,8 +53,6 @@ func dequeue_request(request_queue queue) request_item {
     queue.items = new_items
     return item
 }
-
-
 func peek_request(request_queue queue) request_item {
     if len(queue.items) == 0 {
         return request_item{
@@ -78,28 +66,18 @@ func peek_request(request_queue queue) request_item {
     }
     return queue.items[0]
 }
-
-
 func queue_size(request_queue queue) int {
     return len(queue.items)
 }
-
-
 func is_queue_empty(request_queue queue) bool {
     return len(queue.items) == 0
 }
-
-
 func is_queue_full(request_queue queue) bool {
     return len(queue.items) >= queue.max_queue_size
 }
-
-
 func clear_queue(request_queue queue) {
     queue.items = []request_item{}
 }
-
-
 func get_queue_stats(request_queue queue) queue_stats {
     return queue_stats{
         total_requests: len(queue.items),
@@ -109,8 +87,6 @@ func get_queue_stats(request_queue queue) queue_stats {
         avg_wait_time_ms: 0.0,
     }
 }
-
-
 func prioritize_queue(request_queue queue) {
     for i := 0; i < len(queue.items)-1; i++ {
         for j := 0; j < len(queue.items)-i-1; j++ {
@@ -122,8 +98,6 @@ func prioritize_queue(request_queue queue) {
         }
     }
 }
-
-
 func remove_expired_requests(request_queue queue, float current_time_ms) {
     new_items := []request_item{}
     for i := 0; i < len(queue.items); i++ {
@@ -137,8 +111,6 @@ func remove_expired_requests(request_queue queue, float current_time_ms) {
     }
     queue.items = new_items
 }
-
-
 func retry_failed_request(request_queue queue, string request_id) bool {
     for i := 0; i < len(queue.items); i++ {
         if queue.items[i].request_id == request_id {
@@ -154,8 +126,6 @@ func retry_failed_request(request_queue queue, string request_id) bool {
     }
     return false
 }
-
-
 func find_request_by_id(request_queue queue, string request_id) request_item {
     for i := 0; i < len(queue.items); i++ {
         if queue.items[i].request_id == request_id {
@@ -171,8 +141,6 @@ func find_request_by_id(request_queue queue, string request_id) request_item {
         retry_count: 0,
     }
 }
-
-
 func batch_requests(request_queue queue, int batch_size) [][]request_item {
     batches := [][]request_item{}
     for i := 0; i < len(queue.items); i = i + batch_size {
@@ -188,8 +156,6 @@ func batch_requests(request_queue queue, int batch_size) [][]request_item {
     }
     return batches
 }
-
-
 func print_queue_info(request_queue queue) {
     print("📊 Request Queue Status:\n")
     print("   Total items: " + int_to_string(len(queue.items)) + "\n")
@@ -200,8 +166,6 @@ func print_queue_info(request_queue queue) {
     }
     print("\n")
 }
-
-
 func int_to_string(int val) string {
     if val == 0 { return "0" }
     string res = ""
@@ -214,10 +178,7 @@ func int_to_string(int val) string {
     }
     return res
 }
-
-
 func string_at_index(string s, int idx) string {
     if idx < 0 || idx >= len(s) { return "" }
     return string(s[idx : idx+1])
 }
-

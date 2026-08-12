@@ -11,8 +11,6 @@ struct agent_reflection_state {
     string last_action
     string last_observation
 }
-
-
 func new_agent_reflection_state() agent_reflection_state {
     agent_reflection_state {
         critique: "",
@@ -24,8 +22,6 @@ func new_agent_reflection_state() agent_reflection_state {
         last_observation: "",
     }
 }
-
-
 func agent_reflection_is_aligned(string goal, string action, string observation) bool {
     string a = lower(trim(action))
     if agent_observation_requires_replan(observation) || agent_observation_is_no_progress(observation) || trim(observation) == "" {
@@ -36,16 +32,12 @@ func agent_reflection_is_aligned(string goal, string action, string observation)
     }
     true
 }
-
-
 func agent_reflection_critique(string goal, string action, string observation, int step) string {
     if !agent_reflection_is_aligned(goal, action, observation) {
         return "step=" + string(step) + " action=" + action + " did_not_advance goal=" + goal + " observation=" + observation
     }
     "ok"
 }
-
-
 func agent_reflect(agent_reflection_state state, string goal, string action, string observation, int step) agent_reflection_state {
     string critique = agent_reflection_critique(goal, action, observation, step)
     bool needs_correction = critique != "ok"
@@ -71,19 +63,12 @@ func agent_reflect(agent_reflection_state state, string goal, string action, str
         last_observation: observation,
     }
 }
-
-
 func agent_reflection_state_dict(agent_reflection_state state) agent_reflection_state {
     state
 }
-
-
 func agent_reflection_load_state_dict(agent_reflection_state state, agent_reflection_state other) agent_reflection_state {
     other
 }
-
-
 func agent_reflection_summary(agent_reflection_state state) string {
     "reflections=" + string(state.reflection_count) + " needs_correction=" + string(state.needs_correction) + " suggestion=" + state.suggestion
 }
-

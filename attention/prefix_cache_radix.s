@@ -9,8 +9,6 @@ struct prefix_node {
     long access_time
     int access_count
 }
-
-
 struct radix_prefix_cache {
     []prefix_node nodes
     int next_node_id
@@ -19,8 +17,6 @@ struct radix_prefix_cache {
     int cache_hits
     int cache_misses
 }
-
-
 struct prefix_lookup_result {
     bool found
     int node_id
@@ -28,8 +24,6 @@ struct prefix_lookup_result {
     int matched_tokens
     float memory_saved_mb
 }
-
-
 func new_radix_prefix_cache(int max_nodes, int max_prefix_len) radix_prefix_cache {
     int normalized_max = max_nodes
     if normalized_max <= 0 {
@@ -48,8 +42,6 @@ func new_radix_prefix_cache(int max_nodes, int max_prefix_len) radix_prefix_cach
         cache_misses: 0,
     }
 }
-
-
 func insert_prefix(
     cache radix_prefix_cache,
     string prefix_hash,
@@ -82,8 +74,6 @@ func insert_prefix(
         cache_misses: cache.cache_misses,
     }
 }
-
-
 func lookup_prefix(
     cache radix_prefix_cache,
     string prefix_hash,
@@ -125,8 +115,6 @@ func lookup_prefix(
         memory_saved_mb: 0.0,
     }
 }
-
-
 func compute_prefix_hash([]int token_ids) string {
     if len(token_ids) == 0 {
         return ""
@@ -142,8 +130,6 @@ func compute_prefix_hash([]int token_ids) string {
     }
     return result
 }
-
-
 func find_longest_prefix(
     cache radix_prefix_cache,
     []int token_ids,
@@ -176,8 +162,6 @@ func find_longest_prefix(
         memory_saved_mb: 0.0,
     }
 }
-
-
 func evict_lru_node(cache radix_prefix_cache) radix_prefix_cache {
     if len(cache.nodes) == 0 {
         return cache
@@ -209,8 +193,6 @@ func evict_lru_node(cache radix_prefix_cache) radix_prefix_cache {
         cache_misses: cache.cache_misses,
     }
 }
-
-
 func lookup_batch_prefixes(
     cache radix_prefix_cache,
     [][]int batch_token_ids,
@@ -236,8 +218,6 @@ func lookup_batch_prefixes(
     }
     return results
 }
-
-
 func insert_batch_prefixes(
     cache radix_prefix_cache,
     []string prefix_hashes,
@@ -261,8 +241,6 @@ func insert_batch_prefixes(
     }
     return cache
 }
-
-
 struct cache_stats {
     int total_nodes
     int total_cached_tokens
@@ -272,8 +250,6 @@ struct cache_stats {
     float avg_prefix_len
     int total_memory_mb
 }
-
-
 func get_prefix_cache_stats(cache radix_prefix_cache) cache_stats {
     if len(cache.nodes) == 0 {
         return cache_stats{
@@ -315,8 +291,6 @@ func get_prefix_cache_stats(cache radix_prefix_cache) cache_stats {
         total_memory_mb: memory_mb,
     }
 }
-
-
 func print_prefix_cache_stats(cache radix_prefix_cache) string {
     stats = get_prefix_cache_stats(cache)
     result = ""
@@ -330,36 +304,24 @@ func print_prefix_cache_stats(cache radix_prefix_cache) string {
     result = result + "Total Memory: " + str(stats.total_memory_mb) + " MB\n"
     return result
 }
-
-
 func get_timestamp() long {
     return 0
 }
-
-
 func f(int n) float {
     if n <= 0 {
         return 0.0
     }
     return float(n)
 }
-
-
 func str(int n) string {
     return "0"
 }
-
-
 func str_float_1(float x) string {
     return "0.0"
 }
-
-
 func str_float_2(float x) string {
     return "0.0"
 }
-
-
 struct prefix_cached_attention_runtime {
     paged_kv_cache paged_cache
     radix_prefix_cache prefix_cache
@@ -367,8 +329,6 @@ struct prefix_cached_attention_runtime {
     int decode_steps
     bool use_prefix_cache
 }
-
-
 func new_prefix_cached_runtime(
     int num_kv_heads,
     int head_size,
@@ -394,8 +354,6 @@ func new_prefix_cached_runtime(
         use_prefix_cache: true,
     }
 }
-
-
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 1.0
@@ -408,4 +366,3 @@ func sqrt_approx(float x) float {
     }
     return guess
 }
-

@@ -4,8 +4,6 @@ struct device_array {
     int size
     bool on_device
 }
-
-
 func copy_float_values([]float values) []float {
     []float out = []float{cap: len(values)}
     int i = 0
@@ -15,8 +13,6 @@ func copy_float_values([]float values) []float {
     }
     out
 }
-
-
 func to_device([]float host) device_array {
     device_array {
         data: copy_float_values(host),
@@ -24,13 +20,9 @@ func to_device([]float host) device_array {
         on_device: true,
     }
 }
-
-
 func to_host(device_array arr) []float {
     copy_float_values(arr.data)
 }
-
-
 func add_device(device_array left, device_array right) device_array {
     int n = left.size
     if right.size < n {
@@ -48,8 +40,6 @@ func add_device(device_array left, device_array right) device_array {
         on_device: left.on_device || right.on_device,
     }
 }
-
-
 func mul_device(device_array left, device_array right) device_array {
     int n = left.size
     if right.size < n {
@@ -67,8 +57,6 @@ func mul_device(device_array left, device_array right) device_array {
         on_device: left.on_device || right.on_device,
     }
 }
-
-
 func add_bias_device(device_array values, device_array bias, int rows, int cols) device_array {
     int n = rows * cols
     if values.size < n {
@@ -646,4 +634,3 @@ py_modinit_func py_init_tensor_cuda(void) {
     import_array();
     return py_module_create(&tensor_cuda_module);
 }
-

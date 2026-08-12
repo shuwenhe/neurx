@@ -9,8 +9,6 @@ struct cyclic_lr_state {
     int current_step
     float current_lr
 }
-
-
 func new_cyclic_lr(
     float base_lr,
     float max_lr,
@@ -30,8 +28,6 @@ func new_cyclic_lr(
         current_lr: base_lr,
     }
 }
-
-
 func cyclic_lr_compute(cyclic_lr_state sched, int step) float {
     int total_size = sched.step_size_up + sched.step_size_down
     int cycle = step / total_size
@@ -53,15 +49,11 @@ func cyclic_lr_compute(cyclic_lr_state sched, int step) float {
     }
     return sched.base_lr + base_height * scale
 }
-
-
 func cyclic_lr_step(cyclic_lr_state sched, int step) cyclic_lr_state {
     sched.current_step = step
     sched.current_lr = cyclic_lr_compute(sched, step)
     return sched
 }
-
-
 struct cosine_warm_restarts_state {
     float base_lr
     float min_lr
@@ -70,8 +62,6 @@ struct cosine_warm_restarts_state {
     int current_step
     float current_lr
 }
-
-
 func new_cosine_warm_restarts(float base_lr, float min_lr, int t_0, int t_mult) cosine_warm_restarts_state {
     cosine_warm_restarts_state {
         base_lr: base_lr,
@@ -82,8 +72,6 @@ func new_cosine_warm_restarts(float base_lr, float min_lr, int t_0, int t_mult) 
         current_lr: base_lr,
     }
 }
-
-
 func cosine_warm_restarts_compute(cosine_warm_restarts_state sched, int step) float {
     int t_cur = step
     int t_i = sched.t_0
@@ -105,28 +93,20 @@ func cosine_warm_restarts_compute(cosine_warm_restarts_state sched, int step) fl
     float coeff = 0.5 * (1.0 + cyclic_cos(cos_arg))
     return sched.min_lr + (sched.base_lr - sched.min_lr) * coeff
 }
-
-
 func cosine_warm_restarts_step(cosine_warm_restarts_state sched, int step) cosine_warm_restarts_state {
     sched.current_step = step
     sched.current_lr = cosine_warm_restarts_compute(sched, step)
     return sched
 }
-
-
 func cyclic_max(float a, float b) float {
     if a > b {
         return a
     }
     return b
 }
-
-
 func cyclic_pi() float {
     return 3.14159265358979323846
 }
-
-
 func cyclic_pow_int(float base, int exponent) float {
     float result = 1.0
     int i = 0
@@ -136,8 +116,6 @@ func cyclic_pow_int(float base, int exponent) float {
     }
     result
 }
-
-
 func cyclic_cos(float x) float {
     float two_pi = 2.0 * cyclic_pi()
     float t = x
@@ -158,4 +136,3 @@ func cyclic_cos(float x) float {
     }
     result
 }
-

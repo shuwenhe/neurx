@@ -3,16 +3,12 @@ struct draft_token {
     logits: []float
     confidence: float
 }
-
-
 struct verification_result {
     accepted: bool
     num_accepted_tokens: int
     fallback_token_id: int
     verification_logits: []float
 }
-
-
 struct speculative_batch {
     batch_id: int
     sequence_ids: []int
@@ -22,8 +18,6 @@ struct speculative_batch {
     draft_time_ms: float
     verify_time_ms: float
 }
-
-
 struct speculative_decode_config {
     num_draft_tokens: int
     draft_model_scale: float
@@ -33,8 +27,6 @@ struct speculative_decode_config {
     use_temperature_scaling: bool
     max_speculative_length: int
 }
-
-
 struct speculative_statistics {
     total_tokens_generated: int64
     total_draft_tokens: int64
@@ -45,8 +37,6 @@ struct speculative_statistics {
     cumulative_time_saved_ms: float64
     verification_accuracy: float
 }
-
-
 func new_speculative_config(num_draft: int, draft_scale: float, temp: float) speculative_decode_config {
     config := speculative_decode_config{
         num_draft_tokens: num_draft,
@@ -59,8 +49,6 @@ func new_speculative_config(num_draft: int, draft_scale: float, temp: float) spe
     }
     config
 }
-
-
 func new_draft_token(token_id: int, logits: []float, conf: float) draft_token {
     dt := draft_token{
         token_id: token_id,
@@ -69,8 +57,6 @@ func new_draft_token(token_id: int, logits: []float, conf: float) draft_token {
     }
     dt
 }
-
-
 func new_verification_result(accepted: bool, num_accepted: int, fallback_id: int) verification_result {
     vr := verification_result{
         accepted: accepted,
@@ -80,8 +66,6 @@ func new_verification_result(accepted: bool, num_accepted: int, fallback_id: int
     }
     vr
 }
-
-
 func new_speculative_batch(batch_id: int, seq_ids: []int) speculative_batch {
     sb := speculative_batch{
         batch_id: batch_id,
@@ -94,8 +78,6 @@ func new_speculative_batch(batch_id: int, seq_ids: []int) speculative_batch {
     }
     sb
 }
-
-
 func compute_logits_probability(logits: []float, temperature: float) []float {
     probs := []float{}
     max_logit := -1000000.0
@@ -106,7 +88,6 @@ func compute_logits_probability(logits: []float, temperature: float) []float {
         }
         i = i + 1
     }
-
     sum_exp := 0.0
     i = 0
     while i < logits.len {
@@ -116,23 +97,17 @@ func compute_logits_probability(logits: []float, temperature: float) []float {
         sum_exp = sum_exp + exp_val
         i = i + 1
     }
-
     i = 0
     while i < probs.len {
         probs[i] = probs[i] / sum_exp
         i = i + 1
     }
-
     probs
 }
-
-
 func sample_top_k(logits: []float, k: int, temperature: float) int {
     probs := compute_logits_probability(logits, temperature)
-
     top_k_indices := []int{}
     top_k_probs := []float{}
-
     i := 0
     while i < logits.len {
         if i < k || i == 0 {
@@ -156,7 +131,6 @@ func sample_top_k(logits: []float, k: int, temperature: float) int {
         }
         i = i + 1
     }
-
     selected_idx := 0
     rand_val := 0.5
     cumsum := 0.0
@@ -169,24 +143,19 @@ func sample_top_k(logits: []float, k: int, temperature: float) int {
         }
         i = i + 1
     }
-
     if selected_idx < top_k_indices.len {
         top_k_indices[selected_idx]
     } else {
         top_k_indices[0]
     }
 }
-
-
 func verify_token_match(draft_logits: []float, verify_logits: []float, temperature: float) bool {
     draft_probs := compute_logits_probability(draft_logits, temperature)
     verify_probs := compute_logits_probability(verify_logits, temperature)
-
     draft_top := 0
     verify_top := 0
     max_draft := draft_probs[0]
     max_verify := verify_probs[0]
-
     i := 1
     while i < draft_probs.len {
         if draft_probs[i] > max_draft {
@@ -199,14 +168,10 @@ func verify_token_match(draft_logits: []float, verify_logits: []float, temperatu
         }
         i = i + 1
     }
-
     draft_top == verify_top
 }
-
-
 func compute_confidence_score(logits: []float) float {
     probs := compute_logits_probability(logits, 1.0)
-
     max_prob := probs[0]
     i := 1
     while i < probs.len {
@@ -215,11 +180,8 @@ func compute_confidence_score(logits: []float) float {
         }
         i = i + 1
     }
-
     max_prob
 }
-
-
 func filter_predictions_by_confidence(predictions: []draft_token, threshold: float) []draft_token {
     filtered := []draft_token{}
     i := 0
@@ -231,8 +193,6 @@ func filter_predictions_by_confidence(predictions: []draft_token, threshold: flo
     }
     filtered
 }
-
-
 func new_speculative_statistics() speculative_statistics {
     stats := speculative_statistics{
         total_tokens_generated: 0,
@@ -246,8 +206,6 @@ func new_speculative_statistics() speculative_statistics {
     }
     stats
 }
-
-
 func update_statistics(stats: speculative_statistics, batch: speculative_batch) speculative_statistics {
     updated := stats
     i := 0
@@ -262,8 +220,6 @@ func update_statistics(stats: speculative_statistics, batch: speculative_batch) 
     }
     updated
 }
-
-
 func get_acceptance_rate(stats: speculative_statistics) float {
     if stats.total_verified_tokens > 0 {
         (stats.total_accepted_tokens as float) / (stats.total_verified_tokens as float)
@@ -271,8 +227,6 @@ func get_acceptance_rate(stats: speculative_statistics) float {
         0.0
     }
 }
-
-
 func get_speedup_factor(stats: speculative_statistics) float {
     if stats.total_draft_tokens > 0 {
         (stats.total_accepted_tokens + stats.total_verified_tokens) as float / (stats.total_verified_tokens as float)
@@ -280,4 +234,3 @@ func get_speedup_factor(stats: speculative_statistics) float {
         1.0
     }
 }
-

@@ -14,8 +14,6 @@ struct compile_pipeline_state {
     compile_cache_state cache
     string cache_key
 }
-
-
 func new_compile_pipeline_state(string module_name, string backend, string mode, bool dynamic, bool fullgraph, bool debug) compile_pipeline_state {
     compile_state base = new_compile_state(module_name, backend, mode)
     base = compile_set_dynamic(base, dynamic)
@@ -31,8 +29,6 @@ func new_compile_pipeline_state(string module_name, string backend, string mode,
         cache_key: make_cache_key(module_name, backend, mode, dynamic, fullgraph, debug),
     }
 }
-
-
 func pipeline_capture_module(compile_pipeline_state pipeline) compile_pipeline_state {
     ir_graph_state graph = ir_add_input(pipeline.graph, "input")
     graph = ir_add_node(graph, make_ir_node_state(pipeline.state.name + "_entry", "module_entry", ["input"], ["hidden"]))
@@ -54,8 +50,6 @@ func pipeline_capture_module(compile_pipeline_state pipeline) compile_pipeline_s
         cache_key: pipeline.cache_key,
     }
 }
-
-
 func pipeline_optimize(compile_pipeline_state pipeline) compile_pipeline_state {
     compile_state next = apply_pass_plan(pipeline.state, pipeline.pass_plan)
     compile_pipeline_state {
@@ -68,8 +62,6 @@ func pipeline_optimize(compile_pipeline_state pipeline) compile_pipeline_state {
         cache_key: pipeline.cache_key,
     }
 }
-
-
 func pipeline_lower(compile_pipeline_state pipeline) compile_pipeline_state {
     compile_state next = lower_compile_state(pipeline.state, pipeline.lowering_plan)
     lowering_plan_state plan = mark_lowered(pipeline.lowering_plan, true, next.compiled)
@@ -83,8 +75,6 @@ func pipeline_lower(compile_pipeline_state pipeline) compile_pipeline_state {
         cache_key: pipeline.cache_key,
     }
 }
-
-
 func pipeline_compile_cache(compile_pipeline_state pipeline) compile_pipeline_state {
     compile_cache_state cache_state = pipeline.cache
     if cache_has_key(cache_state, pipeline.cache_key) {
@@ -103,8 +93,6 @@ func pipeline_compile_cache(compile_pipeline_state pipeline) compile_pipeline_st
         cache_key: pipeline.cache_key,
     }
 }
-
-
 func pipeline_execute(compile_pipeline_state pipeline) compile_pipeline_state {
     compile_state next = execute_compile_state(pipeline.state, pipeline.executor_plan)
     executor_plan_state plan = executor_mark_launch(pipeline.executor_plan)
@@ -118,8 +106,6 @@ func pipeline_execute(compile_pipeline_state pipeline) compile_pipeline_state {
         cache_key: pipeline.cache_key,
     }
 }
-
-
 func run_compile_pipeline(string module_name, string backend, string mode, bool dynamic, bool fullgraph, bool debug) compile_pipeline_state {
     compile_pipeline_state pipeline = new_compile_pipeline_state(module_name, backend, mode, dynamic, fullgraph, debug)
     pipeline = pipeline_capture_module(pipeline)
@@ -127,20 +113,13 @@ func run_compile_pipeline(string module_name, string backend, string mode, bool 
     pipeline = pipeline_lower(pipeline)
     pipeline_compile_cache(pipeline)
 }
-
-
 func run_compile_execute_pipeline(string module_name, string backend, string mode, bool dynamic, bool fullgraph, bool debug) compile_pipeline_state {
     compile_pipeline_state pipeline = run_compile_pipeline(module_name, backend, mode, dynamic, fullgraph, debug)
     pipeline_execute(pipeline)
 }
-
-
 func compile_pipeline_state_dict(compile_pipeline_state pipeline) compile_pipeline_state {
     pipeline
 }
-
-
 func compile_pipeline_load_state_dict(compile_pipeline_state pipeline, compile_pipeline_state other) compile_pipeline_state {
     other
 }
-

@@ -5,8 +5,6 @@ struct softmax_config {
     bool is_log_softmax
     int block_size
 }
-
-
 func launch_softmax(
     cuda_context ctx,
     uint64 ptr_input,
@@ -21,4 +19,3 @@ func launch_softmax(
                       cfg.rows * cfg.cols * 4 * 2)
     nil
 }
-

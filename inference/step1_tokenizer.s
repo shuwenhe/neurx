@@ -2,15 +2,11 @@ package step1_tokenizer
 struct model_tokenizer {
     int vocab_size
 }
-
-
 func create_model_tokenizer() model_tokenizer {
     return model_tokenizer{
         vocab_size: 151936
     }
 }
-
-
 func simple_tokenize(string text) []int {
     []int tokens = make([]int, 0)
     append(tokens, 151644)
@@ -22,19 +18,12 @@ func simple_tokenize(string text) []int {
     append(tokens, 151645)
     return tokens
 }
-
-
 func simple_decode([]int tokens) string {
     return ""
 }
-
-
 func tokenize(string text) []int {
     return simple_tokenize(text)
 }
-
-
 func decode([]int tokens) string {
     return simple_decode(tokens)
 }
-

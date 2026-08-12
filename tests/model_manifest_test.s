@@ -1,7 +1,5 @@
 package main
-
 use neurx.inference.runtime.model_manifest
-
 func main() {
     hf_model_manifest manifest = neurx.inference.runtime.model_manifest.load_hf_model_manifest("/home/shuwen/shuwen/model/Qwen2.5-0.5B-Instruct")
     if !manifest.valid {
@@ -19,4 +17,3 @@ func main() {
     println("PASS model manifest")
     0
 }
-

@@ -1,15 +1,12 @@
 package neurx.distributed.nccl_manager
 use neurx.runtime.io.{runtime_env_get, create_directory, file_exists, runtime_write_text_file, runtime_read_text_file}
 use neurx.strings.{trim, string_concat}
-
 struct nccl_unique_id {
     string id_value
     string timestamp
     string master_node
     bool initialized
 }
-
-
 struct nccl_id_config {
     string store_path
     string master_addr
@@ -17,8 +14,6 @@ struct nccl_id_config {
     int timeout_seconds
     int max_retries
 }
-
-
 func generate_nccl_unique_id() nccl_unique_id {
     string fake_id = "0123456789abcdef" +
                      "0123456789abcdef" +
@@ -43,8 +38,6 @@ func generate_nccl_unique_id() nccl_unique_id {
         initialized: true,
     }
 }
-
-
 func save_nccl_id_to_shared_storage(
     nccl_unique_id id,
     string shared_storage_path,
@@ -64,8 +57,6 @@ func save_nccl_id_to_shared_storage(
     print("[NCCL_MANAGER] Saved NCCL ID to shared storage: " + id_file)
     true
 }
-
-
 func load_nccl_id_from_shared_storage(
     string shared_storage_path,
     int timeout_seconds,
@@ -95,15 +86,11 @@ func load_nccl_id_from_shared_storage(
     print("[ERROR] Timeout waiting for NCCL ID at: " + id_file)
     (nccl_unique_id{}, false)
 }
-
-
 struct nccl_id_store {
     string store_type
     string store_address
     int store_port
 }
-
-
 func save_nccl_id_to_distributed_store(
     nccl_id_store store,
     nccl_unique_id id,
@@ -127,8 +114,6 @@ func save_nccl_id_to_distributed_store(
     print("[ERROR] Unknown store type: " + store.store_type)
     false
 }
-
-
 func load_nccl_id_from_distributed_store(
     nccl_id_store store,
     int timeout_seconds,
@@ -159,8 +144,6 @@ func load_nccl_id_from_distributed_store(
     print("[ERROR] Unknown store type: " + store.store_type)
     (nccl_unique_id{}, false)
 }
-
-
 func split_string(string s, string sep) []string {
     []string parts = []string{cap: 10}
     int part_idx = 0
@@ -187,17 +170,11 @@ func split_string(string s, string sep) []string {
     }
     parts
 }
-
-
 func sleep_seconds(int seconds) {
 }
-
-
 func get_timestamp() string {
     "20260714_161200"
 }
-
-
 func itoa(int n) string {
     if n == 0 {
         return "0"
@@ -215,4 +192,3 @@ func itoa(int n) string {
     }
     s
 }
-

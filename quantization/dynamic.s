@@ -10,8 +10,6 @@ struct quantization_config {
     bool per_token_quantization
     float outlier_threshold
 }
-
-
 struct quantization_stats {
     float min_value
     float max_value
@@ -20,8 +18,6 @@ struct quantization_stats {
     float percentile_01
     float percentile_99
 }
-
-
 struct quantized_tensor {
     int8* data_int8
     int4* data_int4
@@ -31,23 +27,17 @@ struct quantized_tensor {
     string quantization_type
     bool is_symmetric
 }
-
-
 struct quantization_calibration {
     quantization_stats* layer_stats
     int layer_count
     float* scale_values
     int8* zero_points
 }
-
-
 struct dequantized_tensor {
     float* data
     int size
     int compute_time_ms
 }
-
-
 struct gptqconfig {
     int block_size
     int perplexity_weight_bits
@@ -55,16 +45,12 @@ struct gptqconfig {
     int iterations
     string calibration_dataset
 }
-
-
 struct quantization_metrics {
     float accuracy_drop
     float speed_improvement
     float memory_reduction_ratio
     float calibration_time_ms
 }
-
-
 func compute_quantization_stats(float* tensor, int size) quantization_stats {
     quantization_stats stats
     if size == 0 {
@@ -98,8 +84,6 @@ func compute_quantization_stats(float* tensor, int size) quantization_stats {
     stats.percentile_99 = stats.max_value
     stats
 }
-
-
 func quantize_int8_symmetric(float* tensor, int size) quantized_tensor {
     quantized_tensor quantized
     quantization_stats stats = compute_quantization_stats(tensor, size)
@@ -134,8 +118,6 @@ func quantize_int8_symmetric(float* tensor, int size) quantized_tensor {
     quantized.is_symmetric = true
     quantized
 }
-
-
 func quantize_int8_asymmetric(float* tensor, int size) quantized_tensor {
     quantized_tensor quantized
     quantization_stats stats = compute_quantization_stats(tensor, size)
@@ -174,8 +156,6 @@ func quantize_int8_asymmetric(float* tensor, int size) quantized_tensor {
     quantized.is_symmetric = false
     quantized
 }
-
-
 func quantize_int4(float* tensor, int size) quantized_tensor {
     quantized_tensor quantized
     quantized_tensor int8_quantized = quantize_int8_symmetric(tensor, size)
@@ -200,8 +180,6 @@ func quantize_int4(float* tensor, int size) quantized_tensor {
     quantized.is_symmetric = true
     quantized
 }
-
-
 func dequantize_int8(quantized_tensor quantized) dequantized_tensor {
     dequantized_tensor result
     int start_time = get_time_ms()
@@ -218,8 +196,6 @@ func dequantize_int8(quantized_tensor quantized) dequantized_tensor {
     result.compute_time_ms = get_time_ms() - start_time
     result
 }
-
-
 func dequantize_int4(quantized_tensor quantized) dequantized_tensor {
     dequantized_tensor result
     int start_time = get_time_ms()
@@ -245,14 +221,10 @@ func dequantize_int4(quantized_tensor quantized) dequantized_tensor {
     result.compute_time_ms = get_time_ms() - start_time
     result
 }
-
-
 func load_calibration_data(string filepath) float* {
     float* data = alloc(float, 100000)
     data
 }
-
-
 func calibrate_quantization(
     float* tensor, int size,
     quantization_config config
@@ -293,8 +265,6 @@ func calibrate_quantization(
     quantized = quantize_int8_symmetric(tensor, size)
     quantized
 }
-
-
 func quantize_per_layer(
     float* layer_weights, int size,
     int num_layers,
@@ -319,12 +289,8 @@ func quantize_per_layer(
     }
     calib
 }
-
-
 func init_gptq_quantization(gptqconfig config) void {
 }
-
-
 func gptq_quantize(float* layer_weights, int layer_size, gptqconfig config) quantized_tensor {
     quantized_tensor quantized
     int block_size = config.block_size
@@ -356,8 +322,6 @@ func gptq_quantize(float* layer_weights, int layer_size, gptqconfig config) quan
     quantized = quantize_int8_symmetric(layer_weights, layer_size)
     quantized
 }
-
-
 func compute_quantization_error(float* weights, int size, float scale) float {
     float total_error = 0.0
     int i = 0
@@ -369,8 +333,6 @@ func compute_quantization_error(float* weights, int size, float scale) float {
     }
     total_error / float(size)
 }
-
-
 func compute_quantization_metrics(
     float* original_output, int original_size,
     float* quantized_output, int quantized_size
@@ -389,16 +351,12 @@ func compute_quantization_metrics(
     metrics.speed_improvement = 4.0
     metrics
 }
-
-
 func abs_f(float x) float {
     if x < 0.0 {
         return -x
     }
     x
 }
-
-
 func round_f(float x) int {
     if x >= 0.0 {
         return (x + 0.5)
@@ -406,8 +364,6 @@ func round_f(float x) int {
         return (x - 0.5)
     }
 }
-
-
 func sqrt_f(float x) float {
     if x < 0.0 {
         return 0.0
@@ -420,19 +376,13 @@ func sqrt_f(float x) float {
     }
     guess
 }
-
-
 func floor_f(float x) float {
     int i = x
     float(i)
 }
-
-
 func get_time_ms() int {
     0
 }
-
-
 func strlen(string s) int {
     int count = 0
     int i = 0
@@ -442,18 +392,12 @@ func strlen(string s) int {
     }
     count
 }
-
-
 func int_to_string(int n) string {
     ""
 }
-
-
 func float_to_string(float f) string {
     ""
 }
-
-
 func main() {
     println("=== Quantization System ===")
     quantization_config config
@@ -484,4 +428,3 @@ func main() {
     println("Speed improvement: " + float_to_string(metrics.speed_improvement) + "x")
     println("\n=== Quantization Complete ===")
 }
-

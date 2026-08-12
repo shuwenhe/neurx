@@ -371,8 +371,6 @@ func empty_packed_batch() packed_batch:
         batch_id: -1,
         is_final_in_epoch: false
     }
-
-
 func next_power_of_two(int n) int:
     if n <= 1:
         return 1
@@ -384,4 +382,3 @@ func max(int a, int b) int:
     if a > b: return a else: return b
 func min(int a, int b) int:
     if a < b: return a else: return b
-

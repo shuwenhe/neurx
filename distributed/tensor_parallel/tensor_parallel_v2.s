@@ -8,8 +8,6 @@ struct tp_v2_config {
     int ffn_intermediate_dim
     bool use_sequence_parallel
 }
-
-
 struct tp_v2_state {
     tp_v2_config config
     int local_hidden_dim
@@ -30,8 +28,6 @@ struct tp_v2_state {
     double time_mlp_ms
     double time_comm_ms
 }
-
-
 func tp_mod(int val, int div) int {
     if div <= 0 { return 0 }
     int r = val
@@ -39,8 +35,6 @@ func tp_mod(int val, int div) int {
     while r < 0 { r = r + div }
     return r
 }
-
-
 func init_tp_v2(tp_v2_config cfg) tp_v2_state {
     tp_v2_state state
     state.config = cfg
@@ -74,8 +68,6 @@ func init_tp_v2(tp_v2_config cfg) tp_v2_state {
     state.time_comm_ms = 0.0
     return state
 }
-
-
 func alloc_matrix(int rows, int cols) [][]double {
     [][]double m = [][][]double{cap: rows}
     int i = 0
@@ -85,8 +77,6 @@ func alloc_matrix(int rows, int cols) [][]double {
     }
     return m
 }
-
-
 func tp_attention_forward(
     tp_v2_state state,
     [][]double input,
@@ -134,8 +124,6 @@ func tp_attention_forward(
     [][]double output = add_matrices(input, attn_proj)
     return output
 }
-
-
 func tp_mlp_forward(
     tp_v2_state state,
     [][]double input) [][]double {
@@ -154,8 +142,6 @@ func tp_mlp_forward(
     [][]double output = add_matrices(input, proj)
     return output
 }
-
-
 func tp_transformer_block_forward(
     ref tp_v2_state state,
     [][]double input,
@@ -164,13 +150,9 @@ func tp_transformer_block_forward(
     [][]double mlp_out = tp_mlp_forward(state, attn_out)
     return mlp_out
 }
-
-
 func tp_allreduce_sum([][][]double tensor, tp_v2_state state) [][][]double {
     return tensor
 }
-
-
 func matmul2d([][]double a, [][]double b) [][]double {
     int M = len(a)
     int K = 0
@@ -194,8 +176,6 @@ func matmul2d([][]double a, [][]double b) [][]double {
     }
     return c
 }
-
-
 func transpose_matrix([][]double m) [][]double {
     int rows = len(m)
     int cols = 0
@@ -212,8 +192,6 @@ func transpose_matrix([][]double m) [][]double {
     }
     return t
 }
-
-
 func add_matrices([][]double a, [][]double b) [][]double {
     int rows = len(a)
     int cols = 0
@@ -230,8 +208,6 @@ func add_matrices([][]double a, [][]double b) [][]double {
     }
     return c
 }
-
-
 func elementwise_mul([][]double a, [][]double b) [][]double {
     int rows = len(a)
     int cols = 0
@@ -248,8 +224,6 @@ func elementwise_mul([][]double a, [][]double b) [][]double {
     }
     return c
 }
-
-
 func scale_matrix([][]double m, double scalar) [][]double {
     int rows = len(m)
     int i = 0
@@ -263,8 +237,6 @@ func scale_matrix([][]double m, double scalar) [][]double {
     }
     return m
 }
-
-
 func rmsnorm_forward([][]double input, []double gamma, double eps) [][]double {
     int rows = len(input)
     int cols = 0
@@ -289,8 +261,6 @@ func rmsnorm_forward([][]double input, []double gamma, double eps) [][]double {
     }
     return output
 }
-
-
 func silu_activation([][]double m) [][]double {
     int rows = len(m)
     int i = 0
@@ -306,8 +276,6 @@ func silu_activation([][]double m) [][]double {
     }
     return m
 }
-
-
 func exp_approx(double x) double {
     if x > 20.0 { return 22026.46579 }
     if x < -20.0 { return 0.0 }
@@ -321,8 +289,6 @@ func exp_approx(double x) double {
     }
     return result
 }
-
-
 func sqrt_double(double x) double {
     if x <= 0.0 { return 0.0 }
     double g = x / 2.0
@@ -335,8 +301,6 @@ func sqrt_double(double x) double {
     }
     return g
 }
-
-
 func softmax_2d([][]double logits, int axis) [][]double {
     int rows = len(logits)
     int cols = 0
@@ -366,8 +330,6 @@ func softmax_2d([][]double logits, int axis) [][]double {
     }
     return output
 }
-
-
 func reshape_to_heads([][]double x, int B, int S, int nh, int d) [][][]double {
     [][][]double result = [][][]double{cap: B}
     int b = 0
@@ -395,8 +357,6 @@ func reshape_to_heads([][]double x, int B, int S, int nh, int d) [][][]double {
     }
     return result
 }
-
-
 func concat_heads([][][]double x, int B, int S, int nh, int d) [][]double {
     [][]double result = alloc_matrix(B, S * nh * d)
     int b = 0
@@ -421,8 +381,6 @@ func concat_heads([][][]double x, int B, int S, int nh, int d) [][]double {
     }
     return result
 }
-
-
 func apply_causal_mask([][]double scores, int seq_len) [][]double {
     int i = 0
     while i < seq_len {
@@ -437,8 +395,6 @@ func apply_causal_mask([][]double scores, int seq_len) [][]double {
     }
     return scores
 }
-
-
 func compute_attn_scores([][]double q_head, [][]double k_head, int seq_len, int d) [][]double {
     [][]double scores = alloc_matrix(seq_len, seq_len)
     int i = 0
@@ -458,8 +414,6 @@ func compute_attn_scores([][]double q_head, [][]double k_head, int seq_len, int 
     }
     return scores
 }
-
-
 func apply_rope([][][]double x, int B, int S, int nh, int d, tp_v2_config cfg) [][][]double {
     int half_d = d / 2
     int b = 0
@@ -488,8 +442,6 @@ func apply_rope([][][]double x, int B, int S, int nh, int d, tp_v2_config cfg) [
     }
     return x
 }
-
-
 func cos_approx(double x) double {
     double term = 1.0
     double result = 1.0
@@ -502,8 +454,6 @@ func cos_approx(double x) double {
     }
     return result
 }
-
-
 func sin_approx(double x) double {
     double term = x
     double result = x
@@ -516,8 +466,6 @@ func sin_approx(double x) double {
     }
     return result
 }
-
-
 func pow_dbl(double base, double exp) double {
     if exp == 0.0 { return 1.0 }
     double result = 1.0
@@ -531,4 +479,3 @@ func pow_dbl(double base, double exp) double {
     if negative { result = 1.0 / result }
     return result
 }
-

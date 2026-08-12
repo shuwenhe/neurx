@@ -5,8 +5,6 @@ struct safetensors_writer {
     int tensor_count
     int total_data_size
 }
-
-
 func safetensors_writer_new(string filepath) safetensors_writer {
     safetensors_writer {
         filepath: filepath,
@@ -15,8 +13,6 @@ func safetensors_writer_new(string filepath) safetensors_writer {
         total_data_size: 0,
     }
 }
-
-
 func safetensors_writer_add_tensor(safetensors_writer w, tensor t) () {
     int data_size = 0
     int i = 0
@@ -34,8 +30,6 @@ func safetensors_writer_add_tensor(safetensors_writer w, tensor t) () {
     w.tensor_count = w.tensor_count + 1
     w.total_data_size = w.total_data_size + data_size
 }
-
-
 func safetensors_writer_build_header(safetensors_writer w) string {
     string header = "{"
     int offset = 0
@@ -74,8 +68,6 @@ func safetensors_writer_build_header(safetensors_writer w) string {
     header = header + "}"
     header
 }
-
-
 func int_to_str_for_json(int n) string {
     if n == 0 {
         return "0"
@@ -107,8 +99,6 @@ func int_to_str_for_json(int n) string {
     }
     digits
 }
-
-
 func safetensors_writer_finish(safetensors_writer w) bool {
     string header = safetensors_writer_build_header(w)
     int header_size = len(header)
@@ -143,4 +133,3 @@ extern "intrinsic" func __host_write_binary_file(string path, []byte data) ()
 func runtime_write_binary_file(string path, []byte data) () {
     __host_write_binary_file(path, data)
 }
-

@@ -1,7 +1,6 @@
 package neurx.posttrain.multimodal.vlm_rl
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
-
 struct vlm_config {
     int vision_encoder_dim
     int text_encoder_dim
@@ -12,24 +11,18 @@ struct vlm_config {
     int image_size
     int patch_size
 }
-
-
 struct multimodal_input {
     tensor image
     []int text_tokens
     []int attention_mask
     []int image_positions
 }
-
-
 struct vlm_output {
     tensor logits
     tensor vision_features
     tensor text_features
     tensor fused_features
 }
-
-
 func new_vlm_config() vlm_config {
     vlm_config {
         vision_encoder_dim: 1024,
@@ -42,8 +35,6 @@ func new_vlm_config() vlm_config {
         patch_size: 14,
     }
 }
-
-
 func encode_image(
     tensor image,
     module vision_encoder,
@@ -62,8 +53,6 @@ func encode_image(
     }
     vision_features
 }
-
-
 func fuse_vision_text_features(
     tensor vision_features,
     tensor text_embeddings,
@@ -98,8 +87,6 @@ func fuse_vision_text_features(
     }
     fused
 }
-
-
 func vlm_forward(
     module model,
     multimodal_input input,
@@ -126,8 +113,6 @@ func vlm_forward(
         fused_features: fused,
     }
 }
-
-
 func vlm_grpo_step(
     module policy,
     module reference_policy,
@@ -210,4 +195,3 @@ func vlm_grpo_step(
     )
     total_loss
 }
-

@@ -5,16 +5,12 @@ import "device_api"
 struct version_counter {
     version: i64
 }
-
-
 struct autograd_meta {
     requires_grad: bool
     is_leaf: bool
     grad_fn: func(grad_output: tensor) -> []tensor
     saved_tensors: []tensor
 }
-
-
 struct tensor_metadata {
     shape: []i64
     stride: []i64
@@ -24,8 +20,6 @@ struct tensor_metadata {
     device: device
     version_counter: version_counter
 }
-
-
 struct tensor_impl {
     id: i64
     storage: storage
@@ -68,4 +62,3 @@ interface i_tensor_impl_lifecycle {
     finalize(impl: tensor_impl) -> void
     debug_info(impl: tensor_impl) -> string
 }
-

@@ -6,8 +6,6 @@ struct batch_norm_stats {
     []float running_var
     []int num_batches
 }
-
-
 func new_batch_norm_stats(int num_features) batch_norm_stats {
     batch_norm_stats {
         running_mean: make_zeros(num_features),
@@ -15,8 +13,6 @@ func new_batch_norm_stats(int num_features) batch_norm_stats {
         num_batches: make([]int, 0),
     }
 }
-
-
 func reset_running_stats(batch_norm_stats stats) batch_norm_stats {
     int i = 0
     while i < len(stats.running_mean) {
@@ -27,8 +23,6 @@ func reset_running_stats(batch_norm_stats stats) batch_norm_stats {
     stats.num_batches = make([]int, 0)
     return stats
 }
-
-
 func update_batch_norm_from_batch(
     batch_norm_stats stats,
     tensor batch_data
@@ -86,8 +80,6 @@ func update_batch_norm_from_batch(
     }
     return stats
 }
-
-
 func apply_batch_norm(
     batch_norm_stats stats,
     tensor input_data,
@@ -112,8 +104,6 @@ func apply_batch_norm(
     }
     return new(out, input_data.shape, input_data.requires_grad)
 }
-
-
 func make_zeros(int n) []float {
     []float arr = []float{cap: n}
     int i = 0
@@ -123,8 +113,6 @@ func make_zeros(int n) []float {
     }
     return arr
 }
-
-
 func make_ones(int n) []float {
     []float arr = []float{cap: n}
     int i = 0
@@ -134,8 +122,6 @@ func make_ones(int n) []float {
     }
     return arr
 }
-
-
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -151,4 +137,3 @@ func sqrt_approx(float x) float {
     }
     return y
 }
-

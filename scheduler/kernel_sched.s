@@ -16,8 +16,6 @@ struct task_struct {
     string  owner_agent
     int     created_at_ms
 }
-
-
 struct run_queue {
     []task_struct  rt_queue
     []task_struct  normal_queue
@@ -26,8 +24,6 @@ struct run_queue {
     int            current_pid
     int            clock_ms
 }
-
-
 func new_run_queue() run_queue {
     return run_queue{
         rt_queue:     [],
@@ -38,8 +34,6 @@ func new_run_queue() run_queue {
         clock_ms:     0,
     }
 }
-
-
 func enqueue_task(rq run_queue, t task_struct) run_queue {
     if t.sched_class == SCHED_RT {
         rq.rt_queue = append(rq.rt_queue, t)
@@ -52,8 +46,6 @@ func enqueue_task(rq run_queue, t task_struct) run_queue {
     }
     return rq
 }
-
-
 func pick_next_task(rq run_queue) (run_queue, task_struct, bool) {
     if len(rq.rt_queue) > 0 {
         task_struct t = rq.rt_queue[0]
@@ -81,4 +73,3 @@ func pick_next_task(rq run_queue) (run_queue, task_struct, bool) {
     }
     return (rq, task_struct{}, false)
 }
-

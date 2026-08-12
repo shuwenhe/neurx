@@ -1,5 +1,4 @@
 package neurx.enterprise.inference_system_with_speculative
-
 use neurx.backends.cuda_core
 use neurx.compute.cuda_matmul
 use neurx.quantization.quant_core
@@ -7,7 +6,6 @@ use neurx.api.openai_compatible
 use neurx.distributed.rank_manager
 use neurx.observability.metrics
 use neurx.enterprise.speculative_inference
-
 struct inference_system_config {
     bool enable_speculative_decode
     speculative_inference.speculative_inference_config speculative_config
@@ -24,8 +22,6 @@ struct inference_system_config {
     bool enable_distributed
     bool enable_metrics
 }
-
-
 struct inference_system_enhanced {
     inference_system_config config
     speculative_inference.speculative_inference_system speculative_sys
@@ -33,8 +29,6 @@ struct inference_system_enhanced {
     metrics.inference_metrics system_metrics
     bool initialized
 }
-
-
 func new_inference_config() inference_system_config {
     spec_cfg := speculative_inference.new_speculative_inference_config()
     cfg := inference_system_config{
@@ -55,14 +49,10 @@ func new_inference_config() inference_system_config {
     }
     cfg
 }
-
-
 func init_enhanced_inference_system(cfg: inference_system_config) inference_system_enhanced {
     gpu_context := cuda_core.cuda_context_create(cfg.gpu_device_id)
     system_metrics := metrics.init_inference_metrics()
-
     speculative_sys := speculative_inference.init_speculative_inference_system(cfg.speculative_config)
-
     sys := inference_system_enhanced{
         config: cfg,
         speculative_sys: speculative_sys,
@@ -70,11 +60,8 @@ func init_enhanced_inference_system(cfg: inference_system_config) inference_syst
         system_metrics: system_metrics,
         initialized: true,
     }
-
     sys
 }
-
-
 func inference_enhanced_single(
     sys: inference_system_enhanced,
     prompt: string,
@@ -82,26 +69,20 @@ func inference_enhanced_single(
     temperature: float,
 ) (inference_system_enhanced, string) {
     updated_sys := sys
-
     if updated_sys.config.enable_speculative_decode {
         input_tokens := tokenize_prompt(prompt)
-
         updated_speculative_sys, output_tokens := speculative_inference.speculative_inference_single(
             updated_sys.speculative_sys,
             input_tokens,
             max_new_tokens,
         )
-
         updated_sys.speculative_sys = updated_speculative_sys
-
         output_text := decode_tokens(output_tokens)
         (updated_sys, output_text)
     } else {
         (updated_sys, "fallback output")
     }
 }
-
-
 func inference_enhanced_batch(
     sys: inference_system_enhanced,
     prompts: []string,
@@ -109,25 +90,20 @@ func inference_enhanced_batch(
 ) (inference_system_enhanced, []string) {
     updated_sys := sys
     outputs := []string{}
-
     if updated_sys.config.enable_speculative_decode {
         batch_input_ids := [][]int{}
-
         i := 0
         while i < prompts.len {
             tokens := tokenize_prompt(prompts[i])
             batch_input_ids = append(batch_input_ids, tokens)
             i = i + 1
         }
-
         updated_speculative_sys, batch_output_ids := speculative_inference.speculative_inference_batch(
             updated_sys.speculative_sys,
             batch_input_ids,
             max_new_tokens,
         )
-
         updated_sys.speculative_sys = updated_speculative_sys
-
         i = 0
         while i < batch_output_ids.len {
             output_text := decode_tokens(batch_output_ids[i])
@@ -135,11 +111,8 @@ func inference_enhanced_batch(
             i = i + 1
         }
     }
-
     (updated_sys, outputs)
 }
-
-
 func adaptive_speculative_inference(sys: inference_system_enhanced) inference_system_enhanced {
     updated_sys := sys
     updated_sys.speculative_sys = speculative_inference.adaptive_update_speculative_params(
@@ -147,25 +120,19 @@ func adaptive_speculative_inference(sys: inference_system_enhanced) inference_sy
     )
     updated_sys
 }
-
-
 func get_system_performance_stats(sys: inference_system_enhanced) string {
     stats := speculative_inference.get_speculative_performance_stats(sys.speculative_sys)
     stats
 }
-
-
 func handle_enhanced_openai_request(
     sys: inference_system_enhanced,
     req: openai_compatible.chat_completion_request,
 ) (inference_system_enhanced, openai_compatible.chat_completion_response) {
     updated_sys := sys
-
     prompt := ""
     if req.messages.len > 0 {
         prompt = req.messages[req.messages.len - 1].content
     }
-
     updated_sys_after, output := inference_enhanced_single(
         updated_sys,
         prompt,
@@ -173,7 +140,6 @@ func handle_enhanced_openai_request(
         req.temperature,
     )
     updated_sys = updated_sys_after
-
     response := openai_compatible.chat_completion_response{
         id: "chatcmpl-speculative-" + int_to_str(get_timestamp()),
         object: "chat.completion",
@@ -195,25 +161,18 @@ func handle_enhanced_openai_request(
             total_tokens: (prompt.len + output.len) / 4,
         },
     }
-
     (updated_sys, response)
 }
-
-
 func enable_speculative_mode(sys: inference_system_enhanced) inference_system_enhanced {
     updated_sys := sys
     updated_sys.config.enable_speculative_decode = true
     updated_sys
 }
-
-
 func disable_speculative_mode(sys: inference_system_enhanced) inference_system_enhanced {
     updated_sys := sys
     updated_sys.config.enable_speculative_decode = false
     updated_sys
 }
-
-
 func tokenize_prompt(prompt: string) []int {
     tokens := []int{}
     i := 0
@@ -223,8 +182,6 @@ func tokenize_prompt(prompt: string) []int {
     }
     tokens
 }
-
-
 func decode_tokens(tokens: []int) string {
     result := ""
     i := 0
@@ -234,13 +191,9 @@ func decode_tokens(tokens: []int) string {
     }
     result
 }
-
-
 func get_timestamp() int {
     1234567890
 }
-
-
 func int_to_str(n: int) string {
     if n == 0 {
         return "0"
@@ -259,4 +212,3 @@ func int_to_str(n: int) string {
     }
     s
 }
-

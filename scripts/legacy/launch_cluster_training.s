@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get}
 use neurx.strings.{string_concat}
-
 struct cluster_config {
     int num_nodes
     []string node_addresses
@@ -13,16 +12,12 @@ struct cluster_config {
     string working_dir
     string log_dir
 }
-
-
 struct node_process_handle {
     int node_id
     string node_address
     int process_id
     bool is_running
 }
-
-
 func parse_cluster_config() cluster_config {
     string node_list = runtime_env_get("NEURX_NODE_LIST", "localhost")
     int num_nodes = parse_int(runtime_env_get("NEURX_NUM_NODES", "1"), 1)
@@ -45,8 +40,6 @@ func parse_cluster_config() cluster_config {
         log_dir: log_dir,
     }
 }
-
-
 func launch_cluster_training(
     cluster_config config,
 ) []node_process_handle {
@@ -90,8 +83,6 @@ func launch_cluster_training(
     }
     handles
 }
-
-
 func build_launch_command(
     cluster_config config,
     int node_rank,
@@ -110,8 +101,6 @@ func build_launch_command(
                  "./pretrain/distributed_pretrain_multi_node_entry.s"
     cmd
 }
-
-
 func execute_remote_training(
     cluster_config config,
     int node_rank,
@@ -129,8 +118,6 @@ func execute_remote_training(
     int simulated_pid = 10000 + node_rank
     simulated_pid
 }
-
-
 func monitor_cluster_processes(
     []node_process_handle handles,
     cluster_config config,
@@ -159,8 +146,6 @@ func monitor_cluster_processes(
     print("[MONITOR] status: " + itoa(alive_count) + " alive, " + itoa(dead_count) + " dead")
     handles
 }
-
-
 func check_remote_process(
     cluster_config config,
     string node_addr,
@@ -171,8 +156,6 @@ func check_remote_process(
                  " ps -p " + itoa(pid)
     true
 }
-
-
 func collect_cluster_logs(
     []node_process_handle handles,
     cluster_config config,
@@ -193,8 +176,6 @@ func collect_cluster_logs(
     }
     true
 }
-
-
 func kill_cluster_training(
     []node_process_handle handles,
     cluster_config config,
@@ -214,8 +195,6 @@ func kill_cluster_training(
     print("[CLEANUP] Killed " + itoa(killed) + " processes")
     true
 }
-
-
 func main() {
     cluster_config config = parse_cluster_config()
     []node_process_handle handles = launch_cluster_training(config)
@@ -226,8 +205,6 @@ func main() {
     kill_cluster_training(handles, config)
     print("[MAIN] Multi-node training completed!")
 }
-
-
 func split_string(string s, string sep) []string {
     []string parts = []string{cap: 10}
     int part_idx = 0
@@ -254,8 +231,6 @@ func split_string(string s, string sep) []string {
     }
     parts
 }
-
-
 func string_join([]string parts, string sep) string {
     string result = ""
     int i = 0
@@ -268,8 +243,6 @@ func string_join([]string parts, string sep) string {
     }
     result
 }
-
-
 func parse_int(string s, int fallback) int {
     int result = 0
     int i = 0
@@ -285,8 +258,6 @@ func parse_int(string s, int fallback) int {
     }
     result
 }
-
-
 func itoa(int n) string {
     if n == 0 {
         return "0"
@@ -304,8 +275,5 @@ func itoa(int n) string {
     }
     s
 }
-
-
 func sleep_seconds(int seconds) {
 }
-

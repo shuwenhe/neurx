@@ -10,15 +10,11 @@ struct pretrain_ddp_state {
     bool enabled
     int step
 }
-
-
 struct pretrain_ddp_sync_result {
     tensor first
     tensor second
     tensor third
 }
-
-
 func copy_float([]float values) []float {
     []float out = []float{cap: len(values)}
     int i = 0
@@ -28,8 +24,6 @@ func copy_float([]float values) []float {
     }
     out
 }
-
-
 func copy_int([]int values) []int {
     []int out = []int{cap: len(values)}
     int i = 0
@@ -39,8 +33,6 @@ func copy_int([]int values) []int {
     }
     out
 }
-
-
 func parse_env_int(string value, int fallback) int {
     string trimmed = trim(value)
     if trimmed == "" {
@@ -52,8 +44,6 @@ func parse_env_int(string value, int fallback) int {
     }
     parsed
 }
-
-
 func env_int_with_fallbacks(string primary, string secondary, int fallback) int {
     int value = parse_env_int(runtime_env_get(primary, ""), -1)
     if value > 0 {
@@ -65,8 +55,6 @@ func env_int_with_fallbacks(string primary, string secondary, int fallback) int 
     }
     fallback
 }
-
-
 func new_pretrain_ddp_state_from_env(string name, int bucket_cap, bool find_unused) pretrain_ddp_state {
     int rank = env_int_with_fallbacks("RANK", "NEURX_PRETRAIN_RANK", 0)
     int world_size = env_int_with_fallbacks("WORLD_SIZE", "NEURX_PRETRAIN_WORLD_SIZE", 1)
@@ -83,8 +71,6 @@ func new_pretrain_ddp_state_from_env(string name, int bucket_cap, bool find_unus
         step: 0,
     }
 }
-
-
 func pretrain_ddp_state_dict(pretrain_ddp_state state) pretrain_ddp_state {
     pretrain_ddp_state {
         ddp: ddp_state_dict(state.ddp),
@@ -93,8 +79,6 @@ func pretrain_ddp_state_dict(pretrain_ddp_state state) pretrain_ddp_state {
         step: state.step,
     }
 }
-
-
 func pretrain_ddp_load_state_dict(pretrain_ddp_state state, pretrain_ddp_state other) pretrain_ddp_state {
     pretrain_ddp_state {
         ddp: ddp_load_state_dict(state.ddp, other.ddp),
@@ -103,23 +87,15 @@ func pretrain_ddp_load_state_dict(pretrain_ddp_state state, pretrain_ddp_state o
         step: other.step,
     }
 }
-
-
 func pretrain_ddp_enabled(pretrain_ddp_state state) bool {
     state.enabled
 }
-
-
 func pretrain_ddp_world_size(pretrain_ddp_state state) int {
     process_group_world_size(state.process_group)
 }
-
-
 func pretrain_ddp_rank(pretrain_ddp_state state) int {
     process_group_rank(state.process_group)
 }
-
-
 func pretrain_ddp_sync_tensor(pretrain_ddp_state state, tensor value) tensor {
     if !state.enabled {
         return new(copy_float(value.data), copy_int(value.shape), value.requires_grad)
@@ -137,8 +113,6 @@ func pretrain_ddp_sync_tensor(pretrain_ddp_state state, tensor value) tensor {
     }
     new(reduced, copy_int(value.shape), value.requires_grad)
 }
-
-
 func pretrain_ddp_sync3(pretrain_ddp_state state, tensor a, tensor b, tensor c) pretrain_ddp_sync_result {
     pretrain_ddp_sync_result {
         first: pretrain_ddp_sync_tensor(state, a),
@@ -146,8 +120,6 @@ func pretrain_ddp_sync3(pretrain_ddp_state state, tensor a, tensor b, tensor c) 
         third: pretrain_ddp_sync_tensor(state, c),
     }
 }
-
-
 func pretrain_ddp_step(pretrain_ddp_state state) pretrain_ddp_state {
     pretrain_ddp_state {
         ddp: ddp_finalize_step(state.ddp),
@@ -156,4 +128,3 @@ func pretrain_ddp_step(pretrain_ddp_state state) pretrain_ddp_state {
         step: state.step + 1,
     }
 }
-

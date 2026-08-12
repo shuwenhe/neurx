@@ -25,9 +25,6 @@ func agent_context_build_from_memory(agent_context_state context, agent_memory_s
     }
     agent_context_maybe_compress(next)
 }
-
-
 func agent_context_build_summary(agent_context_state context) string {
     "context_builder:" + agent_context_summary(context)
 }
-

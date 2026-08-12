@@ -5,8 +5,6 @@ struct tensor {
     bool requires_grad
     option[tensor] grad
 }
-
-
 func clone(tensor a) tensor {
     tensor {
         data: a.data,
@@ -15,8 +13,6 @@ func clone(tensor a) tensor {
         grad: none,
     }
 }
-
-
 func copy_float([]float data) []float {
     int n = len(data)
     []float out = []float{cap: n}
@@ -25,8 +21,6 @@ func copy_float([]float data) []float {
     }
     out
 }
-
-
 func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
@@ -35,15 +29,11 @@ func copy_int([]int data) []int {
     }
     out
 }
-
-
 func shape1(int n) []int {
     []int shape = []int{cap: 1}
     shape[0] = n
     shape
 }
-
-
 func normalize_dim(int dim, int ndim) int {
     int axis = dim
     if axis < 0 {
@@ -51,8 +41,6 @@ func normalize_dim(int dim, int ndim) int {
     }
     axis
 }
-
-
 func shape_prod([]int shape) int {
     int n = 1
     int i = 0
@@ -62,8 +50,6 @@ func shape_prod([]int shape) int {
     }
     n
 }
-
-
 func unravel_index(int flat_index, []int shape) []int {
     int ndim = len(shape)
     []int coords = []int{cap: ndim}
@@ -86,8 +72,6 @@ func unravel_index(int flat_index, []int shape) []int {
     }
     coords
 }
-
-
 func ravel_index([]int coords, []int shape) int {
     int ndim = len(shape)
     int flat = 0
@@ -100,8 +84,6 @@ func ravel_index([]int coords, []int shape) int {
     }
     flat
 }
-
-
 func reduce_output_shape([]int shape, int dim) []int {
     int ndim = len(shape)
     int axis = normalize_dim(dim, ndim)
@@ -120,8 +102,6 @@ func reduce_output_shape([]int shape, int dim) []int {
     }
     out
 }
-
-
 func sorted_pair([]float values, bool descending) tensor {
     int n = len(values)
     []float out = copy_float(values)
@@ -156,8 +136,6 @@ func sorted_pair([]float values, bool descending) tensor {
         grad: none,
     }
 }
-
-
 func replace_dim_shape([]int shape, int dim, int size) []int {
     []int out = copy_int(shape)
     int ndim = len(shape)
@@ -167,8 +145,6 @@ func replace_dim_shape([]int shape, int dim, int size) []int {
     }
     out
 }
-
-
 func sort_slice_values([]float values, bool descending) []float {
     int n = len(values)
     int i = 0
@@ -196,8 +172,6 @@ func sort_slice_values([]float values, bool descending) []float {
     }
     values
 }
-
-
 func sort_slice_values_and_indices([]float values, []float indices, bool descending) {
     int n = len(values)
     int i = 0
@@ -227,8 +201,6 @@ func sort_slice_values_and_indices([]float values, []float indices, bool descend
         i = i + 1
     }
 }
-
-
 func slice_sorted_value(tensor a, []int coords, int axis, int rank, bool descending) float {
     int axis_len = a.shape[axis]
     []float values = []float{cap: axis_len}
@@ -242,8 +214,6 @@ func slice_sorted_value(tensor a, []int coords, int axis, int rank, bool descend
     values = sort_slice_values(values, descending)
     values[rank]
 }
-
-
 func slice_sorted_index(tensor a, []int coords, int axis, int rank, bool descending) float {
     int axis_len = a.shape[axis]
     []float values = []float{cap: axis_len}
@@ -259,8 +229,6 @@ func slice_sorted_index(tensor a, []int coords, int axis, int rank, bool descend
     sort_slice_values_and_indices(values, indices, descending)
     indices[rank]
 }
-
-
 func slice_values(tensor a, []int coords, int axis) []float {
     int axis_len = a.shape[axis]
     []float values = []float{cap: axis_len}
@@ -273,8 +241,6 @@ func slice_values(tensor a, []int coords, int axis) []float {
     }
     values
 }
-
-
 func sort(tensor a, int dim) tensor {
     int ndim = len(a.shape)
     if ndim <= 1 {
@@ -299,8 +265,6 @@ func sort(tensor a, int dim) tensor {
         grad: none,
     }
 }
-
-
 func argsort(tensor a, int dim) tensor {
     int ndim = len(a.shape)
     if ndim <= 1 {
@@ -353,8 +317,6 @@ func argsort(tensor a, int dim) tensor {
         grad: none,
     }
 }
-
-
 func topk(tensor a, int k) tensor {
     tensor sorted = sorted_pair(a.data, true)
     int n = len(sorted.data)
@@ -376,8 +338,6 @@ func topk(tensor a, int k) tensor {
         grad: none,
     }
 }
-
-
 func topk_dim(tensor a, int k, int dim) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
@@ -405,8 +365,6 @@ func topk_dim(tensor a, int k, int dim) tensor {
         grad: none,
     }
 }
-
-
 func cumsum_dim(tensor a, int dim) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
@@ -436,8 +394,6 @@ func cumsum_dim(tensor a, int dim) tensor {
         grad: none,
     }
 }
-
-
 func cumprod_dim(tensor a, int dim) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
@@ -467,8 +423,6 @@ func cumprod_dim(tensor a, int dim) tensor {
         grad: none,
     }
 }
-
-
 func prod_dim(tensor a, int dim) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
@@ -509,8 +463,6 @@ func prod_dim(tensor a, int dim) tensor {
         grad: none,
     }
 }
-
-
 func unique(tensor a) tensor {
     int n = len(a.data)
     []float out = []float{cap: n}
@@ -544,8 +496,6 @@ func unique(tensor a) tensor {
         grad: none,
     }
 }
-
-
 func unique_dim(tensor a, int dim) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
@@ -609,8 +559,6 @@ func unique_dim(tensor a, int dim) tensor {
         grad: none,
     }
 }
-
-
 func median(tensor a) tensor {
     tensor sorted = sorted_pair(a.data, false)
     int n = len(sorted.data)
@@ -632,8 +580,6 @@ func median(tensor a) tensor {
         grad: none,
     }
 }
-
-
 func median_dim(tensor a, int dim) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
@@ -679,8 +625,6 @@ func median_dim(tensor a, int dim) tensor {
         grad: none,
     }
 }
-
-
 func mode(tensor a) tensor {
     int n = len(a.data)
     float best_value = 0.0
@@ -710,8 +654,6 @@ func mode(tensor a) tensor {
         grad: none,
     }
 }
-
-
 func mode_dim(tensor a, int dim) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
@@ -764,8 +706,6 @@ func mode_dim(tensor a, int dim) tensor {
         grad: none,
     }
 }
-
-
 func quantile(tensor a, float q) tensor {
     tensor sorted = sorted_pair(a.data, false)
     int n = len(sorted.data)
@@ -789,8 +729,6 @@ func quantile(tensor a, float q) tensor {
         grad: none,
     }
 }
-
-
 func quantile_dim(tensor a, float q, int dim) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
@@ -838,8 +776,6 @@ func quantile_dim(tensor a, float q, int dim) tensor {
         grad: none,
     }
 }
-
-
 func sum(tensor a) tensor {
     float acc = 0.0
     int i = 0
@@ -856,8 +792,6 @@ func sum(tensor a) tensor {
         grad: none,
     }
 }
-
-
 func mean(tensor a) tensor {
     int n = len(a.data)
     float acc = 0.0
@@ -878,8 +812,6 @@ func mean(tensor a) tensor {
         grad: none,
     }
 }
-
-
 func max(tensor a) tensor {
     int n = len(a.data)
     float best = 0.0
@@ -902,8 +834,6 @@ func max(tensor a) tensor {
         grad: none,
     }
 }
-
-
 func min(tensor a) tensor {
     int n = len(a.data)
     float best = 0.0
@@ -926,8 +856,6 @@ func min(tensor a) tensor {
         grad: none,
     }
 }
-
-
 func argmax(tensor a) tensor {
     int n = len(a.data)
     int best_idx = 0
@@ -952,8 +880,6 @@ func argmax(tensor a) tensor {
         grad: none,
     }
 }
-
-
 func argmin(tensor a) tensor {
     int n = len(a.data)
     int best_idx = 0
@@ -978,8 +904,6 @@ func argmin(tensor a) tensor {
         grad: none,
     }
 }
-
-
 func sum_dim(tensor a, int dim) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
@@ -1020,8 +944,6 @@ func sum_dim(tensor a, int dim) tensor {
         grad: none,
     }
 }
-
-
 func mean_dim(tensor a, int dim) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
@@ -1065,8 +987,6 @@ func mean_dim(tensor a, int dim) tensor {
         grad: none,
     }
 }
-
-
 func max_dim(tensor a, int dim) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
@@ -1111,8 +1031,6 @@ func max_dim(tensor a, int dim) tensor {
         grad: none,
     }
 }
-
-
 func min_dim(tensor a, int dim) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
@@ -1157,8 +1075,6 @@ func min_dim(tensor a, int dim) tensor {
         grad: none,
     }
 }
-
-
 func argmax_dim(tensor a, int dim) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
@@ -1205,8 +1121,6 @@ func argmax_dim(tensor a, int dim) tensor {
         grad: none,
     }
 }
-
-
 func argmin_dim(tensor a, int dim) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
@@ -1253,18 +1167,12 @@ func argmin_dim(tensor a, int dim) tensor {
         grad: none,
     }
 }
-
-
 func cumsum(tensor a, int dim) tensor {
     return cumsum_dim(a, dim)
 }
-
-
 func cumprod(tensor a, int dim) tensor {
     return cumprod_dim(a, dim)
 }
-
-
 func prod(tensor a, int dim) tensor {
     int ndim = len(a.shape)
     int axis = normalize_dim(dim, ndim)
@@ -1287,4 +1195,3 @@ func prod(tensor a, int dim) tensor {
         grad: none,
     }
 }
-

@@ -7,16 +7,12 @@ struct distributed_config {
     int master_port
     string backend
 }
-
-
 func clamp_positive(int value, int fallback) int {
     if value > 0 {
         return value
     }
     fallback
 }
-
-
 func clamp_rank(int rank, int world_size) int {
     if rank < 0 {
         return 0
@@ -26,8 +22,6 @@ func clamp_rank(int rank, int world_size) int {
     }
     rank
 }
-
-
 func new_distributed_config(int world_size, int rank, int local_rank, string master_addr, int master_port, string backend) distributed_config {
     int normalized_world_size = clamp_positive(world_size, 1)
     int normalized_rank = clamp_rank(rank, normalized_world_size)
@@ -56,8 +50,6 @@ func new_distributed_config(int world_size, int rank, int local_rank, string mas
         backend: normalized_backend,
     }
 }
-
-
 func distributed_config_state_dict(distributed_config cfg) distributed_config {
     distributed_config {
         world_size: cfg.world_size,
@@ -68,8 +60,6 @@ func distributed_config_state_dict(distributed_config cfg) distributed_config {
         backend: cfg.backend,
     }
 }
-
-
 func distributed_config_load_state_dict(distributed_config cfg, distributed_config other) distributed_config {
     distributed_config {
         world_size: other.world_size,
@@ -80,15 +70,11 @@ func distributed_config_load_state_dict(distributed_config cfg, distributed_conf
         backend: other.backend,
     }
 }
-
-
 func detect_distributed_config() distributed_config {
     string backend = env_get("TENSOR_DIST_BACKEND", "nccl")
     string master_addr = env_get("MASTER_ADDR", "127.0.0.1")
     new_distributed_config(1, 0, 0, master_addr, 29500, backend)
 }
-
-
 func validate_distributed_config(distributed_config cfg) bool {
     if cfg.world_size < 1 {
         return false
@@ -107,9 +93,6 @@ func validate_distributed_config(distributed_config cfg) bool {
     }
     true
 }
-
-
 func is_distributed(distributed_config cfg) bool {
     cfg.world_size > 1
 }
-

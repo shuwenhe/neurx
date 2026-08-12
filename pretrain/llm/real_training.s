@@ -18,8 +18,6 @@ func relu(tensor x) tensor {
     }
     new(out, x.shape, true)
 }
-
-
 func relu_backward(tensor x, tensor grad_output) tensor {
     int n = len(x.data)
     []float grad_input = []float{cap: n}
@@ -34,8 +32,6 @@ func relu_backward(tensor x, tensor grad_output) tensor {
     }
     new(grad_input, grad_output.shape, true)
 }
-
-
 func softmax_last_dim(tensor logits) tensor {
     int n = len(logits.data)
     []float out = []float{cap: n}
@@ -62,8 +58,6 @@ func softmax_last_dim(tensor logits) tensor {
     }
     new(out, logits.shape, true)
 }
-
-
 func cross_entropy_loss(tensor logits, tensor targets) float {
     int n = len(logits.data)
     tensor probs = softmax_last_dim(logits)
@@ -81,8 +75,6 @@ func cross_entropy_loss(tensor logits, tensor targets) float {
     }
     loss
 }
-
-
 func matmul(tensor A, tensor B) tensor {
     int m = A.shape[0]
     int k = A.shape[1]
@@ -110,8 +102,6 @@ func matmul(tensor A, tensor B) tensor {
     shape[1] = n
     new(c_data, shape, true)
 }
-
-
 func transpose(tensor A, int dim1, int dim2) tensor {
     if dim1 != 0 || dim2 != 1 {
         return A
@@ -133,8 +123,6 @@ func transpose(tensor A, int dim1, int dim2) tensor {
     shape[1] = rows
     new(trans_data, shape, true)
 }
-
-
 func sum_first_dim(tensor x, bool keepdim) tensor {
     int rows = x.shape[0]
     int cols = x.shape[1]
@@ -154,8 +142,6 @@ func sum_first_dim(tensor x, bool keepdim) tensor {
     shape[0] = cols
     new(out, shape, true)
 }
-
-
 struct adamw_state {
     tensor params
     tensor grad
@@ -168,8 +154,6 @@ struct adamw_state {
     float weight_decay
     int step
 }
-
-
 func adamw_update(adamw_state state) tensor {
     float beta1 = state.beta1
     float beta2 = state.beta2
@@ -193,8 +177,6 @@ func adamw_update(adamw_state state) tensor {
     }
     new(new_params, state.params.shape, true)
 }
-
-
 func grad_logits(tensor logits, tensor targets) tensor {
     tensor probs = softmax_last_dim(logits)
     int n = len(probs.data)
@@ -206,8 +188,6 @@ func grad_logits(tensor logits, tensor targets) tensor {
     }
     new(grad, logits.shape, true)
 }
-
-
 func exp_approx(float x) float {
     if x < -20.0 {
         return 0.0
@@ -225,8 +205,6 @@ func exp_approx(float x) float {
     }
     result
 }
-
-
 func log_approx(float x) float {
     if x <= 0.0 {
         return -20.0
@@ -243,8 +221,6 @@ func log_approx(float x) float {
     }
     result * 2.0
 }
-
-
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -257,18 +233,12 @@ func sqrt_approx(float x) float {
     }
     guess
 }
-
-
 func pow_approx(float x, float y) float {
     exp_approx(y * log_approx(x))
 }
-
-
 func print_training_progress(int step, float loss, float lr, int tokens_seen) () {
     println("[Step " + int_to_str(step, 0) + "] Loss: " + fmt_float(loss, 4) + " | LR: " + fmt_float(lr, 6) + " | Tokens: " + int_to_str(tokens_seen, 0))
 }
-
-
 func int_to_str(int n, int fallback) string {
     if n == 0 {
         return "0"
@@ -286,13 +256,9 @@ func int_to_str(int n, int fallback) string {
     }
     result
 }
-
-
 func string_char(int code) string {
     string(code)
 }
-
-
 func fmt_float(float f, int precision) string {
     int int_part = f as int
     string result = int_to_str(int_part, 0)
@@ -311,4 +277,3 @@ func fmt_float(float f, int precision) string {
     }
     result
 }
-

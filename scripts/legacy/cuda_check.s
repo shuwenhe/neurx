@@ -23,4 +23,3 @@ func main() {
     println("GPU Training Setup:")
     println("  make pretrain-gpu")
 }
-

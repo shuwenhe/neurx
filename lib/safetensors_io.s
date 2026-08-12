@@ -6,15 +6,11 @@ struct tensor_meta {
     int64 offset
     int64 size
 }
-
-
 struct safe_tensors_file {
     string path
     []tensor_meta tensors
     int tensor_count
 }
-
-
 func read_uint64_le(string data, int offset) int64 {
     if offset + 8 > len(data) {
         return 0
@@ -34,8 +30,6 @@ func read_uint64_le(string data, int offset) int64 {
     }
     return result
 }
-
-
 func parse_safetensors_header(string filepath) safe_tensors_file {
     safe_tensors_file file
     file.path = filepath
@@ -43,8 +37,6 @@ func parse_safetensors_header(string filepath) safe_tensors_file {
     file.tensor_count = 0
     return file
 }
-
-
 func load_tensor_weight(safe_tensors_file file, string tensor_name) []float {
     []float weights
     for i in 0..file.tensor_count {
@@ -54,8 +46,6 @@ func load_tensor_weight(safe_tensors_file file, string tensor_name) []float {
     }
     return weights
 }
-
-
 func get_model_info(safe_tensors_file file) map[string]string {
     map[string]string info
     info["vocab_size"] = "151936"
@@ -64,4 +54,3 @@ func get_model_info(safe_tensors_file file) map[string]string {
     info["num_heads"] = "14"
     return info
 }
-

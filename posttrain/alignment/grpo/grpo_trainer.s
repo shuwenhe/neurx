@@ -16,8 +16,6 @@ struct generation_output {
     float length_penalty
     float total_reward
 }
-
-
 struct grpo_generation_group {
     string prompt
     string reference_answer
@@ -27,8 +25,6 @@ struct grpo_generation_group {
     float group_std_reward
     int accepted_outputs
 }
-
-
 struct grpo_dataset {
     []string prompts
     []string reference_answers
@@ -37,8 +33,6 @@ struct grpo_dataset {
     int group_size
     float quality_score
 }
-
-
 struct grpo_train_config {
     string method
     int batch_size
@@ -72,8 +66,6 @@ struct grpo_train_config {
     bool pin_memory
     string output_dir
 }
-
-
 struct grpo_trainer_state {
     neurx_model model
     neurx_model reference_model
@@ -102,8 +94,6 @@ struct grpo_trainer_state {
     dataloader train_loader
     dataloader eval_loader
 }
-
-
 struct grpo_train_result {
     bool success
     int final_step
@@ -113,8 +103,6 @@ struct grpo_train_result {
     float training_time_seconds
     string checkpoint_path
 }
-
-
 func compute_format_reward(string response) float {
     if str_contains(response, "<think>") && str_contains(response, "</think>") {
         return 0.5
@@ -124,8 +112,6 @@ func compute_format_reward(string response) float {
     }
     0.0
 }
-
-
 func compute_accuracy_reward(string response, string reference) float {
     if response == reference {
         return 1.0
@@ -135,8 +121,6 @@ func compute_accuracy_reward(string response, string reference) float {
     }
     0.0
 }
-
-
 func compute_length_penalty(int token_count, float penalty_per_100) float {
     float penalty = float_of_int(token_count) / 100.0 * penalty_per_100
     if penalty > 1.0 {
@@ -144,8 +128,6 @@ func compute_length_penalty(int token_count, float penalty_per_100) float {
     }
     0.0 - penalty
 }
-
-
 func compute_generation_reward(
     generation_output output,
     string reference_answer,
@@ -162,8 +144,6 @@ func compute_generation_reward(
     updated.total_reward = format_r + accuracy_r + length_p
     updated
 }
-
-
 func compute_group_advantages(
     []generation_output outputs,
     float advantage_eps
@@ -197,8 +177,6 @@ func compute_group_advantages(
     }
     (advantages, mean_reward, std_reward)
 }
-
-
 struct grpo_loss_result {
     float total_loss
     float policy_loss
@@ -206,8 +184,6 @@ struct grpo_loss_result {
     float clip_fraction
     int clipped_count
 }
-
-
 func compute_grpo_loss(
     []generation_output outputs,
     []float advantages,
@@ -255,8 +231,6 @@ func compute_grpo_loss(
         clipped_count: clipped,
     }
 }
-
-
 func compute_grpo_learning_rate(
     grpo_trainer_state trainer,
     int current_step,
@@ -281,8 +255,6 @@ func compute_grpo_learning_rate(
     float progress = float_of_int(progress_step) / float_of_int(remaining)
     cfg.learning_rate * (1.0 - progress)
 }
-
-
 struct grpo_step_result {
     float loss
     float policy_loss
@@ -291,8 +263,6 @@ struct grpo_step_result {
     float clip_fraction
     float advantage_magnitude
 }
-
-
 func grpo_training_step(
     ref grpo_trainer_state trainer,
     grpo_generation_group group
@@ -338,8 +308,6 @@ func grpo_training_step(
         advantage_magnitude: avg_adv_mag,
     }
 }
-
-
 func start_grpo_training(
     ref grpo_trainer_state trainer
 ) grpo_train_result {
@@ -385,16 +353,12 @@ func start_grpo_training(
         checkpoint_path: cfg.checkpoint_dir,
     }
 }
-
-
 func save_grpo_checkpoint(grpo_trainer_state trainer, int step) {
     string checkpoint_path = trainer.config.checkpoint_dir + "/step_" + string(step)
     if trainer.global_rank == 0 {
         print("[GRPO] checkpoint saved: " + checkpoint_path)
     }
 }
-
-
 func print_grpo_training_header() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║   Group Relative Policy Optimization (GRPO) Training       ║")
@@ -402,8 +366,6 @@ func print_grpo_training_header() {
     print("╚════════════════════════════════════════════════════════════╝")
     print("")
 }
-
-
 func print_grpo_config(grpo_train_config cfg) {
     print("[GRPO config]")
     print("  batch_2 Size: " + string(cfg.batch_size))
@@ -415,8 +377,6 @@ func print_grpo_config(grpo_train_config cfg) {
     print("  Total Steps: " + string(cfg.total_training_steps))
     print("")
 }
-
-
 func print_grpo_training_progress(grpo_trainer_state trainer) {
     int step = trainer.current_step
     print("Step " + string(step) +
@@ -426,8 +386,6 @@ func print_grpo_training_progress(grpo_trainer_state trainer) {
           " | Adv: " + string_float(trainer.running_advantage_magnitude) +
           " | LR: " + string_float(trainer.current_learning_rate))
 }
-
-
 func print_grpo_training_complete(grpo_trainer_state trainer) {
     print("")
     print("╔════════════════════════════════════════════════════════════╗")
@@ -440,17 +398,11 @@ func print_grpo_training_complete(grpo_trainer_state trainer) {
     print("  checkpoint: " + trainer.config.checkpoint_dir)
     print("")
 }
-
-
 func append_float(ref []float arr, float value) {
 }
-
-
 func str_contains(string s, string substr) bool {
     false
 }
-
-
 func sqrt_approx(float x) float {
     if x < 0.0 { return 0.0 }
     if x == 0.0 { return 0.0 }
@@ -462,8 +414,6 @@ func sqrt_approx(float x) float {
     }
     guess
 }
-
-
 func exp_approx_grpo(float x) float {
     if x > 20.0 { return 485165195.0 }
     if x < -20.0 { return 0.0 }
@@ -477,35 +427,25 @@ func exp_approx_grpo(float x) float {
     }
     result
 }
-
-
 func cos_approx_grpo(float x) float {
     float x2 = x * x
     float x4 = x2 * x2
     float x6 = x4 * x2
     1.0 - (x2 / 2.0) + (x4 / 24.0) - (x6 / 720.0)
 }
-
-
 func min_float(float a, float b) float {
     if a < b { return a }
     b
 }
-
-
 func max_float(float a, float b) float {
     if a > b { return a }
     b
 }
-
-
 func string_float(float f) string {
     int int_part = int(f)
     int frac_part = int((f - float_of_int(int_part)) * 10000.0)
     string(int_part) + "." + string(frac_part)
 }
-
-
 func create_dummy_grpo_group() grpo_generation_group {
     grpo_generation_group {
         prompt: "What is 2+2?",
@@ -517,4 +457,3 @@ func create_dummy_grpo_group() grpo_generation_group {
         accepted_outputs: 0,
     }
 }
-

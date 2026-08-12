@@ -8,8 +8,6 @@ struct tensor_s {
     string dtype
     string device
 }
-
-
 struct tensor_metadata_s {
     []int shape
     []int strides
@@ -19,8 +17,6 @@ struct tensor_metadata_s {
     string device
     int offset
 }
-
-
 func new_tensor_s([]float data_ptr, []int shape_list) tensor_s {
     int total = 1
     int i = 0
@@ -39,8 +35,6 @@ func new_tensor_s([]float data_ptr, []int shape_list) tensor_s {
         device: "cpu",
     }
 }
-
-
 func compute_strides_s([]int shape_list) []int {
     []int strides
     if len(shape_list) == 0 {
@@ -55,8 +49,6 @@ func compute_strides_s([]int shape_list) []int {
     }
     reverse_int_array_s(strides)
 }
-
-
 func reverse_int_array_s([]int arr) []int {
     []int reversed
     int i = len(arr) - 1
@@ -66,8 +58,6 @@ func reverse_int_array_s([]int arr) []int {
     }
     reversed
 }
-
-
 func tensor_get_flat_index_s(tensor_s t, []int indices) int {
     int index = 0
     int i = 0
@@ -79,8 +69,6 @@ func tensor_get_flat_index_s(tensor_s t, []int indices) int {
     }
     index
 }
-
-
 func tensor_reshape_s(tensor_s t, []int new_shape) tensor_s {
     int new_total = 1
     int i = 0
@@ -103,8 +91,6 @@ func tensor_reshape_s(tensor_s t, []int new_shape) tensor_s {
         device: t.device,
     }
 }
-
-
 func tensor_transpose_2d_s(tensor_s t) tensor_s {
     if t.rank != 2 {
         println("[ERROR] transpose: only 2D tensors supported")
@@ -123,8 +109,6 @@ func tensor_transpose_2d_s(tensor_s t) tensor_s {
         device: t.device,
     }
 }
-
-
 func tensor_slice_s(tensor_s t, int start, int end) tensor_s {
     if start < 0 || end > len(t.data) || start > end {
         println("[ERROR] slice: invalid indices")
@@ -148,8 +132,6 @@ func tensor_slice_s(tensor_s t, int start, int end) tensor_s {
         device: t.device,
     }
 }
-
-
 func tensor_cat_s(tensor_s t1, tensor_s t2, int dim) tensor_s {
     if t1.dtype != t2.dtype {
         println("[ERROR] cat: dtype mismatch")
@@ -186,8 +168,6 @@ func tensor_cat_s(tensor_s t1, tensor_s t2, int dim) tensor_s {
         device: t1.device,
     }
 }
-
-
 func tensor_to_string_s(tensor_s t) string {
     string result = "Tensor("
     int i = 0
@@ -201,8 +181,6 @@ func tensor_to_string_s(tensor_s t) string {
     result = result + ", dtype=" + t.dtype + ", device=" + t.device + ")"
     result
 }
-
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     string result = ""
@@ -225,8 +203,6 @@ func int_to_str(int n) string {
     if neg { result = "-" + result }
     result
 }
-
-
 func tensor_copy_s(tensor_s t) tensor_s {
     []float new_data = make([]float, len(t.data))
     int i = 0
@@ -250,8 +226,6 @@ func tensor_copy_s(tensor_s t) tensor_s {
         device: t.device,
     }
 }
-
-
 func tensor_fill_s(tensor_s t, float value) tensor_s {
     int i = 0
     while i < len(t.data) {
@@ -260,8 +234,6 @@ func tensor_fill_s(tensor_s t, float value) tensor_s {
     }
     t
 }
-
-
 func tensor_transpose_nd_s(tensor_s t, []int axes) tensor_s {
     if len(axes) != t.rank {
         println("[ERROR] transpose_nd: axes length mismatch")
@@ -293,8 +265,6 @@ func tensor_transpose_nd_s(tensor_s t, []int axes) tensor_s {
         device: t.device,
     }
 }
-
-
 func tensor_expand_s(tensor_s t, []int new_shape) tensor_s {
     int new_total = 1
     int i = 0
@@ -334,8 +304,6 @@ func tensor_expand_s(tensor_s t, []int new_shape) tensor_s {
         device: t.device,
     }
 }
-
-
 func tensor_sum_s(tensor_s t, int axis) tensor_s {
     if axis < 0 || axis >= t.rank {
         println("[ERROR] sum: invalid axis")
@@ -389,8 +357,6 @@ func tensor_sum_s(tensor_s t, int axis) tensor_s {
         device: t.device,
     }
 }
-
-
 func tensor_mean_s(tensor_s t, int axis) tensor_s {
     tensor_s sum_result = tensor_sum_s(t, axis)
     float count = float_from_int(t.shape[axis])
@@ -403,8 +369,6 @@ func tensor_mean_s(tensor_s t, int axis) tensor_s {
     }
     sum_result
 }
-
-
 func float_from_int_ext(int n) float {
     float result = 0.0
     int i = 0
@@ -414,8 +378,6 @@ func float_from_int_ext(int n) float {
     }
     result
 }
-
-
 func tensor_softmax_s(tensor_s t, int axis) tensor_s {
     if axis < 0 || axis >= t.rank {
         println("[ERROR] softmax: invalid axis")
@@ -437,8 +399,6 @@ func tensor_softmax_s(tensor_s t, int axis) tensor_s {
         device: t.device,
     }
 }
-
-
 func tensor_apply_s(tensor_s t, string op) tensor_s {
     []float result = make([]float, len(t.data))
     int i = 0
@@ -468,4 +428,3 @@ func tensor_apply_s(tensor_s t, string op) tensor_s {
         device: t.device,
     }
 }
-

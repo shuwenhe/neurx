@@ -8,8 +8,6 @@ struct training_state {
     float loss
     string checkpoint_time
 }
-
-
 func main() {
     println("[PRETRAIN-GPU] === NVIDIA CUDA Runtime/cuBLAS Pretraining (S launcher) ===")
     string project_root = runtime_env_get("NEURX_ROOT", ".")
@@ -117,14 +115,10 @@ func main() {
     }
     println("[PRETRAIN-GPU] Resume state will be automatically saved every NEURX_PRETRAIN_SAVE_INTERVAL steps.")
 }
-
-
 func checkpoint_exists(string checkpoint_dir) bool {
     string state_file = checkpoint_dir + "/training_state.txt"
     runtime_file_exists(state_file)
 }
-
-
 func new_training_state() training_state {
     training_state {
         current_step: 0,
@@ -134,8 +128,6 @@ func new_training_state() training_state {
         checkpoint_time: "2026-07-14T00:00:00Z",
     }
 }
-
-
 func load_training_state(string checkpoint_dir) training_state {
     string state_file = checkpoint_dir + "/training_state.txt"
     string content = ""
@@ -145,8 +137,6 @@ func load_training_state(string checkpoint_dir) training_state {
     training_state state = parse_training_state(content)
     state
 }
-
-
 func parse_training_state(string content) training_state {
     training_state state = new_training_state()
     if str_len(trim(content)) == 0 {
@@ -175,16 +165,12 @@ func parse_training_state(string content) training_state {
     }
     state
 }
-
-
 func save_training_state(string checkpoint_dir, training_state state) {
     string state_file = checkpoint_dir + "/training_state.txt"
     string content = "step=" + int_to_str(state.current_step) + " docs=" + int_to_str(state.completed_docs) + " shards=" + int_to_str(state.completed_shards) + " loss=" + float_to_str(state.loss) + "\n"
     runtime_write_text_file(state_file, content)
     println("[PRETRAIN-GPU] ✓ Saved training state to " + state_file)
 }
-
-
 func update_training_state(string checkpoint_dir, int step, int docs, int shards, float loss) {
     training_state state = training_state {
         current_step: step,
@@ -195,8 +181,6 @@ func update_training_state(string checkpoint_dir, int step, int docs, int shards
     }
     save_training_state(checkpoint_dir, state)
 }
-
-
 func index_of(string s, string needle) int {
     int s_len = str_len(s)
     int n_len = str_len(needle)
@@ -216,8 +200,6 @@ func index_of(string s, string needle) int {
     }
     -1
 }
-
-
 func parse_int_at(string s, int start) int {
     int i = start
     int value = 0
@@ -232,20 +214,14 @@ func parse_int_at(string s, int start) int {
     }
     value
 }
-
-
 func float_to_str(float f) string {
     int int_part = int(f)
     string result = int_to_str(int_part)
     result
 }
-
-
 func int(float f) int {
     0
 }
-
-
 func initialize_gpu_contexts(int num_gpus) {
     println("[PRETRAIN-GPU] Initializing " + int_to_str(num_gpus) + " GPU context(s)...")
     int i = 0
@@ -254,8 +230,6 @@ func initialize_gpu_contexts(int num_gpus) {
         i = i + 1
     }
 }
-
-
 func process_shard_on_gpu(int gpu_id, int shard_idx, int shard_count, string shard_path, int batch_size, int line_chunk, int step_budget, int doc_budget) int {
     int next_line = 1
     int processed = 0
@@ -286,8 +260,6 @@ func process_shard_on_gpu(int gpu_id, int shard_idx, int shard_count, string sha
     println("[GPU " + int_to_str(gpu_id) + "] complete shard=" + int_to_str(shard_idx + 1) + "/" + int_to_str(shard_count) + " docs=" + int_to_str(processed))
     processed
 }
-
-
 func synchronize_all_gpus(int num_gpus) {
     println("[PRETRAIN-GPU] Synchronizing all GPU streams...")
     int i = 0
@@ -296,8 +268,6 @@ func synchronize_all_gpus(int num_gpus) {
         i = i + 1
     }
 }
-
-
 func extract_filename(string path) string {
     int last_slash = -1
     int i = 0
@@ -312,8 +282,6 @@ func extract_filename(string path) string {
     }
     path
 }
-
-
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
@@ -328,21 +296,15 @@ func shell_escape(string s) string {
     }
     out + "'"
 }
-
-
 func write_progress(string path, string text) {
     if str_len(path) > 0 {
         runtime_write_text_file(path, text + "\n")
     }
 }
-
-
 func should_log_step(int step, int log_interval) bool {
     if log_interval <= 0 { return false }
     step == 1 || step == log_interval || step - (step / log_interval) * log_interval == 0
 }
-
-
 func count_lines(string text) int {
     int count = 0
     int i = 0
@@ -354,8 +316,6 @@ func count_lines(string text) int {
     }
     count
 }
-
-
 func get_shard_path(string list_text, int index) string {
     int current = 0
     int start = 0
@@ -377,8 +337,6 @@ func get_shard_path(string list_text, int index) string {
     }
     ""
 }
-
-
 func trim(string s) string {
     int i = 0
     while i < str_len(s) && is_space(s[i]) {
@@ -393,8 +351,6 @@ func trim(string s) string {
     }
     substring(s, i, j + 1)
 }
-
-
 func substring(string s, int start, int end) string {
     int s_start = start
     int s_end = end
@@ -415,13 +371,9 @@ func substring(string s, int start, int end) string {
     }
     out
 }
-
-
 func is_space(int c) bool {
     c == 32 || c == 9 || c == 10 || c == 13
 }
-
-
 func parse_int(string s, int fallback) int {
     string text = trim(s)
     if str_len(text) == 0 {
@@ -444,8 +396,6 @@ func parse_int(string s, int fallback) int {
     }
     sign * value
 }
-
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -471,13 +421,9 @@ func int_to_str(int n) string {
     }
     out
 }
-
-
 func string_char(int c) string {
     string(c)
 }
-
-
 func detect_gpus() int {
     int count = parse_int(runtime_env_get("NEURX_CUDA_DEVICE_COUNT", "0"), 0)
     if count > 0 {
@@ -487,8 +433,6 @@ func detect_gpus() int {
     }
     count
 }
-
-
 func initialize_gpu_contexts(int num_gpus) {
     println("[PRETRAIN-GPU] Initializing " + int_to_str(num_gpus) + " GPU context(s)...")
     int i = 0
@@ -497,8 +441,6 @@ func initialize_gpu_contexts(int num_gpus) {
         i = i + 1
     }
 }
-
-
 func process_shard_on_gpu(int gpu_id, int shard_idx, int shard_count, string shard_path, int batch_size, int line_chunk, int step_budget, int doc_budget) int {
     int next_line = 1
     int processed = 0
@@ -529,8 +471,6 @@ func process_shard_on_gpu(int gpu_id, int shard_idx, int shard_count, string sha
     println("[GPU " + int_to_str(gpu_id) + "] complete shard=" + int_to_str(shard_idx + 1) + "/" + int_to_str(shard_count) + " docs=" + int_to_str(processed))
     processed
 }
-
-
 func synchronize_all_gpus(int num_gpus) {
     println("[PRETRAIN-GPU] Synchronizing all GPU streams...")
     int i = 0
@@ -539,8 +479,6 @@ func synchronize_all_gpus(int num_gpus) {
         i = i + 1
     }
 }
-
-
 func extract_filename(string path) string {
     int last_slash = -1
     int i = 0
@@ -555,8 +493,6 @@ func extract_filename(string path) string {
     }
     path
 }
-
-
 func shell_escape(string s) string {
     string out = "'"
     int i = 0
@@ -571,21 +507,15 @@ func shell_escape(string s) string {
     }
     out + "'"
 }
-
-
 func write_progress(string path, string text) {
     if str_len(path) > 0 {
         runtime_write_text_file(path, text + "\n")
     }
 }
-
-
 func should_log_step(int step, int log_interval) bool {
     if log_interval <= 0 { return false }
     step == 1 || step == log_interval || step - (step / log_interval) * log_interval == 0
 }
-
-
 func count_lines(string text) int {
     int count = 0
     int i = 0
@@ -597,8 +527,6 @@ func count_lines(string text) int {
     }
     count
 }
-
-
 func get_shard_path(string list_text, int index) string {
     int current = 0
     int start = 0
@@ -620,8 +548,6 @@ func get_shard_path(string list_text, int index) string {
     }
     ""
 }
-
-
 func trim(string s) string {
     int i = 0
     while i < str_len(s) && is_space(s[i]) {
@@ -636,8 +562,6 @@ func trim(string s) string {
     }
     substring(s, i, j + 1)
 }
-
-
 func substring(string s, int start, int end) string {
     int s_start = start
     int s_end = end
@@ -658,13 +582,9 @@ func substring(string s, int start, int end) string {
     }
     out
 }
-
-
 func is_space(int c) bool {
     c == 32 || c == 9 || c == 10 || c == 13
 }
-
-
 func parse_int(string s, int fallback) int {
     string text = trim(s)
     if str_len(text) == 0 {
@@ -687,8 +607,6 @@ func parse_int(string s, int fallback) int {
     }
     sign * value
 }
-
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -714,13 +632,9 @@ func int_to_str(int n) string {
     }
     out
 }
-
-
 func string_char(int c) string {
     string(c)
 }
-
-
 func str_len(string s) int {
     int n = 0
     while s[n] != 0 {
@@ -728,16 +642,12 @@ func str_len(string s) int {
     }
     n
 }
-
-
 func find_latest_checkpoint_weights(string checkpoint_dir, int resume_step) string {
     string cmd = "ls -1 '" + checkpoint_dir + "/checkpoint_step_'*.weights.f32 2>/dev/null | sort -V | tail -1"
     string latest = runtime_run_command_output(cmd)
     string trimmed = trim(latest)
     trimmed
 }
-
-
 func create_cuda_resume_state(string state_file, training_state state, string weights_path) {
     string content = ""
     content = content + "completed_step=" + int_to_str(state.current_step) + "\n"
@@ -752,4 +662,3 @@ func create_cuda_resume_state(string state_file, training_state state, string we
     runtime_write_text_file(state_file, content)
     println("[PRETRAIN-GPU] \u2713 Created CUDA resume state: " + state_file)
 }
-

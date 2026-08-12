@@ -15,8 +15,6 @@ func cuda_malloc(int size_bytes, string label) (uint64, error) {
         current_context().allocated_memory_bytes + size_bytes
     (ptr, nil)
 }
-
-
 func cuda_free(uint64 ptr) {
     int idx = -1
     for i in 0..len(current_context().allocations) {
@@ -36,8 +34,6 @@ func cuda_free(uint64 ptr) {
         current_context().allocations.pop()
     }
 }
-
-
 func memcpy_htod(
     uint64 device_ptr,
     []float host_data,
@@ -45,8 +41,6 @@ func memcpy_htod(
 ) {
     log_memory_transfer("H2D", size_bytes)
 }
-
-
 func memcpy_dtoh(
     []float host_data,
     uint64 device_ptr,
@@ -54,4 +48,3 @@ func memcpy_dtoh(
 ) {
     log_memory_transfer("D2H", size_bytes)
 }
-

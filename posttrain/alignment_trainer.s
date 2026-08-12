@@ -29,8 +29,6 @@ struct alignment_config {
     string reward_model_path
     string output_dir
 }
-
-
 func create_dpo_config() alignment_config {
     return alignment_config {
         method: "dpo",
@@ -60,8 +58,6 @@ func create_dpo_config() alignment_config {
         output_dir: "./checkpoints/dpo/"
     }
 }
-
-
 func create_grpo_config() alignment_config {
     return alignment_config {
         method: "grpo",
@@ -91,8 +87,6 @@ func create_grpo_config() alignment_config {
         output_dir: "./checkpoints/grpo/"
     }
 }
-
-
 func create_ppo_config() alignment_config {
     return alignment_config {
         method: "ppo",
@@ -122,8 +116,6 @@ func create_ppo_config() alignment_config {
         output_dir: "./checkpoints/ppo/"
     }
 }
-
-
 func create_sft_config() alignment_config {
     return alignment_config {
         method: "sft",
@@ -197,8 +189,6 @@ func init_sft_trainer(
             start_time: now()
         }
     }
-
-
 func train_sft_epoch(self: sft_trainer, data_loader dataloader) {
     """
     trainingEnglish text epoch English text SFT
@@ -783,4 +773,3 @@ func compute_kl_divergence(
     tensor ref_log_probs = log_softmax(ref_logits, dim=-1)
     tensor kl = (policy_log_probs - ref_log_probs) * exp(policy_log_probs)
     return kl.sum(dim=-1).mean()
-

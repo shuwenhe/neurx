@@ -18,8 +18,6 @@ struct model_2t_config {
     bool pre_norm
     bool use_bias
 }
-
-
 func new_2t_model_config() model_2t_config {
     model_2t_config cfg
     cfg.vocab_size = 100000
@@ -41,8 +39,6 @@ func new_2t_model_config() model_2t_config {
     cfg.use_bias = false
     return cfg
 }
-
-
 func calculate_2t_model_parameters(model_2t_config cfg) int {
     int embedding_params = cfg.vocab_size * cfg.hidden_dim
     int per_layer_params = 0
@@ -60,8 +56,6 @@ func calculate_2t_model_parameters(model_2t_config cfg) int {
     total_params = total_params + output_params
     return total_params
 }
-
-
 func verify_2t_size(model_2t_config cfg) {
     int params = calculate_2t_model_parameters(cfg)
     int lower_bound = 1900000000000
@@ -69,8 +63,6 @@ func verify_2t_size(model_2t_config cfg) {
     if params >= lower_bound && params <= upper_bound {
     }
 }
-
-
 struct memory_requirements_2t {
     double model_size_gb
     double gradient_size_gb
@@ -80,8 +72,6 @@ struct memory_requirements_2t {
     double total_with_zero_3_gb
     double total_with_gradient_ckpt_gb
 }
-
-
 func calculate_2t_memory_requirements(
     int batch_size,
     int seq_len,
@@ -110,8 +100,6 @@ func calculate_2t_memory_requirements(
     }
     return mem
 }
-
-
 struct communication_requirements_2t {
     double all_reduce_bytes
     double all_to_all_bytes
@@ -120,8 +108,6 @@ struct communication_requirements_2t {
     double total_bytes_per_step
     double total_gb_per_epoch
 }
-
-
 func calculate_2t_communication_volume(
     int num_gpus,
     int batch_size,
@@ -144,8 +130,6 @@ func calculate_2t_communication_volume(
     comm.total_gb_per_epoch = comm.total_bytes_per_step * double(num_steps_per_epoch) / (1024.0 * 1024.0 * 1024.0)
     return comm
 }
-
-
 struct training_time_estimate_2t {
     double flops_per_token
     double peak_throughput_tokens_sec
@@ -154,8 +138,6 @@ struct training_time_estimate_2t {
     double time_for_1t_tokens_hours
     double communication_overhead_percent
 }
-
-
 func estimate_2t_training_time(
     int num_gpus,
     string gpu_type,
@@ -179,8 +161,6 @@ func estimate_2t_training_time(
     estimate.communication_overhead_percent = 0.0
     estimate
 }
-
-
 struct recommended_2t_training_setup {
     int num_gpus
     int tensor_parallel_degree
@@ -195,8 +175,6 @@ struct recommended_2t_training_setup {
     int warmup_steps
     int total_steps
 }
-
-
 func recommended_2t_setup_256_gpus() recommended_2t_training_setup {
     recommended_2t_training_setup setup
     setup.num_gpus = 256
@@ -213,8 +191,6 @@ func recommended_2t_setup_256_gpus() recommended_2t_training_setup {
     setup.total_steps = 1000000
     return setup
 }
-
-
 func recommended_2t_ultra_setup_512_gpus() recommended_2t_training_setup {
     recommended_2t_training_setup setup
     setup.num_gpus = 512
@@ -231,8 +207,5 @@ func recommended_2t_ultra_setup_512_gpus() recommended_2t_training_setup {
     setup.total_steps = 1000000
     return setup
 }
-
-
 func print_2t_model_specification(model_2t_config cfg) {
 }
-

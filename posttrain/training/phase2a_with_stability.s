@@ -1,7 +1,6 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_file_exists, runtime_make_dirs}
 use neurx.posttrain.training.stability.{clip_all_gradients, check_grads_healthy}
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -28,8 +27,6 @@ func int_to_str(int n) string {
     if negative { out = "-" + out }
     return out
 }
-
-
 func float_to_str(float value, int decimals) string {
     float current = value
     bool negative = current < 0.0
@@ -57,8 +54,6 @@ func float_to_str(float value, int decimals) string {
     if negative { result = "-" + result }
     return result
 }
-
-
 func main() {
     println("====================================================")
     println("[Phase 2A] Complete SFT Training with LoRA")
@@ -190,4 +185,3 @@ func main() {
     println("  - training_config.json (training configuration)")
     println("")
 }
-

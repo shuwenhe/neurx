@@ -1,6 +1,5 @@
 package neurx.posttrain.lora.lora_layer
 use neurx.posttrain.model.model_loader.{fill_model_tensor}
-
 struct lora_linear {
     []float base_weight
     []float lora_a
@@ -12,8 +11,6 @@ struct lora_linear {
     float scaling
     float dropout_rate
 }
-
-
 struct lora_adapter {
     []lora_linear q_proj_lora
     []lora_linear k_proj_lora
@@ -28,16 +25,12 @@ struct lora_adapter {
     int hidden_size
     int intermediate_size
 }
-
-
 struct lora_config {
     int rank
     float alpha
     float dropout_rate
     []string target_modules
 }
-
-
 func create_lora_linear(int in_dim, int out_dim, int rank, float alpha, float dropout_rate) lora_linear {
     lora_linear layer
     layer.in_dim = in_dim
@@ -51,8 +44,6 @@ func create_lora_linear(int in_dim, int out_dim, int rank, float alpha, float dr
     layer.lora_b = fill_model_tensor(out_dim * rank, 0.0)
     return layer
 }
-
-
 func lora_linear_forward(lora_linear layer, []float input) []float {
     []float output = fill_model_tensor(layer.out_dim, 0.0)
     int out_idx = 0
@@ -88,8 +79,6 @@ func lora_linear_forward(lora_linear layer, []float input) []float {
     }
     return output
 }
-
-
 func lora_linear_backward(lora_linear layer, []float input, []float grad_output) float {
     float loss = 0.0
     int out_idx = 0
@@ -99,8 +88,6 @@ func lora_linear_backward(lora_linear layer, []float input, []float grad_output)
     }
     return loss
 }
-
-
 func update_lora_weights(lora_linear layer, []float gradients, float learning_rate) lora_linear {
     int i = 0
     while i < len(layer.lora_a) && i < len(gradients) {
@@ -117,8 +104,6 @@ func update_lora_weights(lora_linear layer, []float gradients, float learning_ra
     }
     return layer
 }
-
-
 func create_lora_adapter(int num_layers, int hidden_size, int intermediate_size, int rank, float alpha, float dropout_rate) lora_adapter {
     lora_adapter adapter
     adapter.num_layers = num_layers
@@ -146,8 +131,6 @@ func create_lora_adapter(int num_layers, int hidden_size, int intermediate_size,
     }
     return adapter
 }
-
-
 func get_total_lora_params(lora_adapter adapter) int {
     int total = 0
     int i = 0
@@ -164,8 +147,6 @@ func get_total_lora_params(lora_adapter adapter) int {
     }
     return total
 }
-
-
 func lora_adapter_forward(lora_adapter adapter, int layer_idx, []float hidden_state, string module_name) []float {
     if layer_idx < 0 || layer_idx >= adapter.num_layers {
         return hidden_state
@@ -184,4 +165,3 @@ func lora_adapter_forward(lora_adapter adapter, int layer_idx, []float hidden_st
     }
     return hidden_state
 }
-

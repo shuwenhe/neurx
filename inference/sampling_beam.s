@@ -22,8 +22,6 @@ func select_top_k_beams([]beam_state candidates, int k) []beam_state {
     }
     result
 }
-
-
 func find_best_beam([]beam_state finished) beam {
     if len(finished) == 0 {
         return beam { token_ids: [], score: -1e10, is_finished: true }
@@ -38,4 +36,3 @@ func find_best_beam([]beam_state finished) beam {
     }
     finished[best_idx]
 }
-

@@ -5,8 +5,6 @@ struct agent_safety_result {
     string category
     int severity
 }
-
-
 func new_agent_safety_result_allow() agent_safety_result {
     agent_safety_result {
         allowed: true,
@@ -15,8 +13,6 @@ func new_agent_safety_result_allow() agent_safety_result {
         severity: 0,
     }
 }
-
-
 func new_agent_safety_result_block(string reason, string category, int severity) agent_safety_result {
     agent_safety_result {
         allowed: false,
@@ -25,8 +21,6 @@ func new_agent_safety_result_block(string reason, string category, int severity)
         severity: severity,
     }
 }
-
-
 func agent_safety_text_contains(string text, string pattern) bool {
     string h = lower(trim(text))
     string n = lower(trim(pattern))
@@ -56,8 +50,6 @@ func agent_safety_text_contains(string text, string pattern) bool {
     }
     false
 }
-
-
 func agent_safety_check_injection(string input) agent_safety_result {
     if agent_safety_text_contains(input, "ignore previous instructions") || agent_safety_text_contains(input, "ignore all instructions") {
         return new_agent_safety_result_block("prompt_injection", "security", 3)
@@ -70,8 +62,6 @@ func agent_safety_check_injection(string input) agent_safety_result {
     }
     new_agent_safety_result_allow()
 }
-
-
 func agent_safety_check_destructive(string action, string input) agent_safety_result {
     if agent_safety_text_contains(input, "rm -rf") || agent_safety_text_contains(input, "drop table") || agent_safety_text_contains(input, "delete all") {
         return new_agent_safety_result_block("destructive_operation", "data_loss", 3)
@@ -81,8 +71,6 @@ func agent_safety_check_destructive(string action, string input) agent_safety_re
     }
     new_agent_safety_result_allow()
 }
-
-
 func agent_safety_check_s(string cmd) agent_safety_result {
     string c = lower(trim(cmd))
     if agent_safety_text_contains(c, "| bash") || agent_safety_text_contains(c, "|bash") {
@@ -136,13 +124,9 @@ func agent_safety_check_s(string cmd) agent_safety_result {
     }
     new_agent_safety_result_allow()
 }
-
-
 func agent_safety_check_shell(string cmd) agent_safety_result {
     agent_safety_check_s(cmd)
 }
-
-
 func agent_safety_check(string action, string input, string goal) agent_safety_result {
     agent_safety_result inject_result = agent_safety_check_injection(input)
     if !inject_result.allowed {
@@ -160,9 +144,6 @@ func agent_safety_check(string action, string input, string goal) agent_safety_r
     }
     new_agent_safety_result_allow()
 }
-
-
 func agent_safety_summary(agent_safety_result result) string {
     "allowed=" + string(result.allowed) + " reason=" + result.reason + " category=" + result.category + " severity=" + string(result.severity)
 }
-

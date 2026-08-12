@@ -6,8 +6,6 @@ struct grad_scaler_state {
     int growth_interval
     int _growth_tracker
 }
-
-
 func new_grad_scaler(float init_scale, float growth_factor, float backoff_factor, int growth_interval) grad_scaler_state {
     grad_scaler_state {
         scale: init_scale,
@@ -17,8 +15,6 @@ func new_grad_scaler(float init_scale, float growth_factor, float backoff_factor
         _growth_tracker: 0,
     }
 }
-
-
 func grad_scaler_scale(grad_scaler_state scaler, []float grads) []float {
     []float scaled = []float{cap: len(grads)}
     int i = 0
@@ -28,8 +24,6 @@ func grad_scaler_scale(grad_scaler_state scaler, []float grads) []float {
     }
     return scaled
 }
-
-
 func grad_scaler_unscale(grad_scaler_state scaler, []float grads) []float {
     []float unscaled = []float{cap: len(grads)}
     int i = 0
@@ -39,8 +33,6 @@ func grad_scaler_unscale(grad_scaler_state scaler, []float grads) []float {
     }
     return unscaled
 }
-
-
 func grad_scaler_has_overflow([]float grads) bool {
     int i = 0
     while i < len(grads) {
@@ -58,8 +50,6 @@ func grad_scaler_has_overflow([]float grads) bool {
     }
     return false
 }
-
-
 func grad_scaler_step(grad_scaler_state scaler, bool overflow_occurred) grad_scaler_state {
     if overflow_occurred {
         scaler.scale = scaler.scale * scaler.backoff_factor
@@ -73,9 +63,6 @@ func grad_scaler_step(grad_scaler_state scaler, bool overflow_occurred) grad_sca
     }
     return scaler
 }
-
-
 func grad_scaler_get_scale(grad_scaler_state scaler) float {
     return scaler.scale
 }
-

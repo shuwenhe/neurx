@@ -13,8 +13,6 @@ struct dataloader_config {
     int rank
     collator_config collator
 }
-
-
 struct dataloader {
     dataset ds
     sampler samp
@@ -24,8 +22,6 @@ struct dataloader {
     int batches_served
     []batch prefetch_buffer
 }
-
-
 func new_dataloader(
     dataset ds,
     dataloader_config cfg
@@ -57,8 +53,6 @@ func new_dataloader(
         prefetch_buffer: [],
     }
 }
-
-
 func reset_epoch(dataloader dl) dataloader {
     dl.current_epoch = dl.current_epoch + 1
     dl.batches_served = 0
@@ -71,8 +65,6 @@ func reset_epoch(dataloader dl) dataloader {
     dl = fill_prefetch_buffer(dl)
     dl
 }
-
-
 func next_batch(dataloader dl) (batch, bool) {
     if len(dl.prefetch_buffer) > 0 {
         batch b = dl.prefetch_buffer.pop_front()
@@ -94,8 +86,6 @@ func next_batch(dataloader dl) (batch, bool) {
         (b, false)
     }
 }
-
-
 func load_samples_for_indices(dataset ds, []int indices) []sample {
     []sample samples = []int{cap: len(indices)}
     for idx in indices {
@@ -108,8 +98,6 @@ func load_samples_for_indices(dataset ds, []int indices) []sample {
     }
     samples
 }
-
-
 func fill_prefetch_buffer(dataloader dl) dataloader {
     int target_count = dl.config.prefetch_factor * 2
     while len(dl.prefetch_buffer) < target_count
@@ -124,24 +112,18 @@ func fill_prefetch_buffer(dataloader dl) dataloader {
     }
     dl
 }
-
-
 struct bucket_config {
     int num_buckets
     int min_bucket_size
     int max_bucket_size
     bool dynamic_buckets
 }
-
-
 struct bucketed_dataloader {
     dataloader base_dl
     bucket_config bconfig
     map[int][]int length_to_samples
     []int current_bucket_order
 }
-
-
 func create_bucketed_dataloader(
     dataset ds,
     dataloader_config dl_cfg,
@@ -163,8 +145,6 @@ func create_bucketed_dataloader(
         current_bucket_order: generate_bucket_order(buckets),
     }
 }
-
-
 func assign_to_bucket(int seq_len, bucket_config bcfg) int {
     float range_val = float(bcfg.max_bucket_size - bcfg.min_bucket_size)
     if range_val <= 0.0 { return 0 }
@@ -174,8 +154,6 @@ func assign_to_bucket(int seq_len, bucket_config bcfg) int {
     if bucket >= bcfg.num_buckets { bucket = bcfg.num_buckets - 1 }
     bucket
 }
-
-
 func generate_bucket_order(map[int][]int buckets) []int {
     []int order = []
     for key in buckets {
@@ -192,4 +170,3 @@ func generate_bucket_order(map[int][]int buckets) []int {
     }
     order
 }
-

@@ -1,6 +1,5 @@
 package main
 use neurx.runtime.io.{runtime_env_get, runtime_run_command_output, runtime_shell_escape, trim}
-
 func main() {
     string project_root = runtime_env_get("NEURX_ROOT", "/app/shuwen/neurx")
     string log_dir = project_root + "/artifacts/logs"
@@ -50,14 +49,10 @@ func main() {
     println("  tail -f " + latest_log)
     0
 }
-
-
 func latest_phase2a_log(string log_dir) string {
     string cmd = "cd " + runtime_shell_escape(log_dir) + " && ls -t posttrain_phase2a_*.log 2>/dev/null | head -n 1"
     trim(runtime_run_command_output(cmd))
 }
-
-
 func file_size_human(string path) string {
     string out = trim(runtime_run_command_output("du -h " + runtime_shell_escape(path) + " 2>/dev/null | cut -f1"))
     if out == "" {
@@ -65,8 +60,6 @@ func file_size_human(string path) string {
     }
     out
 }
-
-
 func file_mtime(string path) string {
     string out = trim(runtime_run_command_output("stat -c '%y' " + runtime_shell_escape(path) + " 2>/dev/null"))
     if out == "" {
@@ -77,8 +70,6 @@ func file_mtime(string path) string {
     }
     out
 }
-
-
 func count_lines(string path) string {
     string out = trim(runtime_run_command_output("wc -l < " + runtime_shell_escape(path) + " 2>/dev/null"))
     if out == "" {
@@ -86,8 +77,6 @@ func count_lines(string path) string {
     }
     out
 }
-
-
 func count_matches(string path, string pattern) string {
     string out = trim(runtime_run_command_output(
         "awk '/" + pattern + "/ {c++} END {print c+0}' " + runtime_shell_escape(path) + " 2>/dev/null"
@@ -97,8 +86,6 @@ func count_matches(string path, string pattern) string {
     }
     out
 }
-
-
 func print_indented_block(string text) {
     int i = 0
     string line = ""
@@ -116,4 +103,3 @@ func print_indented_block(string text) {
         i = i + 1
     }
 }
-

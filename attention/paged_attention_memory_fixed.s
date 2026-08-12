@@ -1,5 +1,4 @@
 package neurx.attention.paged_attention_memory
-
 struct physical_block {
     int block_id
     int layer_id
@@ -8,16 +7,12 @@ struct physical_block {
     int end_pos
     bool is_allocated
 }
-
-
 struct block_table {
     int seq_id
     []int physical_blocks
     int num_tokens
     int num_blocks
 }
-
-
 struct paged_kv_cache_manager {
     []physical_block blocks
     []block_table sequences
@@ -33,8 +28,6 @@ struct paged_kv_cache_manager {
     int cache_hits
     int cache_misses
 }
-
-
 func new_paged_kv_cache_manager(
     int num_blocks,
     int block_size,
@@ -44,7 +37,6 @@ func new_paged_kv_cache_manager(
 ) paged_kv_cache_manager {
     []physical_block blocks = []
     []block_table sequences = []
-
     int i
     i = 0
     for i < num_blocks {
@@ -58,10 +50,8 @@ func new_paged_kv_cache_manager(
         blocks = append(blocks, pb)
         i = i + 1
     }
-
     int head_dim
     head_dim = hidden_dim / num_heads
-
     paged_kv_cache_manager result
     result.blocks = blocks
     result.sequences = sequences
@@ -78,8 +68,6 @@ func new_paged_kv_cache_manager(
     result.cache_misses = 0
     return result
 }
-
-
 func allocate_blocks(
     paged_kv_cache_manager mgr,
     int seq_id,
@@ -88,7 +76,6 @@ func allocate_blocks(
     int blocks_needed
     blocks_needed = (num_tokens + mgr.block_size - 1) / mgr.block_size
     []int allocated_block_ids = []
-
     int i
     i = 0
     for i < len(mgr.blocks) {
@@ -106,15 +93,11 @@ func allocate_blocks(
         }
         i = i + 1
     }
-
     if len(allocated_block_ids) < blocks_needed {
         mgr.evictions = mgr.evictions + (blocks_needed - len(allocated_block_ids))
     }
-
     return (mgr, allocated_block_ids)
 }
-
-
 func free_sequence_blocks(
     paged_kv_cache_manager mgr,
     int seq_id
@@ -131,8 +114,6 @@ func free_sequence_blocks(
     }
     return mgr
 }
-
-
 func copy_blocks(
     paged_kv_cache_manager mgr,
     []int src_blocks,
@@ -142,12 +123,10 @@ func copy_blocks(
     if len(dst_blocks) < min_len {
         min_len = len(dst_blocks)
     }
-
     i := 0
     for i < min_len {
         src_id := src_blocks[i]
         dst_id := dst_blocks[i]
-
         if src_id >= 0 && src_id < len(mgr.blocks) {
             if dst_id >= 0 && dst_id < len(mgr.blocks) {
                 mgr.blocks[dst_id].start_pos = mgr.blocks[src_id].start_pos
@@ -157,11 +136,8 @@ func copy_blocks(
         }
         i = i + 1
     }
-
     return mgr
 }
-
-
 func get_cache_stats(paged_kv_cache_manager mgr) string {
     result := "KVCache Stats:\n"
     result = result + "  Total Blocks: " + string(mgr.total_blocks) + "\n"
@@ -172,24 +148,18 @@ func get_cache_stats(paged_kv_cache_manager mgr) string {
     result = result + "  Cache Misses: " + string(mgr.cache_misses) + "\n"
     return result
 }
-
-
 func reset_cache_stats(paged_kv_cache_manager mgr) paged_kv_cache_manager {
     mgr.cache_hits = 0
     mgr.cache_misses = 0
     mgr.evictions = 0
     return mgr
 }
-
-
 func get_block_utilization(paged_kv_cache_manager mgr) float {
     if mgr.total_blocks <= 0 {
         return 0.0
     }
     return float(mgr.allocated_blocks) / float(mgr.total_blocks)
 }
-
-
 func can_allocate_blocks(paged_kv_cache_manager mgr, int num_tokens) bool {
     blocks_needed := (num_tokens + mgr.block_size - 1) / mgr.block_size
     available := 0
@@ -202,4 +172,3 @@ func can_allocate_blocks(paged_kv_cache_manager mgr, int num_tokens) bool {
     }
     return available >= blocks_needed
 }
-

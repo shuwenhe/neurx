@@ -15,4 +15,3 @@ func main() {
     _ = runtime_run_command("rm -f " + runtime_shell_escape(log_fifo))
     0
 }
-

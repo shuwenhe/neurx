@@ -20,8 +20,6 @@ func create_cai_config() cai_config {
         use_mixed_precision: true,
     }
 }
-
-
 func example_basic_constitutional_ai() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 1: Basic Constitutional AI Training              ║")
@@ -51,8 +49,6 @@ func example_basic_constitutional_ai() {
     print("Quality Pass Rate:      " + float_to_string_ex(state.quality_threshold_rate * 100.0) + "%")
     print("")
 }
-
-
 func example_principle_library() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 2: Constitutional Principles Library             ║")
@@ -82,8 +78,6 @@ func example_principle_library() {
     print("  ✓ Transparency (2/5) - Least critical")
     print("")
 }
-
-
 func example_critique_revision_cycle() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 3: Critique-Revision Cycle                       ║")
@@ -115,8 +109,6 @@ func example_critique_revision_cycle() {
     print("        to learn the principle without human annotation!")
     print("")
 }
-
-
 func example_rlaif_scale() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 4: RLAIF Data Generation at Scale                ║")
@@ -145,8 +137,6 @@ func example_rlaif_scale() {
     print("  ✓ Iterative refinement")
     print("")
 }
-
-
 func example_cai_dpo_grpo_integration() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 5: CAI Integration with DPO/GRPO                 ║")
@@ -179,8 +169,6 @@ func example_cai_dpo_grpo_integration() {
     print("  3. GRPO optimizes with actual reward model for final polish")
     print("")
 }
-
-
 func example_quality_metrics() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 6: Quality Metrics and Monitoring                ║")
@@ -213,8 +201,6 @@ func example_quality_metrics() {
     print("  Max Filtered Rate:       20% (too many filtered = adjust thresholds)")
     print("")
 }
-
-
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -231,16 +217,11 @@ func main() {
     print("     All examples completed!                                 ")
     print("═════════════════════════════════════════════════════════════")
 }
-
-
 func float_to_string_ex(float f) string {
     int i_part = int(f)
     int f_part = int((f - float(i_part)) * 10000.0)
     string(i_part) + "." + string(f_part)
 }
-
-
 func int_to_string_ex(int i) string {
     string(i)
 }
-

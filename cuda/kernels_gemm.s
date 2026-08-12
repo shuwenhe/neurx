@@ -11,8 +11,6 @@ struct gemm_config {
     bool use_tensor_cores
     int tile_size
 }
-
-
 func default_gemm_config(int M, int K, int N) gemm_config {
     gemm_config {
         M: M, K: K, N: N,
@@ -25,8 +23,6 @@ func default_gemm_config(int M, int K, int N) gemm_config {
         tile_size: 32,
     }
 }
-
-
 func launch_gemm(
     cuda_context ctx,
     uint64 ptr_a,
@@ -45,4 +41,3 @@ func launch_gemm(
     log_kernel_launch("GEMM", cfg.M, cfg.K, cfg.N, flops, memory_bytes)
     nil
 }
-

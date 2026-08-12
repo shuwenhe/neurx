@@ -6,28 +6,20 @@ struct ipc_message {
     string payload
     int    sent_at_ms
 }
-
-
 struct msg_queue {
     int            qid
     string         name
     []ipc_message  messages
     int            max_depth
 }
-
-
 struct ipc_state {
     []msg_queue  queues
     int          next_qid
     int          next_msg_id
 }
-
-
 func new_ipc_state() ipc_state {
     return ipc_state{queues: [], next_qid: 1, next_msg_id: 1}
 }
-
-
 func msgget(is ipc_state, name string, max_depth int) (ipc_state, int) {
     int i = 0
     while i < len(is.queues) {
@@ -42,8 +34,6 @@ func msgget(is ipc_state, name string, max_depth int) (ipc_state, int) {
     is.next_qid = is.next_qid + 1
     return (is, qid)
 }
-
-
 func msgsnd(is ipc_state, qid int, from_pid int, to_pid int, msg_type string, payload string) ipc_state {
     int i = 0
     while i < len(is.queues) {
@@ -63,8 +53,6 @@ func msgsnd(is ipc_state, qid int, from_pid int, to_pid int, msg_type string, pa
     }
     return is
 }
-
-
 func msgrcv(is ipc_state, qid int, to_pid int) (ipc_state, ipc_message, bool) {
     int qi = 0
     while qi < len(is.queues) {
@@ -91,27 +79,19 @@ func msgrcv(is ipc_state, qid int, to_pid int) (ipc_state, ipc_message, bool) {
     }
     return (is, ipc_message{}, false)
 }
-
-
 struct semaphore {
     int    sem_id
     string name
     int    value
     int    max_value
 }
-
-
 struct sem_state {
     []semaphore sems
     int         next_sem_id
 }
-
-
 func new_sem_state() sem_state {
     return sem_state{sems: [], next_sem_id: 1}
 }
-
-
 func sem_create(ss sem_state, name string, initial int, max_val int) (sem_state, int) {
     semaphore s = semaphore{sem_id: ss.next_sem_id, name: name, value: initial, max_value: max_val}
     ss.sems = append(ss.sems, s)
@@ -119,8 +99,6 @@ func sem_create(ss sem_state, name string, initial int, max_val int) (sem_state,
     ss.next_sem_id = ss.next_sem_id + 1
     return (ss, id)
 }
-
-
 func sem_down(ss sem_state, sem_id int) (sem_state, bool) {
     int i = 0
     while i < len(ss.sems) {
@@ -135,8 +113,6 @@ func sem_down(ss sem_state, sem_id int) (sem_state, bool) {
     }
     return (ss, false)
 }
-
-
 func sem_up(ss sem_state, sem_id int) sem_state {
     int i = 0
     while i < len(ss.sems) {
@@ -149,4 +125,3 @@ func sem_up(ss sem_state, sem_id int) sem_state {
     }
     return ss
 }
-

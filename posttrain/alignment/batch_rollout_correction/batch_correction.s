@@ -8,8 +8,6 @@ struct batch_correction_config {
     float rs_threshold
     bool compute_metrics
 }
-
-
 struct batch_correction_result {
     tensor corrected_advantages
     tensor corrected_mask
@@ -17,8 +15,6 @@ struct batch_correction_result {
     tensor rs_mask
     offpolicy_metrics metrics
 }
-
-
 func default_batch_correction_config() batch_correction_config {
     batch_correction_config {
         enable_is: true,
@@ -28,8 +24,6 @@ func default_batch_correction_config() batch_correction_config {
         compute_metrics: true,
     }
 }
-
-
 func compute_batch_rollout_correction(
     tensor advantages,
     tensor new_log_probs,
@@ -81,8 +75,6 @@ func compute_batch_rollout_correction(
         metrics: metrics,
     }
 }
-
-
 func compute_is_weights_batch(
     tensor new_log_probs,
     tensor rollout_log_probs,
@@ -103,8 +95,6 @@ func compute_is_weights_batch(
     }
     return masked_ratio
 }
-
-
 func compute_rs_mask_batch(
     tensor new_log_probs,
     tensor rollout_log_probs,
@@ -117,8 +107,6 @@ func compute_rs_mask_batch(
     tensor keep_mask = less_than(divergence, threshold_tensor)
     return mul(keep_mask, mask)
 }
-
-
 func add_correction_to_batch(
     tensor advantages,
     tensor new_log_probs,
@@ -137,30 +125,19 @@ func add_correction_to_batch(
     )
     return result.corrected_advantages, result.corrected_mask, result.metrics
 }
-
-
 func clamp_tensor(tensor x, tensor min_val, tensor max_val) tensor {
     tensor clamped_max = minimum_tensor(x, max_val)
     return maximum_tensor(clamped_max, min_val)
 }
-
-
 func minimum_tensor(tensor a, tensor b) tensor {
     return a
 }
-
-
 func maximum_tensor(tensor a, tensor b) tensor {
     return a
 }
-
-
 func less_than(tensor a, tensor b) tensor {
     return a
 }
-
-
 func abs_tensor(tensor x) tensor {
     return x
 }
-

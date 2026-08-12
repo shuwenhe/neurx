@@ -12,16 +12,12 @@ func string_starts_with(text string, pos int, prefix string) bool {
     }
     return true
 }
-
-
 func parse_json_null(text string, pos int) int {
     if string_starts_with(text, pos, "null") {
         return pos + 4
     }
     return -1
 }
-
-
 func parse_json_bool(text string, pos int) int {
     if string_starts_with(text, pos, "true") {
         return pos + 4
@@ -31,8 +27,6 @@ func parse_json_bool(text string, pos int) int {
     }
     return -1
 }
-
-
 func parse_json_number(text string, pos int) int {
     start := pos
     if pos < len(text) && byte(text[pos]) == byte(45) {
@@ -52,8 +46,6 @@ func parse_json_number(text string, pos int) int {
     }
     return pos
 }
-
-
 func parse_json_string(text string, pos int) int {
     if pos >= len(text) || byte(text[pos]) != byte(34) {
         return -1
@@ -72,8 +64,6 @@ func parse_json_string(text string, pos int) int {
     }
     return -1
 }
-
-
 func skip_whitespace(text string, pos int) int {
     for pos < len(text) {
         ch := byte(text[pos])
@@ -85,8 +75,6 @@ func skip_whitespace(text string, pos int) int {
     }
     return pos
 }
-
-
 func parse_json_value(text string, pos int) int {
     pos = skip_whitespace(text, pos)
     if pos >= len(text) {
@@ -113,8 +101,6 @@ func parse_json_value(text string, pos int) int {
     }
     return -1
 }
-
-
 func parse_json_array(text string, pos int) int {
     if pos >= len(text) || byte(text[pos]) != byte(91) {
         return -1
@@ -145,8 +131,6 @@ func parse_json_array(text string, pos int) int {
         }
     }
 }
-
-
 func parse_json_object(text string, pos int) int {
     if pos >= len(text) || byte(text[pos]) != byte(123) {
         return -1
@@ -191,8 +175,6 @@ func parse_json_object(text string, pos int) int {
         }
     }
 }
-
-
 func main() {
     eprintln("Testing Pure-S JSON Parser")
     test_null()
@@ -203,8 +185,6 @@ func main() {
     test_object()
     eprintln("All JSON tests passed")
 }
-
-
 func test_null() {
     eprintln("Test 1: Null value")
     pos := parse_json_value("null", 0)
@@ -213,8 +193,6 @@ func test_null() {
     }
     eprintln("  OK")
 }
-
-
 func test_bool() {
     eprintln("Test 2: Boolean values")
     pos := parse_json_value("true", 0)
@@ -228,8 +206,6 @@ func test_bool() {
     }
     eprintln("  false OK")
 }
-
-
 func test_number() {
     eprintln("Test 3: Number values")
     pos := parse_json_value("42", 0)
@@ -243,8 +219,6 @@ func test_number() {
     }
     eprintln("  float OK")
 }
-
-
 func test_string() {
     eprintln("Test 4: String values")
     pos := parse_json_value("\"hello\"", 0)
@@ -253,8 +227,6 @@ func test_string() {
     }
     eprintln("  OK")
 }
-
-
 func test_array() {
     eprintln("Test 5: Array values")
     pos := parse_json_value("[1,2,3]", 0)
@@ -263,8 +235,6 @@ func test_array() {
     }
     eprintln("  OK")
 }
-
-
 func test_object() {
     eprintln("Test 6: Object values")
     pos := parse_json_value("{\"key\":\"value\"}", 0)
@@ -273,4 +243,3 @@ func test_object() {
     }
     eprintln("  OK")
 }
-

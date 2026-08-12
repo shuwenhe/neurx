@@ -19,8 +19,6 @@ func greedy_decode(
     }
     generated
 }
-
-
 func argmax([]float arr) int {
     if len(arr) == 0 { return -1 }
     int best_idx = 0
@@ -33,8 +31,6 @@ func argmax([]float arr) int {
     }
     best_idx
 }
-
-
 func argmin([]float arr) int {
     if len(arr) == 0 { return -1 }
     int best_idx = 0
@@ -47,8 +43,6 @@ func argmin([]float arr) int {
     }
     best_idx
 }
-
-
 func top_k_sample(
     []float logits,
     sampling_config config,
@@ -81,4 +75,3 @@ func top_k_sample(
         (sample_from_distribution(normalized, rng_state), advance_rng(rng_state))
     }
 }
-

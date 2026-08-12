@@ -3,8 +3,6 @@ use neurx.model.llm.gpt.{
     model_config, language_model, model_output,
     new_language_model, gpt_forward
 }
-
-
 struct reward_model {
     language_model backbone
     []float head
@@ -21,29 +19,21 @@ struct reward_model {
     float eps
     float weight_decay
 }
-
-
 struct reward_train_result {
     reward_model model
     float loss
     float accuracy
     float reward_margin
 }
-
-
 struct reward_batch_scores {
     []float rewards
 }
-
-
 func rm_alloc(int n, float v) []float {
     []float arr = []float{cap: n}
     int i = 0
     while i < n { arr[i] = v; i = i + 1 }
     arr
 }
-
-
 func rm_init_head(int n_embd) []float {
     []float head = rm_alloc(n_embd, 0.0)
     int i = 0
@@ -54,8 +44,6 @@ func rm_init_head(int n_embd) []float {
     }
     head
 }
-
-
 func new_reward_model(model_config cfg, float lr) reward_model {
     language_model backbone = new_language_model(cfg)
     int n_embd = cfg.n_embd
@@ -76,8 +64,6 @@ func new_reward_model(model_config cfg, float lr) reward_model {
         weight_decay: 0.0,
     }
 }
-
-
 func reward_model_from_backbone(language_model backbone, float lr) reward_model {
     int n_embd = backbone.n_embd
     reward_model {
@@ -97,8 +83,6 @@ func reward_model_from_backbone(language_model backbone, float lr) reward_model 
         weight_decay: 0.0,
     }
 }
-
-
 func rm_exp(float x) float {
     if x > 20.0 { return 485165195.4 }
     if x < -20.0 { return 0.0 }
@@ -112,8 +96,6 @@ func rm_exp(float x) float {
     }
     result
 }
-
-
 func rm_log(float x) float {
     if x <= 0.0 { return -1000000.0 }
     float v = x
@@ -132,13 +114,9 @@ func rm_log(float x) float {
     }
     s + adj
 }
-
-
 func rm_sigmoid(float x) float {
     1.0 / (1.0 + rm_exp(-x))
 }
-
-
 func rm_sqrt(float x) float {
     if x <= 0.0 { return 0.0 }
     float y = x
@@ -146,16 +124,12 @@ func rm_sqrt(float x) float {
     while i < 15 { y = 0.5 * (y + x / y); i = i + 1 }
     y
 }
-
-
 func rm_pow(float base, int exp) float {
     float r = 1.0
     int e = exp
     while e > 0 { r = r * base; e = e - 1 }
     r
 }
-
-
 func rm_pool_last_hidden([]float last_hidden, int batch_size, int seq_len, int n_embd) []float {
     []float pooled = rm_alloc(batch_size * n_embd, 0.0)
     int b = 0
@@ -172,8 +146,6 @@ func rm_pool_last_hidden([]float last_hidden, int batch_size, int seq_len, int n
     }
     pooled
 }
-
-
 func rm_score_batch(reward_model rm, []int token_ids, int batch_size, int seq_len) reward_batch_scores {
     model_output out = gpt_forward(rm.backbone, token_ids, batch_size, seq_len)
     []float pooled = rm_pool_last_hidden(out.last_hidden, batch_size, seq_len, rm.n_embd)
@@ -191,14 +163,10 @@ func rm_score_batch(reward_model rm, []int token_ids, int batch_size, int seq_le
     }
     reward_batch_scores { rewards: rewards }
 }
-
-
 func reward_model_score(reward_model rm, []int token_ids, int seq_len) float {
     reward_batch_scores scores = rm_score_batch(rm, token_ids, 1, seq_len)
     scores.rewards[0]
 }
-
-
 func rm_bradley_terry_loss([]float chosen_r, []float rejected_r, int batch_size) float {
     float loss = 0.0
     int i = 0
@@ -210,8 +178,6 @@ func rm_bradley_terry_loss([]float chosen_r, []float rejected_r, int batch_size)
     }
     loss / (batch_size * 1.0)
 }
-
-
 func reward_model_train_step(
     reward_model rm,
     []int chosen_ids,
@@ -286,8 +252,6 @@ func reward_model_train_step(
         reward_margin: reward_margin,
     }
 }
-
-
 func reward_model_eval_accuracy(
     reward_model rm,
     []int chosen_ids,
@@ -307,20 +271,14 @@ func reward_model_eval_accuracy(
     }
     (correct * 1.0) / (batch_size * 1.0)
 }
-
-
 struct reward_normalizer {
     float running_mean
     float running_var
     int count
 }
-
-
 func new_reward_normalizer() reward_normalizer {
     reward_normalizer { running_mean: 0.0, running_var: 1.0, count: 0 }
 }
-
-
 func reward_normalizer_update(reward_normalizer norm, float reward) reward_normalizer {
     int new_count = norm.count + 1
     float delta = reward - norm.running_mean
@@ -333,11 +291,8 @@ func reward_normalizer_update(reward_normalizer norm, float reward) reward_norma
         count: new_count,
     }
 }
-
-
 func reward_normalizer_apply(reward_normalizer norm, float reward) float {
     float std = rm_sqrt(norm.running_var)
     if std < 1e-6 { std = 1.0 }
     (reward - norm.running_mean) / std
 }
-

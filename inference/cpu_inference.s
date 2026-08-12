@@ -7,15 +7,11 @@ struct tensor_location {
     int byte_size
     bool found
 }
-
-
 struct safetensors_model {
     string path
     []int metadata
     int data_offset
 }
-
-
 func int_to_string(int value) string {
     if value == 0 { return "0" }
     string sign = ""
@@ -33,8 +29,6 @@ func int_to_string(int value) string {
     }
     sign + out
 }
-
-
 func pow_int(int base, int exponent) int {
     int value = 1
     int i = 0
@@ -44,8 +38,6 @@ func pow_int(int base, int exponent) int {
     }
     value
 }
-
-
 func u64_le([]int bytes, int offset) int {
     if offset < 0 || offset + 8 > len(bytes) { return 0 }
     int value = 0
@@ -58,8 +50,6 @@ func u64_le([]int bytes, int offset) int {
     }
     value
 }
-
-
 func find_bytes([]int bytes, string needle, int start) int {
     if len(needle) == 0 { return start }
     int i = start
@@ -74,8 +64,6 @@ func find_bytes([]int bytes, string needle, int start) int {
     }
     -1
 }
-
-
 func skip_to_digit([]int bytes, int start) int {
     int i = start
     while i < len(bytes) {
@@ -84,8 +72,6 @@ func skip_to_digit([]int bytes, int start) int {
     }
     -1
 }
-
-
 func parse_uint([]int bytes, int start) int {
     int i = start
     int value = 0
@@ -95,8 +81,6 @@ func parse_uint([]int bytes, int start) int {
     }
     value
 }
-
-
 func open_model(string path) safetensors_model {
     []int prefix = __host_read_binary_file_range(path, 0, 8)
     int header_size = u64_le(prefix, 0)
@@ -106,8 +90,6 @@ func open_model(string path) safetensors_model {
         data_offset: 8 + header_size
     }
 }
-
-
 func find_tensor(safetensors_model model, string name) tensor_location {
     tensor_location location = tensor_location{
         offset: 0,
@@ -132,15 +114,11 @@ func find_tensor(safetensors_model model, string name) tensor_location {
     location.found = true
     location
 }
-
-
 func read_tensor(safetensors_model model, string name) []int {
     tensor_location location = find_tensor(model, name)
     if !location.found { return []int{} }
     __host_read_binary_file_range(model.path, location.offset, location.byte_size)
 }
-
-
 func read_tensor_elements(safetensors_model model, string name, int start, int count) []int {
     tensor_location location = find_tensor(model, name)
     if !location.found || start < 0 || count < 0 || (start + count) * 2 > location.byte_size {
@@ -148,8 +126,6 @@ func read_tensor_elements(safetensors_model model, string name, int start, int c
     }
     __host_read_binary_file_range(model.path, location.offset + start * 2, count * 2)
 }
-
-
 func pow2(int exponent) float {
     float value = 1.0
     int i = 0
@@ -167,8 +143,6 @@ func pow2(int exponent) float {
     }
     value
 }
-
-
 func bf16_at([]int bytes, int element) float {
     int offset = element * 2
     if offset < 0 || offset + 1 >= len(bytes) { return 0.0 }
@@ -186,8 +160,6 @@ func bf16_at([]int bytes, int element) float {
     if sign == 1 { value = 0.0 - value }
     value
 }
-
-
 func load_vector(safetensors_model model, string name, int size) []float {
     []int raw = read_tensor(model, name)
     []float out = []float{cap: size}
@@ -198,8 +170,6 @@ func load_vector(safetensors_model model, string name, int size) []float {
     }
     out
 }
-
-
 func matvec_bf16([]int matrix, int rows, int columns, []float input) []float {
     []float output = []float{cap: rows}
     int row = 0
@@ -216,8 +186,6 @@ func matvec_bf16([]int matrix, int rows, int columns, []float input) []float {
     }
     output
 }
-
-
 func add_in_place([]float output, []float bias) {
     int i = 0
     while i < len(output) && i < len(bias) {
@@ -225,8 +193,6 @@ func add_in_place([]float output, []float bias) {
         i = i + 1
     }
 }
-
-
 func matvec_named(safetensors_model model, string name, int rows, int columns, []float input) []float {
     []int matrix = read_tensor(model, name)
     if len(matrix) != rows * columns * 2 {
@@ -235,8 +201,6 @@ func matvec_named(safetensors_model model, string name, int rows, int columns, [
     }
     matvec_bf16(matrix, rows, columns, input)
 }
-
-
 func sqrt_newton(float value) float {
     if value <= 0.0 { return 0.0 }
     float estimate = value
@@ -248,8 +212,6 @@ func sqrt_newton(float value) float {
     }
     estimate
 }
-
-
 func rms_norm([]float input, []float weight) []float {
     int size = len(input)
     []float output = []float{cap: size}
@@ -267,13 +229,9 @@ func rms_norm([]float input, []float weight) []float {
     }
     output
 }
-
-
 func layer_name(int layer, string suffix) string {
     "model.layers." + int_to_string(layer) + "." + suffix
 }
-
-
 func validate_model(safetensors_model model) bool {
     []string required = []string{
         "model.embed_tokens.weight",
@@ -292,8 +250,6 @@ func validate_model(safetensors_model model) bool {
     }
     true
 }
-
-
 func run_probe(safetensors_model model) int {
     tensor_location embedding = find_tensor(model, "model.embed_tokens.weight")
     tensor_location q_proj = find_tensor(model, "model.layers.0.self_attn.q_proj.weight")
@@ -314,8 +270,6 @@ func run_probe(safetensors_model model) int {
     print("[Model S] real BF16 weight probe passed\n")
     0
 }
-
-
 func run_projection_probe(safetensors_model model) int {
     int hidden = 896
     []int embedding_raw = read_tensor_elements(model, "model.embed_tokens.weight", 151644 * hidden, hidden)
@@ -347,8 +301,6 @@ func run_projection_probe(safetensors_model model) int {
     print("[Model S] real embedding + RMSNorm + q_proj passed\n")
     0
 }
-
-
 func main() {
     string model_dir = runtime_env_get("NEURX_CHAT_MODEL_PATH", "/app/shuwen/posttrain")
     string model_path = model_dir + "/model.safetensors"
@@ -367,4 +319,3 @@ func main() {
     print("error: generation path is not enabled until tokenizer and Transformer validation pass\n")
     1
 }
-

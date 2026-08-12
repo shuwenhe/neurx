@@ -13,8 +13,6 @@ func test_all_modules() {
     test_bpe_tokenizer()
     print("\n=== All Tests Passed! ===\n")
 }
-
-
 func test_moe_layer() {
     print("Testing MOE Layer...\n")
     moe.moe_config config = moe.new_moe_config()
@@ -43,8 +41,6 @@ func test_moe_layer() {
     }
     print("PASS: MOE Layer\n")
 }
-
-
 func test_flash_attention() {
     print("Testing Flash Attention...\n")
     attention.attention_config config = attention.new_attention_config()
@@ -66,8 +62,6 @@ func test_flash_attention() {
     }
     print("PASS: Flash Attention\n")
 }
-
-
 func test_streaming_dataloader() {
     print("Testing Streaming data_loader...\n")
     streaming.streaming_config config = streaming.new_streaming_config("/tmp/test_data")
@@ -91,8 +85,6 @@ func test_streaming_dataloader() {
         print("INFO: Streaming data_loader initialized (no real data)\n")
     }
 }
-
-
 func test_fsdp() {
     print("Testing FSDP...\n")
     fsdp.fsdp_config config = fsdp.new_fsdp_config()
@@ -107,8 +99,6 @@ func test_fsdp() {
         return
     }
 }
-
-
 func test_bpe_tokenizer() {
     print("Testing BPE tokenizer...\n")
     bpe_tokenizer tokenizer = bpe_tokenizer.new_bpe_tokenizer()
@@ -133,8 +123,6 @@ func test_bpe_tokenizer() {
         return
     }
 }
-
-
 func allocate_vector(int size, float init_val) []float {
     []float v = []float{cap: size}
     int i = 0
@@ -144,13 +132,8 @@ func allocate_vector(int size, float init_val) []float {
     }
     v
 }
-
-
 func print(string msg) {
 }
-
-
 func main() {
     test_all_modules()
 }
-

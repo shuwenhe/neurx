@@ -6,8 +6,6 @@ struct lowering_plan_state {
     bool lowered
     bool compiled
 }
-
-
 func new_lowering_plan_state(string backend) lowering_plan_state {
     string target = "cpu_ref"
     if backend == "aot" {
@@ -20,8 +18,6 @@ func new_lowering_plan_state(string backend) lowering_plan_state {
         compiled: false,
     }
 }
-
-
 func lower_compile_state(compile_state state, lowering_plan_state plan) compile_state {
     compile_state next = compile_set_lowered(state, true)
     next = compile_add_pass(next, "lower")
@@ -32,8 +28,6 @@ func lower_compile_state(compile_state state, lowering_plan_state plan) compile_
     }
     next
 }
-
-
 func mark_lowered(lowering_plan_state plan, bool lowered, bool compiled) lowering_plan_state {
     lowering_plan_state {
         backend: plan.backend,
@@ -42,14 +36,9 @@ func mark_lowered(lowering_plan_state plan, bool lowered, bool compiled) lowerin
         compiled: compiled,
     }
 }
-
-
 func lowering_plan_state_dict(lowering_plan_state plan) lowering_plan_state {
     plan
 }
-
-
 func lowering_plan_load_state_dict(lowering_plan_state plan, lowering_plan_state other) lowering_plan_state {
     other
 }
-

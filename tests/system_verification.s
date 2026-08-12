@@ -11,8 +11,6 @@ struct component_status {
     status: string
     description: string
 }
-
-
 struct system_health_check {
     timestamp: string
     total_components: i32
@@ -21,8 +19,6 @@ struct system_health_check {
     components: component_status[]
     recommendations: []string
 }
-
-
 func verify_component(name: string, file_path: string, expected_lines: i32) component_status {
     let exists = true
     let component = component_status {
@@ -35,8 +31,6 @@ func verify_component(name: string, file_path: string, expected_lines: i32) comp
     }
     return component
 }
-
-
 func check_all_components() component_status[] {
     let components = component_status[]{}
     let scaled = verify_component(
@@ -90,8 +84,6 @@ func check_all_components() component_status[] {
     components = append(components, perf)
     return components
 }
-
-
 func calculate_health_score(components: component_status[]) f64 {
     let ready = 0
     for component in components {
@@ -101,8 +93,6 @@ func calculate_health_score(components: component_status[]) f64 {
     }
     return (ready * 100.0) / len(components)
 }
-
-
 func print_component_status(component: component_status) {
     let status_icon = "✅"
     if component.status != "ready" {
@@ -114,8 +104,6 @@ func print_component_status(component: component_status) {
     println("      " + component.description)
     println("")
 }
-
-
 func perform_system_check() system_health_check {
     println("")
     println("╔" + strings.repeat("═", 61) + "╗")
@@ -155,8 +143,6 @@ func perform_system_check() system_health_check {
     }
     return check
 }
-
-
 func verify_integration() {
     println("")
     println("╔" + strings.repeat("═", 61) + "╗")
@@ -184,8 +170,6 @@ func verify_integration() {
     println("  Meets throughput and efficiency targets")
     println("")
 }
-
-
 func check_deployment_readiness() {
     println("")
     println("╔" + strings.repeat("═", 61) + "╗")
@@ -220,8 +204,6 @@ func check_deployment_readiness() {
     println("✅ ALL CHECKLIST ITEMS COMPLETE")
     println("")
 }
-
-
 func print_final_report() {
     println("")
     println("═" + strings.repeat("═", 61))
@@ -274,8 +256,6 @@ func print_final_report() {
     println("═" + strings.repeat("═", 61))
     println("")
 }
-
-
 func main() {
     let health = perform_system_check()
     verify_integration()
@@ -287,4 +267,3 @@ func main() {
     println("  • IMPLEMENTATION_FILES_MANIFEST.md")
     println("")
 }
-

@@ -1,7 +1,6 @@
 package neurx.data.async_prefetch
 use neurx.data.streaming_reader.{streaming_reader_state, read_batch_of_lines}
 use neurx.tokenizer.data_pipeline.{tokenizer_config, default_llm_tokenizer_config, bpe_tokenizer_state, init_bpe_tokenizer, encode}
-
 struct prefetch_config {
     int prefetch_queue_size
     int num_io_threads
@@ -12,8 +11,6 @@ struct prefetch_config {
     int max_queue_size_bytes
     bool enable_backpressure
 }
-
-
 func default_prefetch_config() prefetch_config {
     prefetch_config cfg
     cfg.prefetch_queue_size = 3
@@ -41,8 +38,6 @@ struct prefetched_batch {
     int enqueue_time_ms
     int priority
 }
-
-
 struct prefetch_queue {
     []prefetched_batch buffer
     int capacity
@@ -58,8 +53,6 @@ struct prefetch_queue {
     int64 total_wait_time_consumer_ns
     int max_queue_depth_observed
 }
-
-
 func new_prefetch_queue(int capacity) prefetch_queue {
     prefetch_queue q
     q.buffer = []prefetched_batch{cap: capacity}
@@ -122,8 +115,6 @@ struct async_prefetch_manager {
     int backpressure_events_count
     int starvation_events_count
 }
-
-
 func new_async_prefetch_manager(
     streaming_reader_state reader,
     prefetch_config config
@@ -199,8 +190,6 @@ func fetch_next_batch(async_prefetch_manager mgr) batch_fetch_result:
             had_to_wait: true,
             wait_time_ms: wait_time
         }
-
-
 func io_worker_function(async_prefetch_manager mgr) void:
     while mgr.workers_running:
         if is_full(mgr.queue):
@@ -316,8 +305,6 @@ struct prefetch_stats {
     int active_tokenizer_threads
     int64 memory_used_bytes
 }
-
-
 func get_prefetch_stats(async_prefetch_manager mgr) prefetch_stats:
     int64 elapsed_ns = get_time_nanoseconds() - mgr.start_time_ns
     float elapsed_sec = float(elapsed_ns) / 1e9
@@ -352,8 +339,6 @@ func empty_prefetched_batch() prefetched_batch:
         enqueue_time_ms: 0,
         priority: 0
     }
-
-
 func tokenize_single_line(async_prefetch_manager mgr, string line, int max_tokens) []int:
     []int token_ids = encode(mgr.tokenizer, line)
     if len(token_ids) > max_tokens:
@@ -383,7 +368,6 @@ struct thread_handle:
     int id
 func thread_handle(func callback, void* arg) thread_handle:
     return thread_handle{id: 0}
-
 func join_thread(thread_handle handle) void:
     return
 struct mutex:
@@ -402,4 +386,3 @@ func pass_raw_data_to_tokenizers(async_prefetch_manager mgr, []string lines) voi
     return
 func get_raw_data_from_io_queue(async_prefetch_manager mgr, []string out_lines) bool:
     return false
-

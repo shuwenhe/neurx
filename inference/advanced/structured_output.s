@@ -1,24 +1,18 @@
 package neurx.inference.advanced.structured_output
 func structured_root_object() int { 1 }
-
 func structured_root_array() int { 2 }
-
 struct structured_field_rule {
     string field_name
     string value_type
     bool required
     []string enum_values
 }
-
-
 struct structured_schema {
     string schema_name
     int root_type
     []structured_field_rule fields
     bool allow_additional_fields
 }
-
-
 struct json_stream_state {
     int object_depth
     int array_depth
@@ -31,15 +25,11 @@ struct json_stream_state {
     string text
     string delimiter_stack
 }
-
-
 struct structured_validation_result {
     bool valid
     string error_message
     string normalized_text
 }
-
-
 func new_structured_validation_result(bool valid, string error_message, string normalized_text) structured_validation_result {
     structured_validation_result result
     result.valid = valid
@@ -47,8 +37,6 @@ func new_structured_validation_result(bool valid, string error_message, string n
     result.normalized_text = normalized_text
     result
 }
-
-
 func structured_substring(string text, int start, int end) string {
     string result = ""
     int i = start
@@ -58,8 +46,6 @@ func structured_substring(string text, int start, int end) string {
     }
     result
 }
-
-
 func new_json_stream_state() json_stream_state {
     json_stream_state {
         object_depth: 0,
@@ -74,21 +60,15 @@ func new_json_stream_state() json_stream_state {
         delimiter_stack: "",
     }
 }
-
-
 func structured_is_space(int ch) bool {
     ch == 32 || ch == 10 || ch == 13 || ch == 9
 }
-
-
 func structured_stack_top(string stack) int {
     if len(stack) == 0 {
         return -1
     }
     int(stack[len(stack) - 1])
 }
-
-
 func structured_stack_pop(string stack) string {
     if len(stack) <= 1 {
         return ""
@@ -101,8 +81,6 @@ func structured_stack_pop(string stack) string {
     }
     result
 }
-
-
 func json_stream_consume(json_stream_state state, string chunk) json_stream_state {
     if !state.valid {
         return state
@@ -188,8 +166,6 @@ func json_stream_consume(json_stream_state state, string chunk) json_stream_stat
     }
     state
 }
-
-
 func json_stream_finish(json_stream_state state) structured_validation_result {
     if !state.valid {
         return new_structured_validation_result(false, state.error_message, state.text)
@@ -205,8 +181,6 @@ func json_stream_finish(json_stream_state state) structured_validation_result {
     }
     new_structured_validation_result(true, "", state.text)
 }
-
-
 func structured_find_substring(string text, string pattern, int start) int {
     if len(pattern) == 0 {
         return start
@@ -229,8 +203,6 @@ func structured_find_substring(string text, string pattern, int start) int {
     }
     -1
 }
-
-
 func structured_skip_space(string text, int start) int {
     int i = start
     while i < len(text) && structured_is_space(int(text[i])) {
@@ -238,8 +210,6 @@ func structured_skip_space(string text, int start) int {
     }
     i
 }
-
-
 func structured_value_start(string text, string field_name) int {
     string key = "\"" + field_name + "\""
     int key_start = structured_find_substring(text, key, 0)
@@ -252,8 +222,6 @@ func structured_value_start(string text, string field_name) int {
     }
     structured_skip_space(text, colon + 1)
 }
-
-
 func structured_value_type(string text, int start) string {
     if start < 0 || start >= len(text) {
         return "missing"
@@ -279,8 +247,6 @@ func structured_value_type(string text, int start) string {
     }
     "invalid"
 }
-
-
 func structured_read_string(string text, int start) string {
     if start < 0 || start >= len(text) || int(text[start]) != 34 {
         return ""
@@ -304,8 +270,6 @@ func structured_read_string(string text, int start) string {
     }
     ""
 }
-
-
 func structured_enum_contains([]string values, string value) bool {
     int i = 0
     while i < len(values) {
@@ -316,13 +280,9 @@ func structured_enum_contains([]string values, string value) bool {
     }
     false
 }
-
-
 func structured_field_at(structured_schema schema, int index) structured_field_rule {
     schema.fields[index]
 }
-
-
 func structured_schema_has_field(structured_schema schema, string field_name) bool {
     int i = 0
     while i < len(schema.fields) {
@@ -334,8 +294,6 @@ func structured_schema_has_field(structured_schema schema, string field_name) bo
     }
     false
 }
-
-
 func structured_unknown_top_level_field(structured_schema schema, string text) string {
     int object_depth = 0
     int array_depth = 0
@@ -378,8 +336,6 @@ func structured_unknown_top_level_field(structured_schema schema, string text) s
     }
     ""
 }
-
-
 func validate_structured_output(structured_schema schema, string text) structured_validation_result {
     json_stream_state stream = json_stream_consume(new_json_stream_state(), text)
     structured_validation_result syntax = json_stream_finish(stream)
@@ -428,8 +384,6 @@ func validate_structured_output(structured_schema schema, string text) structure
     }
     new_structured_validation_result(true, "", text)
 }
-
-
 func structured_prefix_allowed(structured_schema schema, string prefix) bool {
     json_stream_state stream = json_stream_consume(new_json_stream_state(), prefix)
     if !stream.valid {
@@ -447,4 +401,3 @@ func structured_prefix_allowed(structured_schema schema, string prefix) bool {
     }
     false
 }
-

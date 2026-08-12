@@ -38,4 +38,3 @@ func main() {
     println("Smart inference build complete")
     0
 }
-

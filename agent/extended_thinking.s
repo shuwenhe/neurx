@@ -8,8 +8,6 @@ struct extended_thought {
     string conclusion
     int    token_estimate
 }
-
-
 struct extended_thinking_state {
     string         goal
     int            budget_steps
@@ -23,8 +21,6 @@ struct extended_thinking_state {
     bool           finished
     bool           budget_exceeded
 }
-
-
 func new_extended_thinking_state(string goal, int budget_steps) extended_thinking_state {
     extended_thinking_state {
         goal:               goal,
@@ -40,8 +36,6 @@ func new_extended_thinking_state(string goal, int budget_steps) extended_thinkin
         budget_exceeded:    false,
     }
 }
-
-
 func new_extended_thinking_state_with_token_budget(string goal, int budget_steps, int token_budget) extended_thinking_state {
     extended_thinking_state {
         goal:               goal,
@@ -57,8 +51,6 @@ func new_extended_thinking_state_with_token_budget(string goal, int budget_steps
         budget_exceeded:    false,
     }
 }
-
-
 func extended_thinking_estimate_tokens(string text) int {
     int chars = len(text)
     int tokens = chars / 4
@@ -67,8 +59,6 @@ func extended_thinking_estimate_tokens(string text) int {
     }
     tokens
 }
-
-
 func extended_thinking_append(extended_thinking_state state, string thought, string conclusion) extended_thinking_state {
     int n = state.thought_count
     []extended_thought next = []extended_thought{cap: n + 1}
@@ -98,8 +88,6 @@ func extended_thinking_append(extended_thinking_state state, string thought, str
         budget_exceeded:    state.budget_exceeded,
     }
 }
-
-
 func extended_thinking_over_budget(extended_thinking_state state) bool {
     if state.steps_used >= state.budget_steps {
         return true
@@ -109,8 +97,6 @@ func extended_thinking_over_budget(extended_thinking_state state) bool {
     }
     false
 }
-
-
 func extended_thinking_finalize(extended_thinking_state state) extended_thinking_state {
     string conclusion = state.working_conclusion
     if trim(conclusion) == "" && state.thought_count > 0 {
@@ -130,8 +116,6 @@ func extended_thinking_finalize(extended_thinking_state state) extended_thinking
         budget_exceeded:    extended_thinking_over_budget(state),
     }
 }
-
-
 func extended_thinking_build_prompt(extended_thinking_state state, string input, int step) string {
     string prompt = "goal: " + state.goal + "\n"
     prompt = prompt + "input: " + input + "\n"
@@ -146,8 +130,6 @@ func extended_thinking_build_prompt(extended_thinking_state state, string input,
     prompt = prompt + "instruction: Think step by step. Output a <thought> block and an updated <conclusion> block.\n"
     prompt
 }
-
-
 func extended_thinking_parse_thought(string response) string {
     int start = 0
     int end = len(response)
@@ -181,8 +163,6 @@ func extended_thinking_parse_thought(string response) string {
     }
     out
 }
-
-
 func extended_thinking_parse_conclusion(string response) string {
     int i = 0
     bool in_tag = false
@@ -222,16 +202,12 @@ func extended_thinking_parse_conclusion(string response) string {
     }
     last_line
 }
-
-
 func extended_thinking_is_done(string response) bool {
     agent_text_contains(response, "final_answer") ||
     agent_text_contains(response, "conclusion:done") ||
     agent_text_contains(response, "<done>") ||
     agent_text_contains(response, "I am confident")
 }
-
-
 func extended_thinking_run(extended_thinking_state state, string input, string model_path) extended_thinking_state {
     agent_tool_registry_state tools = new_agent_tool_registry_state()
     agent_memory_state memory = new_agent_memory_state()
@@ -262,24 +238,18 @@ func extended_thinking_run(extended_thinking_state state, string input, string m
     }
     extended_thinking_finalize(et)
 }
-
-
 func extended_thinking_conclusion(extended_thinking_state state) string {
     if trim(state.final_conclusion) != "" {
         return state.final_conclusion
     }
     state.working_conclusion
 }
-
-
 func extended_thinking_thought_at(extended_thinking_state state, int i) string {
     if i < 0 || i >= state.thought_count {
         return ""
     }
     state.thoughts[i].thought
 }
-
-
 func extended_thinking_export(extended_thinking_state state) string {
     string out = "extended_thinking goal=" + state.goal + "\n"
     out = out + "steps=" + string(state.steps_used) + "/" + string(state.budget_steps) + "\n"
@@ -293,8 +263,6 @@ func extended_thinking_export(extended_thinking_state state) string {
     }
     out + "final: " + extended_thinking_conclusion(state)
 }
-
-
 func extended_thinking_summary(extended_thinking_state state) string {
     string exceeded = "false"
     if state.budget_exceeded {
@@ -305,8 +273,6 @@ func extended_thinking_summary(extended_thinking_state state) string {
     " exceeded=" + exceeded +
     " conclusion=" + agent_thinking_clip(extended_thinking_conclusion(state), 80)
 }
-
-
 func agent_thinking_clip(string s, int max_len) string {
     if len(s) <= max_len {
         return s
@@ -319,4 +285,3 @@ func agent_thinking_clip(string s, int max_len) string {
     }
     out + "..."
 }
-

@@ -12,15 +12,11 @@ struct http_request {
     []string headers
     string body
 }
-
-
 struct http_response {
     int status_code
     []string headers
     string body
 }
-
-
 func parse_http_request(string raw_request) http_request {
     lines := split_string(raw_request, "\n")
     if len(lines) == 0 {
@@ -55,8 +51,6 @@ func parse_http_request(string raw_request) http_request {
         body: body,
     }
 }
-
-
 func format_http_response(http_response resp) string {
     response := "HTTP/1.1 " + int_to_string(resp.status_code) + " OK\r\n"
     response = response + "Content-Type: application/json\r\n"
@@ -68,8 +62,6 @@ func format_http_response(http_response resp) string {
     response = response + "\r\n" + resp.body
     return response
 }
-
-
 func int_to_string(int val) string {
     if val == 0 { return "0" }
     string res = ""
@@ -82,14 +74,10 @@ func int_to_string(int val) string {
     }
     return res
 }
-
-
 func string_at_index(string s, int idx) string {
     if idx < 0 || idx >= len(s) { return "" }
     return string(s[idx : idx+1])
 }
-
-
 func split_string(string s, string sep) []string {
     result := []string{}
     if len(s) == 0 { return result }
@@ -111,16 +99,12 @@ func split_string(string s, string sep) []string {
     }
     return result
 }
-
-
 struct http_server {
     int listen_fd
     int port
     string host
     bool running
 }
-
-
 func create_http_server(string host, int port) http_server {
     listen_fd := __sys_socket(2, 1, 0)
     if listen_fd < 0 {
@@ -147,8 +131,6 @@ func create_http_server(string host, int port) http_server {
         running: true,
     }
 }
-
-
 func handle_connection(int client_fd, func(http_request) http_response handler) {
     request_data := __sys_recv(client_fd, 4096)
     if len(request_data) == 0 {
@@ -161,8 +143,6 @@ func handle_connection(int client_fd, func(http_request) http_response handler) 
     __sys_send(client_fd, response_data)
     __sys_close(client_fd)
 }
-
-
 func server_accept_loop(http_server server, func(http_request) http_response handler) {
     while server.running {
         client_fd := __sys_accept(server.listen_fd)
@@ -173,12 +153,9 @@ func server_accept_loop(http_server server, func(http_request) http_response han
         handle_connection(client_fd, handler)
     }
 }
-
-
 func close_http_server(http_server server) {
     if server.listen_fd >= 0 {
         __sys_close(server.listen_fd)
         print("✓ HTTP server closed\n")
     }
 }
-

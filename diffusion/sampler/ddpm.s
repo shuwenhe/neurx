@@ -7,8 +7,6 @@ struct ddpm_sampler_state {
     bool finished
     noise_schedule_state noise
 }
-
-
 func new_ddpm_sampler_state(noise_schedule_state noise) ddpm_sampler_state {
     int total = noise.cfg.timesteps
     ddpm_sampler_state {
@@ -18,8 +16,6 @@ func new_ddpm_sampler_state(noise_schedule_state noise) ddpm_sampler_state {
         noise: noise,
     }
 }
-
-
 func ddpm_step(ddpm_sampler_state state, []float x_t, []float eps_pred) ddpm_sampler_state {
     del x_t
     del eps_pred
@@ -32,14 +28,9 @@ func ddpm_step(ddpm_sampler_state state, []float x_t, []float eps_pred) ddpm_sam
         noise: noise_schedule_step(state.noise, next_t),
     }
 }
-
-
 func ddpm_sampler_state_dict(ddpm_sampler_state state) ddpm_sampler_state {
     state
 }
-
-
 func ddpm_sampler_load_state_dict(ddpm_sampler_state state, ddpm_sampler_state other) ddpm_sampler_state {
     other
 }
-

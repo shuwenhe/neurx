@@ -12,8 +12,6 @@ struct asgd_optimizer {
     float mu
     []float ax
 }
-
-
 func new_asgd(float lr, float lambd, float alpha, float t0, float weight_decay) asgd_optimizer {
     asgd_optimizer {
         lr: lr,
@@ -27,8 +25,6 @@ func new_asgd(float lr, float lambd, float alpha, float t0, float weight_decay) 
         ax: [],
     }
 }
-
-
 func asgd_step(asgd_optimizer optimizer, tensor params, tensor grads) asgd_optimizer_step_output {
     int n = len(params.data)
     optimizer.step = optimizer.step + 1
@@ -57,14 +53,10 @@ func asgd_step(asgd_optimizer optimizer, tensor params, tensor grads) asgd_optim
         params: new(out, params.shape, params.requires_grad),
     }
 }
-
-
 struct asgd_optimizer_step_output {
     asgd_optimizer optimizer
     tensor params
 }
-
-
 func ensure_asgd_state([]float values, int n) []float {
     []float out = []float{cap: n}
     int i = 0
@@ -78,24 +70,18 @@ func ensure_asgd_state([]float values, int n) []float {
     }
     out
 }
-
-
 func asgd_max(float a, float b) float {
     if a > b {
         return a
     }
     return b
 }
-
-
 func asgd_pow(float base, float exponent) float {
     if base <= 0.0 {
         return 0.0
     }
     return asgd_exp(exponent * asgd_ln(base))
 }
-
-
 func asgd_exp(float x) float {
     float result = 1.0
     float term = 1.0
@@ -107,8 +93,6 @@ func asgd_exp(float x) float {
     }
     result
 }
-
-
 func asgd_ln(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -125,4 +109,3 @@ func asgd_ln(float x) float {
     }
     2.0 * result
 }
-

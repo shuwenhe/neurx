@@ -22,12 +22,9 @@ func main() {
     }
     0
 }
-
-
 func check_path(string path) string {
     if runtime_file_exists(path) {
         return "ready (" + path + ")"
     }
     return "missing (" + path + ")"
 }
-

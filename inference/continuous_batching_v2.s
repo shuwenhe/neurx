@@ -11,8 +11,6 @@ struct inference_request {
     int top_k
     bool is_finished
 }
-
-
 struct running_request {
     inference_request req
     []int generated_token_ids
@@ -20,8 +18,6 @@ struct running_request {
     int current_position
     int start_time_ms
 }
-
-
 struct scheduler_policy {
     string algorithm
     bool enable_preemption
@@ -29,8 +25,6 @@ struct scheduler_policy {
     int max_total_tokens
     float preemption_threshold
 }
-
-
 struct scheduler_state {
     []inference_request pending_queue
     []running_request running_batch
@@ -40,8 +34,6 @@ struct scheduler_state {
     int total_kv_blocks
     int used_kv_blocks
 }
-
-
 func new_scheduler_state(
     scheduler_policy policy,
     int total_kv_blocks) scheduler_state {
@@ -55,8 +47,6 @@ func new_scheduler_state(
         used_kv_blocks: 0,
     }
 }
-
-
 func scheduler_enqueue_request(
     scheduler_state state,
     inference_request req) scheduler_state {
@@ -64,8 +54,6 @@ func scheduler_enqueue_request(
     state.pending_queue.push(req)
     return state
 }
-
-
 func scheduler_schedule_batch(
     scheduler_state state) scheduler_state {
     if state.policy.algorithm == "fcfs" {
@@ -77,8 +65,6 @@ func scheduler_schedule_batch(
     }
     return state
 }
-
-
 func scheduler_fcfs(scheduler_state state) scheduler_state {
     int req_idx = 0
     while req_idx < len(state.pending_queue) &&
@@ -102,20 +88,14 @@ func scheduler_fcfs(scheduler_state state) scheduler_state {
     }
     return state
 }
-
-
 func scheduler_sjf(scheduler_state state) scheduler_state {
     state.pending_queue = sort_by_estimated_time(state.pending_queue)
     return scheduler_fcfs(state)
 }
-
-
 func scheduler_priority(scheduler_state state) scheduler_state {
     state.pending_queue = sort_by_priority(state.pending_queue)
     return scheduler_fcfs(state)
 }
-
-
 func scheduler_preempt_requests(
     scheduler_state state,
     int required_blocks) scheduler_state {
@@ -137,8 +117,6 @@ func scheduler_preempt_requests(
     }
     return state
 }
-
-
 func is_preemptible(
     running_request req,
     float threshold) bool {
@@ -147,8 +125,6 @@ func is_preemptible(
     float completion_ratio = float(progress) / float(total_tokens)
     return completion_ratio < threshold
 }
-
-
 func scheduler_finish_request(
     scheduler_state state,
     int request_id) scheduler_state {
@@ -164,8 +140,6 @@ func scheduler_finish_request(
     }
     return state
 }
-
-
 func scheduler_step(scheduler_state state) scheduler_state {
     state.current_time_ms = state.current_time_ms + 1
     int req_idx = 0
@@ -179,15 +153,11 @@ func scheduler_step(scheduler_state state) scheduler_state {
     }
     return state
 }
-
-
 func estimate_kv_blocks(inference_request req) int {
     int total_tokens = len(req.prompt_tokens) + req.max_new_tokens
     int block_size = 16
     return (total_tokens + block_size - 1) / block_size
 }
-
-
 func sort_by_estimated_time([]inference_request queue) []inference_request {
     int n = len(queue)
     int i = 0
@@ -207,8 +177,6 @@ func sort_by_estimated_time([]inference_request queue) []inference_request {
     }
     return queue
 }
-
-
 func sort_by_priority([]inference_request queue) []inference_request {
     int n = len(queue)
     int i = 0
@@ -226,13 +194,9 @@ func sort_by_priority([]inference_request queue) []inference_request {
     }
     return queue
 }
-
-
 func estimate_completion_time(inference_request req) int {
     return len(req.prompt_tokens) + req.max_new_tokens
 }
-
-
 func remove_at_index([]inference_request arr, int idx) []inference_request {
     []inference_request result = []inference_request{cap: len(arr)}
     int i = 0
@@ -244,8 +208,6 @@ func remove_at_index([]inference_request arr, int idx) []inference_request {
     }
     return result
 }
-
-
 func remove_running_at_index([]running_request arr, int idx) []running_request {
     []running_request result = []running_request{cap: len(arr)}
     int i = 0
@@ -257,8 +219,6 @@ func remove_running_at_index([]running_request arr, int idx) []running_request {
     }
     return result
 }
-
-
 func scheduler_get_stats(scheduler_state state) scheduler_stats {
     int total_requests = len(state.pending_queue) +
                         len(state.running_batch) +
@@ -283,8 +243,6 @@ func scheduler_get_stats(scheduler_state state) scheduler_stats {
         kv_cache_utilization: kv_utilization,
     }
 }
-
-
 struct scheduler_stats {
     int pending_count
     int running_count
@@ -293,4 +251,3 @@ struct scheduler_stats {
     int avg_wait_time_ms
     float kv_cache_utilization
 }
-

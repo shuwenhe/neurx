@@ -11,8 +11,6 @@ func sample_from_distribution([]float probs, uint64 rng_state) int {
     }
     len(probs) - 1
 }
-
-
 func sample_from_softmax(
     []float logits,
     float temperature,
@@ -23,4 +21,3 @@ func sample_from_softmax(
     int idx = sample_from_distribution(probs, rng_state)
     (idx, advance_rng(rng_state))
 }
-

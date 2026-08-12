@@ -5,8 +5,6 @@ struct grad_clip_config {
     float max_value
     float min_value
 }
-
-
 func new_grad_clip_config(string clip_mode, float max_norm) grad_clip_config {
     grad_clip_config {
         clip_mode: clip_mode,
@@ -15,8 +13,6 @@ func new_grad_clip_config(string clip_mode, float max_norm) grad_clip_config {
         min_value: 0.0 - max_norm,
     }
 }
-
-
 func clip_grad_norm([]float grads, float max_norm) []float {
     if max_norm <= 0.0 {
         return grads
@@ -44,8 +40,6 @@ func clip_grad_norm([]float grads, float max_norm) []float {
     }
     return clipped
 }
-
-
 func clip_grad_value([]float grads, float clip_value) []float {
     []float clipped = []float{cap: len(grads)}
     int i = 0
@@ -64,8 +58,6 @@ func clip_grad_value([]float grads, float clip_value) []float {
     }
     return clipped
 }
-
-
 func clip_grad_by_norm([]float grads, float max_norm, []int param_indices) []float {
     []float subgrads = []float{cap: len(param_indices)}
     int i = 0
@@ -111,8 +103,6 @@ func clip_grad_by_norm([]float grads, float max_norm, []int param_indices) []flo
     }
     return clipped
 }
-
-
 func sqrt_approx(float x) float {
     if x <= 0.0 {
         return 0.0
@@ -128,4 +118,3 @@ func sqrt_approx(float x) float {
     }
     return y
 }
-

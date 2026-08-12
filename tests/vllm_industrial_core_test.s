@@ -13,8 +13,6 @@ func test_block_manager_prefix_reuse() bool {
     prefix_match_result prefix = neurx.inference.cache.block_manager.block_manager_match_prefix(state, "request-2", ["prefix-1"])
     prefix.success && prefix.matched_blocks == 1 && prefix.matched_tokens == 4 && prefix.state.cache_hits == 1
 }
-
-
 func test_scheduler_budget() bool {
     vllm_scheduler_config config = neurx.inference.scheduler.vllm_scheduler.default_vllm_scheduler_config()
     config.max_scheduled_tokens = 4
@@ -26,8 +24,6 @@ func test_scheduler_budget() bool {
     scheduler_step_result step = neurx.inference.scheduler.vllm_scheduler.scheduler_step(submitted.state)
     step.output.scheduled_tokens == 4 && step.output.token_budget_remaining == 0 && len(step.output.requests) == 1 && step.output.requests[0].prefill
 }
-
-
 func test_engine_sleep_wake() bool {
     engine_lifecycle_state state = neurx.inference.runtime.engine_lifecycle.new_engine_lifecycle(true, "cumem", true, true)
     engine_lifecycle_result registered = neurx.inference.runtime.engine_lifecycle.engine_register_segment(state, "model", "weights", 100, true, false, "model-v1")
@@ -46,8 +42,6 @@ func test_engine_sleep_wake() bool {
     engine_lifecycle_result awake = neurx.inference.runtime.engine_lifecycle.engine_commit_transition(waking_kv.state, waking_kv.transition_id, true, "")
     awake.accepted && awake.state.status == neurx.inference.runtime.engine_lifecycle.engine_awake_status() && awake.state.device_bytes == 160
 }
-
-
 func main() {
     bool passed = test_block_manager_prefix_reuse()
     passed = passed && test_scheduler_budget()
@@ -59,4 +53,3 @@ func main() {
     println("FAIL vllm industrial core")
     1
 }
-

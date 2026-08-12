@@ -64,4 +64,3 @@ Task coverage:
     io.Println("     s run eval/run_mmlu_benchmark.s")
     io.Println("")
 }
-

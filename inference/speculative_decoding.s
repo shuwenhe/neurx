@@ -6,8 +6,6 @@ enum speculative_mode {
     ADAPTIVE = 2
     BATCH_VERIFICATION = 3
 }
-
-
 struct speculative_config {
     speculative_mode mode
     int draft_model_size
@@ -27,8 +25,6 @@ struct speculative_config {
     float gamma
     float alpha
 }
-
-
 struct draft_model {
     []float embeddings
     [][]float weights
@@ -37,8 +33,6 @@ struct draft_model {
     int hidden_dim
     int num_layers
 }
-
-
 struct verifier_model {
     []float embeddings
     [][]float weights
@@ -47,8 +41,6 @@ struct verifier_model {
     int hidden_dim
     int num_layers
 }
-
-
 struct speculative_state {
     speculative_config config
     draft_model draft
@@ -63,8 +55,6 @@ struct speculative_state {
     int rejected_count
     float avg_accept_rate
 }
-
-
 struct tree_node {
     int token
     float probability
@@ -72,8 +62,6 @@ struct tree_node {
     []tree_node children
     int depth
 }
-
-
 struct speculative_result {
     []int tokens
     []float probabilities
@@ -82,8 +70,6 @@ struct speculative_result {
     float accept_rate
     int total_steps
 }
-
-
 func new_speculative_config() speculative_config {
     speculative_config {
         mode: ADAPTIVE,
@@ -105,8 +91,6 @@ func new_speculative_config() speculative_config {
         alpha: 0.1,
     }
 }
-
-
 func new_draft_model(int vocab_size, int hidden_dim, int num_layers) draft_model {
     draft_model {
         embeddings: math.allocate_float(vocab_size * hidden_dim, 0.0),
@@ -117,8 +101,6 @@ func new_draft_model(int vocab_size, int hidden_dim, int num_layers) draft_model
         num_layers: num_layers,
     }
 }
-
-
 func new_verifier_model(int vocab_size, int hidden_dim, int num_layers) verifier_model {
     verifier_model {
         embeddings: math.allocate_float(vocab_size * hidden_dim, 0.0),
@@ -129,8 +111,6 @@ func new_verifier_model(int vocab_size, int hidden_dim, int num_layers) verifier
         num_layers: num_layers,
     }
 }
-
-
 func new_speculative_state(speculative_config config) speculative_state {
     speculative_state {
         config: config,
@@ -147,8 +127,6 @@ func new_speculative_state(speculative_config config) speculative_state {
         avg_accept_rate: 0.0,
     }
 }
-
-
 func draft_model_predict(draft_model model, []int input_tokens, int seq_len) ([]int, []float) {
     int vocab_size = model.vocab_size
     int hidden_dim = model.hidden_dim
@@ -195,8 +173,6 @@ func draft_model_predict(draft_model model, []int input_tokens, int seq_len) ([]
     ([]int top_indices, []float top_probs) = math.top_k_select(probs, vocab_size, 1)
     (top_indices, top_probs)
 }
-
-
 func verifier_model_verify(verifier_model model, []int input_tokens, []int draft_tokens,
                            int seq_len, int draft_len) []float {
     int vocab_size = model.vocab_size
@@ -258,8 +234,6 @@ func verifier_model_verify(verifier_model model, []int input_tokens, []int draft
     }
     verification_scores
 }
-
-
 func adaptive_speculation_steps(speculative_state state) int {
     if !state.config.use_adaptive_speculation {
         return state.config.max_speculation_steps
@@ -273,8 +247,6 @@ func adaptive_speculation_steps(speculative_state state) int {
     steps = math.min_int(state.config.max_speculation_steps, steps)
     steps
 }
-
-
 func tree_search_generate(draft_model model, []int input_tokens, int seq_len,
                           int width, int depth, float temperature) tree_node {
     tree_node root {
@@ -287,8 +259,6 @@ func tree_search_generate(draft_model model, []int input_tokens, int seq_len,
     build_tree(root, model, input_tokens, seq_len, width, depth, temperature)
     root
 }
-
-
 func build_tree(tree_node node, draft_model model, []int input_tokens, int seq_len,
                 int width, int depth, float temperature) {
     if node.depth >= depth {
@@ -328,8 +298,6 @@ func build_tree(tree_node node, draft_model model, []int input_tokens, int seq_l
         i = i + 1
     }
 }
-
-
 func select_best_path(tree_node root) []int {
     []int path = []int{cap: 10}
     tree_node curr = root
@@ -353,8 +321,6 @@ func select_best_path(tree_node root) []int {
     }
     path
 }
-
-
 func batch_verify(verifier_model model, [][]int input_batches, [][]int draft_batches,
                   int seq_len, int draft_len, int batch_size) [][]float {
     [][]float all_scores = [][]float{cap: batch_size}
@@ -366,8 +332,6 @@ func batch_verify(verifier_model model, [][]int input_batches, [][]int draft_bat
     }
     all_scores
 }
-
-
 func speculative_decode_step(speculative_state state, []int input_tokens, int seq_len) speculative_result {
     speculative_config config = state.config
     int speculation_steps = adaptive_speculation_steps(state)
@@ -433,8 +397,6 @@ func speculative_decode_step(speculative_state state, []int input_tokens, int se
         total_steps: speculation_steps,
     }
 }
-
-
 func speculative_decode_full(speculative_state state, []int input_tokens, int seq_len, int max_len) []int {
     []int output = math.copy_int(input_tokens)
     int pos = seq_len
@@ -449,8 +411,6 @@ func speculative_decode_full(speculative_state state, []int input_tokens, int se
     }
     output
 }
-
-
 func speculative_get_metrics(speculative_state state) speculative_result {
     float total = float(state.accepted_count + state.rejected_count)
     float accept_rate = 0.0
@@ -466,8 +426,6 @@ func speculative_get_metrics(speculative_state state) speculative_result {
         total_steps: state.total_speculation_steps,
     }
 }
-
-
 func speculative_reset(speculative_state state) speculative_state {
     state.draft_tokens = []int{cap: state.config.max_speculation_steps}
     state.verified_tokens = []int{cap: 1024}
@@ -478,4 +436,3 @@ func speculative_reset(speculative_state state) speculative_state {
     state.avg_accept_rate = 0.5
     state
 }
-

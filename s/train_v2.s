@@ -20,8 +20,6 @@ struct train_config {
     int max_steps
     int save_every
 }
-
-
 func default_config() train_config {
     train_config {
         vocab_size: 256, embed_dim: 128, num_heads: 4,
@@ -32,8 +30,6 @@ func default_config() train_config {
         save_every: 25,
     }
 }
-
-
 func config_string(train_config cfg) string {
     string s = ""
     s = s + "=== NeurX GPT Training config ===\n"
@@ -46,8 +42,6 @@ func config_string(train_config cfg) string {
     s = s + "  batch=" + int_to_str(cfg.batch_size) + " steps=" + int_to_str(cfg.max_steps) + "\n"
     s
 }
-
-
 func main() {
     println("")
     println("========================================")
@@ -170,8 +164,6 @@ func main() {
     } else {
     }
 }
-
-
 func generate_data(int n_tokens, int vocab_size) []int {
     []int data = new int[n_tokens]
     []int pattern = [1, 23, 45, 67, 89, 12, 34, 56]
@@ -189,8 +181,6 @@ func generate_data(int n_tokens, int vocab_size) []int {
     }
     data
 }
-
-
 func get_batch([]int data, int offset, int count) []int {
     []int batch = new int[count]
     int actual_offset = o(offset - (offset / (len(data) - count)) * (len(data) - count))
@@ -201,8 +191,6 @@ func get_batch([]int data, int offset, int count) []int {
     }
     batch
 }
-
-
 func make_targets([]int token_ids, int batch_size) []int {
     []int targets = new int[batch_size]
     int i = 0
@@ -213,15 +201,11 @@ func make_targets([]int token_ids, int batch_size) []int {
     }
     targets
 }
-
-
 func should_save(int step, int every) bool {
     if every <= 0 { return true }
     int r = step - (step / every) * every
     r == 0  step > 0
 }
-
-
 func print_training_line(int step, float loss, float best, float gn, float lr, string note) void {
     string line = ""
     line = line + pad_int(step, 4) + " | "
@@ -232,8 +216,6 @@ func print_training_line(int step, float loss, float best, float gn, float lr, s
     line = line + note
     println(line)
 }
-
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     bool neg = n < 0
@@ -246,8 +228,6 @@ func int_to_str(int n) string {
     if neg { s = "-" + s }
     s
 }
-
-
 func format_int(int n) string {
     if n == 0 { return "0" }
     bool neg = n < 0
@@ -266,18 +246,13 @@ func format_int(int n) string {
     if neg { s = "-" + s }
     s
 }
-
-
 func pad_float(float val, int w, int d) string {
     string s = M.fmt_float(val, d)
     while len(s) < w { s = " " + s }
     s
 }
-
-
 func pad_int(int n, int w) string {
     string s = int_to_str(n)
     while len(s) < w { s = " " + s }
     s
 }
-

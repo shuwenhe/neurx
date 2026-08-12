@@ -7,8 +7,6 @@ func new_logger(logger_config cfg) logger {
         message_buffer: [],
     }
 }
-
-
 func log_scalar(
     logger *lg,
     string name,
@@ -33,8 +31,6 @@ func log_scalar(
     }
     flush_if_needed(lg)
 }
-
-
 func log_histogram(
     logger *lg,
     string name,
@@ -55,8 +51,6 @@ func log_histogram(
     }
     lg.metric_buffer.push(entry)
 }
-
-
 func log_text(
     logger *lg,
     string name,
@@ -77,8 +71,6 @@ func log_text(
     entry.metadata["text"] = text
     lg.metric_buffer.push(entry)
 }
-
-
 func log_message(
     logger *lg,
     log_level level,
@@ -95,4 +87,3 @@ func log_message(
         print_message_to_console(lg.config, entry)
     }
 }
-

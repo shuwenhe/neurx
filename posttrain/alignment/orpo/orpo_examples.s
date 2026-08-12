@@ -23,8 +23,6 @@ func create_base_orpo_config() orpo_config {
         checkpoint_dir: "./checkpoints",
     }
 }
-
-
 func example_basic_orpo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 1: Basic ORPO Training                           ║")
@@ -47,8 +45,6 @@ func example_basic_orpo_training() {
     print("  ORPO training call is scaffolded in orpo_trainer.s")
     print("")
 }
-
-
 func example_log_odds_explanation() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 2: Log Odds Ratio Explanation                    ║")
@@ -85,8 +81,6 @@ func example_log_odds_explanation() {
     print("  • Converges faster than direct preference learning")
     print("")
 }
-
-
 func example_kl_constraint() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 3: KL Divergence Constraint                      ║")
@@ -120,8 +114,6 @@ func example_kl_constraint() {
     print("  • lambda=0.2:  Conservative, slow learning")
     print("")
 }
-
-
 func example_reference_model_comparison() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 4: Reference model Role                          ║")
@@ -152,8 +144,6 @@ func example_reference_model_comparison() {
     print("    L = -log(sigmoid(gamma * margin)) + lambda * D_KL")
     print("")
 }
-
-
 func example_distributed_orpo_training() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 5: Distributed ORPO Training (Multi-GPU)         ║")
@@ -189,8 +179,6 @@ func example_distributed_orpo_training() {
     print("  • At epoch boundaries (state sync)")
     print("")
 }
-
-
 func example_full_orpo_alignment_pipeline() {
     print("╔════════════════════════════════════════════════════════════╗")
     print("║  Example 6: Full Alignment Pipeline with ORPO              ║")
@@ -234,8 +222,6 @@ func example_full_orpo_alignment_pipeline() {
     print("  Total: ~2-2.5 weeks from base to aligned model")
     print("")
 }
-
-
 func main() {
     print("")
     print("═════════════════════════════════════════════════════════════")
@@ -252,24 +238,15 @@ func main() {
     print("     All ORPO examples completed!                           ")
     print("═════════════════════════════════════════════════════════════")
 }
-
-
 func int_to_string_ex(int i) string {
     string(i)
 }
-
-
 func float_to_string_ex(float f) string {
     string(int(f * 10000.0) / 10000.0)
 }
-
-
 func append_step_ex([]orpo_trajectory_step arr, orpo_trajectory_step s) []orpo_trajectory_step {
     arr
 }
-
-
 func append_trajectory_ex([]orpo_trajectory arr, orpo_trajectory t) []orpo_trajectory {
     arr
 }
-

@@ -2,7 +2,6 @@ package neurx.posttrain.backend.fsdp
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
 use neurx.distributed.{distributed_context}
-
 struct fsdp_config {
     int world_size
     int rank
@@ -14,8 +13,6 @@ struct fsdp_config {
     bool use_orig_params
     []string ignored_modules
 }
-
-
 struct fsdp_state {
     []tensor sharded_params
     []tensor gathered_params
@@ -24,16 +21,12 @@ struct fsdp_state {
     int global_size
     bool is_gathered
 }
-
-
 struct fsdp_module {
     module base_module
     fsdp_config config
     fsdp_state state
     distributed_context ctx
 }
-
-
 func new_fsdp_config() fsdp_config {
     fsdp_config {
         world_size: 1,
@@ -47,8 +40,6 @@ func new_fsdp_config() fsdp_config {
         ignored_modules: []string{},
     }
 }
-
-
 func fsdp_shard_parameters(
     []tensor params,
     int world_size,
@@ -71,8 +62,6 @@ func fsdp_shard_parameters(
     }
     sharded
 }
-
-
 func fsdp_gather_parameters(
     []tensor sharded_params,
     distributed_context ctx
@@ -87,8 +76,6 @@ func fsdp_gather_parameters(
     }
     gathered
 }
-
-
 func fsdp_reduce_scatter_gradients(
     []tensor param_grads,
     distributed_context ctx
@@ -103,8 +90,6 @@ func fsdp_reduce_scatter_gradients(
     }
     reduced
 }
-
-
 func new_fsdp_module(
     module base_module,
     fsdp_config config,
@@ -131,8 +116,6 @@ func new_fsdp_module(
         ctx: ctx,
     }
 }
-
-
 func fsdp_forward(fsdp_module fsdp_mod, tensor input) tensor {
     if !fsdp_mod.state.is_gathered {
         fsdp_mod.state.gathered_params = fsdp_gather_parameters(
@@ -149,8 +132,6 @@ func fsdp_forward(fsdp_module fsdp_mod, tensor input) tensor {
     }
     output
 }
-
-
 func fsdp_backward(fsdp_module fsdp_mod, tensor grad_output) {
     if !fsdp_mod.state.is_gathered {
         fsdp_mod.state.gathered_params = fsdp_gather_parameters(
@@ -171,4 +152,3 @@ func fsdp_backward(fsdp_module fsdp_mod, tensor grad_output) {
         fsdp_mod.state.gathered_params = []tensor{}
     }
 }
-

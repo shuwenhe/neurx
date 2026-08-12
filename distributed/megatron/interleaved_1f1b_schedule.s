@@ -7,16 +7,12 @@ struct interleaved_config {
     int microbatch_group_size_per_vp_stage
     bool forward_only
 }
-
-
 struct interleaved_plan {
     int total_num_microbatches
     bool are_all_microbatches_in_warmup
     int num_warmup_microbatches
     int num_microbatches_remaining
 }
-
-
 struct schedule_op {
     string op_type
     int virtual_microbatch_id
@@ -24,8 +20,6 @@ struct schedule_op {
     int microbatch_id
     bool is_forward
 }
-
-
 func compute_warmup_microbatches(interleaved_config config) interleaved_plan {
     int total_num_microbatches = config.num_microbatches * config.num_model_chunks
     bool all_in_warmup = false
@@ -52,8 +46,6 @@ func compute_warmup_microbatches(interleaved_config config) interleaved_plan {
         num_microbatches_remaining: remaining,
     }
 }
-
-
 func get_model_chunk_id(
     interleaved_config config,
     int virtual_microbatch_id,
@@ -68,8 +60,6 @@ func get_model_chunk_id(
     }
     return model_chunk_id
 }
-
-
 func get_microbatch_id_in_model_chunk(
     interleaved_config config,
     int virtual_microbatch_id
@@ -80,8 +70,6 @@ func get_microbatch_id_in_model_chunk(
     int microbatch_id_in_group = pp_mod(virtual_microbatch_id, group_size)
     return group_idx * group_size + microbatch_id_in_group
 }
-
-
 func build_interleaved_schedule(interleaved_config config) []schedule_op {
     interleaved_plan plan = compute_warmup_microbatches(config)
     []schedule_op ops = make([]schedule_op, 0)
@@ -136,8 +124,6 @@ func build_interleaved_schedule(interleaved_config config) []schedule_op {
     }
     return ops
 }
-
-
 func pp_mod(int val, int div) int {
     int r = val - (val / div) * div
     if r < 0 {
@@ -145,4 +131,3 @@ func pp_mod(int val, int div) int {
     }
     return r
 }
-

@@ -1,6 +1,5 @@
 package interactive_chat
 use neurx.runtime.io.{runtime_run_command_output}
-
 func main() {
     print("\n╔═══════════════════════════════════════════════╗\n")
     print("║  NeurX Interactive model Chat (Pure S)       ║\n")
@@ -20,4 +19,3 @@ func main() {
         print("Assistant: Medical response to: " + input + "\n\n")
     }
 }
-

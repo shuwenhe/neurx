@@ -10,8 +10,6 @@ func copy_float([]float data) []float {
     }
     out
 }
-
-
 func copy_int([]int data) []int {
     int n = len(data)
     []int out = []int{cap: n}
@@ -22,8 +20,6 @@ func copy_int([]int data) []int {
     }
     out
 }
-
-
 func shape3(int a, int b, int c) []int {
     []int s = []int{cap: 3}
     s[0] = a
@@ -31,8 +27,6 @@ func shape3(int a, int b, int c) []int {
     s[2] = c
     s
 }
-
-
 func shape4(int a, int b, int c, int d) []int {
     []int s = []int{cap: 4}
     s[0] = a
@@ -41,13 +35,9 @@ func shape4(int a, int b, int c, int d) []int {
     s[3] = d
     s
 }
-
-
 func out_size(int in_size, int kernel, int stride, int padding) int {
     (in_size + 2 * padding - kernel) / stride + 1
 }
-
-
 func max_pool1d(tensor input, int kernel_size, int stride, int padding) tensor {
     int batch = input.shape[0]
     int channels = input.shape[1]
@@ -82,8 +72,6 @@ func max_pool1d(tensor input, int kernel_size, int stride, int padding) tensor {
     }
     neurx.tensor.new(out, shape3(batch, channels, out_len), input.requires_grad)
 }
-
-
 func avg_pool1d(tensor input, int kernel_size, int stride, int padding) tensor {
     int batch = input.shape[0]
     int channels = input.shape[1]
@@ -121,8 +109,6 @@ func avg_pool1d(tensor input, int kernel_size, int stride, int padding) tensor {
     }
     neurx.tensor.new(out, shape3(batch, channels, out_len), input.requires_grad)
 }
-
-
 func adaptive_avg_pool1d(tensor input, int out_len) tensor {
     int batch = input.shape[0]
     int channels = input.shape[1]
@@ -160,8 +146,6 @@ func adaptive_avg_pool1d(tensor input, int out_len) tensor {
     }
     neurx.tensor.new(out, shape3(batch, channels, out_len), input.requires_grad)
 }
-
-
 func adaptive_max_pool1d(tensor input, int out_len) tensor {
     int batch = input.shape[0]
     int channels = input.shape[1]
@@ -196,8 +180,6 @@ func adaptive_max_pool1d(tensor input, int out_len) tensor {
     }
     neurx.tensor.new(out, shape3(batch, channels, out_len), input.requires_grad)
 }
-
-
 func max_pool2d(tensor input, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w) tensor {
     int batch = input.shape[0]
     int channels = input.shape[1]
@@ -244,8 +226,6 @@ func max_pool2d(tensor input, int kernel_h, int kernel_w, int stride_h, int stri
     }
     neurx.tensor.new(out, shape4(batch, channels, out_h, out_w), input.requires_grad)
 }
-
-
 func avg_pool2d(tensor input, int kernel_h, int kernel_w, int stride_h, int stride_w, int pad_h, int pad_w) tensor {
     int batch = input.shape[0]
     int channels = input.shape[1]
@@ -295,8 +275,6 @@ func avg_pool2d(tensor input, int kernel_h, int kernel_w, int stride_h, int stri
     }
     neurx.tensor.new(out, shape4(batch, channels, out_h, out_w), input.requires_grad)
 }
-
-
 func adaptive_avg_pool2d(tensor input, int out_h, int out_w) tensor {
     int batch = input.shape[0]
     int channels = input.shape[1]
@@ -348,8 +326,6 @@ func adaptive_avg_pool2d(tensor input, int out_h, int out_w) tensor {
     }
     neurx.tensor.new(out, shape4(batch, channels, out_h, out_w), input.requires_grad)
 }
-
-
 func adaptive_max_pool2d(tensor input, int out_h, int out_w) tensor {
     int batch = input.shape[0]
     int channels = input.shape[1]
@@ -398,8 +374,6 @@ func adaptive_max_pool2d(tensor input, int out_h, int out_w) tensor {
     }
     neurx.tensor.new(out, shape4(batch, channels, out_h, out_w), input.requires_grad)
 }
-
-
 func interpolate1d(tensor input, int out_len) tensor {
     int batch = input.shape[0]
     int channels = input.shape[1]
@@ -430,8 +404,6 @@ func interpolate1d(tensor input, int out_len) tensor {
     }
     neurx.tensor.new(out, shape3(batch, channels, out_len), input.requires_grad)
 }
-
-
 func interpolate2d(tensor input, int out_h, int out_w) tensor {
     int batch = input.shape[0]
     int channels = input.shape[1]
@@ -474,4 +446,3 @@ func interpolate2d(tensor input, int out_h, int out_w) tensor {
     }
     neurx.tensor.new(out, shape4(batch, channels, out_h, out_w), input.requires_grad)
 }
-

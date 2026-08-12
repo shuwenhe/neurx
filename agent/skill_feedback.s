@@ -10,8 +10,6 @@ struct agent_skill_feedback_state {
     int step
     bool success
 }
-
-
 func new_agent_skill_feedback_state() agent_skill_feedback_state {
     agent_skill_feedback_state {
         skill_name: "",
@@ -22,8 +20,6 @@ func new_agent_skill_feedback_state() agent_skill_feedback_state {
         success: false,
     }
 }
-
-
 func agent_skill_feedback_from_trace(agent_trace_state trace_state, agent_memory_state memory_state) agent_skill_feedback_state {
     string task = agent_trace_last_task(trace_state)
     string action = agent_trace_last_action(trace_state)
@@ -53,14 +49,9 @@ func agent_skill_feedback_from_trace(agent_trace_state trace_state, agent_memory
         success: success,
     }
 }
-
-
 func agent_skill_feedback_state_dict(agent_skill_feedback_state state) agent_skill_feedback_state {
     state
 }
-
-
 func agent_skill_feedback_load_state_dict(agent_skill_feedback_state state, agent_skill_feedback_state other) agent_skill_feedback_state {
     other
 }
-

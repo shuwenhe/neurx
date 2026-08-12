@@ -19,23 +19,17 @@ type evaluator struct {
     accumulation_steps: int
     history: []evaluation_metrics
 }
-
-
 func (e *evaluator) init(batch_size: int, accumulation_steps: int) {
     e.batch_size = batch_size
     e.accumulation_steps = accumulation_steps
     e.history = make([]evaluation_metrics, 0)
 }
-
-
 func calculate_perplexity(loss: float): float {
     if loss < 0 {
         return -1.0
     }
     return math.Exp(loss)
 }
-
-
 func calculate_cross_entropy(logits: []float, labels: []int): float {
     total_loss := 0.0
     for i := 0; i < len(labels); i++ {
@@ -57,8 +51,6 @@ func calculate_cross_entropy(logits: []float, labels: []int): float {
     }
     return 0.0
 }
-
-
 func (e *evaluator) evaluate(
     step: int,
     train_loss: float,
@@ -90,8 +82,6 @@ func (e *evaluator) evaluate(
     e.history = append(e.history, metrics)
     return metrics
 }
-
-
 func (e *evaluator) best_perplexity(): float {
     if len(e.history) == 0 {
         return math.MaxFloat
@@ -104,8 +94,6 @@ func (e *evaluator) best_perplexity(): float {
     }
     return best
 }
-
-
 func (e *evaluator) convergence_info(): map[string]interface{} {
     if len(e.history) < 2 {
         return map[string]interface{}{
@@ -136,8 +124,6 @@ func (e *evaluator) convergence_info(): map[string]interface{} {
         "metrics_count": len(e.history),
     }
 }
-
-
 func (e *evaluator) generate_report(): string {
     report := "=== NeurX Training Evaluation Report ===\n\n"
     if len(e.history) == 0 {
@@ -172,8 +158,6 @@ func (e *evaluator) generate_report(): string {
     }
     return report
 }
-
-
 func (e *evaluator) export_json(): string {
     data := map[string]interface{}{
         "total_evaluations": len(e.history),
@@ -184,18 +168,12 @@ func (e *evaluator) export_json(): string {
     json_bytes, _ := json.Marshal(data)
     return string(json_bytes)
 }
-
-
 func format_float(f: float): string {
     return fmt.Sprintf("%.4f", f)
 }
-
-
 func format_int(i: int): string {
     return fmt.Sprintf("%d", i)
 }
-
-
 func main() {
     evaluator := &evaluator{}
     evaluator.init(32, 4)
@@ -217,4 +195,3 @@ func main() {
     println("\nJSON Export:")
     println(evaluator.export_json())
 }
-

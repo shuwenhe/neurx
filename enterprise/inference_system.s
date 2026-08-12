@@ -1,5 +1,4 @@
 package neurx.enterprise.inference_system
-
 use neurx.backends.cuda_core
 use neurx.compute.cuda_matmul
 use neurx.quantization.quant_core
@@ -7,37 +6,28 @@ use neurx.api.openai_compatible
 use neurx.distributed.rank_manager
 use neurx.distributed.tensor_parallel
 use neurx.observability.metrics
-
 struct enterprise_inference_config {
-
     int gpu_device_id
     bool enable_cuda
     int cuda_max_batch_size
-
     string model_name
     string model_path
     int model_layers
     int model_hidden_size
     int model_vocab_size
-
     bool enable_quantization
     string quantization_type
     string quantization_granularity
-
     string api_host
     int api_port
     bool enable_openai_api
-
     bool enable_distributed
     int tensor_parallel_degree
     int pipeline_parallel_degree
     string distributed_backend
-
     bool enable_metrics
     bool enable_prometheus
 }
-
-
 struct enterprise_inference_system {
     enterprise_inference_config config
     cuda_core.cuda_context gpu_context
@@ -47,18 +37,12 @@ struct enterprise_inference_system {
     metrics.inference_metrics system_metrics
     bool initialized
 }
-
-
 func init_enterprise_system(enterprise_inference_config cfg) enterprise_inference_system {
-
     cuda_core.cuda_device gpu_device = cuda_core.cuda_device_init(cfg.gpu_device_id)
     cuda_core.cuda_context gpu_ctx = cuda_core.cuda_context_create(cfg.gpu_device_id)
-
     rank_manager.rank_config rank_cfg = rank_manager.rank_init_from_env()
     rank_manager.distributed_context dist_ctx = rank_manager.distributed_context_init(rank_cfg)
-
     metrics.inference_metrics sys_metrics = metrics.init_inference_metrics()
-
     enterprise_inference_system {
         config: cfg,
         gpu_context: gpu_ctx,
@@ -83,21 +67,15 @@ func init_enterprise_system(enterprise_inference_config cfg) enterprise_inferenc
         initialized: true,
     }
 }
-
-
 func inference_single(
     enterprise_inference_system sys,
     string prompt,
     int max_new_tokens,
     float temperature,
 ) string {
-
     int start_time = get_timestamp()
-
     sys.system_metrics.requests_in_progress.value = sys.system_metrics.requests_in_progress.value + 1.0
-
     []int input_tokens = tokenize_prompt(prompt)
-
     cuda_matmul.matrix input_matrix = cuda_matmul.matrix{
         rows: 1,
         cols: input_tokens.len,
@@ -105,56 +83,42 @@ func inference_single(
         cuda_buffer: cuda_core.cuda_malloc(sys.gpu_context, input_tokens.len * 4),
         dtype: "float32",
     }
-
     cuda_core.cuda_memcpy_h2d(sys.gpu_context, []float{}, input_matrix.cuda_buffer, input_tokens.len * 4)
-
     []int generated_tokens = []int{}
     int token_idx = 0
     while token_idx < max_new_tokens {
-
         cuda_matmul.matmul_config config = cuda_matmul.matmul_config{
             compute_type: "float32",
             use_tensor_cores: true,
             thread_block_size: 256,
             async_enabled: true,
         }
-
         cuda_matmul.matmul_result result = cuda_matmul.cuda_matmul(
             sys.gpu_context,
             input_matrix,
             cuda_matmul.matrix{rows: 0, cols: 0, device_id: 0, cuda_buffer: 0, dtype: "float32"},
             config,
         )
-
         int next_token = 1000 + token_idx
         generated_tokens = append_int(generated_tokens, next_token)
-
         token_idx = token_idx + 1
     }
-
     cuda_core.cuda_stream_synchronize(sys.gpu_context, 0)
-
     string output_text = decode_tokens(generated_tokens)
-
     int end_time = get_timestamp()
     float latency_ms = float(end_time - start_time)
     sys.system_metrics = metrics.record_request(sys.system_metrics, true, latency_ms)
     sys.system_metrics.requests_in_progress.value = sys.system_metrics.requests_in_progress.value - 1.0
-
     output_text
 }
-
-
 func inference_batch(
     enterprise_inference_system sys,
     []string prompts,
     int max_new_tokens,
 ) []string {
     int start_time = get_timestamp()
-
     int batch_size = prompts.len
     sys.system_metrics.requests_in_progress.value = float(batch_size)
-
     []string outputs = []string{}
     int i = 0
     while i < batch_size {
@@ -162,26 +126,20 @@ func inference_batch(
         outputs = append_str(outputs, output)
         i = i + 1
     }
-
     int end_time = get_timestamp()
     float latency_ms = float(end_time - start_time)
     sys.system_metrics = metrics.record_batch(sys.system_metrics, batch_size, latency_ms)
-
     outputs
 }
-
-
 func inference_distributed(
     enterprise_inference_system sys,
     string prompt,
     int max_new_tokens,
 ) string {
-
     []int input_tokens = []int{}
     if sys.dist_context.config.rank == 0 {
         input_tokens = tokenize_prompt(prompt)
     }
-
     int input_len = input_tokens.len
     if sys.dist_context.config.rank != 0 {
         input_tokens = []int{}
@@ -191,47 +149,33 @@ func inference_distributed(
             i = i + 1
         }
     }
-
     int tp_rank = rank_manager.get_tensor_parallel_rank(sys.dist_context)
     int tp_world = sys.dist_context.config.world_size
-
     sys.dist_context = rank_manager.distributed_barrier(sys.dist_context, 0)
-
     string output_text = ""
     if sys.dist_context.config.rank == 0 {
         output_text = "Distributed inference result"
     }
-
     output_text
 }
-
-
 func inference_quantized(
     enterprise_inference_system sys,
     string prompt,
     int max_new_tokens,
 ) string {
-
     if sys.config.enable_quantization {
-
         []float dequant_weights = quant_core.dequantize_int8(sys.model_weights_quantized)
-
     }
-
     inference_single(sys, prompt, max_new_tokens, 0.7)
 }
-
-
 func handle_openai_request(
     enterprise_inference_system sys,
     openai_compatible.chat_completion_request req,
 ) openai_compatible.chat_completion_response {
-
     string prompt = ""
     if req.messages.len > 0 {
         prompt = req.messages[req.messages.len - 1].content
     }
-
     string output = ""
     if sys.config.enable_quantization {
         output = inference_quantized(sys, prompt, req.max_tokens)
@@ -240,7 +184,6 @@ func handle_openai_request(
     } else {
         output = inference_single(sys, prompt, req.max_tokens, req.temperature)
     }
-
     openai_compatible.chat_completion_response {
         id: "chatcmpl-" + int_to_str(get_timestamp()),
         object: "chat.completion",
@@ -263,18 +206,12 @@ func handle_openai_request(
         },
     }
 }
-
-
 func get_metrics_json(enterprise_inference_system sys) string {
     return metrics.export_prometheus_metrics(sys.system_metrics)
 }
-
-
 func get_health_status(enterprise_inference_system sys) metrics.health_status {
     return metrics.check_system_health(sys.system_metrics)
 }
-
-
 func tokenize_prompt(string prompt) []int {
     []int tokens = []int{}
     int i = 0
@@ -284,8 +221,6 @@ func tokenize_prompt(string prompt) []int {
     }
     tokens
 }
-
-
 func decode_tokens([]int tokens) string {
     string result = ""
     int i = 0
@@ -295,13 +230,9 @@ func decode_tokens([]int tokens) string {
     }
     result
 }
-
-
 func get_timestamp() int {
     1234567890
 }
-
-
 func append_int([]int slice, int elem) []int {
     new_slice := make_int(slice.len + 1)
     int i = 0
@@ -312,8 +243,6 @@ func append_int([]int slice, int elem) []int {
     new_slice[slice.len] = elem
     new_slice
 }
-
-
 func append_str([]string slice, string elem) []string {
     new_slice := make_str(slice.len + 1)
     int i = 0
@@ -324,18 +253,12 @@ func append_str([]string slice, string elem) []string {
     new_slice[slice.len] = elem
     new_slice
 }
-
-
 func make_int(int len) []int {
     []int{}
 }
-
-
 func make_str(int len) []string {
     []string{}
 }
-
-
 func int_to_str(int n) string {
     if n == 0 {
         return "0"
@@ -354,4 +277,3 @@ func int_to_str(int n) string {
     }
     return s
 }
-

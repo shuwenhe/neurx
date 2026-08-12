@@ -6,24 +6,18 @@ struct speculative_config {
     bool enable_early_exit
     int max_draft_attempts
 }
-
-
 struct draft_model_state {
     int hidden_size
     int vocab_size
     int num_layers
     []float weights
 }
-
-
 struct target_model_state {
     int hidden_size
     int vocab_size
     int num_layers
     []float weights
 }
-
-
 struct speculation_result {
     []int accepted_tokens
     []int rejected_tokens
@@ -31,8 +25,6 @@ struct speculation_result {
     int draft_time_ms
     int verify_time_ms
 }
-
-
 struct speculative_decoder_state {
     speculative_config config
     draft_model_state draft_model
@@ -41,8 +33,6 @@ struct speculative_decoder_state {
     int total_accepted_tokens
     float cumulative_acceptance_rate
 }
-
-
 func new_speculative_decoder(
     speculative_config config,
     target_model_state target_model) speculative_decoder_state {
@@ -61,14 +51,10 @@ func new_speculative_decoder(
         cumulative_acceptance_rate: 0.0,
     }
 }
-
-
 struct decode_result {
     speculative_decoder_state state
     []int generated_tokens
 }
-
-
 func speculative_decode(
     speculative_decoder_state state,
     []int prompt_tokens,
@@ -126,8 +112,6 @@ func speculative_decode(
     }
     return decode_result{state: state, generated_tokens: all_generated}
 }
-
-
 func draft_model_generate(
     draft_model_state model,
     []int context,
@@ -149,8 +133,6 @@ func draft_model_generate(
     }
     return draft_tokens
 }
-
-
 func verify_draft_tokens(
     target_model_state model,
     []int context,
@@ -190,8 +172,6 @@ func verify_draft_tokens(
         verify_time_ms: 0,
     }
 }
-
-
 func draft_model_forward(
     draft_model_state model,
     []int tokens) []float {
@@ -204,8 +184,6 @@ func draft_model_forward(
     }
     return logits
 }
-
-
 func target_model_forward_sequence(
     target_model_state model,
     []int context,
@@ -224,8 +202,6 @@ func target_model_forward_sequence(
     }
     return all_logits
 }
-
-
 func target_model_generate_single(
     target_model_state model,
     []int context) int {
@@ -237,8 +213,6 @@ func target_model_generate_single(
     }
     return sample_token(logits, 1.0, 0.9, 50)
 }
-
-
 func softmax_prob(
     []float logits,
     int offset,
@@ -261,8 +235,6 @@ func softmax_prob(
     float token_prob = exp_approx(logits[offset + token_id] - max_logit) / sum_exp
     return token_prob
 }
-
-
 func sample_token(
     []float logits,
     float temperature,
@@ -289,8 +261,6 @@ func sample_token(
     }
     return sampled_token
 }
-
-
 func exp_approx(float x) float {
     if x < -10.0 {
         return 0.0
@@ -308,13 +278,9 @@ func exp_approx(float x) float {
     }
     return result
 }
-
-
 func get_time_ms() int {
     return 0
 }
-
-
 func speculative_decoder_get_stats(
     speculative_decoder_state state) speculative_stats {
     float speedup = 1.0
@@ -329,12 +295,9 @@ func speculative_decoder_get_stats(
         speedup_factor: speedup,
     }
 }
-
-
 struct speculative_stats {
     int total_draft_tokens
     int total_accepted_tokens
     float acceptance_rate
     float speedup_factor
 }
-

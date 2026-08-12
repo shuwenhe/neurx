@@ -6,8 +6,6 @@ enum model_type {
     PHI
     GEMMA
 }
-
-
 struct architecture_config {
     name string
     model_type model_type
@@ -38,8 +36,6 @@ var global_registry model_registry_state = model_registry_state {
     configs: make(map[string]architecture_config),
     is_initialized: false,
 }
-
-
 func InitializeRegistry() {
     if global_registry.is_initialized {
         return
@@ -49,8 +45,6 @@ func InitializeRegistry() {
     register_mixtral_models()
     global_registry.is_initialized = true
 }
-
-
 func RegisterModel(
     arch_name string,
     config architecture_config,
@@ -63,24 +57,18 @@ func RegisterModel(
     global_registry.configs[arch_name] = config
     return true
 }
-
-
 func GetArchitectureConfig(arch_name string) architecture_config {
     if config, ok := global_registry.configs[arch_name]; ok {
         return config
     }
     return architecture_config{}
 }
-
-
 func CreateModel(arch_name string, config architecture_config) any {
     if factory, ok := global_registry.factories[arch_name]; ok {
         return factory(config)
     }
     return nil
 }
-
-
 func ListAvailableModels() []string {
     models := make([]string, 0)
     for name := range global_registry.factories {
@@ -88,8 +76,6 @@ func ListAvailableModels() []string {
     }
     return models
 }
-
-
 func register_qwen_models() {
     qwen_config := architecture_config {
         name: "Qwen2.5-7B",
@@ -126,8 +112,6 @@ func register_qwen_models() {
         },
     )
 }
-
-
 func register_llama_models() {
     llama_config := architecture_config {
         name: "Llama-2-7B",
@@ -150,8 +134,6 @@ func register_llama_models() {
         },
     )
 }
-
-
 func register_mixtral_models() {
     mixtral_config := architecture_config {
         name: "Mixtral-8x7B",
@@ -174,8 +156,6 @@ func register_mixtral_models() {
         },
     )
 }
-
-
 func main() {
     InitializeRegistry()
     models := ListAvailableModels()
@@ -186,4 +166,3 @@ func main() {
         println("  Layers:", config.num_hidden_layers)
     }
 }
-

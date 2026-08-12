@@ -4,8 +4,6 @@ struct robotics_deploy_state {
     bool running
     bool emergency_stop
 }
-
-
 func new_robotics_deploy_state(string target_name) robotics_deploy_state {
     robotics_deploy_state {
         target_name: target_name,
@@ -13,18 +11,12 @@ func new_robotics_deploy_state(string target_name) robotics_deploy_state {
         emergency_stop: false,
     }
 }
-
-
 func robotics_deploy_state_dict(robotics_deploy_state state) robotics_deploy_state {
     state
 }
-
-
 func robotics_deploy_load_state_dict(robotics_deploy_state state, robotics_deploy_state other) robotics_deploy_state {
     other
 }
-
-
 func robotics_deploy_start(robotics_deploy_state state) robotics_deploy_state {
     robotics_deploy_state {
         target_name: state.target_name,
@@ -32,8 +24,6 @@ func robotics_deploy_start(robotics_deploy_state state) robotics_deploy_state {
         emergency_stop: state.emergency_stop,
     }
 }
-
-
 func robotics_deploy_stop(robotics_deploy_state state) robotics_deploy_state {
     robotics_deploy_state {
         target_name: state.target_name,
@@ -41,8 +31,6 @@ func robotics_deploy_stop(robotics_deploy_state state) robotics_deploy_state {
         emergency_stop: state.emergency_stop,
     }
 }
-
-
 func robotics_deploy_trigger_emergency_stop(robotics_deploy_state state) robotics_deploy_state {
     robotics_deploy_state {
         target_name: state.target_name,
@@ -50,4 +38,3 @@ func robotics_deploy_trigger_emergency_stop(robotics_deploy_state state) robotic
         emergency_stop: true,
     }
 }
-

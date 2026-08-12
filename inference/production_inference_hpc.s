@@ -6,13 +6,9 @@ func print_line(string text) {
     print(text)
     print("\n")
 }
-
-
 func read_user_line() string {
     trim(__sys_read_string(0, 4096))
 }
-
-
 func parse_positive_int(string text, int fallback) int {
     if len(text) == 0 {
         return fallback
@@ -32,8 +28,6 @@ func parse_positive_int(string text, int fallback) int {
     }
     value
 }
-
-
 func main() {
     string model_path = resolve_model_path_from_env()
     int max_new_tokens = parse_positive_int(runtime_env_get("NEURX_CHAT_MAX_NEW_TOKENS", runtime_env_get("NEURX_MAX_TOKENS", "128")), 128)
@@ -95,4 +89,3 @@ func main() {
         print_line("")
     }
 }
-

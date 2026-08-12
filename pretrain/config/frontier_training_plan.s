@@ -14,8 +14,6 @@ struct frontier_model_target {
     int moe_top_k
     bool multimodal
 }
-
-
 struct frontier_data_plan {
     int target_tokens_billion
     int high_quality_tokens_billion
@@ -28,8 +26,6 @@ struct frontier_data_plan {
     bool toxicity_filter
     bool eval_contamination_filter
 }
-
-
 struct frontier_cluster_plan {
     int gpu_count
     int gpu_memory_gb
@@ -42,8 +38,6 @@ struct frontier_cluster_plan {
     int zero_stage
     bool elastic_recovery
 }
-
-
 struct frontier_train_recipe {
     int global_batch_tokens
     int sequence_length
@@ -59,8 +53,6 @@ struct frontier_train_recipe {
     bool flash_attention
     bool fused_optimizer
 }
-
-
 struct frontier_capability {
     string key
     string area
@@ -70,8 +62,6 @@ struct frontier_capability {
     string implementation_path
     string required_work
 }
-
-
 struct frontier_audit {
     []frontier_capability capabilities
     int total
@@ -82,8 +72,6 @@ struct frontier_audit {
     float readiness_score
     bool can_launch_frontier_run
 }
-
-
 func default_gpt55_class_target() frontier_model_target {
     frontier_model_target {
         name: "neurx-gpt-frontier",
@@ -101,8 +89,6 @@ func default_gpt55_class_target() frontier_model_target {
         multimodal: true,
     }
 }
-
-
 func default_frontier_data_plan() frontier_data_plan {
     frontier_data_plan {
         target_tokens_billion: 20000,
@@ -117,8 +103,6 @@ func default_frontier_data_plan() frontier_data_plan {
         eval_contamination_filter: true,
     }
 }
-
-
 func default_frontier_cluster_plan() frontier_cluster_plan {
     frontier_cluster_plan {
         gpu_count: 8192,
@@ -133,8 +117,6 @@ func default_frontier_cluster_plan() frontier_cluster_plan {
         elastic_recovery: true,
     }
 }
-
-
 func default_frontier_train_recipe() frontier_train_recipe {
     frontier_train_recipe {
         global_batch_tokens: 4194304,
@@ -152,8 +134,6 @@ func default_frontier_train_recipe() frontier_train_recipe {
         fused_optimizer: true,
     }
 }
-
-
 func make_capability(
     string key,
     string area,
@@ -173,8 +153,6 @@ func make_capability(
         required_work: work,
     }
 }
-
-
 func current_neurx_frontier_capabilities() []frontier_capability {
     []frontier_capability caps = []frontier_capability{cap: 16}
     caps[0] = make_capability(
@@ -323,8 +301,6 @@ func current_neurx_frontier_capabilities() []frontier_capability {
     )
     caps
 }
-
-
 func frontier_status_score(string status) int {
     if status == "ready" {
         return 2
@@ -334,8 +310,6 @@ func frontier_status_score(string status) int {
     }
     0
 }
-
-
 func audit_frontier_readiness([]frontier_capability caps) frontier_audit {
     int total = len(caps)
     int ready = 0
@@ -373,13 +347,9 @@ func audit_frontier_readiness([]frontier_capability caps) frontier_audit {
         can_launch_frontier_run: blockers == 0,
     }
 }
-
-
 func default_frontier_audit() frontier_audit {
     audit_frontier_readiness(current_neurx_frontier_capabilities())
 }
-
-
 func frontier_launch_decision(frontier_audit audit) string {
     if audit.can_launch_frontier_run {
         return "launch_allowed"
@@ -389,8 +359,6 @@ func frontier_launch_decision(frontier_audit audit) string {
     }
     "launch_blocked_foundation_incomplete"
 }
-
-
 func next_frontier_p0_work(frontier_audit audit) []frontier_capability {
     []frontier_capability work = []frontier_capability{cap: audit.total}
     int out = 0
@@ -405,4 +373,3 @@ func next_frontier_p0_work(frontier_audit audit) []frontier_capability {
     }
     work
 }
-

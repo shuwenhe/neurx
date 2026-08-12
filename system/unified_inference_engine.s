@@ -1,8 +1,6 @@
 package neurx.system.unified_inference_engine
-
 import "neurx.attention.paged_attention_memory"
 import "neurx.scheduler.continuous_batch_scheduler"
-
 struct unified_inference_config {
     bool enable_paged_attention
     bool enable_continuous_batching
@@ -16,8 +14,6 @@ struct unified_inference_config {
     float draft_model_ratio
     int num_draft_tokens
 }
-
-
 struct unified_inference_engine {
     unified_inference_config config
     paged_attention_memory.paged_kv_cache_manager kv_cache_mgr
@@ -29,8 +25,6 @@ struct unified_inference_engine {
     int total_requests_served
     int total_tokens_generated
 }
-
-
 func new_unified_inference_engine(
     unified_inference_config config
 ) unified_inference_engine {
@@ -41,11 +35,9 @@ func new_unified_inference_engine(
         config.num_heads,
         config.hidden_dim,
     )
-
     batch_sched := continuous_batch_scheduler.new_continuous_batch_scheduler(
         config.batch_capacity,
     )
-
     unified_inference_engine {
         config: config,
         kv_cache_mgr: kv_mgr,
@@ -58,8 +50,6 @@ func new_unified_inference_engine(
         total_tokens_generated: 0,
     }
 }
-
-
 func submit_inference_request(
     unified_inference_engine engine,
     int request_id,
@@ -80,22 +70,16 @@ func submit_inference_request(
     )
     engine
 }
-
-
 func execute_inference_iteration(
     unified_inference_engine engine
 ) unified_inference_engine {
-
     engine.batch_sched = continuous_batch_scheduler.schedule_batch(engine.batch_sched)
-
     if engine.config.enable_paged_attention {
         prefill_batch := continuous_batch_scheduler.get_prefill_batch(engine.batch_sched)
-
         i := 0
         for i < prefill_batch.num_requests {
             req_id := prefill_batch.request_ids[i]
             req := continuous_batch_scheduler.get_request(engine.batch_sched, req_id)
-
             if engine.config.enable_paged_attention {
                 engine.kv_cache_mgr, _ = paged_attention_memory.allocate_blocks(
                     engine.kv_cache_mgr,
@@ -103,32 +87,25 @@ func execute_inference_iteration(
                     req.num_prefill_tokens,
                 )
             }
-
             i = i + 1
         }
     }
-
     decode_batch := continuous_batch_scheduler.get_decode_batch(engine.batch_sched)
     i := 0
     for i < decode_batch.num_requests {
         req_id := decode_batch.request_ids[i]
-
         token_id := 100 + (req_id * 10) + engine.iteration_count
         engine.batch_sched = continuous_batch_scheduler.record_decode_step(
             engine.batch_sched,
             req_id,
             token_id,
         )
-
         i = i + 1
     }
-
     engine.iteration_count = engine.iteration_count + 1
     engine.total_tokens_generated = engine.total_tokens_generated + decode_batch.num_requests
     engine
 }
-
-
 func run_inference_loop(
     unified_inference_engine engine,
     int max_iterations
@@ -136,30 +113,22 @@ func run_inference_loop(
     i := 0
     for i < max_iterations {
         engine = execute_inference_iteration(engine)
-
         prefill := continuous_batch_scheduler.get_prefill_batch(engine.batch_sched)
         decode := continuous_batch_scheduler.get_decode_batch(engine.batch_sched)
-
         if prefill.num_requests == 0 && decode.num_requests == 0 {
             break
         }
-
         i = i + 1
     }
-
     engine
 }
-
-
 func get_engine_stats(unified_inference_engine engine) string {
     sched_stats := continuous_batch_scheduler.get_scheduler_stats(engine.batch_sched)
     cache_stats := paged_attention_memory.get_cache_stats(engine.kv_cache_mgr)
-
     speedup := 1.0
     if engine.latency_baseline > 0.0 {
         speedup = engine.latency_baseline / engine.latency_with_optimization
     }
-
     "========== Unified Inference Engine Stats ==========\n" +
     "\n--- Scheduler Stats ---\n" +
     sched_stats +
@@ -180,8 +149,6 @@ func get_engine_stats(unified_inference_engine engine) string {
     "Max Blocks: " + string(engine.config.max_blocks) + "\n" +
     "Block Size: " + string(engine.config.block_size) + "\n"
 }
-
-
 func complete_all_requests(
     unified_inference_engine engine
 ) unified_inference_engine {
@@ -198,8 +165,6 @@ func complete_all_requests(
     }
     engine
 }
-
-
 func reset_engine(unified_inference_engine engine) unified_inference_engine {
     engine.kv_cache_mgr = paged_attention_memory.new_paged_kv_cache_manager(
         engine.config.max_blocks,
@@ -208,13 +173,10 @@ func reset_engine(unified_inference_engine engine) unified_inference_engine {
         engine.config.num_heads,
         engine.config.hidden_dim,
     )
-
     engine.batch_sched = continuous_batch_scheduler.reset_scheduler(engine.batch_sched)
     engine.iteration_count = 0
     engine
 }
-
-
 func update_config(
     unified_inference_engine engine,
     unified_inference_config new_config
@@ -231,8 +193,6 @@ func update_config(
         total_tokens_generated: engine.total_tokens_generated,
     }
 }
-
-
 func set_performance_baseline(
     unified_inference_engine engine,
     float baseline_latency,
@@ -242,7 +202,6 @@ func set_performance_baseline(
     if baseline_latency > 0.0 {
         speedup = baseline_latency / optimized_latency
     }
-
     unified_inference_engine {
         config: engine.config,
         kv_cache_mgr: engine.kv_cache_mgr,
@@ -255,8 +214,5 @@ func set_performance_baseline(
         total_tokens_generated: engine.total_tokens_generated,
     }
 }
-
-
 func main() {
 }
-

@@ -6,8 +6,6 @@ struct mmlu_task {
     int num_questions
     bool is_included
 }
-
-
 struct mmlu_question {
     string task_name
     string question
@@ -18,8 +16,6 @@ struct mmlu_question {
     string correct_answer
     int qid
 }
-
-
 func mmlu_task_list() []mmlu_task {
     []mmlu_task tasks = []mmlu_task{}
     tasks = append(tasks, mmlu_task{name: "abstract_algebra", category: "STEM", num_questions: 100, is_included: true})
@@ -72,8 +68,6 @@ func mmlu_task_list() []mmlu_task {
     tasks = append(tasks, mmlu_task{name: "college_physics", category: "Other", num_questions: 102, is_included: true})
     tasks
 }
-
-
 struct mmlu_dataset_state {
     map[string][]mmlu_question questions_by_task
     map[string][]mmlu_question dev_by_task
@@ -82,8 +76,6 @@ struct mmlu_dataset_state {
     int total_dev
     bool is_loaded
 }
-
-
 func new_mmlu_dataset_state(string data_root) mmlu_dataset_state {
     mmlu_dataset_state {
         questions_by_task: map[string][]mmlu_question{},
@@ -94,8 +86,6 @@ func new_mmlu_dataset_state(string data_root) mmlu_dataset_state {
         is_loaded: false,
     }
 }
-
-
 func parse_mmlu_csv_line(string line, string task_name, int qid) mmlu_question {
     mmlu_question {
         task_name: task_name,
@@ -108,8 +98,6 @@ func parse_mmlu_csv_line(string line, string task_name, int qid) mmlu_question {
         qid: qid,
     }
 }
-
-
 func load_mmlu_dev_examples(string data_root, string task_name, int num_examples) []mmlu_question {
     []mmlu_question dev = []mmlu_question{}
     int i = 0
@@ -128,8 +116,6 @@ func load_mmlu_dev_examples(string data_root, string task_name, int num_examples
     }
     dev
 }
-
-
 func load_mmlu_test_questions(string data_root, string task_name) []mmlu_question {
     []mmlu_question test = []mmlu_question{}
     int i = 0
@@ -148,8 +134,6 @@ func load_mmlu_test_questions(string data_root, string task_name) []mmlu_questio
     }
     test
 }
-
-
 func load_mmlu_dataset(string data_root) mmlu_dataset_state {
     mmlu_dataset_state state = new_mmlu_dataset_state(data_root)
     println("[MMLU Loader] Loading MMLU dataset from " + data_root)
@@ -173,8 +157,6 @@ func load_mmlu_dataset(string data_root) mmlu_dataset_state {
     println("[MMLU Loader] Total: " + int_to_str(state.total_questions) + " test questions, " + int_to_str(state.total_dev) + " dev examples")
     state
 }
-
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     int value = n
@@ -192,8 +174,6 @@ func int_to_str(int n) string {
     if neg { out = "-" + out }
     out
 }
-
-
 func digit_to_str(int digit) string {
     if digit == 0 { return "0" }
     if digit == 1 { return "1" }
@@ -206,4 +186,3 @@ func digit_to_str(int digit) string {
     if digit == 8 { return "8" }
     "9"
 }
-

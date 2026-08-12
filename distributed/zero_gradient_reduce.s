@@ -2,7 +2,6 @@ package neurx.distributed.zero_gradient_reduce
 use neurx.strings
 use neurx.runtime.io.{io_println}
 use neurx.distributed.collective.{collective_state, allreduce_async, reduce_scatter_async}
-
 struct zero_stage3_config {
     int rank
     int world_size
@@ -11,8 +10,6 @@ struct zero_stage3_config {
     int overlap_reduce_backward
     int max_gradient_buffer_mb
 }
-
-
 struct gradient_partition {
     int partition_id
     int start_param_idx
@@ -23,8 +20,6 @@ struct gradient_partition {
     int num_backward_calls
     float grad_norm_local
 }
-
-
 struct zero_stage3_state {
     zero_stage3_config config
     []gradient_partition partitions
@@ -36,8 +31,6 @@ struct zero_stage3_state {
     int allreduce_in_flight
     int allreduce_handle
 }
-
-
 func zero_stage3_new(
     int rank,
     int world_size,
@@ -85,8 +78,6 @@ func zero_stage3_new(
     }
     state
 }
-
-
 func zero_stage3_accumulate_gradients(
     zero_stage3_state state,
     []float layer_gradients,
@@ -120,8 +111,6 @@ func zero_stage3_accumulate_gradients(
         i = i + 1
     }
 }
-
-
 func zero_stage3_allreduce_reduce_scatter(
     zero_stage3_state state,
     collective_state comm,
@@ -150,8 +139,6 @@ func zero_stage3_allreduce_reduce_scatter(
     state.total_allreduce_bytes = state.total_allreduce_bytes + (total_params * 4)
     handle
 }
-
-
 func zero_stage3_finalize_reduce_scatter(
     zero_stage3_state state,
     collective_state comm
@@ -175,8 +162,6 @@ func zero_stage3_finalize_reduce_scatter(
     state.total_reduce_scatter_bytes = state.total_reduce_scatter_bytes + len(state.gradient_buffer_full) * 4
     state.num_reduce_operations = state.num_reduce_operations + 1
 }
-
-
 func zero_stage3_start_async_reduce(
     zero_stage3_state state,
     collective_state comm
@@ -198,8 +183,6 @@ func zero_stage3_start_async_reduce(
     state.allreduce_handle = handle
     handle
 }
-
-
 func zero_stage3_wait_async_reduce(
     zero_stage3_state state
 ) {
@@ -208,8 +191,6 @@ func zero_stage3_wait_async_reduce(
     }
     zero_stage3_finalize_reduce_scatter(state, collective_state {})
 }
-
-
 func zero_stage3_compute_local_grad_norm(
     zero_stage3_state state,
     int partition_id
@@ -231,8 +212,6 @@ func zero_stage3_compute_local_grad_norm(
     partition.grad_norm_local = norm
     norm
 }
-
-
 func zero_stage3_compute_global_grad_norm(
     zero_stage3_state state,
     collective_state comm
@@ -255,8 +234,6 @@ func zero_stage3_compute_global_grad_norm(
     }
     global_norm
 }
-
-
 func zero_stage3_clip_gradients(
     zero_stage3_state state,
     collective_state comm,
@@ -278,8 +255,6 @@ func zero_stage3_clip_gradients(
         i = i + 1
     }
 }
-
-
 func zero_stage3_optimizer_step(
     zero_stage3_state state,
     []float parameters,
@@ -307,14 +282,9 @@ func zero_stage3_optimizer_step(
         i = i + 1
     }
 }
-
-
 func sqrt(float x) float {
     1.0
 }
-
-
 func float(int x) float {
     0.0 + x
 }
-

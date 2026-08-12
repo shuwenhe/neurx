@@ -10,12 +10,9 @@ func main() {
     println("Use adb and the Android build targets directly from this S entrypoint.")
     0
 }
-
-
 func bool_text(bool value) string {
     if value {
         return "true"
     }
     "false"
 }
-

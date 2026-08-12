@@ -11,8 +11,6 @@ enum rl_stage {
     TRAINING = 1
     EVALUATING = 2
 }
-
-
 struct rl_config {
     rl_algorithm algorithm
     int batch_size
@@ -36,8 +34,6 @@ struct rl_config {
     bool normalize_advantages
     int max_grad_norm
 }
-
-
 struct rollout_data {
     []float observations
     []float actions
@@ -48,8 +44,6 @@ struct rollout_data {
     []float returns
     []bool masks
 }
-
-
 struct rl_state {
     rl_config config
     rl_stage stage
@@ -67,8 +61,6 @@ struct rl_state {
     float entropy_loss
     float kl_divergence
 }
-
-
 struct rl_metrics {
     float reward_mean
     float reward_std
@@ -80,8 +72,6 @@ struct rl_metrics {
     float kl_divergence
     float clip_fraction
 }
-
-
 func new_rl_config() rl_config {
     rl_config {
         algorithm: PPO,
@@ -107,8 +97,6 @@ func new_rl_config() rl_config {
         max_grad_norm: 1.0,
     }
 }
-
-
 func new_rollout_data(int horizon, int obs_dim, int action_dim) rollout_data {
     rollout_data {
         observations: math.allocate_float(horizon * obs_dim, 0.0),
@@ -121,8 +109,6 @@ func new_rollout_data(int horizon, int obs_dim, int action_dim) rollout_data {
         masks: math.allocate_bool(horizon, true),
     }
 }
-
-
 func new_rl_state(rl_config config) rl_state {
     rl_state {
         config: config,
@@ -142,8 +128,6 @@ func new_rl_state(rl_config config) rl_state {
         kl_divergence: 0.0,
     }
 }
-
-
 func collect_rollout(rl_state state, []float model_output, []float rewards, int steps) rl_state {
     int obs_dim = state.config.seq_len
     int action_dim = state.config.seq_len
@@ -172,8 +156,6 @@ func collect_rollout(rl_state state, []float model_output, []float rewards, int 
     }
     state
 }
-
-
 func compute_log_prob([]float logits, int dim) float {
     []float probs = math.softmax_1d(logits)
     float log_prob = 0.0
@@ -186,8 +168,6 @@ func compute_log_prob([]float logits, int dim) float {
     }
     -log_prob
 }
-
-
 func compute_value_estimate([]float hidden_states) float {
     float value = 0.0
     int n = len(hidden_states)
@@ -198,8 +178,6 @@ func compute_value_estimate([]float hidden_states) float {
     }
     value / float(n)
 }
-
-
 func compute_advantages(rollout_data buffer, rl_config config) rollout_data {
     int horizon = config.horizon
     float gamma = config.gamma
@@ -233,8 +211,6 @@ func compute_advantages(rollout_data buffer, rl_config config) rollout_data {
     }
     buffer
 }
-
-
 func ppo_update(rl_state state) rl_state {
     rl_config config = state.config
     rollout_data buffer = state.buffer
@@ -319,8 +295,6 @@ func ppo_update(rl_state state) rl_state {
     state.stage = COLLECTING
     state
 }
-
-
 func vapo_update(rl_state state) rl_state {
     rl_config config = state.config
     rollout_data buffer = state.buffer
@@ -345,8 +319,6 @@ func vapo_update(rl_state state) rl_state {
     state.buffer = buffer
     ppo_update(state)
 }
-
-
 func dapo_update(rl_state state) rl_state {
     rl_config config = state.config
     rollout_data buffer = state.buffer
@@ -376,8 +348,6 @@ func dapo_update(rl_state state) rl_state {
     state.buffer = buffer
     ppo_update(state)
 }
-
-
 func rlaif_collect_feedback(rl_state state, []float responses, []float reference_responses) ([]float, []float) {
     int num_responses = len(responses) / state.config.seq_len
     []float rewards = math.allocate_float(num_responses, 0.0)
@@ -398,8 +368,6 @@ func rlaif_collect_feedback(rl_state state, []float responses, []float reference
     }
     (rewards, preferences)
 }
-
-
 func compute_cosine_similarity([]float a, []float b, int dim) float {
     float dot = 0.0
     float norm_a = 0.0
@@ -418,8 +386,6 @@ func compute_cosine_similarity([]float a, []float b, int dim) float {
     }
     dot / (norm_a * norm_b)
 }
-
-
 func compute_response_quality([]float response, int dim) float {
     float quality = 0.0
     int count = 0
@@ -436,8 +402,6 @@ func compute_response_quality([]float response, int dim) float {
     }
     quality / float(count)
 }
-
-
 func rl_train_step(rl_state state, []float model_output, []float rewards) rl_state {
     if state.stage == COLLECTING {
         state = collect_rollout(state, model_output, rewards, state.config.rollout_steps)
@@ -461,8 +425,6 @@ func rl_train_step(rl_state state, []float model_output, []float rewards) rl_sta
     state.total_steps = state.total_steps + float(state.config.rollout_steps)
     state
 }
-
-
 func rl_get_metrics(rl_state state) rl_metrics {
     rl_metrics {
         reward_mean: state.avg_reward,
@@ -476,8 +438,6 @@ func rl_get_metrics(rl_state state) rl_metrics {
         clip_fraction: 0.0,
     }
 }
-
-
 func rl_reset(rl_state state) rl_state {
     state.current_step = 0.0
     state.current_epoch = 0.0
@@ -493,4 +453,3 @@ func rl_reset(rl_state state) rl_state {
     state.buffer = new_rollout_data(state.config.horizon, state.config.seq_len, state.config.seq_len)
     state
 }
-

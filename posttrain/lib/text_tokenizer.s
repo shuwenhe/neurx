@@ -17,8 +17,6 @@ func normalize_text(string text) string {
     }
     return result
 }
-
-
 func pretokenize(string text) []string {
     []string tokens
     string current_token = ""
@@ -48,8 +46,6 @@ func pretokenize(string text) []string {
     }
     return tokens
 }
-
-
 func word_to_tokens(string word) []string {
     []string result
     int i = 0
@@ -59,8 +55,6 @@ func word_to_tokens(string word) []string {
     }
     return result
 }
-
-
 func apply_bpe_merges([]string tokens) []string {
     []string result = tokens
     int iteration = 0
@@ -88,8 +82,6 @@ func apply_bpe_merges([]string tokens) []string {
     }
     return result
 }
-
-
 func encode(string text) []int {
     []int result
     result = append(result, 1)
@@ -119,8 +111,6 @@ func encode(string text) []int {
     result = append(result, 2)
     return result
 }
-
-
 func decode([]int token_ids) string {
     string result = ""
     int i = 0
@@ -136,13 +126,9 @@ func decode([]int token_ids) string {
     }
     return result
 }
-
-
 func vocab_size() int {
     return 32000
 }
-
-
 func int_to_str(int n) string {
     if n == 0 { return "0" }
     bool negative = n < 0
@@ -156,8 +142,6 @@ func int_to_str(int n) string {
     if negative { result = "-" + result }
     return result
 }
-
-
 func main() {
     eprintln("BPE Tokenizer - Production Ready Implementation")
     eprintln("✓ Text normalization")
@@ -166,4 +150,3 @@ func main() {
     eprintln("✓ Token encoding/decoding")
     eprintln("✓ Vocabulary size: " + int_to_str(vocab_size()))
 }
-

@@ -44,8 +44,6 @@ func cross_entropy_loss(
     if valid_count == 0 { return 0.0 }
     total_loss / (valid_count as float)
 }
-
-
 func exp_approx(float x) float {
     if x > 20.0 { return 485165195.0 }
     if x < -20.0 { return 0.0 }
@@ -59,8 +57,6 @@ func exp_approx(float x) float {
     }
     result
 }
-
-
 func log_approx(float x) float {
     if x <= 0.0 { return -10.0 }
     if x == 1.0 { return 0.0 }
@@ -76,8 +72,6 @@ func log_approx(float x) float {
     }
     result * 2.0
 }
-
-
 func cross_entropy_gradient(
     []float logits,
     []int labels,
@@ -131,9 +125,6 @@ func cross_entropy_gradient(
     }
     grad
 }
-
-
 func perplexity_from_loss(float loss) float {
     exp_approx(loss)
 }
-

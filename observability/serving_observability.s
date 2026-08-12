@@ -21,8 +21,6 @@ struct serving_observability_state {
     bool error_rate_alert
     bool kv_capacity_alert
 }
-
-
 func new_serving_observability_state(int kv_blocks_capacity) serving_observability_state {
     serving_observability_state {
         requests_total: 0, requests_active: 0, requests_rejected: 0, requests_failed: 0,
@@ -33,15 +31,11 @@ func new_serving_observability_state(int kv_blocks_capacity) serving_observabili
         queue_alert: false, error_rate_alert: false, kv_capacity_alert: false,
     }
 }
-
-
 func serving_observe_admission(serving_observability_state state, bool accepted) serving_observability_state {
     state.requests_total = state.requests_total + 1
     if accepted { state.requests_active = state.requests_active + 1 } else { state.requests_rejected = state.requests_rejected + 1 }
     state
 }
-
-
 func serving_observe_completion(serving_observability_state state, bool success, int latency_ms) serving_observability_state {
     if state.requests_active > 0 { state.requests_active = state.requests_active - 1 }
     if !success { state.requests_failed = state.requests_failed + 1 }
@@ -51,8 +45,6 @@ func serving_observe_completion(serving_observability_state state, bool success,
     if latency_ms > state.latency_max_ms { state.latency_max_ms = latency_ms }
     state
 }
-
-
 func serving_observe_runtime(serving_observability_state state, int queue_depth, int prefill_tokens, int decode_tokens, int kv_blocks_used) serving_observability_state {
     state.queue_depth = queue_depth
     state.prefill_tokens = state.prefill_tokens + prefill_tokens
@@ -63,8 +55,6 @@ func serving_observe_runtime(serving_observability_state state, int queue_depth,
     state.kv_capacity_alert = state.kv_blocks_capacity > 0 && kv_blocks_used * 100 > state.kv_blocks_capacity * 90
     state
 }
-
-
 func serving_trace_start(serving_observability_state state, string trace_id, string span_name, int now_ms) serving_observability_state {
     state.trace_ids = append(state.trace_ids, trace_id)
     state.span_names = append(state.span_names, span_name)
@@ -73,8 +63,6 @@ func serving_trace_start(serving_observability_state state, string trace_id, str
     state.span_status = append(state.span_status, "running")
     state
 }
-
-
 func serving_trace_finish(serving_observability_state state, string trace_id, int now_ms, bool ok) serving_observability_state {
     int i = len(state.trace_ids) - 1
     while i >= 0 {
@@ -88,8 +76,6 @@ func serving_trace_finish(serving_observability_state state, string trace_id, in
     }
     state
 }
-
-
 func serving_prometheus_metrics(serving_observability_state state) string {
     string out = "# TYPE neurx_requests_total counter\nneurx_requests_total " + string(state.requests_total) + "\n"
     out = out + "# TYPE neurx_requests_active gauge\nneurx_requests_active " + string(state.requests_active) + "\n"
@@ -105,8 +91,6 @@ func serving_prometheus_metrics(serving_observability_state state) string {
     out = out + "neurx_request_latency_ms_max " + string(state.latency_max_ms) + "\n"
     out
 }
-
-
 func serving_alert_summary(serving_observability_state state) string {
     string alerts = ""
     if state.queue_alert { alerts = alerts + "queue_depth_high;" }
@@ -114,4 +98,3 @@ func serving_alert_summary(serving_observability_state state) string {
     if state.kv_capacity_alert { alerts = alerts + "kv_capacity_high;" }
     alerts
 }
-

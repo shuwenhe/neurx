@@ -20,8 +20,6 @@ func train_single_step() int {
         return 0
     }
 }
-
-
 func main() {
     int result = train_single_step()
     if result == 1 {
@@ -30,4 +28,3 @@ func main() {
         println("FAILURE: Loss increased")
     }
 }
-
