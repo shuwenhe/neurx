@@ -33,14 +33,16 @@ WORKDIR /opt/app
 
 # 复制 NeurX 项目代码
 COPY neurx/ ./neurx/
+# 复制预编译的 s_ir_runner 二进制文件
+COPY neurx/artifacts/build/s_runner/ ./neurx/artifacts/build/s_runner/
 COPY posttrain/ ./posttrain/
 
 # 切换到 NeurX 目录
 WORKDIR /opt/app/neurx
 
-# 编译推理引擎
+# 编译推理引擎（使用预编译的 s_ir_runner）
 RUN echo "Building NeurX inference engine..." && \
-    S_COMPILER_EMIT_CWD=/opt/s make build-real-inference-s 2>&1 | tail -50
+    S_COMPILER_EMIT_CWD=/opt/s S_RUNNER_BIN=/opt/app/neurx/artifacts/build/s_runner/s_ir_runner make build-real-inference-s 2>&1 | tail -50
 
 # 验证编译结果
 RUN ls -lah artifacts/build/production_s_inference/ 2>/dev/null || \
