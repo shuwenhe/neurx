@@ -76,7 +76,7 @@ func simulate_finetuned_model_response(question string) string {
     return finetuned_responses
 }
 
-func contains(str string, substr string) bool {
+func contains(string str, substr string) bool {
     i32 str_len = len(str)
     i32 substr_len = len(substr)
     if substr_len > str_len {
@@ -97,7 +97,7 @@ func contains(str string, substr string) bool {
     return false
 }
 
-func analyze_response_quality(base_resp string, finetuned_resp string) string {
+func analyze_response_quality(string base_resp, finetuned_resp string) string {
     i32 base_len = len(base_resp)
     i32 finetuned_len = len(finetuned_resp)
     f64 length_improvement = f64(finetuned_len - base_len) / f64(base_len) * 100.0

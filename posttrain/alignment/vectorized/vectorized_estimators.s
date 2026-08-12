@@ -158,7 +158,7 @@ func compute_batch_statistics(
     return mean.item(), variance, min_val.item(), max_val.item()
 }
 
-func clamp(x: Tensor, min_val: f32, max_val: f32) -> Tensor {
+func clamp(x: Tensor, f32 min_val, f32 max_val) -> Tensor {
     return maximum(minimum(x, max_val), min_val)
 }
 

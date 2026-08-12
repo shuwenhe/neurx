@@ -34,7 +34,7 @@ func new_cpu_state() cpu_state {
     }
 }
 
-func cpu_register(cs cpu_state, cpu_id int, numa_node int, base_mhz int, max_mhz int) cpu_state {
+func cpu_register(cs cpu_state, int cpu_id, int numa_node, int base_mhz, max_mhz int) cpu_state {
     cpu_info c = cpu_info{
         cpu_id:       cpu_id,
         numa_node:    numa_node,
@@ -48,7 +48,7 @@ func cpu_register(cs cpu_state, cpu_id int, numa_node int, base_mhz int, max_mhz
     return cs
 }
 
-func cpu_spawn_worker(cs cpu_state, cpu_affinity int, numa_affinity int) (cpu_state, int) {
+func cpu_spawn_worker(cs cpu_state, int cpu_affinity, int numa_affinity) (cpu_state, int) {
     worker w = worker{
         worker_id:       cs.next_worker_id,
         cpu_affinity:    cpu_affinity,
@@ -63,7 +63,7 @@ func cpu_spawn_worker(cs cpu_state, cpu_affinity int, numa_affinity int) (cpu_st
     return (cs, id)
 }
 
-func cpu_assign_task(cs cpu_state, worker_id int, task_name string) (cpu_state, bool) {
+func cpu_assign_task(cs cpu_state, int worker_id, string task_name) (cpu_state, bool) {
     int i = 0
     while i < len(cs.workers) {
         if cs.workers[i].worker_id == worker_id && !cs.workers[i].busy {
@@ -89,7 +89,7 @@ func cpu_complete_task(cs cpu_state, worker_id int) cpu_state {
     return cs
 }
 
-func cpu_pick_idle_worker(cs cpu_state, prefer_cpu int, prefer_numa int) (worker, bool) {
+func cpu_pick_idle_worker(cs cpu_state, int prefer_cpu, int prefer_numa) (worker, bool) {
     int i = 0
     while i < len(cs.workers) {
         worker w = cs.workers[i]
@@ -116,7 +116,7 @@ func cpu_pick_idle_worker(cs cpu_state, prefer_cpu int, prefer_numa int) (worker
     return (worker{}, false)
 }
 
-func cpu_set_governor(cs cpu_state, cpu_id int, governor int) cpu_state {
+func cpu_set_governor(cs cpu_state, int cpu_id, governor int) cpu_state {
     int i = 0
     while i < len(cs.cpus) {
         if cs.cpus[i].cpu_id == cpu_id {

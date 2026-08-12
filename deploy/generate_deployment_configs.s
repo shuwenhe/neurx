@@ -23,7 +23,7 @@ struct gpu_config {
     available_memory: i64
 }
 
-func generate_slurm_script(config: deployment_config, output_path: string) bool {
+func generate_slurm_script(config: deployment_config, string output_path) bool {
     let num_nodes = config.num_nodes
     let gpus_per_node = config.gpus_per_node
     let total_tasks = num_nodes * gpus_per_node
@@ -70,7 +70,7 @@ echo "Training completed!"
     return true
 }
 
-func generate_docker_compose(config: deployment_config, output_path: string) bool {
+func generate_docker_compose(config: deployment_config, string output_path) bool {
     let num_nodes = config.num_nodes
     let gpus_per_node = config.gpus_per_node
     let docker_compose = `version: '3.8'
@@ -117,7 +117,7 @@ networks:
     return true
 }
 
-func generate_kubernetes_deployment(config: deployment_config, output_path: string) bool {
+func generate_kubernetes_deployment(config: deployment_config, string output_path) bool {
     let num_nodes = config.num_nodes
     let gpus_per_node = config.gpus_per_node
     let total_replicas = num_nodes
@@ -250,7 +250,7 @@ spec:
     return true
 }
 
-func generate_cluster_config(config: deployment_config, output_path: string) bool {
+func generate_cluster_config(config: deployment_config, string output_path) bool {
     let total_batch = config.batch_size_per_gpu * config.num_nodes * 4
     let config_json = `{
   "cluster": {

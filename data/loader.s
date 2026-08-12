@@ -12,7 +12,7 @@ struct data_loader {
     current_idx i64
 }
 
-func data_loader_new(data []batch, batch_size i64, shuffle bool) data_loader {
+func data_loader_new(data []batch, i64 batch_size, shuffle bool) data_loader {
     return data_loader{
         data: data,
         batch_size: batch_size,
@@ -21,7 +21,7 @@ func data_loader_new(data []batch, batch_size i64, shuffle bool) data_loader {
     }
 }
 
-func create_synthetic_dataset(num_samples i64, seq_len i64, vocab_size i64, num_classes i64) []batch {
+func create_synthetic_dataset(i64 num_samples, i64 seq_len, i64 vocab_size, num_classes i64) []batch {
     batches := make([]batch, 0)
     for b := 0; b < num_samples; b++ {
         batch_item := batch{
@@ -140,7 +140,7 @@ struct distributed_sampler {
     indices []i64
 }
 
-func distributed_sampler_new(data_size i64, rank i64, world_size i64) distributed_sampler {
+func distributed_sampler_new(i64 data_size, i64 rank, world_size i64) distributed_sampler {
     indices := make([]i64, 0)
     samples_per_rank := data_size / world_size
     for i := 0; i < samples_per_rank; i++ {

@@ -198,7 +198,7 @@ type clean_stats struct {
     errors         int64
 }
 
-func process_file_content(writer *bufio.Writer, content string, seen map[string]bool, stats *clean_stats) {
+func process_file_content(writer *bufio.Writer, string content, seen map[string]bool, stats *clean_stats) {
     lines := strings.Split(content, "\n")
     for _, line := range lines {
         line = strings.TrimSpace(line)
@@ -344,7 +344,7 @@ func generate_shards(config shard_config) error {
     return write_shard_manifest(config.ManifestFile, shards)
 }
 
-func write_shard_file(path string, content string) (int64, error) {
+func write_shard_file(string path, string content) (int64, error) {
     err := ioutil.WriteFile(path, []byte(content), 0644)
     if err != nil {
         return 0, err
@@ -356,7 +356,7 @@ func write_shard_file(path string, content string) (int64, error) {
     return info.Size(), nil
 }
 
-func find_source_files(dir string) ([]string, error) {
+func find_source_files(string dir) ([]string, error) {
     var files []string
     entries, err := ioutil.ReadDir(dir)
     if err != nil {
@@ -429,11 +429,11 @@ func format_shard_id(index int) string {
     return fmt.Sprintf("shard_%05d", index)
 }
 
-func format_shard_filename(dir string, index int) string {
+func format_shard_filename(string dir, index int) string {
     return filepath.Join(dir, format_shard_id(index)+".jsonl")
 }
 
-func write_shard_manifest(path string, shards []shard_metadata) error {
+func write_shard_manifest(string path, shards []shard_metadata) error {
     var total_docs int64
     var total_size int64
     for _, shard := range shards {
@@ -502,7 +502,7 @@ func get_env(key, default_val string) string {
     return default_val
 }
 
-func get_env_int(key string, default_val int) int {
+func get_env_int(string key, default_val int) int {
     if val := os.Getenv(key); val != "" {
         var num int
         fmt.Sscanf(val, "%d", &num)

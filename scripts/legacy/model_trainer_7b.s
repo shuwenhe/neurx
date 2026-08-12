@@ -84,7 +84,7 @@ func create_70b_config(): large_model_config {
     return config
 }
 
-func estimate_memory(config: large_model_config, batch_size: int): memory_estimate {
+func estimate_memory(config: large_model_config, int batch_size): memory_estimate {
     num_params_f := float(config.num_params)
     weights_gb := num_params_f * 4.0 / (1024.0 * 1024.0 * 1024.0)
     gradients_gb := weights_gb

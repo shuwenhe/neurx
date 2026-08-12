@@ -103,7 +103,7 @@ func (framework *quantization_framework) quantize_weights(weights [][]float64, l
     layer := &quantized_layer{
         name: layer_name,
         weights_int: quantized,
-        original_shape: []int{len(weights), len(weights[0])},
+        []int original_shape{len(weights), len(weights[0])},
         scales: []float64{stats.scale},
         zero_points: []int{stats.zero_point},
         quantization_type: framework.config.quantization_type,

@@ -50,7 +50,7 @@ func new_verifiable_reward_manager() verifiable_reward_manager_state {
         sample_count: 0,
         avg_reward: 0.0,
         reward_variance: 0.0,
-        function_call_count: map string = int{cap: 50},
+        map function_call_count string = int{cap: 50},
         enable_verification: true,
     }
 }

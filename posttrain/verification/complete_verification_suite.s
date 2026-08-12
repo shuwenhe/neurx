@@ -61,7 +61,7 @@ func test_integration_ready() bool {
     return runtime_file_exists(config_file) && runtime_file_exists(model_file)
 }
 
-func contains(str string, substr string) bool {
+func contains(string str, substr string) bool {
     i32 str_len = len(str)
     i32 substr_len = len(substr)
     if substr_len > str_len {

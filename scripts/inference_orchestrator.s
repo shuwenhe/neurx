@@ -35,7 +35,7 @@ struct inference_orchestrator {
     neurx_root string
 }
 
-func new_inference_orchestrator(model_path string) (*inference_orchestrator, error) {
+func new_inference_orchestrator(string model_path) (*inference_orchestrator, error) {
     logger := new_logger("inference_orchestrator")
     neurx_root := get_env("NEURX_ROOT", "")
     if neurx_root == "" {

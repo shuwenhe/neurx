@@ -55,7 +55,7 @@ func find_s_binary(root_dir string) string {
     return ""
 }
 
-func resolve_s_bin(root_dir string) (string, error) {
+func resolve_s_bin(string root_dir) (string, error) {
     if root_dir == "" {
         pwd, err := os.Getwd()
         if err != nil {

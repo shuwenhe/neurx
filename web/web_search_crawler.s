@@ -96,7 +96,7 @@ struct search_statistics {
 }
 interface SearchEngineInterface {
     name: string { get }
-    search(query: string, config: web_search_config)
+    search(string query, config: web_search_config)
 }
 
 struct engine_search_result {
@@ -118,7 +118,7 @@ class GoogleSearchEngine implements SearchEngineInterface {
     get name -> string {
         return this.name
     }
-    search(query: string, config: web_search_config) {
+    search(string query, config: web_search_config) {
         start_time = current_time_millis()
         if this.api_key != null && this.cx_id != null {
             result = this._search_via_api(query, config, start_time)
@@ -127,7 +127,7 @@ class GoogleSearchEngine implements SearchEngineInterface {
         }
         return result
     }
-    _search_via_api(query: string, config: web_search_config, start_time: float) {
+    _search_via_api(string query, config: web_search_config, float start_time) {
         params = {
             "key": this.api_key!,
             "cx": this.cx_id!,
@@ -162,7 +162,7 @@ class GoogleSearchEngine implements SearchEngineInterface {
             has_more=False
         }
     }
-    _search_public(query: string, config: web_search_config, start_time: float) {
+    _search_public(string query, config: web_search_config, float start_time) {
         try {
             ddg_result = this._duckduckgo_fallback(query, config)
             for item in ddg_result.items:
@@ -174,7 +174,7 @@ class GoogleSearchEngine implements SearchEngineInterface {
                 has_more=false, error=f"Google search failed: {e.message}"
             }
     }
-    _duckduckgo_fallback(query: string, config: web_search_config) {
+    _duckduckgo_fallback(string query, config: web_search_config) {
         params = {
             "q": query,
             "format": "json",
@@ -209,14 +209,14 @@ class BingSearchEngine implements SearchEngineInterface {
     get name -> string {
         return this.name
     }
-    search(query: string, config: web_search_config) {
+    search(string query, config: web_search_config) {
         start_time = current_time_millis()
         if this.api_key != null:
             return this._search_via_api(query, config, start_time)
         else:
             return this._search_fallback(query, config, start_time)
     }
-    _search_via_api(query: string, config: web_search_config, start_time: float) {
+    _search_via_api(string query, config: web_search_config, float start_time) {
         headers = {
             "ocp-apim-subscription-key": this.api_key!
         }
@@ -257,7 +257,7 @@ class BingSearchEngine implements SearchEngineInterface {
             has_more=false
         }
     }
-    _search_fallback(query: string, config: web_search_config, start_time: float) {
+    _search_fallback(string query, config: web_search_config, float start_time) {
         return engine_search_result{
             items=[],
             total_estimated=0,
@@ -284,7 +284,7 @@ class web_crawler {
         this.content_extractor = new main_content_extractor(config=config)
         this.html_cleaner = new html_cleaner(config=config)
     }
-    async crawl(url: string) {
+    async crawl(string url) {
         if this.config.cache_enabled && url in this.cache {
             cached = this.cache[url]
             if !this._is_cache_expired(cached):
@@ -322,10 +322,10 @@ class web_crawler {
         catch exception as e:
             return (null, str(e))
     }
-    batch_crawl(urls: list<string>, max_concurrent: int = 3) {
+    batch_crawl(urls: list<string>, int max_concurrent = 3) {
         results: dict<string, tuple<crawled_content?, string?>> = {}
         semaphore = semaphore(max_concurrent)
-        async def crawl_single(url: string) {
+        async def crawl_single(string url) {
             async with semaphore:
                 results[url] = await this.crawl(url)
         tasks = [crawl_single(url) for url in urls]
@@ -342,7 +342,7 @@ class main_content_extractor {
     init(config: web_search_config) {
         this.config = config
     }
-    extract(html: string, base_url: string) {
+    extract(string html, string base_url) {
         soup = parse_html(html)
         self._remove_unwanted(soup)
         metadata = self._extract_metadata(soup, base_url)
@@ -373,7 +373,7 @@ class main_content_extractor {
                 for elem in soup.find_all(selector):
                     elem.decompose()
     }
-    _extract_metadata(soup: any, base_url: string) {
+    _extract_metadata(soup: any, string base_url) {
         meta = page_metadata{
             title=soup.title.string.trim() if soup.title else "",
             site_name="",
@@ -497,7 +497,7 @@ class html_cleaner {
     init(config: web_search_config) {
         this.config = config
     }
-    clean(raw_text: string) {
+    clean(string raw_text) {
         text = raw_text
         if this.config.remove_scripts_styles:
             text = regex.sub(r'<script[^>]*>.*?</script>', '', text, flags=regex.DOTALL)
@@ -531,7 +531,7 @@ class web_search_system {
         this.crawler = new web_crawler(config=this.config)
         this.result_aggregator = new result_aggregator(config=config)
     }
-    async search(query: string, options?: search_options) {
+    async search(string query, options?: search_options) {
         opts = options ?? new search_options()
         start_total = current_time_millis()
         print(f"🔍 Searching: {query}")
@@ -623,7 +623,7 @@ class web_search_system {
             }
         }
     }
-    _build_context_for_llm(query: string, top_results: list<search_result_item>) {
+    _build_context_for_llm(string query, top_results: list<search_result_item>) {
         parts: list<string> = []
         parts.append(f"Query: {query}\n")
         parts.append("=" * 60 + "\n")
@@ -640,7 +640,7 @@ class web_search_system {
             parts.append("")
         return "\n".join(parts)
     }
-    _generate_summary_with_llm(query: string, context: string) {
+    _generate_summary_with_llm(string query, string context) {
         prompt = f"""
 Based on the following search results for the query "{query}", provide:
 1. A concise summary (3-4 sentences) answering the query
@@ -682,7 +682,7 @@ Also provide a comma-separated ranking of the most relevant result indices (0-ba
         key_findings: list<string>?
         reranked_indices: list<int>?
     }
-    export_results(response: search_response, format: string = "markdown", output_path?: string) {
+    export_results(response: search_response, string format = "markdown", output_path?: string) {
         output: list<string> = []
         output.append(f"# Search Results: {response.query}\n")
         output.append(f"**Total Results**: {response.total_results_found}\n")
@@ -745,7 +745,7 @@ class result_aggregator {
                 unique_items.append(item)
         return unique_items
     }
-    score_and_rank(items: list<search_result_item>, query: string) {
+    score_and_rank(items: list<search_result_item>, string query) {
         scored_items: list<tuple<search_result_item, float>> = []
         query_terms = set(query.to_lower().split_whitespace())
         for item in items {
@@ -774,7 +774,7 @@ class result_aggregator {
         scored_items.sort_by_descending(x => x[1])
         return [item for item, _ in scored_items]
     }
-    _normalize_url(url: string) {
+    _normalize_url(string url) {
         parsed = urlparse(url)
         normalized = f"{parsed.scheme}:
         if parsed.query:
@@ -782,7 +782,7 @@ class result_aggregator {
             normalized += "?" + "&".join(params)
         return normalized.to_lower()
     }
-    _is_high_quality_domain(domain: string) {
+    _is_high_quality_domain(string domain) {
         quality_indicators = [
             ".edu", ".gov", ".org",
             "wikipedia.org", "arxiv.org", "github.com",

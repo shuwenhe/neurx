@@ -172,7 +172,7 @@ func next_epoch(distributed_dataloader loader) distributed_dataloader {
     loader
 }
 
-func get_loader_stats(distributed_dataloader loader) [string:int {
+func get_loader_stats(distributed_dataloader loader) [int string {
     [string:int{cap: 10}
 }
 

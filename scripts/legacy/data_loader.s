@@ -18,7 +18,7 @@ func main() {
         io.println("English text: data_loader <shard_dir> [max_samples_per_shard] [max_shards]")
         os.exit(1)
     }
-    var shard_dir: string = os.args()[1]
+    var string shard_dir = os.args()[1]
     var max_samples_per_shard: i64 = 500
     var max_shards: i64 = 10
     if len(os.args()) > 2 {
@@ -71,6 +71,6 @@ func main() {
 }
 package os {
     extern func args() []string
-    extern func exit(code: i64)
+    extern func exit(i64 code)
 }
 

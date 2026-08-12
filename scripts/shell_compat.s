@@ -36,7 +36,7 @@ func remove_dir(path string) error {
     return os.RemoveAll(path)
 }
 
-func read_file(path string) (string, error) {
+func read_file(string path) (string, error) {
     data, err := os.ReadFile(path)
     if err != nil {
         return "", fmt.Errorf("failed to read file %s: %w", path, err)
@@ -44,7 +44,7 @@ func read_file(path string) (string, error) {
     return string(data), nil
 }
 
-func write_file(path string, content string) error {
+func write_file(string path, content string) error {
     err := os.WriteFile(path, []byte(content), 0644)
     if err != nil {
         return fmt.Errorf("failed to write file %s: %w", path, err)
@@ -52,7 +52,7 @@ func write_file(path string, content string) error {
     return nil
 }
 
-func append_file(path string, content string) error {
+func append_file(string path, content string) error {
     file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
     if err != nil {
         return fmt.Errorf("failed to open file %s: %w", path, err)
@@ -65,7 +65,7 @@ func append_file(path string, content string) error {
     return nil
 }
 
-func copy_file(src string, dst string) error {
+func copy_file(string src, dst string) error {
     data, err := os.ReadFile(src)
     if err != nil {
         return fmt.Errorf("failed to read source %s: %w", src, err)
@@ -77,7 +77,7 @@ func copy_file(src string, dst string) error {
     return nil
 }
 
-func list_dir(path string) ([]string, error) {
+func list_dir(string path) ([]string, error) {
     entries, err := os.ReadDir(path)
     if err != nil {
         return []string{}, fmt.Errorf("failed to list directory %s: %w", path, err)
@@ -89,7 +89,7 @@ func list_dir(path string) ([]string, error) {
     return results, nil
 }
 
-func find_files(dir string, pattern string) ([]string, error) {
+func find_files(string dir, string pattern) ([]string, error) {
     var results []string
     err := filepath.Walk(dir, func(path string, info os.file_info, err error) error {
         if err != nil {
@@ -114,7 +114,7 @@ struct exec_command_result {
     error   error
 }
 
-func exec_command(cmd string, args ...string) exec_command_result {
+func exec_command(string cmd, args ...string) exec_command_result {
     command := exec.command(cmd, args...)
     var stdout strings.Builder
     var stderr strings.Builder
@@ -138,7 +138,7 @@ func exec_command(cmd string, args ...string) exec_command_result {
     }
 }
 
-func exec_in_dir(dir string, cmd string, args ...string) exec_command_result {
+func exec_in_dir(string dir, string cmd, args ...string) exec_command_result {
     command := exec.command(cmd, args...)
     command.Dir = dir
     var stdout strings.Builder
@@ -192,18 +192,18 @@ func command_exists(cmd string) bool {
     return err == nil
 }
 
-func get_env(key string, default_value string) string {
+func get_env(string key, default_value string) string {
     if value := os.Getenv(key); value != "" {
         return value
     }
     return default_value
 }
 
-func set_env(key string, value string) error {
+func set_env(string key, value string) error {
     return os.Setenv(key, value)
 }
 
-func get_env_int(key string, default_value int) int {
+func get_env_int(string key, default_value int) int {
     if value := os.Getenv(key); value != "" {
         if int_val, err := strconv.Atoi(value); err == nil {
             return int_val
@@ -212,7 +212,7 @@ func get_env_int(key string, default_value int) int {
     return default_value
 }
 
-func abs_path(path string) (string, error) {
+func abs_path(string path) (string, error) {
     return filepath.Abs(path)
 }
 
@@ -285,7 +285,7 @@ func timestamp_full() string {
     return time.Now().Format("2006-01-02 15:04:05")
 }
 
-func contains(slice []string, value string) bool {
+func contains([]string slice, value string) bool {
     for _, item := range slice {
         if item == value {
             return true
@@ -294,11 +294,11 @@ func contains(slice []string, value string) bool {
     return false
 }
 
-func join(sep string, strs ...string) string {
+func join(string sep, strs ...string) string {
     return strings.Join(strs, sep)
 }
 
-func split(str string, sep string) []string {
+func split(string str, sep string) []string {
     return strings.Split(str, sep)
 }
 

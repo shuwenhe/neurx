@@ -29,7 +29,7 @@ type checkpoint_manager struct {
     saved_checkpoints: int
 }
 
-func initialize_distributed_1t(world_size: int, rank: int,
+func initialize_distributed_1t(int world_size, int rank,
                               local_rank: int): distributed_trainer1_t {
     trainer := distributed_trainer1_t{
         world_size: world_size,
@@ -55,7 +55,7 @@ func (op *tensor_parallel_operator) split_linear_weight(weight_shape: [2]int): [
     return [2]int{split_out, in_features}
 }
 
-func (op *tensor_parallel_operator) all_reduce_loss(local_loss: float): float {
+func (op *tensor_parallel_operator) all_reduce_loss(float local_loss): float {
     global_loss := local_loss * float(op.tp_size)
     return global_loss / float(op.tp_size)
 }
@@ -71,7 +71,7 @@ type pipeline_scheduler struct {
     pipeline_stages: []*pipeline_stage
 }
 
-func (ps *pipeline_scheduler) create_pipeline_stages(num_stages: int,
+func (ps *pipeline_scheduler) create_pipeline_stages(int num_stages,
                                                    total_layers: int): {
     layers_per_stage := total_layers / num_stages
     for i := 0; i < num_stages; i++ {
@@ -116,7 +116,7 @@ type gradient_manager struct {
     ready_to_update: bool
 }
 
-func (gm *gradient_manager) accumulate_gradient(loss: float): bool {
+func (gm *gradient_manager) accumulate_gradient(float loss): bool {
     gm.accumulated_loss += loss
     gm.accumulated_step += 1
     if gm.accumulated_step >= gm.accumulation_steps {
@@ -160,7 +160,7 @@ type training_loop1_t struct {
     state: training_state
 }
 
-func create_training_loop_1t(rank: int, world_size: int): training_loop1_t {
+func create_training_loop_1t(int rank, int world_size): training_loop1_t {
     trainer := initialize_distributed_1t(world_size, rank, rank % 8)
     grad_mgr := gradient_manager{
         accumulation_steps: 512,
@@ -243,14 +243,14 @@ type performance_monitor struct {
     memory_usage_percent: float
 }
 
-func (pm *performance_monitor) compute_throughput(batch_size: int, seq_len: int,
+func (pm *performance_monitor) compute_throughput(int batch_size, int seq_len,
                                                elapsed_seconds: float): float {
     tokens_per_batch := batch_size * seq_len
     throughput := float(tokens_per_batch) / elapsed_seconds
     return throughput
 }
 
-func (pm *performance_monitor) compute_flops(params: int64, batch_size: int,
+func (pm *performance_monitor) compute_flops(params: int64, int batch_size,
                                           seq_len: int): int64 {
     flops := 2 * params * int64(batch_size) * int64(seq_len)
     return flops

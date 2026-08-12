@@ -24,7 +24,7 @@ struct transformer_output {
     hidden_states [][]f64
 }
 
-func transformer_new(vocab_size i64, hidden_size i64, num_layers i64, num_heads i64, max_seq_len i64) simple_transformer {
+func transformer_new(i64 vocab_size, i64 hidden_size, i64 num_layers, i64 num_heads, max_seq_len i64) simple_transformer {
     t := simple_transformer{
         vocab_size: vocab_size,
         hidden_size: hidden_size,
@@ -236,7 +236,7 @@ func random_normal() f64 {
     return r * cos_approx(2.0 * 3.14159265 * u2)
 }
 
-func random_int_range(min i64, max i64) i64 {
+func random_int_range(i64 min, max i64) i64 {
     return min + ((1103515245*min + 12345) % (max - min))
 }
 
@@ -254,7 +254,7 @@ func sqrt_approx(x f64) f64 {
     return result
 }
 
-func pow_approx(x f64, exp f64) f64 {
+func pow_approx(f64 x, exp f64) f64 {
     if x <= 0.0 {
         return 1.0
     }

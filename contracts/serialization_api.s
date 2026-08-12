@@ -23,50 +23,50 @@ struct state_dict {
     metadata: map[string]string
 }
 interface i_checkpoint {
-    save(path: string, state_dict: state_dict, config: serialization_config) -> void
-    load(path: string) -> state_dict
-    exists(path: string) -> bool
+    save(string path, state_dict: state_dict, config: serialization_config) -> void
+    load(string path) -> state_dict
+    exists(string path) -> bool
 }
 interface i_state_dict {
     create() -> state_dict
-    add_tensor(name: string, tensor: tensor) -> void
-    get_tensor(name: string) -> tensor
-    add_param(name: string, param: tensor) -> void
-    get_param(name: string) -> tensor
+    add_tensor(string name, tensor: tensor) -> void
+    get_tensor(string name) -> tensor
+    add_param(string name, param: tensor) -> void
+    get_param(string name) -> tensor
     keys() -> []string
     merge(other: state_dict) -> state_dict
 }
 interface i_serializer {
     serialize(state_dict: state_dict, config: serialization_config) -> []i8
     deserialize(data: []i8, format: SerializationFormat) -> state_dict
-    write_file(path: string, state_dict: state_dict, config: serialization_config) -> void
-    read_file(path: string) -> state_dict
+    write_file(string path, state_dict: state_dict, config: serialization_config) -> void
+    read_file(string path) -> state_dict
 }
 interface i_format_converter {
     convert(input_format: SerializationFormat, output_format: SerializationFormat, data: []i8) -> []i8
     can_convert(from_format: SerializationFormat, to_format: SerializationFormat) -> bool
 }
 interface i_tensor_io {
-    save_tensor(path: string, tensor: tensor, format: SerializationFormat) -> void
-    load_tensor(path: string) -> tensor
-    save_tensors(path: string, tensors: map[string]tensor, format: SerializationFormat) -> void
-    load_tensors(path: string) -> map[string]tensor
+    save_tensor(string path, tensor: tensor, format: SerializationFormat) -> void
+    load_tensor(string path) -> tensor
+    save_tensors(string path, map tensors[string]tensor, format: SerializationFormat) -> void
+    load_tensors(string path) -> map[string]tensor
 }
 interface i_checkpoint_manager {
-    save_checkpoint(path: string, state_dict: state_dict, step: i64) -> void
-    load_checkpoint(path: string) -> state_dict
-    load_checkpoint_by_step(path: string, step: i64) -> state_dict
-    list_checkpoints(path: string) -> []string
-    cleanup_old_checkpoints(path: string, keep_last: i64) -> void
+    save_checkpoint(string path, state_dict: state_dict, i64 step) -> void
+    load_checkpoint(string path) -> state_dict
+    load_checkpoint_by_step(string path, i64 step) -> state_dict
+    list_checkpoints(string path) -> []string
+    cleanup_old_checkpoints(string path, i64 keep_last) -> void
 }
 interface i_metadata_io {
-    save_metadata(path: string, metadata: map[string]string) -> void
-    load_metadata(path: string) -> map[string]string
-    append_metadata(path: string, metadata: map[string]string) -> void
+    save_metadata(string path, map metadata[string]string) -> void
+    load_metadata(string path) -> map[string]string
+    append_metadata(string path, map metadata[string]string) -> void
 }
 interface i_maliformed_checkpoint_handler {
-    is_valid(path: string) -> bool
-    repair(path: string) -> bool
-    get_error_details(path: string) -> string
+    is_valid(string path) -> bool
+    repair(string path) -> bool
+    get_error_details(string path) -> string
 }
 

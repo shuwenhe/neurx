@@ -17,14 +17,14 @@ interface i_operator {
 }
 interface i_operator_determinism {
     is_deterministic() -> bool
-    set_seed(seed: i64) -> void
+    set_seed(i64 seed) -> void
 }
 interface i_operator_composition {
     compose(operators: []i_operator) -> IOperator
 }
 interface i_operator_autograd {
-    gradient_wrt_input(i: i64, grad_output: tensor, forward_inputs: []tensor) -> tensor
-    check_gradient(forward_inputs: []tensor, eps: f64) -> f64
+    gradient_wrt_input(i64 i, grad_output: tensor, forward_inputs: []tensor) -> tensor
+    check_gradient(forward_inputs: []tensor, f64 eps) -> f64
 }
 interface i_operator_performance {
     estimated_time_us(shapes: [][]i64) -> i64

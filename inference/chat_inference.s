@@ -52,19 +52,19 @@ func init_model(config: chat_config) simple_transformer {
     model.config = config
     model.embedding_dim = config.hidden_dim
     model.head_dim = config.hidden_dim / config.num_heads
-    var embedding_params: i64 = i64(config.vocab_size) * i64(config.hidden_dim)
-    var layer_params: i64 = i64(config.num_layers) * (i64(config.hidden_dim) * i64(config.hidden_dim) * 3)
-    var ffn_params: i64 = i64(config.num_layers) * i64(config.hidden_dim) * i64(config.ffn_dim) * 2
+    var i64 embedding_params = i64(config.vocab_size) * i64(config.hidden_dim)
+    var i64 layer_params = i64(config.num_layers) * (i64(config.hidden_dim) * i64(config.hidden_dim) * 3)
+    var i64 ffn_params = i64(config.num_layers) * i64(config.hidden_dim) * i64(config.ffn_dim) * 2
     model.total_params = embedding_params + layer_params + ffn_params
     return model
 }
 
-func tokenize_input(text: string) []i32 {
+func tokenize_input(string text) []i32 {
     var tokens: []i32
-    var words: []string = strings.split(text, " ")
+    var []string words = strings.split(text, " ")
     var i: i32 = 0
     while i < len(words) {
-        var word_id: i32 = i32(math.abs_i64(i64(i) * 73856093)) % 32000
+        var i32 word_id = i32(math.abs_i64(i64(i) * 73856093)) % 32000
         tokens = append(tokens, word_id)
         i = i + 1
     }
@@ -75,18 +75,18 @@ func generate_token(model: simple_transformer, context: []i32) i32 {
     if len(context) == 0 {
         return 0
     }
-    var last_token: i32 = context[len(context) - 1]
+    var i32 last_token = context[len(context) - 1]
     var context_score: f64 = 0.0
     var i: i32 = 0
     while i < len(context) {
         context_score = context_score + f64(context[i]) / f64(len(context))
         i = i + 1
     }
-    var base_logit: f64 = f64(last_token % 1000) / 1000.0
+    var f64 base_logit = f64(last_token % 1000) / 1000.0
     var context_logit: f64 = context_score
     var combined_logit: f64 = base_logit * 0.3 + context_logit * 0.7
     var temperature_adjusted: f64 = combined_logit / model.config.temperature
-    var next_token: i32 = i32(temperature_adjusted * 1000.0) % model.config.vocab_size
+    var i32 next_token = i32(temperature_adjusted * 1000.0) % model.config.vocab_size
     var token_type: i32 = next_token % 5
     if token_type == 0 {
         next_token = 123
@@ -169,7 +169,7 @@ func decode_tokens(tokens: []i32) string {
 }
 
 func process_chat_request(model: simple_transformer, request: chat_request) chat_response {
-    var start_time: i64 = time.now_ms()
+    var i64 start_time = time.now_ms()
     var input_tokens: []i32 = tokenize_input(request.user_input)
     var context_tokens: []i32
     var i: i32 = 0
@@ -194,7 +194,7 @@ func process_chat_request(model: simple_transformer, request: chat_request) chat
     var generated_tokens: []i32
     var token_count: i32 = 0
     while token_count < max_tokens {
-        var next_token: i32 = generate_token(model, context_tokens)
+        var i32 next_token = generate_token(model, context_tokens)
         generated_tokens = append(generated_tokens, next_token)
         context_tokens = append(context_tokens, next_token)
         token_count = token_count + 1
@@ -202,9 +202,9 @@ func process_chat_request(model: simple_transformer, request: chat_request) chat
             break
         }
     }
-    var response_text: string = decode_tokens(generated_tokens)
-    var end_time: i64 = time.now_ms()
-    var latency: f64 = f64(end_time - start_time)
+    var string response_text = decode_tokens(generated_tokens)
+    var i64 end_time = time.now_ms()
+    var f64 latency = f64(end_time - start_time)
     var response: chat_response
     response.assistant_reply = response_text
     response.tokens_generated = len(generated_tokens)
@@ -226,16 +226,16 @@ func main() {
     io.println("   Layers: " + strings.from_i32(config.num_layers))
     io.println("   Total parameters: " + strings.from_i64(model.total_params))
     io.println("")
-    var args: []string = std.get_args()
+    var []string args = std.get_args()
     if len(args) > 1 {
         var user_input: string = args[1]
         var request: chat_request
         request.user_input = user_input
         request.max_tokens = 50
         request.temperature = config.temperature
-        var start: i64 = time.now_ms()
+        var i64 start = time.now_ms()
         var response: chat_response = process_chat_request(model, request)
-        var end: i64 = time.now_ms()
+        var i64 end = time.now_ms()
         io.println("🤖 Response:")
         io.println(response.assistant_reply)
         io.println("")

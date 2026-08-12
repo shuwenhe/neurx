@@ -24,7 +24,7 @@ func new_ipc_state() ipc_state {
     return ipc_state{queues: [], next_qid: 1, next_msg_id: 1}
 }
 
-func msgget(is ipc_state, name string, max_depth int) (ipc_state, int) {
+func msgget(is ipc_state, string name, int max_depth) (ipc_state, int) {
     int i = 0
     while i < len(is.queues) {
         if is.queues[i].name == name {
@@ -39,7 +39,7 @@ func msgget(is ipc_state, name string, max_depth int) (ipc_state, int) {
     return (is, qid)
 }
 
-func msgsnd(is ipc_state, qid int, from_pid int, to_pid int, msg_type string, payload string) ipc_state {
+func msgsnd(is ipc_state, int qid, int from_pid, int to_pid, string msg_type, payload string) ipc_state {
     int i = 0
     while i < len(is.queues) {
         if is.queues[i].qid == qid {
@@ -59,7 +59,7 @@ func msgsnd(is ipc_state, qid int, from_pid int, to_pid int, msg_type string, pa
     return is
 }
 
-func msgrcv(is ipc_state, qid int, to_pid int) (ipc_state, ipc_message, bool) {
+func msgrcv(is ipc_state, int qid, int to_pid) (ipc_state, ipc_message, bool) {
     int qi = 0
     while qi < len(is.queues) {
         if is.queues[qi].qid == qid {
@@ -102,7 +102,7 @@ func new_sem_state() sem_state {
     return sem_state{sems: [], next_sem_id: 1}
 }
 
-func sem_create(ss sem_state, name string, initial int, max_val int) (sem_state, int) {
+func sem_create(ss sem_state, string name, int initial, int max_val) (sem_state, int) {
     semaphore s = semaphore{sem_id: ss.next_sem_id, name: name, value: initial, max_value: max_val}
     ss.sems = append(ss.sems, s)
     int id = ss.next_sem_id
@@ -110,7 +110,7 @@ func sem_create(ss sem_state, name string, initial int, max_val int) (sem_state,
     return (ss, id)
 }
 
-func sem_down(ss sem_state, sem_id int) (sem_state, bool) {
+func sem_down(ss sem_state, int sem_id) (sem_state, bool) {
     int i = 0
     while i < len(ss.sems) {
         if ss.sems[i].sem_id == sem_id {

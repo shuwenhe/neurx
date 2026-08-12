@@ -46,7 +46,7 @@ func compute_offpolicy_metrics(
         log_ppl_diff: log_ppl_diff,
         ess_token: ess_token,
         ess_sequence: ess_seq,
-        num_tokens: int(num_tokens),
+        int num_tokens(num_tokens),
         num_sequences: num_seqs,
     }
 }

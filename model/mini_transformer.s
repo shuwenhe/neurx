@@ -7,7 +7,7 @@ struct tensor_2 {
     requires_grad: bool
 }
 
-func tensor_new(shape: []int) tensor_2 {
+func tensor_new([]int shape) tensor_2 {
     size := 1
     for i := 0; i < len(shape); i += 1 {
         size *= shape[i]
@@ -281,7 +281,7 @@ func apply_ffn(
     output
 }
 
-func gelu(x: float) float {
+func gelu(float x) float {
     return x * 0.5 * (1.0 + math.Tanh(math.Sqrt(2.0/math.Pi) * (x + 0.044715 * x * x * x)))
 }
 

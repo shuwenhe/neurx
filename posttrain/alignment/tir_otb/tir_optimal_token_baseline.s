@@ -259,7 +259,7 @@ func compute_variance_tensor(x: Tensor) -> f32 {
     return variance.item()
 }
 
-func clamp(x: Tensor, min_val: f32, max_val: f32) -> Tensor {
+func clamp(x: Tensor, f32 min_val, f32 max_val) -> Tensor {
     return maximum(minimum(x, max_val), min_val)
 }
 

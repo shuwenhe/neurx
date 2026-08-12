@@ -28,7 +28,7 @@ func new_irq_state() irq_state {
     }
 }
 
-func request_irq(is irq_state, irq_num int, name string, priority int, handler string) irq_state {
+func request_irq(is irq_state, int irq_num, string name, int priority, handler string) irq_state {
     irq_descriptor d = irq_descriptor{
         irq_num:         irq_num,
         name:            name,

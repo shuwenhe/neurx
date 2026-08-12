@@ -38,7 +38,7 @@ struct replay_buffer {
     insertion_index: i32
 }
 
-func new_replay_buffer(capacity: i32) -> replay_buffer {
+func new_replay_buffer(i32 capacity) -> replay_buffer {
     return replay_buffer{
         capacity: capacity,
         experiences: [],
@@ -48,7 +48,7 @@ func new_replay_buffer(capacity: i32) -> replay_buffer {
     }
 }
 
-func (buffer: *replay_buffer) add(exp: experience, reward: f32) {
+func (buffer: *replay_buffer) add(exp: experience, f32 reward) {
     if buffer.current_size < buffer.capacity {
         buffer.experiences.push(exp)
         buffer.rewards.push(reward)
@@ -60,7 +60,7 @@ func (buffer: *replay_buffer) add(exp: experience, reward: f32) {
     buffer.insertion_index = (buffer.insertion_index + 1) % buffer.capacity
 }
 
-func (buffer: *replay_buffer) sample(n: i32) -> []experience {
+func (buffer: *replay_buffer) sample(i32 n) -> []experience {
     if buffer.current_size == 0 {
         return []
     }
@@ -73,7 +73,7 @@ func (buffer: *replay_buffer) sample(n: i32) -> []experience {
     return sampled
 }
 
-func (buffer: *replay_buffer) filter_by_reward(threshold: f32, percentile: f32) {
+func (buffer: *replay_buffer) filter_by_reward(f32 threshold, f32 percentile) {
     if buffer.current_size == 0 {
         return
     }

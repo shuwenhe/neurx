@@ -20,20 +20,20 @@ type evaluator struct {
     history: []evaluation_metrics
 }
 
-func (e *evaluator) init(batch_size: int, accumulation_steps: int) {
+func (e *evaluator) init(int batch_size, int accumulation_steps) {
     e.batch_size = batch_size
     e.accumulation_steps = accumulation_steps
     e.history = make([]evaluation_metrics, 0)
 }
 
-func calculate_perplexity(loss: float): float {
+func calculate_perplexity(float loss): float {
     if loss < 0 {
         return -1.0
     }
     return math.Exp(loss)
 }
 
-func calculate_cross_entropy(logits: []float, labels: []int): float {
+func calculate_cross_entropy([]float logits, []int labels): float {
     total_loss := 0.0
     for i := 0; i < len(labels); i++ {
         if i >= len(logits) {
@@ -177,11 +177,11 @@ func (e *evaluator) export_json(): string {
     return string(json_bytes)
 }
 
-func format_float(f: float): string {
+func format_float(float f): string {
     return fmt.Sprintf("%.4f", f)
 }
 
-func format_int(i: int): string {
+func format_int(int i): string {
     return fmt.Sprintf("%d", i)
 }
 

@@ -572,7 +572,7 @@ func generate(
     int top_k: int = 50,
     bool do_sample: bool = true,
     bool stream: bool = false,
-    callback: option<function> = None
+    option callback<function> = None
 ):
     """
     English textrequestEnglish textgenerate (English textfunction)

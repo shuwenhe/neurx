@@ -2,6 +2,7 @@ int DEV_CPU  = 0
 int DEV_GPU  = 1
 int DEV_NPU  = 2
 int DEV_FPGA = 3
+
 struct device_info {
     int    dev_id
     int    dev_type
@@ -42,7 +43,7 @@ func new_dispatch_state() dispatch_state {
     }
 }
 
-func register_device(ds dispatch_state, params register_device_params) dispatch_state {
+func register_device(dispatch_state ds, register_device_params params) dispatch_state {
     device_info d = device_info{
         dev_id:          ds.next_dev_id,
         dev_type:        params.dev_type,
@@ -61,7 +62,7 @@ func register_device(ds dispatch_state, params register_device_params) dispatch_
     return ds
 }
 
-func pick_device(ds dispatch_state, op_type string, tensor_size_mb int) device_pick_result {
+func pick_device(dispatch_state ds, string op_type, int tensor_size_mb) device_pick_result {
     if op_type == "control" || op_type == "scalar" {
         int i = 0
         while i < len(ds.devices) {
@@ -120,7 +121,7 @@ func pick_device(ds dispatch_state, op_type string, tensor_size_mb int) device_p
     return failed
 }
 
-func update_device_mem(ds dispatch_state, name string, delta_mb int) dispatch_state {
+func update_device_mem(dispatch_state ds, string name, int delta_mb) dispatch_state {
     int i = 0
     while i < len(ds.devices) {
         if ds.devices[i].name == name {

@@ -661,7 +661,7 @@ func training_loop(training_system_config cfg) {
             tokens_per_sec: tokens_per_sec,
             step: state.global_step,
             epoch: state.epoch,
-            elapsed_time_sec: float(get_time_ms() - start_time) / 1000.0,
+            float elapsed_time_sec(get_time_ms() - start_time) / 1000.0,
         }
         log_training_metrics(metrics, cfg)
         if cfg.enable_checkpointing && is_multiple_of(state.global_step, cfg.save_interval_steps) {

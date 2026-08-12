@@ -51,14 +51,14 @@ type grad_accum_manager struct {
     is_sync_step: bool
 }
 
-func (gm *grad_accum_manager) init(accum_steps: int) {
+func (gm *grad_accum_manager) init(int accum_steps) {
     gm.accum_steps = accum_steps
     gm.current_step = 0
     gm.accumulated_grads = make(map[string]float)
     gm.is_sync_step = false
 }
 
-func (gm *grad_accum_manager) step(grad_norm: float) {
+func (gm *grad_accum_manager) step(float grad_norm) {
     gm.current_step++
     gm.accumulated_grads["grad_norm"] = grad_norm
     gm.is_sync_step = (gm.current_step % gm.accum_steps) == 0
@@ -84,7 +84,7 @@ type activation_ckpt_manager struct {
     memory_savings_percent: float
 }
 
-func (acm *activation_ckpt_manager) init(total_layers: int, strategy: string) {
+func (acm *activation_ckpt_manager) init(int total_layers, string strategy) {
     acm.total_layers = total_layers
     acm.checkpoint_strategy = strategy
     acm.layer_checkpoint_map = make(map[int]bool)
@@ -104,7 +104,7 @@ func (acm *activation_ckpt_manager) init(total_layers: int, strategy: string) {
     }
 }
 
-func (acm *activation_ckpt_manager) should_checkpoint(layer_id: int): bool {
+func (acm *activation_ckpt_manager) should_checkpoint(int layer_id): bool {
     if val, exists := acm.layer_checkpoint_map[layer_id]; exists {
         return val
     }
@@ -118,7 +118,7 @@ type mixed_precision_manager struct {
     loss_scaling_enabled: bool
 }
 
-func (mpm *mixed_precision_manager) init(dtype: string) {
+func (mpm *mixed_precision_manager) init(string dtype) {
     mpm.dtype = dtype
     mpm.loss_scaling_enabled = (dtype != "fp32")
     mpm.loss_scaling = 1024.0
@@ -155,7 +155,7 @@ type large_model_distributed_trainer struct {
     estimated_memory_gb: float
 }
 
-func (lmdt *large_model_distributed_trainer) init(world_size: int, rank: int) error {
+func (lmdt *large_model_distributed_trainer) init(int world_size, int rank) error {
     lmdt.config = create_7b_distributed_config()
     lmdt.config.world_size = world_size
     lmdt.config.rank = rank
@@ -187,7 +187,7 @@ func (lmdt *large_model_distributed_trainer) estimate_memory() {
     lmdt.estimated_memory_gb = total_gb
 }
 
-func (lmdt *large_model_distributed_trainer) step(loss: float) {
+func (lmdt *large_model_distributed_trainer) step(float loss) {
     lmdt.global_step++
     lmdt.grad_accum.step(loss)
     if lmdt.grad_accum.should_sync() {

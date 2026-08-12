@@ -28,7 +28,7 @@ type distributed_process struct {
     bucket_size: int
 }
 
-func (dp *distributed_process) init_from_env(backend: string) error {
+func (dp *distributed_process) init_from_env(string backend) error {
     config := distributed_config{
         backend: backend,
         rank: 0,
@@ -66,7 +66,7 @@ func (dp *distributed_process) init_from_env(backend: string) error {
     return nil
 }
 
-func (dp *distributed_process) all_reduce_grad(grad_norm: float): float {
+func (dp *distributed_process) all_reduce_grad(float grad_norm): float {
     if !dp.config.sync_gradients || dp.config.world_size == 1 {
         return grad_norm
     }
@@ -74,14 +74,14 @@ func (dp *distributed_process) all_reduce_grad(grad_norm: float): float {
     return reduced_grad / float(dp.config.world_size)
 }
 
-func (dp *distributed_process) broadcast_parameters(param: float): float {
+func (dp *distributed_process) broadcast_parameters(float param): float {
     if dp.config.world_size == 1 {
         return param
     }
     return param
 }
 
-func (dp *distributed_process) build_grad_buckets(total_params: int) {
+func (dp *distributed_process) build_grad_buckets(int total_params) {
     if dp.config.world_size == 1 {
         return
     }
@@ -99,7 +99,7 @@ func (dp *distributed_process) build_grad_buckets(total_params: int) {
     }
 }
 
-func (dp *distributed_process) reduce_bucket(bucket_idx: int) {
+func (dp *distributed_process) reduce_bucket(int bucket_idx) {
     if bucket_idx >= len(dp.grad_buckets) {
         return
     }
@@ -161,7 +161,7 @@ func (ds *distributed_sampler) get_indices(): []int {
     return indices
 }
 
-func (ds *distributed_sampler) set_epoch(epoch: int) {
+func (ds *distributed_sampler) set_epoch(int epoch) {
     ds.epoch = epoch
 }
 type communication_metrics struct {

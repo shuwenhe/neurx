@@ -74,7 +74,7 @@ structure anomaly_detector {
     anomaly_count: int
 }
 
-func new_metrics_aggregator(window_size: int): metrics_aggregator {
+func new_metrics_aggregator(int window_size): metrics_aggregator {
     var agg: metrics_aggregator
     agg.window_size = window_size
     agg.history = allocate_vector(window_size, 0.0)
@@ -242,11 +242,11 @@ func compute_timing_breakdown(
     if total_time <= 0.0 {
         return (0.0, 0.0, 0.0, 0.0, 0.0)
     }
-    var pct_forward: float = (metrics.forward_time / total_time) * 100.0
-    var pct_backward: float = (metrics.backward_time / total_time) * 100.0
-    var pct_optimizer: float = (metrics.optimizer_time / total_time) * 100.0
-    var pct_communication: float = (metrics.communication_time / total_time) * 100.0
-    var pct_data_load: float = (metrics.data_loading_time / total_time) * 100.0
+    var float pct_forward = (metrics.forward_time / total_time) * 100.0
+    var float pct_backward = (metrics.backward_time / total_time) * 100.0
+    var float pct_optimizer = (metrics.optimizer_time / total_time) * 100.0
+    var float pct_communication = (metrics.communication_time / total_time) * 100.0
+    var float pct_data_load = (metrics.data_loading_time / total_time) * 100.0
     return (pct_forward, pct_backward, pct_optimizer, pct_communication, pct_data_load)
 }
 
@@ -261,7 +261,7 @@ func identify_communication_bottlenecks(
     if comm_ratio > 0.2 {
         bottleneck_info = "High communication overhead: " + str(comm_ratio * 100.0) + "%"
     }
-    var avg_comm_per_layer: float = metrics.communication_time / float(num_layers)
+    var float avg_comm_per_layer = metrics.communication_time / float(num_layers)
     if avg_comm_per_layer > 100.0 {
         bottleneck_info = bottleneck_info + "\nLarge all-reduce latency: " + str(avg_comm_per_layer) + "ms per layer"
     }
@@ -304,7 +304,7 @@ func new_anomaly_detector(): anomaly_detector {
     return detector
 }
 
-func compute_vector_norm(v: vector): float {
+func compute_vector_norm(vector v): float {
     var norm_sq: float = 0.0
     for i in range(0, length(v)) {
         norm_sq = norm_sq + v[i] * v[i]
@@ -312,7 +312,7 @@ func compute_vector_norm(v: vector): float {
     return sqrt(norm_sq)
 }
 
-func compute_vector_max(v: vector): float {
+func compute_vector_max(vector v): float {
     var max_val: float = -inf
     for i in range(0, length(v)) {
         if abs(v[i]) > max_val {
@@ -322,7 +322,7 @@ func compute_vector_max(v: vector): float {
     return max_val
 }
 
-func compute_vector_min(v: vector): float {
+func compute_vector_min(vector v): float {
     var min_val: float = inf
     for i in range(0, length(v)) {
         if abs(v[i]) < min_val {
@@ -336,11 +336,11 @@ func get_time(): float {
     return 0.0
 }
 
-func is_nan(val: float): bool {
+func is_nan(float val): bool {
     return val != val
 }
 
-func println(msg: string): void {
+func println(string msg): void {
 }
 
 func recommended_monitoring_config_2t(): metrics_aggregator {

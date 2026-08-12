@@ -22,21 +22,21 @@ struct allocation_result {
 }
 interface i_allocator {
     allocate(info: allocation_info) -> allocation_result
-    deallocate(ptr: i64, size: i64) -> void
-    get_allocation_info(ptr: i64) -> allocation_info
+    deallocate(i64 ptr, i64 size) -> void
+    get_allocation_info(i64 ptr) -> allocation_info
     strategy() -> AllocatorStrategy
     device() -> device
     allocated_bytes() -> i64
     reserved_bytes() -> i64
     free_bytes() -> i64
-    set_max_memory(bytes: i64) -> void
+    set_max_memory(i64 bytes) -> void
     get_max_memory() -> i64
 }
 interface i_caching_allocator {
     empty_cache() -> void
     cached_blocks() -> []i64
     defragment() -> void
-    set_caching_enabled(enabled: bool) -> void
+    set_caching_enabled(bool enabled) -> void
     is_caching_enabled() -> bool
 }
 interface i_arena_allocator {
@@ -46,23 +46,23 @@ interface i_arena_allocator {
 }
 interface i_async_allocator {
     allocate_async(info: allocation_info) -> allocation_result
-    wait_allocation(ptr: i64) -> void
-    deallocate_async(ptr: i64, size: i64) -> void
+    wait_allocation(i64 ptr) -> void
+    deallocate_async(i64 ptr, i64 size) -> void
 }
 interface i_unified_allocator {
-    allocate_unified(size: i64) -> allocation_result
-    set_access_mode(ptr: i64, from_device: device, to_device: device, enabled: bool) -> void
-    advise_memory(ptr: i64, size: i64, advice: string) -> void
+    allocate_unified(i64 size) -> allocation_result
+    set_access_mode(i64 ptr, from_device: device, to_device: device, bool enabled) -> void
+    advise_memory(i64 ptr, i64 size, string advice) -> void
 }
 interface i_allocator_factory {
     create_allocator(device: device, strategy: AllocatorStrategy) -> IAllocator
     get_default_allocator(device: device) -> IAllocator
     set_default_allocator(device: device, allocator: IAllocator) -> void
-    register_allocator(device: device, name: string, allocator: IAllocator) -> void
+    register_allocator(device: device, string name, allocator: IAllocator) -> void
 }
 interface i_allocator_monitoring {
     on_memory_pressure() -> void
-    on_allocate(ptr: i64, size: i64) -> void
-    on_deallocate(ptr: i64) -> void
+    on_allocate(i64 ptr, i64 size) -> void
+    on_deallocate(i64 ptr) -> void
 }
 

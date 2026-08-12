@@ -118,7 +118,7 @@ func (trainer: *dppo_trainer) compute_constrained_objective(
     return constrained_obj
 }
 
-func (trainer: *dppo_trainer) update_adaptive_epsilon(current_kl: f32) {
+func (trainer: *dppo_trainer) update_adaptive_epsilon(f32 current_kl) {
     if !trainer.config.use_adaptive_epsilon {
         return
     }
@@ -304,7 +304,7 @@ func compute_mean(values: []f32) -> f32 {
     return sum / f32(values.len())
 }
 
-func compute_std(values: []f32, mean: f32) -> f32 {
+func compute_std(values: []f32, f32 mean) -> f32 {
     if values.len() == 0 {
         return 1.0
     }
@@ -315,7 +315,7 @@ func compute_std(values: []f32, mean: f32) -> f32 {
     return sqrt(sum_sq / f32(values.len()))
 }
 
-func clamp(x: Tensor, min_val: f32, max_val: f32) -> Tensor {
+func clamp(x: Tensor, f32 min_val, f32 max_val) -> Tensor {
     return maximum(minimum(x, max_val), min_val)
 }
 

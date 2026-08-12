@@ -311,7 +311,7 @@ func detect_build_arch() build_arch {
     }
 }
 
-func find_build_artifacts(dir string) ([]string, error) {
+func find_build_artifacts(string dir) ([]string, error) {
     var artifacts []string
     files, _ := list_dir(dir)
     for _, file := range files {

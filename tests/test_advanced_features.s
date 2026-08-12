@@ -6,8 +6,8 @@ import (
     "neurx/distributed/tensor_parallel"
 )
 func test_vectorization_basic() bool {
-    var A: []float = []float(4)
-    var B: []float = []float(4)
+    var []float A = []float(4)
+    var []float B = []float(4)
     A[0] = 1.0; A[1] = 2.0; A[2] = 3.0; A[3] = 4.0
     B[0] = 2.0; B[1] = 2.0; B[2] = 2.0; B[3] = 2.0
     var C = vectorization.element_wise_add(A, B)
@@ -16,8 +16,8 @@ func test_vectorization_basic() bool {
 }
 
 func test_vectorization_dot_product() bool {
-    var A: []float = []float(3)
-    var B: []float = []float(3)
+    var []float A = []float(3)
+    var []float B = []float(3)
     A[0] = 1.0; A[1] = 2.0; A[2] = 3.0
     B[0] = 4.0; B[1] = 5.0; B[2] = 6.0
     var result = vectorization.dot_product(A, B)
@@ -25,14 +25,14 @@ func test_vectorization_dot_product() bool {
 }
 
 func test_vectorization_vector_norm() bool {
-    var A: []float = []float(3)
+    var []float A = []float(3)
     A[0] = 3.0; A[1] = 4.0; A[2] = 0.0
     var norm = vectorization.vector_norm(A)
     return norm >= 4.9 && norm <= 5.1
 }
 
 func test_vectorization_reduce_sum() bool {
-    var A: []float = []float(4)
+    var []float A = []float(4)
     A[0] = 1.0; A[1] = 2.0; A[2] = 3.0; A[3] = 4.0
     var sum = vectorization.reduce_sum(A)
     return sum == 10.0
@@ -179,7 +179,7 @@ func test_mixed_training_config() bool {
 }
 
 func test_vectorization_with_mixed_precision() bool {
-    var A: []float = []float(4)
+    var []float A = []float(4)
     A[0] = 1.0; A[1] = 2.0; A[2] = 3.0; A[3] = 4.0
     var sum = vectorization.reduce_sum(A)
     var gradients: [][]float = [][]float(4)

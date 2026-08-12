@@ -76,35 +76,35 @@ func flash_attention_forward(
     var seq_len: int = state.seq_len
     var num_heads: int = state.num_heads
     var head_dim: int = state.head_dim
-    var q_scale: float = 1.0 / sqrt(float(head_dim))
-    var output: vector = allocate_vector(batch_size * seq_len * num_heads * head_dim, 0.0)
-    var softmax_sum: vector = allocate_vector(batch_size * seq_len * num_heads, 0.0)
+    var float q_scale = 1.0 / sqrt(float(head_dim))
+    var vector output = allocate_vector(batch_size * seq_len * num_heads * head_dim, 0.0)
+    var vector softmax_sum = allocate_vector(batch_size * seq_len * num_heads, 0.0)
     for q_block_idx in range(0, seq_len, state.config.block_size_q) {
-        var q_block_end: int = min(q_block_idx + state.config.block_size_q, seq_len)
+        var int q_block_end = min(q_block_idx + state.config.block_size_q, seq_len)
         var q_block_size: int = q_block_end - q_block_idx
-        var q_block: vector = load_block(q, q_block_idx, q_block_size, num_heads, head_dim)
-        var output_block: vector = allocate_vector(q_block_size * num_heads * head_dim, 0.0)
-        var row_max: vector = allocate_vector(q_block_size * num_heads, -inf)
-        var row_sum: vector = allocate_vector(q_block_size * num_heads, 0.0)
+        var vector q_block = load_block(q, q_block_idx, q_block_size, num_heads, head_dim)
+        var vector output_block = allocate_vector(q_block_size * num_heads * head_dim, 0.0)
+        var vector row_max = allocate_vector(q_block_size * num_heads, -inf)
+        var vector row_sum = allocate_vector(q_block_size * num_heads, 0.0)
         for kv_block_idx in range(0, seq_len, state.config.block_size_kv) {
-            var kv_block_end: int = min(kv_block_idx + state.config.block_size_kv, seq_len)
+            var int kv_block_end = min(kv_block_idx + state.config.block_size_kv, seq_len)
             var kv_block_size: int = kv_block_end - kv_block_idx
-            var k_block: vector = load_block(k, kv_block_idx, kv_block_size, num_heads, head_dim)
-            var v_block: vector = load_block(v, kv_block_idx, kv_block_size, num_heads, head_dim)
-            var scores: vector = block_matrix_multiply(
+            var vector k_block = load_block(k, kv_block_idx, kv_block_size, num_heads, head_dim)
+            var vector v_block = load_block(v, kv_block_idx, kv_block_size, num_heads, head_dim)
+            var vector scores = block_matrix_multiply(
                 q_block, k_block,
                 q_block_size, kv_block_size, num_heads, head_dim,
                 q_scale
             )
             apply_causal_mask(scores, q_block_idx, kv_block_idx,
                             q_block_size, kv_block_size, num_heads)
-            var old_row_max: vector = copy_vector(row_max)
+            var vector old_row_max = copy_vector(row_max)
             update_row_max(row_max, scores, q_block_size, kv_block_size, num_heads)
-            var exp_scores: vector = compute_online_exponentials(
+            var vector exp_scores = compute_online_exponentials(
                 scores, old_row_max, row_max,
                 q_block_size, kv_block_size, num_heads
             )
-            var exp_exp: vector = allocate_vector(q_block_size * num_heads, 0.0)
+            var vector exp_exp = allocate_vector(q_block_size * num_heads, 0.0)
             for i in range(0, q_block_size * num_heads) {
                 if old_row_max[i] < row_max[i] {
                     exp_exp[i] = exp(old_row_max[i] - row_max[i])
@@ -139,16 +139,16 @@ func flash_attention_backward(
     var seq_len: int = state.seq_len
     var num_heads: int = state.num_heads
     var head_dim: int = state.head_dim
-    var grad_q: vector = allocate_vector(length(q), 0.0)
-    var grad_k: vector = allocate_vector(length(k), 0.0)
-    var grad_v: vector = allocate_vector(length(v), 0.0)
+    var vector grad_q = allocate_vector(length(q), 0.0)
+    var vector grad_k = allocate_vector(length(k), 0.0)
+    var vector grad_v = allocate_vector(length(v), 0.0)
     if state.config.use_recompute {
     }
-    var grad_softmax: vector = allocate_vector(batch_size * seq_len * seq_len * num_heads, 0.0)
+    var vector grad_softmax = allocate_vector(batch_size * seq_len * seq_len * num_heads, 0.0)
     for q_block_idx in range(0, seq_len, state.config.block_size_q) {
-        var q_block_end: int = min(q_block_idx + state.config.block_size_q, seq_len)
+        var int q_block_end = min(q_block_idx + state.config.block_size_q, seq_len)
         for kv_block_idx in range(0, seq_len, state.config.block_size_kv) {
-            var kv_block_end: int = min(kv_block_idx + state.config.block_size_kv, seq_len)
+            var int kv_block_end = min(kv_block_idx + state.config.block_size_kv, seq_len)
             compute_attention_gradients_block(
                 grad_q, grad_k, grad_v,
                 q, k, v, grad_output,
@@ -170,8 +170,8 @@ func flash_attention_gqa(
     num_kv_heads: int,
     state: flash_attention_state
 ): vector {
-    var k_expanded: vector = expand_kv_heads(k, num_heads, num_kv_heads)
-    var v_expanded: vector = expand_kv_heads(v, num_heads, num_kv_heads)
+    var vector k_expanded = expand_kv_heads(k, num_heads, num_kv_heads)
+    var vector v_expanded = expand_kv_heads(v, num_heads, num_kv_heads)
     return flash_attention_forward(q, k_expanded, v_expanded, mask, state)
 }
 
@@ -186,12 +186,12 @@ func flash_attention_sequence_parallel(
 ): vector {
     var seq_rank: int = state.config.sequence_parallel_rank
     var seq_size: int = state.config.sequence_parallel_size
-    var local_output: vector = flash_attention_forward(q, k, v, mask, state)
+    var vector local_output = flash_attention_forward(q, k, v, mask, state)
     for remote_rank in range(0, seq_size) {
         if remote_rank != seq_rank {
-            var remote_k: vector = get_chunk_from_all_gather(all_gather_k, remote_rank)
-            var remote_v: vector = get_chunk_from_all_gather(all_gather_v, remote_rank)
-            var cross_output: vector = flash_attention_forward(q, remote_k, remote_v,
+            var vector remote_k = get_chunk_from_all_gather(all_gather_k, remote_rank)
+            var vector remote_v = get_chunk_from_all_gather(all_gather_v, remote_rank)
+            var vector cross_output = flash_attention_forward(q, remote_k, remote_v,
                                                               get_cross_mask(seq_rank, remote_rank),
                                                               state)
             local_output = add_vectors(local_output, cross_output)
@@ -206,18 +206,18 @@ func compute_flash_attention_memory_savings(
     num_heads: int,
     head_dim: int
 ): (float, float) {
-    var standard_memory: float = float(batch_size * seq_len * seq_len * num_heads) * 2.0 / (1024 * 1024 * 1024)
-    var flash_memory: float = float(batch_size * seq_len * head_dim * num_heads) * 2.0 / (1024 * 1024 * 1024)
-    var memory_savings: float = (1.0 - flash_memory / standard_memory) * 100.0
+    var float standard_memory = float(batch_size * seq_len * seq_len * num_heads) * 2.0 / (1024 * 1024 * 1024)
+    var float flash_memory = float(batch_size * seq_len * head_dim * num_heads) * 2.0 / (1024 * 1024 * 1024)
+    var float memory_savings = (1.0 - flash_memory / standard_memory) * 100.0
     var speedup: float = standard_memory / flash_memory
     return (memory_savings, speedup)
 }
 
-func load_block(data: vector, start_idx: int, block_size: int, num_heads: int, head_dim: int): vector {
+func load_block(vector data, int start_idx, int block_size, int num_heads, int head_dim): vector {
     return allocate_vector(block_size * num_heads * head_dim, 0.0)
 }
 
-func store_block(output: vector, block: vector, start_idx: int, block_size: int, num_heads: int, head_dim: int): void {
+func store_block(vector output, vector block, int start_idx, int block_size, int num_heads, int head_dim): void {
 }
 
 func block_matrix_multiply(
@@ -225,7 +225,7 @@ func block_matrix_multiply(
     q_size: int, kv_size: int, num_heads: int, head_dim: int,
     q_scale: float
 ): vector {
-    var result: vector = allocate_vector(q_size * kv_size * num_heads, 0.0)
+    var vector result = allocate_vector(q_size * kv_size * num_heads, 0.0)
     for h in range(0, num_heads) {
         for qi in range(0, q_size) {
             for ki in range(0, kv_size) {
@@ -260,7 +260,7 @@ func apply_causal_mask(
     }
 }
 
-func update_row_max(row_max: vector, scores: vector, q_size: int, kv_size: int, num_heads: int): void {
+func update_row_max(vector row_max, vector scores, int q_size, int kv_size, int num_heads): void {
     for h in range(0, num_heads) {
         for qi in range(0, q_size) {
             var row_idx: int = h * q_size + qi
@@ -280,7 +280,7 @@ func compute_online_exponentials(
     scores: vector, old_max: vector, new_max: vector,
     q_size: int, kv_size: int, num_heads: int
 ): vector {
-    var result: vector = allocate_vector(q_size * kv_size * num_heads, 0.0)
+    var vector result = allocate_vector(q_size * kv_size * num_heads, 0.0)
     for h in range(0, num_heads) {
         for qi in range(0, q_size) {
             var row_idx: int = h * q_size + qi
@@ -294,7 +294,7 @@ func compute_online_exponentials(
     return result
 }
 
-func add_row_sum(row_sum: vector, exp_scores: vector, q_size: int, kv_size: int, num_heads: int): void {
+func add_row_sum(vector row_sum, vector exp_scores, int q_size, int kv_size, int num_heads): void {
     for h in range(0, num_heads) {
         for qi in range(0, q_size) {
             var row_idx: int = h * q_size + qi
@@ -315,7 +315,7 @@ func update_output_block(
     for h in range(0, num_heads) {
         for qi in range(0, q_size) {
             var row_idx: int = h * q_size + qi
-            var scale_factor: float = exp(old_max[row_idx] - new_max[row_idx])
+            var float scale_factor = exp(old_max[row_idx] - new_max[row_idx])
             for d in range(0, head_dim) {
                 output[h * q_size * head_dim + qi * head_dim + d] =
                     output[h * q_size * head_dim + qi * head_dim + d] * scale_factor
@@ -332,7 +332,7 @@ func update_output_block(
     }
 }
 
-func normalize_output_block(output: vector, row_sum: vector, q_size: int, num_heads: int, head_dim: int): void {
+func normalize_output_block(vector output, vector row_sum, int q_size, int num_heads, int head_dim): void {
     for h in range(0, num_heads) {
         for qi in range(0, q_size) {
             var row_idx: int = h * q_size + qi
@@ -345,10 +345,10 @@ func normalize_output_block(output: vector, row_sum: vector, q_size: int, num_he
     }
 }
 
-func expand_kv_heads(kv: vector, num_heads: int, num_kv_heads: int): vector {
+func expand_kv_heads(vector kv, int num_heads, int num_kv_heads): vector {
     var expansion_factor: int = num_heads / num_kv_heads
-    var expanded_size: int = length(kv) * expansion_factor
-    var result: vector = allocate_vector(expanded_size, 0.0)
+    var int expanded_size = length(kv) * expansion_factor
+    var vector result = allocate_vector(expanded_size, 0.0)
     for i in range(0, length(kv)) {
         for j in range(0, expansion_factor) {
             result[i * expansion_factor + j] = kv[i]
@@ -357,15 +357,15 @@ func expand_kv_heads(kv: vector, num_heads: int, num_kv_heads: int): vector {
     return result
 }
 
-func get_chunk_from_all_gather(all_gathered: vector, rank: int): vector {
+func get_chunk_from_all_gather(vector all_gathered, int rank): vector {
     return allocate_vector(length(all_gathered) / rank, 0.0)
 }
 
-func get_cross_mask(from_rank: int, to_rank: int): vector {
+func get_cross_mask(int from_rank, int to_rank): vector {
     return allocate_vector(1, 0.0)
 }
 
-func scale_and_add(result: vector, scale_vec: vector, q_size: int, num_heads: int): void {
+func scale_and_add(vector result, vector scale_vec, int q_size, int num_heads): void {
     for h in range(0, num_heads) {
         for qi in range(0, q_size) {
             result[h * q_size + qi] = result[h * q_size + qi] * scale_vec[h * q_size + qi]
@@ -387,15 +387,15 @@ func benchmark_flash_attention(
     num_heads: int,
     head_dim: int
 ): vector {
-    var results: vector = allocate_vector(length(seq_lengths), 0.0)
+    var vector results = allocate_vector(length(seq_lengths), 0.0)
     for i in range(0, length(seq_lengths)) {
         var seq_len: int = seq_lengths[i]
         var config: flash_attention_config = new_flash_attention_config()
         var state: flash_attention_state = new_flash_attention_state(1, seq_len, num_heads, head_dim, config)
-        var q: vector = allocate_vector(seq_len * num_heads * head_dim, 0.0)
-        var k: vector = allocate_vector(seq_len * num_heads * head_dim, 0.0)
-        var v: vector = allocate_vector(seq_len * num_heads * head_dim, 0.0)
-        var mask: vector = allocate_vector(seq_len * seq_len, 0.0)
+        var vector q = allocate_vector(seq_len * num_heads * head_dim, 0.0)
+        var vector k = allocate_vector(seq_len * num_heads * head_dim, 0.0)
+        var vector v = allocate_vector(seq_len * num_heads * head_dim, 0.0)
+        var vector mask = allocate_vector(seq_len * seq_len, 0.0)
         var _ = flash_attention_forward(q, k, v, mask, state)
     }
     return results
@@ -407,12 +407,12 @@ func verify_flash_attention_correctness(
 ): bool {
     var config: flash_attention_config = new_flash_attention_config()
     var state: flash_attention_state = new_flash_attention_state(1, seq_len, num_heads, head_dim, config)
-    var flash_output: vector = flash_attention_forward(q, k, v, mask, state)
-    var ref_output: vector = standard_attention(q, k, v, mask, seq_len, num_heads, head_dim)
+    var vector flash_output = flash_attention_forward(q, k, v, mask, state)
+    var vector ref_output = standard_attention(q, k, v, mask, seq_len, num_heads, head_dim)
     var tolerance: float = 1e-5
     var max_diff: float = 0.0
     for i in range(0, length(flash_output)) {
-        var diff: float = abs(flash_output[i] - ref_output[i])
+        var float diff = abs(flash_output[i] - ref_output[i])
         if diff > max_diff {
             max_diff = diff
         }
@@ -420,10 +420,10 @@ func verify_flash_attention_correctness(
     return max_diff < tolerance
 }
 
-func standard_attention(q: vector, k: vector, v: vector, mask: vector,
+func standard_attention(vector q, vector k, vector v, vector mask,
                      seq_len: int, num_heads: int, head_dim: int): vector {
-    var q_scale: float = 1.0 / sqrt(float(head_dim))
-    var output: vector = allocate_vector(seq_len * num_heads * head_dim, 0.0)
+    var float q_scale = 1.0 / sqrt(float(head_dim))
+    var vector output = allocate_vector(seq_len * num_heads * head_dim, 0.0)
     for h in range(0, num_heads) {
         for qi in range(0, seq_len) {
             for ki in range(0, seq_len) {
@@ -437,7 +437,7 @@ func standard_attention(q: vector, k: vector, v: vector, mask: vector,
                 if mask[qi * seq_len + ki] == 0.0 {
                     score = -inf
                 }
-                var exp_score: float = exp(score)
+                var float exp_score = exp(score)
                 for d in range(0, head_dim) {
                     var v_val: float = v[h * seq_len * head_dim + ki * head_dim + d]
                     output[h * seq_len * head_dim + qi * head_dim + d] =

@@ -186,7 +186,7 @@ func run_benchmark(args []string) {
     }
 }
 
-func run_benchmark_step(scale string, num_gp_us int) float32 {
+func run_benchmark_step(string scale, num_gp_us int) float32 {
     base_throughput := float32(100)
     return base_throughput * float32(num_gp_us)
 }

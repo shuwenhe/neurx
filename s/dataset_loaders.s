@@ -40,7 +40,7 @@ func load_text_dataset(dataset ds) (dataset, error) {
     ds.stats = dataset_stats {
         total_samples: n,
         total_tokens: total_tokens,
-        avg_length: float(total_tokens / n) if n > 0 else 0.0,
+        float avg_length(total_tokens / n) if n > 0 else 0.0,
         min_length: min_len if n > 0 else 0,
         max_length: max_len,
         length_distribution: compute_length_distribution(ds),

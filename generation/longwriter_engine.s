@@ -131,7 +131,7 @@ class outline_planner {
         this.config = config
         this.llm_client = llm_client
     }
-    async create_plan(topic: string, requirements?: string, existing_outline?: outline_node) {
+    async create_plan(string topic, requirements?: string, existing_outline?: outline_node) {
         start_time = current_time_millis()
         print(f"📋 Creating outline for: {topic}")
         prompt = this._build_planning_prompt(topic, requirements, existing_outline)
@@ -159,7 +159,7 @@ class outline_planner {
         print(f"   ✓ Outline created: {len(flat_sections)} sections, ~{total_words} words estimated")
         return plan
     }
-    _build_planning_prompt(topic: string, requirements?: string, existing_outline?: outline_node) {
+    _build_planning_prompt(string topic, requirements?: string, existing_outline?: outline_node) {
         detail_instructions = match this.config.outline_detail_level {
             "brief" => """
 Provide a high-level outline with main sections only (2-3 levels deep).
@@ -236,7 +236,7 @@ IMPORTANT:
 - Consider the reader's knowledge level: {this.config.constraints?.audience_level ?? "general"}
 Now create the outline:"""
     }
-    _parse_outline(llm_response_text: string, topic: string) {
+    _parse_outline(string llm_response_text, string topic) {
         json_str = extract_json_from_text(llm_response_text)
         try {
             data = json_parse(json_str)
@@ -245,7 +245,7 @@ Now create the outline:"""
             print(f"Warning: Failed to parse outline JSON, falling back to text parsing: {e.message}")
             return this._fallback_parse_outline(llm_response_text, topic)
     }
-    _fallback_parse_outline(text: string, topic: string) {
+    _fallback_parse_outline(string text, string topic) {
         lines = text.split("\n")
         root = outline_node{
             id="root",
@@ -390,7 +390,7 @@ Now write the content for "{section.title}":
         else:
             return 0.7
     }
-    _post_process(raw_text: string, section: outline_node) {
+    _post_process(string raw_text, section: outline_node) {
         changes: list<string> = []
         processed = raw_text
         heading_pattern = regex.match(r'^#{1,6}\s+.+\n*', processed)
@@ -542,7 +542,7 @@ class long_writer_engine {
         this.generator = new content_generator(config=config, llm_client=llm_client)
         this.documents_history = []
     }
-    async write_document(topic: string, requirements?: string) {
+    async write_document(string topic, requirements?: string) {
         total_start = current_time_millis()
         api_calls = 0
         errors = []
@@ -632,7 +632,7 @@ class long_writer_engine {
         print_generation_summary(doc)
         return doc
     }
-    async revise_section(document: long_document, section_id: string, feedback?: string) {
+    async revise_section(document: long_document, string section_id, feedback?: string) {
         """Revise a specific section of an existing document."""
         section_to_revise = find_section_by_id(document.plan.outline, section_id)
         if section_to_revise == None:
@@ -682,7 +682,7 @@ function estimate_total_words(root: outline_node) {
         base = 200 * (root.level + 1)
     child_sum = sum(estimate_total_words(c) for c in root.children)
     return base + child_sum
-function display_outline(root: outline_node, indent: int = 0) {
+function display_outline(root: outline_node, int indent = 0) {
     prefix = "  " * indent
     icon = match root.level {
         0 => "📚"
@@ -770,7 +770,7 @@ async function test_long_writer() {
     return true
 }
 class mock_llm_client {
-    async generate(prompt: string, temperature?: float, max_tokens?: int,
+    async generate(string prompt, temperature?: float, max_tokens?: int,
                    response_format?: string, stop_sequences?: list<string>) {
         content_length = min(max_tokens ?? 256, 300)
         if "outline" in prompt.to_lower():

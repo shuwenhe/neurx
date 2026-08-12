@@ -182,7 +182,7 @@ func is_rollout_correction_enabled(config: RolloutCorrectionConfig) -> bool {
     return config.is_level != is_aggregation_level.NONE || config.rs_modes.len() > 0
 }
 
-func clamp(x: Tensor, min_val: f32, max_val: f32) -> Tensor {
+func clamp(x: Tensor, f32 min_val, f32 max_val) -> Tensor {
     return maximum(minimum(x, max_val), min_val)
 }
 

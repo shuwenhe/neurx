@@ -83,7 +83,7 @@ func create_distributed_config_1t(): distributed_config1_t {
     return config
 }
 
-func calculate_parallelism_dims(total_gpus: int): (int, int, int) {
+func calculate_parallelism_dims(int total_gpus): (int, int, int) {
     tp_size := 64
     pp_size := 8
     dp_size := total_gpus / (tp_size * pp_size)

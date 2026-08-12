@@ -469,7 +469,7 @@ func ops_print_help() {
     io_println("  --dataset=<path>      Dataset JSONL path for governance")
     io_println("  --output-dir=<path>   Output directory")
 }
-pub func main(args: []string) i32 {
+pub func main([]string args) i32 {
     parsed := ops_parse_args(args)
     output_dir := ops_get_arg(parsed.options, "output-dir", "artifacts/industrial_ops")
     match parsed.command {

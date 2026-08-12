@@ -130,7 +130,7 @@ func main() {
     training_data = append(training_data, training_data{
         text: "English textcomputeEnglish text: English textcomputeEnglish textdataEnglish text.supportEnglish text.English textprivacy.English text.English text, English text, safetyEnglish text.English text, English text4.0, English text.TinyMLEnglish textrunEnglish textmodel.English texttraining.",
     })
-    total_count: i64 = i64(len(training_data))
+    i64 total_count = i64(len(training_data))
     io.println("English textgenerateEnglish texttrainingdataEnglish text: " + strings.from_i64(total_count))
     io.println("contentEnglish text:")
     io.println("  ✓ English textgenerateEnglish text (7English text)")

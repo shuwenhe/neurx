@@ -68,7 +68,7 @@ func GetArchitectureConfig(arch_name string) architecture_config {
     return architecture_config{}
 }
 
-func CreateModel(arch_name string, config architecture_config) any {
+func CreateModel(string arch_name, config architecture_config) any {
     if factory, ok := global_registry.factories[arch_name]; ok {
         return factory(config)
     }

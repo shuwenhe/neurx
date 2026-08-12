@@ -283,7 +283,7 @@ class mo_effn_layer {
             output = output / this.shared_experts.length
         return output
     }
-    _compute_dispatch_statistics(expert_mask: tensor, capacity: int) {
+    _compute_dispatch_statistics(expert_mask: tensor, int capacity) {
         tokens_per_expert = expert_mask.sum(dim=(0, 1)).tolist()
         total_tokens = expert_mask.sum().item()
         expert_utilization: list<float> = []
@@ -459,7 +459,7 @@ class expert_manager {
             remaining_active=sum(1 for l in this.moe_layers for e in l.experts if e.is_active)
         }
     }
-    merge_similar_experts(similarity_threshold: float = 0.95) {
+    merge_similar_experts(float similarity_threshold = 0.95) {
         merge_operations: list<merge_operation> = []
         for layer in this.moe_layers:
             active_experts = [e for e in layer.experts if e.is_active]

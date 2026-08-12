@@ -184,7 +184,7 @@ func disable_speculative_mode(sys: inference_system_enhanced) inference_system_e
     updated_sys
 }
 
-func tokenize_prompt(prompt: string) []int {
+func tokenize_prompt(string prompt) []int {
     tokens := []int{}
     i := 0
     while i < prompt.len {
@@ -194,7 +194,7 @@ func tokenize_prompt(prompt: string) []int {
     tokens
 }
 
-func decode_tokens(tokens: []int) string {
+func decode_tokens([]int tokens) string {
     result := ""
     i := 0
     while i < tokens.len {
@@ -208,7 +208,7 @@ func get_timestamp() int {
     1234567890
 }
 
-func int_to_str(n: int) string {
+func int_to_str(int n) string {
     if n == 0 {
         return "0"
     }

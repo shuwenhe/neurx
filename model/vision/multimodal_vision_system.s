@@ -119,7 +119,7 @@ class vi_t_patch_embeddings {
     patch_size: int
     num_patches: int
     embed_dim: int
-    init(img_size: int, patch_size: int, in_channels: int, embed_dim: int) {
+    init(int img_size, int patch_size, int in_channels, int embed_dim) {
         this.img_size = img_size
         this.patch_size = patch_size
         this.embed_dim = embed_dim
@@ -158,7 +158,7 @@ struct embeddings_output {
 class vi_t_encoder_blocks {
     layers: list<vi_t_layer>
     gradient_checkpointing: bool
-    init(hidden_size: int, num_layers: int, num_heads: int, intermediate_size: int) {
+    init(int hidden_size, int num_layers, int num_heads, int intermediate_size) {
         this.gradient_checkpointing = false
         this.layers = []
         for i in range(num_layers) {
@@ -200,7 +200,7 @@ class vi_t_layer {
     output: Output
     layernorm_before: layer_norm
     layernorm_after: layer_norm
-    init(hidden_size: int, num_attention_heads: int, intermediate_size: int, layer_idx: int) {
+    init(int hidden_size, int num_attention_heads, int intermediate_size, int layer_idx) {
         this.attention = new vi_t_attention(hidden_size=hidden_size, num_heads=num_attention_heads)
         this.intermediate = intermediate(hidden_size=hidden_size, intermediate_size=intermediate_size)
         this.output = output(intermediate_size=intermediate_size, hidden_size=hidden_size)
@@ -233,7 +233,7 @@ class vi_t_attention {
     num_heads: int
     head_dim: int
     scale: float
-    init(hidden_size: int, num_heads: int) {
+    init(int hidden_size, int num_heads) {
         this.num_heads = num_heads
         this.head_dim = hidden_size / num_heads
         this.scale = this.head_dim ** (-0.5)
@@ -273,7 +273,7 @@ struct attention_output {
 class intermediate {
     dense: linear
     activation: GELU
-    init(hidden_size: int, intermediate_size: int) {
+    init(int hidden_size, int intermediate_size) {
         this.dense = new linear(in_features=hidden_size, out_features=intermediate_size, bias=true)
         this.activation = new GELU(approximate='none')
     }
@@ -285,7 +285,7 @@ class intermediate {
 class output {
     dense: linear
     dropout: Dropout
-    init(intermediate_size: int, hidden_size: int) {
+    init(int intermediate_size, int hidden_size) {
         this.dense = new linear(in_features=intermediate_size, out_features=hidden_size, bias=true)
         this.dropout = new dropout(p=0.0)
     }
@@ -304,7 +304,7 @@ enum pool_type {
 class vision_pooler {
     pool_type: PoolType
     attention_pool?: LearnableAttentionPool
-    init(pool_type: string) {
+    init(string pool_type) {
         match pool_type {
             "cls_token" => this.pool_type = pool_type.CLS_TOKEN
             "mean" => this.pool_type = pool_type.MEAN_POOLING
@@ -335,7 +335,7 @@ class vision_pooler {
 class learnable_attention_pool {
     query: Parameter
     attention: ViTAttention
-    init(embed_dim: int = 1024, num_heads: int = 16) {
+    init(int embed_dim = 1024, int num_heads = 16) {
         this.query = parameter(shape=(1, 1, embed_dim))
         this.attention = new vi_t_attention(
             hidden_size=embed_dim,
@@ -356,7 +356,7 @@ class visual_adapter {
     layers: Sequential
     activation: GELU
     layer_norm: layer_norm
-    init(input_dim: int, hidden_dim: int, output_dim: int) {
+    init(int input_dim, int hidden_dim, int output_dim) {
         this.input_dim = input_dim
         this.output_dim = output_dim
         this.hidden_dim = hidden_dim
@@ -401,7 +401,7 @@ class clip_contrastive_model {
         )
         this.logit_scale = parameter(tensor([0.07]).log())
     }
-    forward(image_input: image_input, text_input: string) {
+    forward(image_input: image_input, string text_input) {
         let vision_out = this.vision_encoder.forward(image_input.pixel_values)
         let image_features = this.vision_projection.forward(vision_out.pooled_features)
         let text_features = this.text_encoder.forward(text_input)
@@ -448,7 +448,7 @@ class clip_text_encoder {
     embed_dim: int
     max_position_embeddings: int = 77
     context_length: int = 77
-    init(vocab_size: int, embed_dim: int, transformer_width: int,
+    init(int vocab_size, int embed_dim, int transformer_width,
          transformer_heads: int, transformer_layers: int) {
         this.vocab_size = vocab_size
         this.embed_dim = embed_dim
@@ -465,7 +465,7 @@ class clip_text_encoder {
         this.final_layer_norm = new layer_norm(embed_dim)
         this.text_projection = new linear(in_features=embed_dim, out_features=embed_dim, bias=False)
     }
-    forward(text: string) {
+    forward(string text) {
         let tokens = this._tokenize(text)
         let x = this.token_embedding.forward(tokens) + this.positional_embedding
         let causal_mask = this._create_causal_mask(x.shape[0])
@@ -476,14 +476,14 @@ class clip_text_encoder {
         let text_features = x[-1, :]
         return this.text_projection.forward(text_features)
     }
-    _tokenize(text: string) {
+    _tokenize(string text) {
         tokens = [49406]
         tokens.append(49407)
         while tokens.length < 77:
             tokens.append(0)
         return tensor(tokens[:77])
     }
-    _create_causal_mask(seq_len: int) {
+    _create_causal_mask(int seq_len) {
         mask = zeros((seq_len, seq_len))
         for i in range(seq_len):
             for j in range(i + 1):
@@ -496,7 +496,7 @@ class clip_transformer_block {
     mlp: mlp
     layer_norm1: layer_norm
     layer_norm2: layer_norm
-    init(embed_dim: int, num_heads: int, intermediate_size: int) {
+    init(int embed_dim, int num_heads, int intermediate_size) {
         this.self_attn = new multi_head_attention(embed_dim=embed_dim, num_heads=num_heads)
         this.mlp = mlp(embed_dim=embed_dim, intermediate_size=intermediate_size)
         this.layer_norm1 = new layer_norm(embed_dim, eps=1e-6)
@@ -558,7 +558,7 @@ struct video_vision_output {
 class frame_sampler {
     max_frames: int
     fps_sample: float
-    init(max_frames: int, fps_sample: float) {
+    init(int max_frames, float fps_sample) {
         this.max_frames = max_frames
         this.fps_sample = fps_sample
     }
@@ -588,7 +588,7 @@ class temporal_encoder {
     position_embedding: Parameter
     transformer_layers: list<temporal_transformer_block>
     layer_norm: layer_norm
-    init(input_dim: int, num_temporal_layers: int, num_heads: int) {
+    init(int input_dim, int num_temporal_layers, int num_heads) {
         this.position_embedding = parameter(shape=(256, input_dim))
         this.transformer_layers = []
         for i in range(num_temporal_layers) {
@@ -614,7 +614,7 @@ class temporal_transformer_block {
     mlp: mlp
     norm1: layer_norm
     norm2: layer_norm
-    init(embed_dim: int, num_heads: int, intermediate_size: int) {
+    init(int embed_dim, int num_heads, int intermediate_size) {
         this.self_attn = new multi_head_attention(embed_dim=embed_dim, num_heads=num_heads)
         this.mlp = mlp(embed_dim=embed_dim, intermediate_size=intermediate_size)
         this.norm1 = new layer_norm(embed_dim)
@@ -697,7 +697,7 @@ class cross_image_attention {
     num_heads: int
     head_dim: int
     scale: float
-    init(embed_dim: int, num_heads: int) {
+    init(int embed_dim, int num_heads) {
         this.num_heads = num_heads
         this.head_dim = embed_dim / num_heads
         this.scale = this.head_dim ** (-0.5)
@@ -731,7 +731,7 @@ class image_preprocessor {
             normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ]
     }
-    preprocess(image_path: string) {
+    preprocess(string image_path) {
         image = load_image(image_path)
         for transform in this.transforms {
             image = transform.apply(image)
@@ -743,7 +743,7 @@ class image_preprocessor {
             metadata=this._extract_metadata(image_path)
         }
     }
-    preprocess_batch(images: list<string>, adaptive_resolution: bool = false) {
+    preprocess_batch(images: list<string>, bool adaptive_resolution = false) {
         processed: list<tensor> = []
         for path in images {
             let img_input = this.preprocess(path)
@@ -754,7 +754,7 @@ class image_preprocessor {
         }
         return concatenate(processed, dim=0)
     }
-    _extract_metadata(image_path: string) {
+    _extract_metadata(string image_path) {
         metadata = {}
         return metadata
     }
@@ -784,7 +784,7 @@ class multimodal_vision_model {
             this.video_processor = new video_processor(config=config)
         }
     }
-    understand_image(image_path: string, question: string) {
+    understand_image(string image_path, string question) {
         let img_input = this.image_preprocessor.preprocess(image_path)
         let vision_out = this.vision_encoder.forward(img_input.pixel_values)
         let visual_tokens = this.visual_adapter.forward(vision_out.spatial_features!)
@@ -797,7 +797,7 @@ class multimodal_vision_model {
             confidence=response.confidence_score
         }
     }
-    reason_over_multiple_images(image_paths: list<string>, question: string) {
+    reason_over_multiple_images(image_paths: list<string>, string question) {
         assert this.multi_image_processor != null, "Multi-image processing not enabled"
         images: list<image_input> = []
         for path in image_paths {
@@ -814,7 +814,7 @@ class multimodal_vision_model {
             confidence=response.confidence_score
         }
     }
-    understand_video(video_path: string, question: string) {
+    understand_video(string video_path, string question) {
         assert this.video_processor != null, "Video processing not enabled"
         let video = this._load_video(video_path)
         let video_result = this.video_processor!.process_video(video, this.vision_encoder)
@@ -830,10 +830,10 @@ class multimodal_vision_model {
             confidence=response.confidence_score
         }
     }
-    _build_multimodal_prompt(question: string, visual_tokens: tensor) {
+    _build_multimodal_prompt(string question, visual_tokens: tensor) {
         return "<image>\n" + question
     }
-    _build_multi_image_prompt(question: string, multi_result: multimodal_embedding_result) {
+    _build_multi_image_prompt(string question, multi_result: multimodal_embedding_result) {
         prompt_parts: list<string> = []
         for i in range(multi_result.num_images) {
             prompt_parts.append(f"<image{i}>")
@@ -841,10 +841,10 @@ class multimodal_vision_model {
         prompt_parts.append(question)
         return "\n".join(prompt_parts)
     }
-    _build_video_prompt(question: string, video_result: video_vision_output, video_tokens: tensor) {
+    _build_video_prompt(string question, video_result: video_vision_output, video_tokens: tensor) {
         return f"<video>{question}\n[Video contains {video_result.num_frames} frames]"
     }
-    _load_video(video_path: string) {
+    _load_video(string video_path) {
         frames = extract_frames_from_video(video_path)
         return video_input {
             frames=frames,
@@ -862,7 +862,7 @@ struct vision_language_output {
     attention_map: tensor?
     confidence: float
 }
-function create_multimodal_vision(model_variant: string = "neurx-4v-plus") {
+function create_multimodal_vision(string model_variant = "neurx-4v-plus") {
     match model_variant.lower() {
         "neurx-4v-9b" => {
             cfg = vision_config(

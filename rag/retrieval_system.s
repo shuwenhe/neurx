@@ -71,9 +71,9 @@ interface vector_db_interface {
     init(config: retrieval_system_config)
     insert(chunks: list<document_chunk>)
     delete(chunk_ids: list<string>)
-    search(query_embedding: tensor, top_k: int)
-    save(path: string)
-    load(path: string)
+    search(query_embedding: tensor, int top_k)
+    save(string path)
+    load(string path)
     count()
     clear()
     get_status()
@@ -123,7 +123,7 @@ class in_memory_vector_db implements vector_db_interface {
         }
         this.last_updated = current_timestamp()
     }
-    search(query_embedding: tensor, top_k: int) {
+    search(query_embedding: tensor, int top_k) {
         results: list<search_result_item> = []
         for chunk_id, doc_emb in this.embeddings {
             let score = compute_similarity(query_embedding, doc_emb, this.config.metric)
@@ -141,7 +141,7 @@ class in_memory_vector_db implements vector_db_interface {
         }
         return results
     }
-    save(path: string) {
+    save(string path) {
         data = {
             "config": serialize(this.config),
             "documents": [serialize(doc) for doc in this.documents.values()],
@@ -151,7 +151,7 @@ class in_memory_vector_db implements vector_db_interface {
         }
         write_json_file(path, data)
     }
-    load(path: string) {
+    load(string path) {
         data = read_json_file(path)
         this.config = deserialize(data["config"])
         for doc_data in data["documents"]:
@@ -264,7 +264,7 @@ class faiss_vector_db implements vector_db_interface {
             }
         }
     }
-    search(query_embedding: tensor, top_k: int) {
+    search(query_embedding: tensor, int top_k) {
         if query_embedding.ndim == 1 {
             query_embedding = query_embedding.unsqueeze(0)
         }
@@ -293,12 +293,12 @@ class faiss_vector_db implements vector_db_interface {
         }
         return results
     }
-    save(path: string) {
+    save(string path) {
         faiss.write_index(this.index, path + ".index")
         mapping_data = [(int_id, serialize(chunk)) for int_id, chunk in this.id_to_chunk]
         write_pickle_file(path + ".mapping", {"mapping": mapping_data, "next_id": this.next_id})
     }
-    load(path: string) {
+    load(string path) {
         this.index = faiss.read_index(path + ".index")
         mapping_info = read_pickle_file(path + ".mapping")
         for int_id, chunk_data in mapping_info["mapping"] {
@@ -332,7 +332,7 @@ class embedding_service {
     tokenizer: any
     config: retrieval_system_config
     cache: LRUCache<string, tensor>
-    init(model_name: string, config: retrieval_system_config) {
+    init(string model_name, config: retrieval_system_config) {
         this.model_name = model_name
         this.config = config
         this.cache = new lru_cache(capacity=10000)
@@ -395,7 +395,7 @@ class embedding_service {
         }
         return embeddings
     }
-    embed_single(text: string) {
+    embed_single(string text) {
         results = this.embed([text])
         return results[0]
     }
@@ -428,7 +428,7 @@ class embedding_service {
 class lru_cache<K, V> {
     capacity: int
     cache: OrderedDict<K, V>
-    init(capacity: int) {
+    init(int capacity) {
         this.capacity = capacity
         this.cache = new ordered_map<K, V>()
     __getitem__(key: K) {
@@ -460,7 +460,7 @@ class document_processor {
             chunk_overlap=config.max_chunk_length
         )
     }
-    process_document(content: string, metadata: document_metadata) {
+    process_document(string content, metadata: document_metadata) {
         raw_chunks = this.splitter.split_text(content)
         chunks: list<document_chunk> = []
         for i, chunk_text in enumerate(raw_chunks) {
@@ -474,7 +474,7 @@ class document_processor {
         }
         return chunks
     }
-    process_documents(documents: list<{content: string, metadata: document_metadata}>) {
+    process_documents(documents: list<{string content, metadata: document_metadata}>) {
         all_chunks: list<document_chunk> = []
         for doc in documents {
             let chunks = this.process_document(doc.content, doc.metadata)
@@ -487,15 +487,15 @@ class recursive_character_text_splitter {
     chunk_size: int
     chunk_overlap: int
     separators: list<string>
-    init(chunk_size: int, chunk_overlap: int) {
+    init(int chunk_size, int chunk_overlap) {
         this.chunk_size = chunk_size
         this.chunk_overlap = chunk_overlap
         this.separators = ["\n\n", "\n", ". ", ".", " ", ""]
     }
-    split_text(text: string) {
+    split_text(string text) {
         return this._recursive_split(text, this.separators)
     }
-    _recursive_split(text: string, separators: list<string>) {
+    _recursive_split(string text, separators: list<string>) {
         if separators.length == 0 {
             return this._split_by_length(text)
         }
@@ -527,7 +527,7 @@ class recursive_character_text_splitter {
         }
         return chunks
     }
-    _split_by_length(text: string) {
+    _split_by_length(string text) {
         chunks: list<string> = []
         start = 0
         while start < text.length {
@@ -544,11 +544,11 @@ class recursive_character_text_splitter {
 class query_expander {
     llm_client: any
     enabled: bool
-    init(llm_client: any, enabled: bool = true) {
+    init(llm_client: any, bool enabled = true) {
         this.llm_client = llm_client
         this.enabled = enabled
     }
-    expand(query: string, num_expansions: int = 3) {
+    expand(string query, int num_expansions = 3) {
         if !this.enabled {
             return query_expansion_result{original=query, expanded=[]}
         }
@@ -577,7 +577,7 @@ Expanded queries:
         }
         return query_expansion_result{original=query, expanded=[]}
     }
-    _simple_expand(query: string, num: int) {
+    _simple_expand(string query, int num) {
         synonyms_map: map<string, list<string>> = {
             "how": ["English text", "English text", "English text"],
             "what": ["English text", "English text", "English text"],
@@ -645,7 +645,7 @@ class b_m_25_retriever {
         }
         this.avg_doc_len = total_len / this.corpus.length if this.corpus.length > 0 else 1.0
     }
-    search(query: string, top_k: int) {
+    search(string query, int top_k) {
         query_tokens = this._tokenize(query.lower())
         scores: list<tuple<int, float>> = []
         for doc_idx in range(this.corpus.length) {
@@ -664,7 +664,7 @@ class b_m_25_retriever {
         }
         return results
     }
-    _score_bm25(query_tokens: list<string>, doc_idx: int) {
+    _score_bm25(query_tokens: list<string>, int doc_idx) {
         doc_tf = this.tf[doc_idx]
         doc_len = sum(doc_tf.values())
         score = 0.0
@@ -679,7 +679,7 @@ class b_m_25_retriever {
         }
         return score
     }
-    _tokenize(text: string) {
+    _tokenize(string text) {
         return text.split_whitespace()
             .map(t => t.strip_punctuation().lower())
             .filter(t => t.length >= 2)
@@ -695,14 +695,14 @@ class cross_encoder_reranker {
     tokenizer: any
     model_name: string
     device: string
-    init(model_name: string) {
+    init(string model_name) {
         this.model_name = model_name
         this.device = "cuda" if has_gpu() else "cpu"
         this.model, this.tokenizer = load_cross_encoder_model(model_name)
         this.model.eval()
         this.model.to(device=this.device)
     }
-    rerank(query: string, candidates: list<document_chunk>, top_k: int) {
+    rerank(string query, candidates: list<document_chunk>, int top_k) {
         if candidates.length == 0 { return [] }
         pairs: list<tuple<string, string>> = []
         for candidate in candidates {
@@ -743,7 +743,7 @@ class hybrid_fusion_engine {
     vector_weight: float
     keyword_weight: float
     normalization_method: string = "rrf"
-    init(vector_w: float = 0.7, keyword_w: float = 0.3, method: string = "rrf") {
+    init(float vector_w = 0.7, float keyword_w = 0.3, string method = "rrf") {
         assert abs(vector_w + keyword_w - 1.0) < 0.001, "Weights must sum to 1.0"
         this.vector_weight = vector_w
         this.keyword_weight = keyword_w
@@ -876,7 +876,7 @@ class retrieval_engine {
             keyword_w=config.keyword_weight
         )
     }
-    ingest(documents: list<{content: string, metadata: document_metadata}>, compute_embeddings: bool = true) {
+    ingest(documents: list<{string content, metadata: document_metadata}>, bool compute_embeddings = true) {
         start_time = current_time_millis()
         chunks = this.document_processor.process_documents(documents)
         if compute_embeddings {
@@ -902,7 +902,7 @@ class retrieval_engine {
             db_status=this.vector_db.get_status()
         }
     }
-    retrieve(query: string, top_k?: int) {
+    retrieve(string query, top_k?: int) {
         effective_top_k = top_k ?? this.config.top_k
         start_total = current_time_millis()
         expanded_query = query
@@ -1007,7 +1007,7 @@ class retrieval_engine {
             query_expansion_enabled=this.query_expander != null
         }
     }
-    save_state(path: string) {
+    save_state(string path) {
         this.vector_db.save(path + "_vectordb")
         state = {
             "config": serialize(this.config),
@@ -1015,7 +1015,7 @@ class retrieval_engine {
         }
         write_json_file(path + "_state.json", state)
     }
-    load_state(path: string) {
+    load_state(string path) {
         this.vector_db.load(path + "_vectordb")
         state = read_json_file(path + "_state.json")
         for doc_data in state["documents"]:

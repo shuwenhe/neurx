@@ -15,7 +15,7 @@ type training_config struct {
     materialize_corpus_path  string
 }
 
-func setup_training_config(train_bin string) (*training_config, error) {
+func setup_training_config(string train_bin) (*training_config, error) {
     script_dir := core.ResolveScriptDir()
     neurx_dir := core.ResolveRelativePath(script_dir, "../neurx")
     checkpoint_dir := filepath.Join(neurx_dir, "artifacts/checkpoints")

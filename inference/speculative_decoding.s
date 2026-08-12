@@ -411,7 +411,7 @@ func speculative_decode_step(speculative_state state, []int input_tokens, int se
         probabilities: draft_probs,
         accepted_count: accepted_count,
         rejected_count: rejected_count,
-        accept_rate: float(accepted_count) / float(speculation_steps),
+        float accept_rate(accepted_count) / float(speculation_steps),
         total_steps: speculation_steps,
     }
 }

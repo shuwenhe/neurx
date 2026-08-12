@@ -215,7 +215,7 @@ func create_pretrain_state(config: pretrain_config) pretrain_state {
             prefix_lm_losses: [],
             combined_losses: [],
             running_loss: 0.0,
-            best_val_loss: float('inf'),
+            float best_val_loss('inf'),
         },
         total_tokens_seen: 0,
         tokens_this_epoch: 0,

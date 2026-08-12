@@ -39,8 +39,8 @@ func mps_get_devices() []mps_device {
         let device = metal_devices[i]
         mps_device mps_dev {
             id: i,
-            name: string(device.name),
-            max_memory: int(device.maximumTextureWidth),
+            string name(device.name),
+            int max_memory(device.maximumTextureWidth),
             shared_memory: device.hasUnifiedMemory,
         }
         result.push(mps_dev)

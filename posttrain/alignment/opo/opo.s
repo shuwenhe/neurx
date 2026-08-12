@@ -97,7 +97,7 @@ func (trainer: *opo_trainer) compute_optimal_objective(
     return objective
 }
 
-func (trainer: *opo_trainer) adapt_learning_rate(kl: f32) {
+func (trainer: *opo_trainer) adapt_learning_rate(f32 kl) {
     if !trainer.config.use_adaptive_lr {
         return
     }
@@ -288,7 +288,7 @@ func compute_mean(values: []f32) -> f32 {
     return sum / f32(values.len())
 }
 
-func compute_std(values: []f32, mean: f32) -> f32 {
+func compute_std(values: []f32, f32 mean) -> f32 {
     if values.len() == 0 {
         return 1.0
     }
@@ -299,11 +299,11 @@ func compute_std(values: []f32, mean: f32) -> f32 {
     return sqrt(sum_sq / f32(values.len()))
 }
 
-func clamp(x: Tensor, min_val: f32, max_val: f32) -> Tensor {
+func clamp(x: Tensor, f32 min_val, f32 max_val) -> Tensor {
     return maximum(minimum(x, max_val), min_val)
 }
 
-func clamp_scalar(x: f32, min_val: f32, max_val: f32) -> f32 {
+func clamp_scalar(f32 x, f32 min_val, f32 max_val) -> f32 {
     if x < min_val {
         return min_val
     }

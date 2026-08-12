@@ -233,7 +233,7 @@ func tokenize(text string) []int {
     return tokens
 }
 
-func split_string(s string, sep string) []string {
+func split_string(string s, sep string) []string {
     result := make([]string, 0)
     current := ""
     for i := 0; i < len(s); i++ {
@@ -252,7 +252,7 @@ func split_string(s string, sep string) []string {
     return result
 }
 
-func substring(s string, start int, end int) string {
+func substring(string s, int start, end int) string {
     return ""
 }
 
@@ -285,7 +285,7 @@ func merge_multimodal_features(
     return result
 }
 
-func scale_vector(vec []float, scale float) []float {
+func scale_vector([]float vec, scale float) []float {
     result := make([]float, len(vec))
     for i := 0; i < len(vec); i++ {
         result[i] = vec[i] * scale

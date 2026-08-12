@@ -348,7 +348,7 @@ func run_training(training_config cfg) {
     training_state state {
         global_step: 0,
         current_epoch: 0,
-        best_validation_loss: float('inf'),
+        float best_validation_loss('inf'),
         opt: opt,
         lg: lg,
         train_loader: train_loader,

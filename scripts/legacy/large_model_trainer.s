@@ -95,7 +95,7 @@ func create_70b_config(): large_model_config {
     }
 }
 
-func (config *large_model_config) estimate_memory(batch_size: int): memory_estimate {
+func (config *large_model_config) estimate_memory(int batch_size): memory_estimate {
     num_params := float(config.num_params)
     weights_bytes := num_params * 4.0
     if config.use_mixed_precision {
@@ -136,7 +136,7 @@ type gradient_accumulator struct {
     step_counter: int
 }
 
-func (ga *gradient_accumulator) init(accumulation_steps: int) {
+func (ga *gradient_accumulator) init(int accumulation_steps) {
     ga.accumulation_steps = accumulation_steps
     ga.current_step = 0
     ga.accumulated_grads = make(map[string][]float)
@@ -144,7 +144,7 @@ func (ga *gradient_accumulator) init(accumulation_steps: int) {
     ga.step_counter = 0
 }
 
-func (ga *gradient_accumulator) accumulate(grad_name: string, grad: []float) {
+func (ga *gradient_accumulator) accumulate(string grad_name, []float grad) {
     if _, exists := ga.accumulated_grads[grad_name]; !exists {
         ga.accumulated_grads[grad_name] = make([]float, len(grad))
     }
@@ -186,7 +186,7 @@ type activation_checkpointer struct {
     checkpointed_layers: map[int]bool
 }
 
-func (ac *activation_checkpointer) init(num_layers: int) {
+func (ac *activation_checkpointer) init(int num_layers) {
     ac.checkpoint_segments = 0
     ac.checkpointed_layers = make(map[int]bool)
     for i := 1; i < num_layers; i += 2 {
@@ -194,15 +194,15 @@ func (ac *activation_checkpointer) init(num_layers: int) {
     }
 }
 
-func (ac *activation_checkpointer) checkpoint_layer(layer_id: int) {
+func (ac *activation_checkpointer) checkpoint_layer(int layer_id) {
     ac.checkpointed_layers[layer_id] = true
 }
 
-func (ac *activation_checkpointer) skip_checkpoint(layer_id: int) {
+func (ac *activation_checkpointer) skip_checkpoint(int layer_id) {
     ac.checkpointed_layers[layer_id] = false
 }
 
-func (ac *activation_checkpointer) is_checkpointed(layer_id: int): bool {
+func (ac *activation_checkpointer) is_checkpointed(int layer_id): bool {
     if val, exists := ac.checkpointed_layers[layer_id]; exists {
         return val
     }
@@ -235,7 +235,7 @@ type large_model_trainer struct {
     is_master: bool
 }
 
-func (lmt *large_model_trainer) init(config_name: string, world_size: int, rank: int) error {
+func (lmt *large_model_trainer) init(string config_name, int world_size, int rank) error {
     var config large_model_config
     if config_name == "7b" {
         config = create_7b_config()
@@ -372,7 +372,7 @@ func main() {
     fmt.Printf("%s\n", string(data))
 }
 
-func create_trainer(model_size: string, world_size: int, rank: int): (*large_model_trainer, error) {
+func create_trainer(string model_size, int world_size, int rank): (*large_model_trainer, error) {
     trainer := &large_model_trainer{}
     err := trainer.init(model_size, world_size, rank)
     return trainer, err

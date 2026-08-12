@@ -41,7 +41,7 @@ func new_world_model() world_model_state {
     }
 }
 
-func world_model_update(wm world_model_state, action string, observation string) world_model_state {
+func world_model_update(wm world_model_state, string action, observation string) world_model_state {
     world_state next = wm.current
     next.step             = wm.current.step + 1
     next.last_action      = action

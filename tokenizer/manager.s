@@ -167,7 +167,7 @@ func clear_cache(tokenizer_manager mgr) tokenizer_manager {
     mgr
 }
 
-func get_special_tokens(tokenizer_manager mgr) [string:int {
+func get_special_tokens(tokenizer_manager mgr) [int string {
     [string:int {
         "pad": mgr.pad_token_id,
         "eos": mgr.eos_token_id,

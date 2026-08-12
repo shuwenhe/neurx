@@ -35,7 +35,7 @@ func get_gpu_count(host string) int {
     return count
 }
 
-func launch_on_host(host string, rank int, config multi_node_config_2) {
+func launch_on_host(string host, int rank, config multi_node_config_2) {
     env := os.Environ()
     env = append(env,
         "NEURX_ROOT=" + config.root,

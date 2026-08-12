@@ -15,7 +15,7 @@ func test_forward_pass_basic() bool {
     model_state.vocab_size = 50257
     model_state.max_sequence_length = 512
     model_state.weight_matrices = [][]float(100 * 768)
-    var input_ids: []int = []int(32 * 512)
+    var []int input_ids = []int(32 * 512)
     var i = 0
     while i < 16384 {
         input_ids[i] = 1000 + i % 50000
@@ -44,7 +44,7 @@ func test_forward_pass_logits_shape() bool {
     model_state.num_layers = 2
     model_state.vocab_size = 50257
     model_state.weight_matrices = [][]float(100 * 768)
-    var input_ids: []int = []int(8 * 256)
+    var []int input_ids = []int(8 * 256)
     var result: training_pipeline.forward_pass_result =
         training_pipeline.forward_pass(model_state, input_ids, 8, 256)
     if len(result.logits) < 8 * 256 {
@@ -59,7 +59,7 @@ func test_forward_pass_different_batch_sizes() bool {
     model_state.num_layers = 1
     model_state.vocab_size = 50257
     model_state.weight_matrices = [][]float(100 * 768)
-    var batch_sizes: []int = []int(4)
+    var []int batch_sizes = []int(4)
     batch_sizes[0] = 4
     batch_sizes[1] = 8
     batch_sizes[2] = 16
@@ -67,7 +67,7 @@ func test_forward_pass_different_batch_sizes() bool {
     var b = 0
     while b < 4 {
         var batch_size = batch_sizes[b]
-        var input_ids: []int = []int(batch_size * 512)
+        var []int input_ids = []int(batch_size * 512)
         var result: training_pipeline.forward_pass_result =
             training_pipeline.forward_pass(model_state, input_ids, batch_size, 512)
         if result.batch_size != batch_size {
@@ -90,7 +90,7 @@ func test_backward_pass_basic() bool {
     forward_result.sequence_length = 512
     forward_result.vocab_size = 50257
     forward_result.loss_value = 5.5
-    var target_ids: []int = []int(32 * 512)
+    var []int target_ids = []int(32 * 512)
     var result: training_pipeline.backward_pass_result =
         training_pipeline.backward_pass(forward_result, model_state, target_ids, 65536.0)
     if result.gradient_norm < 0.0 {
@@ -114,7 +114,7 @@ func test_backward_pass_gradient_overflow_detection() bool {
     forward_result.sequence_length = 512
     forward_result.vocab_size = 50257
     forward_result.loss_value = 5.5
-    var target_ids: []int = []int(32 * 512)
+    var []int target_ids = []int(32 * 512)
     var result: training_pipeline.backward_pass_result =
         training_pipeline.backward_pass(forward_result, model_state, target_ids, 0.0001)
     return true
@@ -132,7 +132,7 @@ func test_gradient_clipping() bool {
     forward_result.sequence_length = 512
     forward_result.vocab_size = 50257
     forward_result.loss_value = 5.5
-    var target_ids: []int = []int(32 * 512)
+    var []int target_ids = []int(32 * 512)
     var result: training_pipeline.backward_pass_result =
         training_pipeline.backward_pass(forward_result, model_state, target_ids, 65536.0)
     if result.gradient_clipped {
@@ -165,7 +165,7 @@ func test_gradient_scaling_basic() bool {
 
 func test_loss_scale_update_on_overflow() bool {
     var current_scale: float = 65536.0
-    var new_scale: float = training_pipeline.update_loss_scale(current_scale, true, 0)
+    var float new_scale = training_pipeline.update_loss_scale(current_scale, true, 0)
     if new_scale >= current_scale {
         return false
     }
@@ -177,7 +177,7 @@ func test_loss_scale_update_on_overflow() bool {
 
 func test_loss_scale_update_growth() bool {
     var current_scale: float = 1024.0
-    var new_scale: float = training_pipeline.update_loss_scale(current_scale, false, 2001)
+    var float new_scale = training_pipeline.update_loss_scale(current_scale, false, 2001)
     if new_scale <= current_scale {
         return false
     }
@@ -186,12 +186,12 @@ func test_loss_scale_update_growth() bool {
 
 func test_loss_scale_bounds() bool {
     var scale: float = 65536.0
-    var increased: float = training_pipeline.update_loss_scale(scale, false, 2001)
+    var float increased = training_pipeline.update_loss_scale(scale, false, 2001)
     if increased > 65536.0 {
         return false
     }
     var decreased: float = 1.0
-    var final_scale: float = training_pipeline.update_loss_scale(decreased, true, 0)
+    var float final_scale = training_pipeline.update_loss_scale(decreased, true, 0)
     if final_scale < 1.0 {
         return false
     }
@@ -274,7 +274,7 @@ func test_checkpoint_creation() bool {
     var config: training_pipeline.training_config
     config.batch_size = 32
     config.learning_rate = 0.0001
-    var success: bool = training_pipeline.save_checkpoint(
+    var bool success = training_pipeline.save_checkpoint(
         "test_checkpoint.pt",
         training_state.current_step,
         training_state.current_epoch,
@@ -302,15 +302,15 @@ func test_checkpoint_load() bool {
 
 func test_checkpoint_interval_decision() bool {
     var interval: int = 500
-    var save1: bool = training_pipeline.should_save_checkpoint(100, interval)
+    var bool save1 = training_pipeline.should_save_checkpoint(100, interval)
     if save1 {
         return false
     }
-    var save2: bool = training_pipeline.should_save_checkpoint(500, interval)
+    var bool save2 = training_pipeline.should_save_checkpoint(500, interval)
     if !save2 {
         return false
     }
-    var save3: bool = training_pipeline.should_save_checkpoint(1000, interval)
+    var bool save3 = training_pipeline.should_save_checkpoint(1000, interval)
     if !save3 {
         return false
     }
@@ -332,8 +332,8 @@ func test_training_step_complete_pipeline() bool {
     config.batch_size = 32
     config.learning_rate = 0.0001
     config.gradient_accumulation_steps = 4
-    var input_ids: []int = []int(32 * 512)
-    var target_ids: []int = []int(32 * 512)
+    var []int input_ids = []int(32 * 512)
+    var []int target_ids = []int(32 * 512)
     var result: training_pipeline.training_step_result =
         training_pipeline.training_step(
             input_ids,
@@ -391,7 +391,7 @@ func test_gradient_accumulation_integration() bool {
     if !accumulated.is_ready {
         return false
     }
-    var avg_loss: float = accumulated.accumulated_loss / float(accumulated.accumulation_steps)
+    var float avg_loss = accumulated.accumulated_loss / float(accumulated.accumulation_steps)
     if avg_loss < 5.0 || avg_loss > 6.0 {
         return false
     }
@@ -404,7 +404,7 @@ func test_throughput_calculation() bool {
     var tokens_per_sample: int = batch_size * seq_length
     var total_tokens: int = tokens_per_sample * 100
     var time_ms: int = 10000
-    var throughput: float = float(total_tokens) / float(time_ms)
+    var float throughput = float(total_tokens) / float(time_ms)
     if throughput <= 0.0 {
         return false
     }
@@ -413,7 +413,7 @@ func test_throughput_calculation() bool {
 
 func test_perplexity_calculation() bool {
     var loss: float = 5.5
-    var perplexity: float = training_pipeline.compute_perplexity(loss)
+    var float perplexity = training_pipeline.compute_perplexity(loss)
     if perplexity <= 1.0 {
         return false
     }

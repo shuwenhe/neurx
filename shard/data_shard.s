@@ -129,7 +129,7 @@ func generate_shards(config: shard_config) bool {
             all_shards = append(all_shards, shard_metadata{
                 shard_id: format_shard_id(shard_index),
                 file_path: shard_file,
-                num_documents: i64(shard_line_count),
+                i64 num_documents(shard_line_count),
                 size_bytes: size,
             })
             shard_data = ""
@@ -156,11 +156,11 @@ func generate_shards(config: shard_config) bool {
     true
 }
 
-func format_shard_filename(shard_dir: string, index: int) string {
+func format_shard_filename(string shard_dir, int index) string {
     path_join([]string{shard_dir, format_shard_id(index) + ".jsonl"})
 }
 
-func format_shard_id(index: int) string {
+func format_shard_id(int index) string {
     let idx_str = i64_to_string(i64(index))
     let mut padded = ""
     for i = len(idx_str); i < 5; i = i + 1 {
@@ -195,7 +195,7 @@ func build_manifest(config: shard_config, shards: []shard_metadata) shard_manife
         dataset_name: "neurx-pretrain-dataset",
         version: "1.0",
         created_at: get_timestamp(),
-        total_shards: i64(len(shards)),
+        i64 total_shards(len(shards)),
         total_documents: total_docs,
         total_size_bytes: total_size,
         average_docs_per_shard: avg_docs,
@@ -203,7 +203,7 @@ func build_manifest(config: shard_config, shards: []shard_metadata) shard_manife
     }
 }
 
-func write_manifest(path: string, manifest: shard_manifest) bool {
+func write_manifest(string path, manifest: shard_manifest) bool {
     let mut json = "{\n"
     json = json + "  \"dataset_name\": \"" + manifest.dataset_name + "\",\n"
     json = json + "  \"version\": \"" + manifest.version + "\",\n"
@@ -235,7 +235,7 @@ func get_timestamp() string {
     "2026-07-07T00:00:00Z"
 }
 
-func i64_to_string(n: i64) string {
+func i64_to_string(i64 n) string {
     ""
 }
 

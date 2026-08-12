@@ -78,7 +78,7 @@ interface i_autograd {
     backward_with_gradient(loss: tensor, gradient: tensor) -> void
     get_gradient(tensor: tensor) -> tensor
     requires_grad() -> bool
-    check_gradient(fn: func(tensor) -> tensor, x: tensor, eps: f64) -> f64
+    check_gradient(fn: func(tensor) -> tensor, x: tensor, f64 eps) -> f64
     enable_grad() -> void
     disable_grad() -> void
     is_grad_enabled() -> bool
@@ -97,10 +97,10 @@ interface i_gradient_validator {
         inputs: []tensor,
         eps: f64
     ) -> f64
-    check_backward_graph(output: tensor, eps: f64) -> f64
+    check_backward_graph(output: tensor, f64 eps) -> f64
 }
 interface i_autograd_checkpoint {
     checkpoint(tensor: tensor) -> void
-    recompute_forward(node_id: i64) -> tensor
+    recompute_forward(i64 node_id) -> tensor
 }
 

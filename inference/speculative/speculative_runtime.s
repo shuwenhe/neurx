@@ -49,7 +49,7 @@ func new_speculative_decode_runtime(draft_exec: draft_model_executor, verifier_e
     runtime
 }
 
-func new_generation_request(req_id: int, input_ids: []int, max_tokens: int) speculative_generation_request {
+func new_generation_request(int req_id, []int input_ids, int max_tokens) speculative_generation_request {
     req := speculative_generation_request{
         request_id: req_id,
         input_ids: input_ids,
@@ -114,7 +114,7 @@ func speculative_prefill_phase(runtime: speculative_decode_runtime, request: spe
     (draft_preds, verify_results)
 }
 
-func speculative_decode_phase(runtime: speculative_decode_runtime, current_token_id: int, context: speculative_decode_context) ([]draft_token, []verification_result, []int) {
+func speculative_decode_phase(runtime: speculative_decode_runtime, int current_token_id, context: speculative_decode_context) ([]draft_token, []verification_result, []int) {
     draft_preds := draft_predict_batch(runtime.draft_executor, []int{current_token_id}, runtime.decode_config)
     verify_results := verify_draft_sequence(runtime.verifier_executor, draft_preds)
     output_tokens := []int{}
@@ -201,7 +201,7 @@ func generate_with_speculative_decoding(runtime: speculative_decode_runtime, req
     (updated_runtime, output_tokens)
 }
 
-func adaptive_num_draft_tokens(runtime: speculative_decode_runtime, current_acceptance_rate: float) int {
+func adaptive_num_draft_tokens(runtime: speculative_decode_runtime, float current_acceptance_rate) int {
     if current_acceptance_rate > 0.9 {
         if runtime.decode_config.num_draft_tokens < 16 {
             return runtime.decode_config.num_draft_tokens + 1
@@ -214,7 +214,7 @@ func adaptive_num_draft_tokens(runtime: speculative_decode_runtime, current_acce
     runtime.decode_config.num_draft_tokens
 }
 
-func compute_generation_speedup(runtime: speculative_decode_runtime, original_time_ms: float, speculative_time_ms: float) float {
+func compute_generation_speedup(runtime: speculative_decode_runtime, float original_time_ms, float speculative_time_ms) float {
     if speculative_time_ms > 0.0 {
         original_time_ms / speculative_time_ms
     } else {

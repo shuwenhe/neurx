@@ -144,7 +144,7 @@ func forward_pass(
     logits, hidden_states
 }
 
-func compute_loss(logits: bundle.tensor_2, targets: []int) float {
+func compute_loss(logits: bundle.tensor_2, []int targets) float {
     batch_size := logits.shape[0]
     seq_length := logits.shape[1]
     vocab_size := logits.shape[2]
@@ -287,7 +287,7 @@ func compute_learning_rate(
     }
 }
 
-func initialize_normal(size: int, mean: float, std: float) []float {
+func initialize_normal(int size, float mean, float std) []float {
     data := make([]float, size)
     for i := 0; i < size; i += 1 {
         data[i] = mean + std * (float(i%1000) / 1000.0 - 0.5)
@@ -295,7 +295,7 @@ func initialize_normal(size: int, mean: float, std: float) []float {
     data
 }
 
-func initialize_ones(size: int) []float {
+func initialize_ones(int size) []float {
     data := make([]float, size)
     for i := 0; i < size; i += 1 {
         data[i] = 1.0
@@ -303,7 +303,7 @@ func initialize_ones(size: int) []float {
     data
 }
 
-func verify_training(model: mini_language_model, losses: []float, log: logger) {
+func verify_training(model: mini_language_model, []float losses, log: logger) {
     fmt.Printf("   Parameters: %d\n", count_parameters(model))
     fmt.Printf("   Initial loss: %.4f\n", losses[0])
     fmt.Printf("   Final loss: %.4f\n", losses[len(losses)-1])
@@ -330,7 +330,7 @@ func verify_training(model: mini_language_model, losses: []float, log: logger) {
     }
 }
 
-func find_min_loss(losses: []float) float {
+func find_min_loss([]float losses) float {
     if len(losses) == 0 {
         return 0.0
     }
@@ -343,7 +343,7 @@ func find_min_loss(losses: []float) float {
     min_loss
 }
 
-func find_max_loss(losses: []float) float {
+func find_max_loss([]float losses) float {
     if len(losses) == 0 {
         return 0.0
     }
@@ -356,7 +356,7 @@ func find_max_loss(losses: []float) float {
     max_loss
 }
 
-func compute_avg_loss(losses: []float) float {
+func compute_avg_loss([]float losses) float {
     if len(losses) == 0 {
         return 0.0
     }
@@ -367,7 +367,7 @@ func compute_avg_loss(losses: []float) float {
     sum / float(len(losses))
 }
 
-func generate_loss_curve(losses: []float, output_dir: string) {
+func generate_loss_curve([]float losses, string output_dir) {
     output := "Loss Curve Visualization\n"
     output += "=======================\n\n"
     if len(losses) == 0 {
@@ -416,7 +416,7 @@ struct logger {
     loss_handle: io.Writer
 }
 
-func logger_new(log_file: string, loss_file: string) logger {
+func logger_new(string log_file, string loss_file) logger {
     log := logger{
         log_file: log_file,
         loss_file: loss_file,
@@ -424,7 +424,7 @@ func logger_new(log_file: string, loss_file: string) logger {
     log
 }
 
-func log_message(log: logger, message: string) {
+func log_message(log: logger, string message) {
     fmt.Printf("[LOG] %s\n", message)
 }
 
@@ -438,17 +438,17 @@ func log_config(log: logger, config: training_config) {
     log_message(log, fmt.Sprintf("Epochs: %d", config.num_epochs))
 }
 
-func log_loss(log: logger, step: int, loss: float) {
+func log_loss(log: logger, int step, float loss) {
     fmt.Printf("%.4f,%d\n", loss, step)
 }
 
 func logger_close(log: logger) {
 }
 
-func save_checkpoint(path: string, model: mini_language_model, optimizer: any, step: int) {
+func save_checkpoint(string path, model: mini_language_model, optimizer: any, int step) {
 }
 
-func write_file(path: string, content: string) {
+func write_file(string path, string content) {
 }
 
 func main() {

@@ -41,21 +41,21 @@ func create_default_amp_config(): mixed_precision_config {
     }
 }
 
-func (mpt *mixed_precision_trainer) scale_loss(loss: float): float {
+func (mpt *mixed_precision_trainer) scale_loss(float loss): float {
     if !mpt.config.enabled {
         return loss
     }
     return loss * mpt.current_loss_scale
 }
 
-func (mpt *mixed_precision_trainer) unscale_gradients(grad_norm: float): float {
+func (mpt *mixed_precision_trainer) unscale_gradients(float grad_norm): float {
     if !mpt.config.enabled {
         return grad_norm
     }
     return grad_norm / mpt.current_loss_scale
 }
 
-func (mpt *mixed_precision_trainer) check_overflow(grad_norm: float): bool {
+func (mpt *mixed_precision_trainer) check_overflow(float grad_norm): bool {
     if !(grad_norm == grad_norm) {
         return true
     }
@@ -87,7 +87,7 @@ func (mpt *mixed_precision_trainer) step_success() {
     }
 }
 
-func cast_to_fp16(value: float): float {
+func cast_to_fp16(float value): float {
     if value > 65504.0 {
         return 65504.0
     }
@@ -103,7 +103,7 @@ func cast_to_fp16(value: float): float {
     return value
 }
 
-func cast_to_fp32(value: float): float {
+func cast_to_fp32(float value): float {
     return value
 }
 type amp_step_result struct {
@@ -170,7 +170,7 @@ type learning_rate_scheduler struct {
     power: float
 }
 
-func (lrs *learning_rate_scheduler) cosine_annealing_warmup(step: int): float {
+func (lrs *learning_rate_scheduler) cosine_annealing_warmup(int step): float {
     if step < lrs.warmup_steps {
         return lrs.base_lr * float(step) / float(lrs.warmup_steps)
     }
@@ -182,7 +182,7 @@ func (lrs *learning_rate_scheduler) cosine_annealing_warmup(step: int): float {
     return min_lr + (lrs.base_lr - min_lr) * (1.0 + math.Cos(progress*math.Pi)) / 2.0
 }
 
-func (lrs *learning_rate_scheduler) exponential_decay_warmup(step: int): float {
+func (lrs *learning_rate_scheduler) exponential_decay_warmup(int step): float {
     if step < lrs.warmup_steps {
         return lrs.base_lr * float(step) / float(lrs.warmup_steps)
     }
@@ -191,7 +191,7 @@ func (lrs *learning_rate_scheduler) exponential_decay_warmup(step: int): float {
     return lrs.base_lr * decay_rate
 }
 
-func (lrs *learning_rate_scheduler) step_decay(step: int): float {
+func (lrs *learning_rate_scheduler) step_decay(int step): float {
     if step < lrs.warmup_steps {
         return lrs.base_lr * float(step) / float(lrs.warmup_steps)
     }
@@ -200,7 +200,7 @@ func (lrs *learning_rate_scheduler) step_decay(step: int): float {
     return lrs.base_lr * math.Pow(lrs.gamma, float(num_decay))
 }
 
-func (lrs *learning_rate_scheduler) polynomial_decay(step: int): float {
+func (lrs *learning_rate_scheduler) polynomial_decay(int step): float {
     if step < lrs.warmup_steps {
         return lrs.base_lr * float(step) / float(lrs.warmup_steps)
     }
@@ -213,7 +213,7 @@ func (lrs *learning_rate_scheduler) polynomial_decay(step: int): float {
     return min_lr + (lrs.base_lr - min_lr) * decay
 }
 
-func (lrs *learning_rate_scheduler) get_lr(step: int): float {
+func (lrs *learning_rate_scheduler) get_lr(int step): float {
     switch lrs.schedule_type {
     case LINEAR_WARMUP:
         if step < lrs.warmup_steps {
@@ -237,14 +237,14 @@ type gradient_clipper struct {
     clip_type: string
 }
 
-func (gc *gradient_clipper) clip_by_norm(grad_norm: float): float {
+func (gc *gradient_clipper) clip_by_norm(float grad_norm): float {
     if grad_norm <= gc.max_grad_norm {
         return 1.0
     }
     return gc.max_grad_norm / grad_norm
 }
 
-func (gc *gradient_clipper) clip_by_value(gradient: float): float {
+func (gc *gradient_clipper) clip_by_value(float gradient): float {
     if gradient > gc.max_grad_norm {
         return gc.max_grad_norm
     }

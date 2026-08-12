@@ -345,7 +345,7 @@ func (server *apiserver) print_stats() {
     fmt.Printf("Max Connections: %d\n", server.max_connections)
 }
 
-func new_api_server(host string, port int) *apiserver {
+func new_api_server(string host, port int) *apiserver {
     return &apiserver{
         host:               host,
         port:               port,

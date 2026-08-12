@@ -50,7 +50,7 @@ interface i_stream_synchronization {
 }
 interface i_stream_callback {
     add_callback(stream: stream, callback: func() -> void) -> void
-    add_callback_with_data(stream: stream, callback: func(data: i64) -> void, data: i64) -> void
+    add_callback_with_data(stream: stream, callback: func(i64 data) -> void, i64 data) -> void
 }
 interface i_stream_manager_singleton {
     instance() -> IStreamManager

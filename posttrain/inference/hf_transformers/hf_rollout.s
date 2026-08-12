@@ -107,9 +107,9 @@ func (rollout: *hf_transformers_rollout) generate(
     let batch_size = input_ids.shape[0]
     let input_length = input_ids.shape[1]
     let max_length = input_length + max_new_tokens
-    let output_ids = tensor_zeros([batch_size, max_length], dtype: i64)
+    let output_ids = tensor_zeros([batch_size, max_length], i64 dtype)
     output_ids[.., ..input_length] = input_ids
-    let finished = tensor_zeros([batch_size], dtype: bool)
+    let finished = tensor_zeros([batch_size], bool dtype)
     let all_log_probs: [][]f32 = []
     for i in 0..batch_size {
         all_log_probs.push([])
@@ -287,7 +287,7 @@ func load_hf_tokenizer(
     return null
 }
 
-func parse_device(device_str: string) -> device {
+func parse_device(string device_str) -> device {
     return device{}
 }
 

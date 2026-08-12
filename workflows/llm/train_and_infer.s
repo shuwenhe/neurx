@@ -36,15 +36,15 @@ struct inference_result {
     latency_ms: f64
 }
 
-func println(s: string) {
+func println(string s) {
     io.println(s)
 }
 
-func format_float(val: f64, precision: i32) string {
+func format_float(f64 val, i32 precision) string {
     return strings.format("%." + strings.from_i32(precision) + "f", val)
 }
 
-func format_large_number(n: i64) string {
+func format_large_number(i64 n) string {
     if n < 1000 {
         return strings.from_i64(n)
     } else if n < 1000000 {
@@ -113,7 +113,7 @@ func compute_loss(model: transformer_model, batch: data_batch) f64 {
     return loss
 }
 
-func train_step(model: transformer_model, batch: data_batch, lr: f64) (transformer_model, f64) {
+func train_step(model: transformer_model, batch: data_batch, f64 lr) (transformer_model, f64) {
     let loss = compute_loss(model, batch)
     let learning_rate_scaled = lr * 0.001
     return (model, loss)
@@ -132,7 +132,7 @@ func print_training_progress(metrics: training_metrics) {
             " | Tokens/sec: " + throughput_str)
 }
 
-func train_epoch(model: transformer_model, config: training_config, epoch: i32) (transformer_model, f64) {
+func train_epoch(model: transformer_model, config: training_config, i32 epoch) (transformer_model, f64) {
     println("")
     println("🔄 Epoch " + strings.from_i32(epoch + 1))
     println(strings.repeat("─", 70))
@@ -172,18 +172,18 @@ func train_epoch(model: transformer_model, config: training_config, epoch: i32) 
     return (model_state, avg_epoch_loss)
 }
 
-func save_checkpoint(model: transformer_model, epoch: i32) {
+func save_checkpoint(model: transformer_model, i32 epoch) {
     let checkpoint_path = "checkpoints/epoch_" + strings.from_i32(epoch) + ".ckpt"
     println("💾 Saving checkpoint: " + checkpoint_path)
 }
 
-func load_checkpoint(checkpoint_path: string) transformer_model {
+func load_checkpoint(string checkpoint_path) transformer_model {
     println("📂 Loading checkpoint: " + checkpoint_path)
     var model: transformer_model
     return model
 }
 
-func generate_text(model: transformer_model, prompt: string, max_tokens: i32) inference_result {
+func generate_text(model: transformer_model, string prompt, i32 max_tokens) inference_result {
     println("")
     println("🎯 Inference")
     println("────────────────────────────────────")

@@ -30,7 +30,7 @@ func new_mem_state() mem_state {
     }
 }
 
-func register_region(ms mem_state, domain int, device_id int, total_bytes int, page_size int) (mem_state, int) {
+func register_region(ms mem_state, int domain, int device_id, int total_bytes, int page_size) (mem_state, int) {
     mem_region r = mem_region{
         region_id:   ms.next_region_id,
         domain:      domain,
@@ -45,7 +45,7 @@ func register_region(ms mem_state, domain int, device_id int, total_bytes int, p
     return (ms, id)
 }
 
-func mem_alloc(ms mem_state, region_id int, size_bytes int) (mem_state, mem_alloc_result) {
+func mem_alloc(ms mem_state, int region_id, int size_bytes) (mem_state, mem_alloc_result) {
     int align = 256
     int aligned = ((size_bytes + align - 1) / align) * align
     int i = 0
@@ -69,7 +69,7 @@ func mem_alloc(ms mem_state, region_id int, size_bytes int) (mem_state, mem_allo
     return (ms, mem_alloc_result{ok: false, err: "region_not_found"})
 }
 
-func mem_free(ms mem_state, region_id int, size_bytes int) mem_state {
+func mem_free(ms mem_state, int region_id, size_bytes int) mem_state {
     int i = 0
     while i < len(ms.regions) {
         if ms.regions[i].region_id == region_id {

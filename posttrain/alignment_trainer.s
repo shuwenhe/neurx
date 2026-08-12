@@ -730,7 +730,7 @@ func compute_repetition_ratio(string text):
     bigrams = [(words[i], words[i+1]) for i in range(len(words)-1)]
     unique_bigrams = set(bigrams)
     return 1.0 - len(unique_bigrams) / max(len(bigrams), 1)
-func compute_group_diversity(tensor[][] responses, int n: int):
+func compute_group_diversity(tensor[][] responses, int int n):
     set all_ngrams
     for group_responses in responses:
         for response in group_responses:

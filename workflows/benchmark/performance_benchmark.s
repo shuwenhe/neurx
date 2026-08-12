@@ -83,7 +83,7 @@ func benchmark_single_gpu(model: model_config) gpu_benchmark {
     return benchmark
 }
 
-func benchmark_multi_gpu(model: model_config, gpu_count: i32) gpu_benchmark {
+func benchmark_multi_gpu(model: model_config, i32 gpu_count) gpu_benchmark {
     println("Benchmarking: " + strings.from_i32(gpu_count) + " GPUs (DDP)")
     let forward_time = 6.0
     let backward_time = 12.0
@@ -157,7 +157,7 @@ func benchmark_model(model: model_config) performance_report {
     return report
 }
 
-func format_large_number(n: i64) string {
+func format_large_number(i64 n) string {
     if n > 1000000000 {
         return strings.format("%.1f", math.from_i64(n) / 1000000000.0) + "B"
     } else if n > 1000000 {

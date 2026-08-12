@@ -137,7 +137,7 @@ class document_parser {
             this.office_parser = new office_document_parser(config=this.config)
         }
     }
-    parse(file_path: string) {
+    parse(string file_path) {
         ext = get_file_extension(file_path).to_lower()
         match ext {
             "pdf" => { return this._parse_pdf(file_path) }
@@ -151,7 +151,7 @@ class document_parser {
             _ => throw error(f"Unsupported file format: {ext}")
         }
     }
-    parse_string(content: string, format_hint: string = "markdown") {
+    parse_string(string content, string format_hint = "markdown") {
         match format_hint.to_lower() {
             "html" | "htm" => { return this.html_parser!.parse_string(content) }
             "md" | "markdown" => { return this.markdown_parser!.parse_string(content) }
@@ -172,33 +172,33 @@ class document_parser {
         }
         return results
     }
-    _parse_pdf(file_path: string) {
+    _parse_pdf(string file_path) {
         assert this.pdf_parser != null, "PDF parser not initialized"
         return this.pdf_parser!.parse(file_path)
     }
-    _parse_html(file_path: string) {
+    _parse_html(string file_path) {
         assert this.html_parser != null, "HTML parser not initialized"
         let content = read_text_file(file_path)
         return this.html_parser!.parse_string(content, source_url=file_path)
     }
-    _parse_markdown(file_path: string) {
+    _parse_markdown(string file_path) {
         assert this.markdown_parser != null, "Markdown parser not initialized"
         let content = read_text_file(file_path)
         return this.markdown_parser!.parse_string(content, source_path=file_path)
     }
-    _parse_docx(file_path: string) {
+    _parse_docx(string file_path) {
         assert this.office_parser != null, "Office parser not initialized"
         return this.office_parser!.parse_docx(file_path)
     }
-    _parse_pptx(file_path: string) {
+    _parse_pptx(string file_path) {
         assert this.office_parser != null, "Office parser not initialized"
         return this.office_parser!.parse_pptx(file_path)
     }
-    _parse_xlsx(file_path: string) {
+    _parse_xlsx(string file_path) {
         assert this.office_parser != null, "Office parser not initialized"
         return this.office_parser!.parse_xlsx(file_path)
     }
-    _parse_csv(file_path: string) {
+    _parse_csv(string file_path) {
         data = read_csv_file(file_path)
         headers = data[0] if data.length > 0 else []
         rows = data[1:]
@@ -238,11 +238,11 @@ class document_parser {
             statistics=stats
         }
     }
-    _parse_plain_text(file_path: string) {
+    _parse_plain_text(string file_path) {
         content = read_text_file(file_path)
         return this._parse_plain_text_string(content, source_path=file_path)
     }
-    _parse_plain_text_string(content: string, source_path?: string) {
+    _parse_plain_text_string(string content, source_path?: string) {
         stats = compute_statistics(content)
         raw_sections = content.split("\n\n")
         sections: list<document_section> = []
@@ -283,7 +283,7 @@ class pdf_parser {
     init(config: document_parser_config) {
         this.config = config
     }
-    parse(file_path: string) {
+    parse(string file_path) {
         doc = open_pdf(file_path)
         full_text_parts: list<string> = []
         all_sections: list<document_section> = []
@@ -367,7 +367,7 @@ class pdf_parser {
     extract_tables_from_pdf_page(page: any) {
         return []
     }
-    extract_image_from_pdf_block(doc: any, page_idx: int, image_block: map<string, any>) {
+    extract_image_from_pdf_block(doc: any, int page_idx, map image_block<string, any>) {
         return null
     }
 }
@@ -376,7 +376,7 @@ class html_parser {
     init(config: document_parser_config) {
         this.config = config
     }
-    parse_string(html_content: string, source_url?: string) {
+    parse_string(string html_content, source_url?: string) {
         soup = parse_html(html_content)
         if this.config.html_clean_html {
             for selector in this.config.html_remove_elements {
@@ -457,7 +457,7 @@ class html_parser {
         code_blocks: list<code_block> = []
         content_parts: list<string> = []
         pos = 0
-        def process_node(node: any, depth: int = 0) {
+        def process_node(node: any, int depth = 0) {
             nonlocal pos
             if node.name in ["h1", "h2", "h3", "h4", "h5", "h6"]:
                 level = int(node.name[1])
@@ -610,7 +610,7 @@ class markdown_parser {
     init(config: document_parser_config) {
         this.config = config
     }
-    parse_string(markdown_content: string, source_path?: string) {
+    parse_string(string markdown_content, source_path?: string) {
         lines = markdown_content.split("\n")
         sections: list<document_section> = []
         tables: list<extracted_table> = []
@@ -751,7 +751,7 @@ class markdown_parser {
             statistics=stats
         }
     }
-    parse_table_row(line: string) {
+    parse_table_row(string line) {
         parts = line.split("|").filter(p => p != null).map(p => p.trim())
         return parts
     }
@@ -761,7 +761,7 @@ class office_document_parser {
     init(config: document_parser_config) {
         this.config = config
     }
-    parse_docx(file_path: string) {
+    parse_docx(string file_path) {
         doc = load_docx(file_path)
         sections: list<document_section> = []
         tables: list<extracted_table> = []
@@ -841,7 +841,7 @@ class office_document_parser {
             links=[], code_blocks=[], statistics=stats
         }
     }
-    parse_pptx(file_path: string) {
+    parse_pptx(string file_path) {
         pptx = load_pptx(file_path)
         sections: list<document_section> = []
         content_parts: list<string> = []
@@ -878,7 +878,7 @@ class office_document_parser {
             code_blocks=[], statistics=stats
         }
     }
-    parse_xlsx(file_path: string) {
+    parse_xlsx(string file_path) {
         wb = load_excel(file_path)
         sheets_content: list<string> = []
         all_tables: list<extracted_table> = []
@@ -948,7 +948,7 @@ function format_table_as_markdown(headers: list<string>, rows: list<list<string>
         data_lines.append(row_line.trim() + "|")
     return header_line + "\n" + sep_line + "\n" + "\n".join(data_lines)
 }
-function compute_statistics(content: string) {
+function compute_statistics(string content) {
     char_count = content.length
     word_count = len(content.split_whitespace())
     line_count = content.count("\n") + 1
@@ -964,10 +964,10 @@ function compute_statistics(content: string) {
         estimated_reading_time_minutes=word_count / 200.0
     }
 }
-function clean_whitespace(text: string) {
+function clean_whitespace(string text) {
     return regex.sub(r'\s+', ' ', text).strip()
 }
-function get_file_extension(path: string) {
+function get_file_extension(string path) {
     dot_idx = path.rfind(".")
     if dot_idx >= 0 && dot_idx < path.length - 1:
         return path[dot_idx + 1:].to_lower()

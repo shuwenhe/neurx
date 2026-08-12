@@ -39,7 +39,7 @@ func new_vfs() vfs_state {
     }
 }
 
-func vfs_create(vfs vfs_state, path string, inode_type int, size_bytes int, backend string) (vfs_state, int) {
+func vfs_create(vfs vfs_state, string path, int inode_type, int size_bytes, string backend) (vfs_state, int) {
     inode n = inode{
         ino:        vfs.next_ino,
         path:       path,
@@ -56,7 +56,7 @@ func vfs_create(vfs vfs_state, path string, inode_type int, size_bytes int, back
     return (vfs, ino)
 }
 
-func vfs_lookup(vfs vfs_state, path string) (inode, bool) {
+func vfs_lookup(vfs vfs_state, string path) (inode, bool) {
     int i = 0
     while i < len(vfs.inodes) {
         if vfs.inodes[i].path == path {

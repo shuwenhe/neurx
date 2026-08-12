@@ -22,7 +22,7 @@ struct vectorization_stats {
     compute_efficiency: float
 }
 
-func batch_matmul(A: [][]float, B: [][]float, batch_size: int, M: int, K: int, N: int) batch_matmul_result {
+func batch_matmul(A: [][]float, B: [][]float, int batch_size, int M, int K, int N) batch_matmul_result {
     var result: batch_matmul_result
     var output: [][]float = [][]float(batch_size * M * N)
     var idx = 0
@@ -55,7 +55,7 @@ func batch_matmul(A: [][]float, B: [][]float, batch_size: int, M: int, K: int, N
     return result
 }
 
-func batch_matmul_blocked(A: [][]float, B: [][]float, batch_size: int, M: int, K: int, N: int, block_size: int) batch_matmul_result {
+func batch_matmul_blocked(A: [][]float, B: [][]float, int batch_size, int M, int K, int N, int block_size) batch_matmul_result {
     var result: batch_matmul_result
     var output: [][]float = [][]float(batch_size * M * N)
     var idx = 0
@@ -115,8 +115,8 @@ func batch_matmul_blocked(A: [][]float, B: [][]float, batch_size: int, M: int, K
     return result
 }
 
-func element_wise_add(A: []float, B: []float) []float {
-    var result: []float = []float(len(A))
+func element_wise_add([]float A, []float B) []float {
+    var []float result = []float(len(A))
     var i = 0
     while i < len(A) {
         result[i] = A[i] + B[i]
@@ -125,8 +125,8 @@ func element_wise_add(A: []float, B: []float) []float {
     return result
 }
 
-func element_wise_mul(A: []float, B: []float) []float {
-    var result: []float = []float(len(A))
+func element_wise_mul([]float A, []float B) []float {
+    var []float result = []float(len(A))
     var i = 0
     while i < len(A) {
         result[i] = A[i] * B[i]
@@ -135,8 +135,8 @@ func element_wise_mul(A: []float, B: []float) []float {
     return result
 }
 
-func element_wise_div(A: []float, B: []float, epsilon: float) []float {
-    var result: []float = []float(len(A))
+func element_wise_div([]float A, []float B, float epsilon) []float {
+    var []float result = []float(len(A))
     var i = 0
     while i < len(A) {
         if B[i] < 0.0 {
@@ -154,8 +154,8 @@ func element_wise_div(A: []float, B: []float, epsilon: float) []float {
     return result
 }
 
-func element_wise_apply(A: []float, func_ptr: func(float) float) []float {
-    var result: []float = []float(len(A))
+func element_wise_apply([]float A, func_ptr: func(float) float) []float {
+    var []float result = []float(len(A))
     var i = 0
     while i < len(A) {
         result[i] = func_ptr(A[i])
@@ -164,7 +164,7 @@ func element_wise_apply(A: []float, func_ptr: func(float) float) []float {
     return result
 }
 
-func batch_element_wise_add(A: [][]float, B: [][]float, batch_size: int, size_per_batch: int) [][]float {
+func batch_element_wise_add(A: [][]float, B: [][]float, int batch_size, int size_per_batch) [][]float {
     var result: [][]float = [][]float(len(A))
     var idx = 0
     var b = 0
@@ -180,7 +180,7 @@ func batch_element_wise_add(A: [][]float, B: [][]float, batch_size: int, size_pe
     return result
 }
 
-func batch_element_wise_mul(A: [][]float, B: [][]float, batch_size: int, size_per_batch: int) [][]float {
+func batch_element_wise_mul(A: [][]float, B: [][]float, int batch_size, int size_per_batch) [][]float {
     var result: [][]float = [][]float(len(A))
     var idx = 0
     var b = 0
@@ -196,7 +196,7 @@ func batch_element_wise_mul(A: [][]float, B: [][]float, batch_size: int, size_pe
     return result
 }
 
-func reduce_sum(A: []float) float {
+func reduce_sum([]float A) float {
     var sum = 0.0
     var i = 0
     while i < len(A) {
@@ -206,14 +206,14 @@ func reduce_sum(A: []float) float {
     return sum
 }
 
-func reduce_mean(A: []float) float {
+func reduce_mean([]float A) float {
     if len(A) == 0 {
         return 0.0
     }
     return reduce_sum(A) / float(len(A))
 }
 
-func reduce_max(A: []float) float {
+func reduce_max([]float A) float {
     if len(A) == 0 {
         return 0.0
     }
@@ -228,8 +228,8 @@ func reduce_max(A: []float) float {
     return max_val
 }
 
-func reduce_sum_batch(A: [][]float, batch_size: int, size_per_batch: int) []float {
-    var result: []float = []float(batch_size)
+func reduce_sum_batch(A: [][]float, int batch_size, int size_per_batch) []float {
+    var []float result = []float(batch_size)
     var b = 0
     while b < batch_size {
         var sum = 0.0
@@ -244,7 +244,7 @@ func reduce_sum_batch(A: [][]float, batch_size: int, size_per_batch: int) []floa
     return result
 }
 
-func broadcast_add(A: [][]float, b: []float, rows: int, cols: int) [][]float {
+func broadcast_add(A: [][]float, []float b, int rows, int cols) [][]float {
     var result: [][]float = [][]float(len(A))
     var idx = 0
     var r = 0
@@ -260,7 +260,7 @@ func broadcast_add(A: [][]float, b: []float, rows: int, cols: int) [][]float {
     return result
 }
 
-func broadcast_mul(A: [][]float, b: []float, rows: int, cols: int) [][]float {
+func broadcast_mul(A: [][]float, []float b, int rows, int cols) [][]float {
     var result: [][]float = [][]float(len(A))
     var idx = 0
     var r = 0
@@ -276,14 +276,14 @@ func broadcast_mul(A: [][]float, b: []float, rows: int, cols: int) [][]float {
     return result
 }
 
-func measure_ops_throughput(ops_count: int, time_ms: float) float {
+func measure_ops_throughput(int ops_count, float time_ms) float {
     if time_ms <= 0.0 {
         return 0.0
     }
     return float(ops_count) / (time_ms / 1000.0)
 }
 
-func estimate_memory_bandwidth(bytes_transferred: int, time_ms: float) float {
+func estimate_memory_bandwidth(int bytes_transferred, float time_ms) float {
     if time_ms <= 0.0 {
         return 0.0
     }
@@ -291,7 +291,7 @@ func estimate_memory_bandwidth(bytes_transferred: int, time_ms: float) float {
     return bytes_per_sec / (1024.0 * 1024.0 * 1024.0)
 }
 
-func compute_efficiency(flops: int, bytes: int) float {
+func compute_efficiency(int flops, int bytes) float {
     if bytes == 0 {
         return 0.0
     }
@@ -307,7 +307,7 @@ func new_vectorization_stats() vectorization_stats {
     return stats
 }
 
-func gemm_blocked(A: [][]float, B: [][]float, M: int, K: int, N: int, block_size: int) [][]float {
+func gemm_blocked(A: [][]float, B: [][]float, int M, int K, int N, int block_size) [][]float {
     var C: [][]float = [][]float(M * N)
     var i = 0
     while i < M * N {
@@ -356,7 +356,7 @@ func gemm_blocked(A: [][]float, B: [][]float, M: int, K: int, N: int, block_size
     return C
 }
 
-func transpose_in_place(A: [][]float, N: int) [][]float {
+func transpose_in_place(A: [][]float, int N) [][]float {
     var i = 0
     while i < N {
         var j = i + 1
@@ -371,8 +371,8 @@ func transpose_in_place(A: [][]float, N: int) [][]float {
     return A
 }
 
-func scale_vector(A: []float, scalar: float) []float {
-    var result: []float = []float(len(A))
+func scale_vector([]float A, float scalar) []float {
+    var []float result = []float(len(A))
     var i = 0
     while i < len(A) {
         result[i] = A[i] * scalar
@@ -381,7 +381,7 @@ func scale_vector(A: []float, scalar: float) []float {
     return result
 }
 
-func dot_product(A: []float, B: []float) float {
+func dot_product([]float A, []float B) float {
     var result = 0.0
     var i = 0
     while i < len(A) {
@@ -391,7 +391,7 @@ func dot_product(A: []float, B: []float) float {
     return result
 }
 
-func vector_norm(A: []float) float {
+func vector_norm([]float A) float {
     var sum = 0.0
     var i = 0
     while i < len(A) {

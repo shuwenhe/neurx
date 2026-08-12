@@ -20,13 +20,13 @@ interface i_tensor {
     contiguous() -> tensor
     reshape(new_shape: []i64) -> tensor
     view(new_shape: []i64) -> tensor
-    squeeze(dim: i64) -> tensor
-    unsqueeze(dim: i64) -> tensor
-    transpose(dim0: i64, dim1: i64) -> tensor
+    squeeze(i64 dim) -> tensor
+    unsqueeze(i64 dim) -> tensor
+    transpose(i64 dim0, i64 dim1) -> tensor
     permute(dims: []i64) -> tensor
     data_ptr() -> i64
     requires_grad() -> bool
-    set_requires_grad(requires: bool) -> void
+    set_requires_grad(bool requires) -> void
     is_leaf() -> bool
     grad() -> tensor
     set_grad(grad: tensor) -> void
@@ -38,13 +38,13 @@ interface i_tensor {
 interface i_tensor_factory {
     zeros(shape: []i64, dtype: DType, device: device) -> tensor
     ones(shape: []i64, dtype: DType, device: device) -> tensor
-    full(shape: []i64, fill_value: f64, dtype: DType, device: device) -> tensor
+    full(shape: []i64, f64 fill_value, dtype: DType, device: device) -> tensor
     randn(shape: []i64, dtype: DType, device: device) -> tensor
     rand(shape: []i64, dtype: DType, device: device) -> tensor
-    randint(shape: []i64, low: i64, high: i64, device: device) -> tensor
-    arange(start: f64, end: f64, step: f64, dtype: DType, device: device) -> tensor
-    linspace(start: f64, end: f64, steps: i64, dtype: DType, device: device) -> tensor
-    eye(n: i64, m: i64, dtype: DType, device: device) -> tensor
+    randint(shape: []i64, i64 low, i64 high, device: device) -> tensor
+    arange(f64 start, f64 end, f64 step, dtype: DType, device: device) -> tensor
+    linspace(f64 start, f64 end, i64 steps, dtype: DType, device: device) -> tensor
+    eye(i64 n, i64 m, dtype: DType, device: device) -> tensor
     from_array(data: []f64, shape: []i64, dtype: DType, device: device) -> tensor
 }
 interface i_tensor_cloning {
@@ -54,7 +54,7 @@ interface i_tensor_cloning {
 }
 interface i_tensor_comparison {
     equal(t1: tensor, t2: tensor) -> bool
-    allclose(t1: tensor, t2: tensor, rtol: f64, atol: f64) -> bool
+    allclose(t1: tensor, t2: tensor, f64 rtol, f64 atol) -> bool
     less(t1: tensor, t2: tensor) -> tensor
     greater(t1: tensor, t2: tensor) -> tensor
     equal_element(t1: tensor, t2: tensor) -> tensor

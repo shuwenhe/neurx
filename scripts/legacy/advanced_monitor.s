@@ -63,7 +63,7 @@ func (atm *advanced_training_monitor) init(
     return nil
 }
 
-func calculate_perplexity(loss: float): float {
+func calculate_perplexity(float loss): float {
     if loss < 0 {
         return -1.0
     }
@@ -128,7 +128,7 @@ func (atm *advanced_training_monitor) log_step(
     atm.log_to_file(metrics)
 }
 
-func (atm *advanced_training_monitor) calculate_eta(step: int, elapsed: float): float {
+func (atm *advanced_training_monitor) calculate_eta(int step, float elapsed): float {
     if step <= 0 {
         return 0.0
     }
@@ -300,7 +300,7 @@ func (atm *advanced_training_monitor) export_json(): string {
     return string(json_bytes)
 }
 
-func format_time(seconds: float): string {
+func format_time(float seconds): string {
     if seconds < 0 {
         return "N/A"
     }

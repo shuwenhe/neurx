@@ -34,7 +34,7 @@ struct verification_batch {
     batch_verify_time_ms: float
 }
 
-func new_verifier_config(vocab: int, threshold: float) verifier_config {
+func new_verifier_config(int vocab, float threshold) verifier_config {
     cfg := verifier_config{
         model_type: "full_model",
         vocab_size: vocab,
@@ -59,7 +59,7 @@ func new_verifier_executor(config: verifier_config) verifier_executor {
     executor
 }
 
-func initialize_verifier_embeddings(executor: verifier_executor, vocab_size: int, embed_dim: int) verifier_executor {
+func initialize_verifier_embeddings(executor: verifier_executor, int vocab_size, int embed_dim) verifier_executor {
     updated := executor
     i := 0
     while i < vocab_size {
@@ -75,7 +75,7 @@ func initialize_verifier_embeddings(executor: verifier_executor, vocab_size: int
     updated
 }
 
-func verifier_embedding_lookup(executor: verifier_executor, token_id: int) []float {
+func verifier_embedding_lookup(executor: verifier_executor, int token_id) []float {
     if token_id >= 0 && token_id < executor.model_embeddings.len {
         executor.model_embeddings[token_id]
     } else {
@@ -83,7 +83,7 @@ func verifier_embedding_lookup(executor: verifier_executor, token_id: int) []flo
     }
 }
 
-func verifier_layer_forward(input: []float, layer_weight: []float, hidden_dim: int) []float {
+func verifier_layer_forward([]float input, []float layer_weight, int hidden_dim) []float {
     output := []float{}
     i := 0
     while i < hidden_dim {
@@ -102,7 +102,7 @@ func verifier_layer_forward(input: []float, layer_weight: []float, hidden_dim: i
     output
 }
 
-func verifier_apply_residual(original: []float, transformed: []float) []float {
+func verifier_apply_residual([]float original, []float transformed) []float {
     result := []float{}
     i := 0
     while i < original.len && i < transformed.len {
@@ -112,7 +112,7 @@ func verifier_apply_residual(original: []float, transformed: []float) []float {
     result
 }
 
-func verifier_forward_single(executor: verifier_executor, token_id: int, hidden_dim: int) []float {
+func verifier_forward_single(executor: verifier_executor, int token_id, int hidden_dim) []float {
     hidden := verifier_embedding_lookup(executor, token_id)
     if hidden.len == 0 {
         return []float{}
@@ -128,7 +128,7 @@ func verifier_forward_single(executor: verifier_executor, token_id: int, hidden_
     hidden
 }
 
-func verifier_output_logits(hidden_states: []float, vocab_size: int) []float {
+func verifier_output_logits([]float hidden_states, int vocab_size) []float {
     logits := []float{}
     i := 0
     while i < vocab_size {
@@ -191,7 +191,7 @@ func verify_draft_sequence(executor: verifier_executor, draft_sequence: []draft_
     results
 }
 
-func verify_with_confidence_filtering(executor: verifier_executor, draft_sequence: []draft_token, confidence_threshold: float) []verification_result {
+func verify_with_confidence_filtering(executor: verifier_executor, draft_sequence: []draft_token, float confidence_threshold) []verification_result {
     high_confidence := filter_predictions_by_confidence(draft_sequence, confidence_threshold)
     verify_draft_sequence(executor, high_confidence)
 }
@@ -240,7 +240,7 @@ func reset_verifier_statistics(executor: verifier_executor) verifier_executor {
     updated
 }
 
-func adaptive_threshold_adjustment(executor: verifier_executor, current_acceptance_rate: float) verifier_executor {
+func adaptive_threshold_adjustment(executor: verifier_executor, float current_acceptance_rate) verifier_executor {
     updated := executor
     if current_acceptance_rate > 0.9 {
         updated.config.acceptance_threshold = updated.config.acceptance_threshold - 0.05

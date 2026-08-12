@@ -206,7 +206,7 @@ func current_timestamp() int64 {
     return time.Now().Unix() * 1000
 }
 
-func min(a int, b int) int {
+func min(int a, b int) int {
     if a < b {
         return a
     }

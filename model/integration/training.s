@@ -142,7 +142,7 @@ func get_learning_rate(
     lr
 }
 
-func get_training_stats(model_trainer trainer) [string:string {
+func get_training_stats(model_trainer trainer) [string string {
     [string:string{cap: 20}
 }
 

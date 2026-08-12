@@ -109,12 +109,12 @@ pub func clean_data(config: clean_config) bool {
     true
 }
 
-func find_source_files(raw_dir: string) []string {
+func find_source_files(string raw_dir) []string {
     let supported = []string{".jsonl", ".txt", ".xml", ".xml.bz2"}
     dir_list_files(raw_dir, supported)
 }
 
-func process_source_file(config: clean_config, source_file: string, stats: &clean_stats, seen_hashes: map[string]bool) bool {
+func process_source_file(config: clean_config, string source_file, stats: &clean_stats, map seen_hashes[string]bool) bool {
     let (content, ok) = file_read_text(source_file)
     if !ok {
         log_error("Failed to read: " + source_file)
@@ -134,7 +134,7 @@ func process_source_file(config: clean_config, source_file: string, stats: &clea
     }
 }
 
-func process_jsonl(config: clean_config, content: string, stats: &clean_stats, seen_hashes: map[string]bool) bool {
+func process_jsonl(config: clean_config, string content, stats: &clean_stats, map seen_hashes[string]bool) bool {
     let lines = string_split(content, "\n")
     for _, line in lines {
         let trimmed = string_trim(line)
@@ -163,7 +163,7 @@ func process_jsonl(config: clean_config, content: string, stats: &clean_stats, s
     true
 }
 
-func process_text(config: clean_config, content: string, stats: &clean_stats, seen_hashes: map[string]bool) bool {
+func process_text(config: clean_config, string content, stats: &clean_stats, map seen_hashes[string]bool) bool {
     let paragraphs = string_split(content, "\n\n")
     for _, para in paragraphs {
         let text = string_trim(para)
@@ -187,7 +187,7 @@ func process_text(config: clean_config, content: string, stats: &clean_stats, se
     true
 }
 
-func process_xml(config: clean_config, content: string, stats: &clean_stats, seen_hashes: map[string]bool) bool {
+func process_xml(config: clean_config, string content, stats: &clean_stats, map seen_hashes[string]bool) bool {
     let mut text_blocks = []string{}
     let lines = string_split(content, "\n")
     let mut in_tag = false
@@ -228,13 +228,13 @@ func process_xml(config: clean_config, content: string, stats: &clean_stats, see
     true
 }
 
-func create_cleaned_record(text: string, source: string) string {
+func create_cleaned_record(string text, string source) string {
     let encoded_text = escape_json_string(text)
     let token_count = estimate_tokens(text)
     "{\"text\": " + "\"" + encoded_text + "\", \"source\": \"" + source + "\", \"tokens\": " + i64_to_string(token_count) + "}"
 }
 
-func extract_text_from_jsonl(jsonl_line: string) string {
+func extract_text_from_jsonl(string jsonl_line) string {
     if !string_contains(jsonl_line, "\"text\"") {
         return ""
     }
@@ -264,7 +264,7 @@ func extract_text_from_jsonl(jsonl_line: string) string {
     }
 }
 
-func escape_json_string(s: string) string {
+func escape_json_string(string s) string {
     let mut result = ""
     for i = 0; i < len(s); i = i + 1 {
         let ch = s[i]
@@ -286,7 +286,7 @@ func escape_json_string(s: string) string {
     result
 }
 
-func estimate_tokens(text: string) i64 {
+func estimate_tokens(string text) i64 {
     i64(max(1, len(text) / 4))
 }
 
@@ -322,7 +322,7 @@ func finalize_dataset(config: clean_config, stats: &clean_stats) bool {
     true
 }
 
-func split_dataset(input_file: string, splits: dataset_splits, train_size: i64, val_size: i64) bool {
+func split_dataset(string input_file, splits: dataset_splits, i64 train_size, i64 val_size) bool {
     let (content, ok) = file_read_text(input_file)
     if !ok {
         return false
@@ -350,7 +350,7 @@ func split_dataset(input_file: string, splits: dataset_splits, train_size: i64, 
     file_write_text(splits.test_file, test_data)
 }
 
-func write_cleaned_manifest(config: clean_config, splits: dataset_splits, total: i64, stats: &clean_stats) bool {
+func write_cleaned_manifest(config: clean_config, splits: dataset_splits, i64 total, stats: &clean_stats) bool {
     let manifest = "{
   \"dataset_name\": \"neurx-pretrain-dataset\",
   \"version\": \"1.0\",
@@ -385,7 +385,7 @@ func write_empty_manifest(config: clean_config) bool {
     file_write_text(config.manifest_file, manifest)
 }
 
-func find_substring(s: string, substr: string) i32 {
+func find_substring(string s, string substr) i32 {
     for i = 0; i <= len(s) - len(substr); i = i + 1 {
         let mut match_ok = true
         for j = 0; j < len(substr); j = j + 1 {
@@ -401,11 +401,11 @@ func find_substring(s: string, substr: string) i32 {
     -1
 }
 
-func max(a: i64, b: i64) i64 {
+func max(i64 a, i64 b) i64 {
     if a > b { a } else { b }
 }
 
-func i64_to_string(n: i64) string {
+func i64_to_string(i64 n) string {
     ""
 }
 

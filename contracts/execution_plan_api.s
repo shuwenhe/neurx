@@ -51,13 +51,13 @@ interface i_fusion_optimizer {
 }
 interface i_memory_planner {
     allocate_plan_memory(plan: execution_plan) -> i64
-    get_allocation(tensor_id: i64) -> memory_allocation_plan
-    deallocate_plan_memory(base_addr: i64) -> void
+    get_allocation(i64 tensor_id) -> memory_allocation_plan
+    deallocate_plan_memory(i64 base_addr) -> void
 }
 interface icuda_graph_builder {
     build_cuda_graph(plan: execution_plan) -> i64
-    launch_cuda_graph(graph_handle: i64, stream: stream) -> void
-    destroy_cuda_graph(graph_handle: i64) -> void
+    launch_cuda_graph(i64 graph_handle, stream: stream) -> void
+    destroy_cuda_graph(i64 graph_handle) -> void
     can_reuse_graph(plan: execution_plan) -> bool
 }
 interface i_dynamic_shape_handler {

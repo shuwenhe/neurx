@@ -45,12 +45,12 @@ interface i_device {
     free_memory() -> i64
 }
 interface i_device_memory {
-    allocate(size: i64) -> memory_ptr
+    allocate(i64 size) -> memory_ptr
     deallocate(ptr: memory_ptr) -> void
-    memset(ptr: memory_ptr, value: i32, size: i64) -> void
-    memcpy_h2d(dst: memory_ptr, src: i64, size: i64) -> void
-    memcpy_d2h(dst: i64, src: memory_ptr, size: i64) -> void
-    memcpy_d2d(dst: memory_ptr, src: memory_ptr, size: i64) -> void
+    memset(ptr: memory_ptr, i32 value, i64 size) -> void
+    memcpy_h2d(dst: memory_ptr, i64 src, i64 size) -> void
+    memcpy_d2h(i64 dst, src: memory_ptr, i64 size) -> void
+    memcpy_d2d(dst: memory_ptr, src: memory_ptr, i64 size) -> void
 }
 interface i_device_synchronization {
     synchronize() -> void
@@ -63,13 +63,13 @@ interface i_device_properties {
     get_runtime_version() -> string
 }
 interface i_device_factory {
-    create_device(device_type: DeviceType, device_id: i64) -> device
-    get_device(device_type: DeviceType, device_id: i64) -> device
+    create_device(device_type: DeviceType, i64 device_id) -> device
+    get_device(device_type: DeviceType, i64 device_id) -> device
     list_devices(device_type: DeviceType) -> []device
     get_device_count(device_type: DeviceType) -> i64
 }
 interface i_device_registry {
-    register_device(device_type: DeviceType, factory_ptr: i64) -> void
+    register_device(device_type: DeviceType, i64 factory_ptr) -> void
     get_factory(device_type: DeviceType) -> i64
 }
 interface i_device_context {

@@ -27,7 +27,7 @@ struct quality_assessor {
     seen_hashes: set<string>
 }
 
-func new_quality_assessor(sample_size: i64) quality_assessor {
+func new_quality_assessor(i64 sample_size) quality_assessor {
     return quality_assessor{
         sample_size: sample_size,
         metrics: quality_metrics{
@@ -45,7 +45,7 @@ func new_quality_assessor(sample_size: i64) quality_assessor {
     }
 }
 
-func (qa: *quality_assessor) calculate_quality_score(text: string) f64 {
+func (qa: *quality_assessor) calculate_quality_score(string text) f64 {
     if len(text) == 0 {
         return 0.0
     }
@@ -83,7 +83,7 @@ func (qa: *quality_assessor) calculate_quality_score(text: string) f64 {
     return score
 }
 
-func count_unique_chars(text: string) i64 {
+func count_unique_chars(string text) i64 {
     seen := make(set<rune>)
     for c in text {
         seen[c] = true
@@ -91,7 +91,7 @@ func count_unique_chars(text: string) i64 {
     return i64(len(seen))
 }
 
-func has_natural_language_features(text: string) bool {
+func has_natural_language_features(string text) bool {
     words := strings.Split(text, " ")
     long_word_count := 0
     for word in words {
@@ -102,7 +102,7 @@ func has_natural_language_features(text: string) bool {
     return long_word_count > 0 && long_word_count > len(words) / 100
 }
 
-func detect_language(text: string) string {
+func detect_language(string text) string {
     if strings.Contains(text, "é") || strings.Contains(text, "à") {
         return "fr"
     }
@@ -124,7 +124,7 @@ func detect_language(text: string) string {
     return "en"
 }
 
-func (qa: *quality_assessor) assess_file(filepath: string) quality_metrics {
+func (qa: *quality_assessor) assess_file(string filepath) quality_metrics {
     println("📊 evaluationfile: " + filepath)
     file := io.Open(filepath, "r")
     defer file.Close()
@@ -254,7 +254,7 @@ func (metrics: quality_metrics) print_report() {
     println("═══════════════════════════════════════════════════════════")
 }
 
-func format_size(size: i64) string {
+func format_size(i64 size) string {
     if size < 1024 {
         return string(size) + " B"
     }
@@ -267,7 +267,7 @@ func format_size(size: i64) string {
     return format_float(f64(size) / (1024.0 * 1024.0 * 1024.0), 1) + " GB"
 }
 
-func format_tokens(tokens: i64) string {
+func format_tokens(i64 tokens) string {
     if tokens < 1000 {
         return string(tokens)
     }
@@ -280,21 +280,21 @@ func format_tokens(tokens: i64) string {
     return format_float(f64(tokens) / 1000000000.0, 1) + "B"
 }
 
-func format_score(score: f64) string {
+func format_score(f64 score) string {
     return format_float(score, 2) + " / 1.0"
 }
 
-func format_percent(percent: f64) string {
+func format_percent(f64 percent) string {
     return format_float(percent * 100.0, 1) + "%"
 }
 
-func format_float(num: f64, decimals: i32) string {
+func format_float(f64 num, i32 decimals) string {
     multiplier := pow(10.0, f64(decimals))
     rounded := math.Floor(num * multiplier) / multiplier
     return string(rounded)
 }
 
-func pow(base: f64, exp: f64) f64 {
+func pow(f64 base, f64 exp) f64 {
     result := 1.0
     for i := 0; i < i32(exp); i += 1 {
         result *= base
@@ -318,7 +318,7 @@ func main() {
     metrics.print_report()
 }
 
-func string_to_int(s: string) i64 {
+func string_to_int(string s) i64 {
     result := i64(0)
     for c in s {
         if c >= '0' && c <= '9' {

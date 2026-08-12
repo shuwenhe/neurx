@@ -62,7 +62,7 @@ func new_grpo_passk_trainer(
     }
 }
 
-func evaluate_code(code: string, test_cases: []test_case) -> CodeEvaluation {
+func evaluate_code(string code, test_cases: []test_case) -> CodeEvaluation {
     return code_evaluation{
         compiles: true,
         passes_tests: true,
@@ -74,7 +74,7 @@ func evaluate_code(code: string, test_cases: []test_case) -> CodeEvaluation {
     }
 }
 
-func compute_passk(evaluations: []code_evaluation, k: i32) -> f32 {
+func compute_passk(evaluations: []code_evaluation, i32 k) -> f32 {
     let num_passed = 0
     for eval in evaluations {
         if eval.passes_tests {
@@ -254,7 +254,7 @@ func compute_mean(values: []f32) -> f32 {
     return sum / f32(values.len())
 }
 
-func compute_std(values: []f32, mean: f32) -> f32 {
+func compute_std(values: []f32, f32 mean) -> f32 {
     if values.len() == 0 {
         return 1.0
     }
@@ -265,7 +265,7 @@ func compute_std(values: []f32, mean: f32) -> f32 {
     return sqrt(sum_sq / f32(values.len()))
 }
 
-func clamp_scalar(x: f32, min_val: f32, max_val: f32) -> f32 {
+func clamp_scalar(f32 x, f32 min_val, f32 max_val) -> f32 {
     if x < min_val {
         return min_val
     }
@@ -279,7 +279,7 @@ func sort(values: []f32) -> []f32 {
     return values
 }
 
-func concat_prompt_code(prompt: string, code: string) -> Tensor {
+func concat_prompt_code(string prompt, string code) -> Tensor {
     return tensor_zeros([1])
 }
 

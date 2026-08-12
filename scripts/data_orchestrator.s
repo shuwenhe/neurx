@@ -34,7 +34,7 @@ struct data_orchestrator {
     neurx_root string
 }
 
-func new_data_orchestrator(input_path string) (*data_orchestrator, error) {
+func new_data_orchestrator(string input_path) (*data_orchestrator, error) {
     logger := new_logger("data_orchestrator")
     neurx_root := get_env("NEURX_ROOT", "")
     if neurx_root == "" {
@@ -270,7 +270,7 @@ func process_dataset(input_path string) error {
     return orchestrator.statistics()
 }
 
-func split_dataset(input_path string, train_ratio float32, val_ratio float32) error {
+func split_dataset(string input_path, train_ratio float32, val_ratio float32) error {
     orchestrator, err := new_data_orchestrator(input_path)
     if err != nil {
         return err
@@ -281,7 +281,7 @@ func split_dataset(input_path string, train_ratio float32, val_ratio float32) er
     return orchestrator.split(train_ratio, val_ratio)
 }
 
-func convert_data_format(input_path string, output_format string) error {
+func convert_data_format(string input_path, output_format string) error {
     orchestrator, err := new_data_orchestrator(input_path)
     if err != nil {
         return err

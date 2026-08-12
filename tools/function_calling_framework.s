@@ -169,7 +169,7 @@ class tool_registry {
         this.categories[cat].append(definition.name)
         if this.config.verbose_logging:
             print(f"✓ Registered tool: {definition.name} (category: {cat})")
-    unregister(tool_name: string) {
+    unregister(string tool_name) {
         if tool_name in this.tools:
             let defn = this.tools[tool_name]
             cat = defn.category ?? "uncategorized"
@@ -178,10 +178,10 @@ class tool_registry {
             this.tools.remove(tool_name)
             this.executors.remove(tool_name)
         }
-    get(tool_name: string) {
+    get(string tool_name) {
         return this.tools.get(tool_name)
     }
-    get_executor(tool_name: string) {
+    get_executor(string tool_name) {
         return this.executors.get(tool_name)
     }
     list_tools(category?: string, tag?: string) {
@@ -195,7 +195,7 @@ class tool_registry {
         }
         return results
     }
-    search(query: string) {
+    search(string query) {
         query_terms = set(query.to_lower().split())
         scored: list<tuple<tool_definition, float>> = []
         for name, defn in this.tools {
@@ -246,9 +246,9 @@ struct registry_statistics {
     permission_required_tools: int
 }
 interface tool_executor {
-    execute(arguments: map<string, any>)
+    execute(map arguments<string, any>)
     get_name()
-    validate_arguments(args: map<string, any>, schema: parameter_schema)
+    validate_arguments(map args<string, any>, schema: parameter_schema)
 }
 
 struct validation_report {
@@ -270,7 +270,7 @@ class function_calling_engine {
         this.conversation_history = []
         this.call_tracker = new call_tracker()
     }
-    async process_user_request(user_message: string, available_tools?: list<tool_definition>) {
+    async process_user_request(string user_message, available_tools?: list<tool_definition>) {
         total_start = current_time_millis()
         if this.config.verbose_logging:
             print(f"\n{'='*60}")
@@ -344,7 +344,7 @@ class function_calling_engine {
             intermediate_messages=[assistant_msg, final_msg]
         }
     }
-    async _multi_step_execution(user_msg: user_message, tools?: list<tool_definition>, max_rounds: int = 10) {
+    async _multi_step_execution(user_msg: user_message, tools?: list<tool_definition>, int max_rounds = 10) {
         """Allow multiple rounds of tool calls until task completion."""
         tool_defs = tools ?? this.registry.list_tools()
         all_executed_calls: list<tool_call> = []
@@ -583,7 +583,7 @@ class call_tracker {
         this.failed_calls = 0
         this.parallel_batch_count = 0
         this.tools_used.clear()
-    get_recent_calls(count: int = 10) {
+    get_recent_calls(int count = 10) {
         return this.history[-min(count, len(this.history)):]
     }
 }

@@ -87,7 +87,7 @@ struct data_bundle {
     metadata: map[string]string
 }
 
-func bundle_training_data(batch_size: i32, seq_len: i32, vocab_size: i32) data_bundle {
+func bundle_training_data(i32 batch_size, i32 seq_len, i32 vocab_size) data_bundle {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 2: DATA BUNDLING                                ║")
     println("╚════════════════════════════════════════════════════════╝")
@@ -151,7 +151,7 @@ struct runner {
     batch: data_bundle
 }
 
-func init_runner(config: model_config, batch: data_bundle, learning_rate: f64) runner {
+func init_runner(config: model_config, batch: data_bundle, f64 learning_rate) runner {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 3: RUNNER INITIALIZATION                        ║")
     println("╚════════════════════════════════════════════════════════╝")
@@ -313,7 +313,7 @@ struct gradient_info {
     grad_overflow: bool
 }
 
-func backward_pass(runner: runner, output: forward_output, loss: f64) (gradient_info, f64) {
+func backward_pass(runner: runner, output: forward_output, f64 loss) (gradient_info, f64) {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 6: BACKWARD PASS                                ║")
     println("╚════════════════════════════════════════════════════════╝")
@@ -370,7 +370,7 @@ struct optimizer_update {
     weight_decay_applied: bool
 }
 
-func adamw_optimizer_step(runner: runner, grad_info: gradient_info, step: i32) (optimizer_update, f64) {
+func adamw_optimizer_step(runner: runner, grad_info: gradient_info, i32 step) (optimizer_update, f64) {
     println("╔════════════════════════════════════════════════════════╗")
     println("║ STAGE 7: OPTIMIZER UPDATE (adam_w)                     ║")
     println("╚════════════════════════════════════════════════════════╝")

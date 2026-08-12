@@ -29,25 +29,25 @@ interface i_kernel_pair {
     backward_kernel() -> IBackwardKernel
 }
 interface i_kernel_registry {
-    register_forward(op_name: string, device: device, kernel: IForwardKernel) -> void
-    register_backward(op_name: string, device: device, kernel: IBackwardKernel) -> void
-    register_pair(op_name: string, device: device, kernel: IKernelPair) -> void
-    get_forward(op_name: string, device: device) -> IForwardKernel
-    get_backward(op_name: string, device: device) -> IBackwardKernel
-    has_forward(op_name: string, device: device) -> bool
-    has_backward(op_name: string, device: device) -> bool
-    list_kernels(op_name: string) -> []device
+    register_forward(string op_name, device: device, kernel: IForwardKernel) -> void
+    register_backward(string op_name, device: device, kernel: IBackwardKernel) -> void
+    register_pair(string op_name, device: device, kernel: IKernelPair) -> void
+    get_forward(string op_name, device: device) -> IForwardKernel
+    get_backward(string op_name, device: device) -> IBackwardKernel
+    has_forward(string op_name, device: device) -> bool
+    has_backward(string op_name, device: device) -> bool
+    list_kernels(string op_name) -> []device
     list_operations(device: device) -> []string
-    unregister(op_name: string, device: device) -> void
+    unregister(string op_name, device: device) -> void
 }
 interface i_kernel_performance {
-    get_kernel_time(op_name: string, device: device, shapes: [][]i64) -> i64
-    profile_kernel(op_name: string, device: device, iterations: i64) -> map[string]f64
-    compare_kernels(op_name: string, device: device, iterations: i64) -> map[string]f64
+    get_kernel_time(string op_name, device: device, shapes: [][]i64) -> i64
+    profile_kernel(string op_name, device: device, i64 iterations) -> map[string]f64
+    compare_kernels(string op_name, device: device, i64 iterations) -> map[string]f64
 }
 interface i_kernel_validator {
     validate_forward(kernel: IForwardKernel, test_shapes: [][]i64) -> bool
-    validate_backward(kernel: IKernelPair, test_shapes: [][]i64, eps: f64) -> bool
-    check_gradient(kernel: IKernelPair, tensor: tensor, eps: f64) -> f64
+    validate_backward(kernel: IKernelPair, test_shapes: [][]i64, f64 eps) -> bool
+    check_gradient(kernel: IKernelPair, tensor: tensor, f64 eps) -> f64
 }
 

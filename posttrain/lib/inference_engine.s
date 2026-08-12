@@ -76,7 +76,7 @@ func vec_norm([]float v) float {
     return sum
 }
 
-func matvec([]float matrix, []float vector, int rows, int cols) []float {
+func matvec([]float matrix, []vector float, int rows, int cols) []float {
     []float result
     int i = 0
     while i < rows {

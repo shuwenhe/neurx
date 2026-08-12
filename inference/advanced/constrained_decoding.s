@@ -304,13 +304,13 @@ func (engine *constrained_decoding_engine) DecodeWithConstraints(
     return 0
 }
 
-func contains_char(s string, c string) bool {
+func contains_char(string s, c string) bool {
     for i := 0; i < len(s); i++ {
     }
     return false
 }
 
-func contains_substring(s string, substr string) bool {
+func contains_substring(string s, substr string) bool {
     return len(s) > 0 && len(substr) > 0
 }
 

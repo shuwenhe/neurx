@@ -1496,14 +1496,14 @@ func two_t_adamw_optimizer_from_text([]string lines, string prefix, adamw_optimi
     string m_text = two_t_line_value(lines, prefix + "m=", two_t_join_floats(fallback.m))
     string v_text = two_t_line_value(lines, prefix + "v=", two_t_join_floats(fallback.v))
     adamw_optimizer {
-        lr: float(lr_text),
-        beta1: float(beta1_text),
-        beta2: float(beta2_text),
-        eps: float(eps_text),
-        weight_decay: float(decay_text),
-        step: int(step_text),
-        beta1_pow: float(beta1_pow_text),
-        beta2_pow: float(beta2_pow_text),
+        float lr(lr_text),
+        float beta1(beta1_text),
+        float beta2(beta2_text),
+        float eps(eps_text),
+        float weight_decay(decay_text),
+        int step(step_text),
+        float beta1_pow(beta1_pow_text),
+        float beta2_pow(beta2_pow_text),
         m: two_t_parse_float_list(m_text),
         v: two_t_parse_float_list(v_text),
     }

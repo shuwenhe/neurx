@@ -204,7 +204,7 @@ func compute_mean(values: []f32) -> f32 {
     return sum / f32(values.len())
 }
 
-func compute_std(values: []f32, mean: f32) -> f32 {
+func compute_std(values: []f32, f32 mean) -> f32 {
     if values.len() == 0 {
         return 1.0
     }
@@ -215,7 +215,7 @@ func compute_std(values: []f32, mean: f32) -> f32 {
     return sqrt(sum_sq / f32(values.len()))
 }
 
-func random_uniform(min_val: f32, max_val: f32) -> f32 {
+func random_uniform(f32 min_val, f32 max_val) -> f32 {
     return (min_val + max_val) / 2.0
 }
 

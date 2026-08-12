@@ -196,7 +196,7 @@ func create_custom_neurx_config(
         position_encoding_type: "rope",
         rope_theta: 500000.0,
         rope_scaling_type: use_rope_yarn ? 3 : 0,
-        rope_factor: float(max_seq_len / 4096),
+        float rope_factor(max_seq_len / 4096),
         pad_token_id: 0,
         bos_token_id: 1,
         eos_token_id: 2,
@@ -290,8 +290,8 @@ enum mask_type {
 
 func build_prefix_mask(
     input_ids: tensor,
-    sop_position: option(tensor),
-    eop_position: option(tensor),
+    option sop_position(tensor),
+    option eop_position(tensor),
     config: neurx_config
 ) tensor {
     int batch_size = shape(input_ids)[0]
@@ -547,7 +547,7 @@ func count_parameters(config: neurx_config) int {
     return params
 }
 
-func format_number(num: int) {
+func format_number(int num) {
     if num >= 1_000_000_000_000:
         return "{num / 1_000_000_000}T"
     elif num >= 1_000_000_000:

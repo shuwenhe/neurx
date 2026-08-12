@@ -23,13 +23,13 @@ interface i_storage {
     is_shared() -> bool
     is_contiguous() -> bool
     clone() -> storage
-    narrow(offset: i64, length: i64) -> storage
+    narrow(i64 offset, i64 length) -> storage
     reshape(shape: []i64) -> storage
-    transpose(dim0: i64, dim1: i64) -> storage
+    transpose(i64 dim0, i64 dim1) -> storage
 }
 interface i_storage_factory {
-    create(size_bytes: i64, dtype: DType, layout: Layout, device: device) -> storage
-    from_ptr(ptr: i64, size_bytes: i64, dtype: DType, layout: Layout, device: device) -> storage
+    create(i64 size_bytes, dtype: DType, layout: Layout, device: device) -> storage
+    from_ptr(i64 ptr, i64 size_bytes, dtype: DType, layout: Layout, device: device) -> storage
     share(storage: storage) -> storage
 }
 interface i_storage_debug {

@@ -102,7 +102,7 @@ struct train_orchestrator {
     neurx_root string
 }
 
-func new_train_orchestrator(scale training_scale, num_gpus int) (*train_orchestrator, error) {
+func new_train_orchestrator(scale training_scale, int num_gpus) (*train_orchestrator, error) {
     logger := new_logger("train_orchestrator")
     neurx_root := get_env("NEURX_ROOT", "")
     if neurx_root == "" {
@@ -304,7 +304,7 @@ func scale_string(scale training_scale) string {
     }
 }
 
-func run_foundation_model_training(scale string, num_gpus int) error {
+func run_foundation_model_training(string scale, num_gpus int) error {
     var scale_enum training_scale
     switch to_lower(scale) {
     case "mini":

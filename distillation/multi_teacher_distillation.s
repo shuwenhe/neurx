@@ -273,7 +273,7 @@ func (distill: *multi_teacher_distillation) print_teacher_contributions() {
     }
 }
 
-func kl_divergence_loss(student_logits: tensor, teacher_logits: tensor, temperature: f32) -> tensor {
+func kl_divergence_loss(student_logits: tensor, teacher_logits: tensor, f32 temperature) -> tensor {
     let student_log_probs = log_softmax(student_logits / temperature, dim: -1)
     let teacher_probs = softmax(teacher_logits / temperature, dim: -1)
     let kl = -(teacher_probs * student_log_probs).sum(dim: -1).mean()

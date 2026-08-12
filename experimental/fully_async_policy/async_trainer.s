@@ -124,7 +124,7 @@ func get_async_stats(async_policy_state state) async_stats {
         samples_collected: state.samples_collected,
         training_steps: state.training_steps,
         policy_version: state.current_policy_version,
-        buffer_utilization: float(state.buffers[0].size) / float(state.buffers[0].capacity),
+        float buffer_utilization(state.buffers[0].size) / float(state.buffers[0].capacity),
     }
 }
 

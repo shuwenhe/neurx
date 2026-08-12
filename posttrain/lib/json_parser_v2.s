@@ -1,6 +1,6 @@
 package neurx.posttrain.lib
 use std.io.eprintln
-func string_starts_with(text string, pos int, prefix string) bool {
+func string_starts_with(string text, int pos, prefix string) bool {
     end := pos + len(prefix)
     if end > len(text) {
         return false
@@ -13,14 +13,14 @@ func string_starts_with(text string, pos int, prefix string) bool {
     return true
 }
 
-func parse_json_null(text string, pos int) int {
+func parse_json_null(string text, pos int) int {
     if string_starts_with(text, pos, "null") {
         return pos + 4
     }
     return -1
 }
 
-func parse_json_bool(text string, pos int) int {
+func parse_json_bool(string text, pos int) int {
     if string_starts_with(text, pos, "true") {
         return pos + 4
     }
@@ -30,7 +30,7 @@ func parse_json_bool(text string, pos int) int {
     return -1
 }
 
-func parse_json_number(text string, pos int) int {
+func parse_json_number(string text, pos int) int {
     start := pos
     if pos < len(text) && byte(text[pos]) == byte(45) {
         pos = pos + 1
@@ -50,7 +50,7 @@ func parse_json_number(text string, pos int) int {
     return pos
 }
 
-func parse_json_string(text string, pos int) int {
+func parse_json_string(string text, pos int) int {
     if pos >= len(text) || byte(text[pos]) != byte(34) {
         return -1
     }
@@ -69,7 +69,7 @@ func parse_json_string(text string, pos int) int {
     return -1
 }
 
-func skip_whitespace(text string, pos int) int {
+func skip_whitespace(string text, pos int) int {
     for pos < len(text) {
         ch := byte(text[pos])
         if ch == byte(32) || ch == byte(9) || ch == byte(10) || ch == byte(13) {
@@ -81,7 +81,7 @@ func skip_whitespace(text string, pos int) int {
     return pos
 }
 
-func parse_json_value(text string, pos int) int {
+func parse_json_value(string text, pos int) int {
     pos = skip_whitespace(text, pos)
     if pos >= len(text) {
         return -1
@@ -108,7 +108,7 @@ func parse_json_value(text string, pos int) int {
     return -1
 }
 
-func parse_json_array(text string, pos int) int {
+func parse_json_array(string text, pos int) int {
     if pos >= len(text) || byte(text[pos]) != byte(91) {
         return -1
     }
@@ -139,7 +139,7 @@ func parse_json_array(text string, pos int) int {
     }
 }
 
-func parse_json_object(text string, pos int) int {
+func parse_json_object(string text, pos int) int {
     if pos >= len(text) || byte(text[pos]) != byte(123) {
         return -1
     }

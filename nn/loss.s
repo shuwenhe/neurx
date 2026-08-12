@@ -4,7 +4,7 @@ struct cross_entropy_loss {
     label_smoothing f64
 }
 
-func cross_entropy_new(reduction string, label_smoothing f64) cross_entropy_loss {
+func cross_entropy_new(string reduction, label_smoothing f64) cross_entropy_loss {
     return cross_entropy_loss{
         reduction: reduction,
         label_smoothing: label_smoothing,

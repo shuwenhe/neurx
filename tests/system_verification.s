@@ -21,7 +21,7 @@ struct system_health_check {
     recommendations: []string
 }
 
-func verify_component(name: string, file_path: string, expected_lines: i32) component_status {
+func verify_component(string name, string file_path, i32 expected_lines) component_status {
     let exists = true
     let component = component_status {
         name: name,

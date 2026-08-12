@@ -101,8 +101,8 @@ func run_complete_training() {
         var step_loss: float = 0.0
         var step_count: int = 0
         while step < 1000 {
-            var batch_input_ids: []int = create_dummy_batch(training_config.batch_size, 512)
-            var batch_target_ids: []int = create_dummy_batch(training_config.batch_size, 512)
+            var []int batch_input_ids = create_dummy_batch(training_config.batch_size, 512)
+            var []int batch_target_ids = create_dummy_batch(training_config.batch_size, 512)
             var forward_result: training_pipeline.forward_pass_result =
                 training_pipeline.forward_pass(
                     model_state,
@@ -143,8 +143,8 @@ func run_complete_training() {
             step_loss = step_loss + forward_result.loss_value
             step_count = step_count + 1
             if step % training_config.log_interval == 0 {
-                var avg_loss: float = step_loss / float(step_count)
-                var perplexity: float = training_pipeline.compute_perplexity(avg_loss)
+                var float avg_loss = step_loss / float(step_count)
+                var float perplexity = training_pipeline.compute_perplexity(avg_loss)
                 print_step_info(
                     epoch, step,
                     avg_loss,
@@ -173,7 +173,7 @@ func run_complete_training() {
     print_header("Training Complete")
 }
 
-func resume_training_from_checkpoint(checkpoint_path: string) {
+func resume_training_from_checkpoint(string checkpoint_path) {
     print_info("Loading checkpoint from", checkpoint_path)
     var checkpoint: training_pipeline.checkpoint_data =
         training_pipeline.load_checkpoint(checkpoint_path)
@@ -191,8 +191,8 @@ func evaluate_model(
     var total_loss: float = 0.0
     var batch: int = 0
     while batch < num_eval_batches {
-        var input_ids: []int = create_dummy_batch(eval_batch_size, 512)
-        var target_ids: []int = create_dummy_batch(eval_batch_size, 512)
+        var []int input_ids = create_dummy_batch(eval_batch_size, 512)
+        var []int target_ids = create_dummy_batch(eval_batch_size, 512)
         var forward_result: training_pipeline.forward_pass_result =
             training_pipeline.forward_pass(
                 model_state,
@@ -206,8 +206,8 @@ func evaluate_model(
     return total_loss / float(num_eval_batches)
 }
 
-func create_dummy_batch(batch_size: int, seq_len: int) []int {
-    var batch: []int = []int(batch_size * seq_len)
+func create_dummy_batch(int batch_size, int seq_len) []int {
+    var []int batch = []int(batch_size * seq_len)
     var i = 0
     while i < batch_size * seq_len {
         batch[i] = 1000 + i % 50000
@@ -216,7 +216,7 @@ func create_dummy_batch(batch_size: int, seq_len: int) []int {
     return batch
 }
 
-func print_header(msg: string) {
+func print_header(string msg) {
 }
 
 func print_config(
@@ -226,7 +226,7 @@ func print_config(
 ) {
 }
 
-func print_epoch_header(epoch: int) {
+func print_epoch_header(int epoch) {
 }
 
 func print_step_info(
@@ -235,13 +235,13 @@ func print_step_info(
 ) {
 }
 
-func print_warning(msg1: string, scale: float) {
+func print_warning(string msg1, float scale) {
 }
 
-func print_info(msg: string, val: int) {
+func print_info(string msg, int val) {
 }
 
-func format_int(i: int) string {
+func format_int(int i) string {
     return "0"
 }
 

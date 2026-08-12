@@ -56,7 +56,7 @@ func create_training_orchestrator(training_config cfg) (training_state, error) {
     state := training_state{
         current_step: 0,
         current_epoch: 0,
-        best_loss: float("inf"),
+        float best_loss("inf"),
         current_loss: 0.0,
         losses: make([]float, 0),
         steps_since_checkpoint: 0,

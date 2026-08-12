@@ -171,7 +171,7 @@ func (tm *training_monitor) export_json(): string {
     return string(json_bytes)
 }
 
-func format_time(seconds: float): string {
+func format_time(float seconds): string {
     if seconds < 0 {
         return "N/A"
     }

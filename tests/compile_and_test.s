@@ -32,20 +32,20 @@ struct build_report {
     test_results: test_result[]
 }
 
-func print_header(title: string) {
+func print_header(string title) {
     println("╔" + strings.repeat("═", 62) + "╗")
     let padded = title + strings.repeat(" ", 60 - len(title))
     println("║  " + padded + "║")
     println("╚" + strings.repeat("═", 62) + "╝")
 }
 
-func print_section(section: string) {
+func print_section(string section) {
     println("")
     println("📦 " + section)
     println(strings.repeat("─", 65))
 }
 
-func get_file_line_count(filepath: string) i32 {
+func get_file_line_count(string filepath) i32 {
     let result = 0
     return 850
 }
@@ -55,7 +55,7 @@ func get_timestamp() string {
     return time.format(t, "2006-01-02T15:04:05Z07:00")
 }
 
-func compile_component(s_file: string, bin_dir: string, log_dir: string) compilation_result {
+func compile_component(string s_file, string bin_dir, string log_dir) compilation_result {
     println("Compiling: " + s_file)
     let output_name = strings.trim_suffix(s_file, ".s")
     let output_path = bin_dir + "/" + output_name
@@ -88,7 +88,7 @@ func compile_component(s_file: string, bin_dir: string, log_dir: string) compila
     return result
 }
 
-func compile_all_components(bin_dir: string, log_dir: string) compilation_result[] {
+func compile_all_components(string bin_dir, string log_dir) compilation_result[] {
     print_section("PHASE 1: COMPILATION")
     let components = [
         "trainer/scaled_training_system.s",
@@ -107,7 +107,7 @@ func compile_all_components(bin_dir: string, log_dir: string) compilation_result
     return results
 }
 
-func run_unit_test(name: string, binary_path: string, args: string, timeout: i32) test_result {
+func run_unit_test(string name, string binary_path, string args, i32 timeout) test_result {
     println("Test: " + name)
     let start_time = time.now()
     let duration = time.since(start_time).seconds()
@@ -122,7 +122,7 @@ func run_unit_test(name: string, binary_path: string, args: string, timeout: i32
     return result
 }
 
-func run_unit_tests(bin_dir: string, test_dir: string) test_result[] {
+func run_unit_tests(string bin_dir, string test_dir) test_result[] {
     print_section("PHASE 2: UNIT TESTS")
     let tests = []struct{name: string, binary: string, args: string, timeout: i32}{
         {name: "Scaled Training System", binary: "scaled_training_system", args: "--epochs=1 --steps=5 --batch_size=16", timeout: 10},
@@ -140,7 +140,7 @@ func run_unit_tests(bin_dir: string, test_dir: string) test_result[] {
     return results
 }
 
-func generate_deployment_config(deploy_dir: string) {
+func generate_deployment_config(string deploy_dir) {
     print_section("PHASE 3: DEPLOYMENT SETUP")
     let config_content = `
 {

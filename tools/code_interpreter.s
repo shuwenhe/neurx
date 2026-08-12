@@ -153,7 +153,7 @@ class sandbox_environment {
         })
         return result
     }
-    _security_check(code: string) {
+    _security_check(string code) {
         issues: list<string> = []
         dangerous_patterns = [
             ("__import__", "Dynamic import detected"),
@@ -248,7 +248,7 @@ class session_state {
     files_created: list<string>
     execution_history: list<execution_record>
     total_execution_time_ms: float = 0
-    init(session_id: string, created_at: float, variables: map<string, any>,
+    init(string session_id, float created_at, map variables<string, any>,
          files_created: list<string>, execution_history: list<execution_record>) {
         this.session_id = session_id
         this.created_at = created_at
@@ -303,7 +303,7 @@ class python_runtime {
     timeout: int
     process?: ProcessHandle
     interpreter_path: string = "python"
-    init(sandbox_dir: string, memory_limit: int, timeout: int) {
+    init(string sandbox_dir, int memory_limit, int timeout) {
         this.sandbox_dir = sandbox_dir
         this.memory_limit = memory_limit
         this.timeout = timeout
@@ -311,7 +311,7 @@ class python_runtime {
             throw error(f"Python interpreter not found: {this.interpreter_path}")
         }
     }
-    execute(code: string, filename: string?) {
+    execute(string code, string filename?) {
         let script_path = this.sandbox_dir + (filename ?? "execution_" + generate_short_uuid() + ".py")
         write_file(script_path, code)
         try {
@@ -385,7 +385,7 @@ class python_runtime {
             }
         }
     }
-    _parse_python_error(stderr_output: string) {
+    _parse_python_error(string stderr_output) {
         lines = stderr_output.split("\n")
         error_type = ""
         message = ""
@@ -407,7 +407,7 @@ class python_runtime {
             traceback=traceback
         }
     }
-    _extract_return_value(stdout: string) {
+    _extract_return_value(string stdout) {
         lines = stdout.strip().split("\n")
         if lines.length > 0 {
             last_line = lines[-1]
@@ -433,7 +433,7 @@ class java_script_runtime {
     init() {
         this.vm_context = create_javascript_vm()
     }
-    execute(code: string) {
+    execute(string code) {
         try {
             wrapped_code = """
                 (function() {
@@ -476,7 +476,7 @@ class java_script_runtime {
 class shell_runtime {
     allow_network: bool
     allowed_commands: set<string>
-    init(allow_network: bool) {
+    init(bool allow_network) {
         this.allow_network = allow_network
         this.allowed_commands = set<string>{
             "ls", "pwd", "echo", "cat", "head", "tail", "wc", "grep", "find",
@@ -486,7 +486,7 @@ class shell_runtime {
             "wget" if allow_network else null
         }.filter(x => x != null).map(x => x!)
     }
-    execute(command: string) {
+    execute(string command) {
         base_command = command.split_whitespace()[0]
         if base_command not in this.allowed_commands {
             return execution_result{
@@ -539,11 +539,11 @@ class shell_runtime {
 class sql_runtime {
     db_path: string
     connection: DatabaseConnection?
-    init(db_path: string) {
+    init(string db_path) {
         this.db_path = db_path
         this.connection = connect_to_sqlite(db_path)
     }
-    execute(query: string) {
+    execute(string query) {
         try {
             query_type = detect_sql_query_type(query)
             match query_type {
@@ -667,13 +667,13 @@ class result_formatter {
             has_files=(result.generated_files?.length ?? 0) > 0
         }
     }
-    _truncate(text: string, max_chars: int) {
+    _truncate(string text, int max_chars) {
         if text.length <= max_chars {
             return text
         }
         return text[:max_chars] + f"\n... [truncated, {text.length - max_chars} more chars]"
     }
-    _format_code_block(content: string, lang: string) {
+    _format_code_block(string content, string lang) {
         return "```\n" + content + "\n```"
     }
 }
@@ -691,7 +691,7 @@ class data_analysis_helper {
         this.sandbox = sandbox
         this.formatter = new result_formatter(sandbox.config)
     }
-    explore_dataset(csv_path: string, max_rows: int = 5) {
+    explore_dataset(string csv_path, int max_rows = 5) {
         code = f"""
 import pandas as pd
 import numpy as np
@@ -728,7 +728,7 @@ print(f"total: {{mem.sum() / 1024 / 1024:.2f}} MB")
         let result = this.sandbox.execute(code_block)
         return result
     }
-    visualize_data(csv_path: string, chart_type: string, x_col: string, y_col: string?,
+    visualize_data(string csv_path, string chart_type, string x_col, string y_col?,
                    group_by: string?) {
         viz_templates: map<string, string> = {
             "bar": f"""
@@ -807,7 +807,7 @@ print("Chart saved as chart_correlation.png")
         let code_block = code_block{language="python", code=code}
         return this.sandbox.execute(code_block)
     }
-    run_statistical_test(csv_path: string, test_type: string, col1: string, col2: string?) {
+    run_statistical_test(string csv_path, string test_type, string col1, string col2?) {
         code = f"""
 import pandas as pd
 import numpy as np
@@ -856,12 +856,12 @@ class CodeInterpreter {
         this.default_session = this.create_session("default")
         this.data_helper = new DataAnalysisHelper(this.default_session!)
     }
-    create_session(session_name: string) {
+    create_session(string session_name) {
         let session = new SandboxEnvironment(config=this.config)
         this.active_sessions[session_name] = session
         return session
     }
-    execute_code(code: string, language?: string, session?: string) {
+    execute_code(string code, language?: string, session?: string) {
         let target_session = this.active_sessions[session ?? "default"] ?? this.default_session!
         let code_block = code_block{
             language=language ?? this.config.default_language,
@@ -870,39 +870,39 @@ class CodeInterpreter {
         let result = target_session.execute(code_block)
         return this.formatter.format_for_llm(result)
     }
-    run_python(code: string) {
+    run_python(string code) {
         return this.execute_code(code, "python")
     }
-    run_s(command: string) {
+    run_s(string command) {
         return this.execute_code(command, "s")
     }
-    run_shell(command: string) {
+    run_shell(string command) {
         return this.run_s(command)
     }
-    run_sql(query: string) {
+    run_sql(string query) {
         return this.execute_code(query, "sql")
     }
-    analyze_csv(csv_path: string) {
+    analyze_csv(string csv_path) {
         let result = this.data_helper!.explore_dataset(csv_path)
         return this.formatter.format_for_llm(result)
     }
-    plot_chart(csv_path: string, chart_type: string, x: string, y?: string,
+    plot_chart(string csv_path, string chart_type, string x, y?: string,
                group_by?: string) {
         let result = this.data_helper!.visualize_data(csv_path, chart_type, x, y, group_by)
         return this.formatter.format_for_llm(result)
     }
-    statistical_test(csv_path: string, test: string, col1: string, col2?: string) {
+    statistical_test(string csv_path, string test, string col1, col2?: string) {
         let result = this.data_helper!.run_statistical_test(csv_path, test, col1, col2)
         return this.formatter.format_for_llm(result)
     }
     list_sessions() {
         return list(this.active_sessions.keys())
     }
-    get_session_summary(session_name: string) {
+    get_session_summary(string session_name) {
         let session = this.active_sessions[session_name] ?? this.default_session!
         return session.get_session_state().get_summary()
     }
-    reset_session(session_name: string) {
+    reset_session(string session_name) {
         if session_name in this.active_sessions {
             this.active_sessions[session_name].reset()
         }

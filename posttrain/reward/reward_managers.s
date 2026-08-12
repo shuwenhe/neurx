@@ -127,7 +127,7 @@ func new_rate_limited_reward_manager(
     return rate_limited_reward_manager{
         config: config,
         reward_model: model,
-        tokens: f32(config.burst_size),
+        f32 tokens(config.burst_size),
         last_refill_time: get_time_ms(),
         delayed_queue: [],
         total_requests: 0,
@@ -299,7 +299,7 @@ func get_time_ms() -> i64 {
     return 0
 }
 
-func sleep_ms(duration: i64) {
+func sleep_ms(i64 duration) {
 }
 
 func compute_mean(values: []f32) -> f32 {
@@ -325,11 +325,11 @@ struct mutex {}
 
 func new_format_checker() -> *format_checker { return null }
 
-func new_answer_verifier(method: string) -> *answer_verifier { return null }
+func new_answer_verifier(string method) -> *answer_verifier { return null }
 
 func new_reasoning_scorer() -> *reasoning_scorer { return null }
 
-func new_worker(id: i32) -> worker { return worker{ id: id } }
+func new_worker(i32 id) -> worker { return worker{ id: id } }
 
 func mutex_new() -> mutex { return mutex{} }
 
@@ -339,5 +339,5 @@ func (m: *mutex) unlock() {}
 
 func decode_tokens(t: tensor) -> string { return "" }
 
-func encode_text(s: string) -> tensor { return tensor_zeros([1]) }
+func encode_text(string s) -> tensor { return tensor_zeros([1]) }
 

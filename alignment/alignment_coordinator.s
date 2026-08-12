@@ -88,7 +88,7 @@ func run_rlhf_stage(alignment_trainer trainer, []string preference_data) alignme
     trainer
 }
 
-func evaluate_alignment(string model_path, []string test_prompts) [string:float {
+func evaluate_alignment(string model_path, []string test_prompts) [float string {
     [string:float metrics = [string:float{cap: 10}
     metrics["instruction_following"] = 0.0
     metrics["coherence"] = 0.0
@@ -98,7 +98,7 @@ func evaluate_alignment(string model_path, []string test_prompts) [string:float 
     metrics
 }
 
-func run_safety_evaluation(string model_path) [string:bool {
+func run_safety_evaluation(string model_path) [bool string {
     [string:bool results = [string:bool{cap: 10}
     results["jailbreak_resistant"] = true
     results["no_harmful_outputs"] = true
@@ -138,7 +138,7 @@ func create_model_version(alignment_trainer trainer, string version_tag) string 
     version_tag
 }
 
-func compare_model_versions([]string version_ids) [string:float {
+func compare_model_versions([]string version_ids) [float string {
     [string:float comparison = [string:float{cap: 10}
     comparison
 }

@@ -63,7 +63,7 @@ func new_net_state() net_state {
     }
 }
 
-func net_socket(ns net_state, proto int, owner_pid int) (net_state, int) {
+func net_socket(ns net_state, int proto, int owner_pid) (net_state, int) {
     int sid = ns.next_sock_id
     net_socket s = net_socket{
         sock_id:        sid,
@@ -81,7 +81,7 @@ func net_socket(ns net_state, proto int, owner_pid int) (net_state, int) {
     return (ns, sid)
 }
 
-func net_connect(ns net_state, sock_id int, remote net_addr) net_state {
+func net_connect(ns net_state, int sock_id, remote net_addr) net_state {
     int i = 0
     while i < len(ns.sockets) {
         if ns.sockets[i].sock_id == sock_id {
@@ -97,7 +97,7 @@ func net_connect(ns net_state, sock_id int, remote net_addr) net_state {
     return ns
 }
 
-func net_send(ns net_state, sock_id int, payload string, pkt_type int) (net_state, int) {
+func net_send(ns net_state, int sock_id, string payload, int pkt_type) (net_state, int) {
     int src_port = 0
     string dst_host = ""
     int dst_port = 0
@@ -129,7 +129,7 @@ func net_send(ns net_state, sock_id int, payload string, pkt_type int) (net_stat
     return (ns, pkt_id)
 }
 
-func net_recv(ns net_state, sock_id int) (net_state, sk_buff, bool) {
+func net_recv(ns net_state, int sock_id) (net_state, sk_buff, bool) {
     int i = 0
     while i < len(ns.recv_queue) {
         if ns.recv_queue[i].sock_id == sock_id {

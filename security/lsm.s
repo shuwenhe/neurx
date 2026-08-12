@@ -41,7 +41,7 @@ func lsm_register(ls lsm_state, ctx security_context) lsm_state {
     return ls
 }
 
-func lsm_find_context(ls lsm_state, agent_pid int) (security_context, bool) {
+func lsm_find_context(ls lsm_state, int agent_pid) (security_context, bool) {
     int i = 0
     while i < len(ls.contexts) {
         if ls.contexts[i].agent_pid == agent_pid {
@@ -52,7 +52,7 @@ func lsm_find_context(ls lsm_state, agent_pid int) (security_context, bool) {
     return (security_context{}, false)
 }
 
-func lsm_check_tool_call(ls lsm_state, agent_pid int, tool_name string) (lsm_state, int) {
+func lsm_check_tool_call(ls lsm_state, int agent_pid, string tool_name) (lsm_state, int) {
     security_context ctx = security_context{}
     bool found = false
     (ctx, found) = lsm_find_context(ls, agent_pid)
@@ -82,7 +82,7 @@ func lsm_check_tool_call(ls lsm_state, agent_pid int, tool_name string) (lsm_sta
     return (ls, LSM_ALLOW)
 }
 
-func lsm_check_spawn(ls lsm_state, agent_pid int, child_goal string) (lsm_state, int) {
+func lsm_check_spawn(ls lsm_state, int agent_pid, string child_goal) (lsm_state, int) {
     security_context ctx = security_context{}
     bool found = false
     (ctx, found) = lsm_find_context(ls, agent_pid)
@@ -93,7 +93,7 @@ func lsm_check_spawn(ls lsm_state, agent_pid int, child_goal string) (lsm_state,
     return (ls, LSM_ALLOW)
 }
 
-func lsm_check_network(ls lsm_state, agent_pid int, url string) (lsm_state, int) {
+func lsm_check_network(ls lsm_state, int agent_pid, string url) (lsm_state, int) {
     security_context ctx = security_context{}
     bool found = false
     (ctx, found) = lsm_find_context(ls, agent_pid)

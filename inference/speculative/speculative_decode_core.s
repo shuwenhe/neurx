@@ -42,7 +42,7 @@ struct speculative_statistics {
     verification_accuracy: float
 }
 
-func new_speculative_config(num_draft: int, draft_scale: float, temp: float) speculative_decode_config {
+func new_speculative_config(int num_draft, float draft_scale, float temp) speculative_decode_config {
     config := speculative_decode_config{
         num_draft_tokens: num_draft,
         draft_model_scale: draft_scale,
@@ -55,7 +55,7 @@ func new_speculative_config(num_draft: int, draft_scale: float, temp: float) spe
     config
 }
 
-func new_draft_token(token_id: int, logits: []float, conf: float) draft_token {
+func new_draft_token(int token_id, []float logits, float conf) draft_token {
     dt := draft_token{
         token_id: token_id,
         logits: logits,
@@ -64,7 +64,7 @@ func new_draft_token(token_id: int, logits: []float, conf: float) draft_token {
     dt
 }
 
-func new_verification_result(accepted: bool, num_accepted: int, fallback_id: int) verification_result {
+func new_verification_result(bool accepted, int num_accepted, int fallback_id) verification_result {
     vr := verification_result{
         accepted: accepted,
         num_accepted_tokens: num_accepted,
@@ -74,7 +74,7 @@ func new_verification_result(accepted: bool, num_accepted: int, fallback_id: int
     vr
 }
 
-func new_speculative_batch(batch_id: int, seq_ids: []int) speculative_batch {
+func new_speculative_batch(int batch_id, []int seq_ids) speculative_batch {
     sb := speculative_batch{
         batch_id: batch_id,
         sequence_ids: seq_ids,
@@ -87,7 +87,7 @@ func new_speculative_batch(batch_id: int, seq_ids: []int) speculative_batch {
     sb
 }
 
-func compute_logits_probability(logits: []float, temperature: float) []float {
+func compute_logits_probability([]float logits, float temperature) []float {
     probs := []float{}
     max_logit := -1000000.0
     i := 0
@@ -114,7 +114,7 @@ func compute_logits_probability(logits: []float, temperature: float) []float {
     probs
 }
 
-func sample_top_k(logits: []float, k: int, temperature: float) int {
+func sample_top_k([]float logits, int k, float temperature) int {
     probs := compute_logits_probability(logits, temperature)
     top_k_indices := []int{}
     top_k_probs := []float{}
@@ -160,7 +160,7 @@ func sample_top_k(logits: []float, k: int, temperature: float) int {
     }
 }
 
-func verify_token_match(draft_logits: []float, verify_logits: []float, temperature: float) bool {
+func verify_token_match([]float draft_logits, []float verify_logits, float temperature) bool {
     draft_probs := compute_logits_probability(draft_logits, temperature)
     verify_probs := compute_logits_probability(verify_logits, temperature)
     draft_top := 0
@@ -182,7 +182,7 @@ func verify_token_match(draft_logits: []float, verify_logits: []float, temperatu
     draft_top == verify_top
 }
 
-func compute_confidence_score(logits: []float) float {
+func compute_confidence_score([]float logits) float {
     probs := compute_logits_probability(logits, 1.0)
     max_prob := probs[0]
     i := 1
@@ -195,7 +195,7 @@ func compute_confidence_score(logits: []float) float {
     max_prob
 }
 
-func filter_predictions_by_confidence(predictions: []draft_token, threshold: float) []draft_token {
+func filter_predictions_by_confidence(predictions: []draft_token, float threshold) []draft_token {
     filtered := []draft_token{}
     i := 0
     while i < predictions.len {

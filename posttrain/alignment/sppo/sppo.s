@@ -44,7 +44,7 @@ func new_sppo_trainer(config: sppo_config, model: *model, ref_model: *model) -> 
     }
 }
 
-func (trainer: *sppo_trainer) self_play_rollout(prompts: tensor, num_samples: i32) -> []trajectory {
+func (trainer: *sppo_trainer) self_play_rollout(prompts: tensor, i32 num_samples) -> []trajectory {
     let trajectories: []trajectory = []
     for i in 0..prompts.shape[0] {
         let prompt = prompts[i]

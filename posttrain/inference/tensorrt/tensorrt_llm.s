@@ -125,10 +125,10 @@ func (engine: *tensorrt_engine) run_generation(
     let batch_size = input.input_ids.shape[0]
     let max_input_len = input.input_ids.shape[1]
     let max_seq_len = max_input_len + input.max_new_tokens
-    let output_ids = tensor_zeros([batch_size, max_seq_len], dtype: i64)
+    let output_ids = tensor_zeros([batch_size, max_seq_len], i64 dtype)
     output_ids[.., ..max_input_len] = input.input_ids
     let log_probs: []f32 = []
-    let finished = tensor_zeros([batch_size], dtype: bool)
+    let finished = tensor_zeros([batch_size], bool dtype)
     let context_output = engine.engine.forward_context(
         input.input_ids,
         input.cache_blocks
@@ -190,7 +190,7 @@ func (engine: *tensorrt_engine) sample(
     return next_tokens, token_log_probs
 }
 
-func (engine: *tensorrt_engine) load_lora_adapter(adapter_name: string, adapter_path: string) {
+func (engine: *tensorrt_engine) load_lora_adapter(string adapter_name, string adapter_path) {
     if engine.lora_manager == null {
         println("Error: LoRA manager not initialized")
         return
@@ -271,7 +271,7 @@ struct generation_response {
     log_probs: []f32
 }
 
-func load_tensorrt_engine(model_dir: string, engine_name: string) -> *tensorrt_model_engine {
+func load_tensorrt_engine(string model_dir, string engine_name) -> *tensorrt_model_engine {
     return null
 }
 
@@ -283,7 +283,7 @@ func get_pad_token_id() -> i32 {
     return 0
 }
 
-func pad_sequences(sequences: []tensor, max_len: i32) -> tensor {
+func pad_sequences(sequences: []tensor, i32 max_len) -> tensor {
     return sequences[0]
 }
 

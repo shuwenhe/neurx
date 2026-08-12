@@ -201,7 +201,7 @@ func (trainer: *gspo_trainer) train(train_data: DataLoader) -> ([]f32, []f32) {
     return policy_losses, lb_losses
 }
 
-func kmeans_clustering(embeddings: []tensor, k: i32) -> []i32 {
+func kmeans_clustering(embeddings: []tensor, i32 k) -> []i32 {
     let n = embeddings.len()
     let dim = embeddings[0].shape[0]
     let centroids: []tensor = []

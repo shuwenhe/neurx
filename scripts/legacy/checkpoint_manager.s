@@ -24,7 +24,7 @@ type checkpoint_manager struct {
     checkpoints: []checkpoint_metadata
 }
 
-func (cm *checkpoint_manager) init(checkpoint_dir: string, max_checkpoints: int) error {
+func (cm *checkpoint_manager) init(string checkpoint_dir, int max_checkpoints) error {
     cm.checkpoint_dir = checkpoint_dir
     cm.max_checkpoints = max_checkpoints
     cm.checkpoints = make([]checkpoint_metadata, 0)
@@ -100,7 +100,7 @@ func (cm *checkpoint_manager) load_latest(): (map[string]interface{}, error) {
     return cm.load_checkpoint(latest.step)
 }
 
-func (cm *checkpoint_manager) load_checkpoint(step: int): (map[string]interface{}, error) {
+func (cm *checkpoint_manager) load_checkpoint(int step): (map[string]interface{}, error) {
     checkpoint_name := "checkpoint-" + format_int(step)
     checkpoint_path := filepath.Join(cm.checkpoint_dir, checkpoint_name)
     if _, err := os.Stat(checkpoint_path); os.IsNotExist(err) {
@@ -165,7 +165,7 @@ func (cm *checkpoint_manager) list_checkpoints(): []map[string]interface{} {
     return result
 }
 
-func (cm *checkpoint_manager) get_checkpoint_info(step: int): map[string]interface{} {
+func (cm *checkpoint_manager) get_checkpoint_info(int step): map[string]interface{} {
     for _, metadata := range cm.checkpoints {
         if metadata.step == step {
             return map[string]interface{}{
@@ -233,7 +233,7 @@ func compute_hash(data: []byte): string {
     return fmt.Sprintf("%x", h)
 }
 
-func format_int(i: int): string {
+func format_int(int i): string {
     return fmt.Sprintf("%d", i)
 }
 

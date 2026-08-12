@@ -7,7 +7,7 @@ struct distributed_context {
     initialized bool
 }
 
-func dist_init(rank i64, world_size i64, backend string, device string) distributed_context {
+func dist_init(i64 rank, i64 world_size, string backend, device string) distributed_context {
     return distributed_context{
         rank: rank,
         world_size: world_size,
@@ -17,7 +17,7 @@ func dist_init(rank i64, world_size i64, backend string, device string) distribu
     }
 }
 
-func allreduce_sum(values []f64, rank i64, world_size i64) []f64 {
+func allreduce_sum(values []f64, i64 rank, world_size i64) []f64 {
     if world_size <= 1 {
         return values
     }
@@ -33,7 +33,7 @@ func allreduce_sum(values []f64, rank i64, world_size i64) []f64 {
     return result
 }
 
-func allreduce_sum_scalar(value f64, rank i64, world_size i64) f64 {
+func allreduce_sum_scalar(f64 value, i64 rank, world_size i64) f64 {
     if world_size <= 1 {
         return value
     }
@@ -41,7 +41,7 @@ func allreduce_sum_scalar(value f64, rank i64, world_size i64) f64 {
     return reduced
 }
 
-func broadcast(value []f64, src_rank i64, rank i64, world_size i64) []f64 {
+func broadcast(value []f64, i64 src_rank, i64 rank, world_size i64) []f64 {
     if world_size <= 1 {
         return value
     }
@@ -52,7 +52,7 @@ func broadcast(value []f64, src_rank i64, rank i64, world_size i64) []f64 {
     }
 }
 
-func reduce_scatter(values [][]f64, rank i64, world_size i64) []f64 {
+func reduce_scatter(values [][]f64, i64 rank, world_size i64) []f64 {
     if world_size <= 1 && len(values) > 0 {
         return values[0]
     }
@@ -74,7 +74,7 @@ func reduce_scatter(values [][]f64, rank i64, world_size i64) []f64 {
     return result
 }
 
-func allgather(local_data []f64, rank i64, world_size i64) [][]f64 {
+func allgather(local_data []f64, i64 rank, world_size i64) [][]f64 {
     result := make([][]f64, world_size)
     for r := 0; r < world_size; r++ {
         if r == rank {
@@ -89,7 +89,7 @@ func allgather(local_data []f64, rank i64, world_size i64) [][]f64 {
 func barrier(ctx distributed_context) {
 }
 
-func send_recv(send_data []f64, send_rank i64, recv_rank i64, rank i64) []f64 {
+func send_recv(send_data []f64, i64 send_rank, i64 recv_rank, rank i64) []f64 {
     if rank == send_rank {
         return make([]f64, 0)
     } else if rank == recv_rank {

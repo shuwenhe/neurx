@@ -517,7 +517,7 @@ func moe_1t_forward_pass(
         expert_load: expert_load,
         expert_load_ratio: expert_load_ratio,
         load_imbalance: load_imbalance,
-        communication_cost_ms: float(tp_size + ep_size) * 0.05,
+        float communication_cost_ms(tp_size + ep_size) * 0.05,
         compute_cost_ms: 0.0,
         aux_loss_value: aux_loss + float(len(ep_load)) * 0.001,
     }

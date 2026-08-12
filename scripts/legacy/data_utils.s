@@ -9,7 +9,7 @@ struct json_value {
     map[string]json_value obj_val
 }
 
-func json_encode_string(s: string) string {
+func json_encode_string(string s) string {
     let mut result = "\""
     for i = 0; i < len(s); i = i + 1 {
         let ch = s[i]
@@ -32,7 +32,7 @@ func json_encode_string(s: string) string {
     result
 }
 
-func json_decode_string(s: string) string {
+func json_decode_string(string s) string {
     if !string_has_prefix(s, "\"") || !string_has_suffix(s, "\"") {
         ""
     }
@@ -69,7 +69,7 @@ func json_decode_string(s: string) string {
     result
 }
 
-func json_object_to_string(fields: map[string]string, indent: int) string {
+func json_object_to_string(map fields[string]string, int indent) string {
     let mut result = "{\n"
     let pad = string_repeat(" ", indent)
     let mut first = true
@@ -84,11 +84,11 @@ func json_object_to_string(fields: map[string]string, indent: int) string {
     result
 }
 
-func path_join(parts: []string) string {
+func path_join([]string parts) string {
     string_join(parts, "/")
 }
 
-func path_dirname(path: string) string {
+func path_dirname(string path) string {
     let parts = string_split(path, "/")
     if len(parts) <= 1 {
         "."
@@ -97,7 +97,7 @@ func path_dirname(path: string) string {
     }
 }
 
-func path_basename(path: string) string {
+func path_basename(string path) string {
     let parts = string_split(path, "/")
     if len(parts) == 0 {
         ""
@@ -106,19 +106,19 @@ func path_basename(path: string) string {
     }
 }
 
-func path_exists(path: string) bool {
+func path_exists(string path) bool {
     runtime_file_exists(path)
 }
 
-func path_is_dir(path: string) bool {
+func path_is_dir(string path) bool {
     runtime_is_dir(path)
 }
 
-func file_read_text(path: string) (string, bool) {
+func file_read_text(string path) (string, bool) {
     runtime_read_text_file(path)
 }
 
-func file_write_text(path: string, content: string) bool {
+func file_write_text(string path, string content) bool {
     let dir = path_dirname(path)
     if !path_exists(dir) {
         _ = runtime_make_dirs(dir)
@@ -126,7 +126,7 @@ func file_write_text(path: string, content: string) bool {
     runtime_write_text_file(path, content)
 }
 
-func file_append_text(path: string, content: string) bool {
+func file_append_text(string path, string content) bool {
     let (existing, ok) = file_read_text(path)
     if !ok && path_exists(path) {
         return false
@@ -135,15 +135,15 @@ func file_append_text(path: string, content: string) bool {
     file_write_text(path, new_content)
 }
 
-func file_delete(path: string) bool {
+func file_delete(string path) bool {
     runtime_remove_file(path)
 }
 
-func file_size(path: string) i64 {
+func file_size(string path) i64 {
     runtime_file_size(path)
 }
 
-func file_count_lines(path: string) (i64, bool) {
+func file_count_lines(string path) (i64, bool) {
     let (content, ok) = file_read_text(path)
     if !ok {
         (0, false)
@@ -152,7 +152,7 @@ func file_count_lines(path: string) (i64, bool) {
     (i64(len(lines)), true)
 }
 
-func dir_list_files(path: string, suffixes: []string) []string {
+func dir_list_files(string path, []string suffixes) []string {
     if !path_is_dir(path) {
         return []string{}
     }
@@ -170,7 +170,7 @@ func dir_list_files(path: string, suffixes: []string) []string {
     result
 }
 
-func string_repeat(s: string, count: int) string {
+func string_repeat(string s, int count) string {
     let mut result = ""
     for i = 0; i < count; i = i + 1 {
         result = result + s
@@ -178,23 +178,23 @@ func string_repeat(s: string, count: int) string {
     result
 }
 
-func normalize_whitespace(s: string) string {
+func normalize_whitespace(string s) string {
     let parts = string_split(string_trim(s), " ")
     string_join(parts, " ")
 }
 
-func hash_key(s: string) string {
+func hash_key(string s) string {
     "hash_" + string_to_lower(s[0 : min(10, len(s))])
 }
 
-func ensure_dir(path: string) bool {
+func ensure_dir(string path) bool {
     if path_exists(path) {
         return path_is_dir(path)
     }
     runtime_make_dirs(path)
 }
 
-func clear_dir(path: string) bool {
+func clear_dir(string path) bool {
     if !path_exists(path) {
         return ensure_dir(path)
     }
@@ -205,7 +205,7 @@ func clear_dir(path: string) bool {
     true
 }
 
-func get_env(key: string, default_val: string) string {
+func get_env(string key, string default_val) string {
     let val = runtime_env_get(key)
     if val == "" {
         default_val
@@ -214,7 +214,7 @@ func get_env(key: string, default_val: string) string {
     }
 }
 
-func get_env_int(key: string, default_val: int) int {
+func get_env_int(string key, int default_val) int {
     let val = runtime_env_get(key)
     if val == "" {
         default_val
@@ -222,28 +222,28 @@ func get_env_int(key: string, default_val: int) int {
         default_val
     }
 }
-pub func log_info(msg: string) {
+pub func log_info(string msg) {
     println(msg)
 }
-pub func log_warn(msg: string) {
+pub func log_warn(string msg) {
     println("⚠ " + msg)
 }
-pub func log_error(msg: string) {
+pub func log_error(string msg) {
     println("✗ " + msg)
 }
-pub func log_success(msg: string) {
+pub func log_success(string msg) {
     println("✓ " + msg)
 }
 
-func min(a: i64, b: i64) i64 {
+func min(i64 a, i64 b) i64 {
     if a < b { a } else { b }
 }
 
-func max(a: i64, b: i64) i64 {
+func max(i64 a, i64 b) i64 {
     if a > b { a } else { b }
 }
 
-func div_round_up(a: i64, b: i64) i64 {
+func div_round_up(i64 a, i64 b) i64 {
     (a + b - 1) / b
 }
 

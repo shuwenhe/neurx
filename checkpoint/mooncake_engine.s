@@ -151,7 +151,7 @@ func (engine: *mooncake_engine) ring_recv(params: tensor, source_ranks: []i32) {
     }
 }
 
-func (engine: *mooncake_engine) p2p_send(params: tensor, target_rank: i32) {
+func (engine: *mooncake_engine) p2p_send(params: tensor, i32 target_rank) {
     let stream = engine.send_streams[0]
     cuda_memcpy_async(
         params,
@@ -161,7 +161,7 @@ func (engine: *mooncake_engine) p2p_send(params: tensor, target_rank: i32) {
     cuda_stream_synchronize(stream)
 }
 
-func (engine: *mooncake_engine) p2p_recv(params: tensor, source_rank: i32) {
+func (engine: *mooncake_engine) p2p_recv(params: tensor, i32 source_rank) {
     let stream = engine.recv_streams[0]
     cuda_memcpy_async(
         params,
@@ -171,7 +171,7 @@ func (engine: *mooncake_engine) p2p_recv(params: tensor, source_rank: i32) {
     cuda_stream_synchronize(stream)
 }
 
-func (engine: *mooncake_engine) flatten_state(state: map[string]tensor) -> tensor {
+func (engine: *mooncake_engine) flatten_state(map state[string]tensor) -> tensor {
     let total_size: i64 = 0
     let param_list: []tensor = []
     for name, param in state {
@@ -181,7 +181,7 @@ func (engine: *mooncake_engine) flatten_state(state: map[string]tensor) -> tenso
     return tensor_cat(param_list)
 }
 
-func (engine: *mooncake_engine) unflatten_state(flat: tensor, state: map[string]tensor) {
+func (engine: *mooncake_engine) unflatten_state(flat: tensor, map state[string]tensor) {
     let offset: i64 = 0
     for name, param in state {
         let size = param.numel()
@@ -191,7 +191,7 @@ func (engine: *mooncake_engine) unflatten_state(flat: tensor, state: map[string]
     }
 }
 
-func (engine: *mooncake_engine) compute_state_size(state: map[string]tensor) -> i64 {
+func (engine: *mooncake_engine) compute_state_size(map state[string]tensor) -> i64 {
     let total: i64 = 0
     for name, param in state {
         total += param.numel()

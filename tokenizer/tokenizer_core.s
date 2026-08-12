@@ -246,18 +246,18 @@ func batch_decode(
     return results
 }
 
-func preprocess_text(text: string) string {
+func preprocess_text(string text) string {
     text = normalize_unicode(text)
     text = replace_control_characters(text)
     text = normalize_whitespace(text)
     return text
 }
 
-func normalize_unicode(text: string) {
+func normalize_unicode(string text) {
     return text
 }
 
-func replace_control_characters(text: string) {
+func replace_control_characters(string text) {
     string chars = []
     for ch in text:
         int cp = ord(ch)
@@ -268,19 +268,19 @@ func replace_control_characters(text: string) {
     return join(chars, "")
 }
 
-func normalize_whitespace(text: string) {
+func normalize_whitespace(string text) {
     while "  " in text:
         text = text.replace("  ", " ")
     return text.strip()
 }
 
-func cleanup_spaces(text: string) {
+func cleanup_spaces(string text) {
     text = text.replace("  ", " ")
     text = text.strip()
     return text
 }
 
-func tokenize(state: tokenizer_state, text: string) []string {
+func tokenize(state: tokenizer_state, string text) []string {
     if len(text) == 0:
         return []
     []string tokens = []
@@ -416,7 +416,7 @@ func build_mlm_input(
     return result
 }
 
-func _is_special_token(token_id: int, specs: special_tokens_config) {
+func _is_special_token(int token_id, specs: special_tokens_config) {
     return token_id == specs.pad_token_id ||
            token_id == specs.bos_token_id ||
            token_id == specs.eos_token_id ||
@@ -427,7 +427,7 @@ func _is_special_token(token_id: int, specs: special_tokens_config) {
            token_id == specs.eop_token_id
 }
 
-func index_of([]int list, target: int) {
+func index_of([]int list, int target) {
     for i, val in enumerate(list):
         if val == target:
             return i

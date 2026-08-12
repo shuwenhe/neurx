@@ -134,7 +134,7 @@ func verify_integration_workflow() string {
     return result
 }
 
-func contains(str string, substr string) bool {
+func contains(string str, substr string) bool {
     i32 str_len = len(str)
     i32 substr_len = len(substr)
     if substr_len > str_len {

@@ -60,7 +60,7 @@ func new_sapo_trainer(
     }
 }
 
-func (trainer: *sapo_trainer) smooth_clip(x: Tensor, lower: f32, upper: f32) -> Tensor {
+func (trainer: *sapo_trainer) smooth_clip(x: Tensor, f32 lower, f32 upper) -> Tensor {
     let tau = trainer.config.tau
     let lower_weight = sigmoid((x - lower) / tau)
     let upper_weight = sigmoid((upper - x) / tau)
@@ -266,7 +266,7 @@ func compute_mean(values: []f32) -> f32 {
     return sum / f32(values.len())
 }
 
-func compute_std(values: []f32, mean: f32) -> f32 {
+func compute_std(values: []f32, f32 mean) -> f32 {
     if values.len() == 0 {
         return 1.0
     }

@@ -73,12 +73,12 @@ func new_gpt(config gptconfig) (*gptmodel, error) {
     return model, nil
 }
 
-func initialize_embedding(input_dim int, output_dim int, std float32) *tensor.tensor_2 {
+func initialize_embedding(int input_dim, int output_dim, std float32) *tensor.tensor_2 {
     embedding := tensor.Randn(input_dim, output_dim)
     return tensor.ScalarMul(embedding, std)
 }
 
-func initialize_positional_embedding(max_seq_len int, hidden_dim int, std float32) *tensor.tensor_2 {
+func initialize_positional_embedding(int max_seq_len, int hidden_dim, std float32) *tensor.tensor_2 {
     return tensor.Zeros(max_seq_len, hidden_dim)
 }
 
@@ -171,7 +171,7 @@ func (m *gptmodel) save_checkpoint(path string) error {
     return nil
 }
 
-func load_checkpoint(path string) (*gptmodel, error) {
+func load_checkpoint(string path) (*gptmodel, error) {
     fmt.Printf("Loading checkpoint from %s\n", path)
     file, err := os.Open(path)
     if err != nil {

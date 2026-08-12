@@ -42,9 +42,9 @@ interface i_tensor_impl {
     version() -> i64
     bump_version() -> void
     requires_grad() -> bool
-    set_requires_grad(requires: bool) -> void
+    set_requires_grad(bool requires) -> void
     is_leaf() -> bool
-    set_is_leaf(leaf: bool) -> void
+    set_is_leaf(bool leaf) -> void
     grad_fn() -> func(tensor) -> []tensor
     set_grad_fn(fn: func(tensor) -> []tensor) -> void
     save_tensor(t: tensor) -> void

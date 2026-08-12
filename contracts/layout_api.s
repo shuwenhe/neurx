@@ -38,7 +38,7 @@ interface i_layout_optimization {
 interface i_layout_compatibility {
     compatible(layout1: LayoutType, layout2: LayoutType) -> bool
     common_layout(layout1: LayoutType, layout2: LayoutType) -> LayoutType
-    supports_layout(op_name: string, layout: LayoutType) -> bool
+    supports_layout(string op_name, layout: LayoutType) -> bool
 }
 interface i_blocked_layout {
     tile_size() -> []i64
@@ -48,6 +48,6 @@ interface i_blocked_layout {
 interface i_sparse_layout {
     sparse_format() -> string
     sparsity() -> f64
-    to_sparse(tensor: tensor, format: string) -> tensor
+    to_sparse(tensor: tensor, string format) -> tensor
 }
 
