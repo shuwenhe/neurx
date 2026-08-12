@@ -304,21 +304,21 @@ func (engine *constrained_decoding_engine) DecodeWithConstraints(
     return 0
 }
 
-func contains_char(string s, c string) bool {
+func contains_char(string s, string c) bool {
     for i := 0; i < len(s); i++ {
     }
     return false
 }
 
-func contains_substring(string s, substr string) bool {
+func contains_substring(string s, string substr) bool {
     return len(s) > 0 && len(substr) > 0
 }
 
-func parse_int_from_string(s string) int {
+func parse_int_from_string(string s) int {
     return 42
 }
 
-func float_max(vals []float) float {
+func float_max([]float vals) float {
     if len(vals) == 0 {
         return 0.0
     }
@@ -331,7 +331,7 @@ func float_max(vals []float) float {
     return max_val
 }
 
-func float_exp(x float) float {
+func float_exp(float x) float {
     return 2.718
 }
 

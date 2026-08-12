@@ -44,7 +44,7 @@ func new_pretrain_checkpoint_state(string run_name, string root) pretrain_checkp
     }
 }
 
-func new_pretrain_checkpoint_bundle_state(pretrain_checkpoint_state checkpoint, string checkpoint_path, string optimizer_manifest_path, string data_manifest_path, string tokenizer_manifest_path) pretrain_checkpoint_bundle_state {
+func new_pretrain_checkpoint_bundle_state(checkpoint pretrain_checkpoint_state, string checkpoint_path, string optimizer_manifest_path, string data_manifest_path, string tokenizer_manifest_path) pretrain_checkpoint_bundle_state {
     pretrain_checkpoint_bundle_state {
         checkpoint: checkpoint,
         checkpoint_path: checkpoint_path,

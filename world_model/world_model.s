@@ -41,7 +41,7 @@ func new_world_model() world_model_state {
     }
 }
 
-func world_model_update(wm world_model_state, string action, observation string) world_model_state {
+func world_model_update(wm world_model_state, string action, string observation) world_model_state {
     world_state next = wm.current
     next.step             = wm.current.step + 1
     next.last_action      = action
@@ -60,7 +60,7 @@ func world_model_update(wm world_model_state, string action, observation string)
     }
 }
 
-func world_model_predict(wm world_model_state, hypothetical_action string) world_state {
+func world_model_predict(wm world_model_state, string hypothetical_action) world_state {
     world_state predicted = wm.current
     predicted.step             = wm.current.step + 1
     predicted.last_action      = hypothetical_action
@@ -69,7 +69,7 @@ func world_model_predict(wm world_model_state, hypothetical_action string) world
     return predicted
 }
 
-func world_model_rollback(wm world_model_state, target_step int) world_model_state {
+func world_model_rollback(wm world_model_state, int target_step) world_model_state {
     for i = len(wm.history) - 1; i >= 0; i-- {
         if wm.history[i].step == target_step {
             return world_model_state{

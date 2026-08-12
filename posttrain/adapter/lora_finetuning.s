@@ -43,7 +43,7 @@ func (adapter *lora_adapter) initialize_lora_modules(model policy_model) {
     fmt.Printf("  Total trainable parameters: %d\n", adapter.trainable_params)
 }
 
-func (adapter *lora_adapter) create_lora_layer(name string, in_features int, out_features int) {
+func (adapter *lora_adapter) create_lora_layer(name string, int in_features, int out_features) {
     layer := &lora_layer{
         rank: adapter.config.rank,
         alpha: adapter.config.alpha,
@@ -57,7 +57,7 @@ func (adapter *lora_adapter) create_lora_layer(name string, in_features int, out
     adapter.trainable_params += int64(adapter.config.rank*in_features + out_features*adapter.config.rank)
 }
 
-func (adapter *lora_adapter) init_matrix(rows int, cols int, scale float64) [][]float64 {
+func (adapter *lora_adapter) init_matrix(rows int, int cols, scale float64) [][]float64 {
     matrix := make([][]float64, rows)
     for i := 0; i < rows; i++ {
         matrix[i] = make([]float64, cols)

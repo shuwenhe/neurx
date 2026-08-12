@@ -4,7 +4,7 @@ import "fmt"
 import "path/filepath"
 import "strings"
 import "core"
-func is_runnable_candidate(candidate string) bool {
+func is_runnable_candidate(string candidate) bool {
     if candidate == "" {
         return false
     }
@@ -22,7 +22,7 @@ func is_runnable_candidate(candidate string) bool {
     return (mode & 0111) != 0
 }
 
-func find_s_binary(root_dir string) string {
+func find_s_binary(string root_dir) string {
     var candidate string
     if s_bin := os.Getenv("S_BIN"); s_bin != "" {
         if is_runnable_candidate(s_bin) {

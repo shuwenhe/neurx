@@ -80,7 +80,7 @@ func (j json_value) as_object() map[string]json_value {
     return j.object_value
 }
 
-func (j json_value) contains(key string) bool {
+func (string j json_value) contains(key) bool {
     if j.type != 5 {
         return false
     }
@@ -89,7 +89,7 @@ func (j json_value) contains(key string) bool {
     return exists
 }
 
-func (j json_value) at(key string) json_value {
+func (string j json_value) at(key) json_value {
     if j.type != 5 {
         panic("JSON value is not an object")
     }
@@ -101,7 +101,7 @@ func (j json_value) at(key string) json_value {
     return val
 }
 
-func parse(text string) json_value {
+func parse(string text) json_value {
     parser := json_parser_create(text)
     result := parser_parse_value(&parser)
     parser_skip_whitespace(&parser)
@@ -111,7 +111,7 @@ func parse(text string) json_value {
     return result
 }
 
-func parse_file(path string) json_value {
+func parse_file(string path) json_value {
     content := readfile(path)
     if len(content) == 0 {
         panic("cannot read JSON file: " + path)
@@ -124,7 +124,7 @@ struct json_parser {
     int pos
 }
 
-func json_parser_create(text string) json_parser {
+func json_parser_create(string text) json_parser {
     return json_parser{text: text, pos: 0}
 }
 
@@ -349,7 +349,7 @@ func parser_parse_object(p *json_parser) map[string]json_value {
     }
 }
 
-func parse_float(s string) float {
+func parse_float(string s) float {
     f := 0.0
     negative := false
     dot_pos := -1

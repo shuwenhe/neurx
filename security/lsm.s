@@ -24,7 +24,7 @@ struct lsm_state {
     []string           audit_log
 }
 
-func new_lsm_state(enforcing bool) lsm_state {
+func new_lsm_state(bool enforcing) lsm_state {
     return lsm_state{
         contexts:  [],
         enforcing: enforcing,

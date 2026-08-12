@@ -28,7 +28,7 @@ func new_irq_state() irq_state {
     }
 }
 
-func request_irq(is irq_state, int irq_num, string name, int priority, handler string) irq_state {
+func request_irq(is irq_state, int irq_num, string name, int priority, string handler) irq_state {
     irq_descriptor d = irq_descriptor{
         irq_num:         irq_num,
         name:            name,
@@ -41,7 +41,7 @@ func request_irq(is irq_state, int irq_num, string name, int priority, handler s
     return is
 }
 
-func raise_irq(is irq_state, irq_num int) irq_state {
+func raise_irq(is irq_state, int irq_num) irq_state {
     int i = 0
     while i < len(is.descriptors) {
         if is.descriptors[i].irq_num == irq_num && is.descriptors[i].enabled {

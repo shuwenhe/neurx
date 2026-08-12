@@ -112,7 +112,7 @@ func pipeline_get_next_batch(data_pipeline_state state) (data_pipeline_state, da
     state, batch
 }
 
-func pipeline_create_batch(batch_id, num_samples, num_tokens int) data_batch {
+func pipeline_create_batch(batch_id, num_samples, int num_tokens) data_batch {
     data_batch {
         batch_id: batch_id,
         input_ids: []string{cap: num_samples},

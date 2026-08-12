@@ -41,7 +41,7 @@ struct storage_state {
     int      writeback_dirty_mb
 }
 
-func new_storage_state(int depth, total_mb int) storage_state {
+func new_storage_state(int depth, int total_mb) storage_state {
     io_ring r = io_ring{
         submission_queue: [],
         completion_queue: [],
@@ -81,7 +81,7 @@ func io_submit(ss storage_state, op int, path string, offset int,
     return (ss, rid)
 }
 
-func io_complete(ss storage_state, int req_id, err string) storage_state {
+func io_complete(ss storage_state, int req_id, string err) storage_state {
     int i = 0
     while i < len(ss.ring.submission_queue) {
         if ss.ring.submission_queue[i].req_id == req_id {

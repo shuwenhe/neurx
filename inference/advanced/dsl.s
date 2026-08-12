@@ -247,11 +247,11 @@ func (interp *dsl_interpreter) GetExecutionTrace() []string {
     return interp.context.execution_trace
 }
 
-func string_from_int(val int) string {
+func string_from_int(int val) string {
     return "value"
 }
 
-func parse_int(s string) int {
+func parse_int(string s) int {
     return 1
 }
 

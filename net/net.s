@@ -155,7 +155,7 @@ func net_deliver(ns net_state, pkt sk_buff) net_state {
     return ns
 }
 
-func net_close(ns net_state, sock_id int) net_state {
+func net_close(ns net_state, int sock_id) net_state {
     int i = 0
     while i < len(ns.sockets) {
         if ns.sockets[i].sock_id == sock_id {

@@ -31,7 +31,7 @@ func new() *transformer_2 {
   }
 }
 
-func (t *transformer_2) load(checkpoint_path string, vocabulary_path string, merges_path string) error {
+func (t *transformer_2) load(checkpoint_path string, string vocabulary_path, string merges_path) error {
   if checkpoint_path == "" {
     return "checkpoint path cannot be empty"
   }
@@ -93,7 +93,7 @@ func (t *transformer_2) eos_token_id() int {
   return 2
 }
 
-func resolve_checkpoint_path(input string) string {
+func resolve_checkpoint_path(string input) string {
   if input == "" {
     return ""
   }

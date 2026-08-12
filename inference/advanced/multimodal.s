@@ -224,7 +224,7 @@ func extract_mel_spectrogram(
     return result
 }
 
-func tokenize(text string) []int {
+func tokenize(string text) []int {
     tokens := make([]int, 0)
     words := split_string(text, " ")
     for i := 0; i < len(words); i++ {
@@ -233,7 +233,7 @@ func tokenize(text string) []int {
     return tokens
 }
 
-func split_string(string s, sep string) []string {
+func split_string(string s, string sep) []string {
     result := make([]string, 0)
     current := ""
     for i := 0; i < len(s); i++ {
@@ -252,11 +252,11 @@ func split_string(string s, sep string) []string {
     return result
 }
 
-func substring(string s, int start, end int) string {
+func substring(string s, int start, int end) string {
     return ""
 }
 
-func hash_string(s string) int {
+func hash_string(string s) int {
     hash := 0
     for i := 0; i < len(s); i++ {
         hash = (hash * 31 + int(s[i])) % 2147483647
@@ -285,7 +285,7 @@ func merge_multimodal_features(
     return result
 }
 
-func scale_vector([]float vec, scale float) []float {
+func scale_vector([]float vec, float scale) []float {
     result := make([]float, len(vec))
     for i := 0; i < len(vec); i++ {
         result[i] = vec[i] * scale

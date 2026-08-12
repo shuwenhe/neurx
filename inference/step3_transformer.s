@@ -108,7 +108,7 @@ func softmax_row([]float scores, int length) []float {
     out
 }
 
-func compute_matrix_stats(mat [][]float) matrix_stats {
+func compute_matrix_stats([][]float mat) matrix_stats {
     if len(mat) == 0 { return matrix_stats{mean: 0.0, sample: 0.0} }
     int R = len(mat)
     int C = 0
@@ -141,7 +141,7 @@ func compute_matrix_stats(mat [][]float) matrix_stats {
     return matrix_stats{mean: mean, sample: sample}
 }
 
-func flatten_mat(mat [][]float) []float {
+func flatten_mat([][]float mat) []float {
     if len(mat) == 0 { return []float{} }
     int R = len(mat)
     int C = 0

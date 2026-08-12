@@ -33,7 +33,7 @@ type multi_task_learner struct {
     uncertainty_weights     map[int]float64
 }
 
-func (mtl *multi_task_learner) register_task(task_name string, data_size int, weight float64) int {
+func (mtl *multi_task_learner) register_task(task_name string, int data_size, weight float64) int {
     task_id := len(mtl.tasks)
     task := task{
         name: task_name,
@@ -60,7 +60,7 @@ func (mtl *multi_task_learner) shared_forward(input []int) []float64 {
     return hidden
 }
 
-func (mtl *multi_task_learner) task_forward(shared_hidden []float64, task_id int) []float64 {
+func (mtl *multi_task_learner) task_forward(shared_hidden []float64, int task_id) []float64 {
     output := make([]float64, mtl.config.task_specific_size)
     for i := 0; i < mtl.config.task_specific_size; i++ {
         sum := 0.0
@@ -93,7 +93,7 @@ func (mtl *multi_task_learner) compute_multi_task_loss(
     return losses
 }
 
-func (mtl *multi_task_learner) compute_task_loss(output []float64, target []int) float64 {
+func (mtl *multi_task_learner) compute_task_loss(output []float64, []int target) float64 {
     loss := 0.0
     max_out := output[0]
     for _, o := range output {

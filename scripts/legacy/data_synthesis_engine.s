@@ -77,7 +77,7 @@ func (engine *data_synthesis_engine) generate_synthetic_examples() {
     }
 }
 
-func (engine *data_synthesis_engine) generate_prompt(task string, index int) string {
+func (engine *data_synthesis_engine) generate_prompt(task string, int index) string {
     prompts := map[string][]string{
         "qa": {
             "What is the capital of France?",
@@ -129,7 +129,7 @@ func (engine *data_synthesis_engine) generate_prompt(task string, index int) str
     return fmt.Sprintf("task %s example %d", task, index)
 }
 
-func (engine *data_synthesis_engine) generate_response(prompt string, task string) string {
+func (engine *data_synthesis_engine) generate_response(prompt string, string task) string {
     responses := map[string]string{
         "qa": "The answer is based on knowledge about " + prompt,
         "writing": "Here's a thoughtful response addressing the prompt with creativity and clarity.",
@@ -144,7 +144,7 @@ func (engine *data_synthesis_engine) generate_response(prompt string, task strin
     return "Generated response for the given prompt"
 }
 
-func (engine *data_synthesis_engine) evaluate_quality(prompt string, response string) float64 {
+func (engine *data_synthesis_engine) evaluate_quality(prompt string, string response) float64 {
     length_score := math.Min(float64(len(response)) / 500.0, 1.0)
     coherence_score := 0.8
     relevance_score := 0.85
@@ -159,7 +159,7 @@ func (engine *data_synthesis_engine) evaluate_quality(prompt string, response st
     return quality
 }
 
-func (engine *data_synthesis_engine) calculate_diversity(prompt string, response string) float64 {
+func (engine *data_synthesis_engine) calculate_diversity(prompt string, string response) float64 {
     unique_tokens := make(map[string]bool)
     for i := 0; i < len(response); i++ {
         if i+3 < len(response) {

@@ -124,7 +124,7 @@ func load_config_from_env() {
 	}
 }
 
-func load_config_from_file(path string) error {
+func load_config_from_file(string path) error {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
@@ -136,7 +136,7 @@ func load_config_from_file(path string) error {
 	return nil
 }
 
-func save_config_to_file(path string) error {
+func save_config_to_file(string path) error {
 	data, err := json.MarshalIndent(g_config, "", "  ")
 	if err != nil {
 		return err
@@ -175,7 +175,7 @@ func initialize_training() error {
 	return nil
 }
 
-func load_checkpoint(path string) error {
+func load_checkpoint(string path) error {
 	log_info("Loading checkpoint: " + path)
 	stat, err := os.Stat(path)
 	if err != nil {
@@ -320,17 +320,17 @@ func run_training() error {
 	return nil
 }
 
-func log_info(msg string) {
+func log_info(string msg) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] INFO: %s\n", timestamp, msg)
 }
 
-func log_warn(msg string) {
+func log_warn(string msg) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] WARN: %s\n", timestamp, msg)
 }
 
-func log_error(msg string) {
+func log_error(string msg) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] ERROR: %s\n", timestamp, msg)
 }

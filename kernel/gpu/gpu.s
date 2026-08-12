@@ -141,7 +141,7 @@ func gpu_record_fence(gs gpu_state, int stream_id) (gpu_state, int) {
     return (gs, fid)
 }
 
-func gpu_complete_job(gs gpu_state, job_id int) gpu_state {
+func gpu_complete_job(gs gpu_state, int job_id) gpu_state {
     int i = 0
     while i < len(gs.jobs) {
         if gs.jobs[i].job_id == job_id {
@@ -169,7 +169,7 @@ func gpu_complete_job(gs gpu_state, job_id int) gpu_state {
     return gs
 }
 
-func gpu_fence_query(gs gpu_state, fence_id int) bool {
+func gpu_fence_query(gs gpu_state, int fence_id) bool {
     int i = 0
     while i < len(gs.fences) {
         if gs.fences[i].fence_id == fence_id {

@@ -409,7 +409,7 @@ func i64_to_string(i64 n) string {
     ""
 }
 
-func string(ch: u8) string {
+func string(u8 ch:) string {
     ""
 }
 pub func main() i32 {

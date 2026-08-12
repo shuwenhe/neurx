@@ -91,7 +91,7 @@ func (trainer *sft_trainer) tokenize(text string) []int {
     return tokens
 }
 
-func (trainer *sft_trainer) causal_language_modeling_loss(logits [][]float64, labels []int) float64 {
+func (trainer *sft_trainer) causal_language_modeling_loss(logits [][]float64, []int labels) float64 {
     loss := 0.0
     for i := 0; i < len(labels)-1; i++ {
         target_token := labels[i+1]
@@ -133,7 +133,7 @@ func (trainer *sft_trainer) create_batch(examples []instruction_example) ([][]in
     return inputs, labels
 }
 
-func (trainer *sft_trainer) train_step(batch_inputs [][]int, batch_labels [][]int) float64 {
+func (trainer *sft_trainer) train_step(batch_inputs [][]int, [][]int batch_labels) float64 {
     total_loss := 0.0
     for i := 0; i < len(batch_inputs); i++ {
         logits := trainer.model_forward(batch_inputs[i])
@@ -197,7 +197,7 @@ func (trainer *sft_trainer) get_learning_rate() float64 {
     }
 }
 
-func (trainer *sft_trainer) calculate_bleu(reference []int, generated []int, n_gram int) float64 {
+func (trainer *sft_trainer) calculate_bleu(reference []int, []int generated, int n_gram) float64 {
     if len(generated) == 0 {
         return 0.0
     }
@@ -226,7 +226,7 @@ func (trainer *sft_trainer) calculate_bleu(reference []int, generated []int, n_g
     return float64(matches) / float64(total)
 }
 
-func (trainer *sft_trainer) calculate_rouge_l(reference []int, generated []int) float64 {
+func (trainer *sft_trainer) calculate_rouge_l(reference []int, []int generated) float64 {
     if len(reference) == 0 || len(generated) == 0 {
         return 0.0
     }
@@ -240,7 +240,7 @@ func (trainer *sft_trainer) calculate_rouge_l(reference []int, generated []int) 
     return f1
 }
 
-func (trainer *sft_trainer) compute_lcs(a []int, b []int) int {
+func (trainer *sft_trainer) compute_lcs(a []int, []int b) int {
     dp := make([][]int, len(a)+1)
     for i := range dp {
         dp[i] = make([]int, len(b)+1)

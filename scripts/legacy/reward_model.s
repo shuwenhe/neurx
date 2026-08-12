@@ -114,7 +114,7 @@ func (trainer *reward_model_trainer) embed_tokens(tokens []int) []float64 {
     return embeddings
 }
 
-func (trainer *reward_model_trainer) bradley_terry_loss(reward_a float64, reward_b float64, preference int) float64 {
+func (trainer *reward_model_trainer) bradley_terry_loss(reward_a float64, reward_b float64, int preference) float64 {
     if preference == 0 {
         diff := reward_a - reward_b
         return -trainer.log_sigmoid(diff)
@@ -203,7 +203,7 @@ func (trainer *reward_model_trainer) evaluate(dataset preference_dataset) traini
     return metric
 }
 
-func (trainer *reward_model_trainer) calculate_calibration_error(logits []float64, labels []int) float64 {
+func (trainer *reward_model_trainer) calculate_calibration_error(logits []float64, []int labels) float64 {
     ece := 0.0
     num_bins := 10
     bin_size := 1.0 / float64(num_bins)
@@ -232,7 +232,7 @@ func (trainer *reward_model_trainer) calculate_calibration_error(logits []float6
     return ece
 }
 
-func (trainer *reward_model_trainer) calculate_auc(logits []float64, labels []int) float64 {
+func (trainer *reward_model_trainer) calculate_auc(logits []float64, []int labels) float64 {
     pairs := 0
     correct := 0
     for i := range logits {

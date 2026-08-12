@@ -253,7 +253,7 @@ func format_string(format data_format) string {
     }
 }
 
-func process_dataset(input_path string) error {
+func process_dataset(string input_path) error {
     orchestrator, err := new_data_orchestrator(input_path)
     if err != nil {
         return err
@@ -281,7 +281,7 @@ func split_dataset(string input_path, train_ratio float32, val_ratio float32) er
     return orchestrator.split(train_ratio, val_ratio)
 }
 
-func convert_data_format(string input_path, output_format string) error {
+func convert_data_format(string input_path, string output_format) error {
     orchestrator, err := new_data_orchestrator(input_path)
     if err != nil {
         return err
@@ -305,7 +305,7 @@ func convert_data_format(string input_path, output_format string) error {
     return orchestrator.convert(format)
 }
 
-func clean_dataset(input_path string) error {
+func clean_dataset(string input_path) error {
     return process_dataset(input_path)
 }
 

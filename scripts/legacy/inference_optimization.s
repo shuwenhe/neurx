@@ -75,7 +75,7 @@ func (engine *inference_engine) initialize_kv_cache() {
     fmt.Printf("  KV cache size: %.2f GB\n", cache_memory)
 }
 
-func (engine *inference_engine) update_kv_cache(layer_idx int, tokens []int, values []float64) {
+func (engine *inference_engine) update_kv_cache(layer_idx int, []int tokens, values []float64) {
     cache_idx := layer_idx * engine.config.max_batch_size * engine.config.max_seq_length
     for i, v := range values {
         if cache_idx+i < len(engine.kv_cache.value_cache) {

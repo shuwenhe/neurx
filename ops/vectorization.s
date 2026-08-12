@@ -154,7 +154,7 @@ func element_wise_div([]float A, []float B, float epsilon) []float {
     return result
 }
 
-func element_wise_apply([]float A, func_ptr: func(float) float) []float {
+func element_wise_apply([]float A, float func_ptr: func(float)) []float {
     var []float result = []float(len(A))
     var i = 0
     while i < len(A) {

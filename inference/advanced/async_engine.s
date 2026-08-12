@@ -206,7 +206,7 @@ func current_timestamp() int64 {
     return time.Now().Unix() * 1000
 }
 
-func min(int a, b int) int {
+func min(int a, int b) int {
     if a < b {
         return a
     }
@@ -249,7 +249,7 @@ func remove_scheduled_from_pending(
     return result
 }
 
-func remove_at_index(arr []inference_request, index int) []inference_request {
+func remove_at_index(arr []inference_request, int index) []inference_request {
     result := make([]inference_request, 0)
     for i := 0; i < len(arr); i++ {
         if i != index {

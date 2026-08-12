@@ -218,7 +218,7 @@ func save_gradient_checkpoint(
     checkpoint
 }
 
-func restore_gradient_checkpoint(gradient_checkpoint checkpoint) float* {
+func restore_gradient_checkpoint(checkpoint gradient_checkpoint) float* {
     float* restored = alloc(float, checkpoint.checkpoint_size)
     int i = 0
     while i < checkpoint.checkpoint_size {

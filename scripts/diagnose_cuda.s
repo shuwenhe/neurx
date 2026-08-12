@@ -22,7 +22,7 @@ func check_nvidia_smi() int {
     return count
 }
 
-func check_cuda_binary(bin string) bool {
+func check_cuda_binary(string bin) bool {
     stat, err := os.Stat(bin)
     if err != nil || stat.IsDir() {
         io.Println("   ❌ Binary not found: " + bin)
@@ -32,7 +32,7 @@ func check_cuda_binary(bin string) bool {
     return true
 }
 
-func check_required_files(files []string) {
+func check_required_files([]string files) {
     for _, file := range files {
         stat, err := os.Stat(file)
         if err == nil && !stat.IsDir() {
@@ -43,7 +43,7 @@ func check_required_files(files []string) {
     }
 }
 
-func test_cuda_binary(bin string) {
+func test_cuda_binary(string bin) {
     cmd := exec.command("timeout", "30s", bin)
     cmd.Env = append(os.Environ(),
         "NEURX_PRETRAIN_STEPS=1",

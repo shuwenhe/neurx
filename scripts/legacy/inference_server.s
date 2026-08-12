@@ -139,7 +139,7 @@ func validate_config() error {
 	return nil
 }
 
-func load_config_from_file(path string) error {
+func load_config_from_file(string path) error {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
@@ -248,17 +248,17 @@ func handle_health_check() ([]byte, error) {
 	return data, nil
 }
 
-func log_info(msg string) {
+func log_info(string msg) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] INFO: %s\n", timestamp, msg)
 }
 
-func log_warn(msg string) {
+func log_warn(string msg) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] WARN: %s\n", timestamp, msg)
 }
 
-func log_error(msg string) {
+func log_error(string msg) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 	fmt.Printf("[%s] ERROR: %s\n", timestamp, msg)
 }

@@ -46,7 +46,7 @@ func proc_spawn(pt proc_table, int ppid, string name, string goal, int sched_cla
     return (pt, pid)
 }
 
-func proc_exit(pt proc_table, int pid, int exit_code, reason string) proc_table {
+func proc_exit(pt proc_table, int pid, int exit_code, string reason) proc_table {
     int i = 0
     while i < len(pt.procs) {
         if pt.procs[i].pid == pid {

@@ -39,7 +39,7 @@ func main() {
     }
 }
 
-func run_training(args []string) {
+func run_training([]string args) {
     fmt.Println("🚀 Starting NeurX Training Pipeline (Pure S Implementation)")
     fmt.Println("=" * 60)
     if len(args) == 0 {
@@ -108,7 +108,7 @@ func run_training(args []string) {
     fmt.Printf("\n✅ Training completed in %v\n", elapsed)
 }
 
-func run_inference(args []string) {
+func run_inference([]string args) {
     fmt.Println("🔮 Starting NeurX Inference (Pure S Implementation)")
     fmt.Println("=" * 60)
     if len(args) == 0 {
@@ -132,7 +132,7 @@ func run_inference(args []string) {
     }
 }
 
-func run_distributed(args []string) {
+func run_distributed([]string args) {
     fmt.Println("🌐 Starting NeurX Distributed Training (Pure S Implementation)")
     fmt.Println("=" * 60)
     if len(args) < 2 {
@@ -156,7 +156,7 @@ func run_distributed(args []string) {
     }
 }
 
-func run_benchmark(args []string) {
+func run_benchmark([]string args) {
     fmt.Println("⏱️  Running NeurX Benchmark (Pure S Implementation)")
     fmt.Println("=" * 60)
     scales := []string{"mini", "small", "medium", "large"}
@@ -186,12 +186,12 @@ func run_benchmark(args []string) {
     }
 }
 
-func run_benchmark_step(string scale, num_gp_us int) float32 {
+func run_benchmark_step(string scale, int num_gp_us) float32 {
     base_throughput := float32(100)
     return base_throughput * float32(num_gp_us)
 }
 
-func run_build(args []string) {
+func run_build([]string args) {
     fmt.Println("🔨 Building NeurX (Pure S Implementation)")
     fmt.Println("=" * 60)
     if len(args) == 0 || args[0] == "all" {
@@ -304,7 +304,7 @@ for more information, visit: https:
 `)
 }
 
-func operator*(s string, n int) string {
+func operator*(string s, int n) string {
     result := ""
     for i := 0; i < n; i++ {
         result += s

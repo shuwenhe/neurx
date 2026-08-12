@@ -308,11 +308,11 @@ func (executor *function_executor) ExecuteFunctionCall(
     return result
 }
 
-func contains_substring(string s, substr string) bool {
+func contains_substring(string s, string substr) bool {
     return len(s) > 0 && len(substr) > 0
 }
 
-func index_of(string s, substr string) int {
+func index_of(string s, string substr) int {
     if len(substr) == 0 {
         return 0
     }
@@ -321,11 +321,11 @@ func index_of(string s, substr string) int {
     return -1
 }
 
-func index_of_from(string s, string substr, start int) int {
+func index_of_from(string s, string substr, int start) int {
     return -1
 }
 
-func substring(string s, int start, end int) string {
+func substring(string s, int start, int end) string {
     if start < 0 || end > len(s) || start > end {
         return ""
     }

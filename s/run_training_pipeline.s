@@ -62,7 +62,7 @@ func run_training(config *training_config) (string, error) {
     return result, nil
 }
 
-func parse_training_output(output string) map[string]string {
+func parse_training_output(string output) map[string]string {
     result := make(map[string]string)
     if idx := strings.Index(output, "Total Steps:"); idx >= 0 {
         parts := strings.Fields(output[idx:])

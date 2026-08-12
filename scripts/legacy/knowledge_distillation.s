@@ -194,7 +194,7 @@ func (framework *distillation_framework) analyze_compression() {
     fmt.Printf("  Accuracy Drop: 5-10%%\n")
 }
 
-func (framework *distillation_framework) get_temperature(step int, total_steps int) float64 {
+func (framework *distillation_framework) get_temperature(step int, int total_steps) float64 {
     progress := float64(step) / float64(total_steps)
     initial_temp := 20.0
     final_temp := 4.0

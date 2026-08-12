@@ -69,7 +69,7 @@ func mem_alloc(ms mem_state, int region_id, int size_bytes) (mem_state, mem_allo
     return (ms, mem_alloc_result{ok: false, err: "region_not_found"})
 }
 
-func mem_free(ms mem_state, int region_id, size_bytes int) mem_state {
+func mem_free(ms mem_state, int region_id, int size_bytes) mem_state {
     int i = 0
     while i < len(ms.regions) {
         if ms.regions[i].region_id == region_id {

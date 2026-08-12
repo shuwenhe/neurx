@@ -14,7 +14,7 @@ struct multi_node_config_2 {
     hosts []string
 }
 
-func parse_host_file(hostfile string) []string {
+func parse_host_file(string hostfile) []string {
     content, _ := os.ReadFile(hostfile)
     lines := strings.Split(string(content), "\n")
     hosts := []string{}
@@ -27,7 +27,7 @@ func parse_host_file(hostfile string) []string {
     return hosts
 }
 
-func get_gpu_count(host string) int {
+func get_gpu_count(string host) int {
     cmd := exec.command("ssh", host, "nvidia-smi -L | wc -l")
     output, _ := cmd.Output()
     count := 0

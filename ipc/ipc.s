@@ -39,7 +39,7 @@ func msgget(is ipc_state, string name, int max_depth) (ipc_state, int) {
     return (is, qid)
 }
 
-func msgsnd(is ipc_state, int qid, int from_pid, int to_pid, string msg_type, payload string) ipc_state {
+func msgsnd(is ipc_state, int qid, int from_pid, int to_pid, string msg_type, string payload) ipc_state {
     int i = 0
     while i < len(is.queues) {
         if is.queues[i].qid == qid {
@@ -125,7 +125,7 @@ func sem_down(ss sem_state, int sem_id) (sem_state, bool) {
     return (ss, false)
 }
 
-func sem_up(ss sem_state, sem_id int) sem_state {
+func sem_up(ss sem_state, int sem_id) sem_state {
     int i = 0
     while i < len(ss.sems) {
         if ss.sems[i].sem_id == sem_id {

@@ -24,7 +24,7 @@ struct transformer_output {
     hidden_states [][]f64
 }
 
-func transformer_new(i64 vocab_size, i64 hidden_size, i64 num_layers, i64 num_heads, max_seq_len i64) simple_transformer {
+func transformer_new(i64 vocab_size, i64 hidden_size, i64 num_layers, i64 num_heads, i64 max_seq_len) simple_transformer {
     t := simple_transformer{
         vocab_size: vocab_size,
         hidden_size: hidden_size,
@@ -236,11 +236,11 @@ func random_normal() f64 {
     return r * cos_approx(2.0 * 3.14159265 * u2)
 }
 
-func random_int_range(i64 min, max i64) i64 {
+func random_int_range(i64 min, i64 max) i64 {
     return min + ((1103515245*min + 12345) % (max - min))
 }
 
-func sqrt_approx(x f64) f64 {
+func sqrt_approx(f64 x) f64 {
     if x < 0.0 {
         return 0.0
     }
@@ -254,14 +254,14 @@ func sqrt_approx(x f64) f64 {
     return result
 }
 
-func pow_approx(f64 x, exp f64) f64 {
+func pow_approx(f64 x, f64 exp) f64 {
     if x <= 0.0 {
         return 1.0
     }
     return exp_approx(exp * ln_approx(x))
 }
 
-func exp_approx(x f64) f64 {
+func exp_approx(f64 x) f64 {
     if x > 100.0 {
         return 1e10
     }
@@ -277,7 +277,7 @@ func exp_approx(x f64) f64 {
     return result
 }
 
-func ln_approx(x f64) f64 {
+func ln_approx(f64 x) f64 {
     if x <= 0.0 {
         return -100.0
     }
@@ -309,7 +309,7 @@ func ln_approx(x f64) f64 {
     }
 }
 
-func cos_approx(x f64) f64 {
+func cos_approx(f64 x) f64 {
     x = x - 2.0*3.14159265*i64(x/(2.0*3.14159265))
     result := 1.0
     term := 1.0
@@ -323,7 +323,7 @@ func cos_approx(x f64) f64 {
     return result
 }
 
-func sin_approx(x f64) f64 {
+func sin_approx(f64 x) f64 {
     x = x - 2.0*3.14159265*i64(x/(2.0*3.14159265))
     result := x
     term := x

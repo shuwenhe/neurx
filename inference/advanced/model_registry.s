@@ -61,7 +61,7 @@ func RegisterModel(
     return true
 }
 
-func GetArchitectureConfig(arch_name string) architecture_config {
+func GetArchitectureConfig(string arch_name) architecture_config {
     if config, ok := global_registry.configs[arch_name]; ok {
         return config
     }

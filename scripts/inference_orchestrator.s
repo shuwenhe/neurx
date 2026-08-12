@@ -268,7 +268,7 @@ func backend_string(backend InferenceBackend) string {
     }
 }
 
-func run_inference_server(model_path string) error {
+func run_inference_server(string model_path) error {
     orchestrator, err := new_inference_orchestrator(model_path)
     if err != nil {
         return err
@@ -279,7 +279,7 @@ func run_inference_server(model_path string) error {
     return orchestrator.start_server()
 }
 
-func run_interactive_inference(model_path string) error {
+func run_interactive_inference(string model_path) error {
     orchestrator, err := new_inference_orchestrator(model_path)
     if err != nil {
         return err
@@ -290,7 +290,7 @@ func run_interactive_inference(model_path string) error {
     return orchestrator.interactive()
 }
 
-func run_chat_interface(model_path string) error {
+func run_chat_interface(string model_path) error {
     orchestrator, err := new_inference_orchestrator(model_path)
     if err != nil {
         return err
@@ -301,7 +301,7 @@ func run_chat_interface(model_path string) error {
     return orchestrator.chat()
 }
 
-func run_inference_benchmark(model_path string) error {
+func run_inference_benchmark(string model_path) error {
     orchestrator, err := new_inference_orchestrator(model_path)
     if err != nil {
         return err

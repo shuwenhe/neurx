@@ -378,7 +378,7 @@ func find_source_files(string dir) ([]string, error) {
     return files, nil
 }
 
-func extract_text(line string) string {
+func extract_text(string line) string {
     if !strings.Contains(line, "\"text\"") {
         return ""
     }
@@ -399,20 +399,20 @@ func extract_text(line string) string {
     return rest[:endIdx]
 }
 
-func normalize_text(text string) string {
+func normalize_text(string text) string {
     text = strings.TrimSpace(text)
     text = strings.ToLower(text)
     parts := strings.Fields(text)
     return strings.Join(parts, " ")
 }
 
-func hash_key(text string) string {
+func hash_key(string text) string {
     h := sha256.New()
     h.Write([]byte(text))
     return hex.EncodeToString(h.Sum(nil))
 }
 
-func create_record(text string) string {
+func create_record(string text) string {
     tokens := len(text) / 4
     if tokens < 1 {
         tokens = 1
@@ -425,11 +425,11 @@ func create_record(text string) string {
     return string(data)
 }
 
-func format_shard_id(index int) string {
+func format_shard_id(int index) string {
     return fmt.Sprintf("shard_%05d", index)
 }
 
-func format_shard_filename(string dir, index int) string {
+func format_shard_filename(string dir, int index) string {
     return filepath.Join(dir, format_shard_id(index)+".jsonl")
 }
 
@@ -491,18 +491,18 @@ func write_empty_manifest(config clean_config) error {
     return ioutil.WriteFile(config.ManifestFile, data, 0644)
 }
 
-func ensure_dir(dir string) error {
+func ensure_dir(string dir) error {
     return os.MkdirAll(dir, 0755)
 }
 
-func get_env(key, default_val string) string {
+func get_env(key, string default_val) string {
     if val := os.Getenv(key); val != "" {
         return val
     }
     return default_val
 }
 
-func get_env_int(string key, default_val int) int {
+func get_env_int(string key, int default_val) int {
     if val := os.Getenv(key); val != "" {
         var num int
         fmt.Sscanf(val, "%d", &num)

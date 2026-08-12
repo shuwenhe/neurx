@@ -266,7 +266,7 @@ func (recovery *recovery_manager) handle_node_failure() {
     fmt.Println("✓ Node recovery complete")
 }
 
-func new_checkpoint_manager(checkpoint_dir string) *checkpoint_manager {
+func new_checkpoint_manager(string checkpoint_dir) *checkpoint_manager {
     return &checkpoint_manager{
         checkpoint_dir:    checkpoint_dir,
         checkpoints:       make(map[string]checkpoint),

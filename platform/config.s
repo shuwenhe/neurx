@@ -24,7 +24,7 @@ struct int_parse_result {
     platform_error_state error
 }
 
-func make_bool_parse_result(bool value, bool ok, platform_error_state error) bool_parse_result {
+func make_bool_parse_result(bool value, bool ok, error platform_error_state) bool_parse_result {
     bool_parse_result {
         value: value,
         ok: ok,
@@ -32,7 +32,7 @@ func make_bool_parse_result(bool value, bool ok, platform_error_state error) boo
     }
 }
 
-func make_int_parse_result(int value, bool has_value, bool ok, platform_error_state error) int_parse_result {
+func make_int_parse_result(int value, bool has_value, bool ok, error platform_error_state) int_parse_result {
     int_parse_result {
         value: value,
         has_value: has_value,
@@ -41,7 +41,7 @@ func make_int_parse_result(int value, bool has_value, bool ok, platform_error_st
     }
 }
 
-func make_runtime_config_parse_result(runtime_config cfg, bool ok, platform_error_state error) runtime_config_parse_result {
+func make_runtime_config_parse_result(runtime_config cfg, bool ok, error platform_error_state) runtime_config_parse_result {
     runtime_config_parse_result {
         config: cfg,
         ok: ok,

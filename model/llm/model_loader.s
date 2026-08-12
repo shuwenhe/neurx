@@ -110,7 +110,7 @@ func (m *gptmodel) embed_tokens(token_ids *tensor.tensor_2) *tensor.tensor_2 {
     return embeddings
 }
 
-func (m *gptmodel) add_positional_embedding(x *tensor.tensor_2, seq_len int) *tensor.tensor_2 {
+func (m *gptmodel) add_positional_embedding(x *tensor.tensor_2, int seq_len) *tensor.tensor_2 {
     batch_size := x.Shape[0]
     for b := 0; b < batch_size; b++ {
         for t := 0; t < seq_len; t++ {

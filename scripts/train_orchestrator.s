@@ -304,7 +304,7 @@ func scale_string(scale training_scale) string {
     }
 }
 
-func run_foundation_model_training(string scale, num_gpus int) error {
+func run_foundation_model_training(string scale, int num_gpus) error {
     var scale_enum training_scale
     switch to_lower(scale) {
     case "mini":
@@ -348,15 +348,15 @@ func start_quick_training() error {
     return run_foundation_model_training("mini", 1)
 }
 
-func launch_70b_training(num_gpus int) error {
+func launch_70b_training(int num_gpus) error {
     return run_foundation_model_training("xl", num_gpus)
 }
 
-func launch_7b_training(num_gpus int) error {
+func launch_7b_training(int num_gpus) error {
     return run_foundation_model_training("large", num_gpus)
 }
 
-func launch_1t_training(num_gpus int) error {
+func launch_1t_training(int num_gpus) error {
     orchestrator, err := new_train_orchestrator(training_scale.OneT, num_gpus)
     if err != nil {
         return err

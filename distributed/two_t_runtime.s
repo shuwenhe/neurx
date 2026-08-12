@@ -1299,7 +1299,7 @@ func two_t_checkpoint_manifest_path(two_t_runtime_state state) string {
     root + "/manifest.txt"
 }
 
-func two_t_checkpoint_meta_path(two_t_checkpoint_runtime_state checkpoint, two_t_runtime_state state) string {
+func two_t_checkpoint_meta_path(checkpoint two_t_checkpoint_runtime_state, two_t_runtime_state state) string {
     string root = two_t_checkpoint_rank_dir(state)
     if root == "" {
         return ""

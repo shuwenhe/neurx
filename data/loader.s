@@ -12,7 +12,7 @@ struct data_loader {
     current_idx i64
 }
 
-func data_loader_new(data []batch, i64 batch_size, shuffle bool) data_loader {
+func data_loader_new(data []batch, i64 batch_size, bool shuffle) data_loader {
     return data_loader{
         data: data,
         batch_size: batch_size,
@@ -21,7 +21,7 @@ func data_loader_new(data []batch, i64 batch_size, shuffle bool) data_loader {
     }
 }
 
-func create_synthetic_dataset(i64 num_samples, i64 seq_len, i64 vocab_size, num_classes i64) []batch {
+func create_synthetic_dataset(i64 num_samples, i64 seq_len, i64 vocab_size, i64 num_classes) []batch {
     batches := make([]batch, 0)
     for b := 0; b < num_samples; b++ {
         batch_item := batch{
@@ -103,7 +103,7 @@ struct random_sampler {
     indices []i64
 }
 
-func random_sampler_new(data_size i64) random_sampler {
+func random_sampler_new(i64 data_size) random_sampler {
     indices := make([]i64, data_size)
     for i := 0; i < data_size; i++ {
         indices[i] = i64(i)
@@ -140,7 +140,7 @@ struct distributed_sampler {
     indices []i64
 }
 
-func distributed_sampler_new(i64 data_size, i64 rank, world_size i64) distributed_sampler {
+func distributed_sampler_new(i64 data_size, i64 rank, i64 world_size) distributed_sampler {
     indices := make([]i64, 0)
     samples_per_rank := data_size / world_size
     for i := 0; i < samples_per_rank; i++ {
@@ -161,7 +161,7 @@ func distributed_sampler_len(sampler distributed_sampler) i64 {
     return i64(len(sampler.indices))
 }
 
-func distributed_sampler_get(sampler distributed_sampler, idx i64) i64 {
+func distributed_sampler_get(sampler distributed_sampler, i64 idx) i64 {
     if idx < 0 || idx >= i64(len(sampler.indices)) {
         return 0
     }

@@ -12,7 +12,7 @@ struct command {
     handler     func([]string) error
 }
 
-func cmd_train(args []string) error {
+func cmd_train([]string args) error {
     if len(args) == 0 {
         fmt.Println("Usage: neurx train <scale> [num_gpus]")
         fmt.Println("Scales: mini, small, medium, large, xl")
@@ -28,13 +28,13 @@ func cmd_train(args []string) error {
     return scripts.run_foundation_model_training(scale, num_gpus)
 }
 
-func cmd_quick_start(args []string) error {
+func cmd_quick_start([]string args) error {
     logger := scripts.new_logger("CLI")
     logger.log("Starting quick training (mini scale, 1 GPU)...")
     return scripts.start_quick_training()
 }
 
-func cmd_launch_70b(args []string) error {
+func cmd_launch_70b([]string args) error {
     num_gpus := 512
     if len(args) > 0 {
         if n, err := strconv.Atoi(args[0]); err == nil {
@@ -44,7 +44,7 @@ func cmd_launch_70b(args []string) error {
     return scripts.launch_70b_training(num_gpus)
 }
 
-func cmd_launch_7b(args []string) error {
+func cmd_launch_7b([]string args) error {
     num_gpus := 64
     if len(args) > 0 {
         if n, err := strconv.Atoi(args[0]); err == nil {
@@ -54,7 +54,7 @@ func cmd_launch_7b(args []string) error {
     return scripts.launch_7b_training(num_gpus)
 }
 
-func cmd_launch_1t(args []string) error {
+func cmd_launch_1t([]string args) error {
     num_gpus := 1024
     if len(args) > 0 {
         if n, err := strconv.Atoi(args[0]); err == nil {
@@ -64,19 +64,19 @@ func cmd_launch_1t(args []string) error {
     return scripts.launch_1t_training(num_gpus)
 }
 
-func cmd_build(args []string) error {
+func cmd_build([]string args) error {
     return scripts.build_everything()
 }
 
-func cmd_build_quick(args []string) error {
+func cmd_build_quick([]string args) error {
     return scripts.quick_build()
 }
 
-func cmd_build_clean(args []string) error {
+func cmd_build_clean([]string args) error {
     return scripts.clean_build()
 }
 
-func cmd_inference(args []string) error {
+func cmd_inference([]string args) error {
     if len(args) == 0 {
         fmt.Println("Usage: neurx inference <model_path>")
         return nil
@@ -84,7 +84,7 @@ func cmd_inference(args []string) error {
     return scripts.run_inference_server(args[0])
 }
 
-func cmd_chat(args []string) error {
+func cmd_chat([]string args) error {
     model_path := "model.bin"
     if len(args) > 0 {
         model_path = args[0]
@@ -92,7 +92,7 @@ func cmd_chat(args []string) error {
     return scripts.run_chat_interface(model_path)
 }
 
-func cmd_benchmark(args []string) error {
+func cmd_benchmark([]string args) error {
     model_path := "model.bin"
     if len(args) > 0 {
         model_path = args[0]
@@ -100,18 +100,18 @@ func cmd_benchmark(args []string) error {
     return scripts.run_inference_benchmark(model_path)
 }
 
-func cmd_version(args []string) error {
+func cmd_version([]string args) error {
     fmt.Println("NeurX CLI v1.0.0")
     fmt.Println("S Language Implementation")
     return nil
 }
 
-func cmd_help(args []string) error {
+func cmd_help([]string args) error {
     show_help()
     return nil
 }
 
-func cmd_status(args []string) error {
+func cmd_status([]string args) error {
     logger := scripts.new_logger("status")
     if scripts.dir_exists(".build") {
         logger.success("Build artifacts found")
@@ -217,7 +217,7 @@ var commands = []command{
     },
 }
 
-func find_command(name string) *command {
+func find_command(string name) *command {
     for i := 0; i < len(commands); i++ {
         if commands[i].name == name {
             return &commands[i]
@@ -282,7 +282,7 @@ for more information, visit: https:
 `)
 }
 
-func show_detailed_help(cmd string) {
+func show_detailed_help(string cmd) {
     command := find_command(cmd)
     if command == nil {
         fmt.Printf("Unknown command: %s\n", cmd)

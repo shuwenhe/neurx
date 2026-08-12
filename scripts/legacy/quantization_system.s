@@ -83,7 +83,7 @@ func (framework *quantization_framework) calculate_stats(data [][]float64) quant
     }
 }
 
-func (framework *quantization_framework) quantize_weights(weights [][]float64, layer_name string) *quantized_layer {
+func (framework *quantization_framework) quantize_weights(weights [][]float64, string layer_name) *quantized_layer {
     fmt.Printf("[Quantization] Quantizing layer %s\n", layer_name)
     stats := framework.calculate_stats(weights)
     quantized := make([][]int, len(weights))
@@ -123,7 +123,7 @@ func (layer *quantized_layer) dequantize() [][]float64 {
     return result
 }
 
-func (framework *quantization_framework) fake_quantize(weights [][]float64, layer_name string) [][]float64 {
+func (framework *quantization_framework) fake_quantize(weights [][]float64, string layer_name) [][]float64 {
     quantized_layer := framework.quantize_weights(weights, layer_name)
     return quantized_layer.dequantize()
 }

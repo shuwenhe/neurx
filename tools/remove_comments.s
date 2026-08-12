@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 )
-func remove_comments(content string) string {
+func remove_comments(string content) string {
 	lines := strings.Split(content, "\n")
 	result := make([]string, 0, len(lines))
 	in_block_comment := false
@@ -42,7 +42,7 @@ func remove_comments(content string) string {
 	return strings.Join(result, "\n")
 }
 
-func process_file(file_path string) error {
+func process_file(string file_path) error {
 	content, err := ioutil.ReadFile(file_path)
 	if err != nil {
 		return err
@@ -51,7 +51,7 @@ func process_file(file_path string) error {
 	return ioutil.WriteFile(file_path, []byte(clean_content), 0644)
 }
 
-func get_files_with_comments(root_dir string) []string {
+func get_files_with_comments(string root_dir) []string {
 	files := []string{}
 	_ = filepath.Walk(root_dir, func(current_path string, info os.FileInfo, walk_err error) error {
 		if walk_err != nil {

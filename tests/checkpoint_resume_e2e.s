@@ -14,26 +14,26 @@ struct test_config {
     max_steps int
 }
 
-func log_test(config test_config, message string) error {
+func log_test(config test_config, string message) error {
     timestamp = time.Now().Format(time.RFC3339)
     line = "[TEST] " + message
     io.Println(line)
     return io.AppendFile(config.testLog, line + "\n")
 }
 
-func log_info(config test_config, message string) error {
+func log_info(config test_config, string message) error {
     line = "[INFO] " + message
     io.Println(line)
     return io.AppendFile(config.testLog, line + "\n")
 }
 
-func log_error(config test_config, message string) error {
+func log_error(config test_config, string message) error {
     line = "[ERROR] " + message
     io.Println(line)
     return io.AppendFile(config.testLog, line + "\n")
 }
 
-func log_section(config test_config, title string) error {
+func log_section(config test_config, string title) error {
     io.Println("")
     line = "==== " + title + " ===="
     io.Println(line)
@@ -41,7 +41,7 @@ func log_section(config test_config, title string) error {
     return io.AppendFile(config.testLog, "\n" + line + "\n\n")
 }
 
-func read_state_file(file_path string) map[string]string {
+func read_state_file(string file_path) map[string]string {
     content, err = os.ReadFile(file_path)
     if err != nil {
         return make(map[string]string)

@@ -67,7 +67,7 @@ func vfs_lookup(vfs vfs_state, string path) (inode, bool) {
     return (inode{}, false)
 }
 
-func vfs_open(vfs vfs_state, ino int) vfs_state {
+func vfs_open(vfs vfs_state, int ino) vfs_state {
     int i = 0
     while i < len(vfs.inodes) {
         if vfs.inodes[i].ino == ino {
@@ -78,7 +78,7 @@ func vfs_open(vfs vfs_state, ino int) vfs_state {
     return vfs
 }
 
-func vfs_close(vfs vfs_state, ino int) vfs_state {
+func vfs_close(vfs vfs_state, int ino) vfs_state {
     int i = 0
     while i < len(vfs.inodes) {
         if vfs.inodes[i].ino == ino && vfs.inodes[i].ref_count > 0 {

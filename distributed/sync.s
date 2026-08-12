@@ -7,7 +7,7 @@ struct distributed_context {
     initialized bool
 }
 
-func dist_init(i64 rank, i64 world_size, string backend, device string) distributed_context {
+func dist_init(i64 rank, i64 world_size, string backend, string device) distributed_context {
     return distributed_context{
         rank: rank,
         world_size: world_size,
@@ -17,7 +17,7 @@ func dist_init(i64 rank, i64 world_size, string backend, device string) distribu
     }
 }
 
-func allreduce_sum(values []f64, i64 rank, world_size i64) []f64 {
+func allreduce_sum(values []f64, i64 rank, i64 world_size) []f64 {
     if world_size <= 1 {
         return values
     }
@@ -33,7 +33,7 @@ func allreduce_sum(values []f64, i64 rank, world_size i64) []f64 {
     return result
 }
 
-func allreduce_sum_scalar(f64 value, i64 rank, world_size i64) f64 {
+func allreduce_sum_scalar(f64 value, i64 rank, i64 world_size) f64 {
     if world_size <= 1 {
         return value
     }
@@ -41,7 +41,7 @@ func allreduce_sum_scalar(f64 value, i64 rank, world_size i64) f64 {
     return reduced
 }
 
-func broadcast(value []f64, i64 src_rank, i64 rank, world_size i64) []f64 {
+func broadcast(value []f64, i64 src_rank, i64 rank, i64 world_size) []f64 {
     if world_size <= 1 {
         return value
     }
@@ -52,7 +52,7 @@ func broadcast(value []f64, i64 src_rank, i64 rank, world_size i64) []f64 {
     }
 }
 
-func reduce_scatter(values [][]f64, i64 rank, world_size i64) []f64 {
+func reduce_scatter(values [][]f64, i64 rank, i64 world_size) []f64 {
     if world_size <= 1 && len(values) > 0 {
         return values[0]
     }
@@ -74,7 +74,7 @@ func reduce_scatter(values [][]f64, i64 rank, world_size i64) []f64 {
     return result
 }
 
-func allgather(local_data []f64, i64 rank, world_size i64) [][]f64 {
+func allgather(local_data []f64, i64 rank, i64 world_size) [][]f64 {
     result := make([][]f64, world_size)
     for r := 0; r < world_size; r++ {
         if r == rank {
@@ -86,10 +86,10 @@ func allgather(local_data []f64, i64 rank, world_size i64) [][]f64 {
     return result
 }
 
-func barrier(ctx distributed_context) {
+func barrier(distributed_context ctx) {
 }
 
-func send_recv(send_data []f64, i64 send_rank, i64 recv_rank, rank i64) []f64 {
+func send_recv(send_data []f64, i64 send_rank, i64 recv_rank, i64 rank) []f64 {
     if rank == send_rank {
         return make([]f64, 0)
     } else if rank == recv_rank {
@@ -167,7 +167,7 @@ struct two_gpu_sync {
     grad_buffer [][]f64
 }
 
-func two_gpu_sync_new(rank i64) two_gpu_sync {
+func two_gpu_sync_new(i64 rank) two_gpu_sync {
     return two_gpu_sync{
         rank: rank,
         loss_buffer: 0.0,
@@ -175,7 +175,7 @@ func two_gpu_sync_new(rank i64) two_gpu_sync {
     }
 }
 
-func two_gpu_sync_loss(sync two_gpu_sync, loss f64) f64 {
+func two_gpu_sync_loss(sync two_gpu_sync, f64 loss) f64 {
     if sync.rank == 0 {
         return loss
     } else {
@@ -207,7 +207,7 @@ func distributed_training_epoch(
     }
 }
 
-func i64_to_string(val i64) string {
+func i64_to_string(i64 val) string {
     if val == 0 {
         return "0"
     }

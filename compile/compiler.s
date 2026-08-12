@@ -38,7 +38,7 @@ func new_compile_options() compile_options {
     }
 }
 
-func make_compile_result(compiled_module_state state, bool ok, platform_error_state error) compile_result {
+func make_compile_result(compiled_module_state state, bool ok, error platform_error_state) compile_result {
     compile_result {
         state: state,
         ok: ok,

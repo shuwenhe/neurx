@@ -4,7 +4,7 @@ struct cross_entropy_loss {
     label_smoothing f64
 }
 
-func cross_entropy_new(string reduction, label_smoothing f64) cross_entropy_loss {
+func cross_entropy_new(string reduction, f64 label_smoothing) cross_entropy_loss {
     return cross_entropy_loss{
         reduction: reduction,
         label_smoothing: label_smoothing,
@@ -66,7 +66,7 @@ struct mse_loss {
     reduction string
 }
 
-func mse_new(reduction string) mse_loss {
+func mse_new(string reduction) mse_loss {
     return mse_loss{reduction: reduction}
 }
 
@@ -91,7 +91,7 @@ struct bce_loss {
     reduction string
 }
 
-func bce_new(reduction string) bce_loss {
+func bce_new(string reduction) bce_loss {
     return bce_loss{reduction: reduction}
 }
 
@@ -121,7 +121,7 @@ struct kldiv_loss {
     reduction string
 }
 
-func kldiv_new(reduction string) kldiv_loss {
+func kldiv_new(string reduction) kldiv_loss {
     return kldiv_loss{reduction: reduction}
 }
 
@@ -145,7 +145,7 @@ struct l1_loss {
     reduction string
 }
 
-func l1_new(reduction string) l1_loss {
+func l1_new(string reduction) l1_loss {
     return l1_loss{reduction: reduction}
 }
 
@@ -167,7 +167,7 @@ func l1_forward(loss_fn l1_loss, pred []f64, target []f64) f64 {
     return total_loss
 }
 
-func exp_approx(x f64) f64 {
+func exp_approx(f64 x) f64 {
     if x > 100.0 {
         return 1e10
     }
@@ -186,7 +186,7 @@ func exp_approx(x f64) f64 {
     return result
 }
 
-func ln_approx(x f64) f64 {
+func ln_approx(f64 x) f64 {
     if x <= 0.0 {
         return -100.0
     }

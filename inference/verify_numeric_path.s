@@ -30,7 +30,7 @@ func float_to_string(float val) string {
     res
 }
 
-func compute_matrix_stats(mat [][]float) matrix_stats {
+func compute_matrix_stats([][]float mat) matrix_stats {
     if len(mat) == 0 { return matrix_stats{mean: 0.0, sample: 0.0} }
     int R = len(mat)
     int C = 0

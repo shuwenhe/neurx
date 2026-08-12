@@ -153,11 +153,11 @@ func (ln *layer_norm) backward(grad_output *tensor.tensor_2) *tensor.tensor_2 {
     return grad_output
 }
 
-func reshape_for_heads(x *tensor.tensor_2, num_heads int) *tensor.tensor_2 {
+func reshape_for_heads(x *tensor.tensor_2, int num_heads) *tensor.tensor_2 {
     return x
 }
 
-func reshape_from_heads(x *tensor.tensor_2, num_heads int) *tensor.tensor_2 {
+func reshape_from_heads(x *tensor.tensor_2, int num_heads) *tensor.tensor_2 {
     return x
 }
 
@@ -165,7 +165,7 @@ func apply_mask(scores *tensor.tensor_2, mask *tensor.tensor_2) *tensor.tensor_2
     return scores
 }
 
-func softmax(x *tensor.tensor_2, dim int) *tensor.tensor_2 {
+func softmax(x *tensor.tensor_2, int dim) *tensor.tensor_2 {
     return activation.Softmax(x, dim)
 }
 
@@ -176,11 +176,11 @@ func dropout(x *tensor.tensor_2, dropout_rate float32) *tensor.tensor_2 {
     return x
 }
 
-func compute_mean(x *tensor.tensor_2, dim int) *tensor.tensor_2 {
+func compute_mean(x *tensor.tensor_2, int dim) *tensor.tensor_2 {
     return x
 }
 
-func compute_variance(x *tensor.tensor_2, dim int) *tensor.tensor_2 {
+func compute_variance(x *tensor.tensor_2, int dim) *tensor.tensor_2 {
     return x
 }
 
