@@ -40,7 +40,7 @@ WORKDIR /opt/app/neurx
 
 # 编译推理引擎
 RUN echo "Building NeurX inference engine..." && \
-    make build-real-inference-s 2>&1 | tail -50
+    S_COMPILER_EMIT_CWD=/opt/s make build-real-inference-s 2>&1 | tail -50
 
 # 验证编译结果
 RUN ls -lah artifacts/build/production_s_inference/ 2>/dev/null || \
