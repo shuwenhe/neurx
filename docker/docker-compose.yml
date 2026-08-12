@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  neurx-inference:
+    build:
+      context: /home/shuwen/shuwen
+      dockerfile: neurx/docker/Dockerfile.inference
+    container_name: neurx-inference
+    image: neurx-inference:latest
+    restart: unless-stopped
+    environment:
+      # 推理后端: cpu | cuda | npu
+      NEURX_BACKEND: "cpu"
+      
+      # 批处理配置
+      NEURX_BATCH_SIZE: "4"
+      NEURX_NUM_WORKERS: "4"
+      
+      # KV 缓存配置 (PagedAttention)
+      NEURX_KV_BLOCKS: "64"
+      NEURX_KV_BLOCK_SIZE: "256"
+      
+      # 模型和分词器路径
+      NEURX_MODEL_PATH: "/opt/app/posttrain/model.safetensors"
+      NEURX_TOKENIZER_PATH: "/opt/app/posttrain/tokenizer.json"
+      
+      # 服务配置
+      NEURX_API_PORT: "8080"
+      NEURX_GRPC_PORT: "8081"
+      NEURX_METRICS_PORT: "9090"
+      
+      # 日志级别
+      NEURX_LOG_LEVEL: "INFO"
+      
+    ports:
+      - "8080:8080"   # HTTP API
+      - "8081:8081"   # gRPC
+      - "9090:9090"   # Prometheus metrics
+    
+    volumes:
+      # 只读挂载模型和分词器
+      - /home/shuwen/shuwen/posttrain:/opt/app/posttrain:ro
+      
+      # 日志输出
+      - ./logs:/var/log/neurx
+      
+      # 配置文件 (可选)
+      - ./config:/etc/neurx:ro
+    
+    # GPU 支持 (如果使用 CUDA)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    
+    # 健康检查
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    
+    # 日志配置
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service=neurx-inference"
+    
+    # 资源限制
+    # 根据实际机器调整
+    # cpu_shares: 1024
+    # mem_limit: 16g
+    # memswap_limit: 20g
+
+volumes:
+  logs:
+    driver: local
+  config:
+    driver: local

@@ -1,0 +1,68 @@
+# NeurX Inference Engine Dockerfile
+# Pure S Language Implementation
+
+FROM ubuntu:22.04
+
+# 避免交互式提示
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 安装基础工具和依赖
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    wget \
+    git \
+    gcc \
+    g++ \
+    make \
+    python3 \
+    python3-pip \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# 复制 S 编译器到容器
+COPY s/ /opt/s/
+ENV PATH="/opt/s/bin:${PATH}"
+
+# 验证 S 编译器
+RUN /opt/s/bin/s --version 2>/dev/null || echo "S compiler installed"
+
+# 创建应用目录
+WORKDIR /opt/app
+
+# 复制 NeurX 项目代码
+COPY neurx/ ./neurx/
+COPY posttrain/ ./posttrain/
+
+# 切换到 NeurX 目录
+WORKDIR /opt/app/neurx
+
+# 编译推理引擎
+RUN echo "Building NeurX inference engine..." && \
+    make build-real-inference-s 2>&1 | tail -50
+
+# 验证编译结果
+RUN ls -lah artifacts/build/production_s_inference/ 2>/dev/null || \
+    ls -lah artifacts/build/ 2>/dev/null || \
+    find . -name "*inference*" -type f -executable | head -5
+
+# 暴露端口
+# 8080: HTTP API
+# 8081: gRPC
+# 9090: Prometheus metrics
+EXPOSE 8080 8081 9090
+
+# 设置环境变量
+ENV NEURX_MODEL_PATH=/opt/app/posttrain/model.safetensors
+ENV NEURX_TOKENIZER_PATH=/opt/app/posttrain/tokenizer.json
+ENV NEURX_BACKEND=cpu
+ENV NEURX_BATCH_SIZE=4
+ENV NEURX_NUM_WORKERS=4
+ENV NEURX_KV_BLOCKS=64
+
+# 健康检查
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 --start-period=30s \
+    CMD curl -f http://localhost:8080/health/ready || exit 1
+
+# 启动推理服务
+CMD ["./artifacts/build/production_s_inference/inference_runtime"]
