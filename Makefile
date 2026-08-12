@@ -8,7 +8,7 @@
 	run-end-to-end-verification-s run-integration-tests-s minimal-diagnostic-s diagnose-file-creation-s diagnose-tool-registration-s diagnose-autoscroll-s \
 	build-pretrain-manifest-s build-cuda-train-bridge build-cuda-chat-bridge run-gpu-pretrain-s cuda-tools-s cuda-verify-s cuda-build-s cuda-build-runtime-s cuda-build-runtime-alt-s cuda-build-kernels-s cuda-build-kernels-simple-s run-interactive-chat-repl-s transformer-cuda-checkpoint-resume-test build-real-inference-s build-real-model-chat-s build-production-s-inference production-s-inference build-hf-posttrain-chat-s hf-posttrain-chat \
 	build-json-parser-s test-json-parser-s test-hf-config-s build-cpp2s-migration \
-	docker docker-build docker-run docker-stop docker-test docker-clean docker-compose
+	docker
 ifeq ($(OS),windows_nt)
 PLATFORM := windows
 WINDOWS_GIT_BASH := C:/progra~1/git/bin/bash.exe
@@ -162,13 +162,7 @@ help:
 	@echo "  make chat-npu"
 	@echo ""
 	@echo "Docker Deployment:"
-	@echo "  make docker           - Build, run and test Docker deployment"
-	@echo "  make docker-build     - Build Docker image"
-	@echo "  make docker-run       - Start Docker container"
-	@echo "  make docker-test      - Test Docker service"
-	@echo "  make docker-stop      - Stop Docker container"
-	@echo "  make docker-clean     - Remove Docker container and image"
-	@echo "  make docker-compose   - Start services with Docker Compose"
+	@echo "  make docker  - Build and deploy inference engine to Docker"
 train:
 pretrain-s-p0: check-bash build-s-ir-runner
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/tiny_s_pretrain'
@@ -2923,63 +2917,25 @@ build-cpp2s-migration: build-json-parser-s
 	@echo ""
 
 # ============================================================
-# Docker Deployment Targets
+# Docker Deployment
 # ============================================================
 
-docker-build: check-bash
-	@echo "$(BLUE)Building NeurX Docker image...$(NC)"
-	@cd "$(CURDIR_UNIX)" && bash docker/build.sh
-
-docker-run: check-bash
-	@echo "$(BLUE)Starting NeurX Docker container...$(NC)"
-	@cd "$(CURDIR_UNIX)" && bash docker/run.sh
-
-docker-stop:
-	@echo "$(BLUE)Stopping NeurX Docker container...$(NC)"
-	@if docker ps --format '{{.Names}}' | grep -q "neurx-inference"; then \
-		docker stop neurx-inference && echo "$(GREEN)✓ Container stopped$(NC)"; \
-	else \
-		echo "$(YELLOW)⚠️  Container not running$(NC)"; \
-	fi
-
-docker-test: check-bash
-	@echo "$(BLUE)Testing NeurX Docker service...$(NC)"
-	@cd "$(CURDIR_UNIX)" && bash docker/test.sh
-
-docker-clean:
-	@echo "$(BLUE)Cleaning up NeurX Docker resources...$(NC)"
-	@if docker ps -a --format '{{.Names}}' | grep -q "neurx-inference"; then \
-		echo "Removing container..."; \
-		docker stop neurx-inference 2>/dev/null || true; \
-		docker rm neurx-inference 2>/dev/null || true; \
-	fi
-	@if docker images --format '{{.Repository}}:{{.Tag}}' | grep -q "neurx-inference"; then \
-		echo "Removing image..."; \
-		docker rmi neurx-inference:latest 2>/dev/null || true; \
-	fi
-	@echo "$(GREEN)✓ Cleanup complete$(NC)"
-
-docker-compose: check-bash
-	@echo "$(BLUE)Starting NeurX with Docker Compose...$(NC)"
-	@cd "$(CURDIR_UNIX)/docker" && docker-compose up -d
-	@echo "$(GREEN)✓ Services started$(NC)"
-	@echo "  API: http://localhost:8080"
-	@echo "  Metrics: http://localhost:9090/metrics"
-	@echo "  Logs: docker logs -f neurx-inference"
-
-docker: docker-build docker-run docker-test
-	@echo ""
-	@echo "$(GREEN)========================================$(NC)"
-	@echo "$(GREEN)✓ Docker deployment complete!$(NC)"
-	@echo "$(GREEN)========================================$(NC)"
-	@echo ""
-	@echo "Service endpoints:"
-	@echo "  HTTP API:  http://localhost:8080"
-	@echo "  gRPC:      localhost:8081"
-	@echo "  Metrics:   http://localhost:9090/metrics"
-	@echo ""
-	@echo "Quick commands:"
-	@echo "  make docker-test   - Run tests"
-	@echo "  make docker-stop   - Stop container"
-	@echo "  make docker-clean  - Remove container and image"
-	@echo ""
+docker: check-bash
+	@echo "$(BLUE)Building and deploying NeurX inference engine...$(NC)"
+	@cd "$(CURDIR_UNIX)" && bash docker/build.sh && \
+	echo "" && \
+	echo "$(BLUE)Starting inference engine container...$(NC)" && \
+	bash docker/run.sh && \
+	echo "" && \
+	echo "$(BLUE)Running service tests...$(NC)" && \
+	bash docker/test.sh && \
+	echo "" && \
+	echo "$(GREEN)========================================$(NC)" && \
+	echo "$(GREEN)✓ Inference engine deployed successfully!$(NC)" && \
+	echo "$(GREEN)========================================$(NC)" && \
+	echo "" && \
+	echo "Service is running at:" && \
+	echo "  HTTP API:  http://localhost:8080" && \
+	echo "  gRPC:      localhost:8081" && \
+	echo "  Metrics:   http://localhost:9090/metrics" && \
+	echo ""
