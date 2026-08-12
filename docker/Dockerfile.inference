@@ -40,9 +40,14 @@ COPY posttrain/ ./posttrain/
 # 切换到 NeurX 目录
 WORKDIR /opt/app/neurx
 
-# 编译推理引擎（使用预编译的 s_ir_runner）
+# 编译推理引擎（跳过 build-s-ir-runner 依赖，使用预编译的二进制）
 RUN echo "Building NeurX inference engine..." && \
-    S_COMPILER_EMIT_CWD=/opt/s S_RUNNER_BIN=/opt/app/neurx/artifacts/build/s_runner/s_ir_runner make build-real-inference-s 2>&1 | tail -50
+    mkdir -p artifacts/build/real_inference && \
+    echo "Compiling NeurX inference entrypoint (S)..." && \
+    /opt/s/bin/s_seed inference/real_inference.s artifacts/build/real_inference/real_inference.ir && \
+    printf '#!/usr/bin/env bash\nexec %s %s "$$@"\n' '/opt/app/neurx/artifacts/build/s_runner/s_ir_runner' '/opt/app/neurx/artifacts/build/real_inference/real_inference.ir' > artifacts/build/real_inference/real_inference && \
+    chmod +x artifacts/build/real_inference/real_inference && \
+    echo "✓ NeurX S inference runner ready"
 
 # 验证编译结果
 RUN ls -lah artifacts/build/production_s_inference/ 2>/dev/null || \
