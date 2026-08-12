@@ -31,25 +31,28 @@ RUN /opt/s/bin/s --version 2>/dev/null || echo "S compiler installed"
 # 创建应用目录
 WORKDIR /opt/app
 
-# 复制 NeurX 项目代码
+# 复制应用代码
 COPY neurx/ ./neurx/
-# 复制预编译的 s_ir_runner 二进制文件
-COPY neurx/artifacts/build/s_runner/ ./neurx/artifacts/build/s_runner/
 COPY posttrain/ ./posttrain/
 
-# 切换到 NeurX 目录
+# 构建推理服务器
 WORKDIR /opt/app/neurx
+RUN echo "Building NeurX inference server..." && \
+    mkdir -p artifacts/build/inference_server && \
+    /opt/s/bin/s_seed inference/cmd/server.s artifacts/build/inference_server/server.ir 2>&1 | tail -20 && \
+    echo "✓ Server compiled"
 
-# 复制预编译的推理引擎 IR 和包装脚本
-COPY neurx/artifacts/build/real_inference/ ./artifacts/build/real_inference/
+# 确保正确的目录结构用于服务器
+RUN mkdir -p ./artifacts/build/s_runner && \
+    echo "✓ Created artifact directories"
 
-# 验证推理引擎二进制文件
-RUN ls -lah artifacts/build/real_inference/ && \
-    echo "✓ NeurX inference engine ready"
+# 复制预编译的 s_ir_runner 二进制文件
+COPY neurx/artifacts/build/s_runner/s_ir_runner ./artifacts/build/s_runner/
 
-# 验证推理引擎二进制文件已就位
-RUN ls -lah artifacts/build/real_inference/ && \
-    [ -f artifacts/build/real_inference/real_inference ] && echo "✓ Inference wrapper ready" || exit 1
+# 创建启动脚本
+RUN printf '#!/usr/bin/env bash\n# NeurX Inference Server Launcher\nSCRIPT_DIR="$$(cd "$$(dirname "$$0")" && pwd)"\nPROJECT_ROOT="$$(cd "$$SCRIPT_DIR/../.." && pwd)"\nS_IR_RUNNER="$$PROJECT_ROOT/artifacts/build/s_runner/s_ir_runner"\nif [ ! -f "$$S_IR_RUNNER" ]; then S_IR_RUNNER="$$(dirname "$$0")/../s_runner/s_ir_runner"; fi\nexec "$$S_IR_RUNNER" "$$SCRIPT_DIR/inference_server/server.ir" "$$@"\n' > ./artifacts/build/inference_server/server && \
+    chmod +x ./artifacts/build/inference_server/server && \
+    echo "✓ Server launcher created"
 
 # 暴露端口
 # 8080: HTTP API
@@ -58,16 +61,22 @@ RUN ls -lah artifacts/build/real_inference/ && \
 EXPOSE 8080 8081 9090
 
 # 设置环境变量
-ENV NEURX_MODEL_PATH=/opt/app/posttrain/model.safetensors
+ENV NEURX_CHAT_MODEL_PATH=/opt/app/posttrain/model.safetensors
 ENV NEURX_TOKENIZER_PATH=/opt/app/posttrain/tokenizer.json
 ENV NEURX_BACKEND=cpu
 ENV NEURX_BATCH_SIZE=4
 ENV NEURX_NUM_WORKERS=4
 ENV NEURX_KV_BLOCKS=64
+ENV NEURX_API_PORT=8080
+ENV NEURX_GRPC_PORT=8081
+ENV NEURX_METRICS_PORT=9090
+
+# 切换到 NeurX 目录执行
+WORKDIR /opt/app/neurx
 
 # 健康检查
 HEALTHCHECK --interval=10s --timeout=5s --retries=3 --start-period=30s \
-    CMD curl -f http://localhost:8080/health/ready || exit 1
+    CMD curl -f http://localhost:8080/api/health || exit 1
 
-# 启动推理服务
-CMD ["./artifacts/build/real_inference/real_inference"]
+# 启动推理服务器
+CMD ["./artifacts/build/inference_server/server"]

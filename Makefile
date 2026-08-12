@@ -160,9 +160,7 @@ help:
 	@echo "  make chat-cpu"
 	@echo "  make chat-gpu"
 	@echo "  make chat-npu"
-	@echo ""
-	@echo "Docker Deployment:"
-	@echo "  make docker  - Build and deploy inference engine to Docker"
+	@echo "  make docker"
 train:
 pretrain-s-p0: check-bash build-s-ir-runner
 	@mkdir -p '$(CURDIR_UNIX)/artifacts/build/tiny_s_pretrain'
@@ -1034,7 +1032,7 @@ build-real-inference-s: build-s-ir-runner
 	@mkdir -p artifacts/build/real_inference
 	@echo "Compiling NeurX inference entrypoint (S)..."
 	@$(S_SEED_COMPILER) inference/real_inference.s artifacts/build/real_inference/real_inference.ir
-	@printf '#!/usr/bin/env bash\nexec %s %s "$$@"\n' '$(S_RUNNER_BIN)' '$(CURDIR_UNIX)/artifacts/build/real_inference/real_inference.ir' > artifacts/build/real_inference/real_inference
+	@printf '#!/usr/bin/env bash\n# Inference engine wrapper - works in Docker and locally\nSCRIPT_DIR="$$(cd "$$(dirname "$$0")" && pwd)"\nPROJECT_ROOT="$$(cd "$$SCRIPT_DIR/../.." && pwd)"\nS_IR_RUNNER="$$PROJECT_ROOT/artifacts/build/s_runner/s_ir_runner"\nif [ ! -f "$$S_IR_RUNNER" ]; then S_IR_RUNNER="$$(dirname "$$0")/../s_runner/s_ir_runner"; fi\nexec "$$S_IR_RUNNER" "$$SCRIPT_DIR/real_inference.ir" "$$@"\n' > artifacts/build/real_inference/real_inference
 	@chmod +x artifacts/build/real_inference/real_inference
 	@echo "✓ NeurX S inference runner ready"
 
