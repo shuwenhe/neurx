@@ -1,7 +1,7 @@
 # NeurX Inference Engine Dockerfile
 # Pure S Language Implementation
 
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 # 避免交互式提示
 ENV DEBIAN_FRONTEND=noninteractive
