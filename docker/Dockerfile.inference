@@ -20,9 +20,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# 复制 S 编译器到容器
+# 复制 S 编译器和源代码到容器
 COPY s/ /opt/s/
 ENV PATH="/opt/s/bin:${PATH}"
+ENV S_COMPILER_EMIT_CWD=/opt/s
 
 # 验证 S 编译器
 RUN /opt/s/bin/s --version 2>/dev/null || echo "S compiler installed"
