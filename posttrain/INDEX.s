@@ -38,10 +38,10 @@ use neurx.posttrain.backend.megatron.{
     new_megatron_module, megatron_pipeline_forward,
     new_megatron_config
 }
-use neurx.posttrain.inference.vllm.{
-    vllm_config, vllm_engine, vllm_sequence,
-    vllm_generate, vllm_paged_attention,
-    new_vllm_engine, new_vllm_config
+use neurx.posttrain.inference.engine.{
+    inference_config, inference_engine, inference_sequence,
+    paged_attention, schedule_sequences,
+    new_inference_engine, new_inference_config
 }
 use neurx.posttrain.inference.sglang.{
     sglang_config, sglang_engine, radix_tree,

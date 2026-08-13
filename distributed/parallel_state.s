@@ -44,7 +44,7 @@ struct group_coordinator {
     bool initialized
 }
 
-struct vllm_parallel_state {
+struct parallel_state {
     model_parallel_config config
     parallel_coordinates coordinates
     group_coordinator world_group
@@ -275,11 +275,11 @@ func build_expert_parallel_group(model_parallel_config config, parallel_coordina
     make_group_coordinator("ep", config.backend, ranks, config.rank, config.local_rank)
 }
 
-func init_distributed_environment(model_parallel_config requested) vllm_parallel_state {
+func init_distributed_environment(model_parallel_config requested) parallel_state {
     model_parallel_config config = normalize_model_parallel_config(requested)
     parallel_coordinates coordinates = parallel_coordinates_for(config)
     if !model_parallel_config_valid(config) {
-        return vllm_parallel_state {
+        return parallel_state {
             config: config,
             coordinates: coordinates,
             world_group: empty_group_coordinator("world", config.backend, config.rank, config.local_rank),
@@ -294,7 +294,7 @@ func init_distributed_environment(model_parallel_config requested) vllm_parallel
             error_message: "invalid model parallel configuration",
         }
     }
-    vllm_parallel_state {
+    parallel_state {
         config: config,
         coordinates: coordinates,
         world_group: build_world_group(config),
@@ -310,7 +310,7 @@ func init_distributed_environment(model_parallel_config requested) vllm_parallel
     }
 }
 
-func get_parallel_group(vllm_parallel_state state, int kind) group_coordinator {
+func get_parallel_group(parallel_state state, int kind) group_coordinator {
     if kind == group_tensor_parallel() {
         return state.tensor_parallel_group
     }
@@ -368,7 +368,7 @@ func group_is_last_rank(group_coordinator group) bool {
     group.initialized && group.rank_in_group == group.world_size - 1
 }
 
-func model_parallel_is_initialized(vllm_parallel_state state) bool {
+func model_parallel_is_initialized(parallel_state state) bool {
     state.distributed_initialized && state.model_parallel_initialized
 }
 
@@ -385,8 +385,8 @@ func destroy_group_coordinator(group_coordinator group) group_coordinator {
     }
 }
 
-func destroy_model_parallel(vllm_parallel_state state) vllm_parallel_state {
-    vllm_parallel_state {
+func destroy_model_parallel(parallel_state state) parallel_state {
+    parallel_state {
         config: state.config,
         coordinates: state.coordinates,
         world_group: state.world_group,
@@ -402,8 +402,8 @@ func destroy_model_parallel(vllm_parallel_state state) vllm_parallel_state {
     }
 }
 
-func destroy_distributed_environment(vllm_parallel_state state) vllm_parallel_state {
-    vllm_parallel_state {
+func destroy_distributed_environment(parallel_state state) parallel_state {
+    parallel_state {
         config: state.config,
         coordinates: state.coordinates,
         world_group: destroy_group_coordinator(state.world_group),

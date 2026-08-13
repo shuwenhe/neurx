@@ -79,7 +79,7 @@ struct medical_grpo_objective {
     int num_generations
     float learning_rate
     float beta
-    bool use_vllm
+    bool use_inference_engine
 }
 
 func create_medical_sft_objective() medical_sft_objective {
@@ -115,7 +115,7 @@ func create_medical_grpo_objective() medical_grpo_objective {
         num_generations: 8,
         learning_rate: 2e-6,
         beta: 0.01,
-        use_vllm: true
+        use_inference_engine: true
     }
     obj.reward_functions = [
         "cds_fact_consistency_reward",

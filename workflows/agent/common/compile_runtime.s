@@ -33,7 +33,7 @@ func main() {
     roots.push("distributed")
     roots.push("serving")
     roots.push("infer")
-    roots.push("infer/vllm")
+    roots.push("inference")
     roots.push("model")
     roots.push("platform")
     roots.push("compile")

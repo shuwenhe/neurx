@@ -266,7 +266,7 @@ func continuous_batch_finish_request(continuous_batch_state state) continuous_ba
     }
 }
 
-struct vllm_runtime_state {
+struct runtime_state {
     int queue_depth
     string pending_request_id
     string last_selected_request
@@ -276,8 +276,8 @@ struct vllm_runtime_state {
     int last_remaining_tokens
 }
 
-func new_vllm_runtime_state(int layer_count, int page_size, int max_pages, int max_prefix_entries, int max_prefix_tokens, string strategy) vllm_runtime_state {
-    vllm_runtime_state {
+func new_runtime_state(int layer_count, int page_size, int max_pages, int max_prefix_entries, int max_prefix_tokens, string strategy) runtime_state {
+    runtime_state {
         queue_depth: 0,
         pending_request_id: "",
         last_selected_request: "",
@@ -288,7 +288,7 @@ func new_vllm_runtime_state(int layer_count, int page_size, int max_pages, int m
     }
 }
 
-func vllm_runtime_enqueue_request(vllm_runtime_state state, string request_id, int prefill_tokens, int remaining_tokens, bool accepted) vllm_runtime_state {
+func runtime_enqueue_request(runtime_state state, string request_id, int prefill_tokens, int remaining_tokens, bool accepted) runtime_state {
     int next_queue_depth = state.queue_depth
     int next_hits = state.cache_hits
     int next_misses = state.cache_misses
@@ -310,7 +310,7 @@ func vllm_runtime_enqueue_request(vllm_runtime_state state, string request_id, i
             next_misses = next_misses + 1
         }
     }
-    vllm_runtime_state {
+    runtime_state {
         queue_depth: next_queue_depth,
         pending_request_id: pending_request_id,
         last_selected_request: state.last_selected_request,
@@ -321,7 +321,7 @@ func vllm_runtime_enqueue_request(vllm_runtime_state state, string request_id, i
     }
 }
 
-func vllm_runtime_schedule_next(vllm_runtime_state state) vllm_runtime_state {
+func runtime_schedule_next(runtime_state state) runtime_state {
     if state.queue_depth <= 0 {
         return state
     }
@@ -329,7 +329,7 @@ func vllm_runtime_schedule_next(vllm_runtime_state state) vllm_runtime_state {
     if next_queue_depth < 0 {
         next_queue_depth = 0
     }
-    vllm_runtime_state {
+    runtime_state {
         queue_depth: next_queue_depth,
         pending_request_id: "",
         last_selected_request: state.pending_request_id,
@@ -340,8 +340,8 @@ func vllm_runtime_schedule_next(vllm_runtime_state state) vllm_runtime_state {
     }
 }
 
-func vllm_runtime_record_decode(vllm_runtime_state state, int decode_tokens) vllm_runtime_state {
-    vllm_runtime_state {
+func runtime_record_decode(runtime_state state, int decode_tokens) runtime_state {
+    runtime_state {
         queue_depth: state.queue_depth,
         pending_request_id: state.pending_request_id,
         last_selected_request: state.last_selected_request,
@@ -352,8 +352,8 @@ func vllm_runtime_record_decode(vllm_runtime_state state, int decode_tokens) vll
     }
 }
 
-func vllm_runtime_finish_request(vllm_runtime_state state, int release_tokens) vllm_runtime_state {
-    vllm_runtime_state {
+func runtime_finish_request(runtime_state state, int release_tokens) runtime_state {
+    runtime_state {
         queue_depth: state.queue_depth,
         pending_request_id: state.pending_request_id,
         last_selected_request: state.last_selected_request,
@@ -364,7 +364,7 @@ func vllm_runtime_finish_request(vllm_runtime_state state, int release_tokens) v
     }
 }
 
-func vllm_runtime_queue_depth(vllm_runtime_state state) int {
+func runtime_queue_depth(runtime_state state) int {
     state.queue_depth
 }
 
@@ -465,7 +465,7 @@ struct serving_runtime_state {
     int cache_hits
     int cache_misses
     int last_prefill_tokens
-    int last_vllm_remaining_tokens
+    int last_remaining_tokens_runtime
     int accepted_requests
     int rejected_requests
     int finished_requests
@@ -529,7 +529,7 @@ func new_serving_runtime_state(int max_active_requests, int max_prefill_tokens, 
     serving_runtime_config config = new_serving_runtime_config(max_active_requests, max_prefill_tokens, batch_capacity, layer_count, page_size, max_pages, max_prefix_entries, max_prefix_tokens, policy)
     admission_control_state admission = new_admission_control_state_with_policy(config.max_active_requests, config.max_prefill_tokens, config.policy)
     continuous_batch_state batch = new_continuous_batch_state(config.batch_capacity)
-    vllm_runtime_state vllm = new_vllm_runtime_state(config.layer_count, config.page_size, config.max_pages, config.max_prefix_entries, config.max_prefix_tokens, admission.policy)
+    runtime_state runtime_engine = new_runtime_state(config.layer_count, config.page_size, config.max_pages, config.max_prefix_entries, config.max_prefix_tokens, admission.policy)
     serving_runtime_state {
         max_active_requests: config.max_active_requests,
         max_prefill_tokens: config.max_prefill_tokens,
@@ -552,13 +552,13 @@ func new_serving_runtime_state(int max_active_requests, int max_prefill_tokens, 
         scheduling_round: batch.scheduling_round,
         batch_prefill_tokens: batch.prefill_tokens,
         batch_decode_tokens: batch.decode_tokens,
-        queue_depth: vllm.queue_depth,
-        pending_request_id: vllm.pending_request_id,
-        last_selected_request: vllm.last_selected_request,
-        cache_hits: vllm.cache_hits,
-        cache_misses: vllm.cache_misses,
-        last_prefill_tokens: vllm.last_prefill_tokens,
-        last_vllm_remaining_tokens: vllm.last_remaining_tokens,
+        queue_depth: runtime_engine.queue_depth,
+        pending_request_id: runtime_engine.pending_request_id,
+        last_selected_request: runtime_engine.last_selected_request,
+        cache_hits: runtime_engine.cache_hits,
+        cache_misses: runtime_engine.cache_misses,
+        last_prefill_tokens: runtime_engine.last_prefill_tokens,
+        last_remaining_tokens_runtime: runtime_engine.last_remaining_tokens,
         accepted_requests: 0,
         rejected_requests: 0,
         finished_requests: 0,
@@ -595,14 +595,14 @@ func serving_runtime_submit_request(serving_runtime_state state, string request_
         prefill_tokens: state.batch_prefill_tokens,
         decode_tokens: state.batch_decode_tokens,
     }
-    vllm_runtime_state vllm = vllm_runtime_state {
+    runtime_state runtime_engine = runtime_state {
         queue_depth: state.queue_depth,
         pending_request_id: state.pending_request_id,
         last_selected_request: state.last_selected_request,
         cache_hits: state.cache_hits,
         cache_misses: state.cache_misses,
         last_prefill_tokens: state.last_prefill_tokens,
-        last_remaining_tokens: state.last_vllm_remaining_tokens,
+        last_remaining_tokens: state.last_remaining_tokens_runtime,
     }
     bool accepted = admission_can_enqueue_with_remaining(admission, batch.active_requests, normalized_prefill, normalized_remaining)
     admission_control_state next_admission = admission_on_enqueue_with_remaining(admission, normalized_prefill, normalized_remaining, accepted)
@@ -610,7 +610,7 @@ func serving_runtime_submit_request(serving_runtime_state state, string request_
     if accepted {
         next_batch = continuous_batch_enqueue_request(next_batch, normalized_prefill)
     }
-    vllm_runtime_state next_vllm = vllm_runtime_enqueue_request(vllm, request_id, normalized_prefill, normalized_remaining, accepted)
+    runtime_state next_engine = runtime_enqueue_request(runtime_engine, request_id, normalized_prefill, normalized_remaining, accepted)
     int next_accepted = state.accepted_requests
     int next_rejected = state.rejected_requests
     int next_status = 200
@@ -642,13 +642,13 @@ func serving_runtime_submit_request(serving_runtime_state state, string request_
         scheduling_round: next_batch.scheduling_round,
         batch_prefill_tokens: next_batch.prefill_tokens,
         batch_decode_tokens: next_batch.decode_tokens,
-        queue_depth: next_vllm.queue_depth,
-        pending_request_id: next_vllm.pending_request_id,
-        last_selected_request: next_vllm.last_selected_request,
-        cache_hits: next_vllm.cache_hits,
-        cache_misses: next_vllm.cache_misses,
-        last_prefill_tokens: next_vllm.last_prefill_tokens,
-        last_vllm_remaining_tokens: next_vllm.last_remaining_tokens,
+        queue_depth: next_runtime_engine.queue_depth,
+        pending_request_id: next_runtime_engine.pending_request_id,
+        last_selected_request: next_runtime_engine.last_selected_request,
+        cache_hits: next_runtime_engine.cache_hits,
+        cache_misses: next_runtime_engine.cache_misses,
+        last_prefill_tokens: next_runtime_engine.last_prefill_tokens,
+        last_remaining_tokens_runtime: next_runtime_engine.last_remaining_tokens,
         accepted_requests: next_accepted,
         rejected_requests: next_rejected,
         finished_requests: state.finished_requests,
@@ -657,17 +657,17 @@ func serving_runtime_submit_request(serving_runtime_state state, string request_
 }
 
 func serving_runtime_schedule_next(serving_runtime_state state) serving_runtime_state {
-    vllm_runtime_state vllm = vllm_runtime_state {
+    runtime_state runtime_engine = runtime_state {
         queue_depth: state.queue_depth,
         pending_request_id: state.pending_request_id,
         last_selected_request: state.last_selected_request,
         cache_hits: state.cache_hits,
         cache_misses: state.cache_misses,
         last_prefill_tokens: state.last_prefill_tokens,
-        last_remaining_tokens: state.last_vllm_remaining_tokens,
+        last_remaining_tokens: state.last_remaining_tokens_runtime,
     }
     bool selected = state.queue_depth > 0
-    vllm_runtime_state next_vllm = vllm_runtime_schedule_next(vllm)
+    runtime_state next_engine = runtime_schedule_next(runtime_engine)
     int next_status = state.last_status
     if selected {
         next_status = 202
@@ -694,13 +694,13 @@ func serving_runtime_schedule_next(serving_runtime_state state) serving_runtime_
         scheduling_round: state.scheduling_round,
         batch_prefill_tokens: state.batch_prefill_tokens,
         batch_decode_tokens: state.batch_decode_tokens,
-        queue_depth: next_vllm.queue_depth,
-        pending_request_id: next_vllm.pending_request_id,
-        last_selected_request: next_vllm.last_selected_request,
-        cache_hits: next_vllm.cache_hits,
-        cache_misses: next_vllm.cache_misses,
-        last_prefill_tokens: next_vllm.last_prefill_tokens,
-        last_vllm_remaining_tokens: next_vllm.last_remaining_tokens,
+        queue_depth: next_runtime_engine.queue_depth,
+        pending_request_id: next_runtime_engine.pending_request_id,
+        last_selected_request: next_runtime_engine.last_selected_request,
+        cache_hits: next_runtime_engine.cache_hits,
+        cache_misses: next_runtime_engine.cache_misses,
+        last_prefill_tokens: next_runtime_engine.last_prefill_tokens,
+        last_remaining_tokens_runtime: next_runtime_engine.last_remaining_tokens,
         accepted_requests: state.accepted_requests,
         rejected_requests: state.rejected_requests,
         finished_requests: state.finished_requests,
@@ -733,18 +733,18 @@ func serving_runtime_record_decode(serving_runtime_state state, int decode_token
         prefill_tokens: state.batch_prefill_tokens,
         decode_tokens: state.batch_decode_tokens,
     }
-    vllm_runtime_state vllm = vllm_runtime_state {
+    runtime_state runtime_engine = runtime_state {
         queue_depth: state.queue_depth,
         pending_request_id: state.pending_request_id,
         last_selected_request: state.last_selected_request,
         cache_hits: state.cache_hits,
         cache_misses: state.cache_misses,
         last_prefill_tokens: state.last_prefill_tokens,
-        last_remaining_tokens: state.last_vllm_remaining_tokens,
+        last_remaining_tokens: state.last_remaining_tokens_runtime,
     }
     admission_control_state next_admission = admission_on_decode_step(admission, normalized_tokens)
     continuous_batch_state next_batch = continuous_batch_record_decode_step(batch, normalized_tokens)
-    vllm_runtime_state next_vllm = vllm_runtime_record_decode(vllm, normalized_tokens)
+    runtime_state next_engine = runtime_record_decode(runtime_engine, normalized_tokens)
     serving_runtime_state {
         max_active_requests: state.max_active_requests,
         max_prefill_tokens: state.max_prefill_tokens,
@@ -767,13 +767,13 @@ func serving_runtime_record_decode(serving_runtime_state state, int decode_token
         scheduling_round: next_batch.scheduling_round,
         batch_prefill_tokens: next_batch.prefill_tokens,
         batch_decode_tokens: next_batch.decode_tokens,
-        queue_depth: next_vllm.queue_depth,
-        pending_request_id: next_vllm.pending_request_id,
-        last_selected_request: next_vllm.last_selected_request,
-        cache_hits: next_vllm.cache_hits,
-        cache_misses: next_vllm.cache_misses,
-        last_prefill_tokens: next_vllm.last_prefill_tokens,
-        last_vllm_remaining_tokens: next_vllm.last_remaining_tokens,
+        queue_depth: next_runtime_engine.queue_depth,
+        pending_request_id: next_runtime_engine.pending_request_id,
+        last_selected_request: next_runtime_engine.last_selected_request,
+        cache_hits: next_runtime_engine.cache_hits,
+        cache_misses: next_runtime_engine.cache_misses,
+        last_prefill_tokens: next_runtime_engine.last_prefill_tokens,
+        last_remaining_tokens_runtime: next_runtime_engine.last_remaining_tokens,
         accepted_requests: state.accepted_requests,
         rejected_requests: state.rejected_requests,
         finished_requests: state.finished_requests,
@@ -806,18 +806,18 @@ func serving_runtime_finish_request(serving_runtime_state state, int release_tok
         prefill_tokens: state.batch_prefill_tokens,
         decode_tokens: state.batch_decode_tokens,
     }
-    vllm_runtime_state vllm = vllm_runtime_state {
+    runtime_state runtime_engine = runtime_state {
         queue_depth: state.queue_depth,
         pending_request_id: state.pending_request_id,
         last_selected_request: state.last_selected_request,
         cache_hits: state.cache_hits,
         cache_misses: state.cache_misses,
         last_prefill_tokens: state.last_prefill_tokens,
-        last_remaining_tokens: state.last_vllm_remaining_tokens,
+        last_remaining_tokens: state.last_remaining_tokens_runtime,
     }
     admission_control_state next_admission = admission_on_finish(admission, normalized_tokens)
     continuous_batch_state next_batch = continuous_batch_finish_request(batch)
-    vllm_runtime_state next_vllm = vllm_runtime_finish_request(vllm, normalized_tokens)
+    runtime_state next_engine = runtime_finish_request(runtime_engine, normalized_tokens)
     serving_runtime_state {
         max_active_requests: state.max_active_requests,
         max_prefill_tokens: state.max_prefill_tokens,
@@ -840,13 +840,13 @@ func serving_runtime_finish_request(serving_runtime_state state, int release_tok
         scheduling_round: next_batch.scheduling_round,
         batch_prefill_tokens: next_batch.prefill_tokens,
         batch_decode_tokens: next_batch.decode_tokens,
-        queue_depth: next_vllm.queue_depth,
-        pending_request_id: next_vllm.pending_request_id,
-        last_selected_request: next_vllm.last_selected_request,
-        cache_hits: next_vllm.cache_hits,
-        cache_misses: next_vllm.cache_misses,
-        last_prefill_tokens: next_vllm.last_prefill_tokens,
-        last_vllm_remaining_tokens: next_vllm.last_remaining_tokens,
+        queue_depth: next_runtime_engine.queue_depth,
+        pending_request_id: next_runtime_engine.pending_request_id,
+        last_selected_request: next_runtime_engine.last_selected_request,
+        cache_hits: next_runtime_engine.cache_hits,
+        cache_misses: next_runtime_engine.cache_misses,
+        last_prefill_tokens: next_runtime_engine.last_prefill_tokens,
+        last_remaining_tokens_runtime: next_runtime_engine.last_remaining_tokens,
         accepted_requests: state.accepted_requests,
         rejected_requests: state.rejected_requests,
         finished_requests: state.finished_requests + 1,

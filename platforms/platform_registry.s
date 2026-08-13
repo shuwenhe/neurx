@@ -15,17 +15,31 @@ struct platform_capability {
 
 struct platform_request {
     string platform
-    bool require_graph_capture
-    bool require_speculative_decode
-    bool require_multimodal
-    bool require_fp8
-    bool require_distributed
+    int requirements
 }
 
 struct platform_selection {
-    platform_capability capability
+    int distributed_backend
     bool supported
-    string error_message
+    int error_code
+}
+
+func platform_require_graph_capture() int { 1 }
+func platform_require_speculative_decode() int { 2 }
+func platform_require_multimodal() int { 4 }
+func platform_require_fp8() int { 8 }
+func platform_require_distributed() int { 16 }
+func platform_backend_none() int { 0 }
+func platform_backend_nccl() int { 1 }
+func platform_backend_rccl() int { 2 }
+func platform_backend_ccl() int { 3 }
+func platform_backend_xla() int { 4 }
+func platform_backend_hccl() int { 5 }
+func platform_backend_gloo() int { 6 }
+
+func platform_requirement_enabled(int requirements, int flag) bool {
+    int quotient = requirements / flag
+    quotient - (quotient / 2) * 2 == 1
 }
 
 func platform_capability_for(string platform) platform_capability {
@@ -51,14 +65,23 @@ func platform_capability_for(string platform) platform_capability {
 }
 
 func select_platform(platform_request request) platform_selection {
-    platform_capability capability = platform_capability_for(request.platform)
-    bool supported = capability.available
-    if request.require_graph_capture && !capability.supports_graph_capture { supported = false }
-    if request.require_speculative_decode && !capability.supports_speculative_decode { supported = false }
-    if request.require_multimodal && !capability.supports_multimodal { supported = false }
-    if request.require_fp8 && !capability.supports_fp8 { supported = false }
-    if request.require_distributed && !capability.supports_distributed { supported = false }
-    string error_message = ""
-    if !supported { error_message = "platform does not satisfy requested capabilities" }
-    platform_selection {capability: capability, supported: supported, error_message: error_message}
+    if request.platform == "cuda" { return platform_selection {distributed_backend: platform_backend_nccl(), supported: true, error_code: 0} }
+    if request.platform == "rocm" { return platform_selection {distributed_backend: platform_backend_rccl(), supported: true, error_code: 0} }
+    if request.platform == "xpu" {
+        if platform_requirement_enabled(request.requirements, platform_require_graph_capture()) { return platform_selection {distributed_backend: platform_backend_ccl(), supported: false, error_code: 2} }
+        return platform_selection {distributed_backend: platform_backend_ccl(), supported: true, error_code: 0}
+    }
+    if request.platform == "tpu" {
+        if platform_requirement_enabled(request.requirements, platform_require_graph_capture()) || platform_requirement_enabled(request.requirements, platform_require_fp8()) { return platform_selection {distributed_backend: platform_backend_xla(), supported: false, error_code: 2} }
+        return platform_selection {distributed_backend: platform_backend_xla(), supported: true, error_code: 0}
+    }
+    if request.platform == "ascend" {
+        if platform_requirement_enabled(request.requirements, platform_require_speculative_decode()) { return platform_selection {distributed_backend: platform_backend_hccl(), supported: false, error_code: 2} }
+        return platform_selection {distributed_backend: platform_backend_hccl(), supported: true, error_code: 0}
+    }
+    if request.platform == "cpu" {
+        if platform_requirement_enabled(request.requirements, platform_require_graph_capture()) || platform_requirement_enabled(request.requirements, platform_require_speculative_decode()) || platform_requirement_enabled(request.requirements, platform_require_fp8()) { return platform_selection {distributed_backend: platform_backend_gloo(), supported: false, error_code: 2} }
+        return platform_selection {distributed_backend: platform_backend_gloo(), supported: true, error_code: 0}
+    }
+    platform_selection {distributed_backend: platform_backend_none(), supported: false, error_code: 1}
 }

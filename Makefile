@@ -2806,7 +2806,7 @@ vllm-distributed-test: check-bash build-s-ir-runner
 			distributed/communication_op.s \
 			distributed/kv_transfer/kv_transfer_state.s \
 			distributed/weight_transfer/weight_transfer_state.s \
-			tests/test_vllm_distributed.s \
+			tests/vllm_s_distributed_contract.s \
 			> artifacts/build/vllm_distributed/test.bundle.s
 	@cd '$(CURDIR_UNIX)' && \
 		'$(S_COMPILER)' \
@@ -2833,7 +2833,7 @@ vllm-missing-capabilities-test: check-bash build-s-ir-runner
 			distributed/eplb/eplb_state.s \
 			distributed/kv_transfer/connectors/connector_registry.s \
 			distributed/ec_transfer/ec_transfer_state.s \
-			tests/test_vllm_missing_capabilities.s \
+			tests/vllm_s_capability_contract.s \
 			> artifacts/build/vllm_missing_capabilities/test.bundle.s
 	@cd '$(CURDIR_UNIX)' && \
 		'$(S_COMPILER)' \

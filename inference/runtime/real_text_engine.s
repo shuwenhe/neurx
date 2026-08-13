@@ -684,7 +684,7 @@ func prompt_fallback(string prompt, string reason) string {
         return "The current S path is CPU-backed and model-aware, while GPU paged attention, CUDA graphs, distributed workers, kv offload, and recovery are still the remaining gaps."
     }
     if contains_text(lower, "industrial") || contains_text(lower, "工业") {
-        return "NeurX now has a real model-backed S inference path, but it still needs GPU kernels, tensor parallel scheduling, streaming transport, and fault-tolerant multi-worker execution to match vLLM maturity."
+        return "NeurX now has a real model-backed S inference path, but it still needs GPU kernels, tensor parallel scheduling, streaming transport, and fault-tolerant multi-worker execution to match production maturity."
     }
     if len(reason) > 0 {
         return "Model fallback: " + reason

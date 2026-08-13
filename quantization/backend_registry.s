@@ -38,7 +38,7 @@ struct quantization_request {
 }
 
 struct quantization_selection {
-    quantization_backend_capability capability
+    int backend
     bool supported
     string error_message
 }
@@ -80,17 +80,15 @@ func quantization_capability_for(int backend) quantization_backend_capability {
 }
 
 func select_quantization_backend(quantization_request request) quantization_selection {
-    println("DEBUG quant selection entry")
-    quantization_backend_capability capability = quantization_capability_for(request.backend)
-    println("DEBUG quant capability ready")
     bool supported = request.backend >= quant_none() && request.backend <= quant_compressed_tensors()
-    if request.platform == "cuda" && !capability.supports_cuda { supported = false }
-    if request.platform == "rocm" && !capability.supports_rocm { supported = false }
-    if request.platform == "cpu" && !capability.supports_cpu { supported = false }
-    if request.is_moe && !capability.supports_moe { supported = false }
-    if request.online_quantization && !capability.supports_online { supported = false }
-    if request.quantized_kv_cache && !capability.supports_quantized_kv { supported = false }
+    if request.platform == "cuda" && request.backend == quant_quark() { supported = false }
+    if request.platform == "rocm" && (request.backend == quant_nvfp4() || request.backend == quant_modelopt()) { supported = false }
+    if request.platform == "cpu" && (request.backend == quant_mxfp4() || request.backend == quant_nvfp4() || request.backend == quant_awq() || request.backend == quant_gptq() || request.backend == quant_bitsandbytes() || request.backend == quant_modelopt() || request.backend == quant_quark()) { supported = false }
+    bool supports_online = request.backend == quant_fp8() || request.backend == quant_mxfp8() || request.backend == quant_mxfp4() || request.backend == quant_nvfp4() || request.backend == quant_int8() || request.backend == quant_torchao() || request.backend == quant_modelopt() || request.backend == quant_quark()
+    if request.online_quantization && !supports_online { supported = false }
+    bool supports_quantized_kv = request.backend == quant_fp8() || request.backend == quant_mxfp8() || request.backend == quant_int8() || request.backend == quant_modelopt() || request.backend == quant_quark() || request.backend == quant_compressed_tensors()
+    if request.quantized_kv_cache && !supports_quantized_kv { supported = false }
     string error_message = ""
     if !supported { error_message = "quantization backend does not support the requested execution mode" }
-    quantization_selection {capability: capability, supported: supported, error_message: error_message}
+    quantization_selection {backend: request.backend, supported: supported, error_message: error_message}
 }

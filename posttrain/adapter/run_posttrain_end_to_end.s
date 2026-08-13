@@ -173,7 +173,7 @@ func step4_summary() int {
     println("     continueUsage LoRA  or 其他method")
     println("")
     println("  3. deployment and service")
-    println("     Usage vLLM、TGI etcinference引擎")
+    println("     Usage: SGLang, TGI, etc. inference engines")
     println("")
     0
 }

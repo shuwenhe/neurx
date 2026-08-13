@@ -8,7 +8,7 @@ import (
 enum inference_backend {
     ONNX,
     tensor_rt,
-    v_llm,
+    production,
     deep_speed,
     native,
 }
@@ -257,8 +257,8 @@ func backend_string(backend InferenceBackend) string {
         return "onnx"
     case InferenceBackend.TensorRT:
         return "tensorrt"
-    case InferenceBackend.vLLM:
-        return "vllm"
+    case InferenceBackend.Production:
+        return "production"
     case InferenceBackend.DeepSpeed:
         return "deepspeed"
     case InferenceBackend.Native:

@@ -36,17 +36,30 @@ func anthropic_int_string(int value) string {
     string digits = ""
     while current > 0 {
         int digit = current - (current / 10) * 10
-        digits = string(byte(48 + digit)) + digits
+        digits = anthropic_digit_string(digit) + digits
         current = current / 10
     }
     prefix + digits
+}
+
+func anthropic_digit_string(int digit) string {
+    if digit == 0 { return "0" }
+    if digit == 1 { return "1" }
+    if digit == 2 { return "2" }
+    if digit == 3 { return "3" }
+    if digit == 4 { return "4" }
+    if digit == 5 { return "5" }
+    if digit == 6 { return "6" }
+    if digit == 7 { return "7" }
+    if digit == 8 { return "8" }
+    "9"
 }
 
 func anthropic_json_escape(string value) string {
     string output = ""
     int i = 0
     while i < len(value) {
-        int ch = int(value[i])
+        int ch = value[i]
         if ch == 34 { output = output + "\\\"" }
         else if ch == 92 { output = output + "\\\\" }
         else if ch == 10 { output = output + "\\n" }
@@ -83,7 +96,7 @@ func anthropic_estimate_tokens(string text) int {
     int i = 0
     bool previous_space = false
     while i < len(text) {
-        int ch = int(text[i])
+        int ch = text[i]
         bool space = ch == 32 || ch == 10 || ch == 13 || ch == 9
         if space && !previous_space { tokens = tokens + 1 }
         previous_space = space

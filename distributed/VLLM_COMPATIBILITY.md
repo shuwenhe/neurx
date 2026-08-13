@@ -18,6 +18,14 @@ NeurX implements the inference-facing vLLM distributed contracts in S.
 - `weight_transfer/weight_transfer_state.s` implements transactional model
   weight updates with backend validation, parameter accounting, draft-model
   capability checks, commit/failure states, and shutdown.
+- `elastic_ep/elastic_state.s` implements bounded, staged expert-parallel
+  resize with generation tracking, commit, and rollback.
+- `eplb/eplb_state.s` records expert routing load and produces executable
+  expert migration plans when imbalance crosses the configured threshold.
+- `kv_transfer/connectors/connector_registry.s` describes and validates the
+  vLLM connector families and implements their operation lifecycle.
+- `ec_transfer/ec_transfer_state.s` implements encoder-cache transfer request
+  lifecycle and accounting for disaggregated multimodal inference.
 
 `communication_op.s` is a deterministic single-process semantic backend used
 for CPU tests. It models identical input on every rank. Production buffers use
@@ -45,3 +53,8 @@ The device communicator expects these runtime symbols:
 - `neurx_nccl_send_f32`, `neurx_nccl_recv_f32`, `neurx_nccl_barrier`
 
 CPU-only contract tests do not initialize the NCCL communicator.
+
+Connector-specific data planes such as NIXL, Mooncake, and LMCache still
+require their vendor runtime. The S implementation supplies selection,
+validation, lifecycle, and accounting and does not report a transfer as a
+hardware success without a data-plane adapter.

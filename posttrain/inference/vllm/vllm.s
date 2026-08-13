@@ -1,8 +1,8 @@
-package neurx.posttrain.inference.vllm
+package neurx.posttrain.inference.engine
 use neurx.tensor.{tensor, tensor_ops}
 use neurx.nn.{module}
 
-struct vllm_config {
+struct inference_config {
     int max_num_batched_tokens
     int max_num_seqs
     int max_model_len
@@ -16,7 +16,7 @@ struct vllm_config {
     int tensor_parallel_size
 }
 
-struct vllm_sequence {
+struct inference_sequence {
     int seq_id
     []int token_ids
     int prompt_len
@@ -28,37 +28,37 @@ struct vllm_sequence {
     bool finished
 }
 
-struct vllm_block {
+struct cache_block {
     int block_id
     []int token_ids
     int ref_count
     bool is_gpu
 }
 
-struct vllm_block_table {
+struct block_cache_table {
     [][]int seq_block_tables
-    []vllm_block blocks
+    []cache_block blocks
     int num_free_gpu_blocks
     int num_free_cpu_blocks
 }
 
-struct vllm_scheduler_output {
+struct scheduler_output {
     []int scheduled_seq_ids
     []int num_tokens_per_seq
     int total_tokens
     bool is_prompt_phase
 }
 
-struct vllm_engine {
+struct inference_engine {
     module model
-    vllm_config config
-    vllm_block_table block_table
-    []vllm_sequence sequences
+    inference_config config
+    block_cache_table block_table
+    []inference_sequence sequences
     int next_seq_id
 }
 
-func new_vllm_config() vllm_config {
-    vllm_config {
+func new_inference_config() inference_config {
+    inference_config {
         max_num_batched_tokens: 2048,
         max_num_seqs: 256,
         max_model_len: 4096,
@@ -73,7 +73,7 @@ func new_vllm_config() vllm_config {
     }
 }
 
-func vllm_allocate_block(vllm_block_table table, bool is_gpu) int {
+func allocate_block(block_cache_table table, bool is_gpu) int {
     if is_gpu && table.num_free_gpu_blocks > 0 {
         int i = 0
         while i < table.blocks.len {
@@ -98,7 +98,7 @@ func vllm_allocate_block(vllm_block_table table, bool is_gpu) int {
     return -1
 }
 
-func vllm_free_block(vllm_block_table table, int block_id) {
+func free_block(block_cache_table table, int block_id) {
     if block_id >= 0 && block_id < table.blocks.len {
         table.blocks[block_id].ref_count = table.blocks[block_id].ref_count - 1
         if table.blocks[block_id].ref_count == 0 {
@@ -111,16 +111,16 @@ func vllm_free_block(vllm_block_table table, int block_id) {
     }
 }
 
-func vllm_schedule_sequences(
-    vllm_engine engine
-) vllm_scheduler_output {
+func schedule_sequences(
+    inference_engine engine
+) scheduler_output {
     []int scheduled = []int{cap: engine.config.max_num_seqs}
     []int num_tokens = []int{cap: engine.config.max_num_seqs}
     int total_tokens = 0
     bool is_prompt = false
     int i = 0
     while i < engine.sequences.len {
-        vllm_sequence seq = engine.sequences[i]
+        inference_sequence seq = engine.sequences[i]
         if seq.finished {
             i = i + 1
             continue
@@ -140,7 +140,7 @@ func vllm_schedule_sequences(
         }
         i = i + 1
     }
-    vllm_scheduler_output {
+    scheduler_output {
         scheduled_seq_ids: scheduled,
         num_tokens_per_seq: num_tokens,
         total_tokens: total_tokens,
@@ -148,7 +148,7 @@ func vllm_schedule_sequences(
     }
 }
 
-func vllm_paged_attention(
+func paged_attention(
     tensor query,
     tensor key_cache,
     tensor value_cache,
@@ -218,8 +218,8 @@ func vllm_paged_attention(
     output
 }
 
-func vllm_generate(
-    vllm_engine engine,
+func generate(
+    inference_engine engine,
     [][]int prompts,
     int max_tokens,
     float temperature,
@@ -227,7 +227,7 @@ func vllm_generate(
 ) [][]int {
     int i = 0
     while i < prompts.len {
-        vllm_sequence seq = vllm_sequence {
+        inference_sequence seq = inference_sequence {
             seq_id: engine.next_seq_id,
             token_ids: prompts[i],
             prompt_len: prompts[i].len,
@@ -244,7 +244,7 @@ func vllm_generate(
     }
     bool all_finished = false
     while !all_finished {
-        vllm_scheduler_output sched = vllm_schedule_sequences(engine)
+        scheduler_output sched = schedule_sequences(engine)
         if sched.scheduled_seq_ids.len == 0 {
             break
         }
@@ -267,11 +267,11 @@ func vllm_generate(
     outputs
 }
 
-func new_vllm_engine(module model, vllm_config config) vllm_engine {
-    []vllm_block blocks = []vllm_block{cap: config.num_gpu_blocks + config.num_cpu_blocks}
+func new_inference_engine(module model, inference_config config) inference_engine {
+    []cache_block blocks = []cache_block{cap: config.num_gpu_blocks + config.num_cpu_blocks}
     int i = 0
     while i < config.num_gpu_blocks {
-        blocks[i] = vllm_block {
+        blocks[i] = cache_block {
             block_id: i,
             token_ids: []int{cap: config.block_size},
             ref_count: 0,
@@ -280,7 +280,7 @@ func new_vllm_engine(module model, vllm_config config) vllm_engine {
         i = i + 1
     }
     while i < config.num_gpu_blocks + config.num_cpu_blocks {
-        blocks[i] = vllm_block {
+        blocks[i] = cache_block {
             block_id: i,
             token_ids: []int{cap: config.block_size},
             ref_count: 0,
@@ -288,17 +288,17 @@ func new_vllm_engine(module model, vllm_config config) vllm_engine {
         }
         i = i + 1
     }
-    vllm_block_table table = vllm_block_table {
+    block_cache_table table = block_cache_table {
         seq_block_tables: [][]int{},
         blocks: blocks,
         num_free_gpu_blocks: config.num_gpu_blocks,
         num_free_cpu_blocks: config.num_cpu_blocks,
     }
-    vllm_engine {
+    inference_engine {
         model: model,
         config: config,
         block_table: table,
-        sequences: []vllm_sequence{cap: config.max_num_seqs},
+        sequences: []inference_sequence{cap: config.max_num_seqs},
         next_seq_id: 0,
     }
 }

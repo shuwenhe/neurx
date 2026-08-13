@@ -98,10 +98,23 @@ func speech_int_string(int value) string {
     string digits = ""
     while current > 0 {
         int digit = current - (current / 10) * 10
-        digits = string(byte(48 + digit)) + digits
+        digits = speech_digit_string(digit) + digits
         current = current / 10
     }
     prefix + digits
+}
+
+func speech_digit_string(int digit) string {
+    if digit == 0 { return "0" }
+    if digit == 1 { return "1" }
+    if digit == 2 { return "2" }
+    if digit == 3 { return "3" }
+    if digit == 4 { return "4" }
+    if digit == 5 { return "5" }
+    if digit == 6 { return "6" }
+    if digit == 7 { return "7" }
+    if digit == 8 { return "8" }
+    "9"
 }
 
 func speech_consume_chunk(speech_to_text_state state, speech_chunk chunk, string decoded_text, string detected_language) speech_chunk_result {
@@ -139,7 +152,7 @@ func anthropic_safe_json(string value) string {
     string output = ""
     int i = 0
     while i < len(value) {
-        int ch = int(value[i])
+        int ch = value[i]
         if ch == 34 { output = output + "\\\"" }
         else if ch == 92 { output = output + "\\\\" }
         else if ch == 10 { output = output + "\\n" }

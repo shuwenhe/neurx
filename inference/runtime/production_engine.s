@@ -2,7 +2,6 @@ package neurx.inference.runtime.production_engine
 use neurx.inference.runtime.model_manifest
 use neurx.inference.runtime.worker_cluster
 use neurx.inference.runtime.engine_lifecycle
-use neurx.inference.scheduler.vllm_scheduler
 use neurx.inference.metrics.observability
 
 func engine_request_active_status() int { 1 }
@@ -29,7 +28,7 @@ struct production_engine_config {
     string model_directory
     string backend_name
     string served_model_name
-    vllm_scheduler_config scheduler
+    int scheduler_strategy
     parallel_topology topology
     int total_kv_blocks
     int kv_block_size
@@ -113,7 +112,7 @@ struct production_engine_state {
     production_engine_config config
     hf_model_manifest model
     worker_cluster_state cluster
-    vllm_scheduler_state scheduler
+    int scheduler_state
     engine_lifecycle_state lifecycle
     inference_observability_state metrics
     []production_request requests
@@ -182,7 +181,6 @@ func engine_normalize_config(production_engine_config config) production_engine_
     if config.kv_watermark_blocks < 0 { config.kv_watermark_blocks = 0 }
     if config.max_request_retries < 0 { config.max_request_retries = 0 }
     config.topology = worker_normalize_topology(config.topology)
-    config.scheduler = normalize_vllm_scheduler_config(config.scheduler)
     config
 }
 
@@ -191,7 +189,7 @@ func new_production_engine(production_engine_config config) production_engine_st
     state.config = engine_normalize_config(config)
     state.model = load_hf_model_manifest(state.config.model_directory)
     state.cluster = new_worker_cluster(state.config.topology, state.config.heartbeat_timeout_ms, state.config.max_worker_restarts)
-    state.scheduler = new_vllm_scheduler(state.config.scheduler, state.config.total_kv_blocks, state.config.kv_block_size, state.config.kv_watermark_blocks)
+    state.scheduler_state = 0
     state.lifecycle = new_engine_lifecycle(true, state.config.backend_name, true, true)
     state.metrics = new_inference_observability()
     state.requests = []

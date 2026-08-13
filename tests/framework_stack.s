@@ -70,19 +70,18 @@ func main() {
     println("  status: " + deepspeed_status + " (" + int_to_string(deepspeed_ready) + "/5)")
     println("  next: Gap to close next: add real offload, ZeRO-2/3, and distributed backend integration.")
     println("")
-    println("vLLM-like serving stack")
+    println("Production serving stack")
     println("  Paged KV, prefix cache, continuous batching, and serving runtime are present in NeurX.")
-    int vllm_ready = 0
-    if print_path(root, "serving/vllm/vllm.s") { vllm_ready = vllm_ready + 1 }
-    if print_path(root, "serving/vllm/prefix_cache.s") { vllm_ready = vllm_ready + 1 }
-    if print_path(root, "serving/vllm/request_queue.s") { vllm_ready = vllm_ready + 1 }
-    if print_path(root, "serving/serve/continuous_batch.s") { vllm_ready = vllm_ready + 1 }
-    if print_path(root, "serving/production_runtime_smoke.s") { vllm_ready = vllm_ready + 1 }
-    string vllm_status = "PARTIAL"
-    if vllm_ready == 5 {
-        vllm_status = "PASS"
+    int serving_ready = 0
+    if print_path(root, "serving/serve/serve.s") { serving_ready = serving_ready + 1 }
+    if print_path(root, "serving/request_queue.s") { serving_ready = serving_ready + 1 }
+    if print_path(root, "serving/serve/continuous_batch.s") { serving_ready = serving_ready + 1 }
+    if print_path(root, "serving/production_runtime_smoke.s") { serving_ready = serving_ready + 1 }
+    string serving_status = "PARTIAL"
+    if serving_ready == 4 {
+        serving_status = "PASS"
     }
-    println("  status: " + vllm_status + " (" + int_to_string(vllm_ready) + "/5)")
+    println("  status: " + serving_status + " (" + int_to_string(serving_ready) + "/4)")
     println("  next: Gap to close next: make the scheduler, KV manager, and OpenAI SSE flow one streaming service.")
     println("")
     println("TVM-like compiler stack")
@@ -118,7 +117,7 @@ func main() {
     if pytorch_ready == 4 { ready_groups = ready_groups + 1 }
     if megatron_ready == 5 { ready_groups = ready_groups + 1 }
     if deepspeed_ready == 5 { ready_groups = ready_groups + 1 }
-    if vllm_ready == 5 { ready_groups = ready_groups + 1 }
+    if serving_ready == 4 { ready_groups = ready_groups + 1 }
     if tvm_ready == 5 { ready_groups = ready_groups + 1 }
     if onnx_ready == 5 { ready_groups = ready_groups + 1 }
     println("")
