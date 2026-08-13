@@ -71,7 +71,7 @@ type model_config struct {
 }
 
 type base_llm_model struct {
-    model_config config
+    model_config config_data
     string device
     string dtype
 
@@ -82,7 +82,7 @@ type base_llm_model struct {
     *nn.Linear output_linear
 
     bool quantized
-    *quant_config quant_config
+    *quant_config quant_config_data
 }
 
 type transformer_layer struct {
@@ -186,7 +186,7 @@ func NewModelConfig(string model_type) model_config {
 
 func NewBaseLLMModel(model_config config) *base_llm_model {
     model := &base_llm_model{
-        config:      config,
+        config_data: config,
         device:      "cuda",
         dtype:       "float32",
         layers:      []*transformer_layer{},
@@ -317,7 +317,7 @@ func main() {
     model := NewBaseLLMModel(config)
 
     core.Println("Base LLM Model created")
-    core.Println("Model type:", model.config.model_type)
-    core.Println("Hidden size:", model.config.hidden_size)
-    core.Println("Num layers:", model.config.num_hidden_layers)
+    core.Println("Model type:", model.config_data.model_type)
+    core.Println("Hidden size:", model.config_data.hidden_size)
+    core.Println("Num layers:", model.config_data.num_hidden_layers)
 }
