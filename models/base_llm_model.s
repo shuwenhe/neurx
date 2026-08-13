@@ -40,8 +40,7 @@ const (
     NORM_GROUPNORM  NormType = 2
 )
 
-type model_config struct {
-
+struct model_config {
     string model_type
     int32 vocab_size
     int32 hidden_size
@@ -70,7 +69,7 @@ type model_config struct {
     int32 eos_token_id
 }
 
-type base_llm_model struct {
+struct base_llm_model {
     model_config config_data
     string device
     string dtype
@@ -85,7 +84,7 @@ type base_llm_model struct {
     *quant_config quant_config_data
 }
 
-type transformer_layer struct {
+struct transformer_layer {
     *attention_layer self_attn
     *ffn_layer feed_forward
     *layer_norm norm1
@@ -93,7 +92,7 @@ type transformer_layer struct {
     float32 dropout
 }
 
-type attention_layer struct {
+struct attention_layer {
     *nn.Linear q_proj
     *nn.Linear k_proj
     *nn.Linear v_proj
@@ -107,21 +106,21 @@ type attention_layer struct {
     float32 dropout
 }
 
-type ffn_layer struct {
+struct ffn_layer {
     *nn.Linear gate_proj
     *nn.Linear up_proj
     *nn.Linear down_proj
     ActivationType activation
 }
 
-type layer_norm struct {
+struct layer_norm {
     []float32 weight
     []float32 bias
     float32 eps
     []int normalized_shape
 }
 
-type quant_config struct {
+struct quant_config {
     bool enable_quant
     int quant_format
     int32 group_size
