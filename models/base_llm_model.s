@@ -42,92 +42,92 @@ const (
 
 type model_config struct {
 
-    model_type       string
-    vocab_size       int32
-    hidden_size      int32
-    num_hidden_layers int32
-    num_attention_heads int32
-    num_key_value_heads int32
+    string model_type
+    int32 vocab_size
+    int32 hidden_size
+    int32 num_hidden_layers
+    int32 num_attention_heads
+    int32 num_key_value_heads
 
-    max_position_embeddings int32
-    position_embedding_type PositionEmbedding
-    rope_theta              float32
+    int32 max_position_embeddings
+    PositionEmbedding position_embedding_type
+    float32 rope_theta
 
-    attention_type   AttentionType
-    attention_dropout float32
+    AttentionType attention_type
+    float32 attention_dropout
 
-    ffn_hidden_size  int32
-    intermediate_size int32
-    hidden_act       ActivationType
+    int32 ffn_hidden_size
+    int32 intermediate_size
+    ActivationType hidden_act
 
-    norm_type        NormType
-    layer_norm_eps   float32
+    NormType norm_type
+    float32 layer_norm_eps
 
-    initializer_range float32
-    tie_word_embeddings bool
-    pad_token_id     int32
-    bos_token_id     int32
-    eos_token_id     int32
+    float32 initializer_range
+    bool tie_word_embeddings
+    int32 pad_token_id
+    int32 bos_token_id
+    int32 eos_token_id
 }
 
 type base_llm_model struct {
-    config           model_config
-    device           string
-    dtype            string
+    model_config config
+    string device
+    string dtype
 
-    embedding        *nn.Embedding
-    position_embed   [][]float32
-    layers           []*transformer_layer
-    norm             *layer_norm
-    output_linear    *nn.Linear
+    *nn.Embedding embedding
+    [][]float32 position_embed
+    []*transformer_layer layers
+    *layer_norm norm
+    *nn.Linear output_linear
 
-    quantized        bool
-    quant_config     *quant_config
+    bool quantized
+    *quant_config quant_config
 }
 
 type transformer_layer struct {
-    self_attn        *attention_layer
-    feed_forward     *ffn_layer
-    norm1            *layer_norm
-    norm2            *layer_norm
-    dropout          float32
+    *attention_layer self_attn
+    *ffn_layer feed_forward
+    *layer_norm norm1
+    *layer_norm norm2
+    float32 dropout
 }
 
 type attention_layer struct {
-    q_proj           *nn.Linear
-    k_proj           *nn.Linear
-    v_proj           *nn.Linear
-    o_proj           *nn.Linear
+    *nn.Linear q_proj
+    *nn.Linear k_proj
+    *nn.Linear v_proj
+    *nn.Linear o_proj
 
-    hidden_size      int32
-    num_heads        int32
-    num_key_value_heads int32
-    head_dim         int32
-    attention_type   AttentionType
-    dropout          float32
+    int32 hidden_size
+    int32 num_heads
+    int32 num_key_value_heads
+    int32 head_dim
+    AttentionType attention_type
+    float32 dropout
 }
 
 type ffn_layer struct {
-    gate_proj        *nn.Linear
-    up_proj          *nn.Linear
-    down_proj        *nn.Linear
-    activation       ActivationType
+    *nn.Linear gate_proj
+    *nn.Linear up_proj
+    *nn.Linear down_proj
+    ActivationType activation
 }
 
 type layer_norm struct {
-    weight           []float32
-    bias             []float32
-    eps              float32
-    normalized_shape []int
+    []float32 weight
+    []float32 bias
+    float32 eps
+    []int normalized_shape
 }
 
 type quant_config struct {
-    enable_quant     bool
-    quant_format     int
-    group_size       int32
+    bool enable_quant
+    int quant_format
+    int32 group_size
 }
 
-func NewModelConfig(model_type string) model_config {
+func NewModelConfig(string model_type) model_config {
     config := model_config{
         model_type:              model_type,
         vocab_size:              32000,
@@ -184,7 +184,7 @@ func NewModelConfig(model_type string) model_config {
     return config
 }
 
-func NewBaseLLMModel(config model_config) *base_llm_model {
+func NewBaseLLMModel(model_config config) *base_llm_model {
     model := &base_llm_model{
         config:      config,
         device:      "cuda",
@@ -237,7 +237,7 @@ func NewBaseLLMModel(config model_config) *base_llm_model {
     return model
 }
 
-func (m *base_llm_model) Forward(input_ids []int32, attention_mask [][]int32) []float32 {
+func (m *base_llm_model) Forward([]int32 input_ids, [][]int32 attention_mask) []float32 {
 
     embeddings := []float32{}
     for i := 0; i < len(input_ids); i++ {
@@ -268,7 +268,7 @@ func (m *base_llm_model) Forward(input_ids []int32, attention_mask [][]int32) []
     return logits
 }
 
-func (m *base_llm_model) applyLayerNorm(x []float32, norm *layer_norm) []float32 {
+func (m *base_llm_model) applyLayerNorm([]float32 x, *layer_norm norm) []float32 {
     if norm == nil {
         return x
     }
@@ -276,7 +276,7 @@ func (m *base_llm_model) applyLayerNorm(x []float32, norm *layer_norm) []float32
     return x
 }
 
-func (m *base_llm_model) addResidual(x []float32, y []float32) []float32 {
+func (m *base_llm_model) addResidual([]float32 x, []float32 y) []float32 {
     if len(x) != len(y) {
         return x
     }
@@ -287,14 +287,14 @@ func (m *base_llm_model) addResidual(x []float32, y []float32) []float32 {
     return result
 }
 
-func (a *attention_layer) Forward(hidden_states []float32, attention_mask [][]int32) []float32 {
+func (a *attention_layer) Forward([]float32 hidden_states, [][]int32 attention_mask) []float32 {
 
     _ = hidden_states
     _ = attention_mask
     return []float32{}
 }
 
-func (f *ffn_layer) Forward(hidden_states []float32) []float32 {
+func (f *ffn_layer) Forward([]float32 hidden_states) []float32 {
 
     _ = hidden_states
     return []float32{}
