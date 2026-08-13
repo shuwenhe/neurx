@@ -126,7 +126,7 @@ struct quant_config {
     int32 group_size
 }
 
-func NewModelConfig(string model_type) model_config {
+func new_model_config(string model_type) model_config {
     config := model_config{
         model_type:              model_type,
         vocab_size:              32000,
@@ -183,7 +183,7 @@ func NewModelConfig(string model_type) model_config {
     return config
 }
 
-func NewBaseLLMModel(model_config config) *base_llm_model {
+func new_base_llm_model(model_config config) *base_llm_model {
     model := &base_llm_model{
         config_data: config,
         device:      "cuda",
@@ -193,8 +193,8 @@ func NewBaseLLMModel(model_config config) *base_llm_model {
     }
 
     model.embedding = &nn.Embedding{
-        Num_embeddings: int(config.vocab_size),
-        Embedding_dim:  int(config.hidden_size),
+        num_embeddings: int(config.vocab_size),
+        embedding_dim:  int(config.hidden_size),
     }
 
     for i := int32(0); i < config.num_hidden_layers; i++ {
@@ -229,14 +229,14 @@ func NewBaseLLMModel(model_config config) *base_llm_model {
     }
 
     model.output_linear = &nn.Linear{
-        In_features:  int(config.hidden_size),
-        Out_features: int(config.vocab_size),
+        in_features:  int(config.hidden_size),
+        out_features: int(config.vocab_size),
     }
 
     return model
 }
 
-func (m *base_llm_model) Forward([]int32 input_ids, [][]int32 attention_mask) []float32 {
+func (m *base_llm_model) forward([]int32 input_ids, [][]int32 attention_mask) []float32 {
 
     embeddings := []float32{}
     for i := 0; i < len(input_ids); i++ {
@@ -250,24 +250,24 @@ func (m *base_llm_model) Forward([]int32 input_ids, [][]int32 attention_mask) []
     for layer_idx := 0; layer_idx < len(m.layers); layer_idx++ {
         layer := m.layers[layer_idx]
 
-        normed := m.applyLayerNorm(hidden_states, layer.norm1)
+        normed := m.apply_layer_norm(hidden_states, layer.norm1)
 
-        attn_output := layer.self_attn.Forward(normed, attention_mask)
-        hidden_states = m.addResidual(hidden_states, attn_output)
+        attn_output := layer.self_attn.forward(normed, attention_mask)
+        hidden_states = m.add_residual(hidden_states, attn_output)
 
-        normed = m.applyLayerNorm(hidden_states, layer.norm2)
-        ffn_output := layer.feed_forward.Forward(normed)
-        hidden_states = m.addResidual(hidden_states, ffn_output)
+        normed = m.apply_layer_norm(hidden_states, layer.norm2)
+        ffn_output := layer.feed_forward.forward(normed)
+        hidden_states = m.add_residual(hidden_states, ffn_output)
     }
 
-    normed := m.applyLayerNorm(hidden_states, m.norm)
+    normed := m.apply_layer_norm(hidden_states, m.norm)
 
-    logits := m.output_linear.Forward(normed)
+    logits := m.output_linear.forward(normed)
 
     return logits
 }
 
-func (m *base_llm_model) applyLayerNorm([]float32 x, *layer_norm norm) []float32 {
+func (m *base_llm_model) apply_layer_norm([]float32 x, *layer_norm norm) []float32 {
     if norm == nil {
         return x
     }
@@ -275,7 +275,7 @@ func (m *base_llm_model) applyLayerNorm([]float32 x, *layer_norm norm) []float32
     return x
 }
 
-func (m *base_llm_model) addResidual([]float32 x, []float32 y) []float32 {
+func (m *base_llm_model) add_residual([]float32 x, []float32 y) []float32 {
     if len(x) != len(y) {
         return x
     }
@@ -286,20 +286,20 @@ func (m *base_llm_model) addResidual([]float32 x, []float32 y) []float32 {
     return result
 }
 
-func (a *attention_layer) Forward([]float32 hidden_states, [][]int32 attention_mask) []float32 {
+func (a *attention_layer) forward([]float32 hidden_states, [][]int32 attention_mask) []float32 {
 
     _ = hidden_states
     _ = attention_mask
     return []float32{}
 }
 
-func (f *ffn_layer) Forward([]float32 hidden_states) []float32 {
+func (f *ffn_layer) forward([]float32 hidden_states) []float32 {
 
     _ = hidden_states
     return []float32{}
 }
 
-func SupportedModels() []string {
+func supported_models() []string {
     return []string{
         "llama", "llama2", "llama3", "llama4",
         "qwen", "qwen2", "qwen2.5",
@@ -312,8 +312,8 @@ func SupportedModels() []string {
 
 func main() {
 
-    config := NewModelConfig("llama")
-    model := NewBaseLLMModel(config)
+    config := new_model_config("llama")
+    model := new_base_llm_model(config)
 
     core.Println("Base LLM Model created")
     core.Println("Model type:", model.config_data.model_type)
