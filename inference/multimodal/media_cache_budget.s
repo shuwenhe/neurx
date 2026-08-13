@@ -1,8 +1,11 @@
 package neurx.inference.multimodal.media_cache_budget
 
 func media_modality_image() int { 1 }
+
 func media_modality_audio() int { 2 }
+
 func media_modality_video() int { 3 }
+
 func media_modality_embedding() int { 4 }
 
 struct media_cache_config {

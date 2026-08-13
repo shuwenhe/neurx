@@ -1,24 +1,20 @@
 #!/bin/bash
-# NeurX Docker 容器启动脚本
 
 set -e
 
-# 颜色定义
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}NeurX Docker 容器启动${NC}"
 echo -e "${GREEN}========================================${NC}"
 
-# 获取脚本所在目录
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
-# 配置参数 (可通过环境变量覆盖)
 CONTAINER_NAME=${CONTAINER_NAME:-"neurx-inference"}
 IMAGE_NAME=${IMAGE_NAME:-"neurx-inference:latest"}
 BACKEND=${NEURX_BACKEND:-"cpu"}
@@ -42,14 +38,12 @@ echo -e "  gRPC端口: $GRPC_PORT"
 echo -e "  指标端口: $METRICS_PORT"
 echo ""
 
-# 检查镜像是否存在
 if ! docker image inspect "$IMAGE_NAME" &> /dev/null; then
     echo -e "${RED}❌ 镜像 $IMAGE_NAME 不存在${NC}"
     echo -e "${YELLOW}请先运行: bash $SCRIPT_DIR/build.sh${NC}"
     exit 1
 fi
 
-# 检查容器是否已在运行
 if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
     echo -e "${YELLOW}⚠️  容器 $CONTAINER_NAME 已存在${NC}"
     if docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
@@ -79,7 +73,6 @@ if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
     fi
 fi
 
-# 确定 GPU 选项
 if command -v nvidia-smi &> /dev/null && [ "$BACKEND" == "cuda" ]; then
     GPU_OPTS="--gpus all"
     echo -e "${GREEN}✓ 检测到 NVIDIA GPU，启用 CUDA 支持${NC}"
@@ -95,7 +88,6 @@ echo ""
 echo -e "${YELLOW}启动容器...${NC}"
 echo ""
 
-# 启动容器
 docker run -d \
     --name "$CONTAINER_NAME" \
     $GPU_OPTS \
@@ -120,11 +112,10 @@ docker run -d \
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✓ 容器启动成功${NC}"
     echo ""
-    
+
     echo -e "${YELLOW}等待服务就绪...${NC}"
     sleep 3
-    
-    # 等待服务就绪
+
     max_attempts=30
     attempts=0
     while [ $attempts -lt $max_attempts ]; do
@@ -136,20 +127,20 @@ if [ $? -eq 0 ]; then
         echo -n "."
         sleep 1
     done
-    
+
     echo ""
     echo ""
     echo -e "${GREEN}========================================${NC}"
     echo -e "${GREEN}容器运行成功！${NC}"
     echo -e "${GREEN}========================================${NC}"
     echo ""
-    
+
     echo -e "${BLUE}服务端点:${NC}"
     echo -e "  HTTP API: http://localhost:$API_PORT"
     echo -e "  gRPC:     localhost:$GRPC_PORT"
     echo -e "  Metrics:  http://localhost:$METRICS_PORT/metrics"
     echo ""
-    
+
     echo -e "${BLUE}快速测试:${NC}"
     echo ""
     echo "  # 健康检查"
@@ -160,17 +151,17 @@ if [ $? -eq 0 ]; then
     echo "    -H 'Content-Type: application/json' \\"
     echo "    -d '{\"model\": \"base-model-posttrain\", \"prompt\": \"What is medical treatment?\"}'"
     echo ""
-    
+
     echo -e "${BLUE}日志查看:${NC}"
     echo ""
     echo "  docker logs -f $CONTAINER_NAME"
     echo ""
-    
+
     echo -e "${BLUE}停止容器:${NC}"
     echo ""
     echo "  docker stop $CONTAINER_NAME"
     echo ""
-    
+
 else
     echo -e "${RED}❌ 容器启动失败${NC}"
     exit 1

@@ -1,19 +1,33 @@
 package neurx.quantization.backend_registry
 
 func quant_none() int { 0 }
+
 func quant_fp8() int { 1 }
+
 func quant_mxfp8() int { 2 }
+
 func quant_mxfp4() int { 3 }
+
 func quant_nvfp4() int { 4 }
+
 func quant_int8() int { 5 }
+
 func quant_int4() int { 6 }
+
 func quant_awq() int { 7 }
+
 func quant_gptq() int { 8 }
+
 func quant_gguf() int { 9 }
+
 func quant_bitsandbytes() int { 10 }
+
 func quant_torchao() int { 11 }
+
 func quant_modelopt() int { 12 }
+
 func quant_quark() int { 13 }
+
 func quant_compressed_tensors() int { 14 }
 
 struct quantization_backend_capability {

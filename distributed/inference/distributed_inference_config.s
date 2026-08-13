@@ -71,17 +71,17 @@ func validate_config(distributed_inference_full_config cfg) bool {
         println("Invalid world_size")
         return false
     }
-    
+
     if cfg.tp_degree * cfg.pp_degree != cfg.world_size {
         println("tp_degree * pp_degree must equal world_size")
         return false
     }
-    
+
     if cfg.batch_size <= 0 || cfg.max_seq_len <= 0 {
         println("Invalid batch_size or max_seq_len")
         return false
     }
-    
+
     true
 }
 
@@ -89,25 +89,25 @@ func check_resource_availability(
     distributed_inference_full_config cfg
 ) resource_requirement {
     resource_requirement req
-    
+
     if cfg.sharding_strategy == "tensor_parallel" {
         req.min_gpu_memory_gb = 40.0
         req.min_interconnect_bw_gbps = 600
     }
-    
+
     if cfg.sharding_strategy == "pipeline_parallel" {
         req.min_gpu_memory_gb = 60.0
         req.min_interconnect_bw_gbps = 100
     }
-    
+
     if cfg.sharding_strategy == "hybrid" {
         req.min_gpu_memory_gb = 50.0
         req.min_interconnect_bw_gbps = 400
     }
-    
+
     req.min_cpu_memory_gb = 16.0
     req.min_cpu_cores = 8
-    
+
     req
 }
 
@@ -170,7 +170,7 @@ func should_recreate_engine(
     if old_cfg.batch_size != new_cfg.batch_size {
         return true
     }
-    
+
     false
 }
 
@@ -180,38 +180,38 @@ func create_per_rank_config(
 ) distributed_inference_full_config {
     distributed_inference_full_config rank_cfg = global_cfg
     rank_cfg.rank = rank
-    
+
     if global_cfg.sharding_strategy == "pipeline_parallel" {
         int layers_per_rank = global_cfg.num_layers / global_cfg.pp_degree
         rank_cfg.num_layers = layers_per_rank
     }
-    
+
     if global_cfg.sharding_strategy == "tensor_parallel" {
         rank_cfg.hidden_dim = global_cfg.hidden_dim / global_cfg.tp_degree
     }
-    
+
     rank_cfg
 }
 
 func main() {
     println("Distributed Inference Configuration Manager")
     println("==========================================")
-    
+
     distributed_inference_full_config cfg = init_full_config()
-    
+
     if !validate_config(cfg) {
         println("Configuration validation failed!")
         return
     }
-    
+
     print_config(cfg)
-    
+
     resource_requirement req = check_resource_availability(cfg)
     print_resource_requirements(req)
-    
+
     string hash = get_config_hash(cfg)
     printf("Config hash: %s\n", hash)
-    
+
     distributed_inference_full_config rank_cfg = create_per_rank_config(cfg, 1)
     printf("Rank 1 config: layers=%d, hidden_dim=%d\n",
         rank_cfg.num_layers,

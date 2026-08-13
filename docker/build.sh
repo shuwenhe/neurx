@@ -1,25 +1,21 @@
 #!/bin/bash
-# NeurX Docker 镜像构建脚本
 
 set -e
 
-# 颜色定义
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}NeurX Docker 镜像构建${NC}"
 echo -e "${GREEN}========================================${NC}"
 
-# 检查 Docker 是否安装
 if ! command -v docker &> /dev/null; then
     echo -e "${RED}❌ Docker 未安装${NC}"
     exit 1
 fi
 
-# 获取脚本所在目录
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
@@ -27,7 +23,6 @@ echo ""
 echo -e "${YELLOW}项目根目录: $PROJECT_ROOT${NC}"
 echo -e "${YELLOW}Dockerfile: $SCRIPT_DIR/Dockerfile.inference${NC}"
 
-# 检查必要的文件
 echo ""
 echo -e "${YELLOW}检查必要的文件...${NC}"
 
@@ -53,7 +48,6 @@ fi
 
 echo -e "${GREEN}✓ 所有文件检查通过${NC}"
 
-# 构建镜像
 IMAGE_NAME="neurx-inference"
 IMAGE_TAG="latest"
 IMAGE_FULL="${IMAGE_NAME}:${IMAGE_TAG}"

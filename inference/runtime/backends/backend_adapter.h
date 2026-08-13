@@ -5,12 +5,14 @@
 #include <functional>
 #include <string>
 namespace neurx::inference {
+
 struct adapter_status {
   bool ok = false;
   std::string message;
   static adapter_status success() { return {true, {}}; }
   static adapter_status failure(std::string message) { return {false, std::move(message)}; }
 };
+
 struct device_batch {
   batch_2 schedule;
   const void* token_ids = nullptr;

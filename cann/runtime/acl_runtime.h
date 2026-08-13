@@ -4,6 +4,7 @@
 #include <string>
 #include <utility>
 namespace neurx::cann {
+
 struct status {
   bool ok = false;
   std::string message;

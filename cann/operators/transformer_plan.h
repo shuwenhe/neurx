@@ -7,12 +7,14 @@
 #include <string>
 #include <vector>
 namespace neurx::cann {
+
 struct request_kv_plan {
   std::string request_id;
   std::size_t sequence_tokens = 0;
   std::vector<uint32_t> blocks;
   std::vector<int32_t> write_slots;
 };
+
 struct transformer_batch_plan {
   inference::phase phase = inference::phase::prefill;
   std::size_t batch_size = 0;
@@ -27,6 +29,7 @@ struct transformer_batch_plan {
   std::size_t scratch_bytes = 0;
   std::vector<request_kv_plan> requests;
 };
+
 struct paged_attention_metadata {
   std::size_t rows = 0;
   std::size_t block_table_stride = 0;

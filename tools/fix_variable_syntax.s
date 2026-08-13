@@ -13,8 +13,7 @@ func main() {
 func fix_variable_declarations() {
     string cmd = `
 find ./neurx -name "*.s" -type f | while read file; do
-    # 修复函数参数：(\w+): (type) → (type \w+)
-    # 这个较为复杂，需要一个辅助脚本
+
     sed -i 's/\([a-zA-Z_][a-zA-Z0-9_]*\): \(int\|string\|bool\|float\|i32\|i64\|f32\|f64\)/\2 \1/g' "$file"
 done
 `
@@ -41,26 +40,20 @@ def fix_file(filepath):
     original = content
     lines = content.split('\n')
     for i, line in enumerate(lines):
-        # 跳过注释和空行
+
         stripped = line.strip()
         if not stripped or stripped.startswith('//'):
             continue
-        # 跳过 struct 字段定义（这些应该保留 name: type）
-        # struct 字段通常有缩进且不包含 func 关键字
+
         if 'struct' in '\n'.join(lines[max(0, i-5):i]):
             indent = len(line) - len(line.lstrip())
-            # 如果有缩进且是字段定义，跳过
+
             if indent > 0 and ': ' in line:
                 continue
-        # 修复函数参数：func name(..., param: type, ...)
-        # 模式：word: (type) → type word
-        # 但需要避免在 struct 中修改
-        # 简单替换：identifier: type → type identifier
-        # 支持的类型：int, string, bool, float, i32, i64, f32, f64,
-        # 以及复杂类型如 []int, []string 等
+
         pattern = r'\b([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*((?:int|string|bool|float|i32|i64|f32|f64|vector|map|option)\b|\[\](?:int|string|float|bool))'
         replacement = r'\2 \1'
-        # 更智能的替换：只在函数声明中替换
+
         if 'func' in line or '(' in line:
             new_line = re.sub(pattern, replacement, line)
             lines[i] = new_line

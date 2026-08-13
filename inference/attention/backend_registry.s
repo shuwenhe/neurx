@@ -1,13 +1,21 @@
 package neurx.inference.attention.backend_registry
 
 func attention_cpu() int { 1 }
+
 func attention_flash() int { 2 }
+
 func attention_flashinfer() int { 3 }
+
 func attention_triton() int { 4 }
+
 func attention_flashmla() int { 5 }
+
 func attention_rocm_aiter() int { 6 }
+
 func attention_linear() int { 7 }
+
 func attention_mamba() int { 8 }
+
 func attention_sparse_mla() int { 9 }
 
 struct attention_backend_capability {

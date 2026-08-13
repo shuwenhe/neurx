@@ -35,6 +35,7 @@ inline const char* lr_schedule_name(lr_schedule schedule) {
     }
     return "unknown";
 }
+
 struct lr_config {
     double peak_lr = 2e-4;
     double min_lr = 2e-5;
@@ -73,10 +74,12 @@ inline double learning_rate(const lr_config& config,
     return config.min_lr +
            (config.peak_lr - config.min_lr) * multiplier;
 }
+
 struct gradient_policy {
     double max_norm = 1.0;
     double epsilon = 1e-6;
 };
+
 struct gradient_decision {
     bool finite = false;
     bool clipped = false;

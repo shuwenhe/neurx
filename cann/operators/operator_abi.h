@@ -2,6 +2,7 @@
 #include "../../inference/runtime/backends/backend_adapter.h"
 #include <cstdint>
 extern "C" {
+
 struct neurx_cann_operator_status {
   int32_t code;
   const char* message;

@@ -1,13 +1,21 @@
 package neurx.inference.reasoning.reasoning_parser_registry
 
 func reasoning_parser_none() int { 0 }
+
 func reasoning_parser_deepseek_r1() int { 1 }
+
 func reasoning_parser_deepseek_v3() int { 2 }
+
 func reasoning_parser_qwen3() int { 3 }
+
 func reasoning_parser_kimi() int { 4 }
+
 func reasoning_parser_mistral() int { 5 }
+
 func reasoning_parser_gpt_oss() int { 6 }
+
 func reasoning_parser_granite() int { 7 }
+
 func reasoning_parser_step3() int { 8 }
 
 struct reasoning_parser_config {

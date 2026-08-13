@@ -25,16 +25,27 @@ struct platform_selection {
 }
 
 func platform_require_graph_capture() int { 1 }
+
 func platform_require_speculative_decode() int { 2 }
+
 func platform_require_multimodal() int { 4 }
+
 func platform_require_fp8() int { 8 }
+
 func platform_require_distributed() int { 16 }
+
 func platform_backend_none() int { 0 }
+
 func platform_backend_nccl() int { 1 }
+
 func platform_backend_rccl() int { 2 }
+
 func platform_backend_ccl() int { 3 }
+
 func platform_backend_xla() int { 4 }
+
 func platform_backend_hccl() int { 5 }
+
 func platform_backend_gloo() int { 6 }
 
 func platform_requirement_enabled(int requirements, int flag) bool {

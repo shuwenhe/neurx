@@ -1,12 +1,10 @@
 #!/bin/bash
-# NeurX Docker 容器测试脚本
 
-# 颜色定义
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 CONTAINER_NAME=${CONTAINER_NAME:-"neurx-inference"}
 API_PORT=${NEURX_API_PORT:-"8080"}
@@ -17,7 +15,6 @@ echo -e "${GREEN}NeurX Docker 容器测试${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
 
-# 检查容器是否运行
 if ! docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
     echo -e "${RED}❌ 容器 $CONTAINER_NAME 未运行${NC}"
     exit 1
@@ -26,7 +23,6 @@ fi
 echo -e "${GREEN}✓ 容器 $CONTAINER_NAME 运行中${NC}"
 echo ""
 
-# 测试 1: 健康检查
 echo -e "${BLUE}测试 1: 健康检查${NC}"
 echo "GET http://localhost:$API_PORT/health/ready"
 health_response=$(curl -s http://localhost:$API_PORT/health/ready)
@@ -38,7 +34,6 @@ else
 fi
 echo ""
 
-# 测试 2: Prometheus 指标
 echo -e "${BLUE}测试 2: Prometheus 指标${NC}"
 echo "GET http://localhost:$METRICS_PORT/metrics"
 metrics=$(curl -s http://localhost:$METRICS_PORT/metrics | grep "neurx_" | head -5)
@@ -51,7 +46,6 @@ else
 fi
 echo ""
 
-# 测试 3: 推理请求
 echo -e "${BLUE}测试 3: 文本生成推理${NC}"
 echo "POST http://localhost:$API_PORT/v1/completions"
 inference_response=$(curl -s -X POST http://localhost:$API_PORT/v1/completions \
@@ -73,7 +67,6 @@ else
 fi
 echo ""
 
-# 测试 4: 流式输出
 echo -e "${BLUE}测试 4: 流式输出${NC}"
 echo "POST http://localhost:$API_PORT/v1/completions (stream=true)"
 echo -e "${YELLOW}流式响应 (前 5 块):${NC}"
@@ -87,12 +80,10 @@ curl -s -X POST http://localhost:$API_PORT/v1/completions \
     }' | head -5 | sed 's/^/    /'
 echo ""
 
-# 测试 5: 容器资源使用
 echo -e "${BLUE}测试 5: 容器资源使用${NC}"
 docker stats --no-stream $CONTAINER_NAME | tail -1 | sed 's/^/    /'
 echo ""
 
-# 测试 6: 容器日志
 echo -e "${BLUE}测试 6: 最近的容器日志 (最后 10 行)${NC}"
 docker logs $CONTAINER_NAME 2>&1 | tail -10 | sed 's/^/    /'
 echo ""

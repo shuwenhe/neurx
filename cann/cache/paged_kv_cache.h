@@ -8,6 +8,7 @@
 #include <vector>
 namespace neurx::cann {
 enum class kv_storage_format { contiguous_nd, fractal_nz };
+
 struct kv_cache_config_2 {
   std::size_t block_count = 0;
   std::size_t block_bytes = 0;
@@ -31,6 +32,7 @@ struct kv_cache_config_2 {
     return layers != 0 || kv_heads != 0 || head_size != 0 || element_bytes != 0;
   }
 };
+
 struct kv_cache_stats {
   std::size_t total_blocks = 0;
   std::size_t used_blocks = 0;

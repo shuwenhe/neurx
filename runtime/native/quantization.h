@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <vector>
 namespace neurx::runtime::native {
+
 struct quantized_weight {
   int bits = 8;
   std::size_t rows = 0;

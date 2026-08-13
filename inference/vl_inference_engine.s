@@ -77,31 +77,31 @@ func vl_inference_pipeline(int image_width, int image_height, int num_prompt_tok
     int patch_size = get_vl_config_vision_patch_size()
     int hidden_dim = get_vl_config_vision_hidden()
     int language_dim = language_model_dim()
-    
+
     int num_patches = compute_num_patches(image_width, patch_size)
-    
+
     int patch_data = process_image_to_patches(image_width, patch_size)
-    
+
     int patch_embed = embed_image_patches(num_patches, hidden_dim)
-    
+
     int vision_output = vision_encoder_forward(num_patches, hidden_dim, vision_num_layers())
-    
+
     int bridge_output = vl_bridge_projection(num_patches, hidden_dim, language_dim)
-    
+
     int normalized_vision = normalize_vision_features(bridge_output)
-    
+
     int response = generate_response_with_vision(normalized_vision, num_prompt_tokens)
-    
+
     response
 }
 
 func test_vl_inference() int {
     print("Testing VL Inference Pipeline...\n")
-    
+
     int num_patches = compute_num_patches(448, 14)
     print("Number of patches: ")
     print("✓\n")
-    
+
     0
 }
 
@@ -111,7 +111,7 @@ func main() {
     print("NeurX Vision-Language Model Inference Engine\n")
     print("════════════════════════════════════════════════════════════\n")
     print("\n")
-    
+
     print("📊 Vision-Language Model Configuration:\n")
     print("  • Vision Encoder: ViT-Large\n")
     print("  • Patch Size: 14×14\n")
@@ -120,14 +120,14 @@ func main() {
     print("  • Vision Transformer Layers: 24\n")
     print("  • Vision Attention Heads: 16\n")
     print("\n")
-    
+
     print("🌉 Vision-Language Bridge:\n")
     print("  • Vision Dimension: 1024\n")
     print("  • Language Dimension: 3584\n")
     print("  • Projection Type: Linear\n")
     print("  • Activation: GELU\n")
     print("\n")
-    
+
     print("🧠 Language Model Component:\n")
     print("  • Model: Qwen2.5-VL-7B\n")
     print("  • Transformer Layers: 28\n")
@@ -136,7 +136,7 @@ func main() {
     print("  • Vocabulary Size: 152064\n")
     print("  • Max Context Length: 4096\n")
     print("\n")
-    
+
     print("📈 Model Architecture:\n")
     print("  Input Image (RGB)\n")
     print("       ↓\n")
@@ -156,10 +156,10 @@ func main() {
     print("       ↓\n")
     print("  Text Output (Tokens)\n")
     print("\n")
-    
+
     print("✅ Vision-Language Inference Engine Initialized!\n")
     print("\n")
-    
+
     print("🚀 Inference Pipeline Ready:\n")
     print("  1. Image Processing → Extract Patches\n")
     print("  2. Patch Embedding → Create Embeddings\n")
@@ -168,7 +168,7 @@ func main() {
     print("  5. Language Model → Generate Text Response\n")
     print("  6. Decoding → Convert Tokens to Text\n")
     print("\n")
-    
+
     print("💡 Supported Tasks:\n")
     print("  • Image Understanding\n")
     print("  • Visual Question Answering\n")
@@ -176,9 +176,9 @@ func main() {
     print("  • Multi-image Reasoning\n")
     print("  • Visual Context Understanding\n")
     print("\n")
-    
+
     test_vl_inference()
-    
+
     print("════════════════════════════════════════════════════════════\n")
     print("Ready for Vision-Language Inference!\n")
     print("\n")

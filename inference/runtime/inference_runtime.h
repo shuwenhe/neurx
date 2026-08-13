@@ -18,6 +18,7 @@ inline const char* backend_name(backend backend) {
   }
   return "unknown";
 }
+
 struct backend_capabilities {
   backend backend;
   bool fp16;
@@ -40,6 +41,7 @@ inline backend_capabilities capabilities(backend backend) {
   }
   throw std::logic_error("unreachable backend");
 }
+
 struct execution_plan {
   backend backend;
   std::string dtype;
@@ -61,11 +63,13 @@ inline execution_plan make_execution_plan(backend backend, bool fp8_requested) {
           backend != backend::cpu,
           backend != backend::cpu};
 }
+
 struct batch_key {
   backend backend = backend::cpu;
   std::string dtype = "fp32";
   bool operator==(const batch_key& other) const { return backend == other.backend && dtype == other.dtype; }
 };
+
 struct request {
   std::string id;
   batch_key key;
@@ -75,22 +79,26 @@ struct request {
   int generated_tokens = 0;
   request_state state = request_state::queued_prefill;
 };
+
 struct work_item {
   std::string request_id;
   int token_count = 0;
 };
+
 struct batch_2 {
   phase phase = phase::prefill;
   batch_key key;
   std::vector<work_item> items;
   int total_tokens = 0;
 };
+
 struct runtime_config_2 {
   int max_prefill_batch_tokens = 4096;
   int max_prefill_requests = 16;
   int max_decode_batch_size = 64;
   bool prioritize_decode = true;
 };
+
 struct runtime_metrics {
   uint64_t prefills_started = 0;
   uint64_t decode_steps = 0;

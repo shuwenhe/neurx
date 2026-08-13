@@ -1,6 +1,7 @@
 #pragma once
 #include "transformer_plan.h"
 namespace neurx::cann {
+
 struct tensor_view {
   void* data = nullptr;
   std::size_t rows = 0;

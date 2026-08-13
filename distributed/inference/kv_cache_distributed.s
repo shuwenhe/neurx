@@ -38,17 +38,17 @@ func init_distributed_kv_cache(
     cache.rank = rank
     cache.world_size = world_size
     cache.layout = layout
-    
+
     cache.local_key_caches = [][]float{}
     cache.local_value_caches = [][]float{}
     cache.seq_lens = []int{}
-    
+
     for i = 0; i < num_layers; i = i + 1 {
         cache.local_key_caches = append(cache.local_key_caches, []float{})
         cache.local_value_caches = append(cache.local_value_caches, []float{})
         cache.seq_lens = append(cache.seq_lens, 0)
     }
-    
+
     cache
 }
 
@@ -61,15 +61,15 @@ func append_kv_local(
     if layer_idx >= cache.num_layers {
         return
     }
-    
+
     for i = 0; i < len(key); i = i + 1 {
         cache.local_key_caches[layer_idx] = append(cache.local_key_caches[layer_idx], key[i])
     }
-    
+
     for i = 0; i < len(value); i = i + 1 {
         cache.local_value_caches[layer_idx] = append(cache.local_value_caches[layer_idx], value[i])
     }
-    
+
     cache.seq_lens[layer_idx] = cache.seq_lens[layer_idx] + 1
 }
 
@@ -80,7 +80,7 @@ func get_kv_local(
     if layer_idx >= cache.num_layers {
         return []float{}, []float{}
     }
-    
+
     (cache.local_key_caches[layer_idx], cache.local_value_caches[layer_idx])
 }
 
@@ -105,7 +105,7 @@ func get_remote_kv(
     int remote_rank
 ) ([]float, []float) {
     println("Fetching KV from remote rank...")
-    
+
     if remote_rank < cache.world_size {
         ([]float{}, []float{})
     } else {
@@ -118,13 +118,13 @@ func allgather_kv(
     int layer_idx
 ) [][]float {
     println("AllGather KV cache across ranks...")
-    
+
     [][]float gathered = [][]float{}
     for rank = 0; rank < cache.world_size; rank = rank + 1 {
         (key, value) := get_kv_local(cache, layer_idx)
         gathered = append(gathered, key)
     }
-    
+
     gathered
 }
 
@@ -179,16 +179,16 @@ func log_cache_state(
 func main() {
     println("Distributed KV Cache Manager")
     println("============================")
-    
+
     distributed_kv_cache cache = init_distributed_kv_cache(24, 8, 64, 4096, 0, 4, "sharded")
-    
+
     []float test_key = []float{0.1, 0.2, 0.3, 0.4}
     []float test_value = []float{0.5, 0.6, 0.7, 0.8}
-    
+
     append_kv_local(cache, 0, test_key, test_value)
     append_kv_local(cache, 0, test_key, test_value)
-    
+
     log_cache_state(cache)
-    
+
     synchronize_kv_across_ranks(cache, 0)
 }

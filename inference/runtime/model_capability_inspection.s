@@ -1,10 +1,15 @@
 package neurx.inference.runtime.model_capability_inspection
 
 func model_task_generate() int { 1 }
+
 func model_task_pooling() int { 2 }
+
 func model_task_embed() int { 4 }
+
 func model_task_classify() int { 8 }
+
 func model_task_reward() int { 16 }
+
 func model_task_transcription() int { 32 }
 
 struct model_capability_manifest {

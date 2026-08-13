@@ -7,11 +7,10 @@ cleanup_file() {
 	local temp_file="${file}.tmp"
 
 	{
-		# 第一遍：去除注释
+
 		sed -e ':a' -e '$!{N;ba' -e '}' -e 's/\/\*[^*]*\*\+\([^/*][^*]*\*\+\)*\///g' "$file" |
 		sed 's#//.*$##g' |
 
-		# 第二遍：去除多余空行
 		{
 			blank_count=0
 			while IFS= read -r line; do
@@ -27,7 +26,6 @@ cleanup_file() {
 			done
 		} |
 
-		# 第三遍：确保 func/struct 之间有空行
 		{
 			prev_line=""
 			while IFS= read -r line; do
@@ -38,7 +36,7 @@ cleanup_file() {
 
 					if [[ "$prev_trimmed" =~ ^(func|struct) ]] && [[ "$prev_trimmed" =~ \{$ ]]; then
 						if [[ "$trimmed" =~ ^(func|struct) ]] && [[ "$trimmed" != "" ]]; then
-							# 检查前面是否已经有空行
+
 							if [[ -n "$prev_line" ]]; then
 								echo ""
 							fi
@@ -52,7 +50,6 @@ cleanup_file() {
 		}
 	} > "$temp_file"
 
-	# 删除末尾空白并保留单个换行符
 	sed -i -e :a -e '/^\s*$/d;N;ba' "$temp_file"
 	echo "" >> "$temp_file"
 

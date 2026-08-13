@@ -38,12 +38,12 @@ func is_blank_line(string line) bool {
 func clean_file_lines([]string lines) []string {
     []string result
     bool last_was_blank = false
-    
+
     for i := 0; i < len(lines); i = i + 1 {
         string line = lines[i]
         line = remove_comments(line)
         line = trim_right(line)
-        
+
         if is_blank_line(line) {
             if !last_was_blank {
                 result = append(result, "")
@@ -54,7 +54,7 @@ func clean_file_lines([]string lines) []string {
             last_was_blank = false
         }
     }
-    
+
     return result
 }
 

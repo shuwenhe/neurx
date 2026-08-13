@@ -21,6 +21,7 @@ enum class d_type : uint8_t {
   float64,
 };
 enum class device_type : uint8_t { cpu, cuda, cann };
+
 struct device {
   device_type type = device_type::cpu;
   int id = 0;
@@ -34,6 +35,7 @@ bool dtype_is_floating(d_type dtype);
 bool dtype_is_integer(d_type dtype);
 d_type promote_types(d_type lhs, d_type rhs);
 const char* device_type_name(device_type type);
+
 struct memory_ops {
   std::function<void*(int device_id, std::size_t bytes)> allocate;
   std::function<void(int device_id, void* ptr)> deallocate;
@@ -116,6 +118,7 @@ class tensor {
   int64_t storage_offset_ = 0;
   std::shared_ptr<uint64_t> version_;
 };
+
 struct dispatch_key {
   std::string operation;
   device_type device = device_type::cpu;
@@ -124,6 +127,7 @@ struct dispatch_key {
     return operation == other.operation && device == other.device && dtype == other.dtype;
   }
 };
+
 struct dispatch_key_hash {
   std::size_t operator()(const dispatch_key& key) const;
 };

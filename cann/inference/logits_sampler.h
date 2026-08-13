@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 namespace neurx::inference {
+
 struct sampling_config_2 {
   float temperature = 1.0F;
   int top_k = 0;

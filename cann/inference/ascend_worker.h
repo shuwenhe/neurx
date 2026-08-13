@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <vector>
 namespace neurx::inference {
+
 struct worker_batch_result {
   std::vector<float> logits;
   std::vector<int32_t> next_tokens;

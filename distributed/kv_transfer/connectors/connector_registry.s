@@ -1,13 +1,21 @@
 package neurx.distributed.kv_transfer.connectors
 
 func kv_connector_nixl() int { 1 }
+
 func kv_connector_mooncake() int { 2 }
+
 func kv_connector_mooncake_store() int { 3 }
+
 func kv_connector_lmcache() int { 4 }
+
 func kv_connector_hf3fs() int { 5 }
+
 func kv_connector_moriio() int { 6 }
+
 func kv_connector_flexkv() int { 7 }
+
 func kv_connector_cpu_offload() int { 8 }
+
 func kv_connector_multi() int { 9 }
 
 struct kv_connector_capability {

@@ -5,11 +5,13 @@
 #include <string>
 #include <vector>
 namespace neurx::cuda {
+
 struct lora_tensor_snapshot {
   std::string name;
   std::vector<int64_t> shape;
   std::vector<float> values;
 };
+
 struct lora_training_report {
   float initial_loss = 0.0F;
   float final_loss = 0.0F;

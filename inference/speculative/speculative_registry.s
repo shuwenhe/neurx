@@ -1,12 +1,19 @@
 package neurx.inference.speculative.registry
 
 func speculative_none() int { 0 }
+
 func speculative_ngram() int { 1 }
+
 func speculative_suffix() int { 2 }
+
 func speculative_draft_model() int { 3 }
+
 func speculative_eagle() int { 4 }
+
 func speculative_mtp() int { 5 }
+
 func speculative_medusa() int { 6 }
+
 func speculative_dflash() int { 7 }
 
 struct speculative_backend_config {

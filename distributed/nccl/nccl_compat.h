@@ -6,6 +6,7 @@ using nccl_result_t = int;
 using nccl_comm_t = void*;
 using nccl_data_type_t = int;
 using nccl_red_op_t = int;
+
 struct nccl_unique_id { char internal[128]; };
 static constexpr nccl_result_t nccl_success = 0;
 static constexpr nccl_data_type_t nccl_float = 7;

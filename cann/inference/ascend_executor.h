@@ -5,6 +5,7 @@
 #include "../operators/operator_library.h"
 #include <string>
 namespace neurx::inference {
+
 struct ascend_executor_config {
   std::string operator_library;
   std::string checkpoint;

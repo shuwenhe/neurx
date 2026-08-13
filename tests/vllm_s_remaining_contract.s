@@ -1,12 +1,16 @@
 package neurx.tests.vllm_s_remaining_contract
 
-use neurx.inference.cache.kv_event_stream.{kv_event_stream_config, kv_event_stream_state, kv_event_publish_result, kv_event_poll_result, kv_event_block_stored, kv_event_block_removed, kv_medium_gpu, init_kv_event_stream, publish_kv_event, poll_kv_events, acknowledge_kv_events}
-use neurx.inference.cache.tiered_kv_offload.{tiered_kv_offload_config, tiered_kv_offload_state, offload_prepare_result, offload_lookup_result, offload_medium_cpu, offload_lookup_hit, init_tiered_kv_offload, prepare_offload_store, complete_offload_store, lookup_offloaded_block, prepare_offload_load, complete_offload_load, tiered_offload_bytes}
+use neurx.inference.kv.kv_event_stream.{kv_event_stream_config, kv_event_stream_state, kv_event_publish_result, kv_event_poll_result, kv_event_block_stored, kv_event_block_removed, kv_medium_gpu, init_kv_event_stream, publish_kv_event, poll_kv_events, acknowledge_kv_events}
+use neurx.inference.kv.tiered_kv_offload.{tiered_kv_offload_config, tiered_kv_offload_state, offload_prepare_result, offload_lookup_result, offload_medium_cpu, offload_lookup_hit, init_tiered_kv_offload, prepare_offload_store, complete_offload_store, lookup_offloaded_block, prepare_offload_load, complete_offload_load, tiered_offload_bytes}
 use neurx.inference.reasoning.reasoning_parser_registry.{reasoning_stream_state, reasoning_parser_qwen3, init_reasoning_stream, consume_reasoning_delta}
 use neurx.inference.tokenizer.tokenizer_renderer_registry.{tokenizer_renderer_request, tokenizer_renderer_selection, tokenizer_backend_mistral, renderer_backend_mistral, tokenizer_truncate_left, select_tokenizer_renderer}
 use neurx.inference.runtime.model_capability_inspection.{model_capability_manifest, model_inspection_request, model_inspection_result, model_task_generate, model_task_embed, inspect_model_capability}
 use neurx.inference.multimodal.media_cache_budget.{media_cache_config, media_cache_state, media_cache_result, media_budget_result, media_modality_image, media_hash_bytes, init_media_cache, media_cache_insert, media_cache_lookup, compute_media_budget}
 use neurx.inference.plugins.plugin_registry.{plugin_registry_config, plugin_registry_state, plugin_registration_result, plugin_group_endpoint, plugin_group_io_processor, plugin_status_active, plugin_status_skipped, init_plugin_registry, register_plugin, activate_plugin}
+use neurx.inference.sampling.thinking_budget_state.{thinking_budget_config, thinking_budget_state, thinking_budget_update, init_thinking_budget, add_thinking_request, update_thinking_token, remove_thinking_request}
+use neurx.inference.runtime.engine_sentinel.{engine_sentinel_config, engine_sentinel_state, engine_recovery_result, engine_status_healthy, init_engine_sentinel, engine_sentinel_on_fault, retry_engine_recovery}
+use neurx.inference.runtime.sleep_mode_backend.{sleep_mode_state, sleep_transition_result, sleep_backend_cumem, sleep_state_running, init_sleep_mode, suspend_sleep_mode, resume_sleep_mode}
+use neurx.distributed.stateless_coordinator.{stateless_group_config, stateless_group_state, stateless_broadcast_result, init_stateless_group, stateless_broadcast, reinitialize_stateless_group, destroy_stateless_group}
 
 func remaining_expect(bool condition, string name) int {
     if condition { println("PASS " + name); return 0 }
@@ -90,6 +94,33 @@ func test_plugin_security() int {
     failures
 }
 
+func test_runtime_control() int {
+    int failures = 0
+    thinking_budget_state thinking = init_thinking_budget(thinking_budget_config {capacity: 2, start_token_id: 900, end_token_id: 901, speculative_width: 3, enabled: true})
+    thinking_budget_update thinking_update = add_thinking_request(thinking, 77, 2, false, 0)
+    thinking_update = update_thinking_token(thinking_update.state, 77, 900)
+    thinking_update = update_thinking_token(thinking_update.state, 77, 11)
+    thinking_update = update_thinking_token(thinking_update.state, 77, 12)
+    failures = failures + remaining_expect(thinking_update.force_end_token && thinking_update.forced_token_id == 901, "thinking token budget forcing")
+    thinking = remove_thinking_request(thinking_update.state, 77)
+    failures = failures + remaining_expect(thinking.tracked_requests == 0, "thinking request cleanup")
+    engine_sentinel_state sentinel = init_engine_sentinel(engine_sentinel_config {engine_index: 0, recovery_timeout_ms: 5000, maximum_retries: 2, enabled: true})
+    sentinel = engine_sentinel_on_fault(sentinel, 42, 1000, 3, 1, false)
+    engine_recovery_result recovery = retry_engine_recovery(sentinel, 2000, true)
+    failures = failures + remaining_expect(recovery.recovered && recovery.state.status == engine_status_healthy() && recovery.state.data_parallel_epoch == 1 && recovery.state.aborted_requests == 3, "engine sentinel recovery")
+    sleep_mode_state sleep = init_sleep_mode(sleep_backend_cumem(), true)
+    sleep_transition_result transition = suspend_sleep_mode(sleep, 2, 4096, 2048)
+    transition = resume_sleep_mode(transition.state, false, false)
+    failures = failures + remaining_expect(transition.success && transition.state.state == sleep_state_running() && transition.state.suspend_count == 1 && transition.state.resume_count == 1, "sleep mode lifecycle")
+    stateless_group_state group = init_stateless_group(stateless_group_config {group_id: 7, global_rank: 0, local_rank: 0, world_size: 2, base_port: 20000, backend: 1, use_device_communicator: true})
+    stateless_broadcast_result broadcast = stateless_broadcast(group, []int{3, 4, 5}, 0)
+    group = reinitialize_stateless_group(broadcast.state, 21000)
+    failures = failures + remaining_expect(broadcast.success && broadcast.payload[2] == 5 && group.generation == 2 && group.device_port == 21021, "stateless coordinator lifecycle")
+    group = destroy_stateless_group(group)
+    failures = failures + remaining_expect(group.destroyed && !group.store_group_initialized, "stateless coordinator teardown")
+    failures
+}
+
 func main() {
     int failures = 0
     failures = failures + test_kv_event_stream()
@@ -97,6 +128,7 @@ func main() {
     failures = failures + test_reasoning_and_rendering()
     failures = failures + test_model_and_multimodal()
     failures = failures + test_plugin_security()
+    failures = failures + test_runtime_control()
     if failures == 0 { println("vLLM remaining capability contract: PASS") }
     else { println("vLLM remaining capability contract: FAIL") }
 }

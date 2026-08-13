@@ -125,7 +125,7 @@ func record_metric(monitoring_dashboard dashboard, string metric_name, float val
     metric.metric_value = value
     metric.unit = unit
     metric.timestamp = 0
-    
+
     if len(dashboard.metric_history) < 1000 {
         dashboard.metric_history = append(dashboard.metric_history, metric)
     }
@@ -138,17 +138,17 @@ func print_inference_metrics(inference_metrics metrics) {
     print("Successful: " + int_to_string(metrics.successful_requests) + "\n")
     print("Failed: " + int_to_string(metrics.failed_requests) + "\n")
     print("Success Rate: 100%\n\n")
-    
+
     print("📈 Throughput Metrics:\n")
     print("  • Tokens/sec: 25.5\n")
     print("  • Requests/sec: 2.3\n")
     print("  • Avg Latency: 45.2 ms\n\n")
-    
+
     print("⏱️  Latency Percentiles:\n")
     print("  • P50: " + "45.2" + " ms\n")
     print("  • P95: " + "120.5" + " ms\n")
     print("  • P99: " + "250.3" + " ms\n\n")
-    
+
     print("📦 Batch Metrics:\n")
     print("  • Peak Batch Size: " + int_to_string(metrics.peak_batch_size) + "\n")
     print("  • Avg Batch Size: 3.2\n")
@@ -164,7 +164,7 @@ func print_model_performance(model_performance perf) {
     print("  • Hidden Size: " + int_to_string(perf.hidden_size) + "\n")
     print("  • Vocab Size: " + int_to_string(perf.vocab_size) + "\n")
     print("  • Model Size: " + "14.0" + " GB\n\n")
-    
+
     print("Performance:\n")
     print("  • Throughput: 8.3 tokens/sec\n")
     print("  • Avg Latency: 120.5 ms\n")
@@ -179,7 +179,7 @@ func print_system_metrics(system_metrics metrics) {
     print("Memory Usage: 8192 MB (32.0%)\n")
     print("Disk Usage: 45.5%\n")
     print("Network: 125 Mbps\n\n")
-    
+
     print("Service:\n")
     print("  • Active Connections: " + int_to_string(metrics.active_connections) + "\n")
     print("  • Total Requests: " + int_to_string(metrics.total_requests_processed) + "\n")
@@ -190,12 +190,12 @@ func print_monitoring_dashboard(monitoring_dashboard dashboard) {
     print("\n" + "="*60 + "\n")
     print("📊 NeurX Production Monitoring Dashboard\n")
     print("="*60 + "\n")
-    
+
     print_inference_metrics(dashboard.inference_stats)
     print_model_performance(dashboard.text_model_perf)
     print_model_performance(dashboard.vl_model_perf)
     print_system_metrics(dashboard.system_stats)
-    
+
     print("\n" + "="*60 + "\n")
     print("🔄 Logged Events:\n")
     print("─────────────────────────────────────────────\n")

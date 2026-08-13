@@ -7,10 +7,12 @@
 #include <string>
 #include <vector>
 namespace neurx::cann {
+
 struct prefix_cache_config {
   std::size_t max_entries = 256;
   std::size_t max_retained_blocks = 128;
 };
+
 struct prefix_cache_stats {
   std::size_t entries = 0;
   std::size_t retained_blocks = 0;
@@ -18,6 +20,7 @@ struct prefix_cache_stats {
   uint64_t hits = 0;
   uint64_t evictions = 0;
 };
+
 struct prefix_cache_hit {
   bool matched = false;
   std::size_t token_count = 0;

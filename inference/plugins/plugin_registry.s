@@ -1,15 +1,23 @@
 package neurx.inference.plugins.plugin_registry
 
 func plugin_group_general() int { 1 }
+
 func plugin_group_io_processor() int { 2 }
+
 func plugin_group_platform() int { 3 }
+
 func plugin_group_stat_logger() int { 4 }
+
 func plugin_group_endpoint() int { 5 }
+
 func plugin_group_lora_resolver() int { 6 }
 
 func plugin_status_discovered() int { 1 }
+
 func plugin_status_active() int { 2 }
+
 func plugin_status_skipped() int { 3 }
+
 func plugin_status_failed() int { 4 }
 
 struct plugin_registry_config {

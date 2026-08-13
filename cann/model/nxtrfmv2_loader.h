@@ -7,6 +7,7 @@
 namespace neurx::cann {
 enum class model_precision { fp16, fp32, int8_weight_only };
 enum class weight_storage { fp16, fp32, int8_per_channel };
+
 struct model_metadata {
   uint64_t step = 0;
   uint64_t tokenizer_hash = 0;
@@ -19,10 +20,12 @@ struct model_metadata {
   uint32_t layers = 0;
   uint64_t parameter_tensors = 0;
 };
+
 struct model_load_options {
   model_precision precision = model_precision::fp16;
   uint64_t expected_tokenizer_hash = 0;
 };
+
 struct device_weight {
   std::string name;
   uint64_t elements = 0;

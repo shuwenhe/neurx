@@ -1,19 +1,29 @@
 package neurx.inference.tokenizer.tokenizer_renderer_registry
 
 func tokenizer_backend_hf() int { 1 }
+
 func tokenizer_backend_mistral() int { 2 }
+
 func tokenizer_backend_deepseek_v32() int { 3 }
+
 func tokenizer_backend_deepseek_v4() int { 4 }
+
 func tokenizer_backend_kimi_audio() int { 5 }
 
 func renderer_backend_hf() int { 1 }
+
 func renderer_backend_mistral() int { 2 }
+
 func renderer_backend_cohere() int { 3 }
+
 func renderer_backend_deepseek() int { 4 }
+
 func renderer_backend_inkling() int { 5 }
+
 func renderer_backend_kimi() int { 6 }
 
 func tokenizer_truncate_left() int { 1 }
+
 func tokenizer_truncate_right() int { 2 }
 
 struct tokenizer_renderer_request {

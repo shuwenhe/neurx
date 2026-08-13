@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 namespace neurx::inference {
+
 struct physical_kv_allocation {
   std::vector<int32_t> block_table;
   std::vector<uintptr_t> device_addresses;
