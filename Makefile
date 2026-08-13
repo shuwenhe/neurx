@@ -2614,3 +2614,29 @@ logs:
 logs-tail:
 	@mkdir -p $(LOG_DIR)
 	@FILE=$$(ls -1t $(LOG_DIR)
+
+# Docker targets for container deployment
+docker: docker-build
+	@echo "Docker image built successfully"
+	@echo "Run: make docker-run"
+
+docker-build:
+	@echo "Building NeurX Docker image..."
+	@cd $(CURDIR_UNIX)/docker && bash build.sh
+
+docker-run:
+	@echo "Starting NeurX container..."
+	@cd $(CURDIR_UNIX) && docker-compose -f docker/docker-compose.yml up -d
+	@echo "Container started on ports 8080, 8081, 9090"
+
+docker-stop:
+	@echo "Stopping container..."
+	@cd $(CURDIR_UNIX) && docker-compose -f docker/docker-compose.yml down
+
+docker-logs:
+	@cd $(CURDIR_UNIX) && docker-compose -f docker/docker-compose.yml logs -f
+
+docker-shell:
+	@docker exec -it neurx-inference /bin/bash
+
+.PHONY: docker docker-build docker-run docker-stop docker-logs docker-shell
